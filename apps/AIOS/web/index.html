@@ -119,6 +119,20 @@
   .log .tp{color:var(--text)}
   .log .tp.r{color:var(--rule)} .log .tp.c{color:var(--conclude)}
 
+  /* ---- 기록 탭 ---- */
+  .hist-item{background:var(--surface);border:1px solid var(--line);border-radius:12px;
+    padding:12px 14px;margin-top:8px}
+  .hist-item .top{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+  .hist-item .org{font:600 10px var(--mono);letter-spacing:.06em;color:var(--ink);
+    background:var(--dim);border-radius:99px;padding:2px 8px}
+  .hist-item .time{margin-left:auto;font:11px var(--mono);color:var(--faint)}
+  .hist-item .ttl{font-size:15px;font-weight:600;margin-bottom:3px;word-break:break-word}
+  .hist-item .concl{font-size:13px;color:var(--dim);line-height:1.5;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .hist-item .meta{margin-top:6px;font:11px var(--mono);color:var(--faint)}
+  .backbtn{background:none;border:0;color:var(--proposal);font:600 14px var(--sans);
+    padding:6px 0;margin-bottom:4px}
+
   /* ---- 하단 탭바 ---- */
   nav{position:fixed;bottom:0;left:0;right:0;z-index:10;
     background:rgba(16,20,27,.94);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);
@@ -191,6 +205,16 @@
     <div id="candList"></div>
   </section>
 
+  <!-- 기록 -->
+  <section class="pane" id="pane-history">
+    <div class="eyebrow">지난 회의</div>
+    <div id="histList"></div>
+    <div id="histDetail" style="display:none">
+      <button class="backbtn" id="histBack">← 목록으로</button>
+      <div id="histTurns"></div>
+    </div>
+  </section>
+
   <!-- 로그 -->
   <section class="pane" id="pane-log">
     <div class="eyebrow">이벤트 버스</div>
@@ -201,6 +225,7 @@
 <nav>
   <button class="on" data-pane="meet"><span class="ic">◉</span>회의</button>
   <button data-pane="rules"><span class="ic">§</span>규칙<span class="n" id="ruleN" style="display:none"></span></button>
+  <button data-pane="history"><span class="ic">⧉</span>기록</button>
   <button data-pane="log"><span class="ic">≣</span>로그</button>
 </nav>
 
@@ -257,7 +282,7 @@
         kernel.registerAgent({ name, role: name, goal, system,
           capabilities: [o.type.split(".")[0] + ".*"] });
     wire();
-    renderRules(); renderLog();
+    renderRules(); renderLog(); renderHistory();
   }
 
   /* ---- 이벤트 → 화면 ---- */
@@ -275,7 +300,7 @@
       .replace(/\n{3,}/g, "\n\n")
       .trim();
   }
-  function turnCard(kind, chip, name, text){
+  function buildTurn(kind, chip, name, text){
     const d = document.createElement("div");
     d.className = "turn t-" + kind + " clip";
     d.innerHTML = `<div class="rail"></div><div class="body">
@@ -287,22 +312,27 @@
       d.classList.toggle("clip");
       body.classList.toggle("open", !d.classList.contains("clip"));
     });
-    tr.appendChild(d);
-    // 짧은 발언(6줄 이하 추정)은 접기 안 함
-    requestAnimationFrame(() => {
+    requestAnimationFrame(() => {           // 짧은 발언은 접기 해제
       const p = d.querySelector("p");
-      if (p.scrollHeight <= p.clientHeight + 4) {
+      if (p.scrollHeight <= p.clientHeight + 4){
         d.classList.remove("clip"); body.style.cursor = "default";
       }
     });
+    return d;
+  }
+  function turnCard(kind, chip, name, text){
+    const d = buildTurn(kind, chip, name, text);
+    tr.appendChild(d);
     d.scrollIntoView({ behavior:"smooth", block:"end" });
   }
   function wire(){
     kernel.subscribe(T.TURN_PROPOSAL, ev => turnCard("proposal","제안",ev.payload.agent_name,ev.payload.content));
     kernel.subscribe(T.TURN_CRITIQUE, ev => turnCard("critique","반론",ev.payload.agent_name,ev.payload.content));
     kernel.subscribe(T.TURN_REBUTTAL, ev => turnCard("rebuttal","재반론",ev.payload.agent_name,ev.payload.content));
-    kernel.subscribe(T.MEETING_CONCLUDED, ev =>
-      turnCard("conclude","결론","의장",ev.payload.conclusion.decision));
+    kernel.subscribe(T.MEETING_CONCLUDED, ev => {
+      turnCard("conclude","결론","의장",ev.payload.conclusion.decision);
+      renderHistory();
+    });
     kernel.subscribe(T.RULE_PROMOTED, ev => {
       const d = document.createElement("div");
       d.className = "promo";
@@ -381,6 +411,59 @@
     }
   }
 
+  /* ---- 기록 탭 ---- */
+  const ORG_LABEL = { "publishing.title_review":"출판사", "game.concept_review":"게임 스튜디오" };
+  const CHIP = { proposal:["제안","proposal"], critique:["반론","critique"],
+                 rebuttal:["재반론","rebuttal"] };
+  function fmtTime(iso){
+    if (!iso) return "";
+    const d = new Date(iso), n = new Date();
+    const hm = d.toTimeString().slice(0,5);
+    return d.toDateString() === n.toDateString()
+      ? `오늘 ${hm}` : `${d.getMonth()+1}/${d.getDate()} ${hm}`;
+  }
+  function renderHistory(){
+    const meetings = kernel.store.query("meetings").reverse();  // 최신 먼저
+    const list = $("#histList");
+    $("#histDetail").style.display = "none";
+    list.style.display = "";
+    if (!meetings.length){
+      list.innerHTML = `<div class="empty">아직 회의 기록이 없습니다. 첫 회의를 소집해 보세요.</div>`;
+      return;
+    }
+    list.innerHTML = "";
+    for (const m of meetings){
+      const task = kernel.store.load("tasks", m.task_id) || {};
+      const org = ORG_LABEL[task.task_type] || (task.task_type||"").split(".")[0] || "조직";
+      const when = (kernel.store.query("events", { topic:"meeting.concluded" })
+        .find(e => e.payload && e.payload.meeting_id === m.id) || {}).ts;
+      const d = document.createElement("div");
+      d.className = "hist-item";
+      d.innerHTML = `<div class="top"><span class="org"></span><span class="time"></span></div>
+        <div class="ttl"></div><div class="concl"></div>
+        <div class="meta">${(m.turns||[]).length}개 발언 · 참여 ${(m.participants||[]).length}</div>`;
+      d.querySelector(".org").textContent = org;
+      d.querySelector(".time").textContent = fmtTime(when);
+      d.querySelector(".ttl").textContent = task.title || "(제목 없음)";
+      d.querySelector(".concl").textContent = tidy((m.conclusion||{}).decision || "");
+      d.onclick = () => openMeeting(m, task, org);
+      list.appendChild(d);
+    }
+  }
+  function openMeeting(m, task, org){
+    $("#histList").style.display = "none";
+    $("#histDetail").style.display = "";
+    const box = $("#histTurns");
+    box.innerHTML = `<div class="eyebrow">${org} · ${task.title||""}</div>`;
+    for (const u of m.turns||[]){
+      const [chip, kind] = CHIP[u.turn_type] || ["발언","proposal"];
+      box.appendChild(buildTurn(kind, chip, u.agent_name, u.content));
+    }
+    box.appendChild(buildTurn("conclude","결론","의장",(m.conclusion||{}).decision||""));
+    window.scrollTo({ top:0, behavior:"smooth" });
+  }
+  $("#histBack").onclick = renderHistory;
+
   /* ---- 로그 탭 ---- */
   function addLog(ev){
     const d = document.createElement("div");
@@ -400,6 +483,7 @@
     for (const x of document.querySelectorAll("nav button")) x.classList.toggle("on", x === b);
     for (const p of document.querySelectorAll(".pane"))
       p.classList.toggle("on", p.id === "pane-" + b.dataset.pane);
+    if (b.dataset.pane === "history") renderHistory();
   };
 
   /* ---- 설정 시트 ---- */
@@ -417,7 +501,7 @@
     if (!confirm("규칙·경험·이벤트를 모두 삭제할까요?")) return;
     kernel.store.wipe(["rules","rule_candidates","experiences","events","tasks","meetings","feedback"]);
     tr.innerHTML = ""; $("#fbBox").style.display = "none"; currentTask = null;
-    renderRules(); renderLog(); $("#sheet").classList.remove("on");
+    renderRules(); renderLog(); renderHistory(); $("#sheet").classList.remove("on");
   };
 
   boot();
