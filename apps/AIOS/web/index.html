@@ -275,6 +275,21 @@
       ["QA 비평 AI","출시 전 모든 구멍을 찾는다","당신은 QA 리드다. 엣지케이스로 반박하라."],
     ]},
   };
+  function isJunkRule(text){
+    const t = String(text||"").trim();
+    if (t.length < 6) return true;
+    if (/^[-–—─=~.\s]+$/.test(t)) return true;      // "--", "─────" 등
+    if (!/[가-힣]/.test(t)) return true;             // 한글 없음
+    return false;
+  }
+  function cleanupJunk(){
+    // 이전 버전이 잘못 승격/누적한 껍데기 규칙·후보 제거
+    for (const r of kernel.store.query("rules"))
+      if (isJunkRule(r.text)) kernel.store.upsert("rules", { ...r, active: 0 });
+    for (const c of kernel.store.query("rule_candidates"))
+      if (isJunkRule(c.normalized_text))
+        kernel.store.upsert("rule_candidates", { ...c, count: 0 });
+  }
   function boot(){
     kernel = AIOS.createKernel({ llm: makeLLM(), turnDelay: 450 });
     for (const o of Object.values(ORGS))
@@ -282,6 +297,7 @@
         kernel.registerAgent({ name, role: name, goal, system,
           capabilities: [o.type.split(".")[0] + ".*"] });
     wire();
+    cleanupJunk();
     renderRules(); renderLog(); renderHistory();
   }
 
@@ -289,16 +305,25 @@
   const tr = $("#transcript");
   // LLM이 뱉는 마크다운 기호를 모바일에서 읽기 쉽게 경량 정리
   function tidy(md){
-    return String(md)
-      .replace(/\r/g, "")
-      .replace(/^#{1,6}\s*/gm, "▸ ")        // 헤더 → 불릿
-      .replace(/\*\*(.+?)\*\*/g, "$1")       // 볼드 제거
-      .replace(/^\s*[-*]\s+/gm, "• ")        // 리스트 마커
-      .replace(/^\s*\|.*\|\s*$/gm, m =>       // 표 행 → 화살표 구분
-        m.replace(/\|/g, " · ").replace(/[-\s·]{4,}/g, "").trim())
-      .replace(/^[\s·]*---[\s·]*$/gm, "─────")
-      .replace(/\n{3,}/g, "\n\n")
-      .trim();
+    const lines = String(md).replace(/\r/g, "").split("\n");
+    const out = [];
+    for (let ln of lines){
+      // 표 구분행(|---|---|)은 통째로 버림
+      if (/^\s*\|?[\s:|-]+\|[\s:|-]*$/.test(ln) && /-/.test(ln)) continue;
+      // 표 데이터행: | 로 나눠 " · "로 연결 (내용은 그대로 보존)
+      if (/^\s*\|.*\|/.test(ln)){
+        ln = ln.replace(/^\s*\|/, "").replace(/\|\s*$/, "")
+               .split("|").map(c => c.trim()).filter(Boolean).join(" · ");
+      }
+      ln = ln
+        .replace(/^#{1,6}\s*/, "▸ ")       // 헤더 → 불릿
+        .replace(/\*\*(.+?)\*\*/g, "$1")    // 볼드
+        .replace(/^\s*>\s?/, "")            // 인용부호
+        .replace(/^\s*[-*]\s+/, "• ")       // 리스트 마커
+        .replace(/^\s*[-–—]{3,}\s*$/, "─────"); // 구분선
+      out.push(ln);
+    }
+    return out.join("\n").replace(/\n{3,}/g, "\n\n").trim();
   }
   function buildTurn(kind, chip, name, text){
     const d = document.createElement("div");

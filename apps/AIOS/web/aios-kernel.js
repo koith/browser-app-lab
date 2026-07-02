@@ -109,6 +109,28 @@
     }
   }
 
+  /* ---------- 회고 교훈 추출: 마크다운 노이즈·구분선·껍데기 제거 ---------- */
+  function extractLessons(raw){
+    return String(raw).split("\n")
+      .map(l => l
+        .replace(/^[\s>*#·▸►◦・\-–—]+/, "") // 앞쪽 마크다운/불릿 기호
+        .replace(/^\d+[.)]\s*/, "")          // "1. " 번호
+        .replace(/[*`_#|]/g, "")             // 인라인 마크다운
+        .replace(/^[\p{Emoji_Presentation}\p{Extended_Pictographic}\uFE0F\s]+/u, "") // 앞 이모지
+        .trim())
+      .filter(l => {
+        if (l.length < 8) return false;                 // 껍데기
+        if (/^[-–—─=~.\s]+$/.test(l)) return false;     // 구분선
+        if (!/[가-힣]/.test(l)) return false;            // 한글 문장 아님
+        if (/(정리|진행자|목록|머리말)$/.test(l)) return false;  // "~정리" 같은 제목 조각
+        if (/^(다음에도|반복할|하지\s?말|이번|교훈|회고)/.test(l)
+            && l.length < 16) return false;             // 머리말 조각
+        if (!/(다|한다|하라|자|것|기|음)$/.test(l)) return false; // 완결 문장만
+        return true;
+      })
+      .slice(0, 3);
+  }
+
   /* ---------- 교훈 정규화 (v0.1: 사전, v0.2: LLM 드라이버) ---------- */
   function defaultNormalizer(text) {
     const table = {
@@ -218,7 +240,10 @@
       }
 
       const decision = await llm.complete(
-        "당신은 회의 의장이다. 결론/근거/기각된 대안을 정리하라.",
+        "당신은 회의 의장이다. 아래 발언들을 종합해 다음을 순서대로 써라. " +
+        "① 최종 결정: 한 문장으로 명확히(채택/보류/기각 중 하나와 그 대상). " +
+        "② 핵심 근거: 2~3개. ③ 기각된 대안: 있으면. " +
+        "표나 마크다운 없이 짧은 평문으로. 추상적 미사여구 금지.",
         m.turns.map(u => `[${u.turn_type}] ${u.agent_name}: ${u.content}`).join("\n"));
       m.conclusion = { decision, policy: "chair_decides" };
       store.upsert("meetings", m);
@@ -228,10 +253,13 @@
 
       /* 회고 → 경험 저장, Short → 소거(consolidate 축약판) */
       const retroText = await llm.complete(
-        "당신은 회고 진행자다. '다음에도 반복할 것/하지 말 것'을 한 줄 교훈 목록으로 추출하라.",
+        "당신은 회고 진행자다. 이 회의에서 '다음에도 반복할 실무 원칙'을 " +
+        "완결된 평서문 한 문장씩, 최대 3개만 뽑아라. " +
+        "각 줄은 반드시 동사로 끝나는 완전한 문장이어야 한다. " +
+        "제목·머리말·마크다운 기호·구분선·표는 절대 쓰지 마라. " +
+        "설명 없이 문장만, 한 줄에 하나씩.",
         decision);
-      const lessons = retroText.split("\n").map(l => l.replace(/^-\s*/, "").trim())
-        .filter(Boolean).slice(0, 5);
+      const lessons = extractLessons(retroText);
       bus.publish(Topics.RETRO_COMPLETED,
         { task_id: task.id, meeting_id: m.id, lessons }, task.id);
       for (const a of members) a.shortMem = [];
