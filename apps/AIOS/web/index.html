@@ -73,7 +73,13 @@
   .t-rebuttal .rail{background:var(--rebuttal)} .t-rebuttal .chip{color:var(--rebuttal);border-color:var(--rebuttal)}
   .t-conclude .rail{background:var(--conclude)} .t-conclude .chip{color:var(--conclude);border-color:var(--conclude)}
   .t-conclude .body{border-color:var(--conclude)}
-  .turn p{font-size:14px;color:#CBD3E0}
+  .turn p{font-size:14px;color:#CBD3E0;white-space:pre-wrap;word-break:break-word}
+  .turn .body{cursor:pointer;position:relative}
+  .turn.clip p{display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden}
+  .turn.clip .body::after{content:"⌄ 전체 보기";position:absolute;right:10px;bottom:6px;
+    font:600 11px var(--mono);color:var(--dim);background:var(--surface);padding-left:16px}
+  .turn.t-conclude.clip .body::after{background:#182018}
+  .turn .body.open{cursor:default}
 
   /* ---- 승격 배너 (signature) ---- */
   .promo{margin-top:12px;border:1px solid var(--rule);border-radius:12px;
@@ -96,13 +102,14 @@
   .rule-item{display:flex;align-items:center;gap:10px;background:var(--surface);
     border:1px solid var(--line);border-left:3px solid var(--rule);
     border-radius:12px;padding:11px 12px;margin-top:8px}
-  .rule-item .tx{flex:1;font-size:14px}
+  .rule-item .tx{flex:1;font-size:14px;word-break:break-word}
   .rule-item .sc{font:600 10px var(--mono);color:var(--dim)}
   .off{border:1px solid var(--line);background:none;color:var(--danger);
     font:600 12px var(--sans);border-radius:8px;padding:6px 10px;flex:none}
-  .cand{display:flex;justify-content:space-between;align-items:center;
+  .cand{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;
     padding:10px 12px;margin-top:8px;background:var(--surface);
     border:1px dashed var(--line);border-radius:12px;font-size:13px;color:var(--dim)}
+  .cand span:first-child{flex:1;word-break:break-word}
   .empty{color:var(--faint);font-size:13px;padding:14px 2px}
 
   /* ---- 로그 탭 ---- */
@@ -255,14 +262,39 @@
 
   /* ---- 이벤트 → 화면 ---- */
   const tr = $("#transcript");
+  // LLM이 뱉는 마크다운 기호를 모바일에서 읽기 쉽게 경량 정리
+  function tidy(md){
+    return String(md)
+      .replace(/\r/g, "")
+      .replace(/^#{1,6}\s*/gm, "▸ ")        // 헤더 → 불릿
+      .replace(/\*\*(.+?)\*\*/g, "$1")       // 볼드 제거
+      .replace(/^\s*[-*]\s+/gm, "• ")        // 리스트 마커
+      .replace(/^\s*\|.*\|\s*$/gm, m =>       // 표 행 → 화살표 구분
+        m.replace(/\|/g, " · ").replace(/[-\s·]{4,}/g, "").trim())
+      .replace(/^[\s·]*---[\s·]*$/gm, "─────")
+      .replace(/\n{3,}/g, "\n\n")
+      .trim();
+  }
   function turnCard(kind, chip, name, text){
     const d = document.createElement("div");
-    d.className = "turn t-" + kind;
+    d.className = "turn t-" + kind + " clip";
     d.innerHTML = `<div class="rail"></div><div class="body">
       <div class="who"><b></b><span class="chip">${chip}</span></div><p></p></div>`;
     d.querySelector("b").textContent = name;
-    d.querySelector("p").textContent = text;
+    d.querySelector("p").textContent = tidy(text);
+    const body = d.querySelector(".body");
+    body.addEventListener("click", () => {
+      d.classList.toggle("clip");
+      body.classList.toggle("open", !d.classList.contains("clip"));
+    });
     tr.appendChild(d);
+    // 짧은 발언(6줄 이하 추정)은 접기 안 함
+    requestAnimationFrame(() => {
+      const p = d.querySelector("p");
+      if (p.scrollHeight <= p.clientHeight + 4) {
+        d.classList.remove("clip"); body.style.cursor = "default";
+      }
+    });
     d.scrollIntoView({ behavior:"smooth", block:"end" });
   }
   function wire(){
