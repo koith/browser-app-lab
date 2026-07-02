@@ -1,0 +1,13 @@
+[project]
+name = "aios-kernel"
+version = "0.1.0"
+description = "AIOS Kernel v0.1 — AI 조직을 운영하는 운영체제의 최소 커널"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+llm = ["anthropic"]
+dev = ["pytest"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
