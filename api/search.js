@@ -1,9 +1,10 @@
-// Vercel Serverless Function — Brave Search 프록시
-// 경로: /api/search  (저장소의 api/search.js 위치가 곧 URL 경로가 됨)
+// Vercel Serverless Function — Serper(Google) 검색 프록시
+// 경로: /api/search
 //
-// 역할: 앱에서 검색어를 받아 Brave Search API에 대신 요청하고,
+// 역할: 앱에서 검색어를 받아 Serper(google.serper.dev)에 대신 요청하고,
 //       결과에서 제목·URL·플랫폼·설명만 뽑아 돌려준다.
-// 키는 코드에 없다. Vercel 환경변수 BRAVE_KEY 에서 읽는다.
+// 키는 코드에 없다. Vercel 환경변수 SERPER_KEY 에서 읽는다.
+// (구버전 BRAVE_KEY가 남아있어도 무시된다.)
 //
 // 요청:  POST /api/search   { "q": "검색어", "count": 10, "verified": true }
 //        또는 GET /api/search?q=검색어&verified=true
@@ -52,32 +53,32 @@ export default async function handler(req, res) {
   if (!verified) { res.status(403).json({ error: "case_not_verified", results: [] }); return; }
   if (!q)        { res.status(400).json({ error: "empty_query", results: [] }); return; }
 
-  const key = process.env.BRAVE_KEY;
+  const key = process.env.SERPER_KEY;
   if (!key)      { res.status(500).json({ error: "missing_api_key" }); return; }
 
-  // Brave Search 호출
-  const url = "https://api.search.brave.com/res/v1/web/search"
-            + "?q=" + encodeURIComponent(q) + "&count=" + count;
+  // Serper(Google) 호출: POST + X-API-KEY
   try {
-    const r = await fetch(url, {
+    const r = await fetch("https://google.serper.dev/search", {
+      method: "POST",
       headers: {
-        "Accept": "application/json",
-        "Accept-Encoding": "gzip",
-        "X-Subscription-Token": key,
+        "X-API-KEY": key,
+        "Content-Type": "application/json",
       },
+      body: JSON.stringify({ q, num: count }),
     });
     if (!r.ok) {
       const txt = await r.text();
-      res.status(502).json({ error: "brave_error", status: r.status, detail: txt.slice(0, 200) });
+      res.status(502).json({ error: "serper_error", status: r.status, detail: txt.slice(0, 200) });
       return;
     }
     const data = await r.json();
-    const items = ((data.web && data.web.results) || []).map(x => ({
+    // organic 배열: { title, link, snippet, position }
+    const items = ((data.organic) || []).map(x => ({
       title: x.title || "",
-      url: x.url || "",
-      platform: platformOf(x.url || ""),
-      description: (x.description || "").replace(/<[^>]+>/g, ""),
-    }));
+      url: x.link || "",
+      platform: platformOf(x.link || ""),
+      description: x.snippet || "",
+    })).filter(x => x.url);
     res.status(200).json({ query: q, count: items.length, results: items });
   } catch (e) {
     res.status(502).json({ error: "fetch_failed", detail: String(e).slice(0, 200) });
