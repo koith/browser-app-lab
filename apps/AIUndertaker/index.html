@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Undertaker">
+<title>동의 기반 디지털 장의사</title>
+<style>
+  :root{
+    --bg:#161514; --bg2:#1f1d1b; --card:#252220; --line:#332f2b;
+    --txt:#ece7e1; --sub:#9c948a; --amber:#e0a458; --amber-dim:#8a6a3c;
+    --green:#5aa06a; --red:#c76a5a; --blue:#5a86c7;
+    --radius:14px; --safe: env(safe-area-inset-bottom,0px);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;overscroll-behavior-y:none}
+  body{padding-bottom:calc(64px + var(--safe))}
+  h1,h2,h3{margin:0;font-weight:600}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  input,textarea,select{font-family:inherit;font-size:16px}
+  .hidden{display:none!important}
+
+  header{position:sticky;top:0;z-index:20;background:rgba(22,21,20,.92);
+    backdrop-filter:blur(12px);border-bottom:1px solid var(--line);
+    padding:calc(env(safe-area-inset-top,0px) + 10px) 16px 10px}
+  header .row{display:flex;align-items:center;gap:10px;min-height:32px}
+  header h1{font-size:18px;letter-spacing:-.3px;flex:1}
+  .back{color:var(--amber);font-size:16px;font-weight:500;display:flex;align-items:center;gap:2px}
+  .hbtn{color:var(--amber);font-size:15px;font-weight:500;padding:4px 6px}
+
+  main{padding:14px 16px 20px;max-width:640px;margin:0 auto}
+  .muted{color:var(--sub)}
+  .tiny{font-size:12px}
+  .center{text-align:center}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+    padding:14px;margin-bottom:12px}
+  .card.tap:active{background:var(--bg2)}
+  .listrow{display:flex;align-items:center;gap:12px;background:var(--card);
+    border:1px solid var(--line);border-radius:var(--radius);padding:14px;margin-bottom:10px}
+  .listrow:active{background:var(--bg2)}
+  .listrow .grow{flex:1;min-width:0}
+  .listrow .title{font-size:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .listrow .meta{font-size:13px;color:var(--sub);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .chev{color:var(--sub);font-size:20px}
+
+  .badge{display:inline-block;font-size:11px;font-weight:600;padding:3px 8px;border-radius:20px;
+    letter-spacing:.2px;white-space:nowrap}
+  .b-draft{background:#3a3430;color:var(--sub)}
+  .b-verified{background:rgba(90,160,106,.16);color:var(--green)}
+  .b-searching{background:rgba(90,134,199,.16);color:var(--blue)}
+  .b-review{background:rgba(224,164,88,.16);color:var(--amber)}
+  .b-requesting{background:rgba(224,164,88,.16);color:var(--amber)}
+  .b-closed{background:#2c2926;color:var(--sub)}
+  .b-locked{background:rgba(199,106,90,.14);color:var(--red)}
+
+  label{display:block;font-size:13px;color:var(--sub);margin:12px 0 6px}
+  input[type=text],input[type=email],input[type=url],input[type=date],textarea,select{
+    width:100%;background:var(--bg2);border:1px solid var(--line);border-radius:10px;
+    color:var(--txt);padding:12px;outline:none}
+  input:focus,textarea:focus,select:focus{border-color:var(--amber-dim)}
+  textarea{min-height:70px;resize:vertical}
+
+  .btn{display:block;width:100%;text-align:center;background:var(--amber);color:#1a1613;
+    font-weight:600;font-size:16px;padding:14px;border-radius:12px;margin-top:14px}
+  .btn:active{opacity:.85}
+  .btn.sec{background:var(--bg2);color:var(--txt);border:1px solid var(--line)}
+  .btn.danger{background:rgba(199,106,90,.16);color:var(--red);border:1px solid rgba(199,106,90,.3)}
+  .btn.sm{padding:9px 14px;font-size:14px;width:auto;display:inline-block;margin-top:0}
+  .btnrow{display:flex;gap:8px;margin-top:12px}
+  .btnrow .btn{margin-top:0}
+
+  .gate{background:rgba(199,106,90,.09);border:1px solid rgba(199,106,90,.28);
+    border-radius:var(--radius);padding:14px;margin-bottom:12px;font-size:14px;line-height:1.5}
+  .gate b{color:var(--red)}
+
+  .seg{display:flex;background:var(--bg2);border:1px solid var(--line);border-radius:11px;
+    padding:3px;margin-bottom:14px;overflow-x:auto}
+  .seg button{flex:1;min-width:max-content;font-size:13px;font-weight:600;color:var(--sub);
+    padding:8px 10px;border-radius:8px;white-space:nowrap}
+  .seg button.on{background:var(--card);color:var(--txt)}
+
+  .pill{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;
+    padding:6px 10px;border-radius:20px;background:var(--bg2);border:1px solid var(--line);
+    color:var(--sub);margin:0 6px 6px 0}
+  .pill.on{background:rgba(224,164,88,.15);border-color:var(--amber-dim);color:var(--amber)}
+
+  .kv{display:flex;gap:8px;font-size:13px;padding:4px 0}
+  .kv .k{color:var(--sub);min-width:74px}
+  .kv .v{flex:1;word-break:break-all}
+  a{color:var(--blue)}
+
+  .fab{position:fixed;right:18px;bottom:calc(78px + var(--safe));width:54px;height:54px;
+    border-radius:27px;background:var(--amber);color:#1a1613;font-size:30px;font-weight:300;
+    display:flex;align-items:center;justify-content:center;box-shadow:0 6px 18px rgba(0,0,0,.4);z-index:30}
+  .fab:active{opacity:.85}
+
+  nav{position:fixed;left:0;right:0;bottom:0;z-index:25;background:rgba(22,21,20,.94);
+    backdrop-filter:blur(12px);border-top:1px solid var(--line);
+    display:flex;padding-bottom:var(--safe)}
+  nav button{flex:1;padding:9px 0 8px;display:flex;flex-direction:column;align-items:center;gap:3px;
+    color:var(--sub);font-size:10px;font-weight:600}
+  nav button.on{color:var(--amber)}
+  nav .ic{font-size:20px;line-height:1}
+
+  .empty{text-align:center;color:var(--sub);padding:48px 20px;font-size:14px;line-height:1.6}
+  .empty .big{font-size:34px;margin-bottom:10px;opacity:.6}
+
+  /* modal */
+  .sheet{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.5);
+    display:flex;align-items:flex-end;justify-content:center}
+  .sheet .inner{background:var(--bg2);width:100%;max-width:640px;border-radius:18px 18px 0 0;
+    border-top:1px solid var(--line);padding:18px 16px calc(20px + var(--safe));
+    max-height:88vh;overflow-y:auto;-webkit-overflow-scrolling:touch}
+  .sheet h2{font-size:18px;margin-bottom:4px}
+  .grab{width:38px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 14px}
+
+  .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(90px + var(--safe));
+    background:#2f2b27;border:1px solid var(--line);color:var(--txt);font-size:14px;
+    padding:11px 16px;border-radius:12px;z-index:80;box-shadow:0 6px 18px rgba(0,0,0,.4);
+    opacity:0;transition:opacity .2s;pointer-events:none;max-width:90%}
+  .toast.show{opacity:1}
+
+  .divlbl{font-size:12px;font-weight:600;color:var(--amber-dim);text-transform:uppercase;
+    letter-spacing:.6px;margin:18px 0 8px}
+  .note{font-size:12px;color:var(--sub);line-height:1.5;margin-top:6px}
+  .srclink{display:inline-block;font-size:13px;padding:8px 12px;background:var(--bg2);
+    border:1px solid var(--line);border-radius:20px;margin:0 6px 8px 0;color:var(--blue)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="row">
+    <button class="back hidden" id="backBtn">‹ 뒤로</button>
+    <h1 id="hTitle">디지털 장의사</h1>
+    <button class="hbtn hidden" id="hAction"></button>
+  </div>
+</header>
+
+<main id="main"></main>
+
+<button class="fab hidden" id="fab">+</button>
+
+<nav id="nav">
+  <button data-tab="cases" class="on"><span class="ic">🗂️</span>케이스</button>
+  <button data-tab="audit"><span class="ic">📜</span>감사로그</button>
+  <button data-tab="settings"><span class="ic">⚙️</span>설정</button>
+</nav>
+
+<div id="sheetHost"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+/* ============================================================
+   동의 기반 디지털 장의사 — MVP (단일 파일 / IndexedDB)
+   핵심 안전장치: 신원확인 게이트.
+   케이스가 VERIFIED 되기 전에는 단서/검색/후보/삭제요청 전부 잠금.
+   ============================================================ */
+
+// ---------- IndexedDB ----------
+const DB_NAME='undertaker', DB_VER=1;
+const STORES=['cases','clues','terms','candidates','requests','audit'];
+let db;
+function openDB(){return new Promise((res,rej)=>{
+  const r=indexedDB.open(DB_NAME,DB_VER);
+  r.onupgradeneeded=e=>{const d=e.target.result;
+    STORES.forEach(s=>{if(!d.objectStoreNames.contains(s)){
+      const os=d.createObjectStore(s,{keyPath:'id'});
+      if(s!=='cases'&&s!=='audit')os.createIndex('caseId','caseId',{unique:false});
+      if(s==='requests')os.createIndex('candidateId','candidateId',{unique:false});
+    }});};
+  r.onsuccess=e=>{db=e.target.result;res();};
+  r.onerror=e=>rej(e.target.error);
+});}
+function tx(store,mode='readonly'){return db.transaction(store,mode).objectStore(store);}
+function put(store,obj){return new Promise((res,rej)=>{const r=tx(store,'readwrite').put(obj);r.onsuccess=()=>res(obj);r.onerror=()=>rej(r.error);});}
+function del(store,id){return new Promise((res,rej)=>{const r=tx(store,'readwrite').delete(id);r.onsuccess=()=>res();r.onerror=()=>rej(r.error);});}
+function getAll(store){return new Promise((res,rej)=>{const r=tx(store).getAll();r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});}
+function get(store,id){return new Promise((res,rej)=>{const r=tx(store).get(id);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});}
+async function byCase(store,caseId){return (await getAll(store)).filter(x=>x.caseId===caseId);}
+
+// ---------- utils ----------
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+const now=()=>new Date().toISOString();
+const fmt=iso=>{if(!iso)return'—';const d=new Date(iso);
+  return d.getFullYear()+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+String(d.getDate()).padStart(2,'0');};
+const esc=s=>(s==null?'':String(s)).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function sha256(str){
+  try{const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(str));
+    return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('').slice(0,16);}
+  catch(e){return 'nohash';}
+}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),1900);}
+
+// ---------- audit ----------
+async function audit(action,{caseId=null,target=null,reason=null}={}){
+  await put('audit',{id:uid(),actor:state.user+' ('+state.role+')',action,caseId,target,reason,at:now()});
+}
+
+// ---------- state ----------
+const state={
+  user:localStorage.getItem('u_user')||'담당자',
+  role:localStorage.getItem('u_role')||'OPERATOR', // ADMIN|VERIFIER|OPERATOR|VIEWER
+  tab:'cases', view:'list', caseId:null, subtab:'verify'
+};
+function saveUser(){localStorage.setItem('u_user',state.user);localStorage.setItem('u_role',state.role);}
+
+// ---------- status helpers ----------
+const CASE_FLOW=['DRAFT','VERIFIED','SEARCHING','REVIEW','REQUESTING','CLOSED'];
+const badgeClass={DRAFT:'b-draft',VERIFIED:'b-verified',SEARCHING:'b-searching',
+  REVIEW:'b-review',REQUESTING:'b-requesting',CLOSED:'b-closed'};
+const statusKo={DRAFT:'초안',VERIFIED:'신원확인됨',SEARCHING:'검색중',REVIEW:'검토',
+  REQUESTING:'삭제요청중',CLOSED:'종결'};
+const isVerified=c=>c && c.status!=='DRAFT';
+
+// ============================================================
+//  RENDER
+// ============================================================
+const main=()=>document.getElementById('main');
+function setHeader(title,{back=false,action=null}={}){
+  document.getElementById('hTitle').textContent=title;
+  const b=document.getElementById('backBtn');b.classList.toggle('hidden',!back);
+  const a=document.getElementById('hAction');
+  if(action){a.textContent=action.label;a.onclick=action.fn;a.classList.remove('hidden');}
+  else a.classList.add('hidden');
+}
+function nav(tab){state.tab=tab;state.view='list';state.caseId=null;
+  document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));
+  render();}
+
+async function render(){
+  document.getElementById('fab').classList.add('hidden');
+  if(state.view==='case'){return renderCase();}
+  if(state.tab==='cases')return renderCases();
+  if(state.tab==='audit')return renderAudit();
+  if(state.tab==='settings')return renderSettings();
+}
+
+// ----- Cases list -----
+async function renderCases(){
+  setHeader('디지털 장의사');
+  document.getElementById('nav').classList.remove('hidden');
+  const cases=(await getAll('cases')).sort((a,b)=>b.createdAt.localeCompare(a.createdAt));
+  const fab=document.getElementById('fab');
+  if(canWrite()){fab.classList.remove('hidden');fab.onclick=openNewCase;}
+  if(!cases.length){
+    main().innerHTML=`<div class="empty"><div class="big">🗂️</div>
+      아직 케이스가 없습니다.<br>우측 하단 + 로 삭제 의뢰 케이스를 만드세요.</div>`;
+    return;
+  }
+  let h='';
+  for(const c of cases){
+    const cand=await byCase('candidates',c.id);
+    h+=`<div class="listrow" onclick="openCase('${c.id}')">
+      <div class="grow">
+        <div class="title">${esc(c.subjectName)}</div>
+        <div class="meta">${c.isAgent?'대리인 의뢰 · ':''}후보 ${cand.length}건 · ${fmt(c.createdAt)}</div>
+      </div>
+      <span class="badge ${badgeClass[c.status]}">${statusKo[c.status]}</span>
+      <span class="chev">›</span>
+    </div>`;
+  }
+  main().innerHTML=h;
+}
+
+// ----- Case detail -----
+async function openCase(id){state.view='case';state.caseId=id;state.subtab='verify';render();}
+window.openCase=openCase;
+
+async function renderCase(){
+  document.getElementById('fab').classList.add('hidden');
+  document.getElementById('nav').classList.add('hidden');
+  const c=await get('cases',state.caseId);
+  if(!c){nav('cases');return;}
+  setHeader(c.subjectName,{back:true});
+  document.getElementById('backBtn').onclick=()=>nav('cases');
+
+  const verified=isVerified(c);
+  const tabs=[['verify','신원확인'],['clues','단서'],['terms','검색어'],['cands','후보'],['reqs','삭제요청']];
+  let seg='<div class="seg">'+tabs.map(([k,l])=>
+    `<button class="${state.subtab===k?'on':''}" onclick="setSub('${k}')">${l}${k!=='verify'&&!verified?' 🔒':''}</button>`
+  ).join('')+'</div>';
+
+  let body='';
+  if(state.subtab==='verify')body=await subVerify(c);
+  else if(!verified)body=gateBlock();
+  else if(state.subtab==='clues')body=await subClues(c);
+  else if(state.subtab==='terms')body=await subTerms(c);
+  else if(state.subtab==='cands')body=await subCands(c);
+  else if(state.subtab==='reqs')body=await subReqs(c);
+
+  main().innerHTML=`<div class="card" style="margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:8px">
+        <h2 style="flex:1;font-size:17px">${esc(c.subjectName)}</h2>
+        <span class="badge ${badgeClass[c.status]}">${statusKo[c.status]}</span>
+      </div>
+      <div class="kv"><span class="k">유형</span><span class="v">${c.isAgent?'대리인 의뢰':'본인 의뢰'}</span></div>
+      <div class="kv"><span class="k">보존기한</span><span class="v">${c.retentionUntil||'미설정'}</span></div>
+    </div>${seg}${body}`;
+}
+function setSub(k){state.subtab=k;render();}
+window.setSub=setSub;
+
+function gateBlock(){
+  return `<div class="gate">🔒 <b>신원확인 게이트</b><br>
+    이 케이스는 아직 <b>신원확인이 완료되지 않았습니다.</b>
+    본인(또는 적법 대리인)임이 확인되기 전에는 단서 입력·검색어 생성·후보 수집·삭제요청이
+    모두 잠깁니다. 이것이 이 시스템을 감시 도구가 아닌 <b>본인 삭제 지원 도구</b>로
+    유지하는 핵심 장치입니다.<br><br>
+    ‘신원확인’ 탭에서 확인 절차를 완료하세요.</div>`;
+}
+
+// ----- sub: verification (THE GATE) -----
+async function subVerify(c){
+  if(isVerified(c)){
+    return `<div class="card">
+      <div class="kv"><span class="k">상태</span><span class="v" style="color:var(--green)">✔ 신원확인 완료</span></div>
+      <div class="kv"><span class="k">방법</span><span class="v">${esc(c.verifyMethod||'—')}</span></div>
+      <div class="kv"><span class="k">확인자</span><span class="v">${esc(c.verifiedBy||'—')}</span></div>
+      <div class="kv"><span class="k">확인일</span><span class="v">${fmt(c.verifiedAt)}</span></div>
+      <div class="note">확인에 사용한 신분/위임 서류는 목적 달성 후 즉시 파기하는 것을 원칙으로 합니다.
+      이 앱은 서류 자체를 저장하지 않고 ‘확인 사실’만 기록합니다.</div>
+    </div>`;
+  }
+  const canVerify=state.role==='VERIFIER'||state.role==='ADMIN';
+  return `<div class="gate">이 케이스는 <b>초안(DRAFT)</b> 상태입니다. 신원확인 전에는 이후 단계가 잠깁니다.</div>
+    <div class="card">
+      <h3 style="font-size:15px;margin-bottom:6px">신원 / 대리권 확인</h3>
+      <div class="note" style="margin-bottom:6px">본인 의뢰: 신분 확인. 대리인 의뢰: 위임 근거 확인.
+      서류는 외부에서 확인 후, 여기에는 <b>확인 사실만</b> 남깁니다.</div>
+      <label>확인 방법</label>
+      <select id="vMethod">
+        <option value="본인 신분 확인">본인 신분 확인</option>
+        <option value="대리인 위임장 확인">대리인 위임장 확인</option>
+        <option value="법정대리 권한 확인">법정대리 권한 확인</option>
+        <option value="기타(메모)">기타(메모)</option>
+      </select>
+      <label>확인 메모(선택)</label>
+      <input type="text" id="vNote" placeholder="예: 신분증 대조 완료, 위임장 원본 확인">
+      ${canVerify
+        ? `<button class="btn" onclick="doVerify('${c.id}')">✔ 신원확인 완료 처리</button>`
+        : `<div class="gate" style="margin-top:12px">현재 역할(<b>${state.role}</b>)은 신원확인 권한이 없습니다.
+           설정에서 역할을 <b>VERIFIER</b> 또는 <b>ADMIN</b>으로 바꾸면 확인할 수 있습니다.</div>`}
+    </div>`;
+}
+async function doVerify(id){
+  const c=await get('cases',id);
+  c.status='VERIFIED';c.verifyMethod=document.getElementById('vMethod').value;
+  c.verifyNote=document.getElementById('vNote').value.trim();
+  c.verifiedBy=state.user;c.verifiedAt=now();
+  await put('cases',c);
+  await audit('VERIFY_CASE',{caseId:id,reason:c.verifyMethod});
+  toast('신원확인 완료 — 이후 단계가 열렸습니다');
+  state.subtab='clues';render();
+}
+window.doVerify=doVerify;
+
+// ----- sub: clues -----
+async function subClues(c){
+  const clues=await byCase('clues',c.id);
+  let h='';
+  if(canWrite())h+=`<button class="btn sec" onclick="openClue('${c.id}')">+ 단서 추가</button>`;
+  if(!clues.length)h+=`<div class="empty"><div class="big">🧩</div>의뢰인이 제공한 단서를 입력하세요.<br>
+    (닉네임·게시글 URL·SNS 등)</div>`;
+  else{h+='<div style="margin-top:12px"></div>';
+    for(const cl of clues){
+      h+=`<div class="listrow">
+        <div class="grow"><div class="title">${esc(clueLabel(cl.kind))}</div>
+          <div class="meta">${esc(cl.value||'첨부')}</div></div>
+        ${canWrite()?`<button class="hbtn" onclick="rmClue('${cl.id}','${c.id}')">삭제</button>`:''}
+      </div>`;
+    }
+  }
+  return h;
+}
+function clueLabel(k){return {nickname:'닉네임',email:'이메일',blog_url:'블로그',sns_url:'SNS',
+  home_url:'홈페이지',github:'GitHub',profile:'공개 프로필',post_url:'게시글 URL',note:'메모'}[k]||k;}
+function openClue(caseId){
+  sheet(`<h2>단서 추가</h2><div class="note">의뢰인이 직접 제공한 정보만 입력합니다.</div>
+    <label>유형</label>
+    <select id="clKind">
+      <option value="nickname">닉네임</option>
+      <option value="post_url">게시글 URL</option>
+      <option value="sns_url">SNS URL</option>
+      <option value="blog_url">블로그 URL</option>
+      <option value="home_url">홈페이지</option>
+      <option value="github">GitHub</option>
+      <option value="profile">공개 프로필</option>
+      <option value="email">이메일</option>
+      <option value="note">메모</option>
+    </select>
+    <label>내용</label>
+    <input type="text" id="clVal" placeholder="예: oldnick_2011 / https://...">
+    <button class="btn" onclick="saveClue('${caseId}')">저장</button>`);
+}
+window.openClue=openClue;
+async function saveClue(caseId){
+  const kind=document.getElementById('clKind').value;
+  const value=document.getElementById('clVal').value.trim();
+  if(!value){toast('내용을 입력하세요');return;}
+  await put('clues',{id:uid(),caseId,kind,value,createdAt:now()});
+  await audit('ADD_CLUE',{caseId,target:kind});
+  closeSheet();render();toast('단서 추가됨');
+}
+window.saveClue=saveClue;
+async function rmClue(id,caseId){await del('clues',id);await audit('DEL_CLUE',{caseId});render();}
+window.rmClue=rmClue;
+
+// ----- sub: search terms -----
+async function subTerms(c){
+  const terms=await byCase('terms',c.id);
+  const clues=await byCase('clues',c.id);
+  let h=`<div class="card"><h3 style="font-size:15px;margin-bottom:6px">검색어 자동 생성</h3>
+    <div class="note">의뢰인이 제공한 단서만으로 검색어 후보를 만듭니다. 사람에 대한 추정·평가는 하지 않습니다.</div>
+    ${canWrite()?`<button class="btn sm sec" style="margin-top:12px" onclick="genTerms('${c.id}')">단서로 검색어 생성</button>`:''}
+  </div>`;
+  if(!terms.length)h+=`<div class="empty"><div class="big">🔎</div>${clues.length?'‘검색어 생성’을 눌러 후보를 만드세요.':'먼저 단서 탭에서 단서를 입력하세요.'}</div>`;
+  else{
+    for(const t of terms){
+      const q=encodeURIComponent(t.query);
+      h+=`<div class="card">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="flex:1;font-weight:600;word-break:break-all">${esc(t.query)}</div>
+          <span class="badge ${t.status==='APPROVED'?'b-verified':'b-draft'}">${t.status==='APPROVED'?'승인':'제안'}</span>
+        </div>
+        <div class="note">${esc(t.rationale||'')}</div>
+        <div style="margin-top:10px">
+          <a class="srclink" href="https://www.google.com/search?q=${q}" target="_blank" rel="noopener">Google에서 열기 ↗</a>
+          <a class="srclink" href="https://www.bing.com/search?q=${q}" target="_blank" rel="noopener">Bing ↗</a>
+        </div>
+        ${canWrite()?`<div class="btnrow">
+          ${t.status!=='APPROVED'?`<button class="btn sm" onclick="approveTerm('${t.id}','${c.id}')">승인</button>`:''}
+          <button class="btn sm sec" onclick="rmTerm('${t.id}','${c.id}')">삭제</button>
+        </div>`:''}
+      </div>`;
+    }
+    h+=`<div class="note" style="margin-top:8px">※ MVP는 실제 크롤링 대신, 승인된 검색어를 검색엔진에서 열어
+      확인한 뒤 ‘후보’ 탭에 URL을 등록하는 방식입니다. 자동 수집은 백엔드 확장 단계에서 추가됩니다.</div>`;
+  }
+  return h;
+}
+async function genTerms(caseId){
+  const clues=await byCase('clues',caseId);
+  if(!clues.length){toast('단서가 없습니다');return;}
+  const existing=(await byCase('terms',caseId)).map(t=>t.query);
+  const out=[];
+  const domainOf=u=>{try{return new URL(u).hostname.replace(/^www\./,'');}catch(e){return null;}};
+  for(const cl of clues){
+    if(cl.kind==='nickname'&&cl.value){
+      out.push([`"${cl.value}"`,`닉네임 정확일치`]);
+    }
+    if(['sns_url','blog_url','home_url','github','profile','post_url'].includes(cl.kind)&&cl.value){
+      const d=domainOf(cl.value);
+      const nick=clues.find(x=>x.kind==='nickname');
+      if(d&&nick)out.push([`"${nick.value}" site:${d}`,`닉네임 × ${d}`]);
+      out.push([cl.value,`URL 직접 확인`]);
+    }
+    if(cl.kind==='email'&&cl.value){out.push([`"${cl.value}"`,`이메일 노출 확인`]);}
+    if(cl.kind==='note'&&cl.value&&cl.value.length<60){out.push([`"${cl.value}"`,`메모 기반 제목검색`]);}
+  }
+  let added=0;
+  for(const [query,rationale] of out){
+    if(existing.includes(query))continue;existing.push(query);
+    await put('terms',{id:uid(),caseId,query,rationale,status:'SUGGESTED',createdAt:now()});added++;
+  }
+  const c=await get('cases',caseId);if(c.status==='VERIFIED'){c.status='SEARCHING';await put('cases',c);}
+  await audit('GEN_TERMS',{caseId,reason:added+'건'});
+  toast(added?added+'개 검색어 생성':'새 검색어 없음');render();
+}
+window.genTerms=genTerms;
+async function approveTerm(id,caseId){const t=await get('terms',id);t.status='APPROVED';await put('terms',t);
+  await audit('APPROVE_TERM',{caseId,target:t.query});render();}
+window.approveTerm=approveTerm;
+async function rmTerm(id,caseId){await del('terms',id);await audit('DEL_TERM',{caseId});render();}
+window.rmTerm=rmTerm;
+
+// ----- sub: candidates -----
+async function subCands(c){
+  const cands=(await byCase('candidates',c.id)).sort((a,b)=>b.capturedAt.localeCompare(a.capturedAt));
+  let h='';
+  if(canWrite())h+=`<button class="btn sec" onclick="openCand('${c.id}')">+ 후보 URL 등록</button>`;
+  if(!cands.length){h+=`<div class="empty"><div class="big">📄</div>삭제 후보로 확인된 공개 URL을 등록하세요.</div>`;return h;}
+  h+='<div style="margin-top:12px"></div>';
+  for(const cd of cands){
+    const conf=cd.confirmed;
+    const cbadge=conf==='CONFIRMED_MINE'?'<span class="badge b-verified">본인 확인</span>'
+      :conf==='NOT_MINE'?'<span class="badge b-locked">본인 아님</span>'
+      :'<span class="badge b-draft">미확인</span>';
+    h+=`<div class="card">
+      <div style="display:flex;gap:8px;align-items:flex-start">
+        <div style="flex:1;min-width:0">
+          <div class="title" style="font-size:15px">${esc(cd.title||'(제목 없음)')}</div>
+          <div class="meta" style="margin-top:2px">${esc(cd.platform||'플랫폼 미상')} · ${fmt(cd.capturedAt)}</div>
+        </div>${cbadge}
+      </div>
+      <div class="kv"><span class="k">URL</span><span class="v"><a href="${esc(cd.url)}" target="_blank" rel="noopener">${esc(cd.url)}</a></span></div>
+      ${cd.hash?`<div class="kv"><span class="k">해시</span><span class="v tiny">${esc(cd.hash)}</span></div>`:''}
+      ${cd.ocr?`<div class="kv"><span class="k">OCR</span><span class="v tiny">${esc(cd.ocr.slice(0,120))}${cd.ocr.length>120?'…':''}</span></div>`:''}
+      ${canWrite()?`<div class="btnrow" style="flex-wrap:wrap">
+        ${conf!=='CONFIRMED_MINE'?`<button class="btn sm" onclick="confCand('${cd.id}','${c.id}','CONFIRMED_MINE')">본인 확인</button>`:''}
+        ${conf!=='NOT_MINE'?`<button class="btn sm sec" onclick="confCand('${cd.id}','${c.id}','NOT_MINE')">본인 아님</button>`:''}
+        ${conf==='CONFIRMED_MINE'?`<button class="btn sm" onclick="mkReq('${cd.id}','${c.id}')">삭제요청 생성</button>`:''}
+        <button class="btn sm sec" onclick="rmCand('${cd.id}','${c.id}')">삭제</button>
+      </div>`:''}
+    </div>`;
+  }
+  h+=`<div class="note">‘본인 확인’된 항목만 삭제요청으로 넘어갑니다. 시스템이 동일인을 자동 단정하지 않습니다.</div>`;
+  return h;
+}
+function openCand(caseId){
+  sheet(`<h2>후보 URL 등록</h2><div class="note">검색엔진에서 확인한 공개 URL을 등록합니다.</div>
+    <label>URL</label><input type="url" id="cdUrl" placeholder="https://...">
+    <label>제목</label><input type="text" id="cdTitle" placeholder="게시글/페이지 제목">
+    <label>플랫폼</label><input type="text" id="cdPlat" placeholder="예: 네이버 블로그, X, 커뮤니티">
+    <label>OCR 텍스트(선택 · 이미지에서 추출한 경우)</label>
+    <textarea id="cdOcr" placeholder="이미지/PDF에서 읽은 텍스트를 붙여넣기"></textarea>
+    <button class="btn" onclick="saveCand('${caseId}')">등록</button>`);
+}
+window.openCand=openCand;
+async function saveCand(caseId){
+  const url=document.getElementById('cdUrl').value.trim();
+  if(!url){toast('URL을 입력하세요');return;}
+  const title=document.getElementById('cdTitle').value.trim();
+  const platform=document.getElementById('cdPlat').value.trim();
+  const ocr=document.getElementById('cdOcr').value.trim();
+  const dup=(await byCase('candidates',caseId)).some(x=>x.url===url);
+  if(dup){toast('이미 등록된 URL');return;}
+  const hash=await sha256(url+'|'+title);
+  await put('candidates',{id:uid(),caseId,url,title,platform,ocr,hash,
+    confirmed:'UNCONFIRMED',capturedAt:now()});
+  await audit('ADD_CANDIDATE',{caseId,target:url});
+  const c=await get('cases',caseId);if(c.status==='SEARCHING'){c.status='REVIEW';await put('cases',c);}
+  closeSheet();render();toast('후보 등록됨');
+}
+window.saveCand=saveCand;
+async function confCand(id,caseId,val){
+  const cd=await get('candidates',id);cd.confirmed=val;await put('candidates',cd);
+  await audit('CONFIRM_CANDIDATE',{caseId,target:cd.url,reason:val});render();
+}
+window.confCand=confCand;
+async function rmCand(id,caseId){await del('candidates',id);await audit('DEL_CANDIDATE',{caseId});render();}
+window.rmCand=rmCand;
+
+// ----- sub: removal requests -----
+async function subReqs(c){
+  const cands=await byCase('candidates',c.id);
+  const reqs=await byCase('requests',c.id);
+  let h='';
+  if(!reqs.length){h+=`<div class="empty"><div class="big">✉️</div>‘후보’ 탭에서 본인 확인된 항목에 삭제요청을 만드세요.</div>`;}
+  const flow=['DRAFT','SENT','ACK','REMOVED','REJECTED'];
+  const rko={DRAFT:'작성',SENT:'발송',ACK:'접수확인',REMOVED:'삭제완료',REJECTED:'거부',RESUBMIT:'재요청'};
+  for(const r of reqs.sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt))){
+    const cd=cands.find(x=>x.id===r.candidateId);
+    h+=`<div class="card">
+      <div style="display:flex;gap:8px;align-items:center">
+        <div style="flex:1;min-width:0" class="title">${esc(cd?cd.title||cd.url:'(후보 삭제됨)')}</div>
+        <span class="badge ${r.status==='REMOVED'?'b-verified':r.status==='REJECTED'?'b-locked':'b-requesting'}">${rko[r.status]||r.status}</span>
+      </div>
+      <div class="kv"><span class="k">창구</span><span class="v">${esc(r.channel||'—')}</span></div>
+      ${r.note?`<div class="kv"><span class="k">회신</span><span class="v">${esc(r.note)}</span></div>`:''}
+      <div class="kv"><span class="k">갱신</span><span class="v">${fmt(r.updatedAt)}</span></div>
+      ${canWrite()?`<label>상태 변경</label>
+        <select onchange="updReq('${r.id}','${c.id}',this.value)">
+          ${flow.concat(['RESUBMIT']).map(s=>`<option value="${s}" ${r.status===s?'selected':''}>${rko[s]}</option>`).join('')}
+        </select>
+        <label>회신/메모</label>
+        <input type="text" value="${esc(r.note||'')}" onchange="noteReq('${r.id}',this.value)" placeholder="플랫폼 회신 내용">
+      `:''}
+    </div>`;
+  }
+  return h;
+}
+async function mkReq(candId,caseId){
+  const cd=await get('candidates',candId);
+  const ch=prompt('삭제 요청 창구를 입력하세요 (예: 플랫폼 신고, 방심위, 이메일)','플랫폼 신고창구');
+  if(ch===null)return;
+  await put('requests',{id:uid(),caseId,candidateId:candId,channel:ch,status:'DRAFT',
+    note:'',requestedBy:state.user,updatedAt:now(),createdAt:now()});
+  await audit('CREATE_REQUEST',{caseId,target:cd.url,reason:ch});
+  const c=await get('cases',caseId);if(c.status==='REVIEW'){c.status='REQUESTING';await put('cases',c);}
+  state.subtab='reqs';render();toast('삭제요청 생성됨');
+}
+window.mkReq=mkReq;
+async function updReq(id,caseId,val){const r=await get('requests',id);r.status=val;r.updatedAt=now();
+  await put('requests',r);await audit('UPDATE_REQUEST',{caseId,reason:val});render();}
+window.updReq=updReq;
+async function noteReq(id,val){const r=await get('requests',id);r.note=val;r.updatedAt=now();await put('requests',r);}
+window.noteReq=noteReq;
+
+// ----- new case -----
+function openNewCase(){
+  sheet(`<h2>새 삭제 의뢰 케이스</h2>
+    <div class="note">생성 후 <b>신원확인</b>을 완료해야 이후 단계가 열립니다.</div>
+    <label>의뢰인(정보주체) 이름</label>
+    <input type="text" id="ncName" placeholder="본인 이름">
+    <label>의뢰 유형</label>
+    <div style="margin-top:6px">
+      <span class="pill on" id="pSelf" onclick="pickType('self')">본인 의뢰</span>
+      <span class="pill" id="pAgent" onclick="pickType('agent')">대리인 의뢰</span>
+    </div>
+    <button class="btn" onclick="createCase()">케이스 생성</button>`);
+  sheetHost._type='self';
+}
+window.openNewCase=openNewCase;
+function pickType(t){sheetHost._type=t;
+  document.getElementById('pSelf').classList.toggle('on',t==='self');
+  document.getElementById('pAgent').classList.toggle('on',t==='agent');}
+window.pickType=pickType;
+async function createCase(){
+  const name=document.getElementById('ncName').value.trim();
+  if(!name){toast('이름을 입력하세요');return;}
+  const c={id:uid(),subjectName:name,isAgent:sheetHost._type==='agent',status:'DRAFT',
+    retentionUntil:null,createdAt:now()};
+  await put('cases',c);await audit('CREATE_CASE',{caseId:c.id,target:name});
+  closeSheet();openCase(c.id);toast('케이스 생성 — 신원확인을 진행하세요');
+}
+window.createCase=createCase;
+
+// ----- audit view -----
+async function renderAudit(){
+  setHeader('감사 로그');document.getElementById('nav').classList.remove('hidden');
+  if(state.role!=='ADMIN'){
+    main().innerHTML=`<div class="gate">감사 로그는 <b>ADMIN</b> 역할만 열람할 수 있습니다.
+      설정에서 역할을 변경하세요.</div>`;return;
+  }
+  const logs=(await getAll('audit')).sort((a,b)=>b.at.localeCompare(a.at)).slice(0,300);
+  if(!logs.length){main().innerHTML=`<div class="empty"><div class="big">📜</div>기록된 활동이 없습니다.</div>`;return;}
+  let h='';
+  for(const l of logs){
+    h+=`<div class="card" style="padding:11px 14px">
+      <div style="display:flex;gap:8px"><b style="font-size:14px;flex:1">${esc(l.action)}</b>
+        <span class="tiny muted">${new Date(l.at).toLocaleString('ko-KR')}</span></div>
+      <div class="tiny muted" style="margin-top:3px">${esc(l.actor)}${l.reason?' · '+esc(l.reason):''}${l.target?' · '+esc(l.target.slice(0,50)):''}</div>
+    </div>`;
+  }
+  main().innerHTML=`<div class="note" style="margin-bottom:10px">최근 300건. 실제 운영에서는 변경불가(WORM/해시체인) 저장소로 오프로드합니다.</div>`+h;
+}
+
+// ----- settings -----
+async function renderSettings(){
+  setHeader('설정');document.getElementById('nav').classList.remove('hidden');
+  const roles=['ADMIN','VERIFIER','OPERATOR','VIEWER'];
+  const roleDesc={ADMIN:'전체 권한 · 감사로그 · 파기',VERIFIER:'신원확인 전담',
+    OPERATOR:'단서·검색·후보·요청',VIEWER:'읽기 전용'};
+  main().innerHTML=`
+    <div class="card">
+      <h3 style="font-size:15px;margin-bottom:4px">담당자</h3>
+      <label>이름</label>
+      <input type="text" id="stUser" value="${esc(state.user)}">
+      <label>역할 (RBAC 시뮬레이션)</label>
+      ${roles.map(r=>`<span class="pill ${state.role===r?'on':''}" onclick="setRole('${r}')">${r}</span>`).join('')}
+      <div class="note">${roleDesc[state.role]}</div>
+      <button class="btn sm sec" style="margin-top:12px" onclick="saveSettings()">저장</button>
+    </div>
+    <div class="divlbl">데이터</div>
+    <div class="card">
+      <div class="note" style="margin-bottom:10px">이 앱은 데이터를 이 기기(IndexedDB)에만 저장합니다.
+      실제 운영에서는 서버측 암호화·보존기한 자동 파기가 적용됩니다.</div>
+      <button class="btn sm sec" onclick="exportData()">전체 백업(JSON)</button>
+      <button class="btn sm danger" style="margin-top:8px" onclick="wipeAll()">전체 데이터 삭제</button>
+    </div>
+    <div class="divlbl">이 시스템에 대하여</div>
+    <div class="card">
+      <div class="note">대상 = <b>의뢰인 본인</b> 또는 적법 대리인. 공개 자료만 대상.
+      신원확인 게이트 통과 전에는 검색·후보·요청이 잠깁니다.
+      사람에 대한 평가·프로파일링·자동 동일인 매칭은 하지 않습니다.
+      목적은 <b>삭제 지원 업무의 효율화</b>이며, 개인 활동 DB 구축이 아닙니다.</div>
+    </div>`;
+}
+function setRole(r){state.role=r;saveUser();renderSettings();}
+window.setRole=setRole;
+function saveSettings(){state.user=document.getElementById('stUser').value.trim()||'담당자';saveUser();toast('저장됨');}
+window.saveSettings=saveSettings;
+
+async function exportData(){
+  const dump={};for(const s of STORES)dump[s]=await getAll(s);
+  dump._exportedAt=now();
+  const blob=new Blob([JSON.stringify(dump,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='undertaker-backup-'+Date.now()+'.json';a.click();
+  await audit('EXPORT_BACKUP',{});toast('백업 생성됨');
+}
+window.exportData=exportData;
+async function wipeAll(){
+  if(!confirm('모든 케이스/후보/로그를 삭제합니다. 되돌릴 수 없습니다. 계속할까요?'))return;
+  for(const s of STORES){const all=await getAll(s);for(const x of all)await del(s,x.id);}
+  toast('전체 삭제됨');nav('cases');
+}
+window.wipeAll=wipeAll;
+
+// ---------- helpers ----------
+function canWrite(){return state.role==='OPERATOR'||state.role==='ADMIN'||state.role==='VERIFIER';}
+
+// ---------- sheet ----------
+const sheetHost=Object.assign(document.getElementById('sheetHost'),{});
+function sheet(inner){
+  sheetHost.innerHTML=`<div class="sheet" onclick="if(event.target===this)closeSheet()">
+    <div class="inner"><div class="grab"></div>${inner}</div></div>`;
+}
+function closeSheet(){sheetHost.innerHTML='';}
+window.closeSheet=closeSheet;
+
+// ---------- nav wiring ----------
+document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>nav(b.dataset.tab));
+document.getElementById('backBtn').onclick=()=>nav('cases');
+
+// ---------- boot ----------
+(async()=>{await openDB();render();})();
+</script>
+</body>
+</html>
