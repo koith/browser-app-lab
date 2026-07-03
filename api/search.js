@@ -12,12 +12,17 @@
 
 const ALLOWED_ORIGINS = [
   "https://koith.github.io",
+  "https://browser-app-lab.vercel.app",
   "http://localhost",
 ];
 
 function setCors(req, res) {
   const origin = req.headers.origin || "";
-  const allow = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  // 등록된 origin이면 그대로 허용. 그 외 koith.github.io / *.vercel.app 도 허용(자기 프로젝트).
+  let allow = ALLOWED_ORIGINS[0];
+  if (ALLOWED_ORIGINS.includes(origin)) allow = origin;
+  else if (/^https:\/\/([a-z0-9-]+\.)*koith\.github\.io$/.test(origin)) allow = origin;
+  else if (/^https:\/\/browser-app-lab[a-z0-9-]*\.vercel\.app$/.test(origin)) allow = origin;
   res.setHeader("Access-Control-Allow-Origin", allow);
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
