@@ -452,56 +452,68 @@ async function subTerms(c){
 const BIG_SERVICES=['dcinside','naver','google','daum','youtube','facebook','instagram',
   'twitter','x.com','tistory','blog.naver.com','cafe.naver.com','wikipedia','namu.wiki',
   'reddit','github','linkedin','tiktok'];
+// 로컬파트에 붙여볼 흔한 도메인
+const COMMON_DOMAINS=['gmail.com','naver.com','daum.net','hanmail.net','kakao.com','nate.com','outlook.com','hotmail.com'];
 function domainOf(u){try{return new URL(u.startsWith('http')?u:'https://'+u).hostname.replace(/^www\./,'');}catch(e){return null;}}
 function isBig(v){const s=(v||'').toLowerCase().trim();return BIG_SERVICES.some(b=>s===b||s===b.replace('.com','')||s.includes(b));}
+function localPart(e){const s=(e||'').trim();const i=s.indexOf('@');return i>0?s.slice(0,i):s;}
 
 // 단서로부터 "조합 우선" 검색어 목록을 만든다. (승인 개념 없음)
 function buildQueriesFromClues(clues){
   const val=k=>clues.filter(c=>c.kind===k&&c.value).map(c=>c.value.trim()).filter(Boolean);
-  const names=val('note').filter(v=>v.length<=12).concat(clues.filter(c=>c.kind==='name').map(c=>c.value)); // 실명은 note/name에 들어올 수 있음
   const realNames=clues.filter(c=>c.kind==='realname'||c.kind==='name').map(c=>c.value.trim()).filter(Boolean);
   const nicks=val('nickname');
-  const emails=val('email');
+  const emailsRaw=val('email');
   const phones=val('phone');
-  const regions=clues.filter(c=>c.kind==='region').map(c=>c.value.trim()).filter(Boolean);
+  const regions=val('region');
   const orgs=clues.filter(c=>c.kind==='company'||c.kind==='school').map(c=>c.value.trim()).filter(Boolean);
-  // URL 계열에서 도메인 추출(거대 서비스 제외)
   const urlDomains=clues.filter(c=>['sns_url','blog_url','home_url','github','profile','post_url'].includes(c.kind)&&c.value)
     .map(c=>domainOf(c.value)).filter(Boolean);
   const postUrls=clues.filter(c=>c.kind==='post_url'&&c.value).map(c=>c.value.trim());
 
-  // 식별자(사람을 좁히는 것): 실명·이메일·전화
-  const identifiers=[...realNames,...emails,...phones];
   const out=[]; const seen=new Set();
   const add=(q,why)=>{const k=q.trim();if(!k||seen.has(k))return;seen.add(k);out.push([k,why]);};
+  const identifiers=[...realNames,...emailsRaw,...phones];
 
-  // 1) 이메일·전화는 그 자체로 강력 → 완전일치 단독
-  emails.forEach(e=>add(`"${e}"`,'이메일 노출'));
+  // "핸들(handle)" = 닉네임 + 이메일 로컬파트. 둘 다 "사람 아이디"로 취급해 동일하게 분해·조합한다.
+  const handles=[];
+  nicks.forEach(n=>{ if(!isBig(n)) handles.push({v:n,src:'닉네임'}); });
+  emailsRaw.forEach(e=>{ const lp=localPart(e); if(lp&&!isBig(lp)) handles.push({v:lp,src:'이메일ID'}); });
+
+  // 1) 전화 완전일치
   phones.forEach(p=>add(`"${p}"`,'전화번호 노출'));
 
-  // 2) 실제 게시글 URL은 그대로(직접 확인)
+  // 2) 이메일: 전체 완전일치 + (도메인 없으면 흔한 도메인 붙여 추정)
+  emailsRaw.forEach(e=>{
+    if(e.includes('@')) add(`"${e}"`,'이메일 전체 완전일치');
+  });
+
+  // 3) 게시글 URL 직접
   postUrls.forEach(u=>add(u,'제출한 게시글 URL'));
 
-  // 3) 핵심: 2개 조합 (닉네임 × 식별자, 닉네임 × 지역/소속)
-  nicks.forEach(n=>{
-    if(isBig(n))return;
-    realNames.forEach(rn=>add(`"${n}" "${rn}"`,`닉네임 × 실명`));
-    regions.forEach(r=>add(`"${n}" ${r}`,`닉네임 × 지역`));
-    orgs.forEach(o=>add(`"${n}" ${o}`,`닉네임 × 소속`));
-    // 닉네임 × 커뮤니티/블로그 도메인 (거대 서비스여도 site:는 유용)
-    urlDomains.forEach(d=>add(`"${n}" site:${d}`,`닉네임 × ${d}`));
+  // 4) 핸들(닉네임/이메일ID) 분해·조합 — 구글링에서 당연히 하는 것들
+  handles.forEach(h=>{
+    const n=h.v;
+    // 4a) 로컬파트 × 흔한 도메인 (이메일일 가능성) — 완전일치는 동명이인 강력 배제
+    COMMON_DOMAINS.forEach(d=>add(`"${n}@${d}"`,`${h.src} × ${d}`));
+    // 4b) 핸들 × 실명 (같이 나오면 거의 본인)
+    realNames.forEach(rn=>add(`"${n}" "${rn}"`,`${h.src} × 실명`));
+    // 4c) 핸들 × 지역/소속
+    regions.forEach(r=>add(`"${n}" ${r}`,`${h.src} × 지역`));
+    orgs.forEach(o=>add(`"${n}" ${o}`,`${h.src} × 소속`));
+    // 4d) 핸들 × 제출 URL 도메인
+    urlDomains.forEach(d=>add(`"${n}" site:${d}`,`${h.src} × ${d}`));
+    // 4e) 핸들 단독 완전일치 (보조)
+    add(`"${n}"`,`${h.src} 단독`);
   });
+
+  // 5) 실명 조합 (핸들 없이도)
   realNames.forEach(rn=>{
     regions.forEach(r=>add(`"${rn}" ${r}`,`실명 × 지역`));
     orgs.forEach(o=>add(`"${rn}" ${o}`,`실명 × 소속`));
-    nicks.filter(n=>!isBig(n)).forEach(()=>{}); // 이미 위에서 처리
   });
 
-  // 4) 조합이 하나도 안 나온 경우(식별자 없음) → 닉네임 단독이라도(거대명 제외)
-  if(!out.length){
-    nicks.filter(n=>!isBig(n)).forEach(n=>add(`"${n}"`,'닉네임 단독(식별자 없음 — 정밀도 낮음)'));
-  }
-  return {queries:out, hasIdentifier: identifiers.length>0, nickCount:nicks.filter(n=>!isBig(n)).length};
+  return {queries:out, hasIdentifier: identifiers.length>0 || handles.length>0, nickCount:handles.length};
 }
 async function approveTerm(id,caseId){const t=await get('terms',id);t.status='APPROVED';await put('terms',t);
   await audit('APPROVE_TERM',{caseId,target:t.query});render();}
