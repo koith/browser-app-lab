@@ -480,37 +480,35 @@ function buildQueriesFromClues(clues){
   nicks.forEach(n=>{ if(!isBig(n)) handles.push({v:n,src:'닉네임'}); });
   emailsRaw.forEach(e=>{ const lp=localPart(e); if(lp&&!isBig(lp)) handles.push({v:lp,src:'이메일ID'}); });
 
-  // 1) 전화 완전일치
-  phones.forEach(p=>add(`"${p}"`,'전화번호 노출'));
+  // 1) 전화
+  phones.forEach(p=>add(p,'전화번호 노출'));
 
-  // 2) 이메일: 전체 완전일치 + (도메인 없으면 흔한 도메인 붙여 추정)
-  emailsRaw.forEach(e=>{
-    if(e.includes('@')) add(`"${e}"`,'이메일 전체 완전일치');
-  });
+  // 2) 이메일 전체 (따옴표 없이 — Serper가 따옴표+@ 를 거부함)
+  emailsRaw.forEach(e=>{ if(e.includes('@')) add(e,'이메일 전체'); });
 
   // 3) 게시글 URL 직접
   postUrls.forEach(u=>add(u,'제출한 게시글 URL'));
 
-  // 4) 핸들(닉네임/이메일ID) 분해·조합 — 구글링에서 당연히 하는 것들
+  // 4) 핸들(닉네임/이메일ID) 분해·조합 — 따옴표 없이
   handles.forEach(h=>{
     const n=h.v;
-    // 4a) 로컬파트 × 흔한 도메인 (이메일일 가능성) — 완전일치는 동명이인 강력 배제
-    COMMON_DOMAINS.forEach(d=>add(`"${n}@${d}"`,`${h.src} × ${d}`));
-    // 4b) 핸들 × 실명 (같이 나오면 거의 본인)
-    realNames.forEach(rn=>add(`"${n}" "${rn}"`,`${h.src} × 실명`));
+    // 4a) 로컬파트 × 흔한 도메인 (이메일일 가능성)
+    COMMON_DOMAINS.forEach(d=>add(`${n}@${d}`,`${h.src} × ${d}`));
+    // 4b) 핸들 × 실명
+    realNames.forEach(rn=>add(`${n} ${rn}`,`${h.src} × 실명`));
     // 4c) 핸들 × 지역/소속
-    regions.forEach(r=>add(`"${n}" ${r}`,`${h.src} × 지역`));
-    orgs.forEach(o=>add(`"${n}" ${o}`,`${h.src} × 소속`));
+    regions.forEach(r=>add(`${n} ${r}`,`${h.src} × 지역`));
+    orgs.forEach(o=>add(`${n} ${o}`,`${h.src} × 소속`));
     // 4d) 핸들 × 제출 URL 도메인
-    urlDomains.forEach(d=>add(`"${n}" site:${d}`,`${h.src} × ${d}`));
-    // 4e) 핸들 단독 완전일치 (보조)
-    add(`"${n}"`,`${h.src} 단독`);
+    urlDomains.forEach(d=>add(`${n} site:${d}`,`${h.src} × ${d}`));
+    // 4e) 핸들 단독
+    add(n,`${h.src} 단독`);
   });
 
-  // 5) 실명 조합 (핸들 없이도)
+  // 5) 실명 조합
   realNames.forEach(rn=>{
-    regions.forEach(r=>add(`"${rn}" ${r}`,`실명 × 지역`));
-    orgs.forEach(o=>add(`"${rn}" ${o}`,`실명 × 소속`));
+    regions.forEach(r=>add(`${rn} ${r}`,`실명 × 지역`));
+    orgs.forEach(o=>add(`${rn} ${o}`,`실명 × 소속`));
   });
 
   return {queries:out, hasIdentifier: identifiers.length>0 || handles.length>0, nickCount:handles.length};
