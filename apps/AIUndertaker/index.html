@@ -367,37 +367,52 @@ async function subClues(c){
   const clues=await byCase('clues',c.id);
   let h='';
   if(canWrite())h+=`<button class="btn sec" onclick="openClue('${c.id}')">+ 단서 추가</button>`;
-  if(!clues.length)h+=`<div class="empty"><div class="big">🧩</div>의뢰인이 제공한 단서를 입력하세요.<br>
-    (닉네임·게시글 URL·SNS 등)</div>`;
-  else{h+='<div style="margin-top:12px"></div>';
-    for(const cl of clues){
-      h+=`<div class="listrow">
-        <div class="grow"><div class="title">${esc(clueLabel(cl.kind))}</div>
-          <div class="meta">${esc(cl.value||'첨부')}</div></div>
-        ${canWrite()?`<button class="hbtn" onclick="rmClue('${cl.id}','${c.id}')">삭제</button>`:''}
-      </div>`;
-    }
+  if(!clues.length){h+=`<div class="empty"><div class="big">🧩</div>의뢰인이 제공한 단서를 입력하세요.<br>
+    사람을 특정하려면 <b>실명·이메일·지역</b> 같은 식별자를 함께 넣으세요.</div>`;return h;}
+  // 식별자 유무 안내
+  const hasId=clues.some(x=>['realname','email','phone'].includes(x.kind));
+  if(!hasId){
+    h+=`<div class="gate" style="margin-top:12px">⚠️ 지금 단서엔 <b>식별자(실명·이메일·전화)</b>가 없습니다.
+      닉네임만으로는 동명·동일단어 노이즈가 많아 정밀도가 낮습니다. 식별자를 추가하면 결과가 크게 좋아집니다.</div>`;
+  }
+  if(canWrite()){
+    h+=`<button class="btn" style="margin-top:12px" onclick="searchFromClues('${c.id}')">🔎 이 단서로 바로 검색</button>
+      <div class="note">단서를 조합해 검색어를 자동 생성하고 곧바로 검색합니다. (승인 단계 없음)</div>`;
+  }
+  h+='<div style="margin-top:12px"></div>';
+  for(const cl of clues){
+    h+=`<div class="listrow">
+      <div class="grow"><div class="title">${esc(clueLabel(cl.kind))}</div>
+        <div class="meta">${esc(cl.value||'첨부')}</div></div>
+      ${canWrite()?`<button class="hbtn" onclick="rmClue('${cl.id}','${c.id}')">삭제</button>`:''}
+    </div>`;
   }
   return h;
 }
-function clueLabel(k){return {nickname:'닉네임',email:'이메일',blog_url:'블로그',sns_url:'SNS',
+function clueLabel(k){return {realname:'실명',nickname:'닉네임',email:'이메일',phone:'전화번호',
+  region:'지역',company:'회사',school:'학교',blog_url:'블로그',sns_url:'SNS',
   home_url:'홈페이지',github:'GitHub',profile:'공개 프로필',post_url:'게시글 URL',note:'메모'}[k]||k;}
 function openClue(caseId){
   sheet(`<h2>단서 추가</h2><div class="note">의뢰인이 직접 제공한 정보만 입력합니다.</div>
-    <label>유형</label>
+    <label>유형 <span class="tiny muted">(★ = 사람 특정에 중요한 식별자)</span></label>
     <select id="clKind">
+      <option value="realname">★ 실명</option>
+      <option value="email">★ 이메일</option>
+      <option value="phone">★ 전화번호</option>
       <option value="nickname">닉네임</option>
+      <option value="region">지역</option>
+      <option value="company">회사</option>
+      <option value="school">학교</option>
       <option value="post_url">게시글 URL</option>
       <option value="sns_url">SNS URL</option>
       <option value="blog_url">블로그 URL</option>
       <option value="home_url">홈페이지</option>
       <option value="github">GitHub</option>
       <option value="profile">공개 프로필</option>
-      <option value="email">이메일</option>
       <option value="note">메모</option>
     </select>
     <label>내용</label>
-    <input type="text" id="clVal" placeholder="예: oldnick_2011 / https://...">
+    <input type="text" id="clVal" placeholder="예: 홍길동 / oldnick_2011 / 부산 / https://...">
     <button class="btn" onclick="saveClue('${caseId}')">저장</button>`);
 }
 window.openClue=openClue;
@@ -413,73 +428,81 @@ window.saveClue=saveClue;
 async function rmClue(id,caseId){await del('clues',id);await audit('DEL_CLUE',{caseId});render();}
 window.rmClue=rmClue;
 
-// ----- sub: search terms -----
+// ----- sub: search terms (자동 생성된 검색어 기록 · 참고용) -----
 async function subTerms(c){
-  const terms=await byCase('terms',c.id);
+  const terms=(await byCase('terms',c.id)).sort((a,b)=>b.createdAt.localeCompare(a.createdAt));
   const clues=await byCase('clues',c.id);
-  const approved=terms.filter(t=>t.status==='APPROVED');
-  let h=`<div class="card"><h3 style="font-size:15px;margin-bottom:6px">검색어 자동 생성</h3>
-    <div class="note">의뢰인이 제공한 단서만으로 검색어 후보를 만듭니다. 사람에 대한 추정·평가는 하지 않습니다.</div>
-    ${canWrite()?`<div class="btnrow" style="flex-wrap:wrap;margin-top:12px">
-      <button class="btn sm sec" onclick="genTerms('${c.id}')">단서로 검색어 생성</button>
-      ${approved.length?`<button class="btn sm" onclick="runSearch('${c.id}')">🔎 승인 검색어 ${approved.length}개 자동 검색</button>`:''}
-      ${approved.length?`<button class="btn sm sec" onclick="openApproved('${c.id}')">검색엔진에서 열기 ↗</button>`:''}
-    </div>`:''}
+  let h=`<div class="card"><h3 style="font-size:15px;margin-bottom:6px">검색어 기록</h3>
+    <div class="note">‘단서’ 탭에서 <b>바로 검색</b>을 누르면 단서를 조합해 아래 검색어들이 자동 생성·실행됩니다.
+    승인 단계는 없습니다. 여기는 어떤 검색어가 쓰였는지 확인·감사하는 화면입니다.</div>
+    ${canWrite()?`<button class="btn sm" style="margin-top:12px" onclick="searchFromClues('${c.id}')">🔎 단서로 다시 검색</button>`:''}
   </div>`;
-  if(!terms.length)h+=`<div class="empty"><div class="big">🔎</div>${clues.length?'‘검색어 생성’을 눌러 후보를 만드세요.':'먼저 단서 탭에서 단서를 입력하세요.'}</div>`;
+  if(!terms.length)h+=`<div class="empty"><div class="big">🔎</div>${clues.length?'‘단서’ 탭에서 <b>바로 검색</b>을 눌러보세요.':'먼저 단서 탭에서 단서를 입력하세요.'}</div>`;
   else{
     for(const t of terms){
-      const q=encodeURIComponent(t.query);
-      h+=`<div class="card">
-        <div style="display:flex;align-items:center;gap:8px">
-          <div style="flex:1;font-weight:600;word-break:break-all">${esc(t.query)}</div>
-          <span class="badge ${t.status==='APPROVED'?'b-verified':'b-draft'}">${t.status==='APPROVED'?'승인':'제안'}</span>
-        </div>
+      h+=`<div class="card" style="padding:11px 14px">
+        <div style="font-weight:600;word-break:break-all">${esc(t.query)}</div>
         <div class="note">${esc(t.rationale||'')}</div>
-        <div style="margin-top:10px">
-          <a class="srclink" href="https://www.google.com/search?q=${q}" target="_blank" rel="noopener">Google에서 열기 ↗</a>
-          <a class="srclink" href="https://www.bing.com/search?q=${q}" target="_blank" rel="noopener">Bing ↗</a>
-        </div>
-        ${canWrite()?`<div class="btnrow">
-          ${t.status!=='APPROVED'?`<button class="btn sm" onclick="approveTerm('${t.id}','${c.id}')">승인</button>`:''}
-          <button class="btn sm sec" onclick="rmTerm('${t.id}','${c.id}')">삭제</button>
-        </div>`:''}
       </div>`;
     }
-    h+=`<div class="note" style="margin-top:8px">※ <b>자동 검색</b>: 승인된 검색어를 서버로 보내 결과를 후보로 자동 등록합니다(신원확인된 케이스만).
-      서버가 없거나 실패하면 ‘검색엔진에서 열기’로 직접 확인해 URL을 붙여넣는 수동 방식도 가능합니다.</div>`;
   }
   return h;
 }
-async function genTerms(caseId){
-  const clues=await byCase('clues',caseId);
-  if(!clues.length){toast('단서가 없습니다');return;}
-  const existing=(await byCase('terms',caseId)).map(t=>t.query);
-  const out=[];
-  const domainOf=u=>{try{return new URL(u).hostname.replace(/^www\./,'');}catch(e){return null;}};
-  for(const cl of clues){
-    if(cl.kind==='nickname'&&cl.value){
-      out.push([`"${cl.value}"`,`닉네임 정확일치`]);
-    }
-    if(['sns_url','blog_url','home_url','github','profile','post_url'].includes(cl.kind)&&cl.value){
-      const d=domainOf(cl.value);
-      const nick=clues.find(x=>x.kind==='nickname');
-      if(d&&nick)out.push([`"${nick.value}" site:${d}`,`닉네임 × ${d}`]);
-      out.push([cl.value,`URL 직접 확인`]);
-    }
-    if(cl.kind==='email'&&cl.value){out.push([`"${cl.value}"`,`이메일 노출 확인`]);}
-    if(cl.kind==='note'&&cl.value&&cl.value.length<60){out.push([`"${cl.value}"`,`메모 기반 제목검색`]);}
+// 거대 서비스명: 단독 검색어로 쓰지 않음(노이즈). site: 재료로만.
+const BIG_SERVICES=['dcinside','naver','google','daum','youtube','facebook','instagram',
+  'twitter','x.com','tistory','blog.naver.com','cafe.naver.com','wikipedia','namu.wiki',
+  'reddit','github','linkedin','tiktok'];
+function domainOf(u){try{return new URL(u.startsWith('http')?u:'https://'+u).hostname.replace(/^www\./,'');}catch(e){return null;}}
+function isBig(v){const s=(v||'').toLowerCase().trim();return BIG_SERVICES.some(b=>s===b||s===b.replace('.com','')||s.includes(b));}
+
+// 단서로부터 "조합 우선" 검색어 목록을 만든다. (승인 개념 없음)
+function buildQueriesFromClues(clues){
+  const val=k=>clues.filter(c=>c.kind===k&&c.value).map(c=>c.value.trim()).filter(Boolean);
+  const names=val('note').filter(v=>v.length<=12).concat(clues.filter(c=>c.kind==='name').map(c=>c.value)); // 실명은 note/name에 들어올 수 있음
+  const realNames=clues.filter(c=>c.kind==='realname'||c.kind==='name').map(c=>c.value.trim()).filter(Boolean);
+  const nicks=val('nickname');
+  const emails=val('email');
+  const phones=val('phone');
+  const regions=clues.filter(c=>c.kind==='region').map(c=>c.value.trim()).filter(Boolean);
+  const orgs=clues.filter(c=>c.kind==='company'||c.kind==='school').map(c=>c.value.trim()).filter(Boolean);
+  // URL 계열에서 도메인 추출(거대 서비스 제외)
+  const urlDomains=clues.filter(c=>['sns_url','blog_url','home_url','github','profile','post_url'].includes(c.kind)&&c.value)
+    .map(c=>domainOf(c.value)).filter(Boolean);
+  const postUrls=clues.filter(c=>c.kind==='post_url'&&c.value).map(c=>c.value.trim());
+
+  // 식별자(사람을 좁히는 것): 실명·이메일·전화
+  const identifiers=[...realNames,...emails,...phones];
+  const out=[]; const seen=new Set();
+  const add=(q,why)=>{const k=q.trim();if(!k||seen.has(k))return;seen.add(k);out.push([k,why]);};
+
+  // 1) 이메일·전화는 그 자체로 강력 → 완전일치 단독
+  emails.forEach(e=>add(`"${e}"`,'이메일 노출'));
+  phones.forEach(p=>add(`"${p}"`,'전화번호 노출'));
+
+  // 2) 실제 게시글 URL은 그대로(직접 확인)
+  postUrls.forEach(u=>add(u,'제출한 게시글 URL'));
+
+  // 3) 핵심: 2개 조합 (닉네임 × 식별자, 닉네임 × 지역/소속)
+  nicks.forEach(n=>{
+    if(isBig(n))return;
+    realNames.forEach(rn=>add(`"${n}" "${rn}"`,`닉네임 × 실명`));
+    regions.forEach(r=>add(`"${n}" ${r}`,`닉네임 × 지역`));
+    orgs.forEach(o=>add(`"${n}" ${o}`,`닉네임 × 소속`));
+    // 닉네임 × 커뮤니티/블로그 도메인 (거대 서비스여도 site:는 유용)
+    urlDomains.forEach(d=>add(`"${n}" site:${d}`,`닉네임 × ${d}`));
+  });
+  realNames.forEach(rn=>{
+    regions.forEach(r=>add(`"${rn}" ${r}`,`실명 × 지역`));
+    orgs.forEach(o=>add(`"${rn}" ${o}`,`실명 × 소속`));
+    nicks.filter(n=>!isBig(n)).forEach(()=>{}); // 이미 위에서 처리
+  });
+
+  // 4) 조합이 하나도 안 나온 경우(식별자 없음) → 닉네임 단독이라도(거대명 제외)
+  if(!out.length){
+    nicks.filter(n=>!isBig(n)).forEach(n=>add(`"${n}"`,'닉네임 단독(식별자 없음 — 정밀도 낮음)'));
   }
-  let added=0;
-  for(const [query,rationale] of out){
-    if(existing.includes(query))continue;existing.push(query);
-    await put('terms',{id:uid(),caseId,query,rationale,status:'SUGGESTED',createdAt:now()});added++;
-  }
-  const c=await get('cases',caseId);if(c.status==='VERIFIED'){c.status='SEARCHING';await put('cases',c);}
-  await audit('GEN_TERMS',{caseId,reason:added+'건'});
-  toast(added?added+'개 검색어 생성':'새 검색어 없음');render();
+  return {queries:out, hasIdentifier: identifiers.length>0, nickCount:nicks.filter(n=>!isBig(n)).length};
 }
-window.genTerms=genTerms;
 async function approveTerm(id,caseId){const t=await get('terms',id);t.status='APPROVED';await put('terms',t);
   await audit('APPROVE_TERM',{caseId,target:t.query});render();}
 window.approveTerm=approveTerm;
@@ -497,27 +520,41 @@ async function openApproved(caseId){
 }
 window.openApproved=openApproved;
 
-// 서버(Vercel) 자동 검색: 승인 검색어 → /api/search → 결과를 후보로 자동 등록
+// 서버(Vercel) 자동 검색
 const DEFAULT_API='https://browser-app-lab.vercel.app/api/search';
-async function runSearch(caseId){
+// 단서 → 조합 검색어 → 검색 → 후보 등록 (승인 단계 없음, 원샷)
+async function searchFromClues(caseId){
   const SEARCH_API=(localStorage.getItem('u_api')||DEFAULT_API).trim();
   if(!SEARCH_API){toast('설정에서 검색 서버 주소를 먼저 넣으세요');return;}
   const c=await get('cases',caseId);
   if(!isVerified(c)){toast('신원확인된 케이스만 검색할 수 있습니다');return;}
-  const approved=(await byCase('terms',caseId)).filter(t=>t.status==='APPROVED');
-  if(!approved.length){toast('승인된 검색어가 없습니다');return;}
+  const clues=await byCase('clues',caseId);
+  if(!clues.length){toast('단서를 먼저 입력하세요');return;}
 
-  toast('검색 중… '+approved.length+'개 검색어');
-  await audit('RUN_SEARCH',{caseId,reason:approved.length+'건'});
+  const {queries,hasIdentifier,nickCount}=buildQueriesFromClues(clues);
+  if(!queries.length){toast('검색어를 만들 단서가 부족합니다');return;}
+  if(!hasIdentifier){
+    toast('⚠️ 실명·이메일·지역 등 식별자가 없어 정밀도가 낮습니다');
+  }
+
+  // 생성된 검색어를 terms에 기록(참고·감사용)
+  const existingTerms=new Set((await byCase('terms',caseId)).map(t=>t.query));
+  for(const [q,why] of queries){
+    if(existingTerms.has(q))continue;existingTerms.add(q);
+    await put('terms',{id:uid(),caseId,query:q,rationale:why,status:'AUTO',createdAt:now()});
+  }
+
+  toast('검색 중… 검색어 '+queries.length+'개');
+  await audit('SEARCH_FROM_CLUES',{caseId,reason:queries.length+'개 쿼리'});
   const existing=new Set((await byCase('candidates',caseId)).map(x=>x.url));
   let added=0, failed=0;
 
-  for(const t of approved){
+  for(const [q,why] of queries){
     try{
       const r=await fetch(SEARCH_API,{
         method:'POST',
         headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({q:t.query,count:10,verified:true})
+        body:JSON.stringify({q,count:20,verified:true})
       });
       if(!r.ok){failed++;continue;}
       const data=await r.json();
@@ -527,18 +564,18 @@ async function runSearch(caseId){
         const hash=await sha256(item.url+'|'+(item.title||''));
         await put('candidates',{id:uid(),caseId,url:item.url,title:item.title||'',
           platform:item.platform||domainName(item.url),ocr:'',hash,
-          fromQuery:t.query,confirmed:'UNCONFIRMED',capturedAt:now()});
+          fromQuery:q,confirmed:'UNCONFIRMED',capturedAt:now()});
         added++;
       }
     }catch(e){failed++;}
   }
-  const cc=await get('cases',caseId);if(cc.status==='SEARCHING'||cc.status==='VERIFIED'){cc.status='REVIEW';await put('cases',cc);}
-  if(added)toast(added+'개 후보 자동 등록됨'+(failed?` (검색 ${failed}건 실패)`:''));
-  else if(failed)toast('검색 실패 — 서버/키를 확인하세요');
+  const cc=await get('cases',caseId);if(cc.status==='VERIFIED'||cc.status==='SEARCHING'){cc.status='REVIEW';await put('cases',cc);}
+  if(added)toast(added+'개 후보 등록'+(failed?` (검색 ${failed}건 실패)`:''));
+  else if(failed)toast('검색 실패 — 서버/키 확인');
   else toast('새 후보 없음 (중복 제외)');
   state.subtab='cands';render();
 }
-window.runSearch=runSearch;
+window.searchFromClues=searchFromClues;
 async function rmTerm(id,caseId){await del('terms',id);await audit('DEL_TERM',{caseId});render();}
 window.rmTerm=rmTerm;
 
