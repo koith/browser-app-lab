@@ -96,3 +96,5 @@ function clampInt(v, d) {
   return Math.min(Math.max(n, 1), 20);
 }
 function safeParse(s) { try { return JSON.parse(s); } catch (e) { return {}; } }
+
+// redeploy trigger 20260703T154917Z
