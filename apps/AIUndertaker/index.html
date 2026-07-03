@@ -559,7 +559,7 @@ async function searchFromClues(caseId){
   toast('검색 중… 검색어 '+queries.length+'개');
   await audit('SEARCH_FROM_CLUES',{caseId,reason:queries.length+'개 쿼리'});
   const existing=new Set((await byCase('candidates',caseId)).map(x=>x.url));
-  let added=0, failed=0;
+  let added=0, failed=0, firstErr='';
 
   for(const [q,why] of queries){
     try{
@@ -568,7 +568,11 @@ async function searchFromClues(caseId){
         headers:{'Content-Type':'application/json'},
         body:JSON.stringify({q,count:20,verified:true})
       });
-      if(!r.ok){failed++;continue;}
+      if(!r.ok){
+        failed++;
+        if(!firstErr){let t='';try{t=(await r.text()).slice(0,80);}catch(e){}firstErr='HTTP '+r.status+(t?' '+t:'');}
+        continue;
+      }
       const data=await r.json();
       for(const item of (data.results||[])){
         if(!item.url||existing.has(item.url))continue;
@@ -579,11 +583,11 @@ async function searchFromClues(caseId){
           fromQuery:q,confirmed:'UNCONFIRMED',capturedAt:now()});
         added++;
       }
-    }catch(e){failed++;}
+    }catch(e){failed++;if(!firstErr)firstErr='요청실패 '+(e&&e.message?e.message:String(e)).slice(0,80);}
   }
   const cc=await get('cases',caseId);if(cc.status==='VERIFIED'||cc.status==='SEARCHING'){cc.status='REVIEW';await put('cases',cc);}
   if(added)toast(added+'개 후보 등록'+(failed?` (검색 ${failed}건 실패)`:''));
-  else if(failed)toast('검색 실패 — 서버/키 확인');
+  else if(failed)toast('검색 실패: '+(firstErr||'원인 불명'));
   else toast('새 후보 없음 (중복 제외)');
   state.subtab='cands';render();
 }
