@@ -422,7 +422,8 @@ async function subTerms(c){
     <div class="note">의뢰인이 제공한 단서만으로 검색어 후보를 만듭니다. 사람에 대한 추정·평가는 하지 않습니다.</div>
     ${canWrite()?`<div class="btnrow" style="flex-wrap:wrap;margin-top:12px">
       <button class="btn sm sec" onclick="genTerms('${c.id}')">단서로 검색어 생성</button>
-      ${approved.length?`<button class="btn sm" onclick="openApproved('${c.id}')">승인 검색어 ${approved.length}개 검색 열기 ↗</button>`:''}
+      ${approved.length?`<button class="btn sm" onclick="runSearch('${c.id}')">🔎 승인 검색어 ${approved.length}개 자동 검색</button>`:''}
+      ${approved.length?`<button class="btn sm sec" onclick="openApproved('${c.id}')">검색엔진에서 열기 ↗</button>`:''}
     </div>`:''}
   </div>`;
   if(!terms.length)h+=`<div class="empty"><div class="big">🔎</div>${clues.length?'‘검색어 생성’을 눌러 후보를 만드세요.':'먼저 단서 탭에서 단서를 입력하세요.'}</div>`;
@@ -445,9 +446,8 @@ async function subTerms(c){
         </div>`:''}
       </div>`;
     }
-    h+=`<div class="note" style="margin-top:8px">※ 사용법: 검색어를 <b>승인</b> → ‘검색 열기’로 검색엔진에서 결과 확인 →
-      본인 것을 발견하면 그 링크를 복사 → ‘후보’ 탭의 <b>URL 붙여넣기</b>로 등록.
-      제목·플랫폼은 자동으로 채워집니다.</div>`;
+    h+=`<div class="note" style="margin-top:8px">※ <b>자동 검색</b>: 승인된 검색어를 서버로 보내 결과를 후보로 자동 등록합니다(신원확인된 케이스만).
+      서버가 없거나 실패하면 ‘검색엔진에서 열기’로 직접 확인해 URL을 붙여넣는 수동 방식도 가능합니다.</div>`;
   }
   return h;
 }
@@ -496,6 +496,49 @@ async function openApproved(caseId){
   toast(approved.length+'개 검색을 새 탭으로 엽니다');
 }
 window.openApproved=openApproved;
+
+// 서버(Vercel) 자동 검색: 승인 검색어 → /api/search → 결과를 후보로 자동 등록
+const DEFAULT_API='https://browser-app-lab.vercel.app/api/search';
+async function runSearch(caseId){
+  const SEARCH_API=(localStorage.getItem('u_api')||DEFAULT_API).trim();
+  if(!SEARCH_API){toast('설정에서 검색 서버 주소를 먼저 넣으세요');return;}
+  const c=await get('cases',caseId);
+  if(!isVerified(c)){toast('신원확인된 케이스만 검색할 수 있습니다');return;}
+  const approved=(await byCase('terms',caseId)).filter(t=>t.status==='APPROVED');
+  if(!approved.length){toast('승인된 검색어가 없습니다');return;}
+
+  toast('검색 중… '+approved.length+'개 검색어');
+  await audit('RUN_SEARCH',{caseId,reason:approved.length+'건'});
+  const existing=new Set((await byCase('candidates',caseId)).map(x=>x.url));
+  let added=0, failed=0;
+
+  for(const t of approved){
+    try{
+      const r=await fetch(SEARCH_API,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({q:t.query,count:10,verified:true})
+      });
+      if(!r.ok){failed++;continue;}
+      const data=await r.json();
+      for(const item of (data.results||[])){
+        if(!item.url||existing.has(item.url))continue;
+        existing.add(item.url);
+        const hash=await sha256(item.url+'|'+(item.title||''));
+        await put('candidates',{id:uid(),caseId,url:item.url,title:item.title||'',
+          platform:item.platform||domainName(item.url),ocr:'',hash,
+          fromQuery:t.query,confirmed:'UNCONFIRMED',capturedAt:now()});
+        added++;
+      }
+    }catch(e){failed++;}
+  }
+  const cc=await get('cases',caseId);if(cc.status==='SEARCHING'||cc.status==='VERIFIED'){cc.status='REVIEW';await put('cases',cc);}
+  if(added)toast(added+'개 후보 자동 등록됨'+(failed?` (검색 ${failed}건 실패)`:''));
+  else if(failed)toast('검색 실패 — 서버/키를 확인하세요');
+  else toast('새 후보 없음 (중복 제외)');
+  state.subtab='cands';render();
+}
+window.runSearch=runSearch;
 async function rmTerm(id,caseId){await del('terms',id);await audit('DEL_TERM',{caseId});render();}
 window.rmTerm=rmTerm;
 
@@ -698,7 +741,13 @@ async function renderSettings(){
       <div class="note">${roleDesc[state.role]}</div>
       <button class="btn sm sec" style="margin-top:12px" onclick="saveSettings()">저장</button>
     </div>
-    <div class="divlbl">검색 엔진</div>
+    <div class="divlbl">검색 서버 (자동 검색)</div>
+    <div class="card">
+      <div class="note" style="margin-bottom:8px">‘자동 검색’이 호출할 서버 함수 주소입니다. 비워두면 자동 검색이 비활성화됩니다.</div>
+      <input type="url" id="stApi" value="${esc(localStorage.getItem('u_api')||'https://browser-app-lab.vercel.app/api/search')}" placeholder="https://.../api/search">
+      <button class="btn sm sec" style="margin-top:10px" onclick="saveApi()">서버 주소 저장</button>
+    </div>
+    <div class="divlbl">검색 엔진 (수동 열기용)</div>
     <div class="card">
       <div class="note" style="margin-bottom:8px">‘검색 열기’가 사용할 검색엔진입니다.</div>
       ${['brave','google'].map(e=>`<span class="pill ${(localStorage.getItem('u_engine')||'brave')===e?'on':''}" onclick="setEngine('${e}')">${e==='brave'?'Brave':'Google'}</span>`).join('')}
@@ -724,6 +773,8 @@ function saveSettings(){state.user=document.getElementById('stUser').value.trim(
 window.saveSettings=saveSettings;
 function setEngine(e){localStorage.setItem('u_engine',e);renderSettings();toast(e==='brave'?'Brave':'Google'+' 선택');}
 window.setEngine=setEngine;
+function saveApi(){const v=document.getElementById('stApi').value.trim();localStorage.setItem('u_api',v);toast('서버 주소 저장됨');}
+window.saveApi=saveApi;
 
 async function exportData(){
   const dump={};for(const s of STORES)dump[s]=await getAll(s);
