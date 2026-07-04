@@ -452,13 +452,51 @@ async function subTerms(c){
 const BIG_SERVICES=['dcinside','naver','google','daum','youtube','facebook','instagram',
   'twitter','x.com','tistory','blog.naver.com','cafe.naver.com','wikipedia','namu.wiki',
   'reddit','github','linkedin','tiktok'];
-// 로컬파트에 붙여볼 흔한 도메인
 const COMMON_DOMAINS=['gmail.com','naver.com','daum.net','hanmail.net','kakao.com','nate.com','outlook.com','hotmail.com'];
+// 핸들이 자주 나타나는 커뮤니티/블로그 (site: 도크용)
+const DORK_SITES=['reddit.com','github.com','tistory.com','brunch.co.kr','velog.io','medium.com','x.com','instagram.com','pastebin.com'];
+const MAX_QUERIES=50; // 1회 검색 하드캡 (비용 폭주 방지)
+
 function domainOf(u){try{return new URL(u.startsWith('http')?u:'https://'+u).hostname.replace(/^www\./,'');}catch(e){return null;}}
 function isBig(v){const s=(v||'').toLowerCase().trim();return BIG_SERVICES.some(b=>s===b||s===b.replace('.com','')||s.includes(b));}
 function localPart(e){const s=(e||'').trim();const i=s.indexOf('@');return i>0?s.slice(0,i):s;}
 
-// 단서로부터 "조합 우선" 검색어 목록을 만든다. (승인 개념 없음)
+// 핸들 변형 생성 — 사람은 핵심 아이디를 조금씩 바꿔 재사용한다(OSINT 노하우)
+function handleVariations(h){
+  const base=h.trim(); if(!base)return [];
+  const set=new Set([base]);
+  const low=base.toLowerCase();
+  set.add(low);
+  // 구분자 제거/치환: 점·언더스코어·하이픈
+  const stripped=low.replace(/[._-]/g,'');
+  set.add(stripped);
+  // 구분자 삽입 위치 추정: 숫자-문자 경계에 하이픈/언더스코어
+  const dashed=low.replace(/([a-z])(\d)/g,'$1-$2').replace(/(\d)([a-z])/g,'$1-$2');
+  const underd=low.replace(/([a-z])(\d)/g,'$1_$2').replace(/(\d)([a-z])/g,'$1_$2');
+  if(dashed!==low)set.add(dashed);
+  if(underd!==low)set.add(underd);
+  // 흔한 접미사(숫자·연도) — 원형에 붙이는 게 아니라, 이미 숫자가 있으면 스킵
+  if(!/\d/.test(stripped)){
+    ['1','2','7','82','88','90','91','92','93','94','95'].slice(0,4).forEach(s=>set.add(low+s));
+  }
+  return [...set].filter(Boolean);
+}
+// 실명 변형 — 성/이름 분리, 이름만, (영문이면) 순서 바꾸기
+function nameVariations(nm){
+  const s=nm.trim(); if(!s)return [];
+  const set=new Set([s]);
+  // 한글 3음절(성1+이름2) 추정: 뒤 2글자(이름)만
+  if(/^[가-힣]{3}$/.test(s)) set.add(s.slice(1));
+  if(/^[가-힣]{4}$/.test(s)) set.add(s.slice(2)); // 복성 대비
+  // 영문: 토큰 순서 바꾸기 + 하이픈
+  const toks=s.split(/\s+/).filter(Boolean);
+  if(toks.length===2 && /[a-zA-Z]/.test(s)){
+    set.add(toks[1]+' '+toks[0]);
+    set.add(toks.join('-'));
+  }
+  return [...set].filter(Boolean);
+}
+
 function buildQueriesFromClues(clues){
   const val=k=>clues.filter(c=>c.kind===k&&c.value).map(c=>c.value.trim()).filter(Boolean);
   const realNames=clues.filter(c=>c.kind==='realname'||c.kind==='name').map(c=>c.value.trim()).filter(Boolean);
@@ -472,46 +510,65 @@ function buildQueriesFromClues(clues){
   const postUrls=clues.filter(c=>c.kind==='post_url'&&c.value).map(c=>c.value.trim());
 
   const out=[]; const seen=new Set();
-  const add=(q,why)=>{const k=q.trim();if(!k||seen.has(k))return;seen.add(k);out.push([k,why]);};
+  const add=(q,why)=>{const k=q.trim();if(!k||seen.has(k))return;if(out.length>=MAX_QUERIES)return;seen.add(k);out.push([k,why]);};
   const identifiers=[...realNames,...emailsRaw,...phones];
 
-  // "핸들(handle)" = 닉네임 + 이메일 로컬파트. 둘 다 "사람 아이디"로 취급해 동일하게 분해·조합한다.
-  const handles=[];
-  nicks.forEach(n=>{ if(!isBig(n)) handles.push({v:n,src:'닉네임'}); });
-  emailsRaw.forEach(e=>{ const lp=localPart(e); if(lp&&!isBig(lp)) handles.push({v:lp,src:'이메일ID'}); });
+  // 핸들 = 닉네임 + 이메일 로컬파트. 각각 변형까지 확장.
+  const handleSeeds=[];
+  nicks.forEach(n=>{ if(!isBig(n)) handleSeeds.push({v:n,src:'닉'}); });
+  emailsRaw.forEach(e=>{ const lp=localPart(e); if(lp&&!isBig(lp)) handleSeeds.push({v:lp,src:'ID'}); });
+  // 변형 펼치기 (원형은 강한 조합에, 변형은 단독/도크에 주로 씀)
+  const allHandles=[]; const seenH=new Set();
+  handleSeeds.forEach(h=>{
+    handleVariations(h.v).forEach((hv,i)=>{
+      if(seenH.has(hv)||isBig(hv))return;seenH.add(hv);
+      allHandles.push({v:hv,src:h.src,primary:i===0});
+    });
+  });
+  const nameVars=[]; const seenN=new Set();
+  realNames.forEach(rn=>nameVariations(rn).forEach(nv=>{if(!seenN.has(nv)){seenN.add(nv);nameVars.push(nv);}}));
 
-  // 1) 전화
-  phones.forEach(p=>add(p,'전화번호 노출'));
+  // --- 우선순위 순으로 add (하드캡 걸리면 뒤쪽부터 잘림) ---
 
-  // 2) 이메일 전체 (따옴표 없이 — Serper가 따옴표+@ 를 거부함)
+  // 1) 가장 강한 신호: 전화·이메일 전체·게시글URL
+  phones.forEach(p=>add(p,'전화번호'));
   emailsRaw.forEach(e=>{ if(e.includes('@')) add(e,'이메일 전체'); });
+  postUrls.forEach(u=>add(u,'제출 URL'));
 
-  // 3) 게시글 URL 직접
-  postUrls.forEach(u=>add(u,'제출한 게시글 URL'));
-
-  // 4) 핸들(닉네임/이메일ID) 분해·조합 — 따옴표 없이
-  handles.forEach(h=>{
-    const n=h.v;
-    // 4a) 로컬파트 × 흔한 도메인 (이메일일 가능성)
-    COMMON_DOMAINS.forEach(d=>add(`${n}@${d}`,`${h.src} × ${d}`));
-    // 4b) 핸들 × 실명
-    realNames.forEach(rn=>add(`${n} ${rn}`,`${h.src} × 실명`));
-    // 4c) 핸들 × 지역/소속
-    regions.forEach(r=>add(`${n} ${r}`,`${h.src} × 지역`));
-    orgs.forEach(o=>add(`${n} ${o}`,`${h.src} × 소속`));
-    // 4d) 핸들 × 제출 URL 도메인
-    urlDomains.forEach(d=>add(`${n} site:${d}`,`${h.src} × ${d}`));
-    // 4e) 핸들 단독
-    add(n,`${h.src} 단독`);
+  // 2) 핸들(원형) × 실명변형 — 같이 나오면 거의 본인
+  allHandles.filter(h=>h.primary).forEach(h=>{
+    nameVars.forEach(nv=>add(`${h.v} ${nv}`,`${h.src} × 실명`));
   });
 
-  // 5) 실명 조합
-  realNames.forEach(rn=>{
-    regions.forEach(r=>add(`${rn} ${r}`,`실명 × 지역`));
-    orgs.forEach(o=>add(`${rn} ${o}`,`실명 × 소속`));
+  // 3) 핸들(원형) × 흔한 도메인 (이메일 추정)
+  allHandles.filter(h=>h.primary).forEach(h=>{
+    COMMON_DOMAINS.forEach(d=>add(`${h.v}@${d}`,`${h.src} × ${d}`));
   });
 
-  return {queries:out, hasIdentifier: identifiers.length>0 || handles.length>0, nickCount:handles.length};
+  // 4) 핸들(원형) × 지역/소속/제출도메인
+  allHandles.filter(h=>h.primary).forEach(h=>{
+    regions.forEach(r=>add(`${h.v} ${r}`,`${h.src} × 지역`));
+    orgs.forEach(o=>add(`${h.v} ${o}`,`${h.src} × 소속`));
+    urlDomains.forEach(d=>add(`${h.v} site:${d}`,`${h.src} × ${d}`));
+  });
+
+  // 5) 핸들 변형 × site: 도크 (커뮤니티/블로그 프로필 노림)
+  allHandles.forEach(h=>{
+    DORK_SITES.forEach(s=>add(`${h.v} site:${s}`,`${h.src}변형 × ${s}`));
+  });
+
+  // 6) 핸들 변형 단독
+  allHandles.forEach(h=>add(h.v,`${h.src}${h.primary?'':'변형'} 단독`));
+
+  // 7) 실명 변형 × 지역/소속 + 실명 filetype 도크(문서에서 연락처 유출)
+  nameVars.forEach(nv=>{
+    regions.forEach(r=>add(`${nv} ${r}`,`실명 × 지역`));
+    orgs.forEach(o=>add(`${nv} ${o}`,`실명 × 소속`));
+    add(`${nv} filetype:pdf`,`실명 × PDF문서`);
+  });
+
+
+  return {queries:out, hasIdentifier: identifiers.length>0 || handleSeeds.length>0, nickCount:handleSeeds.length};
 }
 async function approveTerm(id,caseId){const t=await get('terms',id);t.status='APPROVED';await put('terms',t);
   await audit('APPROVE_TERM',{caseId,target:t.query});render();}
@@ -543,9 +600,14 @@ async function searchFromClues(caseId){
 
   const {queries,hasIdentifier,nickCount}=buildQueriesFromClues(clues);
   if(!queries.length){toast('검색어를 만들 단서가 부족합니다');return;}
-  if(!hasIdentifier){
-    toast('⚠️ 실명·이메일·지역 등 식별자가 없어 정밀도가 낮습니다');
-  }
+
+  // 소모량 안내 + 확인 (쿼리 1개 ≈ 0.4원, 무료 크레딧 차감)
+  const n=queries.length;
+  const won=(n*0.4).toFixed(0);
+  let msg=`이번 검색에 검색어 ${n}개를 던집니다 (약 ${won}원 상당 · 무료 크레딧에서 차감).`;
+  if(!hasIdentifier) msg+='\n\n⚠️ 실명·이메일 같은 식별자가 없어 정밀도가 낮을 수 있습니다.';
+  msg+='\n\n계속할까요?';
+  if(!confirm(msg))return;
 
   // 생성된 검색어를 terms에 기록(참고·감사용)
   const existingTerms=new Set((await byCase('terms',caseId)).map(t=>t.query));
