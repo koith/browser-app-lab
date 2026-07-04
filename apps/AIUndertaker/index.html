@@ -652,6 +652,33 @@ async function searchFromClues(caseId){
   state.subtab='cands';render();
 }
 window.searchFromClues=searchFromClues;
+
+// 후보를 비공개 분석 저장소로 업로드 (Vercel /api/upload 경유, 토큰은 서버에 숨김)
+async function uploadCandidates(caseId){
+  const base=(localStorage.getItem('u_api')||DEFAULT_API).trim().replace(/\/api\/search$/,'');
+  const UPLOAD_API=base+'/api/upload';
+  const c=await get('cases',caseId);
+  if(!isVerified(c)){toast('신원확인된 케이스만 업로드할 수 있습니다');return;}
+  const cands=await byCase('candidates',caseId);
+  if(!cands.length){toast('업로드할 후보가 없습니다');return;}
+  if(!confirm(`후보 ${cands.length}건을 비공개 분석 저장소로 업로드합니다. 계속할까요?`))return;
+  toast('업로드 중…');
+  try{
+    const r=await fetch(UPLOAD_API,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        caseId, subjectName:c.subjectName, verified:true,
+        candidates:cands.map(x=>({url:x.url,title:x.title,platform:x.platform,
+          fromQuery:x.fromQuery||'',confirmed:x.confirmed,ocr:x.ocr||''}))
+      })
+    });
+    const data=await r.json().catch(()=>({}));
+    if(!r.ok){toast('업로드 실패: HTTP '+r.status+' '+(data.error||'')+(data.detail?' '+data.detail:''));return;}
+    await audit('UPLOAD_ANALYSIS',{caseId,reason:cands.length+'건',target:data.path});
+    toast('업로드 완료: '+(data.path||'ok'));
+  }catch(e){toast('업로드 실패: '+(e&&e.message?e.message:String(e)));}
+}
+window.uploadCandidates=uploadCandidates;
 async function rmTerm(id,caseId){await del('terms',id);await audit('DEL_TERM',{caseId});render();}
 window.rmTerm=rmTerm;
 
@@ -659,7 +686,12 @@ window.rmTerm=rmTerm;
 async function subCands(c){
   const cands=(await byCase('candidates',c.id)).sort((a,b)=>b.capturedAt.localeCompare(a.capturedAt));
   let h='';
-  if(canWrite())h+=`<button class="btn sec" onclick="openCand('${c.id}')">+ 후보 URL 등록</button>`;
+  if(canWrite()){
+    h+=`<div class="btnrow" style="flex-wrap:wrap">
+      <button class="btn sm sec" onclick="openCand('${c.id}')">+ 후보 URL 등록</button>
+      ${cands.length?`<button class="btn sm sec" onclick="uploadCandidates('${c.id}')">🔼 분석 업로드 (${cands.length})</button>`:''}
+    </div>`;
+  }
   if(!cands.length){h+=`<div class="empty"><div class="big">📄</div>삭제 후보로 확인된 공개 URL을 등록하세요.</div>`;return h;}
   h+='<div style="margin-top:12px"></div>';
   for(const cd of cands){
