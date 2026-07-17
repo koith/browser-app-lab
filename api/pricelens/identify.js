@@ -109,25 +109,25 @@ module.exports = async (req, res) => {
     if (!r.ok) throw new Error('lens: ' + r.status);
     const j = await r.json();
 
+    // Lens의 원래 순서 = 시각적 유사도 순서. 쇼핑몰 링크를 앞세우되 그 안에서는 유사도 순서 보존
     const matches = (j.organic || [])
-      .map(o => {
+      .map((o, i) => {
         const link = o.link || '';
         const shop = SHOP_RANK.find(s => s.re.test(link));
         const image = o.imageUrl || o.thumbnailUrl || o.thumbnail || null;
-        let score = (shop ? shop.w : 10) + (image ? 15 : 0);
         return {
           title: siteTail(o.title),
           link,
           image,
           source: shop ? shop.name : (o.source || ''),
           isShop: !!shop,
-          score
+          i
         };
       })
       .filter(m => m.title && m.link && m.image) // 이미지 없는 매치는 확인 UX가 성립 안 함
-      .sort((a, b) => b.score - a.score)
+      .sort((a, b) => (b.isShop - a.isShop) || (a.i - b.i))
       .slice(0, 8)
-      .map(({ score, ...m }) => m);
+      .map(({ i, ...m }) => m);
 
     return res.status(200).json({ matches });
   } catch (e) {
