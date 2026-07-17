@@ -121,7 +121,7 @@
 
 <section id="secPrices">
   <h2 id="priceTitle">가격 비교</h2>
-  <p class="sub">카탈로그 매칭 상품 우선, 중고·리퍼·렌탈 제외 기준입니다. 배송비 포함 최종가는 링크에서 확인하세요.</p>
+  <p class="sub">네이버는 동일 상품으로 검증된 가격비교 카탈로그 페이지로 연결합니다. 표시 가격은 검색 시점 참고치이며, 배송비 포함 최종가는 링크에서 확인하세요.</p>
   <div class="src-head"><span class="dot" style="background:var(--naver)"></span>네이버쇼핑 최저가</div>
   <div id="naverList"></div>
   <div class="src-head"><span class="dot" style="background:var(--tag)"></span>쿠팡</div>
@@ -242,9 +242,8 @@ $('btnPrices').onclick = async () => {
       nv.insertAdjacentHTML('beforeend',
         '<a class="item" href="' + it.link + '" target="_blank" rel="noopener">' +
         '<div class="t">' + it.title + '</div><div class="meta">' +
-        '<span class="price">' + priceFmt(it.lprice) + '</span>' +
-        '<span class="mall">' + (it.mallName || '') + '</span>' +
-        (it.isCatalog ? '<span class="badge cat">카탈로그 최저가</span>' : '') +
+        (it.price ? '<span class="price">' + it.price + '</span>' : '<span class="mall">가격은 페이지에서 확인</span>') +
+        (it.isCatalog ? '<span class="badge cat">가격비교 카탈로그</span>' : '') +
         '</div></a>');
     });
     if (!(r.naver || []).length) nv.innerHTML = '<div class="empty">네이버쇼핑 결과 없음 — 제품명을 더 구체적으로 바꿔보세요.</div>';
