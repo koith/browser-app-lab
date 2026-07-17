@@ -161,6 +161,24 @@
     background: #fff; border: 1px solid var(--line); border-radius: 12px;
     padding: 12px 14px; margin-bottom: 14px; line-height: 1.55;
   }
+  .top-disclosure {
+    font-size: 12px; color: var(--muted);
+    padding: 12px 0 0; border-bottom: 2px solid var(--tag);
+    padding-bottom: 10px;
+  }
+  .pick {
+    display: flex; align-items: center; gap: 14px;
+    background: #fff; border: 1.5px solid var(--tag);
+    border-radius: var(--radius); padding: 16px;
+    text-decoration: none; color: var(--ink);
+  }
+  .pick-thumb {
+    flex: none; width: 52px; height: 52px; border-radius: 12px;
+    background: var(--tag-soft); display: grid; place-items: center; font-size: 24px;
+  }
+  .pick b { display: block; font-size: 15px; }
+  .pick small { color: var(--muted); font-size: 12px; }
+  .pick-arrow { margin-left: auto; color: var(--tag); font-size: 22px; }
   @media (prefers-reduced-motion: reduce) {
     .scanline { animation: none; top: 50%; }
     .chip { animation: none; opacity: 1; }
@@ -176,6 +194,8 @@
 </header>
 
 <main class="wrap">
+
+  <p class="top-disclosure">* 이 페이지는 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</p>
 
   <div class="hero">
     <span class="eyebrow">AI 상품 검색 · 가격 비교</span>
@@ -240,10 +260,25 @@
     </div>
   </section>
 
+  <section id="picks">
+    <h2>오늘의 추천 상품</h2>
+    <p class="sub">PriceLens로 비교해 본 상품을 소개합니다. 아래 링크는 쿠팡 파트너스 링크입니다.</p>
+    <!-- PARTNERS_LINK: href를 발급받은 link.coupang.com 링크로 교체 -->
+    <a class="pick" href="#" rel="nofollow sponsored">
+      <span class="pick-thumb">🧴</span>
+      <span>
+        <b>추천 상품 준비 중</b>
+        <small>COUPANG · link.coupang.com</small>
+      </span>
+      <span class="pick-arrow">›</span>
+    </a>
+  </section>
+
   <section>
     <div class="beta">
       <b>지금 만들고 있습니다</b>
       <p>PriceLens는 현재 개발 중인 개인 프로젝트로, 이 페이지에서 순차적으로 기능이 공개됩니다. 상품 검색 결과에는 쿠팡 파트너스 링크가 포함될 수 있습니다.</p>
+      <p style="margin-top:10px"><a href="./app.html" style="color:var(--tag);font-weight:700">→ 베타 앱 사용해보기</a></p>
     </div>
   </section>
 
