@@ -176,8 +176,13 @@ async function post(path, body){
     method: 'POST', headers: {'Content-Type': 'application/json'},
     body: JSON.stringify(body)
   });
-  if (!res.ok) throw new Error('HTTP ' + res.status);
-  return res.json();
+  let data = null;
+  try { data = await res.json(); } catch(e) {}
+  if (!res.ok) {
+    const detail = data && data.error ? data.error + (data.step ? ' [단계: ' + data.step + ']' : '') : 'HTTP ' + res.status;
+    throw new Error(detail);
+  }
+  return data;
 }
 
 function showCandidates(cands, sourceLabel){
