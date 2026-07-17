@@ -119,7 +119,7 @@
 <script>
 const API = 'https://browser-app-lab.vercel.app/api/pricelens';
 const $ = id => document.getElementById(id);
-let matches = [], idx = 0, noCount = 0;
+let matches = [], idx = 0, noCount = 0, retried = false;
 
 function show(id){
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('on'));
@@ -166,9 +166,14 @@ async function identify(b64){
     if (!matches.length) return show('retake');
     render();
   } catch (e) {
+    if (!retried) { retried = true; return identify(b64); } // 일시 오류 대비 1회 재시도
     show('home');
-    $('homeErr').textContent = '검색 실패: ' + e.message;
+    const msg = /Load failed|Failed to fetch/i.test(e.message)
+      ? '서버 응답 없음 — 잠시 후 다시 시도해 주세요'
+      : e.message;
+    $('homeErr').textContent = '검색 실패: ' + msg;
   }
+  retried = false;
 }
 
 function render(){
