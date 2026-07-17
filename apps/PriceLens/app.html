@@ -135,11 +135,11 @@ function pickFile(input){
     rd.onload = () => {
       const img = new Image();
       img.onload = () => {
-        const max = 1280, r = Math.min(1, max / Math.max(img.width, img.height));
+        const max = 1600, r = Math.min(1, max / Math.max(img.width, img.height));
         const c = document.createElement('canvas');
         c.width = Math.round(img.width * r); c.height = Math.round(img.height * r);
         c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-        const dataUrl = c.toDataURL('image/jpeg', 0.85);
+        const dataUrl = c.toDataURL('image/jpeg', 0.88);
         $('loadingImg').src = dataUrl;
         identify(dataUrl.split(',')[1]); // 찍자마자 즉시 검색
       };
@@ -196,7 +196,11 @@ $('btnShoot').onclick = () => pickFile($('camInput'));
 $('btnPick').onclick = () => pickFile($('fileInput'));
 $('btnReshoot').onclick = () => pickFile($('camInput'));
 $('btnRepick').onclick = () => pickFile($('fileInput'));
-$('btnYes').onclick = () => { window.open(matches[idx].link, '_blank'); };
+$('btnYes').onclick = () => {
+  window.open(matches[idx].link, '_blank');
+  // iOS 유니버설 링크 콜드스타트: 앱 첫 실행 시 홈으로 열리는 경우 안내
+  $('retryHint').textContent = '쇼핑 앱이 홈 화면으로 열렸다면, 돌아와서 \'네\'를 한 번 더 누르면 상품으로 이동합니다.';
+};
 $('btnNo').onclick = () => { noCount++; next(); };
 </script>
 </body>
