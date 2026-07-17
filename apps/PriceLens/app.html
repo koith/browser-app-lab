@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#0E3B2E">
+<title>PriceLens 앱 — 사진으로 가격 비교</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+  :root {
+    --paper:#F5F6F2; --ink:#12241C; --pine:#0E3B2E; --pine-soft:#E4EEE8;
+    --tag:#F25C1F; --tag-soft:#FDEBE1; --line:#D8DDD4; --muted:#5B6A61;
+    --naver:#03A254; --radius:16px;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{
+    font-family:"Pretendard Variable",Pretendard,-apple-system,system-ui,sans-serif;
+    background:var(--paper); color:var(--ink); line-height:1.55;
+    padding:0 16px calc(40px + env(safe-area-inset-bottom)); word-break:keep-all;
+    max-width:480px; margin:0 auto;
+  }
+  header{padding:calc(14px + env(safe-area-inset-top)) 0 12px; display:flex; align-items:center; gap:8px}
+  header a{color:var(--muted); text-decoration:none; font-size:13px; margin-left:auto}
+  .brand{font-weight:800; font-size:16px} .brand em{font-style:normal;color:var(--tag)}
+
+  .capture{
+    border:2px dashed var(--line); border-radius:var(--radius); background:#fff;
+    min-height:200px; display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:10px; text-align:center; padding:20px; position:relative; overflow:hidden;
+  }
+  .capture.has-img{border-style:solid; padding:0; min-height:0}
+  .capture img{width:100%; display:block; max-height:340px; object-fit:contain; background:#000}
+  .capture .hint{color:var(--muted); font-size:13.5px}
+  .btn-row{display:flex; gap:10px; margin-top:12px}
+  .btn{
+    flex:1; border:0; border-radius:14px; padding:15px 12px; font-size:15px; font-weight:700;
+    font-family:inherit; cursor:pointer; -webkit-tap-highlight-color:transparent;
+  }
+  .btn-primary{background:var(--pine); color:#fff}
+  .btn-primary:disabled{background:#B9C4BD}
+  .btn-ghost{background:var(--pine-soft); color:var(--pine); flex:0 0 auto; padding:15px 16px}
+  .btn-tag{background:var(--tag); color:#fff}
+
+  .status{margin-top:14px; font-size:13.5px; color:var(--muted); text-align:center; min-height:20px}
+  .status.err{color:#C22F12}
+  .spinner{display:inline-block; width:14px; height:14px; border:2px solid var(--line);
+    border-top-color:var(--pine); border-radius:50%; animation:sp .8s linear infinite; vertical-align:-2px; margin-right:6px}
+  @keyframes sp{to{transform:rotate(360deg)}}
+
+  section{margin-top:22px; display:none}
+  section.show{display:block}
+  h2{font-size:16px; font-weight:800; margin-bottom:4px}
+  .sub{font-size:12.5px; color:var(--muted); margin-bottom:12px}
+
+  .cands{display:flex; flex-wrap:wrap; gap:8px}
+  .cand{
+    background:#fff; border:1.5px solid var(--line); border-radius:999px;
+    padding:9px 14px; font-size:13.5px; font-family:inherit; cursor:pointer; text-align:left;
+  }
+  .cand.sel{border-color:var(--pine); background:var(--pine-soft); font-weight:700}
+  .query-edit{display:flex; gap:8px; margin-top:10px}
+  .query-edit input{
+    flex:1; border:1.5px solid var(--line); border-radius:12px; padding:12px 14px;
+    font-size:15px; font-family:inherit; background:#fff; -webkit-appearance:none;
+  }
+  .query-edit .btn{flex:0 0 auto; padding:12px 18px}
+
+  .src-head{display:flex; align-items:center; gap:6px; font-size:13px; font-weight:800; margin:16px 0 8px}
+  .dot{width:8px; height:8px; border-radius:50%}
+  .item{
+    background:#fff; border:1px solid var(--line); border-radius:var(--radius);
+    padding:13px 14px; margin-bottom:8px; display:block; text-decoration:none; color:var(--ink);
+  }
+  .item .t{font-size:13.5px; line-height:1.4; margin-bottom:5px}
+  .item .meta{display:flex; align-items:baseline; gap:8px; flex-wrap:wrap}
+  .item .price{font-size:17px; font-weight:800; color:var(--pine)}
+  .item .mall{font-size:12px; color:var(--muted)}
+  .item .badge{font-size:11px; font-weight:700; padding:2px 7px; border-radius:6px}
+  .badge.cat{background:var(--pine-soft); color:var(--pine)}
+  .badge.rocket{background:var(--tag-soft); color:var(--tag)}
+  .empty{font-size:13px; color:var(--muted); background:#fff; border:1px dashed var(--line);
+    border-radius:var(--radius); padding:16px; text-align:center}
+  footer{margin-top:28px; font-size:11.5px; color:var(--muted); text-align:center}
+</style>
+</head>
+<body>
+
+<header>
+  <span class="brand">Price<em>Lens</em> <span style="font-size:11px;color:var(--muted);font-weight:600">BETA</span></span>
+  <a href="./index.html">소개 ›</a>
+</header>
+
+<div class="capture" id="capture">
+  <span style="font-size:34px">📷</span>
+  <b>상품 사진을 촬영하거나 첨부하세요</b>
+  <span class="hint">사용 중인 제품도 괜찮습니다.<br>로고나 모델명이 보이면 더 정확합니다.</span>
+</div>
+<input type="file" id="fileInput" accept="image/*" hidden>
+<input type="file" id="camInput" accept="image/*" capture="environment" hidden>
+
+<div class="btn-row">
+  <button class="btn btn-ghost" id="btnCam">📷 촬영</button>
+  <button class="btn btn-ghost" id="btnFile">🖼️ 첨부</button>
+  <button class="btn btn-primary" id="btnSearch" disabled>제품 찾기</button>
+</div>
+<div class="status" id="status"></div>
+
+<section id="secCand">
+  <h2>이 제품이 맞나요?</h2>
+  <p class="sub">가장 가까운 이름을 선택하거나 직접 수정하세요.</p>
+  <div class="cands" id="cands"></div>
+  <div class="query-edit">
+    <input id="queryInput" placeholder="제품명 직접 입력" autocomplete="off">
+    <button class="btn btn-tag" id="btnPrices">가격 비교</button>
+  </div>
+  <div style="margin-top:10px">
+    <button class="btn btn-ghost" id="btnVision" style="width:100%">🤖 인식이 부정확하면 AI 정밀 분석</button>
+  </div>
+</section>
+
+<section id="secPrices">
+  <h2 id="priceTitle">가격 비교</h2>
+  <p class="sub">카탈로그 매칭 상품 우선, 중고·리퍼·렌탈 제외 기준입니다. 배송비 포함 최종가는 링크에서 확인하세요.</p>
+  <div class="src-head"><span class="dot" style="background:var(--naver)"></span>네이버쇼핑 최저가</div>
+  <div id="naverList"></div>
+  <div class="src-head"><span class="dot" style="background:var(--tag)"></span>쿠팡</div>
+  <div id="coupangList"></div>
+</section>
+
+<footer>이 서비스의 상품 링크에는 쿠팡 파트너스 활동의 일환으로 제공되는 링크가 포함될 수 있으며, 이에 따라 일정액의 수수료를 제공받을 수 있습니다.</footer>
+
+<script>
+const API = 'https://browser-app-lab.vercel.app/api/pricelens';
+const $ = id => document.getElementById(id);
+let imageB64 = null, imageMime = null;
+
+function setStatus(msg, err=false, busy=false){
+  $('status').className = 'status' + (err ? ' err' : '');
+  $('status').innerHTML = (busy ? '<span class="spinner"></span>' : '') + msg;
+}
+
+function pickFile(input){
+  input.onchange = () => {
+    const f = input.files[0];
+    if (!f) return;
+    const rd = new FileReader();
+    rd.onload = () => {
+      // 리사이즈: 긴 변 1280px, JPEG 재인코딩 (업로드/비용 절감)
+      const img = new Image();
+      img.onload = () => {
+        const max = 1280, r = Math.min(1, max / Math.max(img.width, img.height));
+        const c = document.createElement('canvas');
+        c.width = Math.round(img.width * r); c.height = Math.round(img.height * r);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        const dataUrl = c.toDataURL('image/jpeg', 0.85);
+        imageB64 = dataUrl.split(',')[1]; imageMime = 'image/jpeg';
+        $('capture').classList.add('has-img');
+        $('capture').innerHTML = '<img src="' + dataUrl + '" alt="선택한 상품 사진">';
+        $('btnSearch').disabled = false;
+        $('secCand').classList.remove('show'); $('secPrices').classList.remove('show');
+        setStatus('사진 준비 완료. \'제품 찾기\'를 누르세요.');
+      };
+      img.src = rd.result;
+    };
+    rd.readAsDataURL(f);
+    input.value = '';
+  };
+  input.click();
+}
+$('btnCam').onclick = () => pickFile($('camInput'));
+$('btnFile').onclick = () => pickFile($('fileInput'));
+
+async function post(path, body){
+  const res = await fetch(API + path, {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(body)
+  });
+  if (!res.ok) throw new Error('HTTP ' + res.status);
+  return res.json();
+}
+
+function showCandidates(cands, sourceLabel){
+  const box = $('cands'); box.innerHTML = '';
+  if (!cands.length){
+    box.innerHTML = '<div class="empty">이미지 검색 결과가 없습니다. AI 정밀 분석을 시도하거나 제품명을 직접 입력하세요.</div>';
+  }
+  cands.slice(0, 6).forEach((c, i) => {
+    const b = document.createElement('button');
+    b.className = 'cand' + (i === 0 ? ' sel' : '');
+    b.textContent = c;
+    b.onclick = () => {
+      box.querySelectorAll('.cand').forEach(x => x.classList.remove('sel'));
+      b.classList.add('sel');
+      $('queryInput').value = c;
+    };
+    box.appendChild(b);
+  });
+  if (cands.length) $('queryInput').value = cands[0];
+  $('secCand').classList.add('show');
+  setStatus(sourceLabel);
+}
+
+$('btnSearch').onclick = async () => {
+  if (!imageB64) return;
+  $('btnSearch').disabled = true;
+  setStatus('이미지로 동일 상품을 찾는 중…', false, true);
+  try {
+    const r = await post('/identify', { imageBase64: imageB64, mime: imageMime });
+    showCandidates(r.candidates || [], r.source === 'lens' ? '이미지 검색(Google Lens) 결과입니다.' : 'AI 분석 결과입니다.');
+  } catch (e) {
+    setStatus('식별 실패: ' + e.message + ' — 잠시 후 다시 시도하세요.', true);
+  }
+  $('btnSearch').disabled = false;
+};
+
+$('btnVision').onclick = async () => {
+  if (!imageB64) return;
+  setStatus('AI가 이미지를 정밀 분석하는 중…', false, true);
+  try {
+    const r = await post('/identify', { imageBase64: imageB64, mime: imageMime, forceVision: true });
+    showCandidates(r.candidates || [], 'AI 정밀 분석 결과입니다.');
+  } catch (e) { setStatus('AI 분석 실패: ' + e.message, true); }
+};
+
+function priceFmt(n){ return Number(n).toLocaleString('ko-KR') + '원'; }
+
+$('btnPrices').onclick = async () => {
+  const q = $('queryInput').value.trim();
+  if (!q) { setStatus('제품명을 선택하거나 입력하세요.', true); return; }
+  setStatus('네이버와 쿠팡에서 가격을 모으는 중…', false, true);
+  try {
+    const r = await post('/prices', { query: q });
+    $('priceTitle').textContent = '「' + q + '」 가격 비교';
+    const nv = $('naverList'); nv.innerHTML = '';
+    (r.naver || []).forEach(it => {
+      nv.insertAdjacentHTML('beforeend',
+        '<a class="item" href="' + it.link + '" target="_blank" rel="noopener">' +
+        '<div class="t">' + it.title + '</div><div class="meta">' +
+        '<span class="price">' + priceFmt(it.lprice) + '</span>' +
+        '<span class="mall">' + (it.mallName || '') + '</span>' +
+        (it.isCatalog ? '<span class="badge cat">카탈로그 최저가</span>' : '') +
+        '</div></a>');
+    });
+    if (!(r.naver || []).length) nv.innerHTML = '<div class="empty">네이버쇼핑 결과 없음 — 제품명을 더 구체적으로 바꿔보세요.</div>';
+    const cp = $('coupangList'); cp.innerHTML = '';
+    (r.coupang || []).forEach(it => {
+      cp.insertAdjacentHTML('beforeend',
+        '<a class="item" href="' + it.link + '" target="_blank" rel="noopener">' +
+        '<div class="t">' + it.title + '</div><div class="meta">' +
+        (it.price ? '<span class="price">' + it.price + '</span>' : '<span class="mall">가격은 링크에서 확인</span>') +
+        '<span class="badge rocket">COUPANG</span></div></a>');
+    });
+    if (!(r.coupang || []).length) cp.innerHTML = '<div class="empty">쿠팡 검색 결과 없음</div>';
+    $('secPrices').classList.add('show');
+    setStatus('');
+    $('secPrices').scrollIntoView({ behavior: 'smooth' });
+  } catch (e) { setStatus('가격 조회 실패: ' + e.message, true); }
+};
+</script>
+</body>
+</html>
