@@ -55,13 +55,30 @@ function shipNum(s) {
   return m ? parseInt(m[1], 10) : null;
 }
 
-// 쿼리 정제: 묶음/사은품/옵션 꼬리 제거 (용량은 보존 — 매칭 조건으로 사용)
+// 쿼리 정제: 판매 페이지 제목 → 짧은 검색어
+// SEO 제목의 앞머리 카테고리/수식어 (브랜드가 앞으로 오도록 제거)
+const LEAD_NOISE = /^(손상모발|헤어케어|모발|두피|염색모|바디|스킨케어|기초화장품|화장품|생활용품|주방용품|식품|여성용|남성용|정품|당일발송|무료배송|대용량|인기|베스트|추천|신상)/;
+
 function sanitize(q) {
-  return q.split(',')[0]
+  let s = (q || '').split(/\s[-|]\s/)[0]        // " - 린스/컨디셔너" 같은 카테고리 꼬리 제거
+    .split(',')[0]
     .replace(/[\[\(][^\]\)]*[\]\)]/g, ' ')
     .replace(/\+\S+/g, ' ')
     .replace(/\b\d+\s*(개|팩|묶음|박스|입|세트)\b/g, ' ')
+    .replace(/[\/]/g, ' ')
     .replace(/\s+/g, ' ').trim();
+  // 앞머리 카테고리성 단어 제거 (브랜드가 앞으로 오도록)
+  let toks = s.split(' ').filter(Boolean);
+  while (toks.length > 3 && LEAD_NOISE.test(toks[0])) toks.shift();
+  return toks.slice(0, 7).join(' ');
+}
+
+// 용량 토큰과 앞쪽 핵심어만 남긴 더 짧은 쿼리 (단계적 완화용)
+function shorten(q) {
+  const toks = q.split(' ').filter(Boolean);
+  const vol = toks.find(t => new RegExp(VOL_RE.source, 'i').test(t));
+  const head = toks.filter(t => t !== vol).slice(0, 3);
+  return [...head, vol].filter(Boolean).join(' ');
 }
 
 function acceptable(title, q) {
@@ -133,33 +150,40 @@ module.exports = async (req, res) => {
   const q = sanitize(query);
 
   try {
-    let best = null, alts = [], catalog = null, shopping = null;
+    const q2 = shorten(q);
+    const tries = (q2 && q2 !== q) ? [q, q2] : [q];
 
-    const [cat, shop] = await Promise.allSettled([catalogFind(q), shoppingBest(q)]);
-    if (cat.status === 'fulfilled') catalog = cat.value;
-    if (shop.status === 'fulfilled' && shop.value.length) {
-      const items = shop.value;
-      const fmt = it => {
-        const base = it.n.toLocaleString('ko-KR') + '원';
-        if (it.ship === 0) return base + ' · 무료배송';
-        if (it.ship) return base + ' + 배송 ' + it.ship.toLocaleString('ko-KR') + '원';
-        return base + ' · 배송비 별도';
-      };
+    let catalog = null, items = [];
+    for (const qq of tries) {
+      const [cat, shop] = await Promise.allSettled([catalogFind(qq), shoppingBest(qq)]);
+      if (!catalog && cat.status === 'fulfilled' && cat.value) catalog = cat.value;
+      if (!items.length && shop.status === 'fulfilled' && shop.value.length) items = shop.value;
+      if (catalog && catalog.price && items.length) break; // 가격까지 확보되면 종료
+    }
+
+    const fmt = it => {
+      const base = it.n.toLocaleString('ko-KR') + '원';
+      if (it.ship === 0) return base + ' · 무료배송';
+      if (it.ship) return base + ' + 배송 ' + it.ship.toLocaleString('ko-KR') + '원';
+      return base + ' · 배송비 별도';
+    };
+
+    let shopping = null, alts = [];
+    if (items.length) {
       const b = items[0];
       shopping = { title: b.title, link: b.link, source: b.source, price: fmt(b), total: b.total };
       alts = items.slice(1, 5).map(it => ({ title: it.title, link: it.link, source: it.source, price: fmt(it), total: it.total }));
     }
 
+    let best;
     if (catalog) {
-      // 카탈로그가 있으면 그곳으로: 배송비 포함 비교와 판매처 선택이 페이지 안에 있음
       best = { ...catalog };
-      // 카탈로그 스니펫에 가격이 없으면 Shopping 최저가를 참고치로 표시
-      if (!best.price && shopping) best.price = shopping.price + ' (참고)';
+      if (!best.price && shopping) best.price = shopping.price + ' (참고)'; // 카탈로그 스니펫에 가격이 없을 때
     } else {
       best = shopping || await coupangFind(q);
     }
 
-    return res.status(200).json({ best, alts, catalog, shopping, query: q });
+    return res.status(200).json({ best, alts, catalog, shopping, query: q, tried: tries });
   } catch (e) {
     return res.status(500).json({ error: e.message, step: 'search' });
   }
