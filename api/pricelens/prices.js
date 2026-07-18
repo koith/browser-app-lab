@@ -1,6 +1,7 @@
-// /api/pricelens/prices — 제품명으로 네이버 카탈로그 + 쿠팡 가격 수집
-// 필수 env: SERPER_KEY (기존 보유)
-// 참고: 네이버 쇼핑 검색 API가 2026-07-31 종료(대체 API 없음)되어 Serper 기반으로 전환
+// /api/pricelens/prices — 최저가 자동 선정
+// 1순위: Serper Google Shopping(구조화 가격) → 용량/묶음 조건 필터 → 최저액
+// 폴백: 네이버 카탈로그 / 쿠팡 링크
+// 필수 env: SERPER_KEY
 
 const ALLOW_ORIGIN = 'https://koith.github.io';
 
@@ -10,63 +11,87 @@ function cors(res) {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 }
 
-async function serper(q, num) {
-  const r = await fetch('https://google.serper.dev/search', {
+function withTimeout(promise, ms, label) {
+  return Promise.race([
+    promise,
+    new Promise((_, rej) => setTimeout(() => rej(new Error(label + ': timeout')), ms))
+  ]);
+}
+
+async function serper(endpoint, q, ms) {
+  const r = await withTimeout(fetch('https://google.serper.dev/' + endpoint, {
     method: 'POST',
     headers: { 'X-API-KEY': process.env.SERPER_KEY, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ q, gl: 'kr', hl: 'ko', num: num || 10 })
-  });
-  if (!r.ok) throw new Error('serper: ' + r.status);
-  return (await r.json()).organic || [];
+    body: JSON.stringify({ q, gl: 'kr', hl: 'ko', num: 20 })
+  }), ms, endpoint);
+  if (!r.ok) throw new Error(endpoint + ': ' + r.status);
+  return r.json();
 }
 
-function extractPrice(text) {
-  const m = (text || '').match(/(?:최저\s*)?([0-9]{1,3}(?:,[0-9]{3})+|[0-9]{4,})\s*원/);
-  return m ? m[1] + '원' : null;
+const VOL_RE = /(\d+(?:\.\d+)?)\s*(ml|l|g|kg|매|정|캡슐|포|환)\b/gi;
+const PACK_RE = /(\d+\s*(개|팩|묶음|박스|입))|세트|더블|1\s*\+\s*1|2\s*\+\s*1/i;
+const VARIANT_RE = /리필|대용량|미니|휴대용|증정|기획/;
+
+function norm(s) { return (s || '').toLowerCase().replace(/\s+/g, ''); }
+
+function volumes(s) {
+  const out = [];
+  let m; const re = new RegExp(VOL_RE.source, 'gi');
+  while ((m = re.exec(s || ''))) out.push((m[1] + m[2]).toLowerCase());
+  return out;
 }
 
-// 네이버 가격비교 카탈로그 페이지 탐색
-async function naverCatalog(query) {
-  const results = await serper(query + ' site:search.shopping.naver.com', 10);
-  const catalogs = results
-    .filter(o => /search\.shopping\.naver\.com\/catalog\//.test(o.link || ''))
-    .slice(0, 4)
-    .map(o => ({
-      title: (o.title || '').replace(/\s*[:|-]\s*네이버\s*쇼핑.*$/, '').trim(),
-      link: o.link,
-      price: extractPrice(o.snippet),
-      isCatalog: true
-    }));
-  // 카탈로그가 하나도 없으면 네이버쇼핑 검색 페이지 링크라도 제공
-  if (!catalogs.length) {
-    catalogs.push({
-      title: '네이버쇼핑에서 「' + query + '」 직접 검색',
-      link: 'https://search.shopping.naver.com/search/all?query=' + encodeURIComponent(query),
-      price: null,
-      isCatalog: false
-    });
+function priceNum(s) {
+  const m = (s || '').replace(/[₩,\s]/g, '').match(/(\d{3,})/);
+  return m ? parseInt(m[1], 10) : null;
+}
+
+// 쿼리 정제: 묶음/사은품/옵션 꼬리 제거 (용량은 보존 — 매칭 조건으로 사용)
+function sanitize(q) {
+  return q.split(',')[0]
+    .replace(/[\[\(][^\]\)]*[\]\)]/g, ' ')
+    .replace(/\+\S+/g, ' ')
+    .replace(/\b\d+\s*(개|팩|묶음|박스|입|세트)\b/g, ' ')
+    .replace(/\s+/g, ' ').trim();
+}
+
+function acceptable(title, q) {
+  const t = norm(title);
+  const qVols = volumes(q);
+  if (qVols.length && !qVols.some(v => t.includes(v))) return false; // 용량 불일치 제외
+  if (!PACK_RE.test(q) && PACK_RE.test(title)) return false;         // 쿼리에 없는 묶음 제외
+  for (const w of ['리필', '대용량', '미니', '휴대용']) {              // 변형 상품 제외
+    if (!q.includes(w) && title.includes(w)) return false;
   }
-  return catalogs;
+  return true;
 }
 
-async function coupang(query) {
-  const results = await serper(query + ' site:coupang.com', 10);
-  const items = results
-    .filter(o => /coupang\.com\/vp\/products/.test(o.link || '') && !/품절|sold\s?out/i.test((o.title||'') + (o.snippet||'')))
-    .slice(0, 4)
+async function shoppingBest(q) {
+  const j = await serper('shopping', q, 6000);
+  const items = (j.shopping || j.shopping_results || [])
     .map(o => ({
-      title: (o.title || '').replace(/\s*[-|]\s*쿠팡.*$/, '').trim(),
-      link: o.link,
-      price: extractPrice(o.snippet)
-    }));
-  if (!items.length) {
-    items.push({
-      title: '쿠팡에서 「' + query + '」 직접 검색',
-      link: 'https://www.coupang.com/np/search?q=' + encodeURIComponent(query),
-      price: null
-    });
-  }
+      title: o.title || '',
+      link: o.link || '',
+      source: o.source || '',
+      price: o.price || '',
+      n: priceNum(o.price),
+      delivery: o.delivery || ''
+    }))
+    .filter(it => it.title && it.link && it.n && it.n >= 100)
+    .filter(it => !/품절|sold\s?out/i.test(it.title))
+    .filter(it => acceptable(it.title, q))
+    .sort((a, b) => a.n - b.n);
   return items;
+}
+
+async function fallbackPool(q) {
+  const j = await serper('search', q + ' site:search.shopping.naver.com', 6000);
+  const cat = (j.organic || []).find(o => /search\.shopping\.naver\.com\/catalog\//.test(o.link || '') && acceptable(o.title || '', q));
+  if (cat) return { title: cat.title, link: cat.link, price: null, source: '네이버 가격비교' };
+  const c = await serper('search', q + ' site:coupang.com', 6000);
+  const cp = (c.organic || []).find(o => /coupang\.com\/vp\/products/.test(o.link || '') && acceptable(o.title || '', q));
+  if (cp) return { title: cp.title, link: cp.link, price: null, source: '쿠팡' };
+  return null;
 }
 
 module.exports = async (req, res) => {
@@ -76,41 +101,25 @@ module.exports = async (req, res) => {
 
   let { query } = req.body || {};
   if (!query || !query.trim()) return res.status(400).json({ error: 'query required', step: 'input' });
-  // 판매 페이지 제목 → 검색어 정제: 옵션/사은품/수량 꼬리 제거
-  query = query.split(',')[0]
-    .replace(/[\[\(][^\]\)]*[\]\)]/g, ' ')
-    .replace(/\+\S+/g, ' ')
-    .replace(/\b\d+\s?(개|매|입|세트|팩)\b/g, ' ')
-    .replace(/\s+/g, ' ').trim();
   if (!process.env.SERPER_KEY) return res.status(500).json({ error: 'SERPER_KEY 미설정', step: 'config' });
+  const q = sanitize(query);
 
   try {
-    const [nv, cp] = await Promise.allSettled([
-      naverCatalog(query.trim()),
-      coupang(query.trim())
-    ]);
-    const naver = nv.status === 'fulfilled' ? nv.value : [];
-    const coupang = cp.status === 'fulfilled' ? cp.value : [];
-    // 최저가 1개 자동 선정: 숫자 가격 최저 → 없으면 네이버 카탈로그 > 쿠팡
-    const num = s => { const m = (s || '').match(/([0-9]{1,3}(?:,[0-9]{3})+|[0-9]{4,})/); return m ? parseInt(m[1].replace(/,/g, ''), 10) : null; };
-    const pool = [
-      ...naver.filter(it => it.isCatalog).map(it => ({ ...it, src: '네이버 가격비교', n: num(it.price) })),
-      ...coupang.map(it => ({ ...it, src: '쿠팡', n: num(it.price) }))
-    ];
-    const priced = pool.filter(it => it.n && it.n >= 100);
-    let best = null;
-    if (priced.length) best = priced.sort((a, b) => a.n - b.n)[0];
-    else best = pool[0] || null;
-    if (best) best = { title: best.title, link: best.link, price: best.price, source: best.src };
-
-    return res.status(200).json({
-      best,
-      naver, coupang,
-      errors: {
-        naver: nv.status === 'rejected' ? nv.reason.message : null,
-        coupang: cp.status === 'rejected' ? cp.reason.message : null
+    let best = null, alts = [];
+    try {
+      const items = await shoppingBest(q);
+      if (items.length) {
+        const b = items[0];
+        best = {
+          title: b.title, link: b.link, source: b.source,
+          price: b.n.toLocaleString('ko-KR') + '원' + (b.delivery ? ' · ' + b.delivery : '')
+        };
+        alts = items.slice(1, 4).map(it => ({ title: it.title, link: it.link, source: it.source, price: it.n.toLocaleString('ko-KR') + '원' }));
       }
-    });
+    } catch (e) { /* shopping 실패 시 폴백 */ }
+
+    if (!best) best = await fallbackPool(q);
+    return res.status(200).json({ best, alts, query: q });
   } catch (e) {
     return res.status(500).json({ error: e.message, step: 'search' });
   }
