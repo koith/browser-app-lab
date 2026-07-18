@@ -87,6 +87,7 @@ async function shoppingBest(q) {
       delivery: o.delivery || ''
     }))
     .filter(it => it.title && it.link && it.n && it.n >= 100)
+    .filter(it => !/(^|\/\/)([a-z]+\.)?google\.[a-z.]+\//i.test(it.link)) // 구글 중계 URL 제외
     .filter(it => !/품절|sold\s?out/i.test(it.title))
     .filter(it => acceptable(it.title, q))
     .map(it => {
