@@ -46,6 +46,8 @@ export default async function handler(req, res) {
   return res.status(200).json(out);
 }
 
+const dec = s => String(s || '').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/\u0000/g, '');
+
 function parse(html, region) {
   const items = [];
   const re = /<a\b[^>]*href="(?:https?:\/\/www\.daangn\.com)?(\/kr\/group\/(?!s\/)[^"?#]+\/)"[^>]*>([\s\S]*?)<\/a>/g;
@@ -64,17 +66,19 @@ function parse(html, region) {
     const title = parts[0];
     if (!title || title.length > 80) continue;
     const rest = parts.slice(1);
-    const memberTxt = rest.find(t => /멤버|명/.test(t)) || null;
-    const members = memberTxt ? (memberTxt.match(/(\d[\d,]*)\s*명/) || [])[1] : null;
+    const flat = inner.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ');
+    const memMatch = flat.match(/멤버\s*(\d[\d,]*)\s*명?|(\d[\d,]*)\s*명/);
+    const members = memMatch ? (memMatch[1] || memMatch[2]) : null;
+    const memberTxt = memMatch ? memMatch[0] : null;
     const place = rest.find(t => /(동|읍|면|가|구|시)$/.test(t) && t.length <= 12) || null;
     const desc = rest.find(t => t !== memberTxt && t !== place && t.length > 6) || null;
 
     items.push({
       url: 'https://www.daangn.com' + path,
-      title,
+      title: dec(title),
       members: members ? parseInt(members.replace(/,/g, ''), 10) : null,
-      place, desc: desc ? desc.slice(0, 120) : null,
-      thumb: img ? img[1] : null,
+      place, desc: desc ? dec(desc).slice(0, 140) : null,
+      thumb: img ? dec(img[1]) : null,
       region,
     });
   }
