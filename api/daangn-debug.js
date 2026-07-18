@@ -1,29 +1,35 @@
-// /api/daangn-debug.js — 실제 사용 경로(/kr/buy-sell/) 기준 진단
-export const config = { maxDuration: 30 };
+// /api/daangn-debug.js — 검색 추가 로딩 API 탐색
+export const config = { maxDuration: 40 };
 const UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  const q = req.query.q || '브루더';
-  const region = req.query.region || '서초구-362';
-  const variants = ['', '&page=2', '&pageNum=2', '&offset=24', '&cursor=2'];
-  const out = [];
+  const H = { 'User-Agent': UA, 'Accept-Language': 'ko-KR,ko;q=0.9' };
+  const root = 'https://www.daangn.com/kr/buy-sell/s/?in=' + encodeURIComponent('서초구-362') + '&search=' + encodeURIComponent('브루더');
+  const html = await (await fetch(root, { headers: H })).text();
 
-  for (const v of variants) {
-    const url = `https://www.daangn.com/kr/buy-sell/?in=${encodeURIComponent(region)}&search=${encodeURIComponent(q)}${v}`;
+  const scripts = [...new Set([...html.matchAll(/(?:src|href)="([^"]+\.js)"/g)].map(m => m[1]))]
+    .map(u => u.startsWith('http') ? u : 'https://www.daangn.com' + u);
+  // 검색 관련 청크 우선
+  scripts.sort((a, b) => (/(search|buy-sell|article|list)/i.test(b) ? 1 : 0) - (/(search|buy-sell|article|list)/i.test(a) ? 1 : 0));
+
+  const hits = new Set();
+  const grep = (t) => {
+    for (const m of t.matchAll(/["'`](https?:\/\/[a-z0-9\.\-]*(?:karrot|daangn)[a-z0-9\.\-]*\/[^"'`\s]{0,90})["'`]/gi)) hits.add(m[1]);
+    for (const m of t.matchAll(/["'`](\/[a-z0-9_\-\/\.]*(?:search|articles|flea_market|graphql|api)[a-z0-9_\-\/\.]*)["'`]/gi)) hits.add(m[1]);
+  };
+  grep(html);
+
+  const scanned = [];
+  for (const su of scripts.slice(0, 14)) {
     try {
-      const r = await fetch(url, { headers: { 'User-Agent': UA, 'Accept-Language': 'ko-KR,ko;q=0.9' } });
-      const html = await r.text();
-      const items = [...new Set([...html.matchAll(/<a\b[^>]*href="(?:https?:\/\/www\.daangn\.com)?(\/kr\/buy-sell\/(?!s\/)(?!\?)[^"?#]+\/)"/g)].map(m => m[1]))];
-      const entry = { v: v || 'base', status: r.status, bytes: html.length, itemCount: items.length, first: items[0] || null, last: items[items.length - 1] || null };
-      if (!v) {
-        entry.timeHits = [...new Set([...html.matchAll(/(?:끌올\s*)?\d+\s*(?:초|분|시간|일|개월|년)\s*전/g)].map(m => m[0]))].slice(0, 6);
-        entry.dateFields = [...new Set([...html.matchAll(/"(\w*(?:[Aa]t|[Tt]ime|date))"\s*:\s*"?([\d\-T:\.Z]{8,30})"?/g)].map(m => m[1] + '=' + m[2]))].slice(0, 10);
-        const i = html.indexOf(items[0] || 'zzz');
-        entry.itemSnippet = i > 0 ? html.slice(Math.max(0, html.lastIndexOf('<a', i)), i + 900) : '';
-      }
-      out.push(entry);
-    } catch (e) { out.push({ v: v || 'base', error: String(e.message || e).slice(0, 120) }); }
+      const r = await fetch(su, { headers: H });
+      if (!r.ok) { scanned.push(su.split('/').pop() + ' HTTP' + r.status); continue; }
+      const t = await r.text();
+      grep(t);
+      scanned.push(su.split('/').pop() + ' ok');
+    } catch { scanned.push(su.split('/').pop() + ' ERR'); }
   }
-  return res.status(200).json({ q, region, out });
+  const filtered = [...hits].filter(h => /search|article|graphql|api|flea/i.test(h));
+  return res.status(200).json({ scriptCount: scripts.length, scanned, hitCount: filtered.length, hits: filtered.slice(0, 100) });
 }
