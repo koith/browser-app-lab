@@ -121,13 +121,14 @@ module.exports = async (req, res) => {
           image,
           source: shop ? shop.name : (o.source || ''),
           isShop: !!shop,
+          soldOut: /품절|일시품절|판매\s?종료|판매\s?중지|sold\s?out/i.test((o.title || '') + ' ' + (o.snippet || '')),
           i
         };
       })
-      .filter(m => m.title && m.link && m.image) // 이미지 없는 매치는 확인 UX가 성립 안 함
+      .filter(m => m.title && m.link && m.image && !m.soldOut) // 이미지 없거나 품절 표시된 매치 제외
       .sort((a, b) => (b.isShop - a.isShop) || (a.i - b.i))
       .slice(0, 8)
-      .map(({ i, ...m }) => m);
+      .map(({ i, soldOut, ...m }) => m);
 
     return res.status(200).json({ matches });
   } catch (e) {
