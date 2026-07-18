@@ -52,7 +52,7 @@ async function naverCatalog(query) {
 async function coupang(query) {
   const results = await serper(query + ' site:coupang.com', 10);
   const items = results
-    .filter(o => /coupang\.com\/vp\/products/.test(o.link || ''))
+    .filter(o => /coupang\.com\/vp\/products/.test(o.link || '') && !/품절|sold\s?out/i.test((o.title||'') + (o.snippet||'')))
     .slice(0, 4)
     .map(o => ({
       title: (o.title || '').replace(/\s*[-|]\s*쿠팡.*$/, '').trim(),
@@ -74,8 +74,14 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
 
-  const { query } = req.body || {};
+  let { query } = req.body || {};
   if (!query || !query.trim()) return res.status(400).json({ error: 'query required', step: 'input' });
+  // 판매 페이지 제목 → 검색어 정제: 옵션/사은품/수량 꼬리 제거
+  query = query.split(',')[0]
+    .replace(/[\[\(][^\]\)]*[\]\)]/g, ' ')
+    .replace(/\+\S+/g, ' ')
+    .replace(/\b\d+\s?(개|매|입|세트|팩)\b/g, ' ')
+    .replace(/\s+/g, ' ').trim();
   if (!process.env.SERPER_KEY) return res.status(500).json({ error: 'SERPER_KEY 미설정', step: 'config' });
 
   try {
