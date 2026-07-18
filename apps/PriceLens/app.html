@@ -203,6 +203,7 @@ $('btnShoot').onclick = () => pickFile($('camInput'));
 $('btnPick').onclick = () => pickFile($('fileInput'));
 $('btnReshoot').onclick = () => pickFile($('camInput'));
 $('btnRepick').onclick = () => pickFile($('fileInput'));
+$('btnNo').onclick = () => { noCount++; next(); };
 $('btnYes').onclick = () => {
   const b = bestReady;
   if (b) {
