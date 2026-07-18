@@ -31,29 +31,41 @@ export default async function handler(req, res) {
     return res.status(502).json({ error: String(e.message || e).slice(0, 200) });
   }
 
-  // 페이지 내 모든 지역 코드 수집
-  const codes = new Set();
-  for (const m of html.matchAll(/[?&](?:amp;)?in=([^"&#\s]+)/g)) {
-    let c;
-    try { c = decodeURIComponent(m[1]); } catch { continue; }
-    if (/^[가-힣0-9]+(?:-[가-힣0-9]+)*-\d+$/.test(c)) codes.add(c);
+  // 페이지 내 지역 코드를 '위치 기준'으로 시도(광역)에 귀속
+  const PROVINCES = ['서울특별시','부산광역시','대구광역시','인천광역시','광주광역시','대전광역시','울산광역시',
+    '세종특별자치시','경기도','강원특별자치도','강원도','충청북도','충청남도','전북특별자치도','전라북도',
+    '전라남도','경상북도','경상남도','제주특별자치도','전남광주통합특별시'];
+  const markers = [];
+  for (const pv of PROVINCES) {
+    for (const m of html.matchAll(new RegExp('>\\s*' + pv + '\\s*<', 'g'))) markers.push({ i: m.index, pv });
   }
+  markers.sort((a, b) => a.i - b.i);
 
-  // 서울/경기 분류 (코드명은 "서초구-362" 또는 "수원시-권선구-1270" 형태)
+  const provinceAt = (idx) => {
+    let cur = null;
+    for (const mk of markers) { if (mk.i <= idx) cur = mk.pv; else break; }
+    return cur;
+  };
+
   const items = [];
-  for (const code of codes) {
-    const name = code.replace(/-\d+$/, '');       // 예: 수원시-권선구
-    const head = name.split('-')[0];              // 예: 수원시
-    if (SEOUL.includes(name)) {
-      items.push({ code, name, province: '서울특별시' });
-    } else if (GYEONGGI.includes(head)) {
-      items.push({ code, name: name.replace(/-/g, ' '), province: '경기도', head });
-    }
+  const seenCode = new Set();
+  for (const m of html.matchAll(/[?&](?:amp;)?in=([^"&#\s]+)/g)) {
+    let code;
+    try { code = decodeURIComponent(m[1]); } catch { continue; }
+    if (!/^[가-힣0-9]+(?:-[가-힣0-9]+)*-\d+$/.test(code)) continue;
+    if (seenCode.has(code)) continue;
+    seenCode.add(code);
+    const pv = provinceAt(m.index);
+    if (pv !== '서울특별시' && pv !== '경기도') continue;
+    const name = code.replace(/-\d+$/, '');
+    const head = name.split('-')[0];
+    if (pv === '서울특별시' && !SEOUL.includes(name)) continue;
+    if (pv === '경기도' && !GYEONGGI.includes(head)) continue;
+    items.push({ code, name: name.replace(/-/g, ' '), province: pv, head });
   }
 
-  // 시 전체 코드가 있으면 그 시의 하위 구 코드는 제외 (중복 조회 방지)
-  const wholeCities = new Set(items.filter(i => i.head && i.name === i.head).map(i => i.head));
-  const filtered = items.filter(i => !(i.head && i.name !== i.head && wholeCities.has(i.head)));
+  const wholeCities = new Set(items.filter(i => i.name === i.head).map(i => i.head));
+  const filtered = items.filter(i => !(i.name !== i.head && wholeCities.has(i.head)));
 
   filtered.sort((a, b) => (a.province === b.province ? a.name.localeCompare(b.name, 'ko') : a.province === '서울특별시' ? -1 : 1));
   const list = filtered.map(({ code, name, province }) => ({ code, name, province }));
