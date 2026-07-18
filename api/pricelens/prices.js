@@ -46,6 +46,15 @@ function priceNum(s) {
   return m ? parseInt(m[1], 10) : null;
 }
 
+// 배송 문구 → 배송비. 무료면 0, 금액이 있으면 그 값, 알 수 없으면 null
+function shipNum(s) {
+  const t = (s || '').replace(/\s/g, '');
+  if (!t) return null;
+  if (/무료배송|무료|free/i.test(t)) return 0;
+  const m = t.replace(/[₩,]/g, '').match(/(\d{3,})/);
+  return m ? parseInt(m[1], 10) : null;
+}
+
 // 쿼리 정제: 묶음/사은품/옵션 꼬리 제거 (용량은 보존 — 매칭 조건으로 사용)
 function sanitize(q) {
   return q.split(',')[0]
@@ -80,7 +89,11 @@ async function shoppingBest(q) {
     .filter(it => it.title && it.link && it.n && it.n >= 100)
     .filter(it => !/품절|sold\s?out/i.test(it.title))
     .filter(it => acceptable(it.title, q))
-    .sort((a, b) => a.n - b.n);
+    .map(it => {
+      const ship = shipNum(it.delivery);
+      return { ...it, ship, total: it.n + (ship === null ? 3000 : ship) }; // 배송비 미상은 3000원으로 보수적 가정
+    })
+    .sort((a, b) => a.total - b.total); // 배송비 포함 총액 기준
   return items;
 }
 
@@ -108,13 +121,16 @@ module.exports = async (req, res) => {
     let best = null, alts = [];
     try {
       const items = await shoppingBest(q);
+      const fmt = it => {
+        const base = it.n.toLocaleString('ko-KR') + '원';
+        if (it.ship === 0) return base + ' · 무료배송';
+        if (it.ship) return base + ' + 배송 ' + it.ship.toLocaleString('ko-KR') + '원';
+        return base + ' · 배송비 별도';
+      };
       if (items.length) {
         const b = items[0];
-        best = {
-          title: b.title, link: b.link, source: b.source,
-          price: b.n.toLocaleString('ko-KR') + '원' + (b.delivery ? ' · ' + b.delivery : '')
-        };
-        alts = items.slice(1, 4).map(it => ({ title: it.title, link: it.link, source: it.source, price: it.n.toLocaleString('ko-KR') + '원' }));
+        best = { title: b.title, link: b.link, source: b.source, price: fmt(b), total: b.total };
+        alts = items.slice(1, 5).map(it => ({ title: it.title, link: it.link, source: it.source, price: fmt(it), total: it.total }));
       }
     } catch (e) { /* shopping 실패 시 폴백 */ }
 
