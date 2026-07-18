@@ -1,6 +1,6 @@
 // /api/daangn-regions.js — 지역 코드 수집기 (1회성)
 // GET /api/daangn-regions?seed=서초4동-366[&debug=1]
-// 일반 페이지(주변 동 링크) + 검색 페이지(구/시 헤더 링크)를 모두 읽어 링크 통합 반환
+// 일반 페이지(주변 동 링크) + 검색 페이지 /s/ (구/시 breadcrumb)를 모두 읽어 링크 통합
 
 export const config = { maxDuration: 30 };
 
@@ -15,12 +15,15 @@ export default async function handler(req, res) {
   const debug = req.query.debug === '1';
   if (!seed) return res.status(400).json({ error: 'seed 파라미터 필요 (예: 서초4동-366)' });
 
-  const base = 'https://www.daangn.com/kr/buy-sell/?in=' + encodeURIComponent(seed);
-  const urls = [base, base + '&search=' + encodeURIComponent('시계')]; // 검색 페이지에만 구/시 헤더 노출
+  const inQ = encodeURIComponent(seed);
+  const urls = [
+    'https://www.daangn.com/kr/buy-sell/?in=' + inQ,
+    'https://www.daangn.com/kr/buy-sell/s/?in=' + inQ + '&search=' + encodeURIComponent('의자'),
+  ];
 
   let pageRegion = '';
   const links = new Map();
-  const hrefsSample = new Set();
+  const perUrl = [];
   const fails = [];
 
   for (const url of urls) {
@@ -30,37 +33,33 @@ export default async function handler(req, res) {
         headers: { 'User-Agent': UA, 'Accept-Language': 'ko-KR,ko;q=0.9' },
         redirect: 'follow',
       });
-      if (!r.ok) { fails.push(`${url.includes('search') ? 'search' : 'plain'}: HTTP ${r.status}`); continue; }
+      if (!r.ok) { fails.push(`${url}: HTTP ${r.status}`); continue; }
       html = await r.text();
     } catch (e) {
-      fails.push(String(e.message || e).slice(0, 120));
+      fails.push(`${url}: ${String(e.message || e).slice(0, 100)}`);
       continue;
     }
 
     if (!pageRegion) {
-      const titleM = html.match(/<title>([^<]*)<\/title>/);
-      if (titleM) pageRegion = titleM[1].replace(/중고거래.*$/, '').trim();
+      const t = html.match(/<title>([^<]*)<\/title>/);
+      if (t) pageRegion = t[1].replace(/중고거래.*$/, '').trim();
     }
 
+    const local = [];
     const linkRe = /[?&](?:amp;)?in=([^"&#\s]+)/g;
     let m;
     while ((m = linkRe.exec(html)) !== null) {
       let code;
       try { code = decodeURIComponent(m[1]); } catch { continue; }
-      if (/^[가-힣0-9]+-\d+$/.test(code)) links.set(code, true);
+      if (/^[가-힣0-9]+-\d+$/.test(code)) { links.set(code, true); local.push(code); }
     }
-
-    if (debug) {
-      const hrefRe = /href="([^"]*buy-sell[^"]*)"/g;
-      let h;
-      while ((h = hrefRe.exec(html)) !== null && hrefsSample.size < 80) hrefsSample.add(h[1]);
-    }
+    if (debug) perUrl.push({ url, bytes: html.length, found: [...new Set(local)] });
   }
 
   if (!pageRegion && fails.length === urls.length)
     return res.status(502).json({ error: 'daangn fetch 실패', fails });
 
   const out = { seed, pageRegion, links: [...links.keys()], fails };
-  if (debug) out.hrefsSample = [...hrefsSample];
+  if (debug) out.perUrl = perUrl;
   return res.status(200).json(out);
 }
