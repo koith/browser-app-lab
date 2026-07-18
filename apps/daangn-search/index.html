@@ -172,29 +172,78 @@ $('onSaleChip').onclick=()=>{
   onSaleOnly=!onSaleOnly;
   $('onSaleChip').classList.toggle('on', onSaleOnly);
   renderResults(); // 즉시 클라이언트 필터 적용
-  if($('q').value.trim() && selected.size && items.length) search(); // 서버 재조회로 보충
+  if($('q').value.trim() && selected.size && items.length) search();
 };
 
 // ---- 검색 ----
 $('goBtn').onclick=search;
 $('q').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.target.blur(); search(); }});
 
+const LS_DONGS='dgn_dongs_v1';
+let dongCache=JSON.parse(localStorage.getItem(LS_DONGS)||'{}');
+let codeMeta={};   // 동코드 -> {gu, dong}
+const MAX_DONGS=200, BATCH=45;
+
+async function getDongs(r){
+  if(dongCache[r.code]) return dongCache[r.code];
+  const u=`${API}/daangn-dongs?gu=${encodeURIComponent(r.name)}&province=${encodeURIComponent(r.province)}`;
+  const res=await fetch(u); const d=await res.json();
+  if(!res.ok||!d.list||!d.list.length) throw new Error(d.error||'동 목록 없음');
+  dongCache[r.code]=d.list;
+  localStorage.setItem(LS_DONGS, JSON.stringify(dongCache));
+  return d.list;
+}
+
 async function search(){
   const q=$('q').value.trim();
   if(!q) return setStatus('검색어를 입력하세요.', true);
   if(!selected.size) return setStatus('검색 지역을 먼저 선택하세요.', true);
   $('goBtn').disabled=true;
-  setStatus(`서울·경기 <b>${selected.size}개 지역</b>에서 "<b>${esc(q)}</b>" 검색 중...`);
+  items=[]; renderResults();
+  const t0=Date.now();
   try{
-    const url=`${API}/daangn?q=${encodeURIComponent(q)}&regions=${encodeURIComponent([...selected].join(','))}${onSaleOnly?'&onSale=true':''}`;
-    const r=await fetch(url);
-    const d=await r.json();
-    if(!r.ok) throw new Error(d.error||('HTTP '+r.status));
-    items=d.items.map((it,i)=>({...it, _i:i}));
-    let msg=`<b>${d.count}건</b> · ${d.regionCount}개 지역 · ${(d.tookMs/1000).toFixed(1)}초`;
-    if(d.errors.length) msg+=` · <span class="err">${d.errors.length}개 지역 실패 (${esc(d.errors[0].region)}: ${esc(d.errors[0].error)})</span>`;
+    // 1) 선택한 구/시 -> 동 목록 확장
+    const chosen=regionsData.list.filter(r=>selected.has(r.code));
+    setStatus(`${chosen.length}개 지역의 동네 목록 확인 중...`);
+    let codes=[]; codeMeta={}; const dongFails=[];
+    for(const r of chosen){
+      try{
+        const dl=await getDongs(r);
+        for(const d of dl){ codes.push(d.code); codeMeta[d.code]={gu:d.gu||r.name, dong:d.dong}; }
+      }catch(e){
+        codes.push(r.code); codeMeta[r.code]={gu:r.name, dong:null};
+        dongFails.push(r.name);
+      }
+    }
+    codes=[...new Set(codes)];
+    let capped=false;
+    if(codes.length>MAX_DONGS){ codes=codes.slice(0,MAX_DONGS); capped=true; }
+
+    // 2) 배치 검색
+    const batches=[]; for(let i=0;i<codes.length;i+=BATCH) batches.push(codes.slice(i,i+BATCH));
+    const seen=new Set(); let errCount=0;
+    for(let b=0;b<batches.length;b++){
+      setStatus(`동네 <b>${codes.length}곳</b> 검색 중... (${b+1}/${batches.length}) · 현재 <b>${items.length}건</b>`);
+      const url=`${API}/daangn?q=${encodeURIComponent(q)}&regions=${encodeURIComponent(batches[b].join(','))}${onSaleOnly?'&onSale=true':''}`;
+      try{
+        const r=await fetch(url); const d=await r.json();
+        if(!r.ok) throw new Error(d.error||('HTTP '+r.status));
+        errCount+=(d.errors||[]).length;
+        for(const it of d.items){
+          if(seen.has(it.url)) continue;
+          seen.add(it.url);
+          const meta=codeMeta[it.region]||{};
+          items.push({...it, _i:items.length, gu:meta.gu||guName(it.region), dong:it.dong||meta.dong||null});
+        }
+        renderResults();
+      }catch(e){ errCount++; }
+    }
+
+    let msg=`<b>${items.length}건</b> · 동네 ${codes.length}곳 · ${((Date.now()-t0)/1000).toFixed(1)}초`;
+    if(capped) msg+=` · <span class="err">지역이 많아 ${MAX_DONGS}곳까지만 검색</span>`;
+    if(dongFails.length) msg+=` · <span class="err">${dongFails.length}곳 동네목록 실패</span>`;
+    if(errCount) msg+=` · <span class="err">${errCount}건 조회 실패</span>`;
     setStatus(msg);
-    renderResults();
   }catch(e){
     setStatus('검색 실패: '+esc(String(e.message||e)), true);
   }finally{
@@ -214,8 +263,9 @@ function renderResults(){
     arr.sort((a,b)=>(a.price??Infinity)-(b.price??Infinity) || a._i-b._i);
   }else if(sortMode==='dist' && myPos){
     arr.sort((a,b)=>{
-      const da=COORDS[guName(a.region)]?dist(myPos,COORDS[guName(a.region)]):Infinity;
-      const db=COORDS[guName(b.region)]?dist(myPos,COORDS[guName(b.region)]):Infinity;
+      const ga=(a.gu||'').split(' ').pop(), gb=(b.gu||'').split(' ').pop();
+      const da=COORDS[ga]?dist(myPos,COORDS[ga]):Infinity;
+      const db=COORDS[gb]?dist(myPos,COORDS[gb]):Infinity;
       return da-db || a._i-b._i;
     });
   }else{
@@ -234,7 +284,7 @@ function card(it){
     <div class="info">
       <div class="title">${esc(it.title)}</div>
       <div class="price">${price}</div>
-      <div class="meta">${st}<span>${esc(guName(it.region))}${it.dong?' · '+esc(it.dong):''}</span>${ago?`<span class="ago">${ago}</span>`:''}</div>
+      <div class="meta">${st}<span>${esc(it.gu||guName(it.region))}${it.dong?' · '+esc(it.dong):''}</span>${ago?`<span class="ago">${ago}</span>`:''}</div>
     </div></a>`;
 }
 function fmtAgo(s){
