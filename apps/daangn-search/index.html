@@ -183,6 +183,8 @@ $('sortDist').onclick=()=>setSort('dist');
 $('onSaleChip').onclick=()=>{
   onSaleOnly=!onSaleOnly;
   $('onSaleChip').classList.toggle('on', onSaleOnly);
+  renderResults(); // 즉시 클라이언트 필터 적용
+  if($('q').value.trim() && selected.size && items.length) search(); // 서버 재조회로 보충
 };
 
 // ---- 검색 ----
@@ -219,6 +221,7 @@ function dist(a,b){ // 근사 km
 }
 function renderResults(){
   let arr=[...items];
+  if(onSaleOnly) arr=arr.filter(it=>it.status==='on_sale');
   if(sortMode==='price'){
     arr.sort((a,b)=>(a.price??Infinity)-(b.price??Infinity) || a._i-b._i);
   }else if(sortMode==='dist' && myPos){
