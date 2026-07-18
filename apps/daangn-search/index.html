@@ -114,6 +114,7 @@ main{padding:12px 16px 0}
   <div class="tabs">
     <button class="tab on" id="tabSell">중고거래</button>
     <button class="tab" id="tabGroup">모임</button>
+    <button class="tab" id="tabComm">동네생활</button>
   </div>
   <div class="searchRow">
     <input id="q" type="search" placeholder="검색어를 입력하세요" enterkeyhint="search" autocomplete="off">
@@ -300,16 +301,18 @@ function setMode(m){
   mode=m;
   $('tabSell').classList.toggle('on', m==='sell');
   $('tabGroup').classList.toggle('on', m==='group');
-  const groupHide=(m==='group');
-  ['sortPrice','onSaleChip'].forEach(id=>$(id).style.display=groupHide?'none':'');
-  $('sortNew').style.display=groupHide?'none':'';
-  $('sortDist').style.display=groupHide?'none':'';
-  $('q').placeholder = groupHide?'모임 검색 (예: 등산, 독서)':'검색어를 입력하세요';
+  $('tabComm').classList.toggle('on', m==='comm');
+  const sell=(m==='sell');
+  ['sortPrice','onSaleChip','sortDist'].forEach(id=>$(id).style.display=sell?'':'none');
+  $('sortNew').style.display=(m==='comm')?'':(sell?'':'none');
+  $('q').placeholder = m==='group' ? '모임 검색 (예: 등산, 독서)'
+    : m==='comm' ? '동네생활 검색 (예: 맛집, 분실)' : '검색어를 입력하세요';
   items=[]; lastMeta={}; setStatus(''); $('results').innerHTML='';
   if($('q').value.trim()&&selected.size) search();
 }
 $('tabSell').onclick=()=>setMode('sell');
 $('tabGroup').onclick=()=>setMode('group');
+$('tabComm').onclick=()=>setMode('comm');
 
 /* ---------- 제외어 ---------- */
 function openExc(){ $('excBack').classList.add('open'); $('excSheet').classList.add('open'); renderExc(); setTimeout(()=>$('excInput').focus(),150); }
@@ -415,7 +418,7 @@ async function search(){
       if(!items.length) showSpinner(`동네 ${codes.length}곳 검색 중... (${b+1}/${batches.length})`);
       else setStatus(`<span class="inlineSpin"></span>검색 중 (${b+1}/${batches.length}) · 현재 <b>${items.length}건</b>`);
       try{
-        const ep=(mode==='group')?'daangn-group':'daangn';
+        const ep=mode==='group'?'daangn-group':mode==='comm'?'daangn-community':'daangn';
         const r=await fetch(`${API}/${ep}?q=${encodeURIComponent(q)}&regions=${encodeURIComponent(batches[b].join(','))}`);
         const d=await r.json();
         if(!r.ok) throw new Error(d.error||('HTTP '+r.status));
@@ -463,6 +466,7 @@ function renderResults(){
 
 function card(it){
   if(mode==='group') return groupCard(it);
+  if(mode==='comm') return commCard(it);
   const st=it.status==='sold'?'<span class="badge">판매완료</span>':'';
   const price=it.price===0?'나눔':it.price!=null?it.price.toLocaleString()+'원':'';
   const ago=it.sortTime?(it.isBoosted?'끌올 ':'')+fmtAgo((Date.now()-it.sortTime)/1000):'';
@@ -483,6 +487,18 @@ function groupCard(it){
       <div class="title">${esc(it.title)}</div>
       ${it.desc?`<div class="meta" style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(it.desc)}</div>`:''}
       <div class="meta"><span>${esc(it.place||it.gu||guName(it.region))}</span>${mem?`<span class="members">${mem}</span>`:''}</div>
+    </div></a>`;
+}
+
+
+function commCard(it){
+  const ago=it.sortTime?fmtAgo((Date.now()-it.sortTime)/1000):'';
+  return `<a class="card" href="${it.url}" target="_blank" rel="noopener">
+    ${it.thumb?`<img class="thumb" src="${it.thumb}" loading="lazy" alt="">`:''}
+    <div class="info">
+      <div class="title">${esc(it.title)}</div>
+      ${it.desc?`<div class="meta" style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(it.desc)}</div>`:''}
+      <div class="meta"><span>${esc(it.gu||guName(it.region))}</span>${it.author?`<span>${esc(it.author)}</span>`:''}${ago?`<span class="ago">${ago}</span>`:''}</div>
     </div></a>`;
 }
 
