@@ -89,9 +89,23 @@ module.exports = async (req, res) => {
       naverCatalog(query.trim()),
       coupang(query.trim())
     ]);
+    const naver = nv.status === 'fulfilled' ? nv.value : [];
+    const coupang = cp.status === 'fulfilled' ? cp.value : [];
+    // 최저가 1개 자동 선정: 숫자 가격 최저 → 없으면 네이버 카탈로그 > 쿠팡
+    const num = s => { const m = (s || '').match(/([0-9]{1,3}(?:,[0-9]{3})+|[0-9]{4,})/); return m ? parseInt(m[1].replace(/,/g, ''), 10) : null; };
+    const pool = [
+      ...naver.filter(it => it.isCatalog).map(it => ({ ...it, src: '네이버 가격비교', n: num(it.price) })),
+      ...coupang.map(it => ({ ...it, src: '쿠팡', n: num(it.price) }))
+    ];
+    const priced = pool.filter(it => it.n && it.n >= 100);
+    let best = null;
+    if (priced.length) best = priced.sort((a, b) => a.n - b.n)[0];
+    else best = pool[0] || null;
+    if (best) best = { title: best.title, link: best.link, price: best.price, source: best.src };
+
     return res.status(200).json({
-      naver: nv.status === 'fulfilled' ? nv.value : [],
-      coupang: cp.status === 'fulfilled' ? cp.value : [],
+      best,
+      naver, coupang,
       errors: {
         naver: nv.status === 'rejected' ? nv.reason.message : null,
         coupang: cp.status === 'rejected' ? cp.reason.message : null
