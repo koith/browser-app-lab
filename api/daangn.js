@@ -6,8 +6,8 @@ export const config = { maxDuration: 60 };
 const UA =
   'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1';
 
-const CONCURRENCY = 6;
-const MAX_REGIONS = 80;
+const CONCURRENCY = 8;
+const MAX_REGIONS = 45;
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
