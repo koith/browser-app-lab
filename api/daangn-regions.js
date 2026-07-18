@@ -13,9 +13,30 @@ export default async function handler(req, res) {
 
   const seed = (req.query.seed || '').trim();
   const debug = req.query.debug === '1';
-  if (!seed && !req.query.probe && req.query.scan !== '1') return res.status(400).json({ error: 'seed 또는 probe 파라미터 필요' });
+  if (!seed && !req.query.probe && req.query.scan !== '1' && !req.query.path) return res.status(400).json({ error: 'seed 또는 probe 파라미터 필요' });
 
 
+
+
+  // 임의 경로 조회: ?path=/kr/regions/
+  if (req.query.path) {
+    const H = { 'User-Agent': UA, 'Accept-Language': 'ko-KR,ko;q=0.9' };
+    const target = 'https://www.daangn.com' + req.query.path;
+    const r = await fetch(target, { headers: H, redirect: 'follow' });
+    const h = await r.text();
+    const t = h.match(/<title>([^<]*)<\/title>/);
+    const hrefs = [...new Set([...h.matchAll(/href="([^"]+)"/g)].map(m => m[1])
+      .filter(u => /region|\/kr\//.test(u) && !/\.(css|js|png|jpg|ico|svg)/.test(u)))];
+    const codes = [...new Set([...h.matchAll(/[?&](?:amp;)?in=([^"&#\s]+)/g)]
+      .map(m => { try { return decodeURIComponent(m[1]); } catch { return ''; } })
+      .filter(c => /^[가-힣0-9]+-\d+$/.test(c)))];
+    return res.status(200).json({
+      target, status: r.status, finalUrl: r.url, bytes: h.length,
+      title: t ? t[1].slice(0, 100) : '',
+      codeCount: codes.length, codes: codes.slice(0, 80),
+      hrefCount: hrefs.length, hrefs: hrefs.slice(0, 80),
+    });
+  }
 
   // JS 번들 스캔: 지역 자동완성 API 경로 탐색  ?scan=1
   if (req.query.scan === '1') {
