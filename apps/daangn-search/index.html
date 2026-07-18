@@ -274,10 +274,11 @@ async function collect(){
   $('colStart').style.display='none'; $('colStop').style.display='';
   const found=new Map(regionsData.list.map(r=>[r.code,r]));
   const visited=new Set(), queue=['서초4동-366'], areaCount={};
-  const AREA_CAP=2, FETCH_MAX=400;
-  let fetches=0;
+  const AREA_CAP=3, FETCH_MAX=350, STALL_MAX=80;
+  let fetches=0, lastFoundAt=0;
   log('수집 시작 (서초4동에서 BFS)');
   while(colRunning && queue.length && fetches<FETCH_MAX){
+    if(fetches-lastFoundAt>STALL_MAX){ log('새 지역 발견이 없어 종료합니다.'); break; }
     const seed=queue.shift();
     if(visited.has(seed)) continue;
     visited.add(seed);
@@ -298,6 +299,7 @@ async function collect(){
       if(/(구|시|군)$/.test(name)){
         if(!found.has(code)){
           found.set(code,{code,name,province});
+          lastFoundAt=fetches;
           log(`+ ${province} ${name} (${found.size})`);
         }
       }else if(areaCount[areaKey]<=AREA_CAP && !visited.has(code)){
