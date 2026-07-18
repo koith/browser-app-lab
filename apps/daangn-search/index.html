@@ -53,7 +53,7 @@ header{position:sticky;top:0;z-index:20;background:var(--bg);
 .chip .caret{font-size:9px;opacity:.7}
 
 main{padding:12px 16px 0}
-body{overscroll-behavior-y:contain}
+html,body{overscroll-behavior-y:none}
 .ptr{position:fixed;left:0;right:0;top:0;display:flex;justify-content:center;pointer-events:none;z-index:15;
   opacity:0;transition:opacity .15s}
 .ptr.show{opacity:1}
@@ -169,7 +169,7 @@ body{overscroll-behavior-y:contain}
 <div class="sheetBack" id="excBack"></div>
 <div class="sheet" id="excSheet">
   <div class="sheetHead">
-    <h2>제외할 단어</h2>
+    <h2 id="excTitle">제외할 단어</h2>
     <span class="cnt" id="excCnt"></span>
   </div>
   <div class="sheetBody">
@@ -217,9 +217,14 @@ let regionsData=JSON.parse(localStorage.getItem(LS_REGIONS)||'null')||{list:[]};
 let selected=new Set(JSON.parse(localStorage.getItem(LS_SEL)||'[]'));
 let dongCache=JSON.parse(localStorage.getItem(LS_DONGS)||'{}');
 let items=[], codeMeta={}, sortMode='new', onSaleOnly=false, myPos=null, searching=false;
-let excluded=JSON.parse(localStorage.getItem(LS_EXC)||'[]');
+let excAll=(()=>{ try{
+  const raw=JSON.parse(localStorage.getItem(LS_EXC)||'null');
+  if(Array.isArray(raw)) return {sell:raw, group:[], comm:[]};   // 구버전 마이그레이션
+  return Object.assign({sell:[],group:[],comm:[]}, raw||{});
+}catch{ return {sell:[],group:[],comm:[]}; } })();
 let mode='sell';
 const modeState={sell:{q:'',items:[],meta:{}},group:{q:'',items:[],meta:{}},comm:{q:'',items:[],meta:{}}};
+const excList=()=>excAll[mode];
 
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -338,7 +343,7 @@ function setMode(m){
   const st=modeState[m];
   $('q').value=st.q||'';
   items=st.items||[]; lastMeta=st.meta||{};
-  toggleClear();
+  toggleClear(); updateExcChip();
   if(items.length){ renderResults(); updateCount(); }
   else { $('results').innerHTML=''; setStatus(''); }
 }
@@ -352,43 +357,48 @@ function closeExc(){ $('excBack').classList.remove('open'); $('excSheet').classL
 $('excChip').onclick=openExc;
 $('excBack').onclick=closeExc;
 $('excDone').onclick=closeExc;
-$('excClear').onclick=()=>{ excluded=[]; saveExc(); renderExc(); };
+$('excClear').onclick=()=>{ excAll[mode]=[]; saveExc(); renderExc(); };
 $('excAdd').onclick=addExc;
 $('excInput').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); addExc(); }});
 
 function addExc(){
   const raw=$('excInput').value.trim();
   if(!raw) return;
+  const cur=excList();
   for(const w of raw.split(/[,\s]+/).filter(Boolean)){
     const t=w.toLowerCase();
-    if(!excluded.includes(t)) excluded.push(t);
+    if(!cur.includes(t)) cur.push(t);
   }
   $('excInput').value='';
   saveExc(); renderExc();
 }
 function saveExc(){
-  localStorage.setItem(LS_EXC, JSON.stringify(excluded));
+  localStorage.setItem(LS_EXC, JSON.stringify(excAll));
   updateExcChip(); renderResults(); updateCount();
 }
 function updateExcChip(){
-  const n=excluded.length;
+  const n=excList().length;
   $('excChip').innerHTML=(n?`제외어 ${n}`:'제외어')+' <span class="caret">▼</span>';
   $('excChip').classList.toggle('on', n>0);
   const c=$('excCnt'); if(c) c.textContent=n?`${n}개`:'';
 }
 function renderExc(){
-  $('excTags').innerHTML=excluded.length
-    ? excluded.map((w,i)=>`<span class="tag">${esc(w)}<b data-i="${i}">×</b></span>`).join('')
+  const label={sell:'중고거래',group:'모임',comm:'동네생활'}[mode];
+  $('excTitle').textContent=`제외할 단어 · ${label}`;
+  const cur=excList();
+  $('excTags').innerHTML=cur.length
+    ? cur.map((w,i)=>`<span class="tag">${esc(w)}<b data-i="${i}">×</b></span>`).join('')
     : '<div class="hintTxt" style="margin:0">등록된 제외어가 없습니다.</div>';
   $('excTags').querySelectorAll('b[data-i]').forEach(b=>b.onclick=()=>{
-    excluded.splice(+b.dataset.i,1); saveExc(); renderExc();
+    excList().splice(+b.dataset.i,1); saveExc(); renderExc();
   });
   updateExcChip();
 }
 function passExc(it){
-  if(!excluded.length) return true;
-  const t=(it.title||'').toLowerCase();
-  return !excluded.some(w=>t.includes(w));
+  const cur=excList();
+  if(!cur.length) return true;
+  const t=((it.title||'')+' '+(it.desc||'')).toLowerCase();
+  return !cur.some(w=>t.includes(w));
 }
 
 /* ---------- 검색 ---------- */
@@ -414,7 +424,7 @@ function updateCount(){
   if(searching||!lastMeta.codes) return;
   const shown=items.filter(i=>(!onSaleOnly||i.status==='on_sale')&&passExc(i)).length;
   let msg=`<b>${shown}건</b>`;
-  if(onSaleOnly||excluded.length) msg+=` <span style="color:var(--sub)">/ 전체 ${items.length}</span>`;
+  if(onSaleOnly||excList().length) msg+=` <span style="color:var(--sub)">/ 전체 ${items.length}</span>`;
   msg+=` · 동네 ${lastMeta.codes}곳 · ${lastMeta.sec}초`;
   if(lastMeta.capped) msg+=` · <span class="err">${MAX_DONGS}곳까지만 검색</span>`;
   if(lastMeta.err) msg+=` · <span class="err">${lastMeta.err}건 조회 실패</span>`;
@@ -494,9 +504,11 @@ async function search(keepView){
   document.addEventListener('touchmove',e=>{
     if(!pulling||startY===null) return;
     dy=e.touches[0].clientY-startY;
-    if(dy>0&&window.scrollY<=0){ ptr.classList.toggle('show', dy>20); }
-    else pulling=false;
-  },{passive:true});
+    if(dy>0&&window.scrollY<=0){
+      if(e.cancelable) e.preventDefault();   // iOS 기본 새로고침 차단
+      ptr.classList.toggle('show', dy>20);
+    } else { pulling=false; ptr.classList.remove('show'); }
+  },{passive:false});
   document.addEventListener('touchend',()=>{
     if(!pulling){ ptr.classList.remove('show'); return; }
     pulling=false;
@@ -563,7 +575,7 @@ function commCard(it){
     <div class="info">
       <div class="title">${esc(it.title)}</div>
       ${it.desc?`<div class="meta" style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(it.desc)}</div>`:''}
-      <div class="meta"><span>${esc(it.gu||guName(it.region))}</span>${it.author?`<span>${esc(it.author)}</span>`:''}${ago?`<span class="ago">${ago}</span>`:''}</div>
+      <div class="meta"><span>${esc(it.gu||guName(it.region))}${it.dong?' · '+esc(it.dong):''}</span>${it.author?`<span>${esc(it.author)}</span>`:''}${ago?`<span class="ago">${ago}</span>`:''}</div>
     </div></a>`;
 }
 
