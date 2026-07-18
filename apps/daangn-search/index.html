@@ -45,19 +45,13 @@ main{padding:12px 14px}
 .meta{font-size:12px;color:var(--sub);margin-top:3px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
 .badge{font-size:11px;font-weight:700;padding:1.5px 6px;border-radius:6px;background:var(--line);color:var(--sub)}
 .badge.reserved{background:#FFF3E3;color:var(--warn)}
-.regionsPanel,.collector{background:var(--card);border:1px solid var(--line);border-radius:14px;
+.regionsPanel{background:var(--card);border:1px solid var(--line);border-radius:14px;
   padding:12px;margin-bottom:12px}
-.regionsPanel summary,.collector summary{font-size:14px;font-weight:700;cursor:pointer}
+.regionsPanel summary{font-size:14px;font-weight:700;cursor:pointer}
 .provTitle{font-size:13px;font-weight:700;margin:12px 0 6px;color:var(--sub)}
 .provTitle button{font-size:12px;font-weight:600;margin-left:8px;border:none;background:none;color:var(--accent)}
 .guWrap{display:flex;flex-wrap:wrap;gap:6px}
 .guWrap .chip{padding:6px 10px;font-size:12.5px}
-.collector p{font-size:13px;color:var(--sub);line-height:1.6;margin:8px 0}
-.collector button.act{font-size:14px;font-weight:700;padding:10px 16px;border:none;
-  border-radius:10px;background:var(--accent);color:#fff;margin-right:8px}
-.collector button.act.stop{background:var(--warn)}
-#colLog{font-size:12px;color:var(--sub);white-space:pre-wrap;max-height:140px;overflow-y:auto;
-  background:var(--bg);border-radius:8px;padding:8px;margin-top:8px}
 .empty{text-align:center;color:var(--sub);font-size:14px;padding:40px 0;line-height:1.7}
 </style>
 </head>
@@ -81,14 +75,7 @@ main{padding:12px 14px}
     <div id="regionsBody"></div>
   </details>
 
-  <details class="collector" id="collector">
-    <summary>지역 코드 수집 (최초 1회)</summary>
-    <p>당근 지역 페이지를 순회하며 서울·경기 구/시 코드를 수집합니다. 2~3분 소요, 완료 후 이 기기에 저장됩니다.</p>
-    <button class="act" id="colStart">수집 시작</button>
-    <button class="act stop" id="colStop" style="display:none">중지</button>
-    <button class="act" id="colCopy" style="background:var(--ink)">JSON 복사</button>
-    <div id="colLog"></div>
-  </details>
+
 
   <div class="status" id="statusBox"></div>
   <div id="results"></div>
@@ -194,7 +181,7 @@ $('q').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.target.blur(); sea
 async function search(){
   const q=$('q').value.trim();
   if(!q) return setStatus('검색어를 입력하세요.', true);
-  if(!selected.size) return setStatus('검색 지역을 먼저 선택하세요. (지역이 서초구뿐이면 아래 "지역 코드 수집"을 먼저 실행)', true);
+  if(!selected.size) return setStatus('검색 지역을 먼저 선택하세요.', true);
   $('goBtn').disabled=true;
   setStatus(`서울·경기 <b>${selected.size}개 지역</b>에서 "<b>${esc(q)}</b>" 검색 중...`);
   try{
@@ -258,68 +245,29 @@ function fmtAgo(s){
 function setStatus(html,isErr){ $('statusBox').innerHTML = isErr?`<span class="err">${html}</span>`:html; }
 function esc(s){ return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 
-// ---- 지역 코드 수집 (BFS, 최초 1회) ----
-let colRunning=false;
-$('colStart').onclick=collect;
-$('colStop').onclick=()=>{ colRunning=false; };
-$('colCopy').onclick=()=>{
-  navigator.clipboard.writeText(JSON.stringify(regionsData,null,1))
-    .then(()=>log('JSON 복사됨'));
-};
-function log(s){ const el=$('colLog'); el.textContent+=s+'\n'; el.scrollTop=el.scrollHeight; }
-
-async function collect(){
-  if(colRunning) return;
-  colRunning=true;
-  $('colStart').style.display='none'; $('colStop').style.display='';
-  const found=new Map(regionsData.list.map(r=>[r.code,r]));
-  const visited=new Set(), queue=['서초4동-366'], areaCount={};
-  const AREA_CAP=3, FETCH_MAX=350, STALL_MAX=80;
-  let fetches=0, lastFoundAt=0;
-  log('수집 시작 (서초4동에서 BFS)');
-  while(colRunning && queue.length && fetches<FETCH_MAX){
-    if(fetches-lastFoundAt>STALL_MAX){ log('새 지역 발견이 없어 종료합니다.'); break; }
-    const seed=queue.shift();
-    if(visited.has(seed)) continue;
-    visited.add(seed);
-    let d;
-    try{
-      const r=await fetch(`${API}/daangn-regions?seed=${encodeURIComponent(seed)}`);
-      d=await r.json();
-      if(!r.ok) throw new Error(d.error||('HTTP '+r.status));
-    }catch(e){ log(`실패 ${seed}: ${e.message}`); await sleep(800); continue; }
-    fetches++;
-    const toks=(d.pageRegion||'').split(/\s+/);
-    const province=toks[0]||'';
-    if(province!=='서울특별시' && province!=='경기도'){ await sleep(400); continue; }
-    const areaKey=toks.slice(0,-1).join(' ')||seed;
-    areaCount[areaKey]=(areaCount[areaKey]||0)+1;
-    for(const code of d.links){
-      const name=code.replace(/-\d+$/,'');
-      if(/(구|시|군)$/.test(name)){
-        if(!found.has(code)){
-          found.set(code,{code,name,province});
-          lastFoundAt=fetches;
-          log(`+ ${province} ${name} (${found.size})`);
-        }
-      }else if(areaCount[areaKey]<=AREA_CAP && !visited.has(code)){
-        queue.push(code);
-      }
-    }
-    if(fetches%20===0) log(`... ${fetches}페이지 탐색, ${found.size}개 발견, 대기열 ${queue.length}`);
-    await sleep(400);
-  }
-  regionsData={collectedAt:new Date().toISOString(), list:[...found.values()]};
-  localStorage.setItem(LS_REGIONS, JSON.stringify(regionsData));
-  log(`완료: ${fetches}페이지 탐색, 구/시/군 ${found.size}개 저장`);
-  colRunning=false;
-  $('colStart').style.display=''; $('colStop').style.display='none';
-  renderRegions();
+// ---- 지역 목록 자동 로딩 ----
+async function loadRegions(force){
+  if(!force && regionsData.list.length>5){ renderRegions(); refreshRegions(); return; }
+  setStatus('지역 목록 불러오는 중...');
+  await refreshRegions(true);
 }
-const sleep=(ms)=>new Promise(r=>setTimeout(r,ms));
+async function refreshRegions(showStatus){
+  try{
+    const r=await fetch(`${API}/daangn-regions`);
+    const d=await r.json();
+    if(!r.ok||!d.list||!d.list.length) throw new Error(d.error||'목록 없음');
+    regionsData={collectedAt:new Date().toISOString(), list:d.list};
+    localStorage.setItem(LS_REGIONS, JSON.stringify(regionsData));
+    renderRegions();
+    if(showStatus) setStatus(`지역 목록 준비 완료 · 서울 ${d.seoul}곳, 경기 ${d.gyeonggi}곳`);
+  }catch(e){
+    if(showStatus) setStatus('지역 목록 로딩 실패: '+esc(String(e.message||e)), true);
+  }
+}
 
 renderRegions();
 setSort('new');
+loadRegions();
 </script>
 </body>
 </html>
