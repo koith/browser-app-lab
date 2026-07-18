@@ -128,15 +128,17 @@ function parseListings(html, searchedRegion) {
       rest = rest.replace(agoM[0], '').trim();
     }
 
-    // "제목 + 가격(마지막 매칭) + 동네명 + ·" 패턴 분해
+    // "제목 + 가격 + 동네명 + ·" 분해: 가격/나눔의 '마지막' 출현을 앵커로 사용
     let title = rest;
     let price = null; // 원 단위 숫자, 나눔=0
     let dong = null;
-    const pm = rest.match(/^(.*)(?:([\d,]+)\s*원|(나눔))\s*([가-힣A-Za-z0-9]+)?\s*·?$/);
-    if (pm) {
-      title = (pm[1] || '').trim() || rest;
-      price = pm[3] ? 0 : parseInt(pm[2].replace(/,/g, ''), 10);
-      dong = pm[4] || null;
+    const priceRe = /([\d,]+)\s*원|나눔/g;
+    let pm, last = null;
+    while ((pm = priceRe.exec(rest)) !== null) last = pm;
+    if (last) {
+      title = rest.slice(0, last.index).trim() || rest;
+      price = last[1] ? parseInt(last[1].replace(/,/g, ''), 10) : 0;
+      dong = rest.slice(last.index + last[0].length).replace(/·\s*$/, '').trim() || null;
     }
 
     items.push({
