@@ -222,9 +222,12 @@ let bestReady = null, pendingOpen = false, bestSeq = 0;
 function showBest(){
   const b = bestReady;
   if (!b) return;
+  const dest = b.isCatalog
+    ? '네를 누르면 판매처별 가격비교 페이지로 이동합니다 (배송비 포함 비교 가능)'
+    : '네를 누르면 이 판매 페이지로 이동합니다';
   $('bestStrip').innerHTML = b.price
-    ? '이 상품 최저가 ' + b.price + '<small>' + (b.source || '') + ' · 네를 누르면 이 판매처로 이동합니다</small>'
-    : '가격 정보를 찾지 못했습니다<small>네를 누르면 위 판매 페이지로 이동합니다</small>';
+    ? '최저가 ' + b.price + '<small>' + (b.source || '') + ' · ' + dest + '</small>'
+    : '가격 정보를 찾지 못했습니다<small>' + dest + '</small>';
 }
 
 function prefetchBest(m){
