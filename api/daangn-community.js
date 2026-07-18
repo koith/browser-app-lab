@@ -61,6 +61,41 @@ function parse(html, region) {
     }
     break;
   }
+
+  // JSON-LD에 없는 본문/썸네일/동네를 앵커에서 보강
+  if (items.length) {
+    const extra = {};
+    for (const a of html.matchAll(/<a\b[^>]*href="(?:https?:\/\/www\.daangn\.com)?(\/kr\/community\/(?!s\/)[^"?#]+\/)"[^>]*>([\s\S]*?)<\/a>/g)) {
+      const url = 'https://www.daangn.com' + a[1];
+      const inner = a[2];
+      const img = inner.match(/<img[^>]*src="([^"]+)"/);
+      const parts = inner
+        .replace(/<(script|style)[\s\S]*?<\/\1>/g, '')
+        .split(/<\/(?:div|span|p|h\d|li)>/)
+        .map(t => dec(t.replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').trim())
+        .filter(Boolean);
+      if (!parts.length) continue;
+      const title = parts[0];
+      const body = parts.slice(1).filter(t => t !== title && t.length > 8
+        && !/^\d+$/.test(t) && !/(분|시간|일|개월|년)\s*전$/.test(t)
+        && !/^(댓글|공감|관심|조회)/.test(t));
+      const dong = parts.find(t => /(동|읍|면|가)$/.test(t) && t.length <= 10) || null;
+      const prev = extra[url] || {};
+      extra[url] = {
+        desc: prev.desc || (body.sort((x, y) => y.length - x.length)[0] || null),
+        thumb: prev.thumb || (img ? dec(img[1]) : null),
+        dong: prev.dong || dong,
+      };
+    }
+    for (const it of items) {
+      const e = extra[it.url];
+      if (!e) continue;
+      if (!it.desc && e.desc) it.desc = e.desc.slice(0, 160);
+      if (!it.thumb && e.thumb) it.thumb = e.thumb;
+      if (e.dong) it.dong = e.dong;
+    }
+  }
+
   if (!items.length) {
     for (const a of html.matchAll(/<a\b[^>]*href="(?:https?:\/\/www\.daangn\.com)?(\/kr\/community\/(?!s\/)[^"?#]+\/)"[^>]*>([\s\S]*?)<\/a>/g)) {
       const parts = a[2].split(/<\/(?:div|span|p|h\d)>/).map(t => dec(t.replace(/<[^>]+>/g, ' ')).replace(/\s+/g, ' ').trim()).filter(Boolean);
