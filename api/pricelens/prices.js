@@ -97,14 +97,28 @@ async function shoppingBest(q) {
   return items;
 }
 
-async function fallbackPool(q) {
+// 네이버 가격비교 카탈로그 탐색 + 스니펫에서 최저가 파싱
+async function catalogFind(q) {
   const j = await serper('search', q + ' site:search.shopping.naver.com', 6000);
-  const cat = (j.organic || []).find(o => /search\.shopping\.naver\.com\/catalog\//.test(o.link || '') && acceptable(o.title || '', q));
-  if (cat) return { title: cat.title, link: cat.link, price: null, source: '네이버 가격비교' };
+  const hit = (j.organic || []).find(o =>
+    /search\.shopping\.naver\.com\/catalog\//.test(o.link || '') && acceptable(o.title || '', q));
+  if (!hit) return null;
+  const snip = (hit.snippet || '') + ' ' + (hit.title || '');
+  const m = snip.replace(/[,\s]/g, '').match(/최저(?:가)?(\d{3,})원/) || snip.replace(/[,\s]/g, '').match(/(\d{4,})원/);
+  const n = m ? parseInt(m[1], 10) : null;
+  return {
+    title: (hit.title || '').replace(/\s*[:|-]\s*네이버.*$/, '').trim(),
+    link: hit.link,
+    source: '네이버 가격비교',
+    price: n ? n.toLocaleString('ko-KR') + '원~ (판매처별)' : null,
+    isCatalog: true
+  };
+}
+
+async function coupangFind(q) {
   const c = await serper('search', q + ' site:coupang.com', 6000);
   const cp = (c.organic || []).find(o => /coupang\.com\/vp\/products/.test(o.link || '') && acceptable(o.title || '', q));
-  if (cp) return { title: cp.title, link: cp.link, price: null, source: '쿠팡' };
-  return null;
+  return cp ? { title: cp.title, link: cp.link, price: null, source: '쿠팡' } : null;
 }
 
 module.exports = async (req, res) => {
@@ -118,24 +132,33 @@ module.exports = async (req, res) => {
   const q = sanitize(query);
 
   try {
-    let best = null, alts = [];
-    try {
-      const items = await shoppingBest(q);
+    let best = null, alts = [], catalog = null, shopping = null;
+
+    const [cat, shop] = await Promise.allSettled([catalogFind(q), shoppingBest(q)]);
+    if (cat.status === 'fulfilled') catalog = cat.value;
+    if (shop.status === 'fulfilled' && shop.value.length) {
+      const items = shop.value;
       const fmt = it => {
         const base = it.n.toLocaleString('ko-KR') + '원';
         if (it.ship === 0) return base + ' · 무료배송';
         if (it.ship) return base + ' + 배송 ' + it.ship.toLocaleString('ko-KR') + '원';
         return base + ' · 배송비 별도';
       };
-      if (items.length) {
-        const b = items[0];
-        best = { title: b.title, link: b.link, source: b.source, price: fmt(b), total: b.total };
-        alts = items.slice(1, 5).map(it => ({ title: it.title, link: it.link, source: it.source, price: fmt(it), total: it.total }));
-      }
-    } catch (e) { /* shopping 실패 시 폴백 */ }
+      const b = items[0];
+      shopping = { title: b.title, link: b.link, source: b.source, price: fmt(b), total: b.total };
+      alts = items.slice(1, 5).map(it => ({ title: it.title, link: it.link, source: it.source, price: fmt(it), total: it.total }));
+    }
 
-    if (!best) best = await fallbackPool(q);
-    return res.status(200).json({ best, alts, query: q });
+    if (catalog) {
+      // 카탈로그가 있으면 그곳으로: 배송비 포함 비교와 판매처 선택이 페이지 안에 있음
+      best = { ...catalog };
+      // 카탈로그 스니펫에 가격이 없으면 Shopping 최저가를 참고치로 표시
+      if (!best.price && shopping) best.price = shopping.price + ' (참고)';
+    } else {
+      best = shopping || await coupangFind(q);
+    }
+
+    return res.status(200).json({ best, alts, catalog, shopping, query: q });
   } catch (e) {
     return res.status(500).json({ error: e.message, step: 'search' });
   }
