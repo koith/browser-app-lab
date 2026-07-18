@@ -30,6 +30,12 @@ header{position:sticky;top:0;z-index:20;background:var(--bg);
 .searchRow button:active{background:var(--carrot-dark)}
 .searchRow button:disabled{opacity:.45}
 
+.tabs{display:flex;gap:22px;padding:0 16px;border-bottom:0}
+.tab{position:relative;font-size:15px;font-weight:700;color:var(--sub);background:none;border:none;
+  padding:2px 0 10px;cursor:pointer}
+.tab.on{color:var(--ink)}
+.tab.on::after{content:'';position:absolute;left:0;right:0;bottom:0;height:2.5px;background:var(--carrot);border-radius:2px}
+.members{color:var(--sub)}
 .chipbar{display:flex;gap:8px;overflow-x:auto;padding:0 16px 10px;scrollbar-width:none}
 .chipbar::-webkit-scrollbar{display:none}
 .chip{flex:none;display:flex;align-items:center;gap:4px;white-space:nowrap;
@@ -105,6 +111,10 @@ main{padding:12px 16px 0}
 <body>
 <header>
   <div class="hrow"><div class="logo">당근 통합검색</div></div>
+  <div class="tabs">
+    <button class="tab on" id="tabSell">중고거래</button>
+    <button class="tab" id="tabGroup">모임</button>
+  </div>
   <div class="searchRow">
     <input id="q" type="search" placeholder="검색어를 입력하세요" enterkeyhint="search" autocomplete="off">
     <button id="goBtn">검색</button>
@@ -189,6 +199,7 @@ let selected=new Set(JSON.parse(localStorage.getItem(LS_SEL)||'[]'));
 let dongCache=JSON.parse(localStorage.getItem(LS_DONGS)||'{}');
 let items=[], codeMeta={}, sortMode='new', onSaleOnly=false, myPos=null, searching=false;
 let excluded=JSON.parse(localStorage.getItem(LS_EXC)||'[]');
+let mode='sell';
 
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -281,6 +292,24 @@ $('onSaleChip').onclick=()=>{
   renderResults(); updateCount();
 };
 
+
+
+/* ---------- 탭 ---------- */
+function setMode(m){
+  if(mode===m) return;
+  mode=m;
+  $('tabSell').classList.toggle('on', m==='sell');
+  $('tabGroup').classList.toggle('on', m==='group');
+  const groupHide=(m==='group');
+  ['sortPrice','onSaleChip'].forEach(id=>$(id).style.display=groupHide?'none':'');
+  $('sortNew').style.display=groupHide?'none':'';
+  $('sortDist').style.display=groupHide?'none':'';
+  $('q').placeholder = groupHide?'모임 검색 (예: 등산, 독서)':'검색어를 입력하세요';
+  items=[]; lastMeta={}; setStatus(''); $('results').innerHTML='';
+  if($('q').value.trim()&&selected.size) search();
+}
+$('tabSell').onclick=()=>setMode('sell');
+$('tabGroup').onclick=()=>setMode('group');
 
 /* ---------- 제외어 ---------- */
 function openExc(){ $('excBack').classList.add('open'); $('excSheet').classList.add('open'); renderExc(); setTimeout(()=>$('excInput').focus(),150); }
@@ -386,7 +415,8 @@ async function search(){
       if(!items.length) showSpinner(`동네 ${codes.length}곳 검색 중... (${b+1}/${batches.length})`);
       else setStatus(`<span class="inlineSpin"></span>검색 중 (${b+1}/${batches.length}) · 현재 <b>${items.length}건</b>`);
       try{
-        const r=await fetch(`${API}/daangn?q=${encodeURIComponent(q)}&regions=${encodeURIComponent(batches[b].join(','))}`);
+        const ep=(mode==='group')?'daangn-group':'daangn';
+        const r=await fetch(`${API}/${ep}?q=${encodeURIComponent(q)}&regions=${encodeURIComponent(batches[b].join(','))}`);
         const d=await r.json();
         if(!r.ok) throw new Error(d.error||('HTTP '+r.status));
         errCount+=(d.errors||[]).length;
@@ -425,12 +455,14 @@ function renderResults(){
     const ga=(a.gu||'').split(' ').pop(), gb=(b.gu||'').split(' ').pop();
     return (COORDS[ga]?dist(myPos,COORDS[ga]):Infinity)-(COORDS[gb]?dist(myPos,COORDS[gb]):Infinity)||a._i-b._i;
   });
+  else if(mode==='group') arr.sort((a,b)=>(b.members??-1)-(a.members??-1)||a._i-b._i);
   else arr.sort((a,b)=>(b.sortTime??0)-(a.sortTime??0)||a._i-b._i);
   if(arr.length) $('results').innerHTML=arr.map(card).join('');
   else if(!searching&&items.length) $('results').innerHTML='<div class="empty">조건에 맞는 결과가 없습니다.</div>';
 }
 
 function card(it){
+  if(mode==='group') return groupCard(it);
   const st=it.status==='sold'?'<span class="badge">판매완료</span>':'';
   const price=it.price===0?'나눔':it.price!=null?it.price.toLocaleString()+'원':'';
   const ago=it.sortTime?(it.isBoosted?'끌올 ':'')+fmtAgo((Date.now()-it.sortTime)/1000):'';
@@ -442,6 +474,18 @@ function card(it){
       <div class="meta">${st}<span>${esc(it.gu||guName(it.region))}${it.dong?' · '+esc(it.dong):''}</span>${ago?`<span class="ago">${ago}</span>`:''}</div>
     </div></a>`;
 }
+
+function groupCard(it){
+  const mem=it.members!=null?`멤버 ${it.members.toLocaleString()}명`:'';
+  return `<a class="card" href="${it.url}" target="_blank" rel="noopener">
+    ${it.thumb?`<img class="thumb" src="${it.thumb}" loading="lazy" alt="">`:'<div class="thumb"></div>'}
+    <div class="info">
+      <div class="title">${esc(it.title)}</div>
+      ${it.desc?`<div class="meta" style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(it.desc)}</div>`:''}
+      <div class="meta"><span>${esc(it.place||it.gu||guName(it.region))}</span>${mem?`<span class="members">${mem}</span>`:''}</div>
+    </div></a>`;
+}
+
 function fmtAgo(s){
   if(s<60) return '방금 전';
   if(s<3600) return Math.floor(s/60)+'분 전';
