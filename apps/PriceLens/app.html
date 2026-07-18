@@ -56,6 +56,11 @@
   }
   .match-title{font-size:17px; font-weight:700; line-height:1.4; margin-bottom:4px}
   .match-src{font-size:13px; color:var(--muted); margin-bottom:18px}
+  .best-strip{
+    background:var(--pine-soft); color:var(--pine); border-radius:14px;
+    padding:12px 14px; font-size:15px; font-weight:700; margin-bottom:16px;
+  }
+  .best-strip small{display:block; font-weight:600; font-size:12px; color:var(--muted); margin-top:3px}
   .ask{font-size:21px; font-weight:800; margin-bottom:16px}
   .yn{display:flex; gap:12px}
   .yn button{flex:1; border-radius:20px; padding:24px 10px; font-size:23px; font-weight:800}
@@ -99,6 +104,7 @@
   <img class="match-img" id="matchImg" alt="찾은 상품 이미지">
   <div class="match-title" id="matchTitle"></div>
   <div class="match-src" id="matchSrc"></div>
+  <div class="best-strip" id="bestStrip">최저가 확인 중…</div>
   <div class="ask">이 상품이 맞나요?</div>
   <div class="yn">
     <button class="btn-no" id="btnNo">아니오</button>
@@ -213,9 +219,18 @@ $('btnYes').onclick = () => {
 
 let bestReady = null, pendingOpen = false, bestSeq = 0;
 
+function showBest(){
+  const b = bestReady;
+  if (!b) return;
+  $('bestStrip').innerHTML = b.price
+    ? '이 상품 최저가 ' + b.price + '<small>' + (b.source || '') + ' · 네를 누르면 이 판매처로 이동합니다</small>'
+    : '가격 정보를 찾지 못했습니다<small>네를 누르면 위 판매 페이지로 이동합니다</small>';
+}
+
 function prefetchBest(m){
   bestReady = null; pendingOpen = false;
   $('btnYes').textContent = '네'; $('btnYes').disabled = false;
+  $('bestStrip').innerHTML = '최저가 확인 중…';
   const seq = ++bestSeq;
   fetch(API + '/prices', {
     method: 'POST', headers: {'Content-Type': 'application/json'},
@@ -225,11 +240,13 @@ function prefetchBest(m){
   .then(d => {
     if (seq !== bestSeq) return; // 다른 매치로 넘어갔으면 무시
     bestReady = (d && d.best) ? d.best : { title: m.title, link: m.link, price: null, source: m.source };
-    if (pendingOpen) { $('btnYes').textContent = '최저가로 이동' + (bestReady.price ? ' · ' + bestReady.price : ''); $('btnYes').disabled = false; }
+    showBest();
+    if (pendingOpen) { $('btnYes').textContent = '최저가로 이동'; $('btnYes').disabled = false; }
   })
   .catch(() => {
     if (seq !== bestSeq) return;
     bestReady = { title: m.title, link: m.link, price: null, source: m.source }; // 실패 시 찾은 페이지로
+    showBest();
     if (pendingOpen) { $('btnYes').textContent = '판매 페이지로 이동'; $('btnYes').disabled = false; }
   });
 }
