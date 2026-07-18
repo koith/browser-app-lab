@@ -13,7 +13,27 @@ export default async function handler(req, res) {
 
   const seed = (req.query.seed || '').trim();
   const debug = req.query.debug === '1';
-  if (!seed) return res.status(400).json({ error: 'seed 파라미터 필요 (예: 서초4동-366)' });
+  if (!seed && !req.query.probe) return res.status(400).json({ error: 'seed 또는 probe 파라미터 필요' });
+
+
+  // ID 단독 조회 가능 여부 프로브: ?probe=362,363,364
+  const probe = (req.query.probe || '').trim();
+  if (probe) {
+    const ids = probe.split(',').map(x=>x.trim()).filter(Boolean).slice(0,20);
+    const out = [];
+    for (const id of ids) {
+      for (const form of ['x-'+id, id]) {
+        try {
+          const r = await fetch('https://www.daangn.com/kr/buy-sell/?in=' + encodeURIComponent(form), {
+            headers: { 'User-Agent': UA, 'Accept-Language': 'ko-KR,ko;q=0.9' }, redirect: 'follow' });
+          const h = await r.text();
+          const t = h.match(/<title>([^<]*)<\/title>/);
+          out.push({ id, form, status: r.status, finalUrl: r.url, title: t ? t[1].slice(0,80) : '' });
+        } catch (e) { out.push({ id, form, error: String(e.message||e).slice(0,80) }); }
+      }
+    }
+    return res.status(200).json({ probe: out });
+  }
 
   const inQ = encodeURIComponent(seed);
   const urls = [
