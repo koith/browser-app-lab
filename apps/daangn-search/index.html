@@ -88,6 +88,17 @@ main{padding:12px 16px 0}
 .sheetFoot button{flex:1;font-size:15px;font-weight:700;padding:13px;border-radius:10px;border:none}
 .btnClear{background:var(--panel);color:#4D5159;flex:0 0 88px !important}
 .btnDone{background:var(--carrot);color:#fff}
+.tagInputRow{display:flex;gap:8px;margin:14px 0 12px}
+.tagInputRow input{flex:1;font-size:16px;padding:11px 13px;border:none;border-radius:10px;
+  background:var(--panel);color:var(--ink);outline:none}
+.tagInputRow input:focus{box-shadow:0 0 0 2px var(--carrot) inset}
+.tagInputRow button{font-size:14px;font-weight:700;padding:0 16px;border:none;border-radius:10px;
+  background:var(--carrot);color:#fff}
+.tags{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:8px}
+.tag{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;
+  padding:7px 10px 7px 12px;border-radius:999px;background:var(--carrot-soft);color:var(--carrot-dark)}
+.tag b{font-weight:800;font-size:15px;line-height:1;opacity:.7;padding:0 2px}
+.hintTxt{font-size:12.5px;color:var(--sub);line-height:1.6;margin:6px 0 4px}
 .sheetLoad{padding:40px 0;text-align:center;color:var(--sub);font-size:13.5px}
 </style>
 </head>
@@ -104,6 +115,7 @@ main{padding:12px 16px 0}
     <button class="chip" id="sortPrice">낮은가격순</button>
     <button class="chip" id="sortDist">가까운순</button>
     <button class="chip" id="onSaleChip">거래가능만</button>
+    <button class="chip" id="excChip">제외어 <span class="caret">▼</span></button>
   </div>
 </header>
 
@@ -125,9 +137,29 @@ main{padding:12px 16px 0}
   </div>
 </div>
 
+<div class="sheetBack" id="excBack"></div>
+<div class="sheet" id="excSheet">
+  <div class="sheetHead">
+    <h2>제외할 단어</h2>
+    <span class="cnt" id="excCnt"></span>
+  </div>
+  <div class="sheetBody">
+    <div class="hintTxt">입력한 단어가 제목에 포함된 매물은 결과에서 숨겨집니다. 여러 개 등록할 수 있어요.</div>
+    <div class="tagInputRow">
+      <input id="excInput" type="text" placeholder="예: 부품, 고장, 삽니다" enterkeyhint="done" autocomplete="off">
+      <button id="excAdd">추가</button>
+    </div>
+    <div class="tags" id="excTags"></div>
+  </div>
+  <div class="sheetFoot">
+    <button class="btnClear" id="excClear">전체 삭제</button>
+    <button class="btnDone" id="excDone">완료</button>
+  </div>
+</div>
+
 <script>
 const API='https://browser-app-lab.vercel.app/api';
-const LS_REGIONS='dgn_regions_v1', LS_SEL='dgn_selected_v1', LS_DONGS='dgn_dongs_v1';
+const LS_REGIONS='dgn_regions_v1', LS_SEL='dgn_selected_v1', LS_DONGS='dgn_dongs_v1', LS_EXC='dgn_exclude_v1';
 const MAX_DONGS=200, BATCH=45;
 
 const COORDS={
@@ -156,6 +188,7 @@ let regionsData=JSON.parse(localStorage.getItem(LS_REGIONS)||'null')||{list:[]};
 let selected=new Set(JSON.parse(localStorage.getItem(LS_SEL)||'[]'));
 let dongCache=JSON.parse(localStorage.getItem(LS_DONGS)||'{}');
 let items=[], codeMeta={}, sortMode='new', onSaleOnly=false, myPos=null, searching=false;
+let excluded=JSON.parse(localStorage.getItem(LS_EXC)||'[]');
 
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -248,6 +281,52 @@ $('onSaleChip').onclick=()=>{
   renderResults(); updateCount();
 };
 
+
+/* ---------- 제외어 ---------- */
+function openExc(){ $('excBack').classList.add('open'); $('excSheet').classList.add('open'); renderExc(); setTimeout(()=>$('excInput').focus(),150); }
+function closeExc(){ $('excBack').classList.remove('open'); $('excSheet').classList.remove('open'); }
+$('excChip').onclick=openExc;
+$('excBack').onclick=closeExc;
+$('excDone').onclick=closeExc;
+$('excClear').onclick=()=>{ excluded=[]; saveExc(); renderExc(); };
+$('excAdd').onclick=addExc;
+$('excInput').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.preventDefault(); addExc(); }});
+
+function addExc(){
+  const raw=$('excInput').value.trim();
+  if(!raw) return;
+  for(const w of raw.split(/[,\s]+/).filter(Boolean)){
+    const t=w.toLowerCase();
+    if(!excluded.includes(t)) excluded.push(t);
+  }
+  $('excInput').value='';
+  saveExc(); renderExc();
+}
+function saveExc(){
+  localStorage.setItem(LS_EXC, JSON.stringify(excluded));
+  updateExcChip(); renderResults(); updateCount();
+}
+function updateExcChip(){
+  const n=excluded.length;
+  $('excChip').innerHTML=(n?`제외어 ${n}`:'제외어')+' <span class="caret">▼</span>';
+  $('excChip').classList.toggle('on', n>0);
+  const c=$('excCnt'); if(c) c.textContent=n?`${n}개`:'';
+}
+function renderExc(){
+  $('excTags').innerHTML=excluded.length
+    ? excluded.map((w,i)=>`<span class="tag">${esc(w)}<b data-i="${i}">×</b></span>`).join('')
+    : '<div class="hintTxt" style="margin:0">등록된 제외어가 없습니다.</div>';
+  $('excTags').querySelectorAll('b[data-i]').forEach(b=>b.onclick=()=>{
+    excluded.splice(+b.dataset.i,1); saveExc(); renderExc();
+  });
+  updateExcChip();
+}
+function passExc(it){
+  if(!excluded.length) return true;
+  const t=(it.title||'').toLowerCase();
+  return !excluded.some(w=>t.includes(w));
+}
+
 /* ---------- 검색 ---------- */
 $('goBtn').onclick=search;
 $('q').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.target.blur(); search(); }});
@@ -269,9 +348,9 @@ function showSpinner(msg){
 let lastMeta={};
 function updateCount(){
   if(searching||!lastMeta.codes) return;
-  const shown=onSaleOnly?items.filter(i=>i.status==='on_sale').length:items.length;
+  const shown=items.filter(i=>(!onSaleOnly||i.status==='on_sale')&&passExc(i)).length;
   let msg=`<b>${shown}건</b>`;
-  if(onSaleOnly) msg+=` <span style="color:var(--sub)">/ 전체 ${items.length}</span>`;
+  if(onSaleOnly||excluded.length) msg+=` <span style="color:var(--sub)">/ 전체 ${items.length}</span>`;
   msg+=` · 동네 ${lastMeta.codes}곳 · ${lastMeta.sec}초`;
   if(lastMeta.capped) msg+=` · <span class="err">${MAX_DONGS}곳까지만 검색</span>`;
   if(lastMeta.err) msg+=` · <span class="err">${lastMeta.err}건 조회 실패</span>`;
@@ -340,6 +419,7 @@ function dist(a,b){ const dx=(a[1]-b[1])*88, dy=(a[0]-b[0])*111; return Math.sqr
 function renderResults(){
   let arr=[...items];
   if(onSaleOnly) arr=arr.filter(i=>i.status==='on_sale');
+  arr=arr.filter(passExc);
   if(sortMode==='price') arr.sort((a,b)=>(a.price??Infinity)-(b.price??Infinity)||a._i-b._i);
   else if(sortMode==='dist'&&myPos) arr.sort((a,b)=>{
     const ga=(a.gu||'').split(' ').pop(), gb=(b.gu||'').split(' ').pop();
@@ -373,6 +453,7 @@ function fmtAgo(s){
 function setStatus(html,isErr){ $('statusBox').innerHTML=html?(isErr?`<span class="err">${html}</span>`:html):''; }
 
 updateRegionChip();
+updateExcChip();
 if(regionsData.list.length) renderSheet();
 loadRegions();
 </script>
