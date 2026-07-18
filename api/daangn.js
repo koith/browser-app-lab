@@ -56,7 +56,7 @@ export default async function handler(req, res) {
 
 async function fetchRegion(q, region, onSale) {
   const url = 'https://www.daangn.com/kr/buy-sell/?in=' + encodeURIComponent(region) +
-    '&search=' + encodeURIComponent(q) + (onSale ? '&only_on_sale=true' : '');
+    '&search=' + encodeURIComponent(q) + '';
   const r = await fetch(url, {
     headers: { 'User-Agent': UA, 'Accept-Language': 'ko-KR,ko;q=0.9', Accept: 'text/html' },
     redirect: 'follow',
