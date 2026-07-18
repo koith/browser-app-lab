@@ -13,8 +13,41 @@ export default async function handler(req, res) {
 
   const seed = (req.query.seed || '').trim();
   const debug = req.query.debug === '1';
-  if (!seed && !req.query.probe) return res.status(400).json({ error: 'seed 또는 probe 파라미터 필요' });
+  if (!seed && !req.query.probe && req.query.scan !== '1') return res.status(400).json({ error: 'seed 또는 probe 파라미터 필요' });
 
+
+
+  // JS 번들 스캔: 지역 자동완성 API 경로 탐색  ?scan=1
+  if (req.query.scan === '1') {
+    const H = { 'User-Agent': UA, 'Accept-Language': 'ko-KR,ko;q=0.9' };
+    const rootUrl = 'https://www.daangn.com/kr/buy-sell/?in=' + encodeURIComponent('서초4동-366');
+    const rootHtml = await (await fetch(rootUrl, { headers: H })).text();
+
+    const scripts = [...new Set([...rootHtml.matchAll(/(?:src|href)="([^"]+\.js)"/g)].map(m => m[1]))]
+      .map(u => u.startsWith('http') ? u : 'https://www.daangn.com' + u);
+
+    // 인라인 데이터에서 region 관련 경로 추출
+    const hits = new Set();
+    const grep = (txt) => {
+      for (const m of txt.matchAll(/["'`](\/[a-z0-9_\-\/\.]*(?:region|area|nearby|location|dong)[a-z0-9_\-\/\.]*)["'`]/gi)) hits.add(m[1]);
+      for (const m of txt.matchAll(/["'`](https?:\/\/[a-z0-9\.\-]*daangn[a-z0-9\.\-]*\/[^"'`\s]{0,80})["'`]/gi)) {
+        if (/region|area|nearby|location/i.test(m[1])) hits.add(m[1]);
+      }
+    };
+    grep(rootHtml);
+
+    const scanned = [];
+    for (const su of scripts.slice(0, 12)) {
+      try {
+        const r = await fetch(su, { headers: H });
+        if (!r.ok) { scanned.push(su + ' HTTP' + r.status); continue; }
+        const t = await r.text();
+        grep(t);
+        scanned.push(su + ' ok(' + t.length + ')');
+      } catch (e) { scanned.push(su + ' ERR'); }
+    }
+    return res.status(200).json({ scriptCount: scripts.length, scanned, hits: [...hits].slice(0, 120) });
+  }
 
   // ID 단독 조회 가능 여부 프로브: ?probe=362,363,364
   const probe = (req.query.probe || '').trim();
