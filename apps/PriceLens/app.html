@@ -69,19 +69,6 @@
   #retake p{color:var(--muted); font-size:14.5px; margin-bottom:24px}
   .err{color:#C22F12; font-size:14px; margin-top:12px}
 
-  .shops-sub{font-size:13px; color:var(--muted); text-align:center; margin-bottom:14px}
-  .shop-card{
-    display:block; width:100%; text-align:left; background:#fff; border:1.5px solid var(--line);
-    border-radius:var(--radius); padding:16px; margin-bottom:10px; text-decoration:none; color:var(--ink);
-  }
-  .shop-card.hot{border-color:var(--tag)}
-  .shop-card .t{font-size:15px; font-weight:700; line-height:1.4; margin-bottom:6px}
-  .shop-card .meta{display:flex; align-items:baseline; gap:8px; flex-wrap:wrap}
-  .shop-card .price{font-size:18px; font-weight:800; color:var(--pine)}
-  .shop-card .src{font-size:12px; color:var(--muted)}
-  .badge{font-size:11px; font-weight:700; padding:3px 8px; border-radius:6px}
-  .badge.cat{background:var(--pine-soft); color:var(--pine)}
-  .badge.cp{background:#FDEBE1; color:var(--tag)}
   footer{margin-top:34px; font-size:11px; color:var(--muted); text-align:center; line-height:1.6}
 </style>
 </head>
@@ -127,8 +114,6 @@
   <button class="btn-pick" id="btnRepick">🖼️ 사진 선택</button>
 </div>
 
-<div class="screen" id="shops">
-  <div class="ask" style="margin-top:8px">어디서 살까요?</div>
   <p class="shops-sub" id="shopsSub"></p>
   <div id="shopList"></div>
   <button class="btn-pick" id="btnShopsBack" style="margin-top:14px">← 다른 상품 다시 확인</button>
@@ -204,6 +189,7 @@ function render(){
   $('matchSrc').textContent = m.source || '';
   $('retryHint').textContent = matches.length > 1 ? '아니오를 누르면 다음으로 유사한 상품을 보여드립니다. (' + (idx+1) + '/' + matches.length + ')' : '';
   show('result');
+  prefetchBest(m); // 확인 화면 뜨는 동안 최저가 미리 조회
 }
 
 function next(){
@@ -216,41 +202,42 @@ $('btnShoot').onclick = () => pickFile($('camInput'));
 $('btnPick').onclick = () => pickFile($('fileInput'));
 $('btnReshoot').onclick = () => pickFile($('camInput'));
 $('btnRepick').onclick = () => pickFile($('fileInput'));
-$('btnYes').onclick = () => gotoShops(matches[idx]);
-$('btnShopsBack').onclick = () => show('result');
-
-function shopCard(it, cls, badge){
-  const priceHtml = it.price ? '<span class="price">' + it.price + '</span>' : '<span class="src">가격은 페이지에서 확인</span>';
-  return '<a class="shop-card ' + cls + '" href="' + it.link + '" target="_blank" rel="noopener">' +
-    '<div class="t">' + it.title + '</div>' +
-    '<div class="meta">' + priceHtml + (badge || '') + (it.source ? '<span class="src">' + it.source + '</span>' : '') + '</div></a>';
-}
-
-async function gotoShops(m){
-  show('shops');
-  $('shopsSub').textContent = '가격을 모으는 중…';
-  // 방금 찾은 페이지는 항상 첫 선택지로
-  $('shopList').innerHTML = shopCard({ title: m.title, link: m.link, price: null, source: m.source }, 'hot', '<span class="badge cp">방금 찾은 페이지</span>');
-  try {
-    const res = await fetch(API + '/prices', {
-      method: 'POST', headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ query: m.title })
-    });
-    const data = await res.json();
-    let html = '';
-    (data.naver || []).forEach(it => {
-      html += shopCard(it, '', it.isCatalog ? '<span class="badge cat">네이버 가격비교</span>' : '');
-    });
-    (data.coupang || []).forEach(it => {
-      if (it.link !== m.link) html += shopCard(it, '', '<span class="badge cp">COUPANG</span>');
-    });
-    $('shopList').insertAdjacentHTML('beforeend', html);
-    $('shopsSub').textContent = '같은 상품이 맞는지 제목을 확인하고 선택하세요. 쇼핑 앱이 홈으로 열리면 돌아와서 한 번 더 누르면 됩니다.';
-  } catch (e) {
-    $('shopsSub').textContent = '가격 수집 실패 — 위 페이지로 바로 이동할 수 있습니다.';
+$('btnYes').onclick = () => {
+  const b = bestReady;
+  if (b) {
+    window.open(b.link, '_blank');
+    $('retryHint').textContent = (b.price ? '최저가 ' + b.price + ' · ' + b.source : b.source || '') +
+      ' — 쇼핑 앱이 홈으로 열렸다면 돌아와서 네를 한 번 더 누르세요.';
+  } else {
+    // 아직 조회 중: 완료되면 버튼이 "최저가로 이동"으로 바뀜 (사파리 팝업 차단 때문에 자동 열기 불가)
+    $('btnYes').textContent = '최저가 찾는 중…';
+    $('btnYes').disabled = true;
+    pendingOpen = true;
   }
+};
+
+let bestReady = null, pendingOpen = false, bestSeq = 0;
+
+function prefetchBest(m){
+  bestReady = null; pendingOpen = false;
+  $('btnYes').textContent = '네'; $('btnYes').disabled = false;
+  const seq = ++bestSeq;
+  fetch(API + '/prices', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ query: m.title })
+  })
+  .then(r => r.json())
+  .then(d => {
+    if (seq !== bestSeq) return; // 다른 매치로 넘어갔으면 무시
+    bestReady = (d && d.best) ? d.best : { title: m.title, link: m.link, price: null, source: m.source };
+    if (pendingOpen) { $('btnYes').textContent = '최저가로 이동' + (bestReady.price ? ' · ' + bestReady.price : ''); $('btnYes').disabled = false; }
+  })
+  .catch(() => {
+    if (seq !== bestSeq) return;
+    bestReady = { title: m.title, link: m.link, price: null, source: m.source }; // 실패 시 찾은 페이지로
+    if (pendingOpen) { $('btnYes').textContent = '판매 페이지로 이동'; $('btnYes').disabled = false; }
+  });
 }
-$('btnNo').onclick = () => { noCount++; next(); };
 </script>
 </body>
 </html>
