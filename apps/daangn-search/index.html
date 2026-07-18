@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>당근 서울·경기 통합검색</title>
+<style>
+:root{
+  --bg:#FAFAF7; --card:#FFFFFF; --ink:#17201B; --sub:#6B7570;
+  --accent:#1B7F5C; --accent-soft:#E4F2EC; --line:#E3E5E0;
+  --sold:#9AA29D; --warn:#B4541E;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard",sans-serif;
+  padding-bottom:env(safe-area-inset-bottom)}
+header{position:sticky;top:0;z-index:10;background:var(--bg);
+  padding:calc(10px + env(safe-area-inset-top)) 14px 8px;border-bottom:1px solid var(--line)}
+h1{font-size:17px;margin:0 0 8px;font-weight:800;letter-spacing:-.3px}
+h1 small{font-weight:600;color:var(--accent);font-size:12px;margin-left:6px}
+.searchRow{display:flex;gap:8px}
+.searchRow input{flex:1;font-size:16px;padding:11px 12px;border:1.5px solid var(--line);
+  border-radius:12px;background:var(--card);color:var(--ink);outline:none}
+.searchRow input:focus{border-color:var(--accent)}
+.searchRow button{font-size:15px;font-weight:700;padding:0 18px;border:none;border-radius:12px;
+  background:var(--accent);color:#fff}
+.searchRow button:disabled{opacity:.5}
+.ctrlRow{display:flex;gap:6px;margin-top:8px;overflow-x:auto;padding-bottom:2px}
+.chip{flex:none;font-size:13px;font-weight:600;padding:7px 12px;border-radius:999px;
+  border:1.5px solid var(--line);background:var(--card);color:var(--sub)}
+.chip.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+.chip.toggle.on{background:var(--ink);border-color:var(--ink);color:#fff}
+main{padding:12px 14px}
+.status{font-size:13px;color:var(--sub);margin:2px 0 10px;line-height:1.5}
+.status b{color:var(--ink)}
+.status .err{color:var(--warn)}
+.card{display:flex;gap:10px;background:var(--card);border:1px solid var(--line);
+  border-radius:14px;padding:10px;margin-bottom:8px;text-decoration:none;color:inherit}
+.card.sold{opacity:.55}
+.thumb{width:74px;height:74px;border-radius:10px;object-fit:cover;background:var(--line);flex:none}
+.info{min-width:0;flex:1}
+.title{font-size:14.5px;font-weight:600;line-height:1.35;display:-webkit-box;
+  -webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.price{font-size:15px;font-weight:800;margin-top:3px}
+.meta{font-size:12px;color:var(--sub);margin-top:3px;display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.badge{font-size:11px;font-weight:700;padding:1.5px 6px;border-radius:6px;background:var(--line);color:var(--sub)}
+.badge.reserved{background:#FFF3E3;color:var(--warn)}
+.regionsPanel,.collector{background:var(--card);border:1px solid var(--line);border-radius:14px;
+  padding:12px;margin-bottom:12px}
+.regionsPanel summary,.collector summary{font-size:14px;font-weight:700;cursor:pointer}
+.provTitle{font-size:13px;font-weight:700;margin:12px 0 6px;color:var(--sub)}
+.provTitle button{font-size:12px;font-weight:600;margin-left:8px;border:none;background:none;color:var(--accent)}
+.guWrap{display:flex;flex-wrap:wrap;gap:6px}
+.guWrap .chip{padding:6px 10px;font-size:12.5px}
+.collector p{font-size:13px;color:var(--sub);line-height:1.6;margin:8px 0}
+.collector button.act{font-size:14px;font-weight:700;padding:10px 16px;border:none;
+  border-radius:10px;background:var(--accent);color:#fff;margin-right:8px}
+.collector button.act.stop{background:var(--warn)}
+#colLog{font-size:12px;color:var(--sub);white-space:pre-wrap;max-height:140px;overflow-y:auto;
+  background:var(--bg);border-radius:8px;padding:8px;margin-top:8px}
+.empty{text-align:center;color:var(--sub);font-size:14px;padding:40px 0;line-height:1.7}
+</style>
+</head>
+<body>
+<header>
+  <h1>당근 통합검색<small id="covLabel"></small></h1>
+  <div class="searchRow">
+    <input id="q" type="search" placeholder="검색어 (예: 아이폰 15)" enterkeyhint="search">
+    <button id="goBtn">검색</button>
+  </div>
+  <div class="ctrlRow">
+    <button class="chip toggle" id="sortNew">최신순</button>
+    <button class="chip toggle" id="sortPrice">낮은가격순</button>
+    <button class="chip toggle" id="sortDist">가까운순</button>
+    <button class="chip" id="onSaleChip">거래가능만</button>
+  </div>
+</header>
+<main>
+  <details class="regionsPanel" id="regionsPanel">
+    <summary>검색 지역 선택 <span id="selCount" style="color:var(--accent)"></span></summary>
+    <div id="regionsBody"></div>
+  </details>
+
+  <details class="collector" id="collector">
+    <summary>지역 코드 수집 (최초 1회)</summary>
+    <p>당근 지역 페이지를 순회하며 서울·경기 구/시 코드를 수집합니다. 2~3분 소요, 완료 후 이 기기에 저장됩니다.</p>
+    <button class="act" id="colStart">수집 시작</button>
+    <button class="act stop" id="colStop" style="display:none">중지</button>
+    <button class="act" id="colCopy" style="background:var(--ink)">JSON 복사</button>
+    <div id="colLog"></div>
+  </details>
+
+  <div class="status" id="statusBox"></div>
+  <div id="results"></div>
+</main>
+
+<script>
+const API = 'https://browser-app-lab.vercel.app/api';
+const LS_REGIONS = 'dgn_regions_v1';
+const LS_SEL = 'dgn_selected_v1';
+
+// ---- 좌표 (가까운순 정렬용, 구/시 중심 근사) ----
+const COORDS = {
+"종로구":[37.573,126.979],"중구":[37.564,126.997],"용산구":[37.532,126.990],"성동구":[37.563,127.036],
+"광진구":[37.538,127.082],"동대문구":[37.574,127.040],"중랑구":[37.606,127.093],"성북구":[37.589,127.017],
+"강북구":[37.640,127.026],"도봉구":[37.669,127.047],"노원구":[37.654,127.056],"은평구":[37.603,126.929],
+"서대문구":[37.579,126.936],"마포구":[37.566,126.902],"양천구":[37.517,126.866],"강서구":[37.551,126.849],
+"구로구":[37.495,126.887],"금천구":[37.457,126.895],"영등포구":[37.526,126.896],"동작구":[37.512,126.940],
+"관악구":[37.478,126.951],"서초구":[37.484,127.033],"강남구":[37.517,127.047],"송파구":[37.515,127.106],
+"강동구":[37.530,127.124],
+"수원시":[37.263,127.029],"성남시":[37.420,127.127],"고양시":[37.658,126.832],"용인시":[37.241,127.178],
+"부천시":[37.503,126.766],"안산시":[37.322,126.831],"안양시":[37.394,126.957],"남양주시":[37.636,127.216],
+"화성시":[37.199,126.831],"평택시":[36.992,127.113],"의정부시":[37.738,127.034],"시흥시":[37.380,126.803],
+"파주시":[37.760,126.780],"광명시":[37.479,126.865],"김포시":[37.615,126.716],"군포시":[37.361,126.935],
+"광주시":[37.429,127.255],"이천시":[37.272,127.435],"양주시":[37.785,127.046],"오산시":[37.150,127.077],
+"구리시":[37.594,127.130],"안성시":[37.008,127.280],"포천시":[37.895,127.200],"의왕시":[37.345,126.968],
+"하남시":[37.539,127.215],"여주시":[37.298,127.637],"동두천시":[37.904,127.060],"과천시":[37.429,126.988],
+"가평군":[37.831,127.510],"양평군":[37.492,127.488],"연천군":[38.096,127.075],
+"장안구":[37.304,127.010],"권선구":[37.258,126.972],"팔달구":[37.282,127.020],"영통구":[37.259,127.046],
+"수정구":[37.450,127.146],"중원구":[37.430,127.137],"분당구":[37.383,127.119],"만안구":[37.387,126.932],
+"동안구":[37.393,126.951],"상록구":[37.303,126.847],"단원구":[37.320,126.812],"덕양구":[37.637,126.832],
+"일산동구":[37.659,126.775],"일산서구":[37.675,126.750],"처인구":[37.234,127.201],"기흥구":[37.280,127.115],
+"수지구":[37.322,127.098],"원미구":[37.502,126.783],"소사구":[37.482,126.795],"오정구":[37.527,126.790]
+};
+
+// ---- 상태 ----
+let regionsData = JSON.parse(localStorage.getItem(LS_REGIONS) || 'null')
+  || { collectedAt:null, list:[{code:'서초구-362', name:'서초구', province:'서울특별시'}] };
+let selected = new Set(JSON.parse(localStorage.getItem(LS_SEL) || '[]'));
+let sortMode = 'new';
+let onSaleOnly = false;
+let items = [];
+let myPos = null;
+
+const $ = (id)=>document.getElementById(id);
+
+// ---- 지역 선택 UI ----
+function renderRegions(){
+  const byProv = {};
+  for(const r of regionsData.list){ (byProv[r.province] ||= []).push(r); }
+  let html='';
+  for(const prov of ['서울특별시','경기도']){
+    const list = byProv[prov]||[];
+    html += `<div class="provTitle">${prov} (${list.length})
+      <button data-prov="${prov}" class="provAll">전체 선택/해제</button></div>
+      <div class="guWrap">` +
+      list.map(r=>`<button class="chip gu ${selected.has(r.code)?'on':''}" data-code="${r.code}">${r.name}</button>`).join('') +
+      `</div>`;
+  }
+  $('regionsBody').innerHTML = html;
+  $('selCount').textContent = selected.size ? `${selected.size}곳` : '';
+  $('covLabel').textContent = `서울·경기 ${regionsData.list.length}개 지역 데이터`;
+  document.querySelectorAll('.gu').forEach(b=>b.onclick=()=>{
+    const c=b.dataset.code;
+    selected.has(c)?selected.delete(c):selected.add(c);
+    persistSel(); renderRegions();
+  });
+  document.querySelectorAll('.provAll').forEach(b=>b.onclick=()=>{
+    const list=(byProv[b.dataset.prov]||[]).map(r=>r.code);
+    const allOn=list.every(c=>selected.has(c));
+    list.forEach(c=> allOn?selected.delete(c):selected.add(c));
+    persistSel(); renderRegions();
+  });
+}
+function persistSel(){ localStorage.setItem(LS_SEL, JSON.stringify([...selected])); }
+
+// ---- 정렬/필터 컨트롤 ----
+function setSort(m){
+  sortMode=m;
+  for(const [id,mm] of [['sortNew','new'],['sortPrice','price'],['sortDist','dist']])
+    $(id).classList.toggle('on', mm===m);
+  if(m==='dist' && !myPos){
+    navigator.geolocation.getCurrentPosition(
+      p=>{ myPos=[p.coords.latitude,p.coords.longitude]; renderResults(); },
+      ()=>{ setStatus('위치 권한이 없어 가까운순 정렬을 사용할 수 없습니다.', true); setSort('new'); }
+    );
+  }
+  renderResults();
+}
+$('sortNew').onclick=()=>setSort('new');
+$('sortPrice').onclick=()=>setSort('price');
+$('sortDist').onclick=()=>setSort('dist');
+$('onSaleChip').onclick=()=>{
+  onSaleOnly=!onSaleOnly;
+  $('onSaleChip').classList.toggle('on', onSaleOnly);
+};
+
+// ---- 검색 ----
+$('goBtn').onclick=search;
+$('q').addEventListener('keydown',e=>{ if(e.key==='Enter'){ e.target.blur(); search(); }});
+
+async function search(){
+  const q=$('q').value.trim();
+  if(!q) return setStatus('검색어를 입력하세요.', true);
+  if(!selected.size) return setStatus('검색 지역을 먼저 선택하세요. (지역이 서초구뿐이면 아래 "지역 코드 수집"을 먼저 실행)', true);
+  $('goBtn').disabled=true;
+  setStatus(`서울·경기 <b>${selected.size}개 지역</b>에서 "<b>${esc(q)}</b>" 검색 중...`);
+  try{
+    const url=`${API}/daangn?q=${encodeURIComponent(q)}&regions=${encodeURIComponent([...selected].join(','))}${onSaleOnly?'&onSale=true':''}`;
+    const r=await fetch(url);
+    const d=await r.json();
+    if(!r.ok) throw new Error(d.error||('HTTP '+r.status));
+    items=d.items.map((it,i)=>({...it, _i:i}));
+    let msg=`<b>${d.count}건</b> · ${d.regionCount}개 지역 · ${(d.tookMs/1000).toFixed(1)}초`;
+    if(d.errors.length) msg+=` · <span class="err">${d.errors.length}개 지역 실패 (${esc(d.errors[0].region)}: ${esc(d.errors[0].error)})</span>`;
+    setStatus(msg);
+    renderResults();
+  }catch(e){
+    setStatus('검색 실패: '+esc(String(e.message||e)), true);
+  }finally{
+    $('goBtn').disabled=false;
+  }
+}
+
+function guName(code){ return (code||'').replace(/-\d+$/,''); }
+function dist(a,b){ // 근사 km
+  const dx=(a[1]-b[1])*88, dy=(a[0]-b[0])*111;
+  return Math.sqrt(dx*dx+dy*dy);
+}
+function renderResults(){
+  let arr=[...items];
+  if(sortMode==='price'){
+    arr.sort((a,b)=>(a.price??Infinity)-(b.price??Infinity) || a._i-b._i);
+  }else if(sortMode==='dist' && myPos){
+    arr.sort((a,b)=>{
+      const da=COORDS[guName(a.region)]?dist(myPos,COORDS[guName(a.region)]):Infinity;
+      const db=COORDS[guName(b.region)]?dist(myPos,COORDS[guName(b.region)]):Infinity;
+      return da-db || a._i-b._i;
+    });
+  }else{
+    arr.sort((a,b)=>(a.agoSec??Infinity)-(b.agoSec??Infinity) || a._i-b._i);
+  }
+  $('results').innerHTML = arr.length ? arr.map(card).join('')
+    : `<div class="empty">결과가 없습니다.</div>`;
+}
+function card(it){
+  const st = it.status==='sold' ? '<span class="badge">판매완료</span>'
+    : it.status==='reserved' ? '<span class="badge reserved">예약중</span>' : '';
+  const price = it.price===0 ? '나눔' : it.price!=null ? it.price.toLocaleString()+'원' : '';
+  const ago = it.agoSec!=null ? fmtAgo(it.agoSec) : '';
+  return `<a class="card ${it.status==='sold'?'sold':''}" href="${it.url}" target="_blank" rel="noopener">
+    ${it.thumb?`<img class="thumb" src="${it.thumb}" loading="lazy" alt="">`:'<div class="thumb"></div>'}
+    <div class="info">
+      <div class="title">${esc(it.title)}</div>
+      <div class="price">${price}</div>
+      <div class="meta">${st}<span>${esc(guName(it.region))}${it.dong?' · '+esc(it.dong):''}</span>${ago?`<span>${ago}</span>`:''}</div>
+    </div></a>`;
+}
+function fmtAgo(s){
+  if(s<3600) return Math.floor(s/60)+'분 전';
+  if(s<86400) return Math.floor(s/3600)+'시간 전';
+  if(s<2592000) return Math.floor(s/86400)+'일 전';
+  return Math.floor(s/2592000)+'개월 전';
+}
+function setStatus(html,isErr){ $('statusBox').innerHTML = isErr?`<span class="err">${html}</span>`:html; }
+function esc(s){ return String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+// ---- 지역 코드 수집 (BFS, 최초 1회) ----
+let colRunning=false;
+$('colStart').onclick=collect;
+$('colStop').onclick=()=>{ colRunning=false; };
+$('colCopy').onclick=()=>{
+  navigator.clipboard.writeText(JSON.stringify(regionsData,null,1))
+    .then(()=>log('JSON 복사됨'));
+};
+function log(s){ const el=$('colLog'); el.textContent+=s+'\n'; el.scrollTop=el.scrollHeight; }
+
+async function collect(){
+  if(colRunning) return;
+  colRunning=true;
+  $('colStart').style.display='none'; $('colStop').style.display='';
+  const found=new Map(regionsData.list.map(r=>[r.code,r]));
+  const visited=new Set(), queue=['서초4동-366'], areaCount={};
+  const AREA_CAP=2, FETCH_MAX=400;
+  let fetches=0;
+  log('수집 시작 (서초4동에서 BFS)');
+  while(colRunning && queue.length && fetches<FETCH_MAX){
+    const seed=queue.shift();
+    if(visited.has(seed)) continue;
+    visited.add(seed);
+    let d;
+    try{
+      const r=await fetch(`${API}/daangn-regions?seed=${encodeURIComponent(seed)}`);
+      d=await r.json();
+      if(!r.ok) throw new Error(d.error||('HTTP '+r.status));
+    }catch(e){ log(`실패 ${seed}: ${e.message}`); await sleep(800); continue; }
+    fetches++;
+    const toks=(d.pageRegion||'').split(/\s+/);
+    const province=toks[0]||'';
+    if(province!=='서울특별시' && province!=='경기도'){ await sleep(400); continue; }
+    const areaKey=toks.slice(0,-1).join(' ')||seed;
+    areaCount[areaKey]=(areaCount[areaKey]||0)+1;
+    for(const code of d.links){
+      const name=code.replace(/-\d+$/,'');
+      if(/(구|시|군)$/.test(name)){
+        if(!found.has(code)){
+          found.set(code,{code,name,province});
+          log(`+ ${province} ${name} (${found.size})`);
+        }
+      }else if(areaCount[areaKey]<=AREA_CAP && !visited.has(code)){
+        queue.push(code);
+      }
+    }
+    if(fetches%20===0) log(`... ${fetches}페이지 탐색, ${found.size}개 발견, 대기열 ${queue.length}`);
+    await sleep(400);
+  }
+  regionsData={collectedAt:new Date().toISOString(), list:[...found.values()]};
+  localStorage.setItem(LS_REGIONS, JSON.stringify(regionsData));
+  log(`완료: ${fetches}페이지 탐색, 구/시/군 ${found.size}개 저장`);
+  colRunning=false;
+  $('colStart').style.display=''; $('colStop').style.display='none';
+  renderRegions();
+}
+const sleep=(ms)=>new Promise(r=>setTimeout(r,ms));
+
+renderRegions();
+setSort('new');
+</script>
+</body>
+</html>
