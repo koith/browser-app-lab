@@ -172,7 +172,6 @@ $('onSaleChip').onclick=()=>{
   onSaleOnly=!onSaleOnly;
   $('onSaleChip').classList.toggle('on', onSaleOnly);
   renderResults(); // 즉시 클라이언트 필터 적용
-  if($('q').value.trim() && selected.size && items.length) search();
 };
 
 // ---- 검색 ----
@@ -224,7 +223,7 @@ async function search(){
     const seen=new Set(); let errCount=0;
     for(let b=0;b<batches.length;b++){
       setStatus(`동네 <b>${codes.length}곳</b> 검색 중... (${b+1}/${batches.length}) · 현재 <b>${items.length}건</b>`);
-      const url=`${API}/daangn?q=${encodeURIComponent(q)}&regions=${encodeURIComponent(batches[b].join(','))}${onSaleOnly?'&onSale=true':''}`;
+      const url=`${API}/daangn?q=${encodeURIComponent(q)}&regions=${encodeURIComponent(batches[b].join(','))}`;
       try{
         const r=await fetch(url); const d=await r.json();
         if(!r.ok) throw new Error(d.error||('HTTP '+r.status));
@@ -239,7 +238,8 @@ async function search(){
       }catch(e){ errCount++; }
     }
 
-    let msg=`<b>${items.length}건</b> · 동네 ${codes.length}곳 · ${((Date.now()-t0)/1000).toFixed(1)}초`;
+    const shown=onSaleOnly?items.filter(i=>i.status==='on_sale').length:items.length;
+    let msg=`<b>${shown}건</b>${onSaleOnly?` <span style="color:var(--sub)">(전체 ${items.length})</span>`:''} · 동네 ${codes.length}곳 · ${((Date.now()-t0)/1000).toFixed(1)}초`;
     if(capped) msg+=` · <span class="err">지역이 많아 ${MAX_DONGS}곳까지만 검색</span>`;
     if(dongFails.length) msg+=` · <span class="err">${dongFails.length}곳 동네목록 실패</span>`;
     if(errCount) msg+=` · <span class="err">${errCount}건 조회 실패</span>`;
