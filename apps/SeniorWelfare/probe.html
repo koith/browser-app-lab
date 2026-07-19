@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1B4A6B">
+<title>영등포 어르신 복지 찾기</title>
+<style>
+  /* 팔레트 근거:
+     - 노인은 황-청 축 변별력이 적-녹보다 먼저·크게 저하 → 파랑 의존 배제
+     - 빨강이 주의를 가장 잘 끌고 적-흑 조합이 반응속도 최상
+     - 저시력 대비 7:1 이상 권장 (WCAG AAA 상회)
+     - 렌즈 황변으로 흰 배경이 아이보리로 보임 → 순백 대신 미세 회백
+     - 채도 높은 색 사용, 파스텔 간 전환 금지 */
+  :root{
+    --ink:#000000;        /* 본문: 순흑 (대비 최대) */
+    --paper:#FAFAF7;      /* 배경: 미세 회백 */
+    --card:#FFFFFF;
+    --line:#B8B8B0;
+    --act:#0C6152;        /* 주 강조: 진청록 (흰 배경 대비 7.2:1) */
+    --act-press:#0A4F42;
+    --ok:#0E6428;         /* 신청 가능: 밝은 진초록 (대비 4.9:1, 흰글씨 기준) */
+    --wait:#8A4B00;       /* 확인 필요: 주황 (대비 4.6:1, 흰글씨 기준) */
+    --waitline:#8A4B00;   /* 주황 계열 테두리·글자용 진한 톤 */
+    --sub:#3A3A38;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html{-webkit-text-size-adjust:100%}
+  body{margin:0;background:var(--paper);color:var(--ink);word-break:keep-all;
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
+    font-size:36px;line-height:1.6;font-weight:600;-webkit-font-smoothing:antialiased}
+  .apphead{position:sticky;top:0;z-index:50;
+    background:var(--act);color:#fff;
+    padding:calc(14px + env(safe-area-inset-top)) 18px 14px;
+    font-size:30px;font-weight:900;letter-spacing:-.02em;
+    display:flex;align-items:center;gap:14px;
+    border-bottom:5px solid var(--act-press)}
+  .apphead .dotmark{width:22px;height:22px;border-radius:50%;
+    background:#fff;flex:0 0 22px}
+  .wrap{max-width:820px;margin:0 auto;
+    padding:14px 18px calc(48px + env(safe-area-inset-bottom));
+    min-height:100vh;display:flex;flex-direction:column}
+  .qwrap{display:flex;flex-direction:column}
+
+  /* 타이틀 화면 */
+  .title{display:flex;flex-direction:column;padding-top:8px}
+  .hero{background:var(--card);border:5px solid var(--ink);border-radius:24px;
+    padding:24px 20px;text-align:center;margin-bottom:22px}
+  .hero svg{width:100%;max-width:300px;height:auto;display:block;margin:0 auto 16px}
+  .hero h1{font-size:52px;line-height:1.18;margin:0 0 12px;word-break:keep-all}
+  .hero p{font-size:30px;color:var(--sub);margin:0;line-height:1.4;
+    font-weight:600;word-break:keep-all}
+  .steps{margin-bottom:22px}
+  .stepline{display:flex;align-items:center;gap:18px;font-size:30px;
+    font-weight:700;padding:14px 0;border-bottom:3px solid var(--line)}
+  .stepline:last-child{border-bottom:none}
+  .stepline i{flex:0 0 54px;width:54px;height:54px;border-radius:50%;
+    background:var(--act);color:#fff;font-style:normal;font-weight:900;
+    font-size:28px;display:flex;align-items:center;justify-content:center}
+  .start{background:var(--ok);border-color:#0A4F1E;color:#fff;
+    justify-content:center;font-size:44px;min-height:120px}
+  .cover{font-size:25px !important;padding:20px !important;margin-top:20px !important}
+  .start:active{background:#0A4F1E;color:#fff}
+  .stale{background:#FFF4E0;border:5px solid var(--waitline);border-radius:18px;
+    padding:24px;margin-bottom:28px;font-size:29px;line-height:1.5;font-weight:700}
+  .cover{font-size:27px;color:var(--sub);line-height:1.6;font-weight:600;
+    background:#F0EFEA;border-radius:16px;padding:24px;margin-top:26px}
+
+  /* 상단바 */
+  .topbar{display:flex;align-items:center;gap:16px;margin-bottom:16px;min-height:76px}
+  .backbtn{width:76px;height:76px;min-height:76px;flex:0 0 76px;padding:0;
+    font-size:40px;font-weight:800;line-height:1;
+    border:4px solid var(--ink);border-radius:50%;background:var(--card);color:var(--ink);
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+    aspect-ratio:1/1;overflow:hidden}
+  .backbtn:active{background:var(--ink);color:var(--card)}
+  .backspacer{width:76px;flex:0 0 76px}
+  .step{font-size:30px;font-weight:800;color:var(--sub)}
+
+  .bar{height:16px;background:var(--line);border-radius:99px;overflow:hidden;margin-bottom:28px}
+  .bar > i{display:block;height:100%;background:var(--ok);border-radius:99px;transition:width .35s ease}
+
+  h1{font-size:58px;line-height:1.25;font-weight:900;margin:0 0 16px;letter-spacing:-.03em}
+  .hint{font-size:32px;color:var(--sub);margin:0 0 24px;padding-left:18px;
+    border-left:8px solid var(--act);line-height:1.5;font-weight:600}
+
+  /* 선택 버튼 */
+  .opts{display:flex;flex-direction:column;gap:22px;padding-top:20px}
+  button{font-family:inherit;font-size:44px;font-weight:800;
+    min-height:130px;padding:26px 30px;border:5px solid var(--ink);border-radius:20px;
+    background:var(--card);color:var(--ink);width:100%;text-align:left;cursor:pointer;
+    display:flex;align-items:center;transition:transform .12s ease,background .12s ease}
+  button:active{background:var(--ink);color:var(--card);transform:scale(.97)}
+  button.chosen{background:var(--act);border-color:var(--act);color:#fff;transform:scale(.97);
+    box-shadow:0 0 0 8px rgba(179,0,15,.28)}
+  button:focus-visible{outline:6px solid var(--act);outline-offset:4px}
+  button.dim{border-color:var(--sub);color:var(--sub);font-size:36px;min-height:104px;font-weight:700}
+  button.dim:active,button.dim.chosen{background:var(--sub);border-color:var(--sub);color:#fff}
+
+  /* 결과 */
+  .rtop{padding:10px 0 32px;border-bottom:8px solid var(--ink);margin-bottom:40px}
+  .rtop h1{font-size:64px;margin-bottom:20px}
+  .rtop p{margin:0;font-size:32px;color:var(--sub);line-height:1.5;font-weight:600}
+
+  .sec{margin-bottom:40px}
+  .secsub{font-size:30px;color:var(--sub);margin:0 0 6px;font-weight:700}
+
+  /* 카드 — 상태 스티커를 카드마다 부착 */
+  .card{background:var(--card);border:5px solid var(--ink);border-radius:22px;
+    padding:64px 24px 28px;margin-top:44px;position:relative}
+  .badge{position:absolute;top:-32px;right:14px;color:#fff;
+    font-size:32px;font-weight:900;border-radius:16px;padding:14px 24px;
+    letter-spacing:-.02em;border:4px solid #fff;
+    box-shadow:0 5px 14px rgba(0,0,0,.22)}
+  .b-ok{background:var(--ok)}
+  .b-wait{background:var(--wait)}
+  .cnum{position:absolute;top:-26px;left:20px;background:var(--ink);color:#fff;
+    font-size:28px;font-weight:900;border-radius:99px;
+    width:60px;height:60px;display:flex;align-items:center;justify-content:center}
+  .card h2{font-size:46px;font-weight:900;margin:6px 0 16px;line-height:1.3}
+  .card .sum{font-size:32px;color:var(--sub);margin:0 0 24px;line-height:1.55;font-weight:600}
+
+  .tel{display:flex;align-items:center;justify-content:center;gap:20px;
+    min-height:130px;background:var(--act);color:#fff;border-radius:18px;
+    font-size:44px;font-weight:900;text-decoration:none;margin-top:10px;
+    border:5px solid var(--act-press)}
+  .tel svg{width:52px;height:52px;flex:0 0 52px;fill:#fff}
+  .tel:active{background:var(--act-press)}
+
+  .warn{margin-top:22px;padding:22px;background:#FFF0D6;
+    border-radius:14px;font-size:30px;line-height:1.5;
+    border-left:10px solid var(--waitline);font-weight:700}
+
+  .more{margin-top:22px;border-top:4px solid var(--line);padding-top:6px}
+  .more summary{font-size:34px;font-weight:800;color:var(--act);
+    padding:26px 0;cursor:pointer;list-style:none;min-height:96px;
+    display:flex;align-items:center;justify-content:space-between;gap:16px}
+  .more summary::-webkit-details-marker{display:none}
+  .more summary::after{content:"▼";font-size:44px;line-height:1;
+    color:var(--act);flex:0 0 auto}
+  .more[open] summary::after{content:"▲"}
+  .row{font-size:33px;margin:28px 0;line-height:1.5;font-weight:600;color:var(--ink)}
+  .row b{display:block;color:#fff;background:var(--sub);font-weight:800;
+    font-size:24px;margin-bottom:12px;letter-spacing:.06em;
+    padding:6px 16px;border-radius:8px;width:fit-content}
+  .note{margin-top:22px;padding:22px;background:#F0EFEA;border-radius:14px;
+    font-size:29px;line-height:1.55}
+
+  .tip{background:#FFF4E0;border:5px solid var(--waitline);border-radius:22px;
+    padding:28px;margin-top:24px;font-size:32px;line-height:1.55;font-weight:600}
+  .tip b{display:block;font-size:38px;margin-bottom:14px;color:var(--waitline);font-weight:900}
+
+  .restmore{margin-top:34px;border-top:none}
+  .restmore > summary{justify-content:center;border:5px dashed var(--line);
+    border-radius:18px;padding:26px;color:var(--sub)}
+
+  .skip{margin-bottom:32px}
+  .skip summary{font-size:30px;font-weight:800;color:var(--sub);padding:28px 0;
+    cursor:pointer;list-style:none;min-height:92px;display:flex;align-items:center}
+  .skip summary{justify-content:space-between;gap:16px}
+  .skip summary::-webkit-details-marker{display:none}
+  .skip summary::after{content:"▼";font-size:40px;line-height:1;flex:0 0 auto}
+  .skip[open] summary::after{content:"▲"}
+  .mini{font-size:29px;color:var(--sub);padding:22px 0;border-top:3px solid var(--line);line-height:1.45}
+  .mini small{font-size:26px}
+
+  .restart{justify-content:center;font-size:38px;border-color:var(--sub);color:var(--sub)}
+  .foot{margin-top:40px;padding-top:32px;border-top:4px solid var(--line);
+    font-size:26px;color:var(--sub);line-height:1.6;font-weight:600}
+
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header class="apphead">
+  <span class="dotmark"></span>
+  <span>영등포 어르신 복지 찾기</span>
+</header>
+<div class="wrap" id="app"></div>
+
+<script>
+/* ============================================================
+   영등포구 어르신 복지 자격 진단
+   요건 출처: 영등포구청 / 보건복지부 / 서울시 (2026-07-19 확인)
+   ※ 요건은 매년 변경됩니다. 최종 확인은 반드시 담당 기관에 문의.
+   ============================================================ */
+
+var UNKNOWN = 'unknown';
+
+/* ---------- 질문 흐름 ---------- */
+var QUESTIONS = [
+  { id:'age1', field:'_ageband', type:'branch',
+    q:'연세가 어떻게 되세요?',
+    opts:[ {t:'80살 넘음',v:'80+'}, {t:'65살 ~ 80살',v:'65-80'}, {t:'65살 아래',v:'-65'} ] },
+
+  { id:'age2a', field:'age', showIf:{f:'_ageband',v:'80+'},
+    q:'조금만 더 여쭐게요',
+    opts:[ {t:'90살 넘음',v:90}, {t:'85살 ~ 90살',v:85}, {t:'80살 ~ 85살',v:80} ] },
+
+  { id:'age2b', field:'age', showIf:{f:'_ageband',v:'65-80'},
+    q:'조금만 더 여쭐게요',
+    opts:[ {t:'75살 ~ 80살',v:75}, {t:'70살 ~ 75살',v:70}, {t:'65살 ~ 70살',v:66} ] },
+
+  { id:'age2c', field:'age', showIf:{f:'_ageband',v:'-65'},
+    q:'조금만 더 여쭐게요',
+    opts:[ {t:'60살 ~ 65살',v:60}, {t:'60살 아래',v:50} ] },
+
+  { id:'gu', field:'residence_gu',
+    q:'영등포구에 사시나요?',
+    opts:[ {t:'예',v:true}, {t:'아니오',v:false} ] },
+
+  { id:'alone', field:'living_alone',
+    q:'혼자 사시나요?',
+    opts:[ {t:'예',v:true}, {t:'아니오',v:false},
+           {t:'모르겠어요',v:UNKNOWN,dim:true} ] },
+
+  { id:'move', field:'mobility',
+    q:'바깥에 혼자 다니실 수 있나요?',
+    opts:[ {t:'네, 혼자 다닙니다',v:'independent'},
+           {t:'도와주면 다닙니다',v:'assisted'},
+           {t:'거의 집에 있습니다',v:'homebound'} ] },
+
+  { id:'care', field:'care_need',
+    q:'밥 차리기나 씻기가 힘드신가요?',
+    opts:[ {t:'예',v:true}, {t:'아니오',v:false},
+           {t:'모르겠어요',v:UNKNOWN,dim:true} ] },
+
+  { id:'pension', field:'basic_pension',
+    q:'기초연금을 받고 계신가요?',
+    hint:'65살 넘은 어르신 대부분이 받는 돈입니다.',
+    opts:[ {t:'예',v:true}, {t:'아니오',v:false},
+           {t:'모르겠어요',v:UNKNOWN,dim:true} ] },
+
+  { id:'living', field:'livelihood_benefit',
+    q:'주민센터에서 생활비를 받으시나요?',
+    hint:'병원비나 집세만 받으시면 “아니오”입니다.',
+    opts:[ {t:'예',v:true}, {t:'아니오',v:false},
+           {t:'모르겠어요',v:UNKNOWN,dim:true} ] },
+
+  { id:'medical', field:'medical_benefit',
+    q:'병원비를 나라에서 내주나요?',
+    opts:[ {t:'예',v:true}, {t:'아니오',v:false},
+           {t:'모르겠어요',v:UNKNOWN,dim:true} ] },
+
+  { id:'ltc', field:'ltc_grade',
+    q:'장기요양 등급이 있으신가요?',
+    hint:'요양보호사가 집에 오면 “예”입니다.',
+    opts:[ {t:'예',v:'3'}, {t:'아니오',v:null},
+           {t:'모르겠어요',v:UNKNOWN,dim:true} ] },
+
+  { id:'job', field:'employed_insured',
+    q:'지금 직장에 다니시나요?',
+    opts:[ {t:'예',v:true}, {t:'아니오',v:false},
+           {t:'모르겠어요',v:UNKNOWN,dim:true} ] }
+];
+
+/* ---------- 지원사업 데이터 ---------- */
+var PROGRAMS = [
+  { id:'job-public', name:'어르신 일자리 — 공익활동',
+    summary:'노노케어(도시락 배달), 학교 앞 교통지도, 복지시설 봉사 등을 하고 활동비를 받습니다.',
+    category:'일자리', org:'영등포구 어르신장애인과', tel:'02-2670-3408',
+    benefit:'월 30시간 이내 (하루 3시간)', period:'평균 11개월',
+    how:'영등포시니어클럽 등 수행기관 방문, 또는 복지로·노인일자리여기에서 신청',
+    when:'매년 11~12월경 모집', season:[11,12],
+    rules:{ op:'AND', rules:[
+      {f:'age',op:'>=',v:65},{f:'residence_gu',op:'==',v:true},
+      {f:'basic_pension',op:'==',v:true},{f:'livelihood_benefit',op:'==',v:false},
+      {f:'employed_insured',op:'==',v:false},{f:'ltc_grade',op:'in',v:[null]},
+      {f:'mobility',op:'in',v:['independent','assisted']} ]},
+    notes:['60~64세 차상위계층도 자리가 남으면 참여할 수 있습니다. 문의해 보세요.'],
+    conf:'verified' },
+
+  { id:'job-service', name:'어르신 일자리 — 노인 역량활용',
+    summary:'어린이집 보육교사 보조, 우체국 행정 지원, 지역아동센터 학습 보조 등을 합니다.',
+    category:'일자리', org:'영등포구 어르신장애인과', tel:'02-2670-3411',
+    benefit:'월 761,040원 (주휴수당 포함, 연차수당 별도)', period:'10개월 · 주 15시간',
+    how:'수행기관 방문, 또는 복지로·노인일자리여기에서 신청',
+    when:'매년 11~12월경 모집', season:[11,12],
+    rules:{ op:'AND', rules:[
+      {f:'age',op:'>=',v:65},{f:'residence_gu',op:'==',v:true},
+      {f:'livelihood_benefit',op:'==',v:false},{f:'ltc_grade',op:'in',v:[null]},
+      {f:'mobility',op:'in',v:['independent','assisted']} ]},
+    notes:['해당 사업에서 직장가입자가 되는 경우는 제외 대상이 아닙니다.'],
+    conf:'partial' },
+
+  { id:'job-market', name:'어르신 일자리 — 공동체 사업단',
+    summary:'카페, 도시락 제조·판매 같은 작은 가게를 함께 운영합니다. 인생100반 식당, 시니어 북카페 등.',
+    category:'일자리', org:'영등포구 어르신장애인과', tel:'02-2670-3412',
+    benefit:'근로계약에 따름 (하루 최대 8시간)', period:'12개월',
+    how:'수행기관 방문 신청', when:'매년 11~12월경 모집', season:[11,12],
+    rules:{ op:'AND', rules:[
+      {f:'age',op:'>=',v:60},{f:'residence_gu',op:'==',v:true},
+      {f:'livelihood_benefit',op:'==',v:false},{f:'ltc_grade',op:'in',v:[null]},
+      {f:'mobility',op:'in',v:['independent','assisted']} ]},
+    notes:['만 60세 이상이면 기초연금을 안 받아도 신청할 수 있습니다.',
+           '선발 기준표에 따라 뽑기 때문에 신청해도 안 될 수 있습니다.'],
+    conf:'partial' },
+
+  { id:'job-place', name:'취업알선형 일자리',
+    summary:'민간 회사 일자리를 연결해 드립니다. 모집 기간 없이 언제든 상담할 수 있습니다.',
+    category:'일자리', org:'영등포시니어클럽 / 영등포노인종합복지관', tel:'02-2670-3408',
+    benefit:'취업처에 따라 다름', period:'연중 상시',
+    how:'영등포시니어클럽 또는 영등포노인종합복지관 방문', when:'아무 때나', season:'always',
+    rules:{ op:'AND', rules:[
+      {f:'age',op:'>=',v:60},{f:'residence_gu',op:'==',v:true},
+      {f:'mobility',op:'in',v:['independent','assisted']} ]},
+    notes:['다른 일자리 사업과 달리, 생활비를 받고 계셔도·직장에 다니셔도·요양등급이 있어도 신청할 수 있습니다.'],
+    conf:'verified' },
+
+  { id:'care-custom', name:'노인맞춤돌봄서비스',
+    summary:'생활지원사가 집으로 찾아와 안부를 확인하고 집안일과 외출을 도와드립니다.',
+    category:'돌봄', org:'영등포노인종합복지관 외', tel:'02-2670-3408',
+    benefit:'무료 방문 돌봄', period:'연중 상시',
+    how:'사시는 동 주민센터에 방문하거나 전화로 신청', when:'아무 때나', season:'always',
+    rules:{ op:'AND', rules:[
+      {f:'age',op:'>=',v:65},{f:'residence_gu',op:'==',v:true},
+      {f:'ltc_grade',op:'in',v:[null]},
+      {op:'OR',rules:[
+        {f:'living_alone',op:'==',v:true},
+        {f:'care_need',op:'==',v:true},
+        {f:'medical_benefit',op:'==',v:true} ]} ]},
+    notes:['장기요양 등급이 있으면 이 서비스 대신 장기요양 서비스를 받습니다.',
+           '신청은 누구나 할 수 있고, 방문 조사 후 대상이 정해집니다.'],
+    conf:'partial' },
+
+  { id:'care-ltc', name:'재가장기요양 서비스',
+    summary:'요양보호사가 집으로 와서 돌봐 드리거나(방문요양), 목욕을 도와드리거나, 낮 동안 센터에서 지내실 수 있습니다.',
+    category:'돌봄', org:'구립영등포노인복지센터', tel:'02-2631-3212',
+    benefit:'장기요양보험 적용 (본인부담 일부)', period:'연중 상시',
+    how:'국민건강보험공단(1577-1000) 또는 구립영등포노인복지센터 문의', when:'아무 때나', season:'always',
+    rules:{ op:'AND', rules:[
+      {f:'residence_gu',op:'==',v:true},
+      {f:'ltc_grade',op:'in',v:['1','2','3','4','5']} ]},
+    notes:['데이케어센터 문의는 02-2634-2215'],
+    conf:'verified' },
+
+  { id:'meal', name:'어르신 급식 지원',
+    summary:'복지관에서 점심 식사를 무료 또는 낮은 값에 드실 수 있습니다.',
+    category:'급식', org:'영등포노인종합복지관', tel:'02-2068-5324',
+    benefit:'중식 제공', period:'연중 상시',
+    how:'영등포노인종합복지관 방문 신청', when:'아무 때나', season:'always',
+    rules:{ op:'AND', rules:[
+      {f:'age',op:'>=',v:65},{f:'residence_gu',op:'==',v:true},
+      {f:'mobility',op:'in',v:['independent','assisted']},
+      {op:'OR',rules:[
+        {f:'livelihood_benefit',op:'==',v:true},
+        {f:'medical_benefit',op:'==',v:true},
+        {f:'living_alone',op:'==',v:true} ]} ]},
+    notes:['거동이 어려우시면 도시락 배달로 연결해 드립니다.',
+           '소득 기준은 복지관에 확인이 필요합니다.'],
+    conf:'unverified' },
+
+  { id:'counsel', name:'찾아가는 어르신 상담',
+    summary:'상담사가 집으로 찾아와 이야기를 들어 드립니다. 외롭거나 마음이 힘드실 때 이용하세요.',
+    category:'정서지원', org:'영등포구 노인상담센터', tel:'02-2670-3408',
+    benefit:'무료 방문 상담', period:'연중 상시',
+    how:'전화로 신청하거나 동 주민센터에 말씀하세요', when:'아무 때나', season:'always',
+    rules:{ op:'AND', rules:[
+      {f:'age',op:'>=',v:65},{f:'residence_gu',op:'==',v:true} ]},
+    notes:['소득이나 재산 조건이 없습니다. 영등포구 어르신이면 누구나 신청할 수 있습니다.'],
+    conf:'partial' },
+
+  { id:'card', name:'백세카드',
+    summary:'영등포구 안의 “으뜸업소”에서 할인을 받을 수 있는 카드입니다.',
+    category:'생활지원', org:'영등포구', tel:'02-2670-3408',
+    benefit:'제휴 업소 할인', period:'연중 상시',
+    how:'사시는 동 주민센터에서 신청하면 카드와 안내책자를 받습니다', when:'아무 때나', season:'always',
+    rules:{ op:'AND', rules:[
+      {f:'age',op:'>=',v:65},{f:'residence_gu',op:'==',v:true} ]},
+    notes:['나이 기준은 동 주민센터에 다시 확인해 보세요.'],
+    conf:'unverified' },
+
+  { id:'50plus', name:'서울시 50+ 영등포센터',
+    summary:'새로운 것을 배우고, 취미 활동을 하고, 사람들을 만나는 곳입니다.',
+    category:'교육·여가', org:'서울시 50플러스 영등포센터', tel:null,
+    benefit:'교육 및 커뮤니티 프로그램', period:'수시 모집',
+    how:'50plus.or.kr 또는 센터 방문', when:'수시', season:'always',
+    rules:{ op:'AND', rules:[
+      {f:'age',op:'>=',v:50},
+      {f:'mobility',op:'in',v:['independent','assisted']} ]},
+    notes:['서울시에 사는 분이면 신청할 수 있습니다.'],
+    conf:'partial' }
+];
+
+/* ---------- 판정 엔진 (3값 논리) ---------- */
+function evalRule(r,p){
+  if(r.op==='AND'||r.op==='OR') return evalGroup(r,p);
+  var a=p[r.f];
+  if(a===undefined||a===UNKNOWN) return UNKNOWN;
+  switch(r.op){
+    case '>=': return a>=r.v;
+    case '<=': return a<=r.v;
+    case '==': return a===r.v;
+    case '!=': return a!==r.v;
+    case 'in': return r.v.indexOf(a)!==-1;
+    default: return UNKNOWN;
+  }
+}
+function evalGroup(g,p){
+  var res=g.rules.map(function(r){return evalRule(r,p)});
+  if(g.op==='AND'){
+    if(res.indexOf(false)!==-1) return false;
+    if(res.indexOf(UNKNOWN)!==-1) return UNKNOWN;
+    return true;
+  }
+  if(res.indexOf(true)!==-1) return true;
+  if(res.indexOf(UNKNOWN)!==-1) return UNKNOWN;
+  return false;
+}
+function blockers(r,p,out){
+  out=out||{failed:[],unknown:[]};
+  if(r.op==='AND'||r.op==='OR'){ r.rules.forEach(function(x){blockers(x,p,out)}); return out; }
+  var v=evalRule(r,p);
+  if(v===false) out.failed.push(r.f);
+  if(v===UNKNOWN) out.unknown.push(r.f);
+  return out;
+}
+var FIELD_KO={
+  age:'나이', residence_gu:'영등포구에 사시는지',
+  living_alone:'혼자 사시는지', basic_pension:'기초연금을 받으시는지',
+  livelihood_benefit:'생활비를 받으시는지', medical_benefit:'병원비를 지원받으시는지',
+  near_poor:'차상위계층인지', ltc_grade:'장기요양 등급이 있으신지',
+  employed_insured:'직장에 다니시는지', mobility:'바깥에 다니실 수 있는지',
+  care_need:'혼자 생활하기 어려우신지' };
+
+/* 문의 시 어르신이 그대로 말할 수 있는 표현 */
+var ASK_KO={
+  near_poor:'제가 차상위계층에 해당되나요',
+  basic_pension:'제가 기초연금을 받고 있나요',
+  livelihood_benefit:'제가 생계급여를 받고 있나요',
+  medical_benefit:'제가 의료급여 대상인가요',
+  ltc_grade:'제가 장기요양 등급이 있나요',
+  living_alone:'혼자 사는 걸로 되어 있나요',
+  employed_insured:'제가 직장가입자인가요',
+  care_need:'혼자 생활하기 어려운 상태인가요',
+  mobility:'바깥 출입이 가능한 상태인가요',
+  age:'제 나이가 조건에 맞나요',
+  residence_gu:'제가 영등포구민으로 되어 있나요' };
+
+function inSeason(p){
+  if(!p.season || p.season==='always') return true;
+  var m=new Date().getMonth()+1;
+  return p.season.indexOf(m)!==-1;
+}
+function monthsUntil(p){
+  if(!p.season || p.season==='always') return 0;
+  var m=new Date().getMonth()+1, best=99;
+  p.season.forEach(function(s){ var d=(s-m+12)%12; if(d<best) best=d; });
+  return best;
+}
+function diagnose(profile){
+  var out={eligible:[],maybe:[],ineligible:[],later:[],tips:[]};
+  PROGRAMS.forEach(function(pg){
+    var v=evalGroup(pg.rules,profile), b=blockers(pg.rules,profile);
+    var uniq=function(a){return a.filter(function(x,i){return a.indexOf(x)===i})};
+    var item={p:pg,missing:uniq(b.unknown),failed:uniq(b.failed)};
+    if(v===false){ out.ineligible.push(item); return; }
+    if(!inSeason(pg)){ item.wait=monthsUntil(pg); out.later.push(item); return; }
+    if(v===true) out.eligible.push(item);
+    else out.maybe.push(item);
+  });
+  /* 중요도 순: 현금·돌봄처럼 삶에 큰 영향을 주는 것을 먼저 */
+  var PRIORITY={
+    'basic-pension':0, 'ltc-apply':1, 'emergency-support':2,
+    'housing-support':3, 'care-custom':4, 'care-ltc':5,
+    'meal-delivery':6, 'meal':7,
+    'job-public':8, 'job-service':9, 'job-market':10, 'job-place':11,
+    'counsel':12, 'gyeongrodang':13, 'card':14, '50plus':15
+  };
+  var order={verified:0,partial:1,unverified:2};
+  [out.eligible,out.maybe].forEach(function(l){
+    l.sort(function(a,b){
+      var pa=PRIORITY[a.p.id], pb=PRIORITY[b.p.id];
+      if(pa===undefined) pa=99; if(pb===undefined) pb=99;
+      return pa-pb || order[a.p.conf]-order[b.p.conf];
+    });
+  });
+
+  // 대체 경로 안내
+  var jobs=PROGRAMS.filter(function(x){return x.category==='일자리'}).map(function(x){return x.id});
+  var jobItems=out.ineligible.filter(function(i){return jobs.indexOf(i.p.id)!==-1});
+  // 나이·거주지·거동 때문에 막힌 경우는 취업 안내가 무의미
+  var hard=['age','residence_gu','mobility'];
+  var blockedByHard=jobItems.some(function(i){
+    return i.failed.some(function(f){return hard.indexOf(f)!==-1});
+  });
+  if(jobItems.length===jobs.length && !blockedByHard){
+    out.tips.push({t:'일자리를 찾고 계신다면',
+      m:'다른 일자리 사업은 어렵지만 취업알선형은 조건 제한이 없습니다. 영등포시니어클럽에 연중 상담할 수 있습니다.'});
+  }
+  if(profile.care_need===true && (profile.ltc_grade===null||profile.ltc_grade===UNKNOWN)){
+    out.tips.push({t:'장기요양 등급을 먼저 신청해 보세요',
+      m:'등급을 받으면 요양보호사 방문, 목욕 도움, 주야간 보호를 이용할 수 있습니다. 국민건강보험공단 1577-1000으로 전화하세요.'});
+  }
+  if(profile.mobility==='homebound'){
+    out.tips.push({t:'집으로 찾아오는 서비스부터 신청하세요',
+      m:'노인맞춤돌봄서비스와 찾아가는 상담은 직접 집으로 방문합니다. 도시락 배달도 요청할 수 있습니다.'});
+  }
+  return out;
+}
+
+/* ---------- 화면 ---------- */
+var state={idx:0,profile:{},history:[],started:false};
+var app=document.getElementById('app');
+var esc=function(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML};
+
+/* 탭 피드백: iOS Safari는 navigator.vibrate 미지원 → 시각+청각으로 대체 */
+var HERO_SVG='<svg viewBox="0 0 400 210" role="img" aria-label="어르신과 상담원이 지원 목록을 함께 보는 그림"><rect x="150" y="26" width="128" height="160" rx="10" fill="#fff" stroke="#000" stroke-width="6"/><rect x="170" y="52" width="60" height="11" rx="5" fill="#0C6152"/><rect x="170" y="80" width="88" height="10" rx="5" fill="#C9C7C0"/><rect x="170" y="104" width="88" height="10" rx="5" fill="#C9C7C0"/><rect x="170" y="128" width="88" height="10" rx="5" fill="#C9C7C0"/><circle cx="252" cy="150" r="26" fill="#0E6428" stroke="#fff" stroke-width="5"/><path d="M240 150l8 9 16-18" stroke="#fff" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="72" cy="74" r="30" fill="#fff" stroke="#000" stroke-width="6"/><path d="M46 74a26 26 0 0152 0" fill="none" stroke="#8A4B00" stroke-width="7" stroke-linecap="round"/><path d="M30 186c0-30 19-48 42-48s42 18 42 48z" fill="#8A4B00" stroke="#000" stroke-width="6" stroke-linejoin="round"/><circle cx="330" cy="74" r="30" fill="#fff" stroke="#000" stroke-width="6"/><path d="M288 186c0-30 19-48 42-48s42 18 42 48z" fill="#0C6152" stroke="#000" stroke-width="6" stroke-linejoin="round"/></svg>';
+
+var actx=null;
+function ensureAudio(){
+  try{
+    if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)();
+    if(actx.state!=='running') actx.resume();
+  }catch(e){}
+}
+/* iOS는 앱을 벗어났다 돌아오면 AudioContext를 suspended로 만든다.
+   복귀·터치 시점마다 재개해야 소리가 계속 난다. */
+document.addEventListener('visibilitychange',function(){
+  if(!document.hidden) ensureAudio();
+});
+window.addEventListener('pageshow',ensureAudio);
+window.addEventListener('focus',ensureAudio);
+document.addEventListener('touchstart',ensureAudio,{passive:true});
+
+function tick(){
+  try{
+    ensureAudio();
+    if(!actx || actx.state!=='running') return;
+    var o=actx.createOscillator(), g=actx.createGain();
+    o.frequency.value=660; o.type='sine';
+    g.gain.setValueAtTime(0.10, actx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, actx.currentTime+0.09);
+    o.connect(g); g.connect(actx.destination);
+    o.start(); o.stop(actx.currentTime+0.09);
+  }catch(e){}
+  if(navigator.vibrate) navigator.vibrate(30);
+}
+
+var DATA_CHECKED='2026-07-19';
+function monthsSinceCheck(){
+  var d=new Date(DATA_CHECKED), now=new Date();
+  return (now.getFullYear()-d.getFullYear())*12 + (now.getMonth()-d.getMonth());
+}
+
+function renderTitle(){
+  window.scrollTo(0,0);
+  var stale=monthsSinceCheck();
+  var h='<div class="title">'+
+    '<div class="hero">'+HERO_SVG+
+      '<h1>받을 수 있는<br>도움 찾기</h1>'+
+      '<p>몇 가지만 여쭤보고<br>알려드립니다</p>'+
+    '</div>';
+
+  if(stale>=6){
+    h+='<div class="stale">이 정보는 '+stale+'개월 전에 확인한 것입니다. '+
+       '조건이 바뀌었을 수 있으니 신청 전에 꼭 전화로 물어보세요.</div>';
+  }
+
+  h+='<div class="steps">'+
+     '<div class="stepline"><i>1</i>질문에 답하기</div>'+
+     '<div class="stepline"><i>2</i>받을 수 있는 것 보기</div>'+
+     '<div class="stepline"><i>3</i>전화로 신청하기</div>'+
+     '</div>'+
+     '<div class="opts"><button class="start" id="go">시작하기</button></div>'+
+     '<div class="cover">지원사업 '+PROGRAMS.length+'가지를 담았습니다.<br>'+
+     '이것이 전부는 아닙니다.<br>'+
+     '더 궁금하시면 영등포구청<br>02-2670-3408<br><br>'+
+     '확인일 '+DATA_CHECKED.replace(/-/g,'. ')+'</div>'+
+     '</div>';
+  app.innerHTML=h;
+  var b=document.getElementById('go');
+  b.onclick=function(){
+    if(b.dataset.done) return;
+    b.dataset.done='1'; b.classList.add('chosen'); tick();
+    setTimeout(function(){ state.started=true; render(); },180);
+  };
+}
+
+function visibleQuestions(){
+  return QUESTIONS.filter(function(q){
+    if(!q.showIf) return true;
+    return state.profile[q.showIf.f]===q.showIf.v;
+  });
+}
+
+function render(){
+  if(!state.started){ renderTitle(); return; }
+  window.scrollTo(0,0);
+  var list=visibleQuestions();
+  if(state.idx>=list.length){ renderResult(); return; }
+  var q=list[state.idx];
+  var pct=Math.round(state.idx/list.length*100);
+
+  var h='';
+  h+='<div class="topbar">'+
+     '<button class="backbtn" id="back" aria-label="앞으로">←</button>'+
+     '<div class="step">'+list.length+'개 중 '+(state.idx+1)+'번째</div>'+
+     '</div>'+
+     '<div class="bar"><i style="width:'+pct+'%"></i></div>'+
+     '<h1>'+esc(q.q)+'</h1>'+
+     (q.hint?'<p class="hint">'+esc(q.hint)+'</p>':'')+
+     '<div class="opts" id="opts"></div>';
+  app.innerHTML=h;
+
+  var box=document.getElementById('opts');
+  q.opts.forEach(function(o){
+    var b=mkBtn(o.t, function(){ answer(q.field,o.v); });
+    if(o.dim) b.className='dim';
+    box.appendChild(b);
+  });
+
+  var bk=document.getElementById('back');
+  if(bk) bk.onclick=function(){
+    tick();
+    if(state.idx===0){ state.started=false; render(); return; }
+    var prev=state.history.pop();
+    if(prev) delete state.profile[prev];
+    state.idx--;
+    render();
+  };
+}
+
+function mkBtn(text,fn){
+  var b=document.createElement('button');
+  b.innerHTML='<span>'+esc(text)+'</span>';
+  b.onclick=function(){
+    if(b.dataset.done) return;
+    b.dataset.done='1';
+    b.classList.add('chosen');
+    tick();
+    setTimeout(fn,180); // 눌린 상태를 보여준 뒤 이동
+  };
+  return b;
+}
+
+function answer(field,val){
+  state.profile[field]=val;
+  state.history.push(field);
+  state.idx++;
+  render();
+}
+
+var PHONE_ICON='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8c1.4 2.8 3.8 5.2 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.4.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1l-2.3 2.2z"/></svg>';
+
+function card(item,kind,n){
+  var p=item.p;
+  var unver=(p.conf==='unverified');
+  var badge = p.needs_review
+      ? '<span class="badge b-wait">변경됨</span>'
+      : (kind==='good'
+          ? '<span class="badge b-ok">신청 가능</span>'
+          : '<span class="badge b-wait">확인 필요</span>');
+
+  var h='<div class="card">'+badge+'<div class="cnum">'+n+'</div>'+
+        '<h2>'+esc(p.name)+'</h2>'+
+        '<p class="sum">'+esc(p.summary)+'</p>';
+
+  if(p.tel) h+='<a class="tel" href="tel:'+p.tel.replace(/-/g,'')+'">'+PHONE_ICON+'<span>'+esc(p.tel)+'</span></a>';
+
+  if(p.needs_review) h+='<div class="warn">이 사업의 안내가 최근 바뀌었습니다.<br>꼭 전화로 확인해 주세요.</div>';
+  else if(unver) h+='<div class="warn">조건을 다시 확인해야 합니다.<br>꼭 전화로 물어보세요.</div>';
+  else if(kind==='maybe' && item.missing.length){
+    var q=item.missing.map(function(f){return ASK_KO[f]||FIELD_KO[f]||f});
+    var show=q.slice(0,3);
+    h+='<div class="warn">전화해서 이렇게 물어보세요<br><br>'+
+       show.map(function(s){return '\u201c'+esc(s)+'?\u201d'}).join('<br>')+
+       (q.length>3 ? '<br>\u201c그 밖에 조건이 더 있나요?\u201d' : '')+
+       '</div>';
+  }
+
+  h+='<details class="more"><summary>자세히 보기</summary><div class="mbody">'+
+     '<div class="row"><b>받는 것</b>'+esc(p.benefit)+'</div>'+
+     '<div class="row"><b>신청 방법</b>'+esc(p.how)+'</div>'+
+     '<div class="row"><b>신청 시기</b>'+esc(p.when)+'</div>';
+  if(p.notes && p.notes.length) h+='<div class="note">'+p.notes.map(esc).join('<br><br>')+'</div>';
+  h+='</div></details></div>';
+  return h;
+}
+
+function renderResult(){
+  var r=diagnose(state.profile);
+  var now=r.eligible.length+r.maybe.length;
+
+  var h='<div class="rtop"><h1>'+now+'가지를<br>찾았습니다</h1>'+
+        '<p>지금 신청할 수 있는 것만<br>모았습니다.</p></div>';
+
+  var n=0, TOP=3;
+
+  if(r.eligible.length){
+    var head=r.eligible.slice(0,TOP), rest=r.eligible.slice(TOP);
+    h+='<div class="sec">';
+    head.forEach(function(i){ h+=card(i,'good',++n) });
+    if(rest.length){
+      h+='<details class="more restmore"><summary>더 있어요 ('+rest.length+'개)</summary><div>';
+      rest.forEach(function(i){ h+=card(i,'good',++n) });
+      h+='</div></details>';
+    }
+    h+='</div>';
+  }
+
+  if(r.maybe.length){
+    h+='<div class="sec">';
+    r.maybe.forEach(function(i){ h+=card(i,'maybe',++n) });
+    h+='</div>';
+  }
+
+  if(!now){
+    h+='<div class="sec"><div class="tip"><b>맞는 사업을 찾지 못했습니다</b>'+
+       '영등포구청에 전화하시면<br>다른 도움을 알려드립니다.'+
+       '<a class="tel" href="tel:0226703408">'+PHONE_ICON+'<span>02-2670-3408</span></a></div></div>';
+  }
+
+  if(r.tips.length){
+    h+='<div class="sec">';
+    r.tips.forEach(function(t){
+      h+='<div class="tip"><b>'+esc(t.t)+'</b>'+esc(t.m)+'</div>';
+    });
+    h+='</div>';
+  }
+
+  /* 지금은 모집 기간이 아닌 사업 — 접어서 별도 안내 */
+  if(r.later.length){
+    var w=Math.min.apply(null, r.later.map(function(i){return i.wait}));
+    h+='<details class="skip"><summary>가을에 신청하는 일자리 '+r.later.length+'개</summary>';
+    h+='<div class="mini"><b>지금은 모집 기간이 아닙니다.</b><br>'+
+       '<small>약 '+w+'개월 뒤인 11~12월에 모집합니다. 그때 다시 확인해 보세요.</small></div>';
+    r.later.forEach(function(i){
+      h+='<div class="mini">'+esc(i.p.name)+'<br><small>'+esc(i.p.when)+'</small></div>';
+    });
+    h+='</details>';
+  }
+
+  if(r.ineligible.length){
+    h+='<details class="skip"><summary>해당 안 되는 사업 '+r.ineligible.length+'개</summary>';
+    r.ineligible.forEach(function(i){
+      var why=i.failed.map(function(f){return FIELD_KO[f]||f}).join(', ');
+      h+='<div class="mini">'+esc(i.p.name)+'<br><small>'+esc(why)+' 조건에서 해당되지 않습니다</small></div>';
+    });
+    h+='</details>';
+  }
+
+  h+='<button class="restart" id="again">처음부터 다시</button>';
+  h+='<div class="foot">이 안내는 참고용입니다.<br>'+
+     '실제 신청 자격은 담당 기관에서 정합니다.<br><br>'+
+     '2026년 7월 확인<br>영등포구청 · 보건복지부 · 서울시 자료</div>';
+
+  app.innerHTML=h;
+  document.getElementById('again').onclick=function(){
+    tick(); state={idx:0,profile:{},history:[],started:false}; render();
+  };
+  document.querySelectorAll('details').forEach(function(d){
+    d.addEventListener('toggle',function(){ if(d.open) tick(); });
+  });
+}
+
+/* 외부 데이터 우선 로드 — programs-live.json만 교체하면 요건 갱신 가능.
+   실패 시 내장 데이터로 동작하므로 오프라인에서도 앱이 죽지 않는다. */
+fetch('programs-live.json?t='+Date.now())
+  .then(function(r){ if(!r.ok) throw 0; return r.json(); })
+  .then(function(d){
+    if(d && d.programs && d.programs.length){
+      PROGRAMS = d.programs;
+      if(d.checked_at) DATA_CHECKED = d.checked_at;
+      if(!state.started) renderTitle();
+    }
+  })
+  .catch(function(){ /* 내장 데이터 유지 */ });
+
+render();
+</script>
+</body>
+</html>
