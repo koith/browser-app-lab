@@ -18,10 +18,11 @@
     --paper:#FAFAF7;      /* 배경: 미세 회백 */
     --card:#FFFFFF;
     --line:#B8B8B0;
-    --act:#B3000F;        /* 주 강조: 진홍 (흰 배경 대비 8.6:1) */
-    --act-press:#7A000A;
-    --ok:#0B5C1E;         /* 신청 가능: 진녹 (대비 7.4:1) */
-    --wait:#8A4B00;       /* 확인 필요: 갈주황 (대비 7.1:1) */
+    --act:#0C6152;        /* 주 강조: 진청록 (흰 배경 대비 7.2:1) */
+    --act-press:#0A4F42;
+    --ok:#0E6428;         /* 신청 가능: 밝은 진초록 (대비 4.9:1, 흰글씨 기준) */
+    --wait:#8A4B00;       /* 확인 필요: 주황 (대비 4.6:1, 흰글씨 기준) */
+    --waitline:#8A4B00;   /* 주황 계열 테두리·글자용 진한 톤 */
     --sub:#3A3A38;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -29,8 +30,16 @@
   body{margin:0;background:var(--paper);color:var(--ink);
     font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
     font-size:36px;line-height:1.6;font-weight:600;-webkit-font-smoothing:antialiased}
+  .apphead{position:sticky;top:0;z-index:50;
+    background:var(--act);color:#fff;
+    padding:calc(14px + env(safe-area-inset-top)) 18px 14px;
+    font-size:30px;font-weight:900;letter-spacing:-.02em;
+    display:flex;align-items:center;gap:14px;
+    border-bottom:5px solid var(--act-press)}
+  .apphead .dotmark{width:22px;height:22px;border-radius:50%;
+    background:#fff;flex:0 0 22px}
   .wrap{max-width:820px;margin:0 auto;
-    padding:max(12px,env(safe-area-inset-top)) 18px calc(48px + env(safe-area-inset-bottom));
+    padding:18px 18px calc(48px + env(safe-area-inset-bottom));
     min-height:100vh;display:flex;flex-direction:column}
 
   /* 상단바 */
@@ -45,7 +54,7 @@
   .step{font-size:30px;font-weight:800;color:var(--sub)}
 
   .bar{height:16px;background:var(--line);border-radius:99px;overflow:hidden;margin-bottom:40px}
-  .bar > i{display:block;height:100%;background:var(--act);border-radius:99px;transition:width .35s ease}
+  .bar > i{display:block;height:100%;background:var(--ok);border-radius:99px;transition:width .35s ease}
 
   h1{font-size:58px;line-height:1.25;font-weight:900;margin:0 0 20px;letter-spacing:-.03em}
   .hint{font-size:32px;color:var(--sub);margin:0 0 24px;padding-left:18px;
@@ -75,9 +84,10 @@
   /* 카드 — 상태 스티커를 카드마다 부착 */
   .card{background:var(--card);border:5px solid var(--ink);border-radius:22px;
     padding:64px 24px 28px;margin-top:44px;position:relative}
-  .badge{position:absolute;top:-30px;right:16px;color:#fff;
-    font-size:31px;font-weight:900;border-radius:14px;padding:12px 22px;
-    letter-spacing:-.02em;box-shadow:0 4px 0 rgba(0,0,0,.28)}
+  .badge{position:absolute;top:-32px;right:14px;color:#fff;
+    font-size:32px;font-weight:900;border-radius:16px;padding:14px 24px;
+    letter-spacing:-.02em;border:4px solid #fff;
+    box-shadow:0 5px 14px rgba(0,0,0,.22)}
   .b-ok{background:var(--ok)}
   .b-wait{background:var(--wait)}
   .cnum{position:absolute;top:-26px;left:20px;background:var(--ink);color:#fff;
@@ -86,30 +96,35 @@
   .card h2{font-size:46px;font-weight:900;margin:6px 0 16px;line-height:1.3}
   .card .sum{font-size:32px;color:var(--sub);margin:0 0 24px;line-height:1.55;font-weight:600}
 
-  .tel{display:flex;align-items:center;justify-content:center;
-    min-height:120px;background:var(--act);color:#fff;border-radius:18px;
-    font-size:42px;font-weight:900;text-decoration:none;margin-top:10px;
+  .tel{display:flex;align-items:center;justify-content:center;gap:20px;
+    min-height:130px;background:var(--act);color:#fff;border-radius:18px;
+    font-size:44px;font-weight:900;text-decoration:none;margin-top:10px;
     border:5px solid var(--act-press)}
+  .tel svg{width:52px;height:52px;flex:0 0 52px;fill:#fff}
   .tel:active{background:var(--act-press)}
 
   .warn{margin-top:22px;padding:22px;background:#FFF0D6;
     border-radius:14px;font-size:30px;line-height:1.5;
-    border-left:10px solid var(--wait);font-weight:700}
+    border-left:10px solid var(--waitline);font-weight:700}
 
   .more{margin-top:22px;border-top:4px solid var(--line);padding-top:6px}
   .more summary{font-size:34px;font-weight:800;color:var(--act);
-    padding:26px 0;cursor:pointer;list-style:none;min-height:88px;display:flex;align-items:center}
+    padding:26px 0;cursor:pointer;list-style:none;min-height:96px;
+    display:flex;align-items:center;justify-content:space-between;gap:16px}
   .more summary::-webkit-details-marker{display:none}
-  .more summary::after{content:"  ▾";font-size:30px}
-  .more[open] summary::after{content:"  ▴"}
-  .row{font-size:31px;margin:22px 0;line-height:1.5}
-  .row b{display:block;color:var(--sub);font-weight:800;font-size:27px;margin-bottom:4px}
+  .more summary::after{content:"▼";font-size:44px;line-height:1;
+    color:var(--act);flex:0 0 auto}
+  .more[open] summary::after{content:"▲"}
+  .row{font-size:33px;margin:28px 0;line-height:1.5;font-weight:600;color:var(--ink)}
+  .row b{display:block;color:#fff;background:var(--sub);font-weight:800;
+    font-size:24px;margin-bottom:12px;letter-spacing:.06em;
+    padding:6px 16px;border-radius:8px;width:fit-content}
   .note{margin-top:22px;padding:22px;background:#F0EFEA;border-radius:14px;
     font-size:29px;line-height:1.55}
 
-  .tip{background:#FFF0D6;border:5px solid var(--wait);border-radius:22px;
+  .tip{background:#FFF4E0;border:5px solid var(--waitline);border-radius:22px;
     padding:28px;margin-top:24px;font-size:32px;line-height:1.55;font-weight:600}
-  .tip b{display:block;font-size:38px;margin-bottom:14px;color:var(--wait);font-weight:900}
+  .tip b{display:block;font-size:38px;margin-bottom:14px;color:var(--waitline);font-weight:900}
 
   .restmore{margin-top:34px;border-top:none}
   .restmore > summary{justify-content:center;border:5px dashed var(--line);
@@ -118,9 +133,10 @@
   .skip{margin-bottom:32px}
   .skip summary{font-size:30px;font-weight:800;color:var(--sub);padding:28px 0;
     cursor:pointer;list-style:none;min-height:92px;display:flex;align-items:center}
+  .skip summary{justify-content:space-between;gap:16px}
   .skip summary::-webkit-details-marker{display:none}
-  .skip summary::after{content:"  ▾"}
-  .skip[open] summary::after{content:"  ▴"}
+  .skip summary::after{content:"▼";font-size:40px;line-height:1;flex:0 0 auto}
+  .skip[open] summary::after{content:"▲"}
   .mini{font-size:29px;color:var(--sub);padding:22px 0;border-top:3px solid var(--line);line-height:1.45}
   .mini small{font-size:26px}
 
@@ -132,6 +148,10 @@
 </style>
 </head>
 <body>
+<header class="apphead">
+  <span class="dotmark"></span>
+  <span>영등포 어르신 복지 찾기</span>
+</header>
 <div class="wrap" id="app"></div>
 
 <script>
@@ -523,6 +543,8 @@ function answer(field,val){
   render();
 }
 
+var PHONE_ICON='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8c1.4 2.8 3.8 5.2 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.4.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1l-2.3 2.2z"/></svg>';
+
 function card(item,kind,n){
   var p=item.p;
   var unver=(p.conf==='unverified');
@@ -534,7 +556,7 @@ function card(item,kind,n){
         '<h2>'+esc(p.name)+'</h2>'+
         '<p class="sum">'+esc(p.summary)+'</p>';
 
-  if(p.tel) h+='<a class="tel" href="tel:'+p.tel.replace(/-/g,'')+'">전화 '+esc(p.tel)+'</a>';
+  if(p.tel) h+='<a class="tel" href="tel:'+p.tel.replace(/-/g,'')+'">'+PHONE_ICON+'<span>'+esc(p.tel)+'</span></a>';
 
   if(unver) h+='<div class="warn">조건을 다시 확인해야 합니다.<br>꼭 전화로 물어보세요.</div>';
   else if(kind==='maybe' && item.missing.length){
@@ -581,7 +603,7 @@ function renderResult(){
   if(!now){
     h+='<div class="sec"><div class="tip"><b>맞는 사업을 찾지 못했습니다</b>'+
        '영등포구청에 전화하시면<br>다른 도움을 알려드립니다.'+
-       '<a class="tel" href="tel:0226703408">전화 02-2670-3408</a></div></div>';
+       '<a class="tel" href="tel:0226703408">'+PHONE_ICON+'<span>02-2670-3408</span></a></div></div>';
   }
 
   if(r.tips.length){
