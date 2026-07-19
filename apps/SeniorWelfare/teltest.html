@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>전화 링크 테스트</title>
+<style>
+body{font-family:-apple-system,sans-serif;padding:24px;font-size:20px;line-height:1.6}
+a{display:block;padding:24px;margin:16px 0;background:#0C6152;color:#fff;
+  border-radius:12px;text-decoration:none;font-size:28px;font-weight:800;text-align:center}
+p{color:#444}
+b{display:block;margin-top:28px;font-size:22px}
+</style>
+</head>
+<body>
+
+<h1>전화 링크 테스트</h1>
+<p>아래 3개를 차례로 눌러보시고, 각각 차단 팝업이 뜨는지 확인해 주세요.</p>
+
+<b>1. 순수 HTML 링크 (JS 없음)</b>
+<a href="tel:0226703408">02-2670-3408</a>
+
+<b>2. 국번 없는 짧은 번호</b>
+<a href="tel:129">129</a>
+
+<b>3. 자식 span이 있는 링크 (앱과 동일 구조)</b>
+<a href="tel:0226313212"><span>02-2631-3212</span></a>
+
+<p style="margin-top:40px;color:#666;font-size:17px">
+이 페이지에는 자바스크립트가 전혀 없습니다.<br>
+여기서도 팝업이 뜬다면 앱 코드가 아니라 Safari 설정 문제입니다.
+</p>
+
+</body>
+</html>
