@@ -1,0 +1,480 @@
+{
+  "checked_at": "2026-07-19",
+  "note": "요건은 매년 변경됩니다. 이 파일만 교체하면 앱이 자동으로 최신 정보를 사용합니다.",
+  "programs": [
+    {
+      "id": "job-public",
+      "name": "어르신 일자리 — 공익활동",
+      "summary": "노노케어(도시락 배달), 학교 앞 교통지도, 복지시설 봉사 등을 하고 활동비를 받습니다.",
+      "category": "일자리",
+      "org": "영등포구 어르신장애인과",
+      "tel": "02-2670-3408",
+      "benefit": "월 30시간 이내 (하루 3시간)",
+      "period": "평균 11개월",
+      "how": "영등포시니어클럽 등 수행기관 방문, 또는 복지로·노인일자리여기에서 신청",
+      "when": "매년 11~12월경 모집",
+      "season": [
+        11,
+        12
+      ],
+      "rules": {
+        "op": "AND",
+        "rules": [
+          {
+            "f": "age",
+            "op": ">=",
+            "v": 65
+          },
+          {
+            "f": "residence_gu",
+            "op": "==",
+            "v": true
+          },
+          {
+            "f": "basic_pension",
+            "op": "==",
+            "v": true
+          },
+          {
+            "f": "livelihood_benefit",
+            "op": "==",
+            "v": false
+          },
+          {
+            "f": "employed_insured",
+            "op": "==",
+            "v": false
+          },
+          {
+            "f": "ltc_grade",
+            "op": "in",
+            "v": [
+              null
+            ]
+          },
+          {
+            "f": "mobility",
+            "op": "in",
+            "v": [
+              "independent",
+              "assisted"
+            ]
+          }
+        ]
+      },
+      "notes": [
+        "60~64세 차상위계층도 자리가 남으면 참여할 수 있습니다. 문의해 보세요."
+      ],
+      "conf": "verified"
+    },
+    {
+      "id": "job-service",
+      "name": "어르신 일자리 — 노인 역량활용",
+      "summary": "어린이집 보육교사 보조, 우체국 행정 지원, 지역아동센터 학습 보조 등을 합니다.",
+      "category": "일자리",
+      "org": "영등포구 어르신장애인과",
+      "tel": "02-2670-3411",
+      "benefit": "월 761,040원 (주휴수당 포함, 연차수당 별도)",
+      "period": "10개월 · 주 15시간",
+      "how": "수행기관 방문, 또는 복지로·노인일자리여기에서 신청",
+      "when": "매년 11~12월경 모집",
+      "season": [
+        11,
+        12
+      ],
+      "rules": {
+        "op": "AND",
+        "rules": [
+          {
+            "f": "age",
+            "op": ">=",
+            "v": 65
+          },
+          {
+            "f": "residence_gu",
+            "op": "==",
+            "v": true
+          },
+          {
+            "f": "livelihood_benefit",
+            "op": "==",
+            "v": false
+          },
+          {
+            "f": "ltc_grade",
+            "op": "in",
+            "v": [
+              null
+            ]
+          },
+          {
+            "f": "mobility",
+            "op": "in",
+            "v": [
+              "independent",
+              "assisted"
+            ]
+          }
+        ]
+      },
+      "notes": [
+        "해당 사업에서 직장가입자가 되는 경우는 제외 대상이 아닙니다."
+      ],
+      "conf": "partial"
+    },
+    {
+      "id": "job-market",
+      "name": "어르신 일자리 — 공동체 사업단",
+      "summary": "카페, 도시락 제조·판매 같은 작은 가게를 함께 운영합니다. 인생100반 식당, 시니어 북카페 등.",
+      "category": "일자리",
+      "org": "영등포구 어르신장애인과",
+      "tel": "02-2670-3412",
+      "benefit": "근로계약에 따름 (하루 최대 8시간)",
+      "period": "12개월",
+      "how": "수행기관 방문 신청",
+      "when": "매년 11~12월경 모집",
+      "season": [
+        11,
+        12
+      ],
+      "rules": {
+        "op": "AND",
+        "rules": [
+          {
+            "f": "age",
+            "op": ">=",
+            "v": 60
+          },
+          {
+            "f": "residence_gu",
+            "op": "==",
+            "v": true
+          },
+          {
+            "f": "livelihood_benefit",
+            "op": "==",
+            "v": false
+          },
+          {
+            "f": "ltc_grade",
+            "op": "in",
+            "v": [
+              null
+            ]
+          },
+          {
+            "f": "mobility",
+            "op": "in",
+            "v": [
+              "independent",
+              "assisted"
+            ]
+          }
+        ]
+      },
+      "notes": [
+        "만 60세 이상이면 기초연금을 안 받아도 신청할 수 있습니다.",
+        "선발 기준표에 따라 뽑기 때문에 신청해도 안 될 수 있습니다."
+      ],
+      "conf": "partial"
+    },
+    {
+      "id": "job-place",
+      "name": "취업알선형 일자리",
+      "summary": "민간 회사 일자리를 연결해 드립니다. 모집 기간 없이 언제든 상담할 수 있습니다.",
+      "category": "일자리",
+      "org": "영등포시니어클럽 / 영등포노인종합복지관",
+      "tel": "02-2670-3408",
+      "benefit": "취업처에 따라 다름",
+      "period": "연중 상시",
+      "how": "영등포시니어클럽 또는 영등포노인종합복지관 방문",
+      "when": "아무 때나",
+      "season": "always",
+      "rules": {
+        "op": "AND",
+        "rules": [
+          {
+            "f": "age",
+            "op": ">=",
+            "v": 60
+          },
+          {
+            "f": "residence_gu",
+            "op": "==",
+            "v": true
+          },
+          {
+            "f": "mobility",
+            "op": "in",
+            "v": [
+              "independent",
+              "assisted"
+            ]
+          }
+        ]
+      },
+      "notes": [
+        "다른 일자리 사업과 달리, 생활비를 받고 계셔도·직장에 다니셔도·요양등급이 있어도 신청할 수 있습니다."
+      ],
+      "conf": "verified"
+    },
+    {
+      "id": "care-custom",
+      "name": "노인맞춤돌봄서비스",
+      "summary": "생활지원사가 집으로 찾아와 안부를 확인하고 집안일과 외출을 도와드립니다.",
+      "category": "돌봄",
+      "org": "영등포노인종합복지관 외",
+      "tel": "02-2670-3408",
+      "benefit": "무료 방문 돌봄",
+      "period": "연중 상시",
+      "how": "사시는 동 주민센터에 방문하거나 전화로 신청",
+      "when": "아무 때나",
+      "season": "always",
+      "rules": {
+        "op": "AND",
+        "rules": [
+          {
+            "f": "age",
+            "op": ">=",
+            "v": 65
+          },
+          {
+            "f": "residence_gu",
+            "op": "==",
+            "v": true
+          },
+          {
+            "f": "ltc_grade",
+            "op": "in",
+            "v": [
+              null
+            ]
+          },
+          {
+            "op": "OR",
+            "rules": [
+              {
+                "f": "living_alone",
+                "op": "==",
+                "v": true
+              },
+              {
+                "f": "care_need",
+                "op": "==",
+                "v": true
+              },
+              {
+                "f": "medical_benefit",
+                "op": "==",
+                "v": true
+              }
+            ]
+          }
+        ]
+      },
+      "notes": [
+        "장기요양 등급이 있으면 이 서비스 대신 장기요양 서비스를 받습니다.",
+        "신청은 누구나 할 수 있고, 방문 조사 후 대상이 정해집니다."
+      ],
+      "conf": "partial"
+    },
+    {
+      "id": "care-ltc",
+      "name": "재가장기요양 서비스",
+      "summary": "요양보호사가 집으로 와서 돌봐 드리거나(방문요양), 목욕을 도와드리거나, 낮 동안 센터에서 지내실 수 있습니다.",
+      "category": "돌봄",
+      "org": "구립영등포노인복지센터",
+      "tel": "02-2631-3212",
+      "benefit": "장기요양보험 적용 (본인부담 일부)",
+      "period": "연중 상시",
+      "how": "국민건강보험공단(1577-1000) 또는 구립영등포노인복지센터 문의",
+      "when": "아무 때나",
+      "season": "always",
+      "rules": {
+        "op": "AND",
+        "rules": [
+          {
+            "f": "residence_gu",
+            "op": "==",
+            "v": true
+          },
+          {
+            "f": "ltc_grade",
+            "op": "in",
+            "v": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5"
+            ]
+          }
+        ]
+      },
+      "notes": [
+        "데이케어센터 문의는 02-2634-2215"
+      ],
+      "conf": "verified"
+    },
+    {
+      "id": "meal",
+      "name": "어르신 급식 지원",
+      "summary": "복지관에서 점심 식사를 무료 또는 낮은 값에 드실 수 있습니다.",
+      "category": "급식",
+      "org": "영등포노인종합복지관",
+      "tel": "02-2068-5324",
+      "benefit": "중식 제공",
+      "period": "연중 상시",
+      "how": "영등포노인종합복지관 방문 신청",
+      "when": "아무 때나",
+      "season": "always",
+      "rules": {
+        "op": "AND",
+        "rules": [
+          {
+            "f": "age",
+            "op": ">=",
+            "v": 65
+          },
+          {
+            "f": "residence_gu",
+            "op": "==",
+            "v": true
+          },
+          {
+            "f": "mobility",
+            "op": "in",
+            "v": [
+              "independent",
+              "assisted"
+            ]
+          },
+          {
+            "op": "OR",
+            "rules": [
+              {
+                "f": "livelihood_benefit",
+                "op": "==",
+                "v": true
+              },
+              {
+                "f": "medical_benefit",
+                "op": "==",
+                "v": true
+              },
+              {
+                "f": "living_alone",
+                "op": "==",
+                "v": true
+              }
+            ]
+          }
+        ]
+      },
+      "notes": [
+        "거동이 어려우시면 도시락 배달로 연결해 드립니다.",
+        "소득 기준은 복지관에 확인이 필요합니다."
+      ],
+      "conf": "unverified"
+    },
+    {
+      "id": "counsel",
+      "name": "찾아가는 어르신 상담",
+      "summary": "상담사가 집으로 찾아와 이야기를 들어 드립니다. 외롭거나 마음이 힘드실 때 이용하세요.",
+      "category": "정서지원",
+      "org": "영등포구 노인상담센터",
+      "tel": "02-2670-3408",
+      "benefit": "무료 방문 상담",
+      "period": "연중 상시",
+      "how": "전화로 신청하거나 동 주민센터에 말씀하세요",
+      "when": "아무 때나",
+      "season": "always",
+      "rules": {
+        "op": "AND",
+        "rules": [
+          {
+            "f": "age",
+            "op": ">=",
+            "v": 65
+          },
+          {
+            "f": "residence_gu",
+            "op": "==",
+            "v": true
+          }
+        ]
+      },
+      "notes": [
+        "소득이나 재산 조건이 없습니다. 영등포구 어르신이면 누구나 신청할 수 있습니다."
+      ],
+      "conf": "partial"
+    },
+    {
+      "id": "card",
+      "name": "백세카드",
+      "summary": "영등포구 안의 “으뜸업소”에서 할인을 받을 수 있는 카드입니다.",
+      "category": "생활지원",
+      "org": "영등포구",
+      "tel": "02-2670-3408",
+      "benefit": "제휴 업소 할인",
+      "period": "연중 상시",
+      "how": "사시는 동 주민센터에서 신청하면 카드와 안내책자를 받습니다",
+      "when": "아무 때나",
+      "season": "always",
+      "rules": {
+        "op": "AND",
+        "rules": [
+          {
+            "f": "age",
+            "op": ">=",
+            "v": 65
+          },
+          {
+            "f": "residence_gu",
+            "op": "==",
+            "v": true
+          }
+        ]
+      },
+      "notes": [
+        "나이 기준은 동 주민센터에 다시 확인해 보세요."
+      ],
+      "conf": "unverified"
+    },
+    {
+      "id": "50plus",
+      "name": "서울시 50+ 영등포센터",
+      "summary": "새로운 것을 배우고, 취미 활동을 하고, 사람들을 만나는 곳입니다.",
+      "category": "교육·여가",
+      "org": "서울시 50플러스 영등포센터",
+      "tel": null,
+      "benefit": "교육 및 커뮤니티 프로그램",
+      "period": "수시 모집",
+      "how": "50plus.or.kr 또는 센터 방문",
+      "when": "수시",
+      "season": "always",
+      "rules": {
+        "op": "AND",
+        "rules": [
+          {
+            "f": "age",
+            "op": ">=",
+            "v": 50
+          },
+          {
+            "f": "mobility",
+            "op": "in",
+            "v": [
+              "independent",
+              "assisted"
+            ]
+          }
+        ]
+      },
+      "notes": [
+        "서울시에 사는 분이면 신청할 수 있습니다."
+      ],
+      "conf": "partial"
+    }
+  ]
+}
