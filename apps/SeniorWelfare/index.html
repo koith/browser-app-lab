@@ -491,12 +491,17 @@ function diagnose(profile){
     else out.maybe.push(item);
   });
   /* 중요도 순: 현금·돌봄처럼 삶에 큰 영향을 주는 것을 먼저 */
+  /* 순서 기준: 지금 바로 신청해서 도움이 되는 것 → 상황이 생겼을 때 쓰는 것 */
   var PRIORITY={
-    'basic-pension':0, 'ltc-apply':1, 'emergency-support':2,
-    'housing-support':3, 'care-custom':4, 'care-ltc':5,
+    'basic-pension':0, 'ltc-apply':1, 'housing-support':2,
+    'care-custom':3, 'care-ltc':4, 'seoul-home-care':5,
     'meal-delivery':6, 'meal':7,
-    'job-public':8, 'job-service':9, 'job-market':10, 'job-place':11,
-    'counsel':12, 'gyeongrodang':13, 'card':14, '50plus':15
+    'subway-free':8, 'health-checkup':9, 'vaccine':10, 'dementia-check':11,
+    'job-public':12, 'job-service':13, 'job-market':14, 'job-place':15,
+    'gyeongrodang':16, 'counsel':17, 'card':18,
+    'senior-center-program':19, '50plus':20,
+    /* 아래는 해당 상황이 생겼을 때 필요한 것 */
+    'emergency-support':30, 'eye-surgery':31, 'funeral-support':32
   };
   var order={verified:0,partial:1,unverified:2};
   [out.eligible,out.maybe].forEach(function(l){
@@ -775,14 +780,14 @@ function renderResult(){
   var h='<div class="rtop"><h1>'+now+'가지를<br>찾았습니다</h1>'+
         '<p>지금 신청할 수 있는 것만<br>모았습니다.</p></div>';
 
-  var n=0, TOP=3;
+  var n=0, TOP=4;
 
   if(r.eligible.length){
     var head=r.eligible.slice(0,TOP), rest=r.eligible.slice(TOP);
     h+='<div class="sec">';
     head.forEach(function(i){ h+=card(i,'good',++n) });
     if(rest.length){
-      h+='<details class="more restmore"><summary>더 있어요 ('+rest.length+'개)</summary><div>';
+      h+='<details class="more restmore"><summary>이것도 받으실 수 있어요 ('+rest.length+'개)</summary><div>';
       rest.forEach(function(i){ h+=card(i,'good',++n) });
       h+='</div></details>';
     }
