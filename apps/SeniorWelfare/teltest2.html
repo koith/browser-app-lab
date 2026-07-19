@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>전화 링크 테스트 2</title>
+<style>
+body{font-family:-apple-system,sans-serif;padding:24px;font-size:19px;line-height:1.6}
+a{display:block;padding:22px;margin:12px 0;background:#0C6152;color:#fff;
+  border-radius:12px;text-decoration:none;font-size:26px;font-weight:800;text-align:center}
+b{display:block;margin-top:32px;font-size:21px}
+small{color:#666;font-size:16px;display:block;margin-top:4px}
+.warn{background:#FFF4E0;border-left:6px solid #8A4B00;padding:16px;margin:20px 0;font-size:17px}
+</style>
+</head>
+<body>
+
+<h1>전화 링크 테스트 2</h1>
+
+<div class="warn">
+중요: <b style="display:inline;font-size:17px">한 번에 하나씩만</b> 누르고,
+팝업이 뜨는지 적어두세요. 누른 뒤에는 <b style="display:inline;font-size:17px">페이지를 새로고침</b>하고
+다음 것을 눌러 주세요.
+</div>
+
+<b>A. 서로 다른 번호 — 전부 처음 누르는 번호</b>
+
+<a href="tel:0212345678">A-1 · 02-1234-5678</a>
+<small>순수 링크, 자식 없음</small>
+
+<a href="tel:0298765432"><span>A-2 · 02-9876-5432</span></a>
+<small>자식 span 있음, 처음 누르는 번호</small>
+
+<b>B. 같은 번호를 두 번</b>
+
+<a href="tel:0255556666">B-1 · 02-5555-6666</a>
+<small>이 번호 첫 시도</small>
+
+<a href="tel:0255556666">B-2 · 02-5555-6666</a>
+<small>같은 번호 두 번째 시도</small>
+
+<div class="warn" style="margin-top:36px">
+<b style="display:inline;font-size:17px">확인할 것</b><br><br>
+· A-1만 되고 A-2가 막히면 → 자식 span이 원인<br>
+· A-1, A-2 다 되는데 B-2만 막히면 → 같은 번호 반복이 원인<br>
+· 전부 막히면 → 새로고침 없이 연속으로 누른 것이 원인<br>
+· 전부 되면 → 앞선 테스트에서 연속 탭이 원인이었던 것
+</div>
+
+</body>
+</html>
