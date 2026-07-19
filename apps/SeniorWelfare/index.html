@@ -537,19 +537,29 @@ function ensureAudio(){
     if(actx.state!=='running') actx.resume();
   }catch(e){}
 }
-/* iOS는 앱을 벗어났다 돌아오면 AudioContext를 suspended로 만든다.
-   복귀·터치 시점마다 재개해야 소리가 계속 난다. */
+
+/* iOS는 한 번의 탭에 딸린 '사용자 제스처'를 하나의 자원처럼 다룬다.
+   전화 링크 위에서 오디오를 재개하면 그 제스처가 오디오에 소비된 것으로
+   처리되어, 뒤따르는 tel: 이동이 '자동 전화'로 차단된다.
+   따라서 링크 위에서는 오디오에 손대지 않는다. */
+function isPhoneTarget(el){
+  return !!(el && el.closest && el.closest('a[href^="tel:"]'));
+}
+
 document.addEventListener('visibilitychange',function(){
   if(!document.hidden) ensureAudio();
 });
 window.addEventListener('pageshow',ensureAudio);
 window.addEventListener('focus',ensureAudio);
-document.addEventListener('touchstart',ensureAudio,{passive:true});
+document.addEventListener('touchstart',function(e){
+  if(isPhoneTarget(e.target)) return;
+  ensureAudio();
+},{passive:true});
 
-function tick(){
+function tick(el){
+  if(isPhoneTarget(el)) return;   // 전화 버튼에서는 소리를 내지 않는다
   try{
-    ensureAudio();
-    if(!actx || actx.state!=='running') return;
+    if(!actx || actx.state!=='running') return;  // 여기서 resume하지 않는다
     var o=actx.createOscillator(), g=actx.createGain();
     o.frequency.value=660; o.type='sine';
     g.gain.setValueAtTime(0.10, actx.currentTime);
@@ -558,46 +568,6 @@ function tick(){
     o.start(); o.stop(actx.currentTime+0.09);
   }catch(e){}
   if(navigator.vibrate) navigator.vibrate(30);
-}
-
-var DATA_CHECKED='2026-07-19';
-function monthsSinceCheck(){
-  var d=new Date(DATA_CHECKED), now=new Date();
-  return (now.getFullYear()-d.getFullYear())*12 + (now.getMonth()-d.getMonth());
-}
-
-function renderTitle(){
-  window.scrollTo(0,0);
-  var stale=monthsSinceCheck();
-  var h='<div class="title">'+
-    '<div class="hero">'+HERO_SVG+
-      '<h1>받을 수 있는<br>도움 찾기</h1>'+
-      '<p>몇 가지만 여쭤보고<br>알려드립니다</p>'+
-    '</div>';
-
-  if(stale>=6){
-    h+='<div class="stale">이 정보는 '+stale+'개월 전에 확인한 것입니다. '+
-       '조건이 바뀌었을 수 있으니 신청 전에 꼭 전화로 물어보세요.</div>';
-  }
-
-  h+='<div class="steps">'+
-     '<div class="stepline"><i>1</i>질문에 답하기</div>'+
-     '<div class="stepline"><i>2</i>받을 수 있는 것 보기</div>'+
-     '<div class="stepline"><i>3</i>전화로 신청하기</div>'+
-     '</div>'+
-     '<div class="cover">지원사업 '+PROGRAMS.length+'가지를 담았습니다.<br>'+
-     '이것이 전부는 아닙니다.<br>'+
-     '더 궁금하시면 영등포구청<br>02-2670-3408<br><br>'+
-     '확인일 '+DATA_CHECKED.replace(/-/g,'. ')+'</div>'+
-     '</div>'+
-     '<div class="startbar"><button class="start" id="go">시작하기</button></div>';
-  app.innerHTML=h;
-  var b=document.getElementById('go');
-  b.onclick=function(){
-    if(b.dataset.done) return;
-    b.dataset.done='1'; b.classList.add('chosen'); tick();
-    setTimeout(function(){ state.started=true; render(); },180);
-  };
 }
 
 function visibleQuestions(){
@@ -635,7 +605,7 @@ function render(){
 
   var bk=document.getElementById('back');
   if(bk) bk.onclick=function(){
-    tick();
+    tick(bk);
     if(state.idx===0){ state.started=false; render(); return; }
     var prev=state.history.pop();
     if(prev) delete state.profile[prev];
@@ -651,7 +621,7 @@ function mkBtn(text,fn){
     if(b.dataset.done) return;
     b.dataset.done='1';
     b.classList.add('chosen');
-    tick();
+    tick(b);
     setTimeout(fn,180); // 눌린 상태를 보여준 뒤 이동
   };
   return b;
@@ -774,10 +744,10 @@ function renderResult(){
 
   app.innerHTML=h;
   document.getElementById('again').onclick=function(){
-    tick(); state={idx:0,profile:{},history:[],started:false}; render();
+    tick(this); state={idx:0,profile:{},history:[],started:false}; render();
   };
   document.querySelectorAll('details').forEach(function(d){
-    d.addEventListener('toggle',function(){ if(d.open) tick(); });
+    d.addEventListener('toggle',function(){ if(d.open) tick(d); });
   });
 }
 
@@ -799,7 +769,10 @@ fetch('programs-live.json?t='+Date.now())
    차단 팝업을 띄운다. 따라서 손가락 두 개 확대만 막고,
    더블탭은 viewport(maximum-scale)와 touch-action:manipulation에 맡긴다. */
 ['gesturestart','gesturechange','gestureend'].forEach(function(ev){
-  document.addEventListener(ev,function(e){ e.preventDefault(); });
+  document.addEventListener(ev,function(e){
+    if(isPhoneTarget(e.target)) return;
+    e.preventDefault();
+  });
 });
 
 render();
