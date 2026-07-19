@@ -1087,6 +1087,378 @@
         "장례를 치른 뒤에도 신청할 수 있으니 주민센터에 물어보세요."
       ],
       "conf": "partial"
+    },
+    {
+      "id": "smart-safety",
+      "name": "스마트 안부확인 서비스",
+      "summary": "혼자 계시다 갑자기 쓰러지셔도 자동으로 알아채고 도와드립니다. 전기 사용량으로 확인합니다.",
+      "category": "안전",
+      "org": "서울시 / 동 주민센터",
+      "tel": "02-2670-3408",
+      "benefit": "안부 확인 장비 무료 설치",
+      "period": "연중",
+      "how": "동 주민센터에 신청하시면 됩니다",
+      "when": "아무 때나",
+      "season": "always",
+      "rules": {
+        "op": "AND",
+        "rules": [
+          {
+            "f": "age",
+            "op": ">=",
+            "v": 65
+          },
+          {
+            "f": "residence_gu",
+            "op": "==",
+            "v": true
+          },
+          {
+            "f": "living_alone",
+            "op": "==",
+            "v": true
+          }
+        ]
+      },
+      "notes": [
+        "혼자 사시면 소득과 상관없이 신청할 수 있습니다.",
+        "AI가 전화로 안부를 묻는 방식도 있습니다.",
+        "서울시는 여러 종류를 운영하니 주민센터에서 맞는 것을 안내받으세요."
+      ],
+      "conf": "partial"
+    },
+    {
+      "id": "foodbank",
+      "name": "푸드뱅크·푸드마켓",
+      "summary": "쌀, 라면, 반찬 같은 먹거리와 생활용품을 무료로 받으실 수 있습니다.",
+      "category": "급식",
+      "org": "영등포구 푸드뱅크",
+      "tel": "02-2670-3408",
+      "benefit": "식품·생활용품 무료 제공",
+      "period": "연중",
+      "how": "동 주민센터나 푸드뱅크에 신청",
+      "when": "아무 때나",
+      "season": "always",
+      "rules": {
+        "op": "AND",
+        "rules": [
+          {
+            "f": "residence_gu",
+            "op": "==",
+            "v": true
+          },
+          {
+            "op": "OR",
+            "rules": [
+              {
+                "f": "livelihood_benefit",
+                "op": "==",
+                "v": true
+              },
+              {
+                "f": "medical_benefit",
+                "op": "==",
+                "v": true
+              },
+              {
+                "f": "near_poor",
+                "op": "==",
+                "v": true
+              },
+              {
+                "f": "living_alone",
+                "op": "==",
+                "v": true
+              }
+            ]
+          }
+        ]
+      },
+      "notes": [
+        "푸드마켓에서는 필요한 물건을 직접 고르실 수 있습니다.",
+        "거동이 어려우시면 배달해 드리는 경우도 있습니다."
+      ],
+      "conf": "partial"
+    },
+    {
+      "id": "banchan",
+      "name": "밑반찬 배달",
+      "summary": "반찬을 만들어 집으로 가져다 드립니다.",
+      "category": "급식",
+      "org": "영등포구 사회복지관",
+      "tel": "02-2670-3408",
+      "benefit": "주 1~2회 밑반찬 배달",
+      "period": "연중",
+      "how": "동 주민센터나 복지관에 신청",
+      "when": "아무 때나",
+      "season": "always",
+      "rules": {
+        "op": "AND",
+        "rules": [
+          {
+            "f": "age",
+            "op": ">=",
+            "v": 65
+          },
+          {
+            "f": "residence_gu",
+            "op": "==",
+            "v": true
+          },
+          {
+            "f": "living_alone",
+            "op": "==",
+            "v": true
+          },
+          {
+            "op": "OR",
+            "rules": [
+              {
+                "f": "livelihood_benefit",
+                "op": "==",
+                "v": true
+              },
+              {
+                "f": "medical_benefit",
+                "op": "==",
+                "v": true
+              },
+              {
+                "f": "near_poor",
+                "op": "==",
+                "v": true
+              }
+            ]
+          }
+        ]
+      },
+      "notes": [
+        "소득 기준이 있습니다. 주민센터에 물어보세요."
+      ],
+      "conf": "unverified"
+    },
+    {
+      "id": "home-repair",
+      "name": "집 고쳐주기 (주거환경 개선)",
+      "summary": "보일러가 고장 났거나 화장실이 위험하면 고쳐 드립니다.",
+      "category": "주거",
+      "org": "동 주민센터",
+      "tel": "02-2670-3408",
+      "benefit": "수리비 지원 또는 직접 수리",
+      "period": "연중 (예산 소진 시 마감)",
+      "how": "동 주민센터에 신청",
+      "when": "아무 때나",
+      "season": "always",
+      "rules": {
+        "op": "AND",
+        "rules": [
+          {
+            "f": "age",
+            "op": ">=",
+            "v": 65
+          },
+          {
+            "f": "residence_gu",
+            "op": "==",
+            "v": true
+          },
+          {
+            "op": "OR",
+            "rules": [
+              {
+                "f": "livelihood_benefit",
+                "op": "==",
+                "v": true
+              },
+              {
+                "f": "medical_benefit",
+                "op": "==",
+                "v": true
+              },
+              {
+                "f": "near_poor",
+                "op": "==",
+                "v": true
+              },
+              {
+                "f": "living_alone",
+                "op": "==",
+                "v": true
+              }
+            ]
+          }
+        ]
+      },
+      "notes": [
+        "화장실 손잡이, 문턱 없애기 같은 안전 공사도 해 줍니다.",
+        "예산이 정해져 있어 일찍 신청하시는 게 좋습니다."
+      ],
+      "conf": "unverified"
+    },
+    {
+      "id": "energy-voucher",
+      "name": "에너지바우처 (난방비 지원)",
+      "summary": "겨울 난방비와 여름 전기료를 지원해 드립니다.",
+      "category": "생활지원",
+      "org": "동 주민센터",
+      "tel": "1600-3190",
+      "benefit": "전기·가스·연탄 등 요금 지원",
+      "period": "여름·겨울",
+      "how": "동 주민센터에 신청",
+      "when": "보통 5~12월 신청",
+      "season": "always",
+      "rules": {
+        "op": "AND",
+        "rules": [
+          {
+            "f": "age",
+            "op": ">=",
+            "v": 65
+          },
+          {
+            "f": "residence_gu",
+            "op": "==",
+            "v": true
+          },
+          {
+            "op": "OR",
+            "rules": [
+              {
+                "f": "livelihood_benefit",
+                "op": "==",
+                "v": true
+              },
+              {
+                "f": "medical_benefit",
+                "op": "==",
+                "v": true
+              }
+            ]
+          }
+        ]
+      },
+      "notes": [
+        "수급자 중 노인·영유아·장애인 등이 있는 가구가 대상입니다.",
+        "신청 기간을 놓치면 못 받으니 미리 물어보세요."
+      ],
+      "conf": "partial"
+    },
+    {
+      "id": "long-term-care-insurance-reduce",
+      "name": "장기요양 본인부담금 감경",
+      "summary": "요양 서비스를 받으실 때 내는 돈을 줄여 드립니다.",
+      "category": "의료비",
+      "org": "국민건강보험공단",
+      "tel": "1577-1000",
+      "benefit": "본인부담금 40~60% 감경 (수급자는 면제)",
+      "period": "자격 유지 시",
+      "how": "건강보험공단에 문의",
+      "when": "아무 때나",
+      "season": "always",
+      "rules": {
+        "op": "AND",
+        "rules": [
+          {
+            "f": "ltc_grade",
+            "op": "in",
+            "v": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5"
+            ]
+          },
+          {
+            "op": "OR",
+            "rules": [
+              {
+                "f": "livelihood_benefit",
+                "op": "==",
+                "v": true
+              },
+              {
+                "f": "medical_benefit",
+                "op": "==",
+                "v": true
+              },
+              {
+                "f": "near_poor",
+                "op": "==",
+                "v": true
+              }
+            ]
+          }
+        ]
+      },
+      "notes": [
+        "기초생활수급자는 본인 부담이 없습니다.",
+        "건강보험료가 적으면 감경 대상일 수 있으니 꼭 물어보세요."
+      ],
+      "conf": "partial"
+    },
+    {
+      "id": "welfare-device",
+      "name": "복지용구 지원",
+      "summary": "지팡이, 보행기, 침대 같은 물건을 싸게 사거나 빌리실 수 있습니다.",
+      "category": "돌봄",
+      "org": "국민건강보험공단",
+      "tel": "1577-1000",
+      "benefit": "연 160만원 한도, 본인부담 15%",
+      "period": "연중",
+      "how": "장기요양 등급을 받으신 뒤 복지용구 사업소에서 구입",
+      "when": "아무 때나",
+      "season": "always",
+      "rules": {
+        "op": "AND",
+        "rules": [
+          {
+            "f": "ltc_grade",
+            "op": "in",
+            "v": [
+              "1",
+              "2",
+              "3",
+              "4",
+              "5"
+            ]
+          }
+        ]
+      },
+      "notes": [
+        "장기요양 등급이 있어야 합니다.",
+        "미끄럼 방지 매트, 안전 손잡이도 포함됩니다."
+      ],
+      "conf": "partial"
+    },
+    {
+      "id": "senior-protection",
+      "name": "노인보호전문기관 (학대 상담)",
+      "summary": "가족이나 누군가에게 부당한 대우를 받고 계시면 상담받으실 수 있습니다.",
+      "category": "안전",
+      "org": "서울시남부노인보호전문기관",
+      "tel": "1577-1389",
+      "benefit": "무료 상담 및 보호 지원",
+      "period": "24시간",
+      "how": "1577-1389로 전화하시면 됩니다",
+      "when": "아무 때나",
+      "season": "always",
+      "rules": {
+        "op": "AND",
+        "rules": [
+          {
+            "f": "age",
+            "op": ">=",
+            "v": 60
+          }
+        ]
+      },
+      "notes": [
+        "24시간 전화를 받습니다.",
+        "말씀하신 내용은 비밀로 지켜집니다.",
+        "몸에 상처를 입히는 것뿐 아니라 돈을 뺏거나 돌보지 않는 것도 학대입니다."
+      ],
+      "conf": "partial"
     }
   ]
 }
