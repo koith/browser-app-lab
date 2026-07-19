@@ -27,7 +27,7 @@
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html{-webkit-text-size-adjust:100%}
-  body{margin:0;background:var(--paper);color:var(--ink);
+  body{margin:0;background:var(--paper);color:var(--ink);word-break:keep-all;
     font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
     font-size:36px;line-height:1.6;font-weight:600;-webkit-font-smoothing:antialiased}
   .apphead{position:sticky;top:0;z-index:50;
@@ -39,25 +39,28 @@
   .apphead .dotmark{width:22px;height:22px;border-radius:50%;
     background:#fff;flex:0 0 22px}
   .wrap{max-width:820px;margin:0 auto;
-    padding:18px 18px calc(48px + env(safe-area-inset-bottom));
+    padding:14px 18px calc(48px + env(safe-area-inset-bottom));
     min-height:100vh;display:flex;flex-direction:column}
+  .qwrap{display:flex;flex-direction:column}
 
   /* 타이틀 화면 */
-  .title{display:flex;flex-direction:column;min-height:100%;padding-top:20px}
-  .hero{background:var(--card);border:5px solid var(--ink);border-radius:26px;
-    padding:36px 26px;text-align:center;margin-bottom:34px}
-  .hero svg{width:100%;max-width:420px;height:auto;display:block;margin:0 auto 26px}
-  .hero h1{font-size:60px;line-height:1.2;margin:0 0 18px}
-  .hero p{font-size:34px;color:var(--sub);margin:0;line-height:1.5;font-weight:600}
-  .steps{margin-bottom:32px}
-  .stepline{display:flex;align-items:center;gap:20px;font-size:32px;
-    font-weight:700;padding:20px 0;border-bottom:3px solid var(--line)}
+  .title{display:flex;flex-direction:column;padding-top:8px}
+  .hero{background:var(--card);border:5px solid var(--ink);border-radius:24px;
+    padding:24px 20px;text-align:center;margin-bottom:22px}
+  .hero svg{width:100%;max-width:300px;height:auto;display:block;margin:0 auto 16px}
+  .hero h1{font-size:52px;line-height:1.18;margin:0 0 12px;word-break:keep-all}
+  .hero p{font-size:30px;color:var(--sub);margin:0;line-height:1.4;
+    font-weight:600;word-break:keep-all}
+  .steps{margin-bottom:22px}
+  .stepline{display:flex;align-items:center;gap:18px;font-size:30px;
+    font-weight:700;padding:14px 0;border-bottom:3px solid var(--line)}
   .stepline:last-child{border-bottom:none}
-  .stepline i{flex:0 0 62px;width:62px;height:62px;border-radius:50%;
+  .stepline i{flex:0 0 54px;width:54px;height:54px;border-radius:50%;
     background:var(--act);color:#fff;font-style:normal;font-weight:900;
-    font-size:32px;display:flex;align-items:center;justify-content:center}
+    font-size:28px;display:flex;align-items:center;justify-content:center}
   .start{background:var(--ok);border-color:#0A4F1E;color:#fff;
-    justify-content:center;font-size:46px;min-height:140px}
+    justify-content:center;font-size:44px;min-height:120px}
+  .cover{font-size:25px !important;padding:20px !important;margin-top:20px !important}
   .start:active{background:#0A4F1E;color:#fff}
   .stale{background:#FFF4E0;border:5px solid var(--waitline);border-radius:18px;
     padding:24px;margin-bottom:28px;font-size:29px;line-height:1.5;font-weight:700}
@@ -75,15 +78,15 @@
   .backspacer{width:76px;flex:0 0 76px}
   .step{font-size:30px;font-weight:800;color:var(--sub)}
 
-  .bar{height:16px;background:var(--line);border-radius:99px;overflow:hidden;margin-bottom:40px}
+  .bar{height:16px;background:var(--line);border-radius:99px;overflow:hidden;margin-bottom:28px}
   .bar > i{display:block;height:100%;background:var(--ok);border-radius:99px;transition:width .35s ease}
 
-  h1{font-size:58px;line-height:1.25;font-weight:900;margin:0 0 20px;letter-spacing:-.03em}
+  h1{font-size:58px;line-height:1.25;font-weight:900;margin:0 0 16px;letter-spacing:-.03em}
   .hint{font-size:32px;color:var(--sub);margin:0 0 24px;padding-left:18px;
     border-left:8px solid var(--act);line-height:1.5;font-weight:600}
 
   /* 선택 버튼 */
-  .opts{display:flex;flex-direction:column;gap:22px;margin-top:auto;padding-top:28px}
+  .opts{display:flex;flex-direction:column;gap:22px;padding-top:20px}
   button{font-family:inherit;font-size:44px;font-weight:800;
     min-height:130px;padding:26px 30px;border:5px solid var(--ink);border-radius:20px;
     background:var(--card);color:var(--ink);width:100%;text-align:left;cursor:pointer;
@@ -413,9 +416,27 @@ function blockers(r,p,out){
   if(v===UNKNOWN) out.unknown.push(r.f);
   return out;
 }
-var FIELD_KO={ age:'나이', residence_gu:'영등포구 거주', living_alone:'혼자 사시는지',
-  basic_pension:'기초연금', livelihood_benefit:'생활비 지원', medical_benefit:'병원비 지원',
-  ltc_grade:'장기요양 등급', employed_insured:'직장 여부', mobility:'거동', care_need:'돌봄 필요' };
+var FIELD_KO={
+  age:'나이', residence_gu:'영등포구에 사시는지',
+  living_alone:'혼자 사시는지', basic_pension:'기초연금을 받으시는지',
+  livelihood_benefit:'생활비를 받으시는지', medical_benefit:'병원비를 지원받으시는지',
+  near_poor:'차상위계층인지', ltc_grade:'장기요양 등급이 있으신지',
+  employed_insured:'직장에 다니시는지', mobility:'바깥에 다니실 수 있는지',
+  care_need:'혼자 생활하기 어려우신지' };
+
+/* 문의 시 어르신이 그대로 말할 수 있는 표현 */
+var ASK_KO={
+  near_poor:'제가 차상위계층에 해당되나요',
+  basic_pension:'제가 기초연금을 받고 있나요',
+  livelihood_benefit:'제가 생계급여를 받고 있나요',
+  medical_benefit:'제가 의료급여 대상인가요',
+  ltc_grade:'제가 장기요양 등급이 있나요',
+  living_alone:'혼자 사는 걸로 되어 있나요',
+  employed_insured:'제가 직장가입자인가요',
+  care_need:'혼자 생활하기 어려운 상태인가요',
+  mobility:'바깥 출입이 가능한 상태인가요',
+  age:'제 나이가 조건에 맞나요',
+  residence_gu:'제가 영등포구민으로 되어 있나요' };
 
 function inSeason(p){
   if(!p.season || p.season==='always') return true;
@@ -528,8 +549,8 @@ function renderTitle(){
   var stale=monthsSinceCheck();
   var h='<div class="title">'+
     '<div class="hero">'+HERO_SVG+
-      '<h1>내가 받을 수 있는<br>도움 찾기</h1>'+
-      '<p>몇 가지만 여쭤보고<br>맞는 지원을 알려드립니다.</p>'+
+      '<h1>받을 수 있는<br>도움 찾기</h1>'+
+      '<p>몇 가지만 여쭤보고<br>알려드립니다</p>'+
     '</div>';
 
   if(stale>=6){
@@ -543,10 +564,10 @@ function renderTitle(){
      '<div class="stepline"><i>3</i>전화로 신청하기</div>'+
      '</div>'+
      '<div class="opts"><button class="start" id="go">시작하기</button></div>'+
-     '<div class="cover">영등포구 어르신 지원사업 가운데 '+PROGRAMS.length+'가지를 담았습니다. '+
-     '이것이 전부는 아니며, 더 많은 지원이 있을 수 있습니다. '+
-     '자세한 것은 영등포구청(02-2670-3408)에 물어보세요.<br><br>'+
-     '정보 확인일: '+DATA_CHECKED.replace(/-/g,'. ')+'</div>'+
+     '<div class="cover">지원사업 '+PROGRAMS.length+'가지를 담았습니다.<br>'+
+     '이것이 전부는 아닙니다.<br>'+
+     '더 궁금하시면 영등포구청<br>02-2670-3408<br><br>'+
+     '확인일 '+DATA_CHECKED.replace(/-/g,'. ')+'</div>'+
      '</div>';
   app.innerHTML=h;
   var b=document.getElementById('go');
@@ -641,8 +662,12 @@ function card(item,kind,n){
   if(p.needs_review) h+='<div class="warn">이 사업의 안내가 최근 바뀌었습니다.<br>꼭 전화로 확인해 주세요.</div>';
   else if(unver) h+='<div class="warn">조건을 다시 확인해야 합니다.<br>꼭 전화로 물어보세요.</div>';
   else if(kind==='maybe' && item.missing.length){
-    var ko=item.missing.map(function(f){return FIELD_KO[f]||f}).join(', ');
-    h+='<div class="warn">전화해서 '+esc(ko)+'만<br>확인하면 됩니다.</div>';
+    var q=item.missing.map(function(f){return ASK_KO[f]||FIELD_KO[f]||f});
+    var show=q.slice(0,3);
+    h+='<div class="warn">전화해서 이렇게 물어보세요<br><br>'+
+       show.map(function(s){return '\u201c'+esc(s)+'?\u201d'}).join('<br>')+
+       (q.length>3 ? '<br>\u201c그 밖에 조건이 더 있나요?\u201d' : '')+
+       '</div>';
   }
 
   h+='<details class="more"><summary>자세히 보기</summary><div class="mbody">'+
@@ -711,7 +736,7 @@ function renderResult(){
     h+='<details class="skip"><summary>해당 안 되는 사업 '+r.ineligible.length+'개</summary>';
     r.ineligible.forEach(function(i){
       var why=i.failed.map(function(f){return FIELD_KO[f]||f}).join(', ');
-      h+='<div class="mini">'+esc(i.p.name)+'<br><small>'+esc(why)+' 조건이 안 맞습니다</small></div>';
+      h+='<div class="mini">'+esc(i.p.name)+'<br><small>'+esc(why)+' 조건에서 해당되지 않습니다</small></div>';
     });
     h+='</details>';
   }
