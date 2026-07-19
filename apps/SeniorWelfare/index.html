@@ -8,138 +8,110 @@
 <title>영등포 어르신 복지 찾기</title>
 <style>
   :root{
-    --ink:#14202B;
-    --paper:#FBF8F3;
-    --deep:#1B4A6B;
-    --deep-press:#123147;
-    --gold:#C8892A;
-    --line:#D9D2C6;
-    --good:#1E6B3A;
-    --maybe:#8A5A00;
-    --none:#6B6B6B;
+    --ink:#14202B; --paper:#FBF8F3; --deep:#1B4A6B; --deep-press:#0E2A3E;
+    --gold:#C8892A; --line:#D9D2C6;
+    --good:#1E6B3A; --maybe:#8A5A00; --warn-bg:#FFF4DC;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html{-webkit-text-size-adjust:100%}
-  body{
-    margin:0;
-    background:var(--paper);
-    color:var(--ink);
-    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
-    font-size:21px;
-    line-height:1.6;
-    -webkit-font-smoothing:antialiased;
-  }
-  .wrap{
-    max-width:600px;margin:0 auto;
-    padding:max(20px,env(safe-area-inset-top)) 20px calc(28px + env(safe-area-inset-bottom));
-    min-height:100vh;display:flex;flex-direction:column;
-  }
+  body{margin:0;background:var(--paper);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
+    font-size:22px;line-height:1.65;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:600px;margin:0 auto;
+    padding:max(14px,env(safe-area-inset-top)) 20px calc(40px + env(safe-area-inset-bottom));
+    min-height:100vh;display:flex;flex-direction:column}
 
-  /* ---------- 진행 표시 ---------- */
-  .step{
-    font-size:19px;color:var(--deep);font-weight:700;
-    letter-spacing:.02em;margin-bottom:6px;
-  }
-  .bar{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin-bottom:32px}
+  /* 상단바 — 뒤로가기를 구석에 격리 */
+  .topbar{display:flex;align-items:center;gap:12px;margin-bottom:14px;min-height:56px}
+  .backbtn{width:56px;height:56px;flex:0 0 auto;font-size:30px;font-weight:700;
+    border:2px solid var(--line);border-radius:50%;background:#fff;color:#54606B;
+    display:flex;align-items:center;justify-content:center;padding:0;cursor:pointer}
+  .backbtn:active{background:var(--line)}
+  .backspacer{width:56px;flex:0 0 auto}
+  .step{font-size:19px;font-weight:700;color:#54606B;letter-spacing:.01em}
+
+  .bar{height:10px;background:var(--line);border-radius:99px;overflow:hidden;margin-bottom:38px}
   .bar > i{display:block;height:100%;background:var(--gold);border-radius:99px;transition:width .35s ease}
 
-  /* ---------- 질문 ---------- */
-  h1{
-    font-size:38px;line-height:1.3;font-weight:800;
-    margin:0 0 12px;letter-spacing:-.02em;
-  }
-  .hint{
-    font-size:19px;color:#54606B;margin:0 0 28px;
-    padding-left:14px;border-left:4px solid var(--gold);
-  }
+  h1{font-size:40px;line-height:1.28;font-weight:800;margin:0 0 14px;letter-spacing:-.025em}
+  .hint{font-size:20px;color:#54606B;margin:0 0 20px;padding-left:14px;
+    border-left:4px solid var(--gold);line-height:1.55}
 
-  /* ---------- 버튼 ---------- */
-  .opts{display:flex;flex-direction:column;gap:14px;margin-top:auto}
-  button{
-    font-family:inherit;font-size:26px;font-weight:700;
-    min-height:78px;padding:18px 22px;
-    border:2px solid var(--deep);border-radius:14px;
-    background:#fff;color:var(--deep);
-    width:100%;text-align:left;cursor:pointer;
-    display:flex;align-items:center;gap:14px;
-  }
-  button:active{background:var(--deep);color:#fff;transform:scale(.99)}
+  /* 선택 버튼 */
+  .opts{display:flex;flex-direction:column;gap:16px;margin-top:auto;padding-top:20px}
+  button{font-family:inherit;font-size:28px;font-weight:700;
+    min-height:88px;padding:20px 24px;border:2px solid var(--deep);border-radius:16px;
+    background:#fff;color:var(--deep);width:100%;text-align:left;cursor:pointer;
+    display:flex;align-items:center;transition:transform .12s ease,background .12s ease}
+  button:active{background:var(--deep);color:#fff;transform:scale(.97)}
+  button.chosen{background:var(--deep);color:#fff;transform:scale(.97);
+    box-shadow:0 0 0 5px rgba(27,74,107,.22)}
   button:focus-visible{outline:4px solid var(--gold);outline-offset:3px}
-  button .mk{
-    flex:0 0 auto;width:38px;height:38px;border-radius:50%;
-    border:2px solid currentColor;display:flex;align-items:center;
-    justify-content:center;font-size:21px;font-weight:800;
-  }
-  button.dim{border-color:#9AA5AE;color:#5A666F;font-weight:600;font-size:23px;min-height:66px}
-  .back{
-    margin-top:22px;background:none;border:none;color:#54606B;
-    font-size:20px;font-weight:600;min-height:52px;padding:8px 0;
-    text-decoration:underline;justify-content:flex-start;
-  }
-  .back:active{background:none;color:var(--ink);transform:none}
+  button.dim{border-color:#A8B1B9;color:#5A666F;font-size:24px;min-height:72px;font-weight:600}
+  button.dim:active,button.dim.chosen{background:#5A666F;color:#fff}
 
-  /* ---------- 결과 ---------- */
-  .rhead{border-bottom:3px solid var(--ink);padding-bottom:18px;margin-bottom:26px}
-  .rhead h1{font-size:34px;margin-bottom:4px}
-  .rhead p{margin:0;font-size:20px;color:#54606B}
+  /* 결과 화면 */
+  .rtop{padding:12px 0 30px;border-bottom:4px solid var(--ink);margin-bottom:34px}
+  .rtop h1{font-size:44px;margin-bottom:16px}
+  .rtop p{margin:0;font-size:21px;color:#54606B;line-height:1.6}
 
-  .group{margin-bottom:36px}
-  .glabel{
-    display:flex;align-items:baseline;gap:10px;
-    font-size:24px;font-weight:800;margin-bottom:4px;
-  }
-  .glabel .n{font-size:20px;font-weight:700;color:#fff;background:var(--ink);
-    border-radius:99px;padding:2px 12px;min-width:38px;text-align:center}
-  .gnote{font-size:18px;color:#54606B;margin:0 0 16px}
-  .g-good .glabel{color:var(--good)} .g-good .n{background:var(--good)}
-  .g-maybe .glabel{color:var(--maybe)} .g-maybe .n{background:var(--maybe)}
-  .g-none .glabel{color:var(--none)} .g-none .n{background:var(--none)}
+  .sec{margin-bottom:44px}
+  .sechead{display:flex;align-items:center;gap:12px;font-size:25px;font-weight:800;
+    margin-bottom:6px;padding-bottom:12px;border-bottom:2px solid var(--line)}
+  .sechead .dot{width:18px;height:18px;border-radius:50%;flex:0 0 auto}
+  .g-good{color:var(--good)} .g-good .dot{background:var(--good)}
+  .g-maybe{color:var(--maybe)} .g-maybe .dot{background:var(--maybe)}
+  .g-tip{color:var(--deep)} .g-tip .dot{background:var(--deep)}
+  .secsub{font-size:19px;color:#54606B;margin:10px 0 0}
 
-  .card{
-    background:#fff;border:2px solid var(--line);border-left:8px solid var(--good);
-    border-radius:12px;padding:20px;margin-bottom:14px;
-  }
-  .g-maybe .card{border-left-color:var(--maybe)}
-  .card h2{font-size:26px;font-weight:800;margin:0 0 8px;line-height:1.35}
-  .card .sum{font-size:19px;color:#3D4954;margin:0 0 14px}
-  .row{font-size:19px;margin:7px 0;display:flex;gap:9px;align-items:flex-start}
-  .row b{flex:0 0 auto;color:#54606B;font-weight:700;min-width:62px}
-  .ask{
-    margin-top:14px;padding:13px 15px;background:#FFF6E3;
-    border-radius:9px;font-size:18px;line-height:1.55;
-  }
-  .tel{
-    display:flex;align-items:center;justify-content:center;gap:10px;
-    margin-top:16px;min-height:70px;background:var(--deep);color:#fff;
-    border-radius:11px;font-size:25px;font-weight:800;
-    text-decoration:none;
-  }
+  .card{background:#fff;border:2px solid var(--line);border-radius:16px;
+    padding:24px 22px;margin-top:18px;position:relative}
+  .cnum{position:absolute;top:-14px;left:20px;background:var(--ink);color:#fff;
+    font-size:19px;font-weight:800;border-radius:99px;padding:3px 15px}
+  .card h2{font-size:29px;font-weight:800;margin:8px 0 12px;line-height:1.35}
+  .card .sum{font-size:20px;color:#3D4954;margin:0 0 20px;line-height:1.6}
+
+  .tel{display:flex;align-items:center;justify-content:center;gap:10px;
+    min-height:82px;background:var(--deep);color:#fff;border-radius:14px;
+    font-size:26px;font-weight:800;text-decoration:none;margin-top:6px}
   .tel:active{background:var(--deep-press)}
 
-  .tip{
-    background:#EAF1F6;border:2px solid #B9CEDD;border-radius:12px;
-    padding:20px;margin-bottom:14px;font-size:20px;line-height:1.6;
-  }
-  .tip b{display:block;font-size:22px;margin-bottom:7px;color:var(--deep)}
+  .warn{margin-top:16px;padding:16px 18px;background:var(--warn-bg);
+    border-radius:11px;font-size:19px;line-height:1.6;border-left:5px solid var(--gold)}
 
-  details{margin-bottom:14px}
-  summary{
-    font-size:21px;font-weight:700;color:#54606B;padding:16px 0;
-    cursor:pointer;list-style:none;
-  }
-  summary::-webkit-details-marker{display:none}
-  summary::after{content:" ▾"}
-  details[open] summary::after{content:" ▴"}
-  .mini{font-size:19px;color:#54606B;padding:10px 0;border-top:1px solid var(--line)}
+  .more{margin-top:16px;border-top:2px solid var(--line);padding-top:6px}
+  .more summary{font-size:21px;font-weight:700;color:var(--deep);
+    padding:16px 0;cursor:pointer;list-style:none;min-height:56px;display:flex;align-items:center}
+  .more summary::-webkit-details-marker{display:none}
+  .more summary::after{content:"  ▾";font-size:19px}
+  .more[open] summary::after{content:"  ▴"}
+  .mbody{padding-bottom:8px}
+  .row{font-size:20px;margin:14px 0;display:flex;gap:12px;align-items:flex-start;line-height:1.55}
+  .row b{flex:0 0 74px;color:#54606B;font-weight:700}
+  .note{margin-top:16px;padding:16px 18px;background:#F2EFE9;border-radius:11px;
+    font-size:19px;line-height:1.65}
 
-  .foot{
-    margin-top:20px;padding-top:22px;border-top:2px solid var(--line);
-    font-size:17px;color:#6B7680;line-height:1.6;
-  }
-  .restart{
-    margin-top:18px;justify-content:center;font-size:24px;
-    border-color:#9AA5AE;color:#3D4954;
-  }
+  .tip{background:#EAF1F6;border:2px solid #B9CEDD;border-radius:16px;
+    padding:22px;margin-top:18px;font-size:20px;line-height:1.65}
+  .tip b{display:block;font-size:23px;margin-bottom:10px;color:var(--deep)}
+
+  .skip{margin-bottom:28px}
+  .skip summary{font-size:20px;font-weight:700;color:#6B7680;padding:20px 0;
+    cursor:pointer;list-style:none;min-height:60px;display:flex;align-items:center}
+  .skip summary::-webkit-details-marker{display:none}
+  .skip summary::after{content:"  ▾"}
+  .skip[open] summary::after{content:"  ▴"}
+  .mini{font-size:20px;color:#54606B;padding:16px 0;border-top:1px solid var(--line);line-height:1.5}
+  .mini small{font-size:18px;color:#7A848C}
+
+  .restmore{margin-top:22px;border-top:none}
+  .restmore > summary{justify-content:center;border:2px dashed var(--line);
+    border-radius:14px;padding:18px;color:#54606B}
+  .restart{justify-content:center;font-size:25px;border-color:#A8B1B9;
+    color:#3D4954;margin-top:10px}
+  .foot{margin-top:34px;padding-top:26px;border-top:2px solid var(--line);
+    font-size:18px;color:#6B7680;line-height:1.7}
+
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
@@ -157,9 +129,21 @@ var UNKNOWN = 'unknown';
 
 /* ---------- 질문 흐름 ---------- */
 var QUESTIONS = [
-  { id:'birth', field:'age', type:'year',
-    q:'몇 년도에 태어나셨어요?',
-    hint:'태어난 해를 눌러 주세요.' },
+  { id:'age1', field:'_ageband', type:'branch',
+    q:'연세가 어떻게 되세요?',
+    opts:[ {t:'80살 넘음',v:'80+'}, {t:'65살 ~ 80살',v:'65-80'}, {t:'65살 아래',v:'-65'} ] },
+
+  { id:'age2a', field:'age', showIf:{f:'_ageband',v:'80+'},
+    q:'조금만 더 여쭐게요',
+    opts:[ {t:'90살 넘음',v:90}, {t:'85살 ~ 90살',v:85}, {t:'80살 ~ 85살',v:80} ] },
+
+  { id:'age2b', field:'age', showIf:{f:'_ageband',v:'65-80'},
+    q:'조금만 더 여쭐게요',
+    opts:[ {t:'75살 ~ 80살',v:75}, {t:'70살 ~ 75살',v:70}, {t:'65살 ~ 70살',v:66} ] },
+
+  { id:'age2c', field:'age', showIf:{f:'_ageband',v:'-65'},
+    q:'조금만 더 여쭐게요',
+    opts:[ {t:'60살 ~ 65살',v:60}, {t:'60살 아래',v:50} ] },
 
   { id:'gu', field:'residence_gu',
     q:'영등포구에 사시나요?',
@@ -167,49 +151,47 @@ var QUESTIONS = [
 
   { id:'alone', field:'living_alone',
     q:'혼자 사시나요?',
-    opts:[ {t:'예, 혼자 삽니다',v:true}, {t:'아니오, 같이 삽니다',v:false},
-           {t:'말하고 싶지 않아요',v:UNKNOWN,dim:true} ] },
+    opts:[ {t:'예',v:true}, {t:'아니오',v:false},
+           {t:'모르겠어요',v:UNKNOWN,dim:true} ] },
 
   { id:'move', field:'mobility',
     q:'바깥에 혼자 다니실 수 있나요?',
     opts:[ {t:'네, 혼자 다닙니다',v:'independent'},
            {t:'도와주면 다닙니다',v:'assisted'},
-           {t:'거의 집에만 있습니다',v:'homebound'} ] },
+           {t:'거의 집에 있습니다',v:'homebound'} ] },
 
   { id:'care', field:'care_need',
-    q:'밥 차리기나 씻기가 혼자서 어려우신가요?',
-    opts:[ {t:'예, 어렵습니다',v:true}, {t:'아니오, 괜찮습니다',v:false},
-           {t:'잘 모르겠어요',v:UNKNOWN,dim:true} ] },
+    q:'밥 차리기나 씻기가 힘드신가요?',
+    opts:[ {t:'예',v:true}, {t:'아니오',v:false},
+           {t:'모르겠어요',v:UNKNOWN,dim:true} ] },
 
   { id:'pension', field:'basic_pension',
     q:'기초연금을 받고 계신가요?',
-    hint:'만 65세 이상 어르신 열 명 중 일곱 명 정도가 받는 돈입니다.',
-    opts:[ {t:'예, 받습니다',v:true}, {t:'아니오',v:false},
-           {t:'잘 모르겠어요',v:UNKNOWN,dim:true} ] },
+    hint:'65살 넘은 어르신 대부분이 받는 돈입니다.',
+    opts:[ {t:'예',v:true}, {t:'아니오',v:false},
+           {t:'모르겠어요',v:UNKNOWN,dim:true} ] },
 
   { id:'living', field:'livelihood_benefit',
-    q:'주민센터에서 생활비를 매달 받고 계신가요?',
-    hint:'병원비나 집세만 지원받는 경우는 “아니오”입니다.',
-    opts:[ {t:'예, 생활비를 받습니다',v:true}, {t:'아니오',v:false},
-           {t:'잘 모르겠어요',v:UNKNOWN,dim:true} ] },
+    q:'주민센터에서 생활비를 받으시나요?',
+    hint:'병원비나 집세만 받으시면 “아니오”입니다.',
+    opts:[ {t:'예',v:true}, {t:'아니오',v:false},
+           {t:'모르겠어요',v:UNKNOWN,dim:true} ] },
 
   { id:'medical', field:'medical_benefit',
-    q:'병원비를 나라에서 대신 내주나요?',
-    hint:'의료급여 대상이면 병원에 갈 때 돈을 거의 안 냅니다.',
+    q:'병원비를 나라에서 내주나요?',
     opts:[ {t:'예',v:true}, {t:'아니오',v:false},
-           {t:'잘 모르겠어요',v:UNKNOWN,dim:true} ] },
+           {t:'모르겠어요',v:UNKNOWN,dim:true} ] },
 
   { id:'ltc', field:'ltc_grade',
-    q:'장기요양 등급을 받으신 적 있나요?',
-    hint:'요양보호사가 집에 오거나, 낮에 어르신 센터에 다니시면 “예”입니다.',
-    opts:[ {t:'예, 등급이 있습니다',v:'3'}, {t:'아니오, 없습니다',v:null},
-           {t:'잘 모르겠어요',v:UNKNOWN,dim:true} ] },
+    q:'장기요양 등급이 있으신가요?',
+    hint:'요양보호사가 집에 오면 “예”입니다.',
+    opts:[ {t:'예',v:'3'}, {t:'아니오',v:null},
+           {t:'모르겠어요',v:UNKNOWN,dim:true} ] },
 
   { id:'job', field:'employed_insured',
-    q:'지금 직장에 다니고 계신가요?',
-    hint:'4대보험에 가입된 직장을 말합니다.',
-    opts:[ {t:'예, 다닙니다',v:true}, {t:'아니오',v:false},
-           {t:'잘 모르겠어요',v:UNKNOWN,dim:true} ] }
+    q:'지금 직장에 다니시나요?',
+    opts:[ {t:'예',v:true}, {t:'아니오',v:false},
+           {t:'모르겠어요',v:UNKNOWN,dim:true} ] }
 ];
 
 /* ---------- 지원사업 데이터 ---------- */
@@ -416,127 +398,176 @@ function diagnose(profile){
 }
 
 /* ---------- 화면 ---------- */
-var state={idx:0,profile:{},answers:[]};
+var state={idx:0,profile:{},history:[]};
 var app=document.getElementById('app');
 var esc=function(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML};
 
-function render(){
-  app.scrollTop=0; window.scrollTo(0,0);
-  if(state.idx>=QUESTIONS.length){ renderResult(); return; }
-  var q=QUESTIONS[state.idx];
-  var pct=Math.round(state.idx/QUESTIONS.length*100);
+/* 탭 피드백: iOS Safari는 navigator.vibrate 미지원 → 시각+청각으로 대체 */
+var actx=null;
+function tick(){
+  try{
+    if(!actx) actx=new (window.AudioContext||window.webkitAudioContext)();
+    if(actx.state==='suspended') actx.resume();
+    var o=actx.createOscillator(), g=actx.createGain();
+    o.frequency.value=660; o.type='sine';
+    g.gain.setValueAtTime(0.10, actx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, actx.currentTime+0.09);
+    o.connect(g); g.connect(actx.destination);
+    o.start(); o.stop(actx.currentTime+0.09);
+  }catch(e){}
+  if(navigator.vibrate) navigator.vibrate(30); // 안드로이드에서만 동작
+}
 
-  var h='<div class="step">'+QUESTIONS.length+'개 중 '+(state.idx+1)+'번째</div>'+
-        '<div class="bar"><i style="width:'+pct+'%"></i></div>'+
-        '<h1>'+esc(q.q)+'</h1>'+
-        (q.hint?'<p class="hint">'+esc(q.hint)+'</p>':'')+
-        '<div class="opts" id="opts"></div>'+
-        (state.idx>0?'<button class="back" id="back">← 앞 질문으로</button>':'');
+function visibleQuestions(){
+  return QUESTIONS.filter(function(q){
+    if(!q.showIf) return true;
+    return state.profile[q.showIf.f]===q.showIf.v;
+  });
+}
+
+function render(){
+  window.scrollTo(0,0);
+  var list=visibleQuestions();
+  if(state.idx>=list.length){ renderResult(); return; }
+  var q=list[state.idx];
+  var pct=Math.round(state.idx/list.length*100);
+
+  var h='';
+  h+='<div class="topbar">'+
+     (state.idx>0?'<button class="backbtn" id="back" aria-label="앞 질문으로">←</button>':'<span class="backspacer"></span>')+
+     '<div class="step">'+list.length+'개 중 '+(state.idx+1)+'번째</div>'+
+     '</div>'+
+     '<div class="bar"><i style="width:'+pct+'%"></i></div>'+
+     '<h1>'+esc(q.q)+'</h1>'+
+     (q.hint?'<p class="hint">'+esc(q.hint)+'</p>':'')+
+     '<div class="opts" id="opts"></div>';
   app.innerHTML=h;
 
   var box=document.getElementById('opts');
-  if(q.type==='year'){
-    var now=new Date().getFullYear();
-    // 구간이 60세·65세 기준을 걸치지 않도록 쪼갬 (걸치면 오판정 발생)
-    [[86,120,'86살 이상'],[81,85,'81~85살'],[76,80,'76~80살'],
-     [71,75,'71~75살'],[66,70,'66~70살'],[65,65,'65살'],
-     [60,64,'60~64살'],[0,59,'59살 아래']].forEach(function(r){
-      var lo=r[0], hi=r[1];
-      var label = (lo===hi) ? r[2] : r[2]+'  ('+(now-hi)+'~'+(now-lo)+'년생)';
-      box.appendChild(mkBtn('', label, function(){ answer('age', lo); }));
-    });
-  } else {
-    q.opts.forEach(function(o){
-      var b=mkBtn('', o.t, function(){ answer(q.field,o.v); });
-      if(o.dim) b.className='dim';
-      box.appendChild(b);
-    });
-  }
+  q.opts.forEach(function(o){
+    var b=mkBtn(o.t, function(){ answer(q.field,o.v); });
+    if(o.dim) b.className='dim';
+    box.appendChild(b);
+  });
+
   var bk=document.getElementById('back');
   if(bk) bk.onclick=function(){
-    state.idx--; var prev=state.answers.pop();
+    tick();
+    var prev=state.history.pop();
     if(prev) delete state.profile[prev];
+    state.idx--;
     render();
   };
 }
-function mkBtn(mark,text,fn){
+
+function mkBtn(text,fn){
   var b=document.createElement('button');
-  b.innerHTML=(mark?'<span class="mk">'+mark+'</span>':'')+'<span>'+esc(text)+'</span>';
-  b.onclick=fn; return b;
+  b.innerHTML='<span>'+esc(text)+'</span>';
+  b.onclick=function(){
+    if(b.dataset.done) return;
+    b.dataset.done='1';
+    b.classList.add('chosen');
+    tick();
+    setTimeout(fn,180); // 눌린 상태를 보여준 뒤 이동
+  };
+  return b;
 }
+
 function answer(field,val){
   state.profile[field]=val;
-  state.answers.push(field);
+  state.history.push(field);
   state.idx++;
   render();
 }
 
-function card(item,kind){
+function card(item,kind,n){
   var p=item.p;
-  var h='<div class="card"><h2>'+esc(p.name)+'</h2>'+
-        '<p class="sum">'+esc(p.summary)+'</p>'+
-        '<div class="row"><b>받는 것</b><span>'+esc(p.benefit)+'</span></div>'+
-        '<div class="row"><b>신청</b><span>'+esc(p.how)+'</span></div>'+
-        '<div class="row"><b>시기</b><span>'+esc(p.when)+'</span></div>';
-  if(kind==='maybe' && item.missing.length){
+  var unver = (p.conf==='unverified');
+  var h='<div class="card"><div class="cnum">'+n+'</div>'+
+        '<h2>'+esc(p.name)+'</h2>'+
+        '<p class="sum">'+esc(p.summary)+'</p>';
+
+  if(p.tel) h+='<a class="tel" href="tel:'+p.tel.replace(/-/g,'')+'">전화 걸기  '+esc(p.tel)+'</a>';
+
+  if(unver) h+='<div class="warn">이 사업은 조건을 다시 확인해야 합니다. 꼭 전화로 물어보세요.</div>';
+  else if(kind==='maybe' && item.missing.length){
     var ko=item.missing.map(function(f){return FIELD_KO[f]||f}).join(', ');
-    h+='<div class="ask">전화해서 <b>'+esc(ko)+'</b> 부분만 확인하시면 됩니다.</div>';
+    h+='<div class="warn">전화해서 '+esc(ko)+'만 확인하면 됩니다.</div>';
   }
-  if(p.notes && p.notes.length){
-    h+='<div class="ask">'+p.notes.map(esc).join('<br>')+'</div>';
-  }
-  if(p.tel) h+='<a class="tel" href="tel:'+p.tel.replace(/-/g,'')+'">📞 '+esc(p.tel)+' 전화하기</a>';
-  return h+'</div>';
+
+  h+='<details class="more"><summary>자세히 보기</summary><div class="mbody">'+
+     '<div class="row"><b>받는 것</b><span>'+esc(p.benefit)+'</span></div>'+
+     '<div class="row"><b>신청</b><span>'+esc(p.how)+'</span></div>'+
+     '<div class="row"><b>시기</b><span>'+esc(p.when)+'</span></div>';
+  if(p.notes && p.notes.length) h+='<div class="note">'+p.notes.map(esc).join('<br><br>')+'</div>';
+  h+='</div></details></div>';
+  return h;
 }
 
 function renderResult(){
   var r=diagnose(state.profile);
-  var h='<div class="rhead"><h1>이런 도움을 받으실 수 있어요</h1>'+
-        '<p>아래 내용을 주민센터에 그대로 보여 주셔도 됩니다.</p></div>';
+  var total=r.eligible.length+r.maybe.length;
 
-  if(r.tips.length){
-    r.tips.forEach(function(t){
-      h+='<div class="tip"><b>'+esc(t.t)+'</b>'+esc(t.m)+'</div>';
-    });
-  }
+  var h='<div class="rtop"><h1>'+total+'가지를<br>찾았습니다</h1>'+
+        '<p>하나씩 천천히 보세요.<br>전화 한 통이면 물어볼 수 있습니다.</p></div>';
 
+  var n=0;
+  var TOP=3;
   if(r.eligible.length){
-    h+='<div class="group g-good"><div class="glabel"><span class="n">'+r.eligible.length+'</span>받으실 수 있어요</div>'+
-       '<p class="gnote">조건이 맞습니다. 바로 신청해 보세요.</p>';
-    r.eligible.forEach(function(i){h+=card(i,'good')});
+    h+='<div class="sec"><div class="sechead g-good">'+
+       '<span class="dot"></span>받으실 수 있어요</div>';
+    var head=r.eligible.slice(0,TOP), rest=r.eligible.slice(TOP);
+    head.forEach(function(i){ h+=card(i,'good',++n) });
+    if(rest.length){
+      h+='<details class="more restmore"><summary>더 있어요 ('+rest.length+'개 보기)</summary><div>';
+      rest.forEach(function(i){ h+=card(i,'good',++n) });
+      h+='</div></details>';
+    }
     h+='</div>';
   }
 
   if(r.maybe.length){
-    h+='<div class="group g-maybe"><div class="glabel"><span class="n">'+r.maybe.length+'</span>아마 되실 것 같아요</div>'+
-       '<p class="gnote">한두 가지만 확인하면 됩니다. 전화로 물어보세요.</p>';
-    r.maybe.forEach(function(i){h+=card(i,'maybe')});
+    h+='<div class="sec"><div class="sechead g-maybe">'+
+       '<span class="dot"></span>아마 되실 거예요</div>'+
+       '<p class="secsub">한 가지만 확인하면 됩니다.</p>';
+    r.maybe.forEach(function(i){ h+=card(i,'maybe',++n) });
     h+='</div>';
   }
 
-  if(!r.eligible.length && !r.maybe.length){
-    h+='<div class="tip"><b>조건에 맞는 사업을 찾지 못했습니다</b>'+
-       '영등포구 어르신장애인과(02-2670-3408)에 전화하시면 다른 도움을 안내받으실 수 있습니다.</div>';
+  if(!total){
+    h+='<div class="sec"><div class="tip"><b>맞는 사업을 찾지 못했습니다</b>'+
+       '영등포구청에 전화하시면 다른 도움을 알려드립니다.'+
+       '<a class="tel" href="tel:0226703408">전화 걸기  02-2670-3408</a></div></div>';
+  }
+
+  if(r.tips.length){
+    h+='<div class="sec"><div class="sechead g-tip"><span class="dot"></span>이것도 해보세요</div>';
+    r.tips.forEach(function(t){
+      h+='<div class="tip"><b>'+esc(t.t)+'</b>'+esc(t.m)+'</div>';
+    });
+    h+='</div>';
   }
 
   if(r.ineligible.length){
-    h+='<details><summary>지금은 해당되지 않는 사업 '+r.ineligible.length+'개 보기</summary>';
+    h+='<details class="skip"><summary>해당 안 되는 사업 '+r.ineligible.length+'개</summary>';
     r.ineligible.forEach(function(i){
       var why=i.failed.map(function(f){return FIELD_KO[f]||f}).join(', ');
-      h+='<div class="mini"><b>'+esc(i.p.name)+'</b> — '+esc(why)+' 조건이 맞지 않습니다</div>';
+      h+='<div class="mini">'+esc(i.p.name)+'<br><small>'+esc(why)+' 조건이 안 맞습니다</small></div>';
     });
     h+='</details>';
   }
 
-  h+='<button class="restart" id="again">처음부터 다시 하기</button>';
-  h+='<div class="foot">이 안내는 참고용입니다. 실제 신청 자격은 담당 기관에서 최종 확인합니다.<br>'+
-     '요건 확인일: 2026년 7월 19일 · 출처: 영등포구청, 보건복지부, 서울시<br>'+
-     '입력하신 내용은 저장되지 않으며, 창을 닫으면 사라집니다.</div>';
+  h+='<button class="restart" id="again">처음부터 다시</button>';
+  h+='<div class="foot">이 안내는 참고용입니다.<br>실제 신청 자격은 담당 기관에서 정합니다.<br><br>'+
+     '2026년 7월 확인 · 영등포구청, 보건복지부, 서울시 자료<br>'+
+     '입력하신 내용은 저장되지 않습니다.</div>';
 
   app.innerHTML=h;
-  document.getElementById('again').onclick=function(){
-    state={idx:0,profile:{},answers:[]}; render();
-  };
+  var ag=document.getElementById('again');
+  ag.onclick=function(){ tick(); state={idx:0,profile:{},history:[]}; render(); };
+  document.querySelectorAll('details').forEach(function(d){
+    d.addEventListener('toggle',function(){ if(d.open) tick(); });
+  });
 }
 
 render();
