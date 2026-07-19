@@ -614,9 +614,11 @@ var PHONE_ICON='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8c1
 function card(item,kind,n){
   var p=item.p;
   var unver=(p.conf==='unverified');
-  var badge = (kind==='good')
-      ? '<span class="badge b-ok">신청 가능</span>'
-      : '<span class="badge b-wait">확인 필요</span>';
+  var badge = p.needs_review
+      ? '<span class="badge b-wait">변경됨</span>'
+      : (kind==='good'
+          ? '<span class="badge b-ok">신청 가능</span>'
+          : '<span class="badge b-wait">확인 필요</span>');
 
   var h='<div class="card">'+badge+'<div class="cnum">'+n+'</div>'+
         '<h2>'+esc(p.name)+'</h2>'+
@@ -624,7 +626,8 @@ function card(item,kind,n){
 
   if(p.tel) h+='<a class="tel" href="tel:'+p.tel.replace(/-/g,'')+'">'+PHONE_ICON+'<span>'+esc(p.tel)+'</span></a>';
 
-  if(unver) h+='<div class="warn">조건을 다시 확인해야 합니다.<br>꼭 전화로 물어보세요.</div>';
+  if(p.needs_review) h+='<div class="warn">이 사업의 안내가 최근 바뀌었습니다.<br>꼭 전화로 확인해 주세요.</div>';
+  else if(unver) h+='<div class="warn">조건을 다시 확인해야 합니다.<br>꼭 전화로 물어보세요.</div>';
   else if(kind==='maybe' && item.missing.length){
     var ko=item.missing.map(function(f){return FIELD_KO[f]||f}).join(', ');
     h+='<div class="warn">전화해서 '+esc(ko)+'만<br>확인하면 됩니다.</div>';
