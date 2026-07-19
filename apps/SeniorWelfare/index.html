@@ -42,6 +42,28 @@
     padding:18px 18px calc(48px + env(safe-area-inset-bottom));
     min-height:100vh;display:flex;flex-direction:column}
 
+  /* 타이틀 화면 */
+  .title{display:flex;flex-direction:column;min-height:100%;padding-top:20px}
+  .hero{background:var(--card);border:5px solid var(--ink);border-radius:26px;
+    padding:36px 26px;text-align:center;margin-bottom:34px}
+  .hero svg{width:100%;max-width:420px;height:auto;display:block;margin:0 auto 26px}
+  .hero h1{font-size:60px;line-height:1.2;margin:0 0 18px}
+  .hero p{font-size:34px;color:var(--sub);margin:0;line-height:1.5;font-weight:600}
+  .steps{margin-bottom:32px}
+  .stepline{display:flex;align-items:center;gap:20px;font-size:32px;
+    font-weight:700;padding:20px 0;border-bottom:3px solid var(--line)}
+  .stepline:last-child{border-bottom:none}
+  .stepline i{flex:0 0 62px;width:62px;height:62px;border-radius:50%;
+    background:var(--act);color:#fff;font-style:normal;font-weight:900;
+    font-size:32px;display:flex;align-items:center;justify-content:center}
+  .start{background:var(--ok);border-color:#0A4F1E;color:#fff;
+    justify-content:center;font-size:46px;min-height:140px}
+  .start:active{background:#0A4F1E;color:#fff}
+  .stale{background:#FFF4E0;border:5px solid var(--waitline);border-radius:18px;
+    padding:24px;margin-bottom:28px;font-size:29px;line-height:1.5;font-weight:700}
+  .cover{font-size:27px;color:var(--sub);line-height:1.6;font-weight:600;
+    background:#F0EFEA;border-radius:16px;padding:24px;margin-top:26px}
+
   /* 상단바 */
   .topbar{display:flex;align-items:center;gap:16px;margin-bottom:16px;min-height:76px}
   .backbtn{width:76px;height:76px;min-height:76px;flex:0 0 76px;padding:0;
@@ -446,11 +468,13 @@ function diagnose(profile){
 }
 
 /* ---------- 화면 ---------- */
-var state={idx:0,profile:{},history:[]};
+var state={idx:0,profile:{},history:[],started:false};
 var app=document.getElementById('app');
 var esc=function(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML};
 
 /* 탭 피드백: iOS Safari는 navigator.vibrate 미지원 → 시각+청각으로 대체 */
+var HERO_SVG='<svg viewBox="0 0 400 210" role="img" aria-label="어르신과 상담원이 지원 목록을 함께 보는 그림"><rect x="150" y="26" width="128" height="160" rx="10" fill="#fff" stroke="#000" stroke-width="6"/><rect x="170" y="52" width="60" height="11" rx="5" fill="#0C6152"/><rect x="170" y="80" width="88" height="10" rx="5" fill="#C9C7C0"/><rect x="170" y="104" width="88" height="10" rx="5" fill="#C9C7C0"/><rect x="170" y="128" width="88" height="10" rx="5" fill="#C9C7C0"/><circle cx="252" cy="150" r="26" fill="#0E6428" stroke="#fff" stroke-width="5"/><path d="M240 150l8 9 16-18" stroke="#fff" stroke-width="7" fill="none" stroke-linecap="round" stroke-linejoin="round"/><circle cx="72" cy="74" r="30" fill="#fff" stroke="#000" stroke-width="6"/><path d="M46 74a26 26 0 0152 0" fill="none" stroke="#8A4B00" stroke-width="7" stroke-linecap="round"/><path d="M30 186c0-30 19-48 42-48s42 18 42 48z" fill="#8A4B00" stroke="#000" stroke-width="6" stroke-linejoin="round"/><circle cx="330" cy="74" r="30" fill="#fff" stroke="#000" stroke-width="6"/><path d="M288 186c0-30 19-48 42-48s42 18 42 48z" fill="#0C6152" stroke="#000" stroke-width="6" stroke-linejoin="round"/></svg>';
+
 var actx=null;
 function ensureAudio(){
   try{
@@ -481,6 +505,46 @@ function tick(){
   if(navigator.vibrate) navigator.vibrate(30);
 }
 
+var DATA_CHECKED='2026-07-19';
+function monthsSinceCheck(){
+  var d=new Date(DATA_CHECKED), now=new Date();
+  return (now.getFullYear()-d.getFullYear())*12 + (now.getMonth()-d.getMonth());
+}
+
+function renderTitle(){
+  window.scrollTo(0,0);
+  var stale=monthsSinceCheck();
+  var h='<div class="title">'+
+    '<div class="hero">'+HERO_SVG+
+      '<h1>내가 받을 수 있는<br>도움 찾기</h1>'+
+      '<p>몇 가지만 여쭤보고<br>맞는 지원을 알려드립니다.</p>'+
+    '</div>';
+
+  if(stale>=6){
+    h+='<div class="stale">이 정보는 '+stale+'개월 전에 확인한 것입니다. '+
+       '조건이 바뀌었을 수 있으니 신청 전에 꼭 전화로 물어보세요.</div>';
+  }
+
+  h+='<div class="steps">'+
+     '<div class="stepline"><i>1</i>질문에 답하기</div>'+
+     '<div class="stepline"><i>2</i>받을 수 있는 것 보기</div>'+
+     '<div class="stepline"><i>3</i>전화로 신청하기</div>'+
+     '</div>'+
+     '<div class="opts"><button class="start" id="go">시작하기</button></div>'+
+     '<div class="cover">영등포구 어르신 지원사업 가운데 '+PROGRAMS.length+'가지를 담았습니다. '+
+     '이것이 전부는 아니며, 더 많은 지원이 있을 수 있습니다. '+
+     '자세한 것은 영등포구청(02-2670-3408)에 물어보세요.<br><br>'+
+     '정보 확인일: '+DATA_CHECKED.replace(/-/g,'. ')+'</div>'+
+     '</div>';
+  app.innerHTML=h;
+  var b=document.getElementById('go');
+  b.onclick=function(){
+    if(b.dataset.done) return;
+    b.dataset.done='1'; b.classList.add('chosen'); tick();
+    setTimeout(function(){ state.started=true; render(); },180);
+  };
+}
+
 function visibleQuestions(){
   return QUESTIONS.filter(function(q){
     if(!q.showIf) return true;
@@ -489,6 +553,7 @@ function visibleQuestions(){
 }
 
 function render(){
+  if(!state.started){ renderTitle(); return; }
   window.scrollTo(0,0);
   var list=visibleQuestions();
   if(state.idx>=list.length){ renderResult(); return; }
@@ -497,7 +562,7 @@ function render(){
 
   var h='';
   h+='<div class="topbar">'+
-     (state.idx>0?'<button class="backbtn" id="back" aria-label="앞 질문으로">←</button>':'<span class="backspacer"></span>')+
+     '<button class="backbtn" id="back" aria-label="앞으로">←</button>'+
      '<div class="step">'+list.length+'개 중 '+(state.idx+1)+'번째</div>'+
      '</div>'+
      '<div class="bar"><i style="width:'+pct+'%"></i></div>'+
@@ -516,6 +581,7 @@ function render(){
   var bk=document.getElementById('back');
   if(bk) bk.onclick=function(){
     tick();
+    if(state.idx===0){ state.started=false; render(); return; }
     var prev=state.history.pop();
     if(prev) delete state.profile[prev];
     state.idx--;
@@ -642,12 +708,25 @@ function renderResult(){
 
   app.innerHTML=h;
   document.getElementById('again').onclick=function(){
-    tick(); state={idx:0,profile:{},history:[]}; render();
+    tick(); state={idx:0,profile:{},history:[],started:false}; render();
   };
   document.querySelectorAll('details').forEach(function(d){
     d.addEventListener('toggle',function(){ if(d.open) tick(); });
   });
 }
+
+/* 외부 데이터 우선 로드 — programs-live.json만 교체하면 요건 갱신 가능.
+   실패 시 내장 데이터로 동작하므로 오프라인에서도 앱이 죽지 않는다. */
+fetch('programs-live.json?t='+Date.now())
+  .then(function(r){ if(!r.ok) throw 0; return r.json(); })
+  .then(function(d){
+    if(d && d.programs && d.programs.length){
+      PROGRAMS = d.programs;
+      if(d.checked_at) DATA_CHECKED = d.checked_at;
+      if(!state.started) renderTitle();
+    }
+  })
+  .catch(function(){ /* 내장 데이터 유지 */ });
 
 render();
 </script>
