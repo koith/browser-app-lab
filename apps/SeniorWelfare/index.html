@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1B4A6B">
+<title>영등포 어르신 복지 찾기</title>
+<style>
+  :root{
+    --ink:#14202B;
+    --paper:#FBF8F3;
+    --deep:#1B4A6B;
+    --deep-press:#123147;
+    --gold:#C8892A;
+    --line:#D9D2C6;
+    --good:#1E6B3A;
+    --maybe:#8A5A00;
+    --none:#6B6B6B;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+    font-size:21px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{
+    max-width:600px;margin:0 auto;
+    padding:max(20px,env(safe-area-inset-top)) 20px calc(28px + env(safe-area-inset-bottom));
+    min-height:100vh;display:flex;flex-direction:column;
+  }
+
+  /* ---------- 진행 표시 ---------- */
+  .step{
+    font-size:19px;color:var(--deep);font-weight:700;
+    letter-spacing:.02em;margin-bottom:6px;
+  }
+  .bar{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin-bottom:32px}
+  .bar > i{display:block;height:100%;background:var(--gold);border-radius:99px;transition:width .35s ease}
+
+  /* ---------- 질문 ---------- */
+  h1{
+    font-size:38px;line-height:1.3;font-weight:800;
+    margin:0 0 12px;letter-spacing:-.02em;
+  }
+  .hint{
+    font-size:19px;color:#54606B;margin:0 0 28px;
+    padding-left:14px;border-left:4px solid var(--gold);
+  }
+
+  /* ---------- 버튼 ---------- */
+  .opts{display:flex;flex-direction:column;gap:14px;margin-top:auto}
+  button{
+    font-family:inherit;font-size:26px;font-weight:700;
+    min-height:78px;padding:18px 22px;
+    border:2px solid var(--deep);border-radius:14px;
+    background:#fff;color:var(--deep);
+    width:100%;text-align:left;cursor:pointer;
+    display:flex;align-items:center;gap:14px;
+  }
+  button:active{background:var(--deep);color:#fff;transform:scale(.99)}
+  button:focus-visible{outline:4px solid var(--gold);outline-offset:3px}
+  button .mk{
+    flex:0 0 auto;width:38px;height:38px;border-radius:50%;
+    border:2px solid currentColor;display:flex;align-items:center;
+    justify-content:center;font-size:21px;font-weight:800;
+  }
+  button.dim{border-color:#9AA5AE;color:#5A666F;font-weight:600;font-size:23px;min-height:66px}
+  .back{
+    margin-top:22px;background:none;border:none;color:#54606B;
+    font-size:20px;font-weight:600;min-height:52px;padding:8px 0;
+    text-decoration:underline;justify-content:flex-start;
+  }
+  .back:active{background:none;color:var(--ink);transform:none}
+
+  /* ---------- 결과 ---------- */
+  .rhead{border-bottom:3px solid var(--ink);padding-bottom:18px;margin-bottom:26px}
+  .rhead h1{font-size:34px;margin-bottom:4px}
+  .rhead p{margin:0;font-size:20px;color:#54606B}
+
+  .group{margin-bottom:36px}
+  .glabel{
+    display:flex;align-items:baseline;gap:10px;
+    font-size:24px;font-weight:800;margin-bottom:4px;
+  }
+  .glabel .n{font-size:20px;font-weight:700;color:#fff;background:var(--ink);
+    border-radius:99px;padding:2px 12px;min-width:38px;text-align:center}
+  .gnote{font-size:18px;color:#54606B;margin:0 0 16px}
+  .g-good .glabel{color:var(--good)} .g-good .n{background:var(--good)}
+  .g-maybe .glabel{color:var(--maybe)} .g-maybe .n{background:var(--maybe)}
+  .g-none .glabel{color:var(--none)} .g-none .n{background:var(--none)}
+
+  .card{
+    background:#fff;border:2px solid var(--line);border-left:8px solid var(--good);
+    border-radius:12px;padding:20px;margin-bottom:14px;
+  }
+  .g-maybe .card{border-left-color:var(--maybe)}
+  .card h2{font-size:26px;font-weight:800;margin:0 0 8px;line-height:1.35}
+  .card .sum{font-size:19px;color:#3D4954;margin:0 0 14px}
+  .row{font-size:19px;margin:7px 0;display:flex;gap:9px;align-items:flex-start}
+  .row b{flex:0 0 auto;color:#54606B;font-weight:700;min-width:62px}
+  .ask{
+    margin-top:14px;padding:13px 15px;background:#FFF6E3;
+    border-radius:9px;font-size:18px;line-height:1.55;
+  }
+  .tel{
+    display:flex;align-items:center;justify-content:center;gap:10px;
+    margin-top:16px;min-height:70px;background:var(--deep);color:#fff;
+    border-radius:11px;font-size:25px;font-weight:800;
+    text-decoration:none;
+  }
+  .tel:active{background:var(--deep-press)}
+
+  .tip{
+    background:#EAF1F6;border:2px solid #B9CEDD;border-radius:12px;
+    padding:20px;margin-bottom:14px;font-size:20px;line-height:1.6;
+  }
+  .tip b{display:block;font-size:22px;margin-bottom:7px;color:var(--deep)}
+
+  details{margin-bottom:14px}
+  summary{
+    font-size:21px;font-weight:700;color:#54606B;padding:16px 0;
+    cursor:pointer;list-style:none;
+  }
+  summary::-webkit-details-marker{display:none}
+  summary::after{content:" ▾"}
+  details[open] summary::after{content:" ▴"}
+  .mini{font-size:19px;color:#54606B;padding:10px 0;border-top:1px solid var(--line)}
+
+  .foot{
+    margin-top:20px;padding-top:22px;border-top:2px solid var(--line);
+    font-size:17px;color:#6B7680;line-height:1.6;
+  }
+  .restart{
+    margin-top:18px;justify-content:center;font-size:24px;
+    border-color:#9AA5AE;color:#3D4954;
+  }
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+
+<script>
+/* ============================================================
+   영등포구 어르신 복지 자격 진단
+   요건 출처: 영등포구청 / 보건복지부 / 서울시 (2026-07-19 확인)
+   ※ 요건은 매년 변경됩니다. 최종 확인은 반드시 담당 기관에 문의.
+   ============================================================ */
+
+var UNKNOWN = 'unknown';
+
+/* ---------- 질문 흐름 ---------- */
+var QUESTIONS = [
+  { id:'birth', field:'age', type:'year',
+    q:'몇 년도에 태어나셨어요?',
+    hint:'태어난 해를 눌러 주세요.' },
+
+  { id:'gu', field:'residence_gu',
+    q:'영등포구에 사시나요?',
+    opts:[ {t:'예',v:true}, {t:'아니오',v:false} ] },
+
+  { id:'alone', field:'living_alone',
+    q:'혼자 사시나요?',
+    opts:[ {t:'예, 혼자 삽니다',v:true}, {t:'아니오, 같이 삽니다',v:false},
+           {t:'말하고 싶지 않아요',v:UNKNOWN,dim:true} ] },
+
+  { id:'move', field:'mobility',
+    q:'바깥에 혼자 다니실 수 있나요?',
+    opts:[ {t:'네, 혼자 다닙니다',v:'independent'},
+           {t:'도와주면 다닙니다',v:'assisted'},
+           {t:'거의 집에만 있습니다',v:'homebound'} ] },
+
+  { id:'care', field:'care_need',
+    q:'밥 차리기나 씻기가 혼자서 어려우신가요?',
+    opts:[ {t:'예, 어렵습니다',v:true}, {t:'아니오, 괜찮습니다',v:false},
+           {t:'잘 모르겠어요',v:UNKNOWN,dim:true} ] },
+
+  { id:'pension', field:'basic_pension',
+    q:'기초연금을 받고 계신가요?',
+    hint:'만 65세 이상 어르신 열 명 중 일곱 명 정도가 받는 돈입니다.',
+    opts:[ {t:'예, 받습니다',v:true}, {t:'아니오',v:false},
+           {t:'잘 모르겠어요',v:UNKNOWN,dim:true} ] },
+
+  { id:'living', field:'livelihood_benefit',
+    q:'주민센터에서 생활비를 매달 받고 계신가요?',
+    hint:'병원비나 집세만 지원받는 경우는 “아니오”입니다.',
+    opts:[ {t:'예, 생활비를 받습니다',v:true}, {t:'아니오',v:false},
+           {t:'잘 모르겠어요',v:UNKNOWN,dim:true} ] },
+
+  { id:'medical', field:'medical_benefit',
+    q:'병원비를 나라에서 대신 내주나요?',
+    hint:'의료급여 대상이면 병원에 갈 때 돈을 거의 안 냅니다.',
+    opts:[ {t:'예',v:true}, {t:'아니오',v:false},
+           {t:'잘 모르겠어요',v:UNKNOWN,dim:true} ] },
+
+  { id:'ltc', field:'ltc_grade',
+    q:'장기요양 등급을 받으신 적 있나요?',
+    hint:'요양보호사가 집에 오거나, 낮에 어르신 센터에 다니시면 “예”입니다.',
+    opts:[ {t:'예, 등급이 있습니다',v:'3'}, {t:'아니오, 없습니다',v:null},
+           {t:'잘 모르겠어요',v:UNKNOWN,dim:true} ] },
+
+  { id:'job', field:'employed_insured',
+    q:'지금 직장에 다니고 계신가요?',
+    hint:'4대보험에 가입된 직장을 말합니다.',
+    opts:[ {t:'예, 다닙니다',v:true}, {t:'아니오',v:false},
+           {t:'잘 모르겠어요',v:UNKNOWN,dim:true} ] }
+];
+
+/* ---------- 지원사업 데이터 ---------- */
+var PROGRAMS = [
+  { id:'job-public', name:'어르신 일자리 — 공익활동',
+    summary:'노노케어(도시락 배달), 학교 앞 교통지도, 복지시설 봉사 등을 하고 활동비를 받습니다.',
+    category:'일자리', org:'영등포구 어르신장애인과', tel:'02-2670-3408',
+    benefit:'월 30시간 이내 (하루 3시간)', period:'평균 11개월',
+    how:'영등포시니어클럽 등 수행기관 방문, 또는 복지로·노인일자리여기에서 신청',
+    when:'매년 11~12월경 모집',
+    rules:{ op:'AND', rules:[
+      {f:'age',op:'>=',v:65},{f:'residence_gu',op:'==',v:true},
+      {f:'basic_pension',op:'==',v:true},{f:'livelihood_benefit',op:'==',v:false},
+      {f:'employed_insured',op:'==',v:false},{f:'ltc_grade',op:'in',v:[null]},
+      {f:'mobility',op:'in',v:['independent','assisted']} ]},
+    notes:['60~64세 차상위계층도 자리가 남으면 참여할 수 있습니다. 문의해 보세요.'],
+    conf:'verified' },
+
+  { id:'job-service', name:'어르신 일자리 — 노인 역량활용',
+    summary:'어린이집 보육교사 보조, 우체국 행정 지원, 지역아동센터 학습 보조 등을 합니다.',
+    category:'일자리', org:'영등포구 어르신장애인과', tel:'02-2670-3411',
+    benefit:'월 761,040원 (주휴수당 포함, 연차수당 별도)', period:'10개월 · 주 15시간',
+    how:'수행기관 방문, 또는 복지로·노인일자리여기에서 신청',
+    when:'매년 11~12월경 모집',
+    rules:{ op:'AND', rules:[
+      {f:'age',op:'>=',v:65},{f:'residence_gu',op:'==',v:true},
+      {f:'livelihood_benefit',op:'==',v:false},{f:'ltc_grade',op:'in',v:[null]},
+      {f:'mobility',op:'in',v:['independent','assisted']} ]},
+    notes:['해당 사업에서 직장가입자가 되는 경우는 제외 대상이 아닙니다.'],
+    conf:'partial' },
+
+  { id:'job-market', name:'어르신 일자리 — 공동체 사업단',
+    summary:'카페, 도시락 제조·판매 같은 작은 가게를 함께 운영합니다. 인생100반 식당, 시니어 북카페 등.',
+    category:'일자리', org:'영등포구 어르신장애인과', tel:'02-2670-3412',
+    benefit:'근로계약에 따름 (하루 최대 8시간)', period:'12개월',
+    how:'수행기관 방문 신청', when:'매년 11~12월경 모집',
+    rules:{ op:'AND', rules:[
+      {f:'age',op:'>=',v:60},{f:'residence_gu',op:'==',v:true},
+      {f:'livelihood_benefit',op:'==',v:false},{f:'ltc_grade',op:'in',v:[null]},
+      {f:'mobility',op:'in',v:['independent','assisted']} ]},
+    notes:['만 60세 이상이면 기초연금을 안 받아도 신청할 수 있습니다.',
+           '선발 기준표에 따라 뽑기 때문에 신청해도 안 될 수 있습니다.'],
+    conf:'partial' },
+
+  { id:'job-place', name:'취업알선형 일자리',
+    summary:'민간 회사 일자리를 연결해 드립니다. 모집 기간 없이 언제든 상담할 수 있습니다.',
+    category:'일자리', org:'영등포시니어클럽 / 영등포노인종합복지관', tel:'02-2670-3408',
+    benefit:'취업처에 따라 다름', period:'연중 상시',
+    how:'영등포시니어클럽 또는 영등포노인종합복지관 방문', when:'아무 때나',
+    rules:{ op:'AND', rules:[
+      {f:'age',op:'>=',v:60},{f:'residence_gu',op:'==',v:true},
+      {f:'mobility',op:'in',v:['independent','assisted']} ]},
+    notes:['다른 일자리 사업과 달리, 생활비를 받고 계셔도·직장에 다니셔도·요양등급이 있어도 신청할 수 있습니다.'],
+    conf:'verified' },
+
+  { id:'care-custom', name:'노인맞춤돌봄서비스',
+    summary:'생활지원사가 집으로 찾아와 안부를 확인하고 집안일과 외출을 도와드립니다.',
+    category:'돌봄', org:'영등포노인종합복지관 외', tel:'02-2670-3408',
+    benefit:'무료 방문 돌봄', period:'연중 상시',
+    how:'사시는 동 주민센터에 방문하거나 전화로 신청', when:'아무 때나',
+    rules:{ op:'AND', rules:[
+      {f:'age',op:'>=',v:65},{f:'residence_gu',op:'==',v:true},
+      {f:'ltc_grade',op:'in',v:[null]},
+      {op:'OR',rules:[
+        {f:'living_alone',op:'==',v:true},
+        {f:'care_need',op:'==',v:true},
+        {f:'medical_benefit',op:'==',v:true} ]} ]},
+    notes:['장기요양 등급이 있으면 이 서비스 대신 장기요양 서비스를 받습니다.',
+           '신청은 누구나 할 수 있고, 방문 조사 후 대상이 정해집니다.'],
+    conf:'partial' },
+
+  { id:'care-ltc', name:'재가장기요양 서비스',
+    summary:'요양보호사가 집으로 와서 돌봐 드리거나(방문요양), 목욕을 도와드리거나, 낮 동안 센터에서 지내실 수 있습니다.',
+    category:'돌봄', org:'구립영등포노인복지센터', tel:'02-2631-3212',
+    benefit:'장기요양보험 적용 (본인부담 일부)', period:'연중 상시',
+    how:'국민건강보험공단(1577-1000) 또는 구립영등포노인복지센터 문의', when:'아무 때나',
+    rules:{ op:'AND', rules:[
+      {f:'residence_gu',op:'==',v:true},
+      {f:'ltc_grade',op:'in',v:['1','2','3','4','5']} ]},
+    notes:['데이케어센터 문의는 02-2634-2215'],
+    conf:'verified' },
+
+  { id:'meal', name:'어르신 급식 지원',
+    summary:'복지관에서 점심 식사를 무료 또는 낮은 값에 드실 수 있습니다.',
+    category:'급식', org:'영등포노인종합복지관', tel:'02-2068-5324',
+    benefit:'중식 제공', period:'연중 상시',
+    how:'영등포노인종합복지관 방문 신청', when:'아무 때나',
+    rules:{ op:'AND', rules:[
+      {f:'age',op:'>=',v:65},{f:'residence_gu',op:'==',v:true},
+      {f:'mobility',op:'in',v:['independent','assisted']},
+      {op:'OR',rules:[
+        {f:'livelihood_benefit',op:'==',v:true},
+        {f:'medical_benefit',op:'==',v:true},
+        {f:'living_alone',op:'==',v:true} ]} ]},
+    notes:['거동이 어려우시면 도시락 배달로 연결해 드립니다.',
+           '소득 기준은 복지관에 확인이 필요합니다.'],
+    conf:'unverified' },
+
+  { id:'counsel', name:'찾아가는 어르신 상담',
+    summary:'상담사가 집으로 찾아와 이야기를 들어 드립니다. 외롭거나 마음이 힘드실 때 이용하세요.',
+    category:'정서지원', org:'영등포구 노인상담센터', tel:'02-2670-3408',
+    benefit:'무료 방문 상담', period:'연중 상시',
+    how:'전화로 신청하거나 동 주민센터에 말씀하세요', when:'아무 때나',
+    rules:{ op:'AND', rules:[
+      {f:'age',op:'>=',v:65},{f:'residence_gu',op:'==',v:true} ]},
+    notes:['소득이나 재산 조건이 없습니다. 영등포구 어르신이면 누구나 신청할 수 있습니다.'],
+    conf:'partial' },
+
+  { id:'card', name:'백세카드',
+    summary:'영등포구 안의 “으뜸업소”에서 할인을 받을 수 있는 카드입니다.',
+    category:'생활지원', org:'영등포구', tel:'02-2670-3408',
+    benefit:'제휴 업소 할인', period:'연중 상시',
+    how:'사시는 동 주민센터에서 신청하면 카드와 안내책자를 받습니다', when:'아무 때나',
+    rules:{ op:'AND', rules:[
+      {f:'age',op:'>=',v:65},{f:'residence_gu',op:'==',v:true} ]},
+    notes:['나이 기준은 동 주민센터에 다시 확인해 보세요.'],
+    conf:'unverified' },
+
+  { id:'50plus', name:'서울시 50+ 영등포센터',
+    summary:'새로운 것을 배우고, 취미 활동을 하고, 사람들을 만나는 곳입니다.',
+    category:'교육·여가', org:'서울시 50플러스 영등포센터', tel:null,
+    benefit:'교육 및 커뮤니티 프로그램', period:'수시 모집',
+    how:'50plus.or.kr 또는 센터 방문', when:'수시',
+    rules:{ op:'AND', rules:[
+      {f:'age',op:'>=',v:50},
+      {f:'mobility',op:'in',v:['independent','assisted']} ]},
+    notes:['서울시에 사는 분이면 신청할 수 있습니다.'],
+    conf:'partial' }
+];
+
+/* ---------- 판정 엔진 (3값 논리) ---------- */
+function evalRule(r,p){
+  if(r.op==='AND'||r.op==='OR') return evalGroup(r,p);
+  var a=p[r.f];
+  if(a===undefined||a===UNKNOWN) return UNKNOWN;
+  switch(r.op){
+    case '>=': return a>=r.v;
+    case '<=': return a<=r.v;
+    case '==': return a===r.v;
+    case '!=': return a!==r.v;
+    case 'in': return r.v.indexOf(a)!==-1;
+    default: return UNKNOWN;
+  }
+}
+function evalGroup(g,p){
+  var res=g.rules.map(function(r){return evalRule(r,p)});
+  if(g.op==='AND'){
+    if(res.indexOf(false)!==-1) return false;
+    if(res.indexOf(UNKNOWN)!==-1) return UNKNOWN;
+    return true;
+  }
+  if(res.indexOf(true)!==-1) return true;
+  if(res.indexOf(UNKNOWN)!==-1) return UNKNOWN;
+  return false;
+}
+function blockers(r,p,out){
+  out=out||{failed:[],unknown:[]};
+  if(r.op==='AND'||r.op==='OR'){ r.rules.forEach(function(x){blockers(x,p,out)}); return out; }
+  var v=evalRule(r,p);
+  if(v===false) out.failed.push(r.f);
+  if(v===UNKNOWN) out.unknown.push(r.f);
+  return out;
+}
+var FIELD_KO={ age:'나이', residence_gu:'영등포구 거주', living_alone:'혼자 사시는지',
+  basic_pension:'기초연금', livelihood_benefit:'생활비 지원', medical_benefit:'병원비 지원',
+  ltc_grade:'장기요양 등급', employed_insured:'직장 여부', mobility:'거동', care_need:'돌봄 필요' };
+
+function diagnose(profile){
+  var out={eligible:[],maybe:[],ineligible:[],tips:[]};
+  PROGRAMS.forEach(function(pg){
+    var v=evalGroup(pg.rules,profile), b=blockers(pg.rules,profile);
+    var uniq=function(a){return a.filter(function(x,i){return a.indexOf(x)===i})};
+    var item={p:pg,missing:uniq(b.unknown),failed:uniq(b.failed)};
+    if(v===true) out.eligible.push(item);
+    else if(v===UNKNOWN) out.maybe.push(item);
+    else out.ineligible.push(item);
+  });
+  var order={verified:0,partial:1,unverified:2};
+  [out.eligible,out.maybe].forEach(function(l){
+    l.sort(function(a,b){return order[a.p.conf]-order[b.p.conf]});
+  });
+
+  // 대체 경로 안내
+  var jobs=PROGRAMS.filter(function(x){return x.category==='일자리'}).map(function(x){return x.id});
+  var jobItems=out.ineligible.filter(function(i){return jobs.indexOf(i.p.id)!==-1});
+  // 나이·거주지·거동 때문에 막힌 경우는 취업 안내가 무의미
+  var hard=['age','residence_gu','mobility'];
+  var blockedByHard=jobItems.some(function(i){
+    return i.failed.some(function(f){return hard.indexOf(f)!==-1});
+  });
+  if(jobItems.length===jobs.length && !blockedByHard){
+    out.tips.push({t:'일자리를 찾고 계신다면',
+      m:'다른 일자리 사업은 어렵지만 취업알선형은 조건 제한이 없습니다. 영등포시니어클럽에 연중 상담할 수 있습니다.'});
+  }
+  if(profile.care_need===true && (profile.ltc_grade===null||profile.ltc_grade===UNKNOWN)){
+    out.tips.push({t:'장기요양 등급을 먼저 신청해 보세요',
+      m:'등급을 받으면 요양보호사 방문, 목욕 도움, 주야간 보호를 이용할 수 있습니다. 국민건강보험공단 1577-1000으로 전화하세요.'});
+  }
+  if(profile.mobility==='homebound'){
+    out.tips.push({t:'집으로 찾아오는 서비스부터 신청하세요',
+      m:'노인맞춤돌봄서비스와 찾아가는 상담은 직접 집으로 방문합니다. 도시락 배달도 요청할 수 있습니다.'});
+  }
+  return out;
+}
+
+/* ---------- 화면 ---------- */
+var state={idx:0,profile:{},answers:[]};
+var app=document.getElementById('app');
+var esc=function(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML};
+
+function render(){
+  app.scrollTop=0; window.scrollTo(0,0);
+  if(state.idx>=QUESTIONS.length){ renderResult(); return; }
+  var q=QUESTIONS[state.idx];
+  var pct=Math.round(state.idx/QUESTIONS.length*100);
+
+  var h='<div class="step">'+QUESTIONS.length+'개 중 '+(state.idx+1)+'번째</div>'+
+        '<div class="bar"><i style="width:'+pct+'%"></i></div>'+
+        '<h1>'+esc(q.q)+'</h1>'+
+        (q.hint?'<p class="hint">'+esc(q.hint)+'</p>':'')+
+        '<div class="opts" id="opts"></div>'+
+        (state.idx>0?'<button class="back" id="back">← 앞 질문으로</button>':'');
+  app.innerHTML=h;
+
+  var box=document.getElementById('opts');
+  if(q.type==='year'){
+    var now=new Date().getFullYear();
+    // 구간이 60세·65세 기준을 걸치지 않도록 쪼갬 (걸치면 오판정 발생)
+    [[86,120,'86살 이상'],[81,85,'81~85살'],[76,80,'76~80살'],
+     [71,75,'71~75살'],[66,70,'66~70살'],[65,65,'65살'],
+     [60,64,'60~64살'],[0,59,'59살 아래']].forEach(function(r){
+      var lo=r[0], hi=r[1];
+      var label = (lo===hi) ? r[2] : r[2]+'  ('+(now-hi)+'~'+(now-lo)+'년생)';
+      box.appendChild(mkBtn('', label, function(){ answer('age', lo); }));
+    });
+  } else {
+    q.opts.forEach(function(o){
+      var b=mkBtn('', o.t, function(){ answer(q.field,o.v); });
+      if(o.dim) b.className='dim';
+      box.appendChild(b);
+    });
+  }
+  var bk=document.getElementById('back');
+  if(bk) bk.onclick=function(){
+    state.idx--; var prev=state.answers.pop();
+    if(prev) delete state.profile[prev];
+    render();
+  };
+}
+function mkBtn(mark,text,fn){
+  var b=document.createElement('button');
+  b.innerHTML=(mark?'<span class="mk">'+mark+'</span>':'')+'<span>'+esc(text)+'</span>';
+  b.onclick=fn; return b;
+}
+function answer(field,val){
+  state.profile[field]=val;
+  state.answers.push(field);
+  state.idx++;
+  render();
+}
+
+function card(item,kind){
+  var p=item.p;
+  var h='<div class="card"><h2>'+esc(p.name)+'</h2>'+
+        '<p class="sum">'+esc(p.summary)+'</p>'+
+        '<div class="row"><b>받는 것</b><span>'+esc(p.benefit)+'</span></div>'+
+        '<div class="row"><b>신청</b><span>'+esc(p.how)+'</span></div>'+
+        '<div class="row"><b>시기</b><span>'+esc(p.when)+'</span></div>';
+  if(kind==='maybe' && item.missing.length){
+    var ko=item.missing.map(function(f){return FIELD_KO[f]||f}).join(', ');
+    h+='<div class="ask">전화해서 <b>'+esc(ko)+'</b> 부분만 확인하시면 됩니다.</div>';
+  }
+  if(p.notes && p.notes.length){
+    h+='<div class="ask">'+p.notes.map(esc).join('<br>')+'</div>';
+  }
+  if(p.tel) h+='<a class="tel" href="tel:'+p.tel.replace(/-/g,'')+'">📞 '+esc(p.tel)+' 전화하기</a>';
+  return h+'</div>';
+}
+
+function renderResult(){
+  var r=diagnose(state.profile);
+  var h='<div class="rhead"><h1>이런 도움을 받으실 수 있어요</h1>'+
+        '<p>아래 내용을 주민센터에 그대로 보여 주셔도 됩니다.</p></div>';
+
+  if(r.tips.length){
+    r.tips.forEach(function(t){
+      h+='<div class="tip"><b>'+esc(t.t)+'</b>'+esc(t.m)+'</div>';
+    });
+  }
+
+  if(r.eligible.length){
+    h+='<div class="group g-good"><div class="glabel"><span class="n">'+r.eligible.length+'</span>받으실 수 있어요</div>'+
+       '<p class="gnote">조건이 맞습니다. 바로 신청해 보세요.</p>';
+    r.eligible.forEach(function(i){h+=card(i,'good')});
+    h+='</div>';
+  }
+
+  if(r.maybe.length){
+    h+='<div class="group g-maybe"><div class="glabel"><span class="n">'+r.maybe.length+'</span>아마 되실 것 같아요</div>'+
+       '<p class="gnote">한두 가지만 확인하면 됩니다. 전화로 물어보세요.</p>';
+    r.maybe.forEach(function(i){h+=card(i,'maybe')});
+    h+='</div>';
+  }
+
+  if(!r.eligible.length && !r.maybe.length){
+    h+='<div class="tip"><b>조건에 맞는 사업을 찾지 못했습니다</b>'+
+       '영등포구 어르신장애인과(02-2670-3408)에 전화하시면 다른 도움을 안내받으실 수 있습니다.</div>';
+  }
+
+  if(r.ineligible.length){
+    h+='<details><summary>지금은 해당되지 않는 사업 '+r.ineligible.length+'개 보기</summary>';
+    r.ineligible.forEach(function(i){
+      var why=i.failed.map(function(f){return FIELD_KO[f]||f}).join(', ');
+      h+='<div class="mini"><b>'+esc(i.p.name)+'</b> — '+esc(why)+' 조건이 맞지 않습니다</div>';
+    });
+    h+='</details>';
+  }
+
+  h+='<button class="restart" id="again">처음부터 다시 하기</button>';
+  h+='<div class="foot">이 안내는 참고용입니다. 실제 신청 자격은 담당 기관에서 최종 확인합니다.<br>'+
+     '요건 확인일: 2026년 7월 19일 · 출처: 영등포구청, 보건복지부, 서울시<br>'+
+     '입력하신 내용은 저장되지 않으며, 창을 닫으면 사라집니다.</div>';
+
+  app.innerHTML=h;
+  document.getElementById('again').onclick=function(){
+    state={idx:0,profile:{},answers:[]}; render();
+  };
+}
+
+render();
+</script>
+</body>
+</html>
