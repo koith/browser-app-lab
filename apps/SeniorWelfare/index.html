@@ -133,11 +133,8 @@
     gap:6px;width:100%;max-width:100%;box-sizing:border-box;
     min-height:130px;padding:18px 10px;
     background:var(--act);color:#fff;border-radius:18px;
-    text-decoration:none;margin-top:10px;
-    border:5px solid var(--act-press)}
-  /* Safari가 tel: 이동을 '자동 전화'로 오판하지 않도록
-     링크 안의 자식은 탭 대상에서 제외한다 */
-  .tel *{pointer-events:none}
+    text-decoration:none;margin-top:10px;cursor:pointer;
+    border:5px solid var(--act-press);font-family:inherit;text-align:center}
   .tel .lab{display:flex;align-items:center;gap:10px;
     font-size:26px;font-weight:800;opacity:.92}
   .tel .num{font-size:36px;font-weight:900;letter-spacing:-.02em;
@@ -149,6 +146,24 @@
   }
   .tel:active{background:var(--act-press)}
 
+  /* 전화 확인 시트 — Safari의 반복 tel: 차단을 피하기 위한 단계 */
+  .callsheet{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.55);
+    display:flex;align-items:flex-end;justify-content:center}
+  .callbox{background:var(--card);width:100%;max-width:620px;
+    border-radius:26px 26px 0 0;border-top:6px solid var(--ink);
+    padding:30px 22px calc(26px + env(safe-area-inset-bottom))}
+  .callbox .who{font-size:30px;font-weight:800;color:var(--sub);
+    text-align:center;margin-bottom:6px}
+  .callbox .big{font-size:52px;font-weight:900;text-align:center;
+    letter-spacing:-.02em;margin:10px 0 24px;white-space:nowrap}
+  .callbox a.go{display:flex;align-items:center;justify-content:center;gap:12px;
+    min-height:120px;background:var(--act);color:#fff;border-radius:18px;
+    font-size:36px;font-weight:900;text-decoration:none;
+    border:5px solid var(--act-press)}
+  .callbox button.close{margin-top:14px;justify-content:center;
+    font-size:30px;min-height:90px;border-color:var(--sub);color:var(--sub)}
+  .callbox .tip2{font-size:23px;color:var(--sub);text-align:center;
+    margin-top:16px;line-height:1.5;font-weight:600}
   .warn{margin-top:22px;padding:20px;background:#FFF0D6;
     border-radius:14px;font-size:29px;line-height:1.5;
     border-left:10px solid var(--waitline);font-weight:700;
@@ -692,9 +707,9 @@ function card(item,kind,n){
         '<h2>'+esc(p.name)+'</h2>'+
         '<p class="sum">'+esc(p.summary)+'</p>';
 
-  if(p.tel) h+='<a class="tel" href="tel:'+p.tel.replace(/-/g,'')+'">'+
+  if(p.tel) h+='<button class="tel" data-tel="'+esc(p.tel)+'" data-org="'+esc(p.org||'')+'">'+
        '<span class="lab">'+PHONE_ICON+'전화 걸기</span>'+
-       '<span class="num">'+esc(p.tel)+'</span></a>';
+       '<span class="num">'+esc(p.tel)+'</span></button>';
 
   if(p.needs_review) h+='<div class="warn">이 사업의 안내가 최근 바뀌었습니다.<br>꼭 전화로 확인해 주세요.</div>';
   else if(unver) h+='<div class="warn">조건을 다시 확인해야 합니다.<br>꼭 전화로 물어보세요.</div>';
@@ -715,6 +730,36 @@ function card(item,kind,n){
   h+='</div></details></div>';
   return h;
 }
+
+/* Safari는 한 페이지에서 tel: 이동이 반복되면 자동 전화로 보고 차단한다.
+   그래서 카드의 버튼은 이동하지 않고 시트만 열고,
+   실제 tel: 링크는 시트를 열 때마다 새로 만들어 한 번씩만 사용한다. */
+function openCall(tel, org){
+  var digits=tel.replace(/[^0-9]/g,'');
+  var back=document.createElement('div');
+  back.className='callsheet';
+  back.innerHTML='<div class="callbox">'+
+    (org?'<div class="who">'+esc(org)+'</div>':'')+
+    '<div class="big">'+esc(tel)+'</div>'+
+    '<a class="go" href="tel:'+digits+'">'+PHONE_ICON+'지금 걸기</a>'+
+    '<button class="close">닫기</button>'+
+    '<div class="tip2">전화가 걸리지 않으면<br>위 번호를 눌러 직접 걸어 주세요</div>'+
+    '</div>';
+  document.body.appendChild(back);
+
+  function shut(){ if(back.parentNode) back.parentNode.removeChild(back); }
+  back.querySelector('.close').onclick=function(e){ e.stopPropagation(); shut(); };
+  back.onclick=function(e){ if(e.target===back) shut(); };
+  // 전화 앱으로 넘어간 뒤 돌아오면 시트를 정리
+  back.querySelector('.go').addEventListener('click',function(){ setTimeout(shut,1200); });
+}
+
+/* 카드의 전화 버튼은 이벤트 위임으로 처리 */
+document.addEventListener('click',function(e){
+  var b=e.target.closest && e.target.closest('button.tel');
+  if(!b) return;
+  openCall(b.getAttribute('data-tel'), b.getAttribute('data-org'));
+});
 
 function renderResult(){
   var r=diagnose(state.profile);
@@ -746,9 +791,9 @@ function renderResult(){
   if(!now){
     h+='<div class="sec"><div class="tip"><b>맞는 사업을 찾지 못했습니다</b>'+
        '영등포구청에 전화하시면<br>다른 도움을 알려드립니다.'+
-       '<a class="tel" href="tel:0226703408">'+
+       '<button class="tel" data-tel="02-2670-3408" data-org="영등포구청">'+
        '<span class="lab">'+PHONE_ICON+'전화 걸기</span>'+
-       '<span class="num">02-2670-3408</span></a></div></div>';
+       '<span class="num">02-2670-3408</span></button></div></div>';
   }
 
   if(r.tips.length){
