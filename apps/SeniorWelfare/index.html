@@ -26,8 +26,8 @@
     --sub:#3A3A38;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
-  html{-webkit-text-size-adjust:100%}
-  body{margin:0;background:var(--paper);color:var(--ink);word-break:keep-all;
+  html{-webkit-text-size-adjust:100%;overflow-x:hidden}
+  body{margin:0;background:var(--paper);color:var(--ink);word-break:keep-all;overflow-x:hidden;
     font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
     font-size:36px;line-height:1.6;font-weight:600;-webkit-font-smoothing:antialiased}
   .apphead{position:sticky;top:0;z-index:50;
@@ -114,7 +114,8 @@
 
   /* 카드 — 상태 스티커를 카드마다 부착 */
   .card{background:var(--card);border:5px solid var(--ink);border-radius:22px;
-    padding:64px 24px 28px;margin-top:44px;position:relative}
+    padding:64px 20px 28px;margin-top:44px;position:relative;
+    max-width:100%;box-sizing:border-box;overflow-wrap:break-word}
   .badge{position:absolute;top:-32px;right:14px;color:#fff;
     font-size:32px;font-weight:900;border-radius:16px;padding:14px 24px;
     letter-spacing:-.02em;border:4px solid #fff;
@@ -124,19 +125,31 @@
   .cnum{position:absolute;top:-26px;left:20px;background:var(--ink);color:#fff;
     font-size:28px;font-weight:900;border-radius:99px;
     width:60px;height:60px;display:flex;align-items:center;justify-content:center}
-  .card h2{font-size:46px;font-weight:900;margin:6px 0 16px;line-height:1.3}
+  .card h2{font-size:44px;font-weight:900;margin:6px 0 16px;line-height:1.3;
+    overflow-wrap:break-word;max-width:100%}
   .card .sum{font-size:32px;color:var(--sub);margin:0 0 24px;line-height:1.55;font-weight:600}
 
-  .tel{display:flex;align-items:center;justify-content:center;gap:20px;
-    min-height:130px;background:var(--act);color:#fff;border-radius:18px;
-    font-size:44px;font-weight:900;text-decoration:none;margin-top:10px;
+  .tel{display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:6px;width:100%;max-width:100%;box-sizing:border-box;
+    min-height:130px;padding:18px 10px;
+    background:var(--act);color:#fff;border-radius:18px;
+    text-decoration:none;margin-top:10px;
     border:5px solid var(--act-press)}
-  .tel svg{width:52px;height:52px;flex:0 0 52px;fill:#fff}
+  .tel .lab{display:flex;align-items:center;gap:10px;
+    font-size:26px;font-weight:800;opacity:.92}
+  .tel .num{font-size:36px;font-weight:900;letter-spacing:-.02em;
+    white-space:nowrap;line-height:1.1}
+  .tel svg{width:32px;height:32px;flex:0 0 32px;fill:#fff}
+  @media (max-width:380px){
+    .tel .num{font-size:33px}
+    .tel .lab{font-size:24px}
+  }
   .tel:active{background:var(--act-press)}
 
-  .warn{margin-top:22px;padding:22px;background:#FFF0D6;
-    border-radius:14px;font-size:30px;line-height:1.5;
-    border-left:10px solid var(--waitline);font-weight:700}
+  .warn{margin-top:22px;padding:20px;background:#FFF0D6;
+    border-radius:14px;font-size:29px;line-height:1.5;
+    border-left:10px solid var(--waitline);font-weight:700;
+    max-width:100%;box-sizing:border-box;overflow-wrap:break-word}
 
   .more{margin-top:22px;border-top:4px solid var(--line);padding-top:6px}
   .more summary{font-size:34px;font-weight:800;color:var(--act);
@@ -146,12 +159,15 @@
   .more summary::after{content:"▼";font-size:44px;line-height:1;
     color:var(--act);flex:0 0 auto}
   .more[open] summary::after{content:"▲"}
-  .row{font-size:33px;margin:28px 0;line-height:1.5;font-weight:600;color:var(--ink)}
+  .mbody{max-width:100%;overflow-wrap:break-word;word-wrap:break-word}
+  .row{font-size:31px;margin:24px 0;line-height:1.5;font-weight:600;color:var(--ink);
+    max-width:100%;overflow-wrap:break-word}
   .row b{display:block;color:#fff;background:var(--sub);font-weight:800;
     font-size:24px;margin-bottom:12px;letter-spacing:.06em;
     padding:6px 16px;border-radius:8px;width:fit-content}
-  .note{margin-top:22px;padding:22px;background:#F0EFEA;border-radius:14px;
-    font-size:29px;line-height:1.55}
+  .note{margin-top:22px;padding:20px;background:#F0EFEA;border-radius:14px;
+    font-size:28px;line-height:1.55;max-width:100%;box-sizing:border-box;
+    overflow-wrap:break-word}
 
   .tip{background:#FFF4E0;border:5px solid var(--waitline);border-radius:22px;
     padding:28px;margin-top:24px;font-size:32px;line-height:1.55;font-weight:600}
@@ -663,7 +679,9 @@ function card(item,kind,n){
         '<h2>'+esc(p.name)+'</h2>'+
         '<p class="sum">'+esc(p.summary)+'</p>';
 
-  if(p.tel) h+='<a class="tel" href="tel:'+p.tel.replace(/-/g,'')+'">'+PHONE_ICON+'<span>'+esc(p.tel)+'</span></a>';
+  if(p.tel) h+='<a class="tel" href="tel:'+p.tel.replace(/-/g,'')+'">'+
+       '<span class="lab">'+PHONE_ICON+'전화 걸기</span>'+
+       '<span class="num">'+esc(p.tel)+'</span></a>';
 
   if(p.needs_review) h+='<div class="warn">이 사업의 안내가 최근 바뀌었습니다.<br>꼭 전화로 확인해 주세요.</div>';
   else if(unver) h+='<div class="warn">조건을 다시 확인해야 합니다.<br>꼭 전화로 물어보세요.</div>';
@@ -715,7 +733,9 @@ function renderResult(){
   if(!now){
     h+='<div class="sec"><div class="tip"><b>맞는 사업을 찾지 못했습니다</b>'+
        '영등포구청에 전화하시면<br>다른 도움을 알려드립니다.'+
-       '<a class="tel" href="tel:0226703408">'+PHONE_ICON+'<span>02-2670-3408</span></a></div></div>';
+       '<a class="tel" href="tel:0226703408">'+
+       '<span class="lab">'+PHONE_ICON+'전화 걸기</span>'+
+       '<span class="num">02-2670-3408</span></a></div></div>';
   }
 
   if(r.tips.length){
@@ -774,27 +794,13 @@ fetch('programs-live.json?t='+Date.now())
   })
   .catch(function(){ /* 내장 데이터 유지 */ });
 
-/* iOS Safari 더블탭 확대 차단 */
-(function(){
-  var lastT=0, lastX=0, lastY=0;
-  document.addEventListener('touchend',function(e){
-    // 전화 링크·펼치기는 절대 막지 않는다
-    if(e.target.closest && e.target.closest('a,summary,button')) { lastT=0; return; }
-    var t=e.changedTouches && e.changedTouches[0];
-    if(!t) return;
-    var now=Date.now();
-    // 같은 자리를 300ms 안에 두 번 두드린 경우만 확대로 간주
-    if(now-lastT<=300 && Math.abs(t.clientX-lastX)<40 && Math.abs(t.clientY-lastY)<40){
-      e.preventDefault();
-      lastT=0; return;
-    }
-    lastT=now; lastX=t.clientX; lastY=t.clientY;
-  },{passive:false});
-  // 손가락 두 개 확대 차단
-  ['gesturestart','gesturechange','gestureend'].forEach(function(ev){
-    document.addEventListener(ev,function(e){ e.preventDefault(); });
-  });
-})();
+/* iOS Safari 확대 차단
+   touchend를 preventDefault하면 Safari가 tel: 링크를 '자동 전화'로 판정해
+   차단 팝업을 띄운다. 따라서 손가락 두 개 확대만 막고,
+   더블탭은 viewport(maximum-scale)와 touch-action:manipulation에 맡긴다. */
+['gesturestart','gesturechange','gestureend'].forEach(function(ev){
+  document.addEventListener(ev,function(e){ e.preventDefault(); });
+});
 
 render();
 </script>
