@@ -116,7 +116,8 @@ module.exports = async (req, res) => {
       if (fp.error) { failed.push({ id, url, error: fp.error }); continue; }
 
       const old = state.checks[id];
-      if (old && old.hash !== fp.hash) {
+      if (!old) { ok.push(id); state.checks[id] = { hash: fp.hash, length: fp.length, at: new Date().toISOString() }; continue; }
+      if (old.hash !== fp.hash) {
         changed.push({
           id, url,
           before: old.hash, after: fp.hash,
@@ -130,10 +131,19 @@ module.exports = async (req, res) => {
     }
 
     state.last_run = new Date().toISOString();
-    await ghPut(STATE_PATH, state, prev && prev.sha, 'watch: 출처 페이지 점검');
+
+    // 쓰기 권한이 없어도 조회 결과는 돌려준다.
+    // 토큰에 Contents write가 붙으면 자동 저장·자동 표시가 켜진다.
+    let saved = false, saveError = null;
+    try {
+      await ghPut(STATE_PATH, state, prev && prev.sha, 'watch: 출처 페이지 점검');
+      saved = true;
+    } catch (e) {
+      saveError = String(e.message || e).slice(0, 120);
+    }
 
     // 변경이 감지되면 앱 데이터에 needs_review 표시를 남긴다
-    if (changed.length) {
+    if (changed.length && saved) {
       const dataFile = await ghGet(DATA_PATH);
       if (dataFile) {
         const ids = changed.map((c) => c.id);
@@ -142,14 +152,24 @@ module.exports = async (req, res) => {
           if (ids.includes(p.id) && !p.needs_review) { p.needs_review = true; touched = true; }
         });
         if (touched) {
-          await ghPut(DATA_PATH, dataFile.data, dataFile.sha,
-            'watch: 출처 변경 감지 — 검토 필요 표시 (' + ids.join(', ') + ')');
+          try {
+            await ghPut(DATA_PATH, dataFile.data, dataFile.sha,
+              'watch: 출처 변경 감지 — 검토 필요 표시 (' + ids.join(', ') + ')');
+          } catch (e) { saveError = String(e.message || e).slice(0, 120); }
         }
       }
     }
 
     res.status(200).json({
       ran_at: state.last_run,
+      saved,
+      save_error: saveError,
+      hint: saved ? undefined
+        : 'GH_TOKEN에 Contents 쓰기 권한이 없어 결과를 저장하지 못했습니다. ' +
+          '아래 hashes를 직접 비교하거나, 토큰 권한을 추가하면 자동 판정이 켜집니다.',
+      hashes: Object.fromEntries(Object.entries(state.checks).map(function(e){
+        return [e[0], e[1].hash];
+      })),
       changed_count: changed.length,
       changed,
       unchanged: ok.length,
