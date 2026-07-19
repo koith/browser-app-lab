@@ -129,41 +129,23 @@
     overflow-wrap:break-word;max-width:100%}
   .card .sum{font-size:32px;color:var(--sub);margin:0 0 24px;line-height:1.55;font-weight:600}
 
-  .tel{display:flex;flex-direction:column;align-items:center;justify-content:center;
-    gap:6px;width:100%;max-width:100%;box-sizing:border-box;
-    min-height:130px;padding:18px 10px;
-    background:var(--act);color:#fff;border-radius:18px;
-    text-decoration:none;margin-top:10px;cursor:pointer;
-    border:5px solid var(--act-press);font-family:inherit;text-align:center}
-  .tel .lab{display:flex;align-items:center;gap:10px;
-    font-size:26px;font-weight:800;opacity:.92}
-  .tel .num{font-size:36px;font-weight:900;letter-spacing:-.02em;
-    white-space:nowrap;line-height:1.1}
-  .tel svg{width:32px;height:32px;flex:0 0 32px;fill:#fff}
-  @media (max-width:380px){
-    .tel .num{font-size:33px}
-    .tel .lab{font-size:24px}
-  }
-  .tel:active{background:var(--act-press)}
+  /* 전화번호 표시 — tel: 자동 이동이 차단되는 환경이라 번호를 크게 보여준다 */
+  .telbox{margin-top:12px;border:5px solid var(--act);border-radius:18px;
+    overflow:hidden;background:#F2F7F5}
+  .tlab{display:flex;align-items:center;justify-content:center;gap:12px;
+    background:var(--act);color:#fff;font-size:26px;font-weight:800;
+    padding:12px 10px}
+  .tlab svg{width:30px;height:30px;flex:0 0 30px;fill:#fff}
+  .tnum{font-size:46px;font-weight:900;text-align:center;color:var(--ink);
+    padding:20px 8px 16px;letter-spacing:-.01em;white-space:nowrap;
+    -webkit-user-select:text;user-select:text}
+  .tcopy{min-height:88px;font-size:30px;font-weight:800;
+    border:none;border-top:4px solid var(--act);border-radius:0;
+    background:#fff;color:var(--act);width:100%;justify-content:center}
+  .tcopy:active{background:var(--act);color:#fff}
+  .tcopy.ok{background:var(--ok);color:#fff}
+  @media (max-width:380px){ .tnum{font-size:40px} }
 
-  /* 전화 확인 시트 — Safari의 반복 tel: 차단을 피하기 위한 단계 */
-  .callsheet{position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.55);
-    display:flex;align-items:flex-end;justify-content:center}
-  .callbox{background:var(--card);width:100%;max-width:620px;
-    border-radius:26px 26px 0 0;border-top:6px solid var(--ink);
-    padding:30px 22px calc(26px + env(safe-area-inset-bottom))}
-  .callbox .who{font-size:30px;font-weight:800;color:var(--sub);
-    text-align:center;margin-bottom:6px}
-  .callbox .big{font-size:52px;font-weight:900;text-align:center;
-    letter-spacing:-.02em;margin:10px 0 24px;white-space:nowrap}
-  .callbox a.go{display:flex;align-items:center;justify-content:center;gap:12px;
-    min-height:120px;background:var(--act);color:#fff;border-radius:18px;
-    font-size:36px;font-weight:900;text-decoration:none;
-    border:5px solid var(--act-press)}
-  .callbox button.close{margin-top:14px;justify-content:center;
-    font-size:30px;min-height:90px;border-color:var(--sub);color:var(--sub)}
-  .callbox .tip2{font-size:23px;color:var(--sub);text-align:center;
-    margin-top:16px;line-height:1.5;font-weight:600}
   .warn{margin-top:22px;padding:20px;background:#FFF0D6;
     border-radius:14px;font-size:29px;line-height:1.5;
     border-left:10px solid var(--waitline);font-weight:700;
@@ -694,6 +676,32 @@ function answer(field,val){
 
 var PHONE_ICON='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8c1.4 2.8 3.8 5.2 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.4.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1l-2.3 2.2z"/></svg>';
 
+/* 이 도메인에서는 tel: 이동이 Safari에 차단된다.
+   그래서 번호를 크게 보여주고 복사만 제공한다. 어르신은 번호를 보고 직접 건다. */
+function telBlock(tel){
+  return '<div class="telbox">'+
+    '<div class="tlab">'+PHONE_ICON+'<span>전화번호</span></div>'+
+    '<div class="tnum">'+esc(tel)+'</div>'+
+    '<button class="tcopy" data-tel="'+esc(tel)+'">번호 복사하기</button>'+
+    '</div>';
+}
+
+document.addEventListener('click',function(e){
+  var b=e.target.closest && e.target.closest('.tcopy');
+  if(!b) return;
+  var tel=b.getAttribute('data-tel');
+  var done=function(){ b.textContent='복사했습니다'; b.classList.add('ok');
+    setTimeout(function(){ b.textContent='번호 복사하기'; b.classList.remove('ok'); },1800); };
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(tel).then(done,function(){});
+  } else {
+    var ta=document.createElement('textarea');
+    ta.value=tel; document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); done(); }catch(err){}
+    document.body.removeChild(ta);
+  }
+});
+
 function card(item,kind,n){
   var p=item.p;
   var unver=(p.conf==='unverified');
@@ -707,9 +715,7 @@ function card(item,kind,n){
         '<h2>'+esc(p.name)+'</h2>'+
         '<p class="sum">'+esc(p.summary)+'</p>';
 
-  if(p.tel) h+='<button class="tel" data-tel="'+esc(p.tel)+'" data-org="'+esc(p.org||'')+'">'+
-       '<span class="lab">'+PHONE_ICON+'전화 걸기</span>'+
-       '<span class="num">'+esc(p.tel)+'</span></button>';
+  if(p.tel) h+=telBlock(p.tel);
 
   if(p.needs_review) h+='<div class="warn">이 사업의 안내가 최근 바뀌었습니다.<br>꼭 전화로 확인해 주세요.</div>';
   else if(unver) h+='<div class="warn">조건을 다시 확인해야 합니다.<br>꼭 전화로 물어보세요.</div>';
@@ -730,36 +736,6 @@ function card(item,kind,n){
   h+='</div></details></div>';
   return h;
 }
-
-/* Safari는 한 페이지에서 tel: 이동이 반복되면 자동 전화로 보고 차단한다.
-   그래서 카드의 버튼은 이동하지 않고 시트만 열고,
-   실제 tel: 링크는 시트를 열 때마다 새로 만들어 한 번씩만 사용한다. */
-function openCall(tel, org){
-  var digits=tel.replace(/[^0-9]/g,'');
-  var back=document.createElement('div');
-  back.className='callsheet';
-  back.innerHTML='<div class="callbox">'+
-    (org?'<div class="who">'+esc(org)+'</div>':'')+
-    '<div class="big">'+esc(tel)+'</div>'+
-    '<a class="go" href="tel:'+digits+'">'+PHONE_ICON+'지금 걸기</a>'+
-    '<button class="close">닫기</button>'+
-    '<div class="tip2">전화가 걸리지 않으면<br>위 번호를 눌러 직접 걸어 주세요</div>'+
-    '</div>';
-  document.body.appendChild(back);
-
-  function shut(){ if(back.parentNode) back.parentNode.removeChild(back); }
-  back.querySelector('.close').onclick=function(e){ e.stopPropagation(); shut(); };
-  back.onclick=function(e){ if(e.target===back) shut(); };
-  // 전화 앱으로 넘어간 뒤 돌아오면 시트를 정리
-  back.querySelector('.go').addEventListener('click',function(){ setTimeout(shut,1200); });
-}
-
-/* 카드의 전화 버튼은 이벤트 위임으로 처리 */
-document.addEventListener('click',function(e){
-  var b=e.target.closest && e.target.closest('button.tel');
-  if(!b) return;
-  openCall(b.getAttribute('data-tel'), b.getAttribute('data-org'));
-});
 
 function renderResult(){
   var r=diagnose(state.profile);
@@ -791,9 +767,7 @@ function renderResult(){
   if(!now){
     h+='<div class="sec"><div class="tip"><b>맞는 사업을 찾지 못했습니다</b>'+
        '영등포구청에 전화하시면<br>다른 도움을 알려드립니다.'+
-       '<button class="tel" data-tel="02-2670-3408" data-org="영등포구청">'+
-       '<span class="lab">'+PHONE_ICON+'전화 걸기</span>'+
-       '<span class="num">02-2670-3408</span></button></div></div>';
+       telBlock('02-2670-3408')+'</div></div>';
   }
 
   if(r.tips.length){
