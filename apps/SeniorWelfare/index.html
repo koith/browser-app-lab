@@ -135,6 +135,9 @@
     background:var(--act);color:#fff;border-radius:18px;
     text-decoration:none;margin-top:10px;
     border:5px solid var(--act-press)}
+  /* Safari가 tel: 이동을 '자동 전화'로 오판하지 않도록
+     링크 안의 자식은 탭 대상에서 제외한다 */
+  .tel *{pointer-events:none}
   .tel .lab{display:flex;align-items:center;gap:10px;
     font-size:26px;font-weight:800;opacity:.92}
   .tel .num{font-size:36px;font-weight:900;letter-spacing:-.02em;
