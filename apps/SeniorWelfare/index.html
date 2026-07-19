@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#1B4A6B">
 <title>영등포 어르신 복지 찾기</title>
@@ -25,7 +25,7 @@
     --waitline:#8A4B00;   /* 주황 계열 테두리·글자용 진한 톤 */
     --sub:#3A3A38;
   }
-  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
   html{-webkit-text-size-adjust:100%}
   body{margin:0;background:var(--paper);color:var(--ink);word-break:keep-all;
     font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
@@ -60,6 +60,12 @@
     font-size:28px;display:flex;align-items:center;justify-content:center}
   .start{background:var(--ok);border-color:#0A4F1E;color:#fff;
     justify-content:center;font-size:44px;min-height:120px}
+  /* 시작하기는 항상 화면에 보이도록 하단 고정 */
+  .startbar{position:fixed;left:0;right:0;bottom:0;z-index:60;
+    background:var(--paper);border-top:5px solid var(--ink);
+    padding:16px 18px calc(16px + env(safe-area-inset-bottom));}
+  .startbar .start{margin:0;max-width:820px;margin-left:auto;margin-right:auto}
+  .title{padding-bottom:170px}
   .cover{font-size:25px !important;padding:20px !important;margin-top:20px !important}
   .start:active{background:#0A4F1E;color:#fff}
   .stale{background:#FFF4E0;border:5px solid var(--waitline);border-radius:18px;
@@ -563,12 +569,12 @@ function renderTitle(){
      '<div class="stepline"><i>2</i>받을 수 있는 것 보기</div>'+
      '<div class="stepline"><i>3</i>전화로 신청하기</div>'+
      '</div>'+
-     '<div class="opts"><button class="start" id="go">시작하기</button></div>'+
      '<div class="cover">지원사업 '+PROGRAMS.length+'가지를 담았습니다.<br>'+
      '이것이 전부는 아닙니다.<br>'+
      '더 궁금하시면 영등포구청<br>02-2670-3408<br><br>'+
      '확인일 '+DATA_CHECKED.replace(/-/g,'. ')+'</div>'+
-     '</div>';
+     '</div>'+
+     '<div class="startbar"><button class="start" id="go">시작하기</button></div>';
   app.innerHTML=h;
   var b=document.getElementById('go');
   b.onclick=function(){
@@ -767,6 +773,28 @@ fetch('programs-live.json?t='+Date.now())
     }
   })
   .catch(function(){ /* 내장 데이터 유지 */ });
+
+/* iOS Safari 더블탭 확대 차단 */
+(function(){
+  var lastT=0, lastX=0, lastY=0;
+  document.addEventListener('touchend',function(e){
+    // 전화 링크·펼치기는 절대 막지 않는다
+    if(e.target.closest && e.target.closest('a,summary,button')) { lastT=0; return; }
+    var t=e.changedTouches && e.changedTouches[0];
+    if(!t) return;
+    var now=Date.now();
+    // 같은 자리를 300ms 안에 두 번 두드린 경우만 확대로 간주
+    if(now-lastT<=300 && Math.abs(t.clientX-lastX)<40 && Math.abs(t.clientY-lastY)<40){
+      e.preventDefault();
+      lastT=0; return;
+    }
+    lastT=now; lastX=t.clientX; lastY=t.clientY;
+  },{passive:false});
+  // 손가락 두 개 확대 차단
+  ['gesturestart','gesturechange','gestureend'].forEach(function(ev){
+    document.addEventListener(ev,function(e){ e.preventDefault(); });
+  });
+})();
 
 render();
 </script>
