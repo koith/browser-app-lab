@@ -689,14 +689,33 @@ var PHONE_ICON='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8c1
    차단되더라도 어르신이 번호를 보고 직접 걸 수 있게 항상 크게 병기한다. */
 function telUI(tel){
   var digits=tel.replace(/[^0-9]/g,'');
-  return '<a class="tel" href="tel:'+digits+'">'+
+  return '<a class="tel" href="tel:'+digits+'" data-tel="'+esc(tel)+'">'+
       '<span class="lab">'+PHONE_ICON+'전화 걸기</span>'+
-      '<span class="num">'+esc(tel)+'</span></a>'+
-    '<div class="telalt">'+
-      '<span>걸리지 않으면 이 번호로 직접 걸어 주세요</span>'+
-      '<button class="tcopy" data-tel="'+esc(tel)+'">번호 복사</button>'+
-    '</div>';
+      '<span class="num">'+esc(tel)+'</span></a>';
 }
+
+/* 전화 버튼을 눌렀는데도 화면이 그대로면 차단된 것으로 보고,
+   그때만 도움말을 보여준다. 평소에는 아무것도 띄우지 않는다. */
+document.addEventListener('click',function(e){
+  var a=e.target.closest && e.target.closest('a.tel');
+  if(!a || a.dataset.watching) return;
+  a.dataset.watching='1';
+  var left=false;
+  var onHide=function(){ left=true; };
+  document.addEventListener('visibilitychange',onHide,{once:true});
+  setTimeout(function(){
+    document.removeEventListener('visibilitychange',onHide);
+    delete a.dataset.watching;
+    if(left) return;                       // 전화 앱으로 넘어갔음 → 정상
+    if(a.nextElementSibling &&
+       a.nextElementSibling.className==='telalt') return;
+    var d=document.createElement('div');
+    d.className='telalt';
+    d.innerHTML='<span>전화가 걸리지 않았습니다.<br>이 번호로 직접 걸어 주세요.</span>'+
+      '<button class="tcopy" data-tel="'+a.dataset.tel+'">번호 복사</button>';
+    a.parentNode.insertBefore(d, a.nextSibling);
+  },1500);
+});
 
 document.addEventListener('click',function(e){
   var b=e.target.closest && e.target.closest('.tcopy');
