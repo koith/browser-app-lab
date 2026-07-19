@@ -25,7 +25,7 @@
     --waitline:#8A4B00;   /* 주황 계열 테두리·글자용 진한 톤 */
     --sub:#3A3A38;
   }
-  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html{-webkit-text-size-adjust:100%;overflow-x:hidden}
   body{margin:0;background:var(--paper);color:var(--ink);word-break:keep-all;overflow-x:hidden;
     font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
@@ -129,22 +129,22 @@
     overflow-wrap:break-word;max-width:100%}
   .card .sum{font-size:32px;color:var(--sub);margin:0 0 24px;line-height:1.55;font-weight:600}
 
-  /* 전화번호 표시 — tel: 자동 이동이 차단되는 환경이라 번호를 크게 보여준다 */
-  .telbox{margin-top:12px;border:5px solid var(--act);border-radius:18px;
-    overflow:hidden;background:#F2F7F5}
-  .tlab{display:flex;align-items:center;justify-content:center;gap:12px;
-    background:var(--act);color:#fff;font-size:26px;font-weight:800;
-    padding:12px 10px}
-  .tlab svg{width:30px;height:30px;flex:0 0 30px;fill:#fff}
-  .tnum{font-size:46px;font-weight:900;text-align:center;color:var(--ink);
-    padding:20px 8px 16px;letter-spacing:-.01em;white-space:nowrap;
-    -webkit-user-select:text;user-select:text}
-  .tcopy{min-height:88px;font-size:30px;font-weight:800;
-    border:none;border-top:4px solid var(--act);border-radius:0;
-    background:#fff;color:var(--act);width:100%;justify-content:center}
-  .tcopy:active{background:var(--act);color:#fff}
-  .tcopy.ok{background:var(--ok);color:#fff}
-  @media (max-width:380px){ .tnum{font-size:40px} }
+  .tel{display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:6px;width:100%;max-width:100%;box-sizing:border-box;
+    min-height:130px;padding:18px 10px;
+    background:var(--act);color:#fff;border-radius:18px;
+    text-decoration:none;margin-top:10px;
+    border:5px solid var(--act-press)}
+  .tel .lab{display:flex;align-items:center;gap:10px;
+    font-size:26px;font-weight:800;opacity:.92}
+  .tel .num{font-size:36px;font-weight:900;letter-spacing:-.02em;
+    white-space:nowrap;line-height:1.1}
+  .tel svg{width:32px;height:32px;flex:0 0 32px;fill:#fff}
+  .tel:active{background:var(--act-press)}
+  @media (max-width:380px){
+    .tel .num{font-size:33px}
+    .tel .lab{font-size:24px}
+  }
 
   .warn{margin-top:22px;padding:20px;background:#FFF0D6;
     border-radius:14px;font-size:29px;line-height:1.5;
@@ -676,32 +676,6 @@ function answer(field,val){
 
 var PHONE_ICON='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.6 10.8c1.4 2.8 3.8 5.2 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.4.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1l-2.3 2.2z"/></svg>';
 
-/* 이 도메인에서는 tel: 이동이 Safari에 차단된다.
-   그래서 번호를 크게 보여주고 복사만 제공한다. 어르신은 번호를 보고 직접 건다. */
-function telBlock(tel){
-  return '<div class="telbox">'+
-    '<div class="tlab">'+PHONE_ICON+'<span>전화번호</span></div>'+
-    '<div class="tnum">'+esc(tel)+'</div>'+
-    '<button class="tcopy" data-tel="'+esc(tel)+'">번호 복사하기</button>'+
-    '</div>';
-}
-
-document.addEventListener('click',function(e){
-  var b=e.target.closest && e.target.closest('.tcopy');
-  if(!b) return;
-  var tel=b.getAttribute('data-tel');
-  var done=function(){ b.textContent='복사했습니다'; b.classList.add('ok');
-    setTimeout(function(){ b.textContent='번호 복사하기'; b.classList.remove('ok'); },1800); };
-  if(navigator.clipboard && navigator.clipboard.writeText){
-    navigator.clipboard.writeText(tel).then(done,function(){});
-  } else {
-    var ta=document.createElement('textarea');
-    ta.value=tel; document.body.appendChild(ta); ta.select();
-    try{ document.execCommand('copy'); done(); }catch(err){}
-    document.body.removeChild(ta);
-  }
-});
-
 function card(item,kind,n){
   var p=item.p;
   var unver=(p.conf==='unverified');
@@ -715,7 +689,9 @@ function card(item,kind,n){
         '<h2>'+esc(p.name)+'</h2>'+
         '<p class="sum">'+esc(p.summary)+'</p>';
 
-  if(p.tel) h+=telBlock(p.tel);
+  if(p.tel) h+='<a class="tel" href="tel:'+p.tel.replace(/-/g,'')+'">'+
+       '<span class="lab">'+PHONE_ICON+'전화 걸기</span>'+
+       '<span class="num">'+esc(p.tel)+'</span></a>';
 
   if(p.needs_review) h+='<div class="warn">이 사업의 안내가 최근 바뀌었습니다.<br>꼭 전화로 확인해 주세요.</div>';
   else if(unver) h+='<div class="warn">조건을 다시 확인해야 합니다.<br>꼭 전화로 물어보세요.</div>';
@@ -767,7 +743,9 @@ function renderResult(){
   if(!now){
     h+='<div class="sec"><div class="tip"><b>맞는 사업을 찾지 못했습니다</b>'+
        '영등포구청에 전화하시면<br>다른 도움을 알려드립니다.'+
-       telBlock('02-2670-3408')+'</div></div>';
+       '<a class="tel" href="tel:0226703408">'+
+       '<span class="lab">'+PHONE_ICON+'전화 걸기</span>'+
+       '<span class="num">02-2670-3408</span></a></div></div>';
   }
 
   if(r.tips.length){
