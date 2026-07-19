@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>국번 형식 테스트</title>
+<style>
+body{font-family:-apple-system,sans-serif;padding:24px;font-size:19px;line-height:1.6}
+a{display:block;padding:22px;margin:10px 0;background:#0C6152;color:#fff;
+  border-radius:12px;text-decoration:none;font-size:26px;font-weight:800;text-align:center}
+b{display:block;margin-top:30px;font-size:21px}
+small{color:#666;font-size:16px;display:block;margin:2px 0 12px}
+.warn{background:#FFF4E0;border-left:6px solid #8A4B00;padding:16px;margin:20px 0;font-size:17px}
+</style>
+</head>
+<body>
+
+<h1>국번 형식 테스트</h1>
+<div class="warn">
+같은 번호(02-2670-3408)를 4가지 형식으로 만들었습니다.<br>
+하나씩 누르고 <b style="display:inline;font-size:17px">매번 새로고침</b>해 주세요.
+</div>
+
+<b>C-1. 현재 방식 (하이픈 제거)</b>
+<small>tel:0226703408</small>
+<a href="tel:0226703408">02-2670-3408</a>
+
+<b>C-2. 국제 표기 (+82, 앞의 0 제거)</b>
+<small>tel:+8222703408 → 잘못된 예시 아님, 02→+822</small>
+<a href="tel:+82226703408">02-2670-3408</a>
+
+<b>C-3. 하이픈 유지</b>
+<small>tel:02-2670-3408</small>
+<a href="tel:02-2670-3408">02-2670-3408</a>
+
+<b>C-4. 국제 표기 + 하이픈</b>
+<small>tel:+82-2-2670-3408</small>
+<a href="tel:+82-2-2670-3408">02-2670-3408</a>
+
+<div class="warn" style="margin-top:36px">
+어느 형식이 통과하는지 알려주시면<br>그 형식으로 앱 전체를 바꾸겠습니다.
+</div>
+
+</body>
+</html>
