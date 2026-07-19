@@ -439,9 +439,21 @@ function diagnose(profile){
     if(v===true) out.eligible.push(item);
     else out.maybe.push(item);
   });
+  /* 중요도 순: 현금·돌봄처럼 삶에 큰 영향을 주는 것을 먼저 */
+  var PRIORITY={
+    'basic-pension':0, 'ltc-apply':1, 'emergency-support':2,
+    'housing-support':3, 'care-custom':4, 'care-ltc':5,
+    'meal-delivery':6, 'meal':7,
+    'job-public':8, 'job-service':9, 'job-market':10, 'job-place':11,
+    'counsel':12, 'gyeongrodang':13, 'card':14, '50plus':15
+  };
   var order={verified:0,partial:1,unverified:2};
   [out.eligible,out.maybe].forEach(function(l){
-    l.sort(function(a,b){return order[a.p.conf]-order[b.p.conf]});
+    l.sort(function(a,b){
+      var pa=PRIORITY[a.p.id], pb=PRIORITY[b.p.id];
+      if(pa===undefined) pa=99; if(pb===undefined) pb=99;
+      return pa-pb || order[a.p.conf]-order[b.p.conf];
+    });
   });
 
   // 대체 경로 안내
