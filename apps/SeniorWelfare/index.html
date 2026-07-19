@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#1B4A6B">
 <title>영등포 어르신 복지 찾기</title>
@@ -803,17 +803,6 @@ fetch('programs-live.json?t='+Date.now())
     }
   })
   .catch(function(){ /* 내장 데이터 유지 */ });
-
-/* iOS Safari 확대 차단
-   touchend를 preventDefault하면 Safari가 tel: 링크를 '자동 전화'로 판정해
-   차단 팝업을 띄운다. 따라서 손가락 두 개 확대만 막고,
-   더블탭은 viewport(maximum-scale)와 touch-action:manipulation에 맡긴다. */
-['gesturestart','gesturechange','gestureend'].forEach(function(ev){
-  document.addEventListener(ev,function(e){
-    if(isPhoneTarget(e.target)) return;
-    e.preventDefault();
-  });
-});
 
 render();
 </script>
