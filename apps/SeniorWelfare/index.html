@@ -1746,6 +1746,180 @@ var PROGRAMS = [
    "몸에 상처를 입히는 것뿐 아니라 돈을 뺏거나 돌보지 않는 것도 학대입니다."
   ],
   "conf": "partial"
+ },
+ {
+  "id": "legal-aid",
+  "name": "무료 법률 상담 (법률구조공단)",
+  "summary": "돈 문제, 집 문제, 상속 문제로 곤란하실 때 변호사가 무료로 도와드립니다.",
+  "category": "법률",
+  "org": "대한법률구조공단",
+  "tel": "132",
+  "benefit": "무료 법률상담, 소송 대리 (소득 조건 충족 시)",
+  "period": "연중",
+  "how": "국번 없이 132로 전화하시면 됩니다",
+  "when": "아무 때나",
+  "season": "always",
+  "rules": {
+   "op": "AND",
+   "rules": [
+    {
+     "f": "age",
+     "op": ">=",
+     "v": 60
+    }
+   ]
+  },
+  "notes": [
+   "상담은 누구나 무료입니다.",
+   "소송까지 도와주는 것은 중위소득 125% 이하일 때 무료입니다.",
+   "빚 문제, 전세금, 상속, 사기 피해 모두 상담됩니다."
+  ],
+  "conf": "verified"
+ },
+ {
+  "id": "mental-health",
+  "name": "마음 상담 (정신건강복지센터)",
+  "summary": "잠이 안 오거나 마음이 많이 힘드실 때 전문가와 상담하실 수 있습니다.",
+  "category": "정서지원",
+  "org": "영등포구 정신건강복지센터",
+  "tel": "1577-0199",
+  "benefit": "무료 상담, 치료비 지원 가능",
+  "period": "연중",
+  "how": "1577-0199로 전화하시면 가까운 센터로 연결됩니다",
+  "when": "아무 때나",
+  "season": "always",
+  "rules": {
+   "op": "AND",
+   "rules": [
+    {
+     "f": "age",
+     "op": ">=",
+     "v": 60
+    }
+   ]
+  },
+  "notes": [
+   "누구나 무료로 상담받을 수 있습니다.",
+   "많이 힘드실 때는 109번으로 24시간 상담하실 수 있습니다.",
+   "상담 내용은 비밀로 지켜집니다."
+  ],
+  "conf": "verified"
+ },
+ {
+  "id": "hearing-aid",
+  "name": "보청기 지원",
+  "summary": "귀가 잘 안 들리시면 보청기 값을 지원받으실 수 있습니다.",
+  "category": "의료비",
+  "org": "국민건강보험공단 / 동 주민센터",
+  "tel": "1577-1000",
+  "benefit": "보청기 구입비 지원 (최대 약 111만원)",
+  "period": "5년에 1회",
+  "how": "이비인후과에서 청각장애 진단을 먼저 받으셔야 합니다",
+  "when": "아무 때나",
+  "season": "always",
+  "rules": {
+   "op": "AND",
+   "rules": [
+    {
+     "f": "age",
+     "op": ">=",
+     "v": 65
+    }
+   ]
+  },
+  "notes": [
+   "청각장애 등록이 되어 있어야 지원됩니다.",
+   "먼저 이비인후과에서 검사를 받아보세요.",
+   "수급자는 전액, 그 외는 90%를 지원받습니다."
+  ],
+  "conf": "partial"
+ },
+ {
+  "id": "denture-implant",
+  "name": "틀니·임플란트 지원",
+  "summary": "틀니나 임플란트를 훨씬 싸게 하실 수 있습니다.",
+  "category": "의료비",
+  "org": "국민건강보험공단",
+  "tel": "1577-1000",
+  "benefit": "건강보험 적용 (본인부담 30%, 수급자는 5~15%)",
+  "period": "틀니 7년, 임플란트 평생 2개",
+  "how": "치과에서 건강보험 적용을 요청하세요",
+  "when": "아무 때나",
+  "season": "always",
+  "rules": {
+   "op": "AND",
+   "rules": [
+    {
+     "f": "age",
+     "op": ">=",
+     "v": 65
+    }
+   ]
+  },
+  "notes": [
+   "65살이 넘으면 누구나 건강보험이 적용됩니다.",
+   "임플란트는 평생 2개까지 지원됩니다.",
+   "치과에 가실 때 '노인 건강보험 적용해 주세요'라고 말씀하세요."
+  ],
+  "conf": "partial"
+ },
+ {
+  "id": "welfare-membership",
+  "name": "복지멤버십 (맞춤형 급여 안내)",
+  "summary": "한 번 등록해 두면 받을 수 있는 지원이 생길 때마다 알려 드립니다.",
+  "category": "생활지원",
+  "org": "동 주민센터 / 복지로",
+  "tel": "129",
+  "benefit": "받을 수 있는 복지 자동 안내",
+  "period": "1회 등록",
+  "how": "동 주민센터에 신청하거나 복지로에서 등록",
+  "when": "아무 때나",
+  "season": "always",
+  "rules": {
+   "op": "AND",
+   "rules": [
+    {
+     "f": "age",
+     "op": ">=",
+     "v": 60
+    }
+   ]
+  },
+  "notes": [
+   "한 번만 등록하면 계속 알려줍니다.",
+   "몰라서 못 받는 지원을 줄일 수 있습니다.",
+   "가장 먼저 해두시면 좋은 신청입니다."
+  ],
+  "conf": "partial"
+ },
+ {
+  "id": "pension-national",
+  "name": "국민연금 확인",
+  "summary": "예전에 직장 다니며 낸 국민연금이 있는지 확인해 보세요. 잊고 계신 분이 많습니다.",
+  "category": "현금지원",
+  "org": "국민연금공단",
+  "tel": "1355",
+  "benefit": "가입 이력에 따라 매달 연금",
+  "period": "평생",
+  "how": "1355로 전화해 가입 내역을 확인하세요",
+  "when": "아무 때나",
+  "season": "always",
+  "rules": {
+   "op": "AND",
+   "rules": [
+    {
+     "f": "age",
+     "op": ">=",
+     "v": 60
+    }
+   ]
+  },
+  "notes": [
+   "짧게 일하셨어도 낸 돈이 있으면 받으실 수 있습니다.",
+   "10년을 못 채우셨어도 한 번에 돌려받는 방법이 있습니다.",
+   "기초연금과 별개로 함께 받을 수 있습니다."
+  ],
+  "conf": "partial"
  }
 ];
 
@@ -1830,6 +2004,7 @@ function diagnose(profile){
   /* 순서 기준: 지금 바로 신청해서 도움이 되는 것 → 상황이 생겼을 때 쓰는 것 */
   var PRIORITY={
     'basic-pension':0, 'ltc-apply':1, 'housing-support':2,
+    'welfare-membership':2.5, 'pension-national':2.6,
     'care-custom':3, 'care-ltc':4, 'seoul-home-care':5,
     'meal-delivery':6, 'meal':7,
     'subway-free':8, 'health-checkup':9, 'vaccine':10, 'dementia-check':11,
@@ -1840,6 +2015,8 @@ function diagnose(profile){
     'smart-safety':21, 'foodbank':22, 'banchan':23,
     'home-repair':24, 'energy-voucher':25,
     'welfare-device':26, 'long-term-care-insurance-reduce':27,
+    'denture-implant':13.5, 'hearing-aid':13.6,
+    'mental-health':17.5, 'legal-aid':18.5,
     /* 아래는 해당 상황이 생겼을 때 필요한 것 */
     'senior-protection':29,
     'emergency-support':30, 'eye-surgery':31, 'funeral-support':32
