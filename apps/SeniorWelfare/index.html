@@ -6,9 +6,6 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#1B4A6B">
 <title>영등포 어르신 복지 찾기</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet">
 <style>
   /* 영등포 어르신 복지 찾기
      인상: 공공기관 안내문의 단정함.
@@ -277,267 +274,256 @@
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 
 /* ══════════════════════════════════════════════
-   THEME B — 편집 디자인
-   방향: 문학지·미술관 도록의 조판.
-   세리프 제목, 넓은 여백, 절제된 색, 얇은 괘선.
+   THEME B — 큰 타이포 · 넓은 여백 · 면 강조
+   레이아웃은 미니멀, 타이포는 맥시멀.
+   제목과 본문의 크기 대비를 3배 이상으로 벌린다.
    ══════════════════════════════════════════════ */
 body.theme-b{
-  --ink:#1A1815;
-  --ink-2:#585049;
-  --ink-3:#8C8377;
-  --paper:#EFEBE3;
-  --card:#F8F6F1;
-  --rule:#D4CCBE;
-  --rule-2:#E3DDD1;
-  --deep:#232019;
-  --deep-2:#0F0D0A;
-  --deep-pale:#E6E1D6;
-  --act:#7A2E1E;
-  --act-2:#5A1F12;
-  --act-pale:#F0E6DF;
-  --accent:#8A7442;
-  --accent-pale:#EDE6D4;
-  --ok:#3F5240;
-  --wait:#7A5A2E;
-  --wait-pale:#EFE8D9;
+  --ink:#0A0D12;
+  --ink-2:#4E5968;
+  --ink-3:#8B95A1;
+  --paper:#FFFFFF;
+  --card:#F9FAFB;
+  --rule:#E5E8EB;
+  --rule-2:#F2F4F6;
+  --deep:#0A0D12;
+  --deep-2:#000000;
+  --deep-pale:#F2F4F6;
+  --act:#0B5FFF;
+  --act-2:#0048CC;
+  --act-pale:#EDF3FF;
+  --accent:#0B5FFF;
+  --accent-pale:#EDF3FF;
+  --ok:#00753F;
+  --wait:#B35C00;
+  --wait-pale:#FFF6E9;
   background:var(--paper);
-  font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
-  font-size:29px;line-height:1.78;font-weight:400;
-  letter-spacing:.005em;
+  font-size:32px;line-height:1.62;font-weight:500;
+  letter-spacing:-.02em;
 }
-body.theme-b .wrap{padding:40px 30px calc(64px + env(safe-area-inset-bottom))}
+body.theme-b .wrap{padding:32px 24px calc(64px + env(safe-area-inset-bottom))}
 
-/* 상단 — 얇은 괘선 하나 */
+/* 상단 — 최소한으로 */
 body.theme-b .apphead{
-  background:transparent;color:var(--ink);
-  border-bottom:1px solid var(--ink);
-  padding:calc(22px + env(safe-area-inset-top)) 30px 18px;
-  font-size:20px;font-weight:400;letter-spacing:.22em;
-  text-transform:none;position:sticky;
+  background:rgba(255,255,255,.86);backdrop-filter:blur(20px);
+  color:var(--ink);border-bottom:1px solid var(--rule-2);
+  padding:calc(18px + env(safe-area-inset-top)) 24px 18px;
+  font-size:24px;font-weight:700;letter-spacing:-.02em;
 }
 body.theme-b .apphead .dotmark{
-  width:7px;height:7px;background:var(--act);flex:0 0 7px;border-radius:0;
-  transform:rotate(45deg)
+  width:14px;height:14px;background:var(--act);flex:0 0 14px;border-radius:50%
 }
 
-/* 제목 — 세리프, 크게, 가볍게 */
-body.theme-b h1,
-body.theme-b .hero h1,
-body.theme-b .rtop h1{
-  font-family:"Nanum Myeongjo","Apple SD Gothic Neo",Georgia,serif;
-  font-weight:400;letter-spacing:-.015em;line-height:1.32;
-}
+/* 타이틀 — 초대형 */
 body.theme-b .hero{
-  background:transparent;border:none;border-top:2px solid var(--ink);
-  border-bottom:1px solid var(--rule);
-  border-radius:0;padding:44px 0 40px;margin-bottom:44px;text-align:left;
+  background:transparent;border:none;border-radius:0;
+  padding:52px 0 44px;margin-bottom:0;text-align:left
 }
-body.theme-b .hero svg{max-width:150px;margin:0 0 34px;opacity:.72}
-body.theme-b .hero h1{font-size:58px;margin:0 0 22px}
-body.theme-b .hero p{font-size:26px;color:var(--ink-2);line-height:1.7}
+body.theme-b .hero svg{max-width:200px;margin:0 0 44px}
+body.theme-b .hero h1{
+  font-size:76px;font-weight:700;line-height:1.16;letter-spacing:-.045em;
+  margin:0 0 24px;color:var(--ink)
+}
+body.theme-b .hero p{font-size:30px;color:var(--ink-2);line-height:1.55;font-weight:500}
 
-body.theme-b .steps{margin-bottom:44px;padding:0}
+body.theme-b .steps{
+  background:var(--card);border-radius:24px;padding:12px 26px;margin-bottom:32px
+}
 body.theme-b .stepline{
-  font-size:25px;padding:22px 0;gap:24px;
-  border-bottom:1px solid var(--rule-2);color:var(--ink-2)
+  font-size:28px;padding:26px 0;gap:20px;font-weight:600;
+  border-bottom:1px solid var(--rule);color:var(--ink)
 }
 body.theme-b .stepline i{
-  width:auto;height:auto;flex:0 0 auto;border-radius:0;border:none;
-  background:transparent;color:var(--ink-3);
-  font-size:17px;letter-spacing:.14em;font-weight:400;
-  min-width:34px
+  width:44px;height:44px;flex:0 0 44px;border-radius:14px;border:none;
+  background:var(--act);color:#fff;font-size:22px;font-weight:700
 }
 body.theme-b .cover{
-  font-size:20px;line-height:1.85;color:var(--ink-3);
-  border-top:1px solid var(--rule);padding-top:30px;letter-spacing:.01em
+  font-size:24px;line-height:1.65;color:var(--ink-3);
+  border-top:none;background:var(--card);border-radius:20px;
+  padding:26px;font-weight:500
 }
 body.theme-b .stale{
-  background:transparent;border-left:2px solid var(--act);
-  padding:18px 0 18px 22px;font-size:22px;color:var(--ink-2)
+  background:var(--wait-pale);border:none;border-radius:20px;
+  padding:24px 26px;font-size:26px;color:#9A5B00;font-weight:600
 }
 
 /* 진행 */
-body.theme-b .topbar{min-height:58px;margin-bottom:26px}
+body.theme-b .topbar{min-height:64px;margin-bottom:24px}
 body.theme-b .backbtn{
-  width:58px;height:58px;min-height:58px;flex:0 0 58px;
-  border:1px solid var(--rule);background:transparent;color:var(--ink-2);
-  font-size:26px
+  width:64px;height:64px;min-height:64px;flex:0 0 64px;
+  border:none;background:var(--card);color:var(--ink-2);font-size:30px;border-radius:20px
 }
-body.theme-b .backbtn:active{background:var(--ink);color:var(--paper);border-color:var(--ink)}
-body.theme-b .backspacer{width:58px;flex:0 0 58px}
-body.theme-b .step{font-size:19px;letter-spacing:.2em;color:var(--ink-3)}
-body.theme-b .bar{height:1px;background:var(--rule);margin-bottom:58px}
-body.theme-b .bar > i{background:var(--ink)}
+body.theme-b .backbtn:active{background:var(--rule);color:var(--ink)}
+body.theme-b .backspacer{width:64px;flex:0 0 64px}
+body.theme-b .step{font-size:24px;letter-spacing:-.01em;color:var(--ink-3);font-weight:600}
+body.theme-b .bar{height:6px;background:var(--rule-2);border-radius:99px;margin-bottom:52px}
+body.theme-b .bar > i{background:var(--act);border-radius:99px}
 
-body.theme-b h1{font-size:52px;margin:0 0 26px}
+body.theme-b h1{
+  font-size:60px;font-weight:700;letter-spacing:-.045em;
+  line-height:1.22;margin:0 0 28px
+}
 body.theme-b .hint{
-  font-size:23px;color:var(--ink-2);border-left:1px solid var(--rule);
-  padding-left:22px;margin-bottom:34px;line-height:1.7
+  font-size:26px;color:var(--ink-2);border:none;background:var(--card);
+  border-radius:18px;padding:22px 24px;margin-bottom:32px;font-weight:500
 }
 
-/* 선택 — 목록 형태 */
-body.theme-b .opts{gap:0;padding-top:8px;border-top:1px solid var(--rule)}
+/* 선택 — 면으로 채운 큰 버튼 */
+body.theme-b .opts{gap:14px;padding-top:10px;border-top:none}
 body.theme-b button{
-  font-size:31px;font-weight:400;min-height:104px;padding:26px 4px;
-  border:none;border-bottom:1px solid var(--rule-2);border-radius:0;
-  background:transparent;color:var(--ink);
-  transition:padding-left .2s ease,color .2s ease
+  font-size:34px;font-weight:600;min-height:116px;padding:26px 28px;
+  border:none;border-radius:22px;background:var(--card);color:var(--ink);
+  transition:transform .16s cubic-bezier(.2,0,.2,1),background .16s ease
 }
 body.theme-b button:active,
 body.theme-b button.chosen{
-  background:transparent;color:var(--act);padding-left:18px;
-  border-bottom-color:var(--act)
+  background:var(--act);color:#fff;transform:scale(.97)
 }
-body.theme-b button.dim{font-size:25px;color:var(--ink-3);min-height:88px}
+body.theme-b button.dim{font-size:28px;color:var(--ink-2);min-height:100px}
 body.theme-b button.dim:active,
-body.theme-b button.dim.chosen{background:transparent;color:var(--act)}
+body.theme-b button.dim.chosen{background:var(--ink-2);color:#fff}
 
 /* 결과 */
-body.theme-b .rtop{border-bottom:2px solid var(--ink);padding-bottom:34px;margin-bottom:52px}
-body.theme-b .rtop h1{font-size:60px;margin-bottom:22px}
-body.theme-b .rtop p{font-size:24px;color:var(--ink-2);line-height:1.7}
+body.theme-b .rtop{border-bottom:none;padding:0 0 40px;margin-bottom:8px}
+body.theme-b .rtop h1{font-size:66px;margin-bottom:20px}
+body.theme-b .rtop p{font-size:28px;color:var(--ink-2);line-height:1.55;font-weight:500}
 
-/* 통합창구 */
+/* 통합창구 — 파란 면 */
 body.theme-b .gatebox{
-  background:var(--deep);border-radius:0;border-top:none;
-  padding:44px 28px 38px;margin-bottom:58px
+  background:var(--act);border-radius:28px;border-top:none;
+  padding:40px 26px 32px;margin-bottom:44px
 }
 body.theme-b .gatetitle{
-  font-family:"Nanum Myeongjo",Georgia,serif;
-  font-size:38px;font-weight:400;letter-spacing:-.01em;line-height:1.35;
-  color:#F3EFE6;margin-bottom:16px
+  font-size:44px;font-weight:700;letter-spacing:-.04em;line-height:1.24;
+  color:#fff;margin-bottom:16px
 }
-body.theme-b .gatesub{font-size:22px;color:rgba(243,239,230,.6);line-height:1.7;margin-bottom:34px}
-body.theme-b .gcard{background:transparent;border-top:1px solid rgba(243,239,230,.22);
-  border-radius:0;padding:32px 0 6px;margin-top:0}
+body.theme-b .gatesub{font-size:26px;color:rgba(255,255,255,.78);line-height:1.55;margin-bottom:26px;font-weight:500}
+body.theme-b .gcard{
+  background:#fff;border-radius:22px;border-top:none;
+  padding:30px 24px 26px;margin-top:14px
+}
 body.theme-b .gcard h2{
-  font-family:"Nanum Myeongjo",Georgia,serif;
-  font-size:32px;font-weight:400;color:#F3EFE6;letter-spacing:-.01em
+  font-size:36px;font-weight:700;color:var(--ink);letter-spacing:-.035em
 }
-body.theme-b .gcard h2 .cicon{width:30px;height:30px;margin-bottom:16px;opacity:.55}
-body.theme-b .gcard .cicon{stroke:#F3EFE6}
-body.theme-b .gcard .cicon.icon-fill{fill:#F3EFE6}
-body.theme-b .gcard .sum{font-size:22px;color:rgba(243,239,230,.62);line-height:1.7}
-body.theme-b .gcard .tel{background:transparent;border:1px solid rgba(243,239,230,.4);color:#F3EFE6}
-body.theme-b .gcard .tel:active{background:rgba(243,239,230,.12)}
+body.theme-b .gcard h2 .cicon{width:44px;height:44px;margin-bottom:16px}
+body.theme-b .gcard .cicon{stroke:var(--act)}
+body.theme-b .gcard .cicon.icon-fill{fill:var(--act)}
+body.theme-b .gcard .sum{font-size:26px;color:var(--ink-2);line-height:1.55;font-weight:500}
+body.theme-b .gcard .tel{background:var(--act);border:none;color:#fff}
+body.theme-b .gcard .tel:active{background:var(--act-2)}
 
-body.theme-b .sec{margin-bottom:58px}
+body.theme-b .sec{margin-bottom:48px}
 body.theme-b .seclead{
-  font-size:18px;letter-spacing:.24em;color:var(--ink-3);
-  font-weight:400;margin-bottom:6px
+  font-size:26px;letter-spacing:-.02em;color:var(--ink-3);
+  font-weight:600;margin-bottom:14px
 }
 
-/* 카드 — 괘선으로만 구분 */
+/* 카드 — 흰 면, 테두리 없음 */
 body.theme-b .card{
-  background:transparent;border:none;border-top:1px solid var(--rule);
-  border-left:none;border-radius:0;
-  padding:38px 0 34px;margin-top:0
+  background:var(--card);border:none;border-left:none;
+  border-radius:26px;padding:34px 26px 30px;margin-top:16px
 }
 body.theme-b .card:has(.b-ok),
 body.theme-b .card:has(.b-wait){border-left:none}
 body.theme-b .badge{
-  position:static;display:inline-block;background:transparent!important;
-  color:var(--ink-3);font-size:17px;font-weight:400;letter-spacing:.2em;
-  padding:0;margin-bottom:16px;border-radius:0
+  position:static;display:inline-block;border-radius:99px;
+  font-size:22px;font-weight:700;letter-spacing:-.01em;
+  padding:8px 18px;margin-bottom:20px;color:#fff
 }
-body.theme-b .b-ok{color:var(--ok)}
-body.theme-b .b-wait{color:var(--wait)}
-body.theme-b .cnum{
-  position:static;display:block;color:var(--ink-3);
-  font-size:16px;letter-spacing:.2em;margin-bottom:10px
-}
+body.theme-b .b-ok{background:var(--ok)}
+body.theme-b .b-wait{background:var(--wait)}
+body.theme-b .cnum{display:none}
 body.theme-b .card h2{
-  font-family:"Nanum Myeongjo",Georgia,serif;
-  font-size:38px;font-weight:400;letter-spacing:-.015em;line-height:1.38;
-  margin:0 0 18px
+  font-size:42px;font-weight:700;letter-spacing:-.04em;line-height:1.26;
+  margin:0 0 18px;color:var(--ink)
 }
-body.theme-b .card h2 .cicon{width:32px;height:32px;margin-bottom:18px;opacity:.6}
-body.theme-b .cicon{stroke:var(--ink-2);stroke-width:1.4}
-body.theme-b .cicon.icon-fill{fill:var(--ink-2)}
-body.theme-b .card .sum{font-size:23px;color:var(--ink-2);line-height:1.78;margin-bottom:28px}
+body.theme-b .card h2 .cicon{width:46px;height:46px;margin-bottom:18px}
+body.theme-b .cicon{stroke:var(--act);stroke-width:1.9}
+body.theme-b .cicon.icon-fill{fill:var(--act)}
+body.theme-b .card .sum{font-size:27px;color:var(--ink-2);line-height:1.6;margin-bottom:26px;font-weight:500}
 
-/* 전화 — 테두리만 */
+/* 전화 — 파란 면 */
 body.theme-b .tel{
-  background:transparent;border:1px solid var(--ink);color:var(--ink);
-  border-radius:0;min-height:92px;gap:6px
+  background:var(--act);border:none;color:#fff;
+  border-radius:20px;min-height:112px;gap:2px
 }
-body.theme-b .tel .lab{font-size:17px;letter-spacing:.2em;color:var(--ink-3)}
+body.theme-b .tel .lab{font-size:22px;letter-spacing:-.01em;color:rgba(255,255,255,.75);font-weight:600}
 body.theme-b .tel .num{
-  font-family:"Nanum Myeongjo",Georgia,serif;
-  font-size:clamp(24px,6.6vw,32px);font-weight:400;letter-spacing:.02em
+  font-size:clamp(28px,8.4vw,40px);font-weight:700;letter-spacing:-.03em
 }
-body.theme-b .tel svg{width:20px;height:20px;flex:0 0 20px}
-body.theme-b .tel:active{background:var(--ink);color:var(--paper)}
-body.theme-b .tel:active .lab{color:rgba(239,235,227,.7)}
+body.theme-b .tel svg{width:26px;height:26px;flex:0 0 26px}
+body.theme-b .tel:active{background:var(--act-2)}
 
 body.theme-b .telalt{
-  background:transparent;border-left:1px solid var(--act);
-  padding:16px 0 16px 20px;font-size:20px;color:var(--ink-2)
+  background:var(--wait-pale);border:none;border-radius:18px;
+  padding:20px 22px;font-size:23px;color:#9A5B00;font-weight:500
 }
 body.theme-b .telalt .tcopy{
-  border:1px solid var(--rule);border-radius:0;background:transparent;
-  color:var(--ink-2);font-size:19px;font-weight:400;min-height:52px
+  border:none;border-radius:14px;background:#fff;
+  color:var(--act);font-size:22px;font-weight:700;min-height:56px
 }
 body.theme-b .warn{
-  background:transparent;border-left:1px solid var(--wait);
-  padding:16px 0 16px 20px;font-size:21px;color:var(--ink-2);line-height:1.7
+  background:var(--wait-pale);border:none;border-radius:18px;
+  padding:22px 24px;font-size:25px;color:#9A5B00;line-height:1.55;font-weight:500
 }
 
 /* 자세히 */
-body.theme-b .more{border-top:1px solid var(--rule-2);margin-top:28px}
+body.theme-b .more{border-top:1px solid var(--rule);margin-top:26px}
 body.theme-b .more summary{
-  font-size:19px;letter-spacing:.16em;color:var(--ink-3);
-  padding:22px 0;min-height:64px
+  font-size:26px;letter-spacing:-.02em;color:var(--ink-3);
+  padding:24px 0;min-height:76px;font-weight:600
 }
-body.theme-b .more summary::after{font-size:14px}
-body.theme-b .row{font-size:22px;margin:22px 0;line-height:1.75}
+body.theme-b .more summary::after{font-size:20px}
+body.theme-b .row{font-size:26px;margin:24px 0;line-height:1.6;font-weight:500}
 body.theme-b .row b{
-  font-size:16px;letter-spacing:.2em;color:var(--ink-3);
-  font-weight:400;margin-bottom:6px
+  display:inline-block;font-size:21px;letter-spacing:-.01em;
+  color:var(--act);background:var(--act-pale);
+  font-weight:700;margin-bottom:8px;padding:6px 14px;border-radius:99px
 }
 body.theme-b .note{
-  background:transparent;border-left:1px solid var(--accent);
-  padding:16px 0 16px 20px;font-size:20px;color:var(--ink-2);line-height:1.75
+  background:#fff;border:none;border-radius:18px;
+  padding:22px 24px;font-size:24px;color:var(--ink-2);line-height:1.6;font-weight:500
 }
 body.theme-b .tip{
-  background:transparent;border:none;border-top:1px solid var(--ink);
-  border-left:none;border-radius:0;padding:30px 0 6px;font-size:22px;color:var(--ink-2)
+  background:var(--act-pale);border:none;border-radius:22px;
+  padding:28px 26px;font-size:26px;color:var(--ink-2);font-weight:500
 }
 body.theme-b .tip b{
-  font-family:"Nanum Myeongjo",Georgia,serif;
-  font-size:30px;font-weight:400;color:var(--ink);margin-bottom:14px
+  font-size:32px;font-weight:700;color:var(--ink);
+  margin-bottom:12px;letter-spacing:-.03em
 }
 body.theme-b .catlabel{
-  font-size:16px;letter-spacing:.26em;color:var(--ink-3);
-  margin:56px 0 -12px;font-weight:400
+  font-size:24px;letter-spacing:-.02em;color:var(--ink-3);
+  margin:44px 0 4px;font-weight:600
 }
-body.theme-b .catlabel .cicon{stroke:var(--ink-3);width:18px;height:18px}
+body.theme-b .catlabel .cicon{stroke:var(--ink-3);width:26px;height:26px}
 body.theme-b .catlabel .cicon.icon-fill{fill:var(--ink-3)}
 body.theme-b .restmore > summary{
-  border:1px solid var(--rule);border-radius:0;background:transparent;
-  color:var(--ink-2);font-size:19px;letter-spacing:.16em;padding:24px
+  border:none;border-radius:20px;background:var(--card);
+  color:var(--ink-2);font-size:26px;font-weight:600;padding:28px
 }
-body.theme-b .skip summary{font-size:19px;letter-spacing:.16em;color:var(--ink-3)}
-body.theme-b .mini{font-size:21px;color:var(--ink-2);padding:20px 0}
-body.theme-b .mini small{font-size:18px;color:var(--ink-3)}
+body.theme-b .skip summary{font-size:25px;color:var(--ink-3);font-weight:600}
+body.theme-b .mini{font-size:25px;color:var(--ink-2);padding:22px 0;font-weight:500}
+body.theme-b .mini small{font-size:22px;color:var(--ink-3)}
 
 body.theme-b .startbar{
-  background:var(--paper);border-top:1px solid var(--ink);
-  padding:20px 30px calc(20px + env(safe-area-inset-bottom))
+  background:rgba(255,255,255,.9);backdrop-filter:blur(20px);
+  border-top:1px solid var(--rule-2);
+  padding:18px 24px calc(18px + env(safe-area-inset-bottom))
 }
 body.theme-b .start{
-  background:var(--ink);border:1px solid var(--ink);color:var(--paper);
-  border-radius:0;font-size:26px;font-weight:400;letter-spacing:.16em;
-  min-height:88px
+  background:var(--act);border:none;color:#fff;
+  border-radius:20px;font-size:34px;font-weight:700;letter-spacing:-.03em;
+  min-height:108px
 }
-body.theme-b .start:active{background:var(--act);border-color:var(--act);color:var(--paper)}
+body.theme-b .start:active{background:var(--act-2);transform:scale(.98)}
 body.theme-b .restart{
-  border:1px solid var(--rule);border-radius:0;background:transparent;
-  color:var(--ink-2);font-size:21px;letter-spacing:.14em
+  border:none;border-radius:20px;background:var(--card);
+  color:var(--ink-2);font-size:28px;font-weight:600
 }
 body.theme-b .foot{
-  font-size:18px;color:var(--ink-3);line-height:1.9;
-  border-top:1px solid var(--rule);padding-top:32px;letter-spacing:.01em
+  font-size:22px;color:var(--ink-3);line-height:1.75;
+  border-top:1px solid var(--rule-2);padding-top:32px;font-weight:500
 }
 
 /* 토글 */
@@ -551,9 +537,9 @@ body.theme-b .foot{
   display:flex;align-items:center;justify-content:center;width:auto
 }
 body.theme-b .themetoggle{
-  background:rgba(239,235,227,.94);color:#1A1815;
-  border:1px solid rgba(26,24,21,.35);border-radius:0;
-  font-weight:400;letter-spacing:.14em;box-shadow:none
+  background:#0A0D12;color:#fff;
+  border:none;border-radius:99px;
+  font-weight:700;box-shadow:0 2px 8px rgba(0,0,0,.2)
 }
 
 </style>
