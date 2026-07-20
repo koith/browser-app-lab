@@ -6,6 +6,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#1B4A6B">
 <title>영등포 어르신 복지 찾기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Myeongjo:wght@400;700&display=swap" rel="stylesheet">
 <style>
   /* 영등포 어르신 복지 찾기
      인상: 공공기관 안내문의 단정함.
@@ -272,6 +275,287 @@
   .gcard .cicon.icon-fill{fill:var(--act)}
 
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* ══════════════════════════════════════════════
+   THEME B — 편집 디자인
+   방향: 문학지·미술관 도록의 조판.
+   세리프 제목, 넓은 여백, 절제된 색, 얇은 괘선.
+   ══════════════════════════════════════════════ */
+body.theme-b{
+  --ink:#1A1815;
+  --ink-2:#585049;
+  --ink-3:#8C8377;
+  --paper:#EFEBE3;
+  --card:#F8F6F1;
+  --rule:#D4CCBE;
+  --rule-2:#E3DDD1;
+  --deep:#232019;
+  --deep-2:#0F0D0A;
+  --deep-pale:#E6E1D6;
+  --act:#7A2E1E;
+  --act-2:#5A1F12;
+  --act-pale:#F0E6DF;
+  --accent:#8A7442;
+  --accent-pale:#EDE6D4;
+  --ok:#3F5240;
+  --wait:#7A5A2E;
+  --wait-pale:#EFE8D9;
+  background:var(--paper);
+  font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
+  font-size:29px;line-height:1.78;font-weight:400;
+  letter-spacing:.005em;
+}
+body.theme-b .wrap{padding:40px 30px calc(64px + env(safe-area-inset-bottom))}
+
+/* 상단 — 얇은 괘선 하나 */
+body.theme-b .apphead{
+  background:transparent;color:var(--ink);
+  border-bottom:1px solid var(--ink);
+  padding:calc(22px + env(safe-area-inset-top)) 30px 18px;
+  font-size:20px;font-weight:400;letter-spacing:.22em;
+  text-transform:none;position:sticky;
+}
+body.theme-b .apphead .dotmark{
+  width:7px;height:7px;background:var(--act);flex:0 0 7px;border-radius:0;
+  transform:rotate(45deg)
+}
+
+/* 제목 — 세리프, 크게, 가볍게 */
+body.theme-b h1,
+body.theme-b .hero h1,
+body.theme-b .rtop h1{
+  font-family:"Nanum Myeongjo","Apple SD Gothic Neo",Georgia,serif;
+  font-weight:400;letter-spacing:-.015em;line-height:1.32;
+}
+body.theme-b .hero{
+  background:transparent;border:none;border-top:2px solid var(--ink);
+  border-bottom:1px solid var(--rule);
+  border-radius:0;padding:44px 0 40px;margin-bottom:44px;text-align:left;
+}
+body.theme-b .hero svg{max-width:150px;margin:0 0 34px;opacity:.72}
+body.theme-b .hero h1{font-size:58px;margin:0 0 22px}
+body.theme-b .hero p{font-size:26px;color:var(--ink-2);line-height:1.7}
+
+body.theme-b .steps{margin-bottom:44px;padding:0}
+body.theme-b .stepline{
+  font-size:25px;padding:22px 0;gap:24px;
+  border-bottom:1px solid var(--rule-2);color:var(--ink-2)
+}
+body.theme-b .stepline i{
+  width:auto;height:auto;flex:0 0 auto;border-radius:0;border:none;
+  background:transparent;color:var(--ink-3);
+  font-size:17px;letter-spacing:.14em;font-weight:400;
+  min-width:34px
+}
+body.theme-b .cover{
+  font-size:20px;line-height:1.85;color:var(--ink-3);
+  border-top:1px solid var(--rule);padding-top:30px;letter-spacing:.01em
+}
+body.theme-b .stale{
+  background:transparent;border-left:2px solid var(--act);
+  padding:18px 0 18px 22px;font-size:22px;color:var(--ink-2)
+}
+
+/* 진행 */
+body.theme-b .topbar{min-height:58px;margin-bottom:26px}
+body.theme-b .backbtn{
+  width:58px;height:58px;min-height:58px;flex:0 0 58px;
+  border:1px solid var(--rule);background:transparent;color:var(--ink-2);
+  font-size:26px
+}
+body.theme-b .backbtn:active{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+body.theme-b .backspacer{width:58px;flex:0 0 58px}
+body.theme-b .step{font-size:19px;letter-spacing:.2em;color:var(--ink-3)}
+body.theme-b .bar{height:1px;background:var(--rule);margin-bottom:58px}
+body.theme-b .bar > i{background:var(--ink)}
+
+body.theme-b h1{font-size:52px;margin:0 0 26px}
+body.theme-b .hint{
+  font-size:23px;color:var(--ink-2);border-left:1px solid var(--rule);
+  padding-left:22px;margin-bottom:34px;line-height:1.7
+}
+
+/* 선택 — 목록 형태 */
+body.theme-b .opts{gap:0;padding-top:8px;border-top:1px solid var(--rule)}
+body.theme-b button{
+  font-size:31px;font-weight:400;min-height:104px;padding:26px 4px;
+  border:none;border-bottom:1px solid var(--rule-2);border-radius:0;
+  background:transparent;color:var(--ink);
+  transition:padding-left .2s ease,color .2s ease
+}
+body.theme-b button:active,
+body.theme-b button.chosen{
+  background:transparent;color:var(--act);padding-left:18px;
+  border-bottom-color:var(--act)
+}
+body.theme-b button.dim{font-size:25px;color:var(--ink-3);min-height:88px}
+body.theme-b button.dim:active,
+body.theme-b button.dim.chosen{background:transparent;color:var(--act)}
+
+/* 결과 */
+body.theme-b .rtop{border-bottom:2px solid var(--ink);padding-bottom:34px;margin-bottom:52px}
+body.theme-b .rtop h1{font-size:60px;margin-bottom:22px}
+body.theme-b .rtop p{font-size:24px;color:var(--ink-2);line-height:1.7}
+
+/* 통합창구 */
+body.theme-b .gatebox{
+  background:var(--deep);border-radius:0;border-top:none;
+  padding:44px 28px 38px;margin-bottom:58px
+}
+body.theme-b .gatetitle{
+  font-family:"Nanum Myeongjo",Georgia,serif;
+  font-size:38px;font-weight:400;letter-spacing:-.01em;line-height:1.35;
+  color:#F3EFE6;margin-bottom:16px
+}
+body.theme-b .gatesub{font-size:22px;color:rgba(243,239,230,.6);line-height:1.7;margin-bottom:34px}
+body.theme-b .gcard{background:transparent;border-top:1px solid rgba(243,239,230,.22);
+  border-radius:0;padding:32px 0 6px;margin-top:0}
+body.theme-b .gcard h2{
+  font-family:"Nanum Myeongjo",Georgia,serif;
+  font-size:32px;font-weight:400;color:#F3EFE6;letter-spacing:-.01em
+}
+body.theme-b .gcard h2 .cicon{width:30px;height:30px;margin-bottom:16px;opacity:.55}
+body.theme-b .gcard .cicon{stroke:#F3EFE6}
+body.theme-b .gcard .cicon.icon-fill{fill:#F3EFE6}
+body.theme-b .gcard .sum{font-size:22px;color:rgba(243,239,230,.62);line-height:1.7}
+body.theme-b .gcard .tel{background:transparent;border:1px solid rgba(243,239,230,.4);color:#F3EFE6}
+body.theme-b .gcard .tel:active{background:rgba(243,239,230,.12)}
+
+body.theme-b .sec{margin-bottom:58px}
+body.theme-b .seclead{
+  font-size:18px;letter-spacing:.24em;color:var(--ink-3);
+  font-weight:400;margin-bottom:6px
+}
+
+/* 카드 — 괘선으로만 구분 */
+body.theme-b .card{
+  background:transparent;border:none;border-top:1px solid var(--rule);
+  border-left:none;border-radius:0;
+  padding:38px 0 34px;margin-top:0
+}
+body.theme-b .card:has(.b-ok),
+body.theme-b .card:has(.b-wait){border-left:none}
+body.theme-b .badge{
+  position:static;display:inline-block;background:transparent!important;
+  color:var(--ink-3);font-size:17px;font-weight:400;letter-spacing:.2em;
+  padding:0;margin-bottom:16px;border-radius:0
+}
+body.theme-b .b-ok{color:var(--ok)}
+body.theme-b .b-wait{color:var(--wait)}
+body.theme-b .cnum{
+  position:static;display:block;color:var(--ink-3);
+  font-size:16px;letter-spacing:.2em;margin-bottom:10px
+}
+body.theme-b .card h2{
+  font-family:"Nanum Myeongjo",Georgia,serif;
+  font-size:38px;font-weight:400;letter-spacing:-.015em;line-height:1.38;
+  margin:0 0 18px
+}
+body.theme-b .card h2 .cicon{width:32px;height:32px;margin-bottom:18px;opacity:.6}
+body.theme-b .cicon{stroke:var(--ink-2);stroke-width:1.4}
+body.theme-b .cicon.icon-fill{fill:var(--ink-2)}
+body.theme-b .card .sum{font-size:23px;color:var(--ink-2);line-height:1.78;margin-bottom:28px}
+
+/* 전화 — 테두리만 */
+body.theme-b .tel{
+  background:transparent;border:1px solid var(--ink);color:var(--ink);
+  border-radius:0;min-height:92px;gap:6px
+}
+body.theme-b .tel .lab{font-size:17px;letter-spacing:.2em;color:var(--ink-3)}
+body.theme-b .tel .num{
+  font-family:"Nanum Myeongjo",Georgia,serif;
+  font-size:clamp(24px,6.6vw,32px);font-weight:400;letter-spacing:.02em
+}
+body.theme-b .tel svg{width:20px;height:20px;flex:0 0 20px}
+body.theme-b .tel:active{background:var(--ink);color:var(--paper)}
+body.theme-b .tel:active .lab{color:rgba(239,235,227,.7)}
+
+body.theme-b .telalt{
+  background:transparent;border-left:1px solid var(--act);
+  padding:16px 0 16px 20px;font-size:20px;color:var(--ink-2)
+}
+body.theme-b .telalt .tcopy{
+  border:1px solid var(--rule);border-radius:0;background:transparent;
+  color:var(--ink-2);font-size:19px;font-weight:400;min-height:52px
+}
+body.theme-b .warn{
+  background:transparent;border-left:1px solid var(--wait);
+  padding:16px 0 16px 20px;font-size:21px;color:var(--ink-2);line-height:1.7
+}
+
+/* 자세히 */
+body.theme-b .more{border-top:1px solid var(--rule-2);margin-top:28px}
+body.theme-b .more summary{
+  font-size:19px;letter-spacing:.16em;color:var(--ink-3);
+  padding:22px 0;min-height:64px
+}
+body.theme-b .more summary::after{font-size:14px}
+body.theme-b .row{font-size:22px;margin:22px 0;line-height:1.75}
+body.theme-b .row b{
+  font-size:16px;letter-spacing:.2em;color:var(--ink-3);
+  font-weight:400;margin-bottom:6px
+}
+body.theme-b .note{
+  background:transparent;border-left:1px solid var(--accent);
+  padding:16px 0 16px 20px;font-size:20px;color:var(--ink-2);line-height:1.75
+}
+body.theme-b .tip{
+  background:transparent;border:none;border-top:1px solid var(--ink);
+  border-left:none;border-radius:0;padding:30px 0 6px;font-size:22px;color:var(--ink-2)
+}
+body.theme-b .tip b{
+  font-family:"Nanum Myeongjo",Georgia,serif;
+  font-size:30px;font-weight:400;color:var(--ink);margin-bottom:14px
+}
+body.theme-b .catlabel{
+  font-size:16px;letter-spacing:.26em;color:var(--ink-3);
+  margin:56px 0 -12px;font-weight:400
+}
+body.theme-b .catlabel .cicon{stroke:var(--ink-3);width:18px;height:18px}
+body.theme-b .catlabel .cicon.icon-fill{fill:var(--ink-3)}
+body.theme-b .restmore > summary{
+  border:1px solid var(--rule);border-radius:0;background:transparent;
+  color:var(--ink-2);font-size:19px;letter-spacing:.16em;padding:24px
+}
+body.theme-b .skip summary{font-size:19px;letter-spacing:.16em;color:var(--ink-3)}
+body.theme-b .mini{font-size:21px;color:var(--ink-2);padding:20px 0}
+body.theme-b .mini small{font-size:18px;color:var(--ink-3)}
+
+body.theme-b .startbar{
+  background:var(--paper);border-top:1px solid var(--ink);
+  padding:20px 30px calc(20px + env(safe-area-inset-bottom))
+}
+body.theme-b .start{
+  background:var(--ink);border:1px solid var(--ink);color:var(--paper);
+  border-radius:0;font-size:26px;font-weight:400;letter-spacing:.16em;
+  min-height:88px
+}
+body.theme-b .start:active{background:var(--act);border-color:var(--act);color:var(--paper)}
+body.theme-b .restart{
+  border:1px solid var(--rule);border-radius:0;background:transparent;
+  color:var(--ink-2);font-size:21px;letter-spacing:.14em
+}
+body.theme-b .foot{
+  font-size:18px;color:var(--ink-3);line-height:1.9;
+  border-top:1px solid var(--rule);padding-top:32px;letter-spacing:.01em
+}
+
+/* 토글 */
+.themetoggle{
+  position:fixed;top:calc(14px + env(safe-area-inset-top));right:14px;z-index:200;
+  width:auto;min-height:0;padding:8px 14px;
+  font-size:17px;font-weight:600;letter-spacing:.04em;
+  background:rgba(255,255,255,.92);color:#183753;
+  border:1px solid rgba(0,0,0,.18);border-radius:99px;
+  box-shadow:0 1px 6px rgba(0,0,0,.18);
+  display:flex;align-items:center;justify-content:center;width:auto
+}
+body.theme-b .themetoggle{
+  background:rgba(239,235,227,.94);color:#1A1815;
+  border:1px solid rgba(26,24,21,.35);border-radius:0;
+  font-weight:400;letter-spacing:.14em;box-shadow:none
+}
+
 </style>
 </head>
 <body>
@@ -279,6 +563,7 @@
   <span class="dotmark"></span>
   <span>영등포 어르신 복지 찾기</span>
 </header>
+<button class="themetoggle" id="themetoggle" aria-label="디자인 바꾸기">A</button>
 <div class="wrap" id="app"></div>
 
 <script>
@@ -2759,6 +3044,23 @@ fetch('programs-live.json?t='+Date.now())
     }
   })
   .catch(function(){ /* 내장 데이터 유지 */ });
+
+/* 디자인 A/B 전환 */
+(function(){
+  var t=document.getElementById('themetoggle');
+  var b=false;
+  try{ b = sessionStorage.getItem('theme')==='b'; }catch(e){}
+  function apply(){
+    document.body.classList.toggle('theme-b', b);
+    t.textContent = b ? 'B' : 'A';
+    try{ sessionStorage.setItem('theme', b?'b':'a'); }catch(e){}
+  }
+  t.addEventListener('click', function(e){
+    e.stopPropagation();
+    b=!b; apply();
+  });
+  apply();
+})();
 
 render();
 </script>
