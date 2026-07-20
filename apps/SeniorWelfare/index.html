@@ -49,6 +49,7 @@
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html{-webkit-text-size-adjust:100%;overflow-x:hidden;width:100%;
+    scroll-padding-bottom:calc(120px + env(safe-area-inset-bottom));
     overscroll-behavior-x:none;touch-action:pan-y}
   body{margin:0;background:var(--paper);color:var(--ink);
     font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
@@ -58,7 +59,7 @@
     -webkit-font-smoothing:antialiased}
   .wrap{max-width:820px;margin:0 auto;width:100%;
     padding:24px 24px calc(56px + env(safe-area-inset-bottom));
-    min-height:100vh;display:flex;flex-direction:column}
+    min-height:100vh;min-height:100dvh;display:flex;flex-direction:column}
   .wrap *{max-width:100%}
   .wrap svg{max-width:none}
   a,button,summary{touch-action:auto}
@@ -303,17 +304,17 @@ body.theme-b{
   font-size:24px;line-height:1.6;font-weight:500;
   letter-spacing:-.02em;
 }
-body.theme-b .wrap{padding:20px 20px calc(52px + env(safe-area-inset-bottom))}
+body.theme-b .wrap{min-height:100dvh;padding:20px 20px calc(56px + env(safe-area-inset-bottom))}
 
 /* 상단 — 최소한으로 */
 body.theme-b .apphead{
-  background:rgba(242,244,246,.88);backdrop-filter:blur(20px);
-  color:var(--ink);border-bottom:1px solid var(--rule);
-  padding:calc(12px + env(safe-area-inset-top)) 20px 12px;
-  font-size:24px;font-weight:700;letter-spacing:-.02em;
+  background:rgba(247,248,250,.9);backdrop-filter:blur(20px);
+  color:var(--ink-2);border-bottom:1px solid var(--rule-2);
+  padding:calc(11px + env(safe-area-inset-top)) 20px 11px;
+  font-size:21px;font-weight:600;letter-spacing:-.01em;
 }
 body.theme-b .apphead .dotmark{
-  width:14px;height:14px;background:var(--act);flex:0 0 14px;border-radius:50%
+  width:10px;height:10px;background:var(--act);flex:0 0 10px;border-radius:50%
 }
 
 /* 타이틀 — 초대형 */
@@ -322,11 +323,11 @@ body.theme-b .hero{
   background:var(--act);border:none;border-radius:22px;
   padding:28px 22px 26px;margin:4px 0 22px;text-align:left
 }
-body.theme-b .hero svg{max-width:104px;margin:0 0 16px;opacity:.95}
+body.theme-b .hero svg{max-width:88px;margin:0 0 22px;opacity:.95}
 body.theme-b .hero svg *{stroke:#fff}
 body.theme-b .hero h1{
   font-size:42px;font-weight:700;line-height:1.26;letter-spacing:-.04em;
-  margin:0 0 16px;color:#fff
+  margin:0 0 14px;color:#fff
 }
 body.theme-b .hero p{
   font-size:23px;color:rgba(255,255,255,.86);line-height:1.55;font-weight:500
@@ -336,12 +337,12 @@ body.theme-b .steps{
   box-shadow:var(--shadow-sm);background:var(--card);border-radius:22px;padding:4px 22px;margin-bottom:22px
 }
 body.theme-b .stepline{
-  font-size:23px;padding:18px 0;gap:16px;font-weight:600;
+  font-size:22px;padding:15px 0;gap:16px;font-weight:600;min-height:64px;box-sizing:border-box;
   border-bottom:1px solid var(--rule);color:var(--ink)
 }
 body.theme-b .stepline i{
-  width:48px;height:48px;flex:0 0 48px;border-radius:16px;border:none;
-  background:var(--act-pale);color:var(--act);font-size:22px;font-weight:700
+  width:42px;height:42px;flex:0 0 42px;border-radius:14px;border:none;
+  background:var(--act-pale);color:var(--act);font-size:20px;font-weight:700
 }
 body.theme-b .cover{
   font-size:20px;line-height:1.65;color:var(--ink-3);
@@ -354,15 +355,16 @@ body.theme-b .stale{
 }
 
 /* 진행 */
-body.theme-b .topbar{min-height:64px;margin-bottom:24px}
+body.theme-b .topbar{min-height:56px;margin-bottom:18px;align-items:center}
 body.theme-b .backbtn{
-  width:64px;height:64px;min-height:64px;flex:0 0 64px;
-  border:none;background:var(--card);color:var(--ink-2);font-size:30px;border-radius:20px
+  width:56px;height:56px;min-height:56px;flex:0 0 56px;
+  border:none;background:var(--card);color:var(--ink-2);font-size:26px;border-radius:18px;
+  box-shadow:var(--shadow-sm)
 }
 body.theme-b .backbtn:active{background:var(--rule);color:var(--ink)}
-body.theme-b .backspacer{width:64px;flex:0 0 64px}
+body.theme-b .backspacer{width:56px;flex:0 0 56px}
 body.theme-b .step{font-size:20px;letter-spacing:-.01em;color:var(--ink-3);font-weight:600}
-body.theme-b .bar{height:6px;background:var(--rule-2);border-radius:99px;margin-bottom:34px}
+body.theme-b .bar{height:6px;background:#E1E5EA;border-radius:99px;margin-bottom:28px}
 body.theme-b .bar > i{background:var(--act);border-radius:99px}
 
 body.theme-b h1{
@@ -377,13 +379,14 @@ body.theme-b .hint{
 }
 
 /* 선택 — 면으로 채운 큰 버튼 */
-body.theme-b .opts{gap:14px;padding-top:10px;border-top:none}
+body.theme-b .opts{gap:12px;padding-top:6px;border-top:none}
 body.theme-b button{
-  font-size:27px;font-weight:600;min-height:88px;padding:20px 22px;
+  font-size:26px;font-weight:600;min-height:76px;padding:18px 20px;
   border:none;border-radius:22px;background:var(--card);color:var(--ink);
   transition:transform .16s cubic-bezier(.2,0,.2,1),background .16s ease
 }
-body.theme-b button:active{background:var(--rule-2);transform:scale(.98)}
+body.theme-b button{box-shadow:var(--shadow-sm)}
+body.theme-b button:active{background:var(--rule-2);transform:scale(.99)}
 body.theme-b button.chosen{
   background:var(--act-pale);color:var(--act);
   box-shadow:inset 0 0 0 2px var(--act);transform:scale(.98)
@@ -403,7 +406,7 @@ body.theme-b .rtop p{font-size:22px;color:var(--ink-2);line-height:1.55;font-wei
 /* 통합창구 — 파란 면 */
 body.theme-b .gatebox{
   background:var(--act);border-radius:22px;border-top:none;
-  padding:28px 22px 24px;margin-bottom:32px
+  padding:24px 18px 20px;margin-bottom:30px
 }
 body.theme-b .gatetitle{
   font-size:31px;font-weight:700;letter-spacing:-.03em;line-height:1.3;
@@ -412,7 +415,7 @@ body.theme-b .gatetitle{
 body.theme-b .gatesub{font-size:21px;color:rgba(255,255,255,.8);line-height:1.55;margin-bottom:20px;font-weight:500}
 body.theme-b .gcard{
   box-shadow:var(--shadow-sm);background:#fff;border-radius:22px;border-top:none;
-  padding:22px 20px 20px;margin-top:12px
+  padding:20px 18px 18px;margin-top:10px
 }
 body.theme-b .gcard h2{
   font-size:27px;font-weight:700;color:var(--ink);letter-spacing:-.03em
@@ -424,6 +427,18 @@ body.theme-b .gcard .sum{font-size:21px;color:var(--ink-2);line-height:1.55;font
 body.theme-b .gcard .tel{background:var(--act);border:none;color:#fff}
 body.theme-b .gcard .tel:active{background:var(--act-2)}
 
+body.theme-b .summary{
+  background:var(--card);border-radius:22px;padding:6px 20px;margin-bottom:30px;
+  box-shadow:var(--shadow-sm)
+}
+body.theme-b .srow{
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+  padding:16px 0;border-bottom:1px solid var(--rule-2);
+  font-size:21px;color:var(--ink-2);font-weight:500
+}
+body.theme-b .srow:last-child{border-bottom:none}
+body.theme-b .srow b{font-size:23px;color:var(--ink);font-weight:700}
+body.theme-b .rtop h1 em{font-style:normal;color:var(--act)}
 body.theme-b .sec{margin-bottom:34px}
 body.theme-b .seclead{
   font-size:21px;letter-spacing:-.02em;color:var(--ink-3);
@@ -433,17 +448,17 @@ body.theme-b .seclead{
 /* 카드 — 흰 면, 테두리 없음 */
 body.theme-b .card{
   background:var(--card);border:none;border-left:none;box-shadow:var(--shadow-sm);
-  border-radius:22px;padding:24px 20px 22px;margin-top:12px
+  border-radius:22px;padding:22px 20px 20px;margin-top:16px
 }
 body.theme-b .card:has(.b-ok),
 body.theme-b .card:has(.b-wait){border-left:none}
 body.theme-b .badge{
   position:static;display:inline-block;border-radius:99px;
   font-size:19px;font-weight:700;letter-spacing:-.01em;
-  padding:7px 16px;margin-bottom:14px;color:#fff
+  padding:8px 16px;margin-bottom:14px
 }
-body.theme-b .b-ok{background:var(--ok)}
-body.theme-b .b-wait{background:var(--wait)}
+body.theme-b .b-ok{background:#E7F7EE;color:#005432}
+body.theme-b .b-wait{background:#FFF3E2;color:#6E4100}
 body.theme-b .cnum{display:none}
 body.theme-b .card h2{
   font-size:29px;font-weight:700;letter-spacing:-.03em;line-height:1.34;
@@ -457,11 +472,11 @@ body.theme-b .card .sum{font-size:22px;color:var(--ink-2);line-height:1.62;margi
 /* 전화 — 파란 면 */
 body.theme-b .tel{
   background:var(--act);border:none;color:#fff;
-  border-radius:18px;min-height:92px;gap:0
+  border-radius:18px;min-height:80px;gap:0
 }
 body.theme-b .tel .lab{font-size:22px;letter-spacing:-.01em;color:rgba(255,255,255,.75);font-weight:600}
 body.theme-b .tel .num{
-  font-size:clamp(28px,8.4vw,40px);font-weight:700;letter-spacing:-.03em
+  font-size:clamp(26px,7vw,32px);font-weight:700;letter-spacing:-.02em
 }
 body.theme-b .tel svg{width:26px;height:26px;flex:0 0 26px}
 body.theme-b .tel:active{background:var(--act-2)}
@@ -545,8 +560,9 @@ body.theme-b .restart{
   color:var(--ink-2);font-size:28px;font-weight:600
 }
 body.theme-b .foot{
-  font-size:19px;color:var(--ink-3);line-height:1.75;
-  border-top:1px solid var(--rule-2);padding-top:32px;font-weight:500
+  font-size:18px;color:var(--ink-3);line-height:1.85;
+  border-top:1px solid var(--rule);margin-top:36px;padding-top:32px;font-weight:500;
+  padding-bottom:calc(8px + env(safe-area-inset-bottom))
 }
 
 /* 토글 */
@@ -591,15 +607,15 @@ var QUESTIONS = [
     opts:[ {t:'80살 넘음',v:'80+'}, {t:'65살 ~ 80살',v:'65-80'}, {t:'65살 아래',v:'-65'} ] },
 
   { id:'age2a', field:'age', showIf:{f:'_ageband',v:'80+'},
-    q:'조금만 더 여쭐게요',
+    q:'연세를 조금 더 여쭐게요',
     opts:[ {t:'90살 넘음',v:90}, {t:'85살 ~ 90살',v:85}, {t:'80살 ~ 85살',v:80} ] },
 
   { id:'age2b', field:'age', showIf:{f:'_ageband',v:'65-80'},
-    q:'조금만 더 여쭐게요',
+    q:'연세를 조금 더 여쭐게요',
     opts:[ {t:'75살 ~ 80살',v:75}, {t:'70살 ~ 75살',v:70}, {t:'65살 ~ 70살',v:66} ] },
 
   { id:'age2c', field:'age', showIf:{f:'_ageband',v:'-65'},
-    q:'조금만 더 여쭐게요',
+    q:'연세를 조금 더 여쭐게요',
     opts:[ {t:'60살 ~ 65살',v:60}, {t:'60살 아래',v:50} ] },
 
   { id:'gu', field:'residence_gu',
@@ -2784,10 +2800,12 @@ function render(){
 
   var h='';
   h+='<div class="topbar">'+
-     '<button class="backbtn" id="back" aria-label="앞으로">←</button>'+
+     '<button class="backbtn" id="back" aria-label="이전 질문으로">←</button>'+
      '<div class="step">'+(state.idx+1)+' / '+list.length+'</div>'+
      '</div>'+
-     '<div class="bar"><i style="width:'+pct+'%"></i></div>'+
+     '<div class="bar" role="progressbar" aria-valuenow="'+(state.idx+1)+
+     '" aria-valuemin="1" aria-valuemax="'+list.length+
+     '" aria-label="질문 진행"><i style="width:'+pct+'%"></i></div>'+
      '<h1>'+esc(q.q)+'</h1>'+
      (q.hint?'<p class="hint">'+esc(q.hint)+'</p>':'')+
      '<div class="opts" id="opts"></div>';
@@ -2856,9 +2874,10 @@ var CAT_ICON={
 };
 function catIcon(c){ return CAT_ICON[c] || CAT_ICON['생활지원']; }
 
-function telUI(tel){
+function telUI(tel, org){
   var digits=tel.replace(/[^0-9]/g,'');
-  return '<a class="tel" href="tel:'+digits+'" data-tel="'+esc(tel)+'">'+
+  return '<a class="tel" href="tel:'+digits+'" data-tel="'+esc(tel)+'"'+
+      ' aria-label="'+esc((org?org+' ':'')+tel)+'로 전화 걸기">'+
       '<span class="lab">'+PHONE_ICON+'전화 걸기</span>'+
       '<span class="num">'+esc(tel)+'</span></a>';
 }
@@ -2915,7 +2934,7 @@ function card(item,kind,n){
         '<h2>'+catIcon(p.category)+esc(p.name)+'</h2>'+
         '<p class="sum">'+esc(p.summary)+'</p>';
 
-  if(p.tel) h+=telUI(p.tel);
+  if(p.tel) h+=telUI(p.tel, p.org);
 
   if(p.needs_review) h+='<div class="warn">이 사업의 안내가 최근 바뀌었습니다.<br>꼭 전화로 확인해 주세요.</div>';
   else if(unver) h+='<div class="warn">이 사업은 조건이 확실하지 않습니다.<br>신청 전에 꼭 전화로 물어보세요.</div>';
@@ -2941,8 +2960,18 @@ function renderResult(){
   var r=diagnose(state.profile);
   var now=r.eligible.length+r.maybe.length;
 
-  var h='<div class="rtop"><h1>'+now+'가지를<br>찾았습니다</h1>'+
-        '<p>지금 신청할 수 있는 것만<br>모았습니다.</p></div>';
+  var gateN=r.eligible.filter(function(i){return i.p.gateway}).length;
+  var restN=r.eligible.length-gateN;
+
+  var h='<div class="rtop"><h1><em>'+now+'</em>가지를 찾았습니다</h1>'+
+        '<p>받을 가능성이 있는 복지와<br>상담처를 모았습니다.</p></div>';
+
+  /* 요약 — 무엇을 먼저 해야 하는지 한눈에 */
+  h+='<div class="summary">'+
+     (gateN?'<div class="srow"><span>바로 전화할 곳</span><b>'+gateN+'곳</b></div>':'')+
+     (r.maybe.length?'<div class="srow"><span>먼저 확인할 지원</span><b>'+r.maybe.length+'개</b></div>':'')+
+     (restN?'<div class="srow"><span>신청할 수 있는 지원</span><b>'+restN+'개</b></div>':'')+
+     '</div>';
 
   var n=0, TOP=4;
 
@@ -2952,11 +2981,11 @@ function renderResult(){
   if(gates.length){
     h+='<div class="gatebox">'+
        '<div class="gatetitle">먼저 여기에 전화해 보세요</div>'+
-       '<p class="gatesub">한 번 전화하면 받으실 수 있는 것을<br>한꺼번에 알아보고 연결해 줍니다.</p>';
+       '<p class="gatesub">전화 한 번으로 받을 수 있는 지원을<br>함께 확인하고 연결해 드립니다.</p>';
     gates.forEach(function(i){
       h+='<div class="gcard"><h2>'+catIcon(i.p.category)+esc(i.p.name)+'</h2>'+
          '<p class="sum">'+esc(i.p.summary)+'</p>'+
-         telUI(i.p.tel)+'</div>';
+         telUI(i.p.tel, i.p.org)+'</div>';
     });
     h+='</div>';
   }
@@ -3034,10 +3063,15 @@ function renderResult(){
 
   app.innerHTML=h;
   document.getElementById('again').onclick=function(){
+    if(!confirm('처음부터 다시 시작할까요?')) return;
     tick(this); state={idx:0,profile:{},history:[],started:false}; render();
   };
   document.querySelectorAll('details').forEach(function(d){
-    d.addEventListener('toggle',function(){ if(d.open) tick(d); });
+    d.addEventListener('toggle',function(){
+      var s=d.querySelector(':scope > summary');
+      if(s) s.setAttribute('aria-expanded', d.open?'true':'false');
+      if(d.open) tick(d);
+    });
   });
 }
 
