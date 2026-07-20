@@ -13,16 +13,24 @@
      장식은 최소화, 위계는 크기·여백·색으로만 만든다.
      본문 대비 7:1 이상 유지. */
   :root{
-    --ink:#14181D;
-    --ink-2:#4A535C;
-    --ink-3:#525B64;
-    --paper:#F5F4F1;
+    /* 텍스트 3단계 — 눈에 확실히 구별되도록 간격을 넓게 */
+    --ink:#0F1215;        /* 1차: 제목·핵심 (16:1 이상) */
+    --ink-2:#454E57;      /* 2차: 본문 설명 */
+    --ink-3:#6E777F;      /* 3차: 부가·메타 */
+
+    /* 구조는 무채색 — 색을 쓰지 않는다 */
+    --paper:#F4F3F0;
     --card:#FFFFFF;
-    --rule:#DDD9D2;
-    --rule-2:#EDEAE4;
+    --rule:#DCD8D1;
+    --rule-2:#EBE8E2;
+    --slate:#1E262C;      /* 구조 강조(헤더·통합창구) */
+
+    /* 행동색 — 전화 걸기에만 사용 */
     --act:#0A5346;
     --act-2:#06382F;
-    --act-pale:#EDF3F1;
+    --act-pale:#EEF4F2;
+
+    /* 상태색 */
     --ok:#0E6428;
     --wait:#8A4B00;
     --wait-pale:#FCF6EA;
@@ -45,7 +53,7 @@
 
   /* 상단 식별 */
   .apphead{position:sticky;top:0;z-index:50;
-    background:var(--act);color:#fff;
+    background:var(--slate);color:#fff;
     padding:calc(16px + env(safe-area-inset-top)) 24px 16px;
     font-size:26px;font-weight:700;letter-spacing:.02em;
     display:flex;align-items:center;gap:12px}
@@ -66,7 +74,7 @@
     font-weight:400;padding:22px 0;border-bottom:1px solid var(--rule)}
   .stepline:last-child{border-bottom:none}
   .stepline i{flex:0 0 46px;width:46px;height:46px;border-radius:50%;
-    background:var(--act);color:#fff;font-style:normal;font-weight:700;
+    background:var(--slate);color:#fff;font-style:normal;font-weight:700;
     font-size:24px;display:flex;align-items:center;justify-content:center}
 
   .cover{font-size:25px;color:var(--ink-3);line-height:1.65;font-weight:400;
@@ -86,12 +94,12 @@
   .step{font-size:26px;font-weight:400;color:var(--ink-3);letter-spacing:.03em}
 
   .bar{height:5px;background:var(--rule);overflow:hidden;margin-bottom:46px}
-  .bar > i{display:block;height:100%;background:var(--act);
+  .bar > i{display:block;height:100%;background:var(--slate);
     transition:width .4s cubic-bezier(.4,0,.2,1)}
 
   h1{font-size:52px;line-height:1.22;font-weight:700;margin:0 0 18px;letter-spacing:-.04em}
   .hint{font-size:28px;color:var(--ink-2);margin:0 0 24px;padding:0 0 0 20px;
-    border-left:3px solid var(--act);line-height:1.5;font-weight:400}
+    border-left:3px solid var(--rule);line-height:1.5;font-weight:400}
 
   /* 선택 버튼 */
   .opts{display:flex;flex-direction:column;gap:14px;padding-top:18px}
@@ -100,8 +108,8 @@
     background:var(--card);color:var(--ink);width:100%;text-align:left;cursor:pointer;
     display:flex;align-items:center;
     transition:background .14s ease,border-color .14s ease}
-  button:active{background:var(--act);border-color:var(--act);color:#fff}
-  button.chosen{background:var(--act);border-color:var(--act);color:#fff}
+  button:active{background:var(--slate);border-color:var(--slate);color:#fff}
+  button.chosen{background:var(--slate);border-color:var(--slate);color:#fff}
   button:focus-visible{outline:3px solid var(--act);outline-offset:2px}
   button.dim{color:var(--ink-3);font-size:31px;min-height:96px}
   button.dim:active,button.dim.chosen{background:var(--ink-2);border-color:var(--ink-2);color:#fff}
@@ -112,7 +120,7 @@
   .rtop p{margin:0;font-size:28px;color:var(--ink-2);line-height:1.5;font-weight:400}
 
   /* 통합창구 — 유일한 강조 */
-  .gatebox{background:var(--act);color:#fff;border-radius:4px;max-width:100%;
+  .gatebox{background:var(--slate);color:#fff;border-radius:4px;max-width:100%;
     padding:36px 22px 30px;margin-bottom:48px;box-sizing:border-box}
   .gatetitle{font-size:38px;font-weight:700;line-height:1.2;
     margin-bottom:14px;letter-spacing:-.035em}
@@ -121,8 +129,8 @@
   .gcard{background:var(--card);border-radius:3px;padding:28px 18px 24px;margin-top:14px;
     color:var(--ink);max-width:100%;box-sizing:border-box}
   .gcard h2{font-size:34px;font-weight:700;margin:0 0 14px;line-height:1.28;
-    letter-spacing:-.03em;display:flex;align-items:flex-start;gap:.32em}
-  .gcard h2 .cicon{margin-right:0;margin-top:.1em;width:1em;height:1em}
+    letter-spacing:-.03em;display:block}
+  .gcard h2 .cicon{display:block;margin:0 0 12px;width:40px;height:40px}
   .gcard .sum{font-size:27px;color:var(--ink-2);margin:0 0 22px;line-height:1.5;font-weight:400}
 
   .sec{margin-bottom:44px;max-width:100%}
@@ -144,8 +152,8 @@
     font-size:23px;font-weight:700;letter-spacing:.06em}
   .card h2{font-size:38px;font-weight:700;margin:6px 0 16px;line-height:1.28;
     letter-spacing:-.035em;overflow-wrap:break-word;max-width:100%;
-    display:flex;align-items:flex-start;gap:.32em}
-  .card h2 .cicon{margin-right:0;margin-top:.1em;width:1em;height:1em}
+    display:block}
+  .card h2 .cicon{display:block;margin:0 0 14px;width:44px;height:44px}
   .card .sum{font-size:28px;color:var(--ink-2);margin:0 0 24px;line-height:1.55;font-weight:400}
 
   /* 전화 */
@@ -160,9 +168,9 @@
     max-width:100%;white-space:nowrap;font-size:clamp(26px, 8.2vw, 38px)}
   .tel svg{width:26px;height:26px;flex:0 0 26px;fill:currentColor}
   .tel:active{background:var(--act-2)}
-  .gcard .tel{background:var(--ink)}
+  .gcard .tel{background:var(--act)}
   .gcard .tel .num{font-size:clamp(24px, 7.2vw, 34px)}
-  .gcard .tel:active{background:#000}
+  .gcard .tel:active{background:var(--act-2)}
   @media (max-width:380px){ .tel .lab{font-size:21px} }
 
   .telalt{display:flex;align-items:center;justify-content:space-between;gap:14px;
@@ -180,7 +188,7 @@
 
   /* 자세히 보기 */
   .more{margin-top:24px;border-top:1px solid var(--rule-2);padding-top:2px}
-  .more summary{font-size:28px;font-weight:400;color:var(--act);
+  .more summary{font-size:28px;font-weight:400;color:var(--ink-2);
     padding:24px 0;cursor:pointer;list-style:none;min-height:80px;
     display:flex;align-items:center;justify-content:space-between;gap:16px}
   .more summary::-webkit-details-marker{display:none}
@@ -208,7 +216,7 @@
 
   .restmore{margin-top:36px;border-top:none}
   .restmore > summary{justify-content:center;border:1px solid var(--rule);
-    border-radius:4px;padding:26px;color:var(--act);background:var(--card)}
+    border-radius:4px;padding:26px;color:var(--ink-2);background:var(--card)}
 
   .skip{margin-bottom:32px}
   .skip summary{font-size:26px;font-weight:400;color:var(--ink-3);padding:26px 0;
@@ -236,12 +244,13 @@
     font-size:23px;color:var(--ink-3);line-height:1.7;font-weight:400}
 
   .cicon{width:1.05em;height:1.05em;flex:0 0 auto;vertical-align:-.14em;
-    margin-right:.32em;fill:none;stroke:var(--act);stroke-width:1.8;
+    margin-right:.32em;fill:none;stroke:var(--ink-3);stroke-width:1.8;
     stroke-linecap:round;stroke-linejoin:round}
-  .cicon.icon-fill{fill:var(--act);stroke:none}
+  .cicon.icon-fill{fill:var(--ink-3);stroke:none}
   .catlabel .cicon{stroke:var(--ink-3);stroke-width:2;margin-right:.3em}
   .catlabel .cicon.icon-fill{fill:var(--ink-3)}
-  .gcard .cicon{stroke:var(--act)}
+  .gcard .cicon{stroke:var(--slate)}
+  .gcard .cicon.icon-fill{fill:var(--slate)}
 
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
