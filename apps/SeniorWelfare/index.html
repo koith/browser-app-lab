@@ -13,27 +13,39 @@
      장식은 최소화, 위계는 크기·여백·색으로만 만든다.
      본문 대비 7:1 이상 유지. */
   :root{
-    /* 텍스트 3단계 — 눈에 확실히 구별되도록 간격을 넓게 */
-    --ink:#0F1215;        /* 1차: 제목·핵심 (16:1 이상) */
-    --ink-2:#454E57;      /* 2차: 본문 설명 */
-    --ink-3:#6E777F;      /* 3차: 부가·메타 */
+    /* 팔레트: 짙은 한색 계열(청록·남청)에 따뜻한 황토를 대비색으로.
+       모든 색은 명도를 낮게 잡아 배경 대비 9:1 이상을 유지한다.
+       — 색을 쓰되 시인성을 잃지 않는다. */
 
-    /* 구조는 무채색 — 색을 쓰지 않는다 */
-    --paper:#F4F3F0;
+    /* 텍스트 3단계 */
+    --ink:#141A1F;
+    --ink-2:#3F4A54;
+    --ink-3:#6B757E;
+
+    /* 지면 */
+    --paper:#FBF9F4;      /* 미색 종이 */
     --card:#FFFFFF;
-    --rule:#DCD8D1;
-    --rule-2:#EBE8E2;
-    --slate:#1E262C;      /* 구조 강조(헤더·통합창구) */
+    --rule:#DFD9CD;
+    --rule-2:#EFEAE0;
 
-    /* 행동색 — 전화 걸기에만 사용 */
-    --act:#0A5346;
-    --act-2:#06382F;
-    --act-pale:#EEF4F2;
+    /* 구조 — 남청 */
+    --deep:#183753;
+    --deep-2:#0F2537;
+    --deep-pale:#EDF1F6;
 
-    /* 상태색 */
+    /* 행동 — 청록 (전화·주요 버튼) */
+    --act:#0B4F42;
+    --act-2:#073830;
+    --act-pale:#EEF3F1;
+
+    /* 강조 — 황토 (따뜻함을 주는 유일한 난색) */
+    --accent:#8A5A18;
+    --accent-pale:#FBF3E4;
+
+    /* 상태 */
     --ok:#0E6428;
     --wait:#8A4B00;
-    --wait-pale:#FCF6EA;
+    --wait-pale:#FBF3E4;
   }
   *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
   html{-webkit-text-size-adjust:100%;overflow-x:hidden;width:100%;
@@ -53,8 +65,9 @@
 
   /* 상단 식별 */
   .apphead{position:sticky;top:0;z-index:50;
-    background:var(--slate);color:#fff;
+    background:var(--deep);color:#fff;
     padding:calc(16px + env(safe-area-inset-top)) 24px 16px;
+    border-bottom:3px solid var(--accent);
     font-size:26px;font-weight:700;letter-spacing:.02em;
     display:flex;align-items:center;gap:12px}
   .apphead .dotmark{width:13px;height:13px;border-radius:50%;
@@ -63,7 +76,8 @@
   /* 타이틀 */
   .title{display:flex;flex-direction:column;padding:12px 0 184px}
   .hero{background:var(--card);border:1px solid var(--rule);border-radius:4px;
-    padding:40px 26px 36px;text-align:center;margin-bottom:36px}
+    border-top:5px solid var(--deep);
+    padding:38px 26px 36px;text-align:center;margin-bottom:36px}
   .hero svg{width:100%;max-width:260px;height:auto;display:block;margin:0 auto 28px}
   .hero h1{font-size:56px;line-height:1.14;margin:0 0 18px;font-weight:700;
     letter-spacing:-.04em}
@@ -74,7 +88,8 @@
     font-weight:400;padding:22px 0;border-bottom:1px solid var(--rule)}
   .stepline:last-child{border-bottom:none}
   .stepline i{flex:0 0 46px;width:46px;height:46px;border-radius:50%;
-    background:var(--slate);color:#fff;font-style:normal;font-weight:700;
+    background:var(--accent-pale);color:var(--accent);
+    border:1px solid var(--accent);font-style:normal;font-weight:700;
     font-size:24px;display:flex;align-items:center;justify-content:center}
 
   .cover{font-size:25px;color:var(--ink-3);line-height:1.65;font-weight:400;
@@ -94,12 +109,12 @@
   .step{font-size:26px;font-weight:400;color:var(--ink-3);letter-spacing:.03em}
 
   .bar{height:5px;background:var(--rule);overflow:hidden;margin-bottom:46px}
-  .bar > i{display:block;height:100%;background:var(--slate);
+  .bar > i{display:block;height:100%;background:var(--accent);
     transition:width .4s cubic-bezier(.4,0,.2,1)}
 
   h1{font-size:52px;line-height:1.22;font-weight:700;margin:0 0 18px;letter-spacing:-.04em}
   .hint{font-size:28px;color:var(--ink-2);margin:0 0 24px;padding:0 0 0 20px;
-    border-left:3px solid var(--rule);line-height:1.5;font-weight:400}
+    border-left:3px solid var(--accent);line-height:1.5;font-weight:400}
 
   /* 선택 버튼 */
   .opts{display:flex;flex-direction:column;gap:14px;padding-top:18px}
@@ -108,8 +123,8 @@
     background:var(--card);color:var(--ink);width:100%;text-align:left;cursor:pointer;
     display:flex;align-items:center;
     transition:background .14s ease,border-color .14s ease}
-  button:active{background:var(--slate);border-color:var(--slate);color:#fff}
-  button.chosen{background:var(--slate);border-color:var(--slate);color:#fff}
+  button:active{background:var(--deep);border-color:var(--deep);color:#fff}
+  button.chosen{background:var(--deep);border-color:var(--deep);color:#fff}
   button:focus-visible{outline:3px solid var(--act);outline-offset:2px}
   button.dim{color:var(--ink-3);font-size:31px;min-height:96px}
   button.dim:active,button.dim.chosen{background:var(--ink-2);border-color:var(--ink-2);color:#fff}
@@ -120,7 +135,8 @@
   .rtop p{margin:0;font-size:28px;color:var(--ink-2);line-height:1.5;font-weight:400}
 
   /* 통합창구 — 유일한 강조 */
-  .gatebox{background:var(--slate);color:#fff;border-radius:4px;max-width:100%;
+  .gatebox{background:var(--deep);color:#fff;border-radius:4px;max-width:100%;
+    border-top:5px solid var(--accent);
     padding:36px 22px 30px;margin-bottom:48px;box-sizing:border-box}
   .gatetitle{font-size:38px;font-weight:700;line-height:1.2;
     margin-bottom:14px;letter-spacing:-.035em}
@@ -140,7 +156,8 @@
 
   /* 카드 — 테두리 하나, 그림자 없음 */
   .card{background:var(--card);border:1px solid var(--rule);border-radius:4px;
-    padding:52px 20px 28px;margin-top:36px;position:relative;
+    border-left:5px solid var(--deep);
+    padding:52px 20px 28px 22px;margin-top:36px;position:relative;
     max-width:100%;box-sizing:border-box;overflow-wrap:break-word}
   .badge{position:absolute;top:-1px;right:-1px;max-width:calc(100% - 24px);
     white-space:nowrap;overflow:hidden;color:#fff;
@@ -148,6 +165,8 @@
     letter-spacing:.02em;border-radius:0 3px 0 4px}
   .b-ok{background:var(--ok)}
   .b-wait{background:var(--wait)}
+  .card:has(.b-ok){border-left-color:var(--ok)}
+  .card:has(.b-wait){border-left-color:var(--wait)}
   .cnum{position:absolute;top:14px;left:20px;color:var(--ink-3);
     font-size:23px;font-weight:700;letter-spacing:.06em}
   .card h2{font-size:38px;font-weight:700;margin:6px 0 16px;line-height:1.28;
@@ -200,9 +219,9 @@
     max-width:100%;overflow-wrap:break-word}
   .row b{display:block;color:var(--ink-3);font-weight:700;
     font-size:22px;margin-bottom:6px;letter-spacing:.08em}
-  .note{margin-top:20px;padding:20px 22px;background:#FAF9F6;
+  .note{margin-top:20px;padding:20px 22px;background:var(--accent-pale);
     font-size:26px;line-height:1.55;max-width:100%;box-sizing:border-box;
-    overflow-wrap:break-word;border-left:3px solid var(--rule)}
+    overflow-wrap:break-word;border-left:3px solid var(--accent)}
 
   .tip{background:var(--card);border:1px solid var(--rule);
     border-left:3px solid var(--act);border-radius:4px;
@@ -210,7 +229,7 @@
     color:var(--ink-2)}
   .tip b{display:block;font-size:31px;margin-bottom:12px;color:var(--ink);font-weight:700}
 
-  .catlabel{font-size:24px;font-weight:700;color:var(--ink-3);
+  .catlabel{font-size:24px;font-weight:700;color:var(--accent);
     margin:48px 0 -18px;padding-left:2px;letter-spacing:.1em;
     display:flex;align-items:center}
 
@@ -244,13 +263,13 @@
     font-size:23px;color:var(--ink-3);line-height:1.7;font-weight:400}
 
   .cicon{width:1.05em;height:1.05em;flex:0 0 auto;vertical-align:-.14em;
-    margin-right:.32em;fill:none;stroke:var(--ink-3);stroke-width:1.8;
+    margin-right:.32em;fill:none;stroke:var(--deep);stroke-width:1.8;
     stroke-linecap:round;stroke-linejoin:round}
-  .cicon.icon-fill{fill:var(--ink-3);stroke:none}
-  .catlabel .cicon{stroke:var(--ink-3);stroke-width:2;margin-right:.3em}
-  .catlabel .cicon.icon-fill{fill:var(--ink-3)}
-  .gcard .cicon{stroke:var(--slate)}
-  .gcard .cicon.icon-fill{fill:var(--slate)}
+  .cicon.icon-fill{fill:var(--deep);stroke:none}
+  .catlabel .cicon{stroke:var(--accent);stroke-width:2;margin-right:.3em}
+  .catlabel .cicon.icon-fill{fill:var(--accent)}
+  .gcard .cicon{stroke:var(--act)}
+  .gcard .cicon.icon-fill{fill:var(--act)}
 
   @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
