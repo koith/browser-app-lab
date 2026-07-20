@@ -316,16 +316,20 @@ body.theme-b .apphead .dotmark{
 }
 
 /* 타이틀 — 초대형 */
+/* 시안 참고 — 파란 면 히어로 카드 */
 body.theme-b .hero{
-  background:transparent;border:none;border-radius:0;
-  padding:52px 0 44px;margin-bottom:0;text-align:left
+  background:var(--act);border:none;border-radius:28px;
+  padding:38px 28px 34px;margin:8px 0 32px;text-align:left
 }
-body.theme-b .hero svg{max-width:200px;margin:0 0 44px}
+body.theme-b .hero svg{max-width:150px;margin:0 0 24px;opacity:.95}
+body.theme-b .hero svg *{stroke:#fff}
 body.theme-b .hero h1{
-  font-size:76px;font-weight:700;line-height:1.16;letter-spacing:-.045em;
-  margin:0 0 24px;color:var(--ink)
+  font-size:48px;font-weight:700;line-height:1.24;letter-spacing:-.04em;
+  margin:0 0 16px;color:#fff
 }
-body.theme-b .hero p{font-size:30px;color:var(--ink-2);line-height:1.55;font-weight:500}
+body.theme-b .hero p{
+  font-size:26px;color:rgba(255,255,255,.82);line-height:1.55;font-weight:500
+}
 
 body.theme-b .steps{
   background:var(--card);border-radius:24px;padding:10px 26px;margin-bottom:32px
@@ -364,9 +368,11 @@ body.theme-b h1{
   font-size:60px;font-weight:700;letter-spacing:-.045em;
   line-height:1.22;margin:0 0 28px
 }
+/* 설명문은 버튼으로 오인되지 않도록 카드 형태를 피한다 */
 body.theme-b .hint{
-  font-size:26px;color:var(--ink-2);border:none;background:var(--card);
-  border-radius:18px;padding:22px 26px;margin-bottom:32px;font-weight:500
+  font-size:25px;color:var(--ink-2);background:transparent;
+  border:none;border-left:4px solid var(--act);border-radius:0;
+  padding:4px 0 4px 18px;margin:0 0 30px;font-weight:500;line-height:1.55
 }
 
 /* 선택 — 면으로 채운 큰 버튼 */
@@ -478,18 +484,19 @@ body.theme-b .more summary{
   padding:24px 0;min-height:76px;font-weight:600
 }
 body.theme-b .more summary::after{font-size:20px}
-/* 라벨과 내용을 2열로 — 줄바꿈해도 내용이 라벨 왼쪽으로 나가지 않는다 */
+/* 라벨과 내용의 왼쪽 선을 맞춘다 */
 body.theme-b .row{
-  font-size:26px;margin:22px 0;line-height:1.6;font-weight:500;
-  display:flex;align-items:flex-start;gap:14px
+  font-size:26px;margin:0 0 26px;line-height:1.6;font-weight:500;
+  display:block
 }
+body.theme-b .row:last-child{margin-bottom:6px}
 body.theme-b .row b{
-  flex:0 0 auto;display:inline-block;font-size:21px;letter-spacing:-.01em;
+  display:inline-block;font-size:21px;letter-spacing:-.01em;
   color:var(--act);background:var(--act-pale);
-  font-weight:700;margin-bottom:0;padding:7px 15px;border-radius:99px;
-  white-space:nowrap;line-height:1.3;margin-top:2px
+  font-weight:700;margin:0 0 10px;padding:7px 15px;border-radius:99px;
+  white-space:nowrap;line-height:1.3
 }
-body.theme-b .row > span{flex:1 1 auto;min-width:0}
+body.theme-b .row > span{display:block;color:var(--ink)}
 body.theme-b .note{
   background:#F7F8FA;border:none;border-radius:18px;
   padding:22px 26px;font-size:24px;color:var(--ink-2);line-height:1.6;font-weight:500
