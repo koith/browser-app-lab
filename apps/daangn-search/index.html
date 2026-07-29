@@ -482,6 +482,7 @@ async function search(keepView){
     }
     lastMeta={codes:codes.length, sec:((Date.now()-t0)/1000).toFixed(1), capped, err:errCount+dongFails.length};
     searching=false;
+    renderResults();
     updateCount();
     if(!items.length) $('results').innerHTML='<div class="empty">검색 결과가 없습니다.<br>다른 검색어나 지역을 시도해보세요.</div>';
   }catch(e){
@@ -555,7 +556,7 @@ function dist(a,b){ const dx=(a[1]-b[1])*88, dy=(a[0]-b[0])*111; return Math.sqr
 
 function renderResults(){
   let arr=[...items];
-  if(onSaleOnly) arr=arr.filter(i=>i.status==='on_sale');
+  if(onSaleOnly&&mode==='sell') arr=arr.filter(i=>i.status==='on_sale');
   arr=arr.filter(passExc);
   if(sortMode==='price') arr.sort((a,b)=>(a.price??Infinity)-(b.price??Infinity)||a._i-b._i);
   else if(sortMode==='dist'&&myPos) arr.sort((a,b)=>{
@@ -565,7 +566,12 @@ function renderResults(){
   else if(mode==='group') arr.sort((a,b)=>(b.members??-1)-(a.members??-1)||a._i-b._i);
   else arr.sort((a,b)=>(b.sortTime??0)-(a.sortTime??0)||a._i-b._i);
   if(arr.length){ $('results').innerHTML=arr.map(card).join(''); return; }
-  if(searching) return;
+  if(searching){
+    // 진행 중 & 아직 원본 결과 0건이면 스피너 유지, 필터로 0이 된 경우엔 안내
+    if(!items.length) return;
+    $('results').innerHTML='<div class="empty">조건에 맞는 결과가 없습니다.<br>정렬·필터를 조정해보세요.</div>';
+    return;
+  }
   if(items.length) $('results').innerHTML='<div class="empty">조건에 맞는 결과가 없습니다.<br>정렬·필터를 조정해보세요.</div>';
   else showIdle();
 }
