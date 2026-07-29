@@ -3,22 +3,26 @@ const UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/6
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   const q = req.query.q || '브루더';
-  const region = req.query.region || '서초동-6128';
-  const url = 'https://www.daangn.com/kr/buy-sell/?in=' + encodeURIComponent(region) + '&search=' + encodeURIComponent(q);
-  const r = await fetch(url, { headers: { 'User-Agent': UA, 'Accept-Language': 'ko-KR,ko;q=0.9', Accept: 'text/html' } });
-  const html = await r.text();
-  // 진단 지표들
-  const ldBlocks = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)];
-  const ldTypes = ldBlocks.map(m => { try { return JSON.parse(m[1])['@type']; } catch { return 'parse-fail'; } });
-  const hasItemList = ldBlocks.some(m => { try { return JSON.parse(m[1])['@type'] === 'ItemList'; } catch { return false; } });
-  const anchorCount = [...html.matchAll(/href="(?:https?:\/\/www\.daangn\.com)?\/kr\/buy-sell\/(?!s\/)(?!\?)[^"?#]+\//g)].length;
-  const title = (html.match(/<title>([^<]*)<\/title>/) || [])[1] || '';
-  // 첫 ld 블록 원문 앞부분
-  const firstLd = ldBlocks.length ? ldBlocks[0][1].slice(0, 500) : null;
-  const bodySample = html.slice(0, 200);
-  return res.status(200).json({
-    status: r.status, bytes: html.length, title,
-    ldCount: ldBlocks.length, ldTypes, hasItemList, anchorCount,
-    firstLd, bodySample,
-  });
+  const rid = req.query.rid || '6128';
+  const H = { 'User-Agent': UA, 'Accept-Language': 'ko-KR,ko;q=0.9', Accept: 'application/json, text/plain, */*',
+    Referer: 'https://www.daangn.com/kr/buy-sell/?in=%EC%84%9C%EC%B4%88%EB%8F%99-6128&search=' + encodeURIComponent(q) };
+  const bases = [
+    `https://www.daangn.com/kr/api/v1/fleamarket/search?region_id=${rid}&search=${encodeURIComponent(q)}`,
+    `https://www.daangn.com/kr/api/v1/fleamarket/search?region_id=${rid}&keyword=${encodeURIComponent(q)}`,
+    `https://www.daangn.com/kr/api/v1/fleamarket/articles?region_id=${rid}&search=${encodeURIComponent(q)}`,
+  ];
+  const out = [];
+  for (const u of bases) {
+    try {
+      const r = await fetch(u, { headers: H });
+      const b = await r.text();
+      out.push({ url: u.replace('https://www.daangn.com',''), status: r.status, ct: r.headers.get('content-type'), len: b.length, body: b.slice(0, 600) });
+    } catch (e) { out.push({ url: u, error: String(e.message||e).slice(0,120) }); }
+  }
+  // 페이지 안에 다음 데이터(remix)가 인라인으로 있는지도 확인
+  const pageUrl = 'https://www.daangn.com/kr/buy-sell/?in=%EC%84%9C%EC%B4%88%EB%8F%99-6128&search=' + encodeURIComponent(q);
+  const html = await (await fetch(pageUrl, { headers: { 'User-Agent': UA } })).text();
+  const hasStreamData = /window\.__remixContext|__remixContext|streamController|"articles?"|fleamarket/i.test(html);
+  const jsonHints = [...new Set([...html.matchAll(/"([a-zA-Z_]{4,20}(?:Id|At|Price|Title|title|name))"\s*:/g)].map(m=>m[1]))].slice(0,20);
+  return res.status(200).json({ apiTries: out, hasStreamData, jsonHints });
 }
