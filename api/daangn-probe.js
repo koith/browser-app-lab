@@ -1,9 +1,7 @@
-// /api/daangn-probe.js — 봇 방어 임계점 측정
-// GET ?parallel=N&delay=M  → N개 동을 동시(지연 M)로 요청해 빈 응답률 측정
-export const config = { maxDuration: 120 };
+// /api/daangn-probe.js — 누적 요청량 차단 검증 (multi-round)
+export const config = { maxDuration: 300 };
 const UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1';
 
-// 서초구 + 강남구 일부 동 코드 (실측용 고정 목록, 40개)
 const DONGS = [
   '서초동-6128','잠원동-367','반포동-6126','방배동-6127','서초3동-365','양재동-6130','서초4동-366',
   '역삼동-6144','논현동-6136','삼성동-6140','청담동-6134','신사동-6135','압구정동-6137','대치동-6142',
@@ -14,52 +12,42 @@ const DONGS = [
 ];
 
 async function fetchOne(code, q) {
-  const url = 'https://www.daangn.com/kr/buy-sell/?in=' + encodeURIComponent(code) + '&search=' + encodeURIComponent(q) + '&_=' + Date.now() + Math.random();
-  const t0 = Date.now();
+  const url = 'https://www.daangn.com/kr/buy-sell/?in=' + encodeURIComponent(code) + '&search=' + encodeURIComponent(q);
   try {
     const r = await fetch(url, { headers: { 'User-Agent': UA, 'Accept-Language': 'ko-KR,ko;q=0.9', Accept: 'text/html' } });
     const html = await r.text();
     const items = [...new Set([...html.matchAll(/href="(?:https?:\/\/www\.daangn\.com)?\/kr\/buy-sell\/(?!s\/)(?!\?)[^"?#]+\//g)])].length;
-    // 차단성 빈 페이지는 크기가 작음(~156KB), 정상 검색결과 페이지는 큼(~360KB+)
-    // numberOfItems가 명시적으로 0이면 '진짜 결과 없음'
-    const numItems = (html.match(/"numberOfItems"\s*:\s*(\d+)/) || [])[1];
-    return { code, ms: Date.now() - t0, bytes: html.length, items, numItems: numItems!=null?+numItems:null, empty: items === 0 };
-  } catch (e) { return { code, error: String(e.message || e).slice(0, 60), empty: true }; }
+    return { empty: items === 0, bytes: html.length };
+  } catch (e) { return { empty: true, error: true }; }
 }
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Cache-Control', 'no-store');
-  const rounds = parseInt(req.query.rounds || '1', 10);
-  const parallel = Math.min(parseInt(req.query.parallel || '5', 10), 40);
+  const rounds = Math.min(parseInt(req.query.rounds || '1', 10), 15);
+  const parallel = Math.min(parseInt(req.query.parallel || '10', 10), 40);
   const delay = parseInt(req.query.delay || '0', 10);
-  const q = req.query.q || '의자';  // 실제 매물 있는 키워드
+  const q = req.query.q || '브루더';
   const codes = DONGS.slice(0, parallel);
 
   const t0 = Date.now();
-  const results = [];
-  let idx = 0;
-  const workers = Array.from({ length: Math.min(parallel, codes.length) }, async () => {
-    while (idx < codes.length) {
-      const c = codes[idx++];
-      results.push(await fetchOne(c, q));
-      if (delay) await new Promise(r => setTimeout(r, delay));
-    }
-  });
-  await Promise.all(workers);
-
-  // 단일 진단 모드
-  if (req.query.single === '1') {
-    const one = await fetchOne(DONGS[0], q);
-    return res.status(200).json({ mode: 'single', q, ...one });
+  const roundStats = [];
+  for (let round = 0; round < rounds; round++) {
+    const results = [];
+    let idx = 0;
+    await Promise.all(Array.from({ length: Math.min(parallel, codes.length) }, async () => {
+      while (idx < codes.length) {
+        results.push(await fetchOne(codes[idx++], q));
+        if (delay) await new Promise(r => setTimeout(r, delay));
+      }
+    }));
+    const empty = results.filter(r => r.empty).length;
+    roundStats.push({ round: round + 1, empty, emptyRate: (empty / codes.length * 100).toFixed(0) + '%' });
   }
-  const empty = results.filter(r => r.empty).length;
-  const ok = results.length - empty;
-  const avgMs = Math.round(results.reduce((s, r) => s + (r.ms || 0), 0) / results.length);
   return res.status(200).json({
-    parallel, delay, requested: codes.length,
-    ok, empty, emptyRate: (empty / codes.length * 100).toFixed(0) + '%',
-    totalMs: Date.now() - t0, avgMs,
-    detail: results.map(r => r.empty ? (r.error ? 'ERR' : `∅${Math.round((r.bytes||0)/1000)}k${r.numItems!=null?'n'+r.numItems:''}`) : r.items).join(' '),
+    parallel, delay, rounds, perRound: codes.length,
+    totalRequests: codes.length * rounds,
+    totalMs: Date.now() - t0,
+    roundStats,
   });
 }
