@@ -196,7 +196,7 @@ main.snap{transition:transform .28s cubic-bezier(.22,1,.36,1)}
 <script>
 const API='https://browser-app-lab.vercel.app/api';
 const LS_REGIONS='dgn_regions_v1', LS_SEL='dgn_selected_v1', LS_DONGS='dgn_dongs_v1', LS_EXC='dgn_exclude_v1';
-const MAX_DONGS=200, BATCH=45;
+const MAX_DONGS=200, BATCH=20;
 
 const COORDS={
 "종로구":[37.573,126.979],"중구":[37.564,126.997],"용산구":[37.532,126.990],"성동구":[37.563,127.036],
@@ -537,6 +537,7 @@ async function search(keepView){
         }
         renderResults();
       }catch(e){ errCount++; }
+      if(b<batches.length-1) await sleep(120);   // 배치 간 간격 → 순간 밀도 완화
     }
     lastMeta={codes:codes.length, sec:((Date.now()-t0)/1000).toFixed(1), capped, err:errCount+dongFails.length};
     searching=false;
