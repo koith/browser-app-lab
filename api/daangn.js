@@ -6,7 +6,7 @@ export const config = { maxDuration: 60 };
 const UA =
   'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1';
 
-const CONCURRENCY = 8;
+const CONCURRENCY = 3;
 const MAX_REGIONS = 45;
 
 export default async function handler(req, res) {
@@ -35,6 +35,7 @@ export default async function handler(req, res) {
       } catch (e) {
         errors.push({ region, error: String(e.message || e).slice(0, 200) });
       }
+      await new Promise(r => setTimeout(r, 250 + Math.random() * 200));
     }
   }
   await Promise.all(Array.from({ length: CONCURRENCY }, worker));
@@ -47,7 +48,7 @@ export default async function handler(req, res) {
     deduped.push(it);
   }
 
-  res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=120');
+  res.setHeader('Cache-Control', 'no-store');
   return res.status(200).json({
     query: q, regionCount: regions.length, count: deduped.length,
     tookMs: Date.now() - t0, errors, items: deduped,
