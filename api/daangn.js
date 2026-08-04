@@ -6,7 +6,7 @@ export const config = { maxDuration: 60 };
 const UA =
   'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1';
 
-const CONCURRENCY = 3;
+const CONCURRENCY = 10;
 const MAX_REGIONS = 45;
 
 export default async function handler(req, res) {
@@ -35,7 +35,6 @@ export default async function handler(req, res) {
       } catch (e) {
         errors.push({ region, error: String(e.message || e).slice(0, 200) });
       }
-      await new Promise(r => setTimeout(r, 250 + Math.random() * 200));
     }
   }
   await Promise.all(Array.from({ length: CONCURRENCY }, worker));
@@ -48,7 +47,7 @@ export default async function handler(req, res) {
     deduped.push(it);
   }
 
-  res.setHeader('Cache-Control', 'no-store');
+  res.setHeader('Cache-Control', 's-maxage=30, stale-while-revalidate=30');
   return res.status(200).json({
     query: q, regionCount: regions.length, count: deduped.length,
     tookMs: Date.now() - t0, errors, items: deduped,
@@ -57,13 +56,18 @@ export default async function handler(req, res) {
 
 async function fetchRegion(q, region, onSale) {
   const url = 'https://www.daangn.com/kr/buy-sell/?in=' + encodeURIComponent(region) +
-    '&search=' + encodeURIComponent(q) + '';
-  const r = await fetch(url, {
-    headers: { 'User-Agent': UA, 'Accept-Language': 'ko-KR,ko;q=0.9', Accept: 'text/html' },
-    redirect: 'follow',
-  });
-  if (!r.ok) throw new Error(`HTTP ${r.status}`);
-  return parse(await r.text(), region);
+    '&search=' + encodeURIComponent(q);
+  // 최대 2회: 산발적 빈 응답(SSR 순간 누락) 대비 재시도
+  for (let attempt = 0; attempt < 2; attempt++) {
+    const r = await fetch(url + (attempt ? '&_r=' + Date.now() : ''), {
+      headers: { 'User-Agent': UA, 'Accept-Language': 'ko-KR,ko;q=0.9', Accept: 'text/html' },
+      redirect: 'follow',
+    });
+    if (!r.ok) { if (attempt) throw new Error(`HTTP ${r.status}`); continue; }
+    const items = parse(await r.text(), region);
+    if (items.length || attempt) return items;   // 빈 결과면 1회 더 시도
+  }
+  return [];
 }
 
 function parse(html, region) {
