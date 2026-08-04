@@ -58,14 +58,14 @@ async function fetchRegion(q, region, onSale) {
   const url = 'https://www.daangn.com/kr/buy-sell/?in=' + encodeURIComponent(region) +
     '&search=' + encodeURIComponent(q);
   // 최대 2회: 산발적 빈 응답(SSR 순간 누락) 대비 재시도
-  for (let attempt = 0; attempt < 2; attempt++) {
+  for (let attempt = 0; attempt < 3; attempt++) {
     const r = await fetch(url + (attempt ? '&_r=' + Date.now() : ''), {
       headers: { 'User-Agent': UA, 'Accept-Language': 'ko-KR,ko;q=0.9', Accept: 'text/html' },
       redirect: 'follow',
     });
-    if (!r.ok) { if (attempt) throw new Error(`HTTP ${r.status}`); continue; }
+    if (!r.ok) { if (attempt >= 2) throw new Error(`HTTP ${r.status}`); continue; }
     const items = parse(await r.text(), region);
-    if (items.length || attempt) return items;   // 빈 결과면 1회 더 시도
+    if (items.length || attempt >= 2) return items;   // 빈 결과면 최대 2회 더 시도
   }
   return [];
 }
