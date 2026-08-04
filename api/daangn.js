@@ -62,7 +62,7 @@ async function fetchRegion(q, region, onSale) {
   const url = 'https://www.daangn.com/kr/buy-sell/?in=' + encodeURIComponent(region) +
     '&search=' + encodeURIComponent(q);
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
-    const r = await fetch(url + (attempt ? '&_r=' + Date.now() + Math.random() : ''), {
+    const r = await fetch(url, {
       headers: { 'User-Agent': UA, 'Accept-Language': 'ko-KR,ko;q=0.9', Accept: 'text/html' },
       redirect: 'follow',
     });
