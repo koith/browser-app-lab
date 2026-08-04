@@ -30,6 +30,7 @@ async function fetchOne(code, q) {
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Cache-Control', 'no-store');
+  const rounds = parseInt(req.query.rounds || '1', 10);
   const parallel = Math.min(parseInt(req.query.parallel || '5', 10), 40);
   const delay = parseInt(req.query.delay || '0', 10);
   const q = req.query.q || '의자';  // 실제 매물 있는 키워드
