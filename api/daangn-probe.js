@@ -14,7 +14,7 @@ const DONGS = [
 ];
 
 async function fetchOne(code, q) {
-  const url = 'https://www.daangn.com/kr/buy-sell/?in=' + encodeURIComponent(code) + '&search=' + encodeURIComponent(q);
+  const url = 'https://www.daangn.com/kr/buy-sell/?in=' + encodeURIComponent(code) + '&search=' + encodeURIComponent(q) + '&_=' + Date.now() + Math.random();
   const t0 = Date.now();
   try {
     const r = await fetch(url, { headers: { 'User-Agent': UA, 'Accept-Language': 'ko-KR,ko;q=0.9', Accept: 'text/html' } });
@@ -29,7 +29,7 @@ export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
   const parallel = Math.min(parseInt(req.query.parallel || '5', 10), 40);
   const delay = parseInt(req.query.delay || '0', 10);
-  const q = (req.query.q || 'ㅋ') + Math.floor(Math.random() * 100000); // 캐시 회피용 유니크 검색어
+  const q = req.query.q || '의자';  // 실제 매물 있는 키워드
   const codes = DONGS.slice(0, parallel);
 
   const t0 = Date.now();
@@ -44,6 +44,11 @@ export default async function handler(req, res) {
   });
   await Promise.all(workers);
 
+  // 단일 진단 모드
+  if (req.query.single === '1') {
+    const one = await fetchOne(DONGS[0], q);
+    return res.status(200).json({ mode: 'single', q, ...one });
+  }
   const empty = results.filter(r => r.empty).length;
   const ok = results.length - empty;
   const avgMs = Math.round(results.reduce((s, r) => s + (r.ms || 0), 0) / results.length);
