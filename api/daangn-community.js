@@ -1,7 +1,7 @@
 // /api/daangn-community.js — 당근 동네생활 검색 (JSON-LD 우선)
 export const config = { maxDuration: 60 };
 const UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1';
-const CONCURRENCY = 8, MAX_REGIONS = 45;
+const CONCURRENCY = 3, MAX_REGIONS = 45;
 const dec = s => String(s || '').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/\u0000/g, '');
 
 export default async function handler(req, res) {
@@ -27,13 +27,14 @@ export default async function handler(req, res) {
         if (debug && !ldTypes) ldTypes = types;
         results.push(...items);
       } catch (e) { errors.push({ region, error: String(e.message || e).slice(0, 150) }); }
+      await new Promise(r => setTimeout(r, 250 + Math.random() * 200));
     }
   }
   await Promise.all(Array.from({ length: CONCURRENCY }, worker));
 
   const seen = new Set(), items = [];
   for (const it of results) { if (seen.has(it.url)) continue; seen.add(it.url); items.push(it); }
-  res.setHeader('Cache-Control', 's-maxage=120, stale-while-revalidate=300');
+  res.setHeader('Cache-Control', 'no-store');
   const out = { query: q, regionCount: regions.length, count: items.length, tookMs: Date.now() - t0, errors, items };
   if (debug) out.ldTypes = ldTypes;
   return res.status(200).json(out);
