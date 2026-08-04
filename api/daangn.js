@@ -26,7 +26,6 @@ export default async function handler(req, res) {
   const results = [];
   const errors = [];
 
-  const gap = ms => new Promise(r => setTimeout(r, ms));
   let idx = 0;
   async function worker() {
     while (idx < regions.length) {
@@ -36,7 +35,6 @@ export default async function handler(req, res) {
       } catch (e) {
         errors.push({ region, error: String(e.message || e).slice(0, 200) });
       }
-      await gap(60 + Math.random() * 80);   // 워커당 요청 간 간격 → 순간 밀도 하향
     }
   }
   await Promise.all(Array.from({ length: CONCURRENCY }, worker));
@@ -58,7 +56,7 @@ export default async function handler(req, res) {
 
 // 차단성 빈 페이지(데이터 미포함)는 ~157KB로 작음. 정상 결과 페이지는 매물 유무와 무관하게 크다.
 const BLOCK_PAGE_MAX = 220000;
-const MAX_ATTEMPTS = 4;
+const MAX_ATTEMPTS = 2;
 
 async function fetchRegion(q, region, onSale) {
   const url = 'https://www.daangn.com/kr/buy-sell/?in=' + encodeURIComponent(region) +
@@ -78,7 +76,7 @@ async function fetchRegion(q, region, onSale) {
     // 결과 0건: 차단성(작은 페이지)이면 재시도, 정상 페이지(큰데 0건)면 진짜 없음 → 수용
     const blocked = html.length < BLOCK_PAGE_MAX;
     if (!blocked) return items;                       // 정상 페이지의 진짜 0건
-    if (attempt >= MAX_ATTEMPTS - 1) throw new Error('empty-page');  // 끝까지 차단성
+    if (attempt >= MAX_ATTEMPTS - 1) return [];  // 끝까지 차단성이면 빈 결과로 처리
     await backoff(attempt);
   }
   return [];
