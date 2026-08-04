@@ -99,6 +99,9 @@ main.snap{transition:transform .28s cubic-bezier(.22,1,.36,1)}
   padding:16px 18px 12px;border-bottom:1px solid var(--line)}
 .sheetHead h2{font-size:16px;font-weight:800;margin:0}
 .sheetHead .cnt{font-size:13px;color:var(--carrot);font-weight:700}
+.limitBar{font-size:12.5px;font-weight:600;color:var(--sub);padding:0 18px 10px;min-height:0;transition:color .2s}
+.limitBar.warn{color:#D93A3A}
+.limitBar b{color:var(--carrot-dark)}
 .sheetBody{overflow-y:auto;padding:4px 18px 12px;-webkit-overflow-scrolling:touch}
 .provRow{display:flex;align-items:center;justify-content:space-between;margin:16px 0 8px}
 .provRow span{font-size:13.5px;font-weight:800;color:var(--ink)}
@@ -162,6 +165,7 @@ main.snap{transition:transform .28s cubic-bezier(.22,1,.36,1)}
     <h2>검색 지역</h2>
     <span class="cnt" id="sheetCnt"></span>
   </div>
+  <div id="limitBar" class="limitBar"></div>
   <div class="sheetBody" id="sheetBody"><div class="sheetLoad">지역 목록 불러오는 중...</div></div>
   <div class="sheetFoot">
     <button class="btnClear" id="btnClear">전체 해제</button>
@@ -228,6 +232,11 @@ let excAll=(()=>{ try{
 let mode='sell';
 const modeState={sell:{q:'',items:[],meta:{}},group:{q:'',items:[],meta:{}},comm:{q:'',items:[],meta:{}}};
 const excList=()=>excAll[mode];
+const AVG_DONGS=15;               // 미로딩 구의 동 수 추정치
+function dongCountOf(code){ return dongCache[code]? dongCache[code].length : AVG_DONGS; }
+function selectedDongTotal(exclude){
+  let n=0; for(const c of selected){ if(c===exclude) continue; n+=dongCountOf(c); } return n;
+}
 
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -254,6 +263,23 @@ function updateRegionChip(){
   $('sheetCnt').textContent=n?`${n}곳 선택`:'';
 }
 
+let flashTimer=null;
+function updateSheetLimit(){
+  const bar=$('limitBar'); if(!bar) return;
+  const n=selectedDongTotal();
+  const anyEstimate=[...selected].some(c=>!dongCache[c]);
+  bar.classList.remove('warn');
+  if(!selected.size){ bar.textContent=`동네 최대 ${MAX_DONGS}곳까지 선택할 수 있어요`; return; }
+  bar.innerHTML=`선택한 동네 약 <b>${n}</b> / ${MAX_DONGS}곳${anyEstimate?' (예상)':''}`;
+  if(n>MAX_DONGS*0.9) bar.classList.add('warn');
+}
+function flashLimit(msg){
+  const bar=$('limitBar'); if(!bar) return;
+  bar.textContent=msg; bar.classList.add('warn');
+  if(flashTimer) clearTimeout(flashTimer);
+  flashTimer=setTimeout(updateSheetLimit, 2200);
+}
+
 function renderSheet(){
   if(!regionsData.list.length){
     $('sheetBody').innerHTML='<div class="sheetLoad"><span class="inlineSpin"></span>지역 목록 불러오는 중...</div>';
@@ -271,18 +297,50 @@ function renderSheet(){
       `</div>`;
   }
   $('sheetBody').innerHTML=html;
-  $('sheetBody').querySelectorAll('.gu').forEach(b=>b.onclick=()=>{
+  $('sheetBody').querySelectorAll('.gu').forEach(b=>b.onclick=async ()=>{
     const c=b.dataset.code;
-    selected.has(c)?selected.delete(c):selected.add(c);
-    persistSel(); b.classList.toggle('on'); updateRegionChip();
+    if(selected.has(c)){
+      selected.delete(c); persistSel(); b.classList.toggle('on',false); updateRegionChip(); updateSheetLimit();
+      return;
+    }
+    // 추가 전 상한 검사 (이미 로드된 동 수 + 이 구 추정치)
+    const projected=selectedDongTotal()+dongCountOf(c);
+    if(projected>MAX_DONGS){
+      flashLimit(`동네 ${MAX_DONGS}곳까지만 선택할 수 있어요 (현재 약 ${selectedDongTotal()}곳)`);
+      return;
+    }
+    selected.add(c); persistSel(); b.classList.toggle('on',true); updateRegionChip(); updateSheetLimit();
+    // 실제 동 수 확보 위해 백그라운드 로드 → 확정 후 재검사
+    const r=regionsData.list.find(x=>x.code===c);
+    if(r && !dongCache[c]){
+      try{ await getDongs(r); }catch{}
+      updateSheetLimit();
+      if(selectedDongTotal()>MAX_DONGS){    // 실제 로드 결과 초과 판명되면 되돌림
+        selected.delete(c); persistSel();
+        const btn=$('sheetBody').querySelector(`.gu[data-code="${c}"]`); if(btn) btn.classList.remove('on');
+        updateRegionChip(); updateSheetLimit();
+        flashLimit(`동네 ${MAX_DONGS}곳을 넘어 마지막 선택을 해제했어요`);
+      }
+    }
   });
   $('sheetBody').querySelectorAll('.provRow button').forEach(b=>b.onclick=()=>{
     const list=(byProv[b.dataset.prov]||[]).map(r=>r.code);
     const on=list.every(c=>selected.has(c));
-    list.forEach(c=>on?selected.delete(c):selected.add(c));
-    persistSel(); renderSheet(); updateRegionChip();
+    if(on){ list.forEach(c=>selected.delete(c)); }
+    else {
+      let added=0;
+      for(const c of list){
+        if(selected.has(c)) continue;
+        if(selectedDongTotal()+dongCountOf(c)>MAX_DONGS){
+          flashLimit(`동네 ${MAX_DONGS}곳 상한으로 ${added}곳만 추가했어요`); break;
+        }
+        selected.add(c); added++;
+      }
+    }
+    persistSel(); renderSheet(); updateRegionChip(); updateSheetLimit();
   });
   updateRegionChip();
+  updateSheetLimit();
 }
 
 async function loadRegions(){
