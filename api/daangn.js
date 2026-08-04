@@ -54,20 +54,38 @@ export default async function handler(req, res) {
   });
 }
 
+// 차단성 빈 페이지(데이터 미포함)는 ~157KB로 작음. 정상 결과 페이지는 매물 유무와 무관하게 크다.
+const BLOCK_PAGE_MAX = 220000;
+const MAX_ATTEMPTS = 4;
+
 async function fetchRegion(q, region, onSale) {
   const url = 'https://www.daangn.com/kr/buy-sell/?in=' + encodeURIComponent(region) +
     '&search=' + encodeURIComponent(q);
-  // 최대 2회: 산발적 빈 응답(SSR 순간 누락) 대비 재시도
-  for (let attempt = 0; attempt < 3; attempt++) {
-    const r = await fetch(url + (attempt ? '&_r=' + Date.now() : ''), {
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    const r = await fetch(url + (attempt ? '&_r=' + Date.now() + Math.random() : ''), {
       headers: { 'User-Agent': UA, 'Accept-Language': 'ko-KR,ko;q=0.9', Accept: 'text/html' },
       redirect: 'follow',
     });
-    if (!r.ok) { if (attempt >= 2) throw new Error(`HTTP ${r.status}`); continue; }
-    const items = parse(await r.text(), region);
-    if (items.length || attempt >= 2) return items;   // 빈 결과면 최대 2회 더 시도
+    if (!r.ok) {
+      if (attempt >= MAX_ATTEMPTS - 1) throw new Error(`HTTP ${r.status}`);
+      await backoff(attempt); continue;
+    }
+    const html = await r.text();
+    const items = parse(html, region);
+    if (items.length) return items;
+    // 결과 0건: 차단성(작은 페이지)이면 재시도, 정상 페이지(큰데 0건)면 진짜 없음 → 수용
+    const blocked = html.length < BLOCK_PAGE_MAX;
+    if (!blocked || attempt >= MAX_ATTEMPTS - 1) {
+      if (blocked) throw new Error('empty-page');   // 끝까지 차단성이면 실패로 카운트
+      return items;                                  // 진짜 0건
+    }
+    await backoff(attempt);
   }
   return [];
+}
+
+function backoff(attempt) {
+  return new Promise(r => setTimeout(r, 150 * (attempt + 1) + Math.random() * 150));
 }
 
 function parse(html, region) {
