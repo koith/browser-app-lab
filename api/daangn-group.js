@@ -2,7 +2,7 @@
 // GET /api/daangn-group?q=등산&regions=서초동-6128,...[&debug=1]
 export const config = { maxDuration: 60 };
 const UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1';
-const CONCURRENCY = 3, MAX_REGIONS = 45;
+const CONCURRENCY = 10, MAX_REGIONS = 45;
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -33,7 +33,6 @@ export default async function handler(req, res) {
         }
         results.push(...parse(html, region));
       } catch (e) { errors.push({ region, error: String(e.message || e).slice(0, 150) }); }
-      await new Promise(r => setTimeout(r, 250 + Math.random() * 200));
     }
   }
   await Promise.all(Array.from({ length: CONCURRENCY }, worker));
@@ -41,7 +40,7 @@ export default async function handler(req, res) {
   const seen = new Set(), items = [];
   for (const it of results) { if (seen.has(it.url)) continue; seen.add(it.url); items.push(it); }
 
-  res.setHeader('Cache-Control', 'no-store');
+  res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=120');
   const out = { query: q, regionCount: regions.length, count: items.length, tookMs: Date.now() - t0, errors, items };
   if (debug) out.snippet = snippet;
   return res.status(200).json(out);
