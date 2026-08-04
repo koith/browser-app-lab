@@ -47,7 +47,7 @@ export default async function handler(req, res) {
     deduped.push(it);
   }
 
-  res.setHeader('Cache-Control', 's-maxage=30, stale-while-revalidate=30');
+  res.setHeader('Cache-Control', 'no-store');
   return res.status(200).json({
     query: q, regionCount: regions.length, count: deduped.length,
     tookMs: Date.now() - t0, errors, items: deduped,
@@ -75,10 +75,8 @@ async function fetchRegion(q, region, onSale) {
     if (items.length) return items;
     // 결과 0건: 차단성(작은 페이지)이면 재시도, 정상 페이지(큰데 0건)면 진짜 없음 → 수용
     const blocked = html.length < BLOCK_PAGE_MAX;
-    if (!blocked || attempt >= MAX_ATTEMPTS - 1) {
-      if (blocked) throw new Error('empty-page');   // 끝까지 차단성이면 실패로 카운트
-      return items;                                  // 진짜 0건
-    }
+    if (!blocked) return items;                       // 정상 페이지의 진짜 0건
+    if (attempt >= MAX_ATTEMPTS - 1) throw new Error('empty-page');  // 끝까지 차단성
     await backoff(attempt);
   }
   return [];
