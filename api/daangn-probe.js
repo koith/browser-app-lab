@@ -20,7 +20,10 @@ async function fetchOne(code, q) {
     const r = await fetch(url, { headers: { 'User-Agent': UA, 'Accept-Language': 'ko-KR,ko;q=0.9', Accept: 'text/html' } });
     const html = await r.text();
     const items = [...new Set([...html.matchAll(/href="(?:https?:\/\/www\.daangn\.com)?\/kr\/buy-sell\/(?!s\/)(?!\?)[^"?#]+\//g)])].length;
-    return { code, ms: Date.now() - t0, bytes: html.length, items, empty: items === 0 };
+    // 차단성 빈 페이지는 크기가 작음(~156KB), 정상 검색결과 페이지는 큼(~360KB+)
+    // numberOfItems가 명시적으로 0이면 '진짜 결과 없음'
+    const numItems = (html.match(/"numberOfItems"\s*:\s*(\d+)/) || [])[1];
+    return { code, ms: Date.now() - t0, bytes: html.length, items, numItems: numItems!=null?+numItems:null, empty: items === 0 };
   } catch (e) { return { code, error: String(e.message || e).slice(0, 60), empty: true }; }
 }
 
@@ -56,6 +59,6 @@ export default async function handler(req, res) {
     parallel, delay, requested: codes.length,
     ok, empty, emptyRate: (empty / codes.length * 100).toFixed(0) + '%',
     totalMs: Date.now() - t0, avgMs,
-    detail: results.map(r => r.empty ? (r.error ? 'ERR' : '∅') : r.items).join(' '),
+    detail: results.map(r => r.empty ? (r.error ? 'ERR' : `∅${Math.round((r.bytes||0)/1000)}k${r.numItems!=null?'n'+r.numItems:''}`) : r.items).join(' '),
   });
 }
