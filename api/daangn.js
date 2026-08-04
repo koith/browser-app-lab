@@ -6,7 +6,7 @@ export const config = { maxDuration: 60 };
 const UA =
   'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1';
 
-const CONCURRENCY = 10;
+const CONCURRENCY = 5;
 const MAX_REGIONS = 45;
 
 export default async function handler(req, res) {
@@ -26,6 +26,7 @@ export default async function handler(req, res) {
   const results = [];
   const errors = [];
 
+  const gap = ms => new Promise(r => setTimeout(r, ms));
   let idx = 0;
   async function worker() {
     while (idx < regions.length) {
@@ -35,6 +36,7 @@ export default async function handler(req, res) {
       } catch (e) {
         errors.push({ region, error: String(e.message || e).slice(0, 200) });
       }
+      await gap(60 + Math.random() * 80);   // 워커당 요청 간 간격 → 순간 밀도 하향
     }
   }
   await Promise.all(Array.from({ length: CONCURRENCY }, worker));
