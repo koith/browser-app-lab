@@ -565,6 +565,19 @@ body.theme-b .foot{
   padding-bottom:calc(8px + env(safe-area-inset-bottom))
 }
 
+
+body.theme-b .pickh{font-size:42px;letter-spacing:-.04em;margin:8px 0 12px}
+body.theme-b .pickp{font-size:23px;margin-bottom:28px}
+body.theme-b .pickcard{
+  border:none;border-radius:22px;background:var(--card);
+  box-shadow:var(--shadow-sm);padding:28px 24px;margin-bottom:14px
+}
+body.theme-b .pickcard:active{background:var(--act-pale);border:none;transform:scale(.99)}
+body.theme-b .pickcard:active .pt{color:var(--act)}
+body.theme-b .pickcard:active .ps{color:var(--ink-2)}
+body.theme-b .pickcard .pt{font-size:33px;letter-spacing:-.03em}
+body.theme-b .pickcard .ps{font-size:22px}
+
 /* 토글 */
 .themetoggle{
   position:fixed;top:calc(14px + env(safe-area-inset-top));right:14px;z-index:200;
@@ -2696,7 +2709,7 @@ function diagnose(profile){
 }
 
 /* ---------- 화면 ---------- */
-var state={idx:0,profile:{},history:[],started:false};
+var state={idx:0,profile:{},history:[],started:false,track:null};
 var app=document.getElementById('app');
 var esc=function(s){var d=document.createElement('div');d.textContent=s;return d.innerHTML};
 
@@ -2757,6 +2770,7 @@ function renderTitle(){
       '<h1>받을 수 있는<br>도움 찾기</h1>'+
       '<p>약 1분이면<br>받을 수 있는 복지를 찾아드립니다</p>'+
     '</div>';
+  var COUNT = state.track==='low' ? (LOW_PROGRAMS?LOW_PROGRAMS.length:10) : PROGRAMS.length;
 
   if(stale>=6){
     h+='<div class="stale">이 정보는 '+stale+'개월 전에 확인한 것입니다. '+
@@ -2768,7 +2782,7 @@ function renderTitle(){
      '<div class="stepline"><i>2</i>받을 수 있는 것 보기</div>'+
      '<div class="stepline"><i>3</i>전화로 신청하기</div>'+
      '</div>'+
-     '<div class="cover">지원사업 '+PROGRAMS.length+'가지를 담았습니다.<br>'+
+     '<div class="cover">지원사업 '+COUNT+'가지를 담았습니다.<br>'+
      '이것이 전부는 아닙니다.<br>'+
      '더 궁금하시면 영등포구청<br>02-2670-3408<br><br>'+
      '확인일 '+DATA_CHECKED.replace(/-/g,'. ')+'</div>'+
@@ -2784,18 +2798,121 @@ function renderTitle(){
 }
 
 function visibleQuestions(){
+  if(state.track==='low') return lowVisibleQuestions();
   return QUESTIONS.filter(function(q){
     if(!q.showIf) return true;
     return state.profile[q.showIf.f]===q.showIf.v;
   });
 }
 
+/* ══════════ 대상 선택 + 저소득 트랙 ══════════ */
+var MEDIAN_2026={1:2564238,2:4147831,3:5312575,4:6494738,5:7595261,6:8653835};
+var LOW_PROGRAMS=null;
+
+function loadLowPrograms(cb){
+  if(LOW_PROGRAMS){ cb(); return; }
+  fetch('lowincome-programs.json?v='+Date.now())
+    .then(function(r){return r.json()})
+    .then(function(d){ LOW_PROGRAMS=d.programs; cb(); })
+    .catch(function(){ LOW_PROGRAMS=LOW_FALLBACK; cb(); });
+}
+
+/* 가구원수 + 소득구간 → 기준선 대비 비율로 판정.
+   확정하지 않고 경계에서는 무조건 신청 쪽으로 민다. */
+function lowBandRatio(size, band){
+  /* band: 소득 구간 인덱스. 가구 기준 중위소득 대비 위치 */
+  var med=MEDIAN_2026[size]||MEDIAN_2026[4];
+  /* band별 대표 비율(중위소득 대비): 0=거의없음 ~ 5=중위이상 */
+  var reps=[0.15,0.30,0.42,0.55,0.75,1.05];
+  return reps[band];
+}
+
+var LOW_QUESTIONS=[
+  { id:'household', field:'hsize', type:'choice',
+    q:'가족이 모두 몇 명인가요?',
+    hint:'함께 살며 생계를 같이하는 사람 수입니다.',
+    opts:[{t:'혼자 삽니다',v:1},{t:'2명',v:2},{t:'3명',v:3},
+          {t:'4명',v:4},{t:'5명 이상',v:5}] },
+  { id:'income', field:'iband', type:'choice',
+    q:'한 달 소득이 대략 얼마인가요?',
+    hint:'월급, 사업 수입, 연금을 모두 합친 금액입니다. 정확하지 않아도 됩니다.',
+    dynamic:true },
+  { id:'workable', field:'workable', type:'choice',
+    q:'일을 하실 수 있는 상태인가요?',
+    opts:[{t:'일할 수 있습니다',v:true},{t:'몸이 아파 어렵습니다',v:false},
+          {t:'잘 모르겠습니다',v:'unknown'}] },
+  { id:'child', field:'has_child', type:'choice',
+    q:'초·중·고 다니는 자녀가 있나요?',
+    opts:[{t:'있습니다',v:true},{t:'없습니다',v:false}] },
+  { id:'crisis', field:'in_crisis', type:'choice',
+    q:'최근 갑자기 형편이 크게 나빠졌나요?',
+    hint:'실직, 폐업, 큰 병, 이혼 같은 일이 있었는지 여쭙는 것입니다.',
+    opts:[{t:'네, 그런 일이 있었습니다',v:true},{t:'아니요',v:false}] }
+];
+
+/* 소득 구간 선택지를 가구원수에 맞춰 동적 생성 */
+function incomeOptions(size){
+  var med=MEDIAN_2026[size]||MEDIAN_2026[4];
+  function man(x){ return Math.round(med*x/10000); }
+  return [
+    {t:'거의 없습니다',v:0},
+    {t:'약 '+man(0.32)+'만원 아래',v:1},
+    {t:'약 '+man(0.32)+'~'+man(0.48)+'만원',v:2},
+    {t:'약 '+man(0.48)+'~'+man(0.65)+'만원',v:3},
+    {t:'약 '+man(0.65)+'~'+man(1.0)+'만원',v:4},
+    {t:'그보다 많습니다',v:5}
+  ];
+}
+
+function lowVisibleQuestions(){
+  return LOW_QUESTIONS.filter(function(q){
+    if(q.id==='child'){
+      /* 자녀 질문은 소득이 중위 50% 이하 구간일 때만 */
+      return (state.profile.iband!==undefined && state.profile.iband<=3);
+    }
+    return true;
+  });
+}
+
+function renderPicker(){
+  window.scrollTo(0,0);
+  var h='<div class="picker">'+
+    '<h1 class="pickh">어떤 분을 위한<br>복지를 찾으세요?</h1>'+
+    '<p class="pickp">해당하는 것을 눌러 주세요.</p>'+
+    '<button class="pickcard" id="pick-senior">'+
+      '<span class="pt">어르신</span>'+
+      '<span class="ps">65세 이상 어르신을 위한 복지</span>'+
+    '</button>'+
+    '<button class="pickcard" id="pick-low">'+
+      '<span class="pt">형편이 어려운 분</span>'+
+      '<span class="ps">생계·의료·주거 등 기초생활 지원</span>'+
+    '</button>'+
+    '</div>';
+  app.innerHTML=h;
+  document.getElementById('pick-senior').onclick=function(){
+    tick(this); state.track='senior';
+    setTimeout(function(){ state.started=true; render(); },160);
+  };
+  document.getElementById('pick-low').onclick=function(){
+    tick(this);
+    loadLowPrograms(function(){
+      state.track='low';
+      setTimeout(function(){ state.started=true; render(); },160);
+    });
+  };
+}
+
 function render(){
+  if(!state.track){ renderPicker(); return; }
   if(!state.started){ renderTitle(); return; }
   window.scrollTo(0,0);
   var list=visibleQuestions();
   if(state.idx>=list.length){ renderResult(); return; }
   var q=list[state.idx];
+  /* 저소득 트랙의 소득 질문은 가구원수에 따라 선택지가 달라진다 */
+  if(q.dynamic && q.id==='income'){
+    q=Object.assign({}, q, {opts:incomeOptions(state.profile.hsize||1)});
+  }
   var pct=Math.round(state.idx/list.length*100);
 
   var h='';
@@ -2956,7 +3073,96 @@ function card(item,kind,n){
   return h;
 }
 
+/* 저소득 트랙 판정.
+   확정 판정을 피하고 3구간으로 안내: 높음 / 경계 / 다른지원.
+   경계에서는 반드시 신청을 권한다. */
+function lowDiagnose(profile){
+  var size=profile.hsize||1;
+  var band=profile.iband; if(band===undefined) band=2;
+  var ratio=lowBandRatio(size, band);
+  var strong=[], maybe=[], other=[];
+  LOW_PROGRAMS.forEach(function(p){
+    var th=p.threshold||0.5;
+    /* 위기 상황 프로그램은 별도 처리 */
+    if(p.crisis){
+      if(profile.in_crisis===true) strong.push({p:p});
+      else other.push({p:p});
+      return;
+    }
+    /* 자녀·한부모 조건 */
+    if(p.id==='li-education' && profile.has_child!==true){ other.push({p:p}); return; }
+    /* 근로능력 필요한 자활 */
+    if(p.id==='li-selfsupport' && profile.workable===false){ other.push({p:p}); return; }
+    /* 소득 비교: 경계(±0.12)에서는 maybe */
+    if(ratio <= th - 0.08) strong.push({p:p});
+    else if(ratio <= th + 0.12) maybe.push({p:p});
+    else other.push({p:p});
+  });
+  return {strong:strong, maybe:maybe, other:other, ratio:ratio, size:size};
+}
+
+function renderLowResult(){
+  var r=lowDiagnose(state.profile);
+  var total=r.strong.length+r.maybe.length;
+  var h='<div class="rtop"><h1><em>'+total+'</em>가지를 찾았습니다</h1>'+
+        '<p>형편에 맞는 지원을<br>모았습니다.</p></div>';
+
+  h+='<div class="summary">'+
+     (r.strong.length?'<div class="srow"><span>받을 가능성 높음</span><b>'+r.strong.length+'개</b></div>':'')+
+     (r.maybe.length?'<div class="srow"><span>확인이 필요함</span><b>'+r.maybe.length+'개</b></div>':'')+
+     '</div>';
+
+  /* 안내 배너: 정확 판정이 아님을 명확히 */
+  h+='<div class="warn" style="margin-bottom:30px">여기 결과는 대략 짐작한 것입니다. '+
+     '실제 자격은 재산·부양가족에 따라 달라지니, '+
+     '되는지 애매해도 꼭 전화해서 물어보세요.</div>';
+
+  var n=0;
+  function card2(item, kind){
+    var p=item.p; n++;
+    var badge = kind==='strong'
+      ? '<span class="badge b-ok">받을 가능성 높음</span>'
+      : '<span class="badge b-wait">상담 추천</span>';
+    var hh='<div class="card">'+badge+
+      '<h2>'+catIcon(p.category)+esc(p.name)+'</h2>'+
+      '<p class="sum">'+esc(p.summary)+'</p>'+
+      telUI(p.tel, p.org)+
+      '<details class="more"><summary>자세히 보기</summary><div class="mbody">'+
+        '<div class="row"><b>받는 것</b><span>'+esc(p.benefit)+'</span></div>'+
+        '<div class="row"><b>신청 방법</b><span>'+esc(p.how)+'</span></div>'+
+        '<div class="row"><b>신청 시기</b><span>'+esc(p.when)+'</span></div>';
+    if(p.notes) p.notes.forEach(function(t){ hh+='<div class="note">'+esc(t)+'</div>'; });
+    hh+='</div></details></div>';
+    return hh;
+  }
+
+  if(r.strong.length){
+    h+='<div class="sec"><div class="seclead">받을 가능성이 높은 지원</div>';
+    r.strong.forEach(function(i){ h+=card2(i,'strong'); });
+    h+='</div>';
+  }
+  if(r.maybe.length){
+    h+='<div class="sec"><div class="seclead">확인이 필요한 지원</div>';
+    r.maybe.forEach(function(i){ h+=card2(i,'maybe'); });
+    h+='</div>';
+  }
+  if(r.other.length){
+    h+='<details class="skip"><summary>지금은 어려워 보이는 지원 '+r.other.length+'개</summary>';
+    r.other.forEach(function(i){
+      h+='<div class="mini">'+esc(i.p.name)+'<br><small>소득·조건이 맞지 않을 수 있지만, 확실치 않으면 문의해 보세요</small></div>';
+    });
+    h+='</details>';
+  }
+
+  h+='<button class="restart" id="again">처음부터 다시</button>';
+  h+='<div class="foot">이 결과는 참고용입니다. 정확한 자격은 주민센터(129)에서 확인하세요.<br>확인일 '+DATA_CHECKED.replace(/-/g,'. ')+'</div>';
+
+  app.innerHTML=h;
+  wireResult();
+}
+
 function renderResult(){
+  if(state.track==='low'){ renderLowResult(); return; }
   var r=diagnose(state.profile);
   var now=r.eligible.length+r.maybe.length;
 
@@ -3062,9 +3268,13 @@ function renderResult(){
      '2026년 7월 확인<br>영등포구청 · 보건복지부 · 서울시 자료</div>';
 
   app.innerHTML=h;
+  wireResult();
+}
+
+function wireResult(){
   document.getElementById('again').onclick=function(){
     if(!confirm('처음부터 다시 시작할까요?')) return;
-    tick(this); state={idx:0,profile:{},history:[],started:false}; render();
+    tick(this); state={idx:0,profile:{},history:[],started:false,track:null}; render();
   };
   document.querySelectorAll('details').forEach(function(d){
     d.addEventListener('toggle',function(){
