@@ -30,16 +30,17 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Cache-Control', 'no-store');
   const q = req.query.q || '브루더';
-  const delay = parseInt(req.query.delay || '0', 10);   // 순차 요청 간 지연
-  const n = Math.min(parseInt(req.query.n || '60', 10), DONGS.length);
+  const n = Math.min(parseInt(req.query.n || '40', 10), DONGS.length);
+  const chunk = parseInt(req.query.chunk || '0', 10);
+  const pause = parseInt(req.query.pause || '0', 10);
 
   const seq = [];
   let firstEmptyAt = null;
   for (let i = 0; i < n; i++) {
     const items = await fetchOne(DONGS[i], q);
     seq.push(items);
-    if (items === 0 && firstEmptyAt === null) firstEmptyAt = i + 1;   // 1-based
-    if (delay) await new Promise(r => setTimeout(r, delay));
+    if (items === 0 && firstEmptyAt === null) firstEmptyAt = i + 1;
+    if (chunk && pause && (i + 1) % chunk === 0) await new Promise(r => setTimeout(r, pause));
   }
   const emptyCount = seq.filter(x => x === 0).length;
   return res.status(200).json({
