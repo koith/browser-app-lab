@@ -1,0 +1,275 @@
+name: SeniorWelfare one-time data refresh
+
+on:
+  push:
+    paths:
+      - '.github/workflows/senior-welfare-data-refresh.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Patch verified welfare data and embedded fallbacks
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, re, pathlib
+          root = pathlib.Path('apps/SeniorWelfare')
+          pjson = root/'programs-live.json'
+          lowjson = root/'lowincome-programs.json'
+          indexp = root/'index.html'
+
+          data = json.loads(pjson.read_text(encoding='utf-8'))
+          data['checked_at'] = '2026-09-12'
+          by = {p['id']: p for p in data['programs']}
+
+          def setp(pid, **kw):
+              p = by[pid]
+              p.update(kw)
+              return p
+
+          # 서울시 공식 2026 서울형 통합돌봄 / 안심돌봄120
+          p=setp('integrated-care',
+              name='서울형 통합돌봄 (안심돌봄120)',
+              org='서울시 / 거주지 동주민센터', tel='1668-0120',
+              benefit='보건의료·건강·장기요양·일상돌봄·주거 5개 분야 58개 서비스 연계',
+              how='안심돌봄120(1668-0120)으로 상담하거나 동주민센터에 신청. 본인·가족 신청이 가능하고 긴급하면 자치구가 직권 신청할 수 있습니다',
+              notes=['2026년 서울형 통합돌봄은 돌봄이 필요한 노인을 중심으로 시행됩니다.', '안심돌봄120은 돌봄이 필요한 서울시민 누구나 상담할 수 있습니다.', '안심돌봄120 운영시간은 평일 09:00~18:00이며 야간·공휴일 접수는 다음 영업일에 연락합니다.'],
+              conf='verified')
+
+          # 과거 찾아가는 동주민센터의 특정 연령 자동방문 단정 제거
+          p=setp('visiting-dong',
+              summary='동주민센터 복지 담당자가 상황을 확인하고 필요한 복지·건강 서비스를 연결해 드립니다.',
+              benefit='복지상담 및 필요한 건강·돌봄 서비스 연계',
+              how="거주지 동주민센터에 전화해 방문상담이나 복지상담을 요청하세요",
+              notes=['동별 운영 방식과 방문 대상은 달라질 수 있습니다.', '거동이 어렵다면 방문상담이 가능한지 먼저 요청해 보세요.'],
+              conf='partial')
+
+          # 2026 노인역량활용사업 보수 확인
+          setp('job-service', benefit='월 761,040원 (월 60시간·주 15시간 기준, 공고별 세부조건 확인)', conf='verified')
+
+          # 보건복지부 노인맞춤돌봄 공식 선정 축 반영
+          p=setp('care-custom',
+              org='거주지 동주민센터 / 수행기관', tel='129',
+              how='거주지 동주민센터에서 신청하면 방문조사 후 대상 여부를 결정합니다',
+              notes=['만 65세 이상 기초생활수급자·차상위계층·기초연금수급자 등 가운데 돌봄이 필요한 분을 조사해 선정합니다.', '장기요양 등 유사 재가서비스 이용자는 중복 제한이 있을 수 있습니다.'],
+              rules={'op':'AND','rules':[
+                  {'f':'age','op':'>=','v':65}, {'f':'residence_gu','op':'==','v':True},
+                  {'f':'ltc_grade','op':'in','v':[None]},
+                  {'op':'OR','rules':[
+                      {'f':'basic_pension','op':'in','v':[True,'unknown']},
+                      {'f':'livelihood_benefit','op':'==','v':True},
+                      {'f':'medical_benefit','op':'==','v':True},
+                      {'f':'near_poor','op':'==','v':True}]},
+                  {'op':'OR','rules':[
+                      {'f':'living_alone','op':'==','v':True},
+                      {'f':'care_need','op':'==','v':True},
+                      {'f':'mobility','op':'in','v':['assisted','homebound']}]}]},
+              conf='verified')
+
+          # 영등포구 공식 급식 기준: 경로식당 60+, 재가배달은 거동불편 65+ 저소득 중심
+          p=setp('meal',
+              summary='형편이 어렵고 식사를 거를 우려가 있는 어르신께 경로식당 등에서 식사를 지원합니다.',
+              benefit='경로식당 무료급식 등(수행기관별 운영)',
+              how='동주민센터 또는 영등포노인종합복지관에 대상 여부를 문의하세요',
+              rules={'op':'AND','rules':[
+                  {'f':'age','op':'>=','v':60},{'f':'residence_gu','op':'==','v':True},
+                  {'f':'mobility','op':'in','v':['independent','assisted']},
+                  {'op':'OR','rules':[
+                      {'f':'livelihood_benefit','op':'==','v':True},
+                      {'f':'medical_benefit','op':'==','v':True},
+                      {'f':'near_poor','op':'==','v':True}]}]},
+              notes=['영등포구 공식 사업안내에서 경로식당은 60세 이상 저소득 어르신을 대상으로 운영합니다.', '세부 선정과 이용 장소는 수행기관에서 확인합니다.'],
+              conf='partial')
+
+          p=setp('meal-delivery',
+              summary='거동이 불편하고 식사를 거를 우려가 있는 저소득 어르신께 집으로 식사를 배달합니다.',
+              benefit='재가 어르신 식사배달(수행기관별 횟수·요일 상이)',
+              rules={'op':'AND','rules':[
+                  {'f':'age','op':'>=','v':65},{'f':'residence_gu','op':'==','v':True},
+                  {'f':'mobility','op':'in','v':['homebound','assisted']},
+                  {'op':'OR','rules':[
+                      {'f':'livelihood_benefit','op':'==','v':True},
+                      {'f':'medical_benefit','op':'==','v':True},
+                      {'f':'near_poor','op':'==','v':True}]}]},
+              notes=['거동이 불편한 65세 이상 저소득 어르신을 중심으로 선정합니다.', '배달 횟수와 수행기관은 현재 운영계획에 따라 달라질 수 있습니다.'],
+              conf='partial')
+
+          p=setp('banchan',
+              summary='거동이 불편하고 식사를 챙기기 어려운 저소득 어르신께 밑반찬을 배달합니다.',
+              benefit='밑반찬 배달(수행기관별 일정 상이)',
+              notes=['영등포구 공식 사업안내에서 거동이 불편한 65세 이상 저소득 어르신을 대상으로 확인됩니다.', '최신 배달 요일과 선정인원은 수행기관에 따라 달라질 수 있습니다.'],
+              conf='partial')
+
+          # 폐지된 지역서비스는 추천 데이터에서 제거
+          data['programs'] = [p for p in data['programs'] if p['id'] not in {'counsel','50plus'}]
+          by = {p['id']: p for p in data['programs']}
+
+          # 긴급복지는 기존 수급여부 자체가 자격조건이 아니므로 잘못된 제한 제거
+          p=by['emergency-support']
+          p.update(
+              summary='실직·중한 질병·가정폭력·화재 등 갑작스러운 위기로 생계가 어려울 때 신속히 생계·의료·주거 등을 지원합니다.',
+              tel='129',
+              how='위기 상황이면 129 또는 거주지 동주민센터에 즉시 요청하세요',
+              rules={'op':'AND','rules':[{'f':'residence_gu','op':'==','v':True}]},
+              notes=['2026년 소득기준은 기준중위소득 75% 이하이며 재산·금융재산 기준도 함께 봅니다.', '기존 생계·의료급여 수급 여부만으로 자격을 판단하는 제도가 아닙니다.', '긴급지원 상담은 129에서 24시간 가능합니다.'],
+              conf='verified')
+
+          # 치매안심센터 실제 연락처
+          p=by['dementia-check']
+          p.update(tel='02-831-0855', org='영등포구 치매안심센터',
+                   how='영등포구 치매안심센터(02-831-0855~8)에 전화하거나 방문하세요', conf='verified')
+
+          # 2025-26 영등포구 공식 예방접종 연락처 + 국가 폐렴구균 기준
+          p=by['vaccine']
+          p.update(tel='02-2670-4879',
+              benefit='65세 이상 인플루엔자 및 폐렴구균(PPSV23) 국가예방접종',
+              how='지정 의료기관에서 신분증을 지참해 접종하세요. 영등포구 생활건강과 문의 02-2670-4879',
+              notes=['독감은 매년 국가접종 일정에 맞춰 접종합니다.', '폐렴구균은 65세 이상 PPSV23 1회 지원이 원칙이며 과거 접종력에 따라 접종 여부가 달라질 수 있습니다.'],
+              conf='verified')
+
+          # 2026 보건복지부 개안수술 지원
+          p=by['eye-surgery']
+          p.update(org='주소지 보건소 / 한국실명예방재단', tel='070-7542-3714',
+              benefit='백내장·망막질환·녹내장 등 개안수술비 지원',
+              how='수술 전에 주소지 관할 보건소에 신청하세요. 한국실명예방재단 070-7542-3714에서도 안내합니다',
+              notes=['만 60세 이상 수술 필요 안질환자 중 기초생활수급자·차상위계층·한부모가족 지원대상자가 대상입니다.', '지원 결정 전에 발생한 수술비는 지원되지 않을 수 있으므로 반드시 수술 전에 신청하세요.'],
+              conf='verified')
+
+          # 서울복지포털 재가노인지원서비스
+          p=by['seoul-home-care']
+          p.update(org='서울시 재가노인지원서비스센터 / 자치구', tel='02-2133-7389',
+              benefit='일상생활지원·정서지원·위기예방·안전지원·사례관리',
+              how='재가노인지원서비스 수행시설 또는 자치구에 신청·상담하세요',
+              notes=['기준중위소득 150% 이하 만 60세 이상 중 재가노인지원이 필요한 어르신이 대상입니다.', '선정 우선순위는 기초생활수급자, 차상위계층, 기준중위소득 150% 이하 순입니다.'],
+              conf='verified')
+
+          # 장제급여 2026 공식 금액 및 대상
+          p=by['funeral-support']
+          p.update(tel='129', benefit='사망자 1구당 80만원',
+              how='실제로 장제를 실시한 사람이 거주지 동주민센터에 신청합니다',
+              rules={'op':'AND','rules':[{'f':'residence_gu','op':'==','v':True}]},
+              notes=['기초 생계·의료·주거급여 수급자가 사망한 경우 장제를 실제 실시한 사람에게 지급합니다.', '2026년 장제급여는 1구당 80만원입니다.'],
+              conf='verified')
+
+          # 현행 영등포 AI 안부확인 방향으로 설명 교정
+          p=by['smart-safety']
+          p.update(name='AI 안부확인·고독사 예방 서비스',
+              summary='고립 위험이 있는 분께 AI가 정기적으로 안부전화를 하고, 위험 신호가 있으면 담당자가 확인합니다.',
+              benefit='AI 안부전화 및 위험신호 발생 시 담당자 확인·연계',
+              how='거주지 동주민센터에 고독사 예방·안부확인 서비스 대상 여부를 문의하세요',
+              notes=['영등포구는 AI 안부전화 등 고립위험가구 안전확인 사업을 운영하고 있습니다.', '세부 대상과 연락 주기는 동별·사업별로 달라질 수 있습니다.'],
+              conf='partial')
+
+          # 영등포구사회복지협의회 현행 푸드뱅크·마켓
+          p=by['foodbank']
+          p.update(org='영등포구사회복지협의회 잇다푸드뱅크·마켓', tel='02-846-1377',
+              benefit='기부 식품·생활용품 제공(심의 후 이용)',
+              how='푸드뱅크 또는 구청·동주민센터에서 상담 신청 후 심의를 거쳐 이용합니다',
+              rules={'op':'AND','rules':[
+                  {'f':'residence_gu','op':'==','v':True},
+                  {'op':'OR','rules':[
+                      {'f':'livelihood_benefit','op':'==','v':True},
+                      {'f':'medical_benefit','op':'==','v':True},
+                      {'f':'near_poor','op':'==','v':True}]}]},
+              notes=['푸드뱅크 02-846-1377, 푸드마켓 1호점 02-2632-1377, 2호점 02-843-1377, 3호점 02-846-1377.', '긴급지원대상·수급탈락·차상위 등 복지소외계층을 심의해 지원합니다.'],
+              conf='verified')
+
+          # 2026 영등포 안심 집수리 공고로 교정
+          p=by['home-repair']
+          p.update(name='안심 집수리 보조사업',
+              summary='노후 저층주택의 성능·안전·편의 개선 공사비 일부를 지원하는 공모형 사업입니다.',
+              org='영등포구 주택과',
+              benefit='취약가구 등 조건 충족 시 집수리 공사비 보조(공고별 한도 적용)',
+              period='연도별 공고 기간',
+              how='영등포구의 해당 연도 안심 집수리 보조사업 공고 기간에 신청합니다',
+              when='2026년 접수 3월 20~27일 종료 · 다음 공고 확인', season=[3],
+              notes=['연중 상시 주민센터 수리 서비스가 아니라 공고형 보조사업입니다.', '주택 노후도·주택 유형·가구요건과 공사 항목을 심사합니다.'],
+              conf='verified')
+
+          # 장기요양/복지용구 현행 국가기준
+          by['long-term-care-insurance-reduce']['conf']='verified'
+          by['welfare-device']['conf']='verified'
+          by['denture-implant']['conf']='verified'
+
+          # 노인학대 24시간 1577-1389 현행 확인
+          p=by['senior-protection']
+          p.update(org='서울남부노인보호전문기관', tel='1577-1389', conf='verified')
+
+          # 복지멤버십은 노인 전용/60세 이상 제도가 아님
+          p=by['welfare-membership']
+          p.update(summary='한 번 가입하면 나이·가구·경제상황 변화에 따라 받을 가능성이 있는 복지서비스를 찾아 안내합니다.',
+              rules={'op':'AND','rules':[{'f':'age','op':'>=','v':0}]},
+              notes=['대한민국 국민은 연령과 관계없이 가입 신청할 수 있습니다.', '한 번 가입하면 생애 변화나 신규 제도 도입 때 받을 가능성이 있는 서비스를 안내합니다.'],
+              conf='verified')
+
+          # 영등포구 현행 효행장려 조례
+          p=by['centenarian-support']
+          p.update(name='효행장려금 (100세 이상 부모 부양)',
+              summary='영등포구에서 주민등록과 실제 거주를 함께 하는 만 100세 이상 부모 등을 부양하면 효행장려금을 신청할 수 있습니다.',
+              benefit='연 20만원 이내(예산 범위)',
+              how='부양자가 거주지 관할 동주민센터에 신청서를 제출합니다',
+              rules={'op':'AND','rules':[{'f':'age','op':'>=','v':100},{'f':'residence_gu','op':'==','v':True}]},
+              notes=['부양대상자인 100세 이상 부모 등과 부양자가 영등포구에서 주민등록을 함께 하고 실제 거주해야 합니다.', '지원 여부는 신청 후 주민등록 및 실제 부양관계를 확인해 결정합니다.'],
+              conf='verified')
+
+          # JSON 저장
+          pjson.write_text(json.dumps(data, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
+
+          # 저소득 데이터 확인일 갱신 (프로그램 값은 선행 커밋의 공식 교정값 유지)
+          low = json.loads(lowjson.read_text(encoding='utf-8'))
+          low['checked_at']='2026-09-12'
+          lowjson.write_text(json.dumps(low, ensure_ascii=False, indent=2)+'\n', encoding='utf-8')
+
+          # index.html: senior fallback을 JSON과 동일하게 동기화
+          html=indexp.read_text(encoding='utf-8')
+          arr=json.dumps(data['programs'], ensure_ascii=False, indent=1)
+          html, n = re.subn(r'var PROGRAMS\s*=\s*\[.*?\n\];', 'var PROGRAMS = '+arr+';', html, count=1, flags=re.S)
+          if n != 1:
+              raise SystemExit('PROGRAMS fallback replacement failed')
+
+          # 데이터 확인일 및 2026 기준중위소득(선행 JSON 교정값) 동기화
+          html, n2 = re.subn(r"var DATA_CHECKED='[^']+';", "var DATA_CHECKED='2026-09-12';", html, count=1)
+          if n2 != 1: raise SystemExit('DATA_CHECKED replacement failed')
+          correct_med='var MEDIAN_2026={1:2564238,2:4199292,3:5359036,4:6494738,5:7556719,6:8555952};'
+          html, n3 = re.subn(r'var MEDIAN_2026=\{[^;]+\};', correct_med, html, count=1)
+          if n3 != 1: raise SystemExit('MEDIAN_2026 replacement failed')
+
+          # 폐지 서비스가 남아 있는 안내문 제거
+          html=html.replace("노인맞춤돌봄서비스와 찾아가는 상담은 직접 집으로 방문합니다. 도시락 배달도 요청할 수 있습니다.",
+                            "노인맞춤돌봄서비스는 방문 지원이 가능하고, 식사가 필요하면 도시락 배달 대상 여부도 함께 문의해 보세요.")
+
+          # 가능하면 low-income fallback도 외부 JSON과 동기화. 기존 블록이 존재할 때만 안전하게 교체.
+          lowarr=json.dumps(low['programs'], ensure_ascii=False, indent=1)
+          html2, nl = re.subn(r'var LOW_FALLBACK\s*=\s*\[.*?\n\];', 'var LOW_FALLBACK = '+lowarr+';', html, count=1, flags=re.S)
+          if nl == 1:
+              html=html2
+
+          indexp.write_text(html, encoding='utf-8')
+
+          # 검증
+          json.loads(pjson.read_text(encoding='utf-8'))
+          json.loads(lowjson.read_text(encoding='utf-8'))
+          scripts=re.findall(r'<script(?:\s[^>]*)?>(.*?)</script>', html, flags=re.S|re.I)
+          pathlib.Path('/tmp/seniorwelfare-all.js').write_text('\n'.join(scripts), encoding='utf-8')
+          PY
+          node --check /tmp/seniorwelfare-all.js
+
+      - name: Commit refreshed data and remove one-time workflow
+        shell: bash
+        run: |
+          git config user.name 'SeniorWelfare data refresh'
+          git config user.email 'actions@users.noreply.github.com'
+          git rm .github/workflows/senior-welfare-data-refresh.yml
+          git add apps/SeniorWelfare/programs-live.json apps/SeniorWelfare/lowincome-programs.json apps/SeniorWelfare/index.html
+          git commit -m 'data: verify and correct 2026 senior welfare programs'
+          git push
