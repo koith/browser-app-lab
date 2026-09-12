@@ -1,7 +1,8 @@
 // /api/daangn-group.js — 당근 모임 검색
 export const config = { maxDuration: 60 };
 const UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1';
-const CONCURRENCY = 3, MAX_REGIONS = 45, BLOCK_PAGE_MAX = 220000, MAX_ATTEMPTS = 2;
+const CONCURRENCY = 3, MAX_REGIONS = 45, BLOCK_PAGE_MAX = 220000, MAX_ATTEMPTS = 3;
+const BLOCK_RETRY_MS = [1500, 5000];
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -26,7 +27,7 @@ export default async function handler(req, res) {
         }
         results.push(...parse(html, region));
       } catch (e) {
-        errors.push({ region, type: e && e.code ? e.code : 'fetch_error', error: String(e && (e.message || e) || e).slice(0, 150) });
+        errors.push({ region, type: e && e.code ? e.code : 'fetch_error', attempts: e && e.attempts ? e.attempts : 1, lastBytes: e && Number.isFinite(e.lastBytes) ? e.lastBytes : null, error: String(e && (e.message || e) || e).slice(0, 150) });
       }
     }
   }
@@ -46,19 +47,19 @@ async function fetchHtml(q, region) {
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
     const r = await fetch(url, { headers: { 'User-Agent': UA, 'Accept-Language': 'ko-KR,ko;q=0.9', Accept: 'text/html' }, redirect: 'follow' });
     if (!r.ok) {
-      if (attempt === MAX_ATTEMPTS - 1) { const e = new Error('HTTP ' + r.status); e.code = 'http_error'; throw e; }
-      await backoff(attempt); continue;
+      if (attempt === MAX_ATTEMPTS - 1) { const e = new Error('HTTP ' + r.status); e.code = 'http_error'; e.attempts = attempt + 1; throw e; }
+      await sleep(500 * (attempt + 1)); continue;
     }
     const html = await r.text();
     if (html.length < BLOCK_PAGE_MAX) {
-      if (attempt === MAX_ATTEMPTS - 1) { const e = new Error(`차단성 빈 페이지 (${html.length} bytes)`); e.code = 'blocked_page'; throw e; }
-      await backoff(attempt); continue;
+      if (attempt === MAX_ATTEMPTS - 1) { const e = new Error(`차단성 빈 페이지 (${html.length} bytes)`); e.code = 'blocked_page'; e.attempts = attempt + 1; e.lastBytes = html.length; throw e; }
+      await sleep(BLOCK_RETRY_MS[attempt] || 5000); continue;
     }
     return html;
   }
   const e = new Error('검색 실패'); e.code = 'fetch_error'; throw e;
 }
-function backoff(attempt) { return new Promise(r => setTimeout(r, 300 * (attempt + 1) + Math.random() * 300)); }
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
 const dec = s => String(s || '').replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/\u0000/g, '');
 function parse(html, region) {
