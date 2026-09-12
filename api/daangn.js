@@ -6,11 +6,11 @@ export const config = { maxDuration: 60 };
 const UA =
   'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1';
 
-// 프론트가 작은 배치로 호출하므로 한 invocation 안에서도 과도한 병렬화를 피한다.
 const CONCURRENCY = 3;
 const MAX_REGIONS = 45;
 const BLOCK_PAGE_MAX = 220000;
-const MAX_ATTEMPTS = 2;
+const MAX_ATTEMPTS = 3;
+const BLOCK_RETRY_MS = [1500, 5000];
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -38,6 +38,8 @@ export default async function handler(req, res) {
         errors.push({
           region,
           type: e && e.code ? e.code : 'fetch_error',
+          attempts: e && e.attempts ? e.attempts : 1,
+          lastBytes: e && Number.isFinite(e.lastBytes) ? e.lastBytes : null,
           error: String(e && (e.message || e) || 'unknown error').slice(0, 200),
         });
       }
@@ -86,25 +88,26 @@ async function fetchRegion(q, region) {
       if (attempt >= MAX_ATTEMPTS - 1) {
         const e = new Error(`HTTP ${r.status}`);
         e.code = 'http_error';
+        e.attempts = attempt + 1;
         throw e;
       }
-      await backoff(attempt);
+      await sleep(500 * (attempt + 1));
       continue;
     }
 
     const html = await r.text();
-    const blocked = isBlockedPage(html);
-    if (blocked) {
+    if (isBlockedPage(html)) {
       if (attempt >= MAX_ATTEMPTS - 1) {
         const e = new Error(`차단성 빈 페이지 (${html.length} bytes)`);
         e.code = 'blocked_page';
+        e.attempts = attempt + 1;
+        e.lastBytes = html.length;
         throw e;
       }
-      await backoff(attempt);
+      await sleep(BLOCK_RETRY_MS[attempt] || 5000);
       continue;
     }
 
-    // 정상 크기의 페이지라면 결과가 0건이어도 정상 검색으로 인정한다.
     return parse(html, region);
   }
 
@@ -114,14 +117,12 @@ async function fetchRegion(q, region) {
 }
 
 function isBlockedPage(html) {
-  // 실측상 차단성 빈 페이지는 약 157KB, 정상 페이지는 360KB+.
-  // 구조가 바뀌어도 작은 페이지이면서 ItemList가 없을 때만 차단으로 본다.
   if (html.length >= BLOCK_PAGE_MAX) return false;
   return !/<script\s+type="application\/ld\+json">[\s\S]*?"@type"\s*:\s*"ItemList"/.test(html);
 }
 
-function backoff(attempt) {
-  return new Promise(r => setTimeout(r, 300 * (attempt + 1) + Math.random() * 300));
+function sleep(ms) {
+  return new Promise(r => setTimeout(r, ms));
 }
 
 function parse(html, region) {
