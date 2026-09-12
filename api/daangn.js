@@ -13,9 +13,16 @@ export default async function handler(req,res){
   if(!regions.length) return res.status(400).json({error:'regions 파라미터 필요'});
   if(regions.length>MAX_REGIONS) return res.status(400).json({error:`지역은 최대 ${MAX_REGIONS}개`});
   const t0=Date.now(),results=[],errors=[];let idx=0;
-  async function worker(){while(idx<regions.length){const region=regions[idx++];try{results.push(...await fetchRegion(q,region));}catch(e){errors.push({region,type:e&&e.code?e.code:'fetch_error',attempts:1,lastBytes:e&&Number.isFinite(e.lastBytes)?e.lastBytes:null,error:String(e&&(e.message||e)||'unknown error').slice(0,200)});}}}
+  async function worker(){
+    while(idx<regions.length){
+      const region=regions[idx++];
+      try{results.push(...await fetchRegion(q,region));}
+      catch(e){errors.push({region,type:e&&e.code?e.code:'fetch_error',attempts:1,lastBytes:e&&Number.isFinite(e.lastBytes)?e.lastBytes:null,error:String(e&&(e.message||e)||'unknown error').slice(0,200)});}
+    }
+  }
   await Promise.all(Array.from({length:Math.min(CONCURRENCY,regions.length)},worker));
-  const seen=new Set(),items=[];for(const it of results){if(seen.has(it.url))continue;seen.add(it.url);items.push(it);}
+  const seen=new Set(),items=[];
+  for(const it of results){if(seen.has(it.url))continue;seen.add(it.url);items.push(it);}
   const blockedCount=errors.filter(e=>e.type==='blocked_page').length;
   const timeoutCount=errors.filter(e=>e.type==='timeout').length;
   res.setHeader('Cache-Control','no-store');
@@ -26,17 +33,19 @@ async function fetchRegion(q,region){
   const url='https://www.daangn.com/kr/buy-sell/?in='+encodeURIComponent(region)+'&search='+encodeURIComponent(q);
   const controller=new AbortController();
   const timer=setTimeout(()=>controller.abort(),FETCH_TIMEOUT_MS);
-  let r;
   try{
-    r=await fetch(url,{headers:{'User-Agent':UA,'Accept-Language':'ko-KR,ko;q=0.9',Accept:'text/html'},redirect:'follow',signal:controller.signal});
+    const r=await fetch(url,{headers:{'User-Agent':UA,'Accept-Language':'ko-KR,ko;q=0.9',Accept:'text/html'},redirect:'follow',signal:controller.signal});
+    if(!r.ok){const e=new Error(`HTTP ${r.status}`);e.code='http_error';throw e;}
+    // Important: keep the abort timer alive until the full HTML body has been consumed.
+    const html=await r.text();
+    if(isBlockedPage(html)){const e=new Error(`차단성 빈 페이지 (${html.length} bytes)`);e.code='blocked_page';e.lastBytes=html.length;throw e;}
+    return parse(html,region);
   }catch(err){
     if(err&&err.name==='AbortError'){const e=new Error(`timeout ${FETCH_TIMEOUT_MS}ms`);e.code='timeout';throw e;}
     throw err;
-  }finally{clearTimeout(timer);}
-  if(!r.ok){const e=new Error(`HTTP ${r.status}`);e.code='http_error';throw e;}
-  const html=await r.text();
-  if(isBlockedPage(html)){const e=new Error(`차단성 빈 페이지 (${html.length} bytes)`);e.code='blocked_page';e.lastBytes=html.length;throw e;}
-  return parse(html,region);
+  }finally{
+    clearTimeout(timer);
+  }
 }
 function isBlockedPage(html){if(html.length>=BLOCK_PAGE_MAX)return false;return !/<script\s+type="application\/ld\+json">[\s\S]*?"@type"\s*:\s*"ItemList"/.test(html);}
 function parse(html,region){
