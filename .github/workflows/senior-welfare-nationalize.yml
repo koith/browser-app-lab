@@ -1,0 +1,55 @@
+name: SeniorWelfare nationwide data split
+on:
+  push:
+    paths:
+      - '.github/workflows/senior-welfare-nationalize.yml'
+permissions:
+  contents: write
+jobs:
+  split:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Split pilot catalog into geographic layers
+        run: |
+          node <<'NODE'
+          const fs=require('fs');
+          const p='apps/SeniorWelfare/programs-live.json';
+          const src=JSON.parse(fs.readFileSync(p,'utf8'));
+          const NATIONAL_HINTS=['국민연금','국민건강보험','보건복지부','복지로','한국노인','한국실명','노인보호전문','주민센터 / 국민연금'];
+          function level(x){
+            const s=(x.org||'')+' '+(x.name||'');
+            if(NATIONAL_HINTS.some(k=>s.includes(k))) return 'national';
+            if(s.includes('서울') && !s.includes('영등포')) return 'sido';
+            return 'sigungu';
+          }
+          const out={national:[],sido:[],sigungu:[]};
+          for(const x of src.programs){
+            const lv=level(x);
+            const y={...x,scope:{level:lv,codes:lv==='national'?[]:lv==='sido'?['11']:['11560']},checked_at:src.checked_at,source_urls:x.source_urls||[],effective_from:x.effective_from||null,effective_to:x.effective_to||null};
+            out[lv].push(y);
+          }
+          fs.mkdirSync('apps/SeniorWelfare/data/national',{recursive:true});
+          fs.mkdirSync('apps/SeniorWelfare/data/sido',{recursive:true});
+          fs.mkdirSync('apps/SeniorWelfare/data/sigungu',{recursive:true});
+          const wrap=(scope,programs)=>({schema_version:1,scope,checked_at:src.checked_at,programs});
+          fs.writeFileSync('apps/SeniorWelfare/data/national/programs.json',JSON.stringify(wrap({level:'national',codes:[]},out.national),null,2)+'\n');
+          fs.writeFileSync('apps/SeniorWelfare/data/sido/11.json',JSON.stringify(wrap({level:'sido',codes:['11']},out.sido),null,2)+'\n');
+          fs.writeFileSync('apps/SeniorWelfare/data/sigungu/11560.json',JSON.stringify(wrap({level:'sigungu',codes:['11560']},out.sigungu),null,2)+'\n');
+          const manifest={schema_version:1,generated_at:new Date().toISOString(),pilot:'11560',layers:{national:'data/national/programs.json',sido:{'11':'data/sido/11.json'},sigungu:{'11560':'data/sigungu/11560.json'}},counts:{national:out.national.length,sido:out.sido.length,sigungu:out.sigungu.length,total:src.programs.length}};
+          fs.writeFileSync('apps/SeniorWelfare/catalog-manifest.json',JSON.stringify(manifest,null,2)+'\n');
+          if(manifest.counts.total!==src.programs.length) process.exit(2);
+          for(const f of ['apps/SeniorWelfare/data/national/programs.json','apps/SeniorWelfare/data/sido/11.json','apps/SeniorWelfare/data/sigungu/11560.json']) JSON.parse(fs.readFileSync(f));
+          console.log(manifest.counts);
+          NODE
+      - name: Commit layered catalog
+        run: |
+          rm .github/workflows/senior-welfare-nationalize.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add apps/SeniorWelfare .github/workflows/senior-welfare-nationalize.yml
+          git commit -m 'refactor(SeniorWelfare): split catalog into nationwide geographic layers'
+          git push
