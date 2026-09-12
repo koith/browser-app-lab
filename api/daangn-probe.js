@@ -1,9 +1,10 @@
-// /api/daangn-probe.js — 세션당 '서로 다른 지역 수' 임계점 측정
-// 서로 다른 동을 순차로 1개씩 조회하며, 몇 번째부터 빈 페이지가 시작되는지 확인
+// /api/daangn-probe.js — distinct-region threshold/reset diagnostics
+// GET /api/daangn-probe?q=아이폰&n=40&chunk=3&pause=2500
 export const config = { maxDuration: 300 };
-const UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1';
 
-// 서로 다른 동 60개 (검증된 유효 코드 위주 + 확장)
+const UA = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1';
+const BLOCK_PAGE_MAX = 220000;
+
 const DONGS = [
   '서초동-6128','잠원동-367','반포동-6126','방배동-6127','서초3동-365','양재동-6130','서초4동-366',
   '역삼동-6035','논현동-6031','삼성동-6034','청담동-386','신사동-382','압구정동-385','대치동-6032',
@@ -16,38 +17,81 @@ const DONGS = [
   '양재2동-380','서초본동-6132','반포2동-354',
 ];
 
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
 async function fetchOne(code, q) {
   const url = 'https://www.daangn.com/kr/buy-sell/?in=' + encodeURIComponent(code) + '&search=' + encodeURIComponent(q);
+  const started = Date.now();
   try {
-    const r = await fetch(url, { headers: { 'User-Agent': UA, 'Accept-Language': 'ko-KR,ko;q=0.9', Accept: 'text/html' } });
+    const r = await fetch(url, {
+      headers: {
+        'User-Agent': UA,
+        'Accept-Language': 'ko-KR,ko;q=0.9',
+        Accept: 'text/html',
+      },
+      redirect: 'follow',
+    });
     const html = await r.text();
-    const items = [...new Set([...html.matchAll(/href="(?:https?:\/\/www\.daangn\.com)?\/kr\/buy-sell\/(?!s\/)(?!\?)[^"?#]+\//g)])].length;
-    return items === 0 ? 0 : items;
-  } catch { return -1; }
+    const blocked = r.ok && html.length < BLOCK_PAGE_MAX;
+    const hasItemList = /<script type="application\/ld\+json">[\s\S]*?"@type"\s*:\s*"ItemList"/.test(html);
+    return {
+      code,
+      http: r.status,
+      bytes: html.length,
+      blocked,
+      hasItemList,
+      ms: Date.now() - started,
+    };
+  } catch (e) {
+    return {
+      code,
+      http: null,
+      bytes: 0,
+      blocked: false,
+      hasItemList: false,
+      ms: Date.now() - started,
+      error: String(e && (e.message || e) || 'fetch error').slice(0, 160),
+    };
+  }
 }
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Cache-Control', 'no-store');
-  const q = req.query.q || '브루더';
-  const n = Math.min(parseInt(req.query.n || '40', 10), DONGS.length);
-  const chunk = parseInt(req.query.chunk || '0', 10);
-  const pause = parseInt(req.query.pause || '0', 10);
 
+  const q = String(req.query.q || '아이폰').trim();
+  const n = Math.max(1, Math.min(parseInt(req.query.n || '40', 10) || 40, DONGS.length));
+  const chunk = Math.max(0, parseInt(req.query.chunk || '0', 10) || 0);
+  const pause = Math.max(0, Math.min(parseInt(req.query.pause || '0', 10) || 0, 30000));
+  const startAt = Math.max(0, Math.min(parseInt(req.query.start || '0', 10) || 0, DONGS.length - 1));
+  const selected = DONGS.slice(startAt, Math.min(startAt + n, DONGS.length));
+
+  const t0 = Date.now();
   const seq = [];
-  let firstEmptyAt = null;
-  for (let i = 0; i < n; i++) {
-    const items = await fetchOne(DONGS[i], q);
-    seq.push(items);
-    if (items === 0 && firstEmptyAt === null) firstEmptyAt = i + 1;
-    if (chunk && pause && (i + 1) % chunk === 0) await new Promise(r => setTimeout(r, pause));
+  let firstBlockedAt = null;
+
+  for (let i = 0; i < selected.length; i++) {
+    const r = await fetchOne(selected[i], q);
+    seq.push(r);
+    if (r.blocked && firstBlockedAt === null) firstBlockedAt = i + 1;
+    if (chunk && pause && (i + 1) % chunk === 0 && i + 1 < selected.length) await sleep(pause);
   }
-  const emptyCount = seq.filter(x => x === 0).length;
+
+  const blockedCount = seq.filter(x => x.blocked).length;
+  const httpErrors = seq.filter(x => x.error || (x.http != null && (x.http < 200 || x.http >= 300))).length;
   return res.status(200).json({
-    q, delay, tested: n,
-    firstEmptyAt,                       // 몇 번째 지역부터 빈 페이지 시작?
-    emptyCount,
-    emptyRate: (emptyCount / n * 100).toFixed(0) + '%',
-    seq: seq.map(x => x === 0 ? '∅' : x === -1 ? 'E' : x).join(' '),
+    query: q,
+    requested: n,
+    tested: seq.length,
+    startAt,
+    chunk,
+    pauseMs: pause,
+    tookMs: Date.now() - t0,
+    firstBlockedAt,
+    blockedCount,
+    blockedRate: seq.length ? Math.round(blockedCount / seq.length * 100) : 0,
+    httpErrors,
+    classification: 'blocked means HTTP 2xx with HTML smaller than 220000 bytes; zero search results are not treated as blocked',
+    seq,
   });
 }
