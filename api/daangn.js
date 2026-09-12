@@ -1,13 +1,16 @@
 // /api/daangn.js — 당근 지역별 검색 프록시 (JSON-LD 기반 파싱)
-// GET /api/daangn?q=아이폰&regions=서초구-362,강남구-XXX&onSale=true
+// GET /api/daangn?q=아이폰&regions=서초동-6128,역삼동-6035
 
 export const config = { maxDuration: 60 };
 
 const UA =
   'Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1';
 
-const CONCURRENCY = 5;
+// 프론트가 작은 배치로 호출하므로 한 invocation 안에서도 과도한 병렬화를 피한다.
+const CONCURRENCY = 3;
 const MAX_REGIONS = 45;
+const BLOCK_PAGE_MAX = 220000;
+const MAX_ATTEMPTS = 2;
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -15,7 +18,6 @@ export default async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   const q = (req.query.q || '').trim();
-  const onSale = req.query.onSale === 'true';
   const regions = (req.query.regions || '').split(',').map(s => s.trim()).filter(Boolean);
 
   if (!q) return res.status(400).json({ error: 'q 파라미터 필요' });
@@ -25,19 +27,24 @@ export default async function handler(req, res) {
   const t0 = Date.now();
   const results = [];
   const errors = [];
-
   let idx = 0;
+
   async function worker() {
     while (idx < regions.length) {
       const region = regions[idx++];
       try {
-        results.push(...(await fetchRegion(q, region, onSale)));
+        results.push(...(await fetchRegion(q, region)));
       } catch (e) {
-        errors.push({ region, error: String(e.message || e).slice(0, 200) });
+        errors.push({
+          region,
+          type: e && e.code ? e.code : 'fetch_error',
+          error: String(e && (e.message || e) || 'unknown error').slice(0, 200),
+        });
       }
     }
   }
-  await Promise.all(Array.from({ length: CONCURRENCY }, worker));
+
+  await Promise.all(Array.from({ length: Math.min(CONCURRENCY, regions.length) }, worker));
 
   const seen = new Set();
   const deduped = [];
@@ -47,47 +54,77 @@ export default async function handler(req, res) {
     deduped.push(it);
   }
 
+  const blockedCount = errors.filter(e => e.type === 'blocked_page').length;
   res.setHeader('Cache-Control', 'no-store');
   return res.status(200).json({
-    query: q, regionCount: regions.length, count: deduped.length,
-    tookMs: Date.now() - t0, errors, items: deduped,
+    query: q,
+    regionCount: regions.length,
+    count: deduped.length,
+    tookMs: Date.now() - t0,
+    blockedCount,
+    okRegionCount: regions.length - errors.length,
+    errors,
+    items: deduped,
   });
 }
 
-// 차단성 빈 페이지(데이터 미포함)는 ~157KB로 작음. 정상 결과 페이지는 매물 유무와 무관하게 크다.
-const BLOCK_PAGE_MAX = 220000;
-const MAX_ATTEMPTS = 2;
-
-async function fetchRegion(q, region, onSale) {
+async function fetchRegion(q, region) {
   const url = 'https://www.daangn.com/kr/buy-sell/?in=' + encodeURIComponent(region) +
     '&search=' + encodeURIComponent(q);
+
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
     const r = await fetch(url, {
-      headers: { 'User-Agent': UA, 'Accept-Language': 'ko-KR,ko;q=0.9', Accept: 'text/html' },
+      headers: {
+        'User-Agent': UA,
+        'Accept-Language': 'ko-KR,ko;q=0.9',
+        Accept: 'text/html',
+      },
       redirect: 'follow',
     });
+
     if (!r.ok) {
-      if (attempt >= MAX_ATTEMPTS - 1) throw new Error(`HTTP ${r.status}`);
-      await backoff(attempt); continue;
+      if (attempt >= MAX_ATTEMPTS - 1) {
+        const e = new Error(`HTTP ${r.status}`);
+        e.code = 'http_error';
+        throw e;
+      }
+      await backoff(attempt);
+      continue;
     }
+
     const html = await r.text();
-    const items = parse(html, region);
-    if (items.length) return items;
-    // 결과 0건: 차단성(작은 페이지)이면 재시도, 정상 페이지(큰데 0건)면 진짜 없음 → 수용
-    const blocked = html.length < BLOCK_PAGE_MAX;
-    if (!blocked) return items;                       // 정상 페이지의 진짜 0건
-    if (attempt >= MAX_ATTEMPTS - 1) return [];  // 끝까지 차단성이면 빈 결과로 처리
-    await backoff(attempt);
+    const blocked = isBlockedPage(html);
+    if (blocked) {
+      if (attempt >= MAX_ATTEMPTS - 1) {
+        const e = new Error(`차단성 빈 페이지 (${html.length} bytes)`);
+        e.code = 'blocked_page';
+        throw e;
+      }
+      await backoff(attempt);
+      continue;
+    }
+
+    // 정상 크기의 페이지라면 결과가 0건이어도 정상 검색으로 인정한다.
+    return parse(html, region);
   }
-  return [];
+
+  const e = new Error('검색 실패');
+  e.code = 'fetch_error';
+  throw e;
+}
+
+function isBlockedPage(html) {
+  // 실측상 차단성 빈 페이지는 약 157KB, 정상 페이지는 360KB+.
+  // 구조가 바뀌어도 작은 페이지이면서 ItemList가 없을 때만 차단으로 본다.
+  if (html.length >= BLOCK_PAGE_MAX) return false;
+  return !/<script\s+type="application\/ld\+json">[\s\S]*?"@type"\s*:\s*"ItemList"/.test(html);
 }
 
 function backoff(attempt) {
-  return new Promise(r => setTimeout(r, 150 * (attempt + 1) + Math.random() * 150));
+  return new Promise(r => setTimeout(r, 300 * (attempt + 1) + Math.random() * 300));
 }
 
 function parse(html, region) {
-  // 1) JSON-LD ItemList에서 제목/가격/이미지/상태/URL 추출
   let products = [];
   for (const m of html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)) {
     let data;
@@ -107,7 +144,6 @@ function parse(html, region) {
     }
   }
 
-  // 2) 임베디드 데이터에서 시간 추출 (문서 순서 = 목록 순서)
   const times = [];
   const timeRe = /"createdAt"\s*:\s*"([^"]{10,30})"(?:[\s\S]{0,400}?"boostedAt"\s*:\s*"([^"]{10,30})")?/g;
   let tm;
@@ -115,7 +151,6 @@ function parse(html, region) {
     times.push({ createdAt: tm[1], boostedAt: tm[2] || null });
   }
 
-  // 3) 동네명 추출 (앵커 텍스트 기반, URL로 매칭)
   const dongByUrl = {};
   for (const am of html.matchAll(/<a\b[^>]*href="(?:https?:\/\/www\.daangn\.com)?(\/kr\/buy-sell\/(?!s\/)(?!\?)[^"?#]+\/)"[^>]*>([\s\S]*?)<\/a>/g)) {
     const text = am[2].replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
