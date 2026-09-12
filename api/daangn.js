@@ -1,7 +1,7 @@
-// /api/daangn.js — 당근 지역별 검색 프록시 (fast-fail)
+// /api/daangn.js — 당근 지역별 검색 프록시 (speed-first fast-fail)
 export const config = { maxDuration: 60 };
 const UA='Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1';
-const CONCURRENCY=6, MAX_REGIONS=45, BLOCK_PAGE_MAX=220000;
+const CONCURRENCY=15, MAX_REGIONS=45, BLOCK_PAGE_MAX=220000, FETCH_TIMEOUT_MS=3500;
 
 export default async function handler(req,res){
   res.setHeader('Access-Control-Allow-Origin','*');
@@ -17,13 +17,22 @@ export default async function handler(req,res){
   await Promise.all(Array.from({length:Math.min(CONCURRENCY,regions.length)},worker));
   const seen=new Set(),items=[];for(const it of results){if(seen.has(it.url))continue;seen.add(it.url);items.push(it);}
   const blockedCount=errors.filter(e=>e.type==='blocked_page').length;
+  const timeoutCount=errors.filter(e=>e.type==='timeout').length;
   res.setHeader('Cache-Control','no-store');
-  return res.status(200).json({query:q,regionCount:regions.length,count:items.length,tookMs:Date.now()-t0,blockedCount,okRegionCount:regions.length-errors.length,errors,items});
+  return res.status(200).json({query:q,regionCount:regions.length,count:items.length,tookMs:Date.now()-t0,blockedCount,timeoutCount,okRegionCount:regions.length-errors.length,errors,items});
 }
 
 async function fetchRegion(q,region){
   const url='https://www.daangn.com/kr/buy-sell/?in='+encodeURIComponent(region)+'&search='+encodeURIComponent(q);
-  const r=await fetch(url,{headers:{'User-Agent':UA,'Accept-Language':'ko-KR,ko;q=0.9',Accept:'text/html'},redirect:'follow'});
+  const controller=new AbortController();
+  const timer=setTimeout(()=>controller.abort(),FETCH_TIMEOUT_MS);
+  let r;
+  try{
+    r=await fetch(url,{headers:{'User-Agent':UA,'Accept-Language':'ko-KR,ko;q=0.9',Accept:'text/html'},redirect:'follow',signal:controller.signal});
+  }catch(err){
+    if(err&&err.name==='AbortError'){const e=new Error(`timeout ${FETCH_TIMEOUT_MS}ms`);e.code='timeout';throw e;}
+    throw err;
+  }finally{clearTimeout(timer);}
   if(!r.ok){const e=new Error(`HTTP ${r.status}`);e.code='http_error';throw e;}
   const html=await r.text();
   if(isBlockedPage(html)){const e=new Error(`차단성 빈 페이지 (${html.length} bytes)`);e.code='blocked_page';e.lastBytes=html.length;throw e;}
