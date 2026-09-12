@@ -1,7 +1,7 @@
 // /api/daangn.js — 당근 지역별 검색 프록시 (speed-first fast-fail)
 export const config = { maxDuration: 60 };
 const UA='Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1';
-const CONCURRENCY=15, MAX_REGIONS=45, BLOCK_PAGE_MAX=220000, FETCH_TIMEOUT_MS=3500;
+const CONCURRENCY=15, MAX_REGIONS=45, BLOCK_PAGE_MAX=220000, FETCH_TIMEOUT_MS=2500;
 
 export default async function handler(req,res){
   res.setHeader('Access-Control-Allow-Origin','*');
@@ -36,16 +36,13 @@ async function fetchRegion(q,region){
   try{
     const r=await fetch(url,{headers:{'User-Agent':UA,'Accept-Language':'ko-KR,ko;q=0.9',Accept:'text/html'},redirect:'follow',signal:controller.signal});
     if(!r.ok){const e=new Error(`HTTP ${r.status}`);e.code='http_error';throw e;}
-    // Important: keep the abort timer alive until the full HTML body has been consumed.
     const html=await r.text();
     if(isBlockedPage(html)){const e=new Error(`차단성 빈 페이지 (${html.length} bytes)`);e.code='blocked_page';e.lastBytes=html.length;throw e;}
     return parse(html,region);
   }catch(err){
     if(err&&err.name==='AbortError'){const e=new Error(`timeout ${FETCH_TIMEOUT_MS}ms`);e.code='timeout';throw e;}
     throw err;
-  }finally{
-    clearTimeout(timer);
-  }
+  }finally{clearTimeout(timer);}
 }
 function isBlockedPage(html){if(html.length>=BLOCK_PAGE_MAX)return false;return !/<script\s+type="application\/ld\+json">[\s\S]*?"@type"\s*:\s*"ItemList"/.test(html);}
 function parse(html,region){
