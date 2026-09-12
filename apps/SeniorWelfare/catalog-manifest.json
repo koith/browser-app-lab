@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "generated_at": "2026-09-12T13:04:18.891Z",
+  "pilot": "11560",
+  "layers": {
+    "national": "data/national/programs.json",
+    "sido": {
+      "11": "data/sido/11.json"
+    },
+    "sigungu": {
+      "11560": "data/sigungu/11560.json"
+    }
+  },
+  "counts": {
+    "national": 11,
+    "sido": 4,
+    "sigungu": 27,
+    "total": 42
+  }
+}
