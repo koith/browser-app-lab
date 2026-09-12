@@ -1,7 +1,8 @@
 // /api/daangn-community.js — 당근 동네생활 검색
 export const config = { maxDuration: 60 };
 const UA='Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1';
-const CONCURRENCY=3, MAX_REGIONS=45, BLOCK_PAGE_MAX=220000, MAX_ATTEMPTS=2;
+const CONCURRENCY=3, MAX_REGIONS=45, BLOCK_PAGE_MAX=220000, MAX_ATTEMPTS=3;
+const RETRY_MS=[1500,5000];
 const dec=s=>String(s||'').replace(/&amp;/g,'&').replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/\u0000/g,'');
 
 export default async function handler(req,res){
@@ -13,7 +14,6 @@ export default async function handler(req,res){
   if(!q) return res.status(400).json({error:'q 파라미터 필요'});
   if(!regions.length) return res.status(400).json({error:'regions 파라미터 필요'});
   if(regions.length>MAX_REGIONS) return res.status(400).json({error:`지역은 최대 ${MAX_REGIONS}개`});
-
   const t0=Date.now(), results=[], errors=[]; let idx=0, ldTypes=null;
   async function worker(){
     while(idx<regions.length){
@@ -23,12 +23,12 @@ export default async function handler(req,res){
         const out=parse(html,region);
         if(debug&&!ldTypes) ldTypes=out.types;
         results.push(...out.items);
-      }catch(e){ errors.push({region,type:e&&e.code?e.code:'fetch_error',error:String(e&&e.message||e).slice(0,150)}); }
+      }catch(e){errors.push({region,type:e&&e.code?e.code:'fetch_error',attempts:e&&e.attempts?e.attempts:1,lastBytes:e&&Number.isFinite(e.lastBytes)?e.lastBytes:null,error:String(e&&e.message||e).slice(0,150)});}
     }
   }
   await Promise.all(Array.from({length:Math.min(CONCURRENCY,regions.length)},worker));
   const seen=new Set(), items=[];
-  for(const it of results){ if(seen.has(it.url)) continue; seen.add(it.url); items.push(it); }
+  for(const it of results){if(seen.has(it.url))continue;seen.add(it.url);items.push(it);}
   const blockedCount=errors.filter(e=>e.type==='blocked_page').length;
   res.setHeader('Cache-Control','no-store');
   const out={query:q,regionCount:regions.length,count:items.length,tookMs:Date.now()-t0,blockedCount,okRegionCount:regions.length-errors.length,errors,items};
@@ -41,27 +41,26 @@ async function fetchHtml(q,region){
   for(let attempt=0;attempt<MAX_ATTEMPTS;attempt++){
     const r=await fetch(url,{headers:{'User-Agent':UA,'Accept-Language':'ko-KR,ko;q=0.9',Accept:'text/html'},redirect:'follow'});
     if(!r.ok){
-      if(attempt===MAX_ATTEMPTS-1){ const e=new Error('HTTP '+r.status); e.code='http_error'; throw e; }
-      await backoff(attempt); continue;
+      if(attempt===MAX_ATTEMPTS-1){const e=new Error('HTTP '+r.status);e.code='http_error';e.attempts=attempt+1;throw e;}
+      await new Promise(resolve=>setTimeout(resolve,500*(attempt+1)));continue;
     }
     const html=await r.text();
     if(html.length<BLOCK_PAGE_MAX){
-      if(attempt===MAX_ATTEMPTS-1){ const e=new Error(`차단성 빈 페이지 (${html.length} bytes)`); e.code='blocked_page'; throw e; }
-      await backoff(attempt); continue;
+      if(attempt===MAX_ATTEMPTS-1){const e=new Error(`차단성 빈 페이지 (${html.length} bytes)`);e.code='blocked_page';e.attempts=attempt+1;e.lastBytes=html.length;throw e;}
+      await new Promise(resolve=>setTimeout(resolve,RETRY_MS[attempt]||5000));continue;
     }
     return html;
   }
-  const e=new Error('검색 실패'); e.code='fetch_error'; throw e;
+  const e=new Error('검색 실패');e.code='fetch_error';throw e;
 }
-const backoff=attempt=>new Promise(r=>setTimeout(r,300*(attempt+1)+Math.random()*300));
 
 function parse(html,region){
   const items=[], types=[];
   for(const m of html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)){
-    let data; try{data=JSON.parse(m[1]);}catch{continue;}
-    if(!data||data['@type']!=='ItemList'||!Array.isArray(data.itemListElement)) continue;
+    let data;try{data=JSON.parse(m[1]);}catch{continue;}
+    if(!data||data['@type']!=='ItemList'||!Array.isArray(data.itemListElement))continue;
     for(const e of data.itemListElement){
-      const p=e&&e.item; if(!p||!p.url) continue;
+      const p=e&&e.item;if(!p||!p.url)continue;
       types.push(p['@type']);
       const when=p.datePublished||p.dateCreated||p.dateModified||null;
       const t=when?Date.parse(when+(/[Z+]/.test(when)?'':'+09:00')):null;
@@ -72,7 +71,7 @@ function parse(html,region){
   if(!items.length){
     for(const a of html.matchAll(/<a\b[^>]*href="(?:https?:\/\/www\.daangn\.com)?(\/kr\/community\/(?!s\/)[^"?#]+\/)"[^>]*>([\s\S]*?)<\/a>/g)){
       const parts=a[2].split(/<\/(?:div|span|p|h\d)>/).map(t=>dec(t.replace(/<[^>]+>/g,' ')).replace(/\s+/g,' ').trim()).filter(Boolean);
-      if(!parts.length||parts[0].length>120) continue;
+      if(!parts.length||parts[0].length>120)continue;
       items.push({url:'https://www.daangn.com'+a[1],title:parts[0],desc:parts[1]||null,thumb:null,author:null,sortTime:null,region});
     }
   }
