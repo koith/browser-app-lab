@@ -38,8 +38,8 @@
        if(bridge()?.getMatch?.()?.mode==='network')send({type:'state',match:bridge().getMatch()});
      }else if(data.type==='state'&&net.role==='guest'){
        bridge()?.receiveMatch?.(data.match);
-     }else if(data.type==='command'&&net.role==='host'&&data.action==='roll'){
-       bridge()?.remoteRoll?.();
+     }else if(data.type==='command'&&net.role==='host'&&['roll','item','ability'].includes(data.action)){
+       bridge()?.remoteCommand?.(data.action,data.index,data.steps);
      }else if(data.type==='chat'&&typeof data.text==='string'){
        const div=document.createElement('div'),b=document.createElement('b');
        b.textContent=String(data.who||'상대').slice(0,12)+'　';
