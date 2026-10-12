@@ -13,7 +13,10 @@ async function run(){
  await page.locator('#bot-count').selectOption('1');
  await page.locator('#start-game').click();
  await page.waitForSelector('#game:not(.hidden)');
- const nodes=await page.locator('#board-nodes .tile').count();assert.equal(nodes,70,'4LEAF tiles');
+ const nodes=await page.locator('#board-nodes .tile').count();assert.equal(nodes,104,'original 4LEAF MVE path tiles');
+ assert.ok((await page.locator('#map-select option').count())>=25,'25 original archive map names');
+ assert.ok(await page.evaluate(()=>window.ORIGINAL_LEAF_CHESSMEN.length>=90),'original CHR chessman data loaded');
+ assert.ok((await page.locator('#shop-grid .shop-card').count())===0,'shop not active on game screen');
  const first=await page.evaluate(()=>window.__ROG_TEST__.getMatch().players[0].position);
  await page.locator('#roll-btn').click();
  await page.waitForFunction(()=>window.__ROG_TEST__.getMatch().players[0].position>0,{timeout:10000});
@@ -21,13 +24,13 @@ async function run(){
  assert.ok((await page.evaluate(()=>window.__ROG_TEST__.getMatch().players[0].position))>first);
  await page.locator('[data-route="shop"]').first().click();
  await page.waitForSelector('#shop:not(.hidden)');
- assert.ok((await page.locator('#shop-grid .shop-card').count())>=8);
+ assert.ok((await page.locator('#shop-grid .shop-card').count())>=80,'historical chessman roster appears in shop');
  await page.screenshot({path:'rog-shop.png'});
  await page.locator('[data-route="lobby"]').first().click();
  await page.locator('#map-select').selectOption('악마의 달팽이');
  await page.locator('#start-game').click();
  await page.waitForSelector('#game:not(.hidden)');
- assert.equal(await page.locator('#board-nodes .tile').count(),76);
+ assert.equal(await page.locator('#board-nodes .tile').count(),69,'original Devil Snail MVE tile count');
  await page.setViewportSize({width:390,height:844});
  await page.screenshot({path:'rog-mobile.png'});
  assert.ok(await page.locator('#roll-btn').isVisible());
