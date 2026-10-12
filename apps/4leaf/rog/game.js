@@ -56,7 +56,7 @@ const ITEMS=[
 {id:'shoe',name:'여신의 신발',icon:'♘',hint:'3턴 이동 주사위 1개 추가',sourceId:'0040'}
 ];
 const ITEM_MAP=Object.fromEntries(ITEMS.map(i=>[i.id,i]));
-const SOURCE_ROUTES=window.ORIGINAL_LEAF_MAPS||{},SOURCE_INFO=window.ORIGINAL_LEAF_MAP_INFO||{};
+const SOURCE_ROUTES=window.ORIGINAL_LEAF_MAPS||{},SOURCE_INFO=window.ORIGINAL_LEAF_MAP_INFO||{},SOURCE_TILES=window.ORIGINAL_LEAF_TILES||{};
 const SOURCE_IDS=Object.fromEntries(Object.entries(SOURCE_INFO).map(([id,info])=>[info.title,id]));
 const MAPS={
 '4LEAF':{length:70,non:false,warp:[11,38],keepers:[13,29,47,61],jail:[24],chests:[6,32,52],boost:[17,49],attribute:[20,43],joker:[36]},
@@ -170,18 +170,18 @@ function drawShop(){
 }
 function buildRoomList(){const list=$('room-list');list.replaceChildren();['샤이닝 브리즈','실버 호라이즌','윈트리 아이스','헤이즐리 웨이브','엘핀 포레스트'].forEach((r,i)=>{const b=document.createElement('button');b.textContent=(i+1)+'. '+r+'　('+(['평원','설원','빙원','해양','숲'][i])+')';b.className=r===currentRoom?'selected':'';b.onclick=()=>{currentRoom=r;const roomScene=document.querySelector('#rooms .room-floor');if(roomScene)roomScene.style.backgroundImage='url("./original/ChatRoom/room'+Math.min(i,5)+'.png")';buildRoomList();$('room-title').textContent='하이아칸 · '+r;chat('SYSTEM',r+' 방에 입장했습니다. 다른 이용자와는 연결되지 않습니다.','system')};list.append(b)});$('room-title').textContent='하이아칸 · '+currentRoom}
 function buildPeople(){const root=$('town-figures');root.replaceChildren();const roster=[profile.name,'티치엘','막시민','루시안','이스핀'];roster.forEach((name,i)=>{const b=document.createElement('button');b.className='avatar';b.style.setProperty('--hair',['#5f4e70','#c6b26a','#362a5e','#dcc17e','#ce8b7a'][i]);b.style.setProperty('--outfit',['#7d68b7','#649ac4','#5d638f','#ac735c','#aa798e'][i]);b.style.backgroundImage='url("'+townAvatar(i)+'")';b.innerHTML='<i class="avatar-head"></i><i class="avatar-body"></i><small></small>';b.querySelector('small').textContent=name;b.onclick=()=>chat(name,i===0?'오늘도 좋은 하루네요!':'반가워요, '+profile.name+'님.','npc');root.append(b)})}
+function originalTileAt(map,index){
+ const id=SOURCE_IDS[map];return SOURCE_TILES[id]?.[index]||null;
+}
 function generateTiles(map){
- const config=MAPS[map],source=SOURCE_ROUTES[SOURCE_IDS[map]],types=[];
- // The positions of playable cells and transfer edges are read from 4LEAF's original .mve.
- // Unresolved non-transfer tile effects are distributed deterministically, never presented as decoded archive data.
- let salt=Array.from(map).reduce((n,c)=>(n*33+c.codePointAt(0))>>>0,2166136261);
- const weighted=['normal','normal','normal','normal','normal','normal','ability','normal','clover','normal','chest','normal','keeper','normal','spade','normal','boost','normal','attribute','normal','doa','normal','random','normal','joker','normal','prison','normal','blessing','normal','curse','normal','arena'];
+ const config=MAPS[map],source=SOURCE_TILES[SOURCE_IDS[map]];
+ if(source?.length===config.length)return source.map(entry=>entry.type);
+ // Historical map file absent: create a playable but visibly labeled fallback only.
+ const sourceRoute=SOURCE_ROUTES[SOURCE_IDS[map]],types=[];
  for(let i=0;i<config.length;i++){
-   salt=(Math.imul(salt^i,1664525)+1013904223)>>>0;
-   let type=weighted[salt%weighted.length];
-   if(i===0)type='start';
-   else if(i===config.length-1)type='goal';
-   else if(source&&source[i]&&source[i][3]===10&&source[i][5]>=0&&source[i][5]<config.length&&source[i][5]!==i)type='warp';
+   const entry=sourceRoute?.[i];
+   let type=(i===0?'start':i===config.length-1?'goal':'normal');
+   if(entry?.[3]===10&&entry[5]<config.length&&entry[5]!==i)type='warp';
    types.push(type);
  }
  return types;
@@ -189,7 +189,7 @@ function generateTiles(map){
 function pathCoords(){let pts=[],left=0,right=13,top=0,bottom=7;while(left<=right&&top<=bottom){for(let x=left;x<=right;x++)pts.push([x,top]);for(let y=top+1;y<=bottom;y++)pts.push([right,y]);if(top<bottom)for(let x=right-1;x>=left;x--)pts.push([x,bottom]);if(left<right)for(let y=bottom-1;y>top;y--)pts.push([left,y]);left+=1;right-=1;top+=1;bottom-=1}return pts.map(([x,y])=>({x:5.5+x*(89/13),y:8.5+y*(83/7)}))}
 let PATH=pathCoords();
 function chooseSourcePath(map){const records=SOURCE_ROUTES[SOURCE_IDS[map]];if(!records||records.length<8){PATH=pathCoords();return}const xs=records.map(p=>p[0]),ys=records.map(p=>p[1]),xmin=Math.min(...xs),xmax=Math.max(...xs),ymin=Math.min(...ys),ymax=Math.max(...ys);PATH=records.map(p=>({x:8+(p[0]-xmin)*84/Math.max(1,xmax-xmin),y:8+(p[1]-ymin)*84/Math.max(1,ymax-ymin)}))}
-function installAuthenticMaps(){const list=$('map-select'),entries=Object.entries(SOURCE_INFO).filter(([id])=>SOURCE_ROUTES[id]&&SOURCE_ROUTES[id].length>9);if(!entries.length)return;list.replaceChildren();const rank=['4LEAF','주사위','워프 게이트','PK','악마의 달팽이','한반도','For the Lucky'];entries.sort((a,b)=>{let i=rank.indexOf(a[1].title),j=rank.indexOf(b[1].title);return (i<0?99:i)-(j<0?99:j)});for(const [id,info] of entries){const title=info.title,length=SOURCE_ROUTES[id].length;const old=MAPS[title]||{};const generate=(step,offset)=>Array.from({length:Math.floor(length/step)},(_,i)=>offset+i*step).filter(i=>i>0&&i<length-1);MAPS[title]={length,non:['악마의 달팽이','한반도'].includes(title),warp:old.warp||generate(30,8),keepers:old.keepers||generate(17,13),jail:old.jail||generate(44,25),chests:old.chests||generate(19,6),boost:old.boost||generate(23,17),attribute:old.attribute||generate(29,20),joker:old.joker||generate(41,36)};const opt=document.createElement('option');opt.value=title;opt.textContent=title+' · '+length+'칸 [원본 '+id+']';list.append(opt)}list.value='4LEAF'}
+function installAuthenticMaps(){const list=$('map-select'),entries=Object.entries(SOURCE_INFO).filter(([id])=>SOURCE_ROUTES[id]&&SOURCE_ROUTES[id].length>9);if(!entries.length)return;list.replaceChildren();const rank=['4LEAF','주사위','워프 게이트','PK','악마의 달팽이','한반도','For the Lucky'];entries.sort((a,b)=>{let i=rank.indexOf(a[1].title),j=rank.indexOf(b[1].title);return (i<0?99:i)-(j<0?99:j)});for(const [id,info] of entries){const title=info.title,length=SOURCE_ROUTES[id].length;const old=MAPS[title]||{};const generate=(step,offset)=>Array.from({length:Math.floor(length/step)},(_,i)=>offset+i*step).filter(i=>i>0&&i<length-1);MAPS[title]={length,non:['악마의 달팽이','한반도'].includes(title),warp:old.warp||generate(30,8),keepers:old.keepers||generate(17,13),jail:old.jail||generate(44,25),chests:old.chests||generate(19,6),boost:old.boost||generate(23,17),attribute:old.attribute||generate(29,20),joker:old.joker||generate(41,36)};const opt=document.createElement('option');opt.value=title;opt.textContent=title+' · '+length+'칸 [원본 '+id+(SOURCE_TILES[id]?' · 발판 복원':' · 경로 복원')+']';list.append(opt)}list.value='4LEAF'}
 function freshItems(){return Array.from({length:3},()=>ITEMS[rand(ITEMS.length)].id)}
 function newPlayer(id,bot,name,team){return {id,bot,name,team,position:0,jail:0,ability:0,items:freshItems(),effects:{shoe:0,dove:0,clover:0,spade:0,ring:0,armageddon:0,valkyrie:0,oddcurse:0,evencurse:0,block:0,destroy:0,keeper:0},usedItem:false,color:COLORS[id],pawn:PAWNS[id]}}
 function startGame(){const map=$('map-select').value,limit=Number($('point-limit').value),stats=teamStats(profile.team);chooseSourcePath(map);if(!profile.team[0])return modal('파티 구성','공격 체스맨을 선택하세요.',[{label:'확인',primary:true}]);if(stats.point>limit)return modal('소환 POINT 초과','현재 파티는 '+stats.point+'POINT이며 제한은 '+limit+'POINT입니다.',[{label:'확인',primary:true}]);const selectedMode=$('game-mode').value,hotseat=selectedMode!=='ai',bots=selectedMode==='network'?1:Number($('bot-count').value);
@@ -442,15 +442,16 @@ function grantItem(user){if(user.items.length<5){const itemId=ITEMS[rand(ITEMS.l
 async function resolveTile(p,depth=0){
  if(!match||match.finished||depth>5)return;
  const pos=p.position,type=match.tiles[pos];
- if(pos>=match.tiles.length-1){finishGame(p);return}
+ if(type==='goal'||pos>=match.tiles.length-1){finishGame(p);return}
  let landed=false;
  if(type==='boost'||type==='boost4'){
    const n=type==='boost4'?4:3;advance(p,n);appendMove(p.name+' +'+n+' 전진!');landed=true;
  }else if(type==='warp'){
    const row=SOURCE_ROUTES[SOURCE_IDS[match.map]]?.[pos];
-   let target=Number.isInteger(row?.[5])?row[5]:-1;
+   const group=originalTileAt(match.map,pos)?.warpGroup;
+   let target=(row?.[3]===10&&Number.isInteger(row[5]))?row[5]:-1;
    if(target<0||target>=match.tiles.length||target===pos){
-     const candidate=MAPS[match.map].warp.filter(x=>x!==pos);
+     const candidate=match.tiles.map((type,i)=>({type,i})).filter(o=>o.type==='warp'&&o.i!==pos&&(!group||originalTileAt(match.map,o.i)?.warpGroup===group)).map(o=>o.i);
      target=candidate.length?candidate[rand(candidate.length)]:pos;
    }
    if(target!==pos){p.position=target;appendMove(p.name+' 워프: '+(pos+1)+' → '+(target+1)+' 칸');landed=true}
@@ -462,7 +463,7 @@ async function resolveTile(p,depth=0){
  else if(type==='keeperA'||type==='keeperB'||type==='keeperC'){const power={keeperA:1,keeperB:3,keeperC:5};await resolveBattle(p,{id:-1,name:ITEM_MAP[type].name,def:power[type]},true);match.tiles[pos]='normal'}
  else if(type==='ability'){p.ability=Math.min(100,p.ability+25);appendMove(p.name+' 어빌리티 게이지 +25%')}
  else if(type==='ability100'){const count=Math.max(1,Math.min(4,teamStats(p.team).int||teamStats(p.team).atk));const eyes=diceN(count,6).values;if(eyes.some(v=>v===6)){p.ability=100;appendMove(p.name+' 판정 '+eyes.join(',')+' · 어빌리티 100%!')}else appendMove(p.name+' 판정 '+eyes.join(',')+' · 실패')}
- else if(type==='attribute'){match.attribute=['WANDS','SWORDS','CUPS','DISKS'][rand(4)];appendMove('맵 속성이 '+match.attribute+'(으)로 변경!')}
+ else if(type==='attribute'){match.attribute=originalTileAt(match.map,pos)?.attribute||['WANDS','SWORDS','CUPS','DISKS'][rand(4)];appendMove('맵 속성이 '+match.attribute+'(으)로 변경!')}
  else if(type==='clover'){p.effects.clover=1;p.effects.spade=0;appendMove(p.name+' 클로버: 다음 주사위는 높은 눈')}
  else if(type==='spade'){p.effects.spade=1;p.effects.clover=0;appendMove(p.name+' 스페이드: 다음 주사위는 낮은 눈')}
  else if(type==='doa'){
@@ -484,7 +485,7 @@ async function resolveTile(p,depth=0){
    if(type==='joker')match.tiles[pos]='joker';
    return;
  }
- if(p.position>=match.tiles.length-1){finishGame(p);return}
+ if(match.tiles[p.position]==='goal'||p.position>=match.tiles.length-1){finishGame(p);return}
  if(landed){await resolveTile(p,depth+1);return}
  if(!match.finished&&!MAPS[match.map].non){
    const opponent=match.players.find(other=>other!==p&&other.position===p.position&&other.effects.dove<=0&&p.effects.dove<=0);
