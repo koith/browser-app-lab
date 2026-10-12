@@ -1,0 +1,30 @@
+name: 4LEAF WebRTC real multiplayer integration
+on:
+  push:
+    paths:
+      - 'apps/4leaf/rog/network.js'
+      - 'apps/4leaf/rog/network.css'
+      - 'apps/4leaf/rog/index.html'
+      - 'apps/4leaf/rog/game.js'
+      - 'apps/4leaf/rog/tests/network.cjs'
+      - '.github/workflows/rog-network.yml'
+  workflow_dispatch:
+jobs:
+  two-browsers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          npm install --no-save playwright
+          npx playwright install chromium --with-deps
+      - name: Test two independently connected browsers and replicated turns
+        run: node apps/4leaf/rog/tests/network.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: real-p2p-two-device-screenshots
+          path: rog-online-*.png
