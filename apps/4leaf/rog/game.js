@@ -32,16 +32,28 @@ if(CHR_SOURCE.length>50){
 const CARD_MAP=Object.fromEntries(BASE_CARDS.map(c=>[c.id,c]));
 const DEFAULT_PROFILE={name:'Guest',gp:3000,wins:0,owned:CHR_SOURCE.length>50?STARTERS.slice():['soldier','joan','rashid','narcia'],team:CHR_SOURCE.length>50?['c_0078','c_0096','c_0040']:['joan','soldier','narcia']};
 const ITEMS=[
-{id:'wing',name:'날개',icon:'🪽',hint:'1~12칸 전진'},
-{id:'step',name:'4칸 전후진',icon:'↔',hint:'최대 4칸 이동'},
-{id:'shoe',name:'여신의 신발',icon:'♘',hint:'3턴 이동 주사위 +1'},
-{id:'dove',name:'비둘기',icon:'✧',hint:'5턴 PvP 면역'},
-{id:'blessing',name:'신의 축복',icon:'♣',hint:'아이템 5장 충전'},
-{id:'charge',name:'어빌리티 +50%',icon:'⚡',hint:'게이지 50% 충전'},
-{id:'change',name:'체인지',icon:'⟳',hint:'전투 값 교환'},
-{id:'bomb',name:'자폭',icon:'☠',hint:'상대와 START'},
-{id:'keeper',name:'키퍼 소환',icon:'♜',hint:'다음 턴 상대 키퍼'},
-{id:'curse',name:'신의 저주',icon:'♠',hint:'다른 플레이어 카드 소멸'}
+{id:'valkyrie',name:'발키리의 창',icon:'⚔',hint:'두 턴 공격 주사위 1개 추가',sourceId:'0008'},
+{id:'ring',name:'지혜의 반지',icon:'◉',hint:'두 턴 지원 지력 +2',sourceId:'0009'},
+{id:'bomb',name:'자폭',icon:'☠',hint:'대전 중 패배를 무효화하고 서로 START 복귀',sourceId:'0010',battle:true},
+{id:'wing',name:'날개',icon:'✧',hint:'선택한 1~12칸 전진',sourceId:'0011'},
+{id:'step',name:'4칸 전후진',icon:'↔',hint:'선택한 1~4칸 전·후진',sourceId:'0012'},
+{id:'flipper',name:'오리발',icon:'♧',hint:'대전 중 패배를 무효화',sourceId:'0013',battle:true},
+{id:'charge',name:'어빌리티 50',icon:'✦',hint:'능력 게이지 +50%',sourceId:'0014'},
+{id:'charge25',name:'어빌리티 25',icon:'✦',hint:'능력 게이지 +25%',sourceId:'0015'},
+{id:'armageddon',name:'아마겟돈',icon:'✹',hint:'2턴 동안 방어 보정',sourceId:'0016'},
+{id:'dove',name:'비둘기',icon:'✧',hint:'5턴 다른 유저와 전투 면역',sourceId:'0017'},
+{id:'change',name:'체인지',icon:'⟳',hint:'대전 중 공격·방어 결과 교환',sourceId:'0026',battle:true},
+{id:'oddcurse',name:'홀수 저주',icon:'Ⅰ',hint:'다음 타인의 홀수 눈 1 처리',sourceId:'0028'},
+{id:'evencurse',name:'짝수 저주',icon:'Ⅱ',hint:'다음 타인의 짝수 눈 1 처리',sourceId:'0029'},
+{id:'curse',name:'저주',icon:'♠',hint:'원하는 앞쪽 발판을 저주로 변경',sourceId:'0030'},
+{id:'kingbomb',name:'왕폭탄',icon:'✹',hint:'앞쪽 발판에 폭탄 설치',sourceId:'0031'},
+{id:'odincurse',name:'오딘의 저주',icon:'☠',hint:'앞쪽 발판에 데드 오어 얼라이브 저주',sourceId:'0032'},
+{id:'keeperA',name:'키퍼 A',icon:'♙',hint:'앞쪽 발판에 약한 키퍼 소환',sourceId:'0033'},
+{id:'keeperB',name:'키퍼 B',icon:'♜',hint:'앞쪽 발판에 중간 키퍼 소환',sourceId:'0034'},
+{id:'keeperC',name:'키퍼 C',icon:'♛',hint:'앞쪽 발판에 강한 키퍼 소환',sourceId:'0035'},
+{id:'drain25',name:'어빌리티 25 감소',icon:'−',hint:'상대 어빌리티 -25%',sourceId:'0038'},
+{id:'drain50',name:'어빌리티 50 감소',icon:'−',hint:'상대 어빌리티 -50%',sourceId:'0039'},
+{id:'shoe',name:'여신의 신발',icon:'♘',hint:'3턴 이동 주사위 1개 추가',sourceId:'0040'}
 ];
 const ITEM_MAP=Object.fromEntries(ITEMS.map(i=>[i.id,i]));
 const SOURCE_ROUTES=window.ORIGINAL_LEAF_MAPS||{},SOURCE_INFO=window.ORIGINAL_LEAF_MAP_INFO||{};
@@ -86,7 +98,7 @@ function modal(title,body,buttons){$('modal-title').textContent=title;$('modal-c
 function ask(title,body,options){return new Promise(resolve=>modal(title,body,options.map((a,i)=>({label:a,primary:i===0,run:()=>resolve(i)}))))}
 function toast(message){log(message);$('move-log').textContent=message}
 function rosterByIds(ids){return (ids||[]).map(id=>CARD_MAP[id]).filter(Boolean).slice(0,3)}
-function teamStats(ids){const cards=rosterByIds(ids),attack=cards[0]||CARD_MAP.soldier,defend=cards[1]||attack,assist=cards[2]||null;const same=cards.every(c=>c.move===cards[0].move);return {move:cards.length&&same?cards[0].move:1,atk:attack.atk,def:defend.def,int:assist?assist.int:0,point:cards.reduce((sum,c)=>sum+c.point,0),ability:attack.ability,portrait:attack.portrait,name:attack.name};}
+function teamStats(ids){const cards=rosterByIds(ids),attack=cards[0]||BASE_CARDS[0],defend=cards[1]||attack,assist=cards[2]||null;const same=cards.length>0&&cards.every(c=>c.move===cards[0].move);return {move:same?cards[0].move:1,atk:attack.atk,def:defend.def,int:assist?assist.int:0,point:cards.reduce((sum,c)=>sum+c.point,0),ability:attack.ability,abilityId:attack.abilityId,portrait:attack.portrait,name:attack.name};}
 function ownedCards(){return profile.owned.filter(x=>CARD_MAP[x])}
 function drawTeam(){const root=$('team-select');root.replaceChildren();const slots=['공격','방어','지력'];for(let slot=0;slot<3;slot++){const s=document.createElement('button');s.className='team-slot';const c=CARD_MAP[profile.team[slot]];s.innerHTML='<b>'+slots[slot]+'</b><small>'+(c?c.name:'미지정')+'</small><small>'+(c?('M'+c.move+' A'+c.atk+' D'+c.def+' I'+c.int):'')+'</small>';s.onclick=()=>{const div=document.createElement('div');const label=document.createElement('p');label.textContent=slots[slot]+' 포지션에 배치할 체스맨을 고르세요.';div.append(label);const select=document.createElement('select');ownedCards().forEach(id=>{const c=CARD_MAP[id],option=document.createElement('option');option.value=id;option.textContent=c.name+' (이동'+c.move+' · '+c.point+'pt)';if(profile.team[slot]===id)option.selected=true;select.append(option)});div.append(select);modal('파티 구성',div,[{label:'선택',primary:true,run:()=>{profile.team[slot]=select.value;persist();drawTeam()}},{label:'취소'}])};root.append(s)}const stats=teamStats(profile.team);const limit=Number($('point-limit').value);let summary=document.createElement('div');summary.className='fine';summary.textContent='합계 '+stats.point+' / '+limit+' POINT · 이동 주사위 '+stats.move+' · 공격 '+stats.atk+' · 방어 '+stats.def+' · 지원 지력 +'+stats.int;root.append(summary)}
 function drawShop(){const root=$('shop-grid');root.replaceChildren();const filtered=BASE_CARDS.filter(c=>group==='all'||c.rank===group);filtered.forEach(c=>{const b=document.createElement('button');b.className='shop-card'+(chosenCard===c.id?' selected':'');b.innerHTML='<div class="card-art"><img class="pixel-portrait" src="'+imageFor(c.id)+'" alt=""></div><b>'+c.name+'</b><span>'+c.price.toLocaleString()+' GP</span><small>M '+c.move+' / A '+c.atk+' / D '+c.def+' / I '+c.int+'</small><span class="'+(profile.owned.includes(c.id)?'owned':'')+'">'+(profile.owned.includes(c.id)?'● 보유':'◇ 미보유')+'</span>';b.onclick=()=>{chosenCard=c.id;drawShop()};root.append(b)});query('.group-tab').forEach(b=>b.classList.toggle('selected',b.dataset.group===group));const c=CARD_MAP[chosenCard];$('shop-selected').textContent=c.name+' · '+c.rank.toUpperCase()+' · '+c.point+'pt / '+c.price.toLocaleString()+'GP / '+c.ability;profileUI()}
@@ -113,7 +125,7 @@ let PATH=pathCoords();
 function chooseSourcePath(map){const records=SOURCE_ROUTES[SOURCE_IDS[map]];if(!records||records.length<8){PATH=pathCoords();return}const xs=records.map(p=>p[0]),ys=records.map(p=>p[1]),xmin=Math.min(...xs),xmax=Math.max(...xs),ymin=Math.min(...ys),ymax=Math.max(...ys);PATH=records.map(p=>({x:8+(p[0]-xmin)*84/Math.max(1,xmax-xmin),y:8+(p[1]-ymin)*84/Math.max(1,ymax-ymin)}))}
 function installAuthenticMaps(){const list=$('map-select'),entries=Object.entries(SOURCE_INFO).filter(([id])=>SOURCE_ROUTES[id]&&SOURCE_ROUTES[id].length>9);if(!entries.length)return;list.replaceChildren();const rank=['4LEAF','주사위','워프 게이트','PK','악마의 달팽이','한반도','For the Lucky'];entries.sort((a,b)=>{let i=rank.indexOf(a[1].title),j=rank.indexOf(b[1].title);return (i<0?99:i)-(j<0?99:j)});for(const [id,info] of entries){const title=info.title,length=SOURCE_ROUTES[id].length;const old=MAPS[title]||{};const generate=(step,offset)=>Array.from({length:Math.floor(length/step)},(_,i)=>offset+i*step).filter(i=>i>0&&i<length-1);MAPS[title]={length,non:['악마의 달팽이','한반도'].includes(title),warp:old.warp||generate(30,8),keepers:old.keepers||generate(17,13),jail:old.jail||generate(44,25),chests:old.chests||generate(19,6),boost:old.boost||generate(23,17),attribute:old.attribute||generate(29,20),joker:old.joker||generate(41,36)};const opt=document.createElement('option');opt.value=title;opt.textContent=title+' · '+length+'칸 [원본 '+id+']';list.append(opt)}list.value='4LEAF'}
 function freshItems(){return Array.from({length:3},()=>ITEMS[rand(ITEMS.length)].id)}
-function newPlayer(id,bot,name,team){return {id,bot,name,team,position:0,jail:0,ability:0,items:freshItems(),effects:{shoe:0,dove:0,clover:0,spade:0,ring:0,armageddon:0},usedItem:false,color:COLORS[id],pawn:PAWNS[id]}}
+function newPlayer(id,bot,name,team){return {id,bot,name,team,position:0,jail:0,ability:0,items:freshItems(),effects:{shoe:0,dove:0,clover:0,spade:0,ring:0,armageddon:0,valkyrie:0,oddcurse:0,evencurse:0,block:0,destroy:0,keeper:0},usedItem:false,color:COLORS[id],pawn:PAWNS[id]}}
 function startGame(){const map=$('map-select').value,limit=Number($('point-limit').value),stats=teamStats(profile.team);chooseSourcePath(map);if(!profile.team[0])return modal('파티 구성','공격 체스맨을 선택하세요.',[{label:'확인',primary:true}]);if(stats.point>limit)return modal('소환 POINT 초과','현재 파티는 '+stats.point+'POINT이며 제한은 '+limit+'POINT입니다.',[{label:'확인',primary:true}]);const bots=Number($('bot-count').value);let players=[newPlayer(0,false,profile.name,profile.team.slice())];for(let i=0;i<bots;i++){const weakTeams=CHR_SOURCE.length>50?[
  ['c_0096','c_0078','c_0040'],['c_0078','c_0045','c_0096'],['c_0040','c_0078','c_0096'],['c_0045','c_0096','c_0078'],['c_0078','c_0040','c_0045'],['c_0096','c_0045','c_0078'],['c_0040','c_0096','c_0045']]:
  [['rashid','soldier','narcia'],['joan','narcia','soldier'],['soldier','joan','rashid'],['iolyn','soldier','narcia'],['merza','rashid','soldier'],['christian','soldier','joan'],['damian','soldier','narcia']];let team=weakTeams[i].filter((_,j)=>j===0||limit>=8);while(teamStats(team).point>limit)team.pop();players.push(newPlayer(i+1,true,BOT_NAMES[i],team))}match={version:2,map,tiles:generateTiles(map),players,active:0,round:1,finished:false,winner:-1,attribute:'NONE',message:'주사위를 굴려 주세요.',lastRoll:[],history:[],pending:null};busy=false;persist();navigate('game');chat('SYSTEM',map+' 게임을 시작했습니다. 컴퓨터 '+bots+'명이 참가합니다.','system');drawGame()}
@@ -257,6 +269,11 @@ async function takeTurn(){
  if(p.effects.shoe>0)p.effects.shoe--;
  if(p.effects.dove>0)p.effects.dove--;
  if(p.effects.armageddon>0)p.effects.armageddon--;
+ if(p.effects.valkyrie>0)p.effects.valkyrie--;
+ if(p.effects.ring>0)p.effects.ring--;
+ if(p.effects.block>0)p.effects.block--;
+ if(p.effects.destroy>0)p.effects.destroy--;
+ if(p.effects.keeper>0)p.effects.keeper--;
  await wait(p.bot?180:100);busy=false;nextTurn();
 }
 function nextTurn(){
