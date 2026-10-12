@@ -1,0 +1,53 @@
+name: 4LEAF InstallShield resource extraction
+on:
+  push:
+    paths:
+      - '.github/workflows/rog-extract.yml'
+  workflow_dispatch:
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install safe archive readers
+        run: sudo apt-get update -qq && sudo apt-get install -y unshield cabextract p7zip-full
+      - name: Download original installer and inspect InstallShield cabinet
+        run: |
+          mkdir -p original-extract/raw original-extract/unpacked
+          python - <<'PY'
+          import urllib.request
+          url='https://archive.org/download/4leaf/4leaf.zip'
+          with urllib.request.urlopen(urllib.request.Request(url,headers={'User-Agent':'Mozilla/5.0'}),timeout=90) as r,open('original-extract/4leaf.zip','wb') as f:
+            while chunk:=r.read(1048576):f.write(chunk)
+          PY
+          unzip -q original-extract/4leaf.zip 'data1.cab' 'data1.hdr' -d original-extract/raw
+          file original-extract/raw/*
+          unshield l original-extract/raw/data1.cab >original-extract/cab-entries.txt || true
+          head -120 original-extract/cab-entries.txt
+          unshield x -d original-extract/unpacked original-extract/raw/data1.cab || true
+          7z l original-extract/raw/data1.cab | head -55 || true
+          python - <<'PY'
+          import os,collections,json,pathlib
+          roots=list(pathlib.Path('original-extract/unpacked').rglob('*'))
+          files=[p for p in roots if p.is_file()]
+          size=sum(p.stat().st_size for p in files)
+          print('EXTRACTED-COUNT',len(files),'BYTES',size)
+          groups=collections.Counter(p.suffix.lower() for p in files)
+          print('FILE-TYPES',json.dumps(groups,ensure_ascii=False))
+          for p in files[:350]:print('CLIENT-FILE',p,p.stat().st_size)
+          small=[p for p in files if p.stat().st_size<4000000 and p.suffix.lower() in ('.png','.jpg','.gif','.bmp','.pcx','.tga','.spr','.ini','.txt','.xml','.cfg','.pak','.dat','.wma','.wav','.mid')]
+          out=pathlib.Path('original-extract/samples');out.mkdir(exist_ok=True)
+          for i,p in enumerate(small[:180]):
+            dest=out/(str(i).zfill(3)+'_'+p.name)
+            if dest.exists():continue
+            dest.write_bytes(p.read_bytes())
+          print('IMAGE-SAMPLES',len(small))
+          PY
+          rm -rf original-extract/4leaf.zip original-extract/raw original-extract/unpacked
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: 4leaf-extracted-client-resource-samples
+          path: original-extract/
+          retention-days: 2
