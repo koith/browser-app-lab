@@ -1,0 +1,35 @@
+name: 4LEAF original asset discovery
+on:
+  push:
+    paths:
+      - '.github/workflows/rog-assets.yml'
+  workflow_dispatch:
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inspect original archive image resources
+        run: |
+          python - <<'PY'
+          import re,urllib.request,html
+          from html.parser import HTMLParser
+          class P(HTMLParser):
+            def __init__(self): super().__init__();self.images=[]
+            def handle_starttag(self,tag,attrs):
+              a=dict(attrs)
+              if tag=='img':
+                self.images.append({k:v for k,v in a.items() if k in ('src','data-src','data-original','data-phocus','alt','width','height')})
+          for id in [1587,1588,1599,1598,1527,1503]:
+            for base in ['https://4leafmemorial.geld.kr/','https://4leafmemorial.tistory.com/']:
+              try:
+                req=urllib.request.Request(base+str(id),headers={'User-Agent':'Mozilla/5.0'})
+                html_text=urllib.request.urlopen(req,timeout=25).read().decode('utf-8','replace')
+                p=P();p.feed(html_text)
+                photos=[x for x in p.images if any('tistory' in str(z) or 'daumcdn' in str(z) or 'kakaocdn' in str(z) for z in x.values())]
+                print('ASSET_PAGE',id,base,'html_bytes',len(html_text),'images',len(p.images),'cdn_images',len(photos))
+                for i,img in enumerate(photos[:90]):print('IMAGE',id,i,repr(img)[:950])
+                break
+              except Exception as ex:print('FETCH_ERROR',id,base,str(ex)[:190])
+          PY
