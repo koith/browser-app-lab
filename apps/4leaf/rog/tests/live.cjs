@@ -22,6 +22,7 @@ const base='https://koith.github.io/browser-app-lab/apps/4leaf/';
  assert.ok(q.titles>=25&&q.tiles>=25&&q.chessmen>=90);
  await page.locator('#roll-btn').click();
  await page.waitForFunction(()=>window.__ROG_TEST__.getMatch().players[0].position>0,null,{timeout:15000});
+ await page.waitForFunction(()=>Array.from(document.querySelectorAll('#game img')).filter(el=>el.offsetParent!==null).every(el=>el.complete),null,{timeout:12000});
  const images=await page.locator('#game img').evaluateAll(list=>list.filter(el=>el.offsetParent!==null&&!el.naturalWidth).map(el=>el.src));
  assert.deepEqual(images,[],'visible source character textures must load');
  assert.deepEqual(invalid,[],'all requested public assets must exist');
