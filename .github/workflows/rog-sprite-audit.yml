@@ -1,0 +1,52 @@
+name: 4LEAF original sprite archive forensics
+on:
+  push:
+    paths:
+      - '.github/workflows/rog-sprite-audit.yml'
+  workflow_dispatch:
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - run: sudo apt-get update -qq && sudo apt-get install -y unshield
+      - name: Inspect original OBS tile/chessman SPR storage
+        run: |
+          mkdir -p /tmp/leaf/raw /tmp/leaf/unpacked audit-sprites
+          python - <<'PY'
+          import urllib.request,time
+          url='https://archive.org/download/4leaf/4leaf.zip'
+          for trial in range(4):
+            try:
+              with urllib.request.urlopen(urllib.request.Request(url,headers={'User-Agent':'Mozilla/5.0'}),timeout=90) as r,open('/tmp/leaf/setup.zip','wb') as f:
+                while chunk:=r.read(1048576):f.write(chunk)
+              break
+            except Exception as e:
+              if trial==3:raise
+              time.sleep(5)
+          PY
+          unzip -q /tmp/leaf/setup.zip 'data1.cab' 'data1.hdr' -d /tmp/leaf/raw
+          unshield x -d /tmp/leaf/unpacked /tmp/leaf/raw/data1.cab > /dev/null
+          python - <<'PY'
+          import struct,pathlib,collections,json
+          root=pathlib.Path('/tmp/leaf/unpacked/4Leaf_Files/Dice')
+          out=pathlib.Path('audit-sprites')
+          for arch in ['OBS.pak','OBS2.pak','OBS3.pak','IMG.pak','TIS.pak']:
+            p=root/arch;b=p.read_bytes();n=struct.unpack_from('<I',b)[0]^0xffffffff
+            names=[];size=0
+            for i in range(n):
+              rec=b[4+28*i:32+28*i]
+              name=bytes(x^255 for x in rec[:24]).split(b'\0')[0].decode('cp949','replace')
+              end=(struct.unpack_from('<I',rec,24)[0]^0xffffffff)+1
+              names.append(name)
+            print('OBS-ARCHIVE',arch,'length',len(b),'count',n,'extensions',dict(collections.Counter(pathlib.Path(x).suffix.lower() for x in names)))
+            print('OBS-FIRST',arch,repr(names[:150]))
+            print('OBS-LAST',arch,repr(names[-80:]))
+            (out/(arch+'.json')).write_text(json.dumps(names,ensure_ascii=False,indent=2))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: 4leaf-sprite-manifest
+          path: audit-sprites
