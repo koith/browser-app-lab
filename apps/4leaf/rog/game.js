@@ -167,7 +167,7 @@ function drawBoard(){
 }
 function drawPawns(){
  let layer=$('board-pawns');
- if(!layer){layer=document.createElement('div');layer.id='board-pawns';$('board-area').append(layer)}
+ if(!layer){layer=document.createElement('div');layer.id='board-pawns';$('board-world').append(layer)}
  const players=match.players;
  for(const stale of query('.board-pawn',layer)){
    if(!players.some(p=>String(p.id)===stale.dataset.id))stale.remove();
@@ -190,6 +190,41 @@ function drawPawns(){
  }
 }
 function drawGame(){if(!match||!MAPS[match.map])return;chooseSourcePath(match.map);const p=(match.mode==='hotseat'?activePlayer():match.players[0]),stats=teamStats(p.team);$('game-map-title').textContent=match.map;$('element-label').textContent=match.attribute;$('player-count').textContent=match.players.length;$('turn-indicator').textContent='ROUND '+match.round+' · '+match.players[match.active].name+' TURN';$('my-name').textContent=p.name;$('my-stats').textContent='이동 '+stats.move+' · 공격 '+stats.atk+' · 방어 '+stats.def+' · 지력 +'+stats.int;$('my-position').textContent=p.jail>0?'감옥 '+p.jail+'턴':p.position===0?'START':p.position===match.tiles.length-1?'GOAL':(p.position+1)+'번째 칸';$('my-portrait').innerHTML='<img class="player-sprite" alt="" src="'+imageFor(p.team[0]||'soldier')+'">';$('ability-fill').style.width=p.ability+'%';$('game-players').replaceChildren();match.players.forEach((user,i)=>{const li=document.createElement('div');li.className=match.active===i?'is-turn':'';li.textContent=(match.active===i?'▶ ':'　')+user.pawn+' '+user.name+' '+(user.position+1)+'칸 · '+user.ability+'%';li.style.color=user.color;$('game-players').append(li)});$('my-items').replaceChildren();p.items.forEach((itemId,i)=>{const item=ITEM_MAP[itemId],btn=document.createElement('button');btn.className='item-card';btn.innerHTML='<span class="item-icon">'+(item?.icon||'✧')+'</span>'+(item?.name||itemId);btn.title=item.hint;btn.disabled=match.finished||!playerCanAct()||p.usedItem||busy;btn.onclick=()=>useItem(i);$('my-items').append(btn)});$('roll-btn').disabled=!playerCanAct();$('ability-btn').disabled=!playerCanAct()||p.ability<100;$('move-log').textContent=match.message;drawBoard()}
+const mapViewport={zoom:1,panX:0,panY:0};
+function applyMapViewport(){
+ const world=$('board-world');if(!world)return;
+ world.style.transform='translate('+mapViewport.panX+'px,'+mapViewport.panY+'px) scale('+mapViewport.zoom+')';
+ const label=$('board-zoom-reset');if(label)label.title='맵 배율 '+Math.round(mapViewport.zoom*100)+'% · 중앙으로 복귀';
+}
+function zoomBoard(by){
+ mapViewport.zoom=Math.max(1,Math.min(3.2,Math.round((mapViewport.zoom+by)*100)/100));
+ if(mapViewport.zoom===1){mapViewport.panX=0;mapViewport.panY=0}
+ applyMapViewport();
+}
+function installBoardControls(){
+ $('board-zoom-in').onclick=()=>zoomBoard(.25);
+ $('board-zoom-out').onclick=()=>zoomBoard(-.25);
+ $('board-zoom-reset').onclick=()=>{mapViewport.zoom=1;mapViewport.panX=0;mapViewport.panY=0;applyMapViewport()};
+ const area=$('board-area');let tracking=null;
+ area.addEventListener('pointerdown',e=>{
+   if(e.target.closest('#board-zoom-controls')||e.button!==0)return;
+   tracking={id:e.pointerId,x:e.clientX,y:e.clientY,px:mapViewport.panX,py:mapViewport.panY};
+   area.setPointerCapture(e.pointerId);
+ });
+ area.addEventListener('pointermove',e=>{
+   if(!tracking||tracking.id!==e.pointerId||mapViewport.zoom<=1)return;
+   const maxX=area.clientWidth*(mapViewport.zoom-1)/2,maxY=area.clientHeight*(mapViewport.zoom-1)/2;
+   mapViewport.panX=Math.max(-maxX,Math.min(maxX,tracking.px+e.clientX-tracking.x));
+   mapViewport.panY=Math.max(-maxY,Math.min(maxY,tracking.py+e.clientY-tracking.y));
+   applyMapViewport();
+ });
+ for(const kind of ['pointerup','pointercancel','lostpointercapture'])area.addEventListener(kind,()=>{tracking=null});
+ area.addEventListener('wheel',e=>{
+   if(!e.ctrlKey&&!e.metaKey)return;
+   e.preventDefault();zoomBoard(e.deltaY<0?.2:-.2);
+ },{passive:false});
+ applyMapViewport();
+}
 function withUserTurn(){return playerCanAct()}
 function useItem(index){
  if(!withUserTurn())return;
@@ -428,5 +463,5 @@ function nextTurn(){
  if(p.bot)setTimeout(()=>{if(route==='game'&&!busy&&match&&!match.finished&&match.players[match.active].bot)takeTurn()},430);
  else appendMove(p.name+' 차례입니다. 주사위를 굴리세요.');
 }
-function init(){installAuthenticMaps();if(match)chooseSourcePath(match.map);profileUI();buildRoomList();buildPeople();drawTeam();drawShop();query('[data-route]').forEach(b=>b.addEventListener('click',()=>navigate(b.dataset.route)));query('.group-tab').forEach(b=>b.addEventListener('click',()=>{group=b.dataset.group;drawShop()}));$('point-limit').onchange=drawTeam;$('start-game').onclick=startGame;$('resume-game').onclick=()=>{if(match&&!match.finished){busy=false;navigate('game');chat('SYSTEM','진행 중인 게임을 이어합니다.','system')}};$('roll-btn').onclick=takeTurn;$('ability-btn').onclick=useAbility;$('exit-game').onclick=()=>modal('게임에서 나가기','진행 중인 게임은 브라우저에 보관됩니다. 나갔다가 주사위의 잔영 버튼으로 다시 들어올 수 있습니다.',[{label:'나가기',primary:true,run:()=>navigate('lobby')},{label:'취소'}]);$('shop-buy').onclick=()=>{const c=CARD_MAP[chosenCard];if(profile.owned.includes(c.id))return modal('매직카덴',c.name+' 카드는 이미 가지고 있습니다.',[{label:'확인'}]);if(profile.gp<c.price)return modal('매직카덴','GP가 부족합니다.',[{label:'확인'}]);modal('매직카덴',c.name+' 카드를 '+c.price.toLocaleString()+'GP에 구매하시겠습니까?',[{label:'구매',primary:true,run:()=>{profile.gp-=c.price;profile.owned.push(c.id);profileUI();drawShop();drawTeam();chat('매직카덴',c.name+' 카드를 구매했습니다.','system');sfx(830)}},{label:'취소'}])};$('rename').onclick=()=>{const div=document.createElement('div');div.textContent='사용할 닉네임을 입력하세요.';const input=document.createElement('input');input.maxLength=12;input.value=profile.name;div.append(document.createElement('hr'),input);modal('4LEAF 별명 변경',div,[{label:'변경',primary:true,run:()=>{if(!input.value.trim())return;profile.name=input.value.trim().slice(0,12);profileUI();buildPeople();if(match&&!match.finished)match.players[0].name=profile.name;chat('SYSTEM','닉네임이 '+profile.name+'(으)로 변경되었습니다.','system')}},{label:'취소'}])};$('audio').onclick=()=>{soundOn=!soundOn;syncMusic();log(soundOn?'원작 배경음악/효과음 켜짐':'배경음악/효과음 꺼짐');sfx(650)};$('help').onclick=()=>navigate('help-screen');$('make-room').onclick=()=>modal('새로운 채팅방','채팅방 개설은 로컬 재현 모드에서만 가능합니다.',[{label:'확인'}]);$('chat-form').onsubmit=e=>{e.preventDefault();const input=$('message'),message=input.value.trim();input.value='';if(!message)return;chat(profile.name,message);sfx(480);if(route==='rooms'&&Math.random()<.25)setTimeout(()=>chat('티치엘','오늘도 좋은 하루 보내세요!','npc'),650)};query('#online-list').forEach(()=>{});const list=$('online-list');['Guest (LOCAL)','티치엘 (NPC)','막시민 (NPC)','보리스 (NPC)','루시안 (NPC)','이스핀 (NPC)','시벨린 (NPC)','루시아 (NPC)','샤이닝 브리즈','실버 호라이즌','켈티카'].forEach(n=>{const div=document.createElement('div');div.textContent='♧ '+n;list.append(div)});setInterval(()=>{$('clock').textContent=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})},12000);$('clock').textContent=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});chat('SYSTEM','4LEAF Browser에 오신 것을 환영합니다.','system');chat('SYSTEM','원작 화면 재구성 · AI 대전 · 로컬 채팅. 온라인 멀티플레이는 지원하지 않습니다.','system');navigate('sky');window.__ROG_TEST__={startGame,drawGame,takeTurn,teamStats,generateTiles,getMatch:()=>match,go:navigate,setRoll:()=>{},setMatch:v=>{match=v;drawGame()},getSourceMaps:()=>SOURCE_INFO,playerCanAct,refreshResume};if(match&&!match.finished){log('저장된 경기가 있습니다. 주사위 대기실의 이어하기로 복원하세요.')}refreshResume()}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+function init(){installBoardControls();installAuthenticMaps();if(match)chooseSourcePath(match.map);profileUI();buildRoomList();buildPeople();drawTeam();drawShop();query('[data-route]').forEach(b=>b.addEventListener('click',()=>navigate(b.dataset.route)));query('.group-tab').forEach(b=>b.addEventListener('click',()=>{group=b.dataset.group;drawShop()}));$('point-limit').onchange=drawTeam;$('start-game').onclick=startGame;$('resume-game').onclick=()=>{if(match&&!match.finished){busy=false;navigate('game');chat('SYSTEM','진행 중인 게임을 이어합니다.','system')}};$('roll-btn').onclick=takeTurn;$('ability-btn').onclick=useAbility;$('exit-game').onclick=()=>modal('게임에서 나가기','진행 중인 게임은 브라우저에 보관됩니다. 나갔다가 주사위의 잔영 버튼으로 다시 들어올 수 있습니다.',[{label:'나가기',primary:true,run:()=>navigate('lobby')},{label:'취소'}]);$('shop-buy').onclick=()=>{const c=CARD_MAP[chosenCard];if(profile.owned.includes(c.id))return modal('매직카덴',c.name+' 카드는 이미 가지고 있습니다.',[{label:'확인'}]);if(profile.gp<c.price)return modal('매직카덴','GP가 부족합니다.',[{label:'확인'}]);modal('매직카덴',c.name+' 카드를 '+c.price.toLocaleString()+'GP에 구매하시겠습니까?',[{label:'구매',primary:true,run:()=>{profile.gp-=c.price;profile.owned.push(c.id);profileUI();drawShop();drawTeam();chat('매직카덴',c.name+' 카드를 구매했습니다.','system');sfx(830)}},{label:'취소'}])};$('rename').onclick=()=>{const div=document.createElement('div');div.textContent='사용할 닉네임을 입력하세요.';const input=document.createElement('input');input.maxLength=12;input.value=profile.name;div.append(document.createElement('hr'),input);modal('4LEAF 별명 변경',div,[{label:'변경',primary:true,run:()=>{if(!input.value.trim())return;profile.name=input.value.trim().slice(0,12);profileUI();buildPeople();if(match&&!match.finished)match.players[0].name=profile.name;chat('SYSTEM','닉네임이 '+profile.name+'(으)로 변경되었습니다.','system')}},{label:'취소'}])};$('audio').onclick=()=>{soundOn=!soundOn;syncMusic();log(soundOn?'원작 배경음악/효과음 켜짐':'배경음악/효과음 꺼짐');sfx(650)};$('help').onclick=()=>navigate('help-screen');$('make-room').onclick=()=>modal('새로운 채팅방','채팅방 개설은 로컬 재현 모드에서만 가능합니다.',[{label:'확인'}]);$('chat-form').onsubmit=e=>{e.preventDefault();const input=$('message'),message=input.value.trim();input.value='';if(!message)return;chat(profile.name,message);sfx(480);if(route==='rooms'&&Math.random()<.25)setTimeout(()=>chat('티치엘','오늘도 좋은 하루 보내세요!','npc'),650)};query('#online-list').forEach(()=>{});const list=$('online-list');['Guest (LOCAL)','티치엘 (NPC)','막시민 (NPC)','보리스 (NPC)','루시안 (NPC)','이스핀 (NPC)','시벨린 (NPC)','루시아 (NPC)','샤이닝 브리즈','실버 호라이즌','켈티카'].forEach(n=>{const div=document.createElement('div');div.textContent='♧ '+n;list.append(div)});setInterval(()=>{$('clock').textContent=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})},12000);$('clock').textContent=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});chat('SYSTEM','4LEAF Browser에 오신 것을 환영합니다.','system');chat('SYSTEM','원작 화면 재구성 · AI 대전 · 로컬 채팅. 온라인 멀티플레이는 지원하지 않습니다.','system');navigate('sky');window.__ROG_TEST__={startGame,drawGame,takeTurn,teamStats,generateTiles,getMatch:()=>match,go:navigate,setRoll:()=>{},setMatch:v=>{match=v;drawGame()},getSourceMaps:()=>SOURCE_INFO,playerCanAct,refreshResume};if(match&&!match.finished){log('저장된 경기가 있습니다. 주사위 대기실의 이어하기로 복원하세요.')}refreshResume()}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
