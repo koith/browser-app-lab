@@ -15,6 +15,7 @@ const path=require('path');
   await Promise.all([host.waitForFunction(()=>!!window.__LEAF_NET__&&!!window.__LEAF_BRIDGE__),guest.waitForFunction(()=>!!window.__LEAF_NET__&&!!window.__LEAF_BRIDGE__)]);
   await host.locator('[data-route="lobby"]').first().click();
   await guest.locator('[data-route="lobby"]').first().click();
+  await Promise.all([host.locator('#lobby-create').click(),guest.locator('#lobby-create').click()]);
   await Promise.all([host.selectOption('#game-mode','network'),guest.selectOption('#game-mode','network')]);
   await host.locator('#net-make').click();
   await host.waitForFunction(()=>document.querySelector('#net-output-offer').value.length>100,null,{timeout:18000});
