@@ -187,12 +187,16 @@ async function useAbility(){if(!withUserTurn())return;const p=match.players[0];i
 function combat(attacker,defender,keeper=false){
  return new Promise(resolve=>{
  const aStat=teamStats(attacker.team),bStat=keeper?{def:defender.def||2,int:0}:{...teamStats(defender.team)};
- const aCount=Math.max(1,aStat.atk),bCount=Math.max(1,bStat.def);
+ const aCount=Math.max(1,aStat.atk+(attacker.effects?.valkyrie>0?1:0)),bCount=Math.max(1,bStat.def);
  let attack,defense,aValue,bValue,rerolls=0;
  for(let attempt=0;attempt<100;attempt++){
    attack=diceN(aCount,6);defense=diceN(bCount,6);
-   aValue=attack.total+(aStat.int||0)+(attacker.effects?.ring||0);
-   bValue=defense.total+(bStat.int||0)+(defender.effects?.ring||0);
+   aValue=attack.total+(aStat.int||0)+(attacker.effects?.ring>0?2:0);
+   bValue=defense.total+(bStat.int||0)+(defender.effects?.ring>0?2:0);
+   if(attacker.effects?.destroy>0)aValue=24;
+   if(defender.effects?.block>0)bValue=24;
+   if(attacker.effects?.armageddon>0)aValue+=6;
+   if(defender.effects?.armageddon>0)bValue+=6;
    if(aValue!==bValue)break;rerolls++;
  }
  const div=document.createElement('div');
@@ -204,6 +208,7 @@ function combat(attacker,defender,keeper=false){
  if(selfInvolved&&player.items.includes('change')&&!player.usedItem){
    options.unshift({label:'체인지 카드',run:()=>{player.items.splice(player.items.indexOf('change'),1);player.usedItem=true;resolve({attacker:bValue,defender:aValue,changed:true})}});
  }
+ if(selfInvolved&&player.items.includes('bomb')&&!player.usedItem){options.unshift({label:'자폭',run:()=>{player.items.splice(player.items.indexOf('bomb'),1);player.usedItem=true;attacker.position=0;if(Number.isInteger(defender.position))defender.position=0;resolve({...results,negated:true,mutualReset:true})}})}
  if(selfInvolved&&player.items.includes('flipper')&&!player.usedItem){
    options.unshift({label:'오리발 카드',run:()=>{player.items.splice(player.items.indexOf('flipper'),1);player.usedItem=true;resolve({...results,negated:true})}});
  }
@@ -215,7 +220,7 @@ function combat(attacker,defender,keeper=false){
 };modal('⚔ BATTLE · 전투',div,options);sfx(235,.21);if(!selfInvolved||keeper&&attacker.bot){setTimeout(()=>{if(!$('modal').classList.contains('hidden')){const ok=query('#modal-buttons button').find(b=>b.textContent==='결과 확인');if(ok)ok.click()}},Math.max(350,keeper?600:700))}})}
 async function resolveBattle(attacker,defender,keeper){
  const result=await combat(attacker,defender,keeper);
- if(result.negated){appendMove('오리발 효과! 이번 전투는 무효화되었습니다.');return}
+ if(result.negated){appendMove(result.mutualReset?'자폭: 양측 START 복귀':'오리발 효과: 전투 무효화');return}
  const av=result.attacker,bv=result.defender;
  if(av===bv){appendMove('전투 판정이 무효입니다.');return}
  const loser=av>bv?defender:attacker,diff=Math.abs(av-bv);
