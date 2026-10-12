@@ -74,7 +74,7 @@ const imageFor=(id)=>'./original/CardData/chm_'+(SOURCE_PORTRAITS[(CARD_MAP[id]|
 const townAvatar=(i)=>'./original/Registry/sava'+String([0,82,6,1,85][i%5]).padStart(2,'0')+'.png';
 let remoteAct=false;
 let shopPage=0;
-let profile,match=null,route='sky',chosenCard=CHR_SOURCE.length>50?'c_0078':'joan',group='all',currentRoom='샤이닝 브리즈',soundOn=false,audioCtx=null,busy=false,bgm=null,bgmTrack=null;
+let profile,match=null,route='sky',chosenCard=CHR_SOURCE.length>50?'c_0040':'joan',group='all',currentRoom='샤이닝 브리즈',soundOn=false,audioCtx=null,busy=false,bgm=null,bgmTrack=null;
 const safe=(v,f)=>{try{const a=JSON.parse(localStorage.getItem('rog_'+v));return a===null?f:a}catch{return f}};
 profile=safe('profile',DEFAULT_PROFILE);
 if(!profile||!Array.isArray(profile.owned))profile=structuredClone(DEFAULT_PROFILE);
@@ -131,6 +131,7 @@ function selectShopCard(id){
 function drawShop(){
  const root=$('shop-grid'),cards=shopFiltered(),pages=Math.max(1,Math.ceil(cards.length/9));
  shopPage=Math.max(0,Math.min(pages-1,shopPage));
+ if(!cards.slice(shopPage*9,shopPage*9+9).some(c=>c.id===chosenCard)&&cards.length)chosenCard=cards[shopPage*9].id;
  root.replaceChildren();
  for(let i=0;i<9;i++){
    const c=cards[shopPage*9+i],b=document.createElement('button');
