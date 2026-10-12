@@ -536,7 +536,13 @@ async function resolveTile(p,depth=0){
  else if(type==='kingbomb'){p.position=0;appendMove(p.name+' 왕폭탄 폭발! START 복귀');match.tiles[pos]='normal'}
  else if(type==='keeperA'||type==='keeperB'||type==='keeperC'){const power={keeperA:1,keeperB:3,keeperC:5};await resolveBattle(p,{id:-1,name:ITEM_MAP[type].name,def:power[type]},true);match.tiles[pos]='normal'}
  else if(type==='ability'){p.ability=Math.min(100,p.ability+25);appendMove(p.name+' 어빌리티 게이지 +25%')}
- else if(type==='ability100'){const count=Math.max(1,Math.min(4,teamStats(p.team).int||teamStats(p.team).atk));const eyes=diceN(count,6).values;if(eyes.some(v=>v===6)){p.ability=100;appendMove(p.name+' 판정 '+eyes.join(',')+' · 어빌리티 100%!')}else appendMove(p.name+' 판정 '+eyes.join(',')+' · 실패')}
+ else if(type==='ability100'){
+   const ts=teamStats(p.team),count=Math.max(1,Math.min(4,p.team?.length>=3?ts.int:(p.team?.length===2?ts.def:ts.atk)));
+   const targets=Array.from({length:6},(_,i)=>i+1).sort(()=>Math.random()-.5).slice(0,count);
+   const eye=d(6);
+   if(targets.includes(eye)){p.ability=100;appendMove(p.name+' 소울풀 판정 '+eye+' / 목표 '+targets.join(',')+' · 어빌리티 100%!')}
+   else appendMove(p.name+' 소울풀 판정 '+eye+' / 목표 '+targets.join(',')+' · 실패');
+ }
  else if(type==='attribute'){match.attribute=originalTileAt(match.map,pos)?.attribute||['WANDS','SWORDS','CUPS','DISKS'][rand(4)];appendMove('맵 속성이 '+match.attribute+'(으)로 변경!')}
  else if(type==='clover'){p.effects.clover=1;p.effects.spade=0;appendMove(p.name+' 클로버: 다음 주사위는 높은 눈')}
  else if(type==='spade'){p.effects.spade=1;p.effects.clover=0;appendMove(p.name+' 스페이드: 다음 주사위는 낮은 눈')}
@@ -545,8 +551,11 @@ async function resolveTile(p,depth=0){
    if(diff>=3)p.position=0;else p.position=Math.max(0,p.position-diff*3);
    appendMove(p.name+' DEAD OR ALIVE: '+first+' / '+second+' → '+(diff>=3?'START':diff*3+'칸 후퇴'));
  }else if(type==='keeper'||type==='arena'){
-   if(!(type==='arena'&&p.effects.dove>0)){
-     const monsters=[['슬라임',1],['해골',2],['좀비',2],['고렘',3],['아지다하카',3],['크루거',4],['마장기',6]];
+   if(type==='arena'){
+     const incumbent=match.players.find(x=>x!==p&&x.position===pos);
+     if(incumbent&&p.effects.dove<=0&&incumbent.effects.dove<=0)await resolveBattle(p,incumbent,false);
+   }else{
+     const monsters=[['말벌',1],['박쥐',1],['슬라임',1],['가이아버그',2],['해골',2],['좀비',2],['고렘',3],['아지다하카',3],['카르마타',4],['크루거',4],['마장기',6]];
      const mob=monsters[rand(monsters.length)];
      await resolveBattle(p,{id:-1,name:mob[0],def:mob[1]},true);
    }
@@ -561,12 +570,12 @@ async function resolveTile(p,depth=0){
  }
  if(match.tiles[p.position]==='goal'||p.position>=match.tiles.length-1){finishGame(p);return}
  if(landed){await resolveTile(p,depth+1);return}
- if(!match.finished&&!MAPS[match.map].non){
+ if(!match.finished&&!MAPS[match.map].non&&type!=='arena'){
    const opponent=match.players.find(other=>other!==p&&other.position===p.position&&other.effects.dove<=0&&p.effects.dove<=0);
    if(opponent)await resolveBattle(p,opponent,false);
  }
 }
-function finishGame(winner){match.finished=true;match.winner=winner.id;match.message=winner.name+'이(가) GOAL에 도착했습니다!';const distance=match.tiles.length-1;const reward=winner.id===0?1200:Math.max(100,Math.round(match.players[0].position/distance*600));profile.gp+=reward;if(winner.id===0)profile.wins++;profileUI();persist();chat('SYSTEM',winner.name+'님이 가장 먼저 GOAL에 도착했습니다! GP +'+reward,'system');modal('✦ 주사위의 잔영 · 게임 종료',winner.name+' 승리!　획득 GP +'+reward.toLocaleString()+'\n게임을 다시 시작할 수 있습니다.',[{label:'다시 시작',primary:true,run:()=>navigate('lobby')},{label:'결과 보기',run:()=>drawGame()}]);sfx(925,.4)}
+function finishGame(winner){match.finished=true;match.winner=winner.id;match.message=winner.name+'이(가) GOAL에 도착했습니다!';const distance=match.tiles.length-1;const reward=winner.id===0?89:Math.max(1,Math.round(89*match.players[0].position/distance));profile.gp+=reward;if(winner.id===0)profile.wins++;profileUI();persist();chat('SYSTEM',winner.name+'님이 가장 먼저 GOAL에 도착했습니다! GP +'+reward,'system');modal('✦ 주사위의 잔영 · 게임 종료',winner.name+' 승리!　획득 GP +'+reward.toLocaleString()+'\n게임을 다시 시작할 수 있습니다.',[{label:'다시 시작',primary:true,run:()=>navigate('lobby')},{label:'결과 보기',run:()=>drawGame()}]);sfx(925,.4)}
 function moveValues(p){
  const stats=teamStats(p.team),extra=p.effects.shoe>0?1:0,values=[];
  const sides=stats.move===2?4:6,n=Math.min(4,(stats.move===2?2:1)+extra);
