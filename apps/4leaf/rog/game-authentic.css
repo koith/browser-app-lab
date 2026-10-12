@@ -41,3 +41,25 @@
 #game .battle-side-card .battle-side-meter{transition:width .2s}
 @media(max-width:870px){#game .battle-side-card img{max-width:32px}#game .battle-side-info b{font-size:9px}#game .battle-team-side{width:12.5%}#game .board-world{inset:0 12.5%!important}}
 @media(max-width:630px){#game .battle-team-side{width:10.5%;gap:1px;top:3px;bottom:3px;padding:0}#game .board-world{inset:0 10.5%!important}#game .battle-side-card{border-width:1px;padding:1px;flex-direction:column;gap:0}#game .battle-side-card img{max-height:55%;width:100%}#game .battle-side-info{justify-content:center}#game .battle-side-info b{font-size:7px;text-align:center}#game .battle-side-info small{font-size:6px}#game .battle-side-num{font-size:7px;top:0;right:1px}#game .battle-side-meter{height:3px}#game .board-mini{width:86px;height:77px;bottom:2px;left:2px}#game .board-mini canvas{left:2px;top:14px;width:77px;height:55px}#game .board-zoom-controls{right:11%;padding:1px}#game .board-center{width:80px;padding:3px}#game .board-center .crest{font-size:28px;line-height:24px}#game .board-center b{font-size:8px}#game .board-center small{font-size:5px}#game .tile .tile-symbol{font-size:clamp(8px,2.2vw,11px)!important}#game .tile small{font-size:5px}#game .game-controls{height:92px}}
+
+/* Genuine live in-game duel composition; no screenshot used as a click-map. */
+#battle-visual{position:absolute;z-index:11;inset:2% 12% 1%;display:flex;align-items:stretch;justify-content:center;background:linear-gradient(180deg,#232d67a8,#263c75b3 48%,#162c658c);border:2px ridge #a2b6e0;box-shadow:inset 0 0 25px #162351,0 3px 20px #0a1334;pointer-events:none;overflow:hidden}
+.battle-visual-head{position:absolute;top:0;left:0;right:0;z-index:2;text-align:center;font:italic 800 clamp(27px,4vw,65px) Georgia,serif;letter-spacing:2px;color:#fff1a5;-webkit-text-stroke:2px #7a315f;text-shadow:1px 3px #622e68,3px 5px #291754,0 0 13px #fff8aa;animation:battle-arrive .38s ease-out both}
+@keyframes battle-arrive{from{transform:translateY(-40%);opacity:0}to{transform:translateY(0);opacity:1}}
+.battle-visual-side{width:45%;height:100%;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:end;text-align:center}
+.battle-visual-side>strong{position:absolute;top:22%;font-size:15px;color:#fffbea;text-shadow:0 2px #182957;z-index:4;white-space:nowrap}
+.battle-visual-total{position:absolute;top:30%;font:900 clamp(32px,7vw,87px) Georgia;color:white;-webkit-text-stroke:3px #af354d;text-shadow:2px 3px #53215b,0 0 14px #fff2;z-index:3}
+.battle-visual-actor{position:absolute;bottom:15%;z-index:3;height:37%;max-width:45%;image-rendering:pixelated;object-fit:contain;filter:drop-shadow(1px 3px 2px #080d34);animation:battle-actor 1s ease-in-out infinite alternate}
+@keyframes battle-actor{to{transform:translateY(-8px)}}
+.battle-visual-pedestal{position:absolute;bottom:12%;z-index:2;width:70%;height:15%;border:5px ridge #728d9c;background:radial-gradient(ellipse at center,#76e2bd,#2d786b 65%,#1e595b);box-shadow:0 8px 0 #283443,0 13px 0 #15283a}
+.battle-visual-side.defender .battle-visual-pedestal{background:radial-gradient(ellipse at center,#a0bcf4,#497dbb 65%,#2a5086)}
+.battle-visual-vs{z-index:6;align-self:center;font:900 48px Georgia;color:#ff4b46;-webkit-text-stroke:2px #a62d35;text-shadow:3px 5px #200f2d,0 0 10px #ffe6c7}
+.battle-visual-dice{position:absolute;bottom:0;left:0;right:0;display:flex;justify-content:center;gap:4px;flex-wrap:wrap;z-index:4}
+.battle-visual-die{font:26px Georgia,sans-serif;display:inline-flex;align-items:center;justify-content:center;width:31px;height:31px;background:#fff8e9;color:#24253e;border:2px solid #dce6f4;box-shadow:0 2px 3px #182044;border-radius:4px}
+.modal.battle-present{background:transparent;align-items:flex-end;pointer-events:none}
+.modal.battle-present .modal-window{pointer-events:auto;margin-bottom:10px;width:min(410px,90vw);max-height:170px;border:3px ridge #9baede;background:#263b7de9;padding:0}
+.modal.battle-present .modal-title{padding:4px 8px;font-size:12px}
+.modal.battle-present #modal-content{display:none}
+.modal.battle-present .modal-buttons{padding:4px}
+.modal.battle-present .modal-buttons button{font-size:11px;padding:4px 8px}
+@media(max-width:630px){#battle-visual{left:10%;right:10%;inset:2% 10% 2%}.battle-visual-head{-webkit-text-stroke:1px #8c356e}.battle-visual-total{-webkit-text-stroke:1.5px #ac3557}.battle-visual-side>strong{font-size:10px}.battle-visual-die{width:20px;height:20px;font-size:18px}.battle-visual-vs{font-size:25px}.battle-visual-actor{height:32%}.battle-visual-pedestal{height:12%;border-width:2px}.modal.battle-present .modal-window{max-height:120px;margin-bottom:0}}
