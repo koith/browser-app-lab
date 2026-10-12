@@ -17,7 +17,20 @@ const BASE_CARDS=[
 {id:'ironmask',name:'철가면',move:1,atk:4,def:4,int:2,point:7,price:7000,rank:'valuable',portrait:'♚',ability:'디스트로이'},
 {id:'schwarz',name:'흑태자',move:2,atk:5,def:3,int:2,point:8,price:26000,rank:'valuable',portrait:'♚',ability:'공격A'}
 ];
+const CHR_SOURCE=window.ORIGINAL_LEAF_CHESSMEN||[];
+const ABILITY_NAMES={19:'공격C',20:'공격B',21:'공격A',22:'방어C',23:'방어B',24:'이동B',25:'방어B',26:'지력B',27:'지력A',28:'능력 없음',30:'순간이동',31:'팀 지력+',32:'키퍼',33:'프리워프',34:'디스트로이',37:'이동C',38:'공격C',39:'공격B',43:'블럭',56:'흑태자의 힘'};
+const LEGACY_IDS={soldier:'c_0096',joan:'c_0078',rashid:'c_0087',narcia:'c_0088',merza:'c_0040',iolyn:'c_0045',christian:'c_0090',saladin:'c_0087',damian:'c_0127',sherazard:'c_0088',ironmask:'c_0091',schwarz:'c_0170'};
+const STARTERS=['c_0096','c_0078','c_0040','c_0045'];
+const HIGH_PRICES={'살라딘':47000,'셰라자드':46500,'살라딘2':51500,'데미안':49500,'철가면':31000,'흑태자':60000,'크리스티앙':39000};
+if(CHR_SOURCE.length>50){
+ const originalCards=CHR_SOURCE
+ .filter(c=>c.usable===1&&c.move>=1&&c.move<=2&&c.atk>=1&&c.def>=1)
+ .filter(c=>!['근육이','마장기 test','노동자스켈톤'].includes(c.name))
+ .map(c=>({id:'c_'+c.id,sourceId:c.id,name:c.name,move:c.move,atk:c.atk,def:c.def,int:c.int,point:Math.max(1,Math.ceil((c.atk+c.def+c.int+c.move)/3)),rank:c.score>=175?'valuable':'normal',price:HIGH_PRICES[c.name]||Math.max(160,Math.round(c.score*18/10)*10),ability:ABILITY_NAMES[c.abilityId]||'능력 '+c.abilityId,abilityId:c.abilityId,element:['Wands','Swords','Cups','Disks','None'][c.element]||'None',score:c.score,portrait:'♟'}));
+ BASE_CARDS.splice(0,BASE_CARDS.length,...originalCards);
+}
 const CARD_MAP=Object.fromEntries(BASE_CARDS.map(c=>[c.id,c]));
+const DEFAULT_PROFILE={name:'Guest',gp:3000,wins:0,owned:CHR_SOURCE.length>50?STARTERS.slice():['soldier','joan','rashid','narcia'],team:CHR_SOURCE.length>50?['c_0078','c_0096','c_0040']:['joan','soldier','narcia']};
 const ITEMS=[
 {id:'wing',name:'날개',icon:'🪽',hint:'1~12칸 전진'},
 {id:'step',name:'4칸 전후진',icon:'↔',hint:'최대 4칸 이동'},
@@ -43,13 +56,21 @@ const MAPS={
 const BOT_NAMES=['티치엘','막시민','보리스','루시안','이스핀','시벨린','루시아'];
 const COLORS=['#fff3bf','#91f2d1','#ffb4c4','#abc3ff','#e9b8fb','#ffda80','#ff9bab','#d9efff'];
 const PAWNS=['♞','♜','♛','♝','♟','♙','♕','♗'];
-const PORTRAITS={soldier:12,joan:119,rashid:56,narcia:41,merza:45,iolyn:54,christian:25,saladin:31,damian:101,sherazard:33,ironmask:134,schwarz:22};
-const imageFor=(id)=>'./original/CardData/chm_'+(PORTRAITS[id]||12)+'.png';
+const PORTRAITS={soldier:12,joan:119,rashid:56,narcia:41,merza:45,iolyn:54,christian:25,saladin:31,damian:101,sherazard:33,ironmask:11,schwarz:22};
+const SOURCE_PORTRAITS={'0096':12,'0078':48,'0040':33,'0045':8,'0087':31,'0088':33,'0090':23,'0091':11,'0127':40,'0137':31,'0170':22};
+const imageFor=(id)=>'./original/CardData/chm_'+(SOURCE_PORTRAITS[(CARD_MAP[id]||{}).sourceId]||PORTRAITS[id]||((Number((CARD_MAP[id]||{}).sourceId)||40)%59+1))+'.png';
 const townAvatar=(i)=>'./original/Registry/sava'+String([0,82,6,1,85][i%5]).padStart(2,'0')+'.png';
-let profile,match=null,route='sky',chosenCard='joan',group='all',currentRoom='샤이닝 브리즈',soundOn=false,audioCtx=null,busy=false,bgm=null,bgmTrack=null;
+let profile,match=null,route='sky',chosenCard=CHR_SOURCE.length>50?'c_0078':'joan',group='all',currentRoom='샤이닝 브리즈',soundOn=false,audioCtx=null,busy=false,bgm=null,bgmTrack=null;
 const safe=(v,f)=>{try{const a=JSON.parse(localStorage.getItem('rog_'+v));return a===null?f:a}catch{return f}};
-profile=safe('profile',{name:'Guest',gp:3000,wins:0,owned:['soldier','joan','rashid','narcia'],team:['joan','soldier','narcia']});
-if(!profile||!Array.isArray(profile.owned))profile={name:'Guest',gp:3000,wins:0,owned:['soldier','joan','rashid','narcia'],team:['joan','soldier','narcia']};
+profile=safe('profile',DEFAULT_PROFILE);
+if(!profile||!Array.isArray(profile.owned))profile=structuredClone(DEFAULT_PROFILE);
+if(CHR_SOURCE.length>50){
+ profile.owned=[...new Set(profile.owned.map(id=>LEGACY_IDS[id]||id).filter(id=>CARD_MAP[id]))];
+ if(!profile.owned.length)profile.owned=STARTERS.slice();
+ profile.team=(profile.team||[]).map(id=>LEGACY_IDS[id]||id).filter(id=>CARD_MAP[id]);
+ if(!profile.team.length)profile.team=DEFAULT_PROFILE.team.slice();
+ if(!CARD_MAP[chosenCard])chosenCard=profile.owned[0];
+}
 const savedMatch=safe('match',null);if(savedMatch&&savedMatch.players&&MAPS[savedMatch.map])match=savedMatch;
 function persist(){try{localStorage.setItem('rog_profile',JSON.stringify(profile));localStorage.setItem('rog_match',JSON.stringify(match))}catch{}}
 function log(text){$('status').textContent=text}
@@ -78,7 +99,9 @@ function chooseSourcePath(map){const records=SOURCE_ROUTES[SOURCE_IDS[map]];if(!
 function installAuthenticMaps(){const list=$('map-select'),entries=Object.entries(SOURCE_INFO).filter(([id])=>SOURCE_ROUTES[id]&&SOURCE_ROUTES[id].length>9);if(!entries.length)return;list.replaceChildren();const rank=['4LEAF','주사위','워프 게이트','PK','악마의 달팽이','한반도','For the Lucky'];entries.sort((a,b)=>{let i=rank.indexOf(a[1].title),j=rank.indexOf(b[1].title);return (i<0?99:i)-(j<0?99:j)});for(const [id,info] of entries){const title=info.title,length=SOURCE_ROUTES[id].length;const old=MAPS[title]||{};const generate=(step,offset)=>Array.from({length:Math.floor(length/step)},(_,i)=>offset+i*step).filter(i=>i>0&&i<length-1);MAPS[title]={length,non:['악마의 달팽이','한반도'].includes(title),warp:old.warp||generate(30,8),keepers:old.keepers||generate(17,13),jail:old.jail||generate(44,25),chests:old.chests||generate(19,6),boost:old.boost||generate(23,17),attribute:old.attribute||generate(29,20),joker:old.joker||generate(41,36)};const opt=document.createElement('option');opt.value=title;opt.textContent=title+' · '+length+'칸 [원본 '+id+']';list.append(opt)}list.value='4LEAF'}
 function freshItems(){return Array.from({length:3},()=>ITEMS[rand(ITEMS.length)].id)}
 function newPlayer(id,bot,name,team){return {id,bot,name,team,position:0,jail:0,ability:0,items:freshItems(),effects:{shoe:0,dove:0,clover:0,spade:0},usedItem:false,color:COLORS[id],pawn:PAWNS[id]}}
-function startGame(){const map=$('map-select').value,limit=Number($('point-limit').value),stats=teamStats(profile.team);chooseSourcePath(map);if(!profile.team[0])return modal('파티 구성','공격 체스맨을 선택하세요.',[{label:'확인',primary:true}]);if(stats.point>limit)return modal('소환 POINT 초과','현재 파티는 '+stats.point+'POINT이며 제한은 '+limit+'POINT입니다.',[{label:'확인',primary:true}]);const bots=Number($('bot-count').value);let players=[newPlayer(0,false,profile.name,profile.team.slice())];for(let i=0;i<bots;i++){const weakTeams=[['rashid','soldier','narcia'],['joan','narcia','soldier'],['soldier','joan','rashid'],['iolyn','soldier','narcia'],['merza','rashid','soldier'],['christian','soldier','joan'],['damian','soldier','narcia']];let team=weakTeams[i].filter((_,j)=>j===0||limit>=8);while(teamStats(team).point>limit)team.pop();players.push(newPlayer(i+1,true,BOT_NAMES[i],team))}match={version:2,map,tiles:generateTiles(map),players,active:0,round:1,finished:false,winner:-1,attribute:'NONE',message:'주사위를 굴려 주세요.',lastRoll:[],history:[],pending:null};busy=false;persist();navigate('game');chat('SYSTEM',map+' 게임을 시작했습니다. 컴퓨터 '+bots+'명이 참가합니다.','system');drawGame()}
+function startGame(){const map=$('map-select').value,limit=Number($('point-limit').value),stats=teamStats(profile.team);chooseSourcePath(map);if(!profile.team[0])return modal('파티 구성','공격 체스맨을 선택하세요.',[{label:'확인',primary:true}]);if(stats.point>limit)return modal('소환 POINT 초과','현재 파티는 '+stats.point+'POINT이며 제한은 '+limit+'POINT입니다.',[{label:'확인',primary:true}]);const bots=Number($('bot-count').value);let players=[newPlayer(0,false,profile.name,profile.team.slice())];for(let i=0;i<bots;i++){const weakTeams=CHR_SOURCE.length>50?[
+ ['c_0096','c_0078','c_0040'],['c_0078','c_0045','c_0096'],['c_0040','c_0078','c_0096'],['c_0045','c_0096','c_0078'],['c_0078','c_0040','c_0045'],['c_0096','c_0045','c_0078'],['c_0040','c_0096','c_0045']]:
+ [['rashid','soldier','narcia'],['joan','narcia','soldier'],['soldier','joan','rashid'],['iolyn','soldier','narcia'],['merza','rashid','soldier'],['christian','soldier','joan'],['damian','soldier','narcia']];let team=weakTeams[i].filter((_,j)=>j===0||limit>=8);while(teamStats(team).point>limit)team.pop();players.push(newPlayer(i+1,true,BOT_NAMES[i],team))}match={version:2,map,tiles:generateTiles(map),players,active:0,round:1,finished:false,winner:-1,attribute:'NONE',message:'주사위를 굴려 주세요.',lastRoll:[],history:[],pending:null};busy=false;persist();navigate('game');chat('SYSTEM',map+' 게임을 시작했습니다. 컴퓨터 '+bots+'명이 참가합니다.','system');drawGame()}
 function tileGlyph(type){return {start:'S',goal:'G',normal:'✧',warp:'◈',keeper:'⚔',prison:'▤',chest:'▣',boost:'+3',attribute:'✥',joker:'?',ability:'✶',clover:'♣',doa:'☠'}[type]||'✧'}
 function appendMove(message){if(!match)return;match.message=message;match.history.push(message);if(match.history.length>90)match.history.shift();toast(message);persist()}
 function drawBoard(){if(!match)return;const root=$('board-nodes'),svg=$('board-lines');root.replaceChildren();svg.replaceChildren();const coords=PATH.slice(0,match.tiles.length).map(p=>({x:p.x*820/100,y:p.y*355/100}));const path=document.createElementNS('http://www.w3.org/2000/svg','polyline');path.setAttribute('points',coords.map(p=>p.x+','+p.y).join(' '));path.setAttribute('fill','none');path.setAttribute('stroke','#b6a2d5');path.setAttribute('stroke-width','7');path.setAttribute('stroke-linejoin','round');path.setAttribute('opacity','.45');svg.append(path);coords.forEach((pos,i)=>{const type=match.tiles[i];const b=document.createElement('div');b.className='tile '+type;b.style.left=PATH[i].x+'%';b.style.top=PATH[i].y+'%';if(SOURCE_IDS[match.map]){const columns=Math.max(8,Math.sqrt(match.tiles.length)*1.6);b.style.width=Math.max(2.5,Math.min(5,72/columns))+'%';b.style.height=Math.max(4.5,Math.min(9.0,120/columns))+'%'}b.innerHTML='<span class="tile-symbol">'+tileGlyph(type)+'</span><small>'+(i+1)+'</small>';b.title=(i+1)+'칸 · '+type;const players=match.players.filter(p=>p.position===i);if(players.length){b.classList.add('player-here');const stack=document.createElement('div');stack.className='pawn-stack';players.forEach(p=>{const pawn=document.createElement('span');pawn.className='pawn';pawn.style.setProperty('--pawn-color',p.color);const sprite=document.createElement('img');sprite.className='pawn-sprite';sprite.src='./original/Registry/sava'+String([0,82,6,1,85,2,84,4][p.id]||0).padStart(2,'0')+'.png';sprite.alt='';pawn.append(sprite);const name=document.createElement('span');name.className='pawn-label';name.textContent=p.name;pawn.append(name);stack.append(pawn)});b.append(stack)}b.onclick=()=>log((i+1)+'칸 : '+type+(players.length?' · '+players.map(p=>p.name).join(', '):''));root.append(b)})}
