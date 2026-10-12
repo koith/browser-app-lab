@@ -99,3 +99,28 @@ if map_list.exists():
  with (DEST/'maps.js').open('a') as f:
   f.write('window.ORIGINAL_LEAF_MAP_INFO='+json.dumps(actual_map_names,ensure_ascii=False,separators=(',',':'))+';\n')
  print('AUTHENTIC_MAP_TITLES',len(actual_map_names),actual_map_names)
+
+# Recover exact original 4LEAF chessman IDs, names and stats from Dice/CHR.pak.
+# CHR documents are 472-byte Borland records. At offsets 196 and 452
+# are the CP949 caption and packed movement/attack/defense/intelligence fields.
+# Offsets validated against Saladin 1/4/4/2, Black Prince 2/5/3/2,
+# Damian 2/2/4/3, and Sherazard 2/1/2/5.
+chr_pak=ROOT/'Dice'/'CHR.pak'
+if chr_pak.exists():
+ recovered=[]
+ for filename,dat in extract_pak(chr_pak):
+  if not filename.lower().endswith('.chr') or len(dat)<470:continue
+  rawname=dat[196:255].split(b'\0',1)[0]
+  try: name=rawname.decode('cp949').strip()
+  except UnicodeDecodeError:continue
+  if not name or len(name)>22:continue
+  try:
+   defense,element,ability,intelligence,attack,move,score,level,usable=struct.unpack_from('<9H',dat,452)
+  except Exception:continue
+  if not (1<=move<=2 and 1<=attack<=6 and 1<=defense<=6 and 0<=intelligence<=5):continue
+  if usable==0 and filename[:4] in ('0105','0106','0107','0108','0109','0110','0114','0152'):continue
+  recovered.append({'id':filename[:4],'name':name,'move':move,'atk':attack,'def':defense,'int':intelligence,'element':element,'abilityId':ability,'score':score,'level':level,'usable':usable})
+ (DEST/'chessmen.js').write_text('window.ORIGINAL_LEAF_CHESSMEN='+json.dumps(recovered,ensure_ascii=False,separators=(',',':'))+';\n')
+ (DEST/'chessmen.json').write_text(json.dumps(recovered,ensure_ascii=False,indent=2))
+ print('AUTHENTIC_CHESSMEN',len(recovered))
+ for x in recovered:print('CHESSMAN',x['id'],x['name'],x['move'],x['atk'],x['def'],x['int'],x['abilityId'])
