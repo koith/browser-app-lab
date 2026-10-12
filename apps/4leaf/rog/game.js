@@ -26,7 +26,7 @@ if(CHR_SOURCE.length>50){
  const originalCards=CHR_SOURCE
  .filter(c=>c.move>=1&&c.move<=2&&c.atk>=1&&c.def>=1&&!['마장기 test','근육이'].includes(c.name))
  .filter(c=>!['근육이','마장기 test','노동자스켈톤'].includes(c.name))
- .map(c=>({id:'c_'+c.id,sourceId:c.id,name:c.name,move:c.move,atk:c.atk,def:c.def,int:c.int,point:Math.max(1,Math.ceil((c.atk+c.def+c.int+c.move)/3)),rank:c.score>=175?'valuable':'normal',price:HIGH_PRICES[c.name]||Math.max(160,Math.round(c.score*18/10)*10),ability:ABILITY_NAMES[c.abilityId]||'능력 '+c.abilityId,abilityId:c.abilityId,element:['Wands','Swords','Cups','Disks','None'][c.element]||'None',score:c.score,portrait:'♟'}));
+ .map(c=>({id:'c_'+c.id,sourceId:c.id,name:c.name,move:c.move,atk:c.atk,def:c.def,int:c.int,point:Math.max(1,Math.ceil((c.atk+c.def+c.int+c.move)/3)),rank:c.score>=210?'rare':c.score>=175?'valuable':'normal',price:HIGH_PRICES[c.name]||Math.max(160,Math.round(c.score*18/10)*10),ability:ABILITY_NAMES[c.abilityId]||'능력 '+c.abilityId,abilityId:c.abilityId,element:['Wands','Swords','Cups','Disks','None'][c.element]||'None',score:c.score,portrait:'♟'}));
  BASE_CARDS.splice(0,BASE_CARDS.length,...originalCards);
 }
 const CARD_MAP=Object.fromEntries(BASE_CARDS.map(c=>[c.id,c]));
@@ -73,6 +73,7 @@ const SOURCE_PORTRAITS={'0096':12,'0078':48,'0040':33,'0045':8,'0087':31,'0088':
 const imageFor=(id)=>'./original/CardData/chm_'+(SOURCE_PORTRAITS[(CARD_MAP[id]||{}).sourceId]||PORTRAITS[id]||((Number((CARD_MAP[id]||{}).sourceId)||40)%59+1))+'.png';
 const townAvatar=(i)=>'./original/Registry/sava'+String([0,82,6,1,85][i%5]).padStart(2,'0')+'.png';
 let remoteAct=false;
+let shopPage=0;
 let profile,match=null,route='sky',chosenCard=CHR_SOURCE.length>50?'c_0078':'joan',group='all',currentRoom='샤이닝 브리즈',soundOn=false,audioCtx=null,busy=false,bgm=null,bgmTrack=null;
 const safe=(v,f)=>{try{const a=JSON.parse(localStorage.getItem('rog_'+v));return a===null?f:a}catch{return f}};
 profile=safe('profile',DEFAULT_PROFILE);
@@ -117,7 +118,55 @@ function rosterByIds(ids){return (ids||[]).map(id=>CARD_MAP[id]).filter(Boolean)
 function teamStats(ids){const cards=rosterByIds(ids),attack=cards[0]||BASE_CARDS[0],defend=cards[1]||attack,assist=cards[2]||null;const same=cards.length>0&&cards.every(c=>c.move===cards[0].move);return {move:same?cards[0].move:1,atk:attack.atk,def:defend.def,int:assist?assist.int:0,point:cards.reduce((sum,c)=>sum+c.point,0),ability:attack.ability,abilityId:attack.abilityId,portrait:attack.portrait,name:attack.name};}
 function ownedCards(){return profile.owned.filter(x=>CARD_MAP[x])}
 function drawTeam(){const root=$('team-select');root.replaceChildren();const slots=['공격','방어','지력'];for(let slot=0;slot<3;slot++){const s=document.createElement('button');s.className='team-slot';const c=CARD_MAP[profile.team[slot]];s.innerHTML='<b>'+slots[slot]+'</b><small>'+(c?c.name:'미지정')+'</small><small>'+(c?('M'+c.move+' A'+c.atk+' D'+c.def+' I'+c.int):'')+'</small>';s.onclick=()=>{const div=document.createElement('div');const label=document.createElement('p');label.textContent=slots[slot]+' 포지션에 배치할 체스맨을 고르세요.';div.append(label);const select=document.createElement('select');ownedCards().forEach(id=>{const c=CARD_MAP[id],option=document.createElement('option');option.value=id;option.textContent=c.name+' (이동'+c.move+' · '+c.point+'pt)';if(profile.team[slot]===id)option.selected=true;select.append(option)});div.append(select);modal('파티 구성',div,[{label:'선택',primary:true,run:()=>{profile.team[slot]=select.value;persist();drawTeam()}},{label:'취소'}])};root.append(s)}const stats=teamStats(profile.team);const limit=Number($('point-limit').value);let summary=document.createElement('div');summary.className='fine';summary.textContent='합계 '+stats.point+' / '+limit+' POINT · 이동 주사위 '+stats.move+' · 공격 '+stats.atk+' · 방어 '+stats.def+' · 지원 지력 +'+stats.int;root.append(summary)}
-function drawShop(){const root=$('shop-grid');root.replaceChildren();const filtered=BASE_CARDS.filter(c=>group==='all'||c.rank===group);filtered.forEach(c=>{const b=document.createElement('button');b.className='shop-card'+(chosenCard===c.id?' selected':'');b.innerHTML='<div class="card-art"><img class="pixel-portrait" src="'+imageFor(c.id)+'" alt=""></div><b>'+c.name+'</b><span>'+c.price.toLocaleString()+' GP</span><small>M '+c.move+' / A '+c.atk+' / D '+c.def+' / I '+c.int+'</small><span class="'+(profile.owned.includes(c.id)?'owned':'')+'">'+(profile.owned.includes(c.id)?'● 보유':'◇ 미보유')+'</span>';b.onclick=()=>{chosenCard=c.id;drawShop()};root.append(b)});query('.group-tab').forEach(b=>b.classList.toggle('selected',b.dataset.group===group));const c=CARD_MAP[chosenCard];$('shop-selected').textContent=c.name+' · '+c.rank.toUpperCase()+' · '+c.point+'pt / '+c.price.toLocaleString()+'GP / '+c.ability;profileUI()}
+function shopFiltered(){
+ return BASE_CARDS.filter(c=>group==='all'||c.rank===group||(group==='valuable'&&c.rank==='rare'));
+}
+function selectShopCard(id){
+ if(!CARD_MAP[id])return;
+ chosenCard=id;
+ const cards=shopFiltered(),index=cards.findIndex(c=>c.id===id);
+ if(index>=0)shopPage=Math.floor(index/9);
+ drawShop();
+}
+function drawShop(){
+ const root=$('shop-grid'),cards=shopFiltered(),pages=Math.max(1,Math.ceil(cards.length/9));
+ shopPage=Math.max(0,Math.min(pages-1,shopPage));
+ root.replaceChildren();
+ for(let i=0;i<9;i++){
+   const c=cards[shopPage*9+i],b=document.createElement('button');
+   if(!c){
+     b.className='shop-card shop-empty';b.disabled=true;b.setAttribute('aria-hidden','true');
+     root.append(b);continue;
+   }
+   b.className='shop-card'+(chosenCard===c.id?' selected':'');
+   b.title=c.name+' · '+c.ability+' · '+c.price.toLocaleString()+'GP · '+(profile.owned.includes(c.id)?'보유':'미보유');
+   const art=document.createElement('div');art.className='card-art';
+   const img=document.createElement('img');img.className='pixel-portrait';img.alt=c.name;img.src=imageFor(c.id);art.append(img);
+   const name=document.createElement('b');name.textContent=c.name;
+   const state=document.createElement('span');state.className='card-state';state.textContent=profile.owned.includes(c.id)?'OWN':'NEW';
+   b.append(art,name,state);
+   b.onclick=()=>selectShopCard(c.id);
+   root.append(b);
+ }
+ $('shop-page').textContent=(shopPage+1)+' / '+pages;
+ $('shop-prev').disabled=shopPage===0;$('shop-next').disabled=shopPage>=pages-1;
+ query('.group-tab').forEach(b=>b.classList.toggle('selected',b.dataset.group===group));
+ const owned=$('shop-owned-list');owned.replaceChildren();
+ profile.owned.filter(id=>CARD_MAP[id]).forEach(id=>{
+   const c=CARD_MAP[id],b=document.createElement('button');b.className='shop-owned-entry';
+   b.textContent='♧ '+c.name+'　'+c.ability;b.title=c.name+' ('+c.point+'pt)';
+   if(chosenCard===c.id)b.classList.add('selected');
+   b.onclick=()=>{if(!shopFiltered().find(x=>x.id===id))group='all';selectShopCard(id)};
+   owned.append(b);
+ });
+ const c=CARD_MAP[chosenCard]||cards[0]||BASE_CARDS[0];
+ if(c){
+   $('shop-selected').textContent=c.name+' · '+c.ability+' · '+c.element+' / 이동'+c.move+'　공격'+c.atk+'　방어'+c.def+'　지력'+c.int+'　POINT '+c.point+' / '+c.price.toLocaleString()+' GP';
+   $('shop-buy').disabled=profile.owned.includes(c.id)||profile.gp<c.price;
+   $('shop-buy').textContent=profile.owned.includes(c.id)?'보유중':(profile.gp<c.price?'GP 부족':'구입하기');
+ }
+ profileUI();
+}
 function buildRoomList(){const list=$('room-list');list.replaceChildren();['샤이닝 브리즈','실버 호라이즌','윈트리 아이스','헤이즐리 웨이브','엘핀 포레스트'].forEach((r,i)=>{const b=document.createElement('button');b.textContent=(i+1)+'. '+r+'　('+(['평원','설원','빙원','해양','숲'][i])+')';b.className=r===currentRoom?'selected':'';b.onclick=()=>{currentRoom=r;const roomScene=document.querySelector('#rooms .room-floor');if(roomScene)roomScene.style.backgroundImage='url("./original/ChatRoom/room'+Math.min(i,5)+'.png")';buildRoomList();$('room-title').textContent='하이아칸 · '+r;chat('SYSTEM',r+' 방에 입장했습니다. 다른 이용자와는 연결되지 않습니다.','system')};list.append(b)});$('room-title').textContent='하이아칸 · '+currentRoom}
 function buildPeople(){const root=$('town-figures');root.replaceChildren();const roster=[profile.name,'티치엘','막시민','루시안','이스핀'];roster.forEach((name,i)=>{const b=document.createElement('button');b.className='avatar';b.style.setProperty('--hair',['#5f4e70','#c6b26a','#362a5e','#dcc17e','#ce8b7a'][i]);b.style.setProperty('--outfit',['#7d68b7','#649ac4','#5d638f','#ac735c','#aa798e'][i]);b.style.backgroundImage='url("'+townAvatar(i)+'")';b.innerHTML='<i class="avatar-head"></i><i class="avatar-body"></i><small></small>';b.querySelector('small').textContent=name;b.onclick=()=>chat(name,i===0?'오늘도 좋은 하루네요!':'반가워요, '+profile.name+'님.','npc');root.append(b)})}
 function generateTiles(map){
@@ -505,7 +554,7 @@ function nextTurn(){
  if(p.bot)setTimeout(()=>{if(route==='game'&&!busy&&match&&!match.finished&&match.players[match.active].bot)takeTurn()},430);
  else appendMove(p.name+' 차례입니다. 주사위를 굴리세요.');
 }
-function init(){installBoardControls();installAuthenticMaps();if(match)chooseSourcePath(match.map);profileUI();buildRoomList();buildPeople();drawTeam();drawShop();query('[data-route]').forEach(b=>b.addEventListener('click',()=>navigate(b.dataset.route)));query('.group-tab').forEach(b=>b.addEventListener('click',()=>{group=b.dataset.group;drawShop()}));$('point-limit').onchange=drawTeam;$('start-game').onclick=startGame;$('resume-game').onclick=()=>{if(match&&!match.finished){busy=false;navigate('game');chat('SYSTEM','진행 중인 게임을 이어합니다.','system')}};$('roll-btn').onclick=takeTurn;$('ability-btn').onclick=useAbility;$('exit-game').onclick=()=>modal('게임에서 나가기','진행 중인 게임은 브라우저에 보관됩니다. 나갔다가 주사위의 잔영 버튼으로 다시 들어올 수 있습니다.',[{label:'나가기',primary:true,run:()=>navigate('lobby')},{label:'취소'}]);$('shop-buy').onclick=()=>{const c=CARD_MAP[chosenCard];if(profile.owned.includes(c.id))return modal('매직카덴',c.name+' 카드는 이미 가지고 있습니다.',[{label:'확인'}]);if(profile.gp<c.price)return modal('매직카덴','GP가 부족합니다.',[{label:'확인'}]);modal('매직카덴',c.name+' 카드를 '+c.price.toLocaleString()+'GP에 구매하시겠습니까?',[{label:'구매',primary:true,run:()=>{profile.gp-=c.price;profile.owned.push(c.id);profileUI();drawShop();drawTeam();chat('매직카덴',c.name+' 카드를 구매했습니다.','system');sfx(830)}},{label:'취소'}])};$('rename').onclick=()=>{const div=document.createElement('div');div.textContent='사용할 닉네임을 입력하세요.';const input=document.createElement('input');input.maxLength=12;input.value=profile.name;div.append(document.createElement('hr'),input);modal('4LEAF 별명 변경',div,[{label:'변경',primary:true,run:()=>{if(!input.value.trim())return;profile.name=input.value.trim().slice(0,12);profileUI();buildPeople();if(match&&!match.finished)match.players[0].name=profile.name;chat('SYSTEM','닉네임이 '+profile.name+'(으)로 변경되었습니다.','system')}},{label:'취소'}])};$('audio').onclick=()=>{soundOn=!soundOn;syncMusic();log(soundOn?'원작 배경음악/효과음 켜짐':'배경음악/효과음 꺼짐');sfx(650)};$('help').onclick=()=>navigate('help-screen');$('make-room').onclick=()=>modal('새로운 채팅방','채팅방 개설은 로컬 재현 모드에서만 가능합니다.',[{label:'확인'}]);$('chat-form').onsubmit=e=>{e.preventDefault();const input=$('message'),message=input.value.trim();input.value='';if(!message)return;chat(profile.name,message);if(window.__LEAF_NET__?.connected&&match?.mode==='network')window.__LEAF_NET__.send({type:'chat',who:profile.name,text:message});sfx(480);if(route==='rooms'&&Math.random()<.25)setTimeout(()=>chat('티치엘','오늘도 좋은 하루 보내세요!','npc'),650)};query('#online-list').forEach(()=>{});const list=$('online-list');['Guest (LOCAL)','티치엘 (NPC)','막시민 (NPC)','보리스 (NPC)','루시안 (NPC)','이스핀 (NPC)','시벨린 (NPC)','루시아 (NPC)','샤이닝 브리즈','실버 호라이즌','켈티카'].forEach(n=>{const div=document.createElement('div');div.textContent='♧ '+n;list.append(div)});setInterval(()=>{$('clock').textContent=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})},12000);$('clock').textContent=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});chat('SYSTEM','4LEAF Browser에 오신 것을 환영합니다.','system');chat('SYSTEM','원작 화면 재구성 · AI 대전 · 로컬 채팅. 온라인 멀티플레이는 지원하지 않습니다.','system');navigate('sky');window.__LEAF_BRIDGE__={getMatch:()=>match,getName:()=>profile.name,onState:null,
+function init(){installBoardControls();installAuthenticMaps();if(match)chooseSourcePath(match.map);profileUI();buildRoomList();buildPeople();drawTeam();drawShop();query('[data-route]').forEach(b=>b.addEventListener('click',()=>navigate(b.dataset.route)));query('.group-tab').forEach(b=>b.addEventListener('click',()=>{group=b.dataset.group;shopPage=0;drawShop()}));$('shop-prev').onclick=()=>{shopPage--;drawShop()};$('shop-next').onclick=()=>{shopPage++;drawShop()};$('point-limit').onchange=drawTeam;$('start-game').onclick=startGame;$('resume-game').onclick=()=>{if(match&&!match.finished){busy=false;navigate('game');chat('SYSTEM','진행 중인 게임을 이어합니다.','system')}};$('roll-btn').onclick=takeTurn;$('ability-btn').onclick=useAbility;$('exit-game').onclick=()=>modal('게임에서 나가기','진행 중인 게임은 브라우저에 보관됩니다. 나갔다가 주사위의 잔영 버튼으로 다시 들어올 수 있습니다.',[{label:'나가기',primary:true,run:()=>navigate('lobby')},{label:'취소'}]);$('shop-buy').onclick=()=>{const c=CARD_MAP[chosenCard];if(profile.owned.includes(c.id))return modal('매직카덴',c.name+' 카드는 이미 가지고 있습니다.',[{label:'확인'}]);if(profile.gp<c.price)return modal('매직카덴','GP가 부족합니다.',[{label:'확인'}]);modal('매직카덴',c.name+' 카드를 '+c.price.toLocaleString()+'GP에 구매하시겠습니까?',[{label:'구매',primary:true,run:()=>{profile.gp-=c.price;profile.owned.push(c.id);profileUI();drawShop();drawTeam();chat('매직카덴',c.name+' 카드를 구매했습니다.','system');sfx(830)}},{label:'취소'}])};$('rename').onclick=()=>{const div=document.createElement('div');div.textContent='사용할 닉네임을 입력하세요.';const input=document.createElement('input');input.maxLength=12;input.value=profile.name;div.append(document.createElement('hr'),input);modal('4LEAF 별명 변경',div,[{label:'변경',primary:true,run:()=>{if(!input.value.trim())return;profile.name=input.value.trim().slice(0,12);profileUI();buildPeople();if(match&&!match.finished)match.players[0].name=profile.name;chat('SYSTEM','닉네임이 '+profile.name+'(으)로 변경되었습니다.','system')}},{label:'취소'}])};$('audio').onclick=()=>{soundOn=!soundOn;syncMusic();log(soundOn?'원작 배경음악/효과음 켜짐':'배경음악/효과음 꺼짐');sfx(650)};$('help').onclick=()=>navigate('help-screen');$('make-room').onclick=()=>modal('새로운 채팅방','채팅방 개설은 로컬 재현 모드에서만 가능합니다.',[{label:'확인'}]);$('chat-form').onsubmit=e=>{e.preventDefault();const input=$('message'),message=input.value.trim();input.value='';if(!message)return;chat(profile.name,message);if(window.__LEAF_NET__?.connected&&match?.mode==='network')window.__LEAF_NET__.send({type:'chat',who:profile.name,text:message});sfx(480);if(route==='rooms'&&Math.random()<.25)setTimeout(()=>chat('티치엘','오늘도 좋은 하루 보내세요!','npc'),650)};query('#online-list').forEach(()=>{});const list=$('online-list');['Guest (LOCAL)','티치엘 (NPC)','막시민 (NPC)','보리스 (NPC)','루시안 (NPC)','이스핀 (NPC)','시벨린 (NPC)','루시아 (NPC)','샤이닝 브리즈','실버 호라이즌','켈티카'].forEach(n=>{const div=document.createElement('div');div.textContent='♧ '+n;list.append(div)});setInterval(()=>{$('clock').textContent=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})},12000);$('clock').textContent=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});chat('SYSTEM','4LEAF Browser에 오신 것을 환영합니다.','system');chat('SYSTEM','원작 화면 재구성 · AI 대전 · 로컬 채팅. 온라인 멀티플레이는 지원하지 않습니다.','system');navigate('sky');window.__LEAF_BRIDGE__={getMatch:()=>match,getName:()=>profile.name,onState:null,
  receiveMatch:remote=>{if(window.__LEAF_NET__?.role!=='guest'||!remote||!MAPS[remote.map])return;
    match=remote;busy=false;
    try{localStorage.setItem('rog_match',JSON.stringify(match))}catch{}
