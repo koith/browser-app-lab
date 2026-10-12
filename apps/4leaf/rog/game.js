@@ -242,70 +242,84 @@ function installBoardControls(){
  applyMapViewport();
 }
 function withUserTurn(){return playerCanAct()}
-function useItem(index){
+function useItem(index,selectedStep=null){
  if(!withUserTurn())return;
- if(match.mode==='network'&&window.__LEAF_NET__?.role==='guest'){
-   modal('온라인 카드 사용','현재 원격 대전에서 카드 선택 기능은 구현 중입니다. 주사위 이동은 정상 작동합니다.',[{label:'확인',primary:true}]);
-   return;
+ const p=activePlayer(),itemId=p.items[index],item=ITEM_MAP[itemId];
+ if(!item||p.usedItem)return;
+ if(item.battle){
+   modal('전투 전용 아이템',item.name+'은(는) 전투 판정 화면에서 사용할 수 있습니다.',[{label:'확인',primary:true}]);return;
  }
- const user=activePlayer(),itemId=user.items[index],item=ITEM_MAP[itemId];
- if(!item||user.usedItem)return;
- if(item.battle)return modal('전투 전용 카드',item.name+'은(는) 전투 결과가 표시될 때 사용할 수 있습니다. 다른 행동을 선택해 주세요.',[{label:'확인',primary:true}]);
- if(itemId==='wing'||itemId==='step'){
-   const div=document.createElement('div'),label=document.createElement('p'),input=document.createElement('input');
-   label.textContent=item.name+' · '+item.hint;input.type='number';
-   input.min=itemId==='wing'?'1':'-4';input.max=itemId==='wing'?'12':'4';
-   input.value=itemId==='wing'?'6':'4';
-   div.append(label,input);
-   return modal('아이템 사용',div,[{label:'사용',primary:true,run:async()=>{
-     const n=Math.max(Number(input.min),Math.min(Number(input.max),Number(input.value)||1));
-     if(n===0)return;
-     consume(index);advance(user,n);
-     appendMove(user.name+' '+item.name+' · '+n+'칸 이동');
-     if(n>0)await resolveTile(user);drawGame();
-   }},{label:'취소'}]);
- }
- modal('아이템 · '+item.name,item.hint+' · 이번 턴에 사용하시겠습니까?',[{
-   label:'사용',primary:true,run:()=>{
-     consume(index);
-     if(!user.effects)user.effects={};
-     switch(itemId){
-       case 'shoe': user.effects.shoe=3;break;
-       case 'dove': user.effects.dove=5;break;
-       case 'valkyrie':user.effects.valkyrie=2;break;
-       case 'ring':user.effects.ring=2;break;
-       case 'armageddon':user.effects.armageddon=2;break;
-       case 'charge':user.ability=Math.min(100,user.ability+50);break;
-       case 'charge25':user.ability=Math.min(100,user.ability+25);break;
-       case 'drain25':{const other=match.players.filter(p=>p!==user).sort((a,b)=>b.ability-a.ability)[0];if(other)other.ability=Math.max(0,other.ability-25);break}
-       case 'drain50':{const other=match.players.filter(p=>p!==user).sort((a,b)=>b.ability-a.ability)[0];if(other)other.ability=Math.max(0,other.ability-50);break}
-       case 'oddcurse':match.players.filter(p=>p!==user).forEach(p=>p.effects.oddcurse=1);break;
-       case 'evencurse':match.players.filter(p=>p!==user).forEach(p=>p.effects.evencurse=1);break;
-       case 'curse':match.tiles[Math.min(match.tiles.length-2,user.position+6)]='curse';break;
-       case 'odincurse':match.tiles[Math.min(match.tiles.length-2,user.position+6)]='doa';break;
-       case 'kingbomb':match.tiles[Math.min(match.tiles.length-2,user.position+6)]='kingbomb';break;
-       case 'keeperA':case 'keeperB':case 'keeperC':{
-          const tile=Math.min(match.tiles.length-2,user.position+6);
-          match.tiles[tile]=itemId;break
-       }
-     }
-     appendMove(user.name+' · '+item.name+' 사용');drawGame();
+ const isGuest=match.mode==='network'&&window.__LEAF_NET__?.role==='guest'&&!remoteAct;
+ if(remoteAct)return applyItem(index,selectedStep);
+ const apply=(step)=>{
+   if(isGuest){
+     window.__LEAF_NET__?.send?.({type:'command',action:'item',index,steps:step});
+     return;
    }
- },{label:'취소'}]);
+   applyItem(index,step);
+ };
+ if(itemId==='wing'||itemId==='step'){
+   const div=document.createElement('div'),label=document.createElement('p'),field=document.createElement('input');
+   label.textContent=item.name+' · '+item.hint;
+   field.type='number';field.min=itemId==='wing'?'1':'-4';field.max=itemId==='wing'?'12':'4';
+   field.value=itemId==='wing'?'6':'4';div.append(label,field);
+   return modal('아이템 사용',div,[{
+     label:'사용',primary:true,run:()=>{
+       const n=Math.max(Number(field.min),Math.min(Number(field.max),Number(field.value)||0));
+       if(n!==0)apply(n);
+     }
+   },{label:'취소'}]);
+ }
+ modal('아이템 · '+item.name,item.hint+' · 이번 턴에 사용하시겠습니까?',[
+   {label:'사용',primary:true,run:()=>apply(null)},{label:'취소'}
+ ]);
+}
+async function applyItem(index,steps=null){
+ const p=activePlayer(),itemId=p?.items?.[index],item=ITEM_MAP[itemId];
+ if(!p||!item||p.usedItem||item.battle)return;
+ if(itemId==='wing'||itemId==='step'){
+   const n=Math.max(itemId==='wing'?1:-4,Math.min(itemId==='wing'?12:4,Number(steps)||0));
+   if(n===0)return;
+   consume(index);advance(p,n);appendMove(p.name+' · '+item.name+' '+n+'칸 이동');
+   if(n>0)await resolveTile(p);
+   drawGame();return;
+ }
+ consume(index);
+ if(!p.effects)p.effects={};
+ switch(itemId){
+ case 'shoe':p.effects.shoe=3;break;
+ case 'dove':p.effects.dove=5;break;
+ case 'valkyrie':p.effects.valkyrie=2;break;
+ case 'ring':p.effects.ring=2;break;
+ case 'armageddon':p.effects.armageddon=2;break;
+ case 'charge':p.ability=Math.min(100,p.ability+50);break;
+ case 'charge25':p.ability=Math.min(100,p.ability+25);break;
+ case 'drain25':case 'drain50':{
+   const other=match.players.filter(q=>q!==p).sort((a,b)=>b.ability-a.ability)[0];
+   if(other)other.ability=Math.max(0,other.ability-(itemId==='drain25'?25:50));break;
+ }
+ case 'oddcurse':case 'evencurse':match.players.filter(q=>q!==p).forEach(q=>q.effects[itemId]=1);break;
+ case 'curse':match.tiles[Math.min(match.tiles.length-2,p.position+6)]='curse';break;
+ case 'odincurse':match.tiles[Math.min(match.tiles.length-2,p.position+6)]='doa';break;
+ case 'kingbomb':match.tiles[Math.min(match.tiles.length-2,p.position+6)]='kingbomb';break;
+ case 'keeperA':case 'keeperB':case 'keeperC':
+   match.tiles[Math.min(match.tiles.length-2,p.position+6)]=itemId;break;
+ }
+ appendMove(p.name+' · '+item.name+' 사용');drawGame();
 }
 function consume(index){const p=activePlayer();p.items.splice(index,1);p.usedItem=true;persist()}
 function advance(user,distance){user.position=Math.min(match.tiles.length-1,Math.max(0,user.position+distance));user.ability=Math.min(100,user.ability+Math.max(0,distance)*4)}
 async function useAbility(){
  if(!withUserTurn())return;
- if(match.mode==='network'&&window.__LEAF_NET__?.role==='guest'){
-   modal('온라인 어빌리티','현재 원격 플레이어의 특수 능력 조작은 구현 중입니다.',[{label:'확인',primary:true}]);
-   return;
- }
+ 
  const p=activePlayer(),stats=teamStats(p.team);
  if(p.ability<100)return;
  const code=stats.abilityId||0;
- const selection=await ask('어빌리티 발동',stats.name+' · '+stats.ability+' / 충전 100%',['발동','취소']);
+ const selection=remoteAct?0:await ask('어빌리티 발동',stats.name+' · '+stats.ability+' / 충전 100%',['발동','취소']);
  if(selection!==0||!withUserTurn())return;
+ if(match.mode==='network'&&window.__LEAF_NET__?.role==='guest'&&!remoteAct){
+   window.__LEAF_NET__?.send?.({type:'command',action:'ability'});return;
+ }
  p.ability=0;
  switch(code){
  case 30:advance(p,1+rand(15));p.effects.scar=(p.effects.scar||0)+1;break;
@@ -357,7 +371,7 @@ function combat(attacker,defender,keeper=false){
    options.unshift({label:'오리발 카드',run:()=>{player.items.splice(player.items.indexOf('flipper'),1);player.usedItem=true;resolve({...results,negated:true})}});
  }
  modal('⚔ BATTLE · 전투',div,options);sfx(235,.21);
- if(!selfInvolved||keeper&&attacker.bot){
+ if(!selfInvolved||(keeper&&attacker.bot)||(match?.mode==='network'&&attacker.id===1)){
    setTimeout(()=>{const button=query('#modal-buttons button').find(b=>b.textContent==='결과 확인');if(!$('modal').classList.contains('hidden')&&button)button.click()},Math.max(350,keeper?600:700));
  }
  });
@@ -500,7 +514,14 @@ function init(){installBoardControls();installAuthenticMaps();if(match)chooseSou
  setGuestName:name=>{if(window.__LEAF_NET__?.role==='host'&&match?.mode==='network'){
     match.players[1].name=String(name).trim().slice(0,12)||'플레이어 2';drawGame();persist();
  }},
- remoteRoll:async()=>{if(window.__LEAF_NET__?.role!=='host'||match?.mode!=='network'||match.active!==1||busy||match.finished)return;
-    remoteAct=true;try{await takeTurn()}finally{remoteAct=false}
+ remoteCommand:async(action,index,steps)=>{
+   if(window.__LEAF_NET__?.role!=='host'||match?.mode!=='network'||match.active!==1||busy||match.finished||remoteAct)return;
+   if(!['roll','ability','item'].includes(action))return;
+   if(action==='item'&&(!Number.isInteger(index)||index<0||index>=activePlayer().items.length||!Number.isFinite(Number(steps))))return;
+   remoteAct=true;try{
+     if(action==='roll')await takeTurn();
+     else if(action==='ability')await useAbility();
+     else await useItem(index,steps);
+   }finally{remoteAct=false}
  }};window.__ROG_TEST__={startGame,drawGame,takeTurn,teamStats,generateTiles,getMatch:()=>match,go:navigate,setRoll:()=>{},setMatch:v=>{match=v;drawGame()},getSourceMaps:()=>SOURCE_INFO,playerCanAct,refreshResume};if(match&&!match.finished){log('저장된 경기가 있습니다. 주사위 대기실의 이어하기로 복원하세요.')}refreshResume()}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
