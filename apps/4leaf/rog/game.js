@@ -495,11 +495,11 @@ function combat(attacker,defender,keeper=false){
  let results={attacker:aValue,defender:bValue,changed:false,negated:false};
  const options=[{label:'결과 확인',primary:true,run:()=>finish(results)}];
  if(selfInvolved&&player.items.includes('change')&&!player.usedItem){
-   options.unshift({label:'체인지 카드',run:()=>{player.items.splice(player.items.indexOf('change'),1);player.usedItem=true;resolve({attacker:bValue,defender:aValue,changed:true})}});
+   options.unshift({label:'체인지 카드',run:()=>{player.items.splice(player.items.indexOf('change'),1);player.usedItem=true;finish({attacker:bValue,defender:aValue,changed:true})}});
  }
- if(selfInvolved&&player.items.includes('bomb')&&!player.usedItem){options.unshift({label:'자폭',run:()=>{player.items.splice(player.items.indexOf('bomb'),1);player.usedItem=true;attacker.position=0;if(Number.isInteger(defender.position))defender.position=0;resolve({...results,negated:true,mutualReset:true})}})}
+ if(selfInvolved&&player.items.includes('bomb')&&!player.usedItem){options.unshift({label:'자폭',run:()=>{player.items.splice(player.items.indexOf('bomb'),1);player.usedItem=true;attacker.position=0;if(Number.isInteger(defender.position))defender.position=0;finish({...results,negated:true,mutualReset:true})}})}
  if(selfInvolved&&player.items.includes('flipper')&&!player.usedItem){
-   options.unshift({label:'오리발 카드',run:()=>{player.items.splice(player.items.indexOf('flipper'),1);player.usedItem=true;resolve({...results,negated:true})}});
+   options.unshift({label:'오리발 카드',run:()=>{player.items.splice(player.items.indexOf('flipper'),1);player.usedItem=true;finish({...results,negated:true})}});
  }
 
  if(selfInvolved&&!player.usedItem){
