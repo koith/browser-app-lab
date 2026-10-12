@@ -87,7 +87,7 @@ print('AUTHENTIC_DICE_MAP_MOVEMENT_ROUTES',len(original_routes),original_meta)
 # plus a 4-byte trailer. Every record includes a 4-byte map ID, mode and
 # legacy CP949 title. Preserve canonical title↔map graph associations.
 import struct
-map_list=ROOT/'MapList.d1'
+map_list=ROOT/'Dice'/'MapList.d1'
 actual_map_names={}
 if map_list.exists():
  raw=map_list.read_bytes()
