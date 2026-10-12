@@ -1,0 +1,45 @@
+name: Import original 4LEAF graphic resources
+on:
+  push:
+    paths:
+      - 'apps/4leaf/rog/tools/extract_original.py'
+      - '.github/workflows/rog-import.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  import-graphics:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install InstallShield cabinet reader + image library
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y unshield
+          python -m pip install --break-system-packages pillow
+      - name: Download original archived client and extract authentic graphic pieces
+        run: |
+          mkdir -p /tmp/4leaf-archive/raw /tmp/4leaf-archive/unpacked
+          python - <<'PY'
+          import urllib.request
+          src='https://archive.org/download/4leaf/4leaf.zip'
+          req=urllib.request.Request(src,headers={'User-Agent':'Mozilla/5.0'})
+          with urllib.request.urlopen(req,timeout=120) as r,open('/tmp/4leaf-archive/4leaf.zip','wb') as f:
+            while chunk:=r.read(1048576):f.write(chunk)
+          PY
+          unzip -q /tmp/4leaf-archive/4leaf.zip 'data1.cab' 'data1.hdr' -d /tmp/4leaf-archive/raw
+          unshield x -d /tmp/4leaf-archive/unpacked /tmp/4leaf-archive/raw/data1.cab
+          python apps/4leaf/rog/tools/extract_original.py /tmp/4leaf-archive/unpacked/4Leaf_Files apps/4leaf/rog/original
+      - name: Commit original components without full-frame screenshot compositing
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/4leaf/rog/original
+          if ! git diff --cached --quiet; then
+            git commit -m "assets(4leaf): extract authentic UI, maps, avatars, cards and retro dialogue sprites"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
