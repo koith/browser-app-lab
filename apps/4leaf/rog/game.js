@@ -299,8 +299,17 @@ function drawMinimap(){
    context.lineWidth=1;context.strokeStyle='#131c4f';context.stroke();
  });
 }
-function drawGame(){if(!match||!MAPS[match.map])return;chooseSourcePath(match.map);const p=(match.mode==='hotseat'||match.mode==='network'?activePlayer():match.players[0]),stats=teamStats(p.team);$('game-map-title').textContent=match.map;$('element-label').textContent=match.attribute;$('player-count').textContent=match.players.length;$('turn-indicator').textContent='ROUND '+match.round+' · '+match.players[match.active].name+' TURN';$('my-name').textContent=p.name;$('my-stats').textContent='이동 '+stats.move+' · 공격 '+stats.atk+' · 방어 '+stats.def+' · 지력 +'+stats.int;$('my-position').textContent=p.jail>0?'감옥 '+p.jail+'턴':p.position===0?'START':p.position===match.tiles.length-1?'GOAL':(p.position+1)+'번째 칸';$('my-portrait').innerHTML='<img class="player-sprite" alt="" src="'+imageFor(p.team[0]||'soldier')+'">';$('ability-fill').style.width=p.ability+'%';$('game-players').replaceChildren();match.players.forEach((user,i)=>{const li=document.createElement('div');li.className=match.active===i?'is-turn':'';li.textContent=(match.active===i?'▶ ':'　')+user.pawn+' '+user.name+' '+(user.position+1)+'칸 · '+user.ability+'%';li.style.color=user.color;$('game-players').append(li)});$('my-items').replaceChildren();p.items.forEach((itemId,i)=>{const item=ITEM_MAP[itemId],btn=document.createElement('button');btn.className='item-card';btn.innerHTML='<span class="item-icon">'+(item?.icon||'✧')+'</span>'+(item?.name||itemId);btn.title=item.hint;btn.disabled=match.finished||!playerCanAct()||p.usedItem||busy;btn.onclick=()=>useItem(i);$('my-items').append(btn)});$('roll-btn').disabled=!playerCanAct();$('ability-btn').disabled=!playerCanAct()||p.ability<100;$('move-log').textContent=match.message;drawBoard();drawBattlePanels();drawMinimap()}
-const mapViewport={zoom:1,panX:0,panY:0};
+function drawGame(){if(!match||!MAPS[match.map])return;chooseSourcePath(match.map);const p=(match.mode==='hotseat'||match.mode==='network'?activePlayer():match.players[0]),stats=teamStats(p.team);$('game-map-title').textContent=match.map;$('element-label').textContent=match.attribute;$('player-count').textContent=match.players.length;$('turn-indicator').textContent='ROUND '+match.round+' · '+match.players[match.active].name+' TURN';$('my-name').textContent=p.name;$('my-stats').textContent='이동 '+stats.move+' · 공격 '+stats.atk+' · 방어 '+stats.def+' · 지력 +'+stats.int;$('my-position').textContent=p.jail>0?'감옥 '+p.jail+'턴':p.position===0?'START':p.position===match.tiles.length-1?'GOAL':(p.position+1)+'번째 칸';$('my-portrait').innerHTML='<img class="player-sprite" alt="" src="'+imageFor(p.team[0]||'soldier')+'">';$('ability-fill').style.width=p.ability+'%';$('game-players').replaceChildren();match.players.forEach((user,i)=>{const li=document.createElement('div');li.className=match.active===i?'is-turn':'';li.textContent=(match.active===i?'▶ ':'　')+user.pawn+' '+user.name+' '+(user.position+1)+'칸 · '+user.ability+'%';li.style.color=user.color;$('game-players').append(li)});$('my-items').replaceChildren();p.items.forEach((itemId,i)=>{const item=ITEM_MAP[itemId],btn=document.createElement('button');btn.className='item-card';btn.innerHTML='<span class="item-icon">'+(item?.icon||'✧')+'</span>'+(item?.name||itemId);btn.title=item.hint;btn.disabled=match.finished||!playerCanAct()||p.usedItem||busy;btn.onclick=()=>useItem(i);$('my-items').append(btn)});$('roll-btn').disabled=!playerCanAct();$('ability-btn').disabled=!playerCanAct()||p.ability<100;$('move-log').textContent=match.message;drawBoard();drawBattlePanels();drawMinimap();trackActivePawn()}
+const mapViewport={zoom:2.1,panX:0,panY:0,autoFollow:true};
+function trackActivePawn(){
+ if(!mapViewport.autoFollow||!match||!PATH.length)return;
+ const area=$('board-area'),p=activePlayer(),pos=PATH[p.position];if(!pos)return;
+ const w=area.clientWidth,h=area.clientHeight,z=mapViewport.zoom;
+ const maxX=w*(z-1)/2,maxY=h*(z-1)/2;
+ mapViewport.panX=Math.max(-maxX,Math.min(maxX,(50-pos.x)*(w*.76)*z/100));
+ mapViewport.panY=Math.max(-maxY,Math.min(maxY,(50-pos.y)*h*z/100));
+ applyMapViewport();
+}
 function applyMapViewport(){
  const world=$('board-world');if(!world)return;
  world.style.transform='translate('+mapViewport.panX+'px,'+mapViewport.panY+'px) scale('+mapViewport.zoom+')';
@@ -309,12 +318,12 @@ function applyMapViewport(){
 function zoomBoard(by){
  mapViewport.zoom=Math.max(1,Math.min(3.2,Math.round((mapViewport.zoom+by)*100)/100));
  if(mapViewport.zoom===1){mapViewport.panX=0;mapViewport.panY=0}
- applyMapViewport();
+ if(mapViewport.autoFollow)trackActivePawn();else applyMapViewport();
 }
 function installBoardControls(){
  $('board-zoom-in').onclick=()=>zoomBoard(.25);
  $('board-zoom-out').onclick=()=>zoomBoard(-.25);
- $('board-zoom-reset').onclick=()=>{mapViewport.zoom=1;mapViewport.panX=0;mapViewport.panY=0;applyMapViewport()};
+ $('board-zoom-reset').onclick=()=>{mapViewport.zoom=2.1;mapViewport.autoFollow=true;trackActivePawn()};
  const area=$('board-area');let tracking=null;
  area.addEventListener('pointerdown',e=>{
    if(e.target.closest('#board-zoom-controls')||e.button!==0)return;
@@ -323,6 +332,7 @@ function installBoardControls(){
  });
  area.addEventListener('pointermove',e=>{
    if(!tracking||tracking.id!==e.pointerId||mapViewport.zoom<=1)return;
+   mapViewport.autoFollow=false;
    const maxX=area.clientWidth*(mapViewport.zoom-1)/2,maxY=area.clientHeight*(mapViewport.zoom-1)/2;
    mapViewport.panX=Math.max(-maxX,Math.min(maxX,tracking.px+e.clientX-tracking.x));
    mapViewport.panY=Math.max(-maxY,Math.min(maxY,tracking.py+e.clientY-tracking.y));
