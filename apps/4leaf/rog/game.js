@@ -183,7 +183,31 @@ function useItem(index){
 }
 function consume(index){const p=match.players[0];p.items.splice(index,1);p.usedItem=true;persist()}
 function advance(user,distance){user.position=Math.min(match.tiles.length-1,Math.max(0,user.position+distance));user.ability=Math.min(100,user.ability+Math.max(0,distance)*4)}
-async function useAbility(){if(!withUserTurn())return;const p=match.players[0];if(p.ability<100)return;const a=teamStats(p.team).ability;const options=await ask('어빌리티 발동',teamStats(p.team).name+' · '+a+' · 충전된 게이지를 사용합니다.',['발동','취소']);if(options!==0)return;p.ability=0;if(a==='순간이동'||a==='프리워프'){advance(p,1+rand(15))}else if(a==='이동C'||a==='공격B'){advance(p,3)}else if(a==='블럭'){p.effects.dove=3}else{p.items.push('charge');if(p.items.length>5)p.items.shift()}appendMove(p.name+'이(가) '+a+' 어빌리티를 발동했습니다.');resolveTile(p);drawGame()}
+async function useAbility(){
+ if(!withUserTurn())return;
+ const p=match.players[0],stats=teamStats(p.team);
+ if(p.ability<100)return;
+ const code=stats.abilityId||0;
+ const selection=await ask('어빌리티 발동',stats.name+' · '+stats.ability+' / 충전 100%',['발동','취소']);
+ if(selection!==0||!withUserTurn())return;
+ p.ability=0;
+ switch(code){
+ case 30:advance(p,1+rand(15));p.effects.scar=(p.effects.scar||0)+1;break;
+ case 31:p.effects.teamInt=2;break;
+ case 33:case 35:advance(p,1+rand(4));break;
+ case 34:p.effects.destroy=2;break;
+ case 43:p.effects.block=2;break;
+ case 56:p.effects.ultimate=1;break;
+ case 37:case 24:advance(p,3);break;
+ case 23:case 25:p.effects.block=1;break;
+ case 19:case 20:case 21:case 38:case 39:p.effects.valkyrie=2;break;
+ case 26:case 27:p.effects.ring=2;break;
+ default:p.ability=50;appendMove('이 능력은 아직 세부 효과 확인 중입니다. 절반의 게이지를 반환했습니다.');drawGame();return;
+ }
+ appendMove(p.name+' · '+stats.name+' 『'+stats.ability+'』 발동');
+ if([30,33,35,37,24].includes(code))await resolveTile(p);
+ drawGame();
+}
 function combat(attacker,defender,keeper=false){
  return new Promise(resolve=>{
  const aStat=teamStats(attacker.team),bStat=keeper?{def:defender.def||2,int:0}:{...teamStats(defender.team)};
@@ -191,8 +215,12 @@ function combat(attacker,defender,keeper=false){
  let attack,defense,aValue,bValue,rerolls=0;
  for(let attempt=0;attempt<100;attempt++){
    attack=diceN(aCount,6);defense=diceN(bCount,6);
-   aValue=attack.total+(aStat.int||0)+(attacker.effects?.ring>0?2:0);
-   bValue=defense.total+(bStat.int||0)+(defender.effects?.ring>0?2:0);
+   aValue=attack.total+(aStat.int||0)+(attacker.effects?.ring>0?2:0)+(attacker.effects?.teamInt>0?3:0);
+   bValue=defense.total+(bStat.int||0)+(defender.effects?.ring>0?2:0)+(defender.effects?.teamInt>0?3:0);
+   if(attacker.effects?.scar>0)aValue=Math.max(1,aValue-attacker.effects.scar);
+   if(defender.effects?.scar>0)bValue=Math.max(1,bValue-defender.effects.scar);
+   if(attacker.effects?.ultimate>0)aValue=30;
+   if(defender.effects?.ultimate>0)bValue=18;
    if(attacker.effects?.destroy>0)aValue=24;
    if(defender.effects?.block>0)bValue=24;
    if(attacker.effects?.armageddon>0)aValue+=6;
@@ -329,6 +357,8 @@ async function takeTurn(){
  if(p.effects.block>0)p.effects.block--;
  if(p.effects.destroy>0)p.effects.destroy--;
  if(p.effects.keeper>0)p.effects.keeper--;
+ if(p.effects.teamInt>0)p.effects.teamInt--;
+ if(p.effects.ultimate>0)p.effects.ultimate--;
  await wait(p.bot?180:100);busy=false;nextTurn();
 }
 function nextTurn(){
