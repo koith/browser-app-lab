@@ -1,0 +1,56 @@
+name: Acquire original 4LEAF screens
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/4leaf-more-assets.yml']
+  workflow_dispatch:
+permissions: {contents: write}
+jobs:
+  acquire:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch verifiable historical screenshots and build metadata
+        run: |
+          python3 -m pip install --user --quiet pillow
+          python3 - <<'PY'
+          import pathlib,urllib.request,urllib.parse,hashlib,json,io,base64
+          from PIL import Image
+          dest=pathlib.Path('apps/4leaf/assets');dest.mkdir(parents=True,exist_ok=True)
+          sources={
+            'sky':['24280E405142A07C0B','2122A54F51415D7325','2719B84F51415D7330','0116A84F51415D7434','203B004151415E1E2A'],
+            'board':['0117613A5142AFC70D','136090435142CACC36','230E993A5142AFD719','120A5C3A5142AFC221'],
+            'battle':['230E993A5142AFD719','136090435142CACC36'],
+            'intro':['16570B3E5142ABBA13']
+          }
+          result={}
+          for name,ids in sources.items():
+            for id in ids:
+              source='https://t1.daumcdn.net/cfile/tistory/'+id
+              candidates=[source,source.replace('t1.','t2.'),'https://t1.daumcdn.net/thumb/R1024x0/?fname='+urllib.parse.quote(source,safe=''),'https://images.weserv.nl/?url='+urllib.parse.quote(source.replace('https://',''),safe='')]
+              for u in candidates:
+                try:
+                  req=urllib.request.Request(u,headers={'User-Agent':'Mozilla/5.0','Referer':'https://4leafmemorial.geld.kr/'})
+                  with urllib.request.urlopen(req,timeout=11) as r:raw=r.read(6000000)
+                  image=Image.open(io.BytesIO(raw));image.verify()
+                  ext='jpg' if raw.startswith(b'\xff\xd8\xff') else 'png' if raw.startswith(b'\x89PNG') else 'webp'
+                  out=dest/(name+'.'+ext);out.write_bytes(raw)
+                  im=Image.open(io.BytesIO(raw)).convert('RGB');size=im.size;im.thumbnail((760,540))
+                  buf=io.BytesIO();im.save(buf,format='JPEG',quality=65,optimize=True)
+                  previews=dest/'previews';previews.mkdir(exist_ok=True)
+                  (previews/(name+'.b64.txt')).write_text(base64.b64encode(buf.getvalue()).decode())
+                  result[name]={'filename':out.name,'size':size,'source':source,'bytes':len(raw)}
+                  print('ACQUIRED',name,out.name,len(raw),size,u)
+                  break
+                except Exception as e: print('retry',name,id,str(e)[:100])
+              if name in result:break
+            if name not in result:print('MISSING',name)
+          (dest/'additional-manifest.json').write_text(json.dumps(result,ensure_ascii=False,indent=2))
+          PY
+      - name: Commit acquired screenshots
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/4leaf/assets
+          git diff --cached --quiet || (git commit -m 'assets: add original 4LEAF browser and battle screens' && git pull --rebase origin main && git push)
