@@ -1,0 +1,27 @@
+name: 4LEAF dynamic game smoke tests
+on:
+  push:
+    paths:
+      - 'apps/4leaf/rog/**'
+      - '.github/workflows/rog-test.yml'
+  workflow_dispatch:
+jobs:
+  browser-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install headless browser
+        run: |
+          npm install --no-save playwright
+          npx playwright install chromium --with-deps
+      - name: Test functional 4LEAF scenes and dice flow
+        run: node apps/4leaf/rog/tests/smoke.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: rog-browser-screenshots
+          path: rog-*.png
