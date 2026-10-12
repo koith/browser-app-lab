@@ -1,0 +1,1542 @@
+{
+  "source": "Archived 4Leaf original client installer, extracted from data1.cab / *.pak",
+  "original_source": "https://archive.org/details/4leaf",
+  "resources": [
+    {
+      "original": "CardData/chm_1.gif",
+      "image": "CardData/chm_1.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_10.gif",
+      "image": "CardData/chm_10.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_101.gif",
+      "image": "CardData/chm_101.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_102.gif",
+      "image": "CardData/chm_102.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_103.gif",
+      "image": "CardData/chm_103.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_104.gif",
+      "image": "CardData/chm_104.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_105.gif",
+      "image": "CardData/chm_105.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_106.gif",
+      "image": "CardData/chm_106.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_107.gif",
+      "image": "CardData/chm_107.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_108.gif",
+      "image": "CardData/chm_108.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_109.gif",
+      "image": "CardData/chm_109.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_11.gif",
+      "image": "CardData/chm_11.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_110.gif",
+      "image": "CardData/chm_110.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_111.gif",
+      "image": "CardData/chm_111.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_112.gif",
+      "image": "CardData/chm_112.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_113.gif",
+      "image": "CardData/chm_113.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_114.gif",
+      "image": "CardData/chm_114.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_115.gif",
+      "image": "CardData/chm_115.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_116.gif",
+      "image": "CardData/chm_116.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_117.gif",
+      "image": "CardData/chm_117.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_118.gif",
+      "image": "CardData/chm_118.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_119.gif",
+      "image": "CardData/chm_119.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_12.gif",
+      "image": "CardData/chm_12.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_120.gif",
+      "image": "CardData/chm_120.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_121.gif",
+      "image": "CardData/chm_121.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_122.gif",
+      "image": "CardData/chm_122.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_123.gif",
+      "image": "CardData/chm_123.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_125.gif",
+      "image": "CardData/chm_125.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_126.gif",
+      "image": "CardData/chm_126.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_127.gif",
+      "image": "CardData/chm_127.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_128.gif",
+      "image": "CardData/chm_128.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_129.gif",
+      "image": "CardData/chm_129.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_13.gif",
+      "image": "CardData/chm_13.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_130.gif",
+      "image": "CardData/chm_130.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_131.gif",
+      "image": "CardData/chm_131.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_132.gif",
+      "image": "CardData/chm_132.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_133.gif",
+      "image": "CardData/chm_133.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_134.gif",
+      "image": "CardData/chm_134.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_135.gif",
+      "image": "CardData/chm_135.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_14.gif",
+      "image": "CardData/chm_14.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_15.gif",
+      "image": "CardData/chm_15.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_16.gif",
+      "image": "CardData/chm_16.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_17.gif",
+      "image": "CardData/chm_17.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_18.gif",
+      "image": "CardData/chm_18.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_19.gif",
+      "image": "CardData/chm_19.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_2.gif",
+      "image": "CardData/chm_2.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_20.gif",
+      "image": "CardData/chm_20.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_21.gif",
+      "image": "CardData/chm_21.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_22.gif",
+      "image": "CardData/chm_22.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_23.gif",
+      "image": "CardData/chm_23.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_24.gif",
+      "image": "CardData/chm_24.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_25.gif",
+      "image": "CardData/chm_25.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_26.gif",
+      "image": "CardData/chm_26.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_27.gif",
+      "image": "CardData/chm_27.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_28.gif",
+      "image": "CardData/chm_28.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_29.gif",
+      "image": "CardData/chm_29.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_3.gif",
+      "image": "CardData/chm_3.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_30.gif",
+      "image": "CardData/chm_30.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_31.gif",
+      "image": "CardData/chm_31.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_32.gif",
+      "image": "CardData/chm_32.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_33.gif",
+      "image": "CardData/chm_33.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_34.gif",
+      "image": "CardData/chm_34.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_35.gif",
+      "image": "CardData/chm_35.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_36.gif",
+      "image": "CardData/chm_36.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_37.gif",
+      "image": "CardData/chm_37.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_38.gif",
+      "image": "CardData/chm_38.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_39.gif",
+      "image": "CardData/chm_39.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_4.gif",
+      "image": "CardData/chm_4.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_40.gif",
+      "image": "CardData/chm_40.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_41.gif",
+      "image": "CardData/chm_41.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_42.gif",
+      "image": "CardData/chm_42.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_43.gif",
+      "image": "CardData/chm_43.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_44.gif",
+      "image": "CardData/chm_44.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_45.gif",
+      "image": "CardData/chm_45.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_46.gif",
+      "image": "CardData/chm_46.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_47.gif",
+      "image": "CardData/chm_47.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_48.gif",
+      "image": "CardData/chm_48.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_49.gif",
+      "image": "CardData/chm_49.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_5.gif",
+      "image": "CardData/chm_5.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_50.gif",
+      "image": "CardData/chm_50.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_51.gif",
+      "image": "CardData/chm_51.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_52.gif",
+      "image": "CardData/chm_52.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_53.gif",
+      "image": "CardData/chm_53.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_54.gif",
+      "image": "CardData/chm_54.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_55.gif",
+      "image": "CardData/chm_55.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_56.gif",
+      "image": "CardData/chm_56.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_57.gif",
+      "image": "CardData/chm_57.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_58.gif",
+      "image": "CardData/chm_58.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_59.gif",
+      "image": "CardData/chm_59.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_6.gif",
+      "image": "CardData/chm_6.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_60.gif",
+      "image": "CardData/chm_60.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_61.gif",
+      "image": "CardData/chm_61.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_62.gif",
+      "image": "CardData/chm_62.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_63.gif",
+      "image": "CardData/chm_63.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_7.gif",
+      "image": "CardData/chm_7.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_8.gif",
+      "image": "CardData/chm_8.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardData/chm_9.gif",
+      "image": "CardData/chm_9.png",
+      "width": 56,
+      "height": 69
+    },
+    {
+      "original": "CardShop/cardshopback.gif",
+      "image": "CardShop/cardshopback.png",
+      "width": 794,
+      "height": 404
+    },
+    {
+      "original": "CardShop/cardshopbutton.gif",
+      "image": "CardShop/cardshopbutton.png",
+      "width": 500,
+      "height": 510
+    },
+    {
+      "original": "CardShop/cardshopnote.gif",
+      "image": "CardShop/cardshopnote.png",
+      "width": 187,
+      "height": 66
+    },
+    {
+      "original": "CardShop/dressshopbutton.gif",
+      "image": "CardShop/dressshopbutton.png",
+      "width": 498,
+      "height": 460
+    },
+    {
+      "original": "CardShop/magic_look1.gif",
+      "image": "CardShop/magic_look1.png",
+      "width": 37,
+      "height": 29
+    },
+    {
+      "original": "CardShop/magic_look2.gif",
+      "image": "CardShop/magic_look2.png",
+      "width": 37,
+      "height": 29
+    },
+    {
+      "original": "CardShop/magic_look3.gif",
+      "image": "CardShop/magic_look3.png",
+      "width": 37,
+      "height": 29
+    },
+    {
+      "original": "CardShop/magic_look4.gif",
+      "image": "CardShop/magic_look4.png",
+      "width": 37,
+      "height": 29
+    },
+    {
+      "original": "CardShop/magic_look5.gif",
+      "image": "CardShop/magic_look5.png",
+      "width": 37,
+      "height": 29
+    },
+    {
+      "original": "CardShop/magic_look6.gif",
+      "image": "CardShop/magic_look6.png",
+      "width": 37,
+      "height": 29
+    },
+    {
+      "original": "CardShop/master.gif",
+      "image": "CardShop/master.png",
+      "width": 98,
+      "height": 124
+    },
+    {
+      "original": "CardShop/normalcard.gif",
+      "image": "CardShop/normalcard.png",
+      "width": 111,
+      "height": 90
+    },
+    {
+      "original": "CardShop/valuablecard.gif",
+      "image": "CardShop/valuablecard.png",
+      "width": 160,
+      "height": 123
+    },
+    {
+      "original": "ChatRoom/ChatBar.gif",
+      "image": "ChatRoom/chatbar.png",
+      "width": 17,
+      "height": 17
+    },
+    {
+      "original": "ChatRoom/ChatBarEdit.gif",
+      "image": "ChatRoom/chatbaredit.png",
+      "width": 407,
+      "height": 21
+    },
+    {
+      "original": "ChatRoom/Combo.gif",
+      "image": "ChatRoom/combo.png",
+      "width": 68,
+      "height": 87
+    },
+    {
+      "original": "ChatRoom/ExitBtn.gif",
+      "image": "ChatRoom/exitbtn.png",
+      "width": 264,
+      "height": 50
+    },
+    {
+      "original": "ChatRoom/ExpDialogBtn.gif",
+      "image": "ChatRoom/expdialogbtn.png",
+      "width": 196,
+      "height": 267
+    },
+    {
+      "original": "ChatRoom/OwnerDialog.gif",
+      "image": "ChatRoom/ownerdialog.png",
+      "width": 338,
+      "height": 282
+    },
+    {
+      "original": "ChatRoom/RingBtn.gif",
+      "image": "ChatRoom/ringbtn.png",
+      "width": 104,
+      "height": 330
+    },
+    {
+      "original": "ChatRoom/Room0.gif",
+      "image": "ChatRoom/room0.png",
+      "width": 794,
+      "height": 528
+    },
+    {
+      "original": "ChatRoom/Room1.gif",
+      "image": "ChatRoom/room1.png",
+      "width": 794,
+      "height": 528
+    },
+    {
+      "original": "ChatRoom/Room2.gif",
+      "image": "ChatRoom/room2.png",
+      "width": 794,
+      "height": 528
+    },
+    {
+      "original": "ChatRoom/Room3.gif",
+      "image": "ChatRoom/room3.png",
+      "width": 794,
+      "height": 528
+    },
+    {
+      "original": "ChatRoom/Room3t.gif",
+      "image": "ChatRoom/room3t.png",
+      "width": 272,
+      "height": 102
+    },
+    {
+      "original": "ChatRoom/Room4.gif",
+      "image": "ChatRoom/room4.png",
+      "width": 794,
+      "height": 528
+    },
+    {
+      "original": "ChatRoom/Room4t.gif",
+      "image": "ChatRoom/room4t.png",
+      "width": 115,
+      "height": 103
+    },
+    {
+      "original": "ChatRoom/Room5.gif",
+      "image": "ChatRoom/room5.png",
+      "width": 794,
+      "height": 528
+    },
+    {
+      "original": "ChatRoom/Room5t.gif",
+      "image": "ChatRoom/room5t.png",
+      "width": 176,
+      "height": 128
+    },
+    {
+      "original": "ChatRoom/ScrollBar.gif",
+      "image": "ChatRoom/scrollbar.png",
+      "width": 52,
+      "height": 40
+    },
+    {
+      "original": "ChatRoom/TalkBox.gif",
+      "image": "ChatRoom/talkbox.png",
+      "width": 47,
+      "height": 100
+    },
+    {
+      "original": "ChatRoom/UserList.gif",
+      "image": "ChatRoom/userlist.png",
+      "width": 150,
+      "height": 38
+    },
+    {
+      "original": "ChatTown/NorthBack.gif",
+      "image": "ChatTown/northback.png",
+      "width": 794,
+      "height": 404
+    },
+    {
+      "original": "ChatTown/PlainBtn.gif",
+      "image": "ChatTown/plainbtn.png",
+      "width": 568,
+      "height": 444
+    },
+    {
+      "original": "ChatTown/SeaBtn.gif",
+      "image": "ChatTown/seabtn.png",
+      "width": 568,
+      "height": 370
+    },
+    {
+      "original": "ChatTown/SnowBtn.gif",
+      "image": "ChatTown/snowbtn.png",
+      "width": 568,
+      "height": 370
+    },
+    {
+      "original": "ChatTown/SouthBack.gif",
+      "image": "ChatTown/southback.png",
+      "width": 794,
+      "height": 404
+    },
+    {
+      "original": "D1Region/D1RegionBack.gif",
+      "image": "D1Region/d1regionback.png",
+      "width": 627,
+      "height": 412
+    },
+    {
+      "original": "D1Region/D1RegionBtn.gif",
+      "image": "D1Region/d1regionbtn.png",
+      "width": 563,
+      "height": 353
+    },
+    {
+      "original": "Gif/Attribute.gif",
+      "image": "Gif/attribute.png",
+      "width": 20,
+      "height": 110
+    },
+    {
+      "original": "Gif/btnOwner.gif",
+      "image": "Gif/btnowner.png",
+      "width": 18,
+      "height": 24
+    },
+    {
+      "original": "Gif/btnReady.gif",
+      "image": "Gif/btnready.png",
+      "width": 18,
+      "height": 24
+    },
+    {
+      "original": "Gif/D1AbilityBtn.gif",
+      "image": "Gif/d1abilitybtn.png",
+      "width": 118,
+      "height": 16
+    },
+    {
+      "original": "Gif/D1AttackBtn.gif",
+      "image": "Gif/d1attackbtn.png",
+      "width": 36,
+      "height": 16
+    },
+    {
+      "original": "Gif/D1AttrBtn.gif",
+      "image": "Gif/d1attrbtn.png",
+      "width": 36,
+      "height": 16
+    },
+    {
+      "original": "Gif/D1BtnReady.gif",
+      "image": "Gif/d1btnready.png",
+      "width": 760,
+      "height": 36
+    },
+    {
+      "original": "Gif/D1BtnStart.gif",
+      "image": "Gif/d1btnstart.png",
+      "width": 760,
+      "height": 36
+    },
+    {
+      "original": "Gif/D1CancelBtn.gif",
+      "image": "Gif/d1cancelbtn.png",
+      "width": 256,
+      "height": 18
+    },
+    {
+      "original": "Gif/D1CBack.gif",
+      "image": "Gif/d1cback.png",
+      "width": 404,
+      "height": 408
+    },
+    {
+      "original": "Gif/D1CFindRoom.gif",
+      "image": "Gif/d1cfindroom.png",
+      "width": 352,
+      "height": 152
+    },
+    {
+      "original": "Gif/D1CmbBtn.gif",
+      "image": "Gif/d1cmbbtn.png",
+      "width": 64,
+      "height": 17
+    },
+    {
+      "original": "Gif/D1CmbBtn1.gif",
+      "image": "Gif/d1cmbbtn1.png",
+      "width": 64,
+      "height": 18
+    },
+    {
+      "original": "Gif/D1CreateBtn.gif",
+      "image": "Gif/d1createbtn.png",
+      "width": 984,
+      "height": 93
+    },
+    {
+      "original": "Gif/D1DefendBtn.gif",
+      "image": "Gif/d1defendbtn.png",
+      "width": 36,
+      "height": 16
+    },
+    {
+      "original": "Gif/D1ExitBtn.gif",
+      "image": "Gif/d1exitbtn.png",
+      "width": 288,
+      "height": 48
+    },
+    {
+      "original": "Gif/D1GameOption.gif",
+      "image": "Gif/d1gameoption.png",
+      "width": 256,
+      "height": 58
+    },
+    {
+      "original": "Gif/D1IntBtn.gif",
+      "image": "Gif/d1intbtn.png",
+      "width": 36,
+      "height": 16
+    },
+    {
+      "original": "Gif/D1JoinBtn.gif",
+      "image": "Gif/d1joinbtn.png",
+      "width": 984,
+      "height": 93
+    },
+    {
+      "original": "Gif/D1Lobby.gif",
+      "image": "Gif/d1lobby.png",
+      "width": 800,
+      "height": 540
+    },
+    {
+      "original": "Gif/D1LobbyBtn.gif",
+      "image": "Gif/d1lobbybtn.png",
+      "width": 984,
+      "height": 93
+    },
+    {
+      "original": "Gif/D1MoveBtn.gif",
+      "image": "Gif/d1movebtn.png",
+      "width": 36,
+      "height": 16
+    },
+    {
+      "original": "Gif/D1NameBtn.gif",
+      "image": "Gif/d1namebtn.png",
+      "width": 68,
+      "height": 16
+    },
+    {
+      "original": "Gif/D1NormalBtn.gif",
+      "image": "Gif/d1normalbtn.png",
+      "width": 74,
+      "height": 20
+    },
+    {
+      "original": "Gif/D1OkBtn.gif",
+      "image": "Gif/d1okbtn.png",
+      "width": 256,
+      "height": 18
+    },
+    {
+      "original": "Gif/D1PrivateBtn.gif",
+      "image": "Gif/d1privatebtn.png",
+      "width": 104,
+      "height": 20
+    },
+    {
+      "original": "Gif/D1PublicBtn.gif",
+      "image": "Gif/d1publicbtn.png",
+      "width": 72,
+      "height": 20
+    },
+    {
+      "original": "Gif/D1RadioBtn.gif",
+      "image": "Gif/d1radiobtn.png",
+      "width": 284,
+      "height": 91
+    },
+    {
+      "original": "Gif/D1RBtn.gif",
+      "image": "Gif/d1rbtn.png",
+      "width": 256,
+      "height": 128
+    },
+    {
+      "original": "Gif/D1Region.gif",
+      "image": "Gif/d1region.png",
+      "width": 796,
+      "height": 540
+    },
+    {
+      "original": "Gif/D1RegionSelBtn.gif",
+      "image": "Gif/d1regionselbtn.png",
+      "width": 576,
+      "height": 432
+    },
+    {
+      "original": "Gif/D1ScrollDown.gif",
+      "image": "Gif/d1scrolldown.png",
+      "width": 64,
+      "height": 17
+    },
+    {
+      "original": "Gif/D1ScrollThumb.gif",
+      "image": "Gif/d1scrollthumb.png",
+      "width": 16,
+      "height": 17
+    },
+    {
+      "original": "Gif/D1ScrollUp.gif",
+      "image": "Gif/d1scrollup.png",
+      "width": 64,
+      "height": 17
+    },
+    {
+      "original": "Gif/D1SelectBtn.gif",
+      "image": "Gif/d1selectbtn.png",
+      "width": 312,
+      "height": 30
+    },
+    {
+      "original": "Gif/D1SummonBtn.gif",
+      "image": "Gif/d1summonbtn.png",
+      "width": 68,
+      "height": 16
+    },
+    {
+      "original": "Gif/D1TeamBtn.gif",
+      "image": "Gif/d1teambtn.png",
+      "width": 42,
+      "height": 20
+    },
+    {
+      "original": "Gif/D1WaitRoom.gif",
+      "image": "Gif/d1waitroom.png",
+      "width": 800,
+      "height": 540
+    },
+    {
+      "original": "Gif/D1XBtn.gif",
+      "image": "Gif/d1xbtn.png",
+      "width": 80,
+      "height": 20
+    },
+    {
+      "original": "Gif/Panel.bmp",
+      "image": "Gif/panel.png",
+      "width": 308,
+      "height": 44
+    },
+    {
+      "original": "Gif/RoomCBtn.gif",
+      "image": "Gif/roomcbtn.png",
+      "width": 256,
+      "height": 120
+    },
+    {
+      "original": "IMG/abilityBar.bmp",
+      "image": "IMG/abilitybar.png",
+      "width": 92,
+      "height": 64
+    },
+    {
+      "original": "IMG/avatarBack.bmp",
+      "image": "IMG/avatarback.png",
+      "width": 96,
+      "height": 96
+    },
+    {
+      "original": "IMG/bgtile.bmp",
+      "image": "IMG/bgtile.png",
+      "width": 725,
+      "height": 485
+    },
+    {
+      "original": "IMG/chatwnd.bmp",
+      "image": "IMG/chatwnd.png",
+      "width": 406,
+      "height": 152
+    },
+    {
+      "original": "IMG/dialog.bmp",
+      "image": "IMG/dialog.png",
+      "width": 292,
+      "height": 110
+    },
+    {
+      "original": "IMG/eventmsgbox.bmp",
+      "image": "IMG/eventmsgbox.png",
+      "width": 244,
+      "height": 52
+    },
+    {
+      "original": "IMG/groupButton.bmp",
+      "image": "IMG/groupbutton.png",
+      "width": 224,
+      "height": 28
+    },
+    {
+      "original": "IMG/menu.bmp",
+      "image": "IMG/menu.png",
+      "width": 608,
+      "height": 30
+    },
+    {
+      "original": "IMG/minimap.bmp",
+      "image": "IMG/minimap.png",
+      "width": 172,
+      "height": 152
+    },
+    {
+      "original": "IMG/selector.bmp",
+      "image": "IMG/selector.png",
+      "width": 222,
+      "height": 152
+    },
+    {
+      "original": "IMG/title.BMP",
+      "image": "IMG/title.png",
+      "width": 800,
+      "height": 600
+    },
+    {
+      "original": "IMG/topbar.bmp",
+      "image": "IMG/topbar.png",
+      "width": 608,
+      "height": 42
+    },
+    {
+      "original": "Map/mapback.gif",
+      "image": "Map/mapback.png",
+      "width": 794,
+      "height": 404
+    },
+    {
+      "original": "Map/mapbutton.gif",
+      "image": "Map/mapbutton.png",
+      "width": 880,
+      "height": 210
+    },
+    {
+      "original": "Map/maplist.gif",
+      "image": "Map/maplist.png",
+      "width": 402,
+      "height": 77
+    },
+    {
+      "original": "Region/1234.gif",
+      "image": "Region/1234.png",
+      "width": 132,
+      "height": 124
+    },
+    {
+      "original": "Region/character.gif",
+      "image": "Region/character.png",
+      "width": 196,
+      "height": 539
+    },
+    {
+      "original": "Region/Combo.gif",
+      "image": "Region/combo.png",
+      "width": 68,
+      "height": 41
+    },
+    {
+      "original": "Region/regionback.gif",
+      "image": "Region/regionback.png",
+      "width": 794,
+      "height": 404
+    },
+    {
+      "original": "Room/attribute1.gif",
+      "image": "Room/attribute1.png",
+      "width": 23,
+      "height": 110
+    },
+    {
+      "original": "Room/roomback.gif",
+      "image": "Room/roomback.png",
+      "width": 794,
+      "height": 404
+    },
+    {
+      "original": "Room/roombutton.gif",
+      "image": "Room/roombutton.png",
+      "width": 493,
+      "height": 302
+    },
+    {
+      "original": "KnightTown/KnightBack.gif",
+      "image": "KnightTown/knightback.png",
+      "width": 794,
+      "height": 404
+    },
+    {
+      "original": "KnightTown/Plain01.gif",
+      "image": "KnightTown/plain01.png",
+      "width": 568,
+      "height": 74
+    },
+    {
+      "original": "KnightTown/Plain02.gif",
+      "image": "KnightTown/plain02.png",
+      "width": 568,
+      "height": 74
+    },
+    {
+      "original": "KnightTown/Sea01.gif",
+      "image": "KnightTown/sea01.png",
+      "width": 568,
+      "height": 74
+    },
+    {
+      "original": "KnightTown/Sea02.gif",
+      "image": "KnightTown/sea02.png",
+      "width": 568,
+      "height": 74
+    },
+    {
+      "original": "KnightTown/Sea03.gif",
+      "image": "KnightTown/sea03.png",
+      "width": 568,
+      "height": 74
+    },
+    {
+      "original": "KnightTown/Snow01.gif",
+      "image": "KnightTown/snow01.png",
+      "width": 568,
+      "height": 74
+    },
+    {
+      "original": "MainFrame/Agent.gif",
+      "image": "MainFrame/agent.png",
+      "width": 400,
+      "height": 72
+    },
+    {
+      "original": "MainFrame/AgentBtn.gif",
+      "image": "MainFrame/agentbtn.png",
+      "width": 397,
+      "height": 121
+    },
+    {
+      "original": "MainFrame/Border.gif",
+      "image": "MainFrame/border.png",
+      "width": 28,
+      "height": 34
+    },
+    {
+      "original": "MainFrame/BorderBtn.gif",
+      "image": "MainFrame/borderbtn.png",
+      "width": 68,
+      "height": 60
+    },
+    {
+      "original": "MainFrame/BorderBtn1.gif",
+      "image": "MainFrame/borderbtn1.png",
+      "width": 68,
+      "height": 45
+    },
+    {
+      "original": "MainFrame/Channel.gif",
+      "image": "MainFrame/channel.png",
+      "width": 219,
+      "height": 167
+    },
+    {
+      "original": "MainFrame/MsgDlg.gif",
+      "image": "MainFrame/msgdlg.png",
+      "width": 36,
+      "height": 36
+    },
+    {
+      "original": "MainFrame/MsgDlgBtn.gif",
+      "image": "MainFrame/msgdlgbtn.png",
+      "width": 248,
+      "height": 168
+    },
+    {
+      "original": "MainFrame/MsgDlgIcon.gif",
+      "image": "MainFrame/msgdlgicon.png",
+      "width": 136,
+      "height": 104
+    },
+    {
+      "original": "MainFrame/MsgDlgTitle.gif",
+      "image": "MainFrame/msgdlgtitle.png",
+      "width": 32,
+      "height": 17
+    },
+    {
+      "original": "MainFrame/Pannel.gif",
+      "image": "MainFrame/pannel.png",
+      "width": 323,
+      "height": 124
+    },
+    {
+      "original": "MainFrame/SnapLogo.gif",
+      "image": "MainFrame/snaplogo.png",
+      "width": 161,
+      "height": 51
+    },
+    {
+      "original": "MainFrame/SnapNumber.gif",
+      "image": "MainFrame/snapnumber.png",
+      "width": 72,
+      "height": 10
+    },
+    {
+      "original": "MainFrame/Title.gif",
+      "image": "MainFrame/title.png",
+      "width": 680,
+      "height": 54
+    },
+    {
+      "original": "MainFrame/ToolBarBtn.gif",
+      "image": "MainFrame/toolbarbtn.png",
+      "width": 120,
+      "height": 270
+    },
+    {
+      "original": "MainFrame/ToolBarMove.gif",
+      "image": "MainFrame/toolbarmove.png",
+      "width": 8,
+      "height": 30
+    },
+    {
+      "original": "MainFrame/wallpaper.gif",
+      "image": "MainFrame/wallpaper.png",
+      "width": 321,
+      "height": 240
+    },
+    {
+      "original": "MainStreet/Accessory.gif",
+      "image": "MainStreet/accessory.png",
+      "width": 152,
+      "height": 136
+    },
+    {
+      "original": "MainStreet/Back.gif",
+      "image": "MainStreet/back.png",
+      "width": 1938,
+      "height": 404
+    },
+    {
+      "original": "MainStreet/card.gif",
+      "image": "MainStreet/card.png",
+      "width": 183,
+      "height": 266
+    },
+    {
+      "original": "MainStreet/DandyModern.gif",
+      "image": "MainStreet/dandymodern.png",
+      "width": 212,
+      "height": 222
+    },
+    {
+      "original": "MainStreet/Dress.gif",
+      "image": "MainStreet/dress.png",
+      "width": 230,
+      "height": 196
+    },
+    {
+      "original": "MainStreet/Event.gif",
+      "image": "MainStreet/event.png",
+      "width": 190,
+      "height": 229
+    },
+    {
+      "original": "MainStreet/hair.gif",
+      "image": "MainStreet/hair.png",
+      "width": 199,
+      "height": 178
+    },
+    {
+      "original": "MainStreet/Office.gif",
+      "image": "MainStreet/office.png",
+      "width": 215,
+      "height": 238
+    },
+    {
+      "original": "Registry/AvatarDialog1.gif",
+      "image": "Registry/avatardialog1.png",
+      "width": 111,
+      "height": 34
+    },
+    {
+      "original": "Registry/AvatarDialog2.gif",
+      "image": "Registry/avatardialog2.png",
+      "width": 168,
+      "height": 23
+    },
+    {
+      "original": "Registry/AvatarDialog3.gif",
+      "image": "Registry/avatardialog3.png",
+      "width": 368,
+      "height": 205
+    },
+    {
+      "original": "Registry/SAva00.gif",
+      "image": "Registry/sava00.png",
+      "width": 75,
+      "height": 141
+    },
+    {
+      "original": "Registry/SAva01.gif",
+      "image": "Registry/sava01.png",
+      "width": 75,
+      "height": 141
+    },
+    {
+      "original": "Registry/SAva02.gif",
+      "image": "Registry/sava02.png",
+      "width": 75,
+      "height": 141
+    },
+    {
+      "original": "Registry/SAva03.gif",
+      "image": "Registry/sava03.png",
+      "width": 75,
+      "height": 141
+    },
+    {
+      "original": "Registry/SAva04.gif",
+      "image": "Registry/sava04.png",
+      "width": 75,
+      "height": 141
+    },
+    {
+      "original": "Registry/SAva05.gif",
+      "image": "Registry/sava05.png",
+      "width": 75,
+      "height": 141
+    },
+    {
+      "original": "Registry/SAva06.gif",
+      "image": "Registry/sava06.png",
+      "width": 75,
+      "height": 141
+    },
+    {
+      "original": "Registry/SAva80.gif",
+      "image": "Registry/sava80.png",
+      "width": 75,
+      "height": 141
+    },
+    {
+      "original": "Registry/SAva81.gif",
+      "image": "Registry/sava81.png",
+      "width": 75,
+      "height": 141
+    },
+    {
+      "original": "Registry/SAva82.gif",
+      "image": "Registry/sava82.png",
+      "width": 75,
+      "height": 141
+    },
+    {
+      "original": "Registry/SAva83.gif",
+      "image": "Registry/sava83.png",
+      "width": 75,
+      "height": 141
+    },
+    {
+      "original": "Registry/SAva84.gif",
+      "image": "Registry/sava84.png",
+      "width": 75,
+      "height": 141
+    },
+    {
+      "original": "Registry/SAva85.gif",
+      "image": "Registry/sava85.png",
+      "width": 75,
+      "height": 141
+    },
+    {
+      "original": "Registry/SAva86.gif",
+      "image": "Registry/sava86.png",
+      "width": 75,
+      "height": 141
+    },
+    {
+      "original": "WorldMap/Dice.gif",
+      "image": "WorldMap/dice.png",
+      "width": 792,
+      "height": 133
+    },
+    {
+      "original": "WorldMap/Knights.gif",
+      "image": "WorldMap/knights.png",
+      "width": 812,
+      "height": 218
+    },
+    {
+      "original": "WorldMap/m4Leaf.gif",
+      "image": "WorldMap/m4leaf.png",
+      "width": 552,
+      "height": 147
+    },
+    {
+      "original": "WorldMap/MainStreet.gif",
+      "image": "WorldMap/mainstreet.png",
+      "width": 812,
+      "height": 112
+    },
+    {
+      "original": "WorldMap/NorthChatRgn.gif",
+      "image": "WorldMap/northchatrgn.png",
+      "width": 1072,
+      "height": 140
+    },
+    {
+      "original": "WorldMap/Notice.gif",
+      "image": "WorldMap/notice.png",
+      "width": 184,
+      "height": 61
+    },
+    {
+      "original": "WorldMap/SouthChatRgn.gif",
+      "image": "WorldMap/southchatrgn.png",
+      "width": 956,
+      "height": 139
+    },
+    {
+      "original": "WorldMap/WorldMapBack.gif",
+      "image": "WorldMap/worldmapback.png",
+      "width": 796,
+      "height": 528
+    }
+  ]
+}
