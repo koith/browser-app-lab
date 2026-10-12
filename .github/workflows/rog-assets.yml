@@ -21,6 +21,19 @@ jobs:
               a=dict(attrs)
               if tag=='img':
                 self.images.append({k:v for k,v in a.items() if k in ('src','data-src','data-original','data-phocus','alt','width','height')})
+          print('ARCHIVE.ORG 4LEAF ITEM INSPECTION')
+          import json
+          for url in ['https://archive.org/metadata/4leaf','https://archive.org/download/4leaf/']:
+            try:
+              req=urllib.request.Request(url,headers={'User-Agent':'Mozilla/5.0'})
+              r=urllib.request.urlopen(req,timeout=30)
+              payload=r.read(1200000)
+              print('ARCHIVE URL',url,'status',r.status,'bytes',len(payload))
+              if '/metadata/' in url:
+                o=json.loads(payload)
+                for x in o.get('files',[]):print('ARCHIVE_FILE',repr({k:x.get(k) for k in ['name','size','format','md5']})[:650])
+              else:print('ARCHIVE_HTML',payload[:650].decode('utf-8','replace'))
+            except Exception as ex:print('ARCHIVE ERROR',url,repr(ex)[:200])
           for id in [1587,1588,1599,1598,1527,1503]:
             for base in ['https://4leafmemorial.geld.kr/','https://4leafmemorial.tistory.com/']:
               try:
