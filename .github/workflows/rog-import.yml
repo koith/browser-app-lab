@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - 'apps/4leaf/rog/tools/extract_original.py'
+      - 'apps/4leaf/rog/tools/extract_tiles.py'
       - '.github/workflows/rog-import.yml'
   workflow_dispatch:
 permissions:
@@ -42,6 +43,7 @@ jobs:
           unzip -q /tmp/4leaf-archive/4leaf.zip 'data1.cab' 'data1.hdr' -d /tmp/4leaf-archive/raw
           unshield x -d /tmp/4leaf-archive/unpacked /tmp/4leaf-archive/raw/data1.cab
           python apps/4leaf/rog/tools/extract_original.py /tmp/4leaf-archive/unpacked/4Leaf_Files apps/4leaf/rog/original
+          python apps/4leaf/rog/tools/extract_tiles.py /tmp/4leaf-archive/unpacked/4Leaf_Files/Dice/DMP.pak apps/4leaf/rog/original
       - name: Commit original components without full-frame screenshot compositing
         run: |
           git config user.name "github-actions[bot]"
