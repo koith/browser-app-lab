@@ -27,8 +27,17 @@ jobs:
           import urllib.request
           src='https://archive.org/download/4leaf/4leaf.zip'
           req=urllib.request.Request(src,headers={'User-Agent':'Mozilla/5.0'})
-          with urllib.request.urlopen(req,timeout=120) as r,open('/tmp/4leaf-archive/4leaf.zip','wb') as f:
-            while chunk:=r.read(1048576):f.write(chunk)
+          import time
+          for trial in range(5):
+            try:
+              r=urllib.request.urlopen(urllib.request.Request('https://archive.org/download/4leaf/4leaf.zip'+('?download=1' if trial%2 else ''),headers={'User-Agent':'Mozilla/5.0 (compatible; 4LEAF restoration archive checker)'}),timeout=120)
+              with r,open('/tmp/4leaf-archive/4leaf.zip','wb') as f:
+                while chunk:=r.read(1048576):f.write(chunk)
+              break
+            except Exception as exc:
+              print('download retry',trial+1,str(exc),flush=True)
+              if trial==4:raise
+              time.sleep(4+trial*3)
           PY
           unzip -q /tmp/4leaf-archive/4leaf.zip 'data1.cab' 'data1.hdr' -d /tmp/4leaf-archive/raw
           unshield x -d /tmp/4leaf-archive/unpacked /tmp/4leaf-archive/raw/data1.cab
