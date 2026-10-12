@@ -1,0 +1,29 @@
+name: 4LEAF historical visual references
+on:
+  push:
+    paths:
+      - '.github/workflows/rog-reference-review.yml'
+  workflow_dispatch:
+jobs:
+  source:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Print reference sizes and hashes
+        run: |
+          ls -lah apps/4leaf/assets
+          python - <<'PY'
+          import hashlib,pathlib
+          for f in pathlib.Path('apps/4leaf/assets').glob('*'):
+            if f.suffix.lower() in ('.png','.jpg','.jpeg'):
+              print('REFERENCE',f.name,len(f.read_bytes()),hashlib.sha256(f.read_bytes()).hexdigest())
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: 4leaf-historical-original-screens
+          path: |
+            apps/4leaf/assets/*_ref.png
+            apps/4leaf/assets/*_ref.jpg
+            apps/4leaf/assets/board.jpg
+            apps/4leaf/assets/battle.jpg
+          retention-days: 3
