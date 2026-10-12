@@ -1,0 +1,82 @@
+
+/* Composed from ORIGINAL 4LEAF game files, not screen captures. */
+body{background:#131c51}
+#app{border:2px ridge #9bafe4;background:#1c2b70}
+.titlebar{background:#2b3b88 url('./original/MainFrame/title.png') center/auto 54px repeat-x}
+.titlebar .win-logo{font-size:0;width:60px;height:24px;background:url('./original/MainFrame/snaplogo.png') center/90px auto no-repeat}
+.toolbar{background:#1e2b74 url('./original/IMG/topbar.png') center/100% 48px repeat-x;border-color:#9aacd8}
+.toolbar button{border-color:#a4add2!important;background:linear-gradient(#6f88cb,#33489e 49%,#1a2861 51%,#465aa7)!important;color:#f3f4ff!important}
+.toolbar button span{color:#dfe9ff!important}
+.sidebar{background:#8da6d1 url('./original/MainFrame/wallpaper.png') 0 0/321px 240px repeat}
+.online-list{background:#85a4daab}
+.notice-box{border:2px solid #6a84bd;background:#879bd1}
+.paper{border:2px ridge #829bd3;background:#d6e1ff;color:#44548a}
+.paper h2{font-family:Gulim;color:#3556a9}
+.statusbar{background:#30488b}
+.scene-banner{background:linear-gradient(#6c7bbd,#233986);color:#e9f2ff;border-color:#899cd6}
+#sky .sky-art{background:#2c345b url('./original/WorldMap/worldmapback.png') center/100% 100% no-repeat}
+#sky .sky-glow,#sky .cloud,#sky .island,#sky .anomarad,#sky .scene-footer{display:none}
+#sky .island-label{background:transparent;border:0;color:transparent;text-shadow:none;box-shadow:none;font-size:0;min-width:0;border-radius:0;padding:0}
+#sky .island-label strong,#sky .island-label small{opacity:0}
+#sky .island-label:hover{outline:2px solid #fffa96;background:#fafbb01e}
+#sky .north{top:23%;left:42%;width:20%;height:15%}
+#sky .genesis{top:49%;left:62%;width:28%;height:24%}
+#sky .rec{top:30%;left:17%;width:22%;height:13%}
+#sky .street-label{top:5%;left:20%;width:25%;height:20%}
+#sky .south{top:47%;left:29%;width:27%;height:17%}
+#city .city-sky{background:#8b7da0 url('./original/MainStreet/back.png') center/auto 100% no-repeat}
+#city .city-towers,#city .cobble{display:none}
+#city .city-actions{bottom:3%;width:100%;z-index:2;justify-content:space-around;padding:0 8px}
+#city .city-actions button{background:#202e75d9;color:#f5f6ff;border:2px solid #b7c7fb;box-shadow:0 3px 6px #151332}
+#rooms .room-floor{background:#d3c59e url('./original/ChatRoom/room0.png') center/100% 100% no-repeat}
+#rooms .room-floor:after{display:none}
+#rooms .room-scene aside{background:#364a93}
+#rooms .room-scene aside button{background:#5166a5;border-color:#9aabe4}
+#rooms .room-scene aside button.selected{background:#869bd8}
+#rooms .room-sign{background:#323b7acb;color:#f3f6ff}
+#rooms .town-figures{height:75%;align-items:end;justify-content:space-around;gap:0}
+#rooms .town-figures .avatar{position:relative;width:75px;height:141px;padding:0;background-position:center bottom;background-size:contain;background-repeat:no-repeat;border:0;filter:drop-shadow(1px 4px 4px #302539)}
+#rooms .town-figures .avatar .avatar-head,#rooms .town-figures .avatar .avatar-body{display:none}
+#rooms .town-figures .avatar small{display:block;position:absolute;bottom:-9px;left:50%;transform:translateX(-50%);padding:2px 4px;background:#283577c9;color:#fafcfe;text-shadow:1px 1px #141945}
+#rooms .room-note{color:#24336c;background:#e9ecffdf}
+#lobby .lobby-scene{background:#19276e url('./original/Gif/d1lobby.png') center/100% 100% no-repeat}
+#lobby .lobby-card{display:none}
+#lobby .lobby-config{flex:unset;margin-left:auto;margin-right:1%;width:52%;min-width:290px;max-width:440px;padding:12px;background:#142363ec;border:2px solid #8ba5ed;color:#e6efff;box-shadow:0 5px 15px #121741b6}
+#lobby .lobby-config h3{color:#e6f4ff}
+#lobby .team-slot{background:#526cb2;border-color:#9db2ed}
+#lobby .team-slot b{color:#f1faff}
+#lobby .fine{color:#d0daf2}
+#shop .shop-scene{background:#2c2663 url('./original/CardShop/cardshopback.png') center/100% 100% no-repeat;padding:7px}
+#shop .shop-keeper{width:135px;border:0;background:transparent;display:flex;flex-direction:column;justify-content:end;align-items:center}
+#shop .keeper-silhouette{height:122px;width:98px;background:url('./original/CardShop/master.png') center bottom/98px 124px no-repeat;image-rendering:pixelated}
+#shop .keeper-silhouette div,#shop .shop-keeper p{display:none}
+#shop .shop-keeper h3{color:#f5faff;text-shadow:0 2px #26326a;font:bold 14px Gulim}
+#shop .money{background:#28346ddc}
+#shop .shop-stock{background:#142160ed;border:2px solid #aabced;padding:5px}
+#shop .tabline button{background:#405a9e;border-color:#a4b7ef}
+#shop .tabline button.selected{background:#748fcd}
+#shop .shop-card{background:linear-gradient(#e6edff,#95a4d4);color:#222d65;border-color:#a8bae9}
+#shop .shop-card .card-art{background:#1f286c}
+#shop .shop-detail{background:#2b3f88;border-color:#9eabe8}
+#game .game-topline{background:#223883}
+#game .board-area{background:#405b43 url('./original/IMG/bgtile.png') center/cover no-repeat}
+#game .board-area:before{opacity:1;background:linear-gradient(90deg,#0718473b,#0b194323)}
+#game .board-center{background:#1b2e6ba8;color:#f5f5ff;opacity:.78;border:1px solid #a6bced;padding:6px}
+#game .board-center .crest{font-size:50px}
+#game .tile{border:1px solid #a5b6e8;background:linear-gradient(140deg,#b9ced4cc,#6e80a7c9 60%,#33447ccc);border-radius:3px;box-shadow:0 2px 3px #14183aaa}
+#game .tile.goal{background:linear-gradient(#f8e8bc,#c5a46e)}
+#game .tile.start{background:linear-gradient(#c7efb3,#5ba48e)}
+#game .game-controls{background:#273982 url('./original/IMG/topbar.png') center/cover no-repeat;border-color:#9eaedf}
+#game .item-bar{background:#172869}
+#game .item-card{background:linear-gradient(#718bd0,#314d98);border-color:#b9c9ff}
+#game .die{border-color:#a1b5df;background:#e2ebff;color:#22326b}
+.messenger{background:#dfe9ff;border-color:#839bcb}
+.panel-header{background:#334a93;color:#eef3ff}
+.chat-log{background:#e5ecff url('./original/MainFrame/wallpaper.png') center/321px 240px repeat;color:#24376d}
+.chat-log div b{color:#5341a0}
+.chat-log .system{color:#236f7c}
+#chat-form{background:#41559a}
+#chat-form input{background:#f4f7ff}
+.goldbtn{background:linear-gradient(#f4f6ff,#b4c6f1 50%,#738fd2);color:#22316a;border-color:#adbfed}
+.help-scene{background:#364b89}
+@media(max-width:630px){#lobby .lobby-config{min-width:0;width:94%;margin:auto;max-height:95%;overflow:auto}#shop .shop-keeper{display:none}#rooms .town-figures .avatar{width:48px;height:115px}}
