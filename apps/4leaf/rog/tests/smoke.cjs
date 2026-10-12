@@ -47,7 +47,7 @@ async function run(){
  assert.equal(await page.locator('#board-nodes .tile').count(),104,'original map path retained');
  await page.locator('#roll-btn').click();
  await page.waitForFunction(()=>window.__ROG_TEST__.getMatch()?.active===1,null,{timeout:12000});
- assert.equal(await page.locator('#my-name').text(),'플레이어 2');
+ assert.equal(await page.locator('#my-name').textContent(),'플레이어 2');
  assert.ok(await page.locator('#roll-btn').isEnabled(),'second human turn should be clickable');
  await page.locator('#roll-btn').click();
  await page.waitForFunction(()=>window.__ROG_TEST__.getMatch()?.active===0,null,{timeout:12000});
