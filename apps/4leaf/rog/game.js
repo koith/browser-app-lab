@@ -591,13 +591,47 @@ function moveValues(p){
 }
 function showDice(values){$('die1').textContent=['⚀','⚁','⚂','⚃','⚄','⚅'][Math.min(5,values[0]-1)];$('die2').textContent=values.length>1?['⚀','⚁','⚂','⚃','⚄','⚅'][Math.min(5,values[1]-1)]:'·'}
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
+async function computerPrepareTurn(p){
+ if(!p.bot||p.jail>0||match.finished)return;
+ const itemChoices=['charge','charge25','wing','step','shoe','dove','ring','blessing'];
+ if(!p.usedItem){
+  const idx=p.items.findIndex(id=>itemChoices.includes(id));
+  if(idx>=0){
+    const name=p.items[idx];
+    if(['wing','step'].includes(name)&&p.position+12<match.tiles.length){
+      await applyItem(idx,name==='wing'?8:4);
+    }else if(['charge','charge25'].includes(name)&&p.ability<65){
+      await applyItem(idx,null);
+    }else if(['shoe','dove','ring','blessing'].includes(name)){
+      await applyItem(idx,null);
+    }
+  }
+ }
+ if(match.finished)return;
+ if(p.ability>=100){
+   const code=teamStats(p.team).abilityId;
+   p.ability=0;
+   if(code===30||code===33||code===35||code===37||code===24){
+     advance(p,code===30?1+rand(15):1+rand(4));
+     if(code===30)p.effects.scar=(p.effects.scar||0)+1;
+     appendMove(p.name+' 컴퓨터 어빌리티 발동');
+     await resolveTile(p);
+   }else if([31,26,27].includes(code))p.effects.teamInt=2;
+   else if(code===34)p.effects.destroy=2;
+   else if(code===43||code===23||code===25)p.effects.block=2;
+   else if(code===56)p.effects.ultimate=1;
+   else if([19,20,21,38,39].includes(code))p.effects.valkyrie=2;
+   else p.ability=100;
+ }
+ drawGame();persist();
+}
 async function takeTurn(){
  if(!match||match.finished||busy)return;
  if(match.mode==='network'&&window.__LEAF_NET__?.role==='guest'&&!remoteAct){
    if(playerCanAct())window.__LEAF_NET__?.send?.({type:'command',action:'roll'});
    return;
  }
- busy=true;const p=match.players[match.active];drawGame();if(p.bot)await wait(250);
+ busy=true;const p=match.players[match.active];drawGame();if(p.bot){await wait(250);await computerPrepareTurn(p);if(match.finished){busy=false;return}}
  if(p.jail>0){
    const a=d(6),b=d(6);showDice([a,b]);
    if(a===b){p.jail=0;appendMove(p.name+' 감옥 탈출! 더블 '+a+'/'+b+' · 이동 턴 진행')}
