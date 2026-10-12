@@ -24,7 +24,11 @@ async function run(){
  assert.ok((await page.evaluate(()=>window.__ROG_TEST__.getMatch().players[0].position))>first);
  await page.locator('[data-route="shop"]').first().click();
  await page.waitForSelector('#shop:not(.hidden)');
- assert.ok((await page.locator('#shop-grid .shop-card').count())>=80,'historical chessman roster appears in shop');
+ assert.equal(await page.locator('#shop-grid .shop-card').count(),9,'nine original Magic Carden slots');
+ assert.ok((await page.locator('#shop-page').textContent()).includes('/'),'paginated original chessman roster');
+ await page.locator('#shop-next').click();
+ assert.ok((await page.locator('#shop-page').textContent()).startsWith('2'),'next chessman page navigates');
+ await page.locator('#shop-prev').click();
  await page.screenshot({path:'rog-shop.png'});
  await page.locator('[data-route="lobby"]').first().click();
  await page.locator('#map-select').selectOption('악마의 달팽이');
