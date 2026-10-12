@@ -134,8 +134,53 @@ function appendMove(message){if(!match)return;match.message=message;match.histor
 function drawBoard(){if(!match)return;const root=$('board-nodes'),svg=$('board-lines');root.replaceChildren();svg.replaceChildren();const coords=PATH.slice(0,match.tiles.length).map(p=>({x:p.x*820/100,y:p.y*355/100}));const path=document.createElementNS('http://www.w3.org/2000/svg','polyline');path.setAttribute('points',coords.map(p=>p.x+','+p.y).join(' '));path.setAttribute('fill','none');path.setAttribute('stroke','#b6a2d5');path.setAttribute('stroke-width','7');path.setAttribute('stroke-linejoin','round');path.setAttribute('opacity','.45');svg.append(path);coords.forEach((pos,i)=>{const type=match.tiles[i];const b=document.createElement('div');b.className='tile '+type;b.style.left=PATH[i].x+'%';b.style.top=PATH[i].y+'%';if(SOURCE_IDS[match.map]){const columns=Math.max(8,Math.sqrt(match.tiles.length)*1.6);b.style.width=Math.max(2.5,Math.min(5,72/columns))+'%';b.style.height=Math.max(4.5,Math.min(9.0,120/columns))+'%'}b.innerHTML='<span class="tile-symbol">'+tileGlyph(type)+'</span><small>'+(i+1)+'</small>';b.title=(i+1)+'칸 · '+type;const players=match.players.filter(p=>p.position===i);if(players.length){b.classList.add('player-here');const stack=document.createElement('div');stack.className='pawn-stack';players.forEach(p=>{const pawn=document.createElement('span');pawn.className='pawn';pawn.style.setProperty('--pawn-color',p.color);const sprite=document.createElement('img');sprite.className='pawn-sprite';sprite.src='./original/Registry/sava'+String([0,82,6,1,85,2,84,4][p.id]||0).padStart(2,'0')+'.png';sprite.alt='';pawn.append(sprite);const name=document.createElement('span');name.className='pawn-label';name.textContent=p.name;pawn.append(name);stack.append(pawn)});b.append(stack)}b.onclick=()=>log((i+1)+'칸 : '+type+(players.length?' · '+players.map(p=>p.name).join(', '):''));root.append(b)})}
 function drawGame(){if(!match||!MAPS[match.map])return;chooseSourcePath(match.map);const p=match.players[0],stats=teamStats(p.team);$('game-map-title').textContent=match.map;$('element-label').textContent=match.attribute;$('player-count').textContent=match.players.length;$('turn-indicator').textContent='ROUND '+match.round+' · '+match.players[match.active].name+' TURN';$('my-name').textContent=p.name;$('my-stats').textContent='이동 '+stats.move+' · 공격 '+stats.atk+' · 방어 '+stats.def+' · 지력 +'+stats.int;$('my-position').textContent=p.jail>0?'감옥 '+p.jail+'턴':p.position===0?'START':p.position===match.tiles.length-1?'GOAL':(p.position+1)+'번째 칸';$('my-portrait').innerHTML='<img class="player-sprite" alt="" src="'+imageFor(p.team[0]||'soldier')+'">';$('ability-fill').style.width=p.ability+'%';$('game-players').replaceChildren();match.players.forEach((user,i)=>{const li=document.createElement('div');li.className=match.active===i?'is-turn':'';li.textContent=(match.active===i?'▶ ':'　')+user.pawn+' '+user.name+' '+(user.position+1)+'칸 · '+user.ability+'%';li.style.color=user.color;$('game-players').append(li)});$('my-items').replaceChildren();p.items.forEach((itemId,i)=>{const item=ITEM_MAP[itemId],btn=document.createElement('button');btn.className='item-card';btn.innerHTML='<span class="item-icon">'+item.icon+'</span>'+item.name;btn.title=item.hint;btn.disabled=match.finished||match.active!==0||p.usedItem||busy;btn.onclick=()=>useItem(i);$('my-items').append(btn)});$('roll-btn').disabled=match.finished||match.active!==0||busy;$('ability-btn').disabled=match.finished||match.active!==0||busy||p.ability<100;$('move-log').textContent=match.message;drawBoard()}
 function withUserTurn(){return match&&!match.finished&&match.active===0&&!busy}
-function useItem(index){if(!withUserTurn())return;const user=match.players[0],itemId=user.items[index],item=ITEM_MAP[itemId];if(!item||user.usedItem)return;if(itemId==='wing'||itemId==='step'){const div=document.createElement('div');const p=document.createElement('p');p.textContent=item.name+' · '+item.hint;const inp=document.createElement('input');inp.type='number';inp.min=itemId==='wing'?1:-4;inp.max=itemId==='wing'?12:4;inp.value=itemId==='wing'?6:3;div.append(p,inp);modal('아이템 사용',div,[{label:'사용',primary:true,run:()=>{const n=Math.min(Number(inp.max),Math.max(Number(inp.min),Number(inp.value)||1));consume(index);advance(user,n);appendMove(user.name+' · '+item.name+'으로 '+Math.abs(n)+'칸 '+(n<0?'후퇴':'이동'));drawGame()}},{label:'취소'}]);return}
-modal('아이템 · '+item.name,item.hint+' · 이번 턴에 사용하시겠습니까?',[{label:'사용',primary:true,run:()=>{consume(index);switch(itemId){case 'shoe':user.effects.shoe=3;break;case 'dove':user.effects.dove=5;break;case 'blessing':while(user.items.length<5)user.items.push(ITEMS[rand(ITEMS.length)].id);break;case 'charge':user.ability=Math.min(100,user.ability+50);break;case 'curse':match.players.slice(1).forEach(p=>{p.items=[]});break;case 'keeper':match.tiles[Math.min(match.tiles.length-2,user.position+6)]='keeper';break;case 'bomb':user.position=0;match.players.filter(p=>p!==user&&Math.abs(p.position-user.position)<5).forEach(p=>p.position=0);break;case 'change':user.items.push('change');break;}appendMove(user.name+' · '+item.name+' 사용');drawGame()}},{label:'취소'}])}
+function useItem(index){
+ if(!withUserTurn())return;
+ const user=match.players[0],itemId=user.items[index],item=ITEM_MAP[itemId];
+ if(!item||user.usedItem)return;
+ if(item.battle)return modal('전투 전용 카드',item.name+'은(는) 전투 결과가 표시될 때 사용할 수 있습니다. 다른 행동을 선택해 주세요.',[{label:'확인',primary:true}]);
+ if(itemId==='wing'||itemId==='step'){
+   const div=document.createElement('div'),label=document.createElement('p'),input=document.createElement('input');
+   label.textContent=item.name+' · '+item.hint;input.type='number';
+   input.min=itemId==='wing'?'1':'-4';input.max=itemId==='wing'?'12':'4';
+   input.value=itemId==='wing'?'6':'4';
+   div.append(label,input);
+   return modal('아이템 사용',div,[{label:'사용',primary:true,run:async()=>{
+     const n=Math.max(Number(input.min),Math.min(Number(input.max),Number(input.value)||1));
+     if(n===0)return;
+     consume(index);advance(user,n);
+     appendMove(user.name+' '+item.name+' · '+n+'칸 이동');
+     if(n>0)await resolveTile(user);drawGame();
+   }},{label:'취소'}]);
+ }
+ modal('아이템 · '+item.name,item.hint+' · 이번 턴에 사용하시겠습니까?',[{
+   label:'사용',primary:true,run:()=>{
+     consume(index);
+     if(!user.effects)user.effects={};
+     switch(itemId){
+       case 'shoe': user.effects.shoe=3;break;
+       case 'dove': user.effects.dove=5;break;
+       case 'valkyrie':user.effects.valkyrie=2;break;
+       case 'ring':user.effects.ring=2;break;
+       case 'armageddon':user.effects.armageddon=2;break;
+       case 'charge':user.ability=Math.min(100,user.ability+50);break;
+       case 'charge25':user.ability=Math.min(100,user.ability+25);break;
+       case 'drain25':{const other=match.players.filter(p=>p!==user).sort((a,b)=>b.ability-a.ability)[0];if(other)other.ability=Math.max(0,other.ability-25);break}
+       case 'drain50':{const other=match.players.filter(p=>p!==user).sort((a,b)=>b.ability-a.ability)[0];if(other)other.ability=Math.max(0,other.ability-50);break}
+       case 'oddcurse':match.players.filter(p=>p!==user).forEach(p=>p.effects.oddcurse=1);break;
+       case 'evencurse':match.players.filter(p=>p!==user).forEach(p=>p.effects.evencurse=1);break;
+       case 'curse':match.tiles[Math.min(match.tiles.length-2,user.position+6)]='curse';break;
+       case 'odincurse':match.tiles[Math.min(match.tiles.length-2,user.position+6)]='doa';break;
+       case 'kingbomb':match.tiles[Math.min(match.tiles.length-2,user.position+6)]='kingbomb';break;
+       case 'keeperA':case 'keeperB':case 'keeperC':{
+          const tile=Math.min(match.tiles.length-2,user.position+6);
+          match.tiles[tile]=itemId;break
+       }
+     }
+     appendMove(user.name+' · '+item.name+' 사용');drawGame();
+   }
+ },{label:'취소'}]);
+}
 function consume(index){const p=match.players[0];p.items.splice(index,1);p.usedItem=true;persist()}
 function advance(user,distance){user.position=Math.min(match.tiles.length-1,Math.max(0,user.position+distance));user.ability=Math.min(100,user.ability+Math.max(0,distance)*4)}
 async function useAbility(){if(!withUserTurn())return;const p=match.players[0];if(p.ability<100)return;const a=teamStats(p.team).ability;const options=await ask('어빌리티 발동',teamStats(p.team).name+' · '+a+' · 충전된 게이지를 사용합니다.',['발동','취소']);if(options!==0)return;p.ability=0;if(a==='순간이동'||a==='프리워프'){advance(p,1+rand(15))}else if(a==='이동C'||a==='공격B'){advance(p,3)}else if(a==='블럭'){p.effects.dove=3}else{p.items.push('charge');if(p.items.length>5)p.items.shift()}appendMove(p.name+'이(가) '+a+' 어빌리티를 발동했습니다.');resolveTile(p);drawGame()}
@@ -199,6 +244,8 @@ async function resolveTile(p,depth=0){
  else if(type==='blessing'){while(p.items.length<5)p.items.push(ITEMS[rand(ITEMS.length)].id);appendMove(p.name+' 신의 축복: 아이템 가득 충전')}
  else if(type==='curse'){p.items=[];appendMove(p.name+' 신의 저주: 모든 아이템 소실')}
  else if(type==='prison'){p.jail=3;appendMove(p.name+' 감옥 3턴! 더블 주사위로 탈출할 수 있습니다.')}
+ else if(type==='kingbomb'){p.position=0;appendMove(p.name+' 왕폭탄 폭발! START 복귀');match.tiles[pos]='normal'}
+ else if(type==='keeperA'||type==='keeperB'||type==='keeperC'){const power={keeperA:1,keeperB:3,keeperC:5};await resolveBattle(p,{id:-1,name:ITEM_MAP[type].name,def:power[type]},true);match.tiles[pos]='normal'}
  else if(type==='ability'){p.ability=Math.min(100,p.ability+25);appendMove(p.name+' 어빌리티 게이지 +25%')}
  else if(type==='ability100'){const count=Math.max(1,Math.min(4,teamStats(p.team).int||teamStats(p.team).atk));const eyes=diceN(count,6).values;if(eyes.some(v=>v===6)){p.ability=100;appendMove(p.name+' 판정 '+eyes.join(',')+' · 어빌리티 100%!')}else appendMove(p.name+' 판정 '+eyes.join(',')+' · 실패')}
  else if(type==='attribute'){match.attribute=['WANDS','SWORDS','CUPS','DISKS'][rand(4)];appendMove('맵 속성이 '+match.attribute+'(으)로 변경!')}
@@ -240,6 +287,9 @@ function moveValues(p){
    if(p.effects.spade)v=Math.min(v,sides===4?2:3);
    values.push(v);
  }
+ 
+ if(p.effects.oddcurse){for(let i=0;i<values.length;i++)if(values[i]%2===1)values[i]=1;p.effects.oddcurse=0}
+ if(p.effects.evencurse){for(let i=0;i<values.length;i++)if(values[i]%2===0)values[i]=2;p.effects.evencurse=0}
  p.effects.clover=0;p.effects.spade=0;
  return values;
 }
