@@ -1,0 +1,44 @@
+{
+  "street": {
+    "file": "street.jpg",
+    "bytes": 597018,
+    "source": "https://t1.daumcdn.net/cfile/tistory/193E9C335142CED517",
+    "sha256": "42cb02e5553f63286bf227f8827102fdce19562f9b32d8e448cb38c28fad955f"
+  },
+  "chat": {
+    "file": "chat.jpg",
+    "bytes": 442437,
+    "source": "https://t1.daumcdn.net/cfile/tistory/172E384F514188D509",
+    "sha256": "4db511ca2ad2c815e05cae1ade6dd7b3f1bd5b397c99a0c23e027aa6f0b840cb"
+  },
+  "dice_ref": {
+    "file": "dice_ref.png",
+    "bytes": 235475,
+    "source": "https://t1.daumcdn.net/cfile/tistory/0227DF4C5141D1B126",
+    "sha256": "db04b202260c78acfef6edb7c9acb4edd465e812086b59cbcc1e5722449bb373"
+  },
+  "dice_ref2": {
+    "file": "dice_ref2.png",
+    "bytes": 544651,
+    "source": "https://t1.daumcdn.net/cfile/tistory/146CBD4A514178AF27",
+    "sha256": "ed16a7de656bb85397cacc498c593b82fac648a6c68c2def2a471b7fb4492e8c"
+  },
+  "shop_ref": {
+    "file": "shop_ref.png",
+    "bytes": 412469,
+    "source": "https://t1.daumcdn.net/thumb/R1024x0/?fname=http%3A%2F%2Fcfile241.uf.daum.net%2Fimage%2F99DC854E5AE04B01147070",
+    "sha256": "5c1dd76723721eee022ad4642ca312ef3057428aae7116d09e93badc5417ac9b"
+  },
+  "town_ref": {
+    "file": "town_ref.jpg",
+    "bytes": 380887,
+    "source": "https://t1.daumcdn.net/cfile/tistory/1152263A51418F4519",
+    "sha256": "ee6be930ce4689f5d0949192e8df9b5f8c710637d873a7cdd62127f74045de4a"
+  },
+  "chat_ref": {
+    "file": "chat_ref.jpg",
+    "bytes": 459195,
+    "source": "https://t1.daumcdn.net/cfile/tistory/012D994F514188ED0B",
+    "sha256": "e61301b3d1102af64378197ce9a3951d9f91ac97e43f4ad13a801b00462047d5"
+  }
+}
