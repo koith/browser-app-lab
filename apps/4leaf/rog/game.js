@@ -245,7 +245,8 @@ function combat(attacker,defender,keeper=false){
    setTimeout(()=>{const button=query('#modal-buttons button').find(b=>b.textContent==='결과 확인');if(!$('modal').classList.contains('hidden')&&button)button.click()},Math.max(350,keeper?600:700));
  }
  });
-};modal('⚔ BATTLE · 전투',div,options);sfx(235,.21);if(!selfInvolved||keeper&&attacker.bot){setTimeout(()=>{if(!$('modal').classList.contains('hidden')){const ok=query('#modal-buttons button').find(b=>b.textContent==='결과 확인');if(ok)ok.click()}},Math.max(350,keeper?600:700))}})}
+}
+
 async function resolveBattle(attacker,defender,keeper){
  const result=await combat(attacker,defender,keeper);
  if(result.negated){appendMove(result.mutualReset?'자폭: 양측 START 복귀':'오리발 효과: 전투 무효화');return}
