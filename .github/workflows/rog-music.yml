@@ -1,0 +1,48 @@
+name: Restore original 4LEAF MIDI soundtrack
+on:
+  push:
+    paths:
+      - '.github/workflows/rog-music.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  music:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install MIDI synthesizer and soundfont
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y unshield fluid-soundfont-gm fluidsynth ffmpeg
+      - name: Convert archived original music to mobile-friendly MP3
+        run: |
+          mkdir -p /tmp/4leaf-music/raw /tmp/4leaf-music/unpacked apps/4leaf/rog/music
+          python - <<'PY'
+          import urllib.request
+          url='https://archive.org/download/4leaf/4leaf.zip'
+          with urllib.request.urlopen(urllib.request.Request(url,headers={'User-Agent':'Mozilla/5.0'}),timeout=120) as r,open('/tmp/4leaf-music/4leaf.zip','wb') as f:
+            while chunk:=r.read(1048576):f.write(chunk)
+          PY
+          unzip -q /tmp/4leaf-music/4leaf.zip 'data1.cab' 'data1.hdr' -d /tmp/4leaf-music/raw
+          unshield x -d /tmp/4leaf-music/unpacked /tmp/4leaf-music/raw/data1.cab
+          for m in /tmp/4leaf-music/unpacked/4Leaf_Files/Dice/MIDI/*.mid; do
+            n=$(basename "$m" .mid)
+            fluidsynth -ni -g 0.35 -r 22050 -F "/tmp/4leaf-music/$n.wav" /usr/share/sounds/sf2/FluidR3_GM.sf2 "$m" >/dev/null 2>&1
+            ffmpeg -y -loglevel error -i "/tmp/4leaf-music/$n.wav" -ac 2 -c:a libmp3lame -b:a 80k "apps/4leaf/rog/music/$n.mp3"
+            echo "CONVERTED $n"
+          done
+          ls -lh apps/4leaf/rog/music/
+      - name: Commit authentic score
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/4leaf/rog/music
+          if ! git diff --cached --quiet; then
+            git commit -m "audio(4leaf): recover and render seven original 주사위의 잔영 MIDI tracks"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
