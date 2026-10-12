@@ -40,6 +40,33 @@ const path=require('path');
   await guest.waitForFunction(()=>window.__LEAF_BRIDGE__.getMatch()?.active===1,null,{timeout:15000});
   assert.ok(await guest.locator('#roll-btn').isEnabled(),'guest must have control of their own turn');
   assert.ok(await host.locator('#roll-btn').isDisabled(),'host must not play guest turn');
+
+  // The guest chooses an original item locally; the authoritative host applies it.
+  await host.evaluate(()=>{
+    const m=window.__LEAF_BRIDGE__.getMatch();
+    const p=m.players[1];p.items=['charge','wing'];p.ability=10;p.usedItem=false;
+    p.team=['c_0087','c_0078','c_0040'];
+    for(let k=51;k<90;k++)m.tiles[k]='normal';
+    window.__LEAF_BRIDGE__.onState(m);window.__ROG_TEST__.drawGame();
+  });
+  await guest.waitForFunction(()=>window.__LEAF_BRIDGE__.getMatch()?.players[1]?.items?.[0]==='charge',null,{timeout:5000});
+  await guest.locator('#my-items .item-card').first().click();
+  await guest.locator('#modal-buttons button').filter({hasText:'사용'}).click();
+  await host.waitForFunction(()=>window.__LEAF_BRIDGE__.getMatch()?.players[1]?.ability===60,null,{timeout:9000});
+  await guest.waitForFunction(()=>window.__LEAF_BRIDGE__.getMatch()?.players[1]?.ability===60,null,{timeout:9000});
+  assert.equal(await host.evaluate(()=>window.__LEAF_BRIDGE__.getMatch().players[1].items.length),1);
+  console.log('WEBRTC ITEM PASS: guest uses 50-point original card; host and guest synchronized');
+  await host.evaluate(()=>{
+    const m=window.__LEAF_BRIDGE__.getMatch();m.players[1].ability=100;
+    window.__LEAF_BRIDGE__.onState(m);window.__ROG_TEST__.drawGame();
+  });
+  await guest.waitForFunction(()=>window.__LEAF_BRIDGE__.getMatch()?.players[1]?.ability===100,null,{timeout:5000});
+  await guest.locator('#ability-btn').click();
+  await guest.locator('#modal-buttons button').filter({hasText:'발동'}).click();
+  await host.waitForFunction(()=>window.__LEAF_BRIDGE__.getMatch()?.players[1]?.ability===0,null,{timeout:9000});
+  await guest.waitForFunction(()=>window.__LEAF_BRIDGE__.getMatch()?.players[1]?.ability===0,null,{timeout:9000});
+  console.log('WEBRTC ABILITY PASS: guest invokes Saladin ability via host-authoritative game state');
+
   await guest.locator('#roll-btn').click();
   await host.waitForFunction(()=>window.__LEAF_BRIDGE__.getMatch()?.active===0,null,{timeout:16000});
   await guest.waitForFunction(()=>window.__LEAF_BRIDGE__.getMatch()?.active===0,null,{timeout:16000});
