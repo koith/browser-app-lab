@@ -40,6 +40,14 @@ for pak in sorted(ROOT.rglob('*.pak')):
   # Bright green is the original engine's sprite transparency/chroma key,
   # but must NOT erase genuine green game map artwork.
   is_sprite=((group in {'MainStreet','Registry'} and name.lower() not in {'back.gif','worldmapback.gif'}) or (group=='Gif') or (group=='CardShop' and 'back' not in name.lower()) or (group=='ChatRoom' and name.lower().startswith(('roomicon','scrollbar','chatbar','talkbox','ring','combob'))))
+  if (group=='IMG' and name.lower()=='topbar.bmp') or (group=='Gif' and name.lower() in ('d1rbtn.gif','d1radiobtn.gif')):
+   # Original client uses vivid red (251/255,0,0) as bitmap chroma-key,
+   # not as a visible UI fill. Restore true alpha without hiding border artwork.
+   px=transparent.load()
+   for y in range(transparent.height):
+    for x in range(transparent.width):
+     rr,gg,bb,aa=px[x,y]
+     if rr>=245 and gg<10 and bb<10: px[x,y]=(rr,gg,bb,0)
   if is_sprite:
    px=transparent.load()
    for y in range(transparent.height):
