@@ -110,3 +110,19 @@ body{background:#131c51}
 #game .player-panel b,#game .game-opponent b{color:#e6f4ff}
 #shop .shop-keeper h3{margin-top:3px;margin-bottom:4px}
 @media(max-width:630px){.toolbar{gap:4px;height:40px;padding:2px 4px}.toolbar button[data-route]{transform:scale(.88);transform-origin:center}.toolbar .smalltool{min-width:24px;width:24px;padding:0}}
+
+/* Actors are separate persistent DOM entities: tiles no longer redraw when a pawn moves. */
+#board-pawns{position:absolute;inset:0;pointer-events:none;z-index:5;overflow:visible}
+.board-pawn{position:absolute;width:34px;height:48px;transform:translate(-50%,-76%);transition:left .17s linear,top .17s linear;filter:drop-shadow(0px 2px 2px #171735);display:flex;flex-direction:column;justify-content:end;align-items:center;will-change:left,top}
+.board-pawn img{width:35px;height:43px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0px 0px 2px #1b2252)}
+.board-pawn .board-pawn-name{font-size:9px;position:absolute;bottom:100%;white-space:nowrap;background:#1d266fc7;color:#f5f9ff;padding:1px 4px;text-shadow:0 1px 2px #161c54;border:1px solid #879cd6;opacity:0;transition:opacity .12s}
+.board-pawn.pawn-current .board-pawn-name{opacity:1;color:#fff4bd;border-color:#ffea9a;background:#253872}
+.board-pawn.pawn-current img{filter:drop-shadow(0 0 5px var(--pawn-color,#f4f6ff))}
+#game .tile.player-here{border-color:#fff0ae;box-shadow:0 0 4px #ffe4a8b7,inset 0 1px 2px #dde8fe}
+#game .board-area{overflow:hidden}
+#game .tile.warp .tile-symbol{color:#d5eeff}
+#game .tile.boost .tile-symbol,#game .tile.clover .tile-symbol{color:#dfffe9}
+#game .tile.spade .tile-symbol,#game .tile.curse .tile-symbol{color:#ffc4df}
+#resume-game:not(.hidden){margin-top:7px;width:100%;background:linear-gradient(#b9dffa,#608fae);color:#22396b}
+@media(max-width:630px){.board-pawn{width:23px;height:31px}.board-pawn img{width:22px;height:30px}.board-pawn .board-pawn-name{font-size:8px}.board-pawn.pawn-current .board-pawn-name{bottom:90%}}
+@media(prefers-reduced-motion:reduce){.board-pawn{transition:none}}
