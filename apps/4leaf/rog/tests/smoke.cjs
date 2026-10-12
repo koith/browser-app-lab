@@ -18,6 +18,12 @@ async function run(){
  assert.ok((await page.locator('#map-select option').count())>=25,'25 original archive map names');
  assert.ok(await page.evaluate(()=>window.ORIGINAL_LEAF_CHESSMEN.length>=90),'original CHR chessman data loaded');
  assert.ok(await page.locator('#game').isVisible(),'game scene active');
+ assert.ok(await page.evaluate(()=>{
+   const source=window.ORIGINAL_LEAF_TILES['0172'];
+   const current=window.__ROG_TEST__.getMatch().tiles;
+   return current.length===source.length&&source.every((entry,i)=>current[i]===entry.type||['normal','kingbomb','keeperA','keeperB','keeperC'].includes(current[i])&&['normal','practice'].includes(entry.type));
+ }), 'battle board uses original 4LEAF DMP tile effect names');
+
  const first=await page.evaluate(()=>window.__ROG_TEST__.getMatch().players[0].position);
  await page.locator('#roll-btn').click();
  await page.waitForFunction(()=>window.__ROG_TEST__.getMatch().players[0].position>0,{timeout:10000});
@@ -52,11 +58,6 @@ async function run(){
  await page.evaluate(()=>{const m=window.__ROG_TEST__.getMatch();m.players[1].position=50;for(let i=1;i<20;i++)m.tiles[i]='normal';for(let i=51;i<70;i++)m.tiles[i]='normal';window.__ROG_TEST__.drawGame()});
  assert.equal(await page.locator('#board-pawns .board-pawn').count(),2,'persistent independent actors');
 
- assert.ok(await page.evaluate(()=>{
-   const source=window.ORIGINAL_LEAF_TILES['0172'];
-   const current=window.__ROG_TEST__.getMatch().tiles;
-   return current.length===source.length&&source.every((entry,i)=>current[i]===entry.type||['normal','kingbomb','keeperA','keeperB','keeperC'].includes(current[i])&&['normal','practice'].includes(entry.type));
- }), 'battle board uses original 4LEAF DMP tile effect names');
  // Live battle GUI must be a separate animated event layer, never a screenshot overlay.
  await page.evaluate(()=>{
    const m=window.__ROG_TEST__.getMatch();
@@ -87,6 +88,6 @@ async function run(){
  console.log('HOTSEAT PASS: human2 turn, actor layer, original map, and saved resume.');
  assert.deepEqual(errors,[],'browser runtime errors');
  await browser.close();
- console.log('4LEAF SMOKE PASS. Dynamic board 70/76 cells; turn movement; shop; desktop/mobile; no JS errors.');
+ console.log('4LEAF SMOKE PASS: 25 original DMP maps; 104/69 source cells, movable sprites, real battle, shop, WebView and hotseat.');
 }
 run().catch(e=>{console.error('4LEAF SMOKE FAILED:',e);process.exit(1)});
