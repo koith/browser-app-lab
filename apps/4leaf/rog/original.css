@@ -126,3 +126,11 @@ body{background:#131c51}
 #resume-game:not(.hidden){margin-top:7px;width:100%;background:linear-gradient(#b9dffa,#608fae);color:#22396b}
 @media(max-width:630px){.board-pawn{width:23px;height:31px}.board-pawn img{width:22px;height:30px}.board-pawn .board-pawn-name{font-size:8px}.board-pawn.pawn-current .board-pawn-name{bottom:90%}}
 @media(prefers-reduced-motion:reduce){.board-pawn{transition:none}}
+
+.board-world{position:absolute;inset:0;transform-origin:center;transition:transform .13s ease-out;will-change:transform}
+#board-area{touch-action:none}
+.board-zoom-controls{position:absolute;top:7px;right:7px;z-index:12;display:flex;gap:3px;background:#22346dbd;border:1px solid #90a7cf;padding:3px;border-radius:4px}
+.board-zoom-controls button{width:26px;height:25px;border:1px ridge #b4cae8;background:linear-gradient(#7796d0,#2a4687);color:#fff9dc;text-shadow:0 1px #172857;font-size:15px;line-height:1;cursor:pointer}
+.board-zoom-controls button:active{background:#b8cbed;color:#263572}
+.board-world #board-lines,.board-world #board-nodes,.board-world .board-center{position:absolute}
+@media(max-width:630px){.board-zoom-controls{top:4px;right:4px}.board-zoom-controls button{width:26px;height:24px}}
