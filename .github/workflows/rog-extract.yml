@@ -18,8 +18,17 @@ jobs:
           python - <<'PY'
           import urllib.request
           url='https://archive.org/download/4leaf/4leaf.zip'
-          with urllib.request.urlopen(urllib.request.Request(url,headers={'User-Agent':'Mozilla/5.0'}),timeout=90) as r,open('original-extract/4leaf.zip','wb') as f:
-            while chunk:=r.read(1048576):f.write(chunk)
+          import time
+          for trial in range(5):
+            try:
+              r=urllib.request.urlopen(urllib.request.Request('https://archive.org/download/4leaf/4leaf.zip'+('?download=1' if trial%2 else ''),headers={'User-Agent':'Mozilla/5.0 (compatible; 4LEAF restoration archive checker)'}),timeout=120)
+              with r,open('original-extract/4leaf.zip','wb') as f:
+                while chunk:=r.read(1048576):f.write(chunk)
+              break
+            except Exception as exc:
+              print('download retry',trial+1,str(exc),flush=True)
+              if trial==4:raise
+              time.sleep(4+trial*3)
           PY
           unzip -q original-extract/4leaf.zip 'data1.cab' 'data1.hdr' -d original-extract/raw
           file original-extract/raw/*
