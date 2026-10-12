@@ -134,7 +134,61 @@ function startGame(){const map=$('map-select').value,limit=Number($('point-limit
  [['rashid','soldier','narcia'],['joan','narcia','soldier'],['soldier','joan','rashid'],['iolyn','soldier','narcia'],['merza','rashid','soldier'],['christian','soldier','joan'],['damian','soldier','narcia']];let team=weakTeams[i].filter((_,j)=>j===0||limit>=8);while(teamStats(team).point>limit)team.pop();players.push(newPlayer(i+1,!hotseat,hotseat?'플레이어 '+(i+2):BOT_NAMES[i],team))}match={version:3,map,mode:hotseat?'hotseat':'ai',tiles:generateTiles(map),players,active:0,round:1,finished:false,winner:-1,attribute:'NONE',message:'주사위를 굴려 주세요.',lastRoll:[],history:[],pending:null};busy=false;persist();navigate('game');chat('SYSTEM',map+' 게임을 시작했습니다. '+(hotseat?'사람 '+(bots+1)+'명이 번갈아 플레이합니다.':'컴퓨터 '+bots+'명이 참가합니다.'),'system');drawGame()}
 function tileGlyph(type){return {start:'S',goal:'G',normal:'✧',warp:'◈',keeper:'⚔',prison:'▤',chest:'▣',boost:'+3',boost4:'+4',attribute:'✥',joker:'★',random:'?',ability:'✶',ability100:'✦',clover:'♣',spade:'♠',doa:'☠',curse:'♠',blessing:'✥',arena:'⚔'}[type]||'✧'}
 function appendMove(message){if(!match)return;match.message=message;match.history.push(message);if(match.history.length>90)match.history.shift();toast(message);persist()}
-function drawBoard(){if(!match)return;const root=$('board-nodes'),svg=$('board-lines');root.replaceChildren();svg.replaceChildren();const coords=PATH.slice(0,match.tiles.length).map(p=>({x:p.x*820/100,y:p.y*355/100}));const path=document.createElementNS('http://www.w3.org/2000/svg','polyline');path.setAttribute('points',coords.map(p=>p.x+','+p.y).join(' '));path.setAttribute('fill','none');path.setAttribute('stroke','#b6a2d5');path.setAttribute('stroke-width','7');path.setAttribute('stroke-linejoin','round');path.setAttribute('opacity','.45');svg.append(path);coords.forEach((pos,i)=>{const type=match.tiles[i];const b=document.createElement('div');b.className='tile '+type;b.style.left=PATH[i].x+'%';b.style.top=PATH[i].y+'%';if(SOURCE_IDS[match.map]){const columns=Math.max(8,Math.sqrt(match.tiles.length)*1.6);b.style.width=Math.max(2.5,Math.min(5,72/columns))+'%';b.style.height=Math.max(4.5,Math.min(9.0,120/columns))+'%'}b.innerHTML='<span class="tile-symbol">'+tileGlyph(type)+'</span><small>'+(i+1)+'</small>';b.title=(i+1)+'칸 · '+type;const players=match.players.filter(p=>p.position===i);if(players.length){b.classList.add('player-here');const stack=document.createElement('div');stack.className='pawn-stack';players.forEach(p=>{const pawn=document.createElement('span');pawn.className='pawn';pawn.style.setProperty('--pawn-color',p.color);const sprite=document.createElement('img');sprite.className='pawn-sprite';sprite.src='./original/Registry/sava'+String([0,82,6,1,85,2,84,4][p.id]||0).padStart(2,'0')+'.png';sprite.alt='';pawn.append(sprite);const name=document.createElement('span');name.className='pawn-label';name.textContent=p.name;pawn.append(name);stack.append(pawn)});b.append(stack)}b.onclick=()=>log((i+1)+'칸 : '+type+(players.length?' · '+players.map(p=>p.name).join(', '):''));root.append(b)})}
+function drawBoard(){
+ if(!match)return;
+ const root=$('board-nodes'),svg=$('board-lines');
+ const key=match.map+'|'+match.tiles.join(',');
+ if(root.dataset.renderKey!==key){
+   root.dataset.renderKey=key;root.replaceChildren();svg.replaceChildren();
+   const coords=PATH.slice(0,match.tiles.length).map(p=>({x:p.x*820/100,y:p.y*355/100}));
+   const path=document.createElementNS('http://www.w3.org/2000/svg','polyline');
+   path.setAttribute('points',coords.map(p=>p.x+','+p.y).join(' '));
+   path.setAttribute('fill','none');path.setAttribute('stroke','#b6a2d5');
+   path.setAttribute('stroke-width','4');path.setAttribute('stroke-linejoin','round');path.setAttribute('opacity','.35');svg.append(path);
+   const fragment=document.createDocumentFragment();
+   coords.forEach((pos,i)=>{
+     const type=match.tiles[i],b=document.createElement('div');b.className='tile '+type;
+     b.style.left=PATH[i].x+'%';b.style.top=PATH[i].y+'%';b.dataset.tile=i;
+     if(SOURCE_IDS[match.map]){
+       const columns=Math.max(8,Math.sqrt(match.tiles.length)*1.6);
+       b.style.width=Math.max(2.5,Math.min(5,72/columns))+'%';
+       b.style.height=Math.max(4.5,Math.min(9,120/columns))+'%';
+     }
+     const glyph=document.createElement('span');glyph.className='tile-symbol';glyph.textContent=tileGlyph(type);
+     const number=document.createElement('small');number.textContent=i+1;
+     b.title=(i+1)+'칸 · '+type;b.append(glyph,number);
+     b.onclick=()=>log((i+1)+'칸 · '+type+' '+match.players.filter(p=>p.position===i).map(p=>p.name).join(', '));
+     fragment.append(b);
+   });root.append(fragment);
+ }
+ const currentPositions=new Set(match.players.map(p=>p.position));
+ query('.tile',root).forEach((node,i)=>node.classList.toggle('player-here',currentPositions.has(i)));
+ drawPawns();
+}
+function drawPawns(){
+ let layer=$('board-pawns');
+ if(!layer){layer=document.createElement('div');layer.id='board-pawns';$('board-area').append(layer)}
+ const players=match.players;
+ for(const stale of query('.board-pawn',layer)){
+   if(!players.some(p=>String(p.id)===stale.dataset.id))stale.remove();
+ }
+ for(const p of players){
+   let pawn=query('.board-pawn',layer).find(node=>node.dataset.id===String(p.id));
+   if(!pawn){
+     pawn=document.createElement('div');pawn.className='board-pawn';pawn.dataset.id=String(p.id);
+     const img=document.createElement('img');img.alt='';img.src='./original/Registry/sava'+String([0,82,6,1,85,2,84,4][p.id]||0).padStart(2,'0')+'.png';
+     const name=document.createElement('span');name.className='board-pawn-name';
+     pawn.append(img,name);layer.append(pawn);
+   }
+   const point=PATH[Math.min(p.position,PATH.length-1)]||PATH[0];
+   const slot=players.filter(q=>q.position===p.position).findIndex(q=>q.id===p.id);
+   pawn.style.left='calc('+point.x+'% + '+((slot%4)*11-12)+'px)';
+   pawn.style.top='calc('+point.y+'% - '+(Math.floor(slot/4)*14)+'px)';
+   pawn.style.setProperty('--pawn-color',p.color);
+   pawn.classList.toggle('pawn-current',match.active===p.id);
+   pawn.querySelector('.board-pawn-name').textContent=p.name;
+ }
+}
 function drawGame(){if(!match||!MAPS[match.map])return;chooseSourcePath(match.map);const p=(match.mode==='hotseat'?activePlayer():match.players[0]),stats=teamStats(p.team);$('game-map-title').textContent=match.map;$('element-label').textContent=match.attribute;$('player-count').textContent=match.players.length;$('turn-indicator').textContent='ROUND '+match.round+' · '+match.players[match.active].name+' TURN';$('my-name').textContent=p.name;$('my-stats').textContent='이동 '+stats.move+' · 공격 '+stats.atk+' · 방어 '+stats.def+' · 지력 +'+stats.int;$('my-position').textContent=p.jail>0?'감옥 '+p.jail+'턴':p.position===0?'START':p.position===match.tiles.length-1?'GOAL':(p.position+1)+'번째 칸';$('my-portrait').innerHTML='<img class="player-sprite" alt="" src="'+imageFor(p.team[0]||'soldier')+'">';$('ability-fill').style.width=p.ability+'%';$('game-players').replaceChildren();match.players.forEach((user,i)=>{const li=document.createElement('div');li.className=match.active===i?'is-turn':'';li.textContent=(match.active===i?'▶ ':'　')+user.pawn+' '+user.name+' '+(user.position+1)+'칸 · '+user.ability+'%';li.style.color=user.color;$('game-players').append(li)});$('my-items').replaceChildren();p.items.forEach((itemId,i)=>{const item=ITEM_MAP[itemId],btn=document.createElement('button');btn.className='item-card';btn.innerHTML='<span class="item-icon">'+(item?.icon||'✧')+'</span>'+(item?.name||itemId);btn.title=item.hint;btn.disabled=match.finished||!playerCanAct()||p.usedItem||busy;btn.onclick=()=>useItem(i);$('my-items').append(btn)});$('roll-btn').disabled=!playerCanAct();$('ability-btn').disabled=!playerCanAct()||p.ability<100;$('move-log').textContent=match.message;drawBoard()}
 function withUserTurn(){return playerCanAct()}
 function useItem(index){
