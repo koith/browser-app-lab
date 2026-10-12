@@ -38,7 +38,7 @@ jobs:
               page.locator('#reference').wait_for()
               assert page.evaluate('window.__4LEAF_CLASSIC__.getState().scene')=='lobby'
               print('START VIEW: LOBBY')
-              scenes={'lobby':'dice_ref.png','rooms':'dice_ref2.png','town':'chat.jpg','shop':'shop_ref.png','sky':'sky.jpg'}
+              scenes={'lobby':'dice_ref.png','rooms':'dice_ref2.png','town':'chat.jpg','shop':'shop_ref.png','sky':'sky.jpg','board':'board.jpg','intro':'intro.jpg'}
               for scene,asset in scenes.items():
                 page.evaluate('(s)=>window.__4LEAF_CLASSIC__.route(s)',scene)
                 page.locator('#reference').evaluate('(el)=>el.decode()')
