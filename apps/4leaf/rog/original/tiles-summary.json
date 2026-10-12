@@ -1,0 +1,227 @@
+{
+  "0149": {
+    "cells": 46,
+    "dimensions": [
+      16,
+      12
+    ],
+    "special": 42,
+    "warp": 2
+  },
+  "0153": {
+    "cells": 114,
+    "dimensions": [
+      20,
+      20
+    ],
+    "special": 78,
+    "warp": 4
+  },
+  "0159": {
+    "cells": 58,
+    "dimensions": [
+      18,
+      12
+    ],
+    "special": 50,
+    "warp": 4
+  },
+  "0160": {
+    "cells": 74,
+    "dimensions": [
+      20,
+      20
+    ],
+    "special": 66,
+    "warp": 6
+  },
+  "0165": {
+    "cells": 69,
+    "dimensions": [
+      20,
+      20
+    ],
+    "special": 50,
+    "warp": 9
+  },
+  "0172": {
+    "cells": 104,
+    "dimensions": [
+      20,
+      20
+    ],
+    "special": 80,
+    "warp": 10
+  },
+  "0173": {
+    "cells": 68,
+    "dimensions": [
+      32,
+      20
+    ],
+    "special": 53,
+    "warp": 0
+  },
+  "0180": {
+    "cells": 90,
+    "dimensions": [
+      40,
+      25
+    ],
+    "special": 72,
+    "warp": 3
+  },
+  "0183": {
+    "cells": 99,
+    "dimensions": [
+      20,
+      20
+    ],
+    "special": 65,
+    "warp": 8
+  },
+  "0187": {
+    "cells": 81,
+    "dimensions": [
+      25,
+      25
+    ],
+    "special": 37,
+    "warp": 3
+  },
+  "0189": {
+    "cells": 45,
+    "dimensions": [
+      20,
+      30
+    ],
+    "special": 26,
+    "warp": 3
+  },
+  "0190": {
+    "cells": 85,
+    "dimensions": [
+      25,
+      25
+    ],
+    "special": 50,
+    "warp": 3
+  },
+  "0191": {
+    "cells": 52,
+    "dimensions": [
+      20,
+      30
+    ],
+    "special": 40,
+    "warp": 7
+  },
+  "0192": {
+    "cells": 72,
+    "dimensions": [
+      30,
+      20
+    ],
+    "special": 43,
+    "warp": 2
+  },
+  "0193": {
+    "cells": 37,
+    "dimensions": [
+      25,
+      25
+    ],
+    "special": 16,
+    "warp": 3
+  },
+  "0195": {
+    "cells": 75,
+    "dimensions": [
+      20,
+      20
+    ],
+    "special": 58,
+    "warp": 6
+  },
+  "0197": {
+    "cells": 57,
+    "dimensions": [
+      16,
+      16
+    ],
+    "special": 43,
+    "warp": 4
+  },
+  "0198": {
+    "cells": 111,
+    "dimensions": [
+      30,
+      20
+    ],
+    "special": 83,
+    "warp": 0
+  },
+  "0199": {
+    "cells": 97,
+    "dimensions": [
+      20,
+      24
+    ],
+    "special": 54,
+    "warp": 5
+  },
+  "0200": {
+    "cells": 34,
+    "dimensions": [
+      12,
+      12
+    ],
+    "special": 29,
+    "warp": 7
+  },
+  "0202": {
+    "cells": 85,
+    "dimensions": [
+      26,
+      26
+    ],
+    "special": 66,
+    "warp": 3
+  },
+  "0205": {
+    "cells": 75,
+    "dimensions": [
+      24,
+      24
+    ],
+    "special": 61,
+    "warp": 10
+  },
+  "0207": {
+    "cells": 54,
+    "dimensions": [
+      16,
+      16
+    ],
+    "special": 42,
+    "warp": 7
+  },
+  "0219": {
+    "cells": 45,
+    "dimensions": [
+      31,
+      30
+    ],
+    "special": 26,
+    "warp": 0
+  },
+  "0221": {
+    "cells": 58,
+    "dimensions": [
+      26,
+      26
+    ],
+    "special": 30,
+    "warp": 7
+  }
+}
