@@ -1,0 +1,53 @@
+name: 4LEAF visual reference and site verification
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/4leaf-preview.yml', 'apps/4leaf/index.html', 'apps/4leaf/assets/**']
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  visual:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Generate reduced previews from confirmed originals
+        run: |
+          python3 -m pip install --user --quiet pillow
+          python3 - <<'PY'
+          from PIL import Image
+          import base64,pathlib,io
+          path=pathlib.Path('apps/4leaf/assets')
+          previews=path/'previews';previews.mkdir(exist_ok=True)
+          for original in sorted(path.glob('*')):
+              if original.suffix not in ('.jpg','.png','.webp'):continue
+              im=Image.open(original).convert('RGB');dims=im.size
+              im.thumbnail((760,520))
+              f=io.BytesIO();im.save(f,'JPEG',quality=66,optimize=True)
+              target=previews/(original.stem+'.b64.txt')
+              target.write_text(base64.b64encode(f.getvalue()).decode('ascii'))
+              print(original.name,'original_dims=',dims,'thumbnail_dims=',im.size,'preview_bytes=',len(f.getvalue()))
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/4leaf/assets/previews
+          git diff --cached --quiet || (git commit -m "docs: inspectable scaled 4LEAF historical references" && git push)
+      - name: Verify GitHub Pages URL
+        run: |
+          for i in $(seq 1 9); do
+            status=$(curl -L -sS --max-time 20 -o /tmp/4leaf-page.html -w '%{http_code}' 'https://koith.github.io/browser-app-lab/apps/4leaf/' || true)
+            if [ "$status" = 200 ] && grep -q '4LEAF Browser' /tmp/4leaf-page.html; then
+              echo "PAGE VERIFIED: https://koith.github.io/browser-app-lab/apps/4leaf/"
+              break
+            fi
+            echo "Page status: $status retry $i"
+            sleep 8
+          done
+          test "$status" = 200
+          grep -q '4LEAF Browser' /tmp/4leaf-page.html
+          for name in chat.jpg street.jpg dice_ref.png shop_ref.png; do
+            curl -fsSL --max-time 20 --retry 4 "https://koith.github.io/browser-app-lab/apps/4leaf/assets/$name" -o "/tmp/$name"
+            test $(stat -c%s "/tmp/$name") -gt 100000
+            echo "ASSET VERIFIED: $name"
+          done
