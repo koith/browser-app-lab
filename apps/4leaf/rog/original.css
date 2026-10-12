@@ -134,3 +134,51 @@ body{background:#131c51}
 .board-zoom-controls button:active{background:#b8cbed;color:#263572}
 .board-world #board-lines,.board-world #board-nodes,.board-world .board-center{position:absolute}
 @media(max-width:630px){.board-zoom-controls{top:4px;right:4px}.board-zoom-controls button{width:26px;height:24px}}
+
+/* Magic Carden reconstructed from the installed 0.96d CardShop/cardshopback.gif
+   (794×404, three columns × three rows of real card slots) */
+#shop .shop-scene{position:relative;background:#121845 url('./original/CardShop/cardshopback.png') center center/100% 100% no-repeat!important;display:block;padding:0;overflow:hidden}
+#shop .shop-keeper{position:absolute;inset:0;width:100%;height:100%;z-index:1;padding:0;background:transparent;border:0;pointer-events:none;display:block}
+#shop .keeper-silhouette,#shop .shop-keeper h3,#shop .shop-keeper p{display:none!important}
+#shop .shop-keeper .money{position:absolute;left:75%;top:79%;width:22%;height:8%;margin:0;padding:0 6px;border:0;display:flex;align-items:center;justify-content:space-between;background:transparent;color:#e7edff;font-size:10px}
+#shop .shop-keeper .money b{font-size:14px;color:#fff6bf}
+#shop .shop-stock{display:block;position:absolute;inset:0;z-index:2;background:transparent!important;border:0!important;padding:0!important;overflow:visible}
+#shop .shop-grid{position:absolute;top:2.15%;left:2.45%;width:28.6%;height:70.7%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(3,minmax(0,1fr));gap:1.5%;overflow:visible;padding:0;background:transparent;border:0}
+#shop .shop-card{position:relative;min-width:0;min-height:0;width:100%;height:100%;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid #bca6ca;border-radius:0;background:#2e3d78e9;color:#fff5e6;box-shadow:inset 1px 1px #dee5ff,0 1px 2px #17183d;gap:0;overflow:hidden}
+#shop .shop-card .card-art{width:90%;height:79%;border:0;background:transparent!important;display:flex;align-items:center;justify-content:center;padding:0;overflow:hidden}
+#shop .shop-card .pixel-portrait{width:96%;height:98%;object-fit:contain;image-rendering:pixelated;filter:none}
+#shop .shop-card b{display:block;width:100%;font-size:9px;line-height:13px;background:#2a2e67e8;color:#fff9da;text-align:center;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}
+#shop .shop-card .card-state{position:absolute;top:0;right:1px;font:8px Arial;padding:1px;background:#182d61c9;color:#b8e9d9}
+#shop .shop-card.selected{outline:2px solid #ffecab;outline-offset:0;z-index:1;border-color:#fff6bd;filter:brightness(1.14)}
+#shop .shop-card:hover{filter:brightness(1.25)}
+#shop .shop-card.shop-empty{opacity:0;pointer-events:none}
+#shop .tabline{position:absolute;left:33%;top:33%;width:41%;height:8%;display:flex;gap:3px;border:0!important;background:#152154b0;padding:3px;border-radius:5px;z-index:4}
+#shop .tabline button{min-width:0;flex:1;border:1px outset #b5c5f7!important;background:linear-gradient(#a0a2d2,#4d5b9f)!important;color:#ebf1ff;font-size:9px;padding:0 2px;white-space:nowrap}
+#shop .tabline button.selected{color:#2e356a;background:linear-gradient(#fff4c3,#d3bba8)!important}
+#shop .shop-page-controls{position:absolute;left:4%;top:74%;width:25%;height:6%;display:flex;align-items:center;justify-content:center;gap:8px;color:#e5eafa;background:#263f80e9;border:1px ridge #b0c3ed}
+#shop .shop-page-controls button{background:#7187c9;border:1px ridge #aec6fc;font-size:10px;padding:1px 5px}
+#shop .shop-page-controls button:disabled{opacity:.3}
+#shop .shop-page-controls span{font-size:10px}
+#shop .shop-equipped{position:absolute;left:75%;top:4%;height:72%;width:22%;z-index:4;background:#22357cb2;border:1px solid #9fb0e9;padding:4px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 2px 5px #0a1555ab}
+#shop .shop-equipped h4{font-size:11px;letter-spacing:1px;color:#f2e9cd;text-align:center;margin:2px 0 5px;border-bottom:1px solid #8496d2}
+#shop .shop-equipped #shop-owned-list{flex:1;overflow-y:auto}
+#shop .shop-owned-entry{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid #718bc866;background:#ffffff14;font-size:10px;color:#f3f5ff;padding:5px 3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#shop .shop-owned-entry:nth-child(2n){background:#93a6f31b}
+#shop .shop-owned-entry:hover,#shop .shop-owned-entry.selected{background:#b3c5f378;color:#ffeab5}
+#shop .shop-detail{position:absolute;left:2%;top:81%;width:31%;height:18%;display:block;padding:3px!important;background:#213274c3;border:1px solid #637dc2;min-height:0!important;overflow:visible}
+#shop #shop-selected{display:block;overflow:hidden;font-size:10px;line-height:1.45;max-height:100%;color:#eaf2ff}
+#shop #shop-buy{position:absolute;left:239%;top:40%;width:64%;height:50%;font-size:11px;padding:4px!important;white-space:nowrap}
+#shop #shop-buy:disabled{filter:grayscale(.65);opacity:.8}
+@media(max-width:630px){
+ #shop .shop-card b{font-size:6px;line-height:9px}
+ #shop .shop-card .card-state{font-size:5px;padding:0}
+ #shop .tabline{left:32%;width:43%;padding:1px}
+ #shop .tabline button{font-size:7px}
+ #shop .shop-equipped h4{font-size:8px}
+ #shop .shop-owned-entry{font-size:8px;padding:3px 1px}
+ #shop .shop-detail #shop-selected{font-size:7px;line-height:1.4}
+ #shop .shop-keeper .money{font-size:8px}
+ #shop .shop-keeper .money b{font-size:10px}
+ #shop .shop-page-controls{gap:2px}
+ #shop #shop-buy{font-size:9px;padding:2px!important}
+}
