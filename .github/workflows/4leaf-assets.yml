@@ -1,0 +1,63 @@
+name: Acquire 4LEAF historical reference images
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/index.html'
+      - '.github/workflows/4leaf-assets.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  archive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Try historical image hosts and verify actual image bytes
+        run: |
+          python3 - <<'PY'
+          import json, urllib.request, pathlib, urllib.parse, hashlib
+          dest=pathlib.Path('apps/4leaf/assets'); dest.mkdir(exist_ok=True)
+          sources={
+            'sky':'https://t1.daumcdn.net/cfile/tistory/1744B14B5143265132',
+            'street':'https://t1.daumcdn.net/cfile/tistory/193E9C335142CED517',
+            'chat':'https://t1.daumcdn.net/cfile/tistory/172E384F514188D509',
+            'dice_ref':'https://t1.daumcdn.net/cfile/tistory/0227DF4C5141D1B126',
+            'dice_ref2':'https://t1.daumcdn.net/cfile/tistory/146CBD4A514178AF27',
+            'shop_ref':'https://t1.daumcdn.net/thumb/R1024x0/?fname=http%3A%2F%2Fcfile241.uf.daum.net%2Fimage%2F99DC854E5AE04B01147070',
+            'town_ref':'https://t1.daumcdn.net/cfile/tistory/1152263A51418F4519',
+            'chat_ref':'https://t1.daumcdn.net/cfile/tistory/012D994F514188ED0B'
+          }
+          results={}
+          for name,url in sources.items():
+            candidates=[url]
+            if '/cfile/' in url:
+              candidates += ['https://t1.daumcdn.net/thumb/R1024x0/?fname='+urllib.parse.quote(url,safe=''), url.replace('t1.daumcdn.net','t2.daumcdn.net'), 'https://images.weserv.nl/?url='+urllib.parse.quote(url.replace('https://',''),safe='')]
+            for candidate in candidates:
+              try:
+                req=urllib.request.Request(candidate,headers={'User-Agent':'Mozilla/5.0','Accept':'image/webp,image/png,image/jpeg,image/*;q=0.8','Referer':'https://4leafmemorial.geld.kr/'})
+                with urllib.request.urlopen(req,timeout=12) as r:
+                  data=r.read(9000000)
+                if len(data)<3000:continue
+                ext='jpg' if data.startswith(b'\xff\xd8\xff') else 'png' if data.startswith(b'\x89PNG') else 'webp' if data.startswith(b'RIFF') else None
+                if ext:
+                  filepath=dest/(name+'.'+ext)
+                  filepath.write_bytes(data)
+                  if name in ['sky','street','chat'] and ext!='jpg':
+                    (dest/(name+'.jpg')).write_bytes(data)
+                  results[name]={'file':filepath.name,'bytes':len(data),'source':candidate,'sha256':hashlib.sha256(data).hexdigest()}
+                  print('ACQUIRED',name,len(data),candidate);break
+              except Exception as e:print('failed',name,str(e)[:90])
+            if name not in results:print('NOT ACQUIRED',name)
+          (dest/'manifest.json').write_text(json.dumps(results,ensure_ascii=False,indent=2))
+          PY
+      - name: Commit archival reference images when acquired
+        run: |
+          if [ -z "$(find apps/4leaf/assets -type f -name '*.jpg' -o -name '*.png' -o -name '*.webp')" ]; then
+            echo 'No new images to commit'; exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/4leaf/assets/
+          git diff --cached --quiet || (git commit -m "assets: archive original 4LEAF memorial image references" && git push)
