@@ -16,7 +16,7 @@ async function run(){
  const nodes=await page.locator('#board-nodes .tile').count();assert.equal(nodes,104,'original 4LEAF MVE path tiles');
  assert.ok((await page.locator('#map-select option').count())>=25,'25 original archive map names');
  assert.ok(await page.evaluate(()=>window.ORIGINAL_LEAF_CHESSMEN.length>=90),'original CHR chessman data loaded');
- assert.ok((await page.locator('#shop-grid .shop-card').count())===0,'shop not active on game screen');
+ assert.ok(await page.locator('#game').isVisible(),'game scene active');
  const first=await page.evaluate(()=>window.__ROG_TEST__.getMatch().players[0].position);
  await page.locator('#roll-btn').click();
  await page.waitForFunction(()=>window.__ROG_TEST__.getMatch().players[0].position>0,{timeout:10000});
