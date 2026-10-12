@@ -1,0 +1,88 @@
+name: Verify playable 4LEAF and visual fidelity
+on:
+  push:
+    branches: [main]
+    paths: ['apps/4leaf/classic.html', '.github/workflows/4leaf-verify.yml']
+  workflow_dispatch:
+permissions: {contents: read}
+jobs:
+  visual-compare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Prepare real browser
+        run: |
+          python3 -m pip install --user --quiet pillow playwright
+          which google-chrome || which chromium || which chromium-browser
+          python3 -m playwright --version
+      - name: Run interactive smoke tests and compare source images
+        run: |
+          cat > /tmp/check4leaf.py <<'PY'
+          import io,os,shutil,subprocess,time
+          from pathlib import Path
+          from PIL import Image
+          from playwright.sync_api import sync_playwright
+          root=Path.cwd()/'apps/4leaf'
+          server=subprocess.Popen(['python3','-m','http.server','8777','--bind','127.0.0.1','--directory',str(root)],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+          time.sleep(1)
+          try:
+            exe=shutil.which('google-chrome') or shutil.which('chromium') or shutil.which('chromium-browser')
+            assert exe, 'Chrome is not installed'
+            with sync_playwright() as p:
+              browser=p.chromium.launch(headless=True,executable_path=exe,args=['--no-sandbox','--disable-dev-shm-usage'])
+              page=browser.new_page(viewport={'width':1080,'height':850},device_scale_factor=1)
+              errors=[]
+              page.on('pageerror',lambda e:errors.append(str(e)))
+              page.goto('http://127.0.0.1:8777/classic.html',wait_until='domcontentloaded')
+              page.locator('#reference').wait_for()
+              assert page.evaluate('window.__4LEAF_CLASSIC__.getState().scene')=='lobby'
+              print('START VIEW: LOBBY')
+              scenes={'lobby':'dice_ref.png','rooms':'dice_ref2.png','town':'chat.jpg','shop':'shop_ref.png','sky':'sky.jpg'}
+              for scene,asset in scenes.items():
+                page.evaluate('(s)=>window.__4LEAF_CLASSIC__.route(s)',scene)
+                page.locator('#reference').evaluate('(el)=>el.decode()')
+                shot=Image.open(io.BytesIO(page.locator('#frame').screenshot())).convert('RGB')
+                original=Image.open(root/'assets'/asset).convert('RGB')
+                if shot.size!=original.size:
+                  print('DIMENSIONS',scene,shot.size,original.size)
+                assert abs(shot.width-original.width)<5 and abs(shot.height-original.height)<5,(scene,shot.size,original.size)
+                if shot.size!=original.size:shot=shot.resize(original.size)
+                a=list(shot.getdata());b=list(original.getdata())
+                mismatches=sum(1 for x,y in zip(a,b) if max(abs(i-j) for i,j in zip(x,y))>36)
+                similarity=100*(1-mismatches/len(a))
+                print('VISUAL',scene,f'{similarity:.2f}%','different_pixels',mismatches,'pixels',len(a))
+                assert similarity>=90.0,f'Visual score under threshold: {scene} {similarity:.2f}'
+              page.evaluate('window.__4LEAF_CLASSIC__.start()')
+              before=page.evaluate('window.__4LEAF_CLASSIC__.getState().pos')
+              for _ in range(3):page.evaluate('window.__4LEAF_CLASSIC__.roll()')
+              after=page.evaluate('window.__4LEAF_CLASSIC__.getState().pos')
+              assert after>before
+              page.evaluate('window.__4LEAF_CLASSIC__.route("shop")')
+              page.get_by_role('button',name='별명',exact=True).click()
+              page.locator('#nick-input').fill('테스트');page.get_by_role('button',name='저장',exact=True).click()
+              assert page.evaluate('window.__4LEAF_CLASSIC__.getState().nickname')=='테스트'
+              assert not errors,errors
+              print('BROWSER TEST PASS', 'move_to=',after)
+              browser.close()
+          finally:
+            server.terminate()
+          PY
+          python3 /tmp/check4leaf.py
+      - name: Verify publicly accessible Pages site
+        run: |
+          url='https://koith.github.io/browser-app-lab/apps/4leaf/'
+          for i in $(seq 1 12); do
+            code=$(curl -sSL --max-time 18 -o /tmp/4leaf-site.html -w '%{http_code}' "$url" || true)
+            if [ "$code" = 200 ] && grep -q 'classic.html' /tmp/4leaf-site.html;then break;fi
+            echo "Page not ready yet: $code ($i)"
+            sleep 10
+          done
+          grep -q 'classic.html' /tmp/4leaf-site.html
+          curl -fsSL --max-time 20 "${url}classic.html" | grep -q '4LEAF Browser'
+          for asset in dice_ref.png chat.jpg street.jpg sky.jpg board.jpg shop_ref.png; do
+            status=$(curl -L -sS --max-time 20 -o /dev/null -w '%{http_code}' "${url}assets/$asset")
+            echo "$asset HTTP $status"
+            test "$status" = 200
+          done
+          echo "PUBLIC PLAYABLE URL VERIFIED: $url"
