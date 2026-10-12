@@ -1,0 +1,33 @@
+name: 4LEAF live public mobile webview validation
+on:
+  push:
+    paths:
+      - '.github/workflows/rog-public-live.yml'
+      - 'apps/4leaf/rog/tests/live.cjs'
+  workflow_dispatch:
+jobs:
+  public-live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser
+        run: |
+          npm install --no-save playwright
+          npx playwright install chromium --with-deps
+      - name: Verify published 4LEAF Pages and mobile browser gameplay
+        run: |
+          for i in 1 2 3 4 5; do
+            if curl -ILfsS --max-time 20 "https://koith.github.io/browser-app-lab/apps/4leaf/"; then break; fi
+            if [ "$i" -eq 5 ]; then exit 1; fi
+            sleep 15
+          done
+          node apps/4leaf/rog/tests/live.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: 4leaf-public-live-mobile
+          path: 4leaf-live-mobile.png
