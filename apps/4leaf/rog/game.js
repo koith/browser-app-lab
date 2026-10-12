@@ -434,20 +434,23 @@ async function useAbility(){
 function combat(attacker,defender,keeper=false){
  return new Promise(resolve=>{
  const aStat=teamStats(attacker.team),bStat=keeper?{def:defender.def||2,int:0}:{...teamStats(defender.team)};
- const aCount=Math.max(1,aStat.atk+(attacker.effects?.valkyrie>0?1:0)),bCount=Math.max(1,bStat.def);
+ const reducedA=attacker.effects?.armageddon>0,reducedB=defender.effects?.armageddon>0;
+ const isSoloA=attacker.team?.length===1,isSoloB=defender.team?.length===1;
+ const isDuoA=attacker.team?.length===2,isDuoB=defender.team?.length===2;
+ const aCount=Math.max(1,(reducedA?Math.max(1,Math.floor(aStat.atk/2)):aStat.atk)+(isSoloA&&attacker.effects?.ring>0?1:0));
+ const bCount=Math.max(1,(reducedB?Math.max(1,Math.floor(bStat.def/2)):bStat.def)+(isDuoB&&defender.effects?.ring>0?1:0));
  let attack,defense,aValue,bValue,rerolls=0;
  for(let attempt=0;attempt<100;attempt++){
    attack=diceN(aCount,6);defense=diceN(bCount,6);
-   aValue=attack.total+(aStat.int||0)+(attacker.effects?.ring>0?2:0)+(attacker.effects?.teamInt>0?3:0);
-   bValue=defense.total+(bStat.int||0)+(defender.effects?.ring>0?2:0)+(defender.effects?.teamInt>0?3:0);
+   aValue=attack.total+(aStat.int||0)+(attacker.team?.length>=3?(attacker.effects?.ring||0):0)+(attacker.effects?.teamInt>0?3:0);
+   bValue=defense.total+(bStat.int||0)+(defender.team?.length>=3?(defender.effects?.ring||0):0)+(defender.effects?.teamInt>0?3:0);
    if(attacker.effects?.scar>0)aValue=Math.max(1,aValue-attacker.effects.scar);
    if(defender.effects?.scar>0)bValue=Math.max(1,bValue-defender.effects.scar);
    if(attacker.effects?.ultimate>0)aValue=30;
    if(defender.effects?.ultimate>0)bValue=18;
    if(attacker.effects?.destroy>0)aValue=24;
    if(defender.effects?.block>0)bValue=24;
-   if(attacker.effects?.armageddon>0)aValue+=6;
-   if(defender.effects?.armageddon>0)bValue+=6;
+   
    if(aValue!==bValue)break;rerolls++;
  }
  const div=document.createElement('div');
@@ -462,6 +465,34 @@ function combat(attacker,defender,keeper=false){
  if(selfInvolved&&player.items.includes('bomb')&&!player.usedItem){options.unshift({label:'자폭',run:()=>{player.items.splice(player.items.indexOf('bomb'),1);player.usedItem=true;attacker.position=0;if(Number.isInteger(defender.position))defender.position=0;resolve({...results,negated:true,mutualReset:true})}})}
  if(selfInvolved&&player.items.includes('flipper')&&!player.usedItem){
    options.unshift({label:'오리발 카드',run:()=>{player.items.splice(player.items.indexOf('flipper'),1);player.usedItem=true;resolve({...results,negated:true})}});
+ }
+
+ if(selfInvolved&&!player.usedItem){
+   // Original single-use battle cards are applied to the current dice roll.
+   const yourAttack=attacker.id===player.id,enemyDice=yourAttack?defense:attack;
+   const raw=yourAttack?aValue:bValue,opponent=yourAttack?bValue:aValue;
+   function pickCard(id,modify){
+     if(!player.items.includes(id))return;
+     options.unshift({label:ITEM_MAP[id].name,run:()=>{
+       player.items.splice(player.items.indexOf(id),1);player.usedItem=true;
+       const out=modify();
+       resolve(out);
+     }});
+   }
+   pickCard('valkyrie',()=>{
+     const n=Math.floor(enemyDice.values.length/2);
+     const extra=diceN(n,6);
+     if(yourAttack)return {...results,attacker:aValue+extra.total};
+     return {...results,defender:bValue+extra.total};
+   });
+   pickCard('oddcurse',()=>{
+     const deduction=opponent%2===1?enemyDice.values[enemyDice.values.length-1]:0;
+     return yourAttack?{...results,defender:bValue-deduction}:{...results,attacker:aValue-deduction};
+   });
+   pickCard('evencurse',()=>{
+     const deduction=opponent%2===0?enemyDice.values[enemyDice.values.length-1]:0;
+     return yourAttack?{...results,defender:bValue-deduction}:{...results,attacker:aValue-deduction};
+   });
  }
  modal('⚔ BATTLE · 전투',div,options);sfx(235,.21);
  if(!selfInvolved||(keeper&&attacker.bot)||(match?.mode==='network'&&attacker.id===1)){
