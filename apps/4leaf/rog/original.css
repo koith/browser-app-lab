@@ -80,3 +80,33 @@ body{background:#131c51}
 .goldbtn{background:linear-gradient(#f4f6ff,#b4c6f1 50%,#738fd2);color:#22316a;border-color:#adbfed}
 .help-scene{background:#364b89}
 @media(max-width:630px){#lobby .lobby-config{min-width:0;width:94%;margin:auto;max-height:95%;overflow:auto}#shop .shop-keeper{display:none}#rooms .town-figures .avatar{width:48px;height:115px}}
+
+/* Original control sprite sheet: 4 columns (idle, selected, hover, inactive) × 9 rows. */
+.titlebar{background:linear-gradient(#7693d2,#36549e 42%,#233a84 44%,#142463 100%)}
+.toolbar{height:46px;background:linear-gradient(#819ae3,#3e57a3 46%,#233570 49%,#293c8a);border-color:#a6b9f0;gap:9px}
+.toolbar button[data-route]{width:30px;min-width:30px;height:30px;padding:0!important;background-image:url('./original/MainFrame/toolbarbtn.png')!important;background-repeat:no-repeat!important;background-size:120px 270px!important;border:0!important;box-shadow:none!important;font-size:0!important;filter:none!important;border-radius:0!important}
+.toolbar button[data-route] span{display:none!important}
+.toolbar button[data-route="sky"]{background-position:0 0!important}
+.toolbar button[data-route="city"]{background-position:0 -30px!important}
+.toolbar button[data-route="rooms"]{background-position:0 -90px!important}
+.toolbar button[data-route="lobby"]{background-position:0 -120px!important}
+.toolbar button[data-route="shop"]{background-position:0 -150px!important}
+.toolbar button[data-route="sky"].active{background-position:-30px 0!important}
+.toolbar button[data-route="city"].active{background-position:-30px -30px!important}
+.toolbar button[data-route="rooms"].active{background-position:-30px -90px!important}
+.toolbar button[data-route="lobby"].active{background-position:-30px -120px!important}
+.toolbar button[data-route="shop"].active{background-position:-30px -150px!important}
+.toolbar button[data-route="sky"]:hover{background-position:-60px 0!important}
+.toolbar button[data-route="city"]:hover{background-position:-60px -30px!important}
+.toolbar button[data-route="rooms"]:hover{background-position:-60px -90px!important}
+.toolbar button[data-route="lobby"]:hover{background-position:-60px -120px!important}
+.toolbar button[data-route="shop"]:hover{background-position:-60px -150px!important}
+#game .game-controls{background:linear-gradient(#7186ce,#293e95 38%,#192969 80%);border-color:#9aabe6}
+#game .game-topline{background:linear-gradient(#324a99,#1a2865)}
+#game .item-bar{background:linear-gradient(#233676,#121c57)}
+#game .board-center{box-shadow:0 2px 9px #0b2155bf}
+#game .board-center b{font-size:12px}
+#game .player-panel .player-icon{border:2px ridge #abc4fc;background:#d4e5f6}
+#game .player-panel b,#game .game-opponent b{color:#e6f4ff}
+#shop .shop-keeper h3{margin-top:3px;margin-bottom:4px}
+@media(max-width:630px){.toolbar{gap:4px;height:40px;padding:2px 4px}.toolbar button[data-route]{transform:scale(.88);transform-origin:center}.toolbar .smalltool{min-width:24px;width:24px;padding:0}}
