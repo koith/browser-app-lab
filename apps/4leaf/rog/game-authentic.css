@@ -1,0 +1,43 @@
+/* Source-built 2002-style live 4LEAF Dice HUD.
+   Player portraits and minimap use original extracted components and live engine data. */
+#app.app-game .sidebar{display:none}
+#app.app-game main#main{border-right:0}
+#app.app-game .workspace{background:#172965}
+#game .board-area{position:relative;background:#293c6f url('./original/IMG/bgtile.png') center center/cover no-repeat}
+#game .board-world{inset:0 12%!important;transform-origin:center}
+#game .battle-player-panels{position:absolute;inset:0;z-index:3;pointer-events:none}
+#game .battle-team-side{position:absolute;top:8px;bottom:5px;width:12%;display:flex;flex-direction:column;gap:4px;padding:2px}
+#game .battle-team-side.left{left:0}
+#game .battle-team-side.right{right:0}
+#game .battle-side-card{display:flex;align-items:center;gap:4px;position:relative;flex:1;min-height:0;max-height:85px;padding:2px;border:2px ridge #899fcf;background:linear-gradient(#405baaed,#122657ec);box-shadow:inset 0 1px #8199cd;overflow:hidden}
+#game .battle-side-card.active{border-color:#f7e4a0;box-shadow:0 0 8px #fff0ae70,inset 0 0 5px #a3c1fd}
+#game .battle-side-num{position:absolute;top:2px;right:3px;z-index:1;color:#fce2a5;font:bold 9px Arial,sans-serif}
+#game .battle-side-card img{height:90%;width:38%;max-width:45px;object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 2px 2px #080e3d)}
+#game .battle-side-info{flex:1;display:flex;flex-direction:column;gap:3px;min-width:0}
+#game .battle-side-info b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:10px;color:#f7faff;text-shadow:0 1px 2px #142049}
+#game .battle-side-info small{white-space:nowrap;overflow:hidden;font-size:9px;color:#d0ddf6}
+#game .battle-side-meter{display:block;height:5px;max-width:100%;background:#77dbea;border-right:1px solid #c4fcff;box-shadow:0 0 2px #bdf5ff}
+#game .board-mini{position:absolute;z-index:7;left:3px;bottom:3px;width:172px;height:152px;background:#293d86 url('./original/IMG/minimap.png') center/100% 100% no-repeat;pointer-events:none;opacity:.97}
+#game .board-mini canvas{position:absolute;left:5px;top:28px;width:152px;height:112px}
+#game .board-center{top:49%;left:50%;width:162px;padding:5px 8px;opacity:.83;color:#e9e4d5;background:radial-gradient(ellipse,#1f2e66af,#1c2c6890);border:1px ridge #a0b9da;border-radius:30%;text-shadow:1px 1px #101b49;box-shadow:0 0 14px #121f4a}
+#game .board-center .crest{font-size:46px;line-height:42px}
+#game .board-center small{font-size:7px}
+#game .tile{transform:translate(-50%,-50%) rotate(-1deg);border:1px solid #c7dcff;background:linear-gradient(150deg,#dfefffdb,#8da5cacc 42%,#47659ac7 53%,#26366be8);border-radius:4px;box-shadow:0 2px 1px #111a42,0 4px 2px #131d41,inset 0 2px #f6ffffae}
+#game .tile .tile-symbol{color:#fff6cc;text-shadow:1px 1px 1px #18306c}
+#game .tile.start{background:linear-gradient(#ddf8b8,#7cb68e 60%,#41735c)}
+#game .tile.goal{background:linear-gradient(#fff8c7,#f0bc73 58%,#885a59)}
+#game .tile.boost,#game .tile.boost4{background:linear-gradient(#c8dca4,#6caa80 55%,#416d69)}
+#game .tile.chest{background:linear-gradient(#f4dba1,#b69c73 54%,#6a4f54)}
+#game .tile.attribute{background:linear-gradient(#dbd5f7,#9289c6 52%,#4d4684)}
+#game .tile.warp{background:linear-gradient(#bbf5ff,#79bce8 52%,#3e6299)}
+#game .tile.prison{background:linear-gradient(#d1cdd8,#92919f 50%,#565579)}
+#game .tile.arena,#game .tile.keeper{background:linear-gradient(#eed6db,#bf9bab 50%,#74546d)}
+#game .tile.ability,#game .tile.ability100{background:linear-gradient(#b9ddfc,#8aa5cb 50%,#436a98)}
+#game .game-topline{min-height:26px}
+#game .game-controls{height:102px;background:#284583 url('./original/IMG/topbar.png') center/100% 100% no-repeat}
+#game .item-bar{min-height:62px;background:linear-gradient(#4261ac,#182e74);border-top:2px ridge #a1b5ed}
+#game .game-controls .die{background:#f9f4df;border:3px ridge #dce6ff}
+#game .board-zoom-controls{top:5px;right:13%;background:#263979e8}
+#game .battle-side-card .battle-side-meter{transition:width .2s}
+@media(max-width:870px){#game .battle-side-card img{max-width:32px}#game .battle-side-info b{font-size:9px}#game .battle-team-side{width:12.5%}#game .board-world{inset:0 12.5%!important}}
+@media(max-width:630px){#game .battle-team-side{width:10.5%;gap:1px;top:3px;bottom:3px;padding:0}#game .board-world{inset:0 10.5%!important}#game .battle-side-card{border-width:1px;padding:1px;flex-direction:column;gap:0}#game .battle-side-card img{max-height:55%;width:100%}#game .battle-side-info{justify-content:center}#game .battle-side-info b{font-size:7px;text-align:center}#game .battle-side-info small{font-size:6px}#game .battle-side-num{font-size:7px;top:0;right:1px}#game .battle-side-meter{height:3px}#game .board-mini{width:86px;height:77px;bottom:2px;left:2px}#game .board-mini canvas{left:2px;top:14px;width:77px;height:55px}#game .board-zoom-controls{right:11%;padding:1px}#game .board-center{width:80px;padding:3px}#game .board-center .crest{font-size:28px;line-height:24px}#game .board-center b{font-size:8px}#game .board-center small{font-size:5px}#game .tile .tile-symbol{font-size:clamp(8px,2.2vw,11px)!important}#game .tile small{font-size:5px}#game .game-controls{height:92px}}
