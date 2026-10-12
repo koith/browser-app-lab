@@ -441,6 +441,29 @@ async function useAbility(){
  if([30,33,35,37,24].includes(code)){p.ability=0;await resolveTile(p)}
  drawGame();persist();
 }
+function showBattleScene(attacker,defender,attack,defense,attackerPoints,defenderPoints){
+ const area=$('board-area');if(!area)return null;
+ document.querySelector('#battle-visual')?.remove();
+ const stage=document.createElement('div');stage.id='battle-visual';stage.setAttribute('role','status');
+ const head=document.createElement('div');head.className='battle-visual-head';head.textContent='BATTLE';
+ const left=document.createElement('div'),right=document.createElement('div');
+ left.className='battle-visual-side attacker';right.className='battle-visual-side defender';
+ function assemble(panel,player,result,values){
+   const actor=document.createElement('img');actor.className='battle-visual-actor';
+   actor.src=player.id<0?'./original/Registry/sava84.png':'./original/Registry/sava'+String([0,82,6,1,85,2,84,4][player.id]||0).padStart(2,'0')+'.png';
+   actor.alt=player.name;
+   const title=document.createElement('strong');title.textContent=player.name;
+   const score=document.createElement('div');score.className='battle-visual-total';score.textContent=String(result).padStart(2,'0');
+   const dice=document.createElement('div');dice.className='battle-visual-dice';
+   values.forEach(eye=>{const d=document.createElement('span');d.className='battle-visual-die';d.textContent=['⚀','⚁','⚂','⚃','⚄','⚅'][eye-1]||'⚀';dice.append(d)});
+   const pedestal=document.createElement('div');pedestal.className='battle-visual-pedestal';
+   panel.append(title,score,actor,pedestal,dice);
+ }
+ assemble(left,attacker,attackerPoints,attack.values);assemble(right,defender,defenderPoints,defense.values);
+ const vs=document.createElement('div');vs.className='battle-visual-vs';vs.textContent='VS';
+ stage.append(head,left,vs,right);area.append(stage);
+ return stage;
+}
 function combat(attacker,defender,keeper=false){
  return new Promise(resolve=>{
  const aStat=teamStats(attacker.team),bStat=keeper?{def:defender.def||2,int:0}:{...teamStats(defender.team)};
@@ -465,10 +488,12 @@ function combat(attacker,defender,keeper=false){
  }
  const div=document.createElement('div');
  div.innerHTML='<p>'+attacker.name+'의 공격! '+defender.name+'이(가) 방어합니다.'+(rerolls?' · 무승부 '+rerolls+'회 재굴림':'')+'</p><div class="battle-dice"><div>ATTACK<div class="nums">'+attack.values.join('·')+'</div><b>'+aValue+'</b><small>지력 +'+aStat.int+'</small></div><div>DEFENSE<div class="nums">'+defense.values.join('·')+'</div><b>'+bValue+'</b><small>지력 +'+bStat.int+'</small></div></div>';
+ const battleStage=showBattleScene(attacker,defender,attack,defense,aValue,bValue);
+ const finish=result=>{battleStage?.remove();$('modal').classList.remove('battle-present');resolve(result)};
  const player=activePlayer();
  const selfInvolved=!keeper&&player&&!player.bot&&(attacker.id===player.id||defender.id===player.id);
  let results={attacker:aValue,defender:bValue,changed:false,negated:false};
- const options=[{label:'결과 확인',primary:true,run:()=>resolve(results)}];
+ const options=[{label:'결과 확인',primary:true,run:()=>finish(results)}];
  if(selfInvolved&&player.items.includes('change')&&!player.usedItem){
    options.unshift({label:'체인지 카드',run:()=>{player.items.splice(player.items.indexOf('change'),1);player.usedItem=true;resolve({attacker:bValue,defender:aValue,changed:true})}});
  }
@@ -486,7 +511,7 @@ function combat(attacker,defender,keeper=false){
      options.unshift({label:ITEM_MAP[id].name,run:()=>{
        player.items.splice(player.items.indexOf(id),1);player.usedItem=true;
        const out=modify();
-       resolve(out);
+       finish(out);
      }});
    }
    pickCard('valkyrie',()=>{
@@ -504,7 +529,7 @@ function combat(attacker,defender,keeper=false){
      return yourAttack?{...results,defender:bValue-deduction}:{...results,attacker:aValue-deduction};
    });
  }
- modal('⚔ BATTLE · 전투',div,options);sfx(235,.21);
+ modal('⚔ BATTLE · 전투',div,options);$('modal').classList.add('battle-present');sfx(235,.21);
  if(!selfInvolved||(keeper&&attacker.bot)||(match?.mode==='network'&&attacker.id===1)){
    setTimeout(()=>{const button=query('#modal-buttons button').find(b=>b.textContent==='결과 확인');if(!$('modal').classList.contains('hidden')&&button)button.click()},Math.max(350,keeper?600:700));
  }
