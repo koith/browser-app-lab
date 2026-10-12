@@ -65,6 +65,7 @@
   $('lobby-create').onclick=openCreator;
   $('lobby-join').onclick=openCreator;
   $('lobby-config-back').onclick=closeCreator;
+  for(const tab of document.querySelectorAll('[data-route="lobby"]'))tab.addEventListener('click',closeCreator);
   $('bot-count').addEventListener('change',renderPlayerSeats);
   $('game-mode').addEventListener('change',renderPlayerSeats);
   // The original ROOM SELECT has interactive source-built components.
