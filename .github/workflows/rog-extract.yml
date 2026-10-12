@@ -36,7 +36,7 @@ jobs:
           groups=collections.Counter(p.suffix.lower() for p in files)
           print('FILE-TYPES',json.dumps(groups,ensure_ascii=False))
           for p in files[:350]:print('CLIENT-FILE',p,p.stat().st_size)
-          small=[p for p in files if p.stat().st_size<4000000 and p.suffix.lower() in ('.png','.jpg','.gif','.bmp','.pcx','.tga','.spr','.ini','.txt','.xml','.cfg','.pak','.dat','.wma','.wav','.mid')]
+          small=[p for p in files if p.stat().st_size<4000000 and p.suffix.lower() in ('.png','.jpg','.gif','.bmp','.pcx','.tga','.spr','.ini','.txt','.xml','.cfg','.pak','.dat','.wma','.wav','.mid','.d1')]
           out=pathlib.Path('original-extract/samples');out.mkdir(exist_ok=True)
           for i,p in enumerate(small[:180]):
             dest=out/(str(i).zfill(3)+'_'+p.name)
