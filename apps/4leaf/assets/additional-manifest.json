@@ -1,0 +1,38 @@
+{
+  "sky": {
+    "filename": "sky.jpg",
+    "size": [
+      794,
+      528
+    ],
+    "source": "https://t1.daumcdn.net/cfile/tistory/24280E405142A07C0B",
+    "bytes": 417278
+  },
+  "board": {
+    "filename": "board.jpg",
+    "size": [
+      800,
+      600
+    ],
+    "source": "https://t1.daumcdn.net/cfile/tistory/0117613A5142AFC70D",
+    "bytes": 487299
+  },
+  "battle": {
+    "filename": "battle.jpg",
+    "size": [
+      800,
+      600
+    ],
+    "source": "https://t1.daumcdn.net/cfile/tistory/230E993A5142AFD719",
+    "bytes": 480090
+  },
+  "intro": {
+    "filename": "intro.jpg",
+    "size": [
+      800,
+      600
+    ],
+    "source": "https://t1.daumcdn.net/cfile/tistory/16570B3E5142ABBA13",
+    "bytes": 501144
+  }
+}
