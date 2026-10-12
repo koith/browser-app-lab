@@ -59,3 +59,26 @@ for pak in sorted(ROOT.rglob('*.pak')):
 (DEST/'manifest.json').write_text(json.dumps({'source':'Archived 4Leaf original client installer, extracted from data1.cab / *.pak','original_source':'https://archive.org/details/4leaf','resources':manifest},ensure_ascii=False,indent=2))
 print('TOTAL_AUTHENTIC_ASSETS',asset_count)
 print('GROUPS',{x:sum(1 for m in manifest if m['image'].startswith(x+'/')) for x in sorted(KEEP_ALL|OTHER)})
+
+# Authentic movement paths: <number>.mve files consist of a 12-byte heading
+# followed by 24-byte coordinate/direction records. The source map graph
+# coordinates, not an invented spiral, control chessmen positions.
+import struct
+original_routes={}
+original_meta={}
+path_file=ROOT/'Dice'/'DMP.pak'
+if path_file.exists():
+ for name,data in extract_pak(path_file):
+  if not name.lower().endswith('.mve') or len(data)<12:continue
+  count=struct.unpack_from('<I',data,8)[0]
+  variants=struct.unpack_from('<I',data,0)[0]
+  if count>3000 or len(data)<12+count*24:continue
+  records=[]
+  for i in range(count):
+   direction,x,y,warp,arg,target=struct.unpack_from('<6I',data,12+24*i)
+   records.append([int(x),int(y),int(direction),int(warp),int(arg),int(target)])
+  original_routes[name[:4]]=records
+  original_meta[name[:4]]={'length':count,'variants':variants,'size':len(data)}
+(DEST/'maps.js').write_text('window.ORIGINAL_LEAF_MAPS='+json.dumps(original_routes,separators=(',',':'))+';\n')
+(DEST/'maps.json').write_text(json.dumps({'routes':original_routes,'info':original_meta},indent=2))
+print('AUTHENTIC_DICE_MAP_MOVEMENT_ROUTES',len(original_routes),original_meta)
