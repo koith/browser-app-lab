@@ -30,6 +30,10 @@ jobs:
                 photos=[x for x in p.images if any('tistory' in str(z) or 'daumcdn' in str(z) or 'kakaocdn' in str(z) for z in x.values())]
                 print('ASSET_PAGE',id,base,'html_bytes',len(html_text),'images',len(p.images),'cdn_images',len(photos))
                 for i,img in enumerate(photos[:90]):print('IMAGE',id,i,repr(img)[:950])
+                if id in (1587,1588,1599,1598):
+                  idx=html_text.find('-'+{1587:'맵',1588:'체스맨',1599:'발판',1598:'아이템 카드'}[id]);print('CONTENT_REGION',id,html_text[max(0,idx-1100):idx+5500].replace('\\n',' ')[:6400]);
+                  for hit in re.findall(r'(?:https?://[^\"\'<>\\s]+|href=[\"\'][^\"\']+)',html_text):
+                    if any(key in hit for key in ['4leaf.pe','4leafmemorial','media.daumcdn','tistory/']):print('LINK',id,hit[:400])
                 break
               except Exception as ex:print('FETCH_ERROR',id,base,str(ex)[:190])
           PY
