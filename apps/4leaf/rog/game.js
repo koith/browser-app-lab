@@ -385,8 +385,8 @@ async function useAbility(){
  default:p.ability=50;appendMove('이 능력은 아직 세부 효과 확인 중입니다. 절반의 게이지를 반환했습니다.');drawGame();return;
  }
  appendMove(p.name+' · '+stats.name+' 『'+stats.ability+'』 발동');
- if([30,33,35,37,24].includes(code))await resolveTile(p);
- drawGame();
+ if([30,33,35,37,24].includes(code)){p.ability=0;await resolveTile(p)}
+ drawGame();persist();
 }
 function combat(attacker,defender,keeper=false){
  return new Promise(resolve=>{
