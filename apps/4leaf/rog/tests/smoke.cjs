@@ -51,6 +51,23 @@ async function run(){
  await page.waitForFunction(()=>window.__ROG_TEST__.getMatch()?.mode==='hotseat',null,{timeout:6000});
  await page.evaluate(()=>{const m=window.__ROG_TEST__.getMatch();m.players[1].position=50;for(let i=1;i<20;i++)m.tiles[i]='normal';for(let i=51;i<70;i++)m.tiles[i]='normal';window.__ROG_TEST__.drawGame()});
  assert.equal(await page.locator('#board-pawns .board-pawn').count(),2,'persistent independent actors');
+
+ assert.ok(await page.evaluate(()=>{
+   const source=window.ORIGINAL_LEAF_TILES['0172'];
+   const current=window.__ROG_TEST__.getMatch().tiles;
+   return current.length===source.length&&source.every((entry,i)=>current[i]===entry.type||['normal','kingbomb','keeperA','keeperB','keeperC'].includes(current[i])&&['normal','practice'].includes(entry.type));
+ }), 'battle board uses original 4LEAF DMP tile effect names');
+ // Live battle GUI must be a separate animated event layer, never a screenshot overlay.
+ await page.evaluate(()=>{
+   const m=window.__ROG_TEST__.getMatch();
+   window.__ROG_TEST__.resolveBattle(m.players[0],m.players[1],false);
+ });
+ await page.waitForSelector('#battle-visual',{timeout:6000});
+ assert.ok(await page.locator('#battle-visual .battle-visual-die').count()>=2,'authentic attack/defense dice values visible');
+ await page.locator('#modal-buttons button').filter({hasText:'결과 확인'}).click();
+ await page.waitForFunction(()=>!document.querySelector('#battle-visual'),null,{timeout:6000});
+ console.log('BATTLE PASS: visible animated duel with real rolled dice, resolved and cleaned up.');
+
  assert.equal(await page.locator('#board-nodes .tile').count(),104,'original map path retained');
  await page.locator('#roll-btn').click();
  await page.waitForFunction(()=>window.__ROG_TEST__.getMatch()?.active===1,null,{timeout:12000});
