@@ -1,0 +1,17 @@
+
+.net-panel{padding:9px;margin-top:10px;border:2px ridge #99b5ea;background:#1b2f75;color:#e1ecff;font-size:11px;line-height:1.5}
+.net-panel h4{font-size:13px;color:#e5f6ff;margin:0 0 5px}
+.net-panel p{font-size:10px;line-height:1.5;color:#c6d8fb;margin:4px 0 9px}
+.net-panel label{display:block;line-height:1.5;margin-top:5px;color:#dce7ff}
+.net-panel textarea{display:block;color:#263560;background:#e6eeff;border:2px inset #95abd8;width:100%;margin:3px 0 1px;min-width:0;height:38px;max-height:65px;resize:vertical;padding:5px;font:9px monospace;word-break:break-all}
+.net-panel textarea:focus{outline:2px solid #bde1ff}
+.net-panel button{background:linear-gradient(#9eb9ed,#425daa);color:#e9f4ff;border:2px outset #a9c5ef;padding:5px 8px;font-size:10px}
+.net-panel button:active{border-style:inset}
+.net-panel .net-actions{display:flex;gap:4px}
+.net-panel .net-actions button{flex:1}
+.net-panel .net-copy{margin-bottom:3px;background:#344887}
+.net-panel .net-status{background:#233969;border:1px solid #90a8d4;padding:7px;color:#f4e7b5;line-height:1.5}
+.net-panel .net-status.connected{background:#235d60;color:#e0fffc;border-color:#7bcebf}
+#lobby .lobby-config{max-height:100%;overflow-y:auto}
+#lobby .lobby-config #resume-game,#lobby .lobby-config #start-game{position:relative;z-index:1}
+@media(max-width:630px){.net-panel{padding:6px}.net-panel .net-actions button{font-size:9px;padding:4px}.net-panel textarea{height:34px}}
