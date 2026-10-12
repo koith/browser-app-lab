@@ -32,25 +32,25 @@ if(CHR_SOURCE.length>50){
 const CARD_MAP=Object.fromEntries(BASE_CARDS.map(c=>[c.id,c]));
 const DEFAULT_PROFILE={name:'Guest',gp:3000,wins:0,owned:CHR_SOURCE.length>50?STARTERS.slice():['soldier','joan','rashid','narcia'],team:CHR_SOURCE.length>50?['c_0078','c_0096','c_0040']:['joan','soldier','narcia']};
 const ITEMS=[
-{id:'valkyrie',name:'발키리의 창',icon:'⚔',hint:'두 턴 공격 주사위 1개 추가',sourceId:'0008'},
-{id:'ring',name:'지혜의 반지',icon:'◉',hint:'두 턴 지원 지력 +2',sourceId:'0009'},
+{id:'valkyrie',name:'발키리의 창',icon:'⚔',hint:'전투 시 상대 주사위 수의 절반만큼 주사위 추가',sourceId:'0008',battle:true},
+{id:'ring',name:'지혜의 반지',icon:'◉',hint:'해당 게임 종료까지 파티 능력 +1',sourceId:'0009'},
 {id:'bomb',name:'자폭',icon:'☠',hint:'대전 중 패배를 무효화하고 서로 START 복귀',sourceId:'0010',battle:true},
 {id:'wing',name:'날개',icon:'✧',hint:'선택한 1~12칸 전진',sourceId:'0011'},
 {id:'step',name:'4칸 전후진',icon:'↔',hint:'선택한 1~4칸 전·후진',sourceId:'0012'},
 {id:'flipper',name:'오리발',icon:'♧',hint:'대전 중 패배를 무효화',sourceId:'0013',battle:true},
 {id:'charge',name:'어빌리티 50',icon:'✦',hint:'능력 게이지 +50%',sourceId:'0014'},
 {id:'charge25',name:'어빌리티 25',icon:'✦',hint:'능력 게이지 +25%',sourceId:'0015'},
-{id:'armageddon',name:'아마겟돈',icon:'✹',hint:'2턴 동안 방어 보정',sourceId:'0016'},
+{id:'armageddon',name:'아마겟돈',icon:'✹',hint:'모든 체스맨 공격·방어·이동 능력 일시 반감',sourceId:'0016'},
 {id:'dove',name:'비둘기',icon:'✧',hint:'5턴 다른 유저와 전투 면역',sourceId:'0017'},
 {id:'change',name:'체인지',icon:'⟳',hint:'대전 중 공격·방어 결과 교환',sourceId:'0026',battle:true},
-{id:'oddcurse',name:'홀수 저주',icon:'Ⅰ',hint:'다음 타인의 홀수 눈 1 처리',sourceId:'0028'},
-{id:'evencurse',name:'짝수 저주',icon:'Ⅱ',hint:'다음 타인의 짝수 눈 1 처리',sourceId:'0029'},
+{id:'oddcurse',name:'홀수 저주',icon:'Ⅰ',hint:'전투 중 상대 값이 홀수면 마지막 주사위 제거',sourceId:'0028',battle:true},
+{id:'evencurse',name:'짝수 저주',icon:'Ⅱ',hint:'전투 중 상대 값이 짝수면 마지막 주사위 제거',sourceId:'0029',battle:true},
 {id:'curse',name:'저주',icon:'♠',hint:'원하는 앞쪽 발판을 저주로 변경',sourceId:'0030'},
 {id:'kingbomb',name:'왕폭탄',icon:'✹',hint:'앞쪽 발판에 폭탄 설치',sourceId:'0031'},
-{id:'odincurse',name:'오딘의 저주',icon:'☠',hint:'앞쪽 발판에 데드 오어 얼라이브 저주',sourceId:'0032'},
-{id:'keeperA',name:'키퍼 A',icon:'♙',hint:'앞쪽 발판에 약한 키퍼 소환',sourceId:'0033'},
+{id:'odincurse',name:'오딘의 저주',icon:'☠',hint:'미발매 원작 기획 카드 · 경기 획득 불가',sourceId:'0032',disabled:true},
+{id:'keeperA',name:'키퍼 A',icon:'♙',hint:'앞쪽 발판에 강력한 키퍼 소환',sourceId:'0033'},
 {id:'keeperB',name:'키퍼 B',icon:'♜',hint:'앞쪽 발판에 중간 키퍼 소환',sourceId:'0034'},
-{id:'keeperC',name:'키퍼 C',icon:'♛',hint:'앞쪽 발판에 강한 키퍼 소환',sourceId:'0035'},
+{id:'keeperC',name:'키퍼 C',icon:'♛',hint:'앞쪽 발판에 약한 키퍼 소환',sourceId:'0035'},
 {id:'drain25',name:'어빌리티 25 감소',icon:'−',hint:'상대 어빌리티 -25%',sourceId:'0038'},
 {id:'drain50',name:'어빌리티 50 감소',icon:'−',hint:'상대 어빌리티 -50%',sourceId:'0039'},
 {id:'shoe',name:'여신의 신발',icon:'♘',hint:'3턴 이동 주사위 1개 추가',sourceId:'0040'}
@@ -190,7 +190,7 @@ function pathCoords(){let pts=[],left=0,right=13,top=0,bottom=7;while(left<=righ
 let PATH=pathCoords();
 function chooseSourcePath(map){const records=SOURCE_ROUTES[SOURCE_IDS[map]];if(!records||records.length<8){PATH=pathCoords();return}const xs=records.map(p=>p[0]),ys=records.map(p=>p[1]),xmin=Math.min(...xs),xmax=Math.max(...xs),ymin=Math.min(...ys),ymax=Math.max(...ys);PATH=records.map(p=>({x:8+(p[0]-xmin)*84/Math.max(1,xmax-xmin),y:8+(p[1]-ymin)*84/Math.max(1,ymax-ymin)}))}
 function installAuthenticMaps(){const list=$('map-select'),entries=Object.entries(SOURCE_INFO).filter(([id])=>SOURCE_ROUTES[id]&&SOURCE_ROUTES[id].length>9);if(!entries.length)return;list.replaceChildren();const rank=['4LEAF','주사위','워프 게이트','PK','악마의 달팽이','한반도','For the Lucky'];entries.sort((a,b)=>{let i=rank.indexOf(a[1].title),j=rank.indexOf(b[1].title);return (i<0?99:i)-(j<0?99:j)});for(const [id,info] of entries){const title=info.title,length=SOURCE_ROUTES[id].length;const old=MAPS[title]||{};const generate=(step,offset)=>Array.from({length:Math.floor(length/step)},(_,i)=>offset+i*step).filter(i=>i>0&&i<length-1);MAPS[title]={length,non:['악마의 달팽이','한반도'].includes(title),warp:old.warp||generate(30,8),keepers:old.keepers||generate(17,13),jail:old.jail||generate(44,25),chests:old.chests||generate(19,6),boost:old.boost||generate(23,17),attribute:old.attribute||generate(29,20),joker:old.joker||generate(41,36)};const opt=document.createElement('option');opt.value=title;opt.textContent=title+' · '+length+'칸 [원본 '+id+(SOURCE_TILES[id]?' · 발판 복원':' · 경로 복원')+']';list.append(opt)}list.value='4LEAF'}
-function freshItems(){return Array.from({length:3},()=>ITEMS[rand(ITEMS.length)].id)}
+function freshItems(){return Array.from({length:3},()=>{const pool=ITEMS.filter(item=>!item.disabled);return pool[rand(pool.length)].id})}
 function newPlayer(id,bot,name,team){return {id,bot,name,team,position:0,jail:0,ability:0,items:freshItems(),effects:{shoe:0,dove:0,clover:0,spade:0,ring:0,armageddon:0,valkyrie:0,oddcurse:0,evencurse:0,block:0,destroy:0,keeper:0},usedItem:false,color:COLORS[id],pawn:PAWNS[id]}}
 function startGame(){const map=$('map-select').value,limit=Number($('point-limit').value),stats=teamStats(profile.team);chooseSourcePath(map);if(!profile.team[0])return modal('파티 구성','공격 체스맨을 선택하세요.',[{label:'확인',primary:true}]);if(stats.point>limit)return modal('소환 POINT 초과','현재 파티는 '+stats.point+'POINT이며 제한은 '+limit+'POINT입니다.',[{label:'확인',primary:true}]);const selectedMode=$('game-mode').value,hotseat=selectedMode!=='ai',bots=selectedMode==='network'?1:Number($('bot-count').value);
  if(selectedMode==='network'&&(!window.__LEAF_NET__?.connected||window.__LEAF_NET__.role!=='host')){
@@ -384,13 +384,12 @@ async function applyItem(index,steps=null){
  case 'shoe':p.effects.shoe=3;break;
  case 'dove':p.effects.dove=5;break;
  case 'valkyrie':p.effects.valkyrie=2;break;
- case 'ring':p.effects.ring=2;break;
+ case 'ring':p.effects.ring=(p.effects.ring||0)+1;break;
  case 'armageddon':p.effects.armageddon=2;break;
  case 'charge':p.ability=Math.min(100,p.ability+50);break;
  case 'charge25':p.ability=Math.min(100,p.ability+25);break;
  case 'drain25':case 'drain50':{
-   const other=match.players.filter(q=>q!==p).sort((a,b)=>b.ability-a.ability)[0];
-   if(other)other.ability=Math.max(0,other.ability-(itemId==='drain25'?25:50));break;
+   match.players.filter(q=>q!==p).forEach(other=>other.ability=Math.max(0,other.ability-(itemId==='drain25'?25:50)));break;
  }
  case 'oddcurse':case 'evencurse':match.players.filter(q=>q!==p).forEach(q=>q.effects[itemId]=1);break;
  case 'curse':match.tiles[Math.min(match.tiles.length-2,p.position+6)]='curse';break;
@@ -542,14 +541,12 @@ function moveValues(p){
  const sides=stats.move===2?4:6,n=Math.min(4,(stats.move===2?2:1)+extra);
  for(let i=0;i<n;i++){
    let v=d(sides);
-   if(p.effects.clover)v=Math.max(v,sides===4?3:4);
-   if(p.effects.spade)v=Math.min(v,sides===4?2:3);
+   if(p.effects.clover)v=(sides===4?3:4)+rand(sides===4?2:3);
+   if(p.effects.spade)v=1+rand(sides===4?2:3);
    values.push(v);
  }
  
- if(p.effects.oddcurse){for(let i=0;i<values.length;i++)if(values[i]%2===1)values[i]=1;p.effects.oddcurse=0}
- if(p.effects.evencurse){for(let i=0;i<values.length;i++)if(values[i]%2===0)values[i]=2;p.effects.evencurse=0}
- p.effects.clover=0;p.effects.spade=0;
+  p.effects.clover=0;p.effects.spade=0;
  return values;
 }
 function showDice(values){$('die1').textContent=['⚀','⚁','⚂','⚃','⚄','⚅'][Math.min(5,values[0]-1)];$('die2').textContent=values.length>1?['⚀','⚁','⚂','⚃','⚄','⚅'][Math.min(5,values[1]-1)]:'·'}
@@ -583,7 +580,7 @@ async function takeTurn(){
  if(p.effects.dove>0)p.effects.dove--;
  if(p.effects.armageddon>0)p.effects.armageddon--;
  if(p.effects.valkyrie>0)p.effects.valkyrie--;
- if(p.effects.ring>0)p.effects.ring--;
+ 
  if(p.effects.block>0)p.effects.block--;
  if(p.effects.destroy>0)p.effects.destroy--;
  if(p.effects.keeper>0)p.effects.keeper--;
