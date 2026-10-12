@@ -38,4 +38,4 @@ async function run(){
  await browser.close();
  console.log('4LEAF SMOKE PASS. Dynamic board 70/76 cells; turn movement; shop; desktop/mobile; no JS errors.');
 }
-run().catch(e=>{console.error(e);process.exitCode=1});
+run().catch(e=>{console.error('4LEAF SMOKE FAILED:',e);process.exit(1)});
