@@ -10,6 +10,7 @@ async function run(){
  assert.equal(await page.title(),'4LEAF Browser · 주사위의 잔영');
  await page.screenshot({path:'rog-desktop.png'});
  await page.locator('[data-route="lobby"]').first().click();
+ await page.locator('#lobby-create').click();
  await page.locator('#bot-count').selectOption('1');
  await page.locator('#start-game').click();
  await page.waitForSelector('#game:not(.hidden)');
@@ -31,6 +32,7 @@ async function run(){
  await page.locator('#shop-prev').click();
  await page.screenshot({path:'rog-shop.png'});
  await page.locator('[data-route="lobby"]').first().click();
+ await page.locator('#lobby-create').click();
  await page.locator('#map-select').selectOption('악마의 달팽이');
  await page.locator('#start-game').click();
  await page.waitForSelector('#game:not(.hidden)');
@@ -41,6 +43,7 @@ async function run(){
  // Real human-vs-human turn-taking, independent cards, actor motion and save/resume.
  await page.setViewportSize({width:1280,height:860});
  await page.locator('[data-route="lobby"]').first().click();
+ await page.locator('#lobby-create').click();
  await page.locator('#game-mode').selectOption('hotseat');
  await page.locator('#bot-count').selectOption('1');
  await page.locator('#map-select').selectOption('4LEAF');
@@ -58,6 +61,7 @@ async function run(){
  await page.reload();
  await page.waitForFunction(()=>!!window.__ROG_TEST__,null,{timeout:8000});
  await page.locator('[data-route="lobby"]').first().click();
+ await page.locator('#lobby-create').click();
  assert.ok(await page.locator('#resume-game').isVisible(),'saved unfinished match available');
  await page.locator('#resume-game').click();
  assert.equal(await page.locator('#game').isVisible(),true,'resume stored match scene');
