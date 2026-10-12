@@ -22,7 +22,7 @@
  function attach(ch){
    channel=ch;
    channel.onopen=()=>{
-     net.connected=true;notice(net.role==='host'?'연결 완료! 아래 게임 시작으로 2인 대전을 열 수 있습니다.':'연결 완료! 호스트가 경기를 시작하면 자동으로 입장합니다.',true);
+     net.connected=true;if(net.role==='host'&&bridge())bridge().onState=m=>send({type:'state',match:m});notice(net.role==='host'?'연결 완료! 아래 게임 시작으로 2인 대전을 열 수 있습니다.':'연결 완료! 호스트가 경기를 시작하면 자동으로 입장합니다.',true);
      send({type:'hello',name:bridge()?.getName?.()||'Guest'});
      if(net.role==='host'&&bridge()?.getMatch?.()?.mode==='network')send({type:'state',match:bridge().getMatch()});
    };
