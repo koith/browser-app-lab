@@ -1,0 +1,38 @@
+const { chromium }=require('playwright');
+const path=require('path');
+const assert=require('node:assert/strict');
+async function run(){
+ const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
+ const page=await browser.newPage({viewport:{width:1440,height:900},deviceScaleFactor:1});
+ const errors=[];page.on('pageerror',e=>errors.push(String(e)));
+ const url='file://'+path.resolve(__dirname,'../index.html');
+ await page.goto(url);await page.waitForFunction(()=>!!window.__ROG_TEST__);
+ assert.equal(await page.title(),'4LEAF Browser · 주사위의 잔영');
+ await page.screenshot({path:'rog-desktop.png'});
+ await page.locator('[data-route="lobby"]').first().click();
+ await page.locator('#bot-count').selectOption('1');
+ await page.locator('#start-game').click();
+ await page.waitForSelector('#game:not(.hidden)');
+ const nodes=await page.locator('#board-nodes .tile').count();assert.equal(nodes,70,'4LEAF tiles');
+ const first=await page.evaluate(()=>window.__ROG_TEST__.getMatch().players[0].position);
+ await page.locator('#roll-btn').click();
+ await page.waitForFunction(()=>window.__ROG_TEST__.getMatch().players[0].position>0,{timeout:10000});
+ await page.screenshot({path:'rog-game.png'});
+ assert.ok((await page.evaluate(()=>window.__ROG_TEST__.getMatch().players[0].position))>first);
+ await page.locator('[data-route="shop"]').first().click();
+ await page.waitForSelector('#shop:not(.hidden)');
+ assert.ok((await page.locator('#shop-grid .shop-card').count())>=8);
+ await page.screenshot({path:'rog-shop.png'});
+ await page.locator('[data-route="lobby"]').first().click();
+ await page.locator('#map-select').selectOption('악마의 달팽이');
+ await page.locator('#start-game').click();
+ await page.waitForSelector('#game:not(.hidden)');
+ assert.equal(await page.locator('#board-nodes .tile').count(),76);
+ await page.setViewportSize({width:390,height:844});
+ await page.screenshot({path:'rog-mobile.png'});
+ assert.ok(await page.locator('#roll-btn').isVisible());
+ assert.deepEqual(errors,[],'browser runtime errors');
+ await browser.close();
+ console.log('4LEAF SMOKE PASS. Dynamic board 70/76 cells; turn movement; shop; desktop/mobile; no JS errors.');
+}
+run().catch(e=>{console.error(e);process.exitCode=1});
