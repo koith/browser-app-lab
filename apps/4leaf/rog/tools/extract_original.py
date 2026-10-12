@@ -82,3 +82,20 @@ if path_file.exists():
 (DEST/'maps.js').write_text('window.ORIGINAL_LEAF_MAPS='+json.dumps(original_routes,separators=(',',':'))+';\n')
 (DEST/'maps.json').write_text(json.dumps({'routes':original_routes,'info':original_meta},indent=2))
 print('AUTHENTIC_DICE_MAP_MOVEMENT_ROUTES',len(original_routes),original_meta)
+
+# The genuine MapList.d1 is exactly 25 fixed-length (1048-byte) records
+# plus a 4-byte trailer. Every record includes a 4-byte map ID, mode and
+# legacy CP949 title. Preserve canonical title↔map graph associations.
+import struct
+map_list=ROOT/'MapList.d1'
+actual_map_names={}
+if map_list.exists():
+ raw=map_list.read_bytes()
+ for offset in range(0,len(raw)-1047,1048):
+  map_id,mode=struct.unpack_from('<II',raw,offset)
+  title=raw[offset+8:offset+128].split(b'\0')[0].decode('cp949','replace').strip()
+  if title and str(map_id).zfill(4) in original_routes:
+   actual_map_names[str(map_id).zfill(4)]={'title':title,'mode':mode}
+ with (DEST/'maps.js').open('a') as f:
+  f.write('window.ORIGINAL_LEAF_MAP_INFO='+json.dumps(actual_map_names,ensure_ascii=False,separators=(',',':'))+';\n')
+ print('AUTHENTIC_MAP_TITLES',len(actual_map_names),actual_map_names)
