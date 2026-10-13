@@ -1,0 +1,123 @@
+
+/* REAL SOURCE MAP: WorldMapBack and frame-accurate original four-frame
+   WorldMap fragments. No fixed full-screen historical screenshots. */
+#app:not(.app-classic-dice) .workspace{min-height:0}
+#app:not(.app-classic-dice) .sidebar{display:none}
+#app:not(.app-classic-dice) main#main{border-right:0;min-width:0;width:100%}
+#app:not(.app-classic-dice) .messenger{height:148px;min-height:148px;flex:none;border-top:3px ridge #8ea9d6}
+#app:not(.app-classic-dice) .messenger .chat-log{background:#e9f0f9;color:#1e315e;font-family:Gulim,'굴림',sans-serif}
+#app:not(.app-classic-dice) .messenger .panel-header{background:linear-gradient(#5a6eaf,#283d89);color:#e4efff}
+#app:not(.app-classic-dice) .messenger #chat-form{background:linear-gradient(#465ba0,#2c3d78)}
+#app:not(.app-classic-dice) .messenger #chat-form input{border-color:#92a7d3;background:#fafcff;color:#273b79}
+#app:not(.app-classic-dice) .messenger .social-system-line{font-size:11px;color:#5a6e9d}
+#app:not(.app-classic-dice) .messenger .social-chat-message{display:flex;gap:7px;align-items:baseline;line-height:1.5}
+#app:not(.app-classic-dice) .messenger .social-chat-message time{color:#7287a8;font-size:10px;flex:none}
+#app:not(.app-classic-dice) .messenger .social-chat-message b{font-size:11px;color:#466298;flex:none}
+#app:not(.app-classic-dice) .messenger .social-chat-message span{min-width:0;overflow-wrap:anywhere}
+#sky{background:radial-gradient(ellipse at center,#8396c7 0%,#2f436f 80%)!important}
+#sky .leaf-world-viewport{position:absolute;inset:0;overflow:hidden;touch-action:none;user-select:none;background:radial-gradient(ellipse,#9d95a7,#4a557d 72%,#24325a)}
+#sky .leaf-world-stage{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform;backface-visibility:hidden;filter:drop-shadow(2px 9px 8px #16284f9c)}
+#sky .world-backdrop{position:absolute;inset:0;width:796px;height:528px;pointer-events:none;image-rendering:auto}
+#sky .world-sprite{image-rendering:auto;filter:drop-shadow(0 0 2px #ffffff00);transition:filter .15s}
+#sky .world-location{position:absolute;z-index:5;padding:0;margin:0;background:transparent!important;border:0!important;box-shadow:none!important;outline:none;cursor:pointer;-webkit-tap-highlight-color:transparent}
+#sky .world-location::after{content:'';display:block;position:absolute;inset:9%;border:2px dashed #fbf0b900;border-radius:43%;pointer-events:none;transition:border-color .15s,box-shadow .15s}
+#sky .world-location:is(:hover,:focus-visible)::after{border-color:#fff5aab3;box-shadow:0 0 13px 5px #ffecad78,inset 0 0 15px 4px #fff2a72d}
+#sky .world-location-tip{position:absolute;display:none;bottom:calc(100% + 5px);left:50%;transform:translateX(-50%);white-space:nowrap;background:#26386cdd;border:2px ridge #d6d9e4;color:#fff4c9;font-size:14px;padding:6px 12px;text-shadow:1px 1px #111945;z-index:7;pointer-events:none;filter:drop-shadow(0 3px 4px #18223c)}
+#sky .world-location:is(:hover,:focus-visible) .world-location-tip{display:block}
+#sky .world-map-controls{position:absolute;z-index:11;bottom:12px;right:12px;display:flex;align-items:center;gap:3px;background:linear-gradient(#768cbdde,#293b77dc);border:2px ridge #a2b6d7;border-radius:5px;padding:4px;box-shadow:0 2px 7px #13274b9c}
+#sky .world-map-controls button{background:linear-gradient(#839bce,#385389);border:1px ridge #c6d7ef;color:#f6fbff;min-width:29px;height:26px;cursor:pointer;font-size:15px}
+#sky .world-map-controls span{font-size:10px;color:#dfeaff;width:42px;text-align:center}
+#sky .world-map-caption{position:absolute;pointer-events:none;z-index:9;top:8px;left:10px;color:#e9f4ff;text-shadow:0 1px 4px #233c63,1px 1px #15284a;font:bold 11px Georgia,Gulim;letter-spacing:1px;background:#253f7259;padding:4px 8px;border-radius:3px}
+#sky .world-profile-modal{position:absolute;z-index:15;left:50%;top:50%;width:min(370px,90vw);transform:translate(-50%,-50%);border:3px ridge #b4c4ee;background:linear-gradient(#8b9bc9,#2e427d);color:#fff6dc;box-shadow:0 9px 29px #0a1c3b}
+#sky .world-profile-heading{display:flex;align-items:center;justify-content:space-between;background:#29387a;border-bottom:2px ridge #9dbee7;padding:9px 12px;font-weight:bold;letter-spacing:2px}
+#sky .world-profile-heading button{border:1px solid #9eafdb;background:#5268ab;color:#e9f3ff}
+#sky .world-profile-body{display:flex;align-items:center;gap:16px;padding:16px}
+#sky .world-profile-body img{height:125px;object-fit:contain;image-rendering:pixelated}
+#sky .world-profile-body b{display:block;font-size:19px}
+#sky .world-profile-body small{display:block;margin-top:6px;color:#e5f2ff}
+#sky .world-profile-body button{padding:7px 10px;background:#657cbb;border:2px ridge #b3c0e9;color:#f7f8ff}
+#rooms.leaf-social-scene{display:flex;flex-direction:column;position:relative;background:#243560!important}
+#rooms.leaf-social-scene.hidden{display:none!important}
+#rooms .social-header{flex:none;min-height:38px;height:38px;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 10px;background:linear-gradient(#687cac,#273b85);border-bottom:2px ridge #93a9d9;color:#f2f4fc}
+#rooms .social-header strong{font-size:14px;letter-spacing:.4px}
+#rooms .social-header small{font-size:10px;color:#bfd3ee;display:block;margin-top:2px}
+#rooms .social-header-tools{display:flex;align-items:center;gap:8px;flex:none}
+#rooms .social-header-tools>span{color:#baf9cd;font-size:11px;white-space:nowrap}
+#rooms .social-header-tools button{background:linear-gradient(#9babd1,#4762a8);color:#fff4dd;border:2px ridge #adbeec;border-radius:2px;padding:4px 9px;font-size:11px;white-space:nowrap}
+#rooms .social-layout{flex:1;min-height:0;display:flex;background:linear-gradient(#8796ae,#3b4e8c)}
+#rooms .social-stage{position:relative;flex:1;min-width:0;min-height:0;overflow:hidden;background:linear-gradient(#788cab,#465b8c)}
+#rooms .social-image-frame{position:absolute;width:794px;height:528px;top:0;left:0;transform-origin:0 0;will-change:transform;box-shadow:0 2px 10px #0a174e55}
+#rooms .social-town-map{background-repeat:no-repeat;background-position:center top;background-size:794px 404px;background-color:#3d5c94}
+#rooms .social-town-map::after{content:'하이아칸 채팅 지역을 선택하세요.';position:absolute;left:0;right:0;top:406px;bottom:0;display:flex;align-items:center;justify-content:center;font:bold 18px Gulim;color:#e8f0ff;letter-spacing:2px;background:linear-gradient(#566fae,#273c83);border-top:5px ridge #92b0db}
+#rooms .social-district-hotspot{position:absolute;display:block;z-index:3;border:2px dashed transparent;background:transparent;box-shadow:none;border-radius:4px;cursor:pointer;color:#fbf4b8}
+#rooms .social-district-hotspot:is(:hover,:focus-visible){outline:none;border-color:#fff0a2d6;box-shadow:0 0 14px #fbf0bfa6,inset 0 0 17px #fff3b335}
+#rooms .social-district-hotspot>span{position:absolute;top:0;right:0;font-size:12px;background:#314979de;color:#fff0ac;padding:3px}
+#rooms .social-user-panel{width:167px;flex:none;background:linear-gradient(#849ed3,#607db9);border-left:3px ridge #c6d6f4;display:flex;flex-direction:column;overflow:hidden;color:#e7ecff}
+#rooms .social-user-panel h4{font-size:12px;text-align:center;background:linear-gradient(#8cabd4,#3854a0);padding:9px 0;margin:0;border-bottom:2px ridge #c0d0ef;letter-spacing:1px}
+#rooms #social-peer-list{flex:1;overflow:auto;padding:4px}
+#rooms .social-user-row{display:flex;gap:5px;align-items:center;padding:6px 3px;border-bottom:1px solid #a6b5dc55;min-width:0;font-size:11px}
+#rooms .social-user-row b{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#rooms .social-user-row small{font-size:9px;color:#d0d9f3;margin-left:auto;white-space:nowrap}
+#rooms .social-status-led{display:inline-block;background:#9dffc0;box-shadow:0 0 4px #5deca2;border-radius:50%;width:6px;height:6px;flex:none}
+#rooms .social-user-panel>p{font-size:10px;line-height:1.6;padding:8px;border-top:1px solid #a8bee2;color:#e0e8fa;margin:0}
+#rooms .social-room-directory{background-size:794px 404px;background-repeat:no-repeat;background-color:#4c64a1;position:relative}
+#rooms .social-directory{position:absolute;inset:13px 48px 18px;background:#29386ce8;border:5px ridge #a6c4e7;color:#e6efff;display:flex;flex-direction:column;padding:10px;box-shadow:0 5px 20px #0b1b4b}
+#rooms .social-directory-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:2px ridge #778fd1;padding-bottom:10px;margin-bottom:6px;font-size:16px;color:#fff2c9}
+#rooms .social-directory-heading button{background:linear-gradient(#9aabd5,#4d67a6);border:2px ridge #c3d5f8;color:#f9f6e9;padding:8px 11px}
+#rooms #social-directory-list{flex:1;min-height:0;overflow:auto}
+#rooms .social-directory-row{display:flex;gap:9px;align-items:center;text-align:left;width:100%;background:linear-gradient(#415a9c,#2a3a79);border:1px solid #8a9cd1;border-radius:0;color:#eff3ff;padding:11px 9px;margin-bottom:4px;cursor:pointer}
+#rooms .social-directory-row:is(:hover,:focus-visible){background:#627bb6;border-color:#d9e9fd}
+#rooms .social-directory-row b{flex:1;font-size:13px}
+#rooms .social-room-number{color:#f4deb3;font:bold 15px Georgia}
+#rooms .social-room-users{font-size:11px;color:#afffcb;white-space:nowrap}
+#rooms .social-directory>p{font-size:10px;color:#bfcbe8}
+#rooms .social-interior{background-size:794px 528px;background-repeat:no-repeat;background-position:center center;background-color:#243566;cursor:crosshair}
+#rooms .social-room-title{position:absolute;top:6px;left:50%;transform:translateX(-50%);border:2px ridge #b9c9df;border-radius:6px;background:#293b79c9;color:#ffecd0;padding:5px 16px;font-weight:bold;font-size:13px;text-align:center;pointer-events:none;z-index:7;white-space:nowrap}
+#rooms .social-avatar-layer{position:absolute;inset:0;z-index:4}
+#rooms .social-avatar{position:absolute;transform:translate(-50%,-88%);width:65px;height:122px;display:flex;flex-direction:column;align-items:center;justify-content:end;border:0;background:none;cursor:pointer;padding:0;filter:drop-shadow(1px 3px 2px #241a37a9);transition:left .3s linear,top .3s linear}
+#rooms .social-avatar img{width:61px;height:113px;object-fit:contain;object-position:center bottom;image-rendering:pixelated;pointer-events:none}
+#rooms .social-avatar.self img{filter:drop-shadow(0 0 5px #9affde)}
+#rooms .social-avatar:is(:hover,:focus-visible) img{filter:drop-shadow(0 0 6px #fff4b0)}
+#rooms .social-avatar-name{position:absolute;top:100%;left:50%;transform:translateX(-50%);background:#253d78ce;border:1px solid #91a8db;border-radius:3px;color:#f7f9ff;font-size:11px;padding:3px 6px;white-space:nowrap;text-shadow:1px 1px #203360}
+#rooms .social-avatar.self .social-avatar-name{border-color:#f5efb6;color:#fff6c3}
+#rooms .social-speech{position:absolute;bottom:105%;left:50%;transform:translateX(-50%);min-width:70px;max-width:180px;width:max-content;word-break:break-word;white-space:normal;background:#fbf4e4;border:2px solid #5b607f;border-radius:8px;color:#2e324f;box-shadow:1px 3px 4px #16203f8c;padding:7px 10px;font-size:12px;line-height:1.4;text-align:center;pointer-events:none;z-index:20;animation:social-bubble-in .13s ease-out}
+#rooms .social-speech::after{content:'';position:absolute;top:100%;left:calc(50% - 6px);border:7px solid transparent;border-top-color:#fbf4e4}
+@keyframes social-bubble-in{from{opacity:0;transform:translate(-50%,5px)}to{opacity:1;transform:translate(-50%,0)}}
+#rooms .social-interior-controls{position:absolute;z-index:9;bottom:12px;right:11px;display:flex;gap:6px}
+#rooms .social-interior-controls button{border:2px ridge #c0d4ea;background:linear-gradient(#849ac2,#344e94);color:#fff9e8;padding:6px 10px}
+body>.social-modal{position:fixed;inset:0;z-index:100;background:#090e3da8;display:flex;align-items:center;justify-content:center;padding:14px}
+body>.social-modal .social-modal-panel{width:min(500px,98vw);max-height:90vh;overflow:auto;background:linear-gradient(#778cc6,#2f427f);border:4px ridge #b5caee;box-shadow:0 12px 36px #091644}
+body>.social-modal .social-modal-title{padding:11px;display:flex;align-items:center;justify-content:space-between;border-bottom:2px ridge #b5caee;background:linear-gradient(#435ca5,#263678);color:#fff0d3;font-size:14px}
+body>.social-modal .social-modal-title button{background:#546bb0;border:1px solid #a4bbeb;font-size:22px;color:#f5faff;width:30px;height:27px;line-height:22px}
+body>.social-modal .social-avatar-chooser{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;padding:12px}
+body>.social-modal .social-avatar-chooser button{border:2px ridge #a7bbe5;background:#526aa1;height:113px}
+body>.social-modal .social-avatar-chooser img{width:100%;height:100%;object-fit:contain;image-rendering:pixelated}
+body>.social-modal .social-modal-form{padding:18px;display:flex;flex-direction:column;gap:13px;color:#f0eefa}
+body>.social-modal .social-modal-form label{display:flex;align-items:center;justify-content:space-between;gap:8px}
+body>.social-modal .social-modal-form input,body>.social-modal .social-modal-form select{background:#f4f7ff;color:#26366c;border:2px inset #a7bce1;padding:8px;width:68%;font-size:13px}
+body>.social-modal .social-modal-form>button{padding:10px 16px;background:linear-gradient(#eff7fd,#adc1e7);border:2px ridge #c2d6f7;color:#2b3b79;font-weight:bold}
+body>.social-modal .social-peer-card{padding:14px;display:flex;gap:20px;align-items:center;color:#f4f6ff}
+body>.social-modal .social-peer-card img{height:135px;image-rendering:pixelated}
+body>.social-modal .social-connect-panel{padding:14px;display:flex;flex-direction:column;gap:6px;color:#eff1ff;font-size:12px;line-height:1.6}
+body>.social-modal .social-connect-panel button{background:linear-gradient(#b0c9ef,#5f78b5);border:2px outset #a0c2e8;color:#233773;padding:7px;font-size:11px}
+body>.social-modal .social-connect-buttons{display:flex;gap:9px}
+body>.social-modal .social-connect-panel textarea{width:100%;min-height:45px;background:#edf3ff;color:#253b69;border:2px inset #a3b1df;word-break:break-all;font:10px monospace;padding:7px;resize:vertical}
+body>.social-modal .social-connect-panel label{font-size:11px;display:flex;flex-direction:column;gap:3px}
+body>.social-modal #social-connect-state{border:1px solid #a6c7ea;background:#233f7a;padding:9px;color:#fff6c9}
+@media(max-width:650px){
+ #app:not(.app-classic-dice) .messenger{height:135px;min-height:135px}
+ #rooms .social-header{padding:3px 6px}
+ #rooms .social-header strong{font-size:11px}
+ #rooms .social-header small{font-size:8px}
+ #rooms .social-header-tools{gap:3px}
+ #rooms .social-header-tools>span{font-size:9px}
+ #rooms .social-header-tools button{font-size:9px;padding:4px 5px}
+ #rooms .social-user-panel{width:0;display:none}
+ #rooms .social-stage{width:100%}
+ #rooms .social-avatar{transition:left .22s linear,top .22s linear}
+ #sky .world-map-controls{bottom:5px;right:5px;gap:2px;padding:2px}
+ #sky .world-map-caption{font-size:9px}
+ body>.social-modal .social-avatar-chooser{grid-template-columns:repeat(4,minmax(0,1fr))}
+ body>.social-modal .social-modal-panel{max-height:85vh}
+}
+@media(prefers-reduced-motion:reduce){#rooms .social-avatar{transition:none}#rooms .social-speech{animation:none}}
