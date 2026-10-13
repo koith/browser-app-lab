@@ -252,6 +252,30 @@ function startGame(){let map=$('map-select').value;const limit=Number($('point-l
  [['rashid','soldier','narcia'],['joan','narcia','soldier'],['soldier','joan','rashid'],['iolyn','soldier','narcia'],['merza','rashid','soldier'],['christian','soldier','joan'],['damian','soldier','narcia']];let team=weakTeams[i].filter((_,j)=>j===0||limit>=8);while(teamStats(team).point>limit)team.pop();players.push(newPlayer(i+1,!hotseat,selectedMode==='network'?(window.__LEAF_NET__?.guestName||'플레이어 2'):(hotseat?'플레이어 '+(i+2):BOT_NAMES[i]),team))}match={version:5,map,mode:selectedMode,startedAt:Date.now(),tiles:generateTiles(map),players,active:0,round:1,finished:false,winner:-1,attribute:'NONE',message:'주사위를 굴려 주세요.',lastRoll:[],history:[],pending:null};busy=false;persist();navigate('game');chat('SYSTEM',map+' 게임을 시작했습니다. '+(selectedMode==='network'?'두 기기 온라인 연결':hotseat?'사람 '+(bots+1)+'명이 번갈아 플레이':'컴퓨터 '+bots+'명과 대전')+'.','system');drawGame();persist()}
 function tileGlyph(type){return {start:'S',goal:'G',normal:'✧',warp:'◈',keeper:'⚔',prison:'▤',chest:'▣',boost:'+3',boost4:'+4',attribute:'✥',joker:'★',random:'?',ability:'✶',ability100:'✦',clover:'♣',spade:'♠',doa:'☠',curse:'♠',blessing:'✥',arena:'⚔'}[type]||'✧'}
 function appendMove(message){if(!match)return;match.message=message;match.history.push(message);if(match.history.length>90)match.history.shift();toast(message);persist()}
+/* Source-proven historical sprite numbers from original Dice/DMP.pak palette headers:
+   Korean event labels map 1-to-1 to separate authentic Dice/TIS.pak images. */
+const ORIGINAL_TIS_EVENT={
+ start:'0024',goal:'0018',normal:'0015',practice:'0043',
+ boost:'0001',boost4:'0000',clover:'0006',ability:'0007',
+ blessing:'0009',chest:'0010',curse:'0012',doa:'0014',
+ arena:'0017',keeper:'0017',prison:'0019',joker:'0020',
+ spade:'0021',ability100:'0023',random:'0035',
+ kingbomb:'0021',keeperA:'0017',keeperB:'0017',keeperC:'0017'
+};
+const ORIGINAL_TIS_ATTRIBUTES={WANDS:'0027',SWORDS:'0025',CUPS:'0011',DISKS:'0013'};
+const ORIGINAL_TIS_WARPS={'1':'0028','3':'0030','4':'0031'};
+function sourceTileGraphic(type,index){
+ const original=originalTileAt(match.map,index);
+ if(type==='attribute'){
+   const attr=(original?.type==='attribute'?original.attribute:match.attribute)||'WANDS';
+   return ORIGINAL_TIS_ATTRIBUTES[attr]||'0027';
+ }
+ if(type==='warp'){
+   const group=(original?.type==='warp'?original.warpGroup:'1')||'1';
+   return ORIGINAL_TIS_WARPS[group]||'0028';
+ }
+ return ORIGINAL_TIS_EVENT[type]||ORIGINAL_TIS_EVENT.normal;
+}
 function drawBoard(){
  if(!match)return;
  const root=$('board-nodes'),svg=$('board-lines');
@@ -267,6 +291,9 @@ function drawBoard(){
    coords.forEach((pos,i)=>{
      const type=match.tiles[i],b=document.createElement('div');b.className='tile '+type;
      b.style.left=PATH[i].x+'%';b.style.top=PATH[i].y+'%';b.dataset.tile=i;
+     const sourceArt=sourceTileGraphic(type,i);
+     b.dataset.originalArt=sourceArt;
+     b.style.setProperty('background','url("./original/Tiles/'+sourceArt+'.png") center / 100% 100% no-repeat','important');
      if(SOURCE_IDS[match.map]){
        const columns=Math.max(8,Math.sqrt(match.tiles.length)*1.6);
        b.style.width=Math.max(2.5,Math.min(5,72/columns))+'%';
