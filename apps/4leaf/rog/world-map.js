@@ -70,7 +70,7 @@
    }else if(id==='street')window.__ROG_TEST__?.go('city');
    else if(id==='dice')window.__ROG_TEST__?.go('lobby');
    else if(id==='knights'){
-     if(window.__LEAF_SOCIAL__?.openRegion)window.__LEAF_SOCIAL__.openRegion('north');
+     window.__LEAF_SOCIAL__?.openBoard?.();
      window.__ROG_TEST__?.go('rooms');
    }else if(id==='my4leaf')showProfile();
  }
