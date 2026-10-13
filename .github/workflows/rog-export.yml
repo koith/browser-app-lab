@@ -50,6 +50,37 @@ jobs:
             assert '4LEAF-Revival/original/tiles.js' in z.namelist()
             assert z.testzip() is None
           PY
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify packaged app, not just repository source, launches and plays offline
+        run: |
+          npm install --no-save playwright
+          npx playwright install chromium --with-deps
+          mkdir -p /tmp/4leaf-verified
+          unzip -q 4LEAF-Offline-Original-Revival.zip -d /tmp/4leaf-verified
+          node - <<'JS'
+          const {chromium}=require('playwright');
+          const assert=require('node:assert/strict');
+          (async()=>{
+           const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
+           const page=await browser.newPage({viewport:{width:390,height:844}});
+           const errors=[];page.on('pageerror',e=>errors.push(String(e)));
+           await page.goto('file:///tmp/4leaf-verified/4LEAF-Revival/index.html');
+           await page.waitForFunction(()=>!!window.__ROG_TEST__,null,{timeout:9000});
+           await page.locator('[data-route="lobby"]').first().click();
+           await page.locator('#lobby-create').click();
+           await page.locator('#start-game').click();
+           await page.waitForSelector('#game:not(.hidden)');
+           assert.equal(await page.locator('#board-nodes .tile').count(),104);
+           assert.ok(await page.locator('#roll-btn').isVisible());
+           await page.locator('#roll-btn').click();
+           await page.waitForFunction(()=>window.__ROG_TEST__.getMatch().players[0].position>0,null,{timeout:10000});
+           assert.deepEqual(errors,[]);
+           console.log('OFFLINE PACKAGE VERIFIED: extracted ZIP 104 source tiles, mobile, real dice movement');
+           await browser.close();
+          })().catch(e=>{console.error(e.stack||e);process.exit(1)});
+          JS
       - uses: actions/upload-artifact@v4
         with:
           name: 4leaf-standalone-offline
