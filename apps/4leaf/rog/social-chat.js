@@ -58,7 +58,11 @@
  }
  function place(user,index){
   const pos=user.position;
-  if(pos&&Number.isFinite(pos.x)&&Number.isFinite(pos.y))return {x:Math.max(12,Math.min(88,pos.x)),y:Math.max(43,Math.min(91,pos.y))};
+  if(pos&&Number.isFinite(pos.x)&&Number.isFinite(pos.y)){
+    const x=Math.max(12,Math.min(88,pos.x)),y=Math.max(43,Math.min(91,pos.y));
+    if(index>0&&x===52&&y===76){const choices=[{x:31,y:73},{x:71,y:73},{x:42,y:84},{x:63,y:84}];return choices[(index-1)%choices.length]}
+    return {x,y};
+  }
   return {x:19+(index%5)*15,y:76+(Math.floor(index/5)%2)*9};
  }
  function compactPresence(){
@@ -311,7 +315,10 @@
  function enterRoom(room){
   if(room.region!==state.region){state.region=room.region}
   state.district=room.district;state.roomId=room.id;state.view='room';
-  state.position={x:52,y:76};render();
+  const seats=[{x:52,y:76},{x:31,y:73},{x:70,y:73},{x:39,y:84},{x:63,y:84},{x:23,y:63},{x:77,y:63},{x:47,y:67}];
+  const hash=[...tabId].reduce((a,c)=>(a*31+c.charCodeAt(0))>>>0,0);
+  state.position={...seats[hash%seats.length]};
+  render();
  }
  function roomAvatar(user,index){
   const figure=document.createElement('button');figure.className='social-avatar';
