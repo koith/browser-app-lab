@@ -21,6 +21,24 @@ const path=require('path');
  assert.equal(await host.locator('#leaf-world-stage .world-sprite').count(),6,'six genuine four-frame region sprites');
  assert.equal(await host.locator('#leaf-world-stage .world-location').count(),6,'six active world regions');
  await host.screenshot({path:'leaf-original-world.png',fullPage:true});
+ // The original Recordable/Knight noticeboard must be a real working location.
+ await host.locator('[data-region="knights"]').click();
+ await host.waitForFunction(()=>window.__LEAF_SOCIAL__.getState().view==='board',null,{timeout:5000});
+ assert.ok(await host.locator('.recordable-board').isVisible(),'recordable board opens');
+ await host.locator('#recordable-create').click();
+ await host.locator('.recordable-compose [name="title"]').fill('원작 포리프 기사단 게시글');
+ await host.locator('.recordable-compose [name="body"]').fill('실제 게시글 보존과 다른 탭 공유 기능 확인');
+ await host.locator('.recordable-compose button[type="submit"]').click();
+ assert.equal(await host.locator('#recordable-rows .recordable-row').count(),1);
+ await guest.locator('[data-region="knights"]').click();
+ await guest.waitForFunction(()=>document.querySelector('#recordable-rows')?.textContent.includes('원작 포리프 기사단 게시글'),null,{timeout:5000});
+ await guest.locator('#recordable-rows .recordable-row').first().click();
+ assert.ok((await guest.locator('.recordable-article').textContent()).includes('실제 게시글 보존'));
+ await guest.locator('.social-modal-title button').click();
+ await host.screenshot({path:'leaf-original-recordable-board.png'});
+ await host.locator('#social-back').click();
+ await guest.locator('#social-back').click();
+
  await host.locator('[data-region="north"]').click();
  await host.waitForFunction(()=>window.__LEAF_SOCIAL__.getState().region==='north'&&document.querySelector('#rooms:not(.hidden)'),null,{timeout:5000});
  assert.equal(await host.locator('.social-district-hotspot').count(),8,'original northern ChatTown eight signs');
