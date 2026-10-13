@@ -2,7 +2,7 @@
 (function(){
 const $=id=>document.getElementById(id);
 const query=(s,parent=document)=>Array.from(parent.querySelectorAll(s));
-const routeNames={sky:'아노마라드 상공',city:'켈티카의 거리',rooms:'하이아칸 타운',lobby:'주사위의 잔영 대기실',shop:'매직카덴',game:'창세기월드 · 주사위의 잔영','help-screen':'4LEAF 도움말'};
+const routeNames={sky:'포리프 월드맵',city:'켈티카의 거리',rooms:'하이아칸 타운',lobby:'주사위의 잔영 대기실',shop:'매직카덴',game:'창세기월드 · 주사위의 잔영','help-screen':'4LEAF 도움말'};
 const BASE_CARDS=[
 {id:'soldier',name:'솔져',move:1,atk:2,def:2,int:1,point:2,price:180,rank:'normal',portrait:'♟',ability:'방어C'},
 {id:'joan',name:'죠안',move:1,atk:3,def:2,int:2,point:3,price:250,rank:'normal',portrait:'♙',ability:'공격C'},
