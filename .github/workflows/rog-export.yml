@@ -6,6 +6,9 @@ on:
       - 'apps/4leaf/rog/index.html'
       - 'apps/4leaf/rog/game.js'
       - 'apps/4leaf/rog/network.js'
+      - 'apps/4leaf/rog/world-map.js'
+      - 'apps/4leaf/rog/social-chat.js'
+      - 'apps/4leaf/rog/world-social.css'
       - 'apps/4leaf/rog/classic-focus.css'
   workflow_dispatch:
 jobs:
@@ -33,7 +36,7 @@ jobs:
               1. 압축을 풀고 4LEAF-Revival/index.html 을 Chrome 또는 Edge에서 여세요.
               2. 주사위/채팅/상점 메뉴를 선택할 수 있습니다.
               3. 컴퓨터 대전, 한 기기 여러 명 순차 플레이, WebRTC 직접 연결을 사용할 수 있습니다.
-              4. 온라인 WebRTC 직접 연결은 일부 네트워크나 보안 정책에서 실패할 수 있습니다.
+              4. 월드맵→북/남 하이아칸→8개 지역→채팅방을 이용하세요. 여러 탭에서 즉시 대화하고, 다른 기기는 WebRTC 직접 초대 코드로 연결합니다. 일부 네트워크나 보안 정책에서 실패할 수 있습니다.
               5. 원본 4LEAF 서버와는 연결하지 않습니다. 공식 원작의 완전한 복원품이 아닙니다.
               6. 게임 기록은 해당 브라우저 로컬 저장소에 기록됩니다.
               
