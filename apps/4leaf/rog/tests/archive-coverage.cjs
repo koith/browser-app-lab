@@ -12,7 +12,7 @@ const path=require('node:path');
  let completed=0;
  for(const {id,name,n} of maps){
   await page.evaluate(()=>{document.querySelector('#modal').classList.add('hidden');window.__ROG_TEST__.go('lobby')});
-  await page.locator('#lobby-create').click();
+  if(await page.locator('#lobby-create').isVisible())await page.locator('#lobby-create').click();
   await page.locator('#map-select').selectOption(name);
   await page.locator('#bot-count').selectOption('1');
   await page.locator('#game-mode').selectOption('ai');
@@ -41,7 +41,7 @@ const path=require('node:path');
   completed++;
  }
  await page.evaluate(()=>{document.querySelector('#modal').classList.add('hidden');window.__ROG_TEST__.go('lobby')});
- await page.locator('#lobby-create').click();
+ if(await page.locator('#lobby-create').isVisible())await page.locator('#lobby-create').click();
  await page.locator('#map-select').selectOption('__RANDOM__');
  await page.locator('#start-game').click();
  const randomized=await page.evaluate(()=>window.__ROG_TEST__.getMatch()?.map);
