@@ -1,0 +1,57 @@
+name: 4LEAF offline playable source archive
+on:
+  push:
+    paths:
+      - '.github/workflows/rog-export.yml'
+      - 'apps/4leaf/rog/index.html'
+      - 'apps/4leaf/rog/game.js'
+      - 'apps/4leaf/rog/network.js'
+      - 'apps/4leaf/rog/classic-focus.css'
+  workflow_dispatch:
+jobs:
+  build-artifact:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Package tested playable 4LEAF app and authentic original extracted resources
+        run: |
+          python - <<'PY'
+          import pathlib,zipfile,json,hashlib
+          root=pathlib.Path('apps/4leaf/rog')
+          output=pathlib.Path('4LEAF-Offline-Original-Revival.zip')
+          included=[p for p in root.rglob('*') if p.is_file() and '/tests/' not in str(p) and '/tools/' not in str(p)]
+          included.sort(key=lambda p:str(p))
+          manifest=[]
+          with zipfile.ZipFile(output,'w',zipfile.ZIP_DEFLATED,compresslevel=7) as z:
+            for p in included:
+              rel=p.relative_to(root)
+              z.write(p,pathlib.PurePosixPath('4LEAF-Revival')/rel)
+              manifest.append({'name':str(rel),'bytes':p.stat().st_size,'sha256':hashlib.sha256(p.read_bytes()).hexdigest()})
+            readme='''4LEAF Browser · 주사위의 잔영 복원 개발판
+              
+              1. 압축을 풀고 4LEAF-Revival/index.html 을 Chrome 또는 Edge에서 여세요.
+              2. 주사위/채팅/상점 메뉴를 선택할 수 있습니다.
+              3. 컴퓨터 대전, 한 기기 여러 명 순차 플레이, WebRTC 직접 연결을 사용할 수 있습니다.
+              4. 온라인 WebRTC 직접 연결은 일부 네트워크나 보안 정책에서 실패할 수 있습니다.
+              5. 원본 4LEAF 서버와는 연결하지 않습니다. 공식 원작의 완전한 복원품이 아닙니다.
+              6. 게임 기록은 해당 브라우저 로컬 저장소에 기록됩니다.
+              
+              개발 소스: https://github.com/koith/browser-app-lab/tree/main/apps/4leaf/rog
+              원본 클라이언트 아카이브 출처: https://archive.org/details/4leaf
+              '''
+            z.writestr('4LEAF-Revival/실행방법.txt','\n'.join(line.strip() for line in readme.splitlines()))
+            z.writestr('4LEAF-Revival/files.sha256.json',json.dumps(manifest,indent=2,ensure_ascii=False))
+          assert all((root/'original'/n).exists() for n in ('maps.js','tiles.js','chessmen.js','manifest.json'))
+          print('OFFLINE EXPORT READY',output.stat().st_size,'bytes',len(included),'files')
+          with zipfile.ZipFile(output) as z:
+            assert '4LEAF-Revival/index.html' in z.namelist()
+            assert '4LEAF-Revival/game.js' in z.namelist()
+            assert '4LEAF-Revival/original/tiles.js' in z.namelist()
+            assert z.testzip() is None
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: 4leaf-standalone-offline
+          path: 4LEAF-Offline-Original-Revival.zip
+          retention-days: 10
