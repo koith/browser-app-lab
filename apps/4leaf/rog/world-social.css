@@ -121,3 +121,19 @@ body>.social-modal #social-connect-state{border:1px solid #a6c7ea;background:#23
  body>.social-modal .social-modal-panel{max-height:85vh}
 }
 @media(prefers-reduced-motion:reduce){#rooms .social-avatar{transition:none}#rooms .social-speech{animation:none}}
+
+/* Keep the original client at approximately its native 800px world-map size. */
+#app:not(.app-classic-dice){
+ width:min(900px,calc(100vw - 12px));
+ height:min(800px,calc(100dvh - 12px));
+ min-height:520px;
+}
+@media(max-width:650px){
+ #app:not(.app-classic-dice){
+  width:100vw;
+  height:100dvh;
+  min-height:0;
+  margin:0;
+  border:1px solid #596ba5;
+ }
+}
