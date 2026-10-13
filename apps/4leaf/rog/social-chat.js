@@ -24,12 +24,20 @@
  const state={region:'north',district:REGIONS.north.districts[3][0],view:'town',roomId:null,rooms:loadRooms(),peers:new Map(),seen:new Set(),bubble:null,scope:'world',avatar:0,position:{x:52,y:76}};
  let channel=null,rtc=null,dataChannel=null,rtcRole=null,resize=null,pulse=null,stageInfo=null,sceneInit=false;
  const $root=()=>$('rooms'),$stage=()=>$('social-stage');
+ async function deriveRoomProof(password,salt){
+  const raw=new TextEncoder().encode(String(password));
+  const key=await crypto.subtle.importKey('raw',raw,{name:'PBKDF2'},false,['deriveBits']);
+  const bits=await crypto.subtle.deriveBits({
+   name:'PBKDF2',salt:new TextEncoder().encode(salt),iterations:120000,hash:'SHA-256'
+  },key,256);
+  return Array.from(new Uint8Array(bits),n=>n.toString(16).padStart(2,'0')).join('');
+ }
  function loadRooms(){
   try{
    const raw=JSON.parse(localStorage.getItem('leaf_social_rooms_v3')||'[]');
    return Array.isArray(raw)?raw.filter(r=>r&&typeof r.id==='string'&&typeof r.name==='string'&&['north','south'].includes(r.region)).slice(-180).map(r=>({
     id:safe(r.id,70),name:safe(r.name,26),region:r.region,district:safe(r.district,36),owner:safe(r.owner,24),
-    password:safe(r.password||'',36),background:Number.isInteger(r.background)&&r.background>=0&&r.background<=5?r.background:2,created:Number(r.created)||0
+    passwordProof:safe(r.passwordProof||'',65),passwordSalt:safe(r.passwordSalt||'',75),background:Number.isInteger(r.background)&&r.background>=0&&r.background<=5?r.background:2,created:Number(r.created)||0
    })):[];
   }catch{return []}
  }
@@ -44,7 +52,7 @@
   const current=REGIONS[state.region]||REGIONS.north;
   return originalTemplates.map((background,i)=>({
    id:'public:'+state.region+':'+state.district+':'+i,name:'공개 채팅방 '+String(i+1).padStart(2,'0'),
-   region:state.region,district:state.district,owner:'',password:'',background,preset:true,created:0
+   region:state.region,district:state.district,owner:'',passwordProof:'',passwordSalt:'',background,preset:true,created:0
   }));
  }
  function catalogue(){
@@ -137,7 +145,7 @@
      const r=p.room;
      if(r&&typeof r.id==='string'&&!roomById(r.id)&&state.rooms.length<200){
        const incoming={id:safe(r.id,70),name:safe(r.name,26),region:r.region==='south'?'south':'north',
-        district:safe(r.district,36),owner:safe(r.owner,24),password:safe(r.password,36),
+        district:safe(r.district,36),owner:safe(r.owner,24),passwordProof:safe(r.passwordProof,65),passwordSalt:safe(r.passwordSalt,75),
         background:Math.max(0,Math.min(5,Number(r.background)||2)),created:Number(r.created)||now()};
        state.rooms.push(incoming);saveRooms();if(state.view==='directory')renderDirectory();
      }
@@ -360,7 +368,7 @@
    const b=document.createElement('button');b.className='social-directory-row';b.dataset.room=r.id;
    const num=document.createElement('span');num.className='social-room-number';num.textContent=String(i+1).padStart(2,'0');
    const name=document.createElement('b');name.textContent=r.name;
-   const lock=document.createElement('small');lock.textContent=r.password?'🔒':'♧';
+   const lock=document.createElement('small');lock.textContent=r.passwordProof?'🔒':'♧';
    const occupancy=document.createElement('span');occupancy.className='social-room-users';occupancy.textContent=onlinePeers('room:'+r.id).length+'명 접속';
    const arrow=document.createElement('span');arrow.textContent='입장 ›';
    b.append(num,lock,name,occupancy,arrow);
@@ -371,10 +379,12 @@
  }
  function joinRoom(id){
   const room=roomById(id);if(!room)return;
-  if(room.password){
-   askText('비공개 채팅방','입장 비밀번호',true,value=>{
-    if(value===room.password)enterRoom(room);
-    else systemLine('비밀번호가 일치하지 않습니다.');
+  if(room.passwordProof){
+   askText('비공개 채팅방','방 비밀번호',true,async value=>{
+    try{
+     if(await deriveRoomProof(value,room.passwordSalt)===room.passwordProof)enterRoom(room);
+     else systemLine('비밀번호가 일치하지 않습니다.');
+    }catch{systemLine('비밀번호 검증을 진행할 수 없습니다.')}
    });return;
   }
   enterRoom(room);
@@ -491,12 +501,15 @@
  function showCreateRoom(){
   const body=document.createElement('form');body.className='social-modal-form';
   body.innerHTML='<label>방 제목<input name="name" placeholder="방 이름" maxlength="26" required></label><label>배경<select name="background"><option value="2">서재</option><option value="3">클로버 응접실</option><option value="5">벽난로가 있는 방</option><option value="4">햇빛이 드는 방</option><option value="0">숲속 광장</option><option value="1">숲속 오솔길</option></select></label><label>비밀번호 (선택)<input name="password" type="password" maxlength="24" placeholder="비우면 공개방"></label><button type="submit">방 만들기</button>';
-  body.onsubmit=e=>{
+  body.onsubmit=async e=>{
    e.preventDefault();const form=new FormData(body);
    const name=safe(form.get('name'),26);
    if(!name)return;
+   const password=safe(form.get('password'),24),salt=password?uuid():'';
+   if(password&&password.length<6){const field=body.querySelector('[name="password"]');field.setCustomValidity('비밀번호는 6자 이상이어야 합니다.');field.reportValidity();return}
+   const proof=password?await deriveRoomProof(password,salt):'';
    const room={id:uuid(),name,region:state.region,district:state.district,owner:nick(),
-    password:safe(form.get('password'),24),background:Number(form.get('background'))||2,created:now()};
+    passwordProof:proof,passwordSalt:salt,background:Number(form.get('background'))||2,created:now()};
    state.rooms.push(room);saveRooms();sendLocal({kind:'roomCreated',room});sendRTC({kind:'roomCreated',room});
    closePopup();enterRoom(room);
   };
@@ -630,7 +643,7 @@
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
  window.__LEAF_SOCIAL__={openRegion,openBoard,openDirectory,joinRoom,enterRoom,createRoom:(name,background=2)=>{
-  const room={id:uuid(),name:safe(name,26),region:state.region,district:state.district,owner:nick(),password:'',background,created:now()};
+  const room={id:uuid(),name:safe(name,26),region:state.region,district:state.district,owner:nick(),passwordProof:'',passwordSalt:'',background,created:now()};
   state.rooms.push(room);saveRooms();sendLocal({kind:'roomCreated',room});enterRoom(room);return room.id;
  },send:publishText,getState:()=>({region:state.region,district:state.district,view:state.view,scope:state.scope,roomId:state.roomId,people:onlinePeers(),rooms:catalogue()}),
  sendRTC,now,render,transportMessage};
