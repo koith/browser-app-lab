@@ -9,6 +9,21 @@ const path=require('node:path');
  await page.waitForFunction(()=>!!window.__ROG_TEST__);
  const maps=await page.evaluate(()=>Object.entries(window.ORIGINAL_LEAF_MAP_INFO||{}).filter(([id])=>window.ORIGINAL_LEAF_MAPS[id]?.length>9).map(([id,v])=>({id,name:v.title,n:window.ORIGINAL_LEAF_MAPS[id].length})));
  assert.ok(maps.length>=25,'all original source map titles must load');
+ const elemental=await page.evaluate(()=>{
+   const source=window.ORIGINAL_LEAF_CHESSMEN,mod=window.__ROG_TEST__.elementalModifier;
+   const cards=[0,1,2,3].map(t=>source.find(c=>c.element===t&&c.usable===1&&c.move>0&&c.atk>0&&c.def>0));
+   if(cards.some(v=>!v))return {missing:cards.map(x=>!!x)};
+   const [wand,sword,cup,disk]=cards.map(c=>'c_'+c.id);
+   return {
+     swordBuff:mod([sword],'attack','SWORDS'),swordDebuff:mod([sword],'attack','CUPS'),
+     cupBuff:mod([sword,wand,cup],'support','CUPS'),cupDebuff:mod([sword,wand,cup],'support','SWORDS'),
+     wandBuff:mod([sword,wand],'defense','WANDS'),wandDebuff:mod([sword,wand],'defense','DISKS'),
+     diskBuff:mod([disk],'move','DISKS'),diskDebuff:mod([disk],'move','WANDS'),
+     neutral:mod([disk],'move','NONE')
+   };
+ });
+ assert.deepEqual(elemental,{swordBuff:2,swordDebuff:-2,cupBuff:2,cupDebuff:-2,wandBuff:2,wandDebuff:-2,diskBuff:2,diskDebuff:-2,neutral:0},'source-element interactions all match documented 4LEAF rule');
+ console.log('ORIGINAL ELEMENTS PASS: SWORDS/CUPS/WANDS/DISKS across attack, defense, assist and dice movement');
  let completed=0;
  for(const {id,name,n} of maps){
   await page.evaluate(()=>{document.querySelector('#modal').classList.add('hidden');window.__ROG_TEST__.go('lobby')});
