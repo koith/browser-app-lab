@@ -72,7 +72,7 @@ const PORTRAITS={soldier:12,joan:119,rashid:56,narcia:41,merza:45,iolyn:54,chris
 const SOURCE_PORTRAITS={'0096':12,'0078':48,'0040':33,'0045':8,'0087':31,'0088':33,'0090':23,'0091':11,'0127':40,'0137':31,'0170':22};
 const imageFor=(id)=>'./original/CardData/chm_'+(SOURCE_PORTRAITS[(CARD_MAP[id]||{}).sourceId]||PORTRAITS[id]||((Number((CARD_MAP[id]||{}).sourceId)||40)%59+1))+'.png';
 const townAvatar=(i)=>'./original/Registry/sava'+String([0,82,6,1,85][i%5]).padStart(2,'0')+'.png';
-let remoteAct=false;
+let remoteAct=false,remoteBattle=null,remoteBattleSequence=0;
 let shopPage=0;
 let profile,match=null,route='sky',chosenCard=CHR_SOURCE.length>50?'c_0040':'joan',group='all',currentRoom='샤이닝 브리즈',soundOn=false,audioCtx=null,busy=false,bgm=null,bgmTrack=null;
 const safe=(v,f)=>{try{const a=JSON.parse(localStorage.getItem('rog_'+v));return a===null?f:a}catch{return f}};
@@ -530,7 +530,7 @@ function combat(attacker,defender,keeper=false){
  const div=document.createElement('div');
  div.innerHTML='<p>'+attacker.name+'의 공격! '+defender.name+'이(가) 방어합니다.'+(rerolls?' · 무승부 '+rerolls+'회 재굴림':'')+'</p><div class="battle-dice"><div>ATTACK<div class="nums">'+attack.values.join('·')+'</div><b>'+aValue+'</b><small>지력 +'+aStat.int+'</small></div><div>DEFENSE<div class="nums">'+defense.values.join('·')+'</div><b>'+bValue+'</b><small>지력 +'+bStat.int+'</small></div></div>';
  const battleStage=showBattleScene(attacker,defender,attack,defense,aValue,bValue);
- const finish=result=>{battleStage?.remove();$('modal').classList.remove('battle-present');resolve(result)};
+ const finish=result=>{remoteBattle=null;battleStage?.remove();$('modal').classList.remove('battle-present');resolve(result)};
  const player=activePlayer();
  const selfInvolved=!keeper&&player&&!player.bot&&(attacker.id===player.id||defender.id===player.id);
  let results={attacker:aValue,defender:bValue,changed:false,negated:false};
@@ -571,7 +571,15 @@ function combat(attacker,defender,keeper=false){
    });
  }
  modal('⚔ BATTLE · 전투',div,options);$('modal').classList.add('battle-present');sfx(235,.21);
- if(!selfInvolved||(keeper&&attacker.bot)||(match?.mode==='network'&&attacker.id===1)){
+ if(match?.mode==='network'&&window.__LEAF_NET__?.connected&&player?.id===1&&!player.bot){
+   const bid=++remoteBattleSequence;
+   remoteBattle={bid,options:options.map(x=>x.label)};
+   $('modal-title').textContent='상대 플레이어가 전투 카드를 선택하고 있습니다…';
+   window.__LEAF_NET__.send({type:'battle-request',bid,attacker:attacker.name,defender:defender.name,
+      attack:aValue,defense:bValue,diceAttack:attack.values,diceDefense:defense.values,
+      options:remoteBattle.options});
+ }
+ if(!selfInvolved||(keeper&&attacker.bot)){
    setTimeout(()=>{const button=query('#modal-buttons button').find(b=>b.textContent==='결과 확인');if(!$('modal').classList.contains('hidden')&&button)button.click()},Math.max(350,keeper?600:700));
  }
  });
@@ -756,6 +764,12 @@ function init(){installBoardControls();installAuthenticMaps();if(match)chooseSou
  setGuestName:name=>{if(window.__LEAF_NET__?.role==='host'&&match?.mode==='network'){
     match.players[1].name=String(name).trim().slice(0,12)||'플레이어 2';drawGame();persist();
  }},
+ remoteBattleChoice:(bid,label)=>{
+    if(window.__LEAF_NET__?.role!=='host'||!remoteBattle||remoteBattle.bid!==bid||!remoteBattle.options.includes(label))return;
+    const opts=query('#modal-buttons button');
+    const selection=opts.find(btn=>btn.textContent===label);
+    if(selection)selection.click();
+ },
  remoteCommand:async(action,index,steps)=>{
    if(window.__LEAF_NET__?.role!=='host'||match?.mode!=='network'||match.active!==1||busy||match.finished||remoteAct)return;
    if(!['roll','ability','item'].includes(action))return;
