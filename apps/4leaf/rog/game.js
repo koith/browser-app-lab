@@ -81,7 +81,7 @@ if(!profile||!Array.isArray(profile.owned))profile=structuredClone(DEFAULT_PROFI
 if(CHR_SOURCE.length>50){
  profile.owned=[...new Set(profile.owned.map(id=>LEGACY_IDS[id]||id).filter(id=>CARD_MAP[id]))];
  if(!profile.owned.length)profile.owned=STARTERS.slice();
- profile.team=(profile.team||[]).map(id=>LEGACY_IDS[id]||id).filter(id=>CARD_MAP[id]);
+ profile.team=(profile.team||[]).map(id=>LEGACY_IDS[id]||id).filter(id=>CARD_MAP[id]).slice(0,4);
  if(!profile.team.length)profile.team=DEFAULT_PROFILE.team.slice();
  if(!CARD_MAP[chosenCard])chosenCard=profile.owned[0];
 }
@@ -114,10 +114,51 @@ function navigate(id){if(!routeNames[id])return;route=id;$('app').classList.togg
 function modal(title,body,buttons){$('modal-title').textContent=title;$('modal-content').replaceChildren();if(typeof body==='string'){$('modal-content').textContent=body}else if(body)$('modal-content').append(body);$('modal-buttons').replaceChildren();buttons.forEach(opt=>{const b=document.createElement('button');b.textContent=opt.label;b.className=opt.primary?'primary':'';b.onclick=()=>{$('modal').classList.add('hidden');if(opt.run)opt.run()};$('modal-buttons').append(b)});$('modal').classList.remove('hidden')}
 function ask(title,body,options){return new Promise(resolve=>modal(title,body,options.map((a,i)=>({label:a,primary:i===0,run:()=>resolve(i)}))))}
 function toast(message){log(message);$('move-log').textContent=message}
-function rosterByIds(ids){return (ids||[]).map(id=>CARD_MAP[id]).filter(Boolean).slice(0,3)}
-function teamStats(ids){const cards=rosterByIds(ids),attack=cards[0]||BASE_CARDS[0],defend=cards[1]||attack,assist=cards[2]||null;const same=cards.length>0&&cards.every(c=>c.move===cards[0].move);return {move:same?cards[0].move:1,atk:attack.atk,def:defend.def,int:assist?assist.int:0,point:cards.reduce((sum,c)=>sum+c.point,0),ability:attack.ability,abilityId:attack.abilityId,portrait:attack.portrait,name:attack.name};}
+function rosterByIds(ids){return (ids||[]).map(id=>CARD_MAP[id]).filter(Boolean).slice(0,4)}
+function teamStats(ids){
+ const cards=rosterByIds(ids),field=cards.slice(0,3);
+ const attack=field[0]||BASE_CARDS[0],defend=field[1]||attack,assist=field[2]||null;
+ const same=field.length>0&&field.every(c=>c.move===field[0].move);
+ return {move:same?field[0].move:1,atk:attack.atk,def:defend.def,int:assist?assist.int:0,
+ point:cards.reduce((sum,c)=>sum+c.point,0),ability:attack.ability,abilityId:attack.abilityId,portrait:attack.portrait,name:attack.name};
+}
 function ownedCards(){return profile.owned.filter(x=>CARD_MAP[x])}
-function drawTeam(){const root=$('team-select');root.replaceChildren();const slots=['공격','방어','지력'];for(let slot=0;slot<3;slot++){const s=document.createElement('button');s.className='team-slot';const c=CARD_MAP[profile.team[slot]];s.innerHTML='<b>'+slots[slot]+'</b><small>'+(c?c.name:'미지정')+'</small><small>'+(c?('M'+c.move+' A'+c.atk+' D'+c.def+' I'+c.int):'')+'</small>';s.onclick=()=>{const div=document.createElement('div');const label=document.createElement('p');label.textContent=slots[slot]+' 포지션에 배치할 체스맨을 고르세요.';div.append(label);const select=document.createElement('select');ownedCards().forEach(id=>{const c=CARD_MAP[id],option=document.createElement('option');option.value=id;option.textContent=c.name+' (이동'+c.move+' · '+c.point+'pt)';if(profile.team[slot]===id)option.selected=true;select.append(option)});div.append(select);modal('파티 구성',div,[{label:'선택',primary:true,run:()=>{profile.team[slot]=select.value;persist();drawTeam()}},{label:'취소'}])};root.append(s)}const stats=teamStats(profile.team);const limit=Number($('point-limit').value);let summary=document.createElement('div');summary.className='fine';summary.textContent='합계 '+stats.point+' / '+limit+' POINT · 이동 주사위 '+stats.move+' · 공격 '+stats.atk+' · 방어 '+stats.def+' · 지원 지력 +'+stats.int;root.append(summary)}
+function drawTeam(){
+ const root=$('team-select');root.replaceChildren();
+ const slots=['공격','방어','지력','보유(4번째)'];
+ for(let slot=0;slot<4;slot++){
+  const b=document.createElement('button');b.className='team-slot';
+  const id=profile.team[slot],c=CARD_MAP[id];
+  b.innerHTML='<b>'+slots[slot]+'</b><small>'+(c?c.name:'비어 있음')+'</small><small>'+(c?('M'+c.move+' A'+c.atk+' D'+c.def+' I'+c.int):'—')+'</small>';
+  b.title=slot===3?'최대 네 장까지 원정대에 소지할 수 있습니다. 네 번째 체스맨은 대기입니다.':'전투와 이동을 담당하는 체스맨을 배치합니다.';
+  b.onclick=()=>{
+    const div=document.createElement('div'),label=document.createElement('p');
+    label.textContent=slots[slot]+' 체스맨 선택 · 원본 주잔은 네 장을 준비하고 세 명까지 팀으로 업을 수 있습니다.';div.append(label);
+    const select=document.createElement('select');
+    if(slot>0){const blank=document.createElement('option');blank.value='';blank.textContent='비워두기';select.append(blank)}
+    ownedCards().filter(x=>!profile.team.includes(x)||profile.team[slot]===x).forEach(id=>{
+      const c=CARD_MAP[id],option=document.createElement('option');option.value=id;
+      option.textContent=c.name+' / '+c.point+'pt / 이동'+c.move;
+      if(profile.team[slot]===id)option.selected=true;select.append(option);
+    });
+    div.append(select);
+    modal('체스맨 원정대',div,[{label:'선택',primary:true,run:()=>{
+      const chosen=select.value;
+      profile.team[slot]=chosen;
+      if(slot===3&&!chosen)profile.team.splice(3,1);
+      persist();drawTeam();
+    }},{label:'취소'}]);
+  };
+  root.append(b);
+ }
+ const stats=teamStats(profile.team),limit=Number($('point-limit').value);
+ const info=document.createElement('div');info.className='fine';
+ info.textContent='파티 '+profile.team.filter(Boolean).length+' / 4명 · '+stats.point+' / '+limit+' POINT · 이동 '+stats.move+' / 공격 '+stats.atk+' / 방어 '+stats.def+' / 지력 '+stats.int;
+ root.append(info);
+ const label=document.createElement('div');label.className='fine';
+ label.textContent='첫 3명: 실제 공격·방어·지력 팀 / 4번째: 출전 대기 체스맨';
+ root.append(label);
+}
 function shopFiltered(){
  return BASE_CARDS.filter(c=>group==='all'||c.rank===group||(group==='valuable'&&c.rank==='rare'));
 }
