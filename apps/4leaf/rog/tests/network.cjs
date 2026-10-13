@@ -90,6 +90,14 @@ const path=require('path');
   await guest.waitForFunction(()=>window.__LEAF_BRIDGE__.getMatch()?.players[1]?.items?.length===0,null,{timeout:11000});
   assert.ok(await guest.locator('#modal').evaluate(el=>el.classList.contains('hidden')));
   console.log('WEBRTC BATTLE PASS: guest uses actual Change card and host resolves remote duel');
+  await guest.locator('#message').fill('포리프 상대방 온라인 메시지');
+  await guest.locator('#message').press('Enter');
+  await host.waitForFunction(()=>document.querySelector('#chat-log').textContent.includes('포리프 상대방 온라인 메시지'),null,{timeout:6000});
+  await host.locator('#message').fill('호스트 실시간 응답');
+  await host.locator('#message').press('Enter');
+  await guest.waitForFunction(()=>document.querySelector('#chat-log').textContent.includes('호스트 실시간 응답'),null,{timeout:6000});
+  console.log('WEBRTC CHAT PASS: two-way real peer messenger messages mirrored live');
+
   assert.deepEqual(errors,[],'no client JavaScript errors');
   await guest.screenshot({path:'rog-online-guest.png'});
   await host.screenshot({path:'rog-online-host.png'});
