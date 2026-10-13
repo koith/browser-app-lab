@@ -367,8 +367,10 @@ function drawMinimap(){
  });
 }
 function drawGame(){if(!match||!MAPS[match.map])return;chooseSourcePath(match.map);const p=(match.mode==='hotseat'||match.mode==='network'?activePlayer():match.players[0]),stats=teamStats(p.team);$('game-map-title').textContent=match.map;const elapsed=Math.floor((Date.now()-(match.startedAt||Date.now()))/1000);$('mini-time').textContent='TIME '+formatGameDuration(Math.max(0,elapsed))+' / GP '+formatGameDuration(match.players.length*90);$('element-label').textContent=match.attribute;$('player-count').textContent=match.players.length;$('turn-indicator').textContent='ROUND '+match.round+' · '+match.players[match.active].name+' TURN';$('my-name').textContent=p.name;$('my-stats').textContent='이동 '+stats.move+' · 공격 '+stats.atk+' · 방어 '+stats.def+' · 지력 +'+stats.int;$('my-position').textContent=p.jail>0?'감옥 '+p.jail+'턴':p.position===0?'START':p.position===match.tiles.length-1?'GOAL':(p.position+1)+'번째 칸';$('my-portrait').innerHTML='<img class="player-sprite" alt="" src="'+imageFor(p.team[0]||'soldier')+'">';$('ability-fill').style.width=p.ability+'%';$('game-players').replaceChildren();match.players.forEach((user,i)=>{const li=document.createElement('div');li.className=match.active===i?'is-turn':'';li.textContent=(match.active===i?'▶ ':'　')+user.pawn+' '+user.name+' '+(user.position+1)+'칸 · '+user.ability+'%';li.style.color=user.color;$('game-players').append(li)});$('my-items').replaceChildren();p.items.forEach((itemId,i)=>{const item=ITEM_MAP[itemId],btn=document.createElement('button');btn.className='item-card';btn.innerHTML='<span class="item-icon">'+(item?.icon||'✧')+'</span>'+(item?.name||itemId);btn.title=item.hint;btn.disabled=match.finished||!playerCanAct()||p.usedItem||busy;btn.onclick=()=>useItem(i);$('my-items').append(btn)});$('roll-btn').disabled=!playerCanAct();$('ability-btn').disabled=!playerCanAct()||p.ability<100;$('move-log').textContent=match.message;drawBoard();drawBattlePanels();drawMinimap();trackActivePawn()}
-const mapViewport={zoom:2.1,panX:0,panY:0,autoFollow:true};
+const mapViewport={zoom:1,panX:0,panY:0,autoFollow:true};
 function trackActivePawn(){
+ if(!match||!PATH.length)return;
+ if(window.__LEAF_CAMERA__){if(mapViewport.autoFollow){mapViewport.panX=0;mapViewport.panY=0;}window.__LEAF_CAMERA__.sync(match,PATH);return;}
  if(!mapViewport.autoFollow||!match||!PATH.length)return;
  const area=$('board-area'),p=activePlayer(),pos=PATH[p.position];if(!pos)return;
  const w=area.clientWidth,h=area.clientHeight,z=mapViewport.zoom;
@@ -378,19 +380,20 @@ function trackActivePawn(){
  applyMapViewport();
 }
 function applyMapViewport(){
+ if(window.__LEAF_CAMERA__){window.__LEAF_CAMERA__.viewport(mapViewport.zoom,mapViewport.panX,mapViewport.panY);return;}
  const world=$('board-world');if(!world)return;
  world.style.transform='translate('+mapViewport.panX+'px,'+mapViewport.panY+'px) scale('+mapViewport.zoom+')';
  const label=$('board-zoom-reset');if(label)label.title='맵 배율 '+Math.round(mapViewport.zoom*100)+'% · 중앙으로 복귀';
 }
 function zoomBoard(by){
- mapViewport.zoom=Math.max(1,Math.min(3.2,Math.round((mapViewport.zoom+by)*100)/100));
+ mapViewport.zoom=Math.max(.65,Math.min(2.4,Math.round((mapViewport.zoom+by)*100)/100));
  if(mapViewport.zoom===1){mapViewport.panX=0;mapViewport.panY=0}
  if(mapViewport.autoFollow)trackActivePawn();else applyMapViewport();
 }
 function installBoardControls(){
  $('board-zoom-in').onclick=()=>zoomBoard(.25);
  $('board-zoom-out').onclick=()=>zoomBoard(-.25);
- $('board-zoom-reset').onclick=()=>{mapViewport.zoom=2.1;mapViewport.autoFollow=true;trackActivePawn()};
+ $('board-zoom-reset').onclick=()=>{mapViewport.zoom=1;mapViewport.panX=0;mapViewport.panY=0;mapViewport.autoFollow=true;applyMapViewport();trackActivePawn()};
  const area=$('board-area');let tracking=null;
  area.addEventListener('pointerdown',e=>{
    if(e.target.closest('#board-zoom-controls')||e.button!==0)return;
