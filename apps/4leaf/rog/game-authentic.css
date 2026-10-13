@@ -63,3 +63,11 @@
 .modal.battle-present .modal-buttons{padding:4px}
 .modal.battle-present .modal-buttons button{font-size:11px;padding:4px 8px}
 @media(max-width:630px){#battle-visual{left:10%;right:10%;inset:2% 10% 2%}.battle-visual-head{-webkit-text-stroke:1px #8c356e}.battle-visual-total{-webkit-text-stroke:1.5px #ac3557}.battle-visual-side>strong{font-size:10px}.battle-visual-die{width:20px;height:20px;font-size:18px}.battle-visual-vs{font-size:25px}.battle-visual-actor{height:32%}.battle-visual-pedestal{height:12%;border-width:2px}.modal.battle-present .modal-window{max-height:120px;margin-bottom:0}}
+
+/* Four selectable original chessmen, three active battle roles plus one reserve. */
+#lobby .team-select>div:not(.fine){display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
+#lobby .team-slot{min-width:0;max-width:100%;white-space:normal;overflow:hidden;text-overflow:ellipsis}
+#lobby .team-slot b{font-size:9px;color:#fff5ae}
+#lobby .team-slot small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:9px}
+#lobby .team-slot:nth-child(4){border-color:#99d4d4;background:linear-gradient(#5369a2,#28457b)}
+@media(max-width:630px){#lobby .team-slot{padding:1px!important}#lobby .team-slot b{font-size:7px!important}#lobby .team-slot small{font-size:7px!important}}
