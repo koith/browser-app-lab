@@ -137,3 +137,35 @@ body>.social-modal #social-connect-state{border:1px solid #a6c7ea;background:#23
   border:1px solid #596ba5;
  }
 }
+
+/* RECORDABLE · live bulletin, directly reached from the true source world map. */
+#rooms .social-bulletin{background:#425684 url('./original/WorldMap/worldmapback.png') center/100% 100% no-repeat}
+#rooms .recordable-board{position:absolute;inset:25px 34px 30px;background:#253a7ceb;border:6px ridge #9dadca;box-shadow:0 8px 24px #0d183fa6;display:flex;flex-direction:column;color:#eef1fa;font-family:Gulim,'굴림',sans-serif}
+#rooms .recordable-board>header{display:flex;align-items:center;justify-content:space-between;padding:15px 18px;background:linear-gradient(#617ab7,#324b96);border-bottom:3px ridge #c4d5f1}
+#rooms .recordable-board header b{display:block;font:bold italic 26px Georgia,serif;letter-spacing:3px;color:#f8e9bf;text-shadow:1px 2px #263466}
+#rooms .recordable-board header small{display:block;margin-top:4px;color:#d5e2f8;font-size:11px;letter-spacing:1px}
+#rooms .recordable-board header button{background:linear-gradient(#b5c9f0,#5c78b9);color:#293d78;border:2px outset #dae5fc;padding:8px 18px;font-weight:bold}
+#rooms .recordable-list{flex:1;min-height:0;display:flex;flex-direction:column;overflow:hidden;margin:10px;border:2px ridge #9ab2d9;background:#e3eaf9}
+#rooms .recordable-columns{display:grid;grid-template-columns:48px minmax(0,1fr) 90px 100px;align-items:center;gap:8px;color:#eef6ff;padding:12px 9px;background:#415d9c;border-bottom:2px solid #829ed8;font-size:12px}
+#rooms .recordable-columns b:nth-child(2){text-align:left}
+#rooms #recordable-rows{flex:1;overflow:auto}
+#rooms .recordable-row{width:100%;display:grid;grid-template-columns:48px minmax(0,1fr) 90px 100px;align-items:center;gap:8px;padding:10px 8px;color:#24396a;background:#f2f5fa;border:0;border-bottom:1px solid #c6d2e5;text-align:center}
+#rooms .recordable-row:nth-child(even){background:#e3eaf6}
+#rooms .recordable-row:hover{background:#c5d8f9}
+#rooms .recordable-row b{text-align:left;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#rooms .recordable-empty{padding:44px;text-align:center;color:#7484aa;font-size:15px}
+#rooms .recordable-board>footer{flex:none;text-align:center;font-size:10px;padding:8px;color:#ccddf4}
+body>.social-modal .recordable-compose textarea{background:#f2f5ff;color:#293969;min-height:130px;border:2px inset #91add7;width:68%;padding:8px;font-size:13px}
+body>.social-modal .recordable-article{padding:20px;color:#f5f8ff;line-height:1.8}
+body>.social-modal .recordable-article h3{margin:0 0 10px;color:#fff1c6}
+body>.social-modal .recordable-article small{color:#c6d9f1}
+body>.social-modal .recordable-article p{white-space:pre-wrap;overflow-wrap:anywhere;min-height:55px;padding:14px;background:#283d78;border:1px solid #8eacd1}
+@media(max-width:650px){
+ #rooms .recordable-board{inset:20px 10px 17px;border-width:4px}
+ #rooms .recordable-board header{padding:12px}
+ #rooms .recordable-board header b{font-size:18px}
+ #rooms .recordable-board header button{padding:6px 9px;font-size:11px}
+ #rooms .recordable-columns,#rooms .recordable-row{grid-template-columns:26px minmax(0,1fr) 58px 60px;gap:4px;font-size:9px;padding:9px 3px}
+ #rooms .recordable-board>footer{font-size:8px;padding:5px}
+ body>.social-modal .recordable-compose textarea{width:100%}
+}
