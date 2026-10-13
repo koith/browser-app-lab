@@ -58,6 +58,11 @@ const path=require('node:path');
   assert.equal(result.pawns,2,name+' actor instances');
   if(result.source)assert.equal(result.source,n,name+' decoded historical tile entries');
   if(name==='4LEAF'){
+   await page.waitForTimeout(450);
+   const vis=await page.evaluate(()=>{
+     const f=sel=>{const e=document.querySelector(sel);if(!e)return null;const b=e.getBoundingClientRect();return {box:[b.left,b.top,b.width,b.height].map(x=>Math.round(x)),transform:getComputedStyle(e).transform,visibility:getComputedStyle(e).visibility,left:e.style.left,top:e.style.top}};
+     return {area:f('#board-area'),world:f('#board-world'),pawn:f('.board-pawn'),firstTile:f('.tile'),lastTile:f('.tile:nth-child(10)'),visibleTiles:[...document.querySelectorAll('.tile')].filter(x=>getComputedStyle(x).visibility==='visible').length,camera:window.__LEAF_CAMERA__?.getState?.().scale};
+   });console.log('4LEAF CAMERA GEOMETRY',JSON.stringify(vis));
    await page.screenshot({path:'rog-source-map-playable.png'});
    await page.evaluate(()=>{
      const m=window.__ROG_TEST__.getMatch();
