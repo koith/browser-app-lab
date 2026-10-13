@@ -1,0 +1,151 @@
+/* 4LEAF Dice original-asset game presentation.
+   Camera follows chessmen through all authentic MVE vertices, revealing a close-up
+   live board like the archived 800×600 3D game, not 104 miniature cards at once. */
+#game .board-area{
+ background:linear-gradient(#152a3c26,#23366624),#304f41 !important;
+ overflow:hidden!important;
+ isolation:isolate;
+}
+#game .board-world{
+ position:absolute!important;
+ inset:auto!important;
+ top:0!important;
+ left:0!important;
+ right:auto!important;
+ bottom:auto!important;
+ width:1450px!important;
+ height:1120px!important;
+ background:
+   radial-gradient(ellipse at 49% 48%,transparent 20%,#0c173b3e 90%),
+   url('./original/IMG/bgtile.png') 0 0 / 725px 485px repeat!important;
+ transform-origin:0 0!important;
+ transition:transform .20s ease-out!important;
+ will-change:transform;
+}
+#game .board-world::after{
+ content:'';
+ position:absolute;inset:0;pointer-events:none;
+ background:linear-gradient(180deg,#749cb209,#21163914 82%,#061f1930);
+ z-index:0;
+}
+#game #board-lines{
+ width:100%!important;height:100%!important;
+ inset:0!important;opacity:.19!important;
+ pointer-events:none;
+ z-index:1;
+}
+#game #board-nodes{position:absolute!important;inset:0!important;z-index:3;}
+#game .board-world .tile{
+ position:absolute!important;
+ width:92px!important;
+ height:68px!important;
+ border:5px solid #6b5874!important;
+ border-top-color:#d6c3b9!important;
+ border-left-color:#b7a9b6!important;
+ border-right-color:#5c4f6d!important;
+ border-bottom-color:#3e3054!important;
+ border-radius:8px!important;
+ box-shadow:
+   2px 8px 1px #1a143caa,
+   6px 12px 7px #080b2288,
+   inset 0 1px 0 #ffffffab,
+   inset 0 -2px 1px #2322418c!important;
+ background:linear-gradient(130deg,#c6bed5 0%,#f1d79c 28%,#aa88aa 72%,#5e5889 100%)!important;
+ transform:translate(-50%,-50%) rotate(-33deg) skew(8deg,-2deg)!important;
+ transform-origin:50% 50%!important;
+ overflow:visible!important;
+ cursor:pointer;user-select:none;
+ transition:filter .15s ease,box-shadow .18s ease;
+ color:#fff5bf!important;
+}
+#game .board-world .tile::before{
+ content:'';position:absolute;
+ inset:3px;
+ border:3px double #ffffff88;
+ border-radius:4px;
+ background:
+   linear-gradient(152deg,#fffcf42b,#111b4a29),
+   repeating-linear-gradient(0deg,transparent 0 16px,#f0e2e51a 17px);
+ pointer-events:none;z-index:0;
+}
+#game .board-world .tile .tile-symbol{
+ position:relative;z-index:1;
+ color:#fff5bb!important;
+ font:bold 35px Georgia,'Times New Roman',serif!important;
+ text-shadow:2px 3px #461738,-1px -1px #ffffffa1,0 1px 8px #e56bb588!important;
+ transform:skew(-5deg,2deg) rotate(3deg);
+ display:block;
+ line-height:1;
+}
+#game .board-world .tile small{
+ position:absolute;z-index:2;right:1px;bottom:-2px;
+ font:bold 10px Arial,sans-serif!important;
+ color:#f5e8d2;text-shadow:1px 1px #1f2248;
+ background:#2b2b66b4;border-radius:4px;
+ padding:0px 3px;
+}
+#game .board-world .tile.normal{background:linear-gradient(125deg,#dfbb9d,#e9ba7f 45%,#ac8798 84%,#72577c)!important}
+#game .board-world .tile.attribute{background:linear-gradient(135deg,#c39ae3,#8368c8 45%,#4e369c)!important;border-color:#ad8bc5 #6d539b #473c83 #bdb0d2!important}
+#game .board-world .tile.warp{background:linear-gradient(125deg,#71c7ea,#a5f1e5 36%,#358aaf 76%,#15528c)!important;border-color:#d6fbff #3da1d6 #165586 #a6ebf3!important}
+#game .board-world .tile.boost,#game .board-world .tile.boost4{background:linear-gradient(120deg,#fbde8d,#f2a45c 49%,#ba5b4b)!important;border-color:#fff1b0 #d18a43 #a45b50 #ffcf7a!important}
+#game .board-world .tile.chest{background:linear-gradient(130deg,#ecc78e,#a5794c 65%,#60465b)!important;border-color:#f3d9aa #907256 #614860 #edd8a3!important}
+#game .board-world .tile.keeper,#game .board-world .tile.arena{background:linear-gradient(140deg,#ffdb9e,#e15a68 55%,#9a294e)!important;border-color:#ffdcb9 #9c3654 #6c2c48 #e4abb8!important}
+#game .board-world .tile.joker,#game .board-world .tile.random{background:linear-gradient(135deg,#cc93d0,#b15fb9 45%,#56296a)!important;border-color:#f3b8ea #91408c #502352 #b28db9!important}
+#game .board-world .tile.goal{background:linear-gradient(140deg,#e5edcb,#ffdc89 34%,#f37a59 77%,#943f5d)!important;border-color:#ffefd3 #da8b70 #7e3651 #f2dba0!important}
+#game .board-world .tile.start{background:linear-gradient(120deg,#e3f9bd,#81be74 59%,#4a8169)!important;border-color:#dbf4b8 #508e75 #375d63 #a6d18f!important}
+#game .board-world .tile.prison,#game .board-world .tile.doa{background:linear-gradient(130deg,#d1a3c1,#a35b91 60%,#68365e)!important;border-color:#e9bfce #82416e #4a2b58 #bb87b1!important}
+#game .board-world .tile.clover{background:linear-gradient(130deg,#b5eb9e,#4bb779 50%,#236c87)!important;border-color:#c4fcad #489777 #256478 #8de3a1!important}
+#game .board-world .tile.spade,#game .board-world .tile.curse{background:linear-gradient(130deg,#e9d1eb,#a280bd 54%,#643c84)!important;border-color:#efe5ef #996eaa #5e407c #d9b3de!important}
+#game .board-world .tile.player-here{
+ filter:brightness(1.15) saturate(1.1)!important;
+ box-shadow:0px 0px 5px #ffffb6d0,2px 9px 4px #161b3eaa,5px 12px 5px #080b2e83!important;
+}
+#game .board-world .tile:hover{filter:brightness(1.29) saturate(1.25)!important}
+#game .board-world #board-pawns{position:absolute;z-index:6}
+#game .board-world .board-pawn{
+ width:65px!important;
+ height:93px!important;
+ filter:drop-shadow(2px 8px 3px #10132fc9);
+ transform:translate(-50%,-86%)!important;
+ z-index:10;
+ transition:left .15s linear,top .15s linear!important;
+}
+#game .board-world .board-pawn::before{
+ content:'';position:absolute;bottom:4px;left:7px;
+ width:51px;height:17px;border:3px ridge var(--pawn-color,#cbe1ff);
+ border-radius:50%;
+ background:radial-gradient(ellipse,#befbffdd,#2ca8b9d9 58%,#1d4a76ee 85%);
+ box-shadow:0 3px 6px #121833ab,0 0 7px var(--pawn-color,#c8e2ff);
+ transform:rotate(-11deg);z-index:-1;
+}
+#game .board-world .board-pawn img{
+ width:57px!important;height:88px!important;
+ object-fit:contain;
+ filter:drop-shadow(1px 3px 2px #111d39);
+ image-rendering:pixelated;
+}
+#game .board-world .board-pawn-name{bottom:100%;font-size:11px;background:#212a60cc;color:#ffe9bd}
+#game .board-world .pawn-current img{filter:drop-shadow(0 0 6px #fff3ac) drop-shadow(2px 3px 2px #182342)}
+#game .board-world .pawn-current::before{animation:leaf-pawn-glow 1.15s ease-in-out infinite alternate}
+@keyframes leaf-pawn-glow{to{box-shadow:0 4px 5px #172447aa,0 0 17px var(--pawn-color,#d8f8ff);filter:brightness(1.3)}}
+#game .board-mini{
+ background:#202e71 url('./original/IMG/minimap.png') center / 100% 100% no-repeat;
+ box-shadow:0 2px 7px #152247;
+ z-index:12!important;
+}
+#game .board-zoom-controls{z-index:14!important;top:4px!important;right:12%!important}
+#game .board-area::before{
+ content:'';position:absolute;z-index:2;inset:0;
+ pointer-events:none;
+ border-top:1px solid #e0dcff49;
+ box-shadow:inset 0 18px 23px #13255153,inset 0 -15px 28px #101d4545;
+}
+@media(max-width:640px){
+ #game .board-world .tile{width:90px!important;height:66px!important}
+ #game .board-world .tile .tile-symbol{font-size:33px!important}
+}
+@media(prefers-reduced-motion:reduce){
+ #game .board-world{transition:transform 0s!important}
+ #game .board-world .board-pawn{transition:none!important}
+ #game .board-world .pawn-current::before{animation:none!important}
+}
