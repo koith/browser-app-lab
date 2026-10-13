@@ -1,0 +1,59 @@
+/* Source-composed original 4LEAF Dice presentation: original UI pieces and real
+   game DOM are used instead of any historical full-frame screenshot. */
+#app.app-classic-dice{
+  width:min(960px,calc(100vw - 12px));
+  height:min(720px,calc(100dvh - 12px));
+  min-height:530px;
+  margin:auto;
+  border:2px ridge #9db1f2;
+  box-shadow:0 0 0 2px #101843,0 14px 55px #070b27;
+  background:#1c285f;
+}
+#app.app-classic-dice>.toolbar{display:none}
+#app.app-classic-dice>.titlebar{height:29px;flex:none;background:linear-gradient(180deg,#606bb0,#242f73 65%,#12194e)}
+#app.app-classic-dice>.titlebar small{display:none}
+#app.app-classic-dice>.workspace{flex:1;min-height:0}
+#app.app-classic-dice main#main{min-height:0}
+#app.app-classic-dice #game{min-height:0}
+#app.app-classic-dice #game>.scene-banner{height:24px;flex:none;padding:3px 9px;font-size:10px;letter-spacing:1px}
+#app.app-classic-dice #game>.game-topline{height:24px;min-height:24px;flex:none;border-bottom:2px ridge #a0b6e4}
+#app.app-classic-dice #game>.board-area{flex:1;min-height:135px;background-size:cover}
+#app.app-classic-dice #game>.game-controls{height:76px;flex:none;padding:3px 6px}
+#app.app-classic-dice #game>.item-bar{height:50px;min-height:50px;flex:none;padding:2px 5px}
+#app.app-classic-dice .messenger{height:128px;flex:none;background:#32487f;border-top:3px ridge #839dde}
+#app.app-classic-dice .messenger .chat-log{background:#35417e;color:#edf1ff}
+#app.app-classic-dice .messenger .chat-log div b{color:#e9e6a8}
+#app.app-classic-dice .messenger .chat-log .system{color:#86edc6}
+#app.app-classic-dice .messenger .panel-header{background:#21346c url('./original/MainFrame/title.png') center/auto 48px repeat-x}
+#app.app-classic-dice .statusbar{height:18px;font-size:9px;flex:none}
+#app.app-classic-dice #game .board-mini{width:154px;height:128px;bottom:4px;left:3px}
+#app.app-classic-dice #game .board-mini canvas{width:133px;height:89px;top:25px}
+#app.app-classic-dice #game .battle-team-side{width:11.5%}
+#app.app-classic-dice #game .board-world{inset:0 11.5%!important}
+#app.app-classic-dice #game .board-center{opacity:.36;pointer-events:none}
+#app.app-classic-dice #game .game-opponent{min-width:90px}
+#app.app-classic-dice #game .game-controls .die{height:37px;width:37px;font-size:26px}
+#app.app-classic-dice #game .game-controls .player-icon{width:49px;height:57px}
+#app.app-classic-dice #game .game-controls .player-sprite{width:42px;height:51px}
+#app.app-classic-dice #game .game-controls .player-panel{width:32%}
+#app.app-classic-dice #game .game-controls .control-center{gap:6px}
+#app.app-classic-dice #game .game-controls .roll-controls button{padding:5px 7px}
+#app.app-classic-dice #game .item-caption{font-size:9px}
+#app.app-classic-dice #game .item-card{width:52px;height:43px;min-width:52px;max-width:52px;padding:2px;font-size:8px}
+#app.app-classic-dice #game .item-card .item-icon{font-size:18px}
+#app.app-classic-dice #game .move-log{font-size:10px}
+#app.app-classic-dice #game .board-zoom-controls{right:12%}
+@media(max-width:630px){
+ #app.app-classic-dice{width:100vw;height:100dvh;min-height:0;border:0;margin:0}
+ #app.app-classic-dice #game>.scene-banner{height:23px;font-size:8px}
+ #app.app-classic-dice #game>.game-topline{height:23px;min-height:23px;font-size:8px}
+ #app.app-classic-dice #game>.game-controls{height:84px}
+ #app.app-classic-dice #game>.item-bar{height:50px;min-height:50px}
+ #app.app-classic-dice .messenger{height:126px}
+ #app.app-classic-dice #game .game-controls .player-panel{width:28%}
+ #app.app-classic-dice #game .game-opponent{min-width:0;width:23%}
+ #app.app-classic-dice #game .board-mini{width:75px;height:70px}
+ #app.app-classic-dice #game .board-mini canvas{width:68px;height:49px;top:13px;left:2px}
+ #app.app-classic-dice #game .board-zoom-controls{right:11%}
+ #app.app-classic-dice #game .item-card{width:40px;min-width:40px;max-width:40px;height:43px}
+}
