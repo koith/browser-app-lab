@@ -1,0 +1,64 @@
+name: 4LEAF decode genuine original 3D TIS cards
+on:
+  push:
+    paths:
+      - 'apps/4leaf/rog/tools/decode_tis.py'
+      - '.github/workflows/rog-original-tiles.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  import-source-cards:
+    runs-on: ubuntu-latest
+    timeout-minutes: 17
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install original-client archive reader and sprite renderer
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y unshield
+          python -m pip install --break-system-packages pillow
+      - name: Download original 4Leaf source installer
+        run: |
+          mkdir -p /tmp/4leaf-isometric/raw /tmp/4leaf-isometric/unpacked
+          python - <<'PY'
+          import urllib.request,time
+          url='https://archive.org/download/4leaf/4leaf.zip'
+          for trial in range(5):
+              try:
+                  request=urllib.request.Request(url+('?download=1' if trial%2 else ''),headers={'User-Agent':'Mozilla/5.0'})
+                  with urllib.request.urlopen(request,timeout=120) as r,open('/tmp/4leaf-isometric/4leaf.zip','wb') as f:
+                      while chunk:=r.read(1<<20):f.write(chunk)
+                  break
+              except Exception as ex:
+                  print('Download trial',trial,repr(ex))
+                  if trial>=4:raise
+                  time.sleep(trial*3+4)
+          PY
+          unzip -q /tmp/4leaf-isometric/4leaf.zip 'data1.cab' 'data1.hdr' -d /tmp/4leaf-isometric/raw
+          unshield x -d /tmp/4leaf-isometric/unpacked /tmp/4leaf-isometric/raw/data1.cab
+      - name: Decode all 32 indexed original isometric source images plus exact event labels
+        run: |
+          python apps/4leaf/rog/tools/decode_tis.py /tmp/4leaf-isometric/unpacked/4Leaf_Files apps/4leaf/rog/original/Tiles
+          python - <<'PY'
+          import json,pathlib
+          p=pathlib.Path('apps/4leaf/rog/original/Tiles')
+          o=json.loads((p/'manifest.json').read_text())
+          assert len(list(p.glob('*.png')))==32
+          assert len(o['originalNameToTileId'])>=25
+          for name in ['시작','종료','더미','컵','검','완드','디스크','워프1','4리프','신의축복','감옥','상자']:
+              assert name in o['originalNameToTileId'],name
+          print('VERIFIED',len(o['tiles']),'original sprite tiles',len(o['originalNameToTileId']),'historical mappings')
+          PY
+      - name: Commit original game-source sprites
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/4leaf/rog/original/Tiles
+          if ! git diff --cached --quiet; then
+            git commit -m "art(4leaf): restore 32 exact original 3D isometric TIS source sprites"
+            git pull --rebase origin main
+            git push origin HEAD:main
+          fi
