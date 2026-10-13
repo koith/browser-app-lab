@@ -1,0 +1,20 @@
+{
+  "name": "4LEAF Browser — 창세기월드 주사위의 잔영",
+  "short_name": "4LEAF",
+  "description": "Original client assets based 4LEAF browser revival, dice game, local and WebRTC play",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#17245d",
+  "theme_color": "#253b86",
+  "orientation": "any",
+  "lang": "ko",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
