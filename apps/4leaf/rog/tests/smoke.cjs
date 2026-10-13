@@ -31,6 +31,7 @@ async function run(){
  await page.screenshot({path:'rog-game.png'});
  assert.ok((await page.evaluate(()=>window.__ROG_TEST__.getMatch().players[0].position))>first);
  await page.locator('#exit-game').click();
+ await page.locator('#modal-buttons button').filter({hasText:'나가기'}).click();
  await page.locator('[data-route="shop"]').first().click();
  await page.waitForSelector('#shop:not(.hidden)');
  assert.equal(await page.locator('#shop-grid .shop-card').count(),9,'nine original Magic Carden slots');
@@ -51,6 +52,7 @@ async function run(){
  // Real human-vs-human turn-taking, independent cards, actor motion and save/resume.
  await page.setViewportSize({width:1280,height:860});
  await page.locator('#exit-game').click();
+ await page.locator('#modal-buttons button').filter({hasText:'나가기'}).click();
  await page.locator('[data-route="lobby"]').first().click();
  await page.locator('#lobby-create').click();
  await page.locator('#game-mode').selectOption('hotseat');
