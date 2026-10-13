@@ -10,6 +10,7 @@ const path=require('path');
  for(const [who,page] of [['host',host],['guest',guest]]){
    page.on('pageerror',e=>{errors.push(who+': '+e.stack);console.error('PAGE ERROR',who,e.stack)});
    page.on('console',m=>{if(m.type()==='error')console.log('PAGE LOG ERROR',who,m.text())});
+   page.on('response',res=>{if(res.status()===404)console.log('RESOURCE 404',who,res.url())});
  }
  await Promise.all([host.goto(url),guest.goto(url)]);
  await Promise.all([
