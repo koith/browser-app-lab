@@ -54,6 +54,7 @@
   if(state.view==='room'&&state.roomId)return 'room:'+state.roomId;
   if(state.view==='directory')return 'district:'+state.region+':'+state.district;
   if(state.view==='town')return 'town:'+state.region;
+  if(state.view==='board')return 'board:recordable';
   return 'world';
  }
  function place(user,index){
@@ -117,6 +118,19 @@
    if(source==='rtc')sendLocal({kind:'chat',...entry});
    if(entry.scope===state.scope){renderMessage(entry);showBubble(entry.sender,entry.text)}
    return;
+  }
+  if(p.kind==='bulletinPost'){
+    if(p.post&&typeof p.post.id==='string'){
+      const post={id:safe(p.post.id,80),author:safe(p.post.author,12),title:safe(p.post.title,65),
+       body:safe(p.post.body,800),created:Number(p.post.created)||now()};
+      if(post.title&&post.body&&!boardPosts().some(x=>x.id===post.id)){
+        const all=boardPosts();all.push(post);saveBoardPosts(all);
+        if(state.view==='board')renderBoardList();
+        if(source==='rtc')sendLocal({kind:'bulletinPost',post});
+        else if(source==='local')sendRTC({kind:'bulletinPost',post});
+      }
+    }
+    return;
   }
   if(p.kind==='roomCreated'||p.kind==='roomClosed'){
    if(p.roomCreated||p.kind==='roomCreated'){
@@ -219,13 +233,13 @@
  }
  function updateHeader(){
   const name=$('social-location-title');
-  if(name)name.textContent=state.view==='room'?((currentRoom()?.name||'채팅방')+' · '+state.district):
+  if(name)name.textContent=state.view==='board'?'레코르다블 · 기사단 게시판':state.view==='room'?((currentRoom()?.name||'채팅방')+' · '+state.district):
     state.view==='directory'?(state.district+' · 채팅방 목록'):
     (REGIONS[state.region]?.title||'하이아칸')+' · 채팅 지역';
   const bread=$('social-breadcrumb');
-  if(bread)bread.textContent=(REGIONS[state.region]?.title||'하이아칸')+(state.view==='town'?'':' › '+state.district)+(state.view==='room'?' › '+(currentRoom()?.name||''): '');
-  const back=$('social-back');if(back)back.textContent=state.view==='room'?'← 채팅방 목록':state.view==='directory'?'← 채팅 지역':'← 월드맵';
-  const note=$('chatroom-name');if(note)note.textContent=state.view==='room'?(currentRoom()?.name||'CHATTING ROOM'):state.view==='town'?'TOWN CHANNEL':'ROOM LIST';
+  if(bread)bread.textContent=state.view==='board'?'RECORDABLE › 기사단 게시판':(REGIONS[state.region]?.title||'하이아칸')+(state.view==='town'?'':' › '+state.district)+(state.view==='room'?' › '+(currentRoom()?.name||''): '');
+  const back=$('social-back');if(back)back.textContent=state.view==='board'?'← 월드맵':state.view==='room'?'← 채팅방 목록':state.view==='directory'?'← 채팅 지역':'← 월드맵';
+  const note=$('chatroom-name');if(note)note.textContent=state.view==='board'?'BULLETIN CHANNEL':state.view==='room'?(currentRoom()?.name||'CHATTING ROOM'):state.view==='town'?'TOWN CHANNEL':'ROOM LIST';
  }
  function roomTemplate(background){return './original/ChatRoom/room'+background+'.png'}
  function fit(){
@@ -259,10 +273,66 @@
  function render(){
   if(!sceneInit)return;
   const frame=$('social-image-frame');frame.replaceChildren();
+  if(state.view==='board')renderBulletin(frame);
   if(state.view==='town')renderTown(frame);
   if(state.view==='directory')renderDirectory(frame);
   if(state.view==='room')renderRoom(frame);
   updateHeader();fit();changeScope(scope());
+ }
+
+ function boardPosts(){
+   try{const all=JSON.parse(localStorage.getItem('leaf_recordable_posts_v1')||'[]');
+     return Array.isArray(all)?all.slice(-100).filter(x=>x&&typeof x.title==='string'):[]}
+   catch{return []}
+ }
+ function saveBoardPosts(posts){try{localStorage.setItem('leaf_recordable_posts_v1',JSON.stringify(posts.slice(-100)))}catch{}}
+ function openBoard(){
+   state.region='north';state.view='board';state.roomId=null;
+   if(sceneInit)render();
+ }
+ function renderBulletin(frame){
+   frame.className='social-image-frame social-bulletin';
+   frame.style.backgroundImage='url("./original/WorldMap/worldmapback.png")';
+   frame.innerHTML='<section class="recordable-board"><header><div><b>RECORDABLE</b><small>레코르다블 · 기사단 게시판</small></div><button id="recordable-create">+ 글쓰기</button></header><div class="recordable-list"><div class="recordable-columns"><b>NO.</b><b>제목</b><b>작성자</b><b>작성일</b></div><div id="recordable-rows"></div></div><footer>게시글은 브라우저에 보관되며 연결된 상대방과 공유됩니다. 원작 운영 게시판과는 별개입니다.</footer></section>';
+   $('recordable-create').onclick=createBoardPost;
+   renderBoardList();
+ }
+ function renderBoardList(){
+   const list=$('recordable-rows');if(!list)return;
+   list.replaceChildren();
+   const posts=boardPosts().reverse();
+   if(!posts.length){
+     const empty=document.createElement('p');empty.className='recordable-empty';
+     empty.textContent='첫 게시글을 작성해 주세요. · 원작 기사단 게시판 복원';
+     list.append(empty);return;
+   }
+   posts.forEach((post,i)=>{
+     const row=document.createElement('button');row.className='recordable-row';
+     const no=document.createElement('span');no.textContent=String(posts.length-i);
+     const title=document.createElement('b');title.textContent=post.title;
+     const author=document.createElement('span');author.textContent=post.author;
+     const date=document.createElement('time');date.textContent=new Date(post.created).toLocaleDateString('ko-KR');
+     row.append(no,title,author,date);
+     row.onclick=()=>{const body=document.createElement('article');body.className='recordable-article';
+       const h=document.createElement('h3');h.textContent=post.title;
+       const meta=document.createElement('small');meta.textContent=post.author+' · '+new Date(post.created).toLocaleString('ko-KR');
+       const content=document.createElement('p');content.textContent=post.body;
+       body.append(h,meta,content);popup('게시글 열람',body);
+     };
+     list.append(row);
+   });
+ }
+ function createBoardPost(){
+   const form=document.createElement('form');form.className='social-modal-form recordable-compose';
+   form.innerHTML='<label>제목<input name="title" maxlength="65" required placeholder="제목을 입력하세요"></label><label>내용<textarea name="body" maxlength="800" required placeholder="내용을 작성하세요"></textarea></label><button type="submit">게시글 등록</button>';
+   form.onsubmit=e=>{e.preventDefault();const input=new FormData(form);const title=safe(input.get('title'),65),body=safe(input.get('body'),800);
+     if(!title||!body)return;
+     const post={id:uuid(),author:nick(),title,body,created:now()};
+     const posts=boardPosts();posts.push(post);saveBoardPosts(posts);
+     sendLocal({kind:'bulletinPost',post});sendRTC({kind:'bulletinPost',post});
+     closePopup();renderBoardList();
+   };
+   popup('레코르다블 · 기사단 글쓰기',form);
  }
  function renderTown(frame){
   frame.className='social-image-frame social-town-map';
@@ -559,7 +629,7 @@
   presence();render();
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
- window.__LEAF_SOCIAL__={openRegion,openDirectory,joinRoom,enterRoom,createRoom:(name,background=2)=>{
+ window.__LEAF_SOCIAL__={openRegion,openBoard,openDirectory,joinRoom,enterRoom,createRoom:(name,background=2)=>{
   const room={id:uuid(),name:safe(name,26),region:state.region,district:state.district,owner:nick(),password:'',background,created:now()};
   state.rooms.push(room);saveRooms();sendLocal({kind:'roomCreated',room});enterRoom(room);return room.id;
  },send:publishText,getState:()=>({region:state.region,district:state.district,view:state.view,scope:state.scope,roomId:state.roomId,people:onlinePeers(),rooms:catalogue()}),
