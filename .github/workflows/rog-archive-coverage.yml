@@ -26,4 +26,6 @@ jobs:
         if: always()
         with:
           name: 4leaf-original-screen-focused-samples
-          path: rog-classic-focus*.png
+          path: |
+            rog-classic-focus*.png
+            rog-source-*.png
