@@ -26,6 +26,17 @@ const path=require('node:path');
   assert.equal(result.tiles,n,name+' live tile elements');
   assert.equal(result.pawns,2,name+' actor instances');
   if(result.source)assert.equal(result.source,n,name+' decoded historical tile entries');
+  if(name==='4LEAF'){
+   await page.screenshot({path:'rog-source-map-playable.png'});
+   await page.evaluate(()=>{
+     const m=window.__ROG_TEST__.getMatch();
+     window.__ROG_TEST__.resolveBattle(m.players[0],m.players[1],false);
+   });
+   await page.waitForSelector('#battle-visual',{timeout:5000});
+   await page.screenshot({path:'rog-source-battle-live.png'});
+   await page.locator('#modal-buttons button').filter({hasText:'결과 확인'}).click();
+   await page.waitForFunction(()=>!document.querySelector('#battle-visual'),null,{timeout:5000});
+  }
   // Every board must end in a legitimate, reachable GOAL and award GP.
   await page.evaluate(()=>{
    const m=window.__ROG_TEST__.getMatch();
