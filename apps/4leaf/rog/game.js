@@ -120,7 +120,18 @@ function teamStats(ids){
  const attack=cards[0]||BASE_CARDS[0],defend=cards[1]||attack,assist=cards[2]||null;
  const same=field.length>0&&field.every(c=>c.move===field[0].move);
  return {move:same?field[0].move:1,atk:attack.atk,def:defend.def,int:assist?assist.int:0,
+ attackElement:attack.element||'None',defendElement:defend.element||'None',supportElement:assist?.element||'None',
  point:cards.reduce((sum,c)=>sum+(c?.point||0),0),ability:attack.ability,abilityId:attack.abilityId,portrait:attack.portrait,name:attack.name};
+}
+function elementalModifier(team,kind,attribute=match?.attribute||'NONE'){
+ const stats=teamStats(team),attr=String(attribute).toUpperCase(),element=String(
+ kind==='attack'?stats.attackElement:kind==='defense'?stats.defendElement:kind==='support'?stats.supportElement:stats.attackElement
+ ).toUpperCase();
+ if(kind==='attack'&&element==='SWORDS')return attr==='SWORDS'?2:attr==='CUPS'?-2:0;
+ if(kind==='defense'&&element==='WANDS')return attr==='WANDS'?2:attr==='DISKS'?-2:0;
+ if(kind==='support'&&element==='CUPS')return attr==='CUPS'?2:attr==='SWORDS'?-2:0;
+ if(kind==='move'&&element==='DISKS')return attr==='DISKS'?2:attr==='WANDS'?-2:0;
+ return 0;
 }
 function ownedCards(){return profile.owned.filter(x=>CARD_MAP[x])}
 function drawTeam(){
@@ -531,8 +542,8 @@ function combat(attacker,defender,keeper=false){
  let attack,defense,aValue,bValue,rerolls=0;
  for(let attempt=0;attempt<100;attempt++){
    attack=diceN(aCount,6);defense=diceN(bCount,6);
-   aValue=attack.total+(aStat.int||0)+(attacker.team?.length>=3?(attacker.effects?.ring||0):0)+(attacker.effects?.teamInt>0?3:0);
-   bValue=defense.total+(bStat.int||0)+(defender.team?.length>=3?(defender.effects?.ring||0):0)+(defender.effects?.teamInt>0?3:0);
+   aValue=attack.total+(aStat.int||0)+(attacker.team?.length>=3?(attacker.effects?.ring||0):0)+(attacker.effects?.teamInt>0?3:0)+elementalModifier(attacker.team,'attack')+elementalModifier(attacker.team,'support');
+   bValue=defense.total+(bStat.int||0)+(defender.team?.length>=3?(defender.effects?.ring||0):0)+(defender.effects?.teamInt>0?3:0)+(keeper?0:elementalModifier(defender.team,'defense')+elementalModifier(defender.team,'support'));
    if(attacker.effects?.scar>0)aValue=Math.max(1,aValue-attacker.effects.scar);
    if(defender.effects?.scar>0)bValue=Math.max(1,bValue-defender.effects.scar);
    if(attacker.effects?.ultimate>0)aValue=30;
@@ -736,10 +747,10 @@ async function takeTurn(){
    if(a===b){p.jail=0;appendMove(p.name+' 감옥 탈출! 더블 '+a+'/'+b+' · 이동 턴 진행')}
    else{p.jail--;appendMove(p.name+' 감옥 '+p.jail+'턴 남음 (주사위 '+a+'/'+b+')');await wait(p.bot?300:150);busy=false;nextTurn();return}
  }
- const values=moveValues(p),move=values.reduce((a,b)=>a+b,0);showDice(values);
+ const values=moveValues(p),attributeMoveBonus=elementalModifier(p.team,'move'),move=Math.max(1,values.reduce((a,b)=>a+b,0)+attributeMoveBonus);showDice(values);
  p.ability=Math.min(100,p.ability+move*3);
  if(move){
-   appendMove(p.name+' 이동 주사위 '+values.join('+')+' = '+move+'칸');
+   appendMove(p.name+' 이동 주사위 '+values.join('+')+(attributeMoveBonus>0?' +2':attributeMoveBonus<0?' −2':'')+' = '+move+'칸 ('+match.attribute+')');
    const target=Math.min(match.tiles.length-1,p.position+move),steps=target-p.position;
    for(let i=0;i<steps;i++){
      p.position++;
@@ -794,5 +805,5 @@ function init(){installBoardControls();installAuthenticMaps();if(match)chooseSou
      else if(action==='ability')await useAbility();
      else await useItem(index,steps);
    }finally{remoteAct=false}
- }};window.__ROG_TEST__={startGame,drawGame,takeTurn,teamStats,generateTiles,getMatch:()=>match,go:navigate,setRoll:()=>{},setMatch:v=>{match=v;drawGame()},getSourceMaps:()=>SOURCE_INFO,getSourceTiles:()=>SOURCE_TILES,resolveBattle,moveValues,activePlayer,playerCanAct,refreshResume};if(match&&!match.finished){log('저장된 경기가 있습니다. 주사위 대기실의 이어하기로 복원하세요.')}refreshResume()}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+ }};window.__ROG_TEST__={startGame,drawGame,takeTurn,teamStats,generateTiles,getMatch:()=>match,go:navigate,setRoll:()=>{},setMatch:v=>{match=v;drawGame()},getSourceMaps:()=>SOURCE_INFO,getSourceTiles:()=>SOURCE_TILES,elementalModifier,resolveBattle,moveValues,activePlayer,playerCanAct,refreshResume};if(match&&!match.finished){log('저장된 경기가 있습니다. 주사위 대기실의 이어하기로 복원하세요.')}refreshResume()}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
