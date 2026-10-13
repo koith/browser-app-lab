@@ -1,0 +1,323 @@
+{
+  "source": "Original 4Leaf client / Dice/TIS.pak plus Dice/DMP.pak palette index labels",
+  "tiles": {
+    "0000": {
+      "width": 145,
+      "height": 97,
+      "pixelEncoding": "8bit indexed sprite",
+      "frames": 1,
+      "bytes": 9490
+    },
+    "0001": {
+      "width": 145,
+      "height": 97,
+      "pixelEncoding": "8bit indexed sprite",
+      "frames": 1,
+      "bytes": 11057
+    },
+    "0006": {
+      "width": 145,
+      "height": 97,
+      "pixelEncoding": "8bit indexed sprite",
+      "frames": 1,
+      "bytes": 8819
+    },
+    "0007": {
+      "width": 145,
+      "height": 97,
+      "pixelEncoding": "8bit indexed sprite",
+      "frames": 1,
+      "bytes": 9414
+    },
+    "0008": {
+      "width": 145,
+      "height": 97,
+      "pixelEncoding": "8bit indexed sprite",
+      "frames": 1,
+      "bytes": 11003
+    },
+    "0009": {
+      "width": 145,
+      "height": 97,
+      "pixelEncoding": "8bit indexed sprite",
+      "frames": 1,
+      "bytes": 10166
+    },
+    "0010": {
+      "width": 145,
+      "height": 97,
+      "pixelEncoding": "8bit indexed sprite",
+      "frames": 1,
+      "bytes": 6972
+    },
+    "0011": {
+      "width": 145,
+      "height": 97,
+      "pixelEncoding": "8bit indexed sprite",
+      "frames": 1,
+      "bytes": 9015
+    },
+    "0012": {
+      "width": 145,
+      "height": 97,
+      "pixelEncoding": "8bit indexed sprite",
+      "frames": 1,
+      "bytes": 12436
+    },
+    "0013": {
+      "width": 145,
+      "height": 97,
+      "pixelEncoding": "8bit indexed sprite",
+      "frames": 1,
+      "bytes": 8181
+    },
+    "0014": {
+      "width": 145,
+      "height": 97,
+      "pixelEncoding": "8bit indexed sprite",
+      "frames": 1,
+      "bytes": 11155
+    },
+    "0015": {
+      "width": 145,
+      "height": 97,
+      "pixelEncoding": "8bit indexed sprite",
+      "frames": 1,
+      "bytes": 7536
+    },
+    "0016": {
+      "width": 145,
+      "height": 97,
+      "pixelEncoding": "8bit indexed sprite",
+      "frames": 1,
+      "bytes": 9597
+    },
+    "0017": {
+      "width": 145,
+      "height": 97,
+      "pixelEncoding": "8bit indexed sprite",
+      "frames": 1,
+      "bytes": 9556
+    },
+    "0018": {
+      "width": 145,
+      "height": 97,
+      "pixelEncoding": "8bit indexed sprite",
+      "frames": 1,
+      "bytes": 10760
+    },
+    "0019": {
+      "width": 145,
+      "height": 97,
+      "pixelEncoding": "8bit indexed sprite",
+      "frames": 1,
+      "bytes": 11297
+    },
+    "0020": {
+      "width": 145,
+      "height": 97,
+      "pixelEncoding": "8bit indexed sprite",
+      "frames": 1,
+      "bytes": 10858
+    },
+    "0021": {
+      "width": 145,
+      "height": 97,
+      "pixelEncoding": "8bit indexed sprite",
+      "frames": 1,
+      "bytes": 10194
+    },
+    "0022": {
+      "width": 145,
+      "height": 97,
+      "pixelEncoding": "8bit indexed sprite",
+      "frames": 1,
+      "bytes": 11268
+    },
+    "0023": {
+      "width": 145,
+      "height": 97,
+      "pixelEncoding": "8bit indexed sprite",
+      "frames": 1,
+      "bytes": 9409
+    },
+    "0024": {
+      "width": 145,
+      "height": 97,
+      "pixelEncoding": "8bit indexed sprite",
+      "frames": 1,
+      "bytes": 8831
+    },
+    "0025": {
+      "width": 145,
+      "height": 97,
+      "pixelEncoding": "8bit indexed sprite",
+      "frames": 1,
+      "bytes": 9217
+    },
+    "0026": {
+      "width": 145,
+      "height": 97,
+      "pixelEncoding": "8bit indexed sprite",
+      "frames": 1,
+      "bytes": 12698
+    },
+    "0027": {
+      "width": 145,
+      "height": 97,
+      "pixelEncoding": "8bit indexed sprite",
+      "frames": 1,
+      "bytes": 8685
+    },
+    "0028": {
+      "width": 145,
+      "height": 97,
+      "pixelEncoding": "8bit indexed sprite",
+      "frames": 1,
+      "bytes": 11660
+    },
+    "0029": {
+      "width": 145,
+      "height": 97,
+      "pixelEncoding": "8bit indexed sprite",
+      "frames": 1,
+      "bytes": 11660
+    },
+    "0030": {
+      "width": 145,
+      "height": 97,
+      "pixelEncoding": "8bit indexed sprite",
+      "frames": 1,
+      "bytes": 10627
+    },
+    "0031": {
+      "width": 145,
+      "height": 97,
+      "pixelEncoding": "8bit indexed sprite",
+      "frames": 1,
+      "bytes": 10367
+    },
+    "0035": {
+      "width": 145,
+      "height": 97,
+      "pixelEncoding": "8bit indexed sprite",
+      "frames": 1,
+      "bytes": 8892
+    },
+    "0041": {
+      "width": 145,
+      "height": 97,
+      "pixelEncoding": "8bit indexed sprite",
+      "frames": 1,
+      "bytes": 11155
+    },
+    "0043": {
+      "width": 145,
+      "height": 97,
+      "pixelEncoding": "8bit indexed sprite",
+      "frames": 1,
+      "bytes": 7358
+    },
+    "0046": {
+      "width": 145,
+      "height": 97,
+      "pixelEncoding": "8bit indexed sprite",
+      "frames": 1,
+      "bytes": 6972
+    }
+  },
+  "originalNameToTileId": {
+    "4칸전진": "0000",
+    "3칸전진": "0001",
+    "4리프": "0006",
+    "신의축복": "0009",
+    "상자": "0010",
+    "컵": "0011",
+    "신의저주": "0012",
+    "디스크": "0013",
+    "사느냐죽느냐": "0014",
+    "더미": "0015",
+    "싸움": "0017",
+    "종료": "0018",
+    "감옥": "0019",
+    "바뀌는랜덤": "0020",
+    "불운": "0021",
+    "시작": "0024",
+    "검": "0025",
+    "완드": "0027",
+    "워프1": "0028",
+    "랜덤한번": "0035",
+    "연습": "0043",
+    "어빌리티": "0007",
+    "워프3": "0030",
+    "소울풀": "0023",
+    "워프4": "0031"
+  },
+  "byEventType": {
+    "boost": {
+      "3칸전진": "0001"
+    },
+    "clover": {
+      "4리프": "0006"
+    },
+    "boost4": {
+      "4칸전진": "0000"
+    },
+    "prison": {
+      "감옥": "0019"
+    },
+    "attribute": {
+      "검": "0025",
+      "디스크": "0013",
+      "완드": "0027",
+      "컵": "0011"
+    },
+    "normal": {
+      "더미": "0015"
+    },
+    "random": {
+      "랜덤한번": "0035"
+    },
+    "joker": {
+      "바뀌는랜덤": "0020"
+    },
+    "spade": {
+      "불운": "0021"
+    },
+    "doa": {
+      "사느냐죽느냐": "0014"
+    },
+    "chest": {
+      "상자": "0010"
+    },
+    "ability100": {
+      "소울풀": "0023"
+    },
+    "start": {
+      "시작": "0024"
+    },
+    "curse": {
+      "신의저주": "0012"
+    },
+    "blessing": {
+      "신의축복": "0009"
+    },
+    "arena": {
+      "싸움": "0017"
+    },
+    "ability": {
+      "어빌리티": "0007"
+    },
+    "practice": {
+      "연습": "0043"
+    },
+    "warp": {
+      "워프1": "0028",
+      "워프3": "0030",
+      "워프4": "0031"
+    },
+    "goal": {
+      "종료": "0018"
+    }
+  }
+}
