@@ -1,0 +1,29 @@
+name: 4LEAF historic source archive gameplay coverage
+on:
+  push:
+    paths:
+      - 'apps/4leaf/rog/game.js'
+      - 'apps/4leaf/rog/classic-focus.css'
+      - 'apps/4leaf/rog/tests/archive-coverage.cjs'
+      - '.github/workflows/rog-archive-coverage.yml'
+  workflow_dispatch:
+jobs:
+  full-archive:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install real Chromium
+        run: |
+          npm install --no-save playwright
+          npx playwright install chromium --with-deps
+      - name: Replay all 25 historical map wins and check desktop/mobile game
+        run: node apps/4leaf/rog/tests/archive-coverage.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: 4leaf-original-screen-focused-samples
+          path: rog-classic-focus*.png
