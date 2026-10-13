@@ -327,19 +327,21 @@ function drawBattlePanels(){
  root.replaceChildren();
  const left=document.createElement('div'),right=document.createElement('div');
  left.className='battle-team-side left';right.className='battle-team-side right';
- match.players.forEach((p,i)=>{
-  const card=document.createElement('div');card.className='battle-side-card'+(match.active===i?' active':'');
-  card.style.setProperty('--player-tint',p.color);
-  const num=document.createElement('span');num.className='battle-side-num';num.textContent=(i+1)+'P';
-  const portrait=document.createElement('img');portrait.alt='';portrait.src=imageFor(p.team[0]||'soldier');
-  const info=document.createElement('div');info.className='battle-side-info';
-  const nick=document.createElement('b');nick.textContent=p.name;
-  const attrs=document.createElement('small');
-  attrs.textContent='♣ '+(p.position+1)+'칸　'+p.ability+'%';
-  const meter=document.createElement('i');meter.className='battle-side-meter';meter.style.width=Math.max(1,p.ability)+'%';
-  info.append(nick,attrs,meter);card.append(num,portrait,info);
-  (i%2===0?left:right).append(card);
- });
+ const slots=match.players.length>6?4:3;
+ for(let i=0;i<slots*2;i++){
+   const p=match.players[i],card=document.createElement('div');
+   card.className='battle-side-card'+(p&&match.active===i?' active':'')+(p?' occupied':' vacant');
+   card.style.setProperty('--player-tint',p?.color||'#53609a');
+   const num=document.createElement('span');num.className='battle-side-num';num.textContent=(i+1)+'P';
+   const portrait=document.createElement('img');portrait.alt='';
+   if(p)portrait.src=imageFor(p.team[0]||'soldier');
+   const info=document.createElement('div');info.className='battle-side-info';
+   const nick=document.createElement('b');nick.textContent=p?p.name:'EMPTY';
+   const attrs=document.createElement('small');attrs.textContent=p?('CL  '+(p.position+1)+'칸　'+p.ability+'%'):'대기 중';
+   const meter=document.createElement('i');meter.className='battle-side-meter';meter.style.width=(p?Math.max(1,p.ability):0)+'%';
+   info.append(nick,attrs,meter);card.append(num,portrait,info);
+   (i%2===0?left:right).append(card);
+ }
  root.append(left,right);
 }
 function drawMinimap(){
@@ -367,7 +369,7 @@ function drawMinimap(){
  });
 }
 function drawGame(){if(!match||!MAPS[match.map])return;chooseSourcePath(match.map);const p=(match.mode==='hotseat'||match.mode==='network'?activePlayer():match.players[0]),stats=teamStats(p.team);$('game-map-title').textContent=match.map;const elapsed=Math.floor((Date.now()-(match.startedAt||Date.now()))/1000);$('mini-time').textContent='TIME '+formatGameDuration(Math.max(0,elapsed))+' / GP '+formatGameDuration(match.players.length*90);$('element-label').textContent=match.attribute;$('player-count').textContent=match.players.length;$('turn-indicator').textContent='ROUND '+match.round+' · '+match.players[match.active].name+' TURN';$('my-name').textContent=p.name;$('my-stats').textContent='이동 '+stats.move+' · 공격 '+stats.atk+' · 방어 '+stats.def+' · 지력 +'+stats.int;$('my-position').textContent=p.jail>0?'감옥 '+p.jail+'턴':p.position===0?'START':p.position===match.tiles.length-1?'GOAL':(p.position+1)+'번째 칸';$('my-portrait').innerHTML='<img class="player-sprite" alt="" src="'+imageFor(p.team[0]||'soldier')+'">';$('ability-fill').style.width=p.ability+'%';$('game-players').replaceChildren();match.players.forEach((user,i)=>{const li=document.createElement('div');li.className=match.active===i?'is-turn':'';li.textContent=(match.active===i?'▶ ':'　')+user.pawn+' '+user.name+' '+(user.position+1)+'칸 · '+user.ability+'%';li.style.color=user.color;$('game-players').append(li)});$('my-items').replaceChildren();p.items.forEach((itemId,i)=>{const item=ITEM_MAP[itemId],btn=document.createElement('button');btn.className='item-card';btn.innerHTML='<span class="item-icon">'+(item?.icon||'✧')+'</span>'+(item?.name||itemId);btn.title=item.hint;btn.disabled=match.finished||!playerCanAct()||p.usedItem||busy;btn.onclick=()=>useItem(i);$('my-items').append(btn)});$('roll-btn').disabled=!playerCanAct();$('ability-btn').disabled=!playerCanAct()||p.ability<100;$('move-log').textContent=match.message;drawBoard();drawBattlePanels();drawMinimap();trackActivePawn()}
-const mapViewport={zoom:1,panX:0,panY:0,autoFollow:true};
+const mapViewport={zoom:1.25,panX:0,panY:0,autoFollow:true};
 function trackActivePawn(){
  if(!match||!PATH.length)return;
  if(window.__LEAF_CAMERA__){if(mapViewport.autoFollow){mapViewport.panX=0;mapViewport.panY=0;}window.__LEAF_CAMERA__.sync(match,PATH);return;}
@@ -393,7 +395,7 @@ function zoomBoard(by){
 function installBoardControls(){
  $('board-zoom-in').onclick=()=>zoomBoard(.25);
  $('board-zoom-out').onclick=()=>zoomBoard(-.25);
- $('board-zoom-reset').onclick=()=>{mapViewport.zoom=1;mapViewport.panX=0;mapViewport.panY=0;mapViewport.autoFollow=true;applyMapViewport();trackActivePawn()};
+ $('board-zoom-reset').onclick=()=>{mapViewport.zoom=1.25;mapViewport.panX=0;mapViewport.panY=0;mapViewport.autoFollow=true;applyMapViewport();trackActivePawn()};
  const area=$('board-area');let tracking=null;
  area.addEventListener('pointerdown',e=>{
    if(e.target.closest('#board-zoom-controls')||e.button!==0)return;
