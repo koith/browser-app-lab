@@ -1,0 +1,37 @@
+name: 4LEAF world map and real social chat integration
+on:
+  push:
+    paths:
+      - 'apps/4leaf/rog/world-map.js'
+      - 'apps/4leaf/rog/social-chat.js'
+      - 'apps/4leaf/rog/world-social.css'
+      - 'apps/4leaf/rog/index.html'
+      - 'apps/4leaf/rog/tests/world-chat.cjs'
+      - '.github/workflows/rog-world-chat.yml'
+  workflow_dispatch:
+jobs:
+  world-and-chat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser runner
+        run: |
+          npm install --no-save playwright
+          npx playwright install chromium --with-deps
+      - name: Run site on same origin for actual inter-tab messaging
+        run: |
+          nohup python3 -m http.server 8765 --directory apps/4leaf/rog > /tmp/4leaf-http.log 2>&1 &
+          sleep 2
+          curl -fSsI http://127.0.0.1:8765/original/WorldMap/worldmapback.png
+      - name: Verify original world, regions, rooms, messages and mobile
+        run: node apps/4leaf/rog/tests/world-chat.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: original-world-and-social-chat-screens
+          path: leaf-*.png
+          retention-days: 7
