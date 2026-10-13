@@ -23,6 +23,8 @@ const assert=require('node:assert/strict');
  await host.locator('.social-modal-title button').click();await guest.locator('.social-modal-title button').click();
  await guest.waitForFunction(room=>window.__LEAF_SOCIAL__.getState().roomId===room,room,{timeout:10000});
  await Promise.all([host.waitForFunction(()=>document.querySelectorAll('#social-avatar-layer .social-avatar').length===2,null,{timeout:10000}),guest.waitForFunction(()=>document.querySelectorAll('#social-avatar-layer .social-avatar').length===2,null,{timeout:10000})]);
+ const seats=await host.locator('#social-avatar-layer .social-avatar').evaluateAll(nodes=>nodes.map(n=>{const r=n.getBoundingClientRect();return {x:r.x,y:r.y}}));
+ assert.ok(Math.abs(seats[0].x-seats[1].x)>25||Math.abs(seats[0].y-seats[1].y)>25,'original room chat characters must not overlap each other');
  await guest.locator('#message').fill('원격 기기 쌍방향 채팅');await guest.locator('#message').press('Enter');
  await host.waitForFunction(()=>document.querySelector('#chat-log')?.textContent.includes('원격 기기 쌍방향 채팅'),null,{timeout:9000});
  await host.locator('#message').fill('호스트 응답 도착');await host.locator('#message').press('Enter');
