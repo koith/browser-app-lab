@@ -7,7 +7,7 @@ async function run(){
  const errors=[];page.on('pageerror',e=>{errors.push(String(e));console.error('4LEAF PAGEERROR:',e.stack||e)});page.on('console',m=>{if(m.type()==='error')console.error('4LEAF CONSOLE:',m.text())});
  const url='file://'+path.resolve(__dirname,'../index.html');
  await page.goto(url);await page.waitForFunction(()=>!!window.__ROG_TEST__,null,{timeout:6000});
- assert.equal(await page.title(),'4LEAF Browser · 주사위의 잔영');
+ assert.equal(await page.title(),'4LEAF Browser · 월드맵과 채팅');
  await page.screenshot({path:'rog-desktop.png'});
  await page.locator('[data-route="lobby"]').first().click();
  await page.locator('#lobby-create').click();
