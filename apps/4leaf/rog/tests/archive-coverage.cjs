@@ -9,6 +9,22 @@ const path=require('node:path');
  await page.waitForFunction(()=>!!window.__ROG_TEST__);
  const maps=await page.evaluate(()=>Object.entries(window.ORIGINAL_LEAF_MAP_INFO||{}).filter(([id])=>window.ORIGINAL_LEAF_MAPS[id]?.length>9).map(([id,v])=>({id,name:v.title,n:window.ORIGINAL_LEAF_MAPS[id].length})));
  assert.ok(maps.length>=25,'all original source map titles must load');
+ const rewards=await page.evaluate(()=>{
+  const calculate=window.__ROG_TEST__.calculateMatchReward;
+  const mock=(count,map,time,position=0)=>({
+   map,startedAt:1000000,players:Array.from({length:count},(_,id)=>({id,position:id?0:position})),tiles:Array(70).fill('normal')
+  });
+  return {
+   tooFast:calculate({id:0},mock(2,'4LEAF'),1000000+179999).gp,
+   fourLeafTwo:calculate({id:0},mock(2,'4LEAF'),1000000+180000).gp,
+   warpgateTwo:calculate({id:0},mock(2,'워프 게이트'),1000000+180000).gp,
+   warpgateEight:calculate({id:0},mock(8,'워프 게이트'),1000000+720000).gp,
+   fourLeafEight:calculate({id:0},mock(8,'4LEAF'),1000000+720000).gp,
+   loserShare:calculate({id:1},mock(2,'4LEAF',0,35),1000000+180000).gp
+  }
+ });
+ assert.deepEqual(rewards,{tooFast:0,fourLeafTwo:49,warpgateTwo:29,warpgateEight:89,fourLeafEight:109,loserShare:24},'historical original GP eligibility, payouts and loser position share');
+ console.log('ORIGINAL GP PASS: 1m30 per participant; 4LEAF 49/109; Warpgate 29/89; no early payout');
  const elemental=await page.evaluate(()=>{
    const source=window.ORIGINAL_LEAF_CHESSMEN,mod=window.__ROG_TEST__.elementalModifier;
    const cards=[0,1,2,3].map(t=>source.find(c=>c.element===t&&c.usable===1&&c.move>0&&c.atk>0&&c.def>0));
