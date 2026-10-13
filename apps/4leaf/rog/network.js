@@ -40,6 +40,24 @@
        bridge()?.receiveMatch?.(data.match);
      }else if(data.type==='command'&&net.role==='host'&&['roll','item','ability'].includes(data.action)){
        bridge()?.remoteCommand?.(data.action,data.index,data.steps);
+     }else if(data.type==='battle-request'&&net.role==='guest'){
+       const modal=$('modal'),title=$('modal-title'),body=$('modal-content'),buttons=$('modal-buttons');
+       if(!modal||!Array.isArray(data.options))return;
+       title.textContent='⚔ 전투 카드 선택 · '+String(data.attacker).slice(0,16)+' VS '+String(data.defender).slice(0,16);
+       body.replaceChildren();
+       const p=document.createElement('p');p.textContent='공격 '+data.attack+' / 방어 '+data.defense+' · '+(data.diceAttack||[]).join(',')+' : '+(data.diceDefense||[]).join(',');body.append(p);
+       buttons.replaceChildren();
+       data.options.filter(x=>typeof x==='string').slice(0,9).forEach(label=>{
+         const button=document.createElement('button');button.textContent=label;
+         button.onclick=()=>{
+           modal.classList.add('hidden');modal.classList.remove('battle-present');
+           send({type:'battle-choice',bid:data.bid,label});
+         };
+         buttons.append(button);
+       });
+       modal.classList.remove('hidden');
+     }else if(data.type==='battle-choice'&&net.role==='host'){
+       bridge()?.remoteBattleChoice?.(data.bid,data.label);
      }else if(data.type==='chat'&&typeof data.text==='string'){
        const div=document.createElement('div'),b=document.createElement('b');
        b.textContent=String(data.who||'상대').slice(0,12)+'　';
