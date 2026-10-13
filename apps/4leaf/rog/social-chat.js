@@ -538,13 +538,12 @@
      e.preventDefault();const input=$('message'),v=input.value.trim();input.value='';publishText(v);
    };
   }
-  for(const el of document.querySelectorAll('[data-route]')){
-   el.addEventListener('click',()=>{
-     if(el.dataset.route==='rooms'&&state.view==='room')render();
-     else if(el.dataset.route==='sky')changeScope('world');
-     else if(el.dataset.route==='city')changeScope('city');
-   });
-  }
+  window.addEventListener('leaf-route-change',e=>{
+    const route=e.detail?.route;
+    if(route==='sky')changeScope('world');
+    else if(route==='city')changeScope('city');
+    else if(route==='rooms')render();
+  });
   const oldRename=$('rename')?.onclick;
   if($('rename'))$('rename').onclick=(...args)=>{
    if(oldRename)oldRename(...args);
