@@ -4,7 +4,7 @@
 (function(){
  const WIDTH=796,HEIGHT=528;
  const REGIONS=[
-  {id:'street',name:'켈티카의 거리',kind:'street',x:265,y:33,w:203,h:112,hit:[279,42,165,85]},
+  {id:'street',name:'켈티카의 거리',kind:'mainstreet',x:265,y:33,w:203,h:112,hit:[279,42,165,85]},
   {id:'knights',name:'레코르다블 · 기사단',kind:'knights',x:144,y:96,w:203,h:218,hit:[173,151,108,69]},
   {id:'north',name:'북 하이아칸 · 채팅',kind:'northchatrgn',x:305,y:113,w:268,h:140,hit:[351,149,134,75]},
   {id:'south',name:'남 하이아칸 · 채팅',kind:'southchatrgn',x:200,y:205,w:239,h:139,hit:[230,251,130,70]},
