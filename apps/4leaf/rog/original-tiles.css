@@ -1,0 +1,68 @@
+/* True 4LEAF v0.96d 145x97 TIS graphics, recovered from Dice/TIS.pak.
+   Historical Korean source map (DMP) supplies exact event-to-sprite ID.
+   Every picture here is rendered as a separate live chessboard entity.
+   No frozen screenshot or image-overlay button trickery. */
+#app.app-classic-dice #game .board-world .tile{
+ width:112px!important;
+ height:75px!important;
+ transform:translate(-50%,-50%)!important;
+ transform-origin:center center!important;
+ border:0!important;
+ border-radius:0!important;
+ box-shadow:none!important;
+ filter:drop-shadow(2px 7px 3px #090e28b3)!important;
+ color:#ffffd9;
+ padding:0!important;
+ background-color:transparent!important;
+ background-size:100% 100%!important;
+ overflow:visible!important;
+}
+#app.app-classic-dice #game .board-world .tile::before,
+#app.app-classic-dice #game .board-world .tile::after{display:none!important}
+#app.app-classic-dice #game .board-world .tile[data-original-art]{
+ border:0!important;background-color:transparent!important;
+ background-repeat:no-repeat!important;background-position:center!important;
+ background-size:100% 100%!important;
+}
+#app.app-classic-dice #game .board-world .tile[data-original-art] .tile-symbol{
+ display:none!important
+}
+#app.app-classic-dice #game .board-world .tile small{
+ position:absolute!important;right:11px!important;
+ bottom:16px!important;z-index:3!important;
+ color:#f9ecbf!important;
+ background:#2530648a!important;
+ box-shadow:0 1px 2px #171f40a0;
+ padding:0px 3px!important;
+ border-radius:2px;
+ font:bold 8px Arial,sans-serif!important;
+ text-shadow:0 1px #263062!important;
+ transform:none!important;
+}
+#app.app-classic-dice #game .board-world .tile[data-original-art].player-here{
+ filter:drop-shadow(0 0 4px #bcefffaa) drop-shadow(2px 6px 4px #191a3aba)!important;
+}
+#app.app-classic-dice #game .board-world .tile[data-original-art]:hover{
+ filter:brightness(1.15) drop-shadow(0 0 8px #fff5baaa)!important;
+}
+#app.app-classic-dice #game .board-world .tile[data-original-art].start small,
+#app.app-classic-dice #game .board-world .tile[data-original-art].goal small{
+ background:#171943a9!important
+}
+/* Original standees visibly stand on, rather than behind, native isometric cards. */
+#app.app-classic-dice #game .board-world .board-pawn{
+ width:65px!important;height:93px!important;
+ transform:translate(-50%,-78%)!important;
+}
+#app.app-classic-dice #game .board-world .board-pawn::before{
+ bottom:5px!important;z-index:-1;
+}
+#app.app-classic-dice #game .board-world #board-pawns{z-index:8!important}
+#app.app-classic-dice #game #board-lines{opacity:.06!important}
+@media(max-width:630px){
+ #app.app-classic-dice #game .board-world .tile{width:111px!important;height:74px!important}
+ #app.app-classic-dice #game .board-world .board-pawn{width:60px!important;height:89px!important}
+}
+@media(prefers-reduced-motion:reduce){
+ #app.app-classic-dice #game .board-world .tile{transition:none!important}
+}
