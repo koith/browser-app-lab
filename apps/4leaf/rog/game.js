@@ -116,11 +116,11 @@ function ask(title,body,options){return new Promise(resolve=>modal(title,body,op
 function toast(message){log(message);$('move-log').textContent=message}
 function rosterByIds(ids){return (ids||[]).map(id=>CARD_MAP[id]).filter(Boolean).slice(0,4)}
 function teamStats(ids){
- const cards=rosterByIds(ids),field=cards.slice(0,3);
- const attack=field[0]||BASE_CARDS[0],defend=field[1]||attack,assist=field[2]||null;
+ const cards=(ids||[]).slice(0,4).map(id=>CARD_MAP[id]||null),field=cards.slice(0,3).filter(Boolean);
+ const attack=cards[0]||BASE_CARDS[0],defend=cards[1]||attack,assist=cards[2]||null;
  const same=field.length>0&&field.every(c=>c.move===field[0].move);
  return {move:same?field[0].move:1,atk:attack.atk,def:defend.def,int:assist?assist.int:0,
- point:cards.reduce((sum,c)=>sum+c.point,0),ability:attack.ability,abilityId:attack.abilityId,portrait:attack.portrait,name:attack.name};
+ point:cards.reduce((sum,c)=>sum+(c?.point||0),0),ability:attack.ability,abilityId:attack.abilityId,portrait:attack.portrait,name:attack.name};
 }
 function ownedCards(){return profile.owned.filter(x=>CARD_MAP[x])}
 function drawTeam(){
