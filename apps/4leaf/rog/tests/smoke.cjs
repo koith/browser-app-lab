@@ -18,6 +18,7 @@ async function run(){
  assert.ok((await page.locator('#map-select option').count())>=25,'25 original archive map names');
  assert.ok(await page.evaluate(()=>window.ORIGINAL_LEAF_CHESSMEN.length>=90),'original CHR chessman data loaded');
  assert.ok(await page.locator('#game').isVisible(),'game scene active');
+ assert.equal(await page.locator('#app.app-classic-dice').count(),1,'original focused game presentation active');
  assert.ok(await page.evaluate(()=>{
    const source=window.ORIGINAL_LEAF_TILES['0172'];
    const current=window.__ROG_TEST__.getMatch().tiles;
@@ -29,6 +30,7 @@ async function run(){
  await page.waitForFunction(()=>window.__ROG_TEST__.getMatch().players[0].position>0,{timeout:10000});
  await page.screenshot({path:'rog-game.png'});
  assert.ok((await page.evaluate(()=>window.__ROG_TEST__.getMatch().players[0].position))>first);
+ await page.locator('#exit-game').click();
  await page.locator('[data-route="shop"]').first().click();
  await page.waitForSelector('#shop:not(.hidden)');
  assert.equal(await page.locator('#shop-grid .shop-card').count(),9,'nine original Magic Carden slots');
@@ -48,6 +50,7 @@ async function run(){
  assert.ok(await page.locator('#roll-btn').isVisible());
  // Real human-vs-human turn-taking, independent cards, actor motion and save/resume.
  await page.setViewportSize({width:1280,height:860});
+ await page.locator('#exit-game').click();
  await page.locator('[data-route="lobby"]').first().click();
  await page.locator('#lobby-create').click();
  await page.locator('#game-mode').selectOption('hotseat');
