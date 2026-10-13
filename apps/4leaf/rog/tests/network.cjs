@@ -74,6 +74,22 @@ const path=require('path');
   const one=await host.evaluate(()=>window.__LEAF_BRIDGE__.getMatch().players.map(p=>p.position));
   const two=await guest.evaluate(()=>window.__LEAF_BRIDGE__.getMatch().players.map(p=>p.position));
   assert.deepEqual(one,two,'board position state must remain synchronized across independent browser contexts');
+
+  // Host-authoritative peer duel must wait for the remote human's card choice.
+  await host.evaluate(()=>{
+    const m=window.__LEAF_BRIDGE__.getMatch();
+    m.active=1;m.players[1].usedItem=false;m.players[1].items=['change'];
+    m.players[0].position=15;m.players[1].position=15;
+    window.__LEAF_BRIDGE__.onState(m);window.__ROG_TEST__.drawGame();
+    window.__ROG_TEST__.resolveBattle(m.players[1],m.players[0],false);
+  });
+  await guest.waitForFunction(()=>document.querySelector('#modal-title')?.textContent?.includes('전투 카드 선택'),null,{timeout:11000});
+  assert.ok(await host.locator('#battle-visual').isVisible());
+  await guest.locator('#modal-buttons button').filter({hasText:'체인지 카드'}).click();
+  await host.waitForFunction(()=>!document.querySelector('#battle-visual'),null,{timeout:11000});
+  await guest.waitForFunction(()=>window.__LEAF_BRIDGE__.getMatch()?.players[1]?.items?.length===0,null,{timeout:11000});
+  assert.ok(await guest.locator('#modal').evaluate(el=>el.classList.contains('hidden')));
+  console.log('WEBRTC BATTLE PASS: guest uses actual Change card and host resolves remote duel');
   assert.deepEqual(errors,[],'no client JavaScript errors');
   await guest.screenshot({path:'rog-online-guest.png'});
   await host.screenshot({path:'rog-online-host.png'});
