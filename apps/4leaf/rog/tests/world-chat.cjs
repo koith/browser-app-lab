@@ -56,6 +56,32 @@ const path=require('path');
  await host.locator('[data-region="street"]').click();
  assert.ok(await host.locator('#city:not(.hidden) #street-viewport').isVisible(),'original Keltica MainStreet opens from the real map');
  assert.equal(await host.locator('#street-track .street-artwork').getAttribute('src'),'./original/MainStreet/back.png');
+ // The original MainStreet scene was assembled from back.png plus SEVEN
+ // original per-business sprites. Pixel compositing must remove their green
+ // chroma key, and building buttons must remain interactive.
+ await host.waitForFunction(()=>{
+  const tiles=[...document.querySelectorAll('.street-building-art')];
+  return tiles.length===7&&tiles.every(c=>c.dataset.ready==='true');
+ },null,{timeout:16000});
+ const streetArtwork=await host.evaluate(()=>[...document.querySelectorAll('.street-building-art')].map(c=>{
+  const d=c.getContext('2d').getImageData(0,0,c.width,c.height).data;
+  let transparent=0,painted=0,greenLeak=0;
+  for(let i=0;i<d.length;i+=4){
+   if(d[i+3]===0)transparent++;
+   else{painted++;if(d[i+1]>205&&d[i]<92&&d[i+2]<100&&d[i+1]>d[i]*1.65&&d[i+1]>d[i+2]*1.55)greenLeak++}
+  }
+  return {file:c.dataset.source,w:c.width,h:c.height,painted,transparent,greenLeak};
+ }));
+ assert.deepEqual(streetArtwork.map(x=>x.file),['dress','event','card','hair','accessory','dandymodern','office'],'all seven actual MainStreet source buildings, not proxy illustrations');
+ assert.ok(streetArtwork.every(x=>x.painted>200&&x.transparent>100),'every native shop sprite contains artwork and transparent green key');
+ assert.ok(streetArtwork.every(x=>x.greenLeak===0),'no unreplaced source bright green regions');
+ assert.deepEqual(streetArtwork.map(x=>[x.w,x.h]),[[230,196],[190,229],[183,266],[199,178],[152,136],[212,222],[215,238]],'pixel dimensions agree with extracted PAK manifest');
+ assert.equal(await host.locator('[data-street="magic"]').getAttribute('aria-label'),'매직카덴 · 카드샵','original card shop identification');
+ await host.locator('[data-street="magic"]').evaluate(el=>el.click());
+ assert.ok(await host.locator('#shop:not(.hidden)').isVisible(),'native MainStreet card building enters working Magic Carden shop');
+ await host.evaluate(()=>window.__ROG_TEST__.go('city'));
+ assert.ok(await host.locator('#city:not(.hidden)').isVisible(),'shop to MainStreet return route works');
+
  const sx1=await host.evaluate(()=>window.__LEAF_STREET__.getState().x);
  await host.locator('#street-right').click();
  const sx2=await host.evaluate(()=>window.__LEAF_STREET__.getState().x);

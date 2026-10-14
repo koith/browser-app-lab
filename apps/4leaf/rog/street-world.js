@@ -4,14 +4,17 @@
 (function(){
  const $=id=>document.getElementById(id);
  const WIDTH=1938,HEIGHT=404;
+ // MainStreet PAK contains seven independent chroma-keyed building sprites.
+ // The location coordinates are currently reconstructed against back.png;
+ // original click-map coordinates are not yet decoded from the executable.
  const shops=[
-  {id:'fashions',x:210,y:133,w:190,h:160,title:'패션 거리 · 켈티카'},
-  {id:'sweet',x:460,y:138,w:170,h:188,title:'프레쉬 센트 · 거리 상점'},
-  {id:'magic',x:717,y:158,w:150,h:170,title:'매직카덴 카드 상점',route:'shop'},
-  {id:'court',x:941,y:22,w:147,h:247,title:'네나루하의 정원'},
-  {id:'gallery',x:1192,y:124,w:157,h:183,title:'켈티카 거리 입구'},
-  {id:'dandy',x:1350,y:130,w:169,h:180,title:'패션 상점'},
-  {id:'office',x:1613,y:76,w:178,h:235,title:'상점 / 이벤트'}
+  {id:'fashions',asset:'dress',x:182,y:114,w:230,h:196,title:'댄디캣 클래식 · 드레스샵',category:'의상'},
+  {id:'sweet',asset:'event',x:449,y:96,w:190,h:229,title:'프레쉬센트 · 이벤트홀',category:'이벤트'},
+  {id:'magic',asset:'card',x:699,y:63,w:183,h:266,title:'매직카덴 · 카드샵',route:'shop'},
+  {id:'court',asset:'hair',x:915,y:104,w:199,h:178,title:'심리펙 · 헤어샵',category:'헤어'},
+  {id:'gallery',asset:'accessory',x:1194,y:151,w:152,h:136,title:'액세서리 · 잡화점',category:'잡화'},
+  {id:'dandy',asset:'dandymodern',x:1328,y:92,w:212,h:222,title:'댄디캣 · 드레스샵',category:'의상'},
+  {id:'office',asset:'office',x:1591,y:76,w:215,h:238,title:'네나루하 마법학원',category:'지역 시설'}
  ];
  const state={viewport:null,track:null,x:WIDTH/2,scale:1,down:null,clientScale:1};
  function render(){
@@ -34,14 +37,44 @@
   else if(id==='court')showShopPlaceholder(shop);
  }
  function showShopPlaceholder(shop){
-  const old=$('street-shop-detail');if(old)old.remove();
-  const panel=document.createElement('div');panel.className='street-shop-detail';panel.id='street-shop-detail';
+  // The building art and its destination label are original data.
+  // Do not invent historical product catalogues, GP prices or transactions.
+  $('street-shop-detail')?.remove();
+  const panel=document.createElement('section');panel.className='street-shop-detail';panel.id='street-shop-detail';
+  panel.setAttribute('role','dialog');panel.setAttribute('aria-label',shop.title);
   const title=document.createElement('b');title.textContent=shop.title;
-  const sub=document.createElement('p');sub.textContent='원본 켈티카 거리의 상점 위치입니다. 확인된 원작 기능부터 순차적으로 복원하고 있습니다.';
-  const close=document.createElement('button');close.textContent='닫기';close.onclick=()=>panel.remove();
-  panel.append(title,sub,close);
-  state.viewport.append(panel);
+  const art=document.createElement('img');art.className='street-shop-preview';
+  art.src='./original/MainStreet/'+shop.asset+'.png';art.alt=shop.title;
+  const sub=document.createElement('p');
+  sub.textContent='원본 켈티카 거리의 '+shop.category+' 시설입니다. 원작 상품·가격·기능 데이터는 아직 확보되지 않아 구매를 허용하지 않습니다.';
+  const close=document.createElement('button');close.type='button';close.textContent='거리로 돌아가기';close.onclick=()=>panel.remove();
+  panel.append(title,art,sub,close);state.viewport.append(panel);
+  close.focus();
  }
+ // Convert the original MainStreet sprites' bright-green transparency key,
+ // retaining precisely the source bitmap pixels, not CSS-drawn replacement art.
+ function drawOriginalBuilding(canvas,shop){
+  const img=new Image();img.decoding='async';
+  img.onload=()=>{
+   if(!canvas.isConnected)return;
+   if(location.protocol==='file:'){canvas.dataset.ready='offline';return}
+   try{
+    canvas.width=img.naturalWidth;canvas.height=img.naturalHeight;
+    const ctx=canvas.getContext('2d',{willReadFrequently:true});
+    ctx.drawImage(img,0,0);
+    const data=ctx.getImageData(0,0,canvas.width,canvas.height);
+    for(let i=0;i<data.data.length;i+=4){
+     const r=data.data[i],g=data.data[i+1],b=data.data[i+2];
+     if(g>205&&r<92&&b<100&&g>r*1.65&&g>b*1.55)data.data[i+3]=0;
+    }
+    ctx.putImageData(data,0,0);
+    canvas.dataset.ready='true';
+   }catch{canvas.dataset.ready='offline'}
+  };
+  img.onerror=()=>{canvas.dataset.ready='missing';console.error('Missing original MainStreet building '+shop.asset)};
+  img.src='./original/MainStreet/'+shop.asset+'.png';
+ }
+
  function build(){
   const scene=$('city');if(!scene)return;
   scene.replaceChildren();
@@ -55,7 +88,12 @@
    const b=document.createElement('button');b.type='button';b.className='street-location';b.dataset.street=shop.id;
    b.style.cssText='left:'+shop.x+'px;top:'+shop.y+'px;width:'+shop.w+'px;height:'+shop.h+'px;';
    b.title=shop.title;b.setAttribute('aria-label',shop.title);
-   const hint=document.createElement('span');hint.textContent=shop.title;b.append(hint);
+   const building=document.createElement('canvas');
+   building.className='street-building-art';building.width=shop.w;building.height=shop.h;
+   building.dataset.source=shop.asset;
+   const hint=document.createElement('span');hint.textContent=shop.title;
+   b.append(building,hint);
+   drawOriginalBuilding(building,shop);
    b.onclick=()=>selectShop(shop.id);track.append(b);
   }
   viewport.append(track);
