@@ -34,6 +34,13 @@ const assert=require('node:assert/strict');
   assert.deepEqual(await page.evaluate(()=>{const s=window.__LEAF_LOBBY__.getState();return [s.region,s.channel]}),['south','benya:4']);
   assert.equal(await page.locator('#lobby-room-list .lobby-room-row').count(),0,'a northern Ispin saved match must not leak into southern Benya channel');
   assert.ok(await page.locator('#lobby-room-list .lobby-room-empty').isVisible(),'a different dice channel has an independent empty room list');
+  // A previous reconstruction incorrectly put ChatTown log messages under
+  // dice channel keys. Preserve those user messages across the correction.
+  await page.evaluate(()=>{
+   const oldScope='town:north:ispin:2',key='leaf_social_log_'+encodeURIComponent(oldScope);
+   localStorage.setItem(key,JSON.stringify([{id:'legacy-dice-chat-key-test',scope:oldScope,
+    text:'보존되어야 할 이전 채팅 기록',user:'기존사용자',sender:'old-tab',time:Date.now()-50000}]));
+  });
   await page.reload();
   await page.waitForFunction(()=>window.__LEAF_LOBBY__&&window.__LEAF_SOCIAL__);
   assert.deepEqual(await page.evaluate(()=>{const s=window.__LEAF_LOBBY__.getState();return [s.region,s.channel]}),['south','benya:4'],'dice channel persists within the browsing session');
@@ -41,6 +48,8 @@ const assert=require('node:assert/strict');
   await page.locator('[data-route="rooms"]').first().click();
   assert.ok(await page.locator('#rooms:not(.hidden)').isVisible(),'real ChatTown is independently accessible');
   assert.equal(await page.locator('.social-district-hotspot').count(),8);
+  assert.ok((await page.locator('#chat-log').textContent()).includes('보존되어야 할 이전 채팅 기록'),'previously channel-misclassified chat history is safely migrated');
+  assert.ok(await page.evaluate(()=>localStorage.getItem('leaf_social_log_'+encodeURIComponent('town:north:ispin:2'))!==null),'old user log keys are kept for non-destructive migration');
   await page.locator('#social-chat-south').click();
   assert.equal(await page.evaluate(()=>window.__LEAF_SOCIAL__.getState().region),'south');
   assert.equal(await page.locator('.dice-channel-hotspot').count(),28,'ChatTown switching never modifies the dice selector');
