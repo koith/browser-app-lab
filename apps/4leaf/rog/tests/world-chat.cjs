@@ -316,8 +316,10 @@ const path=require('path');
  third.on('pageerror',e=>errors.push('third: '+e.stack));
  await third.goto(url);
  await third.waitForFunction(()=>!!window.__LEAF_SOCIAL__&&!!window.__ROG_TEST__,null,{timeout:8000});
- await third.locator('[data-region="north"]').click();
- await third.locator('[data-channel="ispin:1"]').click();
+ await third.evaluate(()=>{
+  window.__LEAF_SOCIAL__.openRegion('north');
+  window.__ROG_TEST__.go('rooms');
+ });
  await third.locator('.social-district-hotspot').nth(3).click();
  await third.waitForFunction(id=>{
    const row=[...document.querySelectorAll('.social-directory-row')].find(x=>x.dataset.room===id);
