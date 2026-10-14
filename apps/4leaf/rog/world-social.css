@@ -214,3 +214,16 @@ body>.social-modal .recordable-article p{white-space:pre-wrap;overflow-wrap:anyw
 }
 /* ChatRoom title belongs in the upper window chrome, not over the art. */
 #rooms .social-interior .social-room-title{display:none!important}
+
+/* Registry/sava sprites have a 75×141 native frame; restoring those pixels
+   improves relative height of characters against the 794×528 ChatRoom art. */
+#rooms .social-interior .social-avatar{
+ width:80px;
+ height:147px;
+}
+#rooms .social-interior .social-avatar img{
+ width:75px;
+ height:141px;
+ object-fit:contain;
+ object-position:center bottom;
+}
