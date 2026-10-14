@@ -1036,13 +1036,12 @@
  }
 
  function centralRoom(dto){
-  const old=centralRooms.get(dto.id);
   return {id:dto.id,name:safe(dto.name,26),region:dto.region,
    district:sourceDistrict(dto.district),background:allowedBackground(dto.background),
    capacity:allowedCapacity(dto.capacity),preset:!!dto.preset,
    passwordProof:dto.locked?'server-locked':'',passwordSalt:'',
-   ownerId:dto.isOwner?tabId:(old?.ownerId||''),
-   owner:dto.isOwner?nick():(old?.owner||''),created:Number(dto.created)||0};
+   ownerId:dto.isOwner?tabId:'',owner:dto.isOwner?nick():'',
+   created:Number(dto.created)||0};
  }
  function initCentral(){
   if(!central.enabled)return;
@@ -1061,14 +1060,13 @@
     presence();
    }else if(event.type==='rooms'){
     if(!event.rooms||!Array.isArray(event.rooms))return;
-    const known=new Map(centralRooms);
     for(const [id,r] of centralRooms)if(r.region===event.region&&r.district===event.district)centralRooms.delete(id);
     for(const r of event.rooms){
      centralCounts.set(r.id,Number(r.occupants)||0);
      if(!r.preset){
-      const current=centralRoom(r),prior=known.get(r.id);
-      if(prior?.ownerId){current.ownerId=prior.ownerId;current.owner=prior.owner}
-      centralRooms.set(r.id,current);
+      // The server's isOwner flag is the ONLY source of room-management
+      // privilege. A stale locally stored owner name cannot grant controls.
+      centralRooms.set(r.id,centralRoom(r));
      }
     }
     if(state.view==='directory'&&event.region===state.region&&event.district===state.district)renderDirectory();
