@@ -319,11 +319,12 @@
   if(v.startsWith('/nick ')){$('rename')?.click();return}
   const content=originalChatToy(v)||(v.startsWith('/me ')?'＊ '+nick()+' '+v.slice(4):v);
   const item={kind:'chat',id:uuid(),scope:state.scope,user:nick(),text:content,sender:tabId,time:now()};
-  if(central.enabled&&(!central.ready||central.joinedId!==state.roomId)){
+  if(central.enabled&&state.view==='room'&&(!central.ready||central.joinedId!==state.roomId)){
    systemLine('중앙 채팅방에 실제 입장한 뒤 메시지를 보낼 수 있습니다.');return;
   }
   storeMessage(item);renderMessage(item);showBubble(tabId,content);
-  if(central.enabled)central.chat(content).catch(e=>systemLine('서버 메시지 전송 실패: '+e.message));
+  if(central.enabled&&state.view==='room')
+   central.chat(content).catch(e=>systemLine('서버 메시지 전송 실패: '+e.message));
   else{sendLocal(item);sendRTC(item)}
  }
  function onlinePeers(sc=state.scope){
@@ -1047,6 +1048,12 @@
     }
     if(state.view==='directory'&&event.region===state.region&&event.district===state.district)renderDirectory();
    }else if(event.type==='snapshot'){
+    if(state.view==='room'&&central.joinedId===state.roomId&&!event.roomId){
+     central.leave().catch(()=>{});
+     state.view='directory';state.roomId=null;render();
+     systemLine('접속해 있던 방이 닫히거나 서버에서 퇴장 처리되었습니다.');
+     return;
+    }
     for(const [id,p] of state.peers)if(p.source==='central')state.peers.delete(id);
     if(event.roomId===state.roomId&&state.view==='room'&&central.joinedId===state.roomId){
      for(const person of event.peers||[]){
