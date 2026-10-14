@@ -34,6 +34,10 @@
  const TOWN_SIGN_PIXEL_ANCHORS=[[85,63],[265,104],[448,88],[625,69],
                                [48,199],[239,244],[588,203],[417,295]];
  const originalTemplates=[2,3,5,4,0,1];
+ // The same original ChatTown client also runs offline. When a separate HTTPS
+ // authority is configured, remote occupancy/rooms replace browser guesses.
+ const central=window.__LEAF_CENTRAL_CHAT__||{enabled:false};
+ const centralRooms=new Map(),centralCounts=new Map();
  // Native v0.9 ChatTown supported a spatial room area (up to 200 rooms per
  // town per the 2002 announcement). Exact historical room positions/labels
  // are not available in the recovered image assets. These are deterministic,
@@ -91,14 +95,19 @@
   return roomById(state.roomId);
  }
  function roomById(id){
-  return state.rooms.find(r=>r.id===id)||staticRooms.get(id)||null;
+  return central.enabled?(centralRooms.get(id)||staticRooms.get(id)||null):
+   (state.rooms.find(r=>r.id===id)||staticRooms.get(id)||null);
  }
  // ChatRoom/room0..room5 are six BACKGROUND IMAGES, not six historical
  // permanently open server rooms. A real original server supplied the room
  // catalogue. Only display rooms actually created and shared by participants.
  function catalogue(){
-  return state.rooms.filter(r=>r.region===state.region&&r.district===state.district)
+  const source=central.enabled?[...centralRooms.values()]:state.rooms;
+  return source.filter(r=>r.region===state.region&&r.district===state.district)
    .sort((a,b)=>b.created-a.created);
+ }
+ function roomOccupancy(roomId){
+  return central.enabled?(centralCounts.get(roomId)||0):onlinePeers('room:'+roomId).length;
  }
  function scope(){
   if(state.view==='room'&&state.roomId)return 'room:'+state.roomId;
@@ -184,7 +193,7 @@
    const entry={id:safe(p.id,90),scope:safe(p.scope,120),user:safe(p.user,12),text:safe(p.text,250),sender:safe(p.sender,100),time:Number(p.time)||now()};
    if(!entry.scope||!entry.text)return;
    storeMessage(entry);
-   if(source!=='rtc')sendRTC({kind:'chat',...entry});
+   if(source==='local')sendRTC({kind:'chat',...entry});
    if(source==='rtc')sendLocal({kind:'chat',...entry});
    if(entry.scope===state.scope){renderMessage(entry);showBubble(entry.sender,entry.text)}
    return;
@@ -309,7 +318,10 @@
  }
  function onlinePeers(sc=state.scope){
   const fresh=[compactPresence()];
-  for(const peer of state.peers.values())if(now()-peer.last<17000&&peer.id!==tabId)fresh.push(peer);
+  for(const peer of state.peers.values()){
+   if(central.enabled&&peer.source!=='central')continue;
+   if(now()-peer.last<17000&&peer.id!==tabId)fresh.push(peer);
+  }
   return fresh.filter(x=>x.scope===sc);
  }
  function everyoneCount(){
@@ -334,7 +346,7 @@
   }
   const rooms=$('social-directory-list');
   if(rooms&&state.view==='directory')for(const row of rooms.querySelectorAll('[data-room]')){
-    const count=onlinePeers('room:'+row.dataset.room).length;
+    const count=roomOccupancy(row.dataset.room);
     const badge=row.querySelector('.social-room-users');
     if(badge){
      const full=count>=allowedCapacity(roomById(row.dataset.room)?.capacity);
@@ -560,7 +572,7 @@
    const name=document.createElement('b');name.textContent=r.name;
    const lock=document.createElement('small');lock.textContent=r.passwordProof?'🔒':'♧';
    const occupancy=document.createElement('span');occupancy.className='social-room-users';
-   occupancy.textContent=onlinePeers('room:'+r.id).length+'/'+allowedCapacity(r.capacity)+'명';
+   occupancy.textContent=roomOccupancy(r.id)+'/'+allowedCapacity(r.capacity)+'명';
    const arrow=document.createElement('span');arrow.className='social-room-action';arrow.textContent='입장 ›';
    b.append(number,lock,name,occupancy,arrow);
    if(!roomHasSpace(r)){b.classList.add('social-room-full');arrow.textContent='정원 초과'}
