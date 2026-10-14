@@ -169,3 +169,24 @@ body>.social-modal .recordable-article p{white-space:pre-wrap;overflow-wrap:anyw
  #rooms .recordable-board>footer{font-size:8px;padding:5px}
  body>.social-modal .recordable-compose textarea{width:100%}
 }
+
+/* Original Keltica three-sector panorama from MainStreet/Back.gif,
+   displayed as an actual scrollable game environment. */
+#city{background:#516fa2!important;position:relative}
+#city .street-viewport{position:absolute;inset:0 0 38px;overflow:hidden;touch-action:pan-y;user-select:none;background:linear-gradient(#9bccfc,#718bb9 60%,#526c98)}
+#city .street-track{position:absolute;top:0;left:0;transform-origin:0 0;transition:transform .18s ease-out;will-change:transform;box-shadow:0 7px 18px #1b35678c}
+#city .street-artwork{width:1938px;height:404px;position:absolute;inset:0;display:block;pointer-events:none}
+#city .street-location{position:absolute;z-index:5;background:transparent!important;border:2px dashed transparent;border-radius:13px;padding:0;cursor:pointer;box-shadow:none}
+#city .street-location:hover,#city .street-location:focus-visible{border-color:#fff6a6bd;box-shadow:inset 0 0 21px #fff3a02f,0 0 9px #ffeea788;outline:none}
+#city .street-location span{display:none;position:absolute;bottom:calc(100% + 2px);left:50%;transform:translateX(-50%);white-space:nowrap;color:#fbf7df;background:#2f398aeb;border:2px ridge #f2dbad;border-radius:6px;padding:7px 12px;font-size:12px;font-weight:bold;text-shadow:1px 1px #12215a;box-shadow:0 3px 6px #1b2341}
+#city .street-location:hover span,#city .street-location:focus-visible span{display:block}
+#city .street-navigation{position:absolute;inset:auto 0 0;height:40px;display:flex;justify-content:center;align-items:center;gap:6px;background:linear-gradient(#8497c9,#344b92);border-top:3px ridge #a4b8dc;color:#fff4d6}
+#city .street-navigation button{background:linear-gradient(#9ab5d9,#567bb5);border:2px ridge #c3d4f1;padding:5px 10px;color:#f9f6e9;font-weight:bold;cursor:pointer}
+#city .street-navigation span{text-align:center;min-width:190px;font-size:11px;color:#f2eecf}
+#city .street-shop-detail{position:absolute;z-index:11;top:50%;left:50%;transform:translate(-50%,-50%);width:min(350px,80vw);background:linear-gradient(#6783c0,#263b80);border:3px ridge #c8d7ed;box-shadow:0 7px 22px #152a58;color:#f7faff;padding:20px;line-height:1.6}
+#city .street-shop-detail b{display:block;color:#fff1bb;font-size:16px}
+#city .street-shop-detail button{background:#718cc8;border:2px ridge #bdcce9;color:#fff6dc;padding:6px 13px}
+@media(max-width:650px){
+ #city .street-navigation span{min-width:0;flex:1;font-size:9px}
+ #city .street-navigation button{font-size:9px;padding:5px}
+}
