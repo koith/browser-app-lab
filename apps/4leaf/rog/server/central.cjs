@@ -39,9 +39,12 @@ function makeServer(options={}){
    preset:true,background:[2,3,5,4,0,1][slot%6],capacity:12,created:0};
  };
  const room=id=>rooms.get(id)||sourceRoom(id);
- const dto=r=>({id:r.id,name:r.name,region:r.region,district:r.district,
+ const dto=(r,user)=>({id:r.id,name:r.name,region:r.region,district:r.district,
   background:r.background,capacity:r.capacity,preset:!!r.preset,
-  created:r.created,locked:!!r.passwordHash,occupants:count(r.id)});
+  created:r.created,locked:!!r.passwordHash,occupants:count(r.id),
+  // Never trust client-supplied room owners; expose ownership only to its
+  // authenticated server-side session. This survives page reloads.
+  isOwner:!!user&&!r.preset&&r.ownerId===user.id});
  const clean=()=>{for(const [token,s] of sessions)if(clock()-s.lastSeen>45000)sessions.delete(token)};
  const ticker=setInterval(clean,10000);ticker.unref?.();
  const send=(res,code,data,origin)=>{
@@ -82,7 +85,10 @@ function makeServer(options={}){
     if(!sessions.has(token))sessions.set(token,{id,roomId:null,nick:safe(b.nick,12)||'Guest',
      avatar:0,facing:1,position:{x:52,y:76},lastSeen:clock(),recent:[]});
     else{const prior=sessions.get(token);prior.lastSeen=clock();prior.nick=safe(b.nick,12)||prior.nick}
-    return send(res,201,{token,id,ttlMs:45000},origin);
+    const session=sessions.get(token);
+    const restored=session.roomId&&room(session.roomId);
+    return send(res,201,{token,id,ttlMs:45000,
+     room:restored?dto(restored,session):null},origin);
    }
    const token=/^Bearer ([a-f0-9]{64})$/.exec(req.headers.authorization||'')?.[1];
    const s=sessions.get(token);
@@ -94,7 +100,7 @@ function makeServer(options={}){
     const i=REGIONS[region].indexOf(district);
     const permanent=Array.from({length:8},(_,slot)=>sourceRoom('leaf-public-'+region+'-'+i+'-'+slot));
     const extra=[...rooms.values()].filter(r=>r.region===region&&r.district===district);
-    return send(res,200,{rooms:[...permanent,...extra].map(dto)},origin);
+    return send(res,200,{rooms:[...permanent,...extra].map(r=>dto(r,s))},origin);
    }
    if(req.method==='POST'&&route==='/api/rooms'){
     const b=await parse(req),district=safe(b.district,40);
@@ -110,7 +116,7 @@ function makeServer(options={}){
     const r={id:randomUUID(),region:b.region,district,name,capacity,background,preset:false,
      ownerId:s.id,ownerTokenHash:secretFingerprint(token),created:clock(),passwordSalt:salt,
      passwordHash:password?scryptSync(password,salt,32).toString('hex'):''};
-    rooms.set(r.id,r);save();return send(res,201,{room:dto(r)},origin);
+    rooms.set(r.id,r);save();return send(res,201,{room:dto(r,s)},origin);
    }
    const action=/^\/api\/rooms\/([^/]+)\/(join|close)$/.exec(route);
    if(req.method==='POST'&&action){
@@ -129,7 +135,7 @@ function makeServer(options={}){
     // Check and reserve in the same synchronous event-loop turn.
     if(s.roomId!==r.id&&count(r.id)>=r.capacity)fail(409,'Room is full');
     s.roomId=r.id;s.position={x:52,y:76};
-    return send(res,200,{joined:true,room:dto(r)},origin);
+    return send(res,200,{joined:true,room:dto(r,s)},origin);
    }
    if(req.method==='POST'&&route==='/api/leave'){
     s.roomId=null;return send(res,200,{left:true},origin);
