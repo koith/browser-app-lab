@@ -42,7 +42,7 @@ jobs:
           LEAF_CENTRAL_ORIGINS=http://127.0.0.1:8765 node apps/4leaf/rog/server/central.cjs > /tmp/leaf-authority.log 2>&1 &
           nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog > /tmp/leaf-static.log 2>&1 &
           sleep 2
-          curl -fSs http://127.0.0.1:8787/api/health
+          curl -fSs http://127.0.0.1:8877/api/health
           curl -fSsI http://127.0.0.1:8765/index.html
         env:
           PORT: '8877'
