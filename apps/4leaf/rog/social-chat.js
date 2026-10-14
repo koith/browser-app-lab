@@ -16,10 +16,14 @@
   ]}
  };
  const originalTemplates=[2,3,5,4,0,1];
+ // A historic 2-person chat-room event is documented. Other limits are
+ // restoration controls, not claims about the original server's room menu.
+ const allowedCapacity=n=>[2,4,8,12].includes(Number(n))?Number(n):12;
+ const allowedBackground=n=>Number.isInteger(Number(n))&&Number(n)>=0&&Number(n)<=5?Number(n):2;
  const avatars=['sava00','sava82','sava06','sava01','sava85','sava02','sava84','sava04','sava03','sava83','sava05','sava86'];
  const now=()=>Date.now(),uuid=()=>crypto.randomUUID?.()||Math.random().toString(36).slice(2)+String(Date.now());
  const safe=(s,max=100)=>String(s??'').replace(/[\u0000-\u001f\u007f]/g,' ').trim().slice(0,max);
- const tabId=uuid();
+ const tabId=(()=>{try{const key='leaf_social_tab_identity_v1';let id=sessionStorage.getItem(key);if(!id){id=uuid();sessionStorage.setItem(key,id)}return id}catch{return uuid()}})();
  const nick=()=>safe($('profile-name')?.textContent||'Guest',12)||'Guest';
  const state={region:'north',district:REGIONS.north.districts[3][0],view:'town',roomId:null,rooms:loadRooms(),peers:new Map(),seen:new Set(),bubble:null,scope:'world',avatar:0,position:{x:52,y:76}};
  let channel=null,rtc=null,dataChannel=null,rtcRole=null,resize=null,pulse=null,stageInfo=null,sceneInit=false;
@@ -36,8 +40,8 @@
   try{
    const raw=JSON.parse(localStorage.getItem('leaf_social_rooms_v3')||'[]');
    return Array.isArray(raw)?raw.filter(r=>r&&typeof r.id==='string'&&typeof r.name==='string'&&['north','south'].includes(r.region)).slice(-180).map(r=>({
-    id:safe(r.id,70),name:safe(r.name,26),region:r.region,district:safe(r.district,36),owner:safe(r.owner,24),
-    passwordProof:safe(r.passwordProof||'',65),passwordSalt:safe(r.passwordSalt||'',75),background:Number.isInteger(r.background)&&r.background>=0&&r.background<=5?r.background:2,created:Number(r.created)||0
+    id:safe(r.id,70),name:safe(r.name,26),region:r.region,district:safe(r.district,36),owner:safe(r.owner,24),ownerId:safe(r.ownerId||'',100),
+    passwordProof:safe(r.passwordProof||'',65),passwordSalt:safe(r.passwordSalt||'',75),background:allowedBackground(r.background),capacity:allowedCapacity(r.capacity),created:Number(r.created)||0
    })):[];
   }catch{return []}
  }
@@ -102,7 +106,7 @@
  }
  function sendRTC(packet){
   if(dataChannel?.readyState!=='open')return;
-  const data={v:1,...packet};
+  const data={v:1,from:tabId,...packet};
   try{dataChannel.send(JSON.stringify(data))}catch{}
  }
  function presence(announce=true){
@@ -161,11 +165,14 @@
      const r=p.room;
      if(r&&typeof r.id==='string'&&!roomById(r.id)&&state.rooms.length<200){
        const incoming={id:safe(r.id,70),name:safe(r.name,26),region:r.region==='south'?'south':'north',
-        district:safe(r.district,36),owner:safe(r.owner,24),passwordProof:safe(r.passwordProof,65),passwordSalt:safe(r.passwordSalt,75),
-        background:Math.max(0,Math.min(5,Number(r.background)||2)),created:Number(r.created)||now()};
+        district:safe(r.district,36),owner:safe(r.owner,24),ownerId:safe(r.ownerId||'',100),passwordProof:safe(r.passwordProof,65),passwordSalt:safe(r.passwordSalt,75),
+        background:allowedBackground(r.background),capacity:allowedCapacity(r.capacity),created:Number(r.created)||now()};
        state.rooms.push(incoming);saveRooms();if(state.view==='directory')renderDirectory();
      }
    }else{
+     const target=roomById(p.roomId);
+     // A connected participant must not evict another room owner's members.
+     if(target?.ownerId&&p.from!==target.ownerId)return;
      state.rooms=state.rooms.filter(r=>r.id!==p.roomId);saveRooms();
      if(state.roomId===p.roomId)openDirectory();
      else if(state.view==='directory')renderDirectory();
@@ -245,7 +252,12 @@
   if(rooms&&state.view==='directory')for(const row of rooms.querySelectorAll('[data-room]')){
     const count=onlinePeers('room:'+row.dataset.room).length;
     const badge=row.querySelector('.social-room-users');
-    if(badge)badge.textContent=count+'명 접속';
+    if(badge){
+     const full=count>=allowedCapacity(roomById(row.dataset.room)?.capacity);
+     badge.textContent=count+'/'+allowedCapacity(roomById(row.dataset.room)?.capacity)+'명';
+     row.classList.toggle('social-room-full',full);
+     const arrow=row.lastElementChild;if(arrow)arrow.textContent=full?'정원 초과':'입장 ›';
+    }
   }
   if(state.view==='room')renderOccupants();
  }
@@ -283,7 +295,7 @@
    {row:2,title:'기사단 게시판',act:()=>{openBoard();window.__ROG_TEST__?.go('rooms')}},
    {row:3,title:'아바타 선택',act:()=>openAvatarMenu()},
    {row:4,title:'매직카덴',act:()=>window.__ROG_TEST__?.go('shop')},
-   {row:7,title:'게임 안내',act:()=>window.__ROG_TEST__?.go('help-screen')},
+   {row:7,title:'게임 안내',act:()=>$('help')?.click()},
    {row:8,title:'월드맵으로 돌아가기',act:()=>window.__ROG_TEST__?.go('sky')}
   ];
   for(const item of actions){
@@ -419,16 +431,30 @@
    const num=document.createElement('span');num.className='social-room-number';num.textContent=String(i+1).padStart(2,'0');
    const name=document.createElement('b');name.textContent=r.name;
    const lock=document.createElement('small');lock.textContent=r.passwordProof?'🔒':'♧';
-   const occupancy=document.createElement('span');occupancy.className='social-room-users';occupancy.textContent=onlinePeers('room:'+r.id).length+'명 접속';
+   const occupancy=document.createElement('span');occupancy.className='social-room-users';occupancy.textContent=onlinePeers('room:'+r.id).length+'/'+allowedCapacity(r.capacity)+'명';
    const arrow=document.createElement('span');arrow.textContent='입장 ›';
    b.append(num,lock,name,occupancy,arrow);
+   if(onlinePeers('room:'+r.id).length>=allowedCapacity(r.capacity)){
+    b.classList.add('social-room-full');arrow.textContent='정원 초과';
+   }
    b.onclick=()=>joinRoom(r.id);
    list.append(b);
   }
   updateCounts();
  }
+ function roomHasSpace(room){
+  // The browser only knows currently connected peers. A future central
+  // room service must enforce capacity atomically across independent networks.
+  return state.roomId===room.id&&state.view==='room'||onlinePeers('room:'+room.id).length<allowedCapacity(room.capacity);
+ }
+ function roomFullNotice(room){
+  const body=document.createElement('div');body.className='social-modal-form';
+  body.textContent='이 채팅방은 현재 '+allowedCapacity(room.capacity)+'명으로 가득 찼습니다. 다른 방을 선택해 주세요.';
+  popup('채팅방 정원 초과',body);
+ }
  function joinRoom(id){
   const room=roomById(id);if(!room)return;
+  if(!roomHasSpace(room)){roomFullNotice(room);return}
   if(room.passwordProof){
    askText('비공개 채팅방','방 비밀번호',true,async value=>{
     try{
@@ -443,12 +469,13 @@
   state.view='directory';state.roomId=null;render();
  }
  function enterRoom(room){
+  if(!roomHasSpace(room)){roomFullNotice(room);return false}
   if(room.region!==state.region){state.region=room.region}
   state.district=room.district;state.roomId=room.id;state.view='room';
   const seats=roomSeats(room.background);
   const hash=[...tabId].reduce((a,c)=>(a*31+c.charCodeAt(0))>>>0,0);
   state.position={...seats[hash%seats.length]};
-  render();
+  render();return true;
  }
  function roomAvatar(user,index){
   const figure=document.createElement('button');figure.className='social-avatar';
@@ -534,7 +561,7 @@
   addRoomForeground(avatarLayer,room.background);
   // Original scene remains unobstructed; the avatar picker is in the recovered
   // top-toolbar icon row, while room owner actions stay in the window chrome.
-  if(!room.preset&&room.owner===nick()){
+  if(!room.preset&&room.ownerId===tabId||!room.preset&&!room.ownerId&&room.owner===nick()){
    const close=document.createElement('button');
    close.id='social-close-room';close.type='button';
    close.textContent='방 닫기';close.setAttribute('aria-label','현재 채팅방 닫기');
@@ -590,7 +617,7 @@
  }
  function showCreateRoom(){
   const body=document.createElement('form');body.className='social-modal-form';
-  body.innerHTML='<label>방 제목<input name="name" placeholder="방 이름" maxlength="26" required></label><label>배경<select name="background"><option value="2">서재</option><option value="3">클로버 응접실</option><option value="5">벽난로가 있는 방</option><option value="4">햇빛이 드는 방</option><option value="0">숲속 광장</option><option value="1">숲속 오솔길</option></select></label><label>비밀번호 (선택)<input name="password" type="password" maxlength="24" placeholder="비우면 공개방"></label><button type="submit">방 만들기</button>';
+  body.innerHTML='<label>방 제목<input name="name" placeholder="방 이름" maxlength="26" required></label><label>배경<select name="background"><option value="2">서재</option><option value="3">클로버 응접실</option><option value="5">벽난로가 있는 방</option><option value="4">햇빛이 드는 방</option><option value="0">숲속 광장</option><option value="1">숲속 오솔길</option></select></label><label>정원<select name="capacity"><option value="12">12명</option><option value="8">8명</option><option value="4">4명</option><option value="2">2명 전용</option></select></label><label>비밀번호 (선택)<input name="password" type="password" maxlength="24" placeholder="비우면 공개방"></label><button type="submit">방 만들기</button>';
   body.onsubmit=async e=>{
    e.preventDefault();const form=new FormData(body);
    const name=safe(form.get('name'),26);
@@ -599,7 +626,7 @@
    if(password&&password.length<6){const field=body.querySelector('[name="password"]');field.setCustomValidity('비밀번호는 6자 이상이어야 합니다.');field.reportValidity();return}
    const proof=password?await deriveRoomProof(password,salt):'';
    const room={id:uuid(),name,region:state.region,district:state.district,owner:nick(),
-    passwordProof:proof,passwordSalt:salt,background:Number(form.get('background'))||2,created:now()};
+    ownerId:tabId,passwordProof:proof,passwordSalt:salt,background:allowedBackground(form.get('background')),capacity:allowedCapacity(form.get('capacity')),created:now()};
    state.rooms.push(room);saveRooms();sendLocal({kind:'roomCreated',room});sendRTC({kind:'roomCreated',room});
    closePopup();enterRoom(room);
   };
@@ -607,7 +634,7 @@
  }
  function closeRoom(roomId){
   const room=roomById(roomId);
-  if(!room||room.preset||room.owner!==nick())return;
+  if(!room||room.preset||(room.ownerId?room.ownerId!==tabId:room.owner!==nick()))return;
   state.rooms=state.rooms.filter(r=>r.id!==roomId);
   saveRooms();sendLocal({kind:'roomClosed',roomId});sendRTC({kind:'roomClosed',roomId});
   openDirectory();
@@ -723,6 +750,8 @@
     if(route==='sky')changeScope('world');
     else if(route==='city')changeScope('city');
     else if(route==='rooms')render();
+    else changeScope('away:'+route); // leaving the scene vacates the chatroom; do not show ghost users in shop/game/help
+
   });
   const oldRename=$('rename')?.onclick;
   if($('rename'))$('rename').onclick=(...args)=>{
@@ -732,8 +761,8 @@
   presence();render();
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
- window.__LEAF_SOCIAL__={openRegion,openBoard,openDirectory,joinRoom,enterRoom,createRoom:(name,background=2)=>{
-  const room={id:uuid(),name:safe(name,26),region:state.region,district:state.district,owner:nick(),passwordProof:'',passwordSalt:'',background,created:now()};
+ window.__LEAF_SOCIAL__={openRegion,openBoard,openDirectory,joinRoom,enterRoom,createRoom:(name,background=2,capacity=12)=>{
+  const room={id:uuid(),name:safe(name,26),region:state.region,district:state.district,owner:nick(),ownerId:tabId,passwordProof:'',passwordSalt:'',background:allowedBackground(background),capacity:allowedCapacity(capacity),created:now()};
   state.rooms.push(room);saveRooms();sendLocal({kind:'roomCreated',room});enterRoom(room);return room.id;
  },send:publishText,getState:()=>({region:state.region,district:state.district,view:state.view,scope:state.scope,roomId:state.roomId,people:onlinePeers(),rooms:catalogue()}),
  sendRTC,now,render,transportMessage};
