@@ -1035,10 +1035,15 @@
     systemLine('중앙 채팅 서버 접속 완료 · 실제 다른 기기와 방 목록을 공유합니다.');
    }else if(event.type==='rooms'){
     if(!event.rooms||!Array.isArray(event.rooms))return;
+    const known=new Map(centralRooms);
     for(const [id,r] of centralRooms)if(r.region===event.region&&r.district===event.district)centralRooms.delete(id);
     for(const r of event.rooms){
      centralCounts.set(r.id,Number(r.occupants)||0);
-     if(!r.preset)centralRooms.set(r.id,centralRoom(r));
+     if(!r.preset){
+      const current=centralRoom(r),prior=known.get(r.id);
+      if(prior?.ownerId){current.ownerId=prior.ownerId;current.owner=prior.owner}
+      centralRooms.set(r.id,current);
+     }
     }
     if(state.view==='directory'&&event.region===state.region&&event.district===state.district)renderDirectory();
    }else if(event.type==='snapshot'){
