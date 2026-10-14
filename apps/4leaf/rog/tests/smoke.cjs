@@ -13,8 +13,9 @@ async function run(){
  assert.equal(await page.locator('#lobby-room-list .lobby-room-row').count(),0,'no fabricated AI/hotseat/network public rooms');
  assert.equal(await page.locator('#lobby-room-list .lobby-room-empty').count(),1,'empty lobby is honest when no saved match exists');
  assert.equal(await page.locator('#online-list').textContent().then(x=>x.includes('(NPC)')),false,'no fabricated online NPC count');
- await page.locator('#lobby-join').click();
- assert.ok(await page.locator('#modal:not(.hidden)').isVisible(),'joining unavailable room explains that the real server is absent');
+ assert.equal(await page.locator('#lobby-join').getAttribute('aria-disabled'),'true','JOIN is disabled when no real match exists');
+ await page.evaluate(()=>window.__LEAF_LOBBY__.resumeMatch());
+ assert.ok(await page.locator('#modal:not(.hidden)').isVisible(),'unavailable join handler explains that the original server is absent');
  await page.locator('#modal-buttons button').first().click();
  await page.locator('#lobby-create').click();
  await page.locator('#bot-count').selectOption('1');
