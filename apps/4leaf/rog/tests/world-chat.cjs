@@ -85,7 +85,11 @@ const path=require('path');
  await host.locator('[data-region="north"]').click();
  await host.locator('.social-district-hotspot').nth(3).click();
  assert.equal((await host.evaluate(()=>window.__LEAF_SOCIAL__.getState().view)),'directory');
- assert.equal(await host.locator('.social-directory-row').count(),6,'six original interior templates');
+ assert.equal(await host.locator('.social-directory-row').count(),0,'empty server catalogue must not invent six rooms from six image templates');
+ assert.ok(await host.locator('.social-directory-empty').isVisible(),'no fake online rooms are rendered');
+ await host.locator('#social-new-room').click();
+ assert.equal(await host.locator('#social-modal [name="background"] option').count(),6,'the six original room backgrounds remain selectable');
+ await host.locator('#social-modal .social-modal-title button').click();
  await host.screenshot({path:'leaf-original-room-directory.png'});
  const roomId=await host.evaluate(()=>window.__LEAF_SOCIAL__.createRoom('원작 채팅 테스트',3));
  assert.ok(roomId.length>=10,'new real room id');
@@ -184,19 +188,18 @@ const path=require('path');
  await host.waitForFunction(pos=>[...document.querySelectorAll('.social-avatar')].some(el=>el.style.left===pos.left&&el.style.top===pos.top),{left:immediate.left,top:immediate.top},{timeout:7000});
  assert.equal(await host.locator('.social-avatar').first().evaluate(el=>getComputedStyle(el).transitionDuration),'0s','remote avatar also teleports without interpolation');
  await host.screenshot({path:'leaf-two-live-chat-users.png'});
- // Verify background-dependent seat maps and source furniture for all
- // original ChatRoom roomX and roomXt pairs without replacing scene screenshots.
+ // Each recovered roomXt foreground is selected by the actual room's
+ // background style, not by a fabricated public-room number.
  await host.locator('#social-back').click();
- for(const [index,source] of [[2,'room5t'],[3,'room4t']]){
-  await host.locator('.social-directory-row').nth(index).click();
+ for(const [background,source] of [[5,'room5t'],[4,'room4t']]){
+  await host.evaluate(bg=>window.__LEAF_SOCIAL__.createRoom('원본 배경 '+bg+' 테스트',bg),background);
   await host.waitForFunction(expected=>document.querySelector('.social-room-foreground')?.dataset.source===expected&&document.querySelector('.social-room-foreground')?.dataset.ready==='true',source,{timeout:7500});
-  assert.equal(await host.locator('.social-room-foreground').count(),1,'one table foreground per room');
+  assert.equal(await host.locator('.social-room-foreground').count(),1,'one genuine foreground per room');
   await host.screenshot({path:'leaf-original-'+source+'.png'});
-
   await host.locator('#social-back').click();
  }
- await host.locator('.social-directory-row').first().click();
- assert.equal(await host.locator('.social-room-foreground').count(),0,'room2 has no invented overlay asset');
+ await host.evaluate(()=>window.__LEAF_SOCIAL__.createRoom('원본 서재 배경 검증',2));
+ assert.equal(await host.locator('.social-room-foreground').count(),0,'room2 has no fabricated overlay sprite');
 
  await guest.setViewportSize({width:390,height:844});
  await guest.screenshot({path:'leaf-chat-mobile.png'});
