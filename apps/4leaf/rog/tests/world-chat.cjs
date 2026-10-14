@@ -204,9 +204,19 @@ const path=require('path');
  await host.waitForFunction(()=>document.querySelector('#chat-log').textContent.includes('두 번째 브라우저의 실제 응답'),null,{timeout:7000});
  // Clicking a standing area must snap instantly to a discrete slot, without walking interpolation.
  const before=await guest.locator('.social-avatar.self').evaluate(el=>({left:el.style.left,top:el.style.top}));
- await guest.locator('.social-interior').click({position:{x:620,y:365}});
- const immediate=await guest.locator('.social-avatar.self').evaluate(el=>({left:el.style.left,top:el.style.top,transition:getComputedStyle(el).transitionDuration,seat:el.dataset.seat}));
- assert.notDeepEqual({left:immediate.left,top:immediate.top},before,'click changes the occupied slot');
+ // A legitimate random spawn can ALREADY occupy the previously hard-coded
+ // target. Try distinct actual standing areas to avoid false failures.
+ let immediate;
+ for(const [x,y] of [[78,68],[20,93],[58,79]]){
+  immediate=await guest.locator('.social-interior').evaluate((frame,point)=>{
+   const rect=frame.getBoundingClientRect();
+   frame.dispatchEvent(new MouseEvent('click',{bubbles:true,clientX:rect.left+rect.width*point.x/100,clientY:rect.top+rect.height*point.y/100}));
+   const el=frame.querySelector('.social-avatar.self');
+   return {left:el.style.left,top:el.style.top,transition:getComputedStyle(el).transitionDuration,seat:el.dataset.seat};
+  },{x,y});
+  if(immediate.left!==before.left||immediate.top!==before.top)break;
+ }
+ assert.notDeepEqual({left:immediate.left,top:immediate.top},before,'click changes the occupied slot without requiring a different random spawn');
  assert.equal(immediate.transition,'0s','local avatar teleports without CSS interpolation');
  assert.ok(Number.isInteger(Number(immediate.seat)),'avatar is assigned a discrete seat');
  await host.waitForFunction(pos=>[...document.querySelectorAll('.social-avatar')].some(el=>el.style.left===pos.left&&el.style.top===pos.top),{left:immediate.left,top:immediate.top},{timeout:7000});
