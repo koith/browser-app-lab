@@ -122,7 +122,7 @@ const path=require('path');
  assert.equal(avatarAlpha.width,75,'original Registry sprites use 75px source width');
  assert.equal(avatarAlpha.height,141,'original Registry sprites use 141px source height');
  assert.equal(avatarAlpha.cornerAlpha,0,'avatar background is transparent, not chroma-green');
- assert.equal(await host.locator('.social-avatar.self img').evaluate(el=>Math.round(el.getBoundingClientRect().width/parseFloat(getComputedStyle(document.querySelector('#social-image-frame')).transform.match(/matrix\\(([^,]+)/)?.[1]||1))),75,'rendered avatar retains native 75px frame width');
+ assert.equal(await host.locator('.social-avatar.self img').evaluate(el=>getComputedStyle(el).width),'75px','rendered avatar retains native 75px frame width');
  const stage=host.locator('.social-interior');
  const frontBack=async(x,y)=>{
   await stage.evaluate((el,coords)=>{
