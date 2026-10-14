@@ -46,7 +46,7 @@
  function renderLayer(regionId,index){
    const layer=ref.layers.get(regionId);if(!layer)return;
    const ctx=layer.canvas.getContext('2d');ctx.clearRect(0,0,layer.canvas.width,layer.canvas.height);
-   if(ref.region===regionId&&layer.sheet.length)ctx.drawImage(layer.sheet[index%layer.sheet.length],0,0);
+   if(layer.sheet.length)ctx.drawImage(layer.sheet[ref.region===regionId?index%layer.sheet.length:0],0,0);
  }
  function renderScene(){
    if(!ref.viewport||!ref.stage)return;
