@@ -309,11 +309,34 @@
   }
   header.append(bar);
  }
+ // The recovered ChatRoom/userlist bitmap is the original 150×38 header
+ // with vivid-green chroma-key pixels. Composite it instead of drawing the
+ // invented English USER LIST label.
+ function renderNativeUserListHeader(){
+  const canvas=$('social-original-userlist');if(!canvas)return;
+  const image=new Image();
+  image.onload=()=>{
+   if(!canvas.isConnected)return;
+   canvas.width=image.naturalWidth;canvas.height=image.naturalHeight;
+   const ctx=canvas.getContext('2d',{willReadFrequently:true});
+   ctx.drawImage(image,0,0);
+   const frame=ctx.getImageData(0,0,canvas.width,canvas.height);
+   for(let i=0;i<frame.data.length;i+=4){
+    const r=frame.data[i],g=frame.data[i+1],b=frame.data[i+2];
+    if(g>220&&r<65&&b<90&&g>r*1.7&&g>b*1.6)frame.data[i+3]=0;
+   }
+   ctx.putImageData(frame,0,0);
+   canvas.dataset.ready='true';
+  };
+  image.onerror=()=>{canvas.dataset.ready='error';console.error('Original ChatRoom userlist bitmap missing')};
+  image.src='./original/ChatRoom/userlist.png';
+ }
  function build(){
   const root=$root();if(!root)return;
   root.replaceChildren();root.classList.add('leaf-social-scene');
-  root.innerHTML='<div class="social-header"><div><strong id="social-location-title">하이아칸</strong><small id="social-breadcrumb"></small></div><div class="social-header-tools"><span id="social-online-count">1명</span><button id="social-invite" type="button">연결 초대</button><button id="social-back" type="button">← 월드맵</button></div></div><div class="social-layout"><div id="social-stage" class="social-stage"><div id="social-image-frame" class="social-image-frame"></div></div><aside class="social-user-panel"><h4>♧　USER LIST</h4><div id="social-peer-list"></div><p>같은 사이트의 다른 탭과 직접 연결한 상대방이 표시됩니다.</p></aside></div>';
+  root.innerHTML='<div class="social-header"><div><strong id="social-location-title">하이아칸</strong><small id="social-breadcrumb"></small></div><div class="social-header-tools"><span id="social-online-count">1명</span><button id="social-invite" type="button">연결 초대</button><button id="social-back" type="button">← 월드맵</button></div></div><div class="social-layout"><div id="social-stage" class="social-stage"><div id="social-image-frame" class="social-image-frame"></div></div><aside class="social-user-panel"><div class="social-user-titlebar"><canvas id="social-original-userlist" width="150" height="38" aria-label="원본 참여자 목록"></canvas><h4>참여자 목록</h4></div><div id="social-peer-list"></div><p>같은 사이트의 다른 탭과 직접 연결한 상대방이 표시됩니다.</p></aside></div>';
   addClassicRoomToolbar();
+  renderNativeUserListHeader();
   $('social-back').onclick=back;
   $('social-invite').onclick=openInvite;
   sceneInit=true;
