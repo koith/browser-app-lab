@@ -115,6 +115,13 @@ const path=require('path');
  await guest.locator('#social-back').click();
 
  await host.locator('[data-region="north"]').click();
+ assert.equal(await host.evaluate(()=>window.__LEAF_SOCIAL__.getState().view),'channels','world map uses the original Region TOWN SELECT interstitial');
+ assert.equal(await host.locator('.social-channel-hotspot').count(),28,'7 original character rows × 4 numbered channels');
+ assert.ok((await host.locator('#social-image-frame').evaluate(el=>getComputedStyle(el).backgroundImage)).includes('Region/regionback.png'),'native source regionback.png not CSS-drawn channel menu');
+ assert.equal(await host.locator('[data-channel="tichiel:4"]').getAttribute('aria-label'),'채널 Tichiel 4 입장');
+ await host.screenshot({path:'leaf-original-town-select.png'});
+ await host.locator('[data-channel="ispin:1"]').click();
+ assert.equal(await host.evaluate(()=>window.__LEAF_SOCIAL__.getState().channel),'ispin:1');
  await host.waitForFunction(()=>window.__LEAF_SOCIAL__.getState().region==='north'&&document.querySelector('#rooms:not(.hidden)'),null,{timeout:5000});
  assert.equal(await host.locator('.social-district-hotspot').count(),8,'original northern ChatTown eight signs');
  assert.equal(await host.locator('.social-district-hotspot').nth(2).getAttribute('aria-label'),'퓨어 시티 채팅 지역','third northern district label agrees with original signboard pixels');
@@ -124,14 +131,21 @@ const path=require('path');
 
  assert.ok((await host.locator('#social-image-frame').evaluate(el=>getComputedStyle(el).backgroundImage)).includes('northback.png'));
  await host.screenshot({path:'leaf-original-north-town.png'});
- // Confirm distinct historic southern region also works, before returning north.
+ // Return through native channel selector, then check the other region.
+ await host.locator('#social-back').click();
+ assert.equal(await host.evaluate(()=>window.__LEAF_SOCIAL__.getState().view),'channels');
  await host.locator('#social-back').click();
  await host.locator('[data-region="south"]').click();
+ assert.equal(await host.locator('.social-channel-hotspot').count(),28);
+ await host.locator('[data-channel="tichiel:2"]').click();
+ assert.equal(await host.evaluate(()=>window.__LEAF_SOCIAL__.getState().channel),'tichiel:2');
  assert.equal(await host.locator('.social-district-hotspot').count(),8);
  assert.ok((await host.locator('#social-image-frame').evaluate(el=>getComputedStyle(el).backgroundImage)).includes('southback.png'));
  await host.screenshot({path:'leaf-original-south-town.png'});
  await host.locator('#social-back').click();
+ await host.locator('#social-back').click();
  await host.locator('[data-region="north"]').click();
+ await host.locator('[data-channel="ispin:1"]').click();
  await host.locator('.social-district-hotspot').nth(3).click();
  assert.equal((await host.evaluate(()=>window.__LEAF_SOCIAL__.getState().view)),'directory');
  assert.equal(await host.locator('.social-directory-row').count(),0,'empty server catalogue must not invent six rooms from six image templates');
@@ -210,9 +224,15 @@ const path=require('path');
 
  await host.screenshot({path:'leaf-original-chat-room.png'});
 
- await guest.evaluate(()=>{window.__LEAF_SOCIAL__.openRegion('north');window.__ROG_TEST__.go('rooms');});
+ await guest.locator('[data-region="north"]').click();
+ await guest.locator('[data-channel="tichiel:2"]').click();
  await guest.locator('.social-district-hotspot').nth(3).click();
- await guest.waitForFunction(id=>window.__LEAF_SOCIAL__.getState().rooms.some(r=>r.id===id),roomId,{timeout:6500});
+ assert.equal(await guest.locator('.social-directory-row[data-room="'+roomId+'"]').count(),0,'room from another native channel must not leak into this channel');
+ await guest.locator('#social-back').click();
+ await guest.locator('#social-back').click();
+ await guest.locator('[data-channel="ispin:1"]').click();
+ await guest.locator('.social-district-hotspot').nth(3).click();
+ await guest.waitForFunction(id=>document.querySelector('.social-directory-row[data-room="'+id+'"]'),roomId,{timeout:6500});
  await guest.evaluate(id=>window.__LEAF_SOCIAL__.joinRoom(id),roomId);
  await Promise.all([
   host.waitForFunction(()=>document.querySelectorAll('.social-avatar').length===2,null,{timeout:7000}),
@@ -285,6 +305,7 @@ const path=require('path');
  await third.goto(url);
  await third.waitForFunction(()=>!!window.__LEAF_SOCIAL__&&!!window.__ROG_TEST__,null,{timeout:8000});
  await third.locator('[data-region="north"]').click();
+ await third.locator('[data-channel="ispin:1"]').click();
  await third.locator('.social-district-hotspot').nth(3).click();
  await third.waitForFunction(id=>{
    const row=[...document.querySelectorAll('.social-directory-row')].find(x=>x.dataset.room===id);

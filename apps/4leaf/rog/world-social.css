@@ -391,3 +391,51 @@ body>.social-modal .recordable-article p{white-space:pre-wrap;overflow-wrap:anyw
  border:1px solid #90aee2;
 }
 #city .street-shop-detail p{font-size:12px}
+
+/* Recovered Region.pak/regionback.png: the original TOWN SELECT
+   has 7 named avatar channel groups × 4 numbered channel buttons. */
+#rooms .social-region-channels{
+ position:relative;
+ background:#1b2863 url('./original/Region/regionback.png') 0 0/794px 404px no-repeat;
+}
+#rooms .social-channel-hotspot{
+ position:absolute;
+ z-index:5;
+ display:block;
+ padding:0;
+ border:2px solid transparent;
+ border-radius:3px;
+ background:transparent;
+ box-shadow:none;
+ color:transparent;
+ cursor:pointer;
+}
+#rooms .social-channel-hotspot:is(:hover,:focus-visible){
+ outline:none;
+ border-color:#fff6a7;
+ background:#f1f0a725;
+ box-shadow:0 0 9px #faeb89,inset 0 0 8px #fcf4cd;
+}
+#rooms .social-channel-guide{
+ position:absolute;
+ z-index:3;
+ top:404px;
+ left:0;
+ right:0;
+ bottom:0;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ gap:14px;
+ background:linear-gradient(#677fc2,#2e4285);
+ border-top:3px ridge #aec4ec;
+ color:#f3f5ff;
+ font:13px Gulim,'굴림',sans-serif;
+}
+#rooms .social-channel-guide button{
+ background:#4968aa;
+ border:2px ridge #c5d6f4;
+ color:#fff1c7;
+ padding:6px 11px;
+ cursor:pointer;
+}
