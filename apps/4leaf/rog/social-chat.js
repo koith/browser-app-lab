@@ -7,7 +7,7 @@
  const W=794,H=528;
  const REGIONS={
   north:{title:'북 하이아칸',art:'northback',districts:[
-   ['실버 호라이즌',72,55,164,91],['화이트 크리스탈',253,95,165,91],['프레이 시티',433,81,167,93],['샤이닝 브리즈',608,58,165,101],
+   ['실버 호라이즌',72,55,164,91],['화이트 크리스탈',253,95,165,91],['퓨어 시티',433,81,167,93],['샤이닝 브리즈',608,58,165,101],
    ['윈트리 아이스',35,193,169,99],['스노우 폴',226,237,168,95],['스위트 자스민',568,194,178,95],['그린 에메랄드',401,284,168,94]
   ]},
   south:{title:'남 하이아칸',art:'southback',districts:[
@@ -23,6 +23,9 @@
  const avatars=['sava00','sava82','sava06','sava01','sava85','sava02','sava84','sava04','sava03','sava83','sava05','sava86'];
  const now=()=>Date.now(),uuid=()=>crypto.randomUUID?.()||Math.random().toString(36).slice(2)+String(Date.now());
  const safe=(s,max=100)=>String(s??'').replace(/[\u0000-\u001f\u007f]/g,' ').trim().slice(0,max);
+ // A previous reconstruction mistranscribed the third North Haiacan sign.
+ // Preserve rooms already saved under that misspelling when loading storage.
+ const sourceDistrict=s=>{const name=safe(s,40);return name==='프레이 시티'?'퓨어 시티':name};
  const tabId=(()=>{try{const key='leaf_social_tab_identity_v1';let id=sessionStorage.getItem(key);if(!id){id=uuid();sessionStorage.setItem(key,id)}return id}catch{return uuid()}})();
  const nick=()=>safe($('profile-name')?.textContent||'Guest',12)||'Guest';
  const state={region:'north',district:REGIONS.north.districts[3][0],view:'town',roomId:null,rooms:loadRooms(),peers:new Map(),seen:new Set(),bubble:null,scope:'world',avatar:0,position:{x:52,y:76}};
@@ -40,7 +43,7 @@
   try{
    const raw=JSON.parse(localStorage.getItem('leaf_social_rooms_v3')||'[]');
    return Array.isArray(raw)?raw.filter(r=>r&&typeof r.id==='string'&&typeof r.name==='string'&&['north','south'].includes(r.region)).slice(-180).map(r=>({
-    id:safe(r.id,70),name:safe(r.name,26),region:r.region,district:safe(r.district,36),owner:safe(r.owner,24),ownerId:safe(r.ownerId||'',100),
+    id:safe(r.id,70),name:safe(r.name,26),region:r.region,district:sourceDistrict(r.district),owner:safe(r.owner,24),ownerId:safe(r.ownerId||'',100),
     passwordProof:safe(r.passwordProof||'',65),passwordSalt:safe(r.passwordSalt||'',75),background:allowedBackground(r.background),capacity:allowedCapacity(r.capacity),created:Number(r.created)||0
    })):[];
   }catch{return []}
@@ -127,7 +130,7 @@
    if(!user||typeof user.id!=='string'||user.id===tabId)return;
    const peer={id:safe(user.id,100),nick:safe(user.nick,12),scope:safe(user.scope,120),roomId:safe(user.roomId,70),
     region:['north','south'].includes(user.region)?user.region:'north',
-    district:safe(user.district,40),view:safe(user.view,15),avatar:Math.max(0,Math.min(avatars.length-1,Number(user.avatar)||0)),
+    district:sourceDistrict(user.district),view:safe(user.view,15),avatar:Math.max(0,Math.min(avatars.length-1,Number(user.avatar)||0)),
     position:user.position&&Number.isFinite(user.position.x)&&Number.isFinite(user.position.y)?user.position:null,last:now(),source};
    state.peers.set(peer.id,peer);
    if(p.kind==='hello'){sendLocal({kind:'presence',peer:compactPresence()});sendRTC({kind:'presence',peer:compactPresence()})}
@@ -165,7 +168,7 @@
      const r=p.room;
      if(r&&typeof r.id==='string'&&!roomById(r.id)&&state.rooms.length<200){
        const incoming={id:safe(r.id,70),name:safe(r.name,26),region:r.region==='south'?'south':'north',
-        district:safe(r.district,36),owner:safe(r.owner,24),ownerId:safe(r.ownerId||'',100),passwordProof:safe(r.passwordProof,65),passwordSalt:safe(r.passwordSalt,75),
+        district:sourceDistrict(r.district),owner:safe(r.owner,24),ownerId:safe(r.ownerId||'',100),passwordProof:safe(r.passwordProof,65),passwordSalt:safe(r.passwordSalt,75),
         background:allowedBackground(r.background),capacity:allowedCapacity(r.capacity),created:Number(r.created)||now()};
        state.rooms.push(incoming);saveRooms();if(state.view==='directory')renderDirectory();
      }
