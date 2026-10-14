@@ -227,3 +227,72 @@ body>.social-modal .recordable-article p{white-space:pre-wrap;overflow-wrap:anyw
  object-fit:contain;
  object-position:center bottom;
 }
+
+/* Native icon strip for restored original ChatRoom. The source sprite sheet is
+   MainFrame/toolbarbtn.png: 4 states × 30px, 9 icons × 30px. */
+#rooms .social-classic-toolbar{display:none}
+#rooms.classic-chat-room .social-header{
+ display:grid;
+ grid-template-columns:minmax(0,1fr) auto;
+ grid-template-rows:23px 32px;
+ height:56px;
+ min-height:56px;
+ align-items:center;
+ padding:0 8px;
+ column-gap:7px;
+ background:linear-gradient(#566ab0,#2c3e84 50%,#283765);
+}
+#rooms.classic-chat-room .social-header>div:first-child{
+ grid-row:1;grid-column:1;min-width:0;overflow:hidden;
+}
+#rooms.classic-chat-room .social-header>div:first-child strong{
+ display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+ font-family:Tahoma,Gulim,'굴림',sans-serif;
+ font-size:12px;
+}
+#rooms.classic-chat-room .social-header #social-breadcrumb{display:none}
+#rooms.classic-chat-room .social-header-tools{
+ grid-row:1;grid-column:2;
+ gap:5px;
+}
+#rooms.classic-chat-room .social-header-tools button{
+ padding:2px 6px;font-size:10px;
+}
+#rooms.classic-chat-room .social-classic-toolbar{
+ display:flex;
+ grid-row:2;
+ grid-column:1/-1;
+ align-items:center;
+ gap:3px;
+ align-self:stretch;
+ border-top:1px solid #a3abd4;
+ padding-left:4px;
+}
+#rooms.classic-chat-room .social-original-tool{
+ flex:0 0 30px;
+ width:30px;
+ height:30px;
+ min-width:30px;
+ padding:0;
+ border:0;
+ border-radius:0;
+ box-shadow:none;
+ background-color:transparent;
+ background-image:url('./original/MainFrame/toolbarbtn.png');
+ background-repeat:no-repeat;
+ background-position-x:0;
+ background-position-y:var(--icon-y,0px);
+ cursor:pointer;
+ image-rendering:pixelated;
+}
+#rooms.classic-chat-room .social-original-tool:is(:hover,:focus-visible){
+ background-position-x:-30px;
+ outline:1px solid #d5d8f7;
+ outline-offset:-2px;
+}
+#rooms.classic-chat-room .social-original-tool:active{background-position-x:-60px}
+@media(max-width:550px){
+ #rooms.classic-chat-room .social-header{padding:0 4px;column-gap:4px}
+ #rooms.classic-chat-room .social-header-tools button{font-size:9px;padding:1px 4px}
+ #rooms.classic-chat-room .social-header-tools>span{display:none}
+}
