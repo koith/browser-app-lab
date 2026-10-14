@@ -85,13 +85,82 @@ const path=require('path');
  await host.locator('[data-region="north"]').click();
  await host.locator('.social-district-hotspot').nth(3).click();
  assert.equal((await host.evaluate(()=>window.__LEAF_SOCIAL__.getState().view)),'directory');
- assert.equal(await host.locator('.social-directory-row').count(),6,'six original interior templates');
+ assert.equal(await host.locator('.social-directory-row').count(),0,'empty server catalogue must not invent six rooms from six image templates');
+ assert.ok(await host.locator('.social-directory-empty').isVisible(),'no fake online rooms are rendered');
+ await host.locator('#social-new-room').click();
+ assert.equal(await host.locator('#social-modal [name="background"] option').count(),6,'the six original room backgrounds remain selectable');
+ await host.locator('#social-modal .social-modal-title button').click();
  await host.screenshot({path:'leaf-original-room-directory.png'});
  const roomId=await host.evaluate(()=>window.__LEAF_SOCIAL__.createRoom('원작 채팅 테스트',3));
  assert.ok(roomId.length>=10,'new real room id');
  assert.ok((await host.locator('#social-image-frame').evaluate(el=>getComputedStyle(el).backgroundImage)).includes('room3.png'));
  assert.equal(await host.locator('.social-avatar').count(),1,'zero fabricated NPC users');
+ assert.equal(await host.locator('.social-original-tool').count(),6,'six working source-art toolbar actions');
+ assert.equal(await host.locator('#social-close-room').count(),1,'owner can close room from the window chrome');
+ assert.equal(await host.locator('.social-interior-controls').count(),0,'no artificial blue control buttons cover original scene');
+ await host.locator('.social-original-tool[aria-label="아바타 선택"]').click();
+ assert.ok(await host.locator('.social-avatar-chooser').isVisible(),'authentic toolbar avatar icon opens working character picker');
+ await host.locator('.social-modal-title button').click();
+ // The native client shipped a MainFrame toolbar icon sprite sheet.
+ // Do not substitute generic emoji controls: the icon crop and functional
+ // actions must be present in the real room.
+ assert.equal(await host.locator('.social-classic-toolbar .social-original-tool').count(),6,'recovered native ChatRoom toolbar controls are visible');
+ assert.equal(await host.locator('.social-original-tool').first().evaluate(e=>getComputedStyle(e).backgroundImage.includes('original/MainFrame/toolbarbtn.png')),true,'original 120x270 sprite sheet is used');
+ assert.equal(await host.locator('.social-original-tool[aria-label="월드맵으로 돌아가기"]').evaluate(e=>getComputedStyle(e).backgroundPositionY),'-240px','the correct original exit sprite row is used');
+ assert.ok(await host.locator('.social-classic-toolbar').isVisible(),'toolbar has a visible second header row');
+ await host.locator('.social-original-tool[aria-label="아바타 선택"]').click();
+ assert.ok(await host.locator('#social-modal .social-avatar-chooser').isVisible(),'original avatar button opens the chooser');
+ await host.locator('#social-modal .social-modal-title button').click();
+
+ // Original ChatRoom.pak contains an independent red-key foreground table
+ // for room3; it must sit between the rear and front avatar seats.
+ await host.waitForFunction(()=>document.querySelector('.social-room-foreground')?.dataset.ready==='true',null,{timeout:7500});
+ const depth=await host.evaluate(()=>{
+  const c=document.querySelector('.social-room-foreground');
+  const p=c.getContext('2d').getImageData(0,0,c.width,c.height).data;
+  let visible=0,redLeak=0,transparent=0;
+  for(let i=0;i<p.length;i+=4){
+   if(p[i+3]>0){visible++;if(p[i]>242&&p[i+1]<18&&p[i+2]<18)redLeak++}else transparent++;
+  }
+  const me=document.querySelector('.social-avatar.self');
+  return {source:c.dataset.source,visible,redLeak,transparent,avatarZ:Number(me.style.zIndex),foregroundZ:Number(c.style.zIndex),room:document.querySelector('#social-image-frame').style.backgroundImage};
+ });
+ assert.equal(depth.source,'room3t','room3 original furniture sprite was loaded');
+ assert.ok(depth.visible>500,'table pixels are painted');
+ assert.ok(depth.transparent>500,'original bitmap red chroma key is transparent');
+ assert.equal(depth.redLeak,0,'no red chroma-key fringe remains');
+ assert.ok(depth.room.includes('room3.png'),'native room backdrop and independent furniture are composited');
+ assert.equal(await host.locator('#social-image-frame .social-room-title').count(),0,'no invented room title banner over native art');
+ const avatarAlpha=await host.evaluate(async()=>{
+  const img=document.querySelector('.social-avatar.self img');
+  await img.decode();const c=document.createElement('canvas');
+  c.width=img.naturalWidth;c.height=img.naturalHeight;
+  const ctx=c.getContext('2d');ctx.drawImage(img,0,0);
+  const d=ctx.getImageData(0,0,c.width,c.height).data;
+  return {cornerAlpha:d[3],corner:[d[0],d[1],d[2]],width:c.width,height:c.height};
+ });
+ console.log('ORIGINAL REGISTRY AVATAR ALPHA',JSON.stringify(avatarAlpha));
+ assert.equal(avatarAlpha.width,75,'original Registry sprites use 75px source width');
+ assert.equal(avatarAlpha.height,141,'original Registry sprites use 141px source height');
+ assert.equal(avatarAlpha.cornerAlpha,0,'avatar background is transparent, not chroma-green');
+ assert.equal(await host.locator('.social-avatar.self img').evaluate(el=>getComputedStyle(el).width),'75px','rendered avatar retains native 75px frame width');
+ const stage=host.locator('.social-interior');
+ const frontBack=async(x,y)=>{
+  await stage.evaluate((el,coords)=>{
+   const box=el.getBoundingClientRect();
+   el.dispatchEvent(new MouseEvent('click',{bubbles:true,clientX:box.left+box.width*coords.x/100,clientY:box.top+box.height*coords.y/100}));
+  },{x,y});
+  return await host.locator('.social-avatar.self').evaluate(el=>({seat:Number(el.dataset.seat),z:Number(el.style.zIndex),transition:getComputedStyle(el).transitionDuration}));
+ };
+ const behind=await frontBack(38,72);
+ assert.ok(behind.z<depth.foregroundZ,'rear chair is hidden behind original tabletop');
+ assert.equal(behind.transition,'0s','rear-seat change has no walking animation');
+ const inFront=await frontBack(24,94);
+ assert.ok(inFront.z>depth.foregroundZ,'front chair is drawn in front of original tabletop');
+ assert.notEqual(inFront.seat,behind.seat,'front and rear clicks choose different native scene anchors');
+
  await host.screenshot({path:'leaf-original-chat-room.png'});
+
  await guest.evaluate(()=>{window.__LEAF_SOCIAL__.openRegion('north');window.__ROG_TEST__.go('rooms');});
  await guest.locator('.social-district-hotspot').nth(3).click();
  await guest.waitForFunction(id=>window.__LEAF_SOCIAL__.getState().rooms.some(r=>r.id===id),roomId,{timeout:6500});
@@ -119,6 +188,19 @@ const path=require('path');
  await host.waitForFunction(pos=>[...document.querySelectorAll('.social-avatar')].some(el=>el.style.left===pos.left&&el.style.top===pos.top),{left:immediate.left,top:immediate.top},{timeout:7000});
  assert.equal(await host.locator('.social-avatar').first().evaluate(el=>getComputedStyle(el).transitionDuration),'0s','remote avatar also teleports without interpolation');
  await host.screenshot({path:'leaf-two-live-chat-users.png'});
+ // Each recovered roomXt foreground is selected by the actual room's
+ // background style, not by a fabricated public-room number.
+ await host.locator('#social-back').click();
+ for(const [background,source] of [[5,'room5t'],[4,'room4t']]){
+  await host.evaluate(bg=>window.__LEAF_SOCIAL__.createRoom('원본 배경 '+bg+' 테스트',bg),background);
+  await host.waitForFunction(expected=>document.querySelector('.social-room-foreground')?.dataset.source===expected&&document.querySelector('.social-room-foreground')?.dataset.ready==='true',source,{timeout:7500});
+  assert.equal(await host.locator('.social-room-foreground').count(),1,'one genuine foreground per room');
+  await host.screenshot({path:'leaf-original-'+source+'.png'});
+  await host.locator('#social-back').click();
+ }
+ await host.evaluate(()=>window.__LEAF_SOCIAL__.createRoom('원본 서재 배경 검증',2));
+ assert.equal(await host.locator('.social-room-foreground').count(),0,'room2 has no fabricated overlay sprite');
+
  await guest.setViewportSize({width:390,height:844});
  await guest.screenshot({path:'leaf-chat-mobile.png'});
  assert.ok(await guest.locator('#message').isVisible(),'mobile chat input');

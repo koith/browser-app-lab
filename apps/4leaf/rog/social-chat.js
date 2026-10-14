@@ -46,17 +46,14 @@
   return roomById(state.roomId);
  }
  function roomById(id){
-  return state.rooms.find(r=>r.id===id)||presetRooms().find(r=>r.id===id)||null;
+  return state.rooms.find(r=>r.id===id)||null;
  }
- function presetRooms(){
-  const current=REGIONS[state.region]||REGIONS.north;
-  return originalTemplates.map((background,i)=>({
-   id:'public:'+state.region+':'+state.district+':'+i,name:'공개 채팅방 '+String(i+1).padStart(2,'0'),
-   region:state.region,district:state.district,owner:'',passwordProof:'',passwordSalt:'',background,preset:true,created:0
-  }));
- }
+ // ChatRoom/room0..room5 are six BACKGROUND IMAGES, not six historical
+ // permanently open server rooms. A real original server supplied the room
+ // catalogue. Only display rooms actually created and shared by participants.
  function catalogue(){
-  return [...presetRooms(),...state.rooms.filter(r=>r.region===state.region&&r.district===state.district)];
+  return state.rooms.filter(r=>r.region===state.region&&r.district===state.district)
+   .sort((a,b)=>b.created-a.created);
  }
  function scope(){
   if(state.view==='room'&&state.roomId)return 'room:'+state.roomId;
@@ -65,23 +62,33 @@
   if(state.view==='board')return 'board:recordable';
   return 'world';
  }
- // Native-style discrete standing positions: click selects a seat, not a walking destination.
- // The original room backgrounds differ; fixed anchor slots are provisional until per-room anchors are decoded.
- const ROOM_SEATS=[
-  {x:23,y:65},{x:40,y:65},{x:57,y:65},{x:74,y:65},
-  {x:23,y:78},{x:40,y:78},{x:57,y:78},{x:74,y:78},
-  {x:23,y:90},{x:40,y:90},{x:57,y:90},{x:74,y:90}
- ];
- function closestSeat(x,y,occupied=new Set()){
-  const list=ROOM_SEATS.map((seat,i)=>({seat,i,d:(seat.x-x)**2+(seat.y-y)**2*1.3})).sort((a,b)=>a.d-b.d||a.i-b.i);
+ // Room foreground and seat maps are based on the recovered ChatRoom PNG compositions.
+ // Exact historical anchors are not stored in the extracted bitmap assets, so these
+ // values remain image-grounded approximations, not decoded native engine coordinates.
+ const ROOM_LAYOUTS={
+  0:{seats:[[21,66],[38,66],[55,66],[73,66],[20,80],[38,80],[55,80],[74,80],[22,92],[39,92],[57,92],[74,92]]},
+  1:{seats:[[24,64],[42,64],[60,64],[76,64],[22,78],[40,78],[59,78],[76,78],[22,91],[40,91],[59,91],[76,91]]},
+  2:{seats:[[20,63],[37,63],[55,63],[73,63],[21,78],[38,78],[56,78],[73,78],[22,92],[39,92],[57,92],[74,92]]},
+  3:{seats:[[19,83],[38,72],[59,72],[81,83],[24,94],[39,94],[56,94],[72,94],[22,69],[77,69],[39,83],[61,83]],
+     foreground:{file:'room3t',x:204,y:354,w:568,h:213,depth:80}},
+  4:{seats:[[21,65],[38,65],[56,65],[74,65],[21,80],[39,80],[58,80],[75,80],[21,93],[39,93],[57,93],[75,93]],
+     foreground:{file:'room4t',x:318,y:345,w:157,h:143,depth:77}},
+  5:{seats:[[20,66],[38,66],[56,66],[74,66],[20,81],[39,81],[57,81],[75,81],[22,93],[39,93],[57,93],[74,93]],
+     foreground:{file:'room5t',x:281,y:357,w:260,h:170,depth:78}}
+ };
+ const roomLayout=(bg=currentRoom()?.background)=>ROOM_LAYOUTS[bg]||ROOM_LAYOUTS[2];
+ const roomSeats=(bg=currentRoom()?.background)=>roomLayout(bg).seats.map(([x,y])=>({x,y}));
+ function closestSeat(x,y,occupied=new Set(),seats=roomSeats()){
+  const list=seats.map((seat,i)=>({i,d:(seat.x-x)**2*2.26+(seat.y-y)**2}))
+   .sort((a,b)=>a.d-b.d||a.i-b.i);
   return (list.find(p=>!occupied.has(p.i))||list[0]).i;
  }
  function place(user,index,occupied=new Set()){
   const pos=user.position;
   const x=pos&&Number.isFinite(pos.x)?pos.x:52;
   const y=pos&&Number.isFinite(pos.y)?pos.y:76;
-  const seat=closestSeat(x,y,occupied);
-  return {...ROOM_SEATS[seat],seat};
+  const seats=roomSeats(),seat=closestSeat(x,y,occupied,seats);
+  return {...seats[seat],seat};
  }
  function compactPresence(){
   return {id:tabId,nick:nick(),scope:state.scope,roomId:state.roomId,
@@ -250,7 +257,7 @@
  }
  function updateHeader(){
   const name=$('social-location-title');
-  if(name)name.textContent=state.view==='board'?'레코르다블 · 기사단 게시판':state.view==='room'?((currentRoom()?.name||'채팅방')+' · '+state.district):
+  if(name)name.textContent=state.view==='board'?'레코르다블 · 기사단 게시판':state.view==='room'?('Chatting Room · '+(currentRoom()?.name||'채팅방')):
     state.view==='directory'?(state.district+' · 채팅방 목록'):
     (REGIONS[state.region]?.title||'하이아칸')+' · 채팅 지역';
   const bread=$('social-breadcrumb');
@@ -264,10 +271,37 @@
   const scale=Math.min(region.clientWidth/W,region.clientHeight/H);
   frame.style.transform='translate3d('+((region.clientWidth-W*scale)/2)+'px,'+((region.clientHeight-H*scale)/2)+'px,0) scale('+scale+')';
  }
+ function addClassicRoomToolbar(){
+  const header=$root()?.querySelector('.social-header');if(!header)return;
+  // Native MainFrame/toolbarbtn.pak: 120×270, four 30px button states
+  // in columns and nine distinct 30px tool icons in rows.
+  const bar=document.createElement('nav');
+  bar.className='social-classic-toolbar';
+  bar.setAttribute('aria-label','원본 포리프 채팅방 도구모음');
+  const actions=[
+   {row:0,title:'채팅방 목록',act:()=>openDirectory()},
+   {row:2,title:'기사단 게시판',act:()=>{openBoard();window.__ROG_TEST__?.go('rooms')}},
+   {row:3,title:'아바타 선택',act:()=>openAvatarMenu()},
+   {row:4,title:'매직카덴',act:()=>window.__ROG_TEST__?.go('shop')},
+   {row:7,title:'게임 안내',act:()=>window.__ROG_TEST__?.go('help-screen')},
+   {row:8,title:'월드맵으로 돌아가기',act:()=>window.__ROG_TEST__?.go('sky')}
+  ];
+  for(const item of actions){
+   const button=document.createElement('button');
+   button.type='button';button.className='social-original-tool';
+   button.style.setProperty('--icon-row',String(item.row));
+   button.style.setProperty('--icon-y',(-30*item.row)+'px');
+   button.title=item.title;button.setAttribute('aria-label',item.title);
+   button.addEventListener('click',item.act);
+   bar.append(button);
+  }
+  header.append(bar);
+ }
  function build(){
   const root=$root();if(!root)return;
   root.replaceChildren();root.classList.add('leaf-social-scene');
   root.innerHTML='<div class="social-header"><div><strong id="social-location-title">하이아칸</strong><small id="social-breadcrumb"></small></div><div class="social-header-tools"><span id="social-online-count">1명</span><button id="social-invite" type="button">연결 초대</button><button id="social-back" type="button">← 월드맵</button></div></div><div class="social-layout"><div id="social-stage" class="social-stage"><div id="social-image-frame" class="social-image-frame"></div></div><aside class="social-user-panel"><h4>♧　USER LIST</h4><div id="social-peer-list"></div><p>같은 사이트의 다른 탭과 직접 연결한 상대방이 표시됩니다.</p></aside></div>';
+  addClassicRoomToolbar();
   $('social-back').onclick=back;
   $('social-invite').onclick=openInvite;
   sceneInit=true;
@@ -289,6 +323,8 @@
  }
  function render(){
   if(!sceneInit)return;
+  $root()?.classList.toggle('classic-chat-room',state.view==='room');
+  $('social-close-room')?.remove();
   const frame=$('social-image-frame');frame.replaceChildren();
   if(state.view==='board')renderBulletin(frame);
   if(state.view==='town')renderTown(frame);
@@ -373,6 +409,11 @@
   $('social-directory-name').textContent=state.district;
   $('social-new-room').onclick=showCreateRoom;
   const list=$('social-directory-list');
+  if(!catalogue().length){
+   const notice=document.createElement('div');notice.className='social-directory-empty';
+   notice.innerHTML='<b>현재 열린 채팅방이 없습니다.</b><span>채팅방을 만들면 같은 브라우저의 다른 탭 또는 직접 연결한 사용자에게 공유됩니다.</span>';
+   list.append(notice);
+  }
   for(const [i,r] of catalogue().entries()){
    const b=document.createElement('button');b.className='social-directory-row';b.dataset.room=r.id;
    const num=document.createElement('span');num.className='social-room-number';num.textContent=String(i+1).padStart(2,'0');
@@ -404,7 +445,7 @@
  function enterRoom(room){
   if(room.region!==state.region){state.region=room.region}
   state.district=room.district;state.roomId=room.id;state.view='room';
-  const seats=[{x:52,y:76},{x:31,y:73},{x:70,y:73},{x:39,y:84},{x:63,y:84},{x:23,y:63},{x:77,y:63},{x:47,y:67}];
+  const seats=roomSeats(room.background);
   const hash=[...tabId].reduce((a,c)=>(a*31+c.charCodeAt(0))>>>0,0);
   state.position={...seats[hash%seats.length]};
   render();
@@ -455,27 +496,58 @@
   const bubble=document.createElement('div');bubble.className='social-speech';bubble.textContent=safe(text,55);bubble.setAttribute('role','status');node.append(bubble);
   setTimeout(()=>{if(bubble.isConnected)bubble.remove()},5000);
  }
+ // The original T sprites (table/furniture) are independent foreground layers.
+ // They use a red chroma key in the archived client, not CSS transparency.
+ function addRoomForeground(layer,background){
+  const art=roomLayout(background).foreground;if(!art)return;
+  const canvas=document.createElement('canvas');
+  canvas.className='social-room-foreground';
+  canvas.setAttribute('aria-hidden','true');
+  canvas.dataset.source=art.file;
+  canvas.style.cssText='left:'+art.x+'px;top:'+art.y+'px;width:'+art.w+
+   'px;height:'+art.h+'px;z-index:'+art.depth+';';
+  layer.append(canvas);
+  const img=new Image();
+  img.onload=()=>{
+   canvas.width=img.naturalWidth;canvas.height=img.naturalHeight;
+   const ctx=canvas.getContext('2d',{willReadFrequently:true});
+   ctx.drawImage(img,0,0);
+   const pixels=ctx.getImageData(0,0,canvas.width,canvas.height);
+   // Remove only the near-pure red bitmap transparency; keep warm table art.
+   for(let i=0;i<pixels.data.length;i+=4){
+    const r=pixels.data[i],g=pixels.data[i+1],b=pixels.data[i+2];
+    if(r>=242&&g<=18&&b<=18)pixels.data[i+3]=0;
+   }
+   ctx.putImageData(pixels,0,0);
+   canvas.dataset.ready='true';
+  };
+  img.onerror=()=>{canvas.dataset.ready='error';console.error('Missing original room foreground:',img.src)};
+  img.src='./original/ChatRoom/'+art.file+'.png';
+ }
  function renderRoom(frame){
   frame.className='social-image-frame social-interior';
   const room=currentRoom();
   if(!room){openDirectory();return}
   frame.style.backgroundImage='url("'+roomTemplate(room.background)+'")';
-  const roomLabel=document.createElement('div');roomLabel.className='social-room-title';roomLabel.textContent=room.name;
   const avatarLayer=document.createElement('div');avatarLayer.className='social-avatar-layer';avatarLayer.id='social-avatar-layer';
-  frame.append(roomLabel,avatarLayer);
-  const controls=document.createElement('div');controls.className='social-interior-controls';
-  const outfit=document.createElement('button');outfit.textContent='캐릭터 변경';outfit.onclick=openAvatarMenu;controls.append(outfit);
+  frame.append(avatarLayer);
+  addRoomForeground(avatarLayer,room.background);
+  // Original scene remains unobstructed; the avatar picker is in the recovered
+  // top-toolbar icon row, while room owner actions stay in the window chrome.
   if(!room.preset&&room.owner===nick()){
-   const close=document.createElement('button');close.textContent='방 닫기';close.onclick=()=>closeRoom(room.id);controls.append(close);
+   const close=document.createElement('button');
+   close.id='social-close-room';close.type='button';
+   close.textContent='방 닫기';close.setAttribute('aria-label','현재 채팅방 닫기');
+   close.onclick=()=>closeRoom(room.id);
+   $root()?.querySelector('.social-header-tools')?.prepend(close);
   }
-  frame.append(controls);
   frame.addEventListener('click',e=>{
    if(e.target.closest('button')||e.target.closest('.social-room-title'))return;
    const rect=frame.getBoundingClientRect();const x=100*(e.clientX-rect.left)/rect.width,y=100*(e.clientY-rect.top)/rect.height;
    const others=onlinePeers('room:'+state.roomId).filter(p=>p.id!==tabId);
    const occupied=new Set(others.map(p=>closestSeat(p.position?.x??52,p.position?.y??76)));
    const seat=closestSeat(x,y,occupied);
-   state.position={...ROOM_SEATS[seat]};
+   state.position={...roomSeats()[seat]};
    sendLocal({kind:'move',position:state.position});sendRTC({kind:'move',from:tabId,position:state.position});presence();
    renderOccupants();
   });

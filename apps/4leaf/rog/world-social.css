@@ -193,3 +193,122 @@ body>.social-modal .recordable-article p{white-space:pre-wrap;overflow-wrap:anyw
 
 /* Original-style chat seat change is instantaneous, including remote peers. */
 #rooms .social-interior .social-avatar{transition:none!important;animation:none!important}
+
+/* ChatRoom foreground furniture is composited from the archived room3t/4t/5t
+   sprites, in the same stacking context as avatars. The source red key is
+   stripped by the canvas renderer; seats behind tables have lower z-order. */
+#rooms .social-room-foreground{
+ position:absolute;
+ display:block;
+ pointer-events:none;
+ image-rendering:auto;
+}
+#rooms .social-interior .social-avatar-name{
+ top:0;
+ bottom:auto;
+ transform:translate(-50%,-100%);
+}
+#rooms .social-interior .social-avatar,
+#rooms .social-interior .social-room-foreground{
+ transition:none!important;
+}
+/* ChatRoom title belongs in the upper window chrome, not over the art. */
+#rooms .social-interior .social-room-title{display:none!important}
+
+/* Registry/sava sprites have a 75×141 native frame; restoring those pixels
+   improves relative height of characters against the 794×528 ChatRoom art. */
+#rooms .social-interior .social-avatar{
+ width:80px;
+ height:147px;
+}
+#rooms .social-interior .social-avatar img{
+ width:75px;
+ height:141px;
+ object-fit:contain;
+ object-position:center bottom;
+}
+
+/* Native icon strip for restored original ChatRoom. The source sprite sheet is
+   MainFrame/toolbarbtn.png: 4 states × 30px, 9 icons × 30px. */
+#rooms .social-classic-toolbar{display:none}
+#rooms.classic-chat-room .social-header{
+ display:grid;
+ grid-template-columns:minmax(0,1fr) auto;
+ grid-template-rows:23px 32px;
+ height:56px;
+ min-height:56px;
+ align-items:center;
+ padding:0 8px;
+ column-gap:7px;
+ background:linear-gradient(#566ab0,#2c3e84 50%,#283765);
+}
+#rooms.classic-chat-room .social-header>div:first-child{
+ grid-row:1;grid-column:1;min-width:0;overflow:hidden;
+}
+#rooms.classic-chat-room .social-header>div:first-child strong{
+ display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+ font-family:Tahoma,Gulim,'굴림',sans-serif;
+ font-size:12px;
+}
+#rooms.classic-chat-room .social-header #social-breadcrumb{display:none}
+#rooms.classic-chat-room .social-header-tools{
+ grid-row:1;grid-column:2;
+ gap:5px;
+}
+#rooms.classic-chat-room .social-header-tools button{
+ padding:2px 6px;font-size:10px;
+}
+#rooms.classic-chat-room .social-classic-toolbar{
+ display:flex;
+ grid-row:2;
+ grid-column:1/-1;
+ align-items:center;
+ gap:3px;
+ align-self:stretch;
+ border-top:1px solid #a3abd4;
+ padding-left:4px;
+}
+#rooms.classic-chat-room .social-original-tool{
+ flex:0 0 30px;
+ width:30px;
+ height:30px;
+ min-width:30px;
+ padding:0;
+ border:0;
+ border-radius:0;
+ box-shadow:none;
+ background-color:transparent;
+ background-image:url('./original/MainFrame/toolbarbtn.png');
+ background-repeat:no-repeat;
+ background-position-x:0;
+ background-position-y:var(--icon-y,0px);
+ cursor:pointer;
+ image-rendering:pixelated;
+}
+#rooms.classic-chat-room .social-original-tool:is(:hover,:focus-visible){
+ background-position-x:-30px;
+ outline:1px solid #d5d8f7;
+ outline-offset:-2px;
+}
+#rooms.classic-chat-room .social-original-tool:active{background-position-x:-60px}
+@media(max-width:550px){
+ #rooms.classic-chat-room .social-header{padding:0 4px;column-gap:4px}
+ #rooms.classic-chat-room .social-header-tools button{font-size:9px;padding:1px 4px}
+ #rooms.classic-chat-room .social-header-tools>span{display:none}
+}
+
+/* Empty original server room catalogue — source PNG backdrops are NOT rooms. */
+#rooms .social-directory-empty{
+ display:flex;
+ flex-direction:column;
+ gap:12px;
+ margin:18px 6px;
+ padding:32px 14px;
+ text-align:center;
+ border:2px inset #7189bf;
+ background:#243864c9;
+ color:#e9f0ff;
+ font-family:Gulim,'굴림',sans-serif;
+}
+#rooms .social-directory-empty b{font-size:15px;color:#fff2c1}
+#rooms .social-directory-empty span{font-size:11px;line-height:1.5;color:#c9d7f0}
