@@ -260,7 +260,7 @@
  }
  function updateHeader(){
   const name=$('social-location-title');
-  if(name)name.textContent=state.view==='board'?'레코르다블 · 기사단 게시판':state.view==='room'?((currentRoom()?.name||'채팅방')+' · '+state.district):
+  if(name)name.textContent=state.view==='board'?'레코르다블 · 기사단 게시판':state.view==='room'?('Chatting Room · '+(currentRoom()?.name||'채팅방')):
     state.view==='directory'?(state.district+' · 채팅방 목록'):
     (REGIONS[state.region]?.title||'하이아칸')+' · 채팅 지역';
   const bread=$('social-breadcrumb');
@@ -274,10 +274,36 @@
   const scale=Math.min(region.clientWidth/W,region.clientHeight/H);
   frame.style.transform='translate3d('+((region.clientWidth-W*scale)/2)+'px,'+((region.clientHeight-H*scale)/2)+'px,0) scale('+scale+')';
  }
+ function addClassicRoomToolbar(){
+  const header=$root()?.querySelector('.social-header');if(!header)return;
+  // Native MainFrame/toolbarbtn.pak: 120×270, four 30px button states
+  // in columns and nine distinct 30px tool icons in rows.
+  const bar=document.createElement('nav');
+  bar.className='social-classic-toolbar';
+  bar.setAttribute('aria-label','원본 포리프 채팅방 도구모음');
+  const actions=[
+   {row:0,title:'채팅방 목록',act:()=>openDirectory()},
+   {row:2,title:'기사단 게시판',act:()=>{openBoard();window.__ROG_TEST__?.go('rooms')}},
+   {row:3,title:'아바타 선택',act:()=>openAvatarMenu()},
+   {row:4,title:'매직카덴',act:()=>window.__ROG_TEST__?.go('shop')},
+   {row:7,title:'게임 안내',act:()=>window.__ROG_TEST__?.go('help-screen')},
+   {row:8,title:'월드맵으로 돌아가기',act:()=>window.__ROG_TEST__?.go('sky')}
+  ];
+  for(const item of actions){
+   const button=document.createElement('button');
+   button.type='button';button.className='social-original-tool';
+   button.style.setProperty('--icon-row',String(item.row));
+   button.title=item.title;button.setAttribute('aria-label',item.title);
+   button.addEventListener('click',item.act);
+   bar.append(button);
+  }
+  header.append(bar);
+ }
  function build(){
   const root=$root();if(!root)return;
   root.replaceChildren();root.classList.add('leaf-social-scene');
   root.innerHTML='<div class="social-header"><div><strong id="social-location-title">하이아칸</strong><small id="social-breadcrumb"></small></div><div class="social-header-tools"><span id="social-online-count">1명</span><button id="social-invite" type="button">연결 초대</button><button id="social-back" type="button">← 월드맵</button></div></div><div class="social-layout"><div id="social-stage" class="social-stage"><div id="social-image-frame" class="social-image-frame"></div></div><aside class="social-user-panel"><h4>♧　USER LIST</h4><div id="social-peer-list"></div><p>같은 사이트의 다른 탭과 직접 연결한 상대방이 표시됩니다.</p></aside></div>';
+  addClassicRoomToolbar();
   $('social-back').onclick=back;
   $('social-invite').onclick=openInvite;
   sceneInit=true;
@@ -299,6 +325,7 @@
  }
  function render(){
   if(!sceneInit)return;
+  $root()?.classList.toggle('classic-chat-room',state.view==='room');
   const frame=$('social-image-frame');frame.replaceChildren();
   if(state.view==='board')renderBulletin(frame);
   if(state.view==='town')renderTown(frame);
