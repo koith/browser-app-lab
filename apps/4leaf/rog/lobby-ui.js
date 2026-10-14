@@ -21,16 +21,15 @@
   {name:'Anis',slug:'anis',x:620,y:143},
   {name:'Benya',slug:'benya',x:620,y:229}
  ];
- const selection={region:'north',channel:null};
+ const selection={channel:null};
  try{
   const saved=JSON.parse(sessionStorage.getItem('leaf_dice_channel_v1')||'null');
-  if(saved&&['north','south'].includes(saved.region)&&DICE_CHANNEL_ROWS.some(row=>row.slug===saved.slug)&&Number.isInteger(saved.number)&&saved.number>=1&&saved.number<=4){
-   selection.region=saved.region;
+  if(saved&&DICE_CHANNEL_ROWS.some(row=>row.slug===saved.slug)&&Number.isInteger(saved.number)&&saved.number>=1&&saved.number<=4){
    selection.channel={slug:saved.slug,name:DICE_CHANNEL_ROWS.find(row=>row.slug===saved.slug).name,number:saved.number};
   }
  }catch{}
  let channelResize=null;
- const diceChannelText=()=>selection.channel?(selection.region==='south'?'남':'북')+' 하이아칸 · '+selection.channel.name+' '+selection.channel.number+'채널':'채널 미선택';
+ const diceChannelText=()=>selection.channel?'주사위 채널 · '+selection.channel.name+' '+selection.channel.number+'채널':'주사위 채널 미선택';
  function scaleDiceChannels(){
   const wrap=$('dice-channel-viewport'),stage=$('dice-channel-stage');
   if(!wrap||!stage)return;
@@ -65,8 +64,8 @@
   if('ResizeObserver' in window){channelResize=new ResizeObserver(scaleDiceChannels);channelResize.observe(viewport)}
   scaleDiceChannels();
  }
- function openChannelSelect(region='north'){
-  selection.region=region==='south'?'south':'north';
+ function openChannelSelect(){
+  // Region/regionback.png is a Genesis World dice menu, NOT a Haiacan chat region.
   buildDiceChannelScene();
   window.__ROG_TEST__?.go('dice-channels');
   scaleDiceChannels();
@@ -75,7 +74,7 @@
   const row=DICE_CHANNEL_ROWS.find(r=>r.slug===slug);
   if(!row||!Number.isInteger(number)||number<1||number>4)return false;
   selection.channel={slug:row.slug,name:row.name,number};
-  try{sessionStorage.setItem('leaf_dice_channel_v1',JSON.stringify({region:selection.region,slug:row.slug,number}))}catch{}
+  try{sessionStorage.setItem('leaf_dice_channel_v1',JSON.stringify({slug:row.slug,number}))}catch{}
   window.__ROG_TEST__?.go('lobby');
   updateRooms();
   return true;
@@ -94,7 +93,7 @@
   // The Region choice is a Dice channel namespace, not just a cosmetic title:
   // a saved match from another channel must not appear as a joinable game room.
   if(selection.channel){
-   if(m.diceRegion!==selection.region||m.diceChannel!==selection.channel.slug+':'+selection.channel.number)return null;
+   if(m.diceChannel!==selection.channel.slug+':'+selection.channel.number)return null;
   }
   return m;
  };
@@ -196,7 +195,7 @@
   buildDiceChannelScene();
   let change=$('lobby-channel-change');
   if(!change){change=document.createElement('button');change.id='lobby-channel-change';change.type='button';change.textContent='TOWN SELECT · 채널 변경';$('dice-lobby-scene')?.append(change)}
-  change.onclick=()=>openChannelSelect(selection.region);
+  change.onclick=()=>openChannelSelect();
   updateRooms();channelStatus();
   $('lobby-create').onclick=openCreator;
   $('lobby-join').onclick=resumeMatch;
@@ -208,7 +207,7 @@
    if(event.detail?.route==='lobby'){closeCreator();updateRooms()}
   });
   window.addEventListener('storage',event=>{if(event.key==='rog_match'&&!creatorOpen)updateRooms()});
-  window.__LEAF_LOBBY__={openCreator,closeCreator,updateRooms,resumeMatch,openChannelSelect,chooseChannel:chooseDiceChannel,getState:()=>({open:creatorOpen,saved:!!playable(),rooms:playable()?1:0,region:selection.region,channel:selection.channel?selection.channel.slug+':'+selection.channel.number:null,channelName:selection.channel?.name||null})};
+  window.__LEAF_LOBBY__={openCreator,closeCreator,updateRooms,resumeMatch,openChannelSelect,chooseChannel:chooseDiceChannel,getState:()=>({open:creatorOpen,saved:!!playable(),rooms:playable()?1:0,region:'genesis',channel:selection.channel?selection.channel.slug+':'+selection.channel.number:null,channelName:selection.channel?.name||null})};
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);
  else init();
