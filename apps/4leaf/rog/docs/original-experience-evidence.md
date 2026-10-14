@@ -108,3 +108,6 @@
 - **VERIFIED WEBAPP (코드)**: 생성형 채팅방과 별개인 `staticRooms`는 로컬 저장소에 가짜 이용자/대화 내역을 심지 않는다. `roomById`로 실제 입장하고 BroadcastChannel/수동 RTC를 통해 대화할 수 있으며, 원작 사방 탐색 경험을 흉내 내는 독립 DOM 방 마커, 방향키, 드래그, 휠, 이동 버튼이 있다. 방 정원 검사는 **직접 연결된 사용자에 한정**한다. 서로 다른 기기 사이 서버 권위/정원 원자성은 미구현.
 - **VERIFIED WEBAPP (회귀)**: `tests/world-chat.cjs`는 공개방 입장과 비가짜 인원 표시, 2축 지도 이동, 기존 생성 방, 캐릭터 클릭 좌우 반전, 인위적 글로우 미사용을 브라우저에서 검증한다.
 - **PENDING**: 원본 ChatTown 버튼 이미지들의 프레임과 도시 화면의 판정 영역을 역해독하고, 실제 동시대 채팅방 배치 사진/동영상 및 원본 실행 파일을 통해 상설 목록 개수, 정확한 좌표, 카메라 이동 폭, 방 규모를 교정한다. 0.9와 초기 버전 동선을 혼동하지 않는다.
+
+- **VERIFIED-ARCHIVE (2026-10-15 재분석)**: `original/IMG/bgtile.png` is an actual recovered native landscape tile (725×485) with trees, paths, huts and escarpments. The chat-space map now uses independent room controls over repeated source landscape pixels rather than a fabricated gradient. Source's exact historical pan dimensions are still unverified.
+- **VERIFIED-CONTEMPORARY (2000-06-07)**: https://kbench.com/?q=node%2F5061 includes a period Haiacan area screenshot with independent over-water room-building artwork and room number/occupancy labels. It predates 0.9 and must not be mistaken for the exact later city backdrop. The v0.9 room-map terrain currently uses the recovered `bgtile.png`, not that screenshot pasted beneath hotspots.
