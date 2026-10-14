@@ -249,7 +249,12 @@
   if(rooms&&state.view==='directory')for(const row of rooms.querySelectorAll('[data-room]')){
     const count=onlinePeers('room:'+row.dataset.room).length;
     const badge=row.querySelector('.social-room-users');
-    if(badge){badge.textContent=count+'/'+allowedCapacity(roomById(row.dataset.room)?.capacity)+'명';row.classList.toggle('social-room-full',count>=allowedCapacity(roomById(row.dataset.room)?.capacity))}
+    if(badge){
+     const full=count>=allowedCapacity(roomById(row.dataset.room)?.capacity);
+     badge.textContent=count+'/'+allowedCapacity(roomById(row.dataset.room)?.capacity)+'명';
+     row.classList.toggle('social-room-full',full);
+     const arrow=row.lastElementChild;if(arrow)arrow.textContent=full?'정원 초과':'입장 ›';
+    }
   }
   if(state.view==='room')renderOccupants();
  }
@@ -287,7 +292,7 @@
    {row:2,title:'기사단 게시판',act:()=>{openBoard();window.__ROG_TEST__?.go('rooms')}},
    {row:3,title:'아바타 선택',act:()=>openAvatarMenu()},
    {row:4,title:'매직카덴',act:()=>window.__ROG_TEST__?.go('shop')},
-   {row:7,title:'게임 안내',act:()=>window.__ROG_TEST__?.go('help-screen')},
+   {row:7,title:'게임 안내',act:()=>$('help')?.click()},
    {row:8,title:'월드맵으로 돌아가기',act:()=>window.__ROG_TEST__?.go('sky')}
   ];
   for(const item of actions){
