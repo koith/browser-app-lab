@@ -1,0 +1,20 @@
+name: 4LEAF centralized multi-device ChatTown authority
+on:
+  push:
+    paths:
+      - 'apps/4leaf/rog/server/**'
+      - '.github/workflows/rog-central-chat.yml'
+  workflow_dispatch:
+jobs:
+  server-authority:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check central room server syntax
+        run: node --check apps/4leaf/rog/server/central.cjs
+      - name: Verify independent devices, room capacity and rights
+        run: node --test apps/4leaf/rog/server/central.test.cjs
