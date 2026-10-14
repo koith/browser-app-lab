@@ -6,11 +6,11 @@ const path=require('path');
  const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
  const a=await browser.newContext({viewport:{width:1280,height:800}});
  const host=await a.newPage(),guest=await a.newPage(); // same browser storage partition: actual peer tabs
- const errors=[];
+ const errors=[],missingAssets=[];
  for(const [who,page] of [['host',host],['guest',guest]]){
    page.on('pageerror',e=>{errors.push(who+': '+e.stack);console.error('PAGE ERROR',who,e.stack)});
    page.on('console',m=>{if(m.type()==='error')console.log('PAGE LOG ERROR',who,m.text())});
-   page.on('response',res=>{if(res.status()===404)console.log('RESOURCE 404',who,res.url())});
+   page.on('response',res=>{if(res.status()===404){console.log('RESOURCE 404',who,res.url());if(/\/original\//.test(res.url()))missingAssets.push(who+': '+res.url())}});
  }
  await Promise.all([host.goto(url),guest.goto(url)]);
  await Promise.all([
@@ -120,6 +120,7 @@ const path=require('path');
  assert.ok(await guest.locator('#message').isVisible(),'mobile chat input');
  assert.ok(await guest.locator('#social-back').isVisible(),'mobile navigation');
  assert.deepEqual(errors,[],'no JS exceptions');
+ assert.deepEqual(missingAssets,[],'all requested original art assets load without 404');
  await browser.close();
  console.log('4LEAF WORLD + CHAT PASS: original map, north/south boards, 6 interiors, real room creation, two users, cross-tab messages and speech bubbles, mobile');
 })().catch(e=>{console.error('WORLD+CHAT E2E FAILED',e.stack||e);process.exit(1)});
