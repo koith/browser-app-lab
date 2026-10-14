@@ -193,3 +193,24 @@ body>.social-modal .recordable-article p{white-space:pre-wrap;overflow-wrap:anyw
 
 /* Original-style chat seat change is instantaneous, including remote peers. */
 #rooms .social-interior .social-avatar{transition:none!important;animation:none!important}
+
+/* ChatRoom foreground furniture is composited from the archived room3t/4t/5t
+   sprites, in the same stacking context as avatars. The source red key is
+   stripped by the canvas renderer; seats behind tables have lower z-order. */
+#rooms .social-room-foreground{
+ position:absolute;
+ display:block;
+ pointer-events:none;
+ image-rendering:auto;
+}
+#rooms .social-interior .social-avatar-name{
+ top:0;
+ bottom:auto;
+ transform:translate(-50%,-100%);
+}
+#rooms .social-interior .social-avatar,
+#rooms .social-interior .social-room-foreground{
+ transition:none!important;
+}
+/* ChatRoom title belongs in the upper window chrome, not over the art. */
+#rooms .social-interior .social-room-title{display:none!important}
