@@ -22,7 +22,7 @@
  // unoccupied, permanently accessible restoration rooms, NOT claimed to be
  // a transcript of the original service's room catalogue.
  const ROOM_MAP={width:1480,height:1120};
- const PUBLIC_POSITIONS=[[140,160],[670,130],[1180,200],[370,510],[990,600],[170,890],[720,930],[1310,900]];
+ const PUBLIC_POSITIONS=[[85,110],[305,65],[520,160],[880,110],[1250,160],[540,640],[940,585],[1220,850]];
  const staticRooms=new Map();
  for(const region of ['north','south']){
   REGIONS[region].districts.forEach(([district],di)=>{
@@ -536,9 +536,32 @@
   for(const ch of room.id){hash^=ch.charCodeAt(0);hash=Math.imul(hash,16777619)}
   return {x:110+(hash>>>0)%1200,y:125+((hash>>>10)>>>0)%860};
  }
+ // IMG/bgtile.png is native extracted landscape art, not a screenshot or
+ // generated imitation. Recover from intermittent Pages asset errors.
+ function loadNativeRoomTerrain(plane){
+  const source='./original/IMG/bgtile.png';
+  const image=new Image();let retries=0;
+  const attempt=()=>{
+   if(!plane.isConnected)return;
+   image.src=source+(retries?'?retry='+retries+'&at='+Date.now():'');
+  };
+  image.onload=()=>{
+   if(!plane.isConnected)return;
+   plane.style.backgroundImage='url("'+image.src+'")';
+   plane.dataset.terrain='ready';
+  };
+  image.onerror=()=>{
+   if(!plane.isConnected)return;
+   if(retries<5){retries++;plane.dataset.terrain='retrying';
+    setTimeout(attempt,Math.min(1800,250*2**retries));
+   }else{plane.dataset.terrain='error';console.error('4LEAF original town terrain unavailable:',source)}
+  };
+  plane.dataset.terrain='loading';attempt();
+ }
  function setupRoomMap(){
   const viewport=$('social-map-viewport'),plane=$('social-map-plane');
   if(!viewport||!plane)return;
+  loadNativeRoomTerrain(plane);
   let x=-(ROOM_MAP.width-viewport.clientWidth)/2,y=-(ROOM_MAP.height-viewport.clientHeight)/2;
   const clamp=(v,max)=>Math.max(Math.min(0,v),Math.min(0,max));
   const placeMap=()=>{x=clamp(x,viewport.clientWidth-ROOM_MAP.width);
