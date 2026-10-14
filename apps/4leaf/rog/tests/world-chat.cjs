@@ -22,6 +22,18 @@ const path=require('path');
  assert.equal(await host.locator('#leaf-world-stage .world-sprite').count(),6,'six genuine four-frame region sprites');
  assert.equal(await host.locator('#leaf-world-stage .world-location').count(),6,'six active world regions');
  await host.screenshot({path:'leaf-original-world.png',fullPage:true});
+ await host.locator('[data-region="street"]').click();
+ assert.ok(await host.locator('#city:not(.hidden) #street-viewport').isVisible(),'original Keltica MainStreet opens from the real map');
+ assert.equal(await host.locator('#street-track .street-artwork').getAttribute('src'),'./original/MainStreet/back.png');
+ const sx1=await host.evaluate(()=>window.__LEAF_STREET__.getState().x);
+ await host.locator('#street-right').click();
+ const sx2=await host.evaluate(()=>window.__LEAF_STREET__.getState().x);
+ assert.ok(sx2>sx1,'street pans right across 1938px original source artwork');
+ await host.locator('#street-left').click();
+ await host.screenshot({path:'leaf-original-mainstreet.png'});
+ await host.locator('#street-back').click();
+ assert.ok(await host.locator('#sky:not(.hidden)').isVisible(),'street returns to WorldMap');
+
  // The original Recordable/Knight noticeboard must be a real working location.
  await host.locator('[data-region="knights"]').click();
  await host.waitForFunction(()=>window.__LEAF_SOCIAL__.getState().view==='board',null,{timeout:5000});
