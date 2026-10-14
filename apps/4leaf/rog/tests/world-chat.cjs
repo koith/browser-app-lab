@@ -175,6 +175,42 @@ const path=require('path');
    label+' sign frames retain native 142x74 proportions and no offsetting interaction border');
  };
  await assertNativeSignPixels('North Haiacan');
+ // Quantitative source-asset registration: compare each unselected sprite
+ // directly against the original ChatTown background's matching pixels.
+ // This detects incorrect labels, rows, scales and offsets independently of CSS.
+ const assertNativeArtMatch=async region=>{
+  const samples=await host.locator('.social-district-hotspot').evaluateAll(async (els,region)=>{
+   const cache=new Map();
+   const read=async path=>{
+    if(cache.has(path))return cache.get(path);
+    const img=new Image();img.src=path;await img.decode();
+    const cv=document.createElement('canvas');cv.width=img.naturalWidth;cv.height=img.naturalHeight;
+    const cx=cv.getContext('2d',{willReadFrequently:true});cx.drawImage(img,0,0);
+    const obj={data:cx.getImageData(0,0,cv.width,cv.height).data,width:cv.width,height:cv.height};
+    cache.set(path,obj);return obj;
+   };
+   const bg=await read('./original/ChatTown/'+region+'back.png');
+   const values=[];
+   for(const el of els){
+    const sprite=await read('./original/ChatTown/'+el.dataset.sprite+'.png');
+    const row=Number(el.dataset.spriteRow);
+    const top=Math.round(parseFloat(el.style.top)+parseFloat(getComputedStyle(el,'::after').top));
+    const left=Math.round(parseFloat(el.style.left)+parseFloat(getComputedStyle(el,'::after').left));
+    let n=0,sx=0,sy=0,sxx=0,syy=0,sxy=0;
+    for(let y=0;y<74;y+=2)for(let x=0;x<142;x+=2){
+     const ia=4*((row*74+y)*sprite.width+x),ib=4*((top+y)*bg.width+left+x);
+     for(let c=0;c<3;c++){
+      const a=sprite.data[ia+c],b=bg.data[ib+c];n++;sx+=a;sy+=b;sxx+=a*a;syy+=b*b;sxy+=a*b;
+     }
+    }
+    const score=(sxy-sx*sy/n)/Math.sqrt((sxx-sx*sx/n)*(syy-sy*sy/n));
+    values.push({name:el.ariaLabel,score:+score.toFixed(4)});
+   }
+   return values;
+  },region);
+  assert.ok(samples.every(x=>x.score>0.95),region+' original backdrop aligns with every correct native sign frame: '+JSON.stringify(samples));
+ };
+ await assertNativeArtMatch('north');
  assert.equal(await host.locator('.social-district-hotspot').nth(2).getAttribute('data-sprite'),'snowbtn','Pure City uses recovered SnowBtn strip');
  await host.locator('.social-district-hotspot').nth(2).hover();
  const pureHover=await host.locator('.social-district-hotspot').nth(2).evaluate(el=>{
@@ -195,6 +231,7 @@ const path=require('path');
  assert.equal(await host.locator('.social-district-hotspot').nth(0).getAttribute('data-sprite'),'seabtn','south sapphire town uses native SeaBtn art');
  assert.equal(await host.locator('.social-district-hotspot').nth(3).getAttribute('data-sprite'),'plainbtn','south forest town uses native PlainBtn art');
  await assertNativeSignPixels('South Haiacan');
+ await assertNativeArtMatch('south');
  assert.ok((await host.locator('#social-image-frame').evaluate(el=>getComputedStyle(el).backgroundImage)).includes('southback.png'));
  await host.screenshot({path:'leaf-original-south-chat-town.png'});
  await host.locator('#social-chat-north').click();
