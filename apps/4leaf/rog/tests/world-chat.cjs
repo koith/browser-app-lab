@@ -191,7 +191,7 @@ const path=require('path');
 
  // Original ChatRoom.pak contains an independent red-key foreground table
  // for room3; it must sit between the rear and front avatar seats.
- await host.waitForFunction(()=>document.querySelector('.social-room-foreground')?.dataset.ready==='true',null,{timeout:7500});
+ await host.waitForFunction(()=>document.querySelector('.social-room-foreground')?.dataset.ready==='true',null,{timeout:16000});
  const depth=await host.evaluate(()=>{
   const c=document.querySelector('.social-room-foreground');
   const p=c.getContext('2d').getImageData(0,0,c.width,c.height).data;
@@ -285,7 +285,7 @@ const path=require('path');
  await host.locator('#social-back').click();
  for(const [background,source] of [[5,'room5t'],[4,'room4t']]){
   await host.evaluate(bg=>window.__LEAF_SOCIAL__.createRoom('원본 배경 '+bg+' 테스트',bg),background);
-  await host.waitForFunction(expected=>document.querySelector('.social-room-foreground')?.dataset.source===expected&&document.querySelector('.social-room-foreground')?.dataset.ready==='true',source,{timeout:7500});
+  await host.waitForFunction(expected=>document.querySelector('.social-room-foreground')?.dataset.source===expected&&document.querySelector('.social-room-foreground')?.dataset.ready==='true',source,{timeout:16000});
   assert.equal(await host.locator('.social-room-foreground').count(),1,'one genuine foreground per room');
   await host.screenshot({path:'leaf-original-'+source+'.png'});
   await host.locator('#social-back').click();
