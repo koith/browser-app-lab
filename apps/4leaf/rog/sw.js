@@ -1,6 +1,6 @@
 'use strict';
-const REVISION='4leaf-revival-pwa-v6';
-const CORE=['./','./index.html','./game.js','./style.css','./original.css','./lobby.css','./game-authentic.css','./network.css','./network.js','./lobby-ui.js','./original/maps.js','./original/tiles.js','./original/chessmen.js','./original/Gif/d1lobby.png','./original/Gif/d1waitroom.png','./original/WorldMap/worldmapback.png','./original/CardShop/cardshopback.png','./original/IMG/bgtile.png','./original/IMG/minimap.png','./original/MainFrame/wallpaper.png'];
+const REVISION='4leaf-revival-pwa-v7';
+const CORE=['./','./index.html','./game.js','./style.css','./original.css','./lobby.css','./game-authentic.css','./network.css','./network.js','./central-client.js','./social-chat.js','./lobby-ui.js','./original/maps.js','./original/tiles.js','./original/chessmen.js','./original/Gif/d1lobby.png','./original/Gif/d1waitroom.png','./original/WorldMap/worldmapback.png','./original/CardShop/cardshopback.png','./original/IMG/bgtile.png','./original/IMG/minimap.png','./original/MainFrame/wallpaper.png'];
 self.addEventListener('install',event=>{
  event.waitUntil(caches.open(REVISION).then(async cache=>{
    const requests=CORE.map(path=>new Request(new URL(path,self.registration.scope),{cache:'reload'}));
