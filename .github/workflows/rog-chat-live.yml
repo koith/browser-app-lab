@@ -1,0 +1,59 @@
+name: 4LEAF ROG published ChatRoom browser QA
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/rog-chat-live.yml'
+  workflow_run:
+    workflows: ['Deploy static content to Pages']
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  published-chat:
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Wait until published scripts match the checked-out original reconstruction
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://koith.github.io/browser-app-lab/apps/4leaf/rog'
+          ready=0
+          for attempt in $(seq 1 30); do
+            if curl -fLsS --max-time 15 --retry 2 --retry-delay 2 \
+                 "$base/social-chat.js?qa=${GITHUB_SHA}" -o /tmp/leaf-social-live.js &&
+               curl -fLsS --max-time 15 --retry 2 --retry-delay 2 \
+                 "$base/world-social.css?qa=${GITHUB_SHA}" -o /tmp/leaf-world-live.css &&
+               cmp -s /tmp/leaf-social-live.js apps/4leaf/rog/social-chat.js &&
+               cmp -s /tmp/leaf-world-live.css apps/4leaf/rog/world-social.css; then
+              ready=1
+              echo "Published JS/CSS byte-for-byte match the checked-out source at ${GITHUB_SHA}"
+              break
+            fi
+            echo "Published files not ready on attempt $attempt; retrying in 10 seconds"
+            sleep 10
+          done
+          test "$ready" = "1"
+      - name: Install real Chromium browser
+        run: |
+          npm install --no-save playwright
+          npx playwright install chromium --with-deps
+      - name: Run real public 4LEAF ChatRoom, WorldMap, WebRTC and mobile tests
+        env:
+          FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
+        run: node apps/4leaf/rog/tests/world-chat.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: 4leaf-rog-live-published-chat-screens
+          path: leaf-*.png
+          retention-days: 7
