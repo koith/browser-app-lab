@@ -22,13 +22,19 @@
  // unoccupied, permanently accessible restoration rooms, NOT claimed to be
  // a transcript of the original service's room catalogue.
  const ROOM_MAP={width:1480,height:1120};
- const PUBLIC_POSITIONS=[[140,160],[670,130],[1180,200],[370,510],[990,600],[170,890],[720,930],[1310,900]];
+ // Spatial slots are reconstruction anchors, not verified original coordinates.
+ // Sixteen separate rooms per district yields 128 per Haiacan region,
+ // below the 200-room town limit announced for the 0.9 service.
+ const PUBLIC_POSITIONS=Array.from({length:16},(_,i)=>{
+  const col=i%4,row=Math.floor(i/4);
+  return [145+col*345+(i*37)%55,120+row*250+(i*53)%45];
+ });
  const staticRooms=new Map();
  for(const region of ['north','south']){
   REGIONS[region].districts.forEach(([district],di)=>{
    for(let i=0;i<PUBLIC_POSITIONS.length;i++){
     const id='leaf-public-'+region+'-'+di+'-'+i;
-    staticRooms.set(id,{id,name:'채팅방 '+String(di*8+i+1).padStart(2,'0'),region,district,
+    staticRooms.set(id,{id,name:'채팅방 '+String(di*PUBLIC_POSITIONS.length+i+1).padStart(3,'0'),region,district,
      owner:'',ownerId:'',passwordProof:'',passwordSalt:'',background:originalTemplates[i%originalTemplates.length],
      capacity:12,created:0,preset:true,mapX:PUBLIC_POSITIONS[i][0],mapY:PUBLIC_POSITIONS[i][1]});
    }
@@ -48,7 +54,7 @@
  const sourceDistrict=s=>{const name=safe(s,40);return name==='프레이 시티'?'퓨어 시티':name};
  const tabId=(()=>{try{const key='leaf_social_tab_identity_v1';let id=sessionStorage.getItem(key);if(!id){id=uuid();sessionStorage.setItem(key,id)}return id}catch{return uuid()}})();
  const nick=()=>safe($('profile-name')?.textContent||'Guest',12)||'Guest';
- const state={region:'north',district:REGIONS.north.districts[3][0],view:'town',roomId:null,rooms:loadRooms(),peers:new Map(),seen:new Set(),bubble:null,scope:'world',avatar:0,facing:1,position:{x:52,y:76}};
+ const state={region:'north',district:REGIONS.north.districts[3][0],view:'town',roomId:null,rooms:loadRooms(),peers:new Map(),seen:new Set(),bubble:null,scope:'world',avatar:0,facing:1,position:{x:52,y:76},roomMapOffsets:Object.create(null)};
  let channel=null,rtc=null,dataChannel=null,rtcRole=null,resize=null,pulse=null,stageInfo=null,sceneInit=false;
  const $root=()=>$('rooms'),$stage=()=>$('social-stage');
  async function deriveRoomProof(password,salt){
@@ -539,10 +545,14 @@
  function setupRoomMap(){
   const viewport=$('social-map-viewport'),plane=$('social-map-plane');
   if(!viewport||!plane)return;
-  let x=-(ROOM_MAP.width-viewport.clientWidth)/2,y=-(ROOM_MAP.height-viewport.clientHeight)/2;
+  const key=state.region+':'+state.district;
+  const saved=state.roomMapOffsets[key];
+  let x=saved?.x??-(ROOM_MAP.width-viewport.clientWidth)/2;
+  let y=saved?.y??-(ROOM_MAP.height-viewport.clientHeight)/2;
   const clamp=(v,max)=>Math.max(Math.min(0,v),Math.min(0,max));
   const placeMap=()=>{x=clamp(x,viewport.clientWidth-ROOM_MAP.width);
    y=clamp(y,viewport.clientHeight-ROOM_MAP.height);
+   state.roomMapOffsets[key]={x,y};
    plane.style.transform='translate3d('+Math.round(x)+'px,'+Math.round(y)+'px,0)'};
   const pan=(dx,dy)=>{x+=dx;y+=dy;placeMap()};
   placeMap();
