@@ -109,11 +109,15 @@ const path=require('path');
  await guest.locator('#message').fill('두 번째 브라우저의 실제 응답');
  await guest.locator('#message').press('Enter');
  await host.waitForFunction(()=>document.querySelector('#chat-log').textContent.includes('두 번째 브라우저의 실제 응답'),null,{timeout:7000});
+ // Clicking a standing area must snap instantly to a discrete slot, without walking interpolation.
+ const before=await guest.locator('.social-avatar.self').evaluate(el=>({left:el.style.left,top:el.style.top}));
  await guest.locator('.social-interior').click({position:{x:620,y:365}});
- await host.waitForFunction(()=>[...document.querySelectorAll('.social-avatar')].some(x=>x.dataset.peer!==window.__LEAF_SOCIAL__.getState().people[0]?.id&&parseFloat(x.style.left)>60),null,{timeout:6500}).catch(async()=>{
-    const count=await host.locator('.social-avatar').count();
-    assert.equal(count,2,'remote avatar remains present after room movement');
- });
+ const immediate=await guest.locator('.social-avatar.self').evaluate(el=>({left:el.style.left,top:el.style.top,transition:getComputedStyle(el).transitionDuration,seat:el.dataset.seat}));
+ assert.notDeepEqual({left:immediate.left,top:immediate.top},before,'click changes the occupied slot');
+ assert.equal(immediate.transition,'0s','local avatar teleports without CSS interpolation');
+ assert.ok(Number.isInteger(Number(immediate.seat)),'avatar is assigned a discrete seat');
+ await host.waitForFunction(pos=>[...document.querySelectorAll('.social-avatar')].some(el=>el.style.left===pos.left&&el.style.top===pos.top),{left:immediate.left,top:immediate.top},{timeout:7000});
+ assert.equal(await host.locator('.social-avatar').first().evaluate(el=>getComputedStyle(el).transitionDuration),'0s','remote avatar also teleports without interpolation');
  await host.screenshot({path:'leaf-two-live-chat-users.png'});
  await guest.setViewportSize({width:390,height:844});
  await guest.screenshot({path:'leaf-chat-mobile.png'});
