@@ -91,6 +91,17 @@ const path=require('path');
  assert.ok(roomId.length>=10,'new real room id');
  assert.ok((await host.locator('#social-image-frame').evaluate(el=>getComputedStyle(el).backgroundImage)).includes('room3.png'));
  assert.equal(await host.locator('.social-avatar').count(),1,'zero fabricated NPC users');
+ // The native client shipped a MainFrame toolbar icon sprite sheet.
+ // Do not substitute generic emoji controls: the icon crop and functional
+ // actions must be present in the real room.
+ assert.equal(await host.locator('.social-classic-toolbar .social-original-tool').count(),6,'recovered native ChatRoom toolbar controls are visible');
+ assert.equal(await host.locator('.social-original-tool').first().evaluate(e=>getComputedStyle(e).backgroundImage.includes('original/MainFrame/toolbarbtn.png')),true,'original 120x270 sprite sheet is used');
+ assert.equal(await host.locator('.social-original-tool[aria-label="월드맵으로 돌아가기"]').evaluate(e=>getComputedStyle(e).backgroundPositionY),'-240px','the correct original exit sprite row is used');
+ assert.ok(await host.locator('.social-classic-toolbar').isVisible(),'toolbar has a visible second header row');
+ await host.locator('.social-original-tool[aria-label="아바타 선택"]').click();
+ assert.ok(await host.locator('#social-modal .social-avatar-chooser').isVisible(),'original avatar button opens the chooser');
+ await host.locator('#social-modal .social-modal-title button').click();
+
  // Original ChatRoom.pak contains an independent red-key foreground table
  // for room3; it must sit between the rear and front avatar seats.
  await host.waitForFunction(()=>document.querySelector('.social-room-foreground')?.dataset.ready==='true',null,{timeout:7500});
