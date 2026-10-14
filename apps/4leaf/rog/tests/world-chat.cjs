@@ -179,6 +179,10 @@ const path=require('path');
   await host.waitForFunction(expected=>document.querySelector('.social-room-foreground')?.dataset.source===expected&&document.querySelector('.social-room-foreground')?.dataset.ready==='true',source,{timeout:7500});
   assert.equal(await host.locator('.social-room-foreground').count(),1,'one table foreground per room');
   await host.screenshot({path:'leaf-original-'+source+'.png'});
+  const extra=await host.locator('#rooms').screenshot({type:'jpeg',quality:55});
+  const preview=extra.toString('base64');
+  for(let at=0;at<preview.length;at+=4000)console.log('LEAF_'+source+'_CHUNK:'+preview.slice(at,at+4000));
+
   await host.locator('#social-back').click();
  }
  await host.locator('.social-directory-row').first().click();
