@@ -293,6 +293,7 @@
    const button=document.createElement('button');
    button.type='button';button.className='social-original-tool';
    button.style.setProperty('--icon-row',String(item.row));
+   button.style.setProperty('--icon-y',(-30*item.row)+'px');
    button.title=item.title;button.setAttribute('aria-label',item.title);
    button.addEventListener('click',item.act);
    bar.append(button);
