@@ -237,6 +237,13 @@ const path=require('path');
  await third.locator('.social-modal-title button').click();
  await third.close();
  await host.screenshot({path:'leaf-original-room0-two-person.png'});
+ // Leaving a room for the shop must vacate it; returning restores presence.
+ await host.locator('[data-route="shop"]').first().click();
+ await guest.waitForFunction(()=>document.querySelector('#social-online-count')?.textContent==='1명',null,{timeout:8000});
+ assert.equal(await host.evaluate(()=>window.__LEAF_SOCIAL__.getState().scope),'away:shop','shop visitors no longer count as chat occupants');
+ await host.locator('[data-route="rooms"]').first().click();
+ await guest.waitForFunction(()=>document.querySelector('#social-online-count')?.textContent==='2명',null,{timeout:8000});
+ assert.equal(await host.evaluate(()=>window.__LEAF_SOCIAL__.getState().roomId),limitedRoom,'return from shop preserves the current chat room');
 
  await guest.setViewportSize({width:390,height:844});
  await guest.screenshot({path:'leaf-chat-mobile.png'});
