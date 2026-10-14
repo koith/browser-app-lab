@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - 'apps/4leaf/rog/world-map.js'
+      - 'apps/4leaf/rog/street-world.js'
       - 'apps/4leaf/rog/social-chat.js'
       - 'apps/4leaf/rog/world-social.css'
       - 'apps/4leaf/rog/index.html'
