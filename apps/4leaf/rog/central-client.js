@@ -29,8 +29,12 @@
    try{resume=sessionStorage.getItem('leaf_central_session_v1')||''}catch{}
    const result=await request('POST','/api/session',{nick,resume});
    token=result.token;id=result.id;
+   joinedId=result.room?.id||null;
    try{sessionStorage.setItem('leaf_central_session_v1',token)}catch{}
    active=true;notify({type:'ready',id});
+   // The server, not stale browser storage, decides whether the joined room
+   // still exists and belongs to this live session after a page reload.
+   if(result.room)notify({type:'resumed',room:result.room});
    setInterval(async()=>{
     if(!active)return;
     try{
