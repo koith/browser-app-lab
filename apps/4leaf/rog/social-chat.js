@@ -422,10 +422,18 @@
   for(const stale of [...layer.querySelectorAll('.social-avatar')]){
    if(!users.some(p=>p.id===stale.dataset.peer))stale.remove();
   }
+  const used=[];
   users.forEach((user,i)=>{
    let node=[...layer.querySelectorAll('.social-avatar')].find(el=>el.dataset.peer===user.id);
    if(!node){node=roomAvatar(user,i);layer.append(node)}
-   const pos=place(user,i);node.style.left=pos.x+'%';node.style.top=pos.y+'%';
+   let pos=place(user,i);
+   const overlaps=p=>used.some(other=>Math.abs(other.x-p.x)<15&&Math.abs(other.y-p.y)<13);
+   if(overlaps(pos)){
+     const alternatives=[{x:22,y:69},{x:72,y:69},{x:38,y:82},{x:66,y:82},{x:48,y:64},{x:28,y:86},{x:80,y:85},{x:55,y:88}];
+     pos=alternatives.find(point=>!overlaps(point))||{x:Math.min(89,pos.x+i*8),y:Math.min(88,pos.y+i*3)};
+   }
+   used.push(pos);
+   node.style.left=pos.x+'%';node.style.top=pos.y+'%';
    node.style.zIndex=String(Math.round(pos.y));
    node.querySelector('.social-avatar-name').textContent=user.nick;
    node.classList.toggle('self',user.id===tabId);
