@@ -15,6 +15,19 @@
    ['아루아 코랄',34,192,170,99],['블랙씨 아린',226,235,166,99],['브라브 지피트',581,193,174,101],['미스틱 머메이드',405,290,171,96]
   ]}
  };
+ // Native ChatTown/*.pak selection graphics have 4 horizontal button states
+ // (142px per frame) and named rows (74px high). These 16 labels account
+ // for every extracted Plain/Sea/Snow button entry: never invent a hover glow.
+ const TOWN_SIGN_SPRITES={
+  '실버 호라이즌':['snowbtn',0],'화이트 크리스탈':['snowbtn',1],
+  '퓨어 시티':['snowbtn',2],'윈트리 아이스':['snowbtn',3],'스노우 폴':['snowbtn',4],
+  '샤이닝 브리즈':['plainbtn',0],'스위트 자스민':['plainbtn',1],
+  '그린 에메랄드':['plainbtn',2],'미쉘 에메랄드':['plainbtn',3],
+  '엘핀 포레스트':['plainbtn',4],'브라브 지피트':['plainbtn',5],
+  '블루 사파이어':['seabtn',0],'헤이즐리 웨이브':['seabtn',1],
+  '아루아 코랄':['seabtn',2],'블랙씨 아린':['seabtn',3],
+  '미스틱 머메이드':['seabtn',4]
+ };
  const originalTemplates=[2,3,5,4,0,1];
  // Native v0.9 ChatTown supported a spatial room area (up to 200 rooms per
  // town per the 2002 announcement). Exact historical room positions/labels
@@ -502,6 +515,12 @@
   REGIONS[state.region].districts.forEach(([name,x,y,w,h],idx)=>{
    const b=document.createElement('button');b.className='social-district-hotspot';b.type='button';
    b.style.cssText='left:'+x+'px;top:'+y+'px;width:'+w+'px;height:'+h+'px;';
+   const sign=TOWN_SIGN_SPRITES[name];
+   if(sign){
+    b.dataset.sprite=sign[0];b.dataset.spriteRow=String(sign[1]);
+    b.style.setProperty('--town-sprite','url("./original/ChatTown/'+sign[0]+'.png")');
+    b.style.setProperty('--town-sprite-y',(-74*sign[1])+'px');
+   }
    b.title=name+' · 채팅방 입장';
    b.setAttribute('aria-label',name+' 채팅 지역');
    const count=onlinePeers('district:'+state.region+':'+name).length;
