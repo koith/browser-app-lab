@@ -30,6 +30,11 @@ const path=require('path');
  const sx2=await host.evaluate(()=>window.__LEAF_STREET__.getState().x);
  assert.ok(sx2>sx1,'street pans right across 1938px original source artwork');
  await host.locator('#street-left').click();
+ await host.waitForTimeout(350);
+ console.log('STREET GEOMETRY',JSON.stringify(await host.evaluate(()=>{
+   const info=id=>{const el=document.getElementById(id);if(!el)return null;const rect=el.getBoundingClientRect();return {x:Math.round(rect.x),y:Math.round(rect.y),width:Math.round(rect.width),height:Math.round(rect.height),transform:getComputedStyle(el).transform}};
+   return {viewport:info('street-viewport'),track:info('street-track'),state:window.__LEAF_STREET__.getState()}
+ })));
  await host.screenshot({path:'leaf-original-mainstreet.png'});
  await host.locator('#street-back').click();
  assert.ok(await host.locator('#sky:not(.hidden)').isVisible(),'street returns to WorldMap');
