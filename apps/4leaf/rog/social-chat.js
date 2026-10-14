@@ -314,19 +314,25 @@
  // invented English USER LIST label.
  function renderNativeUserListHeader(){
   const canvas=$('social-original-userlist');if(!canvas)return;
+  // Browsers taint file:// image canvases even when the art is next to the
+  // HTML file. Keep a readable text header in the offline archive rather than
+  // throwing SecurityError; public HTTP(S) uses the exact chroma-keyed sprite.
+  if(location.protocol==='file:'){canvas.dataset.ready='offline-fallback';return}
   const image=new Image();
   image.onload=()=>{
    if(!canvas.isConnected)return;
-   canvas.width=image.naturalWidth;canvas.height=image.naturalHeight;
-   const ctx=canvas.getContext('2d',{willReadFrequently:true});
-   ctx.drawImage(image,0,0);
-   const frame=ctx.getImageData(0,0,canvas.width,canvas.height);
-   for(let i=0;i<frame.data.length;i+=4){
-    const r=frame.data[i],g=frame.data[i+1],b=frame.data[i+2];
-    if(g>220&&r<65&&b<90&&g>r*1.7&&g>b*1.6)frame.data[i+3]=0;
-   }
-   ctx.putImageData(frame,0,0);
-   canvas.dataset.ready='true';
+   try{
+    canvas.width=image.naturalWidth;canvas.height=image.naturalHeight;
+    const ctx=canvas.getContext('2d',{willReadFrequently:true});
+    ctx.drawImage(image,0,0);
+    const frame=ctx.getImageData(0,0,canvas.width,canvas.height);
+    for(let i=0;i<frame.data.length;i+=4){
+     const r=frame.data[i],g=frame.data[i+1],b=frame.data[i+2];
+     if(g>220&&r<65&&b<90&&g>r*1.7&&g>b*1.6)frame.data[i+3]=0;
+    }
+    ctx.putImageData(frame,0,0);
+    canvas.dataset.ready='true';
+   }catch{canvas.dataset.ready='offline-fallback'}
   };
   image.onerror=()=>{canvas.dataset.ready='error';console.error('Original ChatRoom userlist bitmap missing')};
   image.src='./original/ChatRoom/userlist.png';
