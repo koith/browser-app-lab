@@ -48,7 +48,7 @@
  const sourceDistrict=s=>{const name=safe(s,40);return name==='프레이 시티'?'퓨어 시티':name};
  const tabId=(()=>{try{const key='leaf_social_tab_identity_v1';let id=sessionStorage.getItem(key);if(!id){id=uuid();sessionStorage.setItem(key,id)}return id}catch{return uuid()}})();
  const nick=()=>safe($('profile-name')?.textContent||'Guest',12)||'Guest';
- const state={region:'north',district:REGIONS.north.districts[3][0],view:'town',roomId:null,rooms:loadRooms(),peers:new Map(),seen:new Set(),bubble:null,scope:'world',avatar:0,facing:1,position:{x:52,y:76}};
+ const state={region:'north',district:REGIONS.north.districts[3][0],view:'town',roomId:null,rooms:loadRooms(),peers:new Map(),seen:new Set(),bubble:null,scope:'world',avatar:0,facing:1,position:{x:52,y:76},roomMapOffsets:Object.create(null)};
  let channel=null,rtc=null,dataChannel=null,rtcRole=null,resize=null,pulse=null,stageInfo=null,sceneInit=false;
  const $root=()=>$('rooms'),$stage=()=>$('social-stage');
  async function deriveRoomProof(password,salt){
@@ -562,10 +562,14 @@
   const viewport=$('social-map-viewport'),plane=$('social-map-plane');
   if(!viewport||!plane)return;
   loadNativeRoomTerrain(plane);
-  let x=-(ROOM_MAP.width-viewport.clientWidth)/2,y=-(ROOM_MAP.height-viewport.clientHeight)/2;
+  const key=state.region+':'+state.district;
+  const saved=state.roomMapOffsets[key];
+  let x=saved?.x??-(ROOM_MAP.width-viewport.clientWidth)/2;
+  let y=saved?.y??-(ROOM_MAP.height-viewport.clientHeight)/2;
   const clamp=(v,max)=>Math.max(Math.min(0,v),Math.min(0,max));
   const placeMap=()=>{x=clamp(x,viewport.clientWidth-ROOM_MAP.width);
    y=clamp(y,viewport.clientHeight-ROOM_MAP.height);
+   state.roomMapOffsets[key]={x,y};
    plane.style.transform='translate3d('+Math.round(x)+'px,'+Math.round(y)+'px,0)'};
   const pan=(dx,dy)=>{x+=dx;y+=dy;placeMap()};
   placeMap();
