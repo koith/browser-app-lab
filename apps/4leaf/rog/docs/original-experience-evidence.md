@@ -111,3 +111,9 @@
 
 - **VERIFIED-ARCHIVE (2026-10-15 재분석)**: `original/IMG/bgtile.png` is an actual recovered native landscape tile (725×485) with trees, paths, huts and escarpments. The chat-space map now uses independent room controls over repeated source landscape pixels rather than a fabricated gradient. Source's exact historical pan dimensions are still unverified.
 - **VERIFIED-CONTEMPORARY (2000-06-07)**: https://kbench.com/?q=node%2F5061 includes a period Haiacan area screenshot with independent over-water room-building artwork and room number/occupancy labels. It predates 0.9 and must not be mistaken for the exact later city backdrop. The v0.9 room-map terrain currently uses the recovered `bgtile.png`, not that screenshot pasted beneath hotspots.
+
+## 9. 2001-era 채팅방 주사위·가위바위보 명령 복원
+
+- **VERIFIED-CONTEMPORARY (2001-02-27)**: 동아일보 당시 보도는 4LEAF 채팅방에서 `/주사위`로 임의의 주사위 결과, `/묵`, `/찌`, `/빠`로 가위바위보 표시를 제공한다고 설명한다. 서버가 승패를 판정하는 게임이 아니라 이용자가 자유롭게 놀이 규칙을 정하는 채팅 요소였다. https://www.donga.com/news/List/article/all/20010227/7655246/1
+- **VERIFIED WEBAPP (2026-10-15)**: `social-chat.js`에서 주사위 1~6 결과와 세 수신 가능한 명령을 채팅 메시지·캐릭터 말풍선에 표시한다. 기존 BroadcastChannel·WebRTC 메시지·로컬 기록에 포함되어 다른 실제 이용자에게 전달한다. `tests/world-chat.cjs`에서 두 브라우저 실시간 메시지와 결정적 주사위 테스트를 수행한다.
+- **INFERRED PRESENTATION**: 원작 정확한 명령 결과 이미지가 아직 해당 자료에서 확인되지 않았으므로 Unicode 주사위와 손동작은 임시 렌더링이다. 원본 외형을 검증하기 전 픽셀 일치로 분류하지 않는다.
