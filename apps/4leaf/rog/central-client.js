@@ -41,7 +41,13 @@
      const current=joinedId;
      const state=await request('GET','/api/snapshot?after='+lastSequence);
      lastSequence=state.nextSequence;
-     if(current===joinedId)notify({type:'snapshot',...state});
+     if(current===joinedId){
+      notify({type:'snapshot',...state});
+      // A closed room or expired membership is already authoritative.
+      // Clear the browser reservation immediately instead of waiting for a
+      // second /api/leave request (which caused a visible ghost-seat race).
+      if(current&&!state.roomId)joinedId=null;
+     }
     }catch(error){notify({type:'error',error})}
    },1600);
    return result;
