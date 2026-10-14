@@ -327,6 +327,7 @@
  function render(){
   if(!sceneInit)return;
   $root()?.classList.toggle('classic-chat-room',state.view==='room');
+  $('social-close-room')?.remove();
   const frame=$('social-image-frame');frame.replaceChildren();
   if(state.view==='board')renderBulletin(frame);
   if(state.view==='town')renderTown(frame);
@@ -529,12 +530,15 @@
   const avatarLayer=document.createElement('div');avatarLayer.className='social-avatar-layer';avatarLayer.id='social-avatar-layer';
   frame.append(avatarLayer);
   addRoomForeground(avatarLayer,room.background);
-  const controls=document.createElement('div');controls.className='social-interior-controls';
-  const outfit=document.createElement('button');outfit.textContent='캐릭터 변경';outfit.onclick=openAvatarMenu;controls.append(outfit);
+  // Original scene remains unobstructed; the avatar picker is in the recovered
+  // top-toolbar icon row, while room owner actions stay in the window chrome.
   if(!room.preset&&room.owner===nick()){
-   const close=document.createElement('button');close.textContent='방 닫기';close.onclick=()=>closeRoom(room.id);controls.append(close);
+   const close=document.createElement('button');
+   close.id='social-close-room';close.type='button';
+   close.textContent='방 닫기';close.setAttribute('aria-label','현재 채팅방 닫기');
+   close.onclick=()=>closeRoom(room.id);
+   $root()?.querySelector('.social-header-tools')?.prepend(close);
   }
-  frame.append(controls);
   frame.addEventListener('click',e=>{
    if(e.target.closest('button')||e.target.closest('.social-room-title'))return;
    const rect=frame.getBoundingClientRect();const x=100*(e.clientX-rect.left)/rect.width,y=100*(e.clientY-rect.top)/rect.height;
