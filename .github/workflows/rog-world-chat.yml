@@ -12,6 +12,7 @@ on:
       - 'apps/4leaf/rog/lobby-ui.js'
       - 'apps/4leaf/rog/lobby.css'
       - 'apps/4leaf/rog/tests/dice-channel.cjs'
+      - 'apps/4leaf/rog/tests/asset-retry.cjs'
       - '.github/workflows/rog-world-chat.yml'
   workflow_dispatch:
 jobs:
@@ -36,6 +37,8 @@ jobs:
         run: node apps/4leaf/rog/tests/world-chat.cjs
       - name: Verify original TOWN SELECT is used solely for dice game channels
         run: node apps/4leaf/rog/tests/dice-channel.cjs
+      - name: Verify original ChatRoom furniture survives transient CDN HTTP 503
+        run: node apps/4leaf/rog/tests/asset-retry.cjs
       - name: Verify cross-device peer-to-peer ChatRoom with real RTCDataChannel
         run: node apps/4leaf/rog/tests/social-network.cjs
       - uses: actions/upload-artifact@v4
