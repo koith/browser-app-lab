@@ -28,7 +28,7 @@
  const sourceDistrict=s=>{const name=safe(s,40);return name==='프레이 시티'?'퓨어 시티':name};
  const tabId=(()=>{try{const key='leaf_social_tab_identity_v1';let id=sessionStorage.getItem(key);if(!id){id=uuid();sessionStorage.setItem(key,id)}return id}catch{return uuid()}})();
  const nick=()=>safe($('profile-name')?.textContent||'Guest',12)||'Guest';
- const state={region:'north',district:REGIONS.north.districts[3][0],view:'town',roomId:null,rooms:loadRooms(),peers:new Map(),seen:new Set(),bubble:null,scope:'world',avatar:0,position:{x:52,y:76}};
+ const state={region:'north',district:REGIONS.north.districts[3][0],view:'town',roomId:null,rooms:loadRooms(),peers:new Map(),seen:new Set(),bubble:null,scope:'world',avatar:0,facing:1,position:{x:52,y:76}};
  let channel=null,rtc=null,dataChannel=null,rtcRole=null,resize=null,pulse=null,stageInfo=null,sceneInit=false;
  const $root=()=>$('rooms'),$stage=()=>$('social-stage');
  async function deriveRoomProof(password,salt){
@@ -552,7 +552,7 @@
   if(user.id===tabId)figure.classList.add('self');
   figure.onclick=e=>{
    e.stopPropagation();
-   if(user.id===tabId)openAvatarMenu();
+   if(user.id===tabId){state.facing*=-1;renderOccupants();}
    else showPeerInfo(user);
   };
   return figure;
@@ -577,6 +577,7 @@
    node.style.zIndex=String(Math.round(pos.y));
    node.querySelector('.social-avatar-name').textContent=user.nick;
    node.classList.toggle('self',user.id===tabId);
+   node.querySelector('img').style.transform=user.id===tabId&&state.facing===-1?'scaleX(-1)':'';
   });
  }
  function showBubble(sender,text){
