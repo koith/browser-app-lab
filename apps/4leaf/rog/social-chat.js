@@ -270,11 +270,22 @@
   systemLine('원본 4LEAF 채팅 화면 복원 · 이 브라우저 탭 및 직접 연결된 사용자만 표시됩니다.');
   for(const item of roomHistory(state.scope))renderMessage(item);
  }
+ // Contemporary 2001 service press documented /주사위 and /묵 /찌 /빠.
+ // They were room chat toys, NOT dice-game rules or RPS match scoring.
+ // Native command-specific pictograms are not yet recovered: Unicode is a
+ // functional placeholder so the remote player still sees the actual action.
+ function originalChatToy(command){
+  if(command==='/주사위'){
+   const roll=1+Math.floor(Math.random()*6);
+   return ['⚀','⚁','⚂','⚃','⚄','⚅'][roll-1]+' 주사위 '+roll;
+  }
+  return ({'/묵':'✊ 묵','/찌':'✌ 찌','/빠':'✋ 빠'})[command]||null;
+ }
  function publishText(text){
   const v=safe(text,250);if(!v)return;
-  if(v==='/help'){systemLine('/nick 별명 · /me 행동 · 각 대화방에서 접속자끼리 대화할 수 있습니다.');return}
+  if(v==='/help'){systemLine('/주사위 · /묵 · /찌 · /빠 · /nick 별명 · /me 행동');return}
   if(v.startsWith('/nick ')){$('rename')?.click();return}
-  const content=v.startsWith('/me ')?'＊ '+nick()+' '+v.slice(4):v;
+  const content=originalChatToy(v)||(v.startsWith('/me ')?'＊ '+nick()+' '+v.slice(4):v);
   const item={kind:'chat',id:uuid(),scope:state.scope,user:nick(),text:content,sender:tabId,time:now()};
   storeMessage(item);renderMessage(item);showBubble(tabId,content);sendLocal(item);sendRTC(item);
  }

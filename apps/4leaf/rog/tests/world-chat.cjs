@@ -295,6 +295,21 @@ const path=require('path');
  await guest.locator('#message').fill('두 번째 브라우저의 실제 응답');
  await guest.locator('#message').press('Enter');
  await host.waitForFunction(()=>document.querySelector('#chat-log').textContent.includes('두 번째 브라우저의 실제 응답'),null,{timeout:7000});
+ // Original 2001 era chat toys use the regular, real participant channel.
+ await host.evaluate(()=>{
+  const old=Math.random;Math.random=()=>0.73;
+  try{window.__LEAF_SOCIAL__.send('/주사위')}finally{Math.random=old}
+ });
+ await guest.waitForFunction(()=>document.querySelector('#chat-log')?.textContent.includes('⚄ 주사위 5'),null,{timeout:7000});
+ assert.ok(await host.locator('.social-speech').allTextContents().then(xs=>xs.some(x=>x.includes('⚄ 주사위 5'))),'original dice command produces a speech bubble');
+ for(const [command,output] of [['/묵','✊ 묵'],['/찌','✌ 찌'],['/빠','✋ 빠']]){
+  await guest.locator('#message').fill(command);
+  await guest.locator('#message').press('Enter');
+  await host.waitForFunction(result=>document.querySelector('#chat-log')?.textContent.includes(result),output,{timeout:7000});
+ }
+ assert.ok((await guest.locator('#chat-log').textContent()).includes('✋ 빠'),'period rock/paper/scissors chat is transmitted without fabricated win/loss');
+
+
  // Clicking a standing area must snap instantly to a discrete slot, without walking interpolation.
  const before=await guest.locator('.social-avatar.self').evaluate(el=>({left:el.style.left,top:el.style.top}));
  // A legitimate random spawn can ALREADY occupy the previously hard-coded

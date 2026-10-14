@@ -114,3 +114,9 @@
 
 - **VERIFIED WEBAPP (2026-10-15)**: 원본 IMG/bgtile 기반 채팅 지역에서 방에 입장한 뒤 목록으로 돌아와도 해당 지역/구역의 좌우·상하 지도 카메라 좌표를 유지한다. Chromium 통합 QA는 방향키 2축 이동과 복귀 후 위치 유지를 검사한다. 원작 정확한 초기 좌표와 이동 한계는 아직 미확인이다.
 - **VERIFIED-ARCHIVE (소스 이미지 육안 검토)**: `original/Map/mapback.png`와 `Map/mapbutton.png`는 주사위의 잔영 `ROOM SELECT` 및 `CREATE/JOIN` UI이고, `original/Room/roomback.png`는 `PLAYER/CHESSMAN INFO`를 포함하는 주잔 준비실이다. 파일명만 보고 채팅타운 지형으로 오용하지 않는다.
+
+## 9. 2001-era 채팅방 주사위·가위바위보 명령 복원
+
+- **VERIFIED-CONTEMPORARY (2001-02-27)**: 동아일보 당시 보도는 4LEAF 채팅방에서 `/주사위`로 임의의 주사위 결과, `/묵`, `/찌`, `/빠`로 가위바위보 표시를 제공한다고 설명한다. 서버가 승패를 판정하는 게임이 아니라 이용자가 자유롭게 놀이 규칙을 정하는 채팅 요소였다. https://www.donga.com/news/List/article/all/20010227/7655246/1
+- **VERIFIED WEBAPP (2026-10-15)**: `social-chat.js`에서 주사위 1~6 결과와 세 수신 가능한 명령을 채팅 메시지·캐릭터 말풍선에 표시한다. 기존 BroadcastChannel·WebRTC 메시지·로컬 기록에 포함되어 다른 실제 이용자에게 전달한다. `tests/world-chat.cjs`에서 두 브라우저 실시간 메시지와 결정적 주사위 테스트를 수행한다.
+- **INFERRED PRESENTATION**: 원작 정확한 명령 결과 이미지가 아직 해당 자료에서 확인되지 않았으므로 Unicode 주사위와 손동작은 임시 렌더링이다. 원본 외형을 검증하기 전 픽셀 일치로 분류하지 않는다.
