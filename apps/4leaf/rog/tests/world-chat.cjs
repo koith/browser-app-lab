@@ -114,44 +114,58 @@ const path=require('path');
  await host.locator('#social-back').click();
  await guest.locator('#social-back').click();
 
+ // Region/regionback.png says TOWN SELECT, but it is a DICE channel menu.
+ // Both Haiacan entries must enter this scene and NEVER switch the ChatTown.
  await host.locator('[data-region="north"]').click();
- assert.equal(await host.evaluate(()=>window.__LEAF_SOCIAL__.getState().view),'channels','world map uses the original Region TOWN SELECT interstitial');
- assert.equal(await host.locator('.social-channel-hotspot').count(),28,'7 original character rows × 4 numbered channels');
- assert.ok((await host.locator('#social-image-frame').evaluate(el=>getComputedStyle(el).backgroundImage)).includes('Region/regionback.png'),'native source regionback.png not CSS-drawn channel menu');
- assert.equal(await host.locator('[data-channel="tichiel:4"]').getAttribute('aria-label'),'채널 Tichiel 4 입장');
- await host.screenshot({path:'leaf-original-town-select.png'});
- await host.locator('[data-channel="ispin:1"]').click();
- assert.equal(await host.evaluate(()=>window.__LEAF_SOCIAL__.getState().channel),'ispin:1');
- await host.waitForFunction(()=>window.__LEAF_SOCIAL__.getState().region==='north'&&document.querySelector('#rooms:not(.hidden)'),null,{timeout:5000});
- assert.equal(await host.locator('.social-district-hotspot').count(),8,'original northern ChatTown eight signs');
- assert.equal(await host.locator('.social-district-hotspot').nth(2).getAttribute('aria-label'),'퓨어 시티 채팅 지역','third northern district label agrees with original signboard pixels');
- await host.locator('.social-district-hotspot').nth(2).click();
- assert.equal(await host.evaluate(()=>window.__LEAF_SOCIAL__.getState().district),'퓨어 시티','room catalogue uses original Pure City district');
- await host.locator('#social-back').click();
-
- assert.ok((await host.locator('#social-image-frame').evaluate(el=>getComputedStyle(el).backgroundImage)).includes('northback.png'));
- await host.screenshot({path:'leaf-original-north-town.png'});
- // Return through native channel selector, then check the other region.
- await host.locator('#social-back').click();
- assert.equal(await host.evaluate(()=>window.__LEAF_SOCIAL__.getState().view),'channels');
- await host.locator('#social-back').click();
+ assert.ok(await host.locator('#dice-channels:not(.hidden)').isVisible(),'north Haiacan opens dice channel select');
+ assert.ok(await host.locator('#rooms.hidden').count()===1,'native TOWN SELECT does not open a chat room');
+ assert.equal(await host.locator('#dice-channels .dice-channel-hotspot').count(),28,'seven original dice channel rows x 4 numbered slots');
+ assert.ok((await host.locator('#dice-channel-stage').evaluate(el=>getComputedStyle(el).backgroundImage)).includes('Region/regionback.png'),'native dice Region background is drawn');
+ assert.equal(await host.locator('#dice-channels [data-channel="tichiel:4"]').getAttribute('aria-label'),'주사위의 잔영 · Tichiel 4번 채널');
+ await host.screenshot({path:'leaf-original-town-select-dice.png'});
+ await host.locator('#dice-channels [data-channel="ispin:1"]').click();
+ assert.ok(await host.locator('#lobby:not(.hidden)').isVisible(),'dice channel opens Genesis World room select, NOT chat town');
+ assert.equal(await host.evaluate(()=>window.__LEAF_LOBBY__.getState().channel),'ispin:1','north dice channel choice is saved');
+ assert.equal(await host.evaluate(()=>window.__LEAF_LOBBY__.getState().region),'north');
+ assert.ok((await host.locator('#lobby .scene-banner').textContent()).includes('Ispin 1채널'),'lobby identifies the selected dice channel');
+ await host.locator('[data-route="sky"]').first().click();
  await host.locator('[data-region="south"]').click();
- assert.equal(await host.locator('.social-channel-hotspot').count(),28);
- await host.locator('[data-channel="tichiel:2"]').click();
- assert.equal(await host.evaluate(()=>window.__LEAF_SOCIAL__.getState().channel),'tichiel:2');
+ assert.ok(await host.locator('#dice-channels:not(.hidden)').isVisible(),'south Haiacan opens the SAME dice channel selection art');
+ assert.equal(await host.locator('#dice-channels .dice-channel-hotspot').count(),28);
+ await host.locator('#dice-channels [data-channel="tichiel:2"]').click();
+ assert.equal(await host.evaluate(()=>window.__LEAF_LOBBY__.getState().region),'south','south region remains associated with dice channel');
+ assert.equal(await host.evaluate(()=>window.__LEAF_LOBBY__.getState().channel),'tichiel:2');
+ assert.ok(await host.locator('#lobby:not(.hidden)').isVisible(),'south dice channel goes to the dice room list');
+ await host.locator('#lobby-channel-change').click();
+ assert.ok(await host.locator('#dice-channels:not(.hidden)').isVisible(),'dice room list supports changing the native dice channel');
+ await host.locator('#dice-channel-back').click();
+ assert.ok(await host.locator('#sky:not(.hidden)').isVisible(),'channel back goes to world map');
+ // The two chat-town art files are a SEPARATE feature, reached via the
+ // main 4LEAF chat tab (not through the dice TOWN SELECT).
+ await host.evaluate(()=>{
+  window.__LEAF_SOCIAL__.openRegion('north');
+  window.__ROG_TEST__.go('rooms');
+ });
+ assert.equal(await host.evaluate(()=>window.__LEAF_SOCIAL__.getState().view),'town');
+ assert.equal(await host.locator('.social-district-hotspot').count(),8,'original north ChatTown eight signs');
+ assert.equal(await host.locator('.social-district-hotspot').nth(2).getAttribute('aria-label'),'퓨어 시티 채팅 지역');
+ await host.locator('.social-district-hotspot').nth(2).click();
+ assert.equal(await host.evaluate(()=>window.__LEAF_SOCIAL__.getState().district),'퓨어 시티');
+ await host.locator('#social-back').click();
+ assert.ok((await host.locator('#social-image-frame').evaluate(el=>getComputedStyle(el).backgroundImage)).includes('northback.png'));
+ await host.screenshot({path:'leaf-original-north-chat-town.png'});
+ await host.locator('#social-chat-south').click();
+ assert.equal(await host.evaluate(()=>window.__LEAF_SOCIAL__.getState().region),'south','chat region switch stays within the actual chat module');
  assert.equal(await host.locator('.social-district-hotspot').count(),8);
  assert.ok((await host.locator('#social-image-frame').evaluate(el=>getComputedStyle(el).backgroundImage)).includes('southback.png'));
- await host.screenshot({path:'leaf-original-south-town.png'});
- await host.locator('#social-back').click();
- await host.locator('#social-back').click();
- await host.locator('[data-region="north"]').click();
- await host.locator('[data-channel="ispin:1"]').click();
+ await host.screenshot({path:'leaf-original-south-chat-town.png'});
+ await host.locator('#social-chat-north').click();
  await host.locator('.social-district-hotspot').nth(3).click();
- assert.equal((await host.evaluate(()=>window.__LEAF_SOCIAL__.getState().view)),'directory');
- assert.equal(await host.locator('.social-directory-row').count(),0,'empty server catalogue must not invent six rooms from six image templates');
- assert.ok(await host.locator('.social-directory-empty').isVisible(),'no fake online rooms are rendered');
+ assert.equal(await host.evaluate(()=>window.__LEAF_SOCIAL__.getState().view),'directory');
+ assert.equal(await host.locator('.social-directory-row').count(),0,'chat catalogue has no invented template-based rooms');
+ assert.ok(await host.locator('.social-directory-empty').isVisible(),'chat town can create rooms independently of dice channel');
  await host.locator('#social-new-room').click();
- assert.equal(await host.locator('#social-modal [name="background"] option').count(),6,'the six original room backgrounds remain selectable');
+ assert.equal(await host.locator('#social-modal [name="background"] option').count(),6,'six source ChatRoom backgrounds remain selectable');
  await host.locator('#social-modal .social-modal-title button').click();
  await host.screenshot({path:'leaf-original-room-directory.png'});
  const roomId=await host.evaluate(()=>window.__LEAF_SOCIAL__.createRoom('원작 채팅 테스트',3));
@@ -224,13 +238,11 @@ const path=require('path');
 
  await host.screenshot({path:'leaf-original-chat-room.png'});
 
- await guest.locator('[data-region="north"]').click();
- await guest.locator('[data-channel="tichiel:2"]').click();
- await guest.locator('.social-district-hotspot').nth(3).click();
- assert.equal(await guest.locator('.social-directory-row[data-room="'+roomId+'"]').count(),0,'room from another native channel must not leak into this channel');
- await guest.locator('#social-back').click();
- await guest.locator('#social-back').click();
- await guest.locator('[data-channel="ispin:1"]').click();
+ await guest.evaluate(()=>{
+  window.__LEAF_SOCIAL__.openRegion('north');
+  window.__ROG_TEST__.go('rooms');
+ });
+ assert.equal(await guest.locator('.social-district-hotspot').count(),8,'second browser chat access does not require a dice channel');
  await guest.locator('.social-district-hotspot').nth(3).click();
  await guest.waitForFunction(id=>document.querySelector('.social-directory-row[data-room="'+id+'"]'),roomId,{timeout:6500});
  await guest.evaluate(id=>window.__LEAF_SOCIAL__.joinRoom(id),roomId);
@@ -304,8 +316,10 @@ const path=require('path');
  third.on('pageerror',e=>errors.push('third: '+e.stack));
  await third.goto(url);
  await third.waitForFunction(()=>!!window.__LEAF_SOCIAL__&&!!window.__ROG_TEST__,null,{timeout:8000});
- await third.locator('[data-region="north"]').click();
- await third.locator('[data-channel="ispin:1"]').click();
+ await third.evaluate(()=>{
+  window.__LEAF_SOCIAL__.openRegion('north');
+  window.__ROG_TEST__.go('rooms');
+ });
  await third.locator('.social-district-hotspot').nth(3).click();
  await third.waitForFunction(id=>{
    const row=[...document.querySelectorAll('.social-directory-row')].find(x=>x.dataset.room===id);

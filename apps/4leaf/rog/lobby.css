@@ -47,3 +47,47 @@
 #lobby .lobby-room-empty small{color:#cfddf5;font-size:10px;line-height:1.4}
 #lobby .lobby-room-row[data-match="saved"]{cursor:pointer}
 #lobby .lobby-room-info span{max-width:70%}
+
+/* Source-faithful Genesis World TOWN SELECT. Native Region/regionback.png
+   already contains all channel labels, faces and number graphics. Overlay
+   only actual button hotspots; do not mislabel it as a chat-town directory. */
+#dice-channels .dice-channel-banner{
+ display:flex;align-items:center;justify-content:space-between;
+}
+#dice-channels #dice-channel-back{
+ border:1px ridge #c6cbea;background:#314987;color:#f3f2e9;
+ padding:4px 9px;font-size:11px;cursor:pointer;
+}
+#dice-channels .dice-channel-viewport{
+ position:relative;width:100%;height:calc(100% - 36px);
+ min-height:230px;background:#19275b;overflow:hidden;
+}
+#dice-channels .dice-channel-stage{
+ position:absolute;left:50%;top:50%;
+ width:794px;height:404px;transform-origin:center center;
+ background:url('./original/Region/regionback.png') 0 0 / 794px 404px no-repeat;
+ box-shadow:0 7px 20px #101735b0;
+}
+#dice-channels .dice-channel-hotspot{
+ position:absolute;z-index:2;display:block;
+ margin:0;padding:0;background:transparent!important;
+ color:transparent!important;box-shadow:none!important;
+ border:2px solid transparent;border-radius:4px;cursor:pointer;
+}
+#dice-channels .dice-channel-hotspot:is(:hover,:focus-visible){
+ outline:1px solid #fff4ad;
+ border-color:#fff1a8;
+ background:rgba(248,226,148,.13)!important;
+ box-shadow:0 0 9px #f3dfa9!important;
+}
+#lobby #lobby-channel-change{
+ position:absolute;right:2%;top:3%;z-index:5;
+ padding:5px 9px;border:1px ridge #a0b5e1;
+ background:#304990e8;color:#ffefc5;font:11px Gulim,'굴림',sans-serif;
+ cursor:pointer;
+}
+#lobby .lobby-scene.config-open #lobby-channel-change{display:none}
+@media(max-width:630px){
+ #lobby #lobby-channel-change{font-size:9px;padding:3px 5px}
+ #dice-channels #dice-channel-back{font-size:10px}
+}

@@ -10,9 +10,94 @@
   hotseat:{label:'같은 기기 대전',description:'한 화면에서 참가자들이 번갈아 경기합니다.'},
   network:{label:'직접 연결 대전',description:'WebRTC로 연결한 두 브라우저 간 경기입니다.'}
  };
+ // Native Region/regionback.png is the Genesis World dice CHANNEL menu.
+ // The embedded 'TOWN SELECT' caption does not make this a chatting screen.
+ const DICE_CHANNEL_ROWS=[
+  {name:'Ispin',slug:'ispin',x:120,y:57},
+  {name:'Nayntrei',slug:'nayntrei',x:120,y:143},
+  {name:'Cloe',slug:'cloe',x:120,y:229},
+  {name:'Mila',slug:'mila',x:120,y:316},
+  {name:'Tichiel',slug:'tichiel',x:620,y:57},
+  {name:'Anis',slug:'anis',x:620,y:143},
+  {name:'Benya',slug:'benya',x:620,y:229}
+ ];
+ const selection={region:'north',channel:null};
+ try{
+  const saved=JSON.parse(sessionStorage.getItem('leaf_dice_channel_v1')||'null');
+  if(saved&&['north','south'].includes(saved.region)&&DICE_CHANNEL_ROWS.some(row=>row.slug===saved.slug)&&Number.isInteger(saved.number)&&saved.number>=1&&saved.number<=4){
+   selection.region=saved.region;
+   selection.channel={slug:saved.slug,name:DICE_CHANNEL_ROWS.find(row=>row.slug===saved.slug).name,number:saved.number};
+  }
+ }catch{}
+ let channelResize=null;
+ const diceChannelText=()=>selection.channel?(selection.region==='south'?'남':'북')+' 하이아칸 · '+selection.channel.name+' '+selection.channel.number+'채널':'채널 미선택';
+ function scaleDiceChannels(){
+  const wrap=$('dice-channel-viewport'),stage=$('dice-channel-stage');
+  if(!wrap||!stage)return;
+  const factor=Math.min(1,wrap.clientWidth/794,wrap.clientHeight/404);
+  stage.style.transform='translate(-50%,-50%) scale('+Math.max(.1,factor)+')';
+ }
+ function buildDiceChannelScene(){
+  if($('dice-channels'))return;
+  const target=$('lobby'),main=target?.parentElement;if(!main)return;
+  const scene=document.createElement('section');scene.className='scene hidden';scene.id='dice-channels';
+  scene.setAttribute('aria-label','주사위의 잔영 채널 선택');
+  const banner=document.createElement('div');banner.className='scene-banner dice-channel-banner';
+  banner.innerHTML='<span>GENESIS WORLD　·　주사위의 잔영 채널 선택</span>';
+  const back=document.createElement('button');back.id='dice-channel-back';back.type='button';back.textContent='← 월드맵';
+  back.onclick=()=>window.__ROG_TEST__?.go('sky');banner.append(back);
+  const viewport=document.createElement('div');viewport.id='dice-channel-viewport';viewport.className='dice-channel-viewport';
+  const stage=document.createElement('div');stage.id='dice-channel-stage';stage.className='dice-channel-stage';
+  stage.dataset.source='Region/regionback.png';
+  for(const row of DICE_CHANNEL_ROWS){
+   for(let number=1;number<=4;number++){
+    const button=document.createElement('button');button.type='button';
+    button.className='dice-channel-hotspot';
+    button.dataset.channel=row.slug+':'+number;
+    button.style.cssText='left:'+(row.x+(number-1)*39)+'px;top:'+row.y+'px;width:34px;height:36px;';
+    button.setAttribute('aria-label','주사위의 잔영 · '+row.name+' '+number+'번 채널');
+    button.title=row.name+' '+number+'채널로 입장';
+    button.onclick=()=>chooseDiceChannel(row.slug,number);
+    stage.append(button);
+   }
+  }
+  viewport.append(stage);scene.append(banner,viewport);main.insertBefore(scene,target);
+  if('ResizeObserver' in window){channelResize=new ResizeObserver(scaleDiceChannels);channelResize.observe(viewport)}
+  scaleDiceChannels();
+ }
+ function openChannelSelect(region='north'){
+  selection.region=region==='south'?'south':'north';
+  buildDiceChannelScene();
+  window.__ROG_TEST__?.go('dice-channels');
+  scaleDiceChannels();
+ }
+ function chooseDiceChannel(slug,number){
+  const row=DICE_CHANNEL_ROWS.find(r=>r.slug===slug);
+  if(!row||!Number.isInteger(number)||number<1||number>4)return false;
+  selection.channel={slug:row.slug,name:row.name,number};
+  try{sessionStorage.setItem('leaf_dice_channel_v1',JSON.stringify({region:selection.region,slug:row.slug,number}))}catch{}
+  window.__ROG_TEST__?.go('lobby');
+  updateRooms();
+  return true;
+ }
+ function channelStatus(){
+  const banner=$('lobby')?.querySelector('.scene-banner span');
+  if(banner)banner.textContent='주사위의 잔영 · '+diceChannelText();
+  const action=$('lobby-channel-change');
+  if(action)action.title='원본 TOWN SELECT에서 주사위 채널 변경 ('+diceChannelText()+')';
+ }
  let creatorOpen=false;
  const getMatch=()=>window.__ROG_TEST__?.getMatch?.()||null;
- const playable=()=>{const m=getMatch();return m&&!m.finished&&Array.isArray(m.players)&&m.players.length>1?m:null};
+ const playable=()=>{
+  const m=getMatch();
+  if(!m||m.finished||!Array.isArray(m.players)||m.players.length<2)return null;
+  // The Region choice is a Dice channel namespace, not just a cosmetic title:
+  // a saved match from another channel must not appear as a joinable game room.
+  if(selection.channel){
+   if(m.diceRegion!==selection.region||m.diceChannel!==selection.channel.slug+':'+selection.channel.number)return null;
+  }
+  return m;
+ };
  function line(container,label,value){
   const row=document.createElement('div'),heading=document.createElement('b'),text=document.createElement('span');
   heading.textContent=label;text.textContent=String(value);row.append(heading,text);container.append(row);
@@ -20,6 +105,7 @@
  function updateRooms(){
   const root=$('lobby-room-list'),info=$('lobby-room-info');if(!root||!info)return;
   root.replaceChildren();info.replaceChildren();
+  channelStatus();
   const match=playable();
   if(match){
    const row=document.createElement('button');
@@ -107,7 +193,11 @@
  }
  function init(){
   if(!$('lobby-room-list'))return;
-  updateRooms();
+  buildDiceChannelScene();
+  let change=$('lobby-channel-change');
+  if(!change){change=document.createElement('button');change.id='lobby-channel-change';change.type='button';change.textContent='TOWN SELECT · 채널 변경';$('dice-lobby-scene')?.append(change)}
+  change.onclick=()=>openChannelSelect(selection.region);
+  updateRooms();channelStatus();
   $('lobby-create').onclick=openCreator;
   $('lobby-join').onclick=resumeMatch;
   $('lobby-config-back').onclick=closeCreator;
@@ -118,7 +208,7 @@
    if(event.detail?.route==='lobby'){closeCreator();updateRooms()}
   });
   window.addEventListener('storage',event=>{if(event.key==='rog_match'&&!creatorOpen)updateRooms()});
-  window.__LEAF_LOBBY__={openCreator,closeCreator,updateRooms,resumeMatch,getState:()=>({open:creatorOpen,saved:!!playable(),rooms:playable()?1:0})};
+  window.__LEAF_LOBBY__={openCreator,closeCreator,updateRooms,resumeMatch,openChannelSelect,chooseChannel:chooseDiceChannel,getState:()=>({open:creatorOpen,saved:!!playable(),rooms:playable()?1:0,region:selection.region,channel:selection.channel?selection.channel.slug+':'+selection.channel.number:null,channelName:selection.channel?.name||null})};
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);
  else init();

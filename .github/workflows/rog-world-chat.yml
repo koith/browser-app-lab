@@ -9,6 +9,9 @@ on:
       - 'apps/4leaf/rog/index.html'
       - 'apps/4leaf/rog/tests/world-chat.cjs'
       - 'apps/4leaf/rog/tests/social-network.cjs'
+      - 'apps/4leaf/rog/lobby-ui.js'
+      - 'apps/4leaf/rog/lobby.css'
+      - 'apps/4leaf/rog/tests/dice-channel.cjs'
       - '.github/workflows/rog-world-chat.yml'
   workflow_dispatch:
 jobs:
@@ -31,6 +34,8 @@ jobs:
           curl -fSsI http://127.0.0.1:8765/original/WorldMap/worldmapback.png
       - name: Verify original world, regions, rooms, messages and mobile
         run: node apps/4leaf/rog/tests/world-chat.cjs
+      - name: Verify original TOWN SELECT is used solely for dice game channels
+        run: node apps/4leaf/rog/tests/dice-channel.cjs
       - name: Verify cross-device peer-to-peer ChatRoom with real RTCDataChannel
         run: node apps/4leaf/rog/tests/social-network.cjs
       - uses: actions/upload-artifact@v4
