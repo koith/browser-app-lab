@@ -420,25 +420,24 @@ body>.social-modal .recordable-article p{white-space:pre-wrap;overflow-wrap:anyw
 #rooms .social-map-plane{
  position:absolute;left:0;top:0;width:1480px;height:1120px;
  transform-origin:0 0;will-change:transform;
- background:radial-gradient(ellipse at 22% 16%,#97b6a0 0%,transparent 39%),
- radial-gradient(ellipse at 76% 70%,#809c90 0%,transparent 47%),
- linear-gradient(135deg,#768e91,#637786 46%,#738991)
+ background-color:#5f8354;
+ background-image:url("./original/IMG/bgtile.png");
+ background-size:725px 485px;background-repeat:repeat;
 }
 #rooms .social-map-terrain{
  position:absolute;inset:0;pointer-events:none;
- background-image:linear-gradient(115deg,transparent 0 46%,#b4c8b035 48%,transparent 51%),
- repeating-linear-gradient(35deg,transparent 0 86px,#34485b17 87px 89px,transparent 90px 170px);
+ background:none;
 }
 #rooms .social-map-rooms{position:absolute!important;inset:0;display:block!important;overflow:visible!important}
 #rooms .social-map-rooms .social-public-room,
 #rooms .social-map-rooms .social-directory-row{
- position:absolute;display:grid;grid-template-columns:23px 18px minmax(0,1fr);
- grid-template-rows:auto auto;gap:3px 4px;
- align-items:center;text-align:left;width:176px;min-height:74px;
- margin:0;padding:8px 9px;
- color:#f2f4ff;background:linear-gradient(155deg,#6981b1,#364e83 82%);
- border:3px ridge #b4c6e3;border-radius:3px;
- box-shadow:2px 5px 0 #24345580;
+ position:absolute;display:grid;grid-template-columns:20px 14px minmax(0,1fr);
+ grid-template-rows:auto auto;gap:1px 3px;
+ align-items:center;text-align:left;width:164px;min-height:51px;
+ margin:0;padding:4px 8px;
+ color:#fff2cb;background:linear-gradient(180deg,#aa8855,#745537 48%,#503d31);
+ border:3px ridge #c7a579;border-radius:2px;
+ box-shadow:1px 3px 2px #182b2680;
  cursor:pointer;font:11px Gulim,'굴림',sans-serif;
  transition:none
 }
@@ -446,11 +445,11 @@ body>.social-modal .recordable-article p{white-space:pre-wrap;overflow-wrap:anyw
 #rooms .social-map-rooms .social-public-room:focus-visible,
 #rooms .social-map-rooms .social-directory-row:hover,
 #rooms .social-map-rooms .social-directory-row:focus-visible{
- background:linear-gradient(#8da8d2,#4f6a9d);
- border-color:#f8e7ad;outline:2px solid #f2db9b;outline-offset:2px
+ background:linear-gradient(#d6af72,#90683a);
+ border-color:#fff0bd;outline:2px solid #f2db9b;outline-offset:2px
 }
 #rooms .social-map-rooms .social-room-number{
- grid-column:1;grid-row:1 / span 2;font:700 16px Georgia,serif;color:#ffe5ac
+ grid-column:1;grid-row:1 / span 2;font:700 13px Georgia,serif;color:#f9e6b1
 }
 #rooms .social-map-rooms small{grid-column:2;grid-row:1;font-size:12px}
 #rooms .social-map-rooms b{
@@ -458,10 +457,10 @@ body>.social-modal .recordable-article p{white-space:pre-wrap;overflow-wrap:anyw
  white-space:nowrap;overflow:hidden;text-overflow:ellipsis
 }
 #rooms .social-map-rooms .social-room-users{
- grid-column:2 / 4;grid-row:2;color:#d1ffe1;font-size:11px
+ grid-column:2 / 4;grid-row:2;color:#e8f8dc;font-size:10px
 }
 #rooms .social-map-rooms .social-room-action{
- position:absolute;right:8px;bottom:9px;font-size:10px;color:#ffebbe
+ position:absolute;right:5px;bottom:5px;font-size:9px;color:#f3e2ba
 }
 #rooms .social-map-rooms .social-room-full{
  filter:grayscale(.55);opacity:.83;border-color:#a2a1ae
