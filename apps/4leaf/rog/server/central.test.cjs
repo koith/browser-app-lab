@@ -90,3 +90,31 @@ test('room owner permissions, passwords, data durability, no leaked credentials,
  assert.equal((await call('POST','/api/rooms/'+id+'/close',a.token,{})).code,200);
  assert.equal((await call('GET','/api/snapshot',b.token)).data.roomId,null);
 });
+
+test('reload resumes live room and server-confirmed ownership without fabricating capacity',async t=>{
+ const {app,call,auth}=await open();t.after(()=>app.close());
+ const host=await auth('OriginalOwner');
+ const built=await call('POST','/api/rooms',host.token,{
+  name:'복구 가능한 채팅방',region:'north',district:'샤이닝 브리즈',
+  capacity:2,background:3,password:'resumption-password'
+ });
+ assert.equal(built.code,201);
+ assert.equal(built.data.room.isOwner,true,'only the authenticated owner gets owner flag');
+ const id=built.data.room.id;
+ assert.equal((await call('POST','/api/rooms/'+id+'/join',host.token,{password:'resumption-password'})).code,200);
+ const guest=await auth('AnotherDevice');
+ assert.equal((await call('POST','/api/rooms/'+id+'/join',guest.token,{password:'resumption-password'})).code,200);
+ const reloaded=await call('POST','/api/session',null,{nick:'OriginalOwner',resume:host.token});
+ assert.equal(reloaded.code,201);
+ assert.equal(reloaded.data.id,host.id,'a browser refresh preserves the server-issued person ID');
+ assert.equal(reloaded.data.token,host.token,'a browser refresh retains its credential');
+ assert.equal(reloaded.data.room?.id,id,'the server confirms the previously joined room');
+ assert.equal(reloaded.data.room?.isOwner,true,'owner controls persist after page reload');
+ const listing=await call('GET','/api/rooms?region=north&district='+encodeURIComponent('샤이닝 브리즈'),host.token);
+ assert.equal(listing.data.rooms.find(r=>r.id===id)?.occupants,2,'reload did not increment the authoritative room count');
+ const visitorListing=await call('GET','/api/rooms?region=north&district='+encodeURIComponent('샤이닝 브리즈'),guest.token);
+ assert.equal(visitorListing.data.rooms.find(r=>r.id===id)?.isOwner,false,'remote visitor is not represented as owner');
+ const stranger=await call('POST','/api/session',null,{nick:'FakeOwner',resume:'a'.repeat(64)});
+ assert.notEqual(stranger.data.id,host.id,'made-up resume tokens cannot claim ownership');
+ assert.equal((await call('POST','/api/rooms/'+id+'/close',host.token,{})).code,200);
+});
