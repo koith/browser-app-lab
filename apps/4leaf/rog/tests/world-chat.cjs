@@ -91,6 +91,11 @@ const path=require('path');
  await host.locator('[data-region="north"]').click();
  await host.waitForFunction(()=>window.__LEAF_SOCIAL__.getState().region==='north'&&document.querySelector('#rooms:not(.hidden)'),null,{timeout:5000});
  assert.equal(await host.locator('.social-district-hotspot').count(),8,'original northern ChatTown eight signs');
+ assert.equal(await host.locator('.social-district-hotspot').nth(2).getAttribute('aria-label'),'퓨어 시티 채팅 지역','third northern district label agrees with original signboard pixels');
+ await host.locator('.social-district-hotspot').nth(2).click();
+ assert.equal(await host.evaluate(()=>window.__LEAF_SOCIAL__.getState().district),'퓨어 시티','room catalogue uses original Pure City district');
+ await host.locator('#social-back').click();
+
  assert.ok((await host.locator('#social-image-frame').evaluate(el=>getComputedStyle(el).backgroundImage)).includes('northback.png'));
  await host.screenshot({path:'leaf-original-north-town.png'});
  // Confirm distinct historic southern region also works, before returning north.
