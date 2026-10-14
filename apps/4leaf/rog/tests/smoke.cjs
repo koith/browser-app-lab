@@ -10,6 +10,13 @@ async function run(){
  assert.equal(await page.title(),'4LEAF Browser · 월드맵과 채팅');
  await page.screenshot({path:'rog-desktop.png'});
  await page.locator('[data-route="lobby"]').first().click();
+ assert.equal(await page.locator('#lobby-room-list .lobby-room-row').count(),0,'no fabricated AI/hotseat/network public rooms');
+ assert.equal(await page.locator('#lobby-room-list .lobby-room-empty').count(),1,'empty lobby is honest when no saved match exists');
+ assert.equal(await page.locator('#online-list').textContent().then(x=>x.includes('(NPC)')),false,'no fabricated online NPC count');
+ assert.equal(await page.locator('#lobby-join').getAttribute('aria-disabled'),'true','JOIN is disabled when no real match exists');
+ await page.evaluate(()=>window.__LEAF_LOBBY__.resumeMatch());
+ assert.ok(await page.locator('#modal:not(.hidden)').isVisible(),'unavailable join handler explains that the original server is absent');
+ await page.locator('#modal-buttons button').first().click();
  await page.locator('#lobby-create').click();
  await page.locator('#bot-count').selectOption('1');
  await page.locator('#start-game').click();
@@ -30,6 +37,13 @@ async function run(){
  await page.waitForFunction(()=>window.__ROG_TEST__.getMatch().players[0].position>0,{timeout:10000});
  await page.screenshot({path:'rog-game.png'});
  assert.ok((await page.evaluate(()=>window.__ROG_TEST__.getMatch().players[0].position))>first);
+ await page.locator('#exit-game').click();
+ await page.locator('#modal-buttons button').filter({hasText:'나가기'}).click();
+ await page.locator('[data-route="lobby"]').first().click();
+ assert.equal(await page.locator('#lobby-room-list .lobby-room-row[data-match="saved"]').count(),1,'only the actual unfinished game appears as a room');
+ assert.ok((await page.locator('#lobby-room-info').textContent()).includes('4LEAF'),'saved room info reflects the real source map');
+ await page.locator('#lobby-join').click();
+ assert.ok(await page.locator('#game:not(.hidden)').isVisible(),'join resumes the real saved match, not a fake new setup');
  await page.locator('#exit-game').click();
  await page.locator('#modal-buttons button').filter({hasText:'나가기'}).click();
  await page.locator('[data-route="shop"]').first().click();
@@ -84,6 +98,7 @@ async function run(){
  await page.reload();
  await page.waitForFunction(()=>!!window.__ROG_TEST__,null,{timeout:8000});
  await page.locator('[data-route="lobby"]').first().click();
+ assert.equal(await page.locator('#lobby-room-list .lobby-room-row[data-match="saved"]').count(),1,'reload shows one genuine resumable game, never three invented modes');
  await page.locator('#lobby-create').click();
  assert.ok(await page.locator('#resume-game').isVisible(),'saved unfinished match available');
  await page.locator('#resume-game').click();
