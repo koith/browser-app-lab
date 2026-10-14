@@ -156,6 +156,25 @@ const path=require('path');
  assert.equal(await host.locator('.social-district-hotspot').count(),8,'original north ChatTown eight signs');
  assert.equal(await host.locator('.social-district-hotspot').nth(2).getAttribute('aria-label'),'퓨어 시티 채팅 지역');
  assert.equal(await host.locator('.social-district-hotspot[data-sprite]').count(),8,'all eight source ChatTown buttons have matching original art');
+ // Compare actual CSS-composited sprite origins to the original 794x404
+ // backing bitmap; cross-correlation of all 16 source patches was >0.96.
+ const originalSignAnchors=[[85,63],[265,104],[448,88],[625,69],
+                            [48,199],[239,244],[588,203],[417,295]];
+ const assertNativeSignPixels=async label=>{
+  const positions=await host.locator('.social-district-hotspot').evaluateAll(els=>els.map(el=>{
+   const pseudo=getComputedStyle(el,'::after');
+   return {
+    x:Math.round(parseFloat(el.style.left)+parseFloat(pseudo.left)),
+    y:Math.round(parseFloat(el.style.top)+parseFloat(pseudo.top)),
+    width:pseudo.width,height:pseudo.height,
+    border:getComputedStyle(el).borderTopWidth
+   };
+  }));
+  assert.deepEqual(positions.map(p=>[p.x,p.y]),originalSignAnchors,label+' artwork overlays exactly the recovered native bitmap coordinates');
+  assert.ok(positions.every(p=>p.width==='142px'&&p.height==='74px'&&p.border==='0px'),
+   label+' sign frames retain native 142x74 proportions and no offsetting interaction border');
+ };
+ await assertNativeSignPixels('North Haiacan');
  assert.equal(await host.locator('.social-district-hotspot').nth(2).getAttribute('data-sprite'),'snowbtn','Pure City uses recovered SnowBtn strip');
  await host.locator('.social-district-hotspot').nth(2).hover();
  const pureHover=await host.locator('.social-district-hotspot').nth(2).evaluate(el=>{
@@ -175,6 +194,7 @@ const path=require('path');
  assert.equal(await host.locator('.social-district-hotspot').count(),8);
  assert.equal(await host.locator('.social-district-hotspot').nth(0).getAttribute('data-sprite'),'seabtn','south sapphire town uses native SeaBtn art');
  assert.equal(await host.locator('.social-district-hotspot').nth(3).getAttribute('data-sprite'),'plainbtn','south forest town uses native PlainBtn art');
+ await assertNativeSignPixels('South Haiacan');
  assert.ok((await host.locator('#social-image-frame').evaluate(el=>getComputedStyle(el).backgroundImage)).includes('southback.png'));
  await host.screenshot({path:'leaf-original-south-chat-town.png'});
  await host.locator('#social-chat-north').click();
