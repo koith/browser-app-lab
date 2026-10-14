@@ -111,3 +111,6 @@
 
 - **VERIFIED-ARCHIVE (2026-10-15 재분석)**: `original/IMG/bgtile.png` is an actual recovered native landscape tile (725×485) with trees, paths, huts and escarpments. The chat-space map now uses independent room controls over repeated source landscape pixels rather than a fabricated gradient. Source's exact historical pan dimensions are still unverified.
 - **VERIFIED-CONTEMPORARY (2000-06-07)**: https://kbench.com/?q=node%2F5061 includes a period Haiacan area screenshot with independent over-water room-building artwork and room number/occupancy labels. It predates 0.9 and must not be mistaken for the exact later city backdrop. The v0.9 room-map terrain currently uses the recovered `bgtile.png`, not that screenshot pasted beneath hotspots.
+
+- **VERIFIED WEBAPP (2026-10-15)**: 원본 IMG/bgtile 기반 채팅 지역에서 방에 입장한 뒤 목록으로 돌아와도 해당 지역/구역의 좌우·상하 지도 카메라 좌표를 유지한다. Chromium 통합 QA는 방향키 2축 이동과 복귀 후 위치 유지를 검사한다. 원작 정확한 초기 좌표와 이동 한계는 아직 미확인이다.
+- **VERIFIED-ARCHIVE (소스 이미지 육안 검토)**: `original/Map/mapback.png`와 `Map/mapbutton.png`는 주사위의 잔영 `ROOM SELECT` 및 `CREATE/JOIN` UI이고, `original/Room/roomback.png`는 `PLAYER/CHESSMAN INFO`를 포함하는 주잔 준비실이다. 파일명만 보고 채팅타운 지형으로 오용하지 않는다.
