@@ -161,7 +161,11 @@
  }
  function presence(announce=true){
   const self=compactPresence();
-  if(announce){sendLocal({kind:'presence',peer:self});sendRTC({kind:'presence',peer:self})}
+  if(announce&&!central.enabled){sendLocal({kind:'presence',peer:self});sendRTC({kind:'presence',peer:self})}
+  if(central.enabled&&central.ready&&central.joinedId===state.roomId){
+   central.presence({nick:self.nick,avatar:self.avatar,facing:self.facing,position:self.position})
+    .catch(e=>console.warn('ChatTown presence:',e.message));
+  }
   updateCounts();
  }
  function seen(id){
@@ -315,7 +319,12 @@
   if(v.startsWith('/nick ')){$('rename')?.click();return}
   const content=originalChatToy(v)||(v.startsWith('/me ')?'＊ '+nick()+' '+v.slice(4):v);
   const item={kind:'chat',id:uuid(),scope:state.scope,user:nick(),text:content,sender:tabId,time:now()};
-  storeMessage(item);renderMessage(item);showBubble(tabId,content);sendLocal(item);sendRTC(item);
+  if(central.enabled&&(!central.ready||central.joinedId!==state.roomId)){
+   systemLine('중앙 채팅방에 실제 입장한 뒤 메시지를 보낼 수 있습니다.');return;
+  }
+  storeMessage(item);renderMessage(item);showBubble(tabId,content);
+  if(central.enabled)central.chat(content).catch(e=>systemLine('서버 메시지 전송 실패: '+e.message));
+  else{sendLocal(item);sendRTC(item)}
  }
  function onlinePeers(sc=state.scope){
   const fresh=[compactPresence()];
@@ -548,7 +557,11 @@
    b.setAttribute('aria-label',name+' 채팅 지역');
    const count=onlinePeers('district:'+state.region+':'+name).length;
    if(count){const countLabel=document.createElement('span');countLabel.textContent=count+'명';b.append(countLabel)}
-   b.onclick=()=>{state.district=name;state.view='directory';state.roomId=null;render()};
+   b.onclick=()=>{
+    state.district=name;state.view='directory';state.roomId=null;render();
+    if(central.enabled&&central.ready)
+     central.list(state.region,state.district).catch(e=>systemLine('서버 방 목록 조회 실패: '+e.message));
+   };
    frame.append(b);
   });
  }
@@ -1072,6 +1085,10 @@
   }
   window.addEventListener('leaf-route-change',e=>{
     const route=e.detail?.route;
+    if(central.enabled&&central.joinedId&&route!=='rooms'){
+     central.leave().catch(e=>console.warn('Central ChatTown leave:',e.message));
+     state.view='directory';state.roomId=null;
+    }
     if(route==='sky')changeScope('world');
     else if(route==='city')changeScope('city');
     else if(route==='rooms')render();
