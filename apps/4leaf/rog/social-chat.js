@@ -600,7 +600,17 @@
    'px;height:'+art.h+'px;z-index:'+art.depth+';';
   layer.append(canvas);
   const img=new Image();
+  let retries=0;
+  const path='./original/ChatRoom/'+art.file+'.png';
+  const load=()=>{
+   if(!canvas.isConnected)return;
+   canvas.dataset.ready=retries?'retrying':'loading';
+   // Pages/CDN can transiently return 503 during publication; cache-bust
+   // retries rather than permanently losing authentic foreground furniture.
+   img.src=path+(retries?'?retry='+retries+'&at='+Date.now():'');
+  };
   img.onload=()=>{
+   if(!canvas.isConnected)return;
    canvas.width=img.naturalWidth;canvas.height=img.naturalHeight;
    const ctx=canvas.getContext('2d',{willReadFrequently:true});
    ctx.drawImage(img,0,0);
@@ -613,8 +623,17 @@
    ctx.putImageData(pixels,0,0);
    canvas.dataset.ready='true';
   };
-  img.onerror=()=>{canvas.dataset.ready='error';console.error('Missing original room foreground:',img.src)};
-  img.src='./original/ChatRoom/'+art.file+'.png';
+  img.onerror=()=>{
+   if(!canvas.isConnected)return;
+   if(retries<5){
+    retries++;
+    setTimeout(load,Math.min(1800,250*2**retries));
+   }else{
+    canvas.dataset.ready='error';
+    console.error('Original ChatRoom foreground unavailable after retries:',path);
+   }
+  };
+  load();
  }
  function renderRoom(frame){
   frame.className='social-image-frame social-interior';
