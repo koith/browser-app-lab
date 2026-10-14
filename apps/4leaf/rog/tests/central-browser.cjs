@@ -55,6 +55,21 @@ const BASE='http://127.0.0.1:8765/',API='http://127.0.0.1:8877';
   await guest.waitForFunction(id=>window.__LEAF_SOCIAL__.getState().roomId===id,newRoom,{timeout:15000});
   assert.equal(await guest.evaluate(()=>window.__LEAF_SOCIAL__.getState().view),'room');
   await host.waitForFunction(()=>document.querySelectorAll('.social-avatar').length===2,{timeout:15000});
+  // SessionStorage survives reload, but not across independent contexts.
+  // The authority alone decides whether the room/owner can be restored.
+  await host.reload();
+  await host.waitForFunction(id=>{
+   const social=window.__LEAF_SOCIAL__,central=window.__LEAF_CENTRAL_CHAT__;
+   return central?.ready&&central.joinedId===id&&social?.getState().roomId===id
+    &&social.getState().view==='room';
+  },newRoom,{timeout:15000});
+  assert.equal(await host.locator('#social-close-room').count(),1,
+   'the real server owner can still close the room after browser reload');
+  await guest.waitForFunction(()=>document.querySelectorAll('.social-avatar').length===2,{timeout:15000});
+  await host.locator('#social-close-room').click();
+  await guest.waitForFunction(()=>window.__LEAF_SOCIAL__?.getState().view==='directory',{timeout:15000});
+  assert.equal(await guest.evaluate(()=>window.__LEAF_CENTRAL_CHAT__.joinedId),null,
+   'the guest is evicted from a room closed by its authenticated owner');
   assert.deepEqual(errors,[]);
   console.log('CENTRAL CHAT BROWSER PASS: independent peers, messaging, facing, secret room and capacity');
  }finally{await browser.close()}
