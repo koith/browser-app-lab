@@ -28,6 +28,11 @@
   '아루아 코랄':['seabtn',2],'블랙씨 아린':['seabtn',3],
   '미스틱 머메이드':['seabtn',4]
  };
+ // Measured by matching the unselected 142x74 source sprite against each
+ // 794x404 native ChatTown backdrop. Both north and south use the same sign
+ // anchors; source-template normalized correlations range ~0.969..0.996.
+ const TOWN_SIGN_PIXEL_ANCHORS=[[85,63],[265,104],[448,88],[625,69],
+                               [48,199],[239,244],[588,203],[417,295]];
  const originalTemplates=[2,3,5,4,0,1];
  // Native v0.9 ChatTown supported a spatial room area (up to 200 rooms per
  // town per the 2002 announcement). Exact historical room positions/labels
@@ -520,6 +525,11 @@
     b.dataset.sprite=sign[0];b.dataset.spriteRow=String(sign[1]);
     b.style.setProperty('--town-sprite','url("./original/ChatTown/'+sign[0]+'.png")');
     b.style.setProperty('--town-sprite-y',(-74*sign[1])+'px');
+    // Position foreground hover art at the EXACT native backdrop coordinates;
+    // the larger approximate interaction hitbox remains unchanged.
+    const [sx,sy]=TOWN_SIGN_PIXEL_ANCHORS[idx];
+    b.style.setProperty('--town-sprite-left',(sx-x)+'px');
+    b.style.setProperty('--town-sprite-top',(sy-y)+'px');
    }
    b.title=name+' · 채팅방 입장';
    b.setAttribute('aria-label',name+' 채팅 지역');
