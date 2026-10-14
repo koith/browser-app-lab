@@ -201,6 +201,43 @@ const path=require('path');
  await host.evaluate(()=>window.__LEAF_SOCIAL__.createRoom('원본 서재 배경 검증',2));
  assert.equal(await host.locator('.social-room-foreground').count(),0,'room2 has no fabricated overlay sprite');
 
+ // Native archive has six distinct room bitmaps. In particular room0 must
+ // not silently become room2 when the browser converts the string "0".
+ await host.locator('#social-back').click();
+ await host.locator('#social-new-room').click();
+ await host.locator('#social-modal [name="name"]').fill('숲속 광장 2인 채팅');
+ await host.locator('#social-modal [name="background"]').selectOption('0');
+ await host.locator('#social-modal [name="capacity"]').selectOption('2');
+ await host.locator('#social-modal button[type="submit"]').click();
+ const limitedRoom=await host.evaluate(()=>window.__LEAF_SOCIAL__.getState().roomId);
+ assert.ok(limitedRoom,'two-person room created through real UI');
+ assert.equal(await host.evaluate(()=>window.__LEAF_SOCIAL__.getState().rooms.find(r=>r.id===window.__LEAF_SOCIAL__.getState().roomId)?.background),0,'original room0 selected without Number(0) fallback error');
+ assert.equal(await host.evaluate(()=>window.__LEAF_SOCIAL__.getState().rooms.find(r=>r.id===window.__LEAF_SOCIAL__.getState().roomId)?.capacity),2,'special two-person room carries a persisted capacity');
+ assert.ok((await host.locator('#social-image-frame').evaluate(el=>getComputedStyle(el).backgroundImage)).includes('room0.png'));
+ assert.equal(await host.locator('.social-room-foreground').count(),0,'original room0 has no invented foreground table');
+ await guest.locator('#social-back').click();
+ await guest.waitForFunction(id=>window.__LEAF_SOCIAL__.getState().rooms.some(r=>r.id===id),limitedRoom,{timeout:8000});
+ await guest.evaluate(id=>window.__LEAF_SOCIAL__.joinRoom(id),limitedRoom);
+ await host.waitForFunction(()=>document.querySelector('#social-online-count')?.textContent==='2명',null,{timeout:8000});
+ // Third actual tab must observe 2/2 in the directory and be refused.
+ const third=await a.newPage();
+ third.on('pageerror',e=>errors.push('third: '+e.stack));
+ await third.goto(url);
+ await third.waitForFunction(()=>!!window.__LEAF_SOCIAL__&&!!window.__ROG_TEST__,null,{timeout:8000});
+ await third.locator('[data-region="north"]').click();
+ await third.locator('.social-district-hotspot').nth(3).click();
+ await third.waitForFunction(id=>{
+   const row=[...document.querySelectorAll('.social-directory-row')].find(x=>x.dataset.room===id);
+   return row?.querySelector('.social-room-users')?.textContent==='2/2명';
+ },limitedRoom,{timeout:8000});
+ assert.ok(await third.locator('.social-directory-row.social-room-full').count()>0,'full room is marked in the directory');
+ await third.evaluate(id=>window.__LEAF_SOCIAL__.joinRoom(id),limitedRoom);
+ assert.ok(await third.locator('#social-modal').isVisible(),'third participant is shown a full-room warning');
+ assert.equal(await third.evaluate(()=>window.__LEAF_SOCIAL__.getState().view),'directory','third participant cannot enter a two-person room');
+ await third.locator('.social-modal-title button').click();
+ await third.close();
+ await host.screenshot({path:'leaf-original-room0-two-person.png'});
+
  await guest.setViewportSize({width:390,height:844});
  await guest.screenshot({path:'leaf-chat-mobile.png'});
  assert.ok(await guest.locator('#message').isVisible(),'mobile chat input');
