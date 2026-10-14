@@ -16,6 +16,26 @@
   ]}
  };
  const originalTemplates=[2,3,5,4,0,1];
+ // Native v0.9 ChatTown supported a spatial room area (up to 200 rooms per
+ // town per the 2002 announcement). Exact historical room positions/labels
+ // are not available in the recovered image assets. These are deterministic,
+ // unoccupied, permanently accessible restoration rooms, NOT claimed to be
+ // a transcript of the original service's room catalogue.
+ const ROOM_MAP={width:1480,height:1120};
+ const PUBLIC_POSITIONS=[[140,160],[670,130],[1180,200],[370,510],[990,600],[170,890],[720,930],[1310,900]];
+ const staticRooms=new Map();
+ for(const region of ['north','south']){
+  REGIONS[region].districts.forEach(([district],di)=>{
+   for(let i=0;i<PUBLIC_POSITIONS.length;i++){
+    const id='leaf-public-'+region+'-'+di+'-'+i;
+    staticRooms.set(id,{id,name:'채팅방 '+String(di*8+i+1).padStart(2,'0'),region,district,
+     owner:'',ownerId:'',passwordProof:'',passwordSalt:'',background:originalTemplates[i%originalTemplates.length],
+     capacity:12,created:0,preset:true,mapX:PUBLIC_POSITIONS[i][0],mapY:PUBLIC_POSITIONS[i][1]});
+   }
+  });
+ }
+ const publicCatalogue=()=>[...staticRooms.values()].filter(r=>r.region===state.region&&r.district===state.district);
+
  // A historic 2-person chat-room event is documented. Other limits are
  // restoration controls, not claims about the original server's room menu.
  const allowedCapacity=n=>[2,4,8,12].includes(Number(n))?Number(n):12;
@@ -28,7 +48,7 @@
  const sourceDistrict=s=>{const name=safe(s,40);return name==='프레이 시티'?'퓨어 시티':name};
  const tabId=(()=>{try{const key='leaf_social_tab_identity_v1';let id=sessionStorage.getItem(key);if(!id){id=uuid();sessionStorage.setItem(key,id)}return id}catch{return uuid()}})();
  const nick=()=>safe($('profile-name')?.textContent||'Guest',12)||'Guest';
- const state={region:'north',district:REGIONS.north.districts[3][0],view:'town',roomId:null,rooms:loadRooms(),peers:new Map(),seen:new Set(),bubble:null,scope:'world',avatar:0,position:{x:52,y:76}};
+ const state={region:'north',district:REGIONS.north.districts[3][0],view:'town',roomId:null,rooms:loadRooms(),peers:new Map(),seen:new Set(),bubble:null,scope:'world',avatar:0,facing:1,position:{x:52,y:76}};
  let channel=null,rtc=null,dataChannel=null,rtcRole=null,resize=null,pulse=null,stageInfo=null,sceneInit=false;
  const $root=()=>$('rooms'),$stage=()=>$('social-stage');
  async function deriveRoomProof(password,salt){
@@ -53,7 +73,7 @@
   return roomById(state.roomId);
  }
  function roomById(id){
-  return state.rooms.find(r=>r.id===id)||null;
+  return state.rooms.find(r=>r.id===id)||staticRooms.get(id)||null;
  }
  // ChatRoom/room0..room5 are six BACKGROUND IMAGES, not six historical
  // permanently open server rooms. A real original server supplied the room
@@ -100,7 +120,7 @@
  function compactPresence(){
   return {id:tabId,nick:nick(),scope:state.scope,roomId:state.roomId,
    region:state.region,district:state.district,view:state.view,
-   avatar:state.avatar,position:{x:state.position.x,y:state.position.y},last:now()};
+   avatar:state.avatar,facing:state.facing,position:{x:state.position.x,y:state.position.y},last:now()};
  }
  function sendLocal(packet){
   const msg={v:1,from:tabId,...packet};
@@ -131,7 +151,8 @@
    const peer={id:safe(user.id,100),nick:safe(user.nick,12),scope:safe(user.scope,120),roomId:safe(user.roomId,70),
     region:['north','south'].includes(user.region)?user.region:'north',
     district:sourceDistrict(user.district),view:safe(user.view,15),avatar:Math.max(0,Math.min(avatars.length-1,Number(user.avatar)||0)),
-    position:user.position&&Number.isFinite(user.position.x)&&Number.isFinite(user.position.y)?user.position:null,last:now(),source};
+    position:user.position&&Number.isFinite(user.position.x)&&Number.isFinite(user.position.y)?user.position:null,
+    facing:user.facing===-1?-1:1,last:now(),source};
    state.peers.set(peer.id,peer);
    if(p.kind==='hello'){sendLocal({kind:'presence',peer:compactPresence()});sendRTC({kind:'presence',peer:compactPresence()})}
    updateCounts();return;
@@ -478,34 +499,80 @@
    frame.append(b);
   });
  }
+ // 4LEAF 0.9 expands the world-like room estate, not a linear HTML list.
+ // Each room is an independent button; the map can pan on both axes.
  function renderDirectory(frame=$('social-image-frame')){
   if(state.view!=='directory')return;
   frame.className='social-image-frame social-room-directory';
   frame.style.backgroundImage='url("./original/ChatTown/'+REGIONS[state.region].art+'.png")';
-  frame.innerHTML='<div class="social-directory"><div class="social-directory-heading"><b>CHATTING ROOM · <span id="social-directory-name"></span></b><button id="social-new-room">+ 채팅방 만들기</button></div><div id="social-directory-list"></div><p>접속 인원은 현재 실제로 연결된 탭과 직접 연결 사용자 기준입니다.</p></div>';
+  frame.innerHTML='<section class="social-directory"><header class="social-directory-heading"><b>CHATTING TOWN · <span id="social-directory-name"></span></b><button id="social-new-room" type="button">+ 채팅방 만들기</button></header><div id="social-map-viewport" class="social-map-viewport" tabindex="0" aria-label="채팅방 지도. 방향키 또는 드래그로 사방 이동"><div id="social-map-plane" class="social-map-plane"><div class="social-map-terrain" aria-hidden="true"></div><div id="social-directory-list" class="social-map-rooms"></div></div></div><footer class="social-map-toolbar"><span>지도 드래그 · 방향키 / 휠 이동 · 표시 인원은 실제 연결 사용자</span><div class="social-map-directions"><button type="button" data-pan="left" aria-label="왼쪽 이동">◀</button><button type="button" data-pan="up" aria-label="위쪽 이동">▲</button><button type="button" data-pan="down" aria-label="아래쪽 이동">▼</button><button type="button" data-pan="right" aria-label="오른쪽 이동">▶</button></div></footer></section>';
   $('social-directory-name').textContent=state.district;
   $('social-new-room').onclick=showCreateRoom;
-  const list=$('social-directory-list');
-  if(!catalogue().length){
-   const notice=document.createElement('div');notice.className='social-directory-empty';
-   notice.innerHTML='<b>현재 열린 채팅방이 없습니다.</b><span>채팅방을 만들면 같은 브라우저의 다른 탭 또는 직접 연결한 사용자에게 공유됩니다.</span>';
-   list.append(notice);
-  }
-  for(const [i,r] of catalogue().entries()){
-   const b=document.createElement('button');b.className='social-directory-row';b.dataset.room=r.id;
-   const num=document.createElement('span');num.className='social-room-number';num.textContent=String(i+1).padStart(2,'0');
+  const list=$('social-directory-list'),rooms=[...publicCatalogue(),...catalogue()];
+  for(const [i,r] of rooms.entries()){
+   const b=document.createElement('button');
+   b.type='button';b.className=r.preset?'social-public-room':'social-directory-row';
+   b.dataset.room=r.id;b.title=r.name+' · 입장';b.setAttribute('aria-label',r.name+' 채팅방 입장');
+   const position=r.preset?{x:r.mapX,y:r.mapY}:customRoomPosition(r);
+   b.style.left=position.x+'px';b.style.top=position.y+'px';
+   const number=document.createElement('span');number.className='social-room-number';
+   number.textContent=r.preset?String(i+1).padStart(2,'0'):'✦';
    const name=document.createElement('b');name.textContent=r.name;
    const lock=document.createElement('small');lock.textContent=r.passwordProof?'🔒':'♧';
-   const occupancy=document.createElement('span');occupancy.className='social-room-users';occupancy.textContent=onlinePeers('room:'+r.id).length+'/'+allowedCapacity(r.capacity)+'명';
-   const arrow=document.createElement('span');arrow.textContent='입장 ›';
-   b.append(num,lock,name,occupancy,arrow);
-   if(onlinePeers('room:'+r.id).length>=allowedCapacity(r.capacity)){
-    b.classList.add('social-room-full');arrow.textContent='정원 초과';
-   }
+   const occupancy=document.createElement('span');occupancy.className='social-room-users';
+   occupancy.textContent=onlinePeers('room:'+r.id).length+'/'+allowedCapacity(r.capacity)+'명';
+   const arrow=document.createElement('span');arrow.className='social-room-action';arrow.textContent='입장 ›';
+   b.append(number,lock,name,occupancy,arrow);
+   if(!roomHasSpace(r)){b.classList.add('social-room-full');arrow.textContent='정원 초과'}
    b.onclick=()=>joinRoom(r.id);
    list.append(b);
   }
+  setupRoomMap();
   updateCounts();
+ }
+ function customRoomPosition(room){
+  // Stable spatial anchors without persisting a view-dependent pixel offset.
+  let hash=2166136261;
+  for(const ch of room.id){hash^=ch.charCodeAt(0);hash=Math.imul(hash,16777619)}
+  return {x:110+(hash>>>0)%1200,y:125+((hash>>>10)>>>0)%860};
+ }
+ function setupRoomMap(){
+  const viewport=$('social-map-viewport'),plane=$('social-map-plane');
+  if(!viewport||!plane)return;
+  let x=-(ROOM_MAP.width-viewport.clientWidth)/2,y=-(ROOM_MAP.height-viewport.clientHeight)/2;
+  const clamp=(v,max)=>Math.max(Math.min(0,v),Math.min(0,max));
+  const placeMap=()=>{x=clamp(x,viewport.clientWidth-ROOM_MAP.width);
+   y=clamp(y,viewport.clientHeight-ROOM_MAP.height);
+   plane.style.transform='translate3d('+Math.round(x)+'px,'+Math.round(y)+'px,0)'};
+  const pan=(dx,dy)=>{x+=dx;y+=dy;placeMap()};
+  placeMap();
+  let pointer=null;
+  viewport.addEventListener('pointerdown',e=>{
+   // Room clicks enter immediately; dragging starts only on empty terrain.
+   if(e.button!==0||e.target.closest('button'))return;
+   pointer={id:e.pointerId,x:e.clientX,y:e.clientY};
+   viewport.setPointerCapture(e.pointerId);
+  });
+  viewport.addEventListener('pointermove',e=>{
+   if(!pointer||e.pointerId!==pointer.id)return;
+   const scale=viewport.getBoundingClientRect().width/viewport.clientWidth||1;
+   pan((e.clientX-pointer.x)/scale,(e.clientY-pointer.y)/scale);
+   pointer.x=e.clientX;pointer.y=e.clientY;
+  });
+  const release=e=>{if(pointer?.id===e.pointerId)pointer=null};
+  viewport.addEventListener('pointerup',release);
+  viewport.addEventListener('pointercancel',release);
+  viewport.addEventListener('wheel',e=>{
+   e.preventDefault();pan(-(e.deltaX||0),-(e.deltaY||0));
+  },{passive:false});
+  viewport.addEventListener('keydown',e=>{
+   const steps={ArrowLeft:[95,0],ArrowRight:[-95,0],ArrowUp:[0,95],ArrowDown:[0,-95]};
+   if(steps[e.key]){e.preventDefault();pan(...steps[e.key])}
+  });
+  for(const button of document.querySelectorAll('.social-map-directions button')){
+   const steps={left:[150,0],right:[-150,0],up:[0,135],down:[0,-135]};
+   button.onclick=()=>pan(...steps[button.dataset.pan]);
+  }
  }
  function roomHasSpace(room){
   // The browser only knows currently connected peers. A future central
@@ -552,7 +619,7 @@
   if(user.id===tabId)figure.classList.add('self');
   figure.onclick=e=>{
    e.stopPropagation();
-   if(user.id===tabId)openAvatarMenu();
+   if(user.id===tabId){state.facing*=-1;presence();renderOccupants();}
    else showPeerInfo(user);
   };
   return figure;
@@ -577,6 +644,10 @@
    node.style.zIndex=String(Math.round(pos.y));
    node.querySelector('.social-avatar-name').textContent=user.nick;
    node.classList.toggle('self',user.id===tabId);
+   const img=node.querySelector('img');
+   const filename=avatars[user.avatar%avatars.length];
+   if(!img.src.endsWith('/'+filename+'.png'))img.src='./original/Registry/'+filename+'.png';
+   img.style.transform=(user.id===tabId?state.facing:user.facing)===-1?'scaleX(-1)':'';
   });
  }
  function showBubble(sender,text){
@@ -653,7 +724,8 @@
    $root()?.querySelector('.social-header-tools')?.prepend(close);
   }
   frame.addEventListener('click',e=>{
-   if(e.target.closest('button')||e.target.closest('.social-room-title'))return;
+   // Do not teleport from a click on a participant or UI overlay.
+   if(e.target.closest('button, .social-room-title, .social-avatar'))return;
    const rect=frame.getBoundingClientRect();const x=100*(e.clientX-rect.left)/rect.width,y=100*(e.clientY-rect.top)/rect.height;
    const others=onlinePeers('room:'+state.roomId).filter(p=>p.id!==tabId);
    const occupied=new Set(others.map(p=>closestSeat(p.position?.x??52,p.position?.y??76)));
