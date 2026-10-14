@@ -65,7 +65,7 @@
  function clickRegion(id){
    const data=REGIONS.find(r=>r.id===id);if(!data)return;
    if(id==='north'||id==='south'){
-     if(window.__LEAF_SOCIAL__?.openRegion)window.__LEAF_SOCIAL__.openRegion(id);
+     if(window.__LEAF_SOCIAL__?.openChannelSelect)window.__LEAF_SOCIAL__.openChannelSelect(id);
      window.__ROG_TEST__?.go('rooms');
    }else if(id==='street')window.__ROG_TEST__?.go('city');
    else if(id==='dice')window.__ROG_TEST__?.go('lobby');
