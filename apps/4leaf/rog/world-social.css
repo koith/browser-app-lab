@@ -321,3 +321,42 @@ body>.social-modal .recordable-article p{white-space:pre-wrap;overflow-wrap:anyw
 }
 #rooms .social-directory-row.social-room-full .social-room-users{color:#ffd0b4}
 #rooms .social-directory-row.social-room-full>span:last-child{color:#ffdbc6}
+
+/* Original ChatRoom PAK participant-list title (150×38), with the game's
+   chroma-key green removed in the JavaScript canvas compositing path. */
+#rooms .social-user-panel .social-user-titlebar{
+ position:relative;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ min-height:38px;
+ flex:none;
+ background:#516da8;
+ border-bottom:2px ridge #c0d0ef;
+}
+#rooms .social-user-panel .social-user-titlebar canvas{
+ display:none;
+ width:150px;
+ height:38px;
+ max-width:100%;
+ image-rendering:pixelated;
+}
+#rooms .social-user-panel .social-user-titlebar canvas[data-ready="true"]{
+ display:block;
+}
+#rooms .social-user-panel .social-user-titlebar canvas[data-ready="true"]+h4{
+ display:none;
+}
+#rooms .social-user-panel .social-user-titlebar h4{
+ flex:1;
+ height:38px;
+ margin:0;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ font-size:12px;
+ letter-spacing:0;
+}
+#rooms.classic-chat-room .social-user-panel>p{
+ display:none;
+}
