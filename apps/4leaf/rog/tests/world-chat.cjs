@@ -91,6 +91,12 @@ const path=require('path');
  assert.ok(roomId.length>=10,'new real room id');
  assert.ok((await host.locator('#social-image-frame').evaluate(el=>getComputedStyle(el).backgroundImage)).includes('room3.png'));
  assert.equal(await host.locator('.social-avatar').count(),1,'zero fabricated NPC users');
+ assert.equal(await host.locator('.social-original-tool').count(),6,'six working source-art toolbar actions');
+ assert.equal(await host.locator('#social-close-room').count(),1,'owner can close room from the window chrome');
+ assert.equal(await host.locator('.social-interior-controls').count(),0,'no artificial blue control buttons cover original scene');
+ await host.locator('.social-original-tool[aria-label="아바타 선택"]').click();
+ assert.ok(await host.locator('.social-avatar-chooser').isVisible(),'authentic toolbar avatar icon opens working character picker');
+ await host.locator('.social-modal-title button').click();
  // The native client shipped a MainFrame toolbar icon sprite sheet.
  // Do not substitute generic emoji controls: the icon crop and functional
  // actions must be present in the real room.
@@ -150,10 +156,6 @@ const path=require('path');
  assert.notEqual(inFront.seat,behind.seat,'front and rear clicks choose different native scene anchors');
 
  await host.screenshot({path:'leaf-original-chat-room.png'});
- // Temporary visual-review JPEG for comparing native scene compositing.
- const reviewBytes=await host.locator('#rooms').screenshot({type:'jpeg',quality:64});
- const reviewB64=reviewBytes.toString('base64');
- for(let at=0;at<reviewB64.length;at+=4000)console.log('LEAF_VISUAL_CHUNK:'+reviewB64.slice(at,at+4000));
 
  await guest.evaluate(()=>{window.__LEAF_SOCIAL__.openRegion('north');window.__ROG_TEST__.go('rooms');});
  await guest.locator('.social-district-hotspot').nth(3).click();
@@ -190,9 +192,6 @@ const path=require('path');
   await host.waitForFunction(expected=>document.querySelector('.social-room-foreground')?.dataset.source===expected&&document.querySelector('.social-room-foreground')?.dataset.ready==='true',source,{timeout:7500});
   assert.equal(await host.locator('.social-room-foreground').count(),1,'one table foreground per room');
   await host.screenshot({path:'leaf-original-'+source+'.png'});
-  const extra=await host.locator('#rooms').screenshot({type:'jpeg',quality:55});
-  const preview=extra.toString('base64');
-  for(let at=0;at<preview.length;at+=4000)console.log('LEAF_'+source+'_CHUNK:'+preview.slice(at,at+4000));
 
   await host.locator('#social-back').click();
  }
