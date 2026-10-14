@@ -244,6 +244,16 @@ const path=require('path');
  await host.locator('[data-route="rooms"]').first().click();
  await guest.waitForFunction(()=>document.querySelector('#social-online-count')?.textContent==='2명',null,{timeout:8000});
  assert.equal(await host.evaluate(()=>window.__LEAF_SOCIAL__.getState().roomId),limitedRoom,'return from shop preserves the current chat room');
+ // Both tabs use the same visible Guest nickname: the guest must not acquire
+ // the host's room-owner privileges from this coincidental display-name match.
+ assert.equal(await guest.locator('#social-close-room').count(),0,'same nickname cannot impersonate room owner');
+ assert.equal(await host.locator('#social-close-room').count(),1,'true room owner retains controls');
+ const owned=await host.evaluate(()=>window.__LEAF_SOCIAL__.getState().rooms.find(r=>r.id===window.__LEAF_SOCIAL__.getState().roomId));
+ assert.ok(owned.ownerId&&owned.capacity===2,'owner identity and participant limit travel with the room');
+ await host.locator('#social-close-room').click();
+ await guest.waitForFunction(id=>window.__LEAF_SOCIAL__.getState().view==='directory'&&!window.__LEAF_SOCIAL__.getState().rooms.some(r=>r.id===id),limitedRoom,{timeout:8000});
+ assert.equal(await guest.locator('.social-directory-row[data-room="'+limitedRoom+'"]').count(),0,'closed room disappears from other browser');
+
 
  await guest.setViewportSize({width:390,height:844});
  await guest.screenshot({path:'leaf-chat-mobile.png'});
