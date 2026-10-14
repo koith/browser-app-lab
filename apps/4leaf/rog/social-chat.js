@@ -65,14 +65,23 @@
   if(state.view==='board')return 'board:recordable';
   return 'world';
  }
- function place(user,index){
+ // Native-style discrete standing positions: click selects a seat, not a walking destination.
+ // The original room backgrounds differ; fixed anchor slots are provisional until per-room anchors are decoded.
+ const ROOM_SEATS=[
+  {x:23,y:65},{x:40,y:65},{x:57,y:65},{x:74,y:65},
+  {x:23,y:78},{x:40,y:78},{x:57,y:78},{x:74,y:78},
+  {x:23,y:90},{x:40,y:90},{x:57,y:90},{x:74,y:90}
+ ];
+ function closestSeat(x,y,occupied=new Set()){
+  const list=ROOM_SEATS.map((seat,i)=>({seat,i,d:(seat.x-x)**2+(seat.y-y)**2*1.3})).sort((a,b)=>a.d-b.d||a.i-b.i);
+  return (list.find(p=>!occupied.has(p.i))||list[0]).i;
+ }
+ function place(user,index,occupied=new Set()){
   const pos=user.position;
-  if(pos&&Number.isFinite(pos.x)&&Number.isFinite(pos.y)){
-    const x=Math.max(12,Math.min(88,pos.x)),y=Math.max(43,Math.min(91,pos.y));
-    if(index>0&&x===52&&y===76){const choices=[{x:31,y:73},{x:71,y:73},{x:42,y:84},{x:63,y:84}];return choices[(index-1)%choices.length]}
-    return {x,y};
-  }
-  return {x:19+(index%5)*15,y:76+(Math.floor(index/5)%2)*9};
+  const x=pos&&Number.isFinite(pos.x)?pos.x:52;
+  const y=pos&&Number.isFinite(pos.y)?pos.y:76;
+  const seat=closestSeat(x,y,occupied);
+  return {...ROOM_SEATS[seat],seat};
  }
  function compactPresence(){
   return {id:tabId,nick:nick(),scope:state.scope,roomId:state.roomId,
@@ -422,17 +431,15 @@
   for(const stale of [...layer.querySelectorAll('.social-avatar')]){
    if(!users.some(p=>p.id===stale.dataset.peer))stale.remove();
   }
-  const used=[];
+  const occupied=new Set();
+  // Stable order keeps each avatar at the same snapped seat on every client.
+  users.sort((a,b)=>String(a.id).localeCompare(String(b.id)));
   users.forEach((user,i)=>{
    let node=[...layer.querySelectorAll('.social-avatar')].find(el=>el.dataset.peer===user.id);
    if(!node){node=roomAvatar(user,i);layer.append(node)}
-   let pos=place(user,i);
-   const overlaps=p=>used.some(other=>Math.abs(other.x-p.x)<15&&Math.abs(other.y-p.y)<13);
-   if(overlaps(pos)){
-     const alternatives=[{x:22,y:69},{x:72,y:69},{x:38,y:82},{x:66,y:82},{x:48,y:64},{x:28,y:86},{x:80,y:85},{x:55,y:88}];
-     pos=alternatives.find(point=>!overlaps(point))||{x:Math.min(89,pos.x+i*8),y:Math.min(88,pos.y+i*3)};
-   }
-   used.push(pos);
+   const pos=place(user,i,occupied);
+   occupied.add(pos.seat);
+   node.dataset.seat=String(pos.seat);
    node.style.left=pos.x+'%';node.style.top=pos.y+'%';
    node.style.zIndex=String(Math.round(pos.y));
    node.querySelector('.social-avatar-name').textContent=user.nick;
@@ -465,7 +472,10 @@
   frame.addEventListener('click',e=>{
    if(e.target.closest('button')||e.target.closest('.social-room-title'))return;
    const rect=frame.getBoundingClientRect();const x=100*(e.clientX-rect.left)/rect.width,y=100*(e.clientY-rect.top)/rect.height;
-   state.position={x:Math.round(Math.max(12,Math.min(88,x))),y:Math.round(Math.max(48,Math.min(91,y)))};
+   const others=onlinePeers('room:'+state.roomId).filter(p=>p.id!==tabId);
+   const occupied=new Set(others.map(p=>closestSeat(p.position?.x??52,p.position?.y??76)));
+   const seat=closestSeat(x,y,occupied);
+   state.position={...ROOM_SEATS[seat]};
    sendLocal({kind:'move',position:state.position});sendRTC({kind:'move',from:tabId,position:state.position});presence();
    renderOccupants();
   });
