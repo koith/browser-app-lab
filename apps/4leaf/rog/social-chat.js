@@ -46,17 +46,14 @@
   return roomById(state.roomId);
  }
  function roomById(id){
-  return state.rooms.find(r=>r.id===id)||presetRooms().find(r=>r.id===id)||null;
+  return state.rooms.find(r=>r.id===id)||null;
  }
- function presetRooms(){
-  const current=REGIONS[state.region]||REGIONS.north;
-  return originalTemplates.map((background,i)=>({
-   id:'public:'+state.region+':'+state.district+':'+i,name:'공개 채팅방 '+String(i+1).padStart(2,'0'),
-   region:state.region,district:state.district,owner:'',passwordProof:'',passwordSalt:'',background,preset:true,created:0
-  }));
- }
+ // ChatRoom/room0..room5 are six BACKGROUND IMAGES, not six historical
+ // permanently open server rooms. A real original server supplied the room
+ // catalogue. Only display rooms actually created and shared by participants.
  function catalogue(){
-  return [...presetRooms(),...state.rooms.filter(r=>r.region===state.region&&r.district===state.district)];
+  return state.rooms.filter(r=>r.region===state.region&&r.district===state.district)
+   .sort((a,b)=>b.created-a.created);
  }
  function scope(){
   if(state.view==='room'&&state.roomId)return 'room:'+state.roomId;
@@ -412,6 +409,11 @@
   $('social-directory-name').textContent=state.district;
   $('social-new-room').onclick=showCreateRoom;
   const list=$('social-directory-list');
+  if(!catalogue().length){
+   const notice=document.createElement('div');notice.className='social-directory-empty';
+   notice.innerHTML='<b>현재 열린 채팅방이 없습니다.</b><span>채팅방을 만들면 같은 브라우저의 다른 탭 또는 직접 연결한 사용자에게 공유됩니다.</span>';
+   list.append(notice);
+  }
   for(const [i,r] of catalogue().entries()){
    const b=document.createElement('button');b.className='social-directory-row';b.dataset.room=r.id;
    const num=document.createElement('span');num.className='social-room-number';num.textContent=String(i+1).padStart(2,'0');
