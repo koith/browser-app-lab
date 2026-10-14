@@ -149,3 +149,20 @@
  #game .board-world .board-pawn{transition:none!important}
  #game .board-world .pawn-current::before{animation:none!important}
 }
+
+/* Preserve the extracted hex artwork's native upright orientation.
+   The former forced rotation/skew and 92px footprint obscured neighboring cells. */
+#game .board-world .tile{
+ width:72px!important;
+ height:54px!important;
+ box-sizing:border-box!important;
+ transform:translate(-50%,-50%)!important;
+ border:0!important;
+ border-radius:0!important;
+ background-size:100% 100%!important;
+ box-shadow:none!important;
+}
+#game .board-world .tile::before{display:none!important}
+#game .board-world .tile .tile-symbol{display:none!important}
+#game .board-world .tile small{right:5px;bottom:5px}
+@media(max-width:640px){#game .board-world .tile{width:72px!important;height:54px!important}}
