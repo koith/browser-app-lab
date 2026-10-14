@@ -120,6 +120,11 @@ const path=require('path');
  });
  console.log('ORIGINAL REGISTRY AVATAR ALPHA',JSON.stringify(avatarAlpha));
  await host.screenshot({path:'leaf-original-chat-room.png'});
+ // Temporary visual-review JPEG for comparing native scene compositing.
+ const reviewBytes=await host.locator('#rooms').screenshot({type:'jpeg',quality:64});
+ const reviewB64=reviewBytes.toString('base64');
+ for(let at=0;at<reviewB64.length;at+=4000)console.log('LEAF_VISUAL_CHUNK:'+reviewB64.slice(at,at+4000));
+
  await guest.evaluate(()=>{window.__LEAF_SOCIAL__.openRegion('north');window.__ROG_TEST__.go('rooms');});
  await guest.locator('.social-district-hotspot').nth(3).click();
  await guest.waitForFunction(id=>window.__LEAF_SOCIAL__.getState().rooms.some(r=>r.id===id),roomId,{timeout:6500});
