@@ -3,6 +3,10 @@ on:
   push:
     paths:
       - 'apps/4leaf/rog/server/**'
+      - 'apps/4leaf/rog/central-client.js'
+      - 'apps/4leaf/rog/social-chat.js'
+      - 'apps/4leaf/rog/index.html'
+      - 'apps/4leaf/rog/tests/central-browser.cjs'
       - '.github/workflows/rog-central-chat.yml'
   workflow_dispatch:
 jobs:
@@ -14,7 +18,36 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Check central room server syntax
-        run: node --check apps/4leaf/rog/server/central.cjs
-      - name: Verify independent devices, room capacity and rights
+      - name: Validate central client and server syntax
+        run: |
+          node --check apps/4leaf/rog/server/central.cjs
+          node --check apps/4leaf/rog/central-client.js
+          node --check apps/4leaf/rog/social-chat.js
+      - name: Verify authenticated server occupancy, chat and permissions
         run: node --test apps/4leaf/rog/server/central.test.cjs
+  central-chromium:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install real Chromium runner
+        run: |
+          npm install --no-save playwright
+          npx playwright install chromium --with-deps
+      - name: Start the standalone authority and original static webapp
+        run: |
+          LEAF_CENTRAL_ORIGINS=http://127.0.0.1:8765 node apps/4leaf/rog/server/central.cjs > /tmp/leaf-authority.log 2>&1 &
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog > /tmp/leaf-static.log 2>&1 &
+          sleep 2
+          curl -fSs http://127.0.0.1:8787/api/health
+          curl -fSsI http://127.0.0.1:8765/index.html
+        env:
+          PORT: '8877'
+      - name: Verify two independent Chromium clients through server
+        run: node apps/4leaf/rog/tests/central-browser.cjs
+      - name: Publish server logs on failure
+        if: failure()
+        run: cat /tmp/leaf-authority.log /tmp/leaf-static.log
