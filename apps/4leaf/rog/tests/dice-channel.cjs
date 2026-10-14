@@ -31,6 +31,8 @@ const assert=require('node:assert/strict');
   assert.equal(await page.locator('.dice-channel-hotspot').count(),28);
   await page.locator('#dice-channels [data-channel="benya:4"]').click();
   assert.deepEqual(await page.evaluate(()=>{const s=window.__LEAF_LOBBY__.getState();return [s.region,s.channel]}),['south','benya:4']);
+  assert.equal(await page.locator('#lobby-room-list .lobby-room-row').count(),0,'a northern Ispin saved match must not leak into southern Benya channel');
+  assert.ok(await page.locator('#lobby-room-list .lobby-room-empty').isVisible(),'a different dice channel has an independent empty room list');
   await page.reload();
   await page.waitForFunction(()=>window.__LEAF_LOBBY__&&window.__LEAF_SOCIAL__);
   assert.deepEqual(await page.evaluate(()=>{const s=window.__LEAF_LOBBY__.getState();return [s.region,s.channel]}),['south','benya:4'],'dice channel persists within the browsing session');
