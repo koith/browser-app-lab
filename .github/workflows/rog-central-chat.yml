@@ -25,6 +25,18 @@ jobs:
           node --check apps/4leaf/rog/social-chat.js
       - name: Verify authenticated server occupancy, chat and permissions
         run: node --test apps/4leaf/rog/server/central.test.cjs
+      - name: Build and boot the deployable Docker authority
+        run: |
+          set -euo pipefail
+          docker build -f apps/4leaf/rog/server/Dockerfile -t leaf-central-chat:qa .
+          container="$(docker run -d -p 127.0.0.1:8899:10000 leaf-central-chat:qa)"
+          trap 'docker rm -f "$container" >/dev/null 2>&1 || true' EXIT
+          ready=0
+          for n in $(seq 1 20); do
+            if curl -fsS --max-time 3 http://127.0.0.1:8899/api/health | grep -q '"ok":true'; then ready=1; break; fi
+            sleep 1
+          done
+          if [ "$ready" -ne 1 ]; then docker logs "$container"; exit 1; fi
   central-chromium:
     runs-on: ubuntu-latest
     timeout-minutes: 15
