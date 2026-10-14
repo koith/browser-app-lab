@@ -294,7 +294,8 @@
  function renderHistory(){
   const log=$('chat-log');if(!log)return;
   log.replaceChildren();
-  systemLine('원본 4LEAF 채팅 화면 복원 · 이 브라우저 탭 및 직접 연결된 사용자만 표시됩니다.');
+  systemLine(central.enabled?'중앙 채팅 서버 이용 모드 · 실제 접속자와 공개방 정원만 표시됩니다.':
+   '원본 4LEAF 채팅 화면 복원 · 이 브라우저 탭 및 직접 연결된 사용자만 표시됩니다.');
   for(const item of roomHistory(state.scope))renderMessage(item);
  }
  // Contemporary 2001 service press documented /주사위 and /묵 /찌 /빠.
@@ -968,10 +969,61 @@
    updateCounts();
   },4200);
  }
+
+ function centralRoom(dto){
+  const old=centralRooms.get(dto.id);
+  return {id:dto.id,name:safe(dto.name,26),region:dto.region,
+   district:sourceDistrict(dto.district),background:allowedBackground(dto.background),
+   capacity:allowedCapacity(dto.capacity),preset:!!dto.preset,
+   passwordProof:dto.locked?'server-locked':'',passwordSalt:'',
+   ownerId:old?.ownerId||'',owner:old?.owner||'',created:Number(dto.created)||0};
+ }
+ function initCentral(){
+  if(!central.enabled)return;
+  central.subscribe(event=>{
+   if(event.type==='ready'){
+    systemLine('중앙 채팅 서버 접속 완료 · 실제 다른 기기와 방 목록을 공유합니다.');
+   }else if(event.type==='rooms'){
+    if(!event.rooms||!Array.isArray(event.rooms))return;
+    for(const [id,r] of centralRooms)if(r.region===event.region&&r.district===event.district)centralRooms.delete(id);
+    for(const r of event.rooms){
+     centralCounts.set(r.id,Number(r.occupants)||0);
+     if(!r.preset)centralRooms.set(r.id,centralRoom(r));
+    }
+    if(state.view==='directory'&&event.region===state.region&&event.district===state.district)renderDirectory();
+   }else if(event.type==='snapshot'){
+    for(const [id,p] of state.peers)if(p.source==='central')state.peers.delete(id);
+    if(event.roomId===state.roomId&&state.view==='room'&&central.joinedId===state.roomId){
+     for(const person of event.peers||[]){
+      if(person.id===central.id)continue;
+      state.peers.set(person.id,{id:person.id,nick:safe(person.nick,12),source:'central',
+       scope:'room:'+state.roomId,roomId:state.roomId,avatar:Number(person.avatar)||0,
+       facing:person.facing===-1?-1:1,position:person.position,last:now()});
+     }
+     for(const entry of event.entries||[]){
+      if(entry.sender===central.id)continue;
+      acceptPacket({v:1,kind:'chat',id:entry.id,scope:'room:'+event.roomId,
+       sender:entry.sender,user:entry.user,text:entry.text,time:entry.time},'central');
+     }
+     renderOccupants();
+    }
+    updateCounts();
+   }else if(event.type==='error'){
+    console.warn('4LEAF central chat connection issue:',event.error?.message||event.error);
+   }
+  });
+  central.connect(nick()).then(()=>{
+   if(state.view==='directory')central.list(state.region,state.district).catch(e=>systemLine(e.message));
+  }).catch(e=>systemLine('중앙 채팅 서버 접속 실패: '+e.message));
+  setInterval(()=>{
+   if(central.ready&&state.view==='directory')
+    central.list(state.region,state.district).catch(e=>console.warn('ChatTown directory sync:',e.message));
+  },3500);
+ }
  function init(){
   migrateLegacyChatHistory();
   try{state.avatar=Math.max(0,Math.min(avatars.length-1,Number(localStorage.getItem('leaf_social_avatar'))||0))}catch{}
-  build();installTransport();
+  build();installTransport();initCentral();
   const form=$('chat-form');
   if(form){
    const oldForm=form.onsubmit;
