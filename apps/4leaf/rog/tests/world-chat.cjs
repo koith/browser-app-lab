@@ -91,6 +91,34 @@ const path=require('path');
  assert.ok(roomId.length>=10,'new real room id');
  assert.ok((await host.locator('#social-image-frame').evaluate(el=>getComputedStyle(el).backgroundImage)).includes('room3.png'));
  assert.equal(await host.locator('.social-avatar').count(),1,'zero fabricated NPC users');
+ // Original ChatRoom.pak contains an independent red-key foreground table
+ // for room3; it must sit between the rear and front avatar seats.
+ await host.waitForFunction(()=>document.querySelector('.social-room-foreground')?.dataset.ready==='true',null,{timeout:7500});
+ const depth=await host.evaluate(()=>{
+  const c=document.querySelector('.social-room-foreground');
+  const p=c.getContext('2d').getImageData(0,0,c.width,c.height).data;
+  let visible=0,redLeak=0,transparent=0;
+  for(let i=0;i<p.length;i+=4){
+   if(p[i+3]>0){visible++;if(p[i]>242&&p[i+1]<18&&p[i+2]<18)redLeak++}else transparent++;
+  }
+  const me=document.querySelector('.social-avatar.self');
+  return {source:c.dataset.source,visible,redLeak,transparent,avatarZ:Number(me.style.zIndex),foregroundZ:Number(c.style.zIndex),room:document.querySelector('#social-image-frame').style.backgroundImage};
+ });
+ assert.equal(depth.source,'room3t','room3 original furniture sprite was loaded');
+ assert.ok(depth.visible>500,'table pixels are painted');
+ assert.ok(depth.transparent>500,'original bitmap red chroma key is transparent');
+ assert.equal(depth.redLeak,0,'no red chroma-key fringe remains');
+ assert.ok(depth.room.includes('room3.png'),'native room backdrop and independent furniture are composited');
+ assert.equal(await host.locator('#social-image-frame .social-room-title').count(),0,'no invented room title banner over native art');
+ const avatarAlpha=await host.evaluate(async()=>{
+  const img=document.querySelector('.social-avatar.self img');
+  await img.decode();const c=document.createElement('canvas');
+  c.width=img.naturalWidth;c.height=img.naturalHeight;
+  const ctx=c.getContext('2d');ctx.drawImage(img,0,0);
+  const d=ctx.getImageData(0,0,c.width,c.height).data;
+  return {cornerAlpha:d[3],corner:[d[0],d[1],d[2]],width:c.width,height:c.height};
+ });
+ console.log('ORIGINAL REGISTRY AVATAR ALPHA',JSON.stringify(avatarAlpha));
  await host.screenshot({path:'leaf-original-chat-room.png'});
  await guest.evaluate(()=>{window.__LEAF_SOCIAL__.openRegion('north');window.__ROG_TEST__.go('rooms');});
  await guest.locator('.social-district-hotspot').nth(3).click();
@@ -119,6 +147,19 @@ const path=require('path');
  await host.waitForFunction(pos=>[...document.querySelectorAll('.social-avatar')].some(el=>el.style.left===pos.left&&el.style.top===pos.top),{left:immediate.left,top:immediate.top},{timeout:7000});
  assert.equal(await host.locator('.social-avatar').first().evaluate(el=>getComputedStyle(el).transitionDuration),'0s','remote avatar also teleports without interpolation');
  await host.screenshot({path:'leaf-two-live-chat-users.png'});
+ // Verify background-dependent seat maps and source furniture for all
+ // original ChatRoom roomX and roomXt pairs without replacing scene screenshots.
+ await host.locator('#social-back').click();
+ for(const [index,source] of [[2,'room5t'],[3,'room4t']]){
+  await host.locator('.social-directory-row').nth(index).click();
+  await host.waitForFunction(expected=>document.querySelector('.social-room-foreground')?.dataset.source===expected&&document.querySelector('.social-room-foreground')?.dataset.ready==='true',source,{timeout:7500});
+  assert.equal(await host.locator('.social-room-foreground').count(),1,'one table foreground per room');
+  await host.screenshot({path:'leaf-original-'+source+'.png'});
+  await host.locator('#social-back').click();
+ }
+ await host.locator('.social-directory-row').first().click();
+ assert.equal(await host.locator('.social-room-foreground').count(),0,'room2 has no invented overlay asset');
+
  await guest.setViewportSize({width:390,height:844});
  await guest.screenshot({path:'leaf-chat-mobile.png'});
  assert.ok(await guest.locator('#message').isVisible(),'mobile chat input');
