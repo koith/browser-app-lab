@@ -74,7 +74,7 @@
 #rooms .social-interior{background-size:794px 528px;background-repeat:no-repeat;background-position:center center;background-color:#243566;cursor:crosshair}
 #rooms .social-room-title{position:absolute;top:6px;left:50%;transform:translateX(-50%);border:2px ridge #b9c9df;border-radius:6px;background:#293b79c9;color:#ffecd0;padding:5px 16px;font-weight:bold;font-size:13px;text-align:center;pointer-events:none;z-index:7;white-space:nowrap}
 #rooms .social-avatar-layer{position:absolute;inset:0;z-index:4}
-#rooms .social-avatar{position:absolute;transform:translate(-50%,-88%);width:65px;height:122px;display:flex;flex-direction:column;align-items:center;justify-content:end;border:0;background:none;cursor:pointer;padding:0;filter:drop-shadow(1px 3px 2px #241a37a9);transition:left .3s linear,top .3s linear}
+#rooms .social-avatar{position:absolute;transform:translate(-50%,-88%);width:65px;height:122px;display:flex;flex-direction:column;align-items:center;justify-content:end;border:0;background:none;cursor:pointer;padding:0;filter:drop-shadow(1px 3px 2px #241a37a9);transition:none}
 #rooms .social-avatar img{width:61px;height:113px;object-fit:contain;object-position:center bottom;image-rendering:pixelated;pointer-events:none}
 #rooms .social-avatar.self img{filter:drop-shadow(0 0 5px #9affde)}
 #rooms .social-avatar:is(:hover,:focus-visible) img{filter:drop-shadow(0 0 6px #fff4b0)}
@@ -190,3 +190,6 @@ body>.social-modal .recordable-article p{white-space:pre-wrap;overflow-wrap:anyw
  #city .street-navigation span{min-width:0;flex:1;font-size:9px}
  #city .street-navigation button{font-size:9px;padding:5px}
 }
+
+/* Original-style chat seat change is instantaneous, including remote peers. */
+#rooms .social-interior .social-avatar{transition:none!important;animation:none!important}
