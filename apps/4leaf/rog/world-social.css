@@ -296,3 +296,19 @@ body>.social-modal .recordable-article p{white-space:pre-wrap;overflow-wrap:anyw
  #rooms.classic-chat-room .social-header-tools button{font-size:9px;padding:1px 4px}
  #rooms.classic-chat-room .social-header-tools>span{display:none}
 }
+
+/* Empty original server room catalogue — source PNG backdrops are NOT rooms. */
+#rooms .social-directory-empty{
+ display:flex;
+ flex-direction:column;
+ gap:12px;
+ margin:18px 6px;
+ padding:32px 14px;
+ text-align:center;
+ border:2px inset #7189bf;
+ background:#243864c9;
+ color:#e9f0ff;
+ font-family:Gulim,'굴림',sans-serif;
+}
+#rooms .social-directory-empty b{font-size:15px;color:#fff2c1}
+#rooms .social-directory-empty span{font-size:11px;line-height:1.5;color:#c9d7f0}
