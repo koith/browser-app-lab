@@ -312,3 +312,12 @@ body>.social-modal .recordable-article p{white-space:pre-wrap;overflow-wrap:anyw
 }
 #rooms .social-directory-empty b{font-size:15px;color:#fff2c1}
 #rooms .social-directory-empty span{font-size:11px;line-height:1.5;color:#c9d7f0}
+
+/* Capacity is computed from actual connected room occupants; room templates
+   remain separate from live room instances. */
+#rooms .social-directory-row.social-room-full{
+ border-color:#bf9b9b;
+ background:#38436cd6;
+}
+#rooms .social-directory-row.social-room-full .social-room-users{color:#ffd0b4}
+#rooms .social-directory-row.social-room-full>span:last-child{color:#ffdbc6}
