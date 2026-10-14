@@ -747,6 +747,8 @@
     if(route==='sky')changeScope('world');
     else if(route==='city')changeScope('city');
     else if(route==='rooms')render();
+    else changeScope('away:'+route); // leaving the scene vacates the chatroom; do not show ghost users in shop/game/help
+
   });
   const oldRename=$('rename')?.onclick;
   if($('rename'))$('rename').onclick=(...args)=>{
