@@ -21,6 +21,19 @@ const path=require('path');
  assert.equal(await host.locator('#leaf-world-stage .world-backdrop').getAttribute('src'),'./original/WorldMap/worldmapback.png');
  assert.equal(await host.locator('#leaf-world-stage .world-sprite').count(),6,'six genuine four-frame region sprites');
  assert.equal(await host.locator('#leaf-world-stage .world-location').count(),6,'six active world regions');
+ // Every source location must have a visible resting sprite without requiring hover.
+ await host.waitForFunction(()=>[...document.querySelectorAll('#leaf-world-stage .world-sprite')].every(c=>{
+   try{const d=c.getContext('2d').getImageData(0,0,c.width,c.height).data;
+     for(let i=3;i<d.length;i+=4)if(d[i]>0)return true;
+   }catch{}return false;
+ }),null,{timeout:12000});
+ await host.locator('[data-region="street"]').hover();
+ await host.locator('#world-zoom-in').hover();
+ assert.ok(await host.evaluate(()=>[...document.querySelectorAll('#leaf-world-stage .world-sprite')].every(c=>{
+   const d=c.getContext('2d').getImageData(0,0,c.width,c.height).data;
+   for(let i=3;i<d.length;i+=4)if(d[i])return true;
+   return false;
+ })),'all original locations remain rendered after pointer leaves');
  await host.screenshot({path:'leaf-original-world.png',fullPage:true});
  await host.locator('[data-region="street"]').click();
  assert.ok(await host.locator('#city:not(.hidden) #street-viewport').isVisible(),'original Keltica MainStreet opens from the real map');
