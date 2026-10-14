@@ -16,6 +16,21 @@
   ]}
  };
  const originalTemplates=[2,3,5,4,0,1];
+ // Native Region/regionback.png: seven named channel rows, four original buttons per row.
+ const CHANNEL_ROWS=[
+  {name:'Ispin',slug:'ispin',x:120,y:57},
+  {name:'Nayntrei',slug:'nayntrei',x:120,y:143},
+  {name:'Cloe',slug:'cloe',x:120,y:229},
+  {name:'Mila',slug:'mila',x:120,y:316},
+  {name:'Tichiel',slug:'tichiel',x:620,y:57},
+  {name:'Anis',slug:'anis',x:620,y:143},
+  {name:'Benya',slug:'benya',x:620,y:229}
+ ];
+ const DEFAULT_CHANNEL='ispin:1';
+ const channelId=value=>{
+  const k=String(value||DEFAULT_CHANNEL).toLowerCase();
+  return CHANNEL_ROWS.some(row=>[1,2,3,4].some(n=>k===row.slug+':'+n))?k:DEFAULT_CHANNEL;
+ };
  // A historic 2-person chat-room event is documented. Other limits are
  // restoration controls, not claims about the original server's room menu.
  const allowedCapacity=n=>[2,4,8,12].includes(Number(n))?Number(n):12;
@@ -28,7 +43,7 @@
  const sourceDistrict=s=>{const name=safe(s,40);return name==='프레이 시티'?'퓨어 시티':name};
  const tabId=(()=>{try{const key='leaf_social_tab_identity_v1';let id=sessionStorage.getItem(key);if(!id){id=uuid();sessionStorage.setItem(key,id)}return id}catch{return uuid()}})();
  const nick=()=>safe($('profile-name')?.textContent||'Guest',12)||'Guest';
- const state={region:'north',district:REGIONS.north.districts[3][0],view:'town',roomId:null,rooms:loadRooms(),peers:new Map(),seen:new Set(),bubble:null,scope:'world',avatar:0,position:{x:52,y:76}};
+ const state={region:'north',district:REGIONS.north.districts[3][0],channel:DEFAULT_CHANNEL,enteredViaChannel:false,view:'town',roomId:null,rooms:loadRooms(),peers:new Map(),seen:new Set(),bubble:null,scope:'world',avatar:0,position:{x:52,y:76}};
  let channel=null,rtc=null,dataChannel=null,rtcRole=null,resize=null,pulse=null,stageInfo=null,sceneInit=false;
  const $root=()=>$('rooms'),$stage=()=>$('social-stage');
  async function deriveRoomProof(password,salt){
@@ -43,7 +58,7 @@
   try{
    const raw=JSON.parse(localStorage.getItem('leaf_social_rooms_v3')||'[]');
    return Array.isArray(raw)?raw.filter(r=>r&&typeof r.id==='string'&&typeof r.name==='string'&&['north','south'].includes(r.region)).slice(-180).map(r=>({
-    id:safe(r.id,70),name:safe(r.name,26),region:r.region,district:sourceDistrict(r.district),owner:safe(r.owner,24),ownerId:safe(r.ownerId||'',100),
+    id:safe(r.id,70),name:safe(r.name,26),region:r.region,channel:channelId(r.channel),district:sourceDistrict(r.district),owner:safe(r.owner,24),ownerId:safe(r.ownerId||'',100),
     passwordProof:safe(r.passwordProof||'',65),passwordSalt:safe(r.passwordSalt||'',75),background:allowedBackground(r.background),capacity:allowedCapacity(r.capacity),created:Number(r.created)||0
    })):[];
   }catch{return []}
@@ -59,13 +74,14 @@
  // permanently open server rooms. A real original server supplied the room
  // catalogue. Only display rooms actually created and shared by participants.
  function catalogue(){
-  return state.rooms.filter(r=>r.region===state.region&&r.district===state.district)
+  return state.rooms.filter(r=>r.region===state.region&&channelId(r.channel)===state.channel&&r.district===state.district)
    .sort((a,b)=>b.created-a.created);
  }
  function scope(){
   if(state.view==='room'&&state.roomId)return 'room:'+state.roomId;
-  if(state.view==='directory')return 'district:'+state.region+':'+state.district;
-  if(state.view==='town')return 'town:'+state.region;
+  if(state.view==='directory')return 'district:'+state.region+':'+state.channel+':'+state.district;
+  if(state.view==='town')return 'town:'+state.region+':'+state.channel;
+  if(state.view==='channels')return 'channels:'+state.region;
   if(state.view==='board')return 'board:recordable';
   return 'world';
  }
@@ -99,7 +115,7 @@
  }
  function compactPresence(){
   return {id:tabId,nick:nick(),scope:state.scope,roomId:state.roomId,
-   region:state.region,district:state.district,view:state.view,
+   region:state.region,channel:state.channel,district:state.district,view:state.view,
    avatar:state.avatar,position:{x:state.position.x,y:state.position.y},last:now()};
  }
  function sendLocal(packet){
@@ -129,7 +145,7 @@
    const user=p.peer;
    if(!user||typeof user.id!=='string'||user.id===tabId)return;
    const peer={id:safe(user.id,100),nick:safe(user.nick,12),scope:safe(user.scope,120),roomId:safe(user.roomId,70),
-    region:['north','south'].includes(user.region)?user.region:'north',
+    region:['north','south'].includes(user.region)?user.region:'north',channel:channelId(user.channel),
     district:sourceDistrict(user.district),view:safe(user.view,15),avatar:Math.max(0,Math.min(avatars.length-1,Number(user.avatar)||0)),
     position:user.position&&Number.isFinite(user.position.x)&&Number.isFinite(user.position.y)?user.position:null,last:now(),source};
    state.peers.set(peer.id,peer);
@@ -167,7 +183,7 @@
    if(p.roomCreated||p.kind==='roomCreated'){
      const r=p.room;
      if(r&&typeof r.id==='string'&&!roomById(r.id)&&state.rooms.length<200){
-       const incoming={id:safe(r.id,70),name:safe(r.name,26),region:r.region==='south'?'south':'north',
+       const incoming={id:safe(r.id,70),name:safe(r.name,26),region:r.region==='south'?'south':'north',channel:channelId(r.channel),
         district:sourceDistrict(r.district),owner:safe(r.owner,24),ownerId:safe(r.ownerId||'',100),passwordProof:safe(r.passwordProof,65),passwordSalt:safe(r.passwordSalt,75),
         background:allowedBackground(r.background),capacity:allowedCapacity(r.capacity),created:Number(r.created)||now()};
        state.rooms.push(incoming);saveRooms();if(state.view==='directory')renderDirectory();
@@ -246,7 +262,7 @@
     row.append(status,name,last);group.append(row);
   })}
   const global=$('online-list');
-  if(global&&$('rooms')&&!$('rooms').classList.contains('hidden')&&['town','directory','room'].includes(state.view)){
+  if(global&&$('rooms')&&!$('rooms').classList.contains('hidden')&&['channels','town','directory','room'].includes(state.view)){
     global.replaceChildren();
     const h=document.createElement('div');h.textContent=state.scope+'　실접속 '+onlinePeers().length;global.append(h);
     onlinePeers().forEach(p=>{const d=document.createElement('div');d.textContent='♧ '+p.nick+(p.id===tabId?' (나)':'');global.append(d)});
@@ -272,13 +288,13 @@
  }
  function updateHeader(){
   const name=$('social-location-title');
-  if(name)name.textContent=state.view==='board'?'레코르다블 · 기사단 게시판':state.view==='room'?('Chatting Room · '+(currentRoom()?.name||'채팅방')):
+  if(name)name.textContent=state.view==='channels'?'TOWN SELECT · '+(REGIONS[state.region]?.title||'하이아칸'):state.view==='board'?'레코르다블 · 기사단 게시판':state.view==='room'?('Chatting Room · '+(currentRoom()?.name||'채팅방')):
     state.view==='directory'?(state.district+' · 채팅방 목록'):
     (REGIONS[state.region]?.title||'하이아칸')+' · 채팅 지역';
   const bread=$('social-breadcrumb');
-  if(bread)bread.textContent=state.view==='board'?'RECORDABLE › 기사단 게시판':(REGIONS[state.region]?.title||'하이아칸')+(state.view==='town'?'':' › '+state.district)+(state.view==='room'?' › '+(currentRoom()?.name||''): '');
-  const back=$('social-back');if(back)back.textContent=state.view==='board'?'← 월드맵':state.view==='room'?'← 채팅방 목록':state.view==='directory'?'← 채팅 지역':'← 월드맵';
-  const note=$('chatroom-name');if(note)note.textContent=state.view==='board'?'BULLETIN CHANNEL':state.view==='room'?(currentRoom()?.name||'CHATTING ROOM'):state.view==='town'?'TOWN CHANNEL':'ROOM LIST';
+  if(bread)bread.textContent=state.view==='channels'?'CHANNEL SELECT':state.view==='board'?'RECORDABLE › 기사단 게시판':(REGIONS[state.region]?.title||'하이아칸')+(state.view==='town'?'':' › '+state.district)+(state.view==='room'?' › '+(currentRoom()?.name||''): '');
+  const back=$('social-back');if(back)back.textContent=state.view==='board'?'← 월드맵':state.view==='room'?'← 채팅방 목록':state.view==='directory'?'← 채팅 지역':state.view==='town'&&state.enteredViaChannel?'← 채널 선택':'← 월드맵';
+  const note=$('chatroom-name');if(note)note.textContent=state.view==='channels'?'TOWN SELECT':state.view==='board'?'BULLETIN CHANNEL':state.view==='room'?(currentRoom()?.name||'CHATTING ROOM'):state.view==='town'?'TOWN CHANNEL':'ROOM LIST';
  }
  function roomTemplate(background){return './original/ChatRoom/room'+background+'.png'}
  function fit(){
@@ -358,11 +374,21 @@
   state.view='town';state.roomId=null;state.position={x:52,y:76};
  }
  function openRegion(region){
-  regionState(region);if(sceneInit)render();
+  regionState(region);state.enteredViaChannel=false;if(sceneInit)render();
+ }
+ function openChannelSelect(region){
+  regionState(region);state.view='channels';state.enteredViaChannel=true;if(sceneInit)render();
+ }
+ function chooseChannel(name,number){
+  const row=CHANNEL_ROWS.find(r=>r.slug===name);
+  if(!row||![1,2,3,4].includes(number))return;
+  state.channel=channelId(row.slug+':'+number);
+  state.view='town';state.roomId=null;state.enteredViaChannel=true;render();
  }
  function back(){
   if(state.view==='room'){openDirectory();return}
   if(state.view==='directory'){state.view='town';state.roomId=null;render();return}
+  if(state.view==='town'&&state.enteredViaChannel){state.view='channels';render();return}
   window.__ROG_TEST__?.go('sky');
  }
  function render(){
@@ -371,6 +397,7 @@
   $('social-close-room')?.remove();
   const frame=$('social-image-frame');frame.replaceChildren();
   if(state.view==='board')renderBulletin(frame);
+  if(state.view==='channels')renderChannelSelect(frame);
   if(state.view==='town')renderTown(frame);
   if(state.view==='directory')renderDirectory(frame);
   if(state.view==='room')renderRoom(frame);
@@ -431,6 +458,28 @@
    };
    popup('레코르다블 · 기사단 글쓰기',form);
  }
+ function renderChannelSelect(frame){
+  frame.className='social-image-frame social-region-channels';
+  frame.style.backgroundImage='url("./original/Region/regionback.png")';
+  frame.dataset.source='Region/regionback.png';
+  for(const row of CHANNEL_ROWS){
+   for(let number=1;number<=4;number++){
+    const b=document.createElement('button');b.type='button';
+    b.className='social-channel-hotspot';b.dataset.channel=row.slug+':'+number;
+    b.style.left=(row.x+(number-1)*39)+'px';b.style.top=row.y+'px';
+    b.style.width='34px';b.style.height='36px';
+    b.title='Channel '+row.name+' '+number;
+    b.setAttribute('aria-label','채널 '+row.name+' '+number+' 입장');
+    b.onclick=()=>chooseChannel(row.slug,number);
+    frame.append(b);
+   }
+  }
+  const bar=document.createElement('div');bar.className='social-channel-guide';
+  const label=document.createElement('span');label.textContent='TOWN SELECT · 원본 채널 번호를 선택해 주세요.';
+  const action=document.createElement('button');action.type='button';action.textContent='월드맵';
+  action.onclick=()=>window.__ROG_TEST__?.go('sky');
+  bar.append(label,action);frame.append(bar);
+ }
  function renderTown(frame){
   frame.className='social-image-frame social-town-map';
   frame.style.backgroundImage='url("./original/ChatTown/'+REGIONS[state.region].art+'.png")';
@@ -439,7 +488,7 @@
    b.style.cssText='left:'+x+'px;top:'+y+'px;width:'+w+'px;height:'+h+'px;';
    b.title=name+' · 채팅방 입장';
    b.setAttribute('aria-label',name+' 채팅 지역');
-   const count=onlinePeers('district:'+state.region+':'+name).length;
+   const count=onlinePeers('district:'+state.region+':'+state.channel+':'+name).length;
    if(count){const countLabel=document.createElement('span');countLabel.textContent=count+'명';b.append(countLabel)}
    b.onclick=()=>{state.district=name;state.view='directory';state.roomId=null;render()};
    frame.append(b);
@@ -503,7 +552,7 @@
  function enterRoom(room){
   if(!roomHasSpace(room)){roomFullNotice(room);return false}
   if(room.region!==state.region){state.region=room.region}
-  state.district=room.district;state.roomId=room.id;state.view='room';
+  state.district=room.district;state.channel=channelId(room.channel);state.roomId=room.id;state.view='room';
   const seats=roomSeats(room.background);
   const hash=[...tabId].reduce((a,c)=>(a*31+c.charCodeAt(0))>>>0,0);
   state.position={...seats[hash%seats.length]};
@@ -657,7 +706,7 @@
    const password=safe(form.get('password'),24),salt=password?uuid():'';
    if(password&&password.length<6){const field=body.querySelector('[name="password"]');field.setCustomValidity('비밀번호는 6자 이상이어야 합니다.');field.reportValidity();return}
    const proof=password?await deriveRoomProof(password,salt):'';
-   const room={id:uuid(),name,region:state.region,district:state.district,owner:nick(),
+   const room={id:uuid(),name,region:state.region,channel:state.channel,district:state.district,owner:nick(),
     ownerId:tabId,passwordProof:proof,passwordSalt:salt,background:allowedBackground(form.get('background')),capacity:allowedCapacity(form.get('capacity')),created:now()};
    state.rooms.push(room);saveRooms();sendLocal({kind:'roomCreated',room});sendRTC({kind:'roomCreated',room});
    closePopup();enterRoom(room);
@@ -793,9 +842,9 @@
   presence();render();
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
- window.__LEAF_SOCIAL__={openRegion,openBoard,openDirectory,joinRoom,enterRoom,createRoom:(name,background=2,capacity=12)=>{
-  const room={id:uuid(),name:safe(name,26),region:state.region,district:state.district,owner:nick(),ownerId:tabId,passwordProof:'',passwordSalt:'',background:allowedBackground(background),capacity:allowedCapacity(capacity),created:now()};
+ window.__LEAF_SOCIAL__={openRegion,openChannelSelect,chooseChannel,openBoard,openDirectory,joinRoom,enterRoom,createRoom:(name,background=2,capacity=12)=>{
+  const room={id:uuid(),name:safe(name,26),region:state.region,channel:state.channel,district:state.district,owner:nick(),ownerId:tabId,passwordProof:'',passwordSalt:'',background:allowedBackground(background),capacity:allowedCapacity(capacity),created:now()};
   state.rooms.push(room);saveRooms();sendLocal({kind:'roomCreated',room});enterRoom(room);return room.id;
- },send:publishText,getState:()=>({region:state.region,district:state.district,view:state.view,scope:state.scope,roomId:state.roomId,people:onlinePeers(),rooms:catalogue()}),
+ },send:publishText,getState:()=>({region:state.region,channel:state.channel,district:state.district,view:state.view,scope:state.scope,roomId:state.roomId,people:onlinePeers(),rooms:catalogue()}),
  sendRTC,now,render,transportMessage};
 })();
