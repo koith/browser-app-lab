@@ -3,8 +3,8 @@
    Every picture here is rendered as a separate live chessboard entity.
    No frozen screenshot or image-overlay button trickery. */
 #app.app-classic-dice #game .board-world .tile{
- width:112px!important;
- height:75px!important;
+ width:70px!important;
+ height:47px!important;
  transform:translate(-50%,-50%)!important;
  transform-origin:center center!important;
  border:0!important;
@@ -60,7 +60,7 @@
 #app.app-classic-dice #game .board-world #board-pawns{z-index:8!important}
 #app.app-classic-dice #game #board-lines{opacity:.06!important}
 @media(max-width:630px){
- #app.app-classic-dice #game .board-world .tile{width:111px!important;height:74px!important}
+ #app.app-classic-dice #game .board-world .tile{width:70px!important;height:47px!important}
  #app.app-classic-dice #game .board-world .board-pawn{width:60px!important;height:89px!important}
 }
 @media(prefers-reduced-motion:reduce){
