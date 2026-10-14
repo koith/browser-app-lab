@@ -322,10 +322,22 @@
   if(central.enabled&&state.view==='room'&&(!central.ready||central.joinedId!==state.roomId)){
    systemLine('중앙 채팅방에 실제 입장한 뒤 메시지를 보낼 수 있습니다.');return;
   }
-  storeMessage(item);renderMessage(item);showBubble(tabId,content);
-  if(central.enabled&&state.view==='room')
-   central.chat(content).catch(e=>systemLine('서버 메시지 전송 실패: '+e.message));
-  else{sendLocal(item);sendRTC(item)}
+  if(central.enabled&&state.view==='room'){
+   // Do not create a visible or saved "sent" message before the authority
+   // accepts it. Failed sends must not masquerade as genuine chat history.
+   central.chat(content).then(result=>{
+    const entry=result.entry;if(!entry)return;
+    const confirmed={id:entry.id,scope:'room:'+entry.roomId,user:entry.user,
+     text:entry.text,sender:tabId,time:entry.time};
+    storeMessage(confirmed);
+    if(state.view==='room'&&state.roomId===entry.roomId){
+     renderMessage(confirmed);showBubble(tabId,entry.text);
+    }
+   }).catch(e=>systemLine('서버 메시지 전송 실패: '+e.message));
+  }else{
+   storeMessage(item);renderMessage(item);showBubble(tabId,content);
+   sendLocal(item);sendRTC(item)
+  }
  }
  function onlinePeers(sc=state.scope){
   const fresh=[compactPresence()];
@@ -679,7 +691,9 @@
  }
  function joinRoom(id){
   const room=roomById(id);if(!room)return;
-  if(!roomHasSpace(room)){roomFullNotice(room);return}
+  // A remotely cached count is advisory only; the central server must make
+  // the final admission decision, including simultaneous joins and vacancies.
+  if(!central.enabled&&!roomHasSpace(room)){roomFullNotice(room);return}
   if(central.enabled){
    const verifiedJoin=async password=>{
     try{
@@ -1027,13 +1041,24 @@
    district:sourceDistrict(dto.district),background:allowedBackground(dto.background),
    capacity:allowedCapacity(dto.capacity),preset:!!dto.preset,
    passwordProof:dto.locked?'server-locked':'',passwordSalt:'',
-   ownerId:old?.ownerId||'',owner:old?.owner||'',created:Number(dto.created)||0};
+   ownerId:dto.isOwner?tabId:(old?.ownerId||''),
+   owner:dto.isOwner?nick():(old?.owner||''),created:Number(dto.created)||0};
  }
  function initCentral(){
   if(!central.enabled)return;
   central.subscribe(event=>{
    if(event.type==='ready'){
     systemLine('중앙 채팅 서버 접속 완료 · 실제 다른 기기와 방 목록을 공유합니다.');
+   }else if(event.type==='resumed'&&event.room){
+    // Restore only a membership acknowledged by the authority, preserving
+    // room capacity and owner privileges across browser reloads.
+    const room=centralRoom(event.room);
+    if(!room.preset)centralRooms.set(room.id,room);
+    centralCounts.set(room.id,Number(event.room.occupants)||0);
+    state.region=room.region;state.district=room.district;
+    window.__ROG_TEST__?.go('rooms');
+    enterRoom(room);
+    presence();
    }else if(event.type==='rooms'){
     if(!event.rooms||!Array.isArray(event.rooms))return;
     const known=new Map(centralRooms);
