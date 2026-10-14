@@ -7,12 +7,12 @@ const assert=require('node:assert/strict');
  const page=await browser.newPage({viewport:{width:1280,height:800},serviceWorkers:'block'});
  const errors=[];let failures=0,requests=0,mapFailures=0,mapRequests=0;
  page.on('pageerror',err=>errors.push(String(err)));
- await page.route('**/original/ChatRoom/room3t.png*',async route=>{
+ await await page.route('**/original/ChatRoom/room3t.png*',async route=>{
   requests++;
   if(failures<2){failures++;await route.fulfill({status:503,contentType:'text/plain',body:'Temporary CDN outage during original-art request'})}
   else await route.continue();
  });
- page.route('**/original/IMG/bgtile.png*',async route=>{
+ await page.route('**/original/IMG/bgtile.png*',async route=>{
   mapRequests++;
   if(mapFailures<2){mapFailures++;await route.fulfill({status:503,contentType:'text/plain',body:'Transient original terrain CDN 503'})}
   else await route.continue();
