@@ -193,6 +193,37 @@
    return Array.isArray(all)?all.slice(-90):[];
   }catch{return []}
  }
+ // Earlier web reconstructions incorrectly used dice TOWN SELECT channel
+ // numbers to partition ChatTown conversations. Read their saved history into
+ // the correct chat-only regional scopes, without deleting any old keys.
+ function migrateLegacyChatHistory(){
+  try{
+   const prefix='leaf_social_log_',pending=new Map();
+   for(let i=0;i<localStorage.length;i++){
+    const key=localStorage.key(i);
+    if(!key||!key.startsWith(prefix))continue;
+    const oldScope=decodeURIComponent(key.slice(prefix.length));
+    const legacy=/^(town|district):(north|south):([a-z]+):([1-4])(?::(.*))?$/.exec(oldScope);
+    if(!legacy)continue;
+    const target=legacy[1]==='town'?'town:'+legacy[2]:'district:'+legacy[2]+':'+legacy[5];
+    if(legacy[1]==='district'&&!legacy[5])continue;
+    const entries=JSON.parse(localStorage.getItem(key)||'[]');
+    if(!Array.isArray(entries))continue;
+    const batch=pending.get(target)||[];
+    for(const entry of entries.slice(-90)){
+     if(!entry||typeof entry.id!=='string'||typeof entry.text!=='string')continue;
+     batch.push({...entry,scope:target});
+    }
+    pending.set(target,batch);
+   }
+   for(const [target,batch] of pending){
+    const merged=new Map(roomHistory(target).map(entry=>[entry.id,entry]));
+    for(const entry of batch)merged.set(entry.id,entry);
+    const values=[...merged.values()].sort((a,b)=>(Number(a.time)||0)-(Number(b.time)||0)).slice(-90);
+    localStorage.setItem(historyKey(target),JSON.stringify(values));
+   }
+  }catch(e){console.warn('Legacy chat history migration was skipped:',e)}
+ }
  function storeMessage(entry){
   const list=roomHistory(entry.scope);
   if(list.some(x=>x.id===entry.id))return;
@@ -246,7 +277,7 @@
     row.append(status,name,last);group.append(row);
   })}
   const global=$('online-list');
-  if(global&&$('rooms')&&!$('rooms').classList.contains('hidden')&&['channels','town','directory','room'].includes(state.view)){
+  if(global&&$('rooms')&&!$('rooms').classList.contains('hidden')&&['town','directory','room'].includes(state.view)){
     global.replaceChildren();
     const h=document.createElement('div');h.textContent=state.scope+'　실접속 '+onlinePeers().length;global.append(h);
     onlinePeers().forEach(p=>{const d=document.createElement('div');d.textContent='♧ '+p.nick+(p.id===tabId?' (나)':'');global.append(d)});
@@ -768,6 +799,7 @@
   },4200);
  }
  function init(){
+  migrateLegacyChatHistory();
   try{state.avatar=Math.max(0,Math.min(avatars.length-1,Number(localStorage.getItem('leaf_social_avatar'))||0))}catch{}
   build();installTransport();
   const form=$('chat-form');
