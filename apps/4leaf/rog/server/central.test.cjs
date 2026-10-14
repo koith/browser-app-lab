@@ -118,3 +118,18 @@ test('reload resumes live room and server-confirmed ownership without fabricatin
  assert.notEqual(stranger.data.id,host.id,'made-up resume tokens cannot claim ownership');
  assert.equal((await call('POST','/api/rooms/'+id+'/close',host.token,{})).code,200);
 });
+
+test('unresponsive devices release seats at the server TTL without fictional occupants',async t=>{
+ let instant=1700000000000;
+ const {app,call,auth}=await open({now:()=>instant});
+ t.after(()=>app.close());
+ const old=await auth('Disconnected');
+ const room='leaf-public-north-3-2';
+ assert.equal((await call('POST','/api/rooms/'+room+'/join',old.token,{})).code,200);
+ instant+=46000;
+ const newcomer=await auth('NewUser');
+ const result=await call('GET','/api/rooms?region=north&district='+encodeURIComponent('샤이닝 브리즈'),newcomer.token);
+ assert.equal(result.data.rooms.find(r=>r.id===room)?.occupants,0,'expired browser sessions never count as real participants');
+ assert.equal((await call('POST','/api/rooms/'+room+'/join',old.token,{})).code,401,'expired credentials cannot silently occupy a room');
+ assert.equal((await call('POST','/api/rooms/'+room+'/join',newcomer.token,{})).code,200);
+});
