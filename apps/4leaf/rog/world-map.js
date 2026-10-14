@@ -20,8 +20,23 @@
    const canvas=document.createElement('canvas');
    canvas.width=region.w;canvas.height=region.h;canvas.className='world-sprite';
    canvas.style.cssText='position:absolute;pointer-events:none;left:'+region.x+'px;top:'+region.y+'px;width:'+region.w+'px;height:'+region.h+'px;z-index:2;';
-   const img=new Image();img.decoding='async';img.src=images(region.kind);
-   const sheet=[];
+   const img=new Image();img.decoding='async';
+   const sheet=[];let retries=0;
+   const attempt=()=>{
+     if(retries&&!canvas.isConnected)return;
+     img.src=images(region.kind)+(retries?'?retry='+retries+'&at='+Date.now():'');
+   };
+   canvas.dataset.ready='loading';
+   img.onerror=()=>{
+     if(!canvas.isConnected)return;
+     if(retries<5){
+       retries++;canvas.dataset.ready='retrying';
+       setTimeout(attempt,Math.min(1600,250*2**retries));
+     }else{
+       canvas.dataset.ready='error';
+       console.error('4LEAF native WorldMap sprite failed:',region.kind);
+     }
+   };
    img.onload=()=>{
      try{
        const buffer=document.createElement('canvas');buffer.width=img.naturalWidth;buffer.height=img.naturalHeight;
@@ -39,8 +54,13 @@
        }
        ref.layers.set(region.id,{canvas,sheet});
        renderLayer(region.id,0);
-     }catch{ /* WorldMapBack remains a usable original scene. */ }
+       canvas.dataset.ready='true';
+     }catch(error){
+       canvas.dataset.ready='error';
+       console.error('4LEAF original world sprite decode:',region.kind,error);
+     }
    };
+   attempt();
    return canvas;
  }
  function renderLayer(regionId,index){
@@ -97,7 +117,21 @@
    const viewport=document.createElement('div');viewport.className='leaf-world-viewport';viewport.id='leaf-world-viewport';
    const stage=document.createElement('div');stage.className='leaf-world-stage';stage.id='leaf-world-stage';
    stage.style.cssText='width:'+WIDTH+'px;height:'+HEIGHT+'px;';
-   const backdrop=document.createElement('img');backdrop.src='./original/WorldMap/worldmapback.png';backdrop.alt='';backdrop.width=WIDTH;backdrop.height=HEIGHT;backdrop.className='world-backdrop';backdrop.draggable=false;stage.append(backdrop);
+   const backdrop=document.createElement('img');backdrop.alt='';backdrop.width=WIDTH;backdrop.height=HEIGHT;backdrop.className='world-backdrop';backdrop.draggable=false;
+   let backdropRetries=0;
+   const loadBackdrop=()=>{
+     if(backdropRetries&&!backdrop.isConnected)return;
+     backdrop.src='./original/WorldMap/worldmapback.png'+(backdropRetries?'?retry='+backdropRetries+'&at='+Date.now():'');
+   };
+   backdrop.dataset.ready='loading';
+   backdrop.onload=()=>{backdrop.dataset.ready='true'};
+   backdrop.onerror=()=>{
+     if(!backdrop.isConnected)return;
+     if(backdropRetries<5){backdropRetries++;backdrop.dataset.ready='retrying';
+       setTimeout(loadBackdrop,Math.min(1600,250*2**backdropRetries));
+     }else{backdrop.dataset.ready='error';console.error('4LEAF native WorldMap backdrop failed')}
+   };
+   stage.append(backdrop);loadBackdrop();
    for(const region of REGIONS){
      stage.append(makeCanvasSprite(region));
      const hit=document.createElement('button');hit.className='world-location';hit.type='button';
