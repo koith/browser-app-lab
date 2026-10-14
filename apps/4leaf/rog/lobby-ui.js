@@ -88,7 +88,16 @@
  }
  let creatorOpen=false;
  const getMatch=()=>window.__ROG_TEST__?.getMatch?.()||null;
- const playable=()=>{const m=getMatch();return m&&!m.finished&&Array.isArray(m.players)&&m.players.length>1?m:null};
+ const playable=()=>{
+  const m=getMatch();
+  if(!m||m.finished||!Array.isArray(m.players)||m.players.length<2)return null;
+  // The Region choice is a Dice channel namespace, not just a cosmetic title:
+  // a saved match from another channel must not appear as a joinable game room.
+  if(selection.channel){
+   if(m.diceRegion!==selection.region||m.diceChannel!==selection.channel.slug+':'+selection.channel.number)return null;
+  }
+  return m;
+ };
  function line(container,label,value){
   const row=document.createElement('div'),heading=document.createElement('b'),text=document.createElement('span');
   heading.textContent=label;text.textContent=String(value);row.append(heading,text);container.append(row);
