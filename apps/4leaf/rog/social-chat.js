@@ -23,7 +23,7 @@
  const avatars=['sava00','sava82','sava06','sava01','sava85','sava02','sava84','sava04','sava03','sava83','sava05','sava86'];
  const now=()=>Date.now(),uuid=()=>crypto.randomUUID?.()||Math.random().toString(36).slice(2)+String(Date.now());
  const safe=(s,max=100)=>String(s??'').replace(/[\u0000-\u001f\u007f]/g,' ').trim().slice(0,max);
- const tabId=uuid();
+ const tabId=(()=>{try{const key='leaf_social_tab_identity_v1';let id=sessionStorage.getItem(key);if(!id){id=uuid();sessionStorage.setItem(key,id)}return id}catch{return uuid()}})();
  const nick=()=>safe($('profile-name')?.textContent||'Guest',12)||'Guest';
  const state={region:'north',district:REGIONS.north.districts[3][0],view:'town',roomId:null,rooms:loadRooms(),peers:new Map(),seen:new Set(),bubble:null,scope:'world',avatar:0,position:{x:52,y:76}};
  let channel=null,rtc=null,dataChannel=null,rtcRole=null,resize=null,pulse=null,stageInfo=null,sceneInit=false;
@@ -40,7 +40,7 @@
   try{
    const raw=JSON.parse(localStorage.getItem('leaf_social_rooms_v3')||'[]');
    return Array.isArray(raw)?raw.filter(r=>r&&typeof r.id==='string'&&typeof r.name==='string'&&['north','south'].includes(r.region)).slice(-180).map(r=>({
-    id:safe(r.id,70),name:safe(r.name,26),region:r.region,district:safe(r.district,36),owner:safe(r.owner,24),
+    id:safe(r.id,70),name:safe(r.name,26),region:r.region,district:safe(r.district,36),owner:safe(r.owner,24),ownerId:safe(r.ownerId||'',100),
     passwordProof:safe(r.passwordProof||'',65),passwordSalt:safe(r.passwordSalt||'',75),background:allowedBackground(r.background),capacity:allowedCapacity(r.capacity),created:Number(r.created)||0
    })):[];
   }catch{return []}
@@ -106,7 +106,7 @@
  }
  function sendRTC(packet){
   if(dataChannel?.readyState!=='open')return;
-  const data={v:1,...packet};
+  const data={v:1,from:tabId,...packet};
   try{dataChannel.send(JSON.stringify(data))}catch{}
  }
  function presence(announce=true){
@@ -165,11 +165,14 @@
      const r=p.room;
      if(r&&typeof r.id==='string'&&!roomById(r.id)&&state.rooms.length<200){
        const incoming={id:safe(r.id,70),name:safe(r.name,26),region:r.region==='south'?'south':'north',
-        district:safe(r.district,36),owner:safe(r.owner,24),passwordProof:safe(r.passwordProof,65),passwordSalt:safe(r.passwordSalt,75),
+        district:safe(r.district,36),owner:safe(r.owner,24),ownerId:safe(r.ownerId||'',100),passwordProof:safe(r.passwordProof,65),passwordSalt:safe(r.passwordSalt,75),
         background:allowedBackground(r.background),capacity:allowedCapacity(r.capacity),created:Number(r.created)||now()};
        state.rooms.push(incoming);saveRooms();if(state.view==='directory')renderDirectory();
      }
    }else{
+     const target=roomById(p.roomId);
+     // A connected participant must not evict another room owner's members.
+     if(target?.ownerId&&p.from!==target.ownerId)return;
      state.rooms=state.rooms.filter(r=>r.id!==p.roomId);saveRooms();
      if(state.roomId===p.roomId)openDirectory();
      else if(state.view==='directory')renderDirectory();
@@ -558,7 +561,7 @@
   addRoomForeground(avatarLayer,room.background);
   // Original scene remains unobstructed; the avatar picker is in the recovered
   // top-toolbar icon row, while room owner actions stay in the window chrome.
-  if(!room.preset&&room.owner===nick()){
+  if(!room.preset&&room.ownerId===tabId||!room.preset&&!room.ownerId&&room.owner===nick()){
    const close=document.createElement('button');
    close.id='social-close-room';close.type='button';
    close.textContent='방 닫기';close.setAttribute('aria-label','현재 채팅방 닫기');
@@ -623,7 +626,7 @@
    if(password&&password.length<6){const field=body.querySelector('[name="password"]');field.setCustomValidity('비밀번호는 6자 이상이어야 합니다.');field.reportValidity();return}
    const proof=password?await deriveRoomProof(password,salt):'';
    const room={id:uuid(),name,region:state.region,district:state.district,owner:nick(),
-    passwordProof:proof,passwordSalt:salt,background:allowedBackground(form.get('background')),capacity:allowedCapacity(form.get('capacity')),created:now()};
+    ownerId:tabId,passwordProof:proof,passwordSalt:salt,background:allowedBackground(form.get('background')),capacity:allowedCapacity(form.get('capacity')),created:now()};
    state.rooms.push(room);saveRooms();sendLocal({kind:'roomCreated',room});sendRTC({kind:'roomCreated',room});
    closePopup();enterRoom(room);
   };
@@ -631,7 +634,7 @@
  }
  function closeRoom(roomId){
   const room=roomById(roomId);
-  if(!room||room.preset||room.owner!==nick())return;
+  if(!room||room.preset||(room.ownerId?room.ownerId!==tabId:room.owner!==nick()))return;
   state.rooms=state.rooms.filter(r=>r.id!==roomId);
   saveRooms();sendLocal({kind:'roomClosed',roomId});sendRTC({kind:'roomClosed',roomId});
   openDirectory();
@@ -759,7 +762,7 @@
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
  window.__LEAF_SOCIAL__={openRegion,openBoard,openDirectory,joinRoom,enterRoom,createRoom:(name,background=2,capacity=12)=>{
-  const room={id:uuid(),name:safe(name,26),region:state.region,district:state.district,owner:nick(),passwordProof:'',passwordSalt:'',background:allowedBackground(background),capacity:allowedCapacity(capacity),created:now()};
+  const room={id:uuid(),name:safe(name,26),region:state.region,district:state.district,owner:nick(),ownerId:tabId,passwordProof:'',passwordSalt:'',background:allowedBackground(background),capacity:allowedCapacity(capacity),created:now()};
   state.rooms.push(room);saveRooms();sendLocal({kind:'roomCreated',room});enterRoom(room);return room.id;
  },send:publishText,getState:()=>({region:state.region,district:state.district,view:state.view,scope:state.scope,roomId:state.roomId,people:onlinePeers(),rooms:catalogue()}),
  sendRTC,now,render,transportMessage};
