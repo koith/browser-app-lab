@@ -4,13 +4,14 @@
 const http=require('node:http');
 const fs=require('node:fs');
 const path=require('node:path');
-const {randomUUID,randomBytes,scryptSync,timingSafeEqual}=require('node:crypto');
+const {randomUUID,randomBytes,scryptSync,timingSafeEqual,createHash}=require('node:crypto');
 const REGIONS={
  north:['실버 호라이즌','화이트 크리스탈','퓨어 시티','샤이닝 브리즈','윈트리 아이스','스노우 폴','스위트 자스민','그린 에메랄드'],
  south:['블루 사파이어','헤이즐리 웨이브','미쉘 에메랄드','엘핀 포레스트','아루아 코랄','블랙씨 아린','브라브 지피트','미스틱 머메이드']
 };
 const safe=(s,n)=>String(s??'').replace(/[\x00-\x1f\x7f]/g,' ').trim().slice(0,n);
 const valid=(r,d)=>Object.hasOwn(REGIONS,r)&&REGIONS[r].includes(d);
+const secretFingerprint=token=>createHash('sha256').update(token).digest('hex');
 function makeServer(options={}){
  const clock=options.now||Date.now;
  const store=options.storageFile||process.env.LEAF_CENTRAL_STORAGE||'';
@@ -69,9 +70,18 @@ function makeServer(options={}){
    clean();const u=new URL(req.url,'http://localhost'),route=u.pathname;
    if(req.method==='GET'&&route==='/api/health')return send(res,200,{ok:true,version:1},origin);
    if(req.method==='POST'&&route==='/api/session'){
-    const b=await parse(req),token=randomBytes(32).toString('hex'),id=randomUUID();
-    sessions.set(token,{id,roomId:null,nick:safe(b.nick,12)||'Guest',avatar:0,facing:1,
-     position:{x:52,y:76},lastSeen:clock(),recent:[]});
+    const b=await parse(req);
+    let token=/^[a-f0-9]{64}$/.test(b.resume||'')?b.resume:'';
+    let existing=token&&sessions.get(token);
+    if(!existing&&token){
+     const owner=[...rooms.values()].find(r=>r.ownerTokenHash===secretFingerprint(token));
+     if(owner)existing={id:owner.ownerId,nick:safe(b.nick,12)||'Guest'};
+    }
+    if(!existing){token=randomBytes(32).toString('hex');existing={id:randomUUID()}}
+    const id=existing.id;
+    if(!sessions.has(token))sessions.set(token,{id,roomId:null,nick:safe(b.nick,12)||'Guest',
+     avatar:0,facing:1,position:{x:52,y:76},lastSeen:clock(),recent:[]});
+    else{const prior=sessions.get(token);prior.lastSeen=clock();prior.nick=safe(b.nick,12)||prior.nick}
     return send(res,201,{token,id,ttlMs:45000},origin);
    }
    const token=/^Bearer ([a-f0-9]{64})$/.exec(req.headers.authorization||'')?.[1];
@@ -98,7 +108,7 @@ function makeServer(options={}){
     if(password&&(password.length<6||password.length>24))fail(400,'Password length 6–24');
     const salt=password?randomBytes(16).toString('hex'):'';
     const r={id:randomUUID(),region:b.region,district,name,capacity,background,preset:false,
-     ownerId:s.id,created:clock(),passwordSalt:salt,
+     ownerId:s.id,ownerTokenHash:secretFingerprint(token),created:clock(),passwordSalt:salt,
      passwordHash:password?scryptSync(password,salt,32).toString('hex'):''};
     rooms.set(r.id,r);save();return send(res,201,{room:dto(r)},origin);
    }
