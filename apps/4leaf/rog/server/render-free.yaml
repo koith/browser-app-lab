@@ -1,0 +1,23 @@
+# Optional zero-disk, free-tier trial. No charge or deployment is triggered by this file.
+# This configuration is for non-persistent evaluation ONLY:
+# - user-created rooms and chat history vanish on restart / spin-down;
+# - the free instance may sleep after 15 minutes of inactivity;
+# - never advertise this as a durable production chat service.
+# Choose the blueprint path apps/4leaf/rog/server/render-free.yaml.
+services:
+  - type: web
+    name: 4leaf-central-chat-free
+    runtime: docker
+    plan: free
+    dockerContext: .
+    dockerfilePath: ./apps/4leaf/rog/server/Dockerfile
+    healthCheckPath: /api/health
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: HOST
+        value: 0.0.0.0
+      - key: LEAF_CENTRAL_ORIGINS
+        value: https://koith.github.io
+      - key: LEAF_CENTRAL_STORAGE
+        value: ""
