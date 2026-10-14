@@ -18,6 +18,24 @@ const path=require('path');
   guest.waitForFunction(()=>!!window.__LEAF_WORLD__&&!!window.__LEAF_SOCIAL__&&!!window.__ROG_TEST__,null,{timeout:8000})
  ]);
  assert.ok(await host.locator('#sky:not(.hidden)').isVisible(),'original WorldMap first');
+ // The original ChatRoom/header is a separate source sprite, not decorative
+ // text. It must load from PAK, key out transparent green and remain legible.
+ await host.waitForFunction(()=>document.querySelector('#social-original-userlist')?.dataset.ready==='true',null,{timeout:12000});
+ const originalListHeader=await host.evaluate(()=>{
+  const c=document.getElementById('social-original-userlist');
+  const data=c.getContext('2d').getImageData(0,0,c.width,c.height).data;
+  let transparent=0,visible=0,leakedGreen=0;
+  for(let i=0;i<data.length;i+=4){
+   if(data[i+3]===0)transparent++;else{
+    visible++;if(data[i+1]>220&&data[i]<65&&data[i+2]<90)leakedGreen++;
+   }
+  }
+  return {width:c.width,height:c.height,transparent,visible,leakedGreen};
+ });
+ assert.deepEqual([originalListHeader.width,originalListHeader.height],[150,38],'original userlist bitmap dimensions');
+ assert.ok(originalListHeader.transparent>200&&originalListHeader.visible>200,'userlist is properly keyed but source artwork preserved');
+ assert.equal(originalListHeader.leakedGreen,0,'no chroma-key green in visible userlist pixels');
+
  assert.equal(await host.locator('#leaf-world-stage .world-backdrop').getAttribute('src'),'./original/WorldMap/worldmapback.png');
  assert.equal(await host.locator('#leaf-world-stage .world-sprite').count(),6,'six genuine four-frame region sprites');
  assert.equal(await host.locator('#leaf-world-stage .world-location').count(),6,'six active world regions');
@@ -170,6 +188,7 @@ const path=require('path');
   guest.waitForFunction(()=>document.querySelectorAll('.social-avatar').length===2,null,{timeout:7000})
  ]);
  assert.equal(await host.locator('#social-online-count').textContent(),'2명');
+ assert.ok(await host.locator('#social-original-userlist').isVisible(),'original participant list header remains visible during real chat');
  assert.equal(await guest.locator('#social-online-count').textContent(),'2명');
  await host.locator('#message').fill('원본 하이아칸 실시간 채팅 테스트');
  await host.locator('#message').press('Enter');
