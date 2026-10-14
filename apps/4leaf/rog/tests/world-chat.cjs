@@ -114,38 +114,44 @@ const path=require('path');
  await host.locator('#social-back').click();
  await guest.locator('#social-back').click();
 
- // Region/regionback.png says TOWN SELECT, but it is a DICE channel menu.
- // Both Haiacan entries must enter this scene and NEVER switch the ChatTown.
+ // Native geography must never mix the two source subsystems:
+ // WorldMap North/South Haiacan open their corresponding ChatTown backdrops;
+ // the Genesis World dice island alone opens Region/TOWN SELECT.
  await host.locator('[data-region="north"]').click();
- assert.ok(await host.locator('#dice-channels:not(.hidden)').isVisible(),'north Haiacan opens dice channel select');
- assert.ok(await host.locator('#rooms.hidden').count()===1,'native TOWN SELECT does not open a chat room');
- assert.equal(await host.locator('#dice-channels .dice-channel-hotspot').count(),28,'seven original dice channel rows x 4 numbered slots');
- assert.ok((await host.locator('#dice-channel-stage').evaluate(el=>getComputedStyle(el).backgroundImage)).includes('Region/regionback.png'),'native dice Region background is drawn');
+ assert.ok(await host.locator('#rooms:not(.hidden)').isVisible(),'north Haiacan enters chat town, not dice');
+ assert.equal(await host.evaluate(()=>window.__LEAF_SOCIAL__.getState().region),'north');
+ assert.ok((await host.locator('#social-image-frame').evaluate(el=>getComputedStyle(el).backgroundImage)).includes('ChatTown/northback.png'),'north Haiacan uses native ChatTown artwork');
+ assert.ok(await host.locator('#dice-channels.hidden').count()===1,'dice TOWN SELECT not shown during north chat');
+ await host.locator('[data-route="sky"]').first().click();
+ await host.locator('[data-region="south"]').click();
+ assert.ok(await host.locator('#rooms:not(.hidden)').isVisible(),'south Haiacan enters chat town');
+ assert.equal(await host.evaluate(()=>window.__LEAF_SOCIAL__.getState().region),'south');
+ assert.ok((await host.locator('#social-image-frame').evaluate(el=>getComputedStyle(el).backgroundImage)).includes('ChatTown/southback.png'),'south Haiacan uses its distinct original ChatTown art');
+ await host.locator('[data-route="sky"]').first().click();
+
+ await host.locator('[data-region="dice"]').click();
+ assert.ok(await host.locator('#dice-channels:not(.hidden)').isVisible(),'Genesis World dice entrance opens native TOWN SELECT');
+ assert.ok(await host.locator('#rooms.hidden').count()===1,'dice TOWN SELECT is not a chat room');
+ assert.equal(await host.locator('#dice-channels .dice-channel-hotspot').count(),28,'seven native dice character channels with four numbered slots each');
+ assert.ok((await host.locator('#dice-channel-stage').evaluate(el=>getComputedStyle(el).backgroundImage)).includes('Region/regionback.png'),'only dice channel menu uses Region/regionback.png');
  assert.equal(await host.locator('#dice-channels [data-channel="tichiel:4"]').getAttribute('aria-label'),'주사위의 잔영 · Tichiel 4번 채널');
  await host.screenshot({path:'leaf-original-town-select-dice.png'});
  await host.locator('#dice-channels [data-channel="ispin:1"]').click();
- assert.ok(await host.locator('#lobby:not(.hidden)').isVisible(),'dice channel opens Genesis World room select, NOT chat town');
- assert.equal(await host.evaluate(()=>window.__LEAF_LOBBY__.getState().channel),'ispin:1','north dice channel choice is saved');
- assert.equal(await host.evaluate(()=>window.__LEAF_LOBBY__.getState().region),'north');
- assert.ok((await host.locator('#lobby .scene-banner').textContent()).includes('Ispin 1채널'),'lobby identifies the selected dice channel');
- await host.locator('[data-route="sky"]').first().click();
- await host.locator('[data-region="south"]').click();
- assert.ok(await host.locator('#dice-channels:not(.hidden)').isVisible(),'south Haiacan opens the SAME dice channel selection art');
- assert.equal(await host.locator('#dice-channels .dice-channel-hotspot').count(),28);
- await host.locator('#dice-channels [data-channel="tichiel:2"]').click();
- assert.equal(await host.evaluate(()=>window.__LEAF_LOBBY__.getState().region),'south','south region remains associated with dice channel');
- assert.equal(await host.evaluate(()=>window.__LEAF_LOBBY__.getState().channel),'tichiel:2');
- assert.ok(await host.locator('#lobby:not(.hidden)').isVisible(),'south dice channel goes to the dice room list');
+ assert.ok(await host.locator('#lobby:not(.hidden)').isVisible(),'dice channel selects Genesis World room list');
+ assert.equal(await host.evaluate(()=>window.__LEAF_LOBBY__.getState().channel),'ispin:1');
+ assert.equal(await host.evaluate(()=>window.__LEAF_LOBBY__.getState().region),'genesis','dice channel namespace is never north or south chatting town');
+ assert.ok((await host.locator('#lobby .scene-banner').textContent()).includes('Ispin 1채널'),'lobby names independent dice channel');
+ assert.ok(!(await host.locator('#lobby .scene-banner').textContent()).includes('하이아칸'),'dice channel label must not falsely associate with chat geography');
  await host.locator('#lobby-channel-change').click();
- assert.ok(await host.locator('#dice-channels:not(.hidden)').isVisible(),'dice room list supports changing the native dice channel');
+ assert.ok(await host.locator('#dice-channels:not(.hidden)').isVisible(),'room list can reselect its dice channel');
+ await host.locator('#dice-channels [data-channel="tichiel:2"]').click();
+ assert.equal(await host.evaluate(()=>window.__LEAF_LOBBY__.getState().channel),'tichiel:2');
+ await host.locator('#lobby-channel-change').click();
  await host.locator('#dice-channel-back').click();
- assert.ok(await host.locator('#sky:not(.hidden)').isVisible(),'channel back goes to world map');
- // The two chat-town art files are a SEPARATE feature, reached via the
- // main 4LEAF chat tab (not through the dice TOWN SELECT).
- await host.evaluate(()=>{
-  window.__LEAF_SOCIAL__.openRegion('north');
-  window.__ROG_TEST__.go('rooms');
- });
+ assert.ok(await host.locator('#sky:not(.hidden)').isVisible(),'dice channel BACK returns to world map');
+ // ChatTown remains independently reachable directly from the real world map.
+ await host.locator('[data-region="north"]').click();
+ assert.ok(await host.locator('#rooms:not(.hidden)').isVisible(),'world map north reenters chat town after dice selection');
  assert.equal(await host.evaluate(()=>window.__LEAF_SOCIAL__.getState().view),'town');
  assert.equal(await host.locator('.social-district-hotspot').count(),8,'original north ChatTown eight signs');
  assert.equal(await host.locator('.social-district-hotspot').nth(2).getAttribute('aria-label'),'퓨어 시티 채팅 지역');
