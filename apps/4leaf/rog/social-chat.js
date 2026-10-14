@@ -653,7 +653,8 @@
    $root()?.querySelector('.social-header-tools')?.prepend(close);
   }
   frame.addEventListener('click',e=>{
-   if(e.target.closest('button')||e.target.closest('.social-room-title'))return;
+   // Clicking a participant must not teleport the local character. Only the room floor selects a seat.
+   if(e.target.closest('button, .social-room-title, .social-avatar'))return;
    const rect=frame.getBoundingClientRect();const x=100*(e.clientX-rect.left)/rect.width,y=100*(e.clientY-rect.top)/rect.height;
    const others=onlinePeers('room:'+state.roomId).filter(p=>p.id!==tabId);
    const occupied=new Set(others.map(p=>closestSeat(p.position?.x??52,p.position?.y??76)));
