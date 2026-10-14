@@ -18,6 +18,56 @@ const path=require('path');
   guest.waitForFunction(()=>!!window.__LEAF_WORLD__&&!!window.__LEAF_SOCIAL__&&!!window.__ROG_TEST__,null,{timeout:8000})
  ]);
  assert.ok(await host.locator('#sky:not(.hidden)').isVisible(),'original WorldMap first');
+
+ // Every native WorldMap four-frame region was measured against the original
+ // 796x528 WorldMapBack source bitmap, not against a manually staged screenshot.
+ await host.waitForFunction(()=>{
+  const background=document.querySelector('#leaf-world-stage .world-backdrop');
+  const sprites=[...document.querySelectorAll('#leaf-world-stage canvas.world-sprite')];
+  return background?.dataset.ready==='true'&&sprites.length===6
+    &&sprites.every(c=>c.dataset.ready==='true');
+ },null,{timeout:19000});
+ const worldSourceRegistration=await host.evaluate(()=>{
+  const stage=document.querySelector('#leaf-world-stage');
+  const bg=stage.querySelector('.world-backdrop');
+  const reference=document.createElement('canvas');reference.width=bg.naturalWidth;
+  reference.height=bg.naturalHeight;
+  const bx=reference.getContext('2d',{willReadFrequently:true});
+  bx.drawImage(bg,0,0);
+  const full=bx.getImageData(0,0,reference.width,reference.height).data;
+  const expected=[
+   {name:'street',x:265,y:33,w:203,h:112},
+   {name:'knights',x:144,y:96,w:203,h:218},
+   {name:'north',x:305,y:113,w:268,h:140},
+   {name:'south',x:200,y:205,w:239,h:139},
+   {name:'dice',x:383,y:280,w:198,h:133},
+   {name:'my4leaf',x:500,y:162,w:138,h:147}
+  ];
+  return [...stage.querySelectorAll('canvas.world-sprite')].map((canvas,i)=>{
+   const want=expected[i],left=parseFloat(canvas.style.left),top=parseFloat(canvas.style.top);
+   const pixels=canvas.getContext('2d',{willReadFrequently:true}).getImageData(0,0,canvas.width,canvas.height).data;
+   let n=0,diff=0,transparent=0;
+   for(let y=0;y<canvas.height;y++)for(let x=0;x<canvas.width;x++){
+    const p=(y*canvas.width+x)*4;
+    if(pixels[p+3]<12){transparent++;continue}
+    const q=((top+y)*reference.width+left+x)*4;
+    for(let k=0;k<3;k++){diff+=Math.abs(pixels[p+k]-full[q+k]);n++}
+   }
+   return {name:want.name,x:left,y:top,w:canvas.width,h:canvas.height,
+    expected:want,meanError:diff/n,visiblePixels:n/3,transparent};
+  });
+ });
+ assert.equal(worldSourceRegistration.length,6,'all six independently rendered native WorldMap sprites');
+ for(const measured of worldSourceRegistration){
+  const {expected,...actual}=measured;
+  assert.deepEqual(
+   [actual.x,actual.y,actual.w,actual.h],
+   [expected.x,expected.y,expected.w,expected.h],
+   measured.name+' exact native 796x528 backdrop pixel registration');
+  assert.ok(measured.meanError<12&&measured.visiblePixels>1500&&measured.transparent>500,
+   measured.name+' matches native bitmap without mismatched chroma-key: '+JSON.stringify(measured));
+ }
+
  // The original ChatRoom/header is a separate source sprite, not decorative
  // text. It must load from PAK, key out transparent green and remain legible.
  await host.waitForFunction(()=>document.querySelector('#social-original-userlist')?.dataset.ready==='true',null,{timeout:12000});
