@@ -6,8 +6,8 @@
  const REGIONS=[
   {id:'street',name:'켈티카의 거리',kind:'mainstreet',x:265,y:33,w:203,h:112,hit:[279,42,165,85]},
   {id:'knights',name:'레코르다블 · 기사단',kind:'knights',x:144,y:96,w:203,h:218,hit:[173,151,108,69]},
-  {id:'north',name:'북 하이아칸 · 주사위 채널',kind:'northchatrgn',x:305,y:113,w:268,h:140,hit:[351,149,134,75]},
-  {id:'south',name:'남 하이아칸 · 주사위 채널',kind:'southchatrgn',x:200,y:205,w:239,h:139,hit:[230,251,130,70]},
+  {id:'north',name:'북 하이아칸 · 채팅 타운',kind:'northchatrgn',x:305,y:113,w:268,h:140,hit:[351,149,134,75]},
+  {id:'south',name:'남 하이아칸 · 채팅 타운',kind:'southchatrgn',x:200,y:205,w:239,h:139,hit:[230,251,130,70]},
   {id:'dice',name:'주사위의 잔영',kind:'dice',x:383,y:280,w:198,h:133,hit:[426,310,134,90]},
   {id:'my4leaf',name:'마이리프 · 내 정보',kind:'m4leaf',x:500,y:162,w:138,h:147,hit:[525,177,105,117]}
  ];
@@ -65,11 +65,17 @@
  function clickRegion(id){
    const data=REGIONS.find(r=>r.id===id);if(!data)return;
    if(id==='north'||id==='south'){
-     // Region/regionback.png is the Dice TOWN SELECT, not ChatTown.
-     // Keep separate, functioning social entry via the 4LEAF chat toolbar.
-     window.__LEAF_LOBBY__?.openChannelSelect(id);
+     // These WorldMap regions are the northern/southern ChatTown entrances.
+     // The similarly titled Region/TOWN SELECT bitmap belongs to Genesis World
+     // (dice channel selection), never to the ChatTown navigation.
+     window.__LEAF_SOCIAL__?.openRegion(id);
+     window.__ROG_TEST__?.go('rooms');
    }else if(id==='street')window.__ROG_TEST__?.go('city');
-   else if(id==='dice')window.__ROG_TEST__?.go('lobby');
+   else if(id==='dice'){
+     // Genesis World owns the distinct native seven-channel TOWN SELECT.
+     if(window.__LEAF_LOBBY__?.openChannelSelect)window.__LEAF_LOBBY__.openChannelSelect();
+     else window.__ROG_TEST__?.go('lobby');
+   }
    else if(id==='knights'){
      window.__LEAF_SOCIAL__?.openBoard?.();
      window.__ROG_TEST__?.go('rooms');
