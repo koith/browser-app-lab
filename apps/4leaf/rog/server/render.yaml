@@ -1,0 +1,24 @@
+# Optional Render Blueprint. Does not deploy or charge on its own.
+# The disk + starter service requires explicit hosting-account/billing approval.
+# In a monorepo, set the Blueprint file path to apps/4leaf/rog/server/render.yaml.
+services:
+  - type: web
+    name: 4leaf-central-chat
+    runtime: docker
+    plan: starter
+    dockerContext: .
+    dockerfilePath: ./apps/4leaf/rog/server/Dockerfile
+    healthCheckPath: /api/health
+    disk:
+      name: chat-state
+      mountPath: /var/lib/4leaf
+      sizeGB: 1
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: HOST
+        value: 0.0.0.0
+      - key: LEAF_CENTRAL_ORIGINS
+        value: https://koith.github.io
+      - key: LEAF_CENTRAL_STORAGE
+        value: /var/lib/4leaf/chat-state.json
