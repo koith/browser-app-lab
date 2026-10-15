@@ -19,16 +19,31 @@
  border-right:2px ridge #97a9e0;
  background:#203367 url('./original/MainFrame/wallpaper.png') 0 0/321px 240px repeat;
 }
-/* The original TIS tiles remain independent interactive elements. Do not use
-   ChatTown's IMG/bgtile.png (houses/terrain) as a fabricated Dice battlefield. */
+/* ARCHIVE CORRECTION (2026-10-15): The 725x485 original/IMG/bgtile.png
+   is not a ChatTown interior. It is the EXACT green cliff/forest/village Dice
+   battlefield with the central cylindrical silo in board.jpg and battle.jpg.
+   Prior revival wrongly removed it and installed a featureless navy field.
+   The real original map's independent DMP-path/TIS tiles/pawns remain above
+   this scenery, and all pan/zoom operations move world+scenery together. */
 #app.app-classic-dice #game .board-area{
- background:#19264e!important;
+ background:#294b30 url('./original/IMG/bgtile.png') center center/725px 485px repeat!important;
 }
 #app.app-classic-dice #game #board-world{
- background:#19264e!important;
+ background-color:#294b30!important;
+ background-image:url('./original/IMG/bgtile.png')!important;
+ background-size:725px 485px!important;
+ background-repeat:repeat!important;
+ background-position:center center!important;
 }
+/* The original terrain already has rocks, cliffs, shading and cast shadows;
+   overlaying a revival grid, center badge or synthetic blue wash breaks it. */
+#app.app-classic-dice #game .board-area::before,
 #app.app-classic-dice #game #board-world::after{
- background:none!important;
+ content:none!important;
+ display:none!important;
+}
+#app.app-classic-dice #game .board-center{
+ display:none!important;
 }
 /* Native dialogs must remain above the living chat window during game
    confirmations (leave, select item, battle result). */
