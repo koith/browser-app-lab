@@ -10,6 +10,8 @@ const path=require('node:path');
  const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
  try{
   const page=await browser.newPage({viewport:{width:1280,height:800},serviceWorkers:'block'});
+  // Test the actual local/peer room renderer without joining public Render.
+  await page.addInitScript(()=>{window.LEAF_CENTRAL_API_URL='';});
   await page.goto(process.env.FOURLEAF_TEST_URL||'http://127.0.0.1:8765/');
   // The standalone ROG test server intentionally exposes only rog/, not
   // neighboring apps/4leaf/assets/. Give Chromium the authentic JPEG bytes.
