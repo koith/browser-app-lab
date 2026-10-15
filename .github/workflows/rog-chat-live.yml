@@ -81,6 +81,10 @@ jobs:
         env:
           FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
         run: node apps/4leaf/rog/tests/chatroom-native-furniture-sizes.cjs
+      - name: Verify published KnightTown sign pixels correlate with independent source backdrop
+        env:
+          FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
+        run: node apps/4leaf/rog/tests/knighttown-sign-registration.cjs
       - name: Verify published source KnightTown original six region scene and functional Recordable routing
         env:
           FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
