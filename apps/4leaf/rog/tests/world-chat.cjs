@@ -126,6 +126,46 @@ const path=require('path');
  assert.ok(streetArtwork.every(x=>x.painted>200&&x.transparent>100),'every native shop sprite contains artwork and transparent green key');
  assert.ok(streetArtwork.every(x=>x.greenLeak===0),'no unreplaced source bright green regions');
  assert.deepEqual(streetArtwork.map(x=>[x.w,x.h]),[[230,196],[190,229],[183,266],[199,178],[152,136],[212,222],[215,238]],'pixel dimensions agree with extracted PAK manifest');
+ // MainStreet source sprites were incorrectly scattered across unrelated
+ // buildings. Check absolute source-space position AND real pixel correlation
+ // against native back.png (not merely sprite dimensions).
+ const streetRegistration=await host.evaluate(()=>{
+  const bg=document.querySelector('#street-track .street-artwork');
+  const ref=document.createElement('canvas');ref.width=bg.naturalWidth;ref.height=bg.naturalHeight;
+  const ctx=ref.getContext('2d',{willReadFrequently:true});ctx.drawImage(bg,0,0);
+  const full=ctx.getImageData(0,0,ref.width,ref.height).data;
+  return [...document.querySelectorAll('.street-building-art')].map(canvas=>{
+   const parent=canvas.closest('.street-location');
+   const x=Math.round(parseFloat(parent.style.left)),y=Math.round(parseFloat(parent.style.top));
+   const pixels=canvas.getContext('2d',{willReadFrequently:true})
+    .getImageData(0,0,canvas.width,canvas.height).data;
+   let ab=0,aa=0,bb=0,count=0;
+   for(let iy=0;iy<canvas.height;iy+=2)for(let ix=0;ix<canvas.width;ix+=2){
+    const a=(iy*canvas.width+ix)*4;
+    if(pixels[a+3]<200)continue;
+    const b=((iy+y)*ref.width+x+ix)*4;
+    for(let k=0;k<3;k++){
+     const c=pixels[a+k],d=full[b+k];ab+=c*d;aa+=c*c;bb+=d*d;count++;
+    }
+   }
+   return {asset:canvas.dataset.source,x,y,width:canvas.width,height:canvas.height,
+    count,similarity:ab/Math.sqrt(aa*bb)};
+  });
+ });
+ const nativeStreetLocations=[
+  {asset:'dress',x:1102,y:135},{asset:'event',x:354,y:39},
+  {asset:'card',x:633,y:63},{asset:'hair',x:164,y:128},
+  {asset:'accessory',x:1765,y:207},{asset:'dandymodern',x:1315,y:157},
+  {asset:'office',x:884,y:7}
+ ];
+ assert.deepEqual(streetRegistration.map(({asset,x,y})=>({asset,x,y})),nativeStreetLocations,
+  'all seven native street sprites must be registered against source backdrop');
+ assert.ok(streetRegistration.every(x=>x.similarity>0.965&&x.count>2500),
+  'Keltica buildings match their actual native backdrop pixels: '+JSON.stringify(streetRegistration));
+ assert.equal(await host.locator('[data-street="court"]').getAttribute('aria-label'),'실키필 · 헤어샵',
+  'native left-hand hair salon is Silkyfill, not a fabricated name');
+ assert.equal(await host.locator('[data-street="gallery"]').getAttribute('aria-label'),'캐즈팝 · 잡화점',
+  'native right-hand accessory shop is KazPop');
  assert.equal(await host.locator('[data-street="magic"]').getAttribute('aria-label'),'매직카덴 · 카드샵','original card shop identification');
  await host.locator('[data-street="magic"]').evaluate(el=>el.click());
  assert.ok(await host.locator('#shop:not(.hidden)').isVisible(),'native MainStreet card building enters working Magic Carden shop');
