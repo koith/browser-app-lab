@@ -1,0 +1,18 @@
+name: Chiikawa phone push one-time test
+on:
+  push:
+    paths:
+      - '.github/workflows/chiikawa-ntfy-phone-test.yml'
+permissions:
+  contents: read
+jobs:
+  phone-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send live push after subscription
+        run: |
+          curl --fail --silent --show-error --retry 2 --max-time 20 \
+            -H 'Title: Chiikawa iPhone push TEST' \
+            -H 'Priority: 5' \
+            -d '새 테스트 알림입니다. 먼작귀 예약 개시가 아닙니다. 잠금화면 배너가 표시되는지 확인해주세요.' \
+            'https://ntfy.sh/lotte-chiikawa-20261016-ca1ab753911c4a153ef003'
