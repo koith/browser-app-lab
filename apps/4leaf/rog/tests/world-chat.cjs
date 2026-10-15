@@ -350,16 +350,27 @@ const path=require('path');
  await host.locator('#street-back').click();
  assert.ok(await host.locator('#sky:not(.hidden)').isVisible(),'street returns to WorldMap');
 
- // The original Recordable/Knight noticeboard must be a real working location.
+ // Actual 794x404 KnightTown source region MUST precede generic bulletin UI.
  await host.locator('[data-region="knights"]').click();
- await host.waitForFunction(()=>window.__LEAF_SOCIAL__.getState().view==='board',null,{timeout:5000});
- assert.ok(await host.locator('.recordable-board').isVisible(),'recordable board opens');
+ await host.waitForFunction(()=>window.__LEAF_SOCIAL__.getState().view==='knighttown',null,{timeout:5000});
+ assert.equal(await host.locator('.knight-district-hotspot').count(),6,'six authentic 0.9 Recordable districts');
+ assert.ok((await host.locator('#social-image-frame').evaluate(el=>getComputedStyle(el).backgroundImage))
+   .includes('original/KnightTown/knightback.png'),'source KnightTown backdrop used');
+ assert.equal(await host.locator('.recordable-board').count(),0,'no fake bulletin hides native region selection');
+ assert.equal(await host.locator('#social-image-frame').evaluate(el=>el.style.height),'404px',
+  'original KnightTown scene is exactly 794x404, not the 794x528 ChatRoom canvas');
+ await host.screenshot({path:'leaf-original-knighttown-six-regions.png'});
+ await host.locator('[data-knight-area="sea01"]').click();
+ assert.equal(await host.evaluate(()=>window.__LEAF_SOCIAL__.getState().knightDistrict),'모험의 바다');
+ assert.ok(await host.locator('.recordable-board').isVisible(),'original district opens real working web bulletin');
  await host.locator('#recordable-create').click();
  await host.locator('.recordable-compose [name="title"]').fill('원작 포리프 기사단 게시글');
  await host.locator('.recordable-compose [name="body"]').fill('실제 게시글 보존과 다른 탭 공유 기능 확인');
  await host.locator('.recordable-compose button[type="submit"]').click();
  assert.equal(await host.locator('#recordable-rows .recordable-row').count(),1);
  await guest.locator('[data-region="knights"]').click();
+ assert.equal(await guest.locator('.knight-district-hotspot').count(),6);
+ await guest.locator('[data-knight-area="sea01"]').click();
  await guest.waitForFunction(()=>document.querySelector('#recordable-rows')?.textContent.includes('원작 포리프 기사단 게시글'),null,{timeout:5000});
  await guest.locator('#recordable-rows .recordable-row').first().click();
  assert.ok((await guest.locator('.recordable-article').textContent()).includes('실제 게시글 보존'));
@@ -367,6 +378,11 @@ const path=require('path');
  await host.screenshot({path:'leaf-original-recordable-board.png'});
  await host.locator('#social-back').click();
  await guest.locator('#social-back').click();
+ assert.equal(await host.locator('.knight-district-hotspot').count(),6,'back from bulletin returns to native Recordable areas');
+ await host.locator('#social-back').click();
+ await guest.locator('#social-back').click();
+ assert.ok(await host.locator('#sky:not(.hidden)').isVisible(),'back from source KnightTown returns to world');
+
 
  // Native geography must never mix the two source subsystems:
  // WorldMap North/South Haiacan open their corresponding ChatTown backdrops;

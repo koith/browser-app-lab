@@ -31,6 +31,10 @@ on:
       - 'apps/4leaf/rog/chatroom-native-ringbtn.css'
       - 'apps/4leaf/rog/chatroom-native-owner-dialog.js'
       - 'apps/4leaf/rog/chatroom-native-expressions.js'
+      - 'apps/4leaf/rog/knighttown-native.js'
+      - 'apps/4leaf/rog/knighttown-native.css'
+      - 'apps/4leaf/rog/tests/knighttown-original.cjs'
+      - 'apps/4leaf/rog/original/KnightTown/**'
       - 'apps/4leaf/rog/chatroom-native-expressions.css'
       - 'apps/4leaf/rog/tests/chatroom-native-expressions.cjs'
       - 'apps/4leaf/rog/chatroom-native-owner-dialog.css'
@@ -101,6 +105,8 @@ jobs:
         run: node apps/4leaf/rog/tests/chatroom-native-expressions.cjs
       - name: Verify recovered ChatRoom room-master atlas with real input, private admission, Cancel and 503 fallback
         run: node apps/4leaf/rog/tests/chatroom-native-owner-dialog.cjs
+      - name: Verify recovered original KnightTown 794x404 six live regions and mobile
+        run: node apps/4leaf/rog/tests/knighttown-original.cjs
       - name: Verify original world, regions, rooms, messages and mobile
         run: node apps/4leaf/rog/tests/world-chat.cjs
       - name: Verify original WorldMap, ChatTown and 115x103 ChatRoom furniture work after cold offline install

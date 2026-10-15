@@ -1,0 +1,51 @@
+/* Original 4LEAF KnightTown.pak, not the Dice Region/TOWN SELECT
+   and not the ChatTown north/south maps. Exact recovered native backdrop:
+   794x404. No screenshot overlay or simulated people. */
+#rooms.native-knight-town .social-user-panel{display:none!important}
+#rooms.native-knight-town .social-stage{
+ background:#879ac6 url('./original/MainFrame/wallpaper.png') repeat!important;
+ background-size:321px 240px!important;
+}
+#rooms.native-knight-town .social-knight-town{
+ box-sizing:border-box!important;
+ position:absolute!important;
+ width:794px!important;height:404px!important;
+ background-color:#576e9e!important;
+ background-image:url('./original/KnightTown/knightback.png')!important;
+ background-size:794px 404px!important;
+ background-position:0 0!important;
+ background-repeat:no-repeat!important;
+ overflow:visible!important;
+}
+#rooms.native-knight-town .social-knight-town .knight-district-hotspot{
+ box-sizing:border-box;position:absolute;z-index:5;
+ display:block;padding:0!important;margin:0!important;
+ background:transparent!important;
+ border:0!important;border-radius:0!important;
+ outline:0!important;box-shadow:none!important;
+ color:transparent!important;cursor:pointer;
+ -webkit-tap-highlight-color:transparent;
+}
+#rooms.native-knight-town .social-knight-town .knight-source-hover{
+ position:absolute;z-index:1;display:block;
+ width:142px;height:74px;
+ background-position:-142px 0;
+ background-size:568px 74px;
+ background-repeat:no-repeat;
+ pointer-events:none;
+ opacity:0;
+ image-rendering:auto;
+}
+#rooms.native-knight-town .social-knight-town .knight-district-hotspot:is(:hover,:focus-visible) .knight-source-hover{
+ opacity:1;
+}
+#rooms.native-knight-town .social-knight-town .knight-district-hotspot:active .knight-source-hover{
+ background-position:-284px 0;
+ opacity:1;
+}
+#rooms.native-knight-town .social-knight-town .knight-district-hotspot:focus-visible{
+ outline:1px dotted #fff5bd!important;outline-offset:-2px!important;
+}
+@media(prefers-reduced-motion:reduce){
+ #rooms.native-knight-town .knight-source-hover{transition:none!important}
+}
