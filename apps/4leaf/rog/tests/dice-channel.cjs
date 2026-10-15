@@ -33,7 +33,41 @@ const assert=require('node:assert/strict');
   assert.equal(await page.evaluate(()=>window.__LEAF_LOBBY__.getState().channel),'ispin:3');
   assert.equal(await page.evaluate(()=>window.__LEAF_LOBBY__.getState().region),'genesis','dice channels have no Haiacan chat region');
   assert.ok(await page.locator('#lobby:not(.hidden)').isVisible());
+  // Native client 0.9 installation resources: ROOM SELECT Map PAK (794x404),
+  // not the unrelated distorted 800x540 Gif/d1lobby mockup.
+  await page.waitForFunction(()=>window.__LEAF_DICE_NATIVE__?.getState().scale>0);
+  const nativeSelect=await page.evaluate(()=>{
+   const stage=document.getElementById('dice-native-stage');
+   return {...window.__LEAF_DICE_NATIVE__.getState(),
+    background:getComputedStyle(stage).backgroundImage,
+    create:stage.querySelector('#lobby-create')?.getBoundingClientRect().width,
+    join:stage.querySelector('#lobby-join')?.getBoundingClientRect().width};
+  });
+  assert.equal(nativeSelect.source,'Map/mapback.png');
+  assert.deepEqual([nativeSelect.width,nativeSelect.height],[794,404]);
+  assert.ok(nativeSelect.background.includes('original/Map/mapback.png'),
+   'original 794x404 Map ROOM SELECT background is used');
+  assert.ok(Math.abs(nativeSelect.actualStageWidth/nativeSelect.actualStageHeight-794/404)<.001,
+   'native room selector scales uniformly, no non-native stretching');
+  assert.ok(nativeSelect.actualStageWidth<=nativeSelect.availableWidth+2
+         &&nativeSelect.actualStageHeight<=nativeSelect.availableHeight+2,
+   'room selector is fully visible rather than cropped');
+  assert.ok(nativeSelect.create>35&&nativeSelect.join>35,
+   'native CREATE/JOIN image hotspots are interactive');
+  await page.screenshot({path:'leaf-dice-native-map-select.png'});
   await page.locator('#lobby-create').click();
+  assert.ok(await page.locator('#dice-lobby-scene.config-open').isVisible());
+  assert.ok((await page.locator('#dice-native-stage').evaluate(el=>getComputedStyle(el).backgroundImage))
+   .includes('original/Room/roomback.png'),'original READY and CHESSMAN INFO are drawn from Room/roomback.png');
+  assert.ok(await page.locator('#lobby-players .lobby-seat').count()===8,'native PLAYER panel displays eight distinct seats');
+  assert.equal(await page.locator('#dice-team-picker').getAttribute('aria-expanded'),'false');
+  await page.locator('#dice-team-picker').click();
+  assert.ok(await page.locator('#dice-room-config .team-select').isVisible(),
+   'native SELECT hotspot opens real interactive chessman controls');
+  await page.keyboard.press('Escape');
+  assert.equal(await page.locator('#dice-team-picker').getAttribute('aria-expanded'),'false',
+   'chessman panel closes without concealing recovered client art');
+  await page.screenshot({path:'leaf-dice-native-ready-room.png'});
   await page.locator('#bot-count').selectOption('1');
   await page.locator('#start-game').click();
   await page.waitForSelector('#game:not(.hidden)');
