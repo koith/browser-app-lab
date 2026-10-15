@@ -13,7 +13,8 @@ from html import unescape
 
 STORE = "https://m.brand.naver.com/lottecinema"
 CATEGORY = STORE + "/category/4c667f4dac7145f3808a651aaade854b?cp=1"
-SOURCES = ("https://r.jina.ai/" + CATEGORY, "https://r.jina.ai/" + STORE)
+RECENT = STORE + "/category/2sWE0vIa6tWNMMW47PDeX_ALL_PRODUCT?st=RECENT"
+SOURCES = ("https://r.jina.ai/" + CATEGORY, "https://r.jina.ai/" + STORE, "https://r.jina.ai/" + RECENT)
 PRODUCT = re.compile(r"먼작귀|치이카와|ちいかわ", re.I)
 TARGETS = (
     ("lenticular", re.compile(r"렌티큘러|띠부띠부|렌티.?씰", re.I), "렌티큘러 스티커"),
