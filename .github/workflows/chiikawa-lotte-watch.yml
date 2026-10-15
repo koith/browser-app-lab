@@ -22,6 +22,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: python3 -m unittest discover -s scripts -p 'test_chiikawa_lotte_watch.py' -v
+      - name: Probe real Naver connections
+        run: python3 scripts/probe_chiikawa_lotte_watch.py
   watch:
     if: github.repository == 'koith/browser-app-lab' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
