@@ -288,6 +288,7 @@ function sourceTileGraphic(type,index){
 }
 function drawBoard(){
  if(!match)return;
+ window.__LEAF_DICE_TERRAIN__?.draw(match.map,PATH);
  const root=$('board-nodes'),svg=$('board-lines');
  const key=match.map+'|'+match.tiles.join(',');
  if(root.dataset.renderKey!==key){
