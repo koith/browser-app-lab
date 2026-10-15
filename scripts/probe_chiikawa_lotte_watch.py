@@ -20,3 +20,17 @@ if healthy == 0:
     sys.exit(2)
 print("LIVE_CATALOG_PROBE_PASS: real product cards were fetched and parsed.")
 print("IMPORTANT: future 1-minute cache refresh, exact sale button and iOS push are not proven by this probe.")
+
+
+for item_url in (
+    "https://m.brand.naver.com/lottecinema/products/12369795868",
+    "https://m.brand.naver.com/lottecinema/products/13751593118",
+):
+    try:
+        resolved,body=fetch("https://r.jina.ai/"+item_url)
+        print("DETAIL_READ",item_url,"chars",len(body),"page",repr(body[:160]))
+        for term in ("구매하기","바로구매","예약구매","판매예정","품절","장바구니","판매중","재고","상품상세"):
+            at=body.find(term)
+            print("DETAIL_MARKER",item_url.split("/")[-1],term,at,"context",repr(body[max(0,at-70):at+100] if at>=0 else ""))
+    except Exception as e:
+        print("DETAIL_FAILED",item_url,repr(e))
