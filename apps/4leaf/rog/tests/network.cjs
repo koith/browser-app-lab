@@ -51,6 +51,14 @@ const path=require('path');
     window.__LEAF_BRIDGE__.onState(m);window.__ROG_TEST__.drawGame();
   });
   await guest.waitForFunction(()=>window.__LEAF_BRIDGE__.getMatch()?.players[1]?.items?.[0]==='charge',null,{timeout:5000});
+  // The original screenshot-accurate game now keeps real item buttons in a
+  // drawer behind native IMG/selector.png. Click its ACTUAL on-screen
+  // command: direct clicks on hidden old strips are no longer gameplay.
+  assert.equal(await guest.locator('#dice-items-toggle').isVisible(),true,'guest can open native item selector');
+  assert.equal(await guest.locator('#dice-items-toggle').getAttribute('aria-expanded'),'false');
+  await guest.locator('#dice-items-toggle').click();
+  assert.equal(await guest.locator('#dice-items-toggle').getAttribute('aria-expanded'),'true','genuine source sprite opened the actual guest inventory');
+  assert.equal(await guest.locator('#my-items .item-card').count(),2,'two real authoritative guest items are in inventory');
   await guest.locator('#my-items .item-card').first().click();
   await guest.locator('#modal-buttons button').filter({hasText:'사용'}).click();
   await host.waitForFunction(()=>window.__LEAF_BRIDGE__.getMatch()?.players[1]?.ability===60,null,{timeout:9000});
