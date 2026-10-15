@@ -12,6 +12,7 @@ on:
       - 'apps/4leaf/rog/dice-native-stage.js'
       - 'apps/4leaf/rog/dice-native-stage.css'
       - 'apps/4leaf/rog/town-native-room-hotspots.css'
+      - 'apps/4leaf/rog/native-chattown-scale.css'
       - 'apps/4leaf/rog/original-shell-accurate.css'
       - 'apps/4leaf/rog/central-client.js'
       - 'apps/4leaf/rog/sw.js'
