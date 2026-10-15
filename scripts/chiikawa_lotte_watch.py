@@ -150,13 +150,16 @@ def send_issue_alerts(products):
         if issue_title in existing:
             print("ALREADY_ALERTED", issue_title, flush=True)
             continue
+        prefix = (
+            "@koith 롯데시네마 먼작귀 상품 상세페이지에서 **구매하기 버튼 표시**를 확인했습니다.\n\n"
+            if item.get("stage") == "buy_button"
+            else "@koith 롯데시네마 먼작귀 예약 대상 상품 **등록**을 감지했습니다.\n\n"
+        )
         body = (
-            ("@koith 롯데시네마 먼작귀 상품 상세페이지에서 **구매하기 버튼 표시**를 확인했습니다.\n\n"
-             if item.get("stage") == "buy_button" else
-             "@koith 롯데시네마 먼작귀 예약 대상 상품 **등록**을 감지했습니다.\n\n")
-            "상품: " + item["title"] + "\n"
-            "상품 링크: " + item["url"] + "\n\n"
-            "**주의: 실제 주문·결제가 가능한지는 상품 페이지에서 직접 최종 확인하세요.**"
+            prefix
+            + "상품: " + item["title"] + "\n"
+            + "상품 링크: " + item["url"] + "\n\n"
+            + "**주의: 실제 주문·결제가 가능한지는 상품 페이지에서 직접 최종 확인하세요.**"
         )
         try:
             send_ntfy(item)
