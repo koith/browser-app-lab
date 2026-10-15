@@ -110,7 +110,7 @@ function syncMusic(){if(!soundOn){if(bgm)bgm.pause();return}const track=({sky:'0
 function sfx(freq=500,duration=.07){if(!soundOn)return;try{const AC=window.AudioContext||window.webkitAudioContext;audioCtx=audioCtx||new AC();const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='triangle';o.frequency.value=freq;g.gain.setValueAtTime(.038,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+duration);o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+duration)}catch{}}
 function chat(who,message,type=''){const line=document.createElement('div');line.className=type;const b=document.createElement('b');b.textContent=who+'　';line.append(b,document.createTextNode(String(message)));$('chat-log').append(line);while($('chat-log').children.length>90)$('chat-log').firstElementChild.remove();$('chat-log').scrollTop=$('chat-log').scrollHeight}
 function profileUI(){$('nick').textContent=profile.name;$('profile-name').textContent=profile.name;$('my-name').textContent=profile.name;$('gp').textContent=profile.gp.toLocaleString();$('shop-gp').textContent=profile.gp.toLocaleString();$('wins').textContent=profile.wins+'승';persist()}
-function navigate(id){if(!routeNames[id])return;route=id;document.getElementById('app')?.classList.toggle('app-classic-dice',id==='game');$('app').classList.toggle('app-game',id==='game');query('.scene').forEach(s=>s.classList.toggle('hidden',s.id!==id));query('[data-route]').forEach(el=>el.classList.toggle('active',el.dataset.route===id));$('where').textContent=routeNames[id];$('chat-location').textContent=routeNames[id];if(id==='game'&&match){drawGame();const p=activePlayer();if(p?.bot&&!busy)setTimeout(()=>{if(route==='game'&&match&&!match.finished&&activePlayer()?.bot&&!busy)takeTurn()},500)}if(id==='shop')drawShop();if(id==='lobby'){drawTeam();refreshResume()}window.dispatchEvent(new CustomEvent('leaf-route-change',{detail:{route:id}}));log(routeNames[id]+'에 입장하였습니다.');syncMusic();sfx(610)}
+function navigate(id){if(!routeNames[id])return;route=id;if(id!=='game')$('app')?.classList.remove('dice-items-open');document.getElementById('app')?.classList.toggle('app-classic-dice',id==='game');$('app').classList.toggle('app-game',id==='game');query('.scene').forEach(s=>s.classList.toggle('hidden',s.id!==id));query('[data-route]').forEach(el=>el.classList.toggle('active',el.dataset.route===id));$('where').textContent=routeNames[id];$('chat-location').textContent=routeNames[id];if(id==='game'&&match){drawGame();const p=activePlayer();if(p?.bot&&!busy)setTimeout(()=>{if(route==='game'&&match&&!match.finished&&activePlayer()?.bot&&!busy)takeTurn()},500)}if(id==='shop')drawShop();if(id==='lobby'){drawTeam();refreshResume()}window.dispatchEvent(new CustomEvent('leaf-route-change',{detail:{route:id}}));log(routeNames[id]+'에 입장하였습니다.');syncMusic();sfx(610)}
 function modal(title,body,buttons){$('modal-title').textContent=title;$('modal-content').replaceChildren();if(typeof body==='string'){$('modal-content').textContent=body}else if(body)$('modal-content').append(body);$('modal-buttons').replaceChildren();buttons.forEach(opt=>{const b=document.createElement('button');b.textContent=opt.label;b.className=opt.primary?'primary':'';b.onclick=()=>{$('modal').classList.add('hidden');if(opt.run)opt.run()};$('modal-buttons').append(b)});$('modal').classList.remove('hidden')}
 function ask(title,body,options){return new Promise(resolve=>modal(title,body,options.map((a,i)=>({label:a,primary:i===0,run:()=>resolve(i)}))))}
 function toast(message){log(message);$('move-log').textContent=message}
@@ -424,7 +424,68 @@ function drawMinimap(){
    context.lineWidth=1;context.strokeStyle='#131c4f';context.stroke();
  });
 }
-function drawGame(){if(!match||!MAPS[match.map])return;chooseSourcePath(match.map);const p=(match.mode==='hotseat'||match.mode==='network'?activePlayer():match.players[0]),stats=teamStats(p.team);$('game-map-title').textContent=match.map;const elapsed=Math.floor((Date.now()-(match.startedAt||Date.now()))/1000);$('mini-time').textContent='TIME '+formatGameDuration(Math.max(0,elapsed))+' / GP '+formatGameDuration(match.players.length*90);$('element-label').textContent=match.attribute;$('player-count').textContent=match.players.length;$('turn-indicator').textContent='ROUND '+match.round+' · '+match.players[match.active].name+' TURN';$('my-name').textContent=p.name;$('my-stats').textContent='이동 '+stats.move+' · 공격 '+stats.atk+' · 방어 '+stats.def+' · 지력 +'+stats.int;$('my-position').textContent=p.jail>0?'감옥 '+p.jail+'턴':p.position===0?'START':p.position===match.tiles.length-1?'GOAL':(p.position+1)+'번째 칸';$('my-portrait').innerHTML='<img class="player-sprite" alt="" src="'+imageFor(p.team[0]||'soldier')+'">';$('ability-fill').style.width=p.ability+'%';$('game-players').replaceChildren();match.players.forEach((user,i)=>{const li=document.createElement('div');li.className=match.active===i?'is-turn':'';li.textContent=(match.active===i?'▶ ':'　')+user.pawn+' '+user.name+' '+(user.position+1)+'칸 · '+user.ability+'%';li.style.color=user.color;$('game-players').append(li)});$('my-items').replaceChildren();p.items.forEach((itemId,i)=>{const item=ITEM_MAP[itemId],btn=document.createElement('button');btn.className='item-card';btn.innerHTML='<span class="item-icon">'+(item?.icon||'✧')+'</span>'+(item?.name||itemId);btn.title=item.hint;btn.disabled=match.finished||!playerCanAct()||p.usedItem||busy;btn.onclick=()=>useItem(i);$('my-items').append(btn)});$('roll-btn').disabled=!playerCanAct();$('ability-btn').disabled=!playerCanAct()||p.ability<100;$('move-log').textContent=match.message;drawBoard();drawBattlePanels();drawMinimap();trackActivePawn()}
+/* Original archived board.jpg/battle.jpg place four CHESSMAN headshots in a
+   genuine bottom-right 2x2 pane. Drive them from the SAME current party used
+   by the 2002-era battle rules, not from fabricated preview characters.
+   CardData/chm_NN PNGs are the recovered source portrait images. */
+function drawNativeChessmen(){
+ const root=$('dice-native-party'),toggle=$('dice-items-toggle');
+ if(!root||!match)return;
+ const p=(match.mode==='hotseat'||match.mode==='network'?activePlayer():match.players[0]);
+ if(!p)return;
+ root.replaceChildren();
+ root.dataset.playerId=String(p.id);
+ root.dataset.playerName=p.name;
+ for(let i=0;i<4;i++){
+  const cardId=p.team?.[i],source=cardId&&CARD_MAP[cardId],role=['공격','방어','지력','대기'][i];
+  const slot=document.createElement(source?'button':'div');
+  slot.className='dice-chessman-slot'+(source?' occupied':' vacant')+(i===3?' reserve':'');
+  slot.dataset.teamIndex=String(i);
+  slot.dataset.cardId=source?source.id:'';
+  slot.setAttribute('aria-label',source?(role+' '+source.name+' 체스맨 정보'):(role+' 비어 있음'));
+  if(source){
+   slot.type='button';
+   slot.title=role+' · '+source.name+' / 이동 '+source.move+' 공격 '+source.atk+' 방어 '+source.def+' 지력 '+source.int;
+   const img=document.createElement('img');
+   img.className='dice-chessman-face';
+   img.src=imageFor(source.id);
+   img.alt=source.name;
+   img.loading='eager';
+   const stamp=document.createElement('span');stamp.className='dice-chessman-moon';
+   stamp.setAttribute('aria-hidden','true');
+   const name=document.createElement('b');name.textContent=source.name;
+   slot.append(img,stamp,name);
+   slot.onclick=()=>{
+    const content=document.createElement('div');
+    const portrait=document.createElement('img');portrait.src=imageFor(source.id);
+    portrait.alt=source.name;portrait.width=58;portrait.height=62;
+    const detail=document.createElement('p');
+    detail.textContent=role+' · '+source.name+' / 이동 '+source.move+' / 공격 '+source.atk+
+      ' / 방어 '+source.def+' / 지력 '+source.int+' / '+(source.ability||'능력 없음')+
+      ' / '+source.point+' POINT';
+    content.append(portrait,detail);
+    modal('체스맨 · '+source.name,content,[{label:'닫기',primary:true}]);
+   };
+  }else{
+   const blank=document.createElement('span');
+   blank.className='dice-chessman-empty';
+   blank.textContent='—';
+   const name=document.createElement('b');name.textContent=role+' 빈 슬롯';
+   slot.append(blank,name);
+  }
+  root.append(slot);
+ }
+ const counter=$('dice-item-count');
+ if(counter)counter.textContent=String(p.items?.length||0);
+ if(toggle){
+  toggle.setAttribute('aria-expanded',String($('app')?.classList.contains('dice-items-open')));
+  toggle.onclick=()=>{
+   const app=$('app');app.classList.toggle('dice-items-open');
+   toggle.setAttribute('aria-expanded',String(app.classList.contains('dice-items-open')));
+  };
+ }
+}
+function drawGame(){if(!match||!MAPS[match.map])return;chooseSourcePath(match.map);const p=(match.mode==='hotseat'||match.mode==='network'?activePlayer():match.players[0]),stats=teamStats(p.team);$('game-map-title').textContent=match.map;const elapsed=Math.floor((Date.now()-(match.startedAt||Date.now()))/1000);$('mini-time').textContent='TIME '+formatGameDuration(Math.max(0,elapsed))+' / GP '+formatGameDuration(match.players.length*90);$('element-label').textContent=match.attribute;$('player-count').textContent=match.players.length;$('turn-indicator').textContent='ROUND '+match.round+' · '+match.players[match.active].name+' TURN';$('my-name').textContent=p.name;$('my-stats').textContent='이동 '+stats.move+' · 공격 '+stats.atk+' · 방어 '+stats.def+' · 지력 +'+stats.int;$('my-position').textContent=p.jail>0?'감옥 '+p.jail+'턴':p.position===0?'START':p.position===match.tiles.length-1?'GOAL':(p.position+1)+'번째 칸';$('my-portrait').innerHTML='<img class="player-sprite" alt="" src="'+imageFor(p.team[0]||'soldier')+'">';$('ability-fill').style.width=p.ability+'%';$('game-players').replaceChildren();match.players.forEach((user,i)=>{const li=document.createElement('div');li.className=match.active===i?'is-turn':'';li.textContent=(match.active===i?'▶ ':'　')+user.pawn+' '+user.name+' '+(user.position+1)+'칸 · '+user.ability+'%';li.style.color=user.color;$('game-players').append(li)});$('my-items').replaceChildren();p.items.forEach((itemId,i)=>{const item=ITEM_MAP[itemId],btn=document.createElement('button');btn.className='item-card';btn.innerHTML='<span class="item-icon">'+(item?.icon||'✧')+'</span>'+(item?.name||itemId);btn.title=item.hint;btn.disabled=match.finished||!playerCanAct()||p.usedItem||busy;btn.onclick=()=>useItem(i);$('my-items').append(btn)});$('roll-btn').disabled=!playerCanAct();$('ability-btn').disabled=!playerCanAct()||p.ability<100;$('move-log').textContent=match.message;drawBoard();drawBattlePanels();drawNativeChessmen();drawMinimap();trackActivePawn()}
 const mapViewport={zoom:1.25,panX:0,panY:0,autoFollow:true};
 function trackActivePawn(){
  if(!match||!PATH.length)return;
