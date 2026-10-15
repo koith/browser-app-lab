@@ -13,6 +13,8 @@ on:
       - 'apps/4leaf/rog/dice-native-stage.css'
       - 'apps/4leaf/rog/dice-native-map-buttons.css'
       - 'apps/4leaf/rog/dice-native-map-buttons.js'
+      - 'apps/4leaf/rog/dice-native-room-buttons.js'
+      - 'apps/4leaf/rog/dice-native-room-buttons.css'
       - 'apps/4leaf/rog/town-native-room-hotspots.css'
       - 'apps/4leaf/rog/native-chattown-scale.css'
       - 'apps/4leaf/rog/original-chat-input.css'

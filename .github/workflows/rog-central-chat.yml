@@ -5,6 +5,7 @@ on:
       - 'apps/4leaf/rog/server/**'
       - 'apps/4leaf/rog/central-client.js'
       - 'apps/4leaf/rog/social-chat.js'
+      - 'apps/4leaf/rog/world-social.css'
       - 'apps/4leaf/rog/index.html'
       - 'apps/4leaf/rog/tests/central-browser.cjs'
       - '.github/workflows/rog-central-chat.yml'
