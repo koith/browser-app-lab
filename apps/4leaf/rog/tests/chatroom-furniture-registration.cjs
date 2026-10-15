@@ -104,6 +104,8 @@ const path=require('node:path');
   });
   const archive=fs.readdirSync(path.resolve(__dirname,'../original/ChatRoom'));
   console.log('CHATROOM EXTRACTED ORIGINAL FILES',JSON.stringify(archive));
+  console.log('MAINFRAME EXTRACTED ORIGINAL FILES',
+   JSON.stringify(fs.readdirSync(path.resolve(__dirname,'../original/MainFrame'))));
   console.log('ROOM4 AVATAR LABEL RAW GEOMETRY',JSON.stringify(avatarLabel));
   assert.ok(avatarLabel.baseline-avatarLabel.nameTop>=175&&
     avatarLabel.baseline-avatarLabel.nameTop<=190,
