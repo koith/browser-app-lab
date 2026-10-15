@@ -92,6 +92,24 @@ const path=require('node:path');
   assert.equal(actual.source,'room4t');
   assert.deepEqual(actual.bitmap,[115,103],'source foreground canvas is not pixel-stretched');
   assert.equal(actual.depth,80,'tables obscure rear actors but stay behind foreground seats');
+  const avatarLabel=await page.locator('.social-avatar.self').evaluate(el=>{
+   const frame=document.querySelector('#social-image-frame').getBoundingClientRect();
+   const zoom=frame.width/794;
+   const label=el.querySelector('.social-avatar-name');
+   const box=label.getBoundingClientRect();
+   const baseline=Number.parseFloat(el.style.top)*5.28;
+   return {baseline,nameTop:(box.top-frame.top)/zoom,
+    height:box.height/zoom,color:getComputedStyle(label).backgroundColor,
+    size:getComputedStyle(label).fontSize};
+  });
+  assert.ok(avatarLabel.baseline-avatarLabel.nameTop>=160&&
+    avatarLabel.baseline-avatarLabel.nameTop<=185,
+   'historical nickname label sits well above the source character head, not over the torso');
+  assert.equal(avatarLabel.color,'rgb(86, 107, 198)',
+   'screenshot-based blue nameplate, no invented gold self-highlight');
+  const archive=fs.readdirSync(path.resolve(__dirname,'../original/ChatRoom'));
+  console.log('CHATROOM EXTRACTED ORIGINAL FILES',JSON.stringify(archive));
+  console.log('ROOM4 AVATAR LABEL ALIGNMENT',JSON.stringify(avatarLabel));
   console.log('ROOM4 ARCHIVE SCREENSHOT FURNITURE REGISTRATION',JSON.stringify({...measured,rendered:actual}));
  }finally{await browser.close()}
 })().catch(e=>{console.error('ROOM4 REGISTRATION FAILED',e.stack||e);process.exit(1)});
