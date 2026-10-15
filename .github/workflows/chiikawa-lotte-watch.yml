@@ -3,6 +3,11 @@ on:
   schedule:
     - cron: '*/5 * 16 10 *'
       timezone: Asia/Seoul
+    - cron: '*/5 * 15 10 *'
+      timezone: Asia/Seoul
+  push:
+    paths:
+      - '.github/workflows/chiikawa-lotte-watch.yml'
   pull_request:
     paths:
       - '.github/workflows/chiikawa-lotte-watch.yml'
