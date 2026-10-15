@@ -1,46 +1,124 @@
 #!/usr/bin/env python3
-"""Fail-closed Naver Lotte Cinema Chiikawa reservation watcher."""
-import json, os, re, sys, urllib.parse, urllib.request
-from datetime import datetime, timezone
+"""Chiikawa Lotte reservation listing monitor.
+
+Never reports confirmed purchasability merely from product listing.
+GitHub Issue mentions/assignees are the delivery channel, not Gmail inbox.
+"""
+import os
+import re
+import subprocess
+import sys
+import urllib.request
 from html import unescape
 
-STORE="https://m.brand.naver.com/lottecinema"
-QUERIES=["먼작귀 롯데시네마 렌티큘러 띠부띠부","먼작귀 롯데시네마 C타입 커버 참"]
-PRODUCT=re.compile(r"(먼작귀|치이카와|ちいかわ)",re.I)
-TYPE=re.compile(r"(렌티큘러|띠부띠부|C타입|커버.?참)",re.I)
-SELL=re.compile(r"(예약구매|예약 구매|구매하기|바로구매|구매 가능)")
-NOTSELL=re.compile(r"(품절|판매예정|판매 예정|구매불가|구매 불가|SOLD OUT|일시품절)",re.I)
+STORE = "https://m.brand.naver.com/lottecinema"
+CATEGORY = STORE + "/category/4c667f4dac7145f3808a651aaade854b?cp=1"
+SOURCES = ("https://r.jina.ai/" + CATEGORY, "https://r.jina.ai/" + STORE)
+PRODUCT = re.compile(r"먼작귀|치이카와|ちいかわ", re.I)
+TARGETS = (
+    ("lenticular", re.compile(r"렌티큘러|띠부띠부|렌티.?씰", re.I), "렌티큘러 스티커"),
+    ("usb-charm", re.compile(r"C\s*타입|USB[\s-]*C|커버\s*참|케이블.{0,15}커버", re.I), "USB-C 커버 참"),
+)
+CARD = re.compile(
+    r"\[상품 상세보기\]\((https://(?:m\.)?brand\.naver\.com/lottecinema/products/\d+)\)\s*\*\*(.{2,250}?)\*\*",
+    re.S,
+)
+
+
 def fetch(url):
-    req=urllib.request.Request(url,headers={"User-Agent":"Mozilla/5.0 (compatible; ReservationAvailabilityCheck/1.0)","Accept-Language":"ko-KR,ko;q=0.9"})
-    with urllib.request.urlopen(req,timeout=18) as r:
-        return r.geturl(),r.read(2_000_000).decode("utf-8","replace")
+    req = urllib.request.Request(
+        url,
+        headers={
+            "User-Agent": "Mozilla/5.0 (compatible; ChiikawaAvailabilityWatcher/1.0)",
+            "Accept-Language": "ko-KR,ko;q=0.9",
+            "X-Cache-Tolerance": "45",
+        },
+    )
+    with urllib.request.urlopen(req, timeout=22) as response:
+        return response.geturl(), response.read(2_000_000).decode("utf-8", "replace")
+
+
+def parse_catalog(document):
+    results = {}
+    for card in CARD.finditer(document):
+        url, raw_title = card.groups()
+        title = re.sub(r"\s+", " ", unescape(raw_title)).strip()
+        if not PRODUCT.search(title):
+            continue
+        for kind, pattern, label in TARGETS:
+            if pattern.search(title):
+                results.setdefault(kind, {"kind": kind, "label": label, "title": title, "url": url})
+    return list(results.values())
+
+
 def check():
-    # Only verified product detail pages can trigger alerts, never search snippets.
-    candidates=set()
-    for q in QUERIES:
+    seen = {}
+    healthy = 0
+    for source in SOURCES:
         try:
-            url,html=fetch("https://search.shopping.naver.com/search/all?query="+urllib.parse.quote(q))
-            for m in re.finditer(r'https?[^"\\\s<>]+(?:brand\.naver\.com/lottecinema/products/|smartstore\.naver\.com/lottecinema/products/)[0-9]+',unescape(html).replace(chr(92) + '/', '/')):
-                candidates.add(m.group(0).replace("&amp;","&").split("?")[0])
-        except Exception as e: print("Discovery unavailable:",type(e).__name__,str(e)[:120],file=sys.stderr)
-    for url in sorted(candidates):
-        try:
-            final,html=fetch(url)
-            clean=unescape(re.sub(r'<[^>]*>',' ',html))
-            clean=re.sub(r'\s+',' ',clean)
-            if not (PRODUCT.search(clean) and TYPE.search(clean)): continue
-            if NOTSELL.search(clean): continue
-            if not SELL.search(clean): continue
-            # Avoid false positive from navigation/global copy: require product-specific
-            # structured data indicating availability and an actual buy CTA.
-            if not re.search(r'(?:InStock|https?://schema.org/InStock|"saleStatus"\s*:\s*"ON_SALE")',html,re.I): continue
-            return {"url":final,"matched":clean[:350],"checked_at":datetime.now(timezone.utc).isoformat()}
-        except Exception as e: print("Detail unavailable:",type(e).__name__,str(e)[:120],file=sys.stderr)
-    return None
-if __name__=="__main__":
-    result=check()
-    if result:
-        with open(os.environ.get("GITHUB_OUTPUT","/tmp/chiikawa-result"),"a") as f:
-            f.write("found=true\nproduct_url="+result["url"]+"\n")
-        print(json.dumps(result,ensure_ascii=False))
-    else: print("No independently verified purchasable product; no alert.")
+            resolved, body = fetch(source)
+            if "롯데시네마" not in body or "/products/" not in body:
+                print("SOURCE_INCOMPLETE", resolved, "chars", len(body), flush=True)
+                continue
+            healthy += 1
+            products = parse_catalog(body)
+            print("SOURCE_OK", resolved, "chars", len(body), "matching_categories", len(products), flush=True)
+            for item in products:
+                seen.setdefault(item["kind"], item)
+        except Exception as exc:
+            print("SOURCE_FAILED", source, type(exc).__name__, str(exc)[:160], file=sys.stderr, flush=True)
+    if healthy == 0:
+        raise RuntimeError("Both independent catalog reads unavailable or incomplete")
+    return list(seen.values())
+
+
+def send_issue_alerts(products):
+    """Require GitHub Token and use GitHub's own API through gh; retry on failures."""
+    if not products:
+        return
+    if not os.environ.get("GH_TOKEN"):
+        print("NO_GH_TOKEN: cannot send alerts", file=sys.stderr)
+        raise RuntimeError("Missing GH_TOKEN")
+    repo = os.environ.get("GITHUB_REPOSITORY", "koith/browser-app-lab")
+    existing = subprocess.run(
+        ["gh", "issue", "list", "--repo", repo, "--state", "all", "--limit", "300",
+         "--json", "title", "--jq", ".[].title"],
+        check=True, capture_output=True, text=True
+    ).stdout.splitlines()
+    for item in products:
+        issue_title = "[먼작귀 예약상품 등록 감지] " + item["label"]
+        if issue_title in existing:
+            print("ALREADY_ALERTED", issue_title, flush=True)
+            continue
+        body = (
+            "@koith 롯데시네마 브랜드스토어에 이번 먼작귀 예약 대상 상품이 "
+            "등록된 것을 감지했습니다.\n\n"
+            "상품: " + item["title"] + "\n"
+            "상품 링크: " + item["url"] + "\n\n"
+            "**주의: 상품 등록 감지이며 구매 버튼 활성화는 별도 확인이 필요합니다.**"
+        )
+        created = subprocess.run(
+            ["gh", "issue", "create", "--repo", repo, "--title", issue_title,
+             "--assignee", "koith", "--body", body],
+            check=True, capture_output=True, text=True
+        )
+        print("ALERT_CREATED", issue_title, created.stdout.strip(), flush=True)
+        existing.append(issue_title)
+
+
+def main():
+    try:
+        products = check()
+        if products:
+            print("TARGETS", [(p["kind"], p["url"]) for p in products], flush=True)
+            send_issue_alerts(products)
+        else:
+            print("HEALTHY_NO_TARGET_YET", flush=True)
+        return 0
+    except Exception as exc:
+        print("WATCH_FAILED", type(exc).__name__, str(exc)[:180], file=sys.stderr, flush=True)
+        return 2
+
+
+if __name__ == "__main__":
+    sys.exit(main())
