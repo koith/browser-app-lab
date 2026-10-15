@@ -7,11 +7,6 @@ on:
   workflow_run:
     workflows: ['Deploy static content to Pages']
     types: [completed]
-  pull_request:
-    branches: [main]
-    paths:
-      - 'apps/4leaf/rog/**'
-      - '.github/workflows/rog-chat-live.yml'
   workflow_dispatch:
 
 permissions:

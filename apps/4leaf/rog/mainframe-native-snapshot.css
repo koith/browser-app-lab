@@ -1,0 +1,25 @@
+/* MainFrame.pak snaplogo.png 161x51: direct matching against original
+   sky.jpg, chat.jpg and chat_ref.jpg locates it at (316,472) at 1x size.
+   These are genuine chroma-keyed sprites, not a screenshot overlay. */
+#sky .leaf-world-stage > .leaf-native-snaplogo,
+#rooms .social-image-frame.social-interior > .leaf-native-snaplogo{
+ position:absolute!important;
+ left:316px!important;top:472px!important;
+ width:161px!important;height:51px!important;
+ z-index:75!important;
+ pointer-events:none!important;
+ user-select:none!important;
+ image-rendering:auto;
+}
+/* The original 72x10 snapnumber atlas is used to render the live browser
+   clock independently of the preserved logo image, never a dated fake image. */
+#sky .leaf-world-stage > .leaf-native-snapnumber,
+#rooms .social-image-frame.social-interior > .leaf-native-snapnumber{
+ position:absolute!important;
+ left:378px!important;top:515px!important;
+ width:90px!important;height:10px!important;
+ z-index:76!important;
+ pointer-events:none!important;
+ user-select:none!important;
+ image-rendering:pixelated;
+}

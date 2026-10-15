@@ -424,3 +424,12 @@ MainStreet/back.png(1938×404)과 7개의 별도 알파/녹색 키 건물 PNG를
 - **REMOVED WEB FICTION:** 북·남 하이아칸 × 8개 지역 × 8개씩 생성하던 128개의 `leaf-public-*` 가상 채팅방은 원작 서버 데이터가 아니며, 진짜 방처럼 입장 버튼/정원/번호를 노출했다. 이제 실제 사용자가 개설했거나 중앙 서버에서 확인된 방만 보인다. 빈 지역은 빈 상태를 명시한다.
 - **INFERRED WEB UX:** 진짜 개설된 방은 여전히 두 축으로 드래그/방향키 탐색할 수 있다. 표시 좌표는 충돌 없는 화면상 임시 배치이며, 원본의 건물 좌표를 복원했다고 주장하지 않는다. 원본 확인 전 지형은 중립색으로 남긴다.
 - **QA:** `tests/world-chat.cjs`에서 가상방 0개, 잘못된 `bgtile` 비노출, 실제 방 생성·입장·퇴장·카메라 복귀·원본 ChatRoom 패널/좌석을 검증한다. `tests/central-browser.cjs`는 독립 브라우저 2개에서 서버가 개설한 공개방으로 입장해 실제 인원·채팅을 검사한다.
+
+
+## 2026-10-15 실제 채팅방 사진 2장과 room4t 원본 탁자 정량 복원
+
+- **VERIFIED ARCHIVED SCREENSHOTS:** `apps/4leaf/assets/chat_ref.jpg`와 `chat.jpg` (모두 794×528)은 `original/ChatRoom/room4.png` 목조 실내를 보여준다. 사진 하단 클라이언트 시계는 **04.02.11**로 표시되어 있어 2004-02-11 캡처로 해석하는 것이 맞다. 2000/2002년의 다른 버전 화면과 혼동하지 않는다.
+- **VERIFIED ARCHIVE:** 별도 탁자 전경 `original/ChatRoom/room4t.png`는 **115×103**이고 빨간 크로마키 매트가 포함돼 있다. 이전 `social-chat.js`는 (318,345)에 **157×143**으로 확대했기 때문에 원작의 탁자가 잘못된 위치와 배율로 표시됐다.
+- **QUANTIFIED PHOTO REGISTRATION:** `tests/chatroom-furniture-registration.cjs`는 Chromium Canvas에서 원본 알파/빨강 마스킹 픽셀 1,011개를 표본 추출하고, 실제 JPEG 두 장과 평행 이동·1.0/1.12/1.24/1.36 배율 대조를 수행한다. 양쪽 역사 사진 모두 정확히 **좌상단 (427,425), 크기 (115,103), 1.0배**에서 최소 평균 RGB 클립오차를 나타냈다. 이 좌표로 독립 원본 PNG를 표준 ChatRoom 캐릭터/가구 깊이 레이어에 렌더링한다. 최종 사진 픽셀은 게임 화면의 출력으로 사용하지 않는다.
+- **INFERRED FROM SCREENSHOT:** `ROOM_LAYOUTS[4].seats`는 사진에 보이는 11명 캐릭터의 발 위치를 원본 794×528 좌표계로 근사한 것이고, 12번째 슬롯은 웹 복원 편의 위치다. 이용자 실제 좌석의 정확한 엔진 앵커/최대 정원 증거는 아니다. 닉네임 이름표의 높이·푸른색 또한 사진에 근거한 추정 CSS일 뿐 원본 별도 비트맵이 추출된 것이 아니다.
+- **VERIFIED WEBAPP TESTS:** Chromium 원본 스프라이트 정합 테스트는 실시간 렌더 `room4t` 캔버스의 위치·크기·원본 해상도와 깊이 80, 소스 좌석 순간이동/이름표를 검사한다. PWA `v38`은 원본 WorldMap 6스프라이트, ChatTown 2배경·표지 버튼, ChatRoom 6배경·3전경 및 실제 Registry 캐릭터를 초기 오프라인 캐시에 추가했고 별도 `native-offline-cache.cjs` 검증 대상으로 삼는다.
