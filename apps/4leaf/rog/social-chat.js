@@ -413,12 +413,12 @@
  }
  function updateHeader(){
   const name=$('social-location-title');
-  if(name)name.textContent=state.view==='board'?'레코르다블 · 기사단 게시판':state.view==='room'?('Chatting Room · '+(currentRoom()?.name||'채팅방')):
+  if(name)name.textContent=state.view==='knights'?'레코르다블 · 지역 선택':state.view==='board'?'레코르다블 · '+(state.knightDistrict||'기사단')+' 게시판':state.view==='room'?('Chatting Room · '+(currentRoom()?.name||'채팅방')):
     state.view==='directory'?(state.district+' · 채팅방 목록'):
     (REGIONS[state.region]?.title||'하이아칸')+' · 채팅 지역';
   const bread=$('social-breadcrumb');
-  if(bread)bread.textContent=state.view==='board'?'RECORDABLE › 기사단 게시판':(REGIONS[state.region]?.title||'하이아칸')+(state.view==='town'?'':' › '+state.district)+(state.view==='room'?' › '+(currentRoom()?.name||''): '');
-  const back=$('social-back');if(back)back.textContent=state.view==='board'?'← 월드맵':state.view==='room'?'← 채팅방 목록':state.view==='directory'?'← 채팅 지역':'← 월드맵';
+  if(bread)bread.textContent=state.view==='knights'?'RECORDABLE':state.view==='board'?'RECORDABLE › '+(state.knightDistrict||'기사단')+' › 게시판':(REGIONS[state.region]?.title||'하이아칸')+(state.view==='town'?'':' › '+state.district)+(state.view==='room'?' › '+(currentRoom()?.name||''): '');
+  const back=$('social-back');if(back)back.textContent=state.view==='board'?'← 기사단 지역':state.view==='room'?'← 채팅방 목록':state.view==='directory'?'← 채팅 지역':'← 월드맵';
   const note=$('chatroom-name');if(note)note.textContent=state.view==='board'?'BULLETIN CHANNEL':state.view==='room'?(currentRoom()?.name||'CHATTING ROOM'):state.view==='town'?'TOWN CHANNEL':'ROOM LIST';
  }
  function roomTemplate(background){return './original/ChatRoom/room'+background+'.png'}
@@ -537,15 +537,38 @@
    catch{return []}
  }
  function saveBoardPosts(posts){try{localStorage.setItem('leaf_recordable_posts_v1',JSON.stringify(posts.slice(-100)))}catch{}}
- function openBoard(){
+ function openKnights(){
+  state.view='knights';state.roomId=null;
+  if(sceneInit)render();
+ }
+ function renderKnightTown(frame){
+  frame.className='social-image-frame social-knight-town';
+  frame.style.backgroundImage='url("./original/KnightTown/knightback.png")';
+  for(const sign of KNIGHT_SIGNS){
+   const button=document.createElement('button');
+   button.type='button';button.className='knight-sign-hotspot';
+   button.dataset.asset=sign.asset;button.dataset.area=sign.name;
+   button.title=sign.name+' · 기사단 지역';button.setAttribute('aria-label',sign.name+' 기사단 지역');
+   button.style.cssText='left:'+sign.x+'px;top:'+sign.y+'px;width:142px;height:74px;';
+   button.style.setProperty('--knight-sign-sheet','url("./original/KnightTown/'+sign.asset+'.png")');
+   button.onclick=()=>openBoard(sign.name);
+   frame.append(button);
+  }
+ }
+ // Native source proves six destinations, not the lost 2000s server protocol.
+ // The retained local recordable bulletin is an explicitly provisional
+ // functional destination rather than a fabricated online community.
+ function openBoard(area=null){
    state.region='north';state.view='board';state.roomId=null;
+   state.knightDistrict=KNIGHT_SIGNS.some(r=>r.name===area)?area:null;
    if(sceneInit)render();
  }
  function renderBulletin(frame){
    frame.className='social-image-frame social-bulletin';
    frame.style.backgroundImage='url("./original/WorldMap/worldmapback.png")';
-   frame.innerHTML='<section class="recordable-board"><header><div><b>RECORDABLE</b><small>레코르다블 · 기사단 게시판</small></div><button id="recordable-create">+ 글쓰기</button></header><div class="recordable-list"><div class="recordable-columns"><b>NO.</b><b>제목</b><b>작성자</b><b>작성일</b></div><div id="recordable-rows"></div></div><footer>게시글은 브라우저에 보관되며 연결된 상대방과 공유됩니다. 원작 운영 게시판과는 별개입니다.</footer></section>';
+   frame.innerHTML='<section class="recordable-board"><header><div><b>RECORDABLE</b><small>레코르다블 · <span id="recordable-knight-area"></span> · 임시 게시판</small></div><button id="recordable-create">+ 글쓰기</button></header><div class="recordable-list"><div class="recordable-columns"><b>NO.</b><b>제목</b><b>작성자</b><b>작성일</b></div><div id="recordable-rows"></div></div><footer>게시글은 브라우저에 보관되며 연결된 상대방과 공유됩니다. 원작 운영 게시판과는 별개입니다.</footer></section>';
    $('recordable-create').onclick=createBoardPost;
+   const districtLabel=$('recordable-knight-area');if(districtLabel)districtLabel.textContent=state.knightDistrict||'기사단';
    renderBoardList();
  }
  function renderBoardList(){
