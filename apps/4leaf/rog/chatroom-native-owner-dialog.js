@@ -114,6 +114,7 @@
   };
   privacy.addEventListener('change',togglePrivate);
   password?.addEventListener('input',()=>{
+   password.setCustomValidity('');
    if(password.value&&visibility()!=='private'){
     const radio=privacy.querySelector('[value="private"]');
     radio.checked=true;togglePrivate();
