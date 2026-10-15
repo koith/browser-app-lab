@@ -7,14 +7,17 @@
  // MainStreet PAK contains seven independent chroma-keyed building sprites.
  // The location coordinates are currently reconstructed against back.png;
  // original click-map coordinates are not yet decoded from the executable.
+ // Native 1938×404 backdrop registration: correlate each non-transparent
+ // source sprite against MainStreet/back.png, NOT an estimated screen crop.
+ // Normalized template similarities are 0.9726–0.9928 (2026-10-15).
  const shops=[
-  {id:'fashions',asset:'dress',x:182,y:114,w:230,h:196,title:'댄디캣 클래식 · 드레스샵',category:'의상'},
-  {id:'sweet',asset:'event',x:449,y:96,w:190,h:229,title:'프레쉬센트 · 이벤트홀',category:'이벤트'},
-  {id:'magic',asset:'card',x:699,y:63,w:183,h:266,title:'매직카덴 · 카드샵',route:'shop'},
-  {id:'court',asset:'hair',x:915,y:104,w:199,h:178,title:'심리펙 · 헤어샵',category:'헤어'},
-  {id:'gallery',asset:'accessory',x:1194,y:151,w:152,h:136,title:'액세서리 · 잡화점',category:'잡화'},
-  {id:'dandy',asset:'dandymodern',x:1328,y:92,w:212,h:222,title:'댄디캣 · 드레스샵',category:'의상'},
-  {id:'office',asset:'office',x:1591,y:76,w:215,h:238,title:'네나루하 마법학원',category:'지역 시설'}
+  {id:'fashions',asset:'dress',x:1102,y:135,w:230,h:196,title:'댄디캣 클래식 · 드레스샵',category:'의상'},
+  {id:'sweet',asset:'event',x:354,y:39,w:190,h:229,title:'프레쉬센트 · 이벤트홀',category:'이벤트'},
+  {id:'magic',asset:'card',x:633,y:63,w:183,h:266,title:'매직카덴 · 카드샵',route:'shop'},
+  {id:'court',asset:'hair',x:164,y:128,w:199,h:178,title:'실키필 · 헤어샵',category:'헤어'},
+  {id:'gallery',asset:'accessory',x:1765,y:207,w:152,h:136,title:'캐즈팝 · 잡화점',category:'잡화'},
+  {id:'dandy',asset:'dandymodern',x:1315,y:157,w:212,h:222,title:'댄디캣 모던 · 드레스샵',category:'의상'},
+  {id:'office',asset:'office',x:884,y:7,w:215,h:238,title:'네나루하 마법학원',category:'지역 시설'}
  ];
  const state={viewport:null,track:null,x:WIDTH/2,scale:1,down:null,clientScale:1};
  function render(){
@@ -26,15 +29,14 @@
   const top=(vh-HEIGHT*scale)/2;
   state.track.style.transform='translate3d('+left.toFixed(2)+'px,'+top.toFixed(2)+'px,0) scale('+scale+')';
   state.clientScale=scale;
-  const marker=$('street-area-label');if(marker)marker.textContent=state.x<645?'거리 왼쪽 · 패션 & 상점':state.x<1292?'거리 중앙 · 매직카덴':'거리 오른쪽 · 켈티카';
+  const marker=$('street-area-label');if(marker)marker.textContent=state.x<645?'거리 왼쪽 · 실키필 / 프레쉬센트':state.x<1292?'거리 중앙 · 매직카덴 / 마법학원':'거리 오른쪽 · 댄디캣 / 캐즈팝';
  }
  function pan(dx){state.x=Math.max(323,Math.min(1615,state.x+dx));render()}
  function enterWorld(){window.__ROG_TEST__?.go('sky')}
  function selectShop(id){
   const shop=shops.find(s=>s.id===id);if(!shop)return;
   if(shop.route==='shop')window.__ROG_TEST__?.go('shop');
-  else if(['fashions','dandy','office','sweet','gallery'].includes(id))showShopPlaceholder(shop);
-  else if(id==='court')showShopPlaceholder(shop);
+  else showShopPlaceholder(shop);
  }
  function showShopPlaceholder(shop){
   // The building art and its destination label are original data.
