@@ -54,6 +54,62 @@ const assert=require('node:assert/strict');
    'room selector is fully visible rather than cropped');
   assert.ok(nativeSelect.create>35&&nativeSelect.join>35,
    'native CREATE/JOIN image hotspots are interactive');
+  // Original Map/mapbutton.png is an 880×210 source atlas. Its real first
+  // CREATE/JOIN frames match the unchanged Map/mapback.png pixels at
+  // (28,317) and (334,312), not approximated screenshot placements.
+  await page.waitForFunction(()=>window.__LEAF_DICE_MAP_BUTTONS__?.getState().loaded==='true'
+   &&window.__LEAF_DICE_MAP_BUTTONS__?.getState().list==='true',null,{timeout:16000});
+  const originalMapButtons=await page.evaluate(async()=>{
+   const state=window.__LEAF_DICE_MAP_BUTTONS__.getState();
+   const makeImage=async(path)=>{const img=new Image();img.src=path;await img.decode();return img};
+   const [atlas,back]=await Promise.all([
+    makeImage('./original/Map/mapbutton.png'),makeImage('./original/Map/mapback.png')
+   ]);
+   const ctx=(img)=>{const c=document.createElement('canvas');c.width=img.width;c.height=img.height;
+    const g=c.getContext('2d',{willReadFrequently:true});g.drawImage(img,0,0);return g};
+   const pixels=ctx(atlas).getImageData(0,0,atlas.width,atlas.height).data;
+   const backdrop=ctx(back).getImageData(0,0,back.width,back.height).data;
+   const match=state.buttons.map(b=>{
+    let total=0,n=0;
+    const sourceY=b.id==='lobby-create'?63:136;
+    for(let y=0;y<b.h;y+=2)for(let x=0;x<b.w;x+=2){
+     const p=((sourceY+y)*atlas.width+x)*4;
+     const r=pixels[p],g=pixels[p+1],blue=pixels[p+2];
+     if(r<=60&&g>=225&&blue<=70)continue;
+     const q=((b.y+y)*back.width+b.x+x)*4;
+     for(let k=0;k<3;k++){total+=Math.abs(pixels[p+k]-backdrop[q+k]);n++}
+    }
+    return {...b,meanError:total/n,compared:n};
+   });
+   const frame=getComputedStyle(document.getElementById('dice-native-stage')).getPropertyValue('--native-map-row');
+   return {source:[atlas.naturalWidth,atlas.naturalHeight],
+    listFrame:frame.includes('data:image/png;base64,'),match};
+  });
+  assert.deepEqual(originalMapButtons.source,[880,210],'actual source map button atlas is loaded');
+  assert.deepEqual(originalMapButtons.match.map(({x,y,w,h})=>[x,y,w,h]),[
+   [28,317,220,72],[334,312,183,72]
+  ],'both original CREATE/JOIN hitboxes align to Map/mapback source pixels');
+  assert.ok(originalMapButtons.match.every(b=>b.meanError<23&&b.compared>3000),
+   'original button frame pixels correlate with native mapback: '+JSON.stringify(originalMapButtons.match));
+  assert.ok(originalMapButtons.listFrame,'real 402×23 maplist row frames are composed from source');
+  assert.equal(await page.locator('#lobby-join .dice-original-map-button-art').getAttribute('data-frame'),'3',
+   'empty room list draws original disabled JOIN state, not a fake text button');
+  await page.locator('#lobby-create').hover();
+  const nativeHover=await page.locator('#lobby-create .dice-original-map-button-art').evaluate(canvas=>{
+   const data=canvas.getContext('2d',{willReadFrequently:true})
+    .getImageData(0,0,canvas.width,canvas.height).data;
+   let opaque=0,leakedGreen=0;
+   for(let i=0;i<data.length;i+=4){
+    if(data[i+3]<120)continue;
+    opaque++;
+    if(data[i]<=60&&data[i+1]>=225&&data[i+2]<=70)leakedGreen++;
+   }
+   return {frame:canvas.dataset.frame,opaque,leakedGreen};
+  });
+  assert.equal(nativeHover.frame,'1','hover selects actual second CREATE sprite frame');
+  assert.ok(nativeHover.opaque>1000,'native hover frame contains real source bitmap pixels');
+  assert.equal(nativeHover.leakedGreen,0,'original chroma green does not obscure mapback');
+
   const sourceRoomInfo=await page.locator('#lobby-room-info>div').evaluateAll(els=>els.map(el=>({
    field:el.dataset.field,x:parseFloat(getComputedStyle(el).left),
    y:parseFloat(getComputedStyle(el).top),width:parseFloat(getComputedStyle(el).width)
