@@ -182,11 +182,11 @@
      hit.addEventListener('click',()=>clickRegion(region.id));
      stage.append(hit);
    }
-   registerNativeNotices(stage);
    const controls=document.createElement('div');controls.className='world-map-controls';
    controls.innerHTML='<button id="world-zoom-out" aria-label="월드맵 축소">−</button><span id="world-zoom-label">100%</span><button id="world-zoom-in" aria-label="월드맵 확대">＋</button><button id="world-zoom-reset" aria-label="월드맵 전체보기">⌂</button>';
    const title=document.createElement('div');title.className='world-map-caption';title.textContent='4LEAF WORLD MAP　·　원본 월드맵';
    viewport.append(stage);scene.append(viewport,controls,title);
+   registerNativeNotices(stage);
    ref.viewport=viewport;ref.stage=stage;
    $('world-zoom-out').onclick=()=>zoom(-.25);
    $('world-zoom-in').onclick=()=>zoom(.25);
