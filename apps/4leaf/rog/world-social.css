@@ -487,3 +487,37 @@ body>.social-modal .recordable-article p{white-space:pre-wrap;overflow-wrap:anyw
  padding:3px 6px;min-width:26px;min-height:23px;cursor:pointer;
  color:#f8f2dc;border:2px ridge #aec0d8;background:#3e5384
 }
+
+
+/* Native 75×141 Registry art is tall but its painted torso is narrow. Earlier
+   HTML buttons stretched the hit target to 80×147, which intercepted clicks
+   on neighboring avatars whenever source room seats overlap vertically.
+   Preserve the real 75×141 visible sprite; restrict the clickable button
+   footprint to its body, retaining its original baseline and depth order. */
+#rooms .social-interior .social-avatar{
+ width:58px!important;
+ height:94px!important;
+ transform:translate(-50%,-80%)!important;
+ overflow:visible!important;
+ transition:none!important;
+}
+#rooms .social-interior .social-avatar img{
+ display:block;
+ flex:0 0 141px;
+ width:75px!important;
+ min-width:75px;
+ height:141px!important;
+ min-height:141px;
+ max-height:none!important;
+ object-fit:contain;
+ object-position:center bottom;
+ pointer-events:none!important;
+}
+#rooms .social-interior .social-avatar-name{
+ top:-54px!important;
+ bottom:auto;
+ pointer-events:none!important;
+}
+#rooms .social-interior .social-avatar .social-speech{
+ pointer-events:none!important;
+}
