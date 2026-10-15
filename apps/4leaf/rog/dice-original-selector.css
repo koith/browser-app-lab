@@ -1,0 +1,107 @@
+/* ARCHIVE-VERIFIED: original/IMG/selector.png is a 222x157 source
+   sprite with four small buttons at left edge: inspect/circular arrow/
+   side arrow/star. We crop those FOUR frames onto actual keyboard-clickable
+   buttons. Their original game command mapping is not recovered; map them
+   only to existing safe UI actions without new fictional gameplay rules. */
+#app:not(.app-classic-dice) #dice-original-selector{display:none!important}
+#app.app-classic-dice #dice-client-sidebar{
+ position:relative!important;
+}
+#app.app-classic-dice #dice-native-party{
+ width:calc(100% - 29px)!important;
+ max-width:none!important;
+ margin-left:29px!important;
+}
+#app.app-classic-dice #dice-original-selector{
+ position:absolute;
+ z-index:4;
+ left:0;bottom:3px;
+ box-sizing:border-box;
+ width:29px;height:139px;
+ display:flex;flex-direction:column;
+ justify-content:space-between;align-items:center;
+ gap:0;
+ padding:0;
+ background:transparent;
+}
+#app.app-classic-dice #dice-original-selector .dice-source-tool,
+#app.app-classic-dice #dice-original-selector #dice-items-toggle{
+ box-sizing:border-box;
+ position:relative!important;
+ flex:0 0 29px!important;
+ display:block!important;
+ width:29px!important;min-width:29px!important;max-width:29px!important;
+ height:29px!important;min-height:29px!important;max-height:29px!important;
+ padding:0!important;margin:0!important;
+ border:0!important;border-radius:0!important;
+ outline:none;
+ background-image:url('./original/IMG/selector.png')!important;
+ background-repeat:no-repeat!important;
+ background-size:222px 157px!important;
+ box-shadow:none!important;
+ color:transparent!important;text-shadow:none!important;
+ font-size:0!important;line-height:0!important;
+ overflow:visible;
+ cursor:pointer;
+}
+#app.app-classic-dice #dice-inspect-tool{background-position:0 -24px!important}
+#app.app-classic-dice #dice-next-tool{background-position:0 -55px!important}
+#app.app-classic-dice #dice-items-toggle{background-position:0 -87px!important}
+#app.app-classic-dice #dice-ability-tool{background-position:0 -118px!important}
+#app.app-classic-dice #dice-original-selector .dice-source-tool:is(:hover,:focus-visible),
+#app.app-classic-dice #dice-original-selector #dice-items-toggle:is(:hover,:focus-visible){
+ filter:brightness(1.19);
+ outline:1px solid #fdf4bc!important;
+ outline-offset:-2px!important;
+}
+#app.app-classic-dice #dice-original-selector .dice-source-tool:disabled{
+ opacity:.53;
+ cursor:default;
+ filter:saturate(.7);
+}
+#app.app-classic-dice #dice-original-selector #dice-items-toggle[aria-expanded="true"]{
+ outline:1px solid #fff4b1!important;
+ outline-offset:-2px;
+}
+#app.app-classic-dice #dice-original-selector #dice-item-count{
+ position:absolute;
+ display:block;
+ right:0;bottom:0;
+ min-width:9px;
+ padding:0 1px;
+ background:#2f448d;
+ color:#ecf5c9!important;
+ font:bold 9px/10px Arial,Gulim,sans-serif!important;
+ border-radius:1px;
+ text-align:center;
+ text-shadow:1px 1px #192449;
+ pointer-events:none;
+}
+#app.app-classic-dice #dice-native-party button.dice-chessman-slot.selected{
+ border-bottom-color:#f2e2b1;
+ box-shadow:inset 0 0 0 1px #f6edbc88;
+}
+@media(max-width:650px){
+ #app.app-classic-dice #dice-original-selector{
+  width:25px;height:98px;
+  bottom:2px;
+ }
+ #app.app-classic-dice #dice-original-selector .dice-source-tool,
+ #app.app-classic-dice #dice-original-selector #dice-items-toggle{
+  flex-basis:23px!important;
+  width:23px!important;min-width:23px!important;max-width:23px!important;
+  height:23px!important;min-height:23px!important;max-height:23px!important;
+  background-size:178px 126px!important;
+ }
+ #app.app-classic-dice #dice-inspect-tool{background-position:0 -19px!important}
+ #app.app-classic-dice #dice-next-tool{background-position:0 -44px!important}
+ #app.app-classic-dice #dice-items-toggle{background-position:0 -69px!important}
+ #app.app-classic-dice #dice-ability-tool{background-position:0 -94px!important}
+ #app.app-classic-dice #dice-native-party{
+  width:calc(100% - 25px)!important;
+  margin-left:25px!important;
+ }
+ #app.app-classic-dice #dice-original-selector #dice-item-count{
+  font-size:8px!important;line-height:9px!important;
+ }
+}
