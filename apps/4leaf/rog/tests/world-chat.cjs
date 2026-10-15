@@ -754,6 +754,8 @@ const path=require('path');
  assert.equal(await host.locator('#social-online-count').textContent(),'2명');
  assert.ok(await host.locator('#social-original-userlist').isVisible(),'original participant list header remains visible during real chat');
  assert.equal(await guest.locator('#social-online-count').textContent(),'2명');
+ assert.equal(await host.locator('#social-native-user-count').textContent(),'2명','source participant badge follows true host/guest peers');
+ assert.equal(await guest.locator('#social-native-user-count').textContent(),'2명','remote 2-user roster count updates without fabricated members');
  await host.locator('#message').fill('원본 하이아칸 실시간 채팅 테스트');
  await host.locator('#message').press('Enter');
  await guest.waitForFunction(()=>document.querySelector('#chat-log').textContent.includes('원본 하이아칸 실시간 채팅 테스트'),null,{timeout:7000});
