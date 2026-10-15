@@ -67,7 +67,9 @@ const path=require('path');
   await page.evaluate(()=>{
    const m=window.__ROG_TEST__.getMatch();
    m.players[0].ability=0;
-   m.players[0].items.push('charge25');
+   // Native matches start with a random real inventory. Isolate one
+   // genuinely usable source item for deterministic consumption QA.
+   m.players[0].items=['charge25'];
    window.__ROG_TEST__.drawGame();
   });
   assert.equal(await page.locator('#dice-item-count').textContent(),'1','real item count is bound to actual match inventory');
