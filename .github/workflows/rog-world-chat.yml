@@ -5,6 +5,8 @@ on:
       - 'apps/4leaf/rog/world-map.js'
       - 'apps/4leaf/rog/street-world.js'
       - 'apps/4leaf/rog/shop-native.js'
+      - 'apps/4leaf/rog/cardshop-native-controls.js'
+      - 'apps/4leaf/rog/cardshop-native-controls.css'
       - 'apps/4leaf/rog/dice-native-stage.js'
       - 'apps/4leaf/rog/dice-native-stage.css'
       - 'apps/4leaf/rog/dice-native-map-buttons.css'
