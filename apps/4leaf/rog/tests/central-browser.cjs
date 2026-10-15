@@ -26,7 +26,8 @@ const BASE='http://127.0.0.1:8765/',API='http://127.0.0.1:8877';
   await host.locator('#social-modal button[type="submit"]').click();
   await host.waitForFunction(()=>window.__LEAF_SOCIAL__.getState().view==='room',{timeout:15000});
   const publicRoom=await host.evaluate(()=>window.__LEAF_SOCIAL__.getState().roomId);
-  await guest.waitForFunction(id=>document.querySelector('.social-directory-row[data-room="'+id+'"]'),publicRoom,{timeout:15000});
+  await guest.waitForFunction(id=>document.querySelector('.social-directory-row[data-room="'+id+'"] .social-room-users')?.textContent==='1/12명',
+   publicRoom,{timeout:15000});
   assert.equal(await guest.locator('.social-directory-row[data-room="'+publicRoom+'"] .social-room-users').textContent(),'1/12명',
    'central API occupancy is real, not a fake preset count');
   await guest.locator('.social-directory-row[data-room="'+publicRoom+'"]').evaluate(el=>el.click());
