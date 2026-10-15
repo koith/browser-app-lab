@@ -41,6 +41,7 @@ on:
       - 'apps/4leaf/rog/tests/dice-chessmen-hud.cjs'
       - 'apps/4leaf/rog/tests/registry-native-portraits.cjs'
       - 'apps/4leaf/rog/tests/world-chat.cjs'
+      - 'apps/4leaf/rog/tests/chatroom-native-furniture-sizes.cjs'
       - 'apps/4leaf/rog/tests/social-network.cjs'
       - 'apps/4leaf/rog/lobby-ui.js'
       - 'apps/4leaf/rog/lobby.css'
@@ -86,6 +87,8 @@ jobs:
           fi
       - name: Register original 161x51 MainFrame 4LEAF logo across WorldMap and ChatRoom archive captures
         run: node apps/4leaf/rog/tests/mainframe-snaplogo-registration.cjs
+      - name: Verify room3/5 source-sized original foreground PNGs and instantaneous character seat placement
+        run: node apps/4leaf/rog/tests/chatroom-native-furniture-sizes.cjs
       - name: Quantify genuine ChatRoom room4 table placement from the 2004-02-11 screenshot
         run: node apps/4leaf/rog/tests/chatroom-furniture-registration.cjs
       - name: Verify original world, regions, rooms, messages and mobile
