@@ -28,6 +28,8 @@ on:
       - 'apps/4leaf/rog/chatroom-native-talkbox.css'
       - 'apps/4leaf/rog/chatroom-native-exit.css'
       - 'apps/4leaf/rog/index.html'
+      - 'apps/4leaf/rog/dice-native-player-portraits.css'
+      - 'apps/4leaf/rog/tests/registry-native-portraits.cjs'
       - 'apps/4leaf/rog/tests/world-chat.cjs'
       - 'apps/4leaf/rog/tests/social-network.cjs'
       - 'apps/4leaf/rog/lobby-ui.js'
@@ -69,6 +71,8 @@ jobs:
           fi
       - name: Verify original world, regions, rooms, messages and mobile
         run: node apps/4leaf/rog/tests/world-chat.cjs
+      - name: Verify live source Registry chroma key, true side player portraits, game turns and mobile
+        run: node apps/4leaf/rog/tests/registry-native-portraits.cjs
       - name: Verify original TOWN SELECT is used solely for dice game channels
         run: node apps/4leaf/rog/tests/dice-channel.cjs
       - name: Verify original ChatRoom furniture survives transient CDN HTTP 503
