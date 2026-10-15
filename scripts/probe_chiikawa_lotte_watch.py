@@ -13,6 +13,21 @@ for url in urls:
     except Exception as e:
         print("NETWORK_FAILED",urllib.parse.urlparse(url).netloc,type(e).__name__,str(e)[:200])
 print("TARGET_FOUND",repr(check()))
+alternative_urls=[
+ "https://r.jina.ai/https://m.brand.naver.com/lottecinema",
+ "https://r.jina.ai/https://search.shopping.naver.com/search/all?query="+urllib.parse.quote(QUERIES[0]),
+ "https://www.google.com/search?q="+urllib.parse.quote('site:brand.naver.com/lottecinema/products 먼작귀'),
+ "https://www.bing.com/search?q="+urllib.parse.quote('롯데시네마 먼작귀 네이버 예약 상품'),
+ "https://search.naver.com/search.naver?query="+urllib.parse.quote(QUERIES[0]),
+ "https://smartstore.naver.com/lottecinema",
+ "https://m.smartstore.naver.com/lottecinema"
+]
+for url in alternative_urls:
+ try:
+  final,html=fetch(url)
+  print("ALTERNATIVE_OK",urllib.parse.urlparse(final).netloc,"chars",len(html),"product_links",html.count("/products/"),"sample",repr(html[:160]))
+ except Exception as e:
+  print("ALTERNATIVE_FAILED",urllib.parse.urlparse(url).netloc,type(e).__name__,str(e)[:160])
 if good<2:
     print("FAIL: Cannot reliably query Naver store/search from runner.",file=sys.stderr)
     sys.exit(2)
