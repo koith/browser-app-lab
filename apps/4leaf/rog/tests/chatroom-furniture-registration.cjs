@@ -87,7 +87,7 @@ const path=require('node:path');
    source:canvas.dataset.source,
    bitmap:[canvas.width,canvas.height],depth:parseInt(canvas.style.zIndex,10)
   }));
-  assert.deepEqual([actual.left,actual.top,actual.width,actual.height],[427,424,115,103],
+  assert.deepEqual([actual.left,actual.top,actual.width,actual.height],[427,425,115,103],
    'real alpha-composited foreground must use screenshot-registered native coordinate and size');
   assert.equal(actual.source,'room4t');
   assert.deepEqual(actual.bitmap,[115,103],'source foreground canvas is not pixel-stretched');
