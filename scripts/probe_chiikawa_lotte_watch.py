@@ -25,7 +25,7 @@ alternative_urls=[
 for url in alternative_urls:
  try:
   final,html=fetch(url)
-  print("ALTERNATIVE_OK",urllib.parse.urlparse(final).netloc,"chars",len(html),"product_links",html.count("/products/"),"sample",repr(html[:160]))
+  print("ALTERNATIVE_OK",urllib.parse.urlparse(final).netloc,"chars",len(html),"product_links",html.count("/products/"),"sample",repr(html[:3000] if "r.jina.ai/https://m.brand.naver.com/lottecinema" in url else html[:160]))
  except Exception as e:
   print("ALTERNATIVE_FAILED",urllib.parse.urlparse(url).netloc,type(e).__name__,str(e)[:160])
 if good<2:
