@@ -1,0 +1,55 @@
+/* Original Map/mapbutton.png (880×210) packed four 220×72 CREATE frames
+   from source y=63 and four 183×72 JOIN frames from source y=136.
+   Both were aligned by pixel correlation with Map/mapback.png: CREATE at
+   (28,317) 0.99131; JOIN at (334,312) 0.99089. */
+#lobby .dice-native-stage #lobby-create{
+ left:28px!important;top:317px!important;
+ width:220px!important;height:72px!important;
+ overflow:hidden;padding:0!important;
+}
+#lobby .dice-native-stage #lobby-join{
+ left:334px!important;top:312px!important;
+ width:183px!important;height:72px!important;
+ overflow:hidden;padding:0!important;
+}
+#lobby .dice-native-stage .dice-original-map-button-art{
+ display:block;position:absolute;left:0;top:0;
+ width:100%;height:100%;padding:0;margin:0;
+ image-rendering:auto;pointer-events:none;
+}
+#lobby .dice-native-stage[data-map-button-ready="true"] #lobby-create:is(:hover,:focus-visible),
+#lobby .dice-native-stage[data-map-button-ready="true"] #lobby-join:is(:hover,:focus-visible){
+ background:transparent!important;
+ outline:none!important;border:0!important;box-shadow:none!important;
+}
+#lobby .dice-native-stage:not([data-map-button-ready="true"]) #lobby-create:is(:hover,:focus-visible),
+#lobby .dice-native-stage:not([data-map-button-ready="true"]) #lobby-join:is(:hover,:focus-visible){
+ outline:2px solid #ffefb5!important;outline-offset:-2px;
+}
+/* The extracted 402×77 Map/maplist.png has complete 402×23 original
+   selected/unselected listing rows. Do not repaint them as CSS gradients. */
+#lobby .dice-native-stage[data-map-list-ready="true"] .lobby-room-list .lobby-room-row{
+ background-image:var(--native-map-row)!important;
+ background-position:left top!important;
+ background-size:402px 23px!important;
+ background-repeat:no-repeat!important;
+ background-color:transparent!important;
+ border-color:transparent!important;
+}
+#lobby .dice-native-stage[data-map-list-ready="true"] .lobby-room-list .lobby-room-row:is(.selected,:hover,:focus-visible){
+ background-image:var(--native-map-row-active)!important;
+ background-color:transparent!important;
+ border-color:transparent!important;
+}
+/* An empty original ROOM SELECT frame is just its authentic blank slate.
+   Keep one readable local-only empty-state line rather than a fake modal. */
+#lobby .dice-native-stage .lobby-room-list .lobby-room-empty{
+ border:0!important;box-shadow:none!important;
+ background:transparent!important;
+ padding:8px 5px!important;margin:5px!important;
+ color:#f2ecdc;
+ text-shadow:1px 1px #14204d;
+}
+/* Screens using Room/roomback.png should continue to expose its distinct
+   native READY action; Map CREATE/JOIN art does not belong in that screen. */
+#lobby .lobby-scene.config-open .dice-original-map-button-art{display:none!important}
