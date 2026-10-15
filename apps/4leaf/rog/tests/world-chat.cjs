@@ -467,6 +467,27 @@ const path=require('path');
  assert.equal(await host.locator('.social-avatar').count(),1,'permanent room contains only genuine participants');
  assert.equal(await host.locator('#social-image-frame').evaluate(el=>parseFloat(getComputedStyle(el).height)),528,
   'entering an original ChatRoom restores its independent 794×528 scene');
+ // The archived ChatRoom/exitbtn.png lower strip is four original 66×25
+ // EXIT states. The existing real room-back action is the hit target.
+ await host.waitForFunction(()=>document.querySelector('#rooms.classic-chat-room #social-back')
+  ?.dataset.nativeExitReady==='true',null,{timeout:12000});
+ const sourceExit=await host.evaluate(async()=>{
+  const button=document.getElementById('social-back');
+  const imageUrl=button.style.backgroundImage.slice(5,-2);
+  const img=new Image();img.src=imageUrl;await img.decode();
+  const computed=getComputedStyle(button);
+  return {source:[img.naturalWidth,img.naturalHeight],
+   width:parseFloat(computed.width),height:parseFloat(computed.height),
+   frame:button.dataset.nativeFrame,cssImage:computed.backgroundImage.startsWith('url("data:image/png;base64,')};
+ });
+ assert.deepEqual(sourceExit.source,[66,25],'native ChatRoom EXIT button is a 66×25 source frame');
+ assert.deepEqual([sourceExit.width,sourceExit.height],[66,25],'room back button uses native 66×25 hitbox');
+ assert.equal(sourceExit.frame,'0','initial ChatRoom EXIT uses first bitmap state');
+ assert.ok(sourceExit.cssImage,'EXIT decoration is a real chroma-keyed source frame');
+ await host.locator('#social-back').hover();
+ assert.equal(await host.locator('#social-back').getAttribute('data-native-frame'),'1',
+  'ChatRoom EXIT hover changes to original second state');
+
  assert.notEqual(await host.locator('#rooms .social-user-panel').evaluate(el=>getComputedStyle(el).display),'none',
   'native user list belongs to ChatRoom interior, not the town selector');
 
