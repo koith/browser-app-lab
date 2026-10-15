@@ -17,6 +17,7 @@ const {chromium}=require('playwright');
    await navigator.serviceWorker.ready;
   });
   const critical=[
+   'chatroom-native-owner-dialog.js','chatroom-native-owner-dialog.css','original/ChatRoom/ownerdialog.png',
    'world-social.css','social-chat.js','world-map.js','mainframe-native-snapshot.js','mainframe-native-snapshot.css','original/MainFrame/snaplogo.png','original/MainFrame/snapnumber.png',
    ...['mainstreet','knights','northchatrgn','southchatrgn','dice','m4leaf'].map(s=>'original/WorldMap/'+s+'.png'),
    ...['northback','southback','plainbtn','seabtn','snowbtn'].map(s=>'original/ChatTown/'+s+'.png'),
@@ -25,7 +26,7 @@ const {chromium}=require('playwright');
    'original/Registry/sava00.png'
   ];
   await page.waitForFunction(async files=>{
-   const cache=await caches.open('4leaf-revival-pwa-v40');
+   const cache=await caches.open('4leaf-revival-pwa-v41');
    return (await Promise.all(files.map(file=>cache.match('./'+file)))).every(Boolean);
   },critical,{timeout:40000});
   // An established controller must answer image and JS fetches offline.
@@ -50,6 +51,18 @@ const {chromium}=require('playwright');
    source:el.dataset.source,native:[el.width,el.height],
    position:[parseFloat(el.style.left),parseFloat(el.style.top)]
   }));
+  // Source-native Room master must remain available without internet, even
+  // if the visitor had never opened the original modal before going offline.
+  await page.locator('#social-back').click();
+  await page.locator('#social-new-room').click();
+  await page.waitForFunction(()=>document.querySelector('form.social-native-owner-form')?.dataset.nativeOwnerReady==='true',null,{timeout:8000});
+  const ownerArt=await page.locator('form.social-native-owner-form').evaluate(el=>({
+   sprite:el.dataset.nativeOwnerSource,
+   panel:[el.querySelector('canvas').width,el.querySelector('canvas').height]
+  }));
+  assert.equal(ownerArt.sprite,'ChatRoom/ownerdialog.png','original room-master works on first cold offline open');
+  assert.deepEqual(ownerArt.panel,[309,126],'cold offline genuine room-owner panel shape preserved');
+  await page.locator('.social-owner-native-cancel').click();
   assert.equal(original.source,'room4t');
   assert.deepEqual(original.native,[115,103]);
   assert.deepEqual(original.position,[427,425]);
