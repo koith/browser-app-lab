@@ -2,6 +2,12 @@ name: Chiikawa Lotte reservation watch
 on:
   schedule:
     - cron: '*/5 * 16 10 *'
+      timezone: Asia/Seoul
+  pull_request:
+    paths:
+      - '.github/workflows/chiikawa-lotte-watch.yml'
+      - 'scripts/chiikawa_lotte_watch.py'
+      - 'scripts/test_chiikawa_lotte_watch.py'
   workflow_dispatch:
 permissions:
   contents: read
@@ -10,29 +16,56 @@ concurrency:
   group: chiikawa-lotte-watch
   cancel-in-progress: false
 jobs:
+  regression:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m unittest discover -s scripts -p 'test_chiikawa_lotte_watch.py' -v
+      - name: Probe real Naver connections
+        run: python3 scripts/probe_chiikawa_lotte_watch.py
+  alert-smoke:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create one clearly-labeled test alert as production bot
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TITLE='[TEST Chiikawa watcher] 알림 전달 시험'
+          if gh issue list --repo "$GITHUB_REPOSITORY" --state all --limit 100 --json title --jq '.[].title' | grep -Fxq "$TITLE"; then
+            echo 'TEST_ISSUE_ALREADY_EXISTS'
+            exit 0
+          fi
+          gh issue create --repo "$GITHUB_REPOSITORY" --title "$TITLE" --assignee koith --body '@koith [테스트 알림] 먼작귀 예약 개시가 아닙니다. GitHub Actions의 알림 생성 및 휴대폰 전달 검증용입니다.'
   watch:
-    if: github.repository == 'koith/browser-app-lab'
+    if: github.repository == 'koith/browser-app-lab' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
       - name: Run watcher regression tests
         run: python3 -m unittest discover -s scripts -p 'test_chiikawa_lotte_watch.py' -v
-      - name: Check each minute for five minutes
-        id: poll
-        shell: bash
-        run: |
-          for i in 1 2 3 4 5; do
-            python3 scripts/chiikawa_lotte_watch.py
-            if grep -q '^found=true$' "$GITHUB_OUTPUT"; then break; fi
-            if [ "$i" -lt 5 ]; then sleep 60; fi
-          done
-      - name: Open single GitHub alert issue
-        if: steps.poll.outputs.found == 'true'
+      - name: Poll every minute and immediately notify on discovery
         env:
           GH_TOKEN: ${{ github.token }}
-          PRODUCT_URL: ${{ steps.poll.outputs.product_url }}
         shell: bash
         run: |
-          if gh issue list --repo "$GITHUB_REPOSITORY" --state all --search 'in:title [Chiikawa reservation live]' --json title --jq '.[].title' | grep -Fq '[Chiikawa reservation live]'; then exit 0; fi
-          gh issue create --repo "$GITHUB_REPOSITORY" --title '[Chiikawa reservation live] 롯데시네마 먼작귀 예약 구매 확인' --body "예약 구매 신호를 감지했습니다. 구매 가능 여부를 최종 확인하세요: $PRODUCT_URL"
+          healthy=0
+          start=$(date +%s)
+          for i in 0 1 2 3 4; do
+            if python3 scripts/chiikawa_lotte_watch.py; then healthy=1; fi
+            if [ "$i" -lt 4 ]; then
+              due=$((start + (i+1)*60))
+              now=$(date +%s)
+              delay=$((due-now))
+              if [ "$delay" -gt 0 ]; then sleep "$delay"; fi
+            fi
+          done
+          if [ "$healthy" -eq 0 ]; then
+            title='[먼작귀 감시 장애] 롯데시네마 상품 감시 불가'
+            if ! gh issue list --repo "$GITHUB_REPOSITORY" --state all --limit 300 --json title --jq '.[].title' | grep -Fxq "$title"; then
+              gh issue create --repo "$GITHUB_REPOSITORY" --title "$title" --assignee koith --body '@koith [긴급] 네이버 상품 목록 접근이 5회 연속 실패했습니다. 대체 접속 방식 점검이 필요합니다.'
+            fi
+            exit 1
+          fi
