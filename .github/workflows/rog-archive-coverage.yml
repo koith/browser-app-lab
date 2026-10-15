@@ -8,6 +8,7 @@ on:
       - 'apps/4leaf/rog/world-perspective.css'
       - 'apps/4leaf/rog/original-stage.css'
       - 'apps/4leaf/rog/dice-native-client-frame.css'
+      - 'apps/4leaf/rog/dice-native-menu-chrome.css'
       - 'apps/4leaf/rog/dice-native-tis-clean.css'
       - 'apps/4leaf/rog/dice-native-client-frame.js'
       - 'apps/4leaf/rog/tests/dice-native-frame.cjs'
