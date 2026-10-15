@@ -1,0 +1,183 @@
+/* Actual recovered 4LEAF Genesis World Map/Room PAK backgrounds.
+   This stylesheet comes AFTER lobby.css and overrides 800x540 GIF scaffolding.
+   All overlays are real DOM controls in the 794x404 source-coordinate system. */
+#lobby>.scene-banner{display:none!important}
+#lobby .lobby-scene,
+#lobby .lobby-scene.config-open{
+ display:block!important;position:relative!important;
+ width:100%;height:100%!important;min-height:0!important;
+ margin:0;padding:0!important;overflow:hidden;
+ background:#152158!important;
+}
+#lobby .dice-native-stage{
+ position:absolute;left:0;top:0;width:794px;height:404px;
+ transform-origin:0 0;
+ background:#19235b url('./original/Map/mapback.png') 0 0 / 794px 404px no-repeat!important;
+ image-rendering:auto;
+}
+#lobby .lobby-scene.config-open .dice-native-stage{
+ background-image:url('./original/Room/roomback.png')!important;
+}
+/* Room select: bitmap already contains native labels, borders, scrollbars,
+   CREATE/JOIN artwork and the four-column ROOM SELECT heading. */
+#lobby .dice-native-stage #lobby-room-list{
+ position:absolute;z-index:3;left:16px;top:40px;
+ width:404px;height:212px;
+ margin:0;padding:0;background:transparent;border:0;
+ overflow:auto;scrollbar-width:thin;scrollbar-color:#b5c8f0 #364c9d;
+}
+#lobby .dice-native-stage .lobby-room-row{
+ height:23px!important;min-height:23px!important;
+ border:1px solid transparent!important;background:transparent!important;
+ color:#eef2ff!important;display:flex;align-items:center;
+ padding:0 2px;font:11px Gulim,'굴림',sans-serif;
+}
+#lobby .dice-native-stage .lobby-room-row:is(.selected,:hover,:focus-visible){
+ border-color:#b6caff!important;background:#aec8fb45!important;
+}
+#lobby .dice-native-stage .lobby-room-empty{
+ min-height:77px;padding:8px 6px;max-width:389px;
+ border:1px solid #758dcc;
+ background:#243979b8;
+}
+#lobby .dice-native-stage #lobby-room-info{
+ position:absolute;z-index:3;
+ left:499px;top:179px;width:274px;height:103px;
+ padding:0;margin:0;overflow:auto;
+ scrollbar-width:thin;background:transparent;
+}
+#lobby .dice-native-stage #lobby-room-info>div{
+ min-height:20px;height:20px!important;
+ font:11px Gulim,'굴림',sans-serif;
+ display:flex;align-items:center;padding:0;gap:0;
+}
+#lobby .dice-native-stage #lobby-room-info b{display:none}
+#lobby .dice-native-stage #lobby-room-info span{
+ max-width:100%;width:100%;padding:2px 4px;border-radius:0;
+ background:#34468db8;color:#f7f4ff;white-space:nowrap;overflow:hidden;
+ text-overflow:ellipsis;
+}
+/* Invisible native hit-surfaces, not fake graphic buttons. */
+#lobby .dice-native-stage .lobby-creation-hotspot,
+#lobby .dice-native-stage .lobby-join-hotspot,
+#lobby .dice-native-stage .lobby-back-hotspot{
+ position:absolute;z-index:6;margin:0;padding:0;
+ color:transparent!important;font-size:0!important;
+ border:0!important;outline:0;background:transparent!important;
+ box-shadow:none!important;filter:none!important;cursor:pointer;
+}
+#lobby .dice-native-stage #lobby-create{
+ left:22px;top:319px;width:312px;height:66px;
+}
+#lobby .dice-native-stage #lobby-join{
+ left:338px;top:318px;width:247px;height:67px;
+}
+#lobby .dice-native-stage #lobby-config-back{
+ left:197px;top:312px;width:133px;height:52px;z-index:14;
+}
+#lobby .dice-native-stage #lobby-create:is(:hover,:focus-visible),
+#lobby .dice-native-stage #lobby-join:is(:hover,:focus-visible),
+#lobby .dice-native-stage #lobby-config-back:is(:hover,:focus-visible),
+#lobby .dice-native-stage #start-game:is(:hover,:focus-visible),
+#lobby .dice-native-stage #dice-team-picker:is(:hover,:focus-visible){
+ background:#dbe8ff24!important;outline:2px solid #fff1b3!important;
+ outline-offset:-2px;filter:none!important;
+}
+#lobby .dice-native-stage #lobby-channel-change{
+ position:absolute;z-index:8;
+ left:683px;top:340px;width:100px;height:34px;
+ border:1px solid #b5c9fa;
+ border-radius:3px;
+ background:#263884e8!important;
+ font:10px Gulim,'굴림',sans-serif;color:#f6ebc1;
+ padding:2px 4px;
+}
+/* Room/roomback.png already draws PLAYER, CHESSMAN INFO, ROOM INFO and READY.
+   Render only dynamic participant names, selectors, and actual interactions. */
+#lobby .dice-native-stage #dice-room-config{
+ position:static!important;
+ display:block;margin:0!important;padding:0!important;
+ border:0!important;background:transparent!important;
+ overflow:visible!important;box-shadow:none!important;
+ pointer-events:none;
+}
+#lobby .dice-native-stage #dice-room-config.hidden{display:none!important}
+#lobby .dice-native-stage #dice-room-config>*{pointer-events:auto}
+#lobby .dice-native-stage #dice-room-config>h3,
+#lobby .dice-native-stage #dice-room-config>.fine{display:none!important}
+#lobby .dice-native-stage #dice-room-config>label{
+ position:absolute;z-index:8;
+ left:76px;width:180px;height:19px;
+ margin:0!important;padding:0!important;
+ background:transparent!important;
+ border:0!important;
+ font-size:0!important;display:block!important;
+}
+#lobby .dice-native-stage #dice-room-config>label:nth-of-type(1){top:267px}
+#lobby .dice-native-stage #dice-room-config>label:nth-of-type(2){top:319px}
+#lobby .dice-native-stage #dice-room-config>label:nth-of-type(3){top:292px}
+#lobby .dice-native-stage #dice-room-config>label:nth-of-type(4){
+ left:438px;top:230px;width:119px
+}
+#lobby .dice-native-stage #dice-room-config>label>select{
+ position:static!important;display:block!important;
+ width:100%!important;max-width:none!important;height:19px!important;
+ padding:0 3px!important;font:10px Gulim,'굴림',sans-serif!important;
+ background:#3c4b98;color:#fff2d9;border:1px solid #748dc6;
+ border-radius:2px;
+}
+#lobby .dice-native-stage #lobby-players{
+ position:absolute!important;left:71px!important;top:49px!important;
+ width:259px!important;height:175px!important;margin:0!important;
+ padding:0!important;z-index:7;display:flex!important;
+ flex-direction:column!important;pointer-events:none!important;
+}
+#lobby .dice-native-stage #lobby-players .lobby-seat{
+ display:flex!important;width:100%;height:21.9px!important;min-height:21.9px;
+ font:11px Gulim,'굴림',sans-serif!important;
+ margin:0!important;padding:0 2px!important;border:0!important;
+ gap:0!important;background:transparent!important;
+ color:#f4f6ff!important;opacity:1;
+}
+#lobby .dice-native-stage #lobby-players .lobby-seat span{display:none}
+#lobby .dice-native-stage #lobby-players .lobby-seat b{
+ display:block;font-weight:normal;white-space:nowrap;
+ max-width:100%;text-overflow:ellipsis;overflow:hidden;
+}
+#lobby .dice-native-stage #lobby-players .lobby-seat.empty b{opacity:.35}
+/* The source's triangular SELECT at 557x228 exposes the real card editor.
+   Editor stays collapsed so native chessman slots remain visible at rest. */
+#lobby .dice-native-stage #dice-team-picker{
+ display:none;position:absolute;z-index:16;left:550px;top:225px;
+ width:79px;height:29px;margin:0!important;padding:0!important;
+ color:transparent!important;font-size:0!important;
+ border:0!important;background:transparent!important;cursor:pointer;
+}
+#lobby .dice-native-stage .team-select{
+ display:none!important;position:absolute!important;z-index:17;
+ left:364px!important;top:30px!important;width:424px!important;
+ height:193px!important;max-width:none!important;
+ overflow-y:auto;overflow-x:hidden;
+ margin:0!important;padding:7px!important;
+ background:#233578f4!important;border:2px ridge #bac6fb!important;
+ box-shadow:0 3px 14px #081342c2;
+}
+#lobby .dice-native-stage.team-picker-open .team-select{display:block!important}
+#lobby .dice-native-stage .team-select h4{
+ font:11px Gulim,'굴림',sans-serif;margin:0 0 4px;color:#faf0b5;
+}
+#lobby .dice-native-stage #start-game{
+ position:absolute;left:477px;top:352px;width:184px;height:45px;
+ z-index:10;margin:0!important;padding:0!important;
+ color:transparent!important;font-size:0!important;
+ border:0!important;background:transparent!important;
+ box-shadow:none!important;cursor:pointer;
+}
+#lobby .dice-native-stage #resume-game{
+ position:absolute;left:661px;top:361px;width:123px;height:26px;
+ z-index:11;margin:0;padding:0 4px;
+ font:10px Gulim,'굴림',sans-serif;
+ border:1px solid #a5baed;background:#344ca0;color:#fff1c4;
+}
+
+#lobby .lobby-scene.config-open .dice-native-stage #dice-team-picker{display:block}

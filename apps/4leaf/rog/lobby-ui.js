@@ -157,6 +157,7 @@
  function openCreator(){
   const scene=$('dice-lobby-scene');if(!scene)return;
   creatorOpen=true;
+  window.__LEAF_DICE_NATIVE__?.closePicker();
   scene.classList.add('config-open');
   $('dice-room-config').classList.remove('hidden');
   $('lobby-config-back').classList.remove('hidden');
@@ -170,6 +171,7 @@
   renderPlayerSeats();
  }
  function closeCreator(){
+  window.__LEAF_DICE_NATIVE__?.closePicker();
   creatorOpen=false;
   $('dice-lobby-scene')?.classList.remove('config-open');
   $('dice-room-config')?.classList.add('hidden');
@@ -194,7 +196,7 @@
   if(!$('lobby-room-list'))return;
   buildDiceChannelScene();
   let change=$('lobby-channel-change');
-  if(!change){change=document.createElement('button');change.id='lobby-channel-change';change.type='button';change.textContent='TOWN SELECT · 채널 변경';$('dice-lobby-scene')?.append(change)}
+  if(!change){change=document.createElement('button');change.id='lobby-channel-change';change.type='button';change.textContent='TOWN SELECT · 채널 변경';($('dice-native-stage')||$('dice-lobby-scene'))?.append(change)}
   change.onclick=()=>openChannelSelect();
   updateRooms();channelStatus();
   $('lobby-create').onclick=openCreator;
