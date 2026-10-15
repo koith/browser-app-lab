@@ -1,0 +1,58 @@
+/* Recovered ChatRoom/chatbaredit.png is an alpha-backed 407×21 native
+   edit-control sprite: left nickname box, center message editor and send bubble.
+   It is not a static screenshot; the real HTML input/button remain functional.
+   Scope only to a visible real ChatRoom, never the dice client's own UI. */
+#app:not(.app-classic-dice):has(#rooms.classic-chat-room:not(.hidden)) .messenger #chat-form{
+ box-sizing:border-box;
+ display:grid;
+ grid-template-columns:81fr 303fr 23fr;
+ gap:0!important;
+ flex:0 0 auto;
+ align-self:center;
+ width:min(407px,calc(100% - 8px));
+ height:21px!important;
+ min-height:21px;
+ padding:0!important;
+ margin:4px auto 4px;
+ border:0!important;
+ outline:none;
+ background:transparent url('./original/ChatRoom/chatbaredit.png') center center/100% 100% no-repeat!important;
+ box-shadow:none!important;
+}
+#app:not(.app-classic-dice):has(#rooms.classic-chat-room:not(.hidden)) .messenger #chat-form #nick{
+ display:block;box-sizing:border-box;
+ min-width:0;width:100%;height:19px;min-height:0;
+ font:11px Gulim,'굴림',sans-serif;
+ line-height:19px;margin:0;padding:0 4px;
+ overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+ background:transparent;color:#273569;
+ text-shadow:none;
+}
+#app:not(.app-classic-dice):has(#rooms.classic-chat-room:not(.hidden)) .messenger #chat-form #message{
+ box-sizing:border-box;
+ width:100%;min-width:0;height:19px!important;
+ min-height:0;max-height:19px;
+ margin:0;padding:0 6px;
+ outline:none;border:0!important;border-radius:0;
+ box-shadow:none!important;background:transparent!important;
+ font:11px Gulim,'굴림',sans-serif;line-height:19px;
+ color:#243265;
+}
+#app:not(.app-classic-dice):has(#rooms.classic-chat-room:not(.hidden)) .messenger #chat-form #message:focus-visible{
+ outline:1px solid #6471c7!important;outline-offset:-2px;
+}
+#app:not(.app-classic-dice):has(#rooms.classic-chat-room:not(.hidden)) .messenger #chat-form .send-btn{
+ box-sizing:border-box;
+ display:block;
+ width:100%;min-width:0;height:21px;
+ margin:0;padding:0;
+ border:0!important;border-radius:0;
+ box-shadow:none!important;background:transparent!important;
+ color:transparent!important;font-size:0!important;
+ cursor:pointer;
+}
+#app:not(.app-classic-dice):has(#rooms.classic-chat-room:not(.hidden)) .messenger #chat-form .send-btn:is(:hover,:focus-visible){
+ outline:1px solid #fff4b5!important;
+ outline-offset:-2px;
+ filter:none!important;
+}
