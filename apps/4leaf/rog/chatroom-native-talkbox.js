@@ -19,7 +19,15 @@
   const sheet=document.createElement('canvas');sheet.width=47;sheet.height=100;
   const ctx=sheet.getContext('2d',{willReadFrequently:true});
   ctx.drawImage(image,0,0);
-  const pixels=ctx.getImageData(0,0,47,100);
+  let pixels;
+  try{pixels=ctx.getImageData(0,0,47,100)}
+  catch(error){
+   // file:// uses opaque origins in Chromium. Native PAK sprites cannot be
+   // pixel-read by canvas there. Leave a readable CSS bubble, and never
+   // turn the entire offline game into a runtime exception.
+   console.warn('4LEAF talkbox source is not canvas-readable on this origin:',error.name);
+   waiting.clear();return;
+  }
   for(let i=0;i<pixels.data.length;i+=4){
    const r=pixels.data[i],g=pixels.data[i+1],b=pixels.data[i+2];
    if(r>=245&&g<=20&&b<=20)pixels.data[i+3]=0;
