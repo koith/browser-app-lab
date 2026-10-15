@@ -14,49 +14,34 @@ const path=require('node:path');
  try{
   const url=process.env.FOURLEAF_TEST_URL||'http://127.0.0.1:8765/';
   await page.goto(url,{waitUntil:'domcontentloaded',timeout:30000});
-  await page.waitForFunction(()=>window.__LEAF_REGISTRY_ALPHA__&&window.__LEAF_SOCIAL__&&window.__ROG_TEST__);
+  await page.waitForFunction(()=>window.__LEAF_SOCIAL__&&window.__ROG_TEST__);
   await page.locator('[data-route="rooms"]').first().click();
   await page.evaluate(()=>window.__LEAF_SOCIAL__.createRoom('원작 스프라이트 검증',2));
   await page.waitForSelector('#rooms.classic-chat-room:not(.hidden) .social-avatar.self img');
-  try {
-   await page.waitForFunction(()=>document.querySelector('#rooms .social-avatar.self img')?.dataset.leafSavaMask==='true',null,{timeout:12000});
-  } catch(e) {
-   const diagnostics=await page.evaluate(()=>{
-    const img=document.querySelector('#rooms .social-avatar.self img');
-    const cvs=document.createElement('canvas'),ctx=cvs.getContext('2d',{willReadFrequently:true});
-    cvs.width=img?.naturalWidth||1;cvs.height=img?.naturalHeight||1;
-    let sample='not available';
-    try{ctx.drawImage(img,0,0);sample=[...ctx.getImageData(0,0,1,1).data]}catch(err){sample=String(err)}
-    return {src:img?.src,complete:img?.complete,dim:[img?.naturalWidth,img?.naturalHeight],
-     dataset:img?.dataset.leafSavaMask,mask:img?.style.maskImage?.slice(0,65),
-     state:window.__LEAF_REGISTRY_ALPHA__?.getState(),sample,scene:window.__LEAF_SOCIAL__?.getState()?.view};
-   });
-   console.error('SAVA MASK DIAGNOSTICS',JSON.stringify(diagnostics));
-   throw e;
-  }
-  const keyed=await page.evaluate(async()=>{
+  const source=await page.evaluate(()=>{
    const img=document.querySelector('#rooms .social-avatar.self img');
-   const state=window.__LEAF_REGISTRY_ALPHA__.getState();
-   const mask=new Image();
-   mask.src=img.style.maskImage.match(/url\(["']?(.*?)["']?\)/)?.[1]||'';
-   await mask.decode();
-   const c=document.createElement('canvas');
-   c.width=mask.width;c.height=mask.height;
-   const ctx=c.getContext('2d',{willReadFrequently:true});
-   ctx.drawImage(mask,0,0);
-   const alpha=ctx.getImageData(0,0,c.width,c.height).data;
-   let transparent=0,visible=0;
-   for(let i=3;i<alpha.length;i+=4){
-    if(alpha[i]===0)transparent++;else visible++;
+   const canvas=document.createElement('canvas');
+   canvas.width=img.naturalWidth;canvas.height=img.naturalHeight;
+   const ctx=canvas.getContext('2d',{willReadFrequently:true});
+   ctx.drawImage(img,0,0);
+   const data=ctx.getImageData(0,0,canvas.width,canvas.height).data;
+   let invisible=0,visible=0,leakedKey=0;
+   for(let i=0;i<data.length;i+=4){
+    if(data[i+3]===0)invisible++;
+    else{
+     visible++;
+     if(data[i+1]>=225&&data[i]<50&&data[i+2]<50)leakedKey++;
+    }
    }
-   return {state,img:img.src,masked:img.dataset.leafSavaMask,transparent,visible,
-    maskWidth:mask.width,maskHeight:mask.height,css:img.style.maskImage.slice(0,35)};
+   return {source:img.getAttribute('src'),size:[canvas.width,canvas.height],
+    corner:[...ctx.getImageData(0,0,1,1).data],invisible,visible,leakedKey};
   });
-  assert.ok(keyed.img.includes('/original/Registry/sava'),'source actor image remains unaltered');
-  assert.ok(keyed.transparent>500&&keyed.visible>500,'actual green key removed without deleting original character');
-  assert.ok(keyed.maskWidth>=70&&keyed.maskHeight>=130,'source asset preserved at native resolution');
-  assert.ok(keyed.state.masked>=1,'native alpha cached and shared with live sprite instances');
-  await page.screenshot({path:'leaf-original-chroma-key-room.png'});
+  assert.ok(source.source.includes('./original/Registry/sava'),'the original source image stays unmodified');
+  assert.deepEqual(source.size,[75,141],'archived SAVA actor bitmap is truly 75x141');
+  assert.equal(source.corner[3],0,'the original PNG ALREADY has transparent alpha in the apparent green field');
+  assert.ok(source.invisible>500&&source.visible>500,'native character silhouette remains distinct from source transparency');
+  assert.equal(source.leakedKey,0,'native transparent edge has no visible chroma-key pixels');
+  await page.screenshot({path:'leaf-original-transparent-sava-room.png'});
   await page.locator('[data-route="lobby"]').first().click();
   await page.locator('#lobby-create').click();
   await page.locator('#bot-count').selectOption('1');
@@ -84,7 +69,7 @@ const path=require('node:path');
   assert.ok(info.occupied.every(x=>x.source.includes('/original/Registry/sava')&&x.background.includes('/original/IMG/avatarback.png')),'actual recovered Registry and IMG portrait source');
   assert.ok(info.occupied.every(x=>x.portrait>0&&x.portrait<x.cropped),'portrait crops original source head without deforming 75x141 actor');
   for(let i=0;i<info.players.length;i++)assert.equal(info.occupied[i].name,info.players[i].name,'portrait names reflect actual player');
-  await page.waitForFunction(()=>[...document.querySelectorAll('#game .battle-side-card.occupied img')].every(x=>x.dataset.leafSavaMask==='true'),null,{timeout:15000});
+  await page.waitForFunction(()=>[...document.querySelectorAll('#game .battle-side-card.occupied img')].every(x=>x.complete&&x.naturalWidth===75&&x.naturalHeight===141),null,{timeout:15000});
   const oldInfo=await page.locator('#game .battle-side-card.occupied').first().locator('small').textContent();
   await page.locator('#roll-btn').click();
   await page.waitForFunction(()=>window.__ROG_TEST__.getMatch().players[0].position>0,null,{timeout:12000});
@@ -95,6 +80,6 @@ const path=require('node:path');
   assert.equal(await page.locator('.battle-team-side.right .battle-side-card.occupied').count(),1);
   await page.screenshot({path:'leaf-original-side-portraits-mobile.png'});
   assert.deepEqual(errors,[],'no browser exceptions');
-  console.log('ORIGINAL SAVA ALPHA + PLAYER RAILS PASS: real chroma key, genuine portraits, left 1/3/5 right 2/4/6, no NPCs, active match and responsive');
+  console.log('ORIGINAL SAVA PNG ALPHA + PLAYER RAILS PASS: source-native alpha, genuine portraits, left 1/3/5 right 2/4/6, no NPCs, active match and responsive');
  }finally{await browser.close()}
-})().catch(err=>{console.error('ORIGINAL SAVA ALPHA FAILED:',err.stack||err);process.exit(1)});
+})().catch(err=>{console.error('ORIGINAL PLAYER RAILS FAILED:',err.stack||err);process.exit(1)});
