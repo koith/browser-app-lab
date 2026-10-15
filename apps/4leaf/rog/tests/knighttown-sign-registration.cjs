@@ -68,6 +68,12 @@ const {chromium}=require('playwright');
    assert.ok(m.samples>200,'original sign has enough opaque source samples: '+m.area);
    assert.deepEqual(m.source,[568,74],'original four 142x74 atlas states');
    console.log('ORIGINAL KNIGHT SIGN REGISTRATION',JSON.stringify(m));
+   assert.deepEqual(m.aligned,m.original,
+    m.area+' hover sprite must use the original pixel-correlated position, not a guessed offset');
+   assert.ok(m.meanRGB<10,
+    m.area+' source sprite must correlate with exact original background pixels: '+m.meanRGB);
+   assert.ok(m.margin>6,
+    m.area+' correlation must have a unique exact-pixel minimum, not a guessed nearby approximate');
   }
  }finally{await browser.close()}
 })().catch(e=>{console.error('SOURCE SIGN CORRELATION FAILED',e.stack||e);process.exit(1)});
