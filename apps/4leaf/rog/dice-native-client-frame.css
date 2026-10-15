@@ -136,3 +136,36 @@
  #app.app-classic-dice .messenger .chat-log{top:23px;bottom:23px}
  #app.app-classic-dice .dice-native-minidock{display:none!important}
 }
+
+/* IMG/abilitybar.png is a genuine 92x64 / 4x16 status atlas.
+   It now belongs to the REAL usable ability button, not a fake UI panel.
+   Activation state comes directly from game.js's charge + turn rules.
+   Exact historical hover-frame semantics remain an inference. */
+#app.app-classic-dice #game #ability-btn{
+ box-sizing:border-box!important;
+ display:block!important;
+ flex:0 0 92px!important;
+ width:92px!important;min-width:92px!important;max-width:92px!important;
+ height:16px!important;min-height:16px!important;max-height:16px!important;
+ padding:0!important;margin:0 auto!important;
+ color:transparent!important;font-size:0!important;line-height:0!important;
+ border:0!important;border-radius:0!important;box-shadow:none!important;
+ text-shadow:none!important;opacity:1!important;filter:none!important;
+ background:transparent url('./original/IMG/abilitybar.png') 0 0/92px 64px no-repeat!important;
+ cursor:default;
+}
+#app.app-classic-dice #game #ability-btn:enabled{
+ background-position:0 -16px!important;cursor:pointer;
+}
+#app.app-classic-dice #game #ability-btn:enabled:is(:hover,:focus-visible){
+ background-position:0 -32px!important;
+ outline:1px solid #eef2b4!important;outline-offset:1px;
+}
+#app.app-classic-dice #game #ability-btn:enabled:active{
+ background-position:0 -48px!important;
+}
+@media(max-width:650px){
+ #app.app-classic-dice #game #ability-btn{
+  transform:scale(.82);transform-origin:center;
+ }
+}
