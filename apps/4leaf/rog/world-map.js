@@ -129,7 +129,7 @@
     }
     ctx.putImageData(pixels,0,0);
     const source=bitmap.toDataURL('image/png');
-    for(const tip of stage.querySelectorAll('.world-location-tip')){
+    for(const tip of stage.querySelectorAll('.world-location-tip, .world-native-notice')){
      tip.style.backgroundImage='url("'+source+'")';
      tip.dataset.source='WorldMap/notice.png';
      tip.dataset.ready='true';
@@ -137,13 +137,13 @@
    }catch(error){
     // Local file:// canvases may be opaque to pixel access; keep text
     // accessible rather than hiding the navigation tooltip.
-    for(const tip of stage.querySelectorAll('.world-location-tip'))tip.dataset.ready='fallback';
+    for(const tip of stage.querySelectorAll('.world-location-tip, .world-native-notice'))tip.dataset.ready='fallback';
    }
   };
   image.onerror=()=>{
    if(!stage.isConnected)return;
    if(retries<4){retries++;setTimeout(request,Math.min(1500,200*2**retries))}
-   else for(const tip of stage.querySelectorAll('.world-location-tip'))tip.dataset.ready='fallback';
+   else for(const tip of stage.querySelectorAll('.world-location-tip, .world-native-notice'))tip.dataset.ready='fallback';
   };
   request();
  }
@@ -178,6 +178,16 @@
    moon.className='world-original-moon';
    moon.setAttribute('aria-hidden','true');
    stage.append(moon);
+   // Actual 2003 sky.jpg has a native winged Notice at source (23,9).
+   // Its historic Chuseok promotion is no longer a live event, so the
+   // recovered frame contains an honest navigation hint instead.
+   const notice=document.createElement('div');
+   notice.id='world-native-notice';notice.className='world-native-notice';
+   notice.dataset.ready='loading';notice.dataset.source='WorldMap/notice.png';
+   notice.setAttribute('role','note');
+   notice.setAttribute('aria-label','4LEAF 월드맵 안내');
+   notice.textContent='월드맵에서 지역을 선택하세요';
+   stage.append(notice);
    for(const region of REGIONS){
      stage.append(makeCanvasSprite(region));
      const hit=document.createElement('button');hit.className='world-location';hit.type='button';
