@@ -16,6 +16,8 @@ const path=require('node:path');
   await page.waitForFunction(()=>window.__ROG_TEST__&&window.__LEAF_LOBBY__&&document.querySelector('#start-game'));
   await page.locator('[data-route="lobby"]').first().click();
   await page.locator('#lobby-create').click();
+  // Two genuine hotseat users give deterministic turns without an AI race.
+  await page.locator('#game-mode').selectOption('hotseat');
   await page.locator('#bot-count').selectOption('1');
   await page.locator('#start-game').click();
   await page.waitForSelector('#game:not(.hidden)');
@@ -67,27 +69,28 @@ const path=require('node:path');
   await page.locator('#modal-buttons button').first().click();
 
   // Real turn with native status art: not a hard-coded demonstration message.
-  const oldLog=await page.locator('#move-log').textContent();
+  const oldLog=await page.locator('#dice-native-event').textContent();
   await page.locator('#roll-btn').click();
   await page.waitForFunction(previous=>{
-   const last=document.querySelector('#move-log')?.textContent||'';
-   return last&&last!==previous&&document.querySelector('#move-log')?.dataset.nativeSource==='IMG/eventmsgbox.png';
+   const node=document.querySelector('#dice-native-event');
+   return node?.textContent&&node.textContent!==previous&&
+    node.dataset.source==='IMG/eventmsgbox.png'&&node.offsetWidth>0;
   },oldLog,{timeout:16000});
-  const move=await page.locator('#move-log').evaluate(node=>({
-   source:node.dataset.nativeSource,paint:getComputedStyle(node).backgroundImage,
+  const move=await page.locator('#dice-native-event').evaluate(node=>({
+   source:node.dataset.source,paint:getComputedStyle(node).backgroundImage,
    frame:[node.offsetWidth,node.offsetHeight],
    rendered:[node.getBoundingClientRect().width,node.getBoundingClientRect().height],
-   computed:[getComputedStyle(node).flexBasis,getComputedStyle(node).minWidth,getComputedStyle(node).height],
-   visibility:{
-    scene:document.querySelector('#game').className,
-    sceneDisplay:getComputedStyle(document.querySelector('#game')).display,
-    itemBar:getComputedStyle(node.parentElement).display,
-    ownDisplay:getComputedStyle(node).display,
-    app:document.querySelector('#app').className
-   },
+   position:getComputedStyle(node).position,
+   visible:getComputedStyle(node).display,
+   parent:node.parentElement.id,
+   realEventNodes:document.querySelectorAll('#dice-native-event').length,
    event:node.textContent,title:node.title
   }));
   assert.equal(move.source,'IMG/eventmsgbox.png','actual played move displayed in original source event');
+  assert.equal(move.parent,'board-area','original event source appears in the visible playable board, not hidden web item footer');
+  assert.equal(move.realEventNodes,1,'one live event UI, no fake duplicate');
+  assert.equal(move.visible,'flex','actual source-backed event remains painted on screen');
+  assert.equal(move.position,'absolute','event floats without hiding actual playable TIS tile hitboxes');
   assert.ok(move.paint.includes('/original/IMG/eventmsgbox.png'));
   assert.ok(Math.abs(move.frame[0]-244)<1&&Math.abs(move.frame[1]-52)<1,
    'true 244x52 original event rectangle in non-mobile client: '+JSON.stringify(move));
@@ -110,8 +113,8 @@ const path=require('node:path');
   assert.equal(await page.locator('#modal').getAttribute('data-native-dice-dialog'),'IMG/dialog.png');
   assert.ok((await page.locator('.modal-window').boundingBox()).width<=390,
    'original small window is not clipped on phone');
-  assert.ok((await page.locator('#move-log').boundingBox()).width<=244,
-   'actual message panel remains visible on phone');
+  assert.ok((await page.locator('#dice-native-event').boundingBox()).width<=244,
+   'actual original message panel remains visible on phone');
   await page.locator('#modal-buttons button').filter({hasText:'취소'}).click();
   assert.deepEqual(errors,[],'native source prompt and eventbox introduce no JS exceptions');
   console.log('GENESIS NATIVE DIALOG/EVENT PASS',JSON.stringify({art,prompt,move,complexParticipants:complex.participants}));
