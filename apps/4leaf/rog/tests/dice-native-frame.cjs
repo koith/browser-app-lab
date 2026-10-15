@@ -127,13 +127,14 @@ const path=require('node:path');
   await page.locator('#message').press('Enter');
   await page.waitForFunction(()=>document.querySelector('#chat-log')?.textContent.includes('원본 채팅창 테스트'));
   await page.screenshot({path:'leaf-dice-original-800x600-frame.png'});
-  const originalCamera=await page.locator('#board-world').evaluate(el=>getComputedStyle(el).transform);
+  const originalCamera=await page.locator('#board-world').evaluate(el=>el.style.transform);
   await page.locator('#roll-btn').click();
   await page.waitForFunction(()=>window.__ROG_TEST__.getMatch()?.players[0].position>0,{timeout:12000});
   assert.equal(await page.locator('#mini-map-canvas').count(),1,'the minimap survives an actual move');
   await page.evaluate(()=>window.__LEAF_CAMERA__?.viewport(1.65,24,16));
+  await page.waitForFunction(()=>window.__LEAF_CAMERA__?.getState()?.scale===1.65);
   const movedWorld=await page.locator('#board-world').evaluate(el=>({
-   transform:getComputedStyle(el).transform,
+   transform:el.style.transform,
    background:getComputedStyle(el).backgroundImage,
    tileCount:el.querySelectorAll('#board-nodes .tile').length
   }));
