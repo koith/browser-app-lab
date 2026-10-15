@@ -1,13 +1,13 @@
 /* Actual ChatRoom/scrollbar.png (52x40) from the 2002 4LEAF client.
- * The recovered atlas is 4 normal/hover/pressed/etc 13px columns by 40px.
- * Canvas keys original green pixels, then the native buttons scroll the
- * existing REAL #chat-log. No second transcript, fake message, proxy panel,
- * custom server or screenshot interaction overlay is introduced. */
+ * The source is ALREADY RGBA transparent in Chromium readback: no green-key
+ * correction or destructive canvas re-encoding is needed. Four source art
+ * columns are 13px wide. Buttons scroll the one REAL #chat-log, not a
+ * secondary transcript or a screenshot-backed click map. */
 (function(){
  'use strict';
  const $=id=>document.getElementById(id);
  let handle=null,up=null,down=null,track=null,thumb=null,log=null;
- let ready=false,source=null,drag=null;
+ let ready=false,drag=null;
  function update(){
   if(!handle||!log)return;
   const max=Math.max(0,log.scrollHeight-log.clientHeight);
@@ -81,27 +81,17 @@
  }
  function loadSource(){
   if(!handle)return;
-  // file:// disallows pixel reads of local images. Native HTTP(S) browser QA
-  // reads the source RGBA and applies the original green-key transparencies.
-  if(location.protocol==='file:'){handle.dataset.ready='offline-fallback';return;}
+  // The source PNG ALREADY contains the correct alpha. Preserve the actual
+  // 52x40 file unmodified, usable through HTTP(S) and offline file://.
   const img=new Image();let attempts=0;
   img.onload=()=>{
    if(!handle?.isConnected)return;
-   try{
-    if(img.naturalWidth!==52||img.naturalHeight!==40)throw Error('Source scrollbar has unexpected dimensions');
-    const canvas=document.createElement('canvas');canvas.width=52;canvas.height=40;
-    const ctx=canvas.getContext('2d',{willReadFrequently:true});
-    ctx.drawImage(img,0,0);
-    const data=ctx.getImageData(0,0,52,40);
-    for(let i=0;i<data.data.length;i+=4){
-     const r=data.data[i],g=data.data[i+1],b=data.data[i+2];
-     if(g>220&&r<65&&b<90)data.data[i+3]=0;
-    }
-    ctx.putImageData(data,0,0);
-    source=canvas.toDataURL('image/png');
-    handle.style.setProperty('--social-scroll-asset','url("'+source+'")');
-    handle.dataset.ready='true';ready=true;update();
-   }catch(e){handle.dataset.ready='offline-fallback';console.warn('Original ChatRoom scrollbar key:',e.message)}
+   if(img.naturalWidth!==52||img.naturalHeight!==40){
+    handle.dataset.ready='error';
+    console.error('Source ChatRoom scrollbar has unexpected size');return;
+   }
+   handle.style.setProperty('--social-scroll-asset','url("./original/ChatRoom/scrollbar.png")');
+   handle.dataset.ready='true';ready=true;update();
   };
   img.onerror=()=>{
    if(attempts++>=5){handle.dataset.ready='error';return}
