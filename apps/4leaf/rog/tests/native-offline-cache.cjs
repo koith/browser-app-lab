@@ -17,7 +17,7 @@ const {chromium}=require('playwright');
    await navigator.serviceWorker.ready;
   });
   const critical=[
-   'world-social.css','social-chat.js','world-map.js',
+   'world-social.css','social-chat.js','world-map.js','mainframe-native-snapshot.js','mainframe-native-snapshot.css','original/MainFrame/snaplogo.png','original/MainFrame/snapnumber.png',
    ...['mainstreet','knights','northchatrgn','southchatrgn','dice','m4leaf'].map(s=>'original/WorldMap/'+s+'.png'),
    ...['northback','southback','plainbtn','seabtn','snowbtn'].map(s=>'original/ChatTown/'+s+'.png'),
    ...Array.from({length:6},(_,n)=>'original/ChatRoom/room'+n+'.png'),
@@ -25,7 +25,7 @@ const {chromium}=require('playwright');
    'original/Registry/sava00.png'
   ];
   await page.waitForFunction(async files=>{
-   const cache=await caches.open('4leaf-revival-pwa-v38');
+   const cache=await caches.open('4leaf-revival-pwa-v39');
    return (await Promise.all(files.map(file=>cache.match('./'+file)))).every(Boolean);
   },critical,{timeout:40000});
   // An established controller must answer image and JS fetches offline.
@@ -34,13 +34,18 @@ const {chromium}=require('playwright');
   await context.setOffline(true);
   await page.reload({waitUntil:'domcontentloaded',timeout:15000});
   await page.waitForFunction(()=>document.querySelector('#leaf-world-stage .world-backdrop')?.dataset.ready==='true'
-   &&document.querySelectorAll('#leaf-world-stage .world-sprite[data-ready="true"]').length===6,
+   &&document.querySelectorAll('#leaf-world-stage .world-sprite[data-ready="true"]').length===6
+   &&document.querySelector('#leaf-world-stage .leaf-native-snaplogo')?.dataset.ready==='true'
+   &&document.querySelector('#leaf-world-stage .leaf-native-snapnumber')?.dataset.ready==='true',
    null,{timeout:18000});
   await page.evaluate(()=>{window.__LEAF_SOCIAL__.openRegion('north');window.__ROG_TEST__.go('rooms');});
   await page.waitForFunction(()=>document.querySelectorAll('.social-district-hotspot').length===8,null,{timeout:8000});
   await page.locator('.social-district-hotspot').nth(3).click();
   await page.evaluate(()=>window.__LEAF_SOCIAL__.createRoom('오프라인 원본 리소스 확인',4));
-  await page.waitForFunction(()=>document.querySelector('.social-room-foreground')?.dataset.ready==='true',null,{timeout:8000});
+  await page.waitForFunction(()=>document.querySelector('.social-room-foreground')?.dataset.ready==='true'
+   &&document.querySelector('#rooms .social-interior > .leaf-native-snaplogo')?.dataset.ready==='true'
+   &&document.querySelector('#rooms .social-interior > .leaf-native-snapnumber')?.dataset.ready==='true',
+   null,{timeout:8000});
   const original=await page.locator('.social-room-foreground').evaluate(el=>({
    source:el.dataset.source,native:[el.width,el.height],
    position:[parseFloat(el.style.left),parseFloat(el.style.top)]
