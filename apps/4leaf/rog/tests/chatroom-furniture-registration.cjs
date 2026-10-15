@@ -4,12 +4,19 @@
 // Historical pixels, not a pasted screenshot, determine foreground geometry.
 const {chromium}=require('playwright');
 const assert=require('node:assert/strict');
+const fs=require('node:fs');
+const path=require('node:path');
 (async()=>{
  const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
  try{
   const page=await browser.newPage({viewport:{width:1280,height:800},serviceWorkers:'block'});
   await page.goto(process.env.FOURLEAF_TEST_URL||'http://127.0.0.1:8765/');
-  const measured=await page.evaluate(async()=>{
+  // The standalone ROG test server intentionally exposes only rog/, not
+  // neighboring apps/4leaf/assets/. Give Chromium the authentic JPEG bytes.
+  const encoded=(name)=>fs.readFileSync(path.resolve(__dirname,name)).toString('base64');
+  const refSrc='data:image/jpeg;base64,'+encoded('../../assets/chat_ref.jpg');
+  const artSrc='data:image/png;base64,'+encoded('../original/ChatRoom/room4t.png');
+  const measured=await page.evaluate(async({refSrc,artSrc})=>{
    const load=async url=>{
     const img=new Image();img.src=url;await img.decode();
     const canvas=document.createElement('canvas');
@@ -18,8 +25,8 @@ const assert=require('node:assert/strict');
     ctx.drawImage(img,0,0);
     return {w:canvas.width,h:canvas.height,data:ctx.getImageData(0,0,canvas.width,canvas.height).data};
    };
-   const reference=await load('../assets/chat_ref.jpg');
-   const art=await load('./original/ChatRoom/room4t.png');
+   const reference=await load(refSrc);
+   const art=await load(artSrc);
    const pixels=[];
    for(let y=1;y<art.h-1;y+=3)for(let x=1;x<art.w-1;x+=3){
     const i=(y*art.w+x)*4,r=art.data[i],g=art.data[i+1],b=art.data[i+2],a=art.data[i+3];
@@ -47,7 +54,7 @@ const assert=require('node:assert/strict');
    const scans=[1,1.12,1.24,1.36].map(search);
    return {reference:[reference.w,reference.h],native:[art.w,art.h],sampleCount:pixels.length,
     scans,best:scans.reduce((a,b)=>a.score<b.score?a:b)};
-  });
+  },{refSrc,artSrc});
   assert.deepEqual(measured.reference,[794,528],'historical room reference is native 794x528');
   assert.deepEqual(measured.native,[115,103],'actual source room4 table bitmap has native 115x103 pixels');
   assert.ok(measured.sampleCount>100,'original table is not just a red matte');
