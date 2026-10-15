@@ -113,13 +113,13 @@
      foreground:{file:'room3t',x:204,y:354,w:568,h:213,depth:80}},
   // ARCHIVE-MEASURED: apps/4leaf/assets/chat_ref.jpg contains the exact
   // original ChatRoom/room4.png environment. Robust transparent-sprite
-  // registration places room4t.png at (427,424), 115x103 (native 1:1).
+  // registration places room4t.png at (427,425), 115x103 (native 1:1).
   // The eleven visible character baselines below were mapped separately
   // from the actual screenshot (INFERRED; not decoded server seat slots).
   // Slot twelve is an additional usable position for the reconstructed room.
   4:{seats:[[17,65],[32,61],[45,70],[61,72],[73,64],[91,65],
             [8,97],[29,97],[48,97],[73,97],[91,97],[52,62]],
-     foreground:{file:'room4t',x:427,y:424,w:115,h:103,depth:80}},
+     foreground:{file:'room4t',x:427,y:425,w:115,h:103,depth:80}},
   5:{seats:[[20,66],[38,66],[56,66],[74,66],[20,81],[39,81],[57,81],[75,81],[22,93],[39,93],[57,93],[74,93]],
      foreground:{file:'room5t',x:281,y:357,w:260,h:170,depth:78}}
  };
