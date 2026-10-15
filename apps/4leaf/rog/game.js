@@ -111,9 +111,30 @@ function sfx(freq=500,duration=.07){if(!soundOn)return;try{const AC=window.Audio
 function chat(who,message,type=''){const line=document.createElement('div');line.className=type;const b=document.createElement('b');b.textContent=who+'　';line.append(b,document.createTextNode(String(message)));$('chat-log').append(line);while($('chat-log').children.length>90)$('chat-log').firstElementChild.remove();$('chat-log').scrollTop=$('chat-log').scrollHeight}
 function profileUI(){$('nick').textContent=profile.name;$('profile-name').textContent=profile.name;$('my-name').textContent=profile.name;$('gp').textContent=profile.gp.toLocaleString();$('shop-gp').textContent=profile.gp.toLocaleString();$('wins').textContent=profile.wins+'승';persist()}
 function navigate(id){if(!routeNames[id])return;route=id;if(id!=='game')$('app')?.classList.remove('dice-items-open');document.getElementById('app')?.classList.toggle('app-classic-dice',id==='game');$('app').classList.toggle('app-game',id==='game');query('.scene').forEach(s=>s.classList.toggle('hidden',s.id!==id));query('[data-route]').forEach(el=>el.classList.toggle('active',el.dataset.route===id));$('where').textContent=routeNames[id];$('chat-location').textContent=routeNames[id];if(id==='game'&&match){drawGame();const p=activePlayer();if(p?.bot&&!busy)setTimeout(()=>{if(route==='game'&&match&&!match.finished&&activePlayer()?.bot&&!busy)takeTurn()},500)}if(id==='shop')drawShop();if(id==='lobby'){drawTeam();refreshResume()}window.dispatchEvent(new CustomEvent('leaf-route-change',{detail:{route:id}}));log(routeNames[id]+'에 입장하였습니다.');syncMusic();sfx(610)}
-function modal(title,body,buttons){$('modal-title').textContent=title;$('modal-content').replaceChildren();if(typeof body==='string'){$('modal-content').textContent=body}else if(body)$('modal-content').append(body);$('modal-buttons').replaceChildren();buttons.forEach(opt=>{const b=document.createElement('button');b.textContent=opt.label;b.className=opt.primary?'primary':'';b.onclick=()=>{$('modal').classList.add('hidden');if(opt.run)opt.run()};$('modal-buttons').append(b)});$('modal').classList.remove('hidden')}
+function modal(title,body,buttons){
+ // Original Genesis IMG/dialog.png is the native 292x110 panel. Limit the
+ // source-backed frame to short, real GAME confirmations and status text;
+ // cards, selectors and battle result layouts retain their own full-size UI.
+ // The existing live buttons and resolver callbacks are never duplicated.
+ const modalNode=$('modal');
+ const simple=route==='game'&&typeof body==='string'&&body.length<=180&&
+  Array.isArray(buttons)&&buttons.length>=1&&buttons.length<=3;
+ if(simple)modalNode.dataset.nativeDiceDialog='IMG/dialog.png';
+ else delete modalNode.dataset.nativeDiceDialog;
+ $('modal-title').textContent=title;$('modal-content').replaceChildren();if(typeof body==='string'){$('modal-content').textContent=body}else if(body)$('modal-content').append(body);$('modal-buttons').replaceChildren();buttons.forEach(opt=>{const b=document.createElement('button');b.textContent=opt.label;b.className=opt.primary?'primary':'';b.onclick=()=>{$('modal').classList.add('hidden');if(opt.run)opt.run()};$('modal-buttons').append(b)});$('modal').classList.remove('hidden')}
 function ask(title,body,options){return new Promise(resolve=>modal(title,body,options.map((a,i)=>({label:a,primary:i===0,run:()=>resolve(i)}))))}
-function toast(message){log(message);$('move-log').textContent=message}
+function toast(message){
+ log(message);
+ const logElement=$('move-log');
+ if(logElement){
+  logElement.textContent=message;
+  // IMG/eventmsgbox.png is a 244x52 original event panel. Its clipped
+  // one/two-line text is readable and the full authentic event stays in the
+  // DOM title and actual match.history; never manufacture gameplay entries.
+  logElement.title=String(message);
+  logElement.dataset.nativeSource='IMG/eventmsgbox.png';
+ }
+}
 function rosterByIds(ids){return (ids||[]).map(id=>CARD_MAP[id]).filter(Boolean).slice(0,4)}
 function teamStats(ids){
  const cards=(ids||[]).slice(0,4).map(id=>CARD_MAP[id]||null),field=cards.slice(0,3).filter(Boolean);
