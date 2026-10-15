@@ -18,7 +18,22 @@ const path=require('node:path');
   await page.locator('[data-route="rooms"]').first().click();
   await page.evaluate(()=>window.__LEAF_SOCIAL__.createRoom('원작 스프라이트 검증',2));
   await page.waitForSelector('#rooms.classic-chat-room:not(.hidden) .social-avatar.self img');
-  await page.waitForFunction(()=>document.querySelector('#rooms .social-avatar.self img')?.dataset.leafSavaMask==='true',null,{timeout:15000});
+  try {
+   await page.waitForFunction(()=>document.querySelector('#rooms .social-avatar.self img')?.dataset.leafSavaMask==='true',null,{timeout:12000});
+  } catch(e) {
+   const diagnostics=await page.evaluate(()=>{
+    const img=document.querySelector('#rooms .social-avatar.self img');
+    const cvs=document.createElement('canvas'),ctx=cvs.getContext('2d',{willReadFrequently:true});
+    cvs.width=img?.naturalWidth||1;cvs.height=img?.naturalHeight||1;
+    let sample='not available';
+    try{ctx.drawImage(img,0,0);sample=[...ctx.getImageData(0,0,1,1).data]}catch(err){sample=String(err)}
+    return {src:img?.src,complete:img?.complete,dim:[img?.naturalWidth,img?.naturalHeight],
+     dataset:img?.dataset.leafSavaMask,mask:img?.style.maskImage?.slice(0,65),
+     state:window.__LEAF_REGISTRY_ALPHA__?.getState(),sample,scene:window.__LEAF_SOCIAL__?.getState()?.view};
+   });
+   console.error('SAVA MASK DIAGNOSTICS',JSON.stringify(diagnostics));
+   throw e;
+  }
   const keyed=await page.evaluate(async()=>{
    const img=document.querySelector('#rooms .social-avatar.self img');
    const state=window.__LEAF_REGISTRY_ALPHA__.getState();
