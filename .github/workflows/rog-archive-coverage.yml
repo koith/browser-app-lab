@@ -9,6 +9,8 @@ on:
       - 'apps/4leaf/rog/original-stage.css'
       - 'apps/4leaf/rog/dice-native-client-frame.css'
       - 'apps/4leaf/rog/dice-native-menu-chrome.css'
+      - 'apps/4leaf/rog/dice-native-dialog-event.css'
+      - 'apps/4leaf/rog/tests/dice-native-dialog-event.cjs'
       - 'apps/4leaf/rog/dice-native-tis-clean.css'
       - 'apps/4leaf/rog/dice-native-battle-podium.css'
       - 'apps/4leaf/rog/tests/dice-battle-podium.cjs'
@@ -34,6 +36,8 @@ jobs:
         run: node apps/4leaf/rog/tests/archive-coverage.cjs
       - name: Verify actual 2.5D mechanical duel platforms and original forest in Chromium
         run: node apps/4leaf/rog/tests/dice-battle-podium.cjs
+      - name: Validate actual source Genesis dialog and live event message in Chromium
+        run: node apps/4leaf/rog/tests/dice-native-dialog-event.cjs
       - name: Chromium verify recovered 800x600 / 406x152 / 172x152 functioning Dice frame
         run: node apps/4leaf/rog/tests/dice-native-frame.cjs
       - uses: actions/upload-artifact@v4

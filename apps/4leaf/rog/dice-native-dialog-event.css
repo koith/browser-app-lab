@@ -1,0 +1,137 @@
+/* Source-recovered Genesis World in-game dialog and event panels.
+ * These are separate native client bitmaps, not a 2003 screenshot.
+ * IMG/dialog.png is EXACTLY 292x110 with a 16px top frame, inset pale body
+ * and 3px closing border. Slice the original image so live short prompts can
+ * expand vertically without skewing the 292px source chrome.
+ * Complex battle/ability layout is intentionally not forced into 110px.
+ */
+#app.app-classic-dice #modal[data-native-dice-dialog="IMG/dialog.png"]{
+ background:#04081bb3;
+}
+#app.app-classic-dice #modal[data-native-dice-dialog="IMG/dialog.png"] .modal-window{
+ box-sizing:border-box!important;
+ display:flex!important;flex-direction:column;
+ width:min(292px,calc(100vw - 26px))!important;
+ min-width:0!important;min-height:110px!important;
+ max-height:min(90dvh,420px)!important;
+ overflow:auto!important;
+ margin:0!important;padding:0!important;
+ border-style:solid!important;
+ border-width:17px 4px 3px!important;
+ border-color:#bdc7e3!important;
+ border-image-source:url('./original/IMG/dialog.png')!important;
+ border-image-slice:17 4 3 4 fill!important;
+ border-image-width:17px 4px 3px 4px!important;
+ border-image-repeat:stretch!important;
+ border-radius:0!important;
+ background:#f8fbff!important;
+ box-shadow:0 6px 15px #101c4aaa!important;
+ color:#172952!important;
+}
+#app.app-classic-dice #modal[data-native-dice-dialog="IMG/dialog.png"] .modal-title{
+ flex:none;
+ margin:0!important;padding:3px 8px 0!important;
+ border:0!important;box-shadow:none!important;
+ background:transparent!important;
+ color:#2b417b!important;
+ text-shadow:none!important;
+ text-align:center;
+ font:700 11px/15px Gulim,'굴림',sans-serif!important;
+ min-height:19px;
+ white-space:normal;
+}
+#app.app-classic-dice #modal[data-native-dice-dialog="IMG/dialog.png"] #modal-content{
+ display:block!important;
+ flex:1 1 auto;
+ overflow-wrap:anywhere;
+ padding:4px 8px 3px!important;
+ margin:0!important;
+ color:#263258!important;
+ background:transparent!important;
+ text-align:center;
+ font:11px/1.4 Gulim,'굴림',sans-serif!important;
+ max-height:215px;
+}
+#app.app-classic-dice #modal[data-native-dice-dialog="IMG/dialog.png"] .modal-buttons{
+ display:flex!important;
+ flex:none;
+ flex-wrap:wrap!important;
+ justify-content:center!important;
+ gap:5px!important;
+ padding:2px 5px 7px!important;
+ background:transparent!important;
+}
+#app.app-classic-dice #modal[data-native-dice-dialog="IMG/dialog.png"] .modal-buttons button{
+ box-sizing:border-box!important;
+ min-width:58px!important;
+ min-height:21px!important;
+ padding:1px 8px!important;
+ margin:0!important;
+ border:1px solid #8797c7!important;
+ border-radius:0!important;
+ box-shadow:inset 1px 1px 0 #fff,1px 1px 0 #7281b0!important;
+ background:linear-gradient(#e2ecff,#a6bce7)!important;
+ font:700 11px/16px Gulim,'굴림',sans-serif!important;
+ color:#223b76!important;
+ text-shadow:none!important;
+}
+#app.app-classic-dice #modal[data-native-dice-dialog="IMG/dialog.png"] .modal-buttons button:is(:hover,:focus-visible){
+ outline:1px solid #304a93!important;
+ outline-offset:1px;
+}
+#app.app-classic-dice #modal[data-native-dice-dialog="IMG/dialog.png"] .modal-buttons button.primary{
+ background:linear-gradient(#f1f7ff,#b5c9ef)!important;
+}
+/* Authentic IMG/eventmsgbox.png must appear on the live visible battlefield.
+ * The older modern .item-bar is intentionally display:none in the native
+ * 2003 layout, so never place the original panel inside that hidden footer.
+ * The sole source of its text is the actual persisted game match.history.
+ */
+#app.app-classic-dice #game #dice-native-event{
+ box-sizing:border-box!important;
+ position:absolute!important;
+ z-index:28!important;
+ top:37px!important;
+ left:50%!important;
+ display:flex!important;
+ align-items:center!important;
+ justify-content:center!important;
+ width:244px!important;
+ min-width:244px!important;
+ max-width:244px!important;
+ height:52px!important;
+ min-height:52px!important;
+ max-height:52px!important;
+ margin:0!important;
+ padding:5px 13px!important;
+ border:0!important;
+ border-radius:0!important;
+ background:transparent url('./original/IMG/eventmsgbox.png') center center/244px 52px no-repeat!important;
+ box-shadow:none!important;
+ color:#152c67!important;
+ text-shadow:0 1px #f3f8ff!important;
+ font:700 10px/1.35 Gulim,'굴림',sans-serif!important;
+ text-align:center!important;
+ overflow:hidden!important;
+ overflow-wrap:anywhere;
+ word-break:keep-all;
+ transform:translateX(-50%)!important;
+ pointer-events:none!important;
+ user-select:none!important;
+}
+@media(max-width:650px){
+ #app.app-classic-dice #game #dice-native-event{
+  width:244px!important;
+  min-width:244px!important;
+  max-width:244px!important;
+  transform:translateX(-50%) scale(.8)!important;
+  transform-origin:top center;
+  padding:5px 10px!important;
+  font-size:9px!important;
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ #app.app-classic-dice #modal[data-native-dice-dialog="IMG/dialog.png"] .modal-window{
+  transition:none!important;
+ }
+}

@@ -49,6 +49,8 @@ on:
       - 'apps/4leaf/rog/dice-native-chessmen-hud.css'
       - 'apps/4leaf/rog/dice-original-selector.css'
       - 'apps/4leaf/rog/dice-native-menu-chrome.css'
+      - 'apps/4leaf/rog/dice-native-dialog-event.css'
+      - 'apps/4leaf/rog/tests/dice-native-dialog-event.cjs'
       - 'apps/4leaf/rog/tests/dice-chessmen-hud.cjs'
       - 'apps/4leaf/rog/tests/registry-native-portraits.cjs'
       - 'apps/4leaf/rog/tests/world-chat.cjs'
@@ -122,6 +124,8 @@ jobs:
         run: node apps/4leaf/rog/tests/dice-chessmen-hud.cjs
       - name: Verify authentic native 796x528 WorldMap plus separate source screenshot full moon
         run: node apps/4leaf/rog/tests/world-map-moon.cjs
+      - name: Validate real original Genesis dialog and game event message in Chromium
+        run: node apps/4leaf/rog/tests/dice-native-dialog-event.cjs
       - name: Verify original TOWN SELECT is used solely for dice game channels
         run: node apps/4leaf/rog/tests/dice-channel.cjs
       - name: Verify original ChatRoom furniture survives transient CDN HTTP 503
