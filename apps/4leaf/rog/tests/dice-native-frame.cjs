@@ -34,6 +34,7 @@ const path=require('node:path');
     atlasTopbar:await dims('topbar'),
     atlasTitle:await dims('title'),
     atlasAbility:await dims('abilitybar'),
+    atlasMenu:await dims('menu'),
     atlasTerrain:await dims('bgtile'),
     frame:box('#app'),main:box('#main'),chat:box('.messenger'),mini:box('#board-mini'),
     chatBackground:getComputedStyle(chat).backgroundImage,
@@ -52,6 +53,7 @@ const path=require('node:path');
   assert.deepEqual(native.atlasChat,[406,152],'original live chat window resource is 406x152');
   assert.deepEqual(native.atlasMini,[172,152],'original minimap resource is 172x152');
   assert.deepEqual(native.atlasAbility,[92,64],'original four-frame 92x16 ABILITY atlas');
+  assert.deepEqual(native.atlasMenu,[608,30],'true original 608x30 Genesis in-game IMG/menu atlas');
   assert.deepEqual(native.atlasTerrain,[725,485],'actual recovered 725x485 native Dice forest-and-cliff battlefield');
   assert.ok(Math.abs(native.frame[2]-800)<2&&Math.abs(native.frame[3]-600)<2,'desktop game uses source logical frame');
   assert.ok(native.main[2]>=594&&native.main[2]<=612,'608px original content coordinate space retained');
@@ -101,6 +103,42 @@ const path=require('node:path');
   assert.ok(Math.abs(nativeTiles.hitbox[0]/nativeTiles.hitbox[1]-145/97)<0.02,'independent TIS hitbox preserves original source aspect');
   assert.ok(nativeTiles.clickable&&nativeTiles.dataset!==undefined&&nativeTiles.title.includes('칸'),'source tiles retain independent hitboxes, accessible source indices and actual gameplay handlers');
 
+  const sourceMenu=await page.evaluate(()=>{
+   const rect=s=>document.querySelector(s).getBoundingClientRect();
+   const menu=document.querySelector('#game .scene-banner');
+   const world=document.querySelector('#game .board-area');
+   const exit=document.querySelector('#exit-game');
+   const menuStyle=getComputedStyle(menu);
+   const info=document.querySelector('#dice-menu-round');
+   const party=document.querySelector('#dice-menu-party');
+   return {
+    title:getComputedStyle(document.querySelector('#app>.titlebar')).display,
+    bar:getComputedStyle(document.querySelector('#app>.statusbar')).display,
+    topline:getComputedStyle(document.querySelector('#game .game-topline')).display,
+    background:menuStyle.backgroundImage,
+    height:rect('#game .scene-banner').height,
+    alignment:Math.abs(rect('#game .board-area').top-rect('#game .scene-banner').bottom),
+    buttons:[info,party].map(btn=>({
+     width:btn.getBoundingClientRect().width,height:btn.getBoundingClientRect().height,
+     source:getComputedStyle(btn).backgroundImage
+    })),
+    exit:{source:getComputedStyle(exit).backgroundImage,width:exit.getBoundingClientRect().width}
+   };
+  });
+  assert.equal(sourceMenu.title,'none','original Dice client does not show invented revival Windows titlebar');
+  assert.equal(sourceMenu.bar,'none','original Dice client does not have invented bottom status strip');
+  assert.equal(sourceMenu.topline,'none','remove fake second PLAYERS/ROUND strip that stole historic stage height');
+  assert.ok(sourceMenu.background.includes('/original/IMG/menu.png'),'top chrome paints the recovered real source menu art');
+  assert.equal(sourceMenu.height,30,'source game menu uses native 30px logical frame');
+  assert.ok(sourceMenu.alignment<2,'actual battlefield begins directly below source menu');
+  assert.ok(sourceMenu.buttons.every(b=>b.width===29&&b.height===29&&b.source.includes('/original/IMG/menu.png')),'two source glyphs are actual working buttons');
+  assert.ok(sourceMenu.exit.source.includes('/original/MainFrame/toolbarbtn.png')&&sourceMenu.exit.width===30,'actual accessible OUT uses original toolbar sprite');
+  await page.locator('#dice-menu-round').click();
+  assert.ok((await page.locator('#modal:not(.hidden) #modal-content').textContent()).includes('라운드'),'first native icon opens current real match state');
+  await page.locator('#modal-buttons button').first().click();
+  await page.locator('#dice-menu-party').click();
+  assert.ok((await page.locator('#modal:not(.hidden) #modal-title').textContent()).includes('체스맨'),'second native icon opens the currently selected original chessman');
+  await page.locator('#modal-buttons button').first().click();
   assert.ok(native.chatInputVisible,'the original chat source art has a real input');
   assert.equal(await page.locator('#mini-map-canvas').count(),1,'only one working minimap canvas');
   const initialAbility=await page.locator('#ability-btn').evaluate(el=>{
@@ -145,6 +183,8 @@ const path=require('node:path');
   await page.locator('#modal-buttons button').filter({hasText:'나가기'}).click();
   await page.waitForFunction(()=>window.__LEAF_DICE_FRAME__.getState().docked===false);
   assert.equal(await page.locator('#board-mini').evaluate(el=>el.parentElement.id),'board-area','return original minimap to game when outside dice route');
+  assert.notEqual(await page.locator('#app>.titlebar').evaluate(el=>getComputedStyle(el).display),'none','leaving Dice returns normal WorldMap/ChatTown chrome');
+  assert.notEqual(await page.locator('#app>.statusbar').evaluate(el=>getComputedStyle(el).display),'none','other screens still retain their own status panel');
   await page.locator('[data-route="lobby"]').first().click();
   await page.locator('#lobby-join').click();
   assert.ok(await page.locator('#game:not(.hidden)').isVisible(),'resumed match still usable');
