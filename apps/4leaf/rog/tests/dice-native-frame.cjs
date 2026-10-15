@@ -7,7 +7,7 @@ const path=require('node:path');
  const errors=[];
  page.on('pageerror',e=>errors.push(String(e)));
  try{
-  await page.goto('file://'+path.resolve(__dirname,'../index.html'));
+  await page.goto(process.env.FOURLEAF_TEST_URL || 'file://'+path.resolve(__dirname,'../index.html'));
   await page.waitForFunction(()=>!!window.__LEAF_DICE_FRAME__&&!!window.__ROG_TEST__);
   await page.locator('[data-route="lobby"]').first().click();
   await page.locator('#lobby-create').click();
@@ -33,6 +33,7 @@ const path=require('node:path');
     atlasMini:await dims('minimap'),
     atlasTopbar:await dims('topbar'),
     atlasTitle:await dims('title'),
+    atlasAbility:await dims('abilitybar'),
     frame:box('#app'),main:box('#main'),chat:box('.messenger'),mini:box('#board-mini'),
     chatBackground:getComputedStyle(chat).backgroundImage,
     miniBackground:getComputedStyle(mini).backgroundImage,
@@ -46,6 +47,7 @@ const path=require('node:path');
   assert.deepEqual(native.atlasTopbar,[608,42],'original topbar is 608x42');
   assert.deepEqual(native.atlasChat,[406,152],'original live chat window resource is 406x152');
   assert.deepEqual(native.atlasMini,[172,152],'original minimap resource is 172x152');
+  assert.deepEqual(native.atlasAbility,[92,64],'original four-frame 92x16 ABILITY atlas');
   assert.ok(Math.abs(native.frame[2]-800)<2&&Math.abs(native.frame[3]-600)<2,'desktop game uses source logical frame');
   assert.ok(native.main[2]>=594&&native.main[2]<=612,'608px original content coordinate space retained');
   assert.ok(Math.abs(native.chat[2]-406)<1&&Math.abs(native.chat[3]-152)<1,'native chat bitmap registration');
@@ -59,6 +61,26 @@ const path=require('node:path');
   assert.equal(native.nodeCount,104,'the source board contains live interactive TIS cells');
   assert.ok(native.chatInputVisible,'the original chat source art has a real input');
   assert.equal(await page.locator('#mini-map-canvas').count(),1,'only one working minimap canvas');
+  const initialAbility=await page.locator('#ability-btn').evaluate(el=>{
+   const st=getComputedStyle(el),r=el.getBoundingClientRect();
+   return {width:r.width,height:r.height,image:st.backgroundImage,pos:st.backgroundPosition,disabled:el.disabled};
+  });
+  assert.equal(initialAbility.disabled,true,'ability action waits for actual 100% charge');
+  assert.deepEqual([initialAbility.width,initialAbility.height],[92,16],'live ability button uses native 92x16 frame');
+  assert.ok(initialAbility.image.includes('/original/IMG/abilitybar.png'),'actual source sprite powers the button');
+  assert.ok(initialAbility.pos.includes('0px 0px'),'uncharged ability uses source resting frame');
+  await page.evaluate(()=>{
+   const m=window.__ROG_TEST__.getMatch();
+   m.players[0].ability=100;
+   window.__ROG_TEST__.drawGame();
+  });
+  assert.ok(await page.locator('#ability-btn').isEnabled(),'original button becomes interactive at full charge');
+  assert.ok((await page.locator('#ability-btn').evaluate(el=>getComputedStyle(el).backgroundPosition)).includes('-16px'),'charged ability uses live source frame');
+  await page.locator('#ability-btn').hover();
+  assert.ok((await page.locator('#ability-btn').evaluate(el=>getComputedStyle(el).backgroundPosition)).includes('-32px'),'hover uses independent original frame');
+  await page.locator('#ability-btn').click();
+  assert.ok(await page.locator('#modal:not(.hidden)').isVisible(),'real charged ability opens original game ability selection');
+  await page.locator('#modal-buttons button').filter({hasText:'취소'}).click();
   await page.locator('#message').fill('원본 채팅창 테스트');
   await page.locator('#message').press('Enter');
   await page.waitForFunction(()=>document.querySelector('#chat-log')?.textContent.includes('원본 채팅창 테스트'));
