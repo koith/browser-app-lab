@@ -1,0 +1,26 @@
+/* Source-verified native TIS tiles are 145x97 RGBA art with the original
+   hex-platform illustration ALREADY PAINTED. Extra generated tile numbers,
+   symbol glyphs and a giant fake GENESIS WORLD centre crest are NOT part
+   of the extracted TIS bitmap and obscure both the route and native art.
+   Keep each independent actual #board-nodes .tile hitbox, backing image,
+   original DMP index in data-tile/title, and actual pawn movement logic. */
+#app.app-classic-dice #game .board-world .tile .tile-symbol,
+#app.app-classic-dice #game .board-world .tile small{
+ display:none!important;
+}
+#app.app-classic-dice #game .board-world .board-center{
+ display:none!important;
+}
+#app.app-classic-dice #game #board-lines{
+ opacity:0!important;
+}
+/* The 70x47 artwork footprint is ratio-equivalent to 145x97 recovered PNGs.
+   No rounded invented CSS card, border, clip or transformed text over source. */
+#app.app-classic-dice #game .board-world .tile[data-original-art]{
+ box-sizing:border-box!important;
+ width:70px!important;height:47px!important;
+ border:0!important;border-radius:0!important;
+ padding:0!important;
+ transform:translate(-50%,-50%)!important;
+ background-size:100% 100%!important;
+}
