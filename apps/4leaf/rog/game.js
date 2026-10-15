@@ -123,6 +123,26 @@ function modal(title,body,buttons){
  else delete modalNode.dataset.nativeDiceDialog;
  $('modal-title').textContent=title;$('modal-content').replaceChildren();if(typeof body==='string'){$('modal-content').textContent=body}else if(body)$('modal-content').append(body);$('modal-buttons').replaceChildren();buttons.forEach(opt=>{const b=document.createElement('button');b.textContent=opt.label;b.className=opt.primary?'primary':'';b.onclick=()=>{$('modal').classList.add('hidden');if(opt.run)opt.run()};$('modal-buttons').append(b)});$('modal').classList.remove('hidden')}
 function ask(title,body,options){return new Promise(resolve=>modal(title,body,options.map((a,i)=>({label:a,primary:i===0,run:()=>resolve(i)}))))}
+function syncNativeDiceEvent(message){
+ // The original app's modern #move-log footer is hidden by the restored
+ // 2003 game layout. Render the genuine source 244x52 IMG event frame
+ // INSIDE the actual visible battlefield instead, sourced exclusively from
+ // real recorded match moves, never an invented status or copied screenshot.
+ const area=$('board-area');if(!area||!match)return;
+ let output=$('dice-native-event');
+ if(!output){
+  output=document.createElement('output');
+  output.id='dice-native-event';
+  output.className='dice-native-event';
+  output.setAttribute('role','status');
+  output.setAttribute('aria-live','polite');
+  output.dataset.source='IMG/eventmsgbox.png';
+  area.append(output);
+ }
+ output.textContent=String(message||'');
+ output.title=String(message||'');
+ output.dataset.eventText=String(message||'');
+}
 function toast(message){
  log(message);
  const logElement=$('move-log');
@@ -134,6 +154,7 @@ function toast(message){
   logElement.title=String(message);
   logElement.dataset.nativeSource='IMG/eventmsgbox.png';
  }
+ syncNativeDiceEvent(message);
 }
 function rosterByIds(ids){return (ids||[]).map(id=>CARD_MAP[id]).filter(Boolean).slice(0,4)}
 function teamStats(ids){
@@ -543,7 +564,7 @@ function drawNativeChessmen(){
   };
  }
 }
-function drawGame(){if(!match||!MAPS[match.map])return;chooseSourcePath(match.map);const p=(match.mode==='hotseat'||match.mode==='network'?activePlayer():match.players[0]),stats=teamStats(p.team);$('game-map-title').textContent=match.map;const elapsed=Math.floor((Date.now()-(match.startedAt||Date.now()))/1000);$('mini-time').textContent='TIME '+formatGameDuration(Math.max(0,elapsed))+' / GP '+formatGameDuration(match.players.length*90);$('element-label').textContent=match.attribute;$('player-count').textContent=match.players.length;$('turn-indicator').textContent='ROUND '+match.round+' · '+match.players[match.active].name+' TURN';$('my-name').textContent=p.name;$('my-stats').textContent='이동 '+stats.move+' · 공격 '+stats.atk+' · 방어 '+stats.def+' · 지력 +'+stats.int;$('my-position').textContent=p.jail>0?'감옥 '+p.jail+'턴':p.position===0?'START':p.position===match.tiles.length-1?'GOAL':(p.position+1)+'번째 칸';$('my-portrait').innerHTML='<img class="player-sprite" alt="" src="'+imageFor(p.team[0]||'soldier')+'">';$('ability-fill').style.width=p.ability+'%';$('game-players').replaceChildren();match.players.forEach((user,i)=>{const li=document.createElement('div');li.className=match.active===i?'is-turn':'';li.textContent=(match.active===i?'▶ ':'　')+user.pawn+' '+user.name+' '+(user.position+1)+'칸 · '+user.ability+'%';li.style.color=user.color;$('game-players').append(li)});$('my-items').replaceChildren();p.items.forEach((itemId,i)=>{const item=ITEM_MAP[itemId],btn=document.createElement('button');btn.className='item-card';btn.innerHTML='<span class="item-icon">'+(item?.icon||'✧')+'</span>'+(item?.name||itemId);btn.title=item.hint;btn.disabled=match.finished||!playerCanAct()||p.usedItem||busy;btn.onclick=()=>useItem(i);$('my-items').append(btn)});$('roll-btn').disabled=!playerCanAct();$('ability-btn').disabled=!playerCanAct()||p.ability<100;$('move-log').textContent=match.message;drawBoard();drawBattlePanels();drawNativeChessmen();drawMinimap();trackActivePawn()}
+function drawGame(){if(!match||!MAPS[match.map])return;chooseSourcePath(match.map);const p=(match.mode==='hotseat'||match.mode==='network'?activePlayer():match.players[0]),stats=teamStats(p.team);$('game-map-title').textContent=match.map;const elapsed=Math.floor((Date.now()-(match.startedAt||Date.now()))/1000);$('mini-time').textContent='TIME '+formatGameDuration(Math.max(0,elapsed))+' / GP '+formatGameDuration(match.players.length*90);$('element-label').textContent=match.attribute;$('player-count').textContent=match.players.length;$('turn-indicator').textContent='ROUND '+match.round+' · '+match.players[match.active].name+' TURN';$('my-name').textContent=p.name;$('my-stats').textContent='이동 '+stats.move+' · 공격 '+stats.atk+' · 방어 '+stats.def+' · 지력 +'+stats.int;$('my-position').textContent=p.jail>0?'감옥 '+p.jail+'턴':p.position===0?'START':p.position===match.tiles.length-1?'GOAL':(p.position+1)+'번째 칸';$('my-portrait').innerHTML='<img class="player-sprite" alt="" src="'+imageFor(p.team[0]||'soldier')+'">';$('ability-fill').style.width=p.ability+'%';$('game-players').replaceChildren();match.players.forEach((user,i)=>{const li=document.createElement('div');li.className=match.active===i?'is-turn':'';li.textContent=(match.active===i?'▶ ':'　')+user.pawn+' '+user.name+' '+(user.position+1)+'칸 · '+user.ability+'%';li.style.color=user.color;$('game-players').append(li)});$('my-items').replaceChildren();p.items.forEach((itemId,i)=>{const item=ITEM_MAP[itemId],btn=document.createElement('button');btn.className='item-card';btn.innerHTML='<span class="item-icon">'+(item?.icon||'✧')+'</span>'+(item?.name||itemId);btn.title=item.hint;btn.disabled=match.finished||!playerCanAct()||p.usedItem||busy;btn.onclick=()=>useItem(i);$('my-items').append(btn)});$('roll-btn').disabled=!playerCanAct();$('ability-btn').disabled=!playerCanAct()||p.ability<100;$('move-log').textContent=match.message;syncNativeDiceEvent(match.message);drawBoard();drawBattlePanels();drawNativeChessmen();drawMinimap();trackActivePawn()}
 const mapViewport={zoom:1.25,panX:0,panY:0,autoFollow:true};
 function trackActivePawn(){
  if(!match||!PATH.length)return;
