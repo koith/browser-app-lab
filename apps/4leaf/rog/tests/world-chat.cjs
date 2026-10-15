@@ -516,44 +516,29 @@ const path=require('path');
  await host.locator('#social-chat-north').click();
  await host.locator('.social-district-hotspot').nth(3).click();
  assert.equal(await host.evaluate(()=>window.__LEAF_SOCIAL__.getState().view),'directory');
- assert.equal(await host.locator('.social-directory-row').count(),0,'chat catalogue has no invented template-based rooms');
- assert.equal(await host.locator('.social-public-room').count(),8,'eight persistent, independently enterable spatial rooms per selected district');
- await host.waitForFunction(()=>document.querySelector('#social-map-plane')?.dataset.terrain==='ready',null,{timeout:16000});
- const nativeTerrain=await host.locator('#social-map-plane').evaluate(el=>getComputedStyle(el).backgroundImage);
- assert.ok(nativeTerrain.includes('original/IMG/bgtile.png'),'town terrain uses real extracted IMG/bgtile.png art instead of invented CSS gradients');
-
- // Each permanent room hotspot now rests over an actual house in the 725x485
- // native terrain tiles; HTML must not paint a giant fabricated wooden house.
- const nativeRoomMarkers=await host.locator('#social-directory-list .social-public-room').evaluateAll(els=>els.map(el=>{
-  const style=getComputedStyle(el);
-  return {x:parseFloat(el.style.left),y:parseFloat(el.style.top),
-   width:parseFloat(style.width),height:parseFloat(style.height),
-   background:style.backgroundColor,backgroundImage:style.backgroundImage,
-   boxShadow:style.boxShadow,number:el.querySelector('.social-room-number')?.textContent,
-   label:el.querySelector('.social-room-users')?.textContent};
+ assert.equal(await host.locator('.social-directory-row').count(),0,
+  'only rooms created by actual participants may be listed');
+ assert.equal(await host.locator('.social-public-room').count(),0,
+  'do not fabricate eight rooms per area / 128 permanent rooms');
+ assert.ok((await host.locator('#social-directory-empty').textContent()).includes('개설된 채팅방이 없습니다'),
+  'a vacant area is visibly honest about occupancy');
+ const emptyTerrain=await host.locator('#social-map-plane').evaluate(el=>({
+  type:el.dataset.terrain,image:getComputedStyle(el).backgroundImage
  }));
- assert.deepEqual(nativeRoomMarkers.map(({x,y})=>[x,y]),[
-  [14,75],[275,17],[435,115],[739,75],
-  [1160,115],[435,600],[739,560],[1025,788]
- ],'reconstructed room hit areas align to houses on repeated 725x485 native terrain tiles');
- assert.ok(nativeRoomMarkers.every(m=>m.width===106&&m.height===81&&
-  m.background==='rgba(0, 0, 0, 0)'&&m.backgroundImage==='none'&&m.boxShadow==='none'),
-  'no fake wooden building graphic paints over original ChatTown landscape: '+JSON.stringify(nativeRoomMarkers));
- assert.equal(new Set(nativeRoomMarkers.map(m=>m.number)).size,8,
-  'native house hotspots retain eight independently enterable room identities');
-
- assert.equal(await host.locator('.social-public-room').first().locator('.social-room-users').textContent(),'0/12명','empty permanent rooms have no fabricated occupants');
+ assert.equal(emptyTerrain.type,'unverified','exact historical ChatTown room-map terrain is unknown');
+ assert.equal(emptyTerrain.image,'none','do not paint unrelated Dice bgtile on ChatTown');
  const mapBefore=await host.locator('#social-map-plane').evaluate(el=>el.style.transform);
  await host.locator('#social-map-viewport').focus();
  await host.keyboard.press('ArrowRight');
  const horizontalPan=await host.locator('#social-map-plane').evaluate(el=>el.style.transform);
- assert.notEqual(horizontalPan,mapBefore,'direction keys pan the room estate horizontally');
+ assert.notEqual(horizontalPan,mapBefore,'direction keys pan the estate horizontally');
  await host.keyboard.press('ArrowDown');
  const mapAfter=await host.locator('#social-map-plane').evaluate(el=>el.style.transform);
- assert.notEqual(mapAfter,horizontalPan,'direction keys pan the native room estate vertically');
- await host.locator('.social-public-room').first().evaluate(el=>el.click());
- assert.equal(await host.evaluate(()=>window.__LEAF_SOCIAL__.getState().view),'room','permanent room is enterable without creating a room');
- assert.equal(await host.locator('.social-avatar').count(),1,'permanent room contains only genuine participants');
+ assert.notEqual(mapAfter,horizontalPan,'direction keys pan the estate vertically');
+ const actualRoomId=await host.evaluate(()=>window.__LEAF_SOCIAL__.createRoom('실제 개설 채팅방',2,12));
+ assert.ok(actualRoomId,'room created by a genuine participant');
+ assert.equal(await host.evaluate(()=>window.__LEAF_SOCIAL__.getState().view),'room');
+ assert.equal(await host.locator('.social-avatar').count(),1,'room contains only actual participants');
  assert.equal(await host.locator('#social-image-frame').evaluate(el=>parseFloat(getComputedStyle(el).height)),528,
   'entering an original ChatRoom restores its independent 794×528 scene');
  // Actual recovered player screenshots chat_ref.jpg and chat.jpg place BOTH
@@ -633,11 +618,18 @@ const path=require('path');
  assert.equal(nativeEntry.name,'rgba(0, 0, 0, 0)','native nickname frame remains visible');
  assert.equal(nativeEntry.edit,'rgba(0, 0, 0, 0)','native text frame remains visible');
  assert.equal(nativeEntry.send,'채팅 메시지 보내기','native source speech-bubble send hitbox is accessible');
- assert.equal(await host.locator('#social-close-room').count(),0,'permanent room cannot be destroyed by its visitors');
+ assert.equal(await host.locator('#social-close-room').count(),1,'room creator may close their own room');
  await host.locator('#social-back').click();
  assert.equal(await host.evaluate(()=>window.__LEAF_NATIVE_ROOM_PANELS__?.getState().messengerParent),'main','leaving source room returns exact same real chat input to main');
  assert.equal(await host.locator('#social-peer-panel').evaluate(el=>el.parentElement.classList.contains('social-layout')),true,'the single real roster returns to its ordinary town layout');
- assert.equal(await host.locator('.social-public-room').count(),8,'permanent room persists after leaving');
+ assert.equal(await host.locator('.social-public-room').count(),0,'no fabricated preset rooms after leaving');
+ assert.equal(await host.locator('.social-directory-row').count(),1,'the actually created room persists after leaving');
+ const realMarker=await host.locator('.social-directory-row').evaluate(el=>({
+  x:Number.parseFloat(el.style.left),y:Number.parseFloat(el.style.top),count:el.querySelector('.social-room-users').textContent
+ }));
+ assert.ok(realMarker.x>=70&&realMarker.x<=1380&&realMarker.y>=70&&realMarker.y<=1050,
+  'actual room has a distinct spatial position (not claimed as original)');
+ assert.equal(realMarker.count,'0/12명','leaving a real room clears its occupancy');
  assert.equal(await host.locator('#social-map-plane').evaluate(el=>el.style.transform),mapAfter,'the original room terrain camera resumes its prior position after returning from a room');
  await host.locator('#social-new-room').click();
  assert.equal(await host.locator('#social-modal [name="background"] option').count(),6,'six source ChatRoom backgrounds remain selectable');
