@@ -132,6 +132,51 @@ const assert=require('node:assert/strict');
   assert.ok(await page.locator('#dice-lobby-scene.config-open').isVisible());
   assert.ok((await page.locator('#dice-native-stage').evaluate(el=>getComputedStyle(el).backgroundImage))
    .includes('original/Room/roomback.png'),'original READY and CHESSMAN INFO are drawn from Room/roomback.png');
+  await page.waitForFunction(()=>window.__LEAF_DICE_ROOM_BUTTONS__?.getState().loaded==='true',null,{timeout:15000});
+  const nativeReady=await page.evaluate(async()=>{
+   const renderState=window.__LEAF_DICE_ROOM_BUTTONS__.getState();
+   const image=async path=>{const i=new Image();i.src=path;await i.decode();return i};
+   const [atlas,background]=await Promise.all([
+    image('./original/Room/roombutton.png'),image('./original/Room/roomback.png')]);
+   const pixels=i=>{const c=document.createElement('canvas');c.width=i.naturalWidth;c.height=i.naturalHeight;
+    const g=c.getContext('2d',{willReadFrequently:true});g.drawImage(i,0,0);
+    return g.getImageData(0,0,c.width,c.height).data};
+   const sheet=pixels(atlas),back=pixels(background);
+   const rows={remake:0,select:111,ready:78};
+   const buttons=renderState.buttons.map(b=>{
+    let total=0,n=0;
+    for(let y=0;y<b.h;y+=2)for(let x=0;x<b.w;x+=2){
+     const p=((rows[b.name]+y)*atlas.naturalWidth+x)*4;
+     const r=sheet[p],g=sheet[p+1],blue=sheet[p+2];
+     if(r<=60&&g>=225&&blue<=70)continue;
+     const q=((b.y+y)*background.naturalWidth+b.x+x)*4;
+     for(let k=0;k<3;k++){total+=Math.abs(sheet[p+k]-back[q+k]);n++}
+    }
+    return {...b,meanError:total/n,compared:n};
+   });
+   return {source:[atlas.naturalWidth,atlas.naturalHeight],buttons};
+  });
+  assert.deepEqual(nativeReady.source,[493,302],'original Room button state atlas is used');
+  assert.deepEqual(nativeReady.buttons.map(b=>[b.name,b.x,b.y,b.w,b.h]),[
+   ['remake',200,306,123,42],['select',560,232,68,28],['ready',524,361,105,33]
+  ],'all original ROOM READY controls use source-correlated 794×404 coordinates');
+  assert.ok(nativeReady.buttons.every(b=>b.meanError<32&&b.compared>500),
+   'REMAKE/SELECT/READY match native source pixels: '+JSON.stringify(nativeReady.buttons));
+  await page.locator('#start-game').hover();
+  const hoverReady=await page.locator('#start-game .dice-original-room-button-art').evaluate(canvas=>{
+   const pix=canvas.getContext('2d',{willReadFrequently:true})
+    .getImageData(0,0,canvas.width,canvas.height).data;
+   let painted=0,green=0;
+   for(let i=0;i<pix.length;i+=4){
+    if(pix[i+3]<120)continue;painted++;
+    if(pix[i]<=60&&pix[i+1]>=225&&pix[i+2]<=70)green++;
+   }
+   return {frame:canvas.dataset.frame,painted,green};
+  });
+  assert.equal(hoverReady.frame,'1','native READY hover uses sprite frame 1');
+  assert.ok(hoverReady.painted>300,'original READY hover art remains visible');
+  assert.equal(hoverReady.green,0,'original green color key never covers ready room bitmap');
+
   assert.ok(await page.locator('#lobby-players .lobby-seat').count()===8,'native PLAYER panel displays eight distinct seats');
   assert.equal(await page.locator('#dice-team-picker').getAttribute('aria-expanded'),'false');
   await page.locator('#dice-team-picker').click();
