@@ -9,6 +9,7 @@
  height:min(600px,calc(100dvh - 12px));
 }
 #app.app-classic-dice > .workspace > .sidebar{
+ display:flex!important;
  flex:0 0 190px;width:190px;min-width:0;
  padding:5px;gap:5px;
 }
@@ -29,6 +30,9 @@
 #app.app-classic-dice #game #board-world::after{
  background:none!important;
 }
+/* Native dialogs must remain above the living chat window during game
+   confirmations (leave, select item, battle result). */
+#app.app-classic-dice #modal:not(.hidden){z-index:60!important}
 /* Native 406x152 chat sprite. Actual messages, nickname input and submit
    button live on top of the atlas' EMPTY fields rather than painted proxies. */
 #app.app-classic-dice .messenger{
@@ -123,7 +127,7 @@
  #app.app-classic-dice{
   width:100vw;height:100dvh;min-height:0;
  }
- #app.app-classic-dice > .workspace > .sidebar{display:none}
+ #app.app-classic-dice > .workspace > .sidebar{display:none!important}
  #app.app-classic-dice .messenger{
   width:min(406px,100%);
   flex-basis:120px;
