@@ -877,6 +877,29 @@ const path=require('path');
 
 
  await guest.setViewportSize({width:390,height:844});
+ // The archived ChatRoom has a real participant list. A small screen may
+ // temporarily overlap it but must never silently remove the list entirely.
+ await guest.evaluate(()=>window.__LEAF_SOCIAL__.createRoom('모바일 참가자 목록 검증',2));
+ assert.equal(await guest.locator('#rooms.classic-chat-room').count(),1,'actual ChatRoom on mobile');
+ assert.equal(await guest.locator('#social-peers-toggle').isVisible(),true,'mobile original roster is accessible');
+ assert.equal(await guest.locator('#social-peers-toggle').getAttribute('aria-expanded'),'false');
+ assert.equal(await guest.locator('#social-peer-panel').isVisible(),false,'mobile roster starts collapsed');
+ assert.equal(await guest.locator('.social-avatar.self').evaluate(el=>getComputedStyle(el).transitionDuration),'0s','mobile avatar teleports without interpolation');
+ await guest.locator('#social-peers-toggle').click();
+ assert.equal(await guest.locator('#social-peers-toggle').getAttribute('aria-expanded'),'true');
+ assert.equal(await guest.locator('#social-peer-panel').isVisible(),true,'roster opens in the original room');
+ assert.equal(await guest.locator('#social-peer-list .social-user-row').count(),1,'only the real participant is listed');
+ await guest.waitForFunction(()=>document.querySelector('#social-original-userlist')?.dataset.ready==='true',null,{timeout:10000});
+ assert.deepEqual(await guest.locator('#social-original-userlist').evaluate(el=>[el.width,el.height]),[150,38],'original ChatRoom userlist remains 150×38');
+ await guest.screenshot({path:'leaf-native-mobile-roster-open.png'});
+ await guest.locator('#social-peers-toggle').focus();
+ await guest.keyboard.press('Escape');
+ assert.equal(await guest.locator('#social-peers-toggle').getAttribute('aria-expanded'),'false','Escape closes the roster');
+ assert.equal(await guest.locator('#social-peer-panel').isVisible(),false,'the source room is fully exposed again');
+ await guest.locator('#social-peers-toggle').click();
+ await guest.locator('#social-back').click();
+ assert.equal(await guest.locator('#social-peers-toggle').isVisible(),false,'ChatTown never inherits ChatRoom roster controls');
+ assert.equal(await guest.locator('#rooms.social-peers-open').count(),0,'room exit resets the mobile roster');
  await guest.screenshot({path:'leaf-chat-mobile.png'});
  assert.ok(await guest.locator('#message').isVisible(),'mobile chat input');
  assert.ok(await guest.locator('#social-back').isVisible(),'mobile navigation');
