@@ -136,3 +136,37 @@
 /* Source Registry actors were vivid-green-keyed in the 2002 renderer.
  * Applying the same alpha mask to the original .board-pawn and ChatRoom
  * <img> also removes the visible rectangle while leaving images inspectable. */
+
+/* Real historical duel screenshot preserves the board scene BEHIND the
+ * gigantic BATTLE scores/actors/dice. Do not cover it with the modern fake
+ * inset gradient-window frame that the old revival used. Actual game.js duel
+ * actors and rolled values stay independent live DOM above the game map. */
+#app.app-classic-dice #game #battle-visual{
+ background:transparent!important;
+ border:0!important;
+ border-radius:0!important;
+ box-shadow:none!important;
+ outline:none!important;
+ overflow:visible!important;
+}
+#app.app-classic-dice #game #battle-visual .battle-visual-head{
+ top:3%;
+ color:#ffe3a0;
+ text-shadow:1px 3px #9b224d,3px 5px #371b4b;
+}
+#app.app-classic-dice #game #battle-visual .battle-visual-total{
+ top:19%;
+}
+#app.app-classic-dice #game #battle-visual .battle-visual-vs{
+ align-self:center;
+ margin-top:20%;
+}
+#app.app-classic-dice #game #battle-visual .battle-visual-actor{
+ animation:battle-actor 1s ease-in-out infinite alternate;
+}
+@media(prefers-reduced-motion:reduce){
+ #app.app-classic-dice #game #battle-visual .battle-visual-actor,
+ #app.app-classic-dice #game #battle-visual .battle-visual-head{
+  animation:none!important;
+ }
+}
