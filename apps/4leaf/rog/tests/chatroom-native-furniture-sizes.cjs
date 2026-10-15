@@ -65,7 +65,11 @@ const {chromium}=require('playwright');
    await page.screenshot({path:'leaf-native-room'+spec.background+'-furniture.png'});
    // Clicking an empty source-floor location teleports, not linear animation.
    const before=await page.locator('.social-avatar.self').evaluate(el=>el.dataset.seat);
-   await page.locator('#social-image-frame').click({position:{x:150,y:485},force:true});
+   const frameBox=await page.locator('#social-image-frame').boundingBox();
+   assert.ok(frameBox&&frameBox.width>100&&frameBox.height>100,'room bitmap is visible');
+   await page.locator('#social-image-frame').click({position:{
+    x:Math.min(110,frameBox.width*.16),y:frameBox.height*.87
+   },force:true});
    const after=await page.locator('.social-avatar.self').evaluate(el=>({
     seat:el.dataset.seat,transition:getComputedStyle(el).transitionDuration
    }));
