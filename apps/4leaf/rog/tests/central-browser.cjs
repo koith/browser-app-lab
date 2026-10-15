@@ -16,14 +16,21 @@ const BASE='http://127.0.0.1:8765/',API='http://127.0.0.1:8877';
   await page.waitForFunction(()=>window.__LEAF_SOCIAL__&&window.__LEAF_CENTRAL_CHAT__?.ready,{timeout:12000});
   await page.evaluate(()=>{window.__LEAF_SOCIAL__.openRegion('north');window.__ROG_TEST__.go('rooms')});
   await page.locator('.social-district-hotspot').nth(3).click();
-  assert.equal(await page.locator('.social-public-room').count(),8);
+  assert.equal(await page.locator('.social-public-room').count(),0,'no fake public rooms');
+  assert.equal(await page.locator('.social-directory-row').count(),0);
  };
  try{
   await enterTown(host);await enterTown(guest);
-  assert.equal(await host.locator('.social-public-room').first().locator('.social-room-users').textContent(),'0/12명');
-  await host.locator('.social-public-room').first().evaluate(el=>el.click());
+  await host.locator('#social-new-room').click();
+  await host.locator('#social-modal [name="name"]').fill('중앙 테스트 공개방');
+  await host.locator('#social-modal button[type="submit"]').click();
   await host.waitForFunction(()=>window.__LEAF_SOCIAL__.getState().view==='room',{timeout:15000});
-  await guest.locator('.social-public-room').first().evaluate(el=>el.click());
+  const publicRoom=await host.evaluate(()=>window.__LEAF_SOCIAL__.getState().roomId);
+  await guest.waitForFunction(id=>document.querySelector('.social-directory-row[data-room="'+id+'"] .social-room-users')?.textContent==='1/12명',
+   publicRoom,{timeout:15000});
+  assert.equal(await guest.locator('.social-directory-row[data-room="'+publicRoom+'"] .social-room-users').textContent(),'1/12명',
+   'central API occupancy is real, not a fake preset count');
+  await guest.locator('.social-directory-row[data-room="'+publicRoom+'"]').evaluate(el=>el.click());
   await guest.waitForFunction(()=>window.__LEAF_SOCIAL__.getState().view==='room',{timeout:15000});
   await Promise.all([
    host.waitForFunction(()=>document.querySelectorAll('.social-avatar').length===2,{timeout:15000}),

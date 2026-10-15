@@ -11,6 +11,11 @@ on:
       - 'apps/4leaf/rog/index.html'
       - 'apps/4leaf/rog/tests/central-browser.cjs'
       - '.github/workflows/rog-central-chat.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/**'
+      - '.github/workflows/rog-*.yml'
   workflow_dispatch:
 jobs:
   server-authority:
