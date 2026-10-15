@@ -522,7 +522,7 @@ body>.social-modal .recordable-article p{white-space:pre-wrap;overflow-wrap:anyw
    Previous dark tags sat ~20px too low. Frame/colors are screenshot-based
    reconstruction (INFERRED), not an extracted standalone nameplate bitmap. */
 #rooms .social-interior .social-avatar-name{
- top:-78px!important;
+ top:-70px!important;
  bottom:auto;
  pointer-events:none!important;
  background:#566bc6!important;
