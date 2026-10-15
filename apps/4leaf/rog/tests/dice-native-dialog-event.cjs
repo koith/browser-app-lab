@@ -98,6 +98,10 @@ const path=require('node:path');
   assert.ok((await page.evaluate(()=>window.__ROG_TEST__.getMatch().history)).includes(move.event),
    'event box is sourced from real persistent match history, never made-up status');
   await page.screenshot({path:'leaf-original-genesis-live-eventbox.png'});
+  // The real move is asynchronous: do not try ability while the movement
+  // resolver still owns the busy flag. Wait for the actual next human turn.
+  await page.waitForFunction(()=>!document.querySelector('#roll-btn')?.disabled
+   &&!window.__ROG_TEST__.getMatch()?.finished,null,{timeout:15000});
   // Source frame also follows real charged-ability decision, not only exit.
   await page.evaluate(()=>{
    const match=window.__ROG_TEST__.getMatch();
