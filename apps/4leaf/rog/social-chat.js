@@ -311,8 +311,9 @@
  function renderHistory(){
   const log=$('chat-log');if(!log)return;
   log.replaceChildren();
-  systemLine(central.enabled?'중앙 채팅 서버 이용 모드 · 실제 접속자와 공개방 정원만 표시됩니다.':
-   '원본 4LEAF 채팅 화면 복원 · 이 브라우저 탭 및 직접 연결된 사용자만 표시됩니다.');
+  // The original conversation pane starts with messages, not a fabricated
+  // restoration/debugging banner. Genuine server warnings still use systemLine.
+  // Connection-scope information remains available in room controls.
   for(const item of roomHistory(state.scope))renderMessage(item);
  }
  // Contemporary 2001 service press documented /주사위 and /묵 /찌 /빠.
