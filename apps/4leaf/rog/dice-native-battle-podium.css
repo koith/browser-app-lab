@@ -1,0 +1,158 @@
+/* BATTLE composition anchored to the actual archived 4LEAF
+   board.jpg / battle.jpg player-vs-player scenes. The original stages are
+   thick mechanical podiums with glowing circular contact surfaces and
+   foot/beam shadows, NOT the shallow modern horizontal gradient bars.
+   Historical 3D meshes are absent; these are CSS-built live 2.5D parts,
+   not screenshots or claims of asset-perfect 2003 rendering. */
+#app.app-classic-dice #game #battle-visual{
+ isolation:isolate;
+ background:transparent!important;
+ border:0!important;
+ box-shadow:none!important;
+ overflow:visible!important;
+}
+#app.app-classic-dice #game #battle-visual .battle-visual-side{
+ position:relative;
+ isolation:isolate;
+ overflow:visible;
+}
+#app.app-classic-dice #game #battle-visual .battle-visual-pedestal{
+ position:absolute!important;
+ bottom:8%!important;
+ width:82%!important;
+ height:25%!important;
+ max-width:176px;
+ box-sizing:border-box!important;
+ border:0!important;
+ border-radius:0!important;
+ background:
+  repeating-linear-gradient(90deg,transparent 0 13px,#5b665d77 14px 18px,transparent 19px 25px),
+  linear-gradient(180deg,#839384 0%,#576b65 20%,#354640 36%,#526860 55%,#273632 75%,#172726 100%)!important;
+ clip-path:polygon(8% 0,92% 0,100% 22%,98% 74%,80% 96%,25% 96%,3% 74%,0 22%);
+ box-shadow:none!important;
+ filter:drop-shadow(7px 15px 5px #0b1825bd)!important;
+ pointer-events:none;
+ z-index:2;
+ transform:none!important;
+}
+#app.app-classic-dice #game #battle-visual .battle-visual-pedestal::before{
+ content:'';
+ box-sizing:border-box;
+ position:absolute;left:8%;top:-1%;
+ width:84%;height:44%;
+ border:5px ridge #899d95;
+ border-radius:50% / 55%;
+ background:
+  radial-gradient(ellipse at 48% 47%,#b2ffae 0%,#8cf671 22%,#39ce43 37%,#176d3d 54%,#1a402d 66%,#849b87 70%,#283c32 81%)!important;
+ box-shadow:
+  inset 0 0 0 2px #a3c8a0,
+  inset 0 0 12px #31fa62,
+  0 3px 0 3px #263b3a,
+  0 0 13px #7bf66e9c;
+ z-index:4;
+ pointer-events:none;
+}
+#app.app-classic-dice #game #battle-visual .battle-visual-pedestal::after{
+ content:'';
+ position:absolute;
+ bottom:1%;left:18%;right:18%;height:43%;
+ background:
+  repeating-linear-gradient(90deg,#243d3d 0 8%,#a2afa4 9% 12%,#44524d 15% 21%,#1c3437 24% 34%),
+  linear-gradient(#6c8a83,#1f3339);
+ border:3px ridge #687e76;
+ clip-path:polygon(0 0,100% 0,93% 88%,74% 100%,25% 100%,8% 87%);
+ box-shadow:0 12px 7px #102126a6;
+ pointer-events:none;
+ z-index:1;
+}
+#app.app-classic-dice #game #battle-visual .battle-visual-side.defender .battle-visual-pedestal::before{
+ background:radial-gradient(ellipse at 48% 47%,#c7ffff 0%,#93eff6 21%,#50c3e4 37%,#236aa0 56%,#1e3f64 67%,#9ca8b5 72%,#30435e 82%)!important;
+ box-shadow:
+  inset 0 0 0 2px #a5dbe7,
+  inset 0 0 13px #62e8ff,
+  0 3px 0 3px #253747,
+  0 0 13px #7ae4f3b0;
+}
+#app.app-classic-dice #game #battle-visual .battle-visual-actor{
+ bottom:29%!important;
+ height:37%!important;
+ max-height:152px;
+ width:auto!important;
+ max-width:48%!important;
+ z-index:5!important;
+ object-position:center bottom;
+ image-rendering:auto;
+ filter:drop-shadow(4px 5px 2px #0b2328cc)!important;
+}
+#app.app-classic-dice #game #battle-visual .battle-visual-dice{
+ position:absolute!important;
+ bottom:1%!important;
+ left:1%!important;right:1%!important;
+ z-index:8!important;
+ pointer-events:none;
+ gap:4px!important;
+}
+#app.app-classic-dice #game #battle-visual .battle-visual-die{
+ position:relative;
+ width:33px;height:33px;
+ background:linear-gradient(135deg,#fffef9 0%,#eaf0f4 60%,#afc9ce 100%)!important;
+ border:1px solid #ffffff!important;
+ border-right-color:#9fb6c4!important;
+ border-bottom-color:#8ca4ac!important;
+ color:#272e3a!important;
+ text-shadow:none!important;
+ border-radius:2px!important;
+ box-shadow:2px 4px 0 #65747a,3px 6px 6px #101d28aa!important;
+ transform:rotate(-4deg);
+}
+#app.app-classic-dice #game #battle-visual .battle-visual-die:nth-child(2n){
+ transform:rotate(7deg) translateY(2px);
+}
+#app.app-classic-dice #game #battle-visual .battle-visual-side>strong{
+ top:27%!important;
+ font:11px/14px Gulim,'굴림',sans-serif!important;
+ color:#f0f6df!important;
+ text-shadow:1px 2px #182d35!important;
+ z-index:6!important;
+}
+#app.app-classic-dice #game #battle-visual .battle-visual-total{
+ top:16%!important;
+ font:900 clamp(45px,6vw,76px)/1 Georgia,'Times New Roman',serif!important;
+ -webkit-text-stroke:3px #a92a48!important;
+ text-shadow:2px 4px #471e3a!important;
+ z-index:7!important;
+}
+#app.app-classic-dice #game #battle-visual .battle-visual-vs{
+ position:relative;
+ align-self:flex-end!important;
+ margin:0 0 24%!important;
+ font:900 clamp(25px,4vw,42px)/1 Georgia,serif!important;
+ z-index:7!important;
+ color:#f33529!important;
+ -webkit-text-stroke:1px #631c20!important;
+ text-shadow:2px 3px #1c0f19!important;
+}
+@media(max-width:650px){
+ #app.app-classic-dice #game #battle-visual .battle-visual-pedestal{
+  width:88%!important;height:22%!important;bottom:12%!important;
+ }
+ #app.app-classic-dice #game #battle-visual .battle-visual-actor{
+  bottom:33%!important;height:28%!important;
+ }
+ #app.app-classic-dice #game #battle-visual .battle-visual-pedestal::before{
+  border-width:2px!important;
+ }
+ #app.app-classic-dice #game #battle-visual .battle-visual-total{
+  font-size:clamp(26px,8vw,43px)!important;
+  -webkit-text-stroke:1px #a92a48!important;
+ }
+ #app.app-classic-dice #game #battle-visual .battle-visual-die{
+  width:22px!important;height:22px!important;
+  font-size:19px!important;
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ #app.app-classic-dice #game #battle-visual .battle-visual-actor{
+  animation:none!important;
+ }
+}
