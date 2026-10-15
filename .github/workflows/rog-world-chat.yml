@@ -31,6 +31,7 @@ on:
       - 'apps/4leaf/rog/dice-native-player-portraits.css'
       - 'apps/4leaf/rog/dice-native-chessmen-hud.css'
       - 'apps/4leaf/rog/dice-original-selector.css'
+      - 'apps/4leaf/rog/dice-native-menu-chrome.css'
       - 'apps/4leaf/rog/tests/dice-chessmen-hud.cjs'
       - 'apps/4leaf/rog/tests/registry-native-portraits.cjs'
       - 'apps/4leaf/rog/tests/world-chat.cjs'
