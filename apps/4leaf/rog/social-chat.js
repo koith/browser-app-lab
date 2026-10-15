@@ -56,7 +56,7 @@
  const sourceDistrict=s=>{const name=safe(s,40);return name==='프레이 시티'?'퓨어 시티':name};
  const tabId=(()=>{try{const key='leaf_social_tab_identity_v1';let id=sessionStorage.getItem(key);if(!id){id=uuid();sessionStorage.setItem(key,id)}return id}catch{return uuid()}})();
  const nick=()=>safe($('profile-name')?.textContent||'Guest',12)||'Guest';
- const state={region:'north',district:REGIONS.north.districts[3][0],view:'town',roomId:null,rooms:loadRooms(),peers:new Map(),seen:new Set(),bubble:null,scope:'world',avatar:0,facing:1,position:{x:52,y:76},roomMapOffsets:Object.create(null)};
+ const state={region:'north',district:REGIONS.north.districts[3][0],view:'town',roomId:null,knightDistrict:null,knightBack:false,rooms:loadRooms(),peers:new Map(),seen:new Set(),bubble:null,scope:'world',avatar:0,facing:1,position:{x:52,y:76},roomMapOffsets:Object.create(null)};
  let channel=null,rtc=null,dataChannel=null,rtcRole=null,resize=null,pulse=null,stageInfo=null,sceneInit=false;
  const $root=()=>$('rooms'),$stage=()=>$('social-stage');
  async function deriveRoomProof(password,salt){
@@ -100,6 +100,7 @@
   if(state.view==='directory')return 'district:'+state.region+':'+state.district;
   if(state.view==='town')return 'town:'+state.region;
   if(state.view==='board')return 'board:recordable';
+  if(state.view==='knighttown')return 'town:recordable';
   return 'world';
  }
  // Room foreground and seat maps are based on the recovered ChatRoom PNG compositions.
@@ -388,19 +389,25 @@
  }
  function updateHeader(){
   const name=$('social-location-title');
-  if(name)name.textContent=state.view==='board'?'레코르다블 · 기사단 게시판':state.view==='room'?('Chatting Room · '+(currentRoom()?.name||'채팅방')):
-    state.view==='directory'?(state.district+' · 채팅방 목록'):
-    (REGIONS[state.region]?.title||'하이아칸')+' · 채팅 지역';
+  if(name)name.textContent=state.view==='knighttown'?'레코르다블 · 원본 기사단 지역':
+   state.view==='board'?('레코르다블 · '+(state.knightDistrict||'기사단 게시판')):
+   state.view==='room'?('Chatting Room · '+(currentRoom()?.name||'채팅방')):
+   state.view==='directory'?(state.district+' · 채팅방 목록'):
+   (REGIONS[state.region]?.title||'하이아칸')+' · 채팅 지역';
   const bread=$('social-breadcrumb');
-  if(bread)bread.textContent=state.view==='board'?'RECORDABLE › 기사단 게시판':(REGIONS[state.region]?.title||'하이아칸')+(state.view==='town'?'':' › '+state.district)+(state.view==='room'?' › '+(currentRoom()?.name||''): '');
-  const back=$('social-back');if(back)back.textContent=state.view==='board'?'← 월드맵':state.view==='room'?'← 채팅방 목록':state.view==='directory'?'← 채팅 지역':'← 월드맵';
-  const note=$('chatroom-name');if(note)note.textContent=state.view==='board'?'BULLETIN CHANNEL':state.view==='room'?(currentRoom()?.name||'CHATTING ROOM'):state.view==='town'?'TOWN CHANNEL':'ROOM LIST';
+  if(bread)bread.textContent=state.view==='knighttown'?'RECORDABLE › 원본 지역 선택':
+   state.view==='board'?('RECORDABLE › '+(state.knightDistrict||'기사단 게시판')+' › 웹 게시판'):
+   (REGIONS[state.region]?.title||'하이아칸')+(state.view==='town'?'':' › '+state.district)+(state.view==='room'?' › '+(currentRoom()?.name||''): '');
+  const back=$('social-back');
+  if(back)back.textContent=state.view==='board'&&state.knightBack?'← 레코르다블 지역':state.view==='room'?'← 채팅방 목록':state.view==='directory'?'← 채팅 지역':'← 월드맵';
+  const note=$('chatroom-name');
+  if(note)note.textContent=state.view==='knighttown'?'KNIGHT TOWN':state.view==='board'?'WEB BULLETIN':state.view==='room'?(currentRoom()?.name||'CHATTING ROOM'):state.view==='town'?'TOWN CHANNEL':'ROOM LIST';
  }
  function roomTemplate(background){return './original/ChatRoom/room'+background+'.png'}
  // ChatTown northback/southback are native 794×404 illustrations, whereas
  // ChatRoom interiors are native 794×528. Never fill the missing 124 pixels
  // with a fabricated information banner or squeeze the town into room space.
- const sceneHeight=()=>state.view==='town'?404:H;
+ const sceneHeight=()=>state.view==='town'||state.view==='knighttown'?404:H;
  function fit(){
   const region=$stage(),frame=$('social-image-frame');if(!region||!frame)return;
   const h=sceneHeight();
@@ -515,7 +522,7 @@
  function regionState(region){
   state.region=region==='south'?'south':'north';
   state.district=REGIONS[state.region].districts[3][0];
-  state.view='town';state.roomId=null;state.position={x:52,y:76};
+  state.view='town';state.roomId=null;state.knightBack=false;state.knightDistrict=null;state.position={x:52,y:76};
  }
  function openRegion(region){
   regionState(region);if(sceneInit)render();
@@ -523,6 +530,9 @@
  function back(){
   if(state.view==='room'){openDirectory();return}
   if(state.view==='directory'){state.view='town';state.roomId=null;render();return}
+  if(state.view==='board'&&state.knightBack){
+   state.view='knighttown';state.knightDistrict=null;render();return;
+  }
   window.__ROG_TEST__?.go('sky');
  }
  function render(){
@@ -533,10 +543,12 @@
   $root()?.classList.toggle('classic-chat-room',state.view==='room');
   $root()?.classList.toggle('native-town-scene',state.view==='town');
   $root()?.classList.toggle('native-directory-scene',state.view==='directory');
+  $root()?.classList.toggle('native-knight-town',state.view==='knighttown');
   $('social-close-room')?.remove();
   const frame=$('social-image-frame');frame.replaceChildren();
   if(state.view==='board')renderBulletin(frame);
   if(state.view==='town')renderTown(frame);
+  if(state.view==='knighttown')renderKnightTown(frame);
   if(state.view==='directory')renderDirectory(frame);
   if(state.view==='room')renderRoom(frame);
   updateHeader();fit();changeScope(scope());
@@ -549,9 +561,24 @@
    catch{return []}
  }
  function saveBoardPosts(posts){try{localStorage.setItem('leaf_recordable_posts_v1',JSON.stringify(posts.slice(-100)))}catch{}}
- function openBoard(){
-   state.region='north';state.view='board';state.roomId=null;
-   if(sceneInit)render();
+ // The original KnightTown is its own 794x404 region selection scene,
+ // not the Genesis Dice ROOM SELECT nor an invented server room list.
+ function openKnightTown(){
+  state.view='knighttown';state.roomId=null;
+  state.knightBack=true;state.knightDistrict=null;
+  if(sceneInit)render();
+ }
+ function renderKnightTown(frame){
+  window.__LEAF_KNIGHT_TOWN__?.render(frame,area=>openBoard(area));
+ }
+ function openBoard(area){
+  if(area&&typeof area==='object'&&typeof area.name==='string'){
+   state.knightDistrict=safe(area.name,28);state.knightBack=true;
+  }else{
+   state.knightDistrict=null;state.knightBack=false;
+  }
+  state.region='north';state.view='board';state.roomId=null;
+  if(sceneInit)render();
  }
  function renderBulletin(frame){
    frame.className='social-image-frame social-bulletin';
@@ -1267,9 +1294,9 @@
   presence();render();
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
- window.__LEAF_SOCIAL__={openRegion,openBoard,openDirectory,joinRoom,enterRoom,createRoom:(name,background=2,capacity=12)=>{
+ window.__LEAF_SOCIAL__={openRegion,openKnightTown,openBoard,openDirectory,joinRoom,enterRoom,createRoom:(name,background=2,capacity=12)=>{
   const room={id:uuid(),name:safe(name,26),region:state.region,district:state.district,owner:nick(),ownerId:tabId,passwordProof:'',passwordSalt:'',background:allowedBackground(background),capacity:allowedCapacity(capacity),created:now()};
   state.rooms.push(room);saveRooms();sendLocal({kind:'roomCreated',room});enterRoom(room);return room.id;
- },send:publishText,getState:()=>({region:state.region,district:state.district,view:state.view,scope:state.scope,roomId:state.roomId,people:onlinePeers(),rooms:catalogue()}),
+ },send:publishText,getState:()=>({region:state.region,district:state.district,view:state.view,scope:state.scope,knightDistrict:state.knightDistrict,roomId:state.roomId,people:onlinePeers(),rooms:catalogue()}),
  sendRTC,now,render,transportMessage};
 })();
