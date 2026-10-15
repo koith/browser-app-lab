@@ -48,9 +48,22 @@ jobs:
           npx playwright install chromium --with-deps
       - name: Run site on same origin for actual inter-tab messaging
         run: |
-          nohup python3 -m http.server 8765 --directory apps/4leaf/rog > /tmp/4leaf-http.log 2>&1 &
-          sleep 2
-          curl -fSsI http://127.0.0.1:8765/original/WorldMap/worldmapback.png
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog > /tmp/4leaf-http.log 2>&1 &
+          # A busy ephemeral Actions runner can take longer than a hardcoded
+          # two-second sleep. Validate real asset availability, not elapsed time.
+          ready=false
+          for attempt in $(seq 1 20); do
+            if curl --fail --silent --show-error --max-time 2 -I http://127.0.0.1:8765/original/WorldMap/worldmapback.png; then
+              ready=true
+              break
+            fi
+            sleep 1
+          done
+          if [ "$ready" != true ]; then
+            echo 'Original-asset HTTP server never became ready.'
+            cat /tmp/4leaf-http.log
+            exit 1
+          fi
       - name: Verify original world, regions, rooms, messages and mobile
         run: node apps/4leaf/rog/tests/world-chat.cjs
       - name: Verify original TOWN SELECT is used solely for dice game channels
