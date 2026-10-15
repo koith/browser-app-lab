@@ -422,6 +422,18 @@
   frame.style.height=h+'px';
   frame.style.transform='translate3d('+((region.clientWidth-W*scale)/2)+'px,'+((region.clientHeight-h*scale)/2)+'px,0) scale('+scale+')';
  }
+ // On narrow screens expose the native user list on demand without changing
+ // the original source-sized room or fabricating occupants.
+ function setMobilePeersOpen(open){
+  const root=$root(),button=$('social-peers-toggle');
+  const expanded=Boolean(open&&state.view==='room');
+  root?.classList.toggle('social-peers-open',expanded);
+  if(button){
+   button.setAttribute('aria-expanded',String(expanded));
+   button.setAttribute('aria-label',expanded?'참여자 목록 닫기':'참여자 목록 보기');
+   button.textContent=expanded?'목록 닫기':'참여자';
+  }
+ }
  function addClassicRoomToolbar(){
   const header=$root()?.querySelector('.social-header');if(!header)return;
   // Native MainFrame/toolbarbtn.pak: 120×270, four 30px button states
@@ -446,6 +458,15 @@
    button.addEventListener('click',item.act);
    bar.append(button);
   }
+  // Keep native ChatRoom/userlist.png in the existing participant panel.
+  const peers=document.createElement('button');
+  peers.type='button';peers.id='social-peers-toggle';
+  peers.className='social-peers-toggle';peers.textContent='참여자';
+  peers.setAttribute('aria-controls','social-peer-panel');
+  peers.setAttribute('aria-expanded','false');
+  peers.setAttribute('aria-label','참여자 목록 보기');
+  peers.onclick=()=>setMobilePeersOpen(!$root()?.classList.contains('social-peers-open'));
+  bar.append(peers);
   header.append(bar);
  }
  // The recovered ChatRoom/userlist bitmap is the original 150×38 header
@@ -479,13 +500,20 @@
  function build(){
   const root=$root();if(!root)return;
   root.replaceChildren();root.classList.add('leaf-social-scene');
-  root.innerHTML='<div class="social-header"><div><strong id="social-location-title">하이아칸</strong><small id="social-breadcrumb"></small></div><div class="social-header-tools"><span id="social-online-count">1명</span><button id="social-chat-north" type="button">북 하이아칸</button><button id="social-chat-south" type="button">남 하이아칸</button><button id="social-invite" type="button">연결 초대</button><button id="social-back" type="button">← 월드맵</button></div></div><div class="social-layout"><div id="social-stage" class="social-stage"><div id="social-image-frame" class="social-image-frame"></div></div><aside class="social-user-panel"><div class="social-user-titlebar"><canvas id="social-original-userlist" width="150" height="38" aria-label="원본 참여자 목록"></canvas><h4>참여자 목록</h4></div><div id="social-peer-list"></div><p>같은 사이트의 다른 탭과 직접 연결한 상대방이 표시됩니다.</p></aside></div>';
+  root.innerHTML='<div class="social-header"><div><strong id="social-location-title">하이아칸</strong><small id="social-breadcrumb"></small></div><div class="social-header-tools"><span id="social-online-count">1명</span><button id="social-chat-north" type="button">북 하이아칸</button><button id="social-chat-south" type="button">남 하이아칸</button><button id="social-invite" type="button">연결 초대</button><button id="social-back" type="button">← 월드맵</button></div></div><div class="social-layout"><div id="social-stage" class="social-stage"><div id="social-image-frame" class="social-image-frame"></div></div><aside class="social-user-panel" id="social-peer-panel"><div class="social-user-titlebar"><canvas id="social-original-userlist" width="150" height="38" aria-label="원본 참여자 목록"></canvas><h4>참여자 목록</h4></div><div id="social-peer-list"></div><p>같은 사이트의 다른 탭과 직접 연결한 상대방이 표시됩니다.</p></aside></div>';
   addClassicRoomToolbar();
   renderNativeUserListHeader();
   $('social-back').onclick=back;
   $('social-chat-north').onclick=()=>openRegion('north');
   $('social-chat-south').onclick=()=>openRegion('south');
   $('social-invite').onclick=openInvite;
+  root.addEventListener('keydown',event=>{
+   if(event.key==='Escape'&&root.classList.contains('social-peers-open')){
+    setMobilePeersOpen(false);
+    $('social-peers-toggle')?.focus();
+    event.stopPropagation();
+   }
+  });
   sceneInit=true;
   if('ResizeObserver' in window){resize=new ResizeObserver(fit);resize.observe($stage())}
   render();
@@ -505,6 +533,7 @@
  }
  function render(){
   if(!sceneInit)return;
+  if(state.view!=='room')setMobilePeersOpen(false);
   $root()?.classList.toggle('classic-chat-room',state.view==='room');
   $root()?.classList.toggle('native-town-scene',state.view==='town');
   $root()?.classList.toggle('native-directory-scene',state.view==='directory');

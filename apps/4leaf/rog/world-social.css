@@ -44,7 +44,7 @@
 #rooms .social-header-tools{display:flex;align-items:center;gap:8px;flex:none}
 #rooms .social-header-tools>span{color:#baf9cd;font-size:11px;white-space:nowrap}
 #rooms .social-header-tools button{background:linear-gradient(#9babd1,#4762a8);color:#fff4dd;border:2px ridge #adbeec;border-radius:2px;padding:4px 9px;font-size:11px;white-space:nowrap}
-#rooms .social-layout{flex:1;min-height:0;display:flex;background:linear-gradient(#8796ae,#3b4e8c)}
+#rooms .social-layout{position:relative;flex:1;min-height:0;display:flex;background:linear-gradient(#8796ae,#3b4e8c)}
 #rooms .social-stage{position:relative;flex:1;min-width:0;min-height:0;overflow:hidden;background:linear-gradient(#788cab,#465b8c)}
 #rooms .social-image-frame{position:absolute;width:794px;height:528px;top:0;left:0;transform-origin:0 0;will-change:transform;box-shadow:0 2px 10px #0a174e55}
 #rooms .social-town-map{background-repeat:no-repeat;background-position:center top;background-size:794px 404px;background-color:#3d5c94}
@@ -243,6 +243,7 @@ body>.social-modal .recordable-article p{white-space:pre-wrap;overflow-wrap:anyw
 /* Native icon strip for restored original ChatRoom. The source sprite sheet is
    MainFrame/toolbarbtn.png: 4 states × 30px, 9 icons × 30px. */
 #rooms .social-classic-toolbar{display:none}
+#rooms .social-peers-toggle{display:none!important}
 #rooms.classic-chat-room .social-header{
  display:grid;
  grid-template-columns:minmax(0,1fr) auto;
@@ -520,4 +521,27 @@ body>.social-modal .recordable-article p{white-space:pre-wrap;overflow-wrap:anyw
 }
 #rooms .social-interior .social-avatar .social-speech{
  pointer-events:none!important;
+}
+
+/* ChatRoom-specific, source-preserving participant roster on narrow viewports.
+   The 794×528 room stays scaled as before; the existing 150×38 original
+   userlist art and actual occupants can be inspected without losing the map. */
+@media(max-width:650px){
+ #rooms.classic-chat-room .social-peers-toggle{
+  display:inline-flex!important;align-items:center;justify-content:center;
+  flex:0 0 auto;height:24px;min-width:58px;margin-left:auto;
+  padding:2px 6px;border:1px solid #a4b6e0;border-radius:0;
+  background:#385295;color:#fff2cf;font:10px Gulim,'굴림',sans-serif;
+ }
+ #rooms.classic-chat-room .social-peers-toggle[aria-expanded="true"]{
+  background:#253874;border-color:#f3e6ab;
+ }
+ #rooms.classic-chat-room .social-user-panel{
+  display:none;position:absolute;z-index:30;
+  top:0;right:0;bottom:0;width:167px;height:100%;
+  border-left:3px ridge #c6d6f4;box-shadow:-3px 0 8px #0b1848a8;
+ }
+ #rooms.classic-chat-room.social-peers-open .social-user-panel{
+  display:flex!important;
+ }
 }
