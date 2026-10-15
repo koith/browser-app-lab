@@ -15,6 +15,19 @@
  // Existing buttons keep their identity and event listeners. This is a
  // reparenting operation, not a screenshot replacing the interactive UI.
  while(wrap.firstChild)stage.append(wrap.firstChild);
+ const picker=document.createElement('button');
+ picker.type='button';picker.id='dice-team-picker';
+ picker.setAttribute('aria-label','체스맨 파티 선택창 열기');
+ picker.setAttribute('aria-expanded','false');
+ picker.setAttribute('aria-controls','dice-room-config');
+ picker.textContent='체스맨 선택';
+ picker.onclick=()=>{
+  if(!wrap.classList.contains('config-open'))return;
+  const open=stage.classList.toggle('team-picker-open');
+  picker.setAttribute('aria-expanded',String(open));
+  picker.setAttribute('aria-label',open?'체스맨 파티 선택창 닫기':'체스맨 파티 선택창 열기');
+ };
+ stage.append(picker);
  wrap.append(stage);
  function fit(){
   const x=wrap.clientWidth,y=wrap.clientHeight;
@@ -34,5 +47,15 @@
  if('ResizeObserver' in window)new ResizeObserver(fit).observe(wrap);
  window.addEventListener('resize',fit,{passive:true});
  fit();
- window.__LEAF_DICE_NATIVE__={fit,getState:state};
+ function closePicker(){
+  stage.classList.remove('team-picker-open');
+  picker.setAttribute('aria-expanded','false');
+  picker.setAttribute('aria-label','체스맨 파티 선택창 열기');
+ }
+ wrap.addEventListener('keydown',event=>{
+  if(event.key==='Escape'&&stage.classList.contains('team-picker-open')){
+   closePicker();picker.focus();event.stopPropagation();
+  }
+ });
+ window.__LEAF_DICE_NATIVE__={fit,getState:state,closePicker};
 })();
