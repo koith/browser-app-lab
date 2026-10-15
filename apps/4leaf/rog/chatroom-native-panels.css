@@ -79,15 +79,15 @@
   overflow:hidden!important;
  }
  #rooms.classic-chat-room .social-user-panel[data-native-overlay="true"] .social-user-titlebar{
-  min-height:31px!important;height:31px!important;
+  min-height:38px!important;height:38px!important;
   background:#647cb7!important;border:0!important;
  }
  #rooms.classic-chat-room .social-user-panel[data-native-overlay="true"] .social-user-titlebar canvas{
-  width:150px!important;height:31px!important;
+  width:150px!important;height:38px!important;
   object-fit:fill;
  }
  #rooms.classic-chat-room .social-user-panel[data-native-overlay="true"] .social-user-titlebar h4{
-  height:31px!important;padding:0!important;line-height:31px;
+  height:38px!important;padding:0!important;line-height:38px;
   background:#657db5!important;color:#f7faff!important;
  }
  #rooms.classic-chat-room .social-user-panel[data-native-overlay="true"] #social-peer-list{
@@ -120,4 +120,19 @@
  #rooms.classic-chat-room .social-user-panel[data-native-overlay="true"]{
   position:static!important;
  }
+}
+
+/* The native 150x38 ChatRoom/userlist bitmap ALREADY contains the entire
+   참가자목록 header + scrollbar arrows + a blank participant-count field.
+   Print the REAL occupancy on that blank field; no invented online users. */
+#rooms.classic-chat-room .social-user-titlebar #social-native-user-count{
+ position:absolute;z-index:5;top:4px;right:20px;
+ min-width:24px;text-align:center;
+ font:bold 11px/15px Gulim,'굴림',sans-serif;
+ color:#2f4687;text-shadow:0 1px #fff;
+ white-space:nowrap;pointer-events:none;
+}
+#rooms.classic-chat-room .social-user-panel .social-status-led,
+#rooms.classic-chat-room .social-user-panel .social-user-row small{
+ display:none!important;
 }
