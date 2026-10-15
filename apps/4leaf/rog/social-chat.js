@@ -453,6 +453,7 @@
   peers.setAttribute('aria-label','참여자 목록 보기');
   peers.onclick=()=>setMobilePeersOpen(!$root()?.classList.contains('social-peers-open'));
   bar.append(peers);
+  window.__LEAF_NATIVE_EXPRESSIONS__?.install(bar);
   header.append(bar);
  }
  // The recovered ChatRoom/userlist bitmap is the original 150×38 header
@@ -526,6 +527,7 @@
  }
  function render(){
   if(!sceneInit)return;
+  window.__LEAF_NATIVE_EXPRESSIONS__?.close();
   window.__LEAF_NATIVE_ROOM_PANELS__?.beforeRender();
   if(state.view!=='room')setMobilePeersOpen(false);
   $root()?.classList.toggle('classic-chat-room',state.view==='room');
@@ -900,6 +902,10 @@
  }
  function showBubble(sender,text){
   if(state.view!=='room')return;
+  // An actual participant selected a recovered original expression button.
+  // Use the original face source, not a duplicated plain-text speech bubble;
+  // the real chat message remains in authoritative/peer history.
+  if(window.__LEAF_NATIVE_EXPRESSIONS__?.show(sender,text))return;
   const layer=$('social-avatar-layer');if(!layer)return;
   const node=[...layer.querySelectorAll('.social-avatar')].find(el=>el.dataset.peer===sender);
   if(!node)return;
