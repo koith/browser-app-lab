@@ -212,7 +212,12 @@ function drawShop(){
  const owned=$('shop-owned-list');owned.replaceChildren();
  profile.owned.filter(id=>CARD_MAP[id]).forEach(id=>{
    const c=CARD_MAP[id],b=document.createElement('button');b.className='shop-owned-entry';
-   b.textContent='♧ '+c.name+'　'+c.ability;b.title=c.name+' ('+c.point+'pt)';
+   b.dataset.cardId=c.id;b.title=c.name+' ('+c.point+'pt)';
+   const icon=document.createElement('img');icon.className='shop-owned-portrait';
+   icon.alt='';icon.src=imageFor(c.id);icon.loading='lazy';
+   const name=document.createElement('span');name.className='shop-owned-name';name.textContent=c.name;
+   const ability=document.createElement('small');ability.className='shop-owned-ability';ability.textContent=c.ability;
+   b.append(icon,name,ability);
    if(chosenCard===c.id)b.classList.add('selected');
    b.onclick=()=>{if(!shopFiltered().find(x=>x.id===id))group='all';selectShopCard(id)};
    owned.append(b);
