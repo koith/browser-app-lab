@@ -50,13 +50,19 @@ const assert=require('node:assert/strict');
   const palette=host.locator('#social-native-expression-palette');
   assert.ok(await palette.isVisible(),'original expression palette opened in the active room');
   assert.equal(await palette.locator('button').count(),6,'real six sprite buttons exist');
-  const art=await palette.locator('button').first().evaluate(el=>({
-   image:getComputedStyle(el).backgroundImage,
-   size:[el.getBoundingClientRect().width,el.getBoundingClientRect().height],
-   text:el.getAttribute('aria-label')
-  }));
+  const art=await palette.locator('button').first().evaluate(el=>{
+   // The entire original 794x528 client scales with the browser viewport.
+   // Measure source-coordinate pixels, not post-transform screen pixels.
+   const frame=document.querySelector('#social-image-frame').getBoundingClientRect();
+   const zoom=frame.width/794,rect=el.getBoundingClientRect();
+   return {
+    image:getComputedStyle(el).backgroundImage,
+    size:[rect.width/zoom,rect.height/zoom],
+    text:el.getAttribute('aria-label')
+   };
+  });
   assert.ok(art.image.includes('original/ChatRoom/expdialogbtn.png'));
-  assert.deepEqual(art.size,[66,22],'source face+Korean label kept at native 66x22');
+  assert.ok(Math.abs(art.size[0]-66)<.5&&Math.abs(art.size[1]-22)<.5,'source face+Korean label kept at native 66x22');
   assert.equal(art.text,'표정 하하');
   await host.screenshot({path:'leaf-original-chatroom-expression-palette.png'});
   await palette.locator('button[data-expression="하하"]').click();
