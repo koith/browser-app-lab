@@ -4,6 +4,7 @@
 // IMG/eventmsgbox.png (244x52) displays ACTUAL game move messages.
 const assert=require('node:assert/strict');
 const {chromium}=require('playwright');
+const path=require('node:path');
 (async()=>{
  const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
  const page=await browser.newPage({viewport:{width:1280,height:900},serviceWorkers:'block'});
@@ -11,7 +12,7 @@ const {chromium}=require('playwright');
  page.on('pageerror',e=>errors.push(String(e)));
  await page.addInitScript(()=>{window.LEAF_CENTRAL_API_URL='';});
  try{
-  await page.goto(process.env.FOURLEAF_TEST_URL||'http://127.0.0.1:8765/');
+  await page.goto(process.env.FOURLEAF_TEST_URL||'file://'+path.resolve(__dirname,'../index.html'));
   await page.waitForFunction(()=>window.__ROG_TEST__&&window.__LEAF_LOBBY__&&document.querySelector('#start-game'));
   await page.locator('[data-route="lobby"]').first().click();
   await page.locator('#lobby-create').click();
@@ -74,13 +75,15 @@ const {chromium}=require('playwright');
   },oldLog,{timeout:16000});
   const move=await page.locator('#move-log').evaluate(node=>({
    source:node.dataset.nativeSource,paint:getComputedStyle(node).backgroundImage,
-   frame:[node.getBoundingClientRect().width,node.getBoundingClientRect().height],
+   frame:[node.offsetWidth,node.offsetHeight],
+   rendered:[node.getBoundingClientRect().width,node.getBoundingClientRect().height],
+   computed:[getComputedStyle(node).flexBasis,getComputedStyle(node).minWidth,getComputedStyle(node).height],
    event:node.textContent,title:node.title
   }));
   assert.equal(move.source,'IMG/eventmsgbox.png','actual played move displayed in original source event');
   assert.ok(move.paint.includes('/original/IMG/eventmsgbox.png'));
   assert.ok(Math.abs(move.frame[0]-244)<1&&Math.abs(move.frame[1]-52)<1,
-   'true 244x52 original event rectangle in non-mobile client');
+   'true 244x52 original event rectangle in non-mobile client: '+JSON.stringify(move));
   assert.equal(move.event,move.title,'ellipsized two-line paint keeps complete actual gameplay event accessible');
   assert.ok((await page.evaluate(()=>window.__ROG_TEST__.getMatch().history)).includes(move.event),
    'event box is sourced from real persistent match history, never made-up status');
