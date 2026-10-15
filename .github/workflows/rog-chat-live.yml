@@ -40,7 +40,9 @@ jobs:
                cmp -s /tmp/leaf-dice-live.css apps/4leaf/rog/dice-native-client-frame.css &&
                cmp -s /tmp/leaf-dice-live.js apps/4leaf/rog/dice-native-client-frame.js &&
                curl -fLsS --max-time 15 "$base/dice-native-chessmen-hud.css?qa=${GITHUB_SHA}" -o /tmp/leaf-chessman-live.css &&
-               cmp -s /tmp/leaf-chessman-live.css apps/4leaf/rog/dice-native-chessmen-hud.css; then
+               cmp -s /tmp/leaf-chessman-live.css apps/4leaf/rog/dice-native-chessmen-hud.css &&
+               curl -fLsS --max-time 15 "$base/dice-original-selector.css?qa=${GITHUB_SHA}" -o /tmp/leaf-selector-live.css &&
+               cmp -s /tmp/leaf-selector-live.css apps/4leaf/rog/dice-original-selector.css; then
               ready=1
               echo "Published JS/CSS byte-for-byte match the checked-out source at ${GITHUB_SHA}"
               break
