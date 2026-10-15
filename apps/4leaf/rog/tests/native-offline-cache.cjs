@@ -18,6 +18,7 @@ const {chromium}=require('playwright');
   });
   const critical=[
    'chatroom-native-owner-dialog.js','chatroom-native-owner-dialog.css','original/ChatRoom/ownerdialog.png',
+   'chatroom-native-expressions.js','chatroom-native-expressions.css','original/ChatRoom/expdialogbtn.png',
    'world-social.css','social-chat.js','world-map.js','mainframe-native-snapshot.js','mainframe-native-snapshot.css','original/MainFrame/snaplogo.png','original/MainFrame/snapnumber.png',
    ...['mainstreet','knights','northchatrgn','southchatrgn','dice','m4leaf'].map(s=>'original/WorldMap/'+s+'.png'),
    ...['northback','southback','plainbtn','seabtn','snowbtn'].map(s=>'original/ChatTown/'+s+'.png'),
@@ -26,7 +27,7 @@ const {chromium}=require('playwright');
    'original/Registry/sava00.png'
   ];
   await page.waitForFunction(async files=>{
-   const cache=await caches.open('4leaf-revival-pwa-v41');
+   const cache=await caches.open('4leaf-revival-pwa-v42');
    return (await Promise.all(files.map(file=>cache.match('./'+file)))).every(Boolean);
   },critical,{timeout:40000});
   // An established controller must answer image and JS fetches offline.
@@ -73,6 +74,12 @@ const {chromium}=require('playwright');
   assert.deepEqual(original.native,[115,103]);
   assert.deepEqual(original.position,[427,425]);
   assert.equal(await page.locator('.social-avatar.self').count(),1,'only genuine offline self occupant');
+  await page.waitForFunction(()=>window.__LEAF_NATIVE_EXPRESSIONS__?.getState().ready,null,{timeout:8000});
+  await page.locator('.social-exp-trigger').click();
+  await page.locator('.social-native-expression-option[data-expression="좋아"]').click();
+  assert.equal(await page.locator('.social-avatar.self .social-native-expression').getAttribute('data-native-expression'),'좋아',
+   'fully offline original face sprite and genuine local chat event work on first opening');
+
   assert.deepEqual(errors,[],'no unexpected JavaScript errors during offline play');
   console.log('4LEAF NATIVE OFFLINE CACHE PASS',JSON.stringify({cached:critical.length,original}));
  }finally{await browser.close()}
