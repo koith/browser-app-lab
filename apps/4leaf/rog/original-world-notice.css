@@ -31,3 +31,42 @@
 #sky .world-location:is(:hover,:focus-visible) .world-location-tip{
  display:block;
 }
+
+/* 2003-09 original sky.jpg: independent 184×61 winged Notice panel at
+   (23,9) in the native 796×528 WorldMap. The UI is NOT the historical
+   screenshot as a texture. It is the recovered WorldMap/notice.png key-masked
+   by world-map.js with live, truthful text in its original white message field.
+   This panel is distinct from location-hover notices and does not eat clicks. */
+#sky #world-native-notice{
+ box-sizing:border-box;
+ position:absolute;
+ z-index:10;
+ left:23px;
+ top:9px;
+ width:184px;
+ height:61px;
+ margin:0;
+ padding:26px 5px 6px;
+ border:0;
+ border-radius:0;
+ background:transparent center/184px 61px no-repeat;
+ color:#263779;
+ text-align:center;
+ font:700 11px/17px Gulim,'굴림',sans-serif;
+ white-space:nowrap;
+ text-shadow:0 1px 0 #fff;
+ overflow:hidden;
+ pointer-events:none;
+ user-select:none;
+}
+#sky #world-native-notice[data-ready="fallback"]{
+ background:#f5f6ff;
+ border:1px solid #98a7d9;
+ padding:9px 7px;
+ height:38px;
+}
+/* When a hover tip also opens, keep native scene priority in front of the
+   fixed Notice without changing either source bitmap's scale. */
+#sky .world-location-tip{
+ z-index:16;
+}
