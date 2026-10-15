@@ -433,9 +433,10 @@ body>.social-modal .recordable-article p{white-space:pre-wrap;overflow-wrap:anyw
 #rooms .social-map-plane{
  position:absolute;left:0;top:0;width:1480px;height:1120px;
  transform-origin:0 0;will-change:transform;
- background-color:#5f8354;
- background-image:url("./original/IMG/bgtile.png");
- background-size:725px 485px;background-repeat:repeat;
+ /* Original ChatTown terrain coordinates are not recovered. Avoid
+    misidentifying the Dice IMG/bgtile as historical chat geography. */
+ background-color:#536a81;
+ background-image:none;
 }
 #rooms .social-map-terrain{
  position:absolute;inset:0;pointer-events:none;
