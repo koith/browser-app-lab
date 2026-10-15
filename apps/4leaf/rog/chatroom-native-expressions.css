@@ -1,0 +1,67 @@
+/* Actual recovered 196x267 ChatRoom/expdialogbtn.png, six rows of
+   66x22 source face+Korean-label controls. Actual actor emote is cropped
+   independently to 23x22, never pasted as a whole historical screenshot. */
+#rooms .social-exp-trigger{display:none!important}
+#rooms.classic-chat-room .social-classic-toolbar .social-exp-trigger{
+ display:block!important;flex:0 0 30px;width:30px;height:30px;
+ padding:0!important;margin:0 3px!important;min-width:30px;
+ border:1px solid #a6b8df!important;border-radius:0!important;
+ background:#344e96 url('./original/ChatRoom/expdialogbtn.png') 2px 3px/196px 267px no-repeat!important;
+ color:transparent!important;font-size:0!important;box-shadow:none!important;
+ cursor:pointer;image-rendering:pixelated;
+}
+#rooms.classic-chat-room .social-exp-trigger:is(:hover,:focus-visible){
+ outline:2px solid #edddac!important;outline-offset:-2px;
+ background-color:#718ace!important;
+}
+#rooms .social-native-expression-palette{
+ box-sizing:content-box;
+ position:absolute;right:20px;top:135px;z-index:105;
+ display:flex;flex-direction:column;align-items:flex-start;gap:0;
+ width:70px;height:137px;overflow:visible;
+ padding:3px 2px;
+ border:2px ridge #b0c5ec;
+ background:#cbd8f2;
+ box-shadow:2px 3px 5px #1b285690;
+ pointer-events:auto;
+}
+#rooms .social-native-expression-option{
+ box-sizing:border-box;position:relative;display:block;
+ flex:0 0 22px;width:66px;height:22px;
+ border:0!important;border-radius:0!important;padding:0!important;
+ margin:0!important;box-shadow:none!important;
+ background:transparent url('./original/ChatRoom/expdialogbtn.png') 0 var(--emotion-y)/196px 267px no-repeat!important;
+ font:700 11px Gulim,'굴림',sans-serif;
+ color:transparent;cursor:pointer;
+ image-rendering:pixelated;
+}
+#rooms .social-native-expression-option:is(:hover,:focus-visible){
+ background-position-x:-66px!important;
+ outline:1px solid #f4e49d!important;outline-offset:-1px;
+}
+#rooms .social-native-expression-palette[data-source-ready="fallback"] .social-native-expression-option{
+ background-image:none!important;
+ color:#27417a!important;
+}
+#rooms .social-native-expression{
+ position:absolute!important;z-index:150!important;
+ display:block;box-sizing:content-box!important;
+ top:-84px;left:calc(50% + 28px);
+ width:23px;height:22px;
+ margin:0;padding:0!important;border:0!important;
+ background-color:transparent;
+ background-image:url('./original/ChatRoom/expdialogbtn.png');
+ background-repeat:no-repeat;background-size:196px 267px;
+ image-rendering:pixelated;
+ pointer-events:none!important;
+ filter:drop-shadow(1px 1px 1px #0d1d53);
+}
+#rooms .social-native-expression[data-fallback="true"]{
+ background-image:none;color:#fff8d5;font:9px Gulim,'굴림',sans-serif;
+ width:40px;text-shadow:1px 1px #132b57;
+}
+@media(max-width:550px){
+ #rooms.classic-chat-room .social-classic-toolbar .social-exp-trigger{
+  margin:0 1px!important;flex-basis:27px;width:27px;height:27px;min-width:27px;
+ }
+}

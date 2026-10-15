@@ -69,6 +69,10 @@ jobs:
         run: |
           npm install --no-save playwright
           npx playwright install chromium --with-deps
+      - name: Verify original expression atlas buttons and two real visitors on public Pages
+        env:
+          FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
+        run: node apps/4leaf/rog/tests/chatroom-native-expressions.cjs
       - name: Verify published source-native room-master creation panel, original Cancel and real private room
         env:
           FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
