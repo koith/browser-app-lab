@@ -620,12 +620,13 @@ const path=require('path');
    name:getComputedStyle(document.getElementById('nick')).backgroundColor,
    edit:getComputedStyle(document.getElementById('message')).backgroundColor,
    send:document.querySelector('#chat-form button').getAttribute('aria-label'),
-   original:[image.naturalWidth,image.naturalHeight],cornerAlpha:alpha};
+   original:[image.naturalWidth,image.naturalHeight],cornerAlpha:alpha,
+   roomScale:document.querySelector('#social-image-frame').getBoundingClientRect().width/794};
  });
  assert.deepEqual(nativeEntry.original,[407,21],'native ChatRoom input art has original source size');
  assert.equal(nativeEntry.cornerAlpha,0,'native source input is transparent at corner; no invented opaque frame');
- assert.ok(Math.abs(nativeEntry.w-407)<2&&Math.abs(nativeEntry.h-21)<1,
-  'working chat edit control retains source-native 407×21 geometry');
+ assert.ok(Math.abs(nativeEntry.w/nativeEntry.roomScale-407)<2&&Math.abs(nativeEntry.h/nativeEntry.roomScale-21)<1,
+  'working chat edit control retains 407×21 original bitmap geometry inside the scaled ChatRoom art');
  assert.ok(nativeEntry.bg.includes('original/ChatRoom/chatbaredit.png'),
   'native sprite supplies actual nickname/input/send frames');
  assert.equal(nativeEntry.name,'rgba(0, 0, 0, 0)','native nickname frame remains visible');
