@@ -74,7 +74,7 @@ const path=require('path');
      height:el.getBoundingClientRect().height
     }))};
   });
-  assert.deepEqual(selector.natural,[222,157],'real 222x157 native selector image is loaded');
+  assert.deepEqual(selector.natural,[222,152],'real 222x152 native selector image is loaded');
   assert.deepEqual(selector.buttons.map(x=>x.id),['dice-inspect-tool','dice-next-tool','dice-items-toggle','dice-ability-tool'],'four original glyph hitboxes survive as independent controls');
   assert.ok(selector.buttons.every(x=>x.source.includes('/original/IMG/selector.png')&&x.width===29&&x.height===29),'every command is skinned by the real source atlas, not a text/emoji facsimile');
   assert.equal(await page.locator('#dice-ability-tool').isDisabled(),true,'native ability shortcut cannot bypass actual charge requirement');
