@@ -111,6 +111,42 @@
    panel.querySelector('.world-profile-heading button').onclick=()=>panel.remove();
    $('world-profile-rename').onclick=()=>{$('rename')?.click();panel.remove()};
  }
+ // Native WorldMap/notice.png is an alpha/chroma-keyed 184×61
+ // "Notice" bubble. Convert pure green transparency at runtime while leaving
+ // each region's real focus/click handler intact.
+ function registerNativeNotices(stage){
+  const image=new Image();let retries=0;
+  const request=()=>{if(!stage.isConnected)return;
+   image.src='./original/WorldMap/notice.png'+(retries?'?retry='+retries+'&at='+Date.now():'')};
+  image.onload=()=>{
+   try{
+    const bitmap=document.createElement('canvas');bitmap.width=image.naturalWidth;bitmap.height=image.naturalHeight;
+    const ctx=bitmap.getContext('2d',{willReadFrequently:true});ctx.drawImage(image,0,0);
+    const pixels=ctx.getImageData(0,0,bitmap.width,bitmap.height);
+    for(let i=0;i<pixels.data.length;i+=4){
+     const r=pixels.data[i],g=pixels.data[i+1],b=pixels.data[i+2];
+     if(r<=40&&g>=235&&b<=45)pixels.data[i+3]=0;
+    }
+    ctx.putImageData(pixels,0,0);
+    const source=bitmap.toDataURL('image/png');
+    for(const tip of stage.querySelectorAll('.world-location-tip')){
+     tip.style.backgroundImage='url("'+source+'")';
+     tip.dataset.source='WorldMap/notice.png';
+     tip.dataset.ready='true';
+    }
+   }catch(error){
+    // Local file:// canvases may be opaque to pixel access; keep text
+    // accessible rather than hiding the navigation tooltip.
+    for(const tip of stage.querySelectorAll('.world-location-tip'))tip.dataset.ready='fallback';
+   }
+  };
+  image.onerror=()=>{
+   if(!stage.isConnected)return;
+   if(retries<4){retries++;setTimeout(request,Math.min(1500,200*2**retries))}
+   else for(const tip of stage.querySelectorAll('.world-location-tip'))tip.dataset.ready='fallback';
+  };
+  request();
+ }
  function build(){
    const scene=$('sky');if(!scene)return;
    scene.replaceChildren();
@@ -146,6 +182,7 @@
      hit.addEventListener('click',()=>clickRegion(region.id));
      stage.append(hit);
    }
+   registerNativeNotices(stage);
    const controls=document.createElement('div');controls.className='world-map-controls';
    controls.innerHTML='<button id="world-zoom-out" aria-label="월드맵 축소">−</button><span id="world-zoom-label">100%</span><button id="world-zoom-in" aria-label="월드맵 확대">＋</button><button id="world-zoom-reset" aria-label="월드맵 전체보기">⌂</button>';
    const title=document.createElement('div');title.className='world-map-caption';title.textContent='4LEAF WORLD MAP　·　원본 월드맵';
