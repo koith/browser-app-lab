@@ -1,0 +1,128 @@
+/* Recovered 338x282 ChatRoom/ownerdialog.png native room-master atlas.
+   The historical top-left 309x126 source is keyed once in JS, rendered 1:1,
+   and overlaid with REAL HTML fields. Only the source bitmap represents
+   original UI; the separately labelled room-background selector is WEB UX. */
+body>.social-modal .social-modal-panel:has(.social-native-owner-form[data-native-owner-ready="true"]){
+ width:326px!important;max-width:min(326px,96vw)!important;
+ max-height:min(90vh,310px);
+ padding:7px 8px 13px!important;
+ background:transparent!important;
+ border:0!important;box-shadow:none!important;overflow:visible!important;
+}
+body>.social-modal .social-modal-panel:has(.social-native-owner-form[data-native-owner-ready="true"])>.social-modal-title{
+ display:none!important;
+}
+body>.social-modal .social-native-owner-form[data-native-owner-ready="true"]{
+ display:block!important;
+ position:relative!important;
+ box-sizing:border-box!important;
+ width:309px!important;height:215px!important;
+ min-height:215px!important;max-height:215px!important;
+ padding:0!important;margin:0 auto!important;
+ overflow:visible!important;
+ background:transparent!important;color:#1f3275!important;
+ font-family:Gulim,'굴림',sans-serif!important;
+}
+body>.social-modal .social-native-owner-form[data-native-owner-ready="true"]>.social-owner-source-backdrop{
+ position:absolute;top:0;left:0;z-index:0;
+ display:block;width:309px;height:126px;
+ image-rendering:auto;pointer-events:none;
+}
+body>.social-modal .social-native-owner-form[data-native-owner-ready="true"] label[data-owner-field]{
+ position:absolute!important;z-index:1;display:block!important;
+ margin:0!important;padding:0!important;
+ border:0!important;background:transparent!important;
+ font-size:0!important;color:transparent!important;
+ width:auto!important;line-height:normal!important;
+}
+body>.social-modal .social-native-owner-form[data-native-owner-ready="true"] label[data-owner-field="name"]{
+ left:57px;top:28px;width:238px!important;height:20px;
+}
+body>.social-modal .social-native-owner-form[data-native-owner-ready="true"] label[data-owner-field="capacity"]{
+ left:57px;top:51px;width:73px!important;height:18px;
+}
+body>.social-modal .social-native-owner-form[data-native-owner-ready="true"] label[data-owner-field="password"]{
+ left:83px;top:99px;width:94px!important;height:18px;
+}
+body>.social-modal .social-native-owner-form[data-native-owner-ready="true"] label[data-owner-field="background"]{
+ top:133px;left:6px;
+ width:295px!important;height:32px;
+ border:1px solid #7e9dd0!important;
+ background:#c5d6ee!important;color:#223a7f!important;
+ text-align:left!important;
+}
+body>.social-modal .social-native-owner-form[data-native-owner-ready="true"] label[data-owner-field="background"]::before{
+ content:'배경';position:absolute;top:8px;left:7px;
+ font-size:11px;color:#263c76;
+}
+body>.social-modal .social-native-owner-form[data-native-owner-ready="true"] label[data-owner-field] input,
+body>.social-modal .social-native-owner-form[data-native-owner-ready="true"] label[data-owner-field] select{
+ box-sizing:border-box!important;
+ display:block!important;
+ width:100%!important;height:100%!important;
+ min-width:0!important;margin:0!important;padding:0 2px!important;
+ font:11px/18px Gulim,'굴림',sans-serif!important;
+ color:#243c75!important;box-shadow:none!important;
+ border:0!important;border-radius:0!important;
+ background:transparent!important;
+}
+body>.social-modal .social-native-owner-form[data-native-owner-ready="true"] label[data-owner-field="background"] select{
+ margin-left:46px!important;width:calc(100% - 46px)!important;
+}
+body>.social-modal .social-native-owner-form[data-native-owner-ready="true"] .social-owner-privacy{
+ position:absolute;left:100px;top:75px;z-index:1;
+ display:flex;align-items:center;gap:14px;
+ border:0;margin:0;padding:0;
+ width:195px;height:22px;
+}
+body>.social-modal .social-native-owner-form[data-native-owner-ready="true"] .social-owner-privacy label{
+ position:relative!important;display:flex!important;
+ width:auto!important;gap:2px;align-items:center;white-space:nowrap;
+ font:10px Gulim,'굴림',sans-serif!important;
+ color:#293b85!important;background:transparent!important;
+}
+body>.social-modal .social-native-owner-form[data-native-owner-ready="true"] .social-owner-privacy input{
+ appearance:none;width:9px;height:9px;margin:0 2px 0 0;
+ border:1px solid #778acf;background:#e5effd;
+ border-radius:50%;cursor:pointer;
+}
+body>.social-modal .social-native-owner-form[data-native-owner-ready="true"] .social-owner-privacy input:checked{
+ box-shadow:inset 0 0 0 2px #e5effd;background:#678ae0;
+}
+body>.social-modal .social-native-owner-form[data-native-owner-ready="true"] .social-owner-native-submit,
+body>.social-modal .social-native-owner-form[data-native-owner-ready="true"] .social-owner-native-cancel{
+ display:block!important;position:absolute;top:178px;z-index:2;
+ width:62px;height:23px;min-width:62px;min-height:23px;
+ border:0!important;border-radius:0!important;
+ padding:0!important;margin:0!important;
+ cursor:pointer;
+ font-size:0!important;color:transparent!important;
+ background-repeat:no-repeat!important;
+ background-color:transparent!important;
+ background-size:62px 23px!important;
+ box-shadow:none!important;
+}
+body>.social-modal .social-native-owner-form[data-native-owner-ready="true"] .social-owner-native-submit{
+ left:81px;background-image:var(--owner-source-ok)!important;
+}
+body>.social-modal .social-native-owner-form[data-native-owner-ready="true"] .social-owner-native-cancel{
+ left:164px;background-image:var(--owner-source-cancel)!important;
+}
+body>.social-modal .social-native-owner-form[data-native-owner-ready="true"] :is(.social-owner-native-submit,.social-owner-native-cancel):is(:hover,:focus-visible){
+ outline:2px solid #f4d67b!important;outline-offset:1px;
+ filter:brightness(1.12);
+}
+body>.social-modal .social-native-owner-form[data-native-owner-ready="true"] .social-owner-privacy label:focus-within,
+body>.social-modal .social-native-owner-form[data-native-owner-ready="true"] label[data-owner-field]:focus-within{
+ outline:1px solid #f0b655!important;outline-offset:1px;
+}
+@media(max-width:360px){
+ body>.social-modal .social-modal-panel:has(.social-native-owner-form[data-native-owner-ready="true"]){
+  transform:scale(.91);transform-origin:center;
+ }
+}
+/* Readable real generic HTML remains usable when archive art fails or the
+   browser's file:// origin forbids canvas source pixel access. */
+body>.social-modal .social-native-owner-form:not([data-native-owner-ready="true"]) .social-owner-source-backdrop{
+ display:none;
+}
