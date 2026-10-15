@@ -7,10 +7,11 @@
 - 소스: https://github.com/koith/browser-app-lab
 - 배포: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
 - 프로젝트 코드: `apps/4leaf/rog/`
-- **마지막 확인 main:** `20ef39c3485af37fa8239c36a1cf0fb8b85e98df` — PR #63 원작 WorldMap 만월·검은 배경.
-- 위 커밋의 GitHub Pages 배포 성공: https://github.com/koith/browser-app-lab/actions/runs/38709066189
-- 위 커밋의 **공개 URL Chromium** 검증 성공: https://github.com/koith/browser-app-lab/actions/runs/38709150398
-- 월드맵/채팅·WebRTC·중앙 서버·주잔 스모크·오프라인 워크플로도 같은 SHA에서 success로 확인.
+- **최신 확인 main:** `9a3e223a0a40b48de366263af9a2d4d00173641a` — 이 인수인계 문서를 추가한 문서 전용 커밋. 그 직전 **애플리케이션 코드 기준점**은 `20ef39c3485af37fa8239c36a1cf0fb8b85e98df` (PR #63 WorldMap 만월·검은 배경)이며, 인수인계 작성으로 앱 동작 코드는 바뀌지 않았다.
+- 최신 확인 main SHA의 GitHub Pages 배포 **성공**: https://github.com/koith/browser-app-lab/actions/runs/38739874119
+- 최신 확인 main SHA의 **공개 URL Chromium 검증 성공**: https://github.com/koith/browser-app-lab/actions/runs/38739952281
+- 최신 확인 main SHA의 일반 게임 스모크 **성공**: https://github.com/koith/browser-app-lab/actions/runs/38739874692
+- 애플리케이션 코드 기준점 `20ef39c`에서도 월드맵/채팅, WebRTC, 중앙 서버, 원본 DMP 경기 및 오프라인 패키지 워크플로가 success로 확인됐다. 문서 이후의 커밋·배포·PR은 매번 **새로 조회**해야 한다.
 - 문서 작성 시점 열린 PR 0개. **다음 대화에서 반드시 다시 확인**해야 한다.
 - 사용자 요구: 외형·동작이 원작과 아직 한참 다르다. 채팅으로 작업을 대체하지 말고 **실제 구현→Chromium 검사→병합→Pages 공개 검사**까지 처리한다. 가장 중요한 우선순위는 **월드맵과 북·남 하이아칸 채팅**이며, 주잔은 차순위.
 
@@ -102,3 +103,9 @@
 **월드맵/북남 하이아칸 채팅부터** 최신 공개 화면을 Chromium 캡처하고, 원작 `sky.jpg`, `chat_ref.jpg`, `chat.jpg`와 같은 크기로 나란히 비교해 가장 큰 공간/캐릭터/방 레이어 차이 **한 건을 실제 구현+테스트+배포로 끝낸다**. 원본에 이미 있는 그림을 잘못 분류하거나 이미 끝난 작은 아이콘 수정만 반복하지 않는다. 그다음 큰 차이를 지속 해결한다.
 
 **종결 판단:** 원본 플레이 화면 및 조작과 아직 현저한 차이가 있으므로 원작 복원은 **진행 중/미완성**이다.
+
+## 9. 다음 대화 재개용 바로 실행 지시문
+
+> GitHub 저장소 `koith/browser-app-lab`의 `apps/4leaf/rog/docs/RESTORATION_HANDOFF_2026-10-15.md`를 먼저 열어 최신 `main`, 열린 PR, Pages 배포, Chromium CI를 재확인한다. 원작 외형과 실제 플레이의 정밀 복원을 **즉시 개발로 이어라.** 최우선은 월드맵·북남 하이아칸 채팅이며, 이미 확보된 `../assets/sky.jpg`, `chat_ref.jpg`, `chat.jpg`와 실제 PNG 원본을 화면/좌표/상호작용 단위로 비교하라. 거짓 접속자·임의 방·전체 스크린샷 덮기는 금지한다. 기존 원본 리소스, 중앙 채팅 서버, 실사용자 동기화, 채팅 좌석의 순간이동, 게임/상점/로비 기능은 보존한다. **직접 코드 수정→로컬 및 실제 Chromium→PR 병합→GitHub Pages 배포→공개 URL 브라우저 검증**을 수행하고, 완성된 부분과 미완료 부분을 명확히 분리해서 보고하라. 원작을 충분히 재현했다고 주장하거나 계획·설명만으로 종료하지 마라.
+
+**실제 UI와 원본 사진의 한 눈 비교·픽셀 단위 문제 목록은 아직 미완성이다.** 다음 작업은 사용자의 시각적 유사도 요구를 반영해 이 비교/실제 코드 교정부터 시작해야 한다. 특히 로비·월드맵·채팅방 진입·실제 멀티유저 시나리오가 테스트에 통과한다는 사실을 원작 화면 유사도와 혼동하지 않는다.
