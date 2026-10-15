@@ -18,6 +18,12 @@ const path=require('node:path');
   await page.locator('[data-route="rooms"]').first().click();
   await page.evaluate(()=>window.__LEAF_SOCIAL__.createRoom('원작 스프라이트 검증',2));
   await page.waitForSelector('#rooms.classic-chat-room:not(.hidden) .social-avatar.self img');
+  // An img DOM node can exist before its original 75x141 PNG has decoded.
+  // Live Pages/CDN timing is unlike localhost; never read pixels from 0x0.
+  await page.waitForFunction(()=>{
+   const img=document.querySelector('#rooms.classic-chat-room .social-avatar.self img');
+   return img?.complete&&img.naturalWidth===75&&img.naturalHeight===141;
+  },null,{timeout:25000});
   const source=await page.evaluate(()=>{
    const img=document.querySelector('#rooms .social-avatar.self img');
    const canvas=document.createElement('canvas');
@@ -47,6 +53,10 @@ const path=require('node:path');
   await page.locator('#bot-count').selectOption('1');
   await page.locator('#start-game').click();
   await page.waitForSelector('#game:not(.hidden)');
+  await page.waitForFunction(()=>{
+   const els=[...document.querySelectorAll('#game .battle-side-card.occupied img')];
+   return els.length>=2&&els.every(img=>img.complete&&img.naturalWidth===75&&img.naturalHeight===141);
+  },null,{timeout:25000});
   const info=await page.evaluate(()=>{
    const m=window.__ROG_TEST__.getMatch();
    const cards=[...document.querySelectorAll('#game .battle-side-card')];
