@@ -1,6 +1,6 @@
 'use strict';
-const REVISION='4leaf-revival-pwa-v9';
-const CORE=['./','./index.html','./game.js','./style.css','./original.css','./lobby.css','./game-authentic.css','./network.css','./network.js','./original-shell-accurate.css','./shop-native.js','./original/MainFrame/title.png','./original/MainFrame/borderbtn.png','./original/CardShop/cardshopback.png','./central-client.js','./world-map.js','./social-chat.js','./lobby-ui.js','./original/maps.js','./original/tiles.js','./original/chessmen.js','./original/Gif/d1lobby.png','./original/Gif/d1waitroom.png','./original/WorldMap/worldmapback.png','./original/CardShop/cardshopback.png','./original/IMG/bgtile.png','./original/IMG/minimap.png','./original/MainFrame/wallpaper.png'];
+const REVISION='4leaf-revival-pwa-v10';
+const CORE=['./','./index.html','./game.js','./style.css','./original.css','./lobby.css','./game-authentic.css','./network.css','./network.js','./original-shell-accurate.css','./shop-native.js','./dice-native-stage.js','./dice-native-stage.css','./original/Map/mapback.png','./original/Room/roomback.png','./original/MainFrame/title.png','./original/MainFrame/borderbtn.png','./original/CardShop/cardshopback.png','./central-client.js','./world-map.js','./social-chat.js','./lobby-ui.js','./original/maps.js','./original/tiles.js','./original/chessmen.js','./original/Gif/d1lobby.png','./original/Gif/d1waitroom.png','./original/WorldMap/worldmapback.png','./original/CardShop/cardshopback.png','./original/IMG/bgtile.png','./original/IMG/minimap.png','./original/MainFrame/wallpaper.png'];
 self.addEventListener('install',event=>{
  event.waitUntil(caches.open(REVISION).then(async cache=>{
    const requests=CORE.map(path=>new Request(new URL(path,self.registration.scope),{cache:'reload'}));
