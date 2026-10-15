@@ -25,7 +25,12 @@ alternative_urls=[
 for url in alternative_urls:
  try:
   final,html=fetch(url)
-  print("ALTERNATIVE_OK",urllib.parse.urlparse(final).netloc,"chars",len(html),"product_links",html.count("/products/"),"sample",repr(html[:3000] if "r.jina.ai/https://m.brand.naver.com/lottecinema" in url else html[:160]))
+  print("ALTERNATIVE_OK",urllib.parse.urlparse(final).netloc,"chars",len(html),"product_links",html.count("/products/"),"sample",repr(html[:160]))
+  if "r.jina.ai/https://m.brand.naver.com/lottecinema" in url:
+   for term in ["먼작귀","렌티큘러","띠부띠부","커버 참","C타입","/products/"]:
+    m=re.search(re.escape(term),html,re.I)
+    print("JINA_TERM",term,"present",bool(m),"context",repr(html[max(0,m.start()-180):m.start()+260] if m else ""))
+   print("JINA_SAMPLE_TAIL",repr(html[-1700:]))
  except Exception as e:
   print("ALTERNATIVE_FAILED",urllib.parse.urlparse(url).netloc,type(e).__name__,str(e)[:160])
 if good<2:
