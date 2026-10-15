@@ -2,6 +2,12 @@ name: Chiikawa Lotte reservation watch
 on:
   schedule:
     - cron: '*/5 * 16 10 *'
+      timezone: Asia/Seoul
+  pull_request:
+    paths:
+      - '.github/workflows/chiikawa-lotte-watch.yml'
+      - 'scripts/chiikawa_lotte_watch.py'
+      - 'scripts/test_chiikawa_lotte_watch.py'
   workflow_dispatch:
 permissions:
   contents: read
@@ -10,8 +16,14 @@ concurrency:
   group: chiikawa-lotte-watch
   cancel-in-progress: false
 jobs:
+  regression:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python3 -m unittest discover -s scripts -p 'test_chiikawa_lotte_watch.py' -v
   watch:
-    if: github.repository == 'koith/browser-app-lab'
+    if: github.repository == 'koith/browser-app-lab' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
@@ -35,4 +47,4 @@ jobs:
         shell: bash
         run: |
           if gh issue list --repo "$GITHUB_REPOSITORY" --state all --search 'in:title [Chiikawa reservation live]' --json title --jq '.[].title' | grep -Fq '[Chiikawa reservation live]'; then exit 0; fi
-          gh issue create --repo "$GITHUB_REPOSITORY" --title '[Chiikawa reservation live] 롯데시네마 먼작귀 예약 구매 확인' --body "예약 구매 신호를 감지했습니다. 구매 가능 여부를 최종 확인하세요: $PRODUCT_URL"
+          gh issue create --repo "$GITHUB_REPOSITORY" --title '[Chiikawa reservation live] 롯데시네마 먼작귀 예약 구매 확인' --body "@koith 예약 구매 신호를 감지했습니다. 구매 가능 여부를 최종 확인하세요: $PRODUCT_URL"
