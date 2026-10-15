@@ -1,0 +1,115 @@
+/* Source cross-check: a surviving 2003-01-17 4LEAF Browser CardShop
+   screenshot shows multiple owned character card faces AND the item list.
+   Archived post: https://bbs.ruliweb.com/hobby/board/300110/read/570459
+   Use existing independent card and portrait art, not a screenshot overlay. */
+
+/* Do not leave purchased/owned chessmen as anonymous card backs. The native
+   500x510 CardShop atlas provides a turquoise owned-card face frame. */
+#shop .shop-grid .shop-card[data-owned="true"]:not(.selected){
+ background:url('./original/CardShop/cardshopbutton.png') 0 -366px / 500px 510px no-repeat!important;
+ outline:0!important;border:0!important;box-shadow:none!important;filter:none!important;
+}
+#shop .shop-grid .shop-card[data-owned="true"]:not(.selected):is(:hover,:focus-visible){
+ background-position:-73px -366px!important;
+ outline:1px solid #fff5ba!important;outline-offset:-2px;
+}
+/* The original source card border remains visible; only the inner rectangle
+   receives the actual playable chessman's portrait and one-line title. */
+#shop .shop-grid .shop-card[data-owned="true"]:not(.selected) .card-art{
+ position:absolute;left:7px;top:7px;width:59px;height:61px;
+ margin:0!important;padding:0!important;display:flex!important;
+ align-items:center;justify-content:center;
+ background:transparent!important;border:0!important;
+ opacity:1!important;pointer-events:none!important;overflow:hidden;
+}
+#shop .shop-grid .shop-card[data-owned="true"]:not(.selected) .pixel-portrait{
+ display:block!important;width:100%;max-width:55px;height:57px;
+ object-fit:contain;image-rendering:pixelated;
+ filter:none;opacity:1!important;pointer-events:none!important;
+}
+#shop .shop-grid .shop-card[data-owned="true"]:not(.selected)>b{
+ display:block!important;position:absolute!important;
+ left:5px!important;bottom:4px!important;width:63px!important;height:13px!important;
+ margin:0!important;padding:0!important;
+ overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+ color:#fff6df!important;background:#152056d8!important;
+ font:9px/13px Gulim,'굴림',sans-serif!important;
+ text-shadow:1px 1px #0b123d;
+ opacity:1!important;pointer-events:none!important;
+}
+#shop .shop-grid .shop-card[data-owned="true"]:not(.selected) .card-state{
+ position:absolute;top:4px;right:5px;
+ color:#fff1ab;font:8px Gulim,sans-serif;background:#1b2c70e1;
+ opacity:1!important;pointer-events:none!important;
+}
+/* Original screenshot has a populated right-hand item list immediately after
+   visiting the shop. Place real owned items below source 소지목록/장비 captions. */
+#shop .shop-equipped{
+ left:549px!important;top:32px!important;
+ width:237px!important;height:263px!important;
+ padding:3px!important;
+ display:none!important;
+ border:1px solid #6f85b5!important;
+ border-top:2px solid #a2b7e0!important;
+ background:linear-gradient(180deg,#15234fd9,#17275fee)!important;
+ box-shadow:inset 0 1px #a2bce54d!important;
+}
+#shop .shop-native-stage.owned-open .shop-equipped{display:flex!important}
+#shop .shop-equipped>h4{
+ position:sticky;top:0;z-index:1;
+ display:block!important;flex:none;
+ margin:0 0 2px!important;padding:2px!important;
+ height:17px!important;min-height:17px;
+ border:0!important;border-bottom:1px solid #809bc6!important;
+ text-align:center;color:#eff1ff!important;
+ font:10px/14px Gulim,'굴림',sans-serif!important;
+ background:#293e7dba!important;letter-spacing:0!important;
+}
+#shop .shop-equipped #shop-owned-list{
+ flex:1;overflow-y:auto!important;overflow-x:hidden!important;
+ scrollbar-width:thin;scrollbar-color:#7c9cd3 #1d2d65;
+}
+#shop .shop-equipped .shop-owned-entry{
+ box-sizing:border-box;
+ display:flex!important;align-items:center!important;
+ width:100%;min-height:22px;height:22px!important;
+ margin:0!important;padding:1px 3px!important;
+ gap:5px;border:0!important;border-bottom:1px solid #526dac92!important;
+ border-radius:0!important;
+ box-shadow:none!important;
+ background:#1f3067e9!important;
+ color:#f1f4fe!important;cursor:pointer;
+ text-align:left;white-space:nowrap;
+ font:10px/18px Gulim,'굴림',sans-serif!important;
+}
+#shop .shop-equipped .shop-owned-entry:nth-child(2n){background:#263d7bef!important}
+#shop .shop-equipped .shop-owned-entry:is(:hover,:focus-visible),
+#shop .shop-equipped .shop-owned-entry.selected{
+ background:#506dab!important;
+ outline:1px solid #c4d1f3!important;outline-offset:-1px;
+}
+#shop .shop-equipped .shop-owned-portrait{
+ display:block;flex:none;
+ width:18px;height:18px;max-width:18px;min-width:18px;
+ padding:0;object-fit:contain;image-rendering:pixelated;
+ border:1px solid #809ed8;background:#0d1b47;
+}
+#shop .shop-equipped .shop-owned-name{
+ min-width:0;flex:1;overflow:hidden;
+ text-overflow:ellipsis;white-space:nowrap;
+ font:10px/17px Gulim,'굴림',sans-serif;
+}
+#shop .shop-equipped .shop-owned-ability{
+ flex:none;max-width:79px;overflow:hidden;text-overflow:ellipsis;
+ white-space:nowrap;
+ font:9px/17px Gulim,'굴림',sans-serif;color:#aebdeb;
+}
+/* The image already labels 장비 at native x=747; do not overlay permanent
+   focus outlines or HTML caption text over it while the list is open. */
+#shop .shop-owned-toggle[aria-expanded="true"]{
+ border-color:transparent!important;background:transparent!important;
+}
+#shop .shop-owned-toggle[aria-expanded="true"]:focus-visible,
+#shop .shop-owned-toggle[aria-expanded="true"]:hover{
+ border-color:#fff0b7!important;background:#d9e4ff16!important;
+}

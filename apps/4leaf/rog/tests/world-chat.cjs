@@ -248,7 +248,8 @@ const path=require('path');
  const shopSprite=await host.evaluate(()=>{
   const stage=document.getElementById('shop-native-stage');
   const selected=document.querySelector('#shop-grid .shop-card.selected');
-  const unselected=[...document.querySelectorAll('#shop-grid .shop-card')].find(el=>!el.classList.contains('selected')&&!el.classList.contains('shop-empty'));
+  const unselected=[...document.querySelectorAll('#shop-grid .shop-card')].find(el=>el.dataset.owned==='false'&&!el.classList.contains('selected')&&!el.classList.contains('shop-empty'));
+  const ownedVisible=[...document.querySelectorAll('#shop-grid .shop-card[data-owned="true"]')];
   const buy=document.getElementById('shop-buy');
   const prev=document.getElementById('shop-prev'),next=document.getElementById('shop-next');
   const info=document.getElementById('shop-selected');
@@ -260,6 +261,11 @@ const path=require('path');
    selected:css(selected).backgroundImage,selectedRank:selected.dataset.rank,
    selectedArtOpacity:css(selected.querySelector('.card-art')).opacity,
    untouched:css(unselected).backgroundImage,
+   ownedVisible:ownedVisible.length,
+   ownedNativeFaces:ownedVisible.filter(el=>css(el).backgroundImage.includes('original/CardShop/cardshopbutton.png')).length,
+   ownedPortraits:ownedVisible.filter(el=>css(el.querySelector('.card-art')).opacity==='1').length,
+   inventoryCount:document.querySelectorAll('#shop-owned-list .shop-owned-entry').length,
+   inventoryPortraits:document.querySelectorAll('#shop-owned-list .shop-owned-portrait').length,
    selectedRect:rect(selected),
    buy:css(buy).backgroundImage,buyRect:rect(buy),
    prev:css(prev).backgroundImage,next:css(next).backgroundImage,
@@ -280,7 +286,13 @@ const path=require('path');
   'purchase and page arrows are recovered source sprite atlas, not Unicode/CSS gradients');
  assert.ok(Math.abs(shopSprite.buyRect.w-98)<0.1&&Math.abs(shopSprite.buyRect.h-21)<0.1,
   'original purchase action uses 98x21 source frame');
- assert.equal(shopSprite.ownedPanelDisplay,'none','invented inventory pane no longer covers the native shop by default');
+ assert.equal(shopSprite.ownedPanelDisplay,'flex','2003 CardShop photograph shows the native right-hand owned-item list open');
+ assert.ok(shopSprite.ownedVisible>=2&&shopSprite.ownedNativeFaces===shopSprite.ownedVisible,
+  'owned cards expose individual recovered card frames simultaneously, not only the chosen card');
+ assert.equal(shopSprite.ownedPortraits,shopSprite.ownedVisible,
+  'all owned-card portraits are visible inside original source frames');
+ assert.ok(shopSprite.inventoryCount>=2&&shopSprite.inventoryCount===shopSprite.inventoryPortraits,
+  'each right-hand item has a real recovered chessman icon; not a fake text-only panel');
  assert.equal(shopSprite.drawerToggle,true,'original 장비 sign has accessible interactive inventory hotspot');
  assert.ok(shopSprite.infoRect.x>=15&&shopSprite.infoRect.x<35
    &&shopSprite.infoRect.y>=320&&shopSprite.infoRect.y<344,
@@ -297,14 +309,20 @@ const path=require('path');
  assert.deepEqual([Math.round(originalAll.x),Math.round(originalAll.y)],[14,302],
   'all-card hot area belongs to existing original 카드정보 caption');
  assert.equal(originalAll.duplicate,'none','no invented doubled 전체 label over the source character');
+ assert.equal(await host.locator('#shop-owned-toggle').getAttribute('aria-expanded'),'true',
+  'the original right-hand owned list is open when entering Magic Carden');
  await host.locator('#shop-owned-toggle').click();
- assert.equal(await host.locator('#shop-owned-toggle').getAttribute('aria-expanded'),'true');
+ assert.equal(await host.locator('#shop-owned-toggle').getAttribute('aria-expanded'),'false');
+ assert.ok(!(await host.locator('#shop .shop-equipped').isVisible()),
+  'original 장비 sign closes only the list, retaining actual shop artwork');
+ await host.locator('#shop-owned-toggle').click();
  assert.ok(await host.locator('#shop .shop-equipped').isVisible(),
-  'native 장비 sign opens actual owned-card list');
+  'original 장비 sign reopens real owned-card list');
  await host.keyboard.press('Escape');
  assert.equal(await host.locator('#shop-owned-toggle').getAttribute('aria-expanded'),'false');
  assert.ok(!(await host.locator('#shop .shop-equipped').isVisible()),
-  'inventory drawer closes without erasing recovered CardShop pixels');
+  'inventory drawer closes on keyboard Escape');
+ await host.locator('#shop-owned-toggle').click();
  await host.locator('#shop .group-tab[data-group="valuable"]').click();
  assert.ok(await host.locator('#shop-grid .shop-card[data-rank="valuable"]').count()>0,
   'original Valuable counter filters real catalog without inventing new card data');

@@ -26,12 +26,13 @@
    if(event.key!=='Escape'||!stage.classList.contains('owned-open'))return;
    setOpen(false);toggle.focus();event.stopPropagation();
   });
-  // Preserve CardShop page transitions: only close the drawer when leaving
-  // the actual shop, never reset user's selected card/filter or purchase data.
+  // Surviving 2003 client screenshots show the equipped item list already
+  // open when entering Magic Carden. Keep the old close-on-click affordance.
   document.addEventListener('leaf-route-change',event=>{
-   if(event.detail?.route!=='shop')setOpen(false);
+   setOpen(event.detail?.route==='shop');
   });
   stage.append(toggle);
+  setOpen(true);
   window.__LEAF_SHOP_NATIVE__={
    getState:()=>({
     ownerPanelOpen:stage.classList.contains('owned-open'),
