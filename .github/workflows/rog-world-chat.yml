@@ -3,6 +3,8 @@ on:
   push:
     paths:
       - 'apps/4leaf/rog/world-map.js'
+      - 'apps/4leaf/rog/world-map-source-moon.css'
+      - 'apps/4leaf/rog/tests/world-map-moon.cjs'
       - 'apps/4leaf/rog/street-world.js'
       - 'apps/4leaf/rog/shop-native.js'
       - 'apps/4leaf/rog/cardshop-native-controls.js'
@@ -85,6 +87,8 @@ jobs:
         run: node apps/4leaf/rog/tests/registry-native-portraits.cjs
       - name: Verify source 2x2 right-hand chessmen party and genuine consumables in Chromium
         run: node apps/4leaf/rog/tests/dice-chessmen-hud.cjs
+      - name: Verify authentic native 796x528 WorldMap plus separate source screenshot full moon
+        run: node apps/4leaf/rog/tests/world-map-moon.cjs
       - name: Verify original TOWN SELECT is used solely for dice game channels
         run: node apps/4leaf/rog/tests/dice-channel.cjs
       - name: Verify original ChatRoom furniture survives transient CDN HTTP 503
