@@ -509,6 +509,13 @@
   $('social-chat-south').onclick=()=>openRegion('south');
   $('social-invite').onclick=openInvite;
   root.addEventListener('keydown',event=>{
+   if(event.key==='Escape'&&$('social-actor-menu')){
+    const selected=$('social-actor-menu').dataset.peer;
+    closeActorMenu();
+    [...document.querySelectorAll('#social-avatar-layer .social-avatar')]
+      .find(el=>el.dataset.peer===selected)?.focus({preventScroll:true});
+    event.preventDefault();event.stopPropagation();return;
+   }
    if(event.key==='Escape'&&root.classList.contains('social-peers-open')){
     setMobilePeersOpen(false);
     $('social-peers-toggle')?.focus();
@@ -791,6 +798,82 @@
   state.position={...seats[hash%seats.length]};
   render();return true;
  }
+ /* Source ChatRoom/ringbtn.png is the *actual* historical 104x330
+    horizontal-state atlas: 4 columns of 26px and 15 rows of 22px. The live
+    screenshot chat_ref.jpg shows a short context strip beside one selected
+    character. Glyph artwork/order is verified; the command semantics below
+    are conservative functional web mappings, NOT decoded 2002 event logic.
+    Never create fictitious occupants or simulated direct messages. */
+ function closeActorMenu(){
+  const menu=$('social-actor-menu');
+  if(menu)menu.remove();
+ }
+ function actorMenuAnchor(menu,figure){
+  const x=Number.parseFloat(figure.style.left)||52;
+  const y=Number.parseFloat(figure.style.top)||76;
+  const px=x*7.94;
+  // Place beside the real 75x141 actor, not at the edge of the document
+  // or a screenshot pixel map. Clamp to the original 794x528 bitmap.
+  menu.style.left=Math.max(3,Math.min(794-31,px+(px>660?-65:31)))+'px';
+  menu.style.top=Math.max(4,Math.min(528-96,y*5.28-108))+'px';
+ }
+ function teleportToFreeSeat(x,y){
+  const others=onlinePeers('room:'+state.roomId).filter(p=>p.id!==tabId);
+  const occupied=new Set(others.map(p=>closestSeat(p.position?.x??52,p.position?.y??76)));
+  const seat=closestSeat(x,y,occupied);
+  state.position={...roomSeats()[seat]};
+  closeActorMenu();
+  sendLocal({kind:'move',position:state.position});
+  sendRTC({kind:'move',from:tabId,position:state.position});
+  presence();renderOccupants();
+  return seat;
+ }
+ function showActorMenu(user,figure){
+  if(state.view!=='room'||!figure?.isConnected)return;
+  const old=$('social-actor-menu');
+  if(old?.dataset.peer===user.id){closeActorMenu();return}
+  closeActorMenu();
+  const layer=$('social-avatar-layer');if(!layer)return;
+  const menu=document.createElement('div');
+  menu.id='social-actor-menu';menu.className='social-actor-menu';
+  menu.dataset.peer=user.id;menu.setAttribute('role','toolbar');
+  menu.setAttribute('aria-label',safe(user.nick,12)+' 캐릭터 조작');
+  actorMenuAnchor(menu,figure);
+  const actions=[
+   {row:4,label:'캐릭터 정보 보기',run:()=>showPeerInfo(user)},
+   {row:5,label:'채팅 입력에 닉네임 넣기',run:()=>{
+    const field=$('message');
+    if(field){
+     const prefix=field.value.trim();
+     field.value=(prefix?prefix+' ':'')+'@'+safe(user.nick,12)+' ';
+     field.focus();
+    }
+   }},
+   {row:7,label:'이 캐릭터 근처 빈 자리로 이동',run:()=>{
+    if(state.view==='room'){
+     const pos=place(user,0);
+     teleportToFreeSeat(pos.x,pos.y);
+    }
+   }},
+   {row:8,label:'캐릭터 메뉴 닫기',run:()=>{}}
+  ];
+  for(const action of actions){
+   const button=document.createElement('button');
+   button.type='button';button.className='social-native-ring-action';
+   button.dataset.ringRow=String(action.row);
+   button.style.setProperty('--ring-y',(-22*action.row)+'px');
+   button.title=action.label;button.setAttribute('aria-label',action.label);
+   button.onclick=event=>{
+    event.stopPropagation();
+    action.run();
+    closeActorMenu();
+   };
+   menu.append(button);
+  }
+  menu.addEventListener('click',event=>event.stopPropagation());
+  layer.append(menu);
+  menu.querySelector('button')?.focus({preventScroll:true});
+ }
  function roomAvatar(user,index){
   const figure=document.createElement('button');figure.className='social-avatar';
   figure.type='button';figure.dataset.peer=user.id;
@@ -801,8 +884,11 @@
   if(user.id===tabId)figure.classList.add('self');
   figure.onclick=e=>{
    e.stopPropagation();
-   if(user.id===tabId){state.facing*=-1;presence();renderOccupants();}
-   else showPeerInfo(user);
+   if(user.id===tabId){closeActorMenu();state.facing*=-1;presence();renderOccupants();}
+   else showActorMenu(user,figure);
+  };
+  figure.oncontextmenu=e=>{
+   e.preventDefault();e.stopPropagation();showActorMenu(user,figure);
   };
   return figure;
  }
@@ -810,6 +896,8 @@
   if(state.view!=='room')return;
   const layer=$('social-avatar-layer');if(!layer)return;
   const users=onlinePeers('room:'+state.roomId);
+  const openMenu=$('social-actor-menu');
+  if(openMenu&&!users.some(p=>p.id===openMenu.dataset.peer))closeActorMenu();
   for(const stale of [...layer.querySelectorAll('.social-avatar')]){
    if(!users.some(p=>p.id===stale.dataset.peer))stale.remove();
   }
@@ -911,12 +999,7 @@
    // Do not teleport from a click on a participant or UI overlay.
    if(e.target.closest('button, .social-room-title, .social-avatar'))return;
    const rect=frame.getBoundingClientRect();const x=100*(e.clientX-rect.left)/rect.width,y=100*(e.clientY-rect.top)/rect.height;
-   const others=onlinePeers('room:'+state.roomId).filter(p=>p.id!==tabId);
-   const occupied=new Set(others.map(p=>closestSeat(p.position?.x??52,p.position?.y??76)));
-   const seat=closestSeat(x,y,occupied);
-   state.position={...roomSeats()[seat]};
-   sendLocal({kind:'move',position:state.position});sendRTC({kind:'move',from:tabId,position:state.position});presence();
-   renderOccupants();
+   teleportToFreeSeat(x,y);
   });
   renderOccupants();
  }

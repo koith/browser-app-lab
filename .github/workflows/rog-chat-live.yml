@@ -48,7 +48,9 @@ jobs:
                curl -fLsS --max-time 15 "$base/dice-native-menu-chrome.css?qa=${GITHUB_SHA}" -o /tmp/leaf-menu-live.css &&
                cmp -s /tmp/leaf-menu-live.css apps/4leaf/rog/dice-native-menu-chrome.css &&
                curl -fLsS --max-time 15 "$base/dice-native-battle-podium.css?qa=${GITHUB_SHA}" -o /tmp/leaf-podium-live.css &&
-               cmp -s /tmp/leaf-podium-live.css apps/4leaf/rog/dice-native-battle-podium.css; then
+               cmp -s /tmp/leaf-podium-live.css apps/4leaf/rog/dice-native-battle-podium.css &&
+               curl -fLsS --max-time 15 "$base/chatroom-native-ringbtn.css?qa=${GITHUB_SHA}" -o /tmp/leaf-ring-live.css &&
+               cmp -s /tmp/leaf-ring-live.css apps/4leaf/rog/chatroom-native-ringbtn.css; then
               ready=1
               echo "Published JS/CSS byte-for-byte match the checked-out source at ${GITHUB_SHA}"
               break

@@ -26,6 +26,7 @@ on:
       - 'apps/4leaf/rog/chatroom-native-exit.js'
       - 'apps/4leaf/rog/chatroom-native-talkbox.js'
       - 'apps/4leaf/rog/chatroom-native-talkbox.css'
+      - 'apps/4leaf/rog/chatroom-native-ringbtn.css'
       - 'apps/4leaf/rog/chatroom-native-exit.css'
       - 'apps/4leaf/rog/index.html'
       - 'apps/4leaf/rog/dice-native-player-portraits.css'

@@ -756,6 +756,77 @@ const path=require('path');
  assert.equal(await guest.locator('#social-online-count').textContent(),'2명');
  assert.equal(await host.locator('#social-native-user-count').textContent(),'2명','source participant badge follows true host/guest peers');
  assert.equal(await guest.locator('#social-native-user-count').textContent(),'2명','remote 2-user roster count updates without fabricated members');
+
+ // The exact recovered 104x330 ChatRoom/ringbtn.png has four 26px-wide
+ // interaction states and fifteen 22px icon rows. Historical chat_ref.jpg
+ // shows a short vertical action strip beside a selected actor. Use ONLY
+ // the actual other browser's avatar, never fabricated profile fixtures.
+ const selectedPeer=host.locator('#social-avatar-layer .social-avatar:not(.self)');
+ assert.equal(await selectedPeer.count(),1,'a real second tab provides the native character menu subject');
+ await selectedPeer.evaluate(el=>el.click());
+ assert.equal(await host.locator('#social-actor-menu .social-native-ring-action').count(),4,
+  'selected real participant opens genuine original 4-control ringbtn strip');
+ const ringSource=await host.evaluate(async()=>{
+  const original=new Image();original.src='./original/ChatRoom/ringbtn.png';await original.decode();
+  const menu=document.getElementById('social-actor-menu');
+  const frame=document.getElementById('social-image-frame');
+  const buttons=[...menu.querySelectorAll('button')];
+  return {
+   source:[original.naturalWidth,original.naturalHeight],
+   peer:menu.dataset.peer,
+   menu:menu.getBoundingClientRect().toJSON(),
+   frame:frame.getBoundingClientRect().toJSON(),
+   actions:buttons.map(el=>{
+    const css=getComputedStyle(el);
+    return {image:css.backgroundImage,
+     pos:css.backgroundPosition,
+     dimensions:[parseFloat(css.width),parseFloat(css.height)],
+     row:el.dataset.ringRow,accessible:el.getAttribute('aria-label')};
+   })
+  };
+ });
+ assert.deepEqual(ringSource.source,[104,330],'native original ChatRoom actor atlas is exactly 104x330');
+ assert.deepEqual(ringSource.actions.map(x=>x.row),['4','5','7','8'],'source graphic rows for the original screenshot-style action column');
+ assert.ok(ringSource.actions.every(x=>x.dimensions[0]===26&&x.dimensions[1]===22),
+  'all menu buttons are native 26x22 independently clickable hitboxes');
+ assert.ok(ringSource.actions.every(x=>x.image.includes('original/ChatRoom/ringbtn.png')),
+  'no invented emoji: every action directly uses original archived ring icon art');
+ assert.ok(ringSource.menu.x>=ringSource.frame.x-2&&ringSource.menu.right<=ringSource.frame.right+2,
+  'source action strip is positioned inside original scaled 794x528 room image');
+ await host.screenshot({path:'leaf-source-ringbtn-live-peer-menu.png'});
+ await host.keyboard.press('Escape');
+ assert.equal(await host.locator('#social-actor-menu').count(),0,'Escape dismisses native player menu without moving actor');
+ assert.equal(await host.locator('#social-avatar-layer .social-avatar:not(.self)').evaluate(el=>document.activeElement===el),true,
+  'native menu restores keyboard focus to real selected participant');
+
+ await selectedPeer.evaluate(el=>el.click());
+ await host.locator('#social-actor-menu [aria-label="캐릭터 정보 보기"]').click();
+ assert.ok(await host.locator('#social-modal').isVisible(),'original icon opens the existing live peer information, not a fabricated member');
+ await host.locator('.social-modal-title button').click();
+ assert.equal(await host.locator('#social-actor-menu').count(),0,'information action closes original sprite menu');
+ await selectedPeer.evaluate(el=>el.click());
+ await host.locator('#social-actor-menu [aria-label="채팅 입력에 닉네임 넣기"]').click();
+ assert.ok((await host.locator('#message').inputValue()).startsWith('@'),
+  'source icon inserts actual peer name into real chat input without sending a fake message');
+ await host.locator('#message').fill('');
+
+ const originSeat=await host.locator('.social-avatar.self').evaluate(el=>el.dataset.seat);
+ await selectedPeer.evaluate(el=>el.click());
+ await host.locator('#social-actor-menu [aria-label="이 캐릭터 근처 빈 자리로 이동"]').click();
+ assert.equal(await host.locator('#social-actor-menu').count(),0,'choosing native near-seat action closes menu');
+ const movedSeat=await host.locator('.social-avatar.self').evaluate(el=>({
+  seat:el.dataset.seat,transition:getComputedStyle(el).transitionDuration,
+  left:el.style.left,top:el.style.top
+ }));
+ assert.equal(movedSeat.transition,'0s','selected peer approach instantly snaps to discrete ChatRoom seat');
+ assert.ok(Number.isInteger(Number(movedSeat.seat)),'peer approach uses actual archived room-layout seat IDs');
+ assert.ok((await host.locator('.social-avatar').count())===2,'no fabricated participant was created by peer commands');
+ await guest.waitForFunction(p=>[...document.querySelectorAll('.social-avatar:not(.self)')]
+   .some(el=>el.style.left===p.left&&el.style.top===p.top),movedSeat,{timeout:7500});
+ await selectedPeer.evaluate(el=>el.click());
+ await host.locator('#social-actor-menu [aria-label="캐릭터 메뉴 닫기"]').click();
+ assert.equal(await host.locator('#social-actor-menu').count(),0,'red original X glyph closes only the context strip');
+
  await host.locator('#message').fill('원본 하이아칸 실시간 채팅 테스트');
  await host.locator('#message').press('Enter');
  await guest.waitForFunction(()=>document.querySelector('#chat-log').textContent.includes('원본 하이아칸 실시간 채팅 테스트'),null,{timeout:7000});
@@ -918,6 +989,13 @@ const path=require('path');
  assert.equal(await guest.locator('#social-peers-toggle').getAttribute('aria-expanded'),'false');
  assert.equal(await guest.locator('#social-peer-panel').isVisible(),false,'mobile roster starts collapsed');
  assert.equal(await guest.locator('.social-avatar.self').evaluate(el=>getComputedStyle(el).transitionDuration),'0s','mobile avatar teleports without interpolation');
+ await guest.locator('.social-avatar.self').evaluate(el=>
+  el.dispatchEvent(new MouseEvent('contextmenu',{bubbles:true,cancelable:true})));
+ assert.equal(await guest.locator('#social-actor-menu button').count(),4,
+  'mobile right-click/long-touch equivalent exposes source ringbtn menu');
+ await guest.locator('#social-actor-menu button').last().click();
+ assert.equal(await guest.locator('#social-actor-menu').count(),0,'mobile original X closes character actions');
+
  await guest.locator('#social-peers-toggle').click();
  assert.equal(await guest.locator('#social-peers-toggle').getAttribute('aria-expanded'),'true');
  assert.equal(await guest.locator('#social-peer-panel').isVisible(),true,'roster opens in the original room');
