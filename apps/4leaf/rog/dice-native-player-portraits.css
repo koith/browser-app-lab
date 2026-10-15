@@ -1,0 +1,138 @@
+/* 4LEAF player rails rebuilt from actual archived board.jpg + battle.jpg,
+ * independent live cards; never a screenshot over transparent hotspots.
+ * Original IMG/avatarback.png is the source blue portrait-cell texture.
+ *
+ * The game-side card shell remains in .battle-player-panels; actual character
+ * portraits are Registry/savaNN.png cropped at the head, alpha-keyed by
+ * registry-original-alpha.js. The original 794x528 ChatRoom is unaffected. */
+#app.app-classic-dice #game .battle-team-side{
+ box-sizing:border-box;
+ width:11.5%!important;
+ top:4px!important;bottom:68px!important;
+ padding:0 2px!important;gap:3px!important;
+ display:flex;
+ flex-direction:column;
+ justify-content:flex-start;
+ align-items:stretch;
+}
+#app.app-classic-dice #game .battle-team-side.left{left:0!important}
+#app.app-classic-dice #game .battle-team-side.right{right:0!important}
+#app.app-classic-dice #game .battle-side-card{
+ position:relative;
+ box-sizing:border-box;
+ flex:0 1 96px!important;
+ width:100%;min-width:0;min-height:0;max-height:105px;
+ display:flex!important;flex-direction:column;
+ gap:0!important;
+ overflow:hidden!important;
+ padding:1px 2px 2px!important;
+ border:2px ridge #738eca!important;
+ border-radius:1px!important;
+ background:#304994 url('./original/IMG/avatarback.png') center center / 100% 100% no-repeat!important;
+ box-shadow:inset 1px 1px #96a8e1,1px 1px 2px #141e48!important;
+}
+#app.app-classic-dice #game .battle-side-card.active{
+ border-color:#e8dfb0!important;
+ box-shadow:inset 0 0 4px #e3efc8,0 0 7px #eef5b69e!important;
+}
+#app.app-classic-dice #game .battle-side-card.vacant{
+ opacity:.55;
+}
+#app.app-classic-dice #game .battle-side-num{
+ position:absolute;top:1px;left:2px;right:auto;
+ color:#d7fbff!important;
+ font:bold 12px/13px Arial,Gulim,sans-serif;
+ text-shadow:1px 1px #13234a;
+ z-index:3;
+}
+#app.app-classic-dice #game .battle-side-num::after{
+ content:'P';margin-left:1px;font-size:9px;color:#c9e8f0;
+}
+#app.app-classic-dice #game .battle-side-portrait{
+ position:relative;flex:1 1 auto;
+ min-height:30px;max-height:65px;
+ overflow:hidden;
+ margin:1px 4px 1px;
+ border:0;
+ background:transparent;
+}
+#app.app-classic-dice #game .battle-side-portrait img{
+ position:absolute!important;
+ left:50%;top:0;
+ width:75px!important;height:141px!important;
+ max-width:none!important;max-height:none!important;
+ min-width:75px!important;min-height:141px!important;
+ transform:translateX(-50%)!important;
+ object-fit:fill!important;object-position:top!important;
+ image-rendering:auto;
+ filter:none!important;
+ pointer-events:none;
+}
+#app.app-classic-dice #game .battle-side-info{
+ flex:0 0 auto;
+ min-height:29px;max-height:34px;
+ display:flex;flex-direction:column;
+ align-items:stretch;justify-content:end;
+ gap:1px!important;
+ min-width:0;width:100%;
+ position:relative;
+ padding:0 1px;
+ border-top:1px solid #758dc2;
+ background:#253a78b8;
+}
+#app.app-classic-dice #game .battle-side-info b{
+ color:#f4f7ff!important;
+ font:10px/12px Gulim,'굴림',sans-serif!important;
+ text-shadow:1px 1px #101b41;
+ text-align:center;
+ overflow:hidden;
+ text-overflow:ellipsis;
+ white-space:nowrap;
+}
+#app.app-classic-dice #game .battle-side-info small{
+ display:block;
+ color:#c0e9ff!important;
+ font:9px/10px Gulim,'굴림',sans-serif!important;
+ text-align:center;
+ overflow:hidden;
+ text-overflow:ellipsis;
+ white-space:nowrap;
+}
+#app.app-classic-dice #game .battle-side-meter{
+ box-sizing:border-box;
+ flex:none;display:block;
+ height:3px!important;min-height:3px!important;
+ background:#79e2ee!important;
+ border:0!important;
+ box-shadow:0 0 3px #82ebff!important;
+ transition:none;
+}
+@media(max-width:650px){
+ #app.app-classic-dice #game .battle-team-side{
+  width:10.5%!important;
+  gap:1px!important;
+  padding:0!important;
+  bottom:58px!important;
+ }
+ #app.app-classic-dice #game .battle-side-card{
+  flex-basis:75px!important;
+  max-height:80px;
+  padding:0!important;
+  border-width:1px!important;
+ }
+ #app.app-classic-dice #game .battle-side-num{font-size:9px;line-height:10px}
+ #app.app-classic-dice #game .battle-side-portrait{min-height:20px;max-height:44px;margin:0}
+ #app.app-classic-dice #game .battle-side-portrait img{
+  transform:translateX(-50%) scale(.72)!important;
+  transform-origin:top center!important;
+ }
+ #app.app-classic-dice #game .battle-side-info{
+  min-height:18px!important;max-height:23px!important;
+ }
+ #app.app-classic-dice #game .battle-side-info b{font-size:7px!important;line-height:9px!important}
+ #app.app-classic-dice #game .battle-side-info small{font-size:6px!important;line-height:7px!important}
+ #app.app-classic-dice #game .battle-side-meter{height:2px!important;min-height:2px!important}
+}
+/* Source Registry actors were vivid-green-keyed in the 2002 renderer.
+ * Applying the same alpha mask to the original .board-pawn and ChatRoom
+ * <img> also removes the visible rectangle while leaving images inspectable. */
