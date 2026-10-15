@@ -54,6 +54,19 @@ const assert=require('node:assert/strict');
    'room selector is fully visible rather than cropped');
   assert.ok(nativeSelect.create>35&&nativeSelect.join>35,
    'native CREATE/JOIN image hotspots are interactive');
+  const sourceRoomInfo=await page.locator('#lobby-room-info>div').evaluateAll(els=>els.map(el=>({
+   field:el.dataset.field,x:parseFloat(getComputedStyle(el).left),
+   y:parseFloat(getComputedStyle(el).top),width:parseFloat(getComputedStyle(el).width)
+  })));
+  assert.deepEqual(sourceRoomInfo.filter(x=>['방제','방장','인원','MAP','소환수치','방식','상태'].includes(x.field)),[
+   {field:'방제',x:502,y:180,width:264},
+   {field:'방장',x:502,y:202,width:125},
+   {field:'인원',x:677,y:202,width:95},
+   {field:'MAP',x:502,y:226,width:125},
+   {field:'소환수치',x:693,y:226,width:78},
+   {field:'방식',x:514,y:249,width:102},
+   {field:'상태',x:677,y:249,width:92}
+  ],'dynamic ROOM INFO values inhabit separate original 794x404 bitmap cells, not a 7-row fake scroll pane');
   await page.screenshot({path:'leaf-dice-native-map-select.png'});
   await page.locator('#lobby-create').click();
   assert.ok(await page.locator('#dice-lobby-scene.config-open').isVisible());

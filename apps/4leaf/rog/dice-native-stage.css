@@ -181,3 +181,52 @@
 }
 
 #lobby .lobby-scene.config-open .dice-native-stage #dice-team-picker{display:block}
+
+/* Native ROOM INFO cells are NOT an arbitrary scroll list. The Map PAK
+   already paints the original labels and six information fields. Position
+   only dynamic values in their corresponding empty source pixels. */
+#lobby .dice-native-stage #lobby-room-info{
+ left:0;top:0;width:794px;height:404px;
+ overflow:visible;pointer-events:none;
+ background:transparent!important;
+}
+#lobby .dice-native-stage #lobby-room-info>div{
+ position:absolute;
+ display:flex;align-items:center;
+ min-height:19px;height:19px!important;margin:0;padding:0;
+ overflow:hidden;
+}
+#lobby .dice-native-stage #lobby-room-info>div[data-field="방제"]{
+ left:502px;top:180px;width:264px;
+}
+#lobby .dice-native-stage #lobby-room-info>div[data-field="방장"]{
+ left:502px;top:202px;width:125px;
+}
+#lobby .dice-native-stage #lobby-room-info>div[data-field="인원"]{
+ left:677px;top:202px;width:95px;
+}
+#lobby .dice-native-stage #lobby-room-info>div[data-field="MAP"]{
+ left:502px;top:226px;width:125px;
+}
+#lobby .dice-native-stage #lobby-room-info>div[data-field="소환수치"]{
+ left:693px;top:226px;width:78px;
+}
+#lobby .dice-native-stage #lobby-room-info>div[data-field="진행"],
+#lobby .dice-native-stage #lobby-room-info>div[data-field="방식"],
+#lobby .dice-native-stage #lobby-room-info>div[data-field="스타일"]{
+ left:514px;top:249px;width:102px;
+}
+#lobby .dice-native-stage #lobby-room-info>div[data-field="상태"]{
+ left:677px;top:249px;width:92px;
+}
+#lobby .dice-native-stage #lobby-room-info>div[data-field="진행"]{display:none}
+/* Empty or resumed games may emit extra metadata not present as dedicated
+   source boxes. Keep it accessible as a row title, not overpaint the PAK. */
+#lobby .dice-native-stage #lobby-room-info>div:not([data-field="방제"]):not([data-field="방장"]):not([data-field="인원"]):not([data-field="MAP"]):not([data-field="소환수치"]):not([data-field="진행"]):not([data-field="방식"]):not([data-field="스타일"]):not([data-field="상태"]){display:none}
+#lobby .dice-native-stage #lobby-room-info>div span{
+ width:100%;max-width:100%;height:19px;
+ padding:1px 3px;line-height:16px;
+ background:#29396e6b;border-radius:0;
+ color:#f8f0ee;font-size:10px;
+ overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
+}
