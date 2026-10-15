@@ -97,7 +97,10 @@
      else window.__ROG_TEST__?.go('lobby');
    }
    else if(id==='knights'){
-     window.__LEAF_SOCIAL__?.openBoard?.();
+     // The genuine KnightTown/knightback.png is a 794x404 six-district
+     // selection scene. Enter it FIRST; the web bulletin is separately
+     // available through a selected region (not a substitute source image).
+     window.__LEAF_SOCIAL__?.openKnightTown?.();
      window.__ROG_TEST__?.go('rooms');
    }else if(id==='my4leaf')showProfile();
  }
