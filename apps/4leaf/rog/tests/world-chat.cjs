@@ -5,7 +5,7 @@ const path=require('path');
  const url=process.env.FOURLEAF_TEST_URL||'http://127.0.0.1:8765/';
  const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
  const a=await browser.newContext({viewport:{width:1280,height:800}});
- const host=await a.newPage(),guest=await a.newPage(); // same browser storage partition: actual peer tabs
+ // Offline visual QA deliberately uses inter-tab transport.\n // Real server behavior has independent central-browser.cjs E2E tests.\n await a.addInitScript(()=>{window.LEAF_CENTRAL_API_URL='';});\n const host=await a.newPage(),guest=await a.newPage(); // same browser storage partition: actual peer tabs
  const errors=[],missingAssets=[];
  for(const [who,page] of [['host',host],['guest',guest]]){
    page.on('pageerror',e=>{errors.push(who+': '+e.stack);console.error('PAGE ERROR',who,e.stack)});
