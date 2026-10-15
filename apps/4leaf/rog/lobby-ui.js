@@ -99,6 +99,7 @@
  };
  function line(container,label,value){
   const row=document.createElement('div'),heading=document.createElement('b'),text=document.createElement('span');
+  row.dataset.field=label;row.title=label+' · '+String(value);
   heading.textContent=label;text.textContent=String(value);row.append(heading,text);container.append(row);
  }
  function updateRooms(){
