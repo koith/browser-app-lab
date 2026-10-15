@@ -579,6 +579,7 @@ const path=require('path');
  assert.ok(Math.abs(overlay.roster.x-(794-13-158))<1.5&&Math.abs(overlay.roster.y-9)<1.5,'archival screen: native participant list at upper-right scene coordinate');
  assert.ok(Math.abs(overlay.input.w-407)<1.5&&overlay.input.y>80,'native source edit frame remains independent from visible scrollable chat lines');
  assert.equal(overlay.peers,1,'only genuine self user appears in overlay, never sample NPCs');
+ assert.equal(await host.locator('#social-native-user-count').textContent(),'1명','the original userlist title field reflects actual room occupants');
  assert.ok(overlay.sourceImage.includes('/original/ChatRoom/room'),'still uses native source room bitmap');
  await host.screenshot({path:'leaf-original-overlay-chatroom-desktop.png'});
  // The archived ChatRoom/exitbtn.png lower strip is four original 66×25
@@ -919,6 +920,7 @@ const path=require('path');
  assert.equal(await guest.locator('#social-peers-toggle').getAttribute('aria-expanded'),'true');
  assert.equal(await guest.locator('#social-peer-panel').isVisible(),true,'roster opens in the original room');
  assert.equal(await guest.locator('#social-peer-list .social-user-row').count(),1,'only the real participant is listed');
+ assert.equal(await guest.locator('#social-native-user-count').textContent(),'1명','original participant count stays factual on mobile');
  await guest.waitForFunction(()=>document.querySelector('#social-original-userlist')?.dataset.ready==='true',null,{timeout:10000});
  assert.deepEqual(await guest.locator('#social-original-userlist').evaluate(el=>[el.width,el.height]),[150,38],'original ChatRoom userlist remains 150×38');
  await guest.screenshot({path:'leaf-native-mobile-roster-open.png'});
