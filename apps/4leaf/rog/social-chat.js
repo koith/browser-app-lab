@@ -533,6 +533,7 @@
  }
  function render(){
   if(!sceneInit)return;
+  window.__LEAF_NATIVE_ROOM_PANELS__?.beforeRender();
   if(state.view!=='room')setMobilePeersOpen(false);
   $root()?.classList.toggle('classic-chat-room',state.view==='room');
   $root()?.classList.toggle('native-town-scene',state.view==='town');
@@ -544,6 +545,7 @@
   if(state.view==='directory')renderDirectory(frame);
   if(state.view==='room')renderRoom(frame);
   updateHeader();fit();changeScope(scope());
+  window.__LEAF_NATIVE_ROOM_PANELS__?.afterRender();
  }
 
  function boardPosts(){
