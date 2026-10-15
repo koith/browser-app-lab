@@ -62,4 +62,19 @@ class WatchTests(unittest.TestCase):
                 self.assertIn("@koith"," ".join(args))
                 self.assertIn("https://m.brand.naver.com/lottecinema/products/222"," ".join(args))
 
+    def test_ntfy_push_contains_direct_link_and_urgent_priority(self):
+        product={"kind":"lenticular","label":"렌티큘러 스티커","title":"먼작귀 렌티큘러","url":"https://m.brand.naver.com/lottecinema/products/222"}
+        response=MagicMock()
+        response.status=200
+        response.__enter__.return_value=response
+        with patch.dict(os.environ,{"NTFY_TOPIC":"test-topic"},clear=False):
+            with patch.object(watch.urllib.request,"urlopen",return_value=response) as call:
+                watch.send_ntfy(product)
+                request=call.call_args[0][0]
+                self.assertEqual(request.full_url,"https://ntfy.sh/test-topic")
+                self.assertEqual(request.get_method(),"POST")
+                self.assertIn("먼작귀",request.data.decode("utf-8"))
+                self.assertEqual(request.get_header("Priority"),"5")
+                self.assertEqual(request.get_header("Click"),product["url"])
+
 if __name__=="__main__": unittest.main()
