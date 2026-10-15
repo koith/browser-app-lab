@@ -367,6 +367,7 @@
  function updateCounts(){
   if(!sceneInit)return;
   const c=$('social-online-count');if(c)c.textContent=onlinePeers().length+'명';
+  const nativeCount=$('social-native-user-count');if(nativeCount)nativeCount.textContent=onlinePeers().length+'명';
   const group=$('social-peer-list');
   if(group){group.replaceChildren();onlinePeers().forEach(user=>{
     const row=document.createElement('div');row.className='social-user-row';
@@ -500,7 +501,7 @@
  function build(){
   const root=$root();if(!root)return;
   root.replaceChildren();root.classList.add('leaf-social-scene');
-  root.innerHTML='<div class="social-header"><div><strong id="social-location-title">하이아칸</strong><small id="social-breadcrumb"></small></div><div class="social-header-tools"><span id="social-online-count">1명</span><button id="social-chat-north" type="button">북 하이아칸</button><button id="social-chat-south" type="button">남 하이아칸</button><button id="social-invite" type="button">연결 초대</button><button id="social-back" type="button">← 월드맵</button></div></div><div class="social-layout"><div id="social-stage" class="social-stage"><div id="social-image-frame" class="social-image-frame"></div></div><aside class="social-user-panel" id="social-peer-panel"><div class="social-user-titlebar"><canvas id="social-original-userlist" width="150" height="38" aria-label="원본 참여자 목록"></canvas><h4>참여자 목록</h4></div><div id="social-peer-list"></div><p>같은 사이트의 다른 탭과 직접 연결한 상대방이 표시됩니다.</p></aside></div>';
+  root.innerHTML='<div class="social-header"><div><strong id="social-location-title">하이아칸</strong><small id="social-breadcrumb"></small></div><div class="social-header-tools"><span id="social-online-count">1명</span><button id="social-chat-north" type="button">북 하이아칸</button><button id="social-chat-south" type="button">남 하이아칸</button><button id="social-invite" type="button">연결 초대</button><button id="social-back" type="button">← 월드맵</button></div></div><div class="social-layout"><div id="social-stage" class="social-stage"><div id="social-image-frame" class="social-image-frame"></div></div><aside class="social-user-panel" id="social-peer-panel"><div class="social-user-titlebar"><canvas id="social-original-userlist" width="150" height="38" aria-label="원본 참여자 목록"></canvas><h4>참여자 목록</h4><span id="social-native-user-count" aria-live="polite">1명</span></div><div id="social-peer-list"></div><p>같은 사이트의 다른 탭과 직접 연결한 상대방이 표시됩니다.</p></aside></div>';
   addClassicRoomToolbar();
   renderNativeUserListHeader();
   $('social-back').onclick=back;
