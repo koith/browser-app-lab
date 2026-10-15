@@ -44,7 +44,9 @@ jobs:
                curl -fLsS --max-time 15 "$base/dice-original-selector.css?qa=${GITHUB_SHA}" -o /tmp/leaf-selector-live.css &&
                cmp -s /tmp/leaf-selector-live.css apps/4leaf/rog/dice-original-selector.css &&
                curl -fLsS --max-time 15 "$base/dice-native-tis-clean.css?qa=${GITHUB_SHA}" -o /tmp/leaf-tis-live.css &&
-               cmp -s /tmp/leaf-tis-live.css apps/4leaf/rog/dice-native-tis-clean.css; then
+               cmp -s /tmp/leaf-tis-live.css apps/4leaf/rog/dice-native-tis-clean.css &&
+               curl -fLsS --max-time 15 "$base/dice-native-menu-chrome.css?qa=${GITHUB_SHA}" -o /tmp/leaf-menu-live.css &&
+               cmp -s /tmp/leaf-menu-live.css apps/4leaf/rog/dice-native-menu-chrome.css; then
               ready=1
               echo "Published JS/CSS byte-for-byte match the checked-out source at ${GITHUB_SHA}"
               break
