@@ -51,6 +51,22 @@ def parse_catalog(document):
     return list(results.values())
 
 
+def buy_button_visible(document, item):
+    """Only a target product detail page's active-looking buy CTA is a buying signal."""
+    header = document[:350]
+    if not PRODUCT.search(header):
+        return False
+    wanted = next((matcher for kind, matcher, _ in TARGETS if kind == item["kind"]), None)
+    if not wanted or not wanted.search(header):
+        return False
+    for match in re.finditer(r"(?m)^\s*구매하기\s*$", document):
+        nearby = document[max(0, match.start()-140):match.end()+140]
+        if re.search(r"품절|판매\s*예정|판매\s*종료|구매\s*불가|판매\s*중지", nearby):
+            continue
+        return True
+    return False
+
+
 def check():
     seen = {}
     healthy = 0
@@ -69,6 +85,15 @@ def check():
             print("SOURCE_FAILED", source, type(exc).__name__, str(exc)[:160], file=sys.stderr, flush=True)
     if healthy == 0:
         raise RuntimeError("Both independent catalog reads unavailable or incomplete")
+    for item in seen.values():
+        item["stage"] = "listed"
+        try:
+            detail_url, detail = fetch("https://r.jina.ai/" + item["url"])
+            if buy_button_visible(detail, item):
+                item["stage"] = "buy_button"
+            print("DETAIL_STAGE", item["kind"], item["stage"], detail_url, flush=True)
+        except Exception as error:
+            print("DETAIL_UNAVAILABLE", item["kind"], type(error).__name__, str(error)[:160], file=sys.stderr, flush=True)
     return list(seen.values())
 
 
@@ -79,11 +104,11 @@ def send_ntfy(item):
         return
     destination = "https://ntfy.sh/" + topic
     body = (
-        "롯데시네마 먼작귀 예약상품 등록 감지\n"
+        ("먼작귀 예약상품 구매 버튼 발견\n" if item.get("stage") == "buy_button" else "롯데시네마 먼작귀 예약상품 등록 감지\n")
         + item["label"] + "\n"
         + item["title"] + "\n"
         + item["url"] + "\n"
-        + "※ 상품 등록 감지이며 구매 가능 여부는 상품 페이지에서 확인."
+        + "※ 페이지 표시를 감지한 것이며 실제 결제 가능 여부는 직접 확인."
     ).encode("utf-8")
     request = urllib.request.Request(
         destination,
@@ -116,16 +141,25 @@ def send_issue_alerts(products):
         check=True, capture_output=True, text=True
     ).stdout.splitlines()
     for item in products:
-        issue_title = "[먼작귀 예약상품 등록 감지] " + item["label"]
+        buy_title = "[먼작귀 구매하기 버튼 감지] " + item["label"]
+        listed_title = "[먼작귀 예약상품 등록 감지] " + item["label"]
+        issue_title = buy_title if item.get("stage") == "buy_button" else listed_title
+        if item.get("stage") != "buy_button" and buy_title in existing:
+            print("BUY_STAGE_ALREADY_ALERTED", item["kind"], flush=True)
+            continue
         if issue_title in existing:
             print("ALREADY_ALERTED", issue_title, flush=True)
             continue
+        prefix = (
+            "@koith 롯데시네마 먼작귀 상품 상세페이지에서 **구매하기 버튼 표시**를 확인했습니다.\n\n"
+            if item.get("stage") == "buy_button"
+            else "@koith 롯데시네마 먼작귀 예약 대상 상품 **등록**을 감지했습니다.\n\n"
+        )
         body = (
-            "@koith 롯데시네마 브랜드스토어에 이번 먼작귀 예약 대상 상품이 "
-            "등록된 것을 감지했습니다.\n\n"
-            "상품: " + item["title"] + "\n"
-            "상품 링크: " + item["url"] + "\n\n"
-            "**주의: 상품 등록 감지이며 구매 버튼 활성화는 별도 확인이 필요합니다.**"
+            prefix
+            + "상품: " + item["title"] + "\n"
+            + "상품 링크: " + item["url"] + "\n\n"
+            + "**주의: 실제 주문·결제가 가능한지는 상품 페이지에서 직접 최종 확인하세요.**"
         )
         try:
             send_ntfy(item)

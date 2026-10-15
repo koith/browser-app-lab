@@ -77,4 +77,23 @@ class WatchTests(unittest.TestCase):
                 self.assertEqual(request.get_header("Priority"),"5")
                 self.assertEqual(request.get_header("Click"),product["url"])
 
+    def test_purchase_button_triggers_second_stage(self):
+        item={"kind":"lenticular","label":"렌티큘러 스티커","title":"먼작귀 렌티큘러","url":"https://m.brand.naver.com/lottecinema/products/222"}
+        detail="Title: 먼작귀 렌티큘러 : 롯데시네마 스토어\n\n상품 옵션\n\n구매하기\n\n찜 하기 톡톡문의 장바구니"
+        self.assertTrue(watch.buy_button_visible(detail,item))
+        catalog="롯데시네마 "+card("먼작귀 렌티큘러 띠부띠부 씰",222)
+        def fake_fetch(url):
+            return url, detail if "/products/222" in url else catalog
+        with patch.object(watch,"fetch",side_effect=fake_fetch):
+            result=watch.check()
+            self.assertEqual(result[0]["stage"],"buy_button")
+    def test_disabled_purchase_button_suppressed(self):
+        item={"kind":"lenticular","label":"렌티큘러 스티커","title":"먼작귀 렌티큘러","url":"https://m.brand.naver.com/lottecinema/products/222"}
+        detail="Title: 먼작귀 렌티큘러 : 롯데시네마 스토어\n\n판매 예정\n\n구매하기\n\n찜 하기"
+        self.assertFalse(watch.buy_button_visible(detail,item))
+    def test_buy_button_is_not_inferred_from_other_product(self):
+        item={"kind":"lenticular","label":"렌티큘러 스티커","title":"먼작귀 렌티큘러","url":"https://m.brand.naver.com/lottecinema/products/222"}
+        detail="Title: 포켓몬스터 키링 : 롯데시네마 스토어\n\n구매하기\n\n찜 하기"
+        self.assertFalse(watch.buy_button_visible(detail,item))
+
 if __name__=="__main__": unittest.main()
