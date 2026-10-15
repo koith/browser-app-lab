@@ -5,7 +5,8 @@
  // never accidentally depend on the unrelated public Render server.
  // Undefined means "use the production HTML meta endpoint".
  const configured=typeof window.LEAF_CENTRAL_API_URL==='string'
-  ?window.LEAF_CENTRAL_API_URL:document.querySelector('meta[name="leaf-central-api"]')?.content;
+  ?window.LEAF_CENTRAL_API_URL
+  :(location.protocol==='file:'?'':document.querySelector('meta[name="leaf-central-api"]')?.content);
  const raw=String(configured||'').trim();
  let endpoint='';
  try{
