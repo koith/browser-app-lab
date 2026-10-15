@@ -72,6 +72,36 @@ def check():
     return list(seen.values())
 
 
+def send_ntfy(item):
+    """Independent high-priority phone push, separate from Gmail-filtered GitHub mail."""
+    topic = os.environ.get("NTFY_TOPIC", "")
+    if not topic:
+        return
+    destination = "https://ntfy.sh/" + topic
+    body = (
+        "롯데시네마 먼작귀 예약상품 등록 감지\n"
+        + item["label"] + "\n"
+        + item["title"] + "\n"
+        + item["url"] + "\n"
+        + "※ 상품 등록 감지이며 구매 가능 여부는 상품 페이지에서 확인."
+    ).encode("utf-8")
+    request = urllib.request.Request(
+        destination,
+        data=body,
+        headers={
+            "Title": "Chiikawa Lotte reservation item found",
+            "Priority": "5",
+            "Click": item["url"],
+            "Content-Type": "text/plain; charset=utf-8",
+        },
+        method="POST",
+    )
+    with urllib.request.urlopen(request, timeout=14) as response:
+        if response.status != 200:
+            raise RuntimeError("ntfy publish failed: " + str(response.status))
+        print("NTFY_PUBLISHED", item["kind"], response.status, flush=True)
+
+
 def send_issue_alerts(products):
     """Require GitHub Token and use GitHub's own API through gh; retry on failures."""
     if not products:
@@ -97,6 +127,10 @@ def send_issue_alerts(products):
             "상품 링크: " + item["url"] + "\n\n"
             "**주의: 상품 등록 감지이며 구매 버튼 활성화는 별도 확인이 필요합니다.**"
         )
+        try:
+            send_ntfy(item)
+        except Exception as error:
+            print("NTFY_FAILED", type(error).__name__, str(error)[:160], file=sys.stderr, flush=True)
         created = subprocess.run(
             ["gh", "issue", "create", "--repo", repo, "--title", issue_title,
              "--assignee", "koith", "--body", body],
