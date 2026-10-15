@@ -11,6 +11,7 @@ on:
       - 'apps/4leaf/rog/shop-native.js'
       - 'apps/4leaf/rog/cardshop-native-controls.js'
       - 'apps/4leaf/rog/cardshop-native-controls.css'
+      - 'apps/4leaf/rog/cardshop-original-2003.css'
       - 'apps/4leaf/rog/dice-native-stage.js'
       - 'apps/4leaf/rog/dice-native-stage.css'
       - 'apps/4leaf/rog/dice-native-map-buttons.css'
