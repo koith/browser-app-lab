@@ -20,7 +20,7 @@ def check():
     for q in QUERIES:
         try:
             url,html=fetch("https://search.shopping.naver.com/search/all?query="+urllib.parse.quote(q))
-            for m in re.finditer(r'https?[^"\\\s<>]+(?:brand\.naver\.com/lottecinema/products/|smartstore\.naver\.com/lottecinema/products/)[0-9]+',unescape(html)):
+            for m in re.finditer(r'https?[^"\\\s<>]+(?:brand\.naver\.com/lottecinema/products/|smartstore\.naver\.com/lottecinema/products/)[0-9]+',unescape(html).replace(chr(92) + '/', '/')):
                 candidates.add(m.group(0).replace("&amp;","&").split("?")[0])
         except Exception as e: print("Discovery unavailable:",type(e).__name__,str(e)[:120],file=sys.stderr)
     for url in sorted(candidates):
