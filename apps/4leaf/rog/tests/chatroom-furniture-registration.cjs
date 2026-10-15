@@ -102,14 +102,14 @@ const path=require('node:path');
     height:box.height/zoom,color:getComputedStyle(label).backgroundColor,
     size:getComputedStyle(label).fontSize};
   });
+  const archive=fs.readdirSync(path.resolve(__dirname,'../original/ChatRoom'));
+  console.log('CHATROOM EXTRACTED ORIGINAL FILES',JSON.stringify(archive));
   console.log('ROOM4 AVATAR LABEL RAW GEOMETRY',JSON.stringify(avatarLabel));
   assert.ok(avatarLabel.baseline-avatarLabel.nameTop>=160&&
     avatarLabel.baseline-avatarLabel.nameTop<=185,
    'historical nickname label sits above character head: '+JSON.stringify(avatarLabel));
   assert.equal(avatarLabel.color,'rgb(86, 107, 198)',
    'screenshot-based blue nameplate, no invented gold self-highlight');
-  const archive=fs.readdirSync(path.resolve(__dirname,'../original/ChatRoom'));
-  console.log('CHATROOM EXTRACTED ORIGINAL FILES',JSON.stringify(archive));
   console.log('ROOM4 AVATAR LABEL ALIGNMENT',JSON.stringify(avatarLabel));
   console.log('ROOM4 ARCHIVE SCREENSHOT FURNITURE REGISTRATION',JSON.stringify({...measured,rendered:actual}));
  }finally{await browser.close()}
