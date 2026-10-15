@@ -4,7 +4,11 @@ const path=require('node:path');
 
 (async()=>{
  const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
- const page=await browser.newPage({viewport:{width:1280,height:900}});
+ const context=await browser.newContext({viewport:{width:1280,height:900}});
+ // Screenshot reconstruction verification is local transport only; the
+ // separate central-server integration suite exercises real authority.
+ await context.addInitScript(()=>{window.LEAF_CENTRAL_API_URL='';});
+ const page=await context.newPage();
  const errors=[];
  page.on('pageerror',e=>errors.push(String(e)));
  try{
