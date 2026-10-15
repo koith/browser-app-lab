@@ -82,22 +82,31 @@
 #app.app-classic-dice #modal[data-native-dice-dialog="IMG/dialog.png"] .modal-buttons button.primary{
  background:linear-gradient(#f1f7ff,#b5c9ef)!important;
 }
-#app.app-classic-dice #game .item-bar #move-log{
+/* Authentic IMG/eventmsgbox.png must appear on the live visible battlefield.
+ * The older modern .item-bar is intentionally display:none in the native
+ * 2003 layout, so never place the original panel inside that hidden footer.
+ * The sole source of its text is the actual persisted game match.history.
+ */
+#app.app-classic-dice #game #dice-native-event{
  box-sizing:border-box!important;
+ position:absolute!important;
+ z-index:28!important;
+ top:37px!important;
+ left:50%!important;
  display:flex!important;
  align-items:center!important;
  justify-content:center!important;
- flex:0 0 244px!important;
  width:244px!important;
- height:52px!important;
  min-width:244px!important;
  max-width:244px!important;
+ height:52px!important;
  min-height:52px!important;
- margin:0 0 0 auto!important;
+ max-height:52px!important;
+ margin:0!important;
  padding:5px 13px!important;
  border:0!important;
  border-radius:0!important;
- background:transparent url('./original/IMG/eventmsgbox.png') center center / 244px 52px no-repeat!important;
+ background:transparent url('./original/IMG/eventmsgbox.png') center center/244px 52px no-repeat!important;
  box-shadow:none!important;
  color:#152c67!important;
  text-shadow:0 1px #f3f8ff!important;
@@ -106,14 +115,18 @@
  overflow:hidden!important;
  overflow-wrap:anywhere;
  word-break:keep-all;
- cursor:help;
+ transform:translateX(-50%)!important;
+ pointer-events:none!important;
+ user-select:none!important;
 }
 @media(max-width:650px){
- #app.app-classic-dice #game .item-bar #move-log{
-  flex-shrink:1!important;
-  width:min(244px,49vw)!important;
-  min-width:100px!important;
-  padding:5px 6px!important;
+ #app.app-classic-dice #game #dice-native-event{
+  width:244px!important;
+  min-width:244px!important;
+  max-width:244px!important;
+  transform:translateX(-50%) scale(.8)!important;
+  transform-origin:top center;
+  padding:5px 10px!important;
   font-size:9px!important;
  }
 }
