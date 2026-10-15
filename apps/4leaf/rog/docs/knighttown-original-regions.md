@@ -28,6 +28,37 @@ It is **incorrect** to interpret `Map/mapback.png` as the Haiacan chat room list
 
 **INFERRED REGISTRATION:** Button hitboxes and hover sprite anchors are approximated from the recovered composited `knightback.png` at 794×404. Region click actions in the original server are not available; the existence of a region selection does *not* prove the 2002 room estate data protocol.
 
+## Pixel-verified atlas registration — corrected after first implementation
+
+The region backplate itself is original. After PR #72, each hover sign had a
+rough image-based anchor (previously marked inferred). An actual Chromium
+Canvas source-vs-source pixel comparison registered each atlas's **first
+142×74 idle frame** to `KnightTown/knightback.png`, using 630 non-chroma source
+samples per sprite, searching native 1x pixel coordinates and measuring mean
+clipped per-channel RGB error. The original scale is 1.0x for **all six**.
+
+| Sprite | First inferred x,y | Verified original source x,y | Source mean RGB delta |
+| --- | --- | --- | --- |
+| sea01 모험의 바다 | 90,96 | **96,91** | 6.24 |
+| plain01 패왕의 대지 | 333,127 | **336,126** | 5.16 |
+| snow01 침묵의 설원 | 566,99 | **571,97** | 3.02 |
+| sea02 도전의 바다 | 72,248 | **76,242** | 4.93 |
+| sea03 찬란한 바다 | 307,284 | **306,283** | 5.62 |
+| plain02 영광의 대지 | 501,264 | **564,258** | 5.52 |
+
+The last sign was particularly misregistered by **63 px horizontally**.
+All six now have distinct, unique low-error correlation minima with the
+recovered native background; the second best candidate's mean error is at
+least 8.4 larger in all six cases. **VERIFIED-SOURCE-PIXEL** for *hover sprite
+positions only*; click hitbox padding and original backend effects remain
+INFERRED.
+
+The reproducible regression in
+`tests/knighttown-sign-registration.cjs` fails if a sign's runtime anchor
+differs from its exact source-pixel best fit (or if the correlation loses
+its distinctive low-error match), rather than silently accepting a shifted
+graphic.
+
 ## Code changes
 
 - Original WorldMap `knights` region now enters its own `knighttown` view rather than skipping the screen. `knighttown-native.js` renders the recovered **original PNG** with six separate semantic, keyboard/touch-clickable hotspot buttons. `knighttown-native.css` uses an authentic independent 568×74 sprite atlas on each sign's hover/pressed/focus state, not an old screenshot or a fabricated modern list.

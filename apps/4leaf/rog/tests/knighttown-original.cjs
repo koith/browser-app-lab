@@ -26,6 +26,7 @@ const assert=require('node:assert/strict');
     return {id:a.id,name:a.name,size:[image.naturalWidth,image.naturalHeight],
       nativeSource:control.dataset.source,
       nativeHit:control.dataset.nativeBounds.split(',').map(Number),
+      nativeSprite:control.dataset.nativeSprite.split(',').map(Number),
       focusButton:control.tagName,
       bg:getComputedStyle(sprite).backgroundImage,
       frameSize:[sprite.offsetWidth,sprite.offsetHeight],
@@ -62,6 +63,9 @@ const assert=require('node:assert/strict');
    assert.equal(art.focusButton,'BUTTON','source sign is independent functional button');
    assert.ok(art.bg.includes('/original/KnightTown/'+art.id+'.png'));
    assert.deepEqual(art.nativeHit,windowDummy(art.nativeHit),'source hotspot bounds are finite');
+   const [hx,hy,hw,hh]=art.nativeHit,[sx,sy]=art.nativeSprite;
+   assert.ok(sx>=hx&&sy>=hy&&sx+142<=hx+hw&&sy+74<=hy+hh,
+    art.id+' complete pixel-correlated original sprite remains pointer/keyboard reachable');
    assert.equal(art.backgroundOffset,'-142px 0px','hover uses authentic second atlas frame');
   }
   await page.locator('[data-knight-area="sea01"]').hover();

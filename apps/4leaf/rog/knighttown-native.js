@@ -4,17 +4,21 @@
  * Genesis Dice Map/ROOM SELECT. Its six signs also have independently
  * recovered 568x74 atlas (4 states x 142px) source art.
  *
+ * Independent native source pixel correlation of first atlas frames
+ * against knightback.png verified all six independent sign sprite
+ * anchors at exact 1x source coordinates (mean clipped RGB error 3–6).
+ * Do not scale or shift the originals to match a fabricated screenshot.
  * Room/board contents of each area are NOT part of these bitmaps. The
  * clicked area currently links into the existing functional web bulletin,
  * explicitly a reconstruction rather than an invented original server. */
 (function(){
  const AREAS=Object.freeze([
-  {id:'sea01',name:'모험의 바다',asset:'sea01',hit:[76,80,181,108],sprite:[90,96]},
-  {id:'plain01',name:'패왕의 대지',asset:'plain01',hit:[317,112,181,108],sprite:[333,127]},
-  {id:'snow01',name:'침묵의 설원',asset:'snow01',hit:[543,83,201,112],sprite:[566,99]},
-  {id:'sea02',name:'도전의 바다',asset:'sea02',hit:[54,225,181,115],sprite:[72,248]},
-  {id:'sea03',name:'찬란한 바다',asset:'sea03',hit:[288,263,183,108],sprite:[307,284]},
-  {id:'plain02',name:'영광의 대지',asset:'plain02',hit:[475,246,215,108],sprite:[501,264]}
+  {id:'sea01',name:'모험의 바다',asset:'sea01',hit:[76,80,181,108],sprite:[96,91]},
+  {id:'plain01',name:'패왕의 대지',asset:'plain01',hit:[317,112,181,108],sprite:[336,126]},
+  {id:'snow01',name:'침묵의 설원',asset:'snow01',hit:[543,83,201,112],sprite:[571,97]},
+  {id:'sea02',name:'도전의 바다',asset:'sea02',hit:[54,225,181,115],sprite:[76,242]},
+  {id:'sea03',name:'찬란한 바다',asset:'sea03',hit:[288,263,183,108],sprite:[306,283]},
+  {id:'plain02',name:'영광의 대지',asset:'plain02',hit:[475,246,235,108],sprite:[564,258]}
  ]);
  const SRC='KnightTown/knightback.png';
  function render(frame,onChoose){
