@@ -230,3 +230,12 @@
  color:#f8f0ee;font-size:10px;
  overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
 }
+
+/* The recovered source's fourth line already has painted STYLE/PUBLIC
+   toggles. Local match's debug metadata is not a native field: preserve the
+   actual source pixels, and expose those values via row title/accessible
+   labels rather than overprinting Korean text on original source labels. */
+#lobby .dice-native-stage #lobby-room-info>div[data-field="방식"],
+#lobby .dice-native-stage #lobby-room-info>div[data-field="상태"]{
+ display:none!important;
+}
