@@ -959,6 +959,9 @@
   const avatarLayer=document.createElement('div');avatarLayer.className='social-avatar-layer';avatarLayer.id='social-avatar-layer';
   frame.append(avatarLayer);
   addRoomForeground(avatarLayer,room.background);
+  // The 2004 screenshots carry the same independent native snaplogo sprite
+  // at the bottom center, above room furniture and occupied seat figures.
+  window.__LEAF_NATIVE_SNAPSHOT__?.mount(frame);
   // Original scene remains unobstructed; the avatar picker is in the recovered
   // top-toolbar icon row, while room owner actions stay in the window chrome.
   if(!room.preset&&room.ownerId===tabId||!room.preset&&!room.ownerId&&room.owner===nick()){
