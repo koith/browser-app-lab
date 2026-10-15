@@ -67,6 +67,10 @@ const assert=require('node:assert/strict');
    {field:'방식',x:514,y:249,width:102},
    {field:'상태',x:677,y:249,width:92}
   ],'dynamic ROOM INFO values inhabit separate original 794x404 bitmap cells, not a 7-row fake scroll pane');
+  assert.equal(await page.locator('#lobby-room-info>div[data-field="방식"]').isVisible(),false,
+   'do not paint non-native local game mode over source STYLE toggle artwork');
+  assert.equal(await page.locator('#lobby-room-info>div[data-field="상태"]').isVisible(),false,
+   'do not paint internal server status over original PUBLIC/PRIVATE artwork');
   await page.screenshot({path:'leaf-dice-native-map-select.png'});
   await page.locator('#lobby-create').click();
   assert.ok(await page.locator('#dice-lobby-scene.config-open').isVisible());
