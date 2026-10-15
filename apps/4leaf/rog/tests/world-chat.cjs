@@ -441,6 +441,33 @@ const path=require('path');
   'entering an original ChatRoom restores its independent 794×528 scene');
  assert.notEqual(await host.locator('#rooms .social-user-panel').evaluate(el=>getComputedStyle(el).display),'none',
   'native user list belongs to ChatRoom interior, not the town selector');
+
+ // The archived ChatRoom text-entry atlas contains the nickname field, long
+ // input field and send bubble in a single exact 407×21 source bitmap.
+ // The real form must remain keyboard and pointer accessible.
+ const nativeEntry=await host.evaluate(async()=>{
+  const form=document.getElementById('chat-form');
+  const image=new Image();image.src='./original/ChatRoom/chatbaredit.png';
+  await image.decode();
+  const source=document.createElement('canvas');source.width=image.naturalWidth;source.height=image.naturalHeight;
+  const canvas=source.getContext('2d',{willReadFrequently:true});canvas.drawImage(image,0,0);
+  const alpha=canvas.getImageData(0,0,1,1).data[3];
+  return {w:form.getBoundingClientRect().width,h:form.getBoundingClientRect().height,
+   bg:getComputedStyle(form).backgroundImage,
+   name:getComputedStyle(document.getElementById('nick')).backgroundColor,
+   edit:getComputedStyle(document.getElementById('message')).backgroundColor,
+   send:document.querySelector('#chat-form button').getAttribute('aria-label'),
+   original:[image.naturalWidth,image.naturalHeight],cornerAlpha:alpha};
+ });
+ assert.deepEqual(nativeEntry.original,[407,21],'native ChatRoom input art has original source size');
+ assert.equal(nativeEntry.cornerAlpha,0,'native source input is transparent at corner; no invented opaque frame');
+ assert.ok(Math.abs(nativeEntry.w-407)<2&&Math.abs(nativeEntry.h-21)<1,
+  'working chat edit control retains source-native 407×21 geometry');
+ assert.ok(nativeEntry.bg.includes('original/ChatRoom/chatbaredit.png'),
+  'native sprite supplies actual nickname/input/send frames');
+ assert.equal(nativeEntry.name,'rgba(0, 0, 0, 0)','native nickname frame remains visible');
+ assert.equal(nativeEntry.edit,'rgba(0, 0, 0, 0)','native text frame remains visible');
+ assert.equal(nativeEntry.send,'채팅 메시지 보내기','native source speech-bubble send hitbox is accessible');
  assert.equal(await host.locator('#social-close-room').count(),0,'permanent room cannot be destroyed by its visitors');
  await host.locator('#social-back').click();
  assert.equal(await host.locator('.social-public-room').count(),8,'permanent room persists after leaving');
