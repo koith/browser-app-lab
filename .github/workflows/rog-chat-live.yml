@@ -50,7 +50,11 @@ jobs:
                curl -fLsS --max-time 15 "$base/dice-native-battle-podium.css?qa=${GITHUB_SHA}" -o /tmp/leaf-podium-live.css &&
                cmp -s /tmp/leaf-podium-live.css apps/4leaf/rog/dice-native-battle-podium.css &&
                curl -fLsS --max-time 15 "$base/chatroom-native-ringbtn.css?qa=${GITHUB_SHA}" -o /tmp/leaf-ring-live.css &&
-               cmp -s /tmp/leaf-ring-live.css apps/4leaf/rog/chatroom-native-ringbtn.css; then
+               cmp -s /tmp/leaf-ring-live.css apps/4leaf/rog/chatroom-native-ringbtn.css &&
+               curl -fLsS --max-time 15 "$base/chatroom-native-scrollbar.js?qa=${GITHUB_SHA}" -o /tmp/leaf-scroll-live.js &&
+               curl -fLsS --max-time 15 "$base/chatroom-native-scrollbar.css?qa=${GITHUB_SHA}" -o /tmp/leaf-scroll-live.css &&
+               cmp -s /tmp/leaf-scroll-live.js apps/4leaf/rog/chatroom-native-scrollbar.js &&
+               cmp -s /tmp/leaf-scroll-live.css apps/4leaf/rog/chatroom-native-scrollbar.css; then
               ready=1
               echo "Published JS/CSS byte-for-byte match the checked-out source at ${GITHUB_SHA}"
               break
@@ -67,6 +71,10 @@ jobs:
         env:
           FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
         run: node apps/4leaf/rog/tests/world-chat.cjs
+      - name: Verify actual public original ChatRoom 52x40 source scrollbar and accessible real history
+        env:
+          FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
+        run: node apps/4leaf/rog/tests/chat-native-scrollbar.cjs
       - name: Verify published source Registry alpha and live original 1/3/5 vs 2/4/6 portraits
         env:
           FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
