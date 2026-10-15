@@ -117,13 +117,18 @@
 #shop .shop-stock .tabline .group-tab[data-group="valuable"]{
  left:449px;top:171px;width:130px;height:62px;
 }
+/* The existing 카드정보 heading is the native "show all cards" control.
+   The underlying accessible button remains real and keyboard operable; no
+   invented duplicate 전체 label is painted across the source character. */
 #shop .shop-stock .tabline .group-tab[data-group="all"]{
- left:257px;top:302px;width:50px;height:22px;
- font:10px/20px Gulim,'굴림',sans-serif!important;
- color:#edf3ff!important;text-align:center;
- background:#303f82db!important;border:1px solid #90a7df!important;
+ left:14px;top:302px;width:63px;height:25px;
+ font-size:0!important;line-height:0!important;color:transparent!important;
+ background:transparent!important;border:1px solid transparent!important;
 }
-#shop .shop-stock .tabline .group-tab[data-group="all"]::after{content:'전체'}
+#shop .shop-stock .tabline .group-tab[data-group="all"]::after{content:none!important}
+#shop .shop-stock .tabline .group-tab[data-group="all"].selected{
+ border-color:transparent!important;box-shadow:none!important;
+}
 #shop .shop-stock .tabline .group-tab:is(:hover,:focus-visible){
  background:#fff2ac13!important;
  border-color:#f9f0b8!important;outline:1px solid #fff0ac!important;
