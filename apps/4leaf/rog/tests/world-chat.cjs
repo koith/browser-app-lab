@@ -567,6 +567,22 @@ const path=require('path');
  assert.equal(avatarAlpha.height,141,'original Registry sprites use 141px source height');
  assert.equal(avatarAlpha.cornerAlpha,0,'avatar background is transparent, not chroma-green');
  assert.equal(await host.locator('.social-avatar.self img').evaluate(el=>getComputedStyle(el).width),'75px','rendered avatar retains native 75px frame width');
+ // Adjacent source 75×141 character sprites may overlap. A huge proxy button
+ // and another user's nametag must not steal clicks from the visible torso.
+ const torsoTarget=await host.locator('.social-avatar.self').evaluate(button=>{
+  const name=button.querySelector('.social-avatar-name'),image=button.querySelector('img');
+  return {width:parseFloat(getComputedStyle(button).width),
+   height:parseFloat(getComputedStyle(button).height),
+   picture:[parseFloat(getComputedStyle(image).width),parseFloat(getComputedStyle(image).height)],
+   namePointer:getComputedStyle(name).pointerEvents,
+   imagePointer:getComputedStyle(image).pointerEvents};
+ });
+ assert.deepEqual([torsoTarget.width,torsoTarget.height],[58,94],
+  'hit target hugs native character torso without covering the next 75×141 avatar');
+ assert.deepEqual(torsoTarget.picture,[75,141],'original Registry sprite size stays unchanged');
+ assert.equal(torsoTarget.namePointer,'none','neighboring nametags never intercept another avatar click');
+ assert.equal(torsoTarget.imagePointer,'none','image paint itself delegates clicks to avatar button body');
+
  const stage=host.locator('.social-interior');
  const frontBack=async(x,y)=>{
   await stage.evaluate((el,coords)=>{
