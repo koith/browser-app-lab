@@ -84,6 +84,15 @@ async function run(){
  });
  await page.waitForSelector('#battle-visual',{timeout:6000});
  assert.ok(await page.locator('#battle-visual .battle-visual-die').count()>=2,'authentic attack/defense dice values visible');
+ const duelSurface=await page.locator('#battle-visual').evaluate(el=>{
+  const style=getComputedStyle(el);
+  return {background:style.backgroundColor,backgroundImage:style.backgroundImage,
+   borderTop:style.borderTopStyle,actors:el.querySelectorAll('.battle-visual-actor').length};
+ });
+ assert.equal(duelSurface.background,'rgba(0, 0, 0, 0)','original BATTLE lives directly over game scene, not a fake opaque panel');
+ assert.equal(duelSurface.backgroundImage,'none','real terrain is not covered by synthetic gradient screenshot backdrop');
+ assert.equal(duelSurface.borderTop,'none','no fabricated border around the original live duel');
+ assert.equal(duelSurface.actors,2,'both combatants stay independent original SAVA actors');
  await page.locator('#modal-buttons button').filter({hasText:'결과 확인'}).click();
  await page.waitForFunction(()=>!document.querySelector('#battle-visual'),null,{timeout:6000});
  console.log('BATTLE PASS: visible animated duel with real rolled dice, resolved and cleaned up.');
