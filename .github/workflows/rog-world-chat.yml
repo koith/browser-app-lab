@@ -27,6 +27,9 @@ on:
       - 'apps/4leaf/rog/chatroom-native-talkbox.js'
       - 'apps/4leaf/rog/chatroom-native-talkbox.css'
       - 'apps/4leaf/rog/chatroom-native-ringbtn.css'
+      - 'apps/4leaf/rog/chatroom-native-scrollbar.js'
+      - 'apps/4leaf/rog/chatroom-native-scrollbar.css'
+      - 'apps/4leaf/rog/tests/chat-native-scrollbar.cjs'
       - 'apps/4leaf/rog/chatroom-native-exit.css'
       - 'apps/4leaf/rog/index.html'
       - 'apps/4leaf/rog/dice-native-player-portraits.css'
@@ -76,6 +79,8 @@ jobs:
           fi
       - name: Verify original world, regions, rooms, messages and mobile
         run: node apps/4leaf/rog/tests/world-chat.cjs
+      - name: Verify original 52x40 ChatRoom scrollbar with real messages and pointer drag
+        run: node apps/4leaf/rog/tests/chat-native-scrollbar.cjs
       - name: Verify live source Registry chroma key, true side player portraits, game turns and mobile
         run: node apps/4leaf/rog/tests/registry-native-portraits.cjs
       - name: Verify source 2x2 right-hand chessmen party and genuine consumables in Chromium
