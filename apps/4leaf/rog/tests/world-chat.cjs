@@ -651,7 +651,9 @@ const path=require('path');
  assert.equal(await host.locator('#social-map-plane').evaluate(el=>el.style.transform),mapAfter,'the original room terrain camera resumes its prior position after returning from a room');
  await host.locator('#social-new-room').click();
  assert.equal(await host.locator('#social-modal [name="background"] option').count(),6,'six source ChatRoom backgrounds remain selectable');
- await host.locator('#social-modal .social-modal-title button').click();
+ // Recovered ChatRoom/ownerdialog uses a visible source-native Cancel
+ // button; the generic HTML title's X is intentionally hidden here.
+ await host.locator('#social-modal .social-owner-native-cancel').click();
  await host.screenshot({path:'leaf-original-room-directory.png'});
  const roomId=await host.evaluate(()=>window.__LEAF_SOCIAL__.createRoom('원작 채팅 테스트',3));
  assert.ok(roomId.length>=10,'new real room id');
