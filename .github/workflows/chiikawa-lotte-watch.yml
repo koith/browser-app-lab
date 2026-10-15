@@ -43,6 +43,17 @@ jobs:
             exit 0
           fi
           gh issue create --repo "$GITHUB_REPOSITORY" --title "$TITLE" --assignee koith --body '@koith [테스트 알림] 먼작귀 예약 개시가 아닙니다. GitHub Actions의 알림 생성 및 휴대폰 전달 검증용입니다.'
+  ntfy-smoke:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify public independent push transport
+        run: |
+          curl --fail --silent --show-error --retry 2 --max-time 20 \
+            -H 'Title: Chiikawa watcher TEST ONLY' \
+            -H 'Priority: 4' \
+            -d 'TEST ONLY: Chiikawa watcher push transport is working. This is not a sale notice.' \
+            'https://ntfy.sh/lotte-chiikawa-20261016-ca1ab753911c4a153ef003'
   watch:
     if: github.repository == 'koith/browser-app-lab' && github.event_name != 'pull_request'
     runs-on: ubuntu-latest
