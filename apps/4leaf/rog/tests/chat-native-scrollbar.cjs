@@ -41,6 +41,7 @@ const path=require('node:path');
     role:track.getAttribute('role'),controls:track.getAttribute('aria-controls'),
     count:document.querySelectorAll('#chat-log').length};
   });
+  console.log('SOURCE 52x40 PIXEL DIAGNOSTICS',JSON.stringify(source));
   assert.deepEqual(source.dimensions,[52,40],'source ChatRoom native scrollbar sprite is 52x40');
   assert.ok(source.keyed>30&&source.nonKey>50,'native bright-green key and real visible artwork both exist in source');
   assert.equal(source.rendered,'true','source PNG was decoded and chroma keyed rather than displayed as neon green');
