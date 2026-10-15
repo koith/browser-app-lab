@@ -5,6 +5,7 @@ const assert=require('node:assert/strict');
 (async()=>{
  const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
  const page=await browser.newPage({viewport:{width:1280,height:800},serviceWorkers:'block'});
+ await page.addInitScript(()=>{window.LEAF_CENTRAL_API_URL='';});
  const errors=[];let failures=0,requests=0,mapFailures=0,mapRequests=0,worldFailures=0,worldRequests=0,spriteFailures=0,spriteRequests=0;
  page.on('pageerror',err=>errors.push(String(err)));
  await page.route('**/original/ChatRoom/room3t.png*',async route=>{
