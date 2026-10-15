@@ -634,7 +634,7 @@ const path=require('path');
  assert.equal(await host.locator('#social-close-room').count(),0,'permanent room cannot be destroyed by its visitors');
  await host.locator('#social-back').click();
  assert.equal(await host.evaluate(()=>window.__LEAF_NATIVE_ROOM_PANELS__?.getState().messengerParent),'main','leaving source room returns exact same real chat input to main');
- assert.equal(await host.evaluate(()=>window.__LEAF_NATIVE_ROOM_PANELS__?.getState().rosterParent?.includes('social-')) ,false,'leaving scene keeps one participant panel');
+ assert.equal(await host.locator('#social-peer-panel').evaluate(el=>el.parentElement.classList.contains('social-layout')),true,'the single real roster returns to its ordinary town layout');
  assert.equal(await host.locator('.social-public-room').count(),8,'permanent room persists after leaving');
  assert.equal(await host.locator('#social-map-plane').evaluate(el=>el.style.transform),mapAfter,'the original room terrain camera resumes its prior position after returning from a room');
  await host.locator('#social-new-room').click();
