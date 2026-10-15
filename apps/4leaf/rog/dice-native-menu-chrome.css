@@ -1,0 +1,103 @@
+/* Source IMG/menu.png is the 608x30 native Genesis World game's real
+   upper frame, present in original board.jpg and battle.jpg. The revived
+   Windows-like app title and synthetic second status strip are NOT there.
+   This changes GAME ONLY; ChatTown / WorldMap / Magic Carden retain their
+   separate original-client framing and navigation.
+   Original scene is composed of real DMP/TIS tile entities and recovered
+   forest art, NOT a screenshot with fake transparent board hotspots. */
+#app.app-classic-dice>.titlebar,
+#app.app-classic-dice>.statusbar{
+ display:none!important;
+}
+#app.app-classic-dice #game .scene-banner{
+ position:absolute!important;
+ display:block!important;
+ top:0!important;left:0!important;right:0!important;
+ height:30px!important;min-height:30px!important;
+ width:100%!important;
+ padding:0!important;margin:0!important;
+ border:0!important;border-radius:0!important;
+ box-shadow:none!important;
+ background:#2e458c url('./original/IMG/menu.png') 0 0/608px 30px no-repeat!important;
+ z-index:32!important;
+}
+#app.app-classic-dice #game .scene-banner>span{
+ display:none!important;
+}
+#app.app-classic-dice #game .game-topline{
+ display:none!important;
+}
+/* Start the actual map beneath its original 30px menu, not the invented
+   24px purple banner PLUS 20px fake round/status strip. */
+#app.app-classic-dice #game .board-area{
+ top:30px!important;
+}
+#app.app-classic-dice #game .scene-banner .dice-menu-source-button{
+ display:block!important;
+ box-sizing:border-box!important;
+ position:absolute!important;
+ top:0!important;
+ width:29px!important;min-width:29px!important;
+ height:29px!important;min-height:29px!important;
+ padding:0!important;margin:0!important;
+ border:0!important;border-radius:0!important;
+ background:#344889 url('./original/IMG/menu.png') no-repeat!important;
+ background-size:608px 30px!important;
+ color:transparent!important;
+ font-size:0!important;line-height:0!important;
+ box-shadow:none!important;
+ cursor:pointer;
+ z-index:2;
+}
+#app.app-classic-dice #game #dice-menu-round{
+ left:38px!important;
+ background-position:-38px 0!important;
+}
+#app.app-classic-dice #game #dice-menu-party{
+ left:67px!important;
+ background-position:-67px 0!important;
+}
+#app.app-classic-dice #game .scene-banner .dice-menu-source-button:is(:hover,:focus-visible){
+ outline:2px solid #fff3bc!important;
+ outline-offset:-2px!important;
+ filter:brightness(1.25);
+}
+/* The original MainFrame toolbar provides a real OUT graphic.
+   Wire it to the existing save-and-leave confirmation; never create a fake
+   logout handler or silently abandon the genuine gameplay state. */
+#app.app-classic-dice #game #exit-game{
+ box-sizing:border-box!important;
+ display:block!important;
+ position:absolute!important;
+ top:0!important;right:0!important;
+ width:30px!important;min-width:30px!important;
+ height:30px!important;min-height:30px!important;
+ padding:0!important;margin:0!important;
+ border:0!important;border-radius:0!important;
+ background:transparent url('./original/MainFrame/toolbarbtn.png') 0 -240px/120px 270px no-repeat!important;
+ box-shadow:none!important;
+ color:transparent!important;
+ font-size:0!important;
+ line-height:0!important;
+ z-index:3!important;
+ cursor:pointer;
+}
+#app.app-classic-dice #game #exit-game:is(:hover,:focus-visible){
+ outline:1px solid #f6e9ba!important;
+ outline-offset:-1px!important;
+ filter:brightness(1.16);
+}
+@media(max-width:650px){
+ /* On small screens retain physical 608px sprite coordinates for the two
+    visible original buttons. Cropping the unused right side is preferable
+    to distorting source artwork and shrinking the clickable buttons. */
+ #app.app-classic-dice #game .scene-banner{
+  background-size:608px 30px!important;
+ }
+ #app.app-classic-dice #game .scene-banner .dice-menu-source-button{
+  width:29px!important;height:29px!important;
+ }
+ #app.app-classic-dice #game .board-area{
+  top:30px!important;
+ }
+}
