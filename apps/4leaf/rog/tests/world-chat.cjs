@@ -258,12 +258,37 @@ const path=require('path');
  assert.ok(await host.locator('#rooms:not(.hidden)').isVisible(),'north Haiacan enters chat town, not dice');
  assert.equal(await host.evaluate(()=>window.__LEAF_SOCIAL__.getState().region),'north');
  assert.ok((await host.locator('#social-image-frame').evaluate(el=>getComputedStyle(el).backgroundImage)).includes('ChatTown/northback.png'),'north Haiacan uses native ChatTown artwork');
+
+ // ChatTown source art is 794×404; ChatRoom interiors are 794×528.
+ // Verify the town uses its own source coordinate system with no fabricated
+ // 124px bottom caption or room-only user list stealing horizontal space.
+ const nativeTown=await host.evaluate(()=>{
+  const scene=document.getElementById('rooms'),frame=document.getElementById('social-image-frame');
+  const stage=document.getElementById('social-stage');
+  const rect=frame.getBoundingClientRect(),bound=stage.getBoundingClientRect();
+  return {className:scene.className,width:parseFloat(getComputedStyle(frame).width),
+   height:parseFloat(getComputedStyle(frame).height),display:getComputedStyle(scene.querySelector('.social-user-panel')).display,
+   footer:getComputedStyle(frame,'::after').content,
+   rectWidth:rect.width,rectHeight:rect.height,stageWidth:bound.width,stageHeight:bound.height};
+ });
+ assert.ok(nativeTown.className.includes('native-town-scene'),'ChatTown uses its own original layout class');
+ assert.deepEqual([nativeTown.width,nativeTown.height],[794,404],'real north ChatTown source is 794×404, not 794×528');
+ assert.equal(nativeTown.display,'none','unrelated room-only participant list cannot shrink original ChatTown art');
+ assert.ok(nativeTown.footer==='none'||nativeTown.footer==='normal',
+  'fabricated caption beneath native town bitmap must be removed');
+ assert.ok(Math.abs(nativeTown.rectWidth/nativeTown.rectHeight-794/404)<.002,
+  'native ChatTown image must be uniformly scaled');
+ assert.ok(nativeTown.rectWidth<=nativeTown.stageWidth+2&&nativeTown.rectHeight<=nativeTown.stageHeight+2,
+  'entire source scene fits view without crop');
+ assert.equal(await host.locator('.social-district-hotspot').count(),8,'eight original native town signs remain clickable');
+
  assert.ok(await host.locator('#dice-channels.hidden').count()===1,'dice TOWN SELECT not shown during north chat');
  await host.locator('[data-route="sky"]').first().click();
  await host.locator('[data-region="south"]').click();
  assert.ok(await host.locator('#rooms:not(.hidden)').isVisible(),'south Haiacan enters chat town');
  assert.equal(await host.evaluate(()=>window.__LEAF_SOCIAL__.getState().region),'south');
  assert.ok((await host.locator('#social-image-frame').evaluate(el=>getComputedStyle(el).backgroundImage)).includes('ChatTown/southback.png'),'south Haiacan uses its distinct original ChatTown art');
+ assert.equal(await host.locator('#social-image-frame').evaluate(el=>parseFloat(getComputedStyle(el).height)),404,'south Haiacan uses same native 794×404 coordinate space');
  await host.locator('[data-route="sky"]').first().click();
 
  await host.locator('[data-region="dice"]').click();
@@ -412,6 +437,10 @@ const path=require('path');
  await host.locator('.social-public-room').first().evaluate(el=>el.click());
  assert.equal(await host.evaluate(()=>window.__LEAF_SOCIAL__.getState().view),'room','permanent room is enterable without creating a room');
  assert.equal(await host.locator('.social-avatar').count(),1,'permanent room contains only genuine participants');
+ assert.equal(await host.locator('#social-image-frame').evaluate(el=>parseFloat(getComputedStyle(el).height)),528,
+  'entering an original ChatRoom restores its independent 794×528 scene');
+ assert.notEqual(await host.locator('#rooms .social-user-panel').evaluate(el=>getComputedStyle(el).display),'none',
+  'native user list belongs to ChatRoom interior, not the town selector');
  assert.equal(await host.locator('#social-close-room').count(),0,'permanent room cannot be destroyed by its visitors');
  await host.locator('#social-back').click();
  assert.equal(await host.locator('.social-public-room').count(),8,'permanent room persists after leaving');
