@@ -34,8 +34,13 @@ const {chromium}=require('playwright');
     }
     const nearest=[];
     const original=area.sprite;
-    for(let y=Math.max(0,original[1]-46);y<=Math.min(404-74,original[1]+46);y++){
-     for(let x=Math.max(0,original[0]-54);x<=Math.min(BW-142,original[0]+54);x++){
+    // The last guild sign is visually larger than its 142px native atlas
+    // frame; search the whole right-bottom district, not the former rough
+    // left edge. The other five have already registered to within 6px.
+    const xRange=area.id==='plain02'?185:54;
+    const yRange=area.id==='plain02'?105:46;
+    for(let y=Math.max(0,original[1]-yRange);y<=Math.min(404-74,original[1]+yRange);y++){
+     for(let x=Math.max(0,original[0]-xRange);x<=Math.min(BW-142,original[0]+xRange);x++){
       let sum=0;
       for(const [sx,sy,r,g,b] of samples){
        const p=((y+sy)*BW+x+sx)*4;
