@@ -34,11 +34,15 @@ const path=require('node:path');
     atlasTopbar:await dims('topbar'),
     atlasTitle:await dims('title'),
     atlasAbility:await dims('abilitybar'),
+    atlasTerrain:await dims('bgtile'),
     frame:box('#app'),main:box('#main'),chat:box('.messenger'),mini:box('#board-mini'),
     chatBackground:getComputedStyle(chat).backgroundImage,
     miniBackground:getComputedStyle(mini).backgroundImage,
     chatInputVisible:getComputedStyle(document.querySelector('#message')).visibility==='visible',
     boardBackground:getComputedStyle(document.querySelector('#board-world')).backgroundImage,
+    terrainSize:getComputedStyle(document.querySelector('#board-world')).backgroundSize,
+    terrainRepeat:getComputedStyle(document.querySelector('#board-world')).backgroundRepeat,
+    gridDecoration:getComputedStyle(document.querySelector('#game .board-area'),'::before').content,
     nodeCount:document.querySelectorAll('#board-nodes .tile').length,
     dock:mini.parentElement.id
    };
@@ -48,6 +52,7 @@ const path=require('node:path');
   assert.deepEqual(native.atlasChat,[406,152],'original live chat window resource is 406x152');
   assert.deepEqual(native.atlasMini,[172,152],'original minimap resource is 172x152');
   assert.deepEqual(native.atlasAbility,[92,64],'original four-frame 92x16 ABILITY atlas');
+  assert.deepEqual(native.atlasTerrain,[725,485],'actual recovered 725x485 native Dice forest-and-cliff battlefield');
   assert.ok(Math.abs(native.frame[2]-800)<2&&Math.abs(native.frame[3]-600)<2,'desktop game uses source logical frame');
   assert.ok(native.main[2]>=594&&native.main[2]<=612,'608px original content coordinate space retained');
   assert.ok(Math.abs(native.chat[2]-406)<1&&Math.abs(native.chat[3]-152)<1,'native chat bitmap registration');
@@ -60,7 +65,10 @@ const path=require('node:path');
   assert.equal(native.dock,'dice-native-minidock','actual minimap canvas reparented, not a fake duplicate');
   assert.ok(native.chatBackground.includes('/original/IMG/chatwnd.png'));
   assert.ok(native.miniBackground.includes('/original/IMG/minimap.png'));
-  assert.ok(!native.boardBackground.includes('/original/IMG/bgtile.png'),'do not paste ChatTown terrain under Dice TIS board');
+  assert.ok(native.boardBackground.includes('/original/IMG/bgtile.png'),'the Dice battlefield must display its actual recovered 725x485 forest terrain, not a flat blue placeholder');
+  assert.equal(native.terrainSize,'725px 485px','keep native source terrain image pixels beneath the independent TIS platform entities');
+  assert.equal(native.terrainRepeat,'repeat','pan/zoom retains the original scenery across the larger MVE world');
+  assert.equal(native.gridDecoration,'none','fake radial grids must not obscure real source cliffs and buildings');
   assert.equal(native.nodeCount,104,'the source board contains live interactive TIS cells');
   // Source v0.96d Tiles/0000.png is exactly 145x97. Every map cell uses
   // a *real independent* TIS bitmap; obsolete added numbering and fake
@@ -119,9 +127,19 @@ const path=require('node:path');
   await page.locator('#message').press('Enter');
   await page.waitForFunction(()=>document.querySelector('#chat-log')?.textContent.includes('원본 채팅창 테스트'));
   await page.screenshot({path:'leaf-dice-original-800x600-frame.png'});
+  const originalCamera=await page.locator('#board-world').evaluate(el=>getComputedStyle(el).transform);
   await page.locator('#roll-btn').click();
   await page.waitForFunction(()=>window.__ROG_TEST__.getMatch()?.players[0].position>0,{timeout:12000});
   assert.equal(await page.locator('#mini-map-canvas').count(),1,'the minimap survives an actual move');
+  await page.evaluate(()=>window.__LEAF_CAMERA__?.viewport(1.65,24,16));
+  const movedWorld=await page.locator('#board-world').evaluate(el=>({
+   transform:getComputedStyle(el).transform,
+   background:getComputedStyle(el).backgroundImage,
+   tileCount:el.querySelectorAll('#board-nodes .tile').length
+  }));
+  assert.ok(movedWorld.background.includes('/original/IMG/bgtile.png'),'actual forest scenery moves inside the SAME game camera as live MVE tiles');
+  assert.equal(movedWorld.tileCount,104,'all original independent TIS tile hitboxes survive terrain zoom');
+  assert.notEqual(movedWorld.transform,originalCamera,'camera tracks original terrain and playable tiles together');
   await page.locator('#exit-game').click();
   await page.locator('#modal-buttons button').filter({hasText:'나가기'}).click();
   await page.waitForFunction(()=>window.__LEAF_DICE_FRAME__.getState().docked===false);
