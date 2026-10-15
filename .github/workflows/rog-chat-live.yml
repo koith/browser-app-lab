@@ -55,6 +55,10 @@ jobs:
         env:
           FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
         run: node apps/4leaf/rog/tests/world-chat.cjs
+      - name: Verify published source Registry alpha and live original 1/3/5 vs 2/4/6 portraits
+        env:
+          FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
+        run: node apps/4leaf/rog/tests/registry-native-portraits.cjs
       - name: Verify deployed 800x600 native Dice frame, original ABILITY button, chat and minimap in Chromium
         env:
           FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
