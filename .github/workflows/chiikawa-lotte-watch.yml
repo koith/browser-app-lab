@@ -10,6 +10,7 @@ on:
       - '.github/workflows/chiikawa-lotte-watch.yml'
       - 'scripts/chiikawa_lotte_watch.py'
       - 'scripts/test_chiikawa_lotte_watch.py'
+      - 'scripts/probe_chiikawa_lotte_watch.py'
   workflow_dispatch:
 permissions:
   contents: read
