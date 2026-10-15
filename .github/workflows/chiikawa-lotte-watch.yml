@@ -5,9 +5,6 @@ on:
       timezone: Asia/Seoul
     - cron: '*/5 * 15 10 *'
       timezone: Asia/Seoul
-  push:
-    paths:
-      - '.github/workflows/chiikawa-lotte-watch.yml'
   pull_request:
     paths:
       - '.github/workflows/chiikawa-lotte-watch.yml'
@@ -29,33 +26,8 @@ jobs:
       - run: python3 -m unittest discover -s scripts -p 'test_chiikawa_lotte_watch.py' -v
       - name: Probe real Naver connections
         run: python3 scripts/probe_chiikawa_lotte_watch.py
-  alert-smoke:
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Create one clearly-labeled test alert as production bot
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          TITLE='[TEST Chiikawa watcher] 알림 전달 시험'
-          if gh issue list --repo "$GITHUB_REPOSITORY" --state all --limit 100 --json title --jq '.[].title' | grep -Fxq "$TITLE"; then
-            echo 'TEST_ISSUE_ALREADY_EXISTS'
-            exit 0
-          fi
-          gh issue create --repo "$GITHUB_REPOSITORY" --title "$TITLE" --assignee koith --body '@koith [테스트 알림] 먼작귀 예약 개시가 아닙니다. GitHub Actions의 알림 생성 및 휴대폰 전달 검증용입니다.'
-  ntfy-smoke:
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Verify public independent push transport
-        run: |
-          curl --fail --silent --show-error --retry 2 --max-time 20 \
-            -H 'Title: Chiikawa watcher TEST ONLY' \
-            -H 'Priority: 4' \
-            -d 'TEST ONLY: Chiikawa watcher push transport is working. This is not a sale notice.' \
-            'https://ntfy.sh/lotte-chiikawa-20261016-ca1ab753911c4a153ef003'
   watch:
-    if: github.repository == 'koith/browser-app-lab' && github.event_name != 'pull_request'
+    if: github.repository == 'koith/browser-app-lab' && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
     runs-on: ubuntu-latest
     timeout-minutes: 8
     steps:
