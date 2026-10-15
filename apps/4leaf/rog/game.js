@@ -433,8 +433,11 @@ function drawNativeChessmen(){
  if(!root||!match)return;
  const p=(match.mode==='hotseat'||match.mode==='network'?activePlayer():match.players[0]);
  if(!p)return;
+ const sameUser=root.dataset.playerId===String(p.id);
+ const selectedIndex=sameUser?Number(root.dataset.selectedIndex)||0:0;
  root.replaceChildren();
  root.dataset.playerId=String(p.id);
+ root.dataset.selectedIndex=String(selectedIndex);
  root.dataset.playerName=p.name;
  for(let i=0;i<4;i++){
   const cardId=p.team?.[i],source=cardId&&CARD_MAP[cardId],role=['공격','방어','지력','대기'][i];
@@ -455,6 +458,11 @@ function drawNativeChessmen(){
    stamp.setAttribute('aria-hidden','true');
    const name=document.createElement('b');name.textContent=source.name;
    slot.append(img,stamp,name);
+   slot.classList.toggle('selected',selectedIndex===i);
+   slot.onfocus=()=>{
+    root.dataset.selectedIndex=String(i);
+    root.querySelectorAll('.dice-chessman-slot').forEach(s=>s.classList.toggle('selected',s===slot));
+   };
    slot.onclick=()=>{
     const content=document.createElement('div');
     const portrait=document.createElement('img');portrait.src=imageFor(source.id);
@@ -474,6 +482,35 @@ function drawNativeChessmen(){
    slot.append(blank,name);
   }
   root.append(slot);
+ }
+ // Source IMG/selector.png is a genuine four-action icon atlas. Historical
+ // icon-to-action mapping is unverified: use safe existing game actions only,
+ // and do NOT invent swapping combat roles or new attack mechanics.
+ const occupied=[...root.querySelectorAll('button.dice-chessman-slot.occupied')];
+ const inspect=$('dice-inspect-tool');
+ if(inspect){
+  inspect.disabled=occupied.length===0;
+  inspect.onclick=()=>{
+   const current=occupied.find(s=>s.dataset.teamIndex===root.dataset.selectedIndex)||occupied[0];
+   current?.click();
+  };
+ }
+ const next=$('dice-next-tool');
+ if(next){
+  next.disabled=occupied.length<2;
+  next.onclick=()=>{
+   const idx=occupied.findIndex(s=>s.dataset.teamIndex===root.dataset.selectedIndex);
+   const item=occupied[(idx+1)%occupied.length];
+   item?.focus();
+  };
+ }
+ const abilityTool=$('dice-ability-tool');
+ if(abilityTool){
+  abilityTool.disabled=$('ability-btn')?.disabled!==false;
+  abilityTool.onclick=()=>{
+   const ability=$('ability-btn');
+   if(ability&&!ability.disabled)ability.click();
+  };
  }
  const counter=$('dice-item-count');
  if(counter)counter.textContent=String(p.items?.length||0);
