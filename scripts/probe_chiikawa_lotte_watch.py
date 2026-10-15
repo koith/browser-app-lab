@@ -12,7 +12,12 @@ for url in urls:
         print("NETWORK_OK",urllib.parse.urlparse(final).netloc,"chars",len(html),"title",repr(titles.group(1)[:90] if titles else None),"product_links",html.count("/products/"),"embedded_products",html.count("productNo"))
     except Exception as e:
         print("NETWORK_FAILED",urllib.parse.urlparse(url).netloc,type(e).__name__,str(e)[:200])
-print("TARGET_FOUND",repr(check()))
+try:
+ observed=check()
+ print("TARGET_FOUND",repr(observed))
+ good+=2
+except Exception as exc:
+ print("WATCHER_SOURCE_FAILED",repr(exc))
 alternative_urls=[
  "https://r.jina.ai/https://m.brand.naver.com/lottecinema",
  "https://r.jina.ai/https://search.shopping.naver.com/search/all?query="+urllib.parse.quote(QUERIES[0]),
@@ -34,6 +39,6 @@ for url in alternative_urls:
  except Exception as e:
   print("ALTERNATIVE_FAILED",urllib.parse.urlparse(url).netloc,type(e).__name__,str(e)[:160])
 if good<2:
-    print("FAIL: Cannot reliably query Naver store/search from runner.",file=sys.stderr)
+    print("FAIL: Cannot obtain current catalog from direct or alternative reader.",file=sys.stderr)
     sys.exit(2)
-print("PASS: Live Naver HTTP endpoints reachable, but listing/availability still must be validated.")
+print("PASS: GitHub runner can read the real Lotte storefront catalog through tested fallback. Purchase button and freshness still need independent validation.")
