@@ -385,7 +385,7 @@ const path=require('path');
  const nativeRoomMarkers=await host.locator('#social-directory-list .social-public-room').evaluateAll(els=>els.map(el=>{
   const style=getComputedStyle(el);
   return {x:parseFloat(el.style.left),y:parseFloat(el.style.top),
-   width:el.getBoundingClientRect().width,height:el.getBoundingClientRect().height,
+   width:parseFloat(style.width),height:parseFloat(style.height),
    background:style.backgroundColor,backgroundImage:style.backgroundImage,
    boxShadow:style.boxShadow,number:el.querySelector('.social-room-number')?.textContent,
    label:el.querySelector('.social-room-users')?.textContent};
