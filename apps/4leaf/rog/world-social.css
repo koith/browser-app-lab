@@ -546,3 +546,38 @@ body>.social-modal .recordable-article p{white-space:pre-wrap;overflow-wrap:anyw
   display:flex!important;
  }
 }
+
+/* The source ChatTown room-estate atlas has not been recovered.
+   Show ONLY actual live/created rooms. This neutral map is explicitly a web
+   interaction layer, not a fabricated "original" forest or hut illustration. */
+#rooms .social-map-plane[data-terrain="unverified"]{
+ background:#40546a!important;
+ background-image:none!important;
+}
+#rooms .social-map-rooms .social-directory-row{
+ background:#253e66!important;
+ border:2px ridge #92b0cf!important;
+ box-shadow:1px 2px 3px #182c46aa!important;
+ color:#f2f2ec!important;
+ width:164px!important;
+ min-height:54px!important;
+}
+#rooms .social-map-rooms .social-directory-row:is(:hover,:focus-visible){
+ background:#385986!important;
+ border-color:#f3e6b3!important;
+}
+#rooms .social-directory-empty{
+ position:absolute;
+ z-index:4;
+ top:50%;left:50%;
+ transform:translate(-50%,-50%);
+ margin:0;
+ width:390px;max-width:72%;
+ padding:18px 22px;
+ border:2px ridge #a9bedb;
+ background:#243860ed;
+ color:#f5f1e6;
+ font:13px/1.7 Gulim,'굴림',sans-serif;
+ text-align:center;
+ pointer-events:none;
+}
