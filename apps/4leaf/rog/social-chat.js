@@ -1045,6 +1045,9 @@
    closePopup();enterRoom(room);
   };
   popup('새로운 4LEAF 채팅방 개설',body);
+  // Use recovered ChatRoom/ownerdialog.png as a separate original 2002 UI
+  // component, with exactly the same working form and server authority.
+  window.__LEAF_NATIVE_OWNER_DIALOG__?.enhance(body);
  }
  async function closeRoom(roomId){
   const room=roomById(roomId);
