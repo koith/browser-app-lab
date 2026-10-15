@@ -564,6 +564,24 @@ const path=require('path');
  assert.ok(Math.abs(overlay.roster.x-(794-13-158))<1.5&&Math.abs(overlay.roster.y-9)<1.5,'archival screen: native participant list at upper-right scene coordinate');
  assert.ok(Math.abs(overlay.input.w-407)<1.5&&overlay.input.y>80,'native source edit frame remains independent from visible scrollable chat lines');
  assert.equal(overlay.peers,1,'only genuine self user appears in overlay, never sample NPCs');
+
+ await host.waitForFunction(()=>{const img=document.querySelector('#social-avatar-layer .social-avatar.self img');return img?.complete&&img.naturalWidth===75&&img.naturalHeight===141},{timeout:12000});
+ const nativeAvatarFeet=await host.evaluate(()=>{
+  const frame=document.getElementById('social-image-frame');
+  const figure=document.querySelector('#social-avatar-layer .social-avatar.self');
+  const sprite=figure.querySelector('img');
+  const room=frame.getBoundingClientRect(),paint=sprite.getBoundingClientRect();
+  const seatBaseline=room.top+Number.parseFloat(figure.style.top)*room.height/100;
+  return {native:[sprite.naturalWidth,sprite.naturalHeight],
+   imageBottom:paint.bottom,seatBaseline,
+   movement:getComputedStyle(figure).transitionDuration};
+ });
+ assert.deepEqual(nativeAvatarFeet.native,[75,141],'use the exact recovered 75×141 Registry character frame');
+ assert.ok(Math.abs(nativeAvatarFeet.imageBottom-nativeAvatarFeet.seatBaseline)<2.5,
+  'native avatar feet must snap to the target seat without the previous 19px offset');
+ assert.ok(nativeAvatarFeet.movement.split(',').every(v=>parseFloat(v)===0),
+  'room seats teleport instantly without a linear walk tween');
+
  assert.equal(await host.locator('#social-native-user-count').textContent(),'1명','the original userlist title field reflects actual room occupants');
  assert.ok(overlay.sourceImage.includes('/original/ChatRoom/room'),'still uses native source room bitmap');
  await host.screenshot({path:'leaf-original-overlay-chatroom-desktop.png'});
