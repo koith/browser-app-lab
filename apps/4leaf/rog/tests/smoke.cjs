@@ -93,6 +93,50 @@ async function run(){
  assert.equal(duelSurface.backgroundImage,'none','real terrain is not covered by synthetic gradient screenshot backdrop');
  assert.equal(duelSurface.borderTop,'none','no fabricated border around the original live duel');
  assert.equal(duelSurface.actors,2,'both combatants stay independent original SAVA actors');
+
+ const duelRig=await page.locator('#battle-visual').evaluate(stage=>{
+  const sides=[...stage.querySelectorAll('.battle-visual-side')];
+  return {
+   stageTransparent:getComputedStyle(stage).backgroundColor,
+   platforms:sides.map(side=>{
+    const body=side.querySelector('.battle-visual-pedestal'),actor=side.querySelector('.battle-visual-actor');
+    const br=body.getBoundingClientRect(),ar=actor.getBoundingClientRect();
+    const top=getComputedStyle(body,'::before'),supports=getComputedStyle(body,'::after');
+    return {
+     color:getComputedStyle(body).backgroundImage,
+     shape:getComputedStyle(body).clipPath,
+     top:top.backgroundImage,
+     struts:supports.backgroundImage,
+     platformHeight:br.height,
+     actorAbove:ar.bottom<br.bottom,
+     rollCount:side.querySelectorAll('.battle-visual-die').length,
+     originalPawn:actor.getAttribute('src')
+    };
+   }),
+   bg:getComputedStyle(document.querySelector('#board-world')).backgroundImage
+  };
+ });
+ assert.equal(duelRig.platforms.length,2,'real duel includes two independent live mechanical podiums');
+ assert.ok(duelRig.platforms.every(s=>s.shape.startsWith('polygon(')&&s.platformHeight>35),'2.5D podium has an actual polygonal depth body rather than original flat 2D bar');
+ assert.ok(duelRig.platforms.every(s=>s.top.includes('radial-gradient')&&s.struts.includes('repeating-linear-gradient')),'separate neon top ring and mechanical lower support are visible independent layers');
+ assert.ok(duelRig.platforms.every(s=>s.actorAbove&&s.originalPawn.includes('original/Registry/sava')),'real original fighter PNGs stand on the source-comparison platform and do not become screenshots');
+ assert.ok(duelRig.platforms.every(s=>s.rollCount>=1),'actual rolled original attack/defense values remain live above podium');
+ assert.ok(duelRig.bg.includes('original/IMG/bgtile.png'),'the ACTUAL source forest with 725x485 cliffs is unobstructed below battle, not inferred replacement art');
+ await page.screenshot({path:'leaf-original-battle-stage-platforms.png'});
+ await page.setViewportSize({width:390,height:844});
+ const mobDuel=await page.locator('#battle-visual').evaluate(el=>({
+  participants:el.querySelectorAll('.battle-visual-side').length,
+  pedestals:el.querySelectorAll('.battle-visual-pedestal').length,
+  dice:el.querySelectorAll('.battle-visual-die').length,
+  background:getComputedStyle(el).backgroundColor
+ }));
+ assert.equal(mobDuel.participants,2);
+ assert.equal(mobDuel.pedestals,2,'live source-inspired battle platform stays in mobile scene');
+ assert.ok(mobDuel.dice>=2);
+ assert.equal(mobDuel.background,'rgba(0, 0, 0, 0)');
+ await page.screenshot({path:'leaf-original-battle-stage-mobile.png'});
+ await page.setViewportSize({width:1280,height:860});
+
  await page.locator('#modal-buttons button').filter({hasText:'결과 확인'}).click();
  await page.waitForFunction(()=>!document.querySelector('#battle-visual'),null,{timeout:6000});
  console.log('BATTLE PASS: visible animated duel with real rolled dice, resolved and cleaned up.');
