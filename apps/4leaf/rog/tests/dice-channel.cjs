@@ -7,6 +7,7 @@ const assert=require('node:assert/strict');
  const base=process.env.FOURLEAF_TEST_URL||'http://127.0.0.1:8765/';
  const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
  const page=await browser.newPage({viewport:{width:1120,height:820}});
+ await page.addInitScript(()=>{window.LEAF_CENTRAL_API_URL='';});
  const errors=[];page.on('pageerror',e=>errors.push(String(e)));
  try{
   await page.goto(base);

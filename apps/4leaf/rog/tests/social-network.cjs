@@ -4,6 +4,8 @@ const assert=require('node:assert/strict');
  const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
  const url='http://127.0.0.1:8765/';
  const ctx1=await browser.newContext(),ctx2=await browser.newContext();
+ await Promise.all([ctx1.addInitScript(()=>{window.LEAF_CENTRAL_API_URL='';}),
+                    ctx2.addInitScript(()=>{window.LEAF_CENTRAL_API_URL='';})]);
  const host=await ctx1.newPage(),guest=await ctx2.newPage(),errors=[];
  for(const [name,p] of [['HOST',host],['GUEST',guest]])p.on('pageerror',e=>{errors.push(name+':'+e.message);console.error(e.stack)});
  await Promise.all([host.goto(url),guest.goto(url)]);
