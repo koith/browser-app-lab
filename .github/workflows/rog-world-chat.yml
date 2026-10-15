@@ -88,6 +88,8 @@ jobs:
         run: node apps/4leaf/rog/tests/chatroom-furniture-registration.cjs
       - name: Verify original world, regions, rooms, messages and mobile
         run: node apps/4leaf/rog/tests/world-chat.cjs
+      - name: Verify original WorldMap, ChatTown and 115x103 ChatRoom furniture work after cold offline install
+        run: node apps/4leaf/rog/tests/native-offline-cache.cjs
       - name: Verify original 52x40 ChatRoom scrollbar with real messages and pointer drag
         run: node apps/4leaf/rog/tests/chat-native-scrollbar.cjs
       - name: Verify live source Registry chroma key, true side player portraits, game turns and mobile
