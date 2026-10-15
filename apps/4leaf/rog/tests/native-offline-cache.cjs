@@ -19,6 +19,8 @@ const {chromium}=require('playwright');
   const critical=[
    'chatroom-native-owner-dialog.js','chatroom-native-owner-dialog.css','original/ChatRoom/ownerdialog.png',
    'chatroom-native-expressions.js','chatroom-native-expressions.css','original/ChatRoom/expdialogbtn.png',
+   'knighttown-native.js','knighttown-native.css',
+   ...['knightback','plain01','plain02','sea01','sea02','sea03','snow01'].map(s=>'original/KnightTown/'+s+'.png'),
    'world-social.css','social-chat.js','world-map.js','mainframe-native-snapshot.js','mainframe-native-snapshot.css','original/MainFrame/snaplogo.png','original/MainFrame/snapnumber.png',
    ...['mainstreet','knights','northchatrgn','southchatrgn','dice','m4leaf'].map(s=>'original/WorldMap/'+s+'.png'),
    ...['northback','southback','plainbtn','seabtn','snowbtn'].map(s=>'original/ChatTown/'+s+'.png'),
@@ -27,7 +29,7 @@ const {chromium}=require('playwright');
    'original/Registry/sava00.png'
   ];
   await page.waitForFunction(async files=>{
-   const cache=await caches.open('4leaf-revival-pwa-v42');
+   const cache=await caches.open('4leaf-revival-pwa-v43');
    return (await Promise.all(files.map(file=>cache.match('./'+file)))).every(Boolean);
   },critical,{timeout:40000});
   // An established controller must answer image and JS fetches offline.
@@ -40,6 +42,21 @@ const {chromium}=require('playwright');
    &&document.querySelector('#leaf-world-stage .leaf-native-snaplogo')?.dataset.ready==='true'
    &&document.querySelector('#leaf-world-stage .leaf-native-snapnumber')?.dataset.ready==='true',
    null,{timeout:18000});
+  // Cold-offline source KnightTown region art and all its six sign frames
+  // must work before a visitor ever browsed the Recordable in this session.
+  await page.evaluate(()=>{window.__LEAF_SOCIAL__.openKnightTown();window.__ROG_TEST__.go('rooms')});
+  await page.waitForFunction(()=>document.querySelectorAll('.knight-district-hotspot').length===6,null,{timeout:8000});
+  const originalKnight=await page.evaluate(async()=>{
+   const img=new Image();img.src='./original/KnightTown/knightback.png';
+   await img.decode();
+   return [img.naturalWidth,img.naturalHeight];
+  });
+  assert.deepEqual(originalKnight,[794,404],'native Recordable area backdrop is available on first offline entry');
+  await page.locator('[data-knight-area="snow01"]').click();
+  assert.equal(await page.evaluate(()=>window.__LEAF_SOCIAL__.getState().knightDistrict),'침묵의 설원',
+   'original KnightTown areas work without the network');
+  await page.locator('#social-back').click();
+  await page.locator('#social-back').click();
   await page.evaluate(()=>{window.__LEAF_SOCIAL__.openRegion('north');window.__ROG_TEST__.go('rooms');});
   await page.waitForFunction(()=>document.querySelectorAll('.social-district-hotspot').length===8,null,{timeout:8000});
   await page.locator('.social-district-hotspot').nth(3).click();
