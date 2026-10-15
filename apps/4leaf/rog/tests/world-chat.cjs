@@ -243,6 +243,67 @@ const path=require('path');
  await host.locator('#shop-grid .shop-card').nth(1).evaluate(el=>el.click());
  assert.ok((await host.locator('#shop-selected').textContent()).length>0,
   'native card-slot interaction still selects and describes a real item');
+ // Native CardShop PAK button atlas is a real 500x510 atlas, not placeholder
+ // lettering over the permanent nine 4LEAF card backs.
+ const shopSprite=await host.evaluate(()=>{
+  const stage=document.getElementById('shop-native-stage');
+  const selected=document.querySelector('#shop-grid .shop-card.selected');
+  const unselected=[...document.querySelectorAll('#shop-grid .shop-card')].find(el=>!el.classList.contains('selected')&&!el.classList.contains('shop-empty'));
+  const buy=document.getElementById('shop-buy');
+  const prev=document.getElementById('shop-prev'),next=document.getElementById('shop-next');
+  const info=document.getElementById('shop-selected');
+  const toggler=document.getElementById('shop-owned-toggle');
+  const css=el=>getComputedStyle(el);
+  const rect=el=>{const r=el.getBoundingClientRect(),b=stage.getBoundingClientRect(),scale=Number(stage.dataset.scale);
+    return {x:(r.x-b.x)/scale,y:(r.y-b.y)/scale,w:r.width/scale,h:r.height/scale}};
+  return {
+   selected:css(selected).backgroundImage,selectedRank:selected.dataset.rank,
+   selectedArtOpacity:css(selected.querySelector('.card-art')).opacity,
+   untouched:css(unselected).backgroundImage,
+   selectedRect:rect(selected),
+   buy:css(buy).backgroundImage,buyRect:rect(buy),
+   prev:css(prev).backgroundImage,next:css(next).backgroundImage,
+   ownedPanelDisplay:css(document.querySelector('#shop .shop-equipped')).display,
+   drawerToggle:!!toggler,infoRect:rect(info),
+   filterDisplay:css(document.querySelector('#shop .tabline')).backgroundColor
+  };
+ });
+ assert.ok(shopSprite.selected.includes('original/CardShop/cardshopbutton.png'),
+  'selected card uses real colored 73x91 source sprite frame');
+ assert.equal(shopSprite.untouched,'none','other cards still show untouched background card backs');
+ assert.equal(shopSprite.selectedArtOpacity,'1','selected source frame contains actual independent chessman portrait');
+ assert.ok(Math.abs(shopSprite.selectedRect.w-73)<0.1&&Math.abs(shopSprite.selectedRect.h-91)<0.1,
+  'independent source frame uses native 73x91 pixel dimensions');
+ assert.ok(shopSprite.buy.includes('original/CardShop/cardshopbutton.png')
+  &&shopSprite.prev.includes('original/CardShop/cardshopbutton.png')
+  &&shopSprite.next.includes('original/CardShop/cardshopbutton.png'),
+  'purchase and page arrows are recovered source sprite atlas, not Unicode/CSS gradients');
+ assert.ok(Math.abs(shopSprite.buyRect.w-98)<0.1&&Math.abs(shopSprite.buyRect.h-21)<0.1,
+  'original purchase action uses 98x21 source frame');
+ assert.equal(shopSprite.ownedPanelDisplay,'none','invented inventory pane no longer covers the native shop by default');
+ assert.equal(shopSprite.drawerToggle,true,'original 장비 sign has accessible interactive inventory hotspot');
+ assert.ok(shopSprite.infoRect.x>=15&&shopSprite.infoRect.x<35
+   &&shopSprite.infoRect.y>=320&&shopSprite.infoRect.y<344,
+  'selected card details live inside original source 카드정보 box');
+ assert.equal(shopSprite.filterDisplay,'rgba(0, 0, 0, 0)',
+  'Normal/Valuable signs are the genuine backdrop, not opaque web filter bar');
+ await host.locator('#shop-owned-toggle').click();
+ assert.equal(await host.locator('#shop-owned-toggle').getAttribute('aria-expanded'),'true');
+ assert.ok(await host.locator('#shop .shop-equipped').isVisible(),
+  'native 장비 sign opens actual owned-card list');
+ await host.keyboard.press('Escape');
+ assert.equal(await host.locator('#shop-owned-toggle').getAttribute('aria-expanded'),'false');
+ assert.ok(!(await host.locator('#shop .shop-equipped').isVisible()),
+  'inventory drawer closes without erasing recovered CardShop pixels');
+ await host.locator('#shop .group-tab[data-group="valuable"]').click();
+ assert.ok(await host.locator('#shop-grid .shop-card[data-rank="valuable"]').count()>0,
+  'original Valuable counter filters real catalog without inventing new card data');
+ await host.locator('#shop .group-tab[data-group="normal"]').click();
+ assert.ok(await host.locator('#shop-grid .shop-card[data-rank="normal"]').count()>0,
+  'original Normal counter restores actual normal cards');
+ await host.locator('#shop .group-tab[data-group="all"]').click();
+ await host.screenshot({path:'leaf-original-cardshop-native.png'});
+
 
  await host.evaluate(()=>window.__ROG_TEST__.go('city'));
  assert.ok(await host.locator('#city:not(.hidden)').isVisible(),'shop to MainStreet return route works');
