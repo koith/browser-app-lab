@@ -1,0 +1,29 @@
+/* Archived ChatTown/northback.png and southback.png are 794 × 404.
+   ChatRoom backgrounds are separate 794 × 528 assets. They must not share
+   a fabricated 528px logical canvas or a forced participant sidebar. */
+#rooms.native-town-scene .social-user-panel,
+#rooms.native-directory-scene .social-user-panel{
+ display:none!important;
+}
+#rooms.native-town-scene .social-stage,
+#rooms.native-directory-scene .social-stage{
+ background-color:#7794ca;
+ background-image:url('./original/MainFrame/wallpaper.png');
+ background-repeat:repeat;
+ background-size:321px 240px;
+}
+/* The source 794×404 town bitmap already includes its own captions and all
+   8 district signboards. A fabricated 124px footer violates its source frame. */
+#rooms.native-town-scene .social-town-map{
+ height:404px!important;
+ background-color:transparent!important;
+ background-size:794px 404px;
+ box-shadow:none;
+}
+#rooms.native-town-scene .social-town-map::after{
+ content:none!important;display:none!important;
+}
+/* The participant panel is an original ChatRoom-specific component.
+   Keep it when actually inside a room, but omit reconstruction guidance
+   from the native visual list. */
+#rooms.classic-chat-room .social-user-panel>p{display:none!important}

@@ -87,6 +87,34 @@ const path=require('path');
    measured.name+' matches native bitmap without mismatched chroma-key: '+JSON.stringify(measured));
  }
 
+
+ // The archived WorldMap/notice.png (184×61) contains the original winged
+ // "Notice" panel. Verify green chroma key removal and native text hitbox,
+ // not a fabricated CSS tooltip or an unrelated modern caption.
+ await host.waitForFunction(()=>[...document.querySelectorAll('#sky .world-location-tip')].length===6
+  &&[...document.querySelectorAll('#sky .world-location-tip')].every(t=>t.dataset.ready==='true'),
+  null,{timeout:15000});
+ const nativeNotice=await host.evaluate(async()=>{
+  const tip=document.querySelector('#sky .world-location-tip');
+  const background=tip.style.backgroundImage;
+  const png=background.slice(5,-2);
+  const img=new Image();img.src=png;await img.decode();
+  const pixels=document.createElement('canvas');pixels.width=img.naturalWidth;pixels.height=img.naturalHeight;
+  const ctx=pixels.getContext('2d',{willReadFrequently:true});ctx.drawImage(img,0,0);
+  const alpha=ctx.getImageData(0,0,1,1).data[3];
+  const style=getComputedStyle(tip);
+  return {source:tip.dataset.source,bitmap:[img.naturalWidth,img.naturalHeight],
+   cornerAlpha:alpha,width:parseFloat(style.width),height:parseFloat(style.height),
+   background:background.startsWith('url("data:image/png;base64,'),
+   caption:getComputedStyle(document.querySelector('#sky .world-map-caption')).display};
+ });
+ assert.equal(nativeNotice.source,'WorldMap/notice.png','original winged Notice sprite is used for world region hints');
+ assert.deepEqual(nativeNotice.bitmap,[184,61],'native Notice sprite is kept at original 184×61 size');
+ assert.equal(nativeNotice.cornerAlpha,0,'pure-green chroma key is removed rather than shown on world art');
+ assert.deepEqual([nativeNotice.width,nativeNotice.height],[184,61],'hover panel geometry is source-native');
+ assert.ok(nativeNotice.background,'chroma-keyed sprite is composed into a real RGBA image');
+ assert.equal(nativeNotice.caption,'none','invented WorldMap reconstruction caption must not overlay source art');
+
  // The original ChatRoom/header is a separate source sprite, not decorative
  // text. It must load from PAK, key out transparent green and remain legible.
  await host.waitForFunction(()=>document.querySelector('#social-original-userlist')?.dataset.ready==='true',null,{timeout:12000});
@@ -258,12 +286,37 @@ const path=require('path');
  assert.ok(await host.locator('#rooms:not(.hidden)').isVisible(),'north Haiacan enters chat town, not dice');
  assert.equal(await host.evaluate(()=>window.__LEAF_SOCIAL__.getState().region),'north');
  assert.ok((await host.locator('#social-image-frame').evaluate(el=>getComputedStyle(el).backgroundImage)).includes('ChatTown/northback.png'),'north Haiacan uses native ChatTown artwork');
+
+ // ChatTown source art is 794×404; ChatRoom interiors are 794×528.
+ // Verify the town uses its own source coordinate system with no fabricated
+ // 124px bottom caption or room-only user list stealing horizontal space.
+ const nativeTown=await host.evaluate(()=>{
+  const scene=document.getElementById('rooms'),frame=document.getElementById('social-image-frame');
+  const stage=document.getElementById('social-stage');
+  const rect=frame.getBoundingClientRect(),bound=stage.getBoundingClientRect();
+  return {className:scene.className,width:parseFloat(getComputedStyle(frame).width),
+   height:parseFloat(getComputedStyle(frame).height),display:getComputedStyle(scene.querySelector('.social-user-panel')).display,
+   footer:getComputedStyle(frame,'::after').content,
+   rectWidth:rect.width,rectHeight:rect.height,stageWidth:bound.width,stageHeight:bound.height};
+ });
+ assert.ok(nativeTown.className.includes('native-town-scene'),'ChatTown uses its own original layout class');
+ assert.deepEqual([nativeTown.width,nativeTown.height],[794,404],'real north ChatTown source is 794×404, not 794×528');
+ assert.equal(nativeTown.display,'none','unrelated room-only participant list cannot shrink original ChatTown art');
+ assert.ok(nativeTown.footer==='none'||nativeTown.footer==='normal',
+  'fabricated caption beneath native town bitmap must be removed');
+ assert.ok(Math.abs(nativeTown.rectWidth/nativeTown.rectHeight-794/404)<.002,
+  'native ChatTown image must be uniformly scaled');
+ assert.ok(nativeTown.rectWidth<=nativeTown.stageWidth+2&&nativeTown.rectHeight<=nativeTown.stageHeight+2,
+  'entire source scene fits view without crop');
+ assert.equal(await host.locator('.social-district-hotspot').count(),8,'eight original native town signs remain clickable');
+
  assert.ok(await host.locator('#dice-channels.hidden').count()===1,'dice TOWN SELECT not shown during north chat');
  await host.locator('[data-route="sky"]').first().click();
  await host.locator('[data-region="south"]').click();
  assert.ok(await host.locator('#rooms:not(.hidden)').isVisible(),'south Haiacan enters chat town');
  assert.equal(await host.evaluate(()=>window.__LEAF_SOCIAL__.getState().region),'south');
  assert.ok((await host.locator('#social-image-frame').evaluate(el=>getComputedStyle(el).backgroundImage)).includes('ChatTown/southback.png'),'south Haiacan uses its distinct original ChatTown art');
+ assert.equal(await host.locator('#social-image-frame').evaluate(el=>parseFloat(getComputedStyle(el).height)),404,'south Haiacan uses same native 794×404 coordinate space');
  await host.locator('[data-route="sky"]').first().click();
 
  await host.locator('[data-region="dice"]').click();
@@ -412,6 +465,37 @@ const path=require('path');
  await host.locator('.social-public-room').first().evaluate(el=>el.click());
  assert.equal(await host.evaluate(()=>window.__LEAF_SOCIAL__.getState().view),'room','permanent room is enterable without creating a room');
  assert.equal(await host.locator('.social-avatar').count(),1,'permanent room contains only genuine participants');
+ assert.equal(await host.locator('#social-image-frame').evaluate(el=>parseFloat(getComputedStyle(el).height)),528,
+  'entering an original ChatRoom restores its independent 794×528 scene');
+ assert.notEqual(await host.locator('#rooms .social-user-panel').evaluate(el=>getComputedStyle(el).display),'none',
+  'native user list belongs to ChatRoom interior, not the town selector');
+
+ // The archived ChatRoom text-entry atlas contains the nickname field, long
+ // input field and send bubble in a single exact 407×21 source bitmap.
+ // The real form must remain keyboard and pointer accessible.
+ const nativeEntry=await host.evaluate(async()=>{
+  const form=document.getElementById('chat-form');
+  const image=new Image();image.src='./original/ChatRoom/chatbaredit.png';
+  await image.decode();
+  const source=document.createElement('canvas');source.width=image.naturalWidth;source.height=image.naturalHeight;
+  const canvas=source.getContext('2d',{willReadFrequently:true});canvas.drawImage(image,0,0);
+  const alpha=canvas.getImageData(0,0,1,1).data[3];
+  return {w:form.getBoundingClientRect().width,h:form.getBoundingClientRect().height,
+   bg:getComputedStyle(form).backgroundImage,
+   name:getComputedStyle(document.getElementById('nick')).backgroundColor,
+   edit:getComputedStyle(document.getElementById('message')).backgroundColor,
+   send:document.querySelector('#chat-form button').getAttribute('aria-label'),
+   original:[image.naturalWidth,image.naturalHeight],cornerAlpha:alpha};
+ });
+ assert.deepEqual(nativeEntry.original,[407,21],'native ChatRoom input art has original source size');
+ assert.equal(nativeEntry.cornerAlpha,0,'native source input is transparent at corner; no invented opaque frame');
+ assert.ok(Math.abs(nativeEntry.w-407)<2&&Math.abs(nativeEntry.h-21)<1,
+  'working chat edit control retains source-native 407×21 geometry');
+ assert.ok(nativeEntry.bg.includes('original/ChatRoom/chatbaredit.png'),
+  'native sprite supplies actual nickname/input/send frames');
+ assert.equal(nativeEntry.name,'rgba(0, 0, 0, 0)','native nickname frame remains visible');
+ assert.equal(nativeEntry.edit,'rgba(0, 0, 0, 0)','native text frame remains visible');
+ assert.equal(nativeEntry.send,'채팅 메시지 보내기','native source speech-bubble send hitbox is accessible');
  assert.equal(await host.locator('#social-close-room').count(),0,'permanent room cannot be destroyed by its visitors');
  await host.locator('#social-back').click();
  assert.equal(await host.locator('.social-public-room').count(),8,'permanent room persists after leaving');

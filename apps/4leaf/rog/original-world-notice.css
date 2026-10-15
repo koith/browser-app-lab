@@ -1,0 +1,33 @@
+/* The recovered WorldMap/notice.png is a 184×61 purple/white Notice
+   sprite. The game already knows the region under the pointer; label goes in
+   its blank native pixel field. CSS does not invent another tooltip frame. */
+#sky .world-map-caption{display:none!important}
+#sky .world-location-tip{
+ box-sizing:border-box;
+ position:absolute;bottom:calc(100% + 5px);left:50%;
+ display:none;
+ width:184px;height:61px;
+ margin:0;padding:25px 8px 6px;
+ border:0!important;border-radius:0!important;
+ box-shadow:none!important;
+ background:transparent center center/184px 61px no-repeat;
+ color:#243276;font:700 11px Gulim,'굴림',sans-serif;
+ line-height:18px;text-align:center;
+ letter-spacing:0;
+ text-shadow:0 1px #fff;
+ filter:none!important;
+ white-space:normal;word-break:keep-all;
+ overflow:hidden;
+ pointer-events:none;
+ transform:translateX(-50%);
+ z-index:15;
+}
+#sky .world-location-tip[data-ready="fallback"]{
+ background-color:#f7f9ff;
+ border:1px solid #6d79bc!important;
+ padding:12px 6px;
+ height:43px;
+}
+#sky .world-location:is(:hover,:focus-visible) .world-location-tip{
+ display:block;
+}
