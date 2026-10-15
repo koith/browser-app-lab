@@ -78,6 +78,13 @@ const path=require('node:path');
    frame:[node.offsetWidth,node.offsetHeight],
    rendered:[node.getBoundingClientRect().width,node.getBoundingClientRect().height],
    computed:[getComputedStyle(node).flexBasis,getComputedStyle(node).minWidth,getComputedStyle(node).height],
+   visibility:{
+    scene:document.querySelector('#game').className,
+    sceneDisplay:getComputedStyle(document.querySelector('#game')).display,
+    itemBar:getComputedStyle(node.parentElement).display,
+    ownDisplay:getComputedStyle(node).display,
+    app:document.querySelector('#app').className
+   },
    event:node.textContent,title:node.title
   }));
   assert.equal(move.source,'IMG/eventmsgbox.png','actual played move displayed in original source event');
