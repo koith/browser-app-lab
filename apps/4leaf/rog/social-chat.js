@@ -807,6 +807,8 @@
   if(!node)return;
   node.querySelector('.social-speech')?.remove();
   const bubble=document.createElement('div');bubble.className='social-speech';bubble.textContent=safe(text,55);bubble.setAttribute('role','status');node.append(bubble);
+  // Actual archived 4LEAF talkbox pieces, assembled around real chat text.
+  window.__LEAF_NATIVE_TALKBOX__?.apply(bubble);
   setTimeout(()=>{if(bubble.isConnected)bubble.remove()},5000);
  }
  // The original T sprites (table/furniture) are independent foreground layers.
