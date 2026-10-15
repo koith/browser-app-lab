@@ -1,44 +1,22 @@
 #!/usr/bin/env python3
-"""Live network smoke probe in GitHub-hosted runner, no purchase, no notification."""
-import re, sys, urllib.parse
-from chiikawa_lotte_watch import fetch, QUERIES, check
-urls=["https://m.brand.naver.com/lottecinema"]+["https://search.shopping.naver.com/search/all?query="+urllib.parse.quote(q) for q in QUERIES]
-good=0
-for url in urls:
+"""End-to-end live catalog probe run from a real GitHub Actions runner."""
+import sys
+from chiikawa_lotte_watch import SOURCES, CARD, fetch, check, parse_catalog
+
+healthy = 0
+for source in SOURCES:
     try:
-        final,html=fetch(url)
-        good+=1
-        titles=re.search(r"<title[^>]*>(.{0,180}?)</title>",html,re.I|re.S)
-        print("NETWORK_OK",urllib.parse.urlparse(final).netloc,"chars",len(html),"title",repr(titles.group(1)[:90] if titles else None),"product_links",html.count("/products/"),"embedded_products",html.count("productNo"))
-    except Exception as e:
-        print("NETWORK_FAILED",urllib.parse.urlparse(url).netloc,type(e).__name__,str(e)[:200])
-try:
- observed=check()
- print("TARGET_FOUND",repr(observed))
- good+=2
-except Exception as exc:
- print("WATCHER_SOURCE_FAILED",repr(exc))
-alternative_urls=[
- "https://r.jina.ai/https://m.brand.naver.com/lottecinema",
- "https://r.jina.ai/https://search.shopping.naver.com/search/all?query="+urllib.parse.quote(QUERIES[0]),
- "https://www.google.com/search?q="+urllib.parse.quote('site:brand.naver.com/lottecinema/products 먼작귀'),
- "https://www.bing.com/search?q="+urllib.parse.quote('롯데시네마 먼작귀 네이버 예약 상품'),
- "https://search.naver.com/search.naver?query="+urllib.parse.quote(QUERIES[0]),
- "https://smartstore.naver.com/lottecinema",
- "https://m.smartstore.naver.com/lottecinema"
-]
-for url in alternative_urls:
- try:
-  final,html=fetch(url)
-  print("ALTERNATIVE_OK",urllib.parse.urlparse(final).netloc,"chars",len(html),"product_links",html.count("/products/"),"sample",repr(html[:160]))
-  if "r.jina.ai/https://m.brand.naver.com/lottecinema" in url:
-   for term in ["먼작귀","렌티큘러","띠부띠부","커버 참","C타입","/products/"]:
-    m=re.search(re.escape(term),html,re.I)
-    print("JINA_TERM",term,"present",bool(m),"context",repr(html[max(0,m.start()-180):m.start()+260] if m else ""))
-   print("JINA_SAMPLE_TAIL",repr(html[-1700:]))
- except Exception as e:
-  print("ALTERNATIVE_FAILED",urllib.parse.urlparse(url).netloc,type(e).__name__,str(e)[:160])
-if good<2:
-    print("FAIL: Cannot obtain current catalog from direct or alternative reader.",file=sys.stderr)
+        final, text = fetch(source)
+        cards = CARD.findall(text)
+        print("LIVE_READER_OK", final, "chars", len(text), "parseable_cards", len(cards))
+        print("LIVE_SAMPLE_TITLES", [title.strip()[:95] for _, title in cards[:3]])
+        print("TARGETS_MATCHED", [(x["kind"],x["url"]) for x in parse_catalog(text)])
+        if "롯데시네마" in text and len(cards) > 0:
+            healthy += 1
+    except Exception as error:
+        print("LIVE_READER_FAILED", source, type(error).__name__, str(error)[:200])
+if healthy == 0:
+    print("FAIL: no usable store catalog from GitHub runner", file=sys.stderr)
     sys.exit(2)
-print("PASS: GitHub runner can read the real Lotte storefront catalog through tested fallback. Purchase button and freshness still need independent validation.")
+print("LIVE_CATALOG_PROBE_PASS: real product cards were fetched and parsed.")
+print("IMPORTANT: future 1-minute cache refresh, exact sale button and iOS push are not proven by this probe.")
