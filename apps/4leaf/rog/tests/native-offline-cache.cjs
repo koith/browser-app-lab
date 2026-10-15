@@ -53,6 +53,7 @@ const {chromium}=require('playwright');
   }));
   // Source-native Room master must remain available without internet, even
   // if the visitor had never opened the original modal before going offline.
+  const offlineRoomId=await page.evaluate(()=>window.__LEAF_SOCIAL__.getState().roomId);
   await page.locator('#social-back').click();
   await page.locator('#social-new-room').click();
   await page.waitForFunction(()=>document.querySelector('form.social-native-owner-form')?.dataset.nativeOwnerReady==='true',null,{timeout:8000});
@@ -63,6 +64,11 @@ const {chromium}=require('playwright');
   assert.equal(ownerArt.sprite,'ChatRoom/ownerdialog.png','original room-master works on first cold offline open');
   assert.deepEqual(ownerArt.panel,[309,126],'cold offline genuine room-owner panel shape preserved');
   await page.locator('.social-owner-native-cancel').click();
+  // Return to the same already-created genuine room: testing the room-owner
+  // popup should not silently vacate the subject of the original offline QA.
+  await page.evaluate(id=>window.__LEAF_SOCIAL__.joinRoom(id),offlineRoomId);
+  await page.waitForFunction(()=>window.__LEAF_SOCIAL__?.getState().view==='room'
+   &&document.querySelectorAll('.social-avatar.self').length===1,null,{timeout:8000});
   assert.equal(original.source,'room4t');
   assert.deepEqual(original.native,[115,103]);
   assert.deepEqual(original.position,[427,425]);
