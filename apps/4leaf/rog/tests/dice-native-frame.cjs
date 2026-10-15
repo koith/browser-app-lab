@@ -52,7 +52,10 @@ const path=require('node:path');
   assert.ok(native.main[2]>=594&&native.main[2]<=612,'608px original content coordinate space retained');
   assert.ok(Math.abs(native.chat[2]-406)<1&&Math.abs(native.chat[3]-152)<1,'native chat bitmap registration');
   assert.ok(Math.abs(native.mini[2]-172)<1&&Math.abs(native.mini[3]-152)<1,'native minimap bitmap registration');
-  assert.ok(Math.abs(native.mini[0]-native.main[0]-414)<2,'minimap is independently docked beside real chat');
+  // Historic real-play board.jpg/battle.jpg show LEFT minimap + CENTRAL chat,
+  // not the reverse order inferred solely from original atlas dimensions.
+  assert.ok(Math.abs(native.mini[0]-native.main[0])<2,'archival screenshot: original minimap at bottom LEFT');
+  assert.ok(Math.abs(native.chat[0]-native.main[0]-172)<2,'archival screenshot: functional chat directly RIGHT of source minimap');
   assert.ok(Math.abs(native.mini[1]-native.chat[1])<2,'original live mini and chat are on the same row');
   assert.equal(native.dock,'dice-native-minidock','actual minimap canvas reparented, not a fake duplicate');
   assert.ok(native.chatBackground.includes('/original/IMG/chatwnd.png'));
