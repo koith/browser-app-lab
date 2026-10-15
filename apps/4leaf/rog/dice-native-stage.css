@@ -148,7 +148,7 @@
 /* The source's triangular SELECT at 557x228 exposes the real card editor.
    Editor stays collapsed so native chessman slots remain visible at rest. */
 #lobby .dice-native-stage #dice-team-picker{
- position:absolute;z-index:16;left:550px;top:225px;
+ display:none;position:absolute;z-index:16;left:550px;top:225px;
  width:79px;height:29px;margin:0!important;padding:0!important;
  color:transparent!important;font-size:0!important;
  border:0!important;background:transparent!important;cursor:pointer;
@@ -179,3 +179,5 @@
  font:10px Gulim,'굴림',sans-serif;
  border:1px solid #a5baed;background:#344ca0;color:#fff1c4;
 }
+
+#lobby .lobby-scene.config-open .dice-native-stage #dice-team-picker{display:block}
