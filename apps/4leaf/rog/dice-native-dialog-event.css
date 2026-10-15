@@ -87,10 +87,10 @@
  display:flex!important;
  align-items:center!important;
  justify-content:center!important;
- flex:0 1 244px!important;
+ flex:0 0 244px!important;
  width:244px!important;
  height:52px!important;
- min-width:150px!important;
+ min-width:244px!important;
  max-width:244px!important;
  min-height:52px!important;
  margin:0 0 0 auto!important;
