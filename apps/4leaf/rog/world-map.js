@@ -168,6 +168,16 @@
      }else{backdrop.dataset.ready='error';console.error('4LEAF native WorldMap backdrop failed')}
    };
    stage.append(backdrop);loadBackdrop();
+   // The 2003 sky.jpg screenshot contains a 120px full moon ABOVE the
+   // right-hand cliff. The recovered WorldMap/worldmapback.png contains
+   // the island but leaves the moon absent/transparent. Reconstruct only
+   // that missing independent visual; it has no hitbox and cannot replace
+   // the native WorldMap bitmap or its six live region sprites.
+   const moon=document.createElement('div');
+   moon.id='world-original-moon';
+   moon.className='world-original-moon';
+   moon.setAttribute('aria-hidden','true');
+   stage.append(moon);
    for(const region of REGIONS){
      stage.append(makeCanvasSprite(region));
      const hit=document.createElement('button');hit.className='world-location';hit.type='button';
@@ -184,8 +194,9 @@
    }
    const controls=document.createElement('div');controls.className='world-map-controls';
    controls.innerHTML='<button id="world-zoom-out" aria-label="월드맵 축소">−</button><span id="world-zoom-label">100%</span><button id="world-zoom-in" aria-label="월드맵 확대">＋</button><button id="world-zoom-reset" aria-label="월드맵 전체보기">⌂</button>';
-   const title=document.createElement('div');title.className='world-map-caption';title.textContent='4LEAF WORLD MAP　·　원본 월드맵';
-   viewport.append(stage);scene.append(viewport,controls,title);
+   // The source screen already carries original island labels and title art.
+   // Do not overlay a new fabricated '원본 월드맵' caption on the recovered bitmap.
+   viewport.append(stage);scene.append(viewport,controls);
    registerNativeNotices(stage);
    ref.viewport=viewport;ref.stage=stage;
    $('world-zoom-out').onclick=()=>zoom(-.25);
