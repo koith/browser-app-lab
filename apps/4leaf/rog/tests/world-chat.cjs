@@ -287,6 +287,16 @@ const path=require('path');
   'selected card details live inside original source 카드정보 box');
  assert.equal(shopSprite.filterDisplay,'rgba(0, 0, 0, 0)',
   'Normal/Valuable signs are the genuine backdrop, not opaque web filter bar');
+ const originalAll=await host.locator('#shop .group-tab[data-group="all"]').evaluate(el=>{
+  const box=el.getBoundingClientRect(),stage=document.querySelector('#shop-native-stage').getBoundingClientRect(),
+    scale=Number(document.querySelector('#shop-native-stage').dataset.scale);
+  return {x:(box.x-stage.x)/scale,y:(box.y-stage.y)/scale,
+   background:getComputedStyle(el).backgroundColor,
+   duplicate:getComputedStyle(el,'::after').content};
+ });
+ assert.deepEqual([Math.round(originalAll.x),Math.round(originalAll.y)],[14,302],
+  'all-card hot area belongs to existing original 카드정보 caption');
+ assert.equal(originalAll.duplicate,'none','no invented doubled 전체 label over the source character');
  await host.locator('#shop-owned-toggle').click();
  assert.equal(await host.locator('#shop-owned-toggle').getAttribute('aria-expanded'),'true');
  assert.ok(await host.locator('#shop .shop-equipped').isVisible(),
