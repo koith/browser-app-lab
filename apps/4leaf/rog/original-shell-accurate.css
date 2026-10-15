@@ -1,0 +1,69 @@
+/* Native recovered 4LEAF chrome and Magic Carden layout.
+   Source art is kept as separate assets; no pre-rendered screen screenshot. */
+
+/* MainFrame/title.png is 680×54 with the original 4LEAF wordmark.
+   Do not cover it with the reconstructed browser logo/title text. */
+#app:not(.app-classic-dice)>.titlebar{
+ height:54px!important;min-height:54px;flex:0 0 54px;
+ padding:0 9px 0 178px;
+ background:#748dc7 url('./original/MainFrame/title.png') left top/680px 54px no-repeat!important;
+ border-bottom:1px solid #4b67a7;
+ box-shadow:none;
+}
+#app:not(.app-classic-dice)>.titlebar .win-logo,
+#app:not(.app-classic-dice)>.titlebar>b,
+#app:not(.app-classic-dice)>.titlebar>small{display:none}
+/* MainFrame/borderbtn.png is the actual 17×15 native chrome icon atlas.
+   The controls remain decorative until window-management behavior exists. */
+#app:not(.app-classic-dice)>.titlebar .window-buttons{gap:1px;align-items:center}
+#app:not(.app-classic-dice)>.titlebar .window-buttons span{
+ width:17px;height:15px;border:0;box-shadow:none;
+ background-image:url('./original/MainFrame/borderbtn.png');
+ background-repeat:no-repeat;background-size:68px 60px;
+ background-color:transparent;font-size:0;line-height:0;
+}
+#app:not(.app-classic-dice)>.titlebar .window-buttons span:nth-child(1){background-position:0 0}
+#app:not(.app-classic-dice)>.titlebar .window-buttons span:nth-child(2){background-position:0 -15px}
+#app:not(.app-classic-dice)>.titlebar .window-buttons span:nth-child(3){background-position:0 -45px}
+
+/* The CardShop bitmap is 794×404. Scaling the entire source stage uniformly
+   preserves card-slot and character proportions at every viewport size. */
+#shop>.scene-banner{display:none!important}
+#shop .shop-scene{
+ position:relative;width:100%;height:100%!important;min-height:0;
+ display:block;overflow:hidden;padding:0!important;
+ background:#121940!important;
+}
+#shop .shop-native-stage{
+ position:absolute;left:0;top:0;width:794px;height:404px;
+ transform-origin:0 0;
+ background:#121940 url('./original/CardShop/cardshopback.png') 0 0/794px 404px no-repeat;
+ image-rendering:auto;
+}
+/* The source backdrop already contains nine card-back drawings. Keep those
+   real pixels visible instead of painting nine opaque HTML proxy cards. */
+#shop .shop-grid .shop-card{
+ background:transparent!important;border:1px solid transparent!important;
+ box-shadow:none!important;outline:none;color:transparent;
+}
+#shop .shop-grid .shop-card .card-art,
+#shop .shop-grid .shop-card .card-state,
+#shop .shop-grid .shop-card>b{opacity:0;pointer-events:none}
+#shop .shop-grid .shop-card:is(:hover,:focus-visible){
+ background:#dfe8ff16!important;outline:2px solid #eef4b9!important;
+ outline-offset:-2px;filter:none;
+}
+#shop .shop-grid .shop-card.selected:not(:hover):not(:focus-visible){
+ outline:1px solid #e7d9a9!important;outline-offset:-2px;
+}
+#shop .shop-grid .shop-card:is(:hover,:focus-visible)>b{
+ opacity:1;position:absolute;bottom:0;left:0;width:100%;
+ padding:2px 1px;color:#f7f9ff;background:#263a85e8;
+ font-size:10px;line-height:13px;
+}
+@media(max-width:650px){
+ #app:not(.app-classic-dice)>.titlebar{
+  height:40px!important;min-height:40px;flex-basis:40px;
+  background-size:504px 40px!important;padding-left:132px;
+ }
+}
