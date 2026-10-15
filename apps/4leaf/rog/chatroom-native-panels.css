@@ -1,0 +1,138 @@
+/* Grounded in the original live ChatRoom screenshots:
+   apps/4leaf/assets/chat_ref.jpg and chat.jpg. Actual 794x528 room artwork
+   fills the stage; conversation+entry floats at upper left, participant list
+   at upper right. These are existing, still interactive DOM components. */
+@media(min-width:651px){
+ #rooms.classic-chat-room .social-layout{
+  position:relative;
+ }
+ #rooms.classic-chat-room .social-stage{
+  width:100%;flex:1 1 100%;min-width:0;overflow:hidden;
+ }
+ #rooms.classic-chat-room .social-image-frame{
+  overflow:visible;
+ }
+ #rooms.classic-chat-room .messenger[data-native-overlay="true"]{
+  box-sizing:border-box;
+  position:absolute!important;
+  z-index:25!important;
+  top:0!important;left:16px!important;right:auto!important;bottom:auto!important;
+  width:407px!important;max-width:none!important;
+  height:112px!important;min-height:112px!important;
+  margin:0!important;padding:0!important;
+  display:block!important;flex:none!important;
+  background:transparent!important;
+  border:0!important;box-shadow:none!important;overflow:visible!important;
+  transform:none!important;
+ }
+ #rooms.classic-chat-room .messenger[data-native-overlay="true"] .panel-header{
+  display:none!important;
+ }
+ #rooms.classic-chat-room .messenger[data-native-overlay="true"] #chat-log{
+  box-sizing:border-box;
+  position:absolute!important;display:block;
+  top:0!important;left:0!important;right:auto!important;bottom:auto!important;
+  width:390px!important;height:91px!important;min-height:0!important;
+  padding:2px 6px!important;margin:0!important;
+  overflow-x:hidden;overflow-y:auto;
+  background:#060506d4!important;
+  border:0!important;
+  font:11px/1.27 Gulim,'굴림',sans-serif!important;
+  color:#f4f1e9!important;
+  text-shadow:1px 1px #070707;
+  scrollbar-width:thin;scrollbar-color:#c3c8ed #192044;
+ }
+ #rooms.classic-chat-room .messenger[data-native-overlay="true"] #chat-log .social-chat-message{
+  gap:4px;line-height:1.3;color:#eee9e6;
+ }
+ #rooms.classic-chat-room .messenger[data-native-overlay="true"] #chat-log .social-chat-message time{
+  display:none!important;
+ }
+ #rooms.classic-chat-room .messenger[data-native-overlay="true"] #chat-log .social-chat-message b{
+  color:#f2efeb!important;font-size:11px!important;
+ }
+ #rooms.classic-chat-room .messenger[data-native-overlay="true"] #chat-log .social-system-line{
+  color:#d9e0ec!important;font-size:10px;
+ }
+ #rooms.classic-chat-room .messenger[data-native-overlay="true"] #chat-form{
+  position:absolute!important;
+  top:91px!important;left:0!important;right:auto!important;bottom:auto!important;
+  display:grid!important;
+  width:407px!important;height:21px!important;min-height:21px!important;
+  margin:0!important;padding:0!important;
+  z-index:1;
+ }
+ #rooms.classic-chat-room .social-user-panel[data-native-overlay="true"]{
+  box-sizing:border-box;
+  position:absolute!important;
+  display:flex!important;
+  z-index:24!important;
+  top:9px!important;right:13px!important;left:auto!important;bottom:auto!important;
+  width:158px!important;height:128px!important;max-height:128px!important;
+  flex:none!important;
+  margin:0!important;padding:0!important;
+  border:2px ridge #91a9da!important;
+  border-radius:5px!important;
+  background:#d8e1f7!important;
+  color:#172a54!important;
+  box-shadow:0 1px 3px #1b1d51a0;
+  overflow:hidden!important;
+ }
+ #rooms.classic-chat-room .social-user-panel[data-native-overlay="true"] .social-user-titlebar{
+  min-height:38px!important;height:38px!important;
+  background:#647cb7!important;border:0!important;
+ }
+ #rooms.classic-chat-room .social-user-panel[data-native-overlay="true"] .social-user-titlebar canvas{
+  width:150px!important;height:38px!important;
+  object-fit:fill;
+ }
+ #rooms.classic-chat-room .social-user-panel[data-native-overlay="true"] .social-user-titlebar h4{
+  height:38px!important;padding:0!important;line-height:38px;
+  background:#657db5!important;color:#f7faff!important;
+ }
+ #rooms.classic-chat-room .social-user-panel[data-native-overlay="true"] #social-peer-list{
+  padding:1px 5px 2px!important;
+  background:#ecf1fa!important;color:#243760!important;
+  overflow-y:auto;overflow-x:hidden;
+  scrollbar-width:thin;scrollbar-color:#7b91c1 #e1e8fa;
+ }
+ #rooms.classic-chat-room .social-user-panel[data-native-overlay="true"] .social-user-row{
+  min-height:17px!important;max-height:22px!important;
+  padding:1px!important;gap:3px!important;
+  border:0!important;font:11px/16px Gulim,'굴림',sans-serif!important;
+  color:#273563!important;
+ }
+ #rooms.classic-chat-room .social-user-panel[data-native-overlay="true"] .social-user-row b{
+  color:#273563!important;
+ }
+ #rooms.classic-chat-room .social-user-panel[data-native-overlay="true"] .social-user-row small{
+  color:#576a9f!important;
+ }
+ #rooms.classic-chat-room .social-user-panel[data-native-overlay="true"]>p{
+  display:none!important;
+ }
+}
+/* On phone/tablet layouts, keep the established large readable chat form
+   BELOW the room and the participant list as a button-triggered side panel.
+   Neither is shrunk to illegible 794x528-scaled interactive controls. */
+@media(max-width:650px){
+ #rooms.classic-chat-room .messenger[data-native-overlay="true"],
+ #rooms.classic-chat-room .social-user-panel[data-native-overlay="true"]{
+  position:static!important;
+ }
+}
+
+/* The native 150x38 ChatRoom/userlist bitmap ALREADY contains the entire
+   참가자목록 header + scrollbar arrows + a blank participant-count field.
+   Print the REAL occupancy on that blank field; no invented online users. */
+#rooms.classic-chat-room .social-user-titlebar #social-native-user-count{
+ position:absolute;z-index:5;top:4px;right:20px;
+ min-width:24px;text-align:center;
+ font:bold 11px/15px Gulim,'굴림',sans-serif;
+ color:#2f4687;text-shadow:0 1px #fff;
+ white-space:nowrap;pointer-events:none;
+}
+#rooms.classic-chat-room .social-user-panel .social-status-led,
+#rooms.classic-chat-room .social-user-panel .social-user-row small{
+ display:none!important;
+}

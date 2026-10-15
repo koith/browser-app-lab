@@ -556,6 +556,32 @@ const path=require('path');
  assert.equal(await host.locator('.social-avatar').count(),1,'permanent room contains only genuine participants');
  assert.equal(await host.locator('#social-image-frame').evaluate(el=>parseFloat(getComputedStyle(el).height)),528,
   'entering an original ChatRoom restores its independent 794×528 scene');
+ // Actual recovered player screenshots chat_ref.jpg and chat.jpg place BOTH
+ // components INSIDE 794x528 ChatRoom art: real edit/log at upper-left,
+ // live occupancy roster upper-right (not adjacent columns shrinking art).
+ const overlay=await host.evaluate(()=>{
+  const frame=document.getElementById('social-image-frame');
+  const img=frame.getBoundingClientRect(),scale=img.width/794;
+  const place=id=>{
+   const b=document.querySelector(id).getBoundingClientRect();
+   return {x:(b.x-img.x)/scale,y:(b.y-img.y)/scale,w:b.width/scale,h:b.height/scale};
+  };
+  return {state:window.__LEAF_NATIVE_ROOM_PANELS__?.getState(),
+   message:place('.messenger'),roster:place('#social-peer-panel'),
+   input:place('#chat-form'),sourceImage:getComputedStyle(frame).backgroundImage,
+   peers:document.querySelectorAll('#social-peer-list .social-user-row').length};
+ });
+ assert.equal(overlay.state?.overlay,true,'actual messenger and list are mounted inside original ChatRoom pixels');
+ assert.equal(overlay.state?.messengerParent,'social-image-frame','real conversation log is a child of the source scene');
+ assert.equal(overlay.state?.rosterParent,'social-image-frame','genuine online participants overlay source art');
+ assert.deepEqual([overlay.state?.messageFormCount,overlay.state?.rosterCount],[1,1],'no dummy chat or fake roster layers');
+ assert.ok(Math.abs(overlay.message.x-16)<1.5&&Math.abs(overlay.message.y)<1.5,'archival screen: chat at upper-left scene coordinate');
+ assert.ok(Math.abs(overlay.roster.x-(794-13-158))<1.5&&Math.abs(overlay.roster.y-9)<1.5,'archival screen: native participant list at upper-right scene coordinate');
+ assert.ok(Math.abs(overlay.input.w-407)<1.5&&overlay.input.y>80,'native source edit frame remains independent from visible scrollable chat lines');
+ assert.equal(overlay.peers,1,'only genuine self user appears in overlay, never sample NPCs');
+ assert.equal(await host.locator('#social-native-user-count').textContent(),'1명','the original userlist title field reflects actual room occupants');
+ assert.ok(overlay.sourceImage.includes('/original/ChatRoom/room'),'still uses native source room bitmap');
+ await host.screenshot({path:'leaf-original-overlay-chatroom-desktop.png'});
  // The archived ChatRoom/exitbtn.png lower strip is four original 66×25
  // EXIT states. The existing real room-back action is the hit target.
  await host.waitForFunction(()=>document.querySelector('#rooms.classic-chat-room #social-back')
@@ -595,12 +621,13 @@ const path=require('path');
    name:getComputedStyle(document.getElementById('nick')).backgroundColor,
    edit:getComputedStyle(document.getElementById('message')).backgroundColor,
    send:document.querySelector('#chat-form button').getAttribute('aria-label'),
-   original:[image.naturalWidth,image.naturalHeight],cornerAlpha:alpha};
+   original:[image.naturalWidth,image.naturalHeight],cornerAlpha:alpha,
+   roomScale:document.querySelector('#social-image-frame').getBoundingClientRect().width/794};
  });
  assert.deepEqual(nativeEntry.original,[407,21],'native ChatRoom input art has original source size');
  assert.equal(nativeEntry.cornerAlpha,0,'native source input is transparent at corner; no invented opaque frame');
- assert.ok(Math.abs(nativeEntry.w-407)<2&&Math.abs(nativeEntry.h-21)<1,
-  'working chat edit control retains source-native 407×21 geometry');
+ assert.ok(Math.abs(nativeEntry.w/nativeEntry.roomScale-407)<2&&Math.abs(nativeEntry.h/nativeEntry.roomScale-21)<1,
+  'working chat edit control retains 407×21 original bitmap geometry inside the scaled ChatRoom art');
  assert.ok(nativeEntry.bg.includes('original/ChatRoom/chatbaredit.png'),
   'native sprite supplies actual nickname/input/send frames');
  assert.equal(nativeEntry.name,'rgba(0, 0, 0, 0)','native nickname frame remains visible');
@@ -608,6 +635,8 @@ const path=require('path');
  assert.equal(nativeEntry.send,'채팅 메시지 보내기','native source speech-bubble send hitbox is accessible');
  assert.equal(await host.locator('#social-close-room').count(),0,'permanent room cannot be destroyed by its visitors');
  await host.locator('#social-back').click();
+ assert.equal(await host.evaluate(()=>window.__LEAF_NATIVE_ROOM_PANELS__?.getState().messengerParent),'main','leaving source room returns exact same real chat input to main');
+ assert.equal(await host.locator('#social-peer-panel').evaluate(el=>el.parentElement.classList.contains('social-layout')),true,'the single real roster returns to its ordinary town layout');
  assert.equal(await host.locator('.social-public-room').count(),8,'permanent room persists after leaving');
  assert.equal(await host.locator('#social-map-plane').evaluate(el=>el.style.transform),mapAfter,'the original room terrain camera resumes its prior position after returning from a room');
  await host.locator('#social-new-room').click();
@@ -725,6 +754,8 @@ const path=require('path');
  assert.equal(await host.locator('#social-online-count').textContent(),'2명');
  assert.ok(await host.locator('#social-original-userlist').isVisible(),'original participant list header remains visible during real chat');
  assert.equal(await guest.locator('#social-online-count').textContent(),'2명');
+ assert.equal(await host.locator('#social-native-user-count').textContent(),'2명','source participant badge follows true host/guest peers');
+ assert.equal(await guest.locator('#social-native-user-count').textContent(),'2명','remote 2-user roster count updates without fabricated members');
  await host.locator('#message').fill('원본 하이아칸 실시간 채팅 테스트');
  await host.locator('#message').press('Enter');
  await guest.waitForFunction(()=>document.querySelector('#chat-log').textContent.includes('원본 하이아칸 실시간 채팅 테스트'),null,{timeout:7000});
@@ -881,6 +912,8 @@ const path=require('path');
  // temporarily overlap it but must never silently remove the list entirely.
  await guest.evaluate(()=>window.__LEAF_SOCIAL__.createRoom('모바일 참가자 목록 검증',2));
  assert.equal(await guest.locator('#rooms.classic-chat-room').count(),1,'actual ChatRoom on mobile');
+ assert.equal(await guest.evaluate(()=>window.__LEAF_NATIVE_ROOM_PANELS__?.getState().overlay),false,'small screens use full-size usable input, never tiny scaled 407px text');
+ assert.equal(await guest.evaluate(()=>window.__LEAF_NATIVE_ROOM_PANELS__?.getState().messengerParent),'main','mobile chat form remains outside transformed room art');
  assert.equal(await guest.locator('#social-peers-toggle').isVisible(),true,'mobile original roster is accessible');
  assert.equal(await guest.locator('#social-peers-toggle').getAttribute('aria-expanded'),'false');
  assert.equal(await guest.locator('#social-peer-panel').isVisible(),false,'mobile roster starts collapsed');
@@ -889,6 +922,7 @@ const path=require('path');
  assert.equal(await guest.locator('#social-peers-toggle').getAttribute('aria-expanded'),'true');
  assert.equal(await guest.locator('#social-peer-panel').isVisible(),true,'roster opens in the original room');
  assert.equal(await guest.locator('#social-peer-list .social-user-row').count(),1,'only the real participant is listed');
+ assert.equal(await guest.locator('#social-native-user-count').textContent(),'1명','original participant count stays factual on mobile');
  await guest.waitForFunction(()=>document.querySelector('#social-original-userlist')?.dataset.ready==='true',null,{timeout:10000});
  assert.deepEqual(await guest.locator('#social-original-userlist').evaluate(el=>[el.width,el.height]),[150,38],'original ChatRoom userlist remains 150×38');
  await guest.screenshot({path:'leaf-native-mobile-roster-open.png'});
