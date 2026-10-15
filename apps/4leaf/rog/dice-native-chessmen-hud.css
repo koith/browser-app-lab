@@ -1,0 +1,203 @@
+/* EVIDENCE: archived real board.jpg + battle.jpg: source game has a
+   separate RIGHT-HAND blue strip, containing the current CHESSMAN four-up
+   headshots in a two by two grid at its bottom. These are not item cards.
+   Each photo is taken from extracted CardData/chm_NN.png, determined by the
+   actual ongoing match's team[], never baked-in names or image screenshots. */
+#app:not(.app-classic-dice) #dice-client-sidebar{display:none!important}
+#app.app-classic-dice>.workspace>.sidebar{
+ position:relative!important;
+ padding:0!important;
+ min-width:190px;
+ border-left:2px ridge #8198d8;
+ background:#273b89 url('./original/IMG/avatarback.png') center top/100% 100% no-repeat!important;
+ box-shadow:inset 1px 0 #7f90df;
+}
+#app.app-classic-dice>.workspace>.sidebar>.online-box,
+#app.app-classic-dice>.workspace>.sidebar>.notice-box,
+#app.app-classic-dice>.workspace>.sidebar>.profile-box{display:none!important}
+#app.app-classic-dice #dice-client-sidebar{
+ display:flex!important;flex-direction:column;
+ position:relative;
+ width:100%;height:100%;
+ min-height:0;
+ justify-content:flex-end;
+ gap:3px;
+ padding:4px 3px 3px;
+ box-sizing:border-box;
+}
+#app.app-classic-dice #dice-native-party{
+ box-sizing:border-box;
+ width:100%;max-width:190px;
+ display:grid;
+ grid-template-columns:repeat(2,minmax(0,1fr));
+ grid-template-rows:repeat(2,68px);
+ column-gap:3px;row-gap:3px;
+ align-items:stretch;justify-items:stretch;
+ margin-top:0;
+}
+#app.app-classic-dice #dice-native-party .dice-chessman-slot{
+ box-sizing:border-box;
+ position:relative;
+ display:block;
+ overflow:hidden;
+ width:100%;height:68px;
+ min-width:0;min-height:0;
+ border:2px ridge #7795df;
+ border-radius:0;
+ margin:0;padding:0;
+ background:#324996 url('./original/IMG/avatarback.png') center/100% 100% no-repeat;
+ color:#e7f1ff;
+ box-shadow:inset 1px 1px #b4c3ec,1px 1px #182963;
+}
+#app.app-classic-dice #dice-native-party button.dice-chessman-slot{
+ cursor:pointer;
+}
+#app.app-classic-dice #dice-native-party button.dice-chessman-slot:is(:hover,:focus-visible){
+ outline:1px solid #ffedac;
+ outline-offset:-2px;
+ border-color:#e6d99c;
+ filter:brightness(1.12);
+}
+#app.app-classic-dice #dice-native-party .dice-chessman-face{
+ position:absolute;
+ top:0;left:50%;
+ width:auto;height:53px;
+ max-width:none;
+ object-fit:contain;
+ transform:translateX(-50%);
+ image-rendering:auto;
+ pointer-events:none;
+}
+#app.app-classic-dice #dice-native-party .dice-chessman-moon{
+ position:absolute;
+ top:1px;left:2px;
+ z-index:1;
+ width:12px;height:14px;
+ border-radius:50%;
+ background:#f5c76e;
+ box-shadow:inset 2px 0 #fff4b4,1px 1px 1px #27386e;
+ pointer-events:none;
+}
+#app.app-classic-dice #dice-native-party .dice-chessman-moon::after{
+ content:'';
+ position:absolute;
+ background:#364b9b;
+ border-radius:50%;
+ width:10px;height:14px;top:-2px;left:5px;
+}
+#app.app-classic-dice #dice-native-party .dice-chessman-slot b{
+ position:absolute;
+ display:block;
+ left:0;right:0;bottom:0;
+ height:15px;line-height:14px;
+ background:#314997e8;
+ border-top:1px solid #8ea4d8;
+ color:#b5f4ff;
+ padding:0 2px;
+ font:10px/14px Gulim,'굴림',sans-serif;
+ overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+ text-align:center;
+ text-shadow:1px 1px #132252;
+ pointer-events:none;
+}
+#app.app-classic-dice #dice-native-party .dice-chessman-slot.vacant{
+ opacity:.45;
+ border-style:inset;
+ background:#233875 url('./original/IMG/avatarback.png') center/100% 100% no-repeat;
+}
+#app.app-classic-dice #dice-native-party .dice-chessman-empty{
+ position:absolute;
+ inset:0 0 14px;
+ display:grid;place-items:center;
+ color:#a7b6d6;
+ font:20px Gulim,sans-serif;
+}
+#app.app-classic-dice #dice-items-toggle{
+ display:block;
+ align-self:flex-start;
+ position:relative;
+ min-width:81px;
+ height:24px;
+ padding:2px 8px;
+ margin:0 0 1px;
+ border:1px ridge #96a5d9;
+ border-radius:2px;
+ background:linear-gradient(#6079b5,#2f4789);
+ color:#ecf6ff;
+ font:bold 10px/17px Gulim,'굴림',sans-serif;
+ box-shadow:inset 1px 1px #adbfec;
+}
+#app.app-classic-dice #dice-items-toggle[aria-expanded="true"]{
+ color:#fff1b3;
+ border-color:#f2dcaa;
+}
+#app.app-classic-dice #dice-item-count{
+ display:inline-block;min-width:13px;
+ color:#b7f8fc;
+ font-variant-numeric:tabular-nums;
+ text-align:right;
+}
+#app.app-classic-dice #game .item-bar{
+ display:none!important;
+}
+#app.app-classic-dice.dice-items-open #game .item-bar{
+ display:flex!important;
+ z-index:52!important;
+ bottom:72px!important;
+ right:3px!important;
+ width:min(295px,80%)!important;
+ height:72px!important;
+ background:#263b85fa!important;
+ box-shadow:0 4px 16px #090f369e!important;
+}
+#app.app-classic-dice.dice-items-open #game #my-items{
+ height:100%;
+ align-items:center;
+}
+#app.app-classic-dice #game #dice-native-party{display:none!important}
+@media(max-width:650px){
+ #app.app-classic-dice>.workspace{position:relative!important}
+ #app.app-classic-dice>.workspace>.sidebar{
+  display:flex!important;
+  position:absolute!important;
+  z-index:23;
+  top:auto!important;right:0;bottom:0!important;
+  width:96px!important;min-width:96px!important;
+  height:auto;
+  max-height:100%;
+  overflow:visible;
+  pointer-events:none;
+  background:transparent!important;
+  border:0!important;
+ }
+ #app.app-classic-dice #dice-client-sidebar{
+  min-height:0;height:auto;
+  width:96px;
+  padding:2px;
+  pointer-events:none;
+ }
+ #app.app-classic-dice #dice-native-party{
+  grid-template-rows:repeat(2,47px);
+  column-gap:1px;row-gap:1px;
+  width:92px;
+  pointer-events:auto;
+ }
+ #app.app-classic-dice #dice-native-party .dice-chessman-slot{height:47px;border-width:1px}
+ #app.app-classic-dice #dice-native-party .dice-chessman-face{height:36px}
+ #app.app-classic-dice #dice-native-party .dice-chessman-moon{width:7px;height:8px;top:1px;left:1px}
+ #app.app-classic-dice #dice-native-party .dice-chessman-moon::after{width:7px;height:9px;left:4px}
+ #app.app-classic-dice #dice-native-party .dice-chessman-slot b{
+  font-size:7px;height:11px;line-height:10px;padding:0 1px;
+ }
+ #app.app-classic-dice #dice-items-toggle{
+  height:20px;min-width:73px;
+  padding:0 3px;margin:0;
+  font-size:9px;line-height:18px;
+  pointer-events:auto;
+ }
+ #app.app-classic-dice.dice-items-open #game .item-bar{
+  right:0!important;bottom:59px!important;
+  width:min(250px,94%)!important;
+  height:62px!important;
+ }
+}

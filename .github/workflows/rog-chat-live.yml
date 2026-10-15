@@ -38,7 +38,9 @@ jobs:
                curl -fLsS --max-time 15 "$base/dice-native-client-frame.css?qa=${GITHUB_SHA}" -o /tmp/leaf-dice-live.css &&
                curl -fLsS --max-time 15 "$base/dice-native-client-frame.js?qa=${GITHUB_SHA}" -o /tmp/leaf-dice-live.js &&
                cmp -s /tmp/leaf-dice-live.css apps/4leaf/rog/dice-native-client-frame.css &&
-               cmp -s /tmp/leaf-dice-live.js apps/4leaf/rog/dice-native-client-frame.js; then
+               cmp -s /tmp/leaf-dice-live.js apps/4leaf/rog/dice-native-client-frame.js &&
+               curl -fLsS --max-time 15 "$base/dice-native-chessmen-hud.css?qa=${GITHUB_SHA}" -o /tmp/leaf-chessman-live.css &&
+               cmp -s /tmp/leaf-chessman-live.css apps/4leaf/rog/dice-native-chessmen-hud.css; then
               ready=1
               echo "Published JS/CSS byte-for-byte match the checked-out source at ${GITHUB_SHA}"
               break
@@ -59,6 +61,10 @@ jobs:
         env:
           FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
         run: node apps/4leaf/rog/tests/registry-native-portraits.cjs
+      - name: Verify real public source four-up chessmen and actual item use in Chromium
+        env:
+          FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
+        run: node apps/4leaf/rog/tests/dice-chessmen-hud.cjs
       - name: Verify deployed 800x600 native Dice frame, original ABILITY button, chat and minimap in Chromium
         env:
           FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
