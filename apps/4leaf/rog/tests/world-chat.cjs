@@ -18,6 +18,22 @@ const path=require('path');
   guest.waitForFunction(()=>!!window.__LEAF_WORLD__&&!!window.__LEAF_SOCIAL__&&!!window.__ROG_TEST__,null,{timeout:8000})
  ]);
  assert.ok(await host.locator('#sky:not(.hidden)').isVisible(),'original WorldMap first');
+ // Native 4LEAF MainFrame title bitmap replaces fabricated textual logo.
+ const nativeFrame=await host.evaluate(()=>{
+  const title=document.querySelector('#app>.titlebar');
+  const style=getComputedStyle(title);
+  return {height:title.getBoundingClientRect().height,
+   image:style.backgroundImage,logo:getComputedStyle(title.querySelector('.win-logo')).display,
+   fakeTitle:getComputedStyle(title.querySelector('b')).display,
+   buttons:[...title.querySelectorAll('.window-buttons span')].map(el=>getComputedStyle(el).backgroundImage)};
+ });
+ assert.equal(nativeFrame.height,54,'desktop 4LEAF title uses original 54px native art height');
+ assert.ok(nativeFrame.image.includes('original/MainFrame/title.png'),'native source logo, not fake text rendering');
+ assert.equal(nativeFrame.logo,'none','hide the invented duplicate clover logo');
+ assert.equal(nativeFrame.fakeTitle,'none','source bitmap already contains native 4LEAF wordmark');
+ assert.ok(nativeFrame.buttons.every(x=>x.includes('original/MainFrame/borderbtn.png')),
+  'native source window-button atlas is used');
+
 
  // Every native WorldMap four-frame region was measured against the original
  // 796x528 WorldMapBack source bitmap, not against a manually staged screenshot.
@@ -169,6 +185,34 @@ const path=require('path');
  assert.equal(await host.locator('[data-street="magic"]').getAttribute('aria-label'),'매직카덴 · 카드샵','original card shop identification');
  await host.locator('[data-street="magic"]').evaluate(el=>el.click());
  assert.ok(await host.locator('#shop:not(.hidden)').isVisible(),'native MainStreet card building enters working Magic Carden shop');
+ // CardShop/cardshopback.png is a 794x404 native screen. Uniform scaling
+ // must leave the original card backs visible beneath accessible controls.
+ await host.waitForFunction(()=>Number(document.querySelector('#shop-native-stage')?.dataset.scale)>0,null,{timeout:9000});
+ const nativeShop=await host.evaluate(()=>{
+  const viewport=document.querySelector('#shop .shop-scene'),stage=document.getElementById('shop-native-stage');
+  const a=viewport.getBoundingClientRect(),b=stage.getBoundingClientRect();
+  const card=document.querySelector('#shop-grid .shop-card');
+  return {width:stage.clientWidth,height:stage.clientHeight,
+   scaledWidth:b.width,scaledHeight:b.height,
+   availableWidth:a.width,availableHeight:a.height,
+   background:getComputedStyle(stage).backgroundImage,
+   overlay:getComputedStyle(card).backgroundColor,
+   cardCount:document.querySelectorAll('#shop-grid .shop-card').length,
+   source:stage.dataset.source};
+ });
+ assert.deepEqual([nativeShop.width,nativeShop.height],[794,404],'source CardShop frame is native 794x404');
+ assert.ok(nativeShop.background.includes('original/CardShop/cardshopback.png'),'genuine native CardShop background retained');
+ assert.equal(nativeShop.source,'CardShop/cardshopback.png');
+ assert.ok(Math.abs(nativeShop.scaledWidth/nativeShop.scaledHeight-794/404)<0.001,
+  'Magic Carden background is never non-uniformly stretched');
+ assert.ok(nativeShop.scaledWidth<=nativeShop.availableWidth+2&&nativeShop.scaledHeight<=nativeShop.availableHeight+2,
+  'native shop bitmap letterboxes rather than cropping off card slots');
+ assert.equal(nativeShop.overlay,'rgba(0, 0, 0, 0)','nine overlay buttons no longer repaint native card backs');
+ assert.equal(nativeShop.cardCount,9,'all original card positions remain independently interactive');
+ await host.locator('#shop-grid .shop-card').nth(1).evaluate(el=>el.click());
+ assert.ok((await host.locator('#shop-selected').textContent()).length>0,
+  'native card-slot interaction still selects and describes a real item');
+
  await host.evaluate(()=>window.__ROG_TEST__.go('city'));
  assert.ok(await host.locator('#city:not(.hidden)').isVisible(),'shop to MainStreet return route works');
 
