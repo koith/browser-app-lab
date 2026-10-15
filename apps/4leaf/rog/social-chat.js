@@ -44,7 +44,20 @@
  // unoccupied, permanently accessible restoration rooms, NOT claimed to be
  // a transcript of the original service's room catalogue.
  const ROOM_MAP={width:1480,height:1120};
- const PUBLIC_POSITIONS=[[85,110],[305,65],[520,160],[880,110],[1250,160],[540,640],[940,585],[1220,850]];
+ // Original IMG/bgtile.png is 725x485 and repeats across the estate.
+ // Register unoccupied public-room hit areas over actual huts/building art,
+ // not unrelated blank terrain underneath invented wooden rectangles.
+ // The exact 0.9 server's room layout is still not recovered.
+ const PUBLIC_POSITIONS=[
+  [14,75],    // tile (0,0): straw hut at ~56x109
+  [275,17],   // tile (0,0): timber building at ~319x54
+  [435,115],  // tile (0,0): green-roof house at ~487x158
+  [739,75],   // tile (1,0): same native hut in repeated terrain
+  [1160,115], // tile (1,0): red-roof house
+  [435,600],  // tile (0,1): green-roof house
+  [739,560],  // tile (1,1): first thatch-roof hut
+  [1025,788]  // tile (1,1): source lower green-roof house
+ ];
  const staticRooms=new Map();
  for(const region of ['north','south']){
   REGIONS[region].districts.forEach(([district],di)=>{
