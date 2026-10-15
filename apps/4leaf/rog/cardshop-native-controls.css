@@ -1,0 +1,254 @@
+/* 4LEAF CardShop: functional 794x404 UI composed from original recovered
+   CardShop/cardshopback.png + cardshopbutton.png, NOT a flattened screenshot.
+   Original PAK sprites stay independently addressable by real input buttons. */
+
+/* The nine native 4LEAF backs already exist at these positions in
+   cardshopback.png. Preserve them until a card is actually inspected. */
+#shop .shop-grid{
+ position:absolute!important;
+ left:22px!important;top:10px!important;width:226px!important;height:281px!important;
+ display:grid!important;
+ grid-template-columns:repeat(3,73px)!important;
+ grid-template-rows:repeat(3,91px)!important;
+ column-gap:4px!important;row-gap:4px!important;
+ padding:0!important;margin:0!important;
+ background:transparent!important;
+ z-index:3!important;overflow:visible!important;
+}
+#shop .shop-grid .shop-card{
+ box-sizing:border-box;position:relative;
+ width:73px!important;height:91px!important;min-width:0;min-height:0;
+ padding:0!important;margin:0!important;
+ display:block!important;overflow:hidden!important;
+ border:0!important;border-radius:0!important;
+ background:transparent!important;box-shadow:none!important;
+ cursor:pointer;
+}
+#shop .shop-grid .shop-card.shop-empty{opacity:0!important;pointer-events:none!important}
+#shop .shop-grid .shop-card:not(.selected):is(:hover,:focus-visible){
+ outline:1px solid #fff5c2!important;outline-offset:-2px;
+ background:#b5d1ff17!important;
+ filter:none!important;
+}
+#shop .shop-grid .shop-card.selected,
+#shop .shop-grid .shop-card.selected[data-rank="normal"]{
+ /* 73x91 original blue card face at atlas (0,0). */
+ background:url('./original/CardShop/cardshopbutton.png') 0 0 / 500px 510px no-repeat!important;
+ outline:0!important;border:0!important;
+ box-shadow:none!important;filter:none!important;
+}
+#shop .shop-grid .shop-card.selected[data-rank="valuable"]{
+ /* Original premium card frame at atlas (0,183). */
+ background-position:0 -183px!important;
+}
+#shop .shop-grid .shop-card.selected[data-owned="true"]{
+ /* Real owned-card status uses a distinct green trimmed source frame. */
+ background-position:0 -366px!important;
+}
+#shop .shop-grid .shop-card.selected:is(:hover,:focus-visible){
+ /* Second original sprite column is the focus state. */
+ background-position:-73px 0!important;outline:none!important;
+}
+#shop .shop-grid .shop-card.selected[data-rank="valuable"]:is(:hover,:focus-visible){
+ background-position:-73px -183px!important;
+}
+#shop .shop-grid .shop-card.selected[data-owned="true"]:is(:hover,:focus-visible){
+ background-position:-73px -366px!important;
+}
+/* Revealed individual card: the real chessman portrait and a small name are
+   rendered *inside* the separate source frame, not across its outer border. */
+#shop .shop-grid .shop-card.selected .card-art{
+ position:absolute;left:7px;top:7px;width:59px;height:61px;
+ margin:0!important;padding:0!important;
+ display:flex!important;justify-content:center;align-items:center;
+ background:transparent!important;border:0!important;
+ opacity:1!important;pointer-events:none!important;overflow:hidden;
+}
+#shop .shop-grid .shop-card.selected .pixel-portrait{
+ display:block!important;max-width:55px;width:100%;height:57px;
+ object-fit:contain;image-rendering:pixelated;
+ filter:none;opacity:1!important;pointer-events:none;
+}
+#shop .shop-grid .shop-card.selected>b{
+ display:block!important;position:absolute!important;
+ bottom:4px!important;left:5px!important;right:5px!important;
+ width:63px!important;height:13px!important;
+ margin:0!important;padding:0!important;
+ overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+ background:#152056d8!important;color:#fff6de!important;
+ text-shadow:1px 1px #0b123d;
+ font:9px/13px Gulim,'굴림',sans-serif!important;
+ opacity:1!important;pointer-events:none!important;
+}
+#shop .shop-grid .shop-card.selected .card-state{
+ position:absolute;top:4px;right:5px;
+ color:#faf4b5;font:8px Gulim,sans-serif;
+ background:#1b2c70e1;opacity:1!important;pointer-events:none;
+}
+#shop .shop-grid .shop-card:not(.selected) .card-art,
+#shop .shop-grid .shop-card:not(.selected)>b,
+#shop .shop-grid .shop-card:not(.selected) .card-state{
+ opacity:0!important;pointer-events:none!important;
+}
+/* 'Normal' and 'Valuable' counters are painted by cardshopback.png itself.
+   Their actual hotspots change the real inventory filter, without inventing
+   a large blue tab bar obscuring the source card shop furniture. */
+#shop .shop-stock .tabline{
+ display:block!important;position:absolute!important;inset:0!important;
+ width:794px!important;height:404px!important;
+ margin:0!important;padding:0!important;
+ background:transparent!important;border:0!important;box-shadow:none!important;
+ border-radius:0!important;z-index:5!important;
+ pointer-events:none!important;
+}
+#shop .shop-stock .tabline .group-tab{
+ position:absolute!important;display:block!important;
+ margin:0!important;padding:0!important;
+ min-width:0!important;width:105px;height:46px;
+ font-size:0!important;line-height:0!important;color:transparent!important;
+ border:1px solid transparent!important;border-radius:0!important;
+ background:transparent!important;background-image:none!important;
+ box-shadow:none!important;text-shadow:none!important;
+ opacity:1!important;pointer-events:auto!important;cursor:pointer;
+}
+#shop .shop-stock .tabline .group-tab[data-group="normal"]{
+ left:285px;top:147px;width:114px;height:51px;
+}
+#shop .shop-stock .tabline .group-tab[data-group="valuable"]{
+ left:449px;top:171px;width:130px;height:62px;
+}
+/* The existing 카드정보 heading is the native "show all cards" control.
+   The underlying accessible button remains real and keyboard operable; no
+   invented duplicate 전체 label is painted across the source character. */
+#shop .shop-stock .tabline .group-tab[data-group="all"]{
+ left:14px;top:302px;width:63px;height:25px;
+ font-size:0!important;line-height:0!important;color:transparent!important;
+ background:transparent!important;border:1px solid transparent!important;
+}
+#shop .shop-stock .tabline .group-tab[data-group="all"]::after{content:none!important}
+#shop .shop-stock .tabline .group-tab[data-group="all"].selected{
+ border-color:transparent!important;box-shadow:none!important;
+}
+#shop .shop-stock .tabline .group-tab:is(:hover,:focus-visible){
+ background:#fff2ac13!important;
+ border-color:#f9f0b8!important;outline:1px solid #fff0ac!important;
+ outline-offset:-1px;
+}
+#shop .shop-stock .tabline .group-tab.selected{
+ border-color:#d3e3b6!important;
+ box-shadow:inset 0 0 0 1px #bfd3b22b!important;
+}
+/* Original 8 tiny arrow frames in cardshopbutton.png, 16x21 each:
+   left: source (297,176); right: source (297,197). */
+#shop .shop-page-controls{
+ position:absolute!important;inset:0!important;
+ width:794px!important;height:404px!important;
+ padding:0!important;margin:0!important;
+ border:0!important;border-radius:0!important;
+ box-shadow:none!important;background:transparent!important;
+ display:block!important;z-index:6!important;pointer-events:none!important;
+}
+#shop .shop-page-controls #shop-prev,
+#shop .shop-page-controls #shop-next{
+ position:absolute;top:141px;
+ box-sizing:border-box;
+ width:16px!important;min-width:16px!important;
+ height:22px!important;min-height:22px!important;
+ padding:0!important;margin:0!important;
+ border:0!important;border-radius:0!important;
+ box-shadow:none!important;color:transparent!important;font-size:0!important;
+ background-image:url('./original/CardShop/cardshopbutton.png')!important;
+ background-size:500px 510px!important;background-repeat:no-repeat!important;
+ cursor:pointer;pointer-events:auto!important;opacity:1!important;
+}
+#shop .shop-page-controls #shop-prev{
+ left:1px;background-position:-297px -176px!important;
+}
+#shop .shop-page-controls #shop-next{
+ left:253px;background-position:-297px -197px!important;
+}
+#shop .shop-page-controls #shop-prev:is(:hover,:focus-visible){
+ background-position:-313px -176px!important;outline:1px solid #fff0c1;
+}
+#shop .shop-page-controls #shop-next:is(:hover,:focus-visible){
+ background-position:-313px -197px!important;outline:1px solid #fff0c1;
+}
+#shop .shop-page-controls button:disabled{opacity:.55!important;pointer-events:none!important}
+#shop .shop-page-controls #shop-page{
+ position:absolute!important;left:110px;top:294px;
+ width:50px;height:13px;display:block!important;
+ color:#e3eafa;font:10px Gulim,sans-serif;text-align:center;
+ background:#142452c9;
+}
+/* Native '카드정보' frame is already at (13,305)..(254,396).
+   The dynamic selected card stats belong INSIDE this existing source panel. */
+#shop .shop-detail{
+ position:absolute!important;left:16px!important;top:324px!important;
+ width:234px!important;height:54px!important;
+ padding:2px 6px!important;margin:0!important;
+ border:0!important;border-radius:0!important;
+ box-shadow:none!important;background:transparent!important;
+ z-index:8!important;overflow:visible!important;
+}
+#shop #shop-selected{
+ display:block!important;
+ width:220px!important;height:54px!important;max-height:54px!important;
+ padding:0!important;margin:0!important;overflow:auto!important;
+ color:#e6f3ff!important;
+ font:10px/13px Gulim,'굴림',sans-serif!important;
+ word-break:keep-all;overflow-wrap:anywhere;text-shadow:1px 1px #16234e;
+}
+/* Source atlas (0..391,460..481) contains four real 구매하기 states.
+   The real purchase click event from game.js is not replaced. */
+#shop #shop-buy{
+ position:absolute!important;left:623px!important;top:25px!important;
+ width:98px!important;min-width:98px!important;height:21px!important;
+ min-height:21px!important;margin:0!important;padding:0!important;
+ border:0!important;border-radius:0!important;
+ background:url('./original/CardShop/cardshopbutton.png') 0 -460px / 500px 510px no-repeat!important;
+ box-shadow:none!important;color:transparent!important;
+ font-size:0!important;line-height:0!important;text-shadow:none!important;
+ outline:none!important;filter:none!important;opacity:1!important;
+ cursor:pointer;
+}
+#shop #shop-buy:is(:hover,:focus-visible):not(:disabled){
+ background-position:-98px -460px!important;outline:1px solid #fff7bb!important;
+}
+#shop #shop-buy:active:not(:disabled){background-position:-196px -460px!important}
+#shop #shop-buy:disabled{
+ background-position:-294px -460px!important;
+ opacity:1!important;cursor:not-allowed;filter:none!important;
+}
+/* The original CardShop right-edge title '장비' acts as a real drawer toggle.
+   Do not continuously show an invented 220px opaque inventory rectangle
+   over the actual furniture and GP field. */
+#shop .shop-equipped{
+ display:none!important;position:absolute!important;
+ left:570px!important;top:36px!important;width:210px!important;height:253px!important;
+ padding:5px!important;margin:0!important;
+ overflow:hidden!important;flex-direction:column!important;
+ border:2px ridge #98b1e5!important;border-radius:0!important;
+ background:#47639bd9 url('./original/MainFrame/wallpaper.png') 0 0/321px 240px repeat!important;
+ box-shadow:0 3px 8px #101a3daa!important;
+ z-index:12!important;
+}
+#shop .shop-native-stage.owned-open .shop-equipped{display:flex!important}
+#shop .shop-equipped #shop-owned-list{overflow:auto!important;flex:1}
+#shop .shop-owned-toggle{
+ position:absolute;top:0;right:7px;
+ width:55px;height:30px;padding:0;margin:0;
+ border:1px solid transparent;background:transparent;
+ color:transparent;font-size:0;cursor:pointer;z-index:13;
+}
+#shop .shop-owned-toggle:is(:hover,:focus-visible),
+#shop .shop-owned-toggle[aria-expanded="true"]{
+ border-color:#f9ecb2;background:#cad6ff22;outline:none;
+}
+#shop .shop-keeper .money{
+ left:595px!important;top:322px!important;
+ width:177px!important;height:23px!important;
+ display:flex!important;align-items:center;justify-content:space-between;
+ padding:0 6px!important;font:11px Gulim,'굴림',sans-serif!important;
+ border:0!important;background:transparent!important;
+}
+#shop .shop-keeper .money b{font:700 13px Gulim,'굴림',sans-serif!important}

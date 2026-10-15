@@ -192,6 +192,11 @@ function drawShop(){
      root.append(b);continue;
    }
    b.className='shop-card'+(chosenCard===c.id?' selected':'');
+   // The archived CardShop atlas contains distinct original Normal and
+   // Valuable card frames; expose the genuine catalog rarity to the skin.
+   b.dataset.rank=c.rank==='valuable'?'valuable':'normal';
+   b.dataset.cardId=c.id;
+   b.dataset.owned=profile.owned.includes(c.id)?'true':'false';
    b.title=c.name+' · '+c.ability+' · '+c.price.toLocaleString()+'GP · '+(profile.owned.includes(c.id)?'보유':'미보유');
    const art=document.createElement('div');art.className='card-art';
    const img=document.createElement('img');img.className='pixel-portrait';img.alt=c.name;img.src=imageFor(c.id);art.append(img);
