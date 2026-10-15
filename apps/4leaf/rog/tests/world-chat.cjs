@@ -106,7 +106,7 @@ const path=require('path');
   return {source:tip.dataset.source,bitmap:[img.naturalWidth,img.naturalHeight],
    cornerAlpha:alpha,width:parseFloat(style.width),height:parseFloat(style.height),
    background:background.startsWith('url("data:image/png;base64,'),
-   caption:getComputedStyle(document.querySelector('#sky .world-map-caption')).display};
+   caption:document.querySelector('#sky .world-map-caption')?getComputedStyle(document.querySelector('#sky .world-map-caption')).display:'none'};
  });
  assert.equal(nativeNotice.source,'WorldMap/notice.png','original winged Notice sprite is used for world region hints');
  assert.deepEqual(nativeNotice.bitmap,[184,61],'native Notice sprite is kept at original 184×61 size');
