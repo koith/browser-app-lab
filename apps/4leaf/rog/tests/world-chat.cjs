@@ -382,7 +382,7 @@ const path=require('path');
 
  // Each permanent room hotspot now rests over an actual house in the 725x485
  // native terrain tiles; HTML must not paint a giant fabricated wooden house.
- const nativeRoomMarkers=await host.locator('#social-map-rooms .social-public-room').evaluateAll(els=>els.map(el=>{
+ const nativeRoomMarkers=await host.locator('#social-directory-list .social-public-room').evaluateAll(els=>els.map(el=>{
   const style=getComputedStyle(el);
   return {x:parseFloat(el.style.left),y:parseFloat(el.style.top),
    width:el.getBoundingClientRect().width,height:el.getBoundingClientRect().height,
