@@ -33,6 +33,16 @@
  // anchors; source-template normalized correlations range ~0.969..0.996.
  const TOWN_SIGN_PIXEL_ANCHORS=[[85,63],[265,104],[448,88],[625,69],
                                [48,199],[239,244],[588,203],[417,295]];
+ // Actual KnightTown.pak pixels, green-keyed 4x142x74 sign sprites.
+ // Each initial 142x74 frame matches source knightback at NCC >= .9983.
+ const KNIGHT_SIGNS=[
+  {name:'모험의 바다',asset:'sea01',x:96,y:91},
+  {name:'패왕의 대지',asset:'plain01',x:336,y:126},
+  {name:'침묵의 설원',asset:'snow01',x:571,y:97},
+  {name:'도전의 바다',asset:'sea02',x:76,y:242},
+  {name:'희망의 바다',asset:'sea03',x:306,y:283},
+  {name:'영광의 대지',asset:'plain02',x:564,y:258}
+ ];
  const originalTemplates=[2,3,5,4,0,1];
  // The same original ChatTown client also runs offline. When a separate HTTPS
  // authority is configured, remote occupancy/rooms replace browser guesses.
@@ -83,7 +93,7 @@
  const sourceDistrict=s=>{const name=safe(s,40);return name==='프레이 시티'?'퓨어 시티':name};
  const tabId=(()=>{try{const key='leaf_social_tab_identity_v1';let id=sessionStorage.getItem(key);if(!id){id=uuid();sessionStorage.setItem(key,id)}return id}catch{return uuid()}})();
  const nick=()=>safe($('profile-name')?.textContent||'Guest',12)||'Guest';
- const state={region:'north',district:REGIONS.north.districts[3][0],view:'town',roomId:null,rooms:loadRooms(),peers:new Map(),seen:new Set(),bubble:null,scope:'world',avatar:0,facing:1,position:{x:52,y:76},roomMapOffsets:Object.create(null)};
+ const state={region:'north',district:REGIONS.north.districts[3][0],view:'town',roomId:null,rooms:loadRooms(),peers:new Map(),seen:new Set(),bubble:null,scope:'world',knightDistrict:null,avatar:0,facing:1,position:{x:52,y:76},roomMapOffsets:Object.create(null)};
  let channel=null,rtc=null,dataChannel=null,rtcRole=null,resize=null,pulse=null,stageInfo=null,sceneInit=false;
  const $root=()=>$('rooms'),$stage=()=>$('social-stage');
  async function deriveRoomProof(password,salt){
@@ -126,6 +136,7 @@
   if(state.view==='room'&&state.roomId)return 'room:'+state.roomId;
   if(state.view==='directory')return 'district:'+state.region+':'+state.district;
   if(state.view==='town')return 'town:'+state.region;
+  if(state.view==='knights')return 'town:knight';
   if(state.view==='board')return 'board:recordable';
   return 'world';
  }
@@ -414,7 +425,7 @@
  // ChatTown northback/southback are native 794×404 illustrations, whereas
  // ChatRoom interiors are native 794×528. Never fill the missing 124 pixels
  // with a fabricated information banner or squeeze the town into room space.
- const sceneHeight=()=>state.view==='town'?404:H;
+ const sceneHeight=()=>state.view==='town'||state.view==='knights'?404:H;
  function fit(){
   const region=$stage(),frame=$('social-image-frame');if(!region||!frame)return;
   const h=sceneHeight();
@@ -501,15 +512,18 @@
  function back(){
   if(state.view==='room'){openDirectory();return}
   if(state.view==='directory'){state.view='town';state.roomId=null;render();return}
+  if(state.view==='board'){state.view='knights';state.roomId=null;render();return}
   window.__ROG_TEST__?.go('sky');
  }
  function render(){
   if(!sceneInit)return;
   $root()?.classList.toggle('classic-chat-room',state.view==='room');
   $root()?.classList.toggle('native-town-scene',state.view==='town');
+  $root()?.classList.toggle('native-knight-scene',state.view==='knights');
   $root()?.classList.toggle('native-directory-scene',state.view==='directory');
   $('social-close-room')?.remove();
   const frame=$('social-image-frame');frame.replaceChildren();
+  if(state.view==='knights')renderKnightTown(frame);
   if(state.view==='board')renderBulletin(frame);
   if(state.view==='town')renderTown(frame);
   if(state.view==='directory')renderDirectory(frame);
@@ -1160,9 +1174,9 @@
   presence();render();
  }
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
- window.__LEAF_SOCIAL__={openRegion,openBoard,openDirectory,joinRoom,enterRoom,createRoom:(name,background=2,capacity=12)=>{
+ window.__LEAF_SOCIAL__={openRegion,openKnights,openBoard,openDirectory,joinRoom,enterRoom,createRoom:(name,background=2,capacity=12)=>{
   const room={id:uuid(),name:safe(name,26),region:state.region,district:state.district,owner:nick(),ownerId:tabId,passwordProof:'',passwordSalt:'',background:allowedBackground(background),capacity:allowedCapacity(capacity),created:now()};
   state.rooms.push(room);saveRooms();sendLocal({kind:'roomCreated',room});enterRoom(room);return room.id;
- },send:publishText,getState:()=>({region:state.region,district:state.district,view:state.view,scope:state.scope,roomId:state.roomId,people:onlinePeers(),rooms:catalogue()}),
+ },send:publishText,getState:()=>({region:state.region,district:state.district,knightDistrict:state.knightDistrict,view:state.view,scope:state.scope,roomId:state.roomId,people:onlinePeers(),rooms:catalogue()}),
  sendRTC,now,render,transportMessage};
 })();
