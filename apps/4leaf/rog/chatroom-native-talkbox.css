@@ -1,0 +1,54 @@
+/* Sprite-assembled historical ChatRoom speech balloon.
+   Source ChatRoom/talkbox.png (47x100) contains individual corners, horizontal
+   and vertical strips, center fill and 12x15 speech tail. Canvas nine-slice
+   produces variable-length messages without inventing rounded CSS balloons. */
+#rooms.classic-chat-room .social-speech {
+ box-sizing:border-box;
+ min-width:48px;
+ width:max-content;
+ max-width:195px;
+ margin:0!important;
+ padding:9px 13px 10px!important;
+ font:11px/1.32 Gulim,'굴림',Dotum,sans-serif!important;
+ color:#282835!important;text-shadow:none!important;
+ word-break:break-word;overflow-wrap:anywhere;
+ border-radius:0!important;
+ filter:none!important;
+}
+#rooms.classic-chat-room .social-speech[data-native-talkbox-ready="true"]{
+ position:absolute;
+ display:block;
+ background:transparent!important;
+ border:0!important;
+ box-shadow:none!important;
+ isolation:isolate;
+ text-align:center!important;
+ overflow:visible!important;
+ pointer-events:none;
+}
+#rooms.classic-chat-room .social-speech[data-native-talkbox-ready="true"]::after{
+ content:none!important;display:none!important;
+}
+#rooms.classic-chat-room .social-speech .native-talkbox-canvas{
+ position:absolute;left:0;top:0;z-index:0;
+ padding:0;margin:0;display:block;border:0;background:transparent;
+ image-rendering:pixelated;pointer-events:none;
+}
+#rooms.classic-chat-room .social-speech .native-talkbox-text{
+ position:relative;z-index:1;
+ display:block;
+ padding:0!important;margin:0!important;
+ font:inherit!important;color:inherit!important;
+ white-space:normal;overflow-wrap:anywhere;
+}
+/* In case the authentic image cannot load, preserve a readable functional
+   fallback, never a missing or clipped message. */
+#rooms.classic-chat-room .social-speech:not([data-native-talkbox-ready="true"]){
+ background:#f6f6f6!important;
+ color:#242834!important;
+ border:1px solid #5f6475!important;
+ box-shadow:none!important;
+}
+#rooms.classic-chat-room .social-speech:not([data-native-talkbox-ready="true"])::after{
+ border-top-color:#f6f6f6!important;
+}
