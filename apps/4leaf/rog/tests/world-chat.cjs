@@ -729,6 +729,45 @@ const path=require('path');
  await host.locator('#message').press('Enter');
  await guest.waitForFunction(()=>document.querySelector('#chat-log').textContent.includes('원본 하이아칸 실시간 채팅 테스트'),null,{timeout:7000});
  assert.ok(await guest.locator('.social-speech').count()>=1,'real speech bubble above sender avatar');
+ // Historical 47x100 sprite: real ChatRoom balloon is assembled from
+ // nine separately cropped corners/sides/center plus an independent 12x15
+ // downward tail. The DOM contains real transmitted text, never a bitmap
+ // of a fabricated canned chat message.
+ await guest.waitForFunction(()=>{
+  const balloon=document.querySelector('.social-speech');
+  return window.__LEAF_NATIVE_TALKBOX__?.getState().ready
+   &&balloon?.dataset.nativeTalkboxReady==='true';
+ },null,{timeout:9000});
+ const nativeTalk=await guest.locator('.social-speech').first().evaluate(el=>{
+  const c=el.querySelector('canvas.native-talkbox-canvas');
+  const ctx=c.getContext('2d');
+  const ratio=c.width/parseFloat(c.style.width);
+  const sample=(x,y)=>[...ctx.getImageData(Math.floor(x*ratio),Math.floor(y*ratio),1,1).data];
+  return {source:el.dataset.nativeSource,text:el.textContent,
+   dataSource:c.dataset.source,renderWidth:parseFloat(c.style.width),
+   renderHeight:parseFloat(c.style.height),
+   clientW:el.offsetWidth,clientH:el.offsetHeight,
+   corner:sample(0,0),
+   fill:sample(el.offsetWidth/2,Math.min(12,el.offsetHeight/2)),
+   tail:sample(el.offsetWidth/2,el.offsetHeight+3),
+   oldPseudo:getComputedStyle(el,'::after').display,
+   atlas:window.__LEAF_NATIVE_TALKBOX__?.getState()};
+ });
+ assert.deepEqual([nativeTalk.atlas.width,nativeTalk.atlas.height],[47,100],
+  'recover actual 47x100 ChatRoom/talkbox.png, not CSS border art');
+ assert.equal(nativeTalk.source,'ChatRoom/talkbox.png');
+ assert.equal(nativeTalk.dataSource,'ChatRoom/talkbox.png');
+ assert.ok(nativeTalk.text.includes('원본 하이아칸 실시간 채팅 테스트'),
+  'source-generated balloon contains genuine remote message');
+ assert.equal(nativeTalk.corner[3],0,
+  'red chroma-key source pixels become transparent corners');
+ assert.ok(nativeTalk.fill[3]>0&&nativeTalk.fill[0]>150,
+  'real source white speech panel center is drawn inside nine-slice');
+ assert.ok(nativeTalk.renderHeight>=nativeTalk.clientH+14,
+  'original tail is drawn below nine-slice body');
+ assert.equal(nativeTalk.oldPseudo,'none','invented CSS speech triangle is removed');
+ await guest.screenshot({path:'leaf-original-native-47x100-speech.png'});
+
  await guest.locator('#message').fill('두 번째 브라우저의 실제 응답');
  await guest.locator('#message').press('Enter');
  await host.waitForFunction(()=>document.querySelector('#chat-log').textContent.includes('두 번째 브라우저의 실제 응답'),null,{timeout:7000});
