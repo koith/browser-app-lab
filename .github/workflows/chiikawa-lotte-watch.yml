@@ -65,6 +65,7 @@ jobs:
       - name: Poll every minute and immediately notify on discovery
         env:
           GH_TOKEN: ${{ github.token }}
+          NTFY_TOPIC: lotte-chiikawa-20261016-ca1ab753911c4a153ef003
         shell: bash
         run: |
           healthy=0
