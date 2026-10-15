@@ -161,7 +161,7 @@
   display:flex!important;
   position:absolute!important;
   z-index:23;
-  top:0;right:0;
+  top:auto!important;right:0;bottom:0!important;
   width:96px!important;min-width:96px!important;
   height:auto;
   max-height:100%;
