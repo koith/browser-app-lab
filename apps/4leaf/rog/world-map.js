@@ -196,6 +196,8 @@
    controls.innerHTML='<button id="world-zoom-out" aria-label="월드맵 축소">−</button><span id="world-zoom-label">100%</span><button id="world-zoom-in" aria-label="월드맵 확대">＋</button><button id="world-zoom-reset" aria-label="월드맵 전체보기">⌂</button>';
    // The source screen already carries original island labels and title art.
    // Do not overlay a new fabricated '원본 월드맵' caption on the recovered bitmap.
+   // Native source MainFrame snaplogo, measured on actual 2003 WorldMap.
+   window.__LEAF_NATIVE_SNAPSHOT__?.mount(stage);
    viewport.append(stage);scene.append(viewport,controls);
    registerNativeNotices(stage);
    ref.viewport=viewport;ref.stage=stage;
