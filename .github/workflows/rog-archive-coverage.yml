@@ -9,6 +9,9 @@ on:
       - 'apps/4leaf/rog/original-stage.css'
       - 'apps/4leaf/rog/dice-native-client-frame.css'
       - 'apps/4leaf/rog/dice-native-tis-clean.css'
+      - 'apps/4leaf/rog/dice-source-forest-terrain.js'
+      - 'apps/4leaf/rog/dice-source-forest-terrain.css'
+      - 'apps/4leaf/rog/tests/dice-terrain-forest.cjs'
       - 'apps/4leaf/rog/dice-native-client-frame.js'
       - 'apps/4leaf/rog/tests/dice-native-frame.cjs'
       - 'apps/4leaf/rog/tests/archive-coverage.cjs'
@@ -29,6 +32,8 @@ jobs:
           npx playwright install chromium --with-deps
       - name: Replay all 25 historical map wins and check desktop/mobile game
         run: node apps/4leaf/rog/tests/archive-coverage.cjs
+      - name: Verify source DMP anchored forest, no screenshot hack and mobile real play
+        run: node apps/4leaf/rog/tests/dice-terrain-forest.cjs
       - name: Chromium verify recovered 800x600 / 406x152 / 172x152 functioning Dice frame
         run: node apps/4leaf/rog/tests/dice-native-frame.cjs
       - uses: actions/upload-artifact@v4
