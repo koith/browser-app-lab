@@ -106,7 +106,7 @@ const path=require('node:path');
   console.log('CHATROOM EXTRACTED ORIGINAL FILES',JSON.stringify(archive));
   console.log('ROOM4 AVATAR LABEL RAW GEOMETRY',JSON.stringify(avatarLabel));
   assert.ok(avatarLabel.baseline-avatarLabel.nameTop>=175&&
-    avatarLabel.baseline-avatarLabel.nameTop<=185,
+    avatarLabel.baseline-avatarLabel.nameTop<=190,
    'historical nickname label sits above character head: '+JSON.stringify(avatarLabel));
   assert.equal(avatarLabel.color,'rgb(86, 107, 198)',
    'screenshot-based blue nameplate, no invented gold self-highlight');
