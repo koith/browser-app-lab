@@ -33,6 +33,10 @@
 /* Native dialogs must remain above the living chat window during game
    confirmations (leave, select item, battle result). */
 #app.app-classic-dice #modal:not(.hidden){z-index:60!important}
+/* SOURCE SCREENSHOT registration: archived apps/4leaf/assets/board.jpg and
+   battle.jpg show the original minimap at BOTTOM LEFT, chat immediately to
+   its right and skill/card panel at far right. The first restoration had
+   chat/minimap reversed; source imagery supersedes inferred layout. */
 /* Native 406x152 chat sprite. Actual messages, nickname input and submit
    button live on top of the atlas' EMPTY fields rather than painted proxies. */
 #app.app-classic-dice .messenger{
@@ -44,7 +48,7 @@
  width:min(406px,100%);
  height:152px!important;min-height:152px!important;
  overflow:hidden;
- margin:0;padding:0;
+ margin:0 0 0 172px;padding:0;
  border:0!important;
  box-shadow:none!important;
  background:transparent url('./original/IMG/chatwnd.png') left top/100% 100% no-repeat!important;
@@ -104,7 +108,7 @@
    canvas component alongside the chat on wide classic Dice frames. */
 #app.app-classic-dice .dice-native-minidock{
  position:absolute;z-index:22;
- left:414px;bottom:0;width:172px;height:152px;
+ left:0;bottom:0;width:172px;height:152px;
  pointer-events:none;
 }
 #app.app-classic-dice .dice-native-minidock .board-mini{
@@ -130,6 +134,7 @@
  #app.app-classic-dice > .workspace > .sidebar{display:none!important}
  #app.app-classic-dice .messenger{
   width:min(406px,100%);
+  margin-left:0;
   flex-basis:120px;
   height:120px!important;min-height:120px!important;
  }
