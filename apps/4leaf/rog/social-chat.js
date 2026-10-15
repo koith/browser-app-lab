@@ -38,39 +38,12 @@
  // authority is configured, remote occupancy/rooms replace browser guesses.
  const central=window.__LEAF_CENTRAL_CHAT__||{enabled:false};
  const centralRooms=new Map(),centralCounts=new Map();
- // Native v0.9 ChatTown supported a spatial room area (up to 200 rooms per
- // town per the 2002 announcement). Exact historical room positions/labels
- // are not available in the recovered image assets. These are deterministic,
- // unoccupied, permanently accessible restoration rooms, NOT claimed to be
- // a transcript of the original service's room catalogue.
+ // Source-era town capacity is documented, but the recovered archive does
+ // not contain a list of live historical rooms. NEVER synthesize 128 empty
+ // "public" rooms or pass them off as rooms supplied by the original server.
+ // Only rooms created by real players or returned by the central authority
+ // belong in the spatial map.
  const ROOM_MAP={width:1480,height:1120};
- // Original IMG/bgtile.png is 725x485 and repeats across the estate.
- // Register unoccupied public-room hit areas over actual huts/building art,
- // not unrelated blank terrain underneath invented wooden rectangles.
- // The exact 0.9 server's room layout is still not recovered.
- const PUBLIC_POSITIONS=[
-  [14,75],    // tile (0,0): straw hut at ~56x109
-  [275,17],   // tile (0,0): timber building at ~319x54
-  [435,115],  // tile (0,0): green-roof house at ~487x158
-  [739,75],   // tile (1,0): same native hut in repeated terrain
-  [1160,115], // tile (1,0): red-roof house
-  [435,600],  // tile (0,1): green-roof house
-  [739,560],  // tile (1,1): first thatch-roof hut
-  [1025,788]  // tile (1,1): source lower green-roof house
- ];
- const staticRooms=new Map();
- for(const region of ['north','south']){
-  REGIONS[region].districts.forEach(([district],di)=>{
-   for(let i=0;i<PUBLIC_POSITIONS.length;i++){
-    const id='leaf-public-'+region+'-'+di+'-'+i;
-    staticRooms.set(id,{id,name:'채팅방 '+String(di*8+i+1).padStart(2,'0'),region,district,
-     owner:'',ownerId:'',passwordProof:'',passwordSalt:'',background:originalTemplates[i%originalTemplates.length],
-     capacity:12,created:0,preset:true,mapX:PUBLIC_POSITIONS[i][0],mapY:PUBLIC_POSITIONS[i][1]});
-   }
-  });
- }
- const publicCatalogue=()=>[...staticRooms.values()].filter(r=>r.region===state.region&&r.district===state.district);
-
  // A historic 2-person chat-room event is documented. Other limits are
  // restoration controls, not claims about the original server's room menu.
  const allowedCapacity=n=>[2,4,8,12].includes(Number(n))?Number(n):12;
@@ -108,8 +81,8 @@
   return roomById(state.roomId);
  }
  function roomById(id){
-  return central.enabled?(centralRooms.get(id)||staticRooms.get(id)||null):
-   (state.rooms.find(r=>r.id===id)||staticRooms.get(id)||null);
+  return central.enabled?(centralRooms.get(id)||null):
+   (state.rooms.find(r=>r.id===id)||null);
  }
  // ChatRoom/room0..room5 are six BACKGROUND IMAGES, not six historical
  // permanently open server rooms. A real original server supplied the room
@@ -648,15 +621,22 @@
   frame.innerHTML='<section class="social-directory"><header class="social-directory-heading"><b>CHATTING TOWN · <span id="social-directory-name"></span></b><button id="social-new-room" type="button">+ 채팅방 만들기</button></header><div id="social-map-viewport" class="social-map-viewport" tabindex="0" aria-label="채팅방 지도. 방향키 또는 드래그로 사방 이동"><div id="social-map-plane" class="social-map-plane"><div class="social-map-terrain" aria-hidden="true"></div><div id="social-directory-list" class="social-map-rooms"></div></div></div><footer class="social-map-toolbar"><span>지도 드래그 · 방향키 / 휠 이동 · 표시 인원은 실제 연결 사용자</span><div class="social-map-directions"><button type="button" data-pan="left" aria-label="왼쪽 이동">◀</button><button type="button" data-pan="up" aria-label="위쪽 이동">▲</button><button type="button" data-pan="down" aria-label="아래쪽 이동">▼</button><button type="button" data-pan="right" aria-label="오른쪽 이동">▶</button></div></footer></section>';
   $('social-directory-name').textContent=state.district;
   $('social-new-room').onclick=showCreateRoom;
-  const list=$('social-directory-list'),rooms=[...publicCatalogue(),...catalogue()];
+  const list=$('social-directory-list'),rooms=catalogue();
+  // A vacant original-era server is not permission to invent rooms.
+  if(!rooms.length){
+   const empty=document.createElement('p');
+   empty.id='social-directory-empty';empty.className='social-directory-empty';
+   empty.textContent='현재 개설된 채팅방이 없습니다. 「채팅방 만들기」로 실제 방을 개설하세요.';
+   frame.querySelector('.social-directory')?.append(empty);
+  }
   for(const [i,r] of rooms.entries()){
    const b=document.createElement('button');
-   b.type='button';b.className=r.preset?'social-public-room':'social-directory-row';
+   b.type='button';b.className='social-directory-row';
    b.dataset.room=r.id;b.title=r.name+' · 입장';b.setAttribute('aria-label',r.name+' 채팅방 입장');
-   const position=r.preset?{x:r.mapX,y:r.mapY}:customRoomPosition(r);
+   const position=realRoomPosition(i);
    b.style.left=position.x+'px';b.style.top=position.y+'px';
    const number=document.createElement('span');number.className='social-room-number';
-   number.textContent=r.preset?String(i+1).padStart(2,'0'):'✦';
+   number.textContent=String(i+1).padStart(2,'0');
    const name=document.createElement('b');name.textContent=r.name;
    const lock=document.createElement('small');lock.textContent=r.passwordProof?'🔒':'♧';
    const occupancy=document.createElement('span');occupancy.className='social-room-users';
@@ -670,38 +650,24 @@
   setupRoomMap();
   updateCounts();
  }
- function customRoomPosition(room){
-  // Stable spatial anchors without persisting a view-dependent pixel offset.
-  let hash=2166136261;
-  for(const ch of room.id){hash^=ch.charCodeAt(0);hash=Math.imul(hash,16777619)}
-  return {x:110+(hash>>>0)%1200,y:125+((hash>>>10)>>>0)%860};
- }
- // IMG/bgtile.png is native extracted landscape art, not a screenshot or
- // generated imitation. Recover from intermittent Pages asset errors.
- function loadNativeRoomTerrain(plane){
-  const source='./original/IMG/bgtile.png';
-  const image=new Image();let retries=0;
-  const attempt=()=>{
-   if(!plane.isConnected)return;
-   image.src=source+(retries?'?retry='+retries+'&at='+Date.now():'');
-  };
-  image.onload=()=>{
-   if(!plane.isConnected)return;
-   plane.style.backgroundImage='url("'+image.src+'")';
-   plane.dataset.terrain='ready';
-  };
-  image.onerror=()=>{
-   if(!plane.isConnected)return;
-   if(retries<5){retries++;plane.dataset.terrain='retrying';
-    setTimeout(attempt,Math.min(1800,250*2**retries));
-   }else{plane.dataset.terrain='error';console.error('4LEAF original town terrain unavailable:',source)}
-  };
-  plane.dataset.terrain='loading';attempt();
+ // Exact native room-map pixel anchors are not extracted from the server.
+ // Use distinct central-first positions for real browser-created rooms.
+ const liveRoomCells=(()=>{
+  const cells=[];
+  for(let row=0;row<12;row++)for(let col=0;col<7;col++)
+   cells.push({col,row,distance:Math.abs(col-3)+Math.abs(row-5.5)});
+  return cells.sort((a,b)=>a.distance-b.distance||a.row-b.row||a.col-b.col);
+ })();
+ function realRoomPosition(index){
+  const cell=liveRoomCells[index%liveRoomCells.length];
+  return {x:70+cell.col*188,y:70+cell.row*81};
  }
  function setupRoomMap(){
   const viewport=$('social-map-viewport'),plane=$('social-map-plane');
   if(!viewport||!plane)return;
-  loadNativeRoomTerrain(plane);
+  // ChatTown backdrops are district selectors, while IMG/bgtile belongs
+  // to Genesis Dice. Do not inject either as a fake native room-map tile.
+  plane.dataset.terrain='unverified';
   const key=state.region+':'+state.district;
   const saved=state.roomMapOffsets[key];
   let x=saved?.x??-(ROOM_MAP.width-viewport.clientWidth)/2;
