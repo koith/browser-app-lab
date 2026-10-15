@@ -62,6 +62,37 @@ const path=require('node:path');
   assert.ok(native.miniBackground.includes('/original/IMG/minimap.png'));
   assert.ok(!native.boardBackground.includes('/original/IMG/bgtile.png'),'do not paste ChatTown terrain under Dice TIS board');
   assert.equal(native.nodeCount,104,'the source board contains live interactive TIS cells');
+  // Source v0.96d Tiles/0000.png is exactly 145x97. Every map cell uses
+  // a *real independent* TIS bitmap; obsolete added numbering and fake
+  // center crest must not cover the recovered hex geometry.
+  const nativeTiles=await page.evaluate(async()=>{
+   const source=new Image();source.src='./original/Tiles/0000.png';await source.decode();
+   const tile=document.querySelector('#game .board-world .tile[data-original-art]');
+   const style=getComputedStyle(tile),rect=tile.getBoundingClientRect();
+   const crest=getComputedStyle(document.querySelector('#game .board-center')).display;
+   return {
+    pixels:[source.naturalWidth,source.naturalHeight],
+    paint:style.backgroundImage,
+    glyph:getComputedStyle(tile.querySelector('.tile-symbol')).display,
+    number:getComputedStyle(tile.querySelector('small')).display,
+    sourceTile:tile.dataset.originalArt,
+    hitbox:[parseFloat(style.width),parseFloat(style.height)],
+    title:tile.title,
+    dataset:tile.dataset.tile,
+    crest,
+    guides:getComputedStyle(document.querySelector('#game #board-lines')).opacity,
+    clickable:typeof tile.onclick==='function'
+   };
+  });
+  assert.deepEqual(nativeTiles.pixels,[145,97],'actual source PNG contains the recovered 145x97 4LEAF TIS artwork');
+  assert.ok(nativeTiles.paint.includes('/original/Tiles/'),'battlefield cell displays its recovered native platform art');
+  assert.equal(nativeTiles.glyph,'none','native artwork already contains artwork, so synthetic emoji labels are hidden');
+  assert.equal(nativeTiles.number,'none','invented printed tile numbers no longer obscure TIS artwork');
+  assert.equal(nativeTiles.crest,'none','invented large centre crest is not placed over original board art');
+  assert.equal(nativeTiles.guides,'0','invented SVG connector lines no longer cover the source map');
+  assert.ok(Math.abs(nativeTiles.hitbox[0]/nativeTiles.hitbox[1]-145/97)<0.02,'independent TIS hitbox preserves original source aspect');
+  assert.ok(nativeTiles.clickable&&nativeTiles.dataset!==undefined&&nativeTiles.title.includes('칸'),'source tiles retain independent hitboxes, accessible source indices and actual gameplay handlers');
+
   assert.ok(native.chatInputVisible,'the original chat source art has a real input');
   assert.equal(await page.locator('#mini-map-canvas').count(),1,'only one working minimap canvas');
   const initialAbility=await page.locator('#ability-btn').evaluate(el=>{
