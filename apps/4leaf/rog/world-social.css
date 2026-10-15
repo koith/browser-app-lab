@@ -518,7 +518,7 @@ body>.social-modal .recordable-article p{white-space:pre-wrap;overflow-wrap:anyw
  pointer-events:none!important;
 }
 /* The archived 2004-02-11 chat.jpg and chat_ref.jpg show small bright-blue
-   nickname tags approximately 170px above each standing foot baseline.
+   nickname tags approximately 180px above each standing foot baseline.
    Previous dark tags sat ~20px too low. Frame/colors are screenshot-based
    reconstruction (INFERRED), not an extracted standalone nameplate bitmap. */
 #rooms .social-interior .social-avatar-name{
