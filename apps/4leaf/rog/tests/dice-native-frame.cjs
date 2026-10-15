@@ -127,6 +127,13 @@ const path=require('node:path');
   await page.locator('#message').press('Enter');
   await page.waitForFunction(()=>document.querySelector('#chat-log')?.textContent.includes('원본 채팅창 테스트'));
   await page.screenshot({path:'leaf-dice-original-800x600-frame.png'});
+  // TEMPORARY visual inspection only: print actual browser JPEG in bounded
+  // pieces so the source restoration can be compared with archived board.jpg.
+  const visual=await page.locator('#app').screenshot({type:'jpeg',quality:49});
+  const b64=visual.toString('base64');
+  for(let at=0;at<b64.length;at+=6000)
+    console.log('LEAF_RENDER_'+String(at/6000).padStart(3,'0')+'='+b64.slice(at,at+6000));
+  console.log('LEAF_RENDER_END='+Math.ceil(b64.length/6000));
   const originalCamera=await page.locator('#board-world').evaluate(el=>el.style.transform);
   await page.locator('#roll-btn').click();
   await page.waitForFunction(()=>window.__ROG_TEST__.getMatch()?.players[0].position>0,{timeout:12000});
