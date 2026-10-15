@@ -361,23 +361,42 @@ function drawPawns(){
 }
 function drawBattlePanels(){
  const root=$('battle-player-panels');if(!root||!match)return;
+ // Archival 4LEAF board.jpg/battle.jpg: 1/3/5 on the LEFT, 2/4/6 on
+ // the RIGHT. These are genuine match players; empty slots are not NPCs.
+ const present=new Map(match.players.map((p,i)=>[i,p]));
+ const slots=match.players.length>6?4:3;
  root.replaceChildren();
  const left=document.createElement('div'),right=document.createElement('div');
  left.className='battle-team-side left';right.className='battle-team-side right';
- const slots=match.players.length>6?4:3;
  for(let i=0;i<slots*2;i++){
-   const p=match.players[i],card=document.createElement('div');
-   card.className='battle-side-card'+(p&&match.active===i?' active':'')+(p?' occupied':' vacant');
-   card.style.setProperty('--player-tint',p?.color||'#53609a');
-   const num=document.createElement('span');num.className='battle-side-num';num.textContent=(i+1)+'P';
-   const portrait=document.createElement('img');portrait.alt='';
-   if(p)portrait.src=imageFor(p.team[0]||'soldier');
+  const p=present.get(i);
+  const card=document.createElement('div');
+  card.className='battle-side-card'+(p&&match.active===i?' active':'')+(p?' occupied':' vacant');
+  card.dataset.slot=String(i+1);
+  card.style.setProperty('--player-tint',p?.color||'#53609a');
+  // The original top-left of each 4LEAF portrait explicitly labels 1..8.
+  const num=document.createElement('span');num.className='battle-side-num';
+  num.textContent=(i+1)+'';
+  card.append(num);
+  if(p){
+   const portrait=document.createElement('div');portrait.className='battle-side-portrait';
+   const avatar=document.createElement('img');avatar.alt='';
+   avatar.src='./original/Registry/sava'+String([0,82,6,1,85,2,84,4][p.id]??84).padStart(2,'0')+'.png';
+   avatar.decoding='async';
+   portrait.append(avatar);
    const info=document.createElement('div');info.className='battle-side-info';
-   const nick=document.createElement('b');nick.textContent=p?p.name:'EMPTY';
-   const attrs=document.createElement('small');attrs.textContent=p?('CL  '+(p.position+1)+'칸　'+p.ability+'%'):'대기 중';
-   const meter=document.createElement('i');meter.className='battle-side-meter';meter.style.width=(p?Math.max(1,p.ability):0)+'%';
-   info.append(nick,attrs,meter);card.append(num,portrait,info);
-   (i%2===0?left:right).append(card);
+   const nick=document.createElement('b');nick.textContent=p.name;
+   const attrs=document.createElement('small');
+   attrs.textContent=p.jail>0?'감옥 '+p.jail+'턴':(p.position+1)+'칸 · '+p.ability+'%';
+   const meter=document.createElement('i');meter.className='battle-side-meter';
+   meter.style.width=Math.max(0,Math.min(100,p.ability))+'%';
+   info.append(nick,attrs,meter);
+   card.append(portrait,info);
+   card.title=(i+1)+'P '+p.name+' · '+attrs.textContent;
+  }else{
+   card.setAttribute('aria-label',(i+1)+'번 빈 참가자 슬롯');
+  }
+  (i%2===0?left:right).append(card);
  }
  root.append(left,right);
 }
