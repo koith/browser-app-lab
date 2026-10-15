@@ -62,6 +62,35 @@ const path=require('path');
   await page.locator('#modal-buttons button').first().click();
   assert.equal(await page.locator('#modal:not(.hidden)').isVisible(),false,'portrait inspection closes without modifying the match');
 
+  // Real IMG/selector.png contains the four purple-blue source button
+  // frames. Each is a functional hitbox; no screenshot image map is used.
+  const selector=await page.evaluate(async()=>{
+   const img=new Image();img.src='./original/IMG/selector.png';await img.decode();
+   return {natural:[img.naturalWidth,img.naturalHeight],
+    buttons:[...document.querySelectorAll('#dice-original-selector button')].map(el=>({
+     id:el.id,source:getComputedStyle(el).backgroundImage,
+     position:getComputedStyle(el).backgroundPosition,
+     width:el.getBoundingClientRect().width,
+     height:el.getBoundingClientRect().height
+    }))};
+  });
+  assert.deepEqual(selector.natural,[222,152],'real 222x152 native selector image is loaded');
+  assert.deepEqual(selector.buttons.map(x=>x.id),['dice-inspect-tool','dice-next-tool','dice-items-toggle','dice-ability-tool'],'four original glyph hitboxes survive as independent controls');
+  assert.ok(selector.buttons.every(x=>x.source.includes('/original/IMG/selector.png')&&x.width===29&&x.height===29),'every command is skinned by the real source atlas, not a text/emoji facsimile');
+  assert.equal(await page.locator('#dice-ability-tool').isDisabled(),true,'native ability shortcut cannot bypass actual charge requirement');
+  assert.equal(await page.locator('#dice-native-party').getAttribute('data-selected-index'),'0');
+  await page.locator('#dice-next-tool').click();
+  assert.equal(await page.locator('#dice-native-party').getAttribute('data-selected-index'),'1','real source navigation button changes focused chessman');
+  assert.equal(await page.locator('#dice-native-party .occupied').nth(1).evaluate(el=>document.activeElement===el),true,'native navigation gives keyboard focus to actual source CardData portrait');
+  await page.locator('#dice-inspect-tool').click();
+  assert.ok(await page.locator('#modal:not(.hidden)').isVisible(),'native inspect icon opens focused genuine card data');
+  await page.locator('#modal-buttons button').first().click();
+  await page.evaluate(()=>{window.__ROG_TEST__.getMatch().players[0].ability=100;window.__ROG_TEST__.drawGame()});
+  assert.ok(await page.locator('#dice-ability-tool').isEnabled(),'source star button mirrors real full-charge ability state');
+  await page.locator('#dice-ability-tool').click();
+  assert.ok(await page.locator('#modal:not(.hidden)').isVisible(),'original star icon invokes the existing legitimate ability confirmation');
+  await page.locator('#modal-buttons button').filter({hasText:'취소'}).click();
+
   // Verify the original-looking roster did not silently delete gameplay
   // inventory. This drawer must reuse the SAME existing #my-items buttons.
   await page.evaluate(()=>{
