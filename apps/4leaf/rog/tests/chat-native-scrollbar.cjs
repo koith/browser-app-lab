@@ -30,8 +30,9 @@ const path=require('node:path');
    const sourceCanvas=document.createElement('canvas');sourceCanvas.width=src.naturalWidth;sourceCanvas.height=src.naturalHeight;
    const ctx=sourceCanvas.getContext('2d',{willReadFrequently:true});ctx.drawImage(src,0,0);
    const p=ctx.getImageData(0,0,src.naturalWidth,src.naturalHeight).data;
-   let keyed=0,nonKey=0;for(let i=0;i<p.length;i+=4){if(p[i+1]>220&&p[i]<65&&p[i+2]<90)keyed++;else if(p[i+3]>0)nonKey++}
-   return {dimensions:[src.naturalWidth,src.naturalHeight],keyed,nonKey,
+   let transparent=0,visible=0,visibleGreen=0;
+   for(let i=0;i<p.length;i+=4){if(p[i+3]===0)transparent++;else{visible++;if(p[i+1]>220&&p[i]<65&&p[i+2]<90)visibleGreen++}}
+   return {dimensions:[src.naturalWidth,src.naturalHeight],transparent,visible,visibleGreen,
     rendered:control.dataset.ready,
     inMessenger:control.parentElement.classList.contains('messenger'),
     parentFrame:control.parentElement.parentElement.id,
@@ -43,13 +44,14 @@ const path=require('node:path');
   });
   console.log('SOURCE 52x40 PIXEL DIAGNOSTICS',JSON.stringify(source));
   assert.deepEqual(source.dimensions,[52,40],'source ChatRoom native scrollbar sprite is 52x40');
-  assert.ok(source.keyed>30&&source.nonKey>50,'native bright-green key and real visible artwork both exist in source');
-  assert.equal(source.rendered,'true','source PNG was decoded and chroma keyed rather than displayed as neon green');
+  assert.ok(source.transparent>50&&source.visible>50,'native ChatRoom source already contains real RGBA transparent corners and visible art');
+  assert.equal(source.visibleGreen,0,'no visible neon key pixels need to be modified');
+  assert.equal(source.rendered,'true','source PNG decoded at native size, preserving original alpha directly');
   assert.equal(source.parentFrame,'social-image-frame','actual scrollbar moves with existing original room chat pane');
   assert.equal(source.count,1,'no fake secondary transcript replaces the native original room chat');
   assert.equal(source.computed,'flex','original 13px vertical scrollbar appears beside actual conversation');
   assert.deepEqual(source.size,[13,13],'both native sprites have original 13px column width');
-  assert.ok(source.art.includes('data:image/png;base64,'),'original source pixels are actually painted with keyed native canvas data');
+  assert.ok(source.art.includes('original/ChatRoom/scrollbar.png'),'original source 52x40 file is painted unmodified, not a re-encoded canvas');
   assert.equal(source.role,'scrollbar','source decoration has accessible real scrollbar semantics');
   assert.equal(source.controls,'chat-log');
 
@@ -86,7 +88,7 @@ const path=require('node:path');
   }));
   assert.ok(Number(native.track)>=0&&Number(native.track)<=100,'scroll thumb retains correct accessible value');
   assert.ok(native.thumbHeight>=15&&native.thumbHeight<60,'source thumb size reflects real transcript ratio');
-  assert.ok(native.source.includes('data:image/png;base64,'),'real 52x40 bitmap also decorates draggable thumb');
+  assert.ok(native.source.includes('original/ChatRoom/scrollbar.png'),'real source PNG also decorates draggable thumb, unchanged');
   assert.equal(native.count,1);
   await page.screenshot({path:'leaf-chatroom-original-52x40-live-scrollbar.png'});
   await page.locator('#social-back').click();
