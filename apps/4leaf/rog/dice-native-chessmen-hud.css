@@ -156,6 +156,7 @@
 }
 #app.app-classic-dice #game #dice-native-party{display:none!important}
 @media(max-width:650px){
+ #app.app-classic-dice>.workspace{position:relative!important}
  #app.app-classic-dice>.workspace>.sidebar{
   display:flex!important;
   position:absolute!important;
