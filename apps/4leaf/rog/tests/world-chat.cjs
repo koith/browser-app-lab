@@ -379,6 +379,27 @@ const path=require('path');
  await host.waitForFunction(()=>document.querySelector('#social-map-plane')?.dataset.terrain==='ready',null,{timeout:16000});
  const nativeTerrain=await host.locator('#social-map-plane').evaluate(el=>getComputedStyle(el).backgroundImage);
  assert.ok(nativeTerrain.includes('original/IMG/bgtile.png'),'town terrain uses real extracted IMG/bgtile.png art instead of invented CSS gradients');
+
+ // Each permanent room hotspot now rests over an actual house in the 725x485
+ // native terrain tiles; HTML must not paint a giant fabricated wooden house.
+ const nativeRoomMarkers=await host.locator('#social-directory-list .social-public-room').evaluateAll(els=>els.map(el=>{
+  const style=getComputedStyle(el);
+  return {x:parseFloat(el.style.left),y:parseFloat(el.style.top),
+   width:parseFloat(style.width),height:parseFloat(style.height),
+   background:style.backgroundColor,backgroundImage:style.backgroundImage,
+   boxShadow:style.boxShadow,number:el.querySelector('.social-room-number')?.textContent,
+   label:el.querySelector('.social-room-users')?.textContent};
+ }));
+ assert.deepEqual(nativeRoomMarkers.map(({x,y})=>[x,y]),[
+  [14,75],[275,17],[435,115],[739,75],
+  [1160,115],[435,600],[739,560],[1025,788]
+ ],'reconstructed room hit areas align to houses on repeated 725x485 native terrain tiles');
+ assert.ok(nativeRoomMarkers.every(m=>m.width===106&&m.height===81&&
+  m.background==='rgba(0, 0, 0, 0)'&&m.backgroundImage==='none'&&m.boxShadow==='none'),
+  'no fake wooden building graphic paints over original ChatTown landscape: '+JSON.stringify(nativeRoomMarkers));
+ assert.equal(new Set(nativeRoomMarkers.map(m=>m.number)).size,8,
+  'native house hotspots retain eight independently enterable room identities');
+
  assert.equal(await host.locator('.social-public-room').first().locator('.social-room-users').textContent(),'0/12명','empty permanent rooms have no fabricated occupants');
  const mapBefore=await host.locator('#social-map-plane').evaluate(el=>el.style.transform);
  await host.locator('#social-map-viewport').focus();
