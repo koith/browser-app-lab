@@ -411,10 +411,16 @@
   const note=$('chatroom-name');if(note)note.textContent=state.view==='board'?'BULLETIN CHANNEL':state.view==='room'?(currentRoom()?.name||'CHATTING ROOM'):state.view==='town'?'TOWN CHANNEL':'ROOM LIST';
  }
  function roomTemplate(background){return './original/ChatRoom/room'+background+'.png'}
+ // ChatTown northback/southback are native 794×404 illustrations, whereas
+ // ChatRoom interiors are native 794×528. Never fill the missing 124 pixels
+ // with a fabricated information banner or squeeze the town into room space.
+ const sceneHeight=()=>state.view==='town'?404:H;
  function fit(){
   const region=$stage(),frame=$('social-image-frame');if(!region||!frame)return;
-  const scale=Math.min(region.clientWidth/W,region.clientHeight/H);
-  frame.style.transform='translate3d('+((region.clientWidth-W*scale)/2)+'px,'+((region.clientHeight-H*scale)/2)+'px,0) scale('+scale+')';
+  const h=sceneHeight();
+  const scale=Math.min(region.clientWidth/W,region.clientHeight/h);
+  frame.style.height=h+'px';
+  frame.style.transform='translate3d('+((region.clientWidth-W*scale)/2)+'px,'+((region.clientHeight-h*scale)/2)+'px,0) scale('+scale+')';
  }
  function addClassicRoomToolbar(){
   const header=$root()?.querySelector('.social-header');if(!header)return;
@@ -500,6 +506,8 @@
  function render(){
   if(!sceneInit)return;
   $root()?.classList.toggle('classic-chat-room',state.view==='room');
+  $root()?.classList.toggle('native-town-scene',state.view==='town');
+  $root()?.classList.toggle('native-directory-scene',state.view==='directory');
   $('social-close-room')?.remove();
   const frame=$('social-image-frame');frame.replaceChildren();
   if(state.view==='board')renderBulletin(frame);
