@@ -16,6 +16,8 @@ jobs:
     timeout-minutes: 8
     steps:
       - uses: actions/checkout@v4
+      - name: Run watcher regression tests
+        run: python3 -m unittest discover -s scripts -p 'test_chiikawa_lotte_watch.py' -v
       - name: Check each minute for five minutes
         id: poll
         shell: bash
