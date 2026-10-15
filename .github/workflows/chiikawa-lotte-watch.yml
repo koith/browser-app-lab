@@ -1,0 +1,36 @@
+name: Chiikawa Lotte reservation watch
+on:
+  schedule:
+    - cron: '*/5 * 16 10 *'
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+concurrency:
+  group: chiikawa-lotte-watch
+  cancel-in-progress: false
+jobs:
+  watch:
+    if: github.repository == 'koith/browser-app-lab'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check each minute for five minutes
+        id: poll
+        shell: bash
+        run: |
+          for i in 1 2 3 4 5; do
+            python3 scripts/chiikawa_lotte_watch.py
+            if grep -q '^found=true$' "$GITHUB_OUTPUT"; then break; fi
+            if [ "$i" -lt 5 ]; then sleep 60; fi
+          done
+      - name: Open single GitHub alert issue
+        if: steps.poll.outputs.found == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PRODUCT_URL: ${{ steps.poll.outputs.product_url }}
+        shell: bash
+        run: |
+          if gh issue list --repo "$GITHUB_REPOSITORY" --state all --search 'in:title [Chiikawa reservation live]' --json title --jq '.[].title' | grep -Fq '[Chiikawa reservation live]'; then exit 0; fi
+          gh issue create --repo "$GITHUB_REPOSITORY" --title '[Chiikawa reservation live] 롯데시네마 먼작귀 예약 구매 확인' --body "예약 구매 신호를 감지했습니다. 구매 가능 여부를 최종 확인하세요: $PRODUCT_URL"
