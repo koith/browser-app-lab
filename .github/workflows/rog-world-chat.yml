@@ -30,6 +30,8 @@ on:
       - 'apps/4leaf/rog/index.html'
       - 'apps/4leaf/rog/dice-native-player-portraits.css'
       - 'apps/4leaf/rog/dice-native-chessmen-hud.css'
+      - 'apps/4leaf/rog/dice-source-forest-terrain.js'
+      - 'apps/4leaf/rog/dice-source-forest-terrain.css'
       - 'apps/4leaf/rog/dice-original-selector.css'
       - 'apps/4leaf/rog/tests/dice-chessmen-hud.cjs'
       - 'apps/4leaf/rog/tests/registry-native-portraits.cjs'
