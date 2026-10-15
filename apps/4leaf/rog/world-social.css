@@ -499,7 +499,9 @@ body>.social-modal .recordable-article p{white-space:pre-wrap;overflow-wrap:anyw
 #rooms .social-interior .social-avatar{
  width:58px!important;
  height:94px!important;
- transform:translate(-50%,-80%)!important;
+ /* Seat coordinates mark the feet/baseline of a native 75×141 sprite.
+    The old -80% anchored the sprite about 19px below its reserved seat. */
+ transform:translate(-50%,-100%)!important;
  overflow:visible!important;
  transition:none!important;
 }
