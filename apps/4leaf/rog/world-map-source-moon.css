@@ -1,0 +1,57 @@
+/* Proven screenshots: apps/4leaf/assets/sky.jpg (794x528).
+ * Archived WorldMap/worldmapback.png (796x528) has the source island,
+ * captions and cliffs but omits the original bright full moon over the
+ * upper-right black sky. Only this separate lunar disc is inferred from
+ * the screenshot; the map bitmap and six native animated sprites remain
+ * original separate images and fully clickable. */
+#sky .leaf-world-viewport{
+ background:#030304!important;
+}
+#sky .leaf-world-stage{
+ filter:none!important;
+}
+#sky #world-original-moon{
+ position:absolute;
+ z-index:1;
+ left:650px;
+ top:11px;
+ width:122px;
+ height:122px;
+ border-radius:50%;
+ pointer-events:none!important;
+ user-select:none;
+ background:
+  radial-gradient(ellipse at 27% 38%,#a88849a8 0 4%,transparent 5%),
+  radial-gradient(ellipse at 72% 30%,#cda9579b 0 8%,transparent 9%),
+  radial-gradient(ellipse at 52% 71%,#bea15d77 0 9%,transparent 10%),
+  radial-gradient(ellipse at 43% 50%,#debc6e87 0 11%,transparent 13%),
+  radial-gradient(circle at 35% 30%,#fff2af 0%,#ffe68d 32%,#e8ba59 67%,#bb8133 86%,#80502c 100%);
+ box-shadow:
+  0 0 3px 2px #ffe7a86e,
+  0 0 18px 8px #ffd3697c,
+  0 0 43px 19px #efbd5f4c,
+  inset -8px -8px 14px #935d3488,
+  inset 7px 6px 12px #fff2ad77;
+}
+/* The 2003 sky.jpg image has no invented giant modern 'WORLD MAP' banner.
+ * Native map bitmap already contains actual world labels and inscriptions. */
+#sky .world-map-caption{
+ display:none!important;
+}
+/* Retain the accessible zoom functionality, but the blue web zoom tray is
+ * NOT on the 2003 scene; reveal only on intent so it does not obscure the
+ * original map. Keyboard tabbing still brings it into view. */
+#sky .world-map-controls{
+ opacity:0;
+ transition:opacity .17s ease-out;
+}
+#sky .leaf-world-viewport:is(:hover,:focus-within)~.world-map-controls,
+#sky .world-map-controls:is(:hover,:focus-within){
+ opacity:1;
+}
+@media(hover:none){
+ #sky .world-map-controls{opacity:.85;}
+}
+@media(prefers-reduced-motion:reduce){
+ #sky .world-map-controls{transition:none!important}
+}
