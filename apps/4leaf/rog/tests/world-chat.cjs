@@ -87,6 +87,34 @@ const path=require('path');
    measured.name+' matches native bitmap without mismatched chroma-key: '+JSON.stringify(measured));
  }
 
+
+ // The archived WorldMap/notice.png (184×61) contains the original winged
+ // "Notice" panel. Verify green chroma key removal and native text hitbox,
+ // not a fabricated CSS tooltip or an unrelated modern caption.
+ await host.waitForFunction(()=>[...document.querySelectorAll('#sky .world-location-tip')].length===6
+  &&[...document.querySelectorAll('#sky .world-location-tip')].every(t=>t.dataset.ready==='true'),
+  null,{timeout:15000});
+ const nativeNotice=await host.evaluate(async()=>{
+  const tip=document.querySelector('#sky .world-location-tip');
+  const background=tip.style.backgroundImage;
+  const png=background.slice(5,-2);
+  const img=new Image();img.src=png;await img.decode();
+  const pixels=document.createElement('canvas');pixels.width=img.naturalWidth;pixels.height=img.naturalHeight;
+  const ctx=pixels.getContext('2d',{willReadFrequently:true});ctx.drawImage(img,0,0);
+  const alpha=ctx.getImageData(0,0,1,1).data[3];
+  const style=getComputedStyle(tip);
+  return {source:tip.dataset.source,bitmap:[img.naturalWidth,img.naturalHeight],
+   cornerAlpha:alpha,width:parseFloat(style.width),height:parseFloat(style.height),
+   background:background.startsWith('url("data:image/png;base64,'),
+   caption:getComputedStyle(document.querySelector('#sky .world-map-caption')).display};
+ });
+ assert.equal(nativeNotice.source,'WorldMap/notice.png','original winged Notice sprite is used for world region hints');
+ assert.deepEqual(nativeNotice.bitmap,[184,61],'native Notice sprite is kept at original 184×61 size');
+ assert.equal(nativeNotice.cornerAlpha,0,'pure-green chroma key is removed rather than shown on world art');
+ assert.deepEqual([nativeNotice.width,nativeNotice.height],[184,61],'hover panel geometry is source-native');
+ assert.ok(nativeNotice.background,'chroma-keyed sprite is composed into a real RGBA image');
+ assert.equal(nativeNotice.caption,'none','invented WorldMap reconstruction caption must not overlay source art');
+
  // The original ChatRoom/header is a separate source sprite, not decorative
  // text. It must load from PAK, key out transparent green and remain legible.
  await host.waitForFunction(()=>document.querySelector('#social-original-userlist')?.dataset.ready==='true',null,{timeout:12000});
