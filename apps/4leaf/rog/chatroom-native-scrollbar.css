@@ -1,0 +1,90 @@
+/* Source `ChatRoom/scrollbar.png` 52x40: a 13px four-column original
+   2002 ChatRoom scroll-atlas with bright green key pixels. The backing data
+   URL is generated from the genuine source bitmap in the standalone JS.
+   Keep mobile/browser normal scrollbar when message log is not positioned
+   over the original room screenshot. */
+#social-native-chat-scroll{display:none}
+@media(min-width:651px){
+ #rooms.classic-chat-room .messenger[data-native-overlay="true"] #chat-log{
+  overflow-y:auto!important;
+  scrollbar-width:none!important;
+  -ms-overflow-style:none!important;
+ }
+ #rooms.classic-chat-room .messenger[data-native-overlay="true"] #chat-log::-webkit-scrollbar{
+  display:none!important;width:0!important;
+ }
+ #rooms.classic-chat-room .messenger[data-native-overlay="true"] #social-native-chat-scroll{
+  display:flex!important;
+  flex-direction:column;
+  box-sizing:border-box;
+  position:absolute!important;
+  z-index:28;
+  top:0!important;left:390px!important;
+  width:16px!important;height:91px!important;
+  gap:0;margin:0;padding:0;
+  border:0;
+  background:transparent;
+  pointer-events:auto;
+ }
+ #rooms.classic-chat-room .messenger[data-native-overlay="true"] #social-native-scroll-up,
+ #rooms.classic-chat-room .messenger[data-native-overlay="true"] #social-native-scroll-down{
+  box-sizing:border-box!important;
+  position:relative!important;
+  display:block!important;
+  flex:0 0 14px!important;
+  width:13px!important;height:14px!important;
+  min-width:13px!important;min-height:14px!important;
+  margin:0!important;padding:0!important;
+  border:0!important;border-radius:0!important;
+  background:var(--social-scroll-asset,linear-gradient(#8d9cda,#374f99)) no-repeat!important;
+  background-size:52px 40px!important;
+  box-shadow:none!important;
+  cursor:pointer;
+ }
+ #rooms.classic-chat-room .messenger[data-native-overlay="true"] #social-native-scroll-up{
+  background-position:0 0!important;
+ }
+ #rooms.classic-chat-room .messenger[data-native-overlay="true"] #social-native-scroll-down{
+  background-position:-26px 0!important;
+ }
+ #rooms.classic-chat-room .messenger[data-native-overlay="true"] #social-native-scroll-track{
+  box-sizing:border-box!important;
+  display:block!important;
+  position:relative!important;
+  width:13px!important;
+  flex:1 1 auto;
+  min-height:6px;
+  border:0!important;
+  margin:0;padding:0;
+  cursor:pointer;
+  background:linear-gradient(90deg,#334a88,#abc1ec 44%,#445890 100%)!important;
+  box-shadow:inset 0 0 0 1px #263975;
+ }
+ #rooms.classic-chat-room .messenger[data-native-overlay="true"] #social-native-scroll-thumb{
+  position:absolute!important;
+  display:block!important;
+  box-sizing:border-box!important;
+  top:0;left:0;
+  width:13px!important;
+  min-width:13px!important;
+  max-width:13px!important;
+  min-height:15px;
+  border:0!important;border-radius:0!important;
+  margin:0!important;padding:0!important;
+  cursor:ns-resize;
+  touch-action:none;
+  background:var(--social-scroll-asset,linear-gradient(#e6f7ff,#6c8bd3)) no-repeat 0 -17px!important;
+  background-size:52px 40px!important;
+  box-shadow:0 0 1px #263c80!important;
+ }
+ #rooms.classic-chat-room .messenger[data-native-overlay="true"] #social-native-scroll-up:disabled,
+ #rooms.classic-chat-room .messenger[data-native-overlay="true"] #social-native-scroll-down:disabled{
+  opacity:.62;cursor:default;
+ }
+ #rooms.classic-chat-room .messenger[data-native-overlay="true"] #social-native-scroll-up:is(:hover,:focus-visible),
+ #rooms.classic-chat-room .messenger[data-native-overlay="true"] #social-native-scroll-down:is(:hover,:focus-visible),
+ #rooms.classic-chat-room .messenger[data-native-overlay="true"] #social-native-scroll-thumb:is(:hover,:focus-visible){
+  outline:1px solid #eaf4ff!important;
+  outline-offset:-1px!important;
+ }
+}
