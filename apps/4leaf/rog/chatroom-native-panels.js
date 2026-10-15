@@ -46,6 +46,7 @@
  function start(){
   remember();
   window.addEventListener('resize',sync,{passive:true});
+  window.addEventListener('leaf-route-change',sync);
   sync();
  }
  window.__LEAF_NATIVE_ROOM_PANELS__={
