@@ -1,0 +1,29 @@
+/* ChatRoom/exitbtn.png (264×50): four 66×25 native EXIT sprite states
+   in the second row, chroma-keyed to preserve original transparent corners.
+   The source asset skins the real #social-back action; no fake button is drawn. */
+#rooms.classic-chat-room #social-back[data-native-exit-ready="true"]{
+ box-sizing:border-box;display:block;
+ flex:0 0 66px;
+ width:66px!important;min-width:66px!important;
+ height:25px!important;min-height:25px!important;
+ margin:0!important;padding:0!important;
+ border:0!important;border-radius:0!important;
+ outline:none;
+ background-color:transparent!important;
+ background-repeat:no-repeat!important;
+ background-size:66px 25px!important;
+ background-position:0 0!important;
+ box-shadow:none!important;
+ font-size:0!important;line-height:0!important;
+ color:transparent!important;text-shadow:none!important;
+ image-rendering:auto;
+ cursor:pointer;
+}
+#rooms.classic-chat-room #social-back[data-native-exit-ready="true"]:focus-visible{
+ outline:1px solid #fff1b2!important;outline-offset:-1px;
+}
+/* Only actual room interiors use EXIT. For the town directory and bulletin,
+   show the normal contextual BACK text and click surface. */
+#rooms:not(.classic-chat-room) #social-back[data-native-exit-ready="true"]{
+ background-image:none!important;
+}
