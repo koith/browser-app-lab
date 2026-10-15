@@ -10,6 +10,7 @@ const path=require('node:path'),fs=require('node:fs');
  const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
  try{
   const page=await browser.newPage();
+  await page.addInitScript(()=>{window.LEAF_CENTRAL_API_URL='';});
   await page.goto(process.env.FOURLEAF_TEST_URL||'http://127.0.0.1:8765/');
   const fixture=p=>fs.readFileSync(path.resolve(__dirname,p)).toString('base64');
   const inputs={
@@ -59,6 +60,47 @@ const path=require('node:path'),fs=require('node:fs');
   },inputs);
   assert.deepEqual(results.source,[161,51]);
   assert.ok(results.samples>200);
+  for(const [name,result] of Object.entries(results.matches)){
+   assert.deepEqual([result.exact.x,result.exact.y,result.exact.scale],[316,472,1],
+    'real screenshot '+name+' must register exact recovered snaplogo pixel anchor');
+  }
+  await page.waitForFunction(()=>document.querySelector('#leaf-world-stage > .leaf-native-snaplogo')?.dataset.ready==='true'
+   &&document.querySelector('#leaf-world-stage > .leaf-native-snapnumber')?.dataset.ready==='true',null,{timeout:12000});
+  const geometry=await page.locator('#leaf-world-stage > .leaf-native-snaplogo').evaluate(c=>{
+   const data=c.getContext('2d').getImageData(0,0,c.width,c.height).data;
+   let visible=0,transparent=0,green=0;
+   for(let i=0;i<data.length;i+=4){
+    if(data[i+3]===0)transparent++;else{
+     visible++;
+     if(data[i+1]>180&&data[i]<100&&data[i+2]<100)green++;
+    }
+   }
+   const s=getComputedStyle(c);
+   return {width:c.width,height:c.height,left:parseFloat(s.left),top:parseFloat(s.top),
+    source:c.dataset.source,visible,transparent,green};
+  });
+  assert.deepEqual([geometry.left,geometry.top,geometry.width,geometry.height],[316,472,161,51]);
+  assert.equal(geometry.source,'MainFrame/snaplogo.png');
+  assert.ok(geometry.visible>1000&&geometry.transparent>100,
+   'retain native logo strokes but remove original chroma-key green background');
+  assert.equal(geometry.green,0,'do not display bright-green atlas matte');
+  const digits=await page.locator('#leaf-world-stage > .leaf-native-snapnumber').evaluate(el=>({
+   size:[el.width,el.height],time:el.dataset.liveTime,ready:el.dataset.ready
+  }));
+  assert.deepEqual(digits.size,[90,10],'timestamp is composed from native 6x10 glyphs');
+  assert.match(digits.time,/^\d{2}\.\d{2}\.\d{2} \d{2}:\d{2}$/);
+  await page.evaluate(()=>{
+   window.__LEAF_SOCIAL__.openRegion('north');window.__ROG_TEST__.go('rooms');
+   window.__LEAF_SOCIAL__.createRoom('원본 스냅 로고 겹침 검증',4);
+  });
+  await page.waitForFunction(()=>document.querySelector('#rooms .social-interior > .leaf-native-snaplogo')?.dataset.ready==='true',null,{timeout:12000});
+  const inRoom=await page.locator('#rooms .social-interior > .leaf-native-snaplogo').evaluate(el=>{
+   const s=getComputedStyle(el);
+   return [parseFloat(s.left),parseFloat(s.top),el.width,el.height];
+  });
+  assert.deepEqual(inRoom,[316,472,161,51],'chat uses identical archived MainFrame watermark pixel registration');
+  console.log('ORIGINAL MAINFRAME SOURCE SNAPLOGO LIVE PASS',JSON.stringify({geometry,digits,inRoom}));
+
   console.log('MAINFRAME ORIGINAL SNAPLOGO SCREENSHOT REGISTRATION',JSON.stringify(results));
  }finally{await browser.close()}
 })().catch(e=>{console.error('4LEAF SOURCE BRAND REGISTRATION FAILED',e.stack||e);process.exit(1)});
