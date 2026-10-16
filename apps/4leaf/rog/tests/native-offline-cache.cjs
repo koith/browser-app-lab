@@ -184,7 +184,7 @@ const {chromium}=require('playwright');
    'cold offline rendered bitmap retains exact recovered TIS provenance');
   assert.equal(offlineTiles.decoded,'ready','cold offline boot actually decoded the source, not just requested it');
   assert.ok(offlineTiles.paint.includes('data:image/png')&&offlineTiles.removed>0,
-   'source-native offline board paints matte-cleaned original TIS pixels, not opaque raw red/pink PNG');
+   'source-native offline board paints matte-cleaned original TIS pixels: '+JSON.stringify(offlineTiles));
   assert.deepEqual(errors,[],'no unexpected JavaScript errors during offline play');
   console.log('4LEAF NATIVE OFFLINE CACHE PASS',JSON.stringify({cached:critical.length,original}));
  }finally{await browser.close()}
