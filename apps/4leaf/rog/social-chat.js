@@ -1030,7 +1030,19 @@
    const img=document.createElement('img');img.src='./original/Registry/'+filename+'.png';img.alt='';
    b.append(img);b.onclick=()=>{state.avatar=i;saveAvatar();closePopup();presence();renderOccupants()};
    content.append(b);
-  });popup('아바타 선택 · 원본 포리프 캐릭터',content);
+  });
+  const panel=popup('아바타 선택 · 원본 포리프 캐릭터',content);
+  // A three-part REAL Registry/avatardialog1/2/3 source form supplies an
+  // original client panel and independently selectable 75x141 actor preview.
+  // Retain fallback immediate-selection behavior if the source enhancer is
+  // unavailable, and preserve the same actual peer/central presence update.
+  window.__LEAF_NATIVE_AVATAR_DIALOG__?.enhance(panel,content,{
+   avatars,current:state.avatar,nickname:nick(),
+   onCommit:index=>{
+    state.avatar=index;saveAvatar();closePopup();presence();renderOccupants();
+   },
+   onCancel:closePopup
+  });
  }
  function saveAvatar(){try{localStorage.setItem('leaf_social_avatar',String(state.avatar))}catch{}}
  function popup(title,body){
