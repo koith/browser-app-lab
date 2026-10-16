@@ -52,6 +52,8 @@
  text-shadow:none!important;
  filter:none!important;
  opacity:1!important;
+ transform:none!important; /* original.css mobile scale(.88) shrank source pixels */
+ transform-origin:center!important;
  cursor:pointer!important;
  -webkit-tap-highlight-color:transparent;
 }
