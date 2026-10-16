@@ -12,6 +12,8 @@ on:
       - 'apps/4leaf/rog/dice-native-dialog-event.css'
       - 'apps/4leaf/rog/tests/dice-native-dialog-event.cjs'
       - 'apps/4leaf/rog/dice-native-tis-clean.css'
+      - 'apps/4leaf/rog/dice-native-tis-depth.css'
+      - 'apps/4leaf/rog/tests/dice-native-tis-depth.cjs'
       - 'apps/4leaf/rog/dice-native-battle-podium.css'
       - 'apps/4leaf/rog/tests/dice-battle-podium.cjs'
       - 'apps/4leaf/rog/dice-native-client-frame.js'
@@ -36,6 +38,8 @@ jobs:
         run: node apps/4leaf/rog/tests/archive-coverage.cjs
       - name: Verify actual 2.5D mechanical duel platforms and original forest in Chromium
         run: node apps/4leaf/rog/tests/dice-battle-podium.cjs
+      - name: Verify native 145x97 TIS and independently depth-sorted original DMP cells in live Chromium
+        run: node apps/4leaf/rog/tests/dice-native-tis-depth.cjs
       - name: Validate actual source Genesis dialog and live event message in Chromium
         run: node apps/4leaf/rog/tests/dice-native-dialog-event.cjs
       - name: Chromium verify recovered 800x600 / 406x152 / 172x152 functioning Dice frame
