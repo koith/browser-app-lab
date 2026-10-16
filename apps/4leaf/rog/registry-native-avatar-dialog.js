@@ -5,9 +5,9 @@
    DO NOT synthesize unavailable original jobs, levels, FP or GP. */
 (function(){
  const SOURCES={
-  logo:{file:'avatardialog1.png',width:111,height:31},
-  title:{file:'avatardialog2.png',width:180,height:29},
-  info:{file:'avatardialog3.png',width:368,height:207},
+  logo:{file:'avatardialog1.png',width:111,height:34},
+  title:{file:'avatardialog2.png',width:168,height:23},
+  info:{file:'avatardialog3.png',width:368,height:205},
   actor:{width:75,height:141}
  };
  const PREFIX='./original/Registry/';
