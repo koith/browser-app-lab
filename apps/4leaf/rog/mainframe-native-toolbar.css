@@ -1,6 +1,6 @@
 /* MainFrame.pak SOURCE RESTORATION: 120x270 toolbarbtn.png comprises
  * 4 interactive horizontal 30px frames × 9 independent vertical 30px rows.
- * Source pannel.png is 323x240, an independent tiled backdrop.
+ * Source pannel.png is 323x124, an independent tiled backdrop.
  *
  * The sprites are VERIFIED original pixel assets. Their exact historical
  * per-row command dispatch is unverified: these controls preserve the
@@ -21,7 +21,7 @@
  border:0!important;
  border-bottom:2px solid #536da7!important;
  border-radius:0!important;
- background:#6e8bcc url('./original/MainFrame/pannel.png') 0 0 / 323px 240px repeat!important;
+ background:#6e8bcc url('./original/MainFrame/pannel.png') 0 0 / 323px 124px repeat!important;
  box-shadow:inset 0 1px #a2bae8!important;
 }
 #app:not(.app-classic-dice) > nav.toolbar > button{
