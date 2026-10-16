@@ -17,3 +17,9 @@ Source PNGs load independently with bounded retries. If file:// browser security
 
 ## Unfinished original parity
 Unrecovered MVE 3D terrain meshes/elevation, real 3D camera/lighting and full-body attack animation remain incomplete; this repair is one substantial visible original-graphics discrepancy, not the completion of the 3D engine.
+
+## Public-source RGBA correction (2026-10-16, PR #84)
+
+Subsequent actual **hosted Chromium canvas getImageData()** proved that the corner alpha of the real archived TIS/0000 is already **0**, even though some image viewers draw a pink backdrop. TIS/0024 also already has transparent corners. Therefore treating PNG preview background colors alone as proof of an **opaque** source matte was wrong. The original archive is substantially more RGBA-complete than originally described above.
+
+The decoder now checks actual pixel alpha and retains the **original source URL/bytes** for every TIS that has no opaque exterior matte: `removed=0, alreadyTransparent=true`. It does not needlessly transcode a valid 145x97 original into a giant browser-generated data URL. Only source images with demonstrably opaque connected border pixels are keyed; source-colored internal art is untouched. The inferred per-sprite original alpha click silhouette is still useful. Hosted tests explicitly verify a zero-alpha source is not modified or falsely described as newly recovered. All title/source DMP records remain historical; no claim of newly recovered 3D meshes is made.
