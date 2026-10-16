@@ -20,6 +20,7 @@ const {chromium}=require('playwright');
    'chatroom-native-owner-dialog.js','chatroom-native-owner-dialog.css','original/ChatRoom/ownerdialog.png',
    'chatroom-native-expressions.js','chatroom-native-expressions.css','original/ChatRoom/expdialogbtn.png',
    'dice-native-dialog-event.css','original/IMG/dialog.png','original/IMG/eventmsgbox.png',
+   'mainframe-native-toolbar.css','original/MainFrame/toolbarbtn.png','original/MainFrame/pannel.png',
    'knighttown-native.js','knighttown-native.css',
    ...['knightback','plain01','plain02','sea01','sea02','sea03','snow01'].map(s=>'original/KnightTown/'+s+'.png'),
    'world-social.css','social-chat.js','world-map.js','mainframe-native-snapshot.js','mainframe-native-snapshot.css','original/MainFrame/snaplogo.png','original/MainFrame/snapnumber.png',
@@ -30,7 +31,7 @@ const {chromium}=require('playwright');
    'original/Registry/sava00.png'
   ];
   await page.waitForFunction(async files=>{
-   const cache=await caches.open('4leaf-revival-pwa-v45');
+   const cache=await caches.open('4leaf-revival-pwa-v46');
    return (await Promise.all(files.map(file=>cache.match('./'+file)))).every(Boolean);
   },critical,{timeout:40000});
   // An established controller must answer image and JS fetches offline.
@@ -43,6 +44,28 @@ const {chromium}=require('playwright');
    &&document.querySelector('#leaf-world-stage .leaf-native-snaplogo')?.dataset.ready==='true'
    &&document.querySelector('#leaf-world-stage .leaf-native-snapnumber')?.dataset.ready==='true',
    null,{timeout:18000});
+  // Cold PWA installation must draw the true 120x270 MainFrame toolbar,
+  // including its genuine four-state sprite and the 323x240 tiled panel.
+  // This remains working even before the player ever navigates menus online.
+  const offlineChrome=await page.evaluate(async()=>{
+   const native=async name=>{
+    const img=new Image();img.src='./original/MainFrame/'+name+'.png';
+    await img.decode();return [img.naturalWidth,img.naturalHeight];
+   };
+   const nav=document.querySelector('#app>nav.toolbar');
+   const first=nav.querySelector('[data-route="sky"]');
+   return {
+    atlas:await native('toolbarbtn'),panel:await native('pannel'),
+    menuBackground:getComputedStyle(nav).backgroundImage,
+    iconBackground:getComputedStyle(first).backgroundImage,
+    sourceButton:parseInt(getComputedStyle(first).width,10)
+   };
+  });
+  assert.deepEqual(offlineChrome.atlas,[120,270],'PWA has original MainFrame toolbar atlas without any prior menu visit');
+  assert.deepEqual(offlineChrome.panel,[323,240],'PWA has original MainFrame tiled menu background');
+  assert.ok(offlineChrome.menuBackground.includes('/original/MainFrame/pannel.png'));
+  assert.ok(offlineChrome.iconBackground.includes('/original/MainFrame/toolbarbtn.png'));
+  assert.equal(offlineChrome.sourceButton,30,'PWA menu retains clickable source 30px atlas cells');
   // Cold-offline source KnightTown region art and all its six sign frames
   // must work before a visitor ever browsed the Recordable in this session.
   await page.evaluate(()=>{window.__LEAF_SOCIAL__.openKnightTown();window.__ROG_TEST__.go('rooms')});
