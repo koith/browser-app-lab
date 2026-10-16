@@ -1,0 +1,21 @@
+/* Camera interaction for genuine 1450x1120 DMP-derived live geometry.
+ * The historical MVE height mesh has NOT been recovered. This layer changes
+ * no extracted TIS pixels, original background art, or gameplay click rules.
+ */
+#app.app-classic-dice #game #board-area{
+ touch-action:none;
+ overscroll-behavior:contain;
+ cursor:grab;
+}
+#app.app-classic-dice #game #board-area:active{cursor:grabbing}
+#app.app-classic-dice #game #board-area:focus-visible{
+ outline:2px solid #f1dfa7;
+ outline-offset:-3px;
+}
+#app.app-classic-dice #game #board-area .tile{
+ touch-action:none;
+}
+#app.app-classic-dice #game #board-area :is(button,input,textarea,select){
+ touch-action:manipulation;
+ cursor:pointer;
+}
