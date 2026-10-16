@@ -359,6 +359,9 @@ function drawBoard(){
      const sourceArt=sourceTileGraphic(type,i);
      b.dataset.originalArt=sourceArt;
      b.style.setProperty('background','url("./original/Tiles/'+sourceArt+'.png") center / 100% 100% no-repeat','important');
+     // Recover genuine original TIS source RGB by clearing ONLY its external
+     // pink/red chroma matte; each independent live DMP tile remains clickable.
+     window.__LEAF_TIS_ALPHA__?.apply(b,sourceArt);
      if(SOURCE_IDS[match.map]){
        const columns=Math.max(8,Math.sqrt(match.tiles.length)*1.6);
        b.style.width=Math.max(2.5,Math.min(5,72/columns))+'%';
