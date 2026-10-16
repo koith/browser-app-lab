@@ -1,0 +1,14 @@
+/* Original Genesis TIS hex art orientation correction.
+ * Current renderer showed the native 145x97 hex platform upside down.
+ * Flip the TILE ART itself in the board plane, not the whole world,
+ * terrain, text, player sprites, camera or click coordinates.
+ * All tile text/symbols are hidden by dice-native-tis-clean.css.
+ * Geometry, source alpha mask and DOM hit targets remain unchanged. */
+#app.app-classic-dice #game .board-world #board-nodes .tile[data-native-tis-size="145x97"]{
+ transform:translate(-50%,-50%) scaleY(-1)!important;
+}
+/* Original tile art is mirrored vertically; its hidden semantic
+ * glyphs remain screen-readable if accessibility styles reveal them. */
+#app.app-classic-dice #game .board-world #board-nodes .tile[data-native-tis-size="145x97"] > :is(.tile-symbol,small){
+ transform:scaleY(-1)!important;
+}
