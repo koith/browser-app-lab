@@ -160,6 +160,8 @@ const {chromium}=require('playwright');
   await page.locator('#bot-count').selectOption('1');
   await page.locator('#start-game').click();
   await page.waitForSelector('#game:not(.hidden)');
+  await page.waitForFunction(()=>document.querySelector('#board-nodes .tile')?.dataset.tisAlpha==='ready',
+   null,{timeout:15000});
   const offlineTiles=await page.evaluate(async()=>{
    const node=document.querySelector('#board-nodes .tile[data-native-tis-size="145x97"]');
    const target=node?.dataset.originalArt;
@@ -169,14 +171,20 @@ const {chromium}=require('playwright');
     original:[image.naturalWidth,image.naturalHeight],
     layout:[node.offsetWidth,node.offsetHeight],
     paint:getComputedStyle(node).backgroundImage,
-    source:target
+    source:target,
+    keyedSource:node.dataset.tisAlphaSource,
+    decoded:node.dataset.tisAlpha,
+    removed:Number(node.dataset.tisChromaRemoved)
    };
   });
   assert.equal(offlineTiles.count,104,'all original offline 4LEAF MVE path cells are live');
   assert.deepEqual(offlineTiles.original,[145,97],'offline native TIS asset decoded at full source shape');
   assert.deepEqual(offlineTiles.layout,[145,97],'offline live board no longer shrinks true original TIS artwork');
-  assert.ok(offlineTiles.paint.includes('/original/Tiles/'),
-   'the cold offline playable board uses genuine archived TIS PNGs');
+  assert.equal(offlineTiles.keyedSource,'Tiles/'+offlineTiles.source+'.png',
+   'cold offline rendered bitmap retains exact recovered TIS provenance');
+  assert.equal(offlineTiles.decoded,'ready','cold offline boot actually decoded the source, not just requested it');
+  assert.ok(offlineTiles.paint.includes('data:image/png')&&offlineTiles.removed>0,
+   'source-native offline board paints matte-cleaned original TIS pixels, not opaque raw red/pink PNG');
   assert.deepEqual(errors,[],'no unexpected JavaScript errors during offline play');
   console.log('4LEAF NATIVE OFFLINE CACHE PASS',JSON.stringify({cached:critical.length,original}));
  }finally{await browser.close()}
