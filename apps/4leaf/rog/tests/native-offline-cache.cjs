@@ -18,6 +18,8 @@ const {chromium}=require('playwright');
   });
   const critical=[
    'chatroom-native-owner-dialog.js','chatroom-native-owner-dialog.css','original/ChatRoom/ownerdialog.png',
+   'registry-native-avatar-dialog.js','registry-native-avatar-dialog.css',
+   ...['avatardialog1','avatardialog2','avatardialog3'].map(x=>'original/Registry/'+x+'.png'),
    'chatroom-native-expressions.js','chatroom-native-expressions.css','original/ChatRoom/expdialogbtn.png',
    'dice-native-dialog-event.css','original/IMG/dialog.png','original/IMG/eventmsgbox.png',
    'mainframe-native-toolbar.css','original/MainFrame/toolbarbtn.png','original/MainFrame/pannel.png',
@@ -31,7 +33,7 @@ const {chromium}=require('playwright');
    'original/Registry/sava00.png'
   ];
   await page.waitForFunction(async files=>{
-   const cache=await caches.open('4leaf-revival-pwa-v46');
+   const cache=await caches.open('4leaf-revival-pwa-v47');
    return (await Promise.all(files.map(file=>cache.match('./'+file)))).every(Boolean);
   },critical,{timeout:40000});
   // An established controller must answer image and JS fetches offline.
@@ -115,6 +117,29 @@ const {chromium}=require('playwright');
   assert.deepEqual(original.native,[115,103]);
   assert.deepEqual(original.position,[427,425]);
   assert.equal(await page.locator('.social-avatar.self').count(),1,'only genuine offline self occupant');
+  // Three independent archived Registry panel assets must be decoded
+  // on FIRST cold offline opening with no pre-visit of avatar selection.
+  await page.locator('.social-original-tool[aria-label="아바타 선택"]').click();
+  await page.waitForFunction(()=>{
+   const assets=[...document.querySelectorAll(
+    '#social-modal .social-native-avatar-header img,#social-modal .social-native-avatar-source')];
+   return assets.length===3&&assets.every(i=>i.dataset.sourceReady==='true');
+  },null,{timeout:12000});
+  const avatarPanel=await page.locator('#social-modal .social-native-avatar-panel').evaluate(el=>({
+   source:el.dataset.nativeAvatarDialog,
+   parts:[...el.querySelectorAll('.social-native-avatar-header img,.social-native-avatar-source')]
+    .map(i=>[i.naturalWidth,i.naturalHeight]),
+   count:el.querySelectorAll('.social-native-avatar-chooser button').length
+  }));
+  assert.equal(avatarPanel.source,'Registry/avatardialog3.png');
+  assert.deepEqual(avatarPanel.parts,[[111,34],[168,23],[368,205]],
+   'cold offline original Registry dialog images decoded at natural source pixels');
+  assert.equal(avatarPanel.count,12,'all twelve actual Registry actors remain independently selectable offline');
+  await page.locator('.social-native-avatar-chooser button[data-avatar-index="7"]').click();
+  await page.locator('.social-native-avatar-confirm').click();
+  assert.ok((await page.locator('.social-avatar.self img').getAttribute('src')).includes('sava04.png'),
+   'cold offline source dialog updates same real room occupant, not a fake actor');
+
   await page.waitForFunction(()=>window.__LEAF_NATIVE_EXPRESSIONS__?.getState().ready,null,{timeout:8000});
   await page.locator('.social-exp-trigger').click();
   await page.locator('.social-native-expression-option[data-expression="좋아"]').click();
