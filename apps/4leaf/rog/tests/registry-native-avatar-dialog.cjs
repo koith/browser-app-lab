@@ -15,6 +15,16 @@ const path=require('node:path');
   page.on('pageerror',e=>errors.push(String(e)));
   await page.addInitScript(()=>{window.LEAF_CENTRAL_API_URL='';});
  }
+ // Source CDN outages cannot permanently replace source UI with modern
+ // screenshot proxies: two transient 503s must recover the real title image.
+ let sourceRequests=0,forcedFailures=0;
+ await host.route('**/original/Registry/avatardialog2.png*',async route=>{
+  sourceRequests++;
+  if(forcedFailures<2){
+   forcedFailures++;
+   await route.fulfill({status:503,contentType:'text/plain',body:'Transient original Registry CDN error'});
+  }else await route.continue();
+ });
  try{
   const url=process.env.FOURLEAF_TEST_URL||'http://127.0.0.1:8765/';
   await host.goto(url);
@@ -87,6 +97,8 @@ const path=require('node:path');
   assert.ok(source.actors.every(x=>x.source.startsWith('./original/Registry/sava')&&x.type==='BUTTON'),
    'all candidates are independent live buttons with recovered source sprites');
   assert.equal(source.genericTitle,'none','generic invented dialogue title does not cover true source header');
+  assert.equal(forcedFailures,2,'test exercised two real HTTP 503 errors on an original Registry PNG');
+  assert.ok(sourceRequests>=3,'source 4LEAF title recovers to original PNG after both transient errors');
   assert.equal(source.closeVisible,'block','real legacy close control stays usable');
   assert.equal(source.actors.filter(x=>x.pressed==='true').length,1,
    'one genuine selected character rather than fabricated users');
