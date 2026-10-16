@@ -20,7 +20,8 @@ const assert=require('node:assert/strict');
      w:parseFloat(c.width),h:parseFloat(c.height),transform:c.transform,
      background:c.backgroundImage,clip:c.clipPath,native:e.dataset.nativeTisSize,
      source:e.dataset.originalArt,decodedSource:e.dataset.tisAlphaSource,
-     alpha:e.dataset.tisAlpha,
+     alpha:e.dataset.tisAlpha,removed:Number(e.dataset.tisChromaRemoved),
+     preserved:e.dataset.tisSourcePreserved,
      dmp:[Number(e.dataset.dmpX),Number(e.dataset.dmpY),Number(e.dataset.dmpCellCode)],
      depth:Number(e.style.zIndex)
     }});
@@ -49,7 +50,8 @@ const assert=require('node:assert/strict');
     'real DMP coordinates and 2D front/back order retained for each independent TIS');
    assert.ok(result.sizes.every(t=>t.alpha==='ready'&&
     t.decodedSource==='Tiles/'+t.source+'.png'&&
-    t.background.includes('data:image/png')),
+    (t.removed===0?t.preserved==='true'&&t.background.includes('/original/Tiles/'+t.source+'.png'):
+     t.background.includes('data:image/png'))),
     'all tiles show their independently decoded recovered TIS PNG, not a fake or an unkeyed source');
    assert.equal(result.bad,0,'DMP grid centers retain native 70x47 spacing even though painted 145x97 sprites overlap');
    assert.ok(result.adjacent>10,'adjacent cells were checked');

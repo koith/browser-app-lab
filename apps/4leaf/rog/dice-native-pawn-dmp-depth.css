@@ -1,0 +1,43 @@
+/* Real original DMP y-based painter order for source Registry chessmen.
+ * Source TIS sprite and character PNGs are verified. Their original
+ * 3D engine pose/height handling is NOT recovered; browser painter order
+ * uses existing exact DMP logical y coordinates, not an invented z-height.
+ */
+#app.app-classic-dice #game .board-world #board-nodes #board-pawns{
+ display:contents!important;
+ z-index:auto!important;
+ pointer-events:none!important;
+}
+#app.app-classic-dice #game .board-world #board-nodes #board-pawns .board-pawn{
+ position:absolute!important;
+ z-index:var(--leaf-pawn-dmp-depth,0)!important;
+ pointer-events:none!important;
+}
+/* Remove the large invented turquoise rune/portal disk previously rendered
+ * under each pawn. A compact grounded cast shadow keeps the visual actor
+ * aligned with real source platform pixels, without pretending the glowing
+ * ring existed in original 4LEAF screenshots.
+ */
+#app.app-classic-dice #game .board-world #board-nodes #board-pawns .board-pawn::before{
+ content:''!important;
+ left:15px!important;
+ bottom:6px!important;
+ width:36px!important;
+ height:10px!important;
+ border:0!important;
+ border-radius:50%!important;
+ background:radial-gradient(ellipse,#0f1d3299 0%,#141c2c40 60%,transparent 100%)!important;
+ box-shadow:none!important;
+ transform:none!important;
+ filter:none!important;
+ animation:none!important;
+ pointer-events:none!important;
+}
+#app.app-classic-dice #game .board-world #board-nodes #board-pawns .pawn-current::before{
+ animation:none!important;
+}
+@media(prefers-reduced-motion:reduce){
+ #app.app-classic-dice #game .board-world #board-nodes #board-pawns .board-pawn{
+  transition:none!important;
+ }
+}

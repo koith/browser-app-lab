@@ -1,13 +1,11 @@
-/* Actual 2002 Genesis TIS/Pak 145×97 sprites arrive with opaque pink/red
- * chroma mattes (for example 0000.png pink, 0015.png red). Browsers do NOT
- * key those colors automatically as the old client did. Without decoding,
- * every overlapping source platform is an opaque painted rectangle.
- *
- * Decode each UNIQUE recovered PNG once, flood-fill only the contiguous
- * outer matte (never blindly remove all red pixels inside the source symbol),
- * preserve every interior colored pixel, and derive a polygonal POINTER
- * silhouette from the alpha boundary. The native TIS and DMP source are
- * genuine. The exact original client chroma tolerance is still unverified.
+/* Actual original Genesis TIS 145x97 RGBA sprites ALREADY carry native
+ * alpha in their corner pixels. The apparently red/pink/green corner tint
+ * visible in some image viewers is not proof of an opaque game bitmap.
+ * Preserve the archived RGBA unchanged when it is already keyed.
+ * For an actually opaque border only, flood-fill the exterior color
+ * without erasing valid center artwork. Derive source-specific pointer
+ * silhouette from genuine alpha data in either case.
+ * Source pixels are verified; lost EXE hit-test logic remains inferred.
  */
 (function(){
  'use strict';
@@ -69,10 +67,14 @@
   // pixels connected to a known corner with a close-enough original color
   // were visited. Do not alter any surviving art's source RGB values.
   for(let i=0;i<count;i++)if(mark[i])pixels[i*4+3]=0;
-  context.putImageData(frame,0,0);
+  // Do not re-encode already-transparent source PNGs into huge data URLs.
+  // This avoids needless GPU uploads and preserves byte-identical original
+  // files when there was never a chroma matte to remove.
+  if(tail)context.putImageData(frame,0,0);
   const clip=silhouette(pixels,w,h);
   return {
-   id,url:canvas.toDataURL('image/png'),clip,removed:tail,
+   id,url:tail?canvas.toDataURL('image/png'):'./original/Tiles/'+id+'.png',
+   clip,removed:tail,alreadyTransparent:tail===0,
    pixels:count,cornerColors:seeds,native:SIZE.slice(),
    source:'Tiles/'+id+'.png'
   };
@@ -106,8 +108,8 @@
   tile.dataset.tisAlpha='loading';
   prepare(id).then(paint=>{
    if(!tile.isConnected||tile.dataset.originalArt!==id)return;
-   // Override original shorthand with the same genuine bitmap re-encoded
-   // only to remove the extracted client chroma key.
+   // The same already-transparent original PNG remains the original URL.
+   // Only sources with an actual opaque external matte get a keyed data PNG.
    tile.style.setProperty('background-image','url("'+paint.url+'")','important');
    if(paint.clip){
     tile.style.setProperty('clip-path',paint.clip,'important');
@@ -116,6 +118,7 @@
    tile.dataset.tisAlpha='ready';
    tile.dataset.tisAlphaSource=paint.source;
    tile.dataset.tisChromaRemoved=String(paint.removed);
+   tile.dataset.tisSourcePreserved=String(paint.alreadyTransparent);
   }).catch(()=>{
    // Keep the old source bitmap/hexagon hitbox playable if client security
    // refuses canvas pixel reads or if a historic asset host sleeps.

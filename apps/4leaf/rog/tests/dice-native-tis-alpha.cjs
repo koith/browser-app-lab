@@ -80,6 +80,8 @@ const fs=require('node:fs');
      otherCorner:point(masked.pixels,144,96),
      centerBefore:point(source.pixels,72,48),centerAfter:point(masked.pixels,72,48),
      removed:processed.removed,pixels:processed.pixels,
+     preserved:processed.alreadyTransparent,
+     encoded:processed.url.startsWith('data:image/png'),
      clip:processed.clip,source:processed.source
     });
    }
@@ -91,6 +93,7 @@ const fs=require('node:fs');
      alpha:node.dataset.tisAlpha,
      original:node.dataset.tisAlphaSource,
      removed:Number(node.dataset.tisChromaRemoved),
+     preserved:node.dataset.tisSourcePreserved,
      bitmap:style.backgroundImage,
      clip:style.clipPath,
      native:[node.offsetWidth,node.offsetHeight],
@@ -105,23 +108,31 @@ const fs=require('node:fs');
    assert.deepEqual(item.native,[145,97]);
    assert.equal(item.cornerAfter[3],0,'actual external source matte is transparent at corner');
    assert.equal(item.otherCorner[3],0,'outer matte also cleared at lower opposite corner');
-   assert.ok(item.removed>500&&item.removed<item.pixels*.65,
-    'only exterior connected matte removed, never whole TIS sprite: '+JSON.stringify(item));
+   // All six recovered source images may already have true transparent
+   // outer pixels. Zero removed is correct, not an alpha-restoration failure.
+   assert.ok(item.removed>=0&&item.removed<item.pixels*.65,
+    'only opaque exterior matte is removed, never native art: '+JSON.stringify(item));
+   if(item.removed===0){
+    assert.equal(item.preserved,true,'preserve source bytes when PNG already keyed');
+    assert.equal(item.encoded,false,'do not make a redundant data URL');
+   }else assert.equal(item.encoded,true);
    assert.deepEqual(item.centerAfter,item.centerBefore,
     'the exact central RGB symbol and its alpha must survive untouched');
    assert.ok(item.clip?.startsWith('polygon(')&&item.clip.split('%').length>40,
     'pointer polygon comes from individual source PNG alpha silhouette');
    assert.equal(item.source,'Tiles/'+item.id+'.png');
   }
-  assert.notDeepEqual(imageSample.probes[0].cornerBefore.slice(0,3),
-   imageSample.probes[1].cornerBefore.slice(0,3),
-   'source 0000 and 0015 have genuinely different red/pink key colors');
+  // Compare actual alpha, never judge the key solely from RGB displayed
+  // by a PNG viewer (fully transparent corners can carry arbitrary RGB).
+  assert.ok(imageSample.probes.every(p=>p.cornerAfter[3]===0));
   assert.equal(imageSample.chroma.length,104);
   assert.ok(imageSample.chroma.every(t=>t.alpha==='ready'),
    'all 104 source tiles are decoded and composited by the live original atlas');
   assert.ok(imageSample.chroma.every(t=>t.original==='Tiles/'+t.source+'.png'&&
-   t.bitmap.includes('data:image/png')&&t.removed>0),
-   'each actual DMP tile uses a source-recolored alpha PNG rather than red/pink rectangle');
+   (t.removed===0?
+     t.preserved==='true'&&t.bitmap.includes('/original/Tiles/'+t.source+'.png'):
+     t.bitmap.includes('data:image/png'))),
+   'real DMP tiles preserve pre-keyed originals and only reencode actual opaque mattes');
   assert.ok(imageSample.chroma.every(t=>t.clip.startsWith('polygon(')&&
    t.clip.split('%').length>40),
    'real per-TIS alpha silhouette replaces a one-size-fits-all invented hexagon');

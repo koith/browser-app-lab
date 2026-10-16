@@ -54,6 +54,8 @@ const path=require('node:path');
      paint:cs.backgroundImage,
      alphaState:tile.dataset.tisAlpha,
      sourceFromAlpha:tile.dataset.tisAlphaSource,
+     preserved:tile.dataset.tisSourcePreserved,
+     removed:Number(tile.dataset.tisChromaRemoved),
      native:tile.dataset.nativeTisSize,
      dmp:[Number(tile.dataset.dmpX),Number(tile.dataset.dmpY),Number(tile.dataset.dmpCellCode)],
      depth:Number(tile.style.zIndex),
@@ -96,7 +98,9 @@ const path=require('node:path');
    const native='Tiles/'+cell.source+'.png';
    return cell.source&&cell.clickable&&(
     cell.alphaState==='ready'
-     ? cell.paint.includes('data:image/png')&&cell.sourceFromAlpha===native
+     ? cell.sourceFromAlpha===native&&
+       (cell.removed===0?cell.preserved==='true'&&cell.paint.includes('/original/'+native):
+        cell.paint.includes('data:image/png'))
      : cell.alphaState==='fallback'&&cell.paint.includes('/original/'+native)
    );
   }), 'all TIS cells use genuine source PNGs: either original unkeyed file:// fallback or correctly keyed original pixel artwork');

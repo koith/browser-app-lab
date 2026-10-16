@@ -333,6 +333,9 @@ function drawBoard(){
  const root=$('board-nodes'),svg=$('board-lines');
  const key=match.map+'|'+match.tiles.join(',');
  if(root.dataset.renderKey!==key){
+   // Keep genuine Registry actors and their animation state while replacing
+   // event tile content (item swaps, map changes and game resumes).
+   const existingPawns=$('board-pawns');
    root.dataset.renderKey=key;root.replaceChildren();svg.replaceChildren();
    const coords=PATH.slice(0,match.tiles.length).map(p=>({x:p.x*820/100,y:p.y*355/100}));
    const path=document.createElementNS('http://www.w3.org/2000/svg','polyline');
@@ -359,8 +362,9 @@ function drawBoard(){
      const sourceArt=sourceTileGraphic(type,i);
      b.dataset.originalArt=sourceArt;
      b.style.setProperty('background','url("./original/Tiles/'+sourceArt+'.png") center / 100% 100% no-repeat','important');
-     // Recover genuine original TIS source RGB by clearing ONLY its external
-     // pink/red chroma matte; each independent live DMP tile remains clickable.
+     // Preserve the source's existing RGBA transparent pixels and derive
+     // its actual click silhouette. Only genuinely opaque exterior mattes
+     // require further masking; every DMP tile stays independently playable.
      window.__LEAF_TIS_ALPHA__?.apply(b,sourceArt);
      if(SOURCE_IDS[match.map]){
        const columns=Math.max(8,Math.sqrt(match.tiles.length)*1.6);
@@ -373,6 +377,7 @@ function drawBoard(){
      b.onclick=()=>log((i+1)+'칸 · '+type+' '+match.players.filter(p=>p.position===i).map(p=>p.name).join(', '));
      fragment.append(b);
    });root.append(fragment);
+   if(existingPawns)root.append(existingPawns);
  }
  const currentPositions=new Set(match.players.map(p=>p.position));
  query('.tile',root).forEach((node,i)=>node.classList.toggle('player-here',currentPositions.has(i)));
@@ -380,7 +385,13 @@ function drawBoard(){
 }
 function drawPawns(){
  let layer=$('board-pawns');
- if(!layer){layer=document.createElement('div');layer.id='board-pawns';$('board-world').append(layer)}
+ const tiles=$('board-nodes');
+ if(!layer){layer=document.createElement('div');layer.id='board-pawns';}
+ // Old renderer always painted actors in an isolated high-z sibling layer,
+ // so distant characters floated ABOVE every nearer original TIS platform.
+ // Dissolve the actor wrapper via CSS display:contents and share the true DMP
+ // painter order with interactive original event tiles.
+ if(tiles&&layer.parentElement!==tiles)tiles.append(layer);
  const players=match.players;
  for(const stale of query('.board-pawn',layer)){
    if(!players.some(p=>String(p.id)===stale.dataset.id))stale.remove();
@@ -413,6 +424,15 @@ function drawPawns(){
    pawn.style.left='calc('+point.x+'% + '+((slot%4)*11-12)+'px)';
    pawn.style.top='calc('+point.y+'% - '+(Math.floor(slot/4)*14)+'px)';
    pawn.style.setProperty('--pawn-color',p.color);
+   const platform=tiles?.querySelector('.tile[data-tile="'+p.position+'"]');
+   const platformDepth=Number(platform?.style.zIndex);
+   // Actor stands above THEIR tile, but genuinely front-facing tiles may
+   // occlude them. The original height/mesh code is not recovered; this uses
+   // only verified DMP planar painter depth, not fabricated elevation.
+   const depth=Number.isFinite(platformDepth)?platformDepth+1:0;
+   pawn.style.setProperty('--leaf-pawn-dmp-depth',String(depth));
+   pawn.dataset.depthTile=String(p.position);
+   pawn.dataset.dmpPainterDepth=String(depth);
    pawn.classList.toggle('pawn-current',match.active===p.id);
    pawn.querySelector('.board-pawn-name').textContent=p.name;
  }

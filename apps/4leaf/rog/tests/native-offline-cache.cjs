@@ -22,7 +22,7 @@ const {chromium}=require('playwright');
    ...['avatardialog1','avatardialog2','avatardialog3'].map(x=>'original/Registry/'+x+'.png'),
    'chatroom-native-expressions.js','chatroom-native-expressions.css','original/ChatRoom/expdialogbtn.png',
    'dice-native-dialog-event.css','original/IMG/dialog.png','original/IMG/eventmsgbox.png',
-   'dice-native-tis-depth.css','dice-native-tis-alpha.js',...['0000','0015','0024','0046'].map(x=>'original/Tiles/'+x+'.png'),
+   'dice-native-tis-depth.css','dice-native-pawn-dmp-depth.css','dice-native-tis-alpha.js',...['0000','0015','0024','0046'].map(x=>'original/Tiles/'+x+'.png'),
    'mainframe-native-toolbar.css','original/MainFrame/toolbarbtn.png','original/MainFrame/pannel.png',
    'knighttown-native.js','knighttown-native.css',
    ...['knightback','plain01','plain02','sea01','sea02','sea03','snow01'].map(s=>'original/KnightTown/'+s+'.png'),
@@ -34,7 +34,7 @@ const {chromium}=require('playwright');
    'original/Registry/sava00.png'
   ];
   await page.waitForFunction(async files=>{
-   const cache=await caches.open('4leaf-revival-pwa-v49');
+   const cache=await caches.open('4leaf-revival-pwa-v50');
    return (await Promise.all(files.map(file=>cache.match('./'+file)))).every(Boolean);
   },critical,{timeout:40000});
   // An established controller must answer image and JS fetches offline.
@@ -189,8 +189,9 @@ const {chromium}=require('playwright');
   assert.equal(offlineTiles.keyedSource,'Tiles/'+offlineTiles.source+'.png',
    'cold offline rendered bitmap retains exact recovered TIS provenance');
   assert.equal(offlineTiles.decoded,'ready','cold offline boot actually decoded the source, not just requested it');
-  assert.ok(offlineTiles.paint.includes('data:image/png'),
-   'source-native offline board uses processed recovered PNG pixels: '+offlineTiles.source);
+  assert.ok(offlineTiles.paint.includes('/original/Tiles/'+offlineTiles.source+'.png')||
+   offlineTiles.paint.includes('data:image/png'),
+   'source-native offline board uses source bytes or genuinely required chroma-key processing');
   // Some original source PNGs (e.g. tile 0024) already have transparent
   // corners; those correctly require ZERO additional pixels removed.
   assert.ok(offlineTiles.removed>=0&&
