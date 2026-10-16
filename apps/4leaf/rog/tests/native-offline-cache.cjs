@@ -189,8 +189,9 @@ const {chromium}=require('playwright');
   assert.equal(offlineTiles.keyedSource,'Tiles/'+offlineTiles.source+'.png',
    'cold offline rendered bitmap retains exact recovered TIS provenance');
   assert.equal(offlineTiles.decoded,'ready','cold offline boot actually decoded the source, not just requested it');
-  assert.ok(offlineTiles.paint.includes('data:image/png'),
-   'source-native offline board uses processed recovered PNG pixels: '+offlineTiles.source);
+  assert.ok(offlineTiles.paint.includes('/original/Tiles/'+offlineTiles.source+'.png')||
+   offlineTiles.paint.includes('data:image/png'),
+   'source-native offline board uses source bytes or genuinely required chroma-key processing');
   // Some original source PNGs (e.g. tile 0024) already have transparent
   // corners; those correctly require ZERO additional pixels removed.
   assert.ok(offlineTiles.removed>=0&&
