@@ -5,6 +5,8 @@ on:
       - 'apps/4leaf/rog/game.js'
       - 'apps/4leaf/rog/classic-focus.css'
       - 'apps/4leaf/rog/board-camera.js'
+      - 'apps/4leaf/rog/dice-dmp-camera-controls.css'
+      - 'apps/4leaf/rog/tests/dice-dmp-full-camera.cjs'
       - 'apps/4leaf/rog/world-perspective.css'
       - 'apps/4leaf/rog/original-stage.css'
       - 'apps/4leaf/rog/dice-native-client-frame.css'
@@ -50,6 +52,8 @@ jobs:
         run: node apps/4leaf/rog/tests/dice-native-pawn-dmp-depth.cjs
       - name: Check 145x97 original TIS chroma-key renderer syntax and file origin fallback
         run: node apps/4leaf/rog/tests/dice-native-tis-alpha.cjs
+      - name: Explore full 1450x1120 original DMP camera via mouse, keyboard, wheel and mobile pinch
+        run: node apps/4leaf/rog/tests/dice-dmp-full-camera.cjs
       - name: Verify native 145x97 TIS and independently depth-sorted original DMP cells in live Chromium
         run: node apps/4leaf/rog/tests/dice-native-tis-depth.cjs
       - name: Verify saved AI turns pause on reload and remain manually rollable
