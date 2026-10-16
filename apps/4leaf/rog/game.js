@@ -85,10 +85,17 @@ if(CHR_SOURCE.length>50){
  if(!profile.team.length)profile.team=DEFAULT_PROFILE.team.slice();
  if(!CARD_MAP[chosenCard])chosenCard=profile.owned[0];
 }
-const savedMatch=safe('match',null);if(savedMatch&&Array.isArray(savedMatch.players)&&savedMatch.players.length>=2&&savedMatch.players.length<=8&&!savedMatch.finished)match=savedMatch;
+const savedMatch=safe('match',null);if(savedMatch&&Array.isArray(savedMatch.players)&&savedMatch.players.length>=2&&savedMatch.players.length<=8&&!savedMatch.finished){
+ match=savedMatch;
+ // Saved AI games never resume automatic dice turns without fresh consent.
+ if(match.mode==='ai')match.botAutoplay=false;
+}
 function activePlayer(){return match?.players?.[match.active]||null}
 function playerCanAct(){
- if(!(match&&!match.finished&&!busy&&activePlayer()&&!activePlayer().bot))return false;
+ if(!(match&&!match.finished&&!busy&&activePlayer()))return false;
+ // A paused computer turn is manually rollable. Fresh hotseat players
+ // already have bot=false; real network permissions remain unchanged.
+ if(activePlayer().bot&&!(match.mode==='ai'&&match.botAutoplay===false))return false;
  if(match.mode==='network'&&!remoteAct){
    const net=window.__LEAF_NET__;
    return !!(net?.connected&&match.active===(net.role==='host'?0:1));
@@ -110,7 +117,13 @@ function syncMusic(){if(!soundOn){if(bgm)bgm.pause();return}const track=({sky:'0
 function sfx(freq=500,duration=.07){if(!soundOn)return;try{const AC=window.AudioContext||window.webkitAudioContext;audioCtx=audioCtx||new AC();const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='triangle';o.frequency.value=freq;g.gain.setValueAtTime(.038,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+duration);o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+duration)}catch{}}
 function chat(who,message,type=''){const line=document.createElement('div');line.className=type;const b=document.createElement('b');b.textContent=who+'　';line.append(b,document.createTextNode(String(message)));$('chat-log').append(line);while($('chat-log').children.length>90)$('chat-log').firstElementChild.remove();$('chat-log').scrollTop=$('chat-log').scrollHeight}
 function profileUI(){$('nick').textContent=profile.name;$('profile-name').textContent=profile.name;$('my-name').textContent=profile.name;$('gp').textContent=profile.gp.toLocaleString();$('shop-gp').textContent=profile.gp.toLocaleString();$('wins').textContent=profile.wins+'승';persist()}
-function navigate(id){if(!routeNames[id])return;route=id;if(id!=='game')$('app')?.classList.remove('dice-items-open');document.getElementById('app')?.classList.toggle('app-classic-dice',id==='game');$('app').classList.toggle('app-game',id==='game');query('.scene').forEach(s=>s.classList.toggle('hidden',s.id!==id));query('[data-route]').forEach(el=>el.classList.toggle('active',el.dataset.route===id));$('where').textContent=routeNames[id];$('chat-location').textContent=routeNames[id];if(id==='game'&&match){drawGame();const p=activePlayer();if(p?.bot&&!busy)setTimeout(()=>{if(route==='game'&&match&&!match.finished&&activePlayer()?.bot&&!busy)takeTurn()},500)}if(id==='shop')drawShop();if(id==='lobby'){drawTeam();refreshResume()}window.dispatchEvent(new CustomEvent('leaf-route-change',{detail:{route:id}}));log(routeNames[id]+'에 입장하였습니다.');syncMusic();sfx(610)}
+function navigate(id){if(!routeNames[id])return;route=id;if(id!=='game')$('app')?.classList.remove('dice-items-open');document.getElementById('app')?.classList.toggle('app-classic-dice',id==='game');$('app').classList.toggle('app-game',id==='game');query('.scene').forEach(s=>s.classList.toggle('hidden',s.id!==id));query('[data-route]').forEach(el=>el.classList.toggle('active',el.dataset.route===id));$('where').textContent=routeNames[id];$('chat-location').textContent=routeNames[id];if(id==='game'&&match){
+ drawGame();
+ const resumedMatch=match,p=activePlayer();
+ if(match.mode==='ai'&&match.botAutoplay===true&&p?.bot&&!busy)
+  setTimeout(()=>{if(route==='game'&&match===resumedMatch&&!match.finished&&
+   match.botAutoplay===true&&activePlayer()?.bot&&!busy)takeTurn()},500);
+}if(id==='shop')drawShop();if(id==='lobby'){drawTeam();refreshResume()}window.dispatchEvent(new CustomEvent('leaf-route-change',{detail:{route:id}}));log(routeNames[id]+'에 입장하였습니다.');syncMusic();sfx(610)}
 function modal(title,body,buttons){
  // Original Genesis IMG/dialog.png is the native 292x110 panel. Limit the
  // source-backed frame to short, real GAME confirmations and status text;
@@ -301,7 +314,7 @@ function startGame(){let map=$('map-select').value;const limit=Number($('point-l
     return modal('온라인 대전 연결','온라인 대전에서는 먼저 상대 브라우저와 연결해야 합니다. 호스트에서 연결을 시작하세요.',[{label:'확인',primary:true}]);
  }let players=[newPlayer(0,false,profile.name,profile.team.slice())];for(let i=0;i<bots;i++){const weakTeams=CHR_SOURCE.length>50?[
  ['c_0096','c_0078','c_0040'],['c_0078','c_0045','c_0096'],['c_0040','c_0078','c_0096'],['c_0045','c_0096','c_0078'],['c_0078','c_0040','c_0045'],['c_0096','c_0045','c_0078'],['c_0040','c_0096','c_0045']]:
- [['rashid','soldier','narcia'],['joan','narcia','soldier'],['soldier','joan','rashid'],['iolyn','soldier','narcia'],['merza','rashid','soldier'],['christian','soldier','joan'],['damian','soldier','narcia']];let team=weakTeams[i].filter((_,j)=>j===0||limit>=8);while(teamStats(team).point>limit)team.pop();players.push(newPlayer(i+1,!hotseat,selectedMode==='network'?(window.__LEAF_NET__?.guestName||'플레이어 2'):(hotseat?'플레이어 '+(i+2):BOT_NAMES[i]),team))}match={version:5,map,mode:selectedMode,diceRegion:window.__LEAF_LOBBY__?.getState?.().region||null,diceChannel:window.__LEAF_LOBBY__?.getState?.().channel||null,startedAt:Date.now(),tiles:generateTiles(map),players,active:0,round:1,finished:false,winner:-1,attribute:'NONE',message:'주사위를 굴려 주세요.',lastRoll:[],history:[],pending:null};busy=false;persist();navigate('game');chat('SYSTEM',map+' 게임을 시작했습니다. '+(selectedMode==='network'?'두 기기 온라인 연결':hotseat?'사람 '+(bots+1)+'명이 번갈아 플레이':'컴퓨터 '+bots+'명과 대전')+'.','system');drawGame();persist()}
+ [['rashid','soldier','narcia'],['joan','narcia','soldier'],['soldier','joan','rashid'],['iolyn','soldier','narcia'],['merza','rashid','soldier'],['christian','soldier','joan'],['damian','soldier','narcia']];let team=weakTeams[i].filter((_,j)=>j===0||limit>=8);while(teamStats(team).point>limit)team.pop();players.push(newPlayer(i+1,!hotseat,selectedMode==='network'?(window.__LEAF_NET__?.guestName||'플레이어 2'):(hotseat?'플레이어 '+(i+2):BOT_NAMES[i]),team))}match={version:5,map,mode:selectedMode,botAutoplay:selectedMode==='ai',diceRegion:window.__LEAF_LOBBY__?.getState?.().region||null,diceChannel:window.__LEAF_LOBBY__?.getState?.().channel||null,startedAt:Date.now(),tiles:generateTiles(map),players,active:0,round:1,finished:false,winner:-1,attribute:'NONE',message:'주사위를 굴려 주세요.',lastRoll:[],history:[],pending:null};busy=false;persist();navigate('game');chat('SYSTEM',map+' 게임을 시작했습니다. '+(selectedMode==='network'?'두 기기 온라인 연결':hotseat?'사람 '+(bots+1)+'명이 번갈아 플레이':'컴퓨터 '+bots+'명과 대전')+'.','system');drawGame();persist()}
 function tileGlyph(type){return {start:'S',goal:'G',normal:'✧',warp:'◈',keeper:'⚔',prison:'▤',chest:'▣',boost:'+3',boost4:'+4',attribute:'✥',joker:'★',random:'?',ability:'✶',ability100:'✦',clover:'♣',spade:'♠',doa:'☠',curse:'♠',blessing:'✥',arena:'⚔'}[type]||'✧'}
 function appendMove(message){if(!match)return;match.message=message;match.history.push(message);if(match.history.length>90)match.history.shift();toast(message);persist()}
 /* Source-proven historical sprite numbers from original Dice/DMP.pak palette headers:
@@ -600,7 +613,25 @@ function drawNativeChessmen(){
   };
  }
 }
-function drawGame(){if(!match||!MAPS[match.map])return;chooseSourcePath(match.map);const p=(match.mode==='hotseat'||match.mode==='network'?activePlayer():match.players[0]),stats=teamStats(p.team);$('game-map-title').textContent=match.map;const elapsed=Math.floor((Date.now()-(match.startedAt||Date.now()))/1000);$('mini-time').textContent='TIME '+formatGameDuration(Math.max(0,elapsed))+' / GP '+formatGameDuration(match.players.length*90);$('element-label').textContent=match.attribute;$('player-count').textContent=match.players.length;$('turn-indicator').textContent='ROUND '+match.round+' · '+match.players[match.active].name+' TURN';$('my-name').textContent=p.name;$('my-stats').textContent='이동 '+stats.move+' · 공격 '+stats.atk+' · 방어 '+stats.def+' · 지력 +'+stats.int;$('my-position').textContent=p.jail>0?'감옥 '+p.jail+'턴':p.position===0?'START':p.position===match.tiles.length-1?'GOAL':(p.position+1)+'번째 칸';$('my-portrait').innerHTML='<img class="player-sprite" alt="" src="'+imageFor(p.team[0]||'soldier')+'">';$('ability-fill').style.width=p.ability+'%';$('game-players').replaceChildren();match.players.forEach((user,i)=>{const li=document.createElement('div');li.className=match.active===i?'is-turn':'';li.textContent=(match.active===i?'▶ ':'　')+user.pawn+' '+user.name+' '+(user.position+1)+'칸 · '+user.ability+'%';li.style.color=user.color;$('game-players').append(li)});$('my-items').replaceChildren();p.items.forEach((itemId,i)=>{const item=ITEM_MAP[itemId],btn=document.createElement('button');btn.className='item-card';btn.innerHTML='<span class="item-icon">'+(item?.icon||'✧')+'</span>'+(item?.name||itemId);btn.title=item.hint;btn.disabled=match.finished||!playerCanAct()||p.usedItem||busy;btn.onclick=()=>useItem(i);$('my-items').append(btn)});$('roll-btn').disabled=!playerCanAct();$('ability-btn').disabled=!playerCanAct()||p.ability<100;$('move-log').textContent=match.message;syncNativeDiceEvent(match.message);drawBoard();drawBattlePanels();drawNativeChessmen();drawMinimap();trackActivePawn()}
+function drawGame(){if(!match||!MAPS[match.map])return;chooseSourcePath(match.map);
+ const controllingOpponent=match.mode==='ai'&&match.botAutoplay===false;
+ const p=(match.mode==='hotseat'||match.mode==='network'||controllingOpponent?activePlayer():match.players[0]),stats=teamStats(p.team);
+ const toggle=$('dice-ai-autoplay-toggle');
+ if(toggle){
+  const ai=match.mode==='ai'&&!match.finished;
+  toggle.hidden=!ai;
+  toggle.textContent=match.botAutoplay?'AI 자동진행: 켜짐':'AI 자동진행: 일시정지';
+  toggle.setAttribute('aria-pressed',String(ai&&match.botAutoplay===true));
+  toggle.title=match.botAutoplay?'컴퓨터 상대의 자동 주사위 턴을 일시정지합니다.':
+   '상대방 턴을 직접 주사위 굴리기로 진행합니다. 눌러 자동 진행을 다시 켤 수 있습니다.';
+ }
+ const roll=$('roll-btn');
+ if(roll){
+  const manualBot=controllingOpponent&&activePlayer()?.bot;
+  roll.setAttribute('aria-label',manualBot?activePlayer().name+'의 주사위 직접 굴리기':'주사위 굴리기');
+  roll.title=manualBot?'컴퓨터 상대의 이번 턴도 사용자가 직접 굴립니다.':'이번 참가자의 주사위를 굴립니다.';
+ }
+$('game-map-title').textContent=match.map;const elapsed=Math.floor((Date.now()-(match.startedAt||Date.now()))/1000);$('mini-time').textContent='TIME '+formatGameDuration(Math.max(0,elapsed))+' / GP '+formatGameDuration(match.players.length*90);$('element-label').textContent=match.attribute;$('player-count').textContent=match.players.length;$('turn-indicator').textContent='ROUND '+match.round+' · '+match.players[match.active].name+' TURN';$('my-name').textContent=p.name;$('my-stats').textContent='이동 '+stats.move+' · 공격 '+stats.atk+' · 방어 '+stats.def+' · 지력 +'+stats.int;$('my-position').textContent=p.jail>0?'감옥 '+p.jail+'턴':p.position===0?'START':p.position===match.tiles.length-1?'GOAL':(p.position+1)+'번째 칸';$('my-portrait').innerHTML='<img class="player-sprite" alt="" src="'+imageFor(p.team[0]||'soldier')+'">';$('ability-fill').style.width=p.ability+'%';$('game-players').replaceChildren();match.players.forEach((user,i)=>{const li=document.createElement('div');li.className=match.active===i?'is-turn':'';li.textContent=(match.active===i?'▶ ':'　')+user.pawn+' '+user.name+' '+(user.position+1)+'칸 · '+user.ability+'%';li.style.color=user.color;$('game-players').append(li)});$('my-items').replaceChildren();p.items.forEach((itemId,i)=>{const item=ITEM_MAP[itemId],btn=document.createElement('button');btn.className='item-card';btn.innerHTML='<span class="item-icon">'+(item?.icon||'✧')+'</span>'+(item?.name||itemId);btn.title=item.hint;btn.disabled=match.finished||!playerCanAct()||p.usedItem||busy;btn.onclick=()=>useItem(i);$('my-items').append(btn)});$('roll-btn').disabled=!playerCanAct();$('ability-btn').disabled=!playerCanAct()||p.ability<100;$('move-log').textContent=match.message;syncNativeDiceEvent(match.message);drawBoard();drawBattlePanels();drawNativeChessmen();drawMinimap();trackActivePawn()}
 const mapViewport={zoom:1.25,panX:0,panY:0,autoFollow:true};
 function trackActivePawn(){
  if(!match||!PATH.length)return;
@@ -990,7 +1021,9 @@ async function takeTurn(){
    if(playerCanAct())window.__LEAF_NET__?.send?.({type:'command',action:'roll'});
    return;
  }
- busy=true;const p=match.players[match.active];drawGame();if(p.bot){await wait(250);await computerPrepareTurn(p);if(match.finished){busy=false;return}}
+ busy=true;const p=match.players[match.active];drawGame();if(p.bot&&match.mode==='ai'&&match.botAutoplay===true){
+  await wait(250);await computerPrepareTurn(p);if(match.finished){busy=false;return}
+ }
  if(p.jail>0){
    const a=d(6),b=d(6);showDice([a,b]);
    if(a===b){p.jail=0;appendMove(p.name+' 감옥 탈출! 더블 '+a+'/'+b+' · 이동 턴 진행')}
@@ -1027,7 +1060,11 @@ function nextTurn(){
  if(match.active===0)match.round++;
  const p=activePlayer();p.usedItem=false;
  drawGame();persist();
- if(p.bot)setTimeout(()=>{if(route==='game'&&!busy&&match&&!match.finished&&match.players[match.active].bot)takeTurn()},430);
+ if(p.bot&&match.mode==='ai'&&match.botAutoplay===true){
+  const scheduledMatch=match;
+  setTimeout(()=>{if(route==='game'&&match===scheduledMatch&&!busy&&!match.finished&&
+   match.botAutoplay===true&&match.players[match.active].bot)takeTurn()},430);
+ }
  else appendMove(p.name+' 차례입니다. 주사위를 굴리세요.');
 }
 /* Recovered Dice/IMG/menu.png contains two independent 29px game menu
@@ -1058,7 +1095,21 @@ function installNativeDiceMenu(){
   $('dice-inspect-tool')?.click();
  };
 }
-function init(){installBoardControls();installNativeDiceMenu();installAuthenticMaps();if(match)chooseSourcePath(match.map);profileUI();buildRoomList();buildPeople();drawTeam();drawShop();query('[data-route]').forEach(b=>b.addEventListener('click',()=>navigate(b.dataset.route)));query('.group-tab').forEach(b=>b.addEventListener('click',()=>{group=b.dataset.group;shopPage=0;drawShop()}));$('shop-prev').onclick=()=>{shopPage--;drawShop()};$('shop-next').onclick=()=>{shopPage++;drawShop()};$('point-limit').onchange=drawTeam;$('start-game').onclick=startGame;$('resume-game').onclick=()=>{if(match&&!match.finished){busy=false;navigate('game');chat('SYSTEM','진행 중인 게임을 이어합니다.','system')}};$('roll-btn').onclick=takeTurn;$('ability-btn').onclick=useAbility;$('exit-game').onclick=()=>modal('게임에서 나가기','진행 중인 게임은 브라우저에 보관됩니다. 나갔다가 주사위의 잔영 버튼으로 다시 들어올 수 있습니다.',[{label:'나가기',primary:true,run:()=>navigate('lobby')},{label:'취소'}]);$('shop-buy').onclick=()=>{const c=CARD_MAP[chosenCard];if(profile.owned.includes(c.id))return modal('매직카덴',c.name+' 카드는 이미 가지고 있습니다.',[{label:'확인'}]);if(profile.gp<c.price)return modal('매직카덴','GP가 부족합니다.',[{label:'확인'}]);modal('매직카덴',c.name+' 카드를 '+c.price.toLocaleString()+'GP에 구매하시겠습니까?',[{label:'구매',primary:true,run:()=>{profile.gp-=c.price;profile.owned.push(c.id);profileUI();drawShop();drawTeam();chat('매직카덴',c.name+' 카드를 구매했습니다.','system');sfx(830)}},{label:'취소'}])};$('rename').onclick=()=>{const div=document.createElement('div');div.textContent='사용할 닉네임을 입력하세요.';const input=document.createElement('input');input.maxLength=12;input.value=profile.name;div.append(document.createElement('hr'),input);modal('4LEAF 별명 변경',div,[{label:'변경',primary:true,run:()=>{if(!input.value.trim())return;profile.name=input.value.trim().slice(0,12);profileUI();buildPeople();if($('rog-real-user'))$('rog-real-user').textContent='♧ '+profile.name+' (내 기기)';if(match&&!match.finished)match.players[0].name=profile.name;chat('SYSTEM','닉네임이 '+profile.name+'(으)로 변경되었습니다.','system')}},{label:'취소'}])};$('audio').onclick=()=>{soundOn=!soundOn;syncMusic();log(soundOn?'원작 배경음악/효과음 켜짐':'배경음악/효과음 꺼짐');sfx(650)};$('help').onclick=()=>navigate('help-screen');$('make-room').onclick=()=>modal('새로운 채팅방','채팅방 개설은 로컬 재현 모드에서만 가능합니다.',[{label:'확인'}]);$('chat-form').onsubmit=e=>{e.preventDefault();const input=$('message'),message=input.value.trim();input.value='';if(!message)return;chat(profile.name,message);if(window.__LEAF_NET__?.connected&&match?.mode==='network')window.__LEAF_NET__.send({type:'chat',who:profile.name,text:message});sfx(480);};const list=$('online-list');list.replaceChildren();const selfUser=document.createElement('div');selfUser.id='rog-real-user';selfUser.textContent='♧ '+profile.name+' (내 기기)';list.append(selfUser);setInterval(()=>{$('clock').textContent=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})},12000);$('clock').textContent=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});chat('SYSTEM','4LEAF Browser에 오신 것을 환영합니다.','system');chat('SYSTEM','원작 화면 재구성 · AI/로컬 대전 · 브라우저 간 직접 연결. 원작 중앙 서버는 지원하지 않습니다.','system');navigate('sky');window.__LEAF_BRIDGE__={getMatch:()=>match,getName:()=>profile.name,onState:null,
+function toggleBotAutoplay(){
+ if(!match||match.mode!=='ai'||match.finished)return;
+ match.botAutoplay=!match.botAutoplay;
+ const enabled=match.botAutoplay;
+ drawGame();persist();
+ appendMove(enabled?'컴퓨터 상대 자동 주사위: 켜짐':'컴퓨터 상대 자동 주사위: 일시정지 · 상대 턴도 직접 굴리세요.');
+ if(enabled&&activePlayer()?.bot&&!busy){
+  const scheduledMatch=match;
+  setTimeout(()=>{if(route==='game'&&match===scheduledMatch&&!busy&&!match.finished&&
+   match.botAutoplay===true&&activePlayer()?.bot)takeTurn()},430);
+ }
+}
+function init(){installBoardControls();installNativeDiceMenu();
+ const botToggle=$('dice-ai-autoplay-toggle');if(botToggle)botToggle.onclick=toggleBotAutoplay;
+ installAuthenticMaps();if(match)chooseSourcePath(match.map);profileUI();buildRoomList();buildPeople();drawTeam();drawShop();query('[data-route]').forEach(b=>b.addEventListener('click',()=>navigate(b.dataset.route)));query('.group-tab').forEach(b=>b.addEventListener('click',()=>{group=b.dataset.group;shopPage=0;drawShop()}));$('shop-prev').onclick=()=>{shopPage--;drawShop()};$('shop-next').onclick=()=>{shopPage++;drawShop()};$('point-limit').onchange=drawTeam;$('start-game').onclick=startGame;$('resume-game').onclick=()=>{if(match&&!match.finished){busy=false;navigate('game');chat('SYSTEM','진행 중인 게임을 이어합니다.','system')}};$('roll-btn').onclick=takeTurn;$('ability-btn').onclick=useAbility;$('exit-game').onclick=()=>modal('게임에서 나가기','진행 중인 게임은 브라우저에 보관됩니다. 나갔다가 주사위의 잔영 버튼으로 다시 들어올 수 있습니다.',[{label:'나가기',primary:true,run:()=>navigate('lobby')},{label:'취소'}]);$('shop-buy').onclick=()=>{const c=CARD_MAP[chosenCard];if(profile.owned.includes(c.id))return modal('매직카덴',c.name+' 카드는 이미 가지고 있습니다.',[{label:'확인'}]);if(profile.gp<c.price)return modal('매직카덴','GP가 부족합니다.',[{label:'확인'}]);modal('매직카덴',c.name+' 카드를 '+c.price.toLocaleString()+'GP에 구매하시겠습니까?',[{label:'구매',primary:true,run:()=>{profile.gp-=c.price;profile.owned.push(c.id);profileUI();drawShop();drawTeam();chat('매직카덴',c.name+' 카드를 구매했습니다.','system');sfx(830)}},{label:'취소'}])};$('rename').onclick=()=>{const div=document.createElement('div');div.textContent='사용할 닉네임을 입력하세요.';const input=document.createElement('input');input.maxLength=12;input.value=profile.name;div.append(document.createElement('hr'),input);modal('4LEAF 별명 변경',div,[{label:'변경',primary:true,run:()=>{if(!input.value.trim())return;profile.name=input.value.trim().slice(0,12);profileUI();buildPeople();if($('rog-real-user'))$('rog-real-user').textContent='♧ '+profile.name+' (내 기기)';if(match&&!match.finished)match.players[0].name=profile.name;chat('SYSTEM','닉네임이 '+profile.name+'(으)로 변경되었습니다.','system')}},{label:'취소'}])};$('audio').onclick=()=>{soundOn=!soundOn;syncMusic();log(soundOn?'원작 배경음악/효과음 켜짐':'배경음악/효과음 꺼짐');sfx(650)};$('help').onclick=()=>navigate('help-screen');$('make-room').onclick=()=>modal('새로운 채팅방','채팅방 개설은 로컬 재현 모드에서만 가능합니다.',[{label:'확인'}]);$('chat-form').onsubmit=e=>{e.preventDefault();const input=$('message'),message=input.value.trim();input.value='';if(!message)return;chat(profile.name,message);if(window.__LEAF_NET__?.connected&&match?.mode==='network')window.__LEAF_NET__.send({type:'chat',who:profile.name,text:message});sfx(480);};const list=$('online-list');list.replaceChildren();const selfUser=document.createElement('div');selfUser.id='rog-real-user';selfUser.textContent='♧ '+profile.name+' (내 기기)';list.append(selfUser);setInterval(()=>{$('clock').textContent=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})},12000);$('clock').textContent=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});chat('SYSTEM','4LEAF Browser에 오신 것을 환영합니다.','system');chat('SYSTEM','원작 화면 재구성 · AI/로컬 대전 · 브라우저 간 직접 연결. 원작 중앙 서버는 지원하지 않습니다.','system');navigate('sky');window.__LEAF_BRIDGE__={getMatch:()=>match,getName:()=>profile.name,onState:null,
  receiveMatch:remote=>{if(window.__LEAF_NET__?.role!=='guest'||!remote||!MAPS[remote.map])return;
    match=remote;busy=false;
    try{localStorage.setItem('rog_match',JSON.stringify(match))}catch{}
