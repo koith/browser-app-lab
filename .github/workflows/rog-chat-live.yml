@@ -35,6 +35,8 @@ jobs:
                  "$base/world-social.css?qa=${GITHUB_SHA}" -o /tmp/leaf-world-live.css &&
                cmp -s /tmp/leaf-social-live.js apps/4leaf/rog/social-chat.js &&
                cmp -s /tmp/leaf-world-live.css apps/4leaf/rog/world-social.css &&
+               curl -fLsS --max-time 15 "$base/mainframe-native-toolbar.css?qa=${GITHUB_SHA}" -o /tmp/leaf-toolbar-live.css &&
+               cmp -s /tmp/leaf-toolbar-live.css apps/4leaf/rog/mainframe-native-toolbar.css &&
                curl -fLsS --max-time 15 "$base/world-map-source-moon.css?qa=${GITHUB_SHA}" -o /tmp/leaf-moon-live.css &&
                cmp -s /tmp/leaf-moon-live.css apps/4leaf/rog/world-map-source-moon.css &&
                curl -fLsS --max-time 15 "$base/dice-native-client-frame.css?qa=${GITHUB_SHA}" -o /tmp/leaf-dice-live.css &&
@@ -71,6 +73,10 @@ jobs:
         run: |
           npm install --no-save playwright
           npx playwright install chromium --with-deps
+      - name: Verify published MainFrame native 120x270 sprite navigation and mobile on public Pages
+        env:
+          FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
+        run: node apps/4leaf/rog/tests/mainframe-native-toolbar.cjs
       - name: Verify original expression atlas buttons and two real visitors on public Pages
         env:
           FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
