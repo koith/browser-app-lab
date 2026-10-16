@@ -45,7 +45,7 @@ const {chromium}=require('playwright');
    &&document.querySelector('#leaf-world-stage .leaf-native-snapnumber')?.dataset.ready==='true',
    null,{timeout:18000});
   // Cold PWA installation must draw the true 120x270 MainFrame toolbar,
-  // including its genuine four-state sprite and the 323x240 tiled panel.
+  // including its genuine four-state sprite and the 323x124 tiled panel.
   // This remains working even before the player ever navigates menus online.
   const offlineChrome=await page.evaluate(async()=>{
    const native=async name=>{
@@ -62,7 +62,7 @@ const {chromium}=require('playwright');
    };
   });
   assert.deepEqual(offlineChrome.atlas,[120,270],'PWA has original MainFrame toolbar atlas without any prior menu visit');
-  assert.deepEqual(offlineChrome.panel,[323,240],'PWA has original MainFrame tiled menu background');
+  assert.deepEqual(offlineChrome.panel,[323,124],'PWA has original MainFrame tiled menu background');
   assert.ok(offlineChrome.menuBackground.includes('/original/MainFrame/pannel.png'));
   assert.ok(offlineChrome.iconBackground.includes('/original/MainFrame/toolbarbtn.png'));
   assert.equal(offlineChrome.sourceButton,30,'PWA menu retains clickable source 30px atlas cells');
