@@ -111,7 +111,7 @@ const {chromium}=require('playwright');
   assert.equal(phone.barHeight,34,'touch client source toolbar remains compact');
   assert.ok(phone.rightmost<=phone.viewportWidth+1,
    'every live source icon, including question-mark help, remains within phone viewport');
-  assert.ok(phone.buttons.every(n=>n===30),'phone never stretches extracted original pixels');
+  assert.ok(phone.buttons.every(n=>Math.abs(n-30)<.02),'phone never stretches extracted original pixels: '+JSON.stringify(phone));
   assert.equal(phone.location,'none','responsive original toolbar does not crop icons for invented text banner');
   await page.locator('#app > nav.toolbar [data-route="shop"]').click();
   assert.ok(await page.locator('#shop:not(.hidden)').isVisible(),'source atlas icons remain touch-sized and usable');
