@@ -28,6 +28,13 @@
      state.panX=Number(panX)||0;state.panY=Number(panY)||0;
      state.manual=state.panX!==0||state.panY!==0;
      camera.render();
+     return camera.getState();
+   },
+   panBy(dx,dy){
+     if(!Number.isFinite(dx)||!Number.isFinite(dy))return camera.getState();
+     state.panX+=dx;state.panY+=dy;state.manual=true;
+     camera.render();
+     return camera.getState();
    },
    zoom(delta){
      state.scale=clamp(Math.round((state.scale+delta)*100)/100,0.65,2.4);
@@ -44,10 +51,15 @@
      if(width<20||height<20)return;
      const scale=state.scale;
      const worldW=SIZE.width*scale,worldH=SIZE.height*scale;
-     let x=width*.49-state.cameraX*scale+state.panX,
-         y=height*.52-state.cameraY*scale+state.panY;
-     x=worldW>=width?clamp(x,width-worldW,0):(width-worldW)/2;
-     y=worldH>=height?clamp(y,height-worldH,0):(height-worldH)/2;
+     const anchorX=width*.49-state.cameraX*scale,
+           anchorY=height*.52-state.cameraY*scale;
+     // Respect the dimensions of the ACTUAL 1450x1120 recovered-DMP world,
+     // not the old zoom-only limit of 1/8 of the viewport. Every source
+     // cell must be accessible even at 65%-100% zoom.
+     const x=worldW>=width?clamp(anchorX+state.panX,width-worldW,0):(width-worldW)/2,
+           y=worldH>=height?clamp(anchorY+state.panY,height-worldH,0):(height-worldH)/2;
+     state.panX=worldW>=width?x-anchorX:0;
+     state.panY=worldH>=height?y-anchorY:0;
      world.style.transform='translate3d('+x.toFixed(2)+'px,'+y.toFixed(2)+'px,0) scale('+scale+')';
      world.style.setProperty('--leaf-camera-scale',scale);
      if($('board-zoom-reset'))$('board-zoom-reset').title='원본 게임 카메라 · '+Math.round(scale*100)+'% · 현재 체스맨 중심';
@@ -57,7 +69,12 @@
          const point=state.path[Number(tile.dataset.tile)];
          if(!point)continue;
          const sx=point.x/100*SIZE.width*scale+x,sy=point.y/100*SIZE.height*scale+y;
-         tile.style.visibility=(sx < -120 || sy < -100 || sx>width+120 || sy>height+110)?'hidden':'visible';
+         // The native sprite is a 145x97 platform. Keep partially visible
+         // pieces at high zoom; fixed 120px culling margins wrongly
+         // disappeared 2.4x platforms while they were still on-screen.
+         const radiusX=73*scale+2,radiusY=49*scale+2;
+         tile.style.visibility=(sx < -radiusX || sy < -radiusY ||
+           sx>width+radiusX || sy>height+radiusY)?'hidden':'visible';
        }
      }
    },
