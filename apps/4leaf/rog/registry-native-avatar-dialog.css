@@ -1,0 +1,192 @@
+/* 2001–2004 source Registry/avatardialog1,2,3. Unlike a screenshot
+ * background: each image is an independent original PNG, the nickname is
+ * genuine live user data, 75×141 preview source is a separately selectable
+ * avatar, and the 12 input controls are individually clickable/keyboardable.
+ */
+body>.social-modal .social-modal-panel.social-native-avatar-panel{
+ box-sizing:border-box!important;
+ width:min(400px,calc(100vw - 12px))!important;
+ max-width:400px!important;
+ max-height:min(94dvh,650px)!important;
+ overflow:auto!important;
+ padding:7px 8px 9px!important;
+ background:#eff5fd!important;
+ border:2px ridge #9eb2df!important;
+ border-radius:3px!important;
+ box-shadow:0 5px 24px #0e205db3!important;
+ color:#28427c!important;
+}
+body>.social-modal .social-native-avatar-panel>.social-modal-title{
+ box-sizing:border-box;
+ display:flex!important;
+ justify-content:flex-end!important;
+ height:0!important;min-height:0!important;
+ overflow:visible!important;
+ border:0!important;margin:0!important;padding:0!important;
+ background:transparent!important;
+ position:relative;z-index:10;
+}
+body>.social-modal .social-native-avatar-panel>.social-modal-title b{
+ display:none!important;
+}
+body>.social-modal .social-native-avatar-panel>.social-modal-title button{
+ position:absolute;top:3px;right:1px;
+ width:22px!important;height:22px!important;
+ padding:0!important;z-index:12;
+ border:1px solid #7798c4!important;
+ color:#28467f!important;
+ background:#d9e8ff!important;
+ font-size:18px!important;
+ line-height:18px!important;
+ cursor:pointer;
+}
+body>.social-modal .social-native-avatar-panel .social-native-avatar-header{
+ display:flex;align-items:center;
+ justify-content:flex-start;gap:21px;
+ position:relative;
+ min-height:35px;
+ padding:0 0 4px 2px;
+ background:transparent;
+}
+body>.social-modal .social-native-avatar-panel .social-native-avatar-header img{
+ display:block;max-width:none;
+ object-fit:contain;flex:none;
+ image-rendering:auto;
+}
+body>.social-modal .social-native-avatar-panel .social-native-avatar-header img.social-native-avatar-logo{
+ width:111px;height:31px;
+}
+body>.social-modal .social-native-avatar-panel .social-native-avatar-header img.social-native-avatar-title{
+ width:180px;height:29px;
+}
+body>.social-modal .social-native-avatar-panel .social-native-avatar-scene{
+ box-sizing:border-box;
+ width:100%;
+ max-width:368px;
+ aspect-ratio:368/207;
+ position:relative;
+ margin:2px auto 5px;
+ overflow:hidden;
+ background:#fff;
+ color:#314d85;
+}
+body>.social-modal .social-native-avatar-panel .social-native-avatar-source{
+ position:absolute;inset:0;
+ display:block;width:100%;height:100%;
+ object-fit:fill;
+ user-select:none;pointer-events:none;
+}
+body>.social-modal .social-native-avatar-panel .social-native-avatar-name{
+ position:absolute;
+ left:15.8%;top:5.3%;width:25.5%;height:10%;
+ display:block;box-sizing:border-box;
+ overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
+ font:700 clamp(9px,1.1vw,11px)/19px Gulim,'굴림',sans-serif;
+ color:#2d498d;
+ background:transparent;
+ user-select:text;
+}
+body>.social-modal .social-native-avatar-panel .social-native-avatar-preview{
+ position:absolute;
+ left:70.4%;top:2.9%;
+ display:block;
+ width:20.38%;height:68.12%;
+ object-fit:contain;object-position:center bottom;
+ image-rendering:pixelated;
+ border:0;box-shadow:none;
+ filter:none;
+ pointer-events:none;
+}
+body>.social-modal .social-native-avatar-panel .social-native-avatar-selection{
+ position:absolute;left:69.2%;top:83%;width:25.5%;
+ color:#2c4887;text-align:center;
+ font:700 10px Gulim,'굴림',sans-serif;
+ pointer-events:none;
+}
+body>.social-modal .social-native-avatar-panel .social-avatar-chooser.social-native-avatar-chooser{
+ display:grid!important;
+ grid-template-columns:repeat(6,minmax(0,1fr))!important;
+ gap:3px!important;
+ width:100%!important;
+ margin:0 auto!important;
+ padding:3px 2px!important;
+ background:#d9e6f9!important;
+ border:1px solid #a7b9df;
+}
+body>.social-modal .social-native-avatar-panel .social-native-avatar-chooser button{
+ display:flex!important;
+ align-items:center;justify-content:center;
+ box-sizing:border-box!important;
+ min-width:0!important;
+ height:76px!important;
+ padding:1px!important;
+ border:1px solid #a9bde1!important;
+ border-radius:0!important;
+ background:#eaf1fc!important;
+ box-shadow:none!important;
+ cursor:pointer;
+}
+body>.social-modal .social-native-avatar-panel .social-native-avatar-chooser button.selected{
+ border:2px solid #537ad2!important;
+ background:#c2d5f7!important;
+ box-shadow:inset 0 0 0 1px white!important;
+}
+body>.social-modal .social-native-avatar-panel .social-native-avatar-chooser button:is(:hover,:focus-visible){
+ outline:2px solid #e4b95a!important;
+ outline-offset:-2px;
+ background:#d8e6fc!important;
+}
+body>.social-modal .social-native-avatar-panel .social-native-avatar-chooser img{
+ display:block;
+ height:70px!important;
+ width:auto!important;
+ max-width:100%!important;
+ object-fit:contain!important;
+ object-position:center bottom;
+ image-rendering:pixelated;
+ border:0!important;
+ pointer-events:none;
+}
+body>.social-modal .social-native-avatar-panel .social-native-avatar-actions{
+ display:flex;align-items:center;justify-content:flex-end;gap:7px;
+ margin:7px 0 0;min-height:27px;
+ color:#52618f;
+ font:10px Gulim,'굴림',sans-serif;
+}
+body>.social-modal .social-native-avatar-panel .social-native-avatar-hint{
+ flex:1;min-width:0;
+ overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
+}
+body>.social-modal .social-native-avatar-panel .social-native-avatar-actions button{
+ width:65px;height:24px;
+ border:1px solid #819bcf!important;
+ border-radius:0!important;
+ box-shadow:inset 1px 1px white!important;
+ background:linear-gradient(#eff7ff,#adc4ee)!important;
+ color:#274582!important;
+ font:700 11px Gulim,'굴림',sans-serif!important;
+ cursor:pointer;
+}
+body>.social-modal .social-native-avatar-panel .social-native-avatar-actions button.social-native-avatar-confirm{
+ background:linear-gradient(#fefbe9,#edce8b)!important;
+}
+body>.social-modal .social-native-avatar-panel .social-native-avatar-actions button:is(:hover,:focus-visible){
+ outline:2px solid #496db4!important;outline-offset:1px;
+}
+@media(max-width:360px){
+ body>.social-modal .social-native-avatar-panel .social-native-avatar-header{
+  gap:7px;
+ }
+ body>.social-modal .social-native-avatar-panel .social-native-avatar-header img.social-native-avatar-logo{
+  width:89px;height:auto;
+ }
+ body>.social-modal .social-native-avatar-panel .social-native-avatar-header img.social-native-avatar-title{
+  width:153px;height:auto;
+ }
+ body>.social-modal .social-native-avatar-panel .social-native-avatar-chooser button{
+  height:66px!important;
+ }
+ body>.social-modal .social-native-avatar-panel .social-native-avatar-chooser img{
+  height:61px!important;
+ }
+}
