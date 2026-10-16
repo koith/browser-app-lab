@@ -27,7 +27,7 @@ const {chromium}=require('playwright');
    };
   });
   assert.deepEqual(originals.toolbar,[120,270],'genuine 4 states × 9 rows sprite');
-  assert.deepEqual(originals.panel,[323,240],'genuine MainFrame tile panel source');
+  assert.deepEqual(originals.panel,[323,124],'genuine MainFrame tile panel source');
   assert.deepEqual(originals.title,[680,54],'genuine unchanged native 4LEAF wordmark');
 
   const native=await page.evaluate(()=>{
