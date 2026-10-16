@@ -46,9 +46,13 @@ const path=require('node:path');
    null,{timeout:20000})));
   const initial=await host.locator('.social-avatar.self img').getAttribute('src');
   await host.locator('.social-original-tool[aria-label="아바타 선택"]').click();
-  await host.waitForFunction(()=>
-   document.querySelector('.social-native-avatar-panel .social-native-avatar-source')
-    ?.dataset.sourceReady==='true',null,{timeout:16000});
+  await host.waitForFunction(()=>{
+   // All three originals must RECOVER after the intentional 503s. Waiting
+   // only for the backdrop races retries of the independent title artwork.
+   const source=document.querySelector('#social-modal .social-native-avatar-panel');
+   const parts=source?.querySelectorAll('.social-native-avatar-header img,.social-native-avatar-source');
+   return parts?.length===3&&[...parts].every(img=>img.dataset.sourceReady==='true');
+  },null,{timeout:19000});
   const source=await host.locator('#social-modal .social-native-avatar-panel').evaluate(async panel=>{
    const assets=async file=>{
     const img=new Image();img.src='./original/Registry/'+file;
