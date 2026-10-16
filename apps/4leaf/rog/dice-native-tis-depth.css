@@ -1,0 +1,60 @@
+/* Genesis Dice: source-native TIS raised hex platform geometry.
+ * Extracted PNGs are 145x97; original DMP cell grid has 70px horizontal
+ * and 47px vertical pitch. Older reconstructed UI displayed each 145x97
+ * authentic sprite at only 70x47, turning the historical overlapping 3D-ish
+ * path into disconnected tiny proxies. Keep ORIGINAL source pixels at 1:1,
+ * with painter's order from real DMP y coordinates and working game events.
+ *
+ * This does not claim recovered 3D meshes, elevations or original lighting.
+ */
+#app.app-classic-dice #game .board-world #board-nodes .tile[data-native-tis-size="145x97"]{
+ box-sizing:border-box!important;
+ position:absolute!important;
+ display:block!important;
+ width:145px!important;
+ height:97px!important;
+ min-width:145px!important;
+ min-height:97px!important;
+ max-width:145px!important;
+ max-height:97px!important;
+ padding:0!important;
+ margin:0!important;
+ border:0!important;
+ outline-offset:0;
+ border-radius:0!important;
+ box-shadow:none!important;
+ transform:translate(-50%,-50%)!important;
+ transform-origin:50% 50%!important;
+ background-color:transparent!important;
+ background-size:145px 97px!important;
+ background-repeat:no-repeat!important;
+ image-rendering:auto!important;
+ overflow:visible!important;
+ /* The source TIS art has a real hexagonal silhouette with transparency
+    at its outer corners. Restrict overlapping hitboxes to the original
+    visual polygon instead of letting invisible rectangle corners swallow
+    clicks intended for another platform below. The perimeter is inferred
+    from the PNG boundaries, not from the lost original EXE hit-test data. */
+ clip-path:polygon(28% 0%,72% 0%,100% 52%,72% 100%,28% 100%,0 52%);
+ -webkit-clip-path:polygon(28% 0%,72% 0%,100% 52%,72% 100%,28% 100%,0 52%);
+}
+#app.app-classic-dice #game .board-world #board-nodes .tile[data-native-tis-size="145x97"]::before,
+#app.app-classic-dice #game .board-world #board-nodes .tile[data-native-tis-size="145x97"]::after{
+ display:none!important;
+}
+#app.app-classic-dice #game .board-world #board-nodes .tile[data-native-tis-size="145x97"]:is(:hover,:focus-visible){
+ filter:brightness(1.13)!important;
+ outline:0!important;
+}
+#app.app-classic-dice #game .board-world #board-nodes .tile[data-native-tis-size="145x97"].player-here{
+ filter:brightness(1.08)!important;
+}
+/* Mobile: keep native 145×97 logical pixels inside the existing game-camera
+   transform, which scales uniformly and clips. Never selectively shrink
+   the source tile to 70×47 or skew native hex artwork. */
+@media(max-width:640px){
+ #app.app-classic-dice #game .board-world #board-nodes .tile[data-native-tis-size="145x97"]{
+  width:145px!important;height:97px!important;
+  min-width:145px!important;min-height:97px!important;
+ }
+}
