@@ -75,6 +75,8 @@ const path=require('node:path');
   // Source v0.96d Tiles/0000.png is exactly 145x97. Every map cell uses
   // a *real independent* TIS bitmap; obsolete added numbering and fake
   // center crest must not cover the recovered hex geometry.
+  await page.waitForFunction(()=>[...document.querySelectorAll('#board-nodes .tile')]
+   .every(el=>el.dataset.tisAlpha==='ready'),null,{timeout:15000});
   const nativeTiles=await page.evaluate(async()=>{
    const source=new Image();source.src='./original/Tiles/0000.png';await source.decode();
    const tile=document.querySelector('#game .board-world .tile[data-original-art]');
@@ -83,6 +85,10 @@ const path=require('node:path');
    return {
     pixels:[source.naturalWidth,source.naturalHeight],
     paint:style.backgroundImage,
+    sourcePath:tile.dataset.tisAlphaSource,
+    sourcePreserved:tile.dataset.tisSourcePreserved,
+    chromaRemoved:Number(tile.dataset.tisChromaRemoved),
+    alphaReady:tile.dataset.tisAlpha,
     glyph:getComputedStyle(tile.querySelector('.tile-symbol')).display,
     number:getComputedStyle(tile.querySelector('small')).display,
     sourceTile:tile.dataset.originalArt,
@@ -95,7 +101,13 @@ const path=require('node:path');
    };
   });
   assert.deepEqual(nativeTiles.pixels,[145,97],'actual source PNG contains the recovered 145x97 4LEAF TIS artwork');
-  assert.ok(nativeTiles.paint.includes('/original/Tiles/'),'battlefield cell displays its recovered native platform art');
+  assert.equal(nativeTiles.sourcePath,'Tiles/'+nativeTiles.sourceTile+'.png',
+   'battlefield provenance identifies the exact recovered TIS bitmap');
+  assert.equal(nativeTiles.alphaReady,'ready','live original source has a valid decoded alpha silhouette');
+  assert.ok(nativeTiles.chromaRemoved===0?
+    nativeTiles.sourcePreserved==='true'&&nativeTiles.paint.includes('/original/Tiles/'):
+    nativeTiles.paint.includes('data:image/png'),
+   'source art remains original when alpha-transparent, rekeyed only for actual opaque matte');
   assert.equal(nativeTiles.glyph,'none','native artwork already contains artwork, so synthetic emoji labels are hidden');
   assert.equal(nativeTiles.number,'none','invented printed tile numbers no longer obscure TIS artwork');
   assert.equal(nativeTiles.crest,'none','invented large centre crest is not placed over original board art');
