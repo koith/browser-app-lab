@@ -101,6 +101,9 @@ const path=require('node:path');
   assert.equal(nativeTiles.crest,'none','invented large centre crest is not placed over original board art');
   assert.equal(nativeTiles.guides,'0','invented SVG connector lines no longer cover the source map');
   assert.ok(Math.abs(nativeTiles.hitbox[0]/nativeTiles.hitbox[1]-145/97)<0.02,'independent TIS hitbox preserves original source aspect');
+  assert.deepEqual(nativeTiles.hitbox,[145,97],
+   'each independent source TIS source platform is full 145x97, never old 70x47 half-size');
+
   assert.ok(nativeTiles.clickable&&nativeTiles.dataset!==undefined&&nativeTiles.title.includes('칸'),'source tiles retain independent hitboxes, accessible source indices and actual gameplay handlers');
 
   const sourceMenu=await page.evaluate(()=>{
