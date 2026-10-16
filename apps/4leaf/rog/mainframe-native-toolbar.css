@@ -1,0 +1,149 @@
+/* MainFrame.pak SOURCE RESTORATION: 120x270 toolbarbtn.png comprises
+ * 4 interactive horizontal 30px frames × 9 independent vertical 30px rows.
+ * Source pannel.png is 323x240, an independent tiled backdrop.
+ *
+ * The sprites are VERIFIED original pixel assets. Their exact historical
+ * per-row command dispatch is unverified: these controls preserve the
+ * existing web app navigation rather than pretending recovered EXE handlers.
+ * Reuse the real DOM buttons/listeners, NEVER screenshot or fake click map.
+ */
+#app:not(.app-classic-dice) > nav.toolbar{
+ box-sizing:border-box!important;
+ position:relative;
+ z-index:90;
+ display:flex!important;
+ flex:0 0 36px!important;
+ height:36px!important;
+ min-height:36px!important;
+ align-items:center!important;
+ gap:3px!important;
+ padding:3px 6px!important;
+ border:0!important;
+ border-bottom:2px solid #536da7!important;
+ border-radius:0!important;
+ background:#6e8bcc url('./original/MainFrame/pannel.png') 0 0 / 323px 240px repeat!important;
+ box-shadow:inset 0 1px #a2bae8!important;
+}
+#app:not(.app-classic-dice) > nav.toolbar > button{
+ box-sizing:border-box!important;
+ position:relative;
+ flex:0 0 30px!important;
+ display:block!important;
+ width:30px!important;
+ min-width:30px!important;
+ max-width:30px!important;
+ height:30px!important;
+ min-height:30px!important;
+ max-height:30px!important;
+ margin:0!important;
+ padding:0!important;
+ border:0!important;
+ border-radius:0!important;
+ outline:0;
+ box-shadow:none!important;
+ background-color:transparent!important;
+ background-image:url('./original/MainFrame/toolbarbtn.png')!important;
+ background-repeat:no-repeat!important;
+ background-size:120px 270px!important;
+ background-position:0 var(--leaf-native-toolbar-y,0px)!important;
+ color:transparent!important;
+ font-size:0!important;
+ line-height:0!important;
+ text-shadow:none!important;
+ filter:none!important;
+ opacity:1!important;
+ cursor:pointer!important;
+ -webkit-tap-highlight-color:transparent;
+}
+#app:not(.app-classic-dice) > nav.toolbar > button > span{
+ display:none!important;
+}
+#app:not(.app-classic-dice) > nav.toolbar > button:is(:hover,:focus-visible){
+ background-position:-30px var(--leaf-native-toolbar-y,0px)!important;
+ filter:none!important;
+ outline:1px solid #ffedac!important;
+ outline-offset:0!important;
+}
+#app:not(.app-classic-dice) > nav.toolbar > button:active{
+ background-position:-60px var(--leaf-native-toolbar-y,0px)!important;
+ filter:none!important;
+}
+#app:not(.app-classic-dice) > nav.toolbar > button:disabled{
+ background-position:-90px var(--leaf-native-toolbar-y,0px)!important;
+ cursor:not-allowed!important;
+ filter:none!important;
+}
+#app:not(.app-classic-dice) > nav.toolbar > button[data-route="sky"]{
+ --leaf-native-toolbar-y:0px;
+}
+#app:not(.app-classic-dice) > nav.toolbar > button[data-route="city"]{
+ --leaf-native-toolbar-y:-60px;
+}
+#app:not(.app-classic-dice) > nav.toolbar > button[data-route="rooms"]{
+ --leaf-native-toolbar-y:-90px;
+}
+#app:not(.app-classic-dice) > nav.toolbar > button[data-route="shop"]{
+ --leaf-native-toolbar-y:-120px;
+}
+#app:not(.app-classic-dice) > nav.toolbar > button[data-route="lobby"]{
+ --leaf-native-toolbar-y:-30px;
+}
+#app:not(.app-classic-dice) > nav.toolbar > button#rename{
+ --leaf-native-toolbar-y:-180px;
+}
+#app:not(.app-classic-dice) > nav.toolbar > button#audio{
+ --leaf-native-toolbar-y:-150px;
+}
+#app:not(.app-classic-dice) > nav.toolbar > button#help{
+ --leaf-native-toolbar-y:-210px;
+}
+/* The original second source sprite state is used for active route, without
+   the invented turquoise outer glow from the revived interface. */
+#app:not(.app-classic-dice) > nav.toolbar > button.active:not(:hover):not(:focus-visible){
+ background-position:-30px var(--leaf-native-toolbar-y,0px)!important;
+ border:0!important;
+ outline:0!important;
+ box-shadow:none!important;
+}
+#app:not(.app-classic-dice) > nav.toolbar > .tool-spacer{
+ flex:1 1 auto!important;
+ min-width:0;
+}
+#app:not(.app-classic-dice) > nav.toolbar > #where{
+ box-sizing:border-box;
+ flex:0 1 auto;
+ min-width:0;
+ max-width:200px;
+ display:block!important;
+ margin:0 2px 0 7px!important;
+ padding:3px 6px!important;
+ border:1px solid #536da7;
+ border-radius:0;
+ box-shadow:inset 1px 1px #9eb8e8;
+ background:#c3d1ed;
+ color:#2c427c!important;
+ text-shadow:none!important;
+ font:700 10px/16px Gulim,'굴림',sans-serif!important;
+ overflow:hidden;
+ white-space:nowrap;
+ text-overflow:ellipsis;
+}
+@media(max-width:650px){
+ #app:not(.app-classic-dice) > nav.toolbar{
+  justify-content:space-between!important;
+  padding:2px 3px!important;
+  gap:1px!important;
+  height:34px!important;
+  min-height:34px!important;
+  flex-basis:34px!important;
+ }
+ #app:not(.app-classic-dice) > nav.toolbar > button{
+  flex-basis:30px!important;
+ }
+ #app:not(.app-classic-dice) > nav.toolbar > #where{
+  display:none!important;
+ }
+ #app:not(.app-classic-dice) > nav.toolbar > .tool-spacer{
+  flex-basis:0!important;
+ }
+}
