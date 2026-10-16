@@ -104,10 +104,19 @@ const path=require('node:path');
   assert.equal(nativeTiles.alphaReady==='fallback'?'Tiles/'+nativeTiles.sourceTile+'.png':nativeTiles.sourcePath,'Tiles/'+nativeTiles.sourceTile+'.png',
    'battlefield provenance identifies the exact recovered TIS bitmap');
   assert.ok(['ready','fallback'].includes(nativeTiles.alphaReady),'original source decoded; file:// may correctly fall back to unmodified PNG');
-  assert.ok(nativeTiles.chromaRemoved===0?
-    nativeTiles.sourcePreserved==='true'&&nativeTiles.paint.includes('/original/Tiles/'):
-    nativeTiles.paint.includes('data:image/png'),
-   'source art remains original when alpha-transparent, rekeyed only for actual opaque matte');
+  // file:// origin is not permitted to read PNG pixels through canvas.
+  // The real source remains painted and alpha processing sets "fallback".
+  if(nativeTiles.alphaReady==='fallback'){
+    assert.ok(nativeTiles.paint.includes('/original/Tiles/'+nativeTiles.sourceTile+'.png'),
+      'file-origin fallback keeps the exact source TIS bitmap without fake art');
+  }else{
+    assert.ok(Number.isFinite(nativeTiles.chromaRemoved)&&nativeTiles.chromaRemoved>=0,
+      'HTTP(S) origin decoded the source bitmap and measured its chroma');
+    assert.ok(nativeTiles.chromaRemoved===0?
+      nativeTiles.sourcePreserved==='true'&&nativeTiles.paint.includes('/original/Tiles/'):
+      nativeTiles.paint.includes('data:image/png'),
+      'only real external chroma is removed; genuine native interior stays untouched');
+  }
   assert.equal(nativeTiles.glyph,'none','native artwork already contains artwork, so synthetic emoji labels are hidden');
   assert.equal(nativeTiles.number,'none','invented printed tile numbers no longer obscure TIS artwork');
   assert.equal(nativeTiles.crest,'none','invented large centre crest is not placed over original board art');
