@@ -57,6 +57,8 @@ jobs:
                cmp -s /tmp/leaf-tis-depth-live.css apps/4leaf/rog/dice-native-tis-depth.css &&
                curl -fLsS --max-time 15 "$base/dice-native-tis-alpha.js?qa=${GITHUB_SHA}" -o /tmp/leaf-tis-alpha-live.js &&
                cmp -s /tmp/leaf-tis-alpha-live.js apps/4leaf/rog/dice-native-tis-alpha.js &&
+               curl -fLsS --max-time 15 "$base/dice-native-pawn-dmp-depth.css?qa=${GITHUB_SHA}" -o /tmp/leaf-pawn-depth.css &&
+               cmp -s /tmp/leaf-pawn-depth.css apps/4leaf/rog/dice-native-pawn-dmp-depth.css &&
                curl -fLsS --max-time 15 "$base/dice-native-menu-chrome.css?qa=${GITHUB_SHA}" -o /tmp/leaf-menu-live.css &&
                cmp -s /tmp/leaf-menu-live.css apps/4leaf/rog/dice-native-menu-chrome.css &&
                curl -fLsS --max-time 15 "$base/dice-native-dialog-event.css?qa=${GITHUB_SHA}" -o /tmp/leaf-native-dialog.css &&
@@ -137,6 +139,10 @@ jobs:
         env:
           FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
         run: node apps/4leaf/rog/tests/dice-native-tis-depth.cjs
+      - name: Verify true DMP tile-avatar interleaved painter order on actual published Pages
+        env:
+          FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
+        run: node apps/4leaf/rog/tests/dice-native-pawn-dmp-depth.cjs
       - name: Check transparent original source TIS sprites and real turn on deployed Pages
         env:
           FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
