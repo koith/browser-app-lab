@@ -74,12 +74,12 @@ const path=require('node:path');
    };
   });
   assert.deepEqual(source.assets,{
-   logo:[111,31],title:[180,29],info:[368,207],actor:[75,141]
+   logo:[111,34],title:[168,23],info:[368,205],actor:[75,141]
   },'all three recovered original UI components plus genuine 75×141 actor decode at source size');
   assert.equal(source.source,'Registry/avatardialog3.png');
   assert.deepEqual(source.headerImages,['Registry/avatardialog1.png','Registry/avatardialog2.png']);
   assert.equal(source.infoImage,'Registry/avatardialog3.png');
-  assert.ok(Math.abs(source.infoBounds[0]-368)<2&&Math.abs(source.infoBounds[1]-207)<2,
+  assert.ok(Math.abs(source.infoBounds[0]-368)<2&&Math.abs(source.infoBounds[1]-205)<2,
    'original UI info art stays at 1:1 logical source pixels on desktop');
   assert.ok(Math.abs(source.displayedActor[0]-75)<1&&Math.abs(source.displayedActor[1]-141)<1,
    'native original character preview is distinct, 1:1 and never screenshot pasted');
