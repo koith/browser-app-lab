@@ -667,7 +667,11 @@ function applyMapViewport(){
 function zoomBoard(by){
  mapViewport.zoom=Math.max(.65,Math.min(2.4,Math.round((mapViewport.zoom+by)*100)/100));
  if(mapViewport.zoom===1){mapViewport.panX=0;mapViewport.panY=0}
- if(mapViewport.autoFollow)trackActivePawn();else applyMapViewport();
+ // Source game zoom buttons must change the real shared world scale even
+ // while follow-camera is enabled. Calling sync() alone kept the previous
+ // scale forever until a manual drag disabled follow.
+ applyMapViewport();
+ if(mapViewport.autoFollow)trackActivePawn();
 }
 function installBoardControls(){
  $('board-zoom-in').onclick=()=>zoomBoard(.25);
