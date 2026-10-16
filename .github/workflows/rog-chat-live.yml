@@ -139,6 +139,8 @@ jobs:
         env:
           FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
         run: node apps/4leaf/rog/tests/dice-native-tis-depth.cjs
+      - name: Verify corrected hex orientation and manual player turns
+        run: node apps/4leaf/rog/tests/dice-native-orientation-manual.cjs
       - name: Verify true DMP tile-avatar interleaved painter order on actual published Pages
         env:
           FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
