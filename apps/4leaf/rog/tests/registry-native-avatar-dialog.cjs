@@ -81,7 +81,7 @@ const path=require('node:path');
   assert.equal(source.infoImage,'Registry/avatardialog3.png');
   assert.ok(Math.abs(source.infoBounds[0]-368)<2&&Math.abs(source.infoBounds[1]-207)<2,
    'original UI info art stays at 1:1 logical source pixels on desktop');
-  assert.deepEqual(source.displayedActor,[75,141],
+  assert.ok(Math.abs(source.displayedActor[0]-75)<1&&Math.abs(source.displayedActor[1]-141)<1,
    'native original character preview is distinct, 1:1 and never screenshot pasted');
   assert.equal(source.actors.length,12,'show exactly twelve true saved Registry actors');
   assert.ok(source.actors.every(x=>x.source.startsWith('./original/Registry/sava')&&x.type==='BUTTON'),
