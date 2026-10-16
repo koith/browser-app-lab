@@ -641,6 +641,10 @@ function trackActivePawn(){
   mapViewport.matchKey=match.startedAt;mapViewport.lastTurn=match.active;
  }
  if(window.__LEAF_CAMERA__){
+  // Follow means keep the actual active pawn at the camera's source anchor.
+  // A clamped offset from the previous pawn position is NOT a manual pan;
+  // otherwise same-turn movement slowly slides the real pawn off-centre.
+  if(mapViewport.autoFollow)window.__LEAF_CAMERA__.viewport(mapViewport.zoom,0,0);
   window.__LEAF_CAMERA__.sync(match,PATH);
   const actual=window.__LEAF_CAMERA__.getState();
   mapViewport.panX=actual.panX;mapViewport.panY=actual.panY;
