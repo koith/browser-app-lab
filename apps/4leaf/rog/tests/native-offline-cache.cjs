@@ -166,9 +166,15 @@ const {chromium}=require('playwright');
    const node=document.querySelector('#board-nodes .tile[data-native-tis-size="145x97"]');
    const target=node?.dataset.originalArt;
    const image=new Image();image.src='./original/Tiles/'+target+'.png';await image.decode();
+   const sampleCanvas=document.createElement('canvas');
+   sampleCanvas.width=image.width;sampleCanvas.height=image.height;
+   const sampleCtx=sampleCanvas.getContext('2d',{willReadFrequently:true});
+   sampleCtx.drawImage(image,0,0);
+   const originalCornerAlpha=sampleCtx.getImageData(0,0,1,1).data[3];
    return {
     count:document.querySelectorAll('#board-nodes .tile').length,
     original:[image.naturalWidth,image.naturalHeight],
+    originalCornerAlpha,
     layout:[node.offsetWidth,node.offsetHeight],
     paint:getComputedStyle(node).backgroundImage,
     source:target,
@@ -183,8 +189,14 @@ const {chromium}=require('playwright');
   assert.equal(offlineTiles.keyedSource,'Tiles/'+offlineTiles.source+'.png',
    'cold offline rendered bitmap retains exact recovered TIS provenance');
   assert.equal(offlineTiles.decoded,'ready','cold offline boot actually decoded the source, not just requested it');
-  assert.ok(offlineTiles.paint.includes('data:image/png')&&offlineTiles.removed>0,
-   'source-native offline board paints matte-cleaned original TIS pixels: '+JSON.stringify(offlineTiles));
+  assert.ok(offlineTiles.paint.includes('data:image/png'),
+   'source-native offline board uses processed recovered PNG pixels: '+offlineTiles.source);
+  // Some original source PNGs (e.g. tile 0024) already have transparent
+  // corners; those correctly require ZERO additional pixels removed.
+  assert.ok(offlineTiles.removed>=0&&
+   (offlineTiles.originalCornerAlpha<16||offlineTiles.removed>0),
+   'preserve originally transparent pixels; only opaque outside mattes are keyed: '+
+   JSON.stringify({source:offlineTiles.source,corner:offlineTiles.originalCornerAlpha,removed:offlineTiles.removed}));
   assert.deepEqual(errors,[],'no unexpected JavaScript errors during offline play');
   console.log('4LEAF NATIVE OFFLINE CACHE PASS',JSON.stringify({cached:critical.length,original}));
  }finally{await browser.close()}
