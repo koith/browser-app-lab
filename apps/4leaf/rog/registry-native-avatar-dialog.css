@@ -54,16 +54,16 @@ body>.social-modal .social-native-avatar-panel .social-native-avatar-header img{
  image-rendering:auto;
 }
 body>.social-modal .social-native-avatar-panel .social-native-avatar-header img.social-native-avatar-logo{
- width:111px;height:31px;
+ width:111px;height:34px;
 }
 body>.social-modal .social-native-avatar-panel .social-native-avatar-header img.social-native-avatar-title{
- width:180px;height:29px;
+ width:168px;height:23px;
 }
 body>.social-modal .social-native-avatar-panel .social-native-avatar-scene{
  box-sizing:border-box;
  width:100%;
  max-width:368px;
- aspect-ratio:368/207;
+ aspect-ratio:368/205;
  position:relative;
  margin:2px auto 5px;
  overflow:hidden;
@@ -90,7 +90,7 @@ body>.social-modal .social-native-avatar-panel .social-native-avatar-preview{
  position:absolute;
  left:70.4%;top:2.9%;
  display:block;
- width:20.38%;height:68.12%;
+ width:20.38%;height:68.78%;
  object-fit:contain;object-position:center bottom;
  image-rendering:pixelated;
  border:0;box-shadow:none;
