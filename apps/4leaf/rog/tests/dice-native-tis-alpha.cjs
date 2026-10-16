@@ -67,7 +67,9 @@ const fs=require('node:fs');
      pixels:ctx.getImageData(0,0,canvas.width,canvas.height).data};
    };
    const probes=[];
-   for(const id of ['0000','0015']){
+   // Six independently archived matte palettes: pink, red, green,
+   // navy, mauve and yellow. A universal red-color filter would be wrong.
+   for(const id of ['0000','0015','0006','0011','0028','0046']){
     const source=await decode('./original/Tiles/'+id+'.png');
     const processed=await window.__LEAF_TIS_ALPHA__.prepare(id);
     const masked=await decode(processed.url);
@@ -113,7 +115,7 @@ const fs=require('node:fs');
   }
   assert.notDeepEqual(imageSample.probes[0].cornerBefore.slice(0,3),
    imageSample.probes[1].cornerBefore.slice(0,3),
-   'source 0000 and 0015 have genuinely different pink/red key colors');
+   'source 0000 and 0015 have genuinely different red/pink key colors');
   assert.equal(imageSample.chroma.length,104);
   assert.ok(imageSample.chroma.every(t=>t.alpha==='ready'),
    'all 104 source tiles are decoded and composited by the live original atlas');
