@@ -22,7 +22,7 @@ const {chromium}=require('playwright');
    ...['avatardialog1','avatardialog2','avatardialog3'].map(x=>'original/Registry/'+x+'.png'),
    'chatroom-native-expressions.js','chatroom-native-expressions.css','original/ChatRoom/expdialogbtn.png',
    'dice-native-dialog-event.css','original/IMG/dialog.png','original/IMG/eventmsgbox.png',
-   'dice-native-tis-depth.css',...['0000','0015','0024','0046'].map(x=>'original/Tiles/'+x+'.png'),
+   'dice-native-tis-depth.css','dice-native-tis-alpha.js',...['0000','0015','0024','0046'].map(x=>'original/Tiles/'+x+'.png'),
    'mainframe-native-toolbar.css','original/MainFrame/toolbarbtn.png','original/MainFrame/pannel.png',
    'knighttown-native.js','knighttown-native.css',
    ...['knightback','plain01','plain02','sea01','sea02','sea03','snow01'].map(s=>'original/KnightTown/'+s+'.png'),
@@ -34,7 +34,7 @@ const {chromium}=require('playwright');
    'original/Registry/sava00.png'
   ];
   await page.waitForFunction(async files=>{
-   const cache=await caches.open('4leaf-revival-pwa-v48');
+   const cache=await caches.open('4leaf-revival-pwa-v49');
    return (await Promise.all(files.map(file=>cache.match('./'+file)))).every(Boolean);
   },critical,{timeout:40000});
   // An established controller must answer image and JS fetches offline.
@@ -69,6 +69,11 @@ const {chromium}=require('playwright');
   assert.ok(offlineChrome.menuBackground.includes('/original/MainFrame/pannel.png'));
   assert.ok(offlineChrome.iconBackground.includes('/original/MainFrame/toolbarbtn.png'));
   assert.equal(offlineChrome.sourceButton,30,'PWA menu retains clickable source 30px atlas cells');
+  // The original TIS source bitmap chroma-mask renderer is pre-cached too.
+  // A user should be able to start a NEW match while entirely offline.
+  assert.deepEqual(await page.evaluate(()=>window.__LEAF_TIS_ALPHA__?.getState().native),
+   [145,97],'source TIS alpha compositor works on first cold offline load');
+
   // Cold-offline source KnightTown region art and all its six sign frames
   // must work before a visitor ever browsed the Recordable in this session.
   await page.evaluate(()=>{window.__LEAF_SOCIAL__.openKnightTown();window.__ROG_TEST__.go('rooms')});
