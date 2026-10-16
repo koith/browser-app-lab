@@ -15,22 +15,40 @@
  const inside=(i,size)=>Math.max(0,Math.min(size-1,Number(i)||0));
  const path=name=>PREFIX+name+'.png';
  function resource(element,file,width,height){
-  const src=path(file.slice(0,-4));
-  element.src=src;
-  element.dataset.source='Registry/'+file;
   element.width=width;element.height=height;
   element.decoding='async';
+  let attempts=0;
+  const setSource=(next)=>{
+   attempts=0;
+   element.dataset.source='Registry/'+next;
+   element.dataset.sourceReady='loading';
+   element.src=PREFIX+next;
+  };
+  element.__leafSetNativeSource=setSource;
   element.addEventListener('load',()=>{
+   const current=element.dataset.source;
    if(element.naturalWidth!==width||element.naturalHeight!==height){
     element.dataset.sourceReady='mismatch';
-    console.warn('Original Registry avatar component has unexpected dimensions:',file);
+    console.warn('Original Registry avatar component has unexpected dimensions:',current);
    }else element.dataset.sourceReady='true';
   });
   element.addEventListener('error',()=>{
+   const current=element.dataset.source;
+   if(attempts<5){
+    attempts++;
+    setTimeout(()=>{
+     // If the user chose a new actor meanwhile, never retry an old sprite.
+     if(element.isConnected&&element.dataset.source===current)
+      element.src=PREFIX+current.slice('Registry/'.length)+
+       '?retry='+attempts+'&at='+Date.now();
+    },Math.min(1800,200*2**attempts));
+    return;
+   }
    element.dataset.sourceReady='fallback';
-   // Accessible, operable selection always remains available.
-   console.warn('Original Registry component could not be loaded:',file);
+   // The live selection stays usable after source CDN failures.
+   console.warn('Original Registry component unavailable after retries:',current);
   });
+  setSource(file);
   return element;
  }
  function enhance(panel,chooser,options){
@@ -85,10 +103,8 @@
   function choose(i,focus=false){
    selected=inside(i,avatars.length);
    const name=avatars[selected];
-   actor.src=path(name);
    actor.dataset.originalAvatar=name;
-   actor.dataset.source='Registry/'+name+'.png';
-   actor.dataset.sourceReady='loading';
+   actor.__leafSetNativeSource(name+'.png');
    selection.textContent=(selected+1)+' / '+avatars.length;
    buttons.forEach((button,index)=>{
     button.classList.toggle('selected',index===selected);
