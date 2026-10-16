@@ -343,6 +343,19 @@ function drawBoard(){
    coords.forEach((pos,i)=>{
      const type=match.tiles[i],b=document.createElement('div');b.className='tile '+type;
      b.style.left=PATH[i].x+'%';b.style.top=PATH[i].y+'%';b.dataset.tile=i;
+     // Original DMP axial-grid pitch is 70x47 while genuine TIS platform
+     // pictures are 145x97. Restore overlapping FULL-SIZE original source
+     // planes and y-based front/back painter order (instead of the previous
+     // tiny disconnected 70x47 proxies).  Preserve the raw third DMP cell
+     // code as evidence without guessing an unrecovered height or rotation.
+     const dmp=SOURCE_ROUTES[SOURCE_IDS[match.map]]?.[i];
+     if(dmp){
+      b.dataset.dmpX=String(dmp[0]);
+      b.dataset.dmpY=String(dmp[1]);
+      b.dataset.dmpCellCode=String(dmp[2]);
+     }
+     b.dataset.nativeTisSize='145x97';
+     b.style.zIndex=String(Math.round(PATH[i].y*1000)*2+i%2);
      const sourceArt=sourceTileGraphic(type,i);
      b.dataset.originalArt=sourceArt;
      b.style.setProperty('background','url("./original/Tiles/'+sourceArt+'.png") center / 100% 100% no-repeat','important');
