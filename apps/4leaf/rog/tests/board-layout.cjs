@@ -12,11 +12,15 @@ const assert=require('node:assert/strict');
    await page.locator('#map-select').selectOption(name);
    await page.locator('#start-game').click();
    await page.waitForSelector('#game:not(.hidden)');
+   await page.waitForFunction(()=>[...document.querySelectorAll('#board-nodes .tile')]
+    .every(el=>el.dataset.tisAlpha==='ready'),null,{timeout:20000});
    const result=await page.evaluate(()=>{
     const tiles=[...document.querySelectorAll('#board-nodes .tile')];
     const sizes=tiles.map(e=>{const c=getComputedStyle(e);return {
      w:parseFloat(c.width),h:parseFloat(c.height),transform:c.transform,
      background:c.backgroundImage,clip:c.clipPath,native:e.dataset.nativeTisSize,
+     source:e.dataset.originalArt,decodedSource:e.dataset.tisAlphaSource,
+     alpha:e.dataset.tisAlpha,
      dmp:[Number(e.dataset.dmpX),Number(e.dataset.dmpY),Number(e.dataset.dmpCellCode)],
      depth:Number(e.style.zIndex)
     }});
@@ -43,7 +47,10 @@ const assert=require('node:assert/strict');
     'inferred hit polygon restricts clicking transparent overlapping source corners');
    assert.ok(result.sizes.every(t=>t.dmp.every(Number.isFinite)&&Number.isFinite(t.depth)),
     'real DMP coordinates and 2D front/back order retained for each independent TIS');
-   assert.ok(result.sizes.every(t=>t.background.includes('original/Tiles/')),'all tiles show original TIS artwork');
+   assert.ok(result.sizes.every(t=>t.alpha==='ready'&&
+    t.decodedSource==='Tiles/'+t.source+'.png'&&
+    t.background.includes('data:image/png')),
+    'all tiles show their independently decoded recovered TIS PNG, not a fake or an unkeyed source');
    assert.equal(result.bad,0,'DMP grid centers retain native 70x47 spacing even though painted 145x97 sprites overlap');
    assert.ok(result.adjacent>10,'adjacent cells were checked');
    await page.screenshot({path:shot});

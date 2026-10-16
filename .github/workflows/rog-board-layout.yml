@@ -6,6 +6,13 @@ on:
       - 'apps/4leaf/rog/original-tiles.css'
       - 'apps/4leaf/rog/world-perspective.css'
       - 'apps/4leaf/rog/tests/board-layout.cjs'
+      - 'apps/4leaf/rog/dice-native-tis-alpha.js'
+      - 'apps/4leaf/rog/tests/dice-native-tis-alpha.cjs'
+      - '.github/workflows/rog-board-layout.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/**'
       - '.github/workflows/rog-board-layout.yml'
   workflow_dispatch:
 jobs:
@@ -24,6 +31,8 @@ jobs:
           nohup python3 -m http.server 8765 --directory apps/4leaf/rog >/tmp/leaf-board-server.log 2>&1 &
           sleep 2
           curl -fSsI http://127.0.0.1:8765/index.html
+      - name: Verify real source TIS multi-color alpha with a live game turn
+        run: node apps/4leaf/rog/tests/dice-native-tis-alpha.cjs
       - run: node apps/4leaf/rog/tests/board-layout.cjs
       - uses: actions/upload-artifact@v4
         if: always()

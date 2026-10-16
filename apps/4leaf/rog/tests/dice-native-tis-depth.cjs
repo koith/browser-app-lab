@@ -21,6 +21,8 @@ const path=require('node:path');
   await page.locator('#map-select').selectOption('4LEAF');
   await page.locator('#start-game').click();
   await page.waitForSelector('#game:not(.hidden)');
+  await page.waitForFunction(()=>[...document.querySelectorAll('#board-nodes .tile')]
+   .every(el=>['ready','fallback'].includes(el.dataset.tisAlpha)),null,{timeout:20000});
   const data=await page.evaluate(async()=>{
    const image=new Image();image.src='./original/Tiles/0015.png';await image.decode();
    // file:// Chromium isolates separately loaded local PNGs into opaque
@@ -50,6 +52,8 @@ const path=require('node:path');
      pos:[tile.offsetLeft,tile.offsetTop],
      bounds:[r.left,r.top,r.width,r.height],
      paint:cs.backgroundImage,
+     alphaState:tile.dataset.tisAlpha,
+     sourceFromAlpha:tile.dataset.tisAlphaSource,
      native:tile.dataset.nativeTisSize,
      dmp:[Number(tile.dataset.dmpX),Number(tile.dataset.dmpY),Number(tile.dataset.dmpCellCode)],
      depth:Number(tile.style.zIndex),
@@ -88,10 +92,14 @@ const path=require('node:path');
    cell.logical[0]===145&&cell.logical[1]===97&&
    cell.css[0]==='145px'&&cell.css[1]==='97px'),
    'each live source platform uses full 145x97 original pixels, NOT 70x47 miniatures');
-  assert.ok(data.cells.every(cell=>cell.source&&
-   cell.paint.includes('/original/Tiles/'+cell.source+'.png')&&
-   cell.clickable),
-   'all terrain/event tiles stay independent, real and clickable original source graphics');
+  assert.ok(data.cells.every(cell=>{
+   const native='Tiles/'+cell.source+'.png';
+   return cell.source&&cell.clickable&&(
+    cell.alphaState==='ready'
+     ? cell.paint.includes('data:image/png')&&cell.sourceFromAlpha===native
+     : cell.alphaState==='fallback'&&cell.paint.includes('/original/'+native)
+   );
+  }), 'all TIS cells use genuine source PNGs: either original unkeyed file:// fallback or correctly keyed original pixel artwork');
   assert.ok(data.cells.every(cell=>cell.clip.startsWith('polygon(')),
    'hexagonal transparent source perimeter, not overlapping invisible rectangle hitboxes');
   assert.ok(data.cells.every(cell=>Number.isInteger(cell.depth)&&cell.dmp.every(Number.isFinite)),
