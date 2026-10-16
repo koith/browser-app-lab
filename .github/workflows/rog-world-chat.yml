@@ -21,6 +21,10 @@ on:
       - 'apps/4leaf/rog/original-chat-input.css'
       - 'apps/4leaf/rog/original-world-notice.css'
       - 'apps/4leaf/rog/original-shell-accurate.css'
+      - 'apps/4leaf/rog/mainframe-native-toolbar.css'
+      - 'apps/4leaf/rog/tests/mainframe-native-toolbar.cjs'
+      - 'apps/4leaf/rog/original/MainFrame/toolbarbtn.png'
+      - 'apps/4leaf/rog/original/MainFrame/pannel.png'
       - 'apps/4leaf/rog/central-client.js'
       - 'apps/4leaf/rog/sw.js'
       - 'apps/4leaf/rog/social-chat.js'
@@ -98,6 +102,8 @@ jobs:
             cat /tmp/4leaf-http.log
             exit 1
           fi
+      - name: Verify actual 120x270 MainFrame toolbar sprites, native panel and working cross-scene navigation
+        run: node apps/4leaf/rog/tests/mainframe-native-toolbar.cjs
       - name: Register original 161x51 MainFrame 4LEAF logo across WorldMap and ChatRoom archive captures
         run: node apps/4leaf/rog/tests/mainframe-snaplogo-registration.cjs
       - name: Verify room3/5 source-sized original foreground PNGs and instantaneous character seat placement
