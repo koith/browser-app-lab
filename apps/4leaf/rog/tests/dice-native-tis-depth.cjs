@@ -23,10 +23,17 @@ const path=require('node:path');
   await page.waitForSelector('#game:not(.hidden)');
   const data=await page.evaluate(async()=>{
    const image=new Image();image.src='./original/Tiles/0015.png';await image.decode();
-   const canvas=document.createElement('canvas');canvas.width=image.width;canvas.height=image.height;
-   const paint=canvas.getContext('2d',{willReadFrequently:true});
-   paint.drawImage(image,0,0);
-   const sourceCorner=[...paint.getImageData(0,0,1,1).data];
+   // file:// Chromium isolates separately loaded local PNGs into opaque
+   // origins. Decoding image size remains valid, but getImageData throws
+   // SecurityError on a tainted canvas. Full RGBA pixel reads are checked
+   // when the same original art is served over the real HTTP(S) origin.
+   let sourceCorner=null;
+   if(location.protocol!=='file:'){
+    const canvas=document.createElement('canvas');canvas.width=image.width;canvas.height=image.height;
+    const paint=canvas.getContext('2d',{willReadFrequently:true});
+    paint.drawImage(image,0,0);
+    sourceCorner=[...paint.getImageData(0,0,1,1).data];
+   }
    const game=window.__ROG_TEST__.getMatch();
    const mapId=Object.entries(window.ORIGINAL_LEAF_MAP_INFO).find(([id,value])=>value.title===game.map)?.[0];
    const dmp=window.ORIGINAL_LEAF_MAPS[mapId];
