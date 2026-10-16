@@ -22,7 +22,7 @@ const {chromium}=require('playwright');
    ...['avatardialog1','avatardialog2','avatardialog3'].map(x=>'original/Registry/'+x+'.png'),
    'chatroom-native-expressions.js','chatroom-native-expressions.css','original/ChatRoom/expdialogbtn.png',
    'dice-native-dialog-event.css','original/IMG/dialog.png','original/IMG/eventmsgbox.png',
-   'dice-native-tis-depth.css',...['0000','0015','0024','0046'].map(x=>'original/Tiles/'+x+'.png'),
+   'dice-native-tis-depth.css','dice-native-tis-alpha.js',...['0000','0015','0024','0046'].map(x=>'original/Tiles/'+x+'.png'),
    'mainframe-native-toolbar.css','original/MainFrame/toolbarbtn.png','original/MainFrame/pannel.png',
    'knighttown-native.js','knighttown-native.css',
    ...['knightback','plain01','plain02','sea01','sea02','sea03','snow01'].map(s=>'original/KnightTown/'+s+'.png'),
@@ -34,7 +34,7 @@ const {chromium}=require('playwright');
    'original/Registry/sava00.png'
   ];
   await page.waitForFunction(async files=>{
-   const cache=await caches.open('4leaf-revival-pwa-v48');
+   const cache=await caches.open('4leaf-revival-pwa-v49');
    return (await Promise.all(files.map(file=>cache.match('./'+file)))).every(Boolean);
   },critical,{timeout:40000});
   // An established controller must answer image and JS fetches offline.
@@ -69,6 +69,11 @@ const {chromium}=require('playwright');
   assert.ok(offlineChrome.menuBackground.includes('/original/MainFrame/pannel.png'));
   assert.ok(offlineChrome.iconBackground.includes('/original/MainFrame/toolbarbtn.png'));
   assert.equal(offlineChrome.sourceButton,30,'PWA menu retains clickable source 30px atlas cells');
+  // The original TIS source bitmap chroma-mask renderer is pre-cached too.
+  // A user should be able to start a NEW match while entirely offline.
+  assert.deepEqual(await page.evaluate(()=>window.__LEAF_TIS_ALPHA__?.getState().native),
+   [145,97],'source TIS alpha compositor works on first cold offline load');
+
   // Cold-offline source KnightTown region art and all its six sign frames
   // must work before a visitor ever browsed the Recordable in this session.
   await page.evaluate(()=>{window.__LEAF_SOCIAL__.openKnightTown();window.__ROG_TEST__.go('rooms')});
@@ -155,23 +160,43 @@ const {chromium}=require('playwright');
   await page.locator('#bot-count').selectOption('1');
   await page.locator('#start-game').click();
   await page.waitForSelector('#game:not(.hidden)');
+  await page.waitForFunction(()=>document.querySelector('#board-nodes .tile')?.dataset.tisAlpha==='ready',
+   null,{timeout:15000});
   const offlineTiles=await page.evaluate(async()=>{
    const node=document.querySelector('#board-nodes .tile[data-native-tis-size="145x97"]');
    const target=node?.dataset.originalArt;
    const image=new Image();image.src='./original/Tiles/'+target+'.png';await image.decode();
+   const sampleCanvas=document.createElement('canvas');
+   sampleCanvas.width=image.width;sampleCanvas.height=image.height;
+   const sampleCtx=sampleCanvas.getContext('2d',{willReadFrequently:true});
+   sampleCtx.drawImage(image,0,0);
+   const originalCornerAlpha=sampleCtx.getImageData(0,0,1,1).data[3];
    return {
     count:document.querySelectorAll('#board-nodes .tile').length,
     original:[image.naturalWidth,image.naturalHeight],
+    originalCornerAlpha,
     layout:[node.offsetWidth,node.offsetHeight],
     paint:getComputedStyle(node).backgroundImage,
-    source:target
+    source:target,
+    keyedSource:node.dataset.tisAlphaSource,
+    decoded:node.dataset.tisAlpha,
+    removed:Number(node.dataset.tisChromaRemoved)
    };
   });
   assert.equal(offlineTiles.count,104,'all original offline 4LEAF MVE path cells are live');
   assert.deepEqual(offlineTiles.original,[145,97],'offline native TIS asset decoded at full source shape');
   assert.deepEqual(offlineTiles.layout,[145,97],'offline live board no longer shrinks true original TIS artwork');
-  assert.ok(offlineTiles.paint.includes('/original/Tiles/'),
-   'the cold offline playable board uses genuine archived TIS PNGs');
+  assert.equal(offlineTiles.keyedSource,'Tiles/'+offlineTiles.source+'.png',
+   'cold offline rendered bitmap retains exact recovered TIS provenance');
+  assert.equal(offlineTiles.decoded,'ready','cold offline boot actually decoded the source, not just requested it');
+  assert.ok(offlineTiles.paint.includes('data:image/png'),
+   'source-native offline board uses processed recovered PNG pixels: '+offlineTiles.source);
+  // Some original source PNGs (e.g. tile 0024) already have transparent
+  // corners; those correctly require ZERO additional pixels removed.
+  assert.ok(offlineTiles.removed>=0&&
+   (offlineTiles.originalCornerAlpha<16||offlineTiles.removed>0),
+   'preserve originally transparent pixels; only opaque outside mattes are keyed: '+
+   JSON.stringify({source:offlineTiles.source,corner:offlineTiles.originalCornerAlpha,removed:offlineTiles.removed}));
   assert.deepEqual(errors,[],'no unexpected JavaScript errors during offline play');
   console.log('4LEAF NATIVE OFFLINE CACHE PASS',JSON.stringify({cached:critical.length,original}));
  }finally{await browser.close()}
