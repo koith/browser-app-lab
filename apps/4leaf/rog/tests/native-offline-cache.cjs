@@ -22,6 +22,7 @@ const {chromium}=require('playwright');
    ...['avatardialog1','avatardialog2','avatardialog3'].map(x=>'original/Registry/'+x+'.png'),
    'chatroom-native-expressions.js','chatroom-native-expressions.css','original/ChatRoom/expdialogbtn.png',
    'dice-native-dialog-event.css','original/IMG/dialog.png','original/IMG/eventmsgbox.png',
+   'dice-native-tis-depth.css',...['0000','0015','0024','0046'].map(x=>'original/Tiles/'+x+'.png'),
    'mainframe-native-toolbar.css','original/MainFrame/toolbarbtn.png','original/MainFrame/pannel.png',
    'knighttown-native.js','knighttown-native.css',
    ...['knightback','plain01','plain02','sea01','sea02','sea03','snow01'].map(s=>'original/KnightTown/'+s+'.png'),
@@ -33,7 +34,7 @@ const {chromium}=require('playwright');
    'original/Registry/sava00.png'
   ];
   await page.waitForFunction(async files=>{
-   const cache=await caches.open('4leaf-revival-pwa-v47');
+   const cache=await caches.open('4leaf-revival-pwa-v48');
    return (await Promise.all(files.map(file=>cache.match('./'+file)))).every(Boolean);
   },critical,{timeout:40000});
   // An established controller must answer image and JS fetches offline.
@@ -146,6 +147,31 @@ const {chromium}=require('playwright');
   assert.equal(await page.locator('.social-avatar.self .social-native-expression').getAttribute('data-native-expression'),'좋아',
    'fully offline original face sprite and genuine local chat event work on first opening');
 
+  // Cold offline Genesis game MUST paint unscaled original 145x97 TIS
+  // before a visitor has ever opened Dice gameplay online. The previous
+  // client silently fell back to empty tile sprites without cached assets.
+  await page.evaluate(()=>window.__ROG_TEST__.go('lobby'));
+  await page.locator('#lobby-create').click();
+  await page.locator('#bot-count').selectOption('1');
+  await page.locator('#start-game').click();
+  await page.waitForSelector('#game:not(.hidden)');
+  const offlineTiles=await page.evaluate(async()=>{
+   const node=document.querySelector('#board-nodes .tile[data-native-tis-size="145x97"]');
+   const target=node?.dataset.originalArt;
+   const image=new Image();image.src='./original/Tiles/'+target+'.png';await image.decode();
+   return {
+    count:document.querySelectorAll('#board-nodes .tile').length,
+    original:[image.naturalWidth,image.naturalHeight],
+    layout:[node.offsetWidth,node.offsetHeight],
+    paint:getComputedStyle(node).backgroundImage,
+    source:target
+   };
+  });
+  assert.equal(offlineTiles.count,104,'all original offline 4LEAF MVE path cells are live');
+  assert.deepEqual(offlineTiles.original,[145,97],'offline native TIS asset decoded at full source shape');
+  assert.deepEqual(offlineTiles.layout,[145,97],'offline live board no longer shrinks true original TIS artwork');
+  assert.ok(offlineTiles.paint.includes('/original/Tiles/'),
+   'the cold offline playable board uses genuine archived TIS PNGs');
   assert.deepEqual(errors,[],'no unexpected JavaScript errors during offline play');
   console.log('4LEAF NATIVE OFFLINE CACHE PASS',JSON.stringify({cached:critical.length,original}));
  }finally{await browser.close()}
