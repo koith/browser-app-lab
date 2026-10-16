@@ -52,10 +52,26 @@ const {chromium}=require('playwright');
    'the other human does not auto-roll after a short delay');
   assert.equal(await page.evaluate(()=>window.__ROG_TEST__.getMatch().active),1,
    'turn remains at second player until their own click');
+  // Source DMP may place the second roll on a battle/keeper/ability cell.
+  // That decision is intentionally MANUAL, so it is incorrect to require
+  // the next turn to begin without the human resolving the authentic event.
+  // Assert the second dice input is recorded and actually begins movement.
+  const beforeSecond=await page.evaluate(()=>window.__ROG_TEST__.getMatch().history.length);
   await page.locator('#roll-btn').click();
-  await page.waitForFunction(()=>window.__ROG_TEST__.getMatch()?.active===0,null,{timeout:30000});
-  assert.ok((await page.evaluate(()=>window.__ROG_TEST__.getMatch().players[1].position))>p2,
-   'second manual player moves only after second click');
+  await page.waitForFunction(({p2,beforeSecond})=>{
+   const m=window.__ROG_TEST__.getMatch();
+   return m.history.slice(beforeSecond).some(line=>
+    line.includes(m.players[1].name+' 이동 주사위')||
+    line.includes(m.players[1].name+' 감옥'));
+  },{p2,beforeSecond},{timeout:30000});
+  const second=await page.evaluate(()=>({
+   match:window.__ROG_TEST__.getMatch(),
+   choice:!document.querySelector('#modal').classList.contains('hidden')
+  }));
+  assert.ok(second.match.players[1].position>p2 ||
+    second.match.history.slice(beforeSecond).some(line=>line.includes('감옥')),
+   'second person acts only after clicking their own dice; source tile choices are never force-skipped');
+  assert.equal(second.match.mode,'hotseat','second turn remains in real manual hotseat mode');
   await page.setViewportSize({width:390,height:844});
   assert.equal(await page.locator('#board-nodes .tile').first().evaluate(e=>getComputedStyle(e).transform.startsWith('matrix(1, 0, 0, -1,')),true,
    'hex platform orientation stays correct on phone');
