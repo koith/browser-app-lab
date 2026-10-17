@@ -1,0 +1,100 @@
+/* The ROLL control in apps/4leaf/assets/board.jpg and battle.jpg occupies
+ * approximately x365–435, y389–439 in the 800x600 original client.
+ * A true 3D source mesh is NOT in the archive. This small WEB INFERENCE
+ * models only its distinct silhouette; all dice/results are real game data.
+ * Keep the original 145x97 TIS / DMP / camera untouched. */
+#app.app-classic-dice #game #dice-source-roll{
+ position:absolute!important;
+ z-index:45!important;
+ left:65.8%!important;
+ bottom:9px!important;
+ display:block!important;
+ box-sizing:border-box!important;
+ width:74px!important;
+ height:53px!important;
+ padding:0!important;
+ margin:0!important;
+ border:0!important;
+ outline-offset:1px;
+ border-radius:0!important;
+ box-shadow:none!important;
+ background:transparent!important;
+ color:#645da7!important;
+ cursor:pointer!important;
+ transform:translateX(-50%)!important;
+ touch-action:manipulation!important;
+ -webkit-tap-highlight-color:transparent;
+ user-select:none;
+}
+#app.app-classic-dice #game #dice-source-roll::before{
+ content:'';
+ position:absolute;
+ left:8px;right:8px;bottom:5px;
+ height:31px;
+ border-radius:7px 7px 48% 48% / 7px 7px 35% 35%;
+ background:linear-gradient(175deg,#a49ccf 0 6%,#7168bc 12%,#b36dce 28%,#9d81dc 50%,#7865ad 75%,#504c91 100%);
+ clip-path:polygon(0 0,100% 0,100% 76%,89% 93%,54% 100%,14% 96%,0 82%);
+ box-shadow:inset 0 2px 0 #f4b8e3,0 3px 0 #303663,0 4px 4px #111a315c;
+}
+#app.app-classic-dice #game #dice-source-roll .dice-source-roll-orb{
+ position:absolute;
+ z-index:2;
+ box-sizing:border-box;
+ left:19px;top:0;
+ width:37px;height:23px;
+ border-radius:50%;
+ border:2px solid #7655b6;
+ background:
+  radial-gradient(ellipse at 35% 23%,#efffff 0 12%,transparent 16%),
+  radial-gradient(ellipse at 70% 66%,#fa82ca 0 18%,transparent 36%),
+  radial-gradient(ellipse at 28% 60%,#62e6f1 0 19%,transparent 40%),
+  linear-gradient(120deg,#86ebee,#ed90ce 60%,#70abdf);
+ box-shadow:inset 0 1px 3px #fff,0 2px 0 #484c88,0 3px 5px #1723469e;
+}
+#app.app-classic-dice #game #dice-source-roll .dice-source-roll-label{
+ position:absolute;
+ z-index:3;
+ left:5px;right:5px;bottom:7px;
+ display:block;
+ color:#7b7fcf!important;
+ text-shadow:-1px -1px #e8b2eb,1px 1px #433e83,2px 3px #34386e!important;
+ font:900 17px/21px Georgia,'Times New Roman',serif!important;
+ letter-spacing:0!important;
+ text-align:center!important;
+ transform:skew(-7deg)!important;
+ pointer-events:none;
+}
+#app.app-classic-dice #game #dice-source-roll:hover:not(:disabled),
+#app.app-classic-dice #game #dice-source-roll:focus-visible:not(:disabled){
+ filter:brightness(1.2) saturate(1.1)!important;
+}
+#app.app-classic-dice #game #dice-source-roll:focus-visible{
+ outline:2px solid #fff4b3!important;
+}
+#app.app-classic-dice #game #dice-source-roll:active:not(:disabled){
+ filter:brightness(1.1);
+ transform:translateX(-50%) translateY(2px)!important;
+}
+#app.app-classic-dice #game #dice-source-roll:disabled{
+ opacity:.76!important;
+ cursor:default!important;
+ pointer-events:none!important;
+}
+@media(max-width:650px){
+ /* The 800x600 source position must not obscure the small phone game HUD.
+  * Mobile presents the same real die action at a reachable, visible point. */
+ #app.app-classic-dice #game #dice-source-roll{
+  left:76%!important;
+  bottom:60px!important;
+  width:65px!important;height:49px!important;
+ }
+ #app.app-classic-dice #game #dice-source-roll .dice-source-roll-orb{
+  left:17px;width:33px;height:21px;
+ }
+ #app.app-classic-dice #game #dice-source-roll .dice-source-roll-label{
+  font-size:15px!important;
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ #app.app-classic-dice #game #dice-source-roll{transition:none!important}
+}
