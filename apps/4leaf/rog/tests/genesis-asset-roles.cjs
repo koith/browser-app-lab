@@ -78,6 +78,24 @@ const {chromium}=require('playwright');
   assert.ok(duel.every(x=>x.rig==='original-obs-sprite'&&
    x.portrait?.startsWith('./original/OBS/')&&!x.chatAvatar));
   await page.locator('#modal-buttons button').filter({hasText:'결과 확인'}).click();
+  const sourceRailGeometry=await page.evaluate(()=>[...document.querySelectorAll(
+    '#battle-player-panels .battle-side-portrait img')].map(img=>{
+    const r=img.getBoundingClientRect();
+    const parent=img.parentElement.getBoundingClientRect();
+    const style=getComputedStyle(img);
+    const parentStyle=getComputedStyle(img.parentElement);
+    return {src:img.getAttribute('src'),pos:[r.x,r.y,r.width,r.height],
+      crop:[parent.x,parent.y,parent.width,parent.height],
+      visible:style.visibility,display:style.display,opacity:style.opacity,
+      parentDisplay:parentStyle.display,parentVisibility:parentStyle.visibility};
+   }));
+  console.log('ORIGINAL_SAVA_PLAYER_RAIL_GEOMETRY '+JSON.stringify(sourceRailGeometry));
+  const sourceImage=await page.locator('#app').screenshot({
+   type:'jpeg',quality:64,animations:'disabled',timeout:16000});
+  console.log('ORIGINAL_SOURCE_ROLE_JPEG_BASE64 '+sourceImage.toString('base64'));
+  assert.ok(sourceRailGeometry.every(x=>x.crop[2]>25&&x.crop[3]>15&&
+    x.display!=='none'&&x.visible==='visible'&&x.opacity!=='0'),
+    'native historical player avatar rail must not be hidden by game HUD');
   assert.deepEqual(errors,[],'game should have no browser runtime errors');
   console.log('VERIFIED SOURCE ASSET ROLES',JSON.stringify({rails:snap.rails,board:snap.board,duel}));
  }finally{await browser.close()}
