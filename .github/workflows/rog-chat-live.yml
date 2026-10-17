@@ -100,6 +100,8 @@ jobs:
                curl -fLsS --max-time 15 "$base/dice-source-roll.css?qa=${GITHUB_SHA}" -o /tmp/leaf-source-roll.css &&
                cmp -s /tmp/leaf-source-roll.js apps/4leaf/rog/dice-source-roll.js &&
                cmp -s /tmp/leaf-source-roll.css apps/4leaf/rog/dice-source-roll.css &&
+               curl -fLsS --max-time 15 "$base/dice-2004-full-frame.css?qa=${GITHUB_SHA}" -o /tmp/leaf-full-frame.css &&
+               cmp -s /tmp/leaf-full-frame.css apps/4leaf/rog/dice-2004-full-frame.css &&
                cmp -s /tmp/leaf-pwa-sw.js apps/4leaf/rog/sw.js &&
                cmp -s /tmp/leaf-pwa-index.html apps/4leaf/rog/index.html; then
               ready=1
@@ -186,6 +188,10 @@ jobs:
         env:
           FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
         run: node apps/4leaf/rog/tests/pwa-dice-upgrade.cjs
+      - name: Verify publicly deployed original 800px game world with both native player rails and side HUD
+        env:
+          FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
+        run: node apps/4leaf/rog/tests/dice-2004-full-frame.cjs
       - name: Verify archived 2004-positioned ROLL HUD drives genuine public Chromium game
         env:
           FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
