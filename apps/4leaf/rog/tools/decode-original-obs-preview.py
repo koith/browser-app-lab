@@ -85,7 +85,11 @@ def main():
         if name not in orig:continue
         dat=orig[name];frames=member_frames(dat)
         if not frames:print('ORIGINAL_OBS_FRAMES_BLOCKED '+name);continue
-        palette=dat[-768:]
+        # OBS palette starts immediately AFTER the advertised first pose group's
+    # exact frame bytes; the final 768-byte footer is NOT the RGB palette.
+    paletteAt=132+sum(12+len(body) for body,_,_,_,_ in frames)
+    palette=dat[paletteAt:paletteAt+768]
+    if len(palette)!=768:raise ValueError('Missing original OBS 256×RGB palette')
         report={'name':name,'frames':len(frames),'sourceSHA256':hashlib.sha256(dat).hexdigest()}
         print('ORIGINAL_OBS_PREVIEW_FRAMES '+json.dumps(report,separators=(',',':')))
         for idx in (0,1,2,3,10,18,25,30):
