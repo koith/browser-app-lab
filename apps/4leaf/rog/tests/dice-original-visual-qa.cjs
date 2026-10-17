@@ -45,5 +45,43 @@ const {chromium}=require('playwright');
   console.log('SOURCE_SCREENSHOT_QA '+JSON.stringify(audit));
   console.log('SOURCE_SCREENSHOT_JPEG_BASE64 '+img.toString('base64'));
   console.log('SOURCE_SCREENSHOT_END');
+  // An independent LIVE source bitmap capture: two OBS.pak original Genesis
+  // full-body characters stand on the actual DMP START cell. Card IDs are
+  // test-only changes, never a static compositor or permanent game data.
+  await page.evaluate(()=>{
+   const m=window.__ROG_TEST__.getMatch();
+   m.players[0].team[0]='c_0045';
+   m.players[1].team[0]='c_0042';
+   m.players[0].position=0;
+   m.players[1].position=0;
+   window.__ROG_TEST__.drawGame();
+  });
+  await page.waitForFunction(()=>[...document.querySelectorAll(
+   '#board-pawns .leaf-chess-original-obs')]
+   .length===2&&[...document.querySelectorAll(
+   '#board-pawns .leaf-chess-original-obs')].every(i=>i.complete&&i.naturalWidth>20),
+   null,{timeout:15000});
+  const sourceActors=await page.evaluate(()=>[...document.querySelectorAll(
+   '#board-pawns .board-pawn')].map(node=>{
+   const img=node.querySelector('img.leaf-chess-original-obs');
+   const tile=document.querySelector('#board-nodes .tile[data-tile="0"]');
+   const actor=img.getBoundingClientRect(),floor=tile.getBoundingClientRect();
+   return {id:node.dataset.chessmanId,rig:node.dataset.actorRig,
+    source:img.getAttribute('src'),
+    frame:Number(node.dataset.actorFrame),pose:node.dataset.actorPose,
+    native:[img.naturalWidth,img.naturalHeight],
+    rendered:[actor.x,actor.y,actor.width,actor.height],
+    floor:[floor.x,floor.y,floor.width,floor.height],
+    distanceFeetFromFloor:Math.round(actor.bottom-(floor.y+floor.height/2)),
+    sameTilePeers:Number(node.dataset.cellPeerCount)};
+  }));
+  if(sourceActors.length!==2||
+   sourceActors.some(a=>a.rig!=='original-obs-sprite'||!a.source.includes('/OBS/')))
+    throw Error('Recovered source character renders as proxy or incorrect asset');
+  console.log('SOURCE_NATIVE_OBS_BOARD_QA '+JSON.stringify(sourceActors));
+  const originalBodies=await game.screenshot({type:'jpeg',quality:82,
+   animations:'disabled',timeout:18000});
+  console.log('SOURCE_NATIVE_OBS_JPEG_BASE64 '+originalBodies.toString('base64'));
+  console.log('SOURCE_NATIVE_OBS_END');
  }finally{await browser.close()}
 })().catch(e=>{console.error('SOURCE SCREENSHOT QA ERROR',e.stack||e);process.exit(1)});
