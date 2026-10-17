@@ -20,6 +20,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Verify every archived Genesis chessman PNG hash, source ID and native frame size
+        run: node apps/4leaf/rog/tests/obs-asset-integrity.cjs
       - run: npm install --no-save playwright
       - run: npx playwright install chromium --with-deps
       - name: Verify distinct native avatars, OBS chessmen and CardData party faces in live match
