@@ -55,7 +55,7 @@
   gap:0!important;
   border:0!important;
   overflow:visible!important;
-  background:transparent!important;
+  background:#273b89 url('./original/IMG/avatarback.png') center top/100% 100% no-repeat!important;
   box-shadow:none!important;
  }
  #app.app-classic-dice #dice-client-sidebar{
