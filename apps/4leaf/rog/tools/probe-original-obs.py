@@ -58,6 +58,13 @@ def main():
         try:report=probe(members[name])
         except Exception as e:
             print('SOURCE_OBS_BOUNDARY_ERROR '+name+' '+str(e));continue
+        if name in ('1025.obs','1045.obs'):
+            import base64
+            firstSize=struct.unpack_from('<I',members[name],132)[0]
+            first=members[name][144:144+firstSize]
+            palette=members[name][report['lastCursor']:report['lastCursor']+768]
+            print('SOURCE_OBS_FRAME0_BASE64 '+name+' '+base64.b64encode(first).decode('ascii'))
+            print('SOURCE_OBS_PALETTE_BASE64 '+name+' '+base64.b64encode(palette).decode('ascii'))
         print('SOURCE_OBS_CHESSMAN_LAYOUT '+json.dumps(
           {'pak':Path(p).name,'member':name,'size':len(members[name]),**report},
           separators=(',',':')))
