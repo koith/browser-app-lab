@@ -3,8 +3,8 @@
  * Original IMG/avatarback.png is the source blue portrait-cell texture.
  *
  * The game-side card shell remains in .battle-player-panels; actual character
- * portraits are Registry/savaNN.png cropped at the head, alpha-keyed by
- * registry-original-alpha.js. The original 794x528 ChatRoom is unaffected. */
+ * portraits are the equipped original CardData/chm_NN chessman faces,
+ * NOT Registry/savaNN ChatTown standees. ChatRoom remains unaffected. */
 #app.app-classic-dice #game .battle-team-side{
  box-sizing:border-box;
  width:11.5%!important;
