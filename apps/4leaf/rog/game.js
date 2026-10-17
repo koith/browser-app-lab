@@ -134,7 +134,12 @@ function modal(title,body,buttons){
   Array.isArray(buttons)&&buttons.length>=1&&buttons.length<=3;
  if(simple)modalNode.dataset.nativeDiceDialog='IMG/dialog.png';
  else delete modalNode.dataset.nativeDiceDialog;
- $('modal-title').textContent=title;$('modal-content').replaceChildren();if(typeof body==='string'){$('modal-content').textContent=body}else if(body)$('modal-content').append(body);$('modal-buttons').replaceChildren();buttons.forEach(opt=>{const b=document.createElement('button');b.textContent=opt.label;b.className=opt.primary?'primary':'';b.onclick=()=>{$('modal').classList.add('hidden');if(opt.run)opt.run()};$('modal-buttons').append(b)});$('modal').classList.remove('hidden')}
+ $('modal-title').textContent=title;$('modal-content').replaceChildren();if(typeof body==='string'){$('modal-content').textContent=body}else if(body)$('modal-content').append(body);$('modal-buttons').replaceChildren();buttons.forEach(opt=>{const b=document.createElement('button');b.textContent=opt.label;b.className=opt.primary?'primary':'';
+  // Native Dice/IMG/okcancelbut.bmp has exactly two captions. Do not put
+  // a misleading screenshot label on Exit/Use/Next or custom game actions.
+  if(simple&&opt.label==='확인')b.dataset.originalDiceAction='confirm';
+  if(simple&&opt.label==='취소')b.dataset.originalDiceAction='cancel';
+  b.onclick=()=>{$('modal').classList.add('hidden');if(opt.run)opt.run()};$('modal-buttons').append(b)});$('modal').classList.remove('hidden')}
 function ask(title,body,options){return new Promise(resolve=>modal(title,body,options.map((a,i)=>({label:a,primary:i===0,run:()=>resolve(i)}))))}
 function syncNativeDiceEvent(message){
  // The original app's modern #move-log footer is hidden by the restored
