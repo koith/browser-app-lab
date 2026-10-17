@@ -632,10 +632,24 @@ function drawGame(){if(!match||!MAPS[match.map])return;chooseSourcePath(match.ma
   roll.title=manualBot?'컴퓨터 상대의 이번 턴도 사용자가 직접 굴립니다.':'이번 참가자의 주사위를 굴립니다.';
  }
 $('game-map-title').textContent=match.map;const elapsed=Math.floor((Date.now()-(match.startedAt||Date.now()))/1000);$('mini-time').textContent='TIME '+formatGameDuration(Math.max(0,elapsed))+' / GP '+formatGameDuration(match.players.length*90);$('element-label').textContent=match.attribute;$('player-count').textContent=match.players.length;$('turn-indicator').textContent='ROUND '+match.round+' · '+match.players[match.active].name+' TURN';$('my-name').textContent=p.name;$('my-stats').textContent='이동 '+stats.move+' · 공격 '+stats.atk+' · 방어 '+stats.def+' · 지력 +'+stats.int;$('my-position').textContent=p.jail>0?'감옥 '+p.jail+'턴':p.position===0?'START':p.position===match.tiles.length-1?'GOAL':(p.position+1)+'번째 칸';$('my-portrait').innerHTML='<img class="player-sprite" alt="" src="'+imageFor(p.team[0]||'soldier')+'">';$('ability-fill').style.width=p.ability+'%';$('game-players').replaceChildren();match.players.forEach((user,i)=>{const li=document.createElement('div');li.className=match.active===i?'is-turn':'';li.textContent=(match.active===i?'▶ ':'　')+user.pawn+' '+user.name+' '+(user.position+1)+'칸 · '+user.ability+'%';li.style.color=user.color;$('game-players').append(li)});$('my-items').replaceChildren();p.items.forEach((itemId,i)=>{const item=ITEM_MAP[itemId],btn=document.createElement('button');btn.className='item-card';btn.innerHTML='<span class="item-icon">'+(item?.icon||'✧')+'</span>'+(item?.name||itemId);btn.title=item.hint;btn.disabled=match.finished||!playerCanAct()||p.usedItem||busy;btn.onclick=()=>useItem(i);$('my-items').append(btn)});$('roll-btn').disabled=!playerCanAct();$('ability-btn').disabled=!playerCanAct()||p.ability<100;$('move-log').textContent=match.message;syncNativeDiceEvent(match.message);drawBoard();drawBattlePanels();drawNativeChessmen();drawMinimap();trackActivePawn()}
-const mapViewport={zoom:1.25,panX:0,panY:0,autoFollow:true};
+const mapViewport={zoom:1.25,panX:0,panY:0,autoFollow:true,lastTurn:null,matchKey:null};
 function trackActivePawn(){
  if(!match||!PATH.length)return;
- if(window.__LEAF_CAMERA__){if(mapViewport.autoFollow){mapViewport.panX=0;mapViewport.panY=0;}window.__LEAF_CAMERA__.sync(match,PATH);return;}
+ // Follow a genuine new participant or new match, not on every UI repaint.
+ if(mapViewport.matchKey!==match.startedAt||mapViewport.lastTurn!==match.active){
+  mapViewport.autoFollow=true;mapViewport.panX=0;mapViewport.panY=0;
+  mapViewport.matchKey=match.startedAt;mapViewport.lastTurn=match.active;
+ }
+ if(window.__LEAF_CAMERA__){
+  // Follow means keep the actual active pawn at the camera's source anchor.
+  // A clamped offset from the previous pawn position is NOT a manual pan;
+  // otherwise same-turn movement slowly slides the real pawn off-centre.
+  if(mapViewport.autoFollow)window.__LEAF_CAMERA__.viewport(mapViewport.zoom,0,0);
+  window.__LEAF_CAMERA__.sync(match,PATH);
+  const actual=window.__LEAF_CAMERA__.getState();
+  mapViewport.panX=actual.panX;mapViewport.panY=actual.panY;
+  return;
+ }
  if(!mapViewport.autoFollow||!match||!PATH.length)return;
  const area=$('board-area'),p=activePlayer(),pos=PATH[p.position];if(!pos)return;
  const w=area.clientWidth,h=area.clientHeight,z=mapViewport.zoom;
@@ -645,7 +659,11 @@ function trackActivePawn(){
  applyMapViewport();
 }
 function applyMapViewport(){
- if(window.__LEAF_CAMERA__){window.__LEAF_CAMERA__.viewport(mapViewport.zoom,mapViewport.panX,mapViewport.panY);return;}
+ if(window.__LEAF_CAMERA__){
+  const view=window.__LEAF_CAMERA__.viewport(mapViewport.zoom,mapViewport.panX,mapViewport.panY);
+  mapViewport.panX=view.panX;mapViewport.panY=view.panY;
+  return;
+ }
  const world=$('board-world');if(!world)return;
  world.style.transform='translate('+mapViewport.panX+'px,'+mapViewport.panY+'px) scale('+mapViewport.zoom+')';
  const label=$('board-zoom-reset');if(label)label.title='맵 배율 '+Math.round(mapViewport.zoom*100)+'% · 중앙으로 복귀';
@@ -653,31 +671,95 @@ function applyMapViewport(){
 function zoomBoard(by){
  mapViewport.zoom=Math.max(.65,Math.min(2.4,Math.round((mapViewport.zoom+by)*100)/100));
  if(mapViewport.zoom===1){mapViewport.panX=0;mapViewport.panY=0}
- if(mapViewport.autoFollow)trackActivePawn();else applyMapViewport();
+ // Source game zoom buttons must change the real shared world scale even
+ // while follow-camera is enabled. Calling sync() alone kept the previous
+ // scale forever until a manual drag disabled follow.
+ applyMapViewport();
+ if(mapViewport.autoFollow)trackActivePawn();
 }
 function installBoardControls(){
  $('board-zoom-in').onclick=()=>zoomBoard(.25);
  $('board-zoom-out').onclick=()=>zoomBoard(-.25);
  $('board-zoom-reset').onclick=()=>{mapViewport.zoom=1.25;mapViewport.panX=0;mapViewport.panY=0;mapViewport.autoFollow=true;applyMapViewport();trackActivePawn()};
- const area=$('board-area');let tracking=null;
+ const area=$('board-area');
+ // 1450x1120 actual DMP route may be explored at ANY source zoom. The old
+ // zoom-only clamp prevented travel beyond a small rectangle of the board.
+ const pointers=new Map();let dragging=null,pinch=null;
+ const distance=()=>{
+  const [a,b]=[...pointers.values()];
+  return a&&b?Math.hypot(a.x-b.x,a.y-b.y):0;
+ };
+ const blocked=e=>Boolean(e.target.closest(
+  '#board-zoom-controls,#board-mini,.board-mini,button,input,textarea,select,[role="button"],#battle-visual,#battle-player-panels'));
+ const pan=(dx,dy)=>{
+  mapViewport.autoFollow=false;
+  if(window.__LEAF_CAMERA__?.panBy){
+   const view=window.__LEAF_CAMERA__.panBy(dx,dy);
+   mapViewport.panX=view.panX;mapViewport.panY=view.panY;
+  }else{
+   mapViewport.panX+=dx;mapViewport.panY+=dy;applyMapViewport();
+  }
+ };
+ area.tabIndex=0;
+ area.setAttribute('aria-label','원본 주잔 지형: 드래그로 탐색, 휠 확대, 방향키 이동, 0키 캐릭터 추적');
  area.addEventListener('pointerdown',e=>{
-   if(e.target.closest('#board-zoom-controls')||e.button!==0)return;
-   tracking={id:e.pointerId,x:e.clientX,y:e.clientY,px:mapViewport.panX,py:mapViewport.panY};
-   area.setPointerCapture(e.pointerId);
+  if((e.pointerType==='mouse'&&e.button!==0)||blocked(e))return;
+  pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(pointers.size===1){
+   dragging={id:e.pointerId,x:e.clientX,y:e.clientY,startX:e.clientX,startY:e.clientY,moved:false};
+  }else if(pointers.size===2){
+   pinch={distance:distance(),zoom:mapViewport.zoom};dragging=null;
+   for(const id of pointers.keys())try{area.setPointerCapture(id)}catch{}
+  }
  });
  area.addEventListener('pointermove',e=>{
-   if(!tracking||tracking.id!==e.pointerId||mapViewport.zoom<=1)return;
-   mapViewport.autoFollow=false;
-   const maxX=area.clientWidth*(mapViewport.zoom-1)/2,maxY=area.clientHeight*(mapViewport.zoom-1)/2;
-   mapViewport.panX=Math.max(-maxX,Math.min(maxX,tracking.px+e.clientX-tracking.x));
-   mapViewport.panY=Math.max(-maxY,Math.min(maxY,tracking.py+e.clientY-tracking.y));
-   applyMapViewport();
+  if(!pointers.has(e.pointerId))return;
+  pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(pointers.size>=2){
+   if(!pinch)pinch={distance:distance(),zoom:mapViewport.zoom};
+   if(pinch.distance>8){
+    mapViewport.zoom=Math.max(.65,Math.min(2.4,
+     Math.round(pinch.zoom*distance()/pinch.distance*100)/100));
+    mapViewport.autoFollow=false;applyMapViewport();
+   }
+   return;
+  }
+  if(!dragging||dragging.id!==e.pointerId)return;
+  if(!dragging.moved&&Math.hypot(e.clientX-dragging.startX,e.clientY-dragging.startY)<5)return;
+  if(!dragging.moved){
+   dragging.moved=true;try{area.setPointerCapture(e.pointerId)}catch{}
+  }
+  const dx=e.clientX-dragging.x,dy=e.clientY-dragging.y;
+  dragging.x=e.clientX;dragging.y=e.clientY;
+  pan(dx,dy);
  });
- for(const kind of ['pointerup','pointercancel','lostpointercapture'])area.addEventListener(kind,()=>{tracking=null});
+ function release(e){
+  pointers.delete(e.pointerId);
+  if(pointers.size<2)pinch=null;
+  if(pointers.size===1){
+   const [id,p]=[...pointers.entries()][0];
+   dragging={id,x:p.x,y:p.y,startX:p.x,startY:p.y,moved:false};
+  }else dragging=null;
+ }
+ for(const kind of ['pointerup','pointercancel','lostpointercapture'])
+  area.addEventListener(kind,release);
  area.addEventListener('wheel',e=>{
-   if(!e.ctrlKey&&!e.metaKey)return;
-   e.preventDefault();zoomBoard(e.deltaY<0?.2:-.2);
+  if(blocked(e))return;
+  e.preventDefault();zoomBoard(e.deltaY<0?.2:-.2);
  },{passive:false});
+ area.addEventListener('keydown',e=>{
+  if(e.target!==area)return;
+  const move={ArrowLeft:[48,0],ArrowRight:[-48,0],
+   ArrowUp:[0,48],ArrowDown:[0,-48]}[e.key];
+  if(move){e.preventDefault();pan(...move);return}
+  if(e.key==='+'||e.key==='='){e.preventDefault();zoomBoard(.25)}
+  else if(e.key==='-'){e.preventDefault();zoomBoard(-.25)}
+  else if(e.key==='0'){
+   e.preventDefault();mapViewport.zoom=1.25;
+   mapViewport.panX=mapViewport.panY=0;
+   mapViewport.autoFollow=true;applyMapViewport();trackActivePawn();
+  }
+ });
  applyMapViewport();
 }
 function withUserTurn(){return playerCanAct()}
