@@ -40,6 +40,17 @@ def inspect_run_table(body,width=None,height=None):
       'first':rows[:10],'last':rows[-3:]}
 
 
+def candidate_boundaries(body,w,h):
+    if len(body)<10:return []
+    base_offset=int.from_bytes(body[2:4],'little')
+    near=[]
+    for j in range(48,min(len(body)-5,700)):
+        le=int.from_bytes(body[j:j+2],'little')
+        off=int.from_bytes(body[j+2:j+4],'little')
+        if 1<=le<=w+15 and base_offset<off<w*h and off<base_offset+w*6:
+            near.append((j,le,off))
+    return near[:60]
+
 def probe(raw,name):
     at=raw.find(b'FAST.PAL.COLORKEY')
     if at<0:raise ValueError("missing sprite signature")
@@ -55,7 +66,7 @@ def probe(raw,name):
         marks=[(p,body[p:p+8].hex()) for p in hits[:14]]
         records.append({
             'index':i,'dataOffset':cursor,'length':length,'width':w,'height':h,'origin':[x,y],
-            'runLayoutGuess':inspect_run_table(body,w,h),'bodyHead':body[:80].hex(),'bodyTail':body[-48:].hex(),
+            'runLayoutGuess':inspect_run_table(body,w,h),'possibleRunHeaders':candidate_boundaries(body,w,h),'bodyHead':body[:80].hex(),'bodyTail':body[-48:].hex(),
             'rowMarkerCandidates':len(hits),'rowMarksFirst14':marks,
             'uniqueBytes':len(set(body)), 'paletteIndexColor0':src[-768:-765].hex()
         })
