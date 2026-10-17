@@ -1,0 +1,77 @@
+/* Recovered TIS geometry remains a full 145x97 clickable game entity.
+   Active inspection is only a pointer/keyboard/camera affordance: no fake
+   historical elevation, 3D screenshot plane or replacement hex sprites. */
+#app.app-classic-dice #game #board-nodes .tile[data-dmp-focusable="true"]{
+ cursor:crosshair!important;
+}
+#app.app-classic-dice #game #board-nodes .tile[data-dmp-focusable="true"][aria-pressed="true"]{
+ filter:brightness(1.29) drop-shadow(0 0 3px #f4edc5)!important;
+}
+#app.app-classic-dice #game #board-nodes .tile[data-dmp-focusable="true"]:focus-visible{
+ filter:brightness(1.2) drop-shadow(0 0 4px #f3daa3)!important;
+ outline:none!important; /* original source 145x97 clip silhouette is preserved */
+}
+#app.app-classic-dice #game #dice-source-dmp-inspector{
+ position:absolute!important;
+ left:50%!important;
+ bottom:72px!important;
+ transform:translateX(-50%)!important;
+ z-index:33!important;
+ box-sizing:border-box!important;
+ display:flex!important;
+ flex-direction:column!important;
+ justify-content:space-between!important;
+ width:244px!important;
+ min-height:52px!important;
+ max-width:244px!important;
+ margin:0!important;
+ padding:7px 14px!important;
+ border:0!important;
+ border-radius:0!important;
+ box-shadow:none!important;
+ color:#25395f!important;
+ background:transparent url('./original/IMG/eventmsgbox.png') center/100% 100% no-repeat!important;
+ font:10px/1.25 Gulim,'굴림',sans-serif!important;
+ text-align:center;
+ pointer-events:auto!important;
+}
+#app.app-classic-dice #game #dice-source-dmp-inspector[hidden]{
+ display:none!important;
+}
+#app.app-classic-dice #game #dice-source-dmp-inspector .dmp-inspector-title{
+ font-weight:bold;color:#173466;
+ white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+#app.app-classic-dice #game #dice-source-dmp-inspector .dmp-inspector-detail{
+ font-size:9px;min-height:12px;
+ white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+#app.app-classic-dice #game #dice-source-dmp-inspector .dmp-inspector-actions{
+ display:flex;justify-content:center;gap:6px;
+}
+#app.app-classic-dice #game #dice-source-dmp-inspector button{
+ min-height:18px!important;
+ margin:0!important;
+ padding:0 5px!important;
+ border:1px solid #8da5c9!important;
+ border-radius:0!important;
+ background:#e8f0ff!important;
+ color:#264479!important;
+ font:9px Gulim,'굴림',sans-serif!important;
+ box-shadow:inset 1px 1px #fff!important;
+ cursor:pointer;
+}
+#app.app-classic-dice #game #dice-source-dmp-inspector button[hidden]{display:none!important}
+#app.app-classic-dice #game #dice-source-dmp-inspector button:is(:hover,:focus-visible){
+ outline:1px solid #d9ad46!important;outline-offset:1px!important;
+}
+@media(max-width:630px){
+ #app.app-classic-dice #game #dice-source-dmp-inspector{
+  bottom:61px!important;
+  left:50%!important;
+  max-width:244px!important;
+  width:244px!important;
+  padding:6px 11px!important;
+  font-size:9px!important;
+ }
+}
