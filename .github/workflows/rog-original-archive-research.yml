@@ -8,6 +8,7 @@ on:
       - 'apps/4leaf/rog/tools/original-pak-index.cjs'
       - 'apps/4leaf/rog/tools/inspect-original-member-signatures.cjs'
       - 'apps/4leaf/rog/tools/probe-original-spr.py'
+      - 'apps/4leaf/rog/tools/emit-original-img-ui.py'
       - 'apps/4leaf/rog/tests/original-pak-index.cjs'
       - 'apps/4leaf/rog/docs/original-evidence-crosscheck-2026-10-17.md'
       - '.github/workflows/rog-original-archive-research.yml'
@@ -52,6 +53,8 @@ jobs:
         run: sudo apt-get update -qq && sudo apt-get install -y -qq unshield
       - name: Test recovered bitwise-inverted PAK header, filename and payload length parser
         run: node apps/4leaf/rog/tests/original-pak-index.cjs
+      - name: Install preservation image decoder for native original BMPs
+        run: python3 -m pip install --user Pillow
       - name: Verify original ZIP SHA1, unpack original PAKs into ephemeral tmp, inspect signatures and SHA256 ONLY
         run: node apps/4leaf/rog/tools/inspect-original-pak-signatures.cjs
       - name: Preserve harmless original PAK header and checksum audit only, never the copyrighted payloads
