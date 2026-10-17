@@ -1,0 +1,37 @@
+/* 4LEAF Dice DMP map source:
+ * logical cells are pitched 70x47; the exported TIS PNG is 145x97.
+ * Full 145x97 CSS billboards at only 70x47 between cell origins create
+ * 75x50px of opaque overlap, visually burying adjacent platforms.
+ * Keep the original full bitmap and its real palette/alpha/hit-mask,
+ * but map its full footprint onto one logical DMP cell. Do not crop art
+ * or paste screenshots; only change the CSS presentation scale.
+ * Source bitmap dimensions remain data-native-tis-size="145x97".
+ */
+#app.app-classic-dice #game .board-world #board-nodes
+.tile[data-native-tis-size="145x97"]{
+ width:70px!important;height:47px!important;
+ min-width:70px!important;min-height:47px!important;
+ max-width:70px!important;max-height:47px!important;
+ background-size:70px 47px!important;
+ background-position:center!important;
+ transform:translate(-50%,-50%)!important;
+ border:0!important;
+ border-radius:0!important;
+ box-shadow:none!important;
+}
+/* Derived native-alpha polygon stays in *percentage* coordinates, and thus
+ * scales with the DMP cell. No opaque substitute rectangle or fake hex HUD.
+ */
+#app.app-classic-dice #game .board-world #board-nodes
+.tile[data-native-tis-size="145x97"][data-tis-alpha="ready"]{
+ background-repeat:no-repeat!important;
+}
+@media(max-width:640px){
+ #app.app-classic-dice #game .board-world #board-nodes
+ .tile[data-native-tis-size="145x97"]{
+  width:70px!important;height:47px!important;
+  min-width:70px!important;min-height:47px!important;
+  max-width:70px!important;max-height:47px!important;
+  background-size:70px 47px!important;
+ }
+}
