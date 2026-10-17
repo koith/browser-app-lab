@@ -19,6 +19,8 @@ on:
       - 'apps/4leaf/rog/world-perspective.css'
       - 'apps/4leaf/rog/original-stage.css'
       - 'apps/4leaf/rog/dice-source-roll.css'
+      - 'apps/4leaf/rog/dice-2004-full-frame.css'
+      - 'apps/4leaf/rog/tests/dice-2004-full-frame.cjs'
       - 'apps/4leaf/rog/dice-source-roll.js'
       - 'apps/4leaf/rog/tests/dice-source-roll.cjs'
       - 'apps/4leaf/rog/dice-native-client-frame.css'
@@ -84,6 +86,8 @@ jobs:
         run: node apps/4leaf/rog/tests/dice-native-orientation-manual.cjs
       - name: Validate actual source Genesis dialog and live event message in Chromium
         run: node apps/4leaf/rog/tests/dice-native-dialog-event.cjs
+      - name: Register complete original 800px source battlefield, both side rails and 3 native HUD regions
+        run: node apps/4leaf/rog/tests/dice-2004-full-frame.cjs
       - name: Verify genuine 2004-positioned ROLL control invokes actual dice engine without duplicate turn
         run: node apps/4leaf/rog/tests/dice-source-roll.cjs
       - name: Chromium verify recovered 800x600 / 406x152 / 172x152 functioning Dice frame

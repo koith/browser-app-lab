@@ -1,0 +1,130 @@
+/* 2004 original board.jpg / battle.jpg (800x600) source-coordinate registration.
+ * The old revival made main#main only 608px wide, leaving the entire
+ * 192px right panel as a flex sibling. That mistakenly shrank the WHOLE
+ * battlefield, shifting the right player rail from x~704 to x~538 and
+ * leaving no 800px source coordinate space for both opponent rails.
+ *
+ * In the real reference the 608px native IMG/menu.png spans x96..704,
+ * but the terrain and left/right player rails span the FULL 800px field.
+ * Bottom atlas zones: minimap x0..172, chat x172..578, tools x578..607,
+ * chessmen x607..800. Recompose real independent DOM/assets, not a JPEG.
+ *
+ * Only activate at 1:1 desktop frame. Keep legacy narrow/mobile layout,
+ * responsive panning and original GameRoom/ChatTown scenes unchanged.
+ */
+@media(min-width:812px){
+ /* Eliminate the revival's two-pixel outer border from the 800px reference
+  coordinate plane. Native game rails already contain their source frame. */
+ #app.app-classic-dice{
+  border:0!important;
+ }
+ #app.app-classic-dice>.workspace{
+  position:relative!important;
+  width:100%!important;
+  min-width:0!important;
+ }
+ #app.app-classic-dice>.workspace>main#main{
+  box-sizing:border-box!important;
+  position:relative!important;
+  flex:1 1 100%!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:none!important;
+  border:0!important;
+  padding:0!important;
+  margin:0!important;
+ }
+ #app.app-classic-dice>.workspace>.sidebar{
+  box-sizing:border-box!important;
+  display:flex!important;
+  position:absolute!important;
+  top:auto!important;
+  left:auto!important;
+  right:0!important;
+  bottom:0!important;
+  z-index:31!important;
+  flex:none!important;
+  width:222px!important;
+  min-width:222px!important;
+  max-width:222px!important;
+  height:152px!important;
+  min-height:152px!important;
+  max-height:152px!important;
+  margin:0!important;
+  padding:0!important;
+  gap:0!important;
+  border:0!important;
+  overflow:visible!important;
+  background:#273b89 url('./original/IMG/avatarback.png') center top/100% 100% no-repeat!important;
+  box-shadow:none!important;
+ }
+ #app.app-classic-dice #dice-client-sidebar{
+  box-sizing:border-box!important;
+  width:222px!important;
+  min-width:222px!important;
+  height:152px!important;
+  padding:0!important;
+  margin:0!important;
+  justify-content:flex-end!important;
+  gap:0!important;
+ }
+ #app.app-classic-dice #dice-native-party{
+  box-sizing:border-box!important;
+  width:193px!important;
+  max-width:193px!important;
+  min-width:193px!important;
+  margin:0 0 0 29px!important;
+  grid-template-rows:repeat(2,74px)!important;
+  column-gap:1px!important;
+  row-gap:2px!important;
+ }
+ #app.app-classic-dice #dice-native-party .dice-chessman-slot{
+  height:74px!important;
+ }
+ #app.app-classic-dice #dice-original-selector{
+  left:0!important;
+  bottom:3px!important;
+ }
+ #app.app-classic-dice #game{
+  width:100%!important;
+  min-width:0!important;
+ }
+ #app.app-classic-dice #game .scene-banner{
+  box-sizing:border-box!important;
+  left:96px!important;
+  right:auto!important;
+  width:608px!important;
+  max-width:none!important;
+  background-position:0 0!important;
+  background-size:608px 30px!important;
+ }
+ #app.app-classic-dice #game .board-area{
+  left:0!important;
+  right:0!important;
+  width:100%!important;
+ }
+ #app.app-classic-dice #game .battle-team-side.left{
+  left:0!important;
+  width:96px!important;
+ }
+ #app.app-classic-dice #game .battle-team-side.right{
+  right:0!important;
+  width:96px!important;
+ }
+ #app.app-classic-dice #game #dice-source-roll{
+  left:50%!important;
+ }
+ #app.app-classic-dice .messenger{
+  box-sizing:border-box!important;
+  width:406px!important;
+  min-width:406px!important;
+  max-width:406px!important;
+  height:152px!important;
+  min-height:152px!important;
+  margin-left:172px!important;
+ }
+ #app.app-classic-dice .dice-native-minidock{
+  left:0!important;
+  bottom:0!important;
+ }
+}
