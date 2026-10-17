@@ -8,6 +8,7 @@ on:
       - 'apps/4leaf/rog/genesis-chessman-actors.js'
       - 'apps/4leaf/rog/dice-original-obs.css'
       - 'apps/4leaf/rog/dice-native-player-portraits.css'
+      - 'apps/4leaf/rog/tests/dice-original-visual-qa.cjs'
       - 'apps/4leaf/rog/registry-native-chroma.js'
       - 'apps/4leaf/rog/original/OBS/animation-extra.js'
   pull_request:
