@@ -476,7 +476,7 @@ function drawBattlePanels(){
   if(p){
    const portrait=document.createElement('div');portrait.className='battle-side-portrait';
    const avatar=document.createElement('img');avatar.alt='';
-   avatar.src='./original/Registry/sava'+String([0,82,6,1,85,2,84,4][p.id]??84).padStart(2,'0')+'.png';
+   avatar.src=imageFor(p.team?.[0]); // Actual active Genesis chessman card portrait, NOT ChatTown Registry
    avatar.decoding='async';
    portrait.append(avatar);
    const info=document.createElement('div');info.className='battle-side-info';
@@ -968,9 +968,25 @@ function showBattleScene(attacker,defender,attack,defense,attackerPoints,defende
  const left=document.createElement('div'),right=document.createElement('div');
  left.className='battle-visual-side attacker';right.className='battle-visual-side defender';
  function assemble(panel,player,result,values){
-   const actor=document.createElement('img');actor.className='battle-visual-actor';
-   actor.src=player.id<0?'./original/Registry/sava84.png':'./original/Registry/sava'+String([0,82,6,1,85,2,84,4][player.id]||0).padStart(2,'0')+'.png';
-   actor.alt=player.name;
+   const actor=document.createElement('div');
+   actor.className='battle-visual-actor board-pawn leaf-battle-chessman';
+   actor.setAttribute('role','img');
+   actor.setAttribute('aria-label',player.name+' · 전투 체스맨');
+   if(player.team?.length){
+     // The actual player's Genesis chessman is also the duel actor.
+     // The original full-body model is not in the recovered archive;
+     // share the existing inferred rig/poses, not unrelated 4LEAF avatars.
+     window.__LEAF_GENESIS_ACTORS__?.mount(actor,player,imageFor(player.team[0]));
+     window.__LEAF_GENESIS_ACTORS__?.pose(actor,
+       panel.classList.contains('attacker')?'attack':'hurt',850);
+   }else{
+     // Keeper mesh is not recovered. Do not impersonate it with savaNN.
+     const placeholder=document.createElement('span');
+     placeholder.className='leaf-unrecovered-keeper';
+     placeholder.textContent='KEEPER';
+     actor.append(placeholder);
+     actor.dataset.actorOriginalModelRecovered='false';
+   }
    const title=document.createElement('strong');title.textContent=player.name;
    const score=document.createElement('div');score.className='battle-visual-total';score.textContent=String(result).padStart(2,'0');
    const dice=document.createElement('div');dice.className='battle-visual-dice';
