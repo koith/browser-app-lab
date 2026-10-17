@@ -1119,10 +1119,28 @@
       "height": 152
     },
     {
+      "original": "IMG/okcancelbut.bmp",
+      "image": "IMG/okcancelbut.png",
+      "width": 256,
+      "height": 36
+    },
+    {
+      "original": "IMG/scrollButton.bmp",
+      "image": "IMG/scrollbutton.png",
+      "width": 80,
+      "height": 16
+    },
+    {
       "original": "IMG/selector.bmp",
       "image": "IMG/selector.png",
       "width": 222,
       "height": 152
+    },
+    {
+      "original": "IMG/stats.bmp",
+      "image": "IMG/stats.png",
+      "width": 164,
+      "height": 125
     },
     {
       "original": "IMG/title.BMP",
