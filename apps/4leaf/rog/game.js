@@ -1009,7 +1009,7 @@ function combat(attacker,defender,keeper=false){
  const bCount=Math.max(1,(reducedB?Math.max(1,Math.floor(bStat.def/2)):bStat.def)+(isDuoB&&defender.effects?.ring>0?1:0));
  let attack,defense,aValue,bValue,rerolls=0;
  // Source: actual final-service 2004 screenshot and commentary archived by
- // 4LEAF Memorial (https://4leafmemorial.tistory.com/ ,
+ // 4LEAF Memorial (https://4leafmemorial.tistory.com/1577 ,
  // "주사위의 잔영 - 철가면 vs 데미안 이벤트", 2013-03-15).
  // Ironmask Destroy and Damian Block each force EXACTLY 24. The native
  // game cancels both abilities when they clash; the old reconstruction
