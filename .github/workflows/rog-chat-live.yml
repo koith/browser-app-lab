@@ -57,6 +57,12 @@ jobs:
                cmp -s /tmp/leaf-tis-live.css apps/4leaf/rog/dice-native-tis-clean.css &&
                curl -fLsS --max-time 15 "$base/dice-native-tis-depth.css?qa=${GITHUB_SHA}" -o /tmp/leaf-tis-depth-live.css &&
                cmp -s /tmp/leaf-tis-depth-live.css apps/4leaf/rog/dice-native-tis-depth.css &&
+               curl -fLsS --max-time 15 "$base/game.js?qa=${GITHUB_SHA}" -o /tmp/leaf-game-live.js &&
+               cmp -s /tmp/leaf-game-live.js apps/4leaf/rog/game.js &&
+               curl -fLsS --max-time 15 "$base/original-stage.css?qa=${GITHUB_SHA}" -o /tmp/leaf-game-stage-live.css &&
+               cmp -s /tmp/leaf-game-stage-live.css apps/4leaf/rog/original-stage.css &&
+               curl -fLsS --max-time 15 "$base/sw.js?qa=${GITHUB_SHA}" -o /tmp/leaf-pwa-live.js &&
+               cmp -s /tmp/leaf-pwa-live.js apps/4leaf/rog/sw.js &&
                curl -fLsS --max-time 15 "$base/dice-native-tis-alpha.js?qa=${GITHUB_SHA}" -o /tmp/leaf-tis-alpha-live.js &&
                cmp -s /tmp/leaf-tis-alpha-live.js apps/4leaf/rog/dice-native-tis-alpha.js &&
                curl -fLsS --max-time 15 "$base/dice-native-pawn-dmp-depth.css?qa=${GITHUB_SHA}" -o /tmp/leaf-pawn-depth.css &&
@@ -165,6 +171,10 @@ jobs:
         env:
           FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
         run: node apps/4leaf/rog/tests/dice-dmp-full-camera.cjs
+      - name: Prove published 4LEAF phone dice rolls twice and DMP neighbor geometry is still source-aligned
+        env:
+          FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
+        run: node apps/4leaf/rog/tests/dice-mobile-roll-dmp-order.cjs
       - name: Verify published full-size 145x97 original TIS raised platform overlap, DMP depth and mobile zoom
         env:
           FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
