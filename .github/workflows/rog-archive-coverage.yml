@@ -18,6 +18,9 @@ on:
       - 'apps/4leaf/rog/tests/dice-dmp-full-camera.cjs'
       - 'apps/4leaf/rog/world-perspective.css'
       - 'apps/4leaf/rog/original-stage.css'
+      - 'apps/4leaf/rog/dice-source-roll.css'
+      - 'apps/4leaf/rog/dice-source-roll.js'
+      - 'apps/4leaf/rog/tests/dice-source-roll.cjs'
       - 'apps/4leaf/rog/dice-native-client-frame.css'
       - 'apps/4leaf/rog/dice-native-menu-chrome.css'
       - 'apps/4leaf/rog/dice-native-dialog-event.css'
@@ -81,6 +84,8 @@ jobs:
         run: node apps/4leaf/rog/tests/dice-native-orientation-manual.cjs
       - name: Validate actual source Genesis dialog and live event message in Chromium
         run: node apps/4leaf/rog/tests/dice-native-dialog-event.cjs
+      - name: Verify genuine 2004-positioned ROLL control invokes actual dice engine without duplicate turn
+        run: node apps/4leaf/rog/tests/dice-source-roll.cjs
       - name: Chromium verify recovered 800x600 / 406x152 / 172x152 functioning Dice frame
         run: node apps/4leaf/rog/tests/dice-native-frame.cjs
       - uses: actions/upload-artifact@v4
