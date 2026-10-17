@@ -27,6 +27,8 @@ on:
       - 'apps/4leaf/rog/original/MainFrame/pannel.png'
       - 'apps/4leaf/rog/central-client.js'
       - 'apps/4leaf/rog/sw.js'
+      - 'apps/4leaf/rog/pwa-runtime.js'
+      - 'apps/4leaf/rog/manifest.webmanifest'
       - 'apps/4leaf/rog/tests/pwa-dice-upgrade.cjs'
       - 'apps/4leaf/rog/social-chat.js'
       - 'apps/4leaf/rog/world-social.css'
