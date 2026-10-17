@@ -14,6 +14,7 @@ const path=require('node:path');
 const {spawnSync}=require('node:child_process');
 const {createHash}=require('node:crypto');
 const {loadPakIndex}=require('./original-pak-index.cjs');
+const {inspect:inspectOriginalMembers}=require('./inspect-original-member-signatures.cjs');
 const source='https://archive.org/download/4leaf/4leaf.zip';
 const expected='86526d89679ae39b85fe9808da97ad871b7888d9';
 const reportPath='original-4leaf-pak-signatures.json';
@@ -113,7 +114,11 @@ function allFiles(directory){
   const paks=files.filter(f=>f.toLowerCase().endsWith('.pak'));
   report.unshieldFiles=files.length;
   report.paksFound=paks.length;
+  report.originalMemberHeaders=[];
   for(const file of paks){
+   const sample=inspectOriginalMembers(file);
+   for(const m of sample)console.log('ORIGINAL_MEMBER_HEADER '+JSON.stringify(m));
+   report.originalMemberHeaders.push(...sample);
    const stat=fs.statSync(file);
    const fd=fs.openSync(file,'r');
    const head=Buffer.alloc(Math.min(96,stat.size));
