@@ -83,11 +83,13 @@ if __name__=='__main__':
     for name in ['roll.spr','eventRoll1.spr','avatar.spr','winBattle.spr','minipanel.spr']:
         try:
             raw=get_member(pak,name)
-            print('SOURCE_SPR_FRAME_LAYOUT '+json.dumps(probe(raw,name),separators=(',',':')))
             if name=='roll.spr':
                 src=raw[raw.find(b'FAST.PAL.COLORKEY'):]
                 length=struct.unpack_from('<I',src,128)[0]
                 import base64
+                # Print raw first frame BEFORE massive 16-frame diagnostics so
+                # actual palette/pixel codec analysis survives log limits.
                 print('ORIGINAL_SPR_ROLL_DEBUG_BASE64 '+base64.b64encode(src[140:140+length]).decode('ascii'))
                 print('ORIGINAL_SPR_ROLL_PALETTE_BASE64 '+base64.b64encode(src[-768:]).decode('ascii'))
+            print('SOURCE_SPR_FRAME_LAYOUT '+json.dumps(probe(raw,name),separators=(',',':')))
         except Exception as exc:print('SOURCE_SPR_ERROR '+name+' '+str(exc))
