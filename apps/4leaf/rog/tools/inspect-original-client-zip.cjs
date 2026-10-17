@@ -82,6 +82,45 @@ async function sha1(file){
   for(const entry of result.entries)
    result.types[entry.extension]=(result.types[entry.extension]||0)+1;
   result.potentialAnimationResources=result.entries.filter(f=>/\.(pak|mve|spr|ani|chr|act|bmp|gif|shp|sff|dat)$/i.test(f.name)).slice(0,180);
+  // The verified outer ZIP is an InstallShield installer package, not
+  // a flat resource release. Only list the CAB index, without EXECUTING.
+  const cabinetNames=paths.filter(n=>/\.(cab|hdr)$/i.test(n));
+  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'4leaf-cab-source-index-'));
+  result.cabinets=[];
+  try{
+   for(const filename of cabinetNames){
+    const basename=path.basename(filename);
+    if(!/^[a-z0-9_. -]+$/i.test(basename))continue;
+    const target=path.join(dir,basename);
+    const fd=fs.openSync(target,'w',0o600);
+    const unzip=spawnSync('unzip',['-p',dest,filename],{
+     stdio:['ignore',fd,'pipe'],timeout:45000,maxBuffer:512000
+    });
+    fs.closeSync(fd);
+    if(unzip.status!==0)result.cabinets.push({name:filename,status:'index-copy-failed'});
+   }
+   const cab=path.join(dir,'data1.cab');
+   if(fs.existsSync(cab)){
+    for(const tool of ['unshield','cabextract']){
+     const inspect=spawnSync(tool,tool==='unshield'?['l',cab]:['-l',cab],{
+      encoding:'utf8',timeout:30000,maxBuffer:8*1024*1024
+     });
+     if(inspect.error){
+      result.cabinets.push({name:tool,status:inspect.error.code||'unavailable'});continue;
+     }
+     const lines=String(inspect.stdout||'').slice(0,150000).split(/\r?\n/).filter(Boolean);
+     const candidates=lines.filter(x=>/\.(pak|mve|spr|ani|chr|act|tis|dmp|bmp|gif|dat)\b/i.test(x));
+     result.cabinets.push({name:tool,status:inspect.status===0?'index-visible':'unrecognized-index',
+      exitCode:inspect.status,listedLines:lines.length,
+      sourceCandidates:candidates.slice(0,400),exampleLines:lines.slice(0,45),
+      stderr:String(inspect.stderr||'').slice(0,600)});
+     console.log('INSTALLSHIELD_INDEX '+tool+' result='+inspect.status+
+      ' indexLines='+lines.length+' candidates='+candidates.length);
+     for(const item of candidates.slice(0,90))console.log('SOURCE_CAB_MEMBER '+item);
+     if(inspect.status===0)break;
+    }
+   }
+  }finally{try{fs.rmSync(dir,{recursive:true,force:true})}catch{}}
   result.status='archive-sha1-verified-list-only';
   console.log('Verified 2002 public archive bytes='+result.size+' SHA1='+result.sha1Actual);
   console.log('Static ZIP index entries='+result.total);
