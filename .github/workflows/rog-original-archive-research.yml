@@ -4,6 +4,7 @@ on:
     paths:
       - 'apps/4leaf/rog/tools/inspect-original-client-archive.cjs'
       - 'apps/4leaf/rog/tools/inspect-original-client-zip.cjs'
+      - 'apps/4leaf/rog/tools/inspect-original-pak-signatures.cjs'
       - 'apps/4leaf/rog/docs/original-evidence-crosscheck-2026-10-17.md'
       - '.github/workflows/rog-original-archive-research.yml'
   workflow_dispatch:
@@ -36,4 +37,20 @@ jobs:
         with:
           name: original-4leaf-zip-listing
           path: original-4leaf-zip-listing.json
+          retention-days: 14
+
+  verified-pak-header-inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install safe InstallShield resource de-archiver
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq unshield
+      - name: Verify original ZIP SHA1, unpack original PAKs into ephemeral tmp, inspect signatures and SHA256 ONLY
+        run: node apps/4leaf/rog/tools/inspect-original-pak-signatures.cjs
+      - name: Preserve harmless original PAK header and checksum audit only, never the copyrighted payloads
+        uses: actions/upload-artifact@v4
+        with:
+          name: original-4leaf-pak-signatures
+          path: original-4leaf-pak-signatures.json
           retention-days: 14
