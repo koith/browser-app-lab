@@ -92,7 +92,7 @@ async function run(){
  assert.equal(duelSurface.background,'rgba(0, 0, 0, 0)','original BATTLE lives directly over game scene, not a fake opaque panel');
  assert.equal(duelSurface.backgroundImage,'none','real terrain is not covered by synthetic gradient screenshot backdrop');
  assert.equal(duelSurface.borderTop,'none','no fabricated border around the original live duel');
- assert.equal(duelSurface.actors,2,'both combatants stay independent original SAVA actors');
+ assert.equal(duelSurface.actors,2,'both combatants stay independent genuine Genesis chessman actors');
 
  const duelRig=await page.locator('#battle-visual').evaluate(stage=>{
   const sides=[...stage.querySelectorAll('.battle-visual-side')];
@@ -110,7 +110,9 @@ async function run(){
      platformHeight:br.height,
      actorAbove:ar.bottom<br.bottom,
      rollCount:side.querySelectorAll('.battle-visual-die').length,
-     originalPawn:actor.getAttribute('src')
+     originalPawn:actor.dataset.chessmanId,
+     nativeSource:actor.querySelector('.leaf-chess-original-obs:not([hidden])')?.getAttribute('src')||
+      actor.querySelector('.leaf-chess-portrait')?.getAttribute('src')
     };
    }),
    bg:getComputedStyle(document.querySelector('#board-world')).backgroundImage
@@ -119,7 +121,8 @@ async function run(){
  assert.equal(duelRig.platforms.length,2,'real duel includes two independent live mechanical podiums');
  assert.ok(duelRig.platforms.every(s=>s.shape.startsWith('polygon(')&&s.platformHeight>35),'2.5D podium has an actual polygonal depth body rather than original flat 2D bar');
  assert.ok(duelRig.platforms.every(s=>s.top.includes('radial-gradient')&&s.struts.includes('repeating-linear-gradient')),'separate neon top ring and mechanical lower support are visible independent layers');
- assert.ok(duelRig.platforms.every(s=>s.actorAbove&&s.originalPawn.includes('original/Registry/sava')),'real original fighter PNGs stand on the source-comparison platform and do not become screenshots');
+ assert.ok(duelRig.platforms.every(s=>s.actorAbove&&s.originalPawn?.length===4&&
+  ['original/CardData/','original/OBS/'].some(prefix=>(s.nativeSource||'').includes(prefix))),'actual selected Genesis card/OBS imagery stands on the source-comparison platform and do not become screenshots');
  assert.ok(duelRig.platforms.every(s=>s.rollCount>=1),'actual rolled original attack/defense values remain live above podium');
  assert.ok(duelRig.bg.includes('original/IMG/bgtile.png'),'the ACTUAL source forest with 725x485 cliffs is unobstructed below battle, not inferred replacement art');
  await page.screenshot({path:'leaf-original-battle-stage-platforms.png'});

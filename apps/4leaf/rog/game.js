@@ -376,7 +376,6 @@ function drawBoard(){
       b.dataset.dmpCellCode=String(dmp[2]);
      }
      b.dataset.nativeTisSize='145x97';
-     b.dataset.renderedTisSize='70x47'; // native art preserved, scaled to original DMP cell pitch
      // Painter order follows the original DMP grid, not route parity.
      // Cells on the same row are sorted by their genuine x coordinate;
      // a row ahead ALWAYS paints over rows behind it. Reserve +1 for actors.

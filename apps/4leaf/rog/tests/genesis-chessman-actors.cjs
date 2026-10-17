@@ -52,6 +52,8 @@ const {chromium}=require('playwright');
   assert.notEqual(await rig.getAttribute('data-chessman-id'),original,
    'changing an actual team card rerenders real actor identity instead of fixed player-index avatar');
   assert.equal(await rig.getAttribute('data-chessman-id'),'0045');
+  assert.equal(await rig.getAttribute('data-actor-rig'),'original-obs-sprite',
+   'original OBS pixels replace inferred CSS when the chessman asset exists');
   // Legitimate actual move sequence uses real 104-cell DMP game and calls
   // actor state transitions. Restore original card to continue real match.
   await page.evaluate(old=>{
@@ -82,8 +84,8 @@ const {chromium}=require('playwright');
    null,{timeout:2000});
   await page.evaluate(()=>window.__LEAF_GENESIS_ACTORS__.poseByPlayer(0,'victory',200));
   assert.equal(await rig.getAttribute('data-actor-pose'),'victory');
-  assert.deepEqual(await page.evaluate(()=>window.__LEAF_GENESIS_ACTORS__.getState().originalFullBodyFramesRecovered),[],
-   'must not falsely advertise any discovered original full-body pose sheets');
+  assert.deepEqual(await page.evaluate(()=>window.__LEAF_GENESIS_ACTORS__.getState().originalFullBodyFramesRecovered),['0042','0045'],
+   'only genuinely sourced OBS IDs are reported as recovered');
   await page.screenshot({path:'leaf-genesis-source-card-proxy-not-chat-actor.png'});
   assert.deepEqual(errors,[]);
   console.log('CARD-IDENTIFIED CHESSMEN + WEB WALK ATTACK HURT VICTORY PASS',JSON.stringify(stats));

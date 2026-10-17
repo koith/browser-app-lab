@@ -23,6 +23,9 @@ on:
       - 'apps/4leaf/rog/genesis-chessman-actors.js'
       - 'apps/4leaf/rog/genesis-chessman-actors.css'
       - 'apps/4leaf/rog/tests/genesis-chessman-actors.cjs'
+      - 'apps/4leaf/rog/tests/dice-original-obs-chessmen.cjs'
+      - 'apps/4leaf/rog/original/OBS/**'
+      - 'apps/4leaf/rog/dice-original-obs.css'
       - 'apps/4leaf/rog/dice-fall.css'
       - 'apps/4leaf/rog/tests/dice-fall.cjs'
       - 'apps/4leaf/rog/tests/dice-historical-24-clash.cjs'
@@ -83,6 +86,8 @@ jobs:
         run: node apps/4leaf/rog/tests/dice-native-pawn-dmp-depth.cjs
       - name: Verify real chessman-card identity and 8-head web pose control, not chat avatars
         run: node apps/4leaf/rog/tests/genesis-chessman-actors.cjs
+      - name: Exercise recovered OBS animated source characters in real Chromium match
+        run: node apps/4leaf/rog/tests/dice-original-obs-chessmen.cjs
       - name: Check 145x97 original TIS chroma-key renderer syntax and file origin fallback
         run: node apps/4leaf/rog/tests/dice-native-tis-alpha.cjs
       - name: Navigate source-native minimap and visible DMP camera viewport in desktop/mobile Chromium

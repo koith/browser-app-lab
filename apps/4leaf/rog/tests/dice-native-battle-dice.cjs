@@ -18,7 +18,9 @@ const cells={
  await page.addInitScript(()=>{window.LEAF_CENTRAL_API_URL='';});
  const readDice=()=>page.locator('#battle-visual').evaluate(stage=>({
   sides:[...stage.querySelectorAll('.battle-visual-side')].map(side=>({
-   character:side.querySelector('.battle-visual-actor')?.src,
+   character:side.querySelector('.battle-visual-actor')?.dataset.chessmanId,
+   source:side.querySelector('.battle-visual-actor .leaf-chess-original-obs:not([hidden])')?.getAttribute('src')||
+     side.querySelector('.battle-visual-actor .leaf-chess-portrait')?.getAttribute('src'),
    total:side.querySelector('.battle-visual-total')?.textContent,
    values:[...side.querySelectorAll('.battle-visual-die')].map(el=>{
     const rect=el.getBoundingClientRect(),css=getComputedStyle(el);
@@ -46,12 +48,12 @@ const cells={
  }));
  const verify=(state,size)=>{
   assert.equal(state.sides.length,2,'real duel has exactly two independently rolled contestants');
-  assert.equal(state.sourcePads,2,'real podiums and source Registry actors remain visible');
+  assert.equal(state.sourcePads,2,'real podiums and selected Genesis chessmen remain visible');
   assert.ok(state.forest.includes('/original/IMG/bgtile.png'),'true original forest remains under live dice');
   assert.equal(state.stageBG,'rgba(0, 0, 0, 0)','no static battle screenshot overlays the real game');
   let count=0;
   for(const side of state.sides){
-   assert.ok(side.character?.includes('/original/Registry/sava'),'original Registry character still stands on the podium');
+   assert.ok(side.character?.length===4&&['original/CardData/','original/OBS/'].some(x=>(side.source||'').includes(x)),'selected Genesis chessman is rendered instead of a ChatTown avatar');
    assert.match(side.total,/^\d\d$/,'actual server-independent rolled battle score remains');
    assert.ok(side.values.length>=1,'real roll always has at least one independent die');
    for(const die of side.values){

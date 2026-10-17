@@ -28,7 +28,7 @@ const path=require('node:path');
     stageBG:style.backgroundColor,stageBackgroundImage:style.backgroundImage,stageBorder:style.borderTopStyle,
     world:getComputedStyle(document.getElementById('board-world')).backgroundImage,
     sides:sides.map(side=>{
-     const podium=side.querySelector('.battle-visual-pedestal'),actor=side.querySelector('img.battle-visual-actor');
+     const podium=side.querySelector('.battle-visual-pedestal'),actor=side.querySelector('.battle-visual-actor');
      const body=getComputedStyle(podium),top=getComputedStyle(podium,'::before'),leg=getComputedStyle(podium,'::after');
      const pr=podium.getBoundingClientRect(),ar=actor.getBoundingClientRect();
      const dice=[...side.querySelectorAll('.battle-visual-die')].map(x=>x.textContent);
@@ -37,7 +37,9 @@ const path=require('node:path');
      return {name,score,dice,mesh:body.clipPath,bodyColor:body.backgroundImage,
       deck:top.backgroundImage,legs:leg.backgroundImage,
       bodyHeight:pr.height,actorFeet:ar.bottom,deckTop:pr.top,
-      actor:actor.getAttribute('src'),original:true};
+      actor:actor.dataset.chessmanId,
+      source:actor.querySelector('.leaf-chess-original-obs:not([hidden])')?.getAttribute('src')||
+       actor.querySelector('.leaf-chess-portrait')?.getAttribute('src'),original:true};
     })
    };
   });
@@ -49,7 +51,7 @@ const path=require('node:path');
   assert.ok(state.sides.every(s=>s.mesh.startsWith('polygon(')&&s.bodyHeight>35),'both staged participants stand on deep independent mechanical polygon structures');
   assert.ok(state.sides.every(s=>s.deck.includes('radial-gradient')&&s.legs.includes('repeating-linear-gradient')),'glowing contact ring and support columns are separate CSS scene elements');
   assert.ok(state.sides.every(s=>s.actorFeet>s.deckTop&&s.actorFeet<s.deckTop+70),'actors land on the active glowing deck, not hovering far offstage');
-  assert.ok(state.sides.every(s=>s.actor.includes('original/Registry/sava')&&s.name&&/^\d\d$/.test(s.score)&&s.dice.length>=1),'real source actor and rolled numbers are independently drawn');
+  assert.ok(state.sides.every(s=>s.actor?.length===4&&['original/CardData/','original/OBS/'].some(x=>(s.source||'').includes(x))&&s.name&&/^\d\d$/.test(s.score)&&s.dice.length>=1),'selected Genesis actor and rolled numbers are independently drawn');
   assert.notEqual(state.sides[0].deck,state.sides[1].deck,'original attacker/defender podiums have distinct active colors');
   await page.screenshot({path:'leaf-live-3d-battle-podiums-desktop.png'});
   await page.setViewportSize({width:390,height:844});
@@ -68,6 +70,6 @@ const path=require('node:path');
   await page.waitForFunction(()=>!document.getElementById('battle-visual'),null,{timeout:8000});
   assert.equal(await page.locator('#game:not(.hidden)').count(),1,'actual game resumes after duel closes');
   assert.deepEqual(errors,[],'no browser exceptions');
-  console.log('LIVE HISTORIC-REFERENCE BATTLE PLATFORM PASS: genuine forest, 2 depth podiums, live Registry actors, rolled dice, mobile and combat exit');
+  console.log('LIVE HISTORIC-REFERENCE BATTLE PLATFORM PASS: genuine forest, 2 depth podiums, live Genesis chessmen, rolled dice, mobile and combat exit');
  }finally{await browser.close()}
 })().catch(e=>{console.error('LIVE BATTLE PLATFORM FAILED:',e.stack||e);process.exit(1)});
