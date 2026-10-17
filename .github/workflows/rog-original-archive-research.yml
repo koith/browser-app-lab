@@ -5,6 +5,8 @@ on:
       - 'apps/4leaf/rog/tools/inspect-original-client-archive.cjs'
       - 'apps/4leaf/rog/tools/inspect-original-client-zip.cjs'
       - 'apps/4leaf/rog/tools/inspect-original-pak-signatures.cjs'
+      - 'apps/4leaf/rog/tools/original-pak-index.cjs'
+      - 'apps/4leaf/rog/tests/original-pak-index.cjs'
       - 'apps/4leaf/rog/docs/original-evidence-crosscheck-2026-10-17.md'
       - '.github/workflows/rog-original-archive-research.yml'
   workflow_dispatch:
@@ -46,6 +48,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Install safe InstallShield resource de-archiver
         run: sudo apt-get update -qq && sudo apt-get install -y -qq unshield
+      - name: Test recovered bitwise-inverted PAK header, filename and payload length parser
+        run: node apps/4leaf/rog/tests/original-pak-index.cjs
       - name: Verify original ZIP SHA1, unpack original PAKs into ephemeral tmp, inspect signatures and SHA256 ONLY
         run: node apps/4leaf/rog/tools/inspect-original-pak-signatures.cjs
       - name: Preserve harmless original PAK header and checksum audit only, never the copyrighted payloads
