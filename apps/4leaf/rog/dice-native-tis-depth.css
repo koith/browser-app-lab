@@ -33,8 +33,8 @@
  /* Preserve full native alpha silhouette; an inferred polygon can clip
     authentic raised-platform edges and cannot represent alpha hit testing.
     Pointer geometry must be resolved in the board input layer. */
- clip-path:none;
- -webkit-clip-path:none;
+ clip-path:polygon(28% 0%,72% 0%,100% 52%,72% 100%,28% 100%,0 52%);
+ -webkit-clip-path:polygon(28% 0%,72% 0%,100% 52%,72% 100%,28% 100%,0 52%);
 }
 #app.app-classic-dice #game .board-world #board-nodes .tile[data-native-tis-size="145x97"]::before,
 #app.app-classic-dice #game .board-world #board-nodes .tile[data-native-tis-size="145x97"]::after{
