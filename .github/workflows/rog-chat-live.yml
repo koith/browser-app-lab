@@ -171,6 +171,10 @@ jobs:
         env:
           FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
         run: node apps/4leaf/rog/tests/dice-dmp-full-camera.cjs
+      - name: Prove published PWA refreshes the real roll code despite an intentionally stale cache
+        env:
+          FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
+        run: node apps/4leaf/rog/tests/pwa-dice-upgrade.cjs
       - name: Prove published 4LEAF phone dice rolls twice and DMP neighbor geometry is still source-aligned
         env:
           FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
