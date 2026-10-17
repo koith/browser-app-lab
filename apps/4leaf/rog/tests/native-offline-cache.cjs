@@ -22,7 +22,7 @@ const {chromium}=require('playwright');
    ...['avatardialog1','avatardialog2','avatardialog3'].map(x=>'original/Registry/'+x+'.png'),
    'chatroom-native-expressions.js','chatroom-native-expressions.css','original/ChatRoom/expdialogbtn.png',
    'dice-native-dialog-event.css','original/IMG/dialog.png','original/IMG/eventmsgbox.png',
-   'dice-native-battle-dice.css','dice-native-minimap-navigation.css','dice-native-tis-depth.css','dice-native-tis-orientation.css','dice-ai-autoplay.css','dice-native-pawn-dmp-depth.css','dice-native-tis-alpha.js',...['0000','0015','0024','0046'].map(x=>'original/Tiles/'+x+'.png'),
+   'dice-source-dmp-terrain-explorer.js','dice-source-dmp-terrain-explorer.css','dice-native-battle-dice.css','dice-native-minimap-navigation.css','dice-native-tis-depth.css','dice-native-tis-orientation.css','dice-ai-autoplay.css','dice-native-pawn-dmp-depth.css','dice-native-tis-alpha.js',...['0000','0015','0024','0046'].map(x=>'original/Tiles/'+x+'.png'),
    'mainframe-native-toolbar.css','original/MainFrame/toolbarbtn.png','original/MainFrame/pannel.png',
    'knighttown-native.js','knighttown-native.css',
    ...['knightback','plain01','plain02','sea01','sea02','sea03','snow01'].map(s=>'original/KnightTown/'+s+'.png'),
@@ -34,7 +34,7 @@ const {chromium}=require('playwright');
    'original/Registry/sava00.png'
   ];
   await page.waitForFunction(async files=>{
-   const cache=await caches.open('4leaf-revival-pwa-v55');
+   const cache=await caches.open('4leaf-revival-pwa-v56');
    return (await Promise.all(files.map(file=>cache.match('./'+file)))).every(Boolean);
   },critical,{timeout:40000});
   // An established controller must answer image and JS fetches offline.
@@ -216,6 +216,20 @@ const {chromium}=require('playwright');
    source:window.__LEAF_MINIMAP_NAV__.getState().source
   }));
   assert.equal(afterOfflineMini.source,'IMG/minimap.png');
+  await page.waitForFunction(()=>document.querySelectorAll('#board-nodes .tile[data-dmp-focusable]').length>30,null,{timeout:12000});
+  const offlineDmp=await page.evaluate(()=>{
+   const m=window.__ROG_TEST__.getMatch();
+   const history=m.history.slice(),positions=m.players.map(p=>p.position);
+   const navigated=window.__LEAF_DMP_EXPLORER__.focus(18);
+   return {tile:navigated?.index,coord:navigated?.coord,art:navigated?.sourceArt,
+    historyUnchanged:JSON.stringify(history)===JSON.stringify(m.history),
+    positionsUnchanged:JSON.stringify(positions)===JSON.stringify(m.players.map(p=>p.position)),
+    panel:document.querySelector('#dice-source-dmp-inspector')?.hidden===false};
+  });
+  assert.equal(offlineDmp.tile,18,'even offline the recovered DMP cell can be inspected');
+  assert.ok(offlineDmp.art&&offlineDmp.coord&&offlineDmp.panel,'cold offline inspector uses actual original map art');
+  assert.ok(offlineDmp.historyUnchanged&&offlineDmp.positionsUnchanged,
+   'offline exploration must not fabricate gameplay or move any real player');
   assert.notEqual(afterOfflineMini.transform,beforeOfflineMini.transform,
    'original live minimap pans the real DMP game even entirely offline');
   assert.deepEqual(afterOfflineMini.players,beforeOfflineMini.players,
