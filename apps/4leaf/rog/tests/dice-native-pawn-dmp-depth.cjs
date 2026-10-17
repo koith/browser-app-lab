@@ -1,6 +1,6 @@
 'use strict';
-// True source sprites stay interactive while actual DMP y painter order
-// interleaves real Registry avatars with the overlapping 145x97 tile planes.
+// True source TIS planes remain interactive while genuine CardData chessman
+// identities use temporary 8-head articulated bodies instead of ChatTown savaNN.
 // No invented 3D height, fake participants, or screenshot-only sprite overlay.
 const {chromium}=require('playwright');
 const assert=require('node:assert/strict');
@@ -65,12 +65,13 @@ const path=require('node:path');
   assert.equal(snapshot.display,'contents','actor list creates no separate always-front stacking context');
   assert.equal(snapshot.actors.length,2,'only the two actual playing humans are displayed');
   for(const actor of snapshot.actors){
-   assert.ok(actor.originalImage.startsWith('./original/Registry/sava'),'actual recovered avatar source is preserved');
-   assert.deepEqual(actor.natural,[75,141],'actual Registry source standee is the recovered 75x141 bitmap');
-   assert.equal(actor.anchor+1,actor.actual,'real DMP owning tile is behind exactly its own user avatar');
+   assert.ok(actor.originalImage.startsWith('./original/CardData/chm_'),
+    'Dice chessmen derive their portraits from the current team card, never 4LEAF chat avatars');
+   assert.ok(actor.natural[0]>15&&actor.natural[1]>15,'real archive CardData source portrait loaded');
+   assert.equal(actor.anchor+1,actor.actual,'DMP owning tile is behind its current Genesis chessman');
    assert.equal(actor.actual,actor.recorded,'actual CSS z-index equals source DMP painter depth');
    assert.equal(actor.actual,Number(actor.variable),'source painter depth drives the live CSS variable');
-   assert.equal(actor.source,actor.seat,'avatar depth references the real current game tile, not fake elevation');
+   assert.equal(actor.source,actor.seat,'chessman depth references the real current game tile, not fake elevation');
    assert.equal(actor.animation,'none','invented glowing portal ring animation is gone');
    assert.equal(actor.ring,'none','invented neon ring border is removed');
   }

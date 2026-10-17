@@ -418,25 +418,18 @@ function drawPawns(){
    let pawn=query('.board-pawn',layer).find(node=>node.dataset.id===String(p.id));
    if(!pawn){
      pawn=document.createElement('div');pawn.className='board-pawn';pawn.dataset.id=String(p.id);
-     const img=document.createElement('img');img.alt='';img.src='./original/Registry/sava'+String([0,82,6,1,85,2,84,4][p.id]||0).padStart(2,'0')+'.png';
      const name=document.createElement('span');name.className='board-pawn-name';
-     pawn.append(img,name);layer.append(pawn);
+     pawn.append(name);layer.append(pawn);
    }
+   // Genesis War combat chessman identity derives from the actual FIRST
+   // chessman card in the player's real team. Never use ChatTown savaNN.
+   // Archive full-body frames are still missing; the temporary articulated
+   // eight-head web rig advertises inferred source until frames are decoded.
+   window.__LEAF_GENESIS_ACTORS__?.mount(pawn,p,imageFor(p.team[0]));
    const point=PATH[Math.min(p.position,PATH.length-1)]||PATH[0];
    const previous=Number(pawn.dataset.position);
    const moved=pawn.dataset.position!==undefined&&previous!==p.position;
-   if(moved&&typeof pawn.animate==='function'&&!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
-     const previousPoint=PATH[Math.min(previous,PATH.length-1)]||point;
-     const dx=point.x-previousPoint.x;
-     const image=pawn.querySelector('img');
-     pawn._stepAnimation?.cancel?.();
-     pawn._stepAnimation=image.animate([
-       {transform:'translateY(0) rotate(0deg) scale(1)'},
-       {transform:'translateY(-7px) rotate('+Math.max(-12,Math.min(12,dx*1.5))+'deg) scale(1.08)'},
-       {transform:'translateY(-3px) rotate(0deg) scale(1.02)'},
-       {transform:'translateY(0) rotate(0deg) scale(1)'}
-     ],{duration:p.position<previous?420:280,easing:'ease-out'});
-   }
+   if(moved)window.__LEAF_GENESIS_ACTORS__?.pose(pawn,'walk',240);
    pawn.dataset.position=String(p.position);
    const slot=players.filter(q=>q.position===p.position).findIndex(q=>q.id===p.id);
    pawn.style.left='calc('+point.x+'% + '+((slot%4)*11-12)+'px)';
@@ -1087,6 +1080,8 @@ function combat(attacker,defender,keeper=false){
 }
 
 async function resolveBattle(attacker,defender,keeper){
+ window.__LEAF_GENESIS_ACTORS__?.poseByPlayer(attacker.id,'attack',800);
+ if(!keeper)window.__LEAF_GENESIS_ACTORS__?.poseByPlayer(defender.id,'hurt',650);
  const result=await combat(attacker,defender,keeper);
  if(result.negated){appendMove(result.mutualReset?'자폭: 양측 START 복귀':'오리발 효과: 전투 무효화');return}
  const av=result.attacker,bv=result.defender;
