@@ -38,7 +38,11 @@ def probe(data):
                        'firstBytes':data[offset+12:offset+28].hex()})
         offset+=12+length
     tail=len(data)-offset
+    remaining=data[offset:]
     return {'frames':frameCount,'type':firstType,'headerBytes':headerLength,
+      'tailFirstHex':remaining[:96].hex(),
+      'tailLastHex':remaining[-96:].hex(),
+      'tailU32First':list(struct.unpack_from('<'+'I'*min(12,len(remaining)//4),remaining,0)) if remaining else [],
       'lastCursor':offset,'tailBytes':tail,'possiblePalette768':tail==768,
       'preview':frames[:12],
       'animationWidthRange':[min(x['width'] for x in frames),max(x['width'] for x in frames)],
