@@ -6,7 +6,7 @@
  * file:// has canvas origin restrictions: leave raw archive playable.
  */
 (function(){
- const cache=new Map();
+ const cache=new Map(),diagnostics=new Map();
  const isSava=src=>/^\.\/original\/Registry\/sava\d{2}\.png$/.test(src);
  function maskRGBA(data,width,height){
   const mark=new Uint8Array(width*height),queue=new Int32Array(width*height);
@@ -34,7 +34,7 @@
  function derive(src){
   if(cache.has(src))return cache.get(src);
   const job=new Promise(resolve=>{
-   if(location.protocol==='file:'){resolve(null);return}
+   if(location.protocol==='file:'){diagnostics.set(src,'file:// canvas fallback');resolve(null);return}
    const img=new Image();
    img.onload=()=>{
     try{
@@ -46,12 +46,13 @@
      ctx.drawImage(img,0,0);
      const bitmap=ctx.getImageData(0,0,canvas.width,canvas.height);
      const removed=maskRGBA(bitmap.data,canvas.width,canvas.height);
-     if(!removed){resolve(null);return}
+     if(!removed){diagnostics.set(src,'no edge-connected chroma pixels: '+canvas.width+'x'+canvas.height);resolve(null);return}
      ctx.putImageData(bitmap,0,0);
+     diagnostics.set(src,'keyed '+removed+'/'+(canvas.width*canvas.height)+' pixels');
      resolve({url:canvas.toDataURL('image/png'),removed});
-    }catch{resolve(null)}
+    }catch(error){diagnostics.set(src,String(error?.name||'error')+': '+String(error?.message||error));resolve(null)}
    };
-   img.onerror=()=>resolve(null);
+   img.onerror=()=>{diagnostics.set(src,'original image load failed');resolve(null)};
    img.src=src;
   });
   cache.set(src,job);return job;
@@ -76,6 +77,6 @@
  }
  window.__LEAF_REGISTRY_CHROMA__={
   apply,
-  getState:()=>({sources:[...cache.keys()],kind:'native-PNG-preserved/exterior-green-alpha-mask'})
+  getState:()=>({sources:[...cache.keys()],diagnostics:Object.fromEntries(diagnostics),kind:'native-PNG-preserved/exterior-green-alpha-mask'})
  };
 })();
