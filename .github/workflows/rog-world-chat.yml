@@ -60,6 +60,9 @@ on:
       - 'apps/4leaf/rog/dice-native-dialog-event.css'
       - 'apps/4leaf/rog/dice-native-tis-depth.css'
       - 'apps/4leaf/rog/dice-dmp-camera-controls.css'
+      - 'apps/4leaf/rog/dice-source-dmp-terrain-explorer.js'
+      - 'apps/4leaf/rog/dice-source-dmp-terrain-explorer.css'
+      - 'apps/4leaf/rog/tests/dice-source-dmp-terrain-explorer.cjs'
       - 'apps/4leaf/rog/tests/dice-dmp-full-camera.cjs'
       - 'apps/4leaf/rog/dice-native-minimap-navigation.css'
       - 'apps/4leaf/rog/dice-native-battle-dice.css'
@@ -122,6 +125,8 @@ jobs:
             cat /tmp/4leaf-http.log
             exit 1
           fi
+      - name: Navigate true source DMP/TIS terrain and warp connections without changing gameplay
+        run: node apps/4leaf/rog/tests/dice-source-dmp-terrain-explorer.cjs
       - name: Verify actual 120x270 MainFrame toolbar sprites, native panel and working cross-scene navigation
         run: node apps/4leaf/rog/tests/mainframe-native-toolbar.cjs
       - name: Register original 161x51 MainFrame 4LEAF logo across WorldMap and ChatRoom archive captures
