@@ -5,7 +5,7 @@ const path=require('node:path');
 (async()=>{
  const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
  const context=await browser.newContext({viewport:{width:1280,height:900}});
- // ChatTown uses Registry/sava, but Genesis Dice MUST use CardData/chm.\n // Screenshot reconstruction verification is local transport only; the
+ // Original player rail uses Registry/sava. Board combat actor uses OBS; party cards use CardData.\n // Screenshot reconstruction verification is local transport only; the
  // separate central-server integration suite exercises real authority.
  await context.addInitScript(()=>{window.LEAF_CENTRAL_API_URL='';});
  const page=await context.newPage();
@@ -55,7 +55,7 @@ const path=require('node:path');
   await page.waitForSelector('#game:not(.hidden)');
   await page.waitForFunction(()=>{
    const els=[...document.querySelectorAll('#game .battle-side-card.occupied img')];
-   return els.length>=2&&els.every(img=>img.complete&&img.naturalWidth>=40&&img.naturalWidth<=120&&img.naturalHeight>=60&&img.naturalHeight<=120&&img.getAttribute('src').includes('/original/CardData/chm_'));
+   return els.length>=2&&els.every(img=>img.complete&&img.naturalWidth===75&&img.naturalHeight===141&&img.getAttribute('src').includes('/original/Registry/sava'));
   },null,{timeout:25000});
   const info=await page.evaluate(()=>{
    const m=window.__ROG_TEST__.getMatch();
@@ -76,10 +76,10 @@ const path=require('node:path');
   assert.deepEqual(info.right,['2','4','6'],'historical screenshot has even-numbered right player rail');
   assert.equal(info.occupied.length,info.players.length,'only actual participants have live portraits');
   assert.ok(info.vacant.every(x=>x===null),'empty slots are not invented players');
-  assert.ok(info.occupied.every(x=>x.source.includes('/original/CardData/chm_')&&x.background.includes('/original/IMG/avatarback.png')),'genuine equipped chessman CardData headshots inside source IMG portrait rails');
-  assert.ok(info.occupied.every(x=>x.portrait>0&&x.cropped>0&&x.portrait<=x.cropped),'source CardData headshot scales without deformation');
+  assert.ok(info.occupied.every(x=>x.source.includes('/original/Registry/sava')&&x.background.includes('/original/IMG/avatarback.png')),'genuine Registry SAVA avatar portraits inside historic IMG player rails');
+  assert.ok(info.occupied.every(x=>x.portrait>0&&x.cropped>0&&x.portrait<=x.cropped),'native 75x141 avatar is cropped into source player rail without distortion');
   for(let i=0;i<info.players.length;i++)assert.equal(info.occupied[i].name,info.players[i].name,'portrait names reflect actual player');
-  await page.waitForFunction(()=>[...document.querySelectorAll('#game .battle-side-card.occupied img')].every(x=>x.complete&&x.naturalWidth>=40&&x.naturalWidth<=120&&x.naturalHeight>=60&&x.naturalHeight<=120&&x.getAttribute('src').includes('/original/CardData/chm_')),null,{timeout:15000});
+  await page.waitForFunction(()=>[...document.querySelectorAll('#game .battle-side-card.occupied img')].every(x=>x.complete&&x.naturalWidth===75&&x.naturalHeight===141&&x.getAttribute('src').includes('/original/Registry/sava')),null,{timeout:15000});
   const oldInfo=await page.locator('#game .battle-side-card.occupied').first().locator('small').textContent();
   await page.locator('#roll-btn').click();
   await page.waitForFunction(()=>window.__ROG_TEST__.getMatch().players[0].position>0,null,{timeout:12000});
@@ -90,6 +90,6 @@ const path=require('node:path');
   assert.equal(await page.locator('.battle-team-side.right .battle-side-card.occupied').count(),1);
   await page.screenshot({path:'leaf-original-side-portraits-mobile.png'});
   assert.deepEqual(errors,[],'no browser exceptions');
-  console.log('ORIGINAL CHAT SAVA ALPHA + GENESIS CARDDATA PLAYER RAILS PASS: correct separate sources, left 1/3/5 right 2/4/6, live matches and responsive');
+  console.log('ORIGINAL CHAT SAVA ALPHA + GENESIS SAVA PLAYER RAILS PASS: correct separate sources, left 1/3/5 right 2/4/6, live matches and responsive');
  }finally{await browser.close()}
 })().catch(err=>{console.error('ORIGINAL PLAYER RAILS FAILED:',err.stack||err);process.exit(1)});
