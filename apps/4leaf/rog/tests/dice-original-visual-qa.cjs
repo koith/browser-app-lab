@@ -78,7 +78,13 @@ const {chromium}=require('playwright');
   if(sourceActors.length!==2||
    sourceActors.some(a=>a.rig!=='original-obs-sprite'||!a.source.includes('/OBS/')))
     throw Error('Recovered source character renders as proxy or incorrect asset');
-  console.log('SOURCE_NATIVE_OBS_BOARD_QA '+JSON.stringify(sourceActors));
+  const feetDifference=Math.abs(sourceActors[0].distanceFeetFromFloor-
+   sourceActors[1].distanceFeetFromFloor);
+  if(feetDifference>2)
+   throw Error('Original source characters on same DMP tile must share a ground plane: '+
+    JSON.stringify(sourceActors));
+  console.log('SOURCE_NATIVE_OBS_BOARD_QA '+JSON.stringify({
+   sourceActors,feetDifference}));
   const originalBodies=await game.screenshot({type:'jpeg',quality:82,
    animations:'disabled',timeout:18000});
   console.log('SOURCE_NATIVE_OBS_JPEG_BASE64 '+originalBodies.toString('base64'));
