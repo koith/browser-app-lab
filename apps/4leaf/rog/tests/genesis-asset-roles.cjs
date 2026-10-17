@@ -84,7 +84,19 @@ const {chromium}=require('playwright');
   if(protocol==='http:'||protocol==='https:'){
    await page.waitForFunction(()=>[...document.querySelectorAll(
     '#battle-player-panels .battle-side-portrait img')]
-    .every(img=>img.dataset.registryChroma==='ready'),null,{timeout:11000});
+    .every(img=>img.dataset.registryChroma==='ready'),null,{timeout:11000})
+    .catch(async error=>{
+     const debug=await page.evaluate(()=>({
+      chroma:window.__LEAF_REGISTRY_CHROMA__?.getState?.(),
+      imgs:[...document.querySelectorAll('#battle-player-panels .battle-side-portrait img')]
+       .map(img=>({src:img.getAttribute('src'),source:img.dataset.nativeRegistrySource,
+        chroma:img.dataset.registryChroma,removed:img.dataset.registryChromaRemoved,
+        mask:img.style.maskImage.slice(0,90)})),
+      protocol:location.protocol
+     }));
+     console.log('SOURCE_REGISTRY_MASK_FAILURE_DIAG '+JSON.stringify(debug));
+     throw error;
+    });
    const masks=await page.evaluate(()=>[...document.querySelectorAll(
     '#battle-player-panels .battle-side-portrait img')]
     .map(img=>({original:img.getAttribute('src'),
