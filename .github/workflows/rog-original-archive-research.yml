@@ -27,6 +27,8 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
+      - name: Install static InstallShield CAB index utilities (read-only, no setup.exe execution)
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq unshield cabextract
       - name: Download public 2002 ZIP into ephemeral tmp, verify SHA1, list central directory only, NEVER execute or publish binaries
         run: node apps/4leaf/rog/tools/inspect-original-client-zip.cjs
       - name: Preserve safe ZIP file-list report only
