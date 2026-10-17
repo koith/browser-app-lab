@@ -78,34 +78,51 @@ const {chromium}=require('playwright');
   assert.ok(duel.every(x=>x.rig==='original-obs-sprite'&&
    x.portrait?.startsWith('./original/OBS/')&&!x.chatAvatar));
   await page.locator('#modal-buttons button').filter({hasText:'결과 확인'}).click();
-  // File URLs taint canvas by browser design; the deployed HTTP(S) client
-  // MUST produce an alpha mask that removes authentic SAVA green matte.
+  // The extracted 75x141 Registry/sava PNGs have real RGBA alpha at
+  // their green-key margins. Never force a second synthetic mask over native
+  // transparent pixels; source with opaque green alone needs computed mask.
   const protocol=await page.evaluate(()=>location.protocol);
   if(protocol==='http:'||protocol==='https:'){
    await page.waitForFunction(()=>[...document.querySelectorAll(
     '#battle-player-panels .battle-side-portrait img')]
-    .every(img=>img.dataset.registryChroma==='ready'),null,{timeout:11000})
+    .every(img=>['ready','native-transparent'].includes(
+     img.dataset.registryChroma)),null,{timeout:11000})
     .catch(async error=>{
      const debug=await page.evaluate(()=>({
       chroma:window.__LEAF_REGISTRY_CHROMA__?.getState?.(),
       imgs:[...document.querySelectorAll('#battle-player-panels .battle-side-portrait img')]
        .map(img=>({src:img.getAttribute('src'),source:img.dataset.nativeRegistrySource,
         chroma:img.dataset.registryChroma,removed:img.dataset.registryChromaRemoved,
+        originalTransparent:img.dataset.registryOriginalTransparent,
         mask:img.style.maskImage.slice(0,90)})),
       protocol:location.protocol
      }));
-     console.log('SOURCE_REGISTRY_MASK_FAILURE_DIAG '+JSON.stringify(debug));
+     console.log('SOURCE_REGISTRY_ALPHA_FAILURE_DIAG '+JSON.stringify(debug));
      throw error;
     });
    const masks=await page.evaluate(()=>[...document.querySelectorAll(
     '#battle-player-panels .battle-side-portrait img')]
-    .map(img=>({original:img.getAttribute('src'),
-     css:getComputedStyle(img).maskImage,removed:Number(img.dataset.registryChromaRemoved)})));
+    .map(img=>{
+     const canvas=document.createElement('canvas');
+     canvas.width=img.naturalWidth;canvas.height=img.naturalHeight;
+     const ctx=canvas.getContext('2d',{willReadFrequently:true});
+     ctx.drawImage(img,0,0);
+     const pixels=ctx.getImageData(0,0,canvas.width,canvas.height).data;
+     let nativeTransparent=0,visibleGreen=0;
+     for(let i=0;i<pixels.length;i+=4){
+      if(pixels[i+3]===0)nativeTransparent++;
+      else if(pixels[i+1]>220&&pixels[i]<75&&pixels[i+2]<75)visibleGreen++;
+     }
+     return {original:img.getAttribute('src'),state:img.dataset.registryChroma,
+      css:getComputedStyle(img).maskImage,removed:Number(img.dataset.registryChromaRemoved),
+      originalTransparent:nativeTransparent,visibleGreen};
+    }));
    assert.ok(masks.every(m=>m.original.startsWith('./original/Registry/sava')&&
-     m.css.includes('data:image/png;base64')&&m.removed>1000),
-     'original Registry pixels remain unchanged while source green matte is made transparent');
-   console.log('VERIFIED_SOURCE_REGISTRY_GREEN_KEY '+JSON.stringify(
-    masks.map(m=>({original:m.original,removed:m.removed}))));
+    (m.state==='native-transparent'
+     ? m.originalTransparent>1000&&!m.css.includes('data:image/png;base64')
+     : m.state==='ready'&&m.css.includes('data:image/png;base64')&&m.removed>1000)),
+    'player rail retains original SAVA RGBA alpha or masks truly opaque source green');
+   console.log('VERIFIED_SOURCE_REGISTRY_NATIVE_ALPHA '+JSON.stringify(masks));
   }
   const sourceRailGeometry=await page.evaluate(()=>[...document.querySelectorAll(
     '#battle-player-panels .battle-side-portrait img')].map(img=>{
