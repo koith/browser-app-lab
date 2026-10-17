@@ -1,0 +1,36 @@
+/* Source-backed minimap: independent original IMG/minimap.png 172×152,
+ * and the ONE real game-updated 152×112 canvas.  Historical viewport drag
+ * command semantics are unverified; this interaction is reconstructed UX.
+ * Actual DMP tiles and pawn positions remain the source of truth.
+ *
+ * The former source container had pointer-events:none, turning the
+ * game's original minimap into a dead screenshot-like ornament.
+ */
+#app.app-classic-dice .dice-native-minidock{
+ pointer-events:auto!important;
+}
+#app.app-classic-dice #game .board-mini,
+#app.app-classic-dice .dice-native-minidock .board-mini{
+ pointer-events:auto!important;
+}
+#app.app-classic-dice #game #mini-map-canvas,
+#app.app-classic-dice .dice-native-minidock #mini-map-canvas{
+ pointer-events:auto!important;
+ touch-action:none!important;
+ cursor:crosshair!important;
+ border:0!important;
+ outline:0;
+}
+#app.app-classic-dice #game #mini-map-canvas:focus-visible,
+#app.app-classic-dice .dice-native-minidock #mini-map-canvas:focus-visible{
+ outline:2px solid #e9db91!important;
+ outline-offset:0!important;
+}
+@media(max-width:650px){
+ /* On small screens the existing live source is docked on the game board as
+  * a scaled original 86×77 sprite, not an invented substitute map. */
+ #app.app-classic-dice #game .board-mini,
+ #app.app-classic-dice #game .board-mini canvas{
+  pointer-events:auto!important;
+ }
+}
