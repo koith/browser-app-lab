@@ -79,11 +79,19 @@ const {chromium}=require('playwright');
   const native=await page.evaluate(async(activeRevision)=>{
    const cache=await caches.open(activeRevision);
    const tile=await cache.match('./original/Tiles/0015.png');
+   const nativeUi=['original/IMG/okcancelbut.png','original/IMG/scrollbutton.png',
+    'original/IMG/stats.png','dice-source-native-ui.css','dice-source-native-chat-scroll.js'];
+   const additional=await Promise.all(nativeUi.map(async file=>{
+    const response=await cache.match('./'+file);
+    return {file,cached:Boolean(response),bytes:response?(await response.blob()).size:0};
+   }));
    return {originalCached:Boolean(tile),size:tile?(await tile.blob()).size:0,
-    controller:Boolean(navigator.serviceWorker.controller)};
+    nativeUi:additional,controller:Boolean(navigator.serviceWorker.controller)};
   },activeRevision);
   assert.ok(native.controller&&native.originalCached&&native.size>500,
    'native TIS artwork remains accessible offline after the JS/CSS update');
+  assert.ok(native.nativeUi.every(item=>item.cached&&item.bytes>100),
+   'real 2002 IMG dialog and chat sprites AND the functional native controls stay in offline PWA cache');
   assert.deepEqual(errors,[],'no browser JavaScript errors during upgrade and offline fetches');
   console.log('4LEAF PWA FRESH DICE HANDLERS + OFFLINE SOURCE PASS',
    JSON.stringify({url:base,files,sourceBytes:online.map(x=>x.text.length),native}));
