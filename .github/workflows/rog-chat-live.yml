@@ -104,6 +104,10 @@ jobs:
                curl -fLsS --max-time 15 "$base/dice-fall.css?qa=${GITHUB_SHA}" -o /tmp/leaf-dice-fall.css &&
                cmp -s /tmp/leaf-dice-fall.js apps/4leaf/rog/dice-fall.js &&
                cmp -s /tmp/leaf-dice-fall.css apps/4leaf/rog/dice-fall.css &&
+               curl -fLsS --max-time 15 "$base/genesis-chessman-actors.js?qa=${GITHUB_SHA}" -o /tmp/leaf-chess-rig.js &&
+               curl -fLsS --max-time 15 "$base/genesis-chessman-actors.css?qa=${GITHUB_SHA}" -o /tmp/leaf-chess-rig.css &&
+               cmp -s /tmp/leaf-chess-rig.js apps/4leaf/rog/genesis-chessman-actors.js &&
+               cmp -s /tmp/leaf-chess-rig.css apps/4leaf/rog/genesis-chessman-actors.css &&
                curl -fLsS --max-time 15 "$base/dice-2004-full-frame.css?qa=${GITHUB_SHA}" -o /tmp/leaf-full-frame.css &&
                cmp -s /tmp/leaf-full-frame.css apps/4leaf/rog/dice-2004-full-frame.css &&
                cmp -s /tmp/leaf-pwa-sw.js apps/4leaf/rog/sw.js &&
@@ -239,6 +243,10 @@ jobs:
         env:
           FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
         run: node apps/4leaf/rog/tests/dice-native-pawn-dmp-depth.cjs
+      - name: Verify published Genesis pawn card identity, 8-proportion rig and five pose states in Chromium
+        env:
+          FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
+        run: node apps/4leaf/rog/tests/genesis-chessman-actors.cjs
       - name: Check transparent original source TIS sprites and real turn on deployed Pages
         env:
           FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
