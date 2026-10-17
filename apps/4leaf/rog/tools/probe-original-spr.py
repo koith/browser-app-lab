@@ -78,8 +78,36 @@ def probe(raw,name):
         'tailHex':src[cursor:cursor+32].hex(),
         'paletteFirst':src[-768:-740].hex(),
         'paletteLast':src[-30:].hex()}
+def diagnostics(pak,member,label):
+    try:
+        raw=get_member(pak,member)
+        info=probe(raw,member)
+        frame=info['frames'][0]
+        sig=raw.find(b'FAST.PAL.COLORKEY')
+        body=raw[sig+140:sig+140+frame['length']]
+        candidates=[]
+        for i in range(len(body)-4):
+            if body[i+1]<=3 and body[i+3]<=3:
+                candidates.append((i, int.from_bytes(body[i:i+2],'little'),
+                    int.from_bytes(body[i+2:i+4],'little')))
+        stable=[]
+        for at,x,y in candidates:
+            if 4<=x%256<=240 and 0<y%256<150 and len(stable)<130:
+                stable.append([at,x,y])
+        print('SOURCE_SPR_ROW_DIAGNOSTIC '+json.dumps({
+            'member':label,'size':len(body),
+            'frameWidth':frame['width'],'frameHeight':frame['height'],
+            'allCandidates':len(candidates),
+            'firstCandidates':stable[:115],
+            'rawPrefix':[body[i:i+16].hex() for i in [0,8,16,19,24,32,40,48,72,80,120,150] if i<len(body)],
+        },separators=(',',':')))
+    except Exception as exc:print('SOURCE_SPR_ROW_ERROR '+label+' '+str(exc))
+
 if __name__=='__main__':
     pak=sys.argv[1]
+    diagnostics(pak,'roll.spr','roll')
+    diagnostics(pak,'minipanel.spr','minipanel')
+    diagnostics(pak,'eventRoll1.spr','eventRoll1')
     for name in ['roll.spr','eventRoll1.spr','avatar.spr','winBattle.spr','minipanel.spr']:
         try:
             raw=get_member(pak,name)
