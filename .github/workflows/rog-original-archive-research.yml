@@ -1,0 +1,22 @@
+name: 4LEAF original 2002 client metadata research
+on:
+  pull_request:
+    paths:
+      - 'apps/4leaf/rog/tools/inspect-original-client-archive.cjs'
+      - 'apps/4leaf/rog/docs/original-evidence-crosscheck-2026-10-17.md'
+      - '.github/workflows/rog-original-archive-research.yml'
+  workflow_dispatch:
+jobs:
+  archive-preservation-metadata:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Query archived 2002 official 4LEAF client file metadata only, without executing Windows code
+        run: node apps/4leaf/rog/tools/inspect-original-client-archive.cjs
+      - name: Attach original client metadata status for source-audit trail
+        uses: actions/upload-artifact@v4
+        with:
+          name: original-4leaf-client-metadata
+          path: original-4leaf-client-metadata.json
+          retention-days: 14
