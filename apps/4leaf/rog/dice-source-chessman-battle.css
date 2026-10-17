@@ -1,0 +1,61 @@
+/* The Genesis Dice participant pane and battle podium display CHESSMEN,
+ * not 4LEAF ChatTown Registry/savaXX avatars.
+ * CardData/chm_NN original portraits are 53x69 and must not be stretched
+ * into the 75x141 ChatTown standee dimensions of the previous renderer.
+ * The battle actor shares the on-board chessman rig and per-pose controller.
+ * Until original Genesis character animation resources are recovered,
+ * that rig is explicitly a WEB PROXY, not a source mesh.
+ */
+#app.app-classic-dice #game .battle-side-portrait img{
+ box-sizing:border-box!important;
+ left:50%!important;top:0!important;
+ width:60px!important;height:auto!important;
+ min-width:0!important;min-height:0!important;
+ max-width:60px!important;max-height:none!important;
+ object-fit:contain!important;
+ object-position:center top!important;
+ transform:translateX(-50%)!important;
+ image-rendering:auto!important;
+}
+#app.app-classic-dice #game #battle-visual .battle-visual-side
+.battle-visual-actor.leaf-battle-chessman{
+ box-sizing:border-box!important;
+ display:block!important;
+ position:absolute!important;
+ left:50%!important;bottom:29%!important;
+ width:82px!important;height:125px!important;
+ min-width:82px!important;min-height:125px!important;
+ max-width:none!important;max-height:none!important;
+ transform:translateX(-50%)!important;
+ overflow:visible!important;
+ z-index:5!important;
+ background:transparent!important;
+ border:0!important;
+ box-shadow:none!important;
+ filter:drop-shadow(4px 6px 2px #0b2328bb)!important;
+ animation:none!important;
+}
+#app.app-classic-dice #game #battle-visual .leaf-battle-chessman .leaf-chess-actor{
+ scale:1!important;
+}
+#app.app-classic-dice #game #battle-visual .leaf-battle-chessman .leaf-unrecovered-keeper{
+ position:absolute;
+ left:0;right:0;bottom:32px;
+ text-align:center;font:bold 11px/1.2 Gulim,sans-serif;
+ color:#f2d29c;text-shadow:1px 2px #283440;
+}
+@media(max-width:650px){
+ #app.app-classic-dice #game .battle-side-portrait img{
+  width:46px!important;max-width:46px!important;
+  transform:translateX(-50%)!important;
+ }
+ #app.app-classic-dice #game #battle-visual .battle-visual-side
+ .battle-visual-actor.leaf-battle-chessman{
+  width:55px!important;min-width:55px!important;
+  height:85px!important;min-height:85px!important;
+  bottom:32%!important;
+ }
+ #app.app-classic-dice #game #battle-visual .leaf-battle-chessman .leaf-chess-actor{
+  scale:.69!important;transform-origin:50% 100%!important;
+ }
+}
