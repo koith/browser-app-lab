@@ -475,7 +475,17 @@ function drawBattlePanels(){
   if(p){
    const portrait=document.createElement('div');portrait.className='battle-side-portrait';
    const avatar=document.createElement('img');avatar.alt='';
-   avatar.src=imageFor(p.team?.[0]); // Actual active Genesis chessman card portrait, NOT ChatTown Registry
+   // Historical 800x600 battle.jpg player rails show player avatar heads.
+   // This is NOT the full-body chessman on the board or CardData party HUD.
+   // For the local human use their currently selected Registry avatar.
+   const savedAvatar=window.__LEAF_SOCIAL__?.getState?.().avatar;
+   const avatarSources=['sava00','sava82','sava06','sava01','sava85','sava02',
+    'sava84','sava04','sava03','sava83','sava05','sava86'];
+   const participantAvatar=p.id===0&&Number.isInteger(savedAvatar)?
+    avatarSources[Math.max(0,Math.min(avatarSources.length-1,savedAvatar))]:
+    avatarSources[(Number(p.id)||0)%avatarSources.length];
+   avatar.src='./original/Registry/'+participantAvatar+'.png';
+   avatar.dataset.sourceRole='player-avatar-not-chessman';
    avatar.decoding='async';
    portrait.append(avatar);
    const info=document.createElement('div');info.className='battle-side-info';

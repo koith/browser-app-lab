@@ -1,6 +1,6 @@
 'use strict';
-/* Original archive has authentic chessman cards; body pose sprites were not
- * recovered. Do not mistake our explicitly inferred 8-head rig for original.
+/* Authentic 2002 Genesis OBS full-body frames have been recovered for some cards.
+ * Never mistake the fallback CSS proxy for actual original pixels.
  * Assert NO ChatTown Registry avatar stands on the Dice board, each actor
  * corresponds to a genuine selected chessman and uses live animation states.
  */
@@ -35,7 +35,8 @@ const {chromium}=require('playwright');
    'every source sprite identity comes from the actual participant chessman');
   assert.ok(initial.actors.every(x=>x.rig==='inferred-8head'&&x.originalRecovered==='false'&&x.pose==='idle'),
    'no unrecovered original meshes or source animation sheets are claimed');
-  assert.ok(initial.heights.every(n=>n>95),'eight-head articulated body stands upright');
+  assert.ok(initial.heights.every(n=>n>=70&&n<=125),
+   'unrecovered proxy body stays source-scale rather than pretending to be an oversized original mesh');
   assert.equal(initial.chatAvatar,0,'ChatTown avatars are NOT used on Genesis board');
   await page.waitForFunction(()=>[...document.querySelectorAll('#board-pawns .leaf-chess-portrait')].every(x=>x.complete&&x.naturalWidth>15),null,{timeout:13000});
   assert.ok(initial.portraits.every(x=>x.src.startsWith('./original/CardData/chm_')));

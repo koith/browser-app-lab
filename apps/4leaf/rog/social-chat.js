@@ -1333,6 +1333,6 @@
  window.__LEAF_SOCIAL__={openRegion,openKnightTown,openBoard,openDirectory,joinRoom,enterRoom,createRoom:(name,background=2,capacity=12)=>{
   const room={id:uuid(),name:safe(name,26),region:state.region,district:state.district,owner:nick(),ownerId:tabId,passwordProof:'',passwordSalt:'',background:allowedBackground(background),capacity:allowedCapacity(capacity),created:now()};
   state.rooms.push(room);saveRooms();sendLocal({kind:'roomCreated',room});enterRoom(room);return room.id;
- },send:publishText,getState:()=>({region:state.region,district:state.district,view:state.view,scope:state.scope,knightDistrict:state.knightDistrict,roomId:state.roomId,people:onlinePeers(),rooms:catalogue()}),
+ },send:publishText,getState:()=>({avatar:state.avatar,region:state.region,district:state.district,view:state.view,scope:state.scope,knightDistrict:state.knightDistrict,roomId:state.roomId,people:onlinePeers(),rooms:catalogue()}),
  sendRTC,now,render,transportMessage};
 })();

@@ -10,7 +10,7 @@
  transform:translate(-50%,-82%)!important;
 }
 #app.app-classic-dice #game #board-pawns .leaf-chess-actor{
- scale:.5;
+ scale:.74;
  transform-origin:50% 100%!important;
 }
 #app.app-classic-dice #game #board-pawns

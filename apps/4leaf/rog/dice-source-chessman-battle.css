@@ -1,22 +1,10 @@
-/* The Genesis Dice participant pane and battle podium display CHESSMEN,
- * not 4LEAF ChatTown Registry/savaXX avatars.
- * CardData/chm_NN original portraits are 53x69 and must not be stretched
- * into the 75x141 ChatTown standee dimensions of the previous renderer.
- * The battle actor shares the on-board chessman rig and per-pose controller.
- * Until original Genesis character animation resources are recovered,
- * that rig is explicitly a WEB PROXY, not a source mesh.
+/* Original 2004 game reference has THREE different visual identities:
+ * (1) player rail: 75x141 ChatTown Registry SAVA portrait/standee crop;
+ * (2) board/battle fighter: Dice/OBS original full-body chessman;
+ * (3) selected party/card/shop: CardData/chm_NN original chessman head.
+ * Preserve the native avatar panel sizing in dice-native-player-portraits.css.
+ * Duel fighter geometry is provisional for unrecovered animation poses.
  */
-#app.app-classic-dice #game .battle-side-portrait img{
- box-sizing:border-box!important;
- left:50%!important;top:0!important;
- width:60px!important;height:auto!important;
- min-width:0!important;min-height:0!important;
- max-width:60px!important;max-height:none!important;
- object-fit:contain!important;
- object-position:center top!important;
- transform:translateX(-50%)!important;
- image-rendering:auto!important;
-}
 #app.app-classic-dice #game #battle-visual .battle-visual-side
 .battle-visual-actor.leaf-battle-chessman{
  box-sizing:border-box!important;
@@ -45,10 +33,6 @@
  color:#f2d29c;text-shadow:1px 2px #283440;
 }
 @media(max-width:650px){
- #app.app-classic-dice #game .battle-side-portrait img{
-  width:46px!important;max-width:46px!important;
-  transform:translateX(-50%)!important;
- }
  #app.app-classic-dice #game #battle-visual .battle-visual-side
  .battle-visual-actor.leaf-battle-chessman{
   width:55px!important;min-width:55px!important;
