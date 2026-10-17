@@ -41,12 +41,12 @@ const assert=require('node:assert/strict');
    // overlap visually; the source grid positions must not collapse.
    assert.ok(result.sizes.every(t=>Math.abs(t.w-145)<.1&&Math.abs(t.h-97)<.1&&t.native==='145x97'),
     'all original TIS raised platforms retain true 145x97 source pixels');
-   // PR #85 fixed the upside-down 145x97 source plate. The art alone
-   // must be vertically mirrored (Y = -1); DMP center points, pawn models,
-   // clickable mask, world camera and original texture shape are NOT flipped.
-   assert.ok(result.sizes.every(t=>t.transform==='matrix(1, 0, 0, -1, -72.5, -48.5)'||
-      (t.transform.startsWith('matrix(1, 0, 0, -1,')&&t.transform.includes('-72.5'))),
-    'source hex artwork is flipped upright while preserving genuine platform center and DMP click geometry');
+   // Side-by-side measured 2004 board.jpg vs genuine source PNG verifies
+   // the TIS platform's TOP is already above its lower skirt. Old scaleY(-1)
+   // inverted the art and created an incorrect pile of platforms.
+   assert.ok(result.sizes.every(t=>t.transform==='matrix(1, 0, 0, 1, -72.5, -48.5)'||
+      (t.transform.startsWith('matrix(1, 0, 0, 1,')&&t.transform.includes('-72.5'))),
+    'every original 145x97 platform is upright without a false vertical flip');
    assert.ok(result.sizes.every(t=>t.clip.startsWith('polygon(')),
     'inferred hit polygon restricts clicking transparent overlapping source corners');
    assert.ok(result.sizes.every(t=>t.dmp.every(Number.isFinite)&&Number.isFinite(t.depth)),
