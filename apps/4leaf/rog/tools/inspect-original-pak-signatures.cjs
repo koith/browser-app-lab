@@ -131,6 +131,14 @@ function allFiles(directory){
     if(probe.error)console.log('SOURCE_SPR_PROBE_FAILED '+probe.error.message);
     else console.log((probe.stdout||'').slice(0,80000));
    }
+   if(/\/Dice\/OBS(?:2|3)?\.pak$/i.test(file.split(path.sep).join('/'))){
+    const sourceActors=spawnSync('python3',[path.join(__dirname,'probe-original-obs.py'),file],{
+     encoding:'utf8',timeout:15000,maxBuffer:3*1024*1024
+    });
+    if(sourceActors.error||sourceActors.status!==0)
+     console.log('SOURCE_OBS_PROBE_ERROR '+String(sourceActors.error||sourceActors.stderr).slice(0,500));
+    else console.log((sourceActors.stdout||'').slice(0,45000));
+   }
    const sample=inspectOriginalMembers(file);
    for(const m of sample)console.log('ORIGINAL_MEMBER_HEADER '+JSON.stringify(m));
    report.originalMemberHeaders.push(...sample);
