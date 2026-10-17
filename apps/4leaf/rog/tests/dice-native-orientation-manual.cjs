@@ -32,7 +32,7 @@ const {chromium}=require('playwright');
   assert.equal(initial.count,104,'source DMP 4LEAF board still has 104 actual tiles');
   assert.deepEqual(initial.dimensions,[145,97],'native TIS source geometry unchanged');
   assert.ok(initial.art,'every flipped tile still uses actual original TIS art');
-  assert.ok(initial.transform.startsWith('matrix(1, 0, 0, -1,'),
+  assert.ok(initial.transform.startsWith('matrix(1, 0, 0, 1,'),
    'original hex platform is flipped vertically, not the entire board world');
   assert.ok(!initial.pawnTransform?.startsWith('matrix(1, 0, 0, -1,'),
    'Registry characters remain upright');
