@@ -436,9 +436,23 @@ function drawPawns(){
    const moved=pawn.dataset.position!==undefined&&previous!==p.position;
    if(moved)window.__LEAF_GENESIS_ACTORS__?.pose(pawn,'walk',240);
    pawn.dataset.position=String(p.position);
-   const slot=players.filter(q=>q.position===p.position).findIndex(q=>q.id===p.id);
-   pawn.style.left='calc('+point.x+'% + '+((slot%4)*11-12)+'px)';
-   pawn.style.top='calc('+point.y+'% - '+(Math.floor(slot/4)*14)+'px)';
+   // Multiple real players may share an ORIGINAL DMP cell. The old 11px
+   // offset stacked native 33..80px OBS bodies completely atop one another,
+   // making the original second chessman disappear behind a web proxy.
+   // Keep every authoritative DMP position unchanged; spread only their
+   // rendered feet within the existing 145x97 tile top. Source game engine
+   // same-cell formation offsets are not recovered (INFERRED visual spacing).
+   const peers=players.filter(q=>q.position===p.position);
+   const slot=peers.findIndex(q=>q.id===p.id);
+   const columns=Math.min(3,peers.length);
+   const column=slot%columns,row=Math.floor(slot/columns);
+   const sourceCellOffsetX=Math.round((column-(columns-1)/2)*32+(row%2)*8);
+   const sourceCellOffsetY=-row*22;
+   pawn.dataset.cellPeerCount=String(peers.length);
+   pawn.dataset.cellPeerSlot=String(slot);
+   pawn.dataset.formationSource='inferred-visibility-offset/source-DMP-position';
+   pawn.style.left='calc('+point.x+'% + '+sourceCellOffsetX+'px)';
+   pawn.style.top='calc('+point.y+'% + '+sourceCellOffsetY+'px)';
    pawn.style.setProperty('--pawn-color',p.color);
    const platform=tiles?.querySelector('.tile[data-tile="'+p.position+'"]');
    const platformDepth=Number(platform?.style.zIndex);
