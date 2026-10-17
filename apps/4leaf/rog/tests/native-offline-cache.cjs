@@ -12,10 +12,11 @@ const {chromium}=require('playwright');
  await page.addInitScript(()=>{window.LEAF_CENTRAL_API_URL='';});
  try{
   await page.goto(process.env.FOURLEAF_TEST_URL||'http://127.0.0.1:8765/');
-  await page.evaluate(async()=>{
-   await navigator.serviceWorker.register('./sw.js');
-   await navigator.serviceWorker.ready;
-  });
+  // The public entry point must register its own worker. Offline QA must
+  // not conceal a missing production registration with an explicit test call.
+  await page.waitForFunction(()=>window.__LEAF_PWA__?.getState().registered===true,
+   null,{timeout:30000});
+  await page.evaluate(()=>navigator.serviceWorker.ready);
   const critical=[
    'chatroom-native-owner-dialog.js','chatroom-native-owner-dialog.css','original/ChatRoom/ownerdialog.png',
    'registry-native-avatar-dialog.js','registry-native-avatar-dialog.css',
@@ -34,7 +35,7 @@ const {chromium}=require('playwright');
    'original/Registry/sava00.png'
   ];
   await page.waitForFunction(async files=>{
-   const cache=await caches.open('4leaf-revival-pwa-v58');
+   const cache=await caches.open('4leaf-revival-pwa-v59');
    return (await Promise.all(files.map(file=>cache.match('./'+file)))).every(Boolean);
   },critical,{timeout:40000});
   // An established controller must answer image and JS fetches offline.
