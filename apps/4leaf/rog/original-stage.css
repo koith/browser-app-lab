@@ -53,6 +53,36 @@
  background:linear-gradient(140deg,#fffdf6,#d3d7fb)!important;
  box-shadow:2px 2px 2px #152050a7!important;
 }
+/* Every displayed die face is produced by a real game turn. Ensure the
+   native gameplay control stays above its background, with a proper touch
+   hit target even when the original 800px client is viewed on a phone. */
+#app.app-classic-dice #game .game-controls .roll-controls{
+ position:relative;z-index:4;min-width:0;
+}
+#app.app-classic-dice #game #roll-btn{
+ position:relative;z-index:5;
+ min-height:30px!important;
+ touch-action:manipulation;
+ pointer-events:auto!important;
+ cursor:pointer;
+}
+#app.app-classic-dice #game #roll-btn:disabled{
+ cursor:default;pointer-events:none!important;
+}
+#app.app-classic-dice #game #dice-box.dice-rolled .die{
+ animation:leaf-dice-real-result .26s ease-out both;
+}
+#app.app-classic-dice #game #dice-box.dice-rolled .die:nth-child(2){
+ animation-delay:.05s;
+}
+@keyframes leaf-dice-real-result{
+ 0%{transform:rotate(-16deg) translateY(-7px)}
+ 60%{transform:rotate(9deg) translateY(2px)}
+ 100%{transform:rotate(0deg) translateY(0)}
+}
+@media(prefers-reduced-motion:reduce){
+ #app.app-classic-dice #game #dice-box.dice-rolled .die{animation:none!important}
+}
 #app.app-classic-dice #game .game-controls .roll-controls button{
  min-width:0!important;
  padding:4px 7px!important;

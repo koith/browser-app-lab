@@ -371,7 +371,12 @@ function drawBoard(){
       b.dataset.dmpCellCode=String(dmp[2]);
      }
      b.dataset.nativeTisSize='145x97';
-     b.style.zIndex=String(Math.round(PATH[i].y*1000)*2+i%2);
+     // Painter order follows the original DMP grid, not route parity.
+     // Cells on the same row are sorted by their genuine x coordinate;
+     // a row ahead ALWAYS paints over rows behind it. Reserve +1 for actors.
+     const sourceY=dmp?dmp[1]:Math.round(PATH[i].y*100);
+     const sourceX=dmp?dmp[0]:Math.round(PATH[i].x);
+     b.style.zIndex=String((sourceY*256+sourceX)*2);
      const sourceArt=sourceTileGraphic(type,i);
      b.dataset.originalArt=sourceArt;
      b.style.setProperty('background','url("./original/Tiles/'+sourceArt+'.png") center / 100% 100% no-repeat','important');
@@ -643,7 +648,11 @@ function drawGame(){if(!match||!MAPS[match.map])return;chooseSourcePath(match.ma
  if(roll){
   const manualBot=controllingOpponent&&activePlayer()?.bot;
   roll.setAttribute('aria-label',manualBot?activePlayer().name+'의 주사위 직접 굴리기':'주사위 굴리기');
-  roll.title=manualBot?'컴퓨터 상대의 이번 턴도 사용자가 직접 굴립니다.':'이번 참가자의 주사위를 굴립니다.';
+  roll.title=manualBot?'컴퓨터 상대의 이번 턴도 사용자가 직접 굴립니다.':
+   match.finished?'경기가 끝났습니다. 대기실에서 새 게임을 시작하세요.':
+   busy?'현재 주사위와 칸 이벤트 처리 중입니다.':
+   match.mode==='network'&&!playerCanAct()?'상대 연결 또는 자신의 차례를 기다리세요.':
+   '이번 참가자의 주사위를 굴립니다.';
  }
 $('game-map-title').textContent=match.map;const elapsed=Math.floor((Date.now()-(match.startedAt||Date.now()))/1000);$('mini-time').textContent='TIME '+formatGameDuration(Math.max(0,elapsed))+' / GP '+formatGameDuration(match.players.length*90);$('element-label').textContent=match.attribute;$('player-count').textContent=match.players.length;$('turn-indicator').textContent='ROUND '+match.round+' · '+match.players[match.active].name+' TURN';$('my-name').textContent=p.name;$('my-stats').textContent='이동 '+stats.move+' · 공격 '+stats.atk+' · 방어 '+stats.def+' · 지력 +'+stats.int;$('my-position').textContent=p.jail>0?'감옥 '+p.jail+'턴':p.position===0?'START':p.position===match.tiles.length-1?'GOAL':(p.position+1)+'번째 칸';$('my-portrait').innerHTML='<img class="player-sprite" alt="" src="'+imageFor(p.team[0]||'soldier')+'">';$('ability-fill').style.width=p.ability+'%';$('game-players').replaceChildren();match.players.forEach((user,i)=>{const li=document.createElement('div');li.className=match.active===i?'is-turn':'';li.textContent=(match.active===i?'▶ ':'　')+user.pawn+' '+user.name+' '+(user.position+1)+'칸 · '+user.ability+'%';li.style.color=user.color;$('game-players').append(li)});$('my-items').replaceChildren();p.items.forEach((itemId,i)=>{const item=ITEM_MAP[itemId],btn=document.createElement('button');btn.className='item-card';btn.innerHTML='<span class="item-icon">'+(item?.icon||'✧')+'</span>'+(item?.name||itemId);btn.title=item.hint;btn.disabled=match.finished||!playerCanAct()||p.usedItem||busy;btn.onclick=()=>useItem(i);$('my-items').append(btn)});$('roll-btn').disabled=!playerCanAct();$('ability-btn').disabled=!playerCanAct()||p.ability<100;$('move-log').textContent=match.message;syncNativeDiceEvent(match.message);drawBoard();drawBattlePanels();drawNativeChessmen();drawMinimap();trackActivePawn()}
 const mapViewport={zoom:1.25,panX:0,panY:0,autoFollow:true,lastTurn:null,matchKey:null};
@@ -1168,7 +1177,22 @@ function moveValues(p){
   p.effects.clover=0;p.effects.spade=0;
  return values;
 }
-function showDice(values){$('die1').textContent=['⚀','⚁','⚂','⚃','⚄','⚅'][Math.min(5,values[0]-1)];$('die2').textContent=values.length>1?['⚀','⚁','⚂','⚃','⚄','⚅'][Math.min(5,values[1]-1)]:'·'}
+function showDice(values){
+ const faces=['⚀','⚁','⚂','⚃','⚄','⚅'];
+ $('die1').textContent=faces[Math.min(5,values[0]-1)];
+ $('die2').textContent=values.length>1?faces[Math.min(5,values[1]-1)]:'·';
+ // These are the ACTUALLY rolled gameplay eyes, not a simulated animation.
+ if(match)match.lastRoll=values.slice();
+ const box=$('dice-box');
+ if(box){
+  box.dataset.rollCount=String((Number(box.dataset.rollCount)||0)+1);
+  box.setAttribute('role','status');
+  box.setAttribute('aria-label','주사위 결과 '+values.join(' + '));
+  box.classList.remove('dice-rolled');
+  void box.offsetWidth;
+  box.classList.add('dice-rolled');
+ }
+}
 const wait=ms=>new Promise(r=>setTimeout(r,ms));
 async function computerPrepareTurn(p){
  if(!p.bot||p.jail>0||match.finished)return;
@@ -1210,7 +1234,9 @@ async function takeTurn(){
    if(playerCanAct())window.__LEAF_NET__?.send?.({type:'command',action:'roll'});
    return;
  }
- busy=true;const p=match.players[match.active];drawGame();if(p.bot&&match.mode==='ai'&&match.botAutoplay===true){
+ busy=true;const p=match.players[match.active];
+ try{
+ drawGame();if(p.bot&&match.mode==='ai'&&match.botAutoplay===true){
   await wait(250);await computerPrepareTurn(p);if(match.finished){busy=false;return}
  }
  if(p.jail>0){
@@ -1242,6 +1268,16 @@ async function takeTurn(){
  if(p.effects.teamInt>0)p.effects.teamInt--;
  if(p.effects.ultimate>0)p.effects.ultimate--;
  await wait(p.bot?180:100);busy=false;nextTurn();
+ }catch(error){
+  // A failed event/battle renderer must never lock the real roll control
+  // permanently in the disabled busy state.
+  busy=false;
+  console.error('4LEAF game dice turn failed',error);
+  const reason=String(error?.message||error||'알 수 없는 오류').slice(0,110);
+  try{appendMove('주사위 처리 오류 · '+reason+' · 다시 시도하세요.');drawGame()}
+  catch(drawError){console.error('4LEAF game error recovery failed',drawError);
+   const button=$('roll-btn');if(button)button.disabled=false;}
+ }
 }
 function nextTurn(){
  if(!match||match.finished)return;

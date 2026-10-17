@@ -30,11 +30,9 @@
  background-repeat:no-repeat!important;
  image-rendering:auto!important;
  overflow:visible!important;
- /* The source TIS art has a real hexagonal silhouette with transparency
-    at its outer corners. Restrict overlapping hitboxes to the original
-    visual polygon instead of letting invisible rectangle corners swallow
-    clicks intended for another platform below. The perimeter is inferred
-    from the PNG boundaries, not from the lost original EXE hit-test data. */
+ /* Preserve full native alpha silhouette; an inferred polygon can clip
+    authentic raised-platform edges and cannot represent alpha hit testing.
+    Pointer geometry must be resolved in the board input layer. */
  clip-path:polygon(28% 0%,72% 0%,100% 52%,72% 100%,28% 100%,0 52%);
  -webkit-clip-path:polygon(28% 0%,72% 0%,100% 52%,72% 100%,28% 100%,0 52%);
 }

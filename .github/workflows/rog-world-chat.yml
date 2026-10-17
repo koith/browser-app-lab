@@ -167,6 +167,8 @@ jobs:
         run: node apps/4leaf/rog/tests/dice-native-minimap-navigation.cjs
       - name: Real Genesis DMP camera navigation across entire board in Chromium
         run: node apps/4leaf/rog/tests/dice-dmp-full-camera.cjs
+      - name: Verify 104 source DMP grid cells and TWO real phone touchscreen dice turns
+        run: node apps/4leaf/rog/tests/dice-mobile-roll-dmp-order.cjs
       - name: Verify native 145x97 TIS and independently depth-sorted original DMP cells in live Chromium
         run: node apps/4leaf/rog/tests/dice-native-tis-depth.cjs
       - name: Verify saved AI turns pause on reload and remain manually rollable
