@@ -59,6 +59,15 @@ const {chromium}=require('playwright');
   }
   assert.ok(horizontal>5&&vertical>5&&sameRow>5,
    'the recovered DMP map contains enough geometric adjacency samples');
+  const mobileCamera=await page.evaluate(()=>window.__LEAF_CAMERA__.getState());
+  assert.equal(mobileCamera.scale,.65,
+   'phone initial camera fits a wider real DMP field than desktop 125%');
+  await page.locator('#board-zoom-in').click();
+  assert.equal(await page.evaluate(()=>window.__LEAF_CAMERA__.getState().scale),.9,
+   'the + zoom control still zooms the real world, not tile CSS');
+  await page.locator('#board-zoom-reset').click();
+  assert.equal(await page.evaluate(()=>window.__LEAF_CAMERA__.getState().scale),.65,
+   'phone reset returns to its source-preserving fit camera');
   const roll=page.locator('#roll-btn');
   const point=async()=>{
    assert.equal(await roll.isVisible(),true,'roll button remains visible in game');
