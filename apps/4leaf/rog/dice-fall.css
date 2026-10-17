@@ -1,0 +1,89 @@
+/* Inferred 3D CSS motion for user-reported original dice rain/bounces.
+ * DMP terrain, true 145x97 TIS sprites and original actor painter order
+ * stay live underneath; this overlay has absolutely no input hitbox. */
+#app.app-classic-dice #game .leaf-dice-fall-layer{
+ box-sizing:border-box!important;
+ position:absolute!important;
+ z-index:42!important;
+ pointer-events:none!important;
+ left:15%!important;
+ right:15%!important;
+ top:32px!important;
+ bottom:155px!important;
+ display:flex!important;
+ align-items:flex-end!important;
+ justify-content:center!important;
+ gap:15px!important;
+ transform-style:preserve-3d!important;
+ perspective:560px;
+}
+#app.app-classic-dice #game .leaf-fall-piece{
+ display:block;position:relative;box-sizing:border-box;
+ width:57px;height:57px;flex:0 0 57px;
+ transform-style:preserve-3d;
+ transform-origin:center center;
+ will-change:transform;
+ filter:drop-shadow(3px 9px 5px #112028a6);
+}
+#app.app-classic-dice #game .leaf-fall-cube{
+ display:block;position:absolute;
+ top:0;left:0;width:57px;height:57px;
+ transform-style:preserve-3d;
+ transform-origin:center center;
+ will-change:transform;
+}
+#app.app-classic-dice #game .leaf-die-face{
+ box-sizing:border-box;
+ position:absolute;top:0;left:0;
+ width:57px;height:57px;
+ display:grid;grid-template-columns:repeat(3,1fr);
+ grid-template-rows:repeat(3,1fr);
+ align-items:center;justify-items:center;
+ padding:9px;border-radius:6px;
+ border:2px solid #e5eff7;
+ background:linear-gradient(145deg,#ffffff,#ebf0f5 58%,#9eb3c5);
+ box-shadow:inset 2px 2px 2px #fff,inset -3px -3px 5px #95acbe;
+ backface-visibility:hidden;
+ transform-style:preserve-3d;
+}
+#app.app-classic-dice #game .leaf-die-face-1{transform:translateZ(28.5px)}
+#app.app-classic-dice #game .leaf-die-face-2{transform:rotateY(90deg) translateZ(28.5px)}
+#app.app-classic-dice #game .leaf-die-face-3{transform:rotateX(90deg) translateZ(28.5px)}
+#app.app-classic-dice #game .leaf-die-face-4{transform:rotateX(-90deg) translateZ(28.5px)}
+#app.app-classic-dice #game .leaf-die-face-5{transform:rotateY(-90deg) translateZ(28.5px)}
+#app.app-classic-dice #game .leaf-die-face-6{transform:rotateY(180deg) translateZ(28.5px)}
+#app.app-classic-dice #game .leaf-die-eye{
+ display:none;box-sizing:border-box;
+ width:10px;height:10px;border-radius:50%;
+ background:#1c2430;
+ box-shadow:inset 1px 1px 2px #02080e,0 1px 0 #fff9;
+}
+#app.app-classic-dice #game .leaf-die-eye.visible{display:block}
+#app.app-classic-dice #game .leaf-die-face-1 .leaf-die-eye.visible{
+ background:#ed2963;width:14px;height:14px;
+ box-shadow:inset 2px 2px 3px #9e1640,0 1px 0 #fff;
+}
+@media(max-width:650px){
+ #app.app-classic-dice #game .leaf-dice-fall-layer{
+  top:24px!important;bottom:145px!important;
+  left:4%!important;right:4%!important;
+  gap:8px!important;perspective:420px;
+ }
+ #app.app-classic-dice #game .leaf-fall-piece,
+ #app.app-classic-dice #game .leaf-fall-cube,
+ #app.app-classic-dice #game .leaf-die-face{width:37px;height:37px}
+ #app.app-classic-dice #game .leaf-fall-piece{flex-basis:37px}
+ #app.app-classic-dice #game .leaf-die-face{padding:6px;border-width:1px;border-radius:4px}
+ #app.app-classic-dice #game .leaf-die-face-1{transform:translateZ(18.5px)}
+ #app.app-classic-dice #game .leaf-die-face-2{transform:rotateY(90deg) translateZ(18.5px)}
+ #app.app-classic-dice #game .leaf-die-face-3{transform:rotateX(90deg) translateZ(18.5px)}
+ #app.app-classic-dice #game .leaf-die-face-4{transform:rotateX(-90deg) translateZ(18.5px)}
+ #app.app-classic-dice #game .leaf-die-face-5{transform:rotateY(-90deg) translateZ(18.5px)}
+ #app.app-classic-dice #game .leaf-die-face-6{transform:rotateY(180deg) translateZ(18.5px)}
+ #app.app-classic-dice #game .leaf-die-eye{width:6px;height:6px}
+ #app.app-classic-dice #game .leaf-die-face-1 .leaf-die-eye.visible{width:8px;height:8px}
+}
+@media(prefers-reduced-motion:reduce){
+ #app.app-classic-dice #game .leaf-fall-cube,
+ #app.app-classic-dice #game .leaf-fall-piece{will-change:auto}
+}

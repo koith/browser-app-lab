@@ -1249,11 +1249,11 @@ async function takeTurn(){
   await wait(250);await computerPrepareTurn(p);if(match.finished){busy=false;return}
  }
  if(p.jail>0){
-   const a=d(6),b=d(6);showDice([a,b]);
+   const a=d(6),b=d(6);await window.__LEAF_DICE_FALL__?.roll([a,b]);showDice([a,b]);
    if(a===b){p.jail=0;appendMove(p.name+' 감옥 탈출! 더블 '+a+'/'+b+' · 이동 턴 진행')}
    else{p.jail--;appendMove(p.name+' 감옥 '+p.jail+'턴 남음 (주사위 '+a+'/'+b+')');await wait(p.bot?300:150);busy=false;nextTurn();return}
  }
- const values=moveValues(p),attributeMoveBonus=elementalModifier(p.team,'move'),move=Math.max(1,values.reduce((a,b)=>a+b,0)+attributeMoveBonus);showDice(values);
+ const values=moveValues(p),attributeMoveBonus=elementalModifier(p.team,'move'),move=Math.max(1,values.reduce((a,b)=>a+b,0)+attributeMoveBonus);await window.__LEAF_DICE_FALL__?.roll(values);showDice(values);
  p.ability=Math.min(100,p.ability+move*3);
  if(move){
    appendMove(p.name+' 이동 주사위 '+values.join('+')+(attributeMoveBonus>0?' +2':attributeMoveBonus<0?' −2':'')+' = '+move+'칸 ('+match.attribute+')');
