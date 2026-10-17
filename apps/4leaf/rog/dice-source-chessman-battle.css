@@ -43,3 +43,28 @@
   scale:.69!important;transform-origin:50% 100%!important;
  }
 }
+
+/* Chromium source-role regression: without cross-axis stretch the avatar
+ * flex child computes width:0, so even valid 75x141 original SAVA PNGs are
+ * fully clipped. The historical 96px player rail MUST visibly show them.
+ * This changes only the profile rails, NEVER source OBS actor dimensions.
+ */
+#app.app-classic-dice #game .battle-player-panels .battle-side-card{
+ align-items:stretch!important;
+}
+#app.app-classic-dice #game .battle-player-panels .battle-side-portrait{
+ align-self:stretch!important;
+ display:block!important;
+ box-sizing:border-box!important;
+ width:calc(100% - 8px)!important;
+ min-width:0!important;
+ min-height:23px!important;
+ flex:1 1 auto!important;
+ position:relative!important;
+ overflow:hidden!important;
+}
+@media(max-width:650px){
+ #app.app-classic-dice #game .battle-player-panels .battle-side-portrait{
+  width:100%!important;min-height:18px!important;
+ }
+}
