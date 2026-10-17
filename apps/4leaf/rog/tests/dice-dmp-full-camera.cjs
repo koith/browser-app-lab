@@ -60,8 +60,15 @@ const path=require('node:path');
   await page.mouse.move(px+115,py+48,{steps:9});
   await page.mouse.up();
   const dragged=await snapshot();
+  const dragTarget=await page.evaluate(([x,y])=>{
+   const el=document.elementFromPoint(x,y);
+   return {tag:el?.tagName||'',id:el?.id||'',classes:el?.className||'',
+    closestBlock:el?.closest('#board-zoom-controls,#board-mini,.board-mini,button,input,textarea,select,[role="button"],#battle-visual,#battle-player-panels')?.id||''};
+  },[px,py]);
+  console.log('DMP_DRAG_SOURCE',JSON.stringify({initial,beforeDrag,dragged,dragTarget}));
   assert.ok(dragged.panX>beforeDrag.panX+70,
-   'genuine pointer drag can move visible source camera right by >70px');
+   'genuine pointer drag can move source camera right >70px: '+
+   JSON.stringify({before:beforeDrag.panX,after:dragged.panX,target:dragTarget}));
   assert.equal(dragged.active,initial.active,'pan is camera-only, never changes real turn owner');
   await page.locator('#board-area').focus();
   await page.keyboard.press('ArrowLeft');
