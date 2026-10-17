@@ -3,7 +3,7 @@
  * Observed direct from SHA1-verifiable original installer:
  * every byte in the index is bitwise inverted; the first UInt32LE is
  * resource count; each entry is a 24-byte zero-terminated filename followed
- * by UInt32LE CUMULATIVE END OFFSET. This tool ONLY reads source INDEXES,
+ * by UInt32LE CUMULATIVE END OFFSET MINUS ONE (the first resource offset is 0). This tool ONLY reads source INDEXES,
  * never runs original binaries or re-exports copyrighted content.
  * The 24/4 layout is experimentally validated against the first headers
  * of Dice/OBS.pak, Dice/CHR.pak, Dice/TIS.pak and Dice/DMP.pak.
@@ -32,7 +32,9 @@ function parseOriginalPakIndex(data,rawSize=null){
   const name=Buffer.from(nameBytes).toString('latin1');
   if(!name||name.length>NAME_BYTES||/[^\x20-\x7e]/.test(name))
    throw Error('Unrecognized source PAK member name at '+i);
-  const endOffset=invert32(data,at+NAME_BYTES);
+  // All 56 original 2002 PAK files use inclusive last-byte offsets.
+  // Add ONE before deriving the next byte span: source extract_original.py.
+  const endOffset=invert32(data,at+NAME_BYTES)+1;
   if(endOffset<previousEnd)throw Error('Source member offsets must increase monotonically: '+name);
   const length=endOffset-previousEnd;
   if(nameSet.has(name))throw Error('Duplicate original file name '+name);
@@ -44,7 +46,7 @@ function parseOriginalPakIndex(data,rawSize=null){
  const gap=rawSize===null?null:rawSize-required-previousEnd;
  return {count,headerBytes:required,sumResourceBytes:previousEnd,
   rawSize,resourceRegionBytes:available,
-  resourceSizeGap:gap,resourceBytesExact:gap===1,
+  resourceSizeGap:gap,resourceBytesExact:gap===0,
   entries};
 }
 function loadPakIndex(path){
