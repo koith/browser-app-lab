@@ -126,10 +126,20 @@ function allFiles(directory){
    const rel=path.relative(unpack,file).split(path.sep).join('/');
    let index=null;
    try{index=loadPakIndex(file)}catch(error){index={error:String(error.message||error)}}
+   let payloadHeader=null;
+   if(index&&!index.error&&index.entries.length){
+    const fd=fs.openSync(file,'r');const data=Buffer.alloc(32);
+    const count=fs.readSync(fd,data,0,data.length,index.headerBytes);
+    fs.closeSync(fd);
+    const view=data.subarray(0,count);
+    payloadHeader={firstName:index.entries[0].name,
+     encryptedHex:view.toString('hex'),
+     invertedHex:Buffer.from(view.map(byte=>byte^255)).toString('hex')};
+   }
    const item={path:rel,size:stat.size,sha256:await digest(file),
     magicHex:head.subarray(0,16).toString('hex'),
     headHex:head.toString('hex'),asciiPreview:printable,
-    firstU32LE,
+    firstU32LE,payloadHeader,
     originalIndex:index?.error?index:{
      count:index.count,headerBytes:index.headerBytes,
      resourceBytesExact:index.resourceBytesExact,
