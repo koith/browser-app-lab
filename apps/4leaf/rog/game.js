@@ -507,6 +507,20 @@ function drawMinimap(){
    context.fillStyle=match.tiles[i]==='goal'?'#ffe58d':match.tiles[i]==='start'?'#86f5a2':'#68dbfa';
    context.fillRect(x-2,y-2,5,5);
  });
+ const cameraView=window.__LEAF_CAMERA__?.getState().visible;
+ if(cameraView){
+  // Real source-camera DMP viewport, not a static guessed minimap box.
+  const x=7+cameraView.x*(w-14),y=10+cameraView.y*(h-17);
+  const viewW=cameraView.width*(w-14),viewH=cameraView.height*(h-17);
+  context.save();
+  context.fillStyle='rgba(74,225,246,.12)';
+  context.strokeStyle='#b0f3f8';
+  context.lineWidth=1.3;
+  context.setLineDash([3,2]);
+  context.fillRect(x,y,viewW,viewH);
+  context.strokeRect(x+.5,y+.5,Math.max(1,viewW-1),Math.max(1,viewH-1));
+  context.restore();
+ }
  match.players.forEach(p=>{
    const point=PATH[p.position]||PATH[0];if(!point)return;
    const x=7+point.x/100*(w-14),y=10+point.y/100*(h-17);
@@ -682,6 +696,75 @@ function installBoardControls(){
  $('board-zoom-out').onclick=()=>zoomBoard(-.25);
  $('board-zoom-reset').onclick=()=>{mapViewport.zoom=1.25;mapViewport.panX=0;mapViewport.panY=0;mapViewport.autoFollow=true;applyMapViewport();trackActivePawn()};
  const area=$('board-area');
+ const minimap=$('mini-map-canvas');
+ // Native IMG/minimap.png is backed by a genuine 152x112 game canvas,
+ // but the original revival disabled interaction. Keep the source art and
+ // bind map clicks to the actual full-size recovered DMP camera.
+ let draggingMinimap=null;
+ function focusMiniPoint(rx,ry){
+  if(!match||route!=='game'||!window.__LEAF_CAMERA__?.focusRatio)return null;
+  mapViewport.autoFollow=false;
+  const view=window.__LEAF_CAMERA__.focusRatio(
+   Math.max(0,Math.min(1,rx)),Math.max(0,Math.min(1,ry)));
+  mapViewport.panX=view.panX;mapViewport.panY=view.panY;
+  return view;
+ }
+ const readMiniPointer=e=>{
+  const b=minimap.getBoundingClientRect();
+  if(!b.width||!b.height)return null;
+  const x=(e.clientX-b.left)/b.width*minimap.width;
+  const y=(e.clientY-b.top)/b.height*minimap.height;
+  return [(x-7)/(minimap.width-14),(y-10)/(minimap.height-17)];
+ };
+ minimap.tabIndex=0;
+ minimap.setAttribute('role','button');
+ minimap.setAttribute('aria-label',
+  '원본 주잔 미니맵 · 클릭 또는 드래그로 DMP 카메라 탐색, 방향키 이동, Home 현재 체스맨 추적');
+ minimap.setAttribute('aria-keyshortcuts','ArrowUp ArrowDown ArrowLeft ArrowRight Home');
+ minimap.addEventListener('pointerdown',e=>{
+  if(e.pointerType==='mouse'&&e.button!==0)return;
+  const point=readMiniPointer(e);if(!point)return;
+  e.preventDefault();e.stopPropagation();
+  draggingMinimap=e.pointerId;
+  try{minimap.setPointerCapture(e.pointerId)}catch{}
+  focusMiniPoint(...point);
+ });
+ minimap.addEventListener('pointermove',e=>{
+  if(draggingMinimap!==e.pointerId)return;
+  const point=readMiniPointer(e);if(point)focusMiniPoint(...point);
+ });
+ const releaseMini=e=>{
+  if(draggingMinimap===e.pointerId)draggingMinimap=null;
+ };
+ for(const type of ['pointerup','pointercancel','lostpointercapture'])
+  minimap.addEventListener(type,releaseMini);
+ minimap.addEventListener('keydown',e=>{
+  if(e.target!==minimap||route!=='game')return;
+  if(e.key==='Home'||e.key==='0'){
+   e.preventDefault();
+   mapViewport.autoFollow=true;
+   mapViewport.panX=mapViewport.panY=0;
+   trackActivePawn();return;
+  }
+  const delta={ArrowLeft:[-.08,0],ArrowRight:[.08,0],
+   ArrowUp:[0,-.08],ArrowDown:[0,.08]}[e.key];
+  if(!delta)return;
+  e.preventDefault();
+  const view=window.__LEAF_CAMERA__?.getState().visible;
+  if(view)focusMiniPoint(view.x+view.width/2+delta[0],
+   view.y+view.height/2+delta[1]);
+ });
+ window.__LEAF_MINIMAP_NAV__={
+  focus:focusMiniPoint,
+  onCameraRender:()=>{if(route==='game'&&match)drawMinimap()},
+  getState:()=>({
+   source:'IMG/minimap.png',canvas:[minimap.width,minimap.height],
+   isVisible:getComputedStyle(minimap).pointerEvents!=='none'&&
+    minimap.getBoundingClientRect().width>0,
+   follow:mapViewport.autoFollow,
+   camera:window.__LEAF_CAMERA__?.getState()||null
+  })
+ };
  // 1450x1120 actual DMP route may be explored at ANY source zoom. The old
  // zoom-only clamp prevented travel beyond a small rectangle of the board.
  const pointers=new Map();let dragging=null,pinch=null;
