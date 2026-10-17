@@ -214,7 +214,7 @@
 
 ### 로컬 빠른 실행 예시
 
-`bash
+```bash
 # 저장소 루트에서, Node 22 및 Chromium/Playwright 설치
 npm install --no-save playwright
 npx playwright install chromium
@@ -225,7 +225,7 @@ node apps/4leaf/rog/tests/dice-native-tis-depth.cjs
 node apps/4leaf/rog/tests/dice-source-dmp-terrain-explorer.cjs
 node apps/4leaf/rog/tests/dice-native-pawn-dmp-depth.cjs
 node apps/4leaf/rog/tests/dice-native-minimap-navigation.cjs
-`
+```
 
 중앙 서버 통합 테스트는 `rog-central-chat.yml`의 Node 서버 포트/테스트 순서를 따른다. `file://`에서는 Chromium의 Canvas CORS 규칙 때문에 PNG 알파값 직접 읽기가 제한될 수 있다. **진짜 공개 HTTP(S) 또는 로컬 HTTP**에서 원본 파일 픽셀을 검증해야 하며, `file://` fallback은 지원하되 원본 알파가 복원됐다고 꾸미지 말 것.
 
