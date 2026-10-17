@@ -49,7 +49,7 @@ const path=require('path');
   assert.ok(hud.occupied.every(x=>x.button==='BUTTON'&&x.source.startsWith('./original/CardData/chm_')&&x.text.length>0));
   assert.equal(hud.side,'flex','source 800x600 game shows its dedicated right side UI');
   assert.ok(hud.originalBackground.includes('original/IMG/avatarback.png'),'real source 4LEAF blue atlas used');
-  assert.ok(hud.rect.x>=hud.sceneRect.right-1,'the four chessmen belong to the independent RIGHT sidebar, not painted over the battlefield');
+  assert.ok(hud.rect.x>=hud.sceneRect.right-194&&hud.rect.right<=hud.sceneRect.right+2, 'the original four chessmen overlay only the rightmost 193px of the 800px scene below the game field');
   assert.ok(Math.abs(hud.rect.right-hud.sidebarRect.right)<12,'chessmen grid is registered to original side rail');
   assert.ok(hud.rect.bottom>hud.sidebarRect.bottom-22,'real four-up chessmen dock at bottom of game side rail');
   assert.equal(hud.itemPanel,'none','fabricated item-card strip no longer replaces source chessmen grid');
