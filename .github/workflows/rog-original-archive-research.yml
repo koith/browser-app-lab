@@ -10,6 +10,7 @@ on:
       - 'apps/4leaf/rog/tools/probe-original-spr.py'
       - 'apps/4leaf/rog/tools/decode-original-img-spr.py'
       - 'apps/4leaf/rog/tools/probe-original-obs.py'
+      - 'apps/4leaf/rog/tools/decode-original-obs-preview.py'
       - 'apps/4leaf/rog/tools/emit-original-img-ui.py'
       - 'apps/4leaf/rog/tests/original-pak-index.cjs'
       - 'apps/4leaf/rog/docs/original-evidence-crosscheck-2026-10-17.md'
