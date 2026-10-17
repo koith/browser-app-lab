@@ -27,6 +27,8 @@ on:
       - 'apps/4leaf/rog/tests/dice-native-tis-alpha.cjs'
       - 'apps/4leaf/rog/tests/dice-native-tis-depth.cjs'
       - 'apps/4leaf/rog/dice-native-battle-podium.css'
+      - 'apps/4leaf/rog/dice-native-battle-dice.css'
+      - 'apps/4leaf/rog/tests/dice-native-battle-dice.cjs'
       - 'apps/4leaf/rog/tests/dice-battle-podium.cjs'
       - 'apps/4leaf/rog/dice-native-client-frame.js'
       - 'apps/4leaf/rog/tests/dice-native-frame.cjs'
@@ -48,6 +50,8 @@ jobs:
           npx playwright install chromium --with-deps
       - name: Replay all 25 historical map wins and check desktop/mobile game
         run: node apps/4leaf/rog/tests/archive-coverage.cjs
+      - name: Verify genuine rolled dice pip topology and live original-screenshot duel in Chromium
+        run: node apps/4leaf/rog/tests/dice-native-battle-dice.cjs
       - name: Verify actual 2.5D mechanical duel platforms and original forest in Chromium
         run: node apps/4leaf/rog/tests/dice-battle-podium.cjs
       - name: Verify genuine DMP painter order of original Registry actors versus overlapping source TIS platforms
