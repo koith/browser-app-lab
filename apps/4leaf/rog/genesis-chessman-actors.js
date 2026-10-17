@@ -99,6 +99,14 @@
     count:p.count,duration:p.duration};
   }
   frames.set(chessmanId,entries);
+  // Late-loaded verified source sheets must replace already visible web
+  // proxies immediately, on the game board AND the battle podium.
+  for(const pawn of document.querySelectorAll(
+    '#board-pawns .board-pawn, #battle-visual .leaf-battle-chessman')){
+    if(pawn.dataset.chessmanId!==chessmanId)continue;
+    renderFrame(pawn,chessmanId,pawn.dataset.actorPose||'idle');
+    pawn.dataset.actorOriginalAnimationRegistered=String(Boolean(Object.keys(entries).length));
+  }
  }
  window.__LEAF_GENESIS_ACTORS__={
   mount,pose,poseByPlayer,registerFrames,
