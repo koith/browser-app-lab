@@ -654,9 +654,9 @@ $('game-map-title').textContent=match.map;const elapsed=Math.floor((Date.now()-(
 // This is a responsive WEB camera convention, not a recovered EXE setting.
 function defaultDiceCameraZoom(){
  const area=$('board-area');
- return area&&area.clientWidth>0&&area.clientWidth<520?.65:1.25;
+ return area&&area.clientWidth>0&&area.clientWidth<520?.65:1;
 }
-const mapViewport={zoom:1.25,panX:0,panY:0,autoFollow:true,lastTurn:null,matchKey:null};
+const mapViewport={zoom:1,panX:0,panY:0,autoFollow:true,lastTurn:null,matchKey:null};
 function trackActivePawn(){
  if(!match||!PATH.length)return;
  // Follow a genuine new participant or new match, not on every UI repaint.
@@ -849,7 +849,7 @@ function installBoardControls(){
   if(e.key==='+'||e.key==='='){e.preventDefault();zoomBoard(.25)}
   else if(e.key==='-'){e.preventDefault();zoomBoard(-.25)}
   else if(e.key==='0'){
-   e.preventDefault();mapViewport.zoom=1.25;
+   e.preventDefault();mapViewport.zoom=defaultDiceCameraZoom();
    mapViewport.panX=mapViewport.panY=0;
    mapViewport.autoFollow=true;applyMapViewport();trackActivePawn();
   }
