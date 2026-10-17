@@ -1,14 +1,18 @@
-/* Original Genesis TIS hex art orientation correction.
- * Current renderer showed the native 145x97 hex platform upside down.
- * Flip the TILE ART itself in the board plane, not the whole world,
- * terrain, text, player sprites, camera or click coordinates.
- * All tile text/symbols are hidden by dice-native-tis-clean.css.
- * Geometry, source alpha mask and DOM hit targets remain unchanged. */
+/* Exact orientation of source TIS palette frames (Dice/TIS.pak) verified
+ * against apps/4leaf/assets/board.jpg and battle.jpg (2004 gameplay).
+ *
+ * Previous reconstruction applied scaleY(-1), turning the source platform
+ * TOP into the BOTTOM. Its thick raised top lip then painted against the
+ * wrong DMP edge and visually stacked as a pile of inverted platforms.
+ * The actual extracted 145x97 PNG is already upright. Do not flip it.
+ *
+ * Original 70x47 DMP source-grid intervals and full RGBA silhouettes are
+ * preserved. No painted screenshots are used as gameplay scenery.
+ */
 #app.app-classic-dice #game .board-world #board-nodes .tile[data-native-tis-size="145x97"]{
- transform:translate(-50%,-50%) scaleY(-1)!important;
+ transform:translate(-50%,-50%)!important;
+ transform-origin:50% 50%!important;
 }
-/* Original tile art is mirrored vertically; its hidden semantic
- * glyphs remain screen-readable if accessibility styles reveal them. */
 #app.app-classic-dice #game .board-world #board-nodes .tile[data-native-tis-size="145x97"] > :is(.tile-symbol,small){
- transform:scaleY(-1)!important;
+ transform:none!important;
 }
