@@ -36,23 +36,26 @@ def member_frames(raw):
     return frames
 
 def source_scanlines(body,w,h):
-    # In original OBS frame data, each bitmap row begins with a four-byte
-    # RLE header: first low byte is roughly 90..127, high bytes <=3.
-    # Find the unique header threshold for EXACTLY h rows and validate the
-    # uncompressed literal run lengths against the original frame width.
-    # Verified on real 1025.obs (73 rows) and 1045.obs (82 rows).
-    for low in range(127,-1,-1):
-        starts=[]
-        for i in range(len(body)-3):
+    # Original OBS each scanline after row0 begins with one 4-byte header.
+    # Real 1025/1045 images: marker byte1 = 0x02, byte3 = 0..3, first
+    # low byte >= 20 (literal palette sequences can contain 00 02 28 01).
+    # The first scanline begins at byte offset0 with a different flag.
+    # Verify EXACT h source scanlines and pixel data fully contiguous.
+    for low in (20,24,28,32,16,12,8,4,0):
+        starts=[0]
+        for i in range(1,len(body)-3):
             a,b,c,d=body[i:i+4]
-            if low<=a<=128 and b<=3 and c<=min(75,w+30) and d<=3:
+            if low<=a<=128 and b==2 and c<=min(90,w+30) and d<=3:
                 starts.append(i)
-        if len(starts)!=h or starts[0]!=0:continue
+        if len(starts)!=h:continue
         widths=[(starts[k+1] if k+1<h else len(body))-p-4
                 for k,p in enumerate(starts)]
         if all(1<=length<=w for length in widths):
             return starts,widths,low
-    raise ValueError(f'Could not find {h} exact native scanline headers in {len(body)} bytes')
+    # Some boss/large monster frames use a less restrictive indicator
+    # and must be individually verified, never silently guessed.
+    raise ValueError(f'Could not find {h} exactly encoded 4-byte row markers in {len(body)} bytes')
+
 
 def guess_frame(raw,w,h,palette):
     starts,lengths,threshold=source_scanlines(raw,w,h)
