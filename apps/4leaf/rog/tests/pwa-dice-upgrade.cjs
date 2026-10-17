@@ -27,10 +27,10 @@ const {chromium}=require('playwright');
   // pass online while testing an obsolete cache for offline preservation.
   const activeRevision=await page.evaluate(async()=>{
    const keys=await caches.keys();
-   return keys.filter(x=>/^4leaf-revival-pwa-v\\d+$/.test(x))
+   return keys.filter(x=>/^4leaf-revival-pwa-v\d+$/.test(x))
     .sort((a,b)=>Number(a.split('-v').at(-1))-Number(b.split('-v').at(-1))).at(-1);
   });
-  assert.match(activeRevision||'',/^4leaf-revival-pwa-v\\d+$/);
+  assert.match(activeRevision||'',/^4leaf-revival-pwa-v\d+$/);
   const old='/* STALE-4LEAF-DICE-HANDLER-SHOULD-NOT-RUN */';
   const files=['game.js','dice-native-tis-depth.css'];
   await page.evaluate(async({files,old,activeRevision})=>{
