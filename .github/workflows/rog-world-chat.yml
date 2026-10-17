@@ -194,3 +194,40 @@ jobs:
           name: original-world-and-social-chat-screens
           path: leaf-*.png
           retention-days: 7
+
+  webkit-mobile-dice:
+    name: Verify WebKit phone touch, original DMP pitch and two real turns
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install actual WebKit browser and system dependencies
+        run: |
+          npm install --no-save playwright
+          npx playwright install webkit --with-deps
+      - name: Serve exact local original source sprites and game engine
+        run: |
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog > /tmp/leaf-webkit-http.log 2>&1 &
+          ready=0
+          for n in $(seq 1 25); do
+            if curl -fsSI --max-time 2 http://127.0.0.1:8765/original/Tiles/0015.png >/dev/null; then
+              ready=1
+              break
+            fi
+            sleep 1
+          done
+          test "$ready" = "1" || { cat /tmp/leaf-webkit-http.log; exit 1; }
+      - name: Tap REAL roll button twice on WebKit mobile and verify 145x97 / 70x47 source DMP
+        env:
+          FOURLEAF_BROWSER: webkit
+          FOURLEAF_TEST_URL: http://127.0.0.1:8765/
+        run: node apps/4leaf/rog/tests/dice-mobile-roll-dmp-order.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: 4leaf-webkit-native-dice-touch-screens
+          path: leaf-4leaf-mobile-dmp-*.png
+          if-no-files-found: ignore
