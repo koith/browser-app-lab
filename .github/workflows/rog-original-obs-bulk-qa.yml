@@ -1,0 +1,30 @@
+name: 4LEAF recovered OBS source-frame gameplay QA
+on:
+  push:
+    paths:
+      - 'apps/4leaf/rog/tests/dice-original-obs-bulk.cjs'
+      - 'apps/4leaf/rog/original/OBS/animation-extra.js'
+      - 'apps/4leaf/rog/original/OBS/bulk/**'
+      - 'apps/4leaf/rog/genesis-chessman-actors.js'
+      - 'apps/4leaf/rog/dice-original-obs.css'
+      - '.github/workflows/rog-original-obs-bulk-qa.yml'
+  workflow_dispatch:
+jobs:
+  original-chessmen-in-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 11
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save playwright
+      - run: npx playwright install chromium --with-deps
+      - name: Verify all recovered OBS source frames and play an actual DMP duel in Chromium
+        run: node apps/4leaf/rog/tests/dice-original-obs-bulk.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: 4leaf-original-obs-source-actors-qa
+          path: leaf-new-original-2002-obs-body-actors.png
+          retention-days: 7
