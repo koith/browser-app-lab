@@ -3,7 +3,7 @@
  * Observed direct from SHA1-verifiable original installer:
  * every byte in the index is bitwise inverted; the first UInt32LE is
  * resource count; each entry is a 24-byte zero-terminated filename followed
- * by UInt32LE resource byte length. This tool ONLY reads source INDEXES,
+ * by UInt32LE CUMULATIVE END OFFSET. This tool ONLY reads source INDEXES,
  * never runs original binaries or re-exports copyrighted content.
  * The 24/4 layout is experimentally validated against the first headers
  * of Dice/OBS.pak, Dice/CHR.pak, Dice/TIS.pak and Dice/DMP.pak.
@@ -20,7 +20,7 @@ function parseOriginalPakIndex(data,rawSize=null){
   throw Error('Not a plausible 4LEAF PAK index: '+count);
  const required=HEADER_WIDTH+count*ENTRY_BYTES;
  if(data.length<required)throw Error('Truncated source PAK index: '+data.length+' of '+required+' required');
- const entries=[],nameSet=new Set();let sizeTotal=0;
+ const entries=[],nameSet=new Set();let previousEnd=0;
  for(let i=0;i<count;i++){
   const at=HEADER_WIDTH+i*ENTRY_BYTES;
   const nameBytes=[];
@@ -32,17 +32,19 @@ function parseOriginalPakIndex(data,rawSize=null){
   const name=Buffer.from(nameBytes).toString('latin1');
   if(!name||name.length>NAME_BYTES||/[^\x20-\x7e]/.test(name))
    throw Error('Unrecognized source PAK member name at '+i);
-  const length=invert32(data,at+NAME_BYTES);
+  const endOffset=invert32(data,at+NAME_BYTES);
+  if(endOffset<previousEnd)throw Error('Source member offsets must increase monotonically: '+name);
+  const length=endOffset-previousEnd;
   if(nameSet.has(name))throw Error('Duplicate original file name '+name);
   nameSet.add(name);
-  sizeTotal+=length;
-  entries.push({name,length});
+  entries.push({name,length,startOffset:previousEnd,endOffset});
+  previousEnd=endOffset;
  }
  const available=rawSize===null?null:rawSize-required;
- const gap=rawSize===null?null:rawSize-required-sizeTotal;
- return {count,headerBytes:required,sumResourceBytes:sizeTotal,
+ const gap=rawSize===null?null:rawSize-required-previousEnd;
+ return {count,headerBytes:required,sumResourceBytes:previousEnd,
   rawSize,resourceRegionBytes:available,
-  resourceSizeGap:gap,resourceBytesExact:gap===0,
+  resourceSizeGap:gap,resourceBytesExact:gap===1,
   entries};
 }
 function loadPakIndex(path){
