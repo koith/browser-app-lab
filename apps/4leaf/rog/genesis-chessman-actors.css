@@ -1,14 +1,14 @@
 /* PROVISIONAL Genesis War chessman representation, NOT a recovered mesh.
  * Original CardData/chm_NN defines the unique CHARACTER portrait; the
  * body below has 1 head / 7 body-heads and independent articulated limbs.
- * Unlike Registry/savaNN.png these actors belong ONLY to the Dice board.
+ * Unlike Registry/savaNN.png these actors belong ONLY to the Dice board and duel stages.
  * Raw native animation frames can replace the proxy through registerFrames.
  */
-#app.app-classic-dice #game #board-pawns .board-pawn{
+#app.app-classic-dice #game :is(#board-pawns,#battle-visual) .board-pawn{
  width:65px!important;height:124px!important;
  transform:translate(-50%,-88%)!important;
 }
-#app.app-classic-dice #game #board-pawns .leaf-chess-actor{
+#app.app-classic-dice #game :is(#board-pawns,#battle-visual) .leaf-chess-actor{
  display:block;position:absolute;
  left:50%;bottom:3px;width:47px;height:112px;
  transform:translateX(-50%);
@@ -17,7 +17,7 @@
  filter:drop-shadow(2px 3px 2px #091622ae);
  --steel:#576578;--silver:#b6c4d3;
 }
-#app.app-classic-dice #game #board-pawns .leaf-chess-head{
+#app.app-classic-dice #game :is(#board-pawns,#battle-visual) .leaf-chess-head{
  position:absolute;z-index:5;
  left:18px;top:1px;width:13px;height:14px;
  border-radius:45% 45% 42% 42%;
@@ -26,7 +26,7 @@
  overflow:hidden;
  box-shadow:0 0 1px #eae5d3;
 }
-#app.app-classic-dice #game #board-pawns .leaf-chess-head .leaf-chess-portrait{
+#app.app-classic-dice #game :is(#board-pawns,#battle-visual) .leaf-chess-head .leaf-chess-portrait{
  display:block!important;position:absolute!important;
  left:50%;top:0;width:48px!important;height:69px!important;
  max-width:none!important;max-height:none!important;
@@ -34,14 +34,14 @@
  transform:translateX(-50%)!important;
  image-rendering:auto!important;
 }
-#app.app-classic-dice #game #board-pawns .leaf-chess-cape{
+#app.app-classic-dice #game :is(#board-pawns,#battle-visual) .leaf-chess-cape{
  position:absolute;z-index:0;
  left:11px;top:20px;width:26px;height:51px;
  clip-path:polygon(23% 0,82% 0,100% 94%,48% 100%,0 93%);
  background:linear-gradient(90deg,#292d40,#755c7d 52%,#252d46);
  transform-origin:top center;
 }
-#app.app-classic-dice #game #board-pawns .leaf-chess-torso{
+#app.app-classic-dice #game :is(#board-pawns,#battle-visual) .leaf-chess-torso{
  position:absolute;z-index:3;box-sizing:border-box;
  left:14px;top:17px;width:20px;height:32px;
  border:1px solid #223246;
@@ -51,7 +51,7 @@
  filter:hue-rotate(var(--chess-armor-hue,0deg));
  transform-origin:50% 10%;
 }
-#app.app-classic-dice #game #board-pawns .leaf-chess-arm{
+#app.app-classic-dice #game :is(#board-pawns,#battle-visual) .leaf-chess-arm{
  position:absolute;z-index:4;box-sizing:border-box;
  width:8px;height:36px;top:19px;border:1px solid #243044;
  border-radius:4px 4px 3px 3px;
@@ -59,9 +59,9 @@
  transform-origin:50% 5%;
  filter:hue-rotate(var(--chess-armor-hue,0deg));
 }
-#app.app-classic-dice #game #board-pawns .leaf-chess-arm.leaf-chess-left{left:6px;transform:rotate(7deg)}
-#app.app-classic-dice #game #board-pawns .leaf-chess-arm.leaf-chess-right{left:34px;transform:rotate(-8deg)}
-#app.app-classic-dice #game #board-pawns .leaf-chess-leg{
+#app.app-classic-dice #game :is(#board-pawns,#battle-visual) .leaf-chess-arm.leaf-chess-left{left:6px;transform:rotate(7deg)}
+#app.app-classic-dice #game :is(#board-pawns,#battle-visual) .leaf-chess-arm.leaf-chess-right{left:34px;transform:rotate(-8deg)}
+#app.app-classic-dice #game :is(#board-pawns,#battle-visual) .leaf-chess-leg{
  position:absolute;z-index:2;box-sizing:border-box;
  top:46px;width:9px;height:56px;
  border:1px solid #25313c;border-radius:4px 4px 2px 2px;
@@ -69,9 +69,9 @@
  transform-origin:50% 6%;
  filter:hue-rotate(var(--chess-armor-hue,0deg));
 }
-#app.app-classic-dice #game #board-pawns .leaf-chess-leg.leaf-chess-left{left:14px;transform:rotate(3deg)}
-#app.app-classic-dice #game #board-pawns .leaf-chess-leg.leaf-chess-right{left:25px;transform:rotate(-3deg)}
-#app.app-classic-dice #game #board-pawns .leaf-chess-weapon{
+#app.app-classic-dice #game :is(#board-pawns,#battle-visual) .leaf-chess-leg.leaf-chess-left{left:14px;transform:rotate(3deg)}
+#app.app-classic-dice #game :is(#board-pawns,#battle-visual) .leaf-chess-leg.leaf-chess-right{left:25px;transform:rotate(-3deg)}
+#app.app-classic-dice #game :is(#board-pawns,#battle-visual) .leaf-chess-weapon{
  position:absolute;z-index:5;
  left:39px;top:31px;width:3px;height:66px;
  background:linear-gradient(90deg,#30415c,#e8e9da,#698192);
@@ -79,38 +79,38 @@
  transform-origin:50% 20%;
  box-shadow:1px 1px 0 #26394d;
 }
-#app.app-classic-dice #game #board-pawns .leaf-chess-contact{
+#app.app-classic-dice #game :is(#board-pawns,#battle-visual) .leaf-chess-contact{
  position:absolute;z-index:1;
  left:7px;bottom:0;width:35px;height:8px;
  background:radial-gradient(ellipse,#030c1a77,transparent 73%);
 }
-#app.app-classic-dice #game #board-pawns .leaf-chess-source-frame{
+#app.app-classic-dice #game :is(#board-pawns,#battle-visual) .leaf-chess-source-frame{
  position:absolute;z-index:9;
  left:50%;bottom:0;
  transform:translateX(-50%);
  background-repeat:no-repeat;
  animation:leaf-chess-source-frames var(--leaf-frames-duration,600ms) steps(var(--leaf-frame-count,1)) infinite;
 }
-#app.app-classic-dice #game #board-pawns [data-actor-rig="source-animation"] .leaf-chess-actor>span:not(.leaf-chess-source-frame){opacity:0}
-#app.app-classic-dice #game #board-pawns .leaf-chess-source-frame[hidden]{display:none!important}
-#app.app-classic-dice #game #board-pawns [data-actor-pose="idle"] .leaf-chess-actor{
+#app.app-classic-dice #game :is(#board-pawns,#battle-visual) [data-actor-rig="source-animation"] .leaf-chess-actor>span:not(.leaf-chess-source-frame){opacity:0}
+#app.app-classic-dice #game :is(#board-pawns,#battle-visual) .leaf-chess-source-frame[hidden]{display:none!important}
+#app.app-classic-dice #game :is(#board-pawns,#battle-visual) [data-actor-pose="idle"] .leaf-chess-actor{
  animation:leaf-chess-breathe 1.65s ease-in-out infinite alternate;
 }
-#app.app-classic-dice #game #board-pawns [data-actor-pose="walk"] .leaf-chess-actor{
+#app.app-classic-dice #game :is(#board-pawns,#battle-visual) [data-actor-pose="walk"] .leaf-chess-actor{
  animation:leaf-chess-step .24s ease-in-out infinite alternate;
 }
-#app.app-classic-dice #game #board-pawns [data-actor-pose="walk"] .leaf-chess-leg.leaf-chess-left,
-#app.app-classic-dice #game #board-pawns [data-actor-pose="walk"] .leaf-chess-arm.leaf-chess-right{animation:leaf-chess-swing .22s ease-in-out infinite alternate}
-#app.app-classic-dice #game #board-pawns [data-actor-pose="walk"] .leaf-chess-leg.leaf-chess-right,
-#app.app-classic-dice #game #board-pawns [data-actor-pose="walk"] .leaf-chess-arm.leaf-chess-left{animation:leaf-chess-swing .22s ease-in-out infinite alternate-reverse}
-#app.app-classic-dice #game #board-pawns [data-actor-pose="attack"] .leaf-chess-arm.leaf-chess-right,
-#app.app-classic-dice #game #board-pawns [data-actor-pose="attack"] .leaf-chess-weapon{
+#app.app-classic-dice #game :is(#board-pawns,#battle-visual) [data-actor-pose="walk"] .leaf-chess-leg.leaf-chess-left,
+#app.app-classic-dice #game :is(#board-pawns,#battle-visual) [data-actor-pose="walk"] .leaf-chess-arm.leaf-chess-right{animation:leaf-chess-swing .22s ease-in-out infinite alternate}
+#app.app-classic-dice #game :is(#board-pawns,#battle-visual) [data-actor-pose="walk"] .leaf-chess-leg.leaf-chess-right,
+#app.app-classic-dice #game :is(#board-pawns,#battle-visual) [data-actor-pose="walk"] .leaf-chess-arm.leaf-chess-left{animation:leaf-chess-swing .22s ease-in-out infinite alternate-reverse}
+#app.app-classic-dice #game :is(#board-pawns,#battle-visual) [data-actor-pose="attack"] .leaf-chess-arm.leaf-chess-right,
+#app.app-classic-dice #game :is(#board-pawns,#battle-visual) [data-actor-pose="attack"] .leaf-chess-weapon{
  animation:leaf-chess-strike .34s ease-out 1 both;
 }
-#app.app-classic-dice #game #board-pawns [data-actor-pose="hurt"] .leaf-chess-actor{
+#app.app-classic-dice #game :is(#board-pawns,#battle-visual) [data-actor-pose="hurt"] .leaf-chess-actor{
  animation:leaf-chess-hit .34s ease-out 1 both;
 }
-#app.app-classic-dice #game #board-pawns [data-actor-pose="victory"] .leaf-chess-arm.leaf-chess-right{
+#app.app-classic-dice #game :is(#board-pawns,#battle-visual) [data-actor-pose="victory"] .leaf-chess-arm.leaf-chess-right{
  animation:leaf-chess-celebrate .5s ease-in-out infinite alternate;
 }
 @keyframes leaf-chess-breathe{to{transform:translateX(-50%) translateY(-2px)}}
@@ -121,8 +121,8 @@
 @keyframes leaf-chess-celebrate{to{transform:rotate(-150deg)}}
 @keyframes leaf-chess-source-frames{to{background-position-x:calc(-1 * var(--leaf-frame-size,64px) * var(--leaf-frame-count,1))}}
 @media(prefers-reduced-motion:reduce){
- #app.app-classic-dice #game #board-pawns .leaf-chess-actor,
- #app.app-classic-dice #game #board-pawns .leaf-chess-actor>*{
+ #app.app-classic-dice #game :is(#board-pawns,#battle-visual) .leaf-chess-actor,
+ #app.app-classic-dice #game :is(#board-pawns,#battle-visual) .leaf-chess-actor>*{
   animation:none!important;
  }
 }
