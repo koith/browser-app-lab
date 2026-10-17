@@ -13,6 +13,11 @@
  * responsive panning and original GameRoom/ChatTown scenes unchanged.
  */
 @media(min-width:812px){
+ /* Eliminate the revival's two-pixel outer border from the 800px reference
+  coordinate plane. Native game rails already contain their source frame. */
+ #app.app-classic-dice{
+  border:0!important;
+ }
  #app.app-classic-dice>.workspace{
   position:relative!important;
   width:100%!important;
