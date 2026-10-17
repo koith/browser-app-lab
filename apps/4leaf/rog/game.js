@@ -955,7 +955,31 @@ function showBattleScene(attacker,defender,attack,defense,attackerPoints,defende
    const title=document.createElement('strong');title.textContent=player.name;
    const score=document.createElement('div');score.className='battle-visual-total';score.textContent=String(result).padStart(2,'0');
    const dice=document.createElement('div');dice.className='battle-visual-dice';
-   values.forEach(eye=>{const d=document.createElement('span');d.className='battle-visual-die';d.textContent=['⚀','⚁','⚂','⚃','⚄','⚅'][eye-1]||'⚀';dice.append(d)});
+   // Archived board.jpg and battle.jpg display real six-sided dice with
+   // visible pip topology, not operating-system Unicode dice characters.
+   // These are independent live faces whose pips come ONLY from the actual
+   // rolled combat arrays; there are no pasted screenshots or fake results.
+   const pipCells={1:[5],2:[1,9],3:[1,5,9],
+    4:[1,3,7,9],5:[1,3,5,7,9],6:[1,3,4,6,7,9]};
+   values.forEach(eye=>{
+    const value=Math.min(6,Math.max(1,Number(eye)||1));
+    const die=document.createElement('span');die.className='battle-visual-die';
+    die.dataset.eye=String(value);
+    die.dataset.source='archived-battle-photo-inferred-3d-pips';
+    die.setAttribute('role','img');
+    die.setAttribute('aria-label','주사위 '+value+'눈');
+    die.title='실제 굴림 '+value;
+    for(const cell of pipCells[value]){
+     const dot=document.createElement('i');
+     dot.className='battle-die-pip';
+     dot.dataset.cell=String(cell);
+     dot.setAttribute('aria-hidden','true');
+     dot.style.gridColumn=String((cell-1)%3+1);
+     dot.style.gridRow=String(Math.floor((cell-1)/3)+1);
+     die.append(dot);
+    }
+    dice.append(die);
+   });
    const pedestal=document.createElement('div');pedestal.className='battle-visual-pedestal';
    panel.append(title,score,actor,pedestal,dice);
  }
