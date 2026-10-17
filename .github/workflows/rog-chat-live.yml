@@ -91,7 +91,13 @@ jobs:
                curl -fLsS --max-time 15 "$base/chatroom-native-scrollbar.js?qa=${GITHUB_SHA}" -o /tmp/leaf-scroll-live.js &&
                curl -fLsS --max-time 15 "$base/chatroom-native-scrollbar.css?qa=${GITHUB_SHA}" -o /tmp/leaf-scroll-live.css &&
                cmp -s /tmp/leaf-scroll-live.js apps/4leaf/rog/chatroom-native-scrollbar.js &&
-               cmp -s /tmp/leaf-scroll-live.css apps/4leaf/rog/chatroom-native-scrollbar.css; then
+               cmp -s /tmp/leaf-scroll-live.css apps/4leaf/rog/chatroom-native-scrollbar.css &&
+               curl -fLsS --max-time 15 "$base/pwa-runtime.js?qa=${GITHUB_SHA}" -o /tmp/leaf-pwa-runtime.js &&
+               curl -fLsS --max-time 15 "$base/sw.js?qa=${GITHUB_SHA}" -o /tmp/leaf-pwa-sw.js &&
+               curl -fLsS --max-time 15 "$base/index.html?qa=${GITHUB_SHA}" -o /tmp/leaf-pwa-index.html &&
+               cmp -s /tmp/leaf-pwa-runtime.js apps/4leaf/rog/pwa-runtime.js &&
+               cmp -s /tmp/leaf-pwa-sw.js apps/4leaf/rog/sw.js &&
+               cmp -s /tmp/leaf-pwa-index.html apps/4leaf/rog/index.html; then
               ready=1
               echo "Published JS/CSS byte-for-byte match the checked-out source at ${GITHUB_SHA}"
               break
