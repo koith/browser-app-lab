@@ -4,7 +4,7 @@
 (function(){
  'use strict';
  const SIZE={width:1450,height:1120};
- const state={game:null,path:null,scale:1,panX:0,panY:0,cameraX:null,cameraY:null,manual:false,lastTurn:null};
+ const state={game:null,path:null,scale:1,panX:0,panY:0,cameraX:null,cameraY:null,manual:false,lastTurn:null,visible:null};
  const $=id=>document.getElementById(id);
  const clamp=(n,low,high)=>Math.min(high,Math.max(low,n));
  const camera={
@@ -27,6 +27,19 @@
      state.scale=clamp(Number(zoom)||1,0.65,2.4);
      state.panX=Number(panX)||0;state.panY=Number(panY)||0;
      state.manual=state.panX!==0||state.panY!==0;
+     camera.render();
+     return camera.getState();
+   },
+   // The recovered IMG/minimap.png is a TRUE working navigator, not a
+   // painted sample. Its coordinates are normalized over the original DMP
+   // route extents, and never alter actual pawn positions or player turns.
+   focusRatio(rx,ry){
+     if(state.cameraX===null||!Number.isFinite(rx)||!Number.isFinite(ry))
+       return camera.getState();
+     const x=clamp(rx,0,1)*SIZE.width,y=clamp(ry,0,1)*SIZE.height;
+     state.panX=(state.cameraX-x)*state.scale;
+     state.panY=(state.cameraY-y)*state.scale;
+     state.manual=true;
      camera.render();
      return camera.getState();
    },
@@ -60,6 +73,14 @@
            y=worldH>=height?clamp(anchorY+state.panY,height-worldH,0):(height-worldH)/2;
      state.panX=worldW>=width?x-anchorX:0;
      state.panY=worldH>=height?y-anchorY:0;
+     // Exactly the same clamped screen rectangle the source camera paints;
+     // no independent guessed minimap box or fictitious world coordinates.
+     state.visible={
+       x:clamp(-x/(SIZE.width*scale),0,1),
+       y:clamp(-y/(SIZE.height*scale),0,1),
+       width:clamp(width/(SIZE.width*scale),0,1),
+       height:clamp(height/(SIZE.height*scale),0,1)
+     };
      world.style.transform='translate3d('+x.toFixed(2)+'px,'+y.toFixed(2)+'px,0) scale('+scale+')';
      world.style.setProperty('--leaf-camera-scale',scale);
      if($('board-zoom-reset'))$('board-zoom-reset').title='원본 게임 카메라 · '+Math.round(scale*100)+'% · 현재 체스맨 중심';
@@ -77,8 +98,9 @@
            sx>width+radiusX || sy>height+radiusY)?'hidden':'visible';
        }
      }
+     window.__LEAF_MINIMAP_NAV__?.onCameraRender?.();
    },
-   getState(){return {...state,size:{...SIZE}}}
+   getState(){return {...state,size:{...SIZE},visible:state.visible?{...state.visible}:null}}
  };
  window.__LEAF_CAMERA__=camera;
  if('ResizeObserver' in window){
