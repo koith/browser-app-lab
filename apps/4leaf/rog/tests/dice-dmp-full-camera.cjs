@@ -39,7 +39,7 @@ const path=require('node:path');
   const initial=await snapshot();
   assert.deepEqual(initial.world,[1450,1120],'original mapped 1450x1120 camera plane is real');
   assert.ok(initial.tiles>30&&initial.sourceVisible>2,'original independent TIS cells render visibly');
-  assert.equal(initial.scale,1.25,'initial player-follow zoom matches existing original-game UX');
+  assert.equal(initial.scale,1,'initial 100% camera renders original TIS 145x97 at source pixels');
   const endpoints=await page.evaluate(()=>{
    const camera=window.__LEAF_CAMERA__;
    const left=camera.panBy(-100000,0),right=camera.panBy(100000,0);
@@ -89,8 +89,8 @@ const path=require('node:path');
    'real pointer touch gesture enables two-finger pinch zoom on original live game');
   await page.locator('#board-zoom-reset').click();
   const reset=await snapshot();
-  assert.ok(Math.abs(reset.scale-1.25)<.01,
-   'native camera reset returns to 125% original follow zoom');
+  assert.ok(Math.abs(reset.scale-1)<.01,
+   'native camera reset returns to source-native 100% follow zoom');
   assert.equal(reset.manual,false,'reset restores live pawn follow instead of remembered stale drag');
 
   // Low zoom still pans the whole DMP: old game.js blocked ALL dragging
