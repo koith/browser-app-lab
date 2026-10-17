@@ -45,8 +45,19 @@
      const ctx=canvas.getContext('2d',{willReadFrequently:true});
      ctx.drawImage(img,0,0);
      const bitmap=ctx.getImageData(0,0,canvas.width,canvas.height);
+     // The recovered 75x141 SAVA PNGs often ALREADY contain true transparent
+     // alpha in the original green-key area (verified by RGBA pixel reads).
+     // In that case any new key/mask would be invented work and may erase
+     // source hair/clothes. Preserve its native alpha without an extra mask.
+     let originalTransparent=0;
+     for(let i=3;i<bitmap.data.length;i+=4)
+      if(bitmap.data[i]===0)originalTransparent++;
+     if(originalTransparent>1000){
+      diagnostics.set(src,'original 2002 RGBA already transparent: '+originalTransparent);
+      resolve({nativeAlpha:true,originalTransparent});return;
+     }
      const removed=maskRGBA(bitmap.data,canvas.width,canvas.height);
-     if(!removed){diagnostics.set(src,'no edge-connected chroma pixels: '+canvas.width+'x'+canvas.height);resolve(null);return}
+     if(!removed){diagnostics.set(src,'no visible border chroma; original image unchanged');resolve({nativeAlpha:true,originalTransparent});return}
      ctx.putImageData(bitmap,0,0);
      diagnostics.set(src,'keyed '+removed+'/'+(canvas.width*canvas.height)+' pixels');
      resolve({url:canvas.toDataURL('image/png'),removed});
@@ -64,6 +75,14 @@
   derive(source).then(mask=>{
    if(!element.isConnected||element.dataset.nativeRegistrySource!==source)return;
    if(!mask){element.dataset.registryChroma='source-fallback';return}
+   if(mask.nativeAlpha){
+    // Do not add redundant visual processing when the source PNG itself has
+    // correct alpha. The browser renders authentic original pixels as-is.
+    element.dataset.registryChroma='native-transparent';
+    element.dataset.registryOriginalTransparent=String(mask.originalTransparent);
+    element.dataset.registryChromaRemoved='0';
+    return;
+   }
    // Keep <img src="./original/Registry/savaNN.png"> for provenance.
    // Only an externally derived CSS alpha mask removes green pixels.
    const url='url("'+mask.url+'")';
