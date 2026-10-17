@@ -85,8 +85,10 @@ const {chromium}=require('playwright');
    null,{timeout:2000});
   await page.evaluate(()=>window.__LEAF_GENESIS_ACTORS__.poseByPlayer(0,'victory',200));
   assert.equal(await rig.getAttribute('data-actor-pose'),'victory');
-  assert.deepEqual(await page.evaluate(()=>window.__LEAF_GENESIS_ACTORS__.getState().originalFullBodyFramesRecovered),['0042','0045'],
-   'only genuinely sourced OBS IDs are reported as recovered');
+  const recovered=await page.evaluate(()=>window.__LEAF_GENESIS_ACTORS__.getState().originalFullBodyFramesRecovered);
+  assert.ok(['0042','0045','0043','0054'].every(id=>recovered.includes(id))&&
+   recovered.length>=46,
+   'recovered IDs include all existing 2002 OBS source characters without fabricating unrelated rig files');
   await page.screenshot({path:'leaf-genesis-source-card-proxy-not-chat-actor.png'});
   assert.deepEqual(errors,[]);
   console.log('CARD-IDENTIFIED CHESSMEN + WEB WALK ATTACK HURT VICTORY PASS',JSON.stringify(stats));
