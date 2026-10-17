@@ -55,7 +55,7 @@ const {chromium,webkit}=require('playwright');
    &&before.click[1]<= (mobile?844:900),'physical ROLL center stays on-screen');
   if(!mobile){
    const px=(before.click[0]-before.scene[0])/before.scene[2];
-   assert.ok(px>.62&&px<.71,'original screenshot places ROLL at ~66% board width');
+   assert.ok(px>.47&&px<.53,'original 800px reference centers ROLL at x400');
    assert.ok(before.button[2]>=70&&before.button[3]>=48,
     '2004 approximate ROLL mesh occupies ~74x53 original logical pixels');
   }else{
