@@ -14,8 +14,8 @@
  };
  const ROTATION={1:[0,0],2:[0,-90],3:[-90,0],
   4:[90,0],5:[0,90],6:[0,180]};
- let active=0,last=[],complete=0;
- const state=()=>({active:active>0,last:last.slice(),complete,
+ let active=0,last=[],lastSides=[],complete=0;
+ const state=()=>({active:active>0,last:last.slice(),lastSides:lastSides.slice(),complete,
   source:'user-reported fall/bounce; outcome from live game engine',
   originalFramesRecovered:false});
  function makeFace(n){
@@ -30,23 +30,37 @@
   }
   return face;
  }
- function makeDie(result,index,count){
+ function makeDie(result,index,count,sides){
   const node=document.createElement('span');
   node.className='leaf-fall-piece';
   node.dataset.result=String(result);
+  node.dataset.sides=String(sides);
   node.dataset.index=String(index);
   node.setAttribute('aria-hidden','true');
   const cube=document.createElement('span');
   cube.className='leaf-fall-cube';
-  for(let n=1;n<=6;n++)cube.append(makeFace(n));
+  if(sides===4){
+   cube.classList.add('leaf-fall-tetra');
+   for(let n=1;n<=4;n++){
+    const face=document.createElement('span');
+    face.className='leaf-tetra-face leaf-tetra-face-'+n;
+    face.textContent=String(n);
+    face.setAttribute('aria-hidden','true');
+    cube.append(face);
+   }
+   cube.dataset.result=String(result);
+  }else{
+   for(let n=1;n<=6;n++)cube.append(makeFace(n));
+  }
   node.append(cube);
-  return {node,cube,result,index,count};
+  return {node,cube,result,index,count,sides};
  }
  const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
  async function animateDie(die,duration,instant){
-  const {node,cube,result,index}=die;
-  const [rx,ry]=ROTATION[result];
-  const target='rotateX('+(720+rx)+'deg) rotateY('+(1080+ry)+'deg) rotateZ(0deg)';
+  const {node,cube,result,index,sides}=die;
+  const [rx,ry]=sides===4?[0,0]:ROTATION[result];
+  const target=sides===4?'rotateY(0deg) rotateZ(0deg)':
+   'rotateX('+(720+rx)+'deg) rotateY('+(1080+ry)+'deg) rotateZ(0deg)';
   const physics=[
    {transform:'translate3d(0,-260px,0) scale(.76)',offset:0},
    {transform:'translate3d('+(index%2?12:-12)+'px,0,0) scale(1.08,.88)',offset:.38},
@@ -55,7 +69,12 @@
    {transform:'translate3d('+(index%2?7:-7)+'px,-19px,0) scale(.99)',offset:.83},
    {transform:'translate3d(0,0,0) scale(1)',offset:1}
   ];
-  const spin=[
+  const spin=sides===4?[
+   {transform:'rotateX(-540deg) rotateY(390deg) rotateZ(-40deg)',offset:0},
+   {transform:'rotateX(-180deg) rotateY(730deg) rotateZ(21deg)',offset:.4},
+   {transform:'rotateX(35deg) rotateY(355deg) rotateZ(-11deg)',offset:.81},
+   {transform:target,offset:1}
+  ]:[
    {transform:'rotateX(-680deg) rotateY(510deg) rotateZ(-30deg)',offset:0},
    {transform:'rotateX(-180deg) rotateY(720deg) rotateZ(24deg)',offset:.38},
    {transform:'rotateX(370deg) rotateY(890deg) rotateZ(-10deg)',offset:.71},
@@ -77,11 +96,14 @@
    node.style.transform='translate3d(0,0,0)';
   }
  }
- async function roll(results){
+ async function roll(results,options={}){
   const values=Array.isArray(results)?results.map(Number):[];
-  if(!values.length||values.length>4||
-   values.some(v=>!Number.isInteger(v)||v<1||v>6))
-   throw new Error('Falling Dice requires 1..4 genuine D4/D6 eyes');
+  const sides=Array.isArray(options.sides)?options.sides.slice():
+    values.map(()=>options.sides===4?4:6);
+  if(!values.length||values.length>4||sides.length!==values.length||
+    sides.some(n=>n!==4&&n!==6)||
+    values.some((v,i)=>!Number.isInteger(v)||v<1||v>sides[i]))
+   throw new Error('Dice results must agree with D4/D6 source rules');
   if(active)throw new Error('Falling Dice presentation already running');
   const game=$('game');
   if(!game||!game.isConnected)return values.slice();
@@ -98,13 +120,15 @@
   layer.dataset.phase='falling';
   layer.setAttribute('aria-label','주사위가 하늘에서 떨어져 굴러갑니다');
   layer.dataset.count=String(values.length);
-  const dice=values.map((result,index)=>makeDie(result,index,values.length));
+  layer.dataset.sides=sides.join(',');
+  const dice=values.map((result,index)=>makeDie(result,index,values.length,sides[index]));
   for(const die of dice)layer.append(die.node);
   const instant=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches||false;
   active=1;
   try{
    await Promise.all(dice.map((die,index)=>animateDie(die,instant?0:1120+index*115,instant)));
    last=values.slice();
+   lastSides=sides.slice();
    complete++;
    layer.dataset.phase='landed';
    layer.dataset.result=values.join(',');
