@@ -28,7 +28,22 @@
    img.style.setProperty('--leaf-obs-width',frame.width+'px');
    img.style.setProperty('--leaf-obs-height',frame.height+'px');
    img.style.setProperty('--leaf-obs-left','calc(50% + '+frame.originX+'px)');
-   img.style.setProperty('--leaf-obs-bottom','calc(var(--leaf-obs-ground,11.52px) - '+(frame.originY+frame.height)+'px)');
+   // The native OBS y origin is relative to that actor's own animation
+   // canvas, not a globally shared foot plane. Directly subtracting the
+   // source bottom offsets caused two characters standing on the SAME
+   // recovered TIS cell to have visibly different shoe heights (8/23px).
+   // Normalize only the per-character reference pivot to the shared
+   // DMP tile top. Preserve every source frame's relative origin motion.
+   // Absolute foot pivot is inferred; original frame metadata remains intact.
+   const native=originalFor(pawn.dataset.chessmanId);
+   const standing=native?.frames?.find(f=>f.index===0)||native?.frames?.[0]||frame;
+   const sourceFoot=(frame.originY+frame.height);
+   const standingFoot=(standing.originY+standing.height);
+   const relativeSourceOffset=sourceFoot-standingFoot;
+   img.style.setProperty('--leaf-obs-bottom',
+    'calc(var(--leaf-obs-ground,14.88px) - '+relativeSourceOffset+'px)');
+   pawn.dataset.sourceFootOffset=String(relativeSourceOffset);
+   pawn.dataset.sourceGrounding='inferred-shared-foot-plane/native-relative-frames';
    pawn.dataset.actorFrame=String(frame.index);
  }
  function useOriginalFrame(pawn,id,action){
