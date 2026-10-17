@@ -22,7 +22,7 @@ const {chromium}=require('playwright');
    ...['avatardialog1','avatardialog2','avatardialog3'].map(x=>'original/Registry/'+x+'.png'),
    'chatroom-native-expressions.js','chatroom-native-expressions.css','original/ChatRoom/expdialogbtn.png',
    'dice-native-dialog-event.css','original/IMG/dialog.png','original/IMG/eventmsgbox.png',
-   'dice-native-tis-depth.css','dice-native-tis-orientation.css','dice-ai-autoplay.css','dice-native-pawn-dmp-depth.css','dice-native-tis-alpha.js',...['0000','0015','0024','0046'].map(x=>'original/Tiles/'+x+'.png'),
+   'dice-native-minimap-navigation.css','dice-native-tis-depth.css','dice-native-tis-orientation.css','dice-ai-autoplay.css','dice-native-pawn-dmp-depth.css','dice-native-tis-alpha.js',...['0000','0015','0024','0046'].map(x=>'original/Tiles/'+x+'.png'),
    'mainframe-native-toolbar.css','original/MainFrame/toolbarbtn.png','original/MainFrame/pannel.png',
    'knighttown-native.js','knighttown-native.css',
    ...['knightback','plain01','plain02','sea01','sea02','sea03','snow01'].map(s=>'original/KnightTown/'+s+'.png'),
@@ -34,7 +34,7 @@ const {chromium}=require('playwright');
    'original/Registry/sava00.png'
   ];
   await page.waitForFunction(async files=>{
-   const cache=await caches.open('4leaf-revival-pwa-v53');
+   const cache=await caches.open('4leaf-revival-pwa-v54');
    return (await Promise.all(files.map(file=>cache.match('./'+file)))).every(Boolean);
   },critical,{timeout:40000});
   // An established controller must answer image and JS fetches offline.
@@ -198,6 +198,28 @@ const {chromium}=require('playwright');
    (offlineTiles.originalCornerAlpha<16||offlineTiles.removed>0),
    'preserve originally transparent pixels; only opaque outside mattes are keyed: '+
    JSON.stringify({source:offlineTiles.source,corner:offlineTiles.originalCornerAlpha,removed:offlineTiles.removed}));
+  // First offline Genesis match also has the SAME navigable source canvas,
+  // not a disconnected cosmetic map. Clicking it changes only camera view.
+  await page.waitForFunction(()=>window.__LEAF_MINIMAP_NAV__?.getState().camera?.visible?.width>0);
+  const beforeOfflineMini=await page.evaluate(()=>({
+   transform:document.querySelector('#board-world').style.transform,
+   players:window.__ROG_TEST__.getMatch().players.map(p=>p.position)
+  }));
+  const offlineMiniCanvas=page.locator('#mini-map-canvas');
+  const offlineMiniBounds=await offlineMiniCanvas.boundingBox();
+  await offlineMiniCanvas.click({position:{
+   x:offlineMiniBounds.width*.88,y:offlineMiniBounds.height*.82
+  }});
+  const afterOfflineMini=await page.evaluate(()=>({
+   transform:document.querySelector('#board-world').style.transform,
+   players:window.__ROG_TEST__.getMatch().players.map(p=>p.position),
+   source:window.__LEAF_MINIMAP_NAV__.getState().source
+  }));
+  assert.equal(afterOfflineMini.source,'IMG/minimap.png');
+  assert.notEqual(afterOfflineMini.transform,beforeOfflineMini.transform,
+   'original live minimap pans the real DMP game even entirely offline');
+  assert.deepEqual(afterOfflineMini.players,beforeOfflineMini.players,
+   'camera-only offline minimap interaction must not fake character movement');
   assert.deepEqual(errors,[],'no unexpected JavaScript errors during offline play');
   console.log('4LEAF NATIVE OFFLINE CACHE PASS',JSON.stringify({cached:critical.length,original}));
  }finally{await browser.close()}
