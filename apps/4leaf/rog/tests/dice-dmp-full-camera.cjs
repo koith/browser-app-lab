@@ -77,7 +77,14 @@ const path=require('node:path');
   const prevScale=keyboard.scale;
   await page.mouse.move(px,py);await page.mouse.wheel(0,-160);
   const wheeled=await snapshot();
-  assert.ok(wheeled.scale>prevScale,'plain wheel zooms native 145x97 cells without Ctrl key');
+  const wheelTarget=await page.evaluate(([x,y])=>{
+   const node=document.elementFromPoint(x,y);
+   return {tag:node?.tagName,id:node?.id,classes:String(node?.className),
+    blocked:!!node?.closest('#board-zoom-controls,#board-mini,.board-mini,button,input,textarea,select,[role="button"],#battle-visual,#battle-player-panels')};
+  },[px,py]);
+  console.log('DMP_WHEEL_SOURCE',JSON.stringify({prevScale,wheeled,wheelTarget}));
+  assert.ok(wheeled.scale>prevScale,
+   'plain wheel zooms native 145x97 cells without Ctrl key: '+JSON.stringify(wheelTarget));
   const pinch=await page.evaluate(()=>{
    const area=document.querySelector('#board-area'),rc=area.getBoundingClientRect();
    const x=rc.x+rc.width/2,y=rc.y+rc.height/2;
