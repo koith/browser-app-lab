@@ -28,6 +28,9 @@ on:
       - 'apps/4leaf/rog/central-client.js'
       - 'apps/4leaf/rog/sw.js'
       - 'apps/4leaf/rog/dice-source-roll.css'
+      - 'apps/4leaf/rog/dice-fall.js'
+      - 'apps/4leaf/rog/dice-fall.css'
+      - 'apps/4leaf/rog/tests/dice-fall.cjs'
       - 'apps/4leaf/rog/dice-2004-full-frame.css'
       - 'apps/4leaf/rog/tests/dice-2004-full-frame.cjs'
       - 'apps/4leaf/rog/dice-source-roll.js'
@@ -186,6 +189,8 @@ jobs:
         env:
           FOURLEAF_MOBILE: '1'
         run: node apps/4leaf/rog/tests/dice-source-roll.cjs
+      - name: Verify all 6 genuine dice eye landings after two bounces and live movement
+        run: node apps/4leaf/rog/tests/dice-fall.cjs
       - name: Verify 104 source DMP grid cells and TWO real phone touchscreen dice turns
         run: node apps/4leaf/rog/tests/dice-mobile-roll-dmp-order.cjs
       - name: Verify native 145x97 TIS and independently depth-sorted original DMP cells in live Chromium
