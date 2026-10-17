@@ -208,6 +208,10 @@ jobs:
         env:
           FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
         run: node apps/4leaf/rog/tests/dice-fall.cjs
+      - name: Replay 2004 Ironmask Destroy 24 vs Damian Block 24 fixed-tie ability cancellation
+        env:
+          FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
+        run: node apps/4leaf/rog/tests/dice-historical-24-clash.cjs
       - name: Verify archived 2004-positioned ROLL HUD drives genuine public Chromium game
         env:
           FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
