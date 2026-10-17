@@ -1,0 +1,26 @@
+name: 4LEAF original source role regression
+on:
+  push:
+    paths:
+      - 'apps/4leaf/rog/game.js'
+      - 'apps/4leaf/rog/social-chat.js'
+      - 'apps/4leaf/rog/dice-source-chessman-battle.css'
+      - 'apps/4leaf/rog/dice-original-obs.css'
+      - 'apps/4leaf/rog/genesis-chessman-actors.js'
+      - 'apps/4leaf/rog/original/OBS/**'
+      - 'apps/4leaf/rog/tests/genesis-asset-roles.cjs'
+      - '.github/workflows/rog-asset-roles.yml'
+  workflow_dispatch:
+jobs:
+  source-roles:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-save playwright
+      - run: npx playwright install chromium --with-deps
+      - name: Verify distinct native avatars, OBS chessmen and CardData party faces in live match
+        run: node apps/4leaf/rog/tests/genesis-asset-roles.cjs
