@@ -1,0 +1,136 @@
+'use strict';
+/* 2002 4LEAF PAK forensic signature inventory. Executes ONLY vetted modern
+ * static index utilities (unzip/unshield) against a publicly archived,
+ * SHA1-verified 2002 Windows client; NEVER executes ANY original EXE/DLL.
+ * Installer bytes and copyrighted PAK content remain in runner tmp and are
+ * DELETED after inspection. Only hashes, sizes and 96 signature bytes are
+ * recorded, not PAK contents or frames. No redistribution.
+ */
+const https=require('node:https');
+const http=require('node:http');
+const fs=require('node:fs');
+const os=require('node:os');
+const path=require('node:path');
+const {spawnSync}=require('node:child_process');
+const {createHash}=require('node:crypto');
+const source='https://archive.org/download/4leaf/4leaf.zip';
+const expected='86526d89679ae39b85fe9808da97ad871b7888d9';
+const reportPath='original-4leaf-pak-signatures.json';
+const temp=fs.mkdtempSync(path.join(os.tmpdir(),'4leaf-original-static-'));
+const zipPath=path.join(temp,'4leaf.zip');
+const bytesMax=90*1024*1024;
+async function download(url,hop=0){
+ if(hop>6)throw Error('archive redirect limit');
+ await new Promise((resolve,reject)=>{
+  let finished=false;const fail=e=>{if(!finished){finished=true;reject(e)}};
+  const req=(url.startsWith('https:')?https:http).get(url,{
+   headers:{'user-agent':'4LEAF-original-file-signature-preservation/1.0'},timeout:65000
+  },res=>{
+   if([301,302,303,307,308].includes(res.statusCode)){
+    const next=res.headers.location;
+    res.resume();if(!next){fail(Error('redirect missing'));return}
+    finished=true;
+    download(new URL(next,url).href,hop+1).then(resolve,reject);return;
+   }
+   if(res.statusCode!==200){res.resume();fail(Error('download HTTP '+res.statusCode));return}
+   let total=0;
+   const stream=fs.createWriteStream(zipPath,{mode:0o600,flags:'w'});
+   res.on('data',b=>{total+=b.length;if(total>bytesMax)res.destroy(Error('size cap'))});
+   res.on('error',fail);stream.on('error',fail);
+   stream.on('finish',()=>{if(!finished){finished=true;resolve()}});
+   res.pipe(stream);
+  });
+  req.on('timeout',()=>req.destroy(Error('download timeout')));
+  req.on('error',fail);
+ });
+}
+function digest(filename,alg='sha256'){
+ return new Promise(async resolve=>{
+  const h=createHash(alg);
+  for await(const part of fs.createReadStream(filename))h.update(part);
+  resolve(h.digest('hex'));
+ });
+}
+function exec(file,args,stdoutFile=null){
+ let fd=null;
+ if(stdoutFile)fd=fs.openSync(stdoutFile,'w',0o600);
+ const result=spawnSync(file,args,{
+  encoding:'utf8',timeout:85000,maxBuffer:2*1024*1024,
+  stdio:fd===null?'pipe':['ignore',fd,'pipe']
+ });
+ if(fd!==null)fs.closeSync(fd);
+ if(result.error||result.status!==0)throw Error(file+' exit '+result.status+' : '+
+  String(result.error?.message||result.stderr||'').slice(0,280));
+ return result.stdout||'';
+}
+function allFiles(directory){
+ const found=[];const dirs=[directory];
+ while(dirs.length){
+  const dir=dirs.pop();
+  for(const entry of fs.readdirSync(dir,{withFileTypes:true})){
+   const full=path.join(dir,entry.name);
+   if(entry.isDirectory())dirs.push(full);
+   else if(entry.isFile())found.push(full);
+  }
+ }
+ return found;
+}
+(async()=>{
+ const report={checkedAt:new Date().toISOString(),source,
+  status:'unavailable',verified:false,executedClient:false,
+  redistributedOriginalBinaries:false,pakSignatures:[],paksFound:0};
+ try{
+  await download(source);
+  report.archiveSHA1=await digest(zipPath,'sha1');
+  if(report.archiveSHA1!==expected)throw Error('archive hash does not match');
+  report.verified=true;
+  const index=exec('unzip',['-Z','-1',zipPath]).split(/\r?\n/).filter(Boolean);
+  const installer=path.join(temp,'installer');fs.mkdirSync(installer);
+  for(const f of index.filter(x=>/\.(cab|hdr)$/i.test(x))){
+   const name=path.basename(f);
+   if(!/^[A-Za-z0-9_.-]+$/.test(name))continue;
+   exec('unzip',['-p',zipPath,f],path.join(installer,name));
+  }
+  const cab=path.join(installer,'data1.cab');
+  if(!fs.existsSync(cab))throw Error('InstallShield CAB not inside archive');
+  const unpack=path.join(temp,'unpacked');fs.mkdirSync(unpack);
+  // Reading/unpacking static resource data, NOT launching any .exe/.dll.
+  exec('unshield',['-d',unpack,'x',cab]);
+  const files=allFiles(unpack);
+  const paks=files.filter(f=>f.toLowerCase().endsWith('.pak'));
+  report.unshieldFiles=files.length;
+  report.paksFound=paks.length;
+  for(const file of paks){
+   const stat=fs.statSync(file);
+   const fd=fs.openSync(file,'r');
+   const head=Buffer.alloc(Math.min(96,stat.size));
+   fs.readSync(fd,head,0,head.length,0);
+   fs.closeSync(fd);
+   const printable=[...head].map(x=>x>=32&&x<=126?String.fromCharCode(x):'.').join('');
+   const firstU32LE=[];
+   for(let offset=0;offset+4<=Math.min(head.length,48);offset+=4)
+    firstU32LE.push(head.readUInt32LE(offset));
+   const rel=path.relative(unpack,file).split(path.sep).join('/');
+   const item={path:rel,size:stat.size,sha256:await digest(file),
+    magicHex:head.subarray(0,16).toString('hex'),
+    headHex:head.toString('hex'),asciiPreview:printable,
+    firstU32LE};
+   report.pakSignatures.push(item);
+   if(/(^|\/)(OBS|OBS2|OBS3|CHR|DMP|TIS|IMG|CRD|MapData)\.pak$/i.test(rel))
+    console.log('ORIGINAL_SOURCE_PAK_SIGNATURE '+JSON.stringify(item));
+  }
+  report.status='verified-original-packages-signature-inventory';
+  console.log('STATIC_SOURCE_PAK_INVENTORY '+JSON.stringify({
+   status:report.status,files:files.length,paks:paks.length,
+   important:report.pakSignatures.filter(x=>/Dice\/(OBS|OBS2|OBS3|CHR|DMP|TIS)\.pak$/i.test(x.path))
+    .map(x=>({file:x.path,bytes:x.size,magic:x.magicHex}))
+  }));
+ }catch(e){
+  report.status='archive-inspection-failed';
+  report.error=String(e?.message||e);
+  console.log('Nonexecuting original PAK inventory blocked: '+report.error);
+ }
+ fs.writeFileSync(reportPath,JSON.stringify(report,null,2)+'\n');
+ fs.rmSync(temp,{recursive:true,force:true});
+ console.log('NO ORIGINAL BINARY FILE OR SOURCE IMAGE WAS EXECUTED, PUBLISHED OR PRESERVED');
+})().catch(e=>{console.error('Static source inspector error',e);process.exitCode=1});
