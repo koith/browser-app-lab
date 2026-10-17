@@ -9,7 +9,7 @@ import io,json,re,sys
 ROOT=Path(sys.argv[1]);DEST=Path(sys.argv[2]);DEST.mkdir(parents=True,exist_ok=True)
 KEEP_ALL={'MainFrame','WorldMap','CardShop','ChatRoom','ChatTown','MainStreet','KnightTown','Gif','IMG','Room','Map','D1Region','Region','Registry'}
 OTHER={'CardData'}
-KEEP_IMG={'bgtile','abilitybar','avatarback','chatwnd','menu','topbar','selector','title','minimap','groupbutton','dialog','eventmsgbox','menumenu','columnTop','loading'}
+KEEP_IMG={'bgtile','abilitybar','avatarback','chatwnd','menu','topbar','selector','title','minimap','groupbutton','dialog','eventmsgbox','menumenu','columnTop','loading','okcancelbut','scrollbutton','stats'}
 def extract_pak(pak):
  raw=pak.read_bytes();count=int.from_bytes(raw[:4],'little')^0xffffffff
  if not 0<count<4000 or len(raw)<4+28*count:raise ValueError(f'invalid {pak}')
