@@ -1,0 +1,101 @@
+name: 4LEAF recover native OBS chessman poses
+on:
+  push:
+    paths:
+      - '.github/workflows/rog-obs-bulk-recovery.yml'
+      - 'apps/4leaf/rog/tools/decode-original-obs-bulk.py'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  extract-validated-pixel-frames:
+    runs-on: ubuntu-latest
+    timeout-minutes: 23
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Install read-only archive extractor and Pillow indexed palette codec
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -qq -y unshield
+          python3 -m pip install --break-system-packages pillow
+      - name: Verify SHA1 of the historically archived 2002 client, unpack resource data only
+        run: |
+          mkdir -p /tmp/leaf-obs-installer /tmp/leaf-obs-resources
+          python3 - <<'PY'
+          from pathlib import Path
+          import urllib.request,hashlib,time
+          target=Path('/tmp/leaf-obs-installer/client.zip')
+          expected='86526d89679ae39b85fe9808da97ad871b7888d9'
+          urls=['https://archive.org/download/4leaf/4leaf.zip',
+                'https://archive.org/download/4leaf/4leaf.zip?download=1']
+          for attempt in range(5):
+              try:
+                  url=urls[attempt%len(urls)]
+                  request=urllib.request.Request(url,headers={'User-Agent':'Mozilla/5.0 (4LEAF preservation scan)'})
+                  with urllib.request.urlopen(request,timeout=120) as r,target.open('wb') as f:
+                      h=hashlib.sha1();count=0
+                      while data:=r.read(1048576):
+                          count+=len(data)
+                          if count>90*1024*1024:raise ValueError('Archive exceeds secure size limit')
+                          h.update(data);f.write(data)
+                  if h.hexdigest()!=expected:
+                      raise ValueError('Archive SHA1 mismatch; refusing unverified original')
+                  print('VERIFIED_ORIGINAL_2002_CLIENT_SHA1',h.hexdigest(),'bytes',count)
+                  break
+              except Exception as e:
+                  if attempt==4:raise
+                  print('Original archive retry:',attempt+1,str(e)[:180],flush=True)
+                  target.unlink(missing_ok=True);time.sleep(4+attempt*2)
+          PY
+          unzip -q /tmp/leaf-obs-installer/client.zip 'data1.cab' 'data1.hdr' -d /tmp/leaf-obs-installer
+          unshield x -d /tmp/leaf-obs-resources /tmp/leaf-obs-installer/data1.cab >/dev/null
+          rm -f /tmp/leaf-obs-installer/client.zip
+      - name: Extract only strictly validated per-card source OBS pixels
+        run: |
+          python3 -m py_compile apps/4leaf/rog/tools/decode-original-obs-bulk.py
+          source="$(find /tmp/leaf-obs-resources -type f -iname 'OBS.pak' | head -1)"
+          test -n "$source"
+          python3 apps/4leaf/rog/tools/decode-original-obs-bulk.py \
+            "$source" \
+            apps/4leaf/rog/original/chessmen.json \
+            apps/4leaf/rog/original/OBS
+          node --check apps/4leaf/rog/original/OBS/animation-extra.js
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('apps/4leaf/rog/original/OBS')
+          report=json.loads((root/'bulk-source-report.json').read_text())
+          assert report['accepted']>=1,report
+          assert report['framePNGs']>=2,report
+          assert len(list((root/'bulk').glob('*.png')))==report['framePNGs'],report
+          print('ORIGINAL_OBS_STRICT_FRAMES_VERIFIED',report['accepted'],report['framePNGs'])
+          PY
+      - name: Import decoded native body images while retaining source SHA and provisional pose labels
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add apps/4leaf/rog/original/OBS/bulk \
+            apps/4leaf/rog/original/OBS/animation-extra.js \
+            apps/4leaf/rog/original/OBS/bulk-source-report.json
+          if git diff --cached --quiet; then
+            echo 'No new source frames accepted; no fabricated assets to publish'
+            exit 0
+          fi
+          git commit -m 'assets(4leaf): use strictly decoded 2002 OBS chessman body frames'
+          for attempt in 1 2 3; do
+            git pull --rebase origin main
+            if git push origin HEAD:main; then exit 0; fi
+            sleep "$((attempt*3))"
+          done
+          echo 'Failed to safely rebase native sprite additions'; exit 1
+      - name: Remove original installer and encrypted binary after extraction
+        if: always()
+        run: rm -rf /tmp/leaf-obs-installer /tmp/leaf-obs-resources
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: 4leaf-2002-obs-source-coverage
+          path: apps/4leaf/rog/original/OBS/bulk-source-report.json
+          retention-days: 10
