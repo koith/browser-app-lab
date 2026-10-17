@@ -67,6 +67,10 @@ jobs:
                cmp -s /tmp/leaf-minimap-nav-live.css apps/4leaf/rog/dice-native-minimap-navigation.css &&
                curl -fLsS --max-time 15 "$base/dice-dmp-camera-controls.css?qa=${GITHUB_SHA}" -o /tmp/leaf-camera-controls-live.css &&
                cmp -s /tmp/leaf-camera-controls-live.css apps/4leaf/rog/dice-dmp-camera-controls.css &&
+               curl -fLsS --max-time 15 "$base/dice-source-dmp-terrain-explorer.js?qa=${GITHUB_SHA}" -o /tmp/leaf-source-dmp-explorer.js &&
+               curl -fLsS --max-time 15 "$base/dice-source-dmp-terrain-explorer.css?qa=${GITHUB_SHA}" -o /tmp/leaf-source-dmp-explorer.css &&
+               cmp -s /tmp/leaf-source-dmp-explorer.js apps/4leaf/rog/dice-source-dmp-terrain-explorer.js &&
+               cmp -s /tmp/leaf-source-dmp-explorer.css apps/4leaf/rog/dice-source-dmp-terrain-explorer.css &&
                curl -fLsS --max-time 15 "$base/dice-native-menu-chrome.css?qa=${GITHUB_SHA}" -o /tmp/leaf-menu-live.css &&
                cmp -s /tmp/leaf-menu-live.css apps/4leaf/rog/dice-native-menu-chrome.css &&
                curl -fLsS --max-time 15 "$base/dice-native-dialog-event.css?qa=${GITHUB_SHA}" -o /tmp/leaf-native-dialog.css &&
@@ -153,6 +157,10 @@ jobs:
         env:
           FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
         run: node apps/4leaf/rog/tests/dice-native-minimap-navigation.cjs
+      - name: Verify actual source DMP tile events and warp destination live camera without phantom moves on published Pages
+        env:
+          FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
+        run: node apps/4leaf/rog/tests/dice-source-dmp-terrain-explorer.cjs
       - name: Explore live published DMP map with genuine camera drag, keyboard, wheel and pinch
         env:
           FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
