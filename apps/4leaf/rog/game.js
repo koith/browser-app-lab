@@ -655,11 +655,20 @@ function drawGame(){if(!match||!MAPS[match.map])return;chooseSourcePath(match.ma
    '이번 참가자의 주사위를 굴립니다.';
  }
 $('game-map-title').textContent=match.map;const elapsed=Math.floor((Date.now()-(match.startedAt||Date.now()))/1000);$('mini-time').textContent='TIME '+formatGameDuration(Math.max(0,elapsed))+' / GP '+formatGameDuration(match.players.length*90);$('element-label').textContent=match.attribute;$('player-count').textContent=match.players.length;$('turn-indicator').textContent='ROUND '+match.round+' · '+match.players[match.active].name+' TURN';$('my-name').textContent=p.name;$('my-stats').textContent='이동 '+stats.move+' · 공격 '+stats.atk+' · 방어 '+stats.def+' · 지력 +'+stats.int;$('my-position').textContent=p.jail>0?'감옥 '+p.jail+'턴':p.position===0?'START':p.position===match.tiles.length-1?'GOAL':(p.position+1)+'번째 칸';$('my-portrait').innerHTML='<img class="player-sprite" alt="" src="'+imageFor(p.team[0]||'soldier')+'">';$('ability-fill').style.width=p.ability+'%';$('game-players').replaceChildren();match.players.forEach((user,i)=>{const li=document.createElement('div');li.className=match.active===i?'is-turn':'';li.textContent=(match.active===i?'▶ ':'　')+user.pawn+' '+user.name+' '+(user.position+1)+'칸 · '+user.ability+'%';li.style.color=user.color;$('game-players').append(li)});$('my-items').replaceChildren();p.items.forEach((itemId,i)=>{const item=ITEM_MAP[itemId],btn=document.createElement('button');btn.className='item-card';btn.innerHTML='<span class="item-icon">'+(item?.icon||'✧')+'</span>'+(item?.name||itemId);btn.title=item.hint;btn.disabled=match.finished||!playerCanAct()||p.usedItem||busy;btn.onclick=()=>useItem(i);$('my-items').append(btn)});$('roll-btn').disabled=!playerCanAct();$('ability-btn').disabled=!playerCanAct()||p.ability<100;$('move-log').textContent=match.message;syncNativeDiceEvent(match.message);drawBoard();drawBattlePanels();drawNativeChessmen();drawMinimap();trackActivePawn()}
+// An 800px native client camera at 125% fills only a few gigantic tiles
+// on a 390px phone. Preserve each 145x97 native TIS sprite and 70x47 DMP
+// pitch, but show a wider source-world slice at game start on small screens.
+// This is a responsive WEB camera convention, not a recovered EXE setting.
+function defaultDiceCameraZoom(){
+ const area=$('board-area');
+ return area&&area.clientWidth>0&&area.clientWidth<520?.65:1.25;
+}
 const mapViewport={zoom:1.25,panX:0,panY:0,autoFollow:true,lastTurn:null,matchKey:null};
 function trackActivePawn(){
  if(!match||!PATH.length)return;
  // Follow a genuine new participant or new match, not on every UI repaint.
  if(mapViewport.matchKey!==match.startedAt||mapViewport.lastTurn!==match.active){
+  if(mapViewport.matchKey!==match.startedAt)mapViewport.zoom=defaultDiceCameraZoom();
   mapViewport.autoFollow=true;mapViewport.panX=0;mapViewport.panY=0;
   mapViewport.matchKey=match.startedAt;mapViewport.lastTurn=match.active;
  }
@@ -703,7 +712,7 @@ function zoomBoard(by){
 function installBoardControls(){
  $('board-zoom-in').onclick=()=>zoomBoard(.25);
  $('board-zoom-out').onclick=()=>zoomBoard(-.25);
- $('board-zoom-reset').onclick=()=>{mapViewport.zoom=1.25;mapViewport.panX=0;mapViewport.panY=0;mapViewport.autoFollow=true;applyMapViewport();trackActivePawn()};
+ $('board-zoom-reset').onclick=()=>{mapViewport.zoom=defaultDiceCameraZoom();mapViewport.panX=0;mapViewport.panY=0;mapViewport.autoFollow=true;applyMapViewport();trackActivePawn()};
  const area=$('board-area');
  const minimap=$('mini-map-canvas');
  // Native IMG/minimap.png is backed by a genuine 152x112 game canvas,
