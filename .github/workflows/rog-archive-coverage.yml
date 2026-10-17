@@ -20,6 +20,9 @@ on:
       - 'apps/4leaf/rog/original-stage.css'
       - 'apps/4leaf/rog/dice-source-roll.css'
       - 'apps/4leaf/rog/dice-fall.js'
+      - 'apps/4leaf/rog/genesis-chessman-actors.js'
+      - 'apps/4leaf/rog/genesis-chessman-actors.css'
+      - 'apps/4leaf/rog/tests/genesis-chessman-actors.cjs'
       - 'apps/4leaf/rog/dice-fall.css'
       - 'apps/4leaf/rog/tests/dice-fall.cjs'
       - 'apps/4leaf/rog/dice-2004-full-frame.css'
@@ -71,6 +74,8 @@ jobs:
         run: node apps/4leaf/rog/tests/dice-battle-podium.cjs
       - name: Verify genuine DMP painter order of original Registry actors versus overlapping source TIS platforms
         run: node apps/4leaf/rog/tests/dice-native-pawn-dmp-depth.cjs
+      - name: Verify real chessman-card identity and 8-head web pose control, not chat avatars
+        run: node apps/4leaf/rog/tests/genesis-chessman-actors.cjs
       - name: Check 145x97 original TIS chroma-key renderer syntax and file origin fallback
         run: node apps/4leaf/rog/tests/dice-native-tis-alpha.cjs
       - name: Navigate source-native minimap and visible DMP camera viewport in desktop/mobile Chromium
