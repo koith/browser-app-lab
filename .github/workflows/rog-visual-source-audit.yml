@@ -21,5 +21,15 @@ jobs:
         run: |
           npm install --no-save playwright
           npx playwright install chromium --with-deps
+      - name: Serve real historical static image and game assets with same-origin canvas reads
+        run: |
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog >/tmp/leaf-original-source.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -fsSI http://127.0.0.1:8765/original/Tiles/0015.png >/dev/null && break
+            sleep 1
+          done
+          curl -fsSI http://127.0.0.1:8765/original/Tiles/0015.png
       - name: Capture real 800x600 original DMP/TIS gameplay (never screenshot-overlay implementation)
+        env:
+          FOURLEAF_TEST_URL: http://127.0.0.1:8765/
         run: node apps/4leaf/rog/tests/dice-original-visual-qa.cjs
