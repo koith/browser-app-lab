@@ -21,23 +21,24 @@ def get_member(pak,name):
 def rows(body):
     return [i for i in range(len(body)-4) if body[i+1] in (0,1,2,3) and 15<=body[i+2]<=45 and body[i+3] in (1,3)]
 
-def inspect_run_table(body):
-    if len(body)<6:return {'error':'too small'}
-    n=int.from_bytes(body[:2],'little')
-    at=2
+def inspect_run_table(body,width=None,height=None):
+    at=0
     rows=[]
-    for i in range(min(n,1000)):
-        if at+4>len(body):
-            return {'error':'header past body','at':at,'run':i,'expectedRuns':n,'first':rows[:5]}
-        index=int.from_bytes(body[at:at+2],'little')
-        length=int.from_bytes(body[at+2:at+4],'little')
+    while at+4<=len(body) and len(rows)<15000:
+        length=int.from_bytes(body[at:at+2],'little')
+        index=int.from_bytes(body[at+2:at+4],'little')
+        if length==0 or at+4+length>len(body):
+            return {'error':'invalid/overlong span','at':at,'run':len(rows),
+                'spanLen':length,'pixelOffset':index,'first':rows[:7],'tail':body[at:at+20].hex()}
+        if width and height and index+length>width*height:
+            return {'error':'span out of frame','at':at,'run':len(rows),
+                'length':length,'pixelOffset':index,'pixels':width*height,'first':rows[:7]}
         rows.append((index,length))
         at+=4+length
-        if at>len(body):
-            return {'error':'run length crosses body','at':at,'run':i,'expectedRuns':n,'first':rows[:5]}
-    return {'runs':n,'consumed':at,'bodyBytes':len(body),
+    return {'spans':len(rows),'consumed':at,'bodyBytes':len(body),
       'exact':at==len(body),'tail':body[at:at+14].hex(),
       'first':rows[:10],'last':rows[-3:]}
+
 
 def probe(raw,name):
     at=raw.find(b'FAST.PAL.COLORKEY')
@@ -54,7 +55,7 @@ def probe(raw,name):
         marks=[(p,body[p:p+8].hex()) for p in hits[:14]]
         records.append({
             'index':i,'dataOffset':cursor,'length':length,'width':w,'height':h,'origin':[x,y],
-            'runLayoutGuess':inspect_run_table(body),'bodyHead':body[:80].hex(),'bodyTail':body[-48:].hex(),
+            'runLayoutGuess':inspect_run_table(body,w,h),'bodyHead':body[:80].hex(),'bodyTail':body[-48:].hex(),
             'rowMarkerCandidates':len(hits),'rowMarksFirst14':marks,
             'uniqueBytes':len(set(body)), 'paletteIndexColor0':src[-768:-765].hex()
         })
