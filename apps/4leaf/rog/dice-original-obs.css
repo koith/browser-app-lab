@@ -32,7 +32,7 @@
 #app.app-classic-dice #game :is(#board-pawns,#battle-visual)
  .board-pawn img.leaf-chess-original-obs[hidden]{display:none!important}
 #app.app-classic-dice #game #board-pawns .board-pawn{
- --leaf-obs-ground:11.52px;
+ --leaf-obs-ground:14.88px;
 }
 #app.app-classic-dice #game #battle-visual .leaf-battle-chessman{
  --leaf-obs-ground:6px;
