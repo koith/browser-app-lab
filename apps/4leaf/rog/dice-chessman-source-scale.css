@@ -1,0 +1,26 @@
+/* Fix the relative chessman-to-platform proportions after DMP cell scaling.
+ * The existing proxy is NOT a recovered Genesis 3 model; changing its size
+ * must not be represented as original geometry or original animation.
+ * Preserve individual live player IDs, per-character card portraits,
+ * painter depth and pose state. Source sprite frames, when recovered,
+ * use their own verified dimensions rather than this fallback size.
+ */
+#app.app-classic-dice #game #board-pawns .board-pawn{
+ width:70px!important;height:64px!important;
+ transform:translate(-50%,-82%)!important;
+}
+#app.app-classic-dice #game #board-pawns .leaf-chess-actor{
+ scale:.5;
+ transform-origin:50% 100%!important;
+}
+#app.app-classic-dice #game #board-pawns
+[data-actor-rig="source-animation"] .leaf-chess-actor{
+ scale:1;
+}
+#app.app-classic-dice #game #board-pawns .board-pawn::before{
+ left:18px!important;bottom:4px!important;width:34px!important;
+}
+#app.app-classic-dice #game #board-pawns .board-pawn-name{
+ bottom:100%!important;
+ font-size:10px!important;
+}
