@@ -1,0 +1,102 @@
+/* Dice/IMG/okcancelbut.bmp 256×36 authentic original 2002 source.
+ * Four 64×18 button states in each of two rows:
+ * row 0: "확인", row 1: "취소"; columns normal/hover/pressed/disabled.
+ * Never replace semantic text or unrelated actions with source-only art.
+ */
+#app.app-classic-dice #modal[data-native-dice-dialog="IMG/dialog.png"]
+ .modal-buttons button[data-original-dice-action]{
+ box-sizing:border-box!important;
+ display:inline-block!important;
+ flex:0 0 64px!important;
+ min-width:64px!important;
+ max-width:64px!important;
+ width:64px!important;
+ min-height:18px!important;
+ max-height:18px!important;
+ height:18px!important;
+ padding:0!important;
+ margin:0!important;
+ border:0!important;
+ border-radius:0!important;
+ outline-offset:2px;
+ box-shadow:none!important;
+ text-shadow:none!important;
+ color:transparent!important;
+ font-size:0!important;
+ overflow:hidden!important;
+ background-image:url('./original/IMG/okcancelbut.png')!important;
+ background-repeat:no-repeat!important;
+ background-size:256px 36px!important;
+}
+#app.app-classic-dice #modal[data-native-dice-dialog="IMG/dialog.png"]
+ .modal-buttons button[data-original-dice-action="confirm"]{
+ background-position:0 0!important;
+}
+#app.app-classic-dice #modal[data-native-dice-dialog="IMG/dialog.png"]
+ .modal-buttons button[data-original-dice-action="cancel"]{
+ background-position:0 -18px!important;
+}
+#app.app-classic-dice #modal[data-native-dice-dialog="IMG/dialog.png"]
+ .modal-buttons button[data-original-dice-action="confirm"]:is(:hover,:focus-visible){
+ background-position:-64px 0!important;
+}
+#app.app-classic-dice #modal[data-native-dice-dialog="IMG/dialog.png"]
+ .modal-buttons button[data-original-dice-action="cancel"]:is(:hover,:focus-visible){
+ background-position:-64px -18px!important;
+}
+#app.app-classic-dice #modal[data-native-dice-dialog="IMG/dialog.png"]
+ .modal-buttons button[data-original-dice-action="confirm"]:active{
+ background-position:-128px 0!important;
+}
+#app.app-classic-dice #modal[data-native-dice-dialog="IMG/dialog.png"]
+ .modal-buttons button[data-original-dice-action="cancel"]:active{
+ background-position:-128px -18px!important;
+}
+#app.app-classic-dice #modal[data-native-dice-dialog="IMG/dialog.png"]
+ .modal-buttons button[data-original-dice-action="confirm"]:disabled{
+ background-position:-192px 0!important;
+}
+#app.app-classic-dice #modal[data-native-dice-dialog="IMG/dialog.png"]
+ .modal-buttons button[data-original-dice-action="cancel"]:disabled{
+ background-position:-192px -18px!important;
+}
+/* Dice/IMG/scrollButton.bmp 80×16 is a five-state 16px native atlas.
+ * Real button elements scroll actual ChatTown/Genesis chat records; no
+ * manufactured messages or screenshot-only overlay.
+ */
+#app .leaf-dice-chat-scroll{
+ display:none;
+}
+#app.app-classic-dice .messenger .leaf-dice-chat-scroll{
+ position:absolute!important;
+ display:block;
+ width:16px!important;height:16px!important;
+ box-sizing:border-box!important;
+ z-index:4;
+ right:7px!important;
+ padding:0!important;
+ margin:0!important;
+ border:0!important;
+ border-radius:0!important;
+ box-shadow:none!important;
+ cursor:pointer!important;
+ background:transparent url('./original/IMG/scrollbutton.png') 0 0/80px 16px no-repeat!important;
+}
+#app.app-classic-dice .messenger .leaf-dice-chat-scroll[data-direction="up"]{
+ top:26px!important;
+ background-position:0 0!important;
+}
+#app.app-classic-dice .messenger .leaf-dice-chat-scroll[data-direction="down"]{
+ bottom:23px!important;
+ background-position:-16px 0!important;
+}
+#app.app-classic-dice .messenger .leaf-dice-chat-scroll[data-direction="up"]:is(:hover,:focus-visible){
+ background-position:-32px 0!important;
+}
+#app.app-classic-dice .messenger .leaf-dice-chat-scroll[data-direction="down"]:is(:hover,:focus-visible){
+ background-position:-48px 0!important;
+}
+#app.app-classic-dice .messenger .leaf-dice-chat-scroll:disabled{
+ opacity:.55!important;
+ cursor:default!important;
+}
