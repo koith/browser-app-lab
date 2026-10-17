@@ -30,6 +30,12 @@ on:
       - 'apps/4leaf/rog/tests/dice-2004-full-frame.cjs'
       - 'apps/4leaf/rog/dice-source-roll.js'
       - 'apps/4leaf/rog/tests/dice-source-roll.cjs'
+      - 'apps/4leaf/rog/tests/dice-source-native-ui.cjs'
+      - 'apps/4leaf/rog/dice-source-native-ui.css'
+      - 'apps/4leaf/rog/dice-source-native-chat-scroll.js'
+      - 'apps/4leaf/rog/original/IMG/okcancelbut.png'
+      - 'apps/4leaf/rog/original/IMG/scrollbutton.png'
+      - 'apps/4leaf/rog/original/IMG/stats.png'
       - 'apps/4leaf/rog/dice-native-client-frame.css'
       - 'apps/4leaf/rog/dice-native-menu-chrome.css'
       - 'apps/4leaf/rog/dice-native-dialog-event.css'
@@ -99,6 +105,8 @@ jobs:
         run: node apps/4leaf/rog/tests/dice-2004-full-frame.cjs
       - name: Verify genuine 2004-positioned ROLL control invokes actual dice engine without duplicate turn
         run: node apps/4leaf/rog/tests/dice-source-roll.cjs
+      - name: Recover native 2002 source UI confirmations and live game chat scroll Chromium
+        run: node apps/4leaf/rog/tests/dice-source-native-ui.cjs
       - name: Verify game waits for actual gravity, bouncing and face-specific 3D die stops
         run: node apps/4leaf/rog/tests/dice-fall.cjs
       - name: Replay 2004 Ironmask Destroy 24 vs Damian Block 24 fixed-tie ability cancellation
