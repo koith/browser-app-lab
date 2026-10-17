@@ -451,8 +451,10 @@ function drawPawns(){
    pawn.dataset.cellPeerCount=String(peers.length);
    pawn.dataset.cellPeerSlot=String(slot);
    pawn.dataset.formationSource='inferred-visibility-offset/source-DMP-position';
-   pawn.style.left='calc('+point.x+'% + '+sourceCellOffsetX+'px)';
-   pawn.style.top='calc('+point.y+'% + '+sourceCellOffsetY+'px)';
+   // CSS calc(45% + -16px) is invalid and silently drops actor anchoring.
+   // Always emit a single signed additive operator instead.
+   pawn.style.left='calc('+point.x+'% '+(sourceCellOffsetX<0?'-':'+' )+' '+Math.abs(sourceCellOffsetX)+'px)';
+   pawn.style.top='calc('+point.y+'% '+(sourceCellOffsetY<0?'-':'+' )+' '+Math.abs(sourceCellOffsetY)+'px)';
    pawn.style.setProperty('--pawn-color',p.color);
    const platform=tiles?.querySelector('.tile[data-tile="'+p.position+'"]');
    const platformDepth=Number(platform?.style.zIndex);
