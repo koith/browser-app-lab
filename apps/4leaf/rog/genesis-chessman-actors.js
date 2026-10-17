@@ -1,16 +1,44 @@
 'use strict';
-/* Per-CHESSMAN source identity and turn-linked animation controller.
- * Archive has CardData head portraits and chessman IDs but NO original
- * Genesis War 3/P2 full-body animation frames. A ChatTown Registry/sava
- * standee must NEVER impersonate the original Dice chessman.
- * This articulated eight-head WEB PROXY is inferred, not original art.
- * registerFrames connects actual recovered animation sources once obtained.
+/* The original 2002 client has native Genesis OBS animation pixels.
+ * Real, individually restored source frames appear for recovered cards
+ * (currently 0042 and 0045). Unrecovered characters still use the clearly
+ * identified web proxy; NEVER substitute ChatTown Registry/sava avatars.
+ * Source frame values are genuine; pose-to-frame attribution and horizontal
+ * run registration remain PROVISIONAL pending native EXE action-table decode.
  */
 (function(){
  'use strict';
  const VALID=['idle','walk','attack','hurt','victory'];
  const frames=new Map(),timeouts=new WeakMap(),states=new WeakMap();
+ const sourceTimers=new WeakMap();
  const sourceId=p=>String(p?.team?.[0]||'').replace(/^c_/,'');
+ const recovered=id=>window.ORIGINAL_LEAF_OBS_FRAMES?.[id]||null;
+ const sequenceFor=(source,action)=>{
+  const frames=source?.frames||[];
+  const byIndex=id=>frames.find(frame=>frame.index===id);
+  // Existing recovered 2002 source poses: the ORIGINAL bitmap frames are
+  // authentic; action labels here are only provisional until animation
+  // group direction/action metadata is fully decoded.
+  const chosen=(action==='idle'?[0,1,2]:
+   action==='walk'?[0,1,2,3]:
+   action==='attack'?[10,18]:
+   action==='hurt'?[18,10]:
+   action==='victory'?[25,30,0]:[0]).map(byIndex).filter(Boolean);
+  return chosen.length?chosen:[frames[0]].filter(Boolean);
+ };
+ function showSourceFrame(pawn,frame){
+  const image=pawn.querySelector('img.leaf-chess-original-obs');
+  if(!image||!frame||pawn.dataset.actorRig!=='original-obs-sprite')return;
+  if(image.getAttribute('src')!==frame.url)image.src=frame.url;
+  image.style.width=frame.width+'px';
+  image.style.height=frame.height+'px';
+  image.style.left='calc(50% + '+frame.originX+'px)';
+  // Frame origins are relative to the world tile center, NOT to the fake
+  // figure's 112px tall CSS box. Pawn root (height124, transform -88%) is
+  // anchored 14.88px below tile origin; preserve native world pixel sizes.
+  image.style.bottom=(14.88-frame.originY-frame.height)+'px';
+  pawn.dataset.actorFrame=String(frame.index);
+ }
  function add(parent,name){
   const n=document.createElement('span');n.className=name;
   n.setAttribute('aria-hidden','true');parent.append(n);return n;
@@ -28,6 +56,44 @@
   return a;
  }
  function renderFrame(node,src,action){
+  clearInterval(sourceTimers.get(node));
+  sourceTimers.delete(node);
+  const original=recovered(src);
+  if(original?.frames?.length){
+   let image=node.querySelector('img.leaf-chess-original-obs');
+   if(!image){
+    image=document.createElement('img');
+    image.className='leaf-chess-original-obs';image.alt='';
+    image.draggable=false;image.setAttribute('aria-hidden','true');
+    node.append(image);
+   }
+   node.dataset.actorRig='original-obs-sprite';
+   node.dataset.actorSource='OBS/'+original.originalMember;
+   node.dataset.actorOriginalModelRecovered='true';
+   node.dataset.sourceAnimation='genuine-bitmap-pose-map-inferred';
+   node.dataset.sourcePoseMapping='unverified';
+   image.hidden=false;
+   const seq=sequenceFor(original,action);
+   showSourceFrame(node,seq[0]);
+   if(seq.length>1&&!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches){
+    let frame=0;
+    const timer=setInterval(()=>{
+     if(!node.isConnected||node.dataset.actorPose!==action||
+       node.dataset.chessmanId!==src){
+      clearInterval(timer);sourceTimers.delete(node);return;
+     }
+     frame=(frame+1)%seq.length;showSourceFrame(node,seq[frame]);
+    },action==='walk'?120:action==='idle'?340:155);
+    sourceTimers.set(node,timer);
+   }
+   const sheet=node.querySelector('.leaf-chess-source-frame');
+   if(sheet)sheet.hidden=true;
+   return;
+  }
+  const originalImage=node.querySelector('img.leaf-chess-original-obs');
+  if(originalImage)originalImage.hidden=true;
+  delete node.dataset.actorFrame;
+  node.dataset.sourcePoseMapping='unavailable';
   const sheet=node.querySelector('.leaf-chess-source-frame');
   if(!sheet)return;
   const f=frames.get(src)?.[action];
@@ -69,8 +135,8 @@
   const image=rig.querySelector('img.leaf-chess-portrait');
   if(pawn.dataset.chessmanId!==src||!image.getAttribute('src')){
    pawn.dataset.chessmanId=src;
-   pawn.dataset.actorSource='CardData';
-   pawn.dataset.actorOriginalModelRecovered='false';
+   pawn.dataset.actorSource=recovered(src)?'OBS/'+recovered(src).originalMember:'CardData';
+   pawn.dataset.actorOriginalModelRecovered=String(!!recovered(src));
    const num=Number(src.replace(/\D/g,''))||0;
    pawn.style.setProperty('--chess-armor-hue',String((num*19)%360)+'deg');
    image.src=portrait;
@@ -103,11 +169,15 @@
  window.__LEAF_GENESIS_ACTORS__={
   mount,pose,poseByPlayer,registerFrames,
   getState:()=>({
-   originalFullBodyFramesRecovered:[...frames.keys()],
+   originalFullBodyFramesRecovered:[...new Set([
+    ...Object.keys(window.ORIGINAL_LEAF_OBS_FRAMES||{}),...frames.keys()
+   ])],
    rendered:[...document.querySelectorAll('#board-pawns .board-pawn')].map(p=>({
     playerId:p.dataset.id,chessmanId:p.dataset.chessmanId,
     pose:p.dataset.actorPose,rig:p.dataset.actorRig,
     originalRecovered:p.dataset.actorOriginalModelRecovered,
+    source:p.dataset.actorSource,frame:p.dataset.actorFrame,
+    poseMapping:p.dataset.sourcePoseMapping,
     counts:states.get(p)||{}
    }))
   })
