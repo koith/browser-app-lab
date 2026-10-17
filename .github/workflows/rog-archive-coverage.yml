@@ -52,6 +52,7 @@ on:
       - 'apps/4leaf/rog/dice-native-tis-alpha.js'
       - 'apps/4leaf/rog/dice-native-pawn-dmp-depth.css'
       - 'apps/4leaf/rog/tests/dice-native-pawn-dmp-depth.cjs'
+      - 'apps/4leaf/rog/tests/dice-cooccupied-pawns.cjs'
       - 'apps/4leaf/rog/tests/dice-native-tis-alpha.cjs'
       - 'apps/4leaf/rog/tests/dice-native-tis-depth.cjs'
       - 'apps/4leaf/rog/dice-native-battle-podium.css'
@@ -84,6 +85,8 @@ jobs:
         run: node apps/4leaf/rog/tests/dice-battle-podium.cjs
       - name: Verify genuine DMP painter order of original Registry actors versus overlapping source TIS platforms
         run: node apps/4leaf/rog/tests/dice-native-pawn-dmp-depth.cjs
+      - name: Verify two actual source OBS chessmen remain distinct when sharing one DMP start tile
+        run: node apps/4leaf/rog/tests/dice-cooccupied-pawns.cjs
       - name: Verify real chessman-card identity and 8-head web pose control, not chat avatars
         run: node apps/4leaf/rog/tests/genesis-chessman-actors.cjs
       - name: Exercise recovered OBS animated source characters in real Chromium match
