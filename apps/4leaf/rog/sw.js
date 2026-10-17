@@ -1,5 +1,5 @@
 'use strict';
-const REVISION='4leaf-revival-pwa-v57';
+const REVISION='4leaf-revival-pwa-v58';
 // 32 genuinely archived 145×97 original TIS platform images. First offline
 // Genesis match must draw the same extracted raised platforms, not replace
 // uncached native source art with a CSS placeholder on first room entry.
@@ -33,7 +33,12 @@ self.addEventListener('fetch',event=>{
  // broken dice handlers and tile CSS alive after a successful Pages deploy.
  // Fetch executable/style updates first while online; retain offline cache.
  const url=new URL(request.url);
- if(url.pathname.includes('/apps/4leaf/rog/')&&/\\.(?:js|css)$/i.test(url.pathname)){
+ // Match actual executable/style paths. The previous /\\\\./ expression
+ // accidentally matched a backslash, NEVER .js/.css; it silently kept
+ // the old cache-first dice handlers after a successful deployment.
+ const scopePath=new URL('./',self.registration.scope).pathname;
+ if(url.pathname.startsWith(scopePath)&&
+   (url.pathname.endsWith('.js')||url.pathname.endsWith('.css'))){
   event.respondWith(fetch(request,{cache:'no-cache'}).then(async response=>{
    if(response.ok&&response.type==='basic'){
     const cache=await caches.open(REVISION);
