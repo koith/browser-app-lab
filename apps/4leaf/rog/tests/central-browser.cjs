@@ -17,7 +17,10 @@ const BASE='http://127.0.0.1:8765/',API='http://127.0.0.1:8877';
   await page.evaluate(()=>{window.__LEAF_SOCIAL__.openRegion('north');window.__ROG_TEST__.go('rooms')});
   await page.locator('.social-district-hotspot').nth(3).click();
   assert.equal(await page.locator('.social-public-room').count(),0,'no fake public rooms');
-  assert.equal(await page.locator('.social-directory-row').count(),0);
+  assert.equal(await page.locator('.social-directory-row[data-permanent="true"]').count(),8,
+   'canonical permanent rooms must be visible even before a server refresh');
+  assert.ok((await page.locator('.social-directory-row[data-permanent="true"] .social-room-users').allTextContents())
+   .every(value=>value==='0/12명'),'no fake participants in permanent rooms');
  };
  try{
   await enterTown(host);await enterTown(guest);
