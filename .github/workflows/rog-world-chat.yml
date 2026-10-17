@@ -62,6 +62,8 @@ on:
       - 'apps/4leaf/rog/dice-dmp-camera-controls.css'
       - 'apps/4leaf/rog/tests/dice-dmp-full-camera.cjs'
       - 'apps/4leaf/rog/dice-native-minimap-navigation.css'
+      - 'apps/4leaf/rog/dice-native-battle-dice.css'
+      - 'apps/4leaf/rog/tests/dice-native-battle-dice.cjs'
       - 'apps/4leaf/rog/tests/dice-native-minimap-navigation.cjs'
       - 'apps/4leaf/rog/dice-native-tis-orientation.css'
       - 'apps/4leaf/rog/dice-ai-autoplay.css'
@@ -146,6 +148,8 @@ jobs:
         run: node apps/4leaf/rog/tests/chat-native-scrollbar.cjs
       - name: Verify live source Registry chroma key, true side player portraits, game turns and mobile
         run: node apps/4leaf/rog/tests/registry-native-portraits.cjs
+      - name: Verify live six-sided combat dice pips and 2004 screenshot arrangement
+        run: node apps/4leaf/rog/tests/dice-native-battle-dice.cjs
       - name: Verify source 2x2 right-hand chessmen party and genuine consumables in Chromium
         run: node apps/4leaf/rog/tests/dice-chessmen-hud.cjs
       - name: Verify authentic native 796x528 WorldMap plus separate source screenshot full moon
