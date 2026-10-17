@@ -56,7 +56,7 @@ const path=require('node:path');
   assert.deepEqual(native.atlasMenu,[608,30],'true original 608x30 Genesis in-game IMG/menu atlas');
   assert.deepEqual(native.atlasTerrain,[725,485],'actual recovered 725x485 native Dice forest-and-cliff battlefield');
   assert.ok(Math.abs(native.frame[2]-800)<2&&Math.abs(native.frame[3]-600)<2,'desktop game uses source logical frame');
-  assert.ok(native.main[2]>=594&&native.main[2]<=612,'608px original content coordinate space retained');
+  assert.ok(Math.abs(native.main[2]-800)<2,'historic battlefield and side player rails span all 800 source pixels');
   assert.ok(Math.abs(native.chat[2]-406)<1&&Math.abs(native.chat[3]-152)<1,'native chat bitmap registration');
   assert.ok(Math.abs(native.mini[2]-172)<1&&Math.abs(native.mini[3]-152)<1,'native minimap bitmap registration');
   // Historic real-play board.jpg/battle.jpg show LEFT minimap + CENTRAL chat,
