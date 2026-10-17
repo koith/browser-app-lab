@@ -132,6 +132,12 @@ function allFiles(directory){
     else console.log((probe.stdout||'').slice(0,80000));
    }
    if(/\/Dice\/OBS(?:2|3)?\.pak$/i.test(file.split(path.sep).join('/'))){
+    const pixels=spawnSync('python3',[path.join(__dirname,'decode-original-obs-preview.py'),file],{
+     encoding:'utf8',timeout:30000,maxBuffer:8*1024*1024
+    });
+    if(pixels.error||pixels.status!==0)
+     console.log('ORIGINAL_OBS_IMAGE_PROBE_ERROR '+String(pixels.error||pixels.stderr).slice(0,500));
+    else console.log((pixels.stdout||'').slice(0,150000));
     const sourceActors=spawnSync('python3',[path.join(__dirname,'probe-original-obs.py'),file],{
      encoding:'utf8',timeout:15000,maxBuffer:3*1024*1024
     });
