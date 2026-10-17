@@ -1,0 +1,79 @@
+/* 2004-02-11 battle.jpg/board.jpg: six-sided WHITE 3D dice show actual
+ * black and pink pips. No original separate dice texture was extracted.
+ * The original 2D screenshots are EVIDENCE ONLY; this is real DOM geometry,
+ * built from the current combat roll values instead of the platform font's
+ * system-dependent Unicode ⚀⚁⚂⚃⚄⚅ faces. Exact 3D mesh is INFERRED.
+ */
+#app.app-classic-dice #game #battle-visual .battle-visual-die{
+ box-sizing:border-box!important;
+ position:relative!important;
+ display:grid!important;
+ grid-template-columns:repeat(3,minmax(0,1fr))!important;
+ grid-template-rows:repeat(3,minmax(0,1fr))!important;
+ align-items:center!important;
+ justify-items:center!important;
+ width:42px!important;
+ min-width:42px!important;
+ max-width:42px!important;
+ height:42px!important;
+ min-height:42px!important;
+ max-height:42px!important;
+ padding:6px!important;
+ border-radius:4px!important;
+ border:1px solid #f7f8fb!important;
+ border-right:3px solid #a2b0b8!important;
+ border-bottom:3px solid #798d9b!important;
+ color:transparent!important;
+ font-size:0!important;
+ line-height:0!important;
+ background:linear-gradient(135deg,#fffdf8 0%,#f5f6fa 55%,#c3d0dc 100%)!important;
+ box-shadow:2px 4px 0 #81919d,3px 6px 5px #12192a95!important;
+ transform:rotate(-4deg)!important;
+ flex:0 0 42px!important;
+ overflow:visible!important;
+}
+#app.app-classic-dice #game #battle-visual .battle-visual-die:nth-child(2n){
+ transform:rotate(6deg) translateY(2px)!important;
+}
+#app.app-classic-dice #game #battle-visual .battle-visual-die .battle-die-pip{
+ display:block!important;
+ align-self:center!important;
+ justify-self:center!important;
+ box-sizing:border-box!important;
+ width:7px!important;
+ height:7px!important;
+ margin:0!important;
+ padding:0!important;
+ border-radius:50%!important;
+ border:0!important;
+ background:#20283a!important;
+ box-shadow:inset 1px 1px 1px #090e17,0 1px 0 #fff7!important;
+ pointer-events:none;
+}
+#app.app-classic-dice #game #battle-visual .battle-visual-die[data-eye="1"] .battle-die-pip{
+ background:#de1c65!important;
+ box-shadow:inset 1px 1px 1px #83274b,0 1px 0 #fff8!important;
+ width:9px!important;height:9px!important;
+}
+/* On small playable source frames use independent smaller live die meshes;
+   never substitute OS Unicode die glyphs or scale a screenshot image. */
+@media(max-width:650px){
+ #app.app-classic-dice #game #battle-visual .battle-visual-die{
+  width:26px!important;min-width:26px!important;max-width:26px!important;
+  height:26px!important;min-height:26px!important;max-height:26px!important;
+  flex-basis:26px!important;
+  padding:3px!important;
+  border-width:1px 2px 2px 1px!important;
+ }
+ #app.app-classic-dice #game #battle-visual .battle-visual-die .battle-die-pip{
+  width:4px!important;height:4px!important;
+ }
+ #app.app-classic-dice #game #battle-visual .battle-visual-die[data-eye="1"] .battle-die-pip{
+  width:6px!important;height:6px!important;
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ #app.app-classic-dice #game #battle-visual .battle-visual-die{
+  transition:none!important;animation:none!important;
+ }
+}
