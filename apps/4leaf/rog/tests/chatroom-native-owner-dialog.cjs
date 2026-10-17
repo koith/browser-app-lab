@@ -22,7 +22,7 @@ const assert=require('node:assert/strict');
   await page.waitForFunction(()=>window.__LEAF_SOCIAL__&&window.__LEAF_NATIVE_OWNER_DIALOG__);
   await page.evaluate(()=>{window.__LEAF_SOCIAL__.openRegion('north');window.__ROG_TEST__.go('rooms')});
   await page.locator('.social-district-hotspot').nth(3).click();
-  assert.equal(await page.locator('.social-directory-row').count(),0,'no fake preset chatrooms are ever created');
+  assert.equal(await page.locator('.social-directory-row[data-permanent="true"]').count(),8,'real permanent ChatTown rooms are independent live routes, not fabricated users');
   await page.locator('#social-new-room').click();
   await page.waitForFunction(()=>document.querySelector('form.social-native-owner-form')?.dataset.nativeOwnerReady==='true',
     null,{timeout:18000});
