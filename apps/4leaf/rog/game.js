@@ -783,8 +783,10 @@ function installBoardControls(){
   const [a,b]=[...pointers.values()];
   return a&&b?Math.hypot(a.x-b.x,a.y-b.y):0;
  };
+ // Original TIS cells are accessible [role=button] but also the actual
+ // pan/zoom surface. Only overlay controls block world camera interactions.
  const blocked=e=>Boolean(e.target.closest(
-  '#board-zoom-controls,#board-mini,.board-mini,button,input,textarea,select,[role="button"],#battle-visual,#battle-player-panels'));
+  '#board-zoom-controls,#board-mini,.board-mini,button,input,textarea,select,#battle-visual,#battle-player-panels,[role="button"]:not(.tile):not(.board-pawn)'));
  const pan=(dx,dy)=>{
   mapViewport.autoFollow=false;
   if(window.__LEAF_CAMERA__?.panBy){
