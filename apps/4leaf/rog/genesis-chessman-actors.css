@@ -126,3 +126,30 @@
   animation:none!important;
  }
 }
+
+/* OBS.pak genuine Genesis War game pawn pixels (NOT CardData head
+ * pasted onto a fabricated 8-head model). Source native w/h/offsets
+ * are applied by genesis-chessman-actors.js on every real pose frame.
+ * The code preserves DMP z sorting and actual game hitboxes beneath. */
+#app.app-classic-dice #game #board-pawns .board-pawn[data-actor-rig="original-obs-sprite"]
+ .leaf-chess-actor{
+ display:none!important;
+}
+#app.app-classic-dice #game #board-pawns .board-pawn .leaf-chess-original-obs{
+ position:absolute!important;
+ display:block;
+ z-index:8!important;
+ pointer-events:none!important;
+ max-width:none!important;
+ max-height:none!important;
+ border:0!important;
+ padding:0!important;
+ margin:0!important;
+ object-fit:contain!important;
+ image-rendering:pixelated!important;
+ filter:drop-shadow(1px 1px 1px #182336a8);
+ transform:none!important;
+}
+#app.app-classic-dice #game #board-pawns .board-pawn .leaf-chess-original-obs[hidden]{
+ display:none!important;
+}
