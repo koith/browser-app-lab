@@ -7,6 +7,7 @@ on:
       - 'apps/4leaf/rog/tools/inspect-original-pak-signatures.cjs'
       - 'apps/4leaf/rog/tools/original-pak-index.cjs'
       - 'apps/4leaf/rog/tools/inspect-original-member-signatures.cjs'
+      - 'apps/4leaf/rog/tools/probe-original-spr.py'
       - 'apps/4leaf/rog/tests/original-pak-index.cjs'
       - 'apps/4leaf/rog/docs/original-evidence-crosscheck-2026-10-17.md'
       - '.github/workflows/rog-original-archive-research.yml'
