@@ -117,6 +117,11 @@ function allFiles(directory){
   report.originalMemberHeaders=[];
   for(const file of paks){
    if(/\/Dice\/IMG\.pak$/i.test(file.split(path.sep).join('/'))){
+    const images=spawnSync('python3',[path.join(__dirname,'emit-original-img-ui.py'),file],
+      {encoding:'utf8',timeout:20000,maxBuffer:8*1024*1024});
+    if(images.error||images.status!==0)
+     console.log('ORIGINAL_IMG_IMAGE_CONVERSION_UNAVAILABLE '+String(images.error||images.stderr).slice(0,600));
+    else console.log((images.stdout||'').slice(0,750000));
     const probe=spawnSync('python3',[path.join(__dirname,'probe-original-spr.py'),file],{encoding:'utf8',timeout:18000,maxBuffer:3*1024*1024});
     if(probe.error)console.log('SOURCE_SPR_PROBE_FAILED '+probe.error.message);
     else console.log((probe.stdout||'').slice(0,80000));
