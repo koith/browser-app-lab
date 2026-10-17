@@ -1,0 +1,41 @@
+/* 4LEAF recovered move rule: Move 2 rolls two four-sided dice.
+ * The archive has no recovered original rolling mesh; this explicit
+ * tetrahedral WEB fallback must never reuse the six-faced cube.
+ * Results are precomputed by game.js and shown only after the bounce.
+ */
+#app.app-classic-dice #game .leaf-fall-piece[data-sides="4"]{
+  filter:drop-shadow(3px 8px 4px #10202d99);
+}
+#app.app-classic-dice #game .leaf-fall-tetra{
+  position:absolute;inset:0;display:block;
+  transform-style:preserve-3d;
+}
+#app.app-classic-dice #game .leaf-fall-tetra::before{
+  content:"";position:absolute;inset:0;
+  clip-path:polygon(50% 0%,100% 88%,0 88%);
+  background:linear-gradient(135deg,#f1f5f6 0%,#e1e8ed 42%,#a7bcc9 86%);
+  filter:drop-shadow(1px 2px 1px #23384b);
+}
+#app.app-classic-dice #game .leaf-fall-tetra::after{
+  content:"";position:absolute;inset:0;
+  clip-path:polygon(50% 0%,100% 88%,50% 80%);
+  background:linear-gradient(120deg,#9eb2c2,#617d96);
+  opacity:.65;
+}
+#app.app-classic-dice #game .leaf-tetra-face{
+  position:absolute;z-index:2;inset:0;
+  display:none;
+  clip-path:polygon(50% 2%,97% 85%,4% 85%);
+  align-items:center;justify-content:center;
+  padding-top:15%;
+  color:#2b3344;
+  font:bold 28px/1 Georgia,'Times New Roman',serif;
+  text-shadow:0 1px 0 #fff;
+}
+#app.app-classic-dice #game .leaf-fall-tetra[data-result="1"] .leaf-tetra-face-1,
+#app.app-classic-dice #game .leaf-fall-tetra[data-result="2"] .leaf-tetra-face-2,
+#app.app-classic-dice #game .leaf-fall-tetra[data-result="3"] .leaf-tetra-face-3,
+#app.app-classic-dice #game .leaf-fall-tetra[data-result="4"] .leaf-tetra-face-4{display:flex;}
+@media(max-width:650px){
+ #app.app-classic-dice #game .leaf-tetra-face{font-size:19px;padding-top:13%;}
+}
