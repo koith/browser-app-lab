@@ -1008,6 +1008,13 @@ function combat(attacker,defender,keeper=false){
  const aCount=Math.max(1,(reducedA?Math.max(1,Math.floor(aStat.atk/2)):aStat.atk)+(isSoloA&&attacker.effects?.ring>0?1:0));
  const bCount=Math.max(1,(reducedB?Math.max(1,Math.floor(bStat.def/2)):bStat.def)+(isDuoB&&defender.effects?.ring>0?1:0));
  let attack,defense,aValue,bValue,rerolls=0;
+ // Source: actual final-service 2004 screenshot and commentary archived by
+ // 4LEAF Memorial (https://4leafmemorial.tistory.com/ ,
+ // "주사위의 잔영 - 철가면 vs 데미안 이벤트", 2013-03-15).
+ // Ironmask Destroy and Damian Block each force EXACTLY 24. The native
+ // game cancels both abilities when they clash; the old reconstruction
+ // blindly rolled the same unavoidable 24:24 draw one hundred times.
+ let neutralizedFixed=false;
  for(let attempt=0;attempt<100;attempt++){
    attack=diceN(aCount,6);defense=diceN(bCount,6);
    aValue=attack.total+(aStat.int||0)+(attacker.team?.length>=3?(attacker.effects?.ring||0):0)+(attacker.effects?.teamInt>0?3:0)+elementalModifier(attacker.team,'attack')+elementalModifier(attacker.team,'support');
@@ -1018,13 +1025,24 @@ function combat(attacker,defender,keeper=false){
    if(defender.effects?.ultimate>0)bValue=18;
    if(attacker.effects?.destroy>0)aValue=24;
    if(defender.effects?.block>0)bValue=24;
-   
+   // Do NOT keep re-rolling two deterministically fixed faces. Only the
+   // demonstrated Destroy-vs-Block pair triggers historic cancellation.
+   if(!keeper&&aValue===24&&bValue===24&&
+      attacker.effects?.destroy>0&&defender.effects?.block>0){
+     attacker.effects.destroy=0;defender.effects.block=0;
+     neutralizedFixed=true;
+     rerolls++;
+     continue;
+   }
    if(aValue!==bValue)break;rerolls++;
  }
  const div=document.createElement('div');
- div.innerHTML='<p>'+attacker.name+'의 공격! '+defender.name+'이(가) 방어합니다.'+(rerolls?' · 무승부 '+rerolls+'회 재굴림':'')+'</p><div class="battle-dice"><div>ATTACK<div class="nums">'+attack.values.join('·')+'</div><b>'+aValue+'</b><small>지력 +'+aStat.int+'</small></div><div>DEFENSE<div class="nums">'+defense.values.join('·')+'</div><b>'+bValue+'</b><small>지력 +'+bStat.int+'</small></div></div>';
+ div.innerHTML='<p>'+attacker.name+'의 공격! '+defender.name+'이(가) 방어합니다.'+
+ (neutralizedFixed?' · DESTROY/BLOCK 24:24 상쇄! 양측 강제 능력 무효화':'')+
+ (rerolls?' · 무승부 '+rerolls+'회 재굴림':'')+'</p><div class="battle-dice"><div>ATTACK<div class="nums">'+attack.values.join('·')+'</div><b>'+aValue+'</b><small>지력 +'+aStat.int+'</small></div><div>DEFENSE<div class="nums">'+defense.values.join('·')+'</div><b>'+bValue+'</b><small>지력 +'+bStat.int+'</small></div></div>';
  const battleStage=showBattleScene(attacker,defender,attack,defense,aValue,bValue);
- const finish=result=>{remoteBattle=null;battleStage?.remove();$('modal').classList.remove('battle-present');resolve(result)};
+ const finish=result=>{remoteBattle=null;battleStage?.remove();$('modal').classList.remove('battle-present');
+   resolve({...result,neutralizedFixed});};
  const player=activePlayer();
  const selfInvolved=!keeper&&player&&!player.bot&&(attacker.id===player.id||defender.id===player.id);
  let results={attacker:aValue,defender:bValue,changed:false,negated:false};
@@ -1083,6 +1101,7 @@ async function resolveBattle(attacker,defender,keeper){
  window.__LEAF_GENESIS_ACTORS__?.poseByPlayer(attacker.id,'attack',800);
  if(!keeper)window.__LEAF_GENESIS_ACTORS__?.poseByPlayer(defender.id,'hurt',650);
  const result=await combat(attacker,defender,keeper);
+ if(result.neutralizedFixed)appendMove('철가면 DESTROY 24 ↔ 데미안 BLOCK 24 · 능력 충돌 무효화 후 정상 주사위 재굴림');
  if(result.negated){appendMove(result.mutualReset?'자폭: 양측 START 복귀':'오리발 효과: 전투 무효화');return}
  const av=result.attacker,bv=result.defender;
  if(av===bv){appendMove('전투 판정이 무효입니다.');return}
