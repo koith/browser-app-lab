@@ -13,6 +13,7 @@ const os=require('node:os');
 const path=require('node:path');
 const {spawnSync}=require('node:child_process');
 const {createHash}=require('node:crypto');
+const {loadPakIndex}=require('./original-pak-index.cjs');
 const source='https://archive.org/download/4leaf/4leaf.zip';
 const expected='86526d89679ae39b85fe9808da97ad871b7888d9';
 const reportPath='original-4leaf-pak-signatures.json';
@@ -111,13 +112,29 @@ function allFiles(directory){
    for(let offset=0;offset+4<=Math.min(head.length,48);offset+=4)
     firstU32LE.push(head.readUInt32LE(offset));
    const rel=path.relative(unpack,file).split(path.sep).join('/');
+   let index=null;
+   try{index=loadPakIndex(file)}catch(error){index={error:String(error.message||error)}}
    const item={path:rel,size:stat.size,sha256:await digest(file),
     magicHex:head.subarray(0,16).toString('hex'),
     headHex:head.toString('hex'),asciiPreview:printable,
-    firstU32LE};
+    firstU32LE,
+    originalIndex:index?.error?index:{
+     count:index.count,headerBytes:index.headerBytes,
+     resourceBytesExact:index.resourceBytesExact,
+     resourceSizeGap:index.resourceSizeGap,
+     sampleNames:index.entries.slice(0,25),
+     sourceSpriteNames:index.entries.filter(e=>/\.(obs|chr|spr|ani|dmp|tis|gif)$/i.test(e.name)).map(e=>e.name).slice(0,350)
+    }};
    report.pakSignatures.push(item);
-   if(/(^|\/)(OBS|OBS2|OBS3|CHR|DMP|TIS|IMG|CRD|MapData)\.pak$/i.test(rel))
+   if(/(^|\/)(OBS|OBS2|OBS3|CHR|DMP|TIS|IMG|CRD|MapData)\.pak$/i.test(rel)){
     console.log('ORIGINAL_SOURCE_PAK_SIGNATURE '+JSON.stringify(item));
+    if(index&&!index.error)
+     console.log('SOURCE_PAK_INDEX '+JSON.stringify({
+      file:rel,count:index.count,
+      exactPayloadLength:index.resourceBytesExact,sizeGap:index.resourceSizeGap,
+      members:index.entries.slice(0,35)
+     }));
+   }
   }
   report.status='verified-original-packages-signature-inventory';
   console.log('STATIC_SOURCE_PAK_INVENTORY '+JSON.stringify({
