@@ -38,11 +38,29 @@
  // authority is configured, remote occupancy/rooms replace browser guesses.
  const central=window.__LEAF_CENTRAL_CHAT__||{enabled:false};
  const centralRooms=new Map(),centralCounts=new Map();
- // Source-era town capacity is documented, but the recovered archive does
- // not contain a list of live historical rooms. NEVER synthesize 128 empty
- // "public" rooms or pass them off as rooms supplied by the original server.
- // Only rooms created by real players or returned by the central authority
- // belong in the spatial map.
+ // The LIVE central server already implements 8 canonical, joinable rooms
+ // per actual north/south district via sourceRoom() in server/central.cjs.
+ // The previous client filtered ALL preset rooms out, leaving every town
+ // apparently empty until slow/free Render /api/rooms finished. Reproduce
+ // exactly the server's deterministic ids, region map and source-backed
+ // join routes without inserting any fake occupants or pretend 2002 users.
+ // Room names/background/positions are WEB conventions, not archived lists. 
+ const canonicalRoomId=(region,district,slot)=>{
+  const i=REGIONS[region]?.districts.findIndex(row=>row[0]===district);
+  return i>=0&&slot>=0&&slot<8?'leaf-public-'+region+'-'+i+'-'+slot:null;
+ };
+ const canonicalRoom=id=>{
+  const m=/^leaf-public-(north|south)-([0-7])-([0-7])$/.exec(id||'');
+  if(!m)return null;
+  const region=m[1],district=REGIONS[region].districts[Number(m[2])]?.[0];
+  if(!district)return null;
+  const slot=Number(m[3]);
+  return {id,name:'채팅방 '+String(Number(m[2])*8+slot+1).padStart(2,'0'),
+   region,district,preset:true,background:[2,3,5,4,0,1][slot%6],
+   capacity:12,owner:'',ownerId:'',passwordProof:'',passwordSalt:'',created:0};
+ };
+ const canonicalRooms=(region,district)=>Array.from({length:8},(_,slot)=>
+  canonicalRoom(canonicalRoomId(region,district,slot))).filter(Boolean);
  const ROOM_MAP={width:1480,height:1120};
  // A historic 2-person chat-room event is documented. Other limits are
  // restoration controls, not claims about the original server's room menu.
@@ -81,16 +99,19 @@
   return roomById(state.roomId);
  }
  function roomById(id){
-  return central.enabled?(centralRooms.get(id)||null):
-   (state.rooms.find(r=>r.id===id)||null);
+  return (central.enabled?centralRooms.get(id):state.rooms.find(r=>r.id===id))||
+   canonicalRoom(id)||null;
  }
- // ChatRoom/room0..room5 are six BACKGROUND IMAGES, not six historical
- // permanently open server rooms. A real original server supplied the room
- // catalogue. Only display rooms actually created and shared by participants.
+ // Display the server's actual always-joinable public room IDs even BEFORE
+ // the sleeping free central authority wakes. They are real endpoints, not
+ // fake occupants. Never manufacture archived 2002 room titles/population.
  function catalogue(){
-  const source=central.enabled?[...centralRooms.values()]:state.rooms;
-  return source.filter(r=>r.region===state.region&&r.district===state.district)
-   .sort((a,b)=>b.created-a.created);
+  const region=state.region,district=state.district;
+  const base=canonicalRooms(region,district);
+  const extra=central.enabled?[...centralRooms.values()]:state.rooms;
+  return base.concat(extra.filter(r=>r.region===region&&r.district===district
+   &&!base.some(permanent=>permanent.id===r.id))
+   .sort((a,b)=>b.created-a.created));
  }
  function roomOccupancy(roomId){
   return central.enabled?(centralCounts.get(roomId)||0):onlinePeers('room:'+roomId).length;
@@ -673,7 +694,9 @@
   for(const [i,r] of rooms.entries()){
    const b=document.createElement('button');
    b.type='button';b.className='social-directory-row';
-   b.dataset.room=r.id;b.title=r.name+' · 입장';b.setAttribute('aria-label',r.name+' 채팅방 입장');
+   b.dataset.room=r.id;b.dataset.permanent=String(!!r.preset);
+   b.title=r.name+(r.preset?' · 복원 서버 상설방':'')+' · 입장';
+   b.setAttribute('aria-label',r.name+' 채팅방 입장');
    const position=realRoomPosition(i);
    b.style.left=position.x+'px';b.style.top=position.y+'px';
    const number=document.createElement('span');number.className='social-room-number';
@@ -682,7 +705,7 @@
    const lock=document.createElement('small');lock.textContent=r.passwordProof?'🔒':'♧';
    const occupancy=document.createElement('span');occupancy.className='social-room-users';
    occupancy.textContent=roomOccupancy(r.id)+'/'+allowedCapacity(r.capacity)+'명';
-   const arrow=document.createElement('span');arrow.className='social-room-action';arrow.textContent='입장 ›';
+   const arrow=document.createElement('span');arrow.className='social-room-action';arrow.textContent=r.preset?'상설방 입장 ›':'입장 ›';
    b.append(number,lock,name,occupancy,arrow);
    if(!roomHasSpace(r)){b.classList.add('social-room-full');arrow.textContent='정원 초과'}
    b.onclick=()=>joinRoom(r.id);
@@ -765,7 +788,10 @@
   if(central.enabled){
    const verifiedJoin=async password=>{
     try{
-     if(!central.ready)throw Error('중앙 서버에 연결 중입니다.');
+     // Cold-start free Render can take tens of seconds. A click on the
+     // canonical server room should WAKE the authority and actually join,
+     // not immediately fail because /api/session is still pending.
+     if(!central.ready)await central.connect(nick());
      await central.join(id,password);
      if(state.view!=='directory'){await central.leave();return}
      if(!enterRoom(room)){await central.leave();return}
@@ -1231,11 +1257,9 @@
     for(const [id,r] of centralRooms)if(r.region===event.region&&r.district===event.district)centralRooms.delete(id);
     for(const r of event.rooms){
      centralCounts.set(r.id,Number(r.occupants)||0);
-     if(!r.preset){
-      // The server's isOwner flag is the ONLY source of room-management
-      // privilege. A stale locally stored owner name cannot grant controls.
-      centralRooms.set(r.id,centralRoom(r));
-     }
+     // The authority is the ONLY source of room-management privilege,
+     // including for canonical rooms. Keep live server room metadata too.
+     centralRooms.set(r.id,centralRoom(r));
     }
     if(state.view==='directory'&&event.region===state.region&&event.district===state.district)renderDirectory();
    }else if(event.type==='snapshot'){

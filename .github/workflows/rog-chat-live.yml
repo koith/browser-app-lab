@@ -148,6 +148,10 @@ jobs:
         env:
           FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
         run: node apps/4leaf/rog/tests/world-chat.cjs
+      - name: Verify 16 published ChatTown districts show actual joinable permanent rooms
+        env:
+          FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
+        run: node apps/4leaf/rog/tests/permanent-chatrooms.cjs
       - name: Verify actual public original ChatRoom 52x40 source scrollbar and accessible real history
         env:
           FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/

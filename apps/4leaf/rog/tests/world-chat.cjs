@@ -532,12 +532,12 @@ const path=require('path');
  await host.locator('#social-chat-north').click();
  await host.locator('.social-district-hotspot').nth(3).click();
  assert.equal(await host.evaluate(()=>window.__LEAF_SOCIAL__.getState().view),'directory');
- assert.equal(await host.locator('.social-directory-row').count(),0,
-  'only rooms created by actual participants may be listed');
+ assert.equal(await host.locator('.social-directory-row[data-permanent="true"]').count(),8,
+  'eight genuine server-side permanently joinable slots exist in this ChatTown district');
  assert.equal(await host.locator('.social-public-room').count(),0,
-  'do not fabricate eight rooms per area / 128 permanent rooms');
- assert.ok((await host.locator('#social-directory-empty').textContent()).includes('개설된 채팅방이 없습니다'),
-  'a vacant area is visibly honest about occupancy');
+  'real server-backed permanent rooms are ordinary functional room buttons, not fake static props');
+ assert.ok((await host.locator('.social-directory-row[data-permanent="true"] .social-room-users').allTextContents())
+  .every(text=>text==='0/12명'),'unoccupied permanent rooms must never show pretend human users');
  const emptyTerrain=await host.locator('#social-map-plane').evaluate(el=>({
   type:el.dataset.terrain,image:getComputedStyle(el).backgroundImage
  }));
@@ -657,8 +657,8 @@ const path=require('path');
  assert.equal(await host.evaluate(()=>window.__LEAF_NATIVE_ROOM_PANELS__?.getState().messengerParent),'main','leaving source room returns exact same real chat input to main');
  assert.equal(await host.locator('#social-peer-panel').evaluate(el=>el.parentElement.classList.contains('social-layout')),true,'the single real roster returns to its ordinary town layout');
  assert.equal(await host.locator('.social-public-room').count(),0,'no fabricated preset rooms after leaving');
- assert.equal(await host.locator('.social-directory-row').count(),1,'the actually created room persists after leaving');
- const realMarker=await host.locator('.social-directory-row').evaluate(el=>({
+ assert.equal(await host.locator('.social-directory-row').count(),9,'eight permanent server rooms plus the actual user-created room persist');
+ const realMarker=await host.locator('.social-directory-row[data-permanent="false"]').first().evaluate(el=>({
   x:Number.parseFloat(el.style.left),y:Number.parseFloat(el.style.top),count:el.querySelector('.social-room-users').textContent
  }));
  assert.ok(realMarker.x>=70&&realMarker.x<=1380&&realMarker.y>=70&&realMarker.y<=1050,

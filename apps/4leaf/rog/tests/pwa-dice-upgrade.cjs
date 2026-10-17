@@ -24,7 +24,7 @@ const {chromium}=require('playwright');
   const old='/* STALE-4LEAF-DICE-HANDLER-SHOULD-NOT-RUN */';
   const files=['game.js','dice-native-tis-depth.css'];
   await page.evaluate(async({files,old})=>{
-   const cache=await caches.open('4leaf-revival-pwa-v61');
+   const cache=await caches.open('4leaf-revival-pwa-v62');
    for(const file of files){
     await cache.put('./'+file,new Response(old,{
      headers:{'Content-Type':file.endsWith('.js')?
@@ -47,7 +47,7 @@ const {chromium}=require('playwright');
   assert.ok(online[1].text.includes('width:145px!important'),
    'online TIS CSS comes from the complete original sprite layout');
   const cached=await page.evaluate(async files=>{
-   const cache=await caches.open('4leaf-revival-pwa-v61');
+   const cache=await caches.open('4leaf-revival-pwa-v62');
    return Promise.all(files.map(async file=>{
     const item=await cache.match('./'+file);
     return item?await item.text():null;
@@ -67,7 +67,7 @@ const {chromium}=require('playwright');
   assert.ok(offline.every(x=>x.status===200&&!x.text.includes('STALE-4LEAF')),
    'the same upgraded genuine game scripts remain cached offline');
   const native=await page.evaluate(async()=>{
-   const cache=await caches.open('4leaf-revival-pwa-v61');
+   const cache=await caches.open('4leaf-revival-pwa-v62');
    const tile=await cache.match('./original/Tiles/0015.png');
    return {originalCached:Boolean(tile),size:tile?(await tile.blob()).size:0,
     controller:Boolean(navigator.serviceWorker.controller)};
