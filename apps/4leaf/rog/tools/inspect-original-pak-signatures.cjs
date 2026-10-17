@@ -122,9 +122,28 @@ function allFiles(directory){
     if(images.error||images.status!==0)
      console.log('ORIGINAL_IMG_IMAGE_CONVERSION_UNAVAILABLE '+String(images.error||images.stderr).slice(0,600));
     else console.log((images.stdout||'').slice(0,750000));
+    const sprite=spawnSync('python3',[path.join(__dirname,'decode-original-img-spr.py'),file],
+     {encoding:'utf8',timeout:50000,maxBuffer:8*1024*1024});
+    if(sprite.error||sprite.status!==0)
+     console.log('ORIGINAL_SPR_PIXEL_DECODE_ERROR '+String(sprite.error||sprite.stderr).slice(0,1200));
+    else console.log((sprite.stdout||'').slice(0,600000));
     const probe=spawnSync('python3',[path.join(__dirname,'probe-original-spr.py'),file],{encoding:'utf8',timeout:18000,maxBuffer:3*1024*1024});
     if(probe.error)console.log('SOURCE_SPR_PROBE_FAILED '+probe.error.message);
     else console.log((probe.stdout||'').slice(0,80000));
+   }
+   if(/\/Dice\/OBS(?:2|3)?\.pak$/i.test(file.split(path.sep).join('/'))){
+    const pixels=spawnSync('python3',[path.join(__dirname,'decode-original-obs-preview.py'),file],{
+     encoding:'utf8',timeout:30000,maxBuffer:8*1024*1024
+    });
+    if(pixels.error||pixels.status!==0)
+     console.log('ORIGINAL_OBS_IMAGE_PROBE_ERROR '+String(pixels.error||pixels.stderr).slice(0,500));
+    else console.log((pixels.stdout||'').slice(0,150000));
+    const sourceActors=spawnSync('python3',[path.join(__dirname,'probe-original-obs.py'),file],{
+     encoding:'utf8',timeout:15000,maxBuffer:3*1024*1024
+    });
+    if(sourceActors.error||sourceActors.status!==0)
+     console.log('SOURCE_OBS_PROBE_ERROR '+String(sourceActors.error||sourceActors.stderr).slice(0,500));
+    else console.log((sourceActors.stdout||'').slice(0,45000));
    }
    const sample=inspectOriginalMembers(file);
    for(const m of sample)console.log('ORIGINAL_MEMBER_HEADER '+JSON.stringify(m));

@@ -52,6 +52,12 @@ const {chromium}=require('playwright');
   assert.notEqual(await rig.getAttribute('data-chessman-id'),original,
    'changing an actual team card rerenders real actor identity instead of fixed player-index avatar');
   assert.equal(await rig.getAttribute('data-chessman-id'),'0045');
+  assert.equal(await rig.getAttribute('data-actor-rig'),'original-obs-sprite',
+   'original 2002 full-body artwork must replace provisional articulated CSS for the 0045 chessman');
+  assert.equal(await rig.locator('img.leaf-chess-original-obs').count(),1);
+  assert.equal(await rig.getAttribute('data-actor-original-model-recovered'),'true');
+  await page.waitForFunction(()=>document.querySelector('#board-pawns .board-pawn img.leaf-chess-original-obs')?.naturalWidth===44,
+   null,{timeout:13000});
   // Legitimate actual move sequence uses real 104-cell DMP game and calls
   // actor state transitions. Restore original card to continue real match.
   await page.evaluate(old=>{
@@ -82,8 +88,8 @@ const {chromium}=require('playwright');
    null,{timeout:2000});
   await page.evaluate(()=>window.__LEAF_GENESIS_ACTORS__.poseByPlayer(0,'victory',200));
   assert.equal(await rig.getAttribute('data-actor-pose'),'victory');
-  assert.deepEqual(await page.evaluate(()=>window.__LEAF_GENESIS_ACTORS__.getState().originalFullBodyFramesRecovered),[],
-   'must not falsely advertise any discovered original full-body pose sheets');
+  assert.deepEqual((await page.evaluate(()=>window.__LEAF_GENESIS_ACTORS__.getState().originalFullBodyFramesRecovered)).sort(),['0042','0045'],
+   'only the two actually recovered full-body OBS member ID sets are marked original; never invent more');
   await page.screenshot({path:'leaf-genesis-source-card-proxy-not-chat-actor.png'});
   assert.deepEqual(errors,[]);
   console.log('CARD-IDENTIFIED CHESSMEN + WEB WALK ATTACK HURT VICTORY PASS',JSON.stringify(stats));
