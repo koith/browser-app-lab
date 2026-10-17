@@ -228,6 +228,10 @@ jobs:
           FOURLEAF_MOBILE: '1'
           FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
         run: node apps/4leaf/rog/tests/dice-source-roll.cjs
+      - name: Verify original Dice IMG buttons and native chat scroll on published Chromium 800x600
+        env:
+          FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
+        run: node apps/4leaf/rog/tests/dice-source-native-ui.cjs
       - name: Verify two genuine mobile dice rolls and DMP layout in WebKit on deployed Pages
         env:
           FOURLEAF_BROWSER: webkit
