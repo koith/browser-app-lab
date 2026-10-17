@@ -78,6 +78,23 @@ const {chromium}=require('playwright');
   assert.ok(duel.every(x=>x.rig==='original-obs-sprite'&&
    x.portrait?.startsWith('./original/OBS/')&&!x.chatAvatar));
   await page.locator('#modal-buttons button').filter({hasText:'결과 확인'}).click();
+  // File URLs taint canvas by browser design; the deployed HTTP(S) client
+  // MUST produce an alpha mask that removes authentic SAVA green matte.
+  const protocol=await page.evaluate(()=>location.protocol);
+  if(protocol==='http:'||protocol==='https:'){
+   await page.waitForFunction(()=>[...document.querySelectorAll(
+    '#battle-player-panels .battle-side-portrait img')]
+    .every(img=>img.dataset.registryChroma==='ready'),null,{timeout:11000});
+   const masks=await page.evaluate(()=>[...document.querySelectorAll(
+    '#battle-player-panels .battle-side-portrait img')]
+    .map(img=>({original:img.getAttribute('src'),
+     css:getComputedStyle(img).maskImage,removed:Number(img.dataset.registryChromaRemoved)})));
+   assert.ok(masks.every(m=>m.original.startsWith('./original/Registry/sava')&&
+     m.css.includes('data:image/png;base64')&&m.removed>1000),
+     'original Registry pixels remain unchanged while source green matte is made transparent');
+   console.log('VERIFIED_SOURCE_REGISTRY_GREEN_KEY '+JSON.stringify(
+    masks.map(m=>({original:m.original,removed:m.removed}))));
+  }
   const sourceRailGeometry=await page.evaluate(()=>[...document.querySelectorAll(
     '#battle-player-panels .battle-side-portrait img')].map(img=>{
     const r=img.getBoundingClientRect();

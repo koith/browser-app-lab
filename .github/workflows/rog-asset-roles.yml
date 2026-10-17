@@ -27,3 +27,12 @@ jobs:
       - run: npx playwright install chromium --with-deps
       - name: Verify distinct native avatars, OBS chessmen and CardData party faces in live match
         run: node apps/4leaf/rog/tests/genesis-asset-roles.cjs
+      - name: Launch source client under same-origin HTTP for source PNG chroma validation
+        run: |
+          python3 -m http.server 8765 --directory apps/4leaf/rog >/tmp/4leaf-source-http.log 2>&1 &
+          echo $! >/tmp/4leaf-source-http.pid
+      - name: Assert original Registry green chroma is removed without re-encoding PNG files
+        env:
+          FOURLEAF_TEST_URL: http://127.0.0.1:8765/
+        run: node apps/4leaf/rog/tests/genesis-asset-roles.cjs
+
