@@ -81,7 +81,19 @@ function allFiles(directory){
   status:'unavailable',verified:false,executedClient:false,
   redistributedOriginalBinaries:false,pakSignatures:[],paksFound:0};
  try{
-  await download(source);
+  let successful=false,lastError='';
+  for(let attempt=1;attempt<=4;attempt++){
+   try{
+    await download(attempt%2===0?source+'?preservation='+attempt:source);
+    successful=true;break;
+   }catch(e){
+    lastError=String(e.message||e);
+    console.log('Source CDN retry '+attempt+'/4: '+lastError);
+    try{fs.unlinkSync(zipPath)}catch{}
+    await new Promise(resolve=>setTimeout(resolve,2500*attempt));
+   }
+  }
+  if(!successful)throw Error('archive CDN unavailable after four attempts: '+lastError);
   report.archiveSHA1=await digest(zipPath,'sha1');
   if(report.archiveSHA1!==expected)throw Error('archive hash does not match');
   report.verified=true;
