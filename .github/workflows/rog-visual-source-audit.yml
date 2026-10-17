@@ -2,6 +2,7 @@ name: 4LEAF 2004 game visual source audit
 on:
   push:
     paths:
+      - 'apps/4leaf/rog/game.js'
       - '.github/workflows/rog-visual-source-audit.yml'
       - 'apps/4leaf/rog/index.html'
       - 'apps/4leaf/rog/genesis-chessman-actors.js'
