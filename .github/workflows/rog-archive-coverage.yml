@@ -4,6 +4,8 @@ on:
     paths:
       - 'apps/4leaf/rog/game.js'
       - 'apps/4leaf/rog/sw.js'
+      - 'apps/4leaf/rog/pwa-runtime.js'
+      - 'apps/4leaf/rog/manifest.webmanifest'
       - 'apps/4leaf/rog/tests/pwa-dice-upgrade.cjs'
       - 'apps/4leaf/rog/classic-focus.css'
       - 'apps/4leaf/rog/board-camera.js'

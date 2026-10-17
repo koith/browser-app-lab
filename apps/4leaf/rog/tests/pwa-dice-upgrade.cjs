@@ -15,17 +15,16 @@ const {chromium}=require('playwright');
   const base=process.env.FOURLEAF_TEST_URL||'http://127.0.0.1:8765/';
   assert.match(base,/^https?:\/\//,'service workers require an HTTP(S) origin');
   await page.goto(base);
-  await page.evaluate(async()=>{
-   await navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'});
-   await navigator.serviceWorker.ready;
-  });
+  await page.waitForFunction(()=>window.__LEAF_PWA__?.getState().registered===true,
+   null,{timeout:30000});
+  await page.evaluate(()=>navigator.serviceWorker.ready);
   await page.reload();
   await page.waitForFunction(()=>Boolean(navigator.serviceWorker.controller),
    null,{timeout:20000});
   const old='/* STALE-4LEAF-DICE-HANDLER-SHOULD-NOT-RUN */';
   const files=['game.js','dice-native-tis-depth.css'];
   await page.evaluate(async({files,old})=>{
-   const cache=await caches.open('4leaf-revival-pwa-v58');
+   const cache=await caches.open('4leaf-revival-pwa-v59');
    for(const file of files){
     await cache.put('./'+file,new Response(old,{
      headers:{'Content-Type':file.endsWith('.js')?
@@ -48,7 +47,7 @@ const {chromium}=require('playwright');
   assert.ok(online[1].text.includes('width:145px!important'),
    'online TIS CSS comes from the complete original sprite layout');
   const cached=await page.evaluate(async files=>{
-   const cache=await caches.open('4leaf-revival-pwa-v58');
+   const cache=await caches.open('4leaf-revival-pwa-v59');
    return Promise.all(files.map(async file=>{
     const item=await cache.match('./'+file);
     return item?await item.text():null;
@@ -68,7 +67,7 @@ const {chromium}=require('playwright');
   assert.ok(offline.every(x=>x.status===200&&!x.text.includes('STALE-4LEAF')),
    'the same upgraded genuine game scripts remain cached offline');
   const native=await page.evaluate(async()=>{
-   const cache=await caches.open('4leaf-revival-pwa-v58');
+   const cache=await caches.open('4leaf-revival-pwa-v59');
    const tile=await cache.match('./original/Tiles/0015.png');
    return {originalCached:Boolean(tile),size:tile?(await tile.blob()).size:0,
     controller:Boolean(navigator.serviceWorker.controller)};
