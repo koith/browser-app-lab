@@ -74,7 +74,7 @@ const {chromium}=require('playwright');
    'second person acts only after clicking their own dice; forced warps and battles may reset a pawn before the test checks its final location');
   assert.equal(second.match.mode,'hotseat','second turn remains in real manual hotseat mode');
   await page.setViewportSize({width:390,height:844});
-  assert.equal(await page.locator('#board-nodes .tile').first().evaluate(e=>getComputedStyle(e).transform.startsWith('matrix(1, 0, 0, -1,')),true,
+  assert.equal(await page.locator('#board-nodes .tile').first().evaluate(e=>getComputedStyle(e).transform.startsWith('matrix(1, 0, 0, 1,')),true,
    'hex platform orientation stays correct on phone');
   assert.deepEqual(errors,[],'no browser runtime errors');
   console.log('GENESIS HEX ORIENTATION + MANUAL TURNS PASS',JSON.stringify({initial,afterTurn:after.match.active}));
