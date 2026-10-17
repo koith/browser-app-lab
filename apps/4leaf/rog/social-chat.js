@@ -912,6 +912,7 @@
   figure.type='button';figure.dataset.peer=user.id;
   const pos=place(user,index);figure.style.left=pos.x+'%';figure.style.top=pos.y+'%';
   const sprite=document.createElement('img');sprite.alt='';sprite.src='./original/Registry/'+avatars[user.avatar%avatars.length]+'.png';
+  window.__LEAF_REGISTRY_CHROMA__?.apply(sprite,sprite.getAttribute('src'));
   const tag=document.createElement('span');tag.className='social-avatar-name';tag.textContent=user.nick;
   figure.append(sprite,tag);
   if(user.id===tabId)figure.classList.add('self');
@@ -949,7 +950,10 @@
    node.classList.toggle('self',user.id===tabId);
    const img=node.querySelector('img');
    const filename=avatars[user.avatar%avatars.length];
-   if(!img.src.endsWith('/'+filename+'.png'))img.src='./original/Registry/'+filename+'.png';
+   if(img.dataset.nativeRegistrySource!=='./original/Registry/'+filename+'.png'){
+    img.src='./original/Registry/'+filename+'.png';
+    window.__LEAF_REGISTRY_CHROMA__?.apply(img,img.getAttribute('src'));
+   }
    img.style.transform=(user.id===tabId?state.facing:user.facing)===-1?'scaleX(-1)':'';
   });
  }

@@ -486,6 +486,8 @@ function drawBattlePanels(){
     avatarSources[(Number(p.id)||0)%avatarSources.length];
    avatar.src='./original/Registry/'+participantAvatar+'.png';
    avatar.dataset.sourceRole='player-avatar-not-chessman';
+   // Preserve genuine source PNG; compute green-key alpha mask on Pages.
+   window.__LEAF_REGISTRY_CHROMA__?.apply(avatar,avatar.getAttribute('src'));
    avatar.decoding='async';
    portrait.append(avatar);
    const info=document.createElement('div');info.className='battle-side-info';
