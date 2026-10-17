@@ -25,6 +25,7 @@ const {chromium}=require('playwright');
   const initial=await page.evaluate(()=>({
    cardTeam:window.__ROG_TEST__.getMatch().players.map(p=>p.team[0].replace(/^c_/,'')),
    actors:window.__LEAF_GENESIS_ACTORS__.getState().rendered,
+   sourceIds:Object.keys(window.ORIGINAL_LEAF_OBS_FRAMES||{}),
    portraits:[...document.querySelectorAll('#board-pawns .leaf-chess-portrait')].map(el=>({
     src:el.getAttribute('src'),ready:el.complete,dimensions:[el.naturalWidth,el.naturalHeight]})),
    heights:[...document.querySelectorAll('#board-pawns .leaf-chess-actor')].map(el=>el.getBoundingClientRect().height),
@@ -33,10 +34,15 @@ const {chromium}=require('playwright');
   assert.equal(initial.actors.length,2,'only real two human chessmen appear on board');
   assert.deepEqual(initial.actors.map(x=>x.chessmanId),initial.cardTeam,
    'every source sprite identity comes from the actual participant chessman');
-  assert.ok(initial.actors.every(x=>x.rig==='inferred-8head'&&x.originalRecovered==='false'&&x.pose==='idle'),
-   'no unrecovered original meshes or source animation sheets are claimed');
-  assert.ok(initial.heights.every(n=>n>=70&&n<=125),
-   'unrecovered proxy body stays source-scale rather than pretending to be an oversized original mesh');
+  assert.ok(initial.actors.every(x=>{
+   const native=initial.sourceIds.includes(x.chessmanId);
+   return x.pose==='idle'&&(native
+    ? x.rig==='original-obs-sprite'&&x.originalRecovered==='true'
+    : x.rig==='inferred-8head'&&x.originalRecovered==='false');
+  }), 'each existing original OBS character must use its actual 2002 pixels; missing frames may use explicitly inferred proxy');
+  assert.ok(initial.heights.every((n,i)=>
+    initial.sourceIds.includes(initial.cardTeam[i])?n===0:n>=70&&n<=125),
+   'native OBS artwork hides the fallback CSS skeleton; only missing characters use source-scale proxy');
   assert.equal(initial.chatAvatar,0,'ChatTown avatars are NOT used on Genesis board');
   await page.waitForFunction(()=>[...document.querySelectorAll('#board-pawns .leaf-chess-portrait')].every(x=>x.complete&&x.naturalWidth>15),null,{timeout:13000});
   assert.ok(initial.portraits.every(x=>x.src.startsWith('./original/CardData/chm_')));
