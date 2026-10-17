@@ -35,7 +35,8 @@ const cells={
      })),
      layout:css.display,
      image:css.backgroundImage,
-     size:[Math.round(rect.width),Math.round(rect.height)]
+     size:[el.offsetWidth,el.offsetHeight],
+     rotatedBounds:[Math.round(rect.width),Math.round(rect.height)]
     };
    })
   })),
