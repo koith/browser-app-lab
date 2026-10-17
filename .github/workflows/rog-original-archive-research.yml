@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'apps/4leaf/rog/tools/inspect-original-client-archive.cjs'
+      - 'apps/4leaf/rog/tools/inspect-original-client-zip.cjs'
       - 'apps/4leaf/rog/docs/original-evidence-crosscheck-2026-10-17.md'
       - '.github/workflows/rog-original-archive-research.yml'
   workflow_dispatch:
@@ -19,4 +20,18 @@ jobs:
         with:
           name: original-4leaf-client-metadata
           path: original-4leaf-client-metadata.json
+          retention-days: 14
+
+  archive-source-zip-listing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download public 2002 ZIP into ephemeral tmp, verify SHA1, list central directory only, NEVER execute or publish binaries
+        run: node apps/4leaf/rog/tools/inspect-original-client-zip.cjs
+      - name: Preserve safe ZIP file-list report only
+        uses: actions/upload-artifact@v4
+        with:
+          name: original-4leaf-zip-listing
+          path: original-4leaf-zip-listing.json
           retention-days: 14
