@@ -73,7 +73,8 @@ def decode_rows(body,width,height,palette):
         sprite.putpalette(palette)
         sprite.info["transparency"]=0
         img=sprite.convert("RGBA").transpose(Image.Transpose.FLIP_TOP_BOTTOM)
-        opaque=sum(1 for i in range(3,len(img.tobytes()),4) if img.tobytes()[i]!=0)
+        rgba=img.tobytes()
+        opaque=sum(1 for i in range(3,len(rgba),4) if rgba[i]!=0)
         if opaque<45:raise ValueError("Native sprite contains insufficient visible pixels")
         return img,{"sourceRows":height,"decoder":"palette-and-byte-run-verified;x-centre-and-orientation-provisional","markerThreshold":low,"opaquePixels":opaque}
     raise ValueError("No strict full-height native scanline solution")
@@ -131,12 +132,12 @@ def main():
         statistics["framePNGs"]+=len(images)
         statistics["bytes"]+=sum(len(f["payload"]) for f in images)
     # Deterministic, sorted, valid JavaScript; no html/screenshot compositing.
-    manifest="/* Genuine original Dice/OBS.pak indexed palette frame pixels.\\n"+\
-      " * PROVISIONAL scanline X placement & action labels.\\n"+\
-      " * NEVER reuse as ChatTown Registry avatars. */\\n"+\
-      "window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(\\n"+\
-      " window.ORIGINAL_LEAF_OBS_FRAMES||{},\\n"+\
-      json.dumps(recovered,ensure_ascii=False,indent=2,sort_keys=True)+"\\n);\\n"
+    manifest="/* Genuine original Dice/OBS.pak indexed palette frame pixels.\n"+\
+      " * PROVISIONAL scanline X placement & action labels.\n"+\
+      " * NEVER reuse as ChatTown Registry avatars. */\n"+\
+      "window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(\n"+\
+      " window.ORIGINAL_LEAF_OBS_FRAMES||{},\n"+\
+      json.dumps(recovered,ensure_ascii=False,indent=2,sort_keys=True)+"\n);\n"
     (out/"animation-extra.js").write_text(manifest,encoding="utf-8")
     (out/"bulk-source-report.json").write_text(
         json.dumps(statistics,ensure_ascii=False,indent=2,sort_keys=True)+"\n",encoding="utf-8")
