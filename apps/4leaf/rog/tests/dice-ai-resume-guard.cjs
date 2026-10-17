@@ -97,8 +97,8 @@ const {chromium}=require('playwright');
    pawnTransform:getComputedStyle(document.querySelector('#board-pawns .board-pawn')).transform
   }));
   assert.ok(automated.source,'original source TIS art remains intact during AI turn');
-  assert.ok(automated.tileTransform.startsWith('matrix(1, 0, 0, -1,'),
-   'the corrected hex platform orientation is stable during actual manual and auto turns');
+  assert.ok(automated.tileTransform.startsWith('matrix(1, 0, 0, 1,'),
+   'upright native original TIS platform art remains stable during manual and AI turns');
   assert.ok(!automated.pawnTransform.startsWith('matrix(1, 0, 0, -1,'),
    'actor models are NOT upside down');
   await page.setViewportSize({width:390,height:844});
