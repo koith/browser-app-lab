@@ -122,6 +122,11 @@ function allFiles(directory){
     if(images.error||images.status!==0)
      console.log('ORIGINAL_IMG_IMAGE_CONVERSION_UNAVAILABLE '+String(images.error||images.stderr).slice(0,600));
     else console.log((images.stdout||'').slice(0,750000));
+    const sprite=spawnSync('python3',[path.join(__dirname,'decode-original-img-spr.py'),file],
+     {encoding:'utf8',timeout:50000,maxBuffer:8*1024*1024});
+    if(sprite.error||sprite.status!==0)
+     console.log('ORIGINAL_SPR_PIXEL_DECODE_ERROR '+String(sprite.error||sprite.stderr).slice(0,1200));
+    else console.log((sprite.stdout||'').slice(0,600000));
     const probe=spawnSync('python3',[path.join(__dirname,'probe-original-spr.py'),file],{encoding:'utf8',timeout:18000,maxBuffer:3*1024*1024});
     if(probe.error)console.log('SOURCE_SPR_PROBE_FAILED '+probe.error.message);
     else console.log((probe.stdout||'').slice(0,80000));
