@@ -25,6 +25,7 @@ on:
       - 'apps/4leaf/rog/tests/genesis-chessman-actors.cjs'
       - 'apps/4leaf/rog/dice-fall.css'
       - 'apps/4leaf/rog/tests/dice-fall.cjs'
+      - 'apps/4leaf/rog/tests/dice-historical-24-clash.cjs'
       - 'apps/4leaf/rog/dice-2004-full-frame.css'
       - 'apps/4leaf/rog/tests/dice-2004-full-frame.cjs'
       - 'apps/4leaf/rog/dice-source-roll.js'
@@ -100,6 +101,8 @@ jobs:
         run: node apps/4leaf/rog/tests/dice-source-roll.cjs
       - name: Verify game waits for actual gravity, bouncing and face-specific 3D die stops
         run: node apps/4leaf/rog/tests/dice-fall.cjs
+      - name: Replay 2004 Ironmask Destroy 24 vs Damian Block 24 fixed-tie ability cancellation
+        run: node apps/4leaf/rog/tests/dice-historical-24-clash.cjs
       - name: Chromium verify recovered 800x600 / 406x152 / 172x152 functioning Dice frame
         run: node apps/4leaf/rog/tests/dice-native-frame.cjs
       - uses: actions/upload-artifact@v4
