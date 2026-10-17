@@ -116,6 +116,11 @@ function allFiles(directory){
   report.paksFound=paks.length;
   report.originalMemberHeaders=[];
   for(const file of paks){
+   if(/\/Dice\/IMG\.pak$/i.test(file.split(path.sep).join('/'))){
+    const probe=spawnSync('python3',[path.join(__dirname,'probe-original-spr.py'),file],{encoding:'utf8',timeout:18000,maxBuffer:3*1024*1024});
+    if(probe.error)console.log('SOURCE_SPR_PROBE_FAILED '+probe.error.message);
+    else console.log((probe.stdout||'').slice(0,80000));
+   }
    const sample=inspectOriginalMembers(file);
    for(const m of sample)console.log('ORIGINAL_MEMBER_HEADER '+JSON.stringify(m));
    report.originalMemberHeaders.push(...sample);
