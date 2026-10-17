@@ -6,9 +6,11 @@
  */
 const assert=require('node:assert/strict');
 const path=require('node:path');
-const {chromium}=require('playwright');
+const {chromium,webkit}=require('playwright');
 (async()=>{
- const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
+ const engine=process.env.FOURLEAF_BROWSER==='webkit'?'webkit':'chromium';
+ const browser=await (engine==='webkit'?webkit:chromium).launch({
+  headless:true,args:engine==='webkit'?[]:['--no-sandbox']});
  const page=await browser.newPage({viewport:{width:390,height:844},
   isMobile:true,hasTouch:true,deviceScaleFactor:2,serviceWorkers:'block'});
  const errors=[];
@@ -125,7 +127,7 @@ const {chromium}=require('playwright');
   assert.ok(final.count>=2&&final.aria?.includes('주사위 결과'));
   await page.screenshot({path:'leaf-4leaf-mobile-dmp-after-roll.png'});
   assert.deepEqual(errors,[],'dice game has no unhandled Chromium runtime error');
-  console.log('GENESIS DMP GRID + ACTUAL MOBILE DICE ROLL PASS',
+  console.log('GENESIS DMP GRID + ACTUAL MOBILE DICE ROLL PASS ['+engine+']',
    JSON.stringify({cells:board.length,horizontal,vertical,sameRow,
     rolls:final.count,firstRoll:firstTurn.match.lastRoll}));
  }finally{await browser.close()}

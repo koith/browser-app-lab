@@ -186,6 +186,13 @@ jobs:
         env:
           FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
         run: node apps/4leaf/rog/tests/dice-mobile-roll-dmp-order.cjs
+      - name: Install WebKit to test Safari-engine touch on public Pages
+        run: npx playwright install webkit --with-deps
+      - name: Verify two genuine mobile dice rolls and DMP layout in WebKit on deployed Pages
+        env:
+          FOURLEAF_BROWSER: webkit
+          FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
+        run: node apps/4leaf/rog/tests/dice-mobile-roll-dmp-order.cjs
       - name: Verify published full-size 145x97 original TIS raised platform overlap, DMP depth and mobile zoom
         env:
           FOURLEAF_TEST_URL: https://koith.github.io/browser-app-lab/apps/4leaf/rog/
