@@ -57,7 +57,7 @@
    pawn.dataset.actorSource='OBS/'+native.originalMember;
    pawn.dataset.actorOriginalModelRecovered='true';
    pawn.dataset.sourceAnimation='genuine-OBS-pixels';
-   pawn.dataset.sourcePoseMapping='provisional';
+   pawn.dataset.sourcePoseMapping='unverified';
    img.hidden=false;
    const seq=sequenceFor(native,action);
    renderNativeFrame(pawn,seq[0]);
