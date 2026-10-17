@@ -1,0 +1,25 @@
+name: 4LEAF 2004 game visual source audit
+on:
+  pull_request:
+    paths:
+      - 'apps/4leaf/rog/tests/dice-original-visual-qa.cjs'
+      - 'apps/4leaf/rog/dice-native-tis-orientation.css'
+      - 'apps/4leaf/rog/dice-native-tis-depth.css'
+      - 'apps/4leaf/rog/game.js'
+      - '.github/workflows/rog-visual-source-audit.yml'
+  workflow_dispatch:
+jobs:
+  actual-800px-chromium-capture:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install genuine desktop Chromium
+        run: |
+          npm install --no-save playwright
+          npx playwright install chromium --with-deps
+      - name: Capture real 800x600 original DMP/TIS gameplay (never screenshot-overlay implementation)
+        run: node apps/4leaf/rog/tests/dice-original-visual-qa.cjs
