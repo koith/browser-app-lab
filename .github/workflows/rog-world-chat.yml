@@ -28,6 +28,8 @@ on:
       - 'apps/4leaf/rog/central-client.js'
       - 'apps/4leaf/rog/sw.js'
       - 'apps/4leaf/rog/dice-source-roll.css'
+      - 'apps/4leaf/rog/dice-2004-full-frame.css'
+      - 'apps/4leaf/rog/tests/dice-2004-full-frame.cjs'
       - 'apps/4leaf/rog/dice-source-roll.js'
       - 'apps/4leaf/rog/tests/dice-source-roll.cjs'
       - 'apps/4leaf/rog/pwa-runtime.js'
@@ -175,6 +177,8 @@ jobs:
         run: node apps/4leaf/rog/tests/dice-native-minimap-navigation.cjs
       - name: Real Genesis DMP camera navigation across entire board in Chromium
         run: node apps/4leaf/rog/tests/dice-dmp-full-camera.cjs
+      - name: Ensure original 2004 screenshot registered full 800px game world and real footer source assets
+        run: node apps/4leaf/rog/tests/dice-2004-full-frame.cjs
       - name: Verify screenshot-anchored battlefield ROLL HUD with physical phone touch
         env:
           FOURLEAF_MOBILE: '1'
