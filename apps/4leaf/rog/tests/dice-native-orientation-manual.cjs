@@ -31,11 +31,11 @@ const {chromium}=require('playwright');
   assert.deepEqual(initial.bots,[false,false],'both participants manually control their own turns');
   assert.equal(initial.count,104,'source DMP 4LEAF board still has 104 actual tiles');
   assert.deepEqual(initial.dimensions,[145,97],'native TIS source geometry unchanged');
-  assert.ok(initial.art,'every flipped tile still uses actual original TIS art');
+  assert.ok(initial.art,'every upright tile still uses actual original TIS art');
   assert.ok(initial.transform.startsWith('matrix(1, 0, 0, 1,'),
-   'original hex platform is flipped vertically, not the entire board world');
+   'original TIS art is already upright with unflipped bitmap top');
   assert.ok(!initial.pawnTransform?.startsWith('matrix(1, 0, 0, -1,'),
-   'Registry characters remain upright');
+   'source CardData chessmen remain upright');
   await page.locator('#roll-btn').click();
   await page.waitForFunction(()=>window.__ROG_TEST__.getMatch()?.active===1&&
    !document.querySelector('#roll-btn')?.disabled,null,{timeout:30000});
