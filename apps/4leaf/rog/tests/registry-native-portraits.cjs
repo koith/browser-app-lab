@@ -48,6 +48,10 @@ const path=require('node:path');
   assert.ok(source.invisible>500&&source.visible>500,'native character silhouette remains distinct from source transparency');
   assert.equal(source.leakedKey,0,'native transparent edge has no visible chroma-key pixels');
   await page.screenshot({path:'leaf-original-transparent-sava-room.png'});
+  // Native 2004 full-frame ChatRoom hides the fabricated duplicate global
+  // toolbar. Leave by its real 66x25 EXIT before selecting Dice on MainFrame.
+  await page.locator('#social-back').click();
+  await page.waitForFunction(()=>window.__LEAF_SOCIAL__.getState().view==='directory');
   await page.locator('[data-route="lobby"]').first().click();
   await page.locator('#lobby-create').click();
   await page.locator('#bot-count').selectOption('1');
