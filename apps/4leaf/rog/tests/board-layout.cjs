@@ -52,12 +52,11 @@ const assert=require('node:assert/strict');
    // Live WEB projection preserves source art, coordinates and events.
    assert.ok(result.sizes.every(t=>Math.abs(t.w-145)<.1&&Math.abs(t.h-97)<.1&&t.native==='145x97'),
     'all original TIS raised platforms retain true 145x97 source pixels');
-   // decode_tis.py already corrected FAST.PAL.COLORKEY bottom-up rows
-   // when exporting the original TIS PNGs. A SECOND scaleY(-1) flips the
-   // genuine JOKER lettering, card edges and skill emblems upside down.
-   // Matrix(1,0,0,1,-72.5,-48.5) is the source-correct upright orientation.
-   assert.ok(result.sizes.every(t=>t.transform.startsWith('matrix(1, 0, 0, 1,')),
-    'all recovered 145x97 TIS PNGs remain upright without a second flip');
+   // Actual October 18 side-by-side browser QA proved the decoded 2002
+   // PNG is displayed upside down without one final CSS scaleY(-1).
+   // The source PNG bytes/alpha are not edited; 145x97 dimensions persist.
+   assert.ok(result.sizes.every(t=>t.transform.startsWith('matrix(1, 0, 0, -1,')),
+    'all recovered 145x97 TIS PNGs show upright lettering after correcting exporter row order');
    assert.ok(result.sizes.every(t=>t.clip.startsWith('polygon(')),
     'inferred hit polygon restricts clicking transparent overlapping source corners');
    assert.ok(result.sizes.every(t=>t.dmp.every(Number.isFinite)&&Number.isFinite(t.depth)),
