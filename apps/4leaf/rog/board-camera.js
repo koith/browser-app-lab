@@ -16,13 +16,35 @@
  const SIZE={width:6000,height:3300};
  const PROJECTED_PITCH={x:70*SIZE.width/SOURCE_GRID.width,
   y:47*SIZE.height/SOURCE_GRID.height};
- const state={game:null,path:null,scale:1,panX:0,panY:0,cameraX:null,cameraY:null,manual:false,lastTurn:null,visible:null};
+ const state={game:null,path:null,scale:1,panX:0,panY:0,cameraX:null,cameraY:null,manual:false,lastTurn:null,visible:null,routeBounds:null};
  const $=id=>document.getElementById(id);
  const clamp=(n,low,high)=>Math.min(high,Math.max(low,n));
+ // Preserve real source DMP cell positions. The enlarged 6000x3300 world
+ // accommodates all 26 maps, but an individual route can occupy only a
+ // third of it. A world-sized camera clamp exposed EMPTY terrain far
+ // outside that map when a user dragged to either edge.
+ // 24px additional WEB camera overscan is inferred, not historical MVE.
+ function projectedRouteBounds(path){
+   let minX=Infinity,maxX=-Infinity,minY=Infinity,maxY=-Infinity;
+   for(const p of path||[]){
+     const x=Number(p.x)/100*SIZE.width,y=Number(p.y)/100*SIZE.height;
+     if(!Number.isFinite(x)||!Number.isFinite(y))continue;
+     minX=Math.min(minX,x);maxX=Math.max(maxX,x);
+     minY=Math.min(minY,y);maxY=Math.max(maxY,y);
+   }
+   if(!Number.isFinite(minX))return {minX:0,maxX:SIZE.width,minY:0,maxY:SIZE.height};
+   return {
+     minX:clamp(minX-97,0,SIZE.width),
+     maxX:clamp(maxX+97,0,SIZE.width),
+     minY:clamp(minY-73,0,SIZE.height),
+     maxY:clamp(maxY+73,0,SIZE.height)
+   };
+ }
  const camera={
    sync(game,path){
      if(!game||!Array.isArray(path)||!path.length||!$('board-area'))return;
      state.game=game;state.path=path;
+     state.routeBounds=projectedRouteBounds(path);
      const current=game.players?.[game.active];
      if(current){
        const p=path[clamp(Number(current.position)||0,0,path.length-1)];
@@ -75,16 +97,23 @@
      const width=area.clientWidth,height=area.clientHeight;
      if(width<20||height<20)return;
      const scale=state.scale;
-     const worldW=SIZE.width*scale,worldH=SIZE.height*scale;
      const anchorX=width*.49-state.cameraX*scale,
            anchorY=height*.52-state.cameraY*scale;
-     // Clamp to the source-grid-preserving, screen-projected DMP route;
-     // not the old zoom-only limit of 1/8 of the viewport. Every source
-     // cell must be accessible even at 65%-100% zoom.
-     const x=worldW>=width?clamp(anchorX+state.panX,width-worldW,0):(width-worldW)/2,
-           y=worldH>=height?clamp(anchorY+state.panY,height-worldH,0):(height-worldH)/2;
-     state.panX=worldW>=width?x-anchorX:0;
-     state.panY=worldH>=height?y-anchorY:0;
+     const route=state.routeBounds||projectedRouteBounds(state.path);
+     // Restrict camera DRAG, WHEEL, MINIMAP and touch pan to the actual
+     // source DMP footprint, not the much larger common canvas allocated
+     // for the longest of the 26 source maps. A native 145x97 platform
+     // and a small overscan margin are included in the footprint.
+     const hasX=(route.maxX-route.minX)*scale>=width;
+     const hasY=(route.maxY-route.minY)*scale>=height;
+     const x=hasX?clamp(anchorX+state.panX,
+       width-route.maxX*scale,-route.minX*scale):
+       (width-(route.minX+route.maxX)*scale)/2;
+     const y=hasY?clamp(anchorY+state.panY,
+       height-route.maxY*scale,-route.minY*scale):
+       (height-(route.minY+route.maxY)*scale)/2;
+     state.panX=hasX?x-anchorX:0;
+     state.panY=hasY?y-anchorY:0;
      // Exactly the same clamped screen rectangle the source camera paints;
      // no independent guessed minimap box or fictitious world coordinates.
      state.visible={
@@ -112,7 +141,10 @@
      }
      window.__LEAF_MINIMAP_NAV__?.onCameraRender?.();
    },
-   getState(){return {...state,size:{...SIZE},sourceGrid:{...SOURCE_GRID},projectedPitch:{...PROJECTED_PITCH},visible:state.visible?{...state.visible}:null}}
+   getState(){return {...state,size:{...SIZE},sourceGrid:{...SOURCE_GRID},
+     projectedPitch:{...PROJECTED_PITCH},
+     routeBounds:state.routeBounds?{...state.routeBounds}:null,
+     visible:state.visible?{...state.visible}:null}}
  };
  window.__LEAF_CAMERA__=camera;
  if('ResizeObserver' in window){
