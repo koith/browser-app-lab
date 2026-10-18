@@ -79,5 +79,7 @@ jobs:
           name: original-dice-board-layout-screens
           path: |
             leaf-board-*.png
+            leaf-live-3d-battle-podiums-*.png
+            leaf-original-battle-stage-*.png
             rog-dmp-overlap-audit.json
           retention-days: 7
