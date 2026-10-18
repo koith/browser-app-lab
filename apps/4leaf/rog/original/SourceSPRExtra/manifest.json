@@ -1,0 +1,1093 @@
+{
+  "classifiedNative2DOnly": true,
+  "decoder": "STRICT-PAL-640-VIDEO-RLE",
+  "original3DDiceMeshRecovered": false,
+  "source": "2002 Dice/IMG.pak",
+  "sourceSHA256": "ab8dcf4d3f774781565982979a9b8e269ce4f6ac295a5c21ecc5b83c0098465b",
+  "sprites": {
+    "avatar.spr": {
+      "frames": [
+        {
+          "height": 17,
+          "index": 0,
+          "originX": 5,
+          "originY": 2,
+          "originalOpaquePixels": 272,
+          "sha256": "939f0cdb0ea776f9e6f26ab41838d4af30648d1fea3c12e7a3666a93a7f2c140",
+          "url": "./original/SourceSPRExtra/avatar-00.png",
+          "width": 25
+        },
+        {
+          "height": 17,
+          "index": 1,
+          "originX": 3,
+          "originY": 2,
+          "originalOpaquePixels": 300,
+          "sha256": "28222325371d2a5b60e51b74c903e1814f2d0611407c40b866564612e9f70fa3",
+          "url": "./original/SourceSPRExtra/avatar-01.png",
+          "width": 27
+        },
+        {
+          "height": 17,
+          "index": 2,
+          "originX": 4,
+          "originY": 2,
+          "originalOpaquePixels": 265,
+          "sha256": "a6b55a1eaa1c48f65e2f898d97261c420aaf9ed4d5bce062558ac9b816aba5a3",
+          "url": "./original/SourceSPRExtra/avatar-02.png",
+          "width": 26
+        },
+        {
+          "height": 17,
+          "index": 3,
+          "originX": 2,
+          "originY": 2,
+          "originalOpaquePixels": 287,
+          "sha256": "f13eeef6a972c84c16ddd75dda77bcb0dc00f2c256ae7ece27853c3940be5378",
+          "url": "./original/SourceSPRExtra/avatar-03.png",
+          "width": 28
+        },
+        {
+          "height": 17,
+          "index": 4,
+          "originX": 3,
+          "originY": 2,
+          "originalOpaquePixels": 283,
+          "sha256": "ad1efc9ac4fb1ccad5ad8603d735ea2d8e7b6d796a5d37a2fcb7bf21994ecc51",
+          "url": "./original/SourceSPRExtra/avatar-04.png",
+          "width": 27
+        },
+        {
+          "height": 17,
+          "index": 5,
+          "originX": 2,
+          "originY": 2,
+          "originalOpaquePixels": 312,
+          "sha256": "cfdd4ba0b16edcf957fcf62e554daca8fc9df3beede284c4689e68ba776545f9",
+          "url": "./original/SourceSPRExtra/avatar-05.png",
+          "width": 28
+        },
+        {
+          "height": 17,
+          "index": 6,
+          "originX": 3,
+          "originY": 2,
+          "originalOpaquePixels": 289,
+          "sha256": "e2c0abadd3aa76663dba5000e962c31438f80c61ab51c16d3d4dc52203d247aa",
+          "url": "./original/SourceSPRExtra/avatar-06.png",
+          "width": 27
+        },
+        {
+          "height": 17,
+          "index": 7,
+          "originX": 3,
+          "originY": 2,
+          "originalOpaquePixels": 321,
+          "sha256": "3ed16c037990602547b767cc591374d7083ac570d0f6a992ed843ad7ace3d238",
+          "url": "./original/SourceSPRExtra/avatar-07.png",
+          "width": 27
+        },
+        {
+          "height": 31,
+          "index": 8,
+          "originX": 4,
+          "originY": 1,
+          "originalOpaquePixels": 323,
+          "sha256": "970f16e8bb3469ad8c2e1cc45a155779cf8c93327fbf6776e194bf5e9c067e89",
+          "url": "./original/SourceSPRExtra/avatar-08.png",
+          "width": 18
+        },
+        {
+          "height": 31,
+          "index": 9,
+          "originX": 5,
+          "originY": 1,
+          "originalOpaquePixels": 426,
+          "sha256": "8f8a1bb2f1b2705099a8350ed2c95b27e9e37450706527e591b41aef3a2f5412",
+          "url": "./original/SourceSPRExtra/avatar-09.png",
+          "width": 19
+        },
+        {
+          "height": 31,
+          "index": 10,
+          "originX": 5,
+          "originY": 1,
+          "originalOpaquePixels": 289,
+          "sha256": "651be4165642b52e90e88d12b94ce1161bbd3fb50a452e48e986bb8f3b244997",
+          "url": "./original/SourceSPRExtra/avatar-10.png",
+          "width": 15
+        },
+        {
+          "height": 31,
+          "index": 11,
+          "originX": 3,
+          "originY": 1,
+          "originalOpaquePixels": 439,
+          "sha256": "c8f053b09af0b31718c684c5cc102b7f965d28f629d3c4a375db709b1511a59f",
+          "url": "./original/SourceSPRExtra/avatar-11.png",
+          "width": 20
+        },
+        {
+          "height": 31,
+          "index": 12,
+          "originX": 5,
+          "originY": 1,
+          "originalOpaquePixels": 337,
+          "sha256": "f9f737aa1c1aee76eee52d6c52a4514dab90543bd8822d1e85c2b807ddbd527d",
+          "url": "./original/SourceSPRExtra/avatar-12.png",
+          "width": 15
+        },
+        {
+          "height": 31,
+          "index": 13,
+          "originX": 5,
+          "originY": 1,
+          "originalOpaquePixels": 315,
+          "sha256": "0e5e5b8d71f267aec7223bf0e2d27394785c34499e791788a97eecc9734f963f",
+          "url": "./original/SourceSPRExtra/avatar-13.png",
+          "width": 15
+        },
+        {
+          "height": 31,
+          "index": 14,
+          "originX": 2,
+          "originY": 1,
+          "originalOpaquePixels": 397,
+          "sha256": "192f339ed1619589e13c53fd713c3f2823fbab6670c52d034438666737e259dd",
+          "url": "./original/SourceSPRExtra/avatar-14.png",
+          "width": 21
+        },
+        {
+          "height": 13,
+          "index": 15,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 1144,
+          "sha256": "a62335d7859b8de3072716683e9b4033e983bfdd381dd277ab384371364fe3e7",
+          "url": "./original/SourceSPRExtra/avatar-15.png",
+          "width": 88
+        },
+        {
+          "height": 13,
+          "index": 16,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 1144,
+          "sha256": "5d136c8449f0b79596e926ffad91116c10ddbbb829ecbfac9497a8fb1de24380",
+          "url": "./original/SourceSPRExtra/avatar-16.png",
+          "width": 88
+        },
+        {
+          "height": 13,
+          "index": 17,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 1144,
+          "sha256": "0af3f6cfa5f364982de68f9ee68663414497a3d2cbc2faf4ab96134b76c78b39",
+          "url": "./original/SourceSPRExtra/avatar-17.png",
+          "width": 88
+        },
+        {
+          "height": 13,
+          "index": 18,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 1144,
+          "sha256": "6733bd90f168eed3ce580154fb49587125410e0a27a9c1d05149582f5650de23",
+          "url": "./original/SourceSPRExtra/avatar-18.png",
+          "width": 88
+        },
+        {
+          "height": 13,
+          "index": 19,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 1144,
+          "sha256": "7c0f1eb18785e1b5f1150825af09371bc48e9b32ce8677745b5de64037c896f4",
+          "url": "./original/SourceSPRExtra/avatar-19.png",
+          "width": 88
+        },
+        {
+          "height": 13,
+          "index": 20,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 1144,
+          "sha256": "a4f92db289fcc599b07efc73adecbd16c3bd8ee6ee1ae89bd2fe41f120fb87e8",
+          "url": "./original/SourceSPRExtra/avatar-20.png",
+          "width": 88
+        },
+        {
+          "height": 13,
+          "index": 21,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 1144,
+          "sha256": "800d86a8abd79f0202a99a81952e87025eb57366fa6adfe8156a2249c5c0748c",
+          "url": "./original/SourceSPRExtra/avatar-21.png",
+          "width": 88
+        },
+        {
+          "height": 13,
+          "index": 22,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 1144,
+          "sha256": "f4366ded5a5131282a22e31e5bb1752afa886544e5cd2268513c05802049661b",
+          "url": "./original/SourceSPRExtra/avatar-22.png",
+          "width": 88
+        },
+        {
+          "height": 8,
+          "index": 23,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 64,
+          "sha256": "2afd95fe67c3242286036a6d79d234b644296a3acdaf4c50d8c186e9ab81b9a6",
+          "url": "./original/SourceSPRExtra/avatar-23.png",
+          "width": 8
+        },
+        {
+          "height": 8,
+          "index": 24,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 64,
+          "sha256": "6c4a71f38dfe0b47f76a58e70352efbe9335861ccd74df3849b9cc913c4c9312",
+          "url": "./original/SourceSPRExtra/avatar-24.png",
+          "width": 8
+        },
+        {
+          "height": 8,
+          "index": 25,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 64,
+          "sha256": "f897bf03697041e1b7a74f1d87e04c7e34beefeb1b8ce28ff75b94e7e3329744",
+          "url": "./original/SourceSPRExtra/avatar-25.png",
+          "width": 8
+        },
+        {
+          "height": 8,
+          "index": 26,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 64,
+          "sha256": "8351c4a28215adc473859fe099134e27fb69ef9c9558de3dbd666708434c9cba",
+          "url": "./original/SourceSPRExtra/avatar-26.png",
+          "width": 8
+        },
+        {
+          "height": 8,
+          "index": 27,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 64,
+          "sha256": "a427cbb8800e7213557a20f593daefb6a6be518ecad403b1fdc356112e968b1e",
+          "url": "./original/SourceSPRExtra/avatar-27.png",
+          "width": 8
+        },
+        {
+          "height": 8,
+          "index": 28,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 64,
+          "sha256": "951b9255ee9c2e20ed496ae514ab8d24b9822bf6f3d42da8d81928fdad39cda7",
+          "url": "./original/SourceSPRExtra/avatar-28.png",
+          "width": 8
+        },
+        {
+          "height": 8,
+          "index": 29,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 64,
+          "sha256": "636fa83f2e4bff09bb04ff2dbd7e62b2eee7c999aac99ba1f2b2b45d87d101f5",
+          "url": "./original/SourceSPRExtra/avatar-29.png",
+          "width": 8
+        },
+        {
+          "height": 8,
+          "index": 30,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 64,
+          "sha256": "97144b4b726e580d4d2f52249a4d78b79f7c2672bba5faa8c4945fbc78854c6d",
+          "url": "./original/SourceSPRExtra/avatar-30.png",
+          "width": 8
+        },
+        {
+          "height": 92,
+          "index": 31,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 364,
+          "sha256": "4df6b538d2212dab588cc57bb731495fb6674a7480e62e651ee56c2793ccf7d2",
+          "url": "./original/SourceSPRExtra/avatar-31.png",
+          "width": 92
+        }
+      ],
+      "nativeFrameCount": 32,
+      "originalMember": "avatar.spr",
+      "sourceSHA256": "655b473d5789cb4cdc1080f04a60c618c5df904fff5ab2ce95b1c29824d43607"
+    },
+    "avatar2.spr": {
+      "frames": [
+        {
+          "height": 76,
+          "index": 0,
+          "originX": -1,
+          "originY": 1,
+          "originalOpaquePixels": 6840,
+          "sha256": "cac647c8146eb6b745bbc92e9d76c8a42a7ed91c0310cb2cd7fcaf347e35f5a0",
+          "url": "./original/SourceSPRExtra/avatar2-00.png",
+          "width": 90
+        }
+      ],
+      "nativeFrameCount": 1,
+      "originalMember": "avatar2.spr",
+      "sourceSHA256": "46a9f0d7f17ad3240156eecfd685f4110ef33b2639e5e6ffd145cc231ffef16a"
+    },
+    "avatar3.spr": {
+      "frames": [
+        {
+          "height": 22,
+          "index": 0,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 770,
+          "sha256": "354ec6b34ed2c729a0fd903f27249e44629472a038d39f981e1bc7f134aa1c1b",
+          "url": "./original/SourceSPRExtra/avatar3-00.png",
+          "width": 35
+        },
+        {
+          "height": 22,
+          "index": 1,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 770,
+          "sha256": "23b9b79e87765991540edc806ea2ffb65e8f29109c1f228912d923fc015c2da5",
+          "url": "./original/SourceSPRExtra/avatar3-01.png",
+          "width": 35
+        },
+        {
+          "height": 22,
+          "index": 2,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 770,
+          "sha256": "50229d4d4ff872052ea0caa5c83666ff3422e558693ba0f0a096957bfac01d46",
+          "url": "./original/SourceSPRExtra/avatar3-02.png",
+          "width": 35
+        },
+        {
+          "height": 22,
+          "index": 3,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 770,
+          "sha256": "0dcd220a3196d38a5185ef7df4b665fa157c57a62703521f843448fbea094e7e",
+          "url": "./original/SourceSPRExtra/avatar3-03.png",
+          "width": 35
+        },
+        {
+          "height": 22,
+          "index": 4,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 770,
+          "sha256": "3a191ebb3ddda5462719a460ea4ea93219267f5787a4565ebae76ebd790f4107",
+          "url": "./original/SourceSPRExtra/avatar3-04.png",
+          "width": 35
+        },
+        {
+          "height": 22,
+          "index": 5,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 770,
+          "sha256": "bc10ef5b9948626b9e7b18daa0de32eba80ef8301207a1821b207f71304ba431",
+          "url": "./original/SourceSPRExtra/avatar3-05.png",
+          "width": 35
+        },
+        {
+          "height": 22,
+          "index": 6,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 770,
+          "sha256": "0e5928697f5fd1111d091e69d6f195491b51827ff0dfbe625b02620d3711f913",
+          "url": "./original/SourceSPRExtra/avatar3-06.png",
+          "width": 35
+        },
+        {
+          "height": 22,
+          "index": 7,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 770,
+          "sha256": "7f505c34826f8cbad7d822e6a8b3bb221a6fb75f41cb3828fedddfb15ec9c07d",
+          "url": "./original/SourceSPRExtra/avatar3-07.png",
+          "width": 35
+        },
+        {
+          "height": 33,
+          "index": 8,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 858,
+          "sha256": "898a45f091b77f1f7baa52ae2fd0921fce5f8bfd10f6e5d2665fcf6eaa958851",
+          "url": "./original/SourceSPRExtra/avatar3-08.png",
+          "width": 26
+        },
+        {
+          "height": 33,
+          "index": 9,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 858,
+          "sha256": "3fbd5f18df7fa731bc286944ed2d1368e49bfaad27ef8c1a919d21449b1e68fe",
+          "url": "./original/SourceSPRExtra/avatar3-09.png",
+          "width": 26
+        },
+        {
+          "height": 33,
+          "index": 10,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 858,
+          "sha256": "4c39c0aa8ff16101e0dc7ced201be887ad20fa1ff77ec51cec3f237350254e75",
+          "url": "./original/SourceSPRExtra/avatar3-10.png",
+          "width": 26
+        },
+        {
+          "height": 33,
+          "index": 11,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 858,
+          "sha256": "de05d5d7b5be5e6d55206df417661f3710d62575b34111f738b14bd49d0211d9",
+          "url": "./original/SourceSPRExtra/avatar3-11.png",
+          "width": 26
+        },
+        {
+          "height": 33,
+          "index": 12,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 858,
+          "sha256": "5e5e069718c7d3989d05ed10c1fea635096e1465130bba7eb9d936e4d1c28f7b",
+          "url": "./original/SourceSPRExtra/avatar3-12.png",
+          "width": 26
+        },
+        {
+          "height": 33,
+          "index": 13,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 858,
+          "sha256": "8f3d6e91cb67d8cb6f122dd27d6acd6a73e9e2d86ea2f6e697b65506892d2125",
+          "url": "./original/SourceSPRExtra/avatar3-13.png",
+          "width": 26
+        },
+        {
+          "height": 33,
+          "index": 14,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 858,
+          "sha256": "6a3fa27af88936e4ad1a9d25def4604157feaf799c6e0a063c070ce5cf9a0cf5",
+          "url": "./original/SourceSPRExtra/avatar3-14.png",
+          "width": 26
+        },
+        {
+          "height": 13,
+          "index": 15,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 1144,
+          "sha256": "a62335d7859b8de3072716683e9b4033e983bfdd381dd277ab384371364fe3e7",
+          "url": "./original/SourceSPRExtra/avatar3-15.png",
+          "width": 88
+        },
+        {
+          "height": 13,
+          "index": 16,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 1144,
+          "sha256": "5d136c8449f0b79596e926ffad91116c10ddbbb829ecbfac9497a8fb1de24380",
+          "url": "./original/SourceSPRExtra/avatar3-16.png",
+          "width": 88
+        },
+        {
+          "height": 13,
+          "index": 17,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 1144,
+          "sha256": "0af3f6cfa5f364982de68f9ee68663414497a3d2cbc2faf4ab96134b76c78b39",
+          "url": "./original/SourceSPRExtra/avatar3-17.png",
+          "width": 88
+        },
+        {
+          "height": 13,
+          "index": 18,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 1144,
+          "sha256": "6733bd90f168eed3ce580154fb49587125410e0a27a9c1d05149582f5650de23",
+          "url": "./original/SourceSPRExtra/avatar3-18.png",
+          "width": 88
+        },
+        {
+          "height": 13,
+          "index": 19,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 1144,
+          "sha256": "7c0f1eb18785e1b5f1150825af09371bc48e9b32ce8677745b5de64037c896f4",
+          "url": "./original/SourceSPRExtra/avatar3-19.png",
+          "width": 88
+        },
+        {
+          "height": 13,
+          "index": 20,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 1144,
+          "sha256": "a4f92db289fcc599b07efc73adecbd16c3bd8ee6ee1ae89bd2fe41f120fb87e8",
+          "url": "./original/SourceSPRExtra/avatar3-20.png",
+          "width": 88
+        },
+        {
+          "height": 13,
+          "index": 21,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 1144,
+          "sha256": "800d86a8abd79f0202a99a81952e87025eb57366fa6adfe8156a2249c5c0748c",
+          "url": "./original/SourceSPRExtra/avatar3-21.png",
+          "width": 88
+        },
+        {
+          "height": 13,
+          "index": 22,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 1144,
+          "sha256": "f4366ded5a5131282a22e31e5bb1752afa886544e5cd2268513c05802049661b",
+          "url": "./original/SourceSPRExtra/avatar3-22.png",
+          "width": 88
+        },
+        {
+          "height": 8,
+          "index": 23,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 64,
+          "sha256": "2afd95fe67c3242286036a6d79d234b644296a3acdaf4c50d8c186e9ab81b9a6",
+          "url": "./original/SourceSPRExtra/avatar3-23.png",
+          "width": 8
+        },
+        {
+          "height": 8,
+          "index": 24,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 64,
+          "sha256": "6c4a71f38dfe0b47f76a58e70352efbe9335861ccd74df3849b9cc913c4c9312",
+          "url": "./original/SourceSPRExtra/avatar3-24.png",
+          "width": 8
+        },
+        {
+          "height": 8,
+          "index": 25,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 64,
+          "sha256": "f897bf03697041e1b7a74f1d87e04c7e34beefeb1b8ce28ff75b94e7e3329744",
+          "url": "./original/SourceSPRExtra/avatar3-25.png",
+          "width": 8
+        },
+        {
+          "height": 8,
+          "index": 26,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 64,
+          "sha256": "8351c4a28215adc473859fe099134e27fb69ef9c9558de3dbd666708434c9cba",
+          "url": "./original/SourceSPRExtra/avatar3-26.png",
+          "width": 8
+        },
+        {
+          "height": 8,
+          "index": 27,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 64,
+          "sha256": "a427cbb8800e7213557a20f593daefb6a6be518ecad403b1fdc356112e968b1e",
+          "url": "./original/SourceSPRExtra/avatar3-27.png",
+          "width": 8
+        },
+        {
+          "height": 8,
+          "index": 28,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 64,
+          "sha256": "951b9255ee9c2e20ed496ae514ab8d24b9822bf6f3d42da8d81928fdad39cda7",
+          "url": "./original/SourceSPRExtra/avatar3-28.png",
+          "width": 8
+        },
+        {
+          "height": 8,
+          "index": 29,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 64,
+          "sha256": "636fa83f2e4bff09bb04ff2dbd7e62b2eee7c999aac99ba1f2b2b45d87d101f5",
+          "url": "./original/SourceSPRExtra/avatar3-29.png",
+          "width": 8
+        },
+        {
+          "height": 8,
+          "index": 30,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 64,
+          "sha256": "97144b4b726e580d4d2f52249a4d78b79f7c2672bba5faa8c4945fbc78854c6d",
+          "url": "./original/SourceSPRExtra/avatar3-30.png",
+          "width": 8
+        },
+        {
+          "height": 92,
+          "index": 31,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 364,
+          "sha256": "4df6b538d2212dab588cc57bb731495fb6674a7480e62e651ee56c2793ccf7d2",
+          "url": "./original/SourceSPRExtra/avatar3-31.png",
+          "width": 92
+        }
+      ],
+      "nativeFrameCount": 32,
+      "originalMember": "avatar3.spr",
+      "sourceSHA256": "76a20877f649d1dc585f7134ca0de770bfbfff511e108cf7c5f3a9a4ae842050"
+    },
+    "menu.spr": {
+      "frames": [
+        {
+          "height": 24,
+          "index": 0,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 391,
+          "sha256": "8cc3abeb48cb6b39b58047ba8482b61ed21980670a3e0050e9f12f2975ec9c2b",
+          "url": "./original/SourceSPRExtra/menu-00.png",
+          "width": 23
+        },
+        {
+          "height": 24,
+          "index": 1,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 391,
+          "sha256": "b8f123f2f477adecb8264e2226c49483520d7d99ef6f0897413c932df474b9f9",
+          "url": "./original/SourceSPRExtra/menu-01.png",
+          "width": 23
+        },
+        {
+          "height": 24,
+          "index": 2,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 391,
+          "sha256": "ad236296c23242353fb6ef597eaee7b1e647affc7ed4a622001d0d6750201618",
+          "url": "./original/SourceSPRExtra/menu-02.png",
+          "width": 23
+        },
+        {
+          "height": 24,
+          "index": 3,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 498,
+          "sha256": "69373406c10234055e6ea4a9ed4cc950bc6d6028b4b17da0f862aad52cb0c4f4",
+          "url": "./original/SourceSPRExtra/menu-03.png",
+          "width": 26
+        },
+        {
+          "height": 24,
+          "index": 4,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 498,
+          "sha256": "8efab0deb4b33c67bfb3721bb5b04562e63beb9ddc4dcd27b2006a558b402ea4",
+          "url": "./original/SourceSPRExtra/menu-04.png",
+          "width": 26
+        },
+        {
+          "height": 24,
+          "index": 5,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 498,
+          "sha256": "c2c26d20dbcebcd8a12bc45fefef5b2f888871f01576ad74c22e63de94fed0c2",
+          "url": "./original/SourceSPRExtra/menu-05.png",
+          "width": 26
+        },
+        {
+          "height": 17,
+          "index": 6,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 438,
+          "sha256": "5d7d63caf593508efbaa3c7fb37090020ae1bf21b0d5a599613a197c0c2e4410",
+          "url": "./original/SourceSPRExtra/menu-06.png",
+          "width": 26
+        },
+        {
+          "height": 17,
+          "index": 7,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 438,
+          "sha256": "2a0cb76188926788cc14fc94af8ee839b145e41ea5eacd643b6e1873af08fc76",
+          "url": "./original/SourceSPRExtra/menu-07.png",
+          "width": 26
+        },
+        {
+          "height": 17,
+          "index": 8,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 438,
+          "sha256": "dc2d7f3a92d1e4b6f647d525cec9a9566d386812a9333429bb2e88068c2c8e33",
+          "url": "./original/SourceSPRExtra/menu-08.png",
+          "width": 26
+        }
+      ],
+      "nativeFrameCount": 9,
+      "originalMember": "menu.spr",
+      "sourceSHA256": "31ac66b37aff596899fb25f0eea7eb614137c8405c197d716fd8eba5e01e589a"
+    },
+    "minipanel.spr": {
+      "frames": [
+        {
+          "height": 20,
+          "index": 0,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 1484,
+          "sha256": "90a25e380119140365a9c48ebbb8f4a9b9f7828ddef018da6108ceeed6f89c92",
+          "url": "./original/SourceSPRExtra/minipanel-00.png",
+          "width": 75
+        },
+        {
+          "height": 20,
+          "index": 1,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 1484,
+          "sha256": "907643b022cd15ad054d010c069a7eac5917a8dc43614e6c1c6144f1cf4143d3",
+          "url": "./original/SourceSPRExtra/minipanel-01.png",
+          "width": 75
+        },
+        {
+          "height": 20,
+          "index": 2,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 1484,
+          "sha256": "ad218b00164dea995fd62d02fbe993e0ec0dad961eeb63a7c186607ed247ea22",
+          "url": "./original/SourceSPRExtra/minipanel-02.png",
+          "width": 75
+        },
+        {
+          "height": 20,
+          "index": 3,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 1484,
+          "sha256": "81ee104d89050fb4df994bc5d7dbe3c7c84a04120d10e2c78998f69df3b3ebc0",
+          "url": "./original/SourceSPRExtra/minipanel-03.png",
+          "width": 75
+        }
+      ],
+      "nativeFrameCount": 4,
+      "originalMember": "minipanel.spr",
+      "sourceSHA256": "f0590e8964aafc3a5b786af01ae6765719a680457c0afbc6207e206a17750c94"
+    },
+    "selector.spr": {
+      "frames": [
+        {
+          "height": 72,
+          "index": 0,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 6592,
+          "sha256": "644b370b98f6db9089437961b666b2166473bc291a4ff2fff73c1e7fb2941378",
+          "url": "./original/SourceSPRExtra/selector-00.png",
+          "width": 92
+        },
+        {
+          "height": 72,
+          "index": 1,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 6592,
+          "sha256": "1e7f4ba24a5c770b2e8c0d4f67aff37c90ef8f582428f13d8414fadc6d90d3a4",
+          "url": "./original/SourceSPRExtra/selector-01.png",
+          "width": 92
+        },
+        {
+          "height": 72,
+          "index": 2,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 6592,
+          "sha256": "ea3604d4ed6ad4567acec8547481e37c50a05f673b537cd81acd9153d86bc4c8",
+          "url": "./original/SourceSPRExtra/selector-02.png",
+          "width": 92
+        },
+        {
+          "height": 72,
+          "index": 3,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 6592,
+          "sha256": "6253fb65fdad6e19ef4e8a4a794db2d48ebe4233dd1173ac16b3a8dbae7b428f",
+          "url": "./original/SourceSPRExtra/selector-03.png",
+          "width": 92
+        },
+        {
+          "height": 72,
+          "index": 4,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 6592,
+          "sha256": "e4db949eca08a5cf4d8454ac8b62aaf45fcc1f6e8e0223cce40d77272c6fa64a",
+          "url": "./original/SourceSPRExtra/selector-04.png",
+          "width": 92
+        },
+        {
+          "height": 72,
+          "index": 5,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 6592,
+          "sha256": "b2b2fcae650c9eaa2ae3c1a9bd988997b4ebf0e1cc13e9c1a483bc6e9e4c8da0",
+          "url": "./original/SourceSPRExtra/selector-05.png",
+          "width": 92
+        },
+        {
+          "height": 72,
+          "index": 6,
+          "originX": 0,
+          "originY": 0,
+          "originalOpaquePixels": 6592,
+          "sha256": "c8803b6115ae4f25e1a2e66425e88610f06ee63b84ada0ae779e576682bd949e",
+          "url": "./original/SourceSPRExtra/selector-06.png",
+          "width": 92
+        }
+      ],
+      "nativeFrameCount": 7,
+      "originalMember": "selector.spr",
+      "sourceSHA256": "5d47b02fb76994cfb5f921fd1d1433cd5acb43c12828a2b1c98f73870b05a200"
+    },
+    "teamIcon.spr": {
+      "frames": [
+        {
+          "height": 18,
+          "index": 0,
+          "originX": -9,
+          "originY": -9,
+          "originalOpaquePixels": 239,
+          "sha256": "2b6fe3867a366a31e26d25eaca5dfe683f2ec2d727445e02327f525bcfa5bf46",
+          "url": "./original/SourceSPRExtra/teamIcon-00.png",
+          "width": 18
+        },
+        {
+          "height": 16,
+          "index": 1,
+          "originX": -8,
+          "originY": -8,
+          "originalOpaquePixels": 235,
+          "sha256": "b777028f7267488e5e13287e6818dab534a8cb2ff2cc330fbccd18d08b5b9146",
+          "url": "./original/SourceSPRExtra/teamIcon-01.png",
+          "width": 17
+        },
+        {
+          "height": 17,
+          "index": 2,
+          "originX": -9,
+          "originY": -8,
+          "originalOpaquePixels": 184,
+          "sha256": "089c65b756d8e1c2c822eac0f9bb766e63cdf547037faa89c1678228a011cc2e",
+          "url": "./original/SourceSPRExtra/teamIcon-02.png",
+          "width": 18
+        },
+        {
+          "height": 18,
+          "index": 3,
+          "originX": -9,
+          "originY": -9,
+          "originalOpaquePixels": 256,
+          "sha256": "836cba8952c5db4232648008d58884e6511d930f3c53d75b1dd19c8a860118ba",
+          "url": "./original/SourceSPRExtra/teamIcon-03.png",
+          "width": 18
+        }
+      ],
+      "nativeFrameCount": 4,
+      "originalMember": "teamIcon.spr",
+      "sourceSHA256": "aeb9d29f987c3a1d4541c13993bfef132b5b43e39b5408028c5d79561a89992a"
+    },
+    "winAbility.spr": {
+      "frames": [
+        {
+          "height": 284,
+          "index": 0,
+          "originX": -165,
+          "originY": -206,
+          "originalOpaquePixels": 51668,
+          "sha256": "cbf78765ca593005bfe948b72c6f5e7af8537e284f89afbdcc6ccea31919ba5c",
+          "url": "./original/SourceSPRExtra/winAbility-00.png",
+          "width": 330
+        },
+        {
+          "height": 29,
+          "index": 1,
+          "originX": -130,
+          "originY": 81,
+          "originalOpaquePixels": 1155,
+          "sha256": "29e0c2dea2ada6223ff204e3faf41c35226193868d78d29a3307820fcfcb1ade",
+          "url": "./original/SourceSPRExtra/winAbility-01.png",
+          "width": 41
+        },
+        {
+          "height": 29,
+          "index": 2,
+          "originX": -100,
+          "originY": 120,
+          "originalOpaquePixels": 1155,
+          "sha256": "29e0c2dea2ada6223ff204e3faf41c35226193868d78d29a3307820fcfcb1ade",
+          "url": "./original/SourceSPRExtra/winAbility-02.png",
+          "width": 41
+        },
+        {
+          "height": 29,
+          "index": 3,
+          "originX": -19,
+          "originY": 134,
+          "originalOpaquePixels": 1155,
+          "sha256": "29e0c2dea2ada6223ff204e3faf41c35226193868d78d29a3307820fcfcb1ade",
+          "url": "./original/SourceSPRExtra/winAbility-03.png",
+          "width": 41
+        },
+        {
+          "height": 29,
+          "index": 4,
+          "originX": 61,
+          "originY": 120,
+          "originalOpaquePixels": 1155,
+          "sha256": "29e0c2dea2ada6223ff204e3faf41c35226193868d78d29a3307820fcfcb1ade",
+          "url": "./original/SourceSPRExtra/winAbility-04.png",
+          "width": 41
+        },
+        {
+          "height": 29,
+          "index": 5,
+          "originX": 91,
+          "originY": 81,
+          "originalOpaquePixels": 1155,
+          "sha256": "29e0c2dea2ada6223ff204e3faf41c35226193868d78d29a3307820fcfcb1ade",
+          "url": "./original/SourceSPRExtra/winAbility-05.png",
+          "width": 41
+        }
+      ],
+      "nativeFrameCount": 6,
+      "originalMember": "winAbility.spr",
+      "sourceSHA256": "559e8c9d5585d5ff8e924ddb1f72ed4718a49eac4f214d666723d9dc9c094793"
+    },
+    "winBattle.spr": {
+      "frames": [
+        {
+          "height": 42,
+          "index": 0,
+          "originX": -112,
+          "originY": -205,
+          "originalOpaquePixels": 7590,
+          "sha256": "5648799c325951bafdc5c2c6a9c44b39feb1d3f89f296a4ad07990ad3ddf1767",
+          "url": "./original/SourceSPRExtra/winBattle-00.png",
+          "width": 222
+        },
+        {
+          "height": 113,
+          "index": 1,
+          "originX": -180,
+          "originY": -4,
+          "originalOpaquePixels": 23689,
+          "sha256": "66c157aed494b162927ba1ec816f969a93ebb636e17d040cc668dbd3d6696599",
+          "url": "./original/SourceSPRExtra/winBattle-01.png",
+          "width": 355
+        }
+      ],
+      "nativeFrameCount": 2,
+      "originalMember": "winBattle.spr",
+      "sourceSHA256": "7422ffc664bb319a533005380a41a263d35d8606e6d10c70e9201e7c14799c57"
+    },
+    "winDoa.spr": {
+      "frames": [
+        {
+          "height": 133,
+          "index": 0,
+          "originX": -181,
+          "originY": -66,
+          "originalOpaquePixels": 41022,
+          "sha256": "cc52f782b04d5d621ada90079b23b50b32fbb2f32d65141817e2513558204720",
+          "url": "./original/SourceSPRExtra/winDoa-00.png",
+          "width": 363
+        }
+      ],
+      "nativeFrameCount": 1,
+      "originalMember": "winDoa.spr",
+      "sourceSHA256": "fc5a9c57fc4e7bd0b189328da6cd8190f42e72d340cec94a8ca8bc8042bd626a"
+    },
+    "winJail.spr": {
+      "frames": [
+        {
+          "height": 219,
+          "index": 0,
+          "originX": -68,
+          "originY": -167,
+          "originalOpaquePixels": 22022,
+          "sha256": "d2dbeb8b575812c0ecddaae46bfeb951ebf2ea47cbc556450d614fed29d45674",
+          "url": "./original/SourceSPRExtra/winJail-00.png",
+          "width": 136
+        }
+      ],
+      "nativeFrameCount": 1,
+      "originalMember": "winJail.spr",
+      "sourceSHA256": "2637a204129339fd3d004a0ed754a659087da734b223bd22608b8cc77e60f372"
+    },
+    "winResult.spr": {
+      "frames": [
+        {
+          "height": 88,
+          "index": 0,
+          "originX": -221,
+          "originY": -217,
+          "originalOpaquePixels": 10465,
+          "sha256": "7452e344f351b91216c032be7151710de33be901ce892e2bcbffc4914406e4f7",
+          "url": "./original/SourceSPRExtra/winResult-00.png",
+          "width": 452
+        }
+      ],
+      "nativeFrameCount": 1,
+      "originalMember": "winResult.spr",
+      "sourceSHA256": "a3df9e96f2bfefd4957f1714ebf72e793c2acf3c9587bf0ffad91e174cbbc619"
+    }
+  }
+}

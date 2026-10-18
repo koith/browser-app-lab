@@ -1,0 +1,104 @@
+/* ORIGINAL SOURCE ART, not 2004 photo-composited background.
+ * SHA-authenticated 2002 Dice/IMG.pak winBattle.spr:
+ *   frame 0 = 222x42 BATTLE chrome
+ *   frame 1 = 355x113 two metal elevated podiums plus native red VS.
+ * The game still independently renders its real OBS chessmen, names,
+ * actual combat dice pips and turn engine. This authentic 2D native art
+ * does NOT establish the historic 3D MVE mesh/physics/camera.
+ */
+#app.app-classic-dice #game #battle-visual .leaf-native-winbattle-podiums{
+ display:block;
+ position:absolute;
+ left:50%;bottom:12%;
+ width:355px;height:113px;
+ max-width:100%;
+ object-fit:contain;
+ object-position:center bottom;
+ transform:translateX(-50%);
+ image-rendering:auto;
+ pointer-events:none;
+ z-index:3;
+}
+#app.app-classic-dice #game #battle-visual .leaf-native-winbattle-heading{
+ display:block;
+ position:absolute;
+ top:3%;left:50%;
+ width:222px;height:42px;
+ max-width:75%;
+ object-fit:contain;
+ transform:translateX(-50%);
+ pointer-events:none;
+ z-index:8;
+}
+#app.app-classic-dice #game #battle-visual[data-native-battle-podium="loading"]
+ .leaf-native-winbattle-podiums,
+#app.app-classic-dice #game #battle-visual[data-native-battle-podium="fallback"]
+ .leaf-native-winbattle-podiums{
+ display:none;
+}
+/* Once genuine IMG.pak pixels decode, completely remove the invented
+ * web-built drums, fake four steel legs and redundant CSS "VS".
+ * DOM fallback remains available if source fails on first offline visit.
+ */
+#app.app-classic-dice #game #battle-visual[data-native-battle-podium="ready"]
+ .battle-visual-pedestal,
+#app.app-classic-dice #game #battle-visual[data-native-battle-podium="ready"]
+ .battle-visual-vs{
+ display:none!important;
+}
+#app.app-classic-dice #game #battle-visual[data-native-battle-heading="ready"]
+ .battle-visual-head{
+ visibility:hidden!important;
+}
+#app.app-classic-dice #game #battle-visual[data-native-battle-podium="ready"]{
+ display:block!important;
+}
+#app.app-classic-dice #game #battle-visual[data-native-battle-podium="ready"]
+ .battle-visual-side{
+ position:absolute!important;
+ top:0!important;
+ height:100%!important;
+ width:140px!important;
+ max-width:none!important;
+ margin:0!important;
+ z-index:5!important;
+}
+#app.app-classic-dice #game #battle-visual[data-native-battle-podium="ready"]
+ .battle-visual-side.attacker{
+ left:calc(50% - 183px)!important;
+ right:auto!important;
+}
+#app.app-classic-dice #game #battle-visual[data-native-battle-podium="ready"]
+ .battle-visual-side.defender{
+ left:calc(50% + 43px)!important;
+ right:auto!important;
+}
+#app.app-classic-dice #game #battle-visual[data-native-battle-podium="ready"]
+ .battle-visual-side .battle-visual-actor.leaf-battle-chessman{
+ bottom:calc(12% + 92px)!important;
+ z-index:7!important;
+}
+#app.app-classic-dice #game #battle-visual[data-native-battle-podium="ready"]
+ .battle-visual-side>.battle-visual-dice{
+ z-index:8!important;
+}
+@media(max-width:650px){
+ #app.app-classic-dice #game #battle-visual .leaf-native-winbattle-podiums{
+  width:100%!important;height:auto!important;
+ }
+ #app.app-classic-dice #game #battle-visual .leaf-native-winbattle-heading{
+  max-width:75%!important;height:auto!important;
+ }
+ #app.app-classic-dice #game #battle-visual[data-native-battle-podium="ready"]
+ .battle-visual-side{
+  width:110px!important;
+ }
+ #app.app-classic-dice #game #battle-visual[data-native-battle-podium="ready"]
+ .battle-visual-side.attacker{left:calc(50% - 155px)!important}
+ #app.app-classic-dice #game #battle-visual[data-native-battle-podium="ready"]
+ .battle-visual-side.defender{left:calc(50% + 45px)!important}
+ #app.app-classic-dice #game #battle-visual[data-native-battle-podium="ready"]
+ .battle-visual-side .battle-visual-actor.leaf-battle-chessman{
+  bottom:calc(12% + 78px)!important;
+ }
+}

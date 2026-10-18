@@ -1,0 +1,100 @@
+name: 4LEAF quarantine original secondary OBS resource candidates
+on:
+  push:
+    paths:
+      - '.github/workflows/rog-obs-secondary-quarantine.yml'
+      - 'apps/4leaf/rog/tools/probe-original-obs-secondary-paks.py'
+      - 'apps/4leaf/rog/tools/probe-original-img-extra-spr.py'
+      - 'apps/4leaf/rog/tools/emit-original-img-extra-spr.py'
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/rog-obs-secondary-quarantine.yml'
+      - 'apps/4leaf/rog/tools/probe-original-obs-secondary-paks.py'
+      - 'apps/4leaf/rog/tools/probe-original-img-extra-spr.py'
+      - 'apps/4leaf/rog/tools/emit-original-img-extra-spr.py'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  read-only-source-probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install strict read-only asset extractor
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -qq -y unshield
+          python3 -m pip install --break-system-packages Pillow
+          python3 -m py_compile apps/4leaf/rog/tools/probe-original-obs-secondary-paks.py
+      - name: Check authentic 2002 client installer SHA1, extract resource files only
+        run: |
+          mkdir -p /tmp/leaf-original-installer /tmp/leaf-original-files
+          python3 - <<'PY'
+          import hashlib,time,urllib.request
+          from pathlib import Path
+          dest=Path('/tmp/leaf-original-installer/4leaf.zip')
+          sha='86526d89679ae39b85fe9808da97ad871b7888d9'
+          for attempt in range(5):
+              try:
+                  uri='https://archive.org/download/4leaf/4leaf.zip'
+                  req=urllib.request.Request(uri,headers={'User-Agent':'4LEAF original archive source integrity audit/1.0'})
+                  hash=hashlib.sha1()
+                  with urllib.request.urlopen(req,timeout=120) as stream,dest.open('wb') as f:
+                      n=0
+                      while buf:=stream.read(1048576):
+                          n+=len(buf)
+                          if n>90*1024*1024:raise ValueError('Source zip exceeds 90 MiB limit')
+                          hash.update(buf);f.write(buf)
+                  if hash.hexdigest()!=sha:raise ValueError('Original SHA1 mismatch')
+                  print('ORIGINAL_2002_INSTALLER_SHA1_VERIFIED',hash.hexdigest(),n)
+                  break
+              except Exception as e:
+                  dest.unlink(missing_ok=True)
+                  if attempt==4:raise
+                  print('Retrying verified archive',str(e)[:120])
+                  time.sleep(5+attempt*2)
+          PY
+          unzip -q /tmp/leaf-original-installer/4leaf.zip 'data1.cab' 'data1.hdr' -d /tmp/leaf-original-installer
+          unshield x -d /tmp/leaf-original-files /tmp/leaf-original-installer/data1.cab >/dev/null
+      - name: Strictly probe ALL original OBS, OBS2, OBS3 packs for missing character source pixels
+        run: |
+          python3 apps/4leaf/rog/tools/probe-original-obs-secondary-paks.py /tmp/leaf-original-files /tmp/leaf-original-obs-quarantine
+          test -s /tmp/leaf-original-obs-quarantine/secondary-pak-probe.json
+      - name: Probe unused genuine IMG.pak battle/result/status SPR with strict native video RLE
+        run: |
+          python3 -m py_compile apps/4leaf/rog/tools/probe-original-img-extra-spr.py
+          source="$(find /tmp/leaf-original-files -type f -ipath '*/Dice/IMG.pak' | head -1)"
+          test -n "$source"
+          python3 apps/4leaf/rog/tools/probe-original-img-extra-spr.py "$source" /tmp/leaf-img-spr-quarantine
+          test -s /tmp/leaf-img-spr-quarantine/source-spr-probe.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: original-img-spr-strict-candidates-not-production
+          path: /tmp/leaf-img-spr-quarantine
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: original-obs-secondary-strict-candidates-not-production
+          path: /tmp/leaf-original-obs-quarantine
+          retention-days: 14
+      - name: Publish source-verified native 2D IMG GUI PNGs on THIS feature branch only
+        if: github.event_name == 'push' && github.ref_name == 'restore-4leaf-secondary-original-obs-audit-20261018'
+        run: |
+          python3 apps/4leaf/rog/tools/emit-original-img-extra-spr.py \
+            /tmp/leaf-img-spr-quarantine apps/4leaf/rog/original/SourceSPRExtra
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add apps/4leaf/rog/original/SourceSPRExtra
+          if git diff --cached --quiet; then
+            echo 'All 100 verified original PNGs already present'
+          else
+            git commit -m 'assets(4leaf): recover 100 native 2002 battle, magic and GUI sprite images'
+            git push origin HEAD:restore-4leaf-secondary-original-obs-audit-20261018
+          fi
+      - name: Clean downloaded historic executable archive
+        if: always()
+        run: rm -rf /tmp/leaf-original-installer /tmp/leaf-original-files
