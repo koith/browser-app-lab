@@ -90,8 +90,11 @@ const {chromium,webkit}=require('playwright');
    null,{timeout:12000});
   const afterRoll=await page.evaluate(()=>({
    count:Number(document.querySelector('#dice-box').dataset.rollCount),
-   match:window.__ROG_TEST__.getMatch()
+   match:window.__ROG_TEST__.getMatch(),
+   nativeTriggers:window.__LEAF_SOURCE_ROLL__.getState().nativeTriggerCount
   }));
+  assert.equal(afterRoll.nativeTriggers,1,
+   'clicking the original source ROLL control must animate genuine eventRoll1.spr exactly once');
   assert.equal(afterRoll.count,1,'one click invokes exactly ONE genuine movement dice roll');
   assert.ok(afterRoll.match.lastRoll.length>=1&&
    afterRoll.match.lastRoll.every(eye=>eye>=1&&eye<=6),
@@ -123,6 +126,9 @@ const {chromium,webkit}=require('playwright');
    null,{timeout:12000});
   assert.equal(await page.locator('#dice-source-roll').getAttribute('data-roll-count'),'2',
    'both game control surfaces display one synchronized count from same engine');
+  assert.equal(await page.evaluate(()=>
+   window.__LEAF_SOURCE_ROLL__.getState().nativeTriggerCount),2,
+   'main/keyboard-accessible ROLL must animate SAME recovered eventRoll1.spr once per roll');
   await page.screenshot({path:'leaf-source-roll-'+engine+(mobile?'-mobile':'-desktop')+'-after.png'});
   assert.deepEqual(errors,[],'the source-positioned ROLL has no uncaught Chromium/WebKit errors');
   console.log('SOURCE ROLL HUD + REAL GAME TURN PASS',JSON.stringify({
