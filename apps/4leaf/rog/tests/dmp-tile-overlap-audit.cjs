@@ -18,7 +18,7 @@ const camera=fs.readFileSync(path.join(root,'board-camera.js'),'utf8');
 function constants(name,keys){
  const match=camera.match(new RegExp('const '+name+'=\\{([^}]*)\\};'));
  assert.ok(match,'camera '+name+' must be statically verifiable');
- const fields=Object.fromEntries([...match[1].matchAll(/(\\w+):(\\d+)/g)]
+ const fields=Object.fromEntries([...match[1].matchAll(/(\w+):(\d+)/g)]
   .map(([,key,val])=>[key,Number(val)]));
  keys.forEach(key=>assert.ok(Number.isFinite(fields[key]),name+'.'+key));
  return fields;
