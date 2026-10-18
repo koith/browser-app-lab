@@ -11,6 +11,7 @@ on:
       - 'apps/4leaf/rog/dice-original-obs.css'
       - 'apps/4leaf/rog/genesis-chessman-actors.js'
       - 'apps/4leaf/rog/tests/genesis-chessman-actors.cjs'
+      - 'apps/4leaf/rog/tests/obs-idle-facing-atlas.cjs'
       - 'apps/4leaf/rog/tests/dice-horizontal-native-actors.cjs'
       - 'apps/4leaf/rog/tests/dice-dmp-full-camera.cjs'
       - 'apps/4leaf/rog/dice-source-roll.js'
@@ -65,6 +66,8 @@ jobs:
       - run: node apps/4leaf/rog/tests/board-layout.cjs
       - name: "Reproduce iPhone screenshot: zero horizontal TIS overlap and 2 original Genesis OBS players"
         run: node apps/4leaf/rog/tests/dice-horizontal-native-actors.cjs
+      - name: Audit archive OBS candidate faces in exact upright native presentation
+        run: node apps/4leaf/rog/tests/obs-idle-facing-atlas.cjs
       - name: Verify genuine native Genesis OBS chessman and no giant fabricated missing-body proxy
         run: node apps/4leaf/rog/tests/genesis-chessman-actors.cjs
       - name: Verify full expanded DMP camera touch, pan, zoom and tile visibility
@@ -79,6 +82,7 @@ jobs:
           name: original-dice-board-layout-screens
           path: |
             leaf-board-*.png
+            leaf-obs-source-facing-atlas.png
             leaf-live-3d-battle-podiums-*.png
             leaf-original-battle-stage-*.png
             rog-dmp-overlap-audit.json
