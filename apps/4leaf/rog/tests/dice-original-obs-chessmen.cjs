@@ -82,7 +82,7 @@ const {chromium,webkit}=require('playwright');
    assert.ok(frame.loaded&&frame.expected,'loaded frame must be in original OBS.pak archive manifest: '+JSON.stringify(frame));
    assert.deepEqual(frame.actual,frame.expected,
     'the current live animation frame must retain its own genuine native dimensions: '+JSON.stringify(frame));
-   assert.match(frame.sourceMember,/^10(45|42)\\.obs$/);
+   assert.match(frame.sourceMember,/^10(45|42)\.obs$/);
    assert.equal(frame.poseMapping,'unverified','do not invent historically proven OBS action names');
   }
   const sizes=sourceFrames.map(f=>f.actual);
