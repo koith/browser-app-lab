@@ -5,15 +5,17 @@ on:
       - '.github/workflows/rog-obs-secondary-quarantine.yml'
       - 'apps/4leaf/rog/tools/probe-original-obs-secondary-paks.py'
       - 'apps/4leaf/rog/tools/probe-original-img-extra-spr.py'
+      - 'apps/4leaf/rog/tools/emit-original-img-extra-spr.py'
   pull_request:
     branches: [main]
     paths:
       - '.github/workflows/rog-obs-secondary-quarantine.yml'
       - 'apps/4leaf/rog/tools/probe-original-obs-secondary-paks.py'
       - 'apps/4leaf/rog/tools/probe-original-img-extra-spr.py'
+      - 'apps/4leaf/rog/tools/emit-original-img-extra-spr.py'
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 jobs:
   read-only-source-probe:
     runs-on: ubuntu-latest
@@ -79,6 +81,20 @@ jobs:
           name: original-obs-secondary-strict-candidates-not-production
           path: /tmp/leaf-original-obs-quarantine
           retention-days: 14
+      - name: Publish source-verified native 2D IMG GUI PNGs on THIS feature branch only
+        if: github.event_name == 'push' && github.ref_name == 'restore-4leaf-secondary-original-obs-audit-20261018'
+        run: |
+          python3 apps/4leaf/rog/tools/emit-original-img-extra-spr.py \
+            /tmp/leaf-img-spr-quarantine apps/4leaf/rog/original/SourceSPRExtra
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add apps/4leaf/rog/original/SourceSPRExtra
+          if git diff --cached --quiet; then
+            echo 'All 100 verified original PNGs already present'
+          else
+            git commit -m 'assets(4leaf): recover 100 native 2002 battle, magic and GUI sprite images'
+            git push origin HEAD:restore-4leaf-secondary-original-obs-audit-20261018
+          fi
       - name: Clean downloaded historic executable archive
         if: always()
         run: rm -rf /tmp/leaf-original-installer /tmp/leaf-original-files
