@@ -1,0 +1,44 @@
+name: 4LEAF permanent restoration ledger integrity
+on:
+  push:
+    paths:
+      - 'apps/4leaf/rog/docs/RESTORATION_LEDGER.json'
+      - 'apps/4leaf/rog/tools/restoration-ledger.cjs'
+      - 'apps/4leaf/rog/tests/restoration-ledger.cjs'
+      - '.github/workflows/rog-restoration-ledger.yml'
+  pull_request:
+    paths:
+      - 'apps/4leaf/rog/docs/RESTORATION_LEDGER.json'
+      - 'apps/4leaf/rog/tools/restoration-ledger.cjs'
+      - 'apps/4leaf/rog/tests/restoration-ledger.cjs'
+      - '.github/workflows/rog-restoration-ledger.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  protect-user-backlog:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate canonical work ledger and protected requirements
+        run: node apps/4leaf/rog/tools/restoration-ledger.cjs check
+      - name: Verify no request or registered task was silently erased
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            node apps/4leaf/rog/tools/restoration-ledger.cjs check --against "$BASE_SHA"
+          elif git rev-parse HEAD^ >/dev/null 2>&1; then
+            node apps/4leaf/rog/tools/restoration-ledger.cjs check --against HEAD^
+          fi
+      - name: Regression-test false completion and truncated history
+        run: node apps/4leaf/rog/tests/restoration-ledger.cjs
+      - name: Surface exact remaining original restoration work
+        run: node apps/4leaf/rog/tools/restoration-ledger.cjs open
