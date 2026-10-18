@@ -62,7 +62,47 @@ async function run(engine){
    assert.ok(hit.selfPoint.ok,
     'user must still physically interact with actual seated source Registry avatar room'+background+': '+JSON.stringify(hit));
    assert.equal(hit.unavailableHits,0,'collision avoidance must not leave source toolbar buttons covered');
-   results.push({room:background,alternate:hit.alternate});
+   results.push({room:background,seat:'initial',alternate:hit.alternate});
+   // Move the ACTUAL logged-in user via the application's original
+   // clickable-floor teleport handler to two occupied source seat regions,
+   // including the historic room3 toolbar collision (#3 and #9).
+   // This never fabricates peers nor edits hidden game state directly.
+   const seatPairs=[
+    [[73,66],[39,92]],[[76,64],[40,91]],[[73,63],[39,92]],
+    [[81,83],[77,69]],[[61,72],[29,97]],[[74,66],[39,93]]
+   ];
+   for(const [index,point] of [3,9].map((seat,i)=>[seat,seatPairs[background][i]])){
+    await page.evaluate(([x,y])=>{
+     const frame=document.querySelector('#social-image-frame'),r=frame.getBoundingClientRect();
+     frame.dispatchEvent(new MouseEvent('click',{
+      bubbles:true,cancelable:true,
+      clientX:r.left+r.width*x/100,clientY:r.top+r.height*y/100
+     }));
+    },point);
+    await page.waitForFunction(seat=>
+      document.querySelector('#social-image-frame .social-avatar.self')?.dataset.seat===String(seat),
+      index,{timeout:3000});
+    const moved=await page.evaluate(()=>{
+     const frame=document.getElementById('social-image-frame');
+     const bar=frame.querySelector('.social-classic-toolbar');
+     const actions=[...bar.querySelectorAll('.social-original-tool')];
+     const sprite=frame.querySelector('.social-avatar.self');
+     const actual=el=>{
+      const r=el.getBoundingClientRect();
+      const target=document.elementFromPoint(r.x+r.width/2,r.y+r.height/2);
+      return target===el||el.contains(target);
+     };
+     return {hits:actions.map(actual),actor:actual(sprite),
+      seat:sprite.dataset.seat,collision:bar.dataset.nativeToolHitCollisions,
+      relocated:bar.dataset.webPositionInferred};
+    });
+    assert.equal(moved.seat,String(index),'floor click actually teleports real user to requested vacant source slot');
+    assert.ok(moved.hits.every(Boolean)&&moved.actor,
+      'all 7 actual mouse targets must work when real source participant stands at seat '+index+
+      ' in original room '+background+': '+JSON.stringify(moved));
+    assert.equal(moved.collision,'0');
+    results.push({room:background,seat:index,alternate:moved.relocated});
+   }
   }
   assert.deepEqual(errors,[],'no browser errors for six real ChatRoom environments');
   await page.screenshot({path:'leaf-chatroom-six-native-input-'+engine+'.png'});
