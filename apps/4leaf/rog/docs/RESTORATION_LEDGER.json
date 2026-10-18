@@ -503,6 +503,18 @@
         "QA-02",
         "QA-03"
       ]
+    },
+    {
+      "id": "REQ-20261019-006",
+      "date": "2026-10-19",
+      "origin": "user",
+      "text": "개씨발년인 너는 또 쳐놀고 있을 줄 알았다 여지없이 딱 그렇네",
+      "taskIds": [
+        "M04",
+        "BRD-04",
+        "P0-BOARD",
+        "P0-RELEASE"
+      ]
     }
   ],
   "tasks": [
@@ -971,19 +983,21 @@
       "id": "BRD-04",
       "priority": "P0",
       "title": "DMP/DMO/MVE 26개 원본 지도 정확도 검증",
-      "status": "todo",
+      "status": "in_progress",
       "milestone": "M04",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 26개 움직임 경로는 복원되었지만 25개 이벤트 데이터와 26경로 간 누락·특수칸 의미가 원작과 완전 일치하는지 불명 | 구현 목표: 원본 DMP.pak 76개 멤버(26 MVE/25 DMP/25 DMO)를 맵 ID별로 대응하고 미연결 맵 조건을 명시",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 26개 움직임 경로는 복원되었지만 25개 이벤트 데이터와 26경로 간 누락·특수칸 의미가 원작과 완전 일치하는지 불명 | 구현 목표: 원본 DMP.pak 76개 멤버(26 MVE/25 DMP/25 DMO)를 맵 ID별로 대응하고 미연결 맵 조건을 명시; VERIFIED 2002 source maps.js has 26 authentic DMP path arrays (1,920 cells) but ORIGINAL_LEAF_MAP_INFO has only 25 titles. Path 0170 (135 cells) was silently absent from playable map dropdown and lacked original DMP event table. The app now registers 0170 with explicit TITLE-UNVERIFIED and retains original coordinates, never fabricates event data. Runtime mobile/desktop QA pending.",
       "acceptance": [
         "26개 경로 전체 셀/특수칸·워프·채널·시작/종점 원본 테이블 대조, 누락된 1개 이벤트 맵은 명시된 처리"
       ],
       "evidence": [
         "original/maps.js",
         "original/tiles.js",
-        "tools/extract_original.py"
+        "tools/extract_original.py",
+        "apps/4leaf/rog/game.js",
+        "apps/4leaf/rog/tests/dice-source-map0170-registration.cjs"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-18",
+      "lastReviewed": "2026-10-19",
       "verifiedAcceptance": null,
       "dependencies": [
         "SRC-01"
@@ -3103,6 +3117,36 @@
       "taskId": "BRD-05",
       "details": "Test each of 1920 actual recovered DMP map cells (all 26) with camera focus and rendered bounds on both desktop/mobile, not static data test only.",
       "evidence": "https://github.com/koith/browser-app-lab/pull/132"
+    },
+    {
+      "seq": 108,
+      "date": "2026-10-19",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261019-006",
+      "taskIds": [
+        "M04",
+        "BRD-04",
+        "P0-BOARD",
+        "P0-RELEASE"
+      ],
+      "details": "사용자 작업 중단에 대한 항의. 새로운 문서 작성에 그치지 않고 확인된 원본 DMP 0170의 실사용 경로 누락을 복원 및 검사."
+    },
+    {
+      "seq": 109,
+      "date": "2026-10-19",
+      "type": "STATUS_CHANGED",
+      "taskId": "BRD-04",
+      "from": "todo",
+      "to": "in_progress",
+      "details": "Original 26-map route audit identifies missing 0170 selection; restores without inventing historical name or DMP event table"
+    },
+    {
+      "seq": 110,
+      "date": "2026-10-19",
+      "type": "IMPLEMENTED_PENDING_QA",
+      "taskId": "BRD-04",
+      "details": "2002 26 DMP paths but 25 title labels; game source map registry now includes historically unnamed 0170 135-cell authentic route, protected explicit uncertainty and desktop/mobile Chromium game QA",
+      "evidence": "apps/4leaf/rog/tests/dice-source-map0170-registration.cjs"
     }
   ]
 }
