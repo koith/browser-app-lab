@@ -42,6 +42,7 @@ on:
       - 'apps/4leaf/rog/sw.js'
       - 'apps/4leaf/rog/tests/dice-original-obs-chessmen.cjs'
       - 'apps/4leaf/rog/dice-native-battle-source-spr.css'
+      - 'apps/4leaf/rog/dice-original-battle-unobstructed.css'
       - 'apps/4leaf/rog/original/SourceSPRExtra/**'
       - '.github/workflows/rog-board-layout.yml'
   pull_request:
