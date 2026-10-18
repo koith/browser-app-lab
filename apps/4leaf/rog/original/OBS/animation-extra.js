@@ -5,6 +5,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
  window.ORIGINAL_LEAF_OBS_FRAMES||{},
 {
   "0043": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
       {
         "height": 67,
@@ -61,6 +62,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 68
       }
     ],
+    "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
     "name": "플랑드르",
     "originalAnimationCount": 37,
@@ -70,6 +72,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "sourceSHA256": "47637f8b5cbb525d761472a69bc10aaa66ba7c08ccf88fef7ae3f917a97d4852"
   },
   "0044": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
       {
         "height": 70,
@@ -108,6 +111,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 25
       }
     ],
+    "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
     "name": "발라",
     "originalAnimationCount": 37,
@@ -116,7 +120,88 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "sourcePak": "OBS.pak",
     "sourceSHA256": "6a6d7f024c20e18dcb0f572bba2113cae3e2fba2d9faf694a8e9419fb839f796"
   },
+  "0047": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
+    "frames": [
+      {
+        "height": 67,
+        "index": 3,
+        "originX": -26,
+        "originY": -55,
+        "sha256": "3ba50675e9e6f0b4f050c78640e73f4782143b5766419d81dde2fefada15de8c",
+        "url": "./original/OBS/bulk/1047-03.png",
+        "width": 54
+      },
+      {
+        "height": 65,
+        "index": 10,
+        "originX": -34,
+        "originY": -55,
+        "sha256": "a830ea722c4eee1c09a8305dc9272969d73107d06431397d4b5084e17971875f",
+        "url": "./original/OBS/bulk/1047-10.png",
+        "width": 61
+      },
+      {
+        "height": 69,
+        "index": 18,
+        "originX": -45,
+        "originY": -61,
+        "sha256": "6a2261b6fbe1859aa338c48cec52f76d3030ecbe21d0d7a1a937b8ddb1b75d62",
+        "url": "./original/OBS/bulk/1047-18.png",
+        "width": 62
+      },
+      {
+        "height": 75,
+        "index": 30,
+        "originX": -19,
+        "originY": -65,
+        "sha256": "4bc06f7c15d04fdc6a58f24052f2f4c7d5f40da7fb6c44cd8872cd7eca9169c7",
+        "url": "./original/OBS/bulk/1047-30.png",
+        "width": 37
+      }
+    ],
+    "hasVerifiedFrameZero": false,
+    "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
+    "name": "사피알딘",
+    "originalAnimationCount": 37,
+    "originalMember": "1047.obs",
+    "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "sourcePak": "OBS.pak",
+    "sourceSHA256": "fcd05bc06d54865e3cc592ffc6d74a38eab233d275b49e5a3fd65ea066c0bdd3"
+  },
+  "0048": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
+    "frames": [
+      {
+        "height": 71,
+        "index": 18,
+        "originX": -29,
+        "originY": -65,
+        "sha256": "fd18f2bdb3fe40b7eedf537a0b399ed4fcdf8a2f0a844c4d2bdccf578e62424e",
+        "url": "./original/OBS/bulk/1048-18.png",
+        "width": 59
+      },
+      {
+        "height": 70,
+        "index": 30,
+        "originX": -18,
+        "originY": -64,
+        "sha256": "e082da68e79d9db6d4e88852bef25ae49f4b7bf80023f4dbdded68d800369667",
+        "url": "./original/OBS/bulk/1048-30.png",
+        "width": 34
+      }
+    ],
+    "hasVerifiedFrameZero": false,
+    "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
+    "name": "이븐시나",
+    "originalAnimationCount": 37,
+    "originalMember": "1048.obs",
+    "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "sourcePak": "OBS.pak",
+    "sourceSHA256": "b0d9d4995c8278bdae042752c042e8eaf8984d108514c71c0a6e0ccd9321c64e"
+  },
   "0050": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
       {
         "height": 68,
@@ -164,6 +249,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 33
       }
     ],
+    "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
     "name": "알무파샤",
     "originalAnimationCount": 37,
@@ -172,7 +258,39 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "sourcePak": "OBS.pak",
     "sourceSHA256": "2f98625c04d18079fbfd3f7d373d9ab1d83c26fa0283b6b4cda479058e4ec79b"
   },
+  "0051": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
+    "frames": [
+      {
+        "height": 69,
+        "index": 10,
+        "originX": -16,
+        "originY": -67,
+        "sha256": "202368da7532934b3a010fcb743977c6c2a03ef5ac17d8add3a23e04bd63782d",
+        "url": "./original/OBS/bulk/1051-10.png",
+        "width": 28
+      },
+      {
+        "height": 69,
+        "index": 30,
+        "originX": -13,
+        "originY": -61,
+        "sha256": "a8856614fa4282a9d5f9b40864d8c786131f0baea189d2d0546d0a8734ac5356",
+        "url": "./original/OBS/bulk/1051-30.png",
+        "width": 29
+      }
+    ],
+    "hasVerifiedFrameZero": false,
+    "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
+    "name": "얀지슈카",
+    "originalAnimationCount": 37,
+    "originalMember": "1051.obs",
+    "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "sourcePak": "OBS.pak",
+    "sourceSHA256": "34d67c4d029bfad0326788b22b65e1d55b9e655cf5269d3598c8217202dd1a31"
+  },
   "0052": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
       {
         "height": 81,
@@ -229,6 +347,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 37
       }
     ],
+    "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
     "name": "아두스베이",
     "originalAnimationCount": 37,
@@ -238,6 +357,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "sourceSHA256": "e14fe89614f5b563cabe8ae959fbd9792f8ca1fba59e25498e0c0ca3691b6c4d"
   },
   "0053": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
       {
         "height": 70,
@@ -267,6 +387,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 50
       }
     ],
+    "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
     "name": "알이스파니히",
     "originalAnimationCount": 37,
@@ -276,6 +397,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "sourceSHA256": "cc5586497f50663c04c6d6501e9719ef36ace625e3ca178d764387ba822575fe"
   },
   "0054": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
       {
         "height": 63,
@@ -350,6 +472,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 34
       }
     ],
+    "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
     "name": "알파라비",
     "originalAnimationCount": 37,
@@ -358,7 +481,88 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "sourcePak": "OBS.pak",
     "sourceSHA256": "42c4ba6b976929720a84175a230b1323332d07580b4915288c6313a205fee236"
   },
+  "0055": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
+    "frames": [
+      {
+        "height": 66,
+        "index": 1,
+        "originX": -12,
+        "originY": -56,
+        "sha256": "29323e5a595dfb49962e5c28d0f993a7825fcdd1e89ebf3b31c61701a763b594",
+        "url": "./original/OBS/bulk/1055-01.png",
+        "width": 23
+      },
+      {
+        "height": 66,
+        "index": 2,
+        "originX": -12,
+        "originY": -57,
+        "sha256": "e101630f3750aa1a418e80f4833f5301dc05b9ed2e917d815cbf93fbf1a6a63b",
+        "url": "./original/OBS/bulk/1055-02.png",
+        "width": 23
+      },
+      {
+        "height": 73,
+        "index": 10,
+        "originX": -12,
+        "originY": -63,
+        "sha256": "cb857f5459cdb4ea5f9c4699cfd4f31f3d0677471907309e8fd8bcae041d8341",
+        "url": "./original/OBS/bulk/1055-10.png",
+        "width": 22
+      }
+    ],
+    "hasVerifiedFrameZero": false,
+    "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
+    "name": "알아샤",
+    "originalAnimationCount": 37,
+    "originalMember": "1055.obs",
+    "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "sourcePak": "OBS.pak",
+    "sourceSHA256": "414e0f087fe598aff57d39502d962fbeac98a3882521702ef3acfc4efdcd6618"
+  },
+  "0056": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
+    "frames": [
+      {
+        "height": 72,
+        "index": 1,
+        "originX": -12,
+        "originY": -62,
+        "sha256": "b0b00d0cd9cc9935f33152604699332194c00a74b771e4fec96bbd7d62cd1ef9",
+        "url": "./original/OBS/bulk/1056-01.png",
+        "width": 27
+      },
+      {
+        "height": 73,
+        "index": 2,
+        "originX": -12,
+        "originY": -63,
+        "sha256": "84fa53019aeb7c81b684da3c156dbdb040aad97e0e5b2052942215ca9b4ac6e2",
+        "url": "./original/OBS/bulk/1056-02.png",
+        "width": 27
+      },
+      {
+        "height": 81,
+        "index": 10,
+        "originX": -12,
+        "originY": -71,
+        "sha256": "ca8776b87f6e581ac55211e3ae18b9b5f4ead977b5997862c37de9e917341a00",
+        "url": "./original/OBS/bulk/1056-10.png",
+        "width": 27
+      }
+    ],
+    "hasVerifiedFrameZero": false,
+    "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
+    "name": "이슈탈",
+    "originalAnimationCount": 37,
+    "originalMember": "1056.obs",
+    "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "sourcePak": "OBS.pak",
+    "sourceSHA256": "e56658101a91e9d8eb8e9182b2353c19882f4d343ddc08fe055f56805146ce6d"
+  },
   "0058": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
       {
         "height": 80,
@@ -406,6 +610,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 69
       }
     ],
+    "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
     "name": "오스만누리파사",
     "originalAnimationCount": 37,
@@ -415,6 +620,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "sourceSHA256": "65ea0f8b4719e60db938aab0eaf3c4a2d72eac26f44173b92fe5f9471b5d4efb"
   },
   "0059": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
       {
         "height": 67,
@@ -462,6 +668,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 44
       }
     ],
+    "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
     "name": "라쉬카",
     "originalAnimationCount": 37,
@@ -471,6 +678,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "sourceSHA256": "6094f708e693f5cef9131e766700d6cf6ae7c19da0f4708ce47dfadf9a5a1467"
   },
   "0060": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
       {
         "height": 72,
@@ -536,6 +744,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 35
       }
     ],
+    "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
     "name": "바이올라",
     "originalAnimationCount": 37,
@@ -545,6 +754,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "sourceSHA256": "ec0c76ce9a6dac060098cc1b1ee8e03704e7edb3495aef2901b05dbc92e5e12e"
   },
   "0062": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
       {
         "height": 70,
@@ -619,6 +829,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 55
       }
     ],
+    "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
     "name": "죠엘",
     "originalAnimationCount": 37,
@@ -628,6 +839,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "sourceSHA256": "4a6b47e3ae45a29e4048c5a4ec2e0e5cda92ee7e9fa3ad9e0cd56b4875ac9205"
   },
   "0063": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
       {
         "height": 72,
@@ -684,6 +896,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 40
       }
     ],
+    "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
     "name": "헤이스팅스",
     "originalAnimationCount": 37,
@@ -693,6 +906,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "sourceSHA256": "bacc3842d039158680d1f5bdd80aa1c245f95f09b59d39836ebf92fc18a0a28e"
   },
   "0066": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
       {
         "height": 71,
@@ -740,6 +954,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 48
       }
     ],
+    "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
     "name": "엘핀스톤",
     "originalAnimationCount": 37,
@@ -749,6 +964,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "sourceSHA256": "1fce493bae40f09481d9e4d81b0c9b0fcd533599340b8694098b78b22dd6cc01"
   },
   "0067": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
       {
         "height": 85,
@@ -814,6 +1030,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 84
       }
     ],
+    "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
     "name": "롤랑",
     "originalAnimationCount": 37,
@@ -823,6 +1040,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "sourceSHA256": "50fd972f807c1f33d56ed203c689b1fec854af1c39c3e0a07e1bac008e19b7e0"
   },
   "0068": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
       {
         "height": 75,
@@ -897,6 +1115,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 78
       }
     ],
+    "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
     "name": "마리아애슬린",
     "originalAnimationCount": 37,
@@ -906,6 +1125,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "sourceSHA256": "2d912261195c9da549350177c196edb579bd7b155691ca700bb6b140aa6826d0"
   },
   "0069": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
       {
         "height": 66,
@@ -980,6 +1200,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 41
       }
     ],
+    "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
     "name": "노포크",
     "originalAnimationCount": 37,
@@ -988,7 +1209,39 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "sourcePak": "OBS.pak",
     "sourceSHA256": "8898df4dfe731d0127f25ccf51099da12ae91f8cb0181aee2c3f8aae5eada068"
   },
+  "0070": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
+    "frames": [
+      {
+        "height": 74,
+        "index": 1,
+        "originX": -32,
+        "originY": -65,
+        "sha256": "3dcb58f5d4e8618f30fdbdc9576ad50fcfb44af3346d36207c293b530f6c5f18",
+        "url": "./original/OBS/bulk/1070-01.png",
+        "width": 65
+      },
+      {
+        "height": 75,
+        "index": 2,
+        "originX": -32,
+        "originY": -66,
+        "sha256": "267e6053cad66c1e2e5365a586f0c0338f3ab6cb85ccb7d590ed628f953091d2",
+        "url": "./original/OBS/bulk/1070-02.png",
+        "width": 65
+      }
+    ],
+    "hasVerifiedFrameZero": false,
+    "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
+    "name": "케이트호크",
+    "originalAnimationCount": 37,
+    "originalMember": "1070.obs",
+    "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "sourcePak": "OBS.pak",
+    "sourceSHA256": "da68ee3d6302dcf94b78b108af57889f200c7979e6b284a9435c309857d9576a"
+  },
   "0071": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
       {
         "height": 70,
@@ -1045,6 +1298,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 43
       }
     ],
+    "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
     "name": "지그문트",
     "originalAnimationCount": 37,
@@ -1054,6 +1308,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "sourceSHA256": "9bfa980afc6ab3e8e6552b7fb231f359f1b5a939d1ca0cdff1fe93de2594ed82"
   },
   "0072": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
       {
         "height": 84,
@@ -1092,6 +1347,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 59
       }
     ],
+    "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
     "name": "올리비에",
     "originalAnimationCount": 37,
@@ -1101,6 +1357,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "sourceSHA256": "0253a62013a1ab7960cc880a61efacb081b36306c3790ef7937ff9a36c222bb0"
   },
   "0073": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
       {
         "height": 72,
@@ -1157,6 +1414,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 33
       }
     ],
+    "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
     "name": "자바카스",
     "originalAnimationCount": 37,
@@ -1166,6 +1424,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "sourceSHA256": "49c9107b905ba1c7c4106e4e3a860e9afac7832624c1892aede732ac07d80c2f"
   },
   "0074": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
       {
         "height": 91,
@@ -1222,6 +1481,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 84
       }
     ],
+    "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
     "name": "말콤",
     "originalAnimationCount": 37,
@@ -1231,6 +1491,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "sourceSHA256": "cf8d56b4d415931fdf582ede9d55b89e6f67e4ac062f7394b4a7820c1acc7cbc"
   },
   "0075": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
       {
         "height": 71,
@@ -1260,6 +1521,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 30
       }
     ],
+    "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
     "name": "심넬램버트",
     "originalAnimationCount": 37,
@@ -1269,6 +1531,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "sourceSHA256": "13e0a6499f7c8c52b945e9b1091f284dabff6e8fb95ac8e1b1ed96f8d4168c05"
   },
   "0076": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
       {
         "height": 65,
@@ -1298,6 +1561,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 25
       }
     ],
+    "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
     "name": "크리스티나",
     "originalAnimationCount": 37,
@@ -1306,7 +1570,39 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "sourcePak": "OBS.pak",
     "sourceSHA256": "af48bdf392446d73f9987ee025542ac3629805df9a47f764fdebfec8292e30a8"
   },
+  "0077": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
+    "frames": [
+      {
+        "height": 67,
+        "index": 1,
+        "originX": -13,
+        "originY": -59,
+        "sha256": "287ea2f1053607b1fb9738f637a7eec67d4379477414128371b9c18850018bb5",
+        "url": "./original/OBS/bulk/1077-01.png",
+        "width": 37
+      },
+      {
+        "height": 68,
+        "index": 2,
+        "originX": -13,
+        "originY": -60,
+        "sha256": "894fa20b725c84f7baffe59d24d72843049f674c8f3e78e96a9e18b2d1cd4cdf",
+        "url": "./original/OBS/bulk/1077-02.png",
+        "width": 37
+      }
+    ],
+    "hasVerifiedFrameZero": false,
+    "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
+    "name": "리슐리외",
+    "originalAnimationCount": 37,
+    "originalMember": "1077.obs",
+    "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "sourcePak": "OBS.pak",
+    "sourceSHA256": "19fc1f2b3e91e16d4f1f0b4e791813b3991fa41fc8a137b4a2e2a1bcb57d8124"
+  },
   "0078": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
       {
         "height": 57,
@@ -1336,6 +1632,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 60
       }
     ],
+    "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
     "name": "죠안",
     "originalAnimationCount": 37,
@@ -1345,6 +1642,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "sourceSHA256": "4218c5b6d60905f02e793feb2533ecc8658195e4619017f3cfea1a461a844bfe"
   },
   "0079": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
       {
         "height": 76,
@@ -1392,6 +1690,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 28
       }
     ],
+    "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
     "name": "보르스",
     "originalAnimationCount": 37,
@@ -1401,6 +1700,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "sourceSHA256": "47f8efb191148fa4218a73a7654b07b0c63f451cf7ee17956b6d6339bf9ce55c"
   },
   "0080": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
       {
         "height": 67,
@@ -1430,6 +1730,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 26
       }
     ],
+    "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
     "name": "시안",
     "originalAnimationCount": 37,
@@ -1439,6 +1740,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "sourceSHA256": "43875a884cfdf32cf01f6536ee116502c875d0cac78b48c16a49b5a1e36adcd6"
   },
   "0081": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
       {
         "height": 90,
@@ -1513,6 +1815,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 37
       }
     ],
+    "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
     "name": "세시",
     "originalAnimationCount": 37,
@@ -1522,6 +1825,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "sourceSHA256": "e81fea5dca522c6d834f62805c4e6aa67b86d9bef1841aee7fa5aa1d91d92316"
   },
   "0082": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
       {
         "height": 70,
@@ -1578,6 +1882,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 40
       }
     ],
+    "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
     "name": "기파랑",
     "originalAnimationCount": 37,
@@ -1586,7 +1891,48 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "sourcePak": "OBS.pak",
     "sourceSHA256": "48cb3e88cf9e254966683813f9d9c09b7efccb11d820d7330c30acece08d4bfd"
   },
+  "0083": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
+    "frames": [
+      {
+        "height": 87,
+        "index": 10,
+        "originX": -13,
+        "originY": -75,
+        "sha256": "3217f3cf8120a21ab8493f0f9df737d433bd1d545385072faa226d92eb32daa4",
+        "url": "./original/OBS/bulk/1083-10.png",
+        "width": 27
+      },
+      {
+        "height": 67,
+        "index": 18,
+        "originX": -23,
+        "originY": -61,
+        "sha256": "85bec01ac151efabd631912bcc997f12193b6e227f0289bd9b2ef0af78c96ed0",
+        "url": "./original/OBS/bulk/1083-18.png",
+        "width": 42
+      },
+      {
+        "height": 66,
+        "index": 30,
+        "originX": -16,
+        "originY": -55,
+        "sha256": "35525c3d64be6f8059fd67b8f2b089d9dfb070aa3c342be46f387e7a64c4dae4",
+        "url": "./original/OBS/bulk/1083-30.png",
+        "width": 32
+      }
+    ],
+    "hasVerifiedFrameZero": false,
+    "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
+    "name": "알바티니",
+    "originalAnimationCount": 37,
+    "originalMember": "1083.obs",
+    "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "sourcePak": "OBS.pak",
+    "sourceSHA256": "92dc63b8159b37e54451e65b302d8ca7d0e192667c0640574dd0dd25aa95561f"
+  },
   "0084": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
       {
         "height": 26,
@@ -1661,6 +2007,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 32
       }
     ],
+    "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
     "name": "벨제부르",
     "originalAnimationCount": 37,
@@ -1670,6 +2017,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "sourceSHA256": "7826f72a1a59dde94c41452317e7f75a63ad27c4bee6a92ceb65944a60a865ae"
   },
   "0086": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
       {
         "height": 74,
@@ -1717,6 +2065,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 31
       }
     ],
+    "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
     "name": "바자",
     "originalAnimationCount": 37,
@@ -1726,6 +2075,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "sourceSHA256": "ab72bd843aadeda3349ca4dbfce7b4660fe9809977c26aab4cfce0b177b7e8bb"
   },
   "0088": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
       {
         "height": 81,
@@ -1800,6 +2150,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 78
       }
     ],
+    "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
     "name": "셰라자드",
     "originalAnimationCount": 37,
@@ -1809,6 +2160,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "sourceSHA256": "40cc720306610aea156d68afda4f3cbd500f2dfa1c4fc4929cdf452d83537976"
   },
   "0090": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
       {
         "height": 47,
@@ -1856,6 +2208,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 50
       }
     ],
+    "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
     "name": "크리스티앙",
     "originalAnimationCount": 51,
@@ -1865,6 +2218,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "sourceSHA256": "dd8945b85fd09fc6d5cfc89f16cfb912cbbc9e9be4e7cfdb9bee1e3f779e0c43"
   },
   "0094": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
       {
         "height": 148,
@@ -1903,6 +2257,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 93
       }
     ],
+    "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
     "name": "알가지",
     "originalAnimationCount": 14,
@@ -1912,6 +2267,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "sourceSHA256": "f5f05e5033d25f455e5d6b1ca63dfaeff4fdffc043e682c8888c5db3c520e75d"
   },
   "0125": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
       {
         "height": 40,
@@ -1959,6 +2315,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 24
       }
     ],
+    "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
     "name": "나탈리",
     "originalAnimationCount": 15,
@@ -1968,6 +2325,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "sourceSHA256": "d637b0046b8d906e201bae80abf329170d1ace1ea1827c5554050a137ab371cd"
   },
   "0127": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
       {
         "height": 28,
@@ -2033,6 +2391,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 118
       }
     ],
+    "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
     "name": "데미안",
     "originalAnimationCount": 28,
@@ -2042,6 +2401,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "sourceSHA256": "760175534712d21dd8398638c1ea02c79c7101ee18f5c5b162e5a1fe4490e509"
   },
   "0130": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
       {
         "height": 28,
@@ -2107,6 +2467,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 118
       }
     ],
+    "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
     "name": "레드헤드",
     "originalAnimationCount": 28,
@@ -2116,6 +2477,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "sourceSHA256": "6004b33639217381a0084845558aed760d3aea6e8e26b84a9cbf40f729475f12"
   },
   "0131": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
       {
         "height": 106,
@@ -2136,6 +2498,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 116
       }
     ],
+    "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
     "name": "루시엔",
     "originalAnimationCount": 29,
@@ -2145,6 +2508,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "sourceSHA256": "06df1cb58068f4fccf1b9f3b44f785c51183f53f34f377a0838dd758e5bc2659"
   },
   "0133": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
       {
         "height": 37,
@@ -2183,6 +2547,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 65
       }
     ],
+    "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
     "name": "리엔",
     "originalAnimationCount": 19,
@@ -2192,6 +2557,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "sourceSHA256": "bccb77a0c7b4e24fb4b466d675b85ef30b86930367fafb4bfa77debe240515bd"
   },
   "0136": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
       {
         "height": 28,
@@ -2230,6 +2596,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 48
       }
     ],
+    "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
     "name": "베라모드",
     "originalAnimationCount": 7,
@@ -2238,7 +2605,48 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "sourcePak": "OBS.pak",
     "sourceSHA256": "f80902027d2c61d56da3830972d8baa566d59b2ce2c273951ca8e203365c22f2"
   },
+  "0140": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
+    "frames": [
+      {
+        "height": 59,
+        "index": 3,
+        "originX": -48,
+        "originY": -38,
+        "sha256": "8f19062f9847473baa0c01b19e36af8eb98c417b670c93e3d236ad4bf51698e6",
+        "url": "./original/OBS/bulk/1140-03.png",
+        "width": 102
+      },
+      {
+        "height": 40,
+        "index": 25,
+        "originX": -48,
+        "originY": -16,
+        "sha256": "02fbd3a3017a2b10a870373c7e8c55dec0d2d930d990f52dd37c464714f70253",
+        "url": "./original/OBS/bulk/1140-25.png",
+        "width": 102
+      },
+      {
+        "height": 40,
+        "index": 30,
+        "originX": -48,
+        "originY": -14,
+        "sha256": "5d6dfcce5ceb7a1746e5cf3fdd1a9528cc4d7efd2c1f5b935b0de00605817555",
+        "url": "./original/OBS/bulk/1140-30.png",
+        "width": 102
+      }
+    ],
+    "hasVerifiedFrameZero": false,
+    "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
+    "name": "아셀라스",
+    "originalAnimationCount": 39,
+    "originalMember": "1140.obs",
+    "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "sourcePak": "OBS.pak",
+    "sourceSHA256": "dfa418ca309de16bb3722382c78181763d5234e94de254ccb256b6b4b694f908"
+  },
   "0141": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
       {
         "height": 46,
@@ -2268,6 +2676,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 114
       }
     ],
+    "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
     "name": "아슈레이",
     "originalAnimationCount": 22,
@@ -2277,6 +2686,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "sourceSHA256": "345f1be08bb90eb5665c6fd1bc4c47fc1217030fcb8cfaf20253893ac927b81d"
   },
   "0142": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
       {
         "height": 38,
@@ -2315,6 +2725,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 72
       }
     ],
+    "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
     "name": "엠블라",
     "originalAnimationCount": 25,
@@ -2324,6 +2735,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "sourceSHA256": "436015280d34085d26e6099991071dad91565191006ebe4f845e77b111953da7"
   },
   "0145": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
       {
         "height": 126,
@@ -2344,6 +2756,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 70
       }
     ],
+    "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
     "name": "슈",
     "originalAnimationCount": 20,
@@ -2353,6 +2766,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "sourceSHA256": "e4e12bd6a17a686635341aa6dfda6e124b84b725480294401a94e22350887579"
   },
   "0147": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
       {
         "height": 24,
@@ -2382,6 +2796,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 60
       }
     ],
+    "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
     "name": "크리스티앙2",
     "originalAnimationCount": 21,
@@ -2390,7 +2805,66 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "sourcePak": "OBS.pak",
     "sourceSHA256": "403e94392a14c312adb5d961e0d6e2f94d97820f52038489243d3e7881c9eb52"
   },
+  "0158": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
+    "frames": [
+      {
+        "height": 86,
+        "index": 2,
+        "originX": -71,
+        "originY": -54,
+        "sha256": "9a81016465061d239f534f58477e32f06ea3fe6f97c5bea6358adec2cc552f37",
+        "url": "./original/OBS/bulk/1158-02.png",
+        "width": 112
+      },
+      {
+        "height": 75,
+        "index": 3,
+        "originX": -64,
+        "originY": -47,
+        "sha256": "d1d0366bf1e257f8edcec198bc8742c5141bad5496cfd0d87325a61048272132",
+        "url": "./original/OBS/bulk/1158-03.png",
+        "width": 98
+      },
+      {
+        "height": 87,
+        "index": 10,
+        "originX": -60,
+        "originY": -54,
+        "sha256": "834bf414155970bbbe5469bbfdcc3e3461a209d7b2c9ff46a45600ed3ae0f645",
+        "url": "./original/OBS/bulk/1158-10.png",
+        "width": 130
+      },
+      {
+        "height": 127,
+        "index": 18,
+        "originX": -64,
+        "originY": -63,
+        "sha256": "8dc769def6a159a65c6f4648e8a2df22b66a29c474c0bb99d74e92639bfefbd5",
+        "url": "./original/OBS/bulk/1158-18.png",
+        "width": 127
+      },
+      {
+        "height": 112,
+        "index": 25,
+        "originX": -64,
+        "originY": -60,
+        "sha256": "b716e4fd43b6a8084365395d66084240c7458fbb4a46e073aa44ff9ae81d53dc",
+        "url": "./original/OBS/bulk/1158-25.png",
+        "width": 130
+      }
+    ],
+    "hasVerifiedFrameZero": false,
+    "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
+    "name": "고렘",
+    "originalAnimationCount": 38,
+    "originalMember": "1158.obs",
+    "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "sourcePak": "OBS.pak",
+    "sourceSHA256": "94fc1719db2727724532c924f0b43cd1984c297b5273c5c70286d21b011cf759"
+  },
   "0167": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
       {
         "height": 65,
@@ -2447,6 +2921,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 27
       }
     ],
+    "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
     "name": "펜텀 마리아",
     "originalAnimationCount": 25,
@@ -2455,7 +2930,48 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "sourcePak": "OBS.pak",
     "sourceSHA256": "c7619c55e0588a52f7fba6d2c631755e346f61ab08f90e1fde665408f2face26"
   },
+  "0169": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
+    "frames": [
+      {
+        "height": 52,
+        "index": 1,
+        "originX": -132,
+        "originY": -19,
+        "sha256": "97097b47139992309a2b03a777346edd47dfc327efa47cfac1f7dbb9bfbc88bf",
+        "url": "./original/OBS/bulk/1169-01.png",
+        "width": 52
+      },
+      {
+        "height": 101,
+        "index": 2,
+        "originX": -143,
+        "originY": -53,
+        "sha256": "1ba7aaf573d8f00f5c6e5a19932a79632698c361d95d00f10dfa1ee4808ebd48",
+        "url": "./original/OBS/bulk/1169-02.png",
+        "width": 110
+      },
+      {
+        "height": 105,
+        "index": 3,
+        "originX": -148,
+        "originY": -72,
+        "sha256": "0917f28e3219631d645d7dbac6e2745c4348d36091a076d935d23152951bea66",
+        "url": "./original/OBS/bulk/1169-03.png",
+        "width": 127
+      }
+    ],
+    "hasVerifiedFrameZero": false,
+    "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
+    "name": "해골병사",
+    "originalAnimationCount": 41,
+    "originalMember": "1169.obs",
+    "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "sourcePak": "OBS.pak",
+    "sourceSHA256": "2d2950bead78fb4d4ae2be3be512cb84f2e55f2ec5a94a2c8a9a08c149a42b04"
+  },
   "0170": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
       {
         "height": 17,
@@ -2476,6 +2992,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 26
       }
     ],
+    "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
     "name": "흑태자",
     "originalAnimationCount": 10,
@@ -2485,6 +3002,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "sourceSHA256": "49daa0d9b79b96d14df6b6afee0305a4149b39f9bfff0d110cf5f9e449d10641"
   },
   "0171": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
       {
         "height": 49,
@@ -2541,6 +3059,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 60
       }
     ],
+    "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
     "name": "하이델룬",
     "originalAnimationCount": 28,
