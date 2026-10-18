@@ -4,6 +4,7 @@ on:
     paths:
       - '.github/workflows/rog-obs-bulk-recovery.yml'
       - 'apps/4leaf/rog/tools/decode-original-obs-bulk.py'
+      - 'apps/4leaf/rog/tools/decode-original-img-spr.py'
   workflow_dispatch:
 permissions:
   contents: write
@@ -72,6 +73,26 @@ jobs:
           assert len(list((root/'bulk').glob('*.png')))==report['framePNGs'],report
           print('ORIGINAL_OBS_STRICT_FRAMES_VERIFIED',report['accepted'],report['framePNGs'])
           PY
+      - name: Decode genuine 2002 ROLL and eventRoll1 animation frames with original 640-stride palette codec
+        run: |
+          python3 -m py_compile apps/4leaf/rog/tools/decode-original-img-spr.py
+          source="$(find /tmp/leaf-obs-resources -type f -iname 'IMG.pak' | grep -i '/Dice/' | head -1)"
+          test -n "$source"
+          python3 apps/4leaf/rog/tools/decode-original-img-spr.py "$source" apps/4leaf/rog/original/SourceSPR
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          path=Path('apps/4leaf/rog/original/SourceSPR')
+          report=json.loads((path/'manifest.json').read_text())
+          assert report['videoStride']==640,report
+          frames=report['spriteAnimations']
+          assert frames['roll.spr']['frameCount']==4,frames['roll.spr']
+          assert frames['eventRoll1.spr']['frameCount']==16,frames['eventRoll1.spr']
+          assert len(list(path.glob('*.png')))==20
+          assert frames['roll.spr']['frames'][0]['width']==158
+          assert frames['roll.spr']['frames'][0]['height']==100
+          print('VERIFIED_GENUINE_2002_IMG_SPR',len(list(path.glob('*.png'))))
+          PY
       - name: Keep offline PWA sprite inventory synchronized with every verified source frame
         run: |
           python3 - <<'PY'
@@ -85,6 +106,20 @@ jobs:
           native="const NATIVE_OBS_BULK_FILES='"+' '.join(sprites)+"'.split(' ');"
           updated,count=re.subn(pattern,lambda _:native,source,count=1)
           assert count==1, "Refusing to alter unknown offline resource table"
+          # The 4+16 authentic PNGs must be cached on first game visit,
+          # independent from the previous inaccessible CSS roll proxy.
+          extra="const ORIGINAL_SOURCE_SPR_FILES='roll-00 roll-01 roll-02 roll-03 "+' '.join(
+            'eventRoll1-'+str(i).zfill(2) for i in range(16)
+          )+"'.split(' ');"
+          if 'const ORIGINAL_SOURCE_SPR_FILES=' not in updated:
+              updated=updated.replace("const NATIVE_TIS_FILES=",extra+"\nconst NATIVE_TIS_FILES=",1)
+              updated=updated.replace(
+                ".concat(NATIVE_OBS_BULK_FILES.map(id=>'./original/OBS/bulk/'+id+'.png'));",
+                ".concat(NATIVE_OBS_BULK_FILES.map(id=>'./original/OBS/bulk/'+id+'.png'))"+
+                ".concat(ORIGINAL_SOURCE_SPR_FILES.map(id=>'./original/SourceSPR/'+id+'.png'));"
+              )
+              if 'ORIGINAL_SOURCE_SPR_FILES.map' not in updated:
+                  raise RuntimeError('SourceSPR cache insertion failed')
           if updated!=source:
               updated,n=re.subn(r"const REVISION='4leaf-revival-pwa-v(\d+)'",
                 lambda m:"const REVISION='4leaf-revival-pwa-v"+str(int(m.group(1))+1)+"'",
@@ -102,6 +137,7 @@ jobs:
           git add apps/4leaf/rog/original/OBS/bulk \
             apps/4leaf/rog/original/OBS/animation-extra.js \
             apps/4leaf/rog/original/OBS/bulk-source-report.json \
+            apps/4leaf/rog/original/SourceSPR \
             apps/4leaf/rog/sw.js
           if git diff --cached --quiet; then
             echo 'No new source frames accepted; no fabricated assets to publish'
