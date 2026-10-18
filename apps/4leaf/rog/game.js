@@ -57,6 +57,17 @@ const ITEMS=[
 ];
 const ITEM_MAP=Object.fromEntries(ITEMS.map(i=>[i.id,i]));
 const SOURCE_ROUTES=window.ORIGINAL_LEAF_MAPS||{},SOURCE_INFO=window.ORIGINAL_LEAF_MAP_INFO||{},SOURCE_TILES=window.ORIGINAL_LEAF_TILES||{};
+// The verified DMP archive has 26 routes but the published client-name
+// lookup contains only 25 entries. Source 0170 is a REAL 135-cell DMP,
+// not a generated route: retain it as selectable/playable with a deliberately
+// PROVISIONAL identifier. Do not invent a historic title or tile events.
+for(const [id,records] of Object.entries(SOURCE_ROUTES)){
+ if(!SOURCE_INFO[id]&&records.length>9)SOURCE_INFO[id]={
+  title:'원본 경로 '+id,mode:null,
+  sourceNameEvidence:'UNVERIFIED-missing-client-title',
+  sourceRouteEvidence:'VERIFIED-2002-DMP'
+ };
+}
 const SOURCE_IDS=Object.fromEntries(Object.entries(SOURCE_INFO).map(([id,info])=>[info.title,id]));
 const MAPS={
 '4LEAF':{length:70,non:false,warp:[11,38],keepers:[13,29,47,61],jail:[24],chests:[6,32,52],boost:[17,49],attribute:[20,43],joker:[36]},
