@@ -36,6 +36,17 @@ async function audit(browser,mobile){
    const entries=Object.entries(info)
     .filter(([id,v])=>sources[id]?.length>=10);
    const original=game.getMatch(),log=[];
+   // The actual client intentionally eases map camera transitions for 200ms
+   // (#game .board-world { transition:transform .20s ease-out!important }).
+   // A zero-delay 1920-cell synchronous hit test otherwise reads the
+   // IN-FLIGHT CSS transform, not the destination of each real camera
+   // focusRatio, giving false 'inaccessible DMP' reports (0219=0/45).
+   // Disable only the animated interpolation for this *geometry audit*.
+   // Movement calculation/rendering/culling continues through the
+   // unmodified production camera focusRatio and actual tile DOM.
+   const world=document.getElementById('board-world');
+   const nativeTransition=getComputedStyle(world).transitionDuration;
+   world.style.setProperty('transition','none','important');
    const valid=(a,b)=>Number.isFinite(a)&&Number.isFinite(b);
    for(const [id,metadata] of entries){
     const title=metadata.title,source=sources[id];
@@ -105,9 +116,11 @@ async function audit(browser,mobile){
    }
    game.setMatch(original);
    camera.reset();
+   world.style.removeProperty('transition');
    return {maps:log,allCells:log.reduce((n,a)=>n+a.total,0),
     reached:log.reduce((n,a)=>n+a.reachable,0),
     pitch:camera.getState().projectedPitch,
+    rendererTransition:nativeTransition,
     restoredGame:game.getMatch().map};
   });
   assert.equal(results.maps.length,26,'All 26 genuine source DMP maps must be tested');
