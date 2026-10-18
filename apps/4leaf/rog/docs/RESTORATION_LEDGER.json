@@ -355,14 +355,18 @@
       "id": "P0-CHAT",
       "priority": "P0",
       "title": "상설 채팅방 원작 화면 정밀 복원",
-      "status": "todo",
+      "status": "in_progress",
       "milestone": "M03",
-      "current": "실제 채팅은 가능하지만 배치·창틀/전경 등 원작 외형 미달",
+      "current": "실제 채팅은 가능하지만 배치·창틀/전경 등 원작 외형 미달; 2026-10-18 실제 Chromium 통합회귀 발견: 원본 ringbtn.png 캐릭터정보 메뉴가 원본 매직카덴 툴바(상위 CSS 쌓임맥락) 아래 가려짐. 2004 ChatRoom 프레임 CSS :has() 특이성 재조정으로 메뉴가 열릴 때만 z=150, 닫히면 본래 z=106. 브라우저 실제 elementFromPoint 클릭 QA 성공. 전체 채팅 원작 픽셀 동등성은 아직 미완료.",
       "acceptance": [
         "원본 794×528/2004 화면의 입력·가구·좌석·상설 목록을 실제 참가자 그대로 재현"
       ],
       "evidence": [
-        "apps/4leaf/rog/chatroom-native-2004-frame.css"
+        "apps/4leaf/rog/chatroom-native-2004-frame.css",
+        "apps/4leaf/rog/chatroom-native-2004-frame.css",
+        "apps/4leaf/rog/tests/world-chat.cjs",
+        "https://github.com/koith/browser-app-lab/actions/runs/39123213181",
+        "https://github.com/koith/browser-app-lab/pull/113"
       ],
       "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
       "lastReviewed": "2026-10-18",
@@ -635,6 +639,31 @@
       "taskId": "P0-BOARD",
       "details": "PR #111 squash abfa068f: real source tile horizontal non-overlap, full expanded DMP camera; initial opponent genuine OBS, missing source no stickman.",
       "evidence": "https://github.com/koith/browser-app-lab/pull/111"
+    },
+    {
+      "seq": 23,
+      "date": "2026-10-18",
+      "type": "STATUS_CHANGED",
+      "taskId": "P0-CHAT",
+      "from": "todo",
+      "to": "in_progress",
+      "details": "원본 ChatRoom/ringbtn.png 메뉴와 MainFrame 매직카덴 버튼 간 z-index 특이성 충돌로 원본 캐릭터 정보 클릭 실패 발견 및 수정. 원작 외형 최종 동일성은 미완료."
+    },
+    {
+      "seq": 24,
+      "date": "2026-10-18",
+      "type": "QA_VERIFIED",
+      "taskId": "P0-CHAT",
+      "details": "원본 104x330 ringbtn.png 메뉴에 대해 document.elementFromPoint 실제 물리 히트타깃 확인, 메뉴 열림 시 z>=150; 카메라/원본 룸/실제 참가자·RTCPeerConnection WebKit 및 Chromium QA 성공.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39123213181"
+    },
+    {
+      "seq": 25,
+      "date": "2026-10-18",
+      "type": "MERGED",
+      "taskId": "P0-CHAT",
+      "details": "PR #113 squash aa4ec1d9: original ChatRoom peer menu clickable above source toolbar with no false actor/menu; PR #112 squash 4e5772f0 v79 cache original board CSS pre-cache.",
+      "evidence": "https://github.com/koith/browser-app-lab/pull/113"
     }
   ]
 }
