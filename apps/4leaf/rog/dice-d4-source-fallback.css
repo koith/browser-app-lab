@@ -1,41 +1,65 @@
-/* 4LEAF recovered move rule: Move 2 rolls two four-sided dice.
- * The archive has no recovered original rolling mesh; this explicit
- * tetrahedral WEB fallback must never reuse the six-faced cube.
- * Results are precomputed by game.js and shown only after the bounce.
+/* Dice move=2 requires D4 + D4, not two painted D6 cubes.
+ * The original 3D client mesh/animation is not recovered; this fallback
+ * now contains FOUR actual independent CSS-3D triangular planes rather
+ * than a single flat triangle with a switched result label.
+ * Tetrahedron face-normal angle: acos(-1/3) = 109.471 degrees.
+ * The result is still the authoritative game.js D4 roll, never randomized
+ * or re-labelled by this visual renderer.
  */
 #app.app-classic-dice #game .leaf-fall-piece[data-sides="4"]{
-  filter:drop-shadow(3px 8px 4px #10202d99);
+ filter:drop-shadow(3px 8px 4px #10202d99);
 }
 #app.app-classic-dice #game .leaf-fall-tetra{
-  position:absolute;inset:0;display:block;
-  transform-style:preserve-3d;
+ position:absolute;inset:0;
+ display:block;
+ transform-style:preserve-3d;
+ --leaf-d4-inradius:11px;
 }
-#app.app-classic-dice #game .leaf-fall-tetra::before{
-  content:"";position:absolute;inset:0;
-  clip-path:polygon(50% 0%,100% 88%,0 88%);
-  background:linear-gradient(135deg,#f1f5f6 0%,#e1e8ed 42%,#a7bcc9 86%);
-  filter:drop-shadow(1px 2px 1px #23384b);
-}
+#app.app-classic-dice #game .leaf-fall-tetra::before,
 #app.app-classic-dice #game .leaf-fall-tetra::after{
-  content:"";position:absolute;inset:0;
-  clip-path:polygon(50% 0%,100% 88%,50% 80%);
-  background:linear-gradient(120deg,#9eb2c2,#617d96);
-  opacity:.65;
+ display:none!important;
 }
-#app.app-classic-dice #game .leaf-tetra-face{
-  position:absolute;z-index:2;inset:0;
-  display:none;
-  clip-path:polygon(50% 2%,97% 85%,4% 85%);
-  align-items:center;justify-content:center;
-  padding-top:15%;
-  color:#2b3344;
-  font:bold 28px/1 Georgia,'Times New Roman',serif;
-  text-shadow:0 1px 0 #fff;
+#app.app-classic-dice #game .leaf-fall-tetra .leaf-tetra-face{
+ position:absolute;
+ box-sizing:border-box;
+ display:flex;
+ top:0;left:0;
+ width:57px;height:57px;
+ align-items:center;justify-content:center;
+ padding-top:15%;
+ color:#253348;
+ font:bold 28px/1 Georgia,'Times New Roman',serif;
+ text-shadow:0 1px 0 #fff;
+ clip-path:polygon(50% 2%,98% 88%,2% 88%);
+ background:linear-gradient(145deg,#f9fdff 5%,#e4edf2 46%,#9bb2c4 100%);
+ border:0;
+ backface-visibility:hidden;
+ -webkit-backface-visibility:hidden;
+ transform-style:preserve-3d;
+ transform-origin:center center;
+ pointer-events:none;
 }
-#app.app-classic-dice #game .leaf-fall-tetra[data-result="1"] .leaf-tetra-face-1,
-#app.app-classic-dice #game .leaf-fall-tetra[data-result="2"] .leaf-tetra-face-2,
-#app.app-classic-dice #game .leaf-fall-tetra[data-result="3"] .leaf-tetra-face-3,
-#app.app-classic-dice #game .leaf-fall-tetra[data-result="4"] .leaf-tetra-face-4{display:flex;}
+#app.app-classic-dice #game .leaf-fall-tetra .leaf-tetra-face-1{
+ transform:translateZ(var(--leaf-d4-inradius));
+}
+#app.app-classic-dice #game .leaf-fall-tetra .leaf-tetra-face-2{
+ transform:rotateZ(0deg) rotateY(109.471deg) translateZ(var(--leaf-d4-inradius));
+ background:linear-gradient(145deg,#f4f9fc,#b9ccda 80%,#859caf);
+}
+#app.app-classic-dice #game .leaf-fall-tetra .leaf-tetra-face-3{
+ transform:rotateZ(120deg) rotateY(109.471deg) translateZ(var(--leaf-d4-inradius));
+ background:linear-gradient(145deg,#f0f6f9,#adc2d2 75%,#7890a3);
+}
+#app.app-classic-dice #game .leaf-fall-tetra .leaf-tetra-face-4{
+ transform:rotateZ(240deg) rotateY(109.471deg) translateZ(var(--leaf-d4-inradius));
+ background:linear-gradient(145deg,#f4faff,#bacbd7 74%,#8098ac);
+}
 @media(max-width:650px){
- #app.app-classic-dice #game .leaf-tetra-face{font-size:19px;padding-top:13%;}
+ #app.app-classic-dice #game .leaf-fall-tetra{
+  --leaf-d4-inradius:7.1px;
+ }
+ #app.app-classic-dice #game .leaf-fall-tetra .leaf-tetra-face{
+  width:37px;height:37px;
+  font-size:19px;padding-top:13%;
+ }
 }
