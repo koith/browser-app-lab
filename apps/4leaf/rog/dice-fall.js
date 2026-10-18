@@ -14,6 +14,16 @@
  };
  const ROTATION={1:[0,0],2:[0,-90],3:[-90,0],
   4:[90,0],5:[0,90],6:[0,180]};
+ // Result-face normals use the regular tetrahedral dihedral angle
+ // acos(-1/3)=109.471 degrees. This is still a WEB fallback mesh,
+ // NOT original 2002 MVE geometry/keyframes.
+ const TETRA_ANGLE=109.471;
+ const TETRA_LAND={
+  1:'rotateY(0deg) rotateZ(0deg)',
+  2:'rotateY(-109.471deg) rotateZ(0deg)',
+  3:'rotateY(-109.471deg) rotateZ(-120deg)',
+  4:'rotateY(-109.471deg) rotateZ(-240deg)'
+ };
  let active=0,last=[],lastSides=[],complete=0;
  const state=()=>({active:active>0,last:last.slice(),lastSides:lastSides.slice(),complete,
   source:'user-reported fall/bounce; outcome from live game engine',
@@ -59,7 +69,7 @@
  async function animateDie(die,duration,instant){
   const {node,cube,result,index,sides}=die;
   const [rx,ry]=sides===4?[0,0]:ROTATION[result];
-  const target=sides===4?'rotateY(0deg) rotateZ(0deg)':
+  const target=sides===4?TETRA_LAND[result]:
    'rotateX('+(720+rx)+'deg) rotateY('+(1080+ry)+'deg) rotateZ(0deg)';
   const physics=[
    {transform:'translate3d(0,-260px,0) scale(.76)',offset:0},
@@ -145,5 +155,6 @@
   }
  }
  window.__LEAF_DICE_FALL__={roll,getState:state,
-  faces:PIPS,orientation:ROTATION};
+  faces:PIPS,orientation:ROTATION,
+  tetraOrientation:{...TETRA_LAND},tetraDihedralDegrees:TETRA_ANGLE};
 })();
