@@ -1010,9 +1010,9 @@
       "id": "BRD-05",
       "priority": "P1",
       "title": "실제 맵 범위·미니맵 이동 정확성",
-      "status": "todo",
+      "status": "in_progress",
       "milestone": "M04",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 카메라를 큰 공통 6000×3300 세계로 보정했고 실제 경로 범위 패닝 제한이 있지만 원작 미니맵 선택 비율과 추적은 비교 부족 | 구현 목표: 맵별 최외곽 접근·줌·드래그·손가락 이동 및 172×152 실제 미니맵 픽셀 좌표 일치 검증; 2026-10-19 원본 2002 Dice/IMG.pak minipanel.spr 4개 실제 75x20 '미니맵/체스맨정보' 버튼을 비조작 이미지에서 독립 실제 클릭 탭으로 복구. DMP 실 미니맵 유지, CardData 실제 선택 팀 캐릭터 정보만 전시. 체스맨정보 상세 UI의 원본 2004 위치는 INFERRED로 미완료. Chromium PC/폰 E2E 진행 중.; 2026-10-19 Playwright 26개 원본 DMP 맵 1,920칸 전체 카메라 focusRatio()로 실제 브라우저 PC·iPhone 390x844 접근성 전수검사 추가(PR #132). 지도별 경계와 145x97 원본 그림 보존, 수용 CI 결과 대기.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 카메라를 큰 공통 6000×3300 세계로 보정했고 실제 경로 범위 패닝 제한이 있지만 원작 미니맵 선택 비율과 추적은 비교 부족 | 구현 목표: 맵별 최외곽 접근·줌·드래그·손가락 이동 및 172×152 실제 미니맵 픽셀 좌표 일치 검증; 2026-10-19 원본 2002 Dice/IMG.pak minipanel.spr 4개 실제 75x20 '미니맵/체스맨정보' 버튼을 비조작 이미지에서 독립 실제 클릭 탭으로 복구. DMP 실 미니맵 유지, CardData 실제 선택 팀 캐릭터 정보만 전시. 체스맨정보 상세 UI의 원본 2004 위치는 INFERRED로 미완료. Chromium PC/폰 E2E 진행 중.; 2026-10-19 Playwright 26개 원본 DMP 맵 1,920칸 전체 카메라 focusRatio()로 실제 브라우저 PC·iPhone 390x844 접근성 전수검사 추가(PR #132). 지도별 경계와 145x97 원본 그림 보존, 수용 CI 결과 대기.; VERIFIED-WEBAPP: 200ms CSS animation used old rendered geometry while camera.culling used final DMP position, causing real 145x97 source tiles to appear unreachable under fast zoom/pan. Disable delayed interpolation to keep visual bounding boxes and hit testing synchronized, and introduce 26-map/1920-cell/PC-iPhone live camera sweep. Original MVE camera still UNVERIFIED.",
       "acceptance": [
         "26개 맵 PC/휴대폰에서 아무 빈 지역에 고립되지 않고 모든 원본 칸 이동/표시 가능"
       ],
@@ -1022,6 +1022,8 @@
         "apps/4leaf/rog/dice-native-minipanel-spr.js",
         "apps/4leaf/rog/dice-native-minipanel-spr.css",
         "apps/4leaf/rog/tests/dice-original-minipanel-spr.cjs",
+        "apps/4leaf/rog/tests/dice-all-source-maps-camera.cjs",
+        "apps/4leaf/rog/world-perspective.css",
         "apps/4leaf/rog/tests/dice-all-source-maps-camera.cjs"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
@@ -3165,6 +3167,23 @@
       "taskId": "BRD-04",
       "details": "PR #133 successfully squash-merged 1fe8683b; restore missing 26th source DMP 0170 into actual playable map menu.",
       "evidence": "https://github.com/koith/browser-app-lab/pull/133"
+    },
+    {
+      "seq": 113,
+      "date": "2026-10-19",
+      "type": "STATUS_CHANGED",
+      "taskId": "BRD-05",
+      "from": "todo",
+      "to": "in_progress",
+      "details": "Full 26-map/1920-cell camera accessibility and CSS animation desync regression implementation; original MVE camera matching not yet verified."
+    },
+    {
+      "seq": 114,
+      "date": "2026-10-19",
+      "type": "IMPLEMENTED_PENDING_QA",
+      "taskId": "BRD-05",
+      "details": "Disable stale 200ms CSS world transform transition that desynchronizes DOM hitboxes from JS native TIS culling; add genuine 26×DMP camera every-cell PC+iPhone audit on mainline branch.",
+      "evidence": "apps/4leaf/rog/tests/dice-all-source-maps-camera.cjs"
     }
   ]
 }
