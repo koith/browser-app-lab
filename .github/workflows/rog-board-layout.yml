@@ -55,7 +55,7 @@ jobs:
       - name: Verify every native TIS image pixel survives full board alpha clipping
         run: node apps/4leaf/rog/tests/dice-native-tis-full-outline.cjs
       - run: node apps/4leaf/rog/tests/board-layout.cjs
-      - name: Reproduce iPhone screenshot: zero horizontal TIS overlap and 2 original Genesis OBS players
+      - name: "Reproduce iPhone screenshot: zero horizontal TIS overlap and 2 original Genesis OBS players"
         run: node apps/4leaf/rog/tests/dice-horizontal-native-actors.cjs
       - name: Verify genuine native Genesis OBS chessman and no giant fabricated missing-body proxy
         run: node apps/4leaf/rog/tests/genesis-chessman-actors.cjs
