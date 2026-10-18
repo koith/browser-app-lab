@@ -1,0 +1,242 @@
+{
+  "source": "Dice/IMG.pak",
+  "archiveSHA256": "ab8dcf4d3f774781565982979a9b8e269ce4f6ac295a5c21ecc5b83c0098465b",
+  "videoStride": 640,
+  "decoder": "verified-640-byte-video-RLE",
+  "spriteAnimations": {
+    "roll.spr": {
+      "member": "roll.spr",
+      "sourceSHA256": "ae6954fb8edbb5585bdb3021037202f9604ed49468877d50c487ebdd13686287",
+      "frameCount": 4,
+      "frames": [
+        {
+          "index": 0,
+          "url": "./original/SourceSPR/roll-00.png",
+          "width": 158,
+          "height": 100,
+          "originX": -79,
+          "originY": -50,
+          "runs": 130,
+          "opaquePixels": 5030,
+          "sha256": "c5db0f6c580efa8fd4791250842a01fe0137b34a62e299c2890317d3abcac526"
+        },
+        {
+          "index": 1,
+          "url": "./original/SourceSPR/roll-01.png",
+          "width": 158,
+          "height": 100,
+          "originX": -79,
+          "originY": -50,
+          "runs": 108,
+          "opaquePixels": 4976,
+          "sha256": "6639b821c08b1b41e367921cf6551ee6c208a3cc337bc8280f67e3020245ffbf"
+        },
+        {
+          "index": 2,
+          "url": "./original/SourceSPR/roll-02.png",
+          "width": 158,
+          "height": 100,
+          "originX": -79,
+          "originY": -50,
+          "runs": 130,
+          "opaquePixels": 5030,
+          "sha256": "57345ce889147294e33780ff264d10d7e8ed2c04d06875244f23c49f5d97f11b"
+        },
+        {
+          "index": 3,
+          "url": "./original/SourceSPR/roll-03.png",
+          "width": 158,
+          "height": 100,
+          "originX": -79,
+          "originY": -50,
+          "runs": 130,
+          "opaquePixels": 5030,
+          "sha256": "2beb7328885d866d0b4a416f8ca6eff09b99a28a2a6f162a130d2268e17ce735"
+        }
+      ]
+    },
+    "eventRoll1.spr": {
+      "member": "eventRoll1.spr",
+      "sourceSHA256": "31c60e73bd7f90bc6ad61d91ddbf711daf20ce5f484b86c9ab3fb39cf6f360cf",
+      "frameCount": 16,
+      "frames": [
+        {
+          "index": 0,
+          "url": "./original/SourceSPR/eventRoll1-00.png",
+          "width": 69,
+          "height": 51,
+          "originX": -30,
+          "originY": -16,
+          "runs": 55,
+          "opaquePixels": 2809,
+          "sha256": "bcbb8ca7a1024b0f7e46bf53a0ce8702e6a4d68a0038aff6f445e18ec8c61611"
+        },
+        {
+          "index": 1,
+          "url": "./original/SourceSPR/eventRoll1-01.png",
+          "width": 75,
+          "height": 51,
+          "originX": -33,
+          "originY": -16,
+          "runs": 55,
+          "opaquePixels": 2890,
+          "sha256": "78256f77520d27e7d628bbc0daabe45eb75272c57680c34e92b27451a4e4687a"
+        },
+        {
+          "index": 2,
+          "url": "./original/SourceSPR/eventRoll1-02.png",
+          "width": 79,
+          "height": 51,
+          "originX": -35,
+          "originY": -16,
+          "runs": 55,
+          "opaquePixels": 2963,
+          "sha256": "b4d7860a6e10e4835fac3a68518a9a8808a2d0ce87c5a86dbfff294080f28e6e"
+        },
+        {
+          "index": 3,
+          "url": "./original/SourceSPR/eventRoll1-03.png",
+          "width": 83,
+          "height": 51,
+          "originX": -37,
+          "originY": -16,
+          "runs": 58,
+          "opaquePixels": 3061,
+          "sha256": "d004300247085224e0cd28b6cce3224c03eecadff96fc437c3b9f2e7bc98c238"
+        },
+        {
+          "index": 4,
+          "url": "./original/SourceSPR/eventRoll1-04.png",
+          "width": 87,
+          "height": 51,
+          "originX": -39,
+          "originY": -16,
+          "runs": 60,
+          "opaquePixels": 3147,
+          "sha256": "101c67c9eb4b4993fb262358eb751e80b941331933e39f3975578ed1fa6a09e9"
+        },
+        {
+          "index": 5,
+          "url": "./original/SourceSPR/eventRoll1-05.png",
+          "width": 89,
+          "height": 51,
+          "originX": -40,
+          "originY": -16,
+          "runs": 60,
+          "opaquePixels": 3206,
+          "sha256": "af89b6e1c12bc3610858a5669a1d73e3cac4fb78b091acebe5b3680eb7b251ac"
+        },
+        {
+          "index": 6,
+          "url": "./original/SourceSPR/eventRoll1-06.png",
+          "width": 89,
+          "height": 51,
+          "originX": -40,
+          "originY": -16,
+          "runs": 60,
+          "opaquePixels": 3233,
+          "sha256": "9439196bedff8072eaf1155e1c7206a5ada9e8153d98e4e06ee8302c2e37cd6c"
+        },
+        {
+          "index": 7,
+          "url": "./original/SourceSPR/eventRoll1-07.png",
+          "width": 91,
+          "height": 51,
+          "originX": -41,
+          "originY": -16,
+          "runs": 60,
+          "opaquePixels": 3258,
+          "sha256": "5afdaa43c3bca7abc16df95cddba914c56343818b3a9809b223b38678f823c74"
+        },
+        {
+          "index": 8,
+          "url": "./original/SourceSPR/eventRoll1-08.png",
+          "width": 89,
+          "height": 51,
+          "originX": -40,
+          "originY": -16,
+          "runs": 60,
+          "opaquePixels": 3233,
+          "sha256": "b5fce7b1fa1ad552e2ad6fafcbbc7f423efe114a5379209611e7a7fc18b96897"
+        },
+        {
+          "index": 9,
+          "url": "./original/SourceSPR/eventRoll1-09.png",
+          "width": 89,
+          "height": 51,
+          "originX": -40,
+          "originY": -16,
+          "runs": 60,
+          "opaquePixels": 3206,
+          "sha256": "59c3effbb4e0c85fd6153cdeca8eb32db5050c6a35ae82ea1dd2673b789a3b95"
+        },
+        {
+          "index": 10,
+          "url": "./original/SourceSPR/eventRoll1-10.png",
+          "width": 87,
+          "height": 51,
+          "originX": -39,
+          "originY": -16,
+          "runs": 60,
+          "opaquePixels": 3147,
+          "sha256": "7a666e153bfe759d1fdb262e59e5de2085e39caeb0669909a9126b93e591eda3"
+        },
+        {
+          "index": 11,
+          "url": "./original/SourceSPR/eventRoll1-11.png",
+          "width": 83,
+          "height": 51,
+          "originX": -37,
+          "originY": -16,
+          "runs": 58,
+          "opaquePixels": 3061,
+          "sha256": "f19479c36173ef061f2d98f6f300c7607dcb36ca16d520a5a2e3ce4438225069"
+        },
+        {
+          "index": 12,
+          "url": "./original/SourceSPR/eventRoll1-12.png",
+          "width": 79,
+          "height": 51,
+          "originX": -35,
+          "originY": -16,
+          "runs": 55,
+          "opaquePixels": 2963,
+          "sha256": "036d05730baba628dc4496f2a6b72ed2e3323b304b28b687efcf36e3920ce5a0"
+        },
+        {
+          "index": 13,
+          "url": "./original/SourceSPR/eventRoll1-13.png",
+          "width": 75,
+          "height": 51,
+          "originX": -33,
+          "originY": -16,
+          "runs": 55,
+          "opaquePixels": 2890,
+          "sha256": "46e5d12601e804b53edeb232bc6bdd3e1268dbf295ac4555b036ac926f618eb3"
+        },
+        {
+          "index": 14,
+          "url": "./original/SourceSPR/eventRoll1-14.png",
+          "width": 69,
+          "height": 51,
+          "originX": -30,
+          "originY": -16,
+          "runs": 55,
+          "opaquePixels": 2809,
+          "sha256": "9de9a84d2ace6a0ed82febd19b63b46120684b605854f477bfa827cab1daade6"
+        },
+        {
+          "index": 15,
+          "url": "./original/SourceSPR/eventRoll1-15.png",
+          "width": 69,
+          "height": 51,
+          "originX": -30,
+          "originY": -16,
+          "runs": 55,
+          "opaquePixels": 2767,
+          "sha256": "20ef9c8c7af278c3e4137f5c574ff157615c1f5bd3f8be5efa880e738d711e7d"
+        }
+      ]
+    }
+  }
+}
