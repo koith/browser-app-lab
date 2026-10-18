@@ -15,21 +15,33 @@
   Math.abs(a[0]-b[0])<=range&&Math.abs(a[1]-b[1])<=range&&
   Math.abs(a[2]-b[2])<=range;
  function silhouette(p,w,h){
-  const rows=[];
-  for(let y=0;y<h;y+=4){
+  // The previous 4-row contour sampled the MIDPOINT of a strip (y+2).
+  // That cut off the top two pixels, the final bottom pixel, and some
+  // anti-aliased protrusions of real 145x97 TIS platform silhouettes.
+  // A clip-path is only a conservative clickable boundary: the original
+  // image's native per-pixel alpha still supplies the ACTUAL artwork.
+  // Cover every row boundary and every nonzero-alpha source pixel.
+  const bands=[],stride=3;
+  for(let y=0;y<h;y+=stride){
    let min=w,max=-1;
-   for(let dy=y;dy<Math.min(h,y+4);dy++){
+   const bottom=Math.min(h,y+stride);
+   for(let dy=y;dy<bottom;dy++){
     for(let x=0;x<w;x++){
-     if(p[(dy*w+x)*4+3]<80)continue;
+     if(p[(dy*w+x)*4+3]===0)continue;
      if(x<min)min=x;if(x>max)max=x;
     }
    }
-   if(max>=min)rows.push({y:Math.min(h-1,y+2),left:Math.max(0,min-1),right:Math.min(w-1,max+1)});
+   if(max>=min)bands.push({
+    top:y,bottom,left:Math.max(0,min-1),right:Math.min(w,max+2)
+   });
   }
-  if(rows.length<4)return null;
-  const point=(x,y)=>(100*x/w).toFixed(2)+'% '+(100*y/h).toFixed(2)+'%';
-  return 'polygon('+rows.map(r=>point(r.left,r.y))
-   .concat([...rows].reverse().map(r=>point(r.right,r.y))).join(',')+')';
+  if(bands.length<4)return null;
+  const point=(x,y)=>(100*x/w).toFixed(3)+'% '+(100*y/h).toFixed(3)+'%';
+  const left=bands.flatMap(b=>[point(b.left,b.top),point(b.left,b.bottom)]);
+  const right=[...bands].reverse().flatMap(b=>[
+   point(b.right,b.bottom),point(b.right,b.top)
+  ]);
+  return 'polygon('+left.concat(right).join(',')+')';
  }
  function decode(img,id){
   if(img.naturalWidth!==SIZE[0]||img.naturalHeight!==SIZE[1])
