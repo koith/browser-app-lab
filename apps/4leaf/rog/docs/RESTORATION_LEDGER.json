@@ -213,14 +213,16 @@
       "id": "P0-BOARD",
       "priority": "P0",
       "title": "타일 상하·겹침·입체감 사용자 재현 결함",
-      "status": "todo",
+      "status": "in_progress",
       "milestone": "M04",
-      "current": "반전 패치와 128x86 웹 투영만으로 최종 해결 아님",
+      "current": "반전 패치와 128x86 웹 투영만으로 최종 해결 아님; 원본 DMP 26개 맵 1,920개 XY 좌표 검사로 동일 맵 좌표 중복 0건, 현재 웹 투영의 사각영역 최대 중첩 약 11.7%로 계산. 실제 픽셀/알파/메시 가림은 미검증.",
       "acceptance": [
         "전체 맵 동선에서 과도한 중첩/상하 역전 0건; 알파/행 순서·타일 접근성·스크린샷 비교 기록"
       ],
       "evidence": [
-        "apps/4leaf/rog/dice-native-tis-orientation.css"
+        "apps/4leaf/rog/dice-native-tis-orientation.css",
+        "apps/4leaf/rog/tests/dmp-tile-overlap-audit.cjs",
+        ".github/workflows/rog-board-layout.yml"
       ],
       "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
       "lastReviewed": "2026-10-18",
@@ -355,6 +357,23 @@
         "GOV-LEDGER"
       ],
       "details": "지난 마일스톤 문서와 GitHub main 상태를 대조해 원작 완성 기준 미달을 유지. 현재 원장 CI·CLI 도입 중."
+    },
+    {
+      "seq": 2,
+      "date": "2026-10-18",
+      "type": "STATUS_CHANGED",
+      "taskId": "P0-BOARD",
+      "from": "todo",
+      "to": "in_progress",
+      "details": "원본 DMP 전체 좌표/웹 투영 수치 감사 구현; 시각적 겹침 수용 기준은 여전히 미완료."
+    },
+    {
+      "seq": 3,
+      "date": "2026-10-18",
+      "type": "AUDIT_IMPLEMENTED",
+      "taskId": "P0-BOARD",
+      "details": "26개 원본 경로 1,920칸 중복 좌표/40% 초과 사각 충돌 검사 도입. 픽셀 알파 겹침과 2004 화면 동일성 검사로 과장하지 않음.",
+      "evidence": "apps/4leaf/rog/tests/dmp-tile-overlap-audit.cjs"
     }
   ]
 }
