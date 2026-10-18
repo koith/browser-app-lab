@@ -355,7 +355,9 @@ function drawBoard(){
    // event tile content (item swaps, map changes and game resumes).
    const existingPawns=$('board-pawns');
    root.dataset.renderKey=key;root.replaceChildren();svg.replaceChildren();
-   const coords=PATH.slice(0,match.tiles.length).map(p=>({x:p.x*3000/100,y:p.y*2320/100}));
+   const cameraSize=window.__LEAF_CAMERA__?.getState?.().size||{width:2300,height:1780};
+   const coords=PATH.slice(0,match.tiles.length).map(p=>({
+    x:p.x*cameraSize.width/100,y:p.y*cameraSize.height/100}));
    const path=document.createElementNS('http://www.w3.org/2000/svg','polyline');
    path.setAttribute('points',coords.map(p=>p.x+','+p.y).join(' '));
    path.setAttribute('fill','none');path.setAttribute('stroke','#b6a2d5');
@@ -365,9 +367,9 @@ function drawBoard(){
      const type=match.tiles[i],b=document.createElement('div');b.className='tile '+type;
      b.style.left=PATH[i].x+'%';b.style.top=PATH[i].y+'%';b.dataset.tile=i;
      // Genuine original DMP axial-grid coordinates are unchanged.
-     // The old web projection packed a full 145x97 sprite every 70x47px,
-     // hiding half of every neighboring tile. Render each SOURCE sprite
-     // at 145x97, with separately tracked WEB projection pitch ~145x97px.
+     // Render full SOURCE 145x97 pixels with screenshot-calibrated WEB
+     // spacing ~111x75. Original DMP indices stay 70x47; the modest
+     // overlap is painted in DMP depth order, not by route index.
      // Original MVE elevation and camera matrix remain unrecovered.
      const dmp=SOURCE_ROUTES[SOURCE_IDS[match.map]]?.[i];
      if(dmp){
@@ -377,7 +379,7 @@ function drawBoard(){
      }
      b.dataset.nativeTisSize='145x97';
      b.dataset.dmpLogicalPitch='70x47';
-     b.dataset.projectedPitch='145x97-web';
+     b.dataset.projectedPitch='111x75-web-screenshot-calibrated';
      // Painter order follows the original DMP grid, not route parity.
      // Cells on the same row are sorted by their genuine x coordinate;
      // a row ahead ALWAYS paints over rows behind it. Reserve +1 for actors.

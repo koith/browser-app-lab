@@ -40,6 +40,10 @@ const {chromium}=require('playwright');
    const r=source.getBoundingClientRect();
    return {
     tileCount:tiles.length,
+    visibleTileCount:tiles.filter(el=>el.style.visibility!=='hidden').length,
+    projection:window.__LEAF_CAMERA__?.getState?.().projectedPitch,
+    cameraWorld:window.__LEAF_CAMERA__?.getState?.().size,
+    nativeTileSize:tiles.slice(0,5).map(el=>[el.offsetWidth,el.offsetHeight]),
     worldBox:[r.x,r.y,r.width,r.height],
     orientation:getComputedStyle(tiles[0]).transform,
     alphaReady:tiles.filter(x=>x.dataset.tisAlpha==='ready').length,
@@ -66,6 +70,13 @@ const {chromium}=require('playwright');
    throw Error('Upside-down source TIS or wrongly scaled source tile: '+
      JSON.stringify(nativeOrientation));
   console.log('SOURCE_TIS_UPRIGHT_ORIENTATION '+JSON.stringify(nativeOrientation));
+  if(audit.visibleTileCount<13 || audit.visibleTileCount>48)
+   throw Error('2004 native screenshot camera has wrong card density: '+
+    JSON.stringify({visible:audit.visibleTileCount,pitch:audit.projection}));
+  if(audit.nativeTileSize.some(([w,h])=>w!==145||h!==97))
+   throw Error('Do not distort original 145x97 TIS artwork');
+  if(audit.orientation.includes('-1, 0, 0'))
+   throw Error('Native TIS painting was flipped/upside down again');
   const img=await game.screenshot({type:'jpeg',quality:70,animations:'disabled',timeout:18000});
   console.log('SOURCE_SCREENSHOT_QA '+JSON.stringify(audit));
   console.log('SOURCE_SCREENSHOT_JPEG_BASE64 '+img.toString('base64'));

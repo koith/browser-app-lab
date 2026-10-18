@@ -53,13 +53,13 @@ const {chromium,webkit}=require('playwright');
     'different source rows must paint in verified y order');
    if(a.y===b.y&&Math.abs(a.x-b.x)===1){
     horizontal++;
-    assert.ok(Math.abs(Math.abs(a.left-b.left)-projection.projectedPitch.x)<2.5&&Math.abs(a.left-b.left)>140,
-     'DMP x delta stays 1 logical cell; web screen pitch keeps 145px tile art distinct');
+    assert.ok(Math.abs(Math.abs(a.left-b.left)-projection.projectedPitch.x)<2.5&&Math.abs(a.left-b.left)>105,
+     'DMP x delta stays 1 original logical cell; original 145px artwork overlaps moderately at source screenshot camera pitch');
    }
    if(a.x===b.x&&Math.abs(a.y-b.y)===1){
     vertical++;
-    assert.ok(Math.abs(Math.abs(a.top-b.top)-projection.projectedPitch.y)<2.5&&Math.abs(a.top-b.top)>94,
-     'DMP y delta stays 1 source cell; web screen pitch avoids huge native sprite overlap');
+    assert.ok(Math.abs(Math.abs(a.top-b.top)-projection.projectedPitch.y)<2.5&&Math.abs(a.top-b.top)>70,
+     'DMP y delta stays 1 original source cell; WEB pitch shows the raised original tiles in source screenshot density');
    }
   }
   assert.ok(horizontal>5&&vertical>5&&sameRow>5,
