@@ -5,6 +5,7 @@ on:
       - '.github/workflows/rog-obs-bulk-recovery.yml'
       - 'apps/4leaf/rog/tools/decode-original-obs-bulk.py'
       - 'apps/4leaf/rog/tools/probe-original-obs-near-rows.py'
+      - 'apps/4leaf/rog/tools/probe-original-obs-640stride.py'
       - 'apps/4leaf/rog/tools/decode-original-img-spr.py'
   workflow_dispatch:
 permissions:
@@ -90,6 +91,21 @@ jobs:
         with:
           name: 4leaf-near-row-quarantine-not-production
           path: /tmp/leaf-obs-near-row-quarantine
+          retention-days: 7
+      - name: Test native OBS 2-byte scanline skip hypothesis against strict 2002 source frame geometry
+        run: |
+          python3 -m py_compile apps/4leaf/rog/tools/probe-original-obs-640stride.py
+          source="$(find /tmp/leaf-obs-resources -type f -iname 'OBS.pak' | head -1)"
+          test -n "$source"
+          python3 apps/4leaf/rog/tools/probe-original-obs-640stride.py \
+            "$source" apps/4leaf/rog/original/chessmen.json \
+            apps/4leaf/rog/original/OBS/bulk-source-report.json
+          test -s /tmp/leaf-obs-640stride-proof.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: 4leaf-obs-640stride-pixel-position-proof
+          path: /tmp/leaf-obs-640stride-proof.json
           retention-days: 7
       - name: Decode genuine 2002 ROLL and eventRoll1 animation frames with original 640-stride palette codec
         run: |
