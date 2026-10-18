@@ -36,7 +36,7 @@ const {chromium}=require('playwright');
   ];
   await page.waitForFunction(async files=>{
    const active=(await caches.keys()).find(name=>
-    /^4leaf-revival-pwa-v\\d+$/.test(name));
+    /^4leaf-revival-pwa-v\d+$/.test(name));
    if(!active)return false;
    const cache=await caches.open(active);
    return (await Promise.all(files.map(file=>cache.match('./'+file)))).every(Boolean);
