@@ -9,6 +9,9 @@ on:
       - 'apps/4leaf/rog/tests/dmp-tile-overlap-audit.cjs'
       - 'apps/4leaf/rog/dice-source-roll.js'
       - 'apps/4leaf/rog/tests/dice-source-roll.cjs'
+      - 'apps/4leaf/rog/dice-fall.js'
+      - 'apps/4leaf/rog/dice-d4-source-fallback.css'
+      - 'apps/4leaf/rog/tests/dice-fall.cjs'
       - 'apps/4leaf/rog/dice-native-tis-alpha.js'
       - 'apps/4leaf/rog/dice-native-pawn-dmp-depth.css'
       - 'apps/4leaf/rog/tests/dice-native-pawn-dmp-depth.cjs'
@@ -45,6 +48,8 @@ jobs:
       - run: node apps/4leaf/rog/tests/board-layout.cjs
       - name: Verify original IMG.pak 16-frame ROLL is decoded and visibly animated on first cold roll
         run: node apps/4leaf/rog/tests/dice-source-roll.cjs
+      - name: Verify D4 result-specific tetrahedral landing and D6 gameplay motion
+        run: node apps/4leaf/rog/tests/dice-fall.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
