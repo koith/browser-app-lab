@@ -51,6 +51,21 @@ const {chromium}=require('playwright');
     }))
    };
   });
+  // Source TIS JOKER lettering and tile artwork are already upright inside
+  // the recovered 145x97 PNG. A second Y-flip in CSS makes real art inverted.
+  const nativeOrientation=await page.evaluate(()=>{
+   const first=document.querySelector('#board-nodes>.tile');
+   const matrix=new DOMMatrixReadOnly(getComputedStyle(first).transform);
+   return {matrix:[matrix.a,matrix.b,matrix.c,matrix.d,matrix.e,matrix.f],
+    det:matrix.a*matrix.d-matrix.b*matrix.c,
+    size:[first.offsetWidth,first.offsetHeight],
+    source:first.dataset.originalArt};
+  });
+  if(nativeOrientation.det<=0||nativeOrientation.size[0]!==145||
+    nativeOrientation.size[1]!==97)
+   throw Error('Upside-down source TIS or wrongly scaled source tile: '+
+     JSON.stringify(nativeOrientation));
+  console.log('SOURCE_TIS_UPRIGHT_ORIENTATION '+JSON.stringify(nativeOrientation));
   const img=await game.screenshot({type:'jpeg',quality:70,animations:'disabled',timeout:18000});
   console.log('SOURCE_SCREENSHOT_QA '+JSON.stringify(audit));
   console.log('SOURCE_SCREENSHOT_JPEG_BASE64 '+img.toString('base64'));
@@ -80,11 +95,18 @@ const {chromium}=require('playwright');
     source:img.getAttribute('src'),
     frame:Number(node.dataset.actorFrame),pose:node.dataset.actorPose,
     native:[img.naturalWidth,img.naturalHeight],
+    flip:getComputedStyle(img).transform,
+    grounding:node.dataset.sourceGrounding,
     rendered:[actor.x,actor.y,actor.width,actor.height],
     floor:[floor.x,floor.y,floor.width,floor.height],
     distanceFeetFromFloor:Math.round(actor.bottom-(floor.y+floor.height/2)),
     sameTilePeers:Number(node.dataset.cellPeerCount)};
   }));
+  if(sourceActors.some(a=>{
+   const m=new DOMMatrixReadOnly(a.flip);
+   return m.a*m.d-m.b*m.c>=0;
+  }))throw Error('Original OBS indexed source is drawn upside down: '+
+   JSON.stringify(sourceActors));
   if(sourceActors.length!==2||
    sourceActors.some(a=>a.rig!=='original-obs-sprite'||!a.source.includes('/OBS/')))
     throw Error('Recovered source character renders as proxy or incorrect asset');
