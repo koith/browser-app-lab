@@ -1171,8 +1171,24 @@ function combat(attacker,defender,keeper=false){
  (neutralizedFixed?' · DESTROY/BLOCK 24:24 상쇄! 양측 강제 능력 무효화':'')+
  (rerolls?' · 무승부 '+rerolls+'회 재굴림':'')+'</p><div class="battle-dice"><div>ATTACK<div class="nums">'+attack.values.join('·')+'</div><b>'+aValue+'</b><small>지력 +'+aStat.int+'</small></div><div>DEFENSE<div class="nums">'+defense.values.join('·')+'</div><b>'+bValue+'</b><small>지력 +'+bStat.int+'</small></div></div>';
  const battleStage=showBattleScene(attacker,defender,attack,defense,aValue,bValue);
- const finish=result=>{remoteBattle=null;battleStage?.remove();$('modal').classList.remove('battle-present');
-   resolve({...result,neutralizedFixed});};
+ // The native 2004 battle stage must remain unobstructed. Keep the
+ // SINGLE authoritative modal-buttons element and the original callbacks,
+ // but display it in an independent tray at the bottom of the real game
+ // canvas rather than overlaying the genuine winBattle.spr podium and VS.
+ const battleActions=document.createElement('div');
+ battleActions.className='leaf-native-battle-actions';
+ battleActions.setAttribute('role','group');
+ battleActions.setAttribute('aria-label','실제 전투 결과 및 전투 카드');
+ const modalButtons=$('modal-buttons');
+ const modalButtonsParent=modalButtons.parentElement;
+ const finish=result=>{
+   remoteBattle=null;
+   if(modalButtons.parentElement===battleActions)modalButtonsParent.append(modalButtons);
+   battleActions.remove();
+   battleStage?.remove();
+   $('modal').classList.remove('battle-present');
+   resolve({...result,neutralizedFixed});
+ };
  const player=activePlayer();
  const selfInvolved=!keeper&&player&&!player.bot&&(attacker.id===player.id||defender.id===player.id);
  let results={attacker:aValue,defender:bValue,changed:false,negated:false};
@@ -1212,7 +1228,11 @@ function combat(attacker,defender,keeper=false){
      return yourAttack?{...results,defender:bValue-deduction}:{...results,attacker:aValue-deduction};
    });
  }
- modal('⚔ BATTLE · 전투',div,options);$('modal').classList.add('battle-present');sfx(235,.21);
+ modal('⚔ BATTLE · 전투',div,options);
+ $('modal').classList.add('battle-present');
+ battleActions.append(modalButtons);
+ $('board-area').append(battleActions);
+ sfx(235,.21);
  if(match?.mode==='network'&&window.__LEAF_NET__?.connected&&player?.id===1&&!player.bot){
    const bid=++remoteBattleSequence;
    remoteBattle={bid,options:options.map(x=>x.label)};
