@@ -1,18 +1,17 @@
-/* Exact orientation of source TIS palette frames (Dice/TIS.pak) verified
- * against apps/4leaf/assets/board.jpg and battle.jpg (2004 gameplay).
- *
- * Previous reconstruction applied scaleY(-1), turning the source platform
- * TOP into the BOTTOM. Its thick raised top lip then painted against the
- * wrong DMP edge and visually stacked as a pile of inverted platforms.
- * The actual extracted 145x97 PNG is already upright. Do not flip it.
- *
- * Original 70x47 DMP source-grid intervals and full RGBA silhouettes are
- * preserved. No painted screenshots are used as gameplay scenery.
+/* Original 2002 TIS.pak scanlines are stored bottom-up.
+ * tools/decode_tis.py currently wrote PNGs with FLIP_TOP_BOTTOM, while the
+ * 2004 ChatRoom / Dice screenshots show the tiles' lettering facing the
+ * opposite way in the live game. Reverse that PNG extraction-side flip in
+ * PRESENTATION ONLY; original 145x97 PNGs, hashes and DMP data remain intact.
+ * Native click mask and all contained source pixels flip together.
  */
-#app.app-classic-dice #game .board-world #board-nodes .tile[data-native-tis-size="145x97"]{
- transform:translate(-50%,-50%)!important;
+#app.app-classic-dice #game .board-world #board-nodes
+ .tile[data-native-tis-size="145x97"]{
+ transform:translate(-50%,-50%) scaleY(-1)!important;
  transform-origin:50% 50%!important;
 }
-#app.app-classic-dice #game .board-world #board-nodes .tile[data-native-tis-size="145x97"] > :is(.tile-symbol,small){
- transform:none!important;
+#app.app-classic-dice #game .board-world #board-nodes
+ .tile[data-native-tis-size="145x97"] > :is(.tile-symbol,small){
+ /* Keep interactive web labels readable even when source art is inverted. */
+ transform:scaleY(-1)!important;
 }
