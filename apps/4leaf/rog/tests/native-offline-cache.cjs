@@ -23,6 +23,7 @@ const {chromium}=require('playwright');
    ...['avatardialog1','avatardialog2','avatardialog3'].map(x=>'original/Registry/'+x+'.png'),
    'chatroom-native-expressions.js','chatroom-native-expressions.css','original/ChatRoom/expdialogbtn.png',
    'dice-native-dialog-event.css','original/IMG/dialog.png','original/IMG/eventmsgbox.png',
+   'world-perspective.css','original-tiles.css','board-camera.js','dice-original-obs.css',
    'dice-source-dmp-terrain-explorer.js','dice-source-dmp-terrain-explorer.css','dice-native-battle-dice.css','dice-2004-full-frame.css','dice-source-roll.css','dice-source-roll.js','dice-fall.js','dice-fall.css','genesis-chessman-actors.css','genesis-chessman-actors.js','dice-native-minimap-navigation.css','dice-native-tis-depth.css','dice-native-tis-orientation.css','dice-ai-autoplay.css','dice-native-pawn-dmp-depth.css','dice-native-tis-alpha.js',...['0000','0015','0024','0046'].map(x=>'original/Tiles/'+x+'.png'),
    'mainframe-native-toolbar.css','original/MainFrame/toolbarbtn.png','original/MainFrame/pannel.png',
    'knighttown-native.js','knighttown-native.css',
