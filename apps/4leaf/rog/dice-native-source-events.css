@@ -55,3 +55,68 @@
   animation:none!important;
  }
 }
+
+/* winResult.spr frame 0, genuine 452x88 source client bitmap, provides
+ * authentic RESULT / PLAYER / CL / COMPLETE / GP / WIN RATE headings.
+ * The data rows below are LIVE player names, progress and awarded GP.
+ * Character level and historic lifetime win-rate are unknown; display —.
+ */
+#app.app-classic-dice #game #modal #leaf-original-match-result{
+ box-sizing:border-box!important;
+ position:relative!important;
+ display:block!important;
+ width:min(452px,100%)!important;
+ margin:0 auto!important;padding:0 0 6px!important;
+ color:#e8ecff;
+}
+#app.app-classic-dice #game #modal #leaf-original-match-result .leaf-original-result-heading{
+ display:block!important;width:100%!important;height:auto!important;
+ min-height:0!important;object-fit:contain!important;
+ margin:0 auto 1px!important;pointer-events:none!important;
+}
+#app.app-classic-dice #game #modal #leaf-original-match-result[data-native-result="fallback"]
+ .leaf-original-result-heading{
+ display:none!important;
+}
+#app.app-classic-dice #game #modal #leaf-original-match-result .leaf-original-result-table{
+ width:100%!important;
+ border-collapse:collapse!important;
+ table-layout:fixed!important;
+ text-align:center!important;
+ font:11px/1.35 Gulim,'굴림',sans-serif!important;
+}
+#app.app-classic-dice #game #modal #leaf-original-match-result .leaf-original-result-table thead{
+ /* 452px source art has the actual 2002 native header/column labels */
+ position:absolute!important;width:1px!important;height:1px!important;
+ overflow:hidden!important;clip-path:inset(50%)!important;
+}
+#app.app-classic-dice #game #modal #leaf-original-match-result[data-native-result="fallback"]
+ .leaf-original-result-table thead{
+ position:static!important;width:auto!important;height:auto!important;
+ overflow:visible!important;clip-path:none!important;
+}
+#app.app-classic-dice #game #modal #leaf-original-match-result .leaf-original-result-table :is(td,th){
+ padding:5px 1px!important;
+ border-bottom:1px solid #6076b9!important;
+ color:#e8edff!important;
+ overflow-wrap:anywhere!important;
+}
+#app.app-classic-dice #game #modal #leaf-original-match-result .leaf-original-result-table :is(td,th):first-child{
+ width:30%!important;text-align:left!important;padding-left:5px!important;
+}
+#app.app-classic-dice #game #modal #leaf-original-match-result .leaf-original-result-winner td{
+ color:#ffdc71!important;
+}
+#app.app-classic-dice #game #modal #leaf-original-match-result .leaf-original-result-description{
+ font:11px/1.45 Gulim,'굴림',sans-serif!important;
+ text-align:center!important;color:#f4f4ff!important;
+ padding:8px 0 4px!important;white-space:normal!important;
+}
+@media(max-width:650px){
+ #app.app-classic-dice #game #modal #leaf-original-match-result{
+  max-width:calc(100vw - 40px)!important;
+ }
+ #app.app-classic-dice #game #modal #leaf-original-match-result .leaf-original-result-table{
+  font-size:10px!important;
+ }
+}
