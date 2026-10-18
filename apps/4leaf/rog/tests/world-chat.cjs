@@ -831,6 +831,28 @@ const path=require('path');
  assert.ok(inFront.z>depth.foregroundZ,'front chair is drawn in front of original tabletop');
  assert.notEqual(inFront.seat,behind.seat,'front and rear clicks choose different native scene anchors');
 
+ // Original room3's seat #9 sits directly beneath 30px MainFrame tool
+ // strip at x608..638 / y311..528. Avatar z106 behind toolbar z109
+ // blocked real click. Do not use synthetic DOM click to disguise that.
+ const toolbarSeat=await frontBack(77,69);
+ assert.equal(toolbarSeat.seat,9,'reproduce the actual near-toolbar original room3 seat');
+ const hit=await host.locator('.social-avatar.self').evaluate(el=>{
+  const r=el.getBoundingClientRect();
+  const target=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);
+  return {actorTop:target===el||el.contains(target),
+   actualHit:target?.getAttribute('aria-label'),
+   actorZ:getComputedStyle(el.closest('.social-avatar-layer')).zIndex,
+   toolbarZ:getComputedStyle(document.querySelector('.social-classic-toolbar')).zIndex};
+ });
+ assert.ok(hit.actorTop,'native seated torso must not be intercepted by toolbar: '+JSON.stringify(hit));
+ assert.ok(Number(hit.actorZ)>Number(hit.toolbarZ),'seated source character must outrank 30px toolbar');
+ const beforeNear=await host.locator('.social-avatar.self img').evaluate(el=>el.style.transform);
+ await host.locator('.social-avatar.self').click({timeout:6500});
+ const afterNear=await host.locator('.social-avatar.self img').evaluate(el=>el.style.transform);
+ assert.notEqual(beforeNear,afterNear,'real user can click to turn avatar at seat #9');
+ await host.locator('.social-avatar.self').click({timeout:6500});
+ await frontBack(24,94);
+
  await host.screenshot({path:'leaf-original-chat-room.png'});
 
  await guest.evaluate(()=>{
