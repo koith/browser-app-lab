@@ -37,7 +37,11 @@ const path=require('node:path');
    };
   });
   const initial=await snapshot();
-  assert.deepEqual(initial.world,[1450,1120],'original mapped 1450x1120 camera plane is real');
+  assert.deepEqual(initial.world,[3000,2320],
+   'web projection opens source DMP paths without overlapping genuine 145x97 tile footprints');
+  const sourced=await page.evaluate(()=>window.__LEAF_CAMERA__.getState().sourceGrid);
+  assert.deepEqual(sourced,{width:1450,height:1120,pitchX:70,pitchY:47},
+   'source DMP coordinates and original logical pitch never change');
   assert.ok(initial.tiles>30&&initial.sourceVisible>2,'original independent TIS cells render visibly');
   assert.equal(initial.scale,1,'initial 100% camera renders original TIS 145x97 at source pixels');
   const endpoints=await page.evaluate(()=>{
