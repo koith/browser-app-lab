@@ -75,9 +75,20 @@ async function audit(browser,mobile){
      if(shown)reachable++;
      else if(miss.length<4)miss.push({id,index:i,xy:source[i].slice(0,2),rect:[r.x,r.y,r.width,r.height]});
     }
-    if(reachable!==source.length)
+    if(reachable!==source.length){
+      const current=camera.getState(),world=document.getElementById('board-world');
       throw Error('Unreachable original DMP platforms '+title+
-       ' '+reachable+'/'+source.length+' '+JSON.stringify(miss));
+       ' '+reachable+'/'+source.length+' '+JSON.stringify({
+        missing:miss,cameraX:current.cameraX,cameraY:current.cameraY,
+        scale:current.scale,panX:current.panX,panY:current.panY,
+        bounds:current.routeBounds,path0:path[0],
+        viewport:[viewport.width,viewport.height],
+        gameViewportHidden:document.getElementById('game').className,
+        worldTransform:world.style.transform,
+        cssWorldTransform:getComputedStyle(world).transform,
+        firstCell:[source[0][0],source[0][1]]
+      }));
+    }
     // Extrema must respect the actual route footprint, not empty
     // margins of the 6000px shared world allocated for all 26 maps.
     const before=camera.panBy(-1e5,-1e5);
