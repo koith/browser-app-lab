@@ -573,7 +573,7 @@
       "title": "원작 복원 최종 화면·기능 수용 게이트",
       "status": "in_progress",
       "milestone": "M09",
-      "current": "과거 CI 성공은 원작 동일성 완료의 증거가 아님; 2026-10-18 공개 Pages 원본 주잔 브라우저 QA(39123501334) 실패 원인: PR #110에서 제거한 .tile-symbol / <small>을 검사에서 참조해 getComputedStyle(null) TypeError. 실제 웹앱 원본 비트맵은 정상, 수용 게이트 검사가 낡아 수정·재검증 중.; 원본 OBS 동작·전투 SPR 정상/오프라인 누락 대비 둘 모두 CI 게이트 추가. source evidence 없는 3D 원작 동등성은 판정하지 않음.; 2026-10-19 원본 2002 IMG.pak winJail.spr(136x219) 및 winAbility.spr(330x284+41x29×5)을 실제 감옥/100% 능력 타일 이벤트에 연결. 이펙트 배치·시간은 WEB INFERRED이며 원작 MVE 원본과 동일성 미검증. Chromium 이벤트 상태/PNG 크기/원본 조각 위치 QA 추가.",
+      "current": "과거 CI 성공은 원작 동일성 완료의 증거가 아님; 2026-10-18 공개 Pages 원본 주잔 브라우저 QA(39123501334) 실패 원인: PR #110에서 제거한 .tile-symbol / <small>을 검사에서 참조해 getComputedStyle(null) TypeError. 실제 웹앱 원본 비트맵은 정상, 수용 게이트 검사가 낡아 수정·재검증 중.; 원본 OBS 동작·전투 SPR 정상/오프라인 누락 대비 둘 모두 CI 게이트 추가. source evidence 없는 3D 원작 동등성은 판정하지 않음.; 2026-10-19 원본 2002 IMG.pak winJail.spr(136x219) 및 winAbility.spr(330x284+41x29×5)을 실제 감옥/100% 능력 타일 이벤트에 연결. 이펙트 배치·시간은 WEB INFERRED이며 원작 MVE 원본과 동일성 미검증. Chromium 이벤트 상태/PNG 크기/원본 조각 위치 QA 추가.; 새 앱 이벤트(감옥/능력)와 실제 경기 종료(원본 452×88 결과 패널) 3장면에 2002 IMG.pak 원본 PNG와 실제 수치/버튼 검증 확대. 웹 배치는 임시임을 표시하며 미완료 종합 검증 유지.",
       "acceptance": [
         "원작 장면 A/B·핵심 시스템 전체 CI·모바일·온라인 배포·동일 커밋 확인 뒤 승인"
       ],
@@ -922,7 +922,7 @@
       "title": "원본 winResult/winAbility/winJail UI 실제 연결",
       "status": "in_progress",
       "milestone": "M06",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: IMG.pak에서 winResult 1장·winAbility 6장·winJail 1장 등을 해독했지만 배포 UI 실사용 여부 미확인 | 구현 목표: 이미 해독한 원본 크기/프레임 순서를 실제 전투 결과·능력·감옥 창의 정확한 상태에 연결; 2026-10-18: 2002 IMG.pak 12 non-ROLL sprites 100 original GUI PNGs including winAbility.spr 6 frames, winResult.spr, winJail.spr decoded to hashed SourceSPRExtra manifest and published main; user-visible ability/result/jail integration not yet verified.; 2026-10-19 원본 2002 IMG.pak winJail.spr(136x219) 및 winAbility.spr(330x284+41x29×5)을 실제 감옥/100% 능력 타일 이벤트에 연결. 이펙트 배치·시간은 WEB INFERRED이며 원작 MVE 원본과 동일성 미검증. Chromium 이벤트 상태/PNG 크기/원본 조각 위치 QA 추가.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: IMG.pak에서 winResult 1장·winAbility 6장·winJail 1장 등을 해독했지만 배포 UI 실사용 여부 미확인 | 구현 목표: 이미 해독한 원본 크기/프레임 순서를 실제 전투 결과·능력·감옥 창의 정확한 상태에 연결; 2026-10-18: 2002 IMG.pak 12 non-ROLL sprites 100 original GUI PNGs including winAbility.spr 6 frames, winResult.spr, winJail.spr decoded to hashed SourceSPRExtra manifest and published main; user-visible ability/result/jail integration not yet verified.; 2026-10-19 원본 2002 IMG.pak winJail.spr(136x219) 및 winAbility.spr(330x284+41x29×5)을 실제 감옥/100% 능력 타일 이벤트에 연결. 이펙트 배치·시간은 WEB INFERRED이며 원작 MVE 원본과 동일성 미검증. Chromium 이벤트 상태/PNG 크기/원본 조각 위치 QA 추가.; 원본 IMG.pak winResult.spr 452×88 결과 제목을 실제 게임 종료 확인창과 살아 있는 2~8명 결과/GP/진행률 데이터로 연결. 해독되지 않은 CL 및 WIN RATE는 —로 표시하고 허구 수치 생성 금지. winJail/winAbility에 이어 원본 3종 전부 실제 이벤트에 연결.",
       "acceptance": [
         "상태별 팝업에 원본 member·frame 명시, 버튼/판정 살아 있음, 무관 장면에 잘못 표시하지 않음"
       ],
@@ -933,7 +933,8 @@
         "https://github.com/koith/browser-app-lab/pull/117",
         "apps/4leaf/rog/dice-native-source-events.js",
         "apps/4leaf/rog/dice-native-source-events.css",
-        "apps/4leaf/rog/tests/dice-native-original-source-events.cjs"
+        "apps/4leaf/rog/tests/dice-native-original-source-events.cjs",
+        "apps/4leaf/rog/game.js"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
       "lastReviewed": "2026-10-19",
@@ -2400,6 +2401,22 @@
       "type": "IMPLEMENTED_PENDING_QA",
       "taskId": "P0-RELEASE",
       "details": "Source-verified winJail and winAbility original sprites wired into actual resolveTile; stage location inferred, old game logic remains authoritative. Browser E2E pending.",
+      "evidence": "apps/4leaf/rog/tests/dice-native-original-source-events.cjs"
+    },
+    {
+      "seq": 87,
+      "date": "2026-10-19",
+      "type": "IMPLEMENTED_PENDING_QA",
+      "taskId": "BTL-03",
+      "details": "원본 IMG.pak winResult.spr 452×88 결과 제목을 실제 게임 종료 확인창과 살아 있는 2~8명 결과/GP/진행률 데이터로 연결. 해독되지 않은 CL 및 WIN RATE는 —로 표시하고 허구 수치 생성 금지. winJail/winAbility에 이어 원본 3종 전부 실제 이벤트에 연결.",
+      "evidence": "apps/4leaf/rog/game.js"
+    },
+    {
+      "seq": 88,
+      "date": "2026-10-19",
+      "type": "IMPLEMENTED_PENDING_QA",
+      "taskId": "P0-RELEASE",
+      "details": "새 앱 이벤트(감옥/능력)와 실제 경기 종료(원본 452×88 결과 패널) 3장면에 2002 IMG.pak 원본 PNG와 실제 수치/버튼 검증 확대. 웹 배치는 임시임을 표시하며 미완료 종합 검증 유지.",
       "evidence": "apps/4leaf/rog/tests/dice-native-original-source-events.cjs"
     }
   ]
