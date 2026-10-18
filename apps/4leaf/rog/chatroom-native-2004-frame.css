@@ -155,3 +155,20 @@
   z-index:110!important;
  }
 }
+
+/* Native mobile participant list short panel.
+ * On phone the real list was previously stretched to 100% height at z=30,
+ * which covered the original EXIT hitbox inside the scaled 794x528 frame.
+ * Keep the authentic 150x38 header and real scrollable occupants, but stay
+ * within the upper corner so EXIT and all source room seats remain usable. */
+@media(max-width:650px){
+ #rooms.classic-chat-room.social-peers-open #social-peer-panel.social-user-panel{
+  top:0!important;right:0!important;bottom:auto!important;left:auto!important;
+  height:min(160px,37vh)!important;max-height:160px!important;
+  width:167px!important;min-width:167px!important;
+  overflow:hidden!important;z-index:30!important;
+ }
+ #rooms.classic-chat-room.social-peers-open #social-peer-panel #social-peer-list{
+  overflow-y:auto!important;min-height:0!important;
+ }
+}
