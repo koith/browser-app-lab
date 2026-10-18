@@ -24,7 +24,13 @@ for(const [id,source] of Object.entries(recovered)){
  assert.equal(source.poseMapping.startsWith('UNVERIFIED'),true,'never falsely certify original action tables');
  assert.equal(source.horizontalScanlineOrigin.startsWith('PROVISIONAL'),true);
  assert.ok(source.frames.length>=2);
- assert.equal(source.frames[0].index,0,'idle candidate must come from source frame zero');
+ assert.equal(source.hasVerifiedFrameZero,source.frames.some(f=>f.index===0),
+   'manifest must truthfully identify whether the original zero frame was decoded');
+ if(!source.hasVerifiedFrameZero){
+  assert.match(source.fallbackAction||'',/^EARLIEST SOURCE FRAME ONLY/,
+   'missing source frame zero is a STATIC original pixel fallback, not certified idle animation');
+  assert.notEqual(source.frames[0].index,0,'never manufacture zero-index original pose');
+ }
  for(const frame of source.frames){
   assert.ok(frame.url.startsWith('./original/OBS/bulk/'),'only original OBS per-frame file is accepted');
   const filename=path.resolve(root,frame.url.replace(/^\.\//,''));
