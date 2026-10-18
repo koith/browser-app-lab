@@ -27,6 +27,10 @@
    area.append(map);
   }
   dock.hidden=!canDock;
+  // The 2002 mini-panel now contains two genuine keyboard-operable source
+  // tabs. A visible dock must NOT retain aria-hidden=true from its previous
+  // decorative-only incarnation.
+  dock.setAttribute('aria-hidden',String(!canDock));
   dock.dataset.active=String(canDock);
  }
  function init(){
