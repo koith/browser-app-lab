@@ -58,9 +58,34 @@ const {chromium,webkit}=require('playwright');
   assert.equal(sources.cache['0042'].originalAnimationCount,37);
   await page.waitForFunction(()=>[...document.querySelectorAll('#board-pawns .leaf-chess-original-obs')].every(img=>img.complete&&img.naturalWidth>20&&img.naturalHeight>60),
    null,{timeout:15000});
-  const sizes=await page.evaluate(()=>[...document.querySelectorAll('#board-pawns .leaf-chess-original-obs')].map(i=>[i.naturalWidth,i.naturalHeight]));
-  assert.deepEqual(sizes,[[44,82],[33,71]],
-   'exact archived native original full-body source pixel sizes, not scaled chat avatars');
+  // A loaded authentic OBS character is ANIMATED, not a still bitmap:
+  // original source frame zero for 1045/1042 has one size, later real
+  // OBS frames have DIFFERENT source dimensions. Old hard-coded sizes
+  // [[44,82],[33,71]] falsely rejected genuine 57x69 / 32x69 frames.
+  // Compare each ACTUALLY DISPLAYED image URL + natural dimensions
+  // against the corresponding original archived frame manifest.
+  const sourceFrames=await page.evaluate(()=>[...document.querySelectorAll(
+   '#board-pawns .board-pawn')].map(pawn=>{
+   const img=pawn.querySelector('.leaf-chess-original-obs');
+   const id=pawn.dataset.chessmanId;
+   const manifest=window.ORIGINAL_LEAF_OBS_FRAMES[id];
+   const frame=manifest?.frames.find(f=>f.url===img?.getAttribute('src'));
+   return {id,src:img?.getAttribute('src'),loaded:!!img?.complete,
+    sourceMember:manifest?.originalMember,
+    actual:[img?.naturalWidth,img?.naturalHeight],
+    expected:frame?[frame.width,frame.height]:null,
+    sourceFrame:frame?.index,
+    poseMapping:pawn.dataset.sourcePoseMapping};
+  }));
+  assert.deepEqual(sourceFrames.map(f=>f.id),['0045','0042']);
+  for(const frame of sourceFrames){
+   assert.ok(frame.loaded&&frame.expected,'loaded frame must be in original OBS.pak archive manifest: '+JSON.stringify(frame));
+   assert.deepEqual(frame.actual,frame.expected,
+    'the current live animation frame must retain its own genuine native dimensions: '+JSON.stringify(frame));
+   assert.match(frame.sourceMember,/^10(45|42)\\.obs$/);
+   assert.equal(frame.poseMapping,'unverified','do not invent historically proven OBS action names');
+  }
+  const sizes=sourceFrames.map(f=>f.actual);
   assert.equal(await page.locator('#board-pawns img[src*="/Registry/sava"]').count(),0);
   const before=await page.locator('#board-pawns .leaf-chess-original-obs').first().getAttribute('src');
   await page.evaluate(()=>{
