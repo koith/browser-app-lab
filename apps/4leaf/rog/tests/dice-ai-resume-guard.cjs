@@ -97,8 +97,13 @@ const {chromium}=require('playwright');
    pawnTransform:getComputedStyle(document.querySelector('#board-pawns .board-pawn')).transform
   }));
   assert.ok(automated.source,'original source TIS art remains intact during AI turn');
-  assert.ok(automated.tileTransform.startsWith('matrix(1, 0, 0, 1,'),
-   'upright native original TIS platform art remains stable during manual and AI turns');
+  // Source TIS indexed bytes were exported with a bottom-up conversion.
+  // The compensating render-time vertical flip must survive automated turns.
+  const nativeMatrix=automated.tileTransform.match(/^matrix\(([^)]+)\)$/);
+  assert.ok(nativeMatrix,'source platform uses a real affine CSS matrix');
+  const [m00,m10,m01,m11]=nativeMatrix[1].split(',').map(Number);
+  assert.ok(m00*m11-m10*m01<0,
+   'original TIS artwork retains correct upright render flip during AI turns');
   assert.ok(!automated.pawnTransform.startsWith('matrix(1, 0, 0, -1,'),
    'actor models are NOT upside down');
   await page.setViewportSize({width:390,height:844});
