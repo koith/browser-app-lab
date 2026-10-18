@@ -85,6 +85,38 @@ const {chromium}=require('playwright');
   await page.waitForTimeout(2450);
   assert.equal(await page.locator('#leaf-source-effect-overlay').count(),0,
    'original pixel overlay is temporary; never replace actual playable game viewport');
+  // Original 363x133 Dead or Alive image must appear ONLY after the
+  // REAL source DMP DOA random decision; do not replace the real dice
+  // values / teleport / backward movement with image-only screen state.
+  await page.evaluate(async()=>{
+   const match=window.__ROG_TEST__.getMatch(),player=match.players[0];
+   match.players[1].position=20;player.position=11;
+   match.tiles[11]='doa';
+   await window.__ROG_TEST__.resolveTile(player);
+  });
+  await page.waitForFunction(()=>document.querySelector(
+   '#leaf-source-effect-overlay')?.dataset.nativeSourceReady==='ready'&&
+   document.querySelector('#leaf-source-effect-overlay')?.dataset.sourceKind==='doa',
+    null,{timeout:10000});
+  const doa=await page.evaluate(()=>{
+   const stage=document.querySelector('#leaf-source-effect-overlay');
+   const image=stage.querySelector('.leaf-source-event-primary');
+   return {member:stage.dataset.originalMember,
+    size:[image.naturalWidth,image.naturalHeight],
+    src:image.getAttribute('src'),
+    source:stage.dataset.sourceLayout,
+    pos:window.__ROG_TEST__.getMatch().players[0].position,
+    totalDmpCells:window.__ROG_TEST__.getMatch().tiles.length,
+    passThrough:getComputedStyle(stage).pointerEvents};
+  });
+  assert.equal(doa.member,'Dice/IMG.pak:winDoa.spr');
+  assert.deepEqual(doa.size,[363,133]);
+  assert.deepEqual([source.sprites['winDoa.spr'].frames[0].width,
+   source.sprites['winDoa.spr'].frames[0].height],doa.size);
+  assert.ok(doa.pos>=0&&doa.pos<=11,'real source DOA random setback still controls gameplay');
+  assert.equal(doa.totalDmpCells,104);
+  assert.equal(doa.passThrough,'none','original DOA art never blocks the ROLL UI');
+  await page.screenshot({path:'leaf-native-source-dead-or-alive-live.png'});
   // A real completed original DMP match must use genuine winResult.spr
   // 452x88 header and *actual* reward/percentage/player rows, not a
   // photographic overlay or manufactured CL / lifetime win-rate numbers.
@@ -134,7 +166,7 @@ const {chromium}=require('playwright');
   assert.ok(finished.buttons.includes('다시 시작'),'real match post-game UI stays interactive');
   await page.screenshot({path:'leaf-native-source-match-result-live.png'});
   assert.deepEqual(errors,[]);
-  console.log('4LEAF REAL SOURCE IMG JAIL/ABILITY/RESULT EFFECTS PASS',
-   JSON.stringify({jail,ability,result:finished}));
+  console.log('4LEAF REAL SOURCE IMG JAIL/ABILITY/DOA/RESULT EFFECTS PASS',
+   JSON.stringify({jail,ability,doa,result:finished}));
  }finally{await browser.close()}
 })().catch(e=>{console.error('SOURCE IMG EVENT E2E FAILED',e.stack||e);process.exit(1)});

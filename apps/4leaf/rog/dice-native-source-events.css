@@ -20,6 +20,9 @@
 #app.app-classic-dice #game #board-area .leaf-source-effect.jail{
  width:136px!important;height:219px!important;
 }
+#app.app-classic-dice #game #board-area .leaf-source-effect.doa{
+ width:363px!important;height:133px!important;
+}
 #app.app-classic-dice #game #board-area .leaf-source-effect[data-native-source-ready="loading"],
 #app.app-classic-dice #game #board-area .leaf-source-effect[data-native-source-ready="fallback"]{
  visibility:hidden!important;

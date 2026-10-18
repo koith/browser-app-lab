@@ -1,0 +1,42 @@
+/* SOURCE: 2002 Dice/IMG.pak winAbility.spr 6 native RGBA frames.
+ * 330x284 original artwork + native 41x29 glyphs with source origin
+ * offsets, not a screenshot overlay. Display time remains WEB inferred.
+ */
+#app.app-classic-dice #game #leaf-original-ability-stage{
+ position:absolute!important;
+ display:block!important;
+ left:50%!important;top:48%!important;
+ width:330px!important;height:380px!important;
+ transform:translate(-50%,-50%)!important;
+ pointer-events:none!important;
+ z-index:68!important;
+ overflow:visible!important;
+ filter:drop-shadow(0 5px 12px #12103888);
+ visibility:hidden!important;
+}
+#app.app-classic-dice #game #leaf-original-ability-stage img{
+ position:absolute!important;
+ display:block!important;
+ max-width:none!important;
+ max-height:none!important;
+ padding:0!important;margin:0!important;border:0!important;
+ box-shadow:none!important;
+ image-rendering:auto!important;
+ pointer-events:none!important;
+}
+#app.app-classic-dice #game #leaf-original-ability-stage[data-status="fallback"]{
+ display:none!important;
+}
+@keyframes leaf-original-ability-entry{
+ 0%{opacity:0}9%{opacity:1}84%{opacity:1}100%{opacity:0}
+}
+@media(max-width:650px){
+ #app.app-classic-dice #game #leaf-original-ability-stage{
+  transform:translate(-50%,-50%) scale(.72)!important;
+ }
+}
+
+#app.app-classic-dice #game #leaf-original-ability-stage[data-status="ready"]{
+ visibility:visible!important;
+ animation:leaf-original-ability-entry 1.6s ease-in-out both;
+}

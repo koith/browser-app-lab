@@ -329,6 +329,66 @@
         "QA-04",
         "CHT-07"
       ]
+    },
+    {
+      "id": "REQ-20261019-003",
+      "date": "2026-10-19",
+      "origin": "user",
+      "text": "남은 업무 전부 처리해",
+      "taskIds": [
+        "M00",
+        "M01",
+        "M02",
+        "M03",
+        "M04",
+        "M05",
+        "M06",
+        "M07",
+        "M08",
+        "M09",
+        "P0-BOARD",
+        "P0-ACTOR",
+        "P0-PODIUM",
+        "P0-DICE",
+        "P0-CHAT",
+        "P0-RELEASE",
+        "SRC-01",
+        "SRC-02",
+        "BRD-01",
+        "BRD-02",
+        "BRD-03",
+        "BRD-04",
+        "BRD-05",
+        "ACT-01",
+        "ACT-02",
+        "ACT-03",
+        "ACT-04",
+        "BTL-02",
+        "BTL-04",
+        "DIE-01",
+        "DIE-02",
+        "DIE-04",
+        "CHT-01",
+        "CHT-02",
+        "CHT-03",
+        "CHT-04",
+        "CHT-05",
+        "CHT-06",
+        "WORLD-01",
+        "WORLD-02",
+        "WORLD-03",
+        "SHOP-01",
+        "SHOP-02",
+        "RULE-01",
+        "RULE-02",
+        "RULE-03",
+        "EVID-01",
+        "EVID-02",
+        "QA-02",
+        "QA-03",
+        "QA-04",
+        "CHT-07"
+      ]
     }
   ],
   "tasks": [
@@ -633,7 +693,7 @@
       "title": "원작 복원 최종 화면·기능 수용 게이트",
       "status": "in_progress",
       "milestone": "M09",
-      "current": "과거 CI 성공은 원작 동일성 완료의 증거가 아님; 2026-10-18 공개 Pages 원본 주잔 브라우저 QA(39123501334) 실패 원인: PR #110에서 제거한 .tile-symbol / <small>을 검사에서 참조해 getComputedStyle(null) TypeError. 실제 웹앱 원본 비트맵은 정상, 수용 게이트 검사가 낡아 수정·재검증 중.; 원본 OBS 동작·전투 SPR 정상/오프라인 누락 대비 둘 모두 CI 게이트 추가. source evidence 없는 3D 원작 동등성은 판정하지 않음.; 2026-10-19 원본 2002 IMG.pak winJail.spr(136x219) 및 winAbility.spr(330x284+41x29×5)을 실제 감옥/100% 능력 타일 이벤트에 연결. 이펙트 배치·시간은 WEB INFERRED이며 원작 MVE 원본과 동일성 미검증. Chromium 이벤트 상태/PNG 크기/원본 조각 위치 QA 추가.; 새 앱 이벤트(감옥/능력)와 실제 경기 종료(원본 452×88 결과 패널) 3장면에 2002 IMG.pak 원본 PNG와 실제 수치/버튼 검증 확대. 웹 배치는 임시임을 표시하며 미완료 종합 검증 유지.",
+      "current": "과거 CI 성공은 원작 동일성 완료의 증거가 아님; 2026-10-18 공개 Pages 원본 주잔 브라우저 QA(39123501334) 실패 원인: PR #110에서 제거한 .tile-symbol / <small>을 검사에서 참조해 getComputedStyle(null) TypeError. 실제 웹앱 원본 비트맵은 정상, 수용 게이트 검사가 낡아 수정·재검증 중.; 원본 OBS 동작·전투 SPR 정상/오프라인 누락 대비 둘 모두 CI 게이트 추가. source evidence 없는 3D 원작 동등성은 판정하지 않음.; 2026-10-19 원본 2002 IMG.pak winJail.spr(136x219) 및 winAbility.spr(330x284+41x29×5)을 실제 감옥/100% 능력 타일 이벤트에 연결. 이펙트 배치·시간은 WEB INFERRED이며 원작 MVE 원본과 동일성 미검증. Chromium 이벤트 상태/PNG 크기/원본 조각 위치 QA 추가.; 새 앱 이벤트(감옥/능력)와 실제 경기 종료(원본 452×88 결과 패널) 3장면에 2002 IMG.pak 원본 PNG와 실제 수치/버튼 검증 확대. 웹 배치는 임시임을 표시하며 미완료 종합 검증 유지.; 2026-10-19 복구된 2002 IMG.pak winAbility.spr 6프레임을 100% 실제 어빌리티 발동 시 표시하고 winDoa.spr 363×133을 실제 원본 DMP DOA 후퇴 판정 시 표시하도록 원본 GUI 코드 통합. 2004 3D 물리 모델 미복원.",
       "acceptance": [
         "원작 장면 A/B·핵심 시스템 전체 CI·모바일·온라인 배포·동일 커밋 확인 뒤 승인"
       ],
@@ -644,6 +704,9 @@
         ".github/workflows/rog-board-layout.yml",
         "apps/4leaf/rog/dice-native-source-events.js",
         "apps/4leaf/rog/dice-native-source-events.css",
+        "apps/4leaf/rog/tests/dice-native-original-source-events.cjs",
+        "apps/4leaf/rog/dice-original-ability-spr.js",
+        "apps/4leaf/rog/tests/dice-original-ability-spr.cjs",
         "apps/4leaf/rog/tests/dice-native-original-source-events.cjs"
       ],
       "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
@@ -982,7 +1045,7 @@
       "title": "원본 winResult/winAbility/winJail UI 실제 연결",
       "status": "done",
       "milestone": "M06",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: IMG.pak에서 winResult 1장·winAbility 6장·winJail 1장 등을 해독했지만 배포 UI 실사용 여부 미확인 | 구현 목표: 이미 해독한 원본 크기/프레임 순서를 실제 전투 결과·능력·감옥 창의 정확한 상태에 연결; 2026-10-18: 2002 IMG.pak 12 non-ROLL sprites 100 original GUI PNGs including winAbility.spr 6 frames, winResult.spr, winJail.spr decoded to hashed SourceSPRExtra manifest and published main; user-visible ability/result/jail integration not yet verified.; 2026-10-19 원본 2002 IMG.pak winJail.spr(136x219) 및 winAbility.spr(330x284+41x29×5)을 실제 감옥/100% 능력 타일 이벤트에 연결. 이펙트 배치·시간은 WEB INFERRED이며 원작 MVE 원본과 동일성 미검증. Chromium 이벤트 상태/PNG 크기/원본 조각 위치 QA 추가.; 원본 IMG.pak winResult.spr 452×88 결과 제목을 실제 게임 종료 확인창과 살아 있는 2~8명 결과/GP/진행률 데이터로 연결. 해독되지 않은 CL 및 WIN RATE는 —로 표시하고 허구 수치 생성 금지. winJail/winAbility에 이어 원본 3종 전부 실제 이벤트에 연결.; 2026-10-19 해당 2D 원본 GUI 역할/검사·배포 조건을 모두 충족하여 세부 일감만 완료. M06/M07/P0 상위의 역사적 3D/프레임/카메라 완성은 미완료.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: IMG.pak에서 winResult 1장·winAbility 6장·winJail 1장 등을 해독했지만 배포 UI 실사용 여부 미확인 | 구현 목표: 이미 해독한 원본 크기/프레임 순서를 실제 전투 결과·능력·감옥 창의 정확한 상태에 연결; 2026-10-18: 2002 IMG.pak 12 non-ROLL sprites 100 original GUI PNGs including winAbility.spr 6 frames, winResult.spr, winJail.spr decoded to hashed SourceSPRExtra manifest and published main; user-visible ability/result/jail integration not yet verified.; 2026-10-19 원본 2002 IMG.pak winJail.spr(136x219) 및 winAbility.spr(330x284+41x29×5)을 실제 감옥/100% 능력 타일 이벤트에 연결. 이펙트 배치·시간은 WEB INFERRED이며 원작 MVE 원본과 동일성 미검증. Chromium 이벤트 상태/PNG 크기/원본 조각 위치 QA 추가.; 원본 IMG.pak winResult.spr 452×88 결과 제목을 실제 게임 종료 확인창과 살아 있는 2~8명 결과/GP/진행률 데이터로 연결. 해독되지 않은 CL 및 WIN RATE는 —로 표시하고 허구 수치 생성 금지. winJail/winAbility에 이어 원본 3종 전부 실제 이벤트에 연결.; 2026-10-19 해당 2D 원본 GUI 역할/검사·배포 조건을 모두 충족하여 세부 일감만 완료. M06/M07/P0 상위의 역사적 3D/프레임/카메라 완성은 미완료.; 2026-10-19 복구된 2002 IMG.pak winAbility.spr 6프레임을 100% 실제 어빌리티 발동 시 표시하고 winDoa.spr 363×133을 실제 원본 DMP DOA 후퇴 판정 시 표시하도록 원본 GUI 코드 통합. 2004 3D 물리 모델 미복원.",
       "acceptance": [
         "상태별 팝업에 원본 member·frame 명시, 버튼/판정 살아 있음, 무관 장면에 잘못 표시하지 않음"
       ],
@@ -997,7 +1060,10 @@
         "apps/4leaf/rog/game.js",
         "https://github.com/koith/browser-app-lab/actions/runs/39149989371",
         "https://github.com/koith/browser-app-lab/actions/runs/39149989440",
-        "https://github.com/koith/browser-app-lab/pull/122"
+        "https://github.com/koith/browser-app-lab/pull/122",
+        "apps/4leaf/rog/dice-original-ability-spr.js",
+        "apps/4leaf/rog/tests/dice-original-ability-spr.cjs",
+        "apps/4leaf/rog/tests/dice-native-original-source-events.cjs"
       ],
       "evidenceLevel": "VERIFIED-ORIGINAL-2002-SOURCE-2D-UI-AND-BROWSER-PRODUCTION; HISTORICAL-3D-EQUIVALENCE-NOT-CLAIMED",
       "lastReviewed": "2026-10-19",
@@ -1390,13 +1456,16 @@
       "title": "원작 특수칸·이벤트 데이터 검증",
       "status": "todo",
       "milestone": "M08",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: DMP 26경로 대비 특수칸 DMO/DMP 25세트, 원작 각 마을 보너스·점프/워프/감옥 등 검증되지 않은 효과 존재 | 구현 목표: 원본 4LEAF 게임 이벤트 테이블을 해석해 Dice engine resolveTile/warp/item/keeper 조건과 26맵 대조",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: DMP 26경로 대비 특수칸 DMO/DMP 25세트, 원작 각 마을 보너스·점프/워프/감옥 등 검증되지 않은 효과 존재 | 구현 목표: 원본 4LEAF 게임 이벤트 테이블을 해석해 Dice engine resolveTile/warp/item/keeper 조건과 26맵 대조; 2026-10-19 복구된 2002 IMG.pak winAbility.spr 6프레임을 100% 실제 어빌리티 발동 시 표시하고 winDoa.spr 363×133을 실제 원본 DMP DOA 후퇴 판정 시 표시하도록 원본 GUI 코드 통합. 2004 3D 물리 모델 미복원.",
       "acceptance": [
         "동일 seed·좌표 입력에 대해 모든 특수칸 이동/부활/보상 결과가 원본 근거 표와 일치"
       ],
       "evidence": [
         "original/tiles.js",
-        "game.js"
+        "game.js",
+        "apps/4leaf/rog/dice-original-ability-spr.js",
+        "apps/4leaf/rog/tests/dice-original-ability-spr.cjs",
+        "apps/4leaf/rog/tests/dice-native-original-source-events.cjs"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
       "lastReviewed": "2026-10-18",
@@ -1604,10 +1673,10 @@
       "id": "CHT-07",
       "priority": "P0",
       "title": "상설 채팅방 자기 아바타·원본 도구모음 클릭 가림 회귀",
-      "status": "in_progress",
+      "status": "done",
       "milestone": "M03",
       "category": "상설 채팅",
-      "current": "2026-10-18 실제 4LEAF World+Chat 통합 CI 39137227054에서 `.social-avatar.self[data-seat=9]`의 물리 클릭이 30초간 막힘: 원본 툴바 `.social-classic-toolbar`의 `채팅방 목록` 버튼이 상단 stacking layer로 클릭을 가로챔. 과거 링메뉴 z-index 수정 PR#113과 별개 사용자 접근성 결함. 동일 지점에서 메뉴 조작과 자기 아바타 선택 모두 성공하게 고쳐야 함.; 2026-10-18: Original room3 seat #9 occupied actor click above source toolbar fixed CSS z112 vs toolbar z109, tooltip menu z150 and focused tools z160, real physical click and WebKit browser regression pass; comprehensive all-six-room original seating acceptance pending.; 2026-10-19 CI 39151404160 실패에서 실접속 self 좌석 3이 원본 30px '아바타 선택' 툴바 히트박스를 가림. 고정 source x608 y311일 때만 물리 충돌 0인 가장 가까운 WEB 보정 좌표를 계산해 주사위·채팅 실제 DOM 이벤트 유지. 해당 위치는 INFERRED이며 원본 fixed visual 위치 정확성은 별도 CHT-02/CHT-05 대상. 원본 배경이나 참가자 조작용 sprite 변경 없음.",
+      "current": "2026-10-18 실제 4LEAF World+Chat 통합 CI 39137227054에서 `.social-avatar.self[data-seat=9]`의 물리 클릭이 30초간 막힘: 원본 툴바 `.social-classic-toolbar`의 `채팅방 목록` 버튼이 상단 stacking layer로 클릭을 가로챔. 과거 링메뉴 z-index 수정 PR#113과 별개 사용자 접근성 결함. 동일 지점에서 메뉴 조작과 자기 아바타 선택 모두 성공하게 고쳐야 함.; 2026-10-18: Original room3 seat #9 occupied actor click above source toolbar fixed CSS z112 vs toolbar z109, tooltip menu z150 and focused tools z160, real physical click and WebKit browser regression pass; comprehensive all-six-room original seating acceptance pending.; 2026-10-19 CI 39151404160 실패에서 실접속 self 좌석 3이 원본 30px '아바타 선택' 툴바 히트박스를 가림. 고정 source x608 y311일 때만 물리 충돌 0인 가장 가까운 WEB 보정 좌표를 계산해 주사위·채팅 실제 DOM 이벤트 유지. 해당 위치는 INFERRED이며 원본 fixed visual 위치 정확성은 별도 CHT-02/CHT-05 대상. 원본 배경이나 참가자 조작용 sprite 변경 없음.; PR #125 Chromium/WebKit 6개 원본 실내 전부 실제 toolbar 6 버튼+real seated avatar 물리 중심점 히트/seat3·seat9 이동 테스트 성공, main squash 61e39be3 및 GitHub Pages deploy 39173963948 성공. 2004 아이콘 위치 픽셀 동일성은 CHT-05에서 별도로 진행.",
       "acceptance": [
         "794×528 전체 상설방/서재/지역 6개 방에서 실물 self·peer 아바타의 중앙 포인트가 document.elementFromPoint로 해당 버튼 또는 소유 아바타를 가리킴; 원본 30px 툴바 버튼도 여전히 클릭 가능. WebKit/Chromium 동일 화면에서 실패 0건."
       ],
@@ -1621,11 +1690,20 @@
         "apps/4leaf/rog/social-chat.js",
         "apps/4leaf/rog/chatroom-native-2004-frame.css",
         "apps/4leaf/rog/tests/world-chat.cjs",
-        "https://github.com/koith/browser-app-lab/actions/runs/39151404160"
+        "https://github.com/koith/browser-app-lab/actions/runs/39151404160",
+        "apps/4leaf/rog/tests/chatroom-native-toolbar-six.cjs",
+        "https://github.com/koith/browser-app-lab/actions/runs/39173653714",
+        "https://github.com/koith/browser-app-lab/actions/runs/39173963948",
+        "https://github.com/koith/browser-app-lab/pull/125"
       ],
       "evidenceLevel": "VERIFIED-WEBAPP-BROWSER-REGRESSION; HISTORICAL-LAYOUT-UNVERIFIED",
       "lastReviewed": "2026-10-19",
-      "verifiedAcceptance": null,
+      "verifiedAcceptance": {
+        "sourceComparison": "Six genuine original ChatRoom/room0..5.png backdrops plus MainFrame/toolbarbtn.png 120x270, 30px native toolbar; 2004 exact toolbar XY inferred and separately open in CHT-05",
+        "implementation": "social-chat.js actual source avatar hitbox collision avoidance; chatroom-native-toolbar-six.cjs verified room0-5 physical tool and avatar hits, PR #125 squash 61e39be30eedef901668a547faecd8bc4cc2b32d",
+        "runtimeTest": "Chromium+WebKit real six-room source button 6/6 and occupied seat3/9 physical central hit test passed GitHub Actions run 39173653714",
+        "deployment": "GitHub Pages 61e39be30eedef901668a547faecd8bc4cc2b32d deploy 39173963948 success"
+      },
       "dependencies": [
         "CHT-04",
         "CHT-05"
@@ -2626,6 +2704,93 @@
       "taskId": "CHT-07",
       "details": "Actual live 794x528 ChatRoom participant self seat obstructs historical 30px toolbar hitbox. Select nearest unoccupied original-art toolbar position on actual seated actors' pixel rectangle. Source art untouched; positions clearly inferred.",
       "evidence": "apps/4leaf/rog/tests/world-chat.cjs"
+    },
+    {
+      "seq": 96,
+      "date": "2026-10-19",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261019-003",
+      "taskIds": [
+        "M00",
+        "M01",
+        "M02",
+        "M03",
+        "M04",
+        "M05",
+        "M06",
+        "M07",
+        "M08",
+        "M09",
+        "P0-BOARD",
+        "P0-ACTOR",
+        "P0-PODIUM",
+        "P0-DICE",
+        "P0-CHAT",
+        "P0-RELEASE",
+        "SRC-01",
+        "SRC-02",
+        "BRD-01",
+        "BRD-02",
+        "BRD-03",
+        "BRD-04",
+        "BRD-05",
+        "ACT-01",
+        "ACT-02",
+        "ACT-03",
+        "ACT-04",
+        "BTL-02",
+        "BTL-04",
+        "DIE-01",
+        "DIE-02",
+        "DIE-04",
+        "CHT-01",
+        "CHT-02",
+        "CHT-03",
+        "CHT-04",
+        "CHT-05",
+        "CHT-06",
+        "WORLD-01",
+        "WORLD-02",
+        "WORLD-03",
+        "SHOP-01",
+        "SHOP-02",
+        "RULE-01",
+        "RULE-02",
+        "RULE-03",
+        "EVID-01",
+        "EVID-02",
+        "QA-02",
+        "QA-03",
+        "QA-04",
+        "CHT-07"
+      ],
+      "details": "모든 원작 복원 미완료 업무 처리 요청 원문 보존. 실제 아카이브-브라우저-배포 모두 검증된 범위만 done. 3D 미해독 MVE/D4/D6/OBS 행동 표는 미복원 유지."
+    },
+    {
+      "seq": 97,
+      "date": "2026-10-19",
+      "type": "STATUS_CHANGED",
+      "taskId": "CHT-07",
+      "from": "in_progress",
+      "to": "done",
+      "details": "Original six actual room backdrop / 6 real source tool buttons/actual self seat 3+9 Chromium & WebKit physical hit acceptance passed; actual Pages deployed; 2004 exact pixel layout remains unverified separate CHT-05",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39173653714"
+    },
+    {
+      "seq": 98,
+      "date": "2026-10-19",
+      "type": "IMPLEMENTED_PENDING_QA",
+      "taskId": "BTL-03",
+      "details": "Integrated SOURCE IMG.pak real cast winAbility six frames and DMP original winDoa 363x133 sprite; source not MVE dice physical model. Acceptance browser QA pending merge.",
+      "evidence": "apps/4leaf/rog/tests/dice-original-ability-spr.cjs"
+    },
+    {
+      "seq": 99,
+      "date": "2026-10-19",
+      "type": "IMPLEMENTED_PENDING_QA",
+      "taskId": "RULE-01",
+      "details": "Integrated SOURCE IMG.pak real cast winAbility six frames and DMP original winDoa 363x133 sprite; source not MVE dice physical model. Acceptance browser QA pending merge.",
+      "evidence": "apps/4leaf/rog/tests/dice-original-ability-spr.cjs"
     }
   ]
 }
