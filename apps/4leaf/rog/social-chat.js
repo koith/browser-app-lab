@@ -566,12 +566,26 @@
   $root()?.classList.toggle('native-directory-scene',state.view==='directory');
   $root()?.classList.toggle('native-knight-town',state.view==='knighttown');
   $('social-close-room')?.remove();
-  const frame=$('social-image-frame');frame.replaceChildren();
+  const frame=$('social-image-frame');
+  // Source-sized room view takes the ACTUAL interactive exit control from
+  // rebuilt web header into historical bottom-right ChatRoom coordinate.
+  // Restore it BEFORE frame.replaceChildren(), otherwise navigation would
+  // remove the native button and its attached event handler.
+  const actualExit=$('social-back');
+  if(actualExit&&actualExit.parentElement===frame)
+   $root()?.querySelector('.social-header-tools')?.append(actualExit);
+  actualExit?.removeAttribute('data-in-original-room');
+  frame.replaceChildren();
   if(state.view==='board')renderBulletin(frame);
   if(state.view==='town')renderTown(frame);
   if(state.view==='knighttown')renderKnightTown(frame);
   if(state.view==='directory')renderDirectory(frame);
-  if(state.view==='room')renderRoom(frame);
+  if(state.view==='room'){
+   renderRoom(frame);
+   // The original screenshot shows the EXIT sprite at (728,503) of 794x528.
+   // Same button instance; preserves back/leave behavior and a11y bindings.
+   if(actualExit){frame.append(actualExit);actualExit.dataset.inOriginalRoom='true';}
+  }
   updateHeader();fit();changeScope(scope());
   window.__LEAF_NATIVE_ROOM_PANELS__?.afterRender();
  }
