@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - 'apps/4leaf/rog/game.js'
+      - 'apps/4leaf/rog/world-perspective.css'
       - '.github/workflows/rog-visual-source-audit.yml'
       - 'apps/4leaf/rog/index.html'
       - 'apps/4leaf/rog/genesis-chessman-actors.js'
