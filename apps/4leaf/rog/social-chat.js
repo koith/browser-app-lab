@@ -633,7 +633,7 @@
    if(ownerClose&&window.matchMedia('(min-width:801px) and (min-height:550px)').matches)
     frame.append(ownerClose);
   }
-  updateHeader();fit();changeScope(scope());
+  updateHeader();fit();avoidOriginalRoomToolbarCollision();changeScope(scope());
   window.__LEAF_NATIVE_ROOM_PANELS__?.afterRender();
  }
 
@@ -1008,6 +1008,57 @@
   };
   return figure;
  }
+ // REAL INPUT PRIORITY: a populated authentic ChatRoom has participant
+ // bodies at inferred seat coordinates. Those native 75x141 sprites must
+ // remain clickable, AND the historical 30px MainFrame toolbar must remain
+ // genuinely pointer-clickable. Previously z=112 avatars swallowed the
+ // toolbar's physical 30px targets at occupied seat 3; raising the toolbar
+ // instead would steal occupied seat 9 actor input.
+ //
+ // Keep all original source pixels, button instances and event handlers.
+ // Only when a real occupant collides with the toolbar choose the closest
+ // free 32x217 logical column in the same 794x528 source-sized room.
+ // The alternate positions are WEB inferred (not archived 2004 coords).
+ function avoidOriginalRoomToolbarCollision(){
+  const frame=$('social-image-frame');
+  const bar=frame?.querySelector('.social-classic-toolbar');
+  if(!bar||state.view!=='room')return;
+  const frameRect=frame.getBoundingClientRect();
+  if(frameRect.width<1||frameRect.height<1)return;
+  const sx=frameRect.width/794,sy=frameRect.height/528;
+  const persons=[...frame.querySelectorAll('.social-avatar')]
+   .map(el=>el.getBoundingClientRect())
+   .filter(r=>r.width>0&&r.height>0);
+  const positions=[];
+  // Source screenshot column first, then the least conspicuous
+  // unoccupied alternatives near it. Avoid the native EXIT & owner button
+  // strip at x=645+, y=500+ when evaluating actual target collisions.
+  for(const y of [311,285,250,220,180])
+   for(const x of [608,550,667,490,720,420,350,260,170,80,15])
+    positions.push({x,y});
+  const actions=[...bar.querySelectorAll('.social-original-tool,.social-exp-trigger')]
+   .filter(button=>getComputedStyle(button).display!=='none');
+  let best=null;
+  for(const candidate of positions){
+   let collisions=0;
+   for(let i=0;i<actions.length;i++){
+    const px=frameRect.left+(candidate.x+15)*sx;
+    const py=frameRect.top+(candidate.y+15+i*30)*sy;
+    if(persons.some(r=>px>=r.left-3&&px<=r.right+3&&
+       py>=r.top-3&&py<=r.bottom+3))collisions++;
+    if(candidate.x>=645&&candidate.y+15+i*30>=498)
+     collisions+=3; // old source room exit and actual owner button
+   }
+   const score=collisions*100000+
+      Math.abs(candidate.x-608)+Math.abs(candidate.y-311)*.5;
+   if(!best||score<best.score)best={...candidate,score,collisions};
+  }
+  if(!best)return;
+  bar.style.setProperty('--leaf-chat-toolbar-x',best.x+'px');
+  bar.style.setProperty('--leaf-chat-toolbar-y',best.y+'px');
+  bar.dataset.nativeToolHitCollisions=String(best.collisions);
+  bar.dataset.webPositionInferred=String(best.x!==608||best.y!==311);
+ }
  function renderOccupants(){
   if(state.view!=='room')return;
   const layer=$('social-avatar-layer');if(!layer)return;
@@ -1038,6 +1089,7 @@
    }
    img.style.transform=(user.id===tabId?state.facing:user.facing)===-1?'scaleX(-1)':'';
   });
+  avoidOriginalRoomToolbarCollision();
  }
  function showBubble(sender,text){
   if(state.view!=='room')return;

@@ -3,6 +3,8 @@ on:
   push:
     paths:
       - 'apps/4leaf/rog/game.js'
+      - 'apps/4leaf/rog/cardshop-native-controls.css'
+      - 'apps/4leaf/rog/tests/cardshop-native-sale.cjs'
       - 'apps/4leaf/rog/original-tiles.css'
       - 'apps/4leaf/rog/world-perspective.css'
       - 'apps/4leaf/rog/tests/board-layout.cjs'
@@ -88,12 +90,15 @@ jobs:
         run: node apps/4leaf/rog/tests/dice-source-roll.cjs
       - name: Verify D4 result-specific tetrahedral landing and D6 gameplay motion
         run: node apps/4leaf/rog/tests/dice-fall.cjs
+      - name: Verify actual source CardShop atlas BUY and SELL, guarded GP and persistent inventory
+        run: node apps/4leaf/rog/tests/cardshop-native-sale.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: original-dice-board-layout-screens
           path: |
             leaf-board-*.png
+            leaf-original-cardshop-buy-sell-native.png
             leaf-live-3d-battle-podiums-*.png
             leaf-original-battle-stage-*.png
             leaf-original-source-battle-*.png

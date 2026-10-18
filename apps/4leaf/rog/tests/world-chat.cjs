@@ -754,6 +754,22 @@ const path=require('path');
  assert.equal(await host.locator('.social-original-tool').count(),6,'six working source-art toolbar actions');
  assert.equal(await host.locator('#social-close-room').count(),1,'owner can close room from the window chrome');
  assert.equal(await host.locator('.social-interior-controls').count(),0,'no artificial blue control buttons cover original scene');
+ // The 794x528 source toolbar is NOT allowed to become unreachable just
+ // because a real Registry person is standing in front of its old 30px
+ // rectangle. Assert native source button's physical HIT TARGET before
+ // clicking, rather than DOM.click() which concealed this original bug.
+ const nativeToolbarHit=await host.locator('.social-original-tool[aria-label="아바타 선택"]').evaluate(btn=>{
+  const rect=btn.getBoundingClientRect();
+  const at=document.elementFromPoint(rect.left+rect.width/2,rect.top+rect.height/2);
+  const bar=btn.closest('.social-classic-toolbar');
+  return {hit:at===btn,interceptor:at?.className,
+   nativeArt:getComputedStyle(btn).backgroundImage,
+   n:bar?.dataset.nativeToolHitCollisions,
+   relocated:bar?.dataset.webPositionInferred};
+ });
+ assert.ok(nativeToolbarHit.hit,
+  'real 30px source avatar tool must be physically clickable even with seated participants: '+JSON.stringify(nativeToolbarHit));
+ assert.equal(nativeToolbarHit.n,'0','toolbar should occupy an actual unoccupied source room area: '+JSON.stringify(nativeToolbarHit));
  await host.locator('.social-original-tool[aria-label="아바타 선택"]').click();
  assert.ok(await host.locator('.social-avatar-chooser').isVisible(),'authentic toolbar avatar icon opens working character picker');
  await host.locator('.social-modal-title button').click();
