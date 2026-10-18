@@ -790,6 +790,7 @@
  function setupRoomMap(){
   const viewport=$('social-map-viewport'),plane=$('social-map-plane');
   if(!viewport||!plane)return;
+  const isWebEstate=()=>Boolean(viewport.closest('.social-directory')?.classList.contains('web-estate-open'));
   // ChatTown backdrops are district selectors, while IMG/bgtile belongs
   // to Genesis Dice. Do not inject either as a fake native room-map tile.
   plane.dataset.terrain='unverified';
@@ -807,7 +808,7 @@
   let pointer=null;
   viewport.addEventListener('pointerdown',e=>{
    // Room clicks enter immediately; dragging starts only on empty terrain.
-   if(e.button!==0||e.target.closest('button'))return;
+   if(!isWebEstate()||e.button!==0||e.target.closest('button'))return;
    pointer={id:e.pointerId,x:e.clientX,y:e.clientY};
    viewport.setPointerCapture(e.pointerId);
   });
@@ -821,15 +822,16 @@
   viewport.addEventListener('pointerup',release);
   viewport.addEventListener('pointercancel',release);
   viewport.addEventListener('wheel',e=>{
+   if(!isWebEstate())return;
    e.preventDefault();pan(-(e.deltaX||0),-(e.deltaY||0));
   },{passive:false});
   viewport.addEventListener('keydown',e=>{
    const steps={ArrowLeft:[95,0],ArrowRight:[-95,0],ArrowUp:[0,95],ArrowDown:[0,-95]};
-   if(steps[e.key]){e.preventDefault();pan(...steps[e.key])}
+   if(isWebEstate()&&steps[e.key]){e.preventDefault();pan(...steps[e.key])}
   });
   for(const button of document.querySelectorAll('.social-map-directions button')){
    const steps={left:[150,0],right:[-150,0],up:[0,135],down:[0,-135]};
-   button.onclick=()=>pan(...steps[button.dataset.pan]);
+   button.onclick=()=>{if(isWebEstate())pan(...steps[button.dataset.pan]);};
   }
  }
  function roomHasSpace(room){
