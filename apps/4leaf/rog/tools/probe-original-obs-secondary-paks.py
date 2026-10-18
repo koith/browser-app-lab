@@ -82,6 +82,7 @@ def scan(folder,target):
           "cardMembersPreviouslyMissing":len(entries),
           "strictRecoverableMembers":sum(bool(e["strictFrames"]) for e in entries),
           "entries":entries}
+    target.mkdir(parents=True,exist_ok=True)
     (target/"secondary-pak-probe.json").write_text(json.dumps(report,ensure_ascii=False,
         indent=2,sort_keys=True)+"\n",encoding="utf-8")
     print("ORIGINAL_OBS_ALL_THREE_PACKS "+json.dumps({
