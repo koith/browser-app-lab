@@ -35,7 +35,10 @@ const {chromium}=require('playwright');
    'original/Registry/sava00.png'
   ];
   await page.waitForFunction(async files=>{
-   const cache=await caches.open('4leaf-revival-pwa-v64');
+   const active=(await caches.keys()).find(name=>
+    /^4leaf-revival-pwa-v\\d+$/.test(name));
+   if(!active)return false;
+   const cache=await caches.open(active);
    return (await Promise.all(files.map(file=>cache.match('./'+file)))).every(Boolean);
   },critical,{timeout:40000});
   // An established controller must answer image and JS fetches offline.
