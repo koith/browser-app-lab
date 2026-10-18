@@ -58,6 +58,42 @@ jobs:
           PY
           unzip -q /tmp/leaf-original-installer/4leaf.zip 'data1.cab' 'data1.hdr' -d /tmp/leaf-original-installer
           unshield x -d /tmp/leaf-original-files /tmp/leaf-original-installer/data1.cab >/dev/null
+      - name: Preserve archived 1078 OBS 37-frame RLE sample for faithful front-facing idle recovery
+        run: |
+          python3 - <<'PY'
+          import importlib.util,json,sys,hashlib
+          from pathlib import Path
+          import glob
+          f=Path('apps/4leaf/rog/tools/decode-original-obs-bulk.py')
+          spec=importlib.util.spec_from_file_location('sourceobs',f)
+          m=importlib.util.module_from_spec(spec);sys.modules[spec.name]=m;spec.loader.exec_module(m)
+          packs=glob.glob('/tmp/leaf-original-files/**/Dice/OBS.pak',recursive=True)
+          assert len(packs)==1,packs
+          raw=Path(packs[0]).read_bytes()
+          source={k.lower():v for k,v in m.source_members(raw)}
+          output=Path('/tmp/leaf-front-obs-evidence');output.mkdir(exist_ok=True)
+          desc={}
+          for name in ['1078.obs','1045.obs','1054.obs']:
+              body=source[name]
+              frames,palette=m.unpack_frames(body)
+              (output/name).write_bytes(body)
+              (output/(name+'.palette')).write_bytes(palette)
+              sample={}
+              for i,(payload,w,h,ox,oy) in enumerate(frames):
+                  if i not in (0,1,2,3,10,18,22,24,25,26,28,30,32,35,36):continue
+                  sample[i]={'size':[w,h],'offset':[ox,oy],
+                   'bytes':len(payload),'rawHead':payload[:32].hex(),
+                   'sourceSHA256':hashlib.sha256(payload).hexdigest()}
+              desc[name]={'sha256':hashlib.sha256(body).hexdigest(),'frames':len(frames),
+               'samples':sample}
+          (output/'source-evidence.json').write_text(json.dumps(desc,indent=2))
+          print('ARCHIVED_OBS_FRONT_ORIENTATION_RAW_VERIFIED',json.dumps(desc)[:3000])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: original-obs-front-facing-frame-rle-evidence-not-production
+          path: /tmp/leaf-front-obs-evidence
+          retention-days: 7
       - name: Strictly probe ALL original OBS, OBS2, OBS3 packs for missing character source pixels
         run: |
           python3 apps/4leaf/rog/tools/probe-original-obs-secondary-paks.py /tmp/leaf-original-files /tmp/leaf-original-obs-quarantine
