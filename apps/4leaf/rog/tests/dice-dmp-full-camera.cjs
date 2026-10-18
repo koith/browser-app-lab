@@ -39,8 +39,8 @@ const path=require('node:path');
   const initial=await snapshot();
   assert.deepEqual(initial.world,[2650,2050],
    'WEB projection keeps full native TIS 145x97 pixels with only a narrow photo-calibrated raised-platform lip overlap');
-  assert.ok(initial.sourceVisible>=13,
-   'archived 2004 board scene contains a dense path, not a nearly empty giant terrain camera: '+initial.sourceVisible);
+  assert.ok(initial.sourceVisible>=9&&initial.sourceVisible<=25,
+   '2004 board shows a close playable slice of independent raised TIS tiles, not dense overlapping stacks or a vacant zoomed field: '+initial.sourceVisible);
   const sourced=await page.evaluate(()=>window.__LEAF_CAMERA__.getState().sourceGrid);
   assert.deepEqual(sourced,{width:1450,height:1120,pitchX:70,pitchY:47},
    'source DMP coordinates and original logical pitch never change');
