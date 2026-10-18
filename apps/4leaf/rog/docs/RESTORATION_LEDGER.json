@@ -264,7 +264,7 @@
       "title": "타일 상하·겹침·입체감 사용자 재현 결함",
       "status": "in_progress",
       "milestone": "M04",
-      "current": "반전 패치와 128x86 웹 투영만으로 최종 해결 아님; 원본 DMP 26개 맵 1,920개 XY 좌표 검사로 동일 맵 좌표 중복 0건, 현재 웹 투영의 사각영역 최대 중첩 약 11.7%로 계산. 실제 픽셀/알파/메시 가림은 미검증.; 이번 수정에서 타일별 원본 이미지의 불투명 픽셀을 잘라내던 4px 중간점 클리핑을 전체 원본 알파 포함 외곽선으로 교정하고, 웹에서 추가한 임의 칸 번호·문자 그래픽을 원본 TIS 위에서 제거. 브라우저 QA 대기.; QA 성공: 원본 TIS 32종 341,961 불투명 픽셀 중 잘림 0, 웹 번호 덧그림 0, 4LEAF 104칸 및 악마의 달팽이 69칸 Chromium 배치·ROLL·D4/D6 회귀 성공. 원본 3D 높이/간격 동등성은 미검증.; 2026-10-18 실제 iPhone 스크린샷: 145x97 원본 TIS 가로 중심 간격 128px로 17px 겹침 재현. 웹 투영 150x100 및 세계 6000x3300으로 확장하고 26맵 원본 DMP 경로 좌표 유지. 모바일 실판 렌더·전맵 검사 진행 중.",
+      "current": "반전 패치와 128x86 웹 투영만으로 최종 해결 아님; 원본 DMP 26개 맵 1,920개 XY 좌표 검사로 동일 맵 좌표 중복 0건, 현재 웹 투영의 사각영역 최대 중첩 약 11.7%로 계산. 실제 픽셀/알파/메시 가림은 미검증.; 이번 수정에서 타일별 원본 이미지의 불투명 픽셀을 잘라내던 4px 중간점 클리핑을 전체 원본 알파 포함 외곽선으로 교정하고, 웹에서 추가한 임의 칸 번호·문자 그래픽을 원본 TIS 위에서 제거. 브라우저 QA 대기.; QA 성공: 원본 TIS 32종 341,961 불투명 픽셀 중 잘림 0, 웹 번호 덧그림 0, 4LEAF 104칸 및 악마의 달팽이 69칸 Chromium 배치·ROLL·D4/D6 회귀 성공. 원본 3D 높이/간격 동등성은 미검증.; 2026-10-18 실제 iPhone 스크린샷: 145x97 원본 TIS 가로 중심 간격 128px로 17px 겹침 재현. 웹 투영 150x100 및 세계 6000x3300으로 확장하고 26맵 원본 DMP 경로 좌표 유지. 모바일 실판 렌더·전맵 검사 진행 중.; 최종 iPhone UI 회귀 통과: DMP 26맵 1,920칸 모든 145x97 PNG의 기하 충돌 0건, iPhone 4LEAF 가로 이웃 38쌍 최소 4.54px 틈/세로 40쌍 최소 2.71px 틈. 원본 3D 메쉬 투영 동등성은 미확보.",
       "acceptance": [
         "전체 맵 동선에서 과도한 중첩/상하 역전 0건; 알파/행 순서·타일 접근성·스크린샷 비교 기록"
       ],
@@ -279,7 +279,9 @@
         "https://github.com/koith/browser-app-lab/actions/runs/39121106579",
         "https://github.com/koith/browser-app-lab/commit/69112199dce1de3a9ae6149d64730f2b4ca84cc3",
         "apps/4leaf/rog/board-camera.js",
-        "apps/4leaf/rog/tests/dice-horizontal-native-actors.cjs"
+        "apps/4leaf/rog/tests/dice-horizontal-native-actors.cjs",
+        "https://github.com/koith/browser-app-lab/actions/runs/39122309781",
+        "https://github.com/koith/browser-app-lab/commit/abfa068f71c26656dc3dfa083044863d38bce991"
       ],
       "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
       "lastReviewed": "2026-10-18",
@@ -291,14 +293,16 @@
       "title": "채팅 아바타 대신 실제 창세기전 체스맨과 행동",
       "status": "in_progress",
       "milestone": "M05",
-      "current": "본체 일부 연결, 캐릭터별 원작 애니메이션 미해독; 기본 상대 c_0096의 OBS 원본 미확보로 거대 CSS 인형 표출하던 원인 확인. 기본 상대는 원본 OBS 있는 c_0045 등으로 교체, 미복원 모델은 원본 CardData 정지 초상화로 표시하고 본체 미복구 명시. 98종 전체 OBS 동작 복원 미완료.",
+      "current": "본체 일부 연결, 캐릭터별 원작 애니메이션 미해독; 기본 상대 c_0096의 OBS 원본 미확보로 거대 CSS 인형 표출하던 원인 확인. 기본 상대는 원본 OBS 있는 c_0045 등으로 교체, 미복원 모델은 원본 CardData 정지 초상화로 표시하고 본체 미복구 명시. 98종 전체 OBS 동작 복원 미완료.; 실제 iPhone QA: 기본 1P c_0078 -> OBS/1078.obs, 2P c_0045 -> OBS/1045.obs 원본 프레임 로드·표시 및 커다란 CSS 인형 0건. c_0096 같은 미복구 OBS는 카드 이미지로만 분명히 표시; 원본 34종 체스맨/액션 미복구 지속.",
       "acceptance": [
         "모든 캐릭터/상태에서 확인된 OBS 동작만 재생하고 나머지는 미복구로 투명하게 표시"
       ],
       "evidence": [
         "apps/4leaf/rog/genesis-chessman-actors.js",
         "apps/4leaf/rog/genesis-chessman-actors.js",
-        "apps/4leaf/rog/dice-original-obs.css"
+        "apps/4leaf/rog/dice-original-obs.css",
+        "https://github.com/koith/browser-app-lab/actions/runs/39122309781",
+        "https://github.com/koith/browser-app-lab/actions/runs/39122309790"
       ],
       "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
       "lastReviewed": "2026-10-18",
@@ -607,6 +611,30 @@
       "taskId": "P0-ACTOR",
       "details": "c_0096 CSS 112px 가짜 큰 인형 대신 미복원 시 CardData 원본 40x55 정지 이미지, 기본 상대는 실제 c_0045 OBS 전신; 실제 원본 모델 없는 캐릭터는 본체 미복구 표시.",
       "evidence": "apps/4leaf/rog/genesis-chessman-actors.js"
+    },
+    {
+      "seq": 20,
+      "date": "2026-10-18",
+      "type": "QA_VERIFIED",
+      "taskId": "P0-BOARD",
+      "details": "Source DMP 26 maps/1,920 cells zero rectangular TIS overlap; native 145x97 tile pitch 150x100; iPhone 390x844 4LEAF map horizontal 38 neighbors gap min 4.543px and vertical 40 neighbors gap min 2.712px. Chromium+WebKit mobile, original ROLL, D4/D6 and non-overlap tests success. Historical camera/3D equivalence still unverified.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39122309781"
+    },
+    {
+      "seq": 21,
+      "date": "2026-10-18",
+      "type": "QA_VERIFIED",
+      "taskId": "P0-ACTOR",
+      "details": "Real iPhone CSS source audit: both fresh match participants use genuine OBS/1078.obs and OBS/1045.obs, synthetic CSS mannequins 0. Explicit c_0096 missing native OBS shows original CardData 40x55 portrait only, with unverified source tag; no false original-body claims. Genesis actor gameplay and WebKit turn tests passed. 98-character original actions not yet recovered.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39122309790"
+    },
+    {
+      "seq": 22,
+      "date": "2026-10-18",
+      "type": "MERGED",
+      "taskId": "P0-BOARD",
+      "details": "PR #111 squash abfa068f: real source tile horizontal non-overlap, full expanded DMP camera; initial opponent genuine OBS, missing source no stickman.",
+      "evidence": "https://github.com/koith/browser-app-lab/pull/111"
     }
   ]
 }
