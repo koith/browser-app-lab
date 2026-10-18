@@ -1240,15 +1240,15 @@ async function resolveTile(p,depth=0){
  }else if(type==='chest'){grantItem(p)}
  else if(type==='blessing'){while(p.items.length<5)p.items.push(ITEMS[rand(ITEMS.length)].id);appendMove(p.name+' 신의 축복: 아이템 가득 충전')}
  else if(type==='curse'){p.items=[];appendMove(p.name+' 신의 저주: 모든 아이템 소실')}
- else if(type==='prison'){p.jail=3;appendMove(p.name+' 감옥 3턴! 더블 주사위로 탈출할 수 있습니다.')}
+ else if(type==='prison'){p.jail=3;appendMove(p.name+' 감옥 3턴! 더블 주사위로 탈출할 수 있습니다.');window.__LEAF_NATIVE_EVENTS__?.show('jail',p.name)}
  else if(type==='kingbomb'){p.position=0;appendMove(p.name+' 왕폭탄 폭발! START 복귀');match.tiles[pos]='normal'}
  else if(type==='keeperA'||type==='keeperB'||type==='keeperC'){const power={keeperA:1,keeperB:3,keeperC:5};await resolveBattle(p,{id:-1,name:ITEM_MAP[type].name,def:power[type]},true);match.tiles[pos]='normal'}
- else if(type==='ability'){p.ability=Math.min(100,p.ability+25);appendMove(p.name+' 어빌리티 게이지 +25%')}
+ else if(type==='ability'){p.ability=Math.min(100,p.ability+25);appendMove(p.name+' 어빌리티 게이지 +25%');if(p.ability===100)window.__LEAF_NATIVE_EVENTS__?.show('ability',p.name)}
  else if(type==='ability100'){
    const ts=teamStats(p.team),count=Math.max(1,Math.min(4,p.team?.length>=3?ts.int:(p.team?.length===2?ts.def:ts.atk)));
    const targets=Array.from({length:6},(_,i)=>i+1).sort(()=>Math.random()-.5).slice(0,count);
    const eye=d(6);
-   if(targets.includes(eye)){p.ability=100;appendMove(p.name+' 소울풀 판정 '+eye+' / 목표 '+targets.join(',')+' · 어빌리티 100%!')}
+   if(targets.includes(eye)){p.ability=100;appendMove(p.name+' 소울풀 판정 '+eye+' / 목표 '+targets.join(',')+' · 어빌리티 100%!');window.__LEAF_NATIVE_EVENTS__?.show('ability',p.name)}
    else appendMove(p.name+' 소울풀 판정 '+eye+' / 목표 '+targets.join(',')+' · 실패');
  }
  else if(type==='attribute'){match.attribute=originalTileAt(match.map,pos)?.attribute||['WANDS','SWORDS','CUPS','DISKS'][rand(4)];appendMove('맵 속성이 '+match.attribute+'(으)로 변경!')}
