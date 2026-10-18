@@ -70,6 +70,6 @@ async function run(engine){
  }finally{await browser.close()}
 }
 (async()=>{
- await run('chromium');
+ if(process.env.FOURLEAF_ONLY_WEBKIT!=='1')await run('chromium');
  if(process.env.FOURLEAF_SKIP_WEBKIT!=='1')await run('webkit');
 })().catch(e=>{console.error('SIX ROOM REAL SOURCE TOOL INPUT FAILURE',e.stack||e);process.exit(1)});
