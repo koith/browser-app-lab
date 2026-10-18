@@ -47,15 +47,17 @@ const assert=require('node:assert/strict');
    assert.ok(result.count>40,'original map contains game tiles');
    // Source DMP 70x47 is LOGICAL grid metadata, not a mandate to pack
    // full 145x97 sprite billboards every 70x47 physical screen pixels.
-   // Live WEB projection avoids 50%-buried tiles while preserving native
-   // source filenames, coordinates, artwork dimensions and game routes.
+   // Historical screenshots show moderately overlapping original raised
+   // hexes, not the previous 3000px camera's empty terrain.
+   // Live WEB projection preserves source art, coordinates and events.
    assert.ok(result.sizes.every(t=>Math.abs(t.w-145)<.1&&Math.abs(t.h-97)<.1&&t.native==='145x97'),
     'all original TIS raised platforms retain true 145x97 source pixels');
-   // The archived extractor already applied FLIP_TOP_BOTTOM to
-   // the source TIS rows. The live scene corrects that preview inversion
-   // while retaining authentic source PNG bytes and hit polygons.
-   assert.ok(result.sizes.every(t=>t.transform.startsWith('matrix(1, 0, 0, -1,')),
-    'all 145x97 original TIS previews render source lettering upright');
+   // decode_tis.py already corrected FAST.PAL.COLORKEY bottom-up rows
+   // when exporting the original TIS PNGs. A SECOND scaleY(-1) flips the
+   // genuine JOKER lettering, card edges and skill emblems upside down.
+   // Matrix(1,0,0,1,-72.5,-48.5) is the source-correct upright orientation.
+   assert.ok(result.sizes.every(t=>t.transform.startsWith('matrix(1, 0, 0, 1,')),
+    'all recovered 145x97 TIS PNGs remain upright without a second flip');
    assert.ok(result.sizes.every(t=>t.clip.startsWith('polygon(')),
     'inferred hit polygon restricts clicking transparent overlapping source corners');
    assert.ok(result.sizes.every(t=>t.dmp.every(Number.isFinite)&&Number.isFinite(t.depth)),
@@ -67,8 +69,9 @@ const assert=require('node:assert/strict');
     'all tiles show their independently decoded recovered TIS PNG, not a fake or an unkeyed source');
    assert.deepEqual(result.sourceGrid,{width:1450,height:1120,pitchX:70,pitchY:47});
    assert.equal(result.bad,0,'every source DMP neighboring position uses projected sprite pitch');
-   assert.ok(result.minimumH>140&&result.minimumV>95,
-    '145x97 native tiles no longer visually bury adjacent path nodes: '+JSON.stringify(result));
+   assert.ok(result.minimumH>=108&&result.minimumH<=114&&
+     result.minimumV>=73&&result.minimumV<=77,
+    '2004 screenshot-calibrated projection keeps source 145x97 sprites at native size while neighboring centers are 111x75: '+JSON.stringify(result));
    assert.ok(result.adjacent>10,'adjacent cells were checked');
    await page.screenshot({path:shot});
    await page.locator('#exit-game').click();
