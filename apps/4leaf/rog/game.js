@@ -1047,6 +1047,21 @@ function showBattleScene(attacker,defender,attack,defense,attackerPoints,defende
     dice.append(die);
    });
    const pedestal=document.createElement('div');pedestal.className='battle-visual-pedestal';
+   // Screenshot-registered 2004 battle platforms use a shallow octagonal
+   // contact deck suspended on independent steel supports, not a green/cyan
+   // full-height modern cylinder. The old PAK does not expose a source mesh:
+   // this is a visibly labelled geometry reconstruction, NOT decoded MVE.
+   pedestal.dataset.geometrySource='2004-screenshot-inferred-not-original-mesh';
+   for(let legIndex=0;legIndex<4;legIndex++){
+     const support=document.createElement('span');
+     support.className='leaf-battle-platform-leg leaf-battle-platform-leg-'+legIndex;
+     support.setAttribute('aria-hidden','true');
+     pedestal.append(support);
+   }
+   const crossbar=document.createElement('span');
+   crossbar.className='leaf-battle-platform-crossbar';
+   crossbar.setAttribute('aria-hidden','true');
+   pedestal.append(crossbar);
    panel.append(title,score,actor,pedestal,dice);
  }
  assemble(left,attacker,attackerPoints,attack.values);assemble(right,defender,defenderPoints,defense.values);
