@@ -155,6 +155,57 @@
         "QA-03",
         "QA-04"
       ]
+    },
+    {
+      "id": "REQ-20261018-007",
+      "date": "2026-10-18",
+      "origin": "user",
+      "text": "남은 미완료 업무 처리해서 마무리해. 막히면 가기서 멈추지 말고 어떻게 해서든 방법 찾아내서 처리완료해. 남은 일감이 16개나 되니까 최대한 다 클리어 시키는 걸 목표로 해라.",
+      "taskIds": [
+        "M00",
+        "M01",
+        "M02",
+        "M03",
+        "M04",
+        "M05",
+        "M06",
+        "M07",
+        "M08",
+        "M09",
+        "P0-BOARD",
+        "P0-ACTOR",
+        "P0-PODIUM",
+        "P0-DICE",
+        "P0-CHAT",
+        "P0-RELEASE",
+        "SRC-01",
+        "SRC-02",
+        "BRD-01",
+        "BRD-02",
+        "BRD-03",
+        "BRD-04",
+        "ACT-01",
+        "ACT-02",
+        "ACT-03",
+        "ACT-04",
+        "BTL-01",
+        "BTL-02",
+        "DIE-01",
+        "DIE-02",
+        "DIE-04",
+        "CHT-01",
+        "CHT-02",
+        "CHT-03",
+        "CHT-04",
+        "CHT-06",
+        "RULE-01",
+        "EVID-01",
+        "EVID-02",
+        "QA-01",
+        "QA-02",
+        "QA-03",
+        "CHT-07"
+      ]
     }
   ],
   "tasks": [
@@ -164,12 +215,14 @@
       "title": "원본 클라이언트·근거 자료 수집",
       "status": "in_progress",
       "milestone": "M00",
-      "current": "원본 자료/스크린샷을 확보했으나 MVE 메시·주사위 키프레임·원본 EXE 프로토콜은 미확보",
+      "current": "원본 자료/스크린샷을 확보했으나 MVE 메시·주사위 키프레임·원본 EXE 프로토콜은 미확보; 2026-10-18: Strict source IMG.pak unused 12 original UI SPR entries recovered as 100 SHA-checked PNGs and original PAK source report (OBS2/OBS3 strict body recovery 0). Remaining EXE 3D/actor mapping unresolved.",
       "acceptance": [
         "원본 바이너리 추적과 SHA/파일 형식·역할을 검증하고 출처·사용 위치를 기록"
       ],
       "evidence": [
-        "apps/4leaf/rog/original/manifest.json"
+        "apps/4leaf/rog/original/manifest.json",
+        "https://github.com/koith/browser-app-lab/actions/runs/39127703411",
+        "apps/4leaf/rog/original/SourceSPRExtra/manifest.json"
       ],
       "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
       "lastReviewed": "2026-10-18",
@@ -215,12 +268,13 @@
       "title": "북·남 하이아칸 상설 채팅 복원",
       "status": "in_progress",
       "milestone": "M03",
-      "current": "16지역·6실내 배경·실제 채팅/즉시 좌석 이동 구현, 원작과 외형 차이 존재",
+      "current": "16지역·6실내 배경·실제 채팅/즉시 좌석 이동 구현, 원작과 외형 차이 존재; 2026-10-18: Seat #9 overlapping original toolbar input fixed using browser real hit test. Overall room art/story/participant layout fidelity incomplete.",
       "acceptance": [
         "실제 사용자만 표시하며 지역선택/입장/가구/좌석/채팅 입력을 원작 캡처와 동등하게 검증"
       ],
       "evidence": [
-        "apps/4leaf/rog/social-chat.js"
+        "apps/4leaf/rog/social-chat.js",
+        "https://github.com/koith/browser-app-lab/pull/118"
       ],
       "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
       "lastReviewed": "2026-10-18",
@@ -267,12 +321,13 @@
       "title": "주잔 배틀 원본 발판·시점",
       "status": "in_progress",
       "milestone": "M06",
-      "current": "스크린샷을 근거로 4지지대 CSS 근사만 존재",
+      "current": "스크린샷을 근거로 4지지대 CSS 근사만 존재; 2026-10-18: Source IMG.pak winBattle.spr genuine 2D two-platform stage and BATTLE header integrated; not a genuine 2004 MVE 3D physical platform; original POV and actual OBS action/synchronization pending.",
       "acceptance": [
         "원본 메시 또는 검증된 동등한 3D 발판 구조·접지·투영·전투 이동을 구현, 사진 비교 QA 통과"
       ],
       "evidence": [
-        "apps/4leaf/rog/dice-native-battle-podium.css"
+        "apps/4leaf/rog/dice-native-battle-podium.css",
+        "https://github.com/koith/browser-app-lab/pull/117"
       ],
       "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
       "lastReviewed": "2026-10-18",
@@ -385,14 +440,16 @@
       "id": "P0-PODIUM",
       "priority": "P0",
       "title": "원본 전투 발판·배치 완성",
-      "status": "todo",
+      "status": "in_progress",
       "milestone": "M06",
-      "current": "웹 CSS 사진 근사 발판",
+      "current": "웹 CSS 사진 근사 발판; 2026-10-18: True winBattle.spr 355x113 dual metallic 2D podium now live (2ea43db0); historic 3D MVE platform mesh, collision/support depth, exact fighter foot placement and camera 2004 equivalence remain unverified.",
       "acceptance": [
         "원본 배틀 캡처와 실측 일치하는 3D 플랫폼, 원본 체스맨 높이/가림·회전/공격 시점 검증"
       ],
       "evidence": [
-        "apps/4leaf/rog/dice-native-battle-podium.css"
+        "apps/4leaf/rog/dice-native-battle-podium.css",
+        "https://github.com/koith/browser-app-lab/pull/117",
+        "apps/4leaf/rog/dice-native-battle-source-spr.css"
       ],
       "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
       "lastReviewed": "2026-10-18",
@@ -430,7 +487,7 @@
       "title": "상설 채팅방 원작 화면 정밀 복원",
       "status": "in_progress",
       "milestone": "M03",
-      "current": "실제 채팅은 가능하지만 배치·창틀/전경 등 원작 외형 미달; 2026-10-18 실제 Chromium 통합회귀 발견: 원본 ringbtn.png 캐릭터정보 메뉴가 원본 매직카덴 툴바(상위 CSS 쌓임맥락) 아래 가려짐. 2004 ChatRoom 프레임 CSS :has() 특이성 재조정으로 메뉴가 열릴 때만 z=150, 닫히면 본래 z=106. 브라우저 실제 elementFromPoint 클릭 QA 성공. 전체 채팅 원작 픽셀 동등성은 아직 미완료.",
+      "current": "실제 채팅은 가능하지만 배치·창틀/전경 등 원작 외형 미달; 2026-10-18 실제 Chromium 통합회귀 발견: 원본 ringbtn.png 캐릭터정보 메뉴가 원본 매직카덴 툴바(상위 CSS 쌓임맥락) 아래 가려짐. 2004 ChatRoom 프레임 CSS :has() 특이성 재조정으로 메뉴가 열릴 때만 z=150, 닫히면 본래 z=106. 브라우저 실제 elementFromPoint 클릭 QA 성공. 전체 채팅 원작 픽셀 동등성은 아직 미완료.; 2026-10-18: Real 2004 ChatRoom source room3 seat 9 torso now receives clicks instead of source toolbar. All scene screenshot pixel fidelity/multiuser seating still outstanding.",
       "acceptance": [
         "원본 794×528/2004 화면의 입력·가구·좌석·상설 목록을 실제 참가자 그대로 재현"
       ],
@@ -439,7 +496,8 @@
         "apps/4leaf/rog/chatroom-native-2004-frame.css",
         "apps/4leaf/rog/tests/world-chat.cjs",
         "https://github.com/koith/browser-app-lab/actions/runs/39123213181",
-        "https://github.com/koith/browser-app-lab/pull/113"
+        "https://github.com/koith/browser-app-lab/pull/113",
+        "https://github.com/koith/browser-app-lab/pull/118"
       ],
       "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
       "lastReviewed": "2026-10-18",
@@ -737,20 +795,30 @@
       "id": "BTL-01",
       "priority": "P0",
       "title": "원본 winBattle.spr 2프레임 배포본 적용",
-      "status": "todo",
+      "status": "done",
       "milestone": "M06",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 배포 main은 아직 CSS 추정 단상; 새 2002 원본 355×113 금속 2발판+VS와 222×42 전투 제목 PNG는 기능 브랜치에만 존재 | 구현 목표: SourceSPRExtra 100개 원본 PNG/manifest를 검증해 main에 반영, 전투에서 가짜 4다리 DOM 대신 winBattle.spr로 표시",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 배포 main은 아직 CSS 추정 단상; 새 2002 원본 355×113 금속 2발판+VS와 222×42 전투 제목 PNG는 기능 브랜치에만 존재 | 구현 목표: SourceSPRExtra 100개 원본 PNG/manifest를 검증해 main에 반영, 전투에서 가짜 4다리 DOM 대신 winBattle.spr로 표시; 2026-10-18: SHA1-verified original 2002 IMG.pak winBattle.spr native frame0 222x42 BATTLE / frame1 355x113 two genuine metal podiums+VS; 100 native GUI PNGs registered and main 2ea43db0 deployed. CSS four-leg/duplicate VS hidden only when source ready. Genuine chessman two independent DOM and actual rolled pip values unchanged.",
       "acceptance": [
         "실제 battle stage에 원본 355×113 PNG가 로드되고 CSS 원통/가짜 발판/중복 VS가 사라짐, 게임 턴 유지"
       ],
       "evidence": [
         "../assets/battle.jpg",
         "dice-native-battle-podium.css",
-        "tests/dice-battle-podium.cjs"
+        "tests/dice-battle-podium.cjs",
+        "https://github.com/koith/browser-app-lab/pull/117",
+        "https://github.com/koith/browser-app-lab/actions/runs/39138053503",
+        "https://github.com/koith/browser-app-lab/actions/runs/39138358819",
+        "apps/4leaf/rog/original/SourceSPRExtra/manifest.json",
+        "apps/4leaf/rog/tests/dice-battle-podium.cjs"
       ],
-      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+      "evidenceLevel": "VERIFIED-ORIGINAL-2D-SPRITE-AND-PRODUCTION-PLAYBACK; HISTORICAL-3D-MVE-CAMERA-UNVERIFIED",
       "lastReviewed": "2026-10-18",
-      "verifiedAcceptance": null,
+      "verifiedAcceptance": {
+        "sourceComparison": "Original verified 2002 Dice/IMG.pak winBattle.spr frame0 (222x42) and frame1 (355x113), source SHA256 in original/SourceSPRExtra/manifest.json; compare original battle.jpg layout, not claim exact MVE 3D camera",
+        "implementation": "main@2ea43db0e5816df5a510bbc53e3c0266748d645b: game.js/dice-native-battle-source-spr.css/index.html/100 PNG source bitmaps and PWA cache",
+        "runtimeTest": "Chromium mobile & desktop source battle QA + real turn/dice/OBS: github.com/koith/browser-app-lab/actions/runs/39138053503 ; smoke github.com/koith/browser-app-lab/actions/runs/39138358588",
+        "deployment": "GitHub Pages deploy run 39138358819 successful; main@2ea43db0e5816df5a510bbc53e3c0266748d645b"
+      },
       "dependencies": [
         "SRC-01"
       ],
@@ -784,15 +852,17 @@
       "id": "BTL-03",
       "priority": "P1",
       "title": "원본 winResult/winAbility/winJail UI 실제 연결",
-      "status": "todo",
+      "status": "in_progress",
       "milestone": "M06",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: IMG.pak에서 winResult 1장·winAbility 6장·winJail 1장 등을 해독했지만 배포 UI 실사용 여부 미확인 | 구현 목표: 이미 해독한 원본 크기/프레임 순서를 실제 전투 결과·능력·감옥 창의 정확한 상태에 연결",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: IMG.pak에서 winResult 1장·winAbility 6장·winJail 1장 등을 해독했지만 배포 UI 실사용 여부 미확인 | 구현 목표: 이미 해독한 원본 크기/프레임 순서를 실제 전투 결과·능력·감옥 창의 정확한 상태에 연결; 2026-10-18: 2002 IMG.pak 12 non-ROLL sprites 100 original GUI PNGs including winAbility.spr 6 frames, winResult.spr, winJail.spr decoded to hashed SourceSPRExtra manifest and published main; user-visible ability/result/jail integration not yet verified.",
       "acceptance": [
         "상태별 팝업에 원본 member·frame 명시, 버튼/판정 살아 있음, 무관 장면에 잘못 표시하지 않음"
       ],
       "evidence": [
         "original/SourceSPR/manifest.json",
-        "game.js"
+        "game.js",
+        "apps/4leaf/rog/original/SourceSPRExtra/manifest.json",
+        "https://github.com/koith/browser-app-lab/pull/117"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
       "lastReviewed": "2026-10-18",
@@ -1277,15 +1347,17 @@
       "id": "QA-01",
       "priority": "P0",
       "title": "원본 발판 새 자산 브랜치 스모크 실패 복구",
-      "status": "todo",
+      "status": "in_progress",
       "milestone": "M09",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원본 winBattle.spr 테스트 브랜치 29b4546d에서 browser-smoke 실패: 기존 시험이 가짜 CSS 발판 DOM 다리 4개를 반드시 요구함 | 구현 목표: 전투 QA를 원본 355×113 source ready vs 진짜 source load 실패시 fallback 두 경로로 분리해 조건 수정",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원본 winBattle.spr 테스트 브랜치 29b4546d에서 browser-smoke 실패: 기존 시험이 가짜 CSS 발판 DOM 다리 4개를 반드시 요구함 | 구현 목표: 전투 QA를 원본 355×113 source ready vs 진짜 source load 실패시 fallback 두 경로로 분리해 조건 수정; 2026-10-18: Old smoke 4 CSS support requirement fixed; source winBattle.spr browser QA and mobile/desktop main pass. Native winAbility result/event hookup and fallback error-path regression are still separate QA acceptance.",
       "acceptance": [
         "native winBattle/ability 실제 PNG·체스맨 2명·눈결과+전투 종료가 Chromium 모바일/desktop에서 정상, 구 CSS DOM 4다리 미요구"
       ],
       "evidence": [
         "tests/smoke.cjs",
-        "tests/dice-battle-podium.cjs"
+        "tests/dice-battle-podium.cjs",
+        "https://github.com/koith/browser-app-lab/actions/runs/39138358588",
+        "apps/4leaf/rog/tests/dice-battle-podium.cjs"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
       "lastReviewed": "2026-10-18",
@@ -1368,17 +1440,20 @@
       "id": "CHT-07",
       "priority": "P0",
       "title": "상설 채팅방 자기 아바타·원본 도구모음 클릭 가림 회귀",
-      "status": "todo",
+      "status": "in_progress",
       "milestone": "M03",
       "category": "상설 채팅",
-      "current": "2026-10-18 실제 4LEAF World+Chat 통합 CI 39137227054에서 `.social-avatar.self[data-seat=9]`의 물리 클릭이 30초간 막힘: 원본 툴바 `.social-classic-toolbar`의 `채팅방 목록` 버튼이 상단 stacking layer로 클릭을 가로챔. 과거 링메뉴 z-index 수정 PR#113과 별개 사용자 접근성 결함. 동일 지점에서 메뉴 조작과 자기 아바타 선택 모두 성공하게 고쳐야 함.",
+      "current": "2026-10-18 실제 4LEAF World+Chat 통합 CI 39137227054에서 `.social-avatar.self[data-seat=9]`의 물리 클릭이 30초간 막힘: 원본 툴바 `.social-classic-toolbar`의 `채팅방 목록` 버튼이 상단 stacking layer로 클릭을 가로챔. 과거 링메뉴 z-index 수정 PR#113과 별개 사용자 접근성 결함. 동일 지점에서 메뉴 조작과 자기 아바타 선택 모두 성공하게 고쳐야 함.; 2026-10-18: Original room3 seat #9 occupied actor click above source toolbar fixed CSS z112 vs toolbar z109, tooltip menu z150 and focused tools z160, real physical click and WebKit browser regression pass; comprehensive all-six-room original seating acceptance pending.",
       "acceptance": [
         "794×528 전체 상설방/서재/지역 6개 방에서 실물 self·peer 아바타의 중앙 포인트가 document.elementFromPoint로 해당 버튼 또는 소유 아바타를 가리킴; 원본 30px 툴바 버튼도 여전히 클릭 가능. WebKit/Chromium 동일 화면에서 실패 0건."
       ],
       "evidence": [
         "https://github.com/koith/browser-app-lab/actions/runs/39137227054",
         "apps/4leaf/rog/tests/world-chat.cjs",
-        "apps/4leaf/rog/chatroom-native-2004-frame.css"
+        "apps/4leaf/rog/chatroom-native-2004-frame.css",
+        "https://github.com/koith/browser-app-lab/pull/118",
+        "https://github.com/koith/browser-app-lab/actions/runs/39138329616",
+        "apps/4leaf/rog/tests/world-chat.cjs"
       ],
       "evidenceLevel": "VERIFIED-WEBAPP-BROWSER-REGRESSION; HISTORICAL-LAYOUT-UNVERIFIED",
       "lastReviewed": "2026-10-18",
@@ -2026,6 +2101,119 @@
       "requestId": "REQ-20261018-006",
       "details": "GitHub Actions world-chat job 117704103913 at 2026-10-18T14:44 UTC fails locator.click('.social-avatar.self'): toolbar button '채팅방 목록' intercepts pointer events for 30s. Do not mark chat pixel/interaction fidelity done.",
       "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39137227054"
+    },
+    {
+      "seq": 72,
+      "date": "2026-10-18",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261018-007",
+      "taskIds": [
+        "M00",
+        "M01",
+        "M02",
+        "M03",
+        "M04",
+        "M05",
+        "M06",
+        "M07",
+        "M08",
+        "M09",
+        "P0-BOARD",
+        "P0-ACTOR",
+        "P0-PODIUM",
+        "P0-DICE",
+        "P0-CHAT",
+        "P0-RELEASE",
+        "SRC-01",
+        "SRC-02",
+        "BRD-01",
+        "BRD-02",
+        "BRD-03",
+        "BRD-04",
+        "ACT-01",
+        "ACT-02",
+        "ACT-03",
+        "ACT-04",
+        "BTL-01",
+        "BTL-02",
+        "DIE-01",
+        "DIE-02",
+        "DIE-04",
+        "CHT-01",
+        "CHT-02",
+        "CHT-03",
+        "CHT-04",
+        "CHT-06",
+        "RULE-01",
+        "EVID-01",
+        "EVID-02",
+        "QA-01",
+        "QA-02",
+        "QA-03",
+        "CHT-07"
+      ],
+      "details": "User asks to finish all 16 original umbrella tasks plus granular 2004 backlog; preserve count distinction 16 umbrella open + 39/40 individual tasks; no unsupported global completion."
+    },
+    {
+      "seq": 73,
+      "date": "2026-10-18",
+      "type": "STATUS_CHANGED",
+      "taskId": "BTL-01",
+      "from": "todo",
+      "to": "done",
+      "details": "SHA1-verified original 2002 IMG.pak winBattle.spr native frame0 222x42 BATTLE / frame1 355x113 two genuine metal podiums+VS; 100 native GUI PNGs registered and main 2ea43db0 deployed. CSS four-leg/duplicate VS hidden only when source ready. Genuine chessman two independent DOM and actual rolled pip values unchanged."
+    },
+    {
+      "seq": 74,
+      "date": "2026-10-18",
+      "type": "STATUS_CHANGED",
+      "taskId": "P0-PODIUM",
+      "from": "todo",
+      "to": "in_progress",
+      "details": "True winBattle.spr 355x113 dual metallic 2D podium now live (2ea43db0); historic 3D MVE platform mesh, collision/support depth, exact fighter foot placement and camera 2004 equivalence remain unverified."
+    },
+    {
+      "seq": 75,
+      "date": "2026-10-18",
+      "type": "STATUS_CHANGED",
+      "taskId": "QA-01",
+      "from": "todo",
+      "to": "in_progress",
+      "details": "Old smoke 4 CSS support requirement fixed; source winBattle.spr browser QA and mobile/desktop main pass. Native winAbility result/event hookup and fallback error-path regression are still separate QA acceptance."
+    },
+    {
+      "seq": 76,
+      "date": "2026-10-18",
+      "type": "STATUS_CHANGED",
+      "taskId": "BTL-03",
+      "from": "todo",
+      "to": "in_progress",
+      "details": "2002 IMG.pak 12 non-ROLL sprites 100 original GUI PNGs including winAbility.spr 6 frames, winResult.spr, winJail.spr decoded to hashed SourceSPRExtra manifest and published main; user-visible ability/result/jail integration not yet verified."
+    },
+    {
+      "seq": 77,
+      "date": "2026-10-18",
+      "type": "STATUS_CHANGED",
+      "taskId": "CHT-07",
+      "from": "todo",
+      "to": "in_progress",
+      "details": "Original room3 seat #9 occupied actor click above source toolbar fixed CSS z112 vs toolbar z109, tooltip menu z150 and focused tools z160, real physical click and WebKit browser regression pass; comprehensive all-six-room original seating acceptance pending."
+    },
+    {
+      "seq": 78,
+      "date": "2026-10-18",
+      "type": "QA_VERIFIED",
+      "taskId": "BTL-01",
+      "details": "PR #117 original winBattle 355x113/222x42 native foreground background, OBS fighters, actual dice, complete mobile/desktop combat and successful deployment. Scope = actual source 2D original stage only, not MVE 3D",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39138358588"
+    },
+    {
+      "seq": 79,
+      "date": "2026-10-18",
+      "type": "QA_VERIFIED",
+      "taskId": "CHT-07",
+      "details": "Real room3 seat #9 click and toolbar overlap resolved physically; WebKit and Chromium world/chat integration pass. Six full rooms and source screenshot comparison still pending.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39138329616"
     }
   ]
 }
