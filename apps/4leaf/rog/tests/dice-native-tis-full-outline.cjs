@@ -81,13 +81,19 @@ const {chromium}=require('playwright');
     allSourceTilesUnobscured:tiles.every(t=>t.dataset.originalArt&&
       t.getAttribute('aria-label')===t.title&&t.title.includes('칸 · ')&&
       !t.querySelector('small,.tile-symbol')),
+    failedLabels:tiles.filter(t=>!(t.dataset.originalArt&&
+      t.getAttribute('aria-label')===t.title&&t.title.includes('칸 · ')&&
+      !t.querySelector('small,.tile-symbol'))).slice(0,7).map(t=>({
+       source:t.dataset.originalArt,title:t.title,aria:t.getAttribute('aria-label'),
+       children:[...t.children].map(e=>e.className)
+      })),
     preservedOrientation:tiles.every(t=>getComputedStyle(t).transform.startsWith('matrix(1, 0, 0, -1,')),
     sourceSize:tiles.every(t=>t.offsetWidth===145&&t.offsetHeight===97)};
   });
   assert.ok(report.images.length>=30,'audit every recovered TIS entry, not a single sample');
   assert.equal(report.tiles,104,'true source 104-cell playable board kept');
   assert.equal(report.syntheticOverlayCount,0,'source pictures must not be covered by invented numbered tiles');
-  assert.ok(report.allSourceTilesUnobscured,'all game events and hover labels remain identifiable');
+  assert.ok(report.allSourceTilesUnobscured,'all game events and hover labels remain identifiable: '+JSON.stringify(report.failedLabels));
   assert.ok(report.preservedOrientation,'prior confirmed original TIS upright orientation survives');
   assert.ok(report.sourceSize,'never scale the 145x97 source artwork');
   assert.ok(report.images.every(i=>i.opaque>350&&i.vertices>=50),'each source platform was actually decoded and traced');
