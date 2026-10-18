@@ -27,7 +27,9 @@
  image-rendering:pixelated!important;
  filter:drop-shadow(1px 2px 1px #121c2e77);
  pointer-events:none!important;
- /* Source OBS frames were saved with FLIP_TOP_BOTTOM by the extractor.\n    Reverse it at render-time: feet down, head up, source PNG bytes intact. */\n transform:scaleY(-1)!important;transform-origin:center center!important;animation:none!important;
+ /* Source OBS frames were saved with FLIP_TOP_BOTTOM by the extractor.
+    Reverse it at render-time: feet down, head up, source PNG bytes intact. */
+ transform:scaleY(-1)!important;transform-origin:center center!important;animation:none!important;
 }
 #app.app-classic-dice #game :is(#board-pawns,#battle-visual)
  .board-pawn img.leaf-chess-original-obs[hidden]{display:none!important}
