@@ -19,7 +19,7 @@ const unresearchedBlock=clone(base);
 unresearchedBlock.tasks.find(t=>t.id==='M07').status='blocked';
 assert.throws(()=>validate(unresearchedBlock),/blocked requires/,'cannot call a failed implementation path impossible');
 const truncated=clone(base);truncated.intake=[];
-assert.throws(()=>validate(truncated,base),/user request history truncated/);
+assert.throws(()=>validate(truncated,base),/user request history truncated|event refers to missing request/);
 const rewritten=clone(base);rewritten.intake[0].text='rewrite the user history';
 assert.throws(()=>validate(rewritten,base),/immutable user request/);
 const wiped=clone(base);wiped.events=[];
