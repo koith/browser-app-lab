@@ -40,9 +40,10 @@ const {chromium}=require('playwright');
     ? x.rig==='original-obs-sprite'&&x.originalRecovered==='true'
     : x.rig==='original-card-portrait-fallback'&&x.originalRecovered==='false');
   }), 'each existing original OBS character must use its actual 2002 pixels; missing frames may use explicitly inferred proxy');
-  assert.ok(initial.heights.every((n,i)=>
-    n===0),
-   'native OBS artwork hides the fallback CSS skeleton; only missing characters use source-scale proxy');
+  assert.ok(initial.heights.every(n=>n===0),
+   'source-only chessmen must never render an oversized synthetic CSS skeleton');
+  assert.ok(initial.actors.every(x=>x.rig==='original-obs-sprite'),
+   'default hotseat players both select recovered original OBS full-body characters');
   assert.equal(initial.chatAvatar,0,'ChatTown avatars are NOT used on Genesis board');
   await page.waitForFunction(()=>[...document.querySelectorAll('#board-pawns .leaf-chess-portrait')].every(x=>x.complete&&x.naturalWidth>15),null,{timeout:13000});
   assert.ok(initial.portraits.every(x=>x.src.startsWith('./original/CardData/chm_')));
@@ -61,6 +62,33 @@ const {chromium}=require('playwright');
   assert.equal(await rig.getAttribute('data-chessman-id'),'0045');
   assert.equal(await rig.getAttribute('data-actor-rig'),'original-obs-sprite',
    'original OBS pixels replace inferred CSS when the chessman asset exists');
+  // Reproduce the reported huge gray chess pawn: the previous DEFAULT
+  // opponent was c_0096, whose OBS source has NOT been recovered.
+  // An explicit user-selected missing body must never manufacture a giant
+  // humanoid. CardData artwork is allowed only as a labeled still fallback.
+  const missing=await page.evaluate(()=>{
+   const m=window.__ROG_TEST__.getMatch();
+   const old=m.players[1].team[0];
+   m.players[1].team[0]='c_0096';
+   window.__ROG_TEST__.drawGame();
+   const n=document.querySelector('#board-pawns .board-pawn[data-id="1"]');
+   const css=getComputedStyle(n.querySelector('.leaf-chess-actor'));
+   const portrait=n.querySelector('.leaf-chess-original-card-fallback');
+   const data={rig:n.dataset.actorRig,source:n.dataset.actorSource,
+    mapping:n.dataset.sourcePoseMapping,css:css.display,
+    portraitSrc:portrait?.getAttribute('src'),
+    visible:portrait?getComputedStyle(portrait).display:'missing',
+    size:portrait?[portrait.offsetWidth,portrait.offsetHeight]:[]};
+   m.players[1].team[0]=old;
+   window.__ROG_TEST__.drawGame();
+   return data;
+  });
+  assert.equal(missing.rig,'original-card-portrait-fallback');
+  assert.equal(missing.css,'none','missing OBS must not show an invented tall figure');
+  assert.ok(missing.portraitSrc?.startsWith('./original/CardData/chm_'));
+  assert.deepEqual(missing.size,[40,55]);
+  assert.notEqual(missing.visible,'none');
+  assert.match(missing.mapping,/original-OBS-missing/);
   // Legitimate actual move sequence uses real 104-cell DMP game and calls
   // actor state transitions. Restore original card to continue real match.
   await page.evaluate(old=>{
