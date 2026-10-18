@@ -1010,9 +1010,9 @@
       "id": "BRD-05",
       "priority": "P1",
       "title": "실제 맵 범위·미니맵 이동 정확성",
-      "status": "todo",
+      "status": "done",
       "milestone": "M04",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 카메라를 큰 공통 6000×3300 세계로 보정했고 실제 경로 범위 패닝 제한이 있지만 원작 미니맵 선택 비율과 추적은 비교 부족 | 구현 목표: 맵별 최외곽 접근·줌·드래그·손가락 이동 및 172×152 실제 미니맵 픽셀 좌표 일치 검증; 2026-10-19 원본 2002 Dice/IMG.pak minipanel.spr 4개 실제 75x20 '미니맵/체스맨정보' 버튼을 비조작 이미지에서 독립 실제 클릭 탭으로 복구. DMP 실 미니맵 유지, CardData 실제 선택 팀 캐릭터 정보만 전시. 체스맨정보 상세 UI의 원본 2004 위치는 INFERRED로 미완료. Chromium PC/폰 E2E 진행 중.; 2026-10-19 Playwright 26개 원본 DMP 맵 1,920칸 전체 카메라 focusRatio()로 실제 브라우저 PC·iPhone 390x844 접근성 전수검사 추가(PR #132). 지도별 경계와 145x97 원본 그림 보존, 수용 CI 결과 대기.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 카메라를 큰 공통 6000×3300 세계로 보정했고 실제 경로 범위 패닝 제한이 있지만 원작 미니맵 선택 비율과 추적은 비교 부족 | 구현 목표: 맵별 최외곽 접근·줌·드래그·손가락 이동 및 172×152 실제 미니맵 픽셀 좌표 일치 검증; 2026-10-19 원본 2002 Dice/IMG.pak minipanel.spr 4개 실제 75x20 '미니맵/체스맨정보' 버튼을 비조작 이미지에서 독립 실제 클릭 탭으로 복구. DMP 실 미니맵 유지, CardData 실제 선택 팀 캐릭터 정보만 전시. 체스맨정보 상세 UI의 원본 2004 위치는 INFERRED로 미완료. Chromium PC/폰 E2E 진행 중.; 2026-10-19 Playwright 26개 원본 DMP 맵 1,920칸 전체 카메라 focusRatio()로 실제 브라우저 PC·iPhone 390x844 접근성 전수검사 추가(PR #132). 지도별 경계와 145x97 원본 그림 보존, 수용 CI 결과 대기.; 2026-10-19 완료(본 일감의 지도 접근성 수용 범위에 한정): 원본 DMP 26맵 1,920칸 전부 실제 Chromium desktop1280x900 및 mobile390x844 focusRatio/타일 145x97 위치 가시성 1920/1920 E2E 성공. 실제 2002 아카이브 25개 map title + 0170 unnamed 135칸 데이터 미변경, 2004 MVE 카메라 원작 픽셀 정확성은 BRD-01/02/03/P0-BOARD 에 미완료.",
       "acceptance": [
         "26개 맵 PC/휴대폰에서 아무 빈 지역에 고립되지 않고 모든 원본 칸 이동/표시 가능"
       ],
@@ -1022,11 +1022,19 @@
         "apps/4leaf/rog/dice-native-minipanel-spr.js",
         "apps/4leaf/rog/dice-native-minipanel-spr.css",
         "apps/4leaf/rog/tests/dice-original-minipanel-spr.cjs",
-        "apps/4leaf/rog/tests/dice-all-source-maps-camera.cjs"
+        "apps/4leaf/rog/tests/dice-all-source-maps-camera.cjs",
+        "https://github.com/koith/browser-app-lab/actions/runs/39178397296",
+        "https://github.com/koith/browser-app-lab/actions/runs/39178664692",
+        "https://github.com/koith/browser-app-lab/pull/134"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
       "lastReviewed": "2026-10-19",
-      "verifiedAcceptance": null,
+      "verifiedAcceptance": {
+        "sourceComparison": "2002 authentic Dice/DMP.pak 26 named/unnamed paths and 1920 unique original 145x97 TIS positions; maps.js original 25 title records + preserved 0170 135 cells; full 2004 3D camera comparison excluded and remains BRD-01/P0-BOARD",
+        "implementation": "apps/4leaf/rog/board-camera.js source path bounds + apps/4leaf/rog/game.js authentic unnamed 0170 map registration + tests/dice-all-source-maps-camera.cjs with original DMP coordinate preservation",
+        "runtimeTest": "https://github.com/koith/browser-app-lab/actions/runs/39178397296 (desktop 1920/1920, mobile 1920/1920, original 26 DMP; full board-layout success)",
+        "deployment": "https://github.com/koith/browser-app-lab/actions/runs/39178664692 (GitHub Pages build/deploy success for main@4530f30f0047aecec2ae77db4b5d2bcd291c63d5)"
+      },
       "dependencies": [
         "BRD-01"
       ],
@@ -3165,6 +3173,23 @@
       "taskId": "BRD-04",
       "details": "PR #133 successfully squash-merged 1fe8683b; restore missing 26th source DMP 0170 into actual playable map menu.",
       "evidence": "https://github.com/koith/browser-app-lab/pull/133"
+    },
+    {
+      "seq": 113,
+      "date": "2026-10-19",
+      "type": "QA_VERIFIED",
+      "taskId": "BRD-05",
+      "details": "Desktop and mobile Chromium both focus and display 1920/1920 recovered source TIS cells across all 26 real DMP paths including historical unnamed 0170; actual game renderer source x/y and 145x97 image sizes verified; no CSS transition timing false positives.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39178397296"
+    },
+    {
+      "seq": 114,
+      "date": "2026-10-19",
+      "type": "STATUS_CHANGED",
+      "taskId": "BRD-05",
+      "from": "todo",
+      "to": "done",
+      "details": "Narrow acceptance for map camera reachability confirmed by original source map table, source implementation, full desktop+phone live QA and published main 4530f30f Pages. NOT a completion of historical MVE 3D projection/BRD-01/P0-BOARD."
     }
   ]
 }
