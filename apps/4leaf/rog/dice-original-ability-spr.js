@@ -55,7 +55,12 @@
      panel.dataset.error='native source image size mismatch';return;
     }
     n++;
-    if(n===members.length&&!invalid)panel.dataset.status='ready';
+    if(n===members.length&&!invalid){
+     panel.dataset.status='ready';
+     // Begin WEB-only display lifetime after all six original pixels decode
+     // so a cold mobile CDN request never makes the source scene invisible.
+     window.setTimeout(()=>{if(seq===serial)remove()},8000);
+    }
    };
    img.addEventListener('load',check);
    img.addEventListener('error',()=>{
