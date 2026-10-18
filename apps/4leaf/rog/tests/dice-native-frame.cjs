@@ -89,8 +89,11 @@ const path=require('node:path');
     sourcePreserved:tile.dataset.tisSourcePreserved,
     chromaRemoved:Number(tile.dataset.tisChromaRemoved),
     alphaReady:tile.dataset.tisAlpha,
-    glyph:getComputedStyle(tile.querySelector('.tile-symbol')).display,
-    number:getComputedStyle(tile.querySelector('small')).display,
+    // Synthetic tile-symbol and 1..104 number nodes were intentionally
+    // REMOVED from the real game renderer (PR #110). The old acceptance
+    // test attempted getComputedStyle(null), breaking Pages QA forever.
+    syntheticGlyphCount:tile.querySelectorAll('.tile-symbol').length,
+    syntheticNumberCount:tile.querySelectorAll('small').length,
     sourceTile:tile.dataset.originalArt,
     hitbox:[parseFloat(style.width),parseFloat(style.height)],
     title:tile.title,
@@ -117,8 +120,8 @@ const path=require('node:path');
       nativeTiles.paint.includes('data:image/png'),
       'only real external chroma is removed; genuine native interior stays untouched');
   }
-  assert.equal(nativeTiles.glyph,'none','native artwork already contains artwork, so synthetic emoji labels are hidden');
-  assert.equal(nativeTiles.number,'none','invented printed tile numbers no longer obscure TIS artwork');
+  assert.equal(nativeTiles.syntheticGlyphCount,0,'native TIS artwork is never covered by synthetic emoji glyph DOM');
+  assert.equal(nativeTiles.syntheticNumberCount,0,'invented per-cell number DOM is absent, not merely hidden');
   assert.equal(nativeTiles.crest,'none','invented large centre crest is not placed over original board art');
   assert.equal(nativeTiles.guides,'0','invented SVG connector lines no longer cover the source map');
   assert.ok(Math.abs(nativeTiles.hitbox[0]/nativeTiles.hitbox[1]-145/97)<0.02,'independent TIS hitbox preserves original source aspect');

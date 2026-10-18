@@ -23,6 +23,7 @@ on:
       - 'apps/4leaf/rog/tests/dice-native-pawn-dmp-depth.cjs'
       - 'apps/4leaf/rog/tests/dice-native-tis-alpha.cjs'
       - 'apps/4leaf/rog/tests/dice-native-tis-full-outline.cjs'
+      - 'apps/4leaf/rog/tests/dice-native-frame.cjs'
       - '.github/workflows/rog-board-layout.yml'
   pull_request:
     branches: [main]
@@ -54,6 +55,8 @@ jobs:
         run: node apps/4leaf/rog/tests/dice-native-tis-alpha.cjs
       - name: Verify every native TIS image pixel survives full board alpha clipping
         run: node apps/4leaf/rog/tests/dice-native-tis-full-outline.cjs
+      - name: Gate actual 800x600 native IMG scene and absence of fake tile overlays
+        run: node apps/4leaf/rog/tests/dice-native-frame.cjs
       - run: node apps/4leaf/rog/tests/board-layout.cjs
       - name: "Reproduce iPhone screenshot: zero horizontal TIS overlap and 2 original Genesis OBS players"
         run: node apps/4leaf/rog/tests/dice-horizontal-native-actors.cjs
