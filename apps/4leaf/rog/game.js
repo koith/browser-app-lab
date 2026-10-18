@@ -1051,11 +1051,10 @@ function showBattleScene(attacker,defender,attack,defense,attackerPoints,defende
     dice.append(die);
    });
    const pedestal=document.createElement('div');pedestal.className='battle-visual-pedestal';
-   // Screenshot-registered 2004 battle platforms use a shallow octagonal
-   // contact deck suspended on independent steel supports, not a green/cyan
-   // full-height modern cylinder. The old PAK does not expose a source mesh:
-   // this is a visibly labelled geometry reconstruction, NOT decoded MVE.
-   pedestal.dataset.geometrySource='2004-screenshot-inferred-not-original-mesh';
+   // Keep fallback geometry available only if the verified archived
+   // winBattle.spr PNG fails to load; the native image supersedes it
+   // automatically when 355x113 source pixels are ready.
+   pedestal.dataset.geometrySource='fallback-only-source-if-missing';
    for(let legIndex=0;legIndex<4;legIndex++){
      const support=document.createElement('span');
      support.className='leaf-battle-platform-leg leaf-battle-platform-leg-'+legIndex;
@@ -1070,7 +1069,43 @@ function showBattleScene(attacker,defender,attack,defense,attackerPoints,defende
  }
  assemble(left,attacker,attackerPoints,attack.values);assemble(right,defender,defenderPoints,defense.values);
  const vs=document.createElement('div');vs.className='battle-visual-vs';vs.textContent='VS';
- stage.append(head,left,vs,right);area.append(stage);
+ // VERIFIED ARCHIVE SOURCE: Dice/IMG.pak winBattle.spr frame 1 is
+ // the *actual* original 355x113 metal dual podium + red VS graphic,
+ // not an invented CSS 4-legged platform or a pasted game screenshot.
+ // The independently rendered participant sprites, names, live pip
+ // results, combat state and game engine remain interactive entities.
+ const nativePodiums=document.createElement('img');
+ nativePodiums.className='leaf-native-winbattle-podiums';
+ nativePodiums.src='./original/SourceSPRExtra/winBattle-01.png';
+ nativePodiums.alt='';
+ nativePodiums.draggable=false;
+ nativePodiums.dataset.originalSourceMember='Dice/IMG.pak:winBattle.spr';
+ nativePodiums.dataset.originalFrame='1';
+ const nativeHeading=document.createElement('img');
+ nativeHeading.className='leaf-native-winbattle-heading';
+ nativeHeading.src='./original/SourceSPRExtra/winBattle-00.png';
+ nativeHeading.alt='';nativeHeading.draggable=false;
+ nativeHeading.dataset.originalSourceMember='Dice/IMG.pak:winBattle.spr';
+ nativeHeading.dataset.originalFrame='0';
+ stage.dataset.nativeBattlePodium='loading';
+ nativePodiums.addEventListener('load',()=>{
+  if(!stage.isConnected)return;
+  stage.dataset.nativeBattlePodium=nativePodiums.naturalWidth===355&&
+   nativePodiums.naturalHeight===113?'ready':'fallback';
+ });
+ nativePodiums.addEventListener('error',()=>{
+  if(stage.isConnected)stage.dataset.nativeBattlePodium='fallback';
+ });
+ nativeHeading.addEventListener('load',()=>{
+  if(stage.isConnected&&nativeHeading.naturalWidth===222&&
+    nativeHeading.naturalHeight===42)
+    stage.dataset.nativeBattleHeading='ready';
+ });
+ nativeHeading.addEventListener('error',()=>{
+  if(stage.isConnected)stage.dataset.nativeBattleHeading='fallback';
+ });
+ stage.append(nativePodiums,nativeHeading,head,left,vs,right);
+ area.append(stage);
  return stage;
 }
 function combat(attacker,defender,keeper=false){
