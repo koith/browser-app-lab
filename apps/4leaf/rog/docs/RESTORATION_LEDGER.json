@@ -620,16 +620,18 @@
       "title": "리소스 출처·실제 용도 전수 정합",
       "status": "todo",
       "milestone": "M00",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: OBS·TIS·DMP·IMG 원본은 여럿 확보했지만 기능별 역할/중복 PAK과 2004 실제 화면 대응표가 불완전함 | 구현 목표: OBS/OBS2/OBS3/IMG/CHR/DMP/TIS/DMO 및 EXE 문자열을 출처·해시·역할·실사용 DOM 파일별로 매핑하고 확인되지 않은 것은 추정으로 표기",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: OBS·TIS·DMP·IMG 원본은 여럿 확보했지만 기능별 역할/중복 PAK과 2004 실제 화면 대응표가 불완전함 | 구현 목표: OBS/OBS2/OBS3/IMG/CHR/DMP/TIS/DMO 및 EXE 문자열을 출처·해시·역할·실사용 DOM 파일별로 매핑하고 확인되지 않은 것은 추정으로 표기; 2026-10-19 진짜 2002 Dice/IMG.pak winDoa.spr 363×133 DEAD OR ALIVE 원본 이미지 확인. 주잔 원본 DOA 특수칸 실제 랜덤 판정 후 source 2D UI 표시, 웹 배치·타이밍은 INFERRED이고 원본 랜덤 확률/원래 수치 룰은 미검증.",
       "acceptance": [
         "모든 게임·채팅 UI 자산에 원본 PAK 멤버, SHA/프레임 및 화면 용도를 연결하고 잘못 분류된 ROLL/모델 자산 0건"
       ],
       "evidence": [
         "original/OBS/bulk-source-report.json",
-        "tools/audit-original-dice-resources.py"
+        "tools/audit-original-dice-resources.py",
+        "apps/4leaf/rog/dice-native-source-events.js",
+        "apps/4leaf/rog/tests/dice-native-original-source-events.cjs"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-18",
+      "lastReviewed": "2026-10-19",
       "verifiedAcceptance": null,
       "dependencies": [],
       "category": "원본 근거"
@@ -1326,16 +1328,18 @@
       "title": "원작 특수칸·이벤트 데이터 검증",
       "status": "todo",
       "milestone": "M08",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: DMP 26경로 대비 특수칸 DMO/DMP 25세트, 원작 각 마을 보너스·점프/워프/감옥 등 검증되지 않은 효과 존재 | 구현 목표: 원본 4LEAF 게임 이벤트 테이블을 해석해 Dice engine resolveTile/warp/item/keeper 조건과 26맵 대조",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: DMP 26경로 대비 특수칸 DMO/DMP 25세트, 원작 각 마을 보너스·점프/워프/감옥 등 검증되지 않은 효과 존재 | 구현 목표: 원본 4LEAF 게임 이벤트 테이블을 해석해 Dice engine resolveTile/warp/item/keeper 조건과 26맵 대조; 2026-10-19 진짜 2002 Dice/IMG.pak winDoa.spr 363×133 DEAD OR ALIVE 원본 이미지 확인. 주잔 원본 DOA 특수칸 실제 랜덤 판정 후 source 2D UI 표시, 웹 배치·타이밍은 INFERRED이고 원본 랜덤 확률/원래 수치 룰은 미검증.",
       "acceptance": [
         "동일 seed·좌표 입력에 대해 모든 특수칸 이동/부활/보상 결과가 원본 근거 표와 일치"
       ],
       "evidence": [
         "original/tiles.js",
-        "game.js"
+        "game.js",
+        "apps/4leaf/rog/dice-native-source-events.js",
+        "apps/4leaf/rog/tests/dice-native-original-source-events.cjs"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-18",
+      "lastReviewed": "2026-10-19",
       "verifiedAcceptance": null,
       "dependencies": [
         "BRD-04"
@@ -2472,6 +2476,22 @@
       "to": "done",
       "details": "2D original source role and live browser behavior accepted with archive/implementation/runtime/deploy evidence; does not close 3D original fidelity.",
       "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39149989371"
+    },
+    {
+      "seq": 92,
+      "date": "2026-10-19",
+      "type": "IMPLEMENTED_PENDING_QA",
+      "taskId": "RULE-01",
+      "details": "Source winDoa.spr original 363x133 and actual DMP DOA random rule linked; source placement inferred. Do not mark rule equivalence as done.",
+      "evidence": "apps/4leaf/rog/tests/dice-native-original-source-events.cjs"
+    },
+    {
+      "seq": 93,
+      "date": "2026-10-19",
+      "type": "IMPLEMENTED_PENDING_QA",
+      "taskId": "SRC-01",
+      "details": "Source winDoa.spr original 363x133 and actual DMP DOA random rule linked; source placement inferred. Do not mark rule equivalence as done.",
+      "evidence": "apps/4leaf/rog/tests/dice-native-original-source-events.cjs"
     }
   ]
 }
