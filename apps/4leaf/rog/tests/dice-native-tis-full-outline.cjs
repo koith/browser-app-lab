@@ -5,7 +5,6 @@
  * especially at top/bottom rows or antialiased decorative edges.
  */
 const assert=require('node:assert/strict');
-const path=require('node:path');
 const {chromium}=require('playwright');
 (async()=>{
  const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
@@ -14,8 +13,11 @@ const {chromium}=require('playwright');
   const errors=[];
   page.on('pageerror',error=>errors.push(String(error)));
   await page.addInitScript(()=>{window.LEAF_CENTRAL_API_URL='';});
+  // Native RGBA readback needs same-origin HTTP; Chromium deliberately
+  // denies canvas.getImageData for file:// even though the PNG displays.
+  // The board-layout QA workflow starts the local source server on 8765.
   await page.goto(process.env.FOURLEAF_TEST_URL||
-    'file://'+path.resolve(__dirname,'../index.html'));
+    'http://127.0.0.1:8765/index.html');
   await page.waitForFunction(()=>window.__ROG_TEST__&&
    window.__LEAF_TIS_ALPHA__&&window.ORIGINAL_LEAF_TILE_ART);
   await page.locator('[data-route="lobby"]').first().click();
