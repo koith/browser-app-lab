@@ -1,0 +1,360 @@
+{
+  "schemaVersion": 1,
+  "project": "4LEAF 원작 복원 웹앱",
+  "canonicalFile": "apps/4leaf/rog/docs/RESTORATION_LEDGER.json",
+  "updatedAt": "2026-10-18",
+  "sourceOfTruth": "Git 저장소의 이 JSON과 커밋 이력. 과거 챗 대화는 기록 근거이지 진행 상태의 원본 데이터가 아님.",
+  "operatingRule": "새 요청 즉시 작업 등록 → open 목록 조회 → 실제 수정 → 원본 근거/코드/브라우저/배포 검증 → 검증 증거와 함께 상태 전이. 부분 구현을 원작 완성으로 표시 금지.",
+  "statusDefinitions": {
+    "todo": "등록되었으나 아직 해당 최종 수용 기준 미달",
+    "in_progress": "복원 작업은 진행됐지만 최종 수용 미달",
+    "blocked": "구체적 장애와 우회 시도가 원장에 기록된 경우에만",
+    "done": "원작 비교·코드·브라우저/서비스 수용 증거가 기록된 경우에만"
+  },
+  "intake": [
+    {
+      "id": "REQ-20261018-001",
+      "date": "2026-10-18",
+      "origin": "2026-10-18 사용자 요청",
+      "text": "4LEAF 포리프 원작 웹앱 개발 재개. 새 개발 요청은 저장소 개발원장에 기록하고 매회 원장 조회하여 남은 일을 추적. 대화 삭제/망각에 의존하지 않고 원작의 실제 외형·리소스·플레이 경험을 복원.",
+      "taskIds": [
+        "M00",
+        "M01",
+        "M02",
+        "M03",
+        "M04",
+        "M05",
+        "M06",
+        "M07",
+        "M08",
+        "M09",
+        "P0-BOARD",
+        "P0-ACTOR",
+        "P0-PODIUM",
+        "P0-DICE",
+        "P0-CHAT",
+        "P0-RELEASE",
+        "GOV-LEDGER"
+      ]
+    }
+  ],
+  "tasks": [
+    {
+      "id": "M00",
+      "priority": "P1",
+      "title": "원본 클라이언트·근거 자료 수집",
+      "status": "in_progress",
+      "milestone": "M00",
+      "current": "원본 자료/스크린샷을 확보했으나 MVE 메시·주사위 키프레임·원본 EXE 프로토콜은 미확보",
+      "acceptance": [
+        "원본 바이너리 추적과 SHA/파일 형식·역할을 검증하고 출처·사용 위치를 기록"
+      ],
+      "evidence": [
+        "apps/4leaf/rog/original/manifest.json"
+      ],
+      "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null
+    },
+    {
+      "id": "M01",
+      "priority": "P1",
+      "title": "월드맵·메인프레임 복원",
+      "status": "in_progress",
+      "milestone": "M01",
+      "current": "원본 WorldMap/MainFrame 리소스와 6지역 이동 구현",
+      "acceptance": [
+        "원작 위치·표시 상태·애니메이션을 역사적 화면에서 실측하고 실제 플레이로 검증"
+      ],
+      "evidence": [
+        "apps/4leaf/rog/world-map.js"
+      ],
+      "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null
+    },
+    {
+      "id": "M02",
+      "priority": "P1",
+      "title": "켈티카·매직카덴 원작 복원",
+      "status": "in_progress",
+      "milestone": "M02",
+      "current": "MainStreet와 CardShop 리소스를 게임에 연결",
+      "acceptance": [
+        "상점/구매/문 UI를 2004년 캡처와 동일 상태에서 비교·검증"
+      ],
+      "evidence": [
+        "apps/4leaf/rog/shop-native.js"
+      ],
+      "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null
+    },
+    {
+      "id": "M03",
+      "priority": "P0",
+      "title": "북·남 하이아칸 상설 채팅 복원",
+      "status": "in_progress",
+      "milestone": "M03",
+      "current": "16지역·6실내 배경·실제 채팅/즉시 좌석 이동 구현, 원작과 외형 차이 존재",
+      "acceptance": [
+        "실제 사용자만 표시하며 지역선택/입장/가구/좌석/채팅 입력을 원작 캡처와 동등하게 검증"
+      ],
+      "evidence": [
+        "apps/4leaf/rog/social-chat.js"
+      ],
+      "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null
+    },
+    {
+      "id": "M04",
+      "priority": "P0",
+      "title": "주잔 DMP·TIS 보드 복원",
+      "status": "in_progress",
+      "milestone": "M04",
+      "current": "26맵·32타일·145x97 소스, 웹 투영/상하 보정 적용됐지만 전체 겹침·높이·카메라 미복원",
+      "acceptance": [
+        "전체 경로 모든 육각 플랫폼의 방향·윗면 노출·비정상 겹침·깊이를 board.jpg와 동일 상태에서 정량 비교"
+      ],
+      "evidence": [
+        "apps/4leaf/rog/board-camera.js"
+      ],
+      "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null
+    },
+    {
+      "id": "M05",
+      "priority": "P0",
+      "title": "주잔 창세기전 체스맨 원본 전신",
+      "status": "in_progress",
+      "milestone": "M05",
+      "current": "OBS 64/98종 281프레임; 원본 ID 연결, 34종과 정확한 행동/방향 매핑 미완료",
+      "acceptance": [
+        "98종 실물 전신과 대기·이동·공격·피격·승리/방향별 프레임을 근거대로 구현해 CSS 대체물 제거"
+      ],
+      "evidence": [
+        "apps/4leaf/rog/genesis-chessman-actors.js"
+      ],
+      "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null
+    },
+    {
+      "id": "M06",
+      "priority": "P0",
+      "title": "주잔 배틀 원본 발판·시점",
+      "status": "in_progress",
+      "milestone": "M06",
+      "current": "스크린샷을 근거로 4지지대 CSS 근사만 존재",
+      "acceptance": [
+        "원본 메시 또는 검증된 동등한 3D 발판 구조·접지·투영·전투 이동을 구현, 사진 비교 QA 통과"
+      ],
+      "evidence": [
+        "apps/4leaf/rog/dice-native-battle-podium.css"
+      ],
+      "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null
+    },
+    {
+      "id": "M07",
+      "priority": "P0",
+      "title": "주사위 원본 모델·결과별 모션",
+      "status": "in_progress",
+      "milestone": "M07",
+      "current": "원본 roll/eventRoll1 SPR 20프레임은 UI에 활용; 물리 주사위는 웹 대체물",
+      "acceptance": [
+        "D4/D6 결과별 하늘 낙하/튕김/정지 원본 시퀀스를 리소스 근거로 구현하고 실제 결과와 일치"
+      ],
+      "evidence": [
+        "apps/4leaf/rog/dice-fall.js"
+      ],
+      "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null
+    },
+    {
+      "id": "M08",
+      "priority": "P1",
+      "title": "주잔 원작 룰·오프라인·온라인",
+      "status": "in_progress",
+      "milestone": "M08",
+      "current": "게임·로컬 턴·WebRTC/무료 중앙 채팅 구조 일부 동작",
+      "acceptance": [
+        "원작 세부 룰·출발·고급 아이템·온라인 권한/연결을 실환경 2브라우저 회귀와 대조"
+      ],
+      "evidence": [
+        "apps/4leaf/rog/game.js"
+      ],
+      "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null
+    },
+    {
+      "id": "M09",
+      "priority": "P0",
+      "title": "동일 상태 원본 비교·배포 수용",
+      "status": "in_progress",
+      "milestone": "M09",
+      "current": "Chromium/PWA/GitHub Pages 기능 QA 존재, 전체 원작 외형과 iOS 검증 미통과",
+      "acceptance": [
+        "실물 2004년 캡처 동일 상태 800x600 정량 비교와 모바일/WebKit·Pages·온라인 회귀 통과"
+      ],
+      "evidence": [
+        "apps/4leaf/rog/tests/dice-original-visual-qa.cjs"
+      ],
+      "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null
+    },
+    {
+      "id": "P0-BOARD",
+      "priority": "P0",
+      "title": "타일 상하·겹침·입체감 사용자 재현 결함",
+      "status": "todo",
+      "milestone": "M04",
+      "current": "반전 패치와 128x86 웹 투영만으로 최종 해결 아님",
+      "acceptance": [
+        "전체 맵 동선에서 과도한 중첩/상하 역전 0건; 알파/행 순서·타일 접근성·스크린샷 비교 기록"
+      ],
+      "evidence": [
+        "apps/4leaf/rog/dice-native-tis-orientation.css"
+      ],
+      "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null
+    },
+    {
+      "id": "P0-ACTOR",
+      "priority": "P0",
+      "title": "채팅 아바타 대신 실제 창세기전 체스맨과 행동",
+      "status": "todo",
+      "milestone": "M05",
+      "current": "본체 일부 연결, 캐릭터별 원작 애니메이션 미해독",
+      "acceptance": [
+        "모든 캐릭터/상태에서 확인된 OBS 동작만 재생하고 나머지는 미복구로 투명하게 표시"
+      ],
+      "evidence": [
+        "apps/4leaf/rog/genesis-chessman-actors.js"
+      ],
+      "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null
+    },
+    {
+      "id": "P0-PODIUM",
+      "priority": "P0",
+      "title": "원본 전투 발판·배치 완성",
+      "status": "todo",
+      "milestone": "M06",
+      "current": "웹 CSS 사진 근사 발판",
+      "acceptance": [
+        "원본 배틀 캡처와 실측 일치하는 3D 플랫폼, 원본 체스맨 높이/가림·회전/공격 시점 검증"
+      ],
+      "evidence": [
+        "apps/4leaf/rog/dice-native-battle-podium.css"
+      ],
+      "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null
+    },
+    {
+      "id": "P0-DICE",
+      "priority": "P0",
+      "title": "원작 주사위 눈별 낙하/튕김/정지 연출",
+      "status": "todo",
+      "milestone": "M07",
+      "current": "SPR 버튼은 실제 소스지만 물리 주사위 웹 폴백",
+      "acceptance": [
+        "각 주사위의 최종 눈이 경기 엔진 판정과 일치, 실제 원본 연출 근거 확보"
+      ],
+      "evidence": [
+        "apps/4leaf/rog/dice-source-roll.js"
+      ],
+      "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null
+    },
+    {
+      "id": "P0-CHAT",
+      "priority": "P0",
+      "title": "상설 채팅방 원작 화면 정밀 복원",
+      "status": "todo",
+      "milestone": "M03",
+      "current": "실제 채팅은 가능하지만 배치·창틀/전경 등 원작 외형 미달",
+      "acceptance": [
+        "원본 794×528/2004 화면의 입력·가구·좌석·상설 목록을 실제 참가자 그대로 재현"
+      ],
+      "evidence": [
+        "apps/4leaf/rog/chatroom-native-2004-frame.css"
+      ],
+      "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null
+    },
+    {
+      "id": "P0-RELEASE",
+      "priority": "P0",
+      "title": "원작 복원 최종 화면·기능 수용 게이트",
+      "status": "todo",
+      "milestone": "M09",
+      "current": "과거 CI 성공은 원작 동일성 완료의 증거가 아님",
+      "acceptance": [
+        "원작 장면 A/B·핵심 시스템 전체 CI·모바일·온라인 배포·동일 커밋 확인 뒤 승인"
+      ],
+      "evidence": [
+        "apps/4leaf/rog/tests/live.cjs"
+      ],
+      "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null
+    },
+    {
+      "id": "GOV-LEDGER",
+      "priority": "P0",
+      "title": "대화 소실 대응 영구 개발원장 운영",
+      "status": "in_progress",
+      "milestone": null,
+      "current": "GitHub 저장소에 최초 원장과 CLI/CI를 도입하는 작업",
+      "acceptance": [
+        "모든 신규 사용자 요청의 작업 ID/상태/근거를 저장소 커밋, 미완료 목록 자동 생성·삭제/거짓 완료 차단"
+      ],
+      "evidence": [
+        "apps/4leaf/rog/docs/RESTORATION_LEDGER.json"
+      ],
+      "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null
+    }
+  ],
+  "events": [
+    {
+      "seq": 1,
+      "date": "2026-10-18",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261018-001",
+      "taskIds": [
+        "M00",
+        "M01",
+        "M02",
+        "M03",
+        "M04",
+        "M05",
+        "M06",
+        "M07",
+        "M08",
+        "M09",
+        "P0-BOARD",
+        "P0-ACTOR",
+        "P0-PODIUM",
+        "P0-DICE",
+        "P0-CHAT",
+        "P0-RELEASE",
+        "GOV-LEDGER"
+      ],
+      "details": "지난 마일스톤 문서와 GitHub main 상태를 대조해 원작 완성 기준 미달을 유지. 현재 원장 CI·CLI 도입 중."
+    }
+  ]
+}
