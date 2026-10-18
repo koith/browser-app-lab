@@ -83,6 +83,42 @@
   cursor:pointer!important;
   visibility:visible!important;
  }
+ /* Retain the actual source MainFrame toolbar sprites. The old page
+    displayed this atlas as a SECOND browser toolbar above the room; the 2004
+    capture places context/action icons inside the scene at lower right.
+    No duplicated buttons: each existing handler is moved into the room. */
+ #rooms.classic-chat-room #social-image-frame>.social-classic-toolbar{
+  display:flex!important;
+  box-sizing:border-box!important;
+  flex-direction:column!important;
+  align-items:flex-start!important;
+  gap:0!important;
+  position:absolute!important;
+  z-index:105!important;
+  top:311px!important;left:608px!important;
+  width:32px!important;
+  height:217px!important;
+  padding:0!important;margin:0!important;
+  background:transparent!important;
+  border:0!important;box-shadow:none!important;
+ }
+ #rooms.classic-chat-room #social-image-frame>.social-classic-toolbar
+ .social-original-tool{
+  display:block!important;
+  width:30px!important;height:30px!important;
+  min-width:30px!important;min-height:30px!important;
+  flex:0 0 30px!important;
+  border:0!important;box-shadow:none!important;
+ }
+ #rooms.classic-chat-room #social-image-frame>.social-classic-toolbar
+ .social-exp-trigger{
+  display:block!important;
+  width:30px!important;height:30px!important;
+  min-width:30px!important;min-height:30px!important;
+  flex:0 0 30px!important;margin:0!important;
+ }
+ #rooms.classic-chat-room #social-image-frame>.social-classic-toolbar
+ .social-peers-toggle{display:none!important;}
  /* Historical screenshots show 1:1 407x112 chat and 158x128 participant
     window. Existing source-native ChatRoom atlas CSS applies inside them. */
  #rooms.classic-chat-room .messenger[data-native-overlay="true"]{
