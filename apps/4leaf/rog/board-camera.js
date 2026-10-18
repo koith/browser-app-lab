@@ -5,17 +5,16 @@
  'use strict';
  // DMP coordinates remain integer logical map cells, 70x47 source pitch.
  // Each native TIS card is 145x97; its DMP source grid is only 70x47.
- // The preceding 3000x2320 WEB projection spaced cards 145x97 apart, so
- // the 800x600 battlefield became mostly EMPTY forest (10 source cards in
- // the viewport instead of the dense overlapping source screenshot).
- // The 2004 board.jpg / battle.jpg display neighboring cards overlapping
- // *moderately*, still showing the raised upper lip of each card. Keep the
- // 145x97 original PNG pixels, DMP cell positions, and source y-painter,
- // but register 1 logical grid step at approximately 111x75 on screen.
- // Original MVE projection is unavailable: this is a screenshot-calibrated
- // WEB camera inference, not a decoded 2002 EXE matrix.
+ // 2004 board.jpg/battle.jpg historical photographs show individually
+ // legible upper faces of the raised hexes, not the interleaved sprite row
+ // produced by the earlier 111x75 WEB pitch (34px horizontal, 22px vertical
+ // overlap between 145x97 native TIS images). A 130x86 projected pitch
+ // retains a physically plausible shallow 15x11 overlap / raised lip,
+ // while leaving the original 70x47 DMP LOGICAL coordinates untouched.
+ // The historic MVE projection/camera is unrecovered: these rendering
+ // distances are provisional photo-calibrated values, never archive facts.
  const SOURCE_GRID={width:1450,height:1120,pitchX:70,pitchY:47};
- const SIZE={width:2300,height:1780};
+ const SIZE={width:2650,height:2050};
  const PROJECTED_PITCH={x:70*SIZE.width/SOURCE_GRID.width,
   y:47*SIZE.height/SOURCE_GRID.height};
  const state={game:null,path:null,scale:1,panX:0,panY:0,cameraX:null,cameraY:null,manual:false,lastTurn:null,visible:null};
