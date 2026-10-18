@@ -88,10 +88,12 @@ const {chromium}=require('playwright');
   const originalPhotoOrientation=await page.evaluate(()=>{
    const style=document.createElement('style');
    style.id='leaf-tis-source-orientation-ab';
-   style.textContent='#app.app-classic-dice #game #board-nodes .tile[data-native-tis-size="145x97"]{transform:translate(-50%,-50%) scaleY(-1)!important}';
+   style.textContent='#app.app-classic-dice #game .board-world #board-nodes .tile[data-native-tis-size="145x97"]{transform:translate(-50%,-50%) scaleY(-1)!important}';
    document.head.append(style);
    return getComputedStyle(document.querySelector('#board-nodes>.tile')).transform;
   });
+  if(!originalPhotoOrientation.startsWith('matrix(1, 0, 0, -1,'))
+   throw Error('Source orientation A/B CSS did not override legacy orientation: '+originalPhotoOrientation);
   const inversePhoto=await game.screenshot({
    type:'jpeg',quality:77,animations:'disabled',timeout:18000});
   console.log('SOURCE_TIS_INVERTED_AB_GEOMETRY '+originalPhotoOrientation);
