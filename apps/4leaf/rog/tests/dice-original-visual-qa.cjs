@@ -131,6 +131,10 @@ const {chromium}=require('playwright');
     native:[img.naturalWidth,img.naturalHeight],
     flip:getComputedStyle(img).transform,
     grounding:node.dataset.sourceGrounding,
+    nativePivot:[img.style.getPropertyValue('--leaf-obs-left').trim(),
+     img.style.getPropertyValue('--leaf-obs-bottom').trim()],
+    computedLeft:getComputedStyle(img).left,
+    computedBottom:getComputedStyle(img).bottom,
     rendered:[actor.x,actor.y,actor.width,actor.height],
     floor:[floor.x,floor.y,floor.width,floor.height],
     distanceFeetFromFloor:Math.round(actor.bottom-(floor.y+floor.height/2)),
@@ -148,6 +152,12 @@ const {chromium}=require('playwright');
   if(sourceActors.length!==2||
    sourceActors.some(a=>a.rig!=='original-obs-sprite'||!a.source.includes('/OBS/')))
     throw Error('Recovered source character renders as proxy or incorrect asset');
+  if(sourceActors.some(a=>
+    a.nativePivot.some(x=>!/^calc\(/.test(x)||/\+\s*-|\-\s*-/.test(x))||
+    a.computedLeft==='auto'||a.computedBottom==='auto'||
+    !/px$/.test(a.computedLeft)||!/px$/.test(a.computedBottom)))
+   throw Error('Native OBS pivot CSS expression failed for signed original offsets: '+
+    JSON.stringify(sourceActors));
   const feetDifference=Math.abs(sourceActors[0].distanceFeetFromFloor-
    sourceActors[1].distanceFeetFromFloor);
   if(feetDifference>2)
