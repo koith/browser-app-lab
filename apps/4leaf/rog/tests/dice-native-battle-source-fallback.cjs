@@ -28,7 +28,8 @@ async function scenario(browser,failSource){
   });
   await page.waitForFunction(()=>{
    const stage=document.querySelector('#battle-visual');
-   return stage&&['ready','fallback'].includes(stage.dataset.nativeBattlePodium);
+   return stage&&['ready','fallback'].includes(stage.dataset.nativeBattlePodium)&&
+    stage.dataset.nativeBattleHeading==='ready';
   },null,{timeout:16000});
   const result=await page.locator('#battle-visual').evaluate(stage=>{
    const png=stage.querySelector('.leaf-native-winbattle-podiums');
