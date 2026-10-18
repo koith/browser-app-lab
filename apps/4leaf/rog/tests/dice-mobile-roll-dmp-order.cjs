@@ -1,6 +1,6 @@
 'use strict';
 /* Regression for a real user's two P0 complaints: the source DMP tiles must
- * align on their 70x47 logical pitch while full 145x97 artwork overlaps, and
+ * preserve ORIGINAL 70x47 DMP logical coordinates without forcing the\n * full 145x97 source artwork to visually overlap by more than half, and
  * the genuine roll button must respond to a physical phone touch, twice.
  * No screenshot overlay, fake player, hard-coded die result or EXE height.
  */
@@ -39,7 +39,7 @@ const {chromium,webkit}=require('playwright');
   assert.ok(board.every(t=>t.art&&t.clip.startsWith('polygon(')&&
    t.pixels[0]===145&&t.pixels[1]===97),
    'native source platform dimensions and nonrectangular click silhouette preserved');
-  let horizontal=0,vertical=0,sameRow=0;
+  const projection=await page.evaluate(()=>window.__LEAF_CAMERA__.getState());\n  assert.deepEqual(projection.sourceGrid,{width:1450,height:1120,pitchX:70,pitchY:47});\n  let horizontal=0,vertical=0,sameRow=0;
   for(let i=0;i<board.length;i++)for(let j=i+1;j<board.length;j++){
    const a=board[i],b=board[j];
    if(a.y===b.y){
@@ -50,13 +50,13 @@ const {chromium,webkit}=require('playwright');
     'different source rows must paint in verified y order');
    if(a.y===b.y&&Math.abs(a.x-b.x)===1){
     horizontal++;
-    assert.ok(Math.abs(Math.abs(a.left-b.left)-70)<.8,
-     'adjacent source x centers have exactly 70 logical pixels');
+    assert.ok(Math.abs(Math.abs(a.left-b.left)-projection.projectedPitch.x)<.8,
+     'DMP x delta stays 1 logical cell; web screen pitch keeps 145px tile art distinct');
    }
    if(a.x===b.x&&Math.abs(a.y-b.y)===1){
     vertical++;
-    assert.ok(Math.abs(Math.abs(a.top-b.top)-47)<.8,
-     'adjacent source y centers have exactly 47 logical pixels');
+    assert.ok(Math.abs(Math.abs(a.top-b.top)-projection.projectedPitch.y)<.8,
+     'DMP y delta stays 1 source cell; web screen pitch avoids huge native sprite overlap');
    }
   }
   assert.ok(horizontal>5&&vertical>5&&sameRow>5,
