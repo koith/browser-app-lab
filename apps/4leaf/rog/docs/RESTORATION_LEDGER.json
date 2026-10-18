@@ -920,9 +920,9 @@
       "id": "BTL-03",
       "priority": "P1",
       "title": "원본 winResult/winAbility/winJail UI 실제 연결",
-      "status": "in_progress",
+      "status": "done",
       "milestone": "M06",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: IMG.pak에서 winResult 1장·winAbility 6장·winJail 1장 등을 해독했지만 배포 UI 실사용 여부 미확인 | 구현 목표: 이미 해독한 원본 크기/프레임 순서를 실제 전투 결과·능력·감옥 창의 정확한 상태에 연결; 2026-10-18: 2002 IMG.pak 12 non-ROLL sprites 100 original GUI PNGs including winAbility.spr 6 frames, winResult.spr, winJail.spr decoded to hashed SourceSPRExtra manifest and published main; user-visible ability/result/jail integration not yet verified.; 2026-10-19 원본 2002 IMG.pak winJail.spr(136x219) 및 winAbility.spr(330x284+41x29×5)을 실제 감옥/100% 능력 타일 이벤트에 연결. 이펙트 배치·시간은 WEB INFERRED이며 원작 MVE 원본과 동일성 미검증. Chromium 이벤트 상태/PNG 크기/원본 조각 위치 QA 추가.; 원본 IMG.pak winResult.spr 452×88 결과 제목을 실제 게임 종료 확인창과 살아 있는 2~8명 결과/GP/진행률 데이터로 연결. 해독되지 않은 CL 및 WIN RATE는 —로 표시하고 허구 수치 생성 금지. winJail/winAbility에 이어 원본 3종 전부 실제 이벤트에 연결.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: IMG.pak에서 winResult 1장·winAbility 6장·winJail 1장 등을 해독했지만 배포 UI 실사용 여부 미확인 | 구현 목표: 이미 해독한 원본 크기/프레임 순서를 실제 전투 결과·능력·감옥 창의 정확한 상태에 연결; 2026-10-18: 2002 IMG.pak 12 non-ROLL sprites 100 original GUI PNGs including winAbility.spr 6 frames, winResult.spr, winJail.spr decoded to hashed SourceSPRExtra manifest and published main; user-visible ability/result/jail integration not yet verified.; 2026-10-19 원본 2002 IMG.pak winJail.spr(136x219) 및 winAbility.spr(330x284+41x29×5)을 실제 감옥/100% 능력 타일 이벤트에 연결. 이펙트 배치·시간은 WEB INFERRED이며 원작 MVE 원본과 동일성 미검증. Chromium 이벤트 상태/PNG 크기/원본 조각 위치 QA 추가.; 원본 IMG.pak winResult.spr 452×88 결과 제목을 실제 게임 종료 확인창과 살아 있는 2~8명 결과/GP/진행률 데이터로 연결. 해독되지 않은 CL 및 WIN RATE는 —로 표시하고 허구 수치 생성 금지. winJail/winAbility에 이어 원본 3종 전부 실제 이벤트에 연결.; 2026-10-19 해당 2D 원본 GUI 역할/검사·배포 조건을 모두 충족하여 세부 일감만 완료. M06/M07/P0 상위의 역사적 3D/프레임/카메라 완성은 미완료.",
       "acceptance": [
         "상태별 팝업에 원본 member·frame 명시, 버튼/판정 살아 있음, 무관 장면에 잘못 표시하지 않음"
       ],
@@ -934,11 +934,19 @@
         "apps/4leaf/rog/dice-native-source-events.js",
         "apps/4leaf/rog/dice-native-source-events.css",
         "apps/4leaf/rog/tests/dice-native-original-source-events.cjs",
-        "apps/4leaf/rog/game.js"
+        "apps/4leaf/rog/game.js",
+        "https://github.com/koith/browser-app-lab/actions/runs/39149989371",
+        "https://github.com/koith/browser-app-lab/actions/runs/39149989440",
+        "https://github.com/koith/browser-app-lab/pull/122"
       ],
-      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+      "evidenceLevel": "VERIFIED-ORIGINAL-2002-SOURCE-2D-UI-AND-BROWSER-PRODUCTION; HISTORICAL-3D-EQUIVALENCE-NOT-CLAIMED",
       "lastReviewed": "2026-10-19",
-      "verifiedAcceptance": null,
+      "verifiedAcceptance": {
+        "sourceComparison": "SHA256-verified 2002 Dice/IMG.pak winJail.spr (136x219), winAbility.spr (330x284 + 5x 41x29), winResult.spr (452x88) original decoded PNGs, per-frame coordinates in original/SourceSPRExtra/manifest.json. Original WEB scene timing/placement is labeled INFERRED and remains covered by BTL-04/M06, not claimed here.",
+        "implementation": "apps/4leaf/rog/dice-native-source-events.js, dice-native-source-events.css, game.js actual prison/100% ability/goal engine hooks and verified native result scoreboard with live GP, no invented CL/win-rate; PR #122.",
+        "runtimeTest": "Main Chromium live DMP tile jail/ability and actual match winResult/GP E2E and native battle 2 fighters: https://github.com/koith/browser-app-lab/actions/runs/39149989371 (success). Source IMG availability/offline cache: run 39149989284 (success).",
+        "deployment": "main@b9ebb85a7a70e834590c5c0c245a8b7be3fb1168 Pages run 39149989440 success, pages build/deploy 39149988935 success."
+      },
       "dependencies": [
         "BTL-01"
       ],
@@ -1016,19 +1024,27 @@
       "id": "DIE-03",
       "priority": "P1",
       "title": "원본 ROLL 버튼·주사위 낙하 UI 역할 분리",
-      "status": "todo",
+      "status": "done",
       "milestone": "M07",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: ROLL UI 20프레임은 복구되어 사용 중이나 임의 만든 낙하 주사위와 같은 원본이라고 오인될 여지 | 구현 목표: eventRoll1/roll 버튼 목적·사용 씬을 실제 원작으로 구분, 애니메이션 1회 입력/비활성 상태 검증",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: ROLL UI 20프레임은 복구되어 사용 중이나 임의 만든 낙하 주사위와 같은 원본이라고 오인될 여지 | 구현 목표: eventRoll1/roll 버튼 목적·사용 씬을 실제 원작으로 구분, 애니메이션 1회 입력/비활성 상태 검증; 2026-10-19 해당 2D 원본 GUI 역할/검사·배포 조건을 모두 충족하여 세부 일감만 완료. M06/M07/P0 상위의 역사적 3D/프레임/카메라 완성은 미완료.",
       "acceptance": [
         "원본 버튼 16프레임 preload 및 중복 롤 0건, D4/D6 모델과 역할 혼동 0건"
       ],
       "evidence": [
         "dice-source-roll.js",
-        "original/SourceSPR/manifest.json"
+        "original/SourceSPR/manifest.json",
+        "https://github.com/koith/browser-app-lab/actions/runs/39149989371",
+        "https://github.com/koith/browser-app-lab/actions/runs/39149989440",
+        "https://github.com/koith/browser-app-lab/pull/122"
       ],
-      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-18",
-      "verifiedAcceptance": null,
+      "evidenceLevel": "VERIFIED-ORIGINAL-2002-SOURCE-2D-UI-AND-BROWSER-PRODUCTION; HISTORICAL-3D-EQUIVALENCE-NOT-CLAIMED",
+      "lastReviewed": "2026-10-19",
+      "verifiedAcceptance": {
+        "sourceComparison": "2002 original Dice/IMG.pak roll.spr 4 native button frames and eventRoll1.spr 16 original button frames extracted and SHA-checked; explicitly NOT original falling D4/D6 model (DIE-01 and DIE-02 remain OPEN).",
+        "implementation": "dice-source-roll.js preloads/decodes all 16 genuine source frames and uses only those for UI; dice-fall.js is separate explicitly labeled inferred model; source manifest original/SourceSPR/manifest.json, PR #108.",
+        "runtimeTest": "Main Chromium tests/dice-source-roll.cjs 16 decoded frames ordered 00..15, one click=one roll, original outcome unchanged; https://github.com/koith/browser-app-lab/actions/runs/39149989371 success. Previous run 39119737439 success.",
+        "deployment": "Source UI from main PR #108 and retained in main@b9ebb85a7a70e834590c5c0c245a8b7be3fb1168 Pages successful run 39149989440."
+      },
       "dependencies": [
         "DIE-01"
       ],
@@ -1419,9 +1435,9 @@
       "id": "QA-01",
       "priority": "P0",
       "title": "원본 발판 새 자산 브랜치 스모크 실패 복구",
-      "status": "in_progress",
+      "status": "done",
       "milestone": "M09",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원본 winBattle.spr 테스트 브랜치 29b4546d에서 browser-smoke 실패: 기존 시험이 가짜 CSS 발판 DOM 다리 4개를 반드시 요구함 | 구현 목표: 전투 QA를 원본 355×113 source ready vs 진짜 source load 실패시 fallback 두 경로로 분리해 조건 수정; 2026-10-18: Old smoke 4 CSS support requirement fixed; source winBattle.spr browser QA and mobile/desktop main pass. Native winAbility result/event hookup and fallback error-path regression are still separate QA acceptance.; 구버전 원본 OBS 실제 움직임 테스트가 44x82,33x71 고정으로 현재 진짜 프레임 57x69,32x69를 거짓 실패 판정함; 현재 displayed src와 verified OBS manifest 원본 크기를 원자적으로 대조. 원본 winBattle 355x113 정상·실패 폴백 각각 독립 브라우저 QA 추가.; 2026-10-19 원본 2002 IMG.pak winJail.spr(136x219) 및 winAbility.spr(330x284+41x29×5)을 실제 감옥/100% 능력 타일 이벤트에 연결. 이펙트 배치·시간은 WEB INFERRED이며 원작 MVE 원본과 동일성 미검증. Chromium 이벤트 상태/PNG 크기/원본 조각 위치 QA 추가.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원본 winBattle.spr 테스트 브랜치 29b4546d에서 browser-smoke 실패: 기존 시험이 가짜 CSS 발판 DOM 다리 4개를 반드시 요구함 | 구현 목표: 전투 QA를 원본 355×113 source ready vs 진짜 source load 실패시 fallback 두 경로로 분리해 조건 수정; 2026-10-18: Old smoke 4 CSS support requirement fixed; source winBattle.spr browser QA and mobile/desktop main pass. Native winAbility result/event hookup and fallback error-path regression are still separate QA acceptance.; 구버전 원본 OBS 실제 움직임 테스트가 44x82,33x71 고정으로 현재 진짜 프레임 57x69,32x69를 거짓 실패 판정함; 현재 displayed src와 verified OBS manifest 원본 크기를 원자적으로 대조. 원본 winBattle 355x113 정상·실패 폴백 각각 독립 브라우저 QA 추가.; 2026-10-19 원본 2002 IMG.pak winJail.spr(136x219) 및 winAbility.spr(330x284+41x29×5)을 실제 감옥/100% 능력 타일 이벤트에 연결. 이펙트 배치·시간은 WEB INFERRED이며 원작 MVE 원본과 동일성 미검증. Chromium 이벤트 상태/PNG 크기/원본 조각 위치 QA 추가.; 2026-10-19 해당 2D 원본 GUI 역할/검사·배포 조건을 모두 충족하여 세부 일감만 완료. M06/M07/P0 상위의 역사적 3D/프레임/카메라 완성은 미완료.",
       "acceptance": [
         "native winBattle/ability 실제 PNG·체스맨 2명·눈결과+전투 종료가 Chromium 모바일/desktop에서 정상, 구 CSS DOM 4다리 미요구"
       ],
@@ -1433,11 +1449,19 @@
         "apps/4leaf/rog/tests/dice-original-obs-chessmen.cjs",
         "apps/4leaf/rog/dice-native-source-events.js",
         "apps/4leaf/rog/dice-native-source-events.css",
-        "apps/4leaf/rog/tests/dice-native-original-source-events.cjs"
+        "apps/4leaf/rog/tests/dice-native-original-source-events.cjs",
+        "https://github.com/koith/browser-app-lab/actions/runs/39149989371",
+        "https://github.com/koith/browser-app-lab/actions/runs/39149989440",
+        "https://github.com/koith/browser-app-lab/pull/122"
       ],
-      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+      "evidenceLevel": "VERIFIED-ORIGINAL-2002-SOURCE-2D-UI-AND-BROWSER-PRODUCTION; HISTORICAL-3D-EQUIVALENCE-NOT-CLAIMED",
       "lastReviewed": "2026-10-19",
-      "verifiedAcceptance": null,
+      "verifiedAcceptance": {
+        "sourceComparison": "Native 2002 winBattle.spr original 355x113 podiums/VS and 222x42 heading source SHA in manifest; 2D scene source from real 2002 client, not fabricated 3D mesh.",
+        "implementation": "game.js source stage and 2 source-owned IMG layers; dice-native-battle-source-spr.css keeps CSS 4 support as failure-only; tests/dice-native-battle-source-fallback.cjs tests 2 real fighters/dice and both PNG-loaded and intentionally-blocked cases; PR #122.",
+        "runtimeTest": "Main Chromium source podium mobile source/pip/complete, missing PNG fallback, real ability and old CSS nonoverlap: https://github.com/koith/browser-app-lab/actions/runs/39149989371 success. Browser smoke 39149989401 success, WebKit touch PR run 39149813245 success.",
+        "deployment": "main@b9ebb85a7a70e834590c5c0c245a8b7be3fb1168 GitHub Pages deployment 39149989440 success."
+      },
       "dependencies": [
         "BTL-01"
       ],
@@ -2418,6 +2442,36 @@
       "taskId": "P0-RELEASE",
       "details": "새 앱 이벤트(감옥/능력)와 실제 경기 종료(원본 452×88 결과 패널) 3장면에 2002 IMG.pak 원본 PNG와 실제 수치/버튼 검증 확대. 웹 배치는 임시임을 표시하며 미완료 종합 검증 유지.",
       "evidence": "apps/4leaf/rog/tests/dice-native-original-source-events.cjs"
+    },
+    {
+      "seq": 89,
+      "date": "2026-10-19",
+      "type": "STATUS_CHANGED",
+      "taskId": "BTL-03",
+      "from": "in_progress",
+      "to": "done",
+      "details": "2D original source role and live browser behavior accepted with archive/implementation/runtime/deploy evidence; does not close 3D original fidelity.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39149989371"
+    },
+    {
+      "seq": 90,
+      "date": "2026-10-19",
+      "type": "STATUS_CHANGED",
+      "taskId": "QA-01",
+      "from": "in_progress",
+      "to": "done",
+      "details": "2D original source role and live browser behavior accepted with archive/implementation/runtime/deploy evidence; does not close 3D original fidelity.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39149989371"
+    },
+    {
+      "seq": 91,
+      "date": "2026-10-19",
+      "type": "STATUS_CHANGED",
+      "taskId": "DIE-03",
+      "from": "todo",
+      "to": "done",
+      "details": "2D original source role and live browser behavior accepted with archive/implementation/runtime/deploy evidence; does not close 3D original fidelity.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39149989371"
     }
   ]
 }
