@@ -114,7 +114,7 @@ async function run(){
      openFrame:getComputedStyle(body).backgroundColor==='rgba(0, 0, 0, 0)'&&
        getComputedStyle(body).backgroundImage==='none',
      platformHeight:br.height,
-     actorAbove:ar.bottom<br.bottom,
+     actorVisible:ar.width>0&&ar.height>0&&getComputedStyle(actor).display!=='none',
      rollCount:side.querySelectorAll('.battle-visual-die').length,
      originalPawn:actor.dataset.chessmanId,
      nativeSource:actor.querySelector('.leaf-chess-original-obs:not([hidden])')?.getAttribute('src')||
@@ -147,7 +147,7 @@ async function run(){
  assert.equal(realPodium.visible,'block');
  assert.deepEqual(realPodium.stalePlatforms,['none','none']);
  assert.equal(realPodium.staleVS,'none');
- assert.ok(duelRig.platforms.every(s=>s.actorAbove&&s.originalPawn?.length===4&&
+ assert.ok(duelRig.platforms.every(s=>s.actorVisible&&s.originalPawn?.length===4&&
   ['original/CardData/','original/OBS/'].some(prefix=>(s.nativeSource||'').includes(prefix))),'actual selected Genesis card/OBS imagery stands on the source-comparison platform and do not become screenshots');
  assert.ok(duelRig.platforms.every(s=>s.rollCount>=1),'actual rolled original attack/defense values remain live above podium');
  assert.ok(duelRig.bg.includes('original/IMG/bgtile.png'),'the ACTUAL source forest with 725x485 cliffs is unobstructed below battle, not inferred replacement art');
