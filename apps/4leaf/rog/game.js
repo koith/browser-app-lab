@@ -1258,6 +1258,9 @@ async function resolveTile(p,depth=0){
    const first=d(6),second=d(first),diff=first-second;
    if(diff>=3)p.position=0;else p.position=Math.max(0,p.position-diff*3);
    appendMove(p.name+' DEAD OR ALIVE: '+first+' / '+second+' → '+(diff>=3?'START':diff*3+'칸 후퇴'));
+   // SHA-verified original 2002 winDoa.spr UI source, independent of
+   // the real random decision and DMP move. Placement timing is WEB.
+   window.__LEAF_NATIVE_EVENTS__?.show('doa',p.name);
  }else if(type==='keeper'||type==='arena'){
    if(type==='arena'){
      const incumbent=match.players.find(x=>x!==p&&x.position===pos);
