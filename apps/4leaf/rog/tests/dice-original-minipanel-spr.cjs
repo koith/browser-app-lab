@@ -87,8 +87,12 @@ async function check(browser,mobile){
   assert.equal(first.canvas,'hidden','only the visible source DMP canvas is temporarily hidden');
   assert.notEqual(first.infoVisible,'none');
   const slot=page.locator('#dice-native-party .dice-chessman-slot.occupied').nth(1);
-  await slot.evaluate(el=>el.click());
-  await page.waitForFunction(()=>document.querySelector('#leaf-native-chessman-info')?.dataset.sourceCardId==='c_0042');
+  // The genuine existing party HUD selects the highlighted chessman on
+  // focus, and opens its separate details modal on click. A programmatic
+  // HTMLElement.click() alone does NOT focus the card or select it.
+  await slot.focus();
+  await page.waitForFunction(()=>document.querySelector('#leaf-native-chessman-info')?.dataset.sourceCardId==='c_0042',
+    null,{timeout:5000});
   const second=await page.evaluate(()=>{
    const el=document.getElementById('leaf-native-chessman-info');
    return {card:el.dataset.sourceCardId,name:el.querySelector('strong').textContent,
