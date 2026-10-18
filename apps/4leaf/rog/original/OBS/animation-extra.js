@@ -4,6 +4,29 @@
 window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
  window.ORIGINAL_LEAF_OBS_FRAMES||{},
 {
+  "0040": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
+    "frames": [
+      {
+        "height": 71,
+        "index": 25,
+        "originX": -18,
+        "originY": -61,
+        "sha256": "46d010dcd6d7adbdb909b373e8ba847106921d2fefd1da7f8f9b0e707fe407b1",
+        "url": "./original/OBS/bulk/1040-25.png",
+        "width": 39
+      }
+    ],
+    "hasVerifiedFrameZero": false,
+    "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
+    "name": "마르자나",
+    "originalAnimationCount": 37,
+    "originalMember": "1040.obs",
+    "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": true,
+    "sourcePak": "OBS.pak",
+    "sourceSHA256": "ac954b320e56b8c34ffbf1249a9905a4a53e9ac1e91c291cc398216cd8db0734"
+  },
   "0043": {
     "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
@@ -68,6 +91,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 37,
     "originalMember": "1043.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "47637f8b5cbb525d761472a69bc10aaa66ba7c08ccf88fef7ae3f917a97d4852"
   },
@@ -117,6 +141,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 37,
     "originalMember": "1044.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "6a6d7f024c20e18dcb0f572bba2113cae3e2fba2d9faf694a8e9419fb839f796"
   },
@@ -166,6 +191,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 37,
     "originalMember": "1047.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "fcd05bc06d54865e3cc592ffc6d74a38eab233d275b49e5a3fd65ea066c0bdd3"
   },
@@ -197,8 +223,32 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 37,
     "originalMember": "1048.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "b0d9d4995c8278bdae042752c042e8eaf8984d108514c71c0a6e0ccd9321c64e"
+  },
+  "0049": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
+    "frames": [
+      {
+        "height": 84,
+        "index": 10,
+        "originX": -17,
+        "originY": -74,
+        "sha256": "25883457d454fcf84b539b615ee0a4da36d9eaaa0115c0fb5230081447d8afd2",
+        "url": "./original/OBS/bulk/1049-10.png",
+        "width": 32
+      }
+    ],
+    "hasVerifiedFrameZero": false,
+    "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
+    "name": "샤프리아르",
+    "originalAnimationCount": 37,
+    "originalMember": "1049.obs",
+    "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": true,
+    "sourcePak": "OBS.pak",
+    "sourceSHA256": "23eee0e6f6335d7ed69caaeb19fa016c1f164263f7597492cb68f2c54466d381"
   },
   "0050": {
     "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
@@ -255,6 +305,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 37,
     "originalMember": "1050.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "2f98625c04d18079fbfd3f7d373d9ab1d83c26fa0283b6b4cda479058e4ec79b"
   },
@@ -286,6 +337,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 37,
     "originalMember": "1051.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "34d67c4d029bfad0326788b22b65e1d55b9e655cf5269d3598c8217202dd1a31"
   },
@@ -353,6 +405,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 37,
     "originalMember": "1052.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "e14fe89614f5b563cabe8ae959fbd9792f8ca1fba59e25498e0c0ca3691b6c4d"
   },
@@ -393,6 +446,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 37,
     "originalMember": "1053.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "cc5586497f50663c04c6d6501e9719ef36ace625e3ca178d764387ba822575fe"
   },
@@ -478,6 +532,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 37,
     "originalMember": "1054.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "42c4ba6b976929720a84175a230b1323332d07580b4915288c6313a205fee236"
   },
@@ -518,6 +573,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 37,
     "originalMember": "1055.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "414e0f087fe598aff57d39502d962fbeac98a3882521702ef3acfc4efdcd6618"
   },
@@ -558,6 +614,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 37,
     "originalMember": "1056.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "e56658101a91e9d8eb8e9182b2353c19882f4d343ddc08fe055f56805146ce6d"
   },
@@ -616,6 +673,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 37,
     "originalMember": "1058.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "65ea0f8b4719e60db938aab0eaf3c4a2d72eac26f44173b92fe5f9471b5d4efb"
   },
@@ -674,6 +732,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 37,
     "originalMember": "1059.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "6094f708e693f5cef9131e766700d6cf6ae7c19da0f4708ce47dfadf9a5a1467"
   },
@@ -750,6 +809,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 37,
     "originalMember": "1060.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "ec0c76ce9a6dac060098cc1b1ee8e03704e7edb3495aef2901b05dbc92e5e12e"
   },
@@ -835,6 +895,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 37,
     "originalMember": "1062.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "4a6b47e3ae45a29e4048c5a4ec2e0e5cda92ee7e9fa3ad9e0cd56b4875ac9205"
   },
@@ -902,8 +963,32 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 37,
     "originalMember": "1063.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "bacc3842d039158680d1f5bdd80aa1c245f95f09b59d39836ebf92fc18a0a28e"
+  },
+  "0065": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
+    "frames": [
+      {
+        "height": 73,
+        "index": 10,
+        "originX": -23,
+        "originY": -63,
+        "sha256": "ec0879f35474d5cf93d0fe0d9f91d95bbf2a0aea7800fbf5486a214cb20f279a",
+        "url": "./original/OBS/bulk/1065-10.png",
+        "width": 41
+      }
+    ],
+    "hasVerifiedFrameZero": false,
+    "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
+    "name": "해럴드깁슨",
+    "originalAnimationCount": 37,
+    "originalMember": "1065.obs",
+    "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": true,
+    "sourcePak": "OBS.pak",
+    "sourceSHA256": "4901695a7ecc2c36d1ef5586a76ac880a2e41a35d63e8b60dc29a1a605f7e1ea"
   },
   "0066": {
     "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
@@ -960,6 +1045,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 37,
     "originalMember": "1066.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "1fce493bae40f09481d9e4d81b0c9b0fcd533599340b8694098b78b22dd6cc01"
   },
@@ -1036,6 +1122,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 37,
     "originalMember": "1067.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "50fd972f807c1f33d56ed203c689b1fec854af1c39c3e0a07e1bac008e19b7e0"
   },
@@ -1121,6 +1208,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 37,
     "originalMember": "1068.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "2d912261195c9da549350177c196edb579bd7b155691ca700bb6b140aa6826d0"
   },
@@ -1206,6 +1294,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 37,
     "originalMember": "1069.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "8898df4dfe731d0127f25ccf51099da12ae91f8cb0181aee2c3f8aae5eada068"
   },
@@ -1237,6 +1326,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 37,
     "originalMember": "1070.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "da68ee3d6302dcf94b78b108af57889f200c7979e6b284a9435c309857d9576a"
   },
@@ -1304,6 +1394,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 37,
     "originalMember": "1071.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "9bfa980afc6ab3e8e6552b7fb231f359f1b5a939d1ca0cdff1fe93de2594ed82"
   },
@@ -1353,6 +1444,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 37,
     "originalMember": "1072.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "0253a62013a1ab7960cc880a61efacb081b36306c3790ef7937ff9a36c222bb0"
   },
@@ -1420,6 +1512,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 37,
     "originalMember": "1073.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "49c9107b905ba1c7c4106e4e3a860e9afac7832624c1892aede732ac07d80c2f"
   },
@@ -1487,6 +1580,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 37,
     "originalMember": "1074.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "cf8d56b4d415931fdf582ede9d55b89e6f67e4ac062f7394b4a7820c1acc7cbc"
   },
@@ -1527,6 +1621,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 37,
     "originalMember": "1075.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "13e0a6499f7c8c52b945e9b1091f284dabff6e8fb95ac8e1b1ed96f8d4168c05"
   },
@@ -1567,6 +1662,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 37,
     "originalMember": "1076.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "af48bdf392446d73f9987ee025542ac3629805df9a47f764fdebfec8292e30a8"
   },
@@ -1598,6 +1694,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 37,
     "originalMember": "1077.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "19fc1f2b3e91e16d4f1f0b4e791813b3991fa41fc8a137b4a2e2a1bcb57d8124"
   },
@@ -1638,6 +1735,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 37,
     "originalMember": "1078.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "4218c5b6d60905f02e793feb2533ecc8658195e4619017f3cfea1a461a844bfe"
   },
@@ -1696,6 +1794,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 37,
     "originalMember": "1079.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "47f8efb191148fa4218a73a7654b07b0c63f451cf7ee17956b6d6339bf9ce55c"
   },
@@ -1736,6 +1835,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 37,
     "originalMember": "1080.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "43875a884cfdf32cf01f6536ee116502c875d0cac78b48c16a49b5a1e36adcd6"
   },
@@ -1821,6 +1921,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 37,
     "originalMember": "1081.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "e81fea5dca522c6d834f62805c4e6aa67b86d9bef1841aee7fa5aa1d91d92316"
   },
@@ -1888,6 +1989,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 37,
     "originalMember": "1082.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "48cb3e88cf9e254966683813f9d9c09b7efccb11d820d7330c30acece08d4bfd"
   },
@@ -1928,6 +2030,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 37,
     "originalMember": "1083.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "92dc63b8159b37e54451e65b302d8ca7d0e192667c0640574dd0dd25aa95561f"
   },
@@ -2013,6 +2116,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 37,
     "originalMember": "1084.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "7826f72a1a59dde94c41452317e7f75a63ad27c4bee6a92ceb65944a60a865ae"
   },
@@ -2071,6 +2175,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 37,
     "originalMember": "1086.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "ab72bd843aadeda3349ca4dbfce7b4660fe9809977c26aab4cfce0b177b7e8bb"
   },
@@ -2156,8 +2261,32 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 37,
     "originalMember": "1088.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "40cc720306610aea156d68afda4f3cbd500f2dfa1c4fc4929cdf452d83537976"
+  },
+  "0089": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
+    "frames": [
+      {
+        "height": 76,
+        "index": 3,
+        "originX": -15,
+        "originY": -77,
+        "sha256": "43c13fb6f914e2b4450fbe3de4df7b19da8f1c186c398cb5d174879c9a57c329",
+        "url": "./original/OBS/bulk/1089-03.png",
+        "width": 30
+      }
+    ],
+    "hasVerifiedFrameZero": false,
+    "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
+    "name": "버몬트",
+    "originalAnimationCount": 13,
+    "originalMember": "1089.obs",
+    "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": true,
+    "sourcePak": "OBS.pak",
+    "sourceSHA256": "eb94ea1834f1957b20146344fb617454ab5faab4abc0f78a47cbd80313941fd9"
   },
   "0090": {
     "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
@@ -2214,6 +2343,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 51,
     "originalMember": "1090.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "dd8945b85fd09fc6d5cfc89f16cfb912cbbc9e9be4e7cfdb9bee1e3f779e0c43"
   },
@@ -2263,8 +2393,32 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 14,
     "originalMember": "1094.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "f5f05e5033d25f455e5d6b1ca63dfaeff4fdffc043e682c8888c5db3c520e75d"
+  },
+  "0097": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
+    "frames": [
+      {
+        "height": 36,
+        "index": 3,
+        "originX": -71,
+        "originY": -24,
+        "sha256": "b9cd80e37b4d9e0dc0229312e3283349fee53737083925cdb7ee729eac8d9b49",
+        "url": "./original/OBS/bulk/1097-03.png",
+        "width": 47
+      }
+    ],
+    "hasVerifiedFrameZero": false,
+    "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
+    "name": "마법사",
+    "originalAnimationCount": 5,
+    "originalMember": "1097.obs",
+    "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": true,
+    "sourcePak": "OBS.pak",
+    "sourceSHA256": "8b025957b0e1ba7465c6b9791d902bb1fb182bfba29cddda3f6b3003388acdbb"
   },
   "0125": {
     "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
@@ -2321,6 +2475,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 15,
     "originalMember": "1125.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "d637b0046b8d906e201bae80abf329170d1ace1ea1827c5554050a137ab371cd"
   },
@@ -2397,6 +2552,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 28,
     "originalMember": "1127.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "760175534712d21dd8398638c1ea02c79c7101ee18f5c5b162e5a1fe4490e509"
   },
@@ -2473,6 +2629,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 28,
     "originalMember": "1130.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "6004b33639217381a0084845558aed760d3aea6e8e26b84a9cbf40f729475f12"
   },
@@ -2504,6 +2661,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 29,
     "originalMember": "1131.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "06df1cb58068f4fccf1b9f3b44f785c51183f53f34f377a0838dd758e5bc2659"
   },
@@ -2553,6 +2711,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 19,
     "originalMember": "1133.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "bccb77a0c7b4e24fb4b466d675b85ef30b86930367fafb4bfa77debe240515bd"
   },
@@ -2602,6 +2761,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 7,
     "originalMember": "1136.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "f80902027d2c61d56da3830972d8baa566d59b2ce2c273951ca8e203365c22f2"
   },
@@ -2642,6 +2802,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 39,
     "originalMember": "1140.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "dfa418ca309de16bb3722382c78181763d5234e94de254ccb256b6b4b694f908"
   },
@@ -2682,6 +2843,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 22,
     "originalMember": "1141.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "345f1be08bb90eb5665c6fd1bc4c47fc1217030fcb8cfaf20253893ac927b81d"
   },
@@ -2731,8 +2893,32 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 25,
     "originalMember": "1142.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "436015280d34085d26e6099991071dad91565191006ebe4f845e77b111953da7"
+  },
+  "0144": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
+    "frames": [
+      {
+        "height": 104,
+        "index": 2,
+        "originX": -25,
+        "originY": -70,
+        "sha256": "8d5df968a9c03ce7f4de317dc7ec35b2974c1f0ff0016f671ae82a36381b0b9c",
+        "url": "./original/OBS/bulk/1144-02.png",
+        "width": 50
+      }
+    ],
+    "hasVerifiedFrameZero": false,
+    "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
+    "name": "쥬디",
+    "originalAnimationCount": 55,
+    "originalMember": "1144.obs",
+    "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": true,
+    "sourcePak": "OBS.pak",
+    "sourceSHA256": "e328dfc6d5cd1cdf681c556319af7c5a37acb57a4f210172ca03aa30c847329d"
   },
   "0145": {
     "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
@@ -2762,6 +2948,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 20,
     "originalMember": "1145.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "e4e12bd6a17a686635341aa6dfda6e124b84b725480294401a94e22350887579"
   },
@@ -2802,6 +2989,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 21,
     "originalMember": "1147.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "403e94392a14c312adb5d961e0d6e2f94d97820f52038489243d3e7881c9eb52"
   },
@@ -2860,8 +3048,32 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 38,
     "originalMember": "1158.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "94fc1719db2727724532c924f0b43cd1984c297b5273c5c70286d21b011cf759"
+  },
+  "0160": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
+    "frames": [
+      {
+        "height": 67,
+        "index": 18,
+        "originX": -32,
+        "originY": -53,
+        "sha256": "23674582bbfa9c2ddb61ff2d5713d317ea59c637eb254aaaff3bdbaa6199c738",
+        "url": "./original/OBS/bulk/1160-18.png",
+        "width": 66
+      }
+    ],
+    "hasVerifiedFrameZero": false,
+    "horizontalScanlineOrigin": "PROVISIONAL; inferred centred rows",
+    "name": "바룬",
+    "originalAnimationCount": 20,
+    "originalMember": "1160.obs",
+    "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": true,
+    "sourcePak": "OBS.pak",
+    "sourceSHA256": "82c0dbd2815c8fbc118d56f1f13f98641c43dcc870d87a79d06a6a13c4d00f28"
   },
   "0167": {
     "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
@@ -2927,6 +3139,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 25,
     "originalMember": "1167.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "c7619c55e0588a52f7fba6d2c631755e346f61ab08f90e1fde665408f2face26"
   },
@@ -2967,6 +3180,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 41,
     "originalMember": "1169.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "2d2950bead78fb4d4ae2be3be512cb84f2e55f2ec5a94a2c8a9a08c149a42b04"
   },
@@ -2998,6 +3212,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 10,
     "originalMember": "1170.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "49daa0d9b79b96d14df6b6afee0305a4149b39f9bfff0d110cf5f9e449d10641"
   },
@@ -3065,6 +3280,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "originalAnimationCount": 28,
     "originalMember": "1171.obs",
     "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "d49a20290f5953f5e09d656686e2eb6305bd8c808d1974452381556261d497ff"
   }
