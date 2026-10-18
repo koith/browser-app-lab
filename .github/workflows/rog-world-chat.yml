@@ -51,6 +51,7 @@ on:
       - 'apps/4leaf/rog/social-chat.js'
       - 'apps/4leaf/rog/world-social.css'
       - 'apps/4leaf/rog/chatroom-native-exit.js'
+      - 'apps/4leaf/rog/chatroom-native-2004-frame.css'
       - 'apps/4leaf/rog/chatroom-native-talkbox.js'
       - 'apps/4leaf/rog/chatroom-native-talkbox.css'
       - 'apps/4leaf/rog/chatroom-native-ringbtn.css'
