@@ -107,6 +107,12 @@ async function run(){
      shape:getComputedStyle(body).clipPath,
      top:top.backgroundImage,
      struts:supports.backgroundImage,
+     feet:[...body.querySelectorAll('.leaf-battle-platform-leg')].map(x=>({
+      w:x.getBoundingClientRect().width,h:x.getBoundingClientRect().height,
+      visible:getComputedStyle(x).display!=='none'
+     })),
+     openFrame:getComputedStyle(body).backgroundColor==='rgba(0, 0, 0, 0)'&&
+       getComputedStyle(body).backgroundImage==='none',
      platformHeight:br.height,
      actorAbove:ar.bottom<br.bottom,
      rollCount:side.querySelectorAll('.battle-visual-die').length,
@@ -119,8 +125,12 @@ async function run(){
   };
  });
  assert.equal(duelRig.platforms.length,2,'real duel includes two independent live mechanical podiums');
- assert.ok(duelRig.platforms.every(s=>s.shape.startsWith('polygon(')&&s.platformHeight>35),'2.5D podium has an actual polygonal depth body rather than original flat 2D bar');
- assert.ok(duelRig.platforms.every(s=>s.top.includes('radial-gradient')&&s.struts.includes('repeating-linear-gradient')),'separate neon top ring and mechanical lower support are visible independent layers');
+ assert.ok(duelRig.platforms.every(s=>s.openFrame&&s.platformHeight>35&&
+  s.feet.length===4&&s.feet.every(f=>f.visible&&f.w>=5&&f.h>=20)),
+  'historic 2004 platform is OPEN, supported by 4 real distinct DOM legs, never a fake opaque cylindrical drum');
+ assert.ok(duelRig.platforms.every(s=>s.top.includes('radial-gradient')&&
+   s.struts.includes('linear-gradient')),
+  '2004 source-style separated glowing top deck and shallow metallic subdeck are both visible');
  assert.ok(duelRig.platforms.every(s=>s.actorAbove&&s.originalPawn?.length===4&&
   ['original/CardData/','original/OBS/'].some(prefix=>(s.nativeSource||'').includes(prefix))),'actual selected Genesis card/OBS imagery stands on the source-comparison platform and do not become screenshots');
  assert.ok(duelRig.platforms.every(s=>s.rollCount>=1),'actual rolled original attack/defense values remain live above podium');
