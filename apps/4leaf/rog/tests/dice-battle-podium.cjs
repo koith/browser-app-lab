@@ -36,6 +36,11 @@ const path=require('node:path');
      const score=side.querySelector('.battle-visual-total')?.textContent;
      return {name,score,dice,mesh:body.clipPath,bodyColor:body.backgroundImage,
       deck:top.backgroundImage,legs:leg.backgroundImage,
+      openSupport:body.backgroundImage==='none'&&body.backgroundColor==='rgba(0, 0, 0, 0)',
+      supports:[...podium.querySelectorAll('.leaf-battle-platform-leg')].map(e=>({
+       width:e.getBoundingClientRect().width,height:e.getBoundingClientRect().height,
+       display:getComputedStyle(e).display
+      })),
       bodyHeight:pr.height,actorFeet:ar.bottom,deckTop:pr.top,
       actor:actor.dataset.chessmanId,
       source:actor.querySelector('.leaf-chess-original-obs:not([hidden])')?.getAttribute('src')||
@@ -48,8 +53,11 @@ const path=require('node:path');
   assert.equal(state.stageBorder,'none','duel uses real terrain, not a GUI popup box');
   assert.ok(state.world.includes('/original/IMG/bgtile.png'),'genuine 725x485 source forest remains below 3D mechanical stages');
   assert.equal(state.sides.length,2,'real active match has two independent duel platforms');
-  assert.ok(state.sides.every(s=>s.mesh.startsWith('polygon(')&&s.bodyHeight>35),'both staged participants stand on deep independent mechanical polygon structures');
-  assert.ok(state.sides.every(s=>s.deck.includes('radial-gradient')&&s.legs.includes('repeating-linear-gradient')),'glowing contact ring and support columns are separate CSS scene elements');
+  assert.ok(state.sides.every(s=>s.openSupport&&s.bodyHeight>35&&
+   s.supports.length===4&&s.supports.every(l=>l.display!=='none'&&l.height>15&&l.width>4)),
+   '2004 source-stage replacement: four exposed metal legs and genuinely open underside, not a solid drum');
+  assert.ok(state.sides.every(s=>s.deck.includes('radial-gradient')&&s.legs.includes('linear-gradient')),
+   'source-photo glowing contact disk and separate shallow metallic top deck are painted');
   assert.ok(state.sides.every(s=>s.actorFeet>s.deckTop&&s.actorFeet<s.deckTop+70),'actors land on the active glowing deck, not hovering far offstage');
   assert.ok(state.sides.every(s=>s.actor?.length===4&&['original/CardData/','original/OBS/'].some(x=>(s.source||'').includes(x))&&s.name&&/^\d\d$/.test(s.score)&&s.dice.length>=1),'selected Genesis actor and rolled numbers are independently drawn');
   assert.notEqual(state.sides[0].deck,state.sides[1].deck,'original attacker/defender podiums have distinct active colors');
