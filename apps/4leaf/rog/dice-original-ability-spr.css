@@ -12,7 +12,7 @@
  z-index:68!important;
  overflow:visible!important;
  filter:drop-shadow(0 5px 12px #12103888);
- animation:leaf-original-ability-entry 1.6s ease-in-out both;
+ visibility:hidden!important;
 }
 #app.app-classic-dice #game #leaf-original-ability-stage img{
  position:absolute!important;
@@ -34,4 +34,9 @@
  #app.app-classic-dice #game #leaf-original-ability-stage{
   transform:translate(-50%,-50%) scale(.72)!important;
  }
+}
+
+#app.app-classic-dice #game #leaf-original-ability-stage[data-status="ready"]{
+ visibility:visible!important;
+ animation:leaf-original-ability-entry 1.6s ease-in-out both;
 }
