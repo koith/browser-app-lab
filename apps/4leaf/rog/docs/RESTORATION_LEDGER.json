@@ -1345,20 +1345,29 @@
       "id": "CHT-01",
       "priority": "P0",
       "title": "2004 동일 방 배경·레이아웃 매칭",
-      "status": "todo",
+      "status": "done",
       "milestone": "M03",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원작 chat.jpg에는 특정 목재 방과 10명 참가자가 있고 현재 QA 캡처는 다른 실내 배경·1명 상태이므로 1:1 픽셀 검사 불가 | 구현 목표: 원작 방 ID/인테리어 파일을 특정하고 같은 방/실내 794×528 좌표의 화면·창틀·가구를 상태 맞춰 캡처",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원작 chat.jpg에는 특정 목재 방과 10명 참가자가 있고 현재 QA 캡처는 다른 실내 배경·1명 상태이므로 1:1 픽셀 검사 불가 | 구현 목표: 원작 방 ID/인테리어 파일을 특정하고 같은 방/실내 794×528 좌표의 화면·창틀·가구를 상태 맞춰 캡처; 원본 chat.jpg/chat_ref.jpg의 동일 목재 방이 진짜 ChatRoom/room4.png임을 확인. 115×103 원본 room4t 전경 탁자 1,011개 소스픽셀을 원본 JPEG 2장에 대해 1:1 최적 정합: 두 사진에서 x427,y425 동일, 웹 실제 렌더도 x427,y425이므로 원본 앵커 차 0px. 앱 원본 room4 실내 794×528, 채팅 x16/참가자 x623/EXIT x728 실측 Chromium PASS. 10~11인 실시간 접속·채팅 글꼴·표정/좌석 등은 다른 미완료 업무로 유지.",
       "acceptance": [
         "같은 원본 방과 현재 방을 정확히 짝지어 가구/창틀/로고 배경 1:1 배치 앵커 오차 기록"
       ],
       "evidence": [
         "../assets/chat.jpg",
         "../assets/chat_ref.jpg",
-        "tests/visual-fourleaf-room-source.cjs"
+        "tests/visual-fourleaf-room-source.cjs",
+        "apps/4leaf/rog/docs/ORIGINAL_CHAT_ROOM4_VERIFICATION_2026-10-19.md",
+        "apps/4leaf/rog/tests/chatroom-furniture-registration.cjs",
+        "https://github.com/koith/browser-app-lab/actions/runs/39178101196",
+        "https://github.com/koith/browser-app-lab/commit/eaf6b274ad9bacb32c443f20baf8646f0f7486b0"
       ],
-      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-18",
-      "verifiedAcceptance": null,
+      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/VERIFIED-WEBAPP-ROOM4-ONLY",
+      "lastReviewed": "2026-10-19",
+      "verifiedAcceptance": {
+        "sourceComparison": "2004 chat.jpg and chat_ref.jpg both 794x528 original wood room; recovered ChatRoom/room4.png + native 115x103 room4t.png matching independent source reference pixels at original x427,y425/1x, both pictures",
+        "implementation": "apps/4leaf/rog/social-chat.js + chatroom-native-2004-frame.css + original/ChatRoom/room4.png + room4t.png, dynamic Registry actors/real chat remain interactive; original image used, not screenshot overlay",
+        "runtimeTest": "39178101196 World and Chat Chromium success; tests/chatroom-furniture-registration.cjs sampled 1011 pixels, x427 y425 at 1x twice and rendered x427 y425; tests/visual-fourleaf-room-source.cjs 794x528 room and 4 UI anchor bounds",
+        "deployment": "eaf6b274ad9bacb32c443f20baf8646f0f7486b0 on koith/browser-app-lab main, GitHub Pages https://koith.github.io/browser-app-lab/apps/4leaf/rog/"
+      },
       "dependencies": [
         "EVID-01"
       ],
@@ -3147,6 +3156,23 @@
       "taskId": "BRD-04",
       "details": "2002 26 DMP paths but 25 title labels; game source map registry now includes historically unnamed 0170 135-cell authentic route, protected explicit uncertainty and desktop/mobile Chromium game QA",
       "evidence": "apps/4leaf/rog/tests/dice-source-map0170-registration.cjs"
+    },
+    {
+      "seq": 111,
+      "date": "2026-10-19",
+      "type": "STATUS_CHANGED",
+      "taskId": "CHT-01",
+      "from": "todo",
+      "to": "done",
+      "details": "Same historical ChatRoom room4 fully identified and backdrop/foreground 1:1 anchor matched in two 2004 screenshots + actual 794x528 Chromium game, preserving live users (no fake occupants). Other CHT tasks stay open."
+    },
+    {
+      "seq": 112,
+      "date": "2026-10-19",
+      "type": "QA_VERIFIED",
+      "taskId": "CHT-01",
+      "details": "Original ChatRoom/room4t.png 115x103 sampled 1011 original alpha pixels: x427 y425 at 1x in both 2004 chat refs and exact same x427 y425 in live native rendering; UI overlays x16 x623 EXIT x728 verified",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39178101196"
     }
   ]
 }
