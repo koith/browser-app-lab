@@ -69,6 +69,21 @@
         "P0-CHAT",
         "P0-RELEASE"
       ]
+    },
+    {
+      "id": "REQ-20261018-004",
+      "date": "2026-10-18",
+      "origin": "iPhone live screenshot IMG_6902.jpeg with user report",
+      "text": "육각발판 수평배열시 겹친다 체스맨 언제 원작 리소스 쓰냐 주사위 저게 원본꺼냐? 아닌데",
+      "taskIds": [
+        "M04",
+        "M05",
+        "M07",
+        "P0-BOARD",
+        "P0-ACTOR",
+        "P0-DICE",
+        "P0-RELEASE"
+      ]
     }
   ],
   "tasks": [
@@ -249,7 +264,7 @@
       "title": "타일 상하·겹침·입체감 사용자 재현 결함",
       "status": "in_progress",
       "milestone": "M04",
-      "current": "반전 패치와 128x86 웹 투영만으로 최종 해결 아님; 원본 DMP 26개 맵 1,920개 XY 좌표 검사로 동일 맵 좌표 중복 0건, 현재 웹 투영의 사각영역 최대 중첩 약 11.7%로 계산. 실제 픽셀/알파/메시 가림은 미검증.; 이번 수정에서 타일별 원본 이미지의 불투명 픽셀을 잘라내던 4px 중간점 클리핑을 전체 원본 알파 포함 외곽선으로 교정하고, 웹에서 추가한 임의 칸 번호·문자 그래픽을 원본 TIS 위에서 제거. 브라우저 QA 대기.; QA 성공: 원본 TIS 32종 341,961 불투명 픽셀 중 잘림 0, 웹 번호 덧그림 0, 4LEAF 104칸 및 악마의 달팽이 69칸 Chromium 배치·ROLL·D4/D6 회귀 성공. 원본 3D 높이/간격 동등성은 미검증.",
+      "current": "반전 패치와 128x86 웹 투영만으로 최종 해결 아님; 원본 DMP 26개 맵 1,920개 XY 좌표 검사로 동일 맵 좌표 중복 0건, 현재 웹 투영의 사각영역 최대 중첩 약 11.7%로 계산. 실제 픽셀/알파/메시 가림은 미검증.; 이번 수정에서 타일별 원본 이미지의 불투명 픽셀을 잘라내던 4px 중간점 클리핑을 전체 원본 알파 포함 외곽선으로 교정하고, 웹에서 추가한 임의 칸 번호·문자 그래픽을 원본 TIS 위에서 제거. 브라우저 QA 대기.; QA 성공: 원본 TIS 32종 341,961 불투명 픽셀 중 잘림 0, 웹 번호 덧그림 0, 4LEAF 104칸 및 악마의 달팽이 69칸 Chromium 배치·ROLL·D4/D6 회귀 성공. 원본 3D 높이/간격 동등성은 미검증.; 2026-10-18 실제 iPhone 스크린샷: 145x97 원본 TIS 가로 중심 간격 128px로 17px 겹침 재현. 웹 투영 150x100 및 세계 6000x3300으로 확장하고 26맵 원본 DMP 경로 좌표 유지. 모바일 실판 렌더·전맵 검사 진행 중.",
       "acceptance": [
         "전체 맵 동선에서 과도한 중첩/상하 역전 0건; 알파/행 순서·타일 접근성·스크린샷 비교 기록"
       ],
@@ -262,7 +277,9 @@
         "apps/4leaf/rog/dice-native-tis-alpha.js",
         "apps/4leaf/rog/game.js",
         "https://github.com/koith/browser-app-lab/actions/runs/39121106579",
-        "https://github.com/koith/browser-app-lab/commit/69112199dce1de3a9ae6149d64730f2b4ca84cc3"
+        "https://github.com/koith/browser-app-lab/commit/69112199dce1de3a9ae6149d64730f2b4ca84cc3",
+        "apps/4leaf/rog/board-camera.js",
+        "apps/4leaf/rog/tests/dice-horizontal-native-actors.cjs"
       ],
       "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
       "lastReviewed": "2026-10-18",
@@ -272,14 +289,16 @@
       "id": "P0-ACTOR",
       "priority": "P0",
       "title": "채팅 아바타 대신 실제 창세기전 체스맨과 행동",
-      "status": "todo",
+      "status": "in_progress",
       "milestone": "M05",
-      "current": "본체 일부 연결, 캐릭터별 원작 애니메이션 미해독",
+      "current": "본체 일부 연결, 캐릭터별 원작 애니메이션 미해독; 기본 상대 c_0096의 OBS 원본 미확보로 거대 CSS 인형 표출하던 원인 확인. 기본 상대는 원본 OBS 있는 c_0045 등으로 교체, 미복원 모델은 원본 CardData 정지 초상화로 표시하고 본체 미복구 명시. 98종 전체 OBS 동작 복원 미완료.",
       "acceptance": [
         "모든 캐릭터/상태에서 확인된 OBS 동작만 재생하고 나머지는 미복구로 투명하게 표시"
       ],
       "evidence": [
-        "apps/4leaf/rog/genesis-chessman-actors.js"
+        "apps/4leaf/rog/genesis-chessman-actors.js",
+        "apps/4leaf/rog/genesis-chessman-actors.js",
+        "apps/4leaf/rog/dice-original-obs.css"
       ],
       "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
       "lastReviewed": "2026-10-18",
@@ -308,7 +327,7 @@
       "title": "원작 주사위 눈별 낙하/튕김/정지 연출",
       "status": "in_progress",
       "milestone": "M07",
-      "current": "SPR 버튼은 실제 소스지만 물리 주사위 웹 폴백; 원본 IMG.pak eventRoll1.spr 16 PNG 선디코드·첫 콜드 롤 프레임 보장 코드를 구현. 최종 원본 3D 눈별 모션은 미복구.; D4 임시 연출은 숫자만 갈아 끼우던 평면 삼각형 대신 서로 다른 실제 3D 면과 결과별 법선 방향을 갖는 정사면체 렌더로 개선 중.; 원본 ROLL 16프레임 선디코드/캐시 및 D4 정사면체 4면 방향별 착지 구현, 원본 낙하 메시/키프레임은 여전히 미복원.",
+      "current": "SPR 버튼은 실제 소스지만 물리 주사위 웹 폴백; 원본 IMG.pak eventRoll1.spr 16 PNG 선디코드·첫 콜드 롤 프레임 보장 코드를 구현. 최종 원본 3D 눈별 모션은 미복구.; D4 임시 연출은 숫자만 갈아 끼우던 평면 삼각형 대신 서로 다른 실제 3D 면과 결과별 법선 방향을 갖는 정사면체 렌더로 개선 중.; 원본 ROLL 16프레임 선디코드/캐시 및 D4 정사면체 4면 방향별 착지 구현, 원본 낙하 메시/키프레임은 여전히 미복원.; 사용자 스크린샷 흰색 입체 주사위는 웹 CSS 3D 폴백. 원본 roll.spr/eventRoll1.spr 20프레임은 ROLL UI 버튼이며 주사위 모델이 아님; 원본 D4/D6 MVE/EXE 메시/애니메이션 미복구. 원본 아닌 것을 원본으로 표시 금지.",
       "acceptance": [
         "각 주사위의 최종 눈이 경기 엔진 판정과 일치, 실제 원본 연출 근거 확보"
       ],
@@ -320,7 +339,9 @@
         "apps/4leaf/rog/dice-d4-source-fallback.css",
         "apps/4leaf/rog/tests/dice-fall.cjs",
         "https://github.com/koith/browser-app-lab/actions/runs/39120197085",
-        "https://github.com/koith/browser-app-lab/commit/38f147e9e41c79bb6c508f3cfb53a24388285f6a"
+        "https://github.com/koith/browser-app-lab/commit/38f147e9e41c79bb6c508f3cfb53a24388285f6a",
+        "apps/4leaf/rog/dice-fall.js",
+        "apps/4leaf/rog/original/SourceSPR/manifest.json"
       ],
       "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
       "lastReviewed": "2026-10-18",
@@ -545,6 +566,47 @@
       "taskId": "P0-BOARD",
       "details": "PR #110 production main squash commit 69112199: conservative full-alpha platform outlines, native artwork only, no synthetic per-cell numbers.",
       "evidence": "https://github.com/koith/browser-app-lab/pull/110"
+    },
+    {
+      "seq": 16,
+      "date": "2026-10-18",
+      "type": "STATUS_CHANGED",
+      "taskId": "P0-ACTOR",
+      "from": "todo",
+      "to": "in_progress",
+      "details": "기본 참가자 원본 OBS 강제, 원본 미확보 0096의 CSS 대형 인형 제거. 전체 98종/원작 행동 표는 미복구."
+    },
+    {
+      "seq": 17,
+      "date": "2026-10-18",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261018-004",
+      "taskIds": [
+        "M04",
+        "M05",
+        "M07",
+        "P0-BOARD",
+        "P0-ACTOR",
+        "P0-DICE",
+        "P0-RELEASE"
+      ],
+      "details": "아이폰에서 수평 타일 겹침 + 거대 CSS 체스맨 + 비원본 주사위 반복 보고. 사용자 화면을 수용 증거로 등록."
+    },
+    {
+      "seq": 18,
+      "date": "2026-10-18",
+      "type": "IMPLEMENTED_PENDING_QA",
+      "taskId": "P0-BOARD",
+      "details": "투영 가로 150px(145px 원본 이미지 폭+5px), 세로 100px(97px+3px), 전 26맵 37열·29행까지 포함하는 6000x3300 월드. 사용자 단순 수평 겹침에 대한 수정. 원작 3D 높이/원본 렌더러 미복구.",
+      "evidence": "apps/4leaf/rog/board-camera.js"
+    },
+    {
+      "seq": 19,
+      "date": "2026-10-18",
+      "type": "IMPLEMENTED_PENDING_QA",
+      "taskId": "P0-ACTOR",
+      "details": "c_0096 CSS 112px 가짜 큰 인형 대신 미복원 시 CardData 원본 40x55 정지 이미지, 기본 상대는 실제 c_0045 OBS 전신; 실제 원본 모델 없는 캐릭터는 본체 미복구 표시.",
+      "evidence": "apps/4leaf/rog/genesis-chessman-actors.js"
     }
   ]
 }
