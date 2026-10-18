@@ -81,6 +81,24 @@ const {chromium}=require('playwright');
   console.log('SOURCE_SCREENSHOT_QA '+JSON.stringify(audit));
   console.log('SOURCE_SCREENSHOT_JPEG_BASE64 '+img.toString('base64'));
   console.log('SOURCE_SCREENSHOT_END');
+  // TEMPORARY DIRECTION A/B QA. Current TIS decoded PNGs are taken from a
+  // bottom-up indexed sprite and flipped by decode_tis.py. This capture does
+  // not change production CSS: render the same LIVE scene with the inverse
+  // Y orientation for historical source-photo comparison, then restore.
+  const originalPhotoOrientation=await page.evaluate(()=>{
+   const style=document.createElement('style');
+   style.id='leaf-tis-source-orientation-ab';
+   style.textContent='#app.app-classic-dice #game #board-nodes .tile[data-native-tis-size="145x97"]{transform:translate(-50%,-50%) scaleY(-1)!important}';
+   document.head.append(style);
+   return getComputedStyle(document.querySelector('#board-nodes>.tile')).transform;
+  });
+  const inversePhoto=await game.screenshot({
+   type:'jpeg',quality:77,animations:'disabled',timeout:18000});
+  console.log('SOURCE_TIS_INVERTED_AB_GEOMETRY '+originalPhotoOrientation);
+  console.log('SOURCE_TIS_INVERTED_AB_JPEG_BASE64 '+inversePhoto.toString('base64'));
+  console.log('SOURCE_TIS_INVERTED_AB_END');
+  await page.evaluate(()=>document.querySelector('#leaf-tis-source-orientation-ab')?.remove());
+
   // An independent LIVE source bitmap capture: two OBS.pak original Genesis
   // full-body characters stand on the actual DMP START cell. Card IDs are
   // test-only changes, never a static compositor or permanent game data.
