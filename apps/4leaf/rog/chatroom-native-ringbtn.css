@@ -60,3 +60,19 @@
   transform-origin:top left;
  }
 }
+
+/* Original actor context menu must be interactive ABOVE the original room
+ * tool strip. A child z-index:175 cannot escape the avatar-layer's z=4
+ * stacking context; the 2004 toolbar at z=105 otherwise steals clicks.
+ * Raise this context only while the menu is open; make its full-scene layer
+ * pointer-transparent so actual chat/EXIT/toolbar still respond outside
+ * the avatar/menu rectangles. Do not duplicate or relocate peer actions.
+ */
+#rooms.classic-chat-room .social-avatar-layer:has(#social-actor-menu){
+ z-index:140!important;
+ pointer-events:none!important;
+}
+#rooms.classic-chat-room .social-avatar-layer:has(#social-actor-menu)
+ :is(.social-avatar,#social-actor-menu){
+ pointer-events:auto!important;
+}
