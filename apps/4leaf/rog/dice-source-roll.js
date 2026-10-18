@@ -23,6 +23,8 @@
   if(sourceAnimation)clearInterval(sourceAnimation);
   let frame=0;
   showFrame(frame);
+  source.dataset.sourceRollTriggerCount=String(
+   (Number(source.dataset.sourceRollTriggerCount)||0)+1);
   source.dataset.sourceRollAnimated='true';
   sourceAnimation=setInterval(()=>{
    frame++;
@@ -91,13 +93,16 @@
    game.append(source);
   }
   installOriginalImage();
+  // The native 16-frame source animation must follow the ONE authoritative
+  // roll engine for all inputs (visible source button, keyboard/primary HUD,
+  // assistive control). Capture fires before game handlers disable the turn.
+  // The source button only forwards its click to that same engine, so no
+  // second animation or duplicate random dice result can be created.
+  roll.addEventListener('click',()=>{
+   if(!roll.disabled)playOriginalRoll();
+  },{capture:true});
   source.addEventListener('click',()=>{
-   // The main game engine alone decides whose turn it is and generates
-   // movement values. Dispatch no synthetic events or duplicate dice logic.
-   if(!roll.disabled){
-    playOriginalRoll();
-    roll.click();
-   }
+   if(!roll.disabled)roll.click();
    sync();
   });
   observer?.disconnect();
@@ -116,6 +121,7 @@
    originalSource:nativeReady()?'Dice/IMG.pak:eventRoll1.spr':null,
    nativeFrameCount:nativeReady()?16:0,
    displayedFrame:Number(source?.dataset.sourceRollFrame)||0,
+   nativeTriggerCount:Number(source?.dataset.sourceRollTriggerCount)||0,
    evidence:nativeReady()?'original-2002-IMG-SPR/palette-frames':
     '2004-board-battle-screenshot-inferred-mesh'})
  };
