@@ -55,8 +55,9 @@ const {chromium}=require('playwright');
     }))
    };
   });
-  // Source TIS JOKER lettering and tile artwork are already upright inside
-  // the recovered 145x97 PNG. A second Y-flip in CSS makes real art inverted.
+  // REAL 2004 photo A/B shows the extracted TIS PNG lettering upside down.
+  // Native decode_tis.py flips bottom-up rows during export. The ACTUAL
+  // in-browser image must be vertically inverted again to show upright art.
   const nativeOrientation=await page.evaluate(()=>{
    const first=document.querySelector('#board-nodes>.tile');
    const matrix=new DOMMatrixReadOnly(getComputedStyle(first).transform);
@@ -65,7 +66,7 @@ const {chromium}=require('playwright');
     size:[first.offsetWidth,first.offsetHeight],
     source:first.dataset.originalArt};
   });
-  if(nativeOrientation.det<=0||nativeOrientation.size[0]!==145||
+  if(nativeOrientation.det>=0||nativeOrientation.size[0]!==145||
     nativeOrientation.size[1]!==97)
    throw Error('Upside-down source TIS or wrongly scaled source tile: '+
      JSON.stringify(nativeOrientation));
@@ -75,30 +76,29 @@ const {chromium}=require('playwright');
     JSON.stringify({visible:audit.visibleTileCount,pitch:audit.projection}));
   if(audit.nativeTileSize.some(([w,h])=>w!==145||h!==97))
    throw Error('Do not distort original 145x97 TIS artwork');
-  if(audit.orientation.includes('-1, 0, 0'))
-   throw Error('Native TIS painting was flipped/upside down again');
+  if(!audit.orientation.includes('0, -1,'))
+   throw Error('Native TIS rendering did not correct upside-down extractor bitmap');
   const img=await game.screenshot({type:'jpeg',quality:70,animations:'disabled',timeout:18000});
   console.log('SOURCE_SCREENSHOT_QA '+JSON.stringify(audit));
   console.log('SOURCE_SCREENSHOT_JPEG_BASE64 '+img.toString('base64'));
   console.log('SOURCE_SCREENSHOT_END');
-  // TEMPORARY DIRECTION A/B QA. Current TIS decoded PNGs are taken from a
-  // bottom-up indexed sprite and flipped by decode_tis.py. This capture does
-  // not change production CSS: render the same LIVE scene with the inverse
-  // Y orientation for historical source-photo comparison, then restore.
+  // Keep an independent nonproduction A/B: restore PREVIOUS erroneous
+  // unflipped TIS art, capture it, then return to approved original source
+  // orientation. The current 2004 screenshot comparison confirmed Y-inversion.
   const originalPhotoOrientation=await page.evaluate(()=>{
    const style=document.createElement('style');
    style.id='leaf-tis-source-orientation-ab';
-   style.textContent='#app.app-classic-dice #game .board-world #board-nodes .tile[data-native-tis-size="145x97"]{transform:translate(-50%,-50%) scaleY(-1)!important}';
+   style.textContent='#app.app-classic-dice #game .board-world #board-nodes .tile[data-native-tis-size="145x97"]{transform:translate(-50%,-50%)!important}';
    document.head.append(style);
    return getComputedStyle(document.querySelector('#board-nodes>.tile')).transform;
   });
-  if(!originalPhotoOrientation.startsWith('matrix(1, 0, 0, -1,'))
+  if(!originalPhotoOrientation.startsWith('matrix(1, 0, 0, 1,'))
    throw Error('Source orientation A/B CSS did not override legacy orientation: '+originalPhotoOrientation);
   const inversePhoto=await game.screenshot({
    type:'jpeg',quality:77,animations:'disabled',timeout:18000});
-  console.log('SOURCE_TIS_INVERTED_AB_GEOMETRY '+originalPhotoOrientation);
-  console.log('SOURCE_TIS_INVERTED_AB_JPEG_BASE64 '+inversePhoto.toString('base64'));
-  console.log('SOURCE_TIS_INVERTED_AB_END');
+  console.log('SOURCE_TIS_OLD_INVERTED_AB_GEOMETRY '+originalPhotoOrientation);
+  console.log('SOURCE_TIS_OLD_INVERTED_AB_JPEG_BASE64 '+inversePhoto.toString('base64'));
+  console.log('SOURCE_TIS_OLD_INVERTED_AB_END');
   await page.evaluate(()=>document.querySelector('#leaf-tis-source-orientation-ab')?.remove());
 
   // An independent LIVE source bitmap capture: two OBS.pak original Genesis
