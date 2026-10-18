@@ -9,6 +9,7 @@ on:
       - 'apps/4leaf/rog/world-perspective.css'
       - 'apps/4leaf/rog/tests/board-layout.cjs'
       - 'apps/4leaf/rog/tests/dmp-tile-overlap-audit.cjs'
+      - 'apps/4leaf/rog/tests/dice-all-source-maps-camera.cjs'
       - 'apps/4leaf/rog/board-camera.js'
       - 'apps/4leaf/rog/dice-original-obs.css'
       - 'apps/4leaf/rog/genesis-chessman-actors.js'
@@ -91,6 +92,8 @@ jobs:
       - name: Verify changing real native OBS frame dimensions, not fixed frame-zero labels
         run: node apps/4leaf/rog/tests/dice-original-obs-chessmen.cjs
       - run: node apps/4leaf/rog/tests/board-layout.cjs
+      - name: Verify 26 native source map DMP paths and all 1920 TIS cells are camera-reachable in desktop and iPhone
+        run: node apps/4leaf/rog/tests/dice-all-source-maps-camera.cjs
       - name: "Reproduce iPhone screenshot: zero horizontal TIS overlap and 2 original Genesis OBS players"
         run: node apps/4leaf/rog/tests/dice-horizontal-native-actors.cjs
       - name: Verify genuine native Genesis OBS chessman and no giant fabricated missing-body proxy
