@@ -722,9 +722,28 @@
   if(state.view!=='directory')return;
   frame.className='social-image-frame social-room-directory';
   frame.style.backgroundImage='url("./original/ChatTown/'+REGIONS[state.region].art+'.png")';
-  frame.innerHTML='<section class="social-directory"><header class="social-directory-heading"><b>CHATTING TOWN · <span id="social-directory-name"></span></b><button id="social-new-room" type="button">+ 채팅방 만들기</button></header><div id="social-map-viewport" class="social-map-viewport" tabindex="0" aria-label="채팅방 지도. 방향키 또는 드래그로 사방 이동"><div id="social-map-plane" class="social-map-plane"><div class="social-map-terrain" aria-hidden="true"></div><div id="social-directory-list" class="social-map-rooms"></div></div></div><footer class="social-map-toolbar"><span>지도 드래그 · 방향키 / 휠 이동 · 표시 인원은 실제 연결 사용자</span><div class="social-map-directions"><button type="button" data-pan="left" aria-label="왼쪽 이동">◀</button><button type="button" data-pan="up" aria-label="위쪽 이동">▲</button><button type="button" data-pan="down" aria-label="아래쪽 이동">▼</button><button type="button" data-pan="right" aria-label="오른쪽 이동">▶</button></div></footer></section>';
+  frame.innerHTML='<section class="social-directory"><header class="social-directory-heading"><b><span id="social-directory-name"></span> · 채팅방</b><div class="social-directory-actions"><button id="social-web-estate-toggle" type="button" aria-pressed="false" title="복원되지 않은 배치 좌표를 사용하는 웹 지도를 선택적으로 열기">지도</button><button id="social-new-room" type="button">+ 방 만들기</button></div></header><div id="social-map-viewport" class="social-map-viewport" tabindex="0" aria-label="채팅방 지도. 방향키 또는 드래그로 사방 이동"><div id="social-map-plane" class="social-map-plane"><div class="social-map-terrain" aria-hidden="true"></div><div id="social-directory-list" class="social-map-rooms"></div></div></div><footer class="social-map-toolbar"><span>지도 드래그 · 방향키 / 휠 이동 · 표시 인원은 실제 연결 사용자</span><div class="social-map-directions"><button type="button" data-pan="left" aria-label="왼쪽 이동">◀</button><button type="button" data-pan="up" aria-label="위쪽 이동">▲</button><button type="button" data-pan="down" aria-label="아래쪽 이동">▼</button><button type="button" data-pan="right" aria-label="오른쪽 이동">▶</button></div></footer></section>';
   $('social-directory-name').textContent=state.district;
   $('social-new-room').onclick=showCreateRoom;
+  // Original ChatTown background is recovered; the room-estate terrain and
+  // position table are NOT. Default to native backdrop + compact genuine
+  // joinable room list, never a giant fabricated grey map covering the art.
+  // Preserve the inferred pan-able web estate only as an explicit option.
+  const estateToggle=$('social-web-estate-toggle');
+  estateToggle.onclick=()=>{
+   const root=frame.querySelector('.social-directory');
+   const opened=root.classList.toggle('web-estate-open');
+   estateToggle.setAttribute('aria-pressed',String(opened));
+   estateToggle.textContent=opened?'목록':'지도';
+   estateToggle.title=opened?
+    '원본 배경 위 실제 방 목록으로 돌아가기':
+    '원본이 미확보된 추정 웹 지도 열기';
+   $('social-map-viewport')?.setAttribute('aria-label',opened?
+    '원본 배치 미확보 · 웹 지도. 방향키 또는 드래그로 보기':
+    '복구한 ChatTown 배경 위 실제 서버 채팅방 목록. 클릭하여 입장');
+  };
+  $('social-map-viewport')?.setAttribute('aria-label',
+   '복구한 ChatTown 배경 위 실제 서버 채팅방 목록. 클릭하여 입장');
   const list=$('social-directory-list'),rooms=catalogue();
   // A vacant original-era server is not permission to invent rooms.
   if(!rooms.length){
