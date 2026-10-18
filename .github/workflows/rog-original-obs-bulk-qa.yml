@@ -3,6 +3,8 @@ on:
   push:
     paths:
       - 'apps/4leaf/rog/tests/dice-original-obs-bulk.cjs'
+      - 'apps/4leaf/rog/tools/report-restoration-coverage.cjs'
+      - 'apps/4leaf/rog/original/SourceSPR/**'
       - 'apps/4leaf/rog/original/OBS/animation-extra.js'
       - 'apps/4leaf/rog/original/OBS/bulk/**'
       - 'apps/4leaf/rog/genesis-chessman-actors.js'
@@ -20,6 +22,8 @@ jobs:
           node-version: '22'
       - run: npm install --no-save playwright
       - run: npx playwright install chromium --with-deps
+      - name: Audit verified source counts, asset referential integrity and unverified behaviors
+        run: node apps/4leaf/rog/tools/report-restoration-coverage.cjs
       - name: Verify all recovered OBS source frames and play an actual DMP duel in Chromium
         run: node apps/4leaf/rog/tests/dice-original-obs-bulk.cjs
       - uses: actions/upload-artifact@v4
