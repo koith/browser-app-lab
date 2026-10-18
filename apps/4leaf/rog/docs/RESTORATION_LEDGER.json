@@ -36,6 +36,21 @@
         "P0-RELEASE",
         "GOV-LEDGER"
       ]
+    },
+    {
+      "id": "REQ-20261018-002",
+      "date": "2026-10-18",
+      "origin": "2026-10-18 user instruction",
+      "text": "원작복원 계속해라",
+      "taskIds": [
+        "M04",
+        "M05",
+        "M07",
+        "P0-BOARD",
+        "P0-ACTOR",
+        "P0-DICE",
+        "P0-RELEASE"
+      ]
     }
   ],
   "tasks": [
@@ -269,12 +284,15 @@
       "title": "원작 주사위 눈별 낙하/튕김/정지 연출",
       "status": "todo",
       "milestone": "M07",
-      "current": "SPR 버튼은 실제 소스지만 물리 주사위 웹 폴백",
+      "current": "SPR 버튼은 실제 소스지만 물리 주사위 웹 폴백; 원본 IMG.pak eventRoll1.spr 16 PNG 선디코드·첫 콜드 롤 프레임 보장 코드를 구현. 최종 원본 3D 눈별 모션은 미복구.",
       "acceptance": [
         "각 주사위의 최종 눈이 경기 엔진 판정과 일치, 실제 원본 연출 근거 확보"
       ],
       "evidence": [
-        "apps/4leaf/rog/dice-source-roll.js"
+        "apps/4leaf/rog/dice-source-roll.js",
+        "apps/4leaf/rog/dice-source-roll.js",
+        "apps/4leaf/rog/tests/dice-source-roll.cjs",
+        ".github/workflows/rog-board-layout.yml"
       ],
       "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
       "lastReviewed": "2026-10-18",
@@ -407,6 +425,30 @@
       "from": "in_progress",
       "to": "done",
       "details": "원장 도입 자체를 완료 판정. 원작 게임 M03–M09/P0는 모두 미완료 상태로 남기고 시각적 복원 완료라는 뜻으로 사용하지 않음. 검증: main ledger CI 39119202546, Pages 39119202555."
+    },
+    {
+      "seq": 7,
+      "date": "2026-10-18",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261018-002",
+      "taskIds": [
+        "M04",
+        "M05",
+        "M07",
+        "P0-BOARD",
+        "P0-ACTOR",
+        "P0-DICE",
+        "P0-RELEASE"
+      ],
+      "details": "원작 복원 지속. 기존 P0 미완료 우선, 소스/브라우저 수용 기준 충족 전 DONE 승격 금지."
+    },
+    {
+      "seq": 8,
+      "date": "2026-10-18",
+      "type": "IMPLEMENTED_PENDING_QA",
+      "taskId": "P0-DICE",
+      "details": "2002 IMG.pak의 원본 eventRoll1.spr 16장 프레임을 게임 시작시 모두 load+decode하여 실제 ROLL 클릭에서 콜드 로드 누락 없는 애니메이션 처리. D4/D6 3D 모델·물리 원본 복원과 구별.",
+      "evidence": "apps/4leaf/rog/dice-source-roll.js"
     }
   ]
 }
