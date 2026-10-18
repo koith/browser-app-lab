@@ -79,6 +79,55 @@ def decode_rows(body,width,height,palette):
         return img,{"sourceRows":height,"decoder":"palette-and-byte-run-verified;x-centre-and-orientation-provisional","markerThreshold":low,"opaquePixels":opaque}
     raise ValueError("No strict full-height native scanline solution")
 
+def inspect_rejected_member(source, frames=None):
+    """Read-only byte-structure probe for the still-missing original bodies.
+    Never converts guesses to accepted game sprites; records candidate row
+    header distributions so a future codec repair can be verified.
+    """
+    if frames is None:
+        headers=[]
+        for off in (66,68,70,72,74):
+            if off+2<=len(source):
+                headers.append({"offset":off,"count":struct.unpack_from("<H",source,off)[0]})
+        geometries=[]
+        for off in (124,128,132,136,140):
+            if off+12<=len(source):
+                n,w,h,ox,oy=struct.unpack_from("<IHHhh",source,off)
+                geometries.append({"offset":off,"length":n,"width":w,
+                    "height":h,"ox":ox,"oy":oy,
+                    "plausible":10<=w<=300 and 10<=h<=300 and 10<n<=250000})
+        return {"headers":headers,"geometries":geometries,
+                "sourceLength":len(source)}
+    probes=[]
+    for index in FRAMES:
+        if index>=len(frames):continue
+        body,w,h,ox,oy=frames[index]
+        candidates=[]
+        for markerHigh in (0,1,2,3):
+            for low in (0,8,16,20,28,32):
+                starts=[0]
+                for i in range(1,len(body)-3):
+                    a,b,c,d=body[i:i+4]
+                    if a>=low and a<=128 and b==markerHigh and c<=min(90,w+30) and d<=3:
+                        starts.append(i)
+                spans=[(starts[j+1] if j+1<len(starts) else len(body))-p-4
+                    for j,p in enumerate(starts)]
+                valid=sum(1 for v in spans if 1<=v<=w)
+                # Sorted by full source-row reconstruction closeness and
+                # in-bounds pixel payload; never guess action frames.
+                candidates.append({"marker":markerHigh,"threshold":low,
+                    "rows":len(starts),"valid":valid,
+                    "deviation":abs(len(starts)-h),
+                    "maxSpan":max(spans) if spans else -1})
+        best=sorted(candidates,key=lambda p:(p["deviation"],
+            -(p["valid"]/max(1,p["rows"])),p["marker"]!=2,
+            abs(p["threshold"]-20)))[:5]
+        probes.append({"frame":index,"width":w,"height":h,"origin":[ox,oy],
+            "length":len(body),"head":body[:16].hex(),
+            "nearby":best})
+    return {"sampled":probes}
+
+
 def main():
     if len(sys.argv)!=4:
         raise SystemExit("Usage: decode-original-obs-bulk.py OBS.pak chessmen.json original/OBS")
@@ -86,7 +135,8 @@ def main():
     deck={str(c["id"]):c for c in json.loads(cards.read_text(encoding="utf-8"))}
     recovered={}; statistics={"source":archive.name,"archiveSHA256":hashlib.sha256(archive.read_bytes()).hexdigest(),
         "members":0,"cardMembers":0,"accepted":0,"framePNGs":0,"bytes":0,
-        "staticOnly":0,"multiFrameSamples":0,"rejected":{}}
+        "staticOnly":0,"multiFrameSamples":0,"rejected":{},
+        "decodeDiagnostics":{}}
     target=out/"bulk"
     source=archive.read_bytes()
     for name,data in source_members(source):
@@ -97,7 +147,9 @@ def main():
         statistics["cardMembers"]+=1
         try:frames,palette=unpack_frames(data)
         except ValueError as exc:
-            statistics["rejected"][name]=str(exc);continue
+            statistics["rejected"][name]=str(exc)
+            statistics["decodeDiagnostics"][name]=inspect_rejected_member(data)
+            continue
         images=[]
         for i in FRAMES:
             if i>=len(frames):continue
@@ -115,6 +167,7 @@ def main():
         # Keep zero-frame-missing and one-frame-only explicitly unverified.
         if not images:
             statistics["rejected"][name]="no strictly decoded source frames"
+            statistics["decodeDiagnostics"][name]=inspect_rejected_member(data,frames)
             continue
         if statistics["framePNGs"]+len(images)>MAX_TOTAL_IMAGES:break
         if statistics["bytes"]+sum(len(f["payload"]) for f in images)>MAX_TOTAL_PNG_BYTES:break
