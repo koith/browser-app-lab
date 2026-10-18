@@ -894,6 +894,22 @@ const path=require('path');
   'native menu restores keyboard focus to real selected participant');
 
  await selectedPeer.evaluate(el=>el.click());
+ // Actual original MainFrame toolbar at z=109 used to steal clicks from
+ // the 26x22 original peer ringbtn menu when it appeared at that seat.
+ // Assert true physical topmost hit-testing, not a synthetic DOM.click().
+ const nativePeerHit=await host.locator(
+  '#social-actor-menu [aria-label="캐릭터 정보 보기"]').evaluate(button=>{
+   const r=button.getBoundingClientRect();
+   const target=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);
+   const layer=button.closest('.social-avatar-layer');
+   return {hit:target===button,interceptor:target?.getAttribute('aria-label'),
+    layerZ:layer?getComputedStyle(layer).zIndex:'missing'};
+  });
+ assert.ok(nativePeerHit.hit,
+  'original ringbtn action must outrank original Magic Carden tool while menu is open: '+
+   JSON.stringify(nativePeerHit));
+ assert.ok(Number(nativePeerHit.layerZ)>=150,
+  'native context menu must lift its own source avatar stacking context');
  await host.locator('#social-actor-menu [aria-label="캐릭터 정보 보기"]').click();
  assert.ok(await host.locator('#social-modal').isVisible(),'original icon opens the existing live peer information, not a fabricated member');
  await host.locator('.social-modal-title button').click();
