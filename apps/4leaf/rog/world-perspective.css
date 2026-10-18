@@ -19,7 +19,12 @@
    radial-gradient(ellipse at 49% 48%,transparent 20%,#0c173b3e 90%),
    url('./original/IMG/bgtile.png') 0 0 / 725px 485px repeat!important;
  transform-origin:0 0!important;
- transition:transform .20s ease-out!important;
+ /* A delayed 200ms CSS camera interpolation displayed tiles in the OLD
+    position after focusRatio() had already culled against the NEW one.
+    Native source DMP tiles disappeared / became unreachable during rapid
+    camera navigation (full 26-map camera regression). Original client
+    cursor/seat navigation is immediate; keep hitboxes and raster in sync. */
+ transition:none!important;
  will-change:transform;
 }
 #game .board-world::after{
