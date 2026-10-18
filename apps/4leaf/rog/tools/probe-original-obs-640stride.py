@@ -18,24 +18,25 @@ module=importlib.util.module_from_spec(spec)
 sys.modules[spec.name]=module
 spec.loader.exec_module(module)
 
-def test_stride(body,width,height,low):
+def test_stride(body,width,height,low,headerBytes=2,screenPitch=640):
     positions=[0]
     for i in range(1,len(body)-3):
         a,b,c,d=body[i:i+4]
         if low<=a<=128 and b==2 and c<=min(90,width+30) and d<=3:
             positions.append(i)
     if len(positions)!=height:return None
-    payload=[(positions[j+1] if j+1<height else len(body))-at-2
+    payload=[(positions[j+1] if j+1<height else len(body))-at-headerBytes
              for j,at in enumerate(positions)]
-    if not all(2<=length<=width+2 for length in payload):return None
+    if not all(1<=length<=width+2 for length in payload):return None
     x=[0]
     for row in range(1,height):
         skip=struct.unpack_from("<H",body,positions[row])[0]
-        x.append(x[-1]+payload[row-1]+skip-640)
+        x.append(x[-1]+payload[row-1]+skip-screenPitch)
     min_x=min(x)
     extent=max(offset+length for offset,length in zip(x,payload))-min_x
     plausible=extent<=width and abs(x[-1]-x[0])<=width
     return {"threshold":low,"height":height,"width":width,
+      "headerBytes":headerBytes,"pitch":screenPitch,
       "nativeRunWidths":payload[:8],"nativeSkipWords":[
          struct.unpack_from("<H",body,p)[0] for p in positions[:8]],
       "offsetFromFirst":[v-x[0] for v in x[:8]],
@@ -61,8 +62,10 @@ def main():
         for frameNo in (0,1,2,3,10):
             if frameNo>=len(frames):continue
             body,w,h,ox,oy=frames[frameNo]
-            options=[d for low in (20,24,28,32,16,12,8,4,0)
-                if (d:=test_stride(body,w,h,low))]
+            options=[d for header in (4,2)
+                for pitch in (638,639,640,641,642,643,644)
+                for low in (20,24,28,32,16,12,8,4,0)
+                if (d:=test_stride(body,w,h,low,header,pitch))]
             if not options:continue
             best=sorted(options,key=lambda d:(not d["fitsSourceFrame"],
                   abs(d["width"]-d["extent"]),abs(d["threshold"]-20)))[0]
@@ -78,12 +81,22 @@ def main():
         if len(group["examples"])<12:group["examples"].append({
             "member":record["member"],"frame":record["frame"],"size":record["size"],
             "extent":record["extent"],"fitting":record["fitsSourceFrame"],
+            "header":record["headerBytes"],"pitch":record["pitch"],
             "runWidths":record["nativeRunWidths"][:3],
             "skips":record["nativeSkipWords"][:3],"x":record["offsetFromFirst"][:3]})
-    result={"codec":"hypothesis-only: two-byte 640-stride skips",
+    # Record combinations; reject a source hypothesis if the majority of
+    # strict original frames do not fit their declared native width.
+    byVariant={}
+    for v in samples:
+        key=str(v["headerBytes"])+"/"+str(v["pitch"])
+        agg=byVariant.setdefault(key,{"sampled":0,"fits":0})
+        agg["sampled"]+=1
+        agg["fits"]+=int(v["fitsSourceFrame"])
+    result={"codec":"hypothesis-only: 2- or 4-byte OBS header with 638..644 pitch",
         "source":"SHA-verified 2002 Dice/OBS.pak",
         "strictFrameSamples":len(samples),
         "sourceFittingSamples":len(fitting),
+        "bestVariantHistogram":byVariant,
         "groups":groups,
         "candidateFrames":[{"member":s["member"],"index":s["frame"],
             "width":s["width"],"height":s["height"],
