@@ -1,14 +1,20 @@
-/* Recovered TIS PNGs have upright source-side UI lettering and ornaments.
- * The prior WEB scaleY(-1) reversed them again, displaying cards and text
- * upside down. Native 145x97 alpha, original DMP cell identity and source
- * painter order are left untouched. Historical 3D camera remains inferred.
+/* 2026-10-18 VERIFIED A/B against 2004 historical 4LEAF board.jpg/battle.jpg.
+ * decode_tis.py converts 2002 bottom-up indexed source with a PIL
+ * FLIP_TOP_BOTTOM before saving extracted Tiles/*.png. The produced PNG
+ * artwork's captions/upper card side appear vertically reversed in the
+ * actual playable 800x600 Chromium screenshot (confirmed by source A/B
+ * same-state capture, workflow 39109660903).
+ * Undo that STORAGE conversion at render-time. Recovered PNG bytes,
+ * per-cell DMP coordinates, 145x97 native size and per-pixel alpha remain
+ * untouched. The actor pawns are not descendants of the tile and are not
+ * flipped by this rule. The recovered historical 3D mesh is still missing.
  */
 #app.app-classic-dice #game .board-world #board-nodes
  .tile[data-native-tis-size="145x97"]{
- transform:translate(-50%,-50%)!important;
+ transform:translate(-50%,-50%) scaleY(-1)!important;
  transform-origin:50% 50%!important;
 }
 #app.app-classic-dice #game .board-world #board-nodes
  .tile[data-native-tis-size="145x97"] > :is(.tile-symbol,small){
- transform:none!important;
+ transform:scaleY(-1)!important;
 }
