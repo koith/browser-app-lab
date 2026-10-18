@@ -85,8 +85,56 @@ const {chromium}=require('playwright');
   await page.waitForTimeout(2450);
   assert.equal(await page.locator('#leaf-source-effect-overlay').count(),0,
    'original pixel overlay is temporary; never replace actual playable game viewport');
+  // A real completed original DMP match must use genuine winResult.spr
+  // 452x88 header and *actual* reward/percentage/player rows, not a
+  // photographic overlay or manufactured CL / lifetime win-rate numbers.
+  await page.evaluate(()=>{
+   const m=window.__ROG_TEST__.getMatch();
+   m.players[0].position=m.tiles.length-1;
+   m.startedAt=Date.now()-200000;
+   window.__ROG_TEST__.finishGame(m.players[0]);
+  });
+  await page.waitForFunction(()=>{
+   const panel=document.querySelector('#leaf-original-match-result');
+   return panel?.dataset.nativeResult==='ready';
+  },null,{timeout:10000});
+  const finished=await page.evaluate(()=>{
+   const panel=document.querySelector('#leaf-original-match-result');
+   const image=panel.querySelector('.leaf-original-result-heading');
+   const m=window.__ROG_TEST__.getMatch();
+   const rows=[...panel.querySelectorAll('tbody tr')];
+   return {member:panel.dataset.originalMember,frame:panel.dataset.originalFrame,
+    size:[image.naturalWidth,image.naturalHeight],
+    winner:m.winner,finished:m.finished,
+    rows:rows.map(row=>({
+     playerId:Number(row.dataset.playerId),
+     name:row.querySelector('[data-col="player"]')?.textContent,
+     cl:row.querySelector('[data-col="cl"]')?.textContent,
+     complete:row.querySelector('[data-col="complete"]')?.textContent,
+     gp:row.querySelector('[data-col="gp"]')?.textContent,
+     rate:row.querySelector('[data-col="win-rate"]')?.textContent,
+     winner:row.classList.contains('leaf-original-result-winner')
+    })),
+    buttons:[...document.querySelectorAll('#modal-buttons button')].map(b=>b.textContent)
+   };
+  });
+  assert.equal(finished.member,'Dice/IMG.pak:winResult.spr');
+  assert.equal(finished.frame,'0');
+  assert.deepEqual(finished.size,[452,88]);
+  assert.deepEqual([source.sprites['winResult.spr'].frames[0].width,
+   source.sprites['winResult.spr'].frames[0].height],finished.size);
+  assert.equal(finished.finished,true);
+  assert.equal(finished.winner,0);
+  assert.equal(finished.rows.length,2);
+  assert.equal(finished.rows[0].winner,true);
+  assert.equal(finished.rows[0].complete,'100%');
+  assert.ok(Number(finished.rows[0].gp)>0,'source result uses actual earned GP, not a fixed original-looking fake');
+  assert.ok(finished.rows.every(r=>r.cl==='—'&&r.rate==='—'),
+   'historic CL and lifetime win-rate remain explicitly unavailable rather than invented');
+  assert.ok(finished.buttons.includes('다시 시작'),'real match post-game UI stays interactive');
+  await page.screenshot({path:'leaf-native-source-match-result-live.png'});
   assert.deepEqual(errors,[]);
-  console.log('4LEAF REAL SOURCE IMG JAIL/ABILITY EFFECTS PASS',
-   JSON.stringify({jail,ability}));
+  console.log('4LEAF REAL SOURCE IMG JAIL/ABILITY/RESULT EFFECTS PASS',
+   JSON.stringify({jail,ability,result:finished}));
  }finally{await browser.close()}
 })().catch(e=>{console.error('SOURCE IMG EVENT E2E FAILED',e.stack||e);process.exit(1)});
