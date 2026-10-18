@@ -355,7 +355,7 @@ function drawBoard(){
    // event tile content (item swaps, map changes and game resumes).
    const existingPawns=$('board-pawns');
    root.dataset.renderKey=key;root.replaceChildren();svg.replaceChildren();
-   const coords=PATH.slice(0,match.tiles.length).map(p=>({x:p.x*820/100,y:p.y*355/100}));
+   const coords=PATH.slice(0,match.tiles.length).map(p=>({x:p.x*3000/100,y:p.y*2320/100}));
    const path=document.createElementNS('http://www.w3.org/2000/svg','polyline');
    path.setAttribute('points',coords.map(p=>p.x+','+p.y).join(' '));
    path.setAttribute('fill','none');path.setAttribute('stroke','#b6a2d5');
@@ -364,11 +364,11 @@ function drawBoard(){
    coords.forEach((pos,i)=>{
      const type=match.tiles[i],b=document.createElement('div');b.className='tile '+type;
      b.style.left=PATH[i].x+'%';b.style.top=PATH[i].y+'%';b.dataset.tile=i;
-     // Original DMP axial-grid pitch is 70x47 while genuine TIS platform
-     // pictures are 145x97. Restore overlapping FULL-SIZE original source
-     // planes and y-based front/back painter order (instead of the previous
-     // tiny disconnected 70x47 proxies).  Preserve the raw third DMP cell
-     // code as evidence without guessing an unrecovered height or rotation.
+     // Genuine original DMP axial-grid coordinates are unchanged.
+     // The old web projection packed a full 145x97 sprite every 70x47px,
+     // hiding half of every neighboring tile. Render each SOURCE sprite
+     // at 145x97, with separately tracked WEB projection pitch ~145x97px.
+     // Original MVE elevation and camera matrix remain unrecovered.
      const dmp=SOURCE_ROUTES[SOURCE_IDS[match.map]]?.[i];
      if(dmp){
       b.dataset.dmpX=String(dmp[0]);
@@ -376,6 +376,8 @@ function drawBoard(){
       b.dataset.dmpCellCode=String(dmp[2]);
      }
      b.dataset.nativeTisSize='145x97';
+     b.dataset.dmpLogicalPitch='70x47';
+     b.dataset.projectedPitch='145x97-web';
      // Painter order follows the original DMP grid, not route parity.
      // Cells on the same row are sorted by their genuine x coordinate;
      // a row ahead ALWAYS paints over rows behind it. Reserve +1 for actors.
