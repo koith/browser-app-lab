@@ -398,9 +398,11 @@ function drawBoard(){
        b.style.width=Math.max(2.5,Math.min(5,72/columns))+'%';
        b.style.height=Math.max(4.5,Math.min(9,120/columns))+'%';
      }
-     const glyph=document.createElement('span');glyph.className='tile-symbol';glyph.textContent=tileGlyph(type);
-     const number=document.createElement('small');number.textContent=i+1;
-     b.title=(i+1)+'칸 · '+type;b.append(glyph,number);
+     // Native TIS already contains its original art and event symbol.
+     // Never paint invented numbers or web font glyphs over source pixels.
+     // Keep cell index discoverable through live metadata and a tooltip.
+     b.title=(i+1)+'칸 · '+type;
+     b.setAttribute('aria-label',b.title);
      b.onclick=()=>log((i+1)+'칸 · '+type+' '+match.players.filter(p=>p.position===i).map(p=>p.name).join(', '));
      fragment.append(b);
    });root.append(fragment);
