@@ -1009,6 +1009,9 @@ async function useAbility(){
  case 26:case 27:p.effects.ring=2;break;
  default:p.ability=50;appendMove('이 능력은 아직 세부 효과 확인 중입니다. 절반의 게이지를 반환했습니다.');drawGame();return;
  }
+ // Verified six native 2002 winAbility.spr frames, shown only on a real
+ // authorized cast. Layout duration is inferred; game logic is not.
+ window.__LEAF_ORIGINAL_ABILITY__?.show(p.name,stats.ability);
  appendMove(p.name+' · '+stats.name+' 『'+stats.ability+'』 발동');
  if([30,33,35,37,24].includes(code)){p.ability=0;await resolveTile(p)}
  drawGame();persist();
@@ -1276,6 +1279,8 @@ async function resolveTile(p,depth=0){
    const first=d(6),second=d(first),diff=first-second;
    if(diff>=3)p.position=0;else p.position=Math.max(0,p.position-diff*3);
    appendMove(p.name+' DEAD OR ALIVE: '+first+' / '+second+' → '+(diff>=3?'START':diff*3+'칸 후퇴'));
+   // Source-authentic winDoa.spr graphic, independent of rolled eyes.
+   window.__LEAF_NATIVE_EVENTS__?.show('doa',p.name);
  }else if(type==='keeper'||type==='arena'){
    if(type==='arena'){
      const incumbent=match.players.find(x=>x!==p&&x.position===pos);
