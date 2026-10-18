@@ -83,6 +83,54 @@ const path=require('node:path');
   assert.ok(state.sides.every(s=>s.fallbackDisplay==='none'&&
    s.redundantVS==='none'&&s.visibleSprite==='block'),
    'source 355x113 bitmap must REPLACE CSS fake metal legs and duplicate HTML VS');
+  // Original asset recovery must degrade honestly on transient CDN/PWA
+  // failures: no invisible battle platform or fake "original" pixel claim.
+  // Exercise the actual IMG element error event, not a synthetic dataset edit.
+  const alternate=await page.evaluate(async()=>{
+   const stage=document.querySelector('#battle-visual');
+   const img=stage.querySelector('.leaf-native-winbattle-podiums');
+   const missing=new Promise(resolve=>img.addEventListener('error',resolve,{once:true}));
+   img.src='./original/SourceSPRExtra/__intentionally_missing_winBattle_src_test__.png';
+   await missing;
+   const legs=[...stage.querySelectorAll('.leaf-battle-platform-leg')];
+   const proof={status:stage.dataset.nativeBattlePodium,
+     sourceDisplay:getComputedStyle(img).display,
+     fallback:[...stage.querySelectorAll('.battle-visual-pedestal')].map(el=>getComputedStyle(el).display),
+     actualFighters:stage.querySelectorAll('.battle-visual-actor').length,
+     activeDice:stage.querySelectorAll('.battle-visual-die').length,
+     visibleLegs:legs.filter(el=>getComputedStyle(el).display!=='none').length};
+   const restored=new Promise(resolve=>img.addEventListener('load',resolve,{once:true}));
+   img.src='./original/SourceSPRExtra/winBattle-01.png';
+   await restored;
+   return {...proof,recovered:stage.dataset.nativeBattlePodium,
+      recoveredSize:[img.naturalWidth,img.naturalHeight]};
+  });
+  assert.equal(alternate.status,'fallback',
+   'original battle source missing means truthfully present CSS fallback, not a blank duel');
+  assert.equal(alternate.sourceDisplay,'none');
+  assert.deepEqual(alternate.fallback,['block','block']);
+  assert.equal(alternate.actualFighters,2);
+  assert.ok(alternate.activeDice>=2);
+  assert.equal(alternate.visibleLegs,8,'fallback-only 4 legs per side remain available offline');
+  assert.equal(alternate.recovered,'ready',
+   'the very same running battle must switch back to authentic original pixels on reload');
+  assert.deepEqual(alternate.recoveredSize,[355,113]);
+
+  // These are native source GUI sprites, NOT the still-missing 3D die.
+  // Do not mis-classify ability/result/jail as the live winBattle podium.
+  const classified=await page.evaluate(async()=>{
+   const files={ability:['winAbility-00.png',330,284],
+     result:['winResult-00.png',452,88],
+     jail:['winJail-00.png',136,219]};
+   const result={};
+   for(const [key,[name,w,h]] of Object.entries(files)){
+    const img=new Image();img.src='./original/SourceSPRExtra/'+name;
+    await img.decode();result[key]=[img.naturalWidth,img.naturalHeight];
+   }
+   return result;
+  });
+  assert.deepEqual(classified,{ability:[330,284],result:[452,88],jail:[136,219]},
+   'all real recovered native GUI PNGs must exist at their exact unscaled source dimensions');
   assert.ok(state.sides.every(s=>s.actorScreenBounds.height>0&&
    Number.isFinite(s.actorScreenBounds.bottom)),
    'real game OBS fighters remain separate independently positioned DOM entities above original platform art');
