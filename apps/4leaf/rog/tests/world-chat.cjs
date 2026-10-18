@@ -1052,6 +1052,16 @@ const path=require('path');
  assert.equal(await guest.locator('#social-peers-toggle').getAttribute('aria-expanded'),'false','Escape closes the roster');
  assert.equal(await guest.locator('#social-peer-panel').isVisible(),false,'the source room is fully exposed again');
  await guest.locator('#social-peers-toggle').click();
+ const mobileExit=await guest.evaluate(()=>{
+  const exit=document.getElementById('social-back'),button=exit.getBoundingClientRect();
+  const panel=document.getElementById('social-peer-panel').getBoundingClientRect();
+  const node=document.elementFromPoint(button.x+button.width/2,button.y+button.height/2);
+  return {exit:[button.x,button.y,button.width,button.height],
+   roster:[panel.x,panel.y,panel.width,panel.height],
+   hit:node?.tagName,top:node?.id,canClick:!!node?.closest('#social-back')};
+ });
+ console.log('MOBILE_NATIVE_CHAT_EXIT_HIT '+JSON.stringify(mobileExit));
+ assert.ok(mobileExit.canClick,'source EXIT must never be covered by optional mobile participant roster');
  await guest.locator('#social-back').click();
  assert.equal(await guest.locator('#social-peers-toggle').isVisible(),false,'ChatTown never inherits ChatRoom roster controls');
  assert.equal(await guest.locator('#rooms.social-peers-open').count(),0,'room exit resets the mobile roster');
