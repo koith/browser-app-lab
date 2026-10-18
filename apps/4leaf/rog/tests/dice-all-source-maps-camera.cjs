@@ -30,9 +30,13 @@ async function audit(browser,mobile){
   await page.waitForSelector('#game:not(.hidden)');
   const results=await page.evaluate(()=>{
    const sources=window.ORIGINAL_LEAF_MAPS;
-   const info=window.ORIGINAL_LEAF_MAP_INFO;
-   const camera=window.__LEAF_CAMERA__;
    const game=window.__ROG_TEST__;
+   const info=game.getSourceMaps();
+   const archiveInfo=window.ORIGINAL_LEAF_MAP_INFO;
+   if(Object.keys(sources).length!==26||Object.keys(archiveInfo).length!==25||
+      Object.keys(info).length!==26||archiveInfo['0170'])
+      throw Error('Source names archive must remain 25, complete playable routes 26, 0170 name unverified');
+   const camera=window.__LEAF_CAMERA__;
    const entries=Object.entries(info)
     .filter(([id,v])=>sources[id]?.length>=10);
    const original=game.getMatch(),log=[];
