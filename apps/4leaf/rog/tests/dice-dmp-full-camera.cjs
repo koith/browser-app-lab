@@ -57,7 +57,7 @@ const path=require('node:path');
    const world=document.querySelector('#board-world');
    const screenWidth=document.querySelector('#board-area').clientWidth;
    const translate=()=>{
-    const match=world.style.transform.match(/translate3d\\((-?[0-9.]+)px/);
+    const match=world.style.transform.match(/translate3d\((-?[0-9.]+)px/);
     return match?Number(match[1]):null;
    };
    const left=camera.panBy(-100000,0),leftTranslate=translate();
