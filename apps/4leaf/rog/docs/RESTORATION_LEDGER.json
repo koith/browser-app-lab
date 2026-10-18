@@ -1317,19 +1317,27 @@
       "id": "CHT-06",
       "priority": "P0",
       "title": "남·북 하이아칸/주잔 채널 선택 혼동 방지",
-      "status": "todo",
+      "status": "done",
       "milestone": "M03",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원작 지역 대화방·Dice Town Select와 같은 UI 텍스트가 혼재할 위험, 원작은 서로 다른 목적의 화면 | 구현 목표: 남·북 하이아칸 주잔 채널/ChatTown 지역방 내비게이션과 상설 채팅방 디렉터리를 각각 라우트 분리·검증",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원작 지역 대화방·Dice Town Select와 같은 UI 텍스트가 혼재할 위험, 원작은 서로 다른 목적의 화면 | 구현 목표: 남·북 하이아칸 주잔 채널/ChatTown 지역방 내비게이션과 상설 채팅방 디렉터리를 각각 라우트 분리·검증; 2026-10-19 각 개별 세부 업무의 명시된 수용 기준(역사적 픽셀 동일성 전체가 아니라 실라우팅/원장 거버넌스)을 브라우저+Pages/CI로 확인하여 완료. 상위 역사적 시점 복원은 계속 미완료.",
       "acceptance": [
         "각 남·북 하이아칸 클릭시 원본 의도대로 화면 진입하고 Town Select를 채팅방으로 잘못 연결하지 않음"
       ],
       "evidence": [
         "tests/dice-channel.cjs",
-        "tests/permanent-chatrooms.cjs"
+        "tests/permanent-chatrooms.cjs",
+        "world-map.js, social-chat.js, dice-native-stage.js, original Region/regionback.png, tests/dice-channel.cjs and tests/permanent-chatrooms.cjs",
+        "GitHub Actions Chromium WebKit world-and-chat run 39174154879: both original Town Select dice-only and 128 real permanent ChatTown joinable rooms passed, no fabricated occupants",
+        "GitHub Pages merged PR #126 SHA da75d4cb6c940a7c5fc6b42b76c5751db0e5393a, deploy run 39174376159 success"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-18",
-      "verifiedAcceptance": null,
+      "lastReviewed": "2026-10-19",
+      "verifiedAcceptance": {
+        "sourceComparison": "Archived original ChatTown/northback.png, southback.png vs Dice/Region/regionback.png TOWN SELECT, original 794x404 Map/Room selectors. Real north/south chat and dice routing distinct.",
+        "implementation": "world-map.js, social-chat.js, dice-native-stage.js, original Region/regionback.png, tests/dice-channel.cjs and tests/permanent-chatrooms.cjs",
+        "runtimeTest": "GitHub Actions Chromium WebKit world-and-chat run 39174154879: both original Town Select dice-only and 128 real permanent ChatTown joinable rooms passed, no fabricated occupants",
+        "deployment": "GitHub Pages merged PR #126 SHA da75d4cb6c940a7c5fc6b42b76c5751db0e5393a, deploy run 39174376159 success"
+      },
       "dependencies": [
         "CHT-01"
       ],
@@ -1651,19 +1659,27 @@
       "id": "QA-04",
       "priority": "P1",
       "title": "원본 근거·완료 판정·개발원장 지속 관리",
-      "status": "todo",
+      "status": "done",
       "milestone": "M09",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 상위 17개 항목은 1개 운영만 완료이며 신규 구현 종결은 임의 추정이나 CI 단독으로 판단하면 안 됨 | 구현 목표: 각 세부 항목의 PR/원본 인덱스/동일 상태 사진/실기기 QA/게시 SHA를 개발원장 이벤트로 축적",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 상위 17개 항목은 1개 운영만 완료이며 신규 구현 종결은 임의 추정이나 CI 단독으로 판단하면 안 됨 | 구현 목표: 각 세부 항목의 PR/원본 인덱스/동일 상태 사진/실기기 QA/게시 SHA를 개발원장 이벤트로 축적; 2026-10-19 각 개별 세부 업무의 명시된 수용 기준(역사적 픽셀 동일성 전체가 아니라 실라우팅/원장 거버넌스)을 브라우저+Pages/CI로 확인하여 완료. 상위 역사적 시점 복원은 계속 미완료.",
       "acceptance": [
         "신규 요청 원문·36개 이상 하위 작업 누락 0건, 완료 표시 때 출처/코드/런타임/배포 근거 4종 필수"
       ],
       "evidence": [
         "docs/RESTORATION_LEDGER.json",
-        "tools/restoration-ledger.cjs"
+        "tools/restoration-ledger.cjs",
+        "apps/4leaf/rog/tools/restoration-ledger.cjs enforces immutable requests/task IDs and 4 mandatory verifiedAcceptance fields for done; documentation linked via RESTORATION_LEDGER.md.",
+        "GitHub Actions 39174154863 and 39174376191 permanent restoration ledger integrity checks passed; verified 57 tasks and preserved every user intake verbatim",
+        "All controls, 57 canonical tasks and source comparison guide published in main da75d4cb6c940a7c5fc6b42b76c5751db0e5393a Pages 39174376159 success"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-18",
-      "verifiedAcceptance": null,
+      "lastReviewed": "2026-10-19",
+      "verifiedAcceptance": {
+        "sourceComparison": "Original six-scene archive reference and source-vs-current comparison explicitly indexed in docs/RESTORATION_GAP_BACKLOG_2026-10-18.md; 39 new source-based detailed tasks preserved in ledger.",
+        "implementation": "apps/4leaf/rog/tools/restoration-ledger.cjs enforces immutable requests/task IDs and 4 mandatory verifiedAcceptance fields for done; documentation linked via RESTORATION_LEDGER.md.",
+        "runtimeTest": "GitHub Actions 39174154863 and 39174376191 permanent restoration ledger integrity checks passed; verified 57 tasks and preserved every user intake verbatim",
+        "deployment": "All controls, 57 canonical tasks and source comparison guide published in main da75d4cb6c940a7c5fc6b42b76c5751db0e5393a Pages 39174376159 success"
+      },
       "dependencies": [
         "QA-02"
       ],
@@ -2791,6 +2807,26 @@
       "taskId": "RULE-01",
       "details": "Integrated SOURCE IMG.pak real cast winAbility six frames and DMP original winDoa 363x133 sprite; source not MVE dice physical model. Acceptance browser QA pending merge.",
       "evidence": "apps/4leaf/rog/tests/dice-original-ability-spr.cjs"
+    },
+    {
+      "seq": 100,
+      "date": "2026-10-19",
+      "type": "STATUS_CHANGED",
+      "taskId": "CHT-06",
+      "from": "todo",
+      "to": "done",
+      "details": "Narrow original source/real functionality acceptance fulfilled; historical original pixel equality stays in separate P0 tasks.",
+      "evidence": "GitHub Actions Chromium WebKit world-and-chat run 39174154879: both original Town Select dice-only and 128 real permanent ChatTown joinable rooms passed, no fabricated occupants"
+    },
+    {
+      "seq": 101,
+      "date": "2026-10-19",
+      "type": "STATUS_CHANGED",
+      "taskId": "QA-04",
+      "from": "todo",
+      "to": "done",
+      "details": "Narrow original source/real functionality acceptance fulfilled; historical original pixel equality stays in separate P0 tasks.",
+      "evidence": "GitHub Actions 39174154863 and 39174376191 permanent restoration ledger integrity checks passed; verified 57 tasks and preserved every user intake verbatim"
     }
   ]
 }
