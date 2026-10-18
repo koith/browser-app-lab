@@ -1,6 +1,7 @@
 # 4LEAF 원작 웹앱 복원 마일스톤 / 진행 상태
 검증 갱신: 2026-10-18 (GitHub main 기준, 브라우저 통과 ≠ 원작 완전 재현).
 요구 목표: 2001–2004년 Windows 4LEAF의 실제 원본 리소스, 원작 화면, 플레이 조작을 재현.
+**2026-10-18부터 작업 상태의 기준 파일은 [`RESTORATION_LEDGER.json`](./RESTORATION_LEDGER.json)이다.** 이 문서의 수치와 체크박스는 이력/근거이며, 새 요구 접수와 최종 완료 여부는 원장 이벤트·원본 수용 근거로 판정한다. [`원장 운영 규정`](./RESTORATION_LEDGER.md) / `node apps/4leaf/rog/tools/restoration-ledger.cjs open`.
 자료: `apps/4leaf/assets/board.jpg`, `battle.jpg`, `chat.jpg`, `chat_ref.jpg`; `original/` 원본 클라이언트 추출 그래픽; https://4leafmemorial.tistory.com/1563
 모든 작업은 실물 아카이브 → 실제 렌더러 → 원본 캡처 비교 → Chromium 동작/회귀 → Pages 배포 순서로 닫는다.
 `[x]`는 해당 마일스톤의 **검증 가능한 하위 조건 일부**를 뜻하며 전체 원작 동일성 완료가 아니다.
