@@ -136,5 +136,37 @@ const {chromium}=require('playwright');
    animations:'disabled',timeout:18000});
   console.log('SOURCE_NATIVE_OBS_JPEG_BASE64 '+originalBodies.toString('base64'));
   console.log('SOURCE_NATIVE_OBS_END');
+  // Compare actual LIVE duel to historical 800x600 original board.jpg /
+  // battle.jpg. The combat engine produces the dice, values and Genesis
+  // chessman IDs; this does not insert fixed screenshots or mock results.
+  await page.evaluate(()=>{
+   const m=window.__ROG_TEST__.getMatch();
+   window.__ROG_TEST__.resolveBattle(m.players[0],m.players[1],false);
+  });
+  await page.waitForSelector('#battle-visual');
+  await page.waitForFunction(()=>[...document.querySelectorAll(
+   '#battle-visual .battle-visual-actor .leaf-chess-original-obs')]
+   .length===2,null,{timeout:15000});
+  const sourceBattle=await page.evaluate(()=>{
+   const stage=document.querySelector('#battle-visual');
+   return {
+    nativeModels:[...stage.querySelectorAll('.battle-visual-actor')].map(x=>({
+      id:x.dataset.chessmanId,rig:x.dataset.actorRig,source:x.dataset.actorSource
+    })),
+    score:[...stage.querySelectorAll('.battle-visual-total')].map(x=>x.textContent),
+    dice:[...stage.querySelectorAll('.battle-visual-die')].map(x=>x.dataset.eye),
+    banner:stage.querySelector('.battle-visual-head')?.textContent,
+    podiums:stage.querySelectorAll('.battle-visual-pedestal').length
+   };
+  });
+  if(sourceBattle.nativeModels.some(x=>x.rig!=='original-obs-sprite')||
+   sourceBattle.banner!=='BATTLE'||sourceBattle.podiums!==2)
+   throw Error('Original battle layout must show real selected Genesis actors and source-like dual podiums: '+
+     JSON.stringify(sourceBattle));
+  console.log('SOURCE_LIVE_DUEL_QA '+JSON.stringify(sourceBattle));
+  const battleCapture=await game.screenshot({
+    type:'jpeg',quality:78,animations:'disabled',timeout:18000});
+  console.log('SOURCE_LIVE_DUEL_JPEG_BASE64 '+battleCapture.toString('base64'));
+  console.log('SOURCE_LIVE_DUEL_END');
  }finally{await browser.close()}
 })().catch(e=>{console.error('SOURCE SCREENSHOT QA ERROR',e.stack||e);process.exit(1)});
