@@ -85,8 +85,47 @@ const {chromium,webkit}=require('playwright');
    assert.equal(topology.pips,eye,'CSS face '+eye+' uses exactly '+eye+' physical pips');
    assert.equal(topology.orientation.length,2);
   }
+  // The 4-sided movement die previously kept the SAME flat polygon for
+  // 1, 2, 3 and 4 and only replaced its printed numeral. Verify four real
+  // independent 3D triangle faces and actual result-facing 3D orientation.
+  const normalResults=[];
+  for(let eye=1;eye<=4;eye++){
+   const proof=await page.evaluate(async eye=>{
+    const pending=window.__LEAF_DICE_FALL__.roll([eye],{sides:4});
+    const die=document.querySelector('#leaf-dice-fall-layer .leaf-fall-tetra');
+    if(!die)return {missing:true};
+    const faces=[...die.querySelectorAll('.leaf-tetra-face')];
+    const cube=new DOMMatrixReadOnly(getComputedStyle(die).transform);
+    const normals=faces.map(face=>{
+     const matrix=cube.multiply(
+      new DOMMatrixReadOnly(getComputedStyle(face).transform));
+     return Number(matrix.transformPoint(new DOMPoint(0,0,1,0)).z.toFixed(3));
+    });
+    const renders=faces.map(face=>({
+     number:Number(face.textContent),
+     display:getComputedStyle(face).display,
+     backface:getComputedStyle(face).backfaceVisibility
+    }));
+    const result=await pending;
+    return {result,normals,renders,
+     angle:window.__LEAF_DICE_FALL__.tetraDihedralDegrees,
+     target:window.__LEAF_DICE_FALL__.tetraOrientation[eye]};
+   },eye);
+   assert.equal(proof.missing,undefined,'D4 must instantiate a real multi-face 3D object');
+   assert.deepEqual(proof.result,[eye],'actual engine result is unchanged');
+   assert.equal(proof.renders.length,4);
+   assert.deepEqual(proof.renders.map(f=>f.number),[1,2,3,4]);
+   assert.ok(proof.renders.every(f=>f.display==='flex'&&f.backface==='hidden'),
+    'all D4 physical triangular planes must exist simultaneously in 3D');
+   assert.ok(proof.normals[eye-1]>.995,
+    'result '+eye+' actual 3D surface must face the viewer rather than switch a flat label: '+JSON.stringify(proof));
+   assert.ok(proof.normals.every((z,i)=>i===eye-1||z<0),
+    'remaining tetrahedral surfaces must point away from final result face');
+   assert.ok(Math.abs(proof.angle-109.471)<.01);
+   normalResults.push({eye,normal:proof.normals[eye-1],target:proof.target});
+  }
   assert.deepEqual(errors,[],'no browser exceptions on real original game');
   console.log('4LEAF DICE FALL BOUNCE AND REAL 1-6 LANDING PASS',
-   JSON.stringify({engine,mobile,first:landed.match,landings:6}));
+   JSON.stringify({engine,mobile,first:landed.match,landings:6,d4:normalResults}));
  }finally{await browser.close()}
 })().catch(e=>{console.error('DICE FALL REAL TURN FAILED',e.stack||e);process.exit(1)});
