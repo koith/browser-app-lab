@@ -103,6 +103,7 @@ on:
       - 'apps/4leaf/rog/tests/dice-chessmen-hud.cjs'
       - 'apps/4leaf/rog/tests/registry-native-portraits.cjs'
       - 'apps/4leaf/rog/tests/world-chat.cjs'
+      - 'apps/4leaf/rog/tests/chatroom-native-toolbar-six.cjs'
       - 'apps/4leaf/rog/tests/permanent-chatrooms.cjs'
       - 'apps/4leaf/rog/tests/chatroom-native-furniture-sizes.cjs'
       - 'apps/4leaf/rog/tests/social-network.cjs'
@@ -172,6 +173,10 @@ jobs:
         run: node apps/4leaf/rog/tests/knighttown-original.cjs
       - name: Verify original world, regions, rooms, messages and mobile
         run: node apps/4leaf/rog/tests/world-chat.cjs
+      - name: Physically hit all six native ChatRoom toolbar icons and real Registry avatar in all 6 rooms Chromium
+        env:
+          FOURLEAF_SKIP_WEBKIT: '1'
+        run: node apps/4leaf/rog/tests/chatroom-native-toolbar-six.cjs
       - name: Verify all 128 real joinable ChatTown rooms and zero invented occupants
         run: node apps/4leaf/rog/tests/permanent-chatrooms.cjs
       - name: Verify original WorldMap, ChatTown and 115x103 ChatRoom furniture work after cold offline install
@@ -261,6 +266,11 @@ jobs:
           FOURLEAF_BROWSER: webkit
           FOURLEAF_TEST_URL: http://127.0.0.1:8765/
         run: node apps/4leaf/rog/tests/dice-mobile-roll-dmp-order.cjs
+      - name: Physically verify original toolbar and player input in six historic ChatRoom backdrops on WebKit
+        env:
+          FOURLEAF_ONLY_WEBKIT: '1'
+          FOURLEAF_TEST_URL: http://127.0.0.1:8765/
+        run: node apps/4leaf/rog/tests/chatroom-native-toolbar-six.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
