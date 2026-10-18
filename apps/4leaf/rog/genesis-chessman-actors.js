@@ -13,12 +13,30 @@
  const sourceTimers=new WeakMap();
  const originalFor=id=>window.ORIGINAL_LEAF_OBS_FRAMES?.[id]||null;
  const poses=['idle','walk','attack','hurt','victory'];
- function sequenceFor(native,action){
+ // Visually confirmed FACING-CAMERA 2002 source frames, examined after the
+ // actual scaleY(-1) bitmap presentation against the original-frame atlas.
+ // These are authentic OBS pixels, but pose/direction index meanings are
+ // still provisional until the client EXE action tables are decoded.
+ // 1078.obs DOES NOT YET have a recovered frontal view (0/1/2 show back).
+ const FRONT_VISIBLE_IDLE=Object.freeze({
+  '0042':[25,30], // visible face three-quarter
+  '0043':[30],    // frontal face
+  '0045':[18],    // visible eyes, face and sword, versus rear 0/1/2
+  '0054':[25,30]  // frontal face (white-haired figure)
+ });
+ const sourceFrontFrame=(id,native)=>{
+  const indexes=FRONT_VISIBLE_IDLE[id]||[];
+  return indexes.map(index=>native?.frames?.find(f=>f.index===index))
+   .filter(Boolean);
+ };
+ function sequenceFor(native,action,id){
    const map={idle:[0,1,2],walk:[0,1,2,3],attack:[10,18],hurt:[18,10],victory:[25,30,0]};
    const all=native.frames||[];
    // Some genuinely decoded OBS sources have no safe frame-0 decode.
    // Expose their real pixels, but NEVER animate unrelated frames as if
    // their original idle/walk/attack semantic mapping were established.
+   const frontal=action==='idle'?sourceFrontFrame(id,native):[];
+   if(frontal.length)return frontal;
    if(native.hasVerifiedFrameZero===false)return all.slice(0,1);
    const picks=(map[action]||[0]).map(index=>all.find(f=>f.index===index)).filter(Boolean);
    // Frame data is source-authentic; these labels are provisional until
@@ -45,7 +63,8 @@
    // DMP tile top. Preserve every source frame's relative origin motion.
    // Absolute foot pivot is inferred; original frame metadata remains intact.
    const native=originalFor(pawn.dataset.chessmanId);
-   const standing=native?.frames?.find(f=>f.index===0)||native?.frames?.[0]||frame;
+   const standing=sourceFrontFrame(pawn.dataset.chessmanId,native)[0]||
+    native?.frames?.find(f=>f.index===0)||native?.frames?.[0]||frame;
    const sourceFoot=(frame.originY+frame.height);
    const standingFoot=(standing.originY+standing.height);
    const relativeSourceOffset=sourceFoot-standingFoot;
@@ -89,7 +108,11 @@
      :native.hasVerifiedFrameZero===false
       ?'unverified-frame-zero-missing/static-source-pose':'unverified';
    img.hidden=false;
-   const seq=sequenceFor(native,action);
+   const seq=sequenceFor(native,action,id);
+   const front=sourceFrontFrame(id,native);
+   pawn.dataset.actorIdleFacing=front.length?'source-front-visible':
+    'not-recovered-front-facing-pose';
+   pawn.dataset.actorIdleFrontFrame=front.length?String(front[0].index):'unavailable';
    renderNativeFrame(pawn,seq[0]);
    const sourceSheet=pawn.querySelector('.leaf-chess-source-frame');
    if(sourceSheet)sourceSheet.hidden=true;
@@ -235,6 +258,7 @@
     pose:p.dataset.actorPose,rig:p.dataset.actorRig,
     originalRecovered:p.dataset.actorOriginalModelRecovered,
     source:p.dataset.actorSource,frame:p.dataset.actorFrame,
+    idleFacing:p.dataset.actorIdleFacing,frontFrame:p.dataset.actorIdleFrontFrame,
     poseMapping:p.dataset.sourcePoseMapping,
     counts:states.get(p)||{}
    }))
