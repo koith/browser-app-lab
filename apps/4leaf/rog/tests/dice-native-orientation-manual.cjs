@@ -32,8 +32,8 @@ const {chromium}=require('playwright');
   assert.equal(initial.count,104,'source DMP 4LEAF board still has 104 actual tiles');
   assert.deepEqual(initial.dimensions,[145,97],'native TIS source geometry unchanged');
   assert.ok(initial.art,'every upright tile still uses actual original TIS art');
-  assert.ok(initial.transform.startsWith('matrix(1, 0, 0, -1,'),
-   'source decoded TIS upside-down scanline is corrected while pixels stay original');
+  assert.ok(initial.transform.startsWith('matrix(1, 0, 0, 1,'),
+   'original TIS glyph and source artwork stay upright; no extra web vertical flip');
   assert.ok(!initial.pawnTransform?.startsWith('matrix(1, 0, 0, -1,'),
    'source CardData chessmen remain upright');
   await page.locator('#roll-btn').click();
@@ -74,7 +74,7 @@ const {chromium}=require('playwright');
    'second person acts only after clicking their own dice; forced warps and battles may reset a pawn before the test checks its final location');
   assert.equal(second.match.mode,'hotseat','second turn remains in real manual hotseat mode');
   await page.setViewportSize({width:390,height:844});
-  assert.equal(await page.locator('#board-nodes .tile').first().evaluate(e=>getComputedStyle(e).transform.startsWith('matrix(1, 0, 0, -1,')),true,
+  assert.equal(await page.locator('#board-nodes .tile').first().evaluate(e=>getComputedStyle(e).transform.startsWith('matrix(1, 0, 0, 1,')),true,
    'hex platform orientation stays correct on phone');
   assert.deepEqual(errors,[],'no browser runtime errors');
   console.log('GENESIS HEX ORIENTATION + MANUAL TURNS PASS',JSON.stringify({initial,afterTurn:after.match.active}));
