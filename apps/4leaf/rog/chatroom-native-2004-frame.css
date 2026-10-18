@@ -1,0 +1,105 @@
+/* Source 2004 ChatRoom screen registration.
+ * Real captured room is 794x528 (apps/4leaf/assets/chat_ref.jpg), with
+ * messenger at x18 y0, participant list at x621 y10 and EXIT at x728 y503.
+ * Previous WEB shell put 54px title + two navigation bars + 56px invented
+ * chat header above it, scaled scene to 896x596 and hid the real framing.
+ *
+ * This is a real, interactive DOM composition. Neither a historical JPEG
+ * backdrop nor invented/fake participants are inserted.
+ * Only apply to actual room interiors on sufficiently large screens;
+ * towns/room directory/game/world map/mobile retain their navigation.
+ */
+@media(min-width:801px) and (min-height:550px){
+ #app:not(.app-classic-dice):has(#rooms.classic-chat-room:not(.hidden)){
+  box-sizing:border-box!important;
+  width:794px!important;min-width:794px!important;max-width:794px!important;
+  height:528px!important;min-height:528px!important;max-height:528px!important;
+  padding:0!important;
+  border:0!important;
+  margin:max(6px,calc((100dvh - 528px)/2)) auto 0!important;
+  box-shadow:0 6px 24px #0b102877!important;
+  overflow:hidden!important;
+ }
+ #app:not(.app-classic-dice):has(#rooms.classic-chat-room:not(.hidden))>.titlebar,
+ #app:not(.app-classic-dice):has(#rooms.classic-chat-room:not(.hidden))>.toolbar,
+ #app:not(.app-classic-dice):has(#rooms.classic-chat-room:not(.hidden))>.statusbar{
+  display:none!important;
+ }
+ #app:not(.app-classic-dice):has(#rooms.classic-chat-room:not(.hidden))>.workspace{
+  display:block!important;flex:1 1 auto!important;
+  width:794px!important;height:528px!important;min-height:0!important;
+  overflow:hidden!important;
+ }
+ #app:not(.app-classic-dice):has(#rooms.classic-chat-room:not(.hidden)) main#main{
+  display:block!important;box-sizing:border-box!important;
+  width:794px!important;height:528px!important;
+  min-width:794px!important;max-width:794px!important;
+  margin:0!important;padding:0!important;border:0!important;
+ }
+ #rooms.classic-chat-room:not(.hidden){
+  display:block!important;
+  box-sizing:border-box!important;
+  width:794px!important;height:528px!important;
+  min-width:794px!important;max-width:794px!important;
+  min-height:528px!important;max-height:528px!important;
+  margin:0!important;padding:0!important;border:0!important;
+  overflow:hidden!important;
+ }
+ /* No additional fabricated 56px room navigation row above original art. */
+ #rooms.classic-chat-room .social-header{display:none!important;}
+ #rooms.classic-chat-room .social-layout{
+  position:relative!important;display:block!important;
+  box-sizing:border-box!important;
+  width:794px!important;height:528px!important;
+  min-width:794px!important;min-height:528px!important;
+  margin:0!important;padding:0!important;border:0!important;
+  overflow:hidden!important;
+ }
+ #rooms.classic-chat-room #social-stage{
+  box-sizing:border-box!important;
+  position:relative!important;
+  width:794px!important;height:528px!important;
+  min-width:794px!important;min-height:528px!important;
+  margin:0!important;padding:0!important;
+  flex:none!important;
+  border:0!important;overflow:hidden!important;
+ }
+ #rooms.classic-chat-room #social-image-frame.social-interior{
+  position:absolute!important;
+  top:0!important;left:0!important;
+  width:794px!important;height:528px!important;
+  transform:none!important;
+  box-shadow:none!important;
+  background-size:794px 528px!important;
+ }
+ #rooms.classic-chat-room #social-back[data-in-original-room="true"]{
+  position:absolute!important;
+  z-index:110!important;
+  left:auto!important;top:auto!important;
+  bottom:0!important;right:0!important;
+  width:66px!important;height:25px!important;
+  display:block!important;
+  padding:0!important;margin:0!important;
+  cursor:pointer!important;
+  visibility:visible!important;
+ }
+ /* Historical screenshots show 1:1 407x112 chat and 158x128 participant
+    window. Existing source-native ChatRoom atlas CSS applies inside them. */
+ #rooms.classic-chat-room .messenger[data-native-overlay="true"]{
+  left:16px!important;top:0!important;
+  transform:none!important;
+ }
+ #rooms.classic-chat-room .social-user-panel[data-native-overlay="true"]{
+  right:13px!important;top:9px!important;
+  transform:none!important;
+ }
+}
+/* On narrow phones keep web-native inputs fully touchable and the room
+ * zoomed via the existing scene's responsive fit; EXIT is always operable.
+ */
+@media(max-width:800px), (max-height:549px){
+ #rooms.classic-chat-room #social-back[data-in-original-room="true"]{
+  position:absolute!important;right:0!important;bottom:0!important;
+  z-index:110!important;
+ }
+}
