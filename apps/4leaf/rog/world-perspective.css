@@ -19,7 +19,11 @@
    radial-gradient(ellipse at 49% 48%,transparent 20%,#0c173b3e 90%),
    url('./original/IMG/bgtile.png') 0 0 / 725px 485px repeat!important;
  transform-origin:0 0!important;
- transition:transform .20s ease-out!important;
+ /* Keep native DMP image, hitboxes and alpha culling on the same
+    CAMERA FRAME. The old 200ms interpolation painted outdated positions
+    after JavaScript had already culled using the target transform.
+    This caused missing/unclickable real platforms during fast map travel. */
+ transition:none!important;
  will-change:transform;
 }
 #game .board-world::after{
