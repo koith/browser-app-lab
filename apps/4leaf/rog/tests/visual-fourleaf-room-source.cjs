@@ -42,7 +42,8 @@ const assert=require('node:assert/strict');
     messenger:r('#rooms .messenger'),chatLog:r('#chat-log'),chatForm:r('#chat-form'),
     avatar:r('.social-avatar.self'),actorArt:r('.social-avatar.self img'),
     furniture:r('.social-room-foreground'),
-    toolbar:r('#rooms .social-header-tools'),
+    toolbar:r('#rooms .social-classic-toolbar'),
+    expression:r('#rooms .social-exp-trigger'),exit:r('#social-back'),
     actualOccupants:document.querySelectorAll('.social-avatar').length,
     frameArt:document.querySelector('#social-image-frame').style.backgroundImage,
     nativeLayer:document.querySelector('.social-room-foreground')?.dataset.ready
@@ -51,6 +52,21 @@ const assert=require('node:assert/strict');
   console.log('SOURCE_ROOM_LIVE_GEOMETRY '+JSON.stringify(audit));
   assert.equal(audit.actualOccupants,1,'do not fake historical 10 people');
   assert.ok(audit.frameArt.includes('room4.png'));
+  assert.equal(audit.frame.w,794,'real ChatRoom atlas width');
+  assert.equal(audit.frame.h,528,'real ChatRoom atlas height');
+  assert.equal(audit.app.w,794,'no oversized reconstructed 900px web window');
+  assert.equal(audit.app.h,528,'no duplicate reconstructed browser toolbar');
+  assert.equal(audit.header.display,'none','source room does not have a second fabricated HTML header');
+  assert.equal(audit.messenger.x-audit.frame.x,16,'original chat overlays x=16');
+  assert.equal(audit.messenger.y-audit.frame.y,0,'original chat overlays y=0');
+  assert.equal(audit.messenger.w,407,'original chat panel width');
+  assert.equal(audit.userPanel.x-audit.frame.x,623,'original right-hand user list x=623');
+  assert.equal(audit.userPanel.y-audit.frame.y,9,'original right-hand user list y=9');
+  assert.equal(audit.exit.x-audit.frame.x,728,'original EXIT x=728');
+  assert.equal(audit.exit.y-audit.frame.y,503,'original EXIT y=503');
+  assert.ok(audit.toolbar&&audit.toolbar.display==='flex'&&
+   audit.expression&&audit.expression.display!=='none',
+   'existing source MainFrame tools and native expression selector remain usable');
   assert.deepEqual(missing,[]);
   assert.deepEqual(errors,[]);
   const shot=await page.locator('#app').screenshot({type:'jpeg',quality:79,animations:'disabled'});
