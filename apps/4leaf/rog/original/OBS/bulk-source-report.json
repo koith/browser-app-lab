@@ -7737,5 +7737,3913 @@
     "1166.obs": "no strictly decoded source frames"
   },
   "source": "OBS.pak",
+  "sourceRLEHeaders": {
+    "1040.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 8,
+          "bytes": "5b001100",
+          "centeredWebFallbackX": 15,
+          "row": 0,
+          "word0": 91,
+          "word1": 17
+        },
+        {
+          "actualPayload": 10,
+          "bytes": "78020202",
+          "centeredWebFallbackX": 14,
+          "row": 1,
+          "word0": 632,
+          "word1": 514
+        },
+        {
+          "actualPayload": 12,
+          "bytes": "75020300",
+          "centeredWebFallbackX": 13,
+          "row": 2,
+          "word0": 629,
+          "word1": 3
+        },
+        {
+          "actualPayload": 13,
+          "bytes": "74020301",
+          "centeredWebFallbackX": 13,
+          "row": 3,
+          "word0": 628,
+          "word1": 259
+        },
+        {
+          "actualPayload": 7,
+          "bytes": "79020103",
+          "centeredWebFallbackX": 16,
+          "row": 68,
+          "word0": 633,
+          "word1": 769
+        },
+        {
+          "actualPayload": 5,
+          "bytes": "7a020101",
+          "centeredWebFallbackX": 17,
+          "row": 69,
+          "word0": 634,
+          "word1": 257
+        },
+        {
+          "actualPayload": 3,
+          "bytes": "7c020003",
+          "centeredWebFallbackX": 18,
+          "row": 70,
+          "word0": 636,
+          "word1": 768
+        }
+      ],
+      "nativeHeight": 71,
+      "threshold": 20
+    },
+    "1043.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 8,
+          "bytes": "5d000e00",
+          "centeredWebFallbackX": 16,
+          "row": 0,
+          "word0": 93,
+          "word1": 14
+        },
+        {
+          "actualPayload": 10,
+          "bytes": "78020202",
+          "centeredWebFallbackX": 15,
+          "row": 1,
+          "word0": 632,
+          "word1": 514
+        },
+        {
+          "actualPayload": 12,
+          "bytes": "75020300",
+          "centeredWebFallbackX": 14,
+          "row": 2,
+          "word0": 629,
+          "word1": 3
+        },
+        {
+          "actualPayload": 14,
+          "bytes": "73020302",
+          "centeredWebFallbackX": 13,
+          "row": 3,
+          "word0": 627,
+          "word1": 515
+        },
+        {
+          "actualPayload": 12,
+          "bytes": "73020300",
+          "centeredWebFallbackX": 14,
+          "row": 64,
+          "word0": 627,
+          "word1": 3
+        },
+        {
+          "actualPayload": 7,
+          "bytes": "76020103",
+          "centeredWebFallbackX": 16,
+          "row": 65,
+          "word0": 630,
+          "word1": 769
+        },
+        {
+          "actualPayload": 4,
+          "bytes": "7c020100",
+          "centeredWebFallbackX": 18,
+          "row": 66,
+          "word0": 636,
+          "word1": 1
+        }
+      ],
+      "nativeHeight": 67,
+      "threshold": 20
+    },
+    "1044.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 10,
+          "bytes": "48000a00",
+          "centeredWebFallbackX": 10,
+          "row": 0,
+          "word0": 72,
+          "word1": 10
+        },
+        {
+          "actualPayload": 12,
+          "bytes": "76020300",
+          "centeredWebFallbackX": 9,
+          "row": 1,
+          "word0": 630,
+          "word1": 3
+        },
+        {
+          "actualPayload": 14,
+          "bytes": "73020302",
+          "centeredWebFallbackX": 8,
+          "row": 2,
+          "word0": 627,
+          "word1": 515
+        },
+        {
+          "actualPayload": 16,
+          "bytes": "71020400",
+          "centeredWebFallbackX": 7,
+          "row": 3,
+          "word0": 625,
+          "word1": 4
+        },
+        {
+          "actualPayload": 17,
+          "bytes": "6e020401",
+          "centeredWebFallbackX": 7,
+          "row": 67,
+          "word0": 622,
+          "word1": 260
+        },
+        {
+          "actualPayload": 13,
+          "bytes": "71020301",
+          "centeredWebFallbackX": 9,
+          "row": 68,
+          "word0": 625,
+          "word1": 259
+        },
+        {
+          "actualPayload": 10,
+          "bytes": "75020202",
+          "centeredWebFallbackX": 10,
+          "row": 69,
+          "word0": 629,
+          "word1": 514
+        }
+      ],
+      "nativeHeight": 70,
+      "threshold": 20
+    },
+    "1047.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 9,
+          "bytes": "48001900",
+          "centeredWebFallbackX": 22,
+          "row": 0,
+          "word0": 72,
+          "word1": 25
+        },
+        {
+          "actualPayload": 10,
+          "bytes": "77020202",
+          "centeredWebFallbackX": 22,
+          "row": 1,
+          "word0": 631,
+          "word1": 514
+        },
+        {
+          "actualPayload": 13,
+          "bytes": "74020301",
+          "centeredWebFallbackX": 20,
+          "row": 2,
+          "word0": 628,
+          "word1": 259
+        },
+        {
+          "actualPayload": 14,
+          "bytes": "73020302",
+          "centeredWebFallbackX": 20,
+          "row": 3,
+          "word0": 627,
+          "word1": 515
+        },
+        {
+          "actualPayload": 22,
+          "bytes": "68020502",
+          "centeredWebFallbackX": 16,
+          "row": 64,
+          "word0": 616,
+          "word1": 517
+        },
+        {
+          "actualPayload": 14,
+          "bytes": "6f020302",
+          "centeredWebFallbackX": 20,
+          "row": 65,
+          "word0": 623,
+          "word1": 515
+        },
+        {
+          "actualPayload": 8,
+          "bytes": "75020200",
+          "centeredWebFallbackX": 23,
+          "row": 66,
+          "word0": 629,
+          "word1": 2
+        }
+      ],
+      "nativeHeight": 67,
+      "threshold": 20
+    },
+    "1048.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 7,
+          "bytes": "6f001500",
+          "centeredWebFallbackX": 26,
+          "row": 0,
+          "word0": 111,
+          "word1": 21
+        },
+        {
+          "actualPayload": 11,
+          "bytes": "77020203",
+          "centeredWebFallbackX": 24,
+          "row": 1,
+          "word0": 631,
+          "word1": 770
+        },
+        {
+          "actualPayload": 13,
+          "bytes": "74020301",
+          "centeredWebFallbackX": 23,
+          "row": 2,
+          "word0": 628,
+          "word1": 259
+        },
+        {
+          "actualPayload": 14,
+          "bytes": "73020302",
+          "centeredWebFallbackX": 22,
+          "row": 3,
+          "word0": 627,
+          "word1": 515
+        },
+        {
+          "actualPayload": 7,
+          "bytes": "79020103",
+          "centeredWebFallbackX": 26,
+          "row": 68,
+          "word0": 633,
+          "word1": 769
+        },
+        {
+          "actualPayload": 6,
+          "bytes": "79020102",
+          "centeredWebFallbackX": 26,
+          "row": 69,
+          "word0": 633,
+          "word1": 513
+        },
+        {
+          "actualPayload": 4,
+          "bytes": "7b020100",
+          "centeredWebFallbackX": 27,
+          "row": 70,
+          "word0": 635,
+          "word1": 1
+        }
+      ],
+      "nativeHeight": 71,
+      "threshold": 24
+    },
+    "1049.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 4,
+          "bytes": "5d000600",
+          "centeredWebFallbackX": 14,
+          "row": 0,
+          "word0": 93,
+          "word1": 6
+        },
+        {
+          "actualPayload": 3,
+          "bytes": "7d020003",
+          "centeredWebFallbackX": 14,
+          "row": 1,
+          "word0": 637,
+          "word1": 768
+        },
+        {
+          "actualPayload": 4,
+          "bytes": "7d020100",
+          "centeredWebFallbackX": 14,
+          "row": 2,
+          "word0": 637,
+          "word1": 1
+        },
+        {
+          "actualPayload": 6,
+          "bytes": "7a020102",
+          "centeredWebFallbackX": 13,
+          "row": 3,
+          "word0": 634,
+          "word1": 513
+        },
+        {
+          "actualPayload": 24,
+          "bytes": "65020202",
+          "centeredWebFallbackX": 4,
+          "row": 81,
+          "word0": 613,
+          "word1": 514
+        },
+        {
+          "actualPayload": 20,
+          "bytes": "68020200",
+          "centeredWebFallbackX": 6,
+          "row": 82,
+          "word0": 616,
+          "word1": 2
+        },
+        {
+          "actualPayload": 12,
+          "bytes": "6d020100",
+          "centeredWebFallbackX": 10,
+          "row": 83,
+          "word0": 621,
+          "word1": 1
+        }
+      ],
+      "nativeHeight": 84,
+      "threshold": 32
+    },
+    "1050.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 8,
+          "bytes": "5b000700",
+          "centeredWebFallbackX": 19,
+          "row": 0,
+          "word0": 91,
+          "word1": 7
+        },
+        {
+          "actualPayload": 10,
+          "bytes": "78020202",
+          "centeredWebFallbackX": 18,
+          "row": 1,
+          "word0": 632,
+          "word1": 514
+        },
+        {
+          "actualPayload": 13,
+          "bytes": "75020301",
+          "centeredWebFallbackX": 17,
+          "row": 2,
+          "word0": 629,
+          "word1": 259
+        },
+        {
+          "actualPayload": 15,
+          "bytes": "72020303",
+          "centeredWebFallbackX": 16,
+          "row": 3,
+          "word0": 626,
+          "word1": 771
+        },
+        {
+          "actualPayload": 8,
+          "bytes": "76020200",
+          "centeredWebFallbackX": 19,
+          "row": 65,
+          "word0": 630,
+          "word1": 2
+        },
+        {
+          "actualPayload": 7,
+          "bytes": "78020103",
+          "centeredWebFallbackX": 20,
+          "row": 66,
+          "word0": 632,
+          "word1": 769
+        },
+        {
+          "actualPayload": 5,
+          "bytes": "7a020101",
+          "centeredWebFallbackX": 21,
+          "row": 67,
+          "word0": 634,
+          "word1": 257
+        }
+      ],
+      "nativeHeight": 68,
+      "threshold": 24
+    },
+    "1051.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 8,
+          "bytes": "46000b00",
+          "centeredWebFallbackX": 10,
+          "row": 0,
+          "word0": 70,
+          "word1": 11
+        },
+        {
+          "actualPayload": 10,
+          "bytes": "78020202",
+          "centeredWebFallbackX": 9,
+          "row": 1,
+          "word0": 632,
+          "word1": 514
+        },
+        {
+          "actualPayload": 12,
+          "bytes": "75020300",
+          "centeredWebFallbackX": 8,
+          "row": 2,
+          "word0": 629,
+          "word1": 3
+        },
+        {
+          "actualPayload": 14,
+          "bytes": "73020302",
+          "centeredWebFallbackX": 7,
+          "row": 3,
+          "word0": 627,
+          "word1": 515
+        },
+        {
+          "actualPayload": 7,
+          "bytes": "79020103",
+          "centeredWebFallbackX": 10,
+          "row": 66,
+          "word0": 633,
+          "word1": 769
+        },
+        {
+          "actualPayload": 7,
+          "bytes": "79020103",
+          "centeredWebFallbackX": 10,
+          "row": 67,
+          "word0": 633,
+          "word1": 769
+        },
+        {
+          "actualPayload": 5,
+          "bytes": "7a020101",
+          "centeredWebFallbackX": 11,
+          "row": 68,
+          "word0": 634,
+          "word1": 257
+        }
+      ],
+      "nativeHeight": 69,
+      "threshold": 20
+    },
+    "1052.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 3,
+          "bytes": "52000b00",
+          "centeredWebFallbackX": 11,
+          "row": 0,
+          "word0": 82,
+          "word1": 11
+        },
+        {
+          "actualPayload": 3,
+          "bytes": "7e020003",
+          "centeredWebFallbackX": 11,
+          "row": 1,
+          "word0": 638,
+          "word1": 768
+        },
+        {
+          "actualPayload": 3,
+          "bytes": "7d020003",
+          "centeredWebFallbackX": 11,
+          "row": 2,
+          "word0": 637,
+          "word1": 768
+        },
+        {
+          "actualPayload": 3,
+          "bytes": "7d020003",
+          "centeredWebFallbackX": 11,
+          "row": 3,
+          "word0": 637,
+          "word1": 768
+        },
+        {
+          "actualPayload": 11,
+          "bytes": "74020203",
+          "centeredWebFallbackX": 7,
+          "row": 78,
+          "word0": 628,
+          "word1": 770
+        },
+        {
+          "actualPayload": 7,
+          "bytes": "75020103",
+          "centeredWebFallbackX": 9,
+          "row": 79,
+          "word0": 629,
+          "word1": 769
+        },
+        {
+          "actualPayload": 4,
+          "bytes": "7a020100",
+          "centeredWebFallbackX": 10,
+          "row": 80,
+          "word0": 634,
+          "word1": 1
+        }
+      ],
+      "nativeHeight": 81,
+      "threshold": 32
+    },
+    "1053.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 5,
+          "bytes": "5b000700",
+          "centeredWebFallbackX": 22,
+          "row": 0,
+          "word0": 91,
+          "word1": 7
+        },
+        {
+          "actualPayload": 6,
+          "bytes": "7c020102",
+          "centeredWebFallbackX": 21,
+          "row": 1,
+          "word0": 636,
+          "word1": 513
+        },
+        {
+          "actualPayload": 9,
+          "bytes": "79020201",
+          "centeredWebFallbackX": 20,
+          "row": 2,
+          "word0": 633,
+          "word1": 258
+        },
+        {
+          "actualPayload": 12,
+          "bytes": "76020300",
+          "centeredWebFallbackX": 18,
+          "row": 3,
+          "word0": 630,
+          "word1": 3
+        },
+        {
+          "actualPayload": 10,
+          "bytes": "74020202",
+          "centeredWebFallbackX": 19,
+          "row": 67,
+          "word0": 628,
+          "word1": 514
+        },
+        {
+          "actualPayload": 7,
+          "bytes": "78020103",
+          "centeredWebFallbackX": 21,
+          "row": 68,
+          "word0": 632,
+          "word1": 769
+        },
+        {
+          "actualPayload": 5,
+          "bytes": "7a020101",
+          "centeredWebFallbackX": 22,
+          "row": 69,
+          "word0": 634,
+          "word1": 257
+        }
+      ],
+      "nativeHeight": 70,
+      "threshold": 20
+    },
+    "1054.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 8,
+          "bytes": "3f000e00",
+          "centeredWebFallbackX": 12,
+          "row": 0,
+          "word0": 63,
+          "word1": 14
+        },
+        {
+          "actualPayload": 10,
+          "bytes": "78020202",
+          "centeredWebFallbackX": 11,
+          "row": 1,
+          "word0": 632,
+          "word1": 514
+        },
+        {
+          "actualPayload": 12,
+          "bytes": "75020300",
+          "centeredWebFallbackX": 10,
+          "row": 2,
+          "word0": 629,
+          "word1": 3
+        },
+        {
+          "actualPayload": 12,
+          "bytes": "74020300",
+          "centeredWebFallbackX": 10,
+          "row": 3,
+          "word0": 628,
+          "word1": 3
+        },
+        {
+          "actualPayload": 23,
+          "bytes": "68020503",
+          "centeredWebFallbackX": 4,
+          "row": 60,
+          "word0": 616,
+          "word1": 773
+        },
+        {
+          "actualPayload": 20,
+          "bytes": "6a020500",
+          "centeredWebFallbackX": 6,
+          "row": 61,
+          "word0": 618,
+          "word1": 5
+        },
+        {
+          "actualPayload": 14,
+          "bytes": "6f020302",
+          "centeredWebFallbackX": 9,
+          "row": 62,
+          "word0": 623,
+          "word1": 515
+        }
+      ],
+      "nativeHeight": 63,
+      "threshold": 20
+    },
+    "1055.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 8,
+          "bytes": "49000900",
+          "centeredWebFallbackX": 7,
+          "row": 0,
+          "word0": 73,
+          "word1": 9
+        },
+        {
+          "actualPayload": 10,
+          "bytes": "78020202",
+          "centeredWebFallbackX": 6,
+          "row": 1,
+          "word0": 632,
+          "word1": 514
+        },
+        {
+          "actualPayload": 12,
+          "bytes": "75020300",
+          "centeredWebFallbackX": 5,
+          "row": 2,
+          "word0": 629,
+          "word1": 3
+        },
+        {
+          "actualPayload": 14,
+          "bytes": "73020302",
+          "centeredWebFallbackX": 4,
+          "row": 3,
+          "word0": 627,
+          "word1": 515
+        },
+        {
+          "actualPayload": 10,
+          "bytes": "76020202",
+          "centeredWebFallbackX": 6,
+          "row": 63,
+          "word0": 630,
+          "word1": 514
+        },
+        {
+          "actualPayload": 7,
+          "bytes": "79020103",
+          "centeredWebFallbackX": 8,
+          "row": 64,
+          "word0": 633,
+          "word1": 769
+        },
+        {
+          "actualPayload": 5,
+          "bytes": "7a020101",
+          "centeredWebFallbackX": 9,
+          "row": 65,
+          "word0": 634,
+          "word1": 257
+        }
+      ],
+      "nativeHeight": 66,
+      "threshold": 20
+    },
+    "1056.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 10,
+          "bytes": "49000800",
+          "centeredWebFallbackX": 8,
+          "row": 0,
+          "word0": 73,
+          "word1": 8
+        },
+        {
+          "actualPayload": 10,
+          "bytes": "77020202",
+          "centeredWebFallbackX": 8,
+          "row": 1,
+          "word0": 631,
+          "word1": 514
+        },
+        {
+          "actualPayload": 12,
+          "bytes": "75020300",
+          "centeredWebFallbackX": 7,
+          "row": 2,
+          "word0": 629,
+          "word1": 3
+        },
+        {
+          "actualPayload": 14,
+          "bytes": "73020302",
+          "centeredWebFallbackX": 6,
+          "row": 3,
+          "word0": 627,
+          "word1": 515
+        },
+        {
+          "actualPayload": 10,
+          "bytes": "75020202",
+          "centeredWebFallbackX": 8,
+          "row": 69,
+          "word0": 629,
+          "word1": 514
+        },
+        {
+          "actualPayload": 8,
+          "bytes": "76020200",
+          "centeredWebFallbackX": 9,
+          "row": 70,
+          "word0": 630,
+          "word1": 2
+        },
+        {
+          "actualPayload": 5,
+          "bytes": "79020101",
+          "centeredWebFallbackX": 11,
+          "row": 71,
+          "word0": 633,
+          "word1": 257
+        }
+      ],
+      "nativeHeight": 72,
+      "threshold": 20
+    },
+    "1058.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 4,
+          "bytes": "6f000600",
+          "centeredWebFallbackX": 15,
+          "row": 0,
+          "word0": 111,
+          "word1": 6
+        },
+        {
+          "actualPayload": 4,
+          "bytes": "7d020100",
+          "centeredWebFallbackX": 15,
+          "row": 1,
+          "word0": 637,
+          "word1": 1
+        },
+        {
+          "actualPayload": 4,
+          "bytes": "7c020100",
+          "centeredWebFallbackX": 15,
+          "row": 2,
+          "word0": 636,
+          "word1": 1
+        },
+        {
+          "actualPayload": 4,
+          "bytes": "7c020100",
+          "centeredWebFallbackX": 15,
+          "row": 3,
+          "word0": 636,
+          "word1": 1
+        },
+        {
+          "actualPayload": 9,
+          "bytes": "75020201",
+          "centeredWebFallbackX": 12,
+          "row": 77,
+          "word0": 629,
+          "word1": 258
+        },
+        {
+          "actualPayload": 8,
+          "bytes": "77020200",
+          "centeredWebFallbackX": 13,
+          "row": 78,
+          "word0": 631,
+          "word1": 2
+        },
+        {
+          "actualPayload": 5,
+          "bytes": "79020101",
+          "centeredWebFallbackX": 14,
+          "row": 79,
+          "word0": 633,
+          "word1": 257
+        }
+      ],
+      "nativeHeight": 80,
+      "threshold": 20
+    },
+    "1059.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 8,
+          "bytes": "4c000a00",
+          "centeredWebFallbackX": 12,
+          "row": 0,
+          "word0": 76,
+          "word1": 10
+        },
+        {
+          "actualPayload": 10,
+          "bytes": "78020202",
+          "centeredWebFallbackX": 11,
+          "row": 1,
+          "word0": 632,
+          "word1": 514
+        },
+        {
+          "actualPayload": 12,
+          "bytes": "75020300",
+          "centeredWebFallbackX": 10,
+          "row": 2,
+          "word0": 629,
+          "word1": 3
+        },
+        {
+          "actualPayload": 14,
+          "bytes": "73020302",
+          "centeredWebFallbackX": 9,
+          "row": 3,
+          "word0": 627,
+          "word1": 515
+        },
+        {
+          "actualPayload": 17,
+          "bytes": "6e020401",
+          "centeredWebFallbackX": 7,
+          "row": 64,
+          "word0": 622,
+          "word1": 260
+        },
+        {
+          "actualPayload": 14,
+          "bytes": "71020302",
+          "centeredWebFallbackX": 9,
+          "row": 65,
+          "word0": 625,
+          "word1": 515
+        },
+        {
+          "actualPayload": 9,
+          "bytes": "75020201",
+          "centeredWebFallbackX": 11,
+          "row": 66,
+          "word0": 629,
+          "word1": 258
+        }
+      ],
+      "nativeHeight": 67,
+      "threshold": 20
+    },
+    "1060.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 13,
+          "bytes": "48000e00",
+          "centeredWebFallbackX": 11,
+          "row": 0,
+          "word0": 72,
+          "word1": 14
+        },
+        {
+          "actualPayload": 16,
+          "bytes": "72020400",
+          "centeredWebFallbackX": 10,
+          "row": 1,
+          "word0": 626,
+          "word1": 4
+        },
+        {
+          "actualPayload": 18,
+          "bytes": "6f020402",
+          "centeredWebFallbackX": 9,
+          "row": 2,
+          "word0": 623,
+          "word1": 516
+        },
+        {
+          "actualPayload": 18,
+          "bytes": "6e020402",
+          "centeredWebFallbackX": 9,
+          "row": 3,
+          "word0": 622,
+          "word1": 516
+        },
+        {
+          "actualPayload": 13,
+          "bytes": "70020301",
+          "centeredWebFallbackX": 11,
+          "row": 69,
+          "word0": 624,
+          "word1": 259
+        },
+        {
+          "actualPayload": 9,
+          "bytes": "75020201",
+          "centeredWebFallbackX": 13,
+          "row": 70,
+          "word0": 629,
+          "word1": 258
+        },
+        {
+          "actualPayload": 7,
+          "bytes": "78020103",
+          "centeredWebFallbackX": 14,
+          "row": 71,
+          "word0": 632,
+          "word1": 769
+        }
+      ],
+      "nativeHeight": 72,
+      "threshold": 20
+    },
+    "1062.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 10,
+          "bytes": "59001400",
+          "centeredWebFallbackX": 16,
+          "row": 0,
+          "word0": 89,
+          "word1": 20
+        },
+        {
+          "actualPayload": 12,
+          "bytes": "76020300",
+          "centeredWebFallbackX": 15,
+          "row": 1,
+          "word0": 630,
+          "word1": 3
+        },
+        {
+          "actualPayload": 14,
+          "bytes": "73020302",
+          "centeredWebFallbackX": 14,
+          "row": 2,
+          "word0": 627,
+          "word1": 515
+        },
+        {
+          "actualPayload": 16,
+          "bytes": "71020400",
+          "centeredWebFallbackX": 13,
+          "row": 3,
+          "word0": 625,
+          "word1": 4
+        },
+        {
+          "actualPayload": 10,
+          "bytes": "75020202",
+          "centeredWebFallbackX": 16,
+          "row": 67,
+          "word0": 629,
+          "word1": 514
+        },
+        {
+          "actualPayload": 8,
+          "bytes": "76020200",
+          "centeredWebFallbackX": 17,
+          "row": 68,
+          "word0": 630,
+          "word1": 2
+        },
+        {
+          "actualPayload": 5,
+          "bytes": "79020101",
+          "centeredWebFallbackX": 19,
+          "row": 69,
+          "word0": 633,
+          "word1": 257
+        }
+      ],
+      "nativeHeight": 70,
+      "threshold": 32
+    },
+    "1063.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 8,
+          "bytes": "48001200",
+          "centeredWebFallbackX": 15,
+          "row": 0,
+          "word0": 72,
+          "word1": 18
+        },
+        {
+          "actualPayload": 10,
+          "bytes": "78020202",
+          "centeredWebFallbackX": 14,
+          "row": 1,
+          "word0": 632,
+          "word1": 514
+        },
+        {
+          "actualPayload": 12,
+          "bytes": "75020300",
+          "centeredWebFallbackX": 13,
+          "row": 2,
+          "word0": 629,
+          "word1": 3
+        },
+        {
+          "actualPayload": 14,
+          "bytes": "73020302",
+          "centeredWebFallbackX": 12,
+          "row": 3,
+          "word0": 627,
+          "word1": 515
+        },
+        {
+          "actualPayload": 7,
+          "bytes": "77020103",
+          "centeredWebFallbackX": 15,
+          "row": 69,
+          "word0": 631,
+          "word1": 769
+        },
+        {
+          "actualPayload": 5,
+          "bytes": "7a020101",
+          "centeredWebFallbackX": 16,
+          "row": 70,
+          "word0": 634,
+          "word1": 257
+        },
+        {
+          "actualPayload": 3,
+          "bytes": "7d020003",
+          "centeredWebFallbackX": 17,
+          "row": 71,
+          "word0": 637,
+          "word1": 768
+        }
+      ],
+      "nativeHeight": 72,
+      "threshold": 20
+    },
+    "1065.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 5,
+          "bytes": "5f001300",
+          "centeredWebFallbackX": 18,
+          "row": 0,
+          "word0": 95,
+          "word1": 19
+        },
+        {
+          "actualPayload": 6,
+          "bytes": "7a020102",
+          "centeredWebFallbackX": 17,
+          "row": 1,
+          "word0": 634,
+          "word1": 513
+        },
+        {
+          "actualPayload": 9,
+          "bytes": "79020201",
+          "centeredWebFallbackX": 16,
+          "row": 2,
+          "word0": 633,
+          "word1": 258
+        },
+        {
+          "actualPayload": 11,
+          "bytes": "76020203",
+          "centeredWebFallbackX": 15,
+          "row": 3,
+          "word0": 630,
+          "word1": 770
+        },
+        {
+          "actualPayload": 9,
+          "bytes": "77020201",
+          "centeredWebFallbackX": 16,
+          "row": 70,
+          "word0": 631,
+          "word1": 258
+        },
+        {
+          "actualPayload": 7,
+          "bytes": "78020103",
+          "centeredWebFallbackX": 17,
+          "row": 71,
+          "word0": 632,
+          "word1": 769
+        },
+        {
+          "actualPayload": 5,
+          "bytes": "7a020101",
+          "centeredWebFallbackX": 18,
+          "row": 72,
+          "word0": 634,
+          "word1": 257
+        }
+      ],
+      "nativeHeight": 73,
+      "threshold": 24
+    },
+    "1066.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 8,
+          "bytes": "65000900",
+          "centeredWebFallbackX": 15,
+          "row": 0,
+          "word0": 101,
+          "word1": 9
+        },
+        {
+          "actualPayload": 10,
+          "bytes": "78020202",
+          "centeredWebFallbackX": 14,
+          "row": 1,
+          "word0": 632,
+          "word1": 514
+        },
+        {
+          "actualPayload": 12,
+          "bytes": "75020300",
+          "centeredWebFallbackX": 13,
+          "row": 2,
+          "word0": 629,
+          "word1": 3
+        },
+        {
+          "actualPayload": 20,
+          "bytes": "73020302",
+          "centeredWebFallbackX": 9,
+          "row": 3,
+          "word0": 627,
+          "word1": 515
+        },
+        {
+          "actualPayload": 11,
+          "bytes": "74020203",
+          "centeredWebFallbackX": 14,
+          "row": 68,
+          "word0": 628,
+          "word1": 770
+        },
+        {
+          "actualPayload": 9,
+          "bytes": "75020201",
+          "centeredWebFallbackX": 15,
+          "row": 69,
+          "word0": 629,
+          "word1": 258
+        },
+        {
+          "actualPayload": 5,
+          "bytes": "78020101",
+          "centeredWebFallbackX": 17,
+          "row": 70,
+          "word0": 632,
+          "word1": 257
+        }
+      ],
+      "nativeHeight": 71,
+      "threshold": 32
+    },
+    "1067.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 4,
+          "bytes": "5c001300",
+          "centeredWebFallbackX": 21,
+          "row": 0,
+          "word0": 92,
+          "word1": 19
+        },
+        {
+          "actualPayload": 4,
+          "bytes": "7d020100",
+          "centeredWebFallbackX": 21,
+          "row": 1,
+          "word0": 637,
+          "word1": 1
+        },
+        {
+          "actualPayload": 8,
+          "bytes": "7a020200",
+          "centeredWebFallbackX": 19,
+          "row": 2,
+          "word0": 634,
+          "word1": 2
+        },
+        {
+          "actualPayload": 12,
+          "bytes": "76020300",
+          "centeredWebFallbackX": 17,
+          "row": 3,
+          "word0": 630,
+          "word1": 3
+        },
+        {
+          "actualPayload": 4,
+          "bytes": "77020100",
+          "centeredWebFallbackX": 21,
+          "row": 82,
+          "word0": 631,
+          "word1": 1
+        },
+        {
+          "actualPayload": 4,
+          "bytes": "7c020100",
+          "centeredWebFallbackX": 21,
+          "row": 83,
+          "word0": 636,
+          "word1": 1
+        },
+        {
+          "actualPayload": 4,
+          "bytes": "7c020100",
+          "centeredWebFallbackX": 21,
+          "row": 84,
+          "word0": 636,
+          "word1": 1
+        }
+      ],
+      "nativeHeight": 85,
+      "threshold": 20
+    },
+    "1068.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 8,
+          "bytes": "4e000d00",
+          "centeredWebFallbackX": 14,
+          "row": 0,
+          "word0": 78,
+          "word1": 13
+        },
+        {
+          "actualPayload": 10,
+          "bytes": "78020202",
+          "centeredWebFallbackX": 13,
+          "row": 1,
+          "word0": 632,
+          "word1": 514
+        },
+        {
+          "actualPayload": 12,
+          "bytes": "75020300",
+          "centeredWebFallbackX": 12,
+          "row": 2,
+          "word0": 629,
+          "word1": 3
+        },
+        {
+          "actualPayload": 12,
+          "bytes": "74020300",
+          "centeredWebFallbackX": 12,
+          "row": 3,
+          "word0": 628,
+          "word1": 3
+        },
+        {
+          "actualPayload": 19,
+          "bytes": "6b020403",
+          "centeredWebFallbackX": 9,
+          "row": 72,
+          "word0": 619,
+          "word1": 772
+        },
+        {
+          "actualPayload": 9,
+          "bytes": "76020201",
+          "centeredWebFallbackX": 14,
+          "row": 73,
+          "word0": 630,
+          "word1": 258
+        },
+        {
+          "actualPayload": 5,
+          "bytes": "78020101",
+          "centeredWebFallbackX": 16,
+          "row": 74,
+          "word0": 632,
+          "word1": 257
+        }
+      ],
+      "nativeHeight": 75,
+      "threshold": 28
+    },
+    "1069.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 8,
+          "bytes": "5e001000",
+          "centeredWebFallbackX": 21,
+          "row": 0,
+          "word0": 94,
+          "word1": 16
+        },
+        {
+          "actualPayload": 12,
+          "bytes": "77020300",
+          "centeredWebFallbackX": 19,
+          "row": 1,
+          "word0": 631,
+          "word1": 3
+        },
+        {
+          "actualPayload": 16,
+          "bytes": "72020400",
+          "centeredWebFallbackX": 17,
+          "row": 2,
+          "word0": 626,
+          "word1": 4
+        },
+        {
+          "actualPayload": 18,
+          "bytes": "6f020402",
+          "centeredWebFallbackX": 16,
+          "row": 3,
+          "word0": 623,
+          "word1": 516
+        },
+        {
+          "actualPayload": 23,
+          "bytes": "5c020503",
+          "centeredWebFallbackX": 13,
+          "row": 63,
+          "word0": 604,
+          "word1": 773
+        },
+        {
+          "actualPayload": 20,
+          "bytes": "6b020500",
+          "centeredWebFallbackX": 15,
+          "row": 64,
+          "word0": 619,
+          "word1": 5
+        },
+        {
+          "actualPayload": 9,
+          "bytes": "73020201",
+          "centeredWebFallbackX": 20,
+          "row": 65,
+          "word0": 627,
+          "word1": 258
+        }
+      ],
+      "nativeHeight": 66,
+      "threshold": 20
+    },
+    "1070.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 11,
+          "bytes": "6d001f00",
+          "centeredWebFallbackX": 27,
+          "row": 0,
+          "word0": 109,
+          "word1": 31
+        },
+        {
+          "actualPayload": 14,
+          "bytes": "74020302",
+          "centeredWebFallbackX": 25,
+          "row": 1,
+          "word0": 628,
+          "word1": 515
+        },
+        {
+          "actualPayload": 15,
+          "bytes": "71020303",
+          "centeredWebFallbackX": 25,
+          "row": 2,
+          "word0": 625,
+          "word1": 771
+        },
+        {
+          "actualPayload": 16,
+          "bytes": "71020400",
+          "centeredWebFallbackX": 24,
+          "row": 3,
+          "word0": 625,
+          "word1": 4
+        },
+        {
+          "actualPayload": 11,
+          "bytes": "75020203",
+          "centeredWebFallbackX": 27,
+          "row": 71,
+          "word0": 629,
+          "word1": 770
+        },
+        {
+          "actualPayload": 9,
+          "bytes": "77020201",
+          "centeredWebFallbackX": 28,
+          "row": 72,
+          "word0": 631,
+          "word1": 258
+        },
+        {
+          "actualPayload": 6,
+          "bytes": "79020102",
+          "centeredWebFallbackX": 29,
+          "row": 73,
+          "word0": 633,
+          "word1": 513
+        }
+      ],
+      "nativeHeight": 74,
+      "threshold": 20
+    },
+    "1071.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 8,
+          "bytes": "4e001200",
+          "centeredWebFallbackX": 16,
+          "row": 0,
+          "word0": 78,
+          "word1": 18
+        },
+        {
+          "actualPayload": 10,
+          "bytes": "78020202",
+          "centeredWebFallbackX": 15,
+          "row": 1,
+          "word0": 632,
+          "word1": 514
+        },
+        {
+          "actualPayload": 12,
+          "bytes": "75020300",
+          "centeredWebFallbackX": 14,
+          "row": 2,
+          "word0": 629,
+          "word1": 3
+        },
+        {
+          "actualPayload": 14,
+          "bytes": "73020302",
+          "centeredWebFallbackX": 13,
+          "row": 3,
+          "word0": 627,
+          "word1": 515
+        },
+        {
+          "actualPayload": 13,
+          "bytes": "72020301",
+          "centeredWebFallbackX": 13,
+          "row": 67,
+          "word0": 626,
+          "word1": 259
+        },
+        {
+          "actualPayload": 10,
+          "bytes": "75020202",
+          "centeredWebFallbackX": 15,
+          "row": 68,
+          "word0": 629,
+          "word1": 514
+        },
+        {
+          "actualPayload": 6,
+          "bytes": "78020102",
+          "centeredWebFallbackX": 17,
+          "row": 69,
+          "word0": 632,
+          "word1": 513
+        }
+      ],
+      "nativeHeight": 70,
+      "threshold": 20
+    },
+    "1072.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 8,
+          "bytes": "65000900",
+          "centeredWebFallbackX": 22,
+          "row": 0,
+          "word0": 101,
+          "word1": 9
+        },
+        {
+          "actualPayload": 10,
+          "bytes": "78020202",
+          "centeredWebFallbackX": 21,
+          "row": 1,
+          "word0": 632,
+          "word1": 514
+        },
+        {
+          "actualPayload": 12,
+          "bytes": "75020300",
+          "centeredWebFallbackX": 20,
+          "row": 2,
+          "word0": 629,
+          "word1": 3
+        },
+        {
+          "actualPayload": 14,
+          "bytes": "73020302",
+          "centeredWebFallbackX": 19,
+          "row": 3,
+          "word0": 627,
+          "word1": 515
+        },
+        {
+          "actualPayload": 5,
+          "bytes": "7c020101",
+          "centeredWebFallbackX": 24,
+          "row": 81,
+          "word0": 636,
+          "word1": 257
+        },
+        {
+          "actualPayload": 4,
+          "bytes": "7c020100",
+          "centeredWebFallbackX": 24,
+          "row": 82,
+          "word0": 636,
+          "word1": 1
+        },
+        {
+          "actualPayload": 3,
+          "bytes": "7d020003",
+          "centeredWebFallbackX": 25,
+          "row": 83,
+          "word0": 637,
+          "word1": 768
+        }
+      ],
+      "nativeHeight": 84,
+      "threshold": 32
+    },
+    "1073.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 8,
+          "bytes": "48000d00",
+          "centeredWebFallbackX": 10,
+          "row": 0,
+          "word0": 72,
+          "word1": 13
+        },
+        {
+          "actualPayload": 10,
+          "bytes": "78020202",
+          "centeredWebFallbackX": 9,
+          "row": 1,
+          "word0": 632,
+          "word1": 514
+        },
+        {
+          "actualPayload": 12,
+          "bytes": "75020300",
+          "centeredWebFallbackX": 8,
+          "row": 2,
+          "word0": 629,
+          "word1": 3
+        },
+        {
+          "actualPayload": 14,
+          "bytes": "73020302",
+          "centeredWebFallbackX": 7,
+          "row": 3,
+          "word0": 627,
+          "word1": 515
+        },
+        {
+          "actualPayload": 14,
+          "bytes": "72020302",
+          "centeredWebFallbackX": 7,
+          "row": 69,
+          "word0": 626,
+          "word1": 515
+        },
+        {
+          "actualPayload": 13,
+          "bytes": "73020301",
+          "centeredWebFallbackX": 8,
+          "row": 70,
+          "word0": 627,
+          "word1": 259
+        },
+        {
+          "actualPayload": 6,
+          "bytes": "79020102",
+          "centeredWebFallbackX": 11,
+          "row": 71,
+          "word0": 633,
+          "word1": 513
+        }
+      ],
+      "nativeHeight": 72,
+      "threshold": 20
+    },
+    "1074.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 3,
+          "bytes": "74001f00",
+          "centeredWebFallbackX": 29,
+          "row": 0,
+          "word0": 116,
+          "word1": 31
+        },
+        {
+          "actualPayload": 3,
+          "bytes": "80020003",
+          "centeredWebFallbackX": 29,
+          "row": 1,
+          "word0": 640,
+          "word1": 768
+        },
+        {
+          "actualPayload": 5,
+          "bytes": "7e020101",
+          "centeredWebFallbackX": 28,
+          "row": 2,
+          "word0": 638,
+          "word1": 257
+        },
+        {
+          "actualPayload": 5,
+          "bytes": "7c020101",
+          "centeredWebFallbackX": 28,
+          "row": 3,
+          "word0": 636,
+          "word1": 257
+        },
+        {
+          "actualPayload": 4,
+          "bytes": "7b020100",
+          "centeredWebFallbackX": 29,
+          "row": 88,
+          "word0": 635,
+          "word1": 1
+        },
+        {
+          "actualPayload": 4,
+          "bytes": "7c020100",
+          "centeredWebFallbackX": 29,
+          "row": 89,
+          "word0": 636,
+          "word1": 1
+        },
+        {
+          "actualPayload": 3,
+          "bytes": "7c020003",
+          "centeredWebFallbackX": 29,
+          "row": 90,
+          "word0": 636,
+          "word1": 768
+        }
+      ],
+      "nativeHeight": 91,
+      "threshold": 20
+    },
+    "1075.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 6,
+          "bytes": "4e000b00",
+          "centeredWebFallbackX": 12,
+          "row": 0,
+          "word0": 78,
+          "word1": 11
+        },
+        {
+          "actualPayload": 8,
+          "bytes": "7a020200",
+          "centeredWebFallbackX": 11,
+          "row": 1,
+          "word0": 634,
+          "word1": 2
+        },
+        {
+          "actualPayload": 12,
+          "bytes": "76020300",
+          "centeredWebFallbackX": 9,
+          "row": 2,
+          "word0": 630,
+          "word1": 3
+        },
+        {
+          "actualPayload": 14,
+          "bytes": "73020302",
+          "centeredWebFallbackX": 8,
+          "row": 3,
+          "word0": 627,
+          "word1": 515
+        },
+        {
+          "actualPayload": 13,
+          "bytes": "72020301",
+          "centeredWebFallbackX": 8,
+          "row": 68,
+          "word0": 626,
+          "word1": 259
+        },
+        {
+          "actualPayload": 12,
+          "bytes": "73020300",
+          "centeredWebFallbackX": 9,
+          "row": 69,
+          "word0": 627,
+          "word1": 3
+        },
+        {
+          "actualPayload": 8,
+          "bytes": "75020200",
+          "centeredWebFallbackX": 11,
+          "row": 70,
+          "word0": 629,
+          "word1": 2
+        }
+      ],
+      "nativeHeight": 71,
+      "threshold": 20
+    },
+    "1076.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 8,
+          "bytes": "41000900",
+          "centeredWebFallbackX": 8,
+          "row": 0,
+          "word0": 65,
+          "word1": 9
+        },
+        {
+          "actualPayload": 10,
+          "bytes": "78020202",
+          "centeredWebFallbackX": 7,
+          "row": 1,
+          "word0": 632,
+          "word1": 514
+        },
+        {
+          "actualPayload": 12,
+          "bytes": "75020300",
+          "centeredWebFallbackX": 6,
+          "row": 2,
+          "word0": 629,
+          "word1": 3
+        },
+        {
+          "actualPayload": 14,
+          "bytes": "73020302",
+          "centeredWebFallbackX": 5,
+          "row": 3,
+          "word0": 627,
+          "word1": 515
+        },
+        {
+          "actualPayload": 16,
+          "bytes": "6f020400",
+          "centeredWebFallbackX": 4,
+          "row": 62,
+          "word0": 623,
+          "word1": 4
+        },
+        {
+          "actualPayload": 11,
+          "bytes": "71020203",
+          "centeredWebFallbackX": 7,
+          "row": 63,
+          "word0": 625,
+          "word1": 770
+        },
+        {
+          "actualPayload": 9,
+          "bytes": "76020201",
+          "centeredWebFallbackX": 8,
+          "row": 64,
+          "word0": 630,
+          "word1": 258
+        }
+      ],
+      "nativeHeight": 65,
+      "threshold": 20
+    },
+    "1077.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 14,
+          "bytes": "62000300",
+          "centeredWebFallbackX": 11,
+          "row": 0,
+          "word0": 98,
+          "word1": 3
+        },
+        {
+          "actualPayload": 17,
+          "bytes": "72020002",
+          "centeredWebFallbackX": 10,
+          "row": 1,
+          "word0": 626,
+          "word1": 512
+        },
+        {
+          "actualPayload": 16,
+          "bytes": "71020400",
+          "centeredWebFallbackX": 10,
+          "row": 2,
+          "word0": 625,
+          "word1": 4
+        },
+        {
+          "actualPayload": 16,
+          "bytes": "71020400",
+          "centeredWebFallbackX": 10,
+          "row": 3,
+          "word0": 625,
+          "word1": 4
+        },
+        {
+          "actualPayload": 10,
+          "bytes": "75020202",
+          "centeredWebFallbackX": 13,
+          "row": 64,
+          "word0": 629,
+          "word1": 514
+        },
+        {
+          "actualPayload": 7,
+          "bytes": "76020103",
+          "centeredWebFallbackX": 15,
+          "row": 65,
+          "word0": 630,
+          "word1": 769
+        },
+        {
+          "actualPayload": 5,
+          "bytes": "7a020101",
+          "centeredWebFallbackX": 16,
+          "row": 66,
+          "word0": 634,
+          "word1": 257
+        }
+      ],
+      "nativeHeight": 67,
+      "threshold": 20
+    },
+    "1078.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 8,
+          "bytes": "53000900",
+          "centeredWebFallbackX": 26,
+          "row": 0,
+          "word0": 83,
+          "word1": 9
+        },
+        {
+          "actualPayload": 10,
+          "bytes": "78020202",
+          "centeredWebFallbackX": 25,
+          "row": 1,
+          "word0": 632,
+          "word1": 514
+        },
+        {
+          "actualPayload": 12,
+          "bytes": "75020300",
+          "centeredWebFallbackX": 24,
+          "row": 2,
+          "word0": 629,
+          "word1": 3
+        },
+        {
+          "actualPayload": 14,
+          "bytes": "73020302",
+          "centeredWebFallbackX": 23,
+          "row": 3,
+          "word0": 627,
+          "word1": 515
+        },
+        {
+          "actualPayload": 9,
+          "bytes": "75020201",
+          "centeredWebFallbackX": 25,
+          "row": 54,
+          "word0": 629,
+          "word1": 258
+        },
+        {
+          "actualPayload": 8,
+          "bytes": "77020200",
+          "centeredWebFallbackX": 26,
+          "row": 55,
+          "word0": 631,
+          "word1": 2
+        },
+        {
+          "actualPayload": 5,
+          "bytes": "79020101",
+          "centeredWebFallbackX": 27,
+          "row": 56,
+          "word0": 633,
+          "word1": 257
+        }
+      ],
+      "nativeHeight": 57,
+      "threshold": 20
+    },
+    "1079.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 4,
+          "bytes": "5a000400",
+          "centeredWebFallbackX": 13,
+          "row": 0,
+          "word0": 90,
+          "word1": 4
+        },
+        {
+          "actualPayload": 2,
+          "bytes": "7e020002",
+          "centeredWebFallbackX": 14,
+          "row": 1,
+          "word0": 638,
+          "word1": 512
+        },
+        {
+          "actualPayload": 3,
+          "bytes": "7e020003",
+          "centeredWebFallbackX": 14,
+          "row": 2,
+          "word0": 638,
+          "word1": 768
+        },
+        {
+          "actualPayload": 2,
+          "bytes": "7e020002",
+          "centeredWebFallbackX": 14,
+          "row": 3,
+          "word0": 638,
+          "word1": 512
+        },
+        {
+          "actualPayload": 15,
+          "bytes": "71020303",
+          "centeredWebFallbackX": 8,
+          "row": 73,
+          "word0": 625,
+          "word1": 771
+        },
+        {
+          "actualPayload": 14,
+          "bytes": "71020302",
+          "centeredWebFallbackX": 8,
+          "row": 74,
+          "word0": 625,
+          "word1": 515
+        },
+        {
+          "actualPayload": 5,
+          "bytes": "73020101",
+          "centeredWebFallbackX": 13,
+          "row": 75,
+          "word0": 627,
+          "word1": 257
+        }
+      ],
+      "nativeHeight": 76,
+      "threshold": 20
+    },
+    "1080.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 8,
+          "bytes": "49000a00",
+          "centeredWebFallbackX": 9,
+          "row": 0,
+          "word0": 73,
+          "word1": 10
+        },
+        {
+          "actualPayload": 10,
+          "bytes": "78020202",
+          "centeredWebFallbackX": 8,
+          "row": 1,
+          "word0": 632,
+          "word1": 514
+        },
+        {
+          "actualPayload": 12,
+          "bytes": "75020300",
+          "centeredWebFallbackX": 7,
+          "row": 2,
+          "word0": 629,
+          "word1": 3
+        },
+        {
+          "actualPayload": 14,
+          "bytes": "73020302",
+          "centeredWebFallbackX": 6,
+          "row": 3,
+          "word0": 627,
+          "word1": 515
+        },
+        {
+          "actualPayload": 9,
+          "bytes": "75020201",
+          "centeredWebFallbackX": 8,
+          "row": 64,
+          "word0": 629,
+          "word1": 258
+        },
+        {
+          "actualPayload": 7,
+          "bytes": "77020103",
+          "centeredWebFallbackX": 9,
+          "row": 65,
+          "word0": 631,
+          "word1": 769
+        },
+        {
+          "actualPayload": 5,
+          "bytes": "7a020101",
+          "centeredWebFallbackX": 10,
+          "row": 66,
+          "word0": 634,
+          "word1": 257
+        }
+      ],
+      "nativeHeight": 67,
+      "threshold": 20
+    },
+    "1081.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 4,
+          "bytes": "66001e00",
+          "centeredWebFallbackX": 14,
+          "row": 0,
+          "word0": 102,
+          "word1": 30
+        },
+        {
+          "actualPayload": 4,
+          "bytes": "7c020100",
+          "centeredWebFallbackX": 14,
+          "row": 1,
+          "word0": 636,
+          "word1": 1
+        },
+        {
+          "actualPayload": 4,
+          "bytes": "7c020100",
+          "centeredWebFallbackX": 14,
+          "row": 2,
+          "word0": 636,
+          "word1": 1
+        },
+        {
+          "actualPayload": 5,
+          "bytes": "7b020101",
+          "centeredWebFallbackX": 13,
+          "row": 3,
+          "word0": 635,
+          "word1": 257
+        },
+        {
+          "actualPayload": 14,
+          "bytes": "72020302",
+          "centeredWebFallbackX": 9,
+          "row": 87,
+          "word0": 626,
+          "word1": 515
+        },
+        {
+          "actualPayload": 14,
+          "bytes": "72020302",
+          "centeredWebFallbackX": 9,
+          "row": 88,
+          "word0": 626,
+          "word1": 515
+        },
+        {
+          "actualPayload": 12,
+          "bytes": "73020300",
+          "centeredWebFallbackX": 10,
+          "row": 89,
+          "word0": 627,
+          "word1": 3
+        }
+      ],
+      "nativeHeight": 90,
+      "threshold": 28
+    },
+    "1082.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 8,
+          "bytes": "49001100",
+          "centeredWebFallbackX": 17,
+          "row": 0,
+          "word0": 73,
+          "word1": 17
+        },
+        {
+          "actualPayload": 10,
+          "bytes": "78020202",
+          "centeredWebFallbackX": 16,
+          "row": 1,
+          "word0": 632,
+          "word1": 514
+        },
+        {
+          "actualPayload": 12,
+          "bytes": "75020300",
+          "centeredWebFallbackX": 15,
+          "row": 2,
+          "word0": 629,
+          "word1": 3
+        },
+        {
+          "actualPayload": 14,
+          "bytes": "73020302",
+          "centeredWebFallbackX": 14,
+          "row": 3,
+          "word0": 627,
+          "word1": 515
+        },
+        {
+          "actualPayload": 28,
+          "bytes": "64020200",
+          "centeredWebFallbackX": 7,
+          "row": 67,
+          "word0": 612,
+          "word1": 2
+        },
+        {
+          "actualPayload": 21,
+          "bytes": "66020102",
+          "centeredWebFallbackX": 10,
+          "row": 68,
+          "word0": 614,
+          "word1": 513
+        },
+        {
+          "actualPayload": 15,
+          "bytes": "69020100",
+          "centeredWebFallbackX": 13,
+          "row": 69,
+          "word0": 617,
+          "word1": 1
+        }
+      ],
+      "nativeHeight": 70,
+      "threshold": 20
+    },
+    "1083.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 4,
+          "bytes": "5c000f00",
+          "centeredWebFallbackX": 11,
+          "row": 0,
+          "word0": 92,
+          "word1": 15
+        },
+        {
+          "actualPayload": 4,
+          "bytes": "7d020100",
+          "centeredWebFallbackX": 11,
+          "row": 1,
+          "word0": 637,
+          "word1": 1
+        },
+        {
+          "actualPayload": 4,
+          "bytes": "7c020100",
+          "centeredWebFallbackX": 11,
+          "row": 2,
+          "word0": 636,
+          "word1": 1
+        },
+        {
+          "actualPayload": 4,
+          "bytes": "7c020100",
+          "centeredWebFallbackX": 11,
+          "row": 3,
+          "word0": 636,
+          "word1": 1
+        },
+        {
+          "actualPayload": 12,
+          "bytes": "73020300",
+          "centeredWebFallbackX": 7,
+          "row": 84,
+          "word0": 627,
+          "word1": 3
+        },
+        {
+          "actualPayload": 8,
+          "bytes": "76020200",
+          "centeredWebFallbackX": 9,
+          "row": 85,
+          "word0": 630,
+          "word1": 2
+        },
+        {
+          "actualPayload": 6,
+          "bytes": "7a020102",
+          "centeredWebFallbackX": 10,
+          "row": 86,
+          "word0": 634,
+          "word1": 513
+        }
+      ],
+      "nativeHeight": 87,
+      "threshold": 24
+    },
+    "1084.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 14,
+          "bytes": "1a000a00",
+          "centeredWebFallbackX": 9,
+          "row": 0,
+          "word0": 26,
+          "word1": 10
+        },
+        {
+          "actualPayload": 17,
+          "bytes": "72020401",
+          "centeredWebFallbackX": 8,
+          "row": 1,
+          "word0": 626,
+          "word1": 260
+        },
+        {
+          "actualPayload": 21,
+          "bytes": "6d020501",
+          "centeredWebFallbackX": 6,
+          "row": 2,
+          "word0": 621,
+          "word1": 261
+        },
+        {
+          "actualPayload": 23,
+          "bytes": "6a020503",
+          "centeredWebFallbackX": 5,
+          "row": 3,
+          "word0": 618,
+          "word1": 773
+        },
+        {
+          "actualPayload": 27,
+          "bytes": "64020603",
+          "centeredWebFallbackX": 3,
+          "row": 23,
+          "word0": 612,
+          "word1": 774
+        },
+        {
+          "actualPayload": 23,
+          "bytes": "67020503",
+          "centeredWebFallbackX": 5,
+          "row": 24,
+          "word0": 615,
+          "word1": 773
+        },
+        {
+          "actualPayload": 17,
+          "bytes": "6c020401",
+          "centeredWebFallbackX": 8,
+          "row": 25,
+          "word0": 620,
+          "word1": 260
+        }
+      ],
+      "nativeHeight": 26,
+      "threshold": 20
+    },
+    "1086.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 14,
+          "bytes": "57000f00",
+          "centeredWebFallbackX": 17,
+          "row": 0,
+          "word0": 87,
+          "word1": 15
+        },
+        {
+          "actualPayload": 25,
+          "bytes": "75020001",
+          "centeredWebFallbackX": 12,
+          "row": 1,
+          "word0": 629,
+          "word1": 256
+        },
+        {
+          "actualPayload": 14,
+          "bytes": "70020302",
+          "centeredWebFallbackX": 17,
+          "row": 2,
+          "word0": 624,
+          "word1": 515
+        },
+        {
+          "actualPayload": 15,
+          "bytes": "73020303",
+          "centeredWebFallbackX": 17,
+          "row": 3,
+          "word0": 627,
+          "word1": 771
+        },
+        {
+          "actualPayload": 6,
+          "bytes": "7a020102",
+          "centeredWebFallbackX": 21,
+          "row": 71,
+          "word0": 634,
+          "word1": 513
+        },
+        {
+          "actualPayload": 5,
+          "bytes": "7b020101",
+          "centeredWebFallbackX": 22,
+          "row": 72,
+          "word0": 635,
+          "word1": 257
+        },
+        {
+          "actualPayload": 3,
+          "bytes": "7c020003",
+          "centeredWebFallbackX": 23,
+          "row": 73,
+          "word0": 636,
+          "word1": 768
+        }
+      ],
+      "nativeHeight": 74,
+      "threshold": 20
+    },
+    "1088.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 9,
+          "bytes": "a2002900",
+          "centeredWebFallbackX": 42,
+          "row": 0,
+          "word0": 162,
+          "word1": 41
+        },
+        {
+          "actualPayload": 13,
+          "bytes": "76020301",
+          "centeredWebFallbackX": 40,
+          "row": 1,
+          "word0": 630,
+          "word1": 259
+        },
+        {
+          "actualPayload": 15,
+          "bytes": "72020303",
+          "centeredWebFallbackX": 39,
+          "row": 2,
+          "word0": 626,
+          "word1": 771
+        },
+        {
+          "actualPayload": 19,
+          "bytes": "6f020403",
+          "centeredWebFallbackX": 37,
+          "row": 3,
+          "word0": 623,
+          "word1": 772
+        },
+        {
+          "actualPayload": 34,
+          "bytes": "54020303",
+          "centeredWebFallbackX": 29,
+          "row": 78,
+          "word0": 596,
+          "word1": 771
+        },
+        {
+          "actualPayload": 31,
+          "bytes": "56020302",
+          "centeredWebFallbackX": 31,
+          "row": 79,
+          "word0": 598,
+          "word1": 515
+        },
+        {
+          "actualPayload": 25,
+          "bytes": "58020300",
+          "centeredWebFallbackX": 34,
+          "row": 80,
+          "word0": 600,
+          "word1": 3
+        }
+      ],
+      "nativeHeight": 81,
+      "threshold": 20
+    },
+    "1089.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 8,
+          "bytes": "55000e00",
+          "centeredWebFallbackX": 11,
+          "row": 0,
+          "word0": 85,
+          "word1": 14
+        },
+        {
+          "actualPayload": 10,
+          "bytes": "77020202",
+          "centeredWebFallbackX": 10,
+          "row": 1,
+          "word0": 631,
+          "word1": 514
+        },
+        {
+          "actualPayload": 12,
+          "bytes": "74020300",
+          "centeredWebFallbackX": 9,
+          "row": 2,
+          "word0": 628,
+          "word1": 3
+        },
+        {
+          "actualPayload": 14,
+          "bytes": "72020302",
+          "centeredWebFallbackX": 8,
+          "row": 3,
+          "word0": 626,
+          "word1": 515
+        },
+        {
+          "actualPayload": 19,
+          "bytes": "6c020002",
+          "centeredWebFallbackX": 5,
+          "row": 73,
+          "word0": 620,
+          "word1": 512
+        },
+        {
+          "actualPayload": 12,
+          "bytes": "74020003",
+          "centeredWebFallbackX": 9,
+          "row": 74,
+          "word0": 628,
+          "word1": 768
+        },
+        {
+          "actualPayload": 13,
+          "bytes": "75020001",
+          "centeredWebFallbackX": 8,
+          "row": 75,
+          "word0": 629,
+          "word1": 256
+        }
+      ],
+      "nativeHeight": 76,
+      "threshold": 20
+    },
+    "1090.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 8,
+          "bytes": "42000b00",
+          "centeredWebFallbackX": 11,
+          "row": 0,
+          "word0": 66,
+          "word1": 11
+        },
+        {
+          "actualPayload": 8,
+          "bytes": "73020002",
+          "centeredWebFallbackX": 11,
+          "row": 1,
+          "word0": 627,
+          "word1": 512
+        },
+        {
+          "actualPayload": 10,
+          "bytes": "73020003",
+          "centeredWebFallbackX": 10,
+          "row": 2,
+          "word0": 627,
+          "word1": 768
+        },
+        {
+          "actualPayload": 12,
+          "bytes": "73020100",
+          "centeredWebFallbackX": 9,
+          "row": 3,
+          "word0": 627,
+          "word1": 1
+        },
+        {
+          "actualPayload": 6,
+          "bytes": "7b020102",
+          "centeredWebFallbackX": 12,
+          "row": 44,
+          "word0": 635,
+          "word1": 513
+        },
+        {
+          "actualPayload": 7,
+          "bytes": "7a020103",
+          "centeredWebFallbackX": 11,
+          "row": 45,
+          "word0": 634,
+          "word1": 769
+        },
+        {
+          "actualPayload": 6,
+          "bytes": "7a020102",
+          "centeredWebFallbackX": 12,
+          "row": 46,
+          "word0": 634,
+          "word1": 513
+        }
+      ],
+      "nativeHeight": 47,
+      "threshold": 20
+    },
+    "1094.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 10,
+          "bytes": "b9001600",
+          "centeredWebFallbackX": 41,
+          "row": 0,
+          "word0": 185,
+          "word1": 22
+        },
+        {
+          "actualPayload": 49,
+          "bytes": "4e020c01",
+          "centeredWebFallbackX": 22,
+          "row": 1,
+          "word0": 590,
+          "word1": 268
+        },
+        {
+          "actualPayload": 51,
+          "bytes": "4e020c03",
+          "centeredWebFallbackX": 21,
+          "row": 2,
+          "word0": 590,
+          "word1": 780
+        },
+        {
+          "actualPayload": 51,
+          "bytes": "4d020c03",
+          "centeredWebFallbackX": 21,
+          "row": 3,
+          "word0": 589,
+          "word1": 780
+        },
+        {
+          "actualPayload": 93,
+          "bytes": "23021701",
+          "centeredWebFallbackX": 0,
+          "row": 145,
+          "word0": 547,
+          "word1": 279
+        },
+        {
+          "actualPayload": 93,
+          "bytes": "23021701",
+          "centeredWebFallbackX": 0,
+          "row": 146,
+          "word0": 547,
+          "word1": 279
+        },
+        {
+          "actualPayload": 93,
+          "bytes": "23021701",
+          "centeredWebFallbackX": 0,
+          "row": 147,
+          "word0": 547,
+          "word1": 279
+        }
+      ],
+      "nativeHeight": 148,
+      "threshold": 20
+    },
+    "1097.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 5,
+          "bytes": "3b001d00",
+          "centeredWebFallbackX": 21,
+          "row": 0,
+          "word0": 59,
+          "word1": 29
+        },
+        {
+          "actualPayload": 5,
+          "bytes": "7c020101",
+          "centeredWebFallbackX": 21,
+          "row": 1,
+          "word0": 636,
+          "word1": 257
+        },
+        {
+          "actualPayload": 7,
+          "bytes": "7a020103",
+          "centeredWebFallbackX": 20,
+          "row": 2,
+          "word0": 634,
+          "word1": 769
+        },
+        {
+          "actualPayload": 6,
+          "bytes": "79020102",
+          "centeredWebFallbackX": 20,
+          "row": 3,
+          "word0": 633,
+          "word1": 513
+        },
+        {
+          "actualPayload": 13,
+          "bytes": "71020003",
+          "centeredWebFallbackX": 17,
+          "row": 33,
+          "word0": 625,
+          "word1": 768
+        },
+        {
+          "actualPayload": 3,
+          "bytes": "73020003",
+          "centeredWebFallbackX": 22,
+          "row": 34,
+          "word0": 627,
+          "word1": 768
+        },
+        {
+          "actualPayload": 1,
+          "bytes": "7e020001",
+          "centeredWebFallbackX": 23,
+          "row": 35,
+          "word0": 638,
+          "word1": 256
+        }
+      ],
+      "nativeHeight": 36,
+      "threshold": 20
+    },
+    "1125.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 3,
+          "bytes": "28000100",
+          "centeredWebFallbackX": 6,
+          "row": 0,
+          "word0": 40,
+          "word1": 1
+        },
+        {
+          "actualPayload": 3,
+          "bytes": "7e020003",
+          "centeredWebFallbackX": 6,
+          "row": 1,
+          "word0": 638,
+          "word1": 768
+        },
+        {
+          "actualPayload": 3,
+          "bytes": "7d020003",
+          "centeredWebFallbackX": 6,
+          "row": 2,
+          "word0": 637,
+          "word1": 768
+        },
+        {
+          "actualPayload": 3,
+          "bytes": "7d020003",
+          "centeredWebFallbackX": 6,
+          "row": 3,
+          "word0": 637,
+          "word1": 768
+        },
+        {
+          "actualPayload": 4,
+          "bytes": "7d020100",
+          "centeredWebFallbackX": 5,
+          "row": 37,
+          "word0": 637,
+          "word1": 1
+        },
+        {
+          "actualPayload": 3,
+          "bytes": "7d020003",
+          "centeredWebFallbackX": 6,
+          "row": 38,
+          "word0": 637,
+          "word1": 768
+        },
+        {
+          "actualPayload": 1,
+          "bytes": "7e020001",
+          "centeredWebFallbackX": 7,
+          "row": 39,
+          "word0": 638,
+          "word1": 256
+        }
+      ],
+      "nativeHeight": 40,
+      "threshold": 20
+    },
+    "1127.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 10,
+          "bytes": "28000a00",
+          "centeredWebFallbackX": 9,
+          "row": 0,
+          "word0": 40,
+          "word1": 10
+        },
+        {
+          "actualPayload": 12,
+          "bytes": "76020300",
+          "centeredWebFallbackX": 8,
+          "row": 1,
+          "word0": 630,
+          "word1": 3
+        },
+        {
+          "actualPayload": 16,
+          "bytes": "72020400",
+          "centeredWebFallbackX": 6,
+          "row": 2,
+          "word0": 626,
+          "word1": 4
+        },
+        {
+          "actualPayload": 18,
+          "bytes": "6f020402",
+          "centeredWebFallbackX": 5,
+          "row": 3,
+          "word0": 623,
+          "word1": 516
+        },
+        {
+          "actualPayload": 16,
+          "bytes": "6f020400",
+          "centeredWebFallbackX": 6,
+          "row": 25,
+          "word0": 623,
+          "word1": 4
+        },
+        {
+          "actualPayload": 12,
+          "bytes": "72020300",
+          "centeredWebFallbackX": 8,
+          "row": 26,
+          "word0": 626,
+          "word1": 3
+        },
+        {
+          "actualPayload": 8,
+          "bytes": "76020200",
+          "centeredWebFallbackX": 10,
+          "row": 27,
+          "word0": 630,
+          "word1": 2
+        }
+      ],
+      "nativeHeight": 28,
+      "threshold": 20
+    },
+    "1130.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 10,
+          "bytes": "28000a00",
+          "centeredWebFallbackX": 9,
+          "row": 0,
+          "word0": 40,
+          "word1": 10
+        },
+        {
+          "actualPayload": 12,
+          "bytes": "76020300",
+          "centeredWebFallbackX": 8,
+          "row": 1,
+          "word0": 630,
+          "word1": 3
+        },
+        {
+          "actualPayload": 16,
+          "bytes": "72020400",
+          "centeredWebFallbackX": 6,
+          "row": 2,
+          "word0": 626,
+          "word1": 4
+        },
+        {
+          "actualPayload": 18,
+          "bytes": "6f020402",
+          "centeredWebFallbackX": 5,
+          "row": 3,
+          "word0": 623,
+          "word1": 516
+        },
+        {
+          "actualPayload": 16,
+          "bytes": "6f020400",
+          "centeredWebFallbackX": 6,
+          "row": 25,
+          "word0": 623,
+          "word1": 4
+        },
+        {
+          "actualPayload": 12,
+          "bytes": "72020300",
+          "centeredWebFallbackX": 8,
+          "row": 26,
+          "word0": 626,
+          "word1": 3
+        },
+        {
+          "actualPayload": 8,
+          "bytes": "76020200",
+          "centeredWebFallbackX": 10,
+          "row": 27,
+          "word0": 630,
+          "word1": 2
+        }
+      ],
+      "nativeHeight": 28,
+      "threshold": 20
+    },
+    "1131.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 9,
+          "bytes": "70002300",
+          "centeredWebFallbackX": 28,
+          "row": 0,
+          "word0": 112,
+          "word1": 35
+        },
+        {
+          "actualPayload": 17,
+          "bytes": "78020202",
+          "centeredWebFallbackX": 24,
+          "row": 1,
+          "word0": 632,
+          "word1": 514
+        },
+        {
+          "actualPayload": 24,
+          "bytes": "66020301",
+          "centeredWebFallbackX": 21,
+          "row": 2,
+          "word0": 614,
+          "word1": 259
+        },
+        {
+          "actualPayload": 31,
+          "bytes": "63020401",
+          "centeredWebFallbackX": 17,
+          "row": 3,
+          "word0": 611,
+          "word1": 260
+        },
+        {
+          "actualPayload": 11,
+          "bytes": "74020203",
+          "centeredWebFallbackX": 27,
+          "row": 103,
+          "word0": 628,
+          "word1": 770
+        },
+        {
+          "actualPayload": 9,
+          "bytes": "77020201",
+          "centeredWebFallbackX": 28,
+          "row": 104,
+          "word0": 631,
+          "word1": 258
+        },
+        {
+          "actualPayload": 1,
+          "bytes": "7d020001",
+          "centeredWebFallbackX": 32,
+          "row": 105,
+          "word0": 637,
+          "word1": 256
+        }
+      ],
+      "nativeHeight": 106,
+      "threshold": 20
+    },
+    "1133.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 15,
+          "bytes": "26001a00",
+          "centeredWebFallbackX": 13,
+          "row": 0,
+          "word0": 38,
+          "word1": 26
+        },
+        {
+          "actualPayload": 17,
+          "bytes": "71020401",
+          "centeredWebFallbackX": 12,
+          "row": 1,
+          "word0": 625,
+          "word1": 260
+        },
+        {
+          "actualPayload": 19,
+          "bytes": "6e020403",
+          "centeredWebFallbackX": 11,
+          "row": 2,
+          "word0": 622,
+          "word1": 772
+        },
+        {
+          "actualPayload": 19,
+          "bytes": "6d020403",
+          "centeredWebFallbackX": 11,
+          "row": 3,
+          "word0": 621,
+          "word1": 772
+        },
+        {
+          "actualPayload": 36,
+          "bytes": "5c020900",
+          "centeredWebFallbackX": 3,
+          "row": 34,
+          "word0": 604,
+          "word1": 9
+        },
+        {
+          "actualPayload": 35,
+          "bytes": "5d020803",
+          "centeredWebFallbackX": 3,
+          "row": 35,
+          "word0": 605,
+          "word1": 776
+        },
+        {
+          "actualPayload": 34,
+          "bytes": "5e020202",
+          "centeredWebFallbackX": 4,
+          "row": 36,
+          "word0": 606,
+          "word1": 514
+        }
+      ],
+      "nativeHeight": 37,
+      "threshold": 20
+    },
+    "1136.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 11,
+          "bytes": "1c000f00",
+          "centeredWebFallbackX": 14,
+          "row": 0,
+          "word0": 28,
+          "word1": 15
+        },
+        {
+          "actualPayload": 17,
+          "bytes": "73020401",
+          "centeredWebFallbackX": 11,
+          "row": 1,
+          "word0": 627,
+          "word1": 260
+        },
+        {
+          "actualPayload": 22,
+          "bytes": "6d020502",
+          "centeredWebFallbackX": 9,
+          "row": 2,
+          "word0": 621,
+          "word1": 517
+        },
+        {
+          "actualPayload": 25,
+          "bytes": "68020601",
+          "centeredWebFallbackX": 7,
+          "row": 3,
+          "word0": 616,
+          "word1": 262
+        },
+        {
+          "actualPayload": 24,
+          "bytes": "67020600",
+          "centeredWebFallbackX": 8,
+          "row": 25,
+          "word0": 615,
+          "word1": 6
+        },
+        {
+          "actualPayload": 20,
+          "bytes": "6a020500",
+          "centeredWebFallbackX": 10,
+          "row": 26,
+          "word0": 618,
+          "word1": 5
+        },
+        {
+          "actualPayload": 13,
+          "bytes": "6f020301",
+          "centeredWebFallbackX": 13,
+          "row": 27,
+          "word0": 623,
+          "word1": 259
+        }
+      ],
+      "nativeHeight": 28,
+      "threshold": 20
+    },
+    "1140.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 16,
+          "bytes": "3c002c00",
+          "centeredWebFallbackX": 43,
+          "row": 0,
+          "word0": 60,
+          "word1": 44
+        },
+        {
+          "actualPayload": 18,
+          "bytes": "70020402",
+          "centeredWebFallbackX": 42,
+          "row": 1,
+          "word0": 624,
+          "word1": 516
+        },
+        {
+          "actualPayload": 22,
+          "bytes": "6c020502",
+          "centeredWebFallbackX": 40,
+          "row": 2,
+          "word0": 620,
+          "word1": 517
+        },
+        {
+          "actualPayload": 26,
+          "bytes": "68020602",
+          "centeredWebFallbackX": 38,
+          "row": 3,
+          "word0": 616,
+          "word1": 518
+        },
+        {
+          "actualPayload": 24,
+          "bytes": "64020600",
+          "centeredWebFallbackX": 39,
+          "row": 56,
+          "word0": 612,
+          "word1": 6
+        },
+        {
+          "actualPayload": 20,
+          "bytes": "6a020500",
+          "centeredWebFallbackX": 41,
+          "row": 57,
+          "word0": 618,
+          "word1": 5
+        },
+        {
+          "actualPayload": 4,
+          "bytes": "74020100",
+          "centeredWebFallbackX": 49,
+          "row": 58,
+          "word0": 628,
+          "word1": 1
+        }
+      ],
+      "nativeHeight": 59,
+      "threshold": 20
+    },
+    "1141.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 7,
+          "bytes": "30002100",
+          "centeredWebFallbackX": 32,
+          "row": 0,
+          "word0": 48,
+          "word1": 33
+        },
+        {
+          "actualPayload": 14,
+          "bytes": "77020302",
+          "centeredWebFallbackX": 29,
+          "row": 1,
+          "word0": 631,
+          "word1": 515
+        },
+        {
+          "actualPayload": 19,
+          "bytes": "6f020403",
+          "centeredWebFallbackX": 26,
+          "row": 2,
+          "word0": 623,
+          "word1": 772
+        },
+        {
+          "actualPayload": 23,
+          "bytes": "6b020503",
+          "centeredWebFallbackX": 24,
+          "row": 3,
+          "word0": 619,
+          "word1": 773
+        },
+        {
+          "actualPayload": 46,
+          "bytes": "53020202",
+          "centeredWebFallbackX": 13,
+          "row": 43,
+          "word0": 595,
+          "word1": 514
+        },
+        {
+          "actualPayload": 17,
+          "bytes": "62020401",
+          "centeredWebFallbackX": 27,
+          "row": 44,
+          "word0": 610,
+          "word1": 260
+        },
+        {
+          "actualPayload": 10,
+          "bytes": "73020202",
+          "centeredWebFallbackX": 31,
+          "row": 45,
+          "word0": 627,
+          "word1": 514
+        }
+      ],
+      "nativeHeight": 46,
+      "threshold": 20
+    },
+    "1142.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 6,
+          "bytes": "2e001600",
+          "centeredWebFallbackX": 19,
+          "row": 0,
+          "word0": 46,
+          "word1": 22
+        },
+        {
+          "actualPayload": 23,
+          "bytes": "6d020001",
+          "centeredWebFallbackX": 10,
+          "row": 1,
+          "word0": 621,
+          "word1": 256
+        },
+        {
+          "actualPayload": 26,
+          "bytes": "68020202",
+          "centeredWebFallbackX": 9,
+          "row": 2,
+          "word0": 616,
+          "word1": 514
+        },
+        {
+          "actualPayload": 31,
+          "bytes": "65020300",
+          "centeredWebFallbackX": 6,
+          "row": 3,
+          "word0": 613,
+          "word1": 3
+        },
+        {
+          "actualPayload": 22,
+          "bytes": "68020502",
+          "centeredWebFallbackX": 11,
+          "row": 35,
+          "word0": 616,
+          "word1": 517
+        },
+        {
+          "actualPayload": 11,
+          "bytes": "6d020203",
+          "centeredWebFallbackX": 16,
+          "row": 36,
+          "word0": 621,
+          "word1": 770
+        },
+        {
+          "actualPayload": 6,
+          "bytes": "7a020001",
+          "centeredWebFallbackX": 19,
+          "row": 37,
+          "word0": 634,
+          "word1": 256
+        }
+      ],
+      "nativeHeight": 38,
+      "threshold": 20
+    },
+    "1144.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 6,
+          "bytes": "6f001700",
+          "centeredWebFallbackX": 22,
+          "row": 0,
+          "word0": 111,
+          "word1": 23
+        },
+        {
+          "actualPayload": 9,
+          "bytes": "7b020002",
+          "centeredWebFallbackX": 20,
+          "row": 1,
+          "word0": 635,
+          "word1": 512
+        },
+        {
+          "actualPayload": 8,
+          "bytes": "79020200",
+          "centeredWebFallbackX": 21,
+          "row": 2,
+          "word0": 633,
+          "word1": 2
+        },
+        {
+          "actualPayload": 10,
+          "bytes": "77020202",
+          "centeredWebFallbackX": 20,
+          "row": 3,
+          "word0": 631,
+          "word1": 514
+        },
+        {
+          "actualPayload": 8,
+          "bytes": "77020200",
+          "centeredWebFallbackX": 21,
+          "row": 101,
+          "word0": 631,
+          "word1": 2
+        },
+        {
+          "actualPayload": 6,
+          "bytes": "79020102",
+          "centeredWebFallbackX": 22,
+          "row": 102,
+          "word0": 633,
+          "word1": 513
+        },
+        {
+          "actualPayload": 4,
+          "bytes": "7b020100",
+          "centeredWebFallbackX": 23,
+          "row": 103,
+          "word0": 635,
+          "word1": 1
+        }
+      ],
+      "nativeHeight": 104,
+      "threshold": 20
+    },
+    "1145.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 3,
+          "bytes": "7e000600",
+          "centeredWebFallbackX": 4,
+          "row": 0,
+          "word0": 126,
+          "word1": 6
+        },
+        {
+          "actualPayload": 1,
+          "bytes": "7e020001",
+          "centeredWebFallbackX": 5,
+          "row": 1,
+          "word0": 638,
+          "word1": 256
+        },
+        {
+          "actualPayload": 2,
+          "bytes": "7f020002",
+          "centeredWebFallbackX": 5,
+          "row": 2,
+          "word0": 639,
+          "word1": 512
+        },
+        {
+          "actualPayload": 2,
+          "bytes": "7e020002",
+          "centeredWebFallbackX": 5,
+          "row": 3,
+          "word0": 638,
+          "word1": 512
+        },
+        {
+          "actualPayload": 2,
+          "bytes": "7e020002",
+          "centeredWebFallbackX": 5,
+          "row": 123,
+          "word0": 638,
+          "word1": 512
+        },
+        {
+          "actualPayload": 1,
+          "bytes": "7f020001",
+          "centeredWebFallbackX": 5,
+          "row": 124,
+          "word0": 639,
+          "word1": 256
+        },
+        {
+          "actualPayload": 1,
+          "bytes": "7e020001",
+          "centeredWebFallbackX": 5,
+          "row": 125,
+          "word0": 638,
+          "word1": 256
+        }
+      ],
+      "nativeHeight": 126,
+      "threshold": 20
+    },
+    "1147.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 7,
+          "bytes": "1b000500",
+          "centeredWebFallbackX": 7,
+          "row": 0,
+          "word0": 27,
+          "word1": 5
+        },
+        {
+          "actualPayload": 8,
+          "bytes": "7a020200",
+          "centeredWebFallbackX": 7,
+          "row": 1,
+          "word0": 634,
+          "word1": 2
+        },
+        {
+          "actualPayload": 10,
+          "bytes": "77020202",
+          "centeredWebFallbackX": 6,
+          "row": 2,
+          "word0": 631,
+          "word1": 514
+        },
+        {
+          "actualPayload": 14,
+          "bytes": "75020302",
+          "centeredWebFallbackX": 4,
+          "row": 3,
+          "word0": 629,
+          "word1": 515
+        },
+        {
+          "actualPayload": 7,
+          "bytes": "78020103",
+          "centeredWebFallbackX": 7,
+          "row": 21,
+          "word0": 632,
+          "word1": 769
+        },
+        {
+          "actualPayload": 7,
+          "bytes": "7b020002",
+          "centeredWebFallbackX": 7,
+          "row": 22,
+          "word0": 635,
+          "word1": 512
+        },
+        {
+          "actualPayload": 1,
+          "bytes": "7d020001",
+          "centeredWebFallbackX": 10,
+          "row": 23,
+          "word0": 637,
+          "word1": 256
+        }
+      ],
+      "nativeHeight": 24,
+      "threshold": 20
+    },
+    "1158.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 6,
+          "bytes": "62004800",
+          "centeredWebFallbackX": 53,
+          "row": 0,
+          "word0": 98,
+          "word1": 72
+        },
+        {
+          "actualPayload": 8,
+          "bytes": "7a020200",
+          "centeredWebFallbackX": 52,
+          "row": 1,
+          "word0": 634,
+          "word1": 2
+        },
+        {
+          "actualPayload": 9,
+          "bytes": "77020201",
+          "centeredWebFallbackX": 51,
+          "row": 2,
+          "word0": 631,
+          "word1": 258
+        },
+        {
+          "actualPayload": 11,
+          "bytes": "76020203",
+          "centeredWebFallbackX": 50,
+          "row": 3,
+          "word0": 630,
+          "word1": 770
+        },
+        {
+          "actualPayload": 14,
+          "bytes": "71020302",
+          "centeredWebFallbackX": 49,
+          "row": 83,
+          "word0": 625,
+          "word1": 515
+        },
+        {
+          "actualPayload": 11,
+          "bytes": "74020203",
+          "centeredWebFallbackX": 50,
+          "row": 84,
+          "word0": 628,
+          "word1": 770
+        },
+        {
+          "actualPayload": 5,
+          "bytes": "78020101",
+          "centeredWebFallbackX": 53,
+          "row": 85,
+          "word0": 632,
+          "word1": 257
+        }
+      ],
+      "nativeHeight": 86,
+      "threshold": 16
+    },
+    "1160.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 5,
+          "bytes": "65000000",
+          "centeredWebFallbackX": 30,
+          "row": 0,
+          "word0": 101,
+          "word1": 0
+        },
+        {
+          "actualPayload": 6,
+          "bytes": "7d020102",
+          "centeredWebFallbackX": 30,
+          "row": 1,
+          "word0": 637,
+          "word1": 513
+        },
+        {
+          "actualPayload": 7,
+          "bytes": "7a020103",
+          "centeredWebFallbackX": 29,
+          "row": 2,
+          "word0": 634,
+          "word1": 769
+        },
+        {
+          "actualPayload": 9,
+          "bytes": "79020201",
+          "centeredWebFallbackX": 28,
+          "row": 3,
+          "word0": 633,
+          "word1": 258
+        },
+        {
+          "actualPayload": 6,
+          "bytes": "7a020102",
+          "centeredWebFallbackX": 30,
+          "row": 64,
+          "word0": 634,
+          "word1": 513
+        },
+        {
+          "actualPayload": 5,
+          "bytes": "7b020101",
+          "centeredWebFallbackX": 30,
+          "row": 65,
+          "word0": 635,
+          "word1": 257
+        },
+        {
+          "actualPayload": 4,
+          "bytes": "7c020100",
+          "centeredWebFallbackX": 31,
+          "row": 66,
+          "word0": 636,
+          "word1": 1
+        }
+      ],
+      "nativeHeight": 67,
+      "threshold": 20
+    },
+    "1167.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 20,
+          "bytes": "41001700",
+          "centeredWebFallbackX": 21,
+          "row": 0,
+          "word0": 65,
+          "word1": 23
+        },
+        {
+          "actualPayload": 25,
+          "bytes": "6a020601",
+          "centeredWebFallbackX": 19,
+          "row": 1,
+          "word0": 618,
+          "word1": 262
+        },
+        {
+          "actualPayload": 30,
+          "bytes": "65020702",
+          "centeredWebFallbackX": 16,
+          "row": 2,
+          "word0": 613,
+          "word1": 519
+        },
+        {
+          "actualPayload": 34,
+          "bytes": "60020802",
+          "centeredWebFallbackX": 14,
+          "row": 3,
+          "word0": 608,
+          "word1": 520
+        },
+        {
+          "actualPayload": 31,
+          "bytes": "5f020703",
+          "centeredWebFallbackX": 16,
+          "row": 62,
+          "word0": 607,
+          "word1": 775
+        },
+        {
+          "actualPayload": 27,
+          "bytes": "63020603",
+          "centeredWebFallbackX": 18,
+          "row": 63,
+          "word0": 611,
+          "word1": 774
+        },
+        {
+          "actualPayload": 21,
+          "bytes": "68020501",
+          "centeredWebFallbackX": 21,
+          "row": 64,
+          "word0": 616,
+          "word1": 261
+        }
+      ],
+      "nativeHeight": 65,
+      "threshold": 20
+    },
+    "1169.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 9,
+          "bytes": "36001b00",
+          "centeredWebFallbackX": 21,
+          "row": 0,
+          "word0": 54,
+          "word1": 27
+        },
+        {
+          "actualPayload": 13,
+          "bytes": "74020301",
+          "centeredWebFallbackX": 19,
+          "row": 1,
+          "word0": 628,
+          "word1": 259
+        },
+        {
+          "actualPayload": 18,
+          "bytes": "6f020402",
+          "centeredWebFallbackX": 17,
+          "row": 2,
+          "word0": 623,
+          "word1": 516
+        },
+        {
+          "actualPayload": 22,
+          "bytes": "6a020502",
+          "centeredWebFallbackX": 15,
+          "row": 3,
+          "word0": 618,
+          "word1": 517
+        },
+        {
+          "actualPayload": 22,
+          "bytes": "67020502",
+          "centeredWebFallbackX": 15,
+          "row": 49,
+          "word0": 615,
+          "word1": 517
+        },
+        {
+          "actualPayload": 17,
+          "bytes": "6c020401",
+          "centeredWebFallbackX": 17,
+          "row": 50,
+          "word0": 620,
+          "word1": 260
+        },
+        {
+          "actualPayload": 16,
+          "bytes": "72020203",
+          "centeredWebFallbackX": 18,
+          "row": 51,
+          "word0": 626,
+          "word1": 770
+        }
+      ],
+      "nativeHeight": 52,
+      "threshold": 20
+    },
+    "1170.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 9,
+          "bytes": "1c000400",
+          "centeredWebFallbackX": 8,
+          "row": 0,
+          "word0": 28,
+          "word1": 4
+        },
+        {
+          "actualPayload": 8,
+          "bytes": "78020200",
+          "centeredWebFallbackX": 8,
+          "row": 1,
+          "word0": 632,
+          "word1": 2
+        },
+        {
+          "actualPayload": 9,
+          "bytes": "77020201",
+          "centeredWebFallbackX": 8,
+          "row": 2,
+          "word0": 631,
+          "word1": 258
+        },
+        {
+          "actualPayload": 11,
+          "bytes": "75020203",
+          "centeredWebFallbackX": 7,
+          "row": 3,
+          "word0": 629,
+          "word1": 770
+        },
+        {
+          "actualPayload": 23,
+          "bytes": "69020202",
+          "centeredWebFallbackX": 1,
+          "row": 14,
+          "word0": 617,
+          "word1": 514
+        },
+        {
+          "actualPayload": 20,
+          "bytes": "6a020202",
+          "centeredWebFallbackX": 2,
+          "row": 15,
+          "word0": 618,
+          "word1": 514
+        },
+        {
+          "actualPayload": 20,
+          "bytes": "6d020202",
+          "centeredWebFallbackX": 2,
+          "row": 16,
+          "word0": 621,
+          "word1": 514
+        }
+      ],
+      "nativeHeight": 17,
+      "threshold": 20
+    },
+    "1171.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 44,
+          "bytes": "31000200",
+          "centeredWebFallbackX": 1,
+          "row": 0,
+          "word0": 49,
+          "word1": 2
+        },
+        {
+          "actualPayload": 44,
+          "bytes": "55020b00",
+          "centeredWebFallbackX": 1,
+          "row": 1,
+          "word0": 597,
+          "word1": 11
+        },
+        {
+          "actualPayload": 45,
+          "bytes": "54020b01",
+          "centeredWebFallbackX": 0,
+          "row": 2,
+          "word0": 596,
+          "word1": 267
+        },
+        {
+          "actualPayload": 45,
+          "bytes": "53020b01",
+          "centeredWebFallbackX": 0,
+          "row": 3,
+          "word0": 595,
+          "word1": 267
+        },
+        {
+          "actualPayload": 45,
+          "bytes": "53020b01",
+          "centeredWebFallbackX": 0,
+          "row": 46,
+          "word0": 595,
+          "word1": 267
+        },
+        {
+          "actualPayload": 44,
+          "bytes": "53020b00",
+          "centeredWebFallbackX": 1,
+          "row": 47,
+          "word0": 595,
+          "word1": 11
+        },
+        {
+          "actualPayload": 42,
+          "bytes": "55020a02",
+          "centeredWebFallbackX": 2,
+          "row": 48,
+          "word0": 597,
+          "word1": 522
+        }
+      ],
+      "nativeHeight": 49,
+      "threshold": 20
+    }
+  },
   "staticOnly": 7
 }
