@@ -72,13 +72,37 @@ jobs:
           assert len(list((root/'bulk').glob('*.png')))==report['framePNGs'],report
           print('ORIGINAL_OBS_STRICT_FRAMES_VERIFIED',report['accepted'],report['framePNGs'])
           PY
+      - name: Keep offline PWA sprite inventory synchronized with every verified source frame
+        run: |
+          python3 - <<'PY'
+          import re
+          from pathlib import Path
+          root=Path('apps/4leaf/rog')
+          sw=root/'sw.js'
+          source=sw.read_text()
+          sprites=sorted(p.stem for p in (root/'original/OBS/bulk').glob('*.png'))
+          pattern=r"const NATIVE_OBS_BULK_FILES='[^']*'\.split\(' '\);"
+          native="const NATIVE_OBS_BULK_FILES='"+' '.join(sprites)+"'.split(' ');"
+          updated,count=re.subn(pattern,lambda _:native,source,count=1)
+          assert count==1, "Refusing to alter unknown offline resource table"
+          if updated!=source:
+              updated,n=re.subn(r"const REVISION='4leaf-revival-pwa-v(\d+)'",
+                lambda m:"const REVISION='4leaf-revival-pwa-v"+str(int(m.group(1))+1)+"'",
+                updated,count=1)
+              assert n==1, "PWA cache version missing"
+              sw.write_text(updated)
+              print('SOURCE_OBS_OFFLINE_CACHE_UPDATED',len(sprites))
+          else:
+              print('SOURCE_OBS_OFFLINE_CACHE_UNCHANGED',len(sprites))
+          PY
       - name: Import decoded native body images while retaining source SHA and provisional pose labels
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add apps/4leaf/rog/original/OBS/bulk \
             apps/4leaf/rog/original/OBS/animation-extra.js \
-            apps/4leaf/rog/original/OBS/bulk-source-report.json
+            apps/4leaf/rog/original/OBS/bulk-source-report.json \
+            apps/4leaf/rog/sw.js
           if git diff --cached --quiet; then
             echo 'No new source frames accepted; no fabricated assets to publish'
             exit 0
