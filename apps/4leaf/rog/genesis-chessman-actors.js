@@ -22,7 +22,8 @@
   '0042':[25,30], // visible face three-quarter
   '0043':[30],    // frontal face
   '0045':[18],    // visible eyes, face and sword, versus rear 0/1/2
-  '0054':[25,30]  // frontal face (white-haired figure)
+  '0054':[25,30], // frontal face (white-haired figure)
+  '0078':[18]     // face-visible 3/4 view, verified 2002 1078.obs RLE frame
  });
  const sourceFrontFrame=(id,native)=>{
   const indexes=FRONT_VISIBLE_IDLE[id]||[];
