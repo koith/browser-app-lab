@@ -26,6 +26,9 @@ on:
       - 'apps/4leaf/rog/tests/dice-native-frame.cjs'
       - 'apps/4leaf/rog/tests/dice-battle-podium.cjs'
       - 'apps/4leaf/rog/tests/dice-native-battle-source-fallback.cjs'
+      - 'apps/4leaf/rog/dice-native-source-events.js'
+      - 'apps/4leaf/rog/dice-native-source-events.css'
+      - 'apps/4leaf/rog/tests/dice-native-original-source-events.cjs'
       - 'apps/4leaf/rog/tests/dice-original-obs-chessmen.cjs'
       - 'apps/4leaf/rog/dice-native-battle-source-spr.css'
       - 'apps/4leaf/rog/original/SourceSPRExtra/**'
@@ -66,6 +69,8 @@ jobs:
         run: node apps/4leaf/rog/tests/dice-battle-podium.cjs
       - name: Test both genuine 2002 battle IMG source and explicit offline CSS fallback
         run: node apps/4leaf/rog/tests/dice-native-battle-source-fallback.cjs
+      - name: Verify genuine original winJail/winAbility sprites on actual jail and 100% ability DMP effects
+        run: node apps/4leaf/rog/tests/dice-native-original-source-events.cjs
       - name: Verify changing real native OBS frame dimensions, not fixed frame-zero labels
         run: node apps/4leaf/rog/tests/dice-original-obs-chessmen.cjs
       - run: node apps/4leaf/rog/tests/board-layout.cjs
