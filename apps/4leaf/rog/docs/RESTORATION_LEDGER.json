@@ -1607,7 +1607,7 @@
       "status": "in_progress",
       "milestone": "M03",
       "category": "상설 채팅",
-      "current": "2026-10-18 실제 4LEAF World+Chat 통합 CI 39137227054에서 `.social-avatar.self[data-seat=9]`의 물리 클릭이 30초간 막힘: 원본 툴바 `.social-classic-toolbar`의 `채팅방 목록` 버튼이 상단 stacking layer로 클릭을 가로챔. 과거 링메뉴 z-index 수정 PR#113과 별개 사용자 접근성 결함. 동일 지점에서 메뉴 조작과 자기 아바타 선택 모두 성공하게 고쳐야 함.; 2026-10-18: Original room3 seat #9 occupied actor click above source toolbar fixed CSS z112 vs toolbar z109, tooltip menu z150 and focused tools z160, real physical click and WebKit browser regression pass; comprehensive all-six-room original seating acceptance pending.",
+      "current": "2026-10-18 실제 4LEAF World+Chat 통합 CI 39137227054에서 `.social-avatar.self[data-seat=9]`의 물리 클릭이 30초간 막힘: 원본 툴바 `.social-classic-toolbar`의 `채팅방 목록` 버튼이 상단 stacking layer로 클릭을 가로챔. 과거 링메뉴 z-index 수정 PR#113과 별개 사용자 접근성 결함. 동일 지점에서 메뉴 조작과 자기 아바타 선택 모두 성공하게 고쳐야 함.; 2026-10-18: Original room3 seat #9 occupied actor click above source toolbar fixed CSS z112 vs toolbar z109, tooltip menu z150 and focused tools z160, real physical click and WebKit browser regression pass; comprehensive all-six-room original seating acceptance pending.; 2026-10-19 CI 39151404160 실패에서 실접속 self 좌석 3이 원본 30px '아바타 선택' 툴바 히트박스를 가림. 고정 source x608 y311일 때만 물리 충돌 0인 가장 가까운 WEB 보정 좌표를 계산해 주사위·채팅 실제 DOM 이벤트 유지. 해당 위치는 INFERRED이며 원본 fixed visual 위치 정확성은 별도 CHT-02/CHT-05 대상. 원본 배경이나 참가자 조작용 sprite 변경 없음.",
       "acceptance": [
         "794×528 전체 상설방/서재/지역 6개 방에서 실물 self·peer 아바타의 중앙 포인트가 document.elementFromPoint로 해당 버튼 또는 소유 아바타를 가리킴; 원본 30px 툴바 버튼도 여전히 클릭 가능. WebKit/Chromium 동일 화면에서 실패 0건."
       ],
@@ -1617,10 +1617,14 @@
         "apps/4leaf/rog/chatroom-native-2004-frame.css",
         "https://github.com/koith/browser-app-lab/pull/118",
         "https://github.com/koith/browser-app-lab/actions/runs/39138329616",
-        "apps/4leaf/rog/tests/world-chat.cjs"
+        "apps/4leaf/rog/tests/world-chat.cjs",
+        "apps/4leaf/rog/social-chat.js",
+        "apps/4leaf/rog/chatroom-native-2004-frame.css",
+        "apps/4leaf/rog/tests/world-chat.cjs",
+        "https://github.com/koith/browser-app-lab/actions/runs/39151404160"
       ],
       "evidenceLevel": "VERIFIED-WEBAPP-BROWSER-REGRESSION; HISTORICAL-LAYOUT-UNVERIFIED",
-      "lastReviewed": "2026-10-18",
+      "lastReviewed": "2026-10-19",
       "verifiedAcceptance": null,
       "dependencies": [
         "CHT-04",
@@ -2614,6 +2618,14 @@
       "taskId": "SHOP-02",
       "details": "CardShop 500x510 original sprite atlas row y481 four 98x21 SELL states now used by live DOM. Guard current party and saved match; user must confirm unknown-value resale. Do not claim 50% original price.",
       "evidence": "apps/4leaf/rog/tests/cardshop-native-sale.cjs"
+    },
+    {
+      "seq": 95,
+      "date": "2026-10-19",
+      "type": "IMPLEMENTED_PENDING_QA",
+      "taskId": "CHT-07",
+      "details": "Actual live 794x528 ChatRoom participant self seat obstructs historical 30px toolbar hitbox. Select nearest unoccupied original-art toolbar position on actual seated actors' pixel rectangle. Source art untouched; positions clearly inferred.",
+      "evidence": "apps/4leaf/rog/tests/world-chat.cjs"
     }
   ]
 }
