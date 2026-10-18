@@ -28,6 +28,26 @@ const {chromium,webkit}=require('playwright');
   await page.locator('#start-game').click();
   await page.waitForSelector('#game:not(.hidden)');
   const source=page.locator('#dice-source-roll'),primary=page.locator('#roll-btn');
+  await page.waitForFunction(()=>{
+   const btn=document.querySelector('#dice-source-roll');
+   const img=btn?.querySelector('.dice-original-roll-spr');
+   return btn?.dataset.nativeRollSource==='ready'&&
+    img?.complete&&img.naturalWidth===69&&img.naturalHeight===51;
+  },null,{timeout:12000});
+  const originalRollSprite=await page.evaluate(()=>({
+   state:window.__LEAF_SOURCE_ROLL__.getState(),
+   source:document.querySelector('#dice-source-roll .dice-original-roll-spr')?.getAttribute('src'),
+   natural:[document.querySelector('#dice-source-roll .dice-original-roll-spr')?.naturalWidth,
+    document.querySelector('#dice-source-roll .dice-original-roll-spr')?.naturalHeight],
+   shown:getComputedStyle(document.querySelector('#dice-source-roll .dice-original-roll-spr')).display
+  }));
+  assert.equal(originalRollSprite.state.originalSource,'Dice/IMG.pak:eventRoll1.spr');
+  assert.equal(originalRollSprite.state.nativeFrameCount,16);
+  assert.ok(originalRollSprite.source.endsWith('/SourceSPR/eventRoll1-00.png'));
+  assert.deepEqual(originalRollSprite.natural,[69,51]);
+  assert.notEqual(originalRollSprite.shown,'none');
+  console.log('GENUINE_SOURCE_ROLL_SPR_ACTIVE '+JSON.stringify(originalRollSprite));
+
   assert.equal(await source.count(),1,'a single real battlefield ROLL surface is mounted');
   assert.equal(await source.isVisible(),true,'battlefield ROLL is visible on real match');
   assert.equal(await primary.isEnabled(),true,'existing genuine roll handler is ready');
@@ -44,7 +64,8 @@ const {chromium,webkit}=require('playwright');
     forest:getComputedStyle(document.querySelector('#board-world')).backgroundImage
    };
   });
-  assert.equal(before.source.evidence,'2004-board-battle-screenshot-inferred-mesh');
+  assert.equal(before.source.evidence,'original-2002-IMG-SPR/palette-frames',
+   'genuine source IMG.pak artwork must replace the old CSS orb when the native sprite is present');
   assert.equal(before.tileCount,104,'native 104-cell DMP remains intact under the ROLL HUD');
   assert.ok(before.forest.includes('IMG/bgtile.png'),
    'real original terrain art remains the original interactive game background');
