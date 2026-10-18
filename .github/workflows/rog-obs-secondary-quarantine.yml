@@ -4,11 +4,13 @@ on:
     paths:
       - '.github/workflows/rog-obs-secondary-quarantine.yml'
       - 'apps/4leaf/rog/tools/probe-original-obs-secondary-paks.py'
+      - 'apps/4leaf/rog/tools/probe-original-img-extra-spr.py'
   pull_request:
     branches: [main]
     paths:
       - '.github/workflows/rog-obs-secondary-quarantine.yml'
       - 'apps/4leaf/rog/tools/probe-original-obs-secondary-paks.py'
+      - 'apps/4leaf/rog/tools/probe-original-img-extra-spr.py'
   workflow_dispatch:
 permissions:
   contents: read
@@ -58,6 +60,19 @@ jobs:
         run: |
           python3 apps/4leaf/rog/tools/probe-original-obs-secondary-paks.py /tmp/leaf-original-files /tmp/leaf-original-obs-quarantine
           test -s /tmp/leaf-original-obs-quarantine/secondary-pak-probe.json
+      - name: Probe unused genuine IMG.pak battle/result/status SPR with strict native video RLE
+        run: |
+          python3 -m py_compile apps/4leaf/rog/tools/probe-original-img-extra-spr.py
+          source="$(find /tmp/leaf-original-files -type f -ipath '*/Dice/IMG.pak' | head -1)"
+          test -n "$source"
+          python3 apps/4leaf/rog/tools/probe-original-img-extra-spr.py "$source" /tmp/leaf-img-spr-quarantine
+          test -s /tmp/leaf-img-spr-quarantine/source-spr-probe.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: original-img-spr-strict-candidates-not-production
+          path: /tmp/leaf-img-spr-quarantine
+          retention-days: 14
       - uses: actions/upload-artifact@v4
         if: always()
         with:
