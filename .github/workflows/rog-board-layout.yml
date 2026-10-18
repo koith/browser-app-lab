@@ -25,6 +25,13 @@ on:
       - 'apps/4leaf/rog/tests/dice-native-tis-full-outline.cjs'
       - 'apps/4leaf/rog/tests/dice-native-frame.cjs'
       - 'apps/4leaf/rog/tests/dice-battle-podium.cjs'
+      - 'apps/4leaf/rog/tests/dice-native-battle-source-fallback.cjs'
+      - 'apps/4leaf/rog/dice-native-source-events.js'
+      - 'apps/4leaf/rog/dice-native-source-events.css'
+      - 'apps/4leaf/rog/tests/dice-native-original-source-events.cjs'
+      - 'apps/4leaf/rog/tests/native-offline-cache.cjs'
+      - 'apps/4leaf/rog/sw.js'
+      - 'apps/4leaf/rog/tests/dice-original-obs-chessmen.cjs'
       - 'apps/4leaf/rog/dice-native-battle-source-spr.css'
       - 'apps/4leaf/rog/original/SourceSPRExtra/**'
       - '.github/workflows/rog-board-layout.yml'
@@ -62,6 +69,14 @@ jobs:
         run: node apps/4leaf/rog/tests/dice-native-frame.cjs
       - name: Verify the actual 2002 IMG.pak 355x113 duel podium, live actors, dice and end of combat
         run: node apps/4leaf/rog/tests/dice-battle-podium.cjs
+      - name: Test both genuine 2002 battle IMG source and explicit offline CSS fallback
+        run: node apps/4leaf/rog/tests/dice-native-battle-source-fallback.cjs
+      - name: Verify genuine original winJail/winAbility sprites on actual jail and 100% ability DMP effects
+        run: node apps/4leaf/rog/tests/dice-native-original-source-events.cjs
+      - name: Cold offline PWA install must preload all original IMG winAbility and winJail sprites
+        run: node apps/4leaf/rog/tests/native-offline-cache.cjs
+      - name: Verify changing real native OBS frame dimensions, not fixed frame-zero labels
+        run: node apps/4leaf/rog/tests/dice-original-obs-chessmen.cjs
       - run: node apps/4leaf/rog/tests/board-layout.cjs
       - name: "Reproduce iPhone screenshot: zero horizontal TIS overlap and 2 original Genesis OBS players"
         run: node apps/4leaf/rog/tests/dice-horizontal-native-actors.cjs
@@ -81,5 +96,8 @@ jobs:
             leaf-board-*.png
             leaf-live-3d-battle-podiums-*.png
             leaf-original-battle-stage-*.png
+            leaf-original-source-battle-*.png
+            leaf-native-source-*.png
+            leaf-genuine-original-2002-obs-chessmen-*.png
             rog-dmp-overlap-audit.json
           retention-days: 7

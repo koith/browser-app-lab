@@ -1240,15 +1240,15 @@ async function resolveTile(p,depth=0){
  }else if(type==='chest'){grantItem(p)}
  else if(type==='blessing'){while(p.items.length<5)p.items.push(ITEMS[rand(ITEMS.length)].id);appendMove(p.name+' 신의 축복: 아이템 가득 충전')}
  else if(type==='curse'){p.items=[];appendMove(p.name+' 신의 저주: 모든 아이템 소실')}
- else if(type==='prison'){p.jail=3;appendMove(p.name+' 감옥 3턴! 더블 주사위로 탈출할 수 있습니다.')}
+ else if(type==='prison'){p.jail=3;appendMove(p.name+' 감옥 3턴! 더블 주사위로 탈출할 수 있습니다.');window.__LEAF_NATIVE_EVENTS__?.show('jail',p.name)}
  else if(type==='kingbomb'){p.position=0;appendMove(p.name+' 왕폭탄 폭발! START 복귀');match.tiles[pos]='normal'}
  else if(type==='keeperA'||type==='keeperB'||type==='keeperC'){const power={keeperA:1,keeperB:3,keeperC:5};await resolveBattle(p,{id:-1,name:ITEM_MAP[type].name,def:power[type]},true);match.tiles[pos]='normal'}
- else if(type==='ability'){p.ability=Math.min(100,p.ability+25);appendMove(p.name+' 어빌리티 게이지 +25%')}
+ else if(type==='ability'){p.ability=Math.min(100,p.ability+25);appendMove(p.name+' 어빌리티 게이지 +25%');if(p.ability===100)window.__LEAF_NATIVE_EVENTS__?.show('ability',p.name)}
  else if(type==='ability100'){
    const ts=teamStats(p.team),count=Math.max(1,Math.min(4,p.team?.length>=3?ts.int:(p.team?.length===2?ts.def:ts.atk)));
    const targets=Array.from({length:6},(_,i)=>i+1).sort(()=>Math.random()-.5).slice(0,count);
    const eye=d(6);
-   if(targets.includes(eye)){p.ability=100;appendMove(p.name+' 소울풀 판정 '+eye+' / 목표 '+targets.join(',')+' · 어빌리티 100%!')}
+   if(targets.includes(eye)){p.ability=100;appendMove(p.name+' 소울풀 판정 '+eye+' / 목표 '+targets.join(',')+' · 어빌리티 100%!');window.__LEAF_NATIVE_EVENTS__?.show('ability',p.name)}
    else appendMove(p.name+' 소울풀 판정 '+eye+' / 목표 '+targets.join(',')+' · 실패');
  }
  else if(type==='attribute'){match.attribute=originalTileAt(match.map,pos)?.attribute||['WANDS','SWORDS','CUPS','DISKS'][rand(4)];appendMove('맵 속성이 '+match.attribute+'(으)로 변경!')}
@@ -1295,7 +1295,69 @@ function calculateMatchReward(winner,m=match,now=Date.now()){
  return {gp:eligible?Math.floor(fullReward*percent):0,eligible,seconds:Math.floor(duration/1000),minimumSeconds:participants*90,fullReward,estimated};
 }
 function formatGameDuration(seconds){return String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0')}
-function finishGame(winner){match.finished=true;match.winner=winner.id;match.message=winner.name+'이(가) GOAL에 도착했습니다!';const rewardInfo=calculateMatchReward(winner);const reward=rewardInfo.gp;profile.gp+=reward;if(winner.id===0)profile.wins++;profileUI();persist();chat('SYSTEM',winner.name+'님이 가장 먼저 GOAL에 도착했습니다! GP +'+reward,'system');modal('✦ 주사위의 잔영 · 게임 종료',winner.name+' 승리!　획득 GP +'+reward.toLocaleString()+'\n플레이 '+formatGameDuration(rewardInfo.seconds)+' / GP 지급 '+formatGameDuration(rewardInfo.minimumSeconds)+(rewardInfo.eligible?'':'\n최소 시간이 충족되지 않아 GP 0')+(rewardInfo.estimated?'\n※ 이 맵의 기본 GP는 추정치':'')+'\n게임을 다시 시작할 수 있습니다.',[{label:'다시 시작',primary:true,run:()=>navigate('lobby')},{label:'결과 보기',run:()=>drawGame()}]);sfx(925,.4)}
+/* Actual source IMG.pak winResult.spr gives the native 452x88
+ * RESULT / PLAYER / CL / COMPLETE / GP / WIN RATE headings.
+ * Rows remain live match entities, NOT a pasted screenshot. Historical
+ * CL and lifetime win-rate protocols are NOT decoded: show a dash rather
+ * than fabricating historical values. Player progress and awarded GP
+ * come exclusively from the real current match state.
+ */
+function nativeMatchResult(winner,rewardInfo,reward){
+ const panel=document.createElement('section');
+ panel.id='leaf-original-match-result';
+ panel.className='leaf-original-match-result';
+ panel.dataset.originalMember='Dice/IMG.pak:winResult.spr';
+ panel.dataset.originalFrame='0';
+ panel.dataset.sourceLayout='source-header/WEB-inferred-data-rows';
+ panel.dataset.nativeResult='loading';
+ const header=document.createElement('img');
+ header.className='leaf-original-result-heading';
+ header.src='./original/SourceSPRExtra/winResult-00.png';
+ header.alt='';header.draggable=false;
+ header.addEventListener('load',()=>{
+  if(!panel.isConnected)return;
+  panel.dataset.nativeResult=header.naturalWidth===452&&
+   header.naturalHeight===88?'ready':'fallback';
+ });
+ header.addEventListener('error',()=>{
+  if(panel.isConnected)panel.dataset.nativeResult='fallback';
+ });
+ panel.append(header);
+ const table=document.createElement('table');
+ table.className='leaf-original-result-table';
+ const heading=document.createElement('thead'),headRow=document.createElement('tr');
+ for(const label of ['PLAYER','CL','COMPLETE','GP','WIN RATE']){
+  const th=document.createElement('th');th.scope='col';th.textContent=label;headRow.append(th);
+ }
+ heading.append(headRow);table.append(heading);
+ const body=document.createElement('tbody');
+ const finish=Math.max(1,(match?.tiles?.length||1)-1);
+ for(const player of match?.players||[]){
+  const row=document.createElement('tr');row.dataset.playerId=String(player.id);
+  if(player.id===winner.id)row.className='leaf-original-result-winner';
+  const percentage=Math.round(Math.max(0,Math.min(100,player.position/finish*100)));
+  const cells=[player.name,'—',percentage+'%',
+   player.id===winner.id?String(reward):'0','—'];
+  cells.forEach((value,index)=>{
+   const td=document.createElement('td');td.textContent=value;
+   td.dataset.col=['player','cl','complete','gp','win-rate'][index];
+   row.append(td);
+  });
+  body.append(row);
+ }
+ table.append(body);panel.append(table);
+ const details=document.createElement('p');
+ details.className='leaf-original-result-description';
+ details.textContent=winner.name+' 승리!　획득 GP +'+reward.toLocaleString()+
+  ' · 플레이 '+formatGameDuration(rewardInfo.seconds)+
+  ' / GP 지급 '+formatGameDuration(rewardInfo.minimumSeconds)+
+  (rewardInfo.eligible?'':' · 최소 시간이 충족되지 않아 GP 0')+
+  (rewardInfo.estimated?' · ※ 이 맵의 기본 GP는 추정치':'')+
+  ' · 게임을 다시 시작할 수 있습니다.';
+ panel.append(details);
+ return panel;
+}
+function finishGame(winner){match.finished=true;match.winner=winner.id;match.message=winner.name+'이(가) GOAL에 도착했습니다!';const rewardInfo=calculateMatchReward(winner);const reward=rewardInfo.gp;profile.gp+=reward;if(winner.id===0)profile.wins++;profileUI();persist();chat('SYSTEM',winner.name+'님이 가장 먼저 GOAL에 도착했습니다! GP +'+reward,'system');modal('✦ 주사위의 잔영 · 게임 종료',nativeMatchResult(winner,rewardInfo,reward),[{label:'다시 시작',primary:true,run:()=>navigate('lobby')},{label:'결과 보기',run:()=>drawGame()}]);sfx(925,.4)}
 function moveValues(p){
  const stats=teamStats(p.team),extra=p.effects.shoe>0?1:0,values=[];
  const sides=stats.move===2?4:6,n=Math.min(4,(stats.move===2?2:1)+extra);
@@ -1490,5 +1552,5 @@ function init(){installBoardControls();installNativeDiceMenu();
      else if(action==='ability')await useAbility();
      else await useItem(index,steps);
    }finally{remoteAct=false}
- }};window.__ROG_TEST__={startGame,drawGame,takeTurn,teamStats,generateTiles,getMatch:()=>match,go:navigate,setRoll:()=>{},setMatch:v=>{match=v;drawGame()},getSourceMaps:()=>SOURCE_INFO,getSourceTiles:()=>SOURCE_TILES,calculateMatchReward,elementalModifier,resolveBattle,moveValues,activePlayer,playerCanAct,refreshResume};if(match&&!match.finished){log('저장된 경기가 있습니다. 주사위 대기실의 이어하기로 복원하세요.')}refreshResume()}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+ }};window.__ROG_TEST__={startGame,drawGame,takeTurn,teamStats,generateTiles,getMatch:()=>match,go:navigate,setRoll:()=>{},setMatch:v=>{match=v;drawGame()},getSourceMaps:()=>SOURCE_INFO,getSourceTiles:()=>SOURCE_TILES,resolveTile,finishGame,calculateMatchReward,elementalModifier,resolveBattle,moveValues,activePlayer,playerCanAct,refreshResume};if(match&&!match.finished){log('저장된 경기가 있습니다. 주사위 대기실의 이어하기로 복원하세요.')}refreshResume()}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
