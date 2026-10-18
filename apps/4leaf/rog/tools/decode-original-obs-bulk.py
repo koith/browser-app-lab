@@ -85,7 +85,8 @@ def main():
     archive=Path(sys.argv[1]); cards=Path(sys.argv[2]); out=Path(sys.argv[3])
     deck={str(c["id"]):c for c in json.loads(cards.read_text(encoding="utf-8"))}
     recovered={}; statistics={"source":archive.name,"archiveSHA256":hashlib.sha256(archive.read_bytes()).hexdigest(),
-        "members":0,"cardMembers":0,"accepted":0,"framePNGs":0,"bytes":0,"rejected":{}}
+        "members":0,"cardMembers":0,"accepted":0,"framePNGs":0,"bytes":0,
+        "staticOnly":0,"multiFrameSamples":0,"rejected":{}}
     target=out/"bulk"
     source=archive.read_bytes()
     for name,data in source_members(source):
@@ -108,11 +109,12 @@ def main():
             images.append({"index":i,"sourceName":f"{Path(name).stem}-{i:02d}.png",
                 "payload":payload,"width":w,"height":h,"originX":ox,"originY":oy,
                 "sha256":hashlib.sha256(payload).hexdigest(),"decode":confidence})
-        # Preserve two or more independently decoded frames of the same
-        # verified original OBS member, even when frame 0 is corrupt or
-        # currently undecodable. Never claim these are identified poses.
-        if len(images)<2:
-            statistics["rejected"][name]="fewer than two strict source frames"
+        # A single FULLY strict original source frame still restores the
+        # ACTUAL Genesis chessman pixels and beats the invented CSS proxy.
+        # Never animate a 1-frame character or label it as an idle pose.
+        # Keep zero-frame-missing and one-frame-only explicitly unverified.
+        if not images:
+            statistics["rejected"][name]="no strictly decoded source frames"
             continue
         if statistics["framePNGs"]+len(images)>MAX_TOTAL_IMAGES:break
         if statistics["bytes"]+sum(len(f["payload"]) for f in images)>MAX_TOTAL_PNG_BYTES:break
@@ -124,12 +126,17 @@ def main():
                 "width":item["width"],"height":item["height"],
                 "originX":item["originX"],"originY":item["originY"],
                 "sha256":item["sha256"]})
+        if len(frameRefs)==1:
+            statistics["staticOnly"]+=1
+        else:
+            statistics["multiFrameSamples"]+=1
         recovered[cid]={"name":deck[cid].get("name",""),"sourcePak":"OBS.pak",
             "originalMember":name,"sourceSHA256":hashlib.sha256(data).hexdigest(),
             "originalAnimationCount":len(frames),"poseMapping":"UNVERIFIED; native action-table not yet decoded",
             "horizontalScanlineOrigin":"PROVISIONAL; inferred centred rows",
             "hasVerifiedFrameZero":any(f["index"]==0 for f in frameRefs),
             "fallbackAction":"EARLIEST SOURCE FRAME ONLY; action unverified",
+            "singleFrameStillOnly":len(frameRefs)==1,
             "frames":frameRefs}
         statistics["accepted"]+=1
         statistics["framePNGs"]+=len(images)
