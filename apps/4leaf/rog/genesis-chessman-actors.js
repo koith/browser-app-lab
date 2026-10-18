@@ -78,6 +78,8 @@
      });
      pawn.append(img);
    }
+   const fallback=pawn.querySelector('.leaf-chess-original-card-fallback');
+   if(fallback)fallback.hidden=true;
    pawn.dataset.actorRig='original-obs-sprite';
    pawn.dataset.actorSource='OBS/'+native.originalMember;
    pawn.dataset.actorOriginalModelRecovered='true';
@@ -137,8 +139,28 @@
    node.dataset.actorRig='source-animation';
    node.dataset.sourceAnimation=action;
   }else{
-   sheet.hidden=true;node.dataset.actorRig='inferred-8head';
+   sheet.hidden=true;
+   // No actual Dice/OBS.pak body exists for this card yet. Do NOT show
+   // an enormous invented eight-head grey stickman as if it were 4LEAF.
+   // The recovered CardData/chm_NN portrait is the only character-specific
+   // authentic artwork available. Display that small archival portrait
+   // honestly, while keeping the source identity and gameplay untouched.
+   let portrait=node.querySelector('.leaf-chess-original-card-fallback');
+   if(!portrait){
+    portrait=document.createElement('img');
+    portrait.className='leaf-chess-original-card-fallback';
+    portrait.alt='';portrait.draggable=false;
+    portrait.setAttribute('aria-hidden','true');
+    node.append(portrait);
+   }
+   const source=node.querySelector('.leaf-chess-portrait')?.getAttribute('src');
+   if(source&&portrait.getAttribute('src')!==source)portrait.src=source;
+   portrait.hidden=false;
+   node.dataset.actorRig='original-card-portrait-fallback';
+   node.dataset.actorSource='CardData (OBS full-body not recovered)';
+   node.dataset.actorOriginalModelRecovered='false';
    node.dataset.sourceAnimation='unavailable';
+   node.dataset.sourcePoseMapping='original-OBS-missing/CardData-original-portrait-only';
   }
  }
  function pose(pawn,requested='idle',duration=0){
