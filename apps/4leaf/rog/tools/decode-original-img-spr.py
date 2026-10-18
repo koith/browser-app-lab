@@ -104,14 +104,15 @@ def main():
     if len(sys.argv)!=3:raise SystemExit('Usage: decode-original-img-spr.py Dice/IMG.pak original/SourceSPR')
     src,out=Path(sys.argv[1]),Path(sys.argv[2])
     data=src.read_bytes()
-    found={name.lower():raw for name,raw in members(data) if name.lower() in SUPPORTED}
-    if set(found)!=set(SUPPORTED):raise ValueError('Missing genuine source SPR entries: '+str(set(SUPPORTED)-set(found)))
+    supported={name.lower():name for name in SUPPORTED}
+    found={name.lower():raw for name,raw in members(data) if name.lower() in supported}
+    if set(found)!=set(supported):raise ValueError('Missing genuine source SPR entries: '+str(set(supported)-set(found)))
     out.mkdir(parents=True,exist_ok=True)
     report={'source':'Dice/IMG.pak','archiveSHA256':hashlib.sha256(data).hexdigest(),
             'videoStride':VIDEO_STRIDE,'decoder':'verified-640-byte-video-RLE',
             'spriteAnimations':{}}
     for name in SUPPORTED:
-        raw=found[name]
+        raw=found[name.lower()]
         allframes,palette=frames(raw)
         entry={'member':name,'sourceSHA256':hashlib.sha256(raw).hexdigest(),
                'frameCount':len(allframes),'frames':[]}
