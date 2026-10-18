@@ -153,7 +153,7 @@ const {chromium}=require('playwright');
    sourceActors.some(a=>a.rig!=='original-obs-sprite'||!a.source.includes('/OBS/')))
     throw Error('Recovered source character renders as proxy or incorrect asset');
   if(sourceActors.some(a=>
-    a.nativePivot.some(x=>!/^calc\(/.test(x)||/\+\s*-|\-\s*-/.test(x))||
+    a.nativePivot.some(x=>!/^calc\(/.test(x)||/[+\-]\s*-\d+(?:\.\d+)?px/.test(x))||
     a.computedLeft==='auto'||a.computedBottom==='auto'||
     !/px$/.test(a.computedLeft)||!/px$/.test(a.computedBottom)))
    throw Error('Native OBS pivot CSS expression failed for signed original offsets: '+
