@@ -546,6 +546,30 @@ const path=require('path');
  }));
  assert.equal(emptyTerrain.type,'unverified','exact historical ChatTown room-map terrain is unknown');
  assert.equal(emptyTerrain.image,'none','do not paint unrelated Dice bgtile on ChatTown');
+ const nativeDirectory=await host.evaluate(()=>{
+  const bg=document.getElementById('social-image-frame');
+  const p=bg.querySelector('.social-directory'),b=p.getBoundingClientRect();
+  const actual=bg.getBoundingClientRect();
+  const roomButtons=[...bg.querySelectorAll('.social-directory-row')];
+  return {background:getComputedStyle(bg).backgroundImage,
+   projectedMap:!!p.classList.contains('web-estate-open'),
+   list:roomButtons.map(el=>{const r=el.getBoundingClientRect();return [r.x,r.y,r.width,r.height]}),
+   panel:[b.x,b.y,b.width,b.height],frame:[actual.width,actual.height],
+   visibleSourceRatio:1-(b.width*b.height)/(actual.width*actual.height)};
+ });
+ assert.ok(nativeDirectory.background.includes('original/ChatTown/northback.png'),
+  'permanent-room selector must expose recovered native ChatTown landscape');
+ assert.equal(nativeDirectory.projectedMap,false,
+  'unknown historical estate coordinates must NOT replace the source art by default');
+ assert.ok(nativeDirectory.panel[2]<=350&&nativeDirectory.panel[3]<=330&&
+  nativeDirectory.visibleSourceRatio>.7,
+  'original town background must occupy most of its native frame');
+ assert.ok(nativeDirectory.list.every(r=>r[2]>180&&r[3]>=34),
+  'eight actual room links are readable full-width instead of tiny scattered gray cards');
+ assert.equal(await host.locator('#social-web-estate-toggle').getAttribute('aria-pressed'),'false');
+ await host.locator('#social-web-estate-toggle').click();
+ assert.equal(await host.locator('#social-web-estate-toggle').getAttribute('aria-pressed'),'true',
+  'inferred web-map is an accessible opt-in, never mistaken for original geography');
  const mapBefore=await host.locator('#social-map-plane').evaluate(el=>el.style.transform);
  await host.locator('#social-map-viewport').focus();
  await host.keyboard.press('ArrowRight');
