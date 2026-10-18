@@ -38,10 +38,10 @@ const {chromium}=require('playwright');
    const native=initial.sourceIds.includes(x.chessmanId);
    return x.pose==='idle'&&(native
     ? x.rig==='original-obs-sprite'&&x.originalRecovered==='true'
-    : x.rig==='inferred-8head'&&x.originalRecovered==='false');
+    : x.rig==='original-card-portrait-fallback'&&x.originalRecovered==='false');
   }), 'each existing original OBS character must use its actual 2002 pixels; missing frames may use explicitly inferred proxy');
   assert.ok(initial.heights.every((n,i)=>
-    initial.sourceIds.includes(initial.cardTeam[i])?n===0:n>=70&&n<=125),
+    n===0),
    'native OBS artwork hides the fallback CSS skeleton; only missing characters use source-scale proxy');
   assert.equal(initial.chatAvatar,0,'ChatTown avatars are NOT used on Genesis board');
   await page.waitForFunction(()=>[...document.querySelectorAll('#board-pawns .leaf-chess-portrait')].every(x=>x.complete&&x.naturalWidth>15),null,{timeout:13000});
