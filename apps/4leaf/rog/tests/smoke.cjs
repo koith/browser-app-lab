@@ -160,7 +160,19 @@ async function run(){
  assert.equal(await page.locator('#my-name').textContent(),'플레이어 2');
  assert.ok(await page.locator('#roll-btn').isEnabled(),'second human turn should be clickable');
  await page.locator('#roll-btn').click();
- await page.waitForFunction(()=>window.__ROG_TEST__.getMatch()?.active===0,null,{timeout:12000});
+ // Real DMP special cells can trigger authentic combat/result dialogs.
+ // Handle the actual prompt rather than assuming every random second
+ // roll has only an empty-board landing (and falsely reporting timeout).
+ let nextTurn=false;
+ for(let i=0;i<110;i++){
+  if(await page.evaluate(()=>window.__ROG_TEST__.getMatch()?.active===0)){
+   nextTurn=true;break;
+  }
+  const confirm=page.locator('#modal-buttons button').filter({hasText:'결과 확인'}).first();
+  if(await confirm.isVisible().catch(()=>false))await confirm.click();
+  await page.waitForTimeout(160);
+ }
+ assert.ok(nextTurn,'legitimate second human turn advances after resolving any original battle modal');
  await page.reload();
  await page.waitForFunction(()=>!!window.__ROG_TEST__,null,{timeout:8000});
  await page.locator('[data-route="lobby"]').first().click();
