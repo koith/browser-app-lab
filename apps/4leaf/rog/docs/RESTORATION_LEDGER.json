@@ -389,6 +389,63 @@
         "QA-04",
         "CHT-07"
       ]
+    },
+    {
+      "id": "REQ-20261019-004",
+      "date": "2026-10-19",
+      "origin": "user",
+      "text": "남은 미완료 업무 처리해서 마무리해. 막히면 절대로 그상태로 멈추지 말고 어떻게 해서든 방법 찾아내서 처리완료해. 남은 일감 중 인간 개입 없이 처리 가능한걸 최대한 무슨 수를 써서라도 최대한 다 클리어 시키는 걸 목표로 해라.",
+      "taskIds": [
+        "M00",
+        "M01",
+        "M02",
+        "M03",
+        "M04",
+        "M05",
+        "M06",
+        "M07",
+        "M08",
+        "M09",
+        "P0-BOARD",
+        "P0-ACTOR",
+        "P0-PODIUM",
+        "P0-DICE",
+        "P0-CHAT",
+        "P0-RELEASE",
+        "SRC-01",
+        "SRC-02",
+        "BRD-01",
+        "BRD-02",
+        "BRD-03",
+        "BRD-04",
+        "BRD-05",
+        "ACT-01",
+        "ACT-02",
+        "ACT-03",
+        "ACT-04",
+        "BTL-02",
+        "BTL-04",
+        "DIE-01",
+        "DIE-02",
+        "DIE-04",
+        "CHT-01",
+        "CHT-02",
+        "CHT-03",
+        "CHT-04",
+        "CHT-05",
+        "WORLD-01",
+        "WORLD-02",
+        "WORLD-03",
+        "SHOP-01",
+        "SHOP-02",
+        "RULE-01",
+        "RULE-02",
+        "RULE-03",
+        "EVID-01",
+        "EVID-02",
+        "QA-02",
+        "QA-03"
+      ]
     }
   ],
   "tasks": [
@@ -629,17 +686,19 @@
       "title": "원본 전투 발판·배치 완성",
       "status": "in_progress",
       "milestone": "M06",
-      "current": "웹 CSS 사진 근사 발판; 2026-10-18: True winBattle.spr 355x113 dual metallic 2D podium now live (2ea43db0); historic 3D MVE platform mesh, collision/support depth, exact fighter foot placement and camera 2004 equivalence remain unverified.",
+      "current": "웹 CSS 사진 근사 발판; 2026-10-18: True winBattle.spr 355x113 dual metallic 2D podium now live (2ea43db0); historic 3D MVE platform mesh, collision/support depth, exact fighter foot placement and camera 2004 equivalence remain unverified.; 2026-10-19 실제 원본 winBattle.spr 발판 BATTLE 제목/VS 위로 겹치던 일반 주사위/전투 모달을 source-safe HUD로 분리, 결과 클릭 버튼은 원본 발판 아래 실게임 영역으로 이동하고 종료시 단일 modal-buttons 본래 자리 복귀. Chromium 아이폰 및 데스크톱 실제 hit-test 검증 중; 역사적 pixel-perfect 3D 등가성은 미완료.",
       "acceptance": [
         "원본 배틀 캡처와 실측 일치하는 3D 플랫폼, 원본 체스맨 높이/가림·회전/공격 시점 검증"
       ],
       "evidence": [
         "apps/4leaf/rog/dice-native-battle-podium.css",
         "https://github.com/koith/browser-app-lab/pull/117",
-        "apps/4leaf/rog/dice-native-battle-source-spr.css"
+        "apps/4leaf/rog/dice-native-battle-source-spr.css",
+        "apps/4leaf/rog/dice-original-battle-unobstructed.css",
+        "apps/4leaf/rog/tests/dice-battle-podium.cjs"
       ],
       "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
-      "lastReviewed": "2026-10-18",
+      "lastReviewed": "2026-10-19",
       "verifiedAcceptance": null
     },
     {
@@ -696,7 +755,7 @@
       "title": "원작 복원 최종 화면·기능 수용 게이트",
       "status": "in_progress",
       "milestone": "M09",
-      "current": "과거 CI 성공은 원작 동일성 완료의 증거가 아님; 2026-10-18 공개 Pages 원본 주잔 브라우저 QA(39123501334) 실패 원인: PR #110에서 제거한 .tile-symbol / <small>을 검사에서 참조해 getComputedStyle(null) TypeError. 실제 웹앱 원본 비트맵은 정상, 수용 게이트 검사가 낡아 수정·재검증 중.; 원본 OBS 동작·전투 SPR 정상/오프라인 누락 대비 둘 모두 CI 게이트 추가. source evidence 없는 3D 원작 동등성은 판정하지 않음.; 2026-10-19 원본 2002 IMG.pak winJail.spr(136x219) 및 winAbility.spr(330x284+41x29×5)을 실제 감옥/100% 능력 타일 이벤트에 연결. 이펙트 배치·시간은 WEB INFERRED이며 원작 MVE 원본과 동일성 미검증. Chromium 이벤트 상태/PNG 크기/원본 조각 위치 QA 추가.; 새 앱 이벤트(감옥/능력)와 실제 경기 종료(원본 452×88 결과 패널) 3장면에 2002 IMG.pak 원본 PNG와 실제 수치/버튼 검증 확대. 웹 배치는 임시임을 표시하며 미완료 종합 검증 유지.; 2026-10-19 복구된 2002 IMG.pak winAbility.spr 6프레임을 100% 실제 어빌리티 발동 시 표시하고 winDoa.spr 363×133을 실제 원본 DMP DOA 후퇴 판정 시 표시하도록 원본 GUI 코드 통합. 2004 3D 물리 모델 미복원.; 2026-10-19 원본 2002 Dice/IMG.pak minipanel.spr 4개 실제 75x20 '미니맵/체스맨정보' 버튼을 비조작 이미지에서 독립 실제 클릭 탭으로 복구. DMP 실 미니맵 유지, CardData 실제 선택 팀 캐릭터 정보만 전시. 체스맨정보 상세 UI의 원본 2004 위치는 INFERRED로 미완료. Chromium PC/폰 E2E 진행 중.",
+      "current": "과거 CI 성공은 원작 동일성 완료의 증거가 아님; 2026-10-18 공개 Pages 원본 주잔 브라우저 QA(39123501334) 실패 원인: PR #110에서 제거한 .tile-symbol / <small>을 검사에서 참조해 getComputedStyle(null) TypeError. 실제 웹앱 원본 비트맵은 정상, 수용 게이트 검사가 낡아 수정·재검증 중.; 원본 OBS 동작·전투 SPR 정상/오프라인 누락 대비 둘 모두 CI 게이트 추가. source evidence 없는 3D 원작 동등성은 판정하지 않음.; 2026-10-19 원본 2002 IMG.pak winJail.spr(136x219) 및 winAbility.spr(330x284+41x29×5)을 실제 감옥/100% 능력 타일 이벤트에 연결. 이펙트 배치·시간은 WEB INFERRED이며 원작 MVE 원본과 동일성 미검증. Chromium 이벤트 상태/PNG 크기/원본 조각 위치 QA 추가.; 새 앱 이벤트(감옥/능력)와 실제 경기 종료(원본 452×88 결과 패널) 3장면에 2002 IMG.pak 원본 PNG와 실제 수치/버튼 검증 확대. 웹 배치는 임시임을 표시하며 미완료 종합 검증 유지.; 2026-10-19 복구된 2002 IMG.pak winAbility.spr 6프레임을 100% 실제 어빌리티 발동 시 표시하고 winDoa.spr 363×133을 실제 원본 DMP DOA 후퇴 판정 시 표시하도록 원본 GUI 코드 통합. 2004 3D 물리 모델 미복원.; 2026-10-19 원본 2002 Dice/IMG.pak minipanel.spr 4개 실제 75x20 '미니맵/체스맨정보' 버튼을 비조작 이미지에서 독립 실제 클릭 탭으로 복구. DMP 실 미니맵 유지, CardData 실제 선택 팀 캐릭터 정보만 전시. 체스맨정보 상세 UI의 원본 2004 위치는 INFERRED로 미완료. Chromium PC/폰 E2E 진행 중.; 2026-10-19 실제 원본 winBattle.spr 발판 BATTLE 제목/VS 위로 겹치던 일반 주사위/전투 모달을 source-safe HUD로 분리, 결과 클릭 버튼은 원본 발판 아래 실게임 영역으로 이동하고 종료시 단일 modal-buttons 본래 자리 복귀. Chromium 아이폰 및 데스크톱 실제 hit-test 검증 중; 역사적 pixel-perfect 3D 등가성은 미완료.",
       "acceptance": [
         "원작 장면 A/B·핵심 시스템 전체 CI·모바일·온라인 배포·동일 커밋 확인 뒤 승인"
       ],
@@ -713,7 +772,9 @@
         "apps/4leaf/rog/tests/dice-native-original-source-events.cjs",
         "apps/4leaf/rog/dice-native-minipanel-spr.js",
         "apps/4leaf/rog/dice-native-minipanel-spr.css",
-        "apps/4leaf/rog/tests/dice-original-minipanel-spr.cjs"
+        "apps/4leaf/rog/tests/dice-original-minipanel-spr.cjs",
+        "apps/4leaf/rog/dice-original-battle-unobstructed.css",
+        "apps/4leaf/rog/tests/dice-battle-podium.cjs"
       ],
       "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
       "lastReviewed": "2026-10-19",
@@ -1030,17 +1091,19 @@
       "title": "전투 800×600 제목·좌우 점수·체스맨·주사위 정밀 배치",
       "status": "todo",
       "milestone": "M06",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원작은 큰 BATTLE/좌우 점수/배틀 플랫폼/중앙 VS/굴림 결과가 겹치지 않으나 현재 score 크기·배치·모달 도구가 다름 | 구현 목표: winBattle 원본 배경 위 실제 OBS·굴린 pip 주사위·결과 버튼을 원본 battle.jpg 기준 픽셀 좌표에 맞춤",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원작은 큰 BATTLE/좌우 점수/배틀 플랫폼/중앙 VS/굴림 결과가 겹치지 않으나 현재 score 크기·배치·모달 도구가 다름 | 구현 목표: winBattle 원본 배경 위 실제 OBS·굴린 pip 주사위·결과 버튼을 원본 battle.jpg 기준 픽셀 좌표에 맞춤; 2026-10-19 실제 원본 winBattle.spr 발판 BATTLE 제목/VS 위로 겹치던 일반 주사위/전투 모달을 source-safe HUD로 분리, 결과 클릭 버튼은 원본 발판 아래 실게임 영역으로 이동하고 종료시 단일 modal-buttons 본래 자리 복귀. Chromium 아이폰 및 데스크톱 실제 hit-test 검증 중; 역사적 pixel-perfect 3D 등가성은 미완료.",
       "acceptance": [
         "원작 battle.jpg 구조와 동등한 위계, 점수·캐릭터·발판·대화창·좌우 카드가 충돌하지 않는 캡처"
       ],
       "evidence": [
         "../assets/battle.jpg",
         "game.js",
-        "game-authentic.css"
+        "game-authentic.css",
+        "apps/4leaf/rog/dice-original-battle-unobstructed.css",
+        "apps/4leaf/rog/tests/dice-battle-podium.cjs"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-18",
+      "lastReviewed": "2026-10-19",
       "verifiedAcceptance": null,
       "dependencies": [
         "BTL-01",
@@ -2844,6 +2907,72 @@
       "taskId": "BRD-05",
       "details": "Archived 2002 IMG.pak:minipanel.spr frames 0-3 restored as real 75x20 click tabs. Real DMP map remains live; alternate panel shows real selected card only. Original info contents layout remains unverified web fallback.",
       "evidence": "apps/4leaf/rog/tests/dice-original-minipanel-spr.cjs"
+    },
+    {
+      "seq": 103,
+      "date": "2026-10-19",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261019-004",
+      "taskIds": [
+        "M00",
+        "M01",
+        "M02",
+        "M03",
+        "M04",
+        "M05",
+        "M06",
+        "M07",
+        "M08",
+        "M09",
+        "P0-BOARD",
+        "P0-ACTOR",
+        "P0-PODIUM",
+        "P0-DICE",
+        "P0-CHAT",
+        "P0-RELEASE",
+        "SRC-01",
+        "SRC-02",
+        "BRD-01",
+        "BRD-02",
+        "BRD-03",
+        "BRD-04",
+        "BRD-05",
+        "ACT-01",
+        "ACT-02",
+        "ACT-03",
+        "ACT-04",
+        "BTL-02",
+        "BTL-04",
+        "DIE-01",
+        "DIE-02",
+        "DIE-04",
+        "CHT-01",
+        "CHT-02",
+        "CHT-03",
+        "CHT-04",
+        "CHT-05",
+        "WORLD-01",
+        "WORLD-02",
+        "WORLD-03",
+        "SHOP-01",
+        "SHOP-02",
+        "RULE-01",
+        "RULE-02",
+        "RULE-03",
+        "EVID-01",
+        "EVID-02",
+        "QA-02",
+        "QA-03"
+      ],
+      "details": "User explicitly requires maximum self-serve restoration progress and alternatives for blockers. Every open task linked. Do not misclassify historical archive gaps as complete."
+    },
+    {
+      "seq": 104,
+      "date": "2026-10-19",
+      "type": "IMPLEMENTED_PENDING_QA",
+      "taskId": "BTL-02",
+      "details": "Native IMG battle podium + 2 Genesis OBS sprites+result pips remain DOM independent, while ordinary roll HUD hidden during combat and same legitimate buttons portalled below original scene; prior real-click interception by game-controls fixed and tested in source branch Chromium before forward-port.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39176987648"
     }
   ]
 }
