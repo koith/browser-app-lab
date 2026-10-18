@@ -108,10 +108,11 @@ def main():
             images.append({"index":i,"sourceName":f"{Path(name).stem}-{i:02d}.png",
                 "payload":payload,"width":w,"height":h,"originX":ox,"originY":oy,
                 "sha256":hashlib.sha256(payload).hexdigest(),"decode":confidence})
-        # An intact frame 0 and at least one other same-source frame are
-        # required. Do NOT mislabel arbitrary late combat poses as idle.
-        if len(images)<2 or images[0]["index"]!=0:
-            statistics["rejected"][name]="missing source frame 0 or fewer than two strict decodes"
+        # Preserve two or more independently decoded frames of the same
+        # verified original OBS member, even when frame 0 is corrupt or
+        # currently undecodable. Never claim these are identified poses.
+        if len(images)<2:
+            statistics["rejected"][name]="fewer than two strict source frames"
             continue
         if statistics["framePNGs"]+len(images)>MAX_TOTAL_IMAGES:break
         if statistics["bytes"]+sum(len(f["payload"]) for f in images)>MAX_TOTAL_PNG_BYTES:break
@@ -127,6 +128,8 @@ def main():
             "originalMember":name,"sourceSHA256":hashlib.sha256(data).hexdigest(),
             "originalAnimationCount":len(frames),"poseMapping":"UNVERIFIED; native action-table not yet decoded",
             "horizontalScanlineOrigin":"PROVISIONAL; inferred centred rows",
+            "hasVerifiedFrameZero":any(f["index"]==0 for f in frameRefs),
+            "fallbackAction":"EARLIEST SOURCE FRAME ONLY; action unverified",
             "frames":frameRefs}
         statistics["accepted"]+=1
         statistics["framePNGs"]+=len(images)
