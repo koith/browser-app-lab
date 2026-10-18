@@ -152,6 +152,16 @@ const path=require('node:path');
     originalBattleSprite:podium?.dataset.originalSourceMember,
     realButtonInCanvas:!!tray?.querySelector('#modal-buttons'),
     canPhysicallyClick:!!r&&document.elementFromPoint(r.left+r.width/2,r.top+r.height/2)===first,
+    clickProbe:!r?null:(()=>{
+     const hit=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);
+     const t=tray?.getBoundingClientRect();
+     return {button:[r.x,r.y,r.width,r.height],tray:t&&[t.x,t.y,t.width,t.height],
+      buttonVisibility:getComputedStyle(first).visibility,
+      buttonPointer:getComputedStyle(first).pointerEvents,
+      trayPointer:getComputedStyle(tray).pointerEvents,
+      interceptedBy:hit?.outerHTML?.slice(0,230)||'none',
+      modalPointer:getComputedStyle(document.getElementById('modal')).pointerEvents};
+    })(),
     originalPodiumBottom:podium?.getBoundingClientRect().bottom,
     buttonsTop:tray?.getBoundingClientRect().top,
     duplicateButtons:document.querySelectorAll('#modal-buttons').length,
@@ -162,7 +172,7 @@ const path=require('node:path');
   assert.equal(battleHud.modernRollVisibility,'hidden','fake modern WEB roll bar must not obscure source battle dice and VS');
   assert.equal(battleHud.realButtonInCanvas,true,'move ACTUAL battle action buttons to native board canvas, no fake duplicate');
   assert.equal(battleHud.duplicateButtons,1,'preserve one authoritative WebRTC/result action container');
-  assert.equal(battleHud.canPhysicallyClick,true,'real battle buttons must be visually topmost and reachable by actual mouse/touch');
+  assert.equal(battleHud.canPhysicallyClick,true,'real battle buttons must be visually topmost and reachable by actual mouse/touch '+JSON.stringify(battleHud.clickProbe));
   assert.equal(battleHud.modalOverlayVisible,'hidden','the old popup chrome cannot obscure the recovered winBattle art');
   assert.ok(battleHud.buttonsTop>battleHud.originalPodiumBottom,
    'battle result controls belong BELOW original metal platforms and VS: '+JSON.stringify(battleHud));
