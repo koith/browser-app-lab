@@ -31,8 +31,12 @@ const {chromium}=require('playwright');
     m.tiles[5]=type;
     await window.__ROG_TEST__.resolveTile(player);
    },{type,ability});
-   await page.waitForFunction(()=>document.querySelector(
-    '#leaf-source-effect-overlay')?.dataset.nativeSourceReady==='ready',null,{timeout:10000});
+   await page.waitForFunction(()=>{
+    const node=document.querySelector('#leaf-source-effect-overlay');
+    if(node?.dataset.nativeSourceReady!=='ready')return false;
+    const parts=[...node.querySelectorAll('.leaf-source-ability-token')];
+    return parts.every(img=>img.complete&&img.naturalWidth===41&&img.naturalHeight===29);
+   },null,{timeout:10000});
    return page.evaluate(()=>{
     const stage=document.querySelector('#leaf-source-effect-overlay'),
      img=stage.querySelector('.leaf-source-event-primary');
