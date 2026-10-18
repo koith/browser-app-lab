@@ -104,6 +104,22 @@
  #rooms.classic-chat-room #social-image-frame>.social-avatar-layer .social-room-foreground{
   pointer-events:none!important;
  }
+ /* The 2004 room chrome assigns the regular Registry layer z=106.
+  * When the genuine ringbtn.png peer menu opens, this MORE SPECIFIC
+  * rule must beat that z-index (and the native 30px toolbar's z=109).
+  * The earlier chatroom-native-ringbtn.css :has() selector loses the
+  * specificity contest against #social-image-frame above, allowing the
+  * Magic Carden button to steal actual peer-menu clicks. Raise only
+  * while a REAL peer menu exists, then automatically restore z=106.
+  */
+ #rooms.classic-chat-room #social-image-frame>.social-avatar-layer:has(#social-actor-menu){
+  z-index:150!important;
+  pointer-events:none!important;
+ }
+ #rooms.classic-chat-room #social-image-frame>.social-avatar-layer:has(#social-actor-menu)
+ :is(.social-avatar,#social-actor-menu,.social-native-ring-action){
+  pointer-events:auto!important;
+ }
  /* When an icon is keyboard-focused, keep it accessible independently of
     which occupied seat overlaps its hit rectangle. */
  #rooms.classic-chat-room #social-image-frame>.social-classic-toolbar:focus-within{
