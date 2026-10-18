@@ -249,7 +249,7 @@
       "title": "타일 상하·겹침·입체감 사용자 재현 결함",
       "status": "in_progress",
       "milestone": "M04",
-      "current": "반전 패치와 128x86 웹 투영만으로 최종 해결 아님; 원본 DMP 26개 맵 1,920개 XY 좌표 검사로 동일 맵 좌표 중복 0건, 현재 웹 투영의 사각영역 최대 중첩 약 11.7%로 계산. 실제 픽셀/알파/메시 가림은 미검증.; 이번 수정에서 타일별 원본 이미지의 불투명 픽셀을 잘라내던 4px 중간점 클리핑을 전체 원본 알파 포함 외곽선으로 교정하고, 웹에서 추가한 임의 칸 번호·문자 그래픽을 원본 TIS 위에서 제거. 브라우저 QA 대기.",
+      "current": "반전 패치와 128x86 웹 투영만으로 최종 해결 아님; 원본 DMP 26개 맵 1,920개 XY 좌표 검사로 동일 맵 좌표 중복 0건, 현재 웹 투영의 사각영역 최대 중첩 약 11.7%로 계산. 실제 픽셀/알파/메시 가림은 미검증.; 이번 수정에서 타일별 원본 이미지의 불투명 픽셀을 잘라내던 4px 중간점 클리핑을 전체 원본 알파 포함 외곽선으로 교정하고, 웹에서 추가한 임의 칸 번호·문자 그래픽을 원본 TIS 위에서 제거. 브라우저 QA 대기.; QA 성공: 원본 TIS 32종 341,961 불투명 픽셀 중 잘림 0, 웹 번호 덧그림 0, 4LEAF 104칸 및 악마의 달팽이 69칸 Chromium 배치·ROLL·D4/D6 회귀 성공. 원본 3D 높이/간격 동등성은 미검증.",
       "acceptance": [
         "전체 맵 동선에서 과도한 중첩/상하 역전 0건; 알파/행 순서·타일 접근성·스크린샷 비교 기록"
       ],
@@ -260,7 +260,9 @@
         "https://github.com/koith/browser-app-lab/actions/runs/39119052163",
         "apps/4leaf/rog/tests/dice-native-tis-full-outline.cjs",
         "apps/4leaf/rog/dice-native-tis-alpha.js",
-        "apps/4leaf/rog/game.js"
+        "apps/4leaf/rog/game.js",
+        "https://github.com/koith/browser-app-lab/actions/runs/39121106579",
+        "https://github.com/koith/browser-app-lab/commit/69112199dce1de3a9ae6149d64730f2b4ca84cc3"
       ],
       "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
       "lastReviewed": "2026-10-18",
@@ -527,6 +529,22 @@
       "taskId": "P0-BOARD",
       "details": "TIS 145x97 소스 알파 실루엣의 y+2 중간점 샘플링으로 발생하던 상단/하단 소스 픽셀 클리핑 수정, 0이 아닌 알파 모든 행을 3px 밴드 외곽선에 포함. 임의 1~104 칸 번호/문자 덧그림을 실제 source event art에서 제거. 단, 2002/2004 원본 3D 투영·입체 겹침 원상복구까지 완료한 것은 아님.",
       "evidence": "apps/4leaf/rog/tests/dice-native-tis-full-outline.cjs"
+    },
+    {
+      "seq": 14,
+      "date": "2026-10-18",
+      "type": "QA_VERIFIED",
+      "taskId": "P0-BOARD",
+      "details": "32 native TIS source images 341,961 opaque pixels, clipped 0; top-edge 6,458/bottom-edge 6,393 included, 104 real DMP cells with zero synthetic badges; 4LEAF/악마의 달팽이 position, native ROLL and D4/D6 gameplay E2E pass. Original 3D mesh projection and overlap fidelity remain unverified.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39121106579"
+    },
+    {
+      "seq": 15,
+      "date": "2026-10-18",
+      "type": "MERGED",
+      "taskId": "P0-BOARD",
+      "details": "PR #110 production main squash commit 69112199: conservative full-alpha platform outlines, native artwork only, no synthetic per-cell numbers.",
+      "evidence": "https://github.com/koith/browser-app-lab/pull/110"
     }
   ]
 }
