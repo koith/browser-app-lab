@@ -68,9 +68,9 @@ const assert=require('node:assert/strict');
     'all tiles show their independently decoded recovered TIS PNG, not a fake or an unkeyed source');
    assert.deepEqual(result.sourceGrid,{width:1450,height:1120,pitchX:70,pitchY:47});
    assert.equal(result.bad,0,'every source DMP neighboring position uses projected sprite pitch');
-   assert.ok(result.minimumH>=108&&result.minimumH<=114&&
-     result.minimumV>=73&&result.minimumV<=77,
-    '2004 screenshot-calibrated projection keeps source 145x97 sprites at native size while neighboring centers are 111x75: '+JSON.stringify(result));
+   assert.ok(result.minimumH>=125&&result.minimumH<=131&&
+     result.minimumV>=83&&result.minimumV<=89,
+    '2004 source-photo-calibrated projection retains 145x97 source art and 128x86 pixel centers without excessive neighboring overlap: '+JSON.stringify(result));
    assert.ok(result.adjacent>10,'adjacent cells were checked');
    await page.screenshot({path:shot});
    await page.locator('#exit-game').click();
