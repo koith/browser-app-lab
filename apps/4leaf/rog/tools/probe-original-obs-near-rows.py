@@ -84,7 +84,9 @@ def main():
             candidates.append({"index":i,"file":filename,"size":[w,h],
                 "origin":[ox,oy],**diag})
             result["previewFrames"]+=1
-            if name in example_names and i==0:
+            if len(candidates)==1:
+                # One representative image per candidate, not all frames.
+                # Preview is nonproduction; byte checksum is stored in the ZIP.
                 print("OBS_NEAR_ROW_PREVIEW_BASE64 "+name+" "+base64.b64encode(out.read_bytes()).decode("ascii"))
         result["members"][name]={"candidates":candidates}
     (target/"probe-report.json").write_text(
