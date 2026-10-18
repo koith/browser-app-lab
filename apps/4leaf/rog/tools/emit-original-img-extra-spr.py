@@ -41,7 +41,10 @@ def emit(quarantine,destination):
             with Image.open(source) as im:
                 assert im.format=="PNG" and im.mode=="RGBA"
                 assert im.size==tuple(item["size"])
-                assert im.getchannel("A").getextrema()==(0,255)
+                alphaMin,alphaMax=im.getchannel("A").getextrema()
+                assert alphaMax==255 and 0<=alphaMin<=255
+                # Genuine source icons can be fully opaque; don't require
+                # a transparent background for every original SPR member.
             filename=f"{Path(name).stem}-{index:02d}.png"
             target=destination/filename
             target.parent.mkdir(parents=True,exist_ok=True)
