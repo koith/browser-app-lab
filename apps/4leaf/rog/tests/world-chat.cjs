@@ -989,7 +989,7 @@ const path=require('path');
  await third.close();
  await host.screenshot({path:'leaf-original-room0-two-person.png'});
  // Leaving a room for the shop must vacate it; returning restores presence.
- await host.locator('[data-route="shop"]').first().click();
+ await host.locator('#social-image-frame .social-original-tool[aria-label="매직카덴"]').click();
  await guest.waitForFunction(()=>document.querySelector('#social-online-count')?.textContent==='1명',null,{timeout:8000});
  assert.equal(await host.evaluate(()=>window.__LEAF_SOCIAL__.getState().scope),'away:shop','shop visitors no longer count as chat occupants');
  await host.locator('[data-route="rooms"]').first().click();
