@@ -1,5 +1,5 @@
 'use strict';
-const REVISION='4leaf-revival-pwa-v81';
+const REVISION='4leaf-revival-pwa-v82';
 // 32 genuinely archived 145×97 original TIS platform images. First offline
 // Genesis match must draw the same extracted raised platforms, not replace
 // uncached native source art with a CSS placeholder on first room entry.
@@ -23,6 +23,7 @@ const CORE=['./','./index.html','./pwa-runtime.js','./manifest.webmanifest','./i
   './original/SourceSPRExtra/winAbility-04.png',
   './original/SourceSPRExtra/winAbility-05.png',
   './original/SourceSPRExtra/winJail-00.png',
+  './original/SourceSPRExtra/winDoa-00.png',
   './original/SourceSPRExtra/winResult-00.png']);
 self.addEventListener('install',event=>{
  event.waitUntil(caches.open(REVISION).then(async cache=>{
