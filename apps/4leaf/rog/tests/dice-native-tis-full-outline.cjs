@@ -79,10 +79,10 @@ const {chromium}=require('playwright');
    return {images:shapes,tiles:tiles.length,
     syntheticOverlayCount:document.querySelectorAll('#board-nodes>.tile small, #board-nodes>.tile .tile-symbol').length,
     allSourceTilesUnobscured:tiles.every(t=>t.dataset.originalArt&&
-      t.getAttribute('aria-label')===t.title&&t.title.includes('칸 · ')&&
+      t.getAttribute('aria-label')?.includes('발판')&&t.title.includes('칸 · ')&&
       !t.querySelector('small,.tile-symbol')),
     failedLabels:tiles.filter(t=>!(t.dataset.originalArt&&
-      t.getAttribute('aria-label')===t.title&&t.title.includes('칸 · ')&&
+      t.getAttribute('aria-label')?.includes('발판')&&t.title.includes('칸 · ')&&
       !t.querySelector('small,.tile-symbol'))).slice(0,7).map(t=>({
        source:t.dataset.originalArt,title:t.title,aria:t.getAttribute('aria-label'),
        children:[...t.children].map(e=>e.className)
