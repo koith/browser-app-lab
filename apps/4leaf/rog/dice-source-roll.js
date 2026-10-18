@@ -10,12 +10,70 @@
 (function(){
  const $=id=>document.getElementById(id);
  let source=null,observer=null,nativeImage=null,sourceAnimation=null;
+ // Decode ALL original 2002 eventRoll1.spr PNG frames BEFORE the first
+ // animated roll. Without this, 55ms src swaps display missing/stale frames
+ // on slow/cold network loads, even when the engine result is correct.
+ const FRAME_COUNT=16,FRAME_HEIGHT=51;
  const SOURCE_BASE='./original/SourceSPR/eventRoll1-';
  const frameUrl=index=>SOURCE_BASE+String(index).padStart(2,'0')+'.png';
- const nativeReady=()=>!!source&&source.dataset.nativeRollSource==='ready';
+ const cachedFrames=new Array(FRAME_COUNT);
+ let preloadPromise=null,nativeFramesReady=false;
+ const nativeReady=()=>nativeFramesReady&&!!source&&source.dataset.nativeRollSource==='ready';
+ function loadFrame(index){
+  return new Promise((resolve,reject)=>{
+   const img=new Image();
+   img.onload=async()=>{
+    if(img.naturalHeight!==FRAME_HEIGHT||
+      img.naturalWidth<69||img.naturalWidth>91){
+     reject(new Error('Unexpected original eventRoll1.spr frame '+index+
+      ' '+img.naturalWidth+'x'+img.naturalHeight));return;
+    }
+    try{
+     // A loaded resource is not necessarily decoded for immediate painting.
+     // Browser support varies; once decoded, swaps hit the image cache.
+     if(typeof img.decode==='function')await img.decode();
+     resolve(img);
+    }catch(error){reject(error)}
+   };
+   img.onerror=()=>reject(new Error('Missing original eventRoll1.spr frame '+index));
+   img.src=frameUrl(index);
+  });
+ }
+ function preloadOriginalFrames(){
+  if(preloadPromise)return preloadPromise;
+  if(source){
+   source.dataset.nativeRollSource='loading';
+   source.dataset.nativeRollPreloaded='0';
+  }
+  preloadPromise=Promise.all(
+   Array.from({length:FRAME_COUNT},(_,index)=>loadFrame(index))
+  ).then(frames=>{
+   frames.forEach((img,index)=>{cachedFrames[index]=img});
+   nativeFramesReady=true;
+   if(!source?.isConnected)return false;
+   source.dataset.nativeRollSource='ready';
+   source.dataset.nativeRollPreloaded=String(frames.length);
+   source.dataset.originalSpriteMember='Dice/IMG.pak:eventRoll1.spr';
+   source.dataset.originalSpriteFrameCount=String(FRAME_COUNT);
+   return true;
+  }).catch(error=>{
+   // The real game always remains clickable. Do not claim recovered
+   // animation if one archived frame fails to load.
+   nativeFramesReady=false;
+   if(source?.isConnected){
+    source.dataset.nativeRollSource='fallback';
+    source.dataset.nativeRollPreloaded='0';
+    source.dataset.nativeRollError=String(error.message||error);
+   }
+   return false;
+  });
+  return preloadPromise;
+ }
  function showFrame(index){
   if(!nativeReady()||!nativeImage)return;
-  nativeImage.src=frameUrl(index);
+  const cached=cachedFrames[index];
+  if(!cached||!cached.complete||!cached.naturalWidth)return;
+  nativeImage.src=cached.src;
   source.dataset.sourceRollFrame=String(index);
  }
  function playOriginalRoll(){
@@ -28,7 +86,7 @@
   source.dataset.sourceRollAnimated='true';
   sourceAnimation=setInterval(()=>{
    frame++;
-   if(frame>=16){
+   if(frame>=FRAME_COUNT){
     clearInterval(sourceAnimation);
     sourceAnimation=null;
     showFrame(0);
@@ -45,22 +103,16 @@
   img.alt='';img.draggable=false;
   img.setAttribute('aria-hidden','true');
   img.decoding='async';
-  img.addEventListener('load',()=>{
-   if(!source?.isConnected)return;
-   if(img.naturalHeight!==51||img.naturalWidth<69||img.naturalWidth>91){
-    source.dataset.nativeRollSource='fallback';return;
-   }
-   source.dataset.nativeRollSource='ready';
-   source.dataset.originalSpriteMember='Dice/IMG.pak:eventRoll1.spr';
-   source.dataset.originalSpriteFrameCount='16';
-  });
   img.addEventListener('error',()=>{
-   // A failed asset never hides the interactive legacy fallback.
+   // Keep gameplay and inferred CSS accessible if the presentation element
+   // fails independently of the decoded 16-frame source cache.
+   nativeFramesReady=false;
    if(source?.isConnected)source.dataset.nativeRollSource='fallback';
   });
   nativeImage=img;
   source.append(img);
   img.src=frameUrl(0);
+  preloadOriginalFrames();
  }
  function sync(){
   const roll=$('roll-btn'),game=$('game');
@@ -119,7 +171,9 @@
   getState:()=>({mounted:!!source,isReady:!!source&&!source.disabled,
    rollCount:Number(source?.dataset.rollCount)||0,
    originalSource:nativeReady()?'Dice/IMG.pak:eventRoll1.spr':null,
-   nativeFrameCount:nativeReady()?16:0,
+   nativeFrameCount:nativeReady()?FRAME_COUNT:0,
+   preloadedFrameCount:nativeReady()?cachedFrames.filter(Boolean).length:0,
+   loadState:source?.dataset.nativeRollSource||'unmounted',
    displayedFrame:Number(source?.dataset.sourceRollFrame)||0,
    nativeTriggerCount:Number(source?.dataset.sourceRollTriggerCount)||0,
    evidence:nativeReady()?'original-2002-IMG-SPR/palette-frames':

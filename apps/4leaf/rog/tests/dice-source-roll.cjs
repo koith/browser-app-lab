@@ -43,6 +43,9 @@ const {chromium,webkit}=require('playwright');
   }));
   assert.equal(originalRollSprite.state.originalSource,'Dice/IMG.pak:eventRoll1.spr');
   assert.equal(originalRollSprite.state.nativeFrameCount,16);
+  assert.equal(originalRollSprite.state.preloadedFrameCount,16,
+   'all 16 genuine 2002 roll frames must be decoded before declaring native animation ready');
+  assert.equal(originalRollSprite.state.loadState,'ready');
   assert.ok(originalRollSprite.source.endsWith('/SourceSPR/eventRoll1-00.png'));
   assert.deepEqual(originalRollSprite.natural,[69,51]);
   assert.notEqual(originalRollSprite.shown,'none');
@@ -84,6 +87,15 @@ const {chromium,webkit}=require('playwright');
     'mobile preserves a reachable physical ROLL control');
   }
   await page.screenshot({path:'leaf-source-roll-'+engine+(mobile?'-mobile':'-desktop')+'-before.png'});
+  await page.evaluate(()=>{
+   window.__observedNativeRollFrames=[];
+   const image=document.querySelector('#dice-source-roll .dice-original-roll-spr');
+   const obs=new MutationObserver(()=>{
+    window.__observedNativeRollFrames.push(image.getAttribute('src'));
+   });
+   obs.observe(image,{attributes:true,attributeFilter:['src']});
+   window.__originalRollObserver=obs;
+  });
   if(mobile)await page.touchscreen.tap(...before.click);
   else await source.click();
   await page.waitForFunction(()=>Number(document.querySelector('#dice-box')?.dataset.rollCount)>0,
@@ -95,6 +107,15 @@ const {chromium,webkit}=require('playwright');
   }));
   assert.equal(afterRoll.nativeTriggers,1,
    'clicking the original source ROLL control must animate genuine eventRoll1.spr exactly once');
+  const animatedSources=await page.evaluate(()=>{
+   window.__originalRollObserver.disconnect();
+   return [...new Set(window.__observedNativeRollFrames)].map(url=>{
+    const part=url?.match(/eventRoll1-(\d{2})\.png/);
+    return part?Number(part[1]):-1;
+   }).filter(n=>n>=0);
+  });
+  assert.deepEqual(animatedSources,Array.from({length:16},(_,i)=>i),
+   'a cold first roll must visibly progress through ALL 16 original decoded IMG.pak frames in order');
   assert.equal(afterRoll.count,1,'one click invokes exactly ONE genuine movement dice roll');
   assert.ok(afterRoll.match.lastRoll.length>=1&&
    afterRoll.match.lastRoll.every(eye=>eye>=1&&eye<=6),
