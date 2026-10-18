@@ -29,6 +29,8 @@ on:
       - 'apps/4leaf/rog/dice-native-source-events.js'
       - 'apps/4leaf/rog/dice-native-source-events.css'
       - 'apps/4leaf/rog/tests/dice-native-original-source-events.cjs'
+      - 'apps/4leaf/rog/tests/native-offline-cache.cjs'
+      - 'apps/4leaf/rog/sw.js'
       - 'apps/4leaf/rog/tests/dice-original-obs-chessmen.cjs'
       - 'apps/4leaf/rog/dice-native-battle-source-spr.css'
       - 'apps/4leaf/rog/original/SourceSPRExtra/**'
@@ -71,6 +73,8 @@ jobs:
         run: node apps/4leaf/rog/tests/dice-native-battle-source-fallback.cjs
       - name: Verify genuine original winJail/winAbility sprites on actual jail and 100% ability DMP effects
         run: node apps/4leaf/rog/tests/dice-native-original-source-events.cjs
+      - name: Cold offline PWA install must preload all original IMG winAbility and winJail sprites
+        run: node apps/4leaf/rog/tests/native-offline-cache.cjs
       - name: Verify changing real native OBS frame dimensions, not fixed frame-zero labels
         run: node apps/4leaf/rog/tests/dice-original-obs-chessmen.cjs
       - run: node apps/4leaf/rog/tests/board-layout.cjs
