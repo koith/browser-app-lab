@@ -76,8 +76,10 @@
    pawn.dataset.actorSource='OBS/'+native.originalMember;
    pawn.dataset.actorOriginalModelRecovered='true';
    pawn.dataset.sourceAnimation='genuine-OBS-pixels';
-   pawn.dataset.sourcePoseMapping=native.hasVerifiedFrameZero===false
-     ?'unverified-frame-zero-missing/static-source-pose':'unverified';
+   pawn.dataset.sourcePoseMapping=native.frames.length===1||native.singleFrameStillOnly===true
+     ?'unverified-single-source-frame/static-no-animation'
+     :native.hasVerifiedFrameZero===false
+      ?'unverified-frame-zero-missing/static-source-pose':'unverified';
    img.hidden=false;
    const seq=sequenceFor(native,action);
    renderNativeFrame(pawn,seq[0]);
