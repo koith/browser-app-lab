@@ -13,7 +13,8 @@
  ];
  const definitions={
   jail:{source:'winJail.spr',name:'winJail',width:136,height:219,frames:1},
-  ability:{source:'winAbility.spr',name:'winAbility',width:330,height:284,frames:6}
+  ability:{source:'winAbility.spr',name:'winAbility',width:330,height:284,frames:6},
+  doa:{source:'winDoa.spr',name:'winDoa',width:363,height:133,frames:1}
  };
  let last=null,deadline=0;
  function show(kind,playerName=''){
@@ -31,7 +32,7 @@
   wrap.dataset.sourceLayout='inferred-signed-SPR-origin/browser-not-3D';
   wrap.dataset.playerName=String(playerName);
   wrap.setAttribute('role','img');
-  wrap.setAttribute('aria-label',(kind==='jail'?'감옥':'어빌리티')+
+  wrap.setAttribute('aria-label',(kind==='jail'?'감옥':kind==='doa'?'데드 오어 얼라이브':'어빌리티')+
    ' · '+String(playerName)+' · 원본 2002년 SPR 스프라이트');
   const primary=document.createElement('img');
   primary.className='leaf-source-event-primary';
