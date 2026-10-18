@@ -26,6 +26,7 @@ const {chromium}=require('playwright');
    'world-perspective.css','original-tiles.css','board-camera.js','dice-original-obs.css',
    'dice-native-source-events.js','dice-native-source-events.css',
    'original/SourceSPRExtra/winJail-00.png',
+   'original/SourceSPRExtra/winDoa-00.png',
    ...Array.from({length:6},(_,i)=>'original/SourceSPRExtra/winAbility-'+String(i).padStart(2,'0')+'.png'),
    'dice-source-dmp-terrain-explorer.js','dice-source-dmp-terrain-explorer.css','dice-native-battle-dice.css','dice-2004-full-frame.css','dice-source-roll.css','dice-source-roll.js','dice-fall.js','dice-fall.css','genesis-chessman-actors.css','genesis-chessman-actors.js','dice-native-minimap-navigation.css','dice-native-tis-depth.css','dice-native-tis-orientation.css','dice-ai-autoplay.css','dice-native-pawn-dmp-depth.css','dice-native-tis-alpha.js',...['0000','0015','0024','0046'].map(x=>'original/Tiles/'+x+'.png'),
    'mainframe-native-toolbar.css','original/MainFrame/toolbarbtn.png','original/MainFrame/pannel.png',
