@@ -116,7 +116,12 @@
   align-items:flex-start!important;
   gap:0!important;
   position:absolute!important;
-  z-index:105!important;
+  /* Tool icons must be independently clickable even when a real player
+   * stands in front of the same historical room coordinates. Only the
+   * 30px image BUTTONS take input; the 32x217 transparent column does not
+   * steal actor clicks between source icons. */
+  z-index:109!important;
+  pointer-events:none!important;
   top:311px!important;left:608px!important;
   width:32px!important;
   height:217px!important;
@@ -130,6 +135,7 @@
   width:30px!important;height:30px!important;
   min-width:30px!important;min-height:30px!important;
   flex:0 0 30px!important;
+  pointer-events:auto!important;
   border:0!important;box-shadow:none!important;
  }
  #rooms.classic-chat-room #social-image-frame>.social-classic-toolbar
@@ -138,6 +144,7 @@
   width:30px!important;height:30px!important;
   min-width:30px!important;min-height:30px!important;
   flex:0 0 30px!important;margin:0!important;
+  pointer-events:auto!important;
  }
  #rooms.classic-chat-room #social-image-frame>.social-classic-toolbar
  .social-peers-toggle{display:none!important;}
