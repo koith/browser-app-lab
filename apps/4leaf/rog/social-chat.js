@@ -489,6 +489,22 @@
  // invented English USER LIST label.
  function renderNativeUserListHeader(){
   const canvas=$('social-original-userlist');if(!canvas)return;
+  // The genuine ChatRoom/userlist header includes a small menu glyph in its
+  // right-hand edge. Attach the web-only invite workflow TO THAT EXISTING
+  // SOURCE HIT AREA rather than adding a fabricated navigation bar/button
+  // over the 2004 room art. Remote users retain the directory invite entry.
+  canvas.tabIndex=0;
+  canvas.setAttribute('role','button');
+  canvas.setAttribute('aria-label','원본 참가자 목록 메뉴 · 다른 기기 연결');
+  canvas.title='오른쪽 메뉴 아이콘: 다른 기기 연결';
+  canvas.addEventListener('click',event=>{
+   const r=canvas.getBoundingClientRect();
+   if(r.width>0&&(event.clientX-r.left)/r.width>.78)openInvite();
+  });
+  canvas.addEventListener('keydown',event=>{
+   if(event.key!=='Enter'&&event.key!==' ')return;
+   event.preventDefault();openInvite();
+  });
   // Browsers taint file:// image canvases even when the art is next to the
   // HTML file. Keep a readable text header in the offline archive rather than
   // throwing SecurityError; public HTTP(S) uses the exact chroma-keyed sprite.
