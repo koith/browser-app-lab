@@ -51,6 +51,24 @@
         "P0-DICE",
         "P0-RELEASE"
       ]
+    },
+    {
+      "id": "REQ-20261018-003",
+      "date": "2026-10-18",
+      "origin": "2026-10-18 user instruction",
+      "text": "원작복원 계속해라",
+      "taskIds": [
+        "M04",
+        "M05",
+        "M06",
+        "M07",
+        "P0-BOARD",
+        "P0-ACTOR",
+        "P0-PODIUM",
+        "P0-DICE",
+        "P0-CHAT",
+        "P0-RELEASE"
+      ]
     }
   ],
   "tasks": [
@@ -133,7 +151,8 @@
         "전체 경로 모든 육각 플랫폼의 방향·윗면 노출·비정상 겹침·깊이를 board.jpg와 동일 상태에서 정량 비교"
       ],
       "evidence": [
-        "apps/4leaf/rog/board-camera.js"
+        "apps/4leaf/rog/board-camera.js",
+        "apps/4leaf/rog/tests/dice-native-tis-full-outline.cjs"
       ],
       "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
       "lastReviewed": "2026-10-18",
@@ -230,7 +249,7 @@
       "title": "타일 상하·겹침·입체감 사용자 재현 결함",
       "status": "in_progress",
       "milestone": "M04",
-      "current": "반전 패치와 128x86 웹 투영만으로 최종 해결 아님; 원본 DMP 26개 맵 1,920개 XY 좌표 검사로 동일 맵 좌표 중복 0건, 현재 웹 투영의 사각영역 최대 중첩 약 11.7%로 계산. 실제 픽셀/알파/메시 가림은 미검증.",
+      "current": "반전 패치와 128x86 웹 투영만으로 최종 해결 아님; 원본 DMP 26개 맵 1,920개 XY 좌표 검사로 동일 맵 좌표 중복 0건, 현재 웹 투영의 사각영역 최대 중첩 약 11.7%로 계산. 실제 픽셀/알파/메시 가림은 미검증.; 이번 수정에서 타일별 원본 이미지의 불투명 픽셀을 잘라내던 4px 중간점 클리핑을 전체 원본 알파 포함 외곽선으로 교정하고, 웹에서 추가한 임의 칸 번호·문자 그래픽을 원본 TIS 위에서 제거. 브라우저 QA 대기.",
       "acceptance": [
         "전체 맵 동선에서 과도한 중첩/상하 역전 0건; 알파/행 순서·타일 접근성·스크린샷 비교 기록"
       ],
@@ -238,7 +257,10 @@
         "apps/4leaf/rog/dice-native-tis-orientation.css",
         "apps/4leaf/rog/tests/dmp-tile-overlap-audit.cjs",
         ".github/workflows/rog-board-layout.yml",
-        "https://github.com/koith/browser-app-lab/actions/runs/39119052163"
+        "https://github.com/koith/browser-app-lab/actions/runs/39119052163",
+        "apps/4leaf/rog/tests/dice-native-tis-full-outline.cjs",
+        "apps/4leaf/rog/dice-native-tis-alpha.js",
+        "apps/4leaf/rog/game.js"
       ],
       "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
       "lastReviewed": "2026-10-18",
@@ -478,6 +500,33 @@
       "taskId": "P0-DICE",
       "details": "ROLL 처음 실행 16프레임 로드/순서 성공; D4 1~4 결과별 3D 정사면체 착지 법선 및 D6 기존 턴 결과 회귀 통과",
       "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39120197085"
+    },
+    {
+      "seq": 12,
+      "date": "2026-10-18",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261018-003",
+      "taskIds": [
+        "M04",
+        "M05",
+        "M06",
+        "M07",
+        "P0-BOARD",
+        "P0-ACTOR",
+        "P0-PODIUM",
+        "P0-DICE",
+        "P0-CHAT",
+        "P0-RELEASE"
+      ],
+      "details": "원작복원 계속해라 요청 원문 보존, P0 보드 원본 이미지 알파·웹 UI 오염 수정 착수"
+    },
+    {
+      "seq": 13,
+      "date": "2026-10-18",
+      "type": "IMPLEMENTED_PENDING_QA",
+      "taskId": "P0-BOARD",
+      "details": "TIS 145x97 소스 알파 실루엣의 y+2 중간점 샘플링으로 발생하던 상단/하단 소스 픽셀 클리핑 수정, 0이 아닌 알파 모든 행을 3px 밴드 외곽선에 포함. 임의 1~104 칸 번호/문자 덧그림을 실제 source event art에서 제거. 단, 2002/2004 원본 3D 투영·입체 겹침 원상복구까지 완료한 것은 아님.",
+      "evidence": "apps/4leaf/rog/tests/dice-native-tis-full-outline.cjs"
     }
   ]
 }
