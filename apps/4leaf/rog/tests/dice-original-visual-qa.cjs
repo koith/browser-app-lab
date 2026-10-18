@@ -103,8 +103,12 @@ const {chromium}=require('playwright');
     sameTilePeers:Number(node.dataset.cellPeerCount)};
   }));
   if(sourceActors.some(a=>{
-   const m=new DOMMatrixReadOnly(a.flip);
-   return m.a*m.d-m.b*m.c>=0;
+   // This assertion runs in Node, not the browser page; parse CSS matrix
+   // numeric values without relying on a browser-only DOMMatrix global.
+   const match=/^matrix\\(([^)]+)\\)$/.exec(a.flip);
+   if(!match)return true;
+   const values=match[1].split(',').map(Number);
+   return values.length!==6||values[0]*values[3]-values[1]*values[2]>=0;
   }))throw Error('Original OBS indexed source is drawn upside down: '+
    JSON.stringify(sourceActors));
   if(sourceActors.length!==2||
