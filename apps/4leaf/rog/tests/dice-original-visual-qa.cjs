@@ -71,7 +71,10 @@ const {chromium}=require('playwright');
    throw Error('Upside-down source TIS or wrongly scaled source tile: '+
      JSON.stringify(nativeOrientation));
   console.log('SOURCE_TIS_UPRIGHT_ORIENTATION '+JSON.stringify(nativeOrientation));
-  if(audit.visibleTileCount<13 || audit.visibleTileCount>48)
+  // Current source-photo 128x86 projection exposes ~12 legible raised
+  // hexes in the real 800x600 window; the older 111x75 packed ~20 layers
+  // and hid native top faces. Reject empty or again overpacked scenes.
+  if(audit.visibleTileCount<8 || audit.visibleTileCount>24)
    throw Error('2004 native screenshot camera has wrong card density: '+
     JSON.stringify({visible:audit.visibleTileCount,pitch:audit.projection}));
   if(audit.nativeTileSize.some(([w,h])=>w!==145||h!==97))
