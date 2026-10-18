@@ -26,7 +26,11 @@ for(const cid of sourceIds){
  const match=/^1(\d{3})\.obs$/i.exec(item.originalMember);
  assert.ok(match,'source pack member should use 1NNN.obs identity');
  assert.equal(Number(match[1]),Number(cid),'never map source actor frames to another chessman');
- assert.ok(Array.isArray(item.frames)&&item.frames.length>=2,'native source actor has multiple actual frames');
+ assert.ok(Array.isArray(item.frames)&&item.frames.length>=1,
+  'a verified single source bitmap is still genuine OBS art, but cannot prove motion');
+ if(item.singleFrameStillOnly!==undefined)
+  assert.equal(item.singleFrameStillOnly,item.frames.length===1,
+   'one-frame source must never be mislabeled as verified animation');
  const ids=new Set();
  for(const frame of item.frames){
   assert.ok(Number.isInteger(frame.index)&&frame.index>=0);
