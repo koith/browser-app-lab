@@ -574,9 +574,20 @@ const path=require('path');
   'permanent-room selector must expose recovered native ChatTown landscape');
  assert.equal(nativeDirectory.projectedMap,false,
   'unknown historical estate coordinates must NOT replace the source art by default');
- assert.ok(nativeDirectory.panel[2]<=350&&nativeDirectory.panel[3]<=330&&
+ // DOM rectangles are POST scene scaling (404px source is often enlarged
+ // to ~455px by the browser). Compare the source-normalized dimensions:
+ // otherwise an authentic native 328x289 overlay falsely fails at 370x326.
+ const nativePanelWidth=nativeDirectory.panel[2]*
+  (794/nativeDirectory.frame[0]);
+ const nativePanelHeight=nativeDirectory.panel[3]*
+  (404/nativeDirectory.frame[1]);
+ console.log('SOURCE_NATIVE_DIRECTORY_PANEL '+JSON.stringify({
+  nativePanelWidth,nativePanelHeight,
+  sourceVisible:nativeDirectory.visibleSourceRatio,
+  projectedPanel:nativeDirectory.panel,projectedFrame:nativeDirectory.frame}));
+ assert.ok(nativePanelWidth<=350&&nativePanelHeight<=330&&
   nativeDirectory.visibleSourceRatio>.7,
-  'original town background must occupy most of its native frame');
+  'source-sized room list must leave most original ChatTown background visible');
  assert.ok(nativeDirectory.list.every(r=>r[2]>180&&r[3]>=34),
   'eight actual room links are readable full-width instead of tiny scattered gray cards');
  assert.equal(await host.locator('#social-web-estate-toggle').getAttribute('aria-pressed'),'false');
