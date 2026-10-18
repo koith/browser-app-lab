@@ -56,7 +56,7 @@ const ITEMS=[
 {id:'shoe',name:'여신의 신발',icon:'♘',hint:'3턴 이동 주사위 1개 추가',sourceId:'0040'}
 ];
 const ITEM_MAP=Object.fromEntries(ITEMS.map(i=>[i.id,i]));
-const SOURCE_ROUTES=window.ORIGINAL_LEAF_MAPS||{},SOURCE_INFO=window.ORIGINAL_LEAF_MAP_INFO||{},SOURCE_TILES=window.ORIGINAL_LEAF_TILES||{};
+const SOURCE_ROUTES=window.ORIGINAL_LEAF_MAPS||{},SOURCE_INFO={...(window.ORIGINAL_LEAF_MAP_INFO||{})},SOURCE_TILES=window.ORIGINAL_LEAF_TILES||{};
 // The verified DMP archive has 26 routes but the published client-name
 // lookup contains only 25 entries. Source 0170 is a REAL 135-cell DMP,
 // not a generated route: retain it as selectable/playable with a deliberately
