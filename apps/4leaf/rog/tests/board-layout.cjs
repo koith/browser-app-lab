@@ -25,28 +25,37 @@ const assert=require('node:assert/strict');
      dmp:[Number(e.dataset.dmpX),Number(e.dataset.dmpY),Number(e.dataset.dmpCellCode)],
      depth:Number(e.style.zIndex)
     }});
-    const pts=tiles.map(e=>({x:parseFloat(e.style.left),y:parseFloat(e.style.top)}));
+    const pts=tiles.map(e=>({x:parseFloat(e.style.left),y:parseFloat(e.style.top),
+     dmpX:Number(e.dataset.dmpX),dmpY:Number(e.dataset.dmpY)}));
     const world=document.querySelector('#board-world');const width=world.clientWidth,height=world.clientHeight;
-    let bad=0,adjacent=0;
+    const camera=window.__LEAF_CAMERA__.getState();
+    let bad=0,adjacent=0,minimumH=Infinity,minimumV=Infinity;
     for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){
-     const dx=Math.abs(pts[i].x-pts[j].x)*width/100,dy=Math.abs(pts[i].y-pts[j].y)*height/100;
-     if(dx<.01&&dy<.01)continue;
-     if(dx<70.01&&dy<47.01){adjacent++;if(dx<69.5&&dy<46.5)bad++}
+     const a=pts[i],b=pts[j];
+     const dx=Math.abs(a.x-b.x)*width/100,dy=Math.abs(a.y-b.y)*height/100;
+     const horizontal=a.dmpY===b.dmpY&&Math.abs(a.dmpX-b.dmpX)===1;
+     const vertical=a.dmpX===b.dmpX&&Math.abs(a.dmpY-b.dmpY)===1;
+     if(horizontal||vertical){
+      adjacent++;
+      if(horizontal){minimumH=Math.min(minimumH,dx);if(Math.abs(dx-camera.projectedPitch.x)>1)bad++}
+      if(vertical){minimumV=Math.min(minimumV,dy);if(Math.abs(dy-camera.projectedPitch.y)>1)bad++}
+     }
     }
-    return {count:tiles.length,sizes,adjacent,bad};
+    return {count:tiles.length,sizes,adjacent,bad,minimumH,minimumV,
+     sourceGrid:camera.sourceGrid,projectedPitch:camera.projectedPitch};
    });
    assert.ok(result.count>40,'original map contains game tiles');
-   // Native TIS bitmap footprint is VERIFIED 145x97. The DMP center-to-
-   // center pitch remains 70x47, so adjacent raised source platforms DO
-   // overlap visually; the source grid positions must not collapse.
+   // Source DMP 70x47 is LOGICAL grid metadata, not a mandate to pack
+   // full 145x97 sprite billboards every 70x47 physical screen pixels.
+   // Live WEB projection avoids 50%-buried tiles while preserving native
+   // source filenames, coordinates, artwork dimensions and game routes.
    assert.ok(result.sizes.every(t=>Math.abs(t.w-145)<.1&&Math.abs(t.h-97)<.1&&t.native==='145x97'),
     'all original TIS raised platforms retain true 145x97 source pixels');
-   // Side-by-side measured 2004 board.jpg vs genuine source PNG verifies
-   // the TIS platform's TOP is already above its lower skirt. Old scaleY(-1)
-   // inverted the art and created an incorrect pile of platforms.
-   assert.ok(result.sizes.every(t=>t.transform==='matrix(1, 0, 0, 1, -72.5, -48.5)'||
-      (t.transform.startsWith('matrix(1, 0, 0, 1,')&&t.transform.includes('-72.5'))),
-    'every original 145x97 platform is upright without a false vertical flip');
+   // The archived extractor already applied FLIP_TOP_BOTTOM to
+   // the source TIS rows. The live scene corrects that preview inversion
+   // while retaining authentic source PNG bytes and hit polygons.
+   assert.ok(result.sizes.every(t=>t.transform.startsWith('matrix(1, 0, 0, -1,')),
+    'all 145x97 original TIS previews render source lettering upright');
    assert.ok(result.sizes.every(t=>t.clip.startsWith('polygon(')),
     'inferred hit polygon restricts clicking transparent overlapping source corners');
    assert.ok(result.sizes.every(t=>t.dmp.every(Number.isFinite)&&Number.isFinite(t.depth)),
@@ -56,7 +65,10 @@ const assert=require('node:assert/strict');
     (t.removed===0?t.preserved==='true'&&t.background.includes('/original/Tiles/'+t.source+'.png'):
      t.background.includes('data:image/png'))),
     'all tiles show their independently decoded recovered TIS PNG, not a fake or an unkeyed source');
-   assert.equal(result.bad,0,'DMP grid centers retain native 70x47 spacing even though painted 145x97 sprites overlap');
+   assert.deepEqual(result.sourceGrid,{width:1450,height:1120,pitchX:70,pitchY:47});
+   assert.equal(result.bad,0,'every source DMP neighboring position uses projected sprite pitch');
+   assert.ok(result.minimumH>140&&result.minimumV>95,
+    '145x97 native tiles no longer visually bury adjacent path nodes: '+JSON.stringify(result));
    assert.ok(result.adjacent>10,'adjacent cells were checked');
    await page.screenshot({path:shot});
    await page.locator('#exit-game').click();
