@@ -119,6 +119,22 @@
  }
  #rooms.classic-chat-room #social-image-frame>.social-classic-toolbar
  .social-peers-toggle{display:none!important;}
+ /* Server-authoritative owner control survives the source-only frame.
+    Original room-owner dialog sprites remain the same; this extra web
+    close action exists only for genuinely owned non-permanent rooms. */
+ #rooms.classic-chat-room #social-image-frame>#social-close-room{
+  position:absolute!important;
+  display:block!important;
+  left:645px!important;top:501px!important;right:auto!important;bottom:auto!important;
+  z-index:120!important;
+  width:77px!important;height:25px!important;
+  margin:0!important;padding:0!important;
+  border:1px solid #98abdb!important;border-radius:2px!important;
+  color:#f4eeff!important;
+  background:#374b8c!important;
+  font:11px/1 Gulim,'굴림',sans-serif!important;
+  cursor:pointer!important;
+ }
  /* Historical screenshots show 1:1 407x112 chat and 158x128 participant
     window. Existing source-native ChatRoom atlas CSS applies inside them. */
  #rooms.classic-chat-room .messenger[data-native-overlay="true"]{
