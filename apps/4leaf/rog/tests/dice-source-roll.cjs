@@ -110,7 +110,7 @@ const {chromium,webkit}=require('playwright');
   const animatedSources=await page.evaluate(()=>{
    window.__originalRollObserver.disconnect();
    return [...new Set(window.__observedNativeRollFrames)].map(url=>{
-    const part=url?.match(/eventRoll1-(\\d{2})\\.png/);
+    const part=url?.match(/eventRoll1-(\d{2})\.png/);
     return part?Number(part[1]):-1;
    }).filter(n=>n>=0);
   });
