@@ -1,0 +1,84 @@
+/* 4LEAF 2004 original battle reference: board.jpg / battle.jpg.
+ * The real original IMG.pak winBattle.spr 355x113 stage and 222x42 heading
+ * are independent live graphics. The old WEB dice event/prompt obscured the
+ * BATTLE heading and original 2-sided metal platforms, while modern
+ * result buttons rendered across the native VS image.
+ *
+ * Never overlay the two authentic source podiums with the WEB HUD:
+ * only during actual battle (not the ordinary turn, shops or other dialogs).
+ * The genuine winBattle platform, scores, original OBS sprites and results
+ * remain normal DOM game entities, not static screenshot compositions.
+ */
+#app.app-classic-dice #game:has(#battle-visual) #dice-native-event,
+#app.app-classic-dice #game:has(#battle-visual) .game-controls,
+#app.app-classic-dice #game:has(#battle-visual) .control-center,
+#app.app-classic-dice #game:has(#battle-visual) .roll-controls,
+#app.app-classic-dice #game:has(#battle-visual) #dice-box{
+ visibility:hidden!important;
+ pointer-events:none!important;
+}
+/* Genuine 2002 roll.spr remains visually part of 2004 chrome below the
+ * native duel but cannot trigger a second roll while a combat modal opens.
+ * Existing engine busy flag and authoritative roll button stay unmodified.
+ */
+#app.app-classic-dice #game:has(#battle-visual) #dice-source-roll{
+ pointer-events:none!important;
+}
+#app.app-classic-dice #modal.battle-present .modal-window{
+ visibility:hidden!important;
+ pointer-events:none!important;
+}
+/* Relocate the SAME real result controls outside the modal overlay.
+ * Buttons retain their game.js click handlers, item selection, and WebRTC
+ * remote battle options. No duplicate controls or synthetic battle result.
+ */
+#app.app-classic-dice #game #board-area>.leaf-native-battle-actions{
+ box-sizing:border-box!important;
+ position:absolute!important;
+ bottom:4px!important;left:50%!important;
+ z-index:65!important;
+ transform:translateX(-50%)!important;
+ max-width:min(92%,420px)!important;
+ display:flex!important;
+ justify-content:center!important;align-items:center!important;
+ padding:2px 7px!important;
+ background:#25395dc9!important;
+ border:1px solid #7389a9!important;
+ box-shadow:0 2px 4px #0b192b99!important;
+ border-radius:2px!important;
+ pointer-events:auto!important;
+}
+#app.app-classic-dice #game #board-area>.leaf-native-battle-actions #modal-buttons{
+ display:flex!important;position:relative!important;
+ flex-wrap:wrap!important;gap:5px!important;
+ margin:0!important;padding:0!important;
+ align-items:center!important;justify-content:center!important;
+ max-width:100%!important;
+}
+#app.app-classic-dice #game #board-area>.leaf-native-battle-actions #modal-buttons button{
+ min-height:23px!important;min-width:64px!important;
+ padding:3px 8px!important;
+ font:700 11px/15px Gulim,'굴림',sans-serif!important;
+ white-space:nowrap!important;
+ color:#fff4d3!important;
+ background:linear-gradient(#607bb8,#344b8a)!important;
+ border:1px solid #afbedf!important;
+ box-shadow:inset 0 1px #a6b8d488!important;
+ border-radius:1px!important;
+ pointer-events:auto!important;
+ cursor:pointer!important;
+}
+#app.app-classic-dice #game #board-area>.leaf-native-battle-actions #modal-buttons button:is(:focus-visible,:hover){
+ outline:1px solid #fff2ad!important;outline-offset:1px!important;
+}
+@media(max-width:650px){
+ #app.app-classic-dice #game #board-area>.leaf-native-battle-actions{
+  padding:2px 4px!important;
+  bottom:2px!important;
+  max-width:94%!important;
+ }
+ #app.app-classic-dice #game #board-area>.leaf-native-battle-actions #modal-buttons button{
+  font-size:10px!important;min-width:55px!important;
+  min-height:22px!important;padding:2px 5px!important;
+ }
+}
