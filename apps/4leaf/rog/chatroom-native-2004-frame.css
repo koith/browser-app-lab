@@ -94,7 +94,12 @@
     actor layer non-intercepting outside actual sprites; nested foreground
     furniture keeps its preexisting per-seat painter depth. */
  #rooms.classic-chat-room #social-image-frame>.social-avatar-layer{
-  z-index:106!important;
+  /* Real participant bodies must outrank 30px source toolbar hitboxes.
+   * Previously z=106 sat BEHIND the toolbar z=109, so a legitimate
+   * occupied seat crossing its icon column could never receive input.
+   * The non-interactive transparent avatar-layer still delegates only
+   * actual 58x94 participant torso buttons to pointer events. */
+  z-index:112!important;
   pointer-events:none!important;
  }
  #rooms.classic-chat-room #social-image-frame>.social-avatar-layer .social-avatar,
@@ -110,7 +115,7 @@
   * The earlier chatroom-native-ringbtn.css :has() selector loses the
   * specificity contest against #social-image-frame above, allowing the
   * Magic Carden button to steal actual peer-menu clicks. Raise only
-  * while a REAL peer menu exists, then automatically restore z=106.
+  * while a REAL peer menu exists, then automatically restore z=112.
   */
  #rooms.classic-chat-room #social-image-frame>.social-avatar-layer:has(#social-actor-menu){
   z-index:150!important;
@@ -123,7 +128,8 @@
  /* When an icon is keyboard-focused, keep it accessible independently of
     which occupied seat overlaps its hit rectangle. */
  #rooms.classic-chat-room #social-image-frame>.social-classic-toolbar:focus-within{
-  z-index:111!important;
+  /* Keyboard focus stays accessible independently of seated participants. */
+  z-index:160!important;
  }
  #rooms.classic-chat-room #social-image-frame>.social-classic-toolbar{
   display:flex!important;
