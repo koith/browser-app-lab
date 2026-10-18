@@ -51,6 +51,31 @@ const path=require('node:path');
    const left=camera.panBy(-100000,0),right=camera.panBy(100000,0);
    return {left:left.panX,right:right.panX,last:right};
   });
+  const routeLimits=await page.evaluate(()=>{
+   const camera=window.__LEAF_CAMERA__;
+   const bounds=camera.getState().routeBounds;
+   const world=document.querySelector('#board-world');
+   const screenWidth=document.querySelector('#board-area').clientWidth;
+   const translate=()=>{
+    const match=world.style.transform.match(/translate3d\((-?[0-9.]+)px/);
+    return match?Number(match[1]):null;
+   };
+   const left=camera.panBy(-100000,0),leftTranslate=translate();
+   const right=camera.panBy(100000,0),rightTranslate=translate();
+   return {bounds,screenWidth,leftTranslate,rightTranslate,
+    sourceWorld:camera.getState().size,left:left.panX,right:right.panX};
+  });
+  assert.ok(routeLimits.bounds&&routeLimits.bounds.minX>0&&
+   routeLimits.bounds.maxX<routeLimits.sourceWorld.width,
+   '4LEAF has a narrow DMP path inside the generic max-size source world');
+  assert.ok(Math.abs(routeLimits.leftTranslate-
+   (routeLimits.screenWidth-routeLimits.bounds.maxX))<1,
+   'left pan edge must reveal LAST real TIS, not empty world margin: '+JSON.stringify(routeLimits));
+  assert.ok(Math.abs(routeLimits.rightTranslate+
+   routeLimits.bounds.minX)<1,
+   'right pan edge must reveal FIRST real TIS, not empty world margin: '+JSON.stringify(routeLimits));
+  assert.ok(routeLimits.leftTranslate>routeLimits.screenWidth-routeLimits.sourceWorld.width+1000,
+   'camera no longer pans to the outer empty 6000px world border');
   const horizontalSpan=endpoints.right-endpoints.left;
   assert.ok(horizontalSpan>initial.area[0]*.6,
    'real pan covers more than a tiny zoom-only scroll (span '+horizontalSpan+')');
@@ -145,7 +170,7 @@ const path=require('node:path');
    'mobile board touch controls are not eaten by browser viewport scrolling');
   assert.deepEqual(errors,[],'all camera gestures preserve client exception safety');
   console.log('DMP FULL CAMERA PASS',JSON.stringify({
-   initial,horizontalSpan,dragged,keyboard,wheeled,pinch,reset,lowKeyboard,atlas,mobile
+   initial,horizontalSpan,routeLimits,dragged,keyboard,wheeled,pinch,reset,lowKeyboard,atlas,mobile
   }));
  }finally{await browser.close()}
 })().catch(e=>{console.error('DMP FULL CAMERA FAILED',e.stack||e);process.exit(1)});
