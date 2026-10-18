@@ -16,6 +16,8 @@ on:
 jobs:
   historical-client:
     runs-on: ubuntu-latest
+    env:
+      FOURLEAF_TEST_URL: http://127.0.0.1:8765/
     timeout-minutes: 9
     steps:
       - uses: actions/checkout@v4
