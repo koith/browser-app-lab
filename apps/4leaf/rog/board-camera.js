@@ -3,7 +3,15 @@
    The historical 3D client showed a zoomed slice of the map, not every card at once. */
 (function(){
  'use strict';
- const SIZE={width:1450,height:1120};
+ // DMP coordinates remain integer logical map cells, 70x47 source pitch.
+ // The old web camera incorrectly painted a FULL 145x97 TIS sprite every
+ // 70x47 visual pixels, causing 50% tile overlap and burial. Original MVE
+ // terrain transform is unrecovered; project cells to near native sprite
+ // pitch instead, while retaining exact DMP x/y, event types and route order.
+ const SOURCE_GRID={width:1450,height:1120,pitchX:70,pitchY:47};
+ const SIZE={width:3000,height:2320}; // WEB inferred projection, not original MVE 3D geometry
+ const PROJECTED_PITCH={x:70*SIZE.width/SOURCE_GRID.width,
+  y:47*SIZE.height/SOURCE_GRID.height};
  const state={game:null,path:null,scale:1,panX:0,panY:0,cameraX:null,cameraY:null,manual:false,lastTurn:null,visible:null};
  const $=id=>document.getElementById(id);
  const clamp=(n,low,high)=>Math.min(high,Math.max(low,n));
@@ -66,7 +74,7 @@
      const worldW=SIZE.width*scale,worldH=SIZE.height*scale;
      const anchorX=width*.49-state.cameraX*scale,
            anchorY=height*.52-state.cameraY*scale;
-     // Respect the dimensions of the ACTUAL 1450x1120 recovered-DMP world,
+     // Clamp to the source-grid-preserving, screen-projected DMP route;
      // not the old zoom-only limit of 1/8 of the viewport. Every source
      // cell must be accessible even at 65%-100% zoom.
      const x=worldW>=width?clamp(anchorX+state.panX,width-worldW,0):(width-worldW)/2,
@@ -100,7 +108,7 @@
      }
      window.__LEAF_MINIMAP_NAV__?.onCameraRender?.();
    },
-   getState(){return {...state,size:{...SIZE},visible:state.visible?{...state.visible}:null}}
+   getState(){return {...state,size:{...SIZE},sourceGrid:{...SOURCE_GRID},projectedPitch:{...PROJECTED_PITCH},visible:state.visible?{...state.visible}:null}}
  };
  window.__LEAF_CAMERA__=camera;
  if('ResizeObserver' in window){
