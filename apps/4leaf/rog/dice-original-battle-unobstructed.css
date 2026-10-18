@@ -10,6 +10,7 @@
  * remain normal DOM game entities, not static screenshot compositions.
  */
 #app.app-classic-dice #game:has(#battle-visual) #dice-native-event,
+#app.app-classic-dice #game:has(#battle-visual) .game-controls,
 #app.app-classic-dice #game:has(#battle-visual) .control-center,
 #app.app-classic-dice #game:has(#battle-visual) .roll-controls,
 #app.app-classic-dice #game:has(#battle-visual) #dice-box{
