@@ -26,6 +26,9 @@ on:
       - 'apps/4leaf/rog/tests/dice-native-frame.cjs'
       - 'apps/4leaf/rog/tests/dice-battle-podium.cjs'
       - 'apps/4leaf/rog/dice-native-battle-source-spr.css'
+      - 'apps/4leaf/rog/dice-original-ability-spr.js'
+      - 'apps/4leaf/rog/dice-original-ability-spr.css'
+      - 'apps/4leaf/rog/tests/dice-original-ability-spr.cjs'
       - 'apps/4leaf/rog/original/SourceSPRExtra/**'
       - '.github/workflows/rog-board-layout.yml'
   pull_request:
@@ -62,6 +65,8 @@ jobs:
         run: node apps/4leaf/rog/tests/dice-native-frame.cjs
       - name: Verify the actual 2002 IMG.pak 355x113 duel podium, live actors, dice and end of combat
         run: node apps/4leaf/rog/tests/dice-battle-podium.cjs
+      - name: Verify authentic winAbility 6-frame source art accompanies live charged CardData action only
+        run: node apps/4leaf/rog/tests/dice-original-ability-spr.cjs
       - run: node apps/4leaf/rog/tests/board-layout.cjs
       - name: "Reproduce iPhone screenshot: zero horizontal TIS overlap and 2 original Genesis OBS players"
         run: node apps/4leaf/rog/tests/dice-horizontal-native-actors.cjs
@@ -80,6 +85,7 @@ jobs:
           path: |
             leaf-board-*.png
             leaf-live-3d-battle-podiums-*.png
+            leaf-original-source-winAbility-live.png
             leaf-original-battle-stage-*.png
             rog-dmp-overlap-audit.json
           retention-days: 7
