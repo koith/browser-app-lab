@@ -37,12 +37,12 @@ const path=require('node:path');
    };
   });
   const initial=await snapshot();
-  assert.deepEqual(initial.world,[2650,2050],
+  assert.deepEqual(initial.world,[6000,3300],
    'WEB projection keeps full native TIS 145x97 pixels with only a narrow photo-calibrated raised-platform lip overlap');
   assert.ok(initial.sourceVisible>=9&&initial.sourceVisible<=25,
    '2004 board shows a close playable slice of independent raised TIS tiles, not dense overlapping stacks or a vacant zoomed field: '+initial.sourceVisible);
   const sourced=await page.evaluate(()=>window.__LEAF_CAMERA__.getState().sourceGrid);
-  assert.deepEqual(sourced,{width:1450,height:1120,pitchX:70,pitchY:47},
+  assert.deepEqual(sourced,{width:2800,height:1551,pitchX:70,pitchY:47},
    'source DMP coordinates and original logical pitch never change');
   assert.ok(initial.tiles>30&&initial.sourceVisible>2,'original independent TIS cells render visibly');
   assert.equal(initial.scale,1,'initial 100% camera renders original TIS 145x97 at source pixels');

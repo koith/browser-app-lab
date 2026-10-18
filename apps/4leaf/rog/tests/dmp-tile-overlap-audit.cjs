@@ -33,6 +33,15 @@ for(const [id,cells] of Object.entries(maps)){
  assert.ok(Array.isArray(cells)&&cells.length>8,'invalid DMP map: '+id);
  const seen=new Map();
  let duplicate=0,severe=0,maxBoundingOverlap=0,adjacent=0;
+ // Source map x/y extents must stay inside the *actual* camera world
+ // even for the 37-column / 29-row outliers, including half a 145x97
+ // source sprite at the outermost centre.
+ const xRange=cells.map(c=>c[0]),yRange=cells.map(c=>c[1]);
+ const projectedW=(Math.max(...xRange)-Math.min(...xRange))*stepX+tileW;
+ const projectedH=(Math.max(...yRange)-Math.min(...yRange))*stepY+tileH;
+ assert.ok(projectedW<=size.width&&projectedH<=size.height,
+  'Native source sprite cropped at world edge '+id+
+  ' '+JSON.stringify({projectedW,projectedH,size}));
  for(let i=0;i<cells.length;i++){
   const a=cells[i];
   assert.ok(Array.isArray(a)&&a.length>=3&&a.slice(0,3).every(Number.isInteger),
@@ -59,6 +68,11 @@ assert.equal(results.reduce((n,x)=>n+x.tiles,0),1920,'original source path count
 assert.ok(results.every(x=>x.duplicate===0),'DMP cell duplicate means fully stacked boards');
 assert.ok(results.every(x=>x.severeBoundingCollisions===0),
  'WEB renderer now puts unrelated source TIS platforms on top of each other');
+assert.ok(results.every(x=>x.maxRectangularOverlapPercent===0),
+ 'HORIZONTAL 145px/vertical 97px ORIGINAL TIS platforms may not overlap: '+
+ JSON.stringify(results.filter(x=>x.maxRectangularOverlapPercent>0)));
+assert.ok(stepX>=tileW+1&&stepY>=tileH+1,
+ 'Native source TIS 145x97 center pitch must include pixel-visible gaps');
 assert.ok(results.some(x=>x.adjacent>10),'source grid connectivity was audited');
 const report={
  checkedMaps:results.length,checkedCells:results.reduce((n,x)=>n+x.tiles,0),

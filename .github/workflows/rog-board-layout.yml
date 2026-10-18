@@ -7,6 +7,12 @@ on:
       - 'apps/4leaf/rog/world-perspective.css'
       - 'apps/4leaf/rog/tests/board-layout.cjs'
       - 'apps/4leaf/rog/tests/dmp-tile-overlap-audit.cjs'
+      - 'apps/4leaf/rog/board-camera.js'
+      - 'apps/4leaf/rog/dice-original-obs.css'
+      - 'apps/4leaf/rog/genesis-chessman-actors.js'
+      - 'apps/4leaf/rog/tests/genesis-chessman-actors.cjs'
+      - 'apps/4leaf/rog/tests/dice-horizontal-native-actors.cjs'
+      - 'apps/4leaf/rog/tests/dice-dmp-full-camera.cjs'
       - 'apps/4leaf/rog/dice-source-roll.js'
       - 'apps/4leaf/rog/tests/dice-source-roll.cjs'
       - 'apps/4leaf/rog/dice-fall.js'
@@ -49,6 +55,12 @@ jobs:
       - name: Verify every native TIS image pixel survives full board alpha clipping
         run: node apps/4leaf/rog/tests/dice-native-tis-full-outline.cjs
       - run: node apps/4leaf/rog/tests/board-layout.cjs
+      - name: "Reproduce iPhone screenshot: zero horizontal TIS overlap and 2 original Genesis OBS players"
+        run: node apps/4leaf/rog/tests/dice-horizontal-native-actors.cjs
+      - name: Verify genuine native Genesis OBS chessman and no giant fabricated missing-body proxy
+        run: node apps/4leaf/rog/tests/genesis-chessman-actors.cjs
+      - name: Verify full expanded DMP camera touch, pan, zoom and tile visibility
+        run: node apps/4leaf/rog/tests/dice-dmp-full-camera.cjs
       - name: Verify original IMG.pak 16-frame ROLL is decoded and visibly animated on first cold roll
         run: node apps/4leaf/rog/tests/dice-source-roll.cjs
       - name: Verify D4 result-specific tetrahedral landing and D6 gameplay motion

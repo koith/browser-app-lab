@@ -66,11 +66,11 @@ const assert=require('node:assert/strict');
     (t.removed===0?t.preserved==='true'&&t.background.includes('/original/Tiles/'+t.source+'.png'):
      t.background.includes('data:image/png'))),
     'all tiles show their independently decoded recovered TIS PNG, not a fake or an unkeyed source');
-   assert.deepEqual(result.sourceGrid,{width:1450,height:1120,pitchX:70,pitchY:47});
+   assert.deepEqual(result.sourceGrid,{width:2800,height:1551,pitchX:70,pitchY:47});
    assert.equal(result.bad,0,'every source DMP neighboring position uses projected sprite pitch');
-   assert.ok(result.minimumH>=125&&result.minimumH<=131&&
-     result.minimumV>=83&&result.minimumV<=89,
-    '2004 source-photo-calibrated projection retains 145x97 source art and 128x86 pixel centers without excessive neighboring overlap: '+JSON.stringify(result));
+   assert.ok(result.minimumH>=149&&result.minimumH<=151&&
+     result.minimumV>=99&&result.minimumV<=101,
+    'Original 145x97 artwork MUST NOT intersect a horizontal/vertical DMP neighbor: '+JSON.stringify(result));
    assert.ok(result.adjacent>10,'adjacent cells were checked');
    await page.screenshot({path:shot});
    await page.locator('#exit-game').click();

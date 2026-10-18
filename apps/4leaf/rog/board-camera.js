@@ -3,18 +3,17 @@
    The historical 3D client showed a zoomed slice of the map, not every card at once. */
 (function(){
  'use strict';
- // DMP coordinates remain integer logical map cells, 70x47 source pitch.
- // Each native TIS card is 145x97; its DMP source grid is only 70x47.
- // 2004 board.jpg/battle.jpg historical photographs show individually
- // legible upper faces of the raised hexes, not the interleaved sprite row
- // produced by the earlier 111x75 WEB pitch (34px horizontal, 22px vertical
- // overlap between 145x97 native TIS images). A 130x86 projected pitch
- // retains a physically plausible shallow 15x11 overlap / raised lip,
- // while leaving the original 70x47 DMP LOGICAL coordinates untouched.
- // The historic MVE projection/camera is unrecovered: these rendering
- // distances are provisional photo-calibrated values, never archive facts.
- const SOURCE_GRID={width:1450,height:1120,pitchX:70,pitchY:47};
- const SIZE={width:2650,height:2050};
+ // The source DMP indices are the authentic integer grid, 70x47
+ // logical units per neighbor; full source TIS billboards are 145x97.
+ // The prior WEB projection separated centers by only ~128x86 px,
+ // mathematically OVERLAPPING HORIZONTAL sprites by 17 px even in a
+ // straight row (reported again in the 2026-10-18 live phone capture).
+ // Use an explicit 150x100 WEB spacing, with source pixels at 1:1.
+ // Enlarge the scrollable world to hold even original DMP 0180's
+ // 37-column and 0191's 29-row span without clipping outer cells.
+ // This is NOT a recovered original MVE camera/3D projection.
+ const SOURCE_GRID={width:2800,height:1551,pitchX:70,pitchY:47};
+ const SIZE={width:6000,height:3300};
  const PROJECTED_PITCH={x:70*SIZE.width/SOURCE_GRID.width,
   y:47*SIZE.height/SOURCE_GRID.height};
  const state={game:null,path:null,scale:1,panX:0,panY:0,cameraX:null,cameraY:null,manual:false,lastTurn:null,visible:null};

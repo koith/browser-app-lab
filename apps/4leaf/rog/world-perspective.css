@@ -1,4 +1,4 @@
-/* 4LEAF Dice original-asset game presentation.\n   Keep world geometry EXACTLY synchronized with board-camera.js SIZE\n   (2650x2050). Prior mismatch silently rendered 2300x1780 physical DOM\n   against a 2650x2050 camera, doubling tile collision/spacing bugs.
+/* 4LEAF Dice original-asset game presentation.\n   Keep world geometry EXACTLY synchronized with board-camera.js SIZE\n   (6000x3300). Prior mismatch silently rendered 2300x1780 physical DOM\n   against a 6000x3300 camera, doubling tile collision/spacing bugs.
    Camera follows chessmen through all authentic MVE vertices, revealing a close-up
    live board like the archived 800×600 3D game, not 104 miniature cards at once. */
 #game .board-area{
@@ -13,8 +13,8 @@
  left:0!important;
  right:auto!important;
  bottom:auto!important;
- width:2650px!important;
- height:2050px!important;
+ width:6000px!important;
+ height:3300px!important;
  background:
    radial-gradient(ellipse at 49% 48%,transparent 20%,#0c173b3e 90%),
    url('./original/IMG/bgtile.png') 0 0 / 725px 485px repeat!important;

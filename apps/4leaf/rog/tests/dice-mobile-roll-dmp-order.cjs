@@ -41,7 +41,7 @@ const {chromium,webkit}=require('playwright');
    t.pixels[0]===145&&t.pixels[1]===97),
    'native source platform dimensions and nonrectangular click silhouette preserved');
   const projection=await page.evaluate(()=>window.__LEAF_CAMERA__.getState());
-  assert.deepEqual(projection.sourceGrid,{width:1450,height:1120,pitchX:70,pitchY:47});
+  assert.deepEqual(projection.sourceGrid,{width:2800,height:1551,pitchX:70,pitchY:47});
   let horizontal=0,vertical=0,sameRow=0;
   for(let i=0;i<board.length;i++)for(let j=i+1;j<board.length;j++){
    const a=board[i],b=board[j];

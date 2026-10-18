@@ -310,7 +310,7 @@ function generateTiles(map){
 }
 function pathCoords(){let pts=[],left=0,right=13,top=0,bottom=7;while(left<=right&&top<=bottom){for(let x=left;x<=right;x++)pts.push([x,top]);for(let y=top+1;y<=bottom;y++)pts.push([right,y]);if(top<bottom)for(let x=right-1;x>=left;x--)pts.push([x,bottom]);if(left<right)for(let y=bottom-1;y>top;y--)pts.push([left,y]);left+=1;right-=1;top+=1;bottom-=1}return pts.map(([x,y])=>({x:5.5+x*(89/13),y:8.5+y*(83/7)}))}
 let PATH=pathCoords();
-function chooseSourcePath(map){const records=SOURCE_ROUTES[SOURCE_IDS[map]];if(!records||records.length<8){PATH=pathCoords();return}/* DMP coordinates are tile-grid indices, not percentages. Keep one fixed world-space grid pitch so adjacent 145:97 TIS sprites do not overlap or stretch when a map has a narrow coordinate range. */const xs=records.map(p=>p[0]),ys=records.map(p=>p[1]);const midX=(Math.min(...xs)+Math.max(...xs))/2,midY=(Math.min(...ys)+Math.max(...ys))/2;PATH=records.map(p=>({x:50+(p[0]-midX)*70/1450*100,y:50+(p[1]-midY)*47/1120*100}))}
+function chooseSourcePath(map){const records=SOURCE_ROUTES[SOURCE_IDS[map]];if(!records||records.length<8){PATH=pathCoords();return}/* Authentic DMP index positions are unchanged. The browser camera owns ONE explicit 150x100 WEB display pitch, and all maps share that projection. */const grid=window.__LEAF_CAMERA__?.getState?.().sourceGrid||{width:2800,height:1551,pitchX:70,pitchY:47};const xs=records.map(p=>p[0]),ys=records.map(p=>p[1]);const midX=(Math.min(...xs)+Math.max(...xs))/2,midY=(Math.min(...ys)+Math.max(...ys))/2;PATH=records.map(p=>({x:50+(p[0]-midX)*grid.pitchX/grid.width*100,y:50+(p[1]-midY)*grid.pitchY/grid.height*100}))}
 function installAuthenticMaps(){const list=$('map-select'),entries=Object.entries(SOURCE_INFO).filter(([id])=>SOURCE_ROUTES[id]&&SOURCE_ROUTES[id].length>9);if(!entries.length)return;list.replaceChildren();const rank=['4LEAF','주사위','워프 게이트','PK','악마의 달팽이','한반도','For the Lucky'];entries.sort((a,b)=>{let i=rank.indexOf(a[1].title),j=rank.indexOf(b[1].title);return (i<0?99:i)-(j<0?99:j)});for(const [id,info] of entries){const title=info.title,length=SOURCE_ROUTES[id].length;const old=MAPS[title]||{};const generate=(step,offset)=>Array.from({length:Math.floor(length/step)},(_,i)=>offset+i*step).filter(i=>i>0&&i<length-1);MAPS[title]={length,non:['악마의 달팽이','한반도'].includes(title),warp:old.warp||generate(30,8),keepers:old.keepers||generate(17,13),jail:old.jail||generate(44,25),chests:old.chests||generate(19,6),boost:old.boost||generate(23,17),attribute:old.attribute||generate(29,20),joker:old.joker||generate(41,36)};const opt=document.createElement('option');opt.value=title;opt.textContent=title+' · '+length+'칸 [원본 '+id+(SOURCE_TILES[id]?' · 발판 복원':' · 경로 복원')+']';list.append(opt)}const randomOption=document.createElement('option');randomOption.value='__RANDOM__';randomOption.textContent='랜덤맵 · 원작 2003.02 업데이트';list.append(randomOption);list.value='4LEAF'}
 function freshItems(){return Array.from({length:3},()=>{const pool=ITEMS.filter(item=>!item.disabled);return pool[rand(pool.length)].id})}
 function newPlayer(id,bot,name,team){return {id,bot,name,team,position:0,jail:0,ability:0,items:freshItems(),effects:{shoe:0,dove:0,clover:0,spade:0,ring:0,armageddon:0,valkyrie:0,oddcurse:0,evencurse:0,block:0,destroy:0,keeper:0},usedItem:false,color:COLORS[id],pawn:PAWNS[id]}}
@@ -318,7 +318,10 @@ function startGame(){let map=$('map-select').value;const limit=Number($('point-l
  if(selectedMode==='network'&&(!window.__LEAF_NET__?.connected||window.__LEAF_NET__.role!=='host')){
     return modal('온라인 대전 연결','온라인 대전에서는 먼저 상대 브라우저와 연결해야 합니다. 호스트에서 연결을 시작하세요.',[{label:'확인',primary:true}]);
  }let players=[newPlayer(0,false,profile.name,profile.team.slice())];for(let i=0;i<bots;i++){const weakTeams=CHR_SOURCE.length>50?[
- ['c_0096','c_0078','c_0040'],['c_0078','c_0045','c_0096'],['c_0040','c_0078','c_0096'],['c_0045','c_0096','c_0078'],['c_0078','c_0040','c_0045'],['c_0096','c_0045','c_0078'],['c_0040','c_0096','c_0045']]:
+ // Default opponents must have an actual recovered OBS body. In the old
+ // sample, c_0096 (no decoded OBS source) displayed a HUGE synthetic mannequin.
+ // Existing saved/user-selected teams are never silently replaced.
+ ['c_0045','c_0042','c_0040'],['c_0042','c_0045','c_0043'],['c_0043','c_0044','c_0045'],['c_0044','c_0045','c_0042'],['c_0045','c_0043','c_0047'],['c_0047','c_0048','c_0045'],['c_0048','c_0049','c_0040']]:
  [['rashid','soldier','narcia'],['joan','narcia','soldier'],['soldier','joan','rashid'],['iolyn','soldier','narcia'],['merza','rashid','soldier'],['christian','soldier','joan'],['damian','soldier','narcia']];let team=weakTeams[i].filter((_,j)=>j===0||limit>=8);while(teamStats(team).point>limit)team.pop();players.push(newPlayer(i+1,!hotseat,selectedMode==='network'?(window.__LEAF_NET__?.guestName||'플레이어 2'):(hotseat?'플레이어 '+(i+2):BOT_NAMES[i]),team))}match={version:5,map,mode:selectedMode,botAutoplay:selectedMode==='ai',diceRegion:window.__LEAF_LOBBY__?.getState?.().region||null,diceChannel:window.__LEAF_LOBBY__?.getState?.().channel||null,startedAt:Date.now(),tiles:generateTiles(map),players,active:0,round:1,finished:false,winner:-1,attribute:'NONE',message:'주사위를 굴려 주세요.',lastRoll:[],history:[],pending:null};busy=false;persist();navigate('game');chat('SYSTEM',map+' 게임을 시작했습니다. '+(selectedMode==='network'?'두 기기 온라인 연결':hotseat?'사람 '+(bots+1)+'명이 번갈아 플레이':'컴퓨터 '+bots+'명과 대전')+'.','system');drawGame();persist()}
 function appendMove(message){if(!match)return;match.message=message;match.history.push(message);if(match.history.length>90)match.history.shift();toast(message);persist()}
 /* Source-proven historical sprite numbers from original Dice/DMP.pak palette headers:
@@ -367,7 +370,7 @@ function drawBoard(){
      b.style.left=PATH[i].x+'%';b.style.top=PATH[i].y+'%';b.dataset.tile=i;
      // Genuine original DMP axial-grid coordinates are unchanged.
      // Render full SOURCE 145x97 pixels with screenshot-calibrated WEB
-     // spacing ~128x86. Original DMP indices stay 70x47; the modest
+     // spacing 150x100. Original DMP indices stay 70x47; the modest
      // overlap is painted in DMP depth order, not by route index.
      // Original MVE elevation and camera matrix remain unrecovered.
      const dmp=SOURCE_ROUTES[SOURCE_IDS[match.map]]?.[i];
@@ -378,7 +381,7 @@ function drawBoard(){
      }
      b.dataset.nativeTisSize='145x97';
      b.dataset.dmpLogicalPitch='70x47';
-     b.dataset.projectedPitch='128x86-web-screenshot-calibrated';
+     b.dataset.projectedPitch='150x100-web-nonoverlap';
      // Painter order follows the original DMP grid, not route parity.
      // Cells on the same row are sorted by their genuine x coordinate;
      // a row ahead ALWAYS paints over rows behind it. Reserve +1 for actors.
