@@ -1,0 +1,41 @@
+name: 4LEAF source ChatRoom and Dice visual QA
+on:
+  push:
+    paths:
+      - 'apps/4leaf/rog/tests/visual-fourleaf-room-source.cjs'
+      - 'apps/4leaf/rog/chatroom-native-panels.css'
+      - 'apps/4leaf/rog/world-social.css'
+      - 'apps/4leaf/rog/social-chat.js'
+      - 'apps/4leaf/rog/dice-native-tis-orientation.css'
+      - 'apps/4leaf/rog/dice-original-obs.css'
+      - 'apps/4leaf/rog/dice-source-tile-pitch.css'
+      - 'apps/4leaf/rog/board-camera.js'
+      - 'apps/4leaf/rog/game.js'
+      - '.github/workflows/rog-source-scene-visual.yml'
+  workflow_dispatch:
+jobs:
+  historical-client:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install real Chromium
+        run: |
+          npm install --no-save playwright
+          npx playwright install chromium --with-deps
+      - name: Serve unmodified extracted historical PNG resources
+        run: |
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog >/tmp/leaf-source-scenes.log 2>&1 &
+          ok=0
+          for i in $(seq 1 35); do
+            if curl -fsSI http://127.0.0.1:8765/original/ChatRoom/room4.png >/dev/null; then ok=1; break; fi
+            sleep 1
+          done
+          test "$ok" = "1"
+      - name: Compare live ChatRoom to archived original 794x528 room scene
+        run: node apps/4leaf/rog/tests/visual-fourleaf-room-source.cjs
+      - name: Capture live 800x600 TIS tiles and OBS chessmen
+        run: node apps/4leaf/rog/tests/dice-original-visual-qa.cjs
