@@ -5,10 +5,10 @@
 
 ## 2004년 원작 화면 ↔ 현재 웹앱 정밀 비교와 세부 작업
 
-- **[RESTORATION_GAP_BACKLOG_2026-10-18.md](./RESTORATION_GAP_BACKLOG_2026-10-18.md)**: 원작 `board.jpg` · `battle.jpg` · `chat.jpg` · `chat_ref.jpg` · `street.jpg` · `shop_ref.png`와 실제 Playwright·WebKit 63개 캡처 중 해당 장면을 비교한 **39개 세부 일감**.
+- **[RESTORATION_GAP_BACKLOG_2026-10-18.md](./RESTORATION_GAP_BACKLOG_2026-10-18.md)**: 원작 `board.jpg` · `battle.jpg` · `chat.jpg` · `chat_ref.jpg` · `street.jpg` · `shop_ref.png`와 실제 Playwright·WebKit 63개 캡처 중 해당 장면을 비교한 **40개 세부 일감**.
 - 세부 일감: `SRC-*`, `BRD-*`, `ACT-*`, `BTL-*`, `DIE-*`, `CHT-*`, `WORLD-*`, `SHOP-*`, `RULE-*`, `EVID-*`, `QA-*`. 원장은 상위 M00–M09/P0 항목을 포함한 단일 원천이다.
 - 2004년 원작 상태와 현재 캡처의 참가자·방 ID·판정이 다를 때에는 **같은 사진 픽셀 오차를 검증했다고 주장하지 않는다**. QA 일감 `EVID-01`에서 먼저 동일 상태 재현.
-- 신규 원본 2D `winBattle.spr` 자산의 브랜치 복원과 배포 메인 통합은 **구별**한다. `QA-01` 스모크 실패·`BTL-01` 통합을 P0로 추적한다.
+- 신규 원본 2D `winBattle.spr` 자산의 브랜치 복원과 배포 메인 통합은 **구별**한다. `QA-01` 스모크 실패·`BTL-01` 통합·`CHT-07` 실물 아바타 클릭 가림을 P0로 추적한다.
 
 ## 신규 대화에서도 반드시 시작하는 순서
 
