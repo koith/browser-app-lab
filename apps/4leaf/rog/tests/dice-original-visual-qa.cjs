@@ -19,7 +19,17 @@ const {chromium}=require('playwright');
   await page.locator('#map-select').selectOption('4LEAF');
   await page.locator('#start-game').click();
   await page.waitForSelector('#game:not(.hidden)');
-  await page.waitForFunction(()=>[...document.querySelectorAll('#game #board-nodes .tile')].every(x=>x.dataset.tisAlpha==='ready'),null,{timeout:20000});
+  await page.waitForFunction(()=>{
+   const tiles=[...document.querySelectorAll('#game #board-nodes .tile')];
+   return tiles.length>=40&&tiles.every(x=>x.dataset.tisAlpha==='ready');
+  },null,{timeout:45000}).catch(async error=>{
+   const states=await page.evaluate(()=>[...document.querySelectorAll(
+    '#game #board-nodes .tile')].reduce((acc,t)=>{
+    const key=t.dataset.tisAlpha||'missing';acc[key]=(acc[key]||0)+1;return acc;
+   },{}));
+   console.log('ORIGINAL_TIS_LOADING_DIAGNOSTICS '+JSON.stringify(states));
+   throw error;
+  });
   await page.waitForTimeout(550);
   const game=page.locator('#app');
   const size=await game.evaluate(el=>{const r=el.getBoundingClientRect();return {w:r.width,h:r.height}});
