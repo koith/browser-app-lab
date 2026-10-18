@@ -44,8 +44,14 @@ for(const id of tiles)
 for(const file of originalPhotos)
  if(!fs.existsSync(path.join(ROOT,file)))missing.push(file);
 assert.deepEqual(missing,[],'Missing source art in deployed tree');
-assert.equal(maps.length,Object.keys(rules).length,
- 'DMP path and source event tile map count differ');
+// The archived 26 movement routes and 25 decoded event rows are NOT an
+// identical dataset. The missing member stays on the restoration backlog;
+// never reject genuine archived route data or fabricate a replacement map.
+const pathIds=new Set(maps.map(([id])=>id));
+const eventIds=new Set(Object.keys(rules));
+assert.ok([...eventIds].every(id=>pathIds.has(id)),
+ 'event map references a route absent from recovered original DMP/MVE');
+const routesWithoutEventData=[...pathIds].filter(id=>!eventIds.has(id)).sort();
 const originals=new Set(chars.map(([id])=>id));
 const frames=chars.reduce((sum,[,c])=>sum+c.frames.length,0);
 const single=chars.filter(([,c])=>c.frames.length===1).length;
@@ -59,6 +65,8 @@ const output={
   originalMembersWithDecodedFrameZero:withFrameZero,
   originalMembersWithNoDecodedBody:cards.filter(c=>!originals.has(c.id)).length,
   sourceDMPMaps:maps.length,
+  sourceDMPEventMaps:eventIds.size,
+  sourceRoutesWithoutFullEventData:routesWithoutEventData,
   sourceTISHexArt:tiles.length,
   sourceRollFrames:Object.fromEntries(Object.entries(sprites)
    .map(([k,v])=>[k,v.frames.length])),
