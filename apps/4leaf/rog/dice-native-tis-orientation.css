@@ -1,17 +1,14 @@
-/* Original 2002 TIS.pak scanlines are stored bottom-up.
- * tools/decode_tis.py currently wrote PNGs with FLIP_TOP_BOTTOM, while the
- * 2004 ChatRoom / Dice screenshots show the tiles' lettering facing the
- * opposite way in the live game. Reverse that PNG extraction-side flip in
- * PRESENTATION ONLY; original 145x97 PNGs, hashes and DMP data remain intact.
- * Native click mask and all contained source pixels flip together.
+/* Recovered TIS PNGs have upright source-side UI lettering and ornaments.
+ * The prior WEB scaleY(-1) reversed them again, displaying cards and text
+ * upside down. Native 145x97 alpha, original DMP cell identity and source
+ * painter order are left untouched. Historical 3D camera remains inferred.
  */
 #app.app-classic-dice #game .board-world #board-nodes
  .tile[data-native-tis-size="145x97"]{
- transform:translate(-50%,-50%) scaleY(-1)!important;
+ transform:translate(-50%,-50%)!important;
  transform-origin:50% 50%!important;
 }
 #app.app-classic-dice #game .board-world #board-nodes
  .tile[data-native-tis-size="145x97"] > :is(.tile-symbol,small){
- /* Keep interactive web labels readable even when source art is inverted. */
- transform:scaleY(-1)!important;
+ transform:none!important;
 }
