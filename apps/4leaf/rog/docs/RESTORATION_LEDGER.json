@@ -108,6 +108,53 @@
         "P0-CHAT",
         "P0-RELEASE"
       ]
+    },
+    {
+      "id": "REQ-20261018-006",
+      "date": "2026-10-18",
+      "origin": "user",
+      "text": "원작과 정밀 비교해서 현재 개발상태에서 뭘 더 해야 하는지 일감 리스트 생성해",
+      "taskIds": [
+        "SRC-01",
+        "SRC-02",
+        "BRD-01",
+        "BRD-02",
+        "BRD-03",
+        "BRD-04",
+        "BRD-05",
+        "ACT-01",
+        "ACT-02",
+        "ACT-03",
+        "ACT-04",
+        "BTL-01",
+        "BTL-02",
+        "BTL-03",
+        "BTL-04",
+        "DIE-01",
+        "DIE-02",
+        "DIE-03",
+        "DIE-04",
+        "CHT-01",
+        "CHT-02",
+        "CHT-03",
+        "CHT-04",
+        "CHT-05",
+        "CHT-06",
+        "WORLD-01",
+        "WORLD-02",
+        "WORLD-03",
+        "SHOP-01",
+        "SHOP-02",
+        "RULE-01",
+        "RULE-02",
+        "RULE-03",
+        "EVID-01",
+        "EVID-02",
+        "QA-01",
+        "QA-02",
+        "QA-03",
+        "QA-04"
+      ]
     }
   ],
   "tasks": [
@@ -440,6 +487,906 @@
         "runtimeTest": "GitHub Actions main 39118635082, 39119052162, 39119202546 모두 success; 삭제/거짓 완료/무기록 상태 변경 회귀 검증",
         "deployment": "GitHub main 2205ab858ee3ab447893139f3566ea4a8b426da0, Pages main 39119202555 success"
       }
+    },
+    {
+      "id": "SRC-01",
+      "priority": "P0",
+      "title": "리소스 출처·실제 용도 전수 정합",
+      "status": "todo",
+      "milestone": "M00",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: OBS·TIS·DMP·IMG 원본은 여럿 확보했지만 기능별 역할/중복 PAK과 2004 실제 화면 대응표가 불완전함 | 구현 목표: OBS/OBS2/OBS3/IMG/CHR/DMP/TIS/DMO 및 EXE 문자열을 출처·해시·역할·실사용 DOM 파일별로 매핑하고 확인되지 않은 것은 추정으로 표기",
+      "acceptance": [
+        "모든 게임·채팅 UI 자산에 원본 PAK 멤버, SHA/프레임 및 화면 용도를 연결하고 잘못 분류된 ROLL/모델 자산 0건"
+      ],
+      "evidence": [
+        "original/OBS/bulk-source-report.json",
+        "tools/audit-original-dice-resources.py"
+      ],
+      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null,
+      "dependencies": [],
+      "category": "원본 근거"
+    },
+    {
+      "id": "SRC-02",
+      "priority": "P0",
+      "title": "2004 원작 조작 영상·상태 기준 확보",
+      "status": "todo",
+      "milestone": "M00",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원본 정지 캡처는 있지만 주사위 낙하/캐릭터 행동·전투 발판의 시간 축과 정확한 시점 정보가 부족함 | 구현 목표: 2004 실제 영상/후기/EXE 리소스의 프레임 순서와 수치를 원본 상태별 캡처·동영상 메타로 수집",
+      "acceptance": [
+        "기본 대기·이동·D4/D6·전투·방 입장 각 상태의 출처 포함 시간순 근거, 없는 장면은 UNVERIFIED로 명시"
+      ],
+      "evidence": [
+        "../assets/board.jpg",
+        "../assets/battle.jpg",
+        "docs/RESTORATION_MILESTONES_2026-10-18.md"
+      ],
+      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null,
+      "dependencies": [],
+      "category": "원본 근거"
+    },
+    {
+      "id": "BRD-01",
+      "priority": "P0",
+      "title": "카메라 투영·발판 크기 원본 시점 맞춤",
+      "status": "todo",
+      "milestone": "M04",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원본 145×97 TIS 원화에 현 웹 중심 피치 150×100을 사용해 가로 겹침을 해소했지만 실제 역사적 3D 카메라 공식은 미확인 | 구현 목표: 원본 board/battle의 동일 DMP 지도·좌표·줌 상태에서 발판 중심/소실점/배경 시야를 추적해 실제 카메라 수치 결정",
+      "acceptance": [
+        "동일 상태 캡처에서 최소 10개 기준 타일 중심·사이즈·상하 방향·배경 지형 오차를 기록하고 역전/비정상 중첩 0건"
+      ],
+      "evidence": [
+        "../assets/board.jpg",
+        "board-camera.js",
+        "tests/dice-horizontal-native-actors.cjs"
+      ],
+      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null,
+      "dependencies": [
+        "EVID-01"
+      ],
+      "category": "주잔 육각 보드"
+    },
+    {
+      "id": "BRD-02",
+      "priority": "P0",
+      "title": "실제 TIS 알파·윗면·하단 림 상태 복원",
+      "status": "todo",
+      "milestone": "M04",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 소스 PNG는 145×97로 렌더되나 바닥 입체감·윗면 보이는 각도·원본 회전/알파 외곽 비교가 완료되지 않음 | 구현 목표: 32종 TIS alpha 외곽·스프라이트의 디코더 상하 반전을 2004 이미지의 실제 그림과 유형별 대조",
+      "acceptance": [
+        "32개 원본 타일의 원화 픽셀/방향/원본 클립 경계 유지, 타일 외곽 잘림·상하 오인 0건"
+      ],
+      "evidence": [
+        "original/Tiles/art.js",
+        "dice-native-tis-alpha.js",
+        "tests/dice-native-tis-full-outline.cjs"
+      ],
+      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null,
+      "dependencies": [
+        "BRD-01"
+      ],
+      "category": "주잔 육각 보드"
+    },
+    {
+      "id": "BRD-03",
+      "priority": "P0",
+      "title": "26맵 타일 간 깊이·캐릭터 가림 재현",
+      "status": "todo",
+      "milestone": "M04",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 사각형 영역 중첩 0건과 DMP 행 painter 정렬 통과는 실제 입체 위아래 가림과 발 접지 증거가 아님 | 구현 목표: 실물 TIS 선후/알파·발판 측면 가림, 다중 체스맨, 카메라 확대와 텍스처 뎁스를 검증",
+      "acceptance": [
+        "26개 맵 경계/교차점/다중 캐릭터의 가림 순서 스크린샷 및 z-index 테스트, 원작과 모순 사례 0건"
+      ],
+      "evidence": [
+        "tests/dmp-tile-overlap-audit.cjs",
+        "tests/dice-native-pawn-dmp-depth.cjs"
+      ],
+      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null,
+      "dependencies": [
+        "BRD-02",
+        "ACT-04"
+      ],
+      "category": "주잔 육각 보드"
+    },
+    {
+      "id": "BRD-04",
+      "priority": "P0",
+      "title": "DMP/DMO/MVE 26개 원본 지도 정확도 검증",
+      "status": "todo",
+      "milestone": "M04",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 26개 움직임 경로는 복원되었지만 25개 이벤트 데이터와 26경로 간 누락·특수칸 의미가 원작과 완전 일치하는지 불명 | 구현 목표: 원본 DMP.pak 76개 멤버(26 MVE/25 DMP/25 DMO)를 맵 ID별로 대응하고 미연결 맵 조건을 명시",
+      "acceptance": [
+        "26개 경로 전체 셀/특수칸·워프·채널·시작/종점 원본 테이블 대조, 누락된 1개 이벤트 맵은 명시된 처리"
+      ],
+      "evidence": [
+        "original/maps.js",
+        "original/tiles.js",
+        "tools/extract_original.py"
+      ],
+      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null,
+      "dependencies": [
+        "SRC-01"
+      ],
+      "category": "주잔 육각 보드"
+    },
+    {
+      "id": "BRD-05",
+      "priority": "P1",
+      "title": "실제 맵 범위·미니맵 이동 정확성",
+      "status": "todo",
+      "milestone": "M04",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 카메라를 큰 공통 6000×3300 세계로 보정했고 실제 경로 범위 패닝 제한이 있지만 원작 미니맵 선택 비율과 추적은 비교 부족 | 구현 목표: 맵별 최외곽 접근·줌·드래그·손가락 이동 및 172×152 실제 미니맵 픽셀 좌표 일치 검증",
+      "acceptance": [
+        "26개 맵 PC/휴대폰에서 아무 빈 지역에 고립되지 않고 모든 원본 칸 이동/표시 가능"
+      ],
+      "evidence": [
+        "board-camera.js",
+        "tests/dice-dmp-full-camera.cjs"
+      ],
+      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null,
+      "dependencies": [
+        "BRD-01"
+      ],
+      "category": "주잔 육각 보드"
+    },
+    {
+      "id": "ACT-01",
+      "priority": "P0",
+      "title": "원본 OBS 미복원 34종 해독",
+      "status": "todo",
+      "milestone": "M05",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원본 ID 98종 중 실제 전신 리소스 64종/281 PNG만 게시됨; 34종은 카드 이미지 정지 대체 | 구현 목표: 첫 OBS.pak의 28종 실패 행 헤더를 검증하고 OBS2/OBS3 중복·클라이언트 RLE 해법 연구, 진짜 PNG만 합격",
+      "acceptance": [
+        "98개 ID 각각 원본 전신 PNG 1장 이상 SHA/오프셋 검증 또는 미확보 원인 기록; 가짜 CSS 체스맨 0건"
+      ],
+      "evidence": [
+        "original/OBS/animation-extra.js",
+        "tools/decode-original-obs-bulk.py"
+      ],
+      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null,
+      "dependencies": [
+        "SRC-01"
+      ],
+      "category": "창세기전 체스맨"
+    },
+    {
+      "id": "ACT-02",
+      "priority": "P0",
+      "title": "OBS 행 X좌표·원점 인코딩 완전 해독",
+      "status": "todo",
+      "milestone": "M05",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 64종의 색/팔레트 픽셀은 원본이지만 일부 horizontal scanline X 위치를 중앙 추정으로 복원함 | 구현 목표: 일부 프레임 raw 4byte 헤더의 run origin을 실제 클라이언트/SPR 640-stride와 교차 검증",
+      "acceptance": [
+        "샘플 프레임 0/10/18/25의 물체 실루엣·팔/다리·원점 좌표가 원본 바이트 수식으로 일치"
+      ],
+      "evidence": [
+        "tools/decode-original-obs-bulk.py",
+        "original/OBS/bulk-source-report.json"
+      ],
+      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null,
+      "dependencies": [
+        "ACT-01"
+      ],
+      "category": "창세기전 체스맨"
+    },
+    {
+      "id": "ACT-03",
+      "priority": "P0",
+      "title": "캐릭터별 대기·이동·공격·피격·승리·방향 원본 프레임표",
+      "status": "todo",
+      "milestone": "M05",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 게임의 idle/walk/attack/hurt/victory는 현재 인덱스 추정; 출처 자료 281장만으로 98종 원본 타임라인 아님 | 구현 목표: EXE 동작테이블/OBS 프레임 배열과 원작 영상으로 포즈별 실제 방향·속도·루프 매핑",
+      "acceptance": [
+        "모든 복구 캐릭터·행동별 검증된 원본 프레임만 재생, 미검증 자세를 원본이라고 표기하지 않음"
+      ],
+      "evidence": [
+        "genesis-chessman-actors.js",
+        "original/OBS/animation-manifest.js"
+      ],
+      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null,
+      "dependencies": [
+        "ACT-02",
+        "SRC-02"
+      ],
+      "category": "창세기전 체스맨"
+    },
+    {
+      "id": "ACT-04",
+      "priority": "P0",
+      "title": "보드·전투 체스맨 발 접지·그림자·다중배치",
+      "status": "todo",
+      "milestone": "M05",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 기본 2P의 진짜 OBS 표시는 검증했으나 모든 체스맨 크기/발판 고정·동시 2인 겹침·전투 POV는 원본과 비교 미흡 | 구현 목표: 원본 OBS originX/Y, 발 위치, TIS 바닥 픽셀, 캐릭터 z-index/그림자 관통 검증",
+      "acceptance": [
+        "전신 64종+추가 복원분에서 보드·전투·2인 겹침·6인 게임에 대한 실사 접지/가림 확인"
+      ],
+      "evidence": [
+        "dice-original-obs.css",
+        "tests/dice-cooccupied-pawns.cjs"
+      ],
+      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null,
+      "dependencies": [
+        "ACT-03",
+        "BRD-03"
+      ],
+      "category": "창세기전 체스맨"
+    },
+    {
+      "id": "BTL-01",
+      "priority": "P0",
+      "title": "원본 winBattle.spr 2프레임 배포본 적용",
+      "status": "todo",
+      "milestone": "M06",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 배포 main은 아직 CSS 추정 단상; 새 2002 원본 355×113 금속 2발판+VS와 222×42 전투 제목 PNG는 기능 브랜치에만 존재 | 구현 목표: SourceSPRExtra 100개 원본 PNG/manifest를 검증해 main에 반영, 전투에서 가짜 4다리 DOM 대신 winBattle.spr로 표시",
+      "acceptance": [
+        "실제 battle stage에 원본 355×113 PNG가 로드되고 CSS 원통/가짜 발판/중복 VS가 사라짐, 게임 턴 유지"
+      ],
+      "evidence": [
+        "../assets/battle.jpg",
+        "dice-native-battle-podium.css",
+        "tests/dice-battle-podium.cjs"
+      ],
+      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null,
+      "dependencies": [
+        "SRC-01"
+      ],
+      "category": "전투 화면"
+    },
+    {
+      "id": "BTL-02",
+      "priority": "P0",
+      "title": "전투 800×600 제목·좌우 점수·체스맨·주사위 정밀 배치",
+      "status": "todo",
+      "milestone": "M06",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원작은 큰 BATTLE/좌우 점수/배틀 플랫폼/중앙 VS/굴림 결과가 겹치지 않으나 현재 score 크기·배치·모달 도구가 다름 | 구현 목표: winBattle 원본 배경 위 실제 OBS·굴린 pip 주사위·결과 버튼을 원본 battle.jpg 기준 픽셀 좌표에 맞춤",
+      "acceptance": [
+        "원작 battle.jpg 구조와 동등한 위계, 점수·캐릭터·발판·대화창·좌우 카드가 충돌하지 않는 캡처"
+      ],
+      "evidence": [
+        "../assets/battle.jpg",
+        "game.js",
+        "game-authentic.css"
+      ],
+      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null,
+      "dependencies": [
+        "BTL-01",
+        "ACT-04"
+      ],
+      "category": "전투 화면"
+    },
+    {
+      "id": "BTL-03",
+      "priority": "P1",
+      "title": "원본 winResult/winAbility/winJail UI 실제 연결",
+      "status": "todo",
+      "milestone": "M06",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: IMG.pak에서 winResult 1장·winAbility 6장·winJail 1장 등을 해독했지만 배포 UI 실사용 여부 미확인 | 구현 목표: 이미 해독한 원본 크기/프레임 순서를 실제 전투 결과·능력·감옥 창의 정확한 상태에 연결",
+      "acceptance": [
+        "상태별 팝업에 원본 member·frame 명시, 버튼/판정 살아 있음, 무관 장면에 잘못 표시하지 않음"
+      ],
+      "evidence": [
+        "original/SourceSPR/manifest.json",
+        "game.js"
+      ],
+      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null,
+      "dependencies": [
+        "BTL-01"
+      ],
+      "category": "전투 화면"
+    },
+    {
+      "id": "BTL-04",
+      "priority": "P1",
+      "title": "전투 발판 원작 실제 공간감·시점 보강",
+      "status": "todo",
+      "milestone": "M06",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 새 winBattle 이미지는 VERIFIED-ARCHIVE 2D UI 스프라이트; 3D 원본 메시·다리 물리/빛 등가성은 미확보 | 구현 목표: 원작 배틀 영상에서 공간/카메라가 이동하는지 확인해 2D 배경·실제 3D 가동 구조를 구별하여 보완",
+      "acceptance": [
+        "원본 2004 전투 카메라·캐릭터 그늘·높이/앞뒤 가림 검증; 2D PNG만으로 3D 메시 완성 판정 금지"
+      ],
+      "evidence": [
+        "../assets/battle.jpg",
+        "docs/RESTORATION_MILESTONES_2026-10-18.md"
+      ],
+      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null,
+      "dependencies": [
+        "BTL-02",
+        "SRC-02"
+      ],
+      "category": "전투 화면"
+    },
+    {
+      "id": "DIE-01",
+      "priority": "P0",
+      "title": "원본 D4/D6 본체 그래픽·메시 출처 발굴",
+      "status": "todo",
+      "milestone": "M07",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 현재 흰색 주사위는 CSS 3D 대체; 원본 roll.spr 4장/eventRoll1.spr 16장은 버튼이며 낙하 메시가 아님 | 구현 목표: 2002 Dice/IMG/SND/EXE/관련 버전 자료와 원작 영상에서 실제 주사위 모델/텍스처 및 별도 결과 렌더러 조사",
+      "acceptance": [
+        "원본 D4/D6 모델과 색/눈 배치/면 법선 등 검증된 소스 연결 또는 미확보 명시"
+      ],
+      "evidence": [
+        "../assets/battle.jpg",
+        "dice-fall.js",
+        "original/SourceSPR/manifest.json"
+      ],
+      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null,
+      "dependencies": [
+        "SRC-02"
+      ],
+      "category": "주사위"
+    },
+    {
+      "id": "DIE-02",
+      "priority": "P0",
+      "title": "결과값별 하늘 낙하·통통 반동·착지 원본 애니",
+      "status": "todo",
+      "milestone": "M07",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 현재 브라우저 구현은 결과별 CSS/JS 추정, 원작 궤적·회전·프레임 길이가 확인되지 않음 | 구현 목표: D4 1–4와 D6 1–6 각각의 모델 면방향/중력/바운스/정지 포즈를 출처 프레임과 타이밍별 매핑",
+      "acceptance": [
+        "D4×4 + D6×6 결과를 고정 seed로 반복 재생해 원본 애니와 착지 최종 눈/게임 엔진 결과가 항상 일치"
+      ],
+      "evidence": [
+        "dice-fall.js",
+        "tests/dice-fall.cjs"
+      ],
+      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null,
+      "dependencies": [
+        "DIE-01"
+      ],
+      "category": "주사위"
+    },
+    {
+      "id": "DIE-03",
+      "priority": "P1",
+      "title": "원본 ROLL 버튼·주사위 낙하 UI 역할 분리",
+      "status": "todo",
+      "milestone": "M07",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: ROLL UI 20프레임은 복구되어 사용 중이나 임의 만든 낙하 주사위와 같은 원본이라고 오인될 여지 | 구현 목표: eventRoll1/roll 버튼 목적·사용 씬을 실제 원작으로 구분, 애니메이션 1회 입력/비활성 상태 검증",
+      "acceptance": [
+        "원본 버튼 16프레임 preload 및 중복 롤 0건, D4/D6 모델과 역할 혼동 0건"
+      ],
+      "evidence": [
+        "dice-source-roll.js",
+        "original/SourceSPR/manifest.json"
+      ],
+      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null,
+      "dependencies": [
+        "DIE-01"
+      ],
+      "category": "주사위"
+    },
+    {
+      "id": "DIE-04",
+      "priority": "P0",
+      "title": "전투 주사위 개수·눈·점수·결과 정렬",
+      "status": "todo",
+      "milestone": "M07",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 기능상 pip 개별 DOM이 실 롤과 연결됐으나 원작 battle.jpg의 실제 주사위 크기·각도·개수와 좌우 위치가 다름 | 구현 목표: 원작 캡처의 공격/방어 점수, pip 수, 4개·6개 상황, 다이스 사운드 및 결과 업데이트 시점 맞춤",
+      "acceptance": [
+        "가변 주사위 개수·각 면 1–6값/합계가 게임 판정과 일치하고 원본형 배열이 화면 밖으로 잘리지 않음"
+      ],
+      "evidence": [
+        "../assets/battle.jpg",
+        "dice-native-battle-dice.css",
+        "tests/dice-native-battle-dice.cjs"
+      ],
+      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null,
+      "dependencies": [
+        "BTL-02",
+        "DIE-02"
+      ],
+      "category": "주사위"
+    },
+    {
+      "id": "CHT-01",
+      "priority": "P0",
+      "title": "2004 동일 방 배경·레이아웃 매칭",
+      "status": "todo",
+      "milestone": "M03",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원작 chat.jpg에는 특정 목재 방과 10명 참가자가 있고 현재 QA 캡처는 다른 실내 배경·1명 상태이므로 1:1 픽셀 검사 불가 | 구현 목표: 원작 방 ID/인테리어 파일을 특정하고 같은 방/실내 794×528 좌표의 화면·창틀·가구를 상태 맞춰 캡처",
+      "acceptance": [
+        "같은 원본 방과 현재 방을 정확히 짝지어 가구/창틀/로고 배경 1:1 배치 앵커 오차 기록"
+      ],
+      "evidence": [
+        "../assets/chat.jpg",
+        "../assets/chat_ref.jpg",
+        "tests/visual-fourleaf-room-source.cjs"
+      ],
+      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null,
+      "dependencies": [
+        "EVID-01"
+      ],
+      "category": "상설 채팅"
+    },
+    {
+      "id": "CHT-02",
+      "priority": "P0",
+      "title": "상단 검정 채팅 로그·입력창 원본 픽셀 정합",
+      "status": "todo",
+      "milestone": "M03",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원작 chat.jpg의 좌측 상단 투명 검정 대화 로그·작은 스크롤바·흰 입력박스와 현재 실제 창 배치/간격 차이 | 구현 목표: 원본 ChatRoom 입력/말풍선/글꼴/자막/스크롤바 리소스를 원래 794×528 좌표에 맞춤",
+      "acceptance": [
+        "실제 메시지·CP949/한글 입력·스크롤·복수 말풍선이 원본 창 테두리와 동일 위치에 렌더"
+      ],
+      "evidence": [
+        "../assets/chat.jpg",
+        "chatroom-native-2004-frame.css",
+        "tests/chat-native-scrollbar.cjs"
+      ],
+      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null,
+      "dependencies": [
+        "CHT-01"
+      ],
+      "category": "상설 채팅"
+    },
+    {
+      "id": "CHT-03",
+      "priority": "P0",
+      "title": "실접속 참가자 목록·닉네임·좌석 표시",
+      "status": "todo",
+      "milestone": "M03",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원작 상단 오른쪽 10~11명 목록/스크롤 구조와 현재 1인 Guest 표시가 달라 레이아웃 테스트가 부족함 | 구현 목표: 원본 명수/목록/선택 텍스트를 실접속 이벤트로만 구성하고 0/1/10/11명 화면 각각 검증",
+      "acceptance": [
+        "원본형 참가자 목록·이름·표시 스크롤, 멀티 브라우저 2/10명 테스트; 존재하지 않는 NPC 참가자 표시 0건"
+      ],
+      "evidence": [
+        "../assets/chat_ref.jpg",
+        "tests/permanent-chatrooms.cjs"
+      ],
+      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null,
+      "dependencies": [
+        "CHT-02"
+      ],
+      "category": "상설 채팅"
+    },
+    {
+      "id": "CHT-04",
+      "priority": "P0",
+      "title": "아바타 즉시 이동·원본 슬롯·표정·동작",
+      "status": "todo",
+      "milestone": "M03",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 좌석 클릭 순간이동은 구현했으나 각 좌석·아바타 투명 경계·원본 동작/감정표현 1:1 검증 미완료 | 구현 목표: 6개 실내 좌석/앞뒤 레이어에 실제 Registry 아바타 원본 크기/위치/표정/메뉴를 정확히 연결",
+      "acceptance": [
+        "원본 좌석 클릭시 즉시 슬롯 교체, 좌표 보간 0회, 2인 상태에서 위치/표정/히트박스 수용"
+      ],
+      "evidence": [
+        "../assets/chat.jpg",
+        "tests/chatroom-native-expressions.cjs",
+        "tests/world-chat.cjs"
+      ],
+      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null,
+      "dependencies": [
+        "CHT-01"
+      ],
+      "category": "상설 채팅"
+    },
+    {
+      "id": "CHT-05",
+      "priority": "P1",
+      "title": "방 가구 전경·캐릭터 뒤가림·원본 링 버튼",
+      "status": "todo",
+      "milestone": "M03",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원작 chat_ref의 의자·책상·창문과 말풍선 겹침/메뉴 위치는 일부 수복됐으나 모든 방 depth 검증 미완료 | 구현 목표: 각 실내 foreground masks, 가구-아바타-스피치 순서, 104×330 ringbtn 상태를 동일 위치에서 대조",
+      "acceptance": [
+        "6개 배경 가구 가림·클릭 메뉴 모두 물리 히트 가능, 원본 스샷 가구 위/뒤 관계 오차 확인"
+      ],
+      "evidence": [
+        "../assets/chat_ref.jpg",
+        "tests/world-chat.cjs"
+      ],
+      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null,
+      "dependencies": [
+        "CHT-04"
+      ],
+      "category": "상설 채팅"
+    },
+    {
+      "id": "CHT-06",
+      "priority": "P0",
+      "title": "남·북 하이아칸/주잔 채널 선택 혼동 방지",
+      "status": "todo",
+      "milestone": "M03",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원작 지역 대화방·Dice Town Select와 같은 UI 텍스트가 혼재할 위험, 원작은 서로 다른 목적의 화면 | 구현 목표: 남·북 하이아칸 주잔 채널/ChatTown 지역방 내비게이션과 상설 채팅방 디렉터리를 각각 라우트 분리·검증",
+      "acceptance": [
+        "각 남·북 하이아칸 클릭시 원본 의도대로 화면 진입하고 Town Select를 채팅방으로 잘못 연결하지 않음"
+      ],
+      "evidence": [
+        "tests/dice-channel.cjs",
+        "tests/permanent-chatrooms.cjs"
+      ],
+      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null,
+      "dependencies": [
+        "CHT-01"
+      ],
+      "category": "상설 채팅"
+    },
+    {
+      "id": "WORLD-01",
+      "priority": "P1",
+      "title": "원본 MainFrame 전체 제목줄·아이콘·배치 정합",
+      "status": "todo",
+      "milestone": "M01",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 복구된 4LEAF 상단 로고/툴바/상태 표시가 브라우저 내 구현됐으나 원작 캡처와 배치·폭·버튼 순서 전체 실측 미완료 | 구현 목표: 원본 WorldMap/MainFrame 각 파일을 원본 창에서 디지털 에셋 크기로 등록하고 click target 비교",
+      "acceptance": [
+        "월드맵·가게·채팅·게임 전환 후 상단/하단 버튼 누락·잘림 0건, 2004 앵커 비교"
+      ],
+      "evidence": [
+        "../assets/street.jpg",
+        "tests/mainframe-native-toolbar.cjs"
+      ],
+      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null,
+      "dependencies": [
+        "EVID-01"
+      ],
+      "category": "월드·메인프레임"
+    },
+    {
+      "id": "WORLD-02",
+      "priority": "P1",
+      "title": "켈티카 원작 파노라마·지점 클릭 경계",
+      "status": "todo",
+      "milestone": "M02",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원작 street.jpg 긴 거리 그림을 웹에서 부분 표시하고 라벨을 덧입히지만 원래 핫스팟/좌우 패닝·이동 버튼 차이 | 구현 목표: 실제 원본 Street 이미지 영역 클릭 polygon과 원래 마을/상점 입장 경로·파노라마 구간 대조",
+      "acceptance": [
+        "지도 좌/중/우 화면에서 출입 지점과 원본 소스 핫스팟 일치, 음영·가짜 라벨 침범 최소화"
+      ],
+      "evidence": [
+        "../assets/street.jpg",
+        "tests/knighttown-original.cjs"
+      ],
+      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null,
+      "dependencies": [
+        "WORLD-01"
+      ],
+      "category": "월드·메인프레임"
+    },
+    {
+      "id": "WORLD-03",
+      "priority": "P1",
+      "title": "월드맵 6지역·각 목적지 경로 복원 검증",
+      "status": "todo",
+      "milestone": "M01",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원본 월드맵 이미지와 6지역 이동은 실사용되지만 화면 월드 선택 애니메이션/실제 월드 동선 최종 검증이 부족 | 구현 목표: 원본 월드맵 도달 가능 지점별 6지역/Street/Chat/Dice 전환을 실제 클릭 기록과 매칭",
+      "acceptance": [
+        "각 목적지가 정확한 배경/기능으로 전환, 뒤로/홈/메신저 상태 유지; 불일치 경로 0건"
+      ],
+      "evidence": [
+        "tests/world-map-moon.cjs",
+        "tests/world-chat.cjs"
+      ],
+      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null,
+      "dependencies": [
+        "WORLD-01"
+      ],
+      "category": "월드·메인프레임"
+    },
+    {
+      "id": "SHOP-01",
+      "priority": "P1",
+      "title": "원작 Normal/Valuable/Rare 상점 탭·목록 복원",
+      "status": "todo",
+      "milestone": "M02",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원작 shop_ref.png은 카드 4×2+등급 탭·오른쪽 목록/소유자·정보, 현재 화면은 3×3 카드 그리드/착용 목록이라 구성 차이 큼 | 구현 목표: 원본 카드 8칸 보기/페이지/가격·선택·카드 정보·구매/판매 버튼을 원본 544x?? 클라이언트 GUI 기준 정렬",
+      "acceptance": [
+        "동일 카드 보유·선택 상태에서 탭/카드 개수/결과 정보·스크롤/현금 표시까지 원작 비교"
+      ],
+      "evidence": [
+        "../assets/shop_ref.png",
+        "tests/genesis-asset-roles.cjs"
+      ],
+      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null,
+      "dependencies": [
+        "WORLD-01"
+      ],
+      "category": "매직카덴 상점"
+    },
+    {
+      "id": "SHOP-02",
+      "priority": "P1",
+      "title": "구매·판매·GP·장착 카드 원본 룰 검증",
+      "status": "todo",
+      "milestone": "M02",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 현 데모 보유 GP와 장착 목록/버튼은 있지만 원작 가격표·판매 시 GP·카드 종류 세부 규칙과 화면 조건 미입증 | 구현 목표: 원본 CardData 수치/GP 문구·등급 Normal Valuable Rare 및 실제 보유·구매/판매 UX 대응",
+      "acceptance": [
+        "선택·구매·판매·장착·잔액·무능력 상태 원본 규칙 예제를 실시간 게임·상점 화면에서 통과"
+      ],
+      "evidence": [
+        "../assets/shop_ref.png",
+        "original/chessmen.json",
+        "game.js"
+      ],
+      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null,
+      "dependencies": [
+        "SHOP-01"
+      ],
+      "category": "매직카덴 상점"
+    },
+    {
+      "id": "RULE-01",
+      "priority": "P0",
+      "title": "원작 특수칸·이벤트 데이터 검증",
+      "status": "todo",
+      "milestone": "M08",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: DMP 26경로 대비 특수칸 DMO/DMP 25세트, 원작 각 마을 보너스·점프/워프/감옥 등 검증되지 않은 효과 존재 | 구현 목표: 원본 4LEAF 게임 이벤트 테이블을 해석해 Dice engine resolveTile/warp/item/keeper 조건과 26맵 대조",
+      "acceptance": [
+        "동일 seed·좌표 입력에 대해 모든 특수칸 이동/부활/보상 결과가 원본 근거 표와 일치"
+      ],
+      "evidence": [
+        "original/tiles.js",
+        "game.js"
+      ],
+      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null,
+      "dependencies": [
+        "BRD-04"
+      ],
+      "category": "게임 규칙"
+    },
+    {
+      "id": "RULE-02",
+      "priority": "P1",
+      "title": "전투·능력·아이템·라운드 원본 예외처리",
+      "status": "todo",
+      "milestone": "M08",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 창세기전 능력치/24 특수 충돌/카드 파티 조합과 텍스트 룰 일부 구현했으나 세부 판정 확정 자료 부족 | 구현 목표: 원본 룰 문서/게임 영상의 전투 2인/다인·아이템 소모·선공·무효 판정 정리 및 고정 재현",
+      "acceptance": [
+        "샘플 전투 수치·아이템·무승부·중복 효과·탈출/종료 원본 기대값 fixture 전부 통과"
+      ],
+      "evidence": [
+        "tests/dice-historical-24-clash.cjs",
+        "game.js"
+      ],
+      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null,
+      "dependencies": [
+        "RULE-01",
+        "BTL-02"
+      ],
+      "category": "게임 규칙"
+    },
+    {
+      "id": "RULE-03",
+      "priority": "P1",
+      "title": "실제 멀티플레이 경기 권한·동기화 실환경 검증",
+      "status": "todo",
+      "milestone": "M08",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: WebRTC/중앙 채팅과 임시 로컬 경기 구현이 있지만 서버 권한·이탈/재접속·기록이 원작 흐름과 동일한지 미검증 | 구현 목표: 두 브라우저+휴대전화 2인, 원격 턴/주사위/전투 승인/중도 이탈·복귀/replay와 권한검사 실행",
+      "acceptance": [
+        "다중 클라이언트 동일 턴/눈/카드/채팅 표시; 롤 중복/치트 요청·재접속 상태 불일치 0건"
+      ],
+      "evidence": [
+        "tests/network.cjs",
+        "tests/central-browser.cjs"
+      ],
+      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null,
+      "dependencies": [
+        "RULE-02"
+      ],
+      "category": "게임 규칙"
+    },
+    {
+      "id": "EVID-01",
+      "priority": "P0",
+      "title": "같은 상태 원작-웹 A/B 800×600·794×528 재현",
+      "status": "todo",
+      "milestone": "M09",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 참조 2004 전투 사진 5~6인 배치와 현재 실플레이 2인 시작화면/다른 방 1인 캡처가 달라 픽셀 차이를 수치 비교할 수 없음 | 구현 목표: 원작 screenshot마다 DMP 맵ID/턴/채팅방ID/참여자 수/게임카드/화면 줌을 가능한 한 통일한 실제 웹 캡처 추가",
+      "acceptance": [
+        "board/battle/chat/chat_ref/street/shop 6개 장면별 source-state/live-state 메타와 재현 가능 테스트 스텝 보존"
+      ],
+      "evidence": [
+        "../assets/board.jpg",
+        "../assets/battle.jpg",
+        "../assets/chat.jpg",
+        "tests/dice-original-visual-qa.cjs"
+      ],
+      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null,
+      "dependencies": [],
+      "category": "원본 정밀 비교"
+    },
+    {
+      "id": "EVID-02",
+      "priority": "P0",
+      "title": "원본 픽셀·앵커 위치 정량 오차 보고",
+      "status": "todo",
+      "milestone": "M09",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 현재 브라우저 CI는 일부 소스 이미지 표시 확인과 좌표·클립 검증을 하지만 2004 동일 장면 SSIM/앵커 오차 정량 게이트는 미구현 | 구현 목표: 복구 PNG와 2004 캡처의 주요 ROI 분리, 발판·아바타·채팅·HUD 앵커 bounding boxes, 알파 차/SSIM 비교",
+      "acceptance": [
+        "동일 상태에 대해 영역별 오차표·허용치·before/after diff 산출하고 임계값 초과 장면 자동 실패"
+      ],
+      "evidence": [
+        "tests/dice-original-visual-qa.cjs",
+        "tests/visual-fourleaf-room-source.cjs"
+      ],
+      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null,
+      "dependencies": [
+        "EVID-01"
+      ],
+      "category": "원본 정밀 비교"
+    },
+    {
+      "id": "QA-01",
+      "priority": "P0",
+      "title": "원본 발판 새 자산 브랜치 스모크 실패 복구",
+      "status": "todo",
+      "milestone": "M09",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원본 winBattle.spr 테스트 브랜치 29b4546d에서 browser-smoke 실패: 기존 시험이 가짜 CSS 발판 DOM 다리 4개를 반드시 요구함 | 구현 목표: 전투 QA를 원본 355×113 source ready vs 진짜 source load 실패시 fallback 두 경로로 분리해 조건 수정",
+      "acceptance": [
+        "native winBattle/ability 실제 PNG·체스맨 2명·눈결과+전투 종료가 Chromium 모바일/desktop에서 정상, 구 CSS DOM 4다리 미요구"
+      ],
+      "evidence": [
+        "tests/smoke.cjs",
+        "tests/dice-battle-podium.cjs"
+      ],
+      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null,
+      "dependencies": [
+        "BTL-01"
+      ],
+      "category": "품질·배포"
+    },
+    {
+      "id": "QA-02",
+      "priority": "P0",
+      "title": "완성본 동일 SHA 전체 CI·배포 추적",
+      "status": "todo",
+      "milestone": "M09",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 현재 main ada3e...는 페이지 배포 성공 사례가 있어도 비슷한 신규 브랜치의 CSS 테스트가 실패; 전체 동일 SHA 2004 QA 연속 통과 없음 | 구현 목표: 병합 SHA별 Playwright Chromium+WebKit/PWA/offline/map+Chat 2인+전투 테스트·Pages 공개 URL smoke를 한 릴리스 게이트로 묶기",
+      "acceptance": [
+        "동일 main SHA의 원장·원본자산 해시·게시 URL·모바일/데스크톱 전 테스트 성공/아티팩트 보관 후에만 완료"
+      ],
+      "evidence": [
+        "docs/RESTORATION_LEDGER.json",
+        ".github/workflows/rog-board-layout.yml"
+      ],
+      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null,
+      "dependencies": [
+        "QA-01",
+        "EVID-02"
+      ],
+      "category": "품질·배포"
+    },
+    {
+      "id": "QA-03",
+      "priority": "P0",
+      "title": "아이폰 Safari 세로·가로 4LEAF HUD 오버랩 재검증",
+      "status": "todo",
+      "milestone": "M09",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 제보된 iPhone 390px 화면에서 육각 겹침/체스맨/주사위 및 하단 HUD 클리핑이 발생했으며 자동 WebKit 시뮬레이션만으로 실기기 완전 재현은 부족 | 구현 목표: iPhone Safari 세로+가로/PWA/주소줄 변화/핀치/롤/가구링 버튼/키보드 동작과 viewport-safearea 검사",
+      "acceptance": [
+        "실제 iOS 또는 공개 Safari 실행 증빙 포함; 390/430/768/800+ 화면의 조작/텍스트/버튼 가림 0건"
+      ],
+      "evidence": [
+        "tests/dice-mobile-roll-dmp-order.cjs",
+        "tests/dice-horizontal-native-actors.cjs"
+      ],
+      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null,
+      "dependencies": [
+        "QA-02",
+        "DIE-02",
+        "CHT-02"
+      ],
+      "category": "품질·배포"
+    },
+    {
+      "id": "QA-04",
+      "priority": "P1",
+      "title": "원본 근거·완료 판정·개발원장 지속 관리",
+      "status": "todo",
+      "milestone": "M09",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 상위 17개 항목은 1개 운영만 완료이며 신규 구현 종결은 임의 추정이나 CI 단독으로 판단하면 안 됨 | 구현 목표: 각 세부 항목의 PR/원본 인덱스/동일 상태 사진/실기기 QA/게시 SHA를 개발원장 이벤트로 축적",
+      "acceptance": [
+        "신규 요청 원문·36개 이상 하위 작업 누락 0건, 완료 표시 때 출처/코드/런타임/배포 근거 4종 필수"
+      ],
+      "evidence": [
+        "docs/RESTORATION_LEDGER.json",
+        "tools/restoration-ledger.cjs"
+      ],
+      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null,
+      "dependencies": [
+        "QA-02"
+      ],
+      "category": "품질·배포"
+    },
+    {
+      "id": "CHT-07",
+      "priority": "P0",
+      "title": "상설 채팅방 자기 아바타·원본 도구모음 클릭 가림 회귀",
+      "status": "todo",
+      "milestone": "M03",
+      "category": "상설 채팅",
+      "current": "2026-10-18 실제 4LEAF World+Chat 통합 CI 39137227054에서 `.social-avatar.self[data-seat=9]`의 물리 클릭이 30초간 막힘: 원본 툴바 `.social-classic-toolbar`의 `채팅방 목록` 버튼이 상단 stacking layer로 클릭을 가로챔. 과거 링메뉴 z-index 수정 PR#113과 별개 사용자 접근성 결함. 동일 지점에서 메뉴 조작과 자기 아바타 선택 모두 성공하게 고쳐야 함.",
+      "acceptance": [
+        "794×528 전체 상설방/서재/지역 6개 방에서 실물 self·peer 아바타의 중앙 포인트가 document.elementFromPoint로 해당 버튼 또는 소유 아바타를 가리킴; 원본 30px 툴바 버튼도 여전히 클릭 가능. WebKit/Chromium 동일 화면에서 실패 0건."
+      ],
+      "evidence": [
+        "https://github.com/koith/browser-app-lab/actions/runs/39137227054",
+        "apps/4leaf/rog/tests/world-chat.cjs",
+        "apps/4leaf/rog/chatroom-native-2004-frame.css"
+      ],
+      "evidenceLevel": "VERIFIED-WEBAPP-BROWSER-REGRESSION; HISTORICAL-LAYOUT-UNVERIFIED",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null,
+      "dependencies": [
+        "CHT-04",
+        "CHT-05"
+      ]
     }
   ],
   "events": [
@@ -742,6 +1689,343 @@
       "taskId": "P0-BOARD",
       "details": "User source-geometry maps have variable dimensions; camera no longer pans to blank margins of 6000x3300 WEB max-map canvas; actual 26-map per-route DMP min/max plus native bitmap margin used. Zero game-state coordinate mutation, source 3D camera still unrecovered.",
       "evidence": "apps/4leaf/rog/board-camera.js"
+    },
+    {
+      "seq": 30,
+      "date": "2026-10-18",
+      "type": "TASK_ADDED",
+      "taskId": "SRC-01",
+      "details": "Side-by-side original screenshot vs deployed webapp review. Acceptance pending source-vs-runtime A/B. See docs/RESTORATION_GAP_BACKLOG_2026-10-18.md"
+    },
+    {
+      "seq": 31,
+      "date": "2026-10-18",
+      "type": "TASK_ADDED",
+      "taskId": "SRC-02",
+      "details": "Side-by-side original screenshot vs deployed webapp review. Acceptance pending source-vs-runtime A/B. See docs/RESTORATION_GAP_BACKLOG_2026-10-18.md"
+    },
+    {
+      "seq": 32,
+      "date": "2026-10-18",
+      "type": "TASK_ADDED",
+      "taskId": "BRD-01",
+      "details": "Side-by-side original screenshot vs deployed webapp review. Acceptance pending source-vs-runtime A/B. See docs/RESTORATION_GAP_BACKLOG_2026-10-18.md"
+    },
+    {
+      "seq": 33,
+      "date": "2026-10-18",
+      "type": "TASK_ADDED",
+      "taskId": "BRD-02",
+      "details": "Side-by-side original screenshot vs deployed webapp review. Acceptance pending source-vs-runtime A/B. See docs/RESTORATION_GAP_BACKLOG_2026-10-18.md"
+    },
+    {
+      "seq": 34,
+      "date": "2026-10-18",
+      "type": "TASK_ADDED",
+      "taskId": "BRD-03",
+      "details": "Side-by-side original screenshot vs deployed webapp review. Acceptance pending source-vs-runtime A/B. See docs/RESTORATION_GAP_BACKLOG_2026-10-18.md"
+    },
+    {
+      "seq": 35,
+      "date": "2026-10-18",
+      "type": "TASK_ADDED",
+      "taskId": "BRD-04",
+      "details": "Side-by-side original screenshot vs deployed webapp review. Acceptance pending source-vs-runtime A/B. See docs/RESTORATION_GAP_BACKLOG_2026-10-18.md"
+    },
+    {
+      "seq": 36,
+      "date": "2026-10-18",
+      "type": "TASK_ADDED",
+      "taskId": "BRD-05",
+      "details": "Side-by-side original screenshot vs deployed webapp review. Acceptance pending source-vs-runtime A/B. See docs/RESTORATION_GAP_BACKLOG_2026-10-18.md"
+    },
+    {
+      "seq": 37,
+      "date": "2026-10-18",
+      "type": "TASK_ADDED",
+      "taskId": "ACT-01",
+      "details": "Side-by-side original screenshot vs deployed webapp review. Acceptance pending source-vs-runtime A/B. See docs/RESTORATION_GAP_BACKLOG_2026-10-18.md"
+    },
+    {
+      "seq": 38,
+      "date": "2026-10-18",
+      "type": "TASK_ADDED",
+      "taskId": "ACT-02",
+      "details": "Side-by-side original screenshot vs deployed webapp review. Acceptance pending source-vs-runtime A/B. See docs/RESTORATION_GAP_BACKLOG_2026-10-18.md"
+    },
+    {
+      "seq": 39,
+      "date": "2026-10-18",
+      "type": "TASK_ADDED",
+      "taskId": "ACT-03",
+      "details": "Side-by-side original screenshot vs deployed webapp review. Acceptance pending source-vs-runtime A/B. See docs/RESTORATION_GAP_BACKLOG_2026-10-18.md"
+    },
+    {
+      "seq": 40,
+      "date": "2026-10-18",
+      "type": "TASK_ADDED",
+      "taskId": "ACT-04",
+      "details": "Side-by-side original screenshot vs deployed webapp review. Acceptance pending source-vs-runtime A/B. See docs/RESTORATION_GAP_BACKLOG_2026-10-18.md"
+    },
+    {
+      "seq": 41,
+      "date": "2026-10-18",
+      "type": "TASK_ADDED",
+      "taskId": "BTL-01",
+      "details": "Side-by-side original screenshot vs deployed webapp review. Acceptance pending source-vs-runtime A/B. See docs/RESTORATION_GAP_BACKLOG_2026-10-18.md"
+    },
+    {
+      "seq": 42,
+      "date": "2026-10-18",
+      "type": "TASK_ADDED",
+      "taskId": "BTL-02",
+      "details": "Side-by-side original screenshot vs deployed webapp review. Acceptance pending source-vs-runtime A/B. See docs/RESTORATION_GAP_BACKLOG_2026-10-18.md"
+    },
+    {
+      "seq": 43,
+      "date": "2026-10-18",
+      "type": "TASK_ADDED",
+      "taskId": "BTL-03",
+      "details": "Side-by-side original screenshot vs deployed webapp review. Acceptance pending source-vs-runtime A/B. See docs/RESTORATION_GAP_BACKLOG_2026-10-18.md"
+    },
+    {
+      "seq": 44,
+      "date": "2026-10-18",
+      "type": "TASK_ADDED",
+      "taskId": "BTL-04",
+      "details": "Side-by-side original screenshot vs deployed webapp review. Acceptance pending source-vs-runtime A/B. See docs/RESTORATION_GAP_BACKLOG_2026-10-18.md"
+    },
+    {
+      "seq": 45,
+      "date": "2026-10-18",
+      "type": "TASK_ADDED",
+      "taskId": "DIE-01",
+      "details": "Side-by-side original screenshot vs deployed webapp review. Acceptance pending source-vs-runtime A/B. See docs/RESTORATION_GAP_BACKLOG_2026-10-18.md"
+    },
+    {
+      "seq": 46,
+      "date": "2026-10-18",
+      "type": "TASK_ADDED",
+      "taskId": "DIE-02",
+      "details": "Side-by-side original screenshot vs deployed webapp review. Acceptance pending source-vs-runtime A/B. See docs/RESTORATION_GAP_BACKLOG_2026-10-18.md"
+    },
+    {
+      "seq": 47,
+      "date": "2026-10-18",
+      "type": "TASK_ADDED",
+      "taskId": "DIE-03",
+      "details": "Side-by-side original screenshot vs deployed webapp review. Acceptance pending source-vs-runtime A/B. See docs/RESTORATION_GAP_BACKLOG_2026-10-18.md"
+    },
+    {
+      "seq": 48,
+      "date": "2026-10-18",
+      "type": "TASK_ADDED",
+      "taskId": "DIE-04",
+      "details": "Side-by-side original screenshot vs deployed webapp review. Acceptance pending source-vs-runtime A/B. See docs/RESTORATION_GAP_BACKLOG_2026-10-18.md"
+    },
+    {
+      "seq": 49,
+      "date": "2026-10-18",
+      "type": "TASK_ADDED",
+      "taskId": "CHT-01",
+      "details": "Side-by-side original screenshot vs deployed webapp review. Acceptance pending source-vs-runtime A/B. See docs/RESTORATION_GAP_BACKLOG_2026-10-18.md"
+    },
+    {
+      "seq": 50,
+      "date": "2026-10-18",
+      "type": "TASK_ADDED",
+      "taskId": "CHT-02",
+      "details": "Side-by-side original screenshot vs deployed webapp review. Acceptance pending source-vs-runtime A/B. See docs/RESTORATION_GAP_BACKLOG_2026-10-18.md"
+    },
+    {
+      "seq": 51,
+      "date": "2026-10-18",
+      "type": "TASK_ADDED",
+      "taskId": "CHT-03",
+      "details": "Side-by-side original screenshot vs deployed webapp review. Acceptance pending source-vs-runtime A/B. See docs/RESTORATION_GAP_BACKLOG_2026-10-18.md"
+    },
+    {
+      "seq": 52,
+      "date": "2026-10-18",
+      "type": "TASK_ADDED",
+      "taskId": "CHT-04",
+      "details": "Side-by-side original screenshot vs deployed webapp review. Acceptance pending source-vs-runtime A/B. See docs/RESTORATION_GAP_BACKLOG_2026-10-18.md"
+    },
+    {
+      "seq": 53,
+      "date": "2026-10-18",
+      "type": "TASK_ADDED",
+      "taskId": "CHT-05",
+      "details": "Side-by-side original screenshot vs deployed webapp review. Acceptance pending source-vs-runtime A/B. See docs/RESTORATION_GAP_BACKLOG_2026-10-18.md"
+    },
+    {
+      "seq": 54,
+      "date": "2026-10-18",
+      "type": "TASK_ADDED",
+      "taskId": "CHT-06",
+      "details": "Side-by-side original screenshot vs deployed webapp review. Acceptance pending source-vs-runtime A/B. See docs/RESTORATION_GAP_BACKLOG_2026-10-18.md"
+    },
+    {
+      "seq": 55,
+      "date": "2026-10-18",
+      "type": "TASK_ADDED",
+      "taskId": "WORLD-01",
+      "details": "Side-by-side original screenshot vs deployed webapp review. Acceptance pending source-vs-runtime A/B. See docs/RESTORATION_GAP_BACKLOG_2026-10-18.md"
+    },
+    {
+      "seq": 56,
+      "date": "2026-10-18",
+      "type": "TASK_ADDED",
+      "taskId": "WORLD-02",
+      "details": "Side-by-side original screenshot vs deployed webapp review. Acceptance pending source-vs-runtime A/B. See docs/RESTORATION_GAP_BACKLOG_2026-10-18.md"
+    },
+    {
+      "seq": 57,
+      "date": "2026-10-18",
+      "type": "TASK_ADDED",
+      "taskId": "WORLD-03",
+      "details": "Side-by-side original screenshot vs deployed webapp review. Acceptance pending source-vs-runtime A/B. See docs/RESTORATION_GAP_BACKLOG_2026-10-18.md"
+    },
+    {
+      "seq": 58,
+      "date": "2026-10-18",
+      "type": "TASK_ADDED",
+      "taskId": "SHOP-01",
+      "details": "Side-by-side original screenshot vs deployed webapp review. Acceptance pending source-vs-runtime A/B. See docs/RESTORATION_GAP_BACKLOG_2026-10-18.md"
+    },
+    {
+      "seq": 59,
+      "date": "2026-10-18",
+      "type": "TASK_ADDED",
+      "taskId": "SHOP-02",
+      "details": "Side-by-side original screenshot vs deployed webapp review. Acceptance pending source-vs-runtime A/B. See docs/RESTORATION_GAP_BACKLOG_2026-10-18.md"
+    },
+    {
+      "seq": 60,
+      "date": "2026-10-18",
+      "type": "TASK_ADDED",
+      "taskId": "RULE-01",
+      "details": "Side-by-side original screenshot vs deployed webapp review. Acceptance pending source-vs-runtime A/B. See docs/RESTORATION_GAP_BACKLOG_2026-10-18.md"
+    },
+    {
+      "seq": 61,
+      "date": "2026-10-18",
+      "type": "TASK_ADDED",
+      "taskId": "RULE-02",
+      "details": "Side-by-side original screenshot vs deployed webapp review. Acceptance pending source-vs-runtime A/B. See docs/RESTORATION_GAP_BACKLOG_2026-10-18.md"
+    },
+    {
+      "seq": 62,
+      "date": "2026-10-18",
+      "type": "TASK_ADDED",
+      "taskId": "RULE-03",
+      "details": "Side-by-side original screenshot vs deployed webapp review. Acceptance pending source-vs-runtime A/B. See docs/RESTORATION_GAP_BACKLOG_2026-10-18.md"
+    },
+    {
+      "seq": 63,
+      "date": "2026-10-18",
+      "type": "TASK_ADDED",
+      "taskId": "EVID-01",
+      "details": "Side-by-side original screenshot vs deployed webapp review. Acceptance pending source-vs-runtime A/B. See docs/RESTORATION_GAP_BACKLOG_2026-10-18.md"
+    },
+    {
+      "seq": 64,
+      "date": "2026-10-18",
+      "type": "TASK_ADDED",
+      "taskId": "EVID-02",
+      "details": "Side-by-side original screenshot vs deployed webapp review. Acceptance pending source-vs-runtime A/B. See docs/RESTORATION_GAP_BACKLOG_2026-10-18.md"
+    },
+    {
+      "seq": 65,
+      "date": "2026-10-18",
+      "type": "TASK_ADDED",
+      "taskId": "QA-01",
+      "details": "Side-by-side original screenshot vs deployed webapp review. Acceptance pending source-vs-runtime A/B. See docs/RESTORATION_GAP_BACKLOG_2026-10-18.md"
+    },
+    {
+      "seq": 66,
+      "date": "2026-10-18",
+      "type": "TASK_ADDED",
+      "taskId": "QA-02",
+      "details": "Side-by-side original screenshot vs deployed webapp review. Acceptance pending source-vs-runtime A/B. See docs/RESTORATION_GAP_BACKLOG_2026-10-18.md"
+    },
+    {
+      "seq": 67,
+      "date": "2026-10-18",
+      "type": "TASK_ADDED",
+      "taskId": "QA-03",
+      "details": "Side-by-side original screenshot vs deployed webapp review. Acceptance pending source-vs-runtime A/B. See docs/RESTORATION_GAP_BACKLOG_2026-10-18.md"
+    },
+    {
+      "seq": 68,
+      "date": "2026-10-18",
+      "type": "TASK_ADDED",
+      "taskId": "QA-04",
+      "details": "Side-by-side original screenshot vs deployed webapp review. Acceptance pending source-vs-runtime A/B. See docs/RESTORATION_GAP_BACKLOG_2026-10-18.md"
+    },
+    {
+      "seq": 69,
+      "date": "2026-10-18",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261018-006",
+      "taskIds": [
+        "SRC-01",
+        "SRC-02",
+        "BRD-01",
+        "BRD-02",
+        "BRD-03",
+        "BRD-04",
+        "BRD-05",
+        "ACT-01",
+        "ACT-02",
+        "ACT-03",
+        "ACT-04",
+        "BTL-01",
+        "BTL-02",
+        "BTL-03",
+        "BTL-04",
+        "DIE-01",
+        "DIE-02",
+        "DIE-03",
+        "DIE-04",
+        "CHT-01",
+        "CHT-02",
+        "CHT-03",
+        "CHT-04",
+        "CHT-05",
+        "CHT-06",
+        "WORLD-01",
+        "WORLD-02",
+        "WORLD-03",
+        "SHOP-01",
+        "SHOP-02",
+        "RULE-01",
+        "RULE-02",
+        "RULE-03",
+        "EVID-01",
+        "EVID-02",
+        "QA-01",
+        "QA-02",
+        "QA-03",
+        "QA-04"
+      ],
+      "details": "2004 original reference board/battle/chat/chat_ref/street/shop versus actual GitHub Actions Chromium renders, distinguish different source states and unmerged winBattle branch"
+    },
+    {
+      "seq": 70,
+      "date": "2026-10-18",
+      "type": "TASK_ADDED",
+      "taskId": "CHT-07",
+      "details": "Original ChatRoom toolbar physically intercepts self-avatar seat 9 in actual Chromium world-chat E2E 39137227054. Connected to REQ-20261018-006 original fidelity audit; prevent hidden click-blocking source toolbars."
+    },
+    {
+      "seq": 71,
+      "date": "2026-10-18",
+      "type": "QA_REGRESSION_FOUND",
+      "taskId": "CHT-07",
+      "requestId": "REQ-20261018-006",
+      "details": "GitHub Actions world-chat job 117704103913 at 2026-10-18T14:44 UTC fails locator.click('.social-avatar.self'): toolbar button '채팅방 목록' intercepts pointer events for 30s. Do not mark chat pixel/interaction fidelity done.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39137227054"
     }
   ]
 }
