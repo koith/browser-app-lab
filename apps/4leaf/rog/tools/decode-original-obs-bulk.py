@@ -79,6 +79,36 @@ def decode_rows(body,width,height,palette):
         return img,{"sourceRows":height,"decoder":"palette-and-byte-run-verified;x-centre-and-orientation-provisional","markerThreshold":low,"opaquePixels":opaque}
     raise ValueError("No strict full-height native scanline solution")
 
+def record_native_row_headers(frame_data,width,height):
+    """Describe (not yet interpret) raw 4-byte OBS scanline headers.
+    Pixel scanline positions require a separate codec-proof; avoid
+    assigning source x via guesswork when presenting real archive bytes.
+    """
+    for low in (20,24,28,32,16,12,8,4,0):
+        starts=[0]
+        for i in range(1,len(frame_data)-3):
+            a,b,c,d=frame_data[i:i+4]
+            if low<=a<=128 and b==2 and c<=min(90,width+30) and d<=3:
+                starts.append(i)
+        if len(starts)!=height:continue
+        spans=[(starts[k+1] if k+1<height else len(frame_data))-at-4
+               for k,at in enumerate(starts)]
+        if not all(1<=v<=width for v in spans):continue
+        return {
+            "headerWordInterpretation":"UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+            "threshold":low,"nativeHeight":height,"headers":[
+                {"row":row,"bytes":frame_data[at:at+4].hex(),
+                 "word0":struct.unpack_from("<H",frame_data,at)[0],
+                 "word1":struct.unpack_from("<H",frame_data,at+2)[0],
+                 "actualPayload":spans[row],
+                 "centeredWebFallbackX":(width-spans[row])//2}
+                for row,at in list(enumerate(starts))[:4] +
+                    list(enumerate(starts))[-3:]
+            ]
+        }
+    return None
+
+
 def inspect_rejected_member(source, frames=None):
     """Read-only byte-structure probe for the still-missing original bodies.
     Never converts guesses to accepted game sprites; records candidate row
@@ -183,6 +213,13 @@ def main():
             statistics["staticOnly"]+=1
         else:
             statistics["multiFrameSamples"]+=1
+        # Persist SOURCE header bytes only for inspection. The current X
+        # placement remains provisional and not the historical EXE formula.
+        first=next((i for i in images if i["index"]==0),images[0])
+        firstBody,firstW,firstH,_,_=frames[first["index"]]
+        headerProbe=record_native_row_headers(firstBody,firstW,firstH)
+        if headerProbe:
+            statistics.setdefault("sourceRLEHeaders",{})[name]=headerProbe
         recovered[cid]={"name":deck[cid].get("name",""),"sourcePak":"OBS.pak",
             "originalMember":name,"sourceSHA256":hashlib.sha256(data).hexdigest(),
             "originalAnimationCount":len(frames),"poseMapping":"UNVERIFIED; native action-table not yet decoded",
