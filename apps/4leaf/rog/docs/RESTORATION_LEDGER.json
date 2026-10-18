@@ -985,7 +985,7 @@
       "title": "DMP/DMO/MVE 26개 원본 지도 정확도 검증",
       "status": "in_progress",
       "milestone": "M04",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 26개 움직임 경로는 복원되었지만 25개 이벤트 데이터와 26경로 간 누락·특수칸 의미가 원작과 완전 일치하는지 불명 | 구현 목표: 원본 DMP.pak 76개 멤버(26 MVE/25 DMP/25 DMO)를 맵 ID별로 대응하고 미연결 맵 조건을 명시; VERIFIED 2002 source maps.js has 26 authentic DMP path arrays (1,920 cells) but ORIGINAL_LEAF_MAP_INFO has only 25 titles. Path 0170 (135 cells) was silently absent from playable map dropdown and lacked original DMP event table. The app now registers 0170 with explicit TITLE-UNVERIFIED and retains original coordinates, never fabricates event data. Runtime mobile/desktop QA pending.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 26개 움직임 경로는 복원되었지만 25개 이벤트 데이터와 26경로 간 누락·특수칸 의미가 원작과 완전 일치하는지 불명 | 구현 목표: 원본 DMP.pak 76개 멤버(26 MVE/25 DMP/25 DMO)를 맵 ID별로 대응하고 미연결 맵 조건을 명시; VERIFIED 2002 source maps.js has 26 authentic DMP path arrays (1,920 cells) but ORIGINAL_LEAF_MAP_INFO has only 25 titles. Path 0170 (135 cells) was silently absent from playable map dropdown and lacked original DMP event table. The app now registers 0170 with explicit TITLE-UNVERIFIED and retains original coordinates, never fabricates event data. Runtime mobile/desktop QA pending.; 2026-10-19 Chromium 1280x900 and iPhone 390x844 QA PASS (39178198474), exact 0170 135-cell source indices/145x97 native TIS displayed, original 25 metadata titles unchanged, merged main 1fe8683b. Historical event table still absent.",
       "acceptance": [
         "26개 경로 전체 셀/특수칸·워프·채널·시작/종점 원본 테이블 대조, 누락된 1개 이벤트 맵은 명시된 처리"
       ],
@@ -994,7 +994,9 @@
         "original/tiles.js",
         "tools/extract_original.py",
         "apps/4leaf/rog/game.js",
-        "apps/4leaf/rog/tests/dice-source-map0170-registration.cjs"
+        "apps/4leaf/rog/tests/dice-source-map0170-registration.cjs",
+        "https://github.com/koith/browser-app-lab/actions/runs/39178198474",
+        "https://github.com/koith/browser-app-lab/pull/133"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
       "lastReviewed": "2026-10-19",
@@ -3147,6 +3149,22 @@
       "taskId": "BRD-04",
       "details": "2002 26 DMP paths but 25 title labels; game source map registry now includes historically unnamed 0170 135-cell authentic route, protected explicit uncertainty and desktop/mobile Chromium game QA",
       "evidence": "apps/4leaf/rog/tests/dice-source-map0170-registration.cjs"
+    },
+    {
+      "seq": 111,
+      "date": "2026-10-19",
+      "type": "QA_VERIFIED",
+      "taskId": "BRD-04",
+      "details": "PR #133 restored full original 26 DMP source map lobby inventory incl. formerly invisible 0170 (135 cells); Chromium desktop + iPhone 390x844, exact source XY and native TIS display verified. Archival metadata still 25 verified names; unknown title and events NOT fabricated.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39178198474"
+    },
+    {
+      "seq": 112,
+      "date": "2026-10-19",
+      "type": "MERGED",
+      "taskId": "BRD-04",
+      "details": "PR #133 successfully squash-merged 1fe8683b; restore missing 26th source DMP 0170 into actual playable map menu.",
+      "evidence": "https://github.com/koith/browser-app-lab/pull/133"
     }
   ]
 }
