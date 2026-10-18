@@ -56,7 +56,22 @@ const ITEMS=[
 {id:'shoe',name:'여신의 신발',icon:'♘',hint:'3턴 이동 주사위 1개 추가',sourceId:'0040'}
 ];
 const ITEM_MAP=Object.fromEntries(ITEMS.map(i=>[i.id,i]));
-const SOURCE_ROUTES=window.ORIGINAL_LEAF_MAPS||{},SOURCE_INFO=window.ORIGINAL_LEAF_MAP_INFO||{},SOURCE_TILES=window.ORIGINAL_LEAF_TILES||{};
+const SOURCE_ROUTES=window.ORIGINAL_LEAF_MAPS||{},
+ SOURCE_TILES=window.ORIGINAL_LEAF_TILES||{};
+// The 2002 source contains 26 real DMP paths, but the extracted client
+// metadata names only 25. The 135-cell source map 0170 was silently
+// unselectable. Preserve the unmodified archive tables and explicitly
+// label an unverified display name; never invent a historical title.
+const SOURCE_INFO={...(window.ORIGINAL_LEAF_MAP_INFO||{})};
+for(const [id,rows] of Object.entries(SOURCE_ROUTES)){
+ if(Array.isArray(rows)&&rows.length>=10&&!SOURCE_INFO[id]){
+  SOURCE_INFO[id]={
+   title:'이름 미확인 · 원본 DMP '+id,
+   mode:null,
+   metadataStatus:'ARCHIVE-MAP-PRESENT/TITLE-UNVERIFIED'
+  };
+ }
+}
 const SOURCE_IDS=Object.fromEntries(Object.entries(SOURCE_INFO).map(([id,info])=>[info.title,id]));
 const MAPS={
 '4LEAF':{length:70,non:false,warp:[11,38],keepers:[13,29,47,61],jail:[24],chests:[6,32,52],boost:[17,49],attribute:[20,43],joker:[36]},
@@ -329,7 +344,13 @@ function generateTiles(map){
 function pathCoords(){let pts=[],left=0,right=13,top=0,bottom=7;while(left<=right&&top<=bottom){for(let x=left;x<=right;x++)pts.push([x,top]);for(let y=top+1;y<=bottom;y++)pts.push([right,y]);if(top<bottom)for(let x=right-1;x>=left;x--)pts.push([x,bottom]);if(left<right)for(let y=bottom-1;y>top;y--)pts.push([left,y]);left+=1;right-=1;top+=1;bottom-=1}return pts.map(([x,y])=>({x:5.5+x*(89/13),y:8.5+y*(83/7)}))}
 let PATH=pathCoords();
 function chooseSourcePath(map){const records=SOURCE_ROUTES[SOURCE_IDS[map]];if(!records||records.length<8){PATH=pathCoords();return}/* Authentic DMP index positions are unchanged. The browser camera owns ONE explicit 150x100 WEB display pitch, and all maps share that projection. */const grid=window.__LEAF_CAMERA__?.getState?.().sourceGrid||{width:2800,height:1551,pitchX:70,pitchY:47};const xs=records.map(p=>p[0]),ys=records.map(p=>p[1]);const midX=(Math.min(...xs)+Math.max(...xs))/2,midY=(Math.min(...ys)+Math.max(...ys))/2;PATH=records.map(p=>({x:50+(p[0]-midX)*grid.pitchX/grid.width*100,y:50+(p[1]-midY)*grid.pitchY/grid.height*100}))}
-function installAuthenticMaps(){const list=$('map-select'),entries=Object.entries(SOURCE_INFO).filter(([id])=>SOURCE_ROUTES[id]&&SOURCE_ROUTES[id].length>9);if(!entries.length)return;list.replaceChildren();const rank=['4LEAF','주사위','워프 게이트','PK','악마의 달팽이','한반도','For the Lucky'];entries.sort((a,b)=>{let i=rank.indexOf(a[1].title),j=rank.indexOf(b[1].title);return (i<0?99:i)-(j<0?99:j)});for(const [id,info] of entries){const title=info.title,length=SOURCE_ROUTES[id].length;const old=MAPS[title]||{};const generate=(step,offset)=>Array.from({length:Math.floor(length/step)},(_,i)=>offset+i*step).filter(i=>i>0&&i<length-1);MAPS[title]={length,non:['악마의 달팽이','한반도'].includes(title),warp:old.warp||generate(30,8),keepers:old.keepers||generate(17,13),jail:old.jail||generate(44,25),chests:old.chests||generate(19,6),boost:old.boost||generate(23,17),attribute:old.attribute||generate(29,20),joker:old.joker||generate(41,36)};const opt=document.createElement('option');opt.value=title;opt.textContent=title+' · '+length+'칸 [원본 '+id+(SOURCE_TILES[id]?' · 발판 복원':' · 경로 복원')+']';list.append(opt)}const randomOption=document.createElement('option');randomOption.value='__RANDOM__';randomOption.textContent='랜덤맵 · 원작 2003.02 업데이트';list.append(randomOption);list.value='4LEAF'}
+function installAuthenticMaps(){const list=$('map-select'),entries=Object.entries(SOURCE_INFO).filter(([id])=>SOURCE_ROUTES[id]&&SOURCE_ROUTES[id].length>9);if(!entries.length)return;list.replaceChildren();const rank=['4LEAF','주사위','워프 게이트','PK','악마의 달팽이','한반도','For the Lucky'];entries.sort((a,b)=>{let i=rank.indexOf(a[1].title),j=rank.indexOf(b[1].title);return (i<0?99:i)-(j<0?99:j)});for(const [id,info] of entries){const title=info.title,length=SOURCE_ROUTES[id].length;const old=MAPS[title]||{};const generate=(step,offset)=>Array.from({length:Math.floor(length/step)},(_,i)=>offset+i*step).filter(i=>i>0&&i<length-1);MAPS[title]={length,non:['악마의 달팽이','한반도'].includes(title),warp:old.warp||generate(30,8),keepers:old.keepers||generate(17,13),jail:old.jail||generate(44,25),chests:old.chests||generate(19,6),boost:old.boost||generate(23,17),attribute:old.attribute||generate(29,20),joker:old.joker||generate(41,36)};const opt=document.createElement('option');opt.value=title;
+ opt.textContent=title+' · '+length+'칸 [원본 '+id+
+  (SOURCE_TILES[id]?' · 발판 복원':' · 경로 복원')+
+  (info.metadataStatus?' · 이벤트/이름 미검증':'')+']';
+ opt.dataset.originalMapId=id;
+ opt.dataset.historicalTitleVerified=String(!info.metadataStatus);
+ list.append(opt)}const randomOption=document.createElement('option');randomOption.value='__RANDOM__';randomOption.textContent='랜덤맵 · 원작 2003.02 업데이트';list.append(randomOption);list.value='4LEAF'}
 function freshItems(){return Array.from({length:3},()=>{const pool=ITEMS.filter(item=>!item.disabled);return pool[rand(pool.length)].id})}
 function newPlayer(id,bot,name,team){return {id,bot,name,team,position:0,jail:0,ability:0,items:freshItems(),effects:{shoe:0,dove:0,clover:0,spade:0,ring:0,armageddon:0,valkyrie:0,oddcurse:0,evencurse:0,block:0,destroy:0,keeper:0},usedItem:false,color:COLORS[id],pawn:PAWNS[id]}}
 function startGame(){let map=$('map-select').value;const limit=Number($('point-limit').value),stats=teamStats(profile.team);if(map==='__RANDOM__'){const candidates=Object.keys(SOURCE_IDS).filter(name=>MAPS[name]&&SOURCE_ROUTES[SOURCE_IDS[name]]?.length>9);map=candidates[rand(candidates.length)]||'4LEAF';}chooseSourcePath(map);if(!profile.team[0])return modal('파티 구성','공격 체스맨을 선택하세요.',[{label:'확인',primary:true}]);if(stats.point>limit)return modal('소환 POINT 초과','현재 파티는 '+stats.point+'POINT이며 제한은 '+limit+'POINT입니다.',[{label:'확인',primary:true}]);const selectedMode=$('game-mode').value,hotseat=selectedMode!=='ai',bots=selectedMode==='network'?1:Number($('bot-count').value);
