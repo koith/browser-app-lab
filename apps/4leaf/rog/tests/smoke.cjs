@@ -125,12 +125,28 @@ async function run(){
   };
  });
  assert.equal(duelRig.platforms.length,2,'real duel includes two independent live mechanical podiums');
- assert.ok(duelRig.platforms.every(s=>s.openFrame&&s.platformHeight>35&&
-  s.feet.length===4&&s.feet.every(f=>f.visible&&f.w>=5&&f.h>=20)),
-  'historic 2004 platform is OPEN, supported by 4 real distinct DOM legs, never a fake opaque cylindrical drum');
- assert.ok(duelRig.platforms.every(s=>s.top.includes('radial-gradient')&&
-   s.struts.includes('linear-gradient')),
-  '2004 source-style separated glowing top deck and shallow metallic subdeck are both visible');
+ await page.waitForFunction(()=>{
+  const stage=document.querySelector('#battle-visual');
+  return stage?.dataset.nativeBattlePodium==='ready'&&
+    stage?.dataset.nativeBattleHeading==='ready';
+ },null,{timeout:12000});
+ const realPodium=await page.locator('#battle-visual').evaluate(stage=>{
+  const art=stage.querySelector('.leaf-native-winbattle-podiums');
+  const title=stage.querySelector('.leaf-native-winbattle-heading');
+  return {size:[art?.naturalWidth,art?.naturalHeight],
+   title:[title?.naturalWidth,title?.naturalHeight],
+   provenance:art?.dataset.originalSourceMember,
+   visible:art&&getComputedStyle(art).display,
+   stalePlatforms:[...stage.querySelectorAll('.battle-visual-pedestal')].map(e=>getComputedStyle(e).display),
+   staleVS:getComputedStyle(stage.querySelector('.battle-visual-vs')).display};
+ });
+ assert.deepEqual(realPodium.size,[355,113],
+  'genuine 2002 IMG.pak winBattle.spr 355x113 source art must replace fabricated four-legged stage');
+ assert.deepEqual(realPodium.title,[222,42]);
+ assert.equal(realPodium.provenance,'Dice/IMG.pak:winBattle.spr');
+ assert.equal(realPodium.visible,'block');
+ assert.deepEqual(realPodium.stalePlatforms,['none','none']);
+ assert.equal(realPodium.staleVS,'none');
  assert.ok(duelRig.platforms.every(s=>s.actorAbove&&s.originalPawn?.length===4&&
   ['original/CardData/','original/OBS/'].some(prefix=>(s.nativeSource||'').includes(prefix))),'actual selected Genesis card/OBS imagery stands on the source-comparison platform and do not become screenshots');
  assert.ok(duelRig.platforms.every(s=>s.rollCount>=1),'actual rolled original attack/defense values remain live above podium');
