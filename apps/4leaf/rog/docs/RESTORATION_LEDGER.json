@@ -1363,6 +1363,30 @@
         "QA-02"
       ],
       "category": "품질·배포"
+    },
+    {
+      "id": "CHT-07",
+      "priority": "P0",
+      "title": "상설 채팅방 자기 아바타·원본 도구모음 클릭 가림 회귀",
+      "status": "todo",
+      "milestone": "M03",
+      "category": "상설 채팅",
+      "current": "2026-10-18 실제 4LEAF World+Chat 통합 CI 39137227054에서 `.social-avatar.self[data-seat=9]`의 물리 클릭이 30초간 막힘: 원본 툴바 `.social-classic-toolbar`의 `채팅방 목록` 버튼이 상단 stacking layer로 클릭을 가로챔. 과거 링메뉴 z-index 수정 PR#113과 별개 사용자 접근성 결함. 동일 지점에서 메뉴 조작과 자기 아바타 선택 모두 성공하게 고쳐야 함.",
+      "acceptance": [
+        "794×528 전체 상설방/서재/지역 6개 방에서 실물 self·peer 아바타의 중앙 포인트가 document.elementFromPoint로 해당 버튼 또는 소유 아바타를 가리킴; 원본 30px 툴바 버튼도 여전히 클릭 가능. WebKit/Chromium 동일 화면에서 실패 0건."
+      ],
+      "evidence": [
+        "https://github.com/koith/browser-app-lab/actions/runs/39137227054",
+        "apps/4leaf/rog/tests/world-chat.cjs",
+        "apps/4leaf/rog/chatroom-native-2004-frame.css"
+      ],
+      "evidenceLevel": "VERIFIED-WEBAPP-BROWSER-REGRESSION; HISTORICAL-LAYOUT-UNVERIFIED",
+      "lastReviewed": "2026-10-18",
+      "verifiedAcceptance": null,
+      "dependencies": [
+        "CHT-04",
+        "CHT-05"
+      ]
     }
   ],
   "events": [
@@ -1986,6 +2010,22 @@
         "QA-04"
       ],
       "details": "2004 original reference board/battle/chat/chat_ref/street/shop versus actual GitHub Actions Chromium renders, distinguish different source states and unmerged winBattle branch"
+    },
+    {
+      "seq": 70,
+      "date": "2026-10-18",
+      "type": "TASK_ADDED",
+      "taskId": "CHT-07",
+      "details": "Original ChatRoom toolbar physically intercepts self-avatar seat 9 in actual Chromium world-chat E2E 39137227054. Connected to REQ-20261018-006 original fidelity audit; prevent hidden click-blocking source toolbars."
+    },
+    {
+      "seq": 71,
+      "date": "2026-10-18",
+      "type": "QA_REGRESSION_FOUND",
+      "taskId": "CHT-07",
+      "requestId": "REQ-20261018-006",
+      "details": "GitHub Actions world-chat job 117704103913 at 2026-10-18T14:44 UTC fails locator.click('.social-avatar.self'): toolbar button '채팅방 목록' intercepts pointer events for 30s. Do not mark chat pixel/interaction fidelity done.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39137227054"
     }
   ]
 }
