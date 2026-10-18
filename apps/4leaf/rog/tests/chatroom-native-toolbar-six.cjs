@@ -69,7 +69,7 @@ async function run(engine){
    // This never fabricates peers nor edits hidden game state directly.
    const seatPairs=[
     [[73,66],[39,92]],[[76,64],[40,91]],[[73,63],[39,92]],
-    [[81,83],[77,69]],[[61,72],[29,97]],[[74,66],[39,93]]
+    [[81,83],[77,69]],[[61,72],[73,97]],[[74,66],[39,93]]
    ];
    for(const [index,point] of [3,9].map((seat,i)=>[seat,seatPairs[background][i]])){
     await page.evaluate(([x,y])=>{
@@ -79,9 +79,11 @@ async function run(engine){
       clientX:r.left+r.width*x/100,clientY:r.top+r.height*y/100
      }));
     },point);
-    await page.waitForFunction(seat=>
-      document.querySelector('#social-image-frame .social-avatar.self')?.dataset.seat===String(seat),
-      index,{timeout:3000});
+    const resultingSeat=await page.locator('#social-image-frame .social-avatar.self')
+      .getAttribute('data-seat',{timeout:3000});
+    assert.equal(resultingSeat,String(index),
+      'floor click must resolve to the exact real room source seat (room '+background+
+      ', clicked '+JSON.stringify(point)+', expected '+index+', actual '+resultingSeat+')');
     const moved=await page.evaluate(()=>{
      const frame=document.getElementById('social-image-frame');
      const bar=frame.querySelector('.social-classic-toolbar');
