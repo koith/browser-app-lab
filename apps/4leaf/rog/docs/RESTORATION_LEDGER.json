@@ -318,18 +318,25 @@
       "id": "GOV-LEDGER",
       "priority": "P0",
       "title": "대화 소실 대응 영구 개발원장 운영",
-      "status": "in_progress",
+      "status": "done",
       "milestone": null,
-      "current": "GitHub 저장소에 최초 원장과 CLI/CI를 도입하는 작업",
+      "current": "GitHub main에 개발원장과 CLI, 불변 이벤트 및 CI가 배포·검증됨. 이후 모든 새로운 요청도 반드시 intake와 작업 ID를 이어서 보존.",
       "acceptance": [
         "모든 신규 사용자 요청의 작업 ID/상태/근거를 저장소 커밋, 미완료 목록 자동 생성·삭제/거짓 완료 차단"
       ],
       "evidence": [
-        "apps/4leaf/rog/docs/RESTORATION_LEDGER.json"
+        "apps/4leaf/rog/docs/RESTORATION_LEDGER.json",
+        "https://github.com/koith/browser-app-lab/actions/runs/39119202546",
+        "https://github.com/koith/browser-app-lab/actions/runs/39119202555"
       ],
       "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
       "lastReviewed": "2026-10-18",
-      "verifiedAcceptance": null
+      "verifiedAcceptance": {
+        "sourceComparison": "기존 RESTORATION_MILESTONES_2026-10-18.md 단일 상태서술 대비 요청 원문/작업 ID/이력 불변 검증의 단일 JSON 개발원장 구조 반영: docs/RESTORATION_LEDGER.md",
+        "implementation": "apps/4leaf/rog/tools/restoration-ledger.cjs + apps/4leaf/rog/docs/RESTORATION_LEDGER.json + .github/workflows/rog-restoration-ledger.yml",
+        "runtimeTest": "GitHub Actions main 39118635082, 39119052162, 39119202546 모두 success; 삭제/거짓 완료/무기록 상태 변경 회귀 검증",
+        "deployment": "GitHub main 2205ab858ee3ab447893139f3566ea4a8b426da0, Pages main 39119202555 success"
+      }
     }
   ],
   "events": [
@@ -391,6 +398,15 @@
       "taskId": "P0-BOARD",
       "details": "26개 원본 DMP 타일 좌표/웹 투영 감사와 독립 브라우저 보드 테스트는 main squash 2c967397e1676595e43e283c79a8483f552ca5f7에서 통과. 원작 픽셀/알파 겹침 동일성은 미검증.",
       "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39119052163"
+    },
+    {
+      "seq": 6,
+      "date": "2026-10-18",
+      "type": "STATUS_CHANGED",
+      "taskId": "GOV-LEDGER",
+      "from": "in_progress",
+      "to": "done",
+      "details": "원장 도입 자체를 완료 판정. 원작 게임 M03–M09/P0는 모두 미완료 상태로 남기고 시각적 복원 완료라는 뜻으로 사용하지 않음. 검증: main ledger CI 39119202546, Pages 39119202555."
     }
   ]
 }
