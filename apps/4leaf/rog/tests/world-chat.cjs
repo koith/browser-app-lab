@@ -758,7 +758,7 @@ const path=require('path');
  // because a real Registry person is standing in front of its old 30px
  // rectangle. Assert native source button's physical HIT TARGET before
  // clicking, rather than DOM.click() which concealed this original bug.
- const hit=await host.locator('.social-original-tool[aria-label="아바타 선택"]').evaluate(btn=>{
+ const nativeToolbarHit=await host.locator('.social-original-tool[aria-label="아바타 선택"]').evaluate(btn=>{
   const rect=btn.getBoundingClientRect();
   const at=document.elementFromPoint(rect.left+rect.width/2,rect.top+rect.height/2);
   const bar=btn.closest('.social-classic-toolbar');
@@ -767,9 +767,9 @@ const path=require('path');
    n:bar?.dataset.nativeToolHitCollisions,
    relocated:bar?.dataset.webPositionInferred};
  });
- assert.ok(hit.hit,
-  'real 30px source avatar tool must be physically clickable even with seated participants: '+JSON.stringify(hit));
- assert.equal(hit.n,'0','toolbar should occupy an actual unoccupied source room area: '+JSON.stringify(hit));
+ assert.ok(nativeToolbarHit.hit,
+  'real 30px source avatar tool must be physically clickable even with seated participants: '+JSON.stringify(nativeToolbarHit));
+ assert.equal(nativeToolbarHit.n,'0','toolbar should occupy an actual unoccupied source room area: '+JSON.stringify(nativeToolbarHit));
  await host.locator('.social-original-tool[aria-label="아바타 선택"]').click();
  assert.ok(await host.locator('.social-avatar-chooser').isVisible(),'authentic toolbar avatar icon opens working character picker');
  await host.locator('.social-modal-title button').click();
