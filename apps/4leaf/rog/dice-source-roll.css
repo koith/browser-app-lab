@@ -98,3 +98,37 @@
 @media(prefers-reduced-motion:reduce){
  #app.app-classic-dice #game #dice-source-roll{transition:none!important}
 }
+
+/* ACTUAL original Dice/IMG.pak eventRoll1.spr 16-frame ROLL control.
+ * 69..91x51 source pixel frames remain centred at their original image
+ * scale on the live 800x600 board. CSS-made ROLL is a load-error fallback.
+ * The 4 frames of roll.spr are a distinct old arrow-style control: do not
+ * conflate it with these 16 eventRoll1.spr source frames. */
+#app.app-classic-dice #game #dice-source-roll .dice-original-roll-spr{
+ position:absolute!important;
+ display:none!important;
+ left:50%!important;bottom:0!important;top:auto!important;
+ width:auto!important;height:51px!important;
+ max-width:none!important;max-height:none!important;
+ min-width:0!important;min-height:0!important;
+ margin:0!important;padding:0!important;
+ object-fit:contain!important;object-position:center bottom!important;
+ transform:translateX(-50%)!important;
+ image-rendering:auto!important;
+ background:transparent!important;border:0!important;box-shadow:none!important;
+ pointer-events:none!important;
+ z-index:6!important;
+}
+#app.app-classic-dice #game #dice-source-roll[data-native-roll-source="ready"]::before,
+#app.app-classic-dice #game #dice-source-roll[data-native-roll-source="ready"] .dice-source-roll-orb,
+#app.app-classic-dice #game #dice-source-roll[data-native-roll-source="ready"] .dice-source-roll-label{
+ display:none!important;
+}
+#app.app-classic-dice #game #dice-source-roll[data-native-roll-source="ready"] .dice-original-roll-spr{
+ display:block!important;
+}
+@media(max-width:650px){
+ #app.app-classic-dice #game #dice-source-roll .dice-original-roll-spr{
+  height:46px!important;
+ }
+}
