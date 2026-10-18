@@ -428,7 +428,10 @@
  // ChatTown northback/southback are native 794×404 illustrations, whereas
  // ChatRoom interiors are native 794×528. Never fill the missing 124 pixels
  // with a fabricated information banner or squeeze the town into room space.
- const sceneHeight=()=>state.view==='town'||state.view==='knighttown'?404:H;
+ // The server-backed room directory is a Web control over the recovered
+ // ChatTown 794x404 background, NOT a 794x528 ChatRoom interior.
+ // Source-only directory never stretches or invents an extra 124px footer.
+ const sceneHeight=()=>['town','directory','knighttown'].includes(state.view)?404:H;
  function fit(){
   const region=$stage(),frame=$('social-image-frame');if(!region||!frame)return;
   const h=sceneHeight();
