@@ -16,6 +16,10 @@
  function sequenceFor(native,action){
    const map={idle:[0,1,2],walk:[0,1,2,3],attack:[10,18],hurt:[18,10],victory:[25,30,0]};
    const all=native.frames||[];
+   // Some genuinely decoded OBS sources have no safe frame-0 decode.
+   // Expose their real pixels, but NEVER animate unrelated frames as if
+   // their original idle/walk/attack semantic mapping were established.
+   if(native.hasVerifiedFrameZero===false)return all.slice(0,1);
    const picks=(map[action]||[0]).map(index=>all.find(f=>f.index===index)).filter(Boolean);
    // Frame data is source-authentic; these labels are provisional until
    // the original action/direction lookup table is recovered.
@@ -72,7 +76,8 @@
    pawn.dataset.actorSource='OBS/'+native.originalMember;
    pawn.dataset.actorOriginalModelRecovered='true';
    pawn.dataset.sourceAnimation='genuine-OBS-pixels';
-   pawn.dataset.sourcePoseMapping='unverified';
+   pawn.dataset.sourcePoseMapping=native.hasVerifiedFrameZero===false
+     ?'unverified-frame-zero-missing/static-source-pose':'unverified';
    img.hidden=false;
    const seq=sequenceFor(native,action);
    renderNativeFrame(pawn,seq[0]);
