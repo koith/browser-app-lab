@@ -87,6 +87,28 @@
     displayed this atlas as a SECOND browser toolbar above the room; the 2004
     capture places context/action icons inside the scene at lower right.
     No duplicated buttons: each existing handler is moved into the room. */
+ /* Live original Registry actors must receive their own clicks. Previously
+    30px source toolbar icon hitboxes intercepted avatar clicks at seats near
+    (608,311..528), even though the figure was visibly in front. Keep the
+    original 794x528 room and native 30px atlas, but make the transparent
+    actor layer non-intercepting outside actual sprites; nested foreground
+    furniture keeps its preexisting per-seat painter depth. */
+ #rooms.classic-chat-room #social-image-frame>.social-avatar-layer{
+  z-index:106!important;
+  pointer-events:none!important;
+ }
+ #rooms.classic-chat-room #social-image-frame>.social-avatar-layer .social-avatar,
+ #rooms.classic-chat-room #social-image-frame>.social-avatar-layer .social-native-ring-action{
+  pointer-events:auto!important;
+ }
+ #rooms.classic-chat-room #social-image-frame>.social-avatar-layer .social-room-foreground{
+  pointer-events:none!important;
+ }
+ /* When an icon is keyboard-focused, keep it accessible independently of
+    which occupied seat overlaps its hit rectangle. */
+ #rooms.classic-chat-room #social-image-frame>.social-classic-toolbar:focus-within{
+  z-index:111!important;
+ }
  #rooms.classic-chat-room #social-image-frame>.social-classic-toolbar{
   display:flex!important;
   box-sizing:border-box!important;
