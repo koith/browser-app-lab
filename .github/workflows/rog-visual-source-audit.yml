@@ -11,6 +11,7 @@ on:
       - 'apps/4leaf/rog/dice-source-roll.js'
       - 'apps/4leaf/rog/dice-source-roll.css'
       - 'apps/4leaf/rog/original/SourceSPR/**'
+      - 'apps/4leaf/rog/tests/original-source-spr-integrity.cjs'
       - 'apps/4leaf/rog/dice-native-player-portraits.css'
       - 'apps/4leaf/rog/tests/dice-original-visual-qa.cjs'
       - 'apps/4leaf/rog/registry-native-chroma.js'
@@ -32,6 +33,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Verify 20 source-authentic 2002 ROLL PNG frames against SHA256
+        run: node apps/4leaf/rog/tests/original-source-spr-integrity.cjs
       - name: Install genuine desktop Chromium
         run: |
           npm install --no-save playwright
