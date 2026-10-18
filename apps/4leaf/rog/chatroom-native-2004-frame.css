@@ -144,7 +144,8 @@
    * steal actor clicks between source icons. */
   z-index:109!important;
   pointer-events:none!important;
-  top:311px!important;left:608px!important;
+  top:var(--leaf-chat-toolbar-y,311px)!important;
+  left:var(--leaf-chat-toolbar-x,608px)!important;
   width:32px!important;
   height:217px!important;
   padding:0!important;margin:0!important;
