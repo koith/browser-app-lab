@@ -991,6 +991,10 @@ async function useAbility(){
  case 26:case 27:p.effects.ring=2;break;
  default:p.ability=50;appendMove('이 능력은 아직 세부 효과 확인 중입니다. 절반의 게이지를 반환했습니다.');drawGame();return;
  }
+ // Overlay actual 2002 source winAbility.spr GUI pixels only AFTER a
+ // successful real 100%-charged game action. This is independent source
+ // artwork, never a screenshot or an invented gameplay result.
+ window.__LEAF_ORIGINAL_ABILITY__?.show(p.name,stats.ability);
  appendMove(p.name+' · '+stats.name+' 『'+stats.ability+'』 발동');
  if([30,33,35,37,24].includes(code)){p.ability=0;await resolveTile(p)}
  drawGame();persist();
