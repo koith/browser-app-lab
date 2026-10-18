@@ -34,7 +34,7 @@ def members(data):
     previous=0
     for i in range(count):
         entry=data[4+i*28:4+(i+1)*28]
-        name=bytes(c^255 for c in entry[:24]).split(b'\\0')[0].decode('cp949','replace')
+        name=bytes(c^255 for c in entry[:24]).split(b'\0')[0].decode('cp949','replace')
         end=(u32(entry,24)^0xffffffff)+1
         if end<=previous or base+end>len(data):raise ValueError('Invalid member '+name)
         yield name,bytes(data[base+previous:base+end])
