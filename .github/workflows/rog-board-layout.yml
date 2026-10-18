@@ -25,6 +25,8 @@ on:
       - 'apps/4leaf/rog/tests/dice-native-pawn-dmp-depth.cjs'
       - 'apps/4leaf/rog/tests/dice-native-tis-alpha.cjs'
       - 'apps/4leaf/rog/tests/dice-native-tis-full-outline.cjs'
+      - 'apps/4leaf/rog/tests/dice-source-map0170-registration.cjs'
+      - 'apps/4leaf/rog/game.js'
       - 'apps/4leaf/rog/tests/dice-native-frame.cjs'
       - 'apps/4leaf/rog/tests/dice-battle-podium.cjs'
       - 'apps/4leaf/rog/tests/dice-native-battle-source-fallback.cjs'
@@ -92,6 +94,8 @@ jobs:
       - name: Verify changing real native OBS frame dimensions, not fixed frame-zero labels
         run: node apps/4leaf/rog/tests/dice-original-obs-chessmen.cjs
       - run: node apps/4leaf/rog/tests/board-layout.cjs
+      - name: Verify all 26 original DMP paths including archived unnamed map 0170 are selectable and playable on desktop/mobile
+        run: node apps/4leaf/rog/tests/dice-source-map0170-registration.cjs
       - name: "Reproduce iPhone screenshot: zero horizontal TIS overlap and 2 original Genesis OBS players"
         run: node apps/4leaf/rog/tests/dice-horizontal-native-actors.cjs
       - name: Verify genuine native Genesis OBS chessman and no giant fabricated missing-body proxy
