@@ -538,6 +538,9 @@ const path=require('path');
   'real server-backed permanent rooms are ordinary functional room buttons, not fake static props');
  assert.ok((await host.locator('.social-directory-row[data-permanent="true"] .social-room-users').allTextContents())
   .every(text=>text==='0/12명'),'unoccupied permanent rooms must never show pretend human users');
+ const directoryShot=await host.locator('#social-image-frame').screenshot({type:'jpeg',quality:65,
+  animations:'disabled',timeout:16000});
+ console.log('SOURCE_PERMANENT_ROOM_DIRECTORY_JPEG_BASE64 '+directoryShot.toString('base64'));
  const emptyTerrain=await host.locator('#social-map-plane').evaluate(el=>({
   type:el.dataset.terrain,image:getComputedStyle(el).backgroundImage
  }));
