@@ -538,6 +538,15 @@
   });
   sceneInit=true;
   if('ResizeObserver' in window){resize=new ResizeObserver(fit);resize.observe($stage())}
+  window.addEventListener('resize',()=>{
+   const bar=$root()?.querySelector('.social-classic-toolbar');
+   const frame=$('social-image-frame');
+   const large=window.matchMedia('(min-width:801px) and (min-height:550px)').matches;
+   if(!bar||!frame)return;
+   if(state.view==='room'&&large&&bar.parentElement!==frame)frame.append(bar);
+   else if((state.view!=='room'||!large)&&bar.parentElement===frame)
+    $root()?.querySelector('.social-header')?.append(bar);
+  },{passive:true});
   render();
  }
  function regionState(region){
@@ -575,6 +584,12 @@
   if(actualExit&&actualExit.parentElement===frame)
    $root()?.querySelector('.social-header-tools')?.append(actualExit);
   actualExit?.removeAttribute('data-in-original-room');
+  // Keep the ACTUAL six native toolbar atlas actions plus source expression
+  // control when the web shell header is removed. Never clone the buttons:
+  // live click handlers, focus, owner permissions and aria stay intact.
+  const originalToolstrip=$root()?.querySelector('.social-classic-toolbar');
+  if(originalToolstrip?.parentElement===frame)
+   $root()?.querySelector('.social-header')?.append(originalToolstrip);
   frame.replaceChildren();
   if(state.view==='board')renderBulletin(frame);
   if(state.view==='town')renderTown(frame);
@@ -585,6 +600,8 @@
    // The original screenshot shows the EXIT sprite at (728,503) of 794x528.
    // Same button instance; preserves back/leave behavior and a11y bindings.
    if(actualExit){frame.append(actualExit);actualExit.dataset.inOriginalRoom='true';}
+   if(originalToolstrip&&window.matchMedia('(min-width:801px) and (min-height:550px)').matches)
+    frame.append(originalToolstrip);
   }
   updateHeader();fit();changeScope(scope());
   window.__LEAF_NATIVE_ROOM_PANELS__?.afterRender();
