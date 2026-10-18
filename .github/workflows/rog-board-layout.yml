@@ -96,5 +96,8 @@ jobs:
             leaf-board-*.png
             leaf-live-3d-battle-podiums-*.png
             leaf-original-battle-stage-*.png
+            leaf-original-source-battle-*.png
+            leaf-native-source-*.png
+            leaf-genuine-original-2002-obs-chessmen-*.png
             rog-dmp-overlap-audit.json
           retention-days: 7
