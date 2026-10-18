@@ -355,7 +355,7 @@ function drawBoard(){
    // event tile content (item swaps, map changes and game resumes).
    const existingPawns=$('board-pawns');
    root.dataset.renderKey=key;root.replaceChildren();svg.replaceChildren();
-   const cameraSize=window.__LEAF_CAMERA__?.getState?.().size||{width:2300,height:1780};
+   const cameraSize=window.__LEAF_CAMERA__?.getState?.().size||{width:2650,height:2050};
    const coords=PATH.slice(0,match.tiles.length).map(p=>({
     x:p.x*cameraSize.width/100,y:p.y*cameraSize.height/100}));
    const path=document.createElementNS('http://www.w3.org/2000/svg','polyline');
@@ -368,7 +368,7 @@ function drawBoard(){
      b.style.left=PATH[i].x+'%';b.style.top=PATH[i].y+'%';b.dataset.tile=i;
      // Genuine original DMP axial-grid coordinates are unchanged.
      // Render full SOURCE 145x97 pixels with screenshot-calibrated WEB
-     // spacing ~111x75. Original DMP indices stay 70x47; the modest
+     // spacing ~128x86. Original DMP indices stay 70x47; the modest
      // overlap is painted in DMP depth order, not by route index.
      // Original MVE elevation and camera matrix remain unrecovered.
      const dmp=SOURCE_ROUTES[SOURCE_IDS[match.map]]?.[i];
@@ -379,7 +379,7 @@ function drawBoard(){
      }
      b.dataset.nativeTisSize='145x97';
      b.dataset.dmpLogicalPitch='70x47';
-     b.dataset.projectedPitch='111x75-web-screenshot-calibrated';
+     b.dataset.projectedPitch='128x86-web-screenshot-calibrated';
      // Painter order follows the original DMP grid, not route parity.
      // Cells on the same row are sorted by their genuine x coordinate;
      // a row ahead ALWAYS paints over rows behind it. Reserve +1 for actors.
