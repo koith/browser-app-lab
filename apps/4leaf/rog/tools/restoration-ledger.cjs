@@ -170,5 +170,8 @@ function main(argv){
  validate(data);save(data);
  report(data,true);
 }
-try{main(process.argv.slice(2))}
-catch(error){console.error('RESTORATION LEDGER ERROR:',error.message);process.exitCode=1}
+module.exports={validate,read,save,report,against,append,idForRequest,REQUIRED,STATUSES};
+if(require.main===module){
+ try{main(process.argv.slice(2))}
+ catch(error){console.error('RESTORATION LEDGER ERROR:',error.message);process.exitCode=1}
+}
