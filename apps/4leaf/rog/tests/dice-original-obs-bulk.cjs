@@ -23,7 +23,12 @@ for(const [id,source] of Object.entries(recovered)){
  assert.match(source.originalMember,/^1\d{3}\.obs$/);
  assert.equal(source.poseMapping.startsWith('UNVERIFIED'),true,'never falsely certify original action tables');
  assert.equal(source.horizontalScanlineOrigin.startsWith('PROVISIONAL'),true);
- assert.ok(source.frames.length>=2);
+ assert.ok(source.frames.length>=1,'one strictly decoded OBS source frame is useful REAL character art');
+ assert.equal(source.singleFrameStillOnly===true,source.frames.length===1,
+  'one-frame original characters MUST advertise static-only, not reconstructed animation');
+ if(source.frames.length===1){
+  assert.match(source.fallbackAction||'',/^EARLIEST SOURCE FRAME ONLY/);
+ }
  assert.equal(source.hasVerifiedFrameZero,source.frames.some(f=>f.index===0),
    'manifest must truthfully identify whether the original zero frame was decoded');
  if(!source.hasVerifiedFrameZero){
