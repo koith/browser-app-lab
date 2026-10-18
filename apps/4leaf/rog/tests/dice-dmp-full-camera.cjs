@@ -37,8 +37,8 @@ const path=require('node:path');
    };
   });
   const initial=await snapshot();
-  assert.deepEqual(initial.world,[2300,1780],
-   'screen-calibrated WEB projection retains real TIS 145x97 pixels with dense source-like overlap');
+  assert.deepEqual(initial.world,[2650,2050],
+   'WEB projection keeps full native TIS 145x97 pixels with only a narrow photo-calibrated raised-platform lip overlap');
   assert.ok(initial.sourceVisible>=13,
    'archived 2004 board scene contains a dense path, not a nearly empty giant terrain camera: '+initial.sourceVisible);
   const sourced=await page.evaluate(()=>window.__LEAF_CAMERA__.getState().sourceGrid);
