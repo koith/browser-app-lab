@@ -653,6 +653,21 @@ const path=require('path');
  assert.equal(nativeEntry.edit,'rgba(0, 0, 0, 0)','native text frame remains visible');
  assert.equal(nativeEntry.send,'채팅 메시지 보내기','native source speech-bubble send hitbox is accessible');
  assert.equal(await host.locator('#social-close-room').count(),1,'room creator may close their own room');
+ const exitHit=await host.evaluate(()=>{
+  const frame=document.getElementById('social-image-frame');
+  const exit=document.getElementById('social-back');
+  const panel=document.getElementById('social-peer-panel');
+  const hit=(el)=>{const b=el.getBoundingClientRect(),c=getComputedStyle(el);
+   return {x:b.x,y:b.y,w:b.width,h:b.height,z:c.zIndex,position:c.position,
+    parent:el.parentElement?.id,overflow:c.overflow,display:c.display}};
+  const b=exit.getBoundingClientRect();
+  const node=document.elementFromPoint(b.x+b.width/2,b.y+b.height/2);
+  return {frame:hit(frame),exit:hit(exit),roster:hit(panel),list:hit(document.getElementById('social-peer-list')),
+   clickedNode:node?.outerHTML.slice(0,210),closestExit:!!node?.closest('#social-back')};
+ });
+ console.log('ORIGINAL_ROOM_EXIT_POINTER_GEOMETRY '+JSON.stringify(exitHit));
+ const screenshot=await host.locator('#social-image-frame').screenshot({type:'jpeg',quality:70,timeout:12000});
+ console.log('ORIGINAL_ROOM_SOURCE_LIVE_JPEG_BASE64 '+screenshot.toString('base64'));
  await host.locator('#social-back').click();
  assert.equal(await host.evaluate(()=>window.__LEAF_NATIVE_ROOM_PANELS__?.getState().messengerParent),'main','leaving source room returns exact same real chat input to main');
  assert.equal(await host.locator('#social-peer-panel').evaluate(el=>el.parentElement.classList.contains('social-layout')),true,'the single real roster returns to its ordinary town layout');
