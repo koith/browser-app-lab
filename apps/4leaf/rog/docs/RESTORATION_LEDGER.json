@@ -573,7 +573,7 @@
       "title": "원작 복원 최종 화면·기능 수용 게이트",
       "status": "in_progress",
       "milestone": "M09",
-      "current": "과거 CI 성공은 원작 동일성 완료의 증거가 아님; 2026-10-18 공개 Pages 원본 주잔 브라우저 QA(39123501334) 실패 원인: PR #110에서 제거한 .tile-symbol / <small>을 검사에서 참조해 getComputedStyle(null) TypeError. 실제 웹앱 원본 비트맵은 정상, 수용 게이트 검사가 낡아 수정·재검증 중.; 원본 OBS 동작·전투 SPR 정상/오프라인 누락 대비 둘 모두 CI 게이트 추가. source evidence 없는 3D 원작 동등성은 판정하지 않음.",
+      "current": "과거 CI 성공은 원작 동일성 완료의 증거가 아님; 2026-10-18 공개 Pages 원본 주잔 브라우저 QA(39123501334) 실패 원인: PR #110에서 제거한 .tile-symbol / <small>을 검사에서 참조해 getComputedStyle(null) TypeError. 실제 웹앱 원본 비트맵은 정상, 수용 게이트 검사가 낡아 수정·재검증 중.; 원본 OBS 동작·전투 SPR 정상/오프라인 누락 대비 둘 모두 CI 게이트 추가. source evidence 없는 3D 원작 동등성은 판정하지 않음.; 2026-10-19 원본 2002 IMG.pak winJail.spr(136x219) 및 winAbility.spr(330x284+41x29×5)을 실제 감옥/100% 능력 타일 이벤트에 연결. 이펙트 배치·시간은 WEB INFERRED이며 원작 MVE 원본과 동일성 미검증. Chromium 이벤트 상태/PNG 크기/원본 조각 위치 QA 추가.",
       "acceptance": [
         "원작 장면 A/B·핵심 시스템 전체 CI·모바일·온라인 배포·동일 커밋 확인 뒤 승인"
       ],
@@ -581,7 +581,10 @@
         "apps/4leaf/rog/tests/live.cjs",
         "apps/4leaf/rog/tests/dice-native-frame.cjs",
         "https://github.com/koith/browser-app-lab/actions/runs/39123501334",
-        ".github/workflows/rog-board-layout.yml"
+        ".github/workflows/rog-board-layout.yml",
+        "apps/4leaf/rog/dice-native-source-events.js",
+        "apps/4leaf/rog/dice-native-source-events.css",
+        "apps/4leaf/rog/tests/dice-native-original-source-events.cjs"
       ],
       "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
       "lastReviewed": "2026-10-19",
@@ -919,7 +922,7 @@
       "title": "원본 winResult/winAbility/winJail UI 실제 연결",
       "status": "in_progress",
       "milestone": "M06",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: IMG.pak에서 winResult 1장·winAbility 6장·winJail 1장 등을 해독했지만 배포 UI 실사용 여부 미확인 | 구현 목표: 이미 해독한 원본 크기/프레임 순서를 실제 전투 결과·능력·감옥 창의 정확한 상태에 연결; 2026-10-18: 2002 IMG.pak 12 non-ROLL sprites 100 original GUI PNGs including winAbility.spr 6 frames, winResult.spr, winJail.spr decoded to hashed SourceSPRExtra manifest and published main; user-visible ability/result/jail integration not yet verified.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: IMG.pak에서 winResult 1장·winAbility 6장·winJail 1장 등을 해독했지만 배포 UI 실사용 여부 미확인 | 구현 목표: 이미 해독한 원본 크기/프레임 순서를 실제 전투 결과·능력·감옥 창의 정확한 상태에 연결; 2026-10-18: 2002 IMG.pak 12 non-ROLL sprites 100 original GUI PNGs including winAbility.spr 6 frames, winResult.spr, winJail.spr decoded to hashed SourceSPRExtra manifest and published main; user-visible ability/result/jail integration not yet verified.; 2026-10-19 원본 2002 IMG.pak winJail.spr(136x219) 및 winAbility.spr(330x284+41x29×5)을 실제 감옥/100% 능력 타일 이벤트에 연결. 이펙트 배치·시간은 WEB INFERRED이며 원작 MVE 원본과 동일성 미검증. Chromium 이벤트 상태/PNG 크기/원본 조각 위치 QA 추가.",
       "acceptance": [
         "상태별 팝업에 원본 member·frame 명시, 버튼/판정 살아 있음, 무관 장면에 잘못 표시하지 않음"
       ],
@@ -927,10 +930,13 @@
         "original/SourceSPR/manifest.json",
         "game.js",
         "apps/4leaf/rog/original/SourceSPRExtra/manifest.json",
-        "https://github.com/koith/browser-app-lab/pull/117"
+        "https://github.com/koith/browser-app-lab/pull/117",
+        "apps/4leaf/rog/dice-native-source-events.js",
+        "apps/4leaf/rog/dice-native-source-events.css",
+        "apps/4leaf/rog/tests/dice-native-original-source-events.cjs"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-18",
+      "lastReviewed": "2026-10-19",
       "verifiedAcceptance": null,
       "dependencies": [
         "BTL-01"
@@ -1414,7 +1420,7 @@
       "title": "원본 발판 새 자산 브랜치 스모크 실패 복구",
       "status": "in_progress",
       "milestone": "M09",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원본 winBattle.spr 테스트 브랜치 29b4546d에서 browser-smoke 실패: 기존 시험이 가짜 CSS 발판 DOM 다리 4개를 반드시 요구함 | 구현 목표: 전투 QA를 원본 355×113 source ready vs 진짜 source load 실패시 fallback 두 경로로 분리해 조건 수정; 2026-10-18: Old smoke 4 CSS support requirement fixed; source winBattle.spr browser QA and mobile/desktop main pass. Native winAbility result/event hookup and fallback error-path regression are still separate QA acceptance.; 구버전 원본 OBS 실제 움직임 테스트가 44x82,33x71 고정으로 현재 진짜 프레임 57x69,32x69를 거짓 실패 판정함; 현재 displayed src와 verified OBS manifest 원본 크기를 원자적으로 대조. 원본 winBattle 355x113 정상·실패 폴백 각각 독립 브라우저 QA 추가.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원본 winBattle.spr 테스트 브랜치 29b4546d에서 browser-smoke 실패: 기존 시험이 가짜 CSS 발판 DOM 다리 4개를 반드시 요구함 | 구현 목표: 전투 QA를 원본 355×113 source ready vs 진짜 source load 실패시 fallback 두 경로로 분리해 조건 수정; 2026-10-18: Old smoke 4 CSS support requirement fixed; source winBattle.spr browser QA and mobile/desktop main pass. Native winAbility result/event hookup and fallback error-path regression are still separate QA acceptance.; 구버전 원본 OBS 실제 움직임 테스트가 44x82,33x71 고정으로 현재 진짜 프레임 57x69,32x69를 거짓 실패 판정함; 현재 displayed src와 verified OBS manifest 원본 크기를 원자적으로 대조. 원본 winBattle 355x113 정상·실패 폴백 각각 독립 브라우저 QA 추가.; 2026-10-19 원본 2002 IMG.pak winJail.spr(136x219) 및 winAbility.spr(330x284+41x29×5)을 실제 감옥/100% 능력 타일 이벤트에 연결. 이펙트 배치·시간은 WEB INFERRED이며 원작 MVE 원본과 동일성 미검증. Chromium 이벤트 상태/PNG 크기/원본 조각 위치 QA 추가.",
       "acceptance": [
         "native winBattle/ability 실제 PNG·체스맨 2명·눈결과+전투 종료가 Chromium 모바일/desktop에서 정상, 구 CSS DOM 4다리 미요구"
       ],
@@ -1423,7 +1429,10 @@
         "tests/dice-battle-podium.cjs",
         "https://github.com/koith/browser-app-lab/actions/runs/39138358588",
         "apps/4leaf/rog/tests/dice-battle-podium.cjs",
-        "apps/4leaf/rog/tests/dice-original-obs-chessmen.cjs"
+        "apps/4leaf/rog/tests/dice-original-obs-chessmen.cjs",
+        "apps/4leaf/rog/dice-native-source-events.js",
+        "apps/4leaf/rog/dice-native-source-events.css",
+        "apps/4leaf/rog/tests/dice-native-original-source-events.cjs"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
       "lastReviewed": "2026-10-19",
@@ -2368,6 +2377,30 @@
       "taskId": "P0-RELEASE",
       "details": "원본 OBS 동작·전투 SPR 정상/오프라인 누락 대비 둘 모두 CI 게이트 추가. source evidence 없는 3D 원작 동등성은 판정하지 않음.",
       "evidence": ".github/workflows/rog-board-layout.yml"
+    },
+    {
+      "seq": 84,
+      "date": "2026-10-19",
+      "type": "IMPLEMENTED_PENDING_QA",
+      "taskId": "BTL-03",
+      "details": "Source-verified winJail and winAbility original sprites wired into actual resolveTile; stage location inferred, old game logic remains authoritative. Browser E2E pending.",
+      "evidence": "apps/4leaf/rog/tests/dice-native-original-source-events.cjs"
+    },
+    {
+      "seq": 85,
+      "date": "2026-10-19",
+      "type": "IMPLEMENTED_PENDING_QA",
+      "taskId": "QA-01",
+      "details": "Source-verified winJail and winAbility original sprites wired into actual resolveTile; stage location inferred, old game logic remains authoritative. Browser E2E pending.",
+      "evidence": "apps/4leaf/rog/tests/dice-native-original-source-events.cjs"
+    },
+    {
+      "seq": 86,
+      "date": "2026-10-19",
+      "type": "IMPLEMENTED_PENDING_QA",
+      "taskId": "P0-RELEASE",
+      "details": "Source-verified winJail and winAbility original sprites wired into actual resolveTile; stage location inferred, old game logic remains authoritative. Browser E2E pending.",
+      "evidence": "apps/4leaf/rog/tests/dice-native-original-source-events.cjs"
     }
   ]
 }
