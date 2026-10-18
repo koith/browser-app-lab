@@ -282,9 +282,9 @@
       "id": "P0-DICE",
       "priority": "P0",
       "title": "원작 주사위 눈별 낙하/튕김/정지 연출",
-      "status": "todo",
+      "status": "in_progress",
       "milestone": "M07",
-      "current": "SPR 버튼은 실제 소스지만 물리 주사위 웹 폴백; 원본 IMG.pak eventRoll1.spr 16 PNG 선디코드·첫 콜드 롤 프레임 보장 코드를 구현. 최종 원본 3D 눈별 모션은 미복구.; D4 임시 연출은 숫자만 갈아 끼우던 평면 삼각형 대신 서로 다른 실제 3D 면과 결과별 법선 방향을 갖는 정사면체 렌더로 개선 중.",
+      "current": "SPR 버튼은 실제 소스지만 물리 주사위 웹 폴백; 원본 IMG.pak eventRoll1.spr 16 PNG 선디코드·첫 콜드 롤 프레임 보장 코드를 구현. 최종 원본 3D 눈별 모션은 미복구.; D4 임시 연출은 숫자만 갈아 끼우던 평면 삼각형 대신 서로 다른 실제 3D 면과 결과별 법선 방향을 갖는 정사면체 렌더로 개선 중.; 원본 ROLL 16프레임 선디코드/캐시 및 D4 정사면체 4면 방향별 착지 구현, 원본 낙하 메시/키프레임은 여전히 미복원.",
       "acceptance": [
         "각 주사위의 최종 눈이 경기 엔진 판정과 일치, 실제 원본 연출 근거 확보"
       ],
@@ -294,7 +294,9 @@
         "apps/4leaf/rog/tests/dice-source-roll.cjs",
         ".github/workflows/rog-board-layout.yml",
         "apps/4leaf/rog/dice-d4-source-fallback.css",
-        "apps/4leaf/rog/tests/dice-fall.cjs"
+        "apps/4leaf/rog/tests/dice-fall.cjs",
+        "https://github.com/koith/browser-app-lab/actions/runs/39120197085",
+        "https://github.com/koith/browser-app-lab/commit/38f147e9e41c79bb6c508f3cfb53a24388285f6a"
       ],
       "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
       "lastReviewed": "2026-10-18",
@@ -459,6 +461,23 @@
       "taskId": "P0-DICE",
       "details": "D4 임시 웹 렌더를 4개의 정사면체 평면과 물리적 착지 방향으로 교체. 원본 MVE/EXE 리소스는 미확보이므로 원작 모션 완성으로 처리하지 않음.",
       "evidence": "apps/4leaf/rog/dice-fall.js"
+    },
+    {
+      "seq": 10,
+      "date": "2026-10-18",
+      "type": "STATUS_CHANGED",
+      "taskId": "P0-DICE",
+      "from": "todo",
+      "to": "in_progress",
+      "details": "원본 ROLL 16프레임 재생 및 D4 실제 3D 법선 선택 E2E QA 성공(39120197085), PR #108/#109 main 병합. 원본 3D 키프레임·모델은 미복구이므로 done 아님."
+    },
+    {
+      "seq": 11,
+      "date": "2026-10-18",
+      "type": "QA_VERIFIED",
+      "taskId": "P0-DICE",
+      "details": "ROLL 처음 실행 16프레임 로드/순서 성공; D4 1~4 결과별 3D 정사면체 착지 법선 및 D6 기존 턴 결과 회귀 통과",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39120197085"
     }
   ]
 }
