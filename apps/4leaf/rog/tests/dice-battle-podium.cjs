@@ -137,6 +137,35 @@ const path=require('node:path');
   assert.ok(state.sides.every(s=>s.actor?.length===4&&['original/CardData/','original/OBS/'].some(x=>(s.source||'').includes(x))&&s.name&&/^\d\d$/.test(s.score)&&s.dice.length>=1),'selected Genesis actor and rolled numbers are independently drawn');
   assert.equal(state.sides[0].originalBattleScene,state.sides[1].originalBattleScene,
    'both sides are genuine independent fighters on ONE exact native 355x113 original VS stage');
+  // Live-original battle.jpg shows BATTLE, scores, two ORIGINAL metal
+  // podiums, independent OBS actors/dice; it does NOT put the normal-turn
+  // event message or a 2000s WEB result popup directly across the 2002 VS.
+  const battleHud=await page.evaluate(()=>{
+   const area=document.querySelector('#board-area');
+   const tray=area.querySelector('.leaf-native-battle-actions');
+   const podium=document.querySelector('#battle-visual .leaf-native-winbattle-podiums');
+   const first=tray?.querySelector('#modal-buttons button');
+   const r=first?.getBoundingClientRect();
+   return {
+    eventVisibility:getComputedStyle(document.querySelector('#dice-native-event')).visibility,
+    modernRollVisibility:getComputedStyle(document.querySelector('#game .control-center')).visibility,
+    originalBattleSprite:podium?.dataset.originalSourceMember,
+    realButtonInCanvas:!!tray?.querySelector('#modal-buttons'),
+    canPhysicallyClick:!!r&&document.elementFromPoint(r.left+r.width/2,r.top+r.height/2)===first,
+    originalPodiumBottom:podium?.getBoundingClientRect().bottom,
+    buttonsTop:tray?.getBoundingClientRect().top,
+    duplicateButtons:document.querySelectorAll('#modal-buttons').length,
+    modalOverlayVisible:getComputedStyle(document.querySelector('#modal.battle-present .modal-window')).visibility
+   };
+  });
+  assert.equal(battleHud.eventVisibility,'hidden','normal-turn 244x52 event prompt must NOT obscure original BATTLE heading');
+  assert.equal(battleHud.modernRollVisibility,'hidden','fake modern WEB roll bar must not obscure source battle dice and VS');
+  assert.equal(battleHud.realButtonInCanvas,true,'move ACTUAL battle action buttons to native board canvas, no fake duplicate');
+  assert.equal(battleHud.duplicateButtons,1,'preserve one authoritative WebRTC/result action container');
+  assert.equal(battleHud.canPhysicallyClick,true,'real battle buttons must be visually topmost and reachable by actual mouse/touch');
+  assert.equal(battleHud.modalOverlayVisible,'hidden','the old popup chrome cannot obscure the recovered winBattle art');
+  assert.ok(battleHud.buttonsTop>battleHud.originalPodiumBottom,
+   'battle result controls belong BELOW original metal platforms and VS: '+JSON.stringify(battleHud));
   await page.screenshot({path:'leaf-live-3d-battle-podiums-desktop.png'});
   await page.setViewportSize({width:390,height:844});
   const mobile=await page.locator('#battle-visual').evaluate(stage=>({
@@ -156,9 +185,26 @@ const path=require('node:path');
   assert.equal(mobile.native,355,'iPhone must show real source resolution graphic');
   assert.equal(mobile.imageDisplayed,'block');
   assert.deepEqual(mobile.fallbackDisplayed,['none','none']);
+  const mobileActions=await page.evaluate(()=>{
+   const button=document.querySelector('.leaf-native-battle-actions #modal-buttons button');
+   const r=button.getBoundingClientRect(),tray=button.closest('.leaf-native-battle-actions');
+   const board=document.getElementById('board-area').getBoundingClientRect();
+   return {physical:document.elementFromPoint(r.x+r.width/2,r.y+r.height/2)===button,
+     insideBoard:r.left>=board.left-1&&r.right<=board.right+1&&
+      r.top>=board.top-1&&r.bottom<=board.bottom+1,
+     parentInBoard:tray.parentElement.id==='board-area'};
+  });
+  assert.ok(mobileActions.physical&&mobileActions.insideBoard&&mobileActions.parentInBoard,
+   'iPhone battle result actions remain physically tappable INSIDE original game viewport: '+JSON.stringify(mobileActions));
   await page.screenshot({path:'leaf-live-3d-battle-podiums-mobile.png'});
   await page.locator('#modal-buttons button').filter({hasText:'결과 확인'}).click();
   await page.waitForFunction(()=>!document.getElementById('battle-visual'),null,{timeout:8000});
+  assert.equal(await page.locator('.leaf-native-battle-actions').count(),0,
+   'result tray is cleaned up after battle to avoid stealing ordinary ROLL clicks');
+  assert.equal(await page.locator('#modal .modal-window #modal-buttons').count(),1,
+   'ONE result button container is returned to its original modal home');
+  assert.equal(await page.locator('#dice-native-event').evaluate(x=>getComputedStyle(x).visibility),'visible',
+   'native IMG/eventmsgbox prompt automatically resumes for ordinary map events');
   assert.equal(await page.locator('#game:not(.hidden)').count(),1,'actual game resumes after duel closes');
   assert.deepEqual(errors,[],'no browser exceptions');
   console.log('ORIGINAL 2002 winBattle.spr 355x113 NATIVE PIXELS PASS: 2 live OBS actors, dice, mobile and combat exit');
