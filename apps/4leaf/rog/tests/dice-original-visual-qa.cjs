@@ -105,10 +105,10 @@ const {chromium}=require('playwright');
   if(sourceActors.some(a=>{
    // This assertion runs in Node, not the browser page; parse CSS matrix
    // numeric values without relying on a browser-only DOMMatrix global.
-   const match=/^matrix\\(([^)]+)\\)$/.exec(a.flip);
-   if(!match)return true;
-   const values=match[1].split(',').map(Number);
-   return values.length!==6||values[0]*values[3]-values[1]*values[2]>=0;
+   const isMatrix=String(a.flip).startsWith('matrix(');
+   const values=String(a.flip).replace('matrix(','').replace(')','').split(',').map(Number);
+   return !isMatrix||values.length!==6||!values.every(Number.isFinite)||
+    values[0]*values[3]-values[1]*values[2]>=0;
   }))throw Error('Original OBS indexed source is drawn upside down: '+
    JSON.stringify(sourceActors));
   if(sourceActors.length!==2||
