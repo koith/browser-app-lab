@@ -43,7 +43,7 @@ const {chromium}=require('playwright');
     const entry=await window.__LEAF_TIS_ALPHA__.prepare(id);
     if(!entry.clip)throw Error('Original source has no clip polygon: '+id);
     const points=entry.clip.slice(8,-1).split(',').map(entry=>{
-     const [x,y]=entry.trim().split(/\\s+/);
+     const [x,y]=entry.trim().split(/\s+/);
      return {x:Number.parseFloat(x)*145/100,y:Number.parseFloat(y)*97/100};
     });
     const img=new Image();
