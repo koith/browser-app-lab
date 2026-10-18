@@ -532,6 +532,19 @@ const path=require('path');
  await host.locator('#social-chat-north').click();
  await host.locator('.social-district-hotspot').nth(3).click();
  assert.equal(await host.evaluate(()=>window.__LEAF_SOCIAL__.getState().view),'directory');
+ assert.equal(await host.locator('#social-image-frame').evaluate(el=>el.style.height),'404px',
+  'permanent ChatTown directory must use recovered 794x404 native background, not 528px chat interior');
+ const sourceDirectoryFrame=await host.locator('#social-image-frame').evaluate(el=>({
+  logical:[el.offsetWidth,el.offsetHeight],
+  background:getComputedStyle(el).backgroundImage,
+  actualRows:el.querySelectorAll('.social-directory-row').length,
+  overlay:el.querySelector('.social-directory')?.getBoundingClientRect().height
+ }));
+ assert.deepEqual(sourceDirectoryFrame.logical,[794,404],
+  'never create the unsupported 124px empty blue footer in the native ChatTown directory');
+ assert.ok(sourceDirectoryFrame.background.includes('/original/ChatTown/'),
+  'preserve original district source PNG instead of a fabricated scenic fill');
+ console.log('SOURCE_PERMANENT_ROOM_NATIVE_GEOMETRY '+JSON.stringify(sourceDirectoryFrame));
  assert.equal(await host.locator('.social-directory-row[data-permanent="true"]').count(),8,
   'eight genuine server-side permanently joinable slots exist in this ChatTown district');
  assert.equal(await host.locator('.social-public-room').count(),0,
