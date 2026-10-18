@@ -109,8 +109,8 @@ const path=require('node:path');
   assert.ok(data.cells.every(cell=>Number.isInteger(cell.depth)&&cell.dmp.every(Number.isFinite)),
    'actual source grid and third original DMP field recorded without inventing elevation data');
   assert.ok(data.near.length>10,'the authentic 104-cell source route has adjacent map cells');
-  assert.ok(data.near.some(p=>p.overlap[0]>40&&p.overlap[1]>30),
-   'full native platform bodies physically overlap neighboring DMP cells like original board.jpg');
+  assert.ok(data.near.every(p=>p.overlap[0]<=40||p.overlap[1]<=30),
+   '145x97 TIS sprites must not bury neighboring DMP tiles with >40x30 pixels of two-axis overlap');
   for(let i=0;i<data.cells.length;i++){
    const a=data.cells[i];
    if(i===0)continue;
@@ -118,7 +118,7 @@ const path=require('node:path');
    if(a.dmp[1]>b.dmp[1])assert.ok(a.depth>b.depth,'front original tile must paint over rear tile');
    if(a.dmp[1]<b.dmp[1])assert.ok(a.depth<b.depth,'rear original tile must paint behind front tile');
   }
-  await page.screenshot({path:'leaf-original-fullsize-tis-overlapping-board.png'});
+  await page.screenshot({path:'leaf-original-fullsize-tis-distinct-board.png'});
   const before=await page.evaluate(()=>window.__LEAF_CAMERA__.getState().scale);
   await page.evaluate(()=>window.__LEAF_CAMERA__.zoom(.35));
   const after=await page.evaluate(()=>window.__LEAF_CAMERA__.getState().scale);
@@ -132,7 +132,7 @@ const path=require('node:path');
   assert.deepEqual(await page.locator('#board-nodes .tile').first().evaluate(el=>[
    el.offsetWidth,el.offsetHeight
   ]),[145,97],'phone retains original logical bitmap and uses the game camera to scale');
-  await page.screenshot({path:'leaf-original-fullsize-tis-overlapping-mobile.png'});
+  await page.screenshot({path:'leaf-original-fullsize-tis-distinct-mobile.png'});
   assert.deepEqual(errors,[],'source tile reconstruction generates no browser errors');
   console.log('FULL-SIZE GENESIS TIS DMP DEPTH PASS',JSON.stringify({
    source:data.sourceImage,firstCell:data.cells[0],count:data.cells.length,
