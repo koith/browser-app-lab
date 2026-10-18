@@ -1490,5 +1490,5 @@ function init(){installBoardControls();installNativeDiceMenu();
      else if(action==='ability')await useAbility();
      else await useItem(index,steps);
    }finally{remoteAct=false}
- }};window.__ROG_TEST__={startGame,drawGame,takeTurn,teamStats,generateTiles,getMatch:()=>match,go:navigate,setRoll:()=>{},setMatch:v=>{match=v;drawGame()},getSourceMaps:()=>SOURCE_INFO,getSourceTiles:()=>SOURCE_TILES,calculateMatchReward,elementalModifier,resolveBattle,moveValues,activePlayer,playerCanAct,refreshResume};if(match&&!match.finished){log('저장된 경기가 있습니다. 주사위 대기실의 이어하기로 복원하세요.')}refreshResume()}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+ }};window.__ROG_TEST__={startGame,drawGame,takeTurn,teamStats,generateTiles,getMatch:()=>match,go:navigate,setRoll:()=>{},setMatch:v=>{match=v;drawGame()},getSourceMaps:()=>SOURCE_INFO,getSourceTiles:()=>SOURCE_TILES,resolveTile,calculateMatchReward,elementalModifier,resolveBattle,moveValues,activePlayer,playerCanAct,refreshResume};if(match&&!match.finished){log('저장된 경기가 있습니다. 주사위 대기실의 이어하기로 복원하세요.')}refreshResume()}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
