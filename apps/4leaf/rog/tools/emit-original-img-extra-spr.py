@@ -35,7 +35,7 @@ def emit(quarantine,destination):
         for item in m["frames"]:
             index=item["index"]
             source=quarantine/item["quarantinePNG"]
-            assert source.is_file() and source.stat().st_size>100
+            assert source.is_file() and source.stat().st_size>=75 # source-authentic 8x8 solid RGBA compresses to 79 bytes
             data=source.read_bytes()
             assert hashlib.sha256(data).hexdigest()==item["sha256"]
             with Image.open(source) as im:
