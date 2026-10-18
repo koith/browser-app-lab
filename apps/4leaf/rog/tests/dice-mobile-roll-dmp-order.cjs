@@ -1,6 +1,7 @@
 'use strict';
 /* Regression for a real user's two P0 complaints: the source DMP tiles must
- * preserve ORIGINAL 70x47 DMP logical coordinates without forcing the\n * full 145x97 source artwork to visually overlap by more than half, and
+ * preserve ORIGINAL 70x47 DMP logical coordinates without forcing the
+ * full 145x97 source artwork to visually overlap by more than half, and
  * the genuine roll button must respond to a physical phone touch, twice.
  * No screenshot overlay, fake player, hard-coded die result or EXE height.
  */
@@ -39,7 +40,9 @@ const {chromium,webkit}=require('playwright');
   assert.ok(board.every(t=>t.art&&t.clip.startsWith('polygon(')&&
    t.pixels[0]===145&&t.pixels[1]===97),
    'native source platform dimensions and nonrectangular click silhouette preserved');
-  const projection=await page.evaluate(()=>window.__LEAF_CAMERA__.getState());\n  assert.deepEqual(projection.sourceGrid,{width:1450,height:1120,pitchX:70,pitchY:47});\n  let horizontal=0,vertical=0,sameRow=0;
+  const projection=await page.evaluate(()=>window.__LEAF_CAMERA__.getState());
+  assert.deepEqual(projection.sourceGrid,{width:1450,height:1120,pitchX:70,pitchY:47});
+  let horizontal=0,vertical=0,sameRow=0;
   for(let i=0;i<board.length;i++)for(let j=i+1;j<board.length;j++){
    const a=board[i],b=board[j];
    if(a.y===b.y){
