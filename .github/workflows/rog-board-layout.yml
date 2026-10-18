@@ -6,6 +6,7 @@ on:
       - 'apps/4leaf/rog/original-tiles.css'
       - 'apps/4leaf/rog/world-perspective.css'
       - 'apps/4leaf/rog/tests/board-layout.cjs'
+      - 'apps/4leaf/rog/tests/dmp-tile-overlap-audit.cjs'
       - 'apps/4leaf/rog/dice-native-tis-alpha.js'
       - 'apps/4leaf/rog/dice-native-pawn-dmp-depth.css'
       - 'apps/4leaf/rog/tests/dice-native-pawn-dmp-depth.cjs'
@@ -26,6 +27,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Check all original DMP cells for duplicate positions and severe WEB projection collisions
+        run: node apps/4leaf/rog/tests/dmp-tile-overlap-audit.cjs
       - run: |
           npm install --no-save playwright
           npx playwright install chromium --with-deps
@@ -42,5 +45,7 @@ jobs:
         if: always()
         with:
           name: original-dice-board-layout-screens
-          path: leaf-board-*.png
+          path: |
+            leaf-board-*.png
+            rog-dmp-overlap-audit.json
           retention-days: 7
