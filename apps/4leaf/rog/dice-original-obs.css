@@ -43,3 +43,41 @@
  #app.app-classic-dice #game :is(#board-pawns,#battle-visual)
  .board-pawn .leaf-chess-original-obs{transition:none!important}
 }
+
+/* A CardData portrait is genuine source artwork, but NOT a recovered
+ * full-body OBS actor. When the selected chessman is among the still
+ * missing native OBS models, show a small visibly distinct source-card
+ * placeholder, NEVER the older fictitious 112px CSS mannequin.
+ * Source OBS chessmen keep their exact native sprite sizes above.
+ */
+#app.app-classic-dice #game :is(#board-pawns,#battle-visual)
+ .board-pawn[data-actor-rig="original-card-portrait-fallback"]>.leaf-chess-actor{
+ display:none!important;
+}
+#app.app-classic-dice #game :is(#board-pawns,#battle-visual)
+ .board-pawn .leaf-chess-original-card-fallback{
+ box-sizing:border-box!important;
+ position:absolute!important;
+ display:block!important;
+ z-index:9!important;
+ left:50%!important;
+ bottom:var(--leaf-obs-ground,14.88px)!important;
+ width:40px!important;
+ height:55px!important;
+ max-width:none!important;
+ max-height:none!important;
+ padding:0!important;
+ margin:0!important;
+ object-fit:contain!important;
+ image-rendering:auto!important;
+ transform:translateX(-50%)!important;
+ border:1px solid #bdaf7a!important;
+ border-radius:2px!important;
+ background:#28334b!important;
+ box-shadow:1px 2px 2px #11172988!important;
+ pointer-events:none!important;
+}
+#app.app-classic-dice #game :is(#board-pawns,#battle-visual)
+ .board-pawn .leaf-chess-original-card-fallback[hidden]{
+ display:none!important;
+}
