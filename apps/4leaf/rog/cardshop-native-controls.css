@@ -252,3 +252,38 @@
  border:0!important;background:transparent!important;
 }
 #shop .shop-keeper .money b{font:700 13px Gulim,'굴림',sans-serif!important}
+
+/* 2002 archival CardShop/cardshopbutton.png: bottom 21px rows at y=460
+ * = genuine 구매하기, and y=481 = genuine 판매하기. Each has four
+ * 98x21 frames at x=0/98/196/294 (normal/hover/active/disabled).
+ * Keep both actual source buttons visible BELOW open owned-card drawer
+ * (drawer ends at y=295) and ABOVE the original GP field (begins y=322).
+ * Inventory and currency are live DOM; no screenshot click-map.
+ */
+#shop .shop-detail #shop-buy{
+ left:554px!important;top:-24px!important;
+}
+#shop .shop-detail #shop-sell{
+ position:absolute!important;
+ left:657px!important;top:-24px!important;
+ width:98px!important;min-width:98px!important;
+ height:21px!important;min-height:21px!important;
+ padding:0!important;margin:0!important;
+ border:0!important;border-radius:0!important;
+ color:transparent!important;font-size:0!important;line-height:0!important;
+ text-shadow:none!important;
+ background:url('./original/CardShop/cardshopbutton.png') 0 -481px / 500px 510px no-repeat!important;
+ box-shadow:none!important;filter:none!important;opacity:1!important;
+ cursor:pointer;pointer-events:auto!important;
+}
+#shop .shop-detail #shop-sell:is(:hover,:focus-visible):not(:disabled){
+ background-position:-98px -481px!important;
+ outline:1px solid #fff7bb!important;
+}
+#shop .shop-detail #shop-sell:active:not(:disabled){
+ background-position:-196px -481px!important;
+}
+#shop .shop-detail #shop-sell:disabled{
+ background-position:-294px -481px!important;
+ opacity:1!important;cursor:not-allowed!important;
+}
