@@ -84,6 +84,30 @@
         "P0-DICE",
         "P0-RELEASE"
       ]
+    },
+    {
+      "id": "REQ-20261018-005",
+      "date": "2026-10-18",
+      "origin": "User instruction",
+      "text": "남은 미완료 업무 처리해서 마무리해",
+      "taskIds": [
+        "M00",
+        "M01",
+        "M02",
+        "M03",
+        "M04",
+        "M05",
+        "M06",
+        "M07",
+        "M08",
+        "M09",
+        "P0-BOARD",
+        "P0-ACTOR",
+        "P0-PODIUM",
+        "P0-DICE",
+        "P0-CHAT",
+        "P0-RELEASE"
+      ]
     }
   ],
   "tasks": [
@@ -376,14 +400,16 @@
       "id": "P0-RELEASE",
       "priority": "P0",
       "title": "원작 복원 최종 화면·기능 수용 게이트",
-      "status": "todo",
+      "status": "in_progress",
       "milestone": "M09",
-      "current": "과거 CI 성공은 원작 동일성 완료의 증거가 아님",
+      "current": "과거 CI 성공은 원작 동일성 완료의 증거가 아님; 2026-10-18 공개 Pages 원본 주잔 브라우저 QA(39123501334) 실패 원인: PR #110에서 제거한 .tile-symbol / <small>을 검사에서 참조해 getComputedStyle(null) TypeError. 실제 웹앱 원본 비트맵은 정상, 수용 게이트 검사가 낡아 수정·재검증 중.",
       "acceptance": [
         "원작 장면 A/B·핵심 시스템 전체 CI·모바일·온라인 배포·동일 커밋 확인 뒤 승인"
       ],
       "evidence": [
-        "apps/4leaf/rog/tests/live.cjs"
+        "apps/4leaf/rog/tests/live.cjs",
+        "apps/4leaf/rog/tests/dice-native-frame.cjs",
+        "https://github.com/koith/browser-app-lab/actions/runs/39123501334"
       ],
       "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
       "lastReviewed": "2026-10-18",
@@ -664,6 +690,48 @@
       "taskId": "P0-CHAT",
       "details": "PR #113 squash aa4ec1d9: original ChatRoom peer menu clickable above source toolbar with no false actor/menu; PR #112 squash 4e5772f0 v79 cache original board CSS pre-cache.",
       "evidence": "https://github.com/koith/browser-app-lab/pull/113"
+    },
+    {
+      "seq": 26,
+      "date": "2026-10-18",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261018-005",
+      "taskIds": [
+        "M00",
+        "M01",
+        "M02",
+        "M03",
+        "M04",
+        "M05",
+        "M06",
+        "M07",
+        "M08",
+        "M09",
+        "P0-BOARD",
+        "P0-ACTOR",
+        "P0-PODIUM",
+        "P0-DICE",
+        "P0-CHAT",
+        "P0-RELEASE"
+      ],
+      "details": "사용자 모든 미완료 일감 처리 및 마무리 지시 원문 저장. P0 전체 원작 동일성을 허위 완료로 전환하지 않고 실제 증거 확보."
+    },
+    {
+      "seq": 27,
+      "date": "2026-10-18",
+      "type": "STATUS_CHANGED",
+      "taskId": "P0-RELEASE",
+      "from": "todo",
+      "to": "in_progress",
+      "details": "공개 Pages 원본 게임 수용 게이트를 실제 동작에 맞게 정정 착수. 릴리스 전체 합격 미완료."
+    },
+    {
+      "seq": 28,
+      "date": "2026-10-18",
+      "type": "IMPLEMENTED_PENDING_QA",
+      "taskId": "P0-RELEASE",
+      "details": "출처 145×97 원본 TIS 그림을 위해 삭제한 두 개 임의 요소에 getComputedStyle(null) 호출하는 오래된 QA 결함 수정. 새 수용은 가짜 타일 glyph/number DOM 각각 0개 명시 확인.",
+      "evidence": "apps/4leaf/rog/tests/dice-native-frame.cjs"
     }
   ]
 }
