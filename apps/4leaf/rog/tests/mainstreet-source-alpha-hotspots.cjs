@@ -17,6 +17,17 @@ const {chromium}=require('playwright');
   await page.evaluate(()=>window.__ROG_TEST__.go('city'));
   await page.waitForFunction(()=>[...document.querySelectorAll('.street-building-art')].length===7&&
    [...document.querySelectorAll('.street-building-art')].every(x=>x.dataset.ready==='true'),null,{timeout:16000});
+  // Source PNG decode completion does NOT imply scene layout is visible.
+  // MainFrame's client-scene transition can leave a rendered but 0x0
+  // street track during initial activation. Physical pixel hit tests must
+  // wait for an actually visible building, not calculate coordinates from
+  // zero-size rects at (192,98) and then falsely call them transparent.
+  await page.waitForFunction(()=>{
+   const canvas=document.querySelector('[data-street="magic"] canvas');
+   const button=canvas?.closest('button');
+   const b=button?.getBoundingClientRect();
+   return !!b&&b.width>70&&b.height>70;
+  },null,{timeout:12000});
   const audit=await page.evaluate(()=>{
    const buttons=[...document.querySelectorAll('.street-location')];
    const rows=buttons.map(button=>{
