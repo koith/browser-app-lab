@@ -1055,18 +1055,21 @@
       "id": "SRC-01",
       "priority": "P0",
       "title": "리소스 출처·실제 용도 전수 정합",
-      "status": "todo",
+      "status": "in_progress",
       "milestone": "M00",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: OBS·TIS·DMP·IMG 원본은 여럿 확보했지만 기능별 역할/중복 PAK과 2004 실제 화면 대응표가 불완전함 | 구현 목표: OBS/OBS2/OBS3/IMG/CHR/DMP/TIS/DMO 및 EXE 문자열을 출처·해시·역할·실사용 DOM 파일별로 매핑하고 확인되지 않은 것은 추정으로 표기",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: OBS·TIS·DMP·IMG 원본은 여럿 확보했지만 기능별 역할/중복 PAK과 2004 실제 화면 대응표가 불완전함 | 구현 목표: OBS/OBS2/OBS3/IMG/CHR/DMP/TIS/DMO 및 EXE 문자열을 출처·해시·역할·실사용 DOM 파일별로 매핑하고 확인되지 않은 것은 추정으로 표기; 복원된 2002 Dice/IMG.pak GUI 원본 12개 SPR 100 PNG 전수 SHA256·IHDR 원본 크기·불투명 픽셀 유효성 검사 추가, 2D GUI와 미복원 3D MVE 구분. 최초 출처 파일 100종 이상 수집/EXE 역할 전수 정합은 여전히 미완료.",
       "acceptance": [
         "모든 게임·채팅 UI 자산에 원본 PAK 멤버, SHA/프레임 및 화면 용도를 연결하고 잘못 분류된 ROLL/모델 자산 0건"
       ],
       "evidence": [
         "original/OBS/bulk-source-report.json",
-        "tools/audit-original-dice-resources.py"
+        "tools/audit-original-dice-resources.py",
+        "apps/4leaf/rog/tests/native-img-source-integrity.cjs",
+        "https://github.com/koith/browser-app-lab/actions/runs/39268819180",
+        "https://github.com/koith/browser-app-lab/pull/146"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-18",
+      "lastReviewed": "2026-10-19",
       "verifiedAcceptance": null,
       "dependencies": [],
       "category": "원본 근거"
@@ -1167,7 +1170,7 @@
       "title": "DMP/DMO/MVE 26개 원본 지도 정확도 검증",
       "status": "in_progress",
       "milestone": "M04",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 26개 움직임 경로는 복원되었지만 25개 이벤트 데이터와 26경로 간 누락·특수칸 의미가 원작과 완전 일치하는지 불명 | 구현 목표: 원본 DMP.pak 76개 멤버(26 MVE/25 DMP/25 DMO)를 맵 ID별로 대응하고 미연결 맵 조건을 명시; VERIFIED 2002 source maps.js has 26 authentic DMP path arrays (1,920 cells) but ORIGINAL_LEAF_MAP_INFO has only 25 titles. Path 0170 (135 cells) was silently absent from playable map dropdown and lacked original DMP event table. The app now registers 0170 with explicit TITLE-UNVERIFIED and retains original coordinates, never fabricates event data. Runtime mobile/desktop QA pending.; 2026-10-19 Chromium 1280x900 and iPhone 390x844 QA PASS (39178198474), exact 0170 135-cell source indices/145x97 native TIS displayed, original 25 metadata titles unchanged, merged main 1fe8683b. Historical event table still absent.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 26개 움직임 경로는 복원되었지만 25개 이벤트 데이터와 26경로 간 누락·특수칸 의미가 원작과 완전 일치하는지 불명 | 구현 목표: 원본 DMP.pak 76개 멤버(26 MVE/25 DMP/25 DMO)를 맵 ID별로 대응하고 미연결 맵 조건을 명시; VERIFIED 2002 source maps.js has 26 authentic DMP path arrays (1,920 cells) but ORIGINAL_LEAF_MAP_INFO has only 25 titles. Path 0170 (135 cells) was silently absent from playable map dropdown and lacked original DMP event table. The app now registers 0170 with explicit TITLE-UNVERIFIED and retains original coordinates, never fabricates event data. Runtime mobile/desktop QA pending.; 2026-10-19 Chromium 1280x900 and iPhone 390x844 QA PASS (39178198474), exact 0170 135-cell source indices/145x97 native TIS displayed, original 25 metadata titles unchanged, merged main 1fe8683b. Historical event table still absent.; 2026-10-19 원작 25개 제목 확인된 지도 GOAL 완주·GP 원본 검사를 복원된 26번째 원본 DMP/135셀(공식명 미확인) 랜덤게임 후보까지 확대. 역사 이름 꾸미지 않음. 고정 25맵 가정으로 실패하던 릴리스 게임 검사 PR #146 수정, E2E 성공.",
       "acceptance": [
         "26개 경로 전체 셀/특수칸·워프·채널·시작/종점 원본 테이블 대조, 누락된 1개 이벤트 맵은 명시된 처리"
       ],
@@ -1178,7 +1181,10 @@
         "apps/4leaf/rog/game.js",
         "apps/4leaf/rog/tests/dice-source-map0170-registration.cjs",
         "https://github.com/koith/browser-app-lab/actions/runs/39178198474",
-        "https://github.com/koith/browser-app-lab/pull/133"
+        "https://github.com/koith/browser-app-lab/pull/133",
+        "apps/4leaf/rog/tests/archive-coverage.cjs",
+        "https://github.com/koith/browser-app-lab/actions/runs/39268463169",
+        "https://github.com/koith/browser-app-lab/pull/146"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
       "lastReviewed": "2026-10-19",
@@ -3849,6 +3855,31 @@
       "taskId": "QA-02",
       "details": "Release gate 39267484708 5/5 passed; 26 DMP 1920 TIS, original 2002 winBattle 355x113, original OBS and GUI ROLL, 6 native rooms real 2-browser, offline PWA, iPhone WebKit portrait+landscape, live Pages version 0.84.0-beta.1.",
       "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39267484708"
+    },
+    {
+      "seq": 147,
+      "date": "2026-10-19",
+      "type": "STATUS_CHANGED",
+      "taskId": "SRC-01",
+      "from": "todo",
+      "to": "in_progress",
+      "details": "Actual 2002 original IMG.pak GUI 100 PNG SHA256/dimensions integrity now runs on same-release QA; rest of archive/EXE classification remains open."
+    },
+    {
+      "seq": 148,
+      "date": "2026-10-19",
+      "type": "QA_VERIFIED",
+      "taskId": "BRD-04",
+      "details": "Historical 25 named source DMP GOAL victory replay and random source path including unnamed official DMP 0170/135 cells E2E fixed after stale 25-map-only assertion. PR #146 4/4 release browser jobs success. Exact historical event mapping remains open.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39268819180"
+    },
+    {
+      "seq": 149,
+      "date": "2026-10-19",
+      "type": "MERGED",
+      "taskId": "SRC-01",
+      "details": "PR #146 main@f7985f7f includes 100-source-sprite SHA256 readback and Pages SHA integrity requirement for original winBattle.spr 355x113, plus 26-map random regression.",
+      "evidence": "https://github.com/koith/browser-app-lab/commit/f7985f7f4eb44cbe16fb78abc6fe014e2bfe4c39"
     }
   ]
 }
