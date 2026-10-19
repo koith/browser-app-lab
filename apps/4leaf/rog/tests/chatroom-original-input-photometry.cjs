@@ -84,11 +84,17 @@ const {chromium}=require('playwright');
    'the real 150x38 source userlist floats at historical right-hand 621px x');
   assert.ok(Math.abs(state.live.participants.y-10)<=2,
    'the historical source userlist top is 10px');
-  // Registration gate only at this stage: the document reports actual
-  // photo-to-DOM displacement. Do NOT quietly assert source pixel
-  // equality when the 2004 photo still shows an input offset.
-  assert.ok(Math.abs(state.live.form.y-state.photoInput.top)<=13,
-   '2004 historic input source row must be visible in the real native ChatRoom layout');
+  // Verifiable SOURCE-to-runtime geometry: in the actual archived 2004
+  // JPG, the inner nearly-white pixels start at row 99; the original
+  // 407x21 source sprite has 1px inner artwork padding. A CSS form at
+  // source y=97 therefore paints real white field starting at y~99.
+  assert.ok(Math.abs(state.live.input.y-(state.photoInput.top-1))<=2,
+   'native editable input must match ACTUAL 2004 JPEG bright pixels within 2px: '+JSON.stringify(state));
+  assert.ok(Math.abs(state.live.form.y-97)<=1,
+   'source 407x21 ChatRoom/chatbaredit.png starts at historical y97, not old y91');
+  assert.equal(state.live.log.h,97,'the original live log reaches the source form without a 6px empty strip');
+  assert.equal(state.live.scroll.h,97,'native 52x40 scrollbar covers exactly the same height as the source log');
+  assert.equal(state.live.messenger.h,118,'historic native dialogue plus edit occupies original 97+21px');
   assert.deepEqual(errs,[]);
   await page.screenshot({path:'leaf-2004-source-chat-input-row-registration.png'});
   console.log('HISTORIC-2004-CHAT-INPUT-PIXEL-REGISTRATION '+JSON.stringify(state));
