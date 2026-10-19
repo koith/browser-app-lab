@@ -1753,9 +1753,9 @@
       "id": "RULE-01",
       "priority": "P0",
       "title": "원작 특수칸·이벤트 데이터 검증",
-      "status": "todo",
+      "status": "in_progress",
       "milestone": "M08",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: DMP 26경로 대비 특수칸 DMO/DMP 25세트, 원작 각 마을 보너스·점프/워프/감옥 등 검증되지 않은 효과 존재 | 구현 목표: 원본 4LEAF 게임 이벤트 테이블을 해석해 Dice engine resolveTile/warp/item/keeper 조건과 26맵 대조; 2026-10-19 복구된 2002 IMG.pak winAbility.spr 6프레임을 100% 실제 어빌리티 발동 시 표시하고 winDoa.spr 363×133을 실제 원본 DMP DOA 후퇴 판정 시 표시하도록 원본 GUI 코드 통합. 2004 3D 물리 모델 미복원.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: DMP 26경로 대비 특수칸 DMO/DMP 25세트, 원작 각 마을 보너스·점프/워프/감옥 등 검증되지 않은 효과 존재 | 구현 목표: 원본 4LEAF 게임 이벤트 테이블을 해석해 Dice engine resolveTile/warp/item/keeper 조건과 26맵 대조; 2026-10-19 복구된 2002 IMG.pak winAbility.spr 6프레임을 100% 실제 어빌리티 발동 시 표시하고 winDoa.spr 363×133을 실제 원본 DMP DOA 후퇴 판정 시 표시하도록 원본 GUI 코드 통합. 2004 3D 물리 모델 미복원.; 2003-02-21 4LEAF 공식 업데이트 공지에서 사용자간 전투 금지 맵은 접두어가 있는 [Non]Stadium/[Non]한반도/[Non]악마의 달팽이 3종으로 확정. 원본 2002 DMP 메타에는 일반 한반도/악마의 달팽이만 존재하므로 일반맵에 잘못 적용한 PvP 금지를 제거하고 arena PvP도 Non에 한정, 별도 원본 [Non] DMP는 미확보로 진위 분리. 경기 테스트 진행 중.",
       "acceptance": [
         "동일 seed·좌표 입력에 대해 모든 특수칸 이동/부활/보상 결과가 원본 근거 표와 일치"
       ],
@@ -1764,10 +1764,13 @@
         "game.js",
         "apps/4leaf/rog/dice-original-ability-spr.js",
         "apps/4leaf/rog/tests/dice-original-ability-spr.cjs",
-        "apps/4leaf/rog/tests/dice-native-original-source-events.cjs"
+        "apps/4leaf/rog/tests/dice-native-original-source-events.cjs",
+        "https://4leafmemorial.geld.kr/m/908",
+        "apps/4leaf/rog/tests/dice-official-2003-non-pvp.cjs",
+        "apps/4leaf/rog/game.js"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-18",
+      "lastReviewed": "2026-10-19",
       "verifiedAcceptance": null,
       "dependencies": [
         "BRD-04"
@@ -3568,6 +3571,23 @@
       "taskId": "CHT-02",
       "details": "Original 2004 input photo pixel-aligned in main PR #141, extends live source-based Chromium proof to genuine sequential 24 Korean messages, scroll bar and native talkbox 9-slice. Original full character speech y/CP949 handling is not verified.",
       "evidence": "apps/4leaf/rog/tests/chatroom-original-input-photometry.cjs"
+    },
+    {
+      "seq": 132,
+      "date": "2026-10-19",
+      "type": "STATUS_CHANGED",
+      "taskId": "RULE-01",
+      "from": "todo",
+      "to": "in_progress",
+      "details": "Verified actual official 2003-02-21 source states only map titles with [Non] prefix prevent player PvP. Ordinary recovered 2002 DMP 한반도/악마의 달팽이 must not silently inherit that optional later no-battle mode."
+    },
+    {
+      "seq": 133,
+      "date": "2026-10-19",
+      "type": "IMPLEMENTED_PENDING_QA",
+      "taskId": "RULE-01",
+      "details": "Normal user-vs-user battles restored for 2002 ordinary source DMP; arena exception also honors [Non] only. Later [Non] DMP map IDs not in recovered source: do not fabricate. Fix gameplay + browser regression.",
+      "evidence": "apps/4leaf/rog/tests/dice-official-2003-non-pvp.cjs"
     }
   ]
 }
