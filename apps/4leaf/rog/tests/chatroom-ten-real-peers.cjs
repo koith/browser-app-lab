@@ -90,6 +90,28 @@ const assert=require('node:assert/strict');
    'ten authentic names cause native user roster to scroll, not clip');
   assert.equal(proof.chatCount,0,'no synthetic peer menus');
   await host.screenshot({path:'leaf-original-wood-room-ten-real-participants.png'});
+  // 2004 chat_ref.jpg also records 11 real people. Reproduce that STATE
+  // with a genuine ELEVENTH independent browser tab, never a fake NPC.
+  const eleventh=await context.newPage();pages.push(eleventh);
+  eleventh.on('pageerror',err=>errors.push('peer10:'+err.message));
+  await eleventh.addInitScript(()=>{window.LEAF_CENTRAL_API_URL='';});
+  await eleventh.goto(base,{waitUntil:'domcontentloaded'});
+  await eleventh.waitForFunction(()=>window.__LEAF_SOCIAL__&&window.__ROG_TEST__);
+  await eleventh.evaluate(room=>{
+   document.getElementById('profile-name').textContent='실참가자10';
+   window.__LEAF_SOCIAL__.openRegion('north');
+   window.__ROG_TEST__.go('rooms');
+   window.__LEAF_SOCIAL__.joinRoom(room);
+  },id);
+  await host.waitForFunction(()=>window.__LEAF_SOCIAL__.getState().people.length===11&&
+   document.querySelectorAll('#social-peer-list .social-user-row').length===11&&
+   document.querySelectorAll('.social-avatar').length===11,
+   null,{timeout:18000});
+  assert.equal(await host.locator('#social-native-user-count').textContent(),'11명');
+  assert.equal(await host.locator('.social-avatar[data-seat]').count(),11);
+  const extra=await host.locator('.social-avatar').evaluateAll(nodes=>nodes.map(x=>x.dataset.seat));
+  assert.equal(new Set(extra).size,11,'11 real native room seats cannot overlap');
+  await host.screenshot({path:'leaf-original-wood-room-eleven-real-participants.png'});
   // Real departure must decrement participant list; stale/fake occupants
   // may not remain when nine physical browser tabs close.
   await Promise.all(pages.slice(1).map(page=>page.close()));
@@ -103,7 +125,7 @@ const assert=require('node:assert/strict');
   assert.equal(await host.locator('#social-native-user-count').textContent(),'1명');
   assert.deepEqual(errors,[]);
   console.log('TEN GENUINE 2004 CHATROOM USERS PASS '+JSON.stringify({
-   userCount:proof.userCount,rosterCount:proof.rosterCount,
+   userCount:proof.userCount,elevenLive:11,rosterCount:proof.rosterCount,
    sourceRoom:proof.source,nativeHeader:proof.originalHeader,
    scroll:proof.scroll,distinctSeats:proof.occupants.length,
    afterRealClientDepart:1,syntheticUsers:0}));
