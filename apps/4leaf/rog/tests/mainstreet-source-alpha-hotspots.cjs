@@ -55,10 +55,11 @@ const {chromium}=require('playwright');
   assert.ok(magic);
   const send=async point=>page.evaluate(({point})=>{
    const button=document.querySelector('[data-street="magic"]');
-   const rect=button.getBoundingClientRect();
+   const canvas=button.querySelector('canvas');
+   const rect=canvas.getBoundingClientRect();
    button.dispatchEvent(new MouseEvent('click',{bubbles:true,
-    detail:1,clientX:rect.left+(point.x+.5)*rect.width/button.offsetWidth,
-    clientY:rect.top+(point.y+.5)*rect.height/button.offsetHeight}));
+    detail:1,clientX:rect.left+(point.x+.5)*rect.width/canvas.width,
+    clientY:rect.top+(point.y+.5)*rect.height/canvas.height}));
    return {cityVisible:!document.querySelector('#city').classList.contains('hidden'),
     shopVisible:!document.querySelector('#shop').classList.contains('hidden'),
     hit:button.dataset.lastSourceHit,
@@ -77,9 +78,10 @@ const {chromium}=require('playwright');
   // Ensure the real source building remains in the viewport at normal zoom.
   const pointer=await page.evaluate(point=>{
    const btn=document.querySelector('[data-street="magic"]');
-   const rect=btn.getBoundingClientRect();
-   return {x:rect.left+(point.x+.5)*rect.width/btn.offsetWidth,
-    y:rect.top+(point.y+.5)*rect.height/btn.offsetHeight,
+   const canvas=btn.querySelector('canvas');
+   const rect=canvas.getBoundingClientRect();
+   return {x:rect.left+(point.x+.5)*rect.width/canvas.width,
+    y:rect.top+(point.y+.5)*rect.height/canvas.height,
     before:window.__LEAF_STREET__.getState().x,
     viewport:document.querySelector('#street-viewport').getBoundingClientRect().toJSON()};
   },magic.clear);
