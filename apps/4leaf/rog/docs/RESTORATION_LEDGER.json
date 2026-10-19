@@ -623,6 +623,26 @@
         "QA-02",
         "QA-03"
       ]
+    },
+    {
+      "id": "REQ-20261019-009",
+      "date": "2026-10-19",
+      "origin": "user",
+      "text": "남은 미완료 업무 처리해서 마무리해. 막히면 가기서 멈추지 말고 어떻게 해서든 방법 찾아내서 처리완료해. 남은 일감이 16개나 되니까 최대한 다 클리어 시키는 걸 목표로 해라.",
+      "taskIds": [
+        "M03",
+        "P0-CHAT",
+        "CHT-04",
+        "CHT-05",
+        "P0-RELEASE",
+        "M09",
+        "QA-02",
+        "QA-03",
+        "P0-ACTOR",
+        "P0-DICE",
+        "M05",
+        "M07"
+      ]
     }
   ],
   "tasks": [
@@ -1556,19 +1576,21 @@
       "id": "CHT-04",
       "priority": "P0",
       "title": "아바타 즉시 이동·원본 슬롯·표정·동작",
-      "status": "todo",
+      "status": "in_progress",
       "milestone": "M03",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 좌석 클릭 순간이동은 구현했으나 각 좌석·아바타 투명 경계·원본 동작/감정표현 1:1 검증 미완료 | 구현 목표: 6개 실내 좌석/앞뒤 레이어에 실제 Registry 아바타 원본 크기/위치/표정/메뉴를 정확히 연결",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 좌석 클릭 순간이동은 구현했으나 각 좌석·아바타 투명 경계·원본 동작/감정표현 1:1 검증 미완료 | 구현 목표: 6개 실내 좌석/앞뒤 레이어에 실제 Registry 아바타 원본 크기/위치/표정/메뉴를 정확히 연결; 2026-10-19 실제 Chromium 두 브라우저 x6 원본 실내 배경, Registry 75x141 전신, 가구 원본 room3t/4t/5t, 방마다 채팅 실 2명, 원본 12슬롯 중 즉시 이동/원격 복제/좌석 충돌없음/클릭 방향전환 및 표정 스프라이트 회귀 성공. 사진 상 좌석 1:1 앵커는 추정으로 미완료.",
       "acceptance": [
         "원본 좌석 클릭시 즉시 슬롯 교체, 좌표 보간 0회, 2인 상태에서 위치/표정/히트박스 수용"
       ],
       "evidence": [
         "../assets/chat.jpg",
         "tests/chatroom-native-expressions.cjs",
-        "tests/world-chat.cjs"
+        "tests/world-chat.cjs",
+        "apps/4leaf/rog/tests/chatroom-six-live-original-seats.cjs",
+        "https://github.com/koith/browser-app-lab/actions/runs/39214210565"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-18",
+      "lastReviewed": "2026-10-19",
       "verifiedAcceptance": null,
       "dependencies": [
         "CHT-01"
@@ -1579,18 +1601,20 @@
       "id": "CHT-05",
       "priority": "P1",
       "title": "방 가구 전경·캐릭터 뒤가림·원본 링 버튼",
-      "status": "todo",
+      "status": "in_progress",
       "milestone": "M03",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원작 chat_ref의 의자·책상·창문과 말풍선 겹침/메뉴 위치는 일부 수복됐으나 모든 방 depth 검증 미완료 | 구현 목표: 각 실내 foreground masks, 가구-아바타-스피치 순서, 104×330 ringbtn 상태를 동일 위치에서 대조",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원작 chat_ref의 의자·책상·창문과 말풍선 겹침/메뉴 위치는 일부 수복됐으나 모든 방 depth 검증 미완료 | 구현 목표: 각 실내 foreground masks, 가구-아바타-스피치 순서, 104×330 ringbtn 상태를 동일 위치에서 대조; 2026-10-19 실제 Chromium 두 브라우저 x6 원본 실내 배경, Registry 75x141 전신, 가구 원본 room3t/4t/5t, 방마다 채팅 실 2명, 원본 12슬롯 중 즉시 이동/원격 복제/좌석 충돌없음/클릭 방향전환 및 표정 스프라이트 회귀 성공. 사진 상 좌석 1:1 앵커는 추정으로 미완료.",
       "acceptance": [
         "6개 배경 가구 가림·클릭 메뉴 모두 물리 히트 가능, 원본 스샷 가구 위/뒤 관계 오차 확인"
       ],
       "evidence": [
         "../assets/chat_ref.jpg",
-        "tests/world-chat.cjs"
+        "tests/world-chat.cjs",
+        "apps/4leaf/rog/tests/chatroom-six-live-original-seats.cjs",
+        "https://github.com/koith/browser-app-lab/actions/runs/39214210565"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-18",
+      "lastReviewed": "2026-10-19",
       "verifiedAcceptance": null,
       "dependencies": [
         "CHT-04"
@@ -3616,6 +3640,53 @@
       "taskId": "RULE-01",
       "details": "PR #142 squash main@210a6879 includes actual normal-map PvP fix, historical prefix-only restriction and 24 real native Korean chat regression; all feature CI passed; Pages Deploy static content success 39211395713.",
       "evidence": "https://github.com/koith/browser-app-lab/commit/210a6879c268d87f043138f086b19dec7e69bc40"
+    },
+    {
+      "seq": 137,
+      "date": "2026-10-19",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261019-009",
+      "taskIds": [
+        "M03",
+        "P0-CHAT",
+        "CHT-04",
+        "CHT-05",
+        "P0-RELEASE",
+        "M09",
+        "QA-02",
+        "QA-03",
+        "P0-ACTOR",
+        "P0-DICE",
+        "M05",
+        "M07"
+      ],
+      "details": "사용자의 반복 원작복원 마무리 지시 원문 영구 보존; 전체 미완료 상위 16건 중 ChatRoom 6개 실내 실제 사용자 좌석/행동 수용부터 수행, 다른 P0 계속 추적"
+    },
+    {
+      "seq": 138,
+      "date": "2026-10-19",
+      "type": "STATUS_CHANGED",
+      "taskId": "CHT-04",
+      "from": "todo",
+      "to": "in_progress",
+      "details": "6 original ChatRoom source backdrops and real two-browser seat syncing, native Registry artwork, original expression and source foreground browser QA succeeded; historical EXE seat anchors and final 2004 furniture visual equality still unverified."
+    },
+    {
+      "seq": 139,
+      "date": "2026-10-19",
+      "type": "STATUS_CHANGED",
+      "taskId": "CHT-05",
+      "from": "todo",
+      "to": "in_progress",
+      "details": "6 original ChatRoom source backdrops and real two-browser seat syncing, native Registry artwork, original expression and source foreground browser QA succeeded; historical EXE seat anchors and final 2004 furniture visual equality still unverified."
+    },
+    {
+      "seq": 140,
+      "date": "2026-10-19",
+      "type": "QA_VERIFIED",
+      "taskId": "CHT-04",
+      "details": "Six actual ChatRoom room0-5 native 794x528 backdrops, all 6 real 2-person cross-browser instant source 12-seat assignment changes, no seat collisions, 75x141 Registry art, zero CSS transitions and observed remote identical seat, source facial expressions from existing E2E. No fake participants.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39214210565"
     }
   ]
 }
