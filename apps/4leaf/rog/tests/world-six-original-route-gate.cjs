@@ -42,8 +42,8 @@ const {chromium}=require('playwright');
   await page.waitForSelector('#rooms:not(.hidden)');
   assert.equal(await page.evaluate(()=>window.__LEAF_SOCIAL__.getState().view),'knighttown');
   assert.equal(await page.locator('.knight-district-hotspot').count(),6);
-  assert.match(await page.locator('#social-image-frame').evaluate(el=>getComputedStyle(el).backgroundImage),
-   /original\\/KnightTown\\/knightback\\.png/);
+  assert.ok((await page.locator('#social-image-frame').evaluate(el=>getComputedStyle(el).backgroundImage))
+   .includes('original/KnightTown/knightback.png'));
   snapshots.push({region:'knights',scene:'rooms:knighttown',source:'KnightTown/knightback.png'});
   await page.locator('#social-back').click();await back();
   for(const region of ['north','south']){
@@ -61,8 +61,8 @@ const {chromium}=require('playwright');
   await page.locator('[data-region="dice"]').click();
   await page.waitForSelector('#dice-channels:not(.hidden)');
   assert.equal(await page.locator('.dice-channel-hotspot').count(),28);
-  assert.match(await page.locator('#dice-channel-stage').evaluate(el=>getComputedStyle(el).backgroundImage),
-   /original\\/Region\\/regionback\\.png/);
+  assert.ok((await page.locator('#dice-channel-stage').evaluate(el=>getComputedStyle(el).backgroundImage))
+   .includes('original/Region/regionback.png'));
   await page.locator('#dice-channels [data-channel="ispin:1"]').click();
   await page.waitForSelector('#lobby:not(.hidden)');
   assert.equal(await page.evaluate(()=>window.__LEAF_LOBBY__.getState().channel),'ispin:1');
