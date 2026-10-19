@@ -643,6 +643,59 @@
         "M05",
         "M07"
       ]
+    },
+    {
+      "id": "REQ-20261019-010",
+      "date": "2026-10-19",
+      "origin": "user",
+      "text": "개발 이어한다. 업무원장에 기재된\n내용 기반으로 남은 일감 처리해. 막힌다고 멈추지 말고 어떻게 해서든 방법 찾아내서 해결하고 보고 시 앱버전 표시하고 일감 리스트에서 뭐뭐 처리했고 뭐뭐남았나 보고 같이 해.",
+      "taskIds": [
+        "M00",
+        "M01",
+        "M02",
+        "M03",
+        "M04",
+        "M05",
+        "M06",
+        "M07",
+        "M08",
+        "M09",
+        "P0-BOARD",
+        "P0-ACTOR",
+        "P0-PODIUM",
+        "P0-DICE",
+        "P0-CHAT",
+        "P0-RELEASE",
+        "SRC-01",
+        "SRC-02",
+        "BRD-01",
+        "BRD-02",
+        "BRD-03",
+        "BRD-04",
+        "ACT-01",
+        "ACT-02",
+        "ACT-03",
+        "ACT-04",
+        "BTL-02",
+        "BTL-04",
+        "DIE-01",
+        "DIE-02",
+        "DIE-04",
+        "CHT-02",
+        "CHT-04",
+        "CHT-05",
+        "WORLD-01",
+        "WORLD-02",
+        "SHOP-01",
+        "SHOP-02",
+        "RULE-01",
+        "RULE-02",
+        "RULE-03",
+        "EVID-01",
+        "EVID-02",
+        "QA-02",
+        "QA-03"
+      ]
     }
   ],
   "tasks": [
@@ -950,7 +1003,7 @@
       "title": "원작 복원 최종 화면·기능 수용 게이트",
       "status": "in_progress",
       "milestone": "M09",
-      "current": "과거 CI 성공은 원작 동일성 완료의 증거가 아님; 2026-10-18 공개 Pages 원본 주잔 브라우저 QA(39123501334) 실패 원인: PR #110에서 제거한 .tile-symbol / <small>을 검사에서 참조해 getComputedStyle(null) TypeError. 실제 웹앱 원본 비트맵은 정상, 수용 게이트 검사가 낡아 수정·재검증 중.; 원본 OBS 동작·전투 SPR 정상/오프라인 누락 대비 둘 모두 CI 게이트 추가. source evidence 없는 3D 원작 동등성은 판정하지 않음.; 2026-10-19 원본 2002 IMG.pak winJail.spr(136x219) 및 winAbility.spr(330x284+41x29×5)을 실제 감옥/100% 능력 타일 이벤트에 연결. 이펙트 배치·시간은 WEB INFERRED이며 원작 MVE 원본과 동일성 미검증. Chromium 이벤트 상태/PNG 크기/원본 조각 위치 QA 추가.; 새 앱 이벤트(감옥/능력)와 실제 경기 종료(원본 452×88 결과 패널) 3장면에 2002 IMG.pak 원본 PNG와 실제 수치/버튼 검증 확대. 웹 배치는 임시임을 표시하며 미완료 종합 검증 유지.; 2026-10-19 복구된 2002 IMG.pak winAbility.spr 6프레임을 100% 실제 어빌리티 발동 시 표시하고 winDoa.spr 363×133을 실제 원본 DMP DOA 후퇴 판정 시 표시하도록 원본 GUI 코드 통합. 2004 3D 물리 모델 미복원.; 2026-10-19 원본 2002 Dice/IMG.pak minipanel.spr 4개 실제 75x20 '미니맵/체스맨정보' 버튼을 비조작 이미지에서 독립 실제 클릭 탭으로 복구. DMP 실 미니맵 유지, CardData 실제 선택 팀 캐릭터 정보만 전시. 체스맨정보 상세 UI의 원본 2004 위치는 INFERRED로 미완료. Chromium PC/폰 E2E 진행 중.",
+      "current": "과거 CI 성공은 원작 동일성 완료의 증거가 아님; 2026-10-18 공개 Pages 원본 주잔 브라우저 QA(39123501334) 실패 원인: PR #110에서 제거한 .tile-symbol / <small>을 검사에서 참조해 getComputedStyle(null) TypeError. 실제 웹앱 원본 비트맵은 정상, 수용 게이트 검사가 낡아 수정·재검증 중.; 원본 OBS 동작·전투 SPR 정상/오프라인 누락 대비 둘 모두 CI 게이트 추가. source evidence 없는 3D 원작 동등성은 판정하지 않음.; 2026-10-19 원본 2002 IMG.pak winJail.spr(136x219) 및 winAbility.spr(330x284+41x29×5)을 실제 감옥/100% 능력 타일 이벤트에 연결. 이펙트 배치·시간은 WEB INFERRED이며 원작 MVE 원본과 동일성 미검증. Chromium 이벤트 상태/PNG 크기/원본 조각 위치 QA 추가.; 새 앱 이벤트(감옥/능력)와 실제 경기 종료(원본 452×88 결과 패널) 3장면에 2002 IMG.pak 원본 PNG와 실제 수치/버튼 검증 확대. 웹 배치는 임시임을 표시하며 미완료 종합 검증 유지.; 2026-10-19 복구된 2002 IMG.pak winAbility.spr 6프레임을 100% 실제 어빌리티 발동 시 표시하고 winDoa.spr 363×133을 실제 원본 DMP DOA 후퇴 판정 시 표시하도록 원본 GUI 코드 통합. 2004 3D 물리 모델 미복원.; 2026-10-19 원본 2002 Dice/IMG.pak minipanel.spr 4개 실제 75x20 '미니맵/체스맨정보' 버튼을 비조작 이미지에서 독립 실제 클릭 탭으로 복구. DMP 실 미니맵 유지, CardData 실제 선택 팀 캐릭터 정보만 전시. 체스맨정보 상세 UI의 원본 2004 위치는 INFERRED로 미완료. Chromium PC/폰 E2E 진행 중.; 2026-10-19 웹앱 버전 0.84.0-beta.1 베타 식별, 오프라인 PWA v84 프리캐시, 역사적 2004 원본과 구분. 동일 SHA 전체 CI 배포 게이트 추가, 원작 모든 장면 동일성은 여전히 미완료.",
       "acceptance": [
         "원작 장면 A/B·핵심 시스템 전체 CI·모바일·온라인 배포·동일 커밋 확인 뒤 승인"
       ],
@@ -967,7 +1020,8 @@
         "apps/4leaf/rog/tests/dice-native-original-source-events.cjs",
         "apps/4leaf/rog/dice-native-minipanel-spr.js",
         "apps/4leaf/rog/dice-native-minipanel-spr.css",
-        "apps/4leaf/rog/tests/dice-original-minipanel-spr.cjs"
+        "apps/4leaf/rog/tests/dice-original-minipanel-spr.cjs",
+        "apps/4leaf/rog/app-version.json"
       ],
       "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
       "lastReviewed": "2026-10-19",
@@ -1934,18 +1988,21 @@
       "id": "QA-02",
       "priority": "P0",
       "title": "완성본 동일 SHA 전체 CI·배포 추적",
-      "status": "todo",
+      "status": "in_progress",
       "milestone": "M09",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 현재 main ada3e...는 페이지 배포 성공 사례가 있어도 비슷한 신규 브랜치의 CSS 테스트가 실패; 전체 동일 SHA 2004 QA 연속 통과 없음 | 구현 목표: 병합 SHA별 Playwright Chromium+WebKit/PWA/offline/map+Chat 2인+전투 테스트·Pages 공개 URL smoke를 한 릴리스 게이트로 묶기",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 현재 main ada3e...는 페이지 배포 성공 사례가 있어도 비슷한 신규 브랜치의 CSS 테스트가 실패; 전체 동일 SHA 2004 QA 연속 통과 없음 | 구현 목표: 병합 SHA별 Playwright Chromium+WebKit/PWA/offline/map+Chat 2인+전투 테스트·Pages 공개 URL smoke를 한 릴리스 게이트로 묶기; 이번 PR에서 0.84.0-beta.1 발행 버전/PWA v84 명시, 한 소스 SHA의 원본 DMP 26맵·OBS·전투·채팅 2브라우저·오프라인 PWA·WebKit iPhone 세로/가로 ROLL·GitHub Pages 실제 원본 355x113 이미지 체크를 한 배포 게이트로 연결. CI/Pages 검증 전 완료 불가.",
       "acceptance": [
         "동일 main SHA의 원장·원본자산 해시·게시 URL·모바일/데스크톱 전 테스트 성공/아티팩트 보관 후에만 완료"
       ],
       "evidence": [
         "docs/RESTORATION_LEDGER.json",
-        ".github/workflows/rog-board-layout.yml"
+        ".github/workflows/rog-board-layout.yml",
+        "apps/4leaf/rog/app-version.json",
+        ".github/workflows/rog-release-acceptance.yml",
+        "apps/4leaf/rog/tests/release-identity.cjs"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-18",
+      "lastReviewed": "2026-10-19",
       "verifiedAcceptance": null,
       "dependencies": [
         "QA-01",
@@ -1959,14 +2016,15 @@
       "title": "아이폰 Safari 세로·가로 4LEAF HUD 오버랩 재검증",
       "status": "in_progress",
       "milestone": "M09",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 제보된 iPhone 390px 화면에서 육각 겹침/체스맨/주사위 및 하단 HUD 클리핑이 발생했으며 자동 WebKit 시뮬레이션만으로 실기기 완전 재현은 부족 | 구현 목표: iPhone Safari 세로+가로/PWA/주소줄 변화/핀치/롤/가구링 버튼/키보드 동작과 viewport-safearea 검사; 2026-10-19 실제 iPhone 폭390 세로 검증에 더해 844×390 회전 가로 viewport 검사 추가. 진짜 TIS 145x97/원본 OBS/모든 104 DMP 칸/ROLL 실제 클릭·화면 경계 390px을 검사. WebKit 실제 Safari/PWA 가로 세션 확인 전까지 완료 불가.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 제보된 iPhone 390px 화면에서 육각 겹침/체스맨/주사위 및 하단 HUD 클리핑이 발생했으며 자동 WebKit 시뮬레이션만으로 실기기 완전 재현은 부족 | 구현 목표: iPhone Safari 세로+가로/PWA/주소줄 변화/핀치/롤/가구링 버튼/키보드 동작과 viewport-safearea 검사; 2026-10-19 실제 iPhone 폭390 세로 검증에 더해 844×390 회전 가로 viewport 검사 추가. 진짜 TIS 145x97/원본 OBS/모든 104 DMP 칸/ROLL 실제 클릭·화면 경계 390px을 검사. WebKit 실제 Safari/PWA 가로 세션 확인 전까지 완료 불가.; WebKit 가상 iPhone 390x844->844x390 실제 회전 후 104개 DMP TIS(145x97), 2명 원본 OBS, 물리 ROLL 버튼 클릭, 턴 이동 미변경을 검증하는 E2E 추가. 실제 물리 iOS 단말/사파리 주소줄 환경은 미검증.",
       "acceptance": [
         "실제 iOS 또는 공개 Safari 실행 증빙 포함; 390/430/768/800+ 화면의 조작/텍스트/버튼 가림 0건"
       ],
       "evidence": [
         "tests/dice-mobile-roll-dmp-order.cjs",
         "tests/dice-horizontal-native-actors.cjs",
-        "apps/4leaf/rog/tests/dice-horizontal-native-actors.cjs"
+        "apps/4leaf/rog/tests/dice-horizontal-native-actors.cjs",
+        "apps/4leaf/rog/tests/dice-landscape-webkit-release.cjs"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
       "lastReviewed": "2026-10-19",
@@ -3687,6 +3745,85 @@
       "taskId": "CHT-04",
       "details": "Six actual ChatRoom room0-5 native 794x528 backdrops, all 6 real 2-person cross-browser instant source 12-seat assignment changes, no seat collisions, 75x141 Registry art, zero CSS transitions and observed remote identical seat, source facial expressions from existing E2E. No fake participants.",
       "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39214210565"
+    },
+    {
+      "seq": 141,
+      "date": "2026-10-19",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261019-010",
+      "taskIds": [
+        "M00",
+        "M01",
+        "M02",
+        "M03",
+        "M04",
+        "M05",
+        "M06",
+        "M07",
+        "M08",
+        "M09",
+        "P0-BOARD",
+        "P0-ACTOR",
+        "P0-PODIUM",
+        "P0-DICE",
+        "P0-CHAT",
+        "P0-RELEASE",
+        "SRC-01",
+        "SRC-02",
+        "BRD-01",
+        "BRD-02",
+        "BRD-03",
+        "BRD-04",
+        "ACT-01",
+        "ACT-02",
+        "ACT-03",
+        "ACT-04",
+        "BTL-02",
+        "BTL-04",
+        "DIE-01",
+        "DIE-02",
+        "DIE-04",
+        "CHT-02",
+        "CHT-04",
+        "CHT-05",
+        "WORLD-01",
+        "WORLD-02",
+        "SHOP-01",
+        "SHOP-02",
+        "RULE-01",
+        "RULE-02",
+        "RULE-03",
+        "EVID-01",
+        "EVID-02",
+        "QA-02",
+        "QA-03"
+      ],
+      "details": "Require actual web app development from immutable ledger, solve blockers, explicit app release version, completed/open task IDs and evidence in every status report."
+    },
+    {
+      "seq": 142,
+      "date": "2026-10-19",
+      "type": "STATUS_CHANGED",
+      "taskId": "QA-02",
+      "from": "todo",
+      "to": "in_progress",
+      "details": "Start release-version and same-SHA multi-browser published-GitHub-Pages acceptance. Do not close until actual PR and main Pages proof."
+    },
+    {
+      "seq": 143,
+      "date": "2026-10-19",
+      "type": "IMPLEMENTED_PENDING_QA",
+      "taskId": "QA-02",
+      "details": "New web revival v0.84.0-beta.1 (NOT historic 4LEAF 0.96d), PWA v84 and 5-job release CI requiring immutable ledger, exact-source DMP/OBS combat, two-browser native ChatTown, iPhone WebKit landscape+roll and Pages live winBattle 355x113.",
+      "evidence": ".github/workflows/rog-release-acceptance.yml"
+    },
+    {
+      "seq": 144,
+      "date": "2026-10-19",
+      "type": "IMPLEMENTED_PENDING_QA",
+      "taskId": "QA-03",
+      "details": "Add WebKit portrait+landscape source board, original OBS and physical ROLL regression; real physical iOS hardware equivalence remains open.",
+      "evidence": "apps/4leaf/rog/tests/dice-landscape-webkit-release.cjs"
     }
   ]
 }

@@ -1,0 +1,181 @@
+name: 4LEAF same-revision original source release acceptance
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/**'
+      - '.github/workflows/rog-release-acceptance.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/**'
+      - '.github/workflows/rog-release-acceptance.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence-and-release-id:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Original source task ledger integrity
+        run: node apps/4leaf/rog/tools/restoration-ledger.cjs check
+      - name: Published revival version is not misrepresented as the original game
+        run: node apps/4leaf/rog/tests/release-identity.cjs
+      - name: All original source DMP board indexes retain no overlapping native sprites
+        run: node apps/4leaf/rog/tests/dmp-tile-overlap-audit.cjs
+  chromium-game:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          npm install --no-save playwright
+          npx playwright install chromium --with-deps
+      - name: Serve this exact commit's original game archive
+        run: |
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog >/tmp/leaf-release-http.log 2>&1 &
+          for i in $(seq 1 25); do
+            if curl -fsSI http://127.0.0.1:8765/index.html >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/leaf-release-http.log
+          exit 1
+      - name: 26 original DMP maps 1920 independent 145x97 tiles on desktop and iPhone
+        run: node apps/4leaf/rog/tests/dice-all-source-maps-camera.cjs
+      - name: Genuine winBattle podium, independent OBS actors and actual dice sum
+        run: node apps/4leaf/rog/tests/dice-battle-podium.cjs
+      - name: Original IMG.pak event sprites on real game events
+        run: node apps/4leaf/rog/tests/dice-native-original-source-events.cjs
+      - name: Native ROLL source sprites and first-click unbroken animation
+        run: node apps/4leaf/rog/tests/dice-source-roll.cjs
+      - name: Native IMG.pak minimap and CardData info tabs without changing turns
+        run: node apps/4leaf/rog/tests/dice-original-minipanel-spr.cjs
+      - name: Original DMP non-PvP special rule regression
+        run: node apps/4leaf/rog/tests/dice-official-2003-non-pvp.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: same-sha-release-native-game
+          path: |
+            leaf-*.png
+            rog-*.png
+            rog-dmp-overlap-audit.json
+          retention-days: 14
+  chromium-chat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          npm install --no-save playwright
+          npx playwright install chromium --with-deps
+      - run: |
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog >/tmp/leaf-release-chat-http.log 2>&1 &
+          for i in $(seq 1 25); do
+            if curl -fsSI http://127.0.0.1:8765/index.html >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/leaf-release-chat-http.log
+          exit 1
+      - name: All 6 original ChatTown rooms and actual 2-browser seat synchronization
+        run: node apps/4leaf/rog/tests/chatroom-six-live-original-seats.cjs
+      - name: All six original ChatRoom toolbar icons must remain physically clickable
+        env:
+          FOURLEAF_SKIP_WEBKIT: '1'
+        run: node apps/4leaf/rog/tests/chatroom-native-toolbar-six.cjs
+      - name: Six genuine WorldMap locations, authentic source navigation
+        run: node apps/4leaf/rog/tests/world-six-original-route-gate.cjs
+      - name: Cold installed PWA stores original game and ChatRoom source graphics
+        run: node apps/4leaf/rog/tests/native-offline-cache.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: same-sha-release-original-chat
+          path: |
+            leaf-*.png
+            rog-*.png
+          retention-days: 14
+  webkit-iphone:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          npm install --no-save playwright
+          npx playwright install webkit --with-deps
+      - run: |
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog >/tmp/leaf-release-webkit-http.log 2>&1 &
+          for i in $(seq 1 25); do
+            if curl -fsSI http://127.0.0.1:8765/index.html >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/leaf-release-webkit-http.log
+          exit 1
+      - name: Real touch original DMP dice twice on WebKit iPhone 390x844
+        env:
+          FOURLEAF_BROWSER: webkit
+        run: node apps/4leaf/rog/tests/dice-mobile-roll-dmp-order.cjs
+      - name: WebKit phone landscape 844x390 hit-tests real original ROLL with full source OBS
+        run: node apps/4leaf/rog/tests/dice-landscape-webkit-release.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: same-sha-release-webkit-portrait-landscape
+          path: |
+            leaf-*.png
+            rog-*.png
+          retention-days: 14
+  published-pages:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [evidence-and-release-id,chromium-game,chromium-chat,webkit-iphone]
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - name: Poll live Pages for EXACT web revival version and verified battle sprite bytes
+        run: |
+          set -eu
+          version="$(python3 -c "import json;print(json.load(open('apps/4leaf/rog/app-version.json'))['version'])")"
+          url='https://koith.github.io/browser-app-lab/apps/4leaf/rog'
+          for i in $(seq 1 36); do
+            if curl -fL --retry 2 --max-time 15 -sS "$url/index.html?revision=$GITHUB_SHA" > /tmp/leaf-live.html; then
+              if grep -Fq "name=\"leaf-revival-version\" content=\"$version\"" /tmp/leaf-live.html; then
+                printf 'Verified published Pages version %s after attempt %s\n' "$version" "$i"
+                curl -fsSL "$url/app-version.json?revision=$GITHUB_SHA" -o /tmp/leaf-live-version.json
+                python3 - <<'PY'
+          import json
+          expected=json.load(open('apps/4leaf/rog/app-version.json'))
+          actual=json.load(open('/tmp/leaf-live-version.json'))
+          assert actual == expected,(expected,actual)
+          print('4LEAF PUBLIC DEPLOYED APP VERSION VERIFIED',actual['version'])
+          PY
+                curl -fsSL "$url/original/SourceSPRExtra/winBattle-01.png" -o /tmp/leaf-original-podium.png
+                python3 - <<'PY'
+          from pathlib import Path
+          import struct
+          data=Path('/tmp/leaf-original-podium.png').read_bytes()
+          assert data[:8] == b'\x89PNG\r\n\x1a\n'
+          assert struct.unpack('>II',data[16:24])==(355,113)
+          print('4LEAF PUBLIC 355x113 ORIGINAL BATTLE SPRITE VERIFIED')
+          PY
+                exit 0
+              fi
+            fi
+            sleep 15
+          done
+          echo 'Published Pages did not reach this release version in time'
+          exit 1

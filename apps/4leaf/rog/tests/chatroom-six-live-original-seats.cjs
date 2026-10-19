@@ -71,12 +71,25 @@ const assert=require('node:assert/strict');
     const prev=Number(fig.dataset.seat);
     const frame=document.querySelector('#social-image-frame');
     const r=frame.getBoundingClientRect();
-    // Choose a different end of the actual native 12-seat grid.
-    const choose=prev>=6?{x:19,y:63}:{x:75,y:96};
-    frame.dispatchEvent(new MouseEvent('click',{bubbles:true,
-     clientX:r.left+r.width*choose.x/100,clientY:r.top+r.height*choose.y/100}));
-    const next=document.querySelector('#social-avatar-layer .social-avatar.self');
-    return {prev,seat:Number(next.dataset.seat),transition:getComputedStyle(next).transitionDuration,
+    // Previous real presence persists across rooms. The opposite corner
+    // can be occupied or map onto the same source slot in rooms 3/4.
+    // Try other genuine click targets: no test-only mutation of positions.
+    const candidates=prev>=6?[
+     {x:19,y:63},{x:76,y:66},{x:39,y:78},{x:21,y:92}
+    ]:[
+     {x:75,y:96},{x:19,y:63},{x:76,y:66},{x:39,y:78}
+    ];
+    let next=null,attempts=0;
+    for(const choose of candidates){
+     attempts++;
+     frame.dispatchEvent(new MouseEvent('click',{bubbles:true,
+      clientX:r.left+r.width*choose.x/100,
+      clientY:r.top+r.height*choose.y/100}));
+     next=document.querySelector('#social-avatar-layer .social-avatar.self');
+     if(Number(next?.dataset.seat)!==prev)break;
+    }
+    return {prev,seat:Number(next?.dataset.seat),attempts,
+     transition:getComputedStyle(next).transitionDuration,
      x:parseFloat(next.style.left),y:parseFloat(next.style.top),
      other:Number(document.querySelector('#social-avatar-layer .social-avatar:not(.self)').dataset.seat)};
    });
