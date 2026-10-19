@@ -65,7 +65,14 @@ const {chromium}=require('playwright');
   const send=async point=>page.evaluate(({point})=>{
    const button=document.querySelector('[data-street="magic"]');
    const canvas=button.querySelector('canvas');
-   const rect=canvas.getBoundingClientRect();
+   const imageRect=canvas.getBoundingClientRect();
+   const box=button.getBoundingClientRect();
+   const sx=box.width/Math.max(1,button.offsetWidth);
+   const sy=box.height/Math.max(1,button.offsetHeight);
+   const rect=imageRect.width>0&&imageRect.height>0?imageRect:{
+    left:box.left+2*sx,top:box.top+2*sy,
+    width:box.width-4*sx,height:box.height-4*sy
+   };
    button.dispatchEvent(new MouseEvent('click',{bubbles:true,
     detail:1,clientX:rect.left+(point.x+.5)*rect.width/canvas.width,
     clientY:rect.top+(point.y+.5)*rect.height/canvas.height}));
@@ -73,6 +80,11 @@ const {chromium}=require('playwright');
     shopVisible:!document.querySelector('#shop').classList.contains('hidden'),
     hit:button.dataset.lastSourceHit,
     sourcePixel:button.dataset.lastSourcePixel,
+    actualRects:{
+     canvas:button.querySelector('canvas').getBoundingClientRect().toJSON(),
+     button:button.getBoundingClientRect().toJSON(),
+     display:getComputedStyle(button.querySelector('canvas')).display
+    },
     active:document.querySelector('#where')?.textContent,
     classes:document.querySelector('#shop').className};
   },{point});
@@ -89,7 +101,14 @@ const {chromium}=require('playwright');
   const pointer=await page.evaluate(point=>{
    const btn=document.querySelector('[data-street="magic"]');
    const canvas=btn.querySelector('canvas');
-   const rect=canvas.getBoundingClientRect();
+   const imageRect=canvas.getBoundingClientRect();
+   const box=btn.getBoundingClientRect();
+   const sx=box.width/Math.max(1,btn.offsetWidth);
+   const sy=box.height/Math.max(1,btn.offsetHeight);
+   const rect=imageRect.width>0&&imageRect.height>0?imageRect:{
+    left:box.left+2*sx,top:box.top+2*sy,
+    width:box.width-4*sx,height:box.height-4*sy
+   };
    return {x:rect.left+(point.x+.5)*rect.width/canvas.width,
     y:rect.top+(point.y+.5)*rect.height/canvas.height,
     before:window.__LEAF_STREET__.getState().x,
