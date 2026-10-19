@@ -129,6 +129,36 @@ const {chromium,webkit}=require('playwright');
    'the second real participant can also roll using the phone touch surface');
   assert.ok(final.count>=2&&final.aria?.includes('주사위 결과'));
   await page.screenshot({path:'leaf-4leaf-mobile-dmp-after-roll.png'});
+  // WebKit implements iOS Safari layout behavior closer than Chromium.
+  // The real source TIS/OBS must remain intact AND a physical ROLL button
+  // must remain onscreen even after rotating to the 844x390 landscape phone.
+  await page.setViewportSize({width:844,height:390});
+  await page.waitForTimeout(250);
+  const landscape=await page.evaluate(()=>{
+   const target=document.getElementById('roll-btn'),
+    area=document.getElementById('board-area'),
+    rect=target.getBoundingClientRect(),br=area.getBoundingClientRect(),
+    above=document.elementFromPoint(rect.x+rect.width/2,rect.y+rect.height/2);
+   return {
+    viewport:[innerWidth,innerHeight],roll:[rect.x,rect.y,rect.width,rect.height],
+    board:[br.x,br.y,br.width,br.height],
+    rollTopmost:above===target||target.contains(above),
+    sourceOriginal:[...document.querySelectorAll('#board-nodes>.tile')]
+     .every(t=>t.offsetWidth===145&&t.offsetHeight===97),
+    sourceActors:[...document.querySelectorAll('#board-pawns .board-pawn')]
+     .map(t=>t.dataset.actorRig)
+   };
+  });
+  assert.deepEqual(landscape.viewport,[844,390]);
+  assert.equal(landscape.sourceOriginal,true,'rotation preserves 145x97 real TIS image');
+  assert.ok(landscape.sourceActors.length>=2&&
+   landscape.sourceActors.every(v=>v==='original-obs-sprite'));
+  assert.ok(landscape.board[3]>=80,'landscape game board remains visible');
+  assert.ok(landscape.roll[0]>=0&&landscape.roll[1]>=0&&
+   landscape.roll[0]+landscape.roll[2]<=844&&
+   landscape.roll[1]+landscape.roll[3]<=390&&landscape.rollTopmost,
+   'iOS landscape real ROLL input must stay fully onscreen and physically clickable '+JSON.stringify(landscape));
+  await page.screenshot({path:'leaf-4leaf-mobile-landscape-'+engine+'.png'});
   assert.deepEqual(errors,[],'dice game has no unhandled Chromium runtime error');
   console.log('GENESIS DMP GRID + ACTUAL MOBILE DICE ROLL PASS ['+engine+']',
    JSON.stringify({cells:board.length,horizontal,vertical,sameRow,
