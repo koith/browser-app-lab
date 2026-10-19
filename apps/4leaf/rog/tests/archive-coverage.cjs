@@ -100,7 +100,7 @@ const path=require('node:path');
   return {map:match?.map,sourceId:source?.[0]||null,
    sourceCount:source?window.ORIGINAL_LEAF_MAPS[source[0]].length:0,
    actualCells:match?.tiles.length,available:entries.length,
-   historicalNamed:maps.length,unverifiedName:source?.[1]?.metadataStatus||null};
+   historicalNamed:Object.keys(window.ORIGINAL_LEAF_MAP_INFO||{}).length,unverifiedName:source?.[1]?.metadataStatus||null};
  });
  assert.equal(randomized.available,26,
   'random game must include 25 originally titled DMP paths plus playable source 0170');
