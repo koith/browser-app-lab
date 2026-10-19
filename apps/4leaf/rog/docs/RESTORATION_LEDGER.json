@@ -1465,18 +1465,20 @@
       "id": "CHT-03",
       "priority": "P0",
       "title": "실접속 참가자 목록·닉네임·좌석 표시",
-      "status": "todo",
+      "status": "in_progress",
       "milestone": "M03",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원작 상단 오른쪽 10~11명 목록/스크롤 구조와 현재 1인 Guest 표시가 달라 레이아웃 테스트가 부족함 | 구현 목표: 원본 명수/목록/선택 텍스트를 실접속 이벤트로만 구성하고 0/1/10/11명 화면 각각 검증",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원작 상단 오른쪽 10~11명 목록/스크롤 구조와 현재 1인 Guest 표시가 달라 레이아웃 테스트가 부족함 | 구현 목표: 원본 명수/목록/선택 텍스트를 실접속 이벤트로만 구성하고 0/1/10/11명 화면 각각 검증; 2026-10-19 새 Chromium QA가 10개의 실제 독립 브라우저 탭에서 채팅방 실참가자 명수, 진짜 ChatRoom/userlist 150x38 원본, 최대 12 슬롯에 10명 실제 자리 및 스크롤, 실제 9명 종료시 1명으로 복귀 검증 중. 배포/QA 아직 확인 전.",
       "acceptance": [
         "원본형 참가자 목록·이름·표시 스크롤, 멀티 브라우저 2/10명 테스트; 존재하지 않는 NPC 참가자 표시 0건"
       ],
       "evidence": [
         "../assets/chat_ref.jpg",
-        "tests/permanent-chatrooms.cjs"
+        "tests/permanent-chatrooms.cjs",
+        "apps/4leaf/rog/tests/chatroom-ten-real-peers.cjs",
+        ".github/workflows/rog-chat-ten-real-peers.yml"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-18",
+      "lastReviewed": "2026-10-19",
       "verifiedAcceptance": null,
       "dependencies": [
         "CHT-02"
@@ -3364,6 +3366,23 @@
       "taskId": "WORLD-03",
       "details": "My4LEAF panel now uses selected Registry original avatar ID (12 true source PNGs) instead of hardcoded sava00, preserving actual GP/name, original 796x528 map and six functioning paths.",
       "evidence": "apps/4leaf/rog/tests/world-six-original-route-gate.cjs"
+    },
+    {
+      "seq": 122,
+      "date": "2026-10-19",
+      "type": "STATUS_CHANGED",
+      "taskId": "CHT-03",
+      "from": "todo",
+      "to": "in_progress",
+      "details": "Ten actual separate Chromium tabs for original historical roster and source seat geometry verification; never fabricate remote NPC participants."
+    },
+    {
+      "seq": 123,
+      "date": "2026-10-19",
+      "type": "TEST_IMPLEMENTED_PENDING_QA",
+      "taskId": "CHT-03",
+      "details": "Original wooden room4 ChatRoom/userlist 150x38 overlay, actual unique participants 2 and 10, ten distinct snaps, source 12-seat collision-free allocation, native scrollbar scroll and genuine nine-peer departure; real physical Chromium pages and screenshots.",
+      "evidence": "apps/4leaf/rog/tests/chatroom-ten-real-peers.cjs"
     }
   ]
 }

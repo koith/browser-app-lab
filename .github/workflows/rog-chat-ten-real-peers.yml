@@ -1,0 +1,49 @@
+name: 4LEAF original ChatRoom ten genuine connected participants
+on:
+  push:
+    paths:
+      - '.github/workflows/rog-chat-ten-real-peers.yml'
+      - 'apps/4leaf/rog/tests/chatroom-ten-real-peers.cjs'
+      - 'apps/4leaf/rog/social-chat.js'
+      - 'apps/4leaf/rog/chatroom-native-panels.css'
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/rog-chat-ten-real-peers.yml'
+      - 'apps/4leaf/rog/tests/chatroom-ten-real-peers.cjs'
+      - 'apps/4leaf/rog/social-chat.js'
+      - 'apps/4leaf/rog/chatroom-native-panels.css'
+  workflow_dispatch:
+jobs:
+  ten-actual-browser-users:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Chromium to render actual participant sprites
+        run: |
+          npm install --no-save playwright
+          npx playwright install chromium --with-deps
+      - name: Serve actual original 2002-04 source PNGs from same origin
+        run: |
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog >/tmp/leaf-ten-chat.log 2>&1 &
+          ready=false
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent --max-time 2 -I http://127.0.0.1:8765/original/ChatRoom/room4.png; then
+              ready=true
+              break
+            fi
+            sleep 1
+          done
+          if [ "$ready" != true ]; then cat /tmp/leaf-ten-chat.log; exit 1; fi
+      - name: Prove ten real distinct ChatRoom users and departure with no invented NPCs
+        run: node apps/4leaf/rog/tests/chatroom-ten-real-peers.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: original-wood-room-ten-real-live-users
+          path: leaf-original-wood-room-ten-real-participants.png
+          retention-days: 21
