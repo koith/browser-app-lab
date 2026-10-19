@@ -72,6 +72,7 @@ const {chromium}=require('playwright');
    return {cityVisible:!document.querySelector('#city').classList.contains('hidden'),
     shopVisible:!document.querySelector('#shop').classList.contains('hidden'),
     hit:button.dataset.lastSourceHit,
+    sourcePixel:button.dataset.lastSourcePixel,
     active:document.querySelector('#where')?.textContent,
     classes:document.querySelector('#shop').className};
   },{point});
