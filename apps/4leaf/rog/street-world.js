@@ -32,7 +32,12 @@
   const canvas=button.querySelector('.street-building-art');
   const source=nativeAlpha.get(canvas);
   if(!source)return true; // Original asset still decoding or offline.
-  const rect=button.getBoundingClientRect();
+  // The original source is painted in the <canvas> CONTENT BOX.
+  // A surrounding CSS 2px focus border means the button's bounding box
+  // is NOT the native bitmap's pixel coordinate system. Sample only
+  // against the actual canvas rect to prevent random false negatives
+  // on narrow real sprite features (observed in Chromium CI).
+  const rect=canvas.getBoundingClientRect();
   if(rect.width<=0||rect.height<=0)return false;
   const x=Math.floor((event.clientX-rect.left)/rect.width*source.w);
   const y=Math.floor((event.clientY-rect.top)/rect.height*source.h);
