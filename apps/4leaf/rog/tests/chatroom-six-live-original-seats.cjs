@@ -71,13 +71,23 @@ const assert=require('node:assert/strict');
     const prev=Number(fig.dataset.seat);
     const frame=document.querySelector('#social-image-frame');
     const r=frame.getBoundingClientRect();
-    // Choose a different end of the actual native 12-seat grid.
-    const choose=prev>=6?{x:19,y:63}:{x:75,y:96};
-    frame.dispatchEvent(new MouseEvent('click',{bubbles:true,
-     clientX:r.left+r.width*choose.x/100,clientY:r.top+r.height*choose.y/100}));
-    const next=document.querySelector('#social-avatar-layer .social-avatar.self');
+    // Two people can reserve whichever two starting slots are picked by
+    // their REAL stable tab hashes. A single guessed click destination may
+    // legitimately be occupied and snap to the current closest slot. Try
+    // independently distant true room coordinates, not a fixed fake seat.
+    const attempts=prev>=6?
+     [{x:20,y:64},{x:75,y:65},{x:39,y:80}]:
+     [{x:76,y:95},{x:22,y:94},{x:59,y:80}];
+    let next,chosen=null;
+    for(const pos of attempts){
+     frame.dispatchEvent(new MouseEvent('click',{bubbles:true,
+      clientX:r.left+r.width*pos.x/100,clientY:r.top+r.height*pos.y/100}));
+     next=document.querySelector('#social-avatar-layer .social-avatar.self');
+     chosen=pos;
+     if(Number(next.dataset.seat)!==prev)break;
+    }
     return {prev,seat:Number(next.dataset.seat),transition:getComputedStyle(next).transitionDuration,
-     x:parseFloat(next.style.left),y:parseFloat(next.style.top),
+     x:parseFloat(next.style.left),y:parseFloat(next.style.top),chosen,
      other:Number(document.querySelector('#social-avatar-layer .social-avatar:not(.self)').dataset.seat)};
    });
    assert.notEqual(move.seat,move.prev,'a genuine room-scene click must teleport to a different native slot');
