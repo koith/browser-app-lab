@@ -22,14 +22,22 @@ const {chromium}=require('playwright');
    const rows=buttons.map(button=>{
     const canvas=button.querySelector('canvas');
     const p=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;
-    let opaque=0,transparent=0,point=null,clear=null;
+    let opaque=0,transparent=0,point=null,clear=null,fallback=null;
     const cx=canvas.width/2,cy=canvas.height/2;
-    let score=Infinity,clearScore=Infinity;
-    for(let y=2;y<canvas.height-2;y++)for(let x=2;x<canvas.width-2;x++){
+    let score=Infinity,backupScore=Infinity,clearScore=Infinity;
+    for(let y=4;y<canvas.height-4;y++)for(let x=4;x<canvas.width-4;x++){
      const alpha=p[(y*canvas.width+x)*4+3],dist=Math.hypot(x-cx,y-cy);
      if(alpha===255){
       opaque++;
-      if(dist<score){score=dist;point={x,y};}
+      if(dist<backupScore){backupScore=dist;fallback={x,y};}
+      // Browser MouseEvent.clientX/clientY are integer CSS pixels.
+      // A 1px opaque edge can become transparent after rasterized pointer
+      // rounding even though the exact SOURCE pixel is white. Select
+      // actual deep SOURCE interior, not an anti-aliased 1px silhouette.
+      let solid=true;
+      for(let dy=-3;dy<=3&&solid;dy++)for(let dx=-3;dx<=3;dx++)
+       if(p[((y+dy)*canvas.width+x+dx)*4+3]!==255){solid=false;break;}
+      if(solid&&dist<score){score=dist;point={x,y};}
      }
      if(alpha===0){
       transparent++;
@@ -37,6 +45,7 @@ const {chromium}=require('playwright');
       if(edge<clearScore){clearScore=edge;clear={x,y};}
      }
     }
+    if(!point)point=fallback;
     return {id:button.dataset.street,source:canvas.dataset.hitMaskSource,
      nativeSize:[canvas.width,canvas.height],opaque,transparent,point,clear,
      ready:canvas.dataset.ready};
