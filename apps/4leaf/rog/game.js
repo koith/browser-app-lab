@@ -73,12 +73,19 @@ for(const [id,rows] of Object.entries(SOURCE_ROUTES)){
  }
 }
 const SOURCE_IDS=Object.fromEntries(Object.entries(SOURCE_INFO).map(([id,info])=>[info.title,id]));
+// 4LEAF OFFICIAL 2003-02-21 map update: specifically "[Non]Stadium",
+ // "[Non]한반도", "[Non]악마의 달팽이" disable PLAYER-VS-PLAYER combat.
+ // The 2002 Dice source map metadata names the normal variants without
+ // [Non], and its 26 DMP routes DO NOT verify the later Non route assets.
+ // Do NOT silently turn off PvP on the regular original source maps.
+ // No invented [Non] source map/texture is registered until recovered.
+const isHistoricalNonBattleTitle=title=>/^\[Non\]/i.test(title);
 const MAPS={
 '4LEAF':{length:70,non:false,warp:[11,38],keepers:[13,29,47,61],jail:[24],chests:[6,32,52],boost:[17,49],attribute:[20,43],joker:[36]},
 '워프게이트':{length:70,non:false,warp:[8,19,30,41,52,63],keepers:[24,45,58],jail:[34],chests:[13,37],boost:[17,56],attribute:[28],joker:[48]},
 'PK':{length:70,non:false,warp:[17,53],keepers:[11,26,43,59],jail:[33],chests:[15,46],boost:[9,35],attribute:[25,50],joker:[56]},
-'Stadium':{length:62,non:true,warp:[19,45],keepers:[14,27,46],jail:[33],chests:[7,23,42],boost:[15,37],attribute:[28,53],joker:[51]},
-'악마의 달팽이':{length:76,non:true,warp:[20,57],keepers:[14,32,49,66],jail:[26,55],chests:[7,38,60],boost:[18,41],attribute:[28,53],joker:[47]}
+'Stadium':{length:62,non:false,warp:[19,45],keepers:[14,27,46],jail:[33],chests:[7,23,42],boost:[15,37],attribute:[28,53],joker:[51]},
+'악마의 달팽이':{length:76,non:false,warp:[20,57],keepers:[14,32,49,66],jail:[26,55],chests:[7,38,60],boost:[18,41],attribute:[28,53],joker:[47]}
 };
 const BOT_NAMES=['티치엘','막시민','보리스','루시안','이스핀','시벨린','루시아'];
 const COLORS=['#fff3bf','#91f2d1','#ffb4c4','#abc3ff','#e9b8fb','#ffda80','#ff9bab','#d9efff'];
@@ -344,7 +351,7 @@ function generateTiles(map){
 function pathCoords(){let pts=[],left=0,right=13,top=0,bottom=7;while(left<=right&&top<=bottom){for(let x=left;x<=right;x++)pts.push([x,top]);for(let y=top+1;y<=bottom;y++)pts.push([right,y]);if(top<bottom)for(let x=right-1;x>=left;x--)pts.push([x,bottom]);if(left<right)for(let y=bottom-1;y>top;y--)pts.push([left,y]);left+=1;right-=1;top+=1;bottom-=1}return pts.map(([x,y])=>({x:5.5+x*(89/13),y:8.5+y*(83/7)}))}
 let PATH=pathCoords();
 function chooseSourcePath(map){const records=SOURCE_ROUTES[SOURCE_IDS[map]];if(!records||records.length<8){PATH=pathCoords();return}/* Authentic DMP index positions are unchanged. The browser camera owns ONE explicit 150x100 WEB display pitch, and all maps share that projection. */const grid=window.__LEAF_CAMERA__?.getState?.().sourceGrid||{width:2800,height:1551,pitchX:70,pitchY:47};const xs=records.map(p=>p[0]),ys=records.map(p=>p[1]);const midX=(Math.min(...xs)+Math.max(...xs))/2,midY=(Math.min(...ys)+Math.max(...ys))/2;PATH=records.map(p=>({x:50+(p[0]-midX)*grid.pitchX/grid.width*100,y:50+(p[1]-midY)*grid.pitchY/grid.height*100}))}
-function installAuthenticMaps(){const list=$('map-select'),entries=Object.entries(SOURCE_INFO).filter(([id])=>SOURCE_ROUTES[id]&&SOURCE_ROUTES[id].length>9);if(!entries.length)return;list.replaceChildren();const rank=['4LEAF','주사위','워프 게이트','PK','악마의 달팽이','한반도','For the Lucky'];entries.sort((a,b)=>{let i=rank.indexOf(a[1].title),j=rank.indexOf(b[1].title);return (i<0?99:i)-(j<0?99:j)});for(const [id,info] of entries){const title=info.title,length=SOURCE_ROUTES[id].length;const old=MAPS[title]||{};const generate=(step,offset)=>Array.from({length:Math.floor(length/step)},(_,i)=>offset+i*step).filter(i=>i>0&&i<length-1);MAPS[title]={length,non:['악마의 달팽이','한반도'].includes(title),warp:old.warp||generate(30,8),keepers:old.keepers||generate(17,13),jail:old.jail||generate(44,25),chests:old.chests||generate(19,6),boost:old.boost||generate(23,17),attribute:old.attribute||generate(29,20),joker:old.joker||generate(41,36)};const opt=document.createElement('option');opt.value=title;
+function installAuthenticMaps(){const list=$('map-select'),entries=Object.entries(SOURCE_INFO).filter(([id])=>SOURCE_ROUTES[id]&&SOURCE_ROUTES[id].length>9);if(!entries.length)return;list.replaceChildren();const rank=['4LEAF','주사위','워프 게이트','PK','악마의 달팽이','한반도','For the Lucky'];entries.sort((a,b)=>{let i=rank.indexOf(a[1].title),j=rank.indexOf(b[1].title);return (i<0?99:i)-(j<0?99:j)});for(const [id,info] of entries){const title=info.title,length=SOURCE_ROUTES[id].length;const old=MAPS[title]||{};const generate=(step,offset)=>Array.from({length:Math.floor(length/step)},(_,i)=>offset+i*step).filter(i=>i>0&&i<length-1);MAPS[title]={length,non:isHistoricalNonBattleTitle(title),warp:old.warp||generate(30,8),keepers:old.keepers||generate(17,13),jail:old.jail||generate(44,25),chests:old.chests||generate(19,6),boost:old.boost||generate(23,17),attribute:old.attribute||generate(29,20),joker:old.joker||generate(41,36)};const opt=document.createElement('option');opt.value=title;
  opt.textContent=title+' · '+length+'칸 [원본 '+id+
   (SOURCE_TILES[id]?' · 발판 복원':' · 경로 복원')+
   (info.metadataStatus?' · 이벤트/이름 미검증':'')+']';
@@ -1325,7 +1332,7 @@ async function resolveTile(p,depth=0){
  }else if(type==='keeper'||type==='arena'){
    if(type==='arena'){
      const incumbent=match.players.find(x=>x!==p&&x.position===pos);
-     if(incumbent&&p.effects.dove<=0&&incumbent.effects.dove<=0)await resolveBattle(p,incumbent,false);
+     if(incumbent&&!MAPS[match.map].non&&p.effects.dove<=0&&incumbent.effects.dove<=0)await resolveBattle(p,incumbent,false);
    }else{
      const monsters=[['말벌',1],['박쥐',1],['슬라임',1],['가이아버그',2],['해골',2],['좀비',2],['고렘',3],['아지다하카',3],['카르마타',4],['크루거',4],['마장기',6]];
      const mob=monsters[rand(monsters.length)];
@@ -1635,5 +1642,5 @@ function init(){installBoardControls();installNativeDiceMenu();
      else if(action==='ability')await useAbility();
      else await useItem(index,steps);
    }finally{remoteAct=false}
- }};window.__ROG_TEST__={startGame,drawGame,takeTurn,teamStats,generateTiles,getMatch:()=>match,go:navigate,setRoll:()=>{},setMatch:v=>{match=v;drawGame()},getSourceMaps:()=>SOURCE_INFO,getSourceTiles:()=>SOURCE_TILES,resolveTile,finishGame,calculateMatchReward,elementalModifier,resolveBattle,moveValues,activePlayer,playerCanAct,refreshResume};if(match&&!match.finished){log('저장된 경기가 있습니다. 주사위 대기실의 이어하기로 복원하세요.')}refreshResume()}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+ }};window.__ROG_TEST__={startGame,drawGame,takeTurn,teamStats,generateTiles,getMatch:()=>match,go:navigate,setRoll:()=>{},setMatch:v=>{match=v;drawGame()},getSourceMaps:()=>SOURCE_INFO,getSourceTiles:()=>SOURCE_TILES,getMapRules:()=>MAPS,isNonBattleTitle:isHistoricalNonBattleTitle,resolveTile,finishGame,calculateMatchReward,elementalModifier,resolveBattle,moveValues,activePlayer,playerCanAct,refreshResume};if(match&&!match.finished){log('저장된 경기가 있습니다. 주사위 대기실의 이어하기로 복원하세요.')}refreshResume()}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();

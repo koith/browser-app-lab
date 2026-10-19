@@ -27,6 +27,7 @@ on:
       - 'apps/4leaf/rog/tests/dice-native-tis-full-outline.cjs'
       - 'apps/4leaf/rog/tests/dice-source-map0170-registration.cjs'
       - 'apps/4leaf/rog/tests/dice-all-source-maps-camera.cjs'
+      - 'apps/4leaf/rog/tests/dice-official-2003-non-pvp.cjs'
       - 'apps/4leaf/rog/game.js'
       - 'apps/4leaf/rog/tests/dice-native-frame.cjs'
       - 'apps/4leaf/rog/tests/dice-battle-podium.cjs'
@@ -78,6 +79,8 @@ jobs:
         run: node apps/4leaf/rog/tests/dice-native-tis-alpha.cjs
       - name: Verify every native TIS image pixel survives full board alpha clipping
         run: node apps/4leaf/rog/tests/dice-native-tis-full-outline.cjs
+      - name: Verify 2003 official Non-only PvP rule using real regular DMP two-user duel
+        run: node apps/4leaf/rog/tests/dice-official-2003-non-pvp.cjs
       - name: Gate actual 800x600 native IMG scene and absence of fake tile overlays
         run: node apps/4leaf/rog/tests/dice-native-frame.cjs
       - name: Verify the actual 2002 IMG.pak 355x113 duel podium, live actors, dice and end of combat
