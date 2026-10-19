@@ -42,6 +42,28 @@ const {chromium}=require('playwright');
   await page.locator('#map-select').selectOption('한반도');
   await page.locator('#start-game').click();
   await page.waitForSelector('#game:not(.hidden)');
+  // Test the published historical [Non] mode only as an in-memory fixture.
+  // The source archive provides NO separate [Non] DMP bytes, so no such
+  // forged path or selectable map is added to the actual application.
+  const nonArena=await page.evaluate(async()=>{
+   const api=window.__ROG_TEST__,m=api.getMatch();
+   const normal=m.map,index=m.tiles.findIndex((x,i)=>
+     i>0&&i<m.tiles.length-1&&x==='normal');
+   const oldType=m.tiles[index],key='[Non]Stadium';
+   api.getMapRules()[key]={...api.getMapRules()[normal],non:true};
+   m.map=key;m.tiles[index]='arena';
+   m.players[0].position=index;m.players[1].position=index;
+   await api.resolveTile(m.players[0]);
+   const source={mode:key,arenaBattle:!!document.querySelector('#battle-visual'),
+    players:m.players.length,actualDmpRegistered:Object.values(api.getSourceMaps())
+     .some(v=>v.title===key)};
+   m.map=normal;m.tiles[index]=oldType;delete api.getMapRules()[key];
+   return source;
+  });
+  assert.equal(nonArena.arenaBattle,false,
+   'genuine [Non] mode must block user PvP EVEN on an arena tile');
+  assert.equal(nonArena.actualDmpRegistered,false,
+   'test fixture never invents a historic [Non] source DMP record');
   const battle=await page.evaluate(()=>{
    const api=window.__ROG_TEST__,match=api.getMatch();
    const index=match.tiles.findIndex((x,i)=>i>0&&i<match.tiles.length-1&&x==='normal');
@@ -64,6 +86,6 @@ const {chromium}=require('playwright');
   assert.ok(after.present&&after.userBodies>=2,'live battle scene uses genuine combat participants');
   await page.screenshot({path:'leaf-2003-official-non-pvp-vs-normal-battle.png'});
   assert.deepEqual(errors,[],'no non-battle source event runtime exceptions');
-  console.log('4LEAF OFFICIAL 2003 [Non] PVP SOURCE RULE PASS',JSON.stringify({verify,battle,after}));
+  console.log('4LEAF OFFICIAL 2003 [Non] PVP SOURCE RULE PASS',JSON.stringify({verify,nonArena,battle,after}));
  }finally{await browser.close()}
 })().catch(e=>{console.error('4LEAF OFFICIAL [Non] PVP RULE FAILED',e.stack||e);process.exit(1)});
