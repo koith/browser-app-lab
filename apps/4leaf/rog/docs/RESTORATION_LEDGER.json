@@ -1795,18 +1795,19 @@
       "id": "QA-03",
       "priority": "P0",
       "title": "아이폰 Safari 세로·가로 4LEAF HUD 오버랩 재검증",
-      "status": "todo",
+      "status": "in_progress",
       "milestone": "M09",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 제보된 iPhone 390px 화면에서 육각 겹침/체스맨/주사위 및 하단 HUD 클리핑이 발생했으며 자동 WebKit 시뮬레이션만으로 실기기 완전 재현은 부족 | 구현 목표: iPhone Safari 세로+가로/PWA/주소줄 변화/핀치/롤/가구링 버튼/키보드 동작과 viewport-safearea 검사",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 제보된 iPhone 390px 화면에서 육각 겹침/체스맨/주사위 및 하단 HUD 클리핑이 발생했으며 자동 WebKit 시뮬레이션만으로 실기기 완전 재현은 부족 | 구현 목표: iPhone Safari 세로+가로/PWA/주소줄 변화/핀치/롤/가구링 버튼/키보드 동작과 viewport-safearea 검사; 2026-10-19 실제 iPhone 폭390 세로 검증에 더해 844×390 회전 가로 viewport 검사 추가. 진짜 TIS 145x97/원본 OBS/모든 104 DMP 칸/ROLL 실제 클릭·화면 경계 390px을 검사. WebKit 실제 Safari/PWA 가로 세션 확인 전까지 완료 불가.",
       "acceptance": [
         "실제 iOS 또는 공개 Safari 실행 증빙 포함; 390/430/768/800+ 화면의 조작/텍스트/버튼 가림 0건"
       ],
       "evidence": [
         "tests/dice-mobile-roll-dmp-order.cjs",
-        "tests/dice-horizontal-native-actors.cjs"
+        "tests/dice-horizontal-native-actors.cjs",
+        "apps/4leaf/rog/tests/dice-horizontal-native-actors.cjs"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-18",
+      "lastReviewed": "2026-10-19",
       "verifiedAcceptance": null,
       "dependencies": [
         "QA-02",
@@ -3216,6 +3217,23 @@
       "taskId": "CHT-01",
       "details": "1011 original native foreground pixels sampled; best 1:1 x427 y425 in two original 2004 captures, current in-game alpha object x427 y425 width115 height103; user room4 desktop, mobile/WebKit and live chat integration source QA success.",
       "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39178101196"
+    },
+    {
+      "seq": 117,
+      "date": "2026-10-19",
+      "type": "STATUS_CHANGED",
+      "taskId": "QA-03",
+      "from": "todo",
+      "to": "in_progress",
+      "details": "Add 844x390 actual rotated iPhone landscape geometry and source TIS/OBS/roll hit testing to existing source-verified 390x844 Chromium mobile QA. Native Safari real device acceptance still open."
+    },
+    {
+      "seq": 118,
+      "date": "2026-10-19",
+      "type": "IMPLEMENTED_PENDING_QA",
+      "taskId": "QA-03",
+      "details": "Playwright landscape 844x390 mobile test: source 104 DMP tiles and 145x97 pixels unchanged; original OBS 2 actors; visible camera and fully on-screen physically touchable roll control checked.",
+      "evidence": "apps/4leaf/rog/tests/dice-horizontal-native-actors.cjs"
     }
   ]
 }
