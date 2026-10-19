@@ -107,7 +107,18 @@
  function showProfile(){
    let panel=$('world-profile-modal');if(panel){panel.remove();return}
    panel=document.createElement('section');panel.id='world-profile-modal';panel.className='world-profile-modal';
-   panel.innerHTML='<div class="world-profile-heading">MY 4LEAF <button aria-label="닫기">×</button></div><div class="world-profile-body"><img alt="" src="./original/Registry/sava00.png"><div><b id="world-profile-name"></b><small id="world-profile-gp"></small><p>마이리프 · 프로필</p><button id="world-profile-rename">닉네임 변경</button></div></div>';
+   panel.innerHTML='<div class="world-profile-heading">MY 4LEAF <button aria-label="닫기">×</button></div><div class="world-profile-body"><img alt=""><div><b id="world-profile-name"></b><small id="world-profile-gp"></small><p>마이리프 · 프로필</p><button id="world-profile-rename">닉네임 변경</button></div></div>';
+   // WorldMap profile must represent the REAL selected Registry avatar,
+   // not the hard-coded starter sava00 while the user's ChatTown figure
+   // has another source skin. These IDs are the 12 recovered native PNGs.
+   const registry=['sava00','sava82','sava06','sava01','sava85','sava02',
+    'sava84','sava04','sava03','sava83','sava05','sava86'];
+   const selected=window.__LEAF_SOCIAL__?.getState?.().avatar;
+   const index=Number.isInteger(selected)?clamp(selected,0,registry.length-1):0;
+   const portrait=panel.querySelector('.world-profile-body img');
+   portrait.src='./original/Registry/'+registry[index]+'.png';
+   portrait.dataset.originalSourceMember='Registry/'+registry[index]+'.png';
+   portrait.dataset.avatarIndex=String(index);
    ref.viewport.append(panel);
    $('world-profile-name').textContent=$('profile-name')?.textContent||'Guest';
    $('world-profile-gp').textContent=$('gp')?.textContent+' GP';
