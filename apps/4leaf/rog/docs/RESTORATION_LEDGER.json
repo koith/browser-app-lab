@@ -1988,9 +1988,9 @@
       "id": "QA-02",
       "priority": "P0",
       "title": "완성본 동일 SHA 전체 CI·배포 추적",
-      "status": "in_progress",
+      "status": "done",
       "milestone": "M09",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 현재 main ada3e...는 페이지 배포 성공 사례가 있어도 비슷한 신규 브랜치의 CSS 테스트가 실패; 전체 동일 SHA 2004 QA 연속 통과 없음 | 구현 목표: 병합 SHA별 Playwright Chromium+WebKit/PWA/offline/map+Chat 2인+전투 테스트·Pages 공개 URL smoke를 한 릴리스 게이트로 묶기; 이번 PR에서 0.84.0-beta.1 발행 버전/PWA v84 명시, 한 소스 SHA의 원본 DMP 26맵·OBS·전투·채팅 2브라우저·오프라인 PWA·WebKit iPhone 세로/가로 ROLL·GitHub Pages 실제 원본 355x113 이미지 체크를 한 배포 게이트로 연결. CI/Pages 검증 전 완료 불가.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 현재 main ada3e...는 페이지 배포 성공 사례가 있어도 비슷한 신규 브랜치의 CSS 테스트가 실패; 전체 동일 SHA 2004 QA 연속 통과 없음 | 구현 목표: 병합 SHA별 Playwright Chromium+WebKit/PWA/offline/map+Chat 2인+전투 테스트·Pages 공개 URL smoke를 한 릴리스 게이트로 묶기; 이번 PR에서 0.84.0-beta.1 발행 버전/PWA v84 명시, 한 소스 SHA의 원본 DMP 26맵·OBS·전투·채팅 2브라우저·오프라인 PWA·WebKit iPhone 세로/가로 ROLL·GitHub Pages 실제 원본 355x113 이미지 체크를 한 배포 게이트로 연결. CI/Pages 검증 전 완료 불가.; 앱 v0.84.0-beta.1(PWA v84) same-SHA main@3235c4af 5-job QA 전부 성공. 실제 공개 Pages version.json과 original winBattle 355x113 PNG 검증. 26 DMP 지도·2 Chromium 사용자 채팅·WebKit iPhone 세로/가로·PWA 오프라인·원본 전투 합격. 원작 전체 원화/3D 메시 동등성은 M09/P0-RELEASE·EVID-01/02 계속 미완료.",
       "acceptance": [
         "동일 main SHA의 원장·원본자산 해시·게시 URL·모바일/데스크톱 전 테스트 성공/아티팩트 보관 후에만 완료"
       ],
@@ -1999,11 +1999,19 @@
         ".github/workflows/rog-board-layout.yml",
         "apps/4leaf/rog/app-version.json",
         ".github/workflows/rog-release-acceptance.yml",
-        "apps/4leaf/rog/tests/release-identity.cjs"
+        "apps/4leaf/rog/tests/release-identity.cjs",
+        "https://github.com/koith/browser-app-lab/pull/145",
+        "https://github.com/koith/browser-app-lab/actions/runs/39267484708",
+        "https://github.com/koith/browser-app-lab/commit/3235c4aff88743c54771a248a5055280c7769bea"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
       "lastReviewed": "2026-10-19",
-      "verifiedAcceptance": null,
+      "verifiedAcceptance": {
+        "sourceComparison": "apps/4leaf/rog/original/SourceSPRExtra/manifest.json (native 2002 winBattle.spr 355x113); apps/4leaf/rog/tests/dmp-tile-overlap-audit.cjs (26 native DMP maps, 1920 tiles); no 2004 MVE equivalence claim",
+        "implementation": ".github/workflows/rog-release-acceptance.yml; apps/4leaf/rog/app-version.json; apps/4leaf/rog/tests/release-identity.cjs; apps/4leaf/rog/tests/dice-landscape-webkit-release.cjs",
+        "runtimeTest": "https://github.com/koith/browser-app-lab/actions/runs/39267484708 (5/5 jobs success: original DMP/battle source, real 2-person 6-room chat, WebKit 390x844 and 844x390 physical roll)",
+        "deployment": "https://github.com/koith/browser-app-lab/commit/3235c4aff88743c54771a248a5055280c7769bea; GitHub Pages live 0.84.0-beta.1 + 355x113 original winBattle PNG confirmed in published-pages job"
+      },
       "dependencies": [
         "QA-01",
         "EVID-02"
@@ -3824,6 +3832,23 @@
       "taskId": "QA-03",
       "details": "Add WebKit portrait+landscape source board, original OBS and physical ROLL regression; real physical iOS hardware equivalence remains open.",
       "evidence": "apps/4leaf/rog/tests/dice-landscape-webkit-release.cjs"
+    },
+    {
+      "seq": 145,
+      "date": "2026-10-19",
+      "type": "STATUS_CHANGED",
+      "taskId": "QA-02",
+      "from": "in_progress",
+      "to": "done",
+      "details": "Verified narrow QA-02 release trace acceptance only, not full 2004 historical restoration. One main SHA 3235c4af game/chat/WebKit 4 jobs + published Pages fifth all pass."
+    },
+    {
+      "seq": 146,
+      "date": "2026-10-19",
+      "type": "QA_VERIFIED",
+      "taskId": "QA-02",
+      "details": "Release gate 39267484708 5/5 passed; 26 DMP 1920 TIS, original 2002 winBattle 355x113, original OBS and GUI ROLL, 6 native rooms real 2-browser, offline PWA, iPhone WebKit portrait+landscape, live Pages version 0.84.0-beta.1.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39267484708"
     }
   ]
 }
