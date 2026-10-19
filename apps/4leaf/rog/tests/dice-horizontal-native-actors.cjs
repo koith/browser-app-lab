@@ -84,6 +84,44 @@ const path=require('node:path');
   assert.equal(proof.fakeCards,0,'default players need no source-missing card fallback');
   assert.deepEqual(errors,[]);
   await page.screenshot({path:'leaf-iphone-original-board-no-overlap.png'});
+  // A real iPhone rotates into a much shorter viewport. Verify source
+  // TIS pixel sizes and actual control hit targets stay functional; simply
+  // having the buttons somewhere below an invisible 500px CSS min-height
+  // is NOT an acceptable landscape recreation.
+  await page.setViewportSize({width:844,height:390});
+  await page.waitForTimeout(300);
+  const landscape=await page.evaluate(()=>{
+   const size=(sel)=>{
+    const el=document.querySelector(sel),r=el?.getBoundingClientRect();
+    if(!el||!r)return null;
+    const hit=document.elementFromPoint(r.left+r.width/2,r.top+r.height/2);
+    return {x:r.x,y:r.y,w:r.width,h:r.height,
+      visible:getComputedStyle(el).visibility!=='hidden'&&r.width>0&&r.height>0,
+      topmost:hit===el||el.contains(hit),interceptor:hit?.id||hit?.className?.toString().slice(0,60)};
+   };
+   const boards=[...document.querySelectorAll('#board-nodes>.tile')];
+   return {
+    screen:[innerWidth,innerHeight],app:size('#app'),board:size('#board-area'),
+    roll:size('#roll-btn'),zoom:size('#board-zoom-reset'),
+    tiles:boards.length,
+    originalSizes:boards.every(t=>t.offsetWidth===145&&t.offsetHeight===97),
+    actorRigs:[...document.querySelectorAll('#board-pawns .board-pawn')].map(a=>a.dataset.actorRig),
+    visibleTiles:boards.filter(t=>getComputedStyle(t).visibility==='visible').length
+   };
+  });
+  assert.deepEqual(landscape.screen,[844,390]);
+  assert.equal(landscape.tiles,104,'turning the iPhone cannot erase original DMP source cells');
+  assert.ok(landscape.originalSizes,'landscape must preserve exact native 145x97 TIS PNG pixels');
+  assert.ok(landscape.actorRigs.length===2&&landscape.actorRigs.every(a=>a==='original-obs-sprite'),
+   'rotation may not replace recovered original OBS with a web-drawn dummy');
+  assert.ok(landscape.board.visible&&landscape.board.h>=80,
+   'physical board must remain visible on rotated phone: '+JSON.stringify(landscape));
+  assert.ok(landscape.visibleTiles>=1,'at least one native tile should be on-screen');
+  assert.ok(landscape.roll.visible&&landscape.roll.y>=0&&
+   landscape.roll.y+landscape.roll.h<=390&&landscape.roll.topmost,
+   'real original roll control must stay completely on-screen and touchable in landscape: '+
+   JSON.stringify(landscape));
+  await page.screenshot({path:'leaf-iphone-landscape-original-board-input.png'});
   console.log('IPHONE ORIGINAL BOARD NONOVERLAP + AUTHENTIC OBS PASS',JSON.stringify({
    tiles:proof.count,pitch:proof.pitch,source:proof.sourceGrid,
    horizontal:proof.horizontal.length,vertical:proof.vertical.length,
