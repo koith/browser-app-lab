@@ -41,8 +41,16 @@
   if(rect.width<=0||rect.height<=0)return false;
   const x=Math.floor((event.clientX-rect.left)/rect.width*source.w);
   const y=Math.floor((event.clientY-rect.top)/rect.height*source.h);
-  if(x<0||x>=source.w||y<0||y>=source.h)return false;
-  return source.alpha[y*source.w+x]>0;
+  const alpha=x>=0&&x<source.w&&y>=0&&y<source.h
+   ? source.alpha[y*source.w+x] : 0;
+  button.dataset.lastSourcePixel=JSON.stringify({
+   x,y,alpha,actualWidth:source.w,actualHeight:source.h,
+   clientX:event.clientX,clientY:event.clientY,
+   canvasLeft:rect.left,canvasTop:rect.top,
+   canvasWidth:rect.width,canvasHeight:rect.height,
+   offsetWidth:button.offsetWidth,offsetHeight:button.offsetHeight
+  });
+  return alpha>0;
  }
  function render(){
   if(!state.viewport||!state.track)return;
