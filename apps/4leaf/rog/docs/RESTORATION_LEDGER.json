@@ -1442,19 +1442,21 @@
       "id": "CHT-02",
       "priority": "P0",
       "title": "상단 검정 채팅 로그·입력창 원본 픽셀 정합",
-      "status": "todo",
+      "status": "in_progress",
       "milestone": "M03",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원작 chat.jpg의 좌측 상단 투명 검정 대화 로그·작은 스크롤바·흰 입력박스와 현재 실제 창 배치/간격 차이 | 구현 목표: 원본 ChatRoom 입력/말풍선/글꼴/자막/스크롤바 리소스를 원래 794×528 좌표에 맞춤",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원작 chat.jpg의 좌측 상단 투명 검정 대화 로그·작은 스크롤바·흰 입력박스와 현재 실제 창 배치/간격 차이 | 구현 목표: 원본 ChatRoom 입력/말풍선/글꼴/자막/스크롤바 리소스를 원래 794×528 좌표에 맞춤; 2026-10-19 진짜 chat.jpg 794×528 원작 JPEG의 흰색 입력창 밝은 픽셀을 동적 검출하고, 진짜 ChatRoom room4의 한글 메시지/원본 로그·스크롤·우측 목록의 독립 DOM 좌표와 직접 대조하는 Playwright 회귀 작업 시작; 감으로 픽셀 미세조정하지 않음.",
       "acceptance": [
         "실제 메시지·CP949/한글 입력·스크롤·복수 말풍선이 원본 창 테두리와 동일 위치에 렌더"
       ],
       "evidence": [
         "../assets/chat.jpg",
         "chatroom-native-2004-frame.css",
-        "tests/chat-native-scrollbar.cjs"
+        "tests/chat-native-scrollbar.cjs",
+        "apps/4leaf/rog/tests/chatroom-original-input-photometry.cjs",
+        ".github/workflows/rog-original-chat-photo-registration.yml"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-18",
+      "lastReviewed": "2026-10-19",
       "verifiedAcceptance": null,
       "dependencies": [
         "CHT-01"
@@ -3431,6 +3433,23 @@
       "from": "in_progress",
       "to": "done",
       "details": "NARROW genuine-source functional route/roster acceptance verified through archival UI, runtime Chromium/WebKit test and deployed main SHA. Historical complete frame fidelity is tracked separately."
+    },
+    {
+      "seq": 128,
+      "date": "2026-10-19",
+      "type": "STATUS_CHANGED",
+      "taskId": "CHT-02",
+      "from": "todo",
+      "to": "in_progress",
+      "details": "Derive white input strip from original 2004 JPG pixels and compare independent real ChatRoom log/entry/userlist coordinates; restore only verified mismatch."
+    },
+    {
+      "seq": 129,
+      "date": "2026-10-19",
+      "type": "AUDIT_IMPLEMENTED",
+      "taskId": "CHT-02",
+      "details": "Historical 794x528 JPEG RGB scanning at left input strip; live actual Korean message, original 390px chat log, 407px input, 150x38 source userlist and true 52x40 source scrollbar acceptance; photo displacement diagnostic pending.",
+      "evidence": "apps/4leaf/rog/tests/chatroom-original-input-photometry.cjs"
     }
   ]
 }

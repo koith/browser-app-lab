@@ -187,7 +187,7 @@
   font:11px/1 Gulim,'굴림',sans-serif!important;
   cursor:pointer!important;
  }
- /* Historical screenshots show 1:1 407x112 chat and 158x128 participant
+ /* Historical screenshots show 1:1 407x118 chat and 158x128 participant
     window. Existing source-native ChatRoom atlas CSS applies inside them. */
  #rooms.classic-chat-room .messenger[data-native-overlay="true"]{
   left:16px!important;top:0!important;

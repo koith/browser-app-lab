@@ -1,0 +1,50 @@
+name: 4LEAF 2004 original ChatRoom photo-to-live input alignment
+on:
+  push:
+    paths:
+      - '.github/workflows/rog-original-chat-photo-registration.yml'
+      - 'apps/4leaf/rog/tests/chatroom-original-input-photometry.cjs'
+      - 'apps/4leaf/rog/chatroom-native-panels.css'
+      - 'apps/4leaf/rog/chatroom-native-2004-frame.css'
+      - 'apps/4leaf/rog/chatroom-native-scrollbar.css'
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/rog-original-chat-photo-registration.yml'
+      - 'apps/4leaf/rog/tests/chatroom-original-input-photometry.cjs'
+      - 'apps/4leaf/rog/chatroom-native-panels.css'
+      - 'apps/4leaf/rog/chatroom-native-2004-frame.css'
+      - 'apps/4leaf/rog/chatroom-native-scrollbar.css'
+  workflow_dispatch:
+jobs:
+  original-2004-jpg-geometry:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install real browser
+        run: |
+          npm install --no-save playwright
+          npx playwright install chromium --with-deps
+      - name: Serve authentic original PNGs from stable same origin
+        run: |
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog >/tmp/leaf-original-photo.log 2>&1 &
+          ready=false
+          for attempt in $(seq 1 25); do
+            if curl --fail --silent --max-time 2 -I http://127.0.0.1:8765/original/ChatRoom/room4.png; then
+              ready=true;break
+            fi
+            sleep 1
+          done
+          if [ "$ready" != true ]; then cat /tmp/leaf-original-photo.log;exit 1;fi
+      - name: Register historical photo bright input pixels against actual native room layout and live Korean chat
+        run: node apps/4leaf/rog/tests/chatroom-original-input-photometry.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: original-2004-chat-input-registration
+          path: leaf-2004-source-chat-input-row-registration.png
+          retention-days: 21
