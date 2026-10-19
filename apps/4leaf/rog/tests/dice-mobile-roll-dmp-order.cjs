@@ -129,20 +129,31 @@ const {chromium,webkit}=require('playwright');
    'the second real participant can also roll using the phone touch surface');
   assert.ok(final.count>=2&&final.aria?.includes('주사위 결과'));
   await page.screenshot({path:'leaf-4leaf-mobile-dmp-after-roll.png'});
-  // WebKit implements iOS Safari layout behavior closer than Chromium.
-  // The real source TIS/OBS must remain intact AND a physical ROLL button
-  // must remain onscreen even after rotating to the 844x390 landscape phone.
+  // Finish the REAL second participant's dice and any source battle
+  // result before testing the NEXT turn's enabled roll button. Original
+  // ROLL artwork is a separate source button; #roll-btn is its legacy
+  // engine wiring, NOT the physical button visible in the 2004 client.
+  await finishTurn(0);
+  await page.waitForFunction(()=>{
+   const native=document.getElementById('dice-source-roll');
+   return native?.dataset.nativeRollSource==='ready'&&!native.disabled;
+  },null,{timeout:15000});
   await page.setViewportSize({width:844,height:390});
   await page.waitForTimeout(250);
   const landscape=await page.evaluate(()=>{
-   const target=document.getElementById('roll-btn'),
+   const target=document.getElementById('dice-source-roll'),
     area=document.getElementById('board-area'),
     rect=target.getBoundingClientRect(),br=area.getBoundingClientRect(),
     above=document.elementFromPoint(rect.x+rect.width/2,rect.y+rect.height/2);
    return {
-    viewport:[innerWidth,innerHeight],roll:[rect.x,rect.y,rect.width,rect.height],
+    viewport:[innerWidth,innerHeight],
+    sourceRoll:[rect.x,rect.y,rect.width,rect.height],
+    sourceRollState:target.dataset.nativeRollSource,
+    sourceRollReady:!target.disabled,
+    sourceRollSource:target.dataset.originalSpriteMember,
     board:[br.x,br.y,br.width,br.height],
     rollTopmost:above===target||target.contains(above),
+    interceptedBy:above?.id||above?.className?.toString().slice(0,100),
     sourceOriginal:[...document.querySelectorAll('#board-nodes>.tile')]
      .every(t=>t.offsetWidth===145&&t.offsetHeight===97),
     sourceActors:[...document.querySelectorAll('#board-pawns .board-pawn')]
@@ -150,14 +161,16 @@ const {chromium,webkit}=require('playwright');
    };
   });
   assert.deepEqual(landscape.viewport,[844,390]);
-  assert.equal(landscape.sourceOriginal,true,'rotation preserves 145x97 real TIS image');
+  assert.equal(landscape.sourceOriginal,true,'rotation preserves 145x97 source TIS art');
   assert.ok(landscape.sourceActors.length>=2&&
    landscape.sourceActors.every(v=>v==='original-obs-sprite'));
   assert.ok(landscape.board[3]>=80,'landscape game board remains visible');
-  assert.ok(landscape.roll[0]>=0&&landscape.roll[1]>=0&&
-   landscape.roll[0]+landscape.roll[2]<=844&&
-   landscape.roll[1]+landscape.roll[3]<=390&&landscape.rollTopmost,
-   'iOS landscape real ROLL input must stay fully onscreen and physically clickable '+JSON.stringify(landscape));
+  assert.equal(landscape.sourceRollSource,'Dice/IMG.pak:eventRoll1.spr');
+  assert.equal(landscape.sourceRollState,'ready');
+  assert.equal(landscape.sourceRollReady,true);
+  const [sx,sy,sw,sh]=landscape.sourceRoll;
+  assert.ok(sx>=0&&sy>=0&&sx+sw<=844&&sy+sh<=390&&landscape.rollTopmost,
+   'iOS landscape must expose the genuine 16-frame original ROLL input as topmost clickable target '+JSON.stringify(landscape));
   await page.screenshot({path:'leaf-4leaf-mobile-landscape-'+engine+'.png'});
   assert.deepEqual(errors,[],'dice game has no unhandled Chromium runtime error');
   console.log('GENESIS DMP GRID + ACTUAL MOBILE DICE ROLL PASS ['+engine+']',
