@@ -37,7 +37,24 @@
   // is NOT the native bitmap's pixel coordinate system. Sample only
   // against the actual canvas rect to prevent random false negatives
   // on narrow real sprite features (observed in Chromium CI).
-  const rect=canvas.getBoundingClientRect();
+  const imageRect=canvas.getBoundingClientRect();
+  const boxRect=button.getBoundingClientRect();
+  // Hidden source overlay: original MainStreet/back.png still contains
+  // the building, but the redundant chroma canvas may be display:none.
+  // In that legitimate original-background state, map pointer to the
+  // bordered button's inner content box rather than a zero-sized canvas.
+  const borderLeft=Number.parseFloat(getComputedStyle(button).borderLeftWidth)||0;
+  const borderTop=Number.parseFloat(getComputedStyle(button).borderTopWidth)||0;
+  const borderRight=Number.parseFloat(getComputedStyle(button).borderRightWidth)||0;
+  const borderBottom=Number.parseFloat(getComputedStyle(button).borderBottomWidth)||0;
+  const sx=boxRect.width/Math.max(1,button.offsetWidth);
+  const sy=boxRect.height/Math.max(1,button.offsetHeight);
+  const rect=imageRect.width>0&&imageRect.height>0 ? imageRect : {
+   left:boxRect.left+borderLeft*sx,
+   top:boxRect.top+borderTop*sy,
+   width:Math.max(0,boxRect.width-(borderLeft+borderRight)*sx),
+   height:Math.max(0,boxRect.height-(borderTop+borderBottom)*sy)
+  };
   if(rect.width<=0||rect.height<=0)return false;
   const x=Math.floor((event.clientX-rect.left)/rect.width*source.w);
   const y=Math.floor((event.clientY-rect.top)/rect.height*source.h);
