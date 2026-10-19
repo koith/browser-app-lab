@@ -45,5 +45,7 @@ jobs:
         if: always()
         with:
           name: original-wood-room-ten-real-live-users
-          path: leaf-original-wood-room-ten-real-participants.png
+          path: |
+            leaf-original-wood-room-ten-real-participants.png
+            leaf-original-wood-room-eleven-real-participants.png
           retention-days: 21
