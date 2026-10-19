@@ -50,6 +50,8 @@ jobs:
           exit 1
       - name: 26 original DMP maps 1920 independent 145x97 tiles on desktop and iPhone
         run: node apps/4leaf/rog/tests/dice-all-source-maps-camera.cjs
+      - name: Complete 25 historically named source maps and preserve unnamed 0170 random route
+        run: node apps/4leaf/rog/tests/archive-coverage.cjs
       - name: Genuine winBattle podium, independent OBS actors and actual dice sum
         run: node apps/4leaf/rog/tests/dice-battle-podium.cjs
       - name: Original IMG.pak event sprites on real game events
