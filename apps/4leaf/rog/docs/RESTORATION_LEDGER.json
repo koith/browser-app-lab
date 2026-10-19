@@ -1465,9 +1465,9 @@
       "id": "CHT-03",
       "priority": "P0",
       "title": "실접속 참가자 목록·닉네임·좌석 표시",
-      "status": "in_progress",
+      "status": "done",
       "milestone": "M03",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원작 상단 오른쪽 10~11명 목록/스크롤 구조와 현재 1인 Guest 표시가 달라 레이아웃 테스트가 부족함 | 구현 목표: 원본 명수/목록/선택 텍스트를 실접속 이벤트로만 구성하고 0/1/10/11명 화면 각각 검증; 2026-10-19 새 Chromium QA가 10개의 실제 독립 브라우저 탭에서 채팅방 실참가자 명수, 진짜 ChatRoom/userlist 150x38 원본, 최대 12 슬롯에 10명 실제 자리 및 스크롤, 실제 9명 종료시 1명으로 복귀 검증 중. 배포/QA 아직 확인 전.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원작 상단 오른쪽 10~11명 목록/스크롤 구조와 현재 1인 Guest 표시가 달라 레이아웃 테스트가 부족함 | 구현 목표: 원본 명수/목록/선택 텍스트를 실접속 이벤트로만 구성하고 0/1/10/11명 화면 각각 검증; 2026-10-19 새 Chromium QA가 10개의 실제 독립 브라우저 탭에서 채팅방 실참가자 명수, 진짜 ChatRoom/userlist 150x38 원본, 최대 12 슬롯에 10명 실제 자리 및 스크롤, 실제 9명 종료시 1명으로 복귀 검증 중. 배포/QA 아직 확인 전.; 2026-10-19 좁게 정의된 세부 기능 수용 기준 실브라우저+Pages 배포까지 완료. 2004 전체 픽셀 동등성/원본 3D는 상위 P0·기타 원장 업무 그대로 미완료.",
       "acceptance": [
         "원본형 참가자 목록·이름·표시 스크롤, 멀티 브라우저 2/10명 테스트; 존재하지 않는 NPC 참가자 표시 0건"
       ],
@@ -1475,11 +1475,18 @@
         "../assets/chat_ref.jpg",
         "tests/permanent-chatrooms.cjs",
         "apps/4leaf/rog/tests/chatroom-ten-real-peers.cjs",
-        ".github/workflows/rog-chat-ten-real-peers.yml"
+        ".github/workflows/rog-chat-ten-real-peers.yml",
+        "https://github.com/koith/browser-app-lab/actions/runs/39195921419",
+        "https://github.com/koith/browser-app-lab/actions/runs/39196192371"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
       "lastReviewed": "2026-10-19",
-      "verifiedAcceptance": null,
+      "verifiedAcceptance": {
+        "sourceComparison": "2004 originals apps/4leaf/assets/chat.jpg shows 10 authentic participants; chat_ref.jpg shows 11. Original ChatRoom/userlist.png 150x38 recovered, actual wooden room4 bitmap 794x528 and 12 source layout seats, not fake NPCs.",
+        "implementation": "apps/4leaf/rog/social-chat.js genuine actual browser-tab presence & room participant list; tests/chatroom-ten-real-peers.cjs / .github/workflows/rog-chat-ten-real-peers.yml assert 2,10,11 independent clients and peer departure.",
+        "runtimeTest": "GitHub Actions 39195921419 SUCCESS; 10 distinct real tabs (no simulated occupants), additional eleventh joined, 11 unique seats, 150x38 original userlist, scroll 183px/86px, 10 departures to 1, real Chromium, zero fake NPCs; source world/chat full suite 39195921535 SUCCESS.",
+        "deployment": "GitHub Pages main squash 23e0724e95ea2ec548155314a7fc19cb401916b2; Deploy static content to Pages 39196192371 SUCCESS."
+      },
       "dependencies": [
         "CHT-02"
       ],
@@ -1608,9 +1615,9 @@
       "id": "WORLD-03",
       "priority": "P1",
       "title": "월드맵 6지역·각 목적지 경로 복원 검증",
-      "status": "in_progress",
+      "status": "done",
       "milestone": "M01",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원본 월드맵 이미지와 6지역 이동은 실사용되지만 화면 월드 선택 애니메이션/실제 월드 동선 최종 검증이 부족 | 구현 목표: 원본 월드맵 도달 가능 지점별 6지역/Street/Chat/Dice 전환을 실제 클릭 기록과 매칭; 2026-10-19 six source WorldMap destination (Street/KnightTown/North/South/Dice/My4LEAF) actual route and back navigation QA authored; My4LEAF previously forced sava00 instead of current native Registry avatar, fixed in world-map.js. CI not yet verified.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원본 월드맵 이미지와 6지역 이동은 실사용되지만 화면 월드 선택 애니메이션/실제 월드 동선 최종 검증이 부족 | 구현 목표: 원본 월드맵 도달 가능 지점별 6지역/Street/Chat/Dice 전환을 실제 클릭 기록과 매칭; 2026-10-19 six source WorldMap destination (Street/KnightTown/North/South/Dice/My4LEAF) actual route and back navigation QA authored; My4LEAF previously forced sava00 instead of current native Registry avatar, fixed in world-map.js. CI not yet verified.; 2026-10-19 좁게 정의된 세부 기능 수용 기준 실브라우저+Pages 배포까지 완료. 2004 전체 픽셀 동등성/원본 3D는 상위 P0·기타 원장 업무 그대로 미완료.",
       "acceptance": [
         "각 목적지가 정확한 배경/기능으로 전환, 뒤로/홈/메신저 상태 유지; 불일치 경로 0건"
       ],
@@ -1618,11 +1625,18 @@
         "tests/world-map-moon.cjs",
         "tests/world-chat.cjs",
         "apps/4leaf/rog/tests/world-six-original-route-gate.cjs",
-        "apps/4leaf/rog/world-map.js"
+        "apps/4leaf/rog/world-map.js",
+        "https://github.com/koith/browser-app-lab/actions/runs/39195348566",
+        "https://github.com/koith/browser-app-lab/actions/runs/39196192371"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-18",
-      "verifiedAcceptance": null,
+      "lastReviewed": "2026-10-19",
+      "verifiedAcceptance": {
+        "sourceComparison": "2002 WorldMap/WorldMapBack 796x528 source and six independently recovered original island sprite routes; 2004 screen controls preserved, 2004 exact camera/animation separately M01/WORLD-01.",
+        "implementation": "apps/4leaf/rog/world-map.js uses original six independently clickable regions; My4LEAF selected Registry index maps 12 genuine recovered PNGs. tests/world-six-original-route-gate.cjs.",
+        "runtimeTest": "GitHub Actions world map and real social chat integration run 39195348566 SUCCESS; all six actual source destinations & returns, selected avatar change/reload, native map dimensions and no errors. WebKit mobile also SUCCESS.",
+        "deployment": "GitHub Pages main squash 2d2cb03552b49b124882cf4a8c45bdd1474029a0, deployment run 39195759066 SUCCESS, latest main 23e0724e deployment 39196192371 SUCCESS."
+      },
       "dependencies": [
         "WORLD-01"
       ],
@@ -3383,6 +3397,40 @@
       "taskId": "CHT-03",
       "details": "Original wooden room4 ChatRoom/userlist 150x38 overlay, actual unique participants 2 and 10, ten distinct snaps, source 12-seat collision-free allocation, native scrollbar scroll and genuine nine-peer departure; real physical Chromium pages and screenshots.",
       "evidence": "apps/4leaf/rog/tests/chatroom-ten-real-peers.cjs"
+    },
+    {
+      "seq": 124,
+      "date": "2026-10-19",
+      "type": "QA_VERIFIED",
+      "taskId": "WORLD-03",
+      "details": "Original six WorldMap destination actions, back/home routes, native island art and current actual Registry avatar profile pass real Chromium; user GP and profile intact. Other full visual world fidelity remains M01/WORLD-01.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39195348566"
+    },
+    {
+      "seq": 125,
+      "date": "2026-10-19",
+      "type": "STATUS_CHANGED",
+      "taskId": "WORLD-03",
+      "from": "in_progress",
+      "to": "done",
+      "details": "NARROW genuine-source functional route/roster acceptance verified through archival UI, runtime Chromium/WebKit test and deployed main SHA. Historical complete frame fidelity is tracked separately."
+    },
+    {
+      "seq": 126,
+      "date": "2026-10-19",
+      "type": "QA_VERIFIED",
+      "taskId": "CHT-03",
+      "details": "Original 2004 10- and 11-person roster counts replicated by independent real Chromium tab participants, unique original Registry avatars/seats, actual scroll, correctly vacated positions without ghost NPCs. Still no claim of full original window pixel match (CHT-02/05 remain open).",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39195921419"
+    },
+    {
+      "seq": 127,
+      "date": "2026-10-19",
+      "type": "STATUS_CHANGED",
+      "taskId": "CHT-03",
+      "from": "in_progress",
+      "to": "done",
+      "details": "NARROW genuine-source functional route/roster acceptance verified through archival UI, runtime Chromium/WebKit test and deployed main SHA. Historical complete frame fidelity is tracked separately."
     }
   ]
 }
