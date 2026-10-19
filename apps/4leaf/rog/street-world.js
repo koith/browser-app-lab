@@ -20,6 +20,25 @@
   {id:'office',asset:'office',x:884,y:7,w:215,h:238,title:'네나루하 마법학원',category:'지역 시설'}
  ];
  const state={viewport:null,track:null,x:WIDTH/2,scale:1,down:null,clientScale:1};
+ // Source MainStreet/*.png are green-keyed 2002 bitmaps; large square
+ // WEB hitboxes incorrectly treated their transparent corners as shops.
+ // Cache only real decoded/source pixels. No photo overlays and no
+ // reconstructed CSS polygon that can diverge from original artwork.
+ const nativeAlpha=new WeakMap();
+ function hitsOriginalBuilding(event,button){
+  // Native keyboard activation / semantic DOM tests remain accessible.
+  // Pointer input (detail>=1) must hit a real archived bitmap pixel.
+  if(!event||event.detail===0||!Number.isFinite(event.clientX))return true;
+  const canvas=button.querySelector('.street-building-art');
+  const source=nativeAlpha.get(canvas);
+  if(!source)return true; // Original asset still decoding or offline.
+  const rect=button.getBoundingClientRect();
+  if(rect.width<=0||rect.height<=0)return false;
+  const x=Math.floor((event.clientX-rect.left)/rect.width*source.w);
+  const y=Math.floor((event.clientY-rect.top)/rect.height*source.h);
+  if(x<0||x>=source.w||y<0||y>=source.h)return false;
+  return source.alpha[y*source.w+x]>0;
+ }
  function render(){
   if(!state.viewport||!state.track)return;
   const vw=state.viewport.clientWidth,vh=state.viewport.clientHeight;
@@ -70,7 +89,11 @@
      if(g>205&&r<92&&b<100&&g>r*1.65&&g>b*1.55)data.data[i+3]=0;
     }
     ctx.putImageData(data,0,0);
+    const alpha=new Uint8Array(canvas.width*canvas.height);
+    for(let i=0;i<alpha.length;i++)alpha[i]=data.data[i*4+3];
+    nativeAlpha.set(canvas,{w:canvas.width,h:canvas.height,alpha});
     canvas.dataset.ready='true';
+    canvas.dataset.hitMaskSource='MainStreet/'+shop.asset+'.png';
    }catch{canvas.dataset.ready='offline'}
   };
   img.onerror=()=>{canvas.dataset.ready='missing';console.error('Missing original MainStreet building '+shop.asset)};
@@ -96,7 +119,13 @@
    const hint=document.createElement('span');hint.textContent=shop.title;
    b.append(building,hint);
    drawOriginalBuilding(building,shop);
-   b.onclick=()=>selectShop(shop.id);track.append(b);
+   b.onclick=event=>{
+    const hit=hitsOriginalBuilding(event,b);
+    b.dataset.lastSourceHit=String(hit);
+    if(!hit)return;
+    selectShop(shop.id);
+   };
+   track.append(b);
   }
   viewport.append(track);
   const tools=document.createElement('nav');tools.className='street-navigation';
@@ -107,7 +136,13 @@
   $('street-left').onclick=()=>pan(-400);
   $('street-right').onclick=()=>pan(400);
   viewport.addEventListener('pointerdown',e=>{
-   if(e.target.closest('.street-location')||e.button!==0)return;
+   if(e.button!==0)return;
+   const building=e.target.closest('.street-location');
+   if(building&&hitsOriginalBuilding({clientX:e.clientX,clientY:e.clientY,detail:1},building))return;
+   // A source chroma-key transparent building corner is open pavement:
+   // dragging there should pan the real 1938px scene rather than being
+   // silently swallowed by the surrounding rectangular <button>.
+
    state.down={id:e.pointerId,x:e.clientX,orig:state.x};
    try{viewport.setPointerCapture(e.pointerId)}catch{}
   });

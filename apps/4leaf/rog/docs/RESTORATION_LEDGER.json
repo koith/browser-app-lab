@@ -1677,18 +1677,20 @@
       "id": "WORLD-02",
       "priority": "P1",
       "title": "켈티카 원작 파노라마·지점 클릭 경계",
-      "status": "todo",
+      "status": "in_progress",
       "milestone": "M02",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원작 street.jpg 긴 거리 그림을 웹에서 부분 표시하고 라벨을 덧입히지만 원래 핫스팟/좌우 패닝·이동 버튼 차이 | 구현 목표: 실제 원본 Street 이미지 영역 클릭 polygon과 원래 마을/상점 입장 경로·파노라마 구간 대조",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원작 street.jpg 긴 거리 그림을 웹에서 부분 표시하고 라벨을 덧입히지만 원래 핫스팟/좌우 패닝·이동 버튼 차이 | 구현 목표: 실제 원본 Street 이미지 영역 클릭 polygon과 원래 마을/상점 입장 경로·파노라마 구간 대조; 2026-10-19 원본 MainStreet 7개 불규칙 녹색키 PNG의 투명 영역까지 WEB 사각 버튼으로 취급해 건물 밖 빈 공간 클릭이 상점 열고 파노라마 드래그 방해하던 결함 수정. 실제 원본 RGBA 캐시와 현재 pointer 좌표 사용, source transparent pixels drag passthrough. 원본 EXE 정확한 click-map은 여전히 미해독.",
       "acceptance": [
         "지도 좌/중/우 화면에서 출입 지점과 원본 소스 핫스팟 일치, 음영·가짜 라벨 침범 최소화"
       ],
       "evidence": [
         "../assets/street.jpg",
-        "tests/knighttown-original.cjs"
+        "tests/knighttown-original.cjs",
+        "apps/4leaf/rog/street-world.js",
+        "apps/4leaf/rog/tests/mainstreet-source-alpha-hotspots.cjs"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-18",
+      "lastReviewed": "2026-10-19",
       "verifiedAcceptance": null,
       "dependencies": [
         "WORLD-01"
@@ -3687,6 +3689,23 @@
       "taskId": "CHT-04",
       "details": "Six actual ChatRoom room0-5 native 794x528 backdrops, all 6 real 2-person cross-browser instant source 12-seat assignment changes, no seat collisions, 75x141 Registry art, zero CSS transitions and observed remote identical seat, source facial expressions from existing E2E. No fake participants.",
       "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39214210565"
+    },
+    {
+      "seq": 141,
+      "date": "2026-10-19",
+      "type": "STATUS_CHANGED",
+      "taskId": "WORLD-02",
+      "from": "todo",
+      "to": "in_progress",
+      "details": "Recovered 2002 source MainStreet bitmap chroma-key mask now supplies actual nonrectangular shop pointer acceptance; historical EXE hotspot definition remains unverified."
+    },
+    {
+      "seq": 142,
+      "date": "2026-10-19",
+      "type": "IMPLEMENTED_PENDING_QA",
+      "taskId": "WORLD-02",
+      "details": "All seven original MainStreet source building canvases use decoded true alpha for pointer click. Transparent corners permit pointer capture/pan. Keyboard activation kept; browser real pointer/route regression running.",
+      "evidence": "apps/4leaf/rog/tests/mainstreet-source-alpha-hotspots.cjs"
     }
   ]
 }

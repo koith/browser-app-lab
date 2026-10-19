@@ -7,6 +7,7 @@ on:
       - 'apps/4leaf/rog/tests/world-map-moon.cjs'
       - 'apps/4leaf/rog/tests/world-six-original-route-gate.cjs'
       - 'apps/4leaf/rog/street-world.js'
+      - 'apps/4leaf/rog/tests/mainstreet-source-alpha-hotspots.cjs'
       - 'apps/4leaf/rog/shop-native.js'
       - 'apps/4leaf/rog/cardshop-native-controls.js'
       - 'apps/4leaf/rog/cardshop-native-controls.css'
@@ -157,6 +158,8 @@ jobs:
         run: node apps/4leaf/rog/tests/dice-source-dmp-terrain-explorer.cjs
       - name: Gate six actual original WorldMap source destinations, return paths, selected Registry profile
         run: node apps/4leaf/rog/tests/world-six-original-route-gate.cjs
+      - name: Verify exact alpha clicks on all seven 2002 MainStreet sprites and transparent-corner panning
+        run: node apps/4leaf/rog/tests/mainstreet-source-alpha-hotspots.cjs
       - name: Verify actual 120x270 MainFrame toolbar sprites, native panel and working cross-scene navigation
         run: node apps/4leaf/rog/tests/mainframe-native-toolbar.cjs
       - name: Register original 161x51 MainFrame 4LEAF logo across WorldMap and ChatRoom archive captures
