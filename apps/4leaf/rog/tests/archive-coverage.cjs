@@ -91,8 +91,25 @@ const path=require('node:path');
  if(await page.locator('#lobby-create').isVisible())await page.locator('#lobby-create').click();
  await page.locator('#map-select').selectOption('__RANDOM__');
  await page.locator('#start-game').click();
- const randomized=await page.evaluate(()=>window.__ROG_TEST__.getMatch()?.map);
- assert.ok(maps.some(m=>m.name===randomized),'official random-map should choose one of the decoded originals');
+ const randomized=await page.evaluate(()=>{
+  const match=window.__ROG_TEST__.getMatch();
+  const info=window.__ROG_TEST__.getSourceMaps();
+  const entries=Object.entries(info).filter(([id,entry])=>
+   window.ORIGINAL_LEAF_MAPS[id]?.length>9);
+  const source=entries.find(([id,entry])=>entry.title===match?.map);
+  return {map:match?.map,sourceId:source?.[0]||null,
+   sourceCount:source?window.ORIGINAL_LEAF_MAPS[source[0]].length:0,
+   actualCells:match?.tiles.length,available:entries.length,
+   historicalNamed:Object.keys(window.ORIGINAL_LEAF_MAP_INFO||{}).length,unverifiedName:source?.[1]?.metadataStatus||null};
+ });
+ assert.equal(randomized.available,26,
+  'random game must include 25 originally titled DMP paths plus playable source 0170');
+ assert.ok(randomized.sourceId && randomized.sourceCount===randomized.actualCells,
+  'original random-map must choose one of ALL 26 archived DMP routes: '+
+   JSON.stringify(randomized));
+ if(randomized.sourceId==='0170')
+  assert.ok(randomized.unverifiedName,
+   'anonymous 2002 DMP 0170 must not receive a fabricated archival map title');
  assert.equal(await page.locator('#app.app-classic-dice').count(),1,'4:3 original gameplay focus automatically enabled');
  const rect=await page.locator('#app').boundingBox();
  assert.ok(rect.width<=970,'desktop original-era game view is 4:3-sized');

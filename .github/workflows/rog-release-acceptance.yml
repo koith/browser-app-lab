@@ -28,6 +28,8 @@ jobs:
         run: node apps/4leaf/rog/tests/release-identity.cjs
       - name: All original source DMP board indexes retain no overlapping native sprites
         run: node apps/4leaf/rog/tests/dmp-tile-overlap-audit.cjs
+      - name: SHA256-audit 100 actual decoded source IMG.pak frames, preserving 2002 winBattle podium
+        run: node apps/4leaf/rog/tests/native-img-source-integrity.cjs
   chromium-game:
     runs-on: ubuntu-latest
     timeout-minutes: 18
@@ -50,6 +52,8 @@ jobs:
           exit 1
       - name: 26 original DMP maps 1920 independent 145x97 tiles on desktop and iPhone
         run: node apps/4leaf/rog/tests/dice-all-source-maps-camera.cjs
+      - name: Complete 25 historically named source maps and preserve unnamed 0170 random route
+        run: node apps/4leaf/rog/tests/archive-coverage.cjs
       - name: Genuine winBattle podium, independent OBS actors and actual dice sum
         run: node apps/4leaf/rog/tests/dice-battle-podium.cjs
       - name: Original IMG.pak event sprites on real game events
@@ -166,11 +170,14 @@ jobs:
                 curl -fsSL "$url/original/SourceSPRExtra/winBattle-01.png" -o /tmp/leaf-original-podium.png
                 python3 - <<'PY'
           from pathlib import Path
-          import struct
+          import hashlib,json,struct
           data=Path('/tmp/leaf-original-podium.png').read_bytes()
           assert data[:8] == b'\x89PNG\r\n\x1a\n'
           assert struct.unpack('>II',data[16:24])==(355,113)
-          print('4LEAF PUBLIC 355x113 ORIGINAL BATTLE SPRITE VERIFIED')
+          meta=json.loads(Path('apps/4leaf/rog/original/SourceSPRExtra/manifest.json').read_text())
+          expected=meta['sprites']['winBattle.spr']['frames'][1]['sha256']
+          assert hashlib.sha256(data).hexdigest()==expected, 'Published source podium PNG differs from authenticated 2002 IMG.pak decoder'
+          print('4LEAF PUBLIC 355x113 BATTLE SOURCE PNG SHA256 VERIFIED',expected)
           PY
                 exit 0
               fi
