@@ -79,7 +79,7 @@ const SOURCE_IDS=Object.fromEntries(Object.entries(SOURCE_INFO).map(([id,info])=
  // [Non], and its 26 DMP routes DO NOT verify the later Non route assets.
  // Do NOT silently turn off PvP on the regular original source maps.
  // No invented [Non] source map/texture is registered until recovered.
-const isHistoricalNonBattleTitle=title=>/^\[Non\](?:\s|$)/i.test(title);
+const isHistoricalNonBattleTitle=title=>/^\[Non\]/i.test(title);
 const MAPS={
 '4LEAF':{length:70,non:false,warp:[11,38],keepers:[13,29,47,61],jail:[24],chests:[6,32,52],boost:[17,49],attribute:[20,43],joker:[36]},
 '워프게이트':{length:70,non:false,warp:[8,19,30,41,52,63],keepers:[24,45,58],jail:[34],chests:[13,37],boost:[17,56],attribute:[28],joker:[48]},
