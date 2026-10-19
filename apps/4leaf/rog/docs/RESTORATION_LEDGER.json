@@ -623,6 +623,26 @@
         "QA-02",
         "QA-03"
       ]
+    },
+    {
+      "id": "REQ-20261019-009",
+      "date": "2026-10-19",
+      "origin": "user",
+      "text": "남은 미완료 업무 처리해서 마무리해. 막히면 가기서 멈추지 말고 어떻게 해서든 방법 찾아내서 처리완료해. 남은 일감이 16개나 되니까 최대한 다 클리어 시키는 걸 목표로 해라.",
+      "taskIds": [
+        "M03",
+        "P0-CHAT",
+        "CHT-04",
+        "CHT-05",
+        "P0-RELEASE",
+        "M09",
+        "QA-02",
+        "QA-03",
+        "P0-ACTOR",
+        "P0-DICE",
+        "M05",
+        "M07"
+      ]
     }
   ],
   "tasks": [
@@ -3616,6 +3636,27 @@
       "taskId": "RULE-01",
       "details": "PR #142 squash main@210a6879 includes actual normal-map PvP fix, historical prefix-only restriction and 24 real native Korean chat regression; all feature CI passed; Pages Deploy static content success 39211395713.",
       "evidence": "https://github.com/koith/browser-app-lab/commit/210a6879c268d87f043138f086b19dec7e69bc40"
+    },
+    {
+      "seq": 137,
+      "date": "2026-10-19",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261019-009",
+      "taskIds": [
+        "M03",
+        "P0-CHAT",
+        "CHT-04",
+        "CHT-05",
+        "P0-RELEASE",
+        "M09",
+        "QA-02",
+        "QA-03",
+        "P0-ACTOR",
+        "P0-DICE",
+        "M05",
+        "M07"
+      ],
+      "details": "사용자의 반복 원작복원 마무리 지시 원문 영구 보존; 전체 미완료 상위 16건 중 ChatRoom 6개 실내 실제 사용자 좌석/행동 수용부터 수행, 다른 P0 계속 추적"
     }
   ]
 }
