@@ -1215,7 +1215,7 @@
       "title": "실제 TIS 알파·윗면·하단 림 상태 복원",
       "status": "in_progress",
       "milestone": "M04",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 소스 PNG는 145×97로 렌더되나 바닥 입체감·윗면 보이는 각도·원본 회전/알파 외곽 비교가 완료되지 않음 | 구현 목표: 32종 TIS alpha 외곽·스프라이트의 디코더 상하 반전을 2004 이미지의 실제 그림과 유형별 대조; 2026-10-20 신뢰 가능한 원본 145x97 RGBA alpha 실제 픽셀과 2004로부터 수용된 scaleY(-1) 방향을 DOM 클릭 좌표/카메라 zoom/모바일과 연결. CSS polygon의 내부 빈 픽셀을 가짜 발판 클릭으로 처리하지 않도록 정확한 source pixel picking 구현. 2002 MVE 실제 메시, 원본 전체 윗면 각도는 여전히 미해결.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 소스 PNG는 145×97로 렌더되나 바닥 입체감·윗면 보이는 각도·원본 회전/알파 외곽 비교가 완료되지 않음 | 구현 목표: 32종 TIS alpha 외곽·스프라이트의 디코더 상하 반전을 2004 이미지의 실제 그림과 유형별 대조; 2026-10-20 신뢰 가능한 원본 145x97 RGBA alpha 실제 픽셀과 2004로부터 수용된 scaleY(-1) 방향을 DOM 클릭 좌표/카메라 zoom/모바일과 연결. CSS polygon의 내부 빈 픽셀을 가짜 발판 클릭으로 처리하지 않도록 정확한 source pixel picking 구현. 2002 MVE 실제 메시, 원본 전체 윗면 각도는 여전히 미해결.; 2026-10-20 PR #149 main@99323ecd source alpha hit test merged; board QA 39381019063 / release 39381019040 / visual 39381019028 and Pages 39381019093 verified. Followup on PR #150 main board workflow 39381488807 occasional first physical click landed on different foreground during camera transition, so followup PR uses pointer movement→document.elementFromPoint recheck/real mouse rather than fake DOM events; still historical original 3D projection incomplete.",
       "acceptance": [
         "32개 원본 타일의 원화 픽셀/방향/원본 클립 경계 유지, 타일 외곽 잘림·상하 오인 0건"
       ],
@@ -1225,9 +1225,13 @@
         "tests/dice-native-tis-full-outline.cjs",
         "apps/4leaf/rog/dice-native-tis-alpha.js",
         "apps/4leaf/rog/game.js",
-        "apps/4leaf/rog/tests/dice-source-alpha-pointer.cjs"
+        "apps/4leaf/rog/tests/dice-source-alpha-pointer.cjs",
+        "https://github.com/koith/browser-app-lab/pull/149",
+        "https://github.com/koith/browser-app-lab/actions/runs/39381019063",
+        "https://github.com/koith/browser-app-lab/actions/runs/39381019040",
+        "https://github.com/koith/browser-app-lab/actions/runs/39381488807"
       ],
-      "evidenceLevel": "VERIFIED-SOURCE-TIS-RGBA; IMPLEMENTED-PENDING-E2E; HISTORICAL-MVE-PROJECTION-UNVERIFIED",
+      "evidenceLevel": "VERIFIED-TIS-ORIGINAL-RGBA/LIVE-BROWSER/PAGES; HISTORICAL-MVE-3D-PROJECTION-UNVERIFIED",
       "lastReviewed": "2026-10-20",
       "verifiedAcceptance": null,
       "dependencies": [
@@ -1326,18 +1330,21 @@
       "id": "ACT-01",
       "priority": "P0",
       "title": "원본 OBS 미복원 34종 해독",
-      "status": "todo",
+      "status": "in_progress",
       "milestone": "M05",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원본 ID 98종 중 실제 전신 리소스 64종/281 PNG만 게시됨; 34종은 카드 이미지 정지 대체 | 구현 목표: 첫 OBS.pak의 28종 실패 행 헤더를 검증하고 OBS2/OBS3 중복·클라이언트 RLE 해법 연구, 진짜 PNG만 합격",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원본 ID 98종 중 실제 전신 리소스 64종/281 PNG만 게시됨; 34종은 카드 이미지 정지 대체 | 구현 목표: 첫 OBS.pak의 28종 실패 행 헤더를 검증하고 OBS2/OBS3 중복·클라이언트 RLE 해법 연구, 진짜 PNG만 합격; 2026-10-20 원본 OBS.pak 검증된 진단 재분류: CardData 98종 중 기존 OBS fullbody 64종/281개 원본 PNG; 엄격 decoder bulk 90종 대상 62종/268PNG 성공, 28종 거부(24 exact row mismatch·3 frame geometry·1 frame count 오류), 그 외 약 6종은 원본 OBS 파일명·다른 클라이언트 판본 전수 대조 필요. 성공 명칭/실루엣 근거 없는 새 PNG는 라이브에 넣지 않음. 상세 출처 보고서 작성.",
       "acceptance": [
         "98개 ID 각각 원본 전신 PNG 1장 이상 SHA/오프셋 검증 또는 미확보 원인 기록; 가짜 CSS 체스맨 0건"
       ],
       "evidence": [
         "original/OBS/animation-extra.js",
-        "tools/decode-original-obs-bulk.py"
+        "tools/decode-original-obs-bulk.py",
+        "apps/4leaf/rog/docs/OBS_MISSING_34_AUDIT_2026-10-20.md",
+        "apps/4leaf/rog/original/OBS/bulk-source-report.json",
+        "apps/4leaf/rog/tools/decode-original-obs-bulk.py"
       ],
-      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-18",
+      "evidenceLevel": "VERIFIED-SOURCE-ARCHIVE-COUNTS/STRICT-DECODER-FAILURES; 34-ORIGINAL-MODELS-UNRECOVERED",
+      "lastReviewed": "2026-10-20",
       "verifiedAcceptance": null,
       "dependencies": [
         "SRC-01"
@@ -1395,7 +1402,7 @@
       "title": "보드·전투 체스맨 발 접지·그림자·다중배치",
       "status": "in_progress",
       "milestone": "M05",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 기본 2P의 진짜 OBS 표시는 검증했으나 모든 체스맨 크기/발판 고정·동시 2인 겹침·전투 POV는 원본과 비교 미흡 | 구현 목표: 원본 OBS originX/Y, 발 위치, TIS 바닥 픽셀, 캐릭터 z-index/그림자 관통 검증; 2026-10-20 원본 OBS 이미지를 일시적 503 응답에서 영구 unavailable 처리하던 문제 개선: 실제 동일 아카이브 OBS PNG 3회 재요청, 실패 후 검증된 원본 CardData 정지 대체, 연결 회복 시 원본 전신 자동 재시도. 팀/턴/DMP 좌표·원본 소스 바이트 불변. 정확한 행동 프레임표·출발/착지·98종 전체 원본 수용은 여전히 미완료.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 기본 2P의 진짜 OBS 표시는 검증했으나 모든 체스맨 크기/발판 고정·동시 2인 겹침·전투 POV는 원본과 비교 미흡 | 구현 목표: 원본 OBS originX/Y, 발 위치, TIS 바닥 픽셀, 캐릭터 z-index/그림자 관통 검증; 2026-10-20 원본 OBS 이미지를 일시적 503 응답에서 영구 unavailable 처리하던 문제 개선: 실제 동일 아카이브 OBS PNG 3회 재요청, 실패 후 검증된 원본 CardData 정지 대체, 연결 회복 시 원본 전신 자동 재시도. 팀/턴/DMP 좌표·원본 소스 바이트 불변. 정확한 행동 프레임표·출발/착지·98종 전체 원본 수용은 여전히 미완료.; 2026-10-20 PR #150 merged main@bb15ba5c genuine OBS 503 retry/reconnect QA 39381181475 + release 39381181551 PASS, Pages 39381488969 success; real main OBS frame job 39381488742 success. Original 34 missing IDs and 2002 direction/actions still not recovered.",
       "acceptance": [
         "전신 64종+추가 복원분에서 보드·전투·2인 겹침·6인 게임에 대한 실사 접지/가림 확인"
       ],
@@ -1403,9 +1410,14 @@
         "dice-original-obs.css",
         "tests/dice-cooccupied-pawns.cjs",
         "apps/4leaf/rog/genesis-chessman-actors.js",
-        "apps/4leaf/rog/tests/dice-obs-source-recovery.cjs"
+        "apps/4leaf/rog/tests/dice-obs-source-recovery.cjs",
+        "https://github.com/koith/browser-app-lab/pull/150",
+        "https://github.com/koith/browser-app-lab/actions/runs/39381181475",
+        "https://github.com/koith/browser-app-lab/actions/runs/39381181551",
+        "https://github.com/koith/browser-app-lab/actions/runs/39381488969",
+        "https://github.com/koith/browser-app-lab/actions/runs/39381488742"
       ],
-      "evidenceLevel": "VERIFIED-OBS-ARCHIVAL-PIXELS; WEBAPP-HTTP-RETRY-PENDING-CI; HISTORICAL-POSE-MAPPING-UNVERIFIED",
+      "evidenceLevel": "VERIFIED-ARCHIVAL-OBS-SOURCE-PNG/PHYSICAL-BROWSER/RECONNECT/DEPLOY; ORIGINAL-POSE-AND-34-SOURCE-BODIES-UNVERIFIED",
       "lastReviewed": "2026-10-20",
       "verifiedAcceptance": null,
       "dependencies": [
@@ -4185,6 +4197,39 @@
       "taskId": "ACT-04",
       "details": "Never re-create a CSS chessman to mask a recoverable OBS source PNG network error; original PNG retries up to three times. On confirmed asset missing, show archival CardData portrait with true missing status; on network restore, reload original OBS source without changing player/turn position. CI physical Chromium 503 and reconnect E2E pending.",
       "evidence": "apps/4leaf/rog/tests/dice-obs-source-recovery.cjs"
+    },
+    {
+      "seq": 162,
+      "date": "2026-10-20",
+      "type": "STATUS_CHANGED",
+      "taskId": "ACT-01",
+      "from": "todo",
+      "to": "in_progress",
+      "details": "Verified original OBS.pak gap census; 28 rejected native sprites classified from actual SHA256-backed member decoder, 34 original full bodies remain missing."
+    },
+    {
+      "seq": 163,
+      "date": "2026-10-20",
+      "type": "SOURCE_AUDIT",
+      "taskId": "ACT-01",
+      "details": "OBS 98 characters, 64 original fullbody source models/281 images, 28 rejected archived OBS members including 24 nonexact row matches/3 geometry/1 frame count and 6 further member-ID candidates unresolved. No invented decoded art promoted.",
+      "evidence": "apps/4leaf/rog/docs/OBS_MISSING_34_AUDIT_2026-10-20.md"
+    },
+    {
+      "seq": 164,
+      "date": "2026-10-20",
+      "type": "QA_VERIFIED",
+      "taskId": "BRD-02",
+      "details": "PR #149 merged main SHA 99323ecdcfc1b6375bc909a7867474646203f1fb. 32 true original RGBA TIS per-pixel actor-independent mouse pick, source Y-inversion, camera zoom/mobile. Release 39381019040/board 39381019063/Pages 39381019093 success. Main #150 intermittent camera-transition physical click test requires followup; no historical MVE camera equivalence claim.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39381019063"
+    },
+    {
+      "seq": 165,
+      "date": "2026-10-20",
+      "type": "QA_VERIFIED",
+      "taskId": "ACT-04",
+      "details": "PR #150 merged main SHA bb15ba5c4de8d3a27233b089dfdf2fd076fc8ea7; genuine source OBS HTTP retry/fallback/reconnect browser PASS 39381181475; same SHA source release 39381488751 and OBS frame gameplay 39381488742 PASS; Pages 39381488969 success. Does not recover missing 34 fullbody models or original per-action motion.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39381488751"
     }
   ]
 }
