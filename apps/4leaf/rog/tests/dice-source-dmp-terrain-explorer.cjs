@@ -4,13 +4,14 @@
 // original files. No artificial height layer, extra actor or match mutation.
 const {chromium}=require('playwright');
 const assert=require('node:assert/strict');
-const path=require('node:path');
 (async()=>{
  const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
  const page=await browser.newPage({viewport:{width:1280,height:900},serviceWorkers:'block'});
  const errors=[];page.on('pageerror',err=>errors.push(String(err)));
  await page.addInitScript(()=>{window.LEAF_CENTRAL_API_URL='';});
- const BASE=process.env.FOURLEAF_TEST_URL||'file://'+path.resolve(__dirname,'../index.html');
+ // Source RGBA pixels must be readable under SAME-ORIGIN HTTP. file://
+ // intentionally taints 145x97 canvases and cannot prove true pixel input.
+ const BASE=process.env.FOURLEAF_TEST_URL||'http://127.0.0.1:8765/index.html';
  try{
   await page.goto(BASE);
   await page.waitForFunction(()=>window.__ROG_TEST__&&window.__LEAF_CAMERA__&&window.__LEAF_DMP_EXPLORER__);
@@ -22,6 +23,35 @@ const path=require('node:path');
   await page.locator('#start-game').click();
   await page.waitForSelector('#game:not(.hidden)');
   await page.waitForFunction(()=>document.querySelectorAll('#board-nodes .tile[data-dmp-focusable]').length===104);
+  // The tile button AND its ancestor inspector must agree on the genuine
+  // decoded original 145x97 alpha pixel. Previously b.onclick rejected
+  // transparent clicks, but the ancestor click still opened the inspector
+  // and moved the camera to a tile the source bitmap did not contain.
+  await page.waitForFunction(()=>window.__LEAF_TIS_ALPHA__&&
+   [...document.querySelectorAll('#board-nodes .tile')].every(t=>t.dataset.tisAlpha==='ready'),
+    null,{timeout:30000});
+  const emptyPixel=await page.evaluate(()=>{
+   const tile=[...document.querySelectorAll('#board-nodes>.tile')][0];
+   const r=tile.getBoundingClientRect(),api=window.__LEAF_TIS_ALPHA__;
+   for(let y=0;y<97;y+=2)for(let x=0;x<145;x+=2){
+    const clientX=r.left+(x+.5)*r.width/145;
+    const clientY=r.top+(y+.5)*r.height/97;
+    const p=api.hitPoint(tile,clientX,clientY);
+    if(p.ready&&!p.hit){
+     tile.dispatchEvent(new MouseEvent('click',{bubbles:true,detail:1,
+       clientX,clientY}));
+     return {id:tile.dataset.tile,x:p.x,y:p.y,hit:p.hit};
+    }
+   }
+   return null;
+  });
+  assert.ok(emptyPixel,'find actual source-transparent TIS pixel inside its DOM tile');
+  assert.equal(await page.locator('#dice-source-dmp-inspector').count(),0,
+    'source-transparent bitmap click MUST NOT open parent DMP inspector');
+  assert.equal(await page.evaluate(()=>window.__LEAF_DMP_EXPLORER__.getState().selected),null,
+    'a ghost transparent click must not move the live DMP inspection camera');
+  // Same source image must remain keyboard accessible; synthetic detail=0
+  // is handled by the existing Enter/Space path tested below.
   const initial=await page.evaluate(()=>{
    const match=window.__ROG_TEST__.getMatch();
    const rows=window.ORIGINAL_LEAF_MAPS[

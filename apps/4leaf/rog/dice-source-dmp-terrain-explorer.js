@@ -130,6 +130,15 @@
   root.addEventListener('click',event=>{
    const tile=event.target.closest('.tile[data-tile]');
    if(!tile||!root.contains(tile))return;
+   // The underlying game tile rejects source-transparent 2002 TIS pixels,
+   // but this independent inspector listens on the ancestor and previously
+   // re-opened a tile panel even when the source-pixel hit was rejected.
+   // Apply the SAME original 145x97 alpha test to the bubbled physical
+   // click. Keyboard .click()/Enter has detail=0 and remains accessible.
+   if(event.detail>0&&Number.isFinite(event.clientX)&&Number.isFinite(event.clientY)){
+    const native=window.__LEAF_TIS_ALPHA__?.hitPoint(tile,event.clientX,event.clientY);
+    if(native?.ready&&!native.hit)return;
+   }
    focus(Number(tile.dataset.tile));
   });
   root.addEventListener('keydown',event=>{

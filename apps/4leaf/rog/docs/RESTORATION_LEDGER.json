@@ -1246,7 +1246,7 @@
       "title": "실제 TIS 알파·윗면·하단 림 상태 복원",
       "status": "in_progress",
       "milestone": "M04",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 소스 PNG는 145×97로 렌더되나 바닥 입체감·윗면 보이는 각도·원본 회전/알파 외곽 비교가 완료되지 않음 | 구현 목표: 32종 TIS alpha 외곽·스프라이트의 디코더 상하 반전을 2004 이미지의 실제 그림과 유형별 대조; 2026-10-20 신뢰 가능한 원본 145x97 RGBA alpha 실제 픽셀과 2004로부터 수용된 scaleY(-1) 방향을 DOM 클릭 좌표/카메라 zoom/모바일과 연결. CSS polygon의 내부 빈 픽셀을 가짜 발판 클릭으로 처리하지 않도록 정확한 source pixel picking 구현. 2002 MVE 실제 메시, 원본 전체 윗면 각도는 여전히 미해결.; 2026-10-20 PR #149 main@99323ecd source alpha hit test merged; board QA 39381019063 / release 39381019040 / visual 39381019028 and Pages 39381019093 verified. Followup on PR #150 main board workflow 39381488807 occasional first physical click landed on different foreground during camera transition, so followup PR uses pointer movement→document.elementFromPoint recheck/real mouse rather than fake DOM events; still historical original 3D projection incomplete.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 소스 PNG는 145×97로 렌더되나 바닥 입체감·윗면 보이는 각도·원본 회전/알파 외곽 비교가 완료되지 않음 | 구현 목표: 32종 TIS alpha 외곽·스프라이트의 디코더 상하 반전을 2004 이미지의 실제 그림과 유형별 대조; 2026-10-20 신뢰 가능한 원본 145x97 RGBA alpha 실제 픽셀과 2004로부터 수용된 scaleY(-1) 방향을 DOM 클릭 좌표/카메라 zoom/모바일과 연결. CSS polygon의 내부 빈 픽셀을 가짜 발판 클릭으로 처리하지 않도록 정확한 source pixel picking 구현. 2002 MVE 실제 메시, 원본 전체 윗면 각도는 여전히 미해결.; 2026-10-20 PR #149 main@99323ecd source alpha hit test merged; board QA 39381019063 / release 39381019040 / visual 39381019028 and Pages 39381019093 verified. Followup on PR #150 main board workflow 39381488807 occasional first physical click landed on different foreground during camera transition, so followup PR uses pointer movement→document.elementFromPoint recheck/real mouse rather than fake DOM events; still historical original 3D projection incomplete.; 2026-10-20 원본 145x97 TIS 투명 픽셀에서 game.js tile click은 거부해도 독립적 부모 DMP 탐색기가 bubbled click을 받아 잘못된 정보창·카메라 이동을 유발하는 문제 확인. source-alpha.hitPoint를 부모에서도 검증해 원본 투명 픽셀은 두 계층 모두 무시. 키보드 Enter/Space 접근성 및 실제 불투명 타일 검사는 유지. 원작 MVE 메시 투영은 미완료.",
       "acceptance": [
         "32개 원본 타일의 원화 픽셀/방향/원본 클립 경계 유지, 타일 외곽 잘림·상하 오인 0건"
       ],
@@ -1260,7 +1260,9 @@
         "https://github.com/koith/browser-app-lab/pull/149",
         "https://github.com/koith/browser-app-lab/actions/runs/39381019063",
         "https://github.com/koith/browser-app-lab/actions/runs/39381019040",
-        "https://github.com/koith/browser-app-lab/actions/runs/39381488807"
+        "https://github.com/koith/browser-app-lab/actions/runs/39381488807",
+        "apps/4leaf/rog/dice-source-dmp-terrain-explorer.js",
+        "apps/4leaf/rog/tests/dice-source-dmp-terrain-explorer.cjs"
       ],
       "evidenceLevel": "VERIFIED-TIS-ORIGINAL-RGBA/LIVE-BROWSER/PAGES; HISTORICAL-MVE-3D-PROJECTION-UNVERIFIED",
       "lastReviewed": "2026-10-20",
@@ -4314,6 +4316,14 @@
       "taskId": "ACT-02",
       "details": "Full original OBS source X/Y 640-video offset and sparse transparency support, genuine 616 native PNG assets/manifest and PWA cache; version v0.85.0-beta.1; core Chromium board gate 39419068901 PASS, same-SHA release PR pending.",
       "evidence": "apps/4leaf/rog/tests/dice-obs-640stride-native-game.cjs"
+    },
+    {
+      "seq": 171,
+      "date": "2026-10-20",
+      "type": "IMPLEMENTED_PENDING_QA",
+      "taskId": "BRD-02",
+      "details": "Same source-original TIS alpha pick at click target and bubbling DMP inspector. Reject only source-transparent mouse clicks and preserve keyboard and original DMP gameplay. New real-browser regression test for ghost inspector camera movement.",
+      "evidence": "apps/4leaf/rog/tests/dice-source-dmp-terrain-explorer.cjs"
     }
   ]
 }
