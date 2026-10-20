@@ -109,6 +109,29 @@ jobs:
           name: 4leaf-near-row-quarantine-not-production
           path: /tmp/leaf-obs-near-row-quarantine
           retention-days: 7
+      - name: Check every card ID against OBS.pak OBS2.pak OBS3.pak and quarantine extra authentic member candidates
+        run: |
+          python3 -m py_compile apps/4leaf/rog/tools/probe-original-obs-secondary-paks.py
+          python3 apps/4leaf/rog/tools/probe-original-obs-secondary-paks.py \
+            /tmp/leaf-obs-resources /tmp/leaf-obs-three-paks-quarantine
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          report=json.loads(Path('/tmp/leaf-obs-three-paks-quarantine/secondary-pak-probe.json').read_text())
+          print('OBS_SECONDARY_ALL_SOURCE_IDS',json.dumps({
+            'missingBefore':report['missingBefore'],
+            'paks':{k:{'missingMembers':v['cardMembersPreviouslyMissing'],
+                       'newStrictModels':v['strictRecoverableMembers']}
+                    for k,v in report['paks'].items()},
+            'newStrictCandidates':[(v['pack'],v['cardId'],len(v['strictFrames']))
+                                   for v in report['newStrictCandidates']]},ensure_ascii=False))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: 4leaf-obs-three-original-paks-missing-body-probe
+          path: /tmp/leaf-obs-three-paks-quarantine
+          retention-days: 14
       - name: Test native OBS 2-byte scanline skip hypothesis against strict 2002 source frame geometry
         run: |
           python3 -m py_compile apps/4leaf/rog/tools/probe-original-obs-640stride.py
