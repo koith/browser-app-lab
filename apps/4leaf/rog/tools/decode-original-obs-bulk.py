@@ -216,11 +216,15 @@ def main():
             statistics["decodeDiagnostics"][name]=inspect_rejected_member(data)
             continue
         images=[]
+        failures=[]
         for i in FRAMES:
             if i>=len(frames):continue
             body,w,h,ox,oy=frames[i]
             try:img,confidence=decode_rows(body,w,h,palette)
-            except ValueError:continue
+            except ValueError as err:
+                failures.append({"frame":i,"shape":[w,h],"reason":str(err),
+                    "sourceFirst8":body[:8].hex()})
+                continue
             buf=io.BytesIO();img.save(buf,format="PNG",optimize=True)
             payload=buf.getvalue()
             images.append({"index":i,"sourceName":f"{Path(name).stem}-{i:02d}.png",
@@ -232,7 +236,11 @@ def main():
         # Keep zero-frame-missing and one-frame-only explicitly unverified.
         if not images:
             statistics["rejected"][name]="no strictly decoded source frames"
-            statistics["decodeDiagnostics"][name]=inspect_rejected_member(data,frames)
+            statistics["decodeDiagnostics"][name]={
+                "nativeVideoRLEFailures":failures,
+                "legacyRowMarkerHeuristic":inspect_rejected_member(data,frames)}
+            if name in ("1046.obs","1072.obs","1094.obs"):
+                print("OBS_NATIVE_RLE_DIAGNOSTIC",name,json.dumps(failures))
             continue
         if statistics["framePNGs"]+len(images)>MAX_TOTAL_IMAGES:break
         if statistics["bytes"]+sum(len(f["payload"]) for f in images)>MAX_TOTAL_PNG_BYTES:break
