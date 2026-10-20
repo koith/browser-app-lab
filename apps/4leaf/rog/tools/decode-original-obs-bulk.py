@@ -5,10 +5,10 @@ Input is a SHA1-verified installer-extracted Dice/OBS.pak provided by the CI
 runner. Native client EXE/DLL are NEVER executed. Output consists solely of
 selected transparent PNG frame samples + source-provenance JS manifest.
 
-Important: scanline origin is still PROVISIONAL: opaque source byte runs and
-RGB palette are genuine, but native 4-byte horizontal-run location encoding
-and action/direction group semantics have not yet been independently decoded.
-Do not label these pixels/pose sequences as pixel-perfect original playback.
+Native indexed pixels and per-row x positions are reconstructed by the
+same strict 640-stride VIDEO RLE as the already verified original ROLL SPR.
+Original action/direction-to-frame semantics and the 2002 3D placement
+remain UNKNOWN; do not claim original animation-timeline fidelity.
 """
 import sys, json, re, struct, hashlib, io
 from pathlib import Path
@@ -52,32 +52,67 @@ def unpack_frames(source):
     return frames,palette
 
 def decode_rows(body,width,height,palette):
-    # Only accept exact-height source row marker sequences with every native
-    # indexed pixel run fitting into its declared frame width.
-    for low in (20,24,28,32,16,12,8,4,0):
-        starts=[0]
-        for i in range(1,len(body)-3):
-            a,b,c,d=body[i:i+4]
-            if low<=a<=128 and b==2 and c<=min(90,width+30) and d<=3:
-                starts.append(i)
-        if len(starts)!=height:continue
-        spans=[(starts[k+1] if k+1<height else len(body))-p-4 for k,p in enumerate(starts)]
-        if not all(1<=length<=width for length in spans):continue
-        raw=bytearray(width*height)
-        for y,(at,n) in enumerate(zip(starts,spans)):
-            # In the current extraction 4-byte run X-origin is still
-            # undecoded. Centre placement is *inferred*, NOT source-verified.
-            x=(width-n)//2
-            raw[y*width+x:y*width+x+n]=body[at+4:at+4+n]
-        sprite=Image.frombytes("P",(width,height),bytes(raw))
-        sprite.putpalette(palette)
-        sprite.info["transparency"]=0
-        img=sprite.convert("RGBA").transpose(Image.Transpose.FLIP_TOP_BOTTOM)
-        rgba=img.tobytes()
-        opaque=sum(1 for i in range(3,len(rgba),4) if rgba[i]!=0)
-        if opaque<45:raise ValueError("Native sprite contains insufficient visible pixels")
-        return img,{"sourceRows":height,"decoder":"palette-and-byte-run-verified;x-centre-and-orientation-provisional","markerThreshold":low,"opaquePixels":opaque}
-    raise ValueError("No strict full-height native scanline solution")
+    """Decode the exact 2002 FAST.PAL.COLORKEY 640-stride run stream.
+
+    Same native packet format as verified Dice/IMG.pak roll.spr:
+      u16 runCount; u16 initialOffset;
+      first packet = byteLengthHi * 4 + byteLengthLo, palette pixels;
+      next packets = u16 transparentSkip, byteLengthHi*4+byteLengthLo,
+                     source palette pixels.
+    All packet boundaries, 640-wide screen-row destinations, source bounds,
+    source palette, and final cursor are checked. Nothing is centered,
+    interpolated, inferred from a false image-row marker, or rendered
+    beyond its native recorded width/height.
+    """
+    if len(body)<6 or len(palette)!=768:
+        raise ValueError("OBS 640-stride source packet or RGB palette truncated")
+    run_count, cursor=struct.unpack_from("<HH",body,0)
+    if not 1<=run_count<=40000:
+        raise ValueError("OBS 640-stride invalid native run count")
+    pos=4
+    pixels=bytearray(width*height)
+    opaque=0
+    for run in range(run_count):
+        if run:
+            if pos+2>len(body):
+                raise ValueError("OBS 640-stride transparent skip truncated")
+            cursor+=struct.unpack_from("<H",body,pos)[0]
+            pos+=2
+        if pos+2>len(body):
+            raise ValueError("OBS 640-stride palette packet truncated")
+        length=body[pos]*4+body[pos+1]
+        if body[pos+1]>3:
+            raise ValueError("OBS 640-stride encoded sub-byte length invalid")
+        pos+=2
+        if pos+length>len(body):
+            raise ValueError("OBS 640-stride palette data truncated")
+        y,x=divmod(cursor,640)
+        if y>=height or x>=width or x+length>width:
+            raise ValueError("OBS source buffer packet outside frame "+
+                             str((run,x,y,length,width,height)))
+        if length:
+            palette_run=body[pos:pos+length]
+            pixels[y*width+x:y*width+x+length]=palette_run
+            opaque+=sum(i!=0 for i in palette_run)
+        pos+=length
+        cursor+=length
+    if pos!=len(body):
+        raise ValueError("OBS native RLE does not consume every source byte")
+    if cursor!=(height-1)*640+width:
+        raise ValueError("OBS source final 640-stride cursor outside native image "+
+                         str((cursor,(height-1)*640+width)))
+    if opaque<45:
+        raise ValueError("OBS native source too transparent after strict decoding")
+    img=Image.frombytes("P",(width,height),bytes(pixels))
+    img.putpalette(palette)
+    img.info["transparency"]=0
+    image=img.convert("RGBA").transpose(Image.Transpose.FLIP_TOP_BOTTOM)
+    return image,{"sourceRows":height,
+       "decoder":"VERIFIED-640-STRIDE-PALETTE-RLE/exact-run-cursor-and-width",
+       "videoStride":640,"nativePackets":run_count,"opaquePixels":opaque,
+       "scanlineX":"ORIGINAL-VIDEO-RUN-CURSOR; NOT CENTERED"}
+
+
 
 def record_native_row_headers(frame_data,width,height):
     """Describe (not yet interpret) raw 4-byte OBS scanline headers.
@@ -223,7 +258,7 @@ def main():
         recovered[cid]={"name":deck[cid].get("name",""),"sourcePak":"OBS.pak",
             "originalMember":name,"sourceSHA256":hashlib.sha256(data).hexdigest(),
             "originalAnimationCount":len(frames),"poseMapping":"UNVERIFIED; native action-table not yet decoded",
-            "horizontalScanlineOrigin":"PROVISIONAL; inferred centred rows",
+            "horizontalScanlineOrigin":"ORIGINAL-640-VIDEO-RLE exact destination",
             "hasVerifiedFrameZero":any(f["index"]==0 for f in frameRefs),
             "fallbackAction":"EARLIEST SOURCE FRAME ONLY; action unverified",
             "singleFrameStillOnly":len(frameRefs)==1,
@@ -233,7 +268,7 @@ def main():
         statistics["bytes"]+=sum(len(f["payload"]) for f in images)
     # Deterministic, sorted, valid JavaScript; no html/screenshot compositing.
     manifest="/* Genuine original Dice/OBS.pak indexed palette frame pixels.\n"+\
-      " * PROVISIONAL scanline X placement & action labels.\n"+\
+      " * VERIFIED native 640-stride source pixel X; action labels UNVERIFIED.\n"+\
       " * NEVER reuse as ChatTown Registry avatars. */\n"+\
       "window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(\n"+\
       " window.ORIGINAL_LEAF_OBS_FRAMES||{},\n"+\
