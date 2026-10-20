@@ -98,9 +98,16 @@ def decode_rows(body,width,height,palette):
         cursor+=length
     if pos!=len(body):
         raise ValueError("OBS native RLE does not consume every source byte")
-    if cursor!=(height-1)*640+width:
-        raise ValueError("OBS source final 640-stride cursor outside native image "+
-                         str((cursor,(height-1)*640+width)))
+    # Unlike IMG/roll.spr, OBS body art omits the trailing transparent
+    # pixels to the right edge of its FINAL source scanline. Original
+    # 1171.obs frame 0 ends 2 px before declared width, frame 25 33 px
+    # before. Requiring cursor == right edge falsely rejected nearly ALL
+    # real source frames even though every run packet and palette byte
+    # is consumed and all pixels fit exactly in the source rectangle.
+    last_row_start=(height-1)*640
+    if not last_row_start<cursor<=last_row_start+width:
+        raise ValueError("OBS source final 640-stride cursor outside final source row "+
+                         str((cursor,last_row_start,last_row_start+width)))
     if opaque<45:
         raise ValueError("OBS native source too transparent after strict decoding")
     img=Image.frombytes("P",(width,height),bytes(pixels))
