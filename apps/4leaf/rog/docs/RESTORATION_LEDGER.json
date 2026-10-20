@@ -749,6 +749,44 @@
         "QA-03",
         "FL-MAP-01"
       ]
+    },
+    {
+      "id": "REQ-20261020-002",
+      "date": "2026-10-20",
+      "origin": "user",
+      "text": "4LEAF 원작 복원 — 다음 개발 지시\n기존 개발을 이어서 진행하라.\n저장소 koith/browser-app-lab; 앱 경로 apps/4leaf/rog/; 기준 버전 v0.84.0-beta.1; 마지막 확인 main 041a236e0435; 개발원장 RESTORATION_LEDGER.json.\n최우선 FL-07~08 육각 말판: board.jpg와 145x97 TIS 정밀 비교, 원래 배치·방향·간격·투영, 수평 겹침 수정, 캐릭터·깊이, 여러 해상도 실브라우저 검증.\nFL-09~10 창세기전 OBS 체스맨: 기존 원본 64종과 누락 34종 조사, 원본 방향·대기·이동·공격·피격 실제로 확인된 애니메이션 복원, 아카이브/EXE/동영상 대체 탐색.\nFL-11~13 원본 배틀/실물 D4 D6: 전투 발판, 결과별 낙하·반동·정지, 2D/3D 출처와 폴백 엄격히 구분.\n병행 FL-03~05/FL-16 하이아칸 채팅방 배경·가구·좌석·입력창·아바타 원작 1:1, 순간이동, 중앙서버·월드맵·켈티카 기존 기능 유지.\n분석과 계획만 하지 말고 실제 수정→자동/실브라우저 QA→PR/병합/배포, 원장에 근거 기록. 시간 허용 범위 최대 미완료 처리. 테스트 통과를 원작 전체 동일성 완료로 오판하지 말 것.",
+      "taskIds": [
+        "M03",
+        "M04",
+        "M05",
+        "M06",
+        "M07",
+        "M09",
+        "P0-BOARD",
+        "P0-ACTOR",
+        "P0-PODIUM",
+        "P0-DICE",
+        "P0-CHAT",
+        "P0-RELEASE",
+        "BRD-01",
+        "BRD-02",
+        "BRD-03",
+        "BRD-04",
+        "ACT-01",
+        "ACT-02",
+        "ACT-03",
+        "ACT-04",
+        "BTL-02",
+        "BTL-04",
+        "DIE-01",
+        "DIE-02",
+        "DIE-04",
+        "CHT-02",
+        "CHT-04",
+        "CHT-05",
+        "EVID-01",
+        "EVID-02"
+      ]
     }
   ],
   "tasks": [
@@ -1175,19 +1213,22 @@
       "id": "BRD-02",
       "priority": "P0",
       "title": "실제 TIS 알파·윗면·하단 림 상태 복원",
-      "status": "todo",
+      "status": "in_progress",
       "milestone": "M04",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 소스 PNG는 145×97로 렌더되나 바닥 입체감·윗면 보이는 각도·원본 회전/알파 외곽 비교가 완료되지 않음 | 구현 목표: 32종 TIS alpha 외곽·스프라이트의 디코더 상하 반전을 2004 이미지의 실제 그림과 유형별 대조",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 소스 PNG는 145×97로 렌더되나 바닥 입체감·윗면 보이는 각도·원본 회전/알파 외곽 비교가 완료되지 않음 | 구현 목표: 32종 TIS alpha 외곽·스프라이트의 디코더 상하 반전을 2004 이미지의 실제 그림과 유형별 대조; 2026-10-20 신뢰 가능한 원본 145x97 RGBA alpha 실제 픽셀과 2004로부터 수용된 scaleY(-1) 방향을 DOM 클릭 좌표/카메라 zoom/모바일과 연결. CSS polygon의 내부 빈 픽셀을 가짜 발판 클릭으로 처리하지 않도록 정확한 source pixel picking 구현. 2002 MVE 실제 메시, 원본 전체 윗면 각도는 여전히 미해결.",
       "acceptance": [
         "32개 원본 타일의 원화 픽셀/방향/원본 클립 경계 유지, 타일 외곽 잘림·상하 오인 0건"
       ],
       "evidence": [
         "original/Tiles/art.js",
         "dice-native-tis-alpha.js",
-        "tests/dice-native-tis-full-outline.cjs"
+        "tests/dice-native-tis-full-outline.cjs",
+        "apps/4leaf/rog/dice-native-tis-alpha.js",
+        "apps/4leaf/rog/game.js",
+        "apps/4leaf/rog/tests/dice-source-alpha-pointer.cjs"
       ],
-      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-18",
+      "evidenceLevel": "VERIFIED-SOURCE-TIS-RGBA; IMPLEMENTED-PENDING-E2E; HISTORICAL-MVE-PROJECTION-UNVERIFIED",
+      "lastReviewed": "2026-10-20",
       "verifiedAcceptance": null,
       "dependencies": [
         "BRD-01"
@@ -4069,6 +4110,62 @@
       "taskId": "WORLD-02",
       "details": "PR #147 squash merged main@0dc5582dc1d524ad50061d9162c51e59ecdabe76; Pages deploy action 39378243796 success, source-fidelity release action 39378243746 success. This milestone fixes source-native WEB interactions, not all original shop/location hit geometry.",
       "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39378243796"
+    },
+    {
+      "seq": 157,
+      "date": "2026-10-20",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261020-002",
+      "taskIds": [
+        "M03",
+        "M04",
+        "M05",
+        "M06",
+        "M07",
+        "M09",
+        "P0-BOARD",
+        "P0-ACTOR",
+        "P0-PODIUM",
+        "P0-DICE",
+        "P0-CHAT",
+        "P0-RELEASE",
+        "BRD-01",
+        "BRD-02",
+        "BRD-03",
+        "BRD-04",
+        "ACT-01",
+        "ACT-02",
+        "ACT-03",
+        "ACT-04",
+        "BTL-02",
+        "BTL-04",
+        "DIE-01",
+        "DIE-02",
+        "DIE-04",
+        "CHT-02",
+        "CHT-04",
+        "CHT-05",
+        "EVID-01",
+        "EVID-02"
+      ],
+      "details": "2026-10-20 next active restoration: original board/OBS/dice priority, chat/world preservation and provenance-strict acceptance."
+    },
+    {
+      "seq": 158,
+      "date": "2026-10-20",
+      "type": "STATUS_CHANGED",
+      "taskId": "BRD-02",
+      "from": "todo",
+      "to": "in_progress",
+      "details": "Source-native TIS per-pixel hit integrity and vertical orientation/camera input work started; not historical full 3D tile geometry acceptance."
+    },
+    {
+      "seq": 159,
+      "date": "2026-10-20",
+      "type": "IMPLEMENTED_PENDING_QA",
+      "taskId": "BRD-02",
+      "details": "TIS 145x97 pixel-exact alpha cache / after chroma decode, inverse projection for existing source scaleY(-1), real pointer suppression on transparent source. New Playwright 32 images all alpha plus actual mouse zoom/mobile. 26 map/OBS/Roll existing functionality preserved. Original EXE MVE projection remains unknown.",
+      "evidence": "apps/4leaf/rog/tests/dice-source-alpha-pointer.cjs"
     }
   ]
 }
