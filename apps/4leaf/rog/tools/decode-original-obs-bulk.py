@@ -50,8 +50,12 @@ def unpack_frames(source):
         frames.append((source[cursor+12:cursor+12+n],w,h,ox,oy))
         cursor+=12+n
     palette=source[cursor:cursor+768]
-    if len(palette)!=768 or cursor+768!=len(source):
-        raise ValueError("Missing/trailing native 256-colour OBS palette at source frame boundary")
+    # OBS members carry extra metadata after their 768-byte RGB palette;
+    # unlike IMG/roll.spr they do not end exactly at that palette.
+    # The frame record cursor is exact; compare and report native trailing
+    # byte count independently rather than rejecting all 2002 chessmen.
+    if len(palette)!=768:
+        raise ValueError("Missing native 256-colour OBS palette at frame boundary")
     return frames,palette
 
 def decode_rows(body,width,height,palette):
