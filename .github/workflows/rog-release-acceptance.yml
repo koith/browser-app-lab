@@ -50,6 +50,8 @@ jobs:
           done
           cat /tmp/leaf-release-http.log
           exit 1
+      - name: Original TIS per-pixel mouse, zoom and mobile input integrity
+        run: node apps/4leaf/rog/tests/dice-source-alpha-pointer.cjs
       - name: 26 original DMP maps 1920 independent 145x97 tiles on desktop and iPhone
         run: node apps/4leaf/rog/tests/dice-all-source-maps-camera.cjs
       - name: Complete 25 historically named source maps and preserve unnamed 0170 random route
