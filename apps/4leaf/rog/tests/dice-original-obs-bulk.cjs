@@ -103,6 +103,7 @@ assert.equal(totalBytes,report.bytes);
     map:p.dataset.sourcePoseMapping,
     png:p.querySelector('.leaf-chess-original-obs')?.getAttribute('src'),
     css:getComputedStyle(p.querySelector('.leaf-chess-actor')).display,
+    sourceOrientation:getComputedStyle(p.querySelector('.leaf-chess-original-obs')).transform,
     pixels:[p.querySelector('.leaf-chess-original-obs').naturalWidth,
             p.querySelector('.leaf-chess-original-obs').naturalHeight]
    }))
@@ -112,6 +113,8 @@ assert.equal(totalBytes,report.bytes);
   assert.ok(state.actors.every(x=>x.rig==='original-obs-sprite'&&
    x.source.startsWith('OBS/')&&x.map==='unverified'&&x.css==='none'&&
    x.png.startsWith('./original/OBS/bulk/')&&x.pixels[0]>20));
+  assert.ok(state.actors.every(x=>/^matrix\\(1, 0, 0, -1, 0, 0\\)$/.test(x.sourceOrientation)),
+   'archival OBS RGB source PNGs are stored bottom-up; real game CSS must unflip them upright');
   assert.equal(await page.locator('#board-pawns img[src*="/Registry/sava"]').count(),0,
    'do not display 4LEAF social avatar as a Genesis chessman');
   await page.locator('#dice-source-roll').click();
