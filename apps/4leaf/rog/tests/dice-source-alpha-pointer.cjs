@@ -1,0 +1,136 @@
+'use strict';
+/* FL-07/08 original TIS source pixel acceptance.
+ * This does not assert that the unrecovered 2002 MVE projection is matched.
+ * It rejects false tile interactions in the transparent parts of authentic
+ * 145x97 TIS PNGs, including the repaired vertical orientation and camera zoom.
+ */
+const assert=require('node:assert/strict');
+const {chromium}=require('playwright');
+(async()=>{
+ const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
+ const page=await browser.newPage({viewport:{width:1280,height:900},serviceWorkers:'block'});
+ const errors=[];
+ page.on('pageerror',e=>errors.push(String(e)));
+ try{
+  await page.addInitScript(()=>{window.LEAF_CENTRAL_API_URL=''});
+  await page.goto(process.env.FOURLEAF_TEST_URL||'http://127.0.0.1:8765/index.html');
+  await page.waitForFunction(()=>window.__ROG_TEST__&&window.__LEAF_TIS_ALPHA__&&window.__LEAF_CAMERA__);
+  await page.locator('[data-route="lobby"]').first().click();
+  await page.locator('#lobby-create').click();
+  await page.locator('#game-mode').selectOption('hotseat');
+  await page.locator('#bot-count').selectOption('1');
+  await page.locator('#map-select').selectOption('4LEAF');
+  await page.locator('#start-game').click();
+  await page.waitForSelector('#game:not(.hidden)');
+  await page.waitForFunction(()=>[...document.querySelectorAll('#board-nodes>.tile')].length===104&&
+    [...document.querySelectorAll('#board-nodes>.tile')].every(t=>t.dataset.tisAlpha==='ready'),
+    null,{timeout:35000});
+
+  // All 32 independently recovered 2002 TIS source bitmaps get decoded.
+  // Compare pixel-accurate picks at 145x97, not a CSS polygon's bounds.
+  const atlas=await page.evaluate(async()=>{
+   const API=window.__LEAF_TIS_ALPHA__,ids=Object.keys(window.ORIGINAL_LEAF_TILE_ART.tiles);
+   const probe=document.createElement('div');
+   probe.style.cssText='position:fixed;left:250px;top:110px;width:145px;height:97px;transform:scaleY(-1);pointer-events:none;z-index:99999';
+   document.body.append(probe);
+   const rows=[];
+   try{
+    for(const id of ids){
+     const frame=await API.prepare(id);
+     probe.dataset.originalArt=id;
+     const rect=probe.getBoundingClientRect();
+     let opaque=0,transparent=0,mismatches=0,probes=0;
+     // Exhaustive native source-alpha test plus subpixel mouse mapping probes.
+     for(let y=0;y<97;y++)for(let x=0;x<145;x++){
+      const alpha=frame.alpha[y*145+x];
+      if(alpha)opaque++;else transparent++;
+      if((x%7)||(y%5))continue;
+      const clientX=rect.left+(x+.5)*rect.width/145;
+      const clientY=rect.top+(96-y+.5)*rect.height/97;
+      const hit=API.hitPoint(probe,clientX,clientY);
+      probes++;
+      if(!hit.ready||hit.source!==id||hit.x!==x||hit.y!==y||
+        hit.alpha!==alpha||hit.hit!==(alpha>0)||!hit.inverted)mismatches++;
+     }
+     rows.push({id,opaque,transparent,mismatches,probes,native:frame.native,removed:frame.removed});
+    }
+   }finally{probe.remove();}
+   return rows;
+  });
+  assert.ok(atlas.length>=30,'audit every actually recovered 2002 TIS');
+  assert.ok(atlas.every(x=>x.opaque>100&&x.transparent>100),'original sprites must retain source transparency');
+  assert.ok(atlas.every(x=>x.mismatches===0&&x.probes>200),
+   'genuine original pixels MUST determine point hit after Y repair: '+JSON.stringify(atlas.filter(x=>x.mismatches)));
+  const findPhysical=async()=>page.evaluate(()=>{
+   const API=window.__LEAF_TIS_ALPHA__;
+   const area=document.querySelector('#board-area').getBoundingClientRect();
+   for(const tile of document.querySelectorAll('#board-nodes>.tile')){
+    if(getComputedStyle(tile).visibility!=='visible')continue;
+    const rect=tile.getBoundingClientRect();
+    if(!rect.width||!rect.height)continue;
+    for(let iy=3;iy<94;iy+=7)for(let ix=3;ix<142;ix+=7){
+     const x=rect.left+(ix+.5)*rect.width/145;
+     const y=rect.top+(96-iy+.5)*rect.height/97;
+     if(x<area.left+3||x>area.right-3||y<area.top+3||y>area.bottom-3)continue;
+     const el=document.elementFromPoint(x,y);
+     if(el!==tile&&!tile.contains(el))continue;
+     const hit=API.hitPoint(tile,x,y);
+     if(hit.ready&&hit.hit)return {x,y,id:tile.dataset.tile,source:tile.dataset.originalArt,pixel:[hit.x,hit.y],rect:[rect.width,rect.height]};
+    }
+   }
+   return null;
+  });
+  const first=await findPhysical();
+  assert.ok(first,'genuine native TIS opaque pixels must be actual physical mouse targets');
+  await page.mouse.click(first.x,first.y);
+  const physical=await page.evaluate(id=>{
+   const tile=document.querySelector('#board-nodes>.tile[data-tile="'+id+'"]');
+   return {hit:tile.dataset.sourcePixelHit,pixel:[tile.dataset.sourceHitX,tile.dataset.sourceHitY]};
+  },first.id);
+  assert.equal(physical.hit,'true','real mouse must activate source-opaque TIS pixels');
+
+  // An artificial MouseEvent sent to a tile's transparent source pixel is
+  // intentionally rejected, not reported as a tile interaction. Keyboard
+  // .click() is explicitly exempt to keep native tab/button accessibility.
+  const synthetic=await page.evaluate(()=>{
+   const tile=document.querySelector('#board-nodes>.tile');
+   const API=window.__LEAF_TIS_ALPHA__,rect=tile.getBoundingClientRect();
+   const find=(want)=>{
+    for(let y=0;y<97;y++)for(let x=0;x<145;x++){
+     const px=rect.left+(x+.5)*rect.width/145;
+     const py=rect.top+(96-y+.5)*rect.height/97;
+     const h=API.hitPoint(tile,px,py);
+     if(h.ready&&h.hit===want)return {px,py,x,y};
+    }
+    return null;
+   };
+   const clear=find(false);if(!clear)return {found:false};
+   tile.dispatchEvent(new MouseEvent('click',{bubbles:true,detail:1,clientX:clear.px,clientY:clear.py}));
+   const rejected=tile.dataset.sourcePixelHit==='false';
+   delete tile.dataset.sourcePixelHit;
+   tile.click();
+   return {found:true,rejected,keyboardUnblocked:tile.dataset.sourcePixelHit===undefined};
+  });
+  assert.ok(synthetic.found&&synthetic.rejected&&synthetic.keyboardUnblocked,
+   'transparent bitmap cells cannot trigger source tile clicks; keyboard must still work');
+
+  // Check the same real original art after zoom and on a narrow mobile board.
+  await page.evaluate(()=>window.__LEAF_CAMERA__.zoom(.4));
+  await page.waitForTimeout(250);
+  const zoomed=await findPhysical();
+  assert.ok(zoomed,'source-native hit still works under transformed camera zoom');
+  await page.mouse.click(zoomed.x,zoomed.y);
+  await page.setViewportSize({width:390,height:844});
+  await page.waitForTimeout(350);
+  const mobile=await findPhysical();
+  assert.ok(mobile,'same source-alpha pointer input survives narrow phone board');
+  await page.mouse.click(mobile.x,mobile.y);
+  assert.deepEqual(errors,[]);
+  await page.screenshot({path:'leaf-source-tis-physical-alpha-mobile.png'});
+  console.log('NATIVE TIS SOURCE PIXEL POINTER PASS '+JSON.stringify({
+   sources:atlas.length,probes:atlas.reduce((a,b)=>a+b.probes,0),
+   errors:0,desktop:first,zoomed,mobile,synthetic,
+   status:'genuine-2002-RGBA + live-browser; historical-3D-mesh-still-unverified'
+  }));
+ }finally{await browser.close();}
+})().catch(error=>{console.error('NATIVE TIS SOURCE POINTER FAILED',error.stack||error);process.exit(1)});
