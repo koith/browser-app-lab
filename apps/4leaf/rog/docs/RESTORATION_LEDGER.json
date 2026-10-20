@@ -4430,7 +4430,8 @@
       "type": "REQUEST_REGISTERED",
       "taskId": "ACT-03",
       "details": "User request persisted before code QA. Original OBS character palette source from 2002 archive and historical EXE action mapping are separate claims; do not certify original FPS/action mappings.",
-      "evidence": "apps/4leaf/rog/docs/RESTORATION_LEDGER.json"
+      "evidence": "apps/4leaf/rog/docs/RESTORATION_LEDGER.json",
+      "requestId": "REQ-20261021-001"
     },
     {
       "seq": 177,
