@@ -58,8 +58,13 @@ class NativeOBS(unittest.TestCase):
         # OBS legitimately stops before the final row's transparent right-edge.
         img,diag=codec.decode_rows(self.data,self.width+1,self.height,self.palette)
         self.assertEqual(img.getpixel((50,0))[3],0)
-        with self.assertRaisesRegex(ValueError,'outside final source row'):
-            codec.decode_rows(self.data,self.width,self.height+1,self.palette)
+        # Genuine OBS 1128 frame is sparse vertically as well: it has
+        # no VIDEO runs in the final rows but still carries exact raw pixels.
+        sparse,info=codec.decode_rows(self.data,self.width,self.height+1,self.palette)
+        self.assertEqual(sparse.getpixel((49,1)),(10,0,245,255))
+        self.assertEqual(sparse.getpixel((49,0))[3],0)
+        with self.assertRaisesRegex(ValueError,'outside frame'):
+            codec.decode_rows(self.data,self.width,self.height-1,self.palette)
         with self.assertRaises(ValueError):
             codec.decode_rows(self.data[:-1],self.width,self.height,self.palette)
         with self.assertRaises(ValueError):
