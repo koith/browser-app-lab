@@ -70,10 +70,45 @@
    if(!img){
      img=document.createElement('img');img.className='leaf-chess-original-obs';
      img.alt='';img.draggable=false;img.setAttribute('aria-hidden','true');
+     // A sleeping/offline source host can reject a real OBS PNG once.
+     // Do NOT permanently replace a recovered Genesis full-body with a card
+     // simply because its first network request failed. Retry ONLY the same
+     // original source URL; never synthesize a body or an action frame.
+     img.addEventListener('load',()=>{
+       img.dataset.obsRetryCount='0';
+       delete img.dataset.obsRetryFor;
+       img.hidden=false;
+       pawn.dataset.actorSourceLoad='ready';
+     });
      img.addEventListener('error',()=>{
        if(!pawn.isConnected)return;
+       const source=String(img.getAttribute('src')||'').split('?')[0];
+       if(!source.startsWith('./original/OBS/')||!source.endsWith('.png')){
+         pawn.dataset.obsUnavailable='true';
+         pawn.dataset.actorOriginalModelRecovered='false';
+         pawn.dataset.actorSourceLoad='unavailable';
+         renderFrame(pawn,pawn.dataset.chessmanId,pawn.dataset.actorPose||'idle');
+         return;
+       }
+       const attempt=img.dataset.obsRetryFor===source?
+         Number(img.dataset.obsRetryCount||0)+1:1;
+       img.dataset.obsRetryFor=source;
+       img.dataset.obsRetryCount=String(attempt);
+       if(attempt<=3){
+         const member=pawn.dataset.chessmanId;
+         pawn.dataset.actorSourceLoad='retrying-original-OBS';
+         img.hidden=true;
+         setTimeout(()=>{
+           if(!pawn.isConnected||!img.isConnected||
+             pawn.dataset.chessmanId!==member||pawn.dataset.obsUnavailable==='true')return;
+           if(String(img.getAttribute('src')||'').split('?')[0]!==source)return;
+           img.src=source+'?native_obs_retry='+attempt+'&at='+Date.now();
+         },Math.min(750,120*2**(attempt-1)));
+         return;
+       }
        pawn.dataset.obsUnavailable='true';
        pawn.dataset.actorOriginalModelRecovered='false';
+       pawn.dataset.actorSourceLoad='unavailable';
        renderFrame(pawn,pawn.dataset.chessmanId,pawn.dataset.actorPose||'idle');
      });
      pawn.append(img);
@@ -226,8 +261,23 @@
     pawn.dataset.actorOriginalAnimationRegistered=String(Boolean(Object.keys(entries).length));
   }
  }
+ // When an offline PWA regains connectivity, give the known authentic
+ // source another chance. Keep source-missing 34 models on their truthful
+ // CardData-only fallback; there is no original OBS URL to retry.
+ const recoverAvailableOriginals=()=>{
+   for(const pawn of document.querySelectorAll(
+     '#board-pawns .board-pawn, #battle-visual .leaf-battle-chessman')){
+     if(pawn.dataset.obsUnavailable!=='true'||!originalFor(pawn.dataset.chessmanId))continue;
+     delete pawn.dataset.obsUnavailable;
+     const img=pawn.querySelector('img.leaf-chess-original-obs');
+     if(img){img.dataset.obsRetryCount='0';delete img.dataset.obsRetryFor;}
+     pawn.dataset.actorSourceLoad='retry-after-online';
+     renderFrame(pawn,pawn.dataset.chessmanId,pawn.dataset.actorPose||'idle');
+   }
+ };
+ window.addEventListener('online',recoverAvailableOriginals);
  window.__LEAF_GENESIS_ACTORS__={
-  mount,pose,poseByPlayer,registerFrames,
+  mount,pose,poseByPlayer,registerFrames,recoverAvailableOriginals,
   getState:()=>({
    originalFullBodyFramesRecovered:[...new Set([...Object.keys(window.ORIGINAL_LEAF_OBS_FRAMES||{}),...frames.keys()])],
    rendered:[...document.querySelectorAll('#board-pawns .board-pawn')].map(p=>({
@@ -235,7 +285,7 @@
     pose:p.dataset.actorPose,rig:p.dataset.actorRig,
     originalRecovered:p.dataset.actorOriginalModelRecovered,
     source:p.dataset.actorSource,frame:p.dataset.actorFrame,
-    poseMapping:p.dataset.sourcePoseMapping,
+    poseMapping:p.dataset.sourcePoseMapping,sourceLoad:p.dataset.actorSourceLoad||'unknown',
     counts:states.get(p)||{}
    }))
   })
