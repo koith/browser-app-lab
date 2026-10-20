@@ -131,7 +131,7 @@
   if(!(rect.width>0&&rect.height>0)||!Number.isFinite(clientX)||!Number.isFinite(clientY))
    return {ready:false,hit:true,source:id};
   const transform=getComputedStyle(tile).transform;
-  const inverted=/^matrix\\(/.test(transform)&&Number(transform.slice(7).split(',')[3])<0;
+  const inverted=transform.startsWith('matrix(')&&Number(transform.slice(7).split(',')[3])<0;
   const x=Math.floor((clientX-rect.left)*SIZE[0]/rect.width);
   const rawY=(clientY-rect.top)*SIZE[1]/rect.height;
   const y=Math.floor(inverted?SIZE[1]-rawY:rawY);
