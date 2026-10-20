@@ -15,6 +15,13 @@ const scope={window:{ORIGINAL_LEAF_OBS_FRAMES:{}}};
 vm.runInNewContext(fs.readFileSync(path.join(root,'original/OBS/animation-extra.js'),'utf8'),scope);
 const recovered=scope.window.ORIGINAL_LEAF_OBS_FRAMES;
 const report=JSON.parse(fs.readFileSync(path.join(root,'original/OBS/bulk-source-report.json'),'utf8'));
+// This archive is verified by the upstream source installer SHA1; never
+// confuse the source 640-stride native pixels with an approximate web rig.
+assert.equal(report.archiveSHA256,
+ '49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514');
+assert.equal(report.accepted,90,'all 90 matching original OBS.pak members recovered');
+assert.equal(report.framePNGs,616,'all 2002 PAK source image frame samples maintained');
+const sourceMissing=['0091','0126','0129','0132','0157','0168'];
 let files=0,totalBytes=0;
 assert.equal(Object.keys(recovered).length,report.accepted,'every reported source character has a manifest entry');
 assert.ok(report.accepted>=40&&report.framePNGs>=200,'broad actual OBS coverage, not a two-character proof-of-concept');
@@ -22,7 +29,15 @@ for(const [id,source] of Object.entries(recovered)){
  assert.match(id,/^\d{4}$/);
  assert.match(source.originalMember,/^1\d{3}\.obs$/);
  assert.equal(source.poseMapping.startsWith('UNVERIFIED'),true,'never falsely certify original action tables');
- assert.equal(source.horizontalScanlineOrigin.startsWith('PROVISIONAL'),true);
+ assert.equal(source.horizontalScanlineOrigin,'ORIGINAL-640-VIDEO-RLE exact destination',
+  'all restored OBS source pixels must use the original VIDEO-RLE offsets, not centered rows');
+ assert.equal(source.sourcePak,'OBS.pak');
+ assert.match(source.sourceSHA256,/^[a-f0-9]{64}$/,
+  'every decoded original chessman must keep its native source-member SHA256');
+ assert.ok(source.frames.every(frame=>Number.isInteger(frame.index)&&
+   frame.originX>=-300&&frame.originX<=300&&
+   frame.originY>=-300&&frame.originY<=300),
+  'native frame index and source signed XY origin preserved');
  assert.ok(source.frames.length>=1,'one strictly decoded OBS source frame is useful REAL character art');
  assert.equal(source.singleFrameStillOnly===true,source.frames.length===1,
   'one-frame original characters MUST advertise static-only, not reconstructed animation');
@@ -47,6 +62,10 @@ for(const [id,source] of Object.entries(recovered)){
   assert.equal(crypto.createHash('sha256').update(binary).digest('hex'),frame.sha256,
    'every published source pixel has a reproducible extraction hash');
  }
+}
+for(const absent of sourceMissing){
+ assert.ok(!Object.hasOwn(recovered,absent),
+  'these six original 2002 OBS source members do not exist, never synthesize pixels: '+absent);
 }
 assert.equal(files,report.framePNGs);
 assert.equal(totalBytes,report.bytes);
