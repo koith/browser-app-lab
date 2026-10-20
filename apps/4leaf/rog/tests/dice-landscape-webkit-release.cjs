@@ -18,7 +18,7 @@ const {webkit}=require('playwright');
     'http://127.0.0.1:8765/index.html');
   await page.waitForFunction(()=>window.__ROG_TEST__&&window.__LEAF_CAMERA__);
   const version=await page.locator('meta[name="leaf-revival-version"]').getAttribute('content');
-  assert.equal(version,'0.85.0-beta.1');
+  assert.equal(version,'0.86.0-beta.1');
   await page.locator('[data-route="lobby"]').first().click();
   await page.locator('#lobby-create').click();
   await page.locator('#game-mode').selectOption('hotseat');
