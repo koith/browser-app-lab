@@ -1393,18 +1393,20 @@
       "id": "ACT-04",
       "priority": "P0",
       "title": "보드·전투 체스맨 발 접지·그림자·다중배치",
-      "status": "todo",
+      "status": "in_progress",
       "milestone": "M05",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 기본 2P의 진짜 OBS 표시는 검증했으나 모든 체스맨 크기/발판 고정·동시 2인 겹침·전투 POV는 원본과 비교 미흡 | 구현 목표: 원본 OBS originX/Y, 발 위치, TIS 바닥 픽셀, 캐릭터 z-index/그림자 관통 검증",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 기본 2P의 진짜 OBS 표시는 검증했으나 모든 체스맨 크기/발판 고정·동시 2인 겹침·전투 POV는 원본과 비교 미흡 | 구현 목표: 원본 OBS originX/Y, 발 위치, TIS 바닥 픽셀, 캐릭터 z-index/그림자 관통 검증; 2026-10-20 원본 OBS 이미지를 일시적 503 응답에서 영구 unavailable 처리하던 문제 개선: 실제 동일 아카이브 OBS PNG 3회 재요청, 실패 후 검증된 원본 CardData 정지 대체, 연결 회복 시 원본 전신 자동 재시도. 팀/턴/DMP 좌표·원본 소스 바이트 불변. 정확한 행동 프레임표·출발/착지·98종 전체 원본 수용은 여전히 미완료.",
       "acceptance": [
         "전신 64종+추가 복원분에서 보드·전투·2인 겹침·6인 게임에 대한 실사 접지/가림 확인"
       ],
       "evidence": [
         "dice-original-obs.css",
-        "tests/dice-cooccupied-pawns.cjs"
+        "tests/dice-cooccupied-pawns.cjs",
+        "apps/4leaf/rog/genesis-chessman-actors.js",
+        "apps/4leaf/rog/tests/dice-obs-source-recovery.cjs"
       ],
-      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-18",
+      "evidenceLevel": "VERIFIED-OBS-ARCHIVAL-PIXELS; WEBAPP-HTTP-RETRY-PENDING-CI; HISTORICAL-POSE-MAPPING-UNVERIFIED",
+      "lastReviewed": "2026-10-20",
       "verifiedAcceptance": null,
       "dependencies": [
         "ACT-03",
@@ -4166,6 +4168,23 @@
       "taskId": "BRD-02",
       "details": "TIS 145x97 pixel-exact alpha cache / after chroma decode, inverse projection for existing source scaleY(-1), real pointer suppression on transparent source. New Playwright 32 images all alpha plus actual mouse zoom/mobile. 26 map/OBS/Roll existing functionality preserved. Original EXE MVE projection remains unknown.",
       "evidence": "apps/4leaf/rog/tests/dice-source-alpha-pointer.cjs"
+    },
+    {
+      "seq": 160,
+      "date": "2026-10-20",
+      "type": "STATUS_CHANGED",
+      "taskId": "ACT-04",
+      "from": "todo",
+      "to": "in_progress",
+      "details": "Implement genuine OBS bitmap transient failure/reconnect recovery; full 98 source actors/foot geometry remain unverified."
+    },
+    {
+      "seq": 161,
+      "date": "2026-10-20",
+      "type": "IMPLEMENTED_PENDING_QA",
+      "taskId": "ACT-04",
+      "details": "Never re-create a CSS chessman to mask a recoverable OBS source PNG network error; original PNG retries up to three times. On confirmed asset missing, show archival CardData portrait with true missing status; on network restore, reload original OBS source without changing player/turn position. CI physical Chromium 503 and reconnect E2E pending.",
+      "evidence": "apps/4leaf/rog/tests/dice-obs-source-recovery.cjs"
     }
   ]
 }
