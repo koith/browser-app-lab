@@ -87,8 +87,8 @@ jobs:
           from pathlib import Path
           root=Path('apps/4leaf/rog/original/OBS')
           report=json.loads((root/'bulk-source-report.json').read_text())
-          assert report['accepted']>=62,(report['accepted'],len(report['rejected']))
-          assert report['framePNGs']>=2,report
+          assert report['accepted']==90,(report['accepted'],len(report['rejected']))
+          assert report['framePNGs']>616,report
           assert len(list((root/'bulk').glob('*.png')))==report['framePNGs'],report
           print('ORIGINAL_OBS_STRICT_FRAMES_VERIFIED',report['accepted'],report['framePNGs'])
           PY
@@ -205,7 +205,7 @@ jobs:
               print('SOURCE_OBS_OFFLINE_CACHE_UNCHANGED',len(sprites))
           PY
       - name: Import strictly decoded OBS pixels into isolated feature branch ONLY
-        if: github.ref == 'refs/heads/restore-4leaf-obs-640stride-native-20261020'
+        if: github.ref == 'refs/heads/restore-4leaf-obs-source-motion-20261021'
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
@@ -220,13 +220,13 @@ jobs:
           fi
           git commit -m 'assets(4leaf): use strictly decoded 2002 OBS chessman body frames'
           for attempt in 1 2 3; do
-            git pull --rebase origin restore-4leaf-obs-640stride-native-20261020
-            if git push origin HEAD:restore-4leaf-obs-640stride-native-20261020; then exit 0; fi
+            git pull --rebase origin restore-4leaf-obs-source-motion-20261021
+            if git push origin HEAD:restore-4leaf-obs-source-motion-20261021; then exit 0; fi
             sleep "$((attempt*3))"
           done
           echo 'Failed to safely rebase native sprite additions'; exit 1
       - name: Reject unreviewed OBS artifact promotion on any other branch
-        if: github.ref != 'refs/heads/restore-4leaf-obs-640stride-native-20261020'
+        if: github.ref != 'refs/heads/restore-4leaf-obs-source-motion-20261021'
         run: echo 'No production merge or main push for experimental source decoding'
       - name: Remove original installer and encrypted binary after extraction
         if: always()

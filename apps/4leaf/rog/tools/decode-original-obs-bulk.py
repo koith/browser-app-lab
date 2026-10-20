@@ -14,10 +14,12 @@ import sys, json, re, struct, hashlib, io
 from pathlib import Path
 from PIL import Image
 
-FRAMES=(0,1,2,3,10,18,25,30)
+# Recover the contiguous source-native 0..7 block, not a guessed animation label. 
+# Later 10/18/25/30 are source samples; their action identities remain unknown.
+FRAMES=tuple(range(8))+(10,18,25,30)
 MAX_SPRITE_FRAMES=256  # Original 1095.obs explicitly declares 172 native frames
-MAX_TOTAL_IMAGES=1000
-MAX_TOTAL_PNG_BYTES=14000000
+MAX_TOTAL_IMAGES=1300
+MAX_TOTAL_PNG_BYTES=17000000
 
 def source_members(data):
     if len(data)<32:raise ValueError("Not an OBS source archive")

@@ -14,7 +14,12 @@
  const originalFor=id=>window.ORIGINAL_LEAF_OBS_FRAMES?.[id]||null;
  const poses=['idle','walk','attack','hurt','victory'];
  function sequenceFor(native,action){
-   const map={idle:[0,1,2],walk:[0,1,2,3],attack:[10,18],hurt:[18,10],victory:[25,30,0]};
+   // Frame indexes are SOURCE-VERIFIED but the native 2002 action table
+   // and FPS have NOT been recovered. Walk samples use the entire contiguous
+   // native 0..7 run, rather than looping 4 frames while discarding real
+   // source frames 4..7. Action labels and pacing remain WEB provisional.
+   const map={idle:[0,1,2,3],walk:[0,1,2,3,4,5,6,7],
+     attack:[10,18],hurt:[18,10],victory:[25,30,0]};
    const all=native.frames||[];
    // Some genuinely decoded OBS sources have no safe frame-0 decode.
    // Expose their real pixels, but NEVER animate unrelated frames as if
@@ -52,6 +57,8 @@
    img.style.setProperty('--leaf-obs-bottom',
     'calc(var(--leaf-obs-ground,14.88px) '+
       (relativeSourceOffset<0?'+':'-')+' '+Math.abs(relativeSourceOffset)+'px)');
+   pawn.dataset.sourceFrameNativeOrigin=frame.originX+','+frame.originY;
+   pawn.dataset.sourceFrameNativeSize=frame.width+'x'+frame.height;
    pawn.dataset.sourceFootOffset=String(relativeSourceOffset);
    pawn.dataset.sourceGrounding='inferred-shared-foot-plane/native-relative-frames';
    pawn.dataset.actorFrame=String(frame.index);
@@ -125,6 +132,10 @@
       ?'unverified-frame-zero-missing/static-source-pose':'unverified';
    img.hidden=false;
    const seq=sequenceFor(native,action);
+   // Expose EXACT SOURCE packet indexes independently from inferred labels;
+   // QA can inspect what was really rendered during genuine gameplay.
+   pawn.dataset.sourceFrameSequence=seq.map(frame=>frame.index).join(',');
+   pawn.dataset.sourceFrameSequenceProvenance='original-OBS-indexes/WEB-action-timing-unverified';
    renderNativeFrame(pawn,seq[0]);
    const sourceSheet=pawn.querySelector('.leaf-chess-source-frame');
    if(sourceSheet)sourceSheet.hidden=true;

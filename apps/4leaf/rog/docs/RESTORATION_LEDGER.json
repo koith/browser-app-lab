@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "project": "4LEAF 원작 복원 웹앱",
   "canonicalFile": "apps/4leaf/rog/docs/RESTORATION_LEDGER.json",
-  "updatedAt": "2026-10-20",
+  "updatedAt": "2026-10-21",
   "sourceOfTruth": "Git 저장소의 이 JSON과 커밋 이력. 과거 챗 대화는 기록 근거이지 진행 상태의 원본 데이터가 아님.",
   "operatingRule": "새 요청 즉시 작업 등록 → open 목록 조회 → 실제 수정 → 원본 근거/코드/브라우저/배포 검증 → 검증 증거와 함께 상태 전이. 부분 구현을 원작 완성으로 표시 금지.",
   "statusDefinitions": {
@@ -835,6 +835,32 @@
         "DIE-02",
         "DIE-04"
       ]
+    },
+    {
+      "id": "REQ-20261021-001",
+      "date": "2026-10-21",
+      "origin": "user",
+      "text": "4LEAF 원작 복원 계속 개발. ACT-01~03/FL-09~10: 기존 92종·629 원본 프레임을 원본 방향/idle/move/attack/hurt/foot pivot/timing으로 게임에 적용; 6종 확보 경로 조사. BRD-01~03 145x97 TIS/150x100 현 웹 투영 원작 동일 상태 비교 및 코드 보정·발판 가림/겹침 해결, 기존 26 DMP 픽셀 판정 보존. DIE-01~04 및 BTL-02/04 original D4D6 model/rain/bounce/landing/3D foot restoration, unsupported historic source를 원본이라고 표기 금지. 코드·실브라우저 Chromium/WebKit QA, 근거 원장, 작은 커밋 PR 병합 Pages 배포. 현재 baseline main 92d3b3d8, version v0.85.0-beta.1, ledger 58/13/32/13.",
+      "taskIds": [
+        "ACT-01",
+        "ACT-02",
+        "ACT-03",
+        "ACT-04",
+        "BRD-01",
+        "BRD-02",
+        "BRD-03",
+        "DIE-01",
+        "DIE-02",
+        "DIE-03",
+        "DIE-04",
+        "BTL-02",
+        "BTL-04",
+        "P0-ACTOR",
+        "P0-BOARD",
+        "P0-DICE",
+        "P0-PODIUM",
+        "M05"
+      ]
     }
   ],
   "tasks": [
@@ -1389,7 +1415,7 @@
       "title": "원본 OBS 미복원 34종 해독",
       "status": "in_progress",
       "milestone": "M05",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원본 ID 98종 중 실제 전신 리소스 64종/281 PNG만 게시됨; 34종은 카드 이미지 정지 대체 | 구현 목표: 첫 OBS.pak의 28종 실패 행 헤더를 검증하고 OBS2/OBS3 중복·클라이언트 RLE 해법 연구, 진짜 PNG만 합격; 2026-10-20 원본 OBS.pak 검증된 진단 재분류: CardData 98종 중 기존 OBS fullbody 64종/281개 원본 PNG; 엄격 decoder bulk 90종 대상 62종/268PNG 성공, 28종 거부(24 exact row mismatch·3 frame geometry·1 frame count 오류), 그 외 약 6종은 원본 OBS 파일명·다른 클라이언트 판본 전수 대조 필요. 성공 명칭/실루엣 근거 없는 새 PNG는 라이브에 넣지 않음. 상세 출처 보고서 작성.; 2026-10-20 2002 OBS.pak native 640-stride RLE 실제 역해독 완료: 원본 90 카드 멤버 모두 엄격 성공, 원본 PNG 616장/기존 별도 2종 13장 합쳐 92/98, 629 원본 프레임. 이전 미복구 28종 전부 진짜 OBS source pixel로 복구/게임 적용. 최종 6종 0091/0126/0129/0132/0157/0168은 SHA1 검증 2002 원본 OBS/OBS2/OBS3 삼중 검색에서 파일명이 존재하지 않음. 타 버전 공식 설치판·패치 확인 남음. ACT-01 전체 완료 아님.; 2026-10-20 통합: PR #152 squash main@bf39a52d94882d48073423a7a1e1f64c1f029c4c 원본 OBS 90/90 멤버 616개 PNG 원본 영상버퍼 인덱스 해독+초기 2/13=92/98 체스맨·629 source PNG 게임과 PWA에 실제 적용. 기존 미해독 28종(24 row+3 geometry+1 frameCount) 전부 source packet으로 해독. 원본 2002 OBS/OBS2/OBS3 전체 목록에도 없는 6개 0091/0126/0129/0132/0157/0168은 OBS fullbody 파일 미확보. CHR.pak에는 ID별 .chr 메타데이터가 있어도 OBS 전신 복구로 주장 금지. PR153 엄격 파일별 SHA/소스 offsets 실게임 수용검사 main@8f5d6df48438d2aac45d241a2a4c11b960a856e1 성공. 전체 98종·EXE 방향별 동작 표 여전히 미완료.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원본 ID 98종 중 실제 전신 리소스 64종/281 PNG만 게시됨; 34종은 카드 이미지 정지 대체 | 구현 목표: 첫 OBS.pak의 28종 실패 행 헤더를 검증하고 OBS2/OBS3 중복·클라이언트 RLE 해법 연구, 진짜 PNG만 합격; 2026-10-20 원본 OBS.pak 검증된 진단 재분류: CardData 98종 중 기존 OBS fullbody 64종/281개 원본 PNG; 엄격 decoder bulk 90종 대상 62종/268PNG 성공, 28종 거부(24 exact row mismatch·3 frame geometry·1 frame count 오류), 그 외 약 6종은 원본 OBS 파일명·다른 클라이언트 판본 전수 대조 필요. 성공 명칭/실루엣 근거 없는 새 PNG는 라이브에 넣지 않음. 상세 출처 보고서 작성.; 2026-10-20 2002 OBS.pak native 640-stride RLE 실제 역해독 완료: 원본 90 카드 멤버 모두 엄격 성공, 원본 PNG 616장/기존 별도 2종 13장 합쳐 92/98, 629 원본 프레임. 이전 미복구 28종 전부 진짜 OBS source pixel로 복구/게임 적용. 최종 6종 0091/0126/0129/0132/0157/0168은 SHA1 검증 2002 원본 OBS/OBS2/OBS3 삼중 검색에서 파일명이 존재하지 않음. 타 버전 공식 설치판·패치 확인 남음. ACT-01 전체 완료 아님.; 2026-10-20 통합: PR #152 squash main@bf39a52d94882d48073423a7a1e1f64c1f029c4c 원본 OBS 90/90 멤버 616개 PNG 원본 영상버퍼 인덱스 해독+초기 2/13=92/98 체스맨·629 source PNG 게임과 PWA에 실제 적용. 기존 미해독 28종(24 row+3 geometry+1 frameCount) 전부 source packet으로 해독. 원본 2002 OBS/OBS2/OBS3 전체 목록에도 없는 6개 0091/0126/0129/0132/0157/0168은 OBS fullbody 파일 미확보. CHR.pak에는 ID별 .chr 메타데이터가 있어도 OBS 전신 복구로 주장 금지. PR153 엄격 파일별 SHA/소스 offsets 실게임 수용검사 main@8f5d6df48438d2aac45d241a2a4c11b960a856e1 성공. 전체 98종·EXE 방향별 동작 표 여전히 미완료.; 2026-10-21 verified original ZIP 640-video source OBS.pak 90/90 reproduced with first continuous 0..7 packet samples plus indexes 10,18,25,30; bulk 616→945 verified PNG (+329), 2 original-only cards/13 retained, aggregate 92 bodies/958 source PNG. 6 absent IDs still unresolved; no invented models.",
       "acceptance": [
         "98개 ID 각각 원본 전신 PNG 1장 이상 SHA/오프셋 검증 또는 미확보 원인 기록; 가짜 CSS 체스맨 0건"
       ],
@@ -1409,10 +1435,12 @@
         "https://github.com/koith/browser-app-lab/pull/153",
         "https://github.com/koith/browser-app-lab/actions/runs/39443928060",
         "https://github.com/koith/browser-app-lab/actions/runs/39444668280",
-        "https://github.com/koith/browser-app-lab/actions/runs/39444668292"
+        "https://github.com/koith/browser-app-lab/actions/runs/39444668292",
+        "https://github.com/koith/browser-app-lab/actions/runs/39509648761",
+        "apps/4leaf/rog/original/OBS/bulk-source-report.json"
       ],
       "evidenceLevel": "VERIFIED-92/98-2002-OBS-629-PNG-SHA-AND-NATIVE-640-STRIDE; 6 ABSENT IN THIS 2002 CLIENT; HISTORICAL ACTION-POSE MAP OPEN",
-      "lastReviewed": "2026-10-20",
+      "lastReviewed": "2026-10-21",
       "verifiedAcceptance": null,
       "dependencies": [
         "SRC-01"
@@ -1450,18 +1478,22 @@
       "id": "ACT-03",
       "priority": "P0",
       "title": "캐릭터별 대기·이동·공격·피격·승리·방향 원본 프레임표",
-      "status": "todo",
+      "status": "in_progress",
       "milestone": "M05",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 게임의 idle/walk/attack/hurt/victory는 현재 인덱스 추정; 출처 자료 281장만으로 98종 원본 타임라인 아님 | 구현 목표: EXE 동작테이블/OBS 프레임 배열과 원작 영상으로 포즈별 실제 방향·속도·루프 매핑",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 게임의 idle/walk/attack/hurt/victory는 현재 인덱스 추정; 출처 자료 281장만으로 98종 원본 타임라인 아님 | 구현 목표: EXE 동작테이블/OBS 프레임 배열과 원작 영상으로 포즈별 실제 방향·속도·루프 매핑; 2026-10-21 原 source OBS verified 640-video-RLE frames 0..7 contiguous decoded; deploy into real playable movement state, with actual signed per-frame source X/Y and original image bounds; expose dataset sourceFrameSequence/Provenance. FPS and EXE action/direction table not yet verified; labels explicitly WEB provisional. Original 92 body member count remains, original source frames rise from 629 to 958 (945 bulk + 13 initial) in isolated feature branch; browser movement gate added.",
       "acceptance": [
         "모든 복구 캐릭터·행동별 검증된 원본 프레임만 재생, 미검증 자세를 원본이라고 표기하지 않음"
       ],
       "evidence": [
         "genesis-chessman-actors.js",
-        "original/OBS/animation-manifest.js"
+        "original/OBS/animation-manifest.js",
+        "apps/4leaf/rog/tools/decode-original-obs-bulk.py",
+        "apps/4leaf/rog/genesis-chessman-actors.js",
+        "apps/4leaf/rog/tests/dice-obs-contiguous-source-motion.cjs",
+        "https://github.com/koith/browser-app-lab/actions/runs/39509648761"
       ],
-      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-18",
+      "evidenceLevel": "VERIFIED-SOURCE-RLE-OBS-0..7-PACKET-INDEXES; WEB-POSE-LABEL-FPS-HISTORICAL-UNVERIFIED; BROWSER-QA-PENDING",
+      "lastReviewed": "2026-10-21",
       "verifiedAcceptance": null,
       "dependencies": [
         "ACT-02",
@@ -1475,7 +1507,7 @@
       "title": "보드·전투 체스맨 발 접지·그림자·다중배치",
       "status": "in_progress",
       "milestone": "M05",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 기본 2P의 진짜 OBS 표시는 검증했으나 모든 체스맨 크기/발판 고정·동시 2인 겹침·전투 POV는 원본과 비교 미흡 | 구현 목표: 원본 OBS originX/Y, 발 위치, TIS 바닥 픽셀, 캐릭터 z-index/그림자 관통 검증; 2026-10-20 원본 OBS 이미지를 일시적 503 응답에서 영구 unavailable 처리하던 문제 개선: 실제 동일 아카이브 OBS PNG 3회 재요청, 실패 후 검증된 원본 CardData 정지 대체, 연결 회복 시 원본 전신 자동 재시도. 팀/턴/DMP 좌표·원본 소스 바이트 불변. 정확한 행동 프레임표·출발/착지·98종 전체 원본 수용은 여전히 미완료.; 2026-10-20 PR #150 merged main@bb15ba5c genuine OBS 503 retry/reconnect QA 39381181475 + release 39381181551 PASS, Pages 39381488969 success; real main OBS frame job 39381488742 success. Original 34 missing IDs and 2002 direction/actions still not recovered.; 2026-10-20 source-native 92/98 chessman animated PNG 629장 실제 playable game actor/OBS loader 연결, PC·mobile 104-cell 4LEAF DMP browser game QA; 6 source-missing still CardData fallback. Exact old original battle 3D contact foot Y and all frames' pose mapping remain unsolved.; 2026-10-20 full-body 원본 92종은 실제 보드/배틀 independent Genesis actor 로더로 연결; PR153 same SHA Chromium source 616 PNG all hash and player roll/duel verified, WebKit iPhone simulation passed. 6 ID CardData still honest static. Exact historical contact/original locomotion animation geometry open.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 기본 2P의 진짜 OBS 표시는 검증했으나 모든 체스맨 크기/발판 고정·동시 2인 겹침·전투 POV는 원본과 비교 미흡 | 구현 목표: 원본 OBS originX/Y, 발 위치, TIS 바닥 픽셀, 캐릭터 z-index/그림자 관통 검증; 2026-10-20 원본 OBS 이미지를 일시적 503 응답에서 영구 unavailable 처리하던 문제 개선: 실제 동일 아카이브 OBS PNG 3회 재요청, 실패 후 검증된 원본 CardData 정지 대체, 연결 회복 시 원본 전신 자동 재시도. 팀/턴/DMP 좌표·원본 소스 바이트 불변. 정확한 행동 프레임표·출발/착지·98종 전체 원본 수용은 여전히 미완료.; 2026-10-20 PR #150 merged main@bb15ba5c genuine OBS 503 retry/reconnect QA 39381181475 + release 39381181551 PASS, Pages 39381488969 success; real main OBS frame job 39381488742 success. Original 34 missing IDs and 2002 direction/actions still not recovered.; 2026-10-20 source-native 92/98 chessman animated PNG 629장 실제 playable game actor/OBS loader 연결, PC·mobile 104-cell 4LEAF DMP browser game QA; 6 source-missing still CardData fallback. Exact old original battle 3D contact foot Y and all frames' pose mapping remain unsolved.; 2026-10-20 full-body 원본 92종은 실제 보드/배틀 independent Genesis actor 로더로 연결; PR153 same SHA Chromium source 616 PNG all hash and player roll/duel verified, WebKit iPhone simulation passed. 6 ID CardData still honest static. Exact historical contact/original locomotion animation geometry open.; 2026-10-21 source native signed-origin and source frame dimensions exposed for every actual playable OBS 0..7 transition. Contact remains inferred shared foot-plane, exact 2004 polygon mesh and dual-actor original contact unverified.",
       "acceptance": [
         "전신 64종+추가 복원분에서 보드·전투·2인 겹침·6인 게임에 대한 실사 접지/가림 확인"
       ],
@@ -1493,10 +1525,11 @@
         "apps/4leaf/rog/original/OBS/bulk-source-report.json",
         "https://github.com/koith/browser-app-lab/actions/runs/39419068901",
         "https://github.com/koith/browser-app-lab/actions/runs/39443928060",
-        "https://github.com/koith/browser-app-lab/actions/runs/39444170153"
+        "https://github.com/koith/browser-app-lab/actions/runs/39444170153",
+        "apps/4leaf/rog/tests/dice-obs-contiguous-source-motion.cjs"
       ],
       "evidenceLevel": "VERIFIED-92-ORIGINAL-OBS-BODIES-IN-PLAYABLE-GAME; 6 ORIGINAL-OBS-FILES-MISSING; EXACT-POSE-3D-CONTACT-OPEN",
-      "lastReviewed": "2026-10-20",
+      "lastReviewed": "2026-10-21",
       "verifiedAcceptance": null,
       "dependencies": [
         "ACT-03",
@@ -4390,6 +4423,33 @@
       "taskId": "BRD-02",
       "details": "PR154 merged main@d443cb5380ad51bfe9a1be1d2637cac48bb6bac8. Genuine native TIS 145x97 alpha transparent click is now rejected in BOTH tile click and bubbled optional DMP inspector, no ghost camera movement, same-origin HTTP browser and original 25-map regression PASS. Historical MVE camera still missing.",
       "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39445335589"
+    },
+    {
+      "seq": 176,
+      "date": "2026-10-21",
+      "type": "REQUEST_REGISTERED",
+      "taskId": "ACT-03",
+      "details": "User request persisted before code QA. Original OBS character palette source from 2002 archive and historical EXE action mapping are separate claims; do not certify original FPS/action mappings.",
+      "evidence": "apps/4leaf/rog/docs/RESTORATION_LEDGER.json",
+      "requestId": "REQ-20261021-001"
+    },
+    {
+      "seq": 177,
+      "date": "2026-10-21",
+      "type": "STATUS_CHANGED",
+      "taskId": "ACT-03",
+      "details": "Begin executable source-sequential native OBS playback: recovered contiguous source 0..7 IDs and genuine native signed origins, still PROVISIONAL WEB walk/idle/action mapping and FPS.",
+      "evidence": "apps/4leaf/rog/genesis-chessman-actors.js",
+      "from": "todo",
+      "to": "in_progress"
+    },
+    {
+      "seq": 178,
+      "date": "2026-10-21",
+      "type": "IMPLEMENTED_PENDING_QA",
+      "taskId": "ACT-03",
+      "details": "SOURCE VERIFIED: original SHA1 archive OBS 90 native actor members decode 945 genuine PNGs (329 additional), plus initial two 13 PNGs: 92/98 native full-body, 958 original PNGs. 6 OBS-body IDs absent from this 2002 installer. Created real-game eight contiguous frame motion QA; historical original action/direction/timing is NOT proven.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39509648761"
     }
   ]
 }

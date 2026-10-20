@@ -47,6 +47,7 @@ on:
       - 'apps/4leaf/rog/sw.js'
       - 'apps/4leaf/rog/tests/dice-obs-source-recovery.cjs'
       - 'apps/4leaf/rog/tests/dice-obs-640stride-native-game.cjs'
+      - 'apps/4leaf/rog/tests/dice-obs-contiguous-source-motion.cjs'
       - 'apps/4leaf/rog/tests/dice-original-obs-chessmen.cjs'
       - 'apps/4leaf/rog/dice-native-battle-source-spr.css'
       - 'apps/4leaf/rog/dice-original-battle-unobstructed.css'
@@ -104,6 +105,8 @@ jobs:
         run: node apps/4leaf/rog/tests/dice-obs-source-recovery.cjs
       - name: Audit source-authentic 640-stride recovered OBS chessmen in live desktop/mobile DMP game
         run: node apps/4leaf/rog/tests/dice-obs-640stride-native-game.cjs
+      - name: Source-original eight consecutive OBS palette frames during playable Genesis movement
+        run: node apps/4leaf/rog/tests/dice-obs-contiguous-source-motion.cjs
       - name: Verify changing real native OBS frame dimensions, not fixed frame-zero labels
         run: node apps/4leaf/rog/tests/dice-original-obs-chessmen.cjs
       - run: node apps/4leaf/rog/tests/board-layout.cjs
