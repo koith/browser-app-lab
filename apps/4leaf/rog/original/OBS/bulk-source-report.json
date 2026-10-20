@@ -1,7 +1,7 @@
 {
-  "accepted": 85,
+  "accepted": 86,
   "archiveSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
-  "bytes": 1922122,
+  "bytes": 1937546,
   "cardMembers": 90,
   "decodeDiagnostics": {
     "1093.obs": {
@@ -75,78 +75,6 @@
         }
       ],
       "sourceLength": 150460
-    },
-    "1095.obs": {
-      "geometries": [
-        {
-          "height": 0,
-          "length": 0,
-          "offset": 124,
-          "ox": 1694,
-          "oy": 0,
-          "plausible": false,
-          "width": 0
-        },
-        {
-          "height": 0,
-          "length": 0,
-          "offset": 128,
-          "ox": 39,
-          "oy": 70,
-          "plausible": false,
-          "width": 1694
-        },
-        {
-          "height": 70,
-          "length": 1694,
-          "offset": 132,
-          "ox": -17,
-          "oy": -58,
-          "plausible": true,
-          "width": 39
-        },
-        {
-          "height": 65478,
-          "length": 4587559,
-          "offset": 136,
-          "ox": 98,
-          "oy": 14,
-          "plausible": false,
-          "width": 65519
-        },
-        {
-          "height": 14,
-          "length": 4291231727,
-          "offset": 140,
-          "ox": 257,
-          "oy": 5398,
-          "plausible": false,
-          "width": 98
-        }
-      ],
-      "headers": [
-        {
-          "count": 0,
-          "offset": 66
-        },
-        {
-          "count": 0,
-          "offset": 68
-        },
-        {
-          "count": 172,
-          "offset": 70
-        },
-        {
-          "count": 0,
-          "offset": 72
-        },
-        {
-          "count": 0,
-          "offset": 74
-        }
-      ],
-      "sourceLength": 302282
     },
     "1098.obs": {
       "geometries": [
@@ -487,15 +415,14 @@
       "sourceLength": 168757
     }
   },
-  "framePNGs": 592,
+  "framePNGs": 600,
   "members": 166,
-  "multiFrameSamples": 85,
+  "multiFrameSamples": 86,
   "rejected": {
-    "1093.obs": "OBS frame geometry invalid",
-    "1095.obs": "Implausible OBS frame count",
-    "1098.obs": "OBS frame geometry invalid",
+    "1093.obs": "OBS frame geometry invalid; index=75 cursor=143134 declared=(131, 15, 9, -7, -13) memberBytes=150460",
+    "1098.obs": "OBS frame geometry invalid; index=4 cursor=7600 declared=(17, 6, 15, -12, -7) memberBytes=8671",
     "1128.obs": "no strictly decoded source frames",
-    "1159.obs": "OBS frame geometry invalid"
+    "1159.obs": "OBS frame geometry invalid; index=2 cursor=33517 declared=(7, 1, 1, 8, 3) memberBytes=168757"
   },
   "source": "OBS.pak",
   "sourceRLEHeaders": {

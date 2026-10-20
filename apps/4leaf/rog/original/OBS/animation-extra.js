@@ -4101,6 +4101,92 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "sourcePak": "OBS.pak",
     "sourceSHA256": "f5f05e5033d25f455e5d6b1ca63dfaeff4fdffc043e682c8888c5db3c520e75d"
   },
+  "0095": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
+    "frames": [
+      {
+        "height": 70,
+        "index": 0,
+        "originX": -17,
+        "originY": -58,
+        "sha256": "86dab0da954adda0177cbdfcd30e4be454467095c24418beeb655ad16e706809",
+        "url": "./original/OBS/bulk/1095-00.png",
+        "width": 39
+      },
+      {
+        "height": 70,
+        "index": 1,
+        "originX": -17,
+        "originY": -58,
+        "sha256": "db44ebfcb54e02ead95b080017450f70210c735b459ef1c888dce2ca2e5059df",
+        "url": "./original/OBS/bulk/1095-01.png",
+        "width": 40
+      },
+      {
+        "height": 70,
+        "index": 2,
+        "originX": -17,
+        "originY": -58,
+        "sha256": "705eeda5071ab2bd93d86861d3ae86a75ef4cbcd08b52475ef8ca7352b7013cc",
+        "url": "./original/OBS/bulk/1095-02.png",
+        "width": 39
+      },
+      {
+        "height": 71,
+        "index": 3,
+        "originX": -16,
+        "originY": -59,
+        "sha256": "a974f7c2bf8174b3c85f7607234135267aed938d4095568d9e19092d28131f42",
+        "url": "./original/OBS/bulk/1095-03.png",
+        "width": 35
+      },
+      {
+        "height": 72,
+        "index": 10,
+        "originX": -15,
+        "originY": -62,
+        "sha256": "d3b352efd0595f7be55a115d64e792d21a547e119674c844246bc476139f6143",
+        "url": "./original/OBS/bulk/1095-10.png",
+        "width": 31
+      },
+      {
+        "height": 68,
+        "index": 18,
+        "originX": -11,
+        "originY": -56,
+        "sha256": "61ff07513a91963d9c0002b544f28bb7a4d41367aac9fc8e0faf4b90d2a0ef30",
+        "url": "./original/OBS/bulk/1095-18.png",
+        "width": 37
+      },
+      {
+        "height": 70,
+        "index": 25,
+        "originX": -19,
+        "originY": -54,
+        "sha256": "68c4c9ed5e914e4857a4d9e55d443b6f5565f5d6aae126edbbe150b64d3ad985",
+        "url": "./original/OBS/bulk/1095-25.png",
+        "width": 30
+      },
+      {
+        "height": 74,
+        "index": 30,
+        "originX": -13,
+        "originY": -63,
+        "sha256": "62a1f96dc48424f9c7ff1fff4233c5f63e74c6d13822026e0b6b9863c78dd2f7",
+        "url": "./original/OBS/bulk/1095-30.png",
+        "width": 31
+      }
+    ],
+    "hasVerifiedFrameZero": true,
+    "horizontalScanlineOrigin": "ORIGINAL-640-VIDEO-RLE exact destination",
+    "name": "팬드래건나이트",
+    "originalAnimationCount": 172,
+    "originalMember": "1095.obs",
+    "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
+    "sourcePak": "OBS.pak",
+    "sourceSHA256": "e956253100bea00f436dae608d4908adc2e5f82e7f4e7ad2b422acad7e3a15a0"
+  },
   "0096": {
     "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
