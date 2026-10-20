@@ -4,13 +4,14 @@
 // original files. No artificial height layer, extra actor or match mutation.
 const {chromium}=require('playwright');
 const assert=require('node:assert/strict');
-const path=require('node:path');
 (async()=>{
  const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
  const page=await browser.newPage({viewport:{width:1280,height:900},serviceWorkers:'block'});
  const errors=[];page.on('pageerror',err=>errors.push(String(err)));
  await page.addInitScript(()=>{window.LEAF_CENTRAL_API_URL='';});
- const BASE=process.env.FOURLEAF_TEST_URL||'file://'+path.resolve(__dirname,'../index.html');
+ // Source RGBA pixels must be readable under SAME-ORIGIN HTTP. file://
+ // intentionally taints 145x97 canvases and cannot prove true pixel input.
+ const BASE=process.env.FOURLEAF_TEST_URL||'http://127.0.0.1:8765/index.html';
  try{
   await page.goto(BASE);
   await page.waitForFunction(()=>window.__ROG_TEST__&&window.__LEAF_CAMERA__&&window.__LEAF_DMP_EXPLORER__);
