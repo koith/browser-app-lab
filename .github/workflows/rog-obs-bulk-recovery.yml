@@ -4,6 +4,7 @@ on:
     paths:
       - '.github/workflows/rog-obs-bulk-recovery.yml'
       - 'apps/4leaf/rog/tools/decode-original-obs-bulk.py'
+      - 'apps/4leaf/rog/tests/test_obs_native_640stride.py'
       - 'apps/4leaf/rog/tools/probe-original-obs-near-rows.py'
       - 'apps/4leaf/rog/tools/probe-original-obs-640stride.py'
       - 'apps/4leaf/rog/tools/audit-original-dice-resources.py'
@@ -24,6 +25,10 @@ jobs:
           sudo apt-get update -qq
           sudo apt-get install -qq -y unshield
           python3 -m pip install --break-system-packages pillow
+      - name: Verify native 640-stride OBS packet decoder against exact expected source pixel positions
+        run: |
+          python3 -m py_compile apps/4leaf/rog/tools/decode-original-obs-bulk.py
+          python3 apps/4leaf/rog/tests/test_obs_native_640stride.py
       - name: Verify SHA1 of the historically archived 2002 client, unpack resource data only
         run: |
           mkdir -p /tmp/leaf-obs-installer /tmp/leaf-obs-resources
@@ -82,7 +87,7 @@ jobs:
           from pathlib import Path
           root=Path('apps/4leaf/rog/original/OBS')
           report=json.loads((root/'bulk-source-report.json').read_text())
-          assert report['accepted']>=1,report
+          assert report['accepted']>=62,(report['accepted'],len(report['rejected']))
           assert report['framePNGs']>=2,report
           assert len(list((root/'bulk').glob('*.png')))==report['framePNGs'],report
           print('ORIGINAL_OBS_STRICT_FRAMES_VERIFIED',report['accepted'],report['framePNGs'])
@@ -104,6 +109,29 @@ jobs:
           name: 4leaf-near-row-quarantine-not-production
           path: /tmp/leaf-obs-near-row-quarantine
           retention-days: 7
+      - name: Check every card ID against OBS.pak OBS2.pak OBS3.pak and quarantine extra authentic member candidates
+        run: |
+          python3 -m py_compile apps/4leaf/rog/tools/probe-original-obs-secondary-paks.py
+          python3 apps/4leaf/rog/tools/probe-original-obs-secondary-paks.py \
+            /tmp/leaf-obs-resources /tmp/leaf-obs-three-paks-quarantine
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          report=json.loads(Path('/tmp/leaf-obs-three-paks-quarantine/secondary-pak-probe.json').read_text())
+          print('OBS_SECONDARY_ALL_SOURCE_IDS',json.dumps({
+            'missingBefore':report['missingBefore'],
+            'paks':{k:{'missingMembers':v['cardMembersPreviouslyMissing'],
+                       'newStrictModels':v['strictRecoverableMembers']}
+                    for k,v in report['paks'].items()},
+            'newStrictCandidates':[(v['pack'],v['cardId'],len(v['strictFrames']))
+                                   for v in report['newStrictCandidates']]},ensure_ascii=False))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: 4leaf-obs-three-original-paks-missing-body-probe
+          path: /tmp/leaf-obs-three-paks-quarantine
+          retention-days: 14
       - name: Test native OBS 2-byte scanline skip hypothesis against strict 2002 source frame geometry
         run: |
           python3 -m py_compile apps/4leaf/rog/tools/probe-original-obs-640stride.py
@@ -176,7 +204,8 @@ jobs:
           else:
               print('SOURCE_OBS_OFFLINE_CACHE_UNCHANGED',len(sprites))
           PY
-      - name: Import decoded native body images while retaining source SHA and provisional pose labels
+      - name: Import strictly decoded OBS pixels into isolated feature branch ONLY
+        if: github.ref == 'refs/heads/restore-4leaf-obs-640stride-native-20261020'
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
@@ -191,11 +220,14 @@ jobs:
           fi
           git commit -m 'assets(4leaf): use strictly decoded 2002 OBS chessman body frames'
           for attempt in 1 2 3; do
-            git pull --rebase origin main
-            if git push origin HEAD:main; then exit 0; fi
+            git pull --rebase origin restore-4leaf-obs-640stride-native-20261020
+            if git push origin HEAD:restore-4leaf-obs-640stride-native-20261020; then exit 0; fi
             sleep "$((attempt*3))"
           done
           echo 'Failed to safely rebase native sprite additions'; exit 1
+      - name: Reject unreviewed OBS artifact promotion on any other branch
+        if: github.ref != 'refs/heads/restore-4leaf-obs-640stride-native-20261020'
+        run: echo 'No production merge or main push for experimental source decoding'
       - name: Remove original installer and encrypted binary after extraction
         if: always()
         run: rm -rf /tmp/leaf-obs-installer /tmp/leaf-obs-resources

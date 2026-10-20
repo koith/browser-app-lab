@@ -62,14 +62,14 @@ const {chromium}=require('playwright');
   assert.equal(await rig.getAttribute('data-chessman-id'),'0045');
   assert.equal(await rig.getAttribute('data-actor-rig'),'original-obs-sprite',
    'original OBS pixels replace inferred CSS when the chessman asset exists');
-  // Reproduce the reported huge gray chess pawn: the previous DEFAULT
-  // opponent was c_0096, whose OBS source has NOT been recovered.
-  // An explicit user-selected missing body must never manufacture a giant
-  // humanoid. CardData artwork is allowed only as a labeled still fallback.
+  // Genuine source 1096.obs was recovered using the 640-stride RGB RLE
+  // decoder. The previous test expected a proxy at c_0096 and would now
+  // reject the successful restoration. Only the SIX OBS/OBS2/OBS3 source-
+  // absent card IDs may use honest, labeled CardData static fallbacks.
   const missing=await page.evaluate(()=>{
    const m=window.__ROG_TEST__.getMatch();
    const old=m.players[1].team[0];
-   m.players[1].team[0]='c_0096';
+   m.players[1].team[0]='c_0091';
    window.__ROG_TEST__.drawGame();
    const n=document.querySelector('#board-pawns .board-pawn[data-id="1"]');
    const css=getComputedStyle(n.querySelector('.leaf-chess-actor'));
@@ -83,7 +83,8 @@ const {chromium}=require('playwright');
    window.__ROG_TEST__.drawGame();
    return data;
   });
-  assert.equal(missing.rig,'original-card-portrait-fallback');
+  assert.equal(missing.rig,'original-card-portrait-fallback',
+   '0091 is absent from all 3 original OBS packs; a phantom actor is prohibited');
   assert.equal(missing.css,'none','missing OBS must not show an invented tall figure');
   assert.ok(missing.portraitSrc?.startsWith('./original/CardData/chm_'));
   assert.deepEqual(missing.size,[40,55]);
