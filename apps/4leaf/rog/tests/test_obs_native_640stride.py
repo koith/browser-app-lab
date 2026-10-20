@@ -39,8 +39,8 @@ class NativeOBS(unittest.TestCase):
         self.width=50;self.height=3
         # Three rows with deliberately DIFFERENT native x positions.
         self.data=encode_640_rows([
-            (0,5,b'\x01\x02\x03'),(1,16,b'\x04\x05\x06\x07'),
-            (2,47,b'\x08\x09\x0a')],self.width,self.height)
+            (0,5,bytes([1]*18)),(1,16,bytes([4]*19)),
+            (2,32,bytes([10]*18))],self.width,self.height)
         self.palette=bytes([c for x in range(256) for c in (x,0,255-x)])
 
     def test_native_packet_pixel_x_and_bottom_up_coordinates(self):
@@ -56,9 +56,7 @@ class NativeOBS(unittest.TestCase):
 
     def test_wrong_final_cursor_and_truncated_source_never_accepted(self):
         with self.assertRaisesRegex(ValueError,'final 640-stride cursor'):
-            codec.decode_rows(self.data[:-3]+b'\x08\x09\x00',
-                              self.width,self.height,self.palette) if False else codec.decode_rows(
-                              self.data,self.width+1,self.height,self.palette)
+            codec.decode_rows(self.data,self.width+1,self.height,self.palette)
         with self.assertRaises(ValueError):
             codec.decode_rows(self.data[:-1],self.width,self.height,self.palette)
         with self.assertRaises(ValueError):
