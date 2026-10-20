@@ -80,15 +80,44 @@ const {chromium}=require('playwright');
    }
    return null;
   });
-  const first=await findPhysical();
-  assert.ok(first,'genuine native TIS opaque pixels must be actual physical mouse targets');
-  await page.mouse.click(first.x,first.y);
-  const physical=await page.evaluate(id=>{
-   const tile=document.querySelector('#board-nodes>.tile[data-tile="'+id+'"]');
-   return {hit:tile.dataset.sourcePixelHit,pixel:[tile.dataset.sourceHitX,tile.dataset.sourceHitY]};
-  },first.id);
-  assert.equal(physical.hit,'true','real mouse must activate source-opaque TIS pixels');
-
+  // Native camera/world layout can keep a short transition alive after
+  // entering a game or changing viewport. A sampled DOM point from BEFORE
+  // mouse.move may no longer be topmost when the physical click arrives.
+  // Check the real hit target again after pointer movement; never replace
+  // this with a synthetic event or mark the original sprite as clickable
+  // just because the source-alpha math said so.
+  const clickRealOpaque=async phase=>{
+   const attempts=[];
+   for(let n=0;n<4;n++){
+    await page.waitForTimeout(n===0?350:220);
+    const point=await findPhysical();
+    if(!point){attempts.push({reason:'no-visible-original-pixel'});continue;}
+    await page.mouse.move(point.x,point.y);
+    const aligned=await page.evaluate(info=>{
+     const tile=document.querySelector('#board-nodes>.tile[data-tile="'+info.id+'"]');
+     const top=document.elementFromPoint(info.x,info.y);
+     const source=tile?window.__LEAF_TIS_ALPHA__.hitPoint(tile,info.x,info.y):null;
+     return {topmost:!!tile&&(top===tile||tile.contains(top)),
+      hit:source?.hit,ready:source?.ready,alpha:source?.alpha,
+      actualTop:top?.id||String(top?.className||'').slice(0,70)};
+    },point);
+    if(!aligned.topmost||!aligned.hit||!aligned.ready){
+     attempts.push({point,aligned,reason:'camera-or-foreground-moved'});
+     continue;
+    }
+    await page.mouse.down();await page.mouse.up();
+    const actual=await page.evaluate(id=>{
+     const tile=document.querySelector('#board-nodes>.tile[data-tile="'+id+'"]');
+     return {hit:tile?.dataset.sourcePixelHit,coords:[
+      tile?.dataset.sourceHitX,tile?.dataset.sourceHitY]};
+    },point.id);
+    if(actual.hit==='true')return {...point,actual,attempts:n+1,phase};
+    attempts.push({point,aligned,actual,reason:'original-pixel-click-not-delivered'});
+   }
+   throw Error('Real '+phase+' original TIS mouse failed after verifying topmost pixels: '+
+    JSON.stringify(attempts));
+  };
+  const first=await clickRealOpaque('desktop');
   // An artificial MouseEvent sent to a tile's transparent source pixel is
   // intentionally rejected, not reported as a tile interaction. Keyboard
   // .click() is explicitly exempt to keep native tab/button accessibility.
@@ -117,14 +146,9 @@ const {chromium}=require('playwright');
   // Check the same real original art after zoom and on a narrow mobile board.
   await page.evaluate(()=>window.__LEAF_CAMERA__.zoom(.4));
   await page.waitForTimeout(250);
-  const zoomed=await findPhysical();
-  assert.ok(zoomed,'source-native hit still works under transformed camera zoom');
-  await page.mouse.click(zoomed.x,zoomed.y);
+  const zoomed=await clickRealOpaque('camera-zoom');
   await page.setViewportSize({width:390,height:844});
-  await page.waitForTimeout(350);
-  const mobile=await findPhysical();
-  assert.ok(mobile,'same source-alpha pointer input survives narrow phone board');
-  await page.mouse.click(mobile.x,mobile.y);
+  const mobile=await clickRealOpaque('mobile');
   assert.deepEqual(errors,[]);
   await page.screenshot({path:'leaf-source-tis-physical-alpha-mobile.png'});
   console.log('NATIVE TIS SOURCE PIXEL POINTER PASS '+JSON.stringify({
