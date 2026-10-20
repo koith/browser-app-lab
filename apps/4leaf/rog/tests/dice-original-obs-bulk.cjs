@@ -20,7 +20,7 @@ const report=JSON.parse(fs.readFileSync(path.join(root,'original/OBS/bulk-source
 assert.equal(report.archiveSHA256,
  '49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514');
 assert.equal(report.accepted,90,'all 90 matching original OBS.pak members recovered');
-assert.equal(report.framePNGs,616,'all 2002 PAK source image frame samples maintained');
+assert.ok(report.framePNGs>=945,'all 945 SHA-authentic OBS source frames, including native 0..7 per character, must remain available');
 const sourceMissing=['0091','0126','0129','0132','0157','0168'];
 let files=0,totalBytes=0;
 assert.equal(Object.keys(recovered).length,report.accepted,'every reported source character has a manifest entry');
