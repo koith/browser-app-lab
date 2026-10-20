@@ -95,6 +95,18 @@ jobs:
         run: node apps/4leaf/rog/tests/dice-native-tis-alpha.cjs
       - name: Navigate source-native minimap and visible DMP camera viewport in desktop/mobile Chromium
         run: node apps/4leaf/rog/tests/dice-native-minimap-navigation.cjs
+      - name: Serve actual source TIS images on same-origin HTTP for pixel-accurate DMP acceptance
+        run: |
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog >/tmp/4leaf-source-tis-http.log 2>&1 &
+          ready=false
+          for attempt in $(seq 1 20); do
+            if curl --fail --silent --show-error --max-time 2 -I http://127.0.0.1:8765/original/Tiles/0015.png >/dev/null; then
+              ready=true
+              break
+            fi
+            sleep 1
+          done
+          test "$ready" = true
       - name: Inspect real recovered DMP source tiles and warp destinations with camera and accessible events
         run: node apps/4leaf/rog/tests/dice-source-dmp-terrain-explorer.cjs
       - name: Explore full 1450x1120 original DMP camera via mouse, keyboard, wheel and mobile pinch
