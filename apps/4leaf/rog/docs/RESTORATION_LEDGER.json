@@ -1792,7 +1792,7 @@
       "title": "켈티카 원작 파노라마·지점 클릭 경계",
       "status": "in_progress",
       "milestone": "M02",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원작 street.jpg 긴 거리 그림을 웹에서 부분 표시하고 라벨을 덧입히지만 원래 핫스팟/좌우 패닝·이동 버튼 차이 | 구현 목표: 실제 원본 Street 이미지 영역 클릭 polygon과 원래 마을/상점 입장 경로·파노라마 구간 대조; 2026-10-20: original 2002 green-key MainStreet 7-building pixel-alpha pointer hit mask ported from PR #144 onto current main branch, transparent pixel click and physical pointer pan tested by new Playwright integration test pending GitHub Actions. Historic EXE hotspot layout still unverified.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원작 street.jpg 긴 거리 그림을 웹에서 부분 표시하고 라벨을 덧입히지만 원래 핫스팟/좌우 패닝·이동 버튼 차이 | 구현 목표: 실제 원본 Street 이미지 영역 클릭 polygon과 원래 마을/상점 입장 경로·파노라마 구간 대조; 2026-10-20: original 2002 green-key MainStreet 7-building pixel-alpha pointer hit mask ported from PR #144 onto current main branch, transparent pixel click and physical pointer pan tested by new Playwright integration test pending GitHub Actions. Historic EXE hotspot layout still unverified.; 2026-10-20 actual original MainStreet seven sprite E2E success PR #147 head@31bf8642, main squash 0dc5582d; Pages deploy run 39378243796 success; original-sprite alpha hit after document.elementFromPoint and real page.mouse.click opens Magic Carden, transparent pixels permit panorama physical drag. Keep in_progress pending original 2002 EXE hotspots and full original visual comparison.",
       "acceptance": [
         "지도 좌/중/우 화면에서 출입 지점과 원본 소스 핫스팟 일치, 음영·가짜 라벨 침범 최소화"
       ],
@@ -1801,9 +1801,15 @@
         "tests/knighttown-original.cjs",
         "apps/4leaf/rog/street-world.js",
         "apps/4leaf/rog/tests/mainstreet-source-alpha-hotspots.cjs",
-        "https://github.com/koith/browser-app-lab/pull/144"
+        "https://github.com/koith/browser-app-lab/pull/144",
+        "https://github.com/koith/browser-app-lab/pull/147",
+        "https://github.com/koith/browser-app-lab/actions/runs/39377915247",
+        "https://github.com/koith/browser-app-lab/actions/runs/39378243790",
+        "https://github.com/koith/browser-app-lab/actions/runs/39378243796",
+        "https://github.com/koith/browser-app-lab/actions/runs/39378243746",
+        "https://github.com/koith/browser-app-lab/commit/0dc5582dc1d524ad50061d9162c51e59ecdabe76"
       ],
-      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+      "evidenceLevel": "VERIFIED-WEBAPP-SOURCE-PIXEL-HIT/BROWSER/MERGE/PAGES; HISTORICAL-EXE-HOTSPOTS-UNVERIFIED",
       "lastReviewed": "2026-10-20",
       "verifiedAcceptance": null,
       "dependencies": [
@@ -2183,16 +2189,18 @@
       "status": "in_progress",
       "milestone": "M09",
       "category": "업무관리",
-      "current": "2026-10-20 사용자 FL-01~FL-16과 GitHub 원장 대조 지시. 실제 저장소·검색에서 FL 번호별 원문/수용조건을 발견하지 못했다. 16개 기존 상위 작업군을 별도 잠정 slot으로 대응하되 역사적 FL 동일성을 꾸며내지 않음. 원문 확인 뒤 충돌/누락만 별도 TASK_ADDED하여 정합 완료. 원작 기능 미완료는 기존 40개 세부 작업과 P0를 계속 추적.",
+      "current": "2026-10-20 사용자 FL-01~FL-16과 GitHub 원장 대조 지시. 실제 저장소·검색에서 FL 번호별 원문/수용조건을 발견하지 못했다. 16개 기존 상위 작업군을 별도 잠정 slot으로 대응하되 역사적 FL 동일성을 꾸며내지 않음. 원문 확인 뒤 충돌/누락만 별도 TASK_ADDED하여 정합 완료. 원작 기능 미완료는 기존 40개 세부 작업과 P0를 계속 추적.; 2026-10-20 앞선 14:45 KST 프로젝트 대화에서 FL-01~FL-16 실제 제목 16건을 복원하고 영구 원장 각 M/P0/세부 ID와 개별 매핑함. FL-01~12 과거 부분/미완료 상태 출처 확인, FL-13~16 당시 상태만 미회수(제목 회수). original 2002-2004 acceptance는 여전히 열려 있음.",
       "acceptance": [
         "FL-01~FL-16 각각의 진짜 이전 명세와 현재 GitHub M00~M09/P0/40 세부 작업을 대조하고 미등록 업무를 중복 없이 추가·근거로 기록",
         "기존 검증 완료 항목의 원본 수용 증거 보존, 임시 16 slots를 원문인 것처럼 표시하지 않음"
       ],
       "evidence": [
         "apps/4leaf/rog/docs/FL_WORKSTREAM_RECONCILIATION_2026-10-20.md",
-        "apps/4leaf/rog/docs/RESTORATION_LEDGER.json"
+        "apps/4leaf/rog/docs/RESTORATION_LEDGER.json",
+        "apps/4leaf/rog/docs/FL_WORKSTREAM_RECONCILIATION_2026-10-20.md",
+        "https://github.com/koith/browser-app-lab/pull/147"
       ],
-      "evidenceLevel": "VERIFIED-GITHUB-LEDGER; FL-ORIGINAL-LIST-UNVERIFIED",
+      "evidenceLevel": "VERIFIED-PRIOR-CONVERSATION-TITLES-16/16; VERIFIED-GITHUB-LEDGER-MAPPING; HISTORICAL-FL-13..16-STATUS-UNVERIFIED",
       "lastReviewed": "2026-10-20",
       "verifiedAcceptance": null,
       "dependencies": [
@@ -4037,6 +4045,30 @@
       "taskId": "WORLD-02",
       "details": "Source alpha cache retained for seven true 2002 building sprites; physical click on opaque pixel opens correct destination, transparent pixel stays street and drag pans. Reusing PR #144 logic, new latest-main branch. Requires CI proof and Pages same-SHA confirmation.",
       "evidence": "apps/4leaf/rog/tests/mainstreet-source-alpha-hotspots.cjs"
+    },
+    {
+      "seq": 154,
+      "date": "2026-10-20",
+      "type": "SOURCE_RECONCILED",
+      "taskId": "FL-MAP-01",
+      "details": "Recovered all 16 exact FL checklist titles from previous 2026-10-20 14:45 KST Instant discussion and mapped individual titles to the canonical GitHub M00-09/P0/40 granular tasks; FL13-16 historical labels' status not recovered. Initial 'FL list missing' GitHub-only assumption corrected.",
+      "evidence": "apps/4leaf/rog/docs/FL_WORKSTREAM_RECONCILIATION_2026-10-20.md"
+    },
+    {
+      "seq": 155,
+      "date": "2026-10-20",
+      "type": "QA_VERIFIED",
+      "taskId": "WORLD-02",
+      "details": "True original MainStreet 7 alpha-keyed sprite source pixel browser Playwright E2E, physical mouse.click Magic Carden opaque pixel, transparent corner click does not enter, genuine pointer drag pans; exact head 31bf8642 passed World+Chat 39377915247; main merge SHA 0dc5582d passed same-SHA world-and-chat 39378243790 and release 39378243746. Accurate source EXE click map is still unknown, so no 'done'.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39378243790"
+    },
+    {
+      "seq": 156,
+      "date": "2026-10-20",
+      "type": "MERGED_AND_DEPLOYED",
+      "taskId": "WORLD-02",
+      "details": "PR #147 squash merged main@0dc5582dc1d524ad50061d9162c51e59ecdabe76; Pages deploy action 39378243796 success, source-fidelity release action 39378243746 success. This milestone fixes source-native WEB interactions, not all original shop/location hit geometry.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39378243796"
     }
   ]
 }
