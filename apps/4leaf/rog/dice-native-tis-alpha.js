@@ -9,7 +9,7 @@
  */
 (function(){
  'use strict';
- const cache=new Map(),SIZE=[145,97];
+ const cache=new Map(),decoded=new Map(),SIZE=[145,97];
  const rgbAt=(p,i)=>[p[i],p[i+1],p[i+2]];
  const alike=(a,b,range=22)=>
   Math.abs(a[0]-b[0])<=range&&Math.abs(a[1]-b[1])<=range&&
@@ -86,6 +86,10 @@
   const clip=silhouette(pixels,w,h);
   return {
    id,url:tail?canvas.toDataURL('image/png'):'./original/Tiles/'+id+'.png',
+   // Copy the genuine decoded source alpha AFTER exterior chroma removal.
+   // A CSS polygon only approximates the original contour; empty pixels
+   // INSIDE it must not trigger a different source tile's click action.
+   alpha:Uint8Array.from({length:count},(_,i)=>pixels[i*4+3]),
    clip,removed:tail,alreadyTransparent:tail===0,
    pixels:count,cornerColors:seeds,native:SIZE.slice(),
    source:'Tiles/'+id+'.png'
@@ -99,7 +103,7 @@
    let retries=0;
    const image=new Image();
    image.onload=()=>{
-    try{resolve(decode(image,id))}
+    try{const frame=decode(image,id);decoded.set(id,frame);resolve(frame)}
     catch(error){reject(error)}
    };
    image.onerror=()=>{
@@ -113,6 +117,27 @@
   });
   cache.set(id,work);
   return work;
+ }
+ // Exact original bitmap pick test in the browser's actual transformed
+ // camera coordinates. Source TIS PNG is 145x97 and intentionally inverted
+ // by the existing scaleY(-1) orientation repair. Rect measures the *live*
+ // DOM tile (including camera zoom), so do not confuse DMP 70x47 logical
+ // pitch with real source pixels or introduce a guessed CSS hexagon here.
+ function hitPoint(tile,clientX,clientY){
+  const id=tile?.dataset?.originalArt;
+  const frame=decoded.get(id);
+  if(!tile||!frame)return {ready:false,hit:true,source:id||null};
+  const rect=tile.getBoundingClientRect();
+  if(!(rect.width>0&&rect.height>0)||!Number.isFinite(clientX)||!Number.isFinite(clientY))
+   return {ready:false,hit:true,source:id};
+  const transform=getComputedStyle(tile).transform;
+  const inverted=/^matrix\\(/.test(transform)&&Number(transform.slice(7).split(',')[3])<0;
+  const x=Math.floor((clientX-rect.left)*SIZE[0]/rect.width);
+  const rawY=(clientY-rect.top)*SIZE[1]/rect.height;
+  const y=Math.floor(inverted?SIZE[1]-rawY:rawY);
+  const inside=x>=0&&x<SIZE[0]&&y>=0&&y<SIZE[1];
+  const alpha=inside?frame.alpha[y*SIZE[0]+x]:0;
+  return {ready:true,hit:alpha>0,alpha,x,y,inverted,source:id};
  }
  function apply(tile,id){
   if(!tile)return;
@@ -138,7 +163,8 @@
   });
  }
  window.__LEAF_TIS_ALPHA__={
-  apply,prepare,
-  getState:()=>({native:SIZE.slice(),cached:[...cache.keys()],kind:'exterior-matte-flood-fill'})
+  apply,prepare,hitPoint,
+  getState:()=>({native:SIZE.slice(),cached:[...cache.keys()],decoded:[...decoded.keys()],
+   kind:'exterior-matte-flood-fill/native-alpha-hit',orientation:'source-PNG/scaleY(-1)'})
  };
 })();
