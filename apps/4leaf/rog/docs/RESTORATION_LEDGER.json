@@ -815,6 +815,26 @@
         "P0-PODIUM",
         "P0-DICE"
       ]
+    },
+    {
+      "id": "REQ-20261020-004",
+      "date": "2026-10-20",
+      "origin": "user",
+      "text": "2026-10-20 4LEAF 원작 복원 개발 시간 초과 후 계속 진행: main 4018f9a0, v0.84.0-beta.1, ledger에서 이어 시작. OBS 640-stride SPR 코드 교차 분석, 미해독 24+3+1 전수 원본 검증, 실제 png/게임 동작 연결, 방향/idle/walk/attack/hurt 출처 검증과 나머지 6개 멤버 확인, 프레임 경계/바이트/체크섬/시각적 검증. 작은 커밋·PR·병합·Pages 배포·원장 증거 영구 보존. 미해결이면 육각 발판 투영/전투 주사위 계속 진행. 결과 버전 SHA 수량 done/open QA/배포 보고.",
+      "taskIds": [
+        "ACT-01",
+        "ACT-02",
+        "ACT-03",
+        "ACT-04",
+        "BRD-01",
+        "BRD-02",
+        "BRD-03",
+        "BTL-02",
+        "BTL-04",
+        "DIE-01",
+        "DIE-02",
+        "DIE-04"
+      ]
     }
   ],
   "tasks": [
@@ -1246,7 +1266,7 @@
       "title": "실제 TIS 알파·윗면·하단 림 상태 복원",
       "status": "in_progress",
       "milestone": "M04",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 소스 PNG는 145×97로 렌더되나 바닥 입체감·윗면 보이는 각도·원본 회전/알파 외곽 비교가 완료되지 않음 | 구현 목표: 32종 TIS alpha 외곽·스프라이트의 디코더 상하 반전을 2004 이미지의 실제 그림과 유형별 대조; 2026-10-20 신뢰 가능한 원본 145x97 RGBA alpha 실제 픽셀과 2004로부터 수용된 scaleY(-1) 방향을 DOM 클릭 좌표/카메라 zoom/모바일과 연결. CSS polygon의 내부 빈 픽셀을 가짜 발판 클릭으로 처리하지 않도록 정확한 source pixel picking 구현. 2002 MVE 실제 메시, 원본 전체 윗면 각도는 여전히 미해결.; 2026-10-20 PR #149 main@99323ecd source alpha hit test merged; board QA 39381019063 / release 39381019040 / visual 39381019028 and Pages 39381019093 verified. Followup on PR #150 main board workflow 39381488807 occasional first physical click landed on different foreground during camera transition, so followup PR uses pointer movement→document.elementFromPoint recheck/real mouse rather than fake DOM events; still historical original 3D projection incomplete.; 2026-10-20 원본 145x97 TIS 투명 픽셀에서 game.js tile click은 거부해도 독립적 부모 DMP 탐색기가 bubbled click을 받아 잘못된 정보창·카메라 이동을 유발하는 문제 확인. source-alpha.hitPoint를 부모에서도 검증해 원본 투명 픽셀은 두 계층 모두 무시. 키보드 Enter/Space 접근성 및 실제 불투명 타일 검사는 유지. 원작 MVE 메시 투영은 미완료.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 소스 PNG는 145×97로 렌더되나 바닥 입체감·윗면 보이는 각도·원본 회전/알파 외곽 비교가 완료되지 않음 | 구현 목표: 32종 TIS alpha 외곽·스프라이트의 디코더 상하 반전을 2004 이미지의 실제 그림과 유형별 대조; 2026-10-20 신뢰 가능한 원본 145x97 RGBA alpha 실제 픽셀과 2004로부터 수용된 scaleY(-1) 방향을 DOM 클릭 좌표/카메라 zoom/모바일과 연결. CSS polygon의 내부 빈 픽셀을 가짜 발판 클릭으로 처리하지 않도록 정확한 source pixel picking 구현. 2002 MVE 실제 메시, 원본 전체 윗면 각도는 여전히 미해결.; 2026-10-20 PR #149 main@99323ecd source alpha hit test merged; board QA 39381019063 / release 39381019040 / visual 39381019028 and Pages 39381019093 verified. Followup on PR #150 main board workflow 39381488807 occasional first physical click landed on different foreground during camera transition, so followup PR uses pointer movement→document.elementFromPoint recheck/real mouse rather than fake DOM events; still historical original 3D projection incomplete.; 2026-10-20 원본 145x97 TIS 투명 픽셀에서 game.js tile click은 거부해도 독립적 부모 DMP 탐색기가 bubbled click을 받아 잘못된 정보창·카메라 이동을 유발하는 문제 확인. source-alpha.hitPoint를 부모에서도 검증해 원본 투명 픽셀은 두 계층 모두 무시. 키보드 Enter/Space 접근성 및 실제 불투명 타일 검사는 유지. 원작 MVE 메시 투영은 미완료.; 2026-10-20 PR154 squash main@d443cb5380ad51bfe9a1be1d2637cac48bb6bac8 original TIS source pixel hit applies BOTH target game tile and bubbling DMP terrain inspector. Previously source-transparent click could open fake DMP inspector and pan camera despite tile rejection. Fixed actual code, same-origin HTTP physical-browser/synthetic-ghost regression, keyboard Enter/Space preserved. Original MVE camera 3D geometry still open.",
       "acceptance": [
         "32개 원본 타일의 원화 픽셀/방향/원본 클립 경계 유지, 타일 외곽 잘림·상하 오인 0건"
       ],
@@ -1262,9 +1282,13 @@
         "https://github.com/koith/browser-app-lab/actions/runs/39381019040",
         "https://github.com/koith/browser-app-lab/actions/runs/39381488807",
         "apps/4leaf/rog/dice-source-dmp-terrain-explorer.js",
-        "apps/4leaf/rog/tests/dice-source-dmp-terrain-explorer.cjs"
+        "apps/4leaf/rog/tests/dice-source-dmp-terrain-explorer.cjs",
+        "https://github.com/koith/browser-app-lab/pull/154",
+        "https://github.com/koith/browser-app-lab/actions/runs/39445537728",
+        "https://github.com/koith/browser-app-lab/actions/runs/39445536874",
+        "https://github.com/koith/browser-app-lab/actions/runs/39445335589"
       ],
-      "evidenceLevel": "VERIFIED-TIS-ORIGINAL-RGBA/LIVE-BROWSER/PAGES; HISTORICAL-MVE-3D-PROJECTION-UNVERIFIED",
+      "evidenceLevel": "VERIFIED-SOURCE-TIS-ALPHA-EVENT-PROPAGATION/REAL-BROWSER-DMP/26-MAP-REGRESSION; HISTORICAL-MVE-CAMERA-OPEN",
       "lastReviewed": "2026-10-20",
       "verifiedAcceptance": null,
       "dependencies": [
@@ -1365,7 +1389,7 @@
       "title": "원본 OBS 미복원 34종 해독",
       "status": "in_progress",
       "milestone": "M05",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원본 ID 98종 중 실제 전신 리소스 64종/281 PNG만 게시됨; 34종은 카드 이미지 정지 대체 | 구현 목표: 첫 OBS.pak의 28종 실패 행 헤더를 검증하고 OBS2/OBS3 중복·클라이언트 RLE 해법 연구, 진짜 PNG만 합격; 2026-10-20 원본 OBS.pak 검증된 진단 재분류: CardData 98종 중 기존 OBS fullbody 64종/281개 원본 PNG; 엄격 decoder bulk 90종 대상 62종/268PNG 성공, 28종 거부(24 exact row mismatch·3 frame geometry·1 frame count 오류), 그 외 약 6종은 원본 OBS 파일명·다른 클라이언트 판본 전수 대조 필요. 성공 명칭/실루엣 근거 없는 새 PNG는 라이브에 넣지 않음. 상세 출처 보고서 작성.; 2026-10-20 2002 OBS.pak native 640-stride RLE 실제 역해독 완료: 원본 90 카드 멤버 모두 엄격 성공, 원본 PNG 616장/기존 별도 2종 13장 합쳐 92/98, 629 원본 프레임. 이전 미복구 28종 전부 진짜 OBS source pixel로 복구/게임 적용. 최종 6종 0091/0126/0129/0132/0157/0168은 SHA1 검증 2002 원본 OBS/OBS2/OBS3 삼중 검색에서 파일명이 존재하지 않음. 타 버전 공식 설치판·패치 확인 남음. ACT-01 전체 완료 아님.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원본 ID 98종 중 실제 전신 리소스 64종/281 PNG만 게시됨; 34종은 카드 이미지 정지 대체 | 구현 목표: 첫 OBS.pak의 28종 실패 행 헤더를 검증하고 OBS2/OBS3 중복·클라이언트 RLE 해법 연구, 진짜 PNG만 합격; 2026-10-20 원본 OBS.pak 검증된 진단 재분류: CardData 98종 중 기존 OBS fullbody 64종/281개 원본 PNG; 엄격 decoder bulk 90종 대상 62종/268PNG 성공, 28종 거부(24 exact row mismatch·3 frame geometry·1 frame count 오류), 그 외 약 6종은 원본 OBS 파일명·다른 클라이언트 판본 전수 대조 필요. 성공 명칭/실루엣 근거 없는 새 PNG는 라이브에 넣지 않음. 상세 출처 보고서 작성.; 2026-10-20 2002 OBS.pak native 640-stride RLE 실제 역해독 완료: 원본 90 카드 멤버 모두 엄격 성공, 원본 PNG 616장/기존 별도 2종 13장 합쳐 92/98, 629 원본 프레임. 이전 미복구 28종 전부 진짜 OBS source pixel로 복구/게임 적용. 최종 6종 0091/0126/0129/0132/0157/0168은 SHA1 검증 2002 원본 OBS/OBS2/OBS3 삼중 검색에서 파일명이 존재하지 않음. 타 버전 공식 설치판·패치 확인 남음. ACT-01 전체 완료 아님.; 2026-10-20 통합: PR #152 squash main@bf39a52d94882d48073423a7a1e1f64c1f029c4c 원본 OBS 90/90 멤버 616개 PNG 원본 영상버퍼 인덱스 해독+초기 2/13=92/98 체스맨·629 source PNG 게임과 PWA에 실제 적용. 기존 미해독 28종(24 row+3 geometry+1 frameCount) 전부 source packet으로 해독. 원본 2002 OBS/OBS2/OBS3 전체 목록에도 없는 6개 0091/0126/0129/0132/0157/0168은 OBS fullbody 파일 미확보. CHR.pak에는 ID별 .chr 메타데이터가 있어도 OBS 전신 복구로 주장 금지. PR153 엄격 파일별 SHA/소스 offsets 실게임 수용검사 main@8f5d6df48438d2aac45d241a2a4c11b960a856e1 성공. 전체 98종·EXE 방향별 동작 표 여전히 미완료.",
       "acceptance": [
         "98개 ID 각각 원본 전신 PNG 1장 이상 SHA/오프셋 검증 또는 미확보 원인 기록; 가짜 CSS 체스맨 0건"
       ],
@@ -1380,9 +1404,14 @@
         "apps/4leaf/rog/original/OBS/animation-extra.js",
         "apps/4leaf/rog/original/OBS/bulk-source-report.json",
         "https://github.com/koith/browser-app-lab/actions/runs/39418202106",
-        "https://github.com/koith/browser-app-lab/actions/runs/39419068901"
+        "https://github.com/koith/browser-app-lab/actions/runs/39419068901",
+        "https://github.com/koith/browser-app-lab/pull/152",
+        "https://github.com/koith/browser-app-lab/pull/153",
+        "https://github.com/koith/browser-app-lab/actions/runs/39443928060",
+        "https://github.com/koith/browser-app-lab/actions/runs/39444668280",
+        "https://github.com/koith/browser-app-lab/actions/runs/39444668292"
       ],
-      "evidenceLevel": "VERIFIED-2002-SHA1-INSTALLER/SHA256-OBS-PAK/90-OF-90-RLE/616-NATIVE-PNG; 6 SOURCE ABSENT IN THREE 2002 PAKS; ACTION TIMELINE UNVERIFIED",
+      "evidenceLevel": "VERIFIED-92/98-2002-OBS-629-PNG-SHA-AND-NATIVE-640-STRIDE; 6 ABSENT IN THIS 2002 CLIENT; HISTORICAL ACTION-POSE MAP OPEN",
       "lastReviewed": "2026-10-20",
       "verifiedAcceptance": null,
       "dependencies": [
@@ -1396,7 +1425,7 @@
       "title": "OBS 행 X좌표·원점 인코딩 완전 해독",
       "status": "in_progress",
       "milestone": "M05",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 64종의 색/팔레트 픽셀은 원본이지만 일부 horizontal scanline X 위치를 중앙 추정으로 복원함 | 구현 목표: 일부 프레임 raw 4byte 헤더의 run origin을 실제 클라이언트/SPR 640-stride와 교차 검증; 2026-10-20 IMG.pak roll.spr에 이미 검증된 640-video-buffer RLE 패킷 형식(2byte runCount/initialOffset/skip, 4*n+rem run size)을 OBS에도 적용해 가짜 중앙 정렬 제거. 원본 프레임의 X/Y 패킷 좌표가 실제 게임 원본 PNG로 반영됨. source-native frame originX/Y 프레임별 manifest 자동 기록. 추정 행동 구간/실루엣 방향표는 ACT-03 미완료.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 64종의 색/팔레트 픽셀은 원본이지만 일부 horizontal scanline X 위치를 중앙 추정으로 복원함 | 구현 목표: 일부 프레임 raw 4byte 헤더의 run origin을 실제 클라이언트/SPR 640-stride와 교차 검증; 2026-10-20 IMG.pak roll.spr에 이미 검증된 640-video-buffer RLE 패킷 형식(2byte runCount/initialOffset/skip, 4*n+rem run size)을 OBS에도 적용해 가짜 중앙 정렬 제거. 원본 프레임의 X/Y 패킷 좌표가 실제 게임 원본 PNG로 반영됨. source-native frame originX/Y 프레임별 manifest 자동 기록. 추정 행동 구간/실루엣 방향표는 ACT-03 미완료.; 2026-10-20 PR152 source 640-stride and SHA manifest, PR153 verified source X geometry, original normal RGBA and canvas scaleY(-1) visible upright in real Chromium browser. Historical action-specific 3D pivot/facing remains unverified; do not mark full ACT-02 done.",
       "acceptance": [
         "샘플 프레임 0/10/18/25의 물체 실루엣·팔/다리·원점 좌표가 원본 바이트 수식으로 일치"
       ],
@@ -1405,9 +1434,11 @@
         "original/OBS/bulk-source-report.json",
         "apps/4leaf/rog/tests/test_obs_native_640stride.py",
         "apps/4leaf/rog/tests/dice-obs-640stride-native-game.cjs",
-        "apps/4leaf/rog/tools/decode-original-obs-bulk.py"
+        "apps/4leaf/rog/tools/decode-original-obs-bulk.py",
+        "https://github.com/koith/browser-app-lab/pull/153",
+        "https://github.com/koith/browser-app-lab/actions/runs/39443928060"
       ],
-      "evidenceLevel": "VERIFIED-VIDEO-640-STRIDE-RLE-PALETTE-SOURCE-POSITIONS; ORIGINAL-ACTION-SEMANTICS-UNVERIFIED",
+      "evidenceLevel": "VERIFIED-SOURCE-X-Y-PALETTE/ALL-PNG-SHA/DIMENSIONS; HISTORICAL-EXE-ACTION-CAMERA-OPEN",
       "lastReviewed": "2026-10-20",
       "verifiedAcceptance": null,
       "dependencies": [
@@ -1444,7 +1475,7 @@
       "title": "보드·전투 체스맨 발 접지·그림자·다중배치",
       "status": "in_progress",
       "milestone": "M05",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 기본 2P의 진짜 OBS 표시는 검증했으나 모든 체스맨 크기/발판 고정·동시 2인 겹침·전투 POV는 원본과 비교 미흡 | 구현 목표: 원본 OBS originX/Y, 발 위치, TIS 바닥 픽셀, 캐릭터 z-index/그림자 관통 검증; 2026-10-20 원본 OBS 이미지를 일시적 503 응답에서 영구 unavailable 처리하던 문제 개선: 실제 동일 아카이브 OBS PNG 3회 재요청, 실패 후 검증된 원본 CardData 정지 대체, 연결 회복 시 원본 전신 자동 재시도. 팀/턴/DMP 좌표·원본 소스 바이트 불변. 정확한 행동 프레임표·출발/착지·98종 전체 원본 수용은 여전히 미완료.; 2026-10-20 PR #150 merged main@bb15ba5c genuine OBS 503 retry/reconnect QA 39381181475 + release 39381181551 PASS, Pages 39381488969 success; real main OBS frame job 39381488742 success. Original 34 missing IDs and 2002 direction/actions still not recovered.; 2026-10-20 source-native 92/98 chessman animated PNG 629장 실제 playable game actor/OBS loader 연결, PC·mobile 104-cell 4LEAF DMP browser game QA; 6 source-missing still CardData fallback. Exact old original battle 3D contact foot Y and all frames' pose mapping remain unsolved.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 기본 2P의 진짜 OBS 표시는 검증했으나 모든 체스맨 크기/발판 고정·동시 2인 겹침·전투 POV는 원본과 비교 미흡 | 구현 목표: 원본 OBS originX/Y, 발 위치, TIS 바닥 픽셀, 캐릭터 z-index/그림자 관통 검증; 2026-10-20 원본 OBS 이미지를 일시적 503 응답에서 영구 unavailable 처리하던 문제 개선: 실제 동일 아카이브 OBS PNG 3회 재요청, 실패 후 검증된 원본 CardData 정지 대체, 연결 회복 시 원본 전신 자동 재시도. 팀/턴/DMP 좌표·원본 소스 바이트 불변. 정확한 행동 프레임표·출발/착지·98종 전체 원본 수용은 여전히 미완료.; 2026-10-20 PR #150 merged main@bb15ba5c genuine OBS 503 retry/reconnect QA 39381181475 + release 39381181551 PASS, Pages 39381488969 success; real main OBS frame job 39381488742 success. Original 34 missing IDs and 2002 direction/actions still not recovered.; 2026-10-20 source-native 92/98 chessman animated PNG 629장 실제 playable game actor/OBS loader 연결, PC·mobile 104-cell 4LEAF DMP browser game QA; 6 source-missing still CardData fallback. Exact old original battle 3D contact foot Y and all frames' pose mapping remain unsolved.; 2026-10-20 full-body 원본 92종은 실제 보드/배틀 independent Genesis actor 로더로 연결; PR153 same SHA Chromium source 616 PNG all hash and player roll/duel verified, WebKit iPhone simulation passed. 6 ID CardData still honest static. Exact historical contact/original locomotion animation geometry open.",
       "acceptance": [
         "전신 64종+추가 복원분에서 보드·전투·2인 겹침·6인 게임에 대한 실사 접지/가림 확인"
       ],
@@ -1460,9 +1491,11 @@
         "https://github.com/koith/browser-app-lab/actions/runs/39381488742",
         "apps/4leaf/rog/tests/dice-obs-640stride-native-game.cjs",
         "apps/4leaf/rog/original/OBS/bulk-source-report.json",
-        "https://github.com/koith/browser-app-lab/actions/runs/39419068901"
+        "https://github.com/koith/browser-app-lab/actions/runs/39419068901",
+        "https://github.com/koith/browser-app-lab/actions/runs/39443928060",
+        "https://github.com/koith/browser-app-lab/actions/runs/39444170153"
       ],
-      "evidenceLevel": "VERIFIED-ARCHIVAL-OBS-SOURCE-PNG/PHYSICAL-BROWSER/RECONNECT/DEPLOY; ORIGINAL-POSE-AND-34-SOURCE-BODIES-UNVERIFIED",
+      "evidenceLevel": "VERIFIED-92-ORIGINAL-OBS-BODIES-IN-PLAYABLE-GAME; 6 ORIGINAL-OBS-FILES-MISSING; EXACT-POSE-3D-CONTACT-OPEN",
       "lastReviewed": "2026-10-20",
       "verifiedAcceptance": null,
       "dependencies": [
@@ -1599,17 +1632,19 @@
       "title": "원본 D4/D6 본체 그래픽·메시 출처 발굴",
       "status": "todo",
       "milestone": "M07",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 현재 흰색 주사위는 CSS 3D 대체; 원본 roll.spr 4장/eventRoll1.spr 16장은 버튼이며 낙하 메시가 아님 | 구현 목표: 2002 Dice/IMG/SND/EXE/관련 버전 자료와 원작 영상에서 실제 주사위 모델/텍스처 및 별도 결과 렌더러 조사",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 현재 흰색 주사위는 CSS 3D 대체; 원본 roll.spr 4장/eventRoll1.spr 16장은 버튼이며 낙하 메시가 아님 | 구현 목표: 2002 Dice/IMG/SND/EXE/관련 버전 자료와 원작 영상에서 실제 주사위 모델/텍스처 및 별도 결과 렌더러 조사; 2026-10-20 read-only archive evidence: SHA-verified 2002 Dice source folder 31 files, 713 archive members inventoried. IMG.pak has 14 .spr and 16 .bmp original UI; roll.spr 4 source frames/eventRoll1.spr 16 UI frames are NOT D4/D6 3D mesh. D4/D6 executable-embedded source geometry and 2004 result-specific physics still not recovered; no false done.",
       "acceptance": [
         "원본 D4/D6 모델과 색/눈 배치/면 법선 등 검증된 소스 연결 또는 미확보 명시"
       ],
       "evidence": [
         "../assets/battle.jpg",
         "dice-fall.js",
-        "original/SourceSPR/manifest.json"
+        "original/SourceSPR/manifest.json",
+        "apps/4leaf/rog/tools/audit-original-dice-resources.py",
+        "https://github.com/koith/browser-app-lab/actions/runs/39418202106"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-18",
+      "lastReviewed": "2026-10-20",
       "verifiedAcceptance": null,
       "dependencies": [
         "SRC-02"
@@ -4324,6 +4359,37 @@
       "taskId": "BRD-02",
       "details": "Same source-original TIS alpha pick at click target and bubbling DMP inspector. Reject only source-transparent mouse clicks and preserve keyboard and original DMP gameplay. New real-browser regression test for ghost inspector camera movement.",
       "evidence": "apps/4leaf/rog/tests/dice-source-dmp-terrain-explorer.cjs"
+    },
+    {
+      "seq": 172,
+      "date": "2026-10-20",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261020-004",
+      "details": "Resume time-out interrupted 4LEAF original restoration while preserving already verified PR152 and completing code/QA/PR/deploy."
+    },
+    {
+      "seq": 173,
+      "date": "2026-10-20",
+      "type": "QA_VERIFIED",
+      "taskId": "ACT-01",
+      "details": "PR152 merged main@bf39a52d94882d48073423a7a1e1f64c1f029c4c source 2002 OBS 90/90 616 recovered frame PNGs + 2 previously original OBS models/13 frames=92/98 629. Original 6 OBS models absent in source OBS 1/2/3 PAK. PR153 merged main@8f5d6df48438d2aac45d241a2a4c11b960a856e1 all native 616 PNG SHA/dimensions/origin and genuine browser duel/roll QA PASS. Historic animation meanings NOT accepted.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39443928060"
+    },
+    {
+      "seq": 174,
+      "date": "2026-10-20",
+      "type": "QA_VERIFIED",
+      "taskId": "ACT-02",
+      "details": "OBS 640 stride original X is exact and all PNG source checksums verified; test formerly asserted PROVISIONAL source X (invalid after restoration) corrected in PR153. Real sprite PNG stored bottom-up and genuine actor rendered upright via scaleY(-1).",
+      "evidence": "https://github.com/koith/browser-app-lab/pull/153"
+    },
+    {
+      "seq": 175,
+      "date": "2026-10-20",
+      "type": "QA_VERIFIED",
+      "taskId": "BRD-02",
+      "details": "PR154 merged main@d443cb5380ad51bfe9a1be1d2637cac48bb6bac8. Genuine native TIS 145x97 alpha transparent click is now rejected in BOTH tile click and bubbled optional DMP inspector, no ghost camera movement, same-origin HTTP browser and original 25-map regression PASS. Historical MVE camera still missing.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39445335589"
     }
   ]
 }
