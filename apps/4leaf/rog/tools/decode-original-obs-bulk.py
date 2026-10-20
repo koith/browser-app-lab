@@ -15,7 +15,7 @@ from pathlib import Path
 from PIL import Image
 
 FRAMES=(0,1,2,3,10,18,25,30)
-MAX_SPRITE_FRAMES=128
+MAX_SPRITE_FRAMES=256  # Original 1095.obs explicitly declares 172 native frames
 MAX_TOTAL_IMAGES=1000
 MAX_TOTAL_PNG_BYTES=14000000
 
@@ -44,7 +44,9 @@ def unpack_frames(source):
         if cursor+12>len(source):raise ValueError("Truncated OBS frame header")
         n,w,h,ox,oy=struct.unpack_from("<IHHhh",source,cursor)
         if not (10<=w<=300 and 10<=h<=300 and 10<n<=250000 and cursor+12+n<=len(source)):
-            raise ValueError("OBS frame geometry invalid")
+            raise ValueError("OBS frame geometry invalid; index="+str(i)+
+                             " cursor="+str(cursor)+" declared="+str((n,w,h,ox,oy))+
+                             " memberBytes="+str(len(source)))
         frames.append((source[cursor+12:cursor+12+n],w,h,ox,oy))
         cursor+=12+n
     palette=source[cursor:cursor+768]
