@@ -43,14 +43,15 @@ def unpack_frames(source):
     for i in range(count):
         if cursor+12>len(source):raise ValueError("Truncated OBS frame header")
         n,w,h,ox,oy=struct.unpack_from("<IHHhh",source,cursor)
-        if not (10<=w<=300 and 10<=h<=300 and 10<n<=250000 and cursor+12+n<=len(source)):
+        if not (1<=w<=300 and 1<=h<=300 and 6<=n<=250000 and cursor+12+n<=len(source)):
             raise ValueError("OBS frame geometry invalid; index="+str(i)+
                              " cursor="+str(cursor)+" declared="+str((n,w,h,ox,oy))+
                              " memberBytes="+str(len(source)))
         frames.append((source[cursor+12:cursor+12+n],w,h,ox,oy))
         cursor+=12+n
     palette=source[cursor:cursor+768]
-    if len(palette)!=768:raise ValueError("Missing native 256-colour OBS palette")
+    if len(palette)!=768 or cursor+768!=len(source):
+        raise ValueError("Missing/trailing native 256-colour OBS palette at source frame boundary")
     return frames,palette
 
 def decode_rows(body,width,height,palette):
@@ -100,16 +101,16 @@ def decode_rows(body,width,height,palette):
         cursor+=length
     if pos!=len(body):
         raise ValueError("OBS native RLE does not consume every source byte")
-    # Unlike IMG/roll.spr, OBS body art omits the trailing transparent
-    # pixels to the right edge of its FINAL source scanline. Original
-    # 1171.obs frame 0 ends 2 px before declared width, frame 25 33 px
-    # before. Requiring cursor == right edge falsely rejected nearly ALL
-    # real source frames even though every run packet and palette byte
-    # is consumed and all pixels fit exactly in the source rectangle.
-    last_row_start=(height-1)*640
-    if not last_row_start<cursor<=last_row_start+width:
-        raise ValueError("OBS source final 640-stride cursor outside final source row "+
-                         str((cursor,last_row_start,last_row_start+width)))
+    # Source OBS may occupy only a SPARSE SUB-RECTANGLE of its declared
+    # animation canvas: genuine 1128.obs 239x222 frame 0 stops at native
+    # framebuffer y=114. The other 107 transparent rows were NEVER sent as
+    # payload, just as authentic 1171.obs omits right-edge transparent x.
+    # We have already checked every packet's exact encoded byte length,
+    # source palette values and legal framebuffer coordinate. Requiring
+    # the final pixel to reach the bottom-right invents a constraint that
+    # rejects genuine sparse source animation frames.
+    if cursor<=0 or cursor>(height-1)*640+width:
+        raise ValueError("OBS source last VIDEO packet exceeds native canvas")
     if opaque<45:
         raise ValueError("OBS native source too transparent after strict decoding")
     img=Image.frombytes("P",(width,height),bytes(pixels))
