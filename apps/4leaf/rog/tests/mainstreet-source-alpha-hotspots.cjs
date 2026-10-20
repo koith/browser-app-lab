@@ -107,9 +107,13 @@ const {chromium}=require('playwright');
   assert.equal(result.shopVisible,true,'hitting opaque original Magic Carden bitmap opens the actual card shop: '+JSON.stringify({result,magic}));
   await page.evaluate(()=>window.__ROG_TEST__.go('city'));
   await page.waitForFunction(()=>!document.querySelector('#city').classList.contains('hidden'));
-  // Verify actual browser hit testing also opens the real CardShop, not
-  // only a synthetic MouseEvent dispatched directly on its <button>.
-  const opaqueMouse=await page.evaluate(point=>{
+  // The source-opaque point must ALSO be a physically clickable DOM target.
+  // In the 1938px panorama, scroll transforms and adjacent building bounding
+  // boxes can cover a source sprite at a fixed center coordinate. Select a
+  // visible source-opaque pixel whose ACTUAL document.elementFromPoint resolves
+  // to the Magic Carden button; do not dispatch fake click events here.
+  await page.waitForTimeout(250); // finish the archived scene's 180ms pan transition
+  const opaqueMouse=await page.evaluate(()=>{
    const button=document.querySelector('[data-street="magic"]');
    const canvas=button.querySelector('canvas');
    const rect=canvas.getBoundingClientRect(),box=button.getBoundingClientRect();
@@ -117,16 +121,40 @@ const {chromium}=require('playwright');
    const hitRect=rect.width>0&&rect.height>0?rect:{
     left:box.left+2*sx,top:box.top+2*sy,width:box.width-4*sx,height:box.height-4*sy
    };
-   return {x:hitRect.left+(point.x+.5)*hitRect.width/canvas.width,
-    y:hitRect.top+(point.y+.5)*hitRect.height/canvas.height,
-    viewport:document.querySelector('#street-viewport').getBoundingClientRect().toJSON()};
-  },magic.point);
-  assert.ok(opaqueMouse.x>=opaqueMouse.viewport.x&&opaqueMouse.x<opaqueMouse.viewport.x+opaqueMouse.viewport.width&&
-   opaqueMouse.y>=opaqueMouse.viewport.y&&opaqueMouse.y<opaqueMouse.viewport.y+opaqueMouse.viewport.height,
-   'native Magic Carden opaque bitmap must be reachable by real browser pointer');
-  await page.mouse.click(opaqueMouse.x,opaqueMouse.y);
-  await page.waitForFunction(()=>!document.querySelector('#shop').classList.contains('hidden'),null,{timeout:3500});
-  assert.equal(await page.locator('[data-street="magic"]').getAttribute('data-last-source-hit'),'true');
+   const pixels=canvas.getContext('2d').getImageData(0,0,canvas.width,canvas.height).data;
+   const viewport=document.querySelector('#street-viewport').getBoundingClientRect();
+   let best=null,score=Infinity,count=0;
+   for(let y=6;y<canvas.height-6;y+=2)for(let x=6;x<canvas.width-6;x+=2){
+    if(pixels[(y*canvas.width+x)*4+3]!==255)continue;
+    const px=hitRect.left+(x+.5)*hitRect.width/canvas.width;
+    const py=hitRect.top+(y+.5)*hitRect.height/canvas.height;
+    if(px<viewport.left||px>=viewport.right||py<viewport.top||py>=viewport.bottom)continue;
+    const element=document.elementFromPoint(px,py);
+    if(element?.closest('.street-location')!==button)continue;
+    count++;
+    const distance=Math.hypot(x-canvas.width/2,y-canvas.height/2);
+    if(distance<score){score=distance;best={x:px,y:py,sourceX:x,sourceY:y,hitTag:element.tagName};}
+   }
+   return {best,count,cityVisible:!document.querySelector('#city').classList.contains('hidden'),
+    bitmapSize:[canvas.width,canvas.height],box:box.toJSON(),hitRect:hitRect.toJSON?.()||hitRect,
+    viewport:viewport.toJSON()};
+  });
+  assert.ok(opaqueMouse.best&&opaqueMouse.count>0,
+   'real source-opaque Magic Carden pixels must be physically reachable: '+JSON.stringify(opaqueMouse));
+  await page.mouse.click(opaqueMouse.best.x,opaqueMouse.best.y);
+  await page.waitForTimeout(180);
+  const physicalState=await page.evaluate(()=>({
+   hit:document.querySelector('[data-street="magic"]').dataset.lastSourceHit,
+   pixel:document.querySelector('[data-street="magic"]').dataset.lastSourcePixel,
+   shopVisible:!document.querySelector('#shop').classList.contains('hidden'),
+   cityVisible:!document.querySelector('#city').classList.contains('hidden'),
+   shopClass:document.querySelector('#shop').className,
+   current:document.querySelector('#where')?.textContent
+  }));
+  assert.equal(physicalState.hit,'true',
+   'physical pointer must hit archived visible Magic Carden sprite: '+JSON.stringify({opaqueMouse,physicalState}));
+  assert.equal(physicalState.shopVisible,true,
+   'actual pointer click must navigate to real Magic Carden: '+JSON.stringify({opaqueMouse,physicalState}));
   await page.evaluate(()=>window.__ROG_TEST__.go('city'));
   await page.waitForFunction(()=>!document.querySelector('#city').classList.contains('hidden'));
   // Use PHYSICAL pointer for open pavement panning, not DOM event simulation.
