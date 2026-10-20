@@ -4042,6 +4042,92 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "sourcePak": "OBS.pak",
     "sourceSHA256": "ef0e497070b3ca93a3fde7c6fc9934a637ed65a39602a836dfd6d8229b16220f"
   },
+  "0093": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
+    "frames": [
+      {
+        "height": 70,
+        "index": 0,
+        "originX": -15,
+        "originY": -63,
+        "sha256": "15bc55c4f6e5dcf1e45344713ec9c1f2f660ec9bf50f095f2ecd60b62f7ee049",
+        "url": "./original/OBS/bulk/1093-00.png",
+        "width": 30
+      },
+      {
+        "height": 71,
+        "index": 1,
+        "originX": -14,
+        "originY": -64,
+        "sha256": "21074c25ba0d1e7e97c25b15df55b6e332dcc7a0cf40d06b0c848ccce58483de",
+        "url": "./original/OBS/bulk/1093-01.png",
+        "width": 28
+      },
+      {
+        "height": 72,
+        "index": 2,
+        "originX": -13,
+        "originY": -65,
+        "sha256": "0bb73fb47cbc81ee63b3f710e567f58a036226f6d5d25debb14f40457bc2e5e3",
+        "url": "./original/OBS/bulk/1093-02.png",
+        "width": 26
+      },
+      {
+        "height": 70,
+        "index": 3,
+        "originX": -19,
+        "originY": -63,
+        "sha256": "1776e407b5569d6fc90a830a9b6d29e11679e6e55f6b48faae85462e9f45cad2",
+        "url": "./original/OBS/bulk/1093-03.png",
+        "width": 36
+      },
+      {
+        "height": 71,
+        "index": 10,
+        "originX": -16,
+        "originY": -63,
+        "sha256": "1df43505fa9b2bf4e7a5f186bc757013600252d2d1322466f2693f9199da0462",
+        "url": "./original/OBS/bulk/1093-10.png",
+        "width": 32
+      },
+      {
+        "height": 67,
+        "index": 18,
+        "originX": -46,
+        "originY": -70,
+        "sha256": "aba2aa542cb051e98426b4ab4cc5216c032675b325d301cef3fc086b6bd46ae1",
+        "url": "./original/OBS/bulk/1093-18.png",
+        "width": 93
+      },
+      {
+        "height": 71,
+        "index": 25,
+        "originX": -14,
+        "originY": -64,
+        "sha256": "e4c3cdb6acf9a244f9cc1d801f5c8ab5a719bd7ea5f688348e113230a6bd3b65",
+        "url": "./original/OBS/bulk/1093-25.png",
+        "width": 28
+      },
+      {
+        "height": 70,
+        "index": 30,
+        "originX": -12,
+        "originY": -64,
+        "sha256": "56176bda628932035b8009dbc2ab9cf066dcbdbf7012ec7dc229a8a9606e74ee",
+        "url": "./original/OBS/bulk/1093-30.png",
+        "width": 28
+      }
+    ],
+    "hasVerifiedFrameZero": true,
+    "horizontalScanlineOrigin": "ORIGINAL-640-VIDEO-RLE exact destination",
+    "name": "무슬림",
+    "originalAnimationCount": 78,
+    "originalMember": "1093.obs",
+    "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
+    "sourcePak": "OBS.pak",
+    "sourceSHA256": "891c7ad0d5878f86315e4ca04e7f8f4854e72b76a84b9c8272eaad0477f6495d"
+  },
   "0094": {
     "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
     "frames": [
@@ -4277,6 +4363,47 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "8b025957b0e1ba7465c6b9791d902bb1fb182bfba29cddda3f6b3003388acdbb"
+  },
+  "0098": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
+    "frames": [
+      {
+        "height": 77,
+        "index": 0,
+        "originX": -56,
+        "originY": -37,
+        "sha256": "3f60c98a425e13def77c72c23899d628739740617e3a7115a66cb94b6424a396",
+        "url": "./original/OBS/bulk/1098-00.png",
+        "width": 85
+      },
+      {
+        "height": 39,
+        "index": 1,
+        "originX": -54,
+        "originY": -19,
+        "sha256": "cca5d3258c6b77ad9ffc8bf1f5a61dde97c1e6873fc0923e30e9e1d1a9740ca5",
+        "url": "./original/OBS/bulk/1098-01.png",
+        "width": 67
+      },
+      {
+        "height": 37,
+        "index": 2,
+        "originX": -33,
+        "originY": -23,
+        "sha256": "e76ddbd6f8b56a9d0af9c113696d5f1abb561b54cd4a9a37e7d6dc42767d44cc",
+        "url": "./original/OBS/bulk/1098-02.png",
+        "width": 37
+      }
+    ],
+    "hasVerifiedFrameZero": true,
+    "horizontalScanlineOrigin": "ORIGINAL-640-VIDEO-RLE exact destination",
+    "name": "제국나이트",
+    "originalAnimationCount": 7,
+    "originalMember": "1098.obs",
+    "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
+    "sourcePak": "OBS.pak",
+    "sourceSHA256": "66d1e694fa6befc3cca392d09759e354b1ef446cac5a8c0d1d408af99f48ac92"
   },
   "0099": {
     "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
@@ -4531,6 +4658,47 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "760175534712d21dd8398638c1ea02c79c7101ee18f5c5b162e5a1fe4490e509"
+  },
+  "0128": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
+    "frames": [
+      {
+        "height": 222,
+        "index": 0,
+        "originX": -119,
+        "originY": -111,
+        "sha256": "b63a3f7c8eaea6a3b4c0a71d59affa325303890a826af4b8efb30392382b0128",
+        "url": "./original/OBS/bulk/1128-00.png",
+        "width": 239
+      },
+      {
+        "height": 222,
+        "index": 1,
+        "originX": -119,
+        "originY": -111,
+        "sha256": "6008c0d55d6bf5810a425aba90aa3546d45b126c99859a19ea335a21eec6d343",
+        "url": "./original/OBS/bulk/1128-01.png",
+        "width": 239
+      },
+      {
+        "height": 222,
+        "index": 2,
+        "originX": -119,
+        "originY": -111,
+        "sha256": "82c8c4ae31fb36b171b18bb712f5832df3a9dbe917665e60873e340128662859",
+        "url": "./original/OBS/bulk/1128-02.png",
+        "width": 239
+      }
+    ],
+    "hasVerifiedFrameZero": true,
+    "horizontalScanlineOrigin": "ORIGINAL-640-VIDEO-RLE exact destination",
+    "name": "디에네",
+    "originalAnimationCount": 3,
+    "originalMember": "1128.obs",
+    "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
+    "sourcePak": "OBS.pak",
+    "sourceSHA256": "b39d18de48c43a175a68ccadf107e7058881d53561e8a35bc3f459bc39d3d794"
   },
   "0130": {
     "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
@@ -5850,6 +6018,38 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
     "singleFrameStillOnly": false,
     "sourcePak": "OBS.pak",
     "sourceSHA256": "94fc1719db2727724532c924f0b43cd1984c297b5273c5c70286d21b011cf759"
+  },
+  "0159": {
+    "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",
+    "frames": [
+      {
+        "height": 178,
+        "index": 0,
+        "originX": -85,
+        "originY": -89,
+        "sha256": "105fd61fbbf93214b858c994303d34a1004600d480f4b9bd042b583a167df20b",
+        "url": "./original/OBS/bulk/1159-00.png",
+        "width": 176
+      },
+      {
+        "height": 179,
+        "index": 1,
+        "originX": -85,
+        "originY": -89,
+        "sha256": "9f824911d9bae79247e0bec1af12cd4fb0355e9ab3f02c5d1ec21e39b1b901d9",
+        "url": "./original/OBS/bulk/1159-01.png",
+        "width": 176
+      }
+    ],
+    "hasVerifiedFrameZero": true,
+    "horizontalScanlineOrigin": "ORIGINAL-640-VIDEO-RLE exact destination",
+    "name": "루칼드",
+    "originalAnimationCount": 18,
+    "originalMember": "1159.obs",
+    "poseMapping": "UNVERIFIED; native action-table not yet decoded",
+    "singleFrameStillOnly": false,
+    "sourcePak": "OBS.pak",
+    "sourceSHA256": "fdd1331cc304655fc780f8b57a56007be09ae01f4060200d4ba57718452c382e"
   },
   "0160": {
     "fallbackAction": "EARLIEST SOURCE FRAME ONLY; action unverified",

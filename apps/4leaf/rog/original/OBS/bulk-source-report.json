@@ -1,429 +1,13 @@
 {
-  "accepted": 86,
+  "accepted": 90,
   "archiveSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
-  "bytes": 1937546,
+  "bytes": 1982614,
   "cardMembers": 90,
-  "decodeDiagnostics": {
-    "1093.obs": {
-      "geometries": [
-        {
-          "height": 0,
-          "length": 0,
-          "offset": 124,
-          "ox": 1548,
-          "oy": 0,
-          "plausible": false,
-          "width": 0
-        },
-        {
-          "height": 0,
-          "length": 0,
-          "offset": 128,
-          "ox": 30,
-          "oy": 70,
-          "plausible": false,
-          "width": 1548
-        },
-        {
-          "height": 70,
-          "length": 1548,
-          "offset": 132,
-          "ox": -15,
-          "oy": -63,
-          "plausible": true,
-          "width": 30
-        },
-        {
-          "height": 65473,
-          "length": 4587550,
-          "offset": 136,
-          "ox": 71,
-          "oy": 9,
-          "plausible": false,
-          "width": 65521
-        },
-        {
-          "height": 9,
-          "length": 4290904049,
-          "offset": 140,
-          "ox": 513,
-          "oy": 4884,
-          "plausible": false,
-          "width": 71
-        }
-      ],
-      "headers": [
-        {
-          "count": 0,
-          "offset": 66
-        },
-        {
-          "count": 0,
-          "offset": 68
-        },
-        {
-          "count": 78,
-          "offset": 70
-        },
-        {
-          "count": 0,
-          "offset": 72
-        },
-        {
-          "count": 0,
-          "offset": 74
-        }
-      ],
-      "sourceLength": 150460
-    },
-    "1098.obs": {
-      "geometries": [
-        {
-          "height": 0,
-          "length": 0,
-          "offset": 124,
-          "ox": 5353,
-          "oy": 0,
-          "plausible": false,
-          "width": 0
-        },
-        {
-          "height": 0,
-          "length": 0,
-          "offset": 128,
-          "ox": 85,
-          "oy": 77,
-          "plausible": false,
-          "width": 5353
-        },
-        {
-          "height": 77,
-          "length": 5353,
-          "offset": 132,
-          "ox": -56,
-          "oy": -37,
-          "plausible": true,
-          "width": 85
-        },
-        {
-          "height": 65499,
-          "length": 5046357,
-          "offset": 136,
-          "ox": 87,
-          "oy": 41,
-          "plausible": false,
-          "width": 65480
-        },
-        {
-          "height": 41,
-          "length": 4292607944,
-          "offset": 140,
-          "ox": 259,
-          "oy": 0,
-          "plausible": false,
-          "width": 87
-        }
-      ],
-      "headers": [
-        {
-          "count": 0,
-          "offset": 66
-        },
-        {
-          "count": 0,
-          "offset": 68
-        },
-        {
-          "count": 7,
-          "offset": 70
-        },
-        {
-          "count": 0,
-          "offset": 72
-        },
-        {
-          "count": 0,
-          "offset": 74
-        }
-      ],
-      "sourceLength": 8671
-    },
-    "1128.obs": {
-      "legacyRowMarkerHeuristic": {
-        "sampled": [
-          {
-            "frame": 0,
-            "head": "1500f9f700011e7f0200011e80070001",
-            "height": 222,
-            "length": 177,
-            "nearby": [
-              {
-                "deviation": 211,
-                "marker": 2,
-                "maxSpan": 49,
-                "rows": 11,
-                "threshold": 20,
-                "valid": 10
-              },
-              {
-                "deviation": 211,
-                "marker": 2,
-                "maxSpan": 49,
-                "rows": 11,
-                "threshold": 16,
-                "valid": 10
-              },
-              {
-                "deviation": 211,
-                "marker": 2,
-                "maxSpan": 49,
-                "rows": 11,
-                "threshold": 28,
-                "valid": 10
-              },
-              {
-                "deviation": 211,
-                "marker": 2,
-                "maxSpan": 49,
-                "rows": 11,
-                "threshold": 8,
-                "valid": 10
-              },
-              {
-                "deviation": 211,
-                "marker": 2,
-                "maxSpan": 49,
-                "rows": 11,
-                "threshold": 0,
-                "valid": 10
-              }
-            ],
-            "origin": [
-              -119,
-              -111
-            ],
-            "width": 239
-          },
-          {
-            "frame": 1,
-            "head": "f700f0a200011e7f0200011e7f020001",
-            "height": 222,
-            "length": 1970,
-            "nearby": [
-              {
-                "deviation": 55,
-                "marker": 0,
-                "maxSpan": 119,
-                "rows": 167,
-                "threshold": 0,
-                "valid": 167
-              },
-              {
-                "deviation": 122,
-                "marker": 2,
-                "maxSpan": 122,
-                "rows": 100,
-                "threshold": 16,
-                "valid": 97
-              },
-              {
-                "deviation": 122,
-                "marker": 2,
-                "maxSpan": 122,
-                "rows": 100,
-                "threshold": 8,
-                "valid": 97
-              },
-              {
-                "deviation": 122,
-                "marker": 2,
-                "maxSpan": 122,
-                "rows": 100,
-                "threshold": 0,
-                "valid": 97
-              },
-              {
-                "deviation": 123,
-                "marker": 2,
-                "maxSpan": 245,
-                "rows": 99,
-                "threshold": 20,
-                "valid": 95
-              }
-            ],
-            "origin": [
-              -119,
-              -111
-            ],
-            "width": 239
-          },
-          {
-            "frame": 2,
-            "head": "4a016d8c00010f800200011e7f020001",
-            "height": 222,
-            "length": 2901,
-            "nearby": [
-              {
-                "deviation": 9,
-                "marker": 0,
-                "maxSpan": 142,
-                "rows": 231,
-                "threshold": 0,
-                "valid": 230
-              },
-              {
-                "deviation": 104,
-                "marker": 2,
-                "maxSpan": 292,
-                "rows": 118,
-                "threshold": 8,
-                "valid": 116
-              },
-              {
-                "deviation": 104,
-                "marker": 2,
-                "maxSpan": 292,
-                "rows": 118,
-                "threshold": 0,
-                "valid": 116
-              },
-              {
-                "deviation": 106,
-                "marker": 2,
-                "maxSpan": 298,
-                "rows": 116,
-                "threshold": 20,
-                "valid": 114
-              },
-              {
-                "deviation": 106,
-                "marker": 2,
-                "maxSpan": 298,
-                "rows": 116,
-                "threshold": 16,
-                "valid": 114
-              }
-            ],
-            "origin": [
-              -119,
-              -111
-            ],
-            "width": 239
-          }
-        ]
-      },
-      "nativeVideoRLEFailures": [
-        {
-          "frame": 0,
-          "reason": "OBS source final 640-stride cursor outside final source row (73086, 141440, 141679)",
-          "shape": [
-            239,
-            222
-          ],
-          "sourceFirst8": "1500f9f700011e7f"
-        },
-        {
-          "frame": 1,
-          "reason": "OBS source final 640-stride cursor outside final source row (92934, 141440, 141679)",
-          "shape": [
-            239,
-            222
-          ],
-          "sourceFirst8": "f700f0a200011e7f"
-        },
-        {
-          "frame": 2,
-          "reason": "OBS source final 640-stride cursor outside final source row (99977, 141440, 141679)",
-          "shape": [
-            239,
-            222
-          ],
-          "sourceFirst8": "4a016d8c00010f80"
-        }
-      ]
-    },
-    "1159.obs": {
-      "geometries": [
-        {
-          "height": 0,
-          "length": 0,
-          "offset": 124,
-          "ox": 16577,
-          "oy": 0,
-          "plausible": false,
-          "width": 0
-        },
-        {
-          "height": 0,
-          "length": 0,
-          "offset": 128,
-          "ox": 176,
-          "oy": 178,
-          "plausible": false,
-          "width": 16577
-        },
-        {
-          "height": 178,
-          "length": 16577,
-          "offset": 132,
-          "ox": -85,
-          "oy": -89,
-          "plausible": true,
-          "width": 176
-        },
-        {
-          "height": 65447,
-          "length": 11665584,
-          "offset": 136,
-          "ox": 318,
-          "oy": 52,
-          "plausible": false,
-          "width": 65451
-        },
-        {
-          "height": 52,
-          "length": 4289200043,
-          "offset": 140,
-          "ox": 1,
-          "oy": 15215,
-          "plausible": false,
-          "width": 318
-        }
-      ],
-      "headers": [
-        {
-          "count": 0,
-          "offset": 66
-        },
-        {
-          "count": 0,
-          "offset": 68
-        },
-        {
-          "count": 18,
-          "offset": 70
-        },
-        {
-          "count": 0,
-          "offset": 72
-        },
-        {
-          "count": 0,
-          "offset": 74
-        }
-      ],
-      "sourceLength": 168757
-    }
-  },
-  "framePNGs": 600,
+  "decodeDiagnostics": {},
+  "framePNGs": 616,
   "members": 166,
-  "multiFrameSamples": 86,
-  "rejected": {
-    "1093.obs": "OBS frame geometry invalid; index=75 cursor=143134 declared=(131, 15, 9, -7, -13) memberBytes=150460",
-    "1098.obs": "OBS frame geometry invalid; index=4 cursor=7600 declared=(17, 6, 15, -12, -7) memberBytes=8671",
-    "1128.obs": "no strictly decoded source frames",
-    "1159.obs": "OBS frame geometry invalid; index=2 cursor=33517 declared=(7, 1, 1, 8, 3) memberBytes=168757"
-  },
+  "multiFrameSamples": 90,
+  "rejected": {},
   "source": "OBS.pak",
   "sourceRLEHeaders": {
     "1043.obs": {
@@ -2316,6 +1900,69 @@
       "nativeHeight": 47,
       "threshold": 20
     },
+    "1093.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 8,
+          "bytes": "47000900",
+          "centeredWebFallbackX": 11,
+          "row": 0,
+          "word0": 71,
+          "word1": 9
+        },
+        {
+          "actualPayload": 10,
+          "bytes": "78020202",
+          "centeredWebFallbackX": 10,
+          "row": 1,
+          "word0": 632,
+          "word1": 514
+        },
+        {
+          "actualPayload": 12,
+          "bytes": "75020300",
+          "centeredWebFallbackX": 9,
+          "row": 2,
+          "word0": 629,
+          "word1": 3
+        },
+        {
+          "actualPayload": 14,
+          "bytes": "73020302",
+          "centeredWebFallbackX": 8,
+          "row": 3,
+          "word0": 627,
+          "word1": 515
+        },
+        {
+          "actualPayload": 16,
+          "bytes": "70020400",
+          "centeredWebFallbackX": 7,
+          "row": 67,
+          "word0": 624,
+          "word1": 4
+        },
+        {
+          "actualPayload": 14,
+          "bytes": "71020302",
+          "centeredWebFallbackX": 8,
+          "row": 68,
+          "word0": 625,
+          "word1": 515
+        },
+        {
+          "actualPayload": 10,
+          "bytes": "72020202",
+          "centeredWebFallbackX": 10,
+          "row": 69,
+          "word0": 626,
+          "word1": 514
+        }
+      ],
+      "nativeHeight": 70,
+      "threshold": 20
+    },
     "1094.obs": {
       "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
       "headers": [
@@ -2378,6 +2025,69 @@
       ],
       "nativeHeight": 148,
       "threshold": 20
+    },
+    "1098.obs": {
+      "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
+      "headers": [
+        {
+          "actualPayload": 15,
+          "bytes": "57002900",
+          "centeredWebFallbackX": 35,
+          "row": 0,
+          "word0": 87,
+          "word1": 41
+        },
+        {
+          "actualPayload": 23,
+          "bytes": "6f020503",
+          "centeredWebFallbackX": 31,
+          "row": 1,
+          "word0": 623,
+          "word1": 773
+        },
+        {
+          "actualPayload": 30,
+          "bytes": "65020702",
+          "centeredWebFallbackX": 27,
+          "row": 2,
+          "word0": 613,
+          "word1": 519
+        },
+        {
+          "actualPayload": 36,
+          "bytes": "5f020900",
+          "centeredWebFallbackX": 24,
+          "row": 3,
+          "word0": 607,
+          "word1": 9
+        },
+        {
+          "actualPayload": 38,
+          "bytes": "5a020001",
+          "centeredWebFallbackX": 23,
+          "row": 74,
+          "word0": 602,
+          "word1": 256
+        },
+        {
+          "actualPayload": 29,
+          "bytes": "60020701",
+          "centeredWebFallbackX": 28,
+          "row": 75,
+          "word0": 608,
+          "word1": 263
+        },
+        {
+          "actualPayload": 21,
+          "bytes": "68020501",
+          "centeredWebFallbackX": 32,
+          "row": 76,
+          "word0": 616,
+          "word1": 261
+        }
+      ],
+      "nativeHeight": 77,
+      "threshold": 24
     },
     "1125.obs": {
       "headerWordInterpretation": "UNVERIFIED/DO-NOT-USE-AS-LIVE-COORDINATE",
