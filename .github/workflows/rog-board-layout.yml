@@ -23,7 +23,7 @@ on:
       - 'apps/4leaf/rog/dice-native-tis-alpha.js'
       - 'apps/4leaf/rog/dice-native-pawn-dmp-depth.css'
       - 'apps/4leaf/rog/tests/dice-native-pawn-dmp-depth.cjs'
-      - 'apps/4leaf/rog/tests/dice-native-tis-alpha.cjs'
+      - 'apps/4leaf/rog/tests/dice-source-alpha-pointer.cjs'      - 'apps/4leaf/rog/tests/dice-native-tis-alpha.cjs'
       - 'apps/4leaf/rog/tests/dice-native-tis-full-outline.cjs'
       - 'apps/4leaf/rog/tests/dice-source-map0170-registration.cjs'
       - 'apps/4leaf/rog/tests/dice-all-source-maps-camera.cjs'
@@ -77,6 +77,8 @@ jobs:
         run: node apps/4leaf/rog/tests/dice-native-pawn-dmp-depth.cjs
       - name: Verify real source TIS multi-color alpha with a live game turn
         run: node apps/4leaf/rog/tests/dice-native-tis-alpha.cjs
+      - name: Original TIS source alpha physical pointer & mobile zoom
+        run: node apps/4leaf/rog/tests/dice-source-alpha-pointer.cjs
       - name: Verify every native TIS image pixel survives full board alpha clipping
         run: node apps/4leaf/rog/tests/dice-native-tis-full-outline.cjs
       - name: Verify 2003 official Non-only PvP rule using real regular DMP two-user duel
