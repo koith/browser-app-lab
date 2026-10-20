@@ -23,7 +23,7 @@ const {chromium}=require('playwright');
   await page.locator('#map-select').selectOption('4LEAF');
   await page.locator('#start-game').click();
   await page.waitForSelector('#game:not(.hidden)');
-  const ids=['0046','0061','0096','0159'];
+  // These four authentic source members contain every original 0..7 packet.\n const ids=['0046','0061','0064','0137'];
   const results=[];
   for(const id of ids){
    const setup=await page.evaluate(id=>{
