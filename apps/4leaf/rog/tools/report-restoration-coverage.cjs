@@ -75,7 +75,7 @@ const output={
  },
  unverified:[
   'OBS original animation action/direction table',
-  'OBS per-scanline true horizontal origin for centered-pixel decoder',
+  '2002 OBS action-specific foot-contact frame groups and client direction/FPS lookup tables',
   'original MVE three-dimensional height/camera mesh',
   'original 3D falling/bouncing result-specific dice assets and physics',
   'original battle podium polygon mesh/light',
