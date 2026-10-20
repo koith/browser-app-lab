@@ -787,6 +787,34 @@
         "EVID-01",
         "EVID-02"
       ]
+    },
+    {
+      "id": "REQ-20261020-003",
+      "date": "2026-10-20",
+      "origin": "user",
+      "text": "4LEAF 원작 복원 개발을 계속 진행해라. 최신 main 4018f9a0, 앱 버전 v0.84.0-beta.1, 개발원장 RESTORATION_LEDGER.json 기준 미완료 45건 처리. 최우선 원본 리소스 해독 및 게임 적용. 원본 OBS 체스맨 미복원 34종 조사: 24 스캔라인 불일치, 3 구조, 1 count, 6 원본 파일 존재 조사, 실 프레임으로 방향/대기/이동/공격/피격 애니; 가짜 캐릭터 금지. 육각 말판 board.jpg/145x97 TIS 같은 상태 수치 비교, 방향/중심/간격/윗면/투영/뎁스 실제 코드 수정 및 브라우저 QA, 기존 픽셀 hit/게임 보존. 원본 D4/D6 source model/keyframes와 전투 발판 카메라·접지 3D 복원. 막히면 다른 리소스/디코더/패키지/경로 조사, 코드·게임 적용→자동/실브라우저 QA→PR/병합/Pages 배포, 모든 결과 GitHub 원장에 기록. 임의 분석 중단 금지, 완료 오판 금지. 최종 보고 버전/SHA/업무ID/복원 수량/보드·전투·주사위/원본 비교/PR·QA·배포/원장 완료·미완료·다음 순서.",
+      "taskIds": [
+        "ACT-01",
+        "ACT-02",
+        "ACT-03",
+        "ACT-04",
+        "BRD-01",
+        "BRD-02",
+        "BRD-03",
+        "BTL-02",
+        "BTL-04",
+        "DIE-01",
+        "DIE-02",
+        "DIE-04",
+        "M04",
+        "M05",
+        "M06",
+        "M07",
+        "P0-BOARD",
+        "P0-ACTOR",
+        "P0-PODIUM",
+        "P0-DICE"
+      ]
     }
   ],
   "tasks": [
@@ -1190,19 +1218,22 @@
       "id": "BRD-01",
       "priority": "P0",
       "title": "카메라 투영·발판 크기 원본 시점 맞춤",
-      "status": "todo",
+      "status": "in_progress",
       "milestone": "M04",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원본 145×97 TIS 원화에 현 웹 중심 피치 150×100을 사용해 가로 겹침을 해소했지만 실제 역사적 3D 카메라 공식은 미확인 | 구현 목표: 원본 board/battle의 동일 DMP 지도·좌표·줌 상태에서 발판 중심/소실점/배경 시야를 추적해 실제 카메라 수치 결정",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원본 145×97 TIS 원화에 현 웹 중심 피치 150×100을 사용해 가로 겹침을 해소했지만 실제 역사적 3D 카메라 공식은 미확인 | 구현 목표: 원본 board/battle의 동일 DMP 지도·좌표·줌 상태에서 발판 중심/소실점/배경 시야를 추적해 실제 카메라 수치 결정; 2026-10-20 board.jpg 및 battle.jpg 원본 800x600 실제 열람 비교: 두 자료는 VS/두 금속 발판/주사위가 있는 전투 씬임. 일반 26 DMP 맵과 동일 시점·주사위/맵 상태가 아니므로 가짜 1:1 원작 카메라 값 산출 불가. WEB 진짜 TIS 145x97/150x100 non-overlap/32 소스 픽셀 검사 보존, 추가 원본 일반 게임 영상/클라이언트 MVE camera 찾는 중. 소스 3D 투영 완료 아님.",
       "acceptance": [
         "동일 상태 캡처에서 최소 10개 기준 타일 중심·사이즈·상하 방향·배경 지형 오차를 기록하고 역전/비정상 중첩 0건"
       ],
       "evidence": [
         "../assets/board.jpg",
         "board-camera.js",
-        "tests/dice-horizontal-native-actors.cjs"
+        "tests/dice-horizontal-native-actors.cjs",
+        "apps/4leaf/assets/board.jpg",
+        "apps/4leaf/assets/battle.jpg",
+        "apps/4leaf/rog/docs/OBS_640_STRIDE_SOURCE_RESTORATION_2026-10-20.md"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-18",
+      "lastReviewed": "2026-10-20",
       "verifiedAcceptance": null,
       "dependencies": [
         "EVID-01"
@@ -1332,7 +1363,7 @@
       "title": "원본 OBS 미복원 34종 해독",
       "status": "in_progress",
       "milestone": "M05",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원본 ID 98종 중 실제 전신 리소스 64종/281 PNG만 게시됨; 34종은 카드 이미지 정지 대체 | 구현 목표: 첫 OBS.pak의 28종 실패 행 헤더를 검증하고 OBS2/OBS3 중복·클라이언트 RLE 해법 연구, 진짜 PNG만 합격; 2026-10-20 원본 OBS.pak 검증된 진단 재분류: CardData 98종 중 기존 OBS fullbody 64종/281개 원본 PNG; 엄격 decoder bulk 90종 대상 62종/268PNG 성공, 28종 거부(24 exact row mismatch·3 frame geometry·1 frame count 오류), 그 외 약 6종은 원본 OBS 파일명·다른 클라이언트 판본 전수 대조 필요. 성공 명칭/실루엣 근거 없는 새 PNG는 라이브에 넣지 않음. 상세 출처 보고서 작성.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원본 ID 98종 중 실제 전신 리소스 64종/281 PNG만 게시됨; 34종은 카드 이미지 정지 대체 | 구현 목표: 첫 OBS.pak의 28종 실패 행 헤더를 검증하고 OBS2/OBS3 중복·클라이언트 RLE 해법 연구, 진짜 PNG만 합격; 2026-10-20 원본 OBS.pak 검증된 진단 재분류: CardData 98종 중 기존 OBS fullbody 64종/281개 원본 PNG; 엄격 decoder bulk 90종 대상 62종/268PNG 성공, 28종 거부(24 exact row mismatch·3 frame geometry·1 frame count 오류), 그 외 약 6종은 원본 OBS 파일명·다른 클라이언트 판본 전수 대조 필요. 성공 명칭/실루엣 근거 없는 새 PNG는 라이브에 넣지 않음. 상세 출처 보고서 작성.; 2026-10-20 2002 OBS.pak native 640-stride RLE 실제 역해독 완료: 원본 90 카드 멤버 모두 엄격 성공, 원본 PNG 616장/기존 별도 2종 13장 합쳐 92/98, 629 원본 프레임. 이전 미복구 28종 전부 진짜 OBS source pixel로 복구/게임 적용. 최종 6종 0091/0126/0129/0132/0157/0168은 SHA1 검증 2002 원본 OBS/OBS2/OBS3 삼중 검색에서 파일명이 존재하지 않음. 타 버전 공식 설치판·패치 확인 남음. ACT-01 전체 완료 아님.",
       "acceptance": [
         "98개 ID 각각 원본 전신 PNG 1장 이상 SHA/오프셋 검증 또는 미확보 원인 기록; 가짜 CSS 체스맨 0건"
       ],
@@ -1341,9 +1372,15 @@
         "tools/decode-original-obs-bulk.py",
         "apps/4leaf/rog/docs/OBS_MISSING_34_AUDIT_2026-10-20.md",
         "apps/4leaf/rog/original/OBS/bulk-source-report.json",
-        "apps/4leaf/rog/tools/decode-original-obs-bulk.py"
+        "apps/4leaf/rog/tools/decode-original-obs-bulk.py",
+        "apps/4leaf/rog/docs/OBS_640_STRIDE_SOURCE_RESTORATION_2026-10-20.md",
+        "apps/4leaf/rog/tools/decode-original-obs-bulk.py",
+        "apps/4leaf/rog/original/OBS/animation-extra.js",
+        "apps/4leaf/rog/original/OBS/bulk-source-report.json",
+        "https://github.com/koith/browser-app-lab/actions/runs/39418202106",
+        "https://github.com/koith/browser-app-lab/actions/runs/39419068901"
       ],
-      "evidenceLevel": "VERIFIED-SOURCE-ARCHIVE-COUNTS/STRICT-DECODER-FAILURES; 34-ORIGINAL-MODELS-UNRECOVERED",
+      "evidenceLevel": "VERIFIED-2002-SHA1-INSTALLER/SHA256-OBS-PAK/90-OF-90-RLE/616-NATIVE-PNG; 6 SOURCE ABSENT IN THREE 2002 PAKS; ACTION TIMELINE UNVERIFIED",
       "lastReviewed": "2026-10-20",
       "verifiedAcceptance": null,
       "dependencies": [
@@ -1355,18 +1392,21 @@
       "id": "ACT-02",
       "priority": "P0",
       "title": "OBS 행 X좌표·원점 인코딩 완전 해독",
-      "status": "todo",
+      "status": "in_progress",
       "milestone": "M05",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 64종의 색/팔레트 픽셀은 원본이지만 일부 horizontal scanline X 위치를 중앙 추정으로 복원함 | 구현 목표: 일부 프레임 raw 4byte 헤더의 run origin을 실제 클라이언트/SPR 640-stride와 교차 검증",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 64종의 색/팔레트 픽셀은 원본이지만 일부 horizontal scanline X 위치를 중앙 추정으로 복원함 | 구현 목표: 일부 프레임 raw 4byte 헤더의 run origin을 실제 클라이언트/SPR 640-stride와 교차 검증; 2026-10-20 IMG.pak roll.spr에 이미 검증된 640-video-buffer RLE 패킷 형식(2byte runCount/initialOffset/skip, 4*n+rem run size)을 OBS에도 적용해 가짜 중앙 정렬 제거. 원본 프레임의 X/Y 패킷 좌표가 실제 게임 원본 PNG로 반영됨. source-native frame originX/Y 프레임별 manifest 자동 기록. 추정 행동 구간/실루엣 방향표는 ACT-03 미완료.",
       "acceptance": [
         "샘플 프레임 0/10/18/25의 물체 실루엣·팔/다리·원점 좌표가 원본 바이트 수식으로 일치"
       ],
       "evidence": [
         "tools/decode-original-obs-bulk.py",
-        "original/OBS/bulk-source-report.json"
+        "original/OBS/bulk-source-report.json",
+        "apps/4leaf/rog/tests/test_obs_native_640stride.py",
+        "apps/4leaf/rog/tests/dice-obs-640stride-native-game.cjs",
+        "apps/4leaf/rog/tools/decode-original-obs-bulk.py"
       ],
-      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-18",
+      "evidenceLevel": "VERIFIED-VIDEO-640-STRIDE-RLE-PALETTE-SOURCE-POSITIONS; ORIGINAL-ACTION-SEMANTICS-UNVERIFIED",
+      "lastReviewed": "2026-10-20",
       "verifiedAcceptance": null,
       "dependencies": [
         "ACT-01"
@@ -1402,7 +1442,7 @@
       "title": "보드·전투 체스맨 발 접지·그림자·다중배치",
       "status": "in_progress",
       "milestone": "M05",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 기본 2P의 진짜 OBS 표시는 검증했으나 모든 체스맨 크기/발판 고정·동시 2인 겹침·전투 POV는 원본과 비교 미흡 | 구현 목표: 원본 OBS originX/Y, 발 위치, TIS 바닥 픽셀, 캐릭터 z-index/그림자 관통 검증; 2026-10-20 원본 OBS 이미지를 일시적 503 응답에서 영구 unavailable 처리하던 문제 개선: 실제 동일 아카이브 OBS PNG 3회 재요청, 실패 후 검증된 원본 CardData 정지 대체, 연결 회복 시 원본 전신 자동 재시도. 팀/턴/DMP 좌표·원본 소스 바이트 불변. 정확한 행동 프레임표·출발/착지·98종 전체 원본 수용은 여전히 미완료.; 2026-10-20 PR #150 merged main@bb15ba5c genuine OBS 503 retry/reconnect QA 39381181475 + release 39381181551 PASS, Pages 39381488969 success; real main OBS frame job 39381488742 success. Original 34 missing IDs and 2002 direction/actions still not recovered.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 기본 2P의 진짜 OBS 표시는 검증했으나 모든 체스맨 크기/발판 고정·동시 2인 겹침·전투 POV는 원본과 비교 미흡 | 구현 목표: 원본 OBS originX/Y, 발 위치, TIS 바닥 픽셀, 캐릭터 z-index/그림자 관통 검증; 2026-10-20 원본 OBS 이미지를 일시적 503 응답에서 영구 unavailable 처리하던 문제 개선: 실제 동일 아카이브 OBS PNG 3회 재요청, 실패 후 검증된 원본 CardData 정지 대체, 연결 회복 시 원본 전신 자동 재시도. 팀/턴/DMP 좌표·원본 소스 바이트 불변. 정확한 행동 프레임표·출발/착지·98종 전체 원본 수용은 여전히 미완료.; 2026-10-20 PR #150 merged main@bb15ba5c genuine OBS 503 retry/reconnect QA 39381181475 + release 39381181551 PASS, Pages 39381488969 success; real main OBS frame job 39381488742 success. Original 34 missing IDs and 2002 direction/actions still not recovered.; 2026-10-20 source-native 92/98 chessman animated PNG 629장 실제 playable game actor/OBS loader 연결, PC·mobile 104-cell 4LEAF DMP browser game QA; 6 source-missing still CardData fallback. Exact old original battle 3D contact foot Y and all frames' pose mapping remain unsolved.",
       "acceptance": [
         "전신 64종+추가 복원분에서 보드·전투·2인 겹침·6인 게임에 대한 실사 접지/가림 확인"
       ],
@@ -1415,7 +1455,10 @@
         "https://github.com/koith/browser-app-lab/actions/runs/39381181475",
         "https://github.com/koith/browser-app-lab/actions/runs/39381181551",
         "https://github.com/koith/browser-app-lab/actions/runs/39381488969",
-        "https://github.com/koith/browser-app-lab/actions/runs/39381488742"
+        "https://github.com/koith/browser-app-lab/actions/runs/39381488742",
+        "apps/4leaf/rog/tests/dice-obs-640stride-native-game.cjs",
+        "apps/4leaf/rog/original/OBS/bulk-source-report.json",
+        "https://github.com/koith/browser-app-lab/actions/runs/39419068901"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-OBS-SOURCE-PNG/PHYSICAL-BROWSER/RECONNECT/DEPLOY; ORIGINAL-POSE-AND-34-SOURCE-BODIES-UNVERIFIED",
       "lastReviewed": "2026-10-20",
@@ -4230,6 +4273,47 @@
       "taskId": "ACT-04",
       "details": "PR #150 merged main SHA bb15ba5c4de8d3a27233b089dfdf2fd076fc8ea7; genuine source OBS HTTP retry/fallback/reconnect browser PASS 39381181475; same SHA source release 39381488751 and OBS frame gameplay 39381488742 PASS; Pages 39381488969 success. Does not recover missing 34 fullbody models or original per-action motion.",
       "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39381488751"
+    },
+    {
+      "seq": 166,
+      "date": "2026-10-20",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261020-003",
+      "details": "2026-10-20 strict source OBS decoder, visual 3D board reference camera, D4/D6 original game, preserve all merged prior main."
+    },
+    {
+      "seq": 167,
+      "date": "2026-10-20",
+      "type": "STATUS_CHANGED",
+      "taskId": "ACT-02",
+      "from": "todo",
+      "to": "in_progress",
+      "details": "Replaced centered original OBS rows with strictly bounded original per-run 640-stride source byte X; 92 model browser QA passing, historical 3D and pose silhouettes need full matching state verification."
+    },
+    {
+      "seq": 168,
+      "date": "2026-10-20",
+      "type": "STATUS_CHANGED",
+      "taskId": "BRD-01",
+      "from": "todo",
+      "to": "in_progress",
+      "details": "Compared original 800x600 archived screenshots to live Chromium board; discovered board.jpg/battle.jpg are BATTLE scenes, not equivalent-state ordinary DMP walk board; numerical 1:1 original MVE camera remains unresolved."
+    },
+    {
+      "seq": 169,
+      "date": "2026-10-20",
+      "type": "SOURCE_AUDIT",
+      "taskId": "ACT-01",
+      "details": "SHA1 verified 64,537,476-byte 2002 ZIP, OBS.pak SHA256 49738a94...: strict VIDEO 640-stride RGB original OBS 90/90 card members, 616 PNG (plus separate 2/13), all 28 former rejected decoded; absent 6 IDs 0091 0126 0129 0132 0157 0168 checked original OBS.pak/OBS2.pak/OBS3.pak. Does NOT verify 2004 animation action semantics.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39418202106"
+    },
+    {
+      "seq": 170,
+      "date": "2026-10-20",
+      "type": "IMPLEMENTED_PENDING_QA",
+      "taskId": "ACT-02",
+      "details": "Full original OBS source X/Y 640-video offset and sparse transparency support, genuine 616 native PNG assets/manifest and PWA cache; version v0.85.0-beta.1; core Chromium board gate 39419068901 PASS, same-SHA release PR pending.",
+      "evidence": "apps/4leaf/rog/tests/dice-obs-640stride-native-game.cjs"
     }
   ]
 }
