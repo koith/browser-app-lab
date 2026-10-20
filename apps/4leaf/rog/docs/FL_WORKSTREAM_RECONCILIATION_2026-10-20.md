@@ -1,60 +1,51 @@
-# 4LEAF FL-01~FL-16 ↔ GitHub 영구 개발원장 대조 (2026-10-20)
+# FL-01~FL-16 원문 복구 ↔ GitHub 원작 개발원장 정합 (2026-10-20)
 
-## 원본 식별 및 변경 정책
+> **업무 원본:** [RESTORATION_LEDGER.json](./RESTORATION_LEDGER.json), 2026-10-20 병합 PR #147, main `0dc5582dc1d524ad50061d9162c51e59ecdabe76`.
+>
+> **FL 원문 출처:** 2026-10-20 약 14:45 KST 프로젝트의 앞선 Instant 대화에서 실제로 제시된 FL-01~FL-16 일감표(기존 assistant 답변). 초기 GitHub 파일 검색에서 FL 번호가 없었던 것은 GitHub 저장소에 **번호별 별칭을 아직 기록하지 않았기 때문**이다. 이후 대화 기록을 재조사하여 전체 16개 제목을 복구했다. 아래 명칭은 **기존 대화상 업무관리 표의 복구**이지 2002~2004 원본 게임 출처 또는 실제 구현 완료의 증명은 아니다.
 
-- **기준:** `main/apps/4leaf/rog/docs/RESTORATION_LEDGER.json`의 57건(작업군 M00~M09 10건, P0-* 6건, GOV-LEDGER 1건, 세부 40건), 2026-10-19 마지막 변경.
-- **중요:** 사용자가 말한 **FL-01~FL-16의 원문별 제목·수용 조건은 현재 GitHub 코드·문서·Issue 검색에 존재하지 않는다.** 16개라는 수만으로 기존 FL 번호에 새 제목을 꾸며 붙이거나 완료로 처리할 수 없다. 이 문서는 **실재하는 GitHub 원장 작업군 16개의 임시 대조 인덱스**이며, 과거 FL 원본과 동일하다는 주장이 아니다.
-- 영구 식별자는 기존 `M00–M09`, `P0-*`, 세부 작업 ID를 유지한다. 원문 확인 후 FL 별칭 매핑을 추가하고, 충돌시 신규 세부 작업을 등록한다.
-- 상태 계산은 GitHub JSON만 사용. 이 문서의 초기 수치는 이후 원장 변경 시 갱신 필요.
+## 실제 FL 16개와 기존 영구 작업 ID 대조
 
-## 16개 기존 상위 작업군의 임시 대조 인덱스
+| FL | 앞선 대화에서 기록된 일감 제목 | 과거 표기 | GitHub 영구 원장 대응 | 현재 원장/원본 수용 상태 |
+| --- | --- | --- | --- | --- |
+| **FL-01** | 월드맵 원작 이미지·배치 정밀 복원 | 부분 | `M01`, `WORLD-01`, `WORLD-03` | 원본 6경로 `WORLD-03=done`; 배치 `WORLD-01=todo` |
+| **FL-02** | 켈티카 거리 및 지역 이동 원작 재현 | 부분 | `M02`, `WORLD-02`, `WORLD-03` | 7채색 원본 source bitmap hitmask PR #147 완료; `WORLD-02=in_progress`; EXE 핫스팟 미검증 |
+| **FL-03** | 하이아칸 채팅방 UI 원작 복원 | 부분 | `M03`, `P0-CHAT`, `CHT-01`, `CHT-02`, `CHT-05` | 원본 방 배경 `CHT-01=done`; 입력창/전경 미완료 |
+| **FL-04** | 채팅방 아바타 순간이동·슬롯 배치 | 부분 | `CHT-04`, `CHT-07` | 실제 2인 즉시 이동 수용 증빙; `CHT-07=done`, 정확한 원작 좌석 좌표 미복원 |
+| **FL-05** | 전체 지역 공통 채팅 및 서버 동기화 | 부분 | `M03`, `M08`, `CHT-03`, `RULE-03` | 실제 동접/실참가자 검증; 게임 원본 서버 권한·재접속 규칙 미검증 |
+| **FL-06** | 원작 채널·지역 선택 구조 정정 | 부분 | `CHT-06`, `M03` | `CHT-06=done` 주잔 TOWN SELECT와 북·남 하이아칸 채팅 분리; M03 전체 미완료 |
+| **FL-07** | 주잔 육각 타일 상하 방향 수정 | 미완료 | `M04`, `P0-BOARD`, `BRD-02` | 145×97 소스 TIS 세로 반전 자체 수정 검증; 전체 원본 윗면/입체 원근 수용 미완료 |
+| **FL-08** | 육각 타일 수평 배열 겹침 제거 | 미완료 | `BRD-01`, `BRD-02`, `BRD-03`, `P0-BOARD` | 실제 원본 카메라 투영·인접 타일 alpha/깊이 A/B 미완료 |
+| **FL-09** | 원작 체스맨 리소스 적용 | 미완료 | `M05`, `P0-ACTOR`, `ACT-01`, `ACT-02`, `ACT-04` | OBS 64/98종 소스 확인, 34종/원점·전체 포즈 미완료 |
+| **FL-10** | 체스맨 상황별 애니메이션 적용 | 미완료 | `ACT-03`, `M05` | 캐릭터별 진짜 idle/walk/attack/hurt/victory/방향 표·동작 타이밍 미확인 |
+| **FL-11** | 원작 체스맨 배틀 발판 적용 | 미완료 | `M06`, `P0-PODIUM`, `BTL-01`, `BTL-02`, `BTL-04` | 원본 355×113 winBattle 2D `BTL-01=done`; 실제 3D 메시·시점·접지 미완료 |
+| **FL-12** | 원작 주사위 모델·이미지 적용 | 미완료 | `M07`, `P0-DICE`, `DIE-01`, `DIE-03` | 진짜 ROLL 버튼 `DIE-03=done`; D4/D6 본체 원본 메시 미확보 |
+| **FL-13** | 주사위 낙하·바운스·결과 연출 | 상태 표기 회수 불가 | `M07`, `P0-DICE`, `DIE-02`, `DIE-04` | WEB 폴백, 원본 결과별 낙하·튕김·착지 미완료 |
+| **FL-14** | 주잔 전체 게임 규칙·멀티플레이 검증 | 상태 표기 회수 불가 | `M08`, `RULE-01`, `RULE-02`, `RULE-03` | 기본 기능/QA 존재, 원작 서버 패킷·판정/예외·재접속 미완료 |
+| **FL-15** | 매직카덴 및 기타 콘텐츠 원작 복원 | 상태 표기 회수 불가 | `M02`, `SHOP-01`, `SHOP-02`, `WORLD-02` | 실제 구매·판매 일부, 원작 전체 상품·카드 UI/룰 미완료 |
+| **FL-16** | 전체 화면 원작 대조·회귀 QA·배포 검증 | 상태 표기 회수 불가 | `M09`, `P0-RELEASE`, `EVID-01`, `EVID-02`, `QA-02`, `QA-03` | 동일 SHA 릴리스 게이트 `QA-02=done`, 2004 동일상태 픽셀/실기기 원작 일치 미완료 |
 
-| 임시 슬롯 | 실제 원장 ID | 원작 수용 목표 | 2026-10-19 상태 |
-|---|---|---|---|
-| slot-01 | M00 | 원본 자산·출처·리소스 역할 | in_progress |
-| slot-02 | M01 | 월드맵·메인프레임 | in_progress |
-| slot-03 | M02 | 켈티카·매직카덴 | in_progress |
-| slot-04 | M03 | 북/남 하이아칸 상설 채팅 | in_progress |
-| slot-05 | M04 | 주잔 DMP/TIS 정밀 보드 | in_progress |
-| slot-06 | M05 | 창세기전 OBS 체스맨 원형/방향/동작 | in_progress |
-| slot-07 | M06 | 전투 발판/카메라/접지 | in_progress |
-| slot-08 | M07 | 결과별 주사위 실제 낙하·반동·정지 | in_progress |
-| slot-09 | M08 | 특수칸·전투 규칙·멀티 | in_progress |
-| slot-10 | M09 | 스크린샷 동일상태 A/B·배포 수용 | in_progress |
-| slot-11 | P0-BOARD | 타일 상하·겹침·윗면·원근 | in_progress |
-| slot-12 | P0-ACTOR | 원작 98종 OBS·프레임별 동작 | in_progress |
-| slot-13 | P0-PODIUM | 원작 입체 전투 발판·보폭 | in_progress |
-| slot-14 | P0-DICE | D4/D6별 진짜 모델·10개 결과 동작 | in_progress |
-| slot-15 | P0-CHAT | 2004 원본 채팅방·실접속·실제 자리 이동 | in_progress |
-| slot-16 | P0-RELEASE | 역사적 원본 동등성 수용 게이트 | in_progress |
+**해석 주의:** `FL-01~FL-16`은 이전 Instant 대화의 관리 묶음 16건이고 `M*`, `P0-*`, 세부 작업은 GitHub의 더 구체적인 진실원천이다. 여러 FL이 한 작업을 공유하므로 합계/완료 건수를 중복 계산하면 안 된다. 과거 표의 `부분`·`미완료`는 당시 진도 표시이며 GitHub `done`과 다른 정의다.
 
-## 실제 검증 완료 — 반복 개발 금지
+## 실재하는 GitHub 기준 진행률
 
-`GOV-LEDGER`, `BRD-05`, `BTL-01`, `BTL-03`, `DIE-03`, `CHT-01`, `CHT-03`, `CHT-06`, `CHT-07`, `WORLD-03`, `QA-01`, `QA-02`, `QA-04`는 GitHub 원장에 `done`. 완수 범위 이상의 원작 3D/포즈·전체 픽셀 동일성까지 끝난 것은 아니다.
+2026-10-20 PR #147 병합 시점의 정본은 **58건 / 검증 완료 13건 / 미완료 45건**(`in_progress=27`, `todo=18`)이다. 앞선 57건에서 `FL-MAP-01` 추적 업무 1건을 등록했다. GitHub Issues에서 해당 FL 번호의 별도 Issue는 확인되지 않았다. `FL-MAP-01`의 정합 업무는 문서로 매핑되었으나 각 FL의 별도 원작 A/B 최종 수용이 끝났다고 표기하지 않는다.
 
-## 미완료 실무 원칙
+### 완료되어 무조건 반복하지 않을 13건
 
-- `P0-BOARD/BRD-01..03`: 145×97 원본 TIS의 맵 투영·윗면·인접 비겹침·깊이 A/B.
-- `P0-ACTOR/ACT-01..04`: 64/98종 실물 OBS 및 미확보 34종, 올바른 scanline 원점·상태 타임라인.
-- `P0-PODIUM/BTL-02/04`: 원본 2D winBattle 사용은 검증됐지만 EXE 원본 입체 3D 시점은 미확인.
-- `P0-DICE/DIE-01/02/04`: ROLL UI 진품과 낙하 주사위 메시를 구별. WEB 폴백을 원작 결과별 모션 완료로 쓰지 않음.
-- `P0-CHAT/CHT-02/04/05`: 같은 방·참가자 상태의 채팅·좌석·가구 클릭 영역 동등성.
-- `WORLD-02`: 원본 녹색키 건물 PNG의 투명 픽셀 클릭을 상점으로 오판하는 결함. PR #144는 `main`과 충돌하므로 최신 `main` 기반으로 재적용하여 정확한 실제 마우스/터치 QA 후 통합. 진짜 EXE 핫스팟은 여전히 미해독.
-- `EVID-01/02`, `QA-03`: 2004 같은 상태 원본-웹 픽셀·아이폰 Safari 동등성은 닫지 않음.
-- 원작 2003년 공식 공지의 `[Non]` 맵 PvP 금지와 랜덤맵 지원은 이미 코드·QA 반영됨. 재개발 말고 회귀 수용 유지.
+`GOV-LEDGER`, `BRD-05`, `BTL-01`, `BTL-03`, `DIE-03`, `CHT-01`, `CHT-03`, `CHT-06`, `CHT-07`, `WORLD-03`, `QA-01`, `QA-02`, `QA-04`.
+
+### 다음 우선순위
+
+1. **FL-07/08**, `BRD-01/02/03`: 실제 원본 `board.jpg` 동일 게임상태의 TIS 타일 윗면·투영·겹침 정량 비교.
+2. **FL-09/10**, `ACT-01/02/03`: OBS 부족 34종 복구·scanline X·상황별/방향별 행동 원본 프레임표.
+3. **FL-11/12/13**, `BTL-02/04` `DIE-01/02/04`: 진품 전투 단상·주사위 결과별 낙하/바운스 모션.
+4. **FL-03/04/05**, `CHT-02/04/05`: 같은 참가자 상태 채팅 입력줄·가구·좌석 역사적 앵커.
+5. **FL-16**, `EVID-01/02` `QA-03`: 원작 동영상/역사적 스크린샷 원본과 동일 상태 재현 후 정량 수용. 정상 배포는 곧 원작 동일성이 아니다.
 
 ## 근거
 
-- 원장: [RESTORATION_LEDGER.json](./RESTORATION_LEDGER.json)
-- 세부 원작 대비: [RESTORATION_GAP_BACKLOG_2026-10-18.md](./RESTORATION_GAP_BACKLOG_2026-10-18.md)
-- 원본 2003.02.21 공식 공지: https://4leafmemorial.geld.kr/m/908
-- 릴리스: [app-version.json](../app-version.json)
-- 최근 원장 및 Pages 완료 SHA: https://github.com/koith/browser-app-lab/commit/fa86a0e865396b2781f528eee7ad29214068a098
-- WORLD-02 충돌 원본 PR: https://github.com/koith/browser-app-lab/pull/144
-
-## 차기 수행
-
-1. WORD-02 오타 없이 **WORLD-02** native bitmap 투명 클릭과 거리 pan QA를 최신 branch/main에서 검사, 원장에 실제 실행·배포 링크 기록.
-2. `EVID-01` 원작 `board.jpg`, `battle.jpg`, `chat.jpg`, `chat_ref.jpg` 대비 동일 게임 상태를 구성해 전후 화면 픽셀 앵커 리포트.
-3. 원본 OBS 결손 34종·D4/D6 메시·정확한 주사위 낙하 프레임을 클라이언트 바이너리/공식 영상과 교차 검증.
-4. 유효한 과거 FL-01~FL-16 원문 확보 전에는 임시 슬롯을 실제 FL 번호로 확정하지 말 것.
+- [영구 개발원장](./RESTORATION_LEDGER.json) · [상세 40건](./RESTORATION_GAP_BACKLOG_2026-10-18.md) · [원장 규정](./RESTORATION_LEDGER.md).
+- 2026-10-20 약 14:45 KST 프로젝트 이전 소통 대화의 **FL-01~FL-16 각 제목** 재확인. 번호별 정의가 GitHub에 없다는 초기 추론은 해당 대화 기록과 교차 검증하여 정정.
+- [PR #147](https://github.com/koith/browser-app-lab/pull/147) 원본 켈티카 7 sprite hitmask 최신 main 병합.
+- [동일 SHA 수용 CI](https://github.com/koith/browser-app-lab/actions/runs/39378243746) / [원본 7 건물 실제 pointer QA](https://github.com/koith/browser-app-lab/actions/runs/39378243790) / [공개 Pages 배포](https://github.com/koith/browser-app-lab/actions/runs/39378243796).
