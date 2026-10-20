@@ -4439,7 +4439,9 @@
       "type": "STATUS_CHANGED",
       "taskId": "ACT-03",
       "details": "Begin executable source-sequential native OBS playback: recovered contiguous source 0..7 IDs and genuine native signed origins, still PROVISIONAL WEB walk/idle/action mapping and FPS.",
-      "evidence": "apps/4leaf/rog/genesis-chessman-actors.js"
+      "evidence": "apps/4leaf/rog/genesis-chessman-actors.js",
+      "from": "todo",
+      "to": "in_progress"
     },
     {
       "seq": 178,
