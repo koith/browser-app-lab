@@ -83,7 +83,7 @@
      img.addEventListener('error',()=>{
        if(!pawn.isConnected)return;
        const source=String(img.getAttribute('src')||'').split('?')[0];
-       if(!/^\\.\\/original\\/OBS\\/[0-9]+-[0-9]+\\.png$/.test(source)){
+       if(!source.startsWith('./original/OBS/')||!source.endsWith('.png')){
          pawn.dataset.obsUnavailable='true';
          pawn.dataset.actorOriginalModelRecovered='false';
          pawn.dataset.actorSourceLoad='unavailable';
