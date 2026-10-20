@@ -44,6 +44,7 @@ on:
       - 'apps/4leaf/rog/dice-native-client-frame.js'
       - 'apps/4leaf/rog/tests/native-offline-cache.cjs'
       - 'apps/4leaf/rog/sw.js'
+      - 'apps/4leaf/rog/tests/dice-obs-source-recovery.cjs'
       - 'apps/4leaf/rog/tests/dice-original-obs-chessmen.cjs'
       - 'apps/4leaf/rog/dice-native-battle-source-spr.css'
       - 'apps/4leaf/rog/dice-original-battle-unobstructed.css'
@@ -95,6 +96,8 @@ jobs:
         run: node apps/4leaf/rog/tests/dice-original-minipanel-spr.cjs
       - name: Cold offline PWA install must preload all original IMG winAbility and winJail sprites
         run: node apps/4leaf/rog/tests/native-offline-cache.cjs
+      - name: Verify original OBS full-body retries after source 503 and real reconnect
+        run: node apps/4leaf/rog/tests/dice-obs-source-recovery.cjs
       - name: Verify changing real native OBS frame dimensions, not fixed frame-zero labels
         run: node apps/4leaf/rog/tests/dice-original-obs-chessmen.cjs
       - run: node apps/4leaf/rog/tests/board-layout.cjs
