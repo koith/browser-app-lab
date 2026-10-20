@@ -107,6 +107,28 @@ const {chromium}=require('playwright');
   assert.equal(result.shopVisible,true,'hitting opaque original Magic Carden bitmap opens the actual card shop: '+JSON.stringify({result,magic}));
   await page.evaluate(()=>window.__ROG_TEST__.go('city'));
   await page.waitForFunction(()=>!document.querySelector('#city').classList.contains('hidden'));
+  // Verify actual browser hit testing also opens the real CardShop, not
+  // only a synthetic MouseEvent dispatched directly on its <button>.
+  const opaqueMouse=await page.evaluate(point=>{
+   const button=document.querySelector('[data-street="magic"]');
+   const canvas=button.querySelector('canvas');
+   const rect=canvas.getBoundingClientRect(),box=button.getBoundingClientRect();
+   const sx=box.width/Math.max(1,button.offsetWidth),sy=box.height/Math.max(1,button.offsetHeight);
+   const hitRect=rect.width>0&&rect.height>0?rect:{
+    left:box.left+2*sx,top:box.top+2*sy,width:box.width-4*sx,height:box.height-4*sy
+   };
+   return {x:hitRect.left+(point.x+.5)*hitRect.width/canvas.width,
+    y:hitRect.top+(point.y+.5)*hitRect.height/canvas.height,
+    viewport:document.querySelector('#street-viewport').getBoundingClientRect().toJSON()};
+  },magic.point);
+  assert.ok(opaqueMouse.x>=opaqueMouse.viewport.x&&opaqueMouse.x<opaqueMouse.viewport.x+opaqueMouse.viewport.width&&
+   opaqueMouse.y>=opaqueMouse.viewport.y&&opaqueMouse.y<opaqueMouse.viewport.y+opaqueMouse.viewport.height,
+   'native Magic Carden opaque bitmap must be reachable by real browser pointer');
+  await page.mouse.click(opaqueMouse.x,opaqueMouse.y);
+  await page.waitForFunction(()=>!document.querySelector('#shop').classList.contains('hidden'),null,{timeout:3500});
+  assert.equal(await page.locator('[data-street="magic"]').getAttribute('data-last-source-hit'),'true');
+  await page.evaluate(()=>window.__ROG_TEST__.go('city'));
+  await page.waitForFunction(()=>!document.querySelector('#city').classList.contains('hidden'));
   // Use PHYSICAL pointer for open pavement panning, not DOM event simulation.
   // Ensure the real source building remains in the viewport at normal zoom.
   const pointer=await page.evaluate(point=>{
