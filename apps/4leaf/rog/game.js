@@ -451,7 +451,21 @@ function drawBoard(){
      // Keep cell index discoverable through live metadata and a tooltip.
      b.title=(i+1)+'칸 · '+type;
      b.setAttribute('aria-label',b.title);
-     b.onclick=()=>log((i+1)+'칸 · '+type+' '+match.players.filter(p=>p.position===i).map(p=>p.name).join(', '));
+     b.onclick=event=>{
+      // Mouse/touch must hit an ACTUAL original TIS pixel, not the
+      // conservative CSS polygon enclosing transparent source corners.
+      // Preserve accessibility: keyboard/button.click() has detail=0.
+      if(event?.detail>0&&Number.isFinite(event.clientX)&&Number.isFinite(event.clientY)){
+       const sourceHit=window.__LEAF_TIS_ALPHA__?.hitPoint(b,event.clientX,event.clientY);
+       if(sourceHit?.ready){
+        b.dataset.sourcePixelHit=String(sourceHit.hit);
+        b.dataset.sourceHitX=String(sourceHit.x);
+        b.dataset.sourceHitY=String(sourceHit.y);
+        if(!sourceHit.hit)return;
+       }
+      }
+      log((i+1)+'칸 · '+type+' '+match.players.filter(p=>p.position===i).map(p=>p.name).join(', '));
+     };
      fragment.append(b);
    });root.append(fragment);
    if(existingPawns)root.append(existingPawns);
