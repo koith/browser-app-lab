@@ -1296,7 +1296,9 @@ function combat(attacker,defender,keeper=false){
 
 async function resolveBattle(attacker,defender,keeper){
  window.__LEAF_GENESIS_ACTORS__?.poseByPlayer(attacker.id,'attack',800);
- if(!keeper)window.__LEAF_GENESIS_ACTORS__?.poseByPlayer(defender.id,'hurt',650);
+ // Do not play a source OBS 'hurt' pose before actual dice resolution.
+ // A blocked/equal attack or a defending winner has NOT been hit yet;
+ // only the combat result below may choose the real losing participant.
  const result=await combat(attacker,defender,keeper);
  if(result.neutralizedFixed)appendMove('철가면 DESTROY 24 ↔ 데미안 BLOCK 24 · 능력 충돌 무효화 후 정상 주사위 재굴림');
  if(result.negated){appendMove(result.mutualReset?'자폭: 양측 START 복귀':'오리발 효과: 전투 무효화');return}
