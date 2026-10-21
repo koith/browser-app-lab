@@ -502,7 +502,16 @@ function drawPawns(){
    const point=PATH[Math.min(p.position,PATH.length-1)]||PATH[0];
    const previous=Number(pawn.dataset.position);
    const moved=pawn.dataset.position!==undefined&&previous!==p.position;
-   if(moved)window.__LEAF_GENESIS_ACTORS__?.pose(pawn,'walk',240);
+   if(moved){
+     // The original source 0..7 bitmap frames take 7*120ms before frame 7
+     // appears at the current explicitly WEB-provisional playback interval.
+     // A 240ms timeout truncated EVERY real rolled movement to 0..1. Extend
+     // the visual source cycle while keeping real DMP step/dice/turn timing
+     // and the incomplete-source 12-character still policy untouched.
+     const fullWalk=pawn.dataset.actorRig==='original-obs-sprite'&&
+       pawn.dataset.sourceWalkCoverage?.startsWith('8-of-8-');
+     window.__LEAF_GENESIS_ACTORS__?.pose(pawn,'walk',fullWalk?1040:240);
+   }
    pawn.dataset.position=String(p.position);
    // Multiple real players may share an ORIGINAL DMP cell. The old 11px
    // offset stacked native 33..80px OBS bodies completely atop one another,
