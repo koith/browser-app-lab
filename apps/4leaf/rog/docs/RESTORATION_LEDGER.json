@@ -4506,6 +4506,21 @@
       ],
       "details": "Base main 3bd12b46 (PR156/157/158 already merged, 958 source OBS PNG) verified. Reused genuine OBS frames; fixed gameplay pose propagation from board-only to both board and live separate winBattle podium actors via real player ID, added Chromium active-duel regression. Historical source action/direction/FPS remains UNVERIFIED. Beta 0.86.0-beta.2/PWA v89 identity synchronized. Await PR/Actions before QA VERIFIED.",
       "evidence": "apps/4leaf/rog/tests/dice-battle-podium.cjs"
+    },
+    {
+      "seq": 182,
+      "date": "2026-10-21",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261021-002",
+      "taskIds": [
+        "ACT-03",
+        "ACT-04",
+        "P0-ACTOR",
+        "M05",
+        "P0-RELEASE",
+        "QA-03"
+      ],
+      "details": "Permanent intake registration for interrupted 4LEAF source OBS recovery; event explicitly required by append-only ledger integrity gate."
     }
   ]
 }
