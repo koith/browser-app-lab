@@ -39,6 +39,10 @@
 #app.app-classic-dice #game .board-world #board-nodes
  .tile[data-native-tis-size="145x97"].player-here{
  filter:none!important;
+ /* style.css previously tweened FILTER over .12s; that temporarily
+  * reintroduces the old 7px exterior halo across 3px native TIS gaps.
+  * Live 2002 source tile pixels do not require that WEB crossfade. */
+ transition:none!important;
 }
 #app.app-classic-dice #game .board-world #board-nodes
  .tile[data-native-tis-size="145x97"]:hover,
