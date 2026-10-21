@@ -1860,15 +1860,20 @@
       "id": "DIE-02",
       "priority": "P0",
       "title": "결과값별 하늘 낙하·통통 반동·착지 원본 애니",
-      "status": "todo",
+      "status": "in_progress",
       "milestone": "M07",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 현재 브라우저 구현은 결과별 CSS/JS 추정, 원작 궤적·회전·프레임 길이가 확인되지 않음 | 구현 목표: D4 1–4와 D6 1–6 각각의 모델 면방향/중력/바운스/정지 포즈를 출처 프레임과 타이밍별 매핑; 2026-10-21 PR pending beta.7: WEB fallback D6 3x3 pip placement fixed to reserve all 9 real grid positions (unused cells hidden not removed). Add Chromium/WebKit all 1..6 physical pip grid/face normals landing regression, original D4 and source roll UI unchanged. Original 2002 3D geometry and keyframes remain UNVERIFIED.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 현재 브라우저 구현은 결과별 CSS/JS 추정, 원작 궤적·회전·프레임 길이가 확인되지 않음 | 구현 목표: D4 1–4와 D6 1–6 각각의 모델 면방향/중력/바운스/정지 포즈를 출처 프레임과 타이밍별 매핑; 2026-10-21 PR pending beta.7: WEB fallback D6 3x3 pip placement fixed to reserve all 9 real grid positions (unused cells hidden not removed). Add Chromium/WebKit all 1..6 physical pip grid/face normals landing regression, original D4 and source roll UI unchanged. Original 2002 3D geometry and keyframes remain UNVERIFIED.; 2026-10-21 PR169 MERGED main 2fe53ab1 v0.86.0-beta.7/PWA94: physically correct WEB D6 result pip 3x3 grid using visibility hidden, all 1..6 result faces verified real DOM normals in Chromium, source gameplay roll unchanged. Original EXE die mesh/3D texture/keyframes still UNVERIFIED and not complete. Main original dice board QA 39609357986 + Pages deploy 39609357790 + build 39609327237 SUCCESS.",
       "acceptance": [
         "D4×4 + D6×6 결과를 고정 seed로 반복 재생해 원본 애니와 착지 최종 눈/게임 엔진 결과가 항상 일치"
       ],
       "evidence": [
         "dice-fall.js",
-        "tests/dice-fall.cjs"
+        "tests/dice-fall.cjs",
+        "https://github.com/koith/browser-app-lab/pull/169",
+        "https://github.com/koith/browser-app-lab/actions/runs/39608672106",
+        "https://github.com/koith/browser-app-lab/actions/runs/39609357986",
+        "https://github.com/koith/browser-app-lab/actions/runs/39609357790",
+        "https://github.com/koith/browser-app-lab/actions/runs/39609327237"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
       "lastReviewed": "2026-10-21",
@@ -5069,6 +5074,74 @@
         "apps/4leaf/rog/dice-fall.css",
         "apps/4leaf/rog/dice-fall.js",
         "apps/4leaf/rog/original/SourceSPR/manifest.json"
+      ]
+    },
+    {
+      "seq": 205,
+      "date": "2026-10-21",
+      "type": "STATUS_CHANGED",
+      "requestId": "REQ-20261021-006",
+      "taskId": "DIE-02",
+      "taskIds": [
+        "DIE-02"
+      ],
+      "from": "todo",
+      "to": "in_progress",
+      "details": "Initial verified correction to physically rendered WEB D6 result-specific pip geometry and source-playable staging, 2002 original mesh/keyframe/fps remains unrecovered, DO NOT mark source animation complete.",
+      "evidence": "https://github.com/koith/browser-app-lab/pull/169"
+    },
+    {
+      "seq": 206,
+      "date": "2026-10-21",
+      "type": "QA_VERIFIED",
+      "requestId": "REQ-20261021-006",
+      "taskIds": [
+        "DIE-02"
+      ],
+      "details": "PR169 latest HEAD b8d17274 QA 39608672106 original dice board Chromium PASS (explicit live DOM proof result1..6 eye 3x3 layouts and actual front normal +1 for all D6, previous D4 1..4 full tetra PASS), same SHA release 39608672184 Chromium/WebKit PASS, chat/world 39608672196 PASS, central chat 39608672136 PASS, ledger 39608672134 PASS. Main same-SHA 39609357986 original dice board QA SUCCESS, 39609360090 source release SUCCESS, 39609358022 game smoke SUCCESS. Test methodology explicitly tolerates source-photo-inspired red single pip 14px vs black pip 10px. Existing gameplay roll result/turn await unchanged. This proves WEB fallback geometry, not original-EXE source equivalence.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39608672106",
+      "refs": [
+        "https://github.com/koith/browser-app-lab/pull/169",
+        "https://github.com/koith/browser-app-lab/actions/runs/39608672184",
+        "https://github.com/koith/browser-app-lab/actions/runs/39608672196",
+        "https://github.com/koith/browser-app-lab/actions/runs/39609357986",
+        "https://github.com/koith/browser-app-lab/actions/runs/39609360090"
+      ]
+    },
+    {
+      "seq": 207,
+      "date": "2026-10-21",
+      "type": "DEPLOY_VERIFIED",
+      "requestId": "REQ-20261021-006",
+      "taskIds": [
+        "DIE-02",
+        "P0-DICE",
+        "P0-RELEASE"
+      ],
+      "details": "PR169 merged main@2fe53ab139959e1a7a6cc941b545553fe0b1d989, app v0.86.0-beta.7, PWA v94. Same-SHA GitHub Pages static deploy 39609357790 SUCCESS, pages build/deployment 39609327237 SUCCESS; game smoke 39609358022 SUCCESS, original source release QA 39609360090 SUCCESS. Original 3D D4/D6 model, texture, MVE timing/physics UNVERIFIED and do not claim source-complete.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39609357790",
+      "refs": [
+        "https://github.com/koith/browser-app-lab/actions/runs/39609327237",
+        "https://github.com/koith/browser-app-lab/pull/169"
+      ]
+    },
+    {
+      "seq": 208,
+      "date": "2026-10-21",
+      "type": "SOURCE_AUDIT",
+      "requestId": "REQ-20261021-006",
+      "taskIds": [
+        "DIE-01",
+        "DIE-02",
+        "BTL-04"
+      ],
+      "details": "GitHub main recursive tree enumerates 1863 tracked entries, NO raw original .pak/.mve/.exe/.3ds/.obj/.fbx/.glb model binaries under apps/4leaf. PR105 changed files primarily sprite decoding/OBS actors and archive research, NOT native D4/D6 meshes. Verified original GUI artifacts roll.spr x4/eventRoll1.spr x16 from Dice/IMG.pak are 2D distinct sources. Historic 4leaf.zip is indexed in existing repo research tools with SHA1 verification and CAB inspection, but no provenance-confirmed native 3D D4/D6 model/mesh, FPS, or exact 2002 bounce keyframes obtained. Continue CAB embedded asset/class table lookup and footage comparison; do not infer impossible from this missing source path. Combat source winBattle.spr 355x113 is native 2D podium visual, not original animated mesh; do NOT overwrite.",
+      "evidence": "apps/4leaf/rog/tools/inspect-original-client-zip.cjs",
+      "refs": [
+        "https://github.com/koith/browser-app-lab/pull/105",
+        "apps/4leaf/rog/original/SourceSPR/manifest.json",
+        "apps/4leaf/rog/original/SourceSPRExtra/winBattle-01.png",
+        "apps/4leaf/rog/tools/audit-original-dice-resources.py"
       ]
     }
   ]
