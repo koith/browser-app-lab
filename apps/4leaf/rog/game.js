@@ -1302,11 +1302,21 @@ async function resolveBattle(attacker,defender,keeper){
  if(result.negated){appendMove(result.mutualReset?'자폭: 양측 START 복귀':'오리발 효과: 전투 무효화');return}
  const av=result.attacker,bv=result.defender;
  if(av===bv){appendMove('전투 판정이 무효입니다.');return}
+ const winner=av>bv?attacker:defender;
  const loser=av>bv?defender:attacker,diff=Math.abs(av-bv);
  if(loser&&Number.isInteger(loser.position)){loser.position=diff>=7?0:Math.max(0,loser.position-diff)}
- appendMove(attacker.name+' '+av+' : '+bv+' '+defender.name+' · '+(av>bv?attacker.name:defender.name)+' 승리! '+(keeper?'키퍼 전투':loser.name+' '+(diff>=7?'START 복귀':diff+'칸 후퇴')));
+ appendMove(attacker.name+' '+av+' : '+bv+' '+defender.name+' · '+winner.name+' 승리! '+(keeper?'키퍼 전투':loser.name+' '+(diff>=7?'START 복귀':diff+'칸 후퇴')));
  chat('BATTLE',attacker.name+' '+av+' : '+bv+' '+defender.name,'system');
  drawGame();
+ // Match outcome—not the preview attacker/defender role—drives the final
+ // original OBS source actor state. The native pixels are authentic, but
+ // the old EXE action-to-frame/FPS mapping remains WEB-PROVISIONAL.
+ // Keep unrecovered keeper bodies as honest placeholders, never animate a
+ // fabricated 2002 model. Actor timers return to idle independently.
+ if(winner?.team?.length)
+   window.__LEAF_GENESIS_ACTORS__?.poseByPlayer(winner.id,'victory',1050);
+ if(loser?.team?.length)
+   window.__LEAF_GENESIS_ACTORS__?.poseByPlayer(loser.id,'hurt',650);
 }
 function grantItem(user){if(user.items.length<5){const itemId=ITEMS[rand(ITEMS.length)].id;user.items.push(itemId);appendMove(user.name+'이(가) 보물상자에서 '+ITEM_MAP[itemId].name+' 획득!')}else appendMove(user.name+'은 아이템이 가득 찼습니다.')}
 async function resolveTile(p,depth=0){
