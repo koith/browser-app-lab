@@ -16,10 +16,13 @@ const path=require('node:path');
   await page.locator('#bot-count').selectOption('1');
   await page.locator('#start-game').click();
   await page.waitForSelector('#game:not(.hidden)');
-  await page.evaluate(()=>{
-   const m=window.__ROG_TEST__.getMatch();
-   window.__ROG_TEST__.resolveBattle(m.players[0],m.players[1],false);
+  const preview=await page.evaluate(()=>{
+   const m=window.__ROG_TEST__.getMatch(),defender=m.players[1];
+   window.__ROG_TEST__.resolveBattle(m.players[0],defender,false);
+   return document.querySelector('#board-pawns .board-pawn[data-id="'+defender.id+'"]')?.dataset.actorPose;
   });
+  assert.equal(preview,'idle',
+   'before dice resolve the real defender must not falsely play source OBS hurt');
   await page.waitForSelector('#battle-visual');
   await page.waitForFunction(()=>{
    const stage=document.querySelector('#battle-visual');
