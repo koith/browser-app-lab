@@ -92,12 +92,19 @@ const {chromium,webkit}=require('playwright');
    const id=window.__ROG_TEST__.getMatch().players[0].id;
    window.__LEAF_GENESIS_ACTORS__.poseByPlayer(id,'walk',750);
   });
-  await page.waitForFunction(prev=>{
-   const src=document.querySelector('#board-pawns .leaf-chess-original-obs')?.getAttribute('src');
-   return src&&src!==prev&&src.includes('1045-');
-  },before,{timeout:5000});
-  const movement=await page.locator('#board-pawns .leaf-chess-original-obs').first().getAttribute('src');
-  assert.notEqual(movement,before,'original OBS walk moves between actual game bitmap frames');
+  // 1045.obs has no original frames 3..7. Previously it looped 0..2 as
+  // a fake complete walk. Display a real still instead; other 80 actors
+  // with all eight native indexes retain their animated walk (separate QA).
+  await page.waitForTimeout(280);
+  const partial=await page.locator('#board-pawns .board-pawn').first().evaluate(el=>({
+   sequence:el.dataset.sourceFrameSequence,
+   coverage:el.dataset.sourceWalkCoverage,
+   source:el.querySelector('.leaf-chess-original-obs')?.getAttribute('src')
+  }));
+  assert.equal(partial.sequence,'0','incomplete genuine source must not loop a fabricated walk');
+  assert.equal(partial.coverage,'partial-original-source/static-walk-until-source-complete');
+  assert.match(partial.source,/1045-00\.png$/);
+  const movement=partial.source;
   await page.waitForFunction(()=>document.querySelector('#board-pawns .board-pawn')?.dataset.actorPose==='idle',null,{timeout:4000});
   await page.locator('#dice-source-roll').click();
   await page.waitForFunction(()=>Number(document.querySelector('#dice-box')?.dataset.rollCount)>=1,

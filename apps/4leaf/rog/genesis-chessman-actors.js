@@ -21,6 +21,14 @@
    const map={idle:[0,1,2,3],walk:[0,1,2,3,4,5,6,7],
      attack:[10,18],hurt:[18,10],victory:[25,30,0]};
    const all=native.frames||[];
+   // The exact 0..7 sequence is available for only 80 original OBS
+   // characters. Repeating a clipped 0..2/0..6 subset on the other 12
+   // wrongly depicts a complete walking cycle. Keep their real first
+   // source frame STATIC until missing packets/action metadata are found.
+   const fullSourceWalk=Array.from({length:8},(_,i)=>i)
+    .every(index=>all.some(frame=>frame.index===index));
+   if(action==='walk'&&!fullSourceWalk)
+     return [all.find(frame=>frame.index===0)||all[0]].filter(Boolean);
    // Some genuinely decoded OBS sources have no safe frame-0 decode.
    // Expose their real pixels, but NEVER animate unrelated frames as if
    // their original idle/walk/attack semantic mapping were established.
@@ -126,6 +134,10 @@
    pawn.dataset.actorSource='OBS/'+native.originalMember;
    pawn.dataset.actorOriginalModelRecovered='true';
    pawn.dataset.sourceAnimation='genuine-OBS-pixels';
+   pawn.dataset.sourceWalkCoverage=Array.from({length:8},(_,i)=>i)
+    .every(index=>native.frames.some(frame=>frame.index===index))
+     ?'8-of-8-original-source-indices/WEB-action-unverified'
+     :'partial-original-source/static-walk-until-source-complete';
    pawn.dataset.sourcePoseMapping=native.frames.length===1||native.singleFrameStillOnly===true
      ?'unverified-single-source-frame/static-no-animation'
      :native.hasVerifiedFrameZero===false
