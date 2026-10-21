@@ -44,6 +44,14 @@
    if(img.getAttribute('src')!==frame.url)img.src=frame.url;
    img.style.setProperty('--leaf-obs-width',frame.width+'px');
    img.style.setProperty('--leaf-obs-height',frame.height+'px');
+   // The former WEB contact ellipse was always 36px, even for original
+   // 12px-to-239px wide chessmen. Derive its conservative visible footprint
+   // from EACH actual source frame's verified width, without fabricating
+   // pixels/meshes. This is an INFERRED shadow, NOT archived EXE lighting.
+   const contactWidth=Math.max(18,Math.min(84,Math.round(frame.width*.72)));
+   pawn.style.setProperty('--leaf-native-contact-width',contactWidth+'px');
+   pawn.dataset.sourceContactFootprint='inferred-shadow-width/from-original-OBS-frame';
+   pawn.dataset.sourceContactWidth=String(contactWidth);
    // Native OBS signed image origins are often negative. Build a valid
    // single-operator CSS calc rather than 'calc(50% + -17px)' which browsers
    // can discard, silently placing authentic models on the wrong platform.

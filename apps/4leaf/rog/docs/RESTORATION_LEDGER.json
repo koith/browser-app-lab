@@ -920,6 +920,27 @@
         "P0-RELEASE",
         "QA-03"
       ]
+    },
+    {
+      "id": "REQ-20261021-005",
+      "date": "2026-10-21",
+      "origin": "user",
+      "text": "원본 4LEAF 4LEAF/web main 8b5ac0b3 app beta.5 PWA v92: ChatRoom published QA 39556011951 root cause verify and fix if needed; prioritized original board TIS 145x97 pitch150x100 anti-overlap and actual shadow/contact visual original reproduction; preserve 32 TIS alpha /26 DMP, original dice ROLL UI vs 3D D4/D6, OBS action/direction/FPS and six missing, real screen QA snapshots Chromium/WebKit/mobile, code PR/merge/Pages+ledger. No fabricated native fidelity claims.",
+      "taskIds": [
+        "BRD-01",
+        "BRD-02",
+        "BRD-03",
+        "ACT-04",
+        "BTL-02",
+        "BTL-04",
+        "DIE-01",
+        "DIE-02",
+        "DIE-04",
+        "ACT-03",
+        "P0-BOARD",
+        "P0-ACTOR",
+        "P0-RELEASE"
+      ]
     }
   ],
   "tasks": [
@@ -1351,7 +1372,7 @@
       "title": "실제 TIS 알파·윗면·하단 림 상태 복원",
       "status": "in_progress",
       "milestone": "M04",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 소스 PNG는 145×97로 렌더되나 바닥 입체감·윗면 보이는 각도·원본 회전/알파 외곽 비교가 완료되지 않음 | 구현 목표: 32종 TIS alpha 외곽·스프라이트의 디코더 상하 반전을 2004 이미지의 실제 그림과 유형별 대조; 2026-10-20 신뢰 가능한 원본 145x97 RGBA alpha 실제 픽셀과 2004로부터 수용된 scaleY(-1) 방향을 DOM 클릭 좌표/카메라 zoom/모바일과 연결. CSS polygon의 내부 빈 픽셀을 가짜 발판 클릭으로 처리하지 않도록 정확한 source pixel picking 구현. 2002 MVE 실제 메시, 원본 전체 윗면 각도는 여전히 미해결.; 2026-10-20 PR #149 main@99323ecd source alpha hit test merged; board QA 39381019063 / release 39381019040 / visual 39381019028 and Pages 39381019093 verified. Followup on PR #150 main board workflow 39381488807 occasional first physical click landed on different foreground during camera transition, so followup PR uses pointer movement→document.elementFromPoint recheck/real mouse rather than fake DOM events; still historical original 3D projection incomplete.; 2026-10-20 원본 145x97 TIS 투명 픽셀에서 game.js tile click은 거부해도 독립적 부모 DMP 탐색기가 bubbled click을 받아 잘못된 정보창·카메라 이동을 유발하는 문제 확인. source-alpha.hitPoint를 부모에서도 검증해 원본 투명 픽셀은 두 계층 모두 무시. 키보드 Enter/Space 접근성 및 실제 불투명 타일 검사는 유지. 원작 MVE 메시 투영은 미완료.; 2026-10-20 PR154 squash main@d443cb5380ad51bfe9a1be1d2637cac48bb6bac8 original TIS source pixel hit applies BOTH target game tile and bubbling DMP terrain inspector. Previously source-transparent click could open fake DMP inspector and pan camera despite tile rejection. Fixed actual code, same-origin HTTP physical-browser/synthetic-ghost regression, keyboard Enter/Space preserved. Original MVE camera 3D geometry still open.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 소스 PNG는 145×97로 렌더되나 바닥 입체감·윗면 보이는 각도·원본 회전/알파 외곽 비교가 완료되지 않음 | 구현 목표: 32종 TIS alpha 외곽·스프라이트의 디코더 상하 반전을 2004 이미지의 실제 그림과 유형별 대조; 2026-10-20 신뢰 가능한 원본 145x97 RGBA alpha 실제 픽셀과 2004로부터 수용된 scaleY(-1) 방향을 DOM 클릭 좌표/카메라 zoom/모바일과 연결. CSS polygon의 내부 빈 픽셀을 가짜 발판 클릭으로 처리하지 않도록 정확한 source pixel picking 구현. 2002 MVE 실제 메시, 원본 전체 윗면 각도는 여전히 미해결.; 2026-10-20 PR #149 main@99323ecd source alpha hit test merged; board QA 39381019063 / release 39381019040 / visual 39381019028 and Pages 39381019093 verified. Followup on PR #150 main board workflow 39381488807 occasional first physical click landed on different foreground during camera transition, so followup PR uses pointer movement→document.elementFromPoint recheck/real mouse rather than fake DOM events; still historical original 3D projection incomplete.; 2026-10-20 원본 145x97 TIS 투명 픽셀에서 game.js tile click은 거부해도 독립적 부모 DMP 탐색기가 bubbled click을 받아 잘못된 정보창·카메라 이동을 유발하는 문제 확인. source-alpha.hitPoint를 부모에서도 검증해 원본 투명 픽셀은 두 계층 모두 무시. 키보드 Enter/Space 접근성 및 실제 불투명 타일 검사는 유지. 원작 MVE 메시 투영은 미완료.; 2026-10-20 PR154 squash main@d443cb5380ad51bfe9a1be1d2637cac48bb6bac8 original TIS source pixel hit applies BOTH target game tile and bubbling DMP terrain inspector. Previously source-transparent click could open fake DMP inspector and pan camera despite tile rejection. Fixed actual code, same-origin HTTP physical-browser/synthetic-ghost regression, keyboard Enter/Space preserved. Original MVE camera 3D geometry still open.; 2026-10-21 NEW beta6 code/QA pending: projected native TIS 145x97 at 150x100 had genuine 5x3 pixel gaps but invented external blur and selected-tile neon glow bled across them; stripped only WEB shadows/glows (original pixels and hit/mapping unchanged). Native OBS sprite contact width proportional to real frame width and source foot-plane centered; shadow INFERRED, original EXE 3D/GFX still unknown. Before/after desktop and iPhone screens on same DMP state pending CI.",
       "acceptance": [
         "32개 원본 타일의 원화 픽셀/방향/원본 클립 경계 유지, 타일 외곽 잘림·상하 오인 0건"
       ],
@@ -1374,7 +1395,7 @@
         "https://github.com/koith/browser-app-lab/actions/runs/39445335589"
       ],
       "evidenceLevel": "VERIFIED-SOURCE-TIS-ALPHA-EVENT-PROPAGATION/REAL-BROWSER-DMP/26-MAP-REGRESSION; HISTORICAL-MVE-CAMERA-OPEN",
-      "lastReviewed": "2026-10-20",
+      "lastReviewed": "2026-10-21",
       "verifiedAcceptance": null,
       "dependencies": [
         "BRD-01"
@@ -1387,7 +1408,7 @@
       "title": "26맵 타일 간 깊이·캐릭터 가림 재현",
       "status": "todo",
       "milestone": "M04",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 사각형 영역 중첩 0건과 DMP 행 painter 정렬 통과는 실제 입체 위아래 가림과 발 접지 증거가 아님 | 구현 목표: 실물 TIS 선후/알파·발판 측면 가림, 다중 체스맨, 카메라 확대와 텍스처 뎁스를 검증",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 사각형 영역 중첩 0건과 DMP 행 painter 정렬 통과는 실제 입체 위아래 가림과 발 접지 증거가 아님 | 구현 목표: 실물 TIS 선후/알파·발판 측면 가림, 다중 체스맨, 카메라 확대와 텍스처 뎁스를 검증; 2026-10-21 NEW beta6 code/QA pending: projected native TIS 145x97 at 150x100 had genuine 5x3 pixel gaps but invented external blur and selected-tile neon glow bled across them; stripped only WEB shadows/glows (original pixels and hit/mapping unchanged). Native OBS sprite contact width proportional to real frame width and source foot-plane centered; shadow INFERRED, original EXE 3D/GFX still unknown. Before/after desktop and iPhone screens on same DMP state pending CI.",
       "acceptance": [
         "26개 맵 경계/교차점/다중 캐릭터의 가림 순서 스크린샷 및 z-index 테스트, 원작과 모순 사례 0건"
       ],
@@ -1396,7 +1417,7 @@
         "tests/dice-native-pawn-dmp-depth.cjs"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-18",
+      "lastReviewed": "2026-10-21",
       "verifiedAcceptance": null,
       "dependencies": [
         "BRD-02",
@@ -1599,7 +1620,7 @@
       "title": "보드·전투 체스맨 발 접지·그림자·다중배치",
       "status": "in_progress",
       "milestone": "M05",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 기본 2P의 진짜 OBS 표시는 검증했으나 모든 체스맨 크기/발판 고정·동시 2인 겹침·전투 POV는 원본과 비교 미흡 | 구현 목표: 원본 OBS originX/Y, 발 위치, TIS 바닥 픽셀, 캐릭터 z-index/그림자 관통 검증; 2026-10-20 원본 OBS 이미지를 일시적 503 응답에서 영구 unavailable 처리하던 문제 개선: 실제 동일 아카이브 OBS PNG 3회 재요청, 실패 후 검증된 원본 CardData 정지 대체, 연결 회복 시 원본 전신 자동 재시도. 팀/턴/DMP 좌표·원본 소스 바이트 불변. 정확한 행동 프레임표·출발/착지·98종 전체 원본 수용은 여전히 미완료.; 2026-10-20 PR #150 merged main@bb15ba5c genuine OBS 503 retry/reconnect QA 39381181475 + release 39381181551 PASS, Pages 39381488969 success; real main OBS frame job 39381488742 success. Original 34 missing IDs and 2002 direction/actions still not recovered.; 2026-10-20 source-native 92/98 chessman animated PNG 629장 실제 playable game actor/OBS loader 연결, PC·mobile 104-cell 4LEAF DMP browser game QA; 6 source-missing still CardData fallback. Exact old original battle 3D contact foot Y and all frames' pose mapping remain unsolved.; 2026-10-20 full-body 원본 92종은 실제 보드/배틀 independent Genesis actor 로더로 연결; PR153 same SHA Chromium source 616 PNG all hash and player roll/duel verified, WebKit iPhone simulation passed. 6 ID CardData still honest static. Exact historical contact/original locomotion animation geometry open.; 2026-10-21 source native signed-origin and source frame dimensions exposed for every actual playable OBS 0..7 transition. Contact remains inferred shared foot-plane, exact 2004 polygon mesh and dual-actor original contact unverified.; 2026-10-21 live model frame signed source origin/native dimension and inferred shared foot plane are recorded for 0..7 gameplay transitions; original 3D foot-contact depth cannot be proven from these original PNGs; game state immutable during source-only animation.; 2026-10-21 source-renderer integration follow-up (PR pending): native game-board actor and live winBattle podium actor previously diverged after an action event because poseByPlayer only targeted #board-pawns. Added explicit match-player ID to each actual duel chessman; propagate gameplay pose changes to both source-backed instances without changing OBS indexed bytes/FPS or inventing original EXE action mapping. Browser QA pending.; 2026-10-21 PR#159 MERGED main@03e433b3c9f8d26e9b8af2bfa22ed4831915fbdf: real Genesis match participant IDs propagated to independent winBattle podium OBS actor rendering. Board + battle action states synchronized to the same recovered source-frame indexes, preserving gameplay/dice/turn authority. Chromium native-battle browser QA passed before merge, and same SHA 958-OBS-source gameplay QA, Pages static deployment & Pages build succeeded. Real 2002 action-direction/FPS mapping and historical 3D contact still NOT verified; do not mark ACT task done.; 2026-10-21 next small source integration slice: after real combat rolls resolve, drive the actual winner's OBS victory and loser's OBS hurt pose (rather than only initial attacker/defender roles), using recovered native OBS images on real board, keeper excluded. Browser QA gates both sides against live numeric dice results, authentic frame-index manifest and idle reset. PR/QA pending; original 2002 pose table still unverified.; 2026-10-21 follow-up PR161 MERGED main@330621b17ff207d832d449419910b1833e2720cb: real resolved battle winner's source OBS victory + loser's hurt playback, correctly scoped to true match participants, native indexed sprites and post-pose idle reset. Live Chromium original winBattle combat source-index checks PR gate PASS, main smoke PASS, Pages build/deploy PASS. Historical exact EXE source action mapping/FPS/pivots still UNVERIFIED and task remains IN_PROGRESS.; 2026-10-21 PR163 code branch: 80 native complete 0..7 retain full walking cycle; original incomplete 12 stop repeating truncated source as full walk (actual first original frame still shown, WEB motion coverage exposed); before combat score resolution, defending actor no longer falsely plays hurt. True win/loss actions remain result-driven. QA/merge/deploy pending; native EXE mapping/FPS/contact not proven.; 2026-10-21 PR163 MERGED main@75880af6 v0.86.0-beta.4; prior false pre-score defender hurt and fabricated incomplete 12 source walking corrected, 80 complete 0..7 retained. PR gate original board/OBS/Chromium/WebKit/Chat/ledger PASS; post-main OBS frame 39555370075 / smoke 39555370229 PASS, Pages deploy 39555370173 + platform 39555369354 SUCCESS. Original EXE action/FPS/mesh contact still UNVERIFIED; not completed.; 2026-10-21 v0.86.0-beta.5 PR pending: real DMP movement step loop no longer restarts genuine 0..7 source frame clock per 60ms turn step; full recovered 80 native sequences may play during actual dice turns, incomplete 12 still static. Real roll regression + screenshots pending CI. Historical EXE action FPS/direction/foot pivot still OPEN.; 2026-10-21 PR165 MERGED at cff0c2d2 v0.86.0-beta.5 PWA v92: physical actual rolled movement displays all 8 verified 0..7 native OBS packets instead of resetting index on every 38–60ms DMP step. Chromium native OBS 39558708001 PASS, Chromium/WebKit release 39558707938 PASS, main 39559102284 PASS, Pages 39559102213 + build 39559102777 SUCCESS. Original action direction/FPS still UNKNOWN; ACT IN_PROGRESS.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 기본 2P의 진짜 OBS 표시는 검증했으나 모든 체스맨 크기/발판 고정·동시 2인 겹침·전투 POV는 원본과 비교 미흡 | 구현 목표: 원본 OBS originX/Y, 발 위치, TIS 바닥 픽셀, 캐릭터 z-index/그림자 관통 검증; 2026-10-20 원본 OBS 이미지를 일시적 503 응답에서 영구 unavailable 처리하던 문제 개선: 실제 동일 아카이브 OBS PNG 3회 재요청, 실패 후 검증된 원본 CardData 정지 대체, 연결 회복 시 원본 전신 자동 재시도. 팀/턴/DMP 좌표·원본 소스 바이트 불변. 정확한 행동 프레임표·출발/착지·98종 전체 원본 수용은 여전히 미완료.; 2026-10-20 PR #150 merged main@bb15ba5c genuine OBS 503 retry/reconnect QA 39381181475 + release 39381181551 PASS, Pages 39381488969 success; real main OBS frame job 39381488742 success. Original 34 missing IDs and 2002 direction/actions still not recovered.; 2026-10-20 source-native 92/98 chessman animated PNG 629장 실제 playable game actor/OBS loader 연결, PC·mobile 104-cell 4LEAF DMP browser game QA; 6 source-missing still CardData fallback. Exact old original battle 3D contact foot Y and all frames' pose mapping remain unsolved.; 2026-10-20 full-body 원본 92종은 실제 보드/배틀 independent Genesis actor 로더로 연결; PR153 same SHA Chromium source 616 PNG all hash and player roll/duel verified, WebKit iPhone simulation passed. 6 ID CardData still honest static. Exact historical contact/original locomotion animation geometry open.; 2026-10-21 source native signed-origin and source frame dimensions exposed for every actual playable OBS 0..7 transition. Contact remains inferred shared foot-plane, exact 2004 polygon mesh and dual-actor original contact unverified.; 2026-10-21 live model frame signed source origin/native dimension and inferred shared foot plane are recorded for 0..7 gameplay transitions; original 3D foot-contact depth cannot be proven from these original PNGs; game state immutable during source-only animation.; 2026-10-21 source-renderer integration follow-up (PR pending): native game-board actor and live winBattle podium actor previously diverged after an action event because poseByPlayer only targeted #board-pawns. Added explicit match-player ID to each actual duel chessman; propagate gameplay pose changes to both source-backed instances without changing OBS indexed bytes/FPS or inventing original EXE action mapping. Browser QA pending.; 2026-10-21 PR#159 MERGED main@03e433b3c9f8d26e9b8af2bfa22ed4831915fbdf: real Genesis match participant IDs propagated to independent winBattle podium OBS actor rendering. Board + battle action states synchronized to the same recovered source-frame indexes, preserving gameplay/dice/turn authority. Chromium native-battle browser QA passed before merge, and same SHA 958-OBS-source gameplay QA, Pages static deployment & Pages build succeeded. Real 2002 action-direction/FPS mapping and historical 3D contact still NOT verified; do not mark ACT task done.; 2026-10-21 next small source integration slice: after real combat rolls resolve, drive the actual winner's OBS victory and loser's OBS hurt pose (rather than only initial attacker/defender roles), using recovered native OBS images on real board, keeper excluded. Browser QA gates both sides against live numeric dice results, authentic frame-index manifest and idle reset. PR/QA pending; original 2002 pose table still unverified.; 2026-10-21 follow-up PR161 MERGED main@330621b17ff207d832d449419910b1833e2720cb: real resolved battle winner's source OBS victory + loser's hurt playback, correctly scoped to true match participants, native indexed sprites and post-pose idle reset. Live Chromium original winBattle combat source-index checks PR gate PASS, main smoke PASS, Pages build/deploy PASS. Historical exact EXE source action mapping/FPS/pivots still UNVERIFIED and task remains IN_PROGRESS.; 2026-10-21 PR163 code branch: 80 native complete 0..7 retain full walking cycle; original incomplete 12 stop repeating truncated source as full walk (actual first original frame still shown, WEB motion coverage exposed); before combat score resolution, defending actor no longer falsely plays hurt. True win/loss actions remain result-driven. QA/merge/deploy pending; native EXE mapping/FPS/contact not proven.; 2026-10-21 PR163 MERGED main@75880af6 v0.86.0-beta.4; prior false pre-score defender hurt and fabricated incomplete 12 source walking corrected, 80 complete 0..7 retained. PR gate original board/OBS/Chromium/WebKit/Chat/ledger PASS; post-main OBS frame 39555370075 / smoke 39555370229 PASS, Pages deploy 39555370173 + platform 39555369354 SUCCESS. Original EXE action/FPS/mesh contact still UNVERIFIED; not completed.; 2026-10-21 v0.86.0-beta.5 PR pending: real DMP movement step loop no longer restarts genuine 0..7 source frame clock per 60ms turn step; full recovered 80 native sequences may play during actual dice turns, incomplete 12 still static. Real roll regression + screenshots pending CI. Historical EXE action FPS/direction/foot pivot still OPEN.; 2026-10-21 PR165 MERGED at cff0c2d2 v0.86.0-beta.5 PWA v92: physical actual rolled movement displays all 8 verified 0..7 native OBS packets instead of resetting index on every 38–60ms DMP step. Chromium native OBS 39558708001 PASS, Chromium/WebKit release 39558707938 PASS, main 39559102284 PASS, Pages 39559102213 + build 39559102777 SUCCESS. Original action direction/FPS still UNKNOWN; ACT IN_PROGRESS.; 2026-10-21 NEW beta6 code/QA pending: projected native TIS 145x97 at 150x100 had genuine 5x3 pixel gaps but invented external blur and selected-tile neon glow bled across them; stripped only WEB shadows/glows (original pixels and hit/mapping unchanged). Native OBS sprite contact width proportional to real frame width and source foot-plane centered; shadow INFERRED, original EXE 3D/GFX still unknown. Before/after desktop and iPhone screens on same DMP state pending CI.",
       "acceptance": [
         "전신 64종+추가 복원분에서 보드·전투·2인 겹침·6인 게임에 대한 실사 접지/가림 확인"
       ],
@@ -4863,6 +4884,46 @@
         "https://github.com/koith/browser-app-lab/actions/runs/39559102777",
         "https://github.com/koith/browser-app-lab/actions/runs/39559102270",
         "https://github.com/koith/browser-app-lab/pull/165"
+      ]
+    },
+    {
+      "seq": 197,
+      "date": "2026-10-21",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261021-005",
+      "taskIds": [
+        "BRD-01",
+        "BRD-02",
+        "BRD-03",
+        "ACT-04",
+        "BTL-02",
+        "BTL-04",
+        "DIE-01",
+        "DIE-02",
+        "DIE-04",
+        "ACT-03",
+        "P0-BOARD",
+        "P0-ACTOR",
+        "P0-RELEASE"
+      ],
+      "details": "Restoration request recorded before independent TIS/OBS contact visual change; previous PR149-166 original OBS extraction and gameplay retained."
+    },
+    {
+      "seq": 198,
+      "date": "2026-10-21",
+      "type": "IMPLEMENTED_PENDING_QA",
+      "requestId": "REQ-20261021-005",
+      "taskIds": [
+        "BRD-02",
+        "BRD-03",
+        "ACT-04"
+      ],
+      "details": "Visual original TIS 145x97 bitmap contains authentic upper/rim and edge RGBA; WEB projected pitch 150x100 leaves 5px horizontal /3px vertical bounding gaps, but preceding extra CSS 2x7px blur and occupied-tile 4px glow made visibly bleeding/shadow-overlapping neighbour cells. Remove fake external tile shadows and brighten only genuine pixel silhouettes on hover; preserve all 32 TIS textures, alpha click/silhouette, 26 original DMP coordinates, source orientation/camera pitch and native 2002 RGB. Board chessman contact ellipse previously fixed 36px left:15 bottom:6 regardless actual OBS width, now width derived/clamped from each genuine native OBS frame width and centered at shared foot plane from --leaf-obs-ground (inferred cast shadow, historical 3D lighting UNVERIFIED). Same-state before/after Chromium native TIS/OBS screenshots + mobile QA added. v0.86.0-beta.6/PWA v93; PR/CI/merge/deploy still PENDING.",
+      "evidence": "apps/4leaf/rog/tests/dice-source-tis-contact-visual.cjs",
+      "refs": [
+        "apps/4leaf/rog/dice-source-tile-pitch.css",
+        "apps/4leaf/rog/dice-native-pawn-dmp-depth.css",
+        "apps/4leaf/rog/genesis-chessman-actors.js"
       ]
     }
   ]
