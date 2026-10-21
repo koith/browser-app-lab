@@ -23,6 +23,9 @@ on:
       - 'apps/4leaf/rog/dice-native-tis-alpha.js'
       - 'apps/4leaf/rog/dice-native-pawn-dmp-depth.css'
       - 'apps/4leaf/rog/tests/dice-native-pawn-dmp-depth.cjs'
+      - 'apps/4leaf/rog/dice-source-tile-pitch.css'
+      - 'apps/4leaf/rog/genesis-chessman-actors.js'
+      - 'apps/4leaf/rog/tests/dice-source-tis-contact-visual.cjs'
       - 'apps/4leaf/rog/tests/dice-source-alpha-pointer.cjs'
       - 'apps/4leaf/rog/tests/dice-native-tis-alpha.cjs'
       - 'apps/4leaf/rog/tests/dice-native-tis-full-outline.cjs'
@@ -79,6 +82,8 @@ jobs:
           curl -fSsI http://127.0.0.1:8765/index.html
       - name: Verify genuine DMP painter order of original Registry actors versus overlapping source TIS platforms
         run: node apps/4leaf/rog/tests/dice-native-pawn-dmp-depth.cjs
+      - name: "Original RGBA TIS edge bleed + source-proportional OBS grounding before/after"
+        run: node apps/4leaf/rog/tests/dice-source-tis-contact-visual.cjs
       - name: Verify real source TIS multi-color alpha with a live game turn
         run: node apps/4leaf/rog/tests/dice-native-tis-alpha.cjs
       - name: Original TIS source alpha physical pointer & mobile zoom
