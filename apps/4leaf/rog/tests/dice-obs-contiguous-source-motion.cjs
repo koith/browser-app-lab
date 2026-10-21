@@ -113,6 +113,11 @@ const {chromium}=require('playwright');
    for(let i=1;i<=15;i++)m.tiles[i]='normal';
    window.__ROG_TEST__.drawGame();
    const actor=document.querySelector('#board-pawns .board-pawn[data-id="0"]');
+   // Force a reproducible HIGH but genuine D6 result (via the game's
+   // ordinary dice RNG) so multiple DMP steps occur. No source frames,
+   // authoritative movement rules or production RNG are modified.
+   window.__OBS_REAL_TURN_RANDOM__=Math.random;
+   Math.random=()=>0.84;
    window.__OBS_REAL_TURN_FRAMES__=[];
    const sample=()=>{
     if(actor.dataset.actorPose!=='walk')return;
@@ -133,6 +138,7 @@ const {chromium}=require('playwright');
    null,{timeout:18000});
   await page.screenshot({path:'leaf-obs-real-roll-source-walk-frame7.png'});
   const liveTurn=await page.evaluate(()=>{
+   Math.random=window.__OBS_REAL_TURN_RANDOM__;
    window.__OBS_REAL_TURN_OBSERVER__?.disconnect();
    const m=window.__ROG_TEST__.getMatch();
    const actor=document.querySelector('#board-pawns .board-pawn[data-id="0"]');
@@ -141,7 +147,7 @@ const {chromium}=require('playwright');
     rig:actor.dataset.actorRig,source:actor.dataset.actorSource,
     coverage:actor.dataset.sourceWalkCoverage};
   });
-  assert.ok(liveTurn.position>0,'real Dice engine must advance original DMP player');
+  assert.ok(liveTurn.position>=2,'deterministic legal D6 real Dice engine must traverse multiple DMP cells');
   assert.ok(liveTurn.lastRoll?.length&&liveTurn.lastRoll.every(Number.isInteger),
    'real source visual playback must be driven by actual rolled dice values');
   assert.equal(liveTurn.rig,'original-obs-sprite');
