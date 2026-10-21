@@ -18,7 +18,9 @@ const {webkit}=require('playwright');
     'http://127.0.0.1:8765/index.html');
   await page.waitForFunction(()=>window.__ROG_TEST__&&window.__LEAF_CAMERA__);
   const version=await page.locator('meta[name="leaf-revival-version"]').getAttribute('content');
-  assert.equal(version,'0.86.0-beta.1');
+  // Do not freeze a previously released beta in a browser acceptance test:
+  // compare the actual rendered build against its canonical release metadata.
+  assert.equal(version,require('../app-version.json').version);
   await page.locator('[data-route="lobby"]').first().click();
   await page.locator('#lobby-create').click();
   await page.locator('#game-mode').selectOption('hotseat');
