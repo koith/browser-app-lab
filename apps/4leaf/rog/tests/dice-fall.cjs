@@ -89,9 +89,18 @@ const {chromium,webkit}=require('playwright');
      index,x:n.offsetLeft,y:n.offsetTop,
      shown:getComputedStyle(n).visibility==='visible'&&getComputedStyle(n).display!=='none'
     }));
-    const xs=[...new Set(coords.map(n=>n.x))].sort((a,b)=>a-b);
-    const ys=[...new Set(coords.map(n=>n.y))].sort((a,b)=>a-b);
-    const layout=coords.map(n=>({...n,col:xs.indexOf(n.x),row:ys.indexOf(n.y)}));
+    // Source screenshot's red result-1 pip is deliberately 14px vs 10px
+    // black pips. Grid aligns their CENTERS, so its left/top is 2px
+    // before the ordinary center cell. Compare each actual pixel position
+    // to the physical row/column references with a 3px centering tolerance.
+    const xs=coords.slice(0,3).map(n=>n.x);
+    const ys=[coords[0],coords[3],coords[6]].map(n=>n.y);
+    const layout=coords.map(n=>({...n,
+     col:xs.reduce((best,x,i)=>Math.abs(x-n.x)<Math.abs(xs[best]-n.x)?i:best,0),
+     row:ys.reduce((best,y,i)=>Math.abs(y-n.y)<Math.abs(ys[best]-n.y)?i:best,0),
+     gridCenterErrorX:Math.abs(n.x-xs[n.index%3]),
+     gridCenterErrorY:Math.abs(n.y-ys[Math.floor(n.index/3)])
+    }));
     const cssCube=new DOMMatrixReadOnly(getComputedStyle(node).transform);
     const normals=[...node.querySelectorAll('.leaf-die-face')].map((face,index)=>{
      const faceMatrix=new DOMMatrixReadOnly(getComputedStyle(face).transform);
@@ -109,7 +118,8 @@ const {chromium,webkit}=require('playwright');
    assert.equal(proof.columns,3,'physical D6 columns: '+JSON.stringify(proof));
    assert.equal(proof.rows,3,'physical D6 rows: '+JSON.stringify(proof));
    assert.equal(proof.coordinates.length,9);
-   assert.ok(proof.coordinates.every((n,i)=>n.col===i%3&&n.row===Math.floor(i/3)),
+   assert.ok(proof.coordinates.every((n,i)=>n.col===i%3&&n.row===Math.floor(i/3)&&
+      n.gridCenterErrorX<=3&&n.gridCenterErrorY<=3),
     'pip grid must preserve real 3x3 positions (hidden cells remain physically laid out): '+
     JSON.stringify(proof.coordinates));
    assert.deepEqual(proof.coordinates.filter(n=>n.shown).map(n=>n.index),proof.expected,
