@@ -90,8 +90,15 @@ const {chromium}=require('playwright');
   });
   const desktop=await measure();
   assert.equal(desktop.tiles.length,104,'native source DMP match unchanged');
-  assert.ok(desktop.tiles.every(t=>t.w===145&&t.h===97&&t.alpha==='ready'&&
-    t.filter==='none'),'real TIS art cannot bleed WEB shadow beyond its own original RGBA pixel bounds');
+  // A tile physically under the mouse may be brighten(1.1) on hover.
+  // Brightness affects ONLY that tile's original RGBA pixels; unlike
+  // drop-shadow it never bleeds beyond the source silhouette.
+  const nativeOnly=t=>t.w===145&&t.h===97&&t.alpha==='ready'&&
+   (t.filter==='none'||t.filter.startsWith('brightness('))&&
+   !t.filter.includes('drop-shadow');
+  assert.ok(desktop.tiles.every(nativeOnly),
+   'real TIS art must have native 145x97 source pixels and no exterior WEB halo: '+
+    JSON.stringify(desktop.tiles.filter(t=>!nativeOnly(t)).slice(0,6)));
   assert.ok(desktop.pawns.every(p=>p.nativeReady&&p.source.includes('OBS/')),
    'native chessman source body must remain on the board');
   for(const actor of desktop.pawns){
@@ -129,7 +136,7 @@ const {chromium}=require('playwright');
   await page.setViewportSize({width:390,height:844});
   const mobile=await measure();
   assert.equal(mobile.tiles.length,104,'iPhone did not lose genuine 26-DMP source cells');
-  assert.ok(mobile.tiles.every(t=>t.w===145&&t.h===97&&t.filter==='none'));
+  assert.ok(mobile.tiles.every(nativeOnly),'mobile still uses genuine source art and no external shadow');
   await page.screenshot({path:'leaf-tis-obs-source-contact-iphone.png'});
   const final=await page.evaluate(()=>({
    positions:window.__ROG_TEST__.getMatch().players.map(p=>p.position),
