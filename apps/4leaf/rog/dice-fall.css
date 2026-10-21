@@ -52,13 +52,20 @@
 #app.app-classic-dice #game .leaf-die-face-4{transform:rotateX(-90deg) translateZ(28.5px)}
 #app.app-classic-dice #game .leaf-die-face-5{transform:rotateY(-90deg) translateZ(28.5px)}
 #app.app-classic-dice #game .leaf-die-face-6{transform:rotateY(180deg) translateZ(28.5px)}
+/* An absent D6 pip is an EMPTY source-grid slot, not a removed slot.
+ * display:none made the CSS Grid auto-place only the visible dots into
+ * adjacent cells: a true 3 face became a row, and 4/5/6 face placements
+ * no longer matched the actual result geometry. All 9 physical locations
+ * must remain in the grid; hide only the mark in an unused location.
+ * Geometry is a WEB fallback (original 2002 3D mesh still unrecovered).
+ */
 #app.app-classic-dice #game .leaf-die-eye{
- display:none;box-sizing:border-box;
+ display:block;visibility:hidden;box-sizing:border-box;
  width:10px;height:10px;border-radius:50%;
  background:#1c2430;
  box-shadow:inset 1px 1px 2px #02080e,0 1px 0 #fff9;
 }
-#app.app-classic-dice #game .leaf-die-eye.visible{display:block}
+#app.app-classic-dice #game .leaf-die-eye.visible{display:block;visibility:visible}
 #app.app-classic-dice #game .leaf-die-face-1 .leaf-die-eye.visible{
  background:#ed2963;width:14px;height:14px;
  box-shadow:inset 2px 2px 3px #9e1640,0 1px 0 #fff;
