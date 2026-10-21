@@ -26,6 +26,35 @@ const path=require('node:path');
    return stage?.dataset.nativeBattlePodium==='ready'&&
      stage?.dataset.nativeBattleHeading==='ready';
   },null,{timeout:15000});
+  // Regression: the same genuine Genesis chessman lives in the board and
+  // native 2002 duel podium. Live events must update BOTH mounted OBS actors,
+  // not just the board; the opposing player's pose stays independently owned.
+  const synced=await page.evaluate(()=>{
+   const m=window.__ROG_TEST__.getMatch(),ids=m.players.slice(0,2).map(p=>String(p.id));
+   const find=(selector,id)=>document.querySelector(selector+'[data-id="'+id+'"]');
+   const board=ids.map(id=>find('#board-pawns .board-pawn',id));
+   const duel=ids.map(id=>find('#battle-visual .leaf-battle-chessman',id));
+   window.__LEAF_GENESIS_ACTORS__.poseByPlayer(ids[0],'walk',1200);
+   window.__LEAF_GENESIS_ACTORS__.poseByPlayer(ids[1],'hurt',1200);
+   return {ids,board:board.map(el=>({id:el?.dataset.id,pose:el?.dataset.actorPose,
+    chessman:el?.dataset.chessmanId,frames:el?.dataset.sourceFrameSequence,
+    source:el?.dataset.actorRig})),
+    duel:duel.map(el=>({id:el?.dataset.id,pose:el?.dataset.actorPose,
+    chessman:el?.dataset.chessmanId,frames:el?.dataset.sourceFrameSequence,
+    source:el?.dataset.actorRig}))};
+  });
+  assert.equal(new Set(synced.ids).size,2,'each live duel side is a distinct match player');
+  assert.deepEqual(synced.board.map(x=>x.pose),['walk','hurt']);
+  assert.deepEqual(synced.duel.map(x=>x.pose),['walk','hurt'],
+   'original OBS action events must also reach duel-podium actors');
+  assert.deepEqual(synced.duel.map(x=>x.id),synced.ids,
+   'duel actors must preserve the real match-player IDs');
+  assert.deepEqual(synced.duel.map(x=>x.chessman),synced.board.map(x=>x.chessman),
+   'duel and board must play each same real selected Genesis chessman');
+  assert.deepEqual(synced.duel.map(x=>x.frames),synced.board.map(x=>x.frames),
+   'board/podium may not substitute different inferred frame indexes');
+  assert.ok(synced.duel.every(x=>x.source==='original-obs-sprite'),
+   'already recovered true OBS full bodies must be rendered on both podiums');
   const state=await page.locator('#battle-visual').evaluate(stage=>{
    const style=getComputedStyle(stage);
    const sides=[...stage.querySelectorAll('.battle-visual-side')];
