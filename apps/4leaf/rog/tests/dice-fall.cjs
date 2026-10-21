@@ -73,17 +73,53 @@ const {chromium,webkit}=require('playwright');
   // Reduced motion skips arbitrary waiting; it must still yield precisely
   // the requested source engine values.
   await page.emulateMedia({reducedMotion:'reduce'});
+  const physicallyMeasured=[];
   for(let eye=1;eye<=6;eye++){
-   const returned=await page.evaluate(async eye=>window.__LEAF_DICE_FALL__.roll([eye]),eye);
-   assert.deepEqual(returned,[eye]);
-   const source=await page.evaluate(()=>window.__LEAF_DICE_FALL__.getState());
-   assert.deepEqual(source.last,[eye],'cube landed with the supplied REAL face '+eye);
-   const topology=await page.evaluate(eye=>({
-    pips:window.__LEAF_DICE_FALL__.faces[eye].length,
-    orientation:window.__LEAF_DICE_FALL__.orientation[eye]
-   }),eye);
-   assert.equal(topology.pips,eye,'CSS face '+eye+' uses exactly '+eye+' physical pips');
-   assert.equal(topology.orientation.length,2);
+   // Inspect the actual rotating native DOM cube WHILE rendered, before
+   // the presentation promise cleans up the result layer. A data/result
+   // attribute is insufficient: it could say "3" while the white cube
+   // visibly paints two, four, or a row of six clustered dots.
+   const proof=await page.evaluate(async eye=>{
+    const pending=window.__LEAF_DICE_FALL__.roll([eye]);
+    const node=document.querySelector('#leaf-dice-fall-layer .leaf-fall-cube');
+    const targetFace=node?.querySelector('.leaf-die-face-'+eye);
+    if(!node||!targetFace)return {missing:true};
+    const pipNodes=[...targetFace.querySelectorAll('.leaf-die-eye')];
+    const coords=pipNodes.map((n,index)=>({
+     index,x:n.offsetLeft,y:n.offsetTop,
+     shown:getComputedStyle(n).visibility==='visible'&&getComputedStyle(n).display!=='none'
+    }));
+    const xs=[...new Set(coords.map(n=>n.x))].sort((a,b)=>a-b);
+    const ys=[...new Set(coords.map(n=>n.y))].sort((a,b)=>a-b);
+    const layout=coords.map(n=>({...n,col:xs.indexOf(n.x),row:ys.indexOf(n.y)}));
+    const cssCube=new DOMMatrixReadOnly(getComputedStyle(node).transform);
+    const normals=[...node.querySelectorAll('.leaf-die-face')].map((face,index)=>{
+     const faceMatrix=new DOMMatrixReadOnly(getComputedStyle(face).transform);
+     return {eye:index+1,
+      towardsCamera:Number(cssCube.multiply(faceMatrix)
+       .transformPoint(new DOMPoint(0,0,1,0)).z.toFixed(3))};
+    });
+    const realValues=await pending;
+    return {result:realValues,expected:window.__LEAF_DICE_FALL__.faces[eye],
+     coordinates:layout,columns:xs.length,rows:ys.length,normals,
+     originalMesh:window.__LEAF_DICE_FALL__.getState().originalFramesRecovered};
+   },eye);
+   assert.equal(proof.missing,undefined,'D6 must instantiate source-valued real 3D geometry');
+   assert.deepEqual(proof.result,[eye]);
+   assert.equal(proof.columns,3,'all three original pip columns must keep physical space');
+   assert.equal(proof.rows,3,'all three original pip rows must keep physical space');
+   assert.equal(proof.coordinates.length,9);
+   assert.ok(proof.coordinates.every((n,i)=>n.col===i%3&&n.row===Math.floor(i/3)),
+    'pip grid must preserve real 3x3 positions (hidden cells remain physically laid out): '+
+    JSON.stringify(proof.coordinates));
+   assert.deepEqual(proof.coordinates.filter(n=>n.shown).map(n=>n.index),proof.expected,
+    'result '+eye+' must show correct geometrical eyes, not auto-packed pips');
+   assert.equal(proof.normals[eye-1].towardsCamera,1,
+    'actual 3D result-face normal must face front for '+eye+': '+JSON.stringify(proof.normals));
+   assert.equal(proof.originalMesh,false,
+    'this corrected WEB fallback is not yet an original 2002 MVE die');
+   physicallyMeasured.push({eye,cells:proof.expected,
+    normal:proof.normals[eye-1].towardsCamera});
   }
   // The 4-sided movement die previously kept the SAME flat polygon for
   // 1, 2, 3 and 4 and only replaced its printed numeral. Verify four real
@@ -126,6 +162,6 @@ const {chromium,webkit}=require('playwright');
   }
   assert.deepEqual(errors,[],'no browser exceptions on real original game');
   console.log('4LEAF DICE FALL BOUNCE AND REAL 1-6 LANDING PASS',
-   JSON.stringify({engine,mobile,first:landed.match,landings:6,d4:normalResults}));
+   JSON.stringify({engine,mobile,first:landed.match,landings:6,d6:physicallyMeasured,d4:normalResults}));
  }finally{await browser.close()}
 })().catch(e=>{console.error('DICE FALL REAL TURN FAILED',e.stack||e);process.exit(1)});
