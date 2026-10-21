@@ -25,3 +25,25 @@
   background-size:145px 97px!important;
  }
 }
+
+/* The source 145x97 TIS already contains its original rim/shading.
+ * The former WEB-only external 7px drop-shadow and player-here glow
+ * expanded beyond the verified 150x100 neighbour pitch (5px / 3px
+ * rectangular gaps), making independently positioned cells APPEAR
+ * merged although the real source pixels never geometrically overlapped.
+ * Retain source RGBA, scaleY orientation, alpha hit and DMP z-sort.
+ * Original 3D MVE camera and global illumination remain UNVERIFIED.
+ */
+#app.app-classic-dice #game .board-world #board-nodes
+ .tile[data-native-tis-size="145x97"],
+#app.app-classic-dice #game .board-world #board-nodes
+ .tile[data-native-tis-size="145x97"].player-here{
+ filter:none!important;
+}
+#app.app-classic-dice #game .board-world #board-nodes
+ .tile[data-native-tis-size="145x97"]:hover,
+#app.app-classic-dice #game .board-world #board-nodes
+ .tile[data-native-tis-size="145x97"]:focus-visible{
+ /* Brighten ONLY the genuine RGBA pixels; no halo over adjacent tiles. */
+ filter:brightness(1.10)!important;
+}
