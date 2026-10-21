@@ -236,8 +236,48 @@ const path=require('node:path');
   assert.ok(mobileActions.physical&&mobileActions.insideBoard&&mobileActions.parentInBoard,
    'iPhone battle result actions remain physically tappable INSIDE original game viewport: '+JSON.stringify(mobileActions));
   await page.screenshot({path:'leaf-live-3d-battle-podiums-mobile.png'});
+  // Read the actual rolled combat scores and participant IDs before
+  // resolving; this assertion must never force a fabricated winning face.
+  const actualCombat=await page.locator('#battle-visual').evaluate(stage=>
+   [...stage.querySelectorAll('.battle-visual-side')].map(side=>({
+    id:side.querySelector('.leaf-battle-chessman')?.dataset.id,
+    score:Number(side.querySelector('.battle-visual-total')?.textContent)
+   })));
+  assert.equal(actualCombat.length,2);
+  assert.ok(actualCombat.every(x=>/^\\d+$/.test(x.id)&&Number.isFinite(x.score)),
+   'the real combat result must retain independent match IDs and numeric rolls');
+  assert.notEqual(actualCombat[0].score,actualCombat[1].score,
+   'normal combat resolves ties before either result pose is applied');
+  const winner=actualCombat[0].score>actualCombat[1].score?
+    actualCombat[0].id:actualCombat[1].id;
+  const loser=actualCombat[0].score>actualCombat[1].score?
+    actualCombat[1].id:actualCombat[0].id;
   await page.locator('#modal-buttons button').filter({hasText:'결과 확인'}).click();
   await page.waitForFunction(()=>!document.getElementById('battle-visual'),null,{timeout:8000});
+  await page.waitForFunction(({winner,loser})=>{
+   const actor=id=>document.querySelector('#board-pawns .board-pawn[data-id="'+id+'"]');
+   return actor(winner)?.dataset.actorPose==='victory'&&
+     actor(loser)?.dataset.actorPose==='hurt';
+  },{winner,loser},{timeout:4000});
+  const resultActors=await page.evaluate(({winner,loser})=>
+   [winner,loser].map(id=>{
+    const actor=document.querySelector('#board-pawns .board-pawn[data-id="'+id+'"]');
+    const native=window.ORIGINAL_LEAF_OBS_FRAMES[actor.dataset.chessmanId];
+    const seq=(actor.dataset.sourceFrameSequence||'').split(',').map(Number);
+    return {id,pose:actor.dataset.actorPose,rig:actor.dataset.actorRig,
+     sequence:seq,sourceNative:native?.frames?.map(x=>x.index)||[],
+     img:actor.querySelector('.leaf-chess-original-obs')?.getAttribute('src')};
+   }),{winner,loser});
+  assert.deepEqual(resultActors.map(x=>x.pose),['victory','hurt'],
+   'resolved match winner must celebrate and real loser must react, not the initial attack side');
+  assert.ok(resultActors.every(x=>x.rig==='original-obs-sprite'&&
+    x.sequence.length>0&&x.sequence.every(n=>x.sourceNative.includes(n))&&
+    x.img?.startsWith('./original/OBS/')),
+   'all post-result action pixels must be genuine archived OBS indices, never synthetic sprites');
+  await page.waitForFunction(({winner,loser})=>
+   [winner,loser].every(id=>document.querySelector(
+    '#board-pawns .board-pawn[data-id="'+id+'"]')?.dataset.actorPose==='idle'),
+   {winner,loser},{timeout:4000});
   assert.equal(await page.locator('.leaf-native-battle-actions').count(),0,
    'result tray is cleaned up after battle to avoid stealing ordinary ROLL clicks');
   assert.equal(await page.locator('#modal .modal-window #modal-buttons').count(),1,
