@@ -42,7 +42,21 @@ const {chromium,webkit}=require('playwright');
    disabled:document.querySelector('#roll-btn').disabled,
    overlay:getComputedStyle(document.querySelector('#leaf-dice-fall-layer')).pointerEvents,
    pos:document.querySelector('#leaf-dice-fall-layer').getBoundingClientRect().toJSON(),
-   original:document.querySelectorAll('#board-nodes>.tile').length
+   original:document.querySelectorAll('#board-nodes>.tile').length,
+   grounded:[...document.querySelectorAll('#leaf-dice-fall-layer .leaf-fall-track')]
+    .map(track=>{
+     const shadow=getComputedStyle(track,'::before');
+     const piece=track.querySelector('.leaf-fall-piece');
+     return {shadowProvenance:track.dataset.shadowProvenance,
+      anchorPosition:getComputedStyle(track).position,
+      anchorTransform:getComputedStyle(track).transform,
+      shadowBackground:shadow.backgroundImage,
+      shadowPosition:shadow.position,
+      shadowBottom:parseFloat(shadow.bottom),
+      piece:!!piece,piecePosition:piece&&getComputedStyle(piece).position,
+      shadowTimeline:track.style.getPropertyValue('--leaf-dice-shadow-duration')
+     };
+    })
   }));
   assert.equal(mid.phase,'falling','dice genuinely start high in the sky');
   assert.ok(mid.faceCount>=6&&mid.faceCount<=24,'every independent die has six visible-world 3D faces');
@@ -50,6 +64,14 @@ const {chromium,webkit}=require('playwright');
   assert.equal(mid.disabled,true,'other player cannot double-roll during drop');
   assert.equal(mid.overlay,'none','physics never blocks underlying game input');
   assert.equal(mid.original,104,'104 real TIS tiles unaffected by physics overlay');
+  assert.equal(mid.grounded.length,mid.total,
+   'every actually falling die needs an independent floor-grounded cast shadow');
+  assert.ok(mid.grounded.every(t=>t.shadowProvenance==='web-inferred-ground-contact'&&
+   t.anchorPosition==='relative'&&t.anchorTransform==='none'&&t.shadowPosition==='absolute'&&
+   t.shadowBottom<0&&t.shadowBackground.includes('radial-gradient')&&
+   t.piece&&t.piecePosition==='absolute'&&t.shadowTimeline.endsWith('ms')),
+   'during actual airborne tumble, floor-shadow must stay in untransformed stage: '+
+    JSON.stringify(mid.grounded));
   await page.screenshot({path:'leaf-true-falling-dice-'+engine+(mobile?'-mobile':'')+'.png'});
   await page.waitForFunction(()=>Number(document.querySelector('#dice-box').dataset.rollCount)>0,
    null,{timeout:14000});
