@@ -224,11 +224,23 @@
  function pose(pawn,requested='idle',duration=0){
   if(!pawn)return;
   const action=VALID.includes(requested)?requested:'idle';
+  // A real roll advances its pawn every ~60ms. If each step restarts the
+  // 120ms native-source frame clock, gameplay can NEVER show frame 2..7
+  // although manual QA plays all eight. Continue the SAME source walk
+  // across successive DMP cell transitions; keep the original OBS pixels.
+  const continueSourceWalk=action==='walk'&&pawn.dataset.actorPose==='walk'&&
+   pawn.dataset.actorRig==='original-obs-sprite'&&
+   pawn.dataset.sourceWalkCoverage?.startsWith('8-of-8-');
   clearTimeout(timeouts.get(pawn));
-  pawn.dataset.actorPose=action;
-  const counts=states.get(pawn)||{};
-  states.set(pawn,{...counts,[action]:(counts[action]||0)+1});
-  renderFrame(pawn,pawn.dataset.chessmanId,action);
+  if(!continueSourceWalk){
+   pawn.dataset.actorPose=action;
+   const counts=states.get(pawn)||{};
+   states.set(pawn,{...counts,[action]:(counts[action]||0)+1});
+   renderFrame(pawn,pawn.dataset.chessmanId,action);
+  }
+  pawn.dataset.walkSourceClock=continueSourceWalk
+   ?'continuous-across-real-DMP-steps/WEB-120ms':
+    action==='walk'?'new-source-sequence/WEB-120ms':'inactive';
   if(duration>0&&action!=='idle'){
    const token=setTimeout(()=>{
     if(pawn.isConnected&&pawn.dataset.actorPose===action)pose(pawn,'idle',0);

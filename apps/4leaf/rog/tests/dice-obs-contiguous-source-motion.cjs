@@ -100,6 +100,65 @@ const {chromium}=require('playwright');
    // Avoid carrying a live sequence into the next character identity.
    await page.evaluate(playerId=>window.__LEAF_GENESIS_ACTORS__.poseByPlayer(playerId,'idle'),setup.playerId);
   }
+  // A real PLAYER roll, not a direct poseByPlayer test, must advance all
+  // eight genuine OBS indexes. The game moves one DMP cell every ~60ms;
+  // previous per-cell walk(240) restarted the 120ms source clock and
+  // almost always left physical gameplay stuck on source indexes 0/1.
+  await page.evaluate(()=>{
+   const m=window.__ROG_TEST__.getMatch();
+   m.players[0].team[0]='c_0046'; // confirmed original source 0..7
+   m.players[0].position=0;m.players[1].position=35;m.active=0;
+   // Controlled event-free GAME turn; retains actual native DMP map,
+   // original source player, dice engine and turn transition.
+   for(let i=1;i<=15;i++)m.tiles[i]='normal';
+   window.__ROG_TEST__.drawGame();
+   const actor=document.querySelector('#board-pawns .board-pawn[data-id="0"]');
+   // Force a reproducible HIGH but genuine D6 result (via the game's
+   // ordinary dice RNG) so multiple DMP steps occur. No source frames,
+   // authoritative movement rules or production RNG are modified.
+   window.__OBS_REAL_TURN_RANDOM__=Math.random;
+   Math.random=()=>0.84;
+   window.__OBS_REAL_TURN_FRAMES__=[];
+   const sample=()=>{
+    if(actor.dataset.actorPose!=='walk')return;
+    window.__OBS_REAL_TURN_FRAMES__.push({
+     frame:Number(actor.dataset.actorFrame),
+     position:Number(actor.dataset.position),
+     clock:actor.dataset.walkSourceClock,
+     file:actor.querySelector('.leaf-chess-original-obs')?.getAttribute('src')
+    });
+   };
+   window.__OBS_REAL_TURN_OBSERVER__=new MutationObserver(sample);
+   window.__OBS_REAL_TURN_OBSERVER__.observe(actor,{attributes:true,
+    attributeFilter:['data-actor-frame','data-position']});
+  });
+  await page.screenshot({path:'leaf-obs-real-roll-source-walk-before.png'});
+  await page.locator('#roll-btn').click();
+  await page.waitForFunction(()=>window.__OBS_REAL_TURN_FRAMES__?.some(x=>x.frame===7),
+   null,{timeout:18000});
+  await page.screenshot({path:'leaf-obs-real-roll-source-walk-frame7.png'});
+  const liveTurn=await page.evaluate(()=>{
+   Math.random=window.__OBS_REAL_TURN_RANDOM__;
+   window.__OBS_REAL_TURN_OBSERVER__?.disconnect();
+   const m=window.__ROG_TEST__.getMatch();
+   const actor=document.querySelector('#board-pawns .board-pawn[data-id="0"]');
+   return {lastRoll:m.lastRoll,position:m.players[0].position,
+    recorded:window.__OBS_REAL_TURN_FRAMES__.slice(),
+    rig:actor.dataset.actorRig,source:actor.dataset.actorSource,
+    coverage:actor.dataset.sourceWalkCoverage};
+  });
+  assert.ok(liveTurn.position>=2,'deterministic legal D6 real Dice engine must traverse multiple DMP cells');
+  assert.ok(liveTurn.lastRoll?.length&&liveTurn.lastRoll.every(Number.isInteger),
+   'real source visual playback must be driven by actual rolled dice values');
+  assert.equal(liveTurn.rig,'original-obs-sprite');
+  assert.match(liveTurn.coverage,/^8-of-8-original-source-indices/);
+  assert.deepEqual([...new Set(liveTurn.recorded.map(x=>x.frame))].sort((a,b)=>a-b),
+   [0,1,2,3,4,5,6,7],
+   'REAL dice movement must render all eight source OBS frames, not repeatedly restart 0,1');
+  assert.ok(liveTurn.recorded.some(x=>x.clock?.startsWith('continuous-across-real-DMP-steps/')),
+   'later DMP steps must preserve source frame clock instead of restarting it');
+  assert.ok(liveTurn.recorded.every(x=>x.file?.includes('/OBS/bulk/1046-')),
+   'real roll cannot substitute simulated or ChatTown figure frames');
   const missing=await page.evaluate(()=>{
    const m=window.__ROG_TEST__.getMatch();
    m.players[0].team[0]='c_0091';window.__ROG_TEST__.drawGame();

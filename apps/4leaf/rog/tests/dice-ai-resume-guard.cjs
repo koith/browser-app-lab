@@ -84,6 +84,10 @@ const {chromium}=require('playwright');
   await page.evaluate(()=>{
    const m=window.__ROG_TEST__.getMatch();
    m.active=1;m.players[1].position=0;
+   // This test checks explicit AI opt-in scheduling, not random combat,
+   // prison, warp or forced START resets. Preserve the authentic DMP
+   // coordinates while using a deterministic neutral event corridor.
+   for(let i=1;i<=16;i++)m.tiles[i]='normal';
    window.__ROG_TEST__.drawGame();
   });
   await page.locator('#dice-ai-autoplay-toggle').click();
