@@ -244,7 +244,7 @@ const path=require('node:path');
     score:Number(side.querySelector('.battle-visual-total')?.textContent)
    })));
   assert.equal(actualCombat.length,2);
-  assert.ok(actualCombat.every(x=>/^\\d+$/.test(x.id)&&Number.isFinite(x.score)),
+  assert.ok(actualCombat.every(x=>x.id!==undefined&&Number.isInteger(Number(x.id))&&Number.isFinite(x.score)),
    'the real combat result must retain independent match IDs and numeric rolls');
   assert.notEqual(actualCombat[0].score,actualCombat[1].score,
    'normal combat resolves ties before either result pose is applied');
