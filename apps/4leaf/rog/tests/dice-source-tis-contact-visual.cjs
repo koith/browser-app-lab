@@ -144,8 +144,8 @@ const {chromium}=require('playwright');
    return out;
   });
   assert.ok(variants[0].footprint<variants[1].footprint,'actual small/wide original bodies must not share a made-up contact ring');
-  assert.ok(variants.every(x=>x.footprint===x.expected&&x.member.includes('/OBS/')&&
-   x.img?.includes('/OBS/')&&x.alpha==='ready'));
+  assert.ok(variants.every(x=>x.footprint===x.expected&&x.member.startsWith('OBS/')&&
+   x.img?.includes('/OBS/')&&x.alpha==='ready'), 'native variants '+JSON.stringify(variants));
   await page.setViewportSize({width:390,height:844});
   const mobile=await measure();
   assert.equal(mobile.tiles.length,104,'iPhone did not lose genuine 26-DMP source cells');
