@@ -89,6 +89,19 @@ const {chromium}=require('playwright');
    };
   });
   const desktop=await measure();
+  const cssDiagnostics=await page.evaluate(()=>{
+   const tile=document.querySelector('#board-nodes>.tile');
+   const selector='#app.app-classic-dice #game .board-world #board-nodes .tile[data-native-tis-size="145x97"]';
+   const sheets=[...document.styleSheets];
+   const sheet=sheets.find(s=>s.href?.includes('dice-source-tile-pitch.css'));
+   const rules=sheet?[...sheet.cssRules].map(r=>r.cssText).filter(t=>t.includes('filter:')).map(x=>x.slice(0,600)):[];
+   return {url:location.href,selectorMatch:tile?.matches(selector),
+    oldStyleStillConnected:!!document.getElementById('qa-legacy-web-halo'),
+    pitchSheet:sheet?.href||null,extraFilterRules:rules,
+    tileStyle:getComputedStyle(tile).filter,
+    member:tile?.outerHTML?.slice(0,500)};
+  });
+  console.log('NATIVE TIS LIVE CSS CASCADE',JSON.stringify(cssDiagnostics));
   assert.equal(desktop.tiles.length,104,'native source DMP match unchanged');
   // A tile physically under the mouse may be brighten(1.1) on hover.
   // Brightness affects ONLY that tile's original RGBA pixels; unlike
