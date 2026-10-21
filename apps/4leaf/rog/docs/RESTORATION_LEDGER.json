@@ -941,6 +941,26 @@
         "P0-ACTOR",
         "P0-RELEASE"
       ]
+    },
+    {
+      "id": "REQ-20261021-006",
+      "date": "2026-10-21",
+      "origin": "user",
+      "text": "기준 aaad31bb/v0.86.0-beta.6/PWA93, 원작 D4/D6 실제 3D 리소스/모션 복원을 최우선, ROLL 2D 구별/PR105 조사, 결과별 낙하·회전·바운스/게임판정 동기화 실코드 수정, 전투 발판 카메라·접지, 미완료 보드/OBS/6개 누락, 공개 ChatRoom QA, 작은 PR·QA·Pages·원장 증거. 근거 없는 원작 MVE/mesh 완료 처리 금지.",
+      "taskIds": [
+        "DIE-01",
+        "DIE-02",
+        "DIE-04",
+        "BTL-02",
+        "BTL-04",
+        "BRD-01",
+        "BRD-03",
+        "ACT-01",
+        "ACT-03",
+        "ACT-04",
+        "P0-DICE",
+        "P0-RELEASE"
+      ]
     }
   ],
   "tasks": [
@@ -1842,7 +1862,7 @@
       "title": "결과값별 하늘 낙하·통통 반동·착지 원본 애니",
       "status": "todo",
       "milestone": "M07",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 현재 브라우저 구현은 결과별 CSS/JS 추정, 원작 궤적·회전·프레임 길이가 확인되지 않음 | 구현 목표: D4 1–4와 D6 1–6 각각의 모델 면방향/중력/바운스/정지 포즈를 출처 프레임과 타이밍별 매핑",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 현재 브라우저 구현은 결과별 CSS/JS 추정, 원작 궤적·회전·프레임 길이가 확인되지 않음 | 구현 목표: D4 1–4와 D6 1–6 각각의 모델 면방향/중력/바운스/정지 포즈를 출처 프레임과 타이밍별 매핑; 2026-10-21 PR pending beta.7: WEB fallback D6 3x3 pip placement fixed to reserve all 9 real grid positions (unused cells hidden not removed). Add Chromium/WebKit all 1..6 physical pip grid/face normals landing regression, original D4 and source roll UI unchanged. Original 2002 3D geometry and keyframes remain UNVERIFIED.",
       "acceptance": [
         "D4×4 + D6×6 결과를 고정 seed로 반복 재생해 원본 애니와 착지 최종 눈/게임 엔진 결과가 항상 일치"
       ],
@@ -1851,7 +1871,7 @@
         "tests/dice-fall.cjs"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-18",
+      "lastReviewed": "2026-10-21",
       "verifiedAcceptance": null,
       "dependencies": [
         "DIE-01"
@@ -1894,7 +1914,7 @@
       "title": "전투 주사위 개수·눈·점수·결과 정렬",
       "status": "todo",
       "milestone": "M07",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 기능상 pip 개별 DOM이 실 롤과 연결됐으나 원작 battle.jpg의 실제 주사위 크기·각도·개수와 좌우 위치가 다름 | 구현 목표: 원작 캡처의 공격/방어 점수, pip 수, 4개·6개 상황, 다이스 사운드 및 결과 업데이트 시점 맞춤",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 기능상 pip 개별 DOM이 실 롤과 연결됐으나 원작 battle.jpg의 실제 주사위 크기·각도·개수와 좌우 위치가 다름 | 구현 목표: 원작 캡처의 공격/방어 점수, pip 수, 4개·6개 상황, 다이스 사운드 및 결과 업데이트 시점 맞춤; 2026-10-21 PR pending beta.7: WEB fallback D6 3x3 pip placement fixed to reserve all 9 real grid positions (unused cells hidden not removed). Add Chromium/WebKit all 1..6 physical pip grid/face normals landing regression, original D4 and source roll UI unchanged. Original 2002 3D geometry and keyframes remain UNVERIFIED.",
       "acceptance": [
         "가변 주사위 개수·각 면 1–6값/합계가 게임 판정과 일치하고 원본형 배열이 화면 밖으로 잘리지 않음"
       ],
@@ -1904,7 +1924,7 @@
         "tests/dice-native-battle-dice.cjs"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-18",
+      "lastReviewed": "2026-10-21",
       "verifiedAcceptance": null,
       "dependencies": [
         "BTL-02",
@@ -5011,6 +5031,44 @@
         "https://4leafmemorial.tistory.com/m/637",
         "apps/4leaf/rog/dice-fall.js",
         "apps/4leaf/rog/tools/audit-original-dice-resources.py"
+      ]
+    },
+    {
+      "seq": 203,
+      "date": "2026-10-21",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261021-006",
+      "taskIds": [
+        "DIE-01",
+        "DIE-02",
+        "DIE-04",
+        "BTL-02",
+        "BTL-04",
+        "BRD-01",
+        "BRD-03",
+        "ACT-01",
+        "ACT-03",
+        "ACT-04",
+        "P0-DICE",
+        "P0-RELEASE"
+      ],
+      "details": "Original 3D D4/D6 restoration and independent source archive investigation requested; preserve PR149-168 merged features."
+    },
+    {
+      "seq": 204,
+      "date": "2026-10-21",
+      "type": "IMPLEMENTED_PENDING_QA",
+      "requestId": "REQ-20261021-006",
+      "taskIds": [
+        "DIE-02",
+        "DIE-04"
+      ],
+      "details": "Source-independent but important D6 geometric bug: WEB fallback renderer had .leaf-die-eye display:none for 9 grid children except visible result pips, so CSS Grid auto-placed only visible children consecutively and corrupts results 2–6 physical pip arrangements. Keep 9 physical grid cells display:block with visibility:hidden on unused cells; show actual pips at documented PIPS index positions. New real Chromium/WebKit reduced-motion DOM geometry regression checks 3 columns/3 rows, all nine cell offsets, actual result-specific visible pip positions and six face-normal landing orientations. Same outcome, existing fall/bounce/keyframes/engine await, D4 tetra and source ROLL UI unchanged. App v0.86.0-beta.7/PWA v94. Historical 2002 D4/D6 geometry/texture/keyframes UNVERIFIED; website original 2D roll.spr 4 and eventRoll1.spr 16 are NOT 3D models. PR/QA/merge/Pages pending.",
+      "evidence": "apps/4leaf/rog/tests/dice-fall.cjs",
+      "refs": [
+        "apps/4leaf/rog/dice-fall.css",
+        "apps/4leaf/rog/dice-fall.js",
+        "apps/4leaf/rog/original/SourceSPR/manifest.json"
       ]
     }
   ]
