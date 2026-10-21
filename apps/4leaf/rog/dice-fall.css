@@ -17,13 +17,43 @@
  transform-style:preserve-3d!important;
  perspective:560px;
 }
-#app.app-classic-dice #game .leaf-fall-piece{
+/* The independently animated 2002-style 3D WEB die rises and bounces;
+ * its WEB-INFERRED shadow must stay ON THE PLATFORM, not follow its cube
+ * into the sky. The former filter:drop-shadow moved with the cube and
+ * produced a conspicuous floating dark outline during the full -260px drop.
+ * Historical model, light direction and native keyframes remain UNKNOWN.
+ */
+#app.app-classic-dice #game .leaf-fall-track{
  display:block;position:relative;box-sizing:border-box;
  width:57px;height:57px;flex:0 0 57px;
  transform-style:preserve-3d;
+ isolation:isolate;
+}
+#app.app-classic-dice #game .leaf-fall-track::before{
+ content:'';position:absolute;
+ width:47px;height:14px;left:5px;bottom:-13px;
+ border-radius:50%;pointer-events:none;
+ background:radial-gradient(ellipse at center,#101d2da8,transparent 72%);
+ z-index:0;
+ animation:leaf-dice-ground-contact var(--leaf-dice-shadow-duration,1120ms) linear both;
+}
+@keyframes leaf-dice-ground-contact{
+ 0%{opacity:.10;transform:scale(.46)}
+ 38%{opacity:.82;transform:scale(.98)}
+ 55%{opacity:.20;transform:scale(.67)}
+ 72%{opacity:.91;transform:scale(1)}
+ 83%{opacity:.49;transform:scale(.83)}
+ 100%{opacity:.83;transform:scale(.96)}
+}
+#app.app-classic-dice #game .leaf-fall-piece{
+ display:block;position:absolute;box-sizing:border-box;
+ left:0;bottom:0;
+ width:57px;height:57px;
+ transform-style:preserve-3d;
  transform-origin:center center;
  will-change:transform;
- filter:drop-shadow(3px 9px 5px #112028a6);
+ filter:none;
+ z-index:1;
 }
 #app.app-classic-dice #game .leaf-fall-cube{
  display:block;position:absolute;
@@ -76,9 +106,14 @@
   left:4%!important;right:4%!important;
   gap:8px!important;perspective:420px;
  }
+ #app.app-classic-dice #game .leaf-fall-track,
  #app.app-classic-dice #game .leaf-fall-piece,
  #app.app-classic-dice #game .leaf-fall-cube,
  #app.app-classic-dice #game .leaf-die-face{width:37px;height:37px}
+ #app.app-classic-dice #game .leaf-fall-track{flex-basis:37px}
+ #app.app-classic-dice #game .leaf-fall-track::before{
+  width:31px;height:10px;left:3px;bottom:-10px
+ }
  #app.app-classic-dice #game .leaf-fall-piece{flex-basis:37px}
  #app.app-classic-dice #game .leaf-die-face{padding:6px;border-width:1px;border-radius:4px}
  #app.app-classic-dice #game .leaf-die-face-1{transform:translateZ(18.5px)}
@@ -93,4 +128,7 @@
 @media(prefers-reduced-motion:reduce){
  #app.app-classic-dice #game .leaf-fall-cube,
  #app.app-classic-dice #game .leaf-fall-piece{will-change:auto}
+ #app.app-classic-dice #game .leaf-fall-track::before{
+  animation:none!important;opacity:.83;transform:scale(.96)
+ }
 }
