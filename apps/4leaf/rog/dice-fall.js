@@ -41,6 +41,14 @@
   return face;
  }
  function makeDie(result,index,count,sides){
+  // Ground contact belongs to the board plane, NOT to the moving cube.
+  // Previously a CSS drop-shadow travelled 260px up into the air with
+  // every falling die. Use a stationary track shadow while the genuine
+  // gameplay die model continues its independent fall/spin/bounces.
+  // This remains WEB inferred lighting, not original 2002 MVE keyframes.
+  const track=document.createElement('span');
+  track.className='leaf-fall-track';
+  track.dataset.shadowProvenance='web-inferred-ground-contact';
   const node=document.createElement('span');
   node.className='leaf-fall-piece';
   node.dataset.result=String(result);
@@ -63,11 +71,15 @@
    for(let n=1;n<=6;n++)cube.append(makeFace(n));
   }
   node.append(cube);
-  return {node,cube,result,index,count,sides};
+  track.append(node);
+  return {track,node,cube,result,index,count,sides};
  }
  const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
  async function animateDie(die,duration,instant){
-  const {node,cube,result,index,sides}=die;
+  const {track,node,cube,result,index,sides}=die;
+  // Match stationary ground-shadow opacity to the SAME presentation
+  // timeline as actual fall/bounce animation, not an independent clock.
+  track.style.setProperty('--leaf-dice-shadow-duration',duration+'ms');
   const [rx,ry]=sides===4?[0,0]:ROTATION[result];
   const target=sides===4?TETRA_LAND[result]:
    'rotateX('+(720+rx)+'deg) rotateY('+(1080+ry)+'deg) rotateZ(0deg)';
@@ -132,7 +144,7 @@
   layer.dataset.count=String(values.length);
   layer.dataset.sides=sides.join(',');
   const dice=values.map((result,index)=>makeDie(result,index,values.length,sides[index]));
-  for(const die of dice)layer.append(die.node);
+  for(const die of dice)layer.append(die.track);
   const instant=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches||false;
   active=1;
   try{
