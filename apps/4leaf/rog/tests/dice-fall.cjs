@@ -106,8 +106,8 @@ const {chromium,webkit}=require('playwright');
    },eye);
    assert.equal(proof.missing,undefined,'D6 must instantiate source-valued real 3D geometry');
    assert.deepEqual(proof.result,[eye]);
-   assert.equal(proof.columns,3,'all three original pip columns must keep physical space');
-   assert.equal(proof.rows,3,'all three original pip rows must keep physical space');
+   assert.equal(proof.columns,3,'physical D6 columns: '+JSON.stringify(proof));
+   assert.equal(proof.rows,3,'physical D6 rows: '+JSON.stringify(proof));
    assert.equal(proof.coordinates.length,9);
    assert.ok(proof.coordinates.every((n,i)=>n.col===i%3&&n.row===Math.floor(i/3)),
     'pip grid must preserve real 3x3 positions (hidden cells remain physically laid out): '+
