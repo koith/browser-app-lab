@@ -20,15 +20,18 @@
  */
 #app.app-classic-dice #game .board-world #board-nodes #board-pawns .board-pawn::before{
  content:''!important;
- left:15px!important;
- bottom:6px!important;
- width:36px!important;
+ left:50%!important;
+ /* Source reference feet sit at --leaf-obs-ground in the common pawn
+  * bounding box. Center the contact plane at that same actual foot Y
+  * instead of leaving the prior hard-coded bottom:6px displacement. */
+ bottom:calc(var(--leaf-obs-ground,14.88px) - 5px)!important;
+ width:var(--leaf-native-contact-width,36px)!important;
  height:10px!important;
  border:0!important;
  border-radius:50%!important;
  background:radial-gradient(ellipse,#0f1d3299 0%,#141c2c40 60%,transparent 100%)!important;
  box-shadow:none!important;
- transform:none!important;
+ transform:translateX(-50%)!important;
  filter:none!important;
  animation:none!important;
  pointer-events:none!important;
