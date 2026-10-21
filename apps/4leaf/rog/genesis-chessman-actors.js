@@ -245,9 +245,13 @@
   return rig;
  }
  function poseByPlayer(id,action,duration){
-  const pawn=[...document.querySelectorAll('#board-pawns .board-pawn')]
-   .find(el=>el.dataset.id===String(id));
-  if(pawn)pose(pawn,action,duration);
+  // Both native game-board and duel podium render independently mounted OBS
+  // actors. Propagate one *real player* action to both renderers, never to an
+  // opponent or a keeper without an original Genesis identity.
+  for(const pawn of document.querySelectorAll(
+    '#board-pawns .board-pawn, #battle-visual .leaf-battle-chessman')){
+    if(pawn.dataset.id===String(id))pose(pawn,action,duration);
+  }
  }
  function registerFrames(chessmanId,poses){
   if(!/^\d{4}$/.test(chessmanId))throw new Error('Source chessman ID required');

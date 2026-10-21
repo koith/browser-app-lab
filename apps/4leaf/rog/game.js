@@ -1068,6 +1068,11 @@ function showBattleScene(attacker,defender,attack,defense,attackerPoints,defende
  function assemble(panel,player,result,values){
    const actor=document.createElement('div');
    actor.className='battle-visual-actor board-pawn leaf-battle-chessman';
+   // This is the exact match participant, not an unrelated stand-in.
+   // Keep this ID on the duel actor so gameplay pose events reach both
+   // independent OBS renderers; source-absent keeper remains unassigned.
+   if(player?.id!==undefined&&player?.id!==null)
+     actor.dataset.id=String(player.id);
    actor.setAttribute('role','img');
    actor.setAttribute('aria-label',player.name+' · 전투 체스맨');
    if(player.team?.length){
