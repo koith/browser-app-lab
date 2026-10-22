@@ -137,7 +137,21 @@ function rand(a){return Math.floor(Math.random()*a)}
 function diceN(n,sides){let values=[];for(let k=0;k<n;k++)values.push(d(sides));return {values,total:values.reduce((a,b)=>a+b,0)}}
 function syncMusic(){if(!soundOn){if(bgm)bgm.pause();return}const track=({sky:'00',city:'01',rooms:'02','dice-channels':'03',lobby:'03',shop:'04',game:'05','help-screen':'06'})[route]||'00';if(bgm&&bgmTrack===track){bgm.play().catch(()=>{});return}if(bgm)bgm.pause();bgm=new Audio('./music/'+track+'.mp3');bgm.loop=true;bgm.volume=.28;bgmTrack=track;bgm.play().catch(()=>{})}
 function sfx(freq=500,duration=.07){if(!soundOn)return;try{const AC=window.AudioContext||window.webkitAudioContext;audioCtx=audioCtx||new AC();const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='triangle';o.frequency.value=freq;g.gain.setValueAtTime(.038,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+duration);o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+duration)}catch{}}
-function chat(who,message,type=''){const line=document.createElement('div');line.className=type;const b=document.createElement('b');b.textContent=who+'　';line.append(b,document.createTextNode(String(message)));$('chat-log').append(line);while($('chat-log').children.length>90)$('chat-log').firstElementChild.remove();$('chat-log').scrollTop=$('chat-log').scrollHeight}
+function chat(who,message,type=''){
+ const log=$('chat-log');
+ // The genuine Dice scrollButton.bmp up/down controls let players inspect
+ // earlier messages. Previously every new game/chat message forcibly jumped
+ // their history to the bottom and disabled the down arrow mid-click.
+ // Auto-follow only if the user WAS at the bottom before insertion.
+ const following=log.scrollHeight-log.clientHeight-log.scrollTop<=3;
+ const line=document.createElement('div');line.className=type;
+ const b=document.createElement('b');b.textContent=who+'　';
+ line.append(b,document.createTextNode(String(message)));
+ log.append(line);
+ while(log.children.length>90)log.firstElementChild.remove();
+ if(following)log.scrollTop=log.scrollHeight;
+ window.__LEAF_NATIVE_DICE_CHAT_SCROLL__?.refresh?.();
+}
 function profileUI(){$('nick').textContent=profile.name;$('profile-name').textContent=profile.name;$('my-name').textContent=profile.name;$('gp').textContent=profile.gp.toLocaleString();$('shop-gp').textContent=profile.gp.toLocaleString();$('wins').textContent=profile.wins+'승';persist()}
 function navigate(id){if(!routeNames[id])return;route=id;if(id!=='game')$('app')?.classList.remove('dice-items-open');document.getElementById('app')?.classList.toggle('app-classic-dice',id==='game');$('app').classList.toggle('app-game',id==='game');query('.scene').forEach(s=>s.classList.toggle('hidden',s.id!==id));query('[data-route]').forEach(el=>el.classList.toggle('active',el.dataset.route===id));$('where').textContent=routeNames[id];$('chat-location').textContent=routeNames[id];if(id==='game'&&match){
  drawGame();
