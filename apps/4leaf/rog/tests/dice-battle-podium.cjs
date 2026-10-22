@@ -101,6 +101,31 @@ const path=require('node:path');
     })
    };
   });
+  // Real source winBattle-01.png = 355x113, two independent metal deck
+  // centres around x=72.5 and 282.5 in the bitmap (±105 native px).
+  // Players must follow the ACTUAL displayed bitmap width, particularly
+  // mobile where the source PNG scales to stage width.
+  const nativeDeckAlignment=async()=>{
+   return page.locator('#battle-visual').evaluate(stage=>{
+    const art=stage.querySelector('.leaf-native-winbattle-podiums');
+    const src=art.getBoundingClientRect();
+    const side=[...stage.querySelectorAll('.battle-visual-side')].map(el=>{
+     const rect=el.getBoundingClientRect();
+     return {center:rect.x+rect.width/2,width:rect.width};
+    });
+    return {displayed:[src.width,src.height],natural:[art.naturalWidth,art.naturalHeight],
+     expected:[src.left+src.width*(177.5-105)/355,
+               src.left+src.width*(177.5+105)/355],
+     actual:side.map(s=>s.center)};
+   });
+  };
+  const desktopDeck=await nativeDeckAlignment();
+  assert.deepEqual(desktopDeck.natural,[355,113],
+   'source-deck geometry measured only from authentic winBattle SPR bitmap');
+  assert.ok(desktopDeck.actual.every((x,i)=>Math.abs(x-desktopDeck.expected[i])<3),
+   '2 native OBS duel actors must align with original podium deck centres on desktop: '+
+   JSON.stringify(desktopDeck));
+  await page.screenshot({path:'leaf-native-winbattle-aligned-desktop.png'});
   assert.equal(state.stageBG,'rgba(0, 0, 0, 0)','the recovered forest is visible through the duel, no fake opaque window');
   assert.equal(state.stageBackgroundImage,'none','duel overlay is transparent, not a 2D screenshot');
   assert.equal(state.stageBorder,'none','duel uses real terrain, not a GUI popup box');
@@ -210,6 +235,12 @@ const path=require('node:path');
    'battle result controls belong BELOW original metal platforms and VS: '+JSON.stringify(battleHud));
   await page.screenshot({path:'leaf-live-3d-battle-podiums-desktop.png'});
   await page.setViewportSize({width:390,height:844});
+  const mobileDeck=await nativeDeckAlignment();
+  assert.ok(mobileDeck.actual.every((x,i)=>
+   Math.abs(x-mobileDeck.expected[i])<3),
+   'mobile fighter centre must follow RESPONSIVELY SCALED genuine source podium image, not fixed old pixels: '+
+   JSON.stringify(mobileDeck));
+  await page.screenshot({path:'leaf-native-winbattle-aligned-iphone.png'});
   const mobile=await page.locator('#battle-visual').evaluate(stage=>({
    actor:stage.querySelectorAll('.battle-visual-actor').length,
    podium:stage.querySelectorAll('.battle-visual-pedestal').length,
