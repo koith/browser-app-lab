@@ -109,6 +109,42 @@ const {chromium,webkit}=require('playwright');
    null,{timeout:14000});
   assert.equal(await page.locator('#dice-box').getAttribute('data-roll-count'),'2',
    'second real participant rolls normally after their own landing');
+  // D4 used to fly with a duplicate 8px CSS shadow even though D6 and
+  // the tetra both have their own anchored .leaf-fall-track::before shadow.
+  // Inspect rendered geometry DURING actual D4 fall, then confirm this
+  // purely visual probe never mutates the real game turn/roll count.
+  await page.waitForFunction(()=>!window.__LEAF_DICE_FALL__.getState().active,
+   null,{timeout:12000});
+  const d4Air=await page.evaluate(()=>{
+   window.__LEAF_D4_AIR_TEST__=window.__LEAF_DICE_FALL__.roll([3],{sides:4});
+   const track=document.querySelector('#leaf-dice-fall-layer .leaf-fall-track');
+   const piece=track.querySelector('.leaf-fall-piece[data-sides="4"]');
+   return {pieceFilter:getComputedStyle(piece).filter,
+    groundShadow:getComputedStyle(track,'::before').backgroundImage,
+    shadowProvenance:track.dataset.shadowProvenance,
+    trackTransform:getComputedStyle(track).transform,
+    result:piece.dataset.result,
+    source:window.__LEAF_DICE_FALL__.getState().originalFramesRecovered,
+    rollCount:Number(document.querySelector('#dice-box').dataset.rollCount)};
+  });
+  assert.equal(d4Air.pieceFilter,'none',
+   'airborne D4 must not carry a second moving WEB shadow');
+  assert.ok(d4Air.groundShadow.includes('radial-gradient')&&
+   d4Air.shadowProvenance==='web-inferred-ground-contact'&&
+   d4Air.trackTransform==='none',
+   'D4 tetra must fall over a stationary ground-contact shadow');
+  assert.equal(d4Air.result,'3');
+  assert.equal(d4Air.source,false,'2002 3D die source still unrecovered');
+  assert.equal(d4Air.rollCount,2,'D4 visual-only probe cannot mutate gameplay');
+  await page.screenshot({path:'leaf-d4-stationary-shadow-'+engine+
+   (mobile?'-iphone':'')+'.png'});
+  const d4End=await page.evaluate(async()=>{
+   const result=await window.__LEAF_D4_AIR_TEST__;
+   return {result,now:Number(document.querySelector('#dice-box').dataset.rollCount)};
+  });
+  assert.deepEqual(d4End.result,[3],'D4 presentation must land on supplied face');
+  assert.equal(d4End.now,2,'D4 shadow test must not advance game turn');
+
   // Inspect ALL six eye placements and final rotations on actual DOM geometry.
   // Reduced motion skips arbitrary waiting; it must still yield precisely
   // the requested source engine values.
