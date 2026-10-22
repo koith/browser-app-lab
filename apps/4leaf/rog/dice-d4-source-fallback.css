@@ -6,8 +6,12 @@
  * The result is still the authoritative game.js D4 roll, never randomized
  * or re-labelled by this visual renderer.
  */
+/* D4 shares the stationary .leaf-fall-track::before shadow with D6.
+ * The old filter on the MOVING tetra floated 8px below it during flight,
+ * producing a duplicate airborne shadow. Remove that inferred WEB artifact;
+ * native 2002 MVE lighting and die model are still UNVERIFIED. */
 #app.app-classic-dice #game .leaf-fall-piece[data-sides="4"]{
- filter:drop-shadow(3px 8px 4px #10202d99);
+ filter:none!important;
 }
 #app.app-classic-dice #game .leaf-fall-tetra{
  position:absolute;inset:0;
