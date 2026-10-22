@@ -78,6 +78,24 @@ const path=require('node:path');
   await down.click();
   const current=await page.evaluate(()=>window.__LEAF_NATIVE_DICE_CHAT_SCROLL__.getState());
   assert.ok(current.scrollTop>0,'clicking archive button actually scrolls shared game chat');
+  // True CHAT form message, not direct DOM manipulation: when a player has
+  // intentionally left the newest line using the source IMG arrow, a live
+  // incoming/self message must NOT yank the history back to its bottom.
+  const afterMessage=await page.evaluate(()=>{
+   const input=document.getElementById('message'),form=document.getElementById('chat-form');
+   input.value='source history stays here';
+   form.requestSubmit();
+   const log=document.getElementById('chat-log');
+   return {top:log.scrollTop,height:log.scrollHeight,client:log.clientHeight,
+    message:log.lastElementChild?.textContent||''};
+  });
+  assert.ok(afterMessage.message.includes('source history stays here'),
+   'the real shared chat handler must still send and append player text');
+  assert.ok(Math.abs(afterMessage.top-current.scrollTop)<3,
+   'incoming actual CHAT messages may not force a native-button reader to the latest line: '+
+    JSON.stringify({current,afterMessage}));
+  assert.ok(afterMessage.height-afterMessage.client-afterMessage.top>1,
+   'reading source chat history remains possible during new messages');
   assert.equal(await up.isEnabled(),true,'up becomes available when history was moved');
   await up.focus();await page.keyboard.press('Enter');
   const backward=await page.evaluate(()=>window.__LEAF_NATIVE_DICE_CHAT_SCROLL__.getState());
