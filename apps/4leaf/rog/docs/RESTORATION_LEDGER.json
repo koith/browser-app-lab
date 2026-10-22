@@ -978,6 +978,24 @@
         "BRD-01",
         "QA-03"
       ]
+    },
+    {
+      "id": "REQ-20261022-002",
+      "date": "2026-10-22",
+      "origin": "user",
+      "text": "Continue 4LEAF original-fidelity implementation without repeating PR149-174. Prioritize original D4/D6 3D dice/material/flight-result timing, stage/feet and board camera, preserve OBS and real ChatTown. Commit actual code, Chromium/WebKit/mobile/Chat QA, PR merge and Pages, record evidence. User reissued the instruction following stalled response.",
+      "taskIds": [
+        "DIE-01",
+        "DIE-02",
+        "DIE-04",
+        "BTL-02",
+        "BTL-04",
+        "BRD-01",
+        "BRD-03",
+        "ACT-03",
+        "ACT-04",
+        "QA-03"
+      ]
     }
   ],
   "tasks": [
@@ -1879,7 +1897,7 @@
       "title": "결과값별 하늘 낙하·통통 반동·착지 원본 애니",
       "status": "in_progress",
       "milestone": "M07",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 현재 브라우저 구현은 결과별 CSS/JS 추정, 원작 궤적·회전·프레임 길이가 확인되지 않음 | 구현 목표: D4 1–4와 D6 1–6 각각의 모델 면방향/중력/바운스/정지 포즈를 출처 프레임과 타이밍별 매핑; 2026-10-21 PR pending beta.7: WEB fallback D6 3x3 pip placement fixed to reserve all 9 real grid positions (unused cells hidden not removed). Add Chromium/WebKit all 1..6 physical pip grid/face normals landing regression, original D4 and source roll UI unchanged. Original 2002 3D geometry and keyframes remain UNVERIFIED.; 2026-10-21 PR169 MERGED main 2fe53ab1 v0.86.0-beta.7/PWA94: physically correct WEB D6 result pip 3x3 grid using visibility hidden, all 1..6 result faces verified real DOM normals in Chromium, source gameplay roll unchanged. Original EXE die mesh/3D texture/keyframes still UNVERIFIED and not complete. Main original dice board QA 39609357986 + Pages deploy 39609357790 + build 39609327237 SUCCESS.; 2026-10-21 PR171 merged beta8: physical grounded WEB-INFERRED shadow now separated from moving original-source-unverified CSS D4/D6 object; independent floor opacity pulse synced to fall/bounce offsets; source 3D mesh still NOT recovered. PR source board 39610512486 / release WebKit 39610512328 / world/chat 39610512247 / central 39610512251 PASS, main 46c19ff. Current same-SHA Pages execution PENDING confirmation.; 2026-10-22 beta9 PR pending: inferred CSS D4/D6 falling 260px no longer blindly crosses viewport stage on iPhone; use real live stage bounds for initial height and proportional bounce heights, preserve authoritative dice outcomes/turn wait. Original MVE keyframes/3D source NOT RECOVERED; QA pending.; 2026-10-22 PR173 MERGED 5882947d beta9 PWA96: genuine gameplay-authoritative die result/camera fall stage bounds responsive WEB fallback, proportional bounces, Chromium/WebKit board/play result PASS 39714139407 39714139416, original CSS 3D assets still inferred. Pages 39714489431 and build 39714488921 SUCCESS, 2002 original MVE animations not recovered.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 현재 브라우저 구현은 결과별 CSS/JS 추정, 원작 궤적·회전·프레임 길이가 확인되지 않음 | 구현 목표: D4 1–4와 D6 1–6 각각의 모델 면방향/중력/바운스/정지 포즈를 출처 프레임과 타이밍별 매핑; 2026-10-21 PR pending beta.7: WEB fallback D6 3x3 pip placement fixed to reserve all 9 real grid positions (unused cells hidden not removed). Add Chromium/WebKit all 1..6 physical pip grid/face normals landing regression, original D4 and source roll UI unchanged. Original 2002 3D geometry and keyframes remain UNVERIFIED.; 2026-10-21 PR169 MERGED main 2fe53ab1 v0.86.0-beta.7/PWA94: physically correct WEB D6 result pip 3x3 grid using visibility hidden, all 1..6 result faces verified real DOM normals in Chromium, source gameplay roll unchanged. Original EXE die mesh/3D texture/keyframes still UNVERIFIED and not complete. Main original dice board QA 39609357986 + Pages deploy 39609357790 + build 39609327237 SUCCESS.; 2026-10-21 PR171 merged beta8: physical grounded WEB-INFERRED shadow now separated from moving original-source-unverified CSS D4/D6 object; independent floor opacity pulse synced to fall/bounce offsets; source 3D mesh still NOT recovered. PR source board 39610512486 / release WebKit 39610512328 / world/chat 39610512247 / central 39610512251 PASS, main 46c19ff. Current same-SHA Pages execution PENDING confirmation.; 2026-10-22 beta9 PR pending: inferred CSS D4/D6 falling 260px no longer blindly crosses viewport stage on iPhone; use real live stage bounds for initial height and proportional bounce heights, preserve authoritative dice outcomes/turn wait. Original MVE keyframes/3D source NOT RECOVERED; QA pending.; 2026-10-22 PR173 MERGED 5882947d beta9 PWA96: genuine gameplay-authoritative die result/camera fall stage bounds responsive WEB fallback, proportional bounces, Chromium/WebKit board/play result PASS 39714139407 39714139416, original CSS 3D assets still inferred. Pages 39714489431 and build 39714488921 SUCCESS, 2002 original MVE animations not recovered.; 2026-10-22 beta10 branch/PENDING QA: true falling D4 CSS-3D has no duplicate moving shadow after removing leftover D4 filter; ground contact anchored to track. Chromium/WebKit/iPhone midflight/result/engine rollCount test added. Source 2002 MVE model/lighting/keyframes UNVERIFIED, DO NOT mark done.",
       "acceptance": [
         "D4×4 + D6×6 결과를 고정 seed로 반복 재생해 원본 애니와 착지 최종 눈/게임 엔진 결과가 항상 일치"
       ],
@@ -5264,6 +5282,40 @@
       "refs": [
         "https://github.com/koith/browser-app-lab/actions/runs/39714488921",
         "https://github.com/koith/browser-app-lab/pull/173"
+      ]
+    },
+    {
+      "seq": 215,
+      "date": "2026-10-22",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261022-002",
+      "taskIds": [
+        "DIE-01",
+        "DIE-02",
+        "DIE-04",
+        "BTL-02",
+        "BTL-04",
+        "BRD-01",
+        "BRD-03",
+        "ACT-03",
+        "ACT-04",
+        "QA-03"
+      ],
+      "details": "Verified latest main e539747f v0.86.0-beta.9 PWA96 after PR174, 58 total done13/in_progress34/todo11, Pages/release/published ChatRoom succeeded. Do NOT reimplement responsive bounce work PR169/171/173; active PR105 historical ROLL 2D IMG only."
+    },
+    {
+      "seq": 216,
+      "date": "2026-10-22",
+      "type": "IMPLEMENTED_PENDING_QA",
+      "requestId": "REQ-20261022-002",
+      "taskIds": [
+        "DIE-02"
+      ],
+      "details": "Source review found D4-specific .leaf-fall-piece[data-sides=4] filter:drop-shadow(3px 8px 4px ...) still attached to ANIMATED 3D tetra, generating a moving airborne fake shadow despite prior ground-anchored track::before in PR171. Removed moving duplicate and retained stationary per-die floor shadow; D6 remains unchanged. Extended real Playwright dice-fall.cjs to inspect actual airborne D4 CSS filter, anchored shadow, genuine supplied D4 result and zero mutation of authoritative game rollCount, and archive iPhone/Chromium screenshot. No original 2002 D4/D6 mesh/keyframes/physics obtained; WEB fallback not original. v0.86.0-beta.10/PWA v97; PR/QA/merge/Pages still PENDING.",
+      "evidence": "apps/4leaf/rog/tests/dice-fall.cjs",
+      "refs": [
+        "apps/4leaf/rog/dice-d4-source-fallback.css",
+        "apps/4leaf/rog/dice-fall.css"
       ]
     }
   ]
