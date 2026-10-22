@@ -996,6 +996,19 @@
         "ACT-04",
         "QA-03"
       ]
+    },
+    {
+      "id": "REQ-20261022-003",
+      "date": "2026-10-22",
+      "origin": "user",
+      "text": "Continue original 4LEAF 2002 source game visual comparison: second independent coding pass fixes real winBattle.spr 355x113 podium fighter horizontal alignment across desktop/iPhone, preserving authentic archive graphics and true OBS; test chromium webkit mobile, merge Pages, do not claim original MVE 3D platform recovered.",
+      "taskIds": [
+        "BTL-02",
+        "BTL-04",
+        "ACT-04",
+        "BRD-01",
+        "P0-PODIUM"
+      ]
     }
   ],
   "tasks": [
@@ -1683,7 +1696,7 @@
       "title": "보드·전투 체스맨 발 접지·그림자·다중배치",
       "status": "in_progress",
       "milestone": "M05",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 기본 2P의 진짜 OBS 표시는 검증했으나 모든 체스맨 크기/발판 고정·동시 2인 겹침·전투 POV는 원본과 비교 미흡 | 구현 목표: 원본 OBS originX/Y, 발 위치, TIS 바닥 픽셀, 캐릭터 z-index/그림자 관통 검증; 2026-10-20 원본 OBS 이미지를 일시적 503 응답에서 영구 unavailable 처리하던 문제 개선: 실제 동일 아카이브 OBS PNG 3회 재요청, 실패 후 검증된 원본 CardData 정지 대체, 연결 회복 시 원본 전신 자동 재시도. 팀/턴/DMP 좌표·원본 소스 바이트 불변. 정확한 행동 프레임표·출발/착지·98종 전체 원본 수용은 여전히 미완료.; 2026-10-20 PR #150 merged main@bb15ba5c genuine OBS 503 retry/reconnect QA 39381181475 + release 39381181551 PASS, Pages 39381488969 success; real main OBS frame job 39381488742 success. Original 34 missing IDs and 2002 direction/actions still not recovered.; 2026-10-20 source-native 92/98 chessman animated PNG 629장 실제 playable game actor/OBS loader 연결, PC·mobile 104-cell 4LEAF DMP browser game QA; 6 source-missing still CardData fallback. Exact old original battle 3D contact foot Y and all frames' pose mapping remain unsolved.; 2026-10-20 full-body 원본 92종은 실제 보드/배틀 independent Genesis actor 로더로 연결; PR153 same SHA Chromium source 616 PNG all hash and player roll/duel verified, WebKit iPhone simulation passed. 6 ID CardData still honest static. Exact historical contact/original locomotion animation geometry open.; 2026-10-21 source native signed-origin and source frame dimensions exposed for every actual playable OBS 0..7 transition. Contact remains inferred shared foot-plane, exact 2004 polygon mesh and dual-actor original contact unverified.; 2026-10-21 live model frame signed source origin/native dimension and inferred shared foot plane are recorded for 0..7 gameplay transitions; original 3D foot-contact depth cannot be proven from these original PNGs; game state immutable during source-only animation.; 2026-10-21 source-renderer integration follow-up (PR pending): native game-board actor and live winBattle podium actor previously diverged after an action event because poseByPlayer only targeted #board-pawns. Added explicit match-player ID to each actual duel chessman; propagate gameplay pose changes to both source-backed instances without changing OBS indexed bytes/FPS or inventing original EXE action mapping. Browser QA pending.; 2026-10-21 PR#159 MERGED main@03e433b3c9f8d26e9b8af2bfa22ed4831915fbdf: real Genesis match participant IDs propagated to independent winBattle podium OBS actor rendering. Board + battle action states synchronized to the same recovered source-frame indexes, preserving gameplay/dice/turn authority. Chromium native-battle browser QA passed before merge, and same SHA 958-OBS-source gameplay QA, Pages static deployment & Pages build succeeded. Real 2002 action-direction/FPS mapping and historical 3D contact still NOT verified; do not mark ACT task done.; 2026-10-21 next small source integration slice: after real combat rolls resolve, drive the actual winner's OBS victory and loser's OBS hurt pose (rather than only initial attacker/defender roles), using recovered native OBS images on real board, keeper excluded. Browser QA gates both sides against live numeric dice results, authentic frame-index manifest and idle reset. PR/QA pending; original 2002 pose table still unverified.; 2026-10-21 follow-up PR161 MERGED main@330621b17ff207d832d449419910b1833e2720cb: real resolved battle winner's source OBS victory + loser's hurt playback, correctly scoped to true match participants, native indexed sprites and post-pose idle reset. Live Chromium original winBattle combat source-index checks PR gate PASS, main smoke PASS, Pages build/deploy PASS. Historical exact EXE source action mapping/FPS/pivots still UNVERIFIED and task remains IN_PROGRESS.; 2026-10-21 PR163 code branch: 80 native complete 0..7 retain full walking cycle; original incomplete 12 stop repeating truncated source as full walk (actual first original frame still shown, WEB motion coverage exposed); before combat score resolution, defending actor no longer falsely plays hurt. True win/loss actions remain result-driven. QA/merge/deploy pending; native EXE mapping/FPS/contact not proven.; 2026-10-21 PR163 MERGED main@75880af6 v0.86.0-beta.4; prior false pre-score defender hurt and fabricated incomplete 12 source walking corrected, 80 complete 0..7 retained. PR gate original board/OBS/Chromium/WebKit/Chat/ledger PASS; post-main OBS frame 39555370075 / smoke 39555370229 PASS, Pages deploy 39555370173 + platform 39555369354 SUCCESS. Original EXE action/FPS/mesh contact still UNVERIFIED; not completed.; 2026-10-21 v0.86.0-beta.5 PR pending: real DMP movement step loop no longer restarts genuine 0..7 source frame clock per 60ms turn step; full recovered 80 native sequences may play during actual dice turns, incomplete 12 still static. Real roll regression + screenshots pending CI. Historical EXE action FPS/direction/foot pivot still OPEN.; 2026-10-21 PR165 MERGED at cff0c2d2 v0.86.0-beta.5 PWA v92: physical actual rolled movement displays all 8 verified 0..7 native OBS packets instead of resetting index on every 38–60ms DMP step. Chromium native OBS 39558708001 PASS, Chromium/WebKit release 39558707938 PASS, main 39559102284 PASS, Pages 39559102213 + build 39559102777 SUCCESS. Original action direction/FPS still UNKNOWN; ACT IN_PROGRESS.; 2026-10-21 NEW beta6 code/QA pending: projected native TIS 145x97 at 150x100 had genuine 5x3 pixel gaps but invented external blur and selected-tile neon glow bled across them; stripped only WEB shadows/glows (original pixels and hit/mapping unchanged). Native OBS sprite contact width proportional to real frame width and source foot-plane centered; shadow INFERRED, original EXE 3D/GFX still unknown. Before/after desktop and iPhone screens on same DMP state pending CI.; 2026-10-21 PR167 MERGED 6b4ffc v0.86.0-beta.6 PWA93: genuine TIS visual gap preserved without WEB external shadow on 145x97 source at WEB150x100, OBS source-frame width-proportional inferred foot contact. 26 DMP/1920 source tile QA, 32 TIS click, Chromium and iPhone original same-state snapshots PASS 39562503977; 2002 true perspective/lights remain UNVERIFIED. Pages 39562851108 SUCCESS; task still OPEN if original fidelity unknown.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 기본 2P의 진짜 OBS 표시는 검증했으나 모든 체스맨 크기/발판 고정·동시 2인 겹침·전투 POV는 원본과 비교 미흡 | 구현 목표: 원본 OBS originX/Y, 발 위치, TIS 바닥 픽셀, 캐릭터 z-index/그림자 관통 검증; 2026-10-20 원본 OBS 이미지를 일시적 503 응답에서 영구 unavailable 처리하던 문제 개선: 실제 동일 아카이브 OBS PNG 3회 재요청, 실패 후 검증된 원본 CardData 정지 대체, 연결 회복 시 원본 전신 자동 재시도. 팀/턴/DMP 좌표·원본 소스 바이트 불변. 정확한 행동 프레임표·출발/착지·98종 전체 원본 수용은 여전히 미완료.; 2026-10-20 PR #150 merged main@bb15ba5c genuine OBS 503 retry/reconnect QA 39381181475 + release 39381181551 PASS, Pages 39381488969 success; real main OBS frame job 39381488742 success. Original 34 missing IDs and 2002 direction/actions still not recovered.; 2026-10-20 source-native 92/98 chessman animated PNG 629장 실제 playable game actor/OBS loader 연결, PC·mobile 104-cell 4LEAF DMP browser game QA; 6 source-missing still CardData fallback. Exact old original battle 3D contact foot Y and all frames' pose mapping remain unsolved.; 2026-10-20 full-body 원본 92종은 실제 보드/배틀 independent Genesis actor 로더로 연결; PR153 same SHA Chromium source 616 PNG all hash and player roll/duel verified, WebKit iPhone simulation passed. 6 ID CardData still honest static. Exact historical contact/original locomotion animation geometry open.; 2026-10-21 source native signed-origin and source frame dimensions exposed for every actual playable OBS 0..7 transition. Contact remains inferred shared foot-plane, exact 2004 polygon mesh and dual-actor original contact unverified.; 2026-10-21 live model frame signed source origin/native dimension and inferred shared foot plane are recorded for 0..7 gameplay transitions; original 3D foot-contact depth cannot be proven from these original PNGs; game state immutable during source-only animation.; 2026-10-21 source-renderer integration follow-up (PR pending): native game-board actor and live winBattle podium actor previously diverged after an action event because poseByPlayer only targeted #board-pawns. Added explicit match-player ID to each actual duel chessman; propagate gameplay pose changes to both source-backed instances without changing OBS indexed bytes/FPS or inventing original EXE action mapping. Browser QA pending.; 2026-10-21 PR#159 MERGED main@03e433b3c9f8d26e9b8af2bfa22ed4831915fbdf: real Genesis match participant IDs propagated to independent winBattle podium OBS actor rendering. Board + battle action states synchronized to the same recovered source-frame indexes, preserving gameplay/dice/turn authority. Chromium native-battle browser QA passed before merge, and same SHA 958-OBS-source gameplay QA, Pages static deployment & Pages build succeeded. Real 2002 action-direction/FPS mapping and historical 3D contact still NOT verified; do not mark ACT task done.; 2026-10-21 next small source integration slice: after real combat rolls resolve, drive the actual winner's OBS victory and loser's OBS hurt pose (rather than only initial attacker/defender roles), using recovered native OBS images on real board, keeper excluded. Browser QA gates both sides against live numeric dice results, authentic frame-index manifest and idle reset. PR/QA pending; original 2002 pose table still unverified.; 2026-10-21 follow-up PR161 MERGED main@330621b17ff207d832d449419910b1833e2720cb: real resolved battle winner's source OBS victory + loser's hurt playback, correctly scoped to true match participants, native indexed sprites and post-pose idle reset. Live Chromium original winBattle combat source-index checks PR gate PASS, main smoke PASS, Pages build/deploy PASS. Historical exact EXE source action mapping/FPS/pivots still UNVERIFIED and task remains IN_PROGRESS.; 2026-10-21 PR163 code branch: 80 native complete 0..7 retain full walking cycle; original incomplete 12 stop repeating truncated source as full walk (actual first original frame still shown, WEB motion coverage exposed); before combat score resolution, defending actor no longer falsely plays hurt. True win/loss actions remain result-driven. QA/merge/deploy pending; native EXE mapping/FPS/contact not proven.; 2026-10-21 PR163 MERGED main@75880af6 v0.86.0-beta.4; prior false pre-score defender hurt and fabricated incomplete 12 source walking corrected, 80 complete 0..7 retained. PR gate original board/OBS/Chromium/WebKit/Chat/ledger PASS; post-main OBS frame 39555370075 / smoke 39555370229 PASS, Pages deploy 39555370173 + platform 39555369354 SUCCESS. Original EXE action/FPS/mesh contact still UNVERIFIED; not completed.; 2026-10-21 v0.86.0-beta.5 PR pending: real DMP movement step loop no longer restarts genuine 0..7 source frame clock per 60ms turn step; full recovered 80 native sequences may play during actual dice turns, incomplete 12 still static. Real roll regression + screenshots pending CI. Historical EXE action FPS/direction/foot pivot still OPEN.; 2026-10-21 PR165 MERGED at cff0c2d2 v0.86.0-beta.5 PWA v92: physical actual rolled movement displays all 8 verified 0..7 native OBS packets instead of resetting index on every 38–60ms DMP step. Chromium native OBS 39558708001 PASS, Chromium/WebKit release 39558707938 PASS, main 39559102284 PASS, Pages 39559102213 + build 39559102777 SUCCESS. Original action direction/FPS still UNKNOWN; ACT IN_PROGRESS.; 2026-10-21 NEW beta6 code/QA pending: projected native TIS 145x97 at 150x100 had genuine 5x3 pixel gaps but invented external blur and selected-tile neon glow bled across them; stripped only WEB shadows/glows (original pixels and hit/mapping unchanged). Native OBS sprite contact width proportional to real frame width and source foot-plane centered; shadow INFERRED, original EXE 3D/GFX still unknown. Before/after desktop and iPhone screens on same DMP state pending CI.; 2026-10-21 PR167 MERGED 6b4ffc v0.86.0-beta.6 PWA93: genuine TIS visual gap preserved without WEB external shadow on 145x97 source at WEB150x100, OBS source-frame width-proportional inferred foot contact. 26 DMP/1920 source tile QA, 32 TIS click, Chromium and iPhone original same-state snapshots PASS 39562503977; 2002 true perspective/lights remain UNVERIFIED. Pages 39562851108 SUCCESS; task still OPEN if original fidelity unknown.; 2026-10-22 beta11 branch QA-PENDING: source 355x113 native winBattle.spr fighter lateral centres follow actual rendered platform width on both desktop/iPhone; original MVE/podium 3D/FPS still UNVERIFIED.",
       "acceptance": [
         "전신 64종+추가 복원분에서 보드·전투·2인 겹침·6인 게임에 대한 실사 접지/가림 확인"
       ],
@@ -1736,7 +1749,7 @@
         "https://github.com/koith/browser-app-lab/actions/runs/39562503977/artifacts/12328791405"
       ],
       "evidenceLevel": "VERIFIED-92-ORIGINAL-OBS-BODIES-IN-PLAYABLE-GAME; 6 ORIGINAL-OBS-FILES-MISSING; EXACT-POSE-3D-CONTACT-OPEN",
-      "lastReviewed": "2026-10-21",
+      "lastReviewed": "2026-10-22",
       "verifiedAcceptance": null,
       "dependencies": [
         "ACT-03",
@@ -1783,7 +1796,7 @@
       "title": "전투 800×600 제목·좌우 점수·체스맨·주사위 정밀 배치",
       "status": "in_progress",
       "milestone": "M06",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원작은 큰 BATTLE/좌우 점수/배틀 플랫폼/중앙 VS/굴림 결과가 겹치지 않으나 현재 score 크기·배치·모달 도구가 다름 | 구현 목표: winBattle 원본 배경 위 실제 OBS·굴린 pip 주사위·결과 버튼을 원본 battle.jpg 기준 픽셀 좌표에 맞춤; 2026-10-19 original battle.jpg vs 39175531240 Chromium screenshot: turn-time IMG/eventmsgbox overlaps actual recovered winBattle BATTLE heading/score; WEB game-controls obscures recovered original metal podium/VS and intercepts the result button. Fixed by hiding normal-turn panel ONLY while combat, placing authoritative battle result buttons at bottom of real board-area, restoring after fight; iPhone physical hit and pre-existing combat tests success before main rebase 39176987648.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원작은 큰 BATTLE/좌우 점수/배틀 플랫폼/중앙 VS/굴림 결과가 겹치지 않으나 현재 score 크기·배치·모달 도구가 다름 | 구현 목표: winBattle 원본 배경 위 실제 OBS·굴린 pip 주사위·결과 버튼을 원본 battle.jpg 기준 픽셀 좌표에 맞춤; 2026-10-19 original battle.jpg vs 39175531240 Chromium screenshot: turn-time IMG/eventmsgbox overlaps actual recovered winBattle BATTLE heading/score; WEB game-controls obscures recovered original metal podium/VS and intercepts the result button. Fixed by hiding normal-turn panel ONLY while combat, placing authoritative battle result buttons at bottom of real board-area, restoring after fight; iPhone physical hit and pre-existing combat tests success before main rebase 39176987648.; 2026-10-22 beta11 branch QA-PENDING: source 355x113 native winBattle.spr fighter lateral centres follow actual rendered platform width on both desktop/iPhone; original MVE/podium 3D/FPS still UNVERIFIED.",
       "acceptance": [
         "원작 battle.jpg 구조와 동등한 위계, 점수·캐릭터·발판·대화창·좌우 카드가 충돌하지 않는 캡처"
       ],
@@ -1796,7 +1809,7 @@
         "https://github.com/koith/browser-app-lab/actions/runs/39176987648"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-19",
+      "lastReviewed": "2026-10-22",
       "verifiedAcceptance": null,
       "dependencies": [
         "BTL-01",
@@ -1897,7 +1910,7 @@
       "title": "결과값별 하늘 낙하·통통 반동·착지 원본 애니",
       "status": "in_progress",
       "milestone": "M07",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 현재 브라우저 구현은 결과별 CSS/JS 추정, 원작 궤적·회전·프레임 길이가 확인되지 않음 | 구현 목표: D4 1–4와 D6 1–6 각각의 모델 면방향/중력/바운스/정지 포즈를 출처 프레임과 타이밍별 매핑; 2026-10-21 PR pending beta.7: WEB fallback D6 3x3 pip placement fixed to reserve all 9 real grid positions (unused cells hidden not removed). Add Chromium/WebKit all 1..6 physical pip grid/face normals landing regression, original D4 and source roll UI unchanged. Original 2002 3D geometry and keyframes remain UNVERIFIED.; 2026-10-21 PR169 MERGED main 2fe53ab1 v0.86.0-beta.7/PWA94: physically correct WEB D6 result pip 3x3 grid using visibility hidden, all 1..6 result faces verified real DOM normals in Chromium, source gameplay roll unchanged. Original EXE die mesh/3D texture/keyframes still UNVERIFIED and not complete. Main original dice board QA 39609357986 + Pages deploy 39609357790 + build 39609327237 SUCCESS.; 2026-10-21 PR171 merged beta8: physical grounded WEB-INFERRED shadow now separated from moving original-source-unverified CSS D4/D6 object; independent floor opacity pulse synced to fall/bounce offsets; source 3D mesh still NOT recovered. PR source board 39610512486 / release WebKit 39610512328 / world/chat 39610512247 / central 39610512251 PASS, main 46c19ff. Current same-SHA Pages execution PENDING confirmation.; 2026-10-22 beta9 PR pending: inferred CSS D4/D6 falling 260px no longer blindly crosses viewport stage on iPhone; use real live stage bounds for initial height and proportional bounce heights, preserve authoritative dice outcomes/turn wait. Original MVE keyframes/3D source NOT RECOVERED; QA pending.; 2026-10-22 PR173 MERGED 5882947d beta9 PWA96: genuine gameplay-authoritative die result/camera fall stage bounds responsive WEB fallback, proportional bounces, Chromium/WebKit board/play result PASS 39714139407 39714139416, original CSS 3D assets still inferred. Pages 39714489431 and build 39714488921 SUCCESS, 2002 original MVE animations not recovered.; 2026-10-22 beta10 branch/PENDING QA: true falling D4 CSS-3D has no duplicate moving shadow after removing leftover D4 filter; ground contact anchored to track. Chromium/WebKit/iPhone midflight/result/engine rollCount test added. Source 2002 MVE model/lighting/keyframes UNVERIFIED, DO NOT mark done.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 현재 브라우저 구현은 결과별 CSS/JS 추정, 원작 궤적·회전·프레임 길이가 확인되지 않음 | 구현 목표: D4 1–4와 D6 1–6 각각의 모델 면방향/중력/바운스/정지 포즈를 출처 프레임과 타이밍별 매핑; 2026-10-21 PR pending beta.7: WEB fallback D6 3x3 pip placement fixed to reserve all 9 real grid positions (unused cells hidden not removed). Add Chromium/WebKit all 1..6 physical pip grid/face normals landing regression, original D4 and source roll UI unchanged. Original 2002 3D geometry and keyframes remain UNVERIFIED.; 2026-10-21 PR169 MERGED main 2fe53ab1 v0.86.0-beta.7/PWA94: physically correct WEB D6 result pip 3x3 grid using visibility hidden, all 1..6 result faces verified real DOM normals in Chromium, source gameplay roll unchanged. Original EXE die mesh/3D texture/keyframes still UNVERIFIED and not complete. Main original dice board QA 39609357986 + Pages deploy 39609357790 + build 39609327237 SUCCESS.; 2026-10-21 PR171 merged beta8: physical grounded WEB-INFERRED shadow now separated from moving original-source-unverified CSS D4/D6 object; independent floor opacity pulse synced to fall/bounce offsets; source 3D mesh still NOT recovered. PR source board 39610512486 / release WebKit 39610512328 / world/chat 39610512247 / central 39610512251 PASS, main 46c19ff. Current same-SHA Pages execution PENDING confirmation.; 2026-10-22 beta9 PR pending: inferred CSS D4/D6 falling 260px no longer blindly crosses viewport stage on iPhone; use real live stage bounds for initial height and proportional bounce heights, preserve authoritative dice outcomes/turn wait. Original MVE keyframes/3D source NOT RECOVERED; QA pending.; 2026-10-22 PR173 MERGED 5882947d beta9 PWA96: genuine gameplay-authoritative die result/camera fall stage bounds responsive WEB fallback, proportional bounces, Chromium/WebKit board/play result PASS 39714139407 39714139416, original CSS 3D assets still inferred. Pages 39714489431 and build 39714488921 SUCCESS, 2002 original MVE animations not recovered.; 2026-10-22 beta10 branch/PENDING QA: true falling D4 CSS-3D has no duplicate moving shadow after removing leftover D4 filter; ground contact anchored to track. Chromium/WebKit/iPhone midflight/result/engine rollCount test added. Source 2002 MVE model/lighting/keyframes UNVERIFIED, DO NOT mark done.; 2026-10-22 PR175 MERGED ad807cd beta10/v97: D4 removed midair CSS moving duplicate shadow, actual D4/D6 gaming Playwright 39786458555 and release Chromium/WebKit 39786458561 PASS; main Pages 39787555032/build 39787553048 SUCCESS. Actual original 2002 MVE meshes/timing still unknown.",
       "acceptance": [
         "D4×4 + D6×6 결과를 고정 seed로 반복 재생해 원본 애니와 착지 최종 눈/게임 엔진 결과가 항상 일치"
       ],
@@ -1915,7 +1928,10 @@
         "https://github.com/koith/browser-app-lab/pull/173",
         "https://github.com/koith/browser-app-lab/actions/runs/39714139407",
         "https://github.com/koith/browser-app-lab/actions/runs/39714139416",
-        "https://github.com/koith/browser-app-lab/actions/runs/39714489431"
+        "https://github.com/koith/browser-app-lab/actions/runs/39714489431",
+        "https://github.com/koith/browser-app-lab/pull/175",
+        "https://github.com/koith/browser-app-lab/actions/runs/39786458555",
+        "https://github.com/koith/browser-app-lab/actions/runs/39787555032"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
       "lastReviewed": "2026-10-22",
@@ -5316,6 +5332,69 @@
       "refs": [
         "apps/4leaf/rog/dice-d4-source-fallback.css",
         "apps/4leaf/rog/dice-fall.css"
+      ]
+    },
+    {
+      "seq": 217,
+      "date": "2026-10-22",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261022-003",
+      "taskIds": [
+        "BTL-02",
+        "BTL-04",
+        "ACT-04",
+        "BRD-01",
+        "P0-PODIUM"
+      ],
+      "details": "After PR175 merged main@ad807cd beta10: found existing native winBattle 355x113 sprite but game source fighters positioned using arbitrary fixed desktop/mobile offsets; scaled sprite image shifts away from live fighter centres."
+    },
+    {
+      "seq": 218,
+      "date": "2026-10-22",
+      "type": "IMPLEMENTED_PENDING_QA",
+      "requestId": "REQ-20261022-003",
+      "taskIds": [
+        "BTL-02",
+        "ACT-04"
+      ],
+      "details": "Two real original winBattle.spr sprite decks, visually measured near native x=72.5 and x=282.5 of 355px, now anchor independent OBS player side centres to actual rendered image width with min(105px,29.577% of stage) desktop and stage percentage on mobile, replacing fixed +-113/+-100 WEB offset approximations. Independent actual gameplay browser QA asserts desktop/iPhone measured CSS centres <3px from source-art deck proportions and saves screenshots, without changing source bitmap, OBS frame bytes, true dice rolls, battle score/result, or original winBattle fallback. Historical MVE mesh/camera/foot pivot still UNVERIFIED. beta11/v98 PR/QA/merge/Pages PENDING.",
+      "evidence": "apps/4leaf/rog/tests/dice-battle-podium.cjs",
+      "refs": [
+        "apps/4leaf/rog/dice-native-battle-source-spr.css",
+        "apps/4leaf/rog/original/SourceSPRExtra/winBattle-01.png"
+      ]
+    },
+    {
+      "seq": 219,
+      "date": "2026-10-22",
+      "type": "QA_VERIFIED",
+      "requestId": "REQ-20261022-002",
+      "taskIds": [
+        "DIE-02"
+      ],
+      "details": "PR175 actually merged main@ad807cd226d58a3a786ec489e581ff217a22d82d v0.86.0-beta.10/PWA v97. D4 moving filtered WEB shadow removed, independent stationary ground track continues. PR same-SHA original board Chromium QA 39786458555 SUCCESS including D4 airborne computed filter=none, stationary independent shadow, true D4 1..4 and D6 1..6 face/landing, gameplay roll count unaffected; same SHA Chromium/WebKit release 39786458561 SUCCESS, central chat 39786458483 SUCCESS, ledger 39786458592 SUCCESS. Main world/chat 39787555591 SUCCESS, WebRTC 39787555142 SUCCESS, main smoke 39787555247 SUCCESS. Original MVE 3D model/physics still UNVERIFIED; DIE02 stays IN_PROGRESS.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39786458555",
+      "refs": [
+        "https://github.com/koith/browser-app-lab/pull/175",
+        "https://github.com/koith/browser-app-lab/actions/runs/39786458561",
+        "https://github.com/koith/browser-app-lab/actions/runs/39787555591",
+        "https://github.com/koith/browser-app-lab/actions/runs/39787555142"
+      ]
+    },
+    {
+      "seq": 220,
+      "date": "2026-10-22",
+      "type": "DEPLOY_VERIFIED",
+      "requestId": "REQ-20261022-002",
+      "taskIds": [
+        "DIE-02",
+        "P0-RELEASE"
+      ],
+      "details": "PR175 main@ad807cd226d58a3a786ec489e581ff217a22d82d app v0.86.0-beta.10 PWA v97, same-SHA static GitHub Pages deploy 39787555032 SUCCESS and Pages build/deployment 39787553048 SUCCESS, dynamic smoke 39787555247 and main ledger integrity 39787555055 SUCCESS. Native 2002 D4/D6 mesh and animation fidelity not established.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39787555032",
+      "refs": [
+        "https://github.com/koith/browser-app-lab/actions/runs/39787553048",
+        "https://github.com/koith/browser-app-lab/actions/runs/39787555247"
       ]
     }
   ]

@@ -139,6 +139,7 @@ jobs:
             leaf-board-*.png
             leaf-original-cardshop-buy-sell-native.png
             leaf-live-3d-battle-podiums-*.png
+            leaf-native-winbattle-aligned-*.png
             leaf-original-battle-stage-*.png
             leaf-original-source-battle-*.png
             leaf-native-source-*.png

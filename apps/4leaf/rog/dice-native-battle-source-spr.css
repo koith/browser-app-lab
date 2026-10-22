@@ -65,12 +65,16 @@
 }
 #app.app-classic-dice #game #battle-visual[data-native-battle-podium="ready"]
  .battle-visual-side.attacker{
- left:calc(50% - 183px)!important;
+ /* 355px native winBattle-01.png contains two deck-centres, each
+  * approximately 105px either side of its midpoint. Follow the real
+  * DISPLAYED source image width if the stage is narrower than 355px.
+  * This is anchored to recovered 2D art, NOT a recovered 3D camera. */
+ left:calc(50% - min(105px, 29.577%) - 70px)!important;
  right:auto!important;
 }
 #app.app-classic-dice #game #battle-visual[data-native-battle-podium="ready"]
  .battle-visual-side.defender{
- left:calc(50% + 43px)!important;
+ left:calc(50% + min(105px, 29.577%) - 70px)!important;
  right:auto!important;
 }
 #app.app-classic-dice #game #battle-visual[data-native-battle-podium="ready"]
@@ -94,9 +98,9 @@
   width:110px!important;
  }
  #app.app-classic-dice #game #battle-visual[data-native-battle-podium="ready"]
- .battle-visual-side.attacker{left:calc(50% - 155px)!important}
+ .battle-visual-side.attacker{left:calc(50% - 29.577% - 55px)!important}
  #app.app-classic-dice #game #battle-visual[data-native-battle-podium="ready"]
- .battle-visual-side.defender{left:calc(50% + 45px)!important}
+ .battle-visual-side.defender{left:calc(50% + 29.577% - 55px)!important}
  #app.app-classic-dice #game #battle-visual[data-native-battle-podium="ready"]
  .battle-visual-side .battle-visual-actor.leaf-battle-chessman{
   bottom:calc(12% + 78px)!important;
