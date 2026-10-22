@@ -1862,7 +1862,7 @@
       "title": "결과값별 하늘 낙하·통통 반동·착지 원본 애니",
       "status": "in_progress",
       "milestone": "M07",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 현재 브라우저 구현은 결과별 CSS/JS 추정, 원작 궤적·회전·프레임 길이가 확인되지 않음 | 구현 목표: D4 1–4와 D6 1–6 각각의 모델 면방향/중력/바운스/정지 포즈를 출처 프레임과 타이밍별 매핑; 2026-10-21 PR pending beta.7: WEB fallback D6 3x3 pip placement fixed to reserve all 9 real grid positions (unused cells hidden not removed). Add Chromium/WebKit all 1..6 physical pip grid/face normals landing regression, original D4 and source roll UI unchanged. Original 2002 3D geometry and keyframes remain UNVERIFIED.; 2026-10-21 PR169 MERGED main 2fe53ab1 v0.86.0-beta.7/PWA94: physically correct WEB D6 result pip 3x3 grid using visibility hidden, all 1..6 result faces verified real DOM normals in Chromium, source gameplay roll unchanged. Original EXE die mesh/3D texture/keyframes still UNVERIFIED and not complete. Main original dice board QA 39609357986 + Pages deploy 39609357790 + build 39609327237 SUCCESS.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 현재 브라우저 구현은 결과별 CSS/JS 추정, 원작 궤적·회전·프레임 길이가 확인되지 않음 | 구현 목표: D4 1–4와 D6 1–6 각각의 모델 면방향/중력/바운스/정지 포즈를 출처 프레임과 타이밍별 매핑; 2026-10-21 PR pending beta.7: WEB fallback D6 3x3 pip placement fixed to reserve all 9 real grid positions (unused cells hidden not removed). Add Chromium/WebKit all 1..6 physical pip grid/face normals landing regression, original D4 and source roll UI unchanged. Original 2002 3D geometry and keyframes remain UNVERIFIED.; 2026-10-21 PR169 MERGED main 2fe53ab1 v0.86.0-beta.7/PWA94: physically correct WEB D6 result pip 3x3 grid using visibility hidden, all 1..6 result faces verified real DOM normals in Chromium, source gameplay roll unchanged. Original EXE die mesh/3D texture/keyframes still UNVERIFIED and not complete. Main original dice board QA 39609357986 + Pages deploy 39609357790 + build 39609327237 SUCCESS.; 2026-10-21 PR171 merged beta8: physical grounded WEB-INFERRED shadow now separated from moving original-source-unverified CSS D4/D6 object; independent floor opacity pulse synced to fall/bounce offsets; source 3D mesh still NOT recovered. PR source board 39610512486 / release WebKit 39610512328 / world/chat 39610512247 / central 39610512251 PASS, main 46c19ff. Current same-SHA Pages execution PENDING confirmation.",
       "acceptance": [
         "D4×4 + D6×6 결과를 고정 seed로 반복 재생해 원본 애니와 착지 최종 눈/게임 엔진 결과가 항상 일치"
       ],
@@ -1873,7 +1873,10 @@
         "https://github.com/koith/browser-app-lab/actions/runs/39608672106",
         "https://github.com/koith/browser-app-lab/actions/runs/39609357986",
         "https://github.com/koith/browser-app-lab/actions/runs/39609357790",
-        "https://github.com/koith/browser-app-lab/actions/runs/39609327237"
+        "https://github.com/koith/browser-app-lab/actions/runs/39609327237",
+        "https://github.com/koith/browser-app-lab/pull/171",
+        "https://github.com/koith/browser-app-lab/actions/runs/39610512486",
+        "https://github.com/koith/browser-app-lab/actions/runs/39610512328"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
       "lastReviewed": "2026-10-21",
@@ -5142,6 +5145,38 @@
         "apps/4leaf/rog/original/SourceSPR/manifest.json",
         "apps/4leaf/rog/original/SourceSPRExtra/winBattle-01.png",
         "apps/4leaf/rog/tools/audit-original-dice-resources.py"
+      ]
+    },
+    {
+      "seq": 209,
+      "date": "2026-10-21",
+      "type": "QA_VERIFIED",
+      "requestId": "REQ-20261021-006",
+      "taskIds": [
+        "DIE-02"
+      ],
+      "details": "PR171 MERGED main@46c19ff38c37894cde23b59f1668ee0b0b43bca9 v0.86.0-beta.8 PWA v95. Physically moving D4/D6 3D WEB fallback no longer carries impossible dark drop-shadow upward by 260px; instead each die moves independently inside untransformed landing track, independent floor shadow scales opacity with existing 0/38/55/72/83/100% actual WAAPI physics/bounce timeline. Source 2D 4+16 GUI sprites/true DMP/OBS and game dice generation/await unchanged. PR latest 00f0f3ab: original board/dice Playwright 39610512486 PASS incl stationary floor-grounded shadows and 1..6 pips, Chromium/WebKit release 39610512328 PASS, world/chat 39610512247 PASS, central chat 39610512251 PASS. The WEB contact shadow is INFERRED, original 2002 MVE 3D die geometry, texture, lighting, keyframes still UNVERIFIED. Same-SHA main Pages deployment verification PENDING as of ledger commit, do not call success until run results.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39610512486",
+      "refs": [
+        "https://github.com/koith/browser-app-lab/pull/171",
+        "https://github.com/koith/browser-app-lab/actions/runs/39610512328",
+        "https://github.com/koith/browser-app-lab/actions/runs/39610512247",
+        "https://github.com/koith/browser-app-lab/actions/runs/39610512251"
+      ]
+    },
+    {
+      "seq": 210,
+      "date": "2026-10-21",
+      "type": "KNOWN_QA_FLAKE",
+      "requestId": "REQ-20261021-006",
+      "taskIds": [
+        "QA-03"
+      ],
+      "details": "On beta.7 main@2fe53ab, world/chat integrated run 39610120961 FAILED at existing dice-ai-resume-guard.cjs explicit bot autoplay `players[1].position>0` 22sec wait after manual gameplay and forced position reset; exported position neutral corridor does not explicitly reset inherited bot jail/effects, so possible residual legal DMP event lock requires reproducible runtime capture. Concurrent WebKit/real ChatTown and published ChatRoom main 39610212151 PASS. No proven production chat fault, do NOT mark reliable permanent fix or quietly disable guard. Follow-up should capture bot.jail, busy, turn, effects and neutralize only fixture-derived event state after instrumented proof.",
+      "evidence": "https://github.com/koith/browser-app-lab/actions/runs/39610120961",
+      "refs": [
+        "https://github.com/koith/browser-app-lab/actions/runs/39610212151",
+        "apps/4leaf/rog/tests/dice-ai-resume-guard.cjs"
       ]
     }
   ]
