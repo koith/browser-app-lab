@@ -10,7 +10,7 @@ const root=path.resolve(__dirname,'..');
 const meta=JSON.parse(fs.readFileSync(path.join(root,'app-version.json'),'utf8'));
 const index=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const sw=fs.readFileSync(path.join(root,'sw.js'),'utf8');
-assert.equal(meta.version,'0.86.0-beta.8');
+assert.equal(meta.version,'0.86.0-beta.9');
 assert.match(meta.channel,/beta/,'original client exact copy was not completed');
 assert.ok(meta.sourceFidelity.includes('not-complete'),'do not falsely claim original is finished');
 assert.ok(!meta.originalClient.includes(meta.version),'web revival is separate from 2002–2004 release');
