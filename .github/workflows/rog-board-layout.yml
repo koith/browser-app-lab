@@ -143,6 +143,7 @@ jobs:
             leaf-original-source-battle-*.png
             leaf-native-source-*.png
             leaf-genuine-original-2002-obs-chessmen-*.png
+            leaf-d4-stationary-shadow-*.png
             leaf-tis-obs-source-contact-*.png
             rog-dmp-overlap-audit.json
           retention-days: 7
