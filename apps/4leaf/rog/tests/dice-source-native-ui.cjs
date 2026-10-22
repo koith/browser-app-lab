@@ -72,8 +72,32 @@ const path=require('node:path');
     log.append(line);
    }
    log.scrollTop=0;
+   window.__LEAF_NATIVE_DICE_CHAT_SCROLL__.refresh();
   });
-  await page.waitForFunction(()=>!document.querySelector('.leaf-dice-chat-scroll[data-direction="down"]').disabled);
+  // Real game message through its normal onsubmit callback must not steal
+  // the reader's old-history position or disable real native down arrow.
+  // This catches the prior PUBLIC browser race, not just an artificial
+  // DOM fixture with no app messages.
+  await page.waitForFunction(()=>{
+   const log=document.getElementById('chat-log');
+   return log.scrollHeight>log.clientHeight+20&&log.scrollTop<=1&&
+    window.__LEAF_NATIVE_DICE_CHAT_SCROLL__.getState().downEnabled;
+  },null,{timeout:5000});
+  await page.evaluate(()=>{
+   document.getElementById('message').value='source-scroll-regression';
+   document.getElementById('chat-form').requestSubmit();
+  });
+  const retained=await page.evaluate(()=>{
+   const log=document.getElementById('chat-log');
+   return {top:log.scrollTop,height:log.scrollHeight,viewport:log.clientHeight,
+    down:window.__LEAF_NATIVE_DICE_CHAT_SCROLL__.getState().downEnabled,
+    sent:log.textContent.includes('source-scroll-regression')};
+  });
+  assert.ok(retained.sent&&retained.height>retained.viewport+20,
+   'real Dice chat submit must append while user reads older lines');
+  assert.ok(retained.top<=1&&retained.down,
+   'new message must preserve historic scroll position and genuine down arrow: '+
+    JSON.stringify(retained));
   assert.equal(await up.isDisabled(),true,'at actual beginning of real chat history up is disabled');
   await down.click();
   const current=await page.evaluate(()=>window.__LEAF_NATIVE_DICE_CHAT_SCROLL__.getState());
