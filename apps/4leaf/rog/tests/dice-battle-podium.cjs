@@ -58,6 +58,48 @@ const path=require('node:path');
    'board/podium may not substitute different inferred frame indexes');
   assert.ok(synced.duel.every(x=>x.source==='original-obs-sprite'),
    'already recovered true OBS full bodies must be rendered on both podiums');
+  // ARCHIVED SOURCE IMAGE anchor regression: validate the physical
+  // fighter feet and horizontal centers against BOTH deck tops in the
+  // 355x113 original winBattle sprite, not static WEB side offsets.
+  const sourceAnchorProof=()=>page.evaluate(()=>{
+   const stage=document.querySelector('#battle-visual');
+   const image=stage.querySelector('.leaf-native-winbattle-podiums');
+   const bitmap=image.getBoundingClientRect();
+   return {
+    provenance:stage.dataset.nativePodiumActorAnchors,
+    image:[bitmap.width,bitmap.height],
+    fighters:[...stage.querySelectorAll('.battle-visual-side')].map((side,i)=>{
+     const actor=side.querySelector('.battle-visual-actor.leaf-battle-chessman');
+     const rect=actor.getBoundingClientRect();
+     const sourceX=[77,278][i];
+     return {
+      id:actor.dataset.id,
+      center:rect.left+rect.width/2,
+      originalDeckCenter:bitmap.left+bitmap.width*sourceX/355,
+      foot:rect.bottom-parseFloat(getComputedStyle(actor).getPropertyValue('--leaf-obs-ground')),
+      originalDeckHeight:bitmap.top+bitmap.height*34/113,
+      originalSource:side.querySelector('.leaf-chess-original-obs')?.getAttribute('src')
+     };
+    })
+   };
+  });
+  const verifyNativeAnchors=(proof,viewport)=>{
+   assert.equal(proof.provenance,'source-winBattle-2d-deck/WEB-depth-inferred',
+    'real native winBattle art, not a fake screenshot, controls combat anchors');
+   assert.equal(proof.fighters.length,2);
+   for(const item of proof.fighters){
+    assert.ok(Math.abs(item.center-item.originalDeckCenter)<2.5,
+     viewport+' source X center drift '+JSON.stringify(item));
+    assert.ok(Math.abs(item.foot-item.originalDeckHeight)<2.5,
+     viewport+' native OBS foot misses original metal deck '+JSON.stringify(item));
+    assert.ok(item.originalSource?.includes('/original/OBS/'),
+     'original OBS fighter must still render at recovered sprite deck');
+   }
+  };
+  await page.waitForFunction(()=>document.querySelector('#battle-visual')
+    ?.dataset.nativePodiumActorAnchors==='source-winBattle-2d-deck/WEB-depth-inferred');
+  const desktopAnchors=await sourceAnchorProof();
+  verifyNativeAnchors(desktopAnchors,'desktop');
   const state=await page.locator('#battle-visual').evaluate(stage=>{
    const style=getComputedStyle(stage);
    const sides=[...stage.querySelectorAll('.battle-visual-side')];
@@ -210,6 +252,14 @@ const path=require('node:path');
    'battle result controls belong BELOW original metal platforms and VS: '+JSON.stringify(battleHud));
   await page.screenshot({path:'leaf-live-3d-battle-podiums-desktop.png'});
   await page.setViewportSize({width:390,height:844});
+  await page.waitForFunction(()=>{
+   const stage=document.querySelector('#battle-visual'),image=stage?.querySelector('.leaf-native-winbattle-podiums');
+   if(!image)return false;
+   const r=image.getBoundingClientRect(),a=stage.querySelector('.battle-visual-side.attacker .leaf-battle-chessman')?.getBoundingClientRect();
+   return !!a&&Math.abs((a.left+a.width/2)-(r.left+r.width*77/355))<2.5;
+  },null,{timeout:6000});
+  const mobileAnchors=await sourceAnchorProof();
+  verifyNativeAnchors(mobileAnchors,'iPhone');
   const mobile=await page.locator('#battle-visual').evaluate(stage=>({
    actor:stage.querySelectorAll('.battle-visual-actor').length,
    podium:stage.querySelectorAll('.battle-visual-pedestal').length,

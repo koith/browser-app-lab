@@ -1183,10 +1183,30 @@ function showBattleScene(attacker,defender,attack,defense,attackerPoints,defende
  nativeHeading.dataset.originalSourceMember='Dice/IMG.pak:winBattle.spr';
  nativeHeading.dataset.originalFrame='0';
  stage.dataset.nativeBattlePodium='loading';
+ // Recovered winBattle-01.png (355x113) has two upper deck centers
+ // near native source pixels [77,34] and [278,34]. The WEB scene must
+ // fit each fighter to this LIVE image, not unrelated CSS pixel guesses.
+ // 3D MVE camera/podium mesh and shadow lighting remain UNVERIFIED.
+ const updateNativeBattleAnchors=()=>{
+  if(!stage.isConnected||stage.dataset.nativeBattlePodium!=='ready')return;
+  const sprite=nativePodiums.getBoundingClientRect();
+  const canvas=stage.getBoundingClientRect();
+  if(!(sprite.width>0&&sprite.height>0&&canvas.width>0))return;
+  const left=sprite.left-canvas.left+77*sprite.width/355;
+  const right=sprite.left-canvas.left+278*sprite.width/355;
+  const sourceDeckY=sprite.top+34*sprite.height/113;
+  const obsPivot=6; // existing verified Battle native-relative OBS foot plane
+  stage.style.setProperty('--leaf-native-podium-left-x',left+'px');
+  stage.style.setProperty('--leaf-native-podium-right-x',right+'px');
+  stage.style.setProperty('--leaf-native-podium-actor-bottom',
+   (canvas.bottom-sourceDeckY-obsPivot)+'px');
+  stage.dataset.nativePodiumActorAnchors='source-winBattle-2d-deck/WEB-depth-inferred';
+ };
  nativePodiums.addEventListener('load',()=>{
   if(!stage.isConnected)return;
   stage.dataset.nativeBattlePodium=nativePodiums.naturalWidth===355&&
    nativePodiums.naturalHeight===113?'ready':'fallback';
+  updateNativeBattleAnchors();
  });
  nativePodiums.addEventListener('error',()=>{
   if(stage.isConnected)stage.dataset.nativeBattlePodium='fallback';
@@ -1201,6 +1221,14 @@ function showBattleScene(attacker,defender,attack,defense,attackerPoints,defende
  });
  stage.append(nativePodiums,nativeHeading,head,left,vs,right);
  area.append(stage);
+ if(typeof ResizeObserver==='function'){
+  // Recompute at every native image/viewport resize; release after duel.
+  const observer=new ResizeObserver(()=>{
+   if(!stage.isConnected){observer.disconnect();return}
+   updateNativeBattleAnchors();
+  });
+  observer.observe(stage);observer.observe(nativePodiums);
+ }
  return stage;
 }
 function combat(attacker,defender,keeper=false){
