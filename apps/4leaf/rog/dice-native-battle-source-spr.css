@@ -65,17 +65,17 @@
 }
 #app.app-classic-dice #game #battle-visual[data-native-battle-podium="ready"]
  .battle-visual-side.attacker{
- left:calc(50% - 183px)!important;
+ left:calc(var(--leaf-native-podium-left-x, 50%) - 70px)!important;
  right:auto!important;
 }
 #app.app-classic-dice #game #battle-visual[data-native-battle-podium="ready"]
  .battle-visual-side.defender{
- left:calc(50% + 43px)!important;
+ left:calc(var(--leaf-native-podium-right-x, 50%) - 70px)!important;
  right:auto!important;
 }
 #app.app-classic-dice #game #battle-visual[data-native-battle-podium="ready"]
  .battle-visual-side .battle-visual-actor.leaf-battle-chessman{
- bottom:calc(12% + 92px)!important;
+ bottom:var(--leaf-native-podium-actor-bottom,calc(12% + 92px))!important;
  z-index:7!important;
 }
 #app.app-classic-dice #game #battle-visual[data-native-battle-podium="ready"]
@@ -94,11 +94,17 @@
   width:110px!important;
  }
  #app.app-classic-dice #game #battle-visual[data-native-battle-podium="ready"]
- .battle-visual-side.attacker{left:calc(50% - 155px)!important}
+ .battle-visual-side.attacker{left:calc(var(--leaf-native-podium-left-x, 50%) - 55px)!important}
  #app.app-classic-dice #game #battle-visual[data-native-battle-podium="ready"]
- .battle-visual-side.defender{left:calc(50% + 45px)!important}
+ .battle-visual-side.defender{left:calc(var(--leaf-native-podium-right-x, 50%) - 55px)!important}
  #app.app-classic-dice #game #battle-visual[data-native-battle-podium="ready"]
  .battle-visual-side .battle-visual-actor.leaf-battle-chessman{
-  bottom:calc(12% + 78px)!important;
+  bottom:var(--leaf-native-podium-actor-bottom,calc(12% + 78px))!important;
  }
 }
+
+/* These variables are computed from the actual rendered 355x113 recovered
+ * winBattle.spr frame (including iPhone object-fit scaling) by game.js.
+ * The source image's top deck is evidence; its 2002 MVE geometry is not.
+ * Both actors use independently positioned native OBS pixels on that deck.
+ */
