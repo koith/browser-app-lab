@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "project": "4LEAF 원작 복원 웹앱",
   "canonicalFile": "apps/4leaf/rog/docs/RESTORATION_LEDGER.json",
-  "updatedAt": "2026-10-21",
+  "updatedAt": "2026-10-22",
   "sourceOfTruth": "Git 저장소의 이 JSON과 커밋 이력. 과거 챗 대화는 기록 근거이지 진행 상태의 원본 데이터가 아님.",
   "operatingRule": "새 요청 즉시 작업 등록 → open 목록 조회 → 실제 수정 → 원본 근거/코드/브라우저/배포 검증 → 검증 증거와 함께 상태 전이. 부분 구현을 원작 완성으로 표시 금지.",
   "statusDefinitions": {
@@ -961,6 +961,23 @@
         "P0-DICE",
         "P0-RELEASE"
       ]
+    },
+    {
+      "id": "REQ-20261022-001",
+      "date": "2026-10-22",
+      "origin": "user",
+      "text": "Resume source-faithful D4/D6 3D model/texture/keyframes and bounces as P0, review source ROLL PR105 and recent PR171/172; prevent fall landing vs authoritative match desync; improve battle podium, camera, feet; retain DMP/TIS, archived OBS 92/958, validate published ChatRoom and persistent bot QA; code first, Chromium/WebKit/mobile QA PR merge deploy, preserve evidence, don't call inferred WEB 3D an original asset.",
+      "taskIds": [
+        "DIE-01",
+        "DIE-02",
+        "DIE-04",
+        "BTL-02",
+        "BTL-04",
+        "ACT-03",
+        "ACT-04",
+        "BRD-01",
+        "QA-03"
+      ]
     }
   ],
   "tasks": [
@@ -1862,7 +1879,7 @@
       "title": "결과값별 하늘 낙하·통통 반동·착지 원본 애니",
       "status": "in_progress",
       "milestone": "M07",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 현재 브라우저 구현은 결과별 CSS/JS 추정, 원작 궤적·회전·프레임 길이가 확인되지 않음 | 구현 목표: D4 1–4와 D6 1–6 각각의 모델 면방향/중력/바운스/정지 포즈를 출처 프레임과 타이밍별 매핑; 2026-10-21 PR pending beta.7: WEB fallback D6 3x3 pip placement fixed to reserve all 9 real grid positions (unused cells hidden not removed). Add Chromium/WebKit all 1..6 physical pip grid/face normals landing regression, original D4 and source roll UI unchanged. Original 2002 3D geometry and keyframes remain UNVERIFIED.; 2026-10-21 PR169 MERGED main 2fe53ab1 v0.86.0-beta.7/PWA94: physically correct WEB D6 result pip 3x3 grid using visibility hidden, all 1..6 result faces verified real DOM normals in Chromium, source gameplay roll unchanged. Original EXE die mesh/3D texture/keyframes still UNVERIFIED and not complete. Main original dice board QA 39609357986 + Pages deploy 39609357790 + build 39609327237 SUCCESS.; 2026-10-21 PR171 merged beta8: physical grounded WEB-INFERRED shadow now separated from moving original-source-unverified CSS D4/D6 object; independent floor opacity pulse synced to fall/bounce offsets; source 3D mesh still NOT recovered. PR source board 39610512486 / release WebKit 39610512328 / world/chat 39610512247 / central 39610512251 PASS, main 46c19ff. Current same-SHA Pages execution PENDING confirmation.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 현재 브라우저 구현은 결과별 CSS/JS 추정, 원작 궤적·회전·프레임 길이가 확인되지 않음 | 구현 목표: D4 1–4와 D6 1–6 각각의 모델 면방향/중력/바운스/정지 포즈를 출처 프레임과 타이밍별 매핑; 2026-10-21 PR pending beta.7: WEB fallback D6 3x3 pip placement fixed to reserve all 9 real grid positions (unused cells hidden not removed). Add Chromium/WebKit all 1..6 physical pip grid/face normals landing regression, original D4 and source roll UI unchanged. Original 2002 3D geometry and keyframes remain UNVERIFIED.; 2026-10-21 PR169 MERGED main 2fe53ab1 v0.86.0-beta.7/PWA94: physically correct WEB D6 result pip 3x3 grid using visibility hidden, all 1..6 result faces verified real DOM normals in Chromium, source gameplay roll unchanged. Original EXE die mesh/3D texture/keyframes still UNVERIFIED and not complete. Main original dice board QA 39609357986 + Pages deploy 39609357790 + build 39609327237 SUCCESS.; 2026-10-21 PR171 merged beta8: physical grounded WEB-INFERRED shadow now separated from moving original-source-unverified CSS D4/D6 object; independent floor opacity pulse synced to fall/bounce offsets; source 3D mesh still NOT recovered. PR source board 39610512486 / release WebKit 39610512328 / world/chat 39610512247 / central 39610512251 PASS, main 46c19ff. Current same-SHA Pages execution PENDING confirmation.; 2026-10-22 beta9 PR pending: inferred CSS D4/D6 falling 260px no longer blindly crosses viewport stage on iPhone; use real live stage bounds for initial height and proportional bounce heights, preserve authoritative dice outcomes/turn wait. Original MVE keyframes/3D source NOT RECOVERED; QA pending.",
       "acceptance": [
         "D4×4 + D6×6 결과를 고정 seed로 반복 재생해 원본 애니와 착지 최종 눈/게임 엔진 결과가 항상 일치"
       ],
@@ -1879,7 +1896,7 @@
         "https://github.com/koith/browser-app-lab/actions/runs/39610512328"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-21",
+      "lastReviewed": "2026-10-22",
       "verifiedAcceptance": null,
       "dependencies": [
         "DIE-01"
@@ -5177,6 +5194,39 @@
       "refs": [
         "https://github.com/koith/browser-app-lab/actions/runs/39610212151",
         "apps/4leaf/rog/tests/dice-ai-resume-guard.cjs"
+      ]
+    },
+    {
+      "seq": 211,
+      "date": "2026-10-22",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261022-001",
+      "taskIds": [
+        "DIE-01",
+        "DIE-02",
+        "DIE-04",
+        "BTL-02",
+        "BTL-04",
+        "ACT-03",
+        "ACT-04",
+        "BRD-01",
+        "QA-03"
+      ],
+      "details": "Start from true main 27e2d554 after verified prior PR171 beta8 and PR172 ledger evidence; avoid repeats."
+    },
+    {
+      "seq": 212,
+      "date": "2026-10-22",
+      "type": "IMPLEMENTED_PENDING_QA",
+      "requestId": "REQ-20261022-001",
+      "taskIds": [
+        "DIE-02"
+      ],
+      "details": "PR pending v0.86.0-beta.9/PWA v96: real dice-fall.js D4/D6 WEB fallback uses live stage/client frame height and real die width to clamp initial 260px source-unverified vertical spawn to visible viewport; first and second rebound height proportional to actual fall and preserve existing offset times 0/38/55/72/83/100% and genuine game await/authoritative roll values. Instrument data-motion provenance 'responsive-WEB-fallback/not-original-MVE'. Chromium and WebKit/iPhone physical fall and match roll Playwright assertions added; actual MVE EXE original mesh/texture/camera/keyframes still UNVERIFIED; no historical completion status change. QA/merge/deployment pending.",
+      "evidence": "apps/4leaf/rog/tests/dice-fall.cjs",
+      "refs": [
+        "apps/4leaf/rog/dice-fall.js",
+        "apps/4leaf/rog/app-version.json"
       ]
     }
   ]

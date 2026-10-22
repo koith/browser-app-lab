@@ -83,12 +83,26 @@
   const [rx,ry]=sides===4?[0,0]:ROTATION[result];
   const target=sides===4?TETRA_LAND[result]:
    'rotateX('+(720+rx)+'deg) rotateY('+(1080+ry)+'deg) rotateZ(0deg)';
+  // Source MVE camera/keyframes have not been recovered. The previous
+  // inferred 260px spawn height put real CSS geometry outside the compact
+  // iPhone stage. Keep the first drop INSIDE the actual current stage, with
+  // rebound heights proportional to the available falling distance.
+  // This changes PRESENTATION only; dice faces/results and game-turn awaits
+  // continue to come exclusively from the authoritative match engine.
+  const layerHeight=track.parentElement?.getBoundingClientRect().height||0;
+  const dieHeight=track.getBoundingClientRect().height||57;
+  const fallHeight=Math.round(Math.max(28,Math.min(260,layerHeight-dieHeight-12)));
+  const bounceHeight=Math.round(Math.min(66,fallHeight*.26));
+  const finalBounce=Math.round(Math.min(19,fallHeight*.075));
+  node.dataset.webFallHeight=String(fallHeight);
+  node.dataset.webBounceHeights=bounceHeight+','+finalBounce;
+  node.dataset.motionProvenance='responsive-WEB-fallback/not-original-MVE';
   const physics=[
-   {transform:'translate3d(0,-260px,0) scale(.76)',offset:0},
+   {transform:'translate3d(0,-'+fallHeight+'px,0) scale(.76)',offset:0},
    {transform:'translate3d('+(index%2?12:-12)+'px,0,0) scale(1.08,.88)',offset:.38},
-   {transform:'translate3d('+(index%2?19:-19)+'px,-66px,0) scale(.98)',offset:.55},
+   {transform:'translate3d('+(index%2?19:-19)+'px,-'+bounceHeight+'px,0) scale(.98)',offset:.55},
    {transform:'translate3d('+(index%2?10:-10)+'px,0,0) scale(1.03,.94)',offset:.72},
-   {transform:'translate3d('+(index%2?7:-7)+'px,-19px,0) scale(.99)',offset:.83},
+   {transform:'translate3d('+(index%2?7:-7)+'px,-'+finalBounce+'px,0) scale(.99)',offset:.83},
    {transform:'translate3d(0,0,0) scale(1)',offset:1}
   ];
   const spin=sides===4?[
