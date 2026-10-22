@@ -43,6 +43,16 @@ const {chromium,webkit}=require('playwright');
    overlay:getComputedStyle(document.querySelector('#leaf-dice-fall-layer')).pointerEvents,
    pos:document.querySelector('#leaf-dice-fall-layer').getBoundingClientRect().toJSON(),
    original:document.querySelectorAll('#board-nodes>.tile').length,
+   // Read the live geometry of the currently playing D4/D6 stage, not
+   // an offscreen CSS constant. Source MVE keyframes remain unknown.
+   trajectories:[...document.querySelectorAll('#leaf-dice-fall-layer .leaf-fall-piece')].map(piece=>{
+    const stage=piece.closest('.leaf-dice-fall-layer');
+    const height=stage.getBoundingClientRect().height;
+    const trackHeight=piece.parentElement.getBoundingClientRect().height;
+    return {height,trackHeight,drop:Number(piece.dataset.webFallHeight),
+     bounce:piece.dataset.webBounceHeights.split(',').map(Number),
+     provenance:piece.dataset.motionProvenance};
+   }),
    grounded:[...document.querySelectorAll('#leaf-dice-fall-layer .leaf-fall-track')]
     .map(track=>{
      const shadow=getComputedStyle(track,'::before');
@@ -64,6 +74,14 @@ const {chromium,webkit}=require('playwright');
   assert.equal(mid.disabled,true,'other player cannot double-roll during drop');
   assert.equal(mid.overlay,'none','physics never blocks underlying game input');
   assert.equal(mid.original,104,'104 real TIS tiles unaffected by physics overlay');
+  assert.ok(mid.trajectories.length===mid.total&&mid.trajectories.every(t=>
+    t.provenance==='responsive-WEB-fallback/not-original-MVE'&&
+    t.drop===Math.round(Math.max(28,Math.min(260,t.height-t.trackHeight-12)))&&
+    t.bounce[0]===Math.round(Math.min(66,t.drop*.26))&&
+    t.bounce[1]===Math.round(Math.min(19,t.drop*.075))&&
+    t.bounce[0]<t.drop&&t.bounce[1]<t.bounce[0]),
+   'real D4/D6 flight must fit the live viewport and rebound progressively: '+
+    JSON.stringify(mid.trajectories));
   assert.equal(mid.grounded.length,mid.total,
    'every actually falling die needs an independent floor-grounded cast shadow');
   assert.ok(mid.grounded.every(t=>t.shadowProvenance==='web-inferred-ground-contact'&&
