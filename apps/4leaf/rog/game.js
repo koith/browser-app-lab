@@ -1192,10 +1192,20 @@ function showBattleScene(attacker,defender,attack,defense,attackerPoints,defende
   const sprite=nativePodiums.getBoundingClientRect();
   const canvas=stage.getBoundingClientRect();
   if(!(sprite.width>0&&sprite.height>0&&canvas.width>0))return;
-  const left=sprite.left-canvas.left+77*sprite.width/355;
-  const right=sprite.left-canvas.left+278*sprite.width/355;
-  const sourceDeckY=sprite.top+34*sprite.height/113;
-  const obsPivot=6; // existing verified Battle native-relative OBS foot plane
+  // The 355x113 *image element* may be taller than its actual object-fit
+  // bitmap when compressed inside a narrow phone or landscape viewport.
+  // object-position:center bottom letterboxes at the TOP. Anchor native
+  // fighters to DRAWN source pixels, not the containing IMG's white space.
+  const nativeRatio=355/113;
+  const imageWidth=Math.min(sprite.width,sprite.height*nativeRatio);
+  const imageHeight=imageWidth/nativeRatio;
+  const imageLeft=sprite.left+(sprite.width-imageWidth)/2;
+  const imageTop=sprite.bottom-imageHeight;
+  const left=imageLeft-canvas.left+77*imageWidth/355;
+  const right=imageLeft-canvas.left+278*imageWidth/355;
+  const sourceDeckY=imageTop+34*imageHeight/113;
+  stage.dataset.nativePodiumBitmapFit='object-fit-contain/center-bottom/source-355x113';
+  const obsPivot=6; // WEB-inferred OBS foot adjustment; not 2002 MVE plane
   stage.style.setProperty('--leaf-native-podium-left-x',left+'px');
   stage.style.setProperty('--leaf-native-podium-right-x',right+'px');
   stage.style.setProperty('--leaf-native-podium-actor-bottom',

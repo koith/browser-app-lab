@@ -159,15 +159,34 @@
    renderNativeFrame(pawn,seq[0]);
    const sourceSheet=pawn.querySelector('.leaf-chess-source-frame');
    if(sourceSheet)sourceSheet.hidden=true;
+   // Idle and contiguous walking cycles repeat; attacks, impacts and
+   // victory are ONE-SHOT events. Repeating their provisional [10,18] etc.
+   // forever made a struck character oscillate between attack/hurt frames
+   // while no actual new gameplay action had occurred. Original OBS bytes
+   // remain untouched; action-to-source-index/FPS remains UNVERIFIED.
+   const loops=action==='idle'||action==='walk';
+   pawn.dataset.sourcePlaybackMode=loops?'loop':'one-shot/WEB-action-unverified';
+   pawn.dataset.sourcePlaybackComplete='false';
    if(seq.length>1&&!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches){
      let i=0;
      const timer=setInterval(()=>{
        if(!pawn.isConnected||pawn.dataset.chessmanId!==id||pawn.dataset.actorPose!==action){
          clearInterval(timer);sourceTimers.delete(pawn);return;
        }
-       i=(i+1)%seq.length;renderNativeFrame(pawn,seq[i]);
+       i++;
+       if(i>=seq.length){
+         if(!loops){
+           clearInterval(timer);sourceTimers.delete(pawn);
+           pawn.dataset.sourcePlaybackComplete='true';
+           return;
+         }
+         i=0;
+       }
+       renderNativeFrame(pawn,seq[i]);
      },action==='idle'?340:action==='walk'?120:175);
      sourceTimers.set(pawn,timer);
+   }else if(!loops){
+     pawn.dataset.sourcePlaybackComplete='true';
    }
    return true;
  }

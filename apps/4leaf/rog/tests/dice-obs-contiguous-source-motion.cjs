@@ -100,6 +100,30 @@ const {chromium}=require('playwright');
    // Avoid carrying a live sequence into the next character identity.
    await page.evaluate(playerId=>window.__LEAF_GENESIS_ACTORS__.poseByPlayer(playerId,'idle'),setup.playerId);
   }
+  // Genuine recovered combat-event frames should play ONCE, then hold
+  // the last packet until the gameplay event asks for idle. This does not
+  // claim that 2002 EXE action frame lookup or FPS has been recovered.
+  const oneShot=await page.evaluate(async()=>{
+   const m=window.__ROG_TEST__.getMatch();m.players[0].team[0]='c_0046';
+   window.__ROG_TEST__.drawGame();
+   const pawn=document.querySelector('#board-pawns .board-pawn[data-id="0"]');
+   window.__LEAF_GENESIS_ACTORS__.poseByPlayer(m.players[0].id,'attack',0);
+   const sequence=pawn.dataset.sourceFrameSequence.split(',').map(Number);
+   const mode=pawn.dataset.sourcePlaybackMode;
+   await new Promise(resolve=>setTimeout(resolve,900));
+   const at900=Number(pawn.dataset.actorFrame);
+   const complete=pawn.dataset.sourcePlaybackComplete;
+   await new Promise(resolve=>setTimeout(resolve,420));
+   const at1320=Number(pawn.dataset.actorFrame);
+   window.__LEAF_GENESIS_ACTORS__.poseByPlayer(m.players[0].id,'idle',0);
+   return {sequence,mode,at900,at1320,complete};
+  });
+  assert.equal(oneShot.mode,'one-shot/WEB-action-unverified');
+  assert.ok(oneShot.sequence.length>=2,'recovered source must offer multiple actual event packets');
+  assert.equal(oneShot.complete,'true');
+  assert.equal(oneShot.at900,oneShot.sequence.at(-1));
+  assert.equal(oneShot.at1320,oneShot.at900,
+   'source attack packets must not repeat as a fake new gameplay hit');
   // A real PLAYER roll, not a direct poseByPlayer test, must advance all
   // eight genuine OBS indexes. The game moves one DMP cell every ~60ms;
   // previous per-cell walk(240) restarted the 120ms source clock and

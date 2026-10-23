@@ -1043,6 +1043,29 @@
         "BRD-03",
         "ACT-04"
       ]
+    },
+    {
+      "id": "REQ-20261023-004",
+      "date": "2026-10-23",
+      "origin": "user",
+      "text": "Continue actual original 4LEAF gameplay restoration after validated PR178/179 and successful Pages, game smoke, ChatRoom QA. Prioritize authentic D4/D6 geometry and result-driven physical animation; original winBattle podium/camera, TIS orientation/overlap and clickable projection, recovered 92 OBS characters/958 original frames with actions/direction/FPS, and original world-map/ChatTown functionality. Code→browser QA→PR→merge→Pages, no administrative-only PR or unsupported done status.",
+      "taskIds": [
+        "P0-DICE",
+        "DIE-01",
+        "DIE-02",
+        "P0-PODIUM",
+        "BTL-02",
+        "BTL-04",
+        "ACT-04",
+        "P0-BOARD",
+        "BRD-01",
+        "BRD-02",
+        "ACT-03",
+        "P0-ACTOR",
+        "P0-CHAT",
+        "M03",
+        "P0-RELEASE"
+      ]
     }
   ],
   "tasks": [
@@ -5504,6 +5527,25 @@
         "https://github.com/koith/browser-app-lab/pull/178",
         "https://github.com/koith/browser-app-lab/commit/05d2b3d4cd0418a30724d738c17ddd702a6cf20f",
         "https://github.com/koith/browser-app-lab/actions/runs/39822939826"
+      ]
+    },
+    {
+      "seq": 225,
+      "date": "2026-10-23",
+      "type": "FUNCTIONAL_CODE_PENDING_BROWSER_ACCEPTANCE",
+      "requestId": "REQ-20261023-004",
+      "taskIds": [
+        "P0-DICE",
+        "P0-PODIUM",
+        "P0-BOARD",
+        "ACT-03",
+        "ACT-04",
+        "P0-RELEASE"
+      ],
+      "details": "PR #180 functional code: D4 WEB fallback triangular face geometric centroid correction; TIS original alpha exact top/bottom flipped pixel and matrix3d Safari hit mapping; native winBattle-01.png actual object-fit bitmap fighter deck anchoring in letterboxed mobile sizes; recovered OBS combat attack/hurt/victory one-shot instead of perpetual loop, idle and complete 8-source-frame walk remain loop. New Playwright assertions exercise these. Original 3D MVE mesh, historical camera and native EXE direction/action/FPS NOT recovered, do NOT mark P0 complete. Chromium/WebKit QA, PR merge, exact-SHA Pages NOT YET confirmed.",
+      "evidence": "apps/4leaf/rog/dice-d4-source-fallback.css; apps/4leaf/rog/dice-native-tis-alpha.js; apps/4leaf/rog/game.js; apps/4leaf/rog/genesis-chessman-actors.js",
+      "refs": [
+        "https://github.com/koith/browser-app-lab/pull/180"
       ]
     }
   ]

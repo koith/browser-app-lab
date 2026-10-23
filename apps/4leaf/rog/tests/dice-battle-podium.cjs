@@ -65,9 +65,16 @@ const path=require('node:path');
    const stage=document.querySelector('#battle-visual');
    const image=stage.querySelector('.leaf-native-winbattle-podiums');
    const bitmap=image.getBoundingClientRect();
+   // Validate the actual object-fit:contain, object-position:center bottom
+   // PAINTED native source rectangle, not a letterboxed IMG CSS box.
+   const drawWidth=Math.min(bitmap.width,bitmap.height*355/113);
+   const drawHeight=drawWidth*113/355;
+   const drawn={left:bitmap.left+(bitmap.width-drawWidth)/2,
+    top:bitmap.bottom-drawHeight,width:drawWidth,height:drawHeight};
    return {
     provenance:stage.dataset.nativePodiumActorAnchors,
-    image:[bitmap.width,bitmap.height],
+    image:[bitmap.width,bitmap.height],painted:[drawWidth,drawHeight],
+    fitProvenance:stage.dataset.nativePodiumBitmapFit,
     fighters:[...stage.querySelectorAll('.battle-visual-side')].map((side,i)=>{
      const actor=side.querySelector('.battle-visual-actor.leaf-battle-chessman');
      const rect=actor.getBoundingClientRect();
@@ -75,9 +82,9 @@ const path=require('node:path');
      return {
       id:actor.dataset.id,
       center:rect.left+rect.width/2,
-      originalDeckCenter:bitmap.left+bitmap.width*sourceX/355,
+      originalDeckCenter:drawn.left+drawn.width*sourceX/355,
       foot:rect.bottom-parseFloat(getComputedStyle(actor).getPropertyValue('--leaf-obs-ground')),
-      originalDeckHeight:bitmap.top+bitmap.height*34/113,
+      originalDeckHeight:drawn.top+drawn.height*34/113,
       originalSource:side.querySelector('.leaf-chess-original-obs')?.getAttribute('src')
      };
     })
@@ -260,6 +267,25 @@ const path=require('node:path');
   },null,{timeout:6000});
   const mobileAnchors=await sourceAnchorProof();
   verifyNativeAnchors(mobileAnchors,'iPhone');
+  // A narrow image in a tall CSS box has TOP letterboxing: the archived
+  // PNG pixels remain bottom-aligned. It used to displace the real OBS feet.
+  await page.locator('#battle-visual .leaf-native-winbattle-podiums').evaluate(img=>
+   img.style.setProperty('height','165px','important'));
+  await page.waitForFunction(()=>{
+   const stage=document.querySelector('#battle-visual');
+   const img=stage.querySelector('.leaf-native-winbattle-podiums').getBoundingClientRect();
+   const actor=stage.querySelector('.battle-visual-side.attacker .leaf-battle-chessman').getBoundingClientRect();
+   const width=Math.min(img.width,img.height*355/113),left=img.left+(img.width-width)/2;
+   return Math.abs(actor.left+actor.width/2-left-width*77/355)<2.5;
+  },null,{timeout:6000});
+  const letterboxedAnchors=await sourceAnchorProof();
+  assert.ok(letterboxedAnchors.image[1]>letterboxedAnchors.painted[1]+8,
+   'test genuinely exercises nonempty IMG top letterboxing');
+  assert.equal(letterboxedAnchors.fitProvenance,
+   'object-fit-contain/center-bottom/source-355x113');
+  verifyNativeAnchors(letterboxedAnchors,'iPhone-letterboxed-source');
+  await page.locator('#battle-visual .leaf-native-winbattle-podiums').evaluate(img=>
+   img.style.removeProperty('height'));
   const mobile=await page.locator('#battle-visual').evaluate(stage=>({
    actor:stage.querySelectorAll('.battle-visual-actor').length,
    podium:stage.querySelectorAll('.battle-visual-pedestal').length,
