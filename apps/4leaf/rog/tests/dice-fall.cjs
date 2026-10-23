@@ -226,7 +226,9 @@ const {chromium,webkit}=require('playwright');
     const renders=faces.map(face=>({
      number:Number(face.textContent),
      display:getComputedStyle(face).display,
-     backface:getComputedStyle(face).backfaceVisibility
+     backface:getComputedStyle(face).backfaceVisibility,
+     originY:parseFloat(getComputedStyle(face).transformOrigin.split(' ')[1]),
+     faceHeight:face.offsetHeight
     }));
     const result=await pending;
     return {result,normals,renders,
@@ -239,6 +241,8 @@ const {chromium,webkit}=require('playwright');
    assert.deepEqual(proof.renders.map(f=>f.number),[1,2,3,4]);
    assert.ok(proof.renders.every(f=>f.display==='flex'&&f.backface==='hidden'),
     'all D4 physical triangular planes must exist simultaneously in 3D');
+   assert.ok(proof.renders.every(f=>Math.abs(f.originY-f.faceHeight*(178/300))<.15),
+    'D4 triangle pivot must be the true polygon centroid (2+88+88)/3, not the bounding-box midpoint');
    assert.ok(proof.normals[eye-1]>.995,
     'result '+eye+' actual 3D surface must face the viewer rather than switch a flat label: '+JSON.stringify(proof));
    assert.ok(proof.normals.every((z,i)=>i===eye-1||z<0),
