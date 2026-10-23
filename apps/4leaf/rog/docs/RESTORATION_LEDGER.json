@@ -5691,6 +5691,29 @@
       "refs": [
         "https://github.com/koith/browser-app-lab/actions/runs/39886338879"
       ]
+    },
+    {
+      "seq": 232,
+      "date": "2026-10-23",
+      "type": "FUNCTIONAL_P0_CODE_MERGED_PAGES_VERIFIED_PARTIAL",
+      "requestId": "REQ-20261023-005",
+      "taskIds": [
+        "P0-DICE",
+        "DIE-02",
+        "P0-BOARD",
+        "P0-RELEASE",
+        "QA-03"
+      ],
+      "details": "PR #184 actual gameplay/renderer merged main 2bc693d55e4472314c893e25099972e67e020e24, beta.15/PWA v102. FIXED publicly failed #39886338879 dice-fall.cjs:242 four D4 CSS face test by making full D4/D6 model physics CSS scoped to stable #game rather than mutable #app.app-classic-dice. Independent real original gameplay: shoe bonus with source-valid D4+D4 now displays all THREE authoritative dice eyes in HUD; prevents third eye from disappearing without changing game RNG or movement. Both original-source D4/D6 fall test and genuine 3-eye shoe Playwright steps passed board QA #39888554944 on PR SHA 6446be860cd97c8f12ae2ada923f2796fd2514c2. Full original same-revision release #39888558744 SUCCESS, main release #39888821809 SUCCESS, main game smoke #39888821925 SUCCESS, Pages deploy #39888821915 SUCCESS and Pages build #39888820965 SUCCESS at exact main SHA 2bc693d5. Public URL app-version.json fetched v0.86.0-beta.15/PWA v102; public game.js/ dice-fall.css fetched expected functional changes. Most critically previously failing public D4 face render step AND new public three-D4 result step both completed SUCCESS in Actions #39888821721 (full run/WebKit downstream pending at time of entry). Original 2002 MVE die mesh/keyframes and native camera, OBS action direction/FPS, 2002 ChatTown room seat authority are still unverified; do not mark P0 complete. All 58 task status values remain unchanged.",
+      "evidence": "apps/4leaf/rog/dice-d4-source-fallback.css; apps/4leaf/rog/dice-fall.css; apps/4leaf/rog/game.js; apps/4leaf/rog/tests/dice-fall.cjs; apps/4leaf/rog/tests/dice-d4-shoe-three-eyes.cjs",
+      "refs": [
+        "https://github.com/koith/browser-app-lab/pull/184",
+        "https://github.com/koith/browser-app-lab/actions/runs/39888554944",
+        "https://github.com/koith/browser-app-lab/actions/runs/39888558744",
+        "https://github.com/koith/browser-app-lab/actions/runs/39888821721",
+        "https://github.com/koith/browser-app-lab/actions/runs/39888821915",
+        "https://github.com/koith/browser-app-lab/actions/runs/39888820965"
+      ]
     }
   ]
 }
