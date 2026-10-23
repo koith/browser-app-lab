@@ -1066,6 +1066,26 @@
         "M03",
         "P0-RELEASE"
       ]
+    },
+    {
+      "id": "REQ-20261023-005",
+      "date": "2026-10-23",
+      "origin": "user",
+      "text": "Continue 4LEAF original restoration from main bb95260 / beta14/PWA101, diagnose published ChatRoom browser QA #39886338879 FAILURE and complete actual code/QA/PR/Pages. Then independent P0 original TIS hex orientation/projection/hit; D4/D6 original shape/fall/results; winBattle+OBS animations; WorldMap/ChatTown authoritative seats/owner/private rooms. Preserve all 58 canonical tasks; use real original source; do not equate WEB approximation with original. Only mark done on verified original acceptance.",
+      "taskIds": [
+        "P0-DICE",
+        "DIE-02",
+        "P0-BOARD",
+        "BRD-01",
+        "BRD-02",
+        "P0-PODIUM",
+        "ACT-03",
+        "ACT-04",
+        "P0-CHAT",
+        "CHT-04",
+        "P0-RELEASE",
+        "QA-03"
+      ]
     }
   ],
   "tasks": [
@@ -5632,6 +5652,44 @@
         "https://github.com/koith/browser-app-lab/actions/runs/39885869794",
         "https://github.com/koith/browser-app-lab/actions/runs/39885869598",
         "https://koith.github.io/browser-app-lab/apps/4leaf/rog/app-version.json"
+      ]
+    },
+    {
+      "seq": 230,
+      "date": "2026-10-23",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261023-005",
+      "taskIds": [
+        "P0-DICE",
+        "DIE-02",
+        "P0-BOARD",
+        "BRD-01",
+        "BRD-02",
+        "P0-PODIUM",
+        "ACT-03",
+        "ACT-04",
+        "P0-CHAT",
+        "CHT-04",
+        "P0-RELEASE",
+        "QA-03"
+      ],
+      "details": "All user P0 priorities retained, including independent backlog tasks not implemented in this single functional PR."
+    },
+    {
+      "seq": 231,
+      "date": "2026-10-23",
+      "type": "FUNCTIONAL_CODE_PENDING_BROWSER_ACCEPTANCE",
+      "requestId": "REQ-20261023-005",
+      "taskIds": [
+        "P0-DICE",
+        "DIE-02",
+        "P0-RELEASE",
+        "QA-03"
+      ],
+      "details": "VERIFIED CI ERROR: public published ChatRoom workflow #39886338879 failed specifically in dice-fall.cjs:242, not ChatRoom gameplay or network; real Pages content matched bb95260 exactly. INFERRED cause: tetrahedral CSS scoped to mutable #app.app-classic-dice, so four planes lose display/backface on UI transitions. Fixed D4 visual geometry selectors to stable #game scope and added a direct class-toggle physical face regression in dice-fall.cjs with diagnostic computed styles. INDEPENDENT genuine gameplay fix: original rule D4+D4 plus shoe bonus rolls THREE D4s, but showDice previously surfaced only two HUD dice; now dynamically renders all real authoritative eyes without changing engine or 3D sources. New 3-D4 live Playwright test gated by board, release, published QA. beta15/PWA v102 candidate; original MVE die mesh/keyframe timing, OBS semantics, 2002 camera projection, authoritative simultaneous seat allocation remain UNVERIFIED. No tasks marked done until green QA + deployed proof.",
+      "evidence": "apps/4leaf/rog/dice-d4-source-fallback.css; apps/4leaf/rog/game.js; apps/4leaf/rog/tests/dice-fall.cjs; apps/4leaf/rog/tests/dice-d4-shoe-three-eyes.cjs",
+      "refs": [
+        "https://github.com/koith/browser-app-lab/actions/runs/39886338879"
       ]
     }
   ]
