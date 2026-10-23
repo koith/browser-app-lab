@@ -134,9 +134,10 @@
   // Safari/Chromium may serialize an actual 3D transform as matrix3d().
   // Inspect its vertical basis instead of assuming only matrix(1,0,0,-1).
   // Parent camera scale remains accounted for by the live screen rectangle.
-  const inverted=typeof DOMMatrixReadOnly==='function'?
-   new DOMMatrixReadOnly(transform).m22<0:
-   (transform.startsWith('matrix(')&&Number(transform.slice(7).split(',')[3])<0);
+  const inverted=transform==='none'?false:
+   typeof DOMMatrixReadOnly==='function'?
+    new DOMMatrixReadOnly(transform).m22<0:
+    (transform.startsWith('matrix(')&&Number(transform.slice(7).split(',')[3])<0);
   const x=Math.floor((clientX-rect.left)*SIZE[0]/rect.width);
   const rawY=(clientY-rect.top)*SIZE[1]/rect.height;
   // The prior floor(97-rawY) returned row 97 at the topmost screen
