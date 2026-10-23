@@ -1022,6 +1022,27 @@
         "WORLD-02",
         "P0-RELEASE"
       ]
+    },
+    {
+      "id": "REQ-20261023-003",
+      "date": "2026-10-23",
+      "origin": "user",
+      "text": "Continue full 4LEAF original restoration from latest GitHub and canonical ledger, preserve completed work, prioritize original 3D D4/D6 fall/bounce/outcome, original winBattle podium and OBS actor grounding, TIS hex orientation/pitch/hit targets, original action sequences, world-map/chat rooms/auth/session, actual browser QA, PR/merge/Pages exact SHA verification; do not claim original source equivalence without evidence; report completed versus pending with proof.",
+      "taskIds": [
+        "P0-DICE",
+        "P0-PODIUM",
+        "P0-BOARD",
+        "P0-ACTOR",
+        "P0-CHAT",
+        "P0-RELEASE",
+        "QA-03",
+        "WORLD-02",
+        "DIE-01",
+        "DIE-02",
+        "BTL-02",
+        "BRD-03",
+        "ACT-04"
+      ]
     }
   ],
   "tasks": [
@@ -5444,6 +5465,45 @@
         "apps/4leaf/rog/game.js",
         "https://github.com/koith/browser-app-lab/actions/runs/39787791025",
         "https://github.com/koith/browser-app-lab/pull/178"
+      ]
+    },
+    {
+      "seq": 223,
+      "date": "2026-10-23",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261023-003",
+      "taskIds": [
+        "P0-DICE",
+        "P0-PODIUM",
+        "P0-BOARD",
+        "P0-ACTOR",
+        "P0-CHAT",
+        "P0-RELEASE",
+        "QA-03",
+        "WORLD-02",
+        "DIE-01",
+        "DIE-02",
+        "BTL-02",
+        "BRD-03",
+        "ACT-04"
+      ],
+      "details": "All P0 user restoration requirements preserved as open acceptance obligations; no task marked done by this registration."
+    },
+    {
+      "seq": 224,
+      "date": "2026-10-23",
+      "type": "CODE_MERGED_PENDING_DEPLOY_QA",
+      "requestId": "REQ-20261023-002",
+      "taskIds": [
+        "QA-03",
+        "WORLD-02",
+        "P0-RELEASE"
+      ],
+      "details": "PR #178 merged to main 05d2b3d4cd0418a30724d738c17ddd702a6cf20f. Actual game.js history-scroll fix and dice-source-native-ui.cjs real chat form regression included; app beta.12/PWA v99. Prior run 39822939826 cancelled at WebKit install, downstream tests skipped; rerun requested for job 119978669006, results and same-SHA public Pages not yet confirmed. Historic original scroll semantics remain uncertain; do not advance task to done.",
+      "refs": [
+        "https://github.com/koith/browser-app-lab/pull/178",
+        "https://github.com/koith/browser-app-lab/commit/05d2b3d4cd0418a30724d738c17ddd702a6cf20f",
+        "https://github.com/koith/browser-app-lab/actions/runs/39822939826"
       ]
     }
   ]
