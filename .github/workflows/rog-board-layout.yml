@@ -20,6 +20,7 @@ on:
       - 'apps/4leaf/rog/dice-fall.js'
       - 'apps/4leaf/rog/dice-d4-source-fallback.css'
       - 'apps/4leaf/rog/tests/dice-fall.cjs'
+      - 'apps/4leaf/rog/tests/dice-d4-shoe-three-eyes.cjs'
       - 'apps/4leaf/rog/dice-native-tis-alpha.js'
       - 'apps/4leaf/rog/dice-native-pawn-dmp-depth.css'
       - 'apps/4leaf/rog/tests/dice-native-pawn-dmp-depth.cjs'
@@ -129,6 +130,8 @@ jobs:
         run: node apps/4leaf/rog/tests/dice-source-roll.cjs
       - name: Verify D4 result-specific tetrahedral landing and D6 gameplay motion
         run: node apps/4leaf/rog/tests/dice-fall.cjs
+      - name: Verify real D4 shoe bonus shows all three actual source roll results
+        run: node apps/4leaf/rog/tests/dice-d4-shoe-three-eyes.cjs
       - name: Verify actual source CardShop atlas BUY and SELL, guarded GP and persistent inventory
         run: node apps/4leaf/rog/tests/cardshop-native-sale.cjs
       - uses: actions/upload-artifact@v4
