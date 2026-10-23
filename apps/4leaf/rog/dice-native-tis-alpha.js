@@ -131,10 +131,18 @@
   if(!(rect.width>0&&rect.height>0)||!Number.isFinite(clientX)||!Number.isFinite(clientY))
    return {ready:false,hit:true,source:id};
   const transform=getComputedStyle(tile).transform;
-  const inverted=transform.startsWith('matrix(')&&Number(transform.slice(7).split(',')[3])<0;
+  // Safari/Chromium may serialize an actual 3D transform as matrix3d().
+  // Inspect its vertical basis instead of assuming only matrix(1,0,0,-1).
+  // Parent camera scale remains accounted for by the live screen rectangle.
+  const inverted=typeof DOMMatrixReadOnly==='function'?
+   new DOMMatrixReadOnly(transform).m22<0:
+   (transform.startsWith('matrix(')&&Number(transform.slice(7).split(',')[3])<0);
   const x=Math.floor((clientX-rect.left)*SIZE[0]/rect.width);
   const rawY=(clientY-rect.top)*SIZE[1]/rect.height;
-  const y=Math.floor(inverted?SIZE[1]-rawY:rawY);
+  // The prior floor(97-rawY) returned row 97 at the topmost screen
+  // edge (outside the 0..96 source bitmap). Pixel 96 must own that edge;
+  // the bottom source edge must likewise map to row 0.
+  const y=inverted?Math.ceil(SIZE[1]-rawY)-1:Math.floor(rawY);
   const inside=x>=0&&x<SIZE[0]&&y>=0&&y<SIZE[1];
   const alpha=inside?frame.alpha[y*SIZE[0]+x]:0;
   return {ready:true,hit:alpha>0,alpha,x,y,inverted,source:id};
