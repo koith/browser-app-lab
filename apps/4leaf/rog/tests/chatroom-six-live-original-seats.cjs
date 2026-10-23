@@ -42,6 +42,8 @@ const assert=require('node:assert/strict');
       [...people].every(el=>el.querySelector('img')?.complete&&
        el.querySelector('img')?.naturalWidth===75);
    },rid,{timeout:15000})));
+   const preferredGuestSeat=background===0?await guest.evaluate(()=>
+    ({...window.__LEAF_SOCIAL__.getState().people[0].position})):null;
    const before=await host.evaluate(bg=>{
     const scene=document.querySelector('#social-image-frame');
     const fig=document.querySelector('#social-avatar-layer .social-avatar.self');
@@ -112,6 +114,43 @@ const assert=require('node:assert/strict');
    if(background===4)await host.screenshot({path:'leaf-source-sixroom-real-twopeers-room4.png'});
    proof.push({room:background,native:before.native,actors:2,seatFrom:move.prev,
     seatTo:move.seat,remoteVerified:true,foreground:before.foreground});
+   if(background===0){
+    // Real two-tab collision regression. Place the incumbent at exactly
+    // the NEW guest's preferred original seat while the guest is absent.
+    // A later rejoin must choose a free slot in BOTH logical presence and
+    // rendered original Registry actor; previously only local rendering
+    // hid the same-seat collision while state.position remained duplicated.
+    await guest.evaluate(()=>window.__LEAF_SOCIAL__.openDirectory());
+    await host.waitForFunction(()=>
+     document.querySelectorAll('#social-avatar-layer .social-avatar').length===1,
+     null,{timeout:12000});
+    const incumbent=await host.evaluate(target=>{
+     const frame=document.querySelector('#social-image-frame');
+     const box=frame.getBoundingClientRect();
+     frame.dispatchEvent(new MouseEvent('click',{bubbles:true,
+      clientX:box.left+box.width*target.x/100,
+      clientY:box.top+box.height*target.y/100}));
+     return window.__LEAF_SOCIAL__.getState().people[0].position;
+    },preferredGuestSeat);
+    assert.deepEqual(incumbent,preferredGuestSeat,
+     'incumbent must actually occupy the incoming peer preferred native seat');
+    await guest.evaluate(id=>window.__LEAF_SOCIAL__.joinRoom(id),rid);
+    await guest.waitForFunction(()=>
+     document.querySelectorAll('#social-avatar-layer .social-avatar').length===2,
+     null,{timeout:12000});
+    const rejoin=await guest.evaluate(()=>{
+     const all=window.__LEAF_SOCIAL__.getState().people;
+     const native=[...document.querySelectorAll('#social-avatar-layer .social-avatar')]
+      .map(el=>Number(el.dataset.seat));
+     return {self:all[0]?.position,incumbent:all[1]?.position,native};
+    });
+    assert.notDeepEqual(rejoin.self,rejoin.incumbent,
+     'rejoining player must not claim an occupied source seat in logical multiplayer presence');
+    assert.equal(new Set(rejoin.native).size,2,
+     'real original Registry actors must not overlap after occupied-seat rejoin');
+    proof.push({room:'0-rejoin-occupied',realPages:2,incumbent:rejoin.incumbent,
+     newGuest:rejoin.self,separateNativeSeats:rejoin.native});
+   }
    await guest.evaluate(()=>window.__LEAF_SOCIAL__.openDirectory());
    await host.evaluate(()=>window.__LEAF_SOCIAL__.openDirectory());
   }
