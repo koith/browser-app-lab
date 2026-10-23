@@ -61,6 +61,29 @@ const {chromium}=require('playwright');
   assert.ok(atlas.every(x=>x.opaque>100&&x.transparent>100),'original sprites must retain source transparency');
   assert.ok(atlas.every(x=>x.mismatches===0&&x.probes>200),
    'genuine original pixels MUST determine point hit after Y repair: '+JSON.stringify(atlas.filter(x=>x.mismatches)));
+  // The topmost visible pixel of a vertically flipped source 145x97 tile
+  // is source row 96, not invalid row 97. Matrix3d serialization must
+  // produce the same result as scaleY(-1) on Safari/iPhone.
+  const sourceEdgeProof=await page.evaluate(()=>{
+   const API=window.__LEAF_TIS_ALPHA__;
+   const probe=document.createElement('div');
+   probe.style.cssText='position:fixed;left:250px;top:110px;width:145px;height:97px;pointer-events:none';
+   probe.dataset.originalArt='0000';document.body.append(probe);
+   const check=transform=>{
+    probe.style.transform=transform;
+    const rect=probe.getBoundingClientRect();
+    const x=rect.left+rect.width/2;
+    const top=API.hitPoint(probe,x,rect.top+rect.height*.000001);
+    const bottom=API.hitPoint(probe,x,rect.bottom-rect.height*.000001);
+    return [top.y,bottom.y,top.inverted,bottom.inverted];
+   };
+   try{return {flip:check('scaleY(-1)'),matrix3d:check(
+    'matrix3d(1,0,0,0,0,-1,0,0,0,0,1,0,0,0,0,1)'),normal:check('none')};}
+   finally{probe.remove();}
+  });
+  assert.deepEqual(sourceEdgeProof.flip,[96,0,true,true]);
+  assert.deepEqual(sourceEdgeProof.matrix3d,[96,0,true,true]);
+  assert.deepEqual(sourceEdgeProof.normal,[0,96,false,false]);
   const findPhysical=async()=>page.evaluate(()=>{
    const API=window.__LEAF_TIS_ALPHA__;
    const area=document.querySelector('#board-area').getBoundingClientRect();
