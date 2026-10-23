@@ -40,7 +40,13 @@
  backface-visibility:hidden;
  -webkit-backface-visibility:hidden;
  transform-style:preserve-3d;
- transform-origin:center center;
+ /* Each 57x57 box clips to a triangle at y=2%,88%,88%. Its TRUE
+  * geometric centroid is y=(2+88+88)/3=59.333%, not 50%.
+  * Rotating around the box centre sheared neighboring tetrahedron edges
+  * apart even when the face normals and result values were correct.
+  * Preserve the source-independent regular-tetra face normals/radius.
+  * This is improved WEB geometry, not recovered 2002 MVE mesh data. */
+ transform-origin:50% 59.333333%;
  pointer-events:none;
 }
 #app.app-classic-dice #game .leaf-fall-tetra .leaf-tetra-face-1{
