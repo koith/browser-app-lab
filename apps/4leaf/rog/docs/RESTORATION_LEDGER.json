@@ -5607,6 +5607,32 @@
       ],
       "details": "New genuine ChatRoom functional patch: on room join, choose a vacant original reconstructed 794x528 Registry seat against currently known real peers instead of user-hash preferred seat unconditionally. Preserves immediate teleport, original background/foreground, server/RTC transport. Added 2-real-browser 6-room regression with occupied preferred seat rejoin testing actual multiplayer logical presence position (not only DOM visual displacement). Beta.14/PWA v101. Native EXE seat coordinates remain inferred; collision race between simultaneous joins and server-authoritative allocations still pending verification; DO NOT mark tasks done. PR/QA/merge/Pages pending.",
       "evidence": "apps/4leaf/rog/social-chat.js; apps/4leaf/rog/tests/chatroom-six-live-original-seats.cjs"
+    },
+    {
+      "seq": 229,
+      "date": "2026-10-23",
+      "type": "FUNCTIONAL_GAME_CODE_MERGED_AND_PUBLISHED_PARTIAL",
+      "requestId": "REQ-20261023-004",
+      "taskIds": [
+        "P0-DICE",
+        "P0-PODIUM",
+        "P0-BOARD",
+        "ACT-03",
+        "ACT-04",
+        "P0-CHAT",
+        "P0-RELEASE"
+      ],
+      "details": "PR #180 actual game P0 code merged main 2d51b8ed0e0f7ace5890affd11595e368dbd66cc: D4 WEB face-centroid, 2002 TIS source-alpha coordinate pick, native winBattle bitmap-painted fighter anchors, source OBS non-looping attack/hurt/victory. PR #182 actual ChatRoom multiplayer code merged main 1112c08c558d67de6c1527e317d29067f2038bd5: on rejoin snap source 794x528 seat to truly unoccupied participant position. The latter is live public beta.14/PWA v101; Pages deploy 39885869794 and Pages build 39885869598 both SUCCESS at exact 1112c08c; public app-version.json and social-chat.js were individually fetched and confirmed. Main release browser QA 39885869735 SUCCESS including original six ChatRooms and two real Chromium browsers with canonical occupied-seat rejoin, WebKit iPhone; original board QA 39885869744 SUCCESS; ten-player chat 39885869802 SUCCESS; central multi-device 39885869749 SUCCESS; WebRTC 39885869762 SUCCESS; original visual audit 39885869770 SUCCESS; ledger integrity 39885869806 SUCCESS. Original MVE D4/D6 3D source mesh, native camera/foot polygon, exact historical OBS action/direction/FPS/6 missing chessmen and original historical seat coordinates NOT recovered; keep ALL 58 task statuses unchanged, 13 done/34 in_progress/11 todo; modern code fixes represent partial restoration only.",
+      "evidence": "apps/4leaf/rog/game.js; apps/4leaf/rog/dice-native-tis-alpha.js; apps/4leaf/rog/dice-d4-source-fallback.css; apps/4leaf/rog/genesis-chessman-actors.js; apps/4leaf/rog/social-chat.js; apps/4leaf/rog/tests/chatroom-six-live-original-seats.cjs",
+      "refs": [
+        "https://github.com/koith/browser-app-lab/pull/180",
+        "https://github.com/koith/browser-app-lab/pull/182",
+        "https://github.com/koith/browser-app-lab/actions/runs/39885869735",
+        "https://github.com/koith/browser-app-lab/actions/runs/39885869744",
+        "https://github.com/koith/browser-app-lab/actions/runs/39885869794",
+        "https://github.com/koith/browser-app-lab/actions/runs/39885869598",
+        "https://koith.github.io/browser-app-lab/apps/4leaf/rog/app-version.json"
+      ]
     }
   ]
 }
