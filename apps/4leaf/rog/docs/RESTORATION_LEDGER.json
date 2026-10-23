@@ -5592,6 +5592,21 @@
         "https://github.com/koith/browser-app-lab/actions/runs/39884154000",
         "https://github.com/koith/browser-app-lab/actions/runs/39884373318"
       ]
+    },
+    {
+      "seq": 228,
+      "date": "2026-10-23",
+      "type": "REAL_CHATROOM_CODE_PENDING_BROWSER_QA",
+      "requestId": "REQ-20261023-004",
+      "taskIds": [
+        "P0-CHAT",
+        "M03",
+        "CHT-04",
+        "CHT-03",
+        "P0-RELEASE"
+      ],
+      "details": "New genuine ChatRoom functional patch: on room join, choose a vacant original reconstructed 794x528 Registry seat against currently known real peers instead of user-hash preferred seat unconditionally. Preserves immediate teleport, original background/foreground, server/RTC transport. Added 2-real-browser 6-room regression with occupied preferred seat rejoin testing actual multiplayer logical presence position (not only DOM visual displacement). Beta.14/PWA v101. Native EXE seat coordinates remain inferred; collision race between simultaneous joins and server-authoritative allocations still pending verification; DO NOT mark tasks done. PR/QA/merge/Pages pending.",
+      "evidence": "apps/4leaf/rog/social-chat.js; apps/4leaf/rog/tests/chatroom-six-live-original-seats.cjs"
     }
   ]
 }
