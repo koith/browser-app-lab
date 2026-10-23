@@ -1,7 +1,11 @@
 /* Inferred 3D CSS motion for user-reported original dice rain/bounces.
+ * All die tracks, 3D faces, and shadows now belong to #game itself rather
+ * than its mutable app-classic-dice route flag: a transitioning/settling die
+ * must retain real geometry after its host view changes. No game results
+ * or original pixels are changed by this view-independent CSS repair.
  * DMP terrain, true 145x97 TIS sprites and original actor painter order
  * stay live underneath; this overlay has absolutely no input hitbox. */
-#app.app-classic-dice #game .leaf-dice-fall-layer{
+#game .leaf-dice-fall-layer{
  box-sizing:border-box!important;
  position:absolute!important;
  z-index:42!important;
@@ -23,13 +27,13 @@
  * produced a conspicuous floating dark outline during the full -260px drop.
  * Historical model, light direction and native keyframes remain UNKNOWN.
  */
-#app.app-classic-dice #game .leaf-fall-track{
+#game .leaf-fall-track{
  display:block;position:relative;box-sizing:border-box;
  width:57px;height:57px;flex:0 0 57px;
  transform-style:preserve-3d;
  isolation:isolate;
 }
-#app.app-classic-dice #game .leaf-fall-track::before{
+#game .leaf-fall-track::before{
  content:'';position:absolute;
  width:47px;height:14px;left:5px;bottom:-13px;
  border-radius:50%;pointer-events:none;
@@ -45,7 +49,7 @@
  83%{opacity:.49;transform:scale(.83)}
  100%{opacity:.83;transform:scale(.96)}
 }
-#app.app-classic-dice #game .leaf-fall-piece{
+#game .leaf-fall-piece{
  display:block;position:absolute;box-sizing:border-box;
  left:0;bottom:0;
  width:57px;height:57px;
@@ -55,14 +59,14 @@
  filter:none;
  z-index:1;
 }
-#app.app-classic-dice #game .leaf-fall-cube{
+#game .leaf-fall-cube{
  display:block;position:absolute;
  top:0;left:0;width:57px;height:57px;
  transform-style:preserve-3d;
  transform-origin:center center;
  will-change:transform;
 }
-#app.app-classic-dice #game .leaf-die-face{
+#game .leaf-die-face{
  box-sizing:border-box;
  position:absolute;top:0;left:0;
  width:57px;height:57px;
@@ -76,12 +80,12 @@
  backface-visibility:hidden;
  transform-style:preserve-3d;
 }
-#app.app-classic-dice #game .leaf-die-face-1{transform:translateZ(28.5px)}
-#app.app-classic-dice #game .leaf-die-face-2{transform:rotateY(90deg) translateZ(28.5px)}
-#app.app-classic-dice #game .leaf-die-face-3{transform:rotateX(90deg) translateZ(28.5px)}
-#app.app-classic-dice #game .leaf-die-face-4{transform:rotateX(-90deg) translateZ(28.5px)}
-#app.app-classic-dice #game .leaf-die-face-5{transform:rotateY(-90deg) translateZ(28.5px)}
-#app.app-classic-dice #game .leaf-die-face-6{transform:rotateY(180deg) translateZ(28.5px)}
+#game .leaf-die-face-1{transform:translateZ(28.5px)}
+#game .leaf-die-face-2{transform:rotateY(90deg) translateZ(28.5px)}
+#game .leaf-die-face-3{transform:rotateX(90deg) translateZ(28.5px)}
+#game .leaf-die-face-4{transform:rotateX(-90deg) translateZ(28.5px)}
+#game .leaf-die-face-5{transform:rotateY(-90deg) translateZ(28.5px)}
+#game .leaf-die-face-6{transform:rotateY(180deg) translateZ(28.5px)}
 /* An absent D6 pip is an EMPTY source-grid slot, not a removed slot.
  * display:none made the CSS Grid auto-place only the visible dots into
  * adjacent cells: a true 3 face became a row, and 4/5/6 face placements
@@ -89,46 +93,46 @@
  * must remain in the grid; hide only the mark in an unused location.
  * Geometry is a WEB fallback (original 2002 3D mesh still unrecovered).
  */
-#app.app-classic-dice #game .leaf-die-eye{
+#game .leaf-die-eye{
  display:block;visibility:hidden;box-sizing:border-box;
  width:10px;height:10px;border-radius:50%;
  background:#1c2430;
  box-shadow:inset 1px 1px 2px #02080e,0 1px 0 #fff9;
 }
-#app.app-classic-dice #game .leaf-die-eye.visible{display:block;visibility:visible}
-#app.app-classic-dice #game .leaf-die-face-1 .leaf-die-eye.visible{
+#game .leaf-die-eye.visible{display:block;visibility:visible}
+#game .leaf-die-face-1 .leaf-die-eye.visible{
  background:#ed2963;width:14px;height:14px;
  box-shadow:inset 2px 2px 3px #9e1640,0 1px 0 #fff;
 }
 @media(max-width:650px){
- #app.app-classic-dice #game .leaf-dice-fall-layer{
+ #game .leaf-dice-fall-layer{
   top:24px!important;bottom:145px!important;
   left:4%!important;right:4%!important;
   gap:8px!important;perspective:420px;
  }
- #app.app-classic-dice #game .leaf-fall-track,
- #app.app-classic-dice #game .leaf-fall-piece,
- #app.app-classic-dice #game .leaf-fall-cube,
- #app.app-classic-dice #game .leaf-die-face{width:37px;height:37px}
- #app.app-classic-dice #game .leaf-fall-track{flex-basis:37px}
- #app.app-classic-dice #game .leaf-fall-track::before{
+ #game .leaf-fall-track,
+ #game .leaf-fall-piece,
+ #game .leaf-fall-cube,
+ #game .leaf-die-face{width:37px;height:37px}
+ #game .leaf-fall-track{flex-basis:37px}
+ #game .leaf-fall-track::before{
   width:31px;height:10px;left:3px;bottom:-10px
  }
- #app.app-classic-dice #game .leaf-fall-piece{flex-basis:37px}
- #app.app-classic-dice #game .leaf-die-face{padding:6px;border-width:1px;border-radius:4px}
- #app.app-classic-dice #game .leaf-die-face-1{transform:translateZ(18.5px)}
- #app.app-classic-dice #game .leaf-die-face-2{transform:rotateY(90deg) translateZ(18.5px)}
- #app.app-classic-dice #game .leaf-die-face-3{transform:rotateX(90deg) translateZ(18.5px)}
- #app.app-classic-dice #game .leaf-die-face-4{transform:rotateX(-90deg) translateZ(18.5px)}
- #app.app-classic-dice #game .leaf-die-face-5{transform:rotateY(-90deg) translateZ(18.5px)}
- #app.app-classic-dice #game .leaf-die-face-6{transform:rotateY(180deg) translateZ(18.5px)}
- #app.app-classic-dice #game .leaf-die-eye{width:6px;height:6px}
- #app.app-classic-dice #game .leaf-die-face-1 .leaf-die-eye.visible{width:8px;height:8px}
+ #game .leaf-fall-piece{flex-basis:37px}
+ #game .leaf-die-face{padding:6px;border-width:1px;border-radius:4px}
+ #game .leaf-die-face-1{transform:translateZ(18.5px)}
+ #game .leaf-die-face-2{transform:rotateY(90deg) translateZ(18.5px)}
+ #game .leaf-die-face-3{transform:rotateX(90deg) translateZ(18.5px)}
+ #game .leaf-die-face-4{transform:rotateX(-90deg) translateZ(18.5px)}
+ #game .leaf-die-face-5{transform:rotateY(-90deg) translateZ(18.5px)}
+ #game .leaf-die-face-6{transform:rotateY(180deg) translateZ(18.5px)}
+ #game .leaf-die-eye{width:6px;height:6px}
+ #game .leaf-die-face-1 .leaf-die-eye.visible{width:8px;height:8px}
 }
 @media(prefers-reduced-motion:reduce){
- #app.app-classic-dice #game .leaf-fall-cube,
- #app.app-classic-dice #game .leaf-fall-piece{will-change:auto}
- #app.app-classic-dice #game .leaf-fall-track::before{
+ #game .leaf-fall-cube,
+ #game .leaf-fall-piece{will-change:auto}
+ #game .leaf-fall-track::before{
   animation:none!important;opacity:.83;transform:scale(.96)
  }
 }
