@@ -10,20 +10,25 @@
  * The old filter on the MOVING tetra floated 8px below it during flight,
  * producing a duplicate airborne shadow. Remove that inferred WEB artifact;
  * native 2002 MVE lighting and die model are still UNVERIFIED. */
-#app.app-classic-dice #game .leaf-fall-piece[data-sides="4"]{
+/* The D4 source-independent geometry must belong to the die instance,
+ * not to a mutable view flag on #app. Live match navigation can remove
+ * app-classic-dice while the settled-result presentation/QA is still
+ * mounted, hiding all tetrahedral faces although roll values are valid.
+ * Scoped to #game, so no chat/world screen will render a stray die. */
+#game .leaf-fall-piece[data-sides="4"]{
  filter:none!important;
 }
-#app.app-classic-dice #game .leaf-fall-tetra{
+#game .leaf-fall-tetra{
  position:absolute;inset:0;
  display:block;
  transform-style:preserve-3d;
  --leaf-d4-inradius:11px;
 }
-#app.app-classic-dice #game .leaf-fall-tetra::before,
-#app.app-classic-dice #game .leaf-fall-tetra::after{
+#game .leaf-fall-tetra::before,
+#game .leaf-fall-tetra::after{
  display:none!important;
 }
-#app.app-classic-dice #game .leaf-fall-tetra .leaf-tetra-face{
+#game .leaf-fall-tetra .leaf-tetra-face{
  position:absolute;
  box-sizing:border-box;
  display:flex;
@@ -49,26 +54,26 @@
  transform-origin:50% 59.333333%;
  pointer-events:none;
 }
-#app.app-classic-dice #game .leaf-fall-tetra .leaf-tetra-face-1{
+#game .leaf-fall-tetra .leaf-tetra-face-1{
  transform:translateZ(var(--leaf-d4-inradius));
 }
-#app.app-classic-dice #game .leaf-fall-tetra .leaf-tetra-face-2{
+#game .leaf-fall-tetra .leaf-tetra-face-2{
  transform:rotateZ(0deg) rotateY(109.471deg) translateZ(var(--leaf-d4-inradius));
  background:linear-gradient(145deg,#f4f9fc,#b9ccda 80%,#859caf);
 }
-#app.app-classic-dice #game .leaf-fall-tetra .leaf-tetra-face-3{
+#game .leaf-fall-tetra .leaf-tetra-face-3{
  transform:rotateZ(120deg) rotateY(109.471deg) translateZ(var(--leaf-d4-inradius));
  background:linear-gradient(145deg,#f0f6f9,#adc2d2 75%,#7890a3);
 }
-#app.app-classic-dice #game .leaf-fall-tetra .leaf-tetra-face-4{
+#game .leaf-fall-tetra .leaf-tetra-face-4{
  transform:rotateZ(240deg) rotateY(109.471deg) translateZ(var(--leaf-d4-inradius));
  background:linear-gradient(145deg,#f4faff,#bacbd7 74%,#8098ac);
 }
 @media(max-width:650px){
- #app.app-classic-dice #game .leaf-fall-tetra{
+ #game .leaf-fall-tetra{
   --leaf-d4-inradius:7.1px;
  }
- #app.app-classic-dice #game .leaf-fall-tetra .leaf-tetra-face{
+ #game .leaf-fall-tetra .leaf-tetra-face{
   width:37px;height:37px;
   font-size:19px;padding-top:13%;
  }

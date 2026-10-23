@@ -1540,11 +1540,40 @@ function moveValues(p){
 }
 function showDice(values){
  const faces=['⚀','⚁','⚂','⚃','⚄','⚅'];
- $('die1').textContent=faces[Math.min(5,values[0]-1)];
- $('die2').textContent=values.length>1?faces[Math.min(5,values[1]-1)]:'·';
+ const box=$('dice-box');
+ // Native D4+D4 source rules plus a genuine shoe bonus can roll THREE D4s.
+ // The previous two static HUD placeholders silently discarded the third
+ // actual die (although match.lastRoll and movement used all three values).
+ // Preserve the original two cells and draw extra independently rolled eyes
+ // rather than forging a combined value or changing the authoritative roll.
+ if(box){
+  box.querySelectorAll('.leaf-extra-roll-eye').forEach(n=>n.remove());
+  for(let index=0;index<Math.min(2,values.length);index++){
+   const cell=$(index===0?'die1':'die2');
+   if(cell){
+    cell.textContent=faces[Math.min(5,values[index]-1)];
+    cell.dataset.eye=String(values[index]);
+    cell.dataset.rollIndex=String(index);
+   }
+  }
+  if(values.length===1){
+   const second=$('die2');
+   if(second){second.textContent='·';delete second.dataset.eye;}
+  }
+  values.slice(2).forEach((eye,offset)=>{
+   const extra=document.createElement('div');
+   extra.className='die leaf-extra-roll-eye';
+   extra.textContent=faces[Math.min(5,eye-1)];
+   extra.dataset.eye=String(eye);
+   extra.dataset.rollIndex=String(offset+2);
+   extra.setAttribute('aria-label','추가 주사위 '+(offset+3)+' · '+eye+'눈');
+   box.append(extra);
+  });
+  box.dataset.diceCount=String(values.length);
+  box.dataset.actualEyes=values.join(',');
+ }
  // These are the ACTUALLY rolled gameplay eyes, not a simulated animation.
  if(match)match.lastRoll=values.slice();
- const box=$('dice-box');
  if(box){
   box.dataset.rollCount=String((Number(box.dataset.rollCount)||0)+1);
   box.setAttribute('role','status');

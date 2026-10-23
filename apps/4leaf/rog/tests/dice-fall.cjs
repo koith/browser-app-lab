@@ -240,7 +240,7 @@ const {chromium,webkit}=require('playwright');
    assert.equal(proof.renders.length,4);
    assert.deepEqual(proof.renders.map(f=>f.number),[1,2,3,4]);
    assert.ok(proof.renders.every(f=>f.display==='flex'&&f.backface==='hidden'),
-    'all D4 physical triangular planes must exist simultaneously in 3D');
+    'all D4 physical triangular planes must exist simultaneously in 3D: '+JSON.stringify(proof.renders));
    assert.ok(proof.renders.every(f=>Math.abs(f.originY-f.faceHeight*(178/300))<.15),
     'D4 triangle pivot must be the true polygon centroid (2+88+88)/3, not the bounding-box midpoint');
    assert.ok(proof.normals[eye-1]>.995,
@@ -250,6 +250,42 @@ const {chromium,webkit}=require('playwright');
    assert.ok(Math.abs(proof.angle-109.471)<.01);
    normalResults.push({eye,normal:proof.normals[eye-1],target:proof.target});
   }
+  // Regression for published ChatRoom/browser QA #39886338879:
+  // the current route class may change while an already active die is
+  // completing its presentation. Source-valued D4 planes cannot vanish.
+  const classIndependence=await page.evaluate(async()=>{
+   const app=document.getElementById('app');
+   const before=app.classList.contains('app-classic-dice');
+   app.classList.remove('app-classic-dice');
+   try{
+    const result=window.__LEAF_DICE_FALL__.roll([2],{sides:4});
+    const die=document.querySelector('#leaf-dice-fall-layer .leaf-fall-tetra');
+    const track=die.closest('.leaf-fall-track');
+    const geometry={trackWidth:track.getBoundingClientRect().width,
+     trackPosition:getComputedStyle(track).position,
+     cubeTransformStyle:getComputedStyle(die).transformStyle};
+    const rendered=[...die.querySelectorAll('.leaf-tetra-face')].map(f=>({
+     eye:Number(f.textContent),display:getComputedStyle(f).display,
+     backface:getComputedStyle(f).backfaceVisibility,
+     normal:new DOMMatrixReadOnly(getComputedStyle(f).transform)
+      .transformPoint(new DOMPoint(0,0,1,0)).z
+    }));
+    const outcome=await result;
+    return {rendered,outcome,geometry};
+   }finally{if(before)app.classList.add('app-classic-dice')}
+  });
+  assert.deepEqual(classIndependence.outcome,[2]);
+  assert.equal(classIndependence.rendered.length,4);
+  assert.ok(classIndependence.geometry.trackWidth>30&&
+   classIndependence.geometry.trackPosition==='relative'&&
+   classIndependence.geometry.cubeTransformStyle==='preserve-3d',
+   'the falling D4 still needs a physical ground track and real 3D model after route changes: '+
+    JSON.stringify(classIndependence.geometry));
+  assert.ok(classIndependence.rendered.every(f=>f.display==='flex'&&f.backface==='hidden'),
+   'D4 planes must stay physical when the APP view class changes: '+
+    JSON.stringify(classIndependence));
+  assert.ok(classIndependence.rendered.some(f=>f.eye===2&&f.normal<0),
+   'each D4 plane must preserve its genuine 3D orientation without view flags');
   assert.deepEqual(errors,[],'no browser exceptions on real original game');
   console.log('4LEAF DICE FALL BOUNCE AND REAL 1-6 LANDING PASS',
    JSON.stringify({engine,mobile,first:landed.match,landings:6,d6:physicallyMeasured,d4:normalResults}));

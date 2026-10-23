@@ -68,6 +68,8 @@ jobs:
         run: node apps/4leaf/rog/tests/dice-native-original-source-events.cjs
       - name: Native ROLL source sprites and first-click unbroken animation
         run: node apps/4leaf/rog/tests/dice-source-roll.cjs
+      - name: Real source D4 plus shoe effect preserves the third rolled eye
+        run: node apps/4leaf/rog/tests/dice-d4-shoe-three-eyes.cjs
       - name: Native IMG.pak minimap and CardData info tabs without changing turns
         run: node apps/4leaf/rog/tests/dice-original-minipanel-spr.cjs
       - name: Original DMP non-PvP special rule regression
