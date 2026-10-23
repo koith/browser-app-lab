@@ -910,7 +910,17 @@
   state.district=room.district;state.roomId=room.id;state.view='room';
   const seats=roomSeats(room.background);
   const hash=[...tabId].reduce((a,c)=>(a*31+c.charCodeAt(0))>>>0,0);
-  state.position={...seats[hash%seats.length]};
+  // A stable per-user preferred seat may ALREADY contain a real peer.
+  // Previously both browser actors could appear on precisely the same
+  // source ChatRoom slot until somebody manually clicked to teleport.
+  // Preserve the historic-looking instantaneous seat snap; choose the
+  // closest genuinely free reconstructed slot at join time instead.
+  const occupied=new Set(onlinePeers('room:'+room.id)
+   .filter(peer=>peer.id!==tabId)
+   .map(peer=>closestSeat(peer.position?.x??52,peer.position?.y??76,new Set(),seats)));
+  const preferred=seats[hash%seats.length];
+  const seatIndex=closestSeat(preferred.x,preferred.y,occupied,seats);
+  state.position={...seats[seatIndex]};
   render();return true;
  }
  /* Source ChatRoom/ringbtn.png is the *actual* historical 104x330
