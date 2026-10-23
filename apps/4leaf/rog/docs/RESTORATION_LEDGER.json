@@ -5547,6 +5547,51 @@
       "refs": [
         "https://github.com/koith/browser-app-lab/pull/180"
       ]
+    },
+    {
+      "seq": 226,
+      "date": "2026-10-23",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261023-004",
+      "taskIds": [
+        "P0-DICE",
+        "DIE-01",
+        "DIE-02",
+        "P0-PODIUM",
+        "BTL-02",
+        "BTL-04",
+        "ACT-04",
+        "P0-BOARD",
+        "BRD-01",
+        "BRD-02",
+        "ACT-03",
+        "P0-ACTOR",
+        "P0-CHAT",
+        "M03",
+        "P0-RELEASE"
+      ],
+      "details": "Repair ledger-integrity GitHub Actions #39884373318: intake REQ-20261023-004 existed but mandatory REQUEST_REGISTERED event was accidentally omitted. The 58 existing tasks remain unchanged; original user obligations preserved."
+    },
+    {
+      "seq": 227,
+      "date": "2026-10-23",
+      "type": "FUNCTIONAL_PR_MERGED_PENDING_DEPLOY",
+      "requestId": "REQ-20261023-004",
+      "taskIds": [
+        "P0-DICE",
+        "P0-PODIUM",
+        "P0-BOARD",
+        "ACT-03",
+        "ACT-04",
+        "P0-RELEASE"
+      ],
+      "details": "PR #180 actual D4 triangle geometry, source winBattle deck positioning, TIS click and one-shot OBS actions merged to main 2d51b8ed0e0f7ace5890affd11595e368dbd66cc. Original dice and 3D EXE action map remain unverified; no done transitions. GitHub Actions #39883970701 board QA PASS and #39884154000 original visual audit PASS; exact final Pages SHA and other post-main QA pending.",
+      "refs": [
+        "https://github.com/koith/browser-app-lab/pull/180",
+        "https://github.com/koith/browser-app-lab/actions/runs/39883970701",
+        "https://github.com/koith/browser-app-lab/actions/runs/39884154000",
+        "https://github.com/koith/browser-app-lab/actions/runs/39884373318"
+      ]
     }
   ]
 }
