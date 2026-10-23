@@ -1,9 +1,9 @@
 {
   "application": "4LEAF Browser Revival",
-  "version": "0.86.0-beta.11",
+  "version": "0.86.0-beta.12",
   "releaseDate": "2026-10-21",
   "channel": "source-restoration-beta",
-  "pwaCache": "4leaf-revival-pwa-v98",
+  "pwaCache": "4leaf-revival-pwa-v99",
   "originalClient": "4LEAF 2002–2004 reference; not this web build",
   "sourceFidelity": "partial-original-assets/not-complete"
 }

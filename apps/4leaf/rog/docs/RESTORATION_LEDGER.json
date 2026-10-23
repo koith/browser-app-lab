@@ -1011,6 +1011,17 @@
         "BRD-03",
         "P0-RELEASE"
       ]
+    },
+    {
+      "id": "REQ-20261023-002",
+      "date": "2026-10-23",
+      "origin": "user",
+      "text": "Continue 4LEAF original restoration and investigate published ChatRoom QA failure 39787791025 without hiding it. Preserve original Dice IMG chat scroll arrows and central server; fix real scrolling behavior with Chromium/WebKit/public browser QA. Independent code PR on top of beta.11 battle source deck improvement; original D4/D6 MVE mesh still pending.",
+      "taskIds": [
+        "QA-03",
+        "WORLD-02",
+        "P0-RELEASE"
+      ]
     }
   ],
   "tasks": [
@@ -5404,6 +5415,35 @@
       "evidence": "https://koith.github.io/browser-app-lab/apps/4leaf/rog/app-version.json",
       "refs": [
         "https://github.com/koith/browser-app-lab/commit/a6c44c375d5d41bf2cab5c17dc23d2bb0f7cd43c"
+      ]
+    },
+    {
+      "seq": 221,
+      "date": "2026-10-23",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261023-002",
+      "taskIds": [
+        "QA-03",
+        "WORLD-02",
+        "P0-RELEASE"
+      ],
+      "details": "Latest main beta.11/PWA v98; published QA main beta.10 run39787791025 failed dice-source-native-ui.cjs:78 when source IMG/scrollButton down button became disabled mid-click. Other ChatTown/Central authority and battle action code independently pass."
+    },
+    {
+      "seq": 222,
+      "date": "2026-10-23",
+      "type": "IMPLEMENTED_PENDING_QA",
+      "requestId": "REQ-20261023-002",
+      "taskIds": [
+        "QA-03",
+        "WORLD-02"
+      ],
+      "details": "Fixed real game.js chat() unconditional scroll-to-bottom when users are reading archived Dice messenger lines via native 80x16 IMG/scrollButton.bmp; auto-follow retained only near bottom, preserving manual reader position across incoming GAME/system/user messages and when 90 line cap trims older entries. Existing source-native-ui Playwright test uses REAL #chat-form.requestSubmit and checks delivered content without forced jump, native scroll-arrow/button + keyboard behavior. Historical client scroll semantics NOT verified. v0.86.0-beta.12/PWA v99; CI/PR/merge/deploy pending. This targets observed failure rather than disabling any test.",
+      "evidence": "apps/4leaf/rog/tests/dice-source-native-ui.cjs",
+      "refs": [
+        "apps/4leaf/rog/game.js",
+        "https://github.com/koith/browser-app-lab/actions/runs/39787791025",
+        "https://github.com/koith/browser-app-lab/pull/178"
       ]
     }
   ]
