@@ -260,6 +260,10 @@ const {chromium,webkit}=require('playwright');
    try{
     const result=window.__LEAF_DICE_FALL__.roll([2],{sides:4});
     const die=document.querySelector('#leaf-dice-fall-layer .leaf-fall-tetra');
+    const track=die.closest('.leaf-fall-track');
+    const geometry={trackWidth:track.getBoundingClientRect().width,
+     trackPosition:getComputedStyle(track).position,
+     cubeTransformStyle:getComputedStyle(die).transformStyle};
     const rendered=[...die.querySelectorAll('.leaf-tetra-face')].map(f=>({
      eye:Number(f.textContent),display:getComputedStyle(f).display,
      backface:getComputedStyle(f).backfaceVisibility,
@@ -267,11 +271,16 @@ const {chromium,webkit}=require('playwright');
       .transformPoint(new DOMPoint(0,0,1,0)).z
     }));
     const outcome=await result;
-    return {rendered,outcome};
+    return {rendered,outcome,geometry};
    }finally{if(before)app.classList.add('app-classic-dice')}
   });
   assert.deepEqual(classIndependence.outcome,[2]);
   assert.equal(classIndependence.rendered.length,4);
+  assert.ok(classIndependence.geometry.trackWidth>30&&
+   classIndependence.geometry.trackPosition==='relative'&&
+   classIndependence.geometry.cubeTransformStyle==='preserve-3d',
+   'the falling D4 still needs a physical ground track and real 3D model after route changes: '+
+    JSON.stringify(classIndependence.geometry));
   assert.ok(classIndependence.rendered.every(f=>f.display==='flex'&&f.backface==='hidden'),
    'D4 planes must stay physical when the APP view class changes: '+
     JSON.stringify(classIndependence));
