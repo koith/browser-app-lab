@@ -5771,6 +5771,36 @@
       ],
       "details": "MANUALLY visually inspected genuine original PNGs (saved FLIP_TOP_BOTTOM; render CSS scaleY(-1)) from 1040/1042/1043/1044/1045/1046/1048/1061/1064 OBS frame 0 versus 18/25/30 and 2004 original screenshot apps/4leaf/assets/battle.jpg; frame 0 frequently rear/side, NOT front. Actual genesis-chessman-actors.js now selects visually audited original front-source frame 25 for 8 identified cards and source frame 18 for native 1045, eliminates previous 0..3 back-facing infinite idle turn. Other available frame-25 body sources are genuine pixels but individually UNVERIFIED front CANDIDATES (not source EXE action map); 30+ with no frame25 remain front-unverified. Standing native foot pivot updated to selected source frame rather than old back-facing 0. Original OBS PNG bytes untouched. Added exhaustive 92-body original 0/10/18/25/30 visual comparison gallery and 9-card real browser image/source-metadata screenshot test. 2002 EXE directions, FPS, original camera and complete visual comparison unresolved, DO NOT mark ACT-03 or P0-ACTOR done. Candidate beta16/PWA v103; QA/PR/Pages pending.",
       "evidence": "apps/4leaf/rog/genesis-chessman-actors.js; apps/4leaf/rog/tests/obs-front-source-review.cjs; apps/4leaf/rog/docs/obs-front-source-direction-audit.html; apps/4leaf/rog/original/OBS/animation-extra.js; apps/4leaf/assets/battle.jpg"
+    },
+    {
+      "seq": 235,
+      "date": "2026-10-24",
+      "type": "D4_D6_ACTUAL_SOURCE_RESEARCH_PENDING_ARCHIVE_RESULT",
+      "requestId": "REQ-20261024-001",
+      "taskIds": [
+        "P0-DICE",
+        "DIE-01",
+        "DIE-02",
+        "P0-RELEASE"
+      ],
+      "details": "Native dice source research code actually changed: `tools/audit-original-dice-resources.py` now distinguishes original UI 2D roll.spr (4 frames) and eventRoll1.spr (16 frames) from possible actual 3D D4/D6 members in SHA1-authenticated official 2002 Dice CAB/PAK. Writes exact member names+SHA256/first16 signatures for candidate 3D formats and potential executable-embedded geometry; original die model+texture+fall/bounce keyframes remain NOT VERIFIED and 2003-2004 client version must be independently sourced. `rog-obs-bulk-recovery.yml` source extraction triggered. Research limitations preserved in docs/ORIGINAL_DICE_3D_SOURCE_AUDIT_2026-10-24.md. This is archival investigation, NOT gameplay replacement or model recovery.",
+      "evidence": "apps/4leaf/rog/tools/audit-original-dice-resources.py; apps/4leaf/rog/docs/ORIGINAL_DICE_3D_SOURCE_AUDIT_2026-10-24.md"
+    },
+    {
+      "seq": 236,
+      "date": "2026-10-24",
+      "type": "VERIFIED_SOURCE_ARCHIVE_NO_D4_D6_MESH",
+      "requestId": "REQ-20261024-001",
+      "taskIds": [
+        "DIE-01",
+        "DIE-02",
+        "P0-DICE"
+      ],
+      "details": "Source archive actual GitHub Actions #40053447386 SUCCESS; verified official client SHA1 86526d89679ae39b85fe9808da97ad871b7888d9 (64537476 bytes). Indexed 31 Dice packages/standalone files and 713 PAK members. DMP.pak contains 25 DMP/25 DMO/26 MVE MAP terrain records, not evidenced separate D4/D6 dice model. IMG.pak 16 BMP/14 SPR contains roll.spr 4 and eventRoll1.spr 16 genuine 2D ROLL UI frames, NOT 3D die body. Sole embedded Dice.dll executable not statically decoded; original D4/D6 geometry/face atlas/physics timeline NO verified asset discovered. Other 2003-2004 client builds require checksum+isolated source search. Preserve blocked/missing evidence; do NOT mark DONE or portray map .mve as dice mesh.",
+      "refs": [
+        "https://github.com/koith/browser-app-lab/actions/runs/40053447386"
+      ],
+      "evidence": "apps/4leaf/rog/docs/ORIGINAL_DICE_3D_SOURCE_AUDIT_2026-10-24.md"
     }
   ]
 }
