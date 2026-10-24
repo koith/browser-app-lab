@@ -1228,6 +1228,8 @@
   load();
  }
  function renderRoom(frame){
+  // Every redraw must revoke stale owner UI after a server-approved handoff.
+  $('social-close-room')?.remove();
   frame.className='social-image-frame social-interior';
   const room=currentRoom();
   if(!room){openDirectory();return}
