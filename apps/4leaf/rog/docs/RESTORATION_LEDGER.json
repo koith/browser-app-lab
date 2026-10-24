@@ -5859,6 +5859,25 @@
         "ACT-04"
       ],
       "details": "MANUAL original PNG visual audit proved many alleged 92 2002 OBS chessmen are actual spell effects, overlays, HUD icons, prop items and rolling result numerals. 25 verified IDs (0096,0097,0098,0100,0125,0128,0133,0134,0136,0137,0138,0139,0141,0142,0145,0146,0147,0159,0160,0161,0163,0164,0165,0167,0170) must NOT be displayed as full-bodied original warriors. Actual genesis-chessman-actors.js now excludes only these visually verified nonactors from actor sprites, preserves all native OBS source files and shows genuine CardData static art instead; source gallery explicitly labels FX/nonbody; browser test checks 25 individual real game cards. Historically quoted 92 recovered OBS ID entries does NOT mean 92 full-body chessmen; remaining candidates still require per-ID role/direction audit, historical pose table/FPS absent. Do not mark full ACT done. Source-image examples 1134 DICE ATTACK logo, 1137 red hex overlay, 1160 sword, 1167 die numeral, 1096 magic orb; source identical byte files retained."
+    },
+    {
+      "seq": 240,
+      "date": "2026-10-24",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261024-002",
+      "taskIds": [
+        "P0-CHAT",
+        "CHT-04",
+        "QA-03",
+        "P0-ACTOR",
+        "ACT-01",
+        "ACT-03",
+        "ACT-04",
+        "P0-DICE",
+        "DIE-01",
+        "P0-RELEASE"
+      ],
+      "details": "User 2026-10-24 request registered and preserved; priority native ChatRoom published QA + original source OBS actor-vs-FX role + actual die source and chat server features."
     }
   ]
 }
