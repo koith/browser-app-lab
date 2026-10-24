@@ -179,12 +179,25 @@
   const data={v:1,from:tabId,...packet};
   try{dataChannel.send(JSON.stringify(data))}catch{}
  }
+ let centralPresenceRequest=0;
  function presence(announce=true){
   const self=compactPresence();
   if(announce&&!central.enabled){sendLocal({kind:'presence',peer:self});sendRTC({kind:'presence',peer:self})}
   if(central.enabled&&central.ready&&central.joinedId===state.roomId){
+   const roomId=state.roomId,request=++centralPresenceRequest;
    central.presence({nick:self.nick,avatar:self.avatar,facing:self.facing,position:self.position})
-    .catch(e=>console.warn('ChatTown presence:',e.message));
+    .then(reply=>{
+     // The server arbitrates simultaneous real clients, not the last
+     // CSS position applied by one browser. Earlier /presence replies
+     // cannot overwrite a newer click or a new room's actual seat.
+     if(request!==centralPresenceRequest||state.roomId!==roomId||
+        reply.roomId!==roomId||!reply.position)return;
+     const pos=reply.position;
+     if(!Number.isFinite(pos.x)||!Number.isFinite(pos.y))return;
+     if(state.position.x===pos.x&&state.position.y===pos.y)return;
+     state.position={x:pos.x,y:pos.y};
+     renderOccupants();
+    }).catch(e=>console.warn('ChatTown presence:',e.message));
   }
   updateCounts();
  }

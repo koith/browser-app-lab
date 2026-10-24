@@ -39,7 +39,34 @@ const BASE='http://127.0.0.1:8765/',API='http://127.0.0.1:8877';
    host.waitForFunction(()=>document.querySelectorAll('.social-avatar').length===2,{timeout:15000}),
    guest.waitForFunction(()=>document.querySelectorAll('.social-avatar').length===2,{timeout:15000})
   ]);
-  await host.locator('#message').fill('멀티기기 중앙 서버 메시지');
+  // Two SEPARATE authenticated browser contexts click the SAME genuine
+  // source room seat at the SAME TIME. Backend reserves unique logical
+  // positions and each browser must show its server-confirmed figure slot.
+  await Promise.all([host,guest].map(page=>page.evaluate(()=>{
+   const frame=document.getElementById('social-image-frame');
+   const box=frame.getBoundingClientRect();
+   frame.dispatchEvent(new MouseEvent('click',{bubbles:true,
+    clientX:box.left+box.width*.21,clientY:box.top+box.height*.66}));
+  })));
+  const realPeers=await Promise.all([host,guest].map(async page=>{
+   await page.waitForFunction(()=>{
+    const people=window.__LEAF_SOCIAL__?.getState()?.people||[];
+    const seats=[...document.querySelectorAll('#social-avatar-layer .social-avatar')];
+    return people.length===2&&seats.length===2&&
+     new Set(people.map(p=>p.position.x+','+p.position.y)).size===2;
+   },null,{timeout:15000});
+   return page.evaluate(()=>({
+    logical:window.__LEAF_SOCIAL__.getState().people.map(p=>({
+     id:p.id,position:p.position})),
+    rendered:[...document.querySelectorAll('#social-avatar-layer .social-avatar')].map(p=>
+     ({id:p.dataset.peer,seat:p.dataset.seat}))
+   }));
+  }));
+  assert.ok(realPeers.every(view=>
+   new Set(view.logical.map(p=>p.position.x+','+p.position.y)).size===2&&
+   new Set(view.rendered.map(p=>p.seat)).size===2),
+   'two real central users cannot occupy the same original Registry seat on either device');
+    await host.locator('#message').fill('멀티기기 중앙 서버 메시지');
   await host.locator('#message').press('Enter');
   await guest.waitForFunction(()=>document.querySelector('#chat-log').textContent.includes('멀티기기 중앙 서버 메시지'),{timeout:15000});
   const before=await guest.locator('.social-avatar:not(.self) img').evaluate(el=>el.style.transform);
