@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "project": "4LEAF 원작 복원 웹앱",
   "canonicalFile": "apps/4leaf/rog/docs/RESTORATION_LEDGER.json",
-  "updatedAt": "2026-10-24",
+  "updatedAt": "2026-10-25",
   "sourceOfTruth": "Git 저장소의 이 JSON과 커밋 이력. 과거 챗 대화는 기록 근거이지 진행 상태의 원본 데이터가 아님.",
   "operatingRule": "새 요청 즉시 작업 등록 → open 목록 조회 → 실제 수정 → 원본 근거/코드/브라우저/배포 검증 → 검증 증거와 함께 상태 전이. 부분 구현을 원작 완성으로 표시 금지.",
   "statusDefinitions": {
@@ -1123,6 +1123,26 @@
         "ACT-04",
         "P0-DICE",
         "DIE-01",
+        "P0-RELEASE"
+      ]
+    },
+    {
+      "id": "REQ-20261025-001",
+      "date": "2026-10-25",
+      "origin": "user",
+      "text": "Continue source 4LEAF gameplay restore on GitHub main 8ae7ccd...; preserve merged PR189/190/192. Close PR193 native Dice.dll forensic PE resource scanner if actual green CI. Diagnose published ChatRoom QA run #40073395625 and repair actual user experience, not false pass. Continue real source OBS front/body roles and direction/action playback, original 3D D4/D6 vertices/timing/model acquisition, real multiuser ChatTown owner/kick/private/reconnect and native UI replacement. Real code -> QA -> PR merge -> exact SHA Pages -> public browser verification; preserve 58 ledger tasks and unverified statuses.",
+      "taskIds": [
+        "P0-BOARD",
+        "BRD-01",
+        "P0-ACTOR",
+        "ACT-03",
+        "ACT-04",
+        "P0-DICE",
+        "DIE-01",
+        "DIE-02",
+        "P0-CHAT",
+        "CHT-04",
+        "QA-03",
         "P0-RELEASE"
       ]
     }
@@ -5950,6 +5970,50 @@
         "https://github.com/koith/browser-app-lab/actions/runs/40072513335"
       ],
       "evidence": "apps/4leaf/rog/tools/probe-original-dice-dll-resources.py; apps/4leaf/rog/docs/ORIGINAL_DICE_DLL_PE_FORENSICS_2026-10-24.md"
+    },
+    {
+      "seq": 246,
+      "date": "2026-10-25",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261025-001",
+      "taskIds": [
+        "P0-BOARD",
+        "BRD-01",
+        "P0-ACTOR",
+        "ACT-03",
+        "ACT-04",
+        "P0-DICE",
+        "DIE-01",
+        "DIE-02",
+        "P0-CHAT",
+        "CHT-04",
+        "QA-03",
+        "P0-RELEASE"
+      ],
+      "details": "Priorities and every user 4LEAF instruction retained, preserve merged PR189/190/192, native original 3D dice remains open."
+    },
+    {
+      "seq": 247,
+      "date": "2026-10-25",
+      "type": "FUNCTIONAL_ORIGINAL_OBS_FRONTS_AND_PUBLISHED_QA_CORRECTION_PENDING_ACCEPTANCE",
+      "requestId": "REQ-20261025-001",
+      "taskIds": [
+        "P0-ACTOR",
+        "ACT-03",
+        "ACT-04",
+        "P0-BOARD",
+        "BRD-01",
+        "P0-CHAT",
+        "QA-03",
+        "P0-RELEASE"
+      ],
+      "details": "PR193 authentic Dice.dll static forensic read-only scanner merged main df7ef2a6a4a802710d5c7c39fed325524e521361, native D4/D6 mesh not decoded, 3D source still missing. In following actual game code: manually visually compared original 1049/1051/1052/1053/1054/1055/1056/1058/1059/1060/1062 OBS native source 0 versus 25 and extended VERIFIED default front-facing original frame25 for 11 authentic chessman IDs, bringing audited front source identities 9->20; original pixels unchanged, EXE direction and action FPS still unverified. Original OBS gallery and genuine Playwright proof include all 20. Published QA #40073395625 failed in source minimap navigation at line35 before any minimap gesture: game/camera/minimap JS boot readiness timeout, NOT a chat protocol failure. Separately main df7ef2a6 published QA #40110997647 later failed original IMG chat scroll: down button disabled just before Playwright click following 44 real form messages; updated test to physically wheel up AFTER chat layout (instead of a same-tick JS scrollTop fixture), assert genuine overflow, real source disabled/enabled status and keyboard navigation. Minimap QA now reports live JS/network failures and retries only a proven failed essential JS fetch; actual JS startup errors still fail. No original D4/D6 3D source falsely claimed; exact browser QA and Pages pending.",
+      "evidence": "apps/4leaf/rog/genesis-chessman-actors.js; apps/4leaf/rog/docs/obs-front-source-direction-audit.html; apps/4leaf/rog/tests/obs-front-source-review.cjs; apps/4leaf/rog/tests/dice-source-native-ui.cjs; apps/4leaf/rog/tests/dice-native-minimap-navigation.cjs",
+      "refs": [
+        "https://github.com/koith/browser-app-lab/pull/193",
+        "https://github.com/koith/browser-app-lab/actions/runs/40073395625",
+        "https://github.com/koith/browser-app-lab/actions/runs/40110997647"
+      ]
     }
   ]
 }
