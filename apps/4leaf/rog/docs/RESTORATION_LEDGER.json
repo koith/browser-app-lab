@@ -5785,6 +5785,22 @@
       ],
       "details": "Native dice source research code actually changed: `tools/audit-original-dice-resources.py` now distinguishes original UI 2D roll.spr (4 frames) and eventRoll1.spr (16 frames) from possible actual 3D D4/D6 members in SHA1-authenticated official 2002 Dice CAB/PAK. Writes exact member names+SHA256/first16 signatures for candidate 3D formats and potential executable-embedded geometry; original die model+texture+fall/bounce keyframes remain NOT VERIFIED and 2003-2004 client version must be independently sourced. `rog-obs-bulk-recovery.yml` source extraction triggered. Research limitations preserved in docs/ORIGINAL_DICE_3D_SOURCE_AUDIT_2026-10-24.md. This is archival investigation, NOT gameplay replacement or model recovery.",
       "evidence": "apps/4leaf/rog/tools/audit-original-dice-resources.py; apps/4leaf/rog/docs/ORIGINAL_DICE_3D_SOURCE_AUDIT_2026-10-24.md"
+    },
+    {
+      "seq": 236,
+      "date": "2026-10-24",
+      "type": "VERIFIED_SOURCE_ARCHIVE_NO_D4_D6_MESH",
+      "requestId": "REQ-20261024-001",
+      "taskIds": [
+        "DIE-01",
+        "DIE-02",
+        "P0-DICE"
+      ],
+      "details": "Source archive actual GitHub Actions #40053447386 SUCCESS; verified official client SHA1 86526d89679ae39b85fe9808da97ad871b7888d9 (64537476 bytes). Indexed 31 Dice packages/standalone files and 713 PAK members. DMP.pak contains 25 DMP/25 DMO/26 MVE MAP terrain records, not evidenced separate D4/D6 dice model. IMG.pak 16 BMP/14 SPR contains roll.spr 4 and eventRoll1.spr 16 genuine 2D ROLL UI frames, NOT 3D die body. Sole embedded Dice.dll executable not statically decoded; original D4/D6 geometry/face atlas/physics timeline NO verified asset discovered. Other 2003-2004 client builds require checksum+isolated source search. Preserve blocked/missing evidence; do NOT mark DONE or portray map .mve as dice mesh.",
+      "refs": [
+        "https://github.com/koith/browser-app-lab/actions/runs/40053447386"
+      ],
+      "evidence": "apps/4leaf/rog/docs/ORIGINAL_DICE_3D_SOURCE_AUDIT_2026-10-24.md"
     }
   ]
 }
