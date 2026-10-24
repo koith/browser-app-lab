@@ -25,7 +25,20 @@ const nonActors={'0096':'spell-orb','0097':'spell-ray','0098':'light-effect','01
  '0141':'smoke','0142':'leaf-symbol','0145':'aura','0146':'bomb-visual',
  '0147':'prop-box','0159':'impact-star','0160':'sword-effect','0161':'fire-ring',
  '0163':'magic-burst','0164':'magic-orb','0165':'glow','0167':'die-result-numeral',
- '0170':'HUD-icon'};
+ '0170':'HUD-icon',
+  '0099':'spell-ring',
+  '0127':'dark-ring',
+  '0130':'aura-ring',
+  '0131':'cloth-effect',
+  '0135':'particle-spray',
+  '0140':'projectile-flash',
+  '0143':'smoke-fragments',
+  '0144':'spark-fragments',
+  '0156':'particle-spray',
+  '0158':'pointer-hand',
+  '0162':'magic-globe',
+  '0169':'pumpkin-prop',
+  '0171':'HUD-card-icon'};
 const entries=Object.entries(window.ORIGINAL_LEAF_OBS_FRAMES||{}).sort((a,b)=>a[0].localeCompare(b[0]));
 document.getElementById('count').textContent=entries.length+' OBS 소스 (이미지로 확인한 효과·HUD '+Object.keys(nonActors).length+'종 포함)';
 function display(onlyChecked){
