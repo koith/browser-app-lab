@@ -78,9 +78,11 @@
  });
  const create=details=>serialize(async()=>{await afterReady();return request('POST','/api/rooms',details)});
  const close=roomId=>serialize(async()=>{await afterReady();return request('POST','/api/rooms/'+encodeURIComponent(roomId)+'/close',{})});
+ const transfer=(roomId,targetId)=>serialize(async()=>{await afterReady();return request('POST','/api/rooms/'+encodeURIComponent(roomId)+'/transfer',{targetId})});
+ const kick=(roomId,targetId)=>serialize(async()=>{await afterReady();return request('POST','/api/rooms/'+encodeURIComponent(roomId)+'/kick',{targetId})});
  const chat=async text=>{await afterReady();return request('POST','/api/chat',{text})};
  const presence=async details=>{await afterReady();return request('POST','/api/presence',details)};
- window.__LEAF_CENTRAL_CHAT__={enabled:true,connect,list,join,leave,create,close,chat,presence,
+ window.__LEAF_CENTRAL_CHAT__={enabled:true,connect,list,join,leave,create,close,transfer,kick,chat,presence,
   get ready(){return Boolean(token)},get id(){return id},get joinedId(){return joinedId},
   subscribe:fn=>{listeners.add(fn);return()=>listeners.delete(fn)},
   disconnect:()=>{active=false;joinedId=null;listeners.clear()}};
