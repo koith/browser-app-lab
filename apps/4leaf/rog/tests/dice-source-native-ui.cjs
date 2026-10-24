@@ -64,6 +64,28 @@ const path=require('node:path');
   assert.equal(controls.length,2);
   assert.ok(controls.every(c=>c.source==='IMG/scrollButton.bmp'&&
    c.image.includes('IMG/scrollbutton.png')&&c.rect[0]===16&&c.rect[1]===16));
+  const originalPanel=await page.evaluate(()=>{
+   const host=document.querySelector('#app.app-classic-dice .messenger'),
+    log=document.getElementById('chat-log');
+   const outer=host.getBoundingClientRect();
+   return {position:getComputedStyle(host).position,
+    anchor:getComputedStyle(log).overflowAnchor,
+    bounds:[outer.left,outer.top,outer.right,outer.bottom],
+    arrows:[...host.querySelectorAll('.leaf-dice-chat-scroll')].map(b=>{
+     const box=b.getBoundingClientRect();
+     return {name:b.dataset.direction,x:box.x,y:box.y,width:box.width,height:box.height,
+      inside:box.left>=outer.left&&box.right<=outer.right&&
+       box.top>=outer.top&&box.bottom<=outer.bottom};
+    })
+   };
+  });
+  assert.equal(originalPanel.position,'relative',
+   'genuine 2002 IMG scroll source controls must be positioned within their actual chat panel');
+  assert.equal(originalPanel.anchor,'none',
+   'the browser must not silently reanchor original manually-read chat history');
+  assert.ok(originalPanel.arrows.every(b=>b.inside),
+   'both source arrow hit targets must live inside the real game chat panel: '+
+    JSON.stringify(originalPanel));
   // The former fixture directly appended 44 synthetic DOM children. A
   // published PWA can re-render chat, invalidating that scroll state between
   // waitForFunction and a Playwright enabled click. Feed the REAL game chat
