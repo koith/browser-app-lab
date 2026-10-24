@@ -24,7 +24,9 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict');
   const originals=await page.evaluate(()=>Object.keys(window.ORIGINAL_LEAF_OBS_FRAMES||{}));
   for(const id of ['0096','0097','0098','0100','0125','0128',
     '0133','0134','0136','0137','0138','0139','0141','0142',
-    '0145','0146','0147','0159','0160','0161','0163','0164','0165','0167','0170']){
+    '0145','0146','0147','0159','0160','0161','0163','0164','0165','0167','0170',
+    '0099','0127','0130','0131','0135','0140','0143','0144',
+    '0156','0158','0162','0169','0171']){
    const result=await page.evaluate(id=>{
     const match=window.__ROG_TEST__.getMatch();match.players[0].team[0]='c_'+id;
     window.__ROG_TEST__.drawGame();
