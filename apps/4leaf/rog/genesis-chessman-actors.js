@@ -13,7 +13,40 @@
  const sourceTimers=new WeakMap();
  const originalFor=id=>window.ORIGINAL_LEAF_OBS_FRAMES?.[id]||null;
  const poses=['idle','walk','attack','hurt','victory'];
- function sequenceFor(native,action){
+ // VISUALLY COMPARED against recovered original pixels, 2026-10-24.
+ // Sample frame 0 is NOT a front-facing pose: original 1040/1042/1043/
+ // 1044/1046/1048/1061/1064 silhouettes show their backs/side at 0.
+ // Native PNGs were FLIP_TOP_BOTTOM on extraction and get scaleY(-1) in
+ // dice-original-obs.css; this is genuine source pixel direction, NOT a
+ // horizontally mirrored or web-generated character.
+ const AUDITED_FRONT_SOURCE=Object.freeze({
+  '0040':25,'0042':25,'0043':25,'0044':25,
+  '0045':18,'0046':25,'0048':25,'0061':25,'0064':25
+ });
+ function frontFacingSource(native,id){
+  const available=native?.frames||[];
+  const approved=AUDITED_FRONT_SOURCE[id];
+  const verified=available.find(f=>f.index===approved);
+  if(verified)return {frame:verified,
+    evidence:'visual-original-OBS-reviewed/front/'+id+'-'+approved};
+  // In 60/90 bulk source models the same 25th native VIDEO packet offers
+  // a likely camera-facing silhouette. It has NOT been manually verified
+  // for every chessman. Use its genuine pixels in idle and keep the
+  // uncertainty visible in the DOM/ledger rather than asserting 2002 FPS.
+  const candidate=available.find(f=>f.index===25);
+  if(candidate)return {frame:candidate,
+    evidence:'source-family-frame25/front-candidate/PER-ID-UNVERIFIED'};
+  return {frame:available.find(f=>f.index===0)||available[0]||null,
+    evidence:'source-front-unavailable/NO-VERIFIED-DIRECTION'};
+ }
+ function sequenceFor(native,action,id){
+  // Idle must not repeatedly rotate 0..3 BACK/SIDE VIDEO packets as though
+  // they represented a front-facing breathing animation.
+  if(action==='idle'){
+   const front=frontFacingSource(native,id).frame;
+   return front?[front]:[];
+  }
+
    // Frame indexes are SOURCE-VERIFIED but the native 2002 action table
    // and FPS have NOT been recovered. Walk samples use the entire contiguous
    // native 0..7 run, rather than looping 4 frames while discarding real
@@ -66,7 +99,7 @@
    // DMP tile top. Preserve every source frame's relative origin motion.
    // Absolute foot pivot is inferred; original frame metadata remains intact.
    const native=originalFor(pawn.dataset.chessmanId);
-   const standing=native?.frames?.find(f=>f.index===0)||native?.frames?.[0]||frame;
+   const standing=frontFacingSource(native,pawn.dataset.chessmanId).frame||frame;
    const sourceFoot=(frame.originY+frame.height);
    const standingFoot=(standing.originY+standing.height);
    const relativeSourceOffset=sourceFoot-standingFoot;
@@ -151,7 +184,11 @@
      :native.hasVerifiedFrameZero===false
       ?'unverified-frame-zero-missing/static-source-pose':'unverified';
    img.hidden=false;
-   const seq=sequenceFor(native,action);
+   const facing=frontFacingSource(native,id);
+   pawn.dataset.sourceFacingFrame=facing.frame?String(facing.frame.index):'none';
+   pawn.dataset.sourceFacingEvidence=facing.evidence;
+   pawn.dataset.sourceDirection='front-source-candidate/not-EXE-direction-table';
+   const seq=sequenceFor(native,action,id);
    // Expose EXACT SOURCE packet indexes independently from inferred labels;
    // QA can inspect what was really rendered during genuine gameplay.
    pawn.dataset.sourceFrameSequence=seq.map(frame=>frame.index).join(',');
@@ -346,6 +383,7 @@
   mount,pose,poseByPlayer,registerFrames,recoverAvailableOriginals,
   getState:()=>({
    originalFullBodyFramesRecovered:[...new Set([...Object.keys(window.ORIGINAL_LEAF_OBS_FRAMES||{}),...frames.keys()])],
+   originalFrontVisualAudited:{...AUDITED_FRONT_SOURCE},
    rendered:[...document.querySelectorAll('#board-pawns .board-pawn')].map(p=>({
     playerId:p.dataset.id,chessmanId:p.dataset.chessmanId,
     pose:p.dataset.actorPose,rig:p.dataset.actorRig,
