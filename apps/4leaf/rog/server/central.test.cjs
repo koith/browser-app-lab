@@ -201,7 +201,13 @@ test('owner transfers private ChatRoom to actual joined peer; kicked former owne
  assert.equal((await call('POST','/api/chat',owner.token,{text:'not in room'})).code,403);
  assert.equal((await call('POST','/api/rooms/'+id+'/join',owner.token,{password:'secret123'})).code,403,
   'an immediate retry must not silently undo an authenticated kick');
- instant+=121000;
+ // Preserve REAL active credentials while the temporary kick window
+ // elapses. Otherwise the test would incorrectly expire 45s sessions too.
+ for(let tick=0;tick<5;tick++){
+  instant+=25000;
+  assert.equal((await call('GET','/api/snapshot',owner.token)).code,200);
+  assert.equal((await call('GET','/api/snapshot',guest.token)).code,200);
+ }
  assert.equal((await call('POST','/api/rooms/'+id+'/join',owner.token,{password:'secret123'})).code,200,
   'after explicit temporary exclusion expiry joining is allowed again');
  const snapshot=await call('GET','/api/snapshot',guest.token);
