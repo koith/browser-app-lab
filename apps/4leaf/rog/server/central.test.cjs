@@ -61,7 +61,8 @@ test('isolated messages and real peers, with remote character direction and snap
  assert.equal(see.data.peers.length,2);
  const alice=see.data.peers.find(x=>x.id===a.id);
  assert.equal(alice.facing,-1);assert.equal(alice.avatar,4);
- assert.deepEqual(alice.position,{x:15,y:86});
+ assert.deepEqual(alice.position,{x:19,y:83},
+  '2002 ChatRoom original background 3 source-aligned slots must be the server-authoritative snapped position');
  const outside=await call('GET','/api/snapshot?after=0',spy.token);
  assert.deepEqual(outside.data.entries,[]);assert.deepEqual(outside.data.peers,[]);
 });
@@ -132,4 +133,37 @@ test('unresponsive devices release seats at the server TTL without fictional occ
  assert.equal(result.data.rooms.find(r=>r.id===room)?.occupants,0,'expired browser sessions never count as real participants');
  assert.equal((await call('POST','/api/rooms/'+room+'/join',old.token,{})).code,401,'expired credentials cannot silently occupy a room');
  assert.equal((await call('POST','/api/rooms/'+room+'/join',newcomer.token,{})).code,200);
+});
+
+test('two distinct authenticated browsers atomically reserve non-overlapping real ChatRoom seat coordinates',async t=>{
+ const {app,call,auth}=await open();t.after(()=>app.close());
+ const [a,b]=await Promise.all([auth('OwnerOne'),auth('GuestTwo')]);
+ const room='leaf-public-north-3-0';
+ // An actual concurrent join must reserve different positions on the
+ // central authority, not merely move overlapping CSS figures apart.
+ const results=await Promise.all([a,b].map(user=>
+  call('POST','/api/rooms/'+room+'/join',user.token,{})));
+ assert.deepEqual(results.map(x=>x.code),[200,200]);
+ const first=results.map(x=>x.data.position);
+ assert.equal(new Set(first.map(pos=>pos.x+','+pos.y)).size,2);
+ const wanted={x:21,y:66}; // original room0 slot #0
+ const simultaneous=await Promise.all([a,b].map(user=>
+  call('POST','/api/presence',user.token,{position:wanted})));
+ assert.deepEqual(simultaneous.map(x=>x.code),[200,200]);
+ assert.ok(simultaneous.every(x=>x.data.seat!==null));
+ const snapshot=await call('GET','/api/snapshot?after=0',a.token);
+ assert.equal(snapshot.data.peers.length,2);
+ const seats=snapshot.data.peers.map(x=>x.position.x+','+x.position.y);
+ assert.equal(new Set(seats).size,2,
+  'simultaneous genuine clicks on the same native floor slot must yield separate authoritative seats');
+ assert.ok(seats.includes('21,66'),'one actual participant receives original requested slot');
+ assert.ok(snapshot.data.peers.every(p=>p.position.x>=0&&p.position.y<=100));
+ await call('POST','/api/leave',a.token,{});
+ const nowFree=await call('POST','/api/presence',b.token,{position:wanted});
+ assert.deepEqual(nowFree.data.position,wanted,
+  'the emptied real original room seat becomes available without synthetic avatars');
+ const restored=await call('POST','/api/rooms/'+room+'/join',a.token,{});
+ assert.equal(restored.code,200);
+ assert.notDeepEqual(restored.data.position,nowFree.data.position,
+  'the returning authenticated client may not retake another live occupant source slot');
 });
