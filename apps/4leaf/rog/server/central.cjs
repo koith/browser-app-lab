@@ -31,6 +31,38 @@ function makeServer(options={}){
   fs.renameSync(temp,store);
  };
  const count=id=>[...sessions.values()].filter(s=>s.roomId===id).length;
+ // Source ChatRoom 794x528 seat locations are currently picture-measured WEB
+ // coordinates, NOT recovered 2002 room SEAT table. Keep the identical table
+ // in the browser until EXE seat data is recovered, but ONLY this authority
+ // allocates seats when two actual browsers click/join in the same instant.
+ const SEATS=Object.freeze([
+  [[21,66],[38,66],[55,66],[73,66],[20,80],[38,80],[55,80],[74,80],[22,92],[39,92],[57,92],[74,92]],
+  [[24,64],[42,64],[60,64],[76,64],[22,78],[40,78],[59,78],[76,78],[22,91],[40,91],[59,91],[76,91]],
+  [[20,63],[37,63],[55,63],[73,63],[21,78],[38,78],[56,78],[73,78],[22,92],[39,92],[57,92],[74,92]],
+  [[19,83],[38,72],[59,72],[81,83],[24,94],[39,94],[56,94],[72,94],[22,69],[77,69],[39,83],[61,83]],
+  [[17,65],[32,61],[45,70],[61,72],[73,64],[91,65],[8,97],[29,97],[48,97],[73,97],[91,97],[52,62]],
+  [[20,66],[38,66],[56,66],[74,66],[20,81],[39,81],[57,81],[75,81],[22,93],[39,93],[57,93],[74,93]]
+ ]);
+ const nativeSeats=r=>SEATS[Number(r?.background)]||SEATS[2];
+ const closestSeat=(list,target,occupied=new Set())=>{
+  const x=Number(target?.x)||52,y=Number(target?.y)||76;
+  const ranked=list.map(([sx,sy],i)=>({i,score:(sx-x)**2*2.26+(sy-y)**2}))
+   .sort((a,b)=>a.score-b.score||a.i-b.i);
+  return (ranked.find(item=>!occupied.has(item.i))||ranked[0]).i;
+ };
+ const reserveSeat=(session,target)=>{
+  if(!session.roomId)return null;
+  const r=room(session.roomId);
+  if(!r)return null;
+  const seats=nativeSeats(r),occupied=new Set();
+  for(const peer of sessions.values()){
+   if(peer===session||peer.roomId!==session.roomId)continue;
+   occupied.add(closestSeat(seats,peer.position));
+  }
+  const i=closestSeat(seats,target,occupied);
+  session.position={x:seats[i][0],y:seats[i][1]};
+  return i;
+ };
  const sourceRoom=id=>{
   const m=/^leaf-public-(north|south)-([0-7])-([0-7])$/.exec(id||'');
   if(!m)return null;
@@ -134,8 +166,11 @@ function makeServer(options={}){
     }
     // Check and reserve in the same synchronous event-loop turn.
     if(s.roomId!==r.id&&count(r.id)>=r.capacity)fail(409,'Room is full');
-    s.roomId=r.id;s.position={x:52,y:76};
-    return send(res,200,{joined:true,room:dto(r,s)},origin);
+    const rejoining=s.roomId===r.id;
+    const wanted=rejoining?s.position:{x:52,y:76};
+    s.roomId=r.id;
+    const seat=reserveSeat(s,wanted);
+    return send(res,200,{joined:true,room:dto(r,s),position:s.position,seat},origin);
    }
    if(req.method==='POST'&&route==='/api/leave'){
     s.roomId=null;return send(res,200,{left:true},origin);
@@ -145,10 +180,14 @@ function makeServer(options={}){
     s.nick=safe(b.nick,12)||s.nick;
     if(Number.isInteger(b.avatar)&&b.avatar>=0&&b.avatar<12)s.avatar=b.avatar;
     if(b.facing===1||b.facing===-1)s.facing=b.facing;
+    let seat=null;
     if(b.position&&Number.isFinite(b.position.x)&&Number.isFinite(b.position.y)){
-     s.position={x:Math.max(0,Math.min(100,b.position.x)),y:Math.max(0,Math.min(100,b.position.y))};
+     const target={x:Math.max(0,Math.min(100,b.position.x)),
+      y:Math.max(0,Math.min(100,b.position.y))};
+     if(s.roomId)seat=reserveSeat(s,target);
+     else s.position=target;
     }
-    return send(res,200,{ok:true,roomId:s.roomId},origin);
+    return send(res,200,{ok:true,roomId:s.roomId,position:s.position,seat},origin);
    }
    if(req.method==='POST'&&route==='/api/chat'){
     if(!s.roomId||!room(s.roomId))fail(403,'Join a room first');
