@@ -146,7 +146,7 @@ test('two distinct authenticated browsers atomically reserve non-overlapping rea
  assert.deepEqual(results.map(x=>x.code),[200,200]);
  const first=results.map(x=>x.data.position);
  assert.equal(new Set(first.map(pos=>pos.x+','+pos.y)).size,2);
- const wanted={x:21,y:66}; // original room0 slot #0
+ const wanted={x:20,y:63}; // original source public room0 uses background #2 slot 0
  const simultaneous=await Promise.all([a,b].map(user=>
   call('POST','/api/presence',user.token,{position:wanted})));
  assert.deepEqual(simultaneous.map(x=>x.code),[200,200]);
@@ -156,7 +156,7 @@ test('two distinct authenticated browsers atomically reserve non-overlapping rea
  const seats=snapshot.data.peers.map(x=>x.position.x+','+x.position.y);
  assert.equal(new Set(seats).size,2,
   'simultaneous genuine clicks on the same native floor slot must yield separate authoritative seats');
- assert.ok(seats.includes('21,66'),'one actual participant receives original requested slot');
+ assert.ok(seats.includes('20,63'),'one actual participant receives original requested slot');
  assert.ok(snapshot.data.peers.every(p=>p.position.x>=0&&p.position.y<=100));
  await call('POST','/api/leave',a.token,{});
  const nowFree=await call('POST','/api/presence',b.token,{position:wanted});
