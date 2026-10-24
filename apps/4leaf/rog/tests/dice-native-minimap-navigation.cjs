@@ -8,8 +8,14 @@ const {chromium}=require('playwright');
 (async()=>{
  const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
  const page=await browser.newPage({viewport:{width:1280,height:900},serviceWorkers:'block'});
- const errors=[];
+ const errors=[],networkFailures=[];
  page.on('pageerror',e=>errors.push(String(e)));
+ page.on('requestfailed',req=>networkFailures.push({
+  url:req.url(),error:req.failure()?.errorText||'failed'}));
+ page.on('response',resp=>{
+  if(resp.status()>=400&&/\.js(\?|$)/.test(resp.url()))
+   networkFailures.push({url:resp.url(),error:'HTTP '+resp.status()});
+ });
  await page.addInitScript(()=>{window.LEAF_CENTRAL_API_URL='';});
  const snap=()=>page.evaluate(()=>{
   const mini=window.__LEAF_MINIMAP_NAV__?.getState();
@@ -31,8 +37,35 @@ const {chromium}=require('playwright');
  });
  const neq=(a,b,label)=>assert.notDeepEqual(a,b,label);
  try{
-  await page.goto(process.env.FOURLEAF_TEST_URL||'file://'+path.resolve(__dirname,'../index.html'),{waitUntil:'domcontentloaded'});
-  await page.waitForFunction(()=>window.__ROG_TEST__&&window.__LEAF_CAMERA__&&window.__LEAF_MINIMAP_NAV__);
+  const url=process.env.FOURLEAF_TEST_URL||'file://'+path.resolve(__dirname,'../index.html');
+  await page.goto(url,{waitUntil:'domcontentloaded'});
+  try{
+   await page.waitForFunction(()=>window.__ROG_TEST__&&window.__LEAF_CAMERA__&&
+    window.__LEAF_MINIMAP_NAV__,null,{timeout:13000});
+  }catch(initial){
+   // Published QA #40073395625 timed out BEFORE any minimap click at
+   // bootstrap line 35. The test previously provided no evidence whether
+   // a live game module was uninitialized or a network asset failed.
+   // Retry exactly once ONLY after a genuine script fetch failure; a
+   // JavaScript startup exception is a real app bug and MUST still fail.
+   const boot=await page.evaluate(()=>({
+    state:document.readyState,scriptCount:document.scripts.length,
+    core:{test:!!window.__ROG_TEST__,camera:!!window.__LEAF_CAMERA__,
+     minimap:!!window.__LEAF_MINIMAP_NAV__},
+    scripts:[...document.scripts].filter(e=>/board-camera|game\.js/.test(e.src))
+     .map(e=>e.src)
+   }));
+   const scriptFetchFailure=networkFailures.some(x=>
+    /board-camera\.js|game\.js/.test(x.url));
+   if(errors.length||!scriptFetchFailure){
+    throw Error('Real native minimap initialization failed (not a gesture test): '+
+     JSON.stringify({boot,networkFailures,errors,cause:String(initial)}));
+   }
+   networkFailures.length=0;
+   await page.reload({waitUntil:'domcontentloaded'});
+   await page.waitForFunction(()=>window.__ROG_TEST__&&window.__LEAF_CAMERA__&&
+    window.__LEAF_MINIMAP_NAV__,null,{timeout:15000});
+  }
   await page.locator('[data-route="lobby"]').first().click();
   await page.locator('#lobby-create').click();
   await page.locator('#game-mode').selectOption('hotseat');
