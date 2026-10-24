@@ -53,7 +53,9 @@ const BASE='http://127.0.0.1:8765/',API='http://127.0.0.1:8877';
     const people=window.__LEAF_SOCIAL__?.getState()?.people||[];
     const seats=[...document.querySelectorAll('#social-avatar-layer .social-avatar')];
     return people.length===2&&seats.length===2&&
-     new Set(people.map(p=>p.position.x+','+p.position.y)).size===2;
+     new Set(people.map(p=>p.position.x+','+p.position.y)).size===2&&
+     new Set(seats.map(p=>p.dataset.seat)).size===2&&
+     seats.every(p=>Number.isFinite(Number(p.dataset.seat)));
    },null,{timeout:15000});
    return page.evaluate(()=>({
     logical:window.__LEAF_SOCIAL__.getState().people.map(p=>({
