@@ -126,6 +126,8 @@ jobs:
         run: node apps/4leaf/rog/tests/genesis-chessman-actors.cjs
       - name: Compare original OBS front-facing frames with live Dice actors and native 2004 battle image
         run: node apps/4leaf/rog/tests/obs-front-source-review.cjs
+      - name: Validate published-failure original IMG scrollbar with real chat-form messages
+        run: node apps/4leaf/rog/tests/dice-source-native-ui.cjs
       - name: Reject source OBS HUD FX and dice numerals as playable chessmen
         run: node apps/4leaf/rog/tests/obs-source-nonactor-role.cjs
       - name: Verify full expanded DMP camera touch, pan, zoom and tile visibility
