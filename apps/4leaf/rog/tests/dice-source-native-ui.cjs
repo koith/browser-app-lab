@@ -78,8 +78,10 @@ const path=require('node:path');
    }
    // New live messages may legitimately follow the latest; the user then
    // deliberately scrolls to the older record via wheel/scrollbar.
-   log.scrollTop=0;
-   window.__LEAF_NATIVE_DICE_CHAT_SCROLL__.refresh();
+   // Do not fake a physical user gesture in the SAME JS task as 44 form
+   // submissions. Browser scroll anchoring can reconcile afterward and
+   // force the read position back to the end, disabling the real arrow.
+   // The test below uses a real wheel gesture after layout settles.
    return {messages:log.children.length,top:log.scrollTop,
     height:log.scrollHeight,client:log.clientHeight,
     enabled:window.__LEAF_NATIVE_DICE_CHAT_SCROLL__.getState()};
@@ -88,7 +90,20 @@ const path=require('node:path');
   assert.ok(history.height-history.client>60,
    'real transcript must overflow before a down arrow can be clickable: '+
    JSON.stringify(history));
-  assert.equal(history.top,0,'user intentionally opened oldest message');
+  await page.locator('#chat-log').hover();
+  await page.mouse.wheel(0,-100000);
+  await page.waitForFunction(()=>{
+   const log=document.getElementById('chat-log');
+   return log.scrollTop<2 && log.scrollHeight-log.clientHeight>60;
+  },null,{timeout:12000});
+  // Full source IMG interaction now follows actual wheel scrolling, so
+  // a deferred MutationObserver/scroll anchoring run cannot masquerade
+  // as a real user looking at the earliest log entry.
+  await page.evaluate(()=>new Promise(resolve=>
+   requestAnimationFrame(()=>requestAnimationFrame(resolve))));
+  assert.ok((await page.evaluate(()=>
+   document.querySelector('#chat-log').scrollTop))<2,
+   'actual mouse wheel keeps the reader at the oldest conversation line');
   await page.waitForFunction(()=>{
    const log=document.getElementById('chat-log'),
     down=document.querySelector('.messenger .leaf-dice-chat-scroll[data-direction="down"]');
@@ -102,7 +117,7 @@ const path=require('node:path');
    return {top:log.scrollTop,max:log.scrollHeight-log.clientHeight,
     enabled:window.__LEAF_NATIVE_DICE_CHAT_SCROLL__.getState()};
   });
-  assert.equal(preClick.top,0,'reader stays at oldest line before actual button click');
+  assert.ok(preClick.top<2,'reader stays at oldest line before actual button click');
   assert.equal(preClick.enabled.downEnabled,true,
    'real overflow must enable the native down button: '+JSON.stringify(preClick));
   // A direct user click is required, not element.evaluate(click) bypassing
