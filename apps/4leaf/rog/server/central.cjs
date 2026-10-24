@@ -16,7 +16,7 @@ function makeServer(options={}){
  const clock=options.now||Date.now;
  const store=options.storageFile||process.env.LEAF_CENTRAL_STORAGE||'';
  const origins=(options.origins??process.env.LEAF_CENTRAL_ORIGINS??'').split(',').map(x=>x.trim()).filter(Boolean);
- const sessions=new Map(),rooms=new Map(),history=new Map();let sequence=0;
+ const sessions=new Map(),rooms=new Map(),history=new Map(),kicked=new Map();let sequence=0;
  if(store&&fs.existsSync(store)){
   const archive=JSON.parse(fs.readFileSync(store,'utf8'));
   for(const r of archive.rooms||[])if(r?.id&&valid(r.region,r.district))rooms.set(r.id,r);
@@ -77,7 +77,8 @@ function makeServer(options={}){
   // Never trust client-supplied room owners; expose ownership only to its
   // authenticated server-side session. This survives page reloads.
   isOwner:!!user&&!r.preset&&r.ownerId===user.id});
- const clean=()=>{for(const [token,s] of sessions)if(clock()-s.lastSeen>45000)sessions.delete(token)};
+ const clean=()=>{for(const [token,s] of sessions)if(clock()-s.lastSeen>45000)sessions.delete(token);
+  for(const [key,until] of kicked)if(clock()>=until)kicked.delete(key)};
  const ticker=setInterval(clean,10000);ticker.unref?.();
  const send=(res,code,data,origin)=>{
   res.writeHead(code,{'content-type':'application/json; charset=utf-8','cache-control':'no-store',
@@ -150,7 +151,7 @@ function makeServer(options={}){
      passwordHash:password?scryptSync(password,salt,32).toString('hex'):''};
     rooms.set(r.id,r);save();return send(res,201,{room:dto(r,s)},origin);
    }
-   const action=/^\/api\/rooms\/([^/]+)\/(join|close)$/.exec(route);
+   const action=/^\/api\/rooms\/([^/]+)\/(join|close|transfer|kick)$/.exec(route);
    if(req.method==='POST'&&action){
     const r=room(action[1]);if(!r)fail(404,'No such room');
     if(action[2]==='close'){
@@ -160,6 +161,24 @@ function makeServer(options={}){
      save();return send(res,200,{closed:true},origin);
     }
     const b=await parse(req);
+    if(action[2]==='transfer'||action[2]==='kick'){
+     if(r.preset||r.ownerId!==s.id||s.roomId!==r.id)fail(403,'Only the current room owner can moderate joined peers');
+     const targetId=safe(b.targetId,80);
+     if(!targetId||targetId===s.id)fail(400,'Another joined participant is required');
+     const peerEntry=[...sessions.entries()].find(([,peer])=>peer.roomId===r.id&&peer.id===targetId);
+     if(!peerEntry)fail(404,'Target participant is not in this room');
+     const [targetToken,target]=peerEntry;
+     if(action[2]==='transfer'){
+      // Only the authority decides ownership; change both the persistent
+      // person id and the recoverable owner-secret fingerprint atomically.
+      r.ownerId=target.id;r.ownerTokenHash=secretFingerprint(targetToken);
+      save();return send(res,200,{transferred:true,room:dto(r,s),targetId},origin);
+     }
+     target.roomId=null;
+     kicked.set(r.id+':'+target.id,clock()+120000);
+     return send(res,200,{kicked:true,targetId,roomId:r.id},origin);
+    }
+    if(kicked.get(r.id+':'+s.id)>clock())fail(403,'Temporarily removed by the room owner');
     if(r.passwordHash){
      const guess=scryptSync(String(b.password||''),r.passwordSalt,32);
      if(!timingSafeEqual(guess,Buffer.from(r.passwordHash,'hex')))fail(403,'Incorrect password');
@@ -209,6 +228,7 @@ function makeServer(options={}){
     })):[];
     const after=Math.max(0,Number(u.searchParams.get('after')||0)||0);
     return send(res,200,{roomId,peers,entries:(history.get(roomId)||[]).filter(x=>x.seq>after),
+     room:roomId?dto(room(roomId),s):null,
      nextSequence:sequence,serverTime:clock()},origin);
    }
    fail(404,'Unknown endpoint');
