@@ -1,0 +1,47 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>4LEAF OBS original direction inspection · 92 recovered characters</title>
+<style>
+:root{color-scheme:dark}body{margin:0;background:#17152a;color:#eee;font:14px system-ui,sans-serif;padding:20px}
+header{position:sticky;top:0;background:#17152af0;z-index:4;padding:12px 0;border-bottom:1px solid #777}
+h1{font-size:22px;margin:0 0 8px}p{max-width:1100px;line-height:1.5}
+a{color:#b7e7ff}table{border-collapse:collapse;width:100%;max-width:1200px}
+th,td{border-bottom:1px solid #59566a;padding:5px 8px;vertical-align:middle}th{position:sticky;top:125px;background:#27243b;z-index:3}
+img.obs{width:auto;height:auto;max-width:120px;max-height:160px;image-rendering:pixelated;transform:scaleY(-1)}
+span.swatch{display:flex;align-items:center;justify-content:center;min-height:118px;width:142px;overflow:hidden;background:#303349}
+code{font-size:12px}.good{color:#94f5c8}.warn{color:#ffde91}label{cursor:pointer}
+</style></head><body><header><h1>4LEAF 원본 OBS 방향 전수 대조판 · 원본 픽셀</h1>
+<p>2002 OBS.pak에서 복원된 <b id="count">…</b>종의 원본 프레임 0 / 10 / 18 / 25 / 30을 직접 나란히 확인합니다. PNG는 원본 FLIP_TOP_BOTTOM 상태이므로 표시할 때만 Y를 반전합니다. <strong>원본 EXE 방향/FPS 표는 아직 미해독</strong>; 아래 <i>정면 후보</i>는 모두 검증된 방향이 아닙니다.</p>
+<label><input type="checkbox" id="reviewed"> 눈으로 검증한 9종만 표시</label>
+</header>
+<table><thead><tr><th>원본 OBS</th><th>0 · 기존 기본(후면/측면)</th><th>10</th><th>18</th><th>25</th><th>30</th><th>현재 기본 대기 및 근거</th></tr></thead><tbody id="rows"></tbody></table>
+<script src="../original/OBS/animation-manifest.js"></script><script src="../original/OBS/animation-extra.js"></script>
+<script>
+'use strict';
+const checked={'0040':25,'0042':25,'0043':25,'0044':25,'0045':18,'0046':25,'0048':25,'0061':25,'0064':25};
+const entries=Object.entries(window.ORIGINAL_LEAF_OBS_FRAMES||{}).sort((a,b)=>a[0].localeCompare(b[0]));
+document.getElementById('count').textContent=String(entries.length);
+function display(onlyChecked){
+ const body=document.getElementById('rows');body.replaceChildren();
+ for(const [id,data] of entries){
+  if(onlyChecked&&!Object.prototype.hasOwnProperty.call(checked,id))continue;
+  const tr=document.createElement('tr'),title=document.createElement('td');title.textContent=id+' / '+data.originalMember;tr.append(title);
+  for(const index of [0,10,18,25,30]){
+   const td=document.createElement('td'),frame=data.frames.find(f=>f.index===index);
+   if(frame){const holder=document.createElement('span');holder.className='swatch';
+    const img=document.createElement('img');img.className='obs';img.loading='lazy';
+    img.alt='원본 OBS '+id+' '+index+' 프레임';
+    img.src=frame.url.replace(/^\.\/original\//,'../original/');
+    img.title=frame.url+' / native '+frame.width+'x'+frame.height+' / sha256 '+frame.sha256;
+    holder.append(img);td.append(holder);
+    if(checked[id]===index)td.style.outline='2px solid #8ed7aa';
+   }else td.textContent='미복원';tr.append(td);
+  }
+  const status=document.createElement('td'),candidate=data.frames.some(f=>f.index===25)?25:null;
+  const audited=Object.prototype.hasOwnProperty.call(checked,id);
+  status.className=audited?'good':'warn';
+  status.textContent=audited?'육안 비교 · 기본 '+checked[id]:'미검증 · '+(candidate!==null?'25번 원본 정면 후보':'정면 원본 후보 미확보');
+  tr.append(status);body.append(tr);
+ }
+}
+document.getElementById('reviewed').addEventListener('change',e=>display(e.target.checked));display(false);
+</script></body></html>

@@ -135,9 +135,12 @@ const {chromium}=require('playwright');
     window.__ROG_TEST__.drawGame();
     const pawn=document.querySelector('#board-pawns .board-pawn[data-id="0"]');
     const img=pawn.querySelector('.leaf-chess-original-obs');
-    const first=window.ORIGINAL_LEAF_OBS_FRAMES[id].frames.find(f=>f.index===0);
-    out.push({id,source:first.width,footprint:parseFloat(getComputedStyle(pawn,'::before').width),
-      expected:Math.max(18,Math.min(84,Math.round(first.width*.72))),
+    // The user-visible ORIGINAL front frame is not necessarily native 0;
+    // test the actual live OBS image width that creates the ground shadow.
+    const shown=window.ORIGINAL_LEAF_OBS_FRAMES[id].frames.find(
+      f=>f.index===Number(pawn.dataset.actorFrame));
+    out.push({id,source:shown.width,footprint:parseFloat(getComputedStyle(pawn,'::before').width),
+      expected:Math.max(18,Math.min(84,Math.round(shown.width*.72))),
       member:pawn.dataset.actorSource,alpha:document.querySelector('#board-nodes>.tile').dataset.tisAlpha,
       img:img.getAttribute('src')});
    }
