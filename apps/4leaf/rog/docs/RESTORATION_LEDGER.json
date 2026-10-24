@@ -5917,6 +5917,22 @@
       ],
       "details": "After actual PR189 native chat scroll and nonactor source sprite correction, separate genuine game/server functional work adds to central.cjs POST /api/rooms/:id/transfer and /kick. Owner server session+room membership only, target must be another live room member; update ownerId+ownerTokenHash persistently for reload; kicked member session.roomId revoked immediately, private room snapshot/messages denied, short 120-second rejoin exclusion; future clock cleanup; source native seat reservations remain server authoritative. central-client.js exposes authorized transfer/kick; social-chat.js actual Registry actor context menu provides text-labeled permission actions rather than falsely assigning unknown original ringbtn sprite rows, uses central snapshot DTO to grant/revoke original room owner toolbar and server kicked members leave. Added Node security E2E for owner/unauthorized user, transfer, kick, expiry, reload, no overlapping seats and two distinct Chromium contexts exercising UI. Source original 2004 menu glyph mapping and persistent ban semantics NOT verified, do not claim complete; beta19/PWA106 candidate pending CI/PR/Pages. 2002 original 3D D4/D6 still missing; manual 25 OBS VFX classification remains; all 58 task statuses unchanged.",
       "evidence": "apps/4leaf/rog/server/central.cjs; apps/4leaf/rog/server/central.test.cjs; apps/4leaf/rog/central-client.js; apps/4leaf/rog/social-chat.js; apps/4leaf/rog/tests/central-browser.cjs"
+    },
+    {
+      "seq": 244,
+      "date": "2026-10-24",
+      "type": "VERIFIED_ORIGINAL_2002_DICE_DLL_PE_FORENSICS_NO_3D_BODY",
+      "requestId": "REQ-20261024-002",
+      "taskIds": [
+        "P0-DICE",
+        "DIE-01",
+        "DIE-02"
+      ],
+      "details": "Source task after merged actual ChatTown gameplay PR189/190, not a WEB CSS patch. Exact SHA1 86526d89679ae39b85fe9808da97ad871b7888d9 original 2002 installer was downloaded and decoded in real GitHub Actions #40072513335 SUCCESS. Original 4Leaf_Files/Dice/Dice.dll SHA256 0987e96cb2d954b98e5815396874488d3bd50560f364df3bcacb588024270060: valid PE32, three sections, zero enumerable PE resources. New read-only script inspects sections/resource RVA/signatures/import text hints, emits SHA-only artifact and never executes Windows original. No original D4/D6 geometry, UV, textures, outcome-specific fall frames yet recovered. Map-related 26 MVE and genuine 2D roll.spr/eventRoll1.spr cannot be passed off as 3D dice. Embedded procedural data, DLL .text/.data and versioned 2003–04 releases remain unexamined. Documentation docs/ORIGINAL_DICE_DLL_PE_FORENSICS_2026-10-24.md retains complete missing/source acquisition next steps. Keep DIE-01 and P0-DICE open, not completed.",
+      "refs": [
+        "https://github.com/koith/browser-app-lab/actions/runs/40072513335"
+      ],
+      "evidence": "apps/4leaf/rog/tools/probe-original-dice-dll-resources.py; .github/workflows/rog-obs-bulk-recovery.yml; apps/4leaf/rog/docs/ORIGINAL_DICE_DLL_PE_FORENSICS_2026-10-24.md"
     }
   ]
 }
