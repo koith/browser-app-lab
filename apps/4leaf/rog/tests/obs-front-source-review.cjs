@@ -22,8 +22,8 @@ const {chromium}=require('playwright');
   await page.locator('#map-select').selectOption('4LEAF');
   await page.locator('#start-game').click();
   await page.waitForSelector('#game:not(.hidden)');
-  const verified={0040:25,0042:25,0043:25,0044:25,0045:18,
-   0046:25,0048:25,0061:25,0064:25};
+  const verified={'0040':25,'0042':25,'0043':25,'0044':25,'0045':18,
+   '0046':25,'0048':25,'0061':25,'0064':25};
   const proofs=[];
   for(const [id,expected] of Object.entries(verified)){
    const state=await page.evaluate(id=>{
