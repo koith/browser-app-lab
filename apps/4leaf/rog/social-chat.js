@@ -966,6 +966,38 @@
   presence();renderOccupants();
   return seat;
  }
+ async function moderatePeer(action,user){
+  const room=currentRoom();
+  if(!central.enabled||!central.ready||!room||room.preset||
+     room.ownerId!==tabId||user.source!=='central'||user.id===central.id)return;
+  const label=action==='transfer'?'방장 권한 양도':'강퇴';
+  const body=document.createElement('div');
+  const description=document.createElement('p');
+  description.textContent=safe(user.nick,12)+'님에게 '+label+' 명령을 수행합니까?';
+  const yes=document.createElement('button');yes.type='button';
+  yes.dataset.roomModeration=action;yes.textContent='확인';
+  const no=document.createElement('button');no.type='button';no.textContent='취소';
+  no.onclick=closePopup;
+  yes.onclick=async()=>{
+   yes.disabled=true;
+   try{
+    if(action==='transfer'){
+     await central.transfer(room.id,user.id);
+     const current=centralRooms.get(room.id);
+     if(current)centralRooms.set(room.id,{...current,ownerId:'',owner:''});
+     closePopup();render();systemLine('중앙 서버가 새 방장을 확정했습니다.');
+    }else{
+     await central.kick(room.id,user.id);
+     state.peers.delete(user.id);closePopup();renderOccupants();
+     systemLine(safe(user.nick,12)+'님을 서버에서 강퇴했습니다.');
+    }
+   }catch(error){
+    yes.disabled=false;systemLine(label+' 실패: '+error.message);
+   }
+  };
+  body.append(description,yes,no);
+  popup(label,body);
+ }
  function showActorMenu(user,figure){
   if(state.view!=='room'||!figure?.isConnected)return;
   const old=$('social-actor-menu');
@@ -995,11 +1027,30 @@
    }},
    {row:8,label:'캐릭터 메뉴 닫기',run:()=>{}}
   ];
+  // These are REAL moderation requests, not mock original sprite actions.
+  // The recovered ringbtn atlas does not identify which historical glyph
+  // represented "kick" / "transfer"; use honest text within its real actor
+  // context menu rather than assigning an unrelated source bitmap row.
+  const current=roomById(state.roomId);
+  if(central.enabled&&central.ready&&current&&!current.preset&&
+     current.ownerId===tabId&&user.source==='central'&&user.id!==central.id){
+   actions.push(
+    {label:'방장 양도',moderation:'transfer',run:()=>moderatePeer('transfer',user)},
+    {label:'강퇴',moderation:'kick',run:()=>moderatePeer('kick',user)}
+   );
+  }
   for(const action of actions){
    const button=document.createElement('button');
-   button.type='button';button.className='social-native-ring-action';
-   button.dataset.ringRow=String(action.row);
-   button.style.setProperty('--ring-y',(-22*action.row)+'px');
+   button.type='button';
+   if(action.moderation){
+    button.className='social-moderation-action';
+    button.dataset.moderation=action.moderation;
+    button.textContent=action.label;
+   }else{
+    button.className='social-native-ring-action';
+    button.dataset.ringRow=String(action.row);
+    button.style.setProperty('--ring-y',(-22*action.row)+'px');
+   }
    button.title=action.label;button.setAttribute('aria-label',action.label);
    button.onclick=event=>{
     event.stopPropagation();
@@ -1424,6 +1475,16 @@
     }
     if(state.view==='directory'&&event.region===state.region&&event.district===state.district)renderDirectory();
    }else if(event.type==='snapshot'){
+    // Ownership changes are authoritative and may arrive on a DIFFERENT
+    // client's next poll. Restore/revoke owner tools only after server DTO.
+    if(event.room&&state.view==='room'&&event.room.id===state.roomId&&!event.room.preset){
+     const old=centralRooms.get(event.room.id);
+     if(old&&Boolean(old.ownerId===tabId)!==Boolean(event.room.isOwner)){
+      centralRooms.set(event.room.id,centralRoom(event.room));
+      render();
+      systemLine(event.room.isOwner?'중앙 서버에서 새 방장 권한을 받았습니다.':'중앙 서버에서 방장 권한이 변경되었습니다.');
+     }
+    }
     if(state.view==='room'&&central.joinedId===state.roomId&&!event.roomId){
      central.leave().catch(()=>{});
      state.view='directory';state.roomId=null;render();
