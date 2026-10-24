@@ -18,8 +18,15 @@ code{font-size:12px}.good{color:#94f5c8}.warn{color:#ffde91}label{cursor:pointer
 <script>
 'use strict';
 const checked={'0040':25,'0042':25,'0043':25,'0044':25,'0045':18,'0046':25,'0048':25,'0061':25,'0064':25};
+const nonActors={'0096':'spell-orb','0097':'spell-ray','0098':'light-effect','0100':'lightning',
+ '0125':'particle','0128':'particle','0133':'ability-icon','0134':'DiceAttack-logo',
+ '0136':'ring-effect','0137':'hex-overlay','0138':'impact-star','0139':'ground-ring',
+ '0141':'smoke','0142':'leaf-symbol','0145':'aura','0146':'bomb-visual',
+ '0147':'prop-box','0159':'impact-star','0160':'sword-effect','0161':'fire-ring',
+ '0163':'magic-burst','0164':'magic-orb','0165':'glow','0167':'die-result-numeral',
+ '0170':'HUD-icon'};
 const entries=Object.entries(window.ORIGINAL_LEAF_OBS_FRAMES||{}).sort((a,b)=>a[0].localeCompare(b[0]));
-document.getElementById('count').textContent=String(entries.length);
+document.getElementById('count').textContent=entries.length+' OBS 소스 (이미지로 확인한 효과·HUD '+Object.keys(nonActors).length+'종 포함)';
 function display(onlyChecked){
  const body=document.getElementById('rows');body.replaceChildren();
  for(const [id,data] of entries){
@@ -38,8 +45,9 @@ function display(onlyChecked){
   }
   const status=document.createElement('td'),candidate=data.frames.some(f=>f.index===25)?25:null;
   const audited=Object.prototype.hasOwnProperty.call(checked,id);
+  const nonActor=nonActors[id];
   status.className=audited?'good':'warn';
-  status.textContent=audited?'육안 비교 · 기본 '+checked[id]:'미검증 · '+(candidate!==null?'25번 원본 정면 후보':'정면 원본 후보 미확보');
+  status.textContent=nonActor?'원본 효과·HUD / 체스맨 아님 · '+nonActor:audited?'육안 비교 · 기본 '+checked[id]:'미검증 · '+(candidate!==null?'25번 원본 정면 후보':'정면 원본 후보 미확보');
   tr.append(status);body.append(tr);
  }
 }
