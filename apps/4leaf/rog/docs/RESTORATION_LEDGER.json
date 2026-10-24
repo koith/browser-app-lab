@@ -5934,6 +5934,22 @@
       "refs": [
         "https://github.com/koith/browser-app-lab/actions/runs/40072750723"
       ]
+    },
+    {
+      "seq": 245,
+      "date": "2026-10-24",
+      "type": "VERIFIED_ORIGINAL_DICE_DLL_PE_READONLY_FORENSICS_NO_NATIVE_3D_BODY",
+      "requestId": "REQ-20261024-002",
+      "taskIds": [
+        "P0-DICE",
+        "DIE-01",
+        "DIE-02"
+      ],
+      "details": "After substantive central native ChatTown owner moderation PR190 and live seat reconciliation PR192, actual original Dice.dll forensic source carried over from PR191 without losing any code or prior ledger history. Original SHA1 86526d89679ae39b85fe9808da97ad871b7888d9 installer processed in GitHub Actions #40072513335 SUCCESS; Dice.dll SHA256 0987e96cb2d954b98e5815396874488d3bd50560f364df3bcacb588024270060 is PE32 with 3 sections and zero enumerable PE resources. Safe static parser and workflow produce original PE resource/section signature artifact without executing Windows original. Actual 3D D4/D6 vertices, UVs, textures and outcome FPS/physics STILL MISSING; compiled procedural .text/.data or 2003/2004 source not yet decoded. Do not substitute 26 map MVE, 2D roll.spr or source Archive query for original die model. Original source priority remains P0 in ledger, statuses unchanged.",
+      "refs": [
+        "https://github.com/koith/browser-app-lab/actions/runs/40072513335"
+      ],
+      "evidence": "apps/4leaf/rog/tools/probe-original-dice-dll-resources.py; apps/4leaf/rog/docs/ORIGINAL_DICE_DLL_PE_FORENSICS_2026-10-24.md"
     }
   ]
 }
