@@ -6,6 +6,8 @@
  */
 const assert=require('node:assert/strict');
 const {chromium}=require('playwright');
+const path=require('node:path');
+const {readFileSync}=require('node:fs');
 (async()=>{
  const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
  const page=await browser.newPage({viewport:{width:1280,height:920},serviceWorkers:'block'});
@@ -64,17 +66,19 @@ const {chromium}=require('playwright');
   assert.ok(sourceCoverage.with25>=60);
   // Visual before/after comparison: archived native 2004 screenshot next
   // to actual running board + source character sheet via single QA artifact.
-  await page.evaluate(()=>{
+  const originalBattle='data:image/jpeg;base64,'+
+   readFileSync(path.resolve(__dirname,'../../assets/battle.jpg')).toString('base64');
+  await page.evaluate(reference=>{
    const wrap=document.createElement('div');
    wrap.id='obs-visual-audit';
    wrap.style.cssText='position:fixed;left:0;top:0;z-index:99999;width:100vw;height:100vh;'+
     'display:flex;gap:14px;align-items:flex-start;background:#17132e;padding:18px;color:white';
-   const original=new Image();original.src='../assets/battle.jpg';
+   const original=new Image();original.src=reference;
    original.style.cssText='width:46vw;max-width:640px;object-fit:contain';
    const live=document.getElementById('game').cloneNode(true);
    live.style.cssText='position:relative!important;width:46vw;height:600px;display:block';
    wrap.append(original,live);document.body.append(wrap);
-  });
+  },originalBattle);
   await page.waitForFunction(()=>document.querySelector('#obs-visual-audit>img')?.naturalWidth===800,
    null,{timeout:12000});
   await page.screenshot({path:'leaf-obs-original-battle-vs-front-native-web.png'});
