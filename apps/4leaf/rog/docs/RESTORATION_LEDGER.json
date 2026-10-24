@@ -5903,6 +5903,20 @@
         "CHT-05"
       ],
       "details": "Correction to prior seq241 (append-only): original #make-room was detached by socialChat rendering so an onclick handler was not reachable. Removed dead placeholder element and handler from game.js/index.html rather than representing it as new live room feature. New Playwright QA exercises ACTUAL source-native #social-new-room after district navigation and demonstrates real original ownerdialog room creation. The original row 241 is preserved without alteration, this append clarifies actual outcome."
+    },
+    {
+      "seq": 243,
+      "date": "2026-10-24",
+      "type": "FUNCTIONAL_OWNER_MODERATION_CODE_PENDING_BROWSER_QA",
+      "requestId": "REQ-20261024-002",
+      "taskIds": [
+        "P0-CHAT",
+        "CHT-04",
+        "CHT-05",
+        "P0-RELEASE"
+      ],
+      "details": "After actual PR189 native chat scroll and nonactor source sprite correction, separate genuine game/server functional work adds to central.cjs POST /api/rooms/:id/transfer and /kick. Owner server session+room membership only, target must be another live room member; update ownerId+ownerTokenHash persistently for reload; kicked member session.roomId revoked immediately, private room snapshot/messages denied, short 120-second rejoin exclusion; future clock cleanup; source native seat reservations remain server authoritative. central-client.js exposes authorized transfer/kick; social-chat.js actual Registry actor context menu provides text-labeled permission actions rather than falsely assigning unknown original ringbtn sprite rows, uses central snapshot DTO to grant/revoke original room owner toolbar and server kicked members leave. Added Node security E2E for owner/unauthorized user, transfer, kick, expiry, reload, no overlapping seats and two distinct Chromium contexts exercising UI. Source original 2004 menu glyph mapping and persistent ban semantics NOT verified, do not claim complete; beta19/PWA106 candidate pending CI/PR/Pages. 2002 original 3D D4/D6 still missing; manual 25 OBS VFX classification remains; all 58 task statuses unchanged.",
+      "evidence": "apps/4leaf/rog/server/central.cjs; apps/4leaf/rog/server/central.test.cjs; apps/4leaf/rog/central-client.js; apps/4leaf/rog/social-chat.js; apps/4leaf/rog/tests/central-browser.cjs"
     }
   ]
 }
