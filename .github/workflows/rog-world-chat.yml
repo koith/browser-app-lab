@@ -152,6 +152,8 @@ jobs:
             cat /tmp/4leaf-http.log
             exit 1
           fi
+      - name: Prove original ChatTown make-room entry creates a real source UI room instead of dead WEB modal
+        run: node apps/4leaf/rog/tests/chat-original-create-entry.cjs
       - name: Prove installed phone PWA replaces stale dice scripts online and stays functional offline
         run: node apps/4leaf/rog/tests/pwa-dice-upgrade.cjs
       - name: Navigate true source DMP/TIS terrain and warp connections without changing gameplay

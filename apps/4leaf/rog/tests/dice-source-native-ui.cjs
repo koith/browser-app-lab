@@ -64,18 +64,51 @@ const path=require('node:path');
   assert.equal(controls.length,2);
   assert.ok(controls.every(c=>c.source==='IMG/scrollButton.bmp'&&
    c.image.includes('IMG/scrollbutton.png')&&c.rect[0]===16&&c.rect[1]===16));
-  await page.evaluate(()=>{
-   const log=document.getElementById('chat-log');
+  // The former fixture directly appended 44 synthetic DOM children. A
+  // published PWA can re-render chat, invalidating that scroll state between
+  // waitForFunction and a Playwright enabled click. Feed the REAL game chat
+  // form instead: no fake messages and no scroll-bar source replacement.
+  const history=await page.evaluate(()=>{
+   const log=document.getElementById('chat-log'),
+    form=document.getElementById('chat-form'),
+    input=document.getElementById('message');
    for(let i=0;i<44;i++){
-    const line=document.createElement('div');
-    line.textContent='Browser fixture line '+i;
-    log.append(line);
+    input.value='2002 원본 IMG 채팅 이력 '+i+' · '+('대화 '.repeat(8));
+    form.requestSubmit();
    }
+   // New live messages may legitimately follow the latest; the user then
+   // deliberately scrolls to the older record via wheel/scrollbar.
    log.scrollTop=0;
+   window.__LEAF_NATIVE_DICE_CHAT_SCROLL__.refresh();
+   return {messages:log.children.length,top:log.scrollTop,
+    height:log.scrollHeight,client:log.clientHeight,
+    enabled:window.__LEAF_NATIVE_DICE_CHAT_SCROLL__.getState()};
   });
-  await page.waitForFunction(()=>!document.querySelector('.leaf-dice-chat-scroll[data-direction="down"]').disabled);
-  assert.equal(await up.isDisabled(),true,'at actual beginning of real chat history up is disabled');
-  await down.click();
+  assert.ok(history.messages>=40,'real game chat form must append actual messages');
+  assert.ok(history.height-history.client>60,
+   'real transcript must overflow before a down arrow can be clickable: '+
+   JSON.stringify(history));
+  assert.equal(history.top,0,'user intentionally opened oldest message');
+  await page.waitForFunction(()=>{
+   const log=document.getElementById('chat-log'),
+    down=document.querySelector('.messenger .leaf-dice-chat-scroll[data-direction="down"]');
+   return log.scrollTop<2&&log.scrollHeight-log.clientHeight>60&&
+    down&&!down.disabled;
+  },null,{timeout:10000});
+  assert.equal(await up.isDisabled(),true,'native up arrow inactive at oldest line');
+  const preClick=await page.evaluate(()=>{
+   const log=document.getElementById('chat-log');
+   window.__LEAF_NATIVE_DICE_CHAT_SCROLL__.refresh();
+   return {top:log.scrollTop,max:log.scrollHeight-log.clientHeight,
+    enabled:window.__LEAF_NATIVE_DICE_CHAT_SCROLL__.getState()};
+  });
+  assert.equal(preClick.top,0,'reader stays at oldest line before actual button click');
+  assert.equal(preClick.enabled.downEnabled,true,
+   'real overflow must enable the native down button: '+JSON.stringify(preClick));
+  // A direct user click is required, not element.evaluate(click) bypassing
+  // native disabled/pointer semantics. Fail with a clear short error if the
+  // live browser changes its scroll geometry.
+  await down.click({timeout:8000});
   const current=await page.evaluate(()=>window.__LEAF_NATIVE_DICE_CHAT_SCROLL__.getState());
   assert.ok(current.scrollTop>0,'clicking archive button actually scrolls shared game chat');
   // True CHAT form message, not direct DOM manipulation: when a player has

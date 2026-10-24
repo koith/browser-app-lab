@@ -64,6 +64,10 @@ jobs:
         run: node apps/4leaf/rog/tests/dice-obs-contiguous-source-motion.cjs
       - name: Validate visually reviewed 2002 OBS front-facing default actors
         run: node apps/4leaf/rog/tests/obs-front-source-review.cjs
+      - name: Validate published-failure original IMG scrollbar with real chat-form messages
+        run: node apps/4leaf/rog/tests/dice-source-native-ui.cjs
+      - name: Reject source OBS HUD FX and dice numerals as playable chessmen
+        run: node apps/4leaf/rog/tests/obs-source-nonactor-role.cjs
       - name: Genuine winBattle podium, independent OBS actors and actual dice sum
         run: node apps/4leaf/rog/tests/dice-battle-podium.cjs
       - name: Original IMG.pak event sprites on real game events

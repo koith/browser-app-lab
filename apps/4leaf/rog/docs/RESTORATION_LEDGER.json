@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "project": "4LEAF 원작 복원 웹앱",
   "canonicalFile": "apps/4leaf/rog/docs/RESTORATION_LEDGER.json",
-  "updatedAt": "2026-10-23",
+  "updatedAt": "2026-10-24",
   "sourceOfTruth": "Git 저장소의 이 JSON과 커밋 이력. 과거 챗 대화는 기록 근거이지 진행 상태의 원본 데이터가 아님.",
   "operatingRule": "새 요청 즉시 작업 등록 → open 목록 조회 → 실제 수정 → 원본 근거/코드/브라우저/배포 검증 → 검증 증거와 함께 상태 전이. 부분 구현을 원작 완성으로 표시 금지.",
   "statusDefinitions": {
@@ -1106,6 +1106,24 @@
         "CHT-07",
         "P0-RELEASE",
         "QA-03"
+      ]
+    },
+    {
+      "id": "REQ-20261024-002",
+      "date": "2026-10-24",
+      "origin": "2026-10-24 사용자 개발 재개 지시",
+      "text": "Continue production development from merged PRs #186-188 and main 82cc7309. Prioritize failed published ChatRoom #40054075479: native IMG scroll down button disabled after synthetic test fixture, distinguish real UI vs test. Extend OBS source visual role and front/back identification beyond initial 9; recover true original 3D D4/D6 assets rather than CSS; complete real distinct browser ChatTown create/join/seat/move/owner/kick/password/reconnect; replace temporary UI with archived 2002 source assets. Do not repeat already green PR/QAs. Game code+archive reference+browser QA+PR merge+Pages same SHA and ledger evidence; keep unresolved work open.",
+      "taskIds": [
+        "P0-CHAT",
+        "CHT-04",
+        "QA-03",
+        "P0-ACTOR",
+        "ACT-01",
+        "ACT-03",
+        "ACT-04",
+        "P0-DICE",
+        "DIE-01",
+        "P0-RELEASE"
       ]
     }
   ],
@@ -5816,6 +5834,75 @@
       ],
       "details": "Actual central ChatTown backend now atomically reserves one of twelve original scene-relative room seats per original background in server/central.cjs for concurrent real `/join` and `/presence`. Old local code only made overlapping peers LOOK apart in DOM while server accepted identical coordinates; now server returns authoritative position/seat and ignores conflicting requested spot. `social-chat.js` receives server response and snaps actual real Registry figure to that coordinate, guards stale asynchronous responses. Real Node server test covers two distinct authenticated tokens concurrently joining/touching same seat, leaving and rejoining; two independent Chromium browser contexts test concurrent original scene clicks, positions, messages, actual owner, secret room, private admission and reload. beta17/PWA v104 candidate. Original 2002 EXE-native seat coordinates still inferred; 2004 room-master transfer/kick/further moderation NOT implemented; do not mark final CHT/P0 DONE. Exact-SHA Pages and QA pending.",
       "evidence": "apps/4leaf/rog/server/central.cjs; apps/4leaf/rog/social-chat.js; apps/4leaf/rog/server/central.test.cjs; apps/4leaf/rog/tests/central-browser.cjs"
+    },
+    {
+      "seq": 238,
+      "date": "2026-10-24",
+      "type": "PUBLIC_CHAT_QA_REAL_FORM_TEST_FIX_PENDING_REDEPLOY",
+      "requestId": "REQ-20261024-002",
+      "taskIds": [
+        "P0-CHAT",
+        "QA-03",
+        "P0-RELEASE"
+      ],
+      "details": "Published ChatRoom QA #40054075479 failure at tests/dice-source-native-ui.cjs:78: source-original down button exists but disabled. Test appended 44 synthetic DOM elements rather than actual chat; caused incorrect scroll state assumptions. Changed test to submit 44 genuine user chat forms, assert actual scrollHeight/clientHeight and top, require button enabled from source native scroll logic before physical Playwright click and preserve reader position on genuine next message; diagnostic timeouts now short. Native source IMG/scrollButton.bmp buttons and real game chat handlers preserved. Browser QA, merge and Pages pending."
+    },
+    {
+      "seq": 239,
+      "date": "2026-10-24",
+      "type": "OBS_ORIGINAL_SOURCE_ROLE_AUDIT_25_NON_ACTORS",
+      "requestId": "REQ-20261024-002",
+      "taskIds": [
+        "P0-ACTOR",
+        "ACT-01",
+        "ACT-03",
+        "ACT-04"
+      ],
+      "details": "MANUAL original PNG visual audit proved many alleged 92 2002 OBS chessmen are actual spell effects, overlays, HUD icons, prop items and rolling result numerals. 25 verified IDs (0096,0097,0098,0100,0125,0128,0133,0134,0136,0137,0138,0139,0141,0142,0145,0146,0147,0159,0160,0161,0163,0164,0165,0167,0170) must NOT be displayed as full-bodied original warriors. Actual genesis-chessman-actors.js now excludes only these visually verified nonactors from actor sprites, preserves all native OBS source files and shows genuine CardData static art instead; source gallery explicitly labels FX/nonbody; browser test checks 25 individual real game cards. Historically quoted 92 recovered OBS ID entries does NOT mean 92 full-body chessmen; remaining candidates still require per-ID role/direction audit, historical pose table/FPS absent. Do not mark full ACT done. Source-image examples 1134 DICE ATTACK logo, 1137 red hex overlay, 1160 sword, 1167 die numeral, 1096 magic orb; source identical byte files retained."
+    },
+    {
+      "seq": 240,
+      "date": "2026-10-24",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261024-002",
+      "taskIds": [
+        "P0-CHAT",
+        "CHT-04",
+        "QA-03",
+        "P0-ACTOR",
+        "ACT-01",
+        "ACT-03",
+        "ACT-04",
+        "P0-DICE",
+        "DIE-01",
+        "P0-RELEASE"
+      ],
+      "details": "User 2026-10-24 request registered and preserved; priority native ChatRoom published QA + original source OBS actor-vs-FX role + actual die source and chat server features."
+    },
+    {
+      "seq": 241,
+      "date": "2026-10-24",
+      "type": "FUNCTIONAL_ORIGINAL_CHAT_ROOM_CREATE_ENTRY_PENDING_BROWSER_ACCEPTANCE",
+      "requestId": "REQ-20261024-002",
+      "taskIds": [
+        "P0-CHAT",
+        "CHT-03",
+        "CHT-05",
+        "P0-RELEASE"
+      ],
+      "details": "Actual existing original ChatTown `#make-room` UI button was a dead click that opened WEB modal 'local reproduction only' while the original `ChatRoom/ownerdialog.png`-backed real room create engine was already implemented. game.js now calls existing real social ChatTown native district selection and ownerdialog submission instead of a fake apology. `tests/chat-original-create-entry.cjs` launches live Chromium, invokes the existing create entry, validates real name/capacity/password native dialog and real room entry; gated by `.github/workflows/rog-world-chat.yml`. Source UI bytes preserved; client room-owner handoff/kick, original source total authenticity still open; do not mark CHT done."
+    },
+    {
+      "seq": 242,
+      "date": "2026-10-24",
+      "type": "EVIDENCE_CORRECTION",
+      "requestId": "REQ-20261024-002",
+      "taskIds": [
+        "P0-CHAT",
+        "CHT-03",
+        "CHT-05"
+      ],
+      "details": "Correction to prior seq241 (append-only): original #make-room was detached by socialChat rendering so an onclick handler was not reachable. Removed dead placeholder element and handler from game.js/index.html rather than representing it as new live room feature. New Playwright QA exercises ACTUAL source-native #social-new-room after district navigation and demonstrates real original ownerdialog room creation. The original row 241 is preserved without alteration, this append clarifies actual outcome."
     }
   ]
 }

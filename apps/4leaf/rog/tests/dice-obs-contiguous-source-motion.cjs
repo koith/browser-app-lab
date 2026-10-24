@@ -24,7 +24,7 @@ const {chromium}=require('playwright');
   await page.locator('#start-game').click();
   await page.waitForSelector('#game:not(.hidden)');
   // These four authentic source members contain every original 0..7 packet.
- const ids=['0046','0061','0064','0137'];
+ const ids=['0046','0061','0064','0087'];
   const results=[];
   for(const id of ids){
    const setup=await page.evaluate(id=>{
@@ -190,6 +190,23 @@ const {chromium}=require('playwright');
    return {rig:a.dataset.actorRig,obs:!!window.ORIGINAL_LEAF_OBS_FRAMES['0091'],
     fallback:a.querySelector('.leaf-chess-original-card-fallback')?.getAttribute('src')};
   });
+  // OBS 1137 is the actual red hex hit-area FX bitmap, *not* a
+  // human chessman. Preserve its recovered PNG in the source gallery,
+  // but in live play it must never replace a source character body.
+  const nonBody=await page.evaluate(()=>{
+   const m=window.__ROG_TEST__.getMatch();
+   m.players[0].team[0]='c_0137';
+   window.__ROG_TEST__.drawGame();
+   const p=document.querySelector('#board-pawns .board-pawn[data-id="0"]');
+   return {role:p.dataset.originalObsMemberRole,rig:p.dataset.actorRig,
+    original:!!window.ORIGINAL_LEAF_OBS_FRAMES['0137'],
+    effect:window.__LEAF_GENESIS_ACTORS__.getState().nativeObsEffectMembers['0137'],
+    fallback:p.querySelector('.leaf-chess-original-card-fallback')?.getAttribute('src')};
+  });
+  assert.equal(nonBody.original,true,'keep source effect pixels for real hex VFX');
+  assert.equal(nonBody.effect,'hex-overlay');
+  assert.equal(nonBody.rig,'original-card-portrait-fallback');
+  assert.ok(nonBody.fallback.includes('original/CardData/'));
   assert.equal(missing.rig,'original-card-portrait-fallback');
   assert.equal(missing.obs,false);
   assert.ok(missing.fallback.includes('original/CardData/'));
