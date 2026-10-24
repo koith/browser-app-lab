@@ -179,7 +179,7 @@
   const data={v:1,from:tabId,...packet};
   try{dataChannel.send(JSON.stringify(data))}catch{}
  }
- let centralPresenceRequest=0;
+ let centralPresenceRequest=0,centralPresenceSettled=0;
  function presence(announce=true){
   const self=compactPresence();
   if(announce&&!central.enabled){sendLocal({kind:'presence',peer:self});sendRTC({kind:'presence',peer:self})}
@@ -187,6 +187,7 @@
    const roomId=state.roomId,request=++centralPresenceRequest;
    central.presence({nick:self.nick,avatar:self.avatar,facing:self.facing,position:self.position})
     .then(reply=>{
+     if(request===centralPresenceRequest)centralPresenceSettled=request;
      // The server arbitrates simultaneous real clients, not the last
      // CSS position applied by one browser. Earlier /presence replies
      // cannot overwrite a newer click or a new room's actual seat.
@@ -197,7 +198,10 @@
      if(state.position.x===pos.x&&state.position.y===pos.y)return;
      state.position={x:pos.x,y:pos.y};
      renderOccupants();
-    }).catch(e=>console.warn('ChatTown presence:',e.message));
+    }).catch(e=>{
+     if(request===centralPresenceRequest)centralPresenceSettled=request;
+     console.warn('ChatTown presence:',e.message);
+    });
   }
   updateCounts();
  }
@@ -1496,7 +1500,18 @@
     for(const [id,p] of state.peers)if(p.source==='central')state.peers.delete(id);
     if(event.roomId===state.roomId&&state.view==='room'&&central.joinedId===state.roomId){
      for(const person of event.peers||[]){
-      if(person.id===central.id)continue;
+      if(person.id===central.id){
+       // An actual two-browser concurrent click can resolve after the
+       // caller has already shown its requested local snap. The server's
+       // session seat is authoritative; a later snapshot repairs any
+       // mismatched local position. Do not undo an in-flight newer click.
+       if(centralPresenceSettled===centralPresenceRequest&&
+          Number.isFinite(person.position?.x)&&Number.isFinite(person.position?.y)&&
+          (state.position.x!==person.position.x||state.position.y!==person.position.y)){
+        state.position={x:person.position.x,y:person.position.y};
+       }
+       continue;
+      }
       state.peers.set(person.id,{id:person.id,nick:safe(person.nick,12),source:'central',
        scope:'room:'+state.roomId,roomId:state.roomId,avatar:Number(person.avatar)||0,
        facing:person.facing===-1?-1:1,position:person.position,last:now()});

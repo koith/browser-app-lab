@@ -5917,6 +5917,23 @@
       ],
       "details": "After actual PR189 native chat scroll and nonactor source sprite correction, separate genuine game/server functional work adds to central.cjs POST /api/rooms/:id/transfer and /kick. Owner server session+room membership only, target must be another live room member; update ownerId+ownerTokenHash persistently for reload; kicked member session.roomId revoked immediately, private room snapshot/messages denied, short 120-second rejoin exclusion; future clock cleanup; source native seat reservations remain server authoritative. central-client.js exposes authorized transfer/kick; social-chat.js actual Registry actor context menu provides text-labeled permission actions rather than falsely assigning unknown original ringbtn sprite rows, uses central snapshot DTO to grant/revoke original room owner toolbar and server kicked members leave. Added Node security E2E for owner/unauthorized user, transfer, kick, expiry, reload, no overlapping seats and two distinct Chromium contexts exercising UI. Source original 2004 menu glyph mapping and persistent ban semantics NOT verified, do not claim complete; beta19/PWA106 candidate pending CI/PR/Pages. 2002 original 3D D4/D6 still missing; manual 25 OBS VFX classification remains; all 58 task statuses unchanged.",
       "evidence": "apps/4leaf/rog/server/central.cjs; apps/4leaf/rog/server/central.test.cjs; apps/4leaf/rog/central-client.js; apps/4leaf/rog/social-chat.js; apps/4leaf/rog/tests/central-browser.cjs"
+    },
+    {
+      "seq": 244,
+      "date": "2026-10-24",
+      "type": "FUNCTIONAL_CENTRAL_2_BROWSER_SEAT_RACE_CORRECTION_PENDING_ACCEPTANCE",
+      "requestId": "REQ-20261024-002",
+      "taskIds": [
+        "P0-CHAT",
+        "CHT-03",
+        "CHT-04",
+        "P0-RELEASE"
+      ],
+      "details": "Live central ChatTown two-browser E2E sporadically failed on research-only PR191 #40072750723 at `central-browser.cjs:65`: server-authoritative API seat tests passed but local user desired coordinates could differ until later poll; previous `snapshot` skipped the current person entirely. Actual social-chat.js now synchronizes LOCAL self actor position from authoritative `snapshot.peers` after newest `/presence` request settles and re-renders original Registry seats; guards in-flight newer clicks against stale snapshot override. Existing 2-real-browser regression strengthened to require unique actual DOM source seats AND distinct logical positions before acceptance. Root issue client/server reconciliation race; not simply increasing test timeout. beta20/PWA107 candidate. Work is partial, EXE historical seat placement and multiaccount identity still pending; 58 original task statuses unchanged.",
+      "evidence": "apps/4leaf/rog/social-chat.js; apps/4leaf/rog/tests/central-browser.cjs",
+      "refs": [
+        "https://github.com/koith/browser-app-lab/actions/runs/40072750723"
+      ]
     }
   ]
 }
