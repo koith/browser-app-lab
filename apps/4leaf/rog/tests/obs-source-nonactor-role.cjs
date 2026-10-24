@@ -21,7 +21,7 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict');
   await page.waitForSelector('#game:not(.hidden)');
   const native=await page.evaluate(()=>window.__LEAF_GENESIS_ACTORS__.getState());
   assert.equal(Object.keys(native.nativeObsEffectMembers).length,25);
-  const originals=Object.keys(window.ORIGINAL_LEAF_OBS_FRAMES||{});
+  const originals=await page.evaluate(()=>Object.keys(window.ORIGINAL_LEAF_OBS_FRAMES||{}));
   for(const id of ['0096','0097','0098','0100','0125','0128',
     '0133','0134','0136','0137','0138','0139','0141','0142',
     '0145','0146','0147','0159','0160','0161','0163','0164','0165','0167','0170']){
