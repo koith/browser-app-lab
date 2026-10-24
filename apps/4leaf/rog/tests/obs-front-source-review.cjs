@@ -75,6 +75,8 @@ const {chromium}=require('playwright');
    live.style.cssText='position:relative!important;width:46vw;height:600px;display:block';
    wrap.append(original,live);document.body.append(wrap);
   });
+  await page.waitForFunction(()=>document.querySelector('#obs-visual-audit>img')?.naturalWidth===800,
+   null,{timeout:12000});
   await page.screenshot({path:'leaf-obs-original-battle-vs-front-native-web.png'});
   assert.deepEqual(errors,[]);
   console.log('ORIGINAL OBS VISUALLY REVIEWED FRONT IDLE PASS '+
