@@ -1743,21 +1743,7 @@ function init(){installBoardControls();installNativeDiceMenu();
    chat('매직카덴',c.name+' 카드 판매 · '+gp.toLocaleString()+' GP (임시 웹 판매 규칙).','system');
    sfx(600);
   }},{label:'취소'}]);
-};$('rename').onclick=()=>{const div=document.createElement('div');div.textContent='사용할 닉네임을 입력하세요.';const input=document.createElement('input');input.maxLength=12;input.value=profile.name;div.append(document.createElement('hr'),input);modal('4LEAF 별명 변경',div,[{label:'변경',primary:true,run:()=>{if(!input.value.trim())return;profile.name=input.value.trim().slice(0,12);profileUI();buildPeople();if($('rog-real-user'))$('rog-real-user').textContent='♧ '+profile.name+' (내 기기)';if(match&&!match.finished)match.players[0].name=profile.name;chat('SYSTEM','닉네임이 '+profile.name+'(으)로 변경되었습니다.','system')}},{label:'취소'}])};$('audio').onclick=()=>{soundOn=!soundOn;syncMusic();log(soundOn?'원작 배경음악/효과음 켜짐':'배경음악/효과음 꺼짐');sfx(650)};$('help').onclick=()=>navigate('help-screen');$('make-room').onclick=()=>{
- const social=window.__LEAF_SOCIAL__;
- // This original town entry existed but previously opened a fake "local
- // reproduction only" apology despite a FUNCTIONAL source-native ChatRoom
- // owner dialog and actual central create/join/secret service being present.
- // Enter the genuine active district and invoke its real dialog instead.
- if(!social?.openRegion||!social.getState)return;
- const region=social.getState().region==='south'?'south':'north';
- social.openRegion(region);
- navigate('rooms');
- const areas=[...document.querySelectorAll('#rooms .social-district-hotspot')];
- const district=areas[3]||areas[0];
- if(district)district.click();
- document.querySelector('#social-new-room')?.click();
-};$('chat-form').onsubmit=e=>{e.preventDefault();const input=$('message'),message=input.value.trim();input.value='';if(!message)return;chat(profile.name,message);if(window.__LEAF_NET__?.connected&&match?.mode==='network')window.__LEAF_NET__.send({type:'chat',who:profile.name,text:message});sfx(480);};const list=$('online-list');list.replaceChildren();const selfUser=document.createElement('div');selfUser.id='rog-real-user';selfUser.textContent='♧ '+profile.name+' (내 기기)';list.append(selfUser);setInterval(()=>{$('clock').textContent=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})},12000);$('clock').textContent=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});chat('SYSTEM','4LEAF Browser에 오신 것을 환영합니다.','system');chat('SYSTEM','원작 화면 재구성 · AI/로컬 대전 · 브라우저 간 직접 연결. 원작 중앙 서버는 지원하지 않습니다.','system');navigate('sky');window.__LEAF_BRIDGE__={getMatch:()=>match,getName:()=>profile.name,onState:null,
+};$('rename').onclick=()=>{const div=document.createElement('div');div.textContent='사용할 닉네임을 입력하세요.';const input=document.createElement('input');input.maxLength=12;input.value=profile.name;div.append(document.createElement('hr'),input);modal('4LEAF 별명 변경',div,[{label:'변경',primary:true,run:()=>{if(!input.value.trim())return;profile.name=input.value.trim().slice(0,12);profileUI();buildPeople();if($('rog-real-user'))$('rog-real-user').textContent='♧ '+profile.name+' (내 기기)';if(match&&!match.finished)match.players[0].name=profile.name;chat('SYSTEM','닉네임이 '+profile.name+'(으)로 변경되었습니다.','system')}},{label:'취소'}])};$('audio').onclick=()=>{soundOn=!soundOn;syncMusic();log(soundOn?'원작 배경음악/효과음 켜짐':'배경음악/효과음 꺼짐');sfx(650)};$('help').onclick=()=>navigate('help-screen');$('chat-form').onsubmit=e=>{e.preventDefault();const input=$('message'),message=input.value.trim();input.value='';if(!message)return;chat(profile.name,message);if(window.__LEAF_NET__?.connected&&match?.mode==='network')window.__LEAF_NET__.send({type:'chat',who:profile.name,text:message});sfx(480);};const list=$('online-list');list.replaceChildren();const selfUser=document.createElement('div');selfUser.id='rog-real-user';selfUser.textContent='♧ '+profile.name+' (내 기기)';list.append(selfUser);setInterval(()=>{$('clock').textContent=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})},12000);$('clock').textContent=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});chat('SYSTEM','4LEAF Browser에 오신 것을 환영합니다.','system');chat('SYSTEM','원작 화면 재구성 · AI/로컬 대전 · 브라우저 간 직접 연결. 원작 중앙 서버는 지원하지 않습니다.','system');navigate('sky');window.__LEAF_BRIDGE__={getMatch:()=>match,getName:()=>profile.name,onState:null,
  receiveMatch:remote=>{if(window.__LEAF_NET__?.role!=='guest'||!remote||!MAPS[remote.map])return;
    match=remote;busy=false;
    try{localStorage.setItem('rog_match',JSON.stringify(match))}catch{}
