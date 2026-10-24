@@ -44,7 +44,10 @@
  // horizontally mirrored or web-generated character.
  const AUDITED_FRONT_SOURCE=Object.freeze({
   '0040':25,'0042':25,'0043':25,'0044':25,
-  '0045':18,'0046':25,'0048':25,'0061':25,'0064':25
+  '0045':18,'0046':25,'0048':25,'0049':25,
+  '0051':25,'0052':25,'0053':25,'0054':25,'0055':25,
+  '0056':25,'0058':25,'0059':25,'0060':25,'0061':25,
+  '0062':25,'0064':25
  });
  function frontFacingSource(native,id){
   const available=native?.frames||[];

@@ -25,7 +25,9 @@ const {readFileSync}=require('node:fs');
   await page.locator('#start-game').click();
   await page.waitForSelector('#game:not(.hidden)');
   const verified={'0040':25,'0042':25,'0043':25,'0044':25,'0045':18,
-   '0046':25,'0048':25,'0061':25,'0064':25};
+   '0046':25,'0048':25,'0049':25,'0051':25,'0052':25,
+   '0053':25,'0054':25,'0055':25,'0056':25,'0058':25,
+   '0059':25,'0060':25,'0061':25,'0062':25,'0064':25};
   const proofs=[];
   for(const [id,expected] of Object.entries(verified)){
    const state=await page.evaluate(id=>{
