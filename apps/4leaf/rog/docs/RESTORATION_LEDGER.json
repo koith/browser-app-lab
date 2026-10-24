@@ -1086,6 +1086,27 @@
         "P0-RELEASE",
         "QA-03"
       ]
+    },
+    {
+      "id": "REQ-20261024-001",
+      "date": "2026-10-24",
+      "origin": "user",
+      "text": "PRIORITY CHANGE: First physically examine recovered original 2002 OBS PNGs and correct default Dice chessmen faces (do not assume frame 0 forward). Second investigate ACTUAL original D4/D6 models/texture/animation instead of endlessly polishing inferred CSS and log exact missing source data. Third verify two distinct browsers/accounts for authoritative ChatTown room create/join/chat/seat/snap/owner/exit/reconnect and repair. Fourth remove provisional web UI when actual native sprites already recovered; original sources/screens and native behavior must drive decisions. Implement code/visual comparison/browser QA/PR merge/Pages. Retain historical source and all earlier priorities; no unsupported done.",
+      "taskIds": [
+        "P0-ACTOR",
+        "ACT-03",
+        "ACT-04",
+        "P0-DICE",
+        "DIE-01",
+        "DIE-02",
+        "P0-CHAT",
+        "CHT-03",
+        "CHT-04",
+        "CHT-05",
+        "CHT-07",
+        "P0-RELEASE",
+        "QA-03"
+      ]
     }
   ],
   "tasks": [
@@ -5714,6 +5735,42 @@
         "https://github.com/koith/browser-app-lab/actions/runs/39888821915",
         "https://github.com/koith/browser-app-lab/actions/runs/39888820965"
       ]
+    },
+    {
+      "seq": 233,
+      "date": "2026-10-24",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261024-001",
+      "taskIds": [
+        "P0-ACTOR",
+        "ACT-03",
+        "ACT-04",
+        "P0-DICE",
+        "DIE-01",
+        "DIE-02",
+        "P0-CHAT",
+        "CHT-03",
+        "CHT-04",
+        "CHT-05",
+        "CHT-07",
+        "P0-RELEASE",
+        "QA-03"
+      ],
+      "details": "Priority changed: ACT-03 chessman native source facing to be addressed before inferred D4 CSS and unrelated QA; all user obligations retained."
+    },
+    {
+      "seq": 234,
+      "date": "2026-10-24",
+      "type": "FUNCTIONAL_OBS_FACING_CODE_PENDING_VISUAL_BROWSER_QA",
+      "requestId": "REQ-20261024-001",
+      "taskIds": [
+        "P0-ACTOR",
+        "ACT-03",
+        "ACT-04",
+        "P0-RELEASE"
+      ],
+      "details": "MANUALLY visually inspected genuine original PNGs (saved FLIP_TOP_BOTTOM; render CSS scaleY(-1)) from 1040/1042/1043/1044/1045/1046/1048/1061/1064 OBS frame 0 versus 18/25/30 and 2004 original screenshot apps/4leaf/assets/battle.jpg; frame 0 frequently rear/side, NOT front. Actual genesis-chessman-actors.js now selects visually audited original front-source frame 25 for 8 identified cards and source frame 18 for native 1045, eliminates previous 0..3 back-facing infinite idle turn. Other available frame-25 body sources are genuine pixels but individually UNVERIFIED front CANDIDATES (not source EXE action map); 30+ with no frame25 remain front-unverified. Standing native foot pivot updated to selected source frame rather than old back-facing 0. Original OBS PNG bytes untouched. Added exhaustive 92-body original 0/10/18/25/30 visual comparison gallery and 9-card real browser image/source-metadata screenshot test. 2002 EXE directions, FPS, original camera and complete visual comparison unresolved, DO NOT mark ACT-03 or P0-ACTOR done. Candidate beta16/PWA v103; QA/PR/Pages pending.",
+      "evidence": "apps/4leaf/rog/genesis-chessman-actors.js; apps/4leaf/rog/tests/obs-front-source-review.cjs; apps/4leaf/rog/docs/obs-front-source-direction-audit.html; apps/4leaf/rog/original/OBS/animation-extra.js; apps/4leaf/assets/battle.jpg"
     }
   ]
 }
