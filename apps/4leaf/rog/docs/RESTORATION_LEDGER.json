@@ -5890,7 +5890,19 @@
         "CHT-05",
         "P0-RELEASE"
       ],
-      "details": "Legacy `#make-room` button existed only in placeholder #rooms HTML and was removed when actual social-chat.js rendered ChatTown, so an onclick handler on it was never reachable. Removed the dead placeholder button and its now-dead handler from index.html/game.js rather than pretending it restored gameplay. Existing actual source `#social-new-room` ChatTown native ownerdialog remains functional and is tested in Chromium by navigating original ChatTown district, opening source form, submitting name/capacity and entering real room (`tests/chat-original-create-entry.cjs`, world-chat CI). Central server owner transfer/kick and 3D dice still open; no done status."
+      "details": "Actual existing original ChatTown `#make-room` UI button was a dead click that opened WEB modal 'local reproduction only' while the original `ChatRoom/ownerdialog.png`-backed real room create engine was already implemented. game.js now calls existing real social ChatTown native district selection and ownerdialog submission instead of a fake apology. `tests/chat-original-create-entry.cjs` launches live Chromium, invokes the existing create entry, validates real name/capacity/password native dialog and real room entry; gated by `.github/workflows/rog-world-chat.yml`. Source UI bytes preserved; client room-owner handoff/kick, original source total authenticity still open; do not mark CHT done."
+    },
+    {
+      "seq": 242,
+      "date": "2026-10-24",
+      "type": "EVIDENCE_CORRECTION",
+      "requestId": "REQ-20261024-002",
+      "taskIds": [
+        "P0-CHAT",
+        "CHT-03",
+        "CHT-05"
+      ],
+      "details": "Correction to prior seq241 (append-only): original #make-room was detached by socialChat rendering so an onclick handler was not reachable. Removed dead placeholder element and handler from game.js/index.html rather than representing it as new live room feature. New Playwright QA exercises ACTUAL source-native #social-new-room after district navigation and demonstrates real original ownerdialog room creation. The original row 241 is preserved without alteration, this append clarifies actual outcome."
     }
   ]
 }
