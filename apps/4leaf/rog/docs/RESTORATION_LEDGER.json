@@ -6014,6 +6014,21 @@
         "https://github.com/koith/browser-app-lab/actions/runs/40073395625",
         "https://github.com/koith/browser-app-lab/actions/runs/40110997647"
       ]
+    },
+    {
+      "seq": 248,
+      "date": "2026-10-25",
+      "type": "VERIFIED_SOURCE_OBS_FX_NONACTOR_ROLE_38_PARTIAL",
+      "requestId": "REQ-20261025-001",
+      "taskIds": [
+        "P0-ACTOR",
+        "ACT-01",
+        "ACT-03",
+        "ACT-04",
+        "P0-RELEASE"
+      ],
+      "details": "Actual original source PNG visuals individually inspected OBS IDs 0099(1099) blue halo ring, 0127(1127) purple ring, 0130(1130) circle, 0131(1131) cloth/magic effect, 0135(1135) debris spray, 0140(1140) flash/projectile, 0143(1143) smoke, 0144(1144) tiny debris, 0156(1156) particles, 0158(1158) pointer hand, 0162(1162) magic globe, 0169(1169) pumpkin prop, 0171(1171) HUD/card icon; all are decoded ORIGINAL 2002 OBS source members but NOT usable original full-body Genesis actors. Increment verified NON_ACTOR_OBS mapping 25=>38 and preserve all authentic recovered PNGs; actual pawn uses original CardData portrait rather than false spell FX. 20 separately verified actual source actor fronts unchanged (from PR194), other candidate role/directions remain unresolved. Enhanced original source image gallery and source-role Playwright QA to distinguish effects. beta22/PWA109, PR/QA/Pages pending; no 58 ledger task status marked done; original D4/D6 3D mesh still missing.",
+      "evidence": "apps/4leaf/rog/genesis-chessman-actors.js; apps/4leaf/rog/docs/obs-front-source-direction-audit.html; apps/4leaf/rog/tests/obs-source-nonactor-role.cjs"
     }
   ]
 }
