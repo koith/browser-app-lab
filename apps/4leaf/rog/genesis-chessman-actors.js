@@ -11,7 +11,30 @@
  const VALID=['idle','walk','attack','hurt','victory'];
  const frames=new Map(),timeouts=new WeakMap(),states=new WeakMap();
  const sourceTimers=new WeakMap();
- const originalFor=id=>window.ORIGINAL_LEAF_OBS_FRAMES?.[id]||null;
+ // A source OBS PAK member is NOT necessarily a playable full-body actor.
+ // Pixel audit against the SHA-verified 2002 source, 2026-10-24:
+ // 1096/1097/1098/1100 are spell glows; 1125/1128 visual particles;
+ // 1133/1134 HUD symbols/logo, 1136-1139 overlay FX;
+ // 1141/1142/1145/1146/1147 atmospheric objects/weapon box/bomb;
+ // 1159-1167 are particles/weapons/roll numeral; 1170 tiny icon.
+ // Older code displayed these original *effect* frames as "chessmen",
+ // producing unreadable objects even if it picked a face-forward packet.
+ // Preserve all original OBS bytes; route ONLY visually audited effects
+ // to the honest native CardData fallback until a real actor is recovered.
+ const NON_ACTOR_OBS=Object.freeze({
+  '0096':'spell-orb','0097':'spell-ray','0098':'light-effect',
+  '0100':'lightning',
+  '0125':'particle','0128':'particle',
+  '0133':'ability-icon','0134':'DiceAttack-logo',
+  '0136':'ring-effect','0137':'hex-overlay','0138':'impact-star',
+  '0139':'ground-ring','0141':'smoke','0142':'leaf-symbol',
+  '0145':'aura','0146':'bomb-visual','0147':'prop-box',
+  '0159':'impact-star','0160':'sword-effect','0161':'fire-ring',
+  '0163':'magic-burst','0164':'magic-orb','0165':'glow',
+  '0167':'die-result-numeral','0170':'HUD-icon'
+ });
+ const originalFor=id=>Object.hasOwn(NON_ACTOR_OBS,id)?null:
+  window.ORIGINAL_LEAF_OBS_FRAMES?.[id]||null;
  const poses=['idle','walk','attack','hurt','victory'];
  // VISUALLY COMPARED against recovered original pixels, 2026-10-24.
  // Sample frame 0 is NOT a front-facing pose: original 1040/1042/1043/
@@ -282,7 +305,10 @@
    node.dataset.actorSource='CardData (OBS full-body not recovered)';
    node.dataset.actorOriginalModelRecovered='false';
    node.dataset.sourceAnimation='unavailable';
-   node.dataset.sourcePoseMapping='original-OBS-missing/CardData-original-portrait-only';
+   node.dataset.sourcePoseMapping=Object.hasOwn(NON_ACTOR_OBS,src)
+    ?'OBS-member-is-non-character-effect/CardData-fallback'
+    :'original-OBS-missing/CardData-original-portrait-only';
+   node.dataset.originalObsMemberRole=NON_ACTOR_OBS[src]||'missing-full-body';
   }
  }
  function pose(pawn,requested='idle',duration=0){
@@ -382,7 +408,8 @@
  window.__LEAF_GENESIS_ACTORS__={
   mount,pose,poseByPlayer,registerFrames,recoverAvailableOriginals,
   getState:()=>({
-   originalFullBodyFramesRecovered:[...new Set([...Object.keys(window.ORIGINAL_LEAF_OBS_FRAMES||{}),...frames.keys()])],
+   originalFullBodyFramesRecovered:[...new Set([...Object.keys(window.ORIGINAL_LEAF_OBS_FRAMES||{}),...frames.keys()])].filter(id=>!Object.hasOwn(NON_ACTOR_OBS,id)),
+   nativeObsEffectMembers:{...NON_ACTOR_OBS},
    originalFrontVisualAudited:{...AUDITED_FRONT_SOURCE},
    rendered:[...document.querySelectorAll('#board-pawns .board-pawn')].map(p=>({
     playerId:p.dataset.id,chessmanId:p.dataset.chessmanId,
