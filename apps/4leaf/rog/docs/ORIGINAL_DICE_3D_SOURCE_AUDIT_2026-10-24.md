@@ -24,3 +24,15 @@ Do not replace actual gameplay with a pasted screenshot, copied Unicode die face
 - Repository source inventory scanner updated and real verified-client GitHub Actions extraction triggered.
 - Check the most recent run under `.github/workflows/rog-obs-bulk-recovery.yml`; inspect original `4leaf-original-Dice-package-manifest` artifact for `dieBody3dInvestigation`.
 - A named candidate may prove to be an unrelated animation or binary blob. **This document does not report that an original 3D mesh has been recovered.**
+
+## Actual SHA-verified extraction result — GitHub Actions #40053447386 SUCCESS
+The original client extraction and source-inventory job **completed successfully**, not just triggered. Archived installer SHA1 `86526d89679ae39b85fe9808da97ad871b7888d9` (64,537,476 bytes) was verified.
+- Under `4Leaf_Files/Dice`, **31 files/packages** and **713 indexed PAK members**.
+- `DMP.pak`: **25 .dmo + 25 .dmp + 26 .mve** entries. These are named map/terrain MVE resources, NOT evidence of D4/D6 mesh. Treating them as die objects just because .mve is a format candidate would misrepresent the archive.
+- `IMG.pak`: **16 BMP + 14 SPR** entries, including the source `roll.spr` and `eventRoll1.spr` which are **2D UI animations**.
+- `OBS.pak` 166 native .obs; `OBS2.pak` 53; `OBS3.pak` 26 (character animation sources), `TIS.pak` 32 native 2D platform textures. Other packs are GIF, ability/character/card metadata, SND and MIDI.
+- **Only one candidate executable** in Dice area: `4Leaf_Files/Dice.dll`. Its resources / static executable tables are **NOT decoded**, not executed, and not evidence of a source die model.
+- 26 name-only 3D format candidates `DMP.pak/*.mve` are ***MAP data***, not verified body dice models. Neither D4 nor D6 original vertices/texture/physics came out of the scanned PAK index.
+- Original native D4/D6 could be programmatically rendered inside `Dice.dll`; another 2003/2004 client/patch could also differ. Neither possibility has yet been demonstrated.
+- Evidence: https://github.com/koith/browser-app-lab/actions/runs/40053447386 and its `4leaf-original-Dice-package-manifest` artifact. This result supersedes the earlier *pending* status in the section above but **does not constitute original 3D model recovery**.
+
