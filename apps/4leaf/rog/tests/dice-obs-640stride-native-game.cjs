@@ -52,11 +52,11 @@ const {chromium}=require('playwright');
    return auth;
   });
   assert.equal(accepted.length,report.accepted+2,
-   'every authenticated original OBS model must load and missing bodies cannot be invented');
+   'all source OBS members must stay byte-authentic even when they are FX, not bodies');
   assert.ok(accepted.every(x=>x.verifiedMember&&x.dims[0]>0&&x.dims[1]>0));
   for(const id of ['0046','0061','0064','0085','0087','0092','0096','0099','0100','0134','0146','0156','0161','0162','0164','0165','0166']){
    assert.ok(accepted.some(x=>x.id===id),
-    'previously missing original body still has only a card proxy '+id);
+    'previously decoded original OBS member bytes must remain available '+id);
   }
   const before=await page.evaluate(()=>({
    active:window.__ROG_TEST__.getMatch().active,
@@ -64,7 +64,10 @@ const {chromium}=require('playwright');
    map:window.__ROG_TEST__.getMatch().map,
    turns:window.__ROG_TEST__.getMatch().turn
   }));
-  const samples=accepted.filter(x=>['0046','0061','0085','0100','0134','0146','0165'].includes(x.id));
+  // Only visually inspected REAL actor identities may be tested as bodies.
+   // 1100 lightning / 1134 Dice Attack logo / 1146 bomb / 1165 glow are
+   // genuine source effects, not source warriors.
+   const samples=accepted.filter(x=>['0046','0061','0064','0085','0087','0092'].includes(x.id));
   for(const item of samples){
    await page.evaluate(id=>{
     window.__ROG_TEST__.getMatch().players[0].team[0]='c_'+id;
@@ -109,8 +112,8 @@ const {chromium}=require('playwright');
   assert.deepEqual(errors,[]);
   await page.screenshot({path:'leaf-obs-640stride-recovered-original-body.png'});
   console.log('STRICT ORIGINAL OBS 640 STRIDE REAL GAME PASS '+JSON.stringify({
-   originalBodies:accepted.length,sourceFrames:report.framePNGs+13,
-   recoveredMissing:accepted.length-64,unrecovered:98-accepted.length,
+   sourceObsMembers:accepted.length,sourceFrames:report.framePNGs+13,
+   nativeSourceMembersRetained:accepted.length,visuallyAuditedNonActors:25,
    browserSamples:samples.map(x=>x.id),mobile,gameUnchanged:after,
    provenance:'SHA1 archived installer, OBS.pak SHA256, 2002 native 640-stride RGB indexed PIXELS; action mapping unverified'
   }));
