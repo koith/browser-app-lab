@@ -194,6 +194,7 @@
    }
    const fallback=pawn.querySelector('.leaf-chess-original-card-fallback');
    if(fallback)fallback.hidden=true;
+   delete pawn.dataset.originalObsMemberRole;
    pawn.dataset.actorRig='original-obs-sprite';
    pawn.dataset.actorSource='OBS/'+native.originalMember;
    pawn.dataset.actorOriginalModelRecovered='true';
