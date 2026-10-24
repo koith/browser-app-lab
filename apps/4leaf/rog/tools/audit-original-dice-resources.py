@@ -54,6 +54,52 @@ def main():
                'archiveCount':len(results),
                'totalEntries':sum(x['memberCount'] for x in results),
                'names':[x['path'] for x in results]}}
+    # Evaluate ALL archived Dice package names, preserving exact member
+    # checksums. Filename/suffix/first bytes alone are NOT a decoded model.
+    # The genuine roll.spr/eventRoll1.spr are 2D UI control animations;
+    # they must never be counted as recovered falling D4/D6 geometry.
+    model_suffixes={'.3ds','.obj','.md2','.md3','.mdl','.mesh','.w3d',
+                    '.lwo','.x','.mve','.m3d','.skn','.ani','.anm'}
+    model_words=('dice','die','cube','tetra','d4','d6','model','mesh',
+                 'geometry','vertex','3d','poly')
+    models=[];source_binaries=[];two_dimensional_controls=[]
+    for pack in results:
+        rel=pack['path'];ext=Path(rel).suffix.lower()
+        if ext in ('.exe','.dll'):
+            source_binaries.append({'path':rel,'sha256':pack['sha256'],
+                                    'bytes':pack['bytes'],
+                                    'role':'POSSIBLE-EMBEDDED-ENGINE-NOT-REVERSE-ENGINEERED'})
+        for entry in pack['members']:
+            name=entry['name'];suffix=Path(name).suffix.lower()
+            record={'container':rel,'member':name,'bytes':entry['bytes'],
+                    'sha256':entry['sha256'],'first16':entry['first16']}
+            if name.lower() in ('roll.spr','eventroll1.spr'):
+                two_dimensional_controls.append({**record,
+                    'role':'ORIGINAL-SPR-UI-CONTROL-NOT-DIE-BODY'})
+                continue
+            if suffix in model_suffixes or any(word in name.lower() for word in model_words):
+                models.append({**record,'reason':(
+                    'FORMAT-CANDIDATE-UNVERIFIED' if suffix in model_suffixes
+                    else 'FILENAME-CANDIDATE-UNVERIFIED')})
+    evidence['dieBody3dInvestigation']={
+        'originalArchiveSha1Requirement':'86526d89679ae39b85fe9808da97ad871b7888d9',
+        'candidateCount':len(models),
+        'possible3dFiles':models,
+        'clientExecutableContainers':source_binaries,
+        'recoveredOriginal2dRollControlFrames':two_dimensional_controls,
+        'verifiedOriginalD4Mesh':False,
+        'verifiedOriginalD6Mesh':False,
+        'verifiedOriginal3dTexture':False,
+        'verifiedOriginalFallBounceKeyframes':False,
+        'missingToDeclareOriginal':'Documented member/container -> parsed vertex+face geometry, native texture material, D4/D6 per-result orientation, physics timing, and historically matching screenshot/video.',
+        'limitations':'Archive name/extension/signature is merely a candidate; EXE embedded resources and other-version clients require independent binary-format decoding and source-image acceptance.'
+    }
+    print('ORIGINAL_D4_D6_SOURCE_STATUS',json.dumps({
+      'possible3dNames':len(models),'sourceExecutables':len(source_binaries),
+      'realRollSprControls':len(two_dimensional_controls),
+      'actualD4D6BodyMeshVerified':False,
+      'modelCandidates':models[:30]
+    },ensure_ascii=False))
     target.parent.mkdir(parents=True,exist_ok=True)
     target.write_text(json.dumps(evidence,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     print('ORIGINAL_DICE_SOURCE_PACKAGES '+json.dumps(evidence['summary'],ensure_ascii=False))
