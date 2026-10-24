@@ -12,11 +12,11 @@ const {chromium}=require('playwright');
  const errors=[];page.on('pageerror',e=>errors.push(String(e)));
  try{
   await page.emulateMedia({reducedMotion:'reduce'});
-  await page.route('**/original/OBS/1045-00.png*',async route=>{
+  await page.route('**/original/OBS/1045-18.png*',async route=>{
    if(failures0045++<2)await route.fulfill({status:503,body:'transient original OBS source'});
    else await route.continue();
   });
-  await page.route('**/original/OBS/1042-00.png*',async route=>{
+  await page.route('**/original/OBS/1042-25.png*',async route=>{
    failures0042++;
    await route.fulfill({status:503,body:'offline original OBS source'});
   });
@@ -57,13 +57,15 @@ const {chromium}=require('playwright');
   assert.equal(restored.rig,'original-obs-sprite');
   assert.equal(restored.source,'OBS/1045.obs');
   assert.equal(restored.original,'true');
-  assert.ok(restored.path.startsWith('./original/OBS/1045-00.png'));
+  assert.ok(restored.path.startsWith('./original/OBS/1045-18.png'));
   assert.ok(restored.native[0]>20&&restored.native[1]>50);
   assert.equal(restored.missing,undefined);
 
-  // A source that remains unreachable must show genuine CardData artwork,
+  // The native default front-direction frame (not old rear-facing index 0)
+  // must recover after actual 503 retries. A source that remains unreachable
+  // must show genuine CardData artwork,
   // never a random unverified 8-head proxy. On reconnect it must retry the
-  // real 1042-00.png source without replacing players or resetting turns.
+  // real 1042-25.png source without replacing players or resetting turns.
   await page.waitForFunction(()=>document.querySelector(
    '#board-pawns .board-pawn[data-chessman-id="0042"]')?.dataset.obsUnavailable==='true',
    null,{timeout:22000});
@@ -75,7 +77,7 @@ const {chromium}=require('playwright');
   assert.equal(unavailable.rig,'original-card-portrait-fallback');
   assert.equal(unavailable.cardVisible,true);
   assert.ok(failures0042>=4,'exhaust actual original source retries before fallback');
-  await page.unroute('**/original/OBS/1042-00.png*');
+  await page.unroute('**/original/OBS/1042-25.png*');
   await page.evaluate(()=>window.__LEAF_GENESIS_ACTORS__.recoverAvailableOriginals());
   await page.waitForFunction(()=>{
    const p=document.querySelector('#board-pawns .board-pawn[data-chessman-id="0042"]');
@@ -91,7 +93,7 @@ const {chromium}=require('playwright');
   await page.screenshot({path:'leaf-real-obs-reconnect-original-full-body.png'});
   console.log('AUTHENTIC OBS SOURCE RETRY / RECONNECT PASS '+JSON.stringify({
    fail0045:failures0045,fail0042:failures0042,restored,unavailable,
-   after,source:'real OBS PNG only; 34 missing models still missing'
+   after,source:'real OBS PNG only; 6 native models still missing'
   }));
  }finally{await browser.close()}
 })().catch(error=>{console.error('ORIGINAL OBS SOURCE RECOVERY FAILED',error.stack||error);process.exit(1)});
