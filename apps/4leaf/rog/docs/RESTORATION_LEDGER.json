@@ -5878,6 +5878,19 @@
         "P0-RELEASE"
       ],
       "details": "User 2026-10-24 request registered and preserved; priority native ChatRoom published QA + original source OBS actor-vs-FX role + actual die source and chat server features."
+    },
+    {
+      "seq": 241,
+      "date": "2026-10-24",
+      "type": "FUNCTIONAL_ORIGINAL_CHAT_ROOM_CREATE_ENTRY_PENDING_BROWSER_ACCEPTANCE",
+      "requestId": "REQ-20261024-002",
+      "taskIds": [
+        "P0-CHAT",
+        "CHT-03",
+        "CHT-05",
+        "P0-RELEASE"
+      ],
+      "details": "Actual existing original ChatTown `#make-room` UI button was a dead click that opened WEB modal 'local reproduction only' while the original `ChatRoom/ownerdialog.png`-backed real room create engine was already implemented. game.js now calls existing real social ChatTown native district selection and ownerdialog submission instead of a fake apology. `tests/chat-original-create-entry.cjs` launches live Chromium, invokes the existing create entry, validates real name/capacity/password native dialog and real room entry; gated by `.github/workflows/rog-world-chat.yml`. Source UI bytes preserved; client room-owner handoff/kick, original source total authenticity still open; do not mark CHT done."
     }
   ]
 }
