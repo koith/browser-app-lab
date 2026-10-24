@@ -1,6 +1,6 @@
 'use strict';
-/* The old "make room" 4LEAF entry must invoke the actual native ChatRoom
- * ownerdialog.png create flow, never a fake local-only apology modal.
+/* The real ChatTown directory must invoke the source-native ChatRoom
+ * ownerdialog.png create flow; legacy local-only apology controls stay removed.
  */
 const assert=require('node:assert/strict');
 const {chromium}=require('playwright');
@@ -12,8 +12,14 @@ const {chromium}=require('playwright');
   await page.addInitScript(()=>{window.LEAF_CENTRAL_API_URL='';});
   await page.goto(process.env.FOURLEAF_TEST_URL||'http://127.0.0.1:8765/');
   await page.waitForFunction(()=>window.__ROG_TEST__&&window.__LEAF_SOCIAL__);
-  await page.evaluate(()=>window.__ROG_TEST__.go('rooms'));
-  await page.evaluate(()=>document.getElementById('make-room').click());
+  await page.evaluate(()=>{
+   window.__LEAF_SOCIAL__.openRegion('north');
+   window.__ROG_TEST__.go('rooms');
+  });
+  assert.equal(await page.locator('#make-room').count(),0,
+   'dead provisional create button removed from legacy HTML');
+  await page.locator('.social-district-hotspot').nth(3).click();
+  await page.locator('#social-new-room').click();
   await page.waitForFunction(()=>document.querySelector('#social-modal form [name="name"]'));
   assert.equal(await page.locator('#social-modal form [name="name"]').count(),1);
   assert.equal(await page.locator('#social-modal form [name="capacity"]').count(),1);
