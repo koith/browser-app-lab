@@ -167,3 +167,52 @@ test('two distinct authenticated browsers atomically reserve non-overlapping rea
  assert.notDeepEqual(restored.data.position,nowFree.data.position,
   'the returning authenticated client may not retake another live occupant source slot');
 });
+
+test('owner transfers private ChatRoom to actual joined peer; kicked former owner cannot rejoin immediately',async t=>{
+ let instant=1700000000000;
+ const {app,call,auth}=await open({now:()=>instant});t.after(()=>app.close());
+ const [owner,guest,outsider]=await Promise.all([auth('Owner'),auth('Guest'),auth('Outsider')]);
+ const created=await call('POST','/api/rooms',owner.token,{
+  region:'north',district:'샤이닝 브리즈',name:'방장 위임 검증',capacity:4,background:3,
+  password:'secret123'
+ });
+ assert.equal(created.code,201);const id=created.data.room.id;
+ for(const u of [owner,guest]){
+  assert.equal((await call('POST','/api/rooms/'+id+'/join',u.token,{password:'secret123'})).code,200);
+ }
+ // Unauthorized outsiders and even joined guests cannot claim moderation.
+ assert.equal((await call('POST','/api/rooms/'+id+'/transfer',outsider.token,{targetId:guest.id})).code,403);
+ assert.equal((await call('POST','/api/rooms/'+id+'/kick',guest.token,{targetId:owner.id})).code,403);
+ assert.equal((await call('POST','/api/rooms/'+id+'/transfer',owner.token,{targetId:outsider.id})).code,404);
+ assert.equal((await call('POST','/api/rooms/'+id+'/transfer',owner.token,{targetId:owner.id})).code,400);
+ const change=await call('POST','/api/rooms/'+id+'/transfer',owner.token,{targetId:guest.id});
+ assert.equal(change.code,200);assert.equal(change.data.room.isOwner,false);
+ assert.equal((await call('GET','/api/snapshot',guest.token)).data.room.isOwner,true);
+ assert.equal((await call('GET','/api/snapshot',owner.token)).data.room.isOwner,false);
+ assert.equal((await call('POST','/api/rooms/'+id+'/close',owner.token,{})).code,403);
+ assert.equal((await call('POST','/api/rooms/'+id+'/kick',owner.token,{targetId:guest.id})).code,403);
+ const reload=await call('POST','/api/session',null,{resume:guest.token,nick:'Guest'});
+ assert.equal(reload.data.room.isOwner,true);
+ const kick=await call('POST','/api/rooms/'+id+'/kick',guest.token,{targetId:owner.id});
+ assert.equal(kick.code,200);assert.equal(kick.data.targetId,owner.id);
+ const kicked=await call('GET','/api/snapshot',owner.token);
+ assert.equal(kicked.data.roomId,null,'server must immediately revoke kicked membership');
+ assert.equal(kicked.data.peers.length,0,'kicked user cannot see private room occupants');
+ assert.equal((await call('POST','/api/chat',owner.token,{text:'not in room'})).code,403);
+ assert.equal((await call('POST','/api/rooms/'+id+'/join',owner.token,{password:'secret123'})).code,403,
+  'an immediate retry must not silently undo an authenticated kick');
+ // Preserve REAL active credentials while the temporary kick window
+ // elapses. Otherwise the test would incorrectly expire 45s sessions too.
+ for(let tick=0;tick<5;tick++){
+  instant+=25000;
+  assert.equal((await call('GET','/api/snapshot',owner.token)).code,200);
+  assert.equal((await call('GET','/api/snapshot',guest.token)).code,200);
+ }
+ assert.equal((await call('POST','/api/rooms/'+id+'/join',owner.token,{password:'secret123'})).code,200,
+  'after explicit temporary exclusion expiry joining is allowed again');
+ const snapshot=await call('GET','/api/snapshot',guest.token);
+ assert.equal(snapshot.data.peers.length,2);
+ assert.equal(new Set(snapshot.data.peers.map(p=>p.position.x+','+p.position.y)).size,2,
+  'authoritative native seats remain distinct after owner transfer/kick/rejoin');
+ assert.equal((await call('POST','/api/rooms/'+id+'/close',guest.token,{})).code,200);
+});

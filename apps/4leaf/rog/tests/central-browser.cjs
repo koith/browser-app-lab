@@ -103,11 +103,34 @@ const BASE='http://127.0.0.1:8765/',API='http://127.0.0.1:8877';
   assert.equal(await host.locator('#social-close-room').count(),1,
    'the real server owner can still close the room after browser reload');
   await guest.waitForFunction(()=>document.querySelectorAll('.social-avatar').length===2,{timeout:15000});
-  await host.locator('#social-close-room').click();
-  await guest.waitForFunction(()=>window.__LEAF_SOCIAL__?.getState().view==='directory',{timeout:15000});
-  assert.equal(await guest.evaluate(()=>window.__LEAF_CENTRAL_CHAT__.joinedId),null,
-   'the guest is evicted from a room closed by its authenticated owner');
+  // The ACTUAL two separate browsers use the original native Registry
+  // actor menu. A real authenticated owner can transfer ownership to a
+  // live peer, who then inherits the source owner toolbar server-side.
+  await host.locator('.social-avatar:not(.self)').click();
+  await host.locator('[data-moderation="transfer"]').click();
+  await host.locator('#social-modal [data-room-moderation="transfer"]').click();
+  await guest.waitForFunction(()=>Boolean(document.getElementById('social-close-room')),
+   null,{timeout:15000});
+  await host.waitForFunction(()=>!document.getElementById('social-close-room'),
+   null,{timeout:15000});
+  // The new owner can genuinely remove their predecessor; the backend
+  // revokes room membership, chat and seat, not just a visual avatar.
+  await guest.locator('.social-avatar:not(.self)').click();
+  await guest.locator('[data-moderation="kick"]').click();
+  await guest.locator('#social-modal [data-room-moderation="kick"]').click();
+  await host.waitForFunction(()=>window.__LEAF_SOCIAL__?.getState().view==='directory',
+   null,{timeout:15000});
+  assert.equal(await host.evaluate(()=>window.__LEAF_CENTRAL_CHAT__.joinedId),null,
+   'kicked owner must have server-revoked membership, not a merely hidden actor');
+  await guest.reload();
+  await guest.waitForFunction(id=>
+   window.__LEAF_CENTRAL_CHAT__?.ready&&
+   window.__LEAF_SOCIAL__?.getState()?.roomId===id&&
+   Boolean(document.getElementById('social-close-room')),newRoom,{timeout:15000});
+  await guest.locator('#social-close-room').click();
+  await guest.waitForFunction(()=>window.__LEAF_SOCIAL__?.getState().view==='directory',
+   null,{timeout:15000});
   assert.deepEqual(errors,[]);
-  console.log('CENTRAL CHAT BROWSER PASS: independent peers, messaging, facing, secret room and capacity');
+  console.log('CENTRAL CHAT BROWSER PASS: independent peer chat, native seats, private owner transfer, kick, reload, closure');
  }finally{await browser.close()}
 })().catch(e=>{console.error('CENTRAL CHAT BROWSER FAIL',e.stack||e);process.exit(1)});
