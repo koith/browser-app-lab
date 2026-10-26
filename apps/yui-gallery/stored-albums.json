@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-26T07:05:53Z",
+  "updated": "2026-10-26T07:07:06Z",
   "storage": "physically stored public previews in GitHub Pages repository, not paid originals",
   "albums": [
     {
@@ -215,6 +215,108 @@
         }
       ],
       "status": "public_previews_only_not_complete",
+      "pages_visited": 1,
+      "errors": []
+    },
+    {
+      "id": "v04",
+      "site": "V2PH",
+      "title": "SWEETBOX — Teddy Bear",
+      "source": "https://www.v2ph.com/album/z6436onz.html?hl=ko",
+      "expected": 97,
+      "images": [
+        {
+          "url": "stored-albums/v04/001_bd8318cfe6e0.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/wMC8UfTJYCJhTwqA.jpg",
+          "origin_page": "https://www.v2ph.com/album/z6436onz.html?hl=ko",
+          "sha256": "bd8318cfe6e08824b26e1d3206a33400502cec23dc4d82f2c8a039520e6ec90d",
+          "width": 1800,
+          "height": 2699,
+          "bytes": 519834
+        },
+        {
+          "url": "stored-albums/v04/002_011b7d8b0320.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/nW_581c8PP4AXPIr.jpg",
+          "origin_page": "https://www.v2ph.com/album/z6436onz.html?hl=ko",
+          "sha256": "011b7d8b03206b4c71a8c39ba4b77cc18c0f85995632b5f0bebe4f0ac4e99733",
+          "width": 1800,
+          "height": 2699,
+          "bytes": 496016
+        },
+        {
+          "url": "stored-albums/v04/003_99bffc19f367.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/MugPkxKG9hGLCnsp.jpg",
+          "origin_page": "https://www.v2ph.com/album/z6436onz.html?hl=ko",
+          "sha256": "99bffc19f367d6f2c0466b7a021802057c58f604a7a592a69ce47b9b912019ea",
+          "width": 2699,
+          "height": 1800,
+          "bytes": 519703
+        },
+        {
+          "url": "stored-albums/v04/004_c8b972c55a7a.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/u77CCH_1OcarI1pn.jpg",
+          "origin_page": "https://www.v2ph.com/album/z6436onz.html?hl=ko",
+          "sha256": "c8b972c55a7abfa5bf7e8fda736d217136dc99c480cf9a84385eea9da5a71db0",
+          "width": 2699,
+          "height": 1800,
+          "bytes": 524128
+        },
+        {
+          "url": "stored-albums/v04/005_2d850a98432f.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/lWvt6aEX509GsE1y.jpg",
+          "origin_page": "https://www.v2ph.com/album/z6436onz.html?hl=ko",
+          "sha256": "2d850a98432fb8b61883b0c81b4e6c36aa417198d725ec4c7b19e2fa391ce930",
+          "width": 2699,
+          "height": 1800,
+          "bytes": 495711
+        },
+        {
+          "url": "stored-albums/v04/006_f136f40d090c.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/U1D5Z5Mvw7LvzflH.jpg",
+          "origin_page": "https://www.v2ph.com/album/z6436onz.html?hl=ko",
+          "sha256": "f136f40d090c8854fccb727ca20f460153ab7932553b11722c0421c162c00d84",
+          "width": 2699,
+          "height": 1800,
+          "bytes": 540532
+        },
+        {
+          "url": "stored-albums/v04/007_0cfbec537fec.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/b-P_1pGVT824JJAa.jpg",
+          "origin_page": "https://www.v2ph.com/album/z6436onz.html?hl=ko",
+          "sha256": "0cfbec537fec314f335b37434d22315680b67e5357f16bd1ea1c63fae4c829be",
+          "width": 1800,
+          "height": 2699,
+          "bytes": 512271
+        },
+        {
+          "url": "stored-albums/v04/008_60cfe6643a16.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/j1otL0jBbS9tbIOt.jpg",
+          "origin_page": "https://www.v2ph.com/album/z6436onz.html?hl=ko",
+          "sha256": "60cfe6643a16de5c4f7f2826c1f714392fe141a3be32e15c645beb5d34c5edab",
+          "width": 1800,
+          "height": 2699,
+          "bytes": 451897
+        },
+        {
+          "url": "stored-albums/v04/009_290e1966f76a.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/QvznR000Uz16r_nd.jpg",
+          "origin_page": "https://www.v2ph.com/album/z6436onz.html?hl=ko",
+          "sha256": "290e1966f76ab6c97105ac2ef104b3be7bdb2244c8b70444a70779e973899dda",
+          "width": 1800,
+          "height": 2699,
+          "bytes": 425049
+        },
+        {
+          "url": "stored-albums/v04/010_57298c4fcbcd.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/beF0waXrJkkRU1rT.jpg",
+          "origin_page": "https://www.v2ph.com/album/z6436onz.html?hl=ko",
+          "sha256": "57298c4fcbcd7239a7934e8c921f4ab62d6fe128d9e559c98916a4ab7699db36",
+          "width": 1800,
+          "height": 2699,
+          "bytes": 512497
+        }
+      ],
+      "status": "partial_public_page_only",
       "pages_visited": 1,
       "errors": []
     }
