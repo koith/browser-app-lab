@@ -109,6 +109,7 @@ async def main():
        items.append({'url':'stored-albums/'+aid+'/'+dest.name,'source_url':img_url,'sha256':digest,'width':im.width,'height':im.height,'bytes':len(raw),'origin_page':target})
       except Exception as e:errors.append(str(e)[:140])
     except Exception as e:errors.append(str(e)[:140])
+   if errors: print('ALBUM_ERRORS',aid,repr(errors[:3]),flush=True)
    await page.close()
    byid[aid]={'id':aid,'site':album['site'],'title':album['title'],'source':url,'expected':album.get('photos'),
               'images':items,'pages_visited':len(visited),'errors':errors[:8],
