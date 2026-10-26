@@ -150,7 +150,8 @@ let startX=0;$('lightbox').addEventListener('touchstart',e=>{startX=e.changedTou
 Promise.all([
  fetch('stored-albums.json').then(r=>{if(!r.ok)throw Error('stored data');return r.json()}),
  fetch('albums.json').then(r=>{if(!r.ok)throw Error('catalog');return r.json()}),
- fetch('source-viewer-albums.json',{cache:'no-store'}).then(r=>r.ok?r.json():{albums:[]}).catch(()=>({albums:[]})),\n fetch('expanded-source-albums.json',{cache:'no-store'}).then(r=>r.ok?r.json():{albums:[]}).catch(()=>({albums:[]}))
+ fetch('source-viewer-albums.json',{cache:'no-store'}).then(r=>r.ok?r.json():{albums:[]}).catch(()=>({albums:[]})),
+ fetch('expanded-source-albums.json',{cache:'no-store'}).then(r=>r.ok?r.json():{albums:[]}).catch(()=>({albums:[]}))
 ]).then(([s,c,remote,expanded])=>{
  localStored=s.albums||[];catalog=c.albums||[];
  remoteStored=[...(remote.albums||[]),...(expanded.albums||[])].filter(a=>a.status==='verified_collected_individual_files_source_hosted_online_view').map(a=>({...a,sourceHosted:true}));
