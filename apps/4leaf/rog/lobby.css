@@ -91,3 +91,21 @@
  #lobby #lobby-channel-change{font-size:9px;padding:3px 5px}
  #dice-channels #dice-channel-back{font-size:10px}
 }
+
+/* Authentic Region/1234.png state frames; the unchanged 794x404
+ * regionback source already paints all four resting numerals.
+ * Hover/selected numbers use the independently decoded 41x28 source
+ * atlas on genuine buttons; no blue gradient overlays or duplicate text. */
+#dice-channels .dice-channel-hotspot:is(:hover,:focus-visible){
+ border-color:transparent!important;background:transparent!important;
+ box-shadow:none!important;outline:1px solid #f7ed9b!important;
+ outline-offset:-1px!important;
+}
+#dice-channels .dice-channel-hotspot .dice-source-channel-number{
+ display:block;position:absolute;inset:0;
+ width:34px;height:36px;pointer-events:none;
+ image-rendering:pixelated;
+}
+#dice-channels .dice-channel-hotspot[data-selected="true"]{
+ border-color:transparent!important;
+}
