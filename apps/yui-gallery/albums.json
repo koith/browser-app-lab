@@ -260,7 +260,8 @@
       "photos": 104,
       "size": "1.91GB",
       "source": "https://www.huantuji.com/yui/",
-      "kind": "index"
+      "kind": "index",
+      "sourceUpdatedAt": "2026-08-14"
     },
     {
       "id": "h10",
@@ -278,7 +279,8 @@
       "photos": 91,
       "size": "1.5GB",
       "source": "https://www.huantuji.com/yui/",
-      "kind": "index"
+      "kind": "index",
+      "sourceUpdatedAt": "2026-10-02"
     },
     {
       "id": "c01",
@@ -359,7 +361,8 @@
       "photos": 104,
       "size": "",
       "source": "https://www.chaotuji.com/yui/",
-      "kind": "index"
+      "kind": "index",
+      "sourceUpdatedAt": "2026-08-14"
     },
     {
       "id": "m01",
@@ -458,7 +461,8 @@
       "photos": 64,
       "size": "6720×4480 JPG 64장",
       "source": "https://moviefantasy.co.kr/125/?idx=446",
-      "kind": "official"
+      "kind": "official",
+      "releaseDate": "2025-07-13"
     },
     {
       "id": "mf04",
@@ -467,7 +471,19 @@
       "photos": 35,
       "size": "4K MP4 2편 + JPG 35장",
       "source": "https://moviefantasy.co.kr/notice/?bmode=view&idx=166748438",
-      "kind": "official"
+      "kind": "official",
+      "releaseDate": "2025-07-13"
+    },
+    {
+      "id": "yyg01",
+      "site": "影语阁 (중국)",
+      "title": "沈惠星 Yui(유이) 화보 컬렉션",
+      "photos": null,
+      "size": "등록 화보 모음 · 원본 접근 조건 확인 필요",
+      "source": "https://www.yingyuge.com/809.html",
+      "kind": "catalog",
+      "sourceUpdatedAt": "",
+      "releaseDate": ""
     }
   ]
 }
