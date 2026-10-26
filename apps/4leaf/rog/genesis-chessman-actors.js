@@ -78,37 +78,48 @@
   return {frame:available.find(f=>f.index===0)||available[0]||null,
     evidence:'source-front-unavailable/NO-VERIFIED-DIRECTION'};
  }
+ // Verified source pixels: 1040/1042/1043 frames 25 and 30 were
+ // individually inspected in their native 640-stride PNGs: both are
+ // camera-facing full-body silhouettes (not 0..7 rear/side turns).
+ // This is a front-preserving WEB movement mapping; original direction
+ // lookup and playback FPS remain unknown.
+ const REVIEWED_FRONT_MOTION=Object.freeze({
+  '0040':[25,30],'0042':[25,30],'0043':[25,30]
+ });
  function sequenceFor(native,action,id){
-  // Idle must not repeatedly rotate 0..3 BACK/SIDE VIDEO packets as though
-  // they represented a front-facing breathing animation.
-  if(action==='idle'){
-   const front=frontFacingSource(native,id).frame;
+  const all=native.frames||[];
+  const at=index=>all.find(f=>f.index===index)||null;
+  const facing=frontFacingSource(native,id);
+  const front=facing.frame;
+  const approved=Object.hasOwn(AUDITED_FRONT_SOURCE,id)&&
+   facing.evidence.startsWith('visual-original-OBS-reviewed/');
+  const movement=REVIEWED_FRONT_MOTION[id]?.map(at).filter(Boolean)||[];
+  if(action==='idle')return front?[front]:[];
+  if(approved){
+   // Do not display verified BACK/SIDE 0..7 during an ordinary forward
+   // movement, attack recovery or victory. One static authentic FRONT is
+   // more truthful than a rapidly pirouetting chessman.
+   if(action==='walk')return movement.length===2
+    ?[movement[0],movement[1],movement[0],movement[1]]
+    :front?[front]:[];
+   if(action==='victory')return movement.length===2
+    ?[movement[0],movement[1],movement[0]]
+    :front?[front]:[];
+   if(action==='attack'&&['0040','0042','0043'].includes(id)&&at(18))
+    return [front,at(18),front];
+   // Original directional action-table does not confirm any other attack,
+   // hit or defeat packet; preserve verified standing identity.
    return front?[front]:[];
   }
-
-   // Frame indexes are SOURCE-VERIFIED but the native 2002 action table
-   // and FPS have NOT been recovered. Walk samples use the entire contiguous
-   // native 0..7 run, rather than looping 4 frames while discarding real
-   // source frames 4..7. Action labels and pacing remain WEB provisional.
-   const map={idle:[0,1,2,3],walk:[0,1,2,3,4,5,6,7],
-     attack:[10,18],hurt:[18,10],victory:[25,30,0]};
-   const all=native.frames||[];
-   // The exact 0..7 sequence is available for only 80 original OBS
-   // characters. Repeating a clipped 0..2/0..6 subset on the other 12
-   // wrongly depicts a complete walking cycle. Keep their real first
-   // source frame STATIC until missing packets/action metadata are found.
-   const fullSourceWalk=Array.from({length:8},(_,i)=>i)
-    .every(index=>all.some(frame=>frame.index===index));
-   if(action==='walk'&&!fullSourceWalk)
-     return [all.find(frame=>frame.index===0)||all[0]].filter(Boolean);
-   // Some genuinely decoded OBS sources have no safe frame-0 decode.
-   // Expose their real pixels, but NEVER animate unrelated frames as if
-   // their original idle/walk/attack semantic mapping were established.
-   if(native.hasVerifiedFrameZero===false)return all.slice(0,1);
-   const picks=(map[action]||[0]).map(index=>all.find(f=>f.index===index)).filter(Boolean);
-   // Frame data is source-authentic; these labels are provisional until
-   // the original action/direction lookup table is recovered.
-   return picks.length?picks:all.slice(0,1);
+  // Other genuine frames are source-verified but directional attribution
+  // remains unverified. A missing 0..7 packet is NOT a full walk animation.
+  const fullWalk=Array.from({length:8},(_,i)=>at(i)).every(Boolean);
+  if(native.hasVerifiedFrameZero===false)return all.slice(0,1);
+  if(action==='walk'&&!fullWalk)return front?[front]:all.slice(0,1);
+  const map={walk:[0,1,2,3,4,5,6,7],
+   attack:[10,18],hurt:[18,10],victory:[25,30,0]};
+  const picks=(map[action]||[0]).map(at).filter(Boolean);
+  return picks.length?picks:(front?[front]:all.slice(0,1));
  }
  function renderNativeFrame(pawn,frame){
    const img=pawn.querySelector('img.leaf-chess-original-obs');
@@ -215,10 +226,17 @@
    pawn.dataset.actorSource='OBS/'+native.originalMember;
    pawn.dataset.actorOriginalModelRecovered='true';
    pawn.dataset.sourceAnimation='genuine-OBS-pixels';
-   pawn.dataset.sourceWalkCoverage=Array.from({length:8},(_,i)=>i)
-    .every(index=>native.frames.some(frame=>frame.index===index))
-     ?'8-of-8-original-source-indices/WEB-action-unverified'
-     :'partial-original-source/static-walk-until-source-complete';
+   const auditedMovement=REVIEWED_FRONT_MOTION[id]||null;
+   pawn.dataset.sourceFrontWalkVerified=String(Boolean(auditedMovement&&
+    auditedMovement.every(index=>native.frames.some(f=>f.index===index))));
+   pawn.dataset.sourceWalkCoverage=pawn.dataset.sourceFrontWalkVerified==='true'
+    ?'front-pair-25-30/source-verified/WEB-action-unverified'
+    :Object.hasOwn(AUDITED_FRONT_SOURCE,id)
+     ?'front-only/source-verified/WEB-action-unverified'
+     :Array.from({length:8},(_,i)=>i)
+      .every(index=>native.frames.some(frame=>frame.index===index))
+       ?'8-of-8-original-source-indices/WEB-action-unverified'
+       :'partial-original-source/static-walk-until-source-complete';
    pawn.dataset.sourcePoseMapping=native.frames.length===1||native.singleFrameStillOnly===true
      ?'unverified-single-source-frame/static-no-animation'
      :native.hasVerifiedFrameZero===false
@@ -232,6 +250,11 @@
    // Expose EXACT SOURCE packet indexes independently from inferred labels;
    // QA can inspect what was really rendered during genuine gameplay.
    pawn.dataset.sourceFrameSequence=seq.map(frame=>frame.index).join(',');
+   pawn.dataset.sourceActionEvidence=Object.hasOwn(AUDITED_FRONT_SOURCE,id)
+    ?(pawn.dataset.sourceFrontWalkVerified==='true'
+       ?'front-source-pair/visual-reviewed; WEB-movement-and-FPS-inferred'
+       :'front-source-static/visual-reviewed; native-action-table-unknown')
+    :'source-packets/orientation-and-2002-action-unverified';
    pawn.dataset.sourceFrameSequenceProvenance='original-OBS-indexes/WEB-action-timing-unverified';
    renderNativeFrame(pawn,seq[0]);
    const sourceSheet=pawn.querySelector('.leaf-chess-source-frame');
@@ -241,8 +264,9 @@
    // forever made a struck character oscillate between attack/hurt frames
    // while no actual new gameplay action had occurred. Original OBS bytes
    // remain untouched; action-to-source-index/FPS remains UNVERIFIED.
-   const loops=action==='idle'||action==='walk';
-   pawn.dataset.sourcePlaybackMode=loops?'loop':'one-shot/WEB-action-unverified';
+   const loops=action==='walk';
+   pawn.dataset.sourcePlaybackMode=loops?'loop/WEB-motion-inferred'
+    :'one-shot/WEB-action-unverified';
    pawn.dataset.sourcePlaybackComplete='false';
    if(seq.length>1&&!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches){
      let i=0;
@@ -337,7 +361,8 @@
   // across successive DMP cell transitions; keep the original OBS pixels.
   const continueSourceWalk=action==='walk'&&pawn.dataset.actorPose==='walk'&&
    pawn.dataset.actorRig==='original-obs-sprite'&&
-   pawn.dataset.sourceWalkCoverage?.startsWith('8-of-8-');
+   (pawn.dataset.sourceFrontWalkVerified==='true'||
+    pawn.dataset.sourceWalkCoverage?.startsWith('8-of-8-'));
   clearTimeout(timeouts.get(pawn));
   if(!continueSourceWalk){
    pawn.dataset.actorPose=action;

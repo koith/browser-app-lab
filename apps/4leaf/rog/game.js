@@ -527,7 +527,8 @@ function drawPawns(){
      // the visual source cycle while keeping real DMP step/dice/turn timing
      // and the incomplete-source 12-character still policy untouched.
      const fullWalk=pawn.dataset.actorRig==='original-obs-sprite'&&
-       pawn.dataset.sourceWalkCoverage?.startsWith('8-of-8-');
+       (pawn.dataset.sourceFrontWalkVerified==='true'||
+        pawn.dataset.sourceWalkCoverage?.startsWith('8-of-8-'));
      window.__LEAF_GENESIS_ACTORS__?.pose(pawn,'walk',fullWalk?1040:240);
    }
    pawn.dataset.position=String(p.position);
