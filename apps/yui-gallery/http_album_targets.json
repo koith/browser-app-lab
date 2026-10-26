@@ -1,7 +1,60 @@
 {
   "sources": [
-    {"id":"thru-thru117", "title":"SWEETBOX — Yui Thru Thru", "url":"https://misskon.com/sweetbox-yui-swtb-vol-49-thru-thru-117-photos/", "adapter":"misskon", "expected":117},
-    {"id":"sweet-dream109", "title":"SWEETBOX — Yui Sweet Dream", "url":"https://4kup.net/sweetbox-yui-swtb-vol-36-sweet-dream/", "adapter":"4kup", "expected":109},
-    {"id":"cream228", "title":"SWEETBOX — Yui CREAM", "url":"https://www.junmeitu.com/en/beauty/014_vol_18_cream_yui_228p-20.html", "adapter":"junmeitu", "expected":228}
+    {
+      "id": "thru-thru117",
+      "title": "SWEETBOX — Yui Thru Thru",
+      "url": "https://misskon.com/sweetbox-yui-swtb-vol-49-thru-thru-117-photos/",
+      "adapter": "misskon",
+      "expected": 117
+    },
+    {
+      "id": "sweet-dream109",
+      "title": "SWEETBOX — Yui Sweet Dream",
+      "url": "https://4kup.net/sweetbox-yui-swtb-vol-36-sweet-dream/",
+      "adapter": "4kup",
+      "expected": 109
+    },
+    {
+      "id": "cream228",
+      "title": "SWEETBOX — Yui CREAM",
+      "url": "https://www.junmeitu.com/en/beauty/014_vol_18_cream_yui_228p-20.html",
+      "adapter": "junmeitu",
+      "expected": 228
+    },
+    {
+      "id": "sweet-dream110",
+      "title": "SWEETBOX — Yui Sweet Dream",
+      "url": "https://misskon.com/sweetbox-yui-swtb-vol-36-sweet-dream-110-photos-6-videos/",
+      "adapter": "misskon",
+      "expected": 110
+    },
+    {
+      "id": "ramen125",
+      "title": "SWEETBOX — Yui RAMEN",
+      "url": "https://misskon.com/sweetbox-yui-swtb-vol-39-ramen-125-photos-3-videos/",
+      "adapter": "misskon",
+      "expected": 125
+    },
+    {
+      "id": "heart-steal78",
+      "title": "SWEETBOX — Yui Heart Steal",
+      "url": "https://misskon.com/sweetbox-yui-swtb-vol-30-heart-steal-78-photos/",
+      "adapter": "misskon",
+      "expected": 78
+    },
+    {
+      "id": "tracksuit201",
+      "title": "MilkyBomb — Yui Tracksuit",
+      "url": "https://misskon.com/milkybomb-yui-vol-2-tracksuit-201-photos-1-video/",
+      "adapter": "misskon",
+      "expected": 201
+    },
+    {
+      "id": "maid291",
+      "title": "MilkyBomb — Yui Maid",
+      "url": "https://misskon.com/milkybomb-yui-vol-3-maid-291-photos-2-videos/",
+      "adapter": "misskon",
+      "expected": 291
+    }
   ]
 }

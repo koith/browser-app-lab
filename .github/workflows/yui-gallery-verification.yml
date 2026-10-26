@@ -28,8 +28,9 @@ jobs:
         with:
           node-version: '22'
       - name: Install free local tools
+        timeout-minutes: 7
         run: |
-          pip install Pillow requests playwright gallery-dl fastapi httpx
+          pip install Pillow requests playwright==1.58.2 gallery-dl fastapi httpx
           python -m playwright install --with-deps ${{ matrix.engine }}
       - name: Verify byte preservation and collector behavior
         run: |

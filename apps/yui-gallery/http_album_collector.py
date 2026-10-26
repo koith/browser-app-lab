@@ -44,12 +44,13 @@ def discover(target,client,cache):
         url=queue.pop(0)
         if url in seen:continue
         if len(seen)>=500:raise ValueError('Public pagination budget exceeded')
-        html=client.get(url);seen.add(url)
+        cached=cache/(hashlib.sha256(url.encode()).hexdigest()[:16]+'.html')
+        html=cached.read_text() if cached.is_file() else client.get(url);seen.add(url)
         (cache/(hashlib.sha256(url.encode()).hexdigest()[:16]+'.html')).write_text(html)
         for raw in links(html):
             absolute=urljoin(url,raw);u=urlsplit(absolute)
             if kind=='misskon':
-                match=re.fullmatch(r'https://wes\.misskon\.com/images/[^"<> ]+Yui[^"<> ]+-(\d{3})[a-f0-9]*\.(webp|jpg)',absolute,re.I)
+                match=re.fullmatch(r'https://(?:(?:wes|bis)\.misskon\.com|lux\.mrcong\.com)/images/[^"<> ]+Yui[^"<> ]+-(\d{3})[a-f0-9]*\.(webp|jpg)',absolute,re.I)
                 if match:selected[int(match.group(1))]=absolute
                 if re.fullmatch(re.escape(origin)+r'\d+/',absolute) and absolute not in seen:queue.append(absolute)
             elif kind=='4kup':
