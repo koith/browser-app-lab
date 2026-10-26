@@ -1,0 +1,76 @@
+name: Yui Private Cloud Album Sync
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '25 19 * * 1,4'
+permissions:
+  contents: read
+concurrency:
+  group: yui-private-storage-sync
+  cancel-in-progress: false
+jobs:
+  sync:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 50
+    env:
+      RCLONE_CONFIG_ARCHIVE_COOKIE: ${{ secrets.YUI_TERABOX_NDUS }}
+      RCLONE_CONFIG_ARCHIVE_TYPE: terabox
+      ARCHIVE_REMOTE: archive:YuiArchive
+    steps:
+      - uses: actions/checkout@v4
+      - name: Account authorization status
+        run: |
+          if [ -z "$RCLONE_CONFIG_ARCHIVE_COOKIE" ]; then
+            echo "::notice::NOT CONNECTED: no private TeraBox account/session approved. No upload was attempted."
+          fi
+      - uses: actions/setup-python@v5
+        if: env.RCLONE_CONFIG_ARCHIVE_COOKIE != ''
+        with:
+          python-version: '3.12'
+      - name: Install browser and image QA tools
+        if: env.RCLONE_CONFIG_ARCHIVE_COOKIE != ''
+        run: |
+          pip install Pillow requests playwright
+          python -m playwright install --with-deps chromium
+      - name: Retrieve previously verified public-web albums
+        if: env.RCLONE_CONFIG_ARCHIVE_COOKIE != ''
+        run: |
+          python apps/yui-gallery/download_jliji_collections.py
+          python apps/yui-gallery/download_verified_public_album.py
+      - name: Stage real album files and previews
+        if: env.RCLONE_CONFIG_ARCHIVE_COOKIE != ''
+        run: |
+          python apps/yui-gallery/cloud/ingest_verified_zips.py \
+            yui-jliji-full-private/yuis-present33.zip \
+            yui-jliji-full-private/athletic-club104.zip \
+            yui-jliji-full-private/wet-yui80.zip \
+            yui-jliji-full-private/teddy-bear97.zip \
+            yui-verified-private-albums/green91_public_web_album.zip \
+            --out cloud-stage --quality web
+          python - <<'PY'
+          import json,pathlib,hashlib
+          base=pathlib.Path('cloud-stage')
+          catalog=json.loads((base/'metadata/catalog.json').read_text())
+          assert len(catalog['albums'])==5
+          n=sum(len(a['images']) for a in catalog['albums'])
+          assert n==405,(n,catalog['albums'])
+          for a in catalog['albums']:
+            assert a['stored']==a['expected']
+            for im in a['images']:
+              p=base/im['key']
+              assert p.is_file() and hashlib.sha256(p.read_bytes()).hexdigest()==im['sha256']
+          print('VERIFIED_CLOUD_READY_PHOTOS',n)
+          PY
+      - name: Install digest-pinned TeraBox rclone
+        if: env.RCLONE_CONFIG_ARCHIVE_COOKIE != ''
+        run: |
+          curl -fsSL https://github.com/gulp79/rclone-extra/releases/download/v1.75.2-extra/rclone-linux-amd64.zip -o /tmp/rclone.zip
+          echo "78855325a2a8d83b3feee3a8363d32e1211babbf4cda6356fa8ca5f472075062  /tmp/rclone.zip" | sha256sum -c -
+          unzip -q /tmp/rclone.zip -d /tmp/rclone-extra
+          find /tmp/rclone-extra -type f -name rclone -exec sudo install -m 755 {} /usr/local/bin/rclone \;
+          rclone help backends | grep -i terabox
+      - name: Upload images into private TeraBox account
+        if: env.RCLONE_CONFIG_ARCHIVE_COOKIE != ''
+        run: |
+          bash apps/yui-gallery/cloud/upload_to_terabox.sh cloud-stage
+          echo "VERIFIED_PRIVATE_CLOUD_UPLOAD_COMPLETED"
