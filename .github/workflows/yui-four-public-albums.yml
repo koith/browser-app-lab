@@ -1,0 +1,54 @@
+name: Yui Four Complete Public Web Photobooks
+on:
+  push:
+    paths:
+      - apps/yui-gallery/download_jliji_collections.py
+      - .github/workflows/yui-four-public-albums.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  archive:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 22
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install browser image validator
+        run: |
+          pip install requests Pillow playwright
+          python -m playwright install --with-deps chromium
+      - name: Validate syntax
+        run: python -m py_compile apps/yui-gallery/download_jliji_collections.py
+      - name: Download four complete gallery pages including all lazy-loaded photos
+        run: python apps/yui-gallery/download_jliji_collections.py
+      - name: Verify all 314 image files and source index integrity
+        run: |
+          python - <<'PY'
+          import json,hashlib,zipfile,pathlib
+          p=pathlib.Path('yui-jliji-full-private')
+          s=json.loads((p/'summary.json').read_text())
+          assert sum(x['advertised'] for x in s)==314
+          assert sum(x['downloaded'] for x in s)==314
+          for x in s:
+           with zipfile.ZipFile(p/(x['id']+'.zip')) as z:
+            assert z.testzip() is None
+            m=json.loads(z.read('manifest.json'))
+            assert len(m['images'])==m['advertised_count']
+            for photo in m['images']:
+             b=z.read('images/'+photo['file'])
+             assert len(b)==photo['bytes']
+             assert hashlib.sha256(b).hexdigest()==photo['sha256']
+          print('VERIFIED_COMPLETE_PHOTOBOOKS',len(s),'IMAGE_FILES',314)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Yui-4-web-albums-314-photographs
+          path: |
+            yui-jliji-full-private/*.zip
+            yui-jliji-full-private/summary.json
+          retention-days: 90
+          if-no-files-found: warn
