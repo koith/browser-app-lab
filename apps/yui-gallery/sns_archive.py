@@ -70,7 +70,7 @@ def record_page(html,url):
     return photos, list(dict.fromkeys(cursor_links)), {'title':soup.title.get_text(' ',strip=True) if soup.title else '', 'page_bytes':len(html), 'photos':len(photos)}
 
 def crawl_pages(session,max_pages,delay):
-    url=ROOT;seen=set();allphotos={};pages=[]
+    url=ROOT;seen=set();allphotos={};pages=[];empty_streak=0
     for page_index in range(1,max_pages+1):
         if url in seen:break
         seen.add(url)
@@ -86,8 +86,9 @@ def crawl_pages(session,max_pages,delay):
                     allphotos[k]['post']=im['post']
             next_url=next((candidate for candidate in reversed(nexts) if candidate not in seen),None)
             pages.append({'index':page_index,'url':url,'found':len(photos),'new':added,'next':bool(next_url),'response_bytes':meta['page_bytes']})
-            print('SNS_PAGE',page_index,'found',len(photos),'new',added,'overall',len(allphotos),'next',bool(next_url),flush=True)
-            if not next_url or (not added and page_index>2):
+            empty_streak=(empty_streak+1) if added==0 else 0
+            print('SNS_PAGE',page_index,'found',len(photos),'new',added,'overall',len(allphotos),'next',bool(next_url),'empty_streak',empty_streak,'url',url[:130],flush=True)
+            if not next_url or empty_streak>=7:
                 break
             url=next_url
             time.sleep(delay)
