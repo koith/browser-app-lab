@@ -1,5 +1,8 @@
 name: Yui Private Cloud Album Sync
 on:
+  push:
+    paths:
+      - .github/workflows/yui-cloud-archive-sync.yml
   workflow_dispatch:
   schedule:
     - cron: '25 19 * * 1,4'
