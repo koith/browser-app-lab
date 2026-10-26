@@ -1,0 +1,101 @@
+name: Yui Free TeraBox 405 Photo Archive Upload
+# No paid provider, R2, Google Drive, or credit-card dependency.
+# Upload starts only by explicit workflow_dispatch and requires a private secret.
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: yui-terabox-real-upload
+  cancel-in-progress: false
+jobs:
+  collect-verify-upload:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    env:
+      ARCHIVE_REMOTE: archive:YuiArchive
+      RCLONE_CONFIG_ARCHIVE_TYPE: terabox
+      RCLONE_CONFIG_ARCHIVE_COOKIE: ${{ secrets.YUI_TERABOX_COOKIE }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Reacquire and verify 405 physical web-resolution photos
+        run: |
+          pip install Pillow requests playwright
+          python -m playwright install --with-deps chromium
+          python apps/yui-gallery/download_jliji_collections.py
+          python apps/yui-gallery/download_verified_public_album.py
+          python apps/yui-gallery/cloud/ingest_verified_zips.py \
+            yui-jliji-full-private/yuis-present33.zip \
+            yui-jliji-full-private/athletic-club104.zip \
+            yui-jliji-full-private/wet-yui80.zip \
+            yui-jliji-full-private/teddy-bear97.zip \
+            yui-verified-private-albums/green91_public_web_album.zip \
+            --out cloud-stage
+          python - <<'PY'
+          import json,hashlib
+          from pathlib import Path
+          p=Path('cloud-stage')
+          c=json.loads((p/'metadata/catalog.json').read_text())
+          expect={'athletic-club104':104,'wet-yui80':80,'teddy-bear97':97,'yuis-present33':33,'green91':91}
+          assert {a['id']:a['stored'] for a in c['albums']}==expect
+          for a in c['albums']:
+              assert a['expected']==a['stored'] and a['complete_sequence']
+              for i in a['images']:
+                  for k,sh,n in [('key','sha256','bytes'),('preview','preview_sha256','preview_bytes')]:
+                      f=p/i[k]
+                      assert f.is_file() and f.stat().st_size==i[n]
+                      assert hashlib.sha256(f.read_bytes()).hexdigest()==i[sh]
+          print('STAGED_405_REAL_WEB_FILES_AND_PREVIEWS_VERIFIED',flush=True)
+          PY
+      - name: Validate that the approved TeraBox session is configured
+        env:
+          RCLONE_COOKIE: ${{ secrets.YUI_TERABOX_COOKIE }}
+        run: |
+          if [ -z "$RCLONE_COOKIE" ]; then
+            echo "::error::TeraBox not connected. Set repository Actions secret YUI_TERABOX_COOKIE through GitHub's secure UI; never paste cookies in issues or chat."
+            exit 1
+          fi
+          echo "TeraBox cookie is present (not displayed)"
+      - name: Install pinned unofficial TeraBox rclone backend
+        run: |
+          curl --fail --location --silent --show-error \
+            https://github.com/gulp79/rclone-extra/releases/download/v1.75.2-extra/rclone-linux-amd64.zip \
+            -o /tmp/yui-rclone.zip
+          echo "78855325a2a8d83b3feee3a8363d32e1211babbf4cda6356fa8ca5f472075062  /tmp/yui-rclone.zip" | sha256sum -c -
+          mkdir -p /tmp/yui-rclone
+          unzip -q /tmp/yui-rclone.zip -d /tmp/yui-rclone
+          mkdir -p "$HOME/.local/bin"
+          find /tmp/yui-rclone -type f -name rclone -exec install -m 755 {} "$HOME/.local/bin/rclone" \;
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+      - name: Check authenticated free account without printing session
+        run: |
+          rclone help backends | grep -i terabox
+          rclone lsd archive: --timeout 50s --retries 2 >/dev/null
+          echo "TERABOX_ACCOUNT_CONNECTED_AND_LISTABLE"
+      - name: Upload only to TeraBox and read back all 810 originals/previews
+        run: |
+          bash apps/yui-gallery/cloud/upload_to_terabox.sh cloud-stage
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          c=json.loads(Path('cloud-stage/metadata/catalog.json').read_text())
+          report=json.loads(Path('cloud-stage/metadata/remote-verification.json').read_text())
+          assert c['storage_provider']=='terabox'
+          assert report['originals']==405
+          assert report['media_files']==810
+          assert len(report['remote_retrievals'])==810
+          print('TERABOX_REAL_ACCOUNT_405_PHOTOS_FULL_SHA256_READBACK_PASS')
+          PY
+      - name: Preserve audit-only evidence, never private photo bytes
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Yui-TeraBox-405-remote-hash-audit
+          path: |
+            cloud-stage/metadata/remote-verification.json
+            cloud-stage/metadata/catalog.json
+          retention-days: 30
+          if-no-files-found: ignore
