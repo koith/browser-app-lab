@@ -1,8 +1,8 @@
-name: Yui Private 405 Photobook ZIP Archive
+name: Yui 405 Individual Photo Staging QA
 on:
   push:
     paths:
-      - apps/yui-gallery/cloud/ingest_verified_zips.py
+      - apps/yui-gallery/cloud/ingest_verified_directories.py
       - .github/workflows/yui-cloud-real-albums-dryrun.yml
   workflow_dispatch:
 permissions:
@@ -26,12 +26,12 @@ jobs:
           python apps/yui-gallery/download_verified_public_album.py
       - name: Stage 405 physical verified files for private cloud upload
         run: |
-          python apps/yui-gallery/cloud/ingest_verified_zips.py \
-            yui-jliji-full-private/yuis-present33.zip \
-            yui-jliji-full-private/athletic-club104.zip \
-            yui-jliji-full-private/wet-yui80.zip \
-            yui-jliji-full-private/teddy-bear97.zip \
-            yui-verified-private-albums/green91_public_web_album.zip \
+          python apps/yui-gallery/cloud/ingest_verified_directories.py \
+            yui-jliji-full-private/yuis-present33 \
+            yui-jliji-full-private/athletic-club104 \
+            yui-jliji-full-private/wet-yui80 \
+            yui-jliji-full-private/teddy-bear97 \
+            yui-verified-private-albums/green91 \
             --out cloud-stage
       - name: Verify every byte and declared count
         run: |
@@ -57,13 +57,8 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: success()
         with:
-          name: Yui-405-five-complete-photobooks-private-ZIPs
+          name: Yui-405-individual-files-hash-evidence
           path: |
-            yui-jliji-full-private/yuis-present33.zip
-            yui-jliji-full-private/athletic-club104.zip
-            yui-jliji-full-private/wet-yui80.zip
-            yui-jliji-full-private/teddy-bear97.zip
-            yui-verified-private-albums/green91_public_web_album.zip
             cloud-stage/metadata/catalog.json
           retention-days: 90
           if-no-files-found: error
