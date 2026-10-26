@@ -3,8 +3,8 @@
 
 NEVER executes the archived Windows client or treats a resource header as a
 decoded D4/D6 original model. Input must come from SHA1-verified installer.
-Only section structure, SHA256, resource names/sizes/signature prefixes and
-model-relevant string references are written; no copyrighted binary emitted.
+Only section structure, SHA256, import API names, resource names/sizes/signature
+prefixes and model-relevant text are written; no copyrighted binary emitted.
 """
 import argparse
 import hashlib
@@ -83,7 +83,7 @@ def parse(path: Path):
     def locate(rva, size=0):
         for va, span, start, rawlen in sections:
             offset = start + rva - va
-            if va <= rva and rva+size <= va+span and 0 <= offset and offset+size <= len(data):
+            if va <= rva and rva+size <= va+rawlen and 0 <= offset and offset+size <= len(data):
                 return offset
         raise ValueError("resource-RVA-outside-PE-sections")
 
@@ -138,6 +138,69 @@ def parse(path: Path):
                 walk(0)
             except (ValueError, struct.error, RecursionError) as error:
                 result["resourceParseError"] = str(error)
+    # PE data-directory index 1 lists imports, not resource records. Extract
+    # only named DLL/API references with bounded RVA reads. Importing graphics
+    # symbols supports a code-path hypothesis, not recovered vertex geometry.
+    result["importDirectory"] = {"rva": 0, "bytes": 0}
+    result["staticImports"] = []
+    result["staticImportCount"] = 0
+    result["graphicsImportHints"] = []
+    if dd+16 <= table:
+        imp_rva, imp_bytes = u32(dd+8), u32(dd+12)
+        result["importDirectory"] = {"rva": imp_rva, "bytes": imp_bytes}
+        if imp_rva:
+            def ascii_rva(rva):
+                pos = locate(rva, 1)
+                end = data.find(b"\0", pos, min(len(data), pos+256))
+                if end < 0 or end == pos:
+                    raise ValueError("unterminated-import-name")
+                locate(rva, end-pos+1)  # never cross raw section bounds
+                return data[pos:end].decode("ascii", "replace")
+
+            try:
+                limit = min(128, max(1, imp_bytes // 20)) if imp_bytes else 128
+                stride = 8 if magic == 0x20B else 4
+                ordinal_bit = 1 << (8*stride-1)
+                for index in range(limit):
+                    position = locate(imp_rva+index*20, 20)
+                    first, _, _, dll_rva, thunk = struct.unpack_from(
+                        "<IIIII", data, position)
+                    if not any((first, dll_rva, thunk)):
+                        break
+                    dll = ascii_rva(dll_rva)
+                    names = []
+                    thunk_rva = first or thunk
+                    if not thunk_rva:
+                        raise ValueError("missing-import-thunk")
+                    for item in range(512):
+                        tpos = locate(thunk_rva+item*stride, stride)
+                        value = struct.unpack_from(
+                            "<Q" if stride == 8 else "<I", data, tpos)[0]
+                        if value == 0:
+                            break
+                        if value & ordinal_bit:
+                            names.append("#ordinal-"+str(value & 0xffff))
+                        else:
+                            name_rva = value & (ordinal_bit-1)
+                            locate(name_rva, 2)  # IMAGE_IMPORT_BY_NAME hint
+                            names.append(ascii_rva(name_rva+2))
+                    else:
+                        raise ValueError("import-thunk-count-exceeds-limit")
+                    result["staticImports"].append({"dll": dll, "names": names})
+                else:
+                    raise ValueError("import-descriptor-count-exceeds-limit")
+            except (ValueError, struct.error) as error:
+                result["importParseWarning"] = str(error)
+    result["staticImportCount"] = sum(
+        len(i["names"]) for i in result["staticImports"])
+    graphics = re.compile(
+        r"(?i)(d3d|direct3d|directdraw|d3dx|opengl|glbegin|"
+        r"getprocaddress|loadlibrary|texture|vertex)")
+    result["graphicsImportHints"] = [
+        {"dll": item["dll"], "api": name}
+        for item in result["staticImports"] for name in item["names"]
+        if graphics.search(item["dll"]) or graphics.search(name)
+    ][:120]
     # Evidence only: names from raw ASCII/UTF16 binary strings, NO disassembly
     # or interpretation of a 3D mesh from a symbolic import.
     hits = []
@@ -174,5 +237,5 @@ if __name__ == "__main__":
     print("DICE_DLL_NATIVE_READ_ONLY_FORENSICS",
           json.dumps({k:proof.get(k) for k in (
               "source","sha256","fileType","sectionCount","resourceCount",
-              "resourceTypes","decodedNativeD4Mesh","decodedNativeD6Mesh")},
+              "resourceTypes","staticImportCount","graphicsImportHints", "decodedNativeD4Mesh","decodedNativeD6Mesh")},
               ensure_ascii=False))
