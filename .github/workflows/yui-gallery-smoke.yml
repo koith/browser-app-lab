@@ -90,6 +90,7 @@ jobs:
             if(errors.length)throw Error('Browser errors: '+errors.join('; '));
             console.log(JSON.stringify({passed:true,imgs,loaded,albums,newest,oldest,chineseCards,chineseLoaded,albumFirstDate,albumOldestDate,errors}));
             await page.screenshot({path:'gallery-mobile.png',fullPage:true});
+            await page.locator('[data-view="media"]').click();
             const [zipDownload]=await Promise.all([page.waitForEvent('download',{timeout:120000}),page.locator('#downloadAll').click()]);
             await zipDownload.saveAs('yui-public-photos.zip');
             console.log('ZIP_FILE_SAVED',zipDownload.suggestedFilename());
