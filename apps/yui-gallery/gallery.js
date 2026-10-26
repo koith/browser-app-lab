@@ -32,7 +32,6 @@ function renderAlbums(){
 function render(){
  const hasAlbum=!!state.album;
  el('heading').textContent=hasAlbum?title(state.albums.find(a=>a.id===state.album)||{}):state.view==='albums'?'화보':state.view==='sns'?'SNS':'사진';
- el('subhead').textContent='';
  el('photoGrid').hidden=state.view==='albums'&&!hasAlbum;
  el('albumGrid').hidden=state.view!=='albums'||hasAlbum;
  el('search').placeholder=state.view==='albums'?'화보 검색':'사진·화보 검색';
