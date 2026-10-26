@@ -87,12 +87,10 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add apps/yui-gallery/stored-albums apps/yui-gallery/stored-albums.json apps/yui-gallery/albums.json
           git diff --cached --quiet || (git commit -m "Store public preview files and connect album gallery" && git pull --rebase origin main && git push origin HEAD:main)
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: yui-individual-public-images-metadata
-          path: |
-            yui-dynamic-discovery.json
-            yui-dynamic-images/summary.json
+          path: yui-dynamic-discovery.json
+          archive: false
           retention-days: 90
           if-no-files-found: warn
