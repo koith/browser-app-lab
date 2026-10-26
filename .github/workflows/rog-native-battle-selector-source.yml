@@ -1,0 +1,59 @@
+name: 4LEAF original real battle state and right selector source QA
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/dice-original-selector.css'
+      - 'apps/4leaf/rog/tests/dice-2004-battle-selector-source.cjs'
+      - '.github/workflows/rog-native-battle-selector-source.yml'
+  workflow_run:
+    workflows: ['Deploy static content to Pages']
+    types: [completed]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-battle-state:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - engine: chromium
+            mobile: '0'
+          - engine: webkit
+            mobile: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          npm install --no-save playwright
+          npx playwright install ${{ matrix.engine }} --with-deps
+      - name: Serve actual source battle on pull request
+        if: github.event_name != 'workflow_run'
+        run: |
+          nohup python3 -m http.server 8765 --directory apps/4leaf/rog >/tmp/leaf-duel-http.log 2>&1 &
+          for i in 1 2 3 4 5 6 7; do
+            if curl -fSsI http://127.0.0.1:8765/index.html >/dev/null 2>&1; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/leaf-duel-http.log
+          exit 1
+      - name: Original 2004 battle state with actual match dice OBS and 222x152 interactive IMG selector
+        env:
+          FOURLEAF_TEST_URL: ${{ github.event_name == 'workflow_run' && 'https://koith.github.io/browser-app-lab/apps/4leaf/rog/' || 'http://127.0.0.1:8765/' }}
+          FOURLEAF_BROWSER: ${{ matrix.engine }}
+          FOURLEAF_MOBILE: ${{ matrix.mobile }}
+        run: node apps/4leaf/rog/tests/dice-2004-battle-selector-source.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: original-2004-live-battle-${{ matrix.engine }}-${{ github.event_name }}
+          path: leaf-*.png
+          retention-days: 14

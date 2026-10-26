@@ -105,3 +105,41 @@
   font-size:8px!important;line-height:9px!important;
  }
 }
+
+/* 2004 archived board.jpg and Dice/IMG.pak selector.png — ORIGINAL
+ * 222x152 right-hand tool+party backing (all four glyphs at x0..28).
+ * Earlier WEB renderer cropped each button from the atlas but fabricated
+ * the rest from avatarback.png, while painting duplicate icon art atop it.
+ * Recompose the genuine sprite as a SINGLE base panel and make the four
+ * real existing interactive tool buttons transparent hit targets precisely
+ * over its icon rows. Never overlay board.jpg or an entire game screenshot.
+ * The verified 800x600 native target has panel local x578..800, y448..600.
+ * Source-backed desktop only; responsive mobile layout unchanged. */
+@media(min-width:812px){
+ #app.app-classic-dice #dice-client-sidebar{
+  background: url('./original/IMG/selector.png') 0 0 / 222px 152px no-repeat!important;
+  background-color:transparent!important;
+ }
+ #app.app-classic-dice #dice-client-sidebar #dice-original-selector{
+  top:24px!important;bottom:auto!important;
+  height:122px!important;width:29px!important;
+  justify-content:space-between!important;
+ }
+ #app.app-classic-dice #dice-client-sidebar #dice-original-selector .dice-source-tool,
+ #app.app-classic-dice #dice-client-sidebar #dice-original-selector #dice-items-toggle{
+  background-image:none!important;
+  background-color:transparent!important;
+  box-shadow:none!important;
+  filter:none;
+ }
+ #app.app-classic-dice #dice-client-sidebar #dice-original-selector .dice-source-tool:is(:hover,:focus-visible),
+ #app.app-classic-dice #dice-client-sidebar #dice-original-selector #dice-items-toggle:is(:hover,:focus-visible){
+  background-image:none!important;
+  box-shadow:inset 0 0 0 1px #fff1a5!important;
+  filter:none;
+ }
+ #app.app-classic-dice #dice-client-sidebar #dice-original-selector .dice-source-tool:disabled{
+  background-image:none!important;
+  opacity:.75;
+ }
+}
