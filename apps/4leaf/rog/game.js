@@ -684,6 +684,9 @@ function drawNativeChessmen(){
   slot.className='dice-chessman-slot'+(source?' occupied':' vacant')+(i===3?' reserve':'');
   slot.dataset.teamIndex=String(i);
   slot.dataset.cardId=source?source.id:'';
+  // Original CardData info portrait is independent of the tiny source OBS
+  // actor now painted in the right-party thumbnail.
+  slot.dataset.sourceCardArtwork=source?imageFor(source.id):'';
   slot.setAttribute('aria-label',source?(role+' '+source.name+' 체스맨 정보'):(role+' 비어 있음'));
   if(source){
    slot.type='button';
