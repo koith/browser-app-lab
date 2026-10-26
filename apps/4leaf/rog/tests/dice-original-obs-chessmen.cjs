@@ -92,18 +92,20 @@ const {chromium,webkit}=require('playwright');
    const id=window.__ROG_TEST__.getMatch().players[0].id;
    window.__LEAF_GENESIS_ACTORS__.poseByPlayer(id,'walk',750);
   });
-  // 1045.obs has no original frames 3..7. Previously it looped 0..2 as
-  // a fake complete walk. Display a real still instead; other 80 actors
-  // with all eight native indexes retain their animated walk (separate QA).
+  // 1045.obs has no original frames 3..7. It now stays on its
+  // visually VERIFIED camera-facing native packet 18 instead of the old
+  // backward-facing packet 0. This is a genuine still, NOT a fabricated walk.
+  // Other 80 direction-UNAUDITED actors with source 0..7 retain provisional
+  // playback, separately tested.
   await page.waitForTimeout(280);
   const partial=await page.locator('#board-pawns .board-pawn').first().evaluate(el=>({
    sequence:el.dataset.sourceFrameSequence,
    coverage:el.dataset.sourceWalkCoverage,
    source:el.querySelector('.leaf-chess-original-obs')?.getAttribute('src')
   }));
-  assert.equal(partial.sequence,'0','incomplete genuine source must not loop a fabricated walk');
-  assert.equal(partial.coverage,'partial-original-source/static-walk-until-source-complete');
-  assert.match(partial.source,/1045-00\.png$/);
+  assert.equal(partial.sequence,'18','verified source front must not loop rear-facing unverified walk');
+  assert.equal(partial.coverage,'front-only/source-verified/WEB-action-unverified');
+  assert.match(partial.source,/1045-18\.png$/);
   const movement=partial.source;
   await page.waitForFunction(()=>document.querySelector('#board-pawns .board-pawn')?.dataset.actorPose==='idle',null,{timeout:4000});
   await page.locator('#dice-source-roll').click();
