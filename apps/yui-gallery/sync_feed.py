@@ -16,9 +16,11 @@ for item in root.findall('.//item'):
         url=url+'?name=orig'
         if not any(x['url']==url for x in images):
             images.append({'url':url,'post':link,'date':pub,'caption':'심유이 공개 SNS'})
-out={'updated':datetime.now(timezone.utc).isoformat(timespec='seconds'),'source':RSS,'images':images[:160]}
 p=Path(__file__).with_name('feed.json')
 if not images: raise RuntimeError('RSS returned no images; preserving old index')
 old=json.loads(p.read_text(encoding='utf-8')) if p.exists() else {}
+seen={x['url'] for x in images}
+merged=images+[x for x in old.get('images',[]) if x['url'] not in seen]
+out={'updated':datetime.now(timezone.utc).isoformat(timespec='seconds'),'source':RSS,'images':merged[:500]}
 if old.get('images')!=out['images']:p.write_text(json.dumps(out,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
 print('Indexed',len(images),'image links')
