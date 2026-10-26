@@ -1177,6 +1177,23 @@
         "ACT-04",
         "CHT-02"
       ]
+    },
+    {
+      "id": "REQ-20261026-003",
+      "date": "2026-10-26",
+      "origin": "user",
+      "text": "Second real source restoration: reproduce actual same BATTLE-state under original 800x600 archived 2004 battle.jpg, apply at least one genuine IMG/OBS/TIS asset to playable source right chessman HUD instead of cosmetic CSS-only edits, verify true battle actor/dice/score and tools, follow Chromium/WebKit+PR+Pages QA; preserve source D4/D6 and chat server provenance.",
+      "taskIds": [
+        "P0-PODIUM",
+        "P0-ACTOR",
+        "ACT-03",
+        "ACT-04",
+        "P0-BOARD",
+        "P0-DICE",
+        "DIE-01",
+        "P0-RELEASE",
+        "P0-CHAT"
+      ]
     }
   ],
   "tasks": [
@@ -6237,6 +6254,37 @@
         "https://github.com/koith/browser-app-lab/actions/runs/40300127667",
         "https://github.com/koith/browser-app-lab/actions/runs/40299980714",
         "https://github.com/koith/browser-app-lab/blob/main/apps/4leaf/rog/docs/PUBLIC_VISUAL_RESTORATION_TARGETS_2026-10-26.json"
+      ]
+    },
+    {
+      "seq": 259,
+      "date": "2026-10-26",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261026-003",
+      "taskIds": [
+        "P0-PODIUM",
+        "P0-ACTOR",
+        "ACT-03",
+        "ACT-04",
+        "P0-RELEASE"
+      ],
+      "details": "Record second actual source screenshot-driven gameplay restoration request; exact source BATTLE state and real 2002 IMG sprites on right chessman controls, not analysis-only. Original D4/D6 native 3D unresolved; source footage and action FPS not claimed."
+    },
+    {
+      "seq": 260,
+      "date": "2026-10-26",
+      "type": "REAL_2004_BATTLE_SOURCE_PANEL_FUNCTIONAL_IMPLEMENTATION_PENDING_CI",
+      "requestId": "REQ-20261026-003",
+      "taskIds": [
+        "P0-PODIUM",
+        "P0-ACTOR",
+        "ACT-04",
+        "P0-RELEASE"
+      ],
+      "details": "Functional original UI implementation on feature PR: original 2002 Dice/IMG.pak `selector.png` complete independently recovered 222×152 authentic right chessman/tool backing replaces separately fabricated WEB avatarback panel and duplicate icon sprite tiles in desktop 800×600 battle; real existing inspect/next/item/ability DOM hitboxes aligned at native (x0, y24/55/86/117), with existing tool callbacks, real CardData currently selected four-party portrait layer and genuine source background. Independently realized original BATTLE state via actual game resolveBattle (not fresh start) with two real authentic OBS actors and original winBattle-01 sprite, random original rules/dice; tests save 800×600 same BATTLE type versus 2004 battle.jpg, preserve actual game result buttons and mobile WebKit. Different historic player and random dice results remain unmatched, so strictly no pixel reproduction score. This does NOT recover missing original D4/D6 native 3D; original 3D client actor actions unverified. beta25 PWA v112. CI/merge/Pages/browser evidence PENDING.",
+      "evidence": [
+        "https://github.com/koith/browser-app-lab/blob/feat/4leaf-original-2004-battle-selector-atlas-20261026/apps/4leaf/rog/dice-original-selector.css",
+        "https://github.com/koith/browser-app-lab/blob/feat/4leaf-original-2004-battle-selector-atlas-20261026/apps/4leaf/rog/tests/dice-2004-battle-selector-source.cjs"
       ]
     }
   ]
