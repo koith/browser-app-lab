@@ -56,7 +56,7 @@ jobs:
             await page.goto('http://127.0.0.1:8765/',{waitUntil:'domcontentloaded',timeout:30000});
             await page.waitForFunction(()=>document.querySelector('#total')?.textContent?.includes('albums'),{timeout:20000});
             const version=await page.locator('footer').innerText();
-            if(!version.includes('v0.1.0-beta.2'))throw Error('Version missing in footer');
+            if(!await page.locator('#app-version').isVisible())throw Error('Top-right version missing');\n            if(!(await page.locator('#app-version').innerText()).includes('v0.1.0-beta.3'))throw Error('Version missing from header');
             if(!await page.locator('[data-filter="albums"]').evaluate(x=>x.classList.contains('active')))throw Error('Albums not default view');
             const albumCount=await page.locator('.album').count();
             if(albumCount!==7)throw Error('Expected seven actual stored albums, got '+albumCount);
