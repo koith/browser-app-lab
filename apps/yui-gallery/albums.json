@@ -484,6 +484,60 @@
       "kind": "catalog",
       "sourceUpdatedAt": "",
       "releaseDate": ""
+    },
+    {
+      "id": "cn-huantuji",
+      "site": "幻图集",
+      "title": "Yui · 공개 미리보기 (화보 미분류)",
+      "photos": null,
+      "source": "https://www.huantuji.com/yui/",
+      "kind": "local-preview",
+      "sourceUpdatedAt": "2026-10-26"
+    },
+    {
+      "id": "cn-chaotuji",
+      "site": "潮图集",
+      "title": "Yui · 공개 미리보기 (화보 미분류)",
+      "photos": null,
+      "source": "https://www.chaotuji.com/yui/",
+      "kind": "local-preview",
+      "sourceUpdatedAt": "2026-10-26"
+    },
+    {
+      "id": "cn-miaohuaying",
+      "site": "喵画影",
+      "title": "Yui · 공개 미리보기 (화보 미분류)",
+      "photos": null,
+      "source": "https://www.miaohuaying.com/yui/",
+      "kind": "local-preview",
+      "sourceUpdatedAt": "2026-10-26"
+    },
+    {
+      "id": "cn-yuntu8",
+      "site": "云图吧",
+      "title": "沈惠星 Yui · 공개 사진 미리보기",
+      "photos": null,
+      "source": "https://yuntu8.com/1748.html",
+      "kind": "local-preview",
+      "sourceUpdatedAt": "2026-10-26"
+    },
+    {
+      "id": "cn-wantuzhi-everyday",
+      "site": "玩图志",
+      "title": "Yui — Everyday Life (공개 미리보기)",
+      "photos": null,
+      "source": "https://wantuzhi.com/yui-simyu-everyday-life",
+      "kind": "local-preview",
+      "sourceUpdatedAt": "2026-10-26"
+    },
+    {
+      "id": "cn-yingyuge",
+      "site": "影语阁",
+      "title": "沈惠星 Yui · 공개 미리보기 (화보 미분류)",
+      "photos": null,
+      "source": "https://www.yingyuge.com/809.html",
+      "kind": "local-preview",
+      "sourceUpdatedAt": "2026-10-26"
     }
   ]
 }

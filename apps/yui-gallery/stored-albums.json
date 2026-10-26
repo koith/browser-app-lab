@@ -1,0 +1,222 @@
+{
+  "updated": "2026-10-26T06:58:14Z",
+  "storage": "physically stored public previews in GitHub Pages repository, not paid originals",
+  "albums": [
+    {
+      "id": "cn-huantuji",
+      "title": "Yui · 공개 미리보기 (화보 미분류)",
+      "site": "幻图集",
+      "source": "https://www.huantuji.com/yui/",
+      "expected": null,
+      "images": [
+        {
+          "url": "stored-albums/cn-huantuji/0001_d1e18de42a52.webp",
+          "source_url": "https://image.huantuji.com/2026/07/2026070806385046-2048x1366.webp",
+          "origin_page": "https://www.huantuji.com/yui/",
+          "sha256": "d1e18de42a52f4406cb95bd80e82e74b50c51df0efd8fbc53d5dfe2d4978c095",
+          "width": 2048,
+          "height": 1366,
+          "bytes": 97924
+        },
+        {
+          "url": "stored-albums/cn-huantuji/0002_0308a4dbadff.webp",
+          "source_url": "https://image.huantuji.com/2026/07/2026070806385978.webp",
+          "origin_page": "https://www.huantuji.com/yui/",
+          "sha256": "0308a4dbadff021909c03809d2b673172fff222fc182fda457cb54d4b7cd4c93",
+          "width": 700,
+          "height": 1047,
+          "bytes": 121326
+        },
+        {
+          "url": "stored-albums/cn-huantuji/0003_15a3646c63b4.webp",
+          "source_url": "https://image.huantuji.com/2026/07/2026070806390473.webp",
+          "origin_page": "https://www.huantuji.com/yui/",
+          "sha256": "15a3646c63b4772a92cdb1b9be2d7344f641359af3b01a47caf9b60be6c6d186",
+          "width": 1280,
+          "height": 962,
+          "bytes": 113634
+        }
+      ],
+      "status": "public_previews_only_not_complete",
+      "pages_visited": 1,
+      "errors": []
+    },
+    {
+      "id": "cn-chaotuji",
+      "title": "Yui · 공개 미리보기 (화보 미분류)",
+      "site": "潮图集",
+      "source": "https://www.chaotuji.com/yui/",
+      "expected": null,
+      "images": [
+        {
+          "url": "stored-albums/cn-chaotuji/0001_2f8348923608.webp",
+          "source_url": "https://image.chaotuji.com/2026/04/2026042913290312.webp?fit=scale&fm=pjpg&h=1536&ixlib=php-3.3.1&w=1024&wpsize=1536x1536&s=3447f2be9e42a28d166a6a8f65e359de",
+          "origin_page": "https://www.chaotuji.com/yui/",
+          "sha256": "2f834892360882d2b2d98d730d7a26756d96566af676ff714cd0e218b42291e6",
+          "width": 853,
+          "height": 1280,
+          "bytes": 108568
+        },
+        {
+          "url": "stored-albums/cn-chaotuji/0002_afe1694b3955.webp",
+          "source_url": "https://image.chaotuji.com/2026/04/2026042913291272.webp?fit=scale&fm=pjpg&h=1536&ixlib=php-3.3.1&w=1105&wpsize=1536x1536&s=18cce12f0a8bf5cd796dba730a842bf6",
+          "origin_page": "https://www.chaotuji.com/yui/",
+          "sha256": "afe1694b39550d9939006d1c0c8a2ffd43e699d752b94922100052a23a1b9fc0",
+          "width": 711,
+          "height": 988,
+          "bytes": 121484
+        },
+        {
+          "url": "stored-albums/cn-chaotuji/0003_4d963fc1423c.webp",
+          "source_url": "https://image.chaotuji.com/2026/04/2026042913291995.webp?fit=scale&fm=pjpg&h=1536&ixlib=php-3.3.1&w=1075&wpsize=1536x1536&s=4a254f724aefc905c4bfc024b77be2ea",
+          "origin_page": "https://www.chaotuji.com/yui/",
+          "sha256": "4d963fc1423c21263bcf7fc7781023a00616ce24bebca589174bc8896d2d8a4b",
+          "width": 706,
+          "height": 1009,
+          "bytes": 107160
+        }
+      ],
+      "status": "public_previews_only_not_complete",
+      "pages_visited": 1,
+      "errors": []
+    },
+    {
+      "id": "cn-miaohuaying",
+      "title": "Yui · 공개 미리보기 (화보 미분류)",
+      "site": "喵画影",
+      "source": "https://www.miaohuaying.com/yui/",
+      "expected": null,
+      "images": [
+        {
+          "url": "stored-albums/cn-miaohuaying/0001_550f109c4e5c.webp",
+          "source_url": "https://img.miaohuaying.com/2026/06/Yui-22.webp?fm=pjpg&ixlib=php-3.3.1&s=82691d7c2b4642726dadee20aac79ee7",
+          "origin_page": "https://www.miaohuaying.com/yui/",
+          "sha256": "550f109c4e5c6c1e3735778094c0991186b12dfa30e4b92f75e1794109404297",
+          "width": 800,
+          "height": 1009,
+          "bytes": 35582
+        },
+        {
+          "url": "stored-albums/cn-miaohuaying/0002_7c0a673fb0cd.webp",
+          "source_url": "https://img.miaohuaying.com/2026/06/Yui-52.webp?fm=pjpg&ixlib=php-3.3.1&s=35d101dc3d26f9bb8243bbf3ca08000a",
+          "origin_page": "https://www.miaohuaying.com/yui/",
+          "sha256": "7c0a673fb0cdba7dc5520746d49fca16362a825de9698f0ca654e1091f77371d",
+          "width": 640,
+          "height": 835,
+          "bytes": 35738
+        },
+        {
+          "url": "stored-albums/cn-miaohuaying/0003_a0f2738c1fd4.webp",
+          "source_url": "https://img.miaohuaying.com/2026/06/Yui-84.webp?fm=pjpg&ixlib=php-3.3.1&s=9513600e15324db40b48dd0b8d4973bf",
+          "origin_page": "https://www.miaohuaying.com/yui/",
+          "sha256": "a0f2738c1fd4b023df305117b7e9bb3d7758ad9bb7de619ad43a1c1614e03130",
+          "width": 650,
+          "height": 848,
+          "bytes": 53522
+        }
+      ],
+      "status": "public_previews_only_not_complete",
+      "pages_visited": 1,
+      "errors": []
+    },
+    {
+      "id": "cn-yuntu8",
+      "title": "沈惠星 Yui · 공개 사진 미리보기",
+      "site": "云图吧",
+      "source": "https://yuntu8.com/1748.html",
+      "expected": null,
+      "images": [
+        {
+          "url": "stored-albums/cn-yuntu8/0001_185e982bd6c7.jpg",
+          "source_url": "https://pic1.imgdb.cn/item/67a389fad0e0a243d4fc02d1.jpg",
+          "origin_page": "https://yuntu8.com/1748.html",
+          "sha256": "185e982bd6c76df4787fc0d2173116c99a995725692d38ebcfd74e80f3c5497c",
+          "width": 846,
+          "height": 951,
+          "bytes": 106311
+        },
+        {
+          "url": "stored-albums/cn-yuntu8/0002_5a5fa9a419ca.jpg",
+          "source_url": "https://pic1.imgdb.cn/item/67a3897ed0e0a243d4fc02ca.jpg",
+          "origin_page": "https://yuntu8.com/1748.html",
+          "sha256": "5a5fa9a419ca128ee74f2bb3bd004ef33f6025c7087bffa7bd1875d13c2a82bc",
+          "width": 2400,
+          "height": 1600,
+          "bytes": 411817
+        },
+        {
+          "url": "stored-albums/cn-yuntu8/0003_bc010fb224bc.jpg",
+          "source_url": "https://pic1.imgdb.cn/item/67a389e5d0e0a243d4fc02d0.jpg",
+          "origin_page": "https://yuntu8.com/1748.html",
+          "sha256": "bc010fb224bc4dad620b245b79815dfcb60f742ac370c4cf1c8d4477cc88ef07",
+          "width": 1080,
+          "height": 1764,
+          "bytes": 161711
+        },
+        {
+          "url": "stored-albums/cn-yuntu8/0004_7f0ebf9ab6fb.jpg",
+          "source_url": "https://pic1.imgdb.cn/item/67a389e5d0e0a243d4fc02cf.jpg",
+          "origin_page": "https://yuntu8.com/1748.html",
+          "sha256": "7f0ebf9ab6fb92aa0d771964076b54ba5c1fa8afcf26e2165706bb39dd0f3992",
+          "width": 846,
+          "height": 723,
+          "bytes": 75562
+        }
+      ],
+      "status": "public_previews_only_not_complete",
+      "pages_visited": 1,
+      "errors": []
+    },
+    {
+      "id": "cn-wantuzhi-everyday",
+      "title": "Yui — Everyday Life (공개 미리보기)",
+      "site": "玩图志",
+      "source": "https://wantuzhi.com/yui-simyu-everyday-life",
+      "expected": 194,
+      "images": [
+        {
+          "url": "stored-albums/cn-wantuzhi-everyday/0001_e8bb01877568.jpg",
+          "source_url": "https://download.wantuzhi.com/6aa2719af45f952eefe12402/Yui%20-%20Everyday%20life.jpg",
+          "origin_page": "https://wantuzhi.com/yui-simyu-everyday-life",
+          "sha256": "e8bb0187756825ee444380e241513cdee925e32887003997e7ea48d55e6f871a",
+          "width": 924,
+          "height": 720,
+          "bytes": 109802
+        }
+      ],
+      "status": "public_previews_only_not_complete",
+      "pages_visited": 1,
+      "errors": []
+    },
+    {
+      "id": "cn-yingyuge",
+      "title": "沈惠星 Yui · 공개 미리보기 (화보 미분류)",
+      "site": "影语阁",
+      "source": "https://www.yingyuge.com/809.html",
+      "expected": null,
+      "images": [
+        {
+          "url": "stored-albums/cn-yingyuge/0001_a1e0805d5d8b.jpg",
+          "source_url": "https://i0.wp.com/yingyugetc.top/i/2025/02/07/67a51648743ad.webp?ssl=1",
+          "origin_page": "https://www.yingyuge.com/809.html",
+          "sha256": "a1e0805d5d8bbf792943625f7f82187aadfd58c2151ed2be73ae5d3dbc996f2d",
+          "width": 846,
+          "height": 951,
+          "bytes": 77628
+        },
+        {
+          "url": "stored-albums/cn-yingyuge/0003_58c71b881400.jpg",
+          "source_url": "https://i0.wp.com/yingyugetc.top/i/2025/02/07/67a5164c06ca9.webp?ssl=1",
+          "origin_page": "https://www.yingyuge.com/809.html",
+          "sha256": "58c71b88140097477e70ca94c447dfbb260fb4a9117e6c00ac9189bc440cf1fc",
+          "width": 1080,
+          "height": 1764,
+          "bytes": 114239
+        }
+      ],
+      "status": "public_previews_only_not_complete",
+      "pages_visited": 1,
+      "errors": []
+    }
+  ]
+}
