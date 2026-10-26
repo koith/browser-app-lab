@@ -1,0 +1,18 @@
+# Import this blueprint only into a user-approved Render workspace.
+# No account, service, workspace, or secret has been selected in ChatGPT.
+services:
+  - type: web
+    name: yui-private-photo-gateway
+    runtime: docker
+    plan: free
+    dockerfilePath: ./apps/yui-gallery/cloud/gateway/Dockerfile
+    dockerContext: ./apps/yui-gallery/cloud/gateway
+    envVars:
+      - key: RCLONE_CONFIG_ARCHIVE_TYPE
+        value: terabox
+      - key: ARCHIVE_REMOTE
+        value: archive:YuiArchive
+      - key: RCLONE_CONFIG_ARCHIVE_COOKIE
+        sync: false
+      - key: GALLERY_ACCESS_TOKEN
+        generateValue: true
