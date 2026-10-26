@@ -1,96 +1,152 @@
 <!doctype html>
-<html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="color-scheme" content="dark"><title>Yui | 사진 갤러리 & 화보 아카이브</title>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101114">
+<meta name="color-scheme" content="dark">
+<title>YUI — Gallery</title>
 <style>
-:root{font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;color-scheme:dark;color:#edf2fc;background:#0b1018}
-*{box-sizing:border-box}body{margin:0}a{color:inherit;text-decoration:none}button,input{font:inherit}button{cursor:pointer}header{max-width:1280px;margin:auto;padding:36px 23px 26px}
-.kicker{letter-spacing:.19em;color:#c3b1fc;font-size:11px;font-weight:750}h1{font-size:clamp(36px,6vw,67px);letter-spacing:-.06em;line-height:1.08;margin:12px 0}
-h1 span{color:#b8b4d4}.lede{color:#abb5c8;line-height:1.65;max-width:800px;font-size:14px}
-.toolbar{max-width:1280px;margin:auto;padding:0 23px 17px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.tabs,.filters{display:flex;flex-wrap:wrap;gap:7px}.tab,.filter,.btn{border:1px solid #384154;color:#d9e1f0;background:#18212f;padding:9px 14px;border-radius:999px;font-size:13px}
-.tab.active,.filter.active{background:#e7e4f7;color:#172033;font-weight:750}
-#search{background:#151e2d;border:1px solid #374255;padding:11px 14px;border-radius:12px;color:white;min-width:min(320px,90vw)}
-main{max-width:1280px;margin:0 auto;padding:0 23px 80px}
-.stats{display:flex;gap:12px;flex-wrap:wrap;margin:10px 0 20px}.stat{font-size:12px;border:1px solid #2c394d;padding:6px 10px;border-radius:8px;color:#a6b5c9}
-.wall{columns:5 180px;column-gap:12px}.media{display:inline-block;width:100%;margin:0 0 12px;position:relative;overflow:hidden;border-radius:12px;background:#20293b;border:1px solid #354257}
-.media img{display:block;width:100%;height:auto;min-height:140px;object-fit:cover;transition:transform .22s}.media:hover img{transform:scale(1.025)}
-.media .shade{position:absolute;inset:auto 0 0;background:linear-gradient(transparent,#000a);padding:26px 9px 9px;font-size:11px;opacity:0;transition:.15s}.media:hover .shade{opacity:1}
-.albumgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
-.album{background:#171f2d;border:1px solid #354257;padding:18px;border-radius:15px;display:flex;flex-direction:column;min-height:180px}
-.album small{font-size:11px;color:#b6aad8}.album strong{line-height:1.4;font-size:16px;margin:13px 0 8px}
-.album p{font-size:12px;color:#a9b3c6;margin:0 0 16px}.album .actions{margin-top:auto;display:flex;gap:7px;flex-wrap:wrap}.album a{font-size:12px;background:#29364a;border-radius:8px;padding:7px 10px}
-.notice{color:#8999b0;font-size:12px;line-height:1.8;padding-top:23px;max-width:910px}
-#lightbox{position:fixed;inset:0;background:#04070af2;z-index:50;display:none;justify-content:center;align-items:center;flex-direction:column;padding:18px;gap:12px}
-#lightbox.show{display:flex}#lightbox img{max-width:min(98vw,1200px);max-height:76vh;object-fit:contain;border-radius:8px}
-#lightbox .controls{display:flex;gap:9px;align-items:center;flex-wrap:wrap;justify-content:center}.controls button,.controls a{border:1px solid #606b81;background:#1c2735;color:#fff;padding:10px 13px;border-radius:8px;font-size:13px}
-.empty{padding:55px 20px;color:#bec9dc;text-align:center;border:1px dashed #4b5670;border-radius:15px}
-@media(max-width:950px){.albumgrid{grid-template-columns:repeat(3,minmax(0,1fr))}.wall{columns:4 160px}}
-@media(max-width:630px){header{padding:24px 16px 18px}main,.toolbar{padding-left:15px;padding-right:15px}.albumgrid{grid-template-columns:repeat(2,minmax(0,1fr))}.wall{columns:2 130px}.album{padding:12px;min-height:160px}.album strong{font-size:14px}.media .shade{opacity:1}}
-.sortcontrol{display:flex;align-items:center;gap:8px;font-size:12px;color:#bcc8dc}.sortcontrol select{background:#1c2535;border:1px solid #414b60;color:#eef1fa;border-radius:9px;padding:10px;font-size:13px}.sortcontrol[hidden]{display:none}.album .when{font-size:11px;color:#a1aec4;margin-bottom:14px}.album-cover{width:100%;height:200px;object-fit:cover;border-radius:10px;margin-bottom:11px;background:#273245}.album-empty{width:100%;height:130px;border:1px dashed #52607a;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#8a9bb6;margin-bottom:11px;font-size:12px}.open-album{background:#aeaded!important;color:#0b1020!important;border:none;border-radius:8px;cursor:pointer;padding:8px 12px!important;font-size:12px;font-weight:700}.album .actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap}</style></head><body><header><div class="kicker">YUI · PERSONAL REVIEW INDEX</div><h1>심유이 <span>/ Gallery</span></h1>
-<div class="lede">화보별 공개 이미지 파일의 실제 저장·열람을 우선합니다. 각 화보에서 보관 사진을 열면 서버에 저장된 이미지 파일만 표시합니다. 출처 전체 장수와 실제 보관 장수는 구분합니다. SNS는 별도 탭입니다.</div><div style="margin-top:18px;padding:14px 16px;border:1px solid #625e97;background:#1f2138;border-radius:12px;font-size:14px;line-height:1.7"><strong>기존 405장 실파일: 비공개 임시 백업 · 1TB 본보관 연결 대기</strong><div style="color:#b9c4de;font-size:12px;margin:5px 0 10px">아래 공개 목록의 Teddy Bear 10장은 이전 미리보기입니다. 405장 웹판은 무료 대용량 TeraBox로 이전하기 전의 Drive 임시 ZIP 백업입니다. 무료 1TB 본보관과 iPhone 온라인 직접 열람은 아직 검증하지 않았습니다. 발행사 원본은 아닙니다.</div><a class="btn" style="display:inline-block;border-color:#b1a7f2;background:#413e6c;color:#fff" href="zip-gallery.html">실파일 405장 화보 뷰어 열기</a></div></header>
-<div class="toolbar"><div class="tabs"><button class="tab active" data-view="albums">화보 아카이브</button><a class="btn" href="zip-gallery.html" title="비공개 Drive ZIP에서 실제 405장 열람">임시 백업 405장 ZIP 뷰어</a><button class="tab" data-view="chinese">중국 공개 이미지</button><button class="tab" data-view="media">SNS (별도)</button><button id="downloadAll" class="btn">공개 사진 40장씩 ZIP ↓</button><a class="btn" href="https://x.com/super_yuisan/media" target="_blank" rel="noopener">본인 SNS ↗</a></div><label class="sortcontrol" id="mediaSortWrap">사진 정렬 <select id="mediaSort" aria-label="사진 정렬"><option value="date-desc">최신순</option><option value="date-asc">오래된순</option><option value="name-asc">이름 오름차순</option><option value="name-desc">이름 내림차순</option></select></label><label class="sortcontrol" id="albumSortWrap" hidden>화보 정렬 <select id="albumSort" aria-label="화보 정렬"><option value="date-desc">최신순</option><option value="date-asc">오래된순</option><option value="name-asc">이름 오름차순</option><option value="name-desc">이름 내림차순</option></select></label><input type="search" id="search" placeholder="사이트·화보 이름 검색" aria-label="화보 검색"></div>
-<main><div class="stats"><span class="stat" id="total">이미지 로딩 중</span><span class="stat" id="update">갱신 상태 확인 중</span><span class="stat">공개 웹판 · 개별 열람</span></div>
-<div id="media" class="wall" hidden></div><div id="albums"><div id="filters" class="filters" style="margin:12px 0 20px"></div><label style="display:flex;gap:8px;align-items:center;font-size:13px;margin:0 0 16px;color:#cbd6eb"><input type="checkbox" id="onlyStored" style="accent-color:#acb7f5"> 실제 이미지 저장된 화보만 보기</label><label style="display:flex;gap:8px;align-items:center;font-size:13px;margin:0 0 16px;color:#cbd6eb"><input type="checkbox" id="includeUnassigned" style="accent-color:#acb7f5"> 작품 미분류 이미지도 포함</label><div id="albumgrid" class="albumgrid"></div></div>
-<div class="notice">화보 탭의 보관 사진은 웹사이트에 실제 저장된 파일입니다. 아직 보관되지 않은 화보는 0장으로 표시합니다. SNS 탭은 외부 링크이며 유료 화보 전체 원본은 포함되지 않습니다.</div></main>
-<div id="lightbox" role="dialog" aria-modal="true"><img id="big" alt="심유이 공개 SNS 사진"><div class="controls"><button id="prev">‹ 이전</button><span id="counter"></span><button id="next">다음 ›</button><button id="saveOne">현재 사진 저장 ↓</button><a id="original" target="_blank" rel="noopener">원본 이미지 ↗</a><a id="post" target="_blank" rel="noopener">게시물 ↗</a><button id="close">닫기 ×</button></div></div>
+:root{font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",system-ui,sans-serif;color:#f5f5f6;background:#101114;color-scheme:dark}
+*{box-sizing:border-box}body{margin:0}a{color:inherit;text-decoration:none}button,input{font:inherit}button{cursor:pointer}
+.shell{max-width:1480px;margin:0 auto;padding:0 clamp(14px,3.2vw,48px)}
+.topbar{height:76px;display:flex;align-items:center;gap:34px;border-bottom:1px solid #2a2b2e}
+.logo{font-size:23px;font-weight:850;letter-spacing:.22em;white-space:nowrap}.logo span{font-size:10px;font-weight:500;letter-spacing:.15em;color:#8a8b8e;margin-left:9px}
+.mainnav{display:flex;align-items:center;gap:25px;margin-left:auto}
+.mainnav a{font-size:13px;color:#babac0;transition:color .2s}.mainnav a:hover{color:#fff}
+.topsearch{background:#1b1d22;border:1px solid #393a40;border-radius:8px;min-width:170px;max-width:240px;width:20vw;padding:11px 14px;color:#fff;font-size:13px;outline:none}
+.topsearch:focus{border-color:#bbb4a8}.topsearch::placeholder{color:#888992}
+.titleline{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;padding:36px 0 22px}
+.eyebrow{color:#c7bdac;font-size:11px;font-weight:700;letter-spacing:.22em}
+h1{margin:8px 0 0;font-weight:750;font-size:clamp(34px,5vw,56px);letter-spacing:-.055em;line-height:1.05}
+.counter{font-size:12px;color:#98999f;white-space:nowrap}
+.filters{display:flex;align-items:center;gap:25px;border-bottom:1px solid #303136;margin-bottom:22px;overflow:auto}
+.filter{background:none;border:0;border-bottom:2px solid transparent;color:#999aa0;padding:12px 1px 13px;white-space:nowrap;font-size:13px}
+.filter.active{color:#fff;border-bottom-color:#f4f2ec;font-weight:700}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px;margin-bottom:55px}
+.album{position:relative;background:#1b1d21;overflow:hidden;aspect-ratio:3/4;cursor:pointer;display:block;border:0;width:100%;padding:0;text-align:left}
+.album img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .32s ease;opacity:.92}
+.album:hover img{transform:scale(1.045)}
+.album .gradient{position:absolute;inset:43% 0 0;background:linear-gradient(transparent,#000e)}
+.album .name{position:absolute;bottom:35px;left:17px;right:14px;color:#fff;font-size:clamp(14px,1.45vw,19px);font-weight:720;line-height:1.35;text-shadow:0 2px 13px #000b}
+.album .number{position:absolute;bottom:15px;left:17px;font-size:12px;color:#d5d4d2;text-shadow:0 1px 6px #000b}
+.album .placeholder{display:flex;align-items:center;justify-content:center;position:absolute;inset:0;background:linear-gradient(145deg,#33333a,#1a1c21);color:#6d6e72;font-size:54px;font-weight:800}
+.photo-grid{columns:5 195px;column-gap:11px;margin-bottom:58px}
+.photo{break-inside:avoid;margin:0 0 11px;display:block;position:relative;cursor:pointer;background:#24262b;border:0;padding:0;width:100%;overflow:hidden}
+.photo img{display:block;width:100%;height:auto;min-height:100px;object-fit:cover;transition:transform .25s}
+.photo:hover img{transform:scale(1.035)}
+.photo span{position:absolute;bottom:0;left:0;right:0;padding:20px 10px 9px;background:linear-gradient(transparent,#000c);font-size:11px;color:#f5f5f5;opacity:0;transition:opacity .2s;text-align:left}
+.photo:hover span{opacity:1}
+.subnav{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:24px}
+.back{background:none;border:0;color:#c9c9cb;padding:0;font-size:13px}
+.detail-title{font-size:clamp(24px,4vw,38px);font-weight:750;letter-spacing:-.035em;margin:0 0 5px}
+.detail-count{font-size:12px;color:#92939a;margin:0 0 22px}
+.empty{padding:90px 18px;text-align:center;color:#98999f}
+footer{border-top:1px solid #292b30;padding:27px 0 55px;color:#84858b;font-size:11px;display:flex;justify-content:space-between;gap:18px}
+#lightbox{position:fixed;inset:0;z-index:20;background:#07080af8;display:none;align-items:center;justify-content:center;flex-direction:column;touch-action:pan-y}
+#lightbox.open{display:flex}
+#full{max-width:min(95vw,1800px);max-height:calc(100dvh - 125px);object-fit:contain}
+.lighttop{position:absolute;top:0;left:0;right:0;height:65px;display:flex;align-items:center;justify-content:space-between;padding:0 19px;color:#c3c4c9;font-size:12px}
+.lightbtn{border:0;background:#262830b5;color:#f4f4f7;width:41px;height:41px;border-radius:50%;font-size:21px;display:grid;place-items:center}
+.lightbottom{position:absolute;bottom:15px;left:0;right:0;display:flex;gap:12px;align-items:center;justify-content:center}
+.lightbottom a{padding:10px 16px;background:#2a2b30;border-radius:8px;font-size:12px}
+.arrow{position:absolute;top:48%;z-index:2}.arrow.prev{left:17px}.arrow.next{right:17px}
+button:focus-visible,a:focus-visible{outline:2px solid #ddd4c7;outline-offset:3px}
+[hidden]{display:none!important}
+@media(max-width:990px){.grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}.mainnav{gap:15px}.topbar{gap:14px}}
+@media(max-width:680px){.topbar{height:67px;flex-wrap:wrap}.logo{font-size:21px}.logo span{font-size:9px}.mainnav{gap:15px}.mainnav a{font-size:12px}.topsearch{min-width:0;width:100%;max-width:none;order:5;height:39px;margin-top:-1px}.topbar:has(.topsearch){height:111px;align-content:center;padding-bottom:9px}.titleline{padding:25px 0 12px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.album .name{font-size:14px;left:11px;bottom:30px}.album .number{left:11px;bottom:12px;font-size:11px}.photo-grid{columns:2 130px;column-gap:8px}.photo{margin-bottom:8px}.filters{gap:22px;margin-bottom:13px}.counter{font-size:11px}#full{max-height:calc(100dvh - 115px)}.arrow{width:35px;height:35px}.arrow.prev{left:6px}.arrow.next{right:6px}}
+@media(prefers-reduced-motion:reduce){.album img,.photo img{transition:none}}
+</style>
+</head>
+<body>
+<div class="shell">
+<header class="topbar">
+ <a href="./" class="logo" aria-label="YUI 갤러리 홈">YUI<span>GALLERY</span></a>
+ <nav class="mainnav" aria-label="이동"><a href="zip-gallery.html">내 아카이브</a><a href="cloud.html">클라우드</a></nav>
+ <input id="search" class="topsearch" type="search" placeholder="화보 검색" aria-label="화보 검색">
+</header>
+<div id="browse">
+ <div class="titleline"><div><div class="eyebrow">COLLECTION</div><h1>Yui Gallery</h1></div><span class="counter" id="total"></span></div>
+ <div class="filters"><button class="filter active" data-filter="albums">화보</button><button class="filter" data-filter="photos">사진</button><button class="filter" data-filter="all">전체 작품 목록</button></div>
+ <div id="albumgrid" class="grid"></div>
+ <div id="photogrid" class="photo-grid" hidden></div>
+ <div id="nothing" class="empty" hidden>표시할 사진이 없습니다.</div>
+</div>
+<div id="detail" hidden>
+ <div class="titleline"><div><button class="back" id="back">← 화보 목록</button><h2 class="detail-title" id="albumname"></h2></div><span class="counter" id="albumtotal"></span></div>
+ <div id="detailphotos" class="photo-grid"></div>
+</div>
+<footer><span>YUI GALLERY</span><span>v0.1.0-beta.1</span></footer>
+</div>
+<div id="lightbox" role="dialog" aria-label="사진 보기" aria-modal="true">
+ <div class="lighttop"><span id="position"></span><button class="lightbtn" id="close" aria-label="닫기">×</button></div>
+ <button class="lightbtn arrow prev" id="prev" aria-label="이전 사진">‹</button><img id="full" alt="화보 사진"><button class="lightbtn arrow next" id="next" aria-label="다음 사진">›</button>
+ <div class="lightbottom"><a id="original" target="_blank" rel="noopener" download>사진 열기 ↗</a></div>
+</div>
 <script>
-let photos=[],albums=[],site='전체',view='albums',idx=0,basePhotos=[],chinesePhotos=[],storedAlbums=[],selectedAlbum=null;
-const el=id=>document.getElementById(id), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','&apos;':'&#39;'}[c]));
-function cdn(url,size){let m=url.match(/^(https:\/\/pbs\.twimg\.com\/media\/[^.?]+)\.(jpg|jpeg|png|webp)(?:\?.*)?$/);return m?m[1]+'?format='+m[2]+'&name='+size:url}
-function snowflakeDate(post){try{const id=String(post||'').split('/status/')[1]?.split('/')[0];if(!id)return '';return new Date(Number((BigInt(id)>>22n)+1288834974657n)).toISOString()}catch{return ''}}
-function photoDate(p){return p.date&&Number.isFinite(Date.parse(p.date))?new Date(p.date).toISOString():snowflakeDate(p.post||'')}
-function norm(s){return String(s||'').normalize('NFKC')}
-function compareSort(a,b,order,kind){const name=x=>norm(kind==='media'?(x.name||x.caption||x.url.split('/').pop()):(x.title||''));const date=x=>kind==='media'?photoDate(x):x.releaseDate||x.sourceUpdatedAt||'';let z;if(order.startsWith('name'))z=name(a).localeCompare(name(b),'ko',{numeric:true,sensitivity:'base'});else{const ta=Date.parse(date(a))||0,tb=Date.parse(date(b))||0;z=(ta===0)!==(tb===0)?(ta===0?1:-1):tb-ta;}return (order==='date-asc'?(Date.parse(date(a))&&Date.parse(date(b))?-z:z):order==='name-desc'?-z:z)||String(a.url||a.title).localeCompare(String(b.url||b.title));}
-function applyPhotoSort(){photos=[...(view==='chinese'?chinesePhotos:basePhotos)].sort((a,b)=>compareSort(a,b,el('mediaSort').value,'media'))}
-function renderMedia(){applyPhotoSort();el('total').textContent=(view==='chinese'?'중국 무료 미리보기 ':'공개 SNS 사진 ')+photos.length+'장';el('media').innerHTML=photos.length?photos.map((p,i)=>'<div class="media"><img loading="lazy" referrerpolicy="no-referrer" data-i="'+i+'" src="'+esc(cdn(p.url,'medium'))+'" alt="공개 SNS 사진 '+(i+1)+'"><div class="shade">'+esc((photoDate(p).slice(0,10)||p.site||'날짜 미상'))+' · 확대 보기</div></div>').join(''):'<div class="empty">공개 SNS 사진을 읽지 못했습니다. 아래 본인 SNS 링크에서 확인할 수 있습니다.</div>';
-el('media').querySelectorAll('img').forEach(im=>{im.onclick=()=>show(+im.dataset.i);im.onerror=()=>{im.closest('.media').style.display='none'}})}
-function openStoredAlbum(a){
- const stored=storedAlbums.find(x=>x.id===a.id);
- selectedAlbum=a;
- const entries=stored?.images||[];
- photos=entries.map((x,i)=>({url:x.url,name:a.title+' #'+String(i+1).padStart(3,'0'),date:a.releaseDate||'',post:a.source,stored:true,site:a.site}));
- el('albums').hidden=true;el('media').hidden=false;el('mediaSortWrap').hidden=false;el('downloadAll').hidden=true;
- el('total').textContent=a.site+' / '+a.title+' · 실제 보관 '+photos.length+'장 / 출처 표시 '+(a.photos??'?')+'장';
- el('media').innerHTML=photos.length?photos.map((p,i)=>'<div class="media"><img loading="lazy" data-i="'+i+'" src="'+esc(p.url)+'" alt="'+esc(p.name)+'"><div class="shade">'+esc(p.name)+' · 확대 보기</div></div>').join(''):'<div class="empty">이 화보의 실제 보관 이미지가 아직 없습니다. 출처 페이지에서 공개 자료를 확인할 수 있습니다.</div>';
- el('media').querySelectorAll('img').forEach(im=>im.onclick=()=>show(+im.dataset.i));
+"use strict";
+const $=id=>document.getElementById(id);
+let catalog=[],stored=[],mode='albums',activeAlbum=null,viewerList=[],viewerIndex=0,detailAlbum=null;
+const titleMap={'cn-huantuji':'幻图集 · Yui','cn-chaotuji':'潮图集 · Yui','cn-miaohuaying':'喵画影 · Yui','cn-yuntu8':'云图吧 · Yui','cn-wantuzhi-everyday':'Everyday Life','cn-yingyuge':'影语阁 · Yui','v04':'SWEETBOX · Teddy Bear'};
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function getName(a){return catalog.find(x=>x.id===a.id)?.title||titleMap[a.id]||a.title||a.id}
+function validImages(a){return (a.images||[]).filter(x=>typeof x.url==='string'&&x.url.startsWith('stored-albums/'))}
+function available(){return stored.filter(x=>validImages(x).length).sort((a,b)=>validImages(b).length-validImages(a).length)}
+function setMode(m){mode=m;activeAlbum=null;$('detail').hidden=true;$('browse').hidden=false;document.querySelectorAll('[data-filter]').forEach(b=>b.classList.toggle('active',b.dataset.filter===m));render()}
+function photosFor(a){return validImages(a).map((p,i)=>({...p,name:getName(a),albumId:a.id,number:i+1}))}
+function card(a,hasImages){
+ const owned=stored.find(x=>x.id===a.id)||a;
+ const p=validImages(owned),cover=p[0]?.url||'',count=p.length,expected=a.photos??a.expected??catalog.find(x=>x.id===a.id)?.photos??null;
+ const label=getName(a);
+ const n=count?(count+'장'+(expected!=null?' / '+expected+'장':'')):(expected!=null?expected+'장 · 미수집':'미수집');
+ const img=cover?'<img loading="lazy" src="'+esc(cover)+'" alt="'+esc(label)+' 표지">':'<div class="placeholder">Y</div>';
+ return '<button class="album" data-id="'+esc(a.id)+'" data-available="'+(hasImages?'1':'0')+'" aria-label="'+esc(label)+'">'+img+'<div class="gradient"></div><strong class="name">'+esc(label)+'</strong><span class="number">'+esc(n)+'</span></button>';
 }
-function renderAlbums(){
- const q=el('search').value.toLowerCase();
- let f=albums.filter(a=>(site==='전체'||a.site===site)&&(''+a.site+' '+a.title).toLowerCase().includes(q));
- if(!el('includeUnassigned').checked)f=f.filter(a=>!a.id.startsWith('cn-'));
- if(el('onlyStored').checked)f=f.filter(a=>(storedAlbums.find(x=>x.id===a.id)?.images||[]).length>0);
- f.sort((a,b)=>compareSort(a,b,el('albumSort').value,'album'));
- el('albumgrid').innerHTML=f.length?f.map(a=>{
-  const stored=storedAlbums.find(x=>x.id===a.id),n=stored?.images?.length||0;
-  const missing=Number.isFinite(a.photos)?Math.max(0,a.photos-n):null;
-  const cover=n?'<img class="album-cover" loading="lazy" src="'+esc(stored.images[0].url)+'" alt="'+esc(a.title)+' 공개 미리보기">':'<div class="album-empty">실제 저장 파일 없음</div>';
-  return '<div class="album">'+cover+'<small>'+esc(a.site)+'</small><strong>'+esc(a.title)+'</strong><p>실제 저장 '+n+'장 / 출처 표기 '+esc(a.photos??'미확인')+'장 · '+(missing===null?'완성 여부 미확인':missing+'장 미확보')+'</p><div class="when">'+esc(a.releaseDate?'발행 '+a.releaseDate:a.sourceUpdatedAt?'목록 갱신 '+a.sourceUpdatedAt:'발행일 미확인')+'</div><div class="actions"><button class="open-album" data-id="'+esc(a.id)+'" '+(n?'':'disabled')+'>보관 이미지 열람</button><a href="'+esc(a.source)+'" target="_blank" rel="noopener">출처 ↗</a></div></div>'
- }).join(''):'<div class="empty">조건에 맞는 실제 저장 화보가 없습니다.</div>';
- el('total').textContent='작품 '+f.length+'개 · 작품별 실물 파일 '+f.reduce((n,a)=>n+(storedAlbums.find(s=>s.id===a.id)?.images?.length||0),0)+'장 · 미분류는 별도';
- el('albumgrid').querySelectorAll('.open-album').forEach(b=>b.onclick=()=>{const a=albums.find(x=>x.id===b.dataset.id);if(a)openStoredAlbum(a)});
+function photoHTML(p,i){return '<button class="photo" data-i="'+i+'" aria-label="'+esc(p.name)+' 사진 '+p.number+'"><img loading="lazy" src="'+esc(p.url)+'" alt="'+esc(p.name)+' 사진 '+p.number+'"><span>'+esc(p.name)+' · '+p.number+'</span></button>'}
+function render(){
+ const q=$('search').value.toLocaleLowerCase().trim();
+ const items=available(),all=items.flatMap(photosFor),match=s=>String(s).toLocaleLowerCase().includes(q);
+ $('albumgrid').hidden=mode==='photos';$('photogrid').hidden=mode!=='photos';$('nothing').hidden=true;
+ if(mode==='photos'){
+  const visible=all.filter(p=>match(p.name));$('photogrid').innerHTML=visible.map(photoHTML).join('');
+  $('photogrid').querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>openViewer(visible,Number(b.dataset.i)));
+  $('total').textContent=visible.length+' photos';
+  $('nothing').hidden=visible.length>0;
+ }else{
+  const src=mode==='all'?catalog:items;
+  const matched=src.filter(a=>match(getName(a)));
+  $('albumgrid').innerHTML=matched.map(a=>card(a,mode!=='all')).join('');
+  $('albumgrid').querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>openAlbum(b.dataset.id));
+  $('total').textContent=matched.length+' albums';
+  $('nothing').hidden=matched.length>0;
+ }
 }
-function renderFilters(){let sites=['전체',...new Set(albums.map(a=>a.site))];el('filters').innerHTML=sites.map(s=>'<button class="filter '+(site===s?'active':'')+'" data-s="'+esc(s)+'">'+esc(s)+'</button>').join('');el('filters').querySelectorAll('button').forEach(b=>b.onclick=()=>{site=b.dataset.s;renderFilters();renderAlbums()})}
-function show(i){idx=(i+photos.length)%photos.length;const p=photos[idx];el('big').src=p.stored?p.url:cdn(p.url,'orig');el('original').href=p.stored?p.url:cdn(p.url,'orig');el('post').href=p.post;el('counter').textContent=(idx+1)+' / '+photos.length;el('lightbox').classList.add('show');document.body.style.overflow='hidden'}
-function hide(){el('lightbox').classList.remove('show');document.body.style.overflow=''}
-async function savePhoto(p,auto=true){const u=p.stored?p.url:cdn(p.url,'orig');const r=await fetch(u,{mode:'cors'});if(!r.ok)throw Error('HTTP '+r.status);const blob=await r.blob();if(!blob.type.startsWith('image/'))throw Error('이미지 파일이 아닙니다');if(auto){const a=document.createElement('a'),link=URL.createObjectURL(blob);a.href=link;a.download=new URL(u).pathname.split('/').pop().split('?')[0]+'.jpg';a.click();setTimeout(()=>URL.revokeObjectURL(link),40000)}return blob}
-function toast(msg){el('update').textContent=msg}
-el('saveOne').onclick=async()=>{try{await savePhoto(photos[idx]);toast('사진 저장 요청 완료')}catch(e){toast('자동 저장 실패 · 원본 이미지 링크 이용');window.open(cdn(photos[idx].url,'orig'),'_blank')}};
-async function loadJSZip(){if(window.JSZip)return;await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js';script.onload=resolve;script.onerror=()=>reject(Error('ZIP 압축 라이브러리 로드 실패'));document.head.append(script)})}
-let zipCursor=0;
-el('downloadAll').onclick=async()=>{const button=el('downloadAll');button.disabled=true;let n=0;const step=40,from=Math.min(zipCursor,photos.length),batch=photos.slice(from,from+step);
-try{if(!batch.length)throw Error('현재 내려받을 사진이 없습니다');await loadJSZip();let zip=new JSZip(),fails=0;
-for(let i=0;i<batch.length;i++){try{const blob=await savePhoto(batch[i],false);const ext=blob.type.includes('png')?'png':blob.type.includes('webp')?'webp':'jpg';zip.file(String(from+i+1).padStart(4,'0')+'.'+ext,blob);n++}catch(e){fails++}
-button.textContent='이미지 '+(i+1)+'/'+batch.length+' 처리 중'}
-if(!n)throw Error('다운로드 가능한 파일 없음');
-const blob=await zip.generateAsync({type:'blob',compression:'STORE'});const link=URL.createObjectURL(blob),a=document.createElement('a');
-a.href=link;a.download='Yui_Public_SNS_'+(from+1)+'-'+(from+batch.length)+'_photos.zip';a.click();setTimeout(()=>URL.revokeObjectURL(link),60000);
-zipCursor=(from+batch.length)%photos.length;toast('공개 사진 '+n+'개 ZIP 생성 · '+(from+1)+'~'+(from+batch.length)+' / 전체 '+photos.length+' · 실패 '+fails+'개')}
-catch(e){toast('ZIP 실패: '+e.message)}finally{button.disabled=false;button.textContent='공개 사진 다음 40장 ZIP ↓'}};
-
-el('close').onclick=hide;el('prev').onclick=()=>show(idx-1);el('next').onclick=()=>show(idx+1);
-document.addEventListener('keydown',e=>{if(e.key==='Escape')hide();if(el('lightbox').classList.contains('show')&&e.key==='ArrowRight')show(idx+1);if(el('lightbox').classList.contains('show')&&e.key==='ArrowLeft')show(idx-1)});
-el('lightbox').onclick=e=>{if(e.target===el('lightbox'))hide()};
-document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{view=b.dataset.view;document.querySelectorAll('[data-view]').forEach(x=>x.classList.toggle('active',x===b));el('albums').hidden=view!=='albums';el('media').hidden=view==='albums';el('search').style.display=view==='albums'?'':'none';el('mediaSortWrap').hidden=view==='albums';el('downloadAll').hidden=view!=='media';selectedAlbum=null;el('albumSortWrap').hidden=view!=='albums';view==='albums'?renderAlbums():renderMedia()});
-el('mediaSortWrap').hidden=true;el('albumSortWrap').hidden=false;el('downloadAll').hidden=true;el('search').style.display='';el('search').oninput=renderAlbums;el('mediaSort').onchange=()=>{zipCursor=0;renderMedia()};el('albumSort').onchange=renderAlbums;el('onlyStored').onchange=renderAlbums;el('includeUnassigned').onchange=renderAlbums;
-Promise.all([fetch('feed.json?d='+Date.now()).then(r=>{if(!r.ok)throw Error(r.status);return r.json()}),fetch('albums.json').then(r=>r.json()),fetch('chinese-previews.json').then(r=>{if(!r.ok)throw Error(r.status);return r.json()}),fetch('paginated-sns-index.json?d='+Date.now()).then(r=>{if(!r.ok)throw Error(r.status);return r.json()}),fetch('stored-albums.json?d='+Date.now()).then(r=>r.ok?r.json():{albums:[]})]).then(([feed,cat,chinese,history,stored])=>{basePhotos=[...new Map([...(history.images||[]),...(feed.images||[])].map(p=>[p.url,p])).values()];albums=cat.albums||[];storedAlbums=stored.albums||[];el('onlyStored').checked=storedAlbums.some(x=>!x.id.startsWith('cn-')&&(x.images||[]).length>0);el('includeUnassigned').checked=false;chinesePhotos=chinese.images||[];el('update').textContent='마지막 확인 '+(feed.updated||'정보 없음');renderFilters();renderAlbums()}).catch(e=>{el('total').textContent='자료 읽기 실패';el('update').textContent=e.message});
-</script></body></html>
+function openAlbum(id){
+ const a=stored.find(x=>x.id===id);
+ if(!a||!validImages(a).length)return;
+ const photos=photosFor(a);detailAlbum=a;$('browse').hidden=true;$('detail').hidden=false;
+ $('albumname').textContent=getName(a);$('albumtotal').textContent=photos.length+' photos';
+ $('detailphotos').innerHTML=photos.map(photoHTML).join('');
+ $('detailphotos').querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>openViewer(photos,Number(b.dataset.i)));
+ history.replaceState(null,'','#'+encodeURIComponent(id));
+ window.scrollTo(0,0);
+}
+function openViewer(list,i){if(!list.length)return;viewerList=list;viewerIndex=((i%list.length)+list.length)%list.length;$('lightbox').classList.add('open');document.body.style.overflow='hidden';showViewer()}
+function showViewer(){
+ const p=viewerList[viewerIndex];if(!p)return;
+ $('full').src=p.url;$('full').alt=p.name+' · '+p.number;
+ $('position').textContent=(viewerIndex+1)+' / '+viewerList.length;
+ $('original').href=p.url;
+}
+function closeViewer(){$('lightbox').classList.remove('open');document.body.style.overflow=''}
+function step(n){viewerIndex=(viewerIndex+n+viewerList.length)%viewerList.length;showViewer()}
+$('prev').onclick=()=>step(-1);$('next').onclick=()=>step(1);$('close').onclick=closeViewer;
+$('back').onclick=()=>{history.replaceState(null,'',location.pathname);$('browse').hidden=false;$('detail').hidden=true;detailAlbum=null;window.scrollTo(0,0)};
+$('search').oninput=()=>{if(!$('detail').hidden){$('back').click()}render()};
+document.querySelectorAll('[data-filter]').forEach(b=>b.onclick=()=>setMode(b.dataset.filter));
+$('lightbox').onclick=e=>{if(e.target===$('lightbox'))closeViewer()};
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!(!$('lightbox').classList.contains('open')))closeViewer();else if($('lightbox').classList.contains('open')&&e.key==='ArrowLeft')step(-1);else if($('lightbox').classList.contains('open')&&e.key==='ArrowRight')step(1)});
+let startX=0;$('lightbox').addEventListener('touchstart',e=>{startX=e.changedTouches[0]?.screenX||0},{passive:true});$('lightbox').addEventListener('touchend',e=>{const d=(e.changedTouches[0]?.screenX||0)-startX;if(Math.abs(d)>55)step(d>0?-1:1)},{passive:true});
+Promise.all([fetch('stored-albums.json').then(r=>{if(!r.ok)throw Error('stored data');return r.json()}),fetch('albums.json').then(r=>{if(!r.ok)throw Error('catalog');return r.json()})]).then(([s,c])=>{stored=s.albums||[];catalog=c.albums||[];render();const id=decodeURIComponent(location.hash.slice(1));if(id)openAlbum(id)}).catch(()=>{$('total').textContent='—';$('nothing').textContent='이미지를 불러올 수 없습니다.';$('nothing').hidden=false});
+</script>
+</body></html>
