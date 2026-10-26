@@ -95,9 +95,10 @@ function available(){return stored.filter(x=>validImages(x).length).sort((a,b)=>
 function setMode(m){mode=m;activeAlbum=null;$('detail').hidden=true;$('browse').hidden=false;document.querySelectorAll('[data-filter]').forEach(b=>b.classList.toggle('active',b.dataset.filter===m));render()}
 function photosFor(a){return validImages(a).map((p,i)=>({...p,name:getName(a),albumId:a.id,number:i+1}))}
 function card(a,hasImages){
- const p=validImages(a),cover=p[0]?.url||'',count=p.length,expected=a.photos??a.expected??null;
- const label=hasImages?getName(a):a.title;
- const n=hasImages?(count+'장'+(expected!=null?' / '+expected+'장':'')):(expected!=null?expected+'장 · 미수집':'미수집');
+ const owned=stored.find(x=>x.id===a.id)||a;
+ const p=validImages(owned),cover=p[0]?.url||'',count=p.length,expected=a.photos??a.expected??catalog.find(x=>x.id===a.id)?.photos??null;
+ const label=getName(a);
+ const n=count?(count+'장'+(expected!=null?' / '+expected+'장':'')):(expected!=null?expected+'장 · 미수집':'미수집');
  const img=cover?'<img loading="lazy" src="'+esc(cover)+'" alt="'+esc(label)+' 표지">':'<div class="placeholder">Y</div>';
  return '<button class="album" data-id="'+esc(a.id)+'" data-available="'+(hasImages?'1':'0')+'" aria-label="'+esc(label)+'">'+img+'<div class="gradient"></div><strong class="name">'+esc(label)+'</strong><span class="number">'+esc(n)+'</span></button>';
 }
