@@ -1,0 +1,43 @@
+name: Yui Cloud Storage Connector QA
+on:
+  push:
+    paths:
+      - apps/yui-gallery/cloud/**
+      - apps/yui-gallery/cloud.html
+      - .github/workflows/yui-cloud-integration-qa.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate ZIP ingester and cloud gateway Python
+        run: |
+          pip install Pillow fastapi uvicorn httpx
+          python -m py_compile apps/yui-gallery/cloud/ingest_verified_zips.py apps/yui-gallery/cloud/gateway/main.py
+          python apps/yui-gallery/cloud/test_ingest.py
+          bash -n apps/yui-gallery/cloud/upload_to_terabox.sh
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify remote gallery script syntax
+        run: |
+          node - <<'NODE'
+          const fs=require('fs'),vm=require('vm');
+          const html=fs.readFileSync('apps/yui-gallery/cloud.html','utf8');
+          const js=html.match(/<script>([\s\S]*?)<\/script>/);
+          if(!js)throw Error('No cloud gallery JS');
+          new vm.Script(js[1]);
+          console.log('CLOUD_GALLERY_JS_SYNTAX_PASS');
+          NODE
+      - name: Verify pinned unofficial TeraBox backend Docker build
+        run: |
+          docker build -t yui-private-cloud:smoke apps/yui-gallery/cloud/gateway
+          docker run --rm yui-private-cloud:smoke rclone help backends | grep -i terabox
+          echo "TERABOX_BACKEND_BINARY_CONFIRMED"
