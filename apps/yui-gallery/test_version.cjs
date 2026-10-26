@@ -20,7 +20,7 @@ const data=JSON.parse(fs.readFileSync(path.join(root,'stored-albums.json'),'utf8
 const actuallyOnPages=data.albums.reduce((n,x)=>n+(x.images?.length||0),0);
 assert.ok(actuallyOnPages<405,'never accidentally claim all private ZIP images are public Pages files');
 assert.equal(state.archiving_engine.bundle_generation,false);
-assert.equal(state.archiving_engine.mode,'individual_files');
+assert.equal(state.archiving_engine.mode,'individual_files');\nassert.ok(state.archiving_engine.open_source_crawler.includes('gallery-dl'));\nassert.ok(fs.readFileSync(path.join(root,'index.html'),'utf8').includes('id=\"app-version\"'));\nassert.ok(fs.readFileSync(path.join(root,'index.html'),'utf8').includes('source-viewer-albums.json'));
 assert.ok(!fs.readFileSync(path.join(root,'index.html'),'utf8').includes('href="zip-gallery.html"'));
 assert.ok(fs.readFileSync(path.join(root,'zip-gallery.html'),'utf8').includes('location.replace("./")'));
 console.log('YUI_VERSION_AND_STORAGE_STATUS_PASS',state.version,'previously_collected_web_photos',405,'public_pages_photos',actuallyOnPages,'terabox_verified',0,'bundle_generation',false);
