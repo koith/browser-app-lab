@@ -46,7 +46,9 @@ const path=require('path');
   assert.equal(hud.empty.length,4-hud.roster.length,'only actual party members get a portrait');
   assert.ok(hud.empty.every(x=>!x.hasImg&&x.button==='DIV'),'unoccupied source pane cannot show a fake portrait');
   assert.deepEqual(hud.occupied.map(x=>x.id),hud.roster,'original displayed chessmen are actual match party, in role order');
-  assert.ok(hud.occupied.every(x=>x.button==='BUTTON'&&x.source.startsWith('./original/CardData/chm_')&&x.text.length>0));
+  assert.ok(hud.occupied.every(x=>x.button==='BUTTON'&&
+   (x.source.startsWith('./original/CardData/chm_')||x.source.includes('/original/OBS/'))&&x.text.length>0),
+   'actual enrolled source CardData remains fallback while reviewed front OBS full bodies replace facial previews');
   assert.equal(hud.side,'flex','source 800x600 game shows its dedicated right side UI');
   assert.ok(hud.originalBackground.includes('original/IMG/avatarback.png'),'real source 4LEAF blue atlas used');
   assert.ok(hud.rect.x>=hud.sceneRect.right-194&&hud.rect.right<=hud.sceneRect.right+2, 'the original four chessmen overlay only the rightmost 193px of the 800px scene below the game field');
