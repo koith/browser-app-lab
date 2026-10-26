@@ -10,9 +10,10 @@ import argparse
 import hashlib
 import json
 import re
+import shutil
 from datetime import datetime, timezone
 from pathlib import Path
-from PIL import Image, ImageOps
+from PIL import Image
 
 MAX_IMAGE_BYTES=140_000_000
 ALBUM_ID=re.compile(r"^[a-z0-9][a-z0-9-]{1,100}$")
@@ -71,10 +72,8 @@ def stage_album(input_dir:Path, dest:Path, quality:str):
             ext=FORMATS.get(im.format)
             if not ext or min(width,height)<300:
                 raise ValueError(f"Unsupported image type or resolution: {aid}/{number}")
-            thumb=ImageOps.exif_transpose(im).convert("RGB")
-            thumb.thumbnail((520,900))
-            preview_path=previews/f"{number:04d}.jpg"
-            thumb.save(preview_path,format="JPEG",quality=82,optimize=True)
+        preview_path=previews/f"{number:04d}.{ext}"
+        shutil.copyfile(raw_path,preview_path)
         name=f"{number:04d}-{digest[:16]}.{ext}"
         image_path=originals/name
         if image_path.exists():
@@ -88,7 +87,7 @@ def stage_album(input_dir:Path, dest:Path, quality:str):
         assert image_path.stat().st_size==raw_path.stat().st_size
         preview_blob=preview_path.read_bytes()
         output.append({"number":number,"key":f"originals/{aid}/{name}",
-                       "preview":f"previews/{aid}/{number:04d}.jpg",
+                       "preview":f"previews/{aid}/{number:04d}.{ext}",
                        "preview_bytes":len(preview_blob),
                        "preview_sha256":hashlib.sha256(preview_blob).hexdigest(),
                        "width":width,"height":height,
@@ -102,6 +101,8 @@ def stage_album(input_dir:Path, dest:Path, quality:str):
             "expected":expected,"stored":len(output),"complete_sequence":True,
             "quality_label":"public_web_resolution" if quality=="web" else "rights_confirmed_source",
             "publisher_original_verified":False,
+            "ai_enhanced":aid=="green91" or bool(manifest.get("ai_enhanced")),
+            "preview_policy":"unchanged_source_bytes_no_reencoding",
             "images":sorted(output,key=lambda row:row["number"])}
 
 def build(folders,output,quality="web"):

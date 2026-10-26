@@ -156,7 +156,7 @@ async def media(album_id: str, image_num: int, kind: str, download: bool = Query
     expected_prefix = "previews" if kind == "preview" else "originals"
     if not key.startswith(expected_prefix + "/" + album_id + "/"):
         raise HTTPException(status_code=500, detail="Manifest media path mismatch")
-    limit = 5_000_000 if kind == "preview" else 140_000_000
+    limit = 140_000_000  # preview endpoints also preserve full source bytes
     digest_field = "sha256" if kind == "original" else "preview_sha256"
     size_field = "bytes" if kind == "original" else "preview_bytes"
     declared_digest = img.get(digest_field)

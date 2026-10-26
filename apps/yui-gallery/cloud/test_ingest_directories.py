@@ -35,6 +35,7 @@ def main():
             original=cloud/item["key"]
             preview=cloud/item["preview"]
             assert original.is_file() and preview.is_file()
+            assert original.read_bytes()==preview.read_bytes(), "Lossy preview transformation forbidden"
             assert hashlib.sha256(original.read_bytes()).hexdigest()==item["sha256"]
             assert hashlib.sha256(preview.read_bytes()).hexdigest()==item["preview_sha256"]
             assert original.read_bytes()==(source/f"{item['number']:03d}.jpg").read_bytes()

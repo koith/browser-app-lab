@@ -1,0 +1,77 @@
+{
+  "checked_at": "2026-10-26T17:34:24.411746+00:00",
+  "base": "http://localhost:8765/",
+  "engine": "chromium",
+  "version": "v0.1.0-beta.4",
+  "viewport": [
+    390,
+    844
+  ],
+  "iphone_real_device": false,
+  "network": "TLS-verified requests bridge",
+  "private_cloud_verified": 0,
+  "albums": [
+    {
+      "id": "athletic-club104",
+      "decoded_lightbox": 104,
+      "sha256_browser_downloads": 0
+    },
+    {
+      "id": "teddy-bear97",
+      "decoded_lightbox": 97,
+      "sha256_browser_downloads": 0
+    },
+    {
+      "id": "green91",
+      "decoded_lightbox": 91,
+      "sha256_browser_downloads": 0
+    },
+    {
+      "id": "wet-yui80",
+      "decoded_lightbox": 80,
+      "sha256_browser_downloads": 0
+    },
+    {
+      "id": "yuis-present33",
+      "decoded_lightbox": 33,
+      "sha256_browser_downloads": 0
+    },
+    {
+      "id": "v04",
+      "decoded_lightbox": 10,
+      "sha256_browser_downloads": 10
+    },
+    {
+      "id": "cn-yuntu8",
+      "decoded_lightbox": 4,
+      "sha256_browser_downloads": 4
+    },
+    {
+      "id": "cn-huantuji",
+      "decoded_lightbox": 3,
+      "sha256_browser_downloads": 3
+    },
+    {
+      "id": "cn-chaotuji",
+      "decoded_lightbox": 3,
+      "sha256_browser_downloads": 3
+    },
+    {
+      "id": "cn-miaohuaying",
+      "decoded_lightbox": 3,
+      "sha256_browser_downloads": 3
+    },
+    {
+      "id": "cn-yingyuge",
+      "decoded_lightbox": 2,
+      "sha256_browser_downloads": 2
+    },
+    {
+      "id": "cn-wantuzhi-everyday",
+      "decoded_lightbox": 1,
+      "sha256_browser_downloads": 1
+    }
+  ],
+  "decoded_image_entries": 431,
+  "browser_download_sha256_verified": 26
+}

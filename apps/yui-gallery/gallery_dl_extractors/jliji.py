@@ -1,11 +1,12 @@
 """Official gallery-dl external-extractor protocol for publicly visible Yui sets.
 
-This adapter uses a real Chromium page for lazy-loaded photo addresses,
-then hands each individual, original network file back to gallery-dl.
+Read public server-rendered data-full addresses through TLS-verified HTTP,
+then hand each unchanged network file back to gallery-dl.
 No login, subscription access, or compressed output.
 """
 from __future__ import annotations
 import re
+from html import unescape
 from gallery_dl.extractor.common import Extractor, Message
 
 SETS={
@@ -18,7 +19,7 @@ SETS={
 class JlijiYuiSetExtractor(Extractor):
     category="yui_jliji"
     subcategory="set"
-    pattern=r"https?://(?:www\.)?jliji\.com/set/(12343|14973|14346|19356)(?:/?(?:\?.*)?)?$"
+    pattern=r"https?://(?:www\.)?jliji\.com/set/(\d+)(?:/?(?:\?.*)?)?$"
     example="https://www.jliji.com/set/12343"
     directory_fmt=("YUI","{album_id}")
     filename_fmt="{num:03}.{extension}"
@@ -29,34 +30,36 @@ class JlijiYuiSetExtractor(Extractor):
         self.set_id=match.group(1)
 
     def items(self):
-        from playwright.sync_api import sync_playwright
-        album_id,title,gallery_id,expected=SETS[self.set_id]
         origin=f"https://www.jliji.com/set/{self.set_id}"
-        prefix=f"https://cdn.jliji.com/galleries/buondua/{gallery_id}/"
+        html=self.request(origin).text
+        heading=re.search(r"<h1[^>]*>(.*?)</h1>", html, re.S)
+        visible_title=unescape(re.sub(r"<[^>]+>", "", heading.group(1))).strip() if heading else ""
+        if self.set_id in SETS:
+            album_id,title,gallery_id,expected=SETS[self.set_id]
+        else:
+            if "Yui (유이)" not in visible_title:
+                raise ValueError("Not the requested Korean Yui; refuse ambiguous model")
+            count=re.search(r"(\d+)P\b", visible_title)
+            if not count:
+                raise ValueError("Public page has no declared image count")
+            expected=int(count.group(1))
+            album_id,title,gallery_id=f"jliji-{self.set_id}",visible_title,None
         selected={}
-        with sync_playwright() as playwright:
-            browser=playwright.chromium.launch(headless=True)
-            try:
-                page=browser.new_page(viewport={"width":1280,"height":900})
-                page.goto(origin,wait_until="domcontentloaded",timeout=35000)
-                page.wait_for_timeout(600)
-                for _ in range(28):
-                    page.evaluate("window.scrollBy(0, Math.max(650, innerHeight*0.92))")
-                    page.wait_for_timeout(120)
-                urls=page.locator("img[data-full]").evaluate_all(
-                    "(imgs)=>imgs.map(im=>im.getAttribute('data-full')).filter(Boolean)")
-                for url in urls:
-                    if not url.startswith(prefix):
-                        continue
-                    match=re.search(r"/(\d+)\.(jpe?g|png|webp)(?:\?.*)?$",url,re.I)
-                    if match:
-                        selected[int(match.group(1))]=url
-            finally:
-                browser.close()
+        groups={}
+        for url in re.findall(r'data-full=["\x27]([^"\x27]+)',html):
+            url=unescape(url)
+            match=re.fullmatch(r"https://cdn\.jliji\.com/galleries/buondua/(\d+)/(\d+)\.(jpe?g|png|webp)",url,re.I)
+            if match:
+                gid,num,_=match.groups()
+                groups.setdefault(int(gid),{})[int(num)]=url
+        if gallery_id is not None:
+            selected=groups.get(gallery_id,{})
+        elif len(groups)==1:
+            selected=next(iter(groups.values()))
         if set(selected)!=set(range(1,expected+1)):
             raise ValueError(f"Incomplete publicly visible set {album_id}: {len(selected)}/{expected}")
-        common={"album_id":album_id,"title":title,"set_id":self.set_id}
+        common={"album_id":album_id,"title":title,"set_id":self.set_id,"expected":expected}
         yield Message.Directory,None,common
         for num,url in sorted(selected.items()):
             extension=url.rsplit(".",1)[-1].split("?",1)[0].lower()
-            yield Message.Url,url,{**common,"num":num,"extension":extension,"source_page":origin}
+            yield Message.Url,url,{**common,"num":num,"extension":extension,"source_page":origin,"image_url":url}
