@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "project": "4LEAF 원작 복원 웹앱",
   "canonicalFile": "apps/4leaf/rog/docs/RESTORATION_LEDGER.json",
-  "updatedAt": "2026-10-26",
+  "updatedAt": "2026-10-27",
   "sourceOfTruth": "Git 저장소의 이 JSON과 커밋 이력. 과거 챗 대화는 기록 근거이지 진행 상태의 원본 데이터가 아님.",
   "operatingRule": "새 요청 즉시 작업 등록 → open 목록 조회 → 실제 수정 → 원본 근거/코드/브라우저/배포 검증 → 검증 증거와 함께 상태 전이. 부분 구현을 원작 완성으로 표시 금지.",
   "statusDefinitions": {
@@ -1191,6 +1191,21 @@
         "P0-BOARD",
         "P0-DICE",
         "DIE-01",
+        "P0-RELEASE",
+        "P0-CHAT"
+      ]
+    },
+    {
+      "id": "REQ-20261027-001",
+      "date": "2026-10-27",
+      "origin": "user",
+      "text": "Continue and complete the original 4LEAF source restoration, not merely write a report. Preserve prior merged PRs and outstanding developer ledger; implement actual source OBS action/front improvements, genuine native UI and gameplay; verify and deploy, do not claim unavailable original dice 3D source as finished.",
+      "taskIds": [
+        "P0-ACTOR",
+        "ACT-03",
+        "ACT-04",
+        "P0-DICE",
+        "P0-PODIUM",
         "P0-RELEASE",
         "P0-CHAT"
       ]
@@ -6304,6 +6319,40 @@
         "https://github.com/koith/browser-app-lab/blob/feat/4leaf-original-obs-right-party-20261026/apps/4leaf/rog/game.js",
         "https://github.com/koith/browser-app-lab/blob/feat/4leaf-original-obs-right-party-20261026/apps/4leaf/rog/dice-native-chessmen-hud.css",
         "https://github.com/koith/browser-app-lab/blob/feat/4leaf-original-obs-right-party-20261026/apps/4leaf/rog/tests/dice-2004-battle-selector-source.cjs"
+      ]
+    },
+    {
+      "seq": 262,
+      "date": "2026-10-27",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261027-001",
+      "taskIds": [
+        "P0-ACTOR",
+        "ACT-03",
+        "ACT-04",
+        "P0-DICE",
+        "P0-PODIUM",
+        "P0-RELEASE",
+        "P0-CHAT"
+      ],
+      "details": "User requests all outstanding original 4LEAF restoration work to continue, prioritizing actual code/release over reports. Existing 58 tracked tasks must retain verified statuses. Newly audited source front 25/30 pair for 0044/46/48 and native Dice/IMG.pak stats art selected as independently verifiable next source restorations; source FPS/die 3D remain unknown."
+    },
+    {
+      "seq": 263,
+      "date": "2026-10-27",
+      "type": "SOURCE_OBS_FRONT_WALK_THREE_ADDITIONAL_ACTORS_AND_NATIVE_164x125_STATS_REAL_GAME_PENDING_CI",
+      "requestId": "REQ-20261027-001",
+      "taskIds": [
+        "P0-ACTOR",
+        "ACT-03",
+        "ACT-04",
+        "P0-RELEASE"
+      ],
+      "details": "Genuine 2002 OBS.pak bulk extracted original upside-down frame images 1044-25/30,1046-25/30,1048-25/30 individually visually inspected: matching camera-facing full-body silhouettes between 25 and 30 for three previously front-static actors. In actual game.js Genesis actor controller add original 25->30->25->30 front-preserving WEB walk for these 3 real chessmen (existing approved 0040/42/43 retained); actual native frame index/data provenance exposed, native 2002 action table/FPS unknown. Replace WEB synthetic selected chessman detail portrait/paragraph with actual source IMG.pak stats.png 164x125 bitmap alongside genuine selected CardData portrait and live role/move/attack/defense/intelligence/ability/point DOM fields. Source sprite unmodified and source pixels displayed at exact 164x125, layout NOT claimed native. Existing real right four-up OBS bodies, game stats, 104-cell DMP, 355x113 native podium, chat preserved. New Chromium+WebKit playable browser QA checks 6-source forward animation coverage, live source stats image and actual 800x600 BATTLE vs archived 2004 BATTLE screenshot. beta27 cache v114; this is feature branch work awaiting CI/Pages confirmation; original D4/D6 meshes/UV/physics still missing. Do not mark any prior original-restoration task wholly complete until full evidence.",
+      "evidence": [
+        "https://github.com/koith/browser-app-lab/blob/feat/4leaf-original-obs-front-steps-native-stats-20261027/apps/4leaf/rog/genesis-chessman-actors.js",
+        "https://github.com/koith/browser-app-lab/blob/feat/4leaf-original-obs-front-steps-native-stats-20261027/apps/4leaf/rog/game.js",
+        "https://github.com/koith/browser-app-lab/blob/feat/4leaf-original-obs-front-steps-native-stats-20261027/apps/4leaf/rog/tests/obs-reviewed-front-walk-native-stats.cjs"
       ]
     }
   ]
