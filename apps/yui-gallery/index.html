@@ -1,96 +1,14 @@
 <!doctype html>
-<html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="color-scheme" content="dark"><title>Yui | 사진 갤러리 & 화보 아카이브</title>
-<style>
-:root{font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;color-scheme:dark;color:#edf2fc;background:#0b1018}
-*{box-sizing:border-box}body{margin:0}a{color:inherit;text-decoration:none}button,input{font:inherit}button{cursor:pointer}header{max-width:1280px;margin:auto;padding:36px 23px 26px}
-.kicker{letter-spacing:.19em;color:#c3b1fc;font-size:11px;font-weight:750}h1{font-size:clamp(36px,6vw,67px);letter-spacing:-.06em;line-height:1.08;margin:12px 0}
-h1 span{color:#b8b4d4}.lede{color:#abb5c8;line-height:1.65;max-width:800px;font-size:14px}
-.toolbar{max-width:1280px;margin:auto;padding:0 23px 17px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.tabs,.filters{display:flex;flex-wrap:wrap;gap:7px}.tab,.filter,.btn{border:1px solid #384154;color:#d9e1f0;background:#18212f;padding:9px 14px;border-radius:999px;font-size:13px}
-.tab.active,.filter.active{background:#e7e4f7;color:#172033;font-weight:750}
-#search{background:#151e2d;border:1px solid #374255;padding:11px 14px;border-radius:12px;color:white;min-width:min(320px,90vw)}
-main{max-width:1280px;margin:0 auto;padding:0 23px 80px}
-.stats{display:flex;gap:12px;flex-wrap:wrap;margin:10px 0 20px}.stat{font-size:12px;border:1px solid #2c394d;padding:6px 10px;border-radius:8px;color:#a6b5c9}
-.wall{columns:5 180px;column-gap:12px}.media{display:inline-block;width:100%;margin:0 0 12px;position:relative;overflow:hidden;border-radius:12px;background:#20293b;border:1px solid #354257}
-.media img{display:block;width:100%;height:auto;min-height:140px;object-fit:cover;transition:transform .22s}.media:hover img{transform:scale(1.025)}
-.media .shade{position:absolute;inset:auto 0 0;background:linear-gradient(transparent,#000a);padding:26px 9px 9px;font-size:11px;opacity:0;transition:.15s}.media:hover .shade{opacity:1}
-.albumgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
-.album{background:#171f2d;border:1px solid #354257;padding:18px;border-radius:15px;display:flex;flex-direction:column;min-height:180px}
-.album small{font-size:11px;color:#b6aad8}.album strong{line-height:1.4;font-size:16px;margin:13px 0 8px}
-.album p{font-size:12px;color:#a9b3c6;margin:0 0 16px}.album .actions{margin-top:auto;display:flex;gap:7px;flex-wrap:wrap}.album a{font-size:12px;background:#29364a;border-radius:8px;padding:7px 10px}
-.notice{color:#8999b0;font-size:12px;line-height:1.8;padding-top:23px;max-width:910px}
-#lightbox{position:fixed;inset:0;background:#04070af2;z-index:50;display:none;justify-content:center;align-items:center;flex-direction:column;padding:18px;gap:12px}
-#lightbox.show{display:flex}#lightbox img{max-width:min(98vw,1200px);max-height:76vh;object-fit:contain;border-radius:8px}
-#lightbox .controls{display:flex;gap:9px;align-items:center;flex-wrap:wrap;justify-content:center}.controls button,.controls a{border:1px solid #606b81;background:#1c2735;color:#fff;padding:10px 13px;border-radius:8px;font-size:13px}
-.empty{padding:55px 20px;color:#bec9dc;text-align:center;border:1px dashed #4b5670;border-radius:15px}
-@media(max-width:950px){.albumgrid{grid-template-columns:repeat(3,minmax(0,1fr))}.wall{columns:4 160px}}
-@media(max-width:630px){header{padding:24px 16px 18px}main,.toolbar{padding-left:15px;padding-right:15px}.albumgrid{grid-template-columns:repeat(2,minmax(0,1fr))}.wall{columns:2 130px}.album{padding:12px;min-height:160px}.album strong{font-size:14px}.media .shade{opacity:1}}
-.sortcontrol{display:flex;align-items:center;gap:8px;font-size:12px;color:#bcc8dc}.sortcontrol select{background:#1c2535;border:1px solid #414b60;color:#eef1fa;border-radius:9px;padding:10px;font-size:13px}.sortcontrol[hidden]{display:none}.album .when{font-size:11px;color:#a1aec4;margin-bottom:14px}.album-cover{width:100%;height:200px;object-fit:cover;border-radius:10px;margin-bottom:11px;background:#273245}.album-empty{width:100%;height:130px;border:1px dashed #52607a;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#8a9bb6;margin-bottom:11px;font-size:12px}.open-album{background:#aeaded!important;color:#0b1020!important;border:none;border-radius:8px;cursor:pointer;padding:8px 12px!important;font-size:12px;font-weight:700}.album .actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap}</style></head><body><header><div class="kicker">YUI · PERSONAL REVIEW INDEX</div><h1>심유이 <span>/ Gallery</span></h1>
-<div class="lede">화보별 공개 이미지 파일의 실제 저장·열람을 우선합니다. 각 화보에서 보관 사진을 열면 서버에 저장된 이미지 파일만 표시합니다. 출처 전체 장수와 실제 보관 장수는 구분합니다. SNS는 별도 탭입니다.</div><div style="margin-top:18px;padding:14px 16px;border:1px solid #625e97;background:#1f2138;border-radius:12px;font-size:14px;line-height:1.7"><strong>기존 405장 실파일: 비공개 임시 백업 · 1TB 본보관 연결 대기</strong><div style="color:#b9c4de;font-size:12px;margin:5px 0 10px">아래 공개 목록의 Teddy Bear 10장은 이전 미리보기입니다. 405장 웹판은 무료 대용량 TeraBox로 이전하기 전의 Drive 임시 ZIP 백업입니다. 무료 1TB 본보관과 iPhone 온라인 직접 열람은 아직 검증하지 않았습니다. 발행사 원본은 아닙니다.</div><a class="btn" style="display:inline-block;border-color:#b1a7f2;background:#413e6c;color:#fff" href="zip-gallery.html">실파일 405장 화보 뷰어 열기</a></div></header>
-<div class="toolbar"><div class="tabs"><button class="tab active" data-view="albums">화보 아카이브</button><a class="btn" href="zip-gallery.html" title="비공개 Drive ZIP에서 실제 405장 열람">임시 백업 405장 ZIP 뷰어</a><button class="tab" data-view="chinese">중국 공개 이미지</button><button class="tab" data-view="media">SNS (별도)</button><button id="downloadAll" class="btn">공개 사진 40장씩 ZIP ↓</button><a class="btn" href="https://x.com/super_yuisan/media" target="_blank" rel="noopener">본인 SNS ↗</a></div><label class="sortcontrol" id="mediaSortWrap">사진 정렬 <select id="mediaSort" aria-label="사진 정렬"><option value="date-desc">최신순</option><option value="date-asc">오래된순</option><option value="name-asc">이름 오름차순</option><option value="name-desc">이름 내림차순</option></select></label><label class="sortcontrol" id="albumSortWrap" hidden>화보 정렬 <select id="albumSort" aria-label="화보 정렬"><option value="date-desc">최신순</option><option value="date-asc">오래된순</option><option value="name-asc">이름 오름차순</option><option value="name-desc">이름 내림차순</option></select></label><input type="search" id="search" placeholder="사이트·화보 이름 검색" aria-label="화보 검색"></div>
-<main><div class="stats"><span class="stat" id="total">이미지 로딩 중</span><span class="stat" id="update">갱신 상태 확인 중</span><span class="stat">공개 웹판 · 개별 열람</span></div>
-<div id="media" class="wall" hidden></div><div id="albums"><div id="filters" class="filters" style="margin:12px 0 20px"></div><label style="display:flex;gap:8px;align-items:center;font-size:13px;margin:0 0 16px;color:#cbd6eb"><input type="checkbox" id="onlyStored" style="accent-color:#acb7f5"> 실제 이미지 저장된 화보만 보기</label><label style="display:flex;gap:8px;align-items:center;font-size:13px;margin:0 0 16px;color:#cbd6eb"><input type="checkbox" id="includeUnassigned" style="accent-color:#acb7f5"> 작품 미분류 이미지도 포함</label><div id="albumgrid" class="albumgrid"></div></div>
-<div class="notice">화보 탭의 보관 사진은 웹사이트에 실제 저장된 파일입니다. 아직 보관되지 않은 화보는 0장으로 표시합니다. SNS 탭은 외부 링크이며 유료 화보 전체 원본은 포함되지 않습니다.</div></main>
-<div id="lightbox" role="dialog" aria-modal="true"><img id="big" alt="심유이 공개 SNS 사진"><div class="controls"><button id="prev">‹ 이전</button><span id="counter"></span><button id="next">다음 ›</button><button id="saveOne">현재 사진 저장 ↓</button><a id="original" target="_blank" rel="noopener">원본 이미지 ↗</a><a id="post" target="_blank" rel="noopener">게시물 ↗</a><button id="close">닫기 ×</button></div></div>
-<script>
-let photos=[],albums=[],site='전체',view='albums',idx=0,basePhotos=[],chinesePhotos=[],storedAlbums=[],selectedAlbum=null;
-const el=id=>document.getElementById(id), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','&apos;':'&#39;'}[c]));
-function cdn(url,size){let m=url.match(/^(https:\/\/pbs\.twimg\.com\/media\/[^.?]+)\.(jpg|jpeg|png|webp)(?:\?.*)?$/);return m?m[1]+'?format='+m[2]+'&name='+size:url}
-function snowflakeDate(post){try{const id=String(post||'').split('/status/')[1]?.split('/')[0];if(!id)return '';return new Date(Number((BigInt(id)>>22n)+1288834974657n)).toISOString()}catch{return ''}}
-function photoDate(p){return p.date&&Number.isFinite(Date.parse(p.date))?new Date(p.date).toISOString():snowflakeDate(p.post||'')}
-function norm(s){return String(s||'').normalize('NFKC')}
-function compareSort(a,b,order,kind){const name=x=>norm(kind==='media'?(x.name||x.caption||x.url.split('/').pop()):(x.title||''));const date=x=>kind==='media'?photoDate(x):x.releaseDate||x.sourceUpdatedAt||'';let z;if(order.startsWith('name'))z=name(a).localeCompare(name(b),'ko',{numeric:true,sensitivity:'base'});else{const ta=Date.parse(date(a))||0,tb=Date.parse(date(b))||0;z=(ta===0)!==(tb===0)?(ta===0?1:-1):tb-ta;}return (order==='date-asc'?(Date.parse(date(a))&&Date.parse(date(b))?-z:z):order==='name-desc'?-z:z)||String(a.url||a.title).localeCompare(String(b.url||b.title));}
-function applyPhotoSort(){photos=[...(view==='chinese'?chinesePhotos:basePhotos)].sort((a,b)=>compareSort(a,b,el('mediaSort').value,'media'))}
-function renderMedia(){applyPhotoSort();el('total').textContent=(view==='chinese'?'중국 무료 미리보기 ':'공개 SNS 사진 ')+photos.length+'장';el('media').innerHTML=photos.length?photos.map((p,i)=>'<div class="media"><img loading="lazy" referrerpolicy="no-referrer" data-i="'+i+'" src="'+esc(cdn(p.url,'medium'))+'" alt="공개 SNS 사진 '+(i+1)+'"><div class="shade">'+esc((photoDate(p).slice(0,10)||p.site||'날짜 미상'))+' · 확대 보기</div></div>').join(''):'<div class="empty">공개 SNS 사진을 읽지 못했습니다. 아래 본인 SNS 링크에서 확인할 수 있습니다.</div>';
-el('media').querySelectorAll('img').forEach(im=>{im.onclick=()=>show(+im.dataset.i);im.onerror=()=>{im.closest('.media').style.display='none'}})}
-function openStoredAlbum(a){
- const stored=storedAlbums.find(x=>x.id===a.id);
- selectedAlbum=a;
- const entries=stored?.images||[];
- photos=entries.map((x,i)=>({url:x.url,name:a.title+' #'+String(i+1).padStart(3,'0'),date:a.releaseDate||'',post:a.source,stored:true,site:a.site}));
- el('albums').hidden=true;el('media').hidden=false;el('mediaSortWrap').hidden=false;el('downloadAll').hidden=true;
- el('total').textContent=a.site+' / '+a.title+' · 실제 보관 '+photos.length+'장 / 출처 표시 '+(a.photos??'?')+'장';
- el('media').innerHTML=photos.length?photos.map((p,i)=>'<div class="media"><img loading="lazy" data-i="'+i+'" src="'+esc(p.url)+'" alt="'+esc(p.name)+'"><div class="shade">'+esc(p.name)+' · 확대 보기</div></div>').join(''):'<div class="empty">이 화보의 실제 보관 이미지가 아직 없습니다. 출처 페이지에서 공개 자료를 확인할 수 있습니다.</div>';
- el('media').querySelectorAll('img').forEach(im=>im.onclick=()=>show(+im.dataset.i));
-}
-function renderAlbums(){
- const q=el('search').value.toLowerCase();
- let f=albums.filter(a=>(site==='전체'||a.site===site)&&(''+a.site+' '+a.title).toLowerCase().includes(q));
- if(!el('includeUnassigned').checked)f=f.filter(a=>!a.id.startsWith('cn-'));
- if(el('onlyStored').checked)f=f.filter(a=>(storedAlbums.find(x=>x.id===a.id)?.images||[]).length>0);
- f.sort((a,b)=>compareSort(a,b,el('albumSort').value,'album'));
- el('albumgrid').innerHTML=f.length?f.map(a=>{
-  const stored=storedAlbums.find(x=>x.id===a.id),n=stored?.images?.length||0;
-  const missing=Number.isFinite(a.photos)?Math.max(0,a.photos-n):null;
-  const cover=n?'<img class="album-cover" loading="lazy" src="'+esc(stored.images[0].url)+'" alt="'+esc(a.title)+' 공개 미리보기">':'<div class="album-empty">실제 저장 파일 없음</div>';
-  return '<div class="album">'+cover+'<small>'+esc(a.site)+'</small><strong>'+esc(a.title)+'</strong><p>실제 저장 '+n+'장 / 출처 표기 '+esc(a.photos??'미확인')+'장 · '+(missing===null?'완성 여부 미확인':missing+'장 미확보')+'</p><div class="when">'+esc(a.releaseDate?'발행 '+a.releaseDate:a.sourceUpdatedAt?'목록 갱신 '+a.sourceUpdatedAt:'발행일 미확인')+'</div><div class="actions"><button class="open-album" data-id="'+esc(a.id)+'" '+(n?'':'disabled')+'>보관 이미지 열람</button><a href="'+esc(a.source)+'" target="_blank" rel="noopener">출처 ↗</a></div></div>'
- }).join(''):'<div class="empty">조건에 맞는 실제 저장 화보가 없습니다.</div>';
- el('total').textContent='작품 '+f.length+'개 · 작품별 실물 파일 '+f.reduce((n,a)=>n+(storedAlbums.find(s=>s.id===a.id)?.images?.length||0),0)+'장 · 미분류는 별도';
- el('albumgrid').querySelectorAll('.open-album').forEach(b=>b.onclick=()=>{const a=albums.find(x=>x.id===b.dataset.id);if(a)openStoredAlbum(a)});
-}
-function renderFilters(){let sites=['전체',...new Set(albums.map(a=>a.site))];el('filters').innerHTML=sites.map(s=>'<button class="filter '+(site===s?'active':'')+'" data-s="'+esc(s)+'">'+esc(s)+'</button>').join('');el('filters').querySelectorAll('button').forEach(b=>b.onclick=()=>{site=b.dataset.s;renderFilters();renderAlbums()})}
-function show(i){idx=(i+photos.length)%photos.length;const p=photos[idx];el('big').src=p.stored?p.url:cdn(p.url,'orig');el('original').href=p.stored?p.url:cdn(p.url,'orig');el('post').href=p.post;el('counter').textContent=(idx+1)+' / '+photos.length;el('lightbox').classList.add('show');document.body.style.overflow='hidden'}
-function hide(){el('lightbox').classList.remove('show');document.body.style.overflow=''}
-async function savePhoto(p,auto=true){const u=p.stored?p.url:cdn(p.url,'orig');const r=await fetch(u,{mode:'cors'});if(!r.ok)throw Error('HTTP '+r.status);const blob=await r.blob();if(!blob.type.startsWith('image/'))throw Error('이미지 파일이 아닙니다');if(auto){const a=document.createElement('a'),link=URL.createObjectURL(blob);a.href=link;a.download=new URL(u).pathname.split('/').pop().split('?')[0]+'.jpg';a.click();setTimeout(()=>URL.revokeObjectURL(link),40000)}return blob}
-function toast(msg){el('update').textContent=msg}
-el('saveOne').onclick=async()=>{try{await savePhoto(photos[idx]);toast('사진 저장 요청 완료')}catch(e){toast('자동 저장 실패 · 원본 이미지 링크 이용');window.open(cdn(photos[idx].url,'orig'),'_blank')}};
-async function loadJSZip(){if(window.JSZip)return;await new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js';script.onload=resolve;script.onerror=()=>reject(Error('ZIP 압축 라이브러리 로드 실패'));document.head.append(script)})}
-let zipCursor=0;
-el('downloadAll').onclick=async()=>{const button=el('downloadAll');button.disabled=true;let n=0;const step=40,from=Math.min(zipCursor,photos.length),batch=photos.slice(from,from+step);
-try{if(!batch.length)throw Error('현재 내려받을 사진이 없습니다');await loadJSZip();let zip=new JSZip(),fails=0;
-for(let i=0;i<batch.length;i++){try{const blob=await savePhoto(batch[i],false);const ext=blob.type.includes('png')?'png':blob.type.includes('webp')?'webp':'jpg';zip.file(String(from+i+1).padStart(4,'0')+'.'+ext,blob);n++}catch(e){fails++}
-button.textContent='이미지 '+(i+1)+'/'+batch.length+' 처리 중'}
-if(!n)throw Error('다운로드 가능한 파일 없음');
-const blob=await zip.generateAsync({type:'blob',compression:'STORE'});const link=URL.createObjectURL(blob),a=document.createElement('a');
-a.href=link;a.download='Yui_Public_SNS_'+(from+1)+'-'+(from+batch.length)+'_photos.zip';a.click();setTimeout(()=>URL.revokeObjectURL(link),60000);
-zipCursor=(from+batch.length)%photos.length;toast('공개 사진 '+n+'개 ZIP 생성 · '+(from+1)+'~'+(from+batch.length)+' / 전체 '+photos.length+' · 실패 '+fails+'개')}
-catch(e){toast('ZIP 실패: '+e.message)}finally{button.disabled=false;button.textContent='공개 사진 다음 40장 ZIP ↓'}};
-
-el('close').onclick=hide;el('prev').onclick=()=>show(idx-1);el('next').onclick=()=>show(idx+1);
-document.addEventListener('keydown',e=>{if(e.key==='Escape')hide();if(el('lightbox').classList.contains('show')&&e.key==='ArrowRight')show(idx+1);if(el('lightbox').classList.contains('show')&&e.key==='ArrowLeft')show(idx-1)});
-el('lightbox').onclick=e=>{if(e.target===el('lightbox'))hide()};
-document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{view=b.dataset.view;document.querySelectorAll('[data-view]').forEach(x=>x.classList.toggle('active',x===b));el('albums').hidden=view!=='albums';el('media').hidden=view==='albums';el('search').style.display=view==='albums'?'':'none';el('mediaSortWrap').hidden=view==='albums';el('downloadAll').hidden=view!=='media';selectedAlbum=null;el('albumSortWrap').hidden=view!=='albums';view==='albums'?renderAlbums():renderMedia()});
-el('mediaSortWrap').hidden=true;el('albumSortWrap').hidden=false;el('downloadAll').hidden=true;el('search').style.display='';el('search').oninput=renderAlbums;el('mediaSort').onchange=()=>{zipCursor=0;renderMedia()};el('albumSort').onchange=renderAlbums;el('onlyStored').onchange=renderAlbums;el('includeUnassigned').onchange=renderAlbums;
-Promise.all([fetch('feed.json?d='+Date.now()).then(r=>{if(!r.ok)throw Error(r.status);return r.json()}),fetch('albums.json').then(r=>r.json()),fetch('chinese-previews.json').then(r=>{if(!r.ok)throw Error(r.status);return r.json()}),fetch('paginated-sns-index.json?d='+Date.now()).then(r=>{if(!r.ok)throw Error(r.status);return r.json()}),fetch('stored-albums.json?d='+Date.now()).then(r=>r.ok?r.json():{albums:[]})]).then(([feed,cat,chinese,history,stored])=>{basePhotos=[...new Map([...(history.images||[]),...(feed.images||[])].map(p=>[p.url,p])).values()];albums=cat.albums||[];storedAlbums=stored.albums||[];el('onlyStored').checked=storedAlbums.some(x=>!x.id.startsWith('cn-')&&(x.images||[]).length>0);el('includeUnassigned').checked=false;chinesePhotos=chinese.images||[];el('update').textContent='마지막 확인 '+(feed.updated||'정보 없음');renderFilters();renderAlbums()}).catch(e=>{el('total').textContent='자료 읽기 실패';el('update').textContent=e.message});
-</script></body></html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="color-scheme" content="dark"><title>YUI · PHOTO GALLERY</title><link rel="stylesheet" href="gallery.css"></head>
+<body>
+<header class="top"><a class="logo" href="./" aria-label="YUI Gallery 홈">YUI<span> / gallery</span></a><nav aria-label="갤러리 탐색"><button class="nav active" data-view="photos">사진</button><button class="nav" data-view="albums">화보</button><button class="nav" data-view="sns">SNS</button></nav><a class="library-link" href="zip-gallery.html" title="내 화보 ZIP 불러오기">내 보관함 <span aria-hidden="true">↗</span></a></header>
+<main>
+ <section class="heading"><div class="eyebrow">PHOTO ARCHIVE</div><div class="heading-line"><h1 id="heading">사진</h1><span id="count" class="count"></span></div><p id="subhead">실제 저장된 사진을 바로 열어보세요.</p></section>
+ <section class="tools" aria-label="사진 필터"><input id="search" type="search" placeholder="화보 검색" aria-label="화보 검색"><select id="order" aria-label="사진 순서"><option value="default">기본순</option><option value="reverse">역순</option></select></section>
+ <section id="photoGrid" class="masonry" aria-label="사진 목록"></section>
+ <section id="albumGrid" class="album-grid" hidden></section>
+ <section id="empty" class="empty" hidden>표시할 사진이 없습니다.</section>
+</main>
+<div id="viewer" class="viewer" role="dialog" aria-modal="true" aria-label="사진 확대 보기" hidden><div class="viewer-top"><span id="viewerTitle"></span><button id="close" aria-label="닫기" title="닫기">✕</button></div><button id="prev" class="turn previous" aria-label="이전 이미지">‹</button><img id="large" alt="선택한 사진" /><button id="next" class="turn following" aria-label="다음 이미지">›</button><div class="viewer-bottom"><span id="position"></span><button id="save" title="사진 저장">저장 ↓</button></div></div>
+<footer>사진은 기존 저장 파일을 표시합니다. 발행사 원본과 공개 웹 이미지는 구분해 보관합니다. <a href="zip-gallery.html">비공개 화보 보관함</a></footer>
+<script src="gallery.js" defer></script></body></html>
