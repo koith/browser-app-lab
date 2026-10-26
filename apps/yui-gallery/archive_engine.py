@@ -11,6 +11,8 @@ from collections import deque
 from pathlib import Path
 from datetime import datetime, timezone
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 from PIL import Image
 from playwright.async_api import async_playwright
 
@@ -184,7 +186,7 @@ async def discover(sources, output:Path, max_pages_override=None):
 
 def download(manifest:Path, dest:Path, max_images=150):
     data=json.loads(manifest.read_text(encoding='utf-8'));dest.mkdir(parents=True,exist_ok=True)
-    session=requests.Session();known={};sha_known={};totals={}
+    session=requests.Session();session.mount('https://',HTTPAdapter(max_retries=Retry(total=3,backoff_factor=1,status_forcelist=[429,500,502,503,504],allowed_methods=['GET'])));known={};sha_known={};totals={}
     for source in data['sources']:
         folder=dest/source['id'];folder.mkdir(exist_ok=True)
         images=source['urls_discovered'][:max_images];done=[];errors=[]
