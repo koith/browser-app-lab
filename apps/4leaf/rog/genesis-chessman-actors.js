@@ -361,7 +361,8 @@
   // across successive DMP cell transitions; keep the original OBS pixels.
   const continueSourceWalk=action==='walk'&&pawn.dataset.actorPose==='walk'&&
    pawn.dataset.actorRig==='original-obs-sprite'&&
-   pawn.dataset.sourceWalkCoverage?.startsWith('8-of-8-');
+   (pawn.dataset.sourceFrontWalkVerified==='true'||
+    pawn.dataset.sourceWalkCoverage?.startsWith('8-of-8-'));
   clearTimeout(timeouts.get(pawn));
   if(!continueSourceWalk){
    pawn.dataset.actorPose=action;
