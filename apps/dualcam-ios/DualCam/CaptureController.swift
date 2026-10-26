@@ -3,7 +3,7 @@ import Combine
 import UIKit
 
 enum CaptureState: Equatable {
-    case preparing, ready, starting, recording, saving, unavailable
+    case preparing, ready, starting, recording, saving, interrupted, unavailable
 }
 
 final class CaptureController: NSObject, ObservableObject {
@@ -25,6 +25,8 @@ final class CaptureController: NSObject, ObservableObject {
     private var configured = false
     private var preparing = false
     private var foreground = true
+    private var audioInterrupted = false
+    private var health: CaptureHealth?
     private var writer: DualMovieWriter?
     private var currentID: UUID?
     private var currentDate: Date?
@@ -33,6 +35,18 @@ final class CaptureController: NSObject, ObservableObject {
     private var saveCallbacks: [() -> Void] = []
     private var watchdog: DispatchSourceTimer?
     private var observers: [NSObjectProtocol] = []
+    @MainActor private var backgroundTask: UIBackgroundTaskIdentifier = .invalid
+    @MainActor private var backgroundToken: UUID?
+
+    private var hasPermissions: Bool {
+        AVCaptureDevice.authorizationStatus(for: .video) == .authorized
+            && AVCaptureDevice.authorizationStatus(for: .audio) == .authorized
+    }
+
+    private var canRecord: Bool {
+        configured && foreground && hasPermissions && session.isRunning
+            && !session.isInterrupted && !audioInterrupted
+    }
 
     override init() {
         super.init()
@@ -62,13 +76,16 @@ final class CaptureController: NSObject, ObservableObject {
         queue.async { [weak self] in
             guard let self else { return }
             do {
+                guard self.writer == nil, !self.saveInProgress else { return }
+                self.configured = false
                 try self.configure()
                 self.configured = true
                 if self.foreground {
                     try self.startSession()
-                    self.update(.ready, "전·후면 카메라와 마이크 준비 완료")
+                    self.updateIdleState(message: "전·후면 카메라와 마이크 준비 완료")
                 }
             } catch {
+                self.configured = false
                 self.update(.unavailable, error.localizedDescription)
             }
         }
@@ -76,8 +93,7 @@ final class CaptureController: NSObject, ObservableObject {
 
     func startRecording() {
         queue.async { [weak self] in
-            guard let self, self.configured, self.foreground,
-                  self.session.isRunning, self.writer == nil, !self.saveInProgress else { return }
+            guard let self, self.canRecord, self.writer == nil, !self.saveInProgress else { return }
             do {
                 guard RecordingStore.freeBytes() >= 200 * 1_024 * 1_024 else {
                     throw RecorderError.message("저장 공간이 부족합니다. 최소 200MB를 확보해 주세요.")
@@ -88,13 +104,9 @@ final class CaptureController: NSObject, ObservableObject {
                 self.currentID = id
                 self.currentDate = Date()
                 self.announcedRecording = false
+                self.health = CaptureHealth(startedAt: ProcessInfo.processInfo.systemUptime)
                 self.update(.starting, "두 카메라와 마이크의 첫 데이터를 기다리는 중")
                 self.startWatchdog()
-                self.queue.asyncAfter(deadline: .now() + 6) { [weak self] in
-                    guard let self, self.currentID == id, let writer = self.writer,
-                          writer.duration == 0 else { return }
-                    self.stopOnQueue(reason: "카메라·마이크에서 데이터를 받지 못해 녹화를 종료했습니다.")
-                }
             } catch { self.showError(error.localizedDescription) }
         }
     }
@@ -102,25 +114,39 @@ final class CaptureController: NSObject, ObservableObject {
     func stopRecording() { queue.async { [weak self] in self?.stopOnQueue() } }
 
     @MainActor func retry() {
+        guard state == .unavailable else { return }
         preparing = false
         Task { await prepare() }
     }
 
     /// Called on the main thread before the app loses active status.
-    func suspend() {
-        let task = UIApplication.shared.beginBackgroundTask(withName: "Finish dual recording")
-        queue.async { [weak self] in
-            guard let self else {
-                DispatchQueue.main.async { if task != .invalid { UIApplication.shared.endBackgroundTask(task) } }
-                return
+    @MainActor func suspend() {
+        // Inactive and background can both arrive for one lock operation.
+        // Reuse one task and reject stale completion/expiration callbacks.
+        let token = backgroundToken ?? UUID()
+        if backgroundToken == nil {
+            backgroundToken = token
+            backgroundTask = UIApplication.shared.beginBackgroundTask(withName: "Finish dual recording") { [weak self] in
+                Task { @MainActor in self?.endBackgroundTask(token: token) }
             }
+        }
+        queue.async { [weak self] in
+            guard let self else { return }
             self.foreground = false
             self.stopOnQueue {
-                if task != .invalid { UIApplication.shared.endBackgroundTask(task) }
+                Task { @MainActor in self.endBackgroundTask(token: token) }
             }
             if self.session.isRunning { self.session.stopRunning() }
             try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
         }
+    }
+
+    @MainActor private func endBackgroundTask(token: UUID) {
+        guard backgroundToken == token else { return }
+        let task = backgroundTask
+        backgroundTask = .invalid
+        backgroundToken = nil
+        if task != .invalid { UIApplication.shared.endBackgroundTask(task) }
     }
 
     func resume() {
@@ -128,10 +154,19 @@ final class CaptureController: NSObject, ObservableObject {
             guard let self else { return }
             self.foreground = true
             guard self.configured else { return }
+            guard self.hasPermissions else {
+                self.configured = false
+                self.update(.unavailable, "카메라·마이크 권한이 변경됐습니다. 설정을 확인하고 재시도해 주세요.")
+                return
+            }
+            guard !self.session.isInterrupted, !self.audioInterrupted else {
+                if !self.saveInProgress { self.update(.interrupted, "전화 또는 다른 앱의 카메라·마이크 사용이 끝나기를 기다리고 있습니다.") }
+                return
+            }
             do {
                 if !self.session.isRunning { try self.startSession() }
                 if self.writer == nil, !self.saveInProgress {
-                    self.update(.ready, "전·후면 카메라와 마이크 준비 완료")
+                    self.updateIdleState(message: "전·후면 카메라와 마이크 준비 완료")
                 }
             } catch { self.update(.unavailable, error.localizedDescription) }
         }
@@ -258,6 +293,7 @@ final class CaptureController: NSObject, ObservableObject {
         self.writer = nil
         currentID = nil
         currentDate = nil
+        health = nil
         watchdog?.cancel()
         watchdog = nil
         saveInProgress = true
@@ -266,16 +302,18 @@ final class CaptureController: NSObject, ObservableObject {
             guard let self else { return }
             self.saveInProgress = false
             var errorText = reason
+            var saved = false
             switch result {
             case .success(let duration):
-                do { try RecordingStore.save(Recording(id: id, createdAt: date, duration: duration)) }
+                do {
+                    try RecordingStore.save(Recording(id: id, createdAt: date, duration: duration))
+                    saved = true
+                }
                 catch { errorText = "영상은 저장됐지만 목록을 갱신하지 못했습니다. 파일 앱에서 확인해 주세요.\n\(error.localizedDescription)" }
             case .failure(let error):
                 errorText = [reason, error.localizedDescription].compactMap { $0 }.joined(separator: "\n")
             }
-            let ready = self.foreground && self.session.isRunning
-            self.update(ready ? .ready : (self.foreground ? .unavailable : .preparing),
-                        ready ? "저장 완료 · 다시 녹화할 수 있습니다." : "녹화가 종료됐습니다. 화면을 다시 열거나 재시도해 주세요.")
+            self.updateIdleState(message: saved ? "저장 완료 · 다시 녹화할 수 있습니다." : "저장 중 문제가 발생했습니다. 파일 앱에서 남은 영상을 확인해 주세요.")
             DispatchQueue.main.async {
                 self.startedAt = nil
                 self.refreshRecordings()
@@ -293,10 +331,13 @@ final class CaptureController: NSObject, ObservableObject {
 
     private func startWatchdog() {
         let timer = DispatchSource.makeTimerSource(queue: queue)
-        timer.schedule(deadline: .now() + 2, repeating: 2)
+        timer.schedule(deadline: .now() + 1, repeating: 1)
         timer.setEventHandler { [weak self] in
             guard let self, self.writer != nil else { return }
-            if RecordingStore.freeBytes() < 80 * 1_024 * 1_024 {
+            let stalled = self.health?.stalled(at: ProcessInfo.processInfo.systemUptime) ?? []
+            if !stalled.isEmpty {
+                self.stopOnQueue(reason: "\(stalled.map(\.rawValue).joined(separator: ", ")) 데이터가 중단되어 녹화를 종료했습니다.")
+            } else if RecordingStore.freeBytes() < 80 * 1_024 * 1_024 {
                 self.stopOnQueue(reason: "저장 공간이 부족해 녹화를 종료했습니다.")
             } else if ProcessInfo.processInfo.thermalState == .critical || self.devices.contains(where: {
                 $0.systemPressureState.level == .critical || $0.systemPressureState.level == .shutdown
@@ -313,12 +354,23 @@ final class CaptureController: NSObject, ObservableObject {
         observers.append(center.addObserver(forName: AVAudioSession.interruptionNotification,
                                              object: AVAudioSession.sharedInstance(), queue: nil) { [weak self] notification in
             guard let raw = notification.userInfo?[AVAudioSessionInterruptionTypeKey] as? UInt,
-                  AVAudioSession.InterruptionType(rawValue: raw) == .began else { return }
-            self?.queue.async { [weak self] in self?.stopOnQueue(reason: "오디오 사용이 중단되어 녹화를 종료했습니다.") }
+                  let type = AVAudioSession.InterruptionType(rawValue: raw) else { return }
+            self?.queue.async { [weak self] in
+                guard let self else { return }
+                self.audioInterrupted = type == .began
+                if type == .began {
+                    self.stopOnQueue(reason: "오디오 사용이 중단되어 녹화를 종료했습니다.")
+                    if !self.saveInProgress { self.updateIdleState(message: "오디오 사용이 중단됐습니다.") }
+                } else { self.resumeIfForeground() }
+            }
         })
         observers.append(center.addObserver(forName: AVCaptureSession.wasInterruptedNotification,
                                              object: session, queue: nil) { [weak self] _ in
-            self?.queue.async { [weak self] in self?.stopOnQueue(reason: "전화 또는 다른 카메라 사용으로 녹화가 중단됐습니다.") }
+            self?.queue.async { [weak self] in
+                guard let self else { return }
+                self.stopOnQueue(reason: "전화 또는 다른 카메라 사용으로 녹화가 중단됐습니다.")
+                if !self.saveInProgress { self.updateIdleState(message: "카메라 사용이 중단됐습니다.") }
+            }
         })
         observers.append(center.addObserver(forName: AVCaptureSession.runtimeErrorNotification,
                                              object: session, queue: nil) { [weak self] notification in
@@ -326,8 +378,9 @@ final class CaptureController: NSObject, ObservableObject {
             self?.queue.async { [weak self] in
                 guard let self else { return }
                 let message = error?.localizedDescription ?? "카메라 세션 오류가 발생했습니다."
+                self.configured = false
                 self.stopOnQueue(reason: message)
-                self.update(.unavailable, message)
+                if !self.saveInProgress { self.update(.unavailable, message) }
             }
         })
         observers.append(center.addObserver(forName: AVCaptureSession.interruptionEndedNotification,
@@ -336,12 +389,22 @@ final class CaptureController: NSObject, ObservableObject {
 
     private func resumeIfForeground() {
         queue.async { [weak self] in
-            guard let self, self.foreground, self.configured else { return }
+            guard let self, self.foreground, self.configured,
+                  self.hasPermissions, !self.audioInterrupted, !self.session.isInterrupted else { return }
             do {
                 try self.startSession()
-                if !self.saveInProgress { self.update(.ready, "전·후면 카메라와 마이크 준비 완료") }
+                if !self.saveInProgress, self.writer == nil { self.updateIdleState(message: "전·후면 카메라와 마이크 준비 완료") }
             } catch { self.update(.unavailable, error.localizedDescription) }
         }
+    }
+
+    private func updateIdleState(message: String) {
+        if !foreground { update(.preparing, "화면이 비활성화되어 녹화를 종료했습니다.") }
+        else if !hasPermissions { update(.unavailable, "설정에서 카메라와 마이크 접근을 허용해 주세요.") }
+        else if session.isInterrupted || audioInterrupted {
+            update(.interrupted, "전화 또는 다른 앱의 카메라·마이크 사용이 끝나기를 기다리고 있습니다.")
+        } else if canRecord { update(.ready, message) }
+        else { update(.unavailable, "카메라를 다시 준비해야 합니다. 재시도를 눌러 주세요.") }
     }
 
     private func update(_ state: CaptureState, _ text: String) {
@@ -355,9 +418,13 @@ extension CaptureController: AVCaptureVideoDataOutputSampleBufferDelegate, AVCap
     func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer,
                        from connection: AVCaptureConnection) {
         guard let writer else { return }
+        guard CMSampleBufferDataIsReady(sampleBuffer) else { return }
         do {
             if output === audioOutput { try writer.appendAudio(sampleBuffer) }
             else { try writer.appendVideo(sampleBuffer, side: output === frontOutput ? .front : .rear) }
+            let stream: CaptureHealth.Stream = output === audioOutput ? .audio : (output === frontOutput ? .front : .rear)
+            health?.received(stream, mediaTime: CMTimeGetSeconds(CMSampleBufferGetPresentationTimeStamp(sampleBuffer)),
+                             at: ProcessInfo.processInfo.systemUptime)
             if writer.duration > 0, let date = currentDate {
                 if !announcedRecording {
                     announcedRecording = true

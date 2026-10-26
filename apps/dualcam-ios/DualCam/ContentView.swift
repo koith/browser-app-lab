@@ -91,7 +91,7 @@ struct ContentView: View {
     private var preview: some View {
         ZStack(alignment: .topTrailing) {
             CameraPreview(previewLayer: capture.rearPreview)
-            if capture.state == .unavailable || capture.state == .preparing {
+            if capture.state == .unavailable || capture.state == .preparing || capture.state == .interrupted {
                 Color.black.opacity(0.85)
                 VStack(spacing: 16) {
                     if capture.state == .preparing { ProgressView().tint(accent) }
@@ -154,7 +154,7 @@ struct ContentView: View {
                 }
             }
             .accessibilityLabel(recording ? "녹화 종료" : "전·후면 녹화 시작")
-            .disabled(busy || capture.state == .unavailable)
+            .disabled(![.ready, .starting, .recording].contains(capture.state))
 
             Button { blackout.enter() } label: {
                 VStack(spacing: 7) {

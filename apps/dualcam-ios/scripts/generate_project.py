@@ -33,7 +33,7 @@ def settings(values):
 
 app_files = sorted((ROOT / "DualCam").glob("*.swift"))
 test_files = sorted((ROOT / "DualCamTests").glob("*.swift"))
-core_names = {"Recording.swift", "RecordingTimeline.swift", "DualMovieWriter.swift"}
+core_names = {"Recording.swift", "RecordingTimeline.swift", "DualMovieWriter.swift", "AudioBacklog.swift", "CaptureHealth.swift"}
 references = {}
 for path in [*app_files, *test_files, ROOT / "DualCam/Info.plist", ROOT / "DualCam/Assets.xcassets"]:
     relative = path.relative_to(ROOT).as_posix()

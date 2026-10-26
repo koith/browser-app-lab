@@ -38,7 +38,13 @@ final class DualMovieWriterTests: XCTestCase {
             let output = AVAssetReaderTrackOutput(track: track, outputSettings: [AVFormatIDKey: kAudioFormatLinearPCM])
             reader.add(output)
             XCTAssertTrue(reader.startReading())
-            XCTAssertNotNil(output.copyNextSampleBuffer(), "AAC audio must actually decode")
+            var decodedSamples = 0
+            while let sample = output.copyNextSampleBuffer() {
+                decodedSamples += CMSampleBufferGetNumSamples(sample)
+            }
+            XCTAssertEqual(reader.status, .completed)
+            XCTAssertGreaterThanOrEqual(decodedSamples, 86_400,
+                                        "Both movies must retain at least 1.8 seconds of the 2-second microphone input")
             reader.cancelReading()
         }
     }

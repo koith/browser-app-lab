@@ -93,7 +93,7 @@ final class DualMovieWriter {
         let group = DispatchGroup()
         for sink in [front, rear] {
             group.enter()
-            sink.finish { group.leave() }
+            sink.finish(on: queue) { group.leave() }
         }
         group.notify(queue: queue) {
             if let error = front.failure ?? rear.failure { completion(.failure(error)) }
@@ -108,8 +108,14 @@ private final class MovieSink {
     private let audio: AVAssetWriterInput
     private var videoCount = 0
     private var audioCount = 0
+    private var pendingAudio = AudioBacklog<CMSampleBuffer>(limit: 128)
+    private var finishError: Error?
+    private var didFinishAudio = false
+    private var finishCompletion: (() -> Void)?
+    private var finishTimeout: DispatchWorkItem?
 
     var failure: Error? {
+        if let finishError { return finishError }
         if let error = writer.error { return error }
         guard writer.status == .completed, videoCount > 0, audioCount > 0 else {
             return RecorderError.message("영상 또는 음성을 완전히 저장하지 못했습니다. 파일 앱의 DualCam 폴더를 확인해 주세요.")
@@ -168,16 +174,64 @@ private final class MovieSink {
 
     func appendAudio(_ sample: CMSampleBuffer) throws {
         if writer.status == .failed { throw writer.error ?? RecorderError.message("음성 저장에 실패했습니다.") }
-        guard audio.isReadyForMoreMediaData else { return }
-        guard audio.append(sample) else { throw writer.error ?? RecorderError.message("음성 저장에 실패했습니다.") }
-        audioCount += 1
+        try drainAudio()
+        try pendingAudio.enqueue(sample)
+        try drainAudio()
     }
 
-    func finish(completion: @escaping () -> Void) {
-        guard writer.status == .writing else { completion(); return }
+    private func drainAudio() throws {
+        let input = audio
+        try pendingAudio.drain(ready: { input.isReadyForMoreMediaData }) { sample in
+            guard input.append(sample) else {
+                throw writer.error ?? RecorderError.message("음성 저장에 실패했습니다.")
+            }
+            audioCount += 1
+        }
+    }
+
+    func finish(on queue: DispatchQueue, completion: @escaping () -> Void) {
+        finishCompletion = completion
+        guard writer.status == .writing else { completeFinish(); return }
         video.markAsFinished()
-        audio.markAsFinished()
-        writer.finishWriting(completionHandler: completion)
+        let timeout = DispatchWorkItem { [weak self] in
+            guard let self, self.finishCompletion != nil else { return }
+            self.finishError = RecorderError.message("저장 마무리 시간이 초과됐습니다. 파일 앱에서 남은 영상을 확인해 주세요.")
+            self.didFinishAudio = true
+            if self.writer.status == .writing { self.writer.cancelWriting() }
+            self.completeFinish()
+        }
+        finishTimeout = timeout
+        queue.asyncAfter(deadline: .now() + 120, execute: timeout)
+        if pendingAudio.isEmpty { finishAudio(on: queue) }
+        else {
+            // Let the encoder catch up before ending the audio track. This callback
+            // shares the capture queue with appendAudio, so the FIFO has one owner.
+            audio.requestMediaDataWhenReady(on: queue) { [weak self] in self?.finishAudio(on: queue) }
+        }
+    }
+
+    private func finishAudio(on queue: DispatchQueue) {
+        guard !didFinishAudio else { return }
+        do {
+            try drainAudio()
+            guard pendingAudio.isEmpty else { return }
+            didFinishAudio = true
+            audio.markAsFinished()
+            writer.finishWriting { [weak self] in queue.async { self?.completeFinish() } }
+        } catch {
+            finishError = error
+            didFinishAudio = true
+            if writer.status == .writing { writer.cancelWriting() }
+            completeFinish()
+        }
+    }
+
+    private func completeFinish() {
+        finishTimeout?.cancel()
+        finishTimeout = nil
+        let completion = finishCompletion
+        finishCompletion = nil
+        completion?()
     }
 
     func cancel() { writer.cancelWriting() }
