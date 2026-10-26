@@ -5,10 +5,11 @@ on:
       - apps/yui-gallery/archive_engine.py
       - apps/yui-gallery/archive_selftest.py
       - apps/yui-gallery/source_targets.json
+      - apps/yui-gallery/promote_downloaded_previews.py
       - .github/workflows/yui-dynamic-archive.yml
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 jobs:
   discover-and-verify:
     runs-on: ubuntu-24.04
@@ -42,6 +43,31 @@ jobs:
           print('DISCOVERY_REPORT',json.dumps({x['id']:{'pages':len(x['pages_visited']),'discovered':x['images_discovered'],'errors':x['errors'],'truncated':x['truncated']} for x in m['sources']},ensure_ascii=False))
           print('ARCHIVE_REPORT',json.dumps(stats,ensure_ascii=False))
           PY
+      - name: Promote actually downloaded files into the album gallery
+        run: |
+          python -m py_compile apps/yui-gallery/promote_downloaded_previews.py
+          python apps/yui-gallery/promote_downloaded_previews.py
+          python - <<'PY'
+          import json,hashlib
+          from pathlib import Path
+          p=Path('apps/yui-gallery')
+          m=json.loads((p/'stored-albums.json').read_text())
+          total=0
+          for a in m['albums']:
+            for x in a['images']:
+              f=p/x['url']
+              assert f.is_file(),f
+              assert hashlib.sha256(f.read_bytes()).hexdigest()==x['sha256'],f
+              total+=1
+          assert total>=5,total
+          print('VERIFIED_REAL_ALBUM_FILES',total)
+          PY
+      - name: Commit physical public previews and index
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/yui-gallery/stored-albums apps/yui-gallery/stored-albums.json apps/yui-gallery/albums.json
+          git diff --cached --quiet || (git commit -m "Store public preview files and connect album gallery" && git push)
       - uses: actions/upload-artifact@v4
         if: always()
         with:
