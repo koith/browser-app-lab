@@ -1,0 +1,23 @@
+{
+  "albums": [
+    {
+      "id": "v04",
+      "title": "SWEETBOX — Teddy Bear",
+      "source": "https://www.v2ph.com/album/z6436onz.html?hl=ko",
+      "expected": 97,
+      "kind": "public_first_page_only",
+      "urls": [
+        "https://cdn.v2ph.com/photos/wMC8UfTJYCJhTwqA.jpg",
+        "https://cdn.v2ph.com/photos/nW_581c8PP4AXPIr.jpg",
+        "https://cdn.v2ph.com/photos/MugPkxKG9hGLCnsp.jpg",
+        "https://cdn.v2ph.com/photos/u77CCH_1OcarI1pn.jpg",
+        "https://cdn.v2ph.com/photos/lWvt6aEX509GsE1y.jpg",
+        "https://cdn.v2ph.com/photos/U1D5Z5Mvw7LvzflH.jpg",
+        "https://cdn.v2ph.com/photos/b-P_1pGVT824JJAa.jpg",
+        "https://cdn.v2ph.com/photos/j1otL0jBbS9tbIOt.jpg",
+        "https://cdn.v2ph.com/photos/QvznR000Uz16r_nd.jpg",
+        "https://cdn.v2ph.com/photos/beF0waXrJkkRU1rT.jpg"
+      ]
+    }
+  ]
+}
