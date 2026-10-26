@@ -1,0 +1,49 @@
+{
+  "version": "v0.1.0-beta.1",
+  "date": "2026-10-26",
+  "policy": {
+    "monthly_charge_krw": 0,
+    "payment_card_required": false,
+    "public_republication_of_paid_originals": false
+  },
+  "storage": {
+    "intended_primary": {
+      "provider": "TeraBox Basic",
+      "max_advertised_storage_gb": 1024,
+      "availability": "not_connected",
+      "remote_verified_images": 0,
+      "conditions": "Free 1024GB advertised as limited-time; unofficial integration not validated",
+      "r2_required": false
+    },
+    "temporary_verified_copy": {
+      "provider": "Google Drive (not accepted as primary)",
+      "private": true,
+      "filename": "Yui_405_5albums_web_images_20261026.zip",
+      "zip_bytes": 31383650,
+      "sha256": "39a69c62c67295156d6e8f52d7c0edd858b99bc1b7ce4bd7bed8a7c1e983d8a5",
+      "drive_byte_readback_match": true
+    },
+    "second_temporary_copy": {
+      "provider": "GitHub Actions artifact",
+      "expires_at": "2027-01-24T14:26:26Z",
+      "images": 405
+    }
+  },
+  "progress": {
+    "physically_acquired_web_images": 405,
+    "web_albums_with_complete_sequence": 5,
+    "primary_cloud_verified_images": 0,
+    "publisher_original_high_resolution_verified_images": 0,
+    "source_catalog_v2ph_works": 20,
+    "source_catalog_huantuji_entries": 11,
+    "source_catalog_duplicated_across_sites": true,
+    "iphone_real_device_verified": false
+  },
+  "notes": [
+    "A private Google Drive ZIP is only a temporary safety copy, not the user-approved primary archive.",
+    "The public index stores only earlier 26 preview files; 405 actual files reside inside a private ZIP.",
+    "TeraBox account is not connected; do not claim a cloud gallery or automatic upload is live.",
+    "The 405 downloaded images are public web versions, not publisher source originals.",
+    "Listed works, publicly available images, privately stored files, and publisher originals are counted separately."
+  ]
+}

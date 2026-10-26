@@ -1,0 +1,22 @@
+'use strict';
+const fs=require('fs'),assert=require('node:assert/strict'),path=require('node:path');
+const root=__dirname;
+const state=JSON.parse(fs.readFileSync(path.join(root,'version.json'),'utf8'));
+assert.match(state.version,/^v\d+\.\d+\.\d+(-beta\.\d+)?$/);
+assert.equal(state.policy.monthly_charge_krw,0);
+assert.equal(state.policy.payment_card_required,false);
+assert.equal(state.progress.physically_acquired_web_images,405);
+assert.equal(state.progress.web_albums_with_complete_sequence,5);
+assert.equal(state.progress.primary_cloud_verified_images,0);
+assert.equal(state.storage.intended_primary.provider,'TeraBox Basic');
+assert.equal(state.storage.intended_primary.availability,'not_connected');
+assert.equal(state.storage.intended_primary.r2_required,false);
+for(const page of ['index.html','zip-gallery.html','cloud.html']){
+ const html=fs.readFileSync(path.join(root,page),'utf8');
+ assert.ok(html.includes(state.version),page+' must visibly show '+state.version);
+ assert.ok(!html.includes('ZIP 2개를'),page+' should not claim two ZIPs');
+}
+const data=JSON.parse(fs.readFileSync(path.join(root,'stored-albums.json'),'utf8'));
+const actuallyOnPages=data.albums.reduce((n,x)=>n+(x.images?.length||0),0);
+assert.ok(actuallyOnPages<405,'never accidentally claim all private ZIP images are public Pages files');
+console.log('YUI_VERSION_AND_STORAGE_STATUS_PASS',state.version,'private_zip_photos',405,'public_pages_photos',actuallyOnPages,'terabox_verified',0);
