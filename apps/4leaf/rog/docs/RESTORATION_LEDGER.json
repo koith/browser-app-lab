@@ -6073,6 +6073,27 @@
         "https://github.com/koith/browser-app-lab/actions/runs/40274940366",
         "https://github.com/koith/browser-app-lab/commit/bcb2d84937012fb1fba230c4ce4b50cc6d469198"
       ]
+    },
+    {
+      "seq": 251,
+      "date": "2026-10-26",
+      "type": "VERIFIED_ORIGINAL_DICE_DLL_IMPORT_PROVENANCE_NOT_NATIVE_3D",
+      "requestId": "REQ-20261025-001",
+      "taskIds": [
+        "P0-DICE",
+        "DIE-01",
+        "DIE-02",
+        "P0-RELEASE"
+      ],
+      "details": "Second independent P0-DICE investigation PR198 merged actual read-only PE scanner code: original SHA1 86526d89679ae39b85fe9808da97ad871b7888d9 archive and Dice.dll SHA256 0987e96cb2d954b98e5815396874488d3bd50560f364df3bcacb588024270060 verified via Actions #40276169868 SUCCESS, no Windows binary execution. A bounded PE32 import-table parser with synthetic QA maps 10 native imported APIs including DDRAW.dll!DirectDrawCreateEx, KERNEL32!LoadLibraryA and KERNEL32!GetProcAddress, narrowing graphics/code-reference leads. Previous scanner's zero PE resource leaves was incomplete: enhanced parser now finds 2 normal RT_GROUP_ICON/RT_ICON records, not a 3D mesh; 2026-10-24 false-zero report kept as historic observation not silently overwritten. Actual D4/D6 vertices, UVs, textures and native result-specific roll keyframes remain unrecovered. New doc ORIGINAL_DICE_DLL_IMPORT_FORENSICS_2026-10-26.md distinguishes VERIFIED, INFERRED and UNVERIFIED. In separate accepted PR197, actual GUI saved-AI autoplay regression fixture repaired without weakening prison rules: a legitimate jailed bot may skip movement; QA now explicitly resets jail/items/ability before checking unjailed AI travel and logs state on failure. PR197 head 2cba38bb104ba3ceac82103e983720adbe29c044 passed ledger, central chat, board, release, world-and-chat Chromium and WebKit CI. Task statuses unchanged; no source-native dice or complete original restoration claimed.",
+      "evidence": [
+        "https://github.com/koith/browser-app-lab/pull/198",
+        "https://github.com/koith/browser-app-lab/actions/runs/40276169868",
+        "https://github.com/koith/browser-app-lab/blob/main/apps/4leaf/rog/tools/probe-original-dice-dll-resources.py",
+        "https://github.com/koith/browser-app-lab/blob/main/apps/4leaf/rog/docs/ORIGINAL_DICE_DLL_IMPORT_FORENSICS_2026-10-26.md",
+        "https://github.com/koith/browser-app-lab/pull/197",
+        "https://github.com/koith/browser-app-lab/actions/runs/40276802080"
+      ]
     }
   ]
 }
