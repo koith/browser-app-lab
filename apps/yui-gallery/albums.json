@@ -432,6 +432,42 @@
       "size": "",
       "source": "https://www.miaohuaying.com/yui/",
       "kind": "index"
+    },
+    {
+      "id": "mf01",
+      "site": "MOVIE FANTASY 공식",
+      "title": "Yui Sim Vol.1 Baby Blue — 사진집",
+      "photos": null,
+      "size": "공식 디지털 화보",
+      "source": "https://moviefantasy.co.kr/onlineshop/?idx=436",
+      "kind": "official"
+    },
+    {
+      "id": "mf02",
+      "site": "MOVIE FANTASY 공식",
+      "title": "Yui Sim Vol.1 Baby Blue — 영상집",
+      "photos": 22,
+      "size": "4K MP4 1편 + JPG 22장",
+      "source": "https://moviefantasy.co.kr/onlineshop/?idx=437",
+      "kind": "official"
+    },
+    {
+      "id": "mf03",
+      "site": "MOVIE FANTASY 공식",
+      "title": "Yui Sim Vol.2 Close to You — 사진집",
+      "photos": 64,
+      "size": "6720×4480 JPG 64장",
+      "source": "https://moviefantasy.co.kr/125/?idx=446",
+      "kind": "official"
+    },
+    {
+      "id": "mf04",
+      "site": "MOVIE FANTASY 공식",
+      "title": "Yui Sim Vol.2 Close to You — 영상집",
+      "photos": 35,
+      "size": "4K MP4 2편 + JPG 35장",
+      "source": "https://moviefantasy.co.kr/notice/?bmode=view&idx=166748438",
+      "kind": "official"
     }
   ]
 }
