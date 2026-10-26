@@ -116,6 +116,13 @@ def collect(target,out):
     # Preserve partial real files and expose missing sequence members explicitly.
     manifest['missing_numbers']=sorted(set(range(1,target['expected']+1))-{p['number'] for p in images})
     (folder/'manifest.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n')
+    if images:
+        from build_additional_source_manifest import build
+        gallery=Path(__file__).with_name('additional-source-albums.json')
+        existing=json.loads(gallery.read_text())['albums'] if gallery.exists() else []
+        # An alternate edition belongs to its already registered canonical work.
+        if not target.get('alternate_of') or not any(a['id']==target['alternate_of'] for a in existing):
+            build([folder],gallery)
     return manifest
 
 

@@ -39,6 +39,7 @@ jobs:
       - name: Verify byte preservation and collector behavior
         run: |
           node apps/yui-gallery/test_version.cjs
+          python apps/yui-gallery/test_auto_registration.py
           python apps/yui-gallery/test_gallery_dl_collector.py
           python apps/yui-gallery/test_source_viewer_manifest.py
           python apps/yui-gallery/cloud/test_ingest_directories.py

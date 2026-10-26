@@ -105,6 +105,10 @@ def crawl_one(target:dict, base:Path, *, executable="gallery-dl", max_images=40,
                   "source_page":url,"ai_enhanced":photos[0].get("ai_enhanced",False),
                   "publisher_original_verified":False,"images":sorted(entries,key=lambda p:p['number'])}
         (dest/"manifest.json").write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+"\n")
+        if not all(p.get("url") for p in entries):
+            raise ValueError("Acquired images lack source metadata; gallery registration refused")
+        from build_additional_source_manifest import build
+        build([dest],Path(__file__).with_name("additional-source-albums.json"))
     return record
 
 def run(targets:Path, base:Path, max_sources:int=4,max_images:int=40,executable="gallery-dl"):
