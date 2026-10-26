@@ -1,0 +1,64 @@
+name: 4LEAF public-versus-original screenshot baseline
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/dice-native-minipanel-spr.css'
+      - 'apps/4leaf/rog/dice-native-client-frame.css'
+      - 'apps/4leaf/rog/tests/public-original-screen-baseline.cjs'
+      - 'apps/4leaf/rog/docs/PUBLIC_VISUAL_RESTORATION_TARGETS_2026-10-26.json'
+      - '.github/workflows/rog-public-visual-baseline.yml'
+  workflow_run:
+    workflows: ['Deploy static content to Pages']
+    types: [completed]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  original-versus-public:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 13
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - engine: chromium
+            mobile: '0'
+          - engine: webkit
+            mobile: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser for actual 2002 screenshot-vs-web acceptance
+        run: |
+          npm install --no-save playwright
+          npx playwright install ${{ matrix.engine }} --with-deps
+      - name: Serve app with original binary sprites from this PR
+        if: github.event_name != 'workflow_run'
+        run: |
+          nohup python3 -m http.server 8765 --directory apps/4leaf/rog >/tmp/leaf-visual-baseline-http.log 2>&1 &
+          for i in 1 2 3 4 5 6 7; do
+            if curl -fSsI http://127.0.0.1:8765/index.html >/dev/null 2>&1; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/leaf-visual-baseline-http.log
+          exit 1
+      - name: Compare published/source screenshot landmarks and play genuine DMP dice
+        env:
+          FOURLEAF_TEST_URL: ${{ github.event_name == 'workflow_run' && 'https://koith.github.io/browser-app-lab/apps/4leaf/rog/' || 'http://127.0.0.1:8765/' }}
+          FOURLEAF_BROWSER: ${{ matrix.engine }}
+          FOURLEAF_MOBILE: ${{ matrix.mobile }}
+        run: node apps/4leaf/rog/tests/public-original-screen-baseline.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: 4leaf-published-vs-2004-${{ matrix.engine }}-${{ github.event_name }}
+          path: | 
+            leaf-*.png
+            leaf-*.json
+          retention-days: 14

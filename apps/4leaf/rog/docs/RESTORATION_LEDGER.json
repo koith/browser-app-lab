@@ -1163,6 +1163,20 @@
         "CHT-04",
         "P0-RELEASE"
       ]
+    },
+    {
+      "id": "REQ-20261026-002",
+      "date": "2026-10-26",
+      "origin": "user",
+      "text": "Research and compare actual deployed public 4LEAF webapp screenshots widely and deeply with original/historical screenshots/related web and source references; use reproducible public capture states and external period evidence as restoration targets; implement visual differences in actual game code; never mislabel the running revival as the historical original.",
+      "taskIds": [
+        "P0-RELEASE",
+        "P0-BOARD",
+        "P0-ACTOR",
+        "P0-CHAT",
+        "ACT-04",
+        "CHT-02"
+      ]
     }
   ],
   "tasks": [
@@ -6162,6 +6176,49 @@
         "P0-RELEASE"
       ],
       "details": "Correction to the INITIAL unverified 164x112 Region number atlas size stated in event252: independent raw PNG IHDR inspection proved the original Region/1234.png is exactly 132x124 RGBA pixels, four columns of 33x31 sprite states for each of four numbered rows. Changed the real native UI and corresponding Chromium/WebKit game QA accordingly, without altering the earlier inaccurate event after first recording. The old observation remains intact for provenance; source PNG bytes unmodified. Source-known and inferred original client API behavior remain separate."
+    },
+    {
+      "seq": 255,
+      "date": "2026-10-26",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261026-002",
+      "taskIds": [
+        "P0-RELEASE",
+        "P0-BOARD",
+        "P0-ACTOR",
+        "P0-CHAT"
+      ],
+      "details": "User directs screenshot-first original restoration using deployed 4LEAF running game as reproducible target baseline alongside broad historic source research. Separate modern reconstruction screenshots (NOT proof of period accuracy) from 2002–2004 screenshots. Covers screenshot geometry, original resources, board, chat and original UI."
+    },
+    {
+      "seq": 256,
+      "date": "2026-10-26",
+      "type": "PUBLIC_SCREENSHOT_VS_HISTORIC_VISUAL_TARGETS_FUNCTIONAL_FIX_PENDING_DEPLOY",
+      "requestId": "REQ-20261026-002",
+      "taskIds": [
+        "P0-RELEASE",
+        "P0-BOARD",
+        "ACT-04"
+      ],
+      "details": "Functional PR work on 2026-10-26: source-screen catalog 6 original local artwork screenshots (2002–2004), 8 independent external references including 4LEAF Memorial 0.9/0.8/Dice original screenshot archive, 5 reproducible public URL/game/browser capture scenarios, clear 800x600 old battle-versus-modern-initial state difference not a pixel-perfect match claim. Fixed 390x844 published WebKit visible #board-mini floating at TOP of actual board: late original SPR tab position:relative wrongly overrode game's original bottom-left mini, now preserve genuine minipanel sprites and live DMP canvas with absolute bottom-left anchor (desktop untouched). Fixed portrait WEB backdrop repeat of actual original 725x485 IMG/bgtile forest/village every 485px vertically by preserving one proportionally scaled original sprite and cropping sides, rather than changing source art or match geometry (desktop original repeat/panning untouched). Playwright mobile WebKit and desktop Chromium check full original DMP 104 cells/OBS/real dice; 800x600 side-by-side historical JPG/public LIVE screenshot emitted as CI artifacts. beta24 cache v111; source 3D D4/D6 still NOT recovered. Do not claim period-native mobile UX verified. CI/merge/Pages/public QA pending.",
+      "evidence": [
+        "https://github.com/koith/browser-app-lab/blob/fix/4leaf-public-visual-baseline-mobile-terrain-20261026/apps/4leaf/rog/docs/PUBLIC_VISUAL_RESTORATION_TARGETS_2026-10-26.json",
+        "https://github.com/koith/browser-app-lab/blob/fix/4leaf-public-visual-baseline-mobile-terrain-20261026/apps/4leaf/rog/tests/public-original-screen-baseline.cjs",
+        "https://4leafmemorial.geld.kr/1527",
+        "https://4leafmemorial.geld.kr/1503"
+      ]
+    },
+    {
+      "seq": 257,
+      "date": "2026-10-26",
+      "type": "PUBLIC_SNAPSHOT_REJECTED_PORTRAIT_TERRAIN_STRETCH_CORRECTION",
+      "requestId": "REQ-20261026-002",
+      "taskIds": [
+        "P0-BOARD",
+        "ACT-04",
+        "P0-RELEASE"
+      ],
+      "details": "Correction to event256's provisional mobile original terrain claim, preserving immutable previous event: actual 390x844 WebKit capture from PR #201 revealed `background-size:auto 100%; no-repeat` of original 725x485 source would enlarge and blur buildings/cliffs and LOSE archived client source detail; author explicitly REVERTED the modification before merging. Original IMG/bgtile.png native 725x485 repeat remains untouched until original historical camera/wrap algorithm is established. The separately confirmed position:relative override bug placing real #board-mini at top-left is still FIXED for phone portrait: restoring source bottom-left mini with live DMP canvas and genuine 2002 source minipanel tabs. 800x600 original-vs-actual deployed HUD ROI diagnostics (non-equivalent battle and first turn) and 90-post period-bucket Memorial provenance are supplemental proof, not a fake completed pose or original mobile claim. PR CI and public QA evidence still pending."
     }
   ]
 }
