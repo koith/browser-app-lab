@@ -60,6 +60,8 @@ jobs:
             const imageNames=await page.evaluate(()=>photos.map(x=>x.name||x.caption||''));
             if(imageNames.length<2||imageNames[0].localeCompare(imageNames.at(-1),'ko',{numeric:true})>0)throw Error('Photo name sort failed');
             await page.selectOption('#mediaSort','date-desc');
+            const imageDownload=await page.evaluate(async()=>{try{const r=await fetch(cdn(photos[0].url,'orig'),{mode:'cors'});return {ok:r.ok,status:r.status,type:r.headers.get('content-type')}}catch(e){return {ok:false,error:String(e)}}});
+            console.log('PUBLIC_IMAGE_DOWNLOAD_CHECK',JSON.stringify(imageDownload));
             await page.locator('[data-view="albums"]').click();
             await page.waitForTimeout(500);
             const albums=await page.locator('.album').count();
