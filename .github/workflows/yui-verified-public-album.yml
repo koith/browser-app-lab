@@ -38,12 +38,10 @@ jobs:
               assert hashlib.sha256(image.read_bytes()).hexdigest()==row['sha256']
             print('VERIFIED_COMPLETE_WEB_PHOTOBOOK',album_id,len(manifest['images']))
           PY
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: Yui-verified-individual-photo-hash-manifests
-          path: |
-            yui-verified-private-albums/*/manifest.json
-            yui-verified-private-albums/summary.json
-          if-no-files-found: warn
+          path: yui-verified-private-albums/summary.json
+          archive: false
           retention-days: 90
+          if-no-files-found: warn
