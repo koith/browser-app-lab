@@ -60,7 +60,7 @@ def main():
         if len(urls)!=n or len(set(urls))!=n:raise ValueError("Discovery count mismatch")
         numbers=[]
         for url in urls:
-            if urlsplit(url).hostname!="imgx001.pixibb.com":raise ValueError("Non-allowlisted download host")
+            if not re.fullmatch(r"imgx[0-9]{3}\.pixibb\.com", urlsplit(url).hostname or ""):raise ValueError("Non-allowlisted download host")
             match=re.search(r"-(\d{3})\.jpg$",url)
             if not match:raise ValueError("Unverified URL pattern "+url)
             numbers.append(int(match.group(1)))
