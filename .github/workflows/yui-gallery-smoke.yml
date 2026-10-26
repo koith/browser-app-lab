@@ -44,7 +44,7 @@ jobs:
         run: |
           npm install --no-save playwright@1.58.2 jszip@3.10.1
           npx playwright install chromium
-      - name: Test real stored photobooks in mobile browser
+      - name: Test photo-first gallery in mobile browser
         run: |
           python -m http.server 8765 --directory apps/yui-gallery >/tmp/yui-web.log 2>&1 &
           node - <<'NODE'
@@ -54,39 +54,34 @@ jobs:
             const page=await browser.newPage({viewport:{width:390,height:844},acceptDownloads:true});
             const errors=[];page.on('pageerror',e=>errors.push(e.message));
             await page.goto('http://127.0.0.1:8765/',{waitUntil:'domcontentloaded',timeout:30000});
-            await page.waitForFunction(()=>document.querySelector('#total')?.textContent?.includes('작품별 실물 파일'),{timeout:20000});
-            const tab=await page.locator('.tab.active').textContent();
-            if(!tab.includes('화보'))throw Error('Album not primary '+tab);
-            const cards=await page.locator('.album').count();
-            if(cards<1)throw Error('Named stored photobook missing '+cards);
-            const summary=await page.locator('.album').first().innerText();
-            if(!summary.includes('87장 미확보'))throw Error('Wrong archive completeness count: '+summary);
-            const saved=await page.locator('.album-cover').count();
-            if(saved<1)throw Error('Named album physical cover missing '+saved);
-            const cover=await page.locator('.album-cover').first().evaluate(i=>({complete:i.complete,w:i.naturalWidth,h:i.naturalHeight}));
-            if(!cover.w)throw Error('Album cover image bytes not loaded');
-            await page.locator('.open-album:not([disabled])').first().click();
-            await page.waitForTimeout(500);
-            const imgs=await page.locator('#media img').count();
-            if(imgs<1)throw Error('No actual stored files in album');
-            if(imgs<10)throw Error('Expected ten actual first-page album files, got '+imgs);
-            const test=await page.locator('#media img').first().evaluate(i=>({src:i.currentSrc,w:i.naturalWidth}));
-            if(!test.src.includes('/stored-albums/')||!test.w)throw Error('Album image not served from physical storage '+JSON.stringify(test));
-            await page.locator('#media img').first().click();
-            const full=await page.locator('#big').evaluate(i=>({w:i.naturalWidth,src:i.src}));
-            await page.waitForFunction(()=>document.querySelector('#big').naturalWidth>0,{timeout:8000});
-            await page.locator('#saveOne').click();
-            await page.screenshot({path:'yui-album-mobile.png',fullPage:false});
+            await page.waitForFunction(()=>document.querySelector('#total')?.textContent?.includes('albums'),{timeout:20000});
+            const version=await page.locator('footer').innerText();
+            if(!version.includes('v0.1.0-beta.1'))throw Error('Version missing in footer');
+            if(!await page.locator('[data-filter="albums"]').evaluate(x=>x.classList.contains('active')))throw Error('Albums not default view');
+            const albumCount=await page.locator('.album').count();
+            if(albumCount!==7)throw Error('Expected seven actual stored albums, got '+albumCount);
+            const cover=await page.locator('.album img').first().evaluate(i=>({w:i.naturalWidth,src:i.src}));
+            if(cover.w<100||!cover.src.includes('/stored-albums/'))throw Error('Actual image cover not loaded: '+JSON.stringify(cover));
+            await page.locator('.album[data-id="v04"]').click();
+            const detailCount=await page.locator('#detailphotos .photo').count();
+            if(detailCount!==10)throw Error('Expected 10 real pictures in Teddy Bear, got '+detailCount);
+            await page.locator('#detailphotos .photo').first().click();
+            await page.waitForFunction(()=>document.querySelector('#full').naturalWidth>0,{timeout:10000});
+            const lightbox=await page.locator('#lightbox').evaluate(x=>x.classList.contains('open'));
+            if(!lightbox)throw Error('Full-screen photo did not open');
+            await page.locator('#next').click();
+            if(!(await page.locator('#position').innerText()).startsWith('2 /'))throw Error('Next photo failed');
             await page.locator('#close').click();
-            await page.locator('[data-view="albums"]').click();
-            await page.locator('#includeUnassigned').check();
-            await page.waitForTimeout(300);
-            if((await page.locator('.album-cover').count())<7)throw Error('Other source preview files not accessible');
-            await page.locator('#includeUnassigned').uncheck();
-            await page.selectOption('#albumSort','name-desc');
-            const afterSort=await page.locator('.album strong').first().textContent();
-            if(errors.length)throw Error('JS errors '+errors.join(';'));
-            console.log('VERIFIED_MOBILE_ALBUM',{cards,saved,imgs,cover,firstImage:test,firstSorted:afterSort,errorCount:errors.length});
+            await page.locator('#back').click();
+            await page.locator('[data-filter="photos"]').click();
+            const allPhotos=await page.locator('#photogrid .photo').count();
+            if(allPhotos!==26)throw Error('Expected 26 physical on-Pages images, got '+allPhotos);
+            await page.screenshot({path:'yui-album-mobile.png',fullPage:false});
+            await page.locator('[data-filter="all"]').click();
+            const allWorks=await page.locator('.album').count();
+            if(allWorks<40)throw Error('Catalog collapsed: '+allWorks);
+            if(errors.length)throw Error('JavaScript errors: '+errors.join('; '));
+            console.log('YUI_IMAGE_FIRST_GALLERY_MOBILE_PASS',{albumCount,detailCount,allPhotos,allWorks,version,errorCount:errors.length});
             await browser.close();
           })().catch(e=>{console.error(e);process.exit(1)});
           NODE
