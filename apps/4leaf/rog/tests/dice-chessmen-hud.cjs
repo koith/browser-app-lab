@@ -67,6 +67,11 @@ const path=require('path');
   const selector=await page.evaluate(async()=>{
    const img=new Image();img.src='./original/IMG/selector.png';await img.decode();
    return {natural:[img.naturalWidth,img.naturalHeight],
+    // Modern restoration previously cropped source icons as four independent
+    // tiles and painted a false WEB background. Desktop beta25 renders the
+    // *complete* genuine 222x152 original sprite exactly once, with four
+    // transparent interactive targets on its native positions.
+    completeSource:getComputedStyle(document.querySelector('#dice-client-sidebar')).backgroundImage,
     buttons:[...document.querySelectorAll('#dice-original-selector button')].map(el=>({
      id:el.id,source:getComputedStyle(el).backgroundImage,
      position:getComputedStyle(el).backgroundPosition,
@@ -76,7 +81,10 @@ const path=require('path');
   });
   assert.deepEqual(selector.natural,[222,152],'real 222x152 native selector image is loaded');
   assert.deepEqual(selector.buttons.map(x=>x.id),['dice-inspect-tool','dice-next-tool','dice-items-toggle','dice-ability-tool'],'four original glyph hitboxes survive as independent controls');
-  assert.ok(selector.buttons.every(x=>x.source.includes('/original/IMG/selector.png')&&x.width===29&&x.height===29),'every command is skinned by the real source atlas, not a text/emoji facsimile');
+  assert.ok(selector.completeSource.includes('/original/IMG/selector.png'),
+   'whole 222x152 authentic source PNG replaces fake right rail backing');
+  assert.ok(selector.buttons.every(x=>x.source==='none'&&x.width===29&&x.height===29),
+   'four hitboxes receive source glyphs from full panel once, rather than duplicate atlas crops');
   assert.equal(await page.locator('#dice-ability-tool').isDisabled(),true,'native ability shortcut cannot bypass actual charge requirement');
   assert.equal(await page.locator('#dice-native-party').getAttribute('data-selected-index'),'0');
   await page.locator('#dice-next-tool').click();
