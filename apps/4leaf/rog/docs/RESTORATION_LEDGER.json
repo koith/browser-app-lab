@@ -6125,7 +6125,7 @@
         "P0-RELEASE",
         "P0-CHAT"
       ],
-      "details": "Functional PR #200 updates real chessman pose routing: visually compared actual source 1040/1042/1043 OBS native frame 25 and 30 as front-facing sprites (bytes unmodified) and maps running-game walk/victory to those source frames; audited 0040/0042/0043 attack uses original packet18 with front recovery; all 20 previously source-reviewed front actor IDs avoid unrelated 0..7 backside/side rotation during walk and mistaken hurt/victory display. Original unreviewed source OBS 0..7 direction/WEB tempo remains explicitly INFERRED; no historical 2002 native direction table/FPS recovered. game.js maintains true DMP movement continuity for native front sequence, independent real dice rolls and team IDs. Independent native Region/1234.png original 132x124 4-number x 4-state sprite atlas is decoded into actual 28 dice-channel interactive controls with native source-selected/hover/pressed/focus art, preserving original 794x404 Region backdrop and separate ChatTown north/south. Source asset preloaded in v110 offline PWA, beta23, no original 3D D4/D6 fabricated. New Chromium/WebKit original-source game QA workflow and visuals. PR merge/Pages/external browser release acceptance PENDING; do not raise task statuses until after end-to-end verified.",
+      "details": "Functional PR #200 updates real chessman pose routing: visually compared actual source 1040/1042/1043 OBS native frame 25 and 30 as front-facing sprites (bytes unmodified) and maps running-game walk/victory to those source frames; audited 0040/0042/0043 attack uses original packet18 with front recovery; all 20 previously source-reviewed front actor IDs avoid unrelated 0..7 backside/side rotation during walk and mistaken hurt/victory display. Original unreviewed source OBS 0..7 direction/WEB tempo remains explicitly INFERRED; no historical 2002 native direction table/FPS recovered. game.js maintains true DMP movement continuity for native front sequence, independent real dice rolls and team IDs. Independent native Region/1234.png original 164x112 4-number x 4-state sprite atlas is decoded into actual 28 dice-channel interactive controls with native source-selected/hover/pressed/focus art, preserving original 794x404 Region backdrop and separate ChatTown north/south. Source asset preloaded in v110 offline PWA, beta23, no original 3D D4/D6 fabricated. New Chromium/WebKit original-source game QA workflow and visuals. PR merge/Pages/external browser release acceptance PENDING; do not raise task statuses until after end-to-end verified.",
       "evidence": [
         "https://github.com/koith/browser-app-lab/pull/200",
         "https://github.com/koith/browser-app-lab/blob/feat/4leaf-obs-front-motion-region-native-20261026/apps/4leaf/rog/tests/obs-front-region-source-game.cjs",
@@ -6150,6 +6150,18 @@
         "P0-RELEASE"
       ],
       "details": "Registered original OBS front/action, D4/D6 forensic source acquisition, original interactive UI replacement and live multiplayer acceptance request REQ-20261026-001. Functional code implementation event seq252 remains preserved, including pending QA gate."
+    },
+    {
+      "seq": 254,
+      "date": "2026-10-26",
+      "type": "REGION_1234_PNG_IHDR_DIMENSIONS_CORRECTION",
+      "requestId": "REQ-20261026-001",
+      "taskIds": [
+        "P0-ACTOR",
+        "ACT-03",
+        "P0-RELEASE"
+      ],
+      "details": "Correction to the INITIAL unverified 164x112 Region number atlas size stated in event252: independent raw PNG IHDR inspection proved the original Region/1234.png is exactly 132x124 RGBA pixels, four columns of 33x31 sprite states for each of four numbered rows. Changed the real native UI and corresponding Chromium/WebKit game QA accordingly, without altering the earlier inaccurate event after first recording. The old observation remains intact for provenance; source PNG bytes unmodified. Source-known and inferred original client API behavior remain separate."
     }
   ]
 }
