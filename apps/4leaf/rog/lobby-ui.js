@@ -73,18 +73,28 @@
    sourceCanvas.width=132;sourceCanvas.height=124;
    const ctx=sourceCanvas.getContext('2d',{willReadFrequently:true});
    ctx.drawImage(atlas,0,0);
-   const rgba=ctx.getImageData(0,0,132,124),bytes=rgba.data;
-   const key=[bytes[0],bytes[1],bytes[2]];
-   // The sprite sheet's solid lavender backdrop was transparent in the
-   // original paletted renderer. Remove ONLY pixels very close to that
-   // encoded source swatch; never redraw or synthesize the numeral.
-   for(let i=0;i<bytes.length;i+=4){
-    if(Math.max(Math.abs(bytes[i]-key[0]),Math.abs(bytes[i+1]-key[1]),
-       Math.abs(bytes[i+2]-key[2]))<=12)bytes[i+3]=0;
+   try{
+    const rgba=ctx.getImageData(0,0,132,124),bytes=rgba.data;
+    const key=[bytes[0],bytes[1],bytes[2]];
+    // The native lavender color key is transparent in the original
+    // paletted client. Retain source numeral RGB; never fabricate glyphs.
+    for(let i=0;i<bytes.length;i+=4){
+     if(Math.max(Math.abs(bytes[i]-key[0]),Math.abs(bytes[i+1]-key[1]),
+        Math.abs(bytes[i+2]-key[2]))<=12)bytes[i+3]=0;
+    }
+    ctx.putImageData(rgba,0,0);
+    stage.dataset.nativeChannelAtlas='ready';
+   }catch(error){
+    // Chromium file:// has an opaque origin. Draw the unchanged authentic
+    // bitmap without color-keying instead of throwing a SecurityError and
+    // breaking unrelated game/depth/toolbar tests or offline local play.
+    if(error?.name!=='SecurityError'){
+     stage.dataset.nativeChannelAtlas='source-decode-error';
+     return;
+    }
+    stage.dataset.nativeChannelAtlas='ready-file-origin-unkeyed';
    }
-   ctx.putImageData(rgba,0,0);
-   atlasReady=true;stage.dataset.nativeChannelAtlas='ready';
-   renderNativeNumbers();
+   atlasReady=true;renderNativeNumbers();
   };
   atlas.onerror=()=>{stage.dataset.nativeChannelAtlas='source-unavailable'};
   stage.dataset.nativeChannelAtlas='loading';
