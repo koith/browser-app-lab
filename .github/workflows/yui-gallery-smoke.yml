@@ -41,7 +41,7 @@ jobs:
             const browser=await chromium.launch({headless:true});
             const page=await browser.newPage({viewport:{width:390,height:844}});
             const errors=[];page.on('pageerror',e=>errors.push(e.message));
-            await page.goto('https://koith.github.io/browser-app-lab/apps/yui-gallery/',{waitUntil:'domcontentloaded',timeout:30000});
+            await page.goto('https://koith.github.io/browser-app-lab/apps/yui-gallery/?smoke='+process.env.GITHUB_SHA,{waitUntil:'domcontentloaded',timeout:30000});
             await page.waitForFunction(()=>document.querySelector('#total')?.textContent?.includes('공개 SNS 사진'),{timeout:20000});
             const imgs=await page.locator('#media img').count();
             if(imgs<10)throw Error('Insufficient image cards: '+imgs);
