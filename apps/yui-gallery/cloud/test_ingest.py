@@ -25,6 +25,9 @@ with tempfile.TemporaryDirectory() as temp:
         thumb=out/photo['preview']
         assert local.is_file() and thumb.is_file()
         assert hashlib.sha256(local.read_bytes()).hexdigest()==photo['sha256']
+        assert thumb.stat().st_size==photo['preview_bytes']
+        assert hashlib.sha256(thumb.read_bytes()).hexdigest()==photo['preview_sha256']
         with Image.open(thumb) as im:assert im.width<=520
+    assert result['storage_provider']=='pending_external_upload'
     assert (out/'metadata/catalog.json').is_file()
     print('CLOUD_INGEST_TEST_PASS',album['stored'])

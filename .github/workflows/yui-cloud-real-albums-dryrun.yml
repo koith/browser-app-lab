@@ -50,6 +50,8 @@ jobs:
               thumb=root/p['preview']
               assert src.is_file() and thumb.is_file()
               assert hashlib.sha256(src.read_bytes()).hexdigest()==p['sha256']
+              assert thumb.stat().st_size==p['preview_bytes']
+              assert hashlib.sha256(thumb.read_bytes()).hexdigest()==p['preview_sha256']
           print('VERIFIED_CLOUD_STAGING_405',sum(a['stored'] for a in c['albums']))
           PY
       - uses: actions/upload-artifact@v4
