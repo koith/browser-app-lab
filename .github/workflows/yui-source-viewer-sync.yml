@@ -1,0 +1,80 @@
+name: Yui 405 Source Gallery and Free Crawler Sync
+on:
+  push:
+    paths:
+      - .github/workflows/yui-source-viewer-sync.yml
+      - apps/yui-gallery/build_source_viewer_manifest.py
+      - apps/yui-gallery/test_source_viewer_manifest.py
+      - apps/yui-gallery/gallery_dl_collector.py
+      - apps/yui-gallery/test_gallery_dl_collector.py
+  workflow_dispatch:
+  schedule:
+    - cron: '12 18 * * 2,5'
+permissions:
+  contents: write
+concurrency:
+  group: yui-origin-manifest-${{ github.ref_name }}
+  cancel-in-progress: false
+jobs:
+  source-gallery:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 32
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install only free local-source crawler and image QA tools
+        run: |
+          python -m pip install Pillow requests playwright gallery-dl
+          python -m playwright install chromium
+          gallery-dl --version
+      - name: Check individual-file collectors and exact five-album source index offline
+        run: |
+          python -m py_compile apps/yui-gallery/gallery_dl_collector.py apps/yui-gallery/build_source_viewer_manifest.py
+          python apps/yui-gallery/test_gallery_dl_collector.py
+          python apps/yui-gallery/test_source_viewer_manifest.py
+      - name: Run gallery-dl against existing approved public source pages
+        continue-on-error: true
+        run: |
+          python apps/yui-gallery/gallery_dl_collector.py --max-sources 2 --max-images 3
+      - name: Re-collect individual web photos with source-specific free browser extractors
+        run: |
+          python apps/yui-gallery/download_jliji_collections.py
+          python apps/yui-gallery/download_verified_public_album.py
+      - name: Index all 405 actually verified individual source photos into viewer
+        run: |
+          python apps/yui-gallery/build_source_viewer_manifest.py
+          python - <<'PY'
+          import json,hashlib
+          from pathlib import Path
+          p=Path('apps/yui-gallery/source-viewer-albums.json')
+          data=json.loads(p.read_text(encoding='utf-8'))
+          expect={'yuis-present33':33,'athletic-club104':104,'wet-yui80':80,
+                  'teddy-bear97':97,'green91':91}
+          assert {a['id']:len(a['images']) for a in data['albums']}==expect
+          assert sum(len(a['images']) for a in data['albums'])==405
+          assert all(x.get('sha256') and x['bytes']>5000 for a in data['albums'] for x in a['images'])
+          assert data['not_private_cloud']
+          print('FIVE_WEB_ALBUMS_405_VERIFIED_VIEWER_ENTRIES',hashlib.sha256(p.read_bytes()).hexdigest(),flush=True)
+          PY
+      - name: Commit only the source-origin viewer index, never redistributed media bytes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/yui-gallery/source-viewer-albums.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Index 405 verified web photos for direct gallery viewing"
+            BRANCH="${GITHUB_REF_NAME}"
+            git fetch origin "${BRANCH}"
+            git rebase "origin/${BRANCH}"
+            git push origin "HEAD:${BRANCH}"
+          fi
+      - name: Save verification summary only, without packaging photographs
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          path: yui-open-source-crawler/gallery-dl-report.json
+          archive: false
+          if-no-files-found: ignore
+          retention-days: 30
