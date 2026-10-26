@@ -9,6 +9,7 @@ on:
       - 'apps/4leaf/rog/tools/probe-original-obs-640stride.py'
       - 'apps/4leaf/rog/tools/audit-original-dice-resources.py'
       - 'apps/4leaf/rog/tools/probe-original-dice-dll-resources.py'
+      - 'apps/4leaf/rog/tests/test_dice_pe_imports.py'
       - 'apps/4leaf/rog/tools/decode-original-img-spr.py'
   workflow_dispatch:
 permissions:
@@ -76,6 +77,7 @@ jobs:
       - name: Inspect historical Dice.dll PE resource tree without executing original Windows code
         run: |
           python3 -m py_compile apps/4leaf/rog/tools/probe-original-dice-dll-resources.py
+          python3 apps/4leaf/rog/tests/test_dice_pe_imports.py
           source="$(find /tmp/leaf-obs-resources -type f -iname 'Dice.dll' | head -1)"
           test -n "$source"
           python3 apps/4leaf/rog/tools/probe-original-dice-dll-resources.py \
