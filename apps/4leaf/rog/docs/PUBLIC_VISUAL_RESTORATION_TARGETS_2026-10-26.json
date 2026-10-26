@@ -122,11 +122,11 @@
       "capture": "leaf-public-target-mobile-webkit.png",
       "beforeArtifact": "leaf-obs-2002-front-motion-live-mobile-webkit.png",
       "check": [
-        "IMG/bgtile.png shown once vertically instead of repeating every 485 CSS pixels",
+        "Original 725x485 forest remains unaltered and pixel-size sharp; repeating/native camera texture wrap is unverified and should not be asserted as erroneous without 2002 camera proof",
         "native minimap anchored bottom left of live board, not top-left",
         "still 104 playable DMP cells, actual OBS and genuine dice movement"
       ],
-      "sourceAuth": "source PNG dimensions verified 725x485 and screenshot board.jpg lower-left mini. Exact mobile historical layout UNVERIFIED; mobile cropping is web adaptation."
+      "sourceAuth": "source PNG dimensions verified 725x485 and screenshot board.jpg lower-left mini. Exact mobile historical layout UNVERIFIED; mobile cropping is web adaptation. A proposed no-repeat 100%-height enlargement blurred source buildings/cliffs in live WebKit capture and was explicitly REVERTED before release."
     },
     {
       "id": "WEB-DESKTOP-BOARD",
@@ -187,6 +187,12 @@
     "P0 verify all genuine OBS actor forward/back/action native tables; source pixel existence alone not direction proof",
     "P0 source D4/D6 real 3D mesh, texture, drop/bounce recovery from Dice.dll/EXE/PAK (currently unavailable)",
     "P1 full original ChatRoom 794x528 scene paired with public DOM capture and real two-user state",
-    "P1 mobile UX: live portrait screenshot must avoid backdrop tiling and top-left mini overlay without inventing historical native mobile UI"
-  ]
+    "P1 source-camera investigation: preserve native 725x485 original forest repeat until actual historic background tiling projection is verified; test/REJECT blurred portrait stretched approximation from real public screenshot."
+  ],
+  "publicScreenshotReview": {
+    "accepted": "Original 2002 minimap live DMP canvas moved from top to bottom-left in mobile portrait; native pixel source remains unchanged.",
+    "rejected": "The draft portrait no-repeat background-size:auto 100% scaled the 725x485 original IMG texture to enormous blurred terrain/cliffs: explicit review on 390x844 WebKit captured this and rejected it. Preserve original size and repeat pending native camera evidence.",
+    "evidenceRejectedImage": "GitHub PR #201 preliminary QA run 40298249027 screenshot leaf-public-target-mobile-webkit.png prior to source background CSS revert; comparison reference previous public beta23 390x844 leaf-obs-2002-front-motion-live-mobile-webkit.png.",
+    "why": "Historical baseline source board.jpg was 800x600 and does not determine a phone portrait camera/tiling algorithm; screenshot-first acceptance requires rejecting a change that visually degrades original-source fidelity."
+  }
 }
