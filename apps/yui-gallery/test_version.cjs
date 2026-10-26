@@ -11,7 +11,7 @@ assert.equal(state.progress.primary_cloud_verified_images,0);
 assert.equal(state.storage.intended_primary.provider,'TeraBox Basic');
 assert.equal(state.storage.intended_primary.availability,'not_connected');
 assert.equal(state.storage.intended_primary.r2_required,false);
-for(const page of ['index.html','zip-gallery.html','cloud.html']){
+for(const page of ['index.html','cloud.html','zip-gallery.html']){
  const html=fs.readFileSync(path.join(root,page),'utf8');
  assert.ok(html.includes(state.version),page+' must visibly show '+state.version);
  assert.ok(!html.includes('ZIP 2개를'),page+' should not claim two ZIPs');
@@ -19,4 +19,8 @@ for(const page of ['index.html','zip-gallery.html','cloud.html']){
 const data=JSON.parse(fs.readFileSync(path.join(root,'stored-albums.json'),'utf8'));
 const actuallyOnPages=data.albums.reduce((n,x)=>n+(x.images?.length||0),0);
 assert.ok(actuallyOnPages<405,'never accidentally claim all private ZIP images are public Pages files');
-console.log('YUI_VERSION_AND_STORAGE_STATUS_PASS',state.version,'private_zip_photos',405,'public_pages_photos',actuallyOnPages,'terabox_verified',0);
+assert.equal(state.archiving_engine.bundle_generation,false);
+assert.equal(state.archiving_engine.mode,'individual_files');
+assert.ok(!fs.readFileSync(path.join(root,'index.html'),'utf8').includes('href="zip-gallery.html"'));
+assert.ok(fs.readFileSync(path.join(root,'zip-gallery.html'),'utf8').includes('location.replace("./")'));
+console.log('YUI_VERSION_AND_STORAGE_STATUS_PASS',state.version,'previously_collected_web_photos',405,'public_pages_photos',actuallyOnPages,'terabox_verified',0,'bundle_generation',false);
