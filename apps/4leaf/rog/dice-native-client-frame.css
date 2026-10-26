@@ -189,3 +189,22 @@
   transform:scale(.82);transform-origin:center;
  }
 }
+
+/* PUBLIC 390x844 visual-baseline repair. The real 725x485 Dice/IMG.pak
+ * forest pixel sheet was tiled/repeated every 485 CSS pixels down the
+ * portrait screen (same village/cliff reappearing twice in one camera
+ * view). Archived board.jpg/battle.jpg show ONE continuous original forest
+ * scene behind live DMP/TIS cells; the 2002 renderer's camera projection
+ * is not known. This MOBILE-ONLY adaptation scales the UNCHANGED source
+ * bitmap proportionally to the portrait board height and crops its sides,
+ * rather than inventing fill terrain or duplicating a visible village.
+ * Desktop stays native 725x485 with independent panning and source assets. */
+@media(max-width:650px) and (orientation:portrait){
+ #app.app-classic-dice #game .board-area,
+ #app.app-classic-dice #game #board-world{
+  background-image:url('./original/IMG/bgtile.png')!important;
+  background-size:auto 100%!important;
+  background-repeat:no-repeat!important;
+  background-position:center center!important;
+ }
+}
