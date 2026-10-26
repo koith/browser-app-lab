@@ -1,0 +1,85 @@
+{
+  "updated": "2026-10-26",
+  "images": [
+    {
+      "id": "cn-01",
+      "site": "huantuji",
+      "source": "https://www.huantuji.com/yui/",
+      "url": "https://image.huantuji.com/2026/07/2026070806385046-2048x1366.webp",
+      "name": "Yui 공개 미리보기 01 (huantuji)",
+      "date": "",
+      "type": "chinese-preview",
+      "verifiedAt": "2026-10-26"
+    },
+    {
+      "id": "cn-02",
+      "site": "huantuji",
+      "source": "https://www.huantuji.com/yui/",
+      "url": "https://image.huantuji.com/2026/07/2026070806385978.webp",
+      "name": "Yui 공개 미리보기 02 (huantuji)",
+      "date": "",
+      "type": "chinese-preview",
+      "verifiedAt": "2026-10-26"
+    },
+    {
+      "id": "cn-03",
+      "site": "huantuji",
+      "source": "https://www.huantuji.com/yui/",
+      "url": "https://image.huantuji.com/2026/07/2026070806390473.webp",
+      "name": "Yui 공개 미리보기 03 (huantuji)",
+      "date": "",
+      "type": "chinese-preview",
+      "verifiedAt": "2026-10-26"
+    },
+    {
+      "id": "cn-04",
+      "site": "chaotuji",
+      "source": "https://www.chaotuji.com/yui/",
+      "url": "https://image.chaotuji.com/2026/04/2026042913290312.webp?fit=scale&fm=pjpg&h=1536&ixlib=php-3.3.1&w=1024&wpsize=1536x1536&s=3447f2be9e42a28d166a6a8f65e359de",
+      "name": "Yui 공개 미리보기 04 (chaotuji)",
+      "date": "",
+      "type": "chinese-preview",
+      "verifiedAt": "2026-10-26"
+    },
+    {
+      "id": "cn-05",
+      "site": "chaotuji",
+      "source": "https://www.chaotuji.com/yui/",
+      "url": "https://image.chaotuji.com/2026/04/2026042913291272.webp?fit=scale&fm=pjpg&h=1536&ixlib=php-3.3.1&w=1105&wpsize=1536x1536&s=18cce12f0a8bf5cd796dba730a842bf6",
+      "name": "Yui 공개 미리보기 05 (chaotuji)",
+      "date": "",
+      "type": "chinese-preview",
+      "verifiedAt": "2026-10-26"
+    },
+    {
+      "id": "cn-06",
+      "site": "miaohuaying",
+      "source": "https://www.miaohuaying.com/yui/",
+      "url": "https://img.miaohuaying.com/2026/06/Yui-22.webp?fm=pjpg&ixlib=php-3.3.1&s=82691d7c2b4642726dadee20aac79ee7",
+      "name": "Yui 공개 미리보기 06 (miaohuaying)",
+      "date": "",
+      "type": "chinese-preview",
+      "verifiedAt": "2026-10-26"
+    },
+    {
+      "id": "cn-07",
+      "site": "miaohuaying",
+      "source": "https://www.miaohuaying.com/yui/",
+      "url": "https://img.miaohuaying.com/2026/06/Yui-52.webp?fm=pjpg&ixlib=php-3.3.1&s=35d101dc3d26f9bb8243bbf3ca08000a",
+      "name": "Yui 공개 미리보기 07 (miaohuaying)",
+      "date": "",
+      "type": "chinese-preview",
+      "verifiedAt": "2026-10-26"
+    },
+    {
+      "id": "cn-08",
+      "site": "miaohuaying",
+      "source": "https://www.miaohuaying.com/yui/",
+      "url": "https://img.miaohuaying.com/2026/06/Yui-84.webp?fm=pjpg&ixlib=php-3.3.1&s=9513600e15324db40b48dd0b8d4973bf",
+      "name": "Yui 공개 미리보기 08 (miaohuaying)",
+      "date": "",
+      "type": "chinese-preview",
+      "verifiedAt": "2026-10-26"
+    }
+  ]
+}
