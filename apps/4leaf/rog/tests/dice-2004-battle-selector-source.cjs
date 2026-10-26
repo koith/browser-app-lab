@@ -59,7 +59,7 @@ const {chromium,webkit}=require('playwright');
     'right actual chessman uses reviewed full-body source not face card: '+JSON.stringify(actor));
    assert.equal(actor.proof,'visually-reviewed');
    assert.equal(actor.sourceFrame,'25');
-   assert.ok(/104[023]-25\\.png$/.test(actor.source),
+   assert.ok(/104[023]-25/.test(actor.source)&&actor.source.endsWith('-25.png'),
     'genuine 2002 OBS source frame 25 for audited 0040/0042/0043 only');
    assert.ok(actor.image[0]>10&&actor.image[1]>20,
     'full-body original OBS bitmap has real native pixel geometry');
