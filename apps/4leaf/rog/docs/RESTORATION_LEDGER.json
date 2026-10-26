@@ -6131,6 +6131,25 @@
         "https://github.com/koith/browser-app-lab/blob/feat/4leaf-obs-front-motion-region-native-20261026/apps/4leaf/rog/tests/obs-front-region-source-game.cjs",
         "https://github.com/koith/browser-app-lab/blob/feat/4leaf-obs-front-motion-region-native-20261026/apps/4leaf/rog/genesis-chessman-actors.js"
       ]
+    },
+    {
+      "seq": 253,
+      "date": "2026-10-26",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261026-001",
+      "taskIds": [
+        "P0-ACTOR",
+        "ACT-03",
+        "ACT-04",
+        "P0-DICE",
+        "DIE-01",
+        "DIE-02",
+        "P0-BOARD",
+        "P0-CHAT",
+        "CHT-04",
+        "P0-RELEASE"
+      ],
+      "details": "Registered original OBS front/action, D4/D6 forensic source acquisition, original interactive UI replacement and live multiplayer acceptance request REQ-20261026-001. Functional code implementation event seq252 remains preserved, including pending QA gate."
     }
   ]
 }
