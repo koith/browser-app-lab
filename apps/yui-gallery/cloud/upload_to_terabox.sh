@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
-STAGE="\${1:-cloud-stage}"
-REMOTE="\${ARCHIVE_REMOTE:-archive:YuiArchive}"
+STAGE="${1:-cloud-stage}"
+REMOTE="${ARCHIVE_REMOTE:-archive:YuiArchive}"
 if [[ ! -d "$STAGE/originals" || ! -f "$STAGE/metadata/catalog.json" ]]; then
   echo "Missing validated original files and catalog in staging directory" >&2; exit 2
 fi
-if [[ -z "\${RCLONE_CONFIG_ARCHIVE_COOKIE:-}" ]]; then
+if [[ -z "${RCLONE_CONFIG_ARCHIVE_COOKIE:-}" ]]; then
   echo "NOT CONNECTED: RCLONE_CONFIG_ARCHIVE_COOKIE must be set securely" >&2; exit 3
 fi
 export RCLONE_CONFIG_ARCHIVE_TYPE=terabox
