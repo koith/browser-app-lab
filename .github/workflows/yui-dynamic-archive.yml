@@ -81,11 +81,12 @@ jobs:
           print('VERIFIED_REAL_ALBUM_FILES',total)
           PY
       - name: Commit physical public previews and index
+        if: github.ref == 'refs/heads/main'
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add apps/yui-gallery/stored-albums apps/yui-gallery/stored-albums.json apps/yui-gallery/albums.json
-          git diff --cached --quiet || (git commit -m "Store public preview files and connect album gallery" && git push)
+          git diff --cached --quiet || (git commit -m "Store public preview files and connect album gallery" && git pull --rebase origin main && git push origin HEAD:main)
       - uses: actions/upload-artifact@v4
         if: always()
         with:
