@@ -50,7 +50,9 @@
    const slot=party.querySelector('.dice-chessman-slot.selected .dice-chessman-face')?.closest('.dice-chessman-slot')||
     party.querySelector('.dice-chessman-slot.occupied');
    const img=slot?.querySelector('.dice-chessman-face');
-   const source=img?.getAttribute('src')||'';
+   // Info remains the genuine CardData image while the independently
+   // functioning right-party slots use the source OBS full-body figure.
+   const source=slot?.dataset.sourceCardArtwork||img?.getAttribute('src')||'';
    if(source&&picture.getAttribute('src')!==source)picture.src=source;
    picture.hidden=!source;
    name.textContent=slot?.querySelector('b')?.textContent||'출전 체스맨 없음';
