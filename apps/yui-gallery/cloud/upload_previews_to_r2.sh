@@ -25,7 +25,7 @@ python3 "$HERE/verify_r2_cache.py" "$STAGE"
 # because operation counts and other account usage are not available here.
 CURRENT="$(rclone size "$REMOTE" --json)"
 export CURRENT
-python3 - "$STAGE" <<'PY'
+PYTHONPATH="$HERE" python3 - "$STAGE" <<'PY'
 import json,os,sys
 from pathlib import Path
 from verify_r2_cache import check_previews,MAX_CACHE_BYTES
