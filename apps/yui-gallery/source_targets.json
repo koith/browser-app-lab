@@ -30,7 +30,10 @@
       ],
       "max_pages": 10,
       "scroll_limit": 30,
-      "declared_photos": null
+      "declared_photos": null,
+      "include_image_paths": [
+        "/Yui-[0-9]+\\.webp$"
+      ]
     },
     {
       "id": "yuntu8-yui-profile",
@@ -40,7 +43,10 @@
       ],
       "max_pages": 8,
       "scroll_limit": 30,
-      "declared_photos": null
+      "declared_photos": null,
+      "include_image_paths": [
+        "/item/[0-9a-f]+\\.(jpg|jpeg|webp|png)$"
+      ]
     },
     {
       "id": "wantuzhi-everyday-life",
@@ -50,7 +56,10 @@
       ],
       "max_pages": 12,
       "scroll_limit": 30,
-      "declared_photos": 194
+      "declared_photos": 194,
+      "include_image_paths": [
+        "Yui.*Everyday.*life\\.(jpg|png|webp)$"
+      ]
     },
     {
       "id": "yingyuge-yui-collection",
@@ -62,7 +71,10 @@
       ],
       "max_pages": 10,
       "scroll_limit": 30,
-      "declared_photos": null
+      "declared_photos": null,
+      "exclude_image_paths": [
+        "/logo|/favicon|/vip"
+      ]
     }
   ]
 }
