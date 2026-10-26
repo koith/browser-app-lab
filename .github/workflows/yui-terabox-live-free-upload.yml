@@ -27,12 +27,12 @@ jobs:
           python -m playwright install --with-deps chromium
           python apps/yui-gallery/download_jliji_collections.py
           python apps/yui-gallery/download_verified_public_album.py
-          python apps/yui-gallery/cloud/ingest_verified_zips.py \
-            yui-jliji-full-private/yuis-present33.zip \
-            yui-jliji-full-private/athletic-club104.zip \
-            yui-jliji-full-private/wet-yui80.zip \
-            yui-jliji-full-private/teddy-bear97.zip \
-            yui-verified-private-albums/green91_public_web_album.zip \
+          python apps/yui-gallery/cloud/ingest_verified_directories.py \
+            yui-jliji-full-private/yuis-present33 \
+            yui-jliji-full-private/athletic-club104 \
+            yui-jliji-full-private/wet-yui80 \
+            yui-jliji-full-private/teddy-bear97 \
+            yui-verified-private-albums/green91 \
             --out cloud-stage
           python - <<'PY'
           import json,hashlib
