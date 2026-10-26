@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "project": "4LEAF 원작 복원 웹앱",
   "canonicalFile": "apps/4leaf/rog/docs/RESTORATION_LEDGER.json",
-  "updatedAt": "2026-10-25",
+  "updatedAt": "2026-10-26",
   "sourceOfTruth": "Git 저장소의 이 JSON과 커밋 이력. 과거 챗 대화는 기록 근거이지 진행 상태의 원본 데이터가 아님.",
   "operatingRule": "새 요청 즉시 작업 등록 → open 목록 조회 → 실제 수정 → 원본 근거/코드/브라우저/배포 검증 → 검증 증거와 함께 상태 전이. 부분 구현을 원작 완성으로 표시 금지.",
   "statusDefinitions": {
@@ -6045,6 +6045,33 @@
       "evidence": "apps/4leaf/rog/dice-source-native-ui.css; apps/4leaf/rog/tests/dice-source-native-ui.cjs",
       "refs": [
         "https://github.com/koith/browser-app-lab/actions/runs/40111857975"
+      ]
+    },
+    {
+      "seq": 250,
+      "date": "2026-10-26",
+      "type": "VERIFIED_BETA22_ORIGINAL_OBS_FX_FIX_PUBLISHED_CHAT_QA_ACCEPTED",
+      "requestId": "REQ-20261025-001",
+      "taskIds": [
+        "P0-ACTOR",
+        "ACT-01",
+        "ACT-03",
+        "P0-CHAT",
+        "P0-RELEASE"
+      ],
+      "details": "GitHub main PR195 merged bcb2d84937012fb1fba230c4ce4b50cc6d469198 (0.86.0-beta.22/PWA v109). Actual game uses independently visually audited original OBS NON_ACTOR_OBS 38 IDs rather than displaying particles, rings, pointer or HUD as full-body chessmen; all decoded original PNG bytes remain and 20 previously verified OBS source actor fronts are preserved. Original IMG 16px Dice chat scroll buttons now anchor to the actual .messenger panel and maintain reader overflow-anchor:none. Exact deployed SHA Pages and real public browser QA #40274994669 SUCCESS: actual chat-form messages produced scroll overflow, wheel readback, physical down-button click and keyboard-up scroll PASS, Chromium/WebKit/mobile original DMP and source ROLL checks PASS. GitHub main post-merge game smoke, source OBS role regression, board, centralized chat, restoration ledger and same-SHA release QA SUCCESS. Render current live server deploy dep-dbe5er7b9u1s73c86i80 at server commit ce12e0553067470bfb293bad7eaf761dd83e8b98 supports transfer/kick from merged PR190; newer PR192-195 did not change server/central.cjs, so Render deploy is not falsely represented as same GitHub main SHA. Redundant identical PR196 vs merged PR190 independently compared 10/10 patches and CLOSED unmerged. Old #105 and #176 safely CLOSED unmerged because new verified source decoders/OBS and measured 2D battle deck anchoring supersede them. Original D4/D6 3D meshes and native action-table/FPS/directions remain NOT RECOVERED. Ledger task statuses unchanged until full acceptance; preserve earlier failure events.",
+      "evidence": [
+        "https://github.com/koith/browser-app-lab/pull/195",
+        "https://github.com/koith/browser-app-lab/pull/196",
+        "https://github.com/koith/browser-app-lab/pull/176",
+        "https://github.com/koith/browser-app-lab/pull/105",
+        "https://github.com/koith/browser-app-lab/actions/runs/40274994669",
+        "https://github.com/koith/browser-app-lab/actions/runs/40274940414",
+        "https://github.com/koith/browser-app-lab/actions/runs/40274940472",
+        "https://github.com/koith/browser-app-lab/actions/runs/40274940457",
+        "https://github.com/koith/browser-app-lab/actions/runs/40274940563",
+        "https://github.com/koith/browser-app-lab/actions/runs/40274940366",
+        "https://github.com/koith/browser-app-lab/commit/bcb2d84937012fb1fba230c4ce4b50cc6d469198"
       ]
     }
   ]
