@@ -36,14 +36,14 @@ main{max-width:1280px;margin:0 auto;padding:0 23px 80px}
 <script>
 let photos=[],albums=[],site='전체',view='media',idx=0;
 const el=id=>document.getElementById(id), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','&apos;':'&#39;'}[c]));
-function renderMedia(){el('total').textContent='공개 SNS 사진 '+photos.length+'장';el('media').innerHTML=photos.length?photos.map((p,i)=>'<div class="media"><img loading="lazy" referrerpolicy="no-referrer" data-i="'+i+'" src="'+esc(p.url.replace('name=orig','name=medium'))+'" alt="공개 SNS 사진 '+(i+1)+'"><div class="shade">눌러서 크게 보기</div></div>').join(''):'<div class="empty">공개 SNS 사진을 읽지 못했습니다. 아래 본인 SNS 링크에서 확인할 수 있습니다.</div>';
+function cdn(url,size){let m=url.match(/^(https:\/\/pbs\.twimg\.com\/media\/[^.?]+)\.(jpg|jpeg|png|webp)(?:\?.*)?$/);return m?m[1]+'?format='+m[2]+'&name='+size:url}\nfunction renderMedia(){el('total').textContent='공개 SNS 사진 '+photos.length+'장';el('media').innerHTML=photos.length?photos.map((p,i)=>'<div class="media"><img loading="lazy" referrerpolicy="no-referrer" data-i="'+i+'" src="'+esc(cdn(p.url,'medium'))+'" alt="공개 SNS 사진 '+(i+1)+'"><div class="shade">눌러서 크게 보기</div></div>').join(''):'<div class="empty">공개 SNS 사진을 읽지 못했습니다. 아래 본인 SNS 링크에서 확인할 수 있습니다.</div>';
 el('media').querySelectorAll('img').forEach(im=>{im.onclick=()=>show(+im.dataset.i);im.onerror=()=>{im.closest('.media').style.display='none'}})}
 function renderAlbums(){let q=el('search').value.toLowerCase();let f=albums.filter(a=>(site==='전체'||a.site===site)&&(''+a.site+' '+a.title).toLowerCase().includes(q));
 el('albumgrid').innerHTML=f.length?f.map(a=>'<div class="album"><small>'+esc(a.site)+'</small><strong>'+esc(a.title)+'</strong><p>'+esc(a.photos??'사진 수 미상')+'장 · '+esc(a.size||'출처 정보')+'</p><div class="actions"><a href="'+esc(a.source)+'" target="_blank" rel="noopener">화보 사이트 ↗</a></div></div>').join(''):'<div class="empty">검색된 화보가 없습니다.</div>';
 el('total').textContent='화보 출처 '+f.length+'건 · 전체 '+albums.length+'건';
 }
 function renderFilters(){let sites=['전체',...new Set(albums.map(a=>a.site))];el('filters').innerHTML=sites.map(s=>'<button class="filter '+(site===s?'active':'')+'" data-s="'+esc(s)+'">'+esc(s)+'</button>').join('');el('filters').querySelectorAll('button').forEach(b=>b.onclick=()=>{site=b.dataset.s;renderFilters();renderAlbums()})}
-function show(i){idx=(i+photos.length)%photos.length;const p=photos[idx];el('big').src=p.url;el('original').href=p.url;el('post').href=p.post;el('counter').textContent=(idx+1)+' / '+photos.length;el('lightbox').classList.add('show');document.body.style.overflow='hidden'}
+function show(i){idx=(i+photos.length)%photos.length;const p=photos[idx];el('big').src=cdn(p.url,'orig');el('original').href=cdn(p.url,'orig');el('post').href=p.post;el('counter').textContent=(idx+1)+' / '+photos.length;el('lightbox').classList.add('show');document.body.style.overflow='hidden'}
 function hide(){el('lightbox').classList.remove('show');document.body.style.overflow=''}
 el('close').onclick=hide;el('prev').onclick=()=>show(idx-1);el('next').onclick=()=>show(idx+1);
 document.addEventListener('keydown',e=>{if(e.key==='Escape')hide();if(el('lightbox').classList.contains('show')&&e.key==='ArrowRight')show(idx+1);if(el('lightbox').classList.contains('show')&&e.key==='ArrowLeft')show(idx-1)});
