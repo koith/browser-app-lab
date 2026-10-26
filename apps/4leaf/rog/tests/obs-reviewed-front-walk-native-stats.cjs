@@ -105,14 +105,21 @@ const {chromium,webkit}=require('playwright');
      frame:a.querySelector('img.leaf-chess-original-obs')?.getAttribute('src')})),
     scores:[...el.querySelectorAll('.battle-visual-total')].map(x=>x.textContent),
     dice:el.querySelectorAll('.battle-visual-die').length,
-    statsArt:getComputedStyle(document.querySelector('#dice-client-sidebar')).backgroundImage};
+    statsArt:getComputedStyle(document.querySelector('#dice-client-sidebar')).backgroundImage,
+    mobileIconArt:getComputedStyle(document.querySelector('#dice-original-selector .dice-source-tool')).backgroundImage};
   });
   assert.equal(stage.fighters.length,2);
   assert.ok(stage.fighters.every(a=>a.rig==='original-obs-sprite'&&a.frame?.includes('/original/OBS/')));
   assert.equal(stage.scores.length,2);
   assert.ok(stage.dice>=2);
   assert.ok(stage.podium?.includes('winBattle-01.png'));
-  assert.ok(stage.statsArt.includes('selector.png'),'complete authentic right panel still used in battle');
+  if(mobile){
+   // Original desktop 222×152 full backing is intentionally NOT applied to
+   // a 390px phone screen. Mobile retains the genuine cropped icon glyphs.
+   assert.ok(stage.mobileIconArt.includes('selector.png'),
+    'mobile tool hit targets use genuine original selector atlas pixels');
+  }else assert.ok(stage.statsArt.includes('selector.png'),
+   'desktop 800×600 keeps complete original 222×152 source selector panel');
   await page.screenshot({path:'leaf-real-battle-six-front-motion-'+engine.name()+(mobile?'-mobile':'')+'.png'});
   if(!mobile){
    const live=await page.locator('#app').screenshot();
