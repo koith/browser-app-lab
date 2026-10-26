@@ -52,7 +52,7 @@ jobs:
             const page=await browser.newPage({viewport:{width:390,height:844},acceptDownloads:true});
             const errors=[];page.on('pageerror',e=>errors.push(e.message));
             await page.goto('http://127.0.0.1:8765/',{waitUntil:'domcontentloaded',timeout:30000});
-            await page.waitForFunction(()=>document.querySelector('#total')?.textContent?.includes('실제 저장'),{timeout:20000});
+            await page.waitForFunction(()=>document.querySelector('#total')?.textContent?.includes('작품별 실물 파일'),{timeout:20000});
             const tab=await page.locator('.tab.active').textContent();
             if(!tab.includes('화보'))throw Error('Album not primary '+tab);
             const cards=await page.locator('.album').count();
