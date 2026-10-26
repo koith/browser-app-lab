@@ -13,12 +13,16 @@ permissions:
   contents: read
 jobs:
   verified-viewing:
-    runs-on: ubuntu-24.04
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 25
     strategy:
       fail-fast: false
       matrix:
-        engine: [chromium, webkit]
+        include:
+          - engine: chromium
+            os: ubuntu-24.04
+          - engine: webkit
+            os: macos-14
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -30,8 +34,8 @@ jobs:
       - name: Install free local tools
         timeout-minutes: 7
         run: |
-          pip install Pillow requests playwright==1.58.2 gallery-dl fastapi httpx
-          python -m playwright install --with-deps ${{ matrix.engine }}
+          pip install Pillow requests playwright==1.58.0 gallery-dl fastapi httpx
+          python -m playwright install ${{ matrix.engine }}
       - name: Verify byte preservation and collector behavior
         run: |
           node apps/yui-gallery/test_version.cjs
