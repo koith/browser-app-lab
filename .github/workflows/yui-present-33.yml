@@ -1,0 +1,45 @@
+name: Yui Present 33 Public Album Archive
+on:
+  push:
+    paths:
+      - apps/yui-gallery/download_jliji_present.py
+      - .github/workflows/yui-present-33.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  archive:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install browser and image packages
+        run: |
+          pip install playwright requests Pillow
+          python -m playwright install --with-deps chromium
+      - name: Compile script
+        run: python -m py_compile apps/yui-gallery/download_jliji_present.py
+      - name: Browse 33 picture cards and download visible media
+        run: python apps/yui-gallery/download_jliji_present.py
+      - name: Verify actual archive
+        run: |
+          python - <<'PY'
+          import zipfile,json,hashlib
+          with zipfile.ZipFile('YuiPresent33PublicGallery.zip') as z:
+            assert z.testzip() is None
+            m=json.loads(z.read('manifest.json'))
+            assert len(m['files'])==33
+            for p in m['files']:
+              assert hashlib.sha256(z.read('images/'+p['file'])).hexdigest()==p['sha256']
+          print('PASS_33_IMAGES',len(m['files']))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Yui-Present-33-public-web-photos
+          path: YuiPresent33PublicGallery.zip
+          retention-days: 90
+          if-no-files-found: warn
