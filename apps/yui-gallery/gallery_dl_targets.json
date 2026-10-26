@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "description": "Verified Yui sets with dedicated free gallery-dl external extractors, individually downloaded images only.",
+  "sources": [
+    {
+      "id": "yuis-present33",
+      "url": "https://www.jliji.com/set/12343",
+      "expected": 33
+    },
+    {
+      "id": "athletic-club104",
+      "url": "https://www.jliji.com/set/14973",
+      "expected": 104
+    },
+    {
+      "id": "wet-yui80",
+      "url": "https://www.jliji.com/set/14346",
+      "expected": 80
+    },
+    {
+      "id": "teddy-bear97",
+      "url": "https://www.jliji.com/set/19356",
+      "expected": 97
+    }
+  ]
+}
