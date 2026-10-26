@@ -1,4 +1,4 @@
-"""Private media gateway over TeraBox rclone backend.
+"""Private media gateway: TeraBox originals, optional private R2 previews.
 
 Sensitive storage cookies stay in server env, never in the GitHub Pages client.
 Every user API request requires the private gallery bearer token. Full size media
@@ -31,6 +31,16 @@ app.add_middleware(
     expose_headers=["Content-Disposition", "X-Archive-Source"],
 )
 REMOTE = os.environ.get("ARCHIVE_REMOTE", "archive:YuiArchive").rstrip("/")
+# The optional R2 preview cache is private: never upload originals to R2.
+R2_PREVIEW_REMOTE = os.environ.get("R2_PREVIEW_REMOTE", "").rstrip("/")
+R2_READY = bool(
+    R2_PREVIEW_REMOTE.startswith("previewcache:")
+    and os.environ.get("RCLONE_CONFIG_PREVIEWCACHE_ACCESS_KEY_ID")
+    and os.environ.get("RCLONE_CONFIG_PREVIEWCACHE_SECRET_ACCESS_KEY")
+    and os.environ.get("RCLONE_CONFIG_PREVIEWCACHE_ENDPOINT", "").startswith("https://")
+    and os.environ.get("RCLONE_CONFIG_PREVIEWCACHE_TYPE") == "s3"
+    and os.environ.get("RCLONE_CONFIG_PREVIEWCACHE_PROVIDER") == "Cloudflare"
+)
 TOKEN = os.environ.get("GALLERY_ACCESS_TOKEN", "")
 COOKIE = os.environ.get("RCLONE_CONFIG_ARCHIVE_COOKIE", "")
 _cache = {"time": 0.0, "catalog": None}
@@ -54,14 +64,14 @@ async def authenticated(authorization: str | None = Header(default=None)):
         raise HTTPException(status_code=401, detail="Authorization required", headers={"WWW-Authenticate": "Bearer"})
 
 
-async def rclone_bytes(path: str, limit: int) -> bytes:
+async def rclone_bytes(path: str, limit: int, *, remote: str | None = None) -> bytes:
     """Drain the *entire* remote stream, with size/timeout bounds.
 
     A single StreamReader.read(limit) may return only the first network chunk.
     Never treat such a partial read as a successfully fetched photograph.
     """
     proc = await asyncio.create_subprocess_exec(
-        "rclone", "cat", f"{REMOTE}/{path}", "--timeout=50s", "--retries=2",
+        "rclone", "cat", f"{remote or REMOTE}/{path}", "--timeout=50s", "--retries=2",
         stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
     )
 
@@ -118,7 +128,7 @@ async def get_catalog():
 async def health():
     # Never disclose credentials or confirm account identity through health.
     return {"service": "Yui private archive", "configured": bool(TOKEN and COOKIE),
-            "data_connected": bool(_cache["catalog"])}
+            "data_connected": bool(_cache["catalog"]), "r2_preview_cache_configured": R2_READY}
 
 
 @app.get("/api/catalog", dependencies=[Depends(authenticated)])
@@ -147,22 +157,39 @@ async def media(album_id: str, image_num: int, kind: str, download: bool = Query
     if not key.startswith(expected_prefix + "/" + album_id + "/"):
         raise HTTPException(status_code=500, detail="Manifest media path mismatch")
     limit = 5_000_000 if kind == "preview" else 140_000_000
-    blob = await rclone_bytes(key,limit)
     digest_field = "sha256" if kind == "original" else "preview_sha256"
     size_field = "bytes" if kind == "original" else "preview_bytes"
     declared_digest = img.get(digest_field)
     declared_bytes = img.get(size_field)
-    if (not isinstance(declared_digest, str)
-            or not re.fullmatch(r"[0-9a-f]{64}", declared_digest)
-            or type(declared_bytes) is not int
-            or declared_bytes != len(blob)
-            or hashlib.sha256(blob).hexdigest() != declared_digest):
-        print("CLOUD_MEDIA_INTEGRITY_FAILED", album_id, image_num, kind, flush=True)
-        raise HTTPException(status_code=502, detail="Cloud media integrity check failed")
+
+    def integrity_ok(data: bytes) -> bool:
+        return (isinstance(declared_digest, str)
+                and bool(re.fullmatch(r"[0-9a-f]{64}", declared_digest))
+                and type(declared_bytes) is int
+                and declared_bytes == len(data)
+                and hashlib.sha256(data).hexdigest() == declared_digest)
+
+    source = "terabox"
+    blob = None
+    if kind == "preview" and R2_READY:
+        try:
+            cached = await rclone_bytes(key, limit, remote=R2_PREVIEW_REMOTE)
+            if integrity_ok(cached):
+                blob, source = cached, "r2-preview-cache"
+            else:
+                print("R2_PREVIEW_CACHE_HASH_MISMATCH", album_id, image_num, flush=True)
+        except (HTTPException, OSError) as exc:
+            # A cache outage must not break access to a verified origin preview.
+            print("R2_PREVIEW_CACHE_UNAVAILABLE", album_id, image_num, type(exc).__name__, flush=True)
+    if blob is None:
+        blob = await rclone_bytes(key, limit)
+        if not integrity_ok(blob):
+            print("CLOUD_MEDIA_INTEGRITY_FAILED", album_id, image_num, kind, flush=True)
+            raise HTTPException(status_code=502, detail="Cloud media integrity check failed")
     extension = key.rsplit(".", 1)[-1].lower()
     content_type = {"jpg":"image/jpeg","jpeg":"image/jpeg","png":"image/png","webp":"image/webp","avif":"image/avif"}.get(extension,"application/octet-stream")
     headers={"Cache-Control":"private, max-age=600","X-Content-Type-Options":"nosniff",
-             "Content-Length":str(len(blob))}
+             "Content-Length":str(len(blob)), "X-Archive-Source":source}
     if download:
         headers["Content-Disposition"] = f'attachment; filename="{album_id}-{image_num:04d}.{extension}"'
     return StreamingResponse(iter([blob]),media_type=content_type,headers=headers)
