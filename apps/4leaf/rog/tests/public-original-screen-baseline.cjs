@@ -58,10 +58,15 @@ const path=require('node:path');
     geometry.mini.bottom<=geometry.area.bottom+2,
     'native minimap bottom is anchored to actual game lower-left; got '+JSON.stringify(geometry));
    assert.ok(Math.abs(geometry.mini.x-geometry.area.x)<8);
-   assert.equal(geometry.worldRepeat,'no-repeat',
-    'no repeated village/cliff seam every 485 pixels in portrait');
-   assert.equal(geometry.areaRepeat,'no-repeat');
-   assert.equal(geometry.worldSize,'auto 100%','unchanged 725x485 source proportionally covers portrait height');
+   // The original 725x485 PAK texture's historical wrap/projection is
+   // UNVERIFIED. A proposed mobile stretched no-repeat variant caused a
+   // visibly blurred, giant cliff in actual WebKit. Reject that attempted
+   // approximation; keep authentic source PIXEL SCALE and bitmap intact.
+   assert.equal(geometry.worldRepeat,'repeat',
+    'do not claim unknown native terrain wrap as non-repeating original');
+   assert.equal(geometry.areaRepeat,'repeat');
+   assert.equal(geometry.worldSize,'725px 485px',
+    'exact real source terrain dimensions retained until source camera recovered');
    assert.ok(geometry.miniImage.includes('/original/IMG/minimap.png'));
   }else{
    assert.ok(Math.abs(geometry.app.width-800)<2&&Math.abs(geometry.app.height-600)<2);
