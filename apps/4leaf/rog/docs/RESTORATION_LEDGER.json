@@ -6219,6 +6219,25 @@
         "P0-RELEASE"
       ],
       "details": "Correction to event256's provisional mobile original terrain claim, preserving immutable previous event: actual 390x844 WebKit capture from PR #201 revealed `background-size:auto 100%; no-repeat` of original 725x485 source would enlarge and blur buildings/cliffs and LOSE archived client source detail; author explicitly REVERTED the modification before merging. Original IMG/bgtile.png native 725x485 repeat remains untouched until original historical camera/wrap algorithm is established. The separately confirmed position:relative override bug placing real #board-mini at top-left is still FIXED for phone portrait: restoring source bottom-left mini with live DMP canvas and genuine 2002 source minipanel tabs. 800x600 original-vs-actual deployed HUD ROI diagnostics (non-equivalent battle and first turn) and 90-post period-bucket Memorial provenance are supplemental proof, not a fake completed pose or original mobile claim. PR CI and public QA evidence still pending."
+    },
+    {
+      "seq": 258,
+      "date": "2026-10-26",
+      "type": "VERIFIED_PUBLIC_ORIGINAL_SCREEN_BASELINE_MINIMAP_FIX_PR201_PAGES_ACCEPTED",
+      "requestId": "REQ-20261026-002",
+      "taskIds": [
+        "P0-BOARD",
+        "P0-RELEASE",
+        "ACT-04"
+      ],
+      "details": "PR #201 merged 11d23c3dc58e27482b10b3b82aa671039f983e2a: public beta24 PWA v111. Source VERIFIED 2002 original IMG/minimap.png display and native 75x20 minipanel source artwork now mobile board BOTTOM-left with LIVE original DMP map canvas, fixing PRIOR visible TOP-left overlay. CSS relative-vs-absolute conflict removed only for portrait mobile. Desktop 800x600 remains pixel-aligned. Source forest 725x485 native pixel repeat left intact after rejecting WebKit-blurry proposed zoom: unknown original source MVE/background projection remains UNVERIFIED. PR head 6778ee3 passes main game smoke, source visual audit Chromium/WebKit, DMP full board, release acceptance, central server authority, world/chat and ledger checks. Identical merge SHA Pages static deploy workflow 40299980714 SUCCESS, pages build 40299979815 SUCCESS. Published Pages Chromium+WebKit side-by-side source screenshot and real DMP dice acceptance workflow 40300127563 SUCCESS. Public ChatRoom/WorldMap/roll Chrome+WebKit job 40300127667 published-chat SUCCESS, later status publishing may follow. Eight original third-party historic archive references and six local original JPG/PNG screen targets are stored in PUBLIC_VISUAL_RESTORATION_TARGETS_2026-10-26.json. ROI RGB deltas historic original BATTLE vs public INITIAL TURN: source menu MAE=11.269; minimap 21.618; chat 13.815; right chessman/tools 48.149; dynamic arena 67.855 DIFFERENT GAME STATES, diagnostic only NOT pixel-perfect similarity. Original 3D D4/D6 not recovered, sprite action/FPS remains incomplete. Original and source rights not changed. Task statuses remain truthful; no total task completion due one mobile positional defect.",
+      "evidence": [
+        "https://github.com/koith/browser-app-lab/pull/201",
+        "https://github.com/koith/browser-app-lab/actions/runs/40300127563",
+        "https://github.com/koith/browser-app-lab/actions/runs/40300127667",
+        "https://github.com/koith/browser-app-lab/actions/runs/40299980714",
+        "https://github.com/koith/browser-app-lab/blob/main/apps/4leaf/rog/docs/PUBLIC_VISUAL_RESTORATION_TARGETS_2026-10-26.json"
+      ]
     }
   ]
 }
