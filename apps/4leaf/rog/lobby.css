@@ -94,7 +94,7 @@
 
 /* Authentic Region/1234.png state frames; the unchanged 794x404
  * regionback source already paints all four resting numerals.
- * Hover/selected numbers use the independently decoded 41x28 source
+ * Hover/selected numbers use the independently decoded 33x31 source
  * atlas on genuine buttons; no blue gradient overlays or duplicate text. */
 #dice-channels .dice-channel-hotspot:is(:hover,:focus-visible){
  border-color:transparent!important;background:transparent!important;
