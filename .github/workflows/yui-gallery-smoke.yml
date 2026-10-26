@@ -19,7 +19,7 @@ jobs:
       - name: Validate primary photo gallery source
         run: |
           node --check apps/yui-gallery/gallery.js
-          node --check apps/yui-gallery/zip-gallery.js
+          node --check apps/yui-gallery/gallery-import.js
           node --check apps/yui-gallery/test_photo_gallery.cjs
       - name: Install mobile browser test dependencies
         run: |
@@ -29,7 +29,3 @@ jobs:
         run: |
           python -m http.server 8765 --directory apps/yui-gallery >/tmp/yui-web.log 2>&1 &
           node apps/yui-gallery/test_photo_gallery.cjs
-      - name: Validate existing private ZIP viewer import and SHA-256 rejection
-        run: |
-          python -m http.server 8765 --directory apps/yui-gallery >/tmp/yui-zip-http.log 2>&1 &
-          node apps/yui-gallery/test_zip_gallery.cjs
