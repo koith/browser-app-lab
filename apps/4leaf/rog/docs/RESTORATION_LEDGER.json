@@ -6286,6 +6286,25 @@
         "https://github.com/koith/browser-app-lab/blob/feat/4leaf-original-2004-battle-selector-atlas-20261026/apps/4leaf/rog/dice-original-selector.css",
         "https://github.com/koith/browser-app-lab/blob/feat/4leaf-original-2004-battle-selector-atlas-20261026/apps/4leaf/rog/tests/dice-2004-battle-selector-source.cjs"
       ]
+    },
+    {
+      "seq": 261,
+      "date": "2026-10-26",
+      "type": "ORIGINAL_AUDITED_OBS_FULLBODY_RIGHT_CHESSMEN_IMPLEMENTED_PENDING_PUBLIC_QA",
+      "requestId": "REQ-20261026-003",
+      "taskIds": [
+        "P0-ACTOR",
+        "ACT-03",
+        "ACT-04",
+        "P0-PODIUM",
+        "P0-RELEASE"
+      ],
+      "details": "AFTER exact same BATTLE-state vs original battle.jpg side-by-side verified functional PR #203 original entire 222x152 IMG/selector.png right GUI (prior event260), screenshot inspection revealed right party still drew only unrelated CardData facial headshots while 2004 shows full-body chessman figures with ABILITY border. Functional beta26 changes real drawNativeChessmen game renderer to prefer the genuine original 2002 OBS.pak camera-facing FRONT frame for the 20 visually audited actor member IDs as reported by the same gameplay Genesis actor source-of-truth; original frame indexes 0040/42/43=>25, 0045=>18 etc are reused, alpha/FLIP_TOP_BOTTOM restored in HUD CSS and source bytes untouched. For non-audited source actors or source-image load failures, preserve original CardData face fallback with explicit DOM provenance; never invent historically proven directions or classify 38 non-actor FX as chessmen. Source 222x152 original atlas/tools, selected true CardData details, inventory, real BATTLE and central server remain unchanged. Extended Chromium/WebKit true BATTLE screenshot fixture asserts source 1040/1042/1043 native 25 portraits and real rolls/podium; source roster QA now accepts original full body or honest card fallback. beta26 PWA v113. CI, merge, Pages and public browser QA PENDING; do not change 58 task statuses on uncertain original action/FPS/98 model recovery.",
+      "evidence": [
+        "https://github.com/koith/browser-app-lab/blob/feat/4leaf-original-obs-right-party-20261026/apps/4leaf/rog/game.js",
+        "https://github.com/koith/browser-app-lab/blob/feat/4leaf-original-obs-right-party-20261026/apps/4leaf/rog/dice-native-chessmen-hud.css",
+        "https://github.com/koith/browser-app-lab/blob/feat/4leaf-original-obs-right-party-20261026/apps/4leaf/rog/tests/dice-2004-battle-selector-source.cjs"
+      ]
     }
   ]
 }

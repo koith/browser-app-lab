@@ -33,6 +33,39 @@ const {chromium,webkit}=require('playwright');
    window.__ROG_TEST__.drawGame();
   });
   await page.waitForFunction(()=>document.querySelectorAll('#dice-native-party .dice-chessman-slot.occupied').length>=3);
+  // The original 2004 right 2x2 ABILITY slots show FULL-BODY
+  // chessmen, not three unrelated CardData facial preview posters.
+  // This QA requires the visually audited real 2002 OBS packets for our
+  // three specifically chosen sample actors, with actual native IMG load.
+  await page.waitForFunction(()=>[...document.querySelectorAll(
+   '#dice-native-party .dice-chessman-slot.occupied img')]
+   .length===3&&[...document.querySelectorAll(
+   '#dice-native-party .dice-chessman-slot.occupied img')]
+   .every(img=>img.complete&&img.naturalWidth>0),null,{timeout:16000});
+  const rightBodies=await page.evaluate(()=>[...document.querySelectorAll(
+   '#dice-native-party .dice-chessman-slot.occupied')].map(slot=>{
+    const img=slot.querySelector('img');
+    return {id:slot.dataset.cardId,role:slot.dataset.teamIndex,
+     atlas:slot.dataset.rightPortraitSource,
+     proof:slot.dataset.rightPortraitFacingEvidence,
+     source:img.getAttribute('src'),sourceFrame:img.dataset.nativeFrontFrame,
+     image:[img.naturalWidth,img.naturalHeight],
+     flipped:getComputedStyle(img).transform,
+     tooltip:slot.title};
+   }));
+  assert.equal(rightBodies.length,3);
+  for(const actor of rightBodies){
+   assert.equal(actor.atlas,'OBS.pak/verified-front',
+    'right actual chessman uses reviewed full-body source not face card: '+JSON.stringify(actor));
+   assert.equal(actor.proof,'visually-reviewed');
+   assert.equal(actor.sourceFrame,'25');
+   assert.ok(/104[023]-25/.test(actor.source)&&actor.source.endsWith('-25.png'),
+    'genuine 2002 OBS source frame 25 for audited 0040/0042/0043 only');
+   assert.ok(actor.image[0]>10&&actor.image[1]>20,
+    'full-body original OBS bitmap has real native pixel geometry');
+   assert.ok(actor.flipped.startsWith('matrix('),
+    'source 640-stride original upside-down pixels must display with native inverse Y');
+  }
   const data=await page.evaluate(async()=>{
    const img=new Image();img.src='./original/IMG/selector.png';await img.decode();
    const source=document.querySelector('#dice-client-sidebar'),rail=document.querySelector('#dice-original-selector');
