@@ -27,28 +27,28 @@ jobs:
       - name: Verify all 314 image files and source index integrity
         run: |
           python - <<'PY'
-          import json,hashlib,zipfile,pathlib
+          import json,hashlib,pathlib
           p=pathlib.Path('yui-jliji-full-private')
           s=json.loads((p/'summary.json').read_text())
           assert sum(x['advertised'] for x in s)==314
           assert sum(x['downloaded'] for x in s)==314
           for x in s:
-           with zipfile.ZipFile(p/(x['id']+'.zip')) as z:
-            assert z.testzip() is None
-            m=json.loads(z.read('manifest.json'))
+            folder=p/x['id']
+            m=json.loads((folder/'manifest.json').read_text())
             assert len(m['images'])==m['advertised_count']
             for photo in m['images']:
-             b=z.read('images/'+photo['file'])
-             assert len(b)==photo['bytes']
-             assert hashlib.sha256(b).hexdigest()==photo['sha256']
+              image=folder/photo['file']
+              assert image.is_file()
+              assert image.stat().st_size==photo['bytes']
+              assert hashlib.sha256(image.read_bytes()).hexdigest()==photo['sha256']
           print('VERIFIED_COMPLETE_PHOTOBOOKS',len(s),'IMAGE_FILES',314)
           PY
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: Yui-4-web-albums-314-photographs
+          name: Yui-4-albums-314-hash-manifests
           path: |
-            yui-jliji-full-private/*.zip
+            yui-jliji-full-private/*/manifest.json
             yui-jliji-full-private/summary.json
           retention-days: 90
           if-no-files-found: warn
