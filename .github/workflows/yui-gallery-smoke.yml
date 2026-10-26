@@ -1,0 +1,63 @@
+name: Yui Gallery Browser Smoke
+on:
+  push:
+    paths:
+      - apps/yui-gallery/**
+      - .github/workflows/yui-gallery-smoke.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  browser-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate browser script syntax
+        run: |
+          node - <<'NODE'
+          const fs=require('fs'),vm=require('vm');
+          const html=fs.readFileSync('apps/yui-gallery/index.html','utf8');
+          const scripts=[...html.matchAll(/<script>([\s\S]*?)<\/script>/g)];
+          if(scripts.length!==1)throw Error('Expected exactly one application script');
+          new vm.Script(scripts[0][1]);
+          const feed=JSON.parse(fs.readFileSync('apps/yui-gallery/feed.json'));
+          const albums=JSON.parse(fs.readFileSync('apps/yui-gallery/albums.json'));
+          if(!feed.images.length||!albums.albums.length)throw Error('Empty gallery');
+          console.log('PASS: JS syntax, photo links',feed.images.length,'albums',albums.albums.length);
+          NODE
+      - name: Install Playwright
+        run: |
+          npm install --no-save playwright@1.58.2
+          npx playwright install chromium
+      - name: Test browser loading
+        run: |
+          node - <<'NODE'
+          const { chromium } = require('playwright');
+          (async()=>{
+            const browser=await chromium.launch({headless:true});
+            const page=await browser.newPage({viewport:{width:390,height:844}});
+            const errors=[];page.on('pageerror',e=>errors.push(e.message));
+            await page.goto('https://koith.github.io/browser-app-lab/apps/yui-gallery/',{waitUntil:'domcontentloaded',timeout:30000});
+            await page.waitForFunction(()=>document.querySelector('#total')?.textContent?.includes('공개 SNS 사진'),{timeout:20000});
+            const imgs=await page.locator('#media img').count();
+            if(imgs<10)throw Error('Insufficient image cards: '+imgs);
+            await page.locator('[data-view="albums"]').click();
+            await page.waitForTimeout(500);
+            const albums=await page.locator('.album').count();
+            if(albums<40)throw Error('Insufficient albums: '+albums);
+            if(errors.length)throw Error('Browser errors: '+errors.join('; '));
+            console.log(JSON.stringify({passed:true,imgs,albums,errors}));
+            await page.screenshot({path:'gallery-mobile.png',fullPage:true});
+            await browser.close();
+          })().catch(e=>{console.error(e);process.exit(1)});
+          NODE
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gallery-mobile-smoke
+          path: gallery-mobile.png
+          if-no-files-found: ignore
