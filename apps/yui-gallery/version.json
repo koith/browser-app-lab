@@ -1,5 +1,5 @@
 {
-  "version": "v0.1.0-beta.2",
+  "version": "v0.1.0-beta.3",
   "date": "2026-10-27",
   "policy": {
     "monthly_charge_krw": 0,
@@ -37,7 +37,8 @@
     "source_catalog_v2ph_works": 20,
     "source_catalog_huantuji_entries": 11,
     "source_catalog_duplicated_across_sites": true,
-    "iphone_real_device_verified": false
+    "iphone_real_device_verified": false,
+    "owner_gallery_remote_hosted_count": "pending_405_manifest_live_verification"
   },
   "notes": [
     "A private Google Drive ZIP is only a temporary safety copy, not the user-approved primary archive.",
@@ -45,7 +46,8 @@
     "TeraBox account is not connected; do not claim a cloud gallery or automatic upload is live.",
     "The 405 downloaded images are public web versions, not publisher source originals.",
     "Listed works, publicly available images, privately stored files, and publisher originals are counted separately.",
-    "Since beta.2, active album collectors, the scheduled discovery pipeline, and cloud staging use individually verified files rather than compressed photo bundles."
+    "Since beta.2, active album collectors, the scheduled discovery pipeline, and cloud staging use individually verified files rather than compressed photo bundles.",
+    "The source-viewer album layer shows links to originally publicly hosted full web images and is not the private archived binary storage."
   ],
   "archiving_engine": {
     "mode": "individual_files",
@@ -53,6 +55,8 @@
     "dynamic_collector": "per-source SHA256 manifests",
     "cloud_stage": "verified individual folders",
     "live_gallery_images": 26,
-    "free_tools": "Python + Playwright + Pillow + rclone"
+    "free_tools": "Python + Playwright + Pillow + rclone",
+    "source_viewer": "source-hosted image manifest, not a cloud storage claim",
+    "open_source_crawler": "gallery-dl + browser source-specific collectors"
   }
 }

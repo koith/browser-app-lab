@@ -10,8 +10,8 @@
 :root{font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",system-ui,sans-serif;color:#f5f5f6;background:#101114;color-scheme:dark}
 *{box-sizing:border-box}body{margin:0}a{color:inherit;text-decoration:none}button,input{font:inherit}button{cursor:pointer}
 .shell{max-width:1480px;margin:0 auto;padding:0 clamp(14px,3.2vw,48px)}
-.topbar{height:76px;display:flex;align-items:center;gap:34px;border-bottom:1px solid #2a2b2e}
-.logo{font-size:23px;font-weight:850;letter-spacing:.22em;white-space:nowrap}.logo span{font-size:10px;font-weight:500;letter-spacing:.15em;color:#8a8b8e;margin-left:9px}
+.topbar{position:relative;height:76px;display:flex;align-items:center;gap:34px;border-bottom:1px solid #2a2b2e}
+.version-chip{position:absolute;top:5px;right:1px;font-size:10px;font-weight:450;letter-spacing:.02em;color:#878891;white-space:nowrap;pointer-events:none}\n.inventory{margin:10px 0 0;color:#999aa0;font-size:12px}\n.logo{font-size:23px;font-weight:850;letter-spacing:.22em;white-space:nowrap}.logo span{font-size:10px;font-weight:500;letter-spacing:.15em;color:#8a8b8e;margin-left:9px}
 .mainnav{display:flex;align-items:center;gap:25px;margin-left:auto}
 .mainnav a{font-size:13px;color:#babac0;transition:color .2s}.mainnav a:hover{color:#fff}
 .topsearch{background:#1b1d22;border:1px solid #393a40;border-radius:8px;min-width:170px;max-width:240px;width:20vw;padding:11px 14px;color:#fff;font-size:13px;outline:none}
@@ -63,10 +63,10 @@ button:focus-visible,a:focus-visible{outline:2px solid #ddd4c7;outline-offset:3p
 <header class="topbar">
  <a href="./" class="logo" aria-label="YUI 갤러리 홈">YUI<span>GALLERY</span></a>
  <nav class="mainnav" aria-label="이동"><a href="cloud.html">클라우드</a></nav>
- <input id="search" class="topsearch" type="search" placeholder="화보 검색" aria-label="화보 검색">
+ <input id="search" class="topsearch" type="search" placeholder="화보 검색" aria-label="화보 검색">\n <small id="app-version" class="version-chip">v0.1.0-beta.3</small>
 </header>
 <div id="browse">
- <div class="titleline"><div><div class="eyebrow">COLLECTION</div><h1>Yui Gallery</h1></div><span class="counter" id="total"></span></div>
+ <div class="titleline"><div><div class="eyebrow">COLLECTION</div><h1>Yui Gallery</h1><p class="inventory" id="inventory">수집 화보를 불러오는 중</p></div><span class="counter" id="total"></span></div>
  <div class="filters"><button class="filter active" data-filter="albums">화보</button><button class="filter" data-filter="photos">사진</button><button class="filter" data-filter="all">전체 작품 목록</button></div>
  <div id="albumgrid" class="grid"></div>
  <div id="photogrid" class="photo-grid" hidden></div>
@@ -76,7 +76,7 @@ button:focus-visible,a:focus-visible{outline:2px solid #ddd4c7;outline-offset:3p
  <div class="titleline"><div><button class="back" id="back">← 화보 목록</button><h2 class="detail-title" id="albumname"></h2></div><span class="counter" id="albumtotal"></span></div>
  <div id="detailphotos" class="photo-grid"></div>
 </div>
-<footer><span>YUI GALLERY</span><span>v0.1.0-beta.2</span></footer>
+<footer><span>YUI GALLERY</span><span>개별 이미지 · 원본 화질 유지</span></footer>
 </div>
 <div id="lightbox" role="dialog" aria-label="사진 보기" aria-modal="true">
  <div class="lighttop"><span id="position"></span><button class="lightbtn" id="close" aria-label="닫기">×</button></div>
@@ -86,11 +86,11 @@ button:focus-visible,a:focus-visible{outline:2px solid #ddd4c7;outline-offset:3p
 <script>
 "use strict";
 const $=id=>document.getElementById(id);
-let catalog=[],stored=[],mode='albums',activeAlbum=null,viewerList=[],viewerIndex=0,detailAlbum=null;
+let catalog=[],stored=[],localStored=[],remoteStored=[],mode='albums',activeAlbum=null,viewerList=[],viewerIndex=0,detailAlbum=null;
 const titleMap={'cn-huantuji':'幻图集 · Yui','cn-chaotuji':'潮图集 · Yui','cn-miaohuaying':'喵画影 · Yui','cn-yuntu8':'云图吧 · Yui','cn-wantuzhi-everyday':'Everyday Life','cn-yingyuge':'影语阁 · Yui','v04':'SWEETBOX · Teddy Bear'};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function getName(a){return catalog.find(x=>x.id===a.id)?.title||titleMap[a.id]||a.title||a.id}
-function validImages(a){return (a.images||[]).filter(x=>typeof x.url==='string'&&x.url.startsWith('stored-albums/'))}
+function getName(a){return a.title||catalog.find(x=>x.id===a.id)?.title||titleMap[a.id]||a.id}
+function validImages(a){return (a.images||[]).filter(x=>{if(typeof x.url!=='string')return false;if(x.url.startsWith('stored-albums/'))return true;if(!a.sourceHosted)return false;try{const u=new URL(x.url);return u.protocol==='https:'&&(u.hostname==='cdn.jliji.com'||/^imgx\d{3}\.pixibb\.com$/.test(u.hostname));}catch{return false}})}
 function available(){return stored.filter(x=>validImages(x).length).sort((a,b)=>validImages(b).length-validImages(a).length)}
 function setMode(m){mode=m;activeAlbum=null;$('detail').hidden=true;$('browse').hidden=false;document.querySelectorAll('[data-filter]').forEach(b=>b.classList.toggle('active',b.dataset.filter===m));render()}
 function photosFor(a){return validImages(a).map((p,i)=>({...p,name:getName(a),albumId:a.id,number:i+1}))}
@@ -98,11 +98,11 @@ function card(a,hasImages){
  const owned=stored.find(x=>x.id===a.id)||a;
  const p=validImages(owned),cover=p[0]?.url||'',count=p.length,expected=a.photos??a.expected??catalog.find(x=>x.id===a.id)?.photos??null;
  const label=getName(a);
- const n=count?(count+'장'+(expected!=null?' / '+expected+'장':'')):(expected!=null?expected+'장 · 미수집':'미수집');
- const img=cover?'<img loading="lazy" src="'+esc(cover)+'" alt="'+esc(label)+' 표지">':'<div class="placeholder">Y</div>';
+ const n=count?(count+'장'+(owned.sourceHosted?' · 출처 열람':'')+(expected!=null&&expected!==count?' / '+expected+'장':'')):(expected!=null?expected+'장 · 미수집':'미수집');
+ const img=cover?'<img loading="lazy" referrerpolicy="no-referrer" src="'+esc(cover)+'" alt="'+esc(label)+' 표지">':'<div class="placeholder">Y</div>';
  return '<button class="album" data-id="'+esc(a.id)+'" data-available="'+(hasImages?'1':'0')+'" aria-label="'+esc(label)+'">'+img+'<div class="gradient"></div><strong class="name">'+esc(label)+'</strong><span class="number">'+esc(n)+'</span></button>';
 }
-function photoHTML(p,i){return '<button class="photo" data-i="'+i+'" aria-label="'+esc(p.name)+' 사진 '+p.number+'"><img loading="lazy" src="'+esc(p.url)+'" alt="'+esc(p.name)+' 사진 '+p.number+'"><span>'+esc(p.name)+' · '+p.number+'</span></button>'}
+function photoHTML(p,i){return '<button class="photo" data-i="'+i+'" aria-label="'+esc(p.name)+' 사진 '+p.number+'"><img loading="lazy" referrerpolicy="no-referrer" src="'+esc(p.url)+'" alt="'+esc(p.name)+' 사진 '+p.number+'"><span>'+esc(p.name)+' · '+p.number+'</span></button>'}
 function render(){
  const q=$('search').value.toLocaleLowerCase().trim();
  const items=available(),all=items.flatMap(photosFor),match=s=>String(s).toLocaleLowerCase().includes(q);
@@ -134,7 +134,7 @@ function openAlbum(id){
 function openViewer(list,i){if(!list.length)return;viewerList=list;viewerIndex=((i%list.length)+list.length)%list.length;$('lightbox').classList.add('open');document.body.style.overflow='hidden';showViewer()}
 function showViewer(){
  const p=viewerList[viewerIndex];if(!p)return;
- $('full').src=p.url;$('full').alt=p.name+' · '+p.number;
+ $('full').referrerPolicy='no-referrer';$('full').src=p.url;$('full').alt=p.name+' · '+p.number;
  $('position').textContent=(viewerIndex+1)+' / '+viewerList.length;
  $('original').href=p.url;
 }
@@ -147,6 +147,19 @@ document.querySelectorAll('[data-filter]').forEach(b=>b.onclick=()=>setMode(b.da
 $('lightbox').onclick=e=>{if(e.target===$('lightbox'))closeViewer()};
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!(!$('lightbox').classList.contains('open')))closeViewer();else if($('lightbox').classList.contains('open')&&e.key==='ArrowLeft')step(-1);else if($('lightbox').classList.contains('open')&&e.key==='ArrowRight')step(1)});
 let startX=0;$('lightbox').addEventListener('touchstart',e=>{startX=e.changedTouches[0]?.screenX||0},{passive:true});$('lightbox').addEventListener('touchend',e=>{const d=(e.changedTouches[0]?.screenX||0)-startX;if(Math.abs(d)>55)step(d>0?-1:1)},{passive:true});
-Promise.all([fetch('stored-albums.json').then(r=>{if(!r.ok)throw Error('stored data');return r.json()}),fetch('albums.json').then(r=>{if(!r.ok)throw Error('catalog');return r.json()})]).then(([s,c])=>{stored=s.albums||[];catalog=c.albums||[];render();const id=decodeURIComponent(location.hash.slice(1));if(id)openAlbum(id)}).catch(()=>{$('total').textContent='—';$('nothing').textContent='이미지를 불러올 수 없습니다.';$('nothing').hidden=false});
+Promise.all([
+ fetch('stored-albums.json').then(r=>{if(!r.ok)throw Error('stored data');return r.json()}),
+ fetch('albums.json').then(r=>{if(!r.ok)throw Error('catalog');return r.json()}),
+ fetch('source-viewer-albums.json',{cache:'no-store'}).then(r=>r.ok?r.json():{albums:[]}).catch(()=>({albums:[]}))
+]).then(([s,c,remote])=>{
+ localStored=s.albums||[];catalog=c.albums||[];
+ remoteStored=(remote.albums||[]).filter(a=>a.status==='verified_collected_individual_files_source_hosted_online_view').map(a=>({...a,sourceHosted:true}));
+ stored=[...remoteStored,...localStored];
+ const localCount=localStored.reduce((n,a)=>n+validImages(a).length,0);
+ const remoteCount=remoteStored.reduce((n,a)=>n+validImages(a).length,0);
+ $('inventory').textContent=localCount+'장 저장 · '+remoteCount+'장 출처 열람'+(remoteCount?' · 대용량 개인 클라우드 연결 전':'');
+ render();
+ const id=decodeURIComponent(location.hash.slice(1));if(id)openAlbum(id);
+}).catch(()=>{$('total').textContent='—';$('nothing').textContent='이미지를 불러올 수 없습니다.';$('nothing').hidden=false});
 </script>
 </body></html>

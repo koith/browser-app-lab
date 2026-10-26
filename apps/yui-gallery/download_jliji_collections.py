@@ -6,7 +6,7 @@ related-model tiles, thumbnails and partial groups. No auth/purchase bypass.
 Files are emitted as individual image files with a manifest for personal use,
 never added to the public GitHub Pages repository.
 """
-import asyncio,concurrent.futures,hashlib,io,json,re,requests
+import asyncio,concurrent.futures,hashlib,io,json,re,requests,time
 from collections import Counter
 from pathlib import Path
 from urllib.parse import urlparse
@@ -45,9 +45,16 @@ async def discover(page,cfg):
 
 def getphoto(task):
  idx,url,source=task
- res=requests.get(url,timeout=(12,30),headers={'User-Agent':'Mozilla/5.0','Referer':source})
- res.raise_for_status()
- b=res.content
+ b=None
+ for attempt in range(4):
+  try:
+   res=requests.get(url,timeout=(15,60),headers={'User-Agent':'Mozilla/5.0','Referer':source})
+   res.raise_for_status()
+   b=res.content
+   break
+  except requests.RequestException:
+   if attempt==3:raise
+   time.sleep(1.5*(attempt+1))
  if len(b)<3000 or len(b)>22000000:raise ValueError("Unreasonable file size "+str(len(b)))
  with Image.open(io.BytesIO(b)) as im:im.verify()
  with Image.open(io.BytesIO(b)) as im:im.load();fmt=im.format;w,h=im.size
@@ -65,7 +72,7 @@ async def main():
   for cfg in CONFIG:
    selected,source=await discover(page,cfg)
    successful={};failures={}
-   with concurrent.futures.ThreadPoolExecutor(max_workers=7) as pool:
+   with concurrent.futures.ThreadPoolExecutor(max_workers=5) as pool:
     fut={pool.submit(getphoto,(n,url,source)):n for n,url in selected.items()}
     for f in concurrent.futures.as_completed(fut):
      n=fut[f]
