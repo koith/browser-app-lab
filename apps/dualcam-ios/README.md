@@ -4,6 +4,10 @@
 
 빌드 실행·결과: [GitHub Actions → DualCam iPhone IPA](https://github.com/koith/browser-app-lab/actions/workflows/dualcam-ios.yml)
 
+첫 성공 빌드: [자동 테스트 5개 통과 + iPhone IPA 생성](https://github.com/koith/browser-app-lab/actions/runs/40368695687)
+
+설치 파일: [DualCam-unsigned-IPA 다운로드](https://github.com/koith/browser-app-lab/actions/runs/40368695687/artifacts/12672616233). ZIP 안의 IPA를 Windows에서 서명한 뒤 설치합니다. 이 빌드 파일의 보관 기한은 2026-11-09이며 이후에는 Actions를 다시 실행해 생성할 수 있습니다.
+
 전면·후면 카메라 영상을 **동시에, 각각의 MOV 파일로 녹화**하는 개인용 네이티브 iPhone 앱입니다. 두 영상 모두 같은 마이크 음성을 포함합니다. 시작·종료 효과음을 재생하는 코드는 넣지 않았습니다.
 
 ## 구현된 기능
@@ -31,9 +35,9 @@
 
 ## 현재 검증 상태
 
-이 소스는 Linux 작업 환경에서 만들었습니다. Swift 9개 파일의 구문 분석, Xcode 프로젝트 구조, plist·워크플로·스크립트 검사와 패키징 검사를 수행했습니다.
+2026-10-26에 GitHub Actions의 macOS·Xcode 16.4 환경에서 **자동 테스트 5개, 시뮬레이터 앱 컴파일, 실제 iPhone 대상 Release 빌드가 모두 통과**했습니다. 생성된 IPA를 내려받아 iPhone 플랫폼·arm64 실행 파일·권한 설명·ZIP 무결성도 확인했습니다.
 
-**현재 환경에는 Xcode·iOS SDK가 없으므로 Xcode 컴파일, 아래 XCTest 실행, 실제 iPhone 촬영 검증은 아직 수행하지 않았습니다. 설치 가능한 IPA가 이미 만들어진 상태는 아닙니다.** GitHub Actions는 이 검증과 빌드를 수행하도록 작성되어 있습니다. 첫 실행에서 Xcode의 형식·API 검사에 따른 수정이 필요할 수 있습니다.
+자동 테스트는 두 MOV 파일의 실제 영상·음성 트랙과 AAC 디코딩을 검사합니다. **실제 iPhone의 카메라 동시 촬영, 시작·종료 소리, 밝기 복원, 잠금 시 저장, 장시간 발열은 아직 실기기에서 검증하지 않았습니다.** 설치 후 아래 테스트를 진행해야 합니다. IPA는 개인용 서명 전 상태입니다.
 
 ## 맥 없이 GitHub에서 빌드하기
 
