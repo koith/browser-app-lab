@@ -83,7 +83,14 @@ const {chromium}=require('playwright');
   // Enabling computer turns requires a NEW conscious click of the UI.
   await page.evaluate(()=>{
    const m=window.__ROG_TEST__.getMatch();
-   m.active=1;m.players[1].position=0;
+   m.active=1;
+   // The preceding real manual move can legitimately land in PRISON.
+   // A jailed bot must skip movement unless it rolls doubles, so waiting
+   // for position>0 was a random invalid precondition, not an AI scheduler
+   // failure. Establish an explicit, legal unjailed neutral AI turn first.
+   const bot=m.players[1];
+   bot.position=0;bot.jail=0;bot.ability=0;
+   bot.items=[];bot.usedItem=true;
    // This test checks explicit AI opt-in scheduling, not random combat,
    // prison, warp or forced START resets. Preserve the authentic DMP
    // coordinates while using a deterministic neutral event corridor.
@@ -92,8 +99,20 @@ const {chromium}=require('playwright');
   });
   await page.locator('#dice-ai-autoplay-toggle').click();
   assert.equal(await page.locator('#dice-ai-autoplay-toggle').getAttribute('aria-pressed'),'true');
-  await page.waitForFunction(()=>window.__ROG_TEST__.getMatch().players[1].position>0,
-   null,{timeout:22000});
+  try{
+   await page.waitForFunction(()=>window.__ROG_TEST__.getMatch().players[1].position>0,
+    null,{timeout:22000});
+  }catch(error){
+   const state=await page.evaluate(()=>{
+    const m=window.__ROG_TEST__.getMatch(),bot=m.players[1];
+    return {active:m.active,autoplay:m.botAutoplay,finished:m.finished,
+     botPosition:bot.position,botJail:bot.jail,botItems:bot.items,
+     lastRoll:m.lastRoll,history:m.history.slice(-7),
+     rollDisabled:document.getElementById('roll-btn').disabled};
+   });
+   throw new Error('Explicit unjailed AI turn did not move: '+JSON.stringify(state),
+    {cause:error});
+  }
   const automated=await page.evaluate(()=>({
    p:window.__ROG_TEST__.getMatch().players[1].position,
    source:document.querySelector('#board-nodes .tile')?.dataset.originalArt,
