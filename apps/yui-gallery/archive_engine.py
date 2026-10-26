@@ -6,7 +6,7 @@ downloads only sources listed in source_targets.json, and records provenance.
 Does not log in, evade access controls, or discover paid archive URLs.
 """
 from __future__ import annotations
-import argparse, asyncio, hashlib, io, json, os, re, time, urllib.parse, zipfile
+import argparse, asyncio, hashlib, io, json, os, re, time, urllib.parse
 from collections import deque
 from pathlib import Path
 from datetime import datetime, timezone
@@ -230,11 +230,9 @@ def download(manifest:Path, dest:Path, max_images=150):
         (folder/'manifest.json').write_text(json.dumps({'source':source['source_url'],'pages':source['pages_visited'],
             'downloaded':done,'failed':errors,'summary':totals[source['id']]},ensure_ascii=False,indent=2),encoding='utf-8')
     (dest/'summary.json').write_text(json.dumps(totals,ensure_ascii=False,indent=2),encoding='utf-8')
-    with zipfile.ZipFile('yui-public-archive-dynamic.zip','w',zipfile.ZIP_DEFLATED,compresslevel=4) as zipf:
-        for file in dest.rglob('*'):
-            if file.is_file():zipf.write(file,file.relative_to(dest))
-    with zipfile.ZipFile('yui-public-archive-dynamic.zip') as zipf:
-        assert zipf.testzip() is None
+    # Photos remain as individual files; never create bundles or archives.
+    # Keep the per-source manifests and summary beside those files.
+    print('INDIVIDUAL_IMAGE_FILES',sum(x['stored_files'] for x in totals.values()),flush=True)
     print('DOWNLOAD_SUMMARY',json.dumps(totals,ensure_ascii=False),flush=True)
     return totals
 
