@@ -24,7 +24,7 @@ const {chromium,webkit}=require('playwright');
    return {size:[img.naturalWidth,img.naturalHeight],
     status:window.__LEAF_DICE_CHANNEL_SPR__.getState()};
   });
-  assert.deepEqual(source.size,[164,112],'original Region number source atlas must be 164x112');
+  assert.deepEqual(source.size,[132,124],'original Region number source atlas must be 132x124');
   assert.equal(source.status.buttons,28,'seven original channel rows each have four working real-source buttons');
   const target=page.locator('#dice-channels [data-channel="ispin:2"]');
   if(!mobile)await target.hover();
