@@ -201,3 +201,26 @@
   height:62px!important;
  }
 }
+
+/* SOURCE CORRECTION — archived 2004 battle.jpg ability 2x2 slots display
+ * GENESIS full-body chessmen, not facial CardData preview posters.
+ * For the 20 source OBS members whose exact frontal PNG frame was visually
+ * audited, game.js now supplies the 2002 original OBS.pak frame; card face
+ * remains original CardData fallback if the direction is unverified or an
+ * actual source PNG fails. Those original 640-stride OBS frames are stored
+ * upside-down by the extraction algorithm: use the very same inverse Y
+ * as the live board/battle actor, without mutating original PNG bytes. */
+#app.app-classic-dice #dice-native-party .dice-chessman-face.dice-chessman-original-obs{
+ height:53px!important;
+ width:auto!important;max-width:80px!important;
+ object-fit:contain!important;
+ image-rendering:pixelated!important;
+ transform:translateX(-50%) scaleY(-1)!important;
+ transform-origin:center center!important;
+ filter:drop-shadow(1px 2px 1px #12203199)!important;
+}
+@media(max-width:650px){
+ #app.app-classic-dice #dice-native-party .dice-chessman-face.dice-chessman-original-obs{
+  height:36px!important;max-width:48px!important;
+ }
+}
