@@ -85,9 +85,10 @@ jobs:
             await browser.close();
           })().catch(e=>{console.error(e);process.exit(1)});
           NODE
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: yui-album-mobile-screenshot
           path: yui-album-mobile.png
-          if-no-files-found: ignore
+          archive: false
+          retention-days: 90
+          if-no-files-found: warn
