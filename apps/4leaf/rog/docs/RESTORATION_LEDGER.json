@@ -6354,6 +6354,23 @@
         "https://github.com/koith/browser-app-lab/blob/feat/4leaf-original-obs-front-steps-native-stats-20261027/apps/4leaf/rog/game.js",
         "https://github.com/koith/browser-app-lab/blob/feat/4leaf-original-obs-front-steps-native-stats-20261027/apps/4leaf/rog/tests/obs-reviewed-front-walk-native-stats.cjs"
       ]
+    },
+    {
+      "seq": 264,
+      "date": "2026-10-27",
+      "type": "VISUALLY_REVIEWED_19_SOURCE_FRONT_WALK_PAIRS_REAL_GAME_EXTENSION",
+      "requestId": "REQ-20261027-001",
+      "taskIds": [
+        "P0-ACTOR",
+        "ACT-03",
+        "ACT-04",
+        "P0-RELEASE"
+      ],
+      "details": "Append-only expansion of provisional event263: rather than stop after 3 new full-body front walk pairs, individually visually inspected both genuine original OBS.pak indexed palette sprites -25/-30 for 13 more actor IDs (0049, 0051,0052,0053,0054,0055,0056,0058,0059,0060,0061,0062,0064). Thus real 2002 source packets support visually-reviewed front-preserving pair for 19 actors: 0040,0042,0043,0044,0046,0048,0049,0051,0052,0053,0054,0055,0056,0058,0059,0060,0061,0062,0064. The previously reviewed 0045 has verified front packet 18 ONLY and was not misclassified as 25/30 pair. Original 25/30 source PNGs retained byte-exact, no nonactor FX as chessmen; actual game maps 25/30 to WEB animation loop with inferred FPS, NOT original code or action table. QA now tests real DOM gameplay pawn source front facing and 25,30,25,30 sequence for ALL 19 IDs, plus live CardData info and native 164x125 stats GUI on 3 sample actors, and source-versus-live BATTLE state 800x600 with native podium/dice. PR CI and Pages validation pending; no completed task status inflation.",
+      "evidence": [
+        "https://github.com/koith/browser-app-lab/blob/feat/4leaf-original-obs-front-steps-native-stats-20261027/apps/4leaf/rog/genesis-chessman-actors.js",
+        "https://github.com/koith/browser-app-lab/blob/feat/4leaf-original-obs-front-steps-native-stats-20261027/apps/4leaf/rog/tests/obs-reviewed-front-walk-native-stats.cjs"
+      ]
     }
   ]
 }
