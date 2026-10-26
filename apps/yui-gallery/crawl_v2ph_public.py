@@ -33,7 +33,7 @@ def public_photo_url(raw,base):
     p=urlsplit(url)
     if p.scheme!="https" or p.hostname not in (CDN,"www.v2ph.com","v2ph.com"):
         return None
-    if not re.search(r"\\.(?:jpg|jpeg|png|webp)(?:[?#]|$)",url,re.I):
+    if not re.search(r"\.(?:jpg|jpeg|png|webp)(?:[?#]|$)",url,re.I):
         return None
     if "/photos/" not in p.path and p.hostname==CDN:
         return None
