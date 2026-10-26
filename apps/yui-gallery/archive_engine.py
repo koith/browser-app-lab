@@ -89,7 +89,7 @@ def candidates(raw:str,base:str):
                     try:weight=int(float(parts[1].rstrip('x'))*1000)
                     except ValueError:pass
             pairs.append((weight,parts[0]))
-        return [urllib.parse.urljoin(base,x[1]) for x in sorted(pairs,reverse=True)]
+        return [urllib.parse.urljoin(base,max(pairs,key=lambda x:x[0])[1])]
     return [urllib.parse.urljoin(base,raw)]
 
 def image_allowed(url,allowed_hosts):
@@ -100,13 +100,16 @@ def image_allowed(url,allowed_hosts):
     if EXCLUDE_IMAGE.search(p.path):return False
     return bool(IMAGE_EXT.search(p.path))
 
-def image_choice(items,base,allowed_hosts):
+def image_choice(items,base,allowed_hosts,include_paths=(),exclude_paths=()):
     got={}
     # Explicit high-resolution data-original comes before display src, but same photo variants remain recorded.
     weights={'data-original':9,'data-full':9,'data-zoom-image':8,'image-link':8,'data-srcset':7,'srcset':7,'data-lazy-src':6,'data-src':6,'currentSrc':4,'src':3,'data-url':3}
     for it in items:
         for u in candidates(it['v'],base):
             if not image_allowed(u,allowed_hosts):continue
+            path=urllib.parse.unquote(urllib.parse.urlsplit(u).path)
+            if include_paths and not any(re.search(p,path,re.I) for p in include_paths):continue
+            if exclude_paths and any(re.search(p,path,re.I) for p in exclude_paths):continue
             key=canonical(u)
             entry={'url':u,'origin_page':base,'source_attribute':it['attr'],'alt':it.get('alt',''),'priority':weights.get(it['attr'],1)}
             if key not in got or entry['priority']>got[key]['priority']:
@@ -127,14 +130,14 @@ def next_pages(links,original,visited):
             result.append(e['url'])
     return list(dict.fromkeys(result))
 
-async def inspect_page(page, url, allowed_hosts, max_steps=55):
+async def inspect_page(page, url, allowed_hosts, max_steps=55, include_paths=(),exclude_paths=()):
     await page.goto(url,wait_until='domcontentloaded',timeout=35000)
     await page.wait_for_timeout(550)
     found={};pagination=[];stable=0;prev=(-1,-1,-1);snap=None
     for step in range(max_steps):
         snap=await page.evaluate(DOM_COLLECT)
-        found.update(image_choice(snap['imgs'],page.url,allowed_hosts))
-        pagination+=snap['links']
+        found.update(image_choice(snap['imgs'],page.url,allowed_hosts,include_paths,exclude_paths))
+        pagination=list({entry['url']:entry for entry in pagination+snap['links']}.values())
         metrics=(len(found),snap['documentHeight'],len(pagination))
         movement=await page.evaluate(SCROLL_JS)
         if metrics==prev and movement['atBottom'] and not movement['moved']:stable+=1
@@ -159,7 +162,7 @@ async def discover(sources, output:Path, max_pages_override=None):
                 if url in visited:continue
                 visited.add(url)
                 try:
-                    data=await inspect_page(page,url,src['image_hosts'],src.get('scroll_limit',55))
+                    data=await inspect_page(page,url,src['image_hosts'],src.get('scroll_limit',55),src.get('include_image_paths',()),src.get('exclude_image_paths',()))
                     pages.append({k:data[k] for k in ('url','title','scroll_steps','scrolled_to_end')})
                     for im in data['images']:
                         key=canonical(im['url'])
@@ -181,7 +184,7 @@ async def discover(sources, output:Path, max_pages_override=None):
 
 def download(manifest:Path, dest:Path, max_images=150):
     data=json.loads(manifest.read_text(encoding='utf-8'));dest.mkdir(parents=True,exist_ok=True)
-    session=requests.Session();known={};totals={}
+    session=requests.Session();known={};sha_known={};totals={}
     for source in data['sources']:
         folder=dest/source['id'];folder.mkdir(exist_ok=True)
         images=source['urls_discovered'][:max_images];done=[];errors=[]
@@ -204,18 +207,24 @@ def download(manifest:Path, dest:Path, max_images=150):
                 ext={'JPEG':'jpg','PNG':'png','WEBP':'webp','GIF':'gif','AVIF':'avif'}.get(im.format)
                 if not ext:raise ValueError('unrecognized format '+str(im.format))
                 sha=hashlib.sha256(raw).hexdigest()
+                if sha in sha_known:
+                    done.append({**item,'sha256':sha,'duplicate_content_of':sha_known[sha], 'bytes':len(raw),'status':'duplicate_content'})
+                    known[key]=sha_known[sha]
+                    continue
                 file=folder/('%04d_%s.%s'%(i,sha[:12],ext))
                 file.write_bytes(raw)
                 row={**item,'local_path':str(file.relative_to(dest)),'bytes':len(raw),
                      'sha256':sha,'width':im.width,'height':im.height,'verified_at':utcnow(),'status':'downloaded'}
-                done.append(row);known[key]=row['local_path']
+                done.append(row);known[key]=row['local_path'];sha_known[sha]=row['local_path']
             except Exception as ex:
                 errors.append({**item,'error':str(ex)[:220]})
             time.sleep(.12)
         declared=source.get('declared_photos')
         totals[source['id']]={'discovered':source['images_discovered'],'downloaded':len(done),
             'download_failures':len(errors),'declared_photos':declared,
-            'status':'partial' if errors or (declared and len(done)<declared) or source.get('truncated') else 'unverified_completeness'}
+            'stored_files':sum(x['status']=='downloaded' for x in done),
+            'duplicate_content':sum(x['status']=='duplicate_content' for x in done),
+            'status':'partial' if errors or (declared and len(done)<declared) or source.get('truncated') else 'public_previews_only_unverified_completeness'}
         (folder/'manifest.json').write_text(json.dumps({'source':source['source_url'],'pages':source['pages_visited'],
             'downloaded':done,'failed':errors,'summary':totals[source['id']]},ensure_ascii=False,indent=2),encoding='utf-8')
     (dest/'summary.json').write_text(json.dumps(totals,ensure_ascii=False,indent=2),encoding='utf-8')
