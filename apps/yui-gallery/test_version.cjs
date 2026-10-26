@@ -21,6 +21,7 @@ const actuallyOnPages=data.albums.reduce((n,x)=>n+(x.images?.length||0),0);
 assert.ok(actuallyOnPages<405,'never accidentally claim all private ZIP images are public Pages files');
 assert.equal(state.archiving_engine.bundle_generation,false);
 assert.equal(state.archiving_engine.mode,'individual_files');
+assert.ok(state.archiving_engine.expansion.includes('public article crawler'));
 assert.ok(state.archiving_engine.open_source_crawler.includes('gallery-dl'));
 assert.ok(fs.readFileSync(path.join(root,'index.html'),'utf8').includes('id=\"app-version\"'));
 assert.ok(fs.readFileSync(path.join(root,'index.html'),'utf8').includes('source-viewer-albums.json'));
