@@ -94,7 +94,7 @@ def run(targets:Path, base:Path, max_sources:int=4,max_images:int=40,executable=
     rows=[]
     for src in config.get("sources",[])[:max_sources]:
         row=crawl_one(src,base,executable=executable,max_images=max_images)
-        print("OPEN_SOURCE_EXTRACTOR",row["id"],row["status"],row["physical_verified"],flush=True)
+        print("OPEN_SOURCE_EXTRACTOR",row["id"],row["status"],row["physical_verified"],row["errors"][:250],flush=True)
         rows.append({k:v for k,v in row.items() if k!="images"})
     summary={"collected_at":datetime.now(timezone.utc).isoformat(),
              "configured_source_pages":len(config.get("sources",[])),
