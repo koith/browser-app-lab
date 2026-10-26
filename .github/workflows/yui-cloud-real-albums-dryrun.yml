@@ -1,4 +1,4 @@
-name: Yui Cloud 405 File Staging Check
+name: Yui Private 405 Photobook ZIP Archive
 on:
   push:
     paths:
@@ -55,8 +55,15 @@ jobs:
           print('VERIFIED_CLOUD_STAGING_405',sum(a['stored'] for a in c['albums']))
           PY
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: success()
         with:
-          name: Yui-405-cloud-ready-catalog-only
-          path: cloud-stage/metadata/catalog.json
-          if-no-files-found: warn
+          name: Yui-405-five-complete-photobooks-private-ZIPs
+          path: |
+            yui-jliji-full-private/yuis-present33.zip
+            yui-jliji-full-private/athletic-club104.zip
+            yui-jliji-full-private/wet-yui80.zip
+            yui-jliji-full-private/teddy-bear97.zip
+            yui-verified-private-albums/green91_public_web_album.zip
+            cloud-stage/metadata/catalog.json
+          retention-days: 90
+          if-no-files-found: error
