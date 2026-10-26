@@ -18,7 +18,7 @@ SETS={
 class JlijiYuiSetExtractor(Extractor):
     category="yui_jliji"
     subcategory="set"
-    pattern=r"https?://(?:www\\.)?jliji\\.com/set/(12343|14973|14346|19356)(?:/?(?:\\?.*)?)?$"
+    pattern=r"https?://(?:www\.)?jliji\.com/set/(12343|14973|14346|19356)(?:/?(?:\?.*)?)?$"
     example="https://www.jliji.com/set/12343"
     directory_fmt=("YUI","{album_id}")
     filename_fmt="{num:03}.{extension}"
@@ -48,7 +48,7 @@ class JlijiYuiSetExtractor(Extractor):
                 for url in urls:
                     if not url.startswith(prefix):
                         continue
-                    match=re.search(r"/(\\d+)\\.(jpe?g|png|webp)(?:\\?.*)?$",url,re.I)
+                    match=re.search(r"/(\d+)\.(jpe?g|png|webp)(?:\?.*)?$",url,re.I)
                     if match:
                         selected[int(match.group(1))]=url
             finally:
