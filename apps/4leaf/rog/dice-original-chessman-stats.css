@@ -1,0 +1,46 @@
+/* Genuine 2002 Dice/IMG.pak stats.png (164×125) integrated into
+ * the real live selected chessman details. Native bitmap dimensions and
+ * green/blue original grid are preserved. CardData data is live DOM, not
+ * rasterized / fabricated into the 2002 source. Native position/field
+ * mapping remains unverified: this WEB dialog is explicitly composite. */
+#app.app-classic-dice #modal .dice-native-chessman-detail{
+ display:grid;
+ grid-template-columns:164px minmax(140px,1fr);
+ align-items:start;gap:12px;
+ max-width:100%;color:#f2f5ff;
+ font:12px/1.45 Gulim,'굴림',sans-serif;
+}
+#app.app-classic-dice #modal .dice-native-chessman-media{
+ display:flex;flex-direction:column;align-items:start;gap:6px;
+ min-width:0;
+}
+#app.app-classic-dice #modal .dice-native-source-stats{
+ display:block;width:164px;height:125px;object-fit:fill;max-width:none;
+ image-rendering:auto;pointer-events:none;
+}
+#app.app-classic-dice #modal .dice-native-card-detail-portrait{
+ display:block;width:58px;height:62px;object-fit:contain;
+ background:#263e86;
+}
+#app.app-classic-dice #modal .dice-native-live-card-stats{
+ display:grid;grid-template-columns:54px minmax(70px,1fr);
+ margin:0;padding:4px 6px 6px;gap:3px 4px;
+ border:1px solid #869fdb;background:#203777;color:#e8efff;
+}
+#app.app-classic-dice #modal .dice-native-live-card-stats dt{
+ color:#bcd4f7;margin:0;
+}
+#app.app-classic-dice #modal .dice-native-live-card-stats dd{
+ margin:0;min-width:0;overflow-wrap:anywhere;color:#fff4b0;
+}
+@media(max-width:650px){
+ #app.app-classic-dice #modal .dice-native-chessman-detail{
+  display:flex;flex-wrap:wrap;gap:6px;
+ }
+ #app.app-classic-dice #modal .dice-native-chessman-media{
+  flex-direction:row;align-items:start;gap:5px;
+ }
+ #app.app-classic-dice #modal .dice-native-live-card-stats{
+  flex:1 1 155px;
+ }
+}

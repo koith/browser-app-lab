@@ -733,14 +733,39 @@ function drawNativeChessmen(){
     root.querySelectorAll('.dice-chessman-slot').forEach(s=>s.classList.toggle('selected',s===slot));
    };
    slot.onclick=()=>{
+    // Source Dice/IMG.pak stats.png 164x125 (original icon/attribute grid).
+    // The previous temporary WEB info dialog was a single portrait and
+    // paragraph. Restore actual recovered SOURCE UI art, while retaining
+    // independently rendered LIVE CardData values. Its exact historical
+    // dialog position/data overlay coordinates are still unverified.
     const content=document.createElement('div');
+    content.className='dice-native-chessman-detail';
+    content.dataset.originalSourceMember='Dice/IMG.pak:stats.png';
+    content.dataset.historicalLayoutVerified='false';
+    content.dataset.sourceCardId=source.id;
+    const media=document.createElement('div');media.className='dice-native-chessman-media';
+    const originalStats=document.createElement('img');
+    originalStats.className='dice-native-source-stats';
+    originalStats.src='./original/IMG/stats.png';
+    originalStats.width=164;originalStats.height=125;
+    originalStats.alt='원본 4LEAF 체스맨 능력치 패널';
+    originalStats.dataset.originalSourceMember='Dice/IMG.pak:stats.png';
     const portrait=document.createElement('img');portrait.src=imageFor(source.id);
+    portrait.className='dice-native-card-detail-portrait';
     portrait.alt=source.name;portrait.width=58;portrait.height=62;
-    const detail=document.createElement('p');
-    detail.textContent=role+' · '+source.name+' / 이동 '+source.move+' / 공격 '+source.atk+
-      ' / 방어 '+source.def+' / 지력 '+source.int+' / '+(source.ability||'능력 없음')+
-      ' / '+source.point+' POINT';
-    content.append(portrait,detail);
+    media.append(originalStats,portrait);
+    const stats=document.createElement('dl');stats.className='dice-native-live-card-stats';
+    for(const [key,label,value] of [
+      ['role','역할',role],['move','이동',source.move],
+      ['attack','공격',source.atk],['defense','방어',source.def],
+      ['intellect','지력',source.int],['ability','능력',source.ability||'없음'],
+      ['point','POINT',source.point]]){
+      const term=document.createElement('dt');term.textContent=label;
+      const number=document.createElement('dd');
+      number.dataset.field=key;number.textContent=String(value);
+      stats.append(term,number);
+    }
+    content.append(media,stats);
     modal('체스맨 · '+source.name,content,[{label:'닫기',primary:true}]);
    };
   }else{

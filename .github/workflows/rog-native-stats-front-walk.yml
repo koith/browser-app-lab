@@ -1,0 +1,62 @@
+name: 4LEAF genuine OBS front movement and original chessman stats UI
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/game.js'
+      - 'apps/4leaf/rog/genesis-chessman-actors.js'
+      - 'apps/4leaf/rog/dice-original-chessman-stats.css'
+      - 'apps/4leaf/rog/tests/obs-reviewed-front-walk-native-stats.cjs'
+      - '.github/workflows/rog-native-stats-front-walk.yml'
+  workflow_run:
+    workflows: ['Deploy static content to Pages']
+    types: [completed]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-front-and-stats:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 17
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - browser: chromium
+            mobile: '0'
+          - browser: webkit
+            mobile: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install real browsers
+        run: |
+          npm install --no-save playwright
+          npx playwright install ${{ matrix.browser }} --with-deps
+      - name: Serve source from PR
+        if: github.event_name != 'workflow_run'
+        run: |
+          nohup python3 -m http.server 8765 --directory apps/4leaf/rog >/tmp/leaf-obs-stats.log 2>&1 &
+          for i in 1 2 3 4 5 6 7; do
+            if curl -fSsI http://127.0.0.1:8765/index.html >/dev/null 2>&1; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/leaf-obs-stats.log
+          exit 1
+      - name: Play original OBS front locomotion, live CardData stats and 2004 battle screenshot
+        env:
+          FOURLEAF_TEST_URL: ${{ github.event_name == 'workflow_run' && 'https://koith.github.io/browser-app-lab/apps/4leaf/rog/' || 'http://127.0.0.1:8765/' }}
+          FOURLEAF_BROWSER: ${{ matrix.browser }}
+          FOURLEAF_MOBILE: ${{ matrix.mobile }}
+        run: node apps/4leaf/rog/tests/obs-reviewed-front-walk-native-stats.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: original-obs-front-stats-${{ matrix.browser }}-${{ github.event_name }}
+          path: leaf-*.png
+          retention-days: 14

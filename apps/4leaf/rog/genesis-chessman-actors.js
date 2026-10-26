@@ -84,7 +84,20 @@
  // This is a front-preserving WEB movement mapping; original direction
  // lookup and playback FPS remain unknown.
  const REVIEWED_FRONT_MOTION=Object.freeze({
-  '0040':[25,30],'0042':[25,30],'0043':[25,30]
+  // 19 specific actual 2002 OBS.pak source members. Their frame25 and
+  // frame30 PNGs were individually viewed in original paletted form and
+  // retain the already-audited front-facing body silhouette with changed
+  // arm/leg/cloth poses. Native 2002 action table / frame timing UNKNOWN;
+  // sequenceFor's 25-30 loop is a WEB playback reconstruction, NOT a
+  // recovered original lookup. Never map 0045 (only front 18 confirmed)
+  // or any visually unaudited source/effect member.
+  '0040':[25,30], '0042':[25,30], '0043':[25,30],
+  '0044':[25,30], '0046':[25,30], '0048':[25,30],
+  '0049':[25,30], '0051':[25,30], '0052':[25,30],
+  '0053':[25,30], '0054':[25,30], '0055':[25,30],
+  '0056':[25,30], '0058':[25,30], '0059':[25,30],
+  '0060':[25,30], '0061':[25,30], '0062':[25,30],
+  '0064':[25,30]
  });
  function sequenceFor(native,action,id){
   const all=native.frames||[];
