@@ -49,7 +49,7 @@
   const stage=document.createElement('div');stage.id='dice-channel-stage';stage.className='dice-channel-stage';
   stage.dataset.source='Region/regionback.png';
   // 2002 Region/1234.png is the native four-number, four-state atlas
-  // (164x112 = four 41x28 states per number); Region/regionback.png
+  // (132x124 = four 41x28 states per number); Region/regionback.png
   // already paints resting digits. Use REAL source pixels for selected,
   // hover, pressed and keyboard focus, not an invented blue CSS button.
   const atlas=new Image(),numberControls=[];
@@ -61,19 +61,19 @@
     const state=button.dataset.pressed==='true'?2:
       active?3:(button.matches(':hover')||button.matches(':focus'))?1:0;
     if(!atlasReady||state===0)continue; // underlying ORIGINAL source art
-    ctx.drawImage(sourceCanvas,state*41,(number-1)*28,41,28,0,4,34,28);
+    ctx.drawImage(sourceCanvas,state*33,(number-1)*31,33,31,0,2,33,31);
     canvas.dataset.originalFrame=String((number-1)*4+state);
    }
   }
   atlas.onload=()=>{
-   if(atlas.naturalWidth!==164||atlas.naturalHeight!==112){
+   if(atlas.naturalWidth!==132||atlas.naturalHeight!==124){
     stage.dataset.nativeChannelAtlas='invalid-source-size';return;
    }
    sourceCanvas=document.createElement('canvas');
-   sourceCanvas.width=164;sourceCanvas.height=112;
+   sourceCanvas.width=132;sourceCanvas.height=124;
    const ctx=sourceCanvas.getContext('2d',{willReadFrequently:true});
    ctx.drawImage(atlas,0,0);
-   const rgba=ctx.getImageData(0,0,164,112),bytes=rgba.data;
+   const rgba=ctx.getImageData(0,0,132,124),bytes=rgba.data;
    const key=[bytes[0],bytes[1],bytes[2]];
    // The sprite sheet's solid lavender backdrop was transparent in the
    // original paletted renderer. Remove ONLY pixels very close to that
