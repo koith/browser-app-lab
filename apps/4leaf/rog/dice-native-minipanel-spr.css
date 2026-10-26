@@ -70,3 +70,21 @@
 #app.app-classic-dice #board-mini .leaf-native-minipanel-detail strong{
  color:#fff2b4!important;
 }
+
+/* PUBLIC-SCREEN VISUAL DEFECT (2026-10-26): #board-mini was made
+ * position:relative by the generic native-tab rule above. On portrait
+ * WebKit this reinserted the 86x77 original minimap at the TOP of the
+ * 4LEAF board (visible in the published 390x844 QA screenshot), covering
+ * the 2002 menu/upper tiles. The original 800x600 board.jpg anchors the
+ * minimap at BOTTOM LEFT. Keep the same real DMP canvas + four source
+ * 75x20 tab bitmaps interactive, do not create a proxy image or move it
+ * into the document flow. Desktop minidock is unchanged. */
+@media(max-width:650px){
+ #app.app-classic-dice #game #board-area > #board-mini{
+  position:absolute!important;
+  left:2px!important;right:auto!important;
+  bottom:2px!important;top:auto!important;
+  margin:0!important;
+  z-index:23!important;
+ }
+}
