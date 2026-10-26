@@ -6,27 +6,26 @@ import json
 import os
 import shutil
 import tempfile
-import zipfile
 from pathlib import Path
 
 from PIL import Image
-from ingest_verified_zips import build
+from ingest_verified_directories import build
 from verify_r2_cache import check_previews, verify_remote_previews
 
 with tempfile.TemporaryDirectory() as root_string:
     root = Path(root_string)
-    archive = root / "album.zip"
-    source = io.BytesIO()
-    Image.new("RGB", (900, 1300), (45, 80, 160)).save(source, format="PNG")
-    blob = source.getvalue()
-    with zipfile.ZipFile(archive, "w") as z:
-        z.writestr("images/001.png", blob)
-        z.writestr("manifest.json", json.dumps({
-            "id": "sample-album", "title": "Sample", "advertised_count": 1,
-            "images": [{"number": 1, "file": "001.png", "sha256": hashlib.sha256(blob).hexdigest()}],
-        }))
+    folder = root / "individual-images"
+    folder.mkdir()
+    photo = folder / "001.png"
+    Image.new("RGB", (900, 1300), (45, 80, 160)).save(photo, format="PNG")
+    blob = photo.read_bytes()
+    (folder / "manifest.json").write_text(json.dumps({
+        "id": "sample-album", "title": "Sample", "advertised_count": 1,
+        "images": [{"number": 1, "file": "001.png",
+                    "sha256": hashlib.sha256(blob).hexdigest()}],
+    }))
     stage = root / "stage"
-    c = build([archive], stage)
+    c = build([folder], stage)
     specs = check_previews(stage)
     assert len(specs) == 1
     key, size, digest = specs[0]
