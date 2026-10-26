@@ -1,5 +1,7 @@
 name: Yui Dynamic Gallery Archiver
 on:
+  schedule:
+    - cron: '45 2 * * *'
   push:
     paths:
       - apps/yui-gallery/archive_engine.py
@@ -10,6 +12,9 @@ on:
   workflow_dispatch:
 permissions:
   contents: write
+concurrency:
+  group: yui-archive-refresh
+  cancel-in-progress: false
 jobs:
   discover-and-verify:
     runs-on: ubuntu-24.04
