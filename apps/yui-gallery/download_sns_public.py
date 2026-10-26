@@ -10,8 +10,9 @@ from archive_engine import download,utcnow
 
 source=Path("apps/yui-gallery/paginated-sns-index.json")
 index=json.loads(source.read_text(encoding="utf-8"))
+latest=json.loads(Path("apps/yui-gallery/feed.json").read_text(encoding="utf-8"))
 records=[];seen=set()
-for item in index["images"]:
+for item in index["images"]+latest["images"]:
     img=item["url"];post=item.get("post","")
     if not post.startswith("https://x.com/super_yuisan/status/"):continue
     if img in seen:continue
