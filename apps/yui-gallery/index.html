@@ -64,7 +64,7 @@ function renderAlbums(){
   const stored=storedAlbums.find(x=>x.id===a.id),n=stored?.images?.length||0;
   const missing=Number.isFinite(a.photos)?Math.max(0,a.photos-n):null;
   const cover=n?'<img class="album-cover" loading="lazy" src="'+esc(stored.images[0].url)+'" alt="'+esc(a.title)+' 공개 미리보기">':'<div class="album-empty">실제 저장 파일 없음</div>';
-  return '<div class="album">'+cover+'<small>'+esc(a.site)+'</small><strong>'+esc(a.title)+'</strong><p>실제 저장 '+n+'장 / 출처 표기 '+esc(a.photos??'미확인')+'장</p><div class="when">'+esc(a.releaseDate?'발행 '+a.releaseDate:a.sourceUpdatedAt?'목록 갱신 '+a.sourceUpdatedAt:'발행일 미확인')+'</div><div class="actions"><button class="open-album" data-id="'+esc(a.id)+'" '+(n?'':'disabled')+'>보관 이미지 열람</button><a href="'+esc(a.source)+'" target="_blank" rel="noopener">출처 ↗</a></div></div>'
+  return '<div class="album">'+cover+'<small>'+esc(a.site)+'</small><strong>'+esc(a.title)+'</strong><p>실제 저장 '+n+'장 / 출처 표기 '+esc(a.photos??'미확인')+'장 · '+(missing===null?'완성 여부 미확인':missing+'장 미확보')+'</p><div class="when">'+esc(a.releaseDate?'발행 '+a.releaseDate:a.sourceUpdatedAt?'목록 갱신 '+a.sourceUpdatedAt:'발행일 미확인')+'</div><div class="actions"><button class="open-album" data-id="'+esc(a.id)+'" '+(n?'':'disabled')+'>보관 이미지 열람</button><a href="'+esc(a.source)+'" target="_blank" rel="noopener">출처 ↗</a></div></div>'
  }).join(''):'<div class="empty">조건에 맞는 실제 저장 화보가 없습니다.</div>';
  el('total').textContent='작품 '+f.length+'개 · 작품별 실물 파일 '+f.reduce((n,a)=>n+(storedAlbums.find(s=>s.id===a.id)?.images?.length||0),0)+'장 · 미분류는 별도';
  el('albumgrid').querySelectorAll('.open-album').forEach(b=>b.onclick=()=>{const a=albums.find(x=>x.id===b.dataset.id);if(a)openStoredAlbum(a)});
