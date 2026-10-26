@@ -84,7 +84,12 @@
  // This is a front-preserving WEB movement mapping; original direction
  // lookup and playback FPS remain unknown.
  const REVIEWED_FRONT_MOTION=Object.freeze({
-  '0040':[25,30],'0042':[25,30],'0043':[25,30]
+  '0040':[25,30],'0042':[25,30],'0043':[25,30],
+  // Audited 2026-10-27 directly from 2002 OBS.pak original paletted PNGs:
+  // 1044-25/30, 1046-25/30 and 1048-25/30 all keep the forward-facing
+  // full-body silhouette while changing arm/leg placement. They are NOT
+  // native source action-table labels: WEB pacing/loop still inferred.
+  '0044':[25,30],'0046':[25,30],'0048':[25,30]
  });
  function sequenceFor(native,action,id){
   const all=native.frames||[];
