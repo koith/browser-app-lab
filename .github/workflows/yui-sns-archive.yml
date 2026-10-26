@@ -1,5 +1,9 @@
 name: Public Photo Review QA
 on:
+  push:
+    paths:
+      - apps/yui-gallery/sns_archive.py
+      - .github/workflows/yui-sns-archive.yml
   workflow_dispatch:
 permissions:
   contents: read
