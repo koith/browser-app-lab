@@ -1,3 +1,28 @@
+> ## beta.4 인수인계 추가 — 2026-10-27 KST
+> 현재 배포 버전은 **v0.1.0-beta.4**. 아래 beta.3 본문은 이전 기록이다.
+> **PR #221 병합**: https://github.com/koith/browser-app-lab/pull/221
+> 코드 병합 SHA: `86c0a2ecafe8eeb952b64baa28a65f1cb580d7ad`.
+> 검증한 Pages 배포 SHA: `3975ef7f758023d205fe24724415cd5513854b72` (출처 인덱스 자동 갱신).
+>
+> - 기존 405장 전부를 개별 파일로 다시 내려받아 기존 SHA-256과 일치 및 디코딩 검증했다.
+> - 신규 다운로드 **844개 실파일**에는 Sweet Dream 다른 판본 106장이 포함된다. 새 고유 화보 **6개 / 선택본 738장**: CREAM 228, Thru Thru 117, Sweet Dream 110, Seethrough 80, RAMEN 125, Heart Steal 78.
+> - Sweet Dream 선택본 110장 중 106장은 공개된 전체 크기 링크의 실제 **1920px** 파일을 선택했다. 기존 낮은 판본과 보수적인 사진 매칭 후 큰 파일을 바이트 변경 없이 복사했다. 근거: verification/higher-resolution-web-selections.json. **기존 405장의 고해상도 교체는 0장**, 발행사 원본 확인도 0장이다.
+> - additional-source-albums.json에 신규 738장의 실제 수집 파일 해시·픽셀·출처 URL을 등록했다. 갤러리 총 **18개 그룹 / 1169개 이미지 항목** (기존 저장 26 + 기존 출처 405 + 신규 출처 738). 작품 중복 그룹을 포함하므로 고유 사진 1169장이라고 표현하지 않는다.
+> - **Chromium 및 WebKit CI 각각 1169개 확대 이미지 디코딩 + 저장 26개 브라우저 다운로드 SHA-256 PASS**: https://github.com/koith/browser-app-lab/actions/runs/40414360257
+> - 배포된 실제 주소에서도 1169개 디코딩 및 저장 26개 다운로드 해시 PASS. 관리형 환경에서는 TLS를 검증하는 requests 브리지로 Chromium 프록시 CA 문제를 처리했으며 TLS 검증을 끄지 않았다. **실기기 iPhone QA는 미완료**.
+> - HTTP/gallery-dl 수집 완료 시 공유 등록기로 자동 연결한다. 기존 앨범을 보존하고 파일 잠금·원자적 교체로 동시 등록 충돌을 막는다. Jliji 재수집이 같은 앨범 카드를 중복 생성하지 않도록 ID로 병합한다.
+> - 사진 확대·개별 다운로드 UI를 추가하고 현재 픽셀을 표시했다. 저장 파일 26개 다운로드는 실제 브라우저 검증, 인증 보관본 다운로드는 로컬 모의 원격 검증이다. **출처 호스팅 이미지의 직접 fetch 다운로드는 사이트 CORS에 제한될 수 있으며 전체 원격 사진 다운로드 성공으로 보고하지 않는다.**
+> - cloud/ingest_verified_directories.py의 손실 미리보기 재압축을 제거했다. originals와 preview 경로 모두 수집 바이트를 그대로 보존한다.
+> - 무료 수집기: gallery_dl_extractors/pixibb.py, 수정된 jliji.py, http_album_collector.py, http_album_targets.json, build_additional_source_manifest.py, merge_higher_resolution.py. 유료 크롤러·TinyFish·사진 압축파일 생성 없음.
+> - CTEE https://ctee.kr/item/store/86995 의 **にゃ〜 | 심유이 YUI** 제목과 Bcutrank 심유이 23편을 확인해 research-sources.json 및 작품 참고 목록에 반영했다. 참고 목록·표지를 실파일 확보로 세지 않는다. 공식 최신 화보 전체 및 공개 샘플 추가 수집은 남아 있다.
+> - Maid/Tracksuit는 이번 수집에서 정상 디코딩 파일 0장이며 성공/확보로 세지 않았다. 이미지 호스트 및 응답 원인을 추가 분석해야 한다. Xasiat 두 링크는 영상 스크린샷이므로 화보 사진 수로 세지 않았다. ImgCup은 403으로 우회하지 않았다.
+> - **TeraBox 미연결 / 실파일 업로드·원격 SHA-256 재다운로드 검증 0장**. QR 발급 자체는 성공했지만 현재 사용자의 iOS 앱에서 로그인 승인 경로를 완료하지 못했다. 오래된 '아바타 옆 스캔' 안내를 현 iOS UI에서 검증 없이 다시 지시하지 말 것. 공식 OAuth 승인 방식 검토가 필요하다. 공개 출처 링크는 개인 영구 보관소가 아니다.
+> - 월 이용료 0원·카드 미등록 원칙 유지. 신규 파일은 작업 환경의 개별 파일 폴더에 있고 원격 영구 보관 완료가 아니다. 기존 유일한 검증 사본은 삭제하지 않았다.
+>
+> 작업 환경 원본 경로(환경이 유지되는 경우): /workspace/yui-private/recovered (405), /workspace/yui-private/new-albums (신규 및 판본), /workspace/yui-private/pixibb/verified-albums/seethrough80, /workspace/yui-private/new-albums/sweet-dream-best. 원격 계정 연결 후 이 파일들부터 검증·업로드할 것.
+>
+> ---
+
 # Codex 개발 인수인계서 — 심유이(Yui/심혜성) 화보 아카이빙 갤러리
 
 작성 기준: 2026-10-27 KST
