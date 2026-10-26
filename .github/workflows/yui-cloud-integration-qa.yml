@@ -17,11 +17,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Validate ZIP ingester and cloud gateway Python
+      - name: Validate photo directory ingester and cloud gateway Python
         run: |
           pip install Pillow fastapi uvicorn httpx
-          python -m py_compile apps/yui-gallery/cloud/ingest_verified_zips.py apps/yui-gallery/cloud/verify_remote.py apps/yui-gallery/cloud/verify_r2_cache.py apps/yui-gallery/cloud/gateway/main.py
-          python apps/yui-gallery/cloud/test_ingest.py
+          python -m py_compile apps/yui-gallery/cloud/ingest_verified_directories.py apps/yui-gallery/cloud/verify_remote.py apps/yui-gallery/cloud/verify_r2_cache.py apps/yui-gallery/cloud/gateway/main.py
+          python apps/yui-gallery/cloud/test_ingest_directories.py
           python apps/yui-gallery/cloud/test_verify_remote.py
           python apps/yui-gallery/cloud/test_verify_r2_cache.py
           python apps/yui-gallery/cloud/test_gateway.py

@@ -14,7 +14,7 @@ from io import BytesIO
 from pathlib import Path
 from urllib.parse import urlsplit
 from collections import Counter
-import json, os, re, requests, time, zipfile
+import json, os, re, requests, time
 from PIL import Image, UnidentifiedImageError
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
@@ -94,14 +94,14 @@ def main():
         hashes=[x["sha256"] for x in manifest["images"]]
         collisions=[k for k,c in Counter(hashes).items() if c>1]
         if collisions:raise ValueError("Duplicate actual photo content, investigate: "+str(collisions[:5]))
-        zip_path=OUTPUT/(album["id"]+"_public_web_album.zip")
-        with zipfile.ZipFile(zip_path,"w",compression=zipfile.ZIP_DEFLATED,compresslevel=2) as z:
-            for i,(row,raw) in sorted(successful.items()):z.writestr("images/"+row["file"],raw)
-            z.write(folder/"manifest.json",arcname="manifest.json")
-        with zipfile.ZipFile(zip_path) as z:
-            assert z.testzip() is None
-            assert len([name for name in z.namelist() if name.startswith("images/")])==len(successful)
-        record={"id":album["id"],"expected":n,"files":len(successful),"failed":failed,"zip":str(zip_path),"size":zip_path.stat().st_size,
+        # The gallery and cloud ingest consume files directly; no archive bundles.
+        for row,raw in (value for key,value in sorted(successful.items())):
+            photo=folder/row['file']
+            assert photo.is_file() and photo.stat().st_size==row['bytes']
+            assert sha256(photo.read_bytes()).hexdigest()==row['sha256']
+        record={"id":album["id"],"expected":n,"files":len(successful),
+                "failed":failed,"directory":str(folder),
+                "bytes":sum(row['bytes'] for row,_ in successful.values()),
                 "smallest_width":min((a[0]["width"] for a in successful.values()),default=0),
                 "largest_width":max((a[0]["width"] for a in successful.values()),default=0)}
         index_report.append(record)
