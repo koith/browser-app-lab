@@ -49,7 +49,7 @@
   const stage=document.createElement('div');stage.id='dice-channel-stage';stage.className='dice-channel-stage';
   stage.dataset.source='Region/regionback.png';
   // 2002 Region/1234.png is the native four-number, four-state atlas
-  // (132x124 = four 41x28 states per number); Region/regionback.png
+  // (132x124 = four 33x31 states per number); Region/regionback.png
   // already paints resting digits. Use REAL source pixels for selected,
   // hover, pressed and keyboard focus, not an invented blue CSS button.
   const atlas=new Image(),numberControls=[];
