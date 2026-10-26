@@ -128,7 +128,7 @@ const path=require('node:path');
       deployed:process.env.FOURLEAF_TEST_URL||'local PR',
       originalState:'battle',deployedState:'two-player first turn',
       benchmarkTrust:'source-region proximity diagnostic; NOT pixel-perfect state match',
-      regions:comparison},null,2)+'\\n');
+      regions:comparison},null,2));
    console.log('HISTORICAL-PUBLISHED-ROI-MEASUREMENTS '+JSON.stringify(comparison));
    await meta.screenshot({path:'leaf-original-2004-vs-public-live-800x600.png'});
    await meta.close();
