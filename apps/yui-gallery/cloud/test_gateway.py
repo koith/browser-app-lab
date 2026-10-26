@@ -7,6 +7,12 @@ from pathlib import Path
 
 os.environ['GALLERY_ACCESS_TOKEN']='test-gallery-token'
 os.environ['RCLONE_CONFIG_ARCHIVE_COOKIE']='fake-local-test-cookie'
+os.environ['R2_PREVIEW_REMOTE']='previewcache:test-private-bucket'
+os.environ['RCLONE_CONFIG_PREVIEWCACHE_TYPE']='s3'
+os.environ['RCLONE_CONFIG_PREVIEWCACHE_PROVIDER']='Cloudflare'
+os.environ['RCLONE_CONFIG_PREVIEWCACHE_ENDPOINT']='https://test.r2.cloudflarestorage.com'
+os.environ['RCLONE_CONFIG_PREVIEWCACHE_ACCESS_KEY_ID']='local-test'
+os.environ['RCLONE_CONFIG_PREVIEWCACHE_SECRET_ACCESS_KEY']='local-test-secret'
 from fastapi.testclient import TestClient
 from fastapi import HTTPException
 from gateway import main as gateway
@@ -42,7 +48,9 @@ catalog={'schema_version':1,'albums':[{'id':'test-album','title':'Sample',
             'preview':'previews/test-album/0001.jpg','width':900,'height':1350,
             'bytes':len(photo),'sha256':digest,
             'preview_bytes':len(photo),'preview_sha256':digest}]}]}
-async def fake_read(key,limit):
+reads=[]
+async def fake_read(key,limit,*,remote=None):
+    reads.append((key,remote))
     if key=='metadata/catalog.json':return json.dumps(catalog).encode()
     if key in ('originals/test-album/0001.jpg','previews/test-album/0001.jpg'):return photo
     raise ValueError('Unexpected storage read')
@@ -50,6 +58,7 @@ gateway.rclone_bytes=fake_read
 
 with TestClient(gateway.app) as client:
     assert client.get('/api/health').status_code==200
+    assert client.get('/api/health').json()['r2_preview_cache_configured'] is True
     assert client.get('/api/catalog').status_code==401
     header={'Authorization':'Bearer test-gallery-token'}
     assert client.get('/api/catalog',headers=header).json()['albums'][0]['id']=='test-album'
@@ -58,10 +67,32 @@ with TestClient(gateway.app) as client:
         assert response.status_code==200
         assert response.content==photo
         assert int(response.headers['content-length'])==len(photo)
+        assert response.headers['x-archive-source']==('r2-preview-cache' if kind=='preview' else 'terabox')
+    assert ('previews/test-album/0001.jpg','previewcache:test-private-bucket') in reads
+    assert ('originals/test-album/0001.jpg',None) in reads
+    assert ('originals/test-album/0001.jpg','previewcache:test-private-bucket') not in reads
+
+    # A corrupt R2 object has the right length but must NEVER reach the user.
+    async def broken_cache(key,limit,*,remote=None):
+        if remote:return b'B'*len(photo)
+        return await fake_read(key,limit,remote=remote)
+    gateway.rclone_bytes=broken_cache
+    response=client.get('/api/media/test-album/1/preview',headers=header)
+    assert response.status_code==200 and response.content==photo
+    assert response.headers['x-archive-source']=='terabox'
+
+    # A cache outage must still allow verified TeraBox preview retrieval.
+    async def cache_outage(key,limit,*,remote=None):
+        if remote:raise HTTPException(status_code=502,detail='Cache offline')
+        return await fake_read(key,limit,remote=remote)
+    gateway.rclone_bytes=cache_outage
+    response=client.get('/api/media/test-album/1/preview',headers=header)
+    assert response.status_code==200 and response.content==photo
+    assert response.headers['x-archive-source']=='terabox'
     assert client.get('/api/media/unknown/1/original',headers=header).status_code==404
     assert client.get('/api/media/test-album/1/wrong',headers=header).status_code==404
 
-    async def corrupted_read(key,limit):
+    async def corrupted_read(key,limit,*,remote=None):
         if key.startswith('originals/'):
             return b'tampered-same-len'  # matching byte count alone cannot pass
         return await fake_read(key,limit)

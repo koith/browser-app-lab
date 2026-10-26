@@ -22,12 +22,12 @@ footer{font-size:12px;color:#8d9aaf;padding-bottom:50px}
 </style></head><body>
 <header><small style="letter-spacing:.2em;color:#c7b5fc">YUI · PRIVATE CLOUD ARCHIVE</small>
 <h1>심유이 / 실제 클라우드 화보</h1>
-<div class="note">이 화면은 TeraBox 비공개 저장소의 이미지 파일을 인증된 게이트웨이로 가져옵니다. 외부 링크를 사진 보유량으로 계산하지 않습니다.</div>
+<div class="note">원본 이미지는 TeraBox 비공개 저장소에서, 미리보기는 선택적으로 R2 비공개 캐시에서 가져옵니다. 어느 저장소든 SHA-256 검증 후 표시합니다. 외부 링크는 사진 보유량으로 계산하지 않습니다.</div>
 <div class="config">
 <input id="endpoint" placeholder="비공개 게이트웨이 주소 (https://...)" aria-label="게이트웨이 주소">
 <input id="token" type="password" autocomplete="off" placeholder="갤러리 접근 토큰" aria-label="갤러리 접근 토큰">
 <button id="connect">연결 및 파일 검증</button>
-</div><div id="status" role="status">미연결 · TeraBox 계정과 인증 서버가 구성되지 않았습니다.</div></header>
+</div><div id="status" role="status">미연결 · 원본 저장소와 비공개 게이트웨이 연결이 필요합니다. R2 미리보기 캐시는 선택 사항입니다.</div></header>
 <main>
 <section id="list"><div class="controls"><input id="query" placeholder="작품명 검색" aria-label="작품명 검색">
 <select id="sort"><option value="name">이름순</option><option value="name-reverse">이름 역순</option><option value="new">최신순</option><option value="old">오래된순</option></select>
