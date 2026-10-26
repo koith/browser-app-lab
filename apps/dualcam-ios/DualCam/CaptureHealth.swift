@@ -12,6 +12,8 @@ struct CaptureHealth {
     private var arrivals: [Stream: TimeInterval] = [:]
     private var timestamps: [Stream: TimeInterval] = [:]
 
+    init(startedAt: TimeInterval) { self.startedAt = startedAt }
+
     mutating func received(_ stream: Stream, mediaTime: TimeInterval, at uptime: TimeInterval) {
         guard mediaTime.isFinite, uptime.isFinite else { return }
         if let previous = timestamps[stream], mediaTime <= previous { return }

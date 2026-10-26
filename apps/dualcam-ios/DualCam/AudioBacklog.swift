@@ -3,6 +3,8 @@ struct AudioBacklog<Sample> {
     private var samples: [Sample] = []
     let limit: Int
 
+    init(limit: Int) { self.limit = limit }
+
     var isEmpty: Bool { samples.isEmpty }
     var count: Int { samples.count }
 
