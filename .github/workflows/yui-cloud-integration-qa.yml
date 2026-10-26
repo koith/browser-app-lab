@@ -22,6 +22,7 @@ jobs:
           pip install Pillow fastapi uvicorn httpx
           python -m py_compile apps/yui-gallery/cloud/ingest_verified_zips.py apps/yui-gallery/cloud/gateway/main.py
           python apps/yui-gallery/cloud/test_ingest.py
+          python apps/yui-gallery/cloud/test_gateway.py
           bash -n apps/yui-gallery/cloud/upload_to_terabox.sh
       - uses: actions/setup-node@v4
         with:
@@ -36,6 +37,12 @@ jobs:
           new vm.Script(js[1]);
           console.log('CLOUD_GALLERY_JS_SYNTAX_PASS');
           NODE
+      - name: Simulate cloud album connection and original file download in mobile Chromium
+        run: |
+          npm install --no-save playwright@1.58.2
+          npx playwright install chromium
+          python -m http.server 8765 --bind 127.0.0.1 --directory apps/yui-gallery >/tmp/yui-cloud-static.log 2>&1 &
+          node apps/yui-gallery/cloud/test_browser.cjs
       - name: Verify pinned unofficial TeraBox backend Docker build
         run: |
           docker build -t yui-private-cloud:smoke apps/yui-gallery/cloud/gateway
