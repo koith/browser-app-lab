@@ -83,8 +83,11 @@ def read_album(input_zip, folder, quality):
                     thumb=ImageOps.exif_transpose(im).convert("RGB")
                     thumb.thumbnail((520,900))
                     thumb.save(thumb_path,format="JPEG",quality=82,optimize=True)
+                preview_blob=thumb_path.read_bytes()
                 output.append({"number":photo_num,"key":f"originals/{album_id}/{out_name}",
                                "preview":f"previews/{album_id}/{photo_num:04d}.jpg",
+                               "preview_bytes":len(preview_blob),
+                               "preview_sha256":hashlib.sha256(preview_blob).hexdigest(),
                                "width":w,"height":h,"bytes":len(blob),"sha256":digest,
                                "origin_url":row.get("url",""),"quality":"web" if quality=="web" else quality})
         order=[x["number"] for x in output]
@@ -104,7 +107,7 @@ def build(inputs,output,quality="web"):
         albums.append(album)
     catalog={"schema_version":1,"created_at":datetime.now(timezone.utc).isoformat(),
              "access":"private authenticated gallery, not public CDN",
-             "storage_provider":"terabox",
+             "storage_provider":"pending_external_upload",
              "quality_policy":"Only label publisher original after explicit source verification.",
              "albums":sorted(albums,key=lambda x:x["title"].casefold())}
     destination=output/"metadata"
