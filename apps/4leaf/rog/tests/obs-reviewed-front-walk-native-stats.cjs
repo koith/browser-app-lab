@@ -58,6 +58,7 @@ const {chromium,webkit}=require('playwright');
    const slot=page.locator('#dice-native-party button.dice-chessman-slot.occupied').first();
    await slot.click();
    await page.waitForSelector('#modal:not(.hidden) .dice-native-chessman-detail');
+   await page.waitForFunction(()=>{const art=document.querySelector('#modal .dice-native-source-stats');return art?.complete&&art.naturalWidth===164&&art.naturalHeight===125;},null,{timeout:12000});
    const stats=await page.evaluate(()=>{
     const el=document.querySelector('#modal .dice-native-chessman-detail');
     const art=el.querySelector('img.dice-native-source-stats');
