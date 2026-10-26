@@ -59,7 +59,7 @@
     const ctx=canvas.getContext('2d');ctx.clearRect(0,0,34,36);
     const active=button.dataset.selected==='true';
     const state=button.dataset.pressed==='true'?2:
-      active?3:(button.matches(':hover')||button.matches(':focus-visible'))?1:0;
+      active?3:(button.matches(':hover')||button.matches(':focus'))?1:0;
     if(!atlasReady||state===0)continue; // underlying ORIGINAL source art
     ctx.drawImage(sourceCanvas,state*41,(number-1)*28,41,28,0,4,34,28);
     canvas.dataset.originalFrame=String((number-1)*4+state);
