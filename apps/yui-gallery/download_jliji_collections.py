@@ -3,10 +3,10 @@
 
 Collect exact rendered data-full image URLs for each specified album; reject
 related-model tiles, thumbnails and partial groups. No auth/purchase bypass.
-Files are emitted to ephemeral artifact ZIPs for personal offline use,
+Files are emitted as individual image files with a manifest for personal use,
 never added to the public GitHub Pages repository.
 """
-import asyncio,concurrent.futures,hashlib,io,json,re,requests,zipfile
+import asyncio,concurrent.futures,hashlib,io,json,re,requests
 from collections import Counter
 from pathlib import Path
 from urllib.parse import urlparse
@@ -78,14 +78,17 @@ async def main():
    manifest={"id":cfg["id"],"title":cfg["title"],"source_page":source,"advertised_count":cfg["count"],
              "acquired_count":len(successful),"images":[v[0] for _,v in sorted(successful.items())],
              "complete_public_visible_page":True,"publisher_original_quality_unverified":True}
-   file=ROOT/(cfg['id']+'.zip')
-   with zipfile.ZipFile(file,'w',compression=zipfile.ZIP_DEFLATED,compresslevel=3) as z:
-    for n,(row,b) in sorted(successful.items()):z.writestr('images/'+row['file'],b)
-    z.writestr('manifest.json',json.dumps(manifest,ensure_ascii=False,indent=2))
-   with zipfile.ZipFile(file) as z:
-    assert z.testzip() is None
-    assert len(z.namelist())==cfg['count']+1
-   summary={"id":cfg["id"],"advertised":cfg["count"],"downloaded":len(successful),"bytes":file.stat().st_size,
+   folder=ROOT/cfg['id']
+   folder.mkdir(parents=True,exist_ok=True)
+   for n,(row,blob) in sorted(successful.items()):
+    path=folder/row['file']
+    path.write_bytes(blob)
+    assert path.stat().st_size==row['bytes']
+    assert hashlib.sha256(path.read_bytes()).hexdigest()==row['sha256']
+   (folder/'manifest.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2),encoding='utf-8')
+   assert len(list(folder.glob('*.jpg')))+len(list(folder.glob('*.jpeg')))+len(list(folder.glob('*.png')))+len(list(folder.glob('*.webp')))==cfg['count']
+   summary={"id":cfg["id"],"advertised":cfg["count"],"downloaded":len(successful),
+            "bytes":sum(row['bytes'] for row,blob in successful.values()),
             "sizes":Counter((v[0]["width"],v[0]["height"]) for v in successful.values()).most_common(3)}
    report.append(summary)
    print('VERIFIED_PUBLIC_ALBUM',json.dumps(summary,ensure_ascii=False),flush=True)
