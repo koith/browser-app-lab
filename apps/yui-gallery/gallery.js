@@ -1,0 +1,1 @@
+// Photo-first gallery interactions
