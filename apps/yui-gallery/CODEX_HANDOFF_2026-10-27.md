@@ -1,0 +1,140 @@
+# Codex 개발 인수인계서 — 심유이(Yui/심혜성) 화보 아카이빙 갤러리
+
+작성 기준: 2026-10-27 KST
+저장소: https://github.com/koith/browser-app-lab
+앱: https://koith.github.io/browser-app-lab/apps/yui-gallery/
+현재 앱 표시 버전: **v0.1.0-beta.3**
+상태 확인 당시 main SHA: **dbfe79b9cd636e36d2a140bc0a15b814ad3634a7** (다른 프로젝트도 같은 main을 수정하므로 최초 작업 전 다시 조회)
+기존 인수인계: apps/yui-gallery/HANDOFF_2026-10-26.md (과거 기록이며 ZIP 지시 등 일부가 이미 폐기됨. 본 문서를 최신 기준으로 우선 적용)
+
+## 0. 코덱스에게 직접 지시 — 요약
+
+이 프로젝트의 목적은 **사용자가 iPhone에서 심유이 화보를 직접 볼 수 있는 실사용 개인 갤러리**를 만들고, 아직 수집하지 못한 화보를 **무료 오픈소스 크롤러로 대규모·지속적·증분 수집**하는 것이다. 기존 작업을 초기화하거나 설명/목록만 추가해서 끝내지 마라. 코드를 직접 수정하고 테스트하여 GitHub에 반영하라.
+
+절대 요구사항:
+1. **ZIP/압축파일 제작, ZIP 가져오기 UI, 다운로드를 열람의 전제조건으로 만드는 방식 금지.** 이미지 각각을 독립된 파일로 저장한다. 기존 웹판 바이트를 손실 재압축/리인코딩/인위적 업스케일하지 않는다.
+2. **사용자가 볼 수 없다면 보관 성과가 아니다.** 개인 보관소는 제3자 접근을 제한해도 소유자는 웹 갤러리에서 실제 파일 전체를 바로 볼 수 있어야 한다. 파일 선택·ZIP 풀기·클라우드 관리자 UI 수동 열기 등을 사용자에게 강요하지 마라.
+3. **유료 수집 API·크레딧 기반 크롤러·카드 등록 없이** Python, Playwright, gallery-dl, Scrapy/Crawlee 계열의 직접 실행 가능한 무료 기술을 채택한다. **TinyFish 사용 금지.** Firecrawl 무료 크레딧이나 다른 SaaS 한도에 핵심 파이프라인을 의존시키지 않는다.
+4. 출처 조사 수를 5~6곳에서 끝내지 않는다. 사용자는 **500개 사이트 수준을 조사해도 모자랄 정도로 광범위한 발견·비교·기술 적용**을 요구한다. 500개를 조사했다고 허위보고하지 말고, 검증된 사이트/화보/실파일 수를 분리 집계한다. 중복 출처·도메인·게시글은 중복 제거한다.
+5. **앱 버전은 화면 우상단에 작은 글씨**로 노출한다. 매 개발 보고 시 버전, 커밋/PR, 갤러리 실제 열람 검증 수, 새로 확보한 실파일 수, 남은 일, QA를 명시한다.
+6. 합법적으로 공개·접근 가능한 이미지 또는 사용자가 권한을 가진 이미지만 수집한다. 인증·유료 장벽 우회 금지. **공개 열람 허용과 타인 저작물의 공개 재배포 권한은 다르다.** 상업 화보 파일을 무단으로 공개 GitHub Pages에 미러링하지 않는다.
+
+## 1. 실상 — 숫자와 단계 정확히 구분
+
+- **실제 재수집/검증된 웹판 이미지: 화보 5세트 405장.** 파일의 바이트/픽셀/SHA-256 검사와 목록 생성 CI 성공. **발행사 최고해상도 원본이라고 검증된 것은 0장**이다.
+- 현재 GitHub Pages 저장소에 물리 이미지 파일로 존재하는 것은 **26장** (stored-albums.json, stored-albums/). 총 7개 부분 앨범/그룹에 분산.
+- source-viewer-albums.json에는 외부 출처 사이트의 이미지 URL로 연결된 **405장 / 5개 화보**가 있다. 갤러리 화면상으로는 **26 + 405 = 431개 이미지 항목 / 12개 그룹**이다. Teddy Bear 등의 **중복/동일 작품**이 있으므로 고유 431장이라고 표현 금지.
+- 외부 출처 405장은 **우리 개인 클라우드에 영구 보관된 405개 실물 파일이 아니다**. 서버가 링크를 차단/삭제/만료시키면 갤러리 열람도 깨질 수 있다. 일시적인 직접 열람용 연결이다.
+- 갤러리 모바일 Chromium CI가 431개 항목을 렌더링하고 대표 원격 사진(athletic-club104 및 green91) 실제 로딩을 확인해 PASS한 로그가 있다. **전체 405장의 원격 브라우저 실물 로딩 검증, 실기기 iPhone Safari QA는 별도 미완료.**
+- 대용량 무료 개인 저장소(TeraBox 후보)는 **실계정 미연결, 업로드 및 원격 SHA-256 재다운로드 검증 0장**. 인증 FastAPI 게이트웨이는 모의 테스트만 완료. GitHub Pages 링크를 영구 보관의 대체물로 보지 않는다.
+- 이전에 검증된 별도 임시 안전 사본이 있다. 405장 데이터의 장기 안전성을 확인하기 전 **기존 유일한 검증 사본을 임의 삭제 금지**. 단, 사용자에게 압축파일을 열람 방식으로 요구하거나 앞으로 압축본을 추가 생성하지 않는다.
+- 작품 색인에는 현재 59개 항목이 렌더링된 QA 기록이 있으나, 중복·출처별 복제본을 포함한다. **고유 신규 작품 59개 확보로 해석 금지.**
+
+기검증 작품(모두 공개 웹판):
+| ID | 화보 | 검증 사진 | 상태 |
+|---|---|---:|---|
+| yuis-present33 | SWEETBOX Yui's Present | 33/33 | 웹판 |
+| athletic-club104 | Yui — Athletic Club | 104/104 | 웹판, 일부 가로 사진 2305px |
+| wet-yui80 | Yui — Wet Yui | 80/80 | 웹판 |
+| teddy-bear97 | SWEETBOX Yui — Teddy Bear | 97/97 | 웹판, 별도 v04 10장과 중복 가능 |
+| green91 | Yui — Green | 91/91 | **AI 보정 웹판**, 원본 취급 금지 |
+
+## 2. 이미 구현한 소스 — 반드시 재사용
+
+앱/목록:
+- apps/yui-gallery/index.html — 사진 우선 일반 갤러리, 검색·앨범·사진·전체 작품, 전체화면/스와이프/개별 사진 열기, 우상단 v0.1.0-beta.3 표시.
+- apps/yui-gallery/stored-albums.json + stored-albums/ — 저장된 실물 26장.
+- apps/yui-gallery/source-viewer-albums.json — 5개 화보 405개 **출처 호스팅 이미지 URL**. 전체 405장 사진 바이트가 아님.
+- apps/yui-gallery/albums.json — 여러 출처 화보 색인. 중복 통합 필요.
+- apps/yui-gallery/version.json — 버전, 클라우드 미연결, 실제 검증량 등. 숫자 변경 시 반드시 실제 검증 근거와 동기화.
+- apps/yui-gallery/cloud.html — 현재 실계정 미연결 클라우드 갤러리. 이상적인 목표는 사용자가 별도 페이지/토큰 설정 없이 일반 갤러리에서 사진을 보는 것.
+
+수집/크롤러:
+- apps/yui-gallery/download_jliji_collections.py — Playwright + HTTP 기반 4개 공개 화보를 개별 파일로 수집(314장).
+- apps/yui-gallery/download_verified_public_album.py — Green 및 별도 Teddy Bear 웹판 개별 파일로 수집.
+- apps/yui-gallery/build_source_viewer_manifest.py — 405개 실제 수집 파일의 SHA-256을 검증하고 출처 URL 열람용 인덱스 생성.
+- apps/yui-gallery/archive_engine.py + source_targets.json — 공개 사이트 6개 초기 대상, lazy-loading, 스크롤·페이지네이션 탐색, 파일별 보관.
+- apps/yui-gallery/gallery_dl_collector.py — **무료 gallery-dl** CLI 적용, JPEG/WEBP/PNG 등 이미지 독립 파일·SHA-256·SQLite 다운로드 이력.
+- apps/yui-gallery/gallery_dl_extractors/jliji.py + gallery_dl_targets.json — Jliji 웹 갤러리를 위한 자체 gallery-dl 외부 추출기와 4세트 타깃. 소스별 추출기 확장 출발점.
+- apps/yui-gallery/promote_downloaded_previews.py — 실제 다운로드한 공개 미리보기 중 적법하게 배포 가능한 것만 갤러리 실물 저장소에 등록.
+
+클라우드/검증:
+- apps/yui-gallery/cloud/ingest_verified_directories.py — **압축파일 없이** 개별 사진 폴더/manifest.json 입력, 바이트 무변경 originals/, 별도 previews/, metadata/catalog.json 생성.
+- apps/yui-gallery/cloud/upload_to_terabox.sh / verify_remote.py — 실제 비공개 계정에 개별 업로드, 원격 재다운로드 후 바이트/SHA-256 확인.
+- apps/yui-gallery/cloud/gateway/main.py — 원본 원격 읽기·인증·검증 FastAPI 게이트웨이. 실 배포 여부는 새로 확인.
+- apps/yui-gallery/cloud/README.md — 상세 구현 문서. 표제는 beta.2지만 현 앱 기준은 beta.3.
+- apps/yui-gallery/test_version.cjs, test_gallery_dl_collector.py, test_source_viewer_manifest.py, cloud/test_ingest_directories.py 등 — 자동검증.
+
+CI:
+- .github/workflows/yui-source-viewer-sync.yml — 무료 gallery-dl / 브라우저 수집 / 405장 출처 목록 생성, 공개 Pages에는 링크/메타데이터만.
+- .github/workflows/yui-gallery-smoke.yml — 모바일 Chromium 실제 렌더/대표 사진 로딩/버전 위치.
+- .github/workflows/yui-dynamic-archive.yml — 기존 6개 공개 출처 주기적 크롤링/소량 미리보기 갱신.
+- .github/workflows/yui-cloud-real-albums-dryrun.yml — 405장 클라우드 폴더 스테이징 검증.
+- .github/workflows/yui-cloud-integration-qa.yml — 가짜 원격/인증/브라우저/컨테이너 QA.
+- .github/workflows/yui-terabox-live-free-upload.yml — TeraBox 실제 계정 토큰이 있을 때만 작동. 실행 버튼 존재만으로 연결 완료 처리하지 말 것.
+
+## 3. 최근 작업과 확인 가능한 증거
+
+- PR #216 (병합) https://github.com/koith/browser-app-lab/pull/216 — ZIP 중심 경로 제거·개별 파일 저장/해시·업로드 폴더 수용·구형 ZIP 뷰어 제거, v0.1.0-beta.2.
+- 2026-10-27 이후 main에 beta.3 수집/갤러리 코드가 병합되어 있음. 최근 관련 main 커밋 **e50ca602a8bf**(beta.3), **2d7ae3019ef7**, **baa47d928ce**, **8ed00de08da6**, **6ad811b22c94**. 현재 main은 다른 4LEAF 프로젝트 때문에 이보다 전진했음. 먼저 SHA 갱신.
+- 405장 생성/검증 + 무료 수집 파이프라인: https://github.com/koith/browser-app-lab/actions/runs/40353556856 — 성공. 다만 이 로그에서는 새 외부 gallery-dl Jliji 추출기가 ValueError(not enough values to unpack)로 실패하고 기존 Playwright 수집기로 405장을 성공적으로 수집했다. 그 뒤 main에 외부 extractor 메시지 튜플 수정 및 실파일 QA 강화 커밋이 들어왔으므로 **수정 후 현재 extractor의 실사이트 성공 여부는 재실행 로그로 독립 확인할 것**.
+- 431개 갤러리 항목 + 대표 외부 이미지 열람 + 우상단 v0.1.0-beta.3 모바일 Chromium: https://github.com/koith/browser-app-lab/actions/runs/40353556865 — 성공, 로그에는 albumCount 12, allPhotos 431, sourceRemoteBrowserQA true.
+- 최근 GitHub Pages 배포: main SHA dbfe79b9...의 Pages 워크플로 성공(실제 방문 및 iPhone QA는 별도 점검).
+- 구형 PR #213, #215는 열린 상태로 남아 있음. **오래된 UI/ZIP 중심 내용을 현재 main에 덮어쓰지 말 것.** 필요 시 비교 후 닫기.
+
+## 4. P0 — 코덱스가 가장 먼저 완료할 작업
+
+1. 작업 시작 시 main SHA, 버전, 기본 갤러리/클라우드/405 manifest, CI 실결과를 새로 읽는다. 기존 작업을 절대 초기화하지 않는다. beta.3 레이아웃/우상단 버전 유지.
+2. **내가 실제로 보는 사진 중심으로 안정화.** 405개 URL이 iOS Safari / Chromium에서 실제로 열리는지 앨범별/파일별 점검한다. HTTP 상태와 decoded image size를 확인하고, 열리지 않는 URL은 다른 공개 출처/정당하게 확보된 실물로 대체한다. 431개 DOM 기록만으로 431장 사용 가능이라고 선언하지 않는다.
+3. **이미 획득한 405개 개별 사진을 직접 연결되는 영구 보관소로 옮긴다.** 사용자 비용은 월 0원, 카드 등록 없음, 사진 그대로(비손실 변경 없음), 계정 소유자 iPhone 즉시 접근, 개별 사진 다운로드 필수. 공개 GitHub Pages에 상업 화보 파일을 무단 재배포하지 말 것. 현재 TeraBox 후보 외에도 무료 대용량 공식/비공식 API, 저장소 게이트웨이, 계정 유지·속도·크기 제한을 비교하고 작은 앨범로 실계정 시험. 필요한 최소 **1회 계정 로그인/승인만** 사용자에게 요청; 인증정보를 채팅/리포/로그에 기록하지 않는다.
+4. 업로드는 405개 **개별 사진** → 원격 직접 읽기 → 각 파일 길이/SHA-256 일치 → 카탈로그 마지막 확정 → 일반 갤러리 열람 순. 원격 인증·다운로드 실패 시 다른 안전한 경로를 시험하되 사용자 승인 없는 우회/과금 금지.
+5. 기본 갤러리(index.html)에 사용자 본인이 바로 접속하면 **해당 405장의 인증된 보관본**이 실제 열리게 한다. 별도 수동 ZIP 선택이나 토큰 복사 반복이 없는 구조. 전체화면·스와이프·원본 개별 다운로드 및 모바일 네트워크 실제 QA.
+6. 우상단 작은 버전 표시, 버전 변경 및 카운트/상태 동기화. 기존 소스에는 HTML 태그 옆에 리터럴 역슬래시 n(\\n) 문자열이 남아 있는지 확인하여 필요시 수정할 것.
+7. P0 완료 판정은 **영구 원격에 사진 실물이 존재하고 재다운로드 해시 검증, 실제 인증된 iPhone 갤러리 읽기까지 통과했을 때**만 PASS. 외부 링크 405개는 P0 완료가 아님.
+
+## 5. P1 — 남은 화보의 대량 탐색/실파일 확보
+
+1. 기존 색인(중국 화보 사이트, 원발행사, V2PH, SWEETBOX, SNS 원출처, 여러 언어 명칭)을 바탕으로 seed source 목록을 확장한다. 타깃 명칭: 심유이, 심혜성, Yui, 沈惠星 및 실제 검증된 변형. 검색 엔진/사이트 내 검색/목록 pagination/사이트맵/게시 날짜 피드/발행사 DB를 조합한다.
+2. 사용자 요구는 **광범위한 출처 발굴**이다. 500개 사이트 조사도 모자랄 수 있다는 요구를 수집기 설계 범위로 받아들이되, 숫자만 채우지 말고 **서로 다른 사이트 호스트/작품 상세 페이지/화보 실물**을 분리 계수한다. 사이트별 접근 가능 여부, 마지막 확인 시각, API/이미지 로딩 기술, 중복률, 저작권/권한 상태까지 추적한다.
+3. 무료 gallery-dl의 공식 extractor + 자체 외부 extractor를 우선; 미지원 사이트는 Scrapy/직접 HTML·HTTP/Playwright로 적법한 공개 페이지 탐색. srcset, data-full, lazyload, infinite scroll, next page, 이미지 CDN 변환 URL의 실픽셀 비교로 **실제 취득 가능한 최대 해상도** 확보.
+4. 새 수집기의 성공은 다운로드된 정상 디코딩 이미지/바이트/SHA-256과 순번 연속성으로 판정. 로그인 회피, 속도 제한 회피, 유료 자료 침해, 차단 우회 도구 사용 금지. robots/사이트 약관·저작권 존중, 속도·동시성 제한.
+5. **고유 작품 원장**: 발행처, 작품 제목/다국어 별명, 발매/게시 날짜, 표기 장수, 공개 웹판 실확보 장수, 발행사 원본 확인 장수, 이미지 URL/실파일 경로, 폭·높이·파일 바이트·SHA-256, AI 보정 여부, 출처/허용 상태, 중복/누락 수. SNS 사진은 화보 작품 실적과 별도.
+6. 신규 실파일 확보 → 원격 검증 저장 → 일반 갤러리 자동 목록 갱신까지 연결. URL·미리보기·빈 앨범 카드만 추가한 것을 성과로 보고하지 마라. 수집 실패 시 원인과 보완 후 재실행을 남긴다.
+7. 최근 조사에서 5세트 외 추가 화보 예시: CREAM YUI, Seethrough YUI, Sweet Dream, RAMEN, Thru Thru 등. **이름이 검색됐다는 것과 실제 확보/전체 이미지 검증은 별개**다. 유료 원본이면 정당한 권한을 가진 경로를 우선한다.
+
+## 6. P2 — 운영화
+
+- 크롤러 작업 큐/사이트별 adapter/증분 SQLite DB/콘텐츠 해시+지각 해시 중복 제거, 실패 체크포인트·재시도, 재개 기능, 주간 신규 작품 통계.
+- 버전/개발원장/작품 수치와 CI 근거를 일치시키고, 우상단 버전은 CSS 소형 크기/모바일에서도 가려지지 않게 유지.
+- 무료 사용 한도나 외부 서비스의 가격 변경으로 수집 엔진 전체가 중단되지 않도록 재현 가능한 무료 오픈소스 의존성 고정 및 대체 경로 마련.
+- 사용자의 저장 파일을 임의로 삭제하지 않고, 실제 새 저장소·복구 검증 후 오래된 임시 사본 폐기 여부를 결정.
+- 최종 UX는 사용자가 **일반 갤러리 하나에서 앨범·사진을 누르는 것만으로 감상**하는 방식.
+
+## 7. 보고/수락 기준 — 반드시 이 형식
+
+매 보고 첫머리에 아래 사실을 적는다:
+
+- 앱 버전 / main SHA / PR 번호 및 병합 여부 / Pages 배포 SHA.
+- **유일 작품 수**, 작품별 기대 사진 수 / 실제 취득 파일 수 / 원격 SHA-256 재검증 파일 수 / 사용자 갤러리 실제 로딩 성공 파일 수. 출처 URL 개수와 사진 바이트 개수 구분.
+- 소스별 성공·실패율, 신규 실파일 수, 품질(최고 실제 픽셀과 발행사 원본/공개 웹판/AI 보정), 중복 제거 결과.
+- 월비용, 카드 등록 여부, 스토리지 실제 원격 경로, iPhone 실기기 QA 여부. 미완료를 PASS라고 쓰지 않는다.
+- 문제가 있으면 관측 로그, 수정 커밋, 재실행 결과와 남은 작업을 간결히 기록.
+
+초기 확인용 명령:
+
+    git fetch origin
+    git checkout main && git pull --ff-only
+    git rev-parse HEAD
+    cat apps/yui-gallery/version.json
+    python -m pip install Pillow requests playwright gallery-dl
+    python -m playwright install chromium
+    python apps/yui-gallery/test_gallery_dl_collector.py
+    python apps/yui-gallery/test_source_viewer_manifest.py
+    node apps/yui-gallery/test_version.cjs
+    # 실 사이트 수집은 현재 타깃과 권한/실행량을 검토한 후
+    python apps/yui-gallery/gallery_dl_collector.py --max-sources 2 --max-images 3
+    python apps/yui-gallery/download_jliji_collections.py
+    python apps/yui-gallery/download_verified_public_album.py
+    python apps/yui-gallery/build_source_viewer_manifest.py
+
+**실행 지시:** 최초 목표는 이미 확보한 화보의 **실물 개인 보관·직접 감상 완성**, 동시에 **gallery-dl 자체 추출기 실사이트 성공 고정**이다. 그 다음 새 화보를 광범위하게 찾아 실제 개별 사진을 계속 수집하고 자동으로 갤러리에 반영하라. ZIP을 되살리거나 유료 크롤러에 기대지 마라. 설명·제안만 하지 말고 소스 변경, 테스트, 병합·배포, 진짜 사용 가능한 결과를 제출하라.
