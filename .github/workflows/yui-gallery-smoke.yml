@@ -60,6 +60,18 @@ jobs:
             const imageNames=await page.evaluate(()=>photos.map(x=>x.name||x.caption||''));
             if(imageNames.length<2||imageNames[0].localeCompare(imageNames.at(-1),'ko',{numeric:true})>0)throw Error('Photo name sort failed');
             await page.selectOption('#mediaSort','date-desc');
+            await page.locator('[data-view="chinese"]').click();
+            await page.waitForFunction(()=>document.querySelector('#total')?.textContent?.includes('중국 무료 미리보기'),{timeout:15000});
+            const chineseCards=await page.locator('#media img').count();
+            if(chineseCards!==8)throw Error('Chinese preview card count mismatch: '+chineseCards);
+            await page.waitForTimeout(2200);
+            const chineseLoaded=await page.locator('#media img').evaluateAll(a=>a.filter(img=>img.complete&&img.naturalWidth>0).length);
+            if(chineseLoaded<2)throw Error('Chinese preview images did not load; loaded='+chineseLoaded);
+            await page.screenshot({path:'gallery-mobile-chinese.png',fullPage:true});
+            await page.selectOption('#mediaSort','name-desc');
+            if((await page.locator('#media img').count())!==8)throw Error('Chinese sorting discarded entries');
+            await page.locator('[data-view="media"]').click();
+            await page.selectOption('#mediaSort','date-desc');
             const imageDownload=await page.evaluate(async()=>{try{const r=await fetch(cdn(photos[0].url,'orig'),{mode:'cors'});return {ok:r.ok,status:r.status,type:r.headers.get('content-type')}}catch(e){return {ok:false,error:String(e)}}});
             console.log('PUBLIC_IMAGE_DOWNLOAD_CHECK',JSON.stringify(imageDownload));
             await page.locator('[data-view="albums"]').click();
@@ -76,7 +88,7 @@ jobs:
             const albumOldestDate=await page.locator('.album .when').first().textContent();
             if(!albumOldestDate.includes('2025'))throw Error('Album oldest-first date sort failed: '+albumOldestDate);
             if(errors.length)throw Error('Browser errors: '+errors.join('; '));
-            console.log(JSON.stringify({passed:true,imgs,loaded,albums,newest,oldest,albumFirstDate,albumOldestDate,errors}));
+            console.log(JSON.stringify({passed:true,imgs,loaded,albums,newest,oldest,chineseCards,chineseLoaded,albumFirstDate,albumOldestDate,errors}));
             await page.screenshot({path:'gallery-mobile.png',fullPage:true});
             const [zipDownload]=await Promise.all([page.waitForEvent('download',{timeout:120000}),page.locator('#downloadAll').click()]);
             await zipDownload.saveAs('yui-public-photos.zip');
@@ -103,5 +115,6 @@ jobs:
           path: |
             gallery-mobile.png
             gallery-mobile-photos.png
+            gallery-mobile-chinese.png
             yui-public-photos.zip
           if-no-files-found: ignore
