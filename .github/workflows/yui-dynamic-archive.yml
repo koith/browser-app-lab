@@ -38,13 +38,24 @@ jobs:
       - name: Verify archive and print completeness
         run: |
           python - <<'PY'
-          import json,zipfile
+          import json,hashlib
+          from pathlib import Path
           m=json.load(open('yui-dynamic-discovery.json'))
           stats=json.load(open('yui-dynamic-images/summary.json'))
           assert len(m['sources'])==6
-          with zipfile.ZipFile('yui-public-archive-dynamic.zip') as z:
-            assert z.testzip() is None
-            assert any(x.endswith('.json') for x in z.namelist())
+          verified=0
+          for source in m['sources']:
+            directory=Path('yui-dynamic-images')/source['id']
+            report=json.loads((directory/'manifest.json').read_text())
+            for entry in report['downloaded']:
+              if entry.get('status')!='downloaded': continue
+              path=Path('yui-dynamic-images')/entry['local_path']
+              assert path.is_file(),path
+              assert path.stat().st_size==entry['bytes'],path
+              assert hashlib.sha256(path.read_bytes()).hexdigest()==entry['sha256'],path
+              verified+=1
+          assert verified==sum(x['stored_files'] for x in stats.values())
+          print('ZIPLESS_INDIVIDUAL_IMAGES_VERIFIED',verified)
           print('DISCOVERY_REPORT',json.dumps({x['id']:{'pages':len(x['pages_visited']),'discovered':x['images_discovered'],'errors':x['errors'],'truncated':x['truncated']} for x in m['sources']},ensure_ascii=False))
           print('ARCHIVE_REPORT',json.dumps(stats,ensure_ascii=False))
           PY
@@ -76,10 +87,9 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: yui-public-dynamic-archive
+          name: yui-individual-public-images-metadata
           path: |
             yui-dynamic-discovery.json
             yui-dynamic-images/summary.json
-            yui-public-archive-dynamic.zip
           retention-days: 90
           if-no-files-found: warn
