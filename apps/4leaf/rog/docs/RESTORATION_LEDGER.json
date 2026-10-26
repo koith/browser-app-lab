@@ -6207,6 +6207,18 @@
         "https://4leafmemorial.geld.kr/1527",
         "https://4leafmemorial.geld.kr/1503"
       ]
+    },
+    {
+      "seq": 257,
+      "date": "2026-10-26",
+      "type": "PUBLIC_SNAPSHOT_REJECTED_PORTRAIT_TERRAIN_STRETCH_CORRECTION",
+      "requestId": "REQ-20261026-002",
+      "taskIds": [
+        "P0-BOARD",
+        "ACT-04",
+        "P0-RELEASE"
+      ],
+      "details": "Correction to event256's provisional mobile original terrain claim, preserving immutable previous event: actual 390x844 WebKit capture from PR #201 revealed `background-size:auto 100%; no-repeat` of original 725x485 source would enlarge and blur buildings/cliffs and LOSE archived client source detail; author explicitly REVERTED the modification before merging. Original IMG/bgtile.png native 725x485 repeat remains untouched until original historical camera/wrap algorithm is established. The separately confirmed position:relative override bug placing real #board-mini at top-left is still FIXED for phone portrait: restoring source bottom-left mini with live DMP canvas and genuine 2002 source minipanel tabs. 800x600 original-vs-actual deployed HUD ROI diagnostics (non-equivalent battle and first turn) and 90-post period-bucket Memorial provenance are supplemental proof, not a fake completed pose or original mobile claim. PR CI and public QA evidence still pending."
     }
   ]
 }
