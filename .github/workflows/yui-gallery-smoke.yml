@@ -16,6 +16,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Verify release version and free cloud truth-in-status
+        run: node apps/yui-gallery/test_version.cjs
       - name: Verify physically stored photos and application syntax
         run: |
           node - <<'NODE'
