@@ -42,6 +42,18 @@ jobs:
         env:
           FOURLEAF_TEST_URL: ${{ github.event_name == 'workflow_run' && 'https://koith.github.io/browser-app-lab/apps/4leaf/rog/' || 'http://127.0.0.1:8765/' }}
         run: node apps/4leaf/rog/tests/dice-source-native-ui.cjs
+      - name: Run two real central ChatRoom clients and authority while checking source IMG chat
+        if: github.event_name != 'workflow_run'
+        run: |
+          PORT=8877 LEAF_CENTRAL_ORIGINS=http://127.0.0.1:8765 nohup node apps/4leaf/rog/server/central.cjs >/tmp/leaf-chat-central.log 2>&1 &
+          for i in 1 2 3 4 5 6 7; do
+            if curl -fSs http://127.0.0.1:8877/api/health >/dev/null 2>&1; then break; fi
+            sleep 1
+          done
+          node apps/4leaf/rog/tests/central-browser.cjs || {
+            tail -n 100 /tmp/leaf-chat-central.log
+            exit 1
+          }
       - uses: actions/upload-artifact@v4
         if: always()
         with:
