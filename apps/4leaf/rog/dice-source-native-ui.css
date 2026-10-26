@@ -64,6 +64,20 @@
  * Real button elements scroll actual ChatTown/Genesis chat records; no
  * manufactured messages or screenshot-only overlay.
  */
+/* Own the recovered IMG 16px arrow controls inside the 2002 game-chat
+ * panel itself. Previously position:absolute was resolved against an
+ * unrelated ancestor, so a physical click could scroll/reflow the wrong
+ * container while Playwright waited for the native enabled button.
+ * No new artwork, no overlaid fake UI. */
+#app.app-classic-dice .messenger{
+ position:relative;
+}
+#app.app-classic-dice .messenger #chat-log{
+ /* Native game chat explicitly preserves the history reader's scrollTop.
+  * Browser scroll anchoring must not silently jump that reader to the
+  * newest message during a real IMG arrow gesture. */
+ overflow-anchor:none;
+}
 #app .leaf-dice-chat-scroll{
  display:none;
 }
