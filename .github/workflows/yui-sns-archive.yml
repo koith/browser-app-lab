@@ -10,6 +10,7 @@ permissions:
 jobs:
   check:
     runs-on: ubuntu-24.04
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -17,9 +18,11 @@ jobs:
           python-version: '3.12'
       - run: pip install beautifulsoup4 requests Pillow
       - run: python -m py_compile apps/yui-gallery/sns_archive.py
-      - run: python apps/yui-gallery/sns_archive.py --discover-only --max-pages 20
+      - run: python apps/yui-gallery/sns_archive.py --max-pages 36 --workers 5 --part-size 50
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: social-photo-metadata
-          path: yui-sns-discovery.json
+          name: public-photo-archive
+          path: |
+            yui-sns-archive/*.zip
+            yui-sns-archive/*.json
