@@ -43,12 +43,10 @@ jobs:
               assert hashlib.sha256(image.read_bytes()).hexdigest()==photo['sha256']
           print('VERIFIED_COMPLETE_PHOTOBOOKS',len(s),'IMAGE_FILES',314)
           PY
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
-          name: Yui-4-albums-314-hash-manifests
-          path: |
-            yui-jliji-full-private/*/manifest.json
-            yui-jliji-full-private/summary.json
+          path: yui-jliji-full-private/summary.json
+          archive: false
           retention-days: 90
           if-no-files-found: warn
