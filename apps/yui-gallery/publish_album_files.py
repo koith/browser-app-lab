@@ -66,7 +66,7 @@ async def main():
  budget_used=sum(f.stat().st_size for f in OUT.rglob('*') if f.is_file())
  async with async_playwright() as p:
   browser=await p.chromium.launch(headless=True)
-  ctx=await browser.new_context(viewport={'width':1100,'height':780'},service_workers='block')
+  ctx=await browser.new_context(viewport={'width':1100,'height':780},service_workers='block')
   for album in chosen:
    aid=album['id']; url=album['source']; base=urllib.parse.urlsplit(url)
    page=await ctx.new_page()
