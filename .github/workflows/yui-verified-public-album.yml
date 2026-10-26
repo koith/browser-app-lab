@@ -27,17 +27,18 @@ jobs:
         run: |
           python - <<'PY'
           import json,zipfile,hashlib,pathlib
-          p=pathlib.Path('yui-verified-private-albums/v04_public_web_album.zip')
-          with zipfile.ZipFile(p) as z:
-            assert z.testzip() is None
-            m=json.loads(z.read('manifest.json'))
-            assert len(m['images'])==97
-            assert m['complete_public_web_sequence'] is True
-            for a in m['images']:
-              data=z.read('images/'+a['file'])
-              assert len(data)==a['bytes']
-              assert hashlib.sha256(data).hexdigest()==a['sha256']
-            print('VERIFIED_97_PHOTOGRAPHIC_FILES',len(m['images']),'ZIP_BYTES',p.stat().st_size)
+          for album_id,expected in [('v04',97),('green91',91)]:
+            p=pathlib.Path(f'yui-verified-private-albums/{album_id}_public_web_album.zip')
+            with zipfile.ZipFile(p) as z:
+              assert z.testzip() is None
+              m=json.loads(z.read('manifest.json'))
+              assert len(m['images'])==expected
+              assert m['complete_public_web_sequence'] is True
+              for a in m['images']:
+                data=z.read('images/'+a['file'])
+                assert len(data)==a['bytes']
+                assert hashlib.sha256(data).hexdigest()==a['sha256']
+              print('VERIFIED_COMPLETE_WEB_PHOTOBOOK',album_id,len(m['images']),'ZIP_BYTES',p.stat().st_size)
           PY
       - uses: actions/upload-artifact@v4
         if: always()
