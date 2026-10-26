@@ -2,7 +2,7 @@
 
 ## 저장소 선정
 
-- 원본 저장소: TeraBox (무료 최대 1TB 표방). 실제 계정은 아직 연결되지 않았음.
+- 원본 저장소: TeraBox (무료 최대 1TB 표방). 공식 한국어 요금표에서는 1024GB를 '기간 한정'으로 표시하므로 영구 보장 아님. 실제 계정은 아직 연결되지 않았음. 무료 계정 파일당 4GB 업로드 제한.
 - 갤러리 브라우저: /apps/yui-gallery/cloud.html
 - 미디어 게이트웨이: /apps/yui-gallery/cloud/gateway/main.py (비공개, Bearer 인증)
 - GitHub Pages에는 전체 상업 화보 파일이나 TeraBox 쿠키를 넣지 않음.
@@ -56,3 +56,4 @@ python apps/yui-gallery/cloud/ingest_verified_zips.py folder/album1.zip folder/a
 bash apps/yui-gallery/cloud/upload_to_terabox.sh cloud-stage
 
 실제 TeraBox 쿠키 없이 마지막 명령을 실행하면 명확한 미연결 오류로 종료되도록 설계.
+공식 TeraBox 플랜: https://www.terabox.com/korean/cloud-storage-pricing-plans?lang=ko
