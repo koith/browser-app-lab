@@ -9,7 +9,9 @@ The container does not keep originals on its ephemeral disk. They live remotely.
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import json
+import re
 import os
 import secrets
 import time
@@ -53,30 +55,48 @@ async def authenticated(authorization: str | None = Header(default=None)):
 
 
 async def rclone_bytes(path: str, limit: int) -> bytes:
+    """Drain the *entire* remote stream, with size/timeout bounds.
+
+    A single StreamReader.read(limit) may return only the first network chunk.
+    Never treat such a partial read as a successfully fetched photograph.
+    """
     proc = await asyncio.create_subprocess_exec(
         "rclone", "cat", f"{REMOTE}/{path}", "--timeout=50s", "--retries=2",
         stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
     )
+
+    async def drain_stderr() -> str:
+        # Drain in parallel so a noisy rclone process cannot block on stderr.
+        prefix = bytearray()
+        while chunk := await proc.stderr.read(4096):
+            if len(prefix) < 3000:
+                prefix.extend(chunk[:3000 - len(prefix)])
+        return prefix.decode("utf-8", errors="replace")
+
+    stderr_task = asyncio.create_task(drain_stderr())
     try:
-        result = await asyncio.wait_for(proc.stdout.read(limit + 1), timeout=115)
-        if len(result) > limit:
-            proc.kill()
-            await proc.wait()
-            raise HTTPException(status_code=413, detail="Remote asset larger than supported")
-        rc = await asyncio.wait_for(proc.wait(), timeout=15)
-        if rc:
-            err = (await proc.stderr.read(3000)).decode("utf-8", errors="replace")
-            print("RCLONE_REMOTE_READ_FAILED", path, err[:300], flush=True)
-            raise HTTPException(status_code=502, detail="Cloud media unavailable")
-        return result
+        async def read_all() -> bytes:
+            content = bytearray()
+            while chunk := await proc.stdout.read(65536):
+                content.extend(chunk)
+                if len(content) > limit:
+                    raise HTTPException(status_code=413, detail="Remote asset larger than supported")
+            rc = await proc.wait()
+            error = await stderr_task
+            if rc:
+                print("RCLONE_REMOTE_READ_FAILED", path, error[:300], flush=True)
+                raise HTTPException(status_code=502, detail="Cloud media unavailable")
+            return bytes(content)
+
+        return await asyncio.wait_for(read_all(), timeout=115)
     except asyncio.TimeoutError:
-        proc.kill()
-        await proc.wait()
         raise HTTPException(status_code=504, detail="Cloud read timed out")
     finally:
         if proc.returncode is None:
             proc.kill()
-            await proc.wait()
+        await proc.wait()
+        if not stderr_task.done():
+            await stderr_task
 
 
 async def get_catalog():
@@ -128,9 +148,21 @@ async def media(album_id: str, image_num: int, kind: str, download: bool = Query
         raise HTTPException(status_code=500, detail="Manifest media path mismatch")
     limit = 5_000_000 if kind == "preview" else 140_000_000
     blob = await rclone_bytes(key,limit)
+    digest_field = "sha256" if kind == "original" else "preview_sha256"
+    size_field = "bytes" if kind == "original" else "preview_bytes"
+    declared_digest = img.get(digest_field)
+    declared_bytes = img.get(size_field)
+    if (not isinstance(declared_digest, str)
+            or not re.fullmatch(r"[0-9a-f]{64}", declared_digest)
+            or type(declared_bytes) is not int
+            or declared_bytes != len(blob)
+            or hashlib.sha256(blob).hexdigest() != declared_digest):
+        print("CLOUD_MEDIA_INTEGRITY_FAILED", album_id, image_num, kind, flush=True)
+        raise HTTPException(status_code=502, detail="Cloud media integrity check failed")
     extension = key.rsplit(".", 1)[-1].lower()
     content_type = {"jpg":"image/jpeg","jpeg":"image/jpeg","png":"image/png","webp":"image/webp","avif":"image/avif"}.get(extension,"application/octet-stream")
-    headers={"Cache-Control":"private, max-age=600","X-Content-Type-Options":"nosniff"}
+    headers={"Cache-Control":"private, max-age=600","X-Content-Type-Options":"nosniff",
+             "Content-Length":str(len(blob))}
     if download:
         headers["Content-Disposition"] = f'attachment; filename="{album_id}-{image_num:04d}.{extension}"'
     return StreamingResponse(iter([blob]),media_type=content_type,headers=headers)
