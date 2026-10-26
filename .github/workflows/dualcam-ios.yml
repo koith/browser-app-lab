@@ -1,0 +1,52 @@
+name: DualCam iPhone IPA
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'apps/dualcam-ios/**'
+      - '.github/workflows/dualcam-ios.yml'
+  pull_request:
+    paths:
+      - 'apps/dualcam-ios/**'
+      - '.github/workflows/dualcam-ios.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dualcam-ios-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 30
+    defaults:
+      run:
+        working-directory: apps/dualcam-ios
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check Xcode
+        run: xcodebuild -version
+      - name: Run movie writer and timeline tests
+        run: bash scripts/test_ios.sh
+      - name: Build unsigned iPhone app
+        run: bash scripts/build_unsigned.sh
+      - name: Upload IPA for personal signing
+        uses: actions/upload-artifact@v4
+        with:
+          name: DualCam-unsigned-IPA
+          path: apps/dualcam-ios/build/DualCam-unsigned.ipa
+          if-no-files-found: error
+          retention-days: 14
+      - name: Upload build and test diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: DualCam-diagnostics
+          path: |
+            apps/dualcam-ios/build/*.log
+            apps/dualcam-ios/build/*.xcresult
+          if-no-files-found: ignore
+          retention-days: 7
