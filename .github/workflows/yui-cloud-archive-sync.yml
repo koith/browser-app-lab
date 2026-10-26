@@ -43,12 +43,12 @@ jobs:
       - name: Stage real album files and previews
         if: env.RCLONE_CONFIG_ARCHIVE_COOKIE != ''
         run: |
-          python apps/yui-gallery/cloud/ingest_verified_zips.py \
-            yui-jliji-full-private/yuis-present33.zip \
-            yui-jliji-full-private/athletic-club104.zip \
-            yui-jliji-full-private/wet-yui80.zip \
-            yui-jliji-full-private/teddy-bear97.zip \
-            yui-verified-private-albums/green91_public_web_album.zip \
+          python apps/yui-gallery/cloud/ingest_verified_directories.py \
+            yui-jliji-full-private/yuis-present33 \
+            yui-jliji-full-private/athletic-club104 \
+            yui-jliji-full-private/wet-yui80 \
+            yui-jliji-full-private/teddy-bear97 \
+            yui-verified-private-albums/green91 \
             --out cloud-stage --quality web
           python - <<'PY'
           import json,pathlib,hashlib
