@@ -1,0 +1,60 @@
+name: Yui Cloud 405 File Staging Check
+on:
+  push:
+    paths:
+      - apps/yui-gallery/cloud/ingest_verified_zips.py
+      - .github/workflows/yui-cloud-real-albums-dryrun.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  prepare:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install browser and source image validators
+        run: |
+          pip install Pillow requests playwright
+          python -m playwright install --with-deps chromium
+      - name: Acquire four real source-page sets and the Green web set
+        run: |
+          python apps/yui-gallery/download_jliji_collections.py
+          python apps/yui-gallery/download_verified_public_album.py
+      - name: Stage 405 physical verified files for private cloud upload
+        run: |
+          python apps/yui-gallery/cloud/ingest_verified_zips.py \
+            yui-jliji-full-private/yuis-present33.zip \
+            yui-jliji-full-private/athletic-club104.zip \
+            yui-jliji-full-private/wet-yui80.zip \
+            yui-jliji-full-private/teddy-bear97.zip \
+            yui-verified-private-albums/green91_public_web_album.zip \
+            --out cloud-stage
+      - name: Verify every byte and declared count
+        run: |
+          python - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          root=Path('cloud-stage')
+          c=json.loads((root/'metadata/catalog.json').read_text())
+          expected={'athletic-club104':104,'wet-yui80':80,'teddy-bear97':97,'yuis-present33':33,'green91':91}
+          assert set(a['id'] for a in c['albums'])==set(expected)
+          for a in c['albums']:
+            assert a['expected']==a['stored']==expected[a['id']]
+            assert a['complete_sequence']
+            for p in a['images']:
+              src=root/p['key']
+              thumb=root/p['preview']
+              assert src.is_file() and thumb.is_file()
+              assert hashlib.sha256(src.read_bytes()).hexdigest()==p['sha256']
+          print('VERIFIED_CLOUD_STAGING_405',sum(a['stored'] for a in c['albums']))
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Yui-405-cloud-ready-catalog-only
+          path: cloud-stage/metadata/catalog.json
+          if-no-files-found: warn
