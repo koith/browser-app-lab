@@ -78,9 +78,24 @@ jobs:
             if(errors.length)throw Error('Browser errors: '+errors.join('; '));
             console.log(JSON.stringify({passed:true,imgs,loaded,albums,newest,oldest,albumFirstDate,albumOldestDate,errors}));
             await page.screenshot({path:'gallery-mobile.png',fullPage:true});
+            const [zipDownload]=await Promise.all([page.waitForEvent('download',{timeout:120000}),page.locator('#downloadAll').click()]);
+            await zipDownload.saveAs('yui-public-photos.zip');
+            console.log('ZIP_FILE_SAVED',zipDownload.suggestedFilename());
             await browser.close();
           })().catch(e=>{console.error(e);process.exit(1)});
           NODE
+      - name: Verify actual image ZIP
+        run: |
+          python3 - <<'PY'
+          import zipfile
+          path='yui-public-photos.zip'
+          with zipfile.ZipFile(path) as z:
+              images=z.namelist()
+              assert len(images)>=20,(len(images),images)
+              assert all(z.getinfo(n).file_size>10000 for n in images)
+              assert z.testzip() is None
+              print('VERIFIED_ZIP',len(images),'photos')
+          PY
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -88,4 +103,5 @@ jobs:
           path: |
             gallery-mobile.png
             gallery-mobile-photos.png
+            yui-public-photos.zip
           if-no-files-found: ignore
