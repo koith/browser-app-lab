@@ -1,5 +1,5 @@
 {
-  "version": "v0.1.0-beta.3",
+  "version": "v0.1.0-beta.4",
   "date": "2026-10-27",
   "policy": {
     "monthly_charge_krw": 0,
@@ -57,6 +57,7 @@
     "live_gallery_images": 26,
     "free_tools": "Python + Playwright + Pillow + rclone",
     "source_viewer": "source-hosted image manifest, not a cloud storage claim",
-    "open_source_crawler": "gallery-dl + browser source-specific collectors"
+    "open_source_crawler": "gallery-dl + browser source-specific collectors",
+    "expansion": "public article crawler plus independently verified incremental gallery albums"
   }
 }
