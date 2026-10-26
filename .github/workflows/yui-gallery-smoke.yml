@@ -45,12 +45,19 @@ jobs:
             await page.waitForFunction(()=>document.querySelector('#total')?.textContent?.includes('공개 SNS 사진'),{timeout:20000});
             const imgs=await page.locator('#media img').count();
             if(imgs<10)throw Error('Insufficient image cards: '+imgs);
+            await page.waitForTimeout(2400);
+            const loaded=await page.locator('#media img').evaluateAll(a=>a.filter(img=>img.complete&&img.naturalWidth>0).length);
+            if(loaded<2)throw Error('Image elements exist but image bytes did not load; loaded='+loaded);
+            await page.locator('#media img').first().click();
+            if(!(await page.locator('#lightbox').evaluate(e=>e.classList.contains('show'))))throw Error('Full-size image overlay did not open');
+            await page.locator('#close').click();
+            await page.screenshot({path:'gallery-mobile-photos.png',fullPage:true});
             await page.locator('[data-view="albums"]').click();
             await page.waitForTimeout(500);
             const albums=await page.locator('.album').count();
             if(albums<40)throw Error('Insufficient albums: '+albums);
             if(errors.length)throw Error('Browser errors: '+errors.join('; '));
-            console.log(JSON.stringify({passed:true,imgs,albums,errors}));
+            console.log(JSON.stringify({passed:true,imgs,loaded,albums,errors}));
             await page.screenshot({path:'gallery-mobile.png',fullPage:true});
             await browser.close();
           })().catch(e=>{console.error(e);process.exit(1)});
@@ -59,5 +66,5 @@ jobs:
         if: always()
         with:
           name: gallery-mobile-smoke
-          path: gallery-mobile.png
+          path: |\n            gallery-mobile.png\n            gallery-mobile-photos.png
           if-no-files-found: ignore
