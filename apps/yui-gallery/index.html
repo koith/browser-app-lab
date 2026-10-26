@@ -63,7 +63,7 @@ button:focus-visible,a:focus-visible{outline:2px solid #ddd4c7;outline-offset:3p
 <header class="topbar">
  <a href="./" class="logo" aria-label="YUI 갤러리 홈">YUI<span>GALLERY</span></a>
  <nav class="mainnav" aria-label="이동"><a href="cloud.html">클라우드</a></nav>
- <input id="search" class="topsearch" type="search" placeholder="화보 검색" aria-label="화보 검색">\n <small id="app-version" class="version-chip">v0.1.0-beta.3</small>
+ <input id="search" class="topsearch" type="search" placeholder="화보 검색" aria-label="화보 검색">\n <small id="app-version" class="version-chip">v0.1.0-beta.4</small>
 </header>
 <div id="browse">
  <div class="titleline"><div><div class="eyebrow">COLLECTION</div><h1>Yui Gallery</h1><p class="inventory" id="inventory">수집 화보를 불러오는 중</p></div><span class="counter" id="total"></span></div>
@@ -90,7 +90,7 @@ let catalog=[],stored=[],localStored=[],remoteStored=[],mode='albums',activeAlbu
 const titleMap={'cn-huantuji':'幻图集 · Yui','cn-chaotuji':'潮图集 · Yui','cn-miaohuaying':'喵画影 · Yui','cn-yuntu8':'云图吧 · Yui','cn-wantuzhi-everyday':'Everyday Life','cn-yingyuge':'影语阁 · Yui','v04':'SWEETBOX · Teddy Bear'};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function getName(a){return a.title||catalog.find(x=>x.id===a.id)?.title||titleMap[a.id]||a.id}
-function validImages(a){return (a.images||[]).filter(x=>{if(typeof x.url!=='string')return false;if(x.url.startsWith('stored-albums/'))return true;if(!a.sourceHosted)return false;try{const u=new URL(x.url);return u.protocol==='https:'&&(u.hostname==='cdn.jliji.com'||/^imgx\d{3}\.pixibb\.com$/.test(u.hostname));}catch{return false}})}
+function validImages(a){return (a.images||[]).filter(x=>{if(typeof x.url!=='string')return false;if(x.url.startsWith('stored-albums/'))return true;if(!a.sourceHosted)return false;try{const u=new URL(x.url),h=u.hostname.toLowerCase();return u.protocol==='https:'&&!!h&&!h.endsWith('.local')&&!h.endsWith('.internal')&&h!=='localhost'&&!/^(127\.|10\.|192\.168\.|169\.254\.|0\.)/.test(h);}catch{return false}})}
 function available(){return stored.filter(x=>validImages(x).length).sort((a,b)=>validImages(b).length-validImages(a).length)}
 function setMode(m){mode=m;activeAlbum=null;$('detail').hidden=true;$('browse').hidden=false;document.querySelectorAll('[data-filter]').forEach(b=>b.classList.toggle('active',b.dataset.filter===m));render()}
 function photosFor(a){return validImages(a).map((p,i)=>({...p,name:getName(a),albumId:a.id,number:i+1}))}
@@ -150,10 +150,10 @@ let startX=0;$('lightbox').addEventListener('touchstart',e=>{startX=e.changedTou
 Promise.all([
  fetch('stored-albums.json').then(r=>{if(!r.ok)throw Error('stored data');return r.json()}),
  fetch('albums.json').then(r=>{if(!r.ok)throw Error('catalog');return r.json()}),
- fetch('source-viewer-albums.json',{cache:'no-store'}).then(r=>r.ok?r.json():{albums:[]}).catch(()=>({albums:[]}))
-]).then(([s,c,remote])=>{
+ fetch('source-viewer-albums.json',{cache:'no-store'}).then(r=>r.ok?r.json():{albums:[]}).catch(()=>({albums:[]})),\n fetch('expanded-source-albums.json',{cache:'no-store'}).then(r=>r.ok?r.json():{albums:[]}).catch(()=>({albums:[]}))
+]).then(([s,c,remote,expanded])=>{
  localStored=s.albums||[];catalog=c.albums||[];
- remoteStored=(remote.albums||[]).filter(a=>a.status==='verified_collected_individual_files_source_hosted_online_view').map(a=>({...a,sourceHosted:true}));
+ remoteStored=[...(remote.albums||[]),...(expanded.albums||[])].filter(a=>a.status==='verified_collected_individual_files_source_hosted_online_view').map(a=>({...a,sourceHosted:true}));
  stored=[...remoteStored,...localStored];
  const localCount=localStored.reduce((n,a)=>n+validImages(a).length,0);
  const remoteCount=remoteStored.reduce((n,a)=>n+validImages(a).length,0);
