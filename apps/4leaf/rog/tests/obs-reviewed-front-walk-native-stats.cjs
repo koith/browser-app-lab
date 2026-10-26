@@ -27,7 +27,9 @@ const {chromium,webkit}=require('playwright');
   await page.locator('#start-game').click();
   await page.waitForSelector('#game:not(.hidden)');
   const report=[];
-  for(const id of ['0044','0046','0048']){
+  for(const id of ['0040','0042','0043','0044','0046','0048','0049',
+   '0051','0052','0053','0054','0055','0056','0058','0059',
+   '0060','0061','0062','0064']){
    const evidence=await page.evaluate(id=>{
     const m=window.__ROG_TEST__.getMatch();
     m.players[0].team=['c_'+id,'c_0042'];
@@ -51,10 +53,12 @@ const {chromium,webkit}=require('playwright');
    assert.equal(evidence.frontWalk,'true','only inspected source front pair is allowed');
    assert.equal(evidence.sequence,'25,30,25,30','moving character must NEVER spin through source back 0..7');
    assert.equal(evidence.pose,'walk');
-   assert.ok(evidence.src?.includes('/original/OBS/bulk/10'+id.slice(2)+'-25.png'),JSON.stringify(evidence));
+   assert.ok(evidence.src?.includes('/original/OBS/')&&
+    evidence.src.endsWith('/10'+id.slice(2)+'-25.png'),JSON.stringify(evidence));
    assert.ok(evidence.actionEvidence?.includes('WEB-movement-and-FPS-inferred'),
     'original native frame labels/FPS are NOT proven');
    report.push(evidence);
+   if(['0044','0046','0048'].includes(id)){
    const slot=page.locator('#dice-native-party button.dice-chessman-slot.occupied').first();
    await slot.click();
    await page.waitForSelector('#modal:not(.hidden) .dice-native-chessman-detail');
@@ -77,7 +81,9 @@ const {chromium,webkit}=require('playwright');
    assert.ok(stats.portrait?.includes('/original/CardData/'));
    for(const key of ['role','move','attack','defense','intellect','ability','point'])
     assert.ok(stats.fields[key]?.length,JSON.stringify(stats));
+   if(id==='0044')await page.screenshot({path:'leaf-original-164x125-stats-'+engine.name()+(mobile?'-mobile':'')+'.png'});
    await page.locator('#modal-buttons button').first().click();
+   }
   }
   // Re-enter actual battle pipeline, with players' real CardData-equipped
   // game state, distinct original OBS fighters, native winBattle.spr podium,
@@ -123,7 +129,7 @@ const {chromium,webkit}=require('playwright');
   await ok.click();
   await page.waitForFunction(()=>!document.querySelector('#battle-visual'),null,{timeout:7000});
   assert.deepEqual(errors,[],'source art cannot break real DMP battle/UI');
-  console.log('ORIGINAL OBS 3 EXTRA FRONT WALKS + ORIGINAL STATS UI PASS',
+  console.log('ORIGINAL OBS 19 VERIFIED FRONT WALKS + ORIGINAL STATS UI PASS',
    JSON.stringify({engine:engine.name(),mobile,report,stage}));
  }finally{await browser.close();}
 })().catch(e=>{console.error('OBS FRONT + ORIGINAL STATS FAILED',e.stack||e);process.exit(1);});
