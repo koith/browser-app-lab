@@ -6,30 +6,29 @@ import json
 import os
 import shutil
 import tempfile
-import zipfile
 from pathlib import Path
 
 from PIL import Image
-from ingest_verified_zips import build
+from ingest_verified_directories import build
 from verify_remote import verify_catalog, verify_media
 
 with tempfile.TemporaryDirectory() as temp:
     root=Path(temp)
-    archive=root/'test.zip'
+    folder=root/'individual-images'
+    folder.mkdir()
     entries=[]
-    with zipfile.ZipFile(archive,'w') as z:
-        for n in (1,2):
-            im=Image.new('RGB',(901+n,1301+n),(n*30,n*60,n*80))
-            fp=io.BytesIO()
-            im.save(fp,format='PNG')
-            blob=fp.getvalue()
-            filename=f'{n:03}.png'
-            z.writestr('images/'+filename,blob)
-            entries.append({'number':n,'file':filename,'sha256':hashlib.sha256(blob).hexdigest()})
-        z.writestr('manifest.json',json.dumps(
-            {'id':'sample-album','title':'Sample','advertised_count':2,'images':entries}))
+    for n in (1,2):
+        im=Image.new('RGB',(901+n,1301+n),(n*30,n*60,n*80))
+        filename=f'{n:03}.png'
+        path=folder/filename
+        im.save(path,format='PNG')
+        blob=path.read_bytes()
+        entries.append({'number':n,'file':filename,'sha256':hashlib.sha256(blob).hexdigest()})
+    (folder/'manifest.json').write_text(json.dumps({
+        'id':'sample-album','title':'Sample','advertised_count':2,'images':entries
+    }))
     stage=root/'stage'
-    catalog=build([archive],stage)
+    catalog=build([folder],stage)
     mirror=root/'mirror'
     shutil.copytree(stage,mirror)
     fakebin=root/'bin'
