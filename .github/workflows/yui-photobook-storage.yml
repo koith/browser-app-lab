@@ -1,0 +1,59 @@
+name: Yui Photobook Stored Media
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - apps/yui-gallery/publish_album_files.py
+      - .github/workflows/yui-photobook-storage.yml
+permissions:
+  contents: write
+concurrency:
+  group: yui-photobook-store
+  cancel-in-progress: false
+jobs:
+  store:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install browser and image validation
+        run: |
+          pip install requests Pillow playwright
+          python -m playwright install --with-deps chromium
+      - name: Acquire public photobook image files by actual album pages
+        env:
+          MAX_ALBUMS: '20'
+          MAX_IMAGE_PER_ALBUM: '40'
+          MAX_TOTAL_MB: '150'
+        run: python apps/yui-gallery/publish_album_files.py
+      - name: Check real files and publish album index
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import json,hashlib
+          base=Path('apps/yui-gallery')
+          data=json.loads((base/'stored-albums.json').read_text())
+          count=0
+          for album in data['albums']:
+            for photo in album['images']:
+              f=base/photo['url']
+              assert f.is_file(),f
+              assert hashlib.sha256(f.read_bytes()).hexdigest()==photo['sha256']
+              count+=1
+          assert count>0,'No verified stored photos'
+          print('VERIFIED_STORED_ALBUMS',len(data['albums']),'PHOTOS',count)
+          PY
+      - name: Commit real media and manifests to GitHub Pages source
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/yui-gallery/stored-albums apps/yui-gallery/stored-albums.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Archive and publish verified public photobook image files"
+            git push
+          fi
