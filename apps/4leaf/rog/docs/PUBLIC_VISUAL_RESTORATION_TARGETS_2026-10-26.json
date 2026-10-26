@@ -1,0 +1,192 @@
+{
+  "schemaVersion": 1,
+  "createdDate": "2026-10-26",
+  "target": "source-evidenced-original-vs-actual-published-revival",
+  "publishedApp": "https://koith.github.io/browser-app-lab/apps/4leaf/rog/",
+  "publishedBaselineCommit": "bfd8dd145e460b723d1bd563c04382f14dd39bc2",
+  "publishedBaselineVersion": "0.86.0-beta.23",
+  "publishedBaselineScreenshotsArtifact": "GitHub Actions 4LEAF ROG published ChatRoom browser QA, workflow run 40287178548, successful, sha bfd8dd145e460b723d1bd563c04382f14dd39bc2; screenshot proof ZIP 4leaf-published-chat-proof.zip. Original FRONT motion screenshot from workflow 40287178545.",
+  "acceptancePrinciple": "The published webapp is a reproducible running BEFORE/AFTER baseline, NOT an original-client accuracy authority. Independently preserved 2002-2004 screenshots/PNG and original PAK+SPR+OBS+DMP+TIS provenance are the historic reconstruction targets. A current screenshot cannot prove original fidelity. Preserve source modes and exact viewport/action state.",
+  "historicalEraScope": "4LEAF desktop Browser 0.9, circa March 2002 to February 2004; 0.8 screenshots are earlier evolution. WEB 4LEAF from December 2003 onward and 2018 mobile reboot are NOT direct references for native 2002 Dice/OBS acting and stage.",
+  "originalScreenshots": [
+    {
+      "id": "R-DICE-BOARD-2004",
+      "path": "../../assets/board.jpg",
+      "width": 800,
+      "height": 600,
+      "scene": "DICE battle; multiple original OBS chessmen on 3D podiums, independent physical dice, HUD map/rail/chat",
+      "quality": "original screenshot as provided; game-state differs from demo initial turn",
+      "expected": "800x600; top IMG/menu band x96..704; bottom source minimap x0..172, chat x172..578, tools x578..607, portraits x607..800; original TIS/DMP actor layering and full-size battle 2.5D",
+      "currentCode": "game.js;dice-2004-full-frame.css;dice-native-client-frame.css;dice-native-battle-source-spr.css;genesis-chessman-actors.js",
+      "status": "in_progress",
+      "remaining": [
+        "original D4/D6 3D mesh",
+        "3D battle perspective",
+        "original OBS direction/FPS"
+      ]
+    },
+    {
+      "id": "R-DICE-BATTLE-2004",
+      "path": "../../assets/battle.jpg",
+      "width": 800,
+      "height": 600,
+      "scene": "DICE score, dice/actor battle stage",
+      "expected": "original 800x600 opponent left/right rail+source chat and raised duel stages",
+      "status": "in_progress",
+      "remaining": [
+        "real source 3D dice and effect mapping"
+      ]
+    },
+    {
+      "id": "R-CHAT-ROOM-2004",
+      "path": "../../assets/chat.jpg",
+      "width": 794,
+      "height": 528,
+      "scene": "original ChatRoom with source stage and active participants",
+      "expected": "native speech panes, black log upper-left, original participant list upper-right, avatar instant seat click, furniture front/back occlusion",
+      "currentCode": "social-chat.js;chatroom-native-panels.css;chatroom-native-scrollbar.js",
+      "status": "in_progress"
+    },
+    {
+      "id": "R-WORLD",
+      "path": "../../assets/sky.jpg",
+      "scene": "WorldMap",
+      "expected": "source WorldMap backgrounds and working regions",
+      "status": "in_progress"
+    },
+    {
+      "id": "R-CARD-SHOP",
+      "path": "../../assets/shop_ref.png",
+      "scene": "Magic Carden shop",
+      "expected": "source CardData, independent inventory and buying controls",
+      "status": "in_progress"
+    },
+    {
+      "id": "R-TOWN",
+      "path": "../../assets/town_ref.jpg",
+      "scene": "ChatTown and district",
+      "expected": "original room directory and distinct North/South selection",
+      "status": "in_progress"
+    }
+  ],
+  "externalHistoricalReferences": [
+    {
+      "url": "https://4leafmemorial.geld.kr/1477",
+      "kind": "historical-archive-index",
+      "notes": "Memorial website catalogues screen captures by prototype, 0.8, 0.9, Dice and WEB 4LEAF; archived content supplied by former users, not a runnable client."
+    },
+    {
+      "url": "https://4leafmemorial.geld.kr/1527",
+      "kind": "historical-screen-capture-0.9",
+      "notes": "five documented original 0.9 Dice screenshots, including final-night user match, archived 2013; use original images as historical visual source."
+    },
+    {
+      "url": "https://4leafmemorial.geld.kr/1503",
+      "kind": "historical-screen-capture-0.8",
+      "notes": "0.8 era dice/chessman/waiting-room screenshots; do not silently treat older UI as 0.9."
+    },
+    {
+      "url": "https://4leafmemorial.geld.kr/1562",
+      "kind": "historical-screen-capture-battle",
+      "notes": "archive contains multiple original full-game battle screenshots and four-chessman scenes"
+    },
+    {
+      "url": "https://4leafmemorial.geld.kr/1577",
+      "kind": "historical-battle-rule",
+      "notes": "source-backed Iron Mask Destroy 24 vs Damien Block 24 collision and original screenshot references"
+    },
+    {
+      "url": "https://www.ggemguide.com/community/recommend/9479/",
+      "kind": "historic-firsthand-play-report",
+      "notes": "2007 first-person recollection includes 2001 original play screenshot and period card/movement rules; anecdotal mechanics must be cross-checked."
+    },
+    {
+      "url": "https://m.ruliweb.com/game/3100/read/3589186",
+      "kind": "historic-battle-screenshot",
+      "notes": "archived screenshot of native red BATTLE/VS, multipip dice and original HUD"
+    },
+    {
+      "url": "https://www.inven.co.kr/webzine/news/?news=21016",
+      "kind": "release-era-chronology",
+      "notes": "2009 news article distinguishes original Dice from later browser-to-web conversion; 2009 web service is not original native game"
+    }
+  ],
+  "publishedSnapshotStates": [
+    {
+      "id": "WEB-PORTRAIT-BOARD",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "route": "lobby→create→hotseat (2 players)→4LEAF→start game",
+      "capture": "leaf-public-target-mobile-webkit.png",
+      "beforeArtifact": "leaf-obs-2002-front-motion-live-mobile-webkit.png",
+      "check": [
+        "IMG/bgtile.png shown once vertically instead of repeating every 485 CSS pixels",
+        "native minimap anchored bottom left of live board, not top-left",
+        "still 104 playable DMP cells, actual OBS and genuine dice movement"
+      ],
+      "sourceAuth": "source PNG dimensions verified 725x485 and screenshot board.jpg lower-left mini. Exact mobile historical layout UNVERIFIED; mobile cropping is web adaptation."
+    },
+    {
+      "id": "WEB-DESKTOP-BOARD",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "route": "lobby→create→hotseat (2 players)→4LEAF→start game",
+      "capture": "leaf-public-target-desktop-chromium.png",
+      "comparison": "leaf-original-2004-vs-public-live-800x600.png",
+      "check": [
+        "app actual 800x600",
+        "bottom mini 172x152 on same row as original 406x152 chat",
+        "historical reference game-state differs (BATTLE vs initial turn), no blind pixel threshold"
+      ]
+    },
+    {
+      "id": "WEB-REGION",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "route": "WorldMap→Genesis Dice→TOWN SELECT",
+      "capture": "leaf-2002-region-native-number-mobile-webkit.png",
+      "check": [
+        "Region/regionback.png and Region/1234.png actual interactive native digits",
+        "no mistaken North/South ChatTown namespace"
+      ]
+    },
+    {
+      "id": "WEB-CHAT",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "route": "WorldMap→Haiacan→Room→join",
+      "capture": "leaf-original-chat-room.png",
+      "check": [
+        "original ChatRoom native furniture+scrollbar; actual central multi-browser chat+seat sync"
+      ],
+      "notes": "reference screenshot is 794x528 while web canvas may be framed/translated"
+    },
+    {
+      "id": "WEB-SHOP",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "route": "WorldMap→Keltica→Magic Carden",
+      "capture": "leaf-original-cardshop-native.png",
+      "check": [
+        "CardData and CardShop sprite controls are interactive, not screenshot wallpaper"
+      ]
+    }
+  ],
+  "nextPriorities": [
+    "P0 source-pixel-match original battle screenshot vs exact same game state (do NOT compare battle to static start)",
+    "P0 verify all genuine OBS actor forward/back/action native tables; source pixel existence alone not direction proof",
+    "P0 source D4/D6 real 3D mesh, texture, drop/bounce recovery from Dice.dll/EXE/PAK (currently unavailable)",
+    "P1 full original ChatRoom 794x528 scene paired with public DOM capture and real two-user state",
+    "P1 mobile UX: live portrait screenshot must avoid backdrop tiling and top-left mini overlay without inventing historical native mobile UI"
+  ]
+}
