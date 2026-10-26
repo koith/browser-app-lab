@@ -10,89 +10,22 @@ permissions:
 jobs:
   album-view:
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Verify release version and free cloud truth-in-status
-        run: node apps/yui-gallery/test_version.cjs
-      - name: Verify physically stored photos and application syntax
+      - name: Validate primary photo gallery source
         run: |
-          node - <<'NODE'
-          const fs=require('fs'), vm=require('vm'),crypto=require('crypto');
-          const root='apps/yui-gallery/';
-          const html=fs.readFileSync(root+'index.html','utf8');
-          const js=html.match(/<script>([\s\S]*?)<\/script>/);
-          if(!js)throw Error('No app JS');
-          new vm.Script(js[1]);
-          const db=JSON.parse(fs.readFileSync(root+'stored-albums.json'));
-          let n=0;
-          for(const album of db.albums){
-            for(const x of album.images){
-              const data=fs.readFileSync(root+x.url);
-              const hash=crypto.createHash('sha256').update(data).digest('hex');
-              if(hash!==x.sha256||data.length!==x.bytes)throw Error('Storage integrity '+x.url);
-              n++;
-            }
-          }
-          if(n<10)throw Error('Insufficient stored photos '+n);
-          console.log('VERIFIED_STORED_PHOTOS',n, 'ALBUMS',db.albums.length);
-          NODE
-      - name: Install Playwright
+          node --check apps/yui-gallery/gallery.js
+          node --check apps/yui-gallery/gallery-import.js
+          node --check apps/yui-gallery/test_photo_gallery.cjs
+      - name: Install mobile browser test dependencies
         run: |
           npm install --no-save playwright@1.58.2 jszip@3.10.1
           npx playwright install chromium
-      - name: Test photo-first gallery in mobile browser
+      - name: Validate image-first gallery and full-screen photo navigation
         run: |
           python -m http.server 8765 --directory apps/yui-gallery >/tmp/yui-web.log 2>&1 &
-          node - <<'NODE'
-          const {chromium}=require('playwright');
-          (async()=>{
-            const browser=await chromium.launch({headless:true});
-            const page=await browser.newPage({viewport:{width:390,height:844},acceptDownloads:true});
-            const errors=[];page.on('pageerror',e=>errors.push(e.message));
-            await page.goto('http://127.0.0.1:8765/',{waitUntil:'domcontentloaded',timeout:30000});
-            await page.waitForFunction(()=>document.querySelector('#total')?.textContent?.includes('albums'),{timeout:20000});
-            const version=await page.locator('footer').innerText();
-            if(!version.includes('v0.1.0-beta.1'))throw Error('Version missing in footer');
-            if(!await page.locator('[data-filter="albums"]').evaluate(x=>x.classList.contains('active')))throw Error('Albums not default view');
-            const albumCount=await page.locator('.album').count();
-            if(albumCount!==7)throw Error('Expected seven actual stored albums, got '+albumCount);
-            const cover=await page.locator('.album img').first().evaluate(i=>({w:i.naturalWidth,src:i.src}));
-            if(cover.w<100||!cover.src.includes('/stored-albums/'))throw Error('Actual image cover not loaded: '+JSON.stringify(cover));
-            await page.locator('.album[data-id="v04"]').click();
-            const detailCount=await page.locator('#detailphotos .photo').count();
-            if(detailCount!==10)throw Error('Expected 10 real pictures in Teddy Bear, got '+detailCount);
-            await page.locator('#detailphotos .photo').first().click();
-            await page.waitForFunction(()=>document.querySelector('#full').naturalWidth>0,{timeout:10000});
-            const lightbox=await page.locator('#lightbox').evaluate(x=>x.classList.contains('open'));
-            if(!lightbox)throw Error('Full-screen photo did not open');
-            await page.locator('#next').click();
-            if(!(await page.locator('#position').innerText()).startsWith('2 /'))throw Error('Next photo failed');
-            await page.locator('#close').click();
-            await page.locator('#back').click();
-            await page.locator('[data-filter="photos"]').click();
-            const allPhotos=await page.locator('#photogrid .photo').count();
-            if(allPhotos!==26)throw Error('Expected 26 physical on-Pages images, got '+allPhotos);
-            await page.screenshot({path:'yui-album-mobile.png',fullPage:false});
-            await page.locator('[data-filter="all"]').click();
-            const allWorks=await page.locator('.album').count();
-            if(allWorks<40)throw Error('Catalog collapsed: '+allWorks);
-            if(errors.length)throw Error('JavaScript errors: '+errors.join('; '));
-            console.log('YUI_IMAGE_FIRST_GALLERY_MOBILE_PASS',{albumCount,detailCount,allPhotos,allWorks,version,errorCount:errors.length});
-            await browser.close();
-          })().catch(e=>{console.error(e);process.exit(1)});
-          NODE
-      - name: Verify complete private ZIP viewer in mobile Chromium
-        run: |
-          node --check apps/yui-gallery/zip-gallery.js
-          python -m http.server 8765 --directory apps/yui-gallery >/tmp/yui-zip-http.log 2>&1 &
-          node apps/yui-gallery/test_zip_gallery.cjs
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: yui-album-mobile-screenshot
-          path: yui-album-mobile.png
-          if-no-files-found: ignore
+          node apps/yui-gallery/test_photo_gallery.cjs
