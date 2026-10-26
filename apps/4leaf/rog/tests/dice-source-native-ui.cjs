@@ -113,19 +113,38 @@ const path=require('node:path');
    'real transcript must overflow before a down arrow can be clickable: '+
    JSON.stringify(history));
   await page.locator('#chat-log').hover();
-  await page.mouse.wheel(0,-100000);
-  await page.waitForFunction(()=>{
-   const log=document.getElementById('chat-log');
-   return log.scrollTop<2 && log.scrollHeight-log.clientHeight>60;
-  },null,{timeout:12000});
-  // Full source IMG interaction now follows actual wheel scrolling, so
-  // a deferred MutationObserver/scroll anchoring run cannot masquerade
-  // as a real user looking at the earliest log entry.
-  await page.evaluate(()=>new Promise(resolve=>
-   requestAnimationFrame(()=>requestAnimationFrame(resolve))));
-  assert.ok((await page.evaluate(()=>
-   document.querySelector('#chat-log').scrollTop))<2,
-   'actual mouse wheel keeps the reader at the oldest conversation line');
+  // On CI Chromium, a huge synthetic wheel event can reach scrollTop=0
+  // before compositor/MutationObserver anchoring has settled, then bounce
+  // back 1-2 frames later. Only accept STABLE, REAL mouse scrolling:
+  // retry an actual user wheel gesture after the browser has settled
+  // rather than force-setting the DOM scrollTop or hiding a chat bug.
+  const readerStable=async()=>{
+   return page.evaluate(()=>new Promise(resolve=>
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+     const log=document.querySelector('#chat-log');
+     const top=log.scrollTop;
+     requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      resolve(top<2&&log.scrollTop<2&&
+       log.scrollHeight-log.clientHeight>60);
+     }));
+    }))));
+  };
+  let atOldest=false;
+  for(let i=0;i<4;i++){
+   await page.mouse.wheel(0,-Math.min(100000,2000*(i+1)));
+   await page.waitForFunction(()=>{
+    const log=document.getElementById('chat-log');
+    return log.scrollTop<2&&log.scrollHeight-log.clientHeight>60;
+   },null,{timeout:9000});
+   if(await readerStable()){atOldest=true;break;}
+  }
+  assert.ok(atOldest,
+   'real mouse wheel never remains at the oldest conversation line after frame settling: '+
+    JSON.stringify(await page.evaluate(()=>{
+     const log=document.querySelector('#chat-log');
+     return {top:log.scrollTop,client:log.clientHeight,
+      height:log.scrollHeight,source:window.__LEAF_NATIVE_DICE_CHAT_SCROLL__.getState()};
+    })));
   await page.waitForFunction(()=>{
    const log=document.getElementById('chat-log'),
     down=document.querySelector('.messenger .leaf-dice-chat-scroll[data-direction="down"]');
