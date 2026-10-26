@@ -48,6 +48,46 @@
   const viewport=document.createElement('div');viewport.id='dice-channel-viewport';viewport.className='dice-channel-viewport';
   const stage=document.createElement('div');stage.id='dice-channel-stage';stage.className='dice-channel-stage';
   stage.dataset.source='Region/regionback.png';
+  // 2002 Region/1234.png is the native four-number, four-state atlas
+  // (164x112 = four 41x28 states per number); Region/regionback.png
+  // already paints resting digits. Use REAL source pixels for selected,
+  // hover, pressed and keyboard focus, not an invented blue CSS button.
+  const atlas=new Image(),numberControls=[];
+  let atlasReady=false,sourceCanvas=null;
+  function renderNativeNumbers(){
+   for(const {button,canvas,number} of numberControls){
+    const ctx=canvas.getContext('2d');ctx.clearRect(0,0,34,36);
+    const active=button.dataset.selected==='true';
+    const state=button.dataset.pressed==='true'?2:
+      active?3:(button.matches(':hover')||button.matches(':focus-visible'))?1:0;
+    if(!atlasReady||state===0)continue; // underlying ORIGINAL source art
+    ctx.drawImage(sourceCanvas,state*41,(number-1)*28,41,28,0,4,34,28);
+    canvas.dataset.originalFrame=String((number-1)*4+state);
+   }
+  }
+  atlas.onload=()=>{
+   if(atlas.naturalWidth!==164||atlas.naturalHeight!==112){
+    stage.dataset.nativeChannelAtlas='invalid-source-size';return;
+   }
+   sourceCanvas=document.createElement('canvas');
+   sourceCanvas.width=164;sourceCanvas.height=112;
+   const ctx=sourceCanvas.getContext('2d',{willReadFrequently:true});
+   ctx.drawImage(atlas,0,0);
+   const rgba=ctx.getImageData(0,0,164,112),bytes=rgba.data;
+   const key=[bytes[0],bytes[1],bytes[2]];
+   // The sprite sheet's solid lavender backdrop was transparent in the
+   // original paletted renderer. Remove ONLY pixels very close to that
+   // encoded source swatch; never redraw or synthesize the numeral.
+   for(let i=0;i<bytes.length;i+=4){
+    if(Math.max(Math.abs(bytes[i]-key[0]),Math.abs(bytes[i+1]-key[1]),
+       Math.abs(bytes[i+2]-key[2]))<=12)bytes[i+3]=0;
+   }
+   ctx.putImageData(rgba,0,0);
+   atlasReady=true;stage.dataset.nativeChannelAtlas='ready';
+   renderNativeNumbers();
+  };
+  atlas.onerror=()=>{stage.dataset.nativeChannelAtlas='source-unavailable'};
+  stage.dataset.nativeChannelAtlas='loading';
   for(const row of DICE_CHANNEL_ROWS){
    for(let number=1;number<=4;number++){
     const button=document.createElement('button');button.type='button';
@@ -56,11 +96,43 @@
     button.style.cssText='left:'+(row.x+(number-1)*39)+'px;top:'+row.y+'px;width:34px;height:36px;';
     button.setAttribute('aria-label','주사위의 잔영 · '+row.name+' '+number+'번 채널');
     button.title=row.name+' '+number+'채널로 입장';
+    button.dataset.selected=String(selection.channel?.slug===row.slug&&
+      selection.channel?.number===number);
+    const canvas=document.createElement('canvas');
+    canvas.className='dice-source-channel-number';
+    canvas.width=34;canvas.height=36;
+    canvas.dataset.originalMember='Region/1234.png';
+    canvas.setAttribute('aria-hidden','true');
+    button.append(canvas);
+    numberControls.push({button,canvas,number});
+    button.addEventListener('pointerenter',renderNativeNumbers);
+    button.addEventListener('pointerleave',()=>{
+     button.dataset.pressed='false';renderNativeNumbers();
+    });
+    button.addEventListener('pointerdown',()=>{
+     button.dataset.pressed='true';renderNativeNumbers();
+    });
+    button.addEventListener('pointerup',()=>{
+     button.dataset.pressed='false';renderNativeNumbers();
+    });
+    button.addEventListener('focus',renderNativeNumbers);
+    button.addEventListener('blur',renderNativeNumbers);
     button.onclick=()=>chooseDiceChannel(row.slug,number);
     stage.append(button);
    }
   }
   viewport.append(stage);scene.append(banner,viewport);main.insertBefore(scene,target);
+  atlas.src='./original/Region/1234.png';
+  window.__LEAF_DICE_CHANNEL_SPR__={
+   repaint:()=>{numberControls.forEach(({button,number})=>{
+    button.dataset.selected=String(selection.channel?.slug===
+     button.dataset.channel.split(':')[0]&&selection.channel?.number===number);
+   });renderNativeNumbers();},
+   getState:()=>({source:'Region/1234.png',loaded:stage.dataset.nativeChannelAtlas,
+    buttons:numberControls.length,
+    selected:numberControls.filter(({button})=>button.dataset.selected==='true')
+     .map(({button})=>button.dataset.channel)})
+  };
   if('ResizeObserver' in window){channelResize=new ResizeObserver(scaleDiceChannels);channelResize.observe(viewport)}
   scaleDiceChannels();
  }
@@ -74,6 +146,7 @@
   const row=DICE_CHANNEL_ROWS.find(r=>r.slug===slug);
   if(!row||!Number.isInteger(number)||number<1||number>4)return false;
   selection.channel={slug:row.slug,name:row.name,number};
+  window.__LEAF_DICE_CHANNEL_SPR__?.repaint();
   try{sessionStorage.setItem('leaf_dice_channel_v1',JSON.stringify({slug:row.slug,number}))}catch{}
   window.__ROG_TEST__?.go('lobby');
   updateRooms();
