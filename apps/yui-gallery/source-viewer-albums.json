@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-10-26T18:19:39.851885+00:00",
+  "generated_at": "2026-10-26T23:06:16.125652+00:00",
   "kind": "external_origin_viewer_not_persistently_hosted",
   "not_private_cloud": true,
   "note": "405 collected and SHA256 validated individual web-resolution images. Viewer points at originating publicly accessible sites until private owner-authenticated storage is connected.",
