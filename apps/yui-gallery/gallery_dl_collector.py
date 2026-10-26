@@ -60,7 +60,7 @@ def crawl_one(target:dict, base:Path, *, executable="gallery-dl", max_images=40,
     db.parent.mkdir(parents=True,exist_ok=True)
     # Gallery-dl's --download-archive is a SQLite download HISTORY, not a ZIP.
     # The --directory option writes individual files; no postprocessing / reencoding.
-    cmd=[executable,"--no-input","--no-mtime","--no-postprocessors",
+    cmd=[executable,"--extractors","apps/yui-gallery/gallery_dl_extractors","--no-input","--no-mtime","--no-postprocessors",
          "--directory",str(folder),"--download-archive",str(db),
          "--filesize-min","5k","--filesize-max","50M",
          "--sleep-request","1.0","--sleep","0.5",
@@ -87,7 +87,7 @@ def crawl_one(target:dict, base:Path, *, executable="gallery-dl", max_images=40,
         raise AssertionError("Compression output forbidden")
     return record
 
-def run(targets:Path, base:Path, max_sources:int=6,max_images:int=40,executable="gallery-dl"):
+def run(targets:Path, base:Path, max_sources:int=4,max_images:int=40,executable="gallery-dl"):
     if shutil.which(executable) is None:
         raise FileNotFoundError("gallery-dl not installed; pip install gallery-dl")
     config=json.loads(targets.read_text(encoding="utf-8"))
@@ -106,9 +106,9 @@ def run(targets:Path, base:Path, max_sources:int=6,max_images:int=40,executable=
 
 if __name__=="__main__":
     parser=argparse.ArgumentParser()
-    parser.add_argument("--targets",type=Path,default=Path("apps/yui-gallery/source_targets.json"))
+    parser.add_argument("--targets",type=Path,default=Path("apps/yui-gallery/gallery_dl_targets.json"))
     parser.add_argument("--out",type=Path,default=Path("yui-open-source-crawler"))
-    parser.add_argument("--max-sources",type=int,default=6)
+    parser.add_argument("--max-sources",type=int,default=4)
     parser.add_argument("--max-images",type=int,default=40)
     args=parser.parse_args()
     if not 1<=args.max_sources<=500 or not 1<=args.max_images<=1000:
