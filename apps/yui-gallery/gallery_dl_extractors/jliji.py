@@ -56,7 +56,7 @@ class JlijiYuiSetExtractor(Extractor):
         if set(selected)!=set(range(1,expected+1)):
             raise ValueError(f"Incomplete publicly visible set {album_id}: {len(selected)}/{expected}")
         common={"album_id":album_id,"title":title,"set_id":self.set_id}
-        yield Message.Directory,common
+        yield Message.Directory,None,common
         for num,url in sorted(selected.items()):
             extension=url.rsplit(".",1)[-1].split("?",1)[0].lower()
             yield Message.Url,url,{**common,"num":num,"extension":extension,"source_page":origin}
