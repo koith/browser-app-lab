@@ -6305,6 +6305,28 @@
         "https://github.com/koith/browser-app-lab/blob/feat/4leaf-original-obs-right-party-20261026/apps/4leaf/rog/dice-native-chessmen-hud.css",
         "https://github.com/koith/browser-app-lab/blob/feat/4leaf-original-obs-right-party-20261026/apps/4leaf/rog/tests/dice-2004-battle-selector-source.cjs"
       ]
+    },
+    {
+      "seq": 262,
+      "date": "2026-10-26",
+      "type": "ACTUAL_2004_BATTLE_OBS_RIGHT_PANEL_PR203_PR204_MERGED_AND_CHAT_SCROLL_QA_FIX_PROPOSED",
+      "requestId": "REQ-20261026-003",
+      "taskIds": [
+        "P0-BOARD",
+        "P0-ACTOR",
+        "P0-RELEASE",
+        "P0-CHAT"
+      ],
+      "details": "PR #203 original source IMG/selector.png complete 222x152 playable right-side chessman panel and LIVE same BATTLE-state 800x600 screenshot comparison MERGED at f58d0b6b485065751b464e3a819080af9523ece8. PR #204 original true audited OBS front full-body party chessman sources replacing incomplete head-only preview in right party HUD MERGED at ca26640d4d2726d3d03916b8cb13323a780ef56c; actual same-merge Pages deploy workflow 40342698071 SUCCESS and source BATTLE Chromium/WebKit QA workflow 40342889357 SUCCESS. PUBLIC ChatRoom full workflow 40341201923 FAILED at scroll history line126 after giant Chromium wheel, NOT a reason to claim chat fully passed. Followup test PR #212 replaces unstable transient two-rAF assertion with stable real wheel scrolling/real retry gestures, no programmatic scrollTop or fake chat, and original source interactive scroll buttons still exercised; exact PR targeted Chromium workflow 40343207600 SUCCESS. Main beta26 PWA v113; native D4/D6 source 3D remains missing. PR #212 and post-merge Pages/public 4LEAF ChatRoom acceptance remain pending at event creation; task statuses unchanged.",
+      "evidence": [
+        "https://github.com/koith/browser-app-lab/pull/203",
+        "https://github.com/koith/browser-app-lab/pull/204",
+        "https://github.com/koith/browser-app-lab/actions/runs/40342698071",
+        "https://github.com/koith/browser-app-lab/actions/runs/40342889357",
+        "https://github.com/koith/browser-app-lab/actions/runs/40341201923",
+        "https://github.com/koith/browser-app-lab/pull/212",
+        "https://github.com/koith/browser-app-lab/actions/runs/40343207600"
+      ]
     }
   ]
 }
