@@ -23,8 +23,8 @@ from playwright.sync_api import sync_playwright
 HEART_STEAL="https://jjcos.com/post/Yui%20%EC%9C%A0%EC%9D%B4%2C%20%5BSWEETBOX%5D%20SWTB%20Vol.30%20Heart%20Steal%20Set.01/"
 MAX_BYTES=30_000_000
 ARTICLE_SITE="jjcos.com"
-IMAGE_NUM=re.compile(r"^Image\\s+(\\d{1,4})$",re.I)
-IMAGE_FILE=re.compile(r"\\.(?:jpe?g|webp|png|avif)(?:[?#]|$)",re.I)
+IMAGE_NUM=re.compile(r"^Image\s+(\d{1,4})$",re.I)
+IMAGE_FILE=re.compile(r"\.(?:jpe?g|webp|png|avif)(?:[?#]|$)",re.I)
 STRIP=re.compile(r"(?:[?&#]|$)")
 
 def safe_remote(url):
