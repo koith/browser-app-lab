@@ -36,25 +36,32 @@ jobs:
       - name: Test browser loading
         run: |
           node - <<'NODE'
-          const { chromium } = require('playwright');
+          const { chromium } = require('playwright');const fs=require('fs');
           (async()=>{
             const browser=await chromium.launch({headless:true});
             const page=await browser.newPage({viewport:{width:390,height:844}});
             const errors=[];page.on('pageerror',e=>errors.push(e.message));
+            await page.route('https://koith.github.io/browser-app-lab/apps/yui-gallery/**',async route=>{
+              const path=new URL(route.request().url()).pathname.split('/apps/yui-gallery/')[1]||'index.html';
+              const name=path.split('?')[0];
+              if(['index.html','feed.json','albums.json','chinese-previews.json','paginated-sns-index.json'].includes(name)){
+                await route.fulfill({status:200,body:fs.readFileSync('apps/yui-gallery/'+name),contentType:name.endsWith('.json')?'application/json':'text/html'});
+              }else await route.continue();
+            });
             await page.goto('https://koith.github.io/browser-app-lab/apps/yui-gallery/?smoke='+process.env.GITHUB_SHA,{waitUntil:'domcontentloaded',timeout:30000});
             await page.waitForFunction(()=>document.querySelector('#total')?.textContent?.includes('공개 SNS 사진'),{timeout:20000});
             const imgs=await page.locator('#media img').count();
-            if(imgs<10)throw Error('Insufficient image cards: '+imgs);
+            if(imgs<250)throw Error('Paginated public media was not loaded: '+imgs);
             await page.waitForTimeout(2400);
             const loaded=await page.locator('#media img').evaluateAll(a=>a.filter(img=>img.complete&&img.naturalWidth>0).length);
             if(loaded<2)throw Error('Image elements exist but image bytes did not load; loaded='+loaded);
             await page.locator('#media img').first().click();
             if(!(await page.locator('#lightbox').evaluate(e=>e.classList.contains('show'))))throw Error('Full-size image overlay did not open');
             await page.locator('#close').click();
-            await page.screenshot({path:'gallery-mobile-photos.png',fullPage:true});
-            const newest=await page.evaluate(()=>photos[0]?.date);
+            await page.screenshot({path:'gallery-mobile-photos.png',fullPage:false});
+            const newest=await page.evaluate(()=>photoDate(photos[0]));
             await page.selectOption('#mediaSort','date-asc');
-            const oldest=await page.evaluate(()=>photos[0]?.date);
+            const oldest=await page.evaluate(()=>photoDate(photos[0]));
             if(!newest||!oldest||Date.parse(oldest)>=Date.parse(newest))throw Error('Photo date sort failed: '+newest+' / '+oldest);
             await page.selectOption('#mediaSort','name-asc');
             const imageNames=await page.evaluate(()=>photos.map(x=>x.name||x.caption||''));
