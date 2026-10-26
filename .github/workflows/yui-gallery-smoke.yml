@@ -66,5 +66,7 @@ jobs:
         if: always()
         with:
           name: gallery-mobile-smoke
-          path: |\n            gallery-mobile.png\n            gallery-mobile-photos.png
+          path: |
+            gallery-mobile.png
+            gallery-mobile-photos.png
           if-no-files-found: ignore
