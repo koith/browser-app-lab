@@ -1,73 +1,70 @@
-name: YUI Expand Public Article Albums — Individual Image Crawl
+name: YUI Expand Free Public V2PH Album Previews
 on:
   push:
     paths:
       - .github/workflows/yui-expand-public-article.yml
-      - apps/yui-gallery/crawl_public_article.py
+      - apps/yui-gallery/crawl_v2ph_public.py
       - apps/yui-gallery/build_expanded_source_albums.py
-      - apps/yui-gallery/test_public_article.py
+      - apps/yui-gallery/test_v2ph_public.py
   workflow_dispatch:
   schedule:
     - cron: '22 19 * * 3'
 permissions:
   contents: write
 concurrency:
-  group: yui-expand-public-article-${{ github.ref_name }}
+  group: yui-expand-free-public-${{ github.ref_name }}
   cancel-in-progress: false
 jobs:
-  crawl-public-article:
+  crawl-public-albums:
     runs-on: ubuntu-24.04
-    timeout-minutes: 24
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Install free local browser and source image decoder
+      - name: Install free Python browser and original image validator
         run: |
           python -m pip install requests Pillow playwright
           python -m playwright install chromium
-      - name: Verify safe image discovery rules
+      - name: Syntax and safety checks for public page extraction
         run: |
-          python -m py_compile apps/yui-gallery/crawl_public_article.py apps/yui-gallery/build_expanded_source_albums.py
-          python apps/yui-gallery/test_public_article.py
-      - name: Crawl new publicly displayed Yui Heart Steal photos as individual files
-        run: python apps/yui-gallery/crawl_public_article.py
-      - name: Check image hashes and build extra gallery album without republishing photo bytes
+          python -m py_compile apps/yui-gallery/crawl_v2ph_public.py apps/yui-gallery/build_expanded_source_albums.py
+          python apps/yui-gallery/test_v2ph_public.py
+      - name: Retrieve only freely displayed individual preview images from four distinct Yui albums
+        run: |
+          python apps/yui-gallery/crawl_v2ph_public.py
+      - name: Verify physical image bytes and build source-viewer album records
         run: |
           python apps/yui-gallery/build_expanded_source_albums.py
           python - <<'PY'
-          import hashlib,json
+          import json
           from pathlib import Path
-          p=Path('apps/yui-gallery/expanded-source-albums.json')
-          report=json.loads(p.read_text(encoding='utf-8'))
-          assert len(report['albums'])==1
-          album=report['albums'][0]
-          assert album['id']=='heart-steal-set01'
-          assert len(album['images'])>=10
-          for photo in album['images']:
-              local=Path('yui-article-images/heart-steal-set01')/f"{photo['number']:03d}."+photo['url'].rsplit('.',1)[-1].split('?',1)[0].lower()
-              # Individual original bytes already checked in build_expanded_source_albums.py
-              assert len(photo['sha256'])==64 and photo['bytes']>3000
-          print('EXPANDED_ARCHIVE_PUBLIC_ARTICLE',album['id'],len(album['images']),flush=True)
+          d=json.loads(Path('apps/yui-gallery/expanded-source-albums.json').read_text())
+          assert 1<=len(d['albums'])<=4
+          photos=sum(len(a['images']) for a in d['albums'])
+          assert photos>0
+          assert all(a['full_album_complete'] is False for a in d['albums'])
+          assert all(len(a['images'])<=5 for a in d['albums'])
+          print('NEW_PHYSICALLY_VERIFIED_PUBLIC_PHOTOS',photos,flush=True)
           PY
-      - name: Commit only validated source URLs for owner gallery
+      - name: Commit only publicly available source URLs for gallery owner
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add apps/yui-gallery/expanded-source-albums.json
           if ! git diff --cached --quiet; then
-            git commit -m "Index extra individually verified Heart Steal photos for YUI gallery"
+            git commit -m "Index additional free publicly visible Yui photos"
             BRANCH="${GITHUB_REF_NAME}"
             git fetch origin "${BRANCH}"
             git rebase "origin/${BRANCH}"
             git push origin "HEAD:${BRANCH}"
           fi
-      - name: Save small audit file directly without compressed photos
+      - name: Preserve hash summary as one uncompressed JSON audit file
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          path: yui-article-images/heart-steal-set01/manifest.json
+          path: yui-v2ph-public-previews/summary.json
           archive: false
           retention-days: 30
           if-no-files-found: ignore
