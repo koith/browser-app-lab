@@ -11,7 +11,7 @@
 
 ## 현재 작동 상태
 
-기술 연결부는 구현했지만 실제 TeraBox 저장 및 온라인 게이트웨이 배포는 아직 안 됨.
+기술 연결부·원격 SHA256 검증 코드는 구현했지만 실제 TeraBox 저장 및 온라인 게이트웨이 배포는 아직 안 됨. 모의 테스트 및 공개 웹판 스테이징 성공은 실계정 업로드 성공이 아님.
 계정 생성, 사용자 로그인, TeraBox 쿠키 발급, Render workspace 선택, API 서비스 생성도 하지 않았음.
 현재 공개 웹사이트에 있는 다른 갤러리 파일들을 실제 1TB 업로드로 착각하지 말 것.
 
@@ -21,9 +21,9 @@
 2. cloud/ingest_verified_zips.py 가 ZIP 안의 물리 파일과 SHA256/이미지 디코딩을 재검증.
 3. 픽셀 크기와 출처를 기록하고 바이트를 그대로 originals/ 아래 저장.
 4. 검색·미리보기용 520px 썸네일을 previews/ 아래 별도로 생성.
-5. metadata/catalog.json에 작품별 실물 보유 장수와 품질·해시 기록.
-6. cloud/upload_to_terabox.sh 가 실제 파일을 TeraBox에 업로드, 크기 검증 후 카탈로그를 마지막에 업로드.
-7. cloud/gateway/main.py 가 인증된 사용자에게만 TeraBox로부터 사진을 읽어 전송.
+5. metadata/catalog.json에 작품별 실물 보유 장수와 품질·원본 및 미리보기 SHA256 기록. 미연결 스테이징의 storage_provider는 pending_external_upload.
+6. cloud/upload_to_terabox.sh 가 실계정에 파일을 업로드하고 cloud/verify_remote.py 가 원본·미리보기 **모든 파일**을 rclone cat으로 재다운로드하여 바이트 길이와 SHA256을 검증. remote-verification.json 감사 기록을 저장한 뒤 카탈로그를 마지막에 업로드하고 그 카탈로그도 재다운로드 해시 검증.
+7. cloud/gateway/main.py 가 인증된 사용자에게만 TeraBox로부터 사진 **전체 바이트**를 읽고 카탈로그에 적힌 길이·SHA256과 일치할 때만 전송.
 8. cloud.html은 그 API에서 실물 파일을 열람/확대/개별 다운로드.
 
 ## 설정: 사용자가 실제로 한 번 승인해야 하는 작업
@@ -55,5 +55,5 @@ MEGA rclone backend: https://rclone.org/mega/
 python apps/yui-gallery/cloud/ingest_verified_zips.py folder/album1.zip folder/album2.zip --out cloud-stage
 bash apps/yui-gallery/cloud/upload_to_terabox.sh cloud-stage
 
-실제 TeraBox 쿠키 없이 마지막 명령을 실행하면 명확한 미연결 오류로 종료되도록 설계.
+실제 TeraBox 쿠키 없이 마지막 명령을 실행하면 명확한 미연결 오류로 종료되도록 설계. 모든 파일의 원격 재다운로드가 시간 제한 내에 끝나지 않거나 해시가 불일치하면 카탈로그 공개를 중단한다. 실계정에서 대량 처리 시간·세션 유지·쿼터 제한은 별도 검증 필요.
 공식 TeraBox 플랜: https://www.terabox.com/korean/cloud-storage-pricing-plans?lang=ko
