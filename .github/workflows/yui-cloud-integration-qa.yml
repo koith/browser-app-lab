@@ -20,8 +20,9 @@ jobs:
       - name: Validate ZIP ingester and cloud gateway Python
         run: |
           pip install Pillow fastapi uvicorn httpx
-          python -m py_compile apps/yui-gallery/cloud/ingest_verified_zips.py apps/yui-gallery/cloud/gateway/main.py
+          python -m py_compile apps/yui-gallery/cloud/ingest_verified_zips.py apps/yui-gallery/cloud/verify_remote.py apps/yui-gallery/cloud/gateway/main.py
           python apps/yui-gallery/cloud/test_ingest.py
+          python apps/yui-gallery/cloud/test_verify_remote.py
           python apps/yui-gallery/cloud/test_gateway.py
           bash -n apps/yui-gallery/cloud/upload_to_terabox.sh
       - uses: actions/setup-node@v4
