@@ -28,7 +28,7 @@ def build(root=Path("yui-v2ph-public-previews"),out=Path("apps/yui-gallery/expan
             hashes.add(digest)
             source=item["url"]
             p=urlsplit(source)
-            if p.scheme!="https" or p.hostname!="cdn.v2ph.com" or not re.fullmatch(r"/photos/[A-Za-z0-9_.-]+\\.(?:jpg|jpeg|png|webp)",p.path,re.I):
+            if p.scheme!="https" or p.hostname!="cdn.v2ph.com" or not re.fullmatch(r"/photos/[A-Za-z0-9_.-]+\.(?:jpg|jpeg|png|webp)",p.path,re.I):
                 raise ValueError("Untrusted external image URL")
             with Image.open(path) as image:
                 image.verify()
