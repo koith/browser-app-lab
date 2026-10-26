@@ -51,7 +51,9 @@ jobs:
           const {chromium}=require('playwright'),fs=require('fs');
           const local=JSON.parse(fs.readFileSync('apps/yui-gallery/stored-albums.json'));
           const extra=fs.existsSync('apps/yui-gallery/additional-source-albums.json')?JSON.parse(fs.readFileSync('apps/yui-gallery/additional-source-albums.json')):{albums:[]};
-          const extraCount=extra.albums.reduce((n,a)=>n+a.images.length,0);
+          const base=fs.existsSync('apps/yui-gallery/source-viewer-albums.json')?JSON.parse(fs.readFileSync('apps/yui-gallery/source-viewer-albums.json')):{albums:[]};
+          const remote=[...new Map([...base.albums,...extra.albums].map(a=>[a.id,a])).values()];
+          const remoteCount=remote.reduce((n,a)=>n+a.images.length,0);
           const hasSources=fs.existsSync('apps/yui-gallery/source-viewer-albums.json');
           (async()=>{
             const browser=await chromium.launch({headless:true});
@@ -64,7 +66,7 @@ jobs:
             const vbox=await page.locator('#app-version').boundingBox();
             if(!vbox||vbox.x<190||vbox.y>25||vbox.height>18)throw Error('Version is not small/top-right');
             if(!await page.locator('[data-filter="albums"]').evaluate(x=>x.classList.contains('active')))throw Error('Albums not default view');
-            const albumCount=await page.locator('.album').count(),expectedAlbums=(hasSources?12:7)+extra.albums.length;
+            const albumCount=await page.locator('.album').count(),expectedAlbums=local.albums.length+remote.length;
             if(albumCount!==expectedAlbums)throw Error('Expected '+expectedAlbums+' albums, got '+albumCount);
             const localCover=await page.locator('.album[data-id="v04"] img').evaluate(i=>({w:i.naturalWidth,src:i.src}));
             if(localCover.w<100||!localCover.src.includes('/stored-albums/'))throw Error('Existing stored preview failed');
@@ -91,7 +93,7 @@ jobs:
             }
             await page.locator('[data-filter="photos"]').click();
             const allPhotos=await page.locator('#photogrid .photo').count();
-            const expectedPhotos=(hasSources?431:26)+extraCount;
+            const expectedPhotos=local.albums.reduce((n,a)=>n+a.images.length,0)+remoteCount;
             if(allPhotos!==expectedPhotos)throw Error('Expected '+expectedPhotos+' photo records, got '+allPhotos);
             await page.screenshot({path:'yui-album-mobile.png',fullPage:false});
             await page.locator('[data-filter="all"]').click();

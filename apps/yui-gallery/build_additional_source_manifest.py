@@ -5,7 +5,7 @@ from pathlib import Path
 from urllib.parse import urlsplit
 from PIL import Image
 
-ALLOWED=re.compile(r'^(?:(?:wes|bis)\.misskon\.com|lux\.mrcong\.com|(?:imgx\d{3}|images\d{2})\.pixibb\.com|s\.wujituku\.com|lh\d\.ggpht\.com)$')
+ALLOWED=re.compile(r'^(?:cdn\.jliji\.com|(?:wes|bis)\.misskon\.com|lux\.mrcong\.com|(?:imgx\d{3}|images\d{2})\.pixibb\.com|s\.wujituku\.com|lh\d\.ggpht\.com)$')
 def build(folders,out,replace=False):
     albums=[]
     for folder in folders:

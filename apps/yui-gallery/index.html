@@ -183,7 +183,7 @@ Promise.all([
  fetch('source-viewer-albums.json',{cache:'no-store'}).then(r=>r.ok?r.json():{albums:[]}).catch(()=>({albums:[]}))
 ]).then(([s,c,owner,extra,remote])=>{
  localStored=s.albums||[];catalog=c.albums||[];
- remoteStored=[...(remote.albums||[]),...(extra.albums||[])].filter(a=>a.status==='verified_collected_individual_files_source_hosted_online_view').map(a=>({...a,sourceHosted:true}));
+ remoteStored=[...new Map([...(remote.albums||[]),...(extra.albums||[])].map(a=>[a.id,a])).values()].filter(a=>a.status==='verified_collected_individual_files_source_hosted_online_view').map(a=>({...a,sourceHosted:true}));
  ownerStored=owner.albums;const ownerIds=new Set(ownerStored.map(a=>a.id));
  stored=[...ownerStored,...remoteStored.filter(a=>!ownerIds.has(a.id)),...localStored];
  const localCount=localStored.reduce((n,a)=>n+validImages(a).length,0);

@@ -62,4 +62,4 @@ class JlijiYuiSetExtractor(Extractor):
         yield Message.Directory,None,common
         for num,url in sorted(selected.items()):
             extension=url.rsplit(".",1)[-1].split("?",1)[0].lower()
-            yield Message.Url,url,{**common,"num":num,"extension":extension,"source_page":origin}
+            yield Message.Url,url,{**common,"num":num,"extension":extension,"source_page":origin,"image_url":url}
