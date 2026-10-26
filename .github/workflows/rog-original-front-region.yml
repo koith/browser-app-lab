@@ -1,0 +1,62 @@
+name: 4LEAF native OBS fronts and Region channel source QA
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/genesis-chessman-actors.js'
+      - 'apps/4leaf/rog/lobby-ui.js'
+      - 'apps/4leaf/rog/lobby.css'
+      - 'apps/4leaf/rog/game.js'
+      - 'apps/4leaf/rog/tests/obs-front-region-source-game.cjs'
+      - '.github/workflows/rog-original-front-region.yml'
+  workflow_run:
+    workflows: ['Deploy static content to Pages']
+    types: [completed]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  genuine-source-front-region:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 13
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - engine: chromium
+            mobile: '0'
+          - engine: webkit
+            mobile: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          npm install --no-save playwright
+          npx playwright install ${{ matrix.engine }} --with-deps
+      - name: Serve local real 2002 sources on PR
+        if: github.event_name != 'workflow_run'
+        run: |
+          nohup python3 -m http.server 8765 --directory apps/4leaf/rog >/tmp/leaf-front-region-server.log 2>&1 &
+          for attempt in 1 2 3 4 5 6; do
+            if curl -fSsI http://127.0.0.1:8765/index.html >/dev/null 2>&1; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/leaf-front-region-server.log
+          exit 1
+      - name: Real source-number channel selection, OBS front-safe movement, original game roll
+        env:
+          FOURLEAF_TEST_URL: ${{ github.event_name == 'workflow_run' && 'https://koith.github.io/browser-app-lab/apps/4leaf/rog/' || 'http://127.0.0.1:8765/' }}
+          FOURLEAF_BROWSER: ${{ matrix.engine }}
+          FOURLEAF_MOBILE: ${{ matrix.mobile }}
+        run: node apps/4leaf/rog/tests/obs-front-region-source-game.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: original-obs-front-region-${{ matrix.engine }}-${{ github.event_name }}
+          path: leaf-*.png
+          retention-days: 7
