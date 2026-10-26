@@ -63,8 +63,9 @@ def discover(url,steps=40):
         browser=playwright.chromium.launch(headless=True)
         try:
             page=browser.new_page(viewport={"width":1300,"height":950})
-            page.goto(url,wait_until="domcontentloaded",timeout=45000)
-            page.wait_for_timeout(600)
+            response=page.goto(url,wait_until="domcontentloaded",timeout=45000)
+            page.wait_for_timeout(1200)
+            print("ARTICLE_PAGE_RESPONSE",response.status if response else "none","title",page.title(),"url",page.url,flush=True)
             for step in range(steps):
                 items=page.evaluate("""() => Array.from(document.querySelectorAll('img')).map(im=>({
                     alt:im.alt||'',full:im.getAttribute('data-full')||im.getAttribute('data-original'),
@@ -79,6 +80,7 @@ def discover(url,steps=40):
                         found[number]=target
                 page.evaluate("window.scrollBy(0,Math.max(700,innerHeight*0.95))")
                 page.wait_for_timeout(160)
+            print("ARTICLE_DISCOVERY_DIAGNOSTICS","images_in_dom",len(items),"numbered_found",len(found),\n                  "sample_alt",[(x.get("alt") or "")[:30] for x in items[:8]],\n                  "sample_url",[(x.get("src") or "")[:130] for x in items[:5]],\n                  "body_prefix",page.locator("body").inner_text(timeout=7000)[:220],flush=True)
         finally:
             browser.close()
     return found
