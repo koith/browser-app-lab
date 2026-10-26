@@ -5,7 +5,7 @@
  * equivalent. The comparison image is visual evidence, never game art.
  */
 const {chromium,webkit}=require('playwright');
-const {readFileSync}=require('node:fs');
+const {readFileSync,writeFileSync}=require('node:fs');
 const assert=require('node:assert/strict');
 const path=require('node:path');
 (async()=>{
@@ -84,6 +84,52 @@ const path=require('node:path');
     '<section>DEPLOYED WEB — fresh 2-player board, SAME 800×600 frame'+
     '<img src="data:image/png;base64,'+current.toString('base64')+'"></section></div>');
    await meta.waitForFunction(()=>[...document.images].every(x=>x.complete&&x.naturalWidth===800));
+   // Source screenshot is historical combat; current capture is a fresh
+   // match, so these numeric per-ROI distances are EVIDENCE ONLY, never a
+   // hard pass/fail target or a claim that client art is exact. Distinguish
+   // stable HUD regions from incomparable dynamic battle/map areas.
+   const comparison=await meta.evaluate(()=>{
+    const [reference,current]=document.querySelectorAll('.compare img');
+    const cvs=document.createElement('canvas');cvs.width=800;cvs.height=600;
+    const ctx=cvs.getContext('2d',{willReadFrequently:true});
+    ctx.drawImage(reference,0,0,800,600);
+    const original=ctx.getImageData(0,0,800,600).data;
+    ctx.clearRect(0,0,800,600);ctx.drawImage(current,0,0,800,600);
+    const deployed=ctx.getImageData(0,0,800,600).data;
+    const regions=[
+     {id:'historic-menu',x:96,y:0,w:608,h:30,comparable:true},
+     {id:'historic-minimap',x:0,y:448,w:172,h:152,comparable:true},
+     {id:'historic-chat-window',x:172,y:448,w:406,h:152,comparable:true},
+     {id:'historic-tools-and-chessmen',x:578,y:448,w:222,h:152,comparable:true},
+     {id:'battle-vs-fresh-board-INCOMPARABLE',x:96,y:30,w:608,h:418,comparable:false}
+    ];
+    return regions.map(r=>{
+     let abs=0,total=0,greaterThan48=0,meanOriginal=[0,0,0],meanPublished=[0,0,0];
+     for(let y=r.y;y<r.y+r.h;y++)for(let x=r.x;x<r.x+r.w;x++){
+      const at=(y*800+x)*4;
+      for(let c=0;c<3;c++){
+       const av=original[at+c],bv=deployed[at+c];
+       const delta=Math.abs(av-bv);abs+=delta;total++;
+       if(delta>48)greaterThan48++;
+       meanOriginal[c]+=av;meanPublished[c]+=bv;
+      }
+     }
+     const n=r.w*r.h;
+     return {...r,source:'original 800x600 JPG vs deployed 800x600 PNG',
+      meanAbsoluteRgbDifference:Number((abs/total).toFixed(3)),
+      fractionRgbChannelsDifferingOver48:Number((greaterThan48/total).toFixed(4)),
+      meanOriginalRgb:meanOriginal.map(q=>Math.round(q/n)),
+      meanPublishedRgb:meanPublished.map(q=>Math.round(q/n)),
+      acceptance:'DIAGNOSTIC ONLY; dynamics/players/time differ, not historical sprite-perfect tolerance'};
+    });
+   });
+   writeFileSync('leaf-original-vs-public-800x600-roi-evidence.json',
+     JSON.stringify({viewport:[800,600],original:'apps/4leaf/assets/board.jpg',
+      deployed:process.env.FOURLEAF_TEST_URL||'local PR',
+      originalState:'battle',deployedState:'two-player first turn',
+      benchmarkTrust:'source-region proximity diagnostic; NOT pixel-perfect state match',
+      regions:comparison},null,2)+'\\n');
+   console.log('HISTORICAL-PUBLISHED-ROI-MEASUREMENTS '+JSON.stringify(comparison));
    await meta.screenshot({path:'leaf-original-2004-vs-public-live-800x600.png'});
    await meta.close();
   }
