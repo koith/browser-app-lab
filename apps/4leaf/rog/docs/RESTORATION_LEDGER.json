@@ -6371,6 +6371,28 @@
         "https://github.com/koith/browser-app-lab/blob/feat/4leaf-original-obs-front-steps-native-stats-20261027/apps/4leaf/rog/genesis-chessman-actors.js",
         "https://github.com/koith/browser-app-lab/blob/feat/4leaf-original-obs-front-steps-native-stats-20261027/apps/4leaf/rog/tests/obs-reviewed-front-walk-native-stats.cjs"
       ]
+    },
+    {
+      "seq": 265,
+      "date": "2026-10-27",
+      "type": "PR217_ORIGINAL_19_OBS_FRONT_STEPS_AND_NATIVE_STATS_MERGED_PUBLIC_PAGES_DEPLOYED",
+      "requestId": "REQ-20261027-001",
+      "taskIds": [
+        "P0-ACTOR",
+        "ACT-03",
+        "ACT-04",
+        "P0-PODIUM",
+        "P0-RELEASE"
+      ],
+      "details": "VERIFIED merge of functional 4LEAF source reconstruction PR #217 on GitHub main merge SHA 22c47df17de56f98022f9869d3971bb27dd5ad03, app beta27 PWA cache v114. Genuine recovered 2002 OBS.pak full-body source 25/30 pixels visually independently audited for 19 previously known source-facing members (0040,0042,0043,0044,0046,0048,0049,0051,0052,0053,0054,0055,0056,0058,0059,0060,0061,0062,0064), actual playable game front-pair 25,30,25,30 WEB-inferred movement; source 0045 front18 remains intentionally static. Genuine original 2002 Dice/IMG.pak stats.png 164x125 art replaces plain temporary CardData text-only modal in REAL functional right-chessman click; actual CardData attributes independently rendered, not a pasted screenshot, layout inferred. Original 800x600 historic BATTLE vs newly triggered real BATTLE screenshots and WebKit mobile original stats screenshot emitted as QA artifact. PR head QA run 40355313863 Chromium SUCCESS, earlier source core WebKit run 40353340213 SUCCESS; existing original Region/OBS PR head 40355314112 Chromium/WebKit SUCCESS. Corrected old regression that assumed 0046 still front-static; 0045 static front18 still correctly asserted. Same-merge-SHA GitHub Pages static deploy workflow 40356314070 SUCCESS (separate Jekyll build 40356311602 was canceled by unrelated concurrent Pages build, not a static deploy failure). Public exact-deploy Regions/OBS source QA workflow 40356522364 Chromium and WebKit SUCCESS. Public NEW source-front/stats QA workflow 40356522618 was queued/in_progress at recording; do NOT claim PASS until separately confirmed. Verified original D4/D6 source native 3D geometry/UV/impact keyframes NOT recovered. Native 2002 OBS action-frame timing/direction labels remain UNVERIFIED, other 92-19 source actors remain unverified for true front WALK. Ledger 58 task statuses deliberately unchanged.",
+      "evidence": [
+        "https://github.com/koith/browser-app-lab/pull/217",
+        "https://github.com/koith/browser-app-lab/actions/runs/40355313863",
+        "https://github.com/koith/browser-app-lab/actions/runs/40353340213",
+        "https://github.com/koith/browser-app-lab/actions/runs/40356314070",
+        "https://github.com/koith/browser-app-lab/actions/runs/40356522364",
+        "https://github.com/koith/browser-app-lab/actions/runs/40356522618"
+      ]
     }
   ]
 }
