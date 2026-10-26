@@ -1,4 +1,4 @@
-name: Yui Verified Public Photobook ZIP
+name: Yui Verified Public Photobook Individual Photos
 on:
   push:
     paths:
@@ -23,29 +23,27 @@ jobs:
         run: python -m py_compile apps/yui-gallery/download_verified_public_album.py
       - name: Acquire full public page sequence
         run: python apps/yui-gallery/download_verified_public_album.py
-      - name: Verify ZIP content and SHA256 digest against images
+      - name: Verify every individual photo against SHA256
         run: |
           python - <<'PY'
-          import json,zipfile,hashlib,pathlib
+          import json,hashlib,pathlib
           for album_id,expected in [('v04',97),('green91',91)]:
-            p=pathlib.Path(f'yui-verified-private-albums/{album_id}_public_web_album.zip')
-            with zipfile.ZipFile(p) as z:
-              assert z.testzip() is None
-              m=json.loads(z.read('manifest.json'))
-              assert len(m['images'])==expected
-              assert m['complete_public_web_sequence'] is True
-              for a in m['images']:
-                data=z.read('images/'+a['file'])
-                assert len(data)==a['bytes']
-                assert hashlib.sha256(data).hexdigest()==a['sha256']
-              print('VERIFIED_COMPLETE_WEB_PHOTOBOOK',album_id,len(m['images']),'ZIP_BYTES',p.stat().st_size)
+            folder=pathlib.Path(f'yui-verified-private-albums/{album_id}')
+            manifest=json.loads((folder/'manifest.json').read_text())
+            assert len(manifest['images'])==expected
+            assert manifest['complete_public_web_sequence'] is True
+            for row in manifest['images']:
+              image=folder/row['file']
+              assert image.is_file() and image.stat().st_size==row['bytes']
+              assert hashlib.sha256(image.read_bytes()).hexdigest()==row['sha256']
+            print('VERIFIED_COMPLETE_WEB_PHOTOBOOK',album_id,len(manifest['images']))
           PY
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: Yui-Teddy-Bear-97-public-web-photos
+          name: Yui-verified-individual-photo-hash-manifests
           path: |
-            yui-verified-private-albums/*_public_web_album.zip
+            yui-verified-private-albums/*/manifest.json
             yui-verified-private-albums/summary.json
           if-no-files-found: warn
           retention-days: 90
