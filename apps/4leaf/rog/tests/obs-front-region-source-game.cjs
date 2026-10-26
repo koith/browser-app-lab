@@ -89,16 +89,17 @@ const {chromium,webkit}=require('playwright');
    assert.ok(row.image.includes('/OBS/')&&row.image.endsWith('-25.png'));
    inspected.push(row);
   }
-  // A fourth, separately reviewed original card lacked trustworthy forward
-  // alternation. It must hold the VERIFIED front, not old back-facing packets.
+  // 0045 is source-front frame18 ONLY (original OBS member 1045), not a
+  // visually approved 25/30 pair. Never infer 2002 action/FPS from 0046.
   const staticFront=await page.evaluate(()=>{
-   const m=window.__ROG_TEST__.getMatch();m.players[0].team[0]='c_0046';
+   const m=window.__ROG_TEST__.getMatch();m.players[0].team[0]='c_0045';
    window.__ROG_TEST__.drawGame();
    const p=document.querySelector('#board-pawns .board-pawn[data-id="0"]');
    window.__LEAF_GENESIS_ACTORS__.poseByPlayer(0,'walk',0);
    return {sequence:p.dataset.sourceFrameSequence,coverage:p.dataset.sourceWalkCoverage};
   });
-  assert.equal(staticFront.sequence,'25');
+  assert.equal(staticFront.sequence,'18',
+   '0045 must stay on its visually verified 18 front packet');
   assert.ok(staticFront.coverage.startsWith('front-only/'));
   // A real TURN and dice-roll moves source actor on original DMP terrain.
   await page.evaluate(()=>{
