@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark"><title>Yui | 사진 갤러리 & 화보 아카이브</title>
+<style>
+:root{font-family:ui-sans-serif,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;color-scheme:dark;color:#edf2fc;background:#0b1018}
+*{box-sizing:border-box}body{margin:0}a{color:inherit;text-decoration:none}button,input{font:inherit}button{cursor:pointer}header{max-width:1280px;margin:auto;padding:36px 23px 26px}
+.kicker{letter-spacing:.19em;color:#c3b1fc;font-size:11px;font-weight:750}h1{font-size:clamp(36px,6vw,67px);letter-spacing:-.06em;line-height:1.08;margin:12px 0}
+h1 span{color:#b8b4d4}.lede{color:#abb5c8;line-height:1.65;max-width:800px;font-size:14px}
+.toolbar{max-width:1280px;margin:auto;padding:0 23px 17px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.tabs,.filters{display:flex;flex-wrap:wrap;gap:7px}.tab,.filter,.btn{border:1px solid #384154;color:#d9e1f0;background:#18212f;padding:9px 14px;border-radius:999px;font-size:13px}
+.tab.active,.filter.active{background:#e7e4f7;color:#172033;font-weight:750}
+#search{background:#151e2d;border:1px solid #374255;padding:11px 14px;border-radius:12px;color:white;min-width:min(320px,90vw)}
+main{max-width:1280px;margin:0 auto;padding:0 23px 80px}
+.stats{display:flex;gap:12px;flex-wrap:wrap;margin:10px 0 20px}.stat{font-size:12px;border:1px solid #2c394d;padding:6px 10px;border-radius:8px;color:#a6b5c9}
+.wall{columns:5 180px;column-gap:12px}.media{display:inline-block;width:100%;margin:0 0 12px;position:relative;overflow:hidden;border-radius:12px;background:#20293b;border:1px solid #354257}
+.media img{display:block;width:100%;height:auto;min-height:140px;object-fit:cover;transition:transform .22s}.media:hover img{transform:scale(1.025)}
+.media .shade{position:absolute;inset:auto 0 0;background:linear-gradient(transparent,#000a);padding:26px 9px 9px;font-size:11px;opacity:0;transition:.15s}.media:hover .shade{opacity:1}
+.albumgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.album{background:#171f2d;border:1px solid #354257;padding:18px;border-radius:15px;display:flex;flex-direction:column;min-height:180px}
+.album small{font-size:11px;color:#b6aad8}.album strong{line-height:1.4;font-size:16px;margin:13px 0 8px}
+.album p{font-size:12px;color:#a9b3c6;margin:0 0 16px}.album .actions{margin-top:auto;display:flex;gap:7px;flex-wrap:wrap}.album a{font-size:12px;background:#29364a;border-radius:8px;padding:7px 10px}
+.notice{color:#8999b0;font-size:12px;line-height:1.8;padding-top:23px;max-width:910px}
+#lightbox{position:fixed;inset:0;background:#04070af2;z-index:50;display:none;justify-content:center;align-items:center;flex-direction:column;padding:18px;gap:12px}
+#lightbox.show{display:flex}#lightbox img{max-width:min(98vw,1200px);max-height:76vh;object-fit:contain;border-radius:8px}
+#lightbox .controls{display:flex;gap:9px;align-items:center;flex-wrap:wrap;justify-content:center}.controls button,.controls a{border:1px solid #606b81;background:#1c2735;color:#fff;padding:10px 13px;border-radius:8px;font-size:13px}
+.empty{padding:55px 20px;color:#bec9dc;text-align:center;border:1px dashed #4b5670;border-radius:15px}
+@media(max-width:950px){.albumgrid{grid-template-columns:repeat(3,minmax(0,1fr))}.wall{columns:4 160px}}
+@media(max-width:630px){header{padding:24px 16px 18px}main,.toolbar{padding-left:15px;padding-right:15px}.albumgrid{grid-template-columns:repeat(2,minmax(0,1fr))}.wall{columns:2 130px}.album{padding:12px;min-height:160px}.album strong{font-size:14px}.media .shade{opacity:1}}
+</style></head><body><header><div class="kicker">YUI · PERSONAL REVIEW INDEX</div><h1>심유이 <span>/ Gallery</span></h1>
+<div class="lede">공개 SNS 사진을 원 출처에서 실시간 로딩하고, 중국 화보 사이트별 작품을 연결한 온라인 열람 시스템입니다. 공개 SNS 이미지는 이 사이트에 재업로드되지 않으며, 유료 원본은 제공·해제하지 않습니다.</div></header>
+<div class="toolbar"><div class="tabs"><button class="tab active" data-view="media">사진 보기</button><button class="tab" data-view="albums">화보 출처</button><a class="btn" href="https://x.com/super_yuisan/media" target="_blank" rel="noopener">본인 SNS ↗</a></div><input type="search" id="search" placeholder="사이트·화보 이름 검색" aria-label="화보 검색"></div>
+<main><div class="stats"><span class="stat" id="total">이미지 로딩 중</span><span class="stat" id="update">갱신 상태 확인 중</span><span class="stat">고화질 원본 링크 · 개별 열람</span></div>
+<div id="media" class="wall"></div><div id="albums" hidden><div id="filters" class="filters" style="margin:12px 0 20px"></div><div id="albumgrid" class="albumgrid"></div></div>
+<div class="notice">출처가 보유한 콘텐츠 권리는 각 게시자에게 있습니다. 이미지는 원 서버에서 불러오는 링크 형식이므로 출처가 삭제하거나 외부 로딩을 차단하면 표시되지 않을 수 있습니다. '원본 이미지'는 외부 원본 서버로 이동하며 브라우저에서 저장할 수 있습니다. 화보 발행사의 전체 유료 사진집을 다운로드한 상태는 아닙니다.</div></main>
+<div id="lightbox" role="dialog" aria-modal="true"><img id="big" alt="심유이 공개 SNS 사진"><div class="controls"><button id="prev">‹ 이전</button><span id="counter"></span><button id="next">다음 ›</button><a id="original" target="_blank" rel="noopener">원본 이미지 ↗</a><a id="post" target="_blank" rel="noopener">게시물 ↗</a><button id="close">닫기 ×</button></div></div>
+<script>
+let photos=[],albums=[],site='전체',view='media',idx=0;
+const el=id=>document.getElementById(id), esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','&apos;':'&#39;'}[c]));
+function renderMedia(){el('total').textContent='공개 SNS 사진 '+photos.length+'장';el('media').innerHTML=photos.length?photos.map((p,i)=>'<div class="media"><img loading="lazy" referrerpolicy="no-referrer" data-i="'+i+'" src="'+esc(p.url.replace('name=orig','name=medium'))+'" alt="공개 SNS 사진 '+(i+1)+'"><div class="shade">눌러서 크게 보기</div></div>').join(''):'<div class="empty">공개 SNS 사진을 읽지 못했습니다. 아래 본인 SNS 링크에서 확인할 수 있습니다.</div>';
+el('media').querySelectorAll('img').forEach(im=>{im.onclick=()=>show(+im.dataset.i);im.onerror=()=>{im.closest('.media').style.display='none'}})}
+function renderAlbums(){let q=el('search').value.toLowerCase();let f=albums.filter(a=>(site==='전체'||a.site===site)&&(''+a.site+' '+a.title).toLowerCase().includes(q));
+el('albumgrid').innerHTML=f.length?f.map(a=>'<div class="album"><small>'+esc(a.site)+'</small><strong>'+esc(a.title)+'</strong><p>'+esc(a.photos??'사진 수 미상')+'장 · '+esc(a.size||'출처 정보')+'</p><div class="actions"><a href="'+esc(a.source)+'" target="_blank" rel="noopener">화보 사이트 ↗</a></div></div>').join(''):'<div class="empty">검색된 화보가 없습니다.</div>';
+el('total').textContent='화보 출처 '+f.length+'건 · 전체 '+albums.length+'건';
+}
+function renderFilters(){let sites=['전체',...new Set(albums.map(a=>a.site))];el('filters').innerHTML=sites.map(s=>'<button class="filter '+(site===s?'active':'')+'" data-s="'+esc(s)+'">'+esc(s)+'</button>').join('');el('filters').querySelectorAll('button').forEach(b=>b.onclick=()=>{site=b.dataset.s;renderFilters();renderAlbums()})}
+function show(i){idx=(i+photos.length)%photos.length;const p=photos[idx];el('big').src=p.url;el('original').href=p.url;el('post').href=p.post;el('counter').textContent=(idx+1)+' / '+photos.length;el('lightbox').classList.add('show');document.body.style.overflow='hidden'}
+function hide(){el('lightbox').classList.remove('show');document.body.style.overflow=''}
+el('close').onclick=hide;el('prev').onclick=()=>show(idx-1);el('next').onclick=()=>show(idx+1);
+document.addEventListener('keydown',e=>{if(e.key==='Escape')hide();if(el('lightbox').classList.contains('show')&&e.key==='ArrowRight')show(idx+1);if(el('lightbox').classList.contains('show')&&e.key==='ArrowLeft')show(idx-1)});
+el('lightbox').onclick=e=>{if(e.target===el('lightbox'))hide()};
+document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{view=b.dataset.view;document.querySelectorAll('[data-view]').forEach(x=>x.classList.toggle('active',x===b));el('albums').hidden=view!=='albums';el('media').hidden=view!=='media';el('search').style.display=view==='albums'?'':'none';view==='albums'?renderAlbums():renderMedia()});
+el('search').style.display='none';el('search').oninput=renderAlbums;
+Promise.all([fetch('feed.json?d='+Date.now()).then(r=>{if(!r.ok)throw Error(r.status);return r.json()}),fetch('albums.json').then(r=>r.json())]).then(([feed,cat])=>{photos=feed.images||[];albums=cat.albums||[];el('update').textContent='마지막 확인 '+(feed.updated||'정보 없음');renderFilters();renderMedia()}).catch(e=>{el('total').textContent='자료 읽기 실패';el('update').textContent=e.message});
+</script></body></html>
