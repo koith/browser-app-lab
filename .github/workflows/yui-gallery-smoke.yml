@@ -40,7 +40,7 @@ jobs:
           NODE
       - name: Install Playwright
         run: |
-          npm install --no-save playwright@1.58.2
+          npm install --no-save playwright@1.58.2 jszip@3.10.1
           npx playwright install chromium
       - name: Test real stored photobooks in mobile browser
         run: |
@@ -88,6 +88,11 @@ jobs:
             await browser.close();
           })().catch(e=>{console.error(e);process.exit(1)});
           NODE
+      - name: Verify complete private ZIP viewer in mobile Chromium
+        run: |
+          node --check apps/yui-gallery/zip-gallery.js
+          python -m http.server 8765 --directory apps/yui-gallery >/tmp/yui-zip-http.log 2>&1 &
+          node apps/yui-gallery/test_zip_gallery.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
