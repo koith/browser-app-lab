@@ -67,7 +67,7 @@ const BASE='http://127.0.0.1:8765/',API='http://127.0.0.1:8877';
   assert.ok(realPeers.every(view=>
    new Set(view.logical.map(p=>p.position.x+','+p.position.y)).size===2&&
    new Set(view.rendered.map(p=>p.seat)).size===2),
-   'two real central users cannot occupy the same original Registry seat on either device');
+   'two real central users cannot occupy the same original Registry seat on either device: '+JSON.stringify(realPeers));
     await host.locator('#message').fill('멀티기기 중앙 서버 메시지');
   await host.locator('#message').press('Enter');
   await guest.waitForFunction(()=>document.querySelector('#chat-log').textContent.includes('멀티기기 중앙 서버 메시지'),{timeout:15000});
