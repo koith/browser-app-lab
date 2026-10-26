@@ -89,13 +89,11 @@ jobs:
           assert len(report['remote_retrievals'])==810
           print('TERABOX_REAL_ACCOUNT_405_PHOTOS_FULL_SHA256_READBACK_PASS')
           PY
-      - name: Preserve audit-only evidence, never private photo bytes
+      - name: Preserve remote verification evidence as an individual JSON file
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
-          name: Yui-TeraBox-405-remote-hash-audit
-          path: |
-            cloud-stage/metadata/remote-verification.json
-            cloud-stage/metadata/catalog.json
+          path: cloud-stage/metadata/remote-verification.json
+          archive: false
           retention-days: 30
           if-no-files-found: ignore
