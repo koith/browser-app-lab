@@ -49,7 +49,10 @@ jobs:
           python -m http.server 8765 --directory apps/yui-gallery >/tmp/yui-web.log 2>&1 &
           node - <<'NODE'
           const {chromium}=require('playwright'),fs=require('fs');
-          const hasSources=fs.existsSync('apps/yui-gallery/source-viewer-albums.json');\n          const expandedFile='apps/yui-gallery/expanded-source-albums.json';\n          const extra=fs.existsSync(expandedFile)?JSON.parse(fs.readFileSync(expandedFile)): {albums:[]};\n          const extraCount=extra.albums.reduce((n,a)=>n+(a.images?.length||0),0);
+          const hasSources=fs.existsSync('apps/yui-gallery/source-viewer-albums.json');
+          const expandedFile='apps/yui-gallery/expanded-source-albums.json';
+          const extra=fs.existsSync(expandedFile)?JSON.parse(fs.readFileSync(expandedFile)): {albums:[]};
+          const extraCount=extra.albums.reduce((n,a)=>n+(a.images?.length||0),0);
           (async()=>{
             const browser=await chromium.launch({headless:true});
             const page=await browser.newPage({viewport:{width:390,height:844},acceptDownloads:true});
