@@ -80,7 +80,10 @@ def discover(url,steps=40):
                         found[number]=target
                 page.evaluate("window.scrollBy(0,Math.max(700,innerHeight*0.95))")
                 page.wait_for_timeout(160)
-            print("ARTICLE_DISCOVERY_DIAGNOSTICS","images_in_dom",len(items),"numbered_found",len(found),\n                  "sample_alt",[(x.get("alt") or "")[:30] for x in items[:8]],\n                  "sample_url",[(x.get("src") or "")[:130] for x in items[:5]],\n                  "body_prefix",page.locator("body").inner_text(timeout=7000)[:220],flush=True)
+            print("ARTICLE_DISCOVERY_DIAGNOSTICS","images_in_dom",len(items),"numbered_found",len(found),
+                  "sample_alt",[(x.get("alt") or "")[:30] for x in items[:8]],
+                  "sample_url",[(x.get("src") or "")[:130] for x in items[:5]],
+                  "body_prefix",page.locator("body").inner_text(timeout=7000)[:220],flush=True)
         finally:
             browser.close()
     return found
