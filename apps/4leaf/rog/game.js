@@ -671,6 +671,13 @@ function drawNativeChessmen(){
  root.dataset.playerId=String(p.id);
  root.dataset.selectedIndex=String(selectedIndex);
  root.dataset.playerName=p.name;
+ // The 2004 battle.jpg right-hand ability slots show tiny FULL-BODY
+ // Chessmen, not 75x141 CardData facial headshots. Only twenty recovered
+ // OBS members have had a human visual check of their true FRONT packet.
+ // Reuse the identical source authority used for live DMP/battle actors;
+ // never invent a front-facing direction for unreviewed OBS or an FX member.
+ const verifiedFront=window.__LEAF_GENESIS_ACTORS__?.getState()
+  ?.originalFrontVisualAudited||{};
  for(let i=0;i<4;i++){
   const cardId=p.team?.[i],source=cardId&&CARD_MAP[cardId],role=['공격','방어','지력','대기'][i];
   const slot=document.createElement(source?'button':'div');
@@ -683,7 +690,34 @@ function drawNativeChessmen(){
    slot.title=role+' · '+source.name+' / 이동 '+source.move+' 공격 '+source.atk+' 방어 '+source.def+' 지력 '+source.int;
    const img=document.createElement('img');
    img.className='dice-chessman-face';
-   img.src=imageFor(source.id);
+   // source.id is a genuine CardData ID e.g. c_0042. Keep the CardData
+   // artwork for modal details, but display an actual native source FRONT
+   // OBS full-body as the 2004 right 2x2 panel did when provenance is
+   // VERIFIED, with an automatic fallback if the source PNG is unavailable.
+   const obsId=source.id.startsWith('c_')?source.id.slice(2):'';
+   const auditedIndex=Object.hasOwn(verifiedFront,obsId)
+    ?verifiedFront[obsId]:null;
+   const sourceMember=window.ORIGINAL_LEAF_OBS_FRAMES?.[obsId];
+   const fullBody=auditedIndex===null?null:
+    sourceMember?.frames?.find(frame=>frame.index===auditedIndex);
+   if(fullBody){
+    img.classList.add('dice-chessman-original-obs');
+    img.src=fullBody.url;
+    img.dataset.originalMember=sourceMember.originalMember||('10'+obsId.slice(2)+'.obs');
+    img.dataset.nativeFrontFrame=String(auditedIndex);
+    slot.dataset.rightPortraitSource='OBS.pak/verified-front';
+    slot.dataset.rightPortraitFacingEvidence='visually-reviewed';
+    img.onerror=()=>{
+     img.onerror=null;img.src=imageFor(source.id);
+     img.classList.remove('dice-chessman-original-obs');
+     slot.dataset.rightPortraitSource='CardData/original-fallback-source-404';
+     slot.dataset.rightPortraitFacingEvidence='source-load-failed';
+    };
+   }else{
+    img.src=imageFor(source.id);
+    slot.dataset.rightPortraitSource='CardData/original-fallback-direction-unverified';
+    slot.dataset.rightPortraitFacingEvidence='unknown';
+   }
    img.alt=source.name;
    img.loading='eager';
    const stamp=document.createElement('span');stamp.className='dice-chessman-moon';
