@@ -12,6 +12,7 @@ import hashlib
 import json
 import re
 import subprocess
+import tempfile
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 from pathlib import Path
@@ -19,20 +20,28 @@ from pathlib import Path
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
 
 
-def read_remote(remote: str, key: str) -> bytes:
+def remote_digest(remote: str, key: str, limit: int) -> tuple[int, str]:
+    """Stream remote bytes to a scratch file, then hash with bounded RAM."""
     try:
-        result = subprocess.run(
-            ["rclone", "cat", f"{remote.rstrip('/')}/{key}",
-             "--timeout=50s", "--retries=2"],
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=130,
-            check=False,
-        )
+        with tempfile.TemporaryFile() as output:
+            result = subprocess.run(
+                ["rclone", "cat", f"{remote.rstrip('/')}/{key}",
+                 "--timeout=50s", "--retries=2"],
+                stdout=output, stderr=subprocess.DEVNULL, timeout=130,
+                check=False,
+            )
+            if result.returncode:
+                raise RuntimeError(f"Remote read failed ({result.returncode}): {key}")
+            length = output.tell()
+            if length > limit:
+                raise ValueError(f"Remote asset larger than allowed: {key}")
+            output.seek(0)
+            digest = hashlib.sha256()
+            while chunk := output.read(256 * 1024):
+                digest.update(chunk)
+            return length, digest.hexdigest()
     except subprocess.TimeoutExpired as error:
         raise RuntimeError(f"Remote read timed out: {key}") from error
-    if result.returncode:
-        # Error output may include private infrastructure details. Never log it.
-        raise RuntimeError(f"Remote read failed ({result.returncode}): {key}")
-    return result.stdout
 
 
 def file_specs(catalog: dict) -> list[tuple[str, int, str]]:
@@ -73,11 +82,10 @@ def verify_media(stage: Path, remote: str, workers: int) -> dict:
 
     def verify_one(spec: tuple[str, int, str]) -> dict:
         key, size, digest = spec
-        blob = read_remote(remote, key)
-        observed = hashlib.sha256(blob).hexdigest()
-        if len(blob) != size or observed != digest:
+        length, observed = remote_digest(remote, key, limit=size + 1)
+        if length != size or observed != digest:
             raise ValueError(f"Remote byte/hash mismatch: {key}")
-        return {"key": key, "remote_sha256": observed, "bytes": len(blob)}
+        return {"key": key, "remote_sha256": observed, "bytes": length}
 
     verified = []
     with ThreadPoolExecutor(max_workers=workers) as pool:
@@ -101,10 +109,10 @@ def verify_media(stage: Path, remote: str, workers: int) -> dict:
 
 def verify_catalog(stage: Path, remote: str) -> None:
     local = (stage / "metadata/catalog.json").read_bytes()
-    retrieved = read_remote(remote, "metadata/catalog.json")
-    if hashlib.sha256(local).digest() != hashlib.sha256(retrieved).digest():
+    size, retrieved_digest = remote_digest(remote, "metadata/catalog.json", limit=len(local) + 1)
+    if size != len(local) or hashlib.sha256(local).hexdigest() != retrieved_digest:
         raise ValueError("Remote catalogue differs from the local validated catalogue")
-    print("REMOTE_CATALOG_SHA256_VERIFIED", hashlib.sha256(retrieved).hexdigest(), flush=True)
+    print("REMOTE_CATALOG_SHA256_VERIFIED", retrieved_digest, flush=True)
 
 
 def main() -> None:
