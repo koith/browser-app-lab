@@ -1,5 +1,5 @@
 {
-  "version": "v0.1.0-beta.3",
+  "version": "v0.1.0-beta.4",
   "date": "2026-10-27",
   "policy": {
     "monthly_charge_krw": 0,
@@ -38,16 +38,21 @@
     "source_catalog_huantuji_entries": 11,
     "source_catalog_duplicated_across_sites": true,
     "iphone_real_device_verified": false,
-    "owner_gallery_remote_hosted_count": "pending_405_manifest_live_verification"
+    "owner_gallery_remote_hosted_count": "pending_authenticated_storage_connection",
+    "newly_acquired_web_images": 197,
+    "additional_source_gallery_images": 117,
+    "source_browser_decode_verified_images": 405,
+    "local_browser_download_sha256_verified_images": 26
   },
   "notes": [
     "A private Google Drive ZIP is only a temporary safety copy, not the user-approved primary archive.",
-    "The public index stores only earlier 26 preview files; 405 actual files reside inside a private ZIP.",
     "TeraBox account is not connected; do not claim a cloud gallery or automatic upload is live.",
     "The 405 downloaded images are public web versions, not publisher source originals.",
     "Listed works, publicly available images, privately stored files, and publisher originals are counted separately.",
     "Since beta.2, active album collectors, the scheduled discovery pipeline, and cloud staging use individually verified files rather than compressed photo bundles.",
-    "The source-viewer album layer shows links to originally publicly hosted full web images and is not the private archived binary storage."
+    "The source-viewer album layer shows links to originally publicly hosted full web images and is not the private archived binary storage.",
+    "beta.4 recovered 405 unchanged individual source files; primary private cloud remains unconnected. Owner-session main-gallery integration is implemented but live deployment is pending.",
+    "Additional 197 physical photos acquired: Seethrough 80 and Thru Thru 117. Only the 117 provenance-complete entries are registered in this initial additional source manifest; remote private storage is still zero."
   ],
   "archiving_engine": {
     "mode": "individual_files",
@@ -57,6 +62,7 @@
     "live_gallery_images": 26,
     "free_tools": "Python + Playwright + Pillow + rclone",
     "source_viewer": "source-hosted image manifest, not a cloud storage claim",
-    "open_source_crawler": "gallery-dl + browser source-specific collectors"
+    "open_source_crawler": "gallery-dl + browser source-specific collectors",
+    "preview_policy": "unchanged_source_bytes_no_reencoding"
   }
 }

@@ -1,0 +1,52 @@
+name: Yui Full Image and Owner Gallery Verification
+on:
+  push:
+    paths:
+      - apps/yui-gallery/**
+      - .github/workflows/yui-gallery-verification.yml
+  pull_request:
+    paths:
+      - apps/yui-gallery/**
+      - .github/workflows/yui-gallery-verification.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verified-viewing:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install free local tools
+        run: |
+          pip install Pillow requests playwright gallery-dl fastapi httpx
+          python -m playwright install --with-deps ${{ matrix.engine }}
+      - name: Verify byte preservation and collector behavior
+        run: |
+          node apps/yui-gallery/test_version.cjs
+          python apps/yui-gallery/test_gallery_dl_collector.py
+          python apps/yui-gallery/test_source_viewer_manifest.py
+          python apps/yui-gallery/cloud/test_ingest_directories.py
+          python apps/yui-gallery/cloud/test_verify_remote.py
+          python apps/yui-gallery/cloud/test_gateway.py
+      - name: Decode every source image and verify all local downloads
+        run: |
+          python -m http.server 8765 --directory apps/yui-gallery >/tmp/yui-http.log 2>&1 &
+          python apps/yui-gallery/qa_gallery.py --engine ${{ matrix.engine }} --out yui-${{ matrix.engine }}.json
+          python apps/yui-gallery/qa_owner_media.py --engine ${{ matrix.engine }}
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          path: yui-${{ matrix.engine }}.json
+          archive: false
+          if-no-files-found: ignore

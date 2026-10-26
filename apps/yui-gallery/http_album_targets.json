@@ -1,0 +1,7 @@
+{
+  "sources": [
+    {"id":"thru-thru117", "title":"SWEETBOX — Yui Thru Thru", "url":"https://misskon.com/sweetbox-yui-swtb-vol-49-thru-thru-117-photos/", "adapter":"misskon", "expected":117},
+    {"id":"sweet-dream109", "title":"SWEETBOX — Yui Sweet Dream", "url":"https://4kup.net/sweetbox-yui-swtb-vol-36-sweet-dream/", "adapter":"4kup", "expected":109},
+    {"id":"cream228", "title":"SWEETBOX — Yui CREAM", "url":"https://www.junmeitu.com/en/beauty/014_vol_18_cream_yui_228p-20.html", "adapter":"junmeitu", "expected":228}
+  ]
+}

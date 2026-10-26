@@ -1,0 +1,43 @@
+{
+  "checked_at": "2026-10-26T17:17:31.714251+00:00",
+  "method": "HTTP 200 + unchanged SHA256 + complete image decode",
+  "private_cloud_verified": 0,
+  "albums": [
+    {
+      "id": "yuis-present33",
+      "expected": 33,
+      "verified_files": 33,
+      "new_local_files": 33,
+      "bytes": 2003214
+    },
+    {
+      "id": "athletic-club104",
+      "expected": 104,
+      "verified_files": 104,
+      "new_local_files": 104,
+      "bytes": 9917254
+    },
+    {
+      "id": "wet-yui80",
+      "expected": 80,
+      "verified_files": 80,
+      "new_local_files": 80,
+      "bytes": 3045168
+    },
+    {
+      "id": "teddy-bear97",
+      "expected": 97,
+      "verified_files": 97,
+      "new_local_files": 97,
+      "bytes": 8783492
+    },
+    {
+      "id": "green91",
+      "expected": 91,
+      "verified_files": 91,
+      "new_local_files": 91,
+      "bytes": 7563371
+    }
+  ],
+  "failures": []
+}

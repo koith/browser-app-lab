@@ -43,7 +43,14 @@ def verify_files(folder:Path)->list[dict]:
         if min(width,height)<300:
             continue
         seen.add(digest)
-        images.append({"path":str(item.relative_to(folder)),"sha256":digest,
+        metadata={}
+        for sidecar in (item.with_suffix(item.suffix+".json"),item.with_suffix(".json")):
+            if sidecar.is_file():
+                metadata=json.loads(sidecar.read_text());break
+        images.append({"number":metadata.get("num",int(item.stem) if item.stem.isdecimal() else None),
+                       "url":metadata.get("image_url",""),"source_page":metadata.get("source_page",""),
+                       "title":metadata.get("title",""),"ai_enhanced":metadata.get("ai_enhanced",False),
+                       "path":str(item.relative_to(folder)),"sha256":digest,
                        "width":width,"height":height,"bytes":len(blob)})
     return images
 
@@ -60,8 +67,8 @@ def crawl_one(target:dict, base:Path, *, executable="gallery-dl", max_images=40,
     db.parent.mkdir(parents=True,exist_ok=True)
     # Gallery-dl's --download-archive is a SQLite download HISTORY, not a ZIP.
     # The --directory option writes individual files; no postprocessing / reencoding.
-    cmd=[executable,"--extractors","apps/yui-gallery/gallery_dl_extractors","--no-input","--no-mtime","--no-postprocessors",
-         "--directory",str(folder),"--download-archive",str(db),
+    cmd=[executable,"--extractors",str(Path(__file__).with_name("gallery_dl_extractors").resolve()),"--ignore-config","--no-input","--no-mtime",
+         "--write-metadata","--directory",str(folder),"--download-archive",str(db),
          "--filesize-min","5k","--filesize-max","50M",
          "--sleep-request","1.0","--sleep","0.5",
          "--range",f"1-{max_images}",url]
@@ -79,12 +86,25 @@ def crawl_one(target:dict, base:Path, *, executable="gallery-dl", max_images=40,
     if photos:
         status="verified_physical_images" if status=="ok" else "partial_verified_images"
     record={"id":site_id,"url":url,"status":status,"return_code":code,
-            "images":photos,"physical_verified":len(photos),
+            "expected":target.get("expected"),"images":photos,"physical_verified":len(photos),
             "elapsed_seconds":round(time.monotonic()-started,2),
             "errors":detail,"collector":"gallery-dl"}
     (folder/"manifest.json").write_text(json.dumps(record,ensure_ascii=False,indent=2)+"\n")
     if list(folder.rglob("*.zip")) or list(folder.rglob("*.cbz")):
         raise AssertionError("Compression output forbidden")
+    expected=target.get("expected")
+    if expected and len(photos)==expected and {p["number"] for p in photos}==set(range(1,expected+1)):
+        dest=base/"verified-albums"/site_id
+        dest.mkdir(parents=True,exist_ok=True)
+        entries=[]
+        for photo in photos:
+            filename=f"{photo['number']:04d}"+Path(photo['path']).suffix
+            shutil.copyfile(folder/photo['path'],dest/filename)
+            entries.append({**photo,"file":filename})
+        manifest={"id":site_id,"expected":expected,"title":photos[0].get("title") or site_id,
+                  "source_page":url,"ai_enhanced":photos[0].get("ai_enhanced",False),
+                  "publisher_original_verified":False,"images":sorted(entries,key=lambda p:p['number'])}
+        (dest/"manifest.json").write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+"\n")
     return record
 
 def run(targets:Path, base:Path, max_sources:int=4,max_images:int=40,executable="gallery-dl"):
@@ -106,6 +126,7 @@ def run(targets:Path, base:Path, max_sources:int=4,max_images:int=40,executable=
 
 if __name__=="__main__":
     parser=argparse.ArgumentParser()
+    parser.add_argument("--strict",action="store_true",help="Fail on zero files or an incomplete full-album run")
     parser.add_argument("--targets",type=Path,default=Path("apps/yui-gallery/gallery_dl_targets.json"))
     parser.add_argument("--out",type=Path,default=Path("yui-open-source-crawler"))
     parser.add_argument("--max-sources",type=int,default=4)
@@ -113,4 +134,8 @@ if __name__=="__main__":
     args=parser.parse_args()
     if not 1<=args.max_sources<=500 or not 1<=args.max_images<=1000:
         parser.error("Expected 1..500 source pages and 1..1000 images per page")
-    run(args.targets,args.out,args.max_sources,args.max_images)
+    report=run(args.targets,args.out,args.max_sources,args.max_images)
+    if args.strict and any(x['return_code']!=0 or x['physical_verified']==0 or
+            (x.get('expected') and args.max_images>=x['expected'] and x['physical_verified']!=x['expected'])
+            for x in report['extractors']):
+        raise SystemExit('Extractor failed/incomplete; see gallery-dl-report.json')
