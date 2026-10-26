@@ -1,0 +1,68 @@
+{
+  "version": 1,
+  "site_access": "publicly displayed previews only, no authentication, subscription resources, or protected downloads",
+  "sources": [
+    {
+      "id": "huantuji-yui-collection",
+      "url": "https://www.huantuji.com/yui/",
+      "image_hosts": [
+        "image.huantuji.com"
+      ],
+      "max_pages": 10,
+      "scroll_limit": 30,
+      "declared_photos": null
+    },
+    {
+      "id": "chaotuji-yui-collection",
+      "url": "https://www.chaotuji.com/yui/",
+      "image_hosts": [
+        "image.chaotuji.com"
+      ],
+      "max_pages": 10,
+      "scroll_limit": 30,
+      "declared_photos": null
+    },
+    {
+      "id": "miaohuaying-yui-collection",
+      "url": "https://www.miaohuaying.com/yui/",
+      "image_hosts": [
+        "img.miaohuaying.com"
+      ],
+      "max_pages": 10,
+      "scroll_limit": 30,
+      "declared_photos": null
+    },
+    {
+      "id": "yuntu8-yui-profile",
+      "url": "https://yuntu8.com/1748.html",
+      "image_hosts": [
+        "pic1.imgdb.cn"
+      ],
+      "max_pages": 8,
+      "scroll_limit": 30,
+      "declared_photos": null
+    },
+    {
+      "id": "wantuzhi-everyday-life",
+      "url": "https://wantuzhi.com/yui-simyu-everyday-life",
+      "image_hosts": [
+        "download.wantuzhi.com"
+      ],
+      "max_pages": 12,
+      "scroll_limit": 30,
+      "declared_photos": 194
+    },
+    {
+      "id": "yingyuge-yui-collection",
+      "url": "https://www.yingyuge.com/809.html",
+      "image_hosts": [
+        "i1.wp.com",
+        "i3.wp.com",
+        "i0.wp.com"
+      ],
+      "max_pages": 10,
+      "scroll_limit": 30,
+      "declared_photos": null
+    }
+  ]
+}
