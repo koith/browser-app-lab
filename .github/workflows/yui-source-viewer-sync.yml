@@ -6,6 +6,8 @@ on:
       - apps/yui-gallery/build_source_viewer_manifest.py
       - apps/yui-gallery/test_source_viewer_manifest.py
       - apps/yui-gallery/gallery_dl_collector.py
+      - apps/yui-gallery/gallery_dl_extractors/**
+      - apps/yui-gallery/gallery_dl_targets.json
       - apps/yui-gallery/test_gallery_dl_collector.py
   workflow_dispatch:
   schedule:
@@ -35,9 +37,25 @@ jobs:
           python apps/yui-gallery/test_gallery_dl_collector.py
           python apps/yui-gallery/test_source_viewer_manifest.py
       - name: Run gallery-dl against existing approved public source pages
-        continue-on-error: true
         run: |
           python apps/yui-gallery/gallery_dl_collector.py --max-sources 2 --max-images 3
+          python - <<'PY'
+          import json,hashlib
+          from pathlib import Path
+          root=Path('yui-open-source-crawler')
+          data=json.loads((root/'gallery-dl-report.json').read_text())
+          assert data['attempted_source_pages']==2
+          assert data['physical_files']>=2, data
+          for entry in data['extractors']:
+              p=root/'photos'/entry['id']/'manifest.json'
+              report=json.loads(p.read_text())
+              assert report['physical_verified']>=1,report
+              for im in report['images']:
+                  path=root/'photos'/entry['id']/im['path']
+                  assert path.is_file() and path.stat().st_size==im['bytes']
+                  assert hashlib.sha256(path.read_bytes()).hexdigest()==im['sha256']
+          print('REAL_GALLERY_DL_EXTRACTOR_TWO_ALBUMS_PASS',data['physical_files'])
+          PY
       - name: Re-collect individual web photos with source-specific free browser extractors
         run: |
           python apps/yui-gallery/download_jliji_collections.py
