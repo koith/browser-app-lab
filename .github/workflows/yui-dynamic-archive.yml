@@ -6,6 +6,7 @@ on:
     paths:
       - apps/yui-gallery/archive_engine.py
       - apps/yui-gallery/archive_selftest.py
+      - apps/yui-gallery/test_archive_individual.py
       - apps/yui-gallery/source_targets.json
       - apps/yui-gallery/promote_downloaded_previews.py
       - .github/workflows/yui-dynamic-archive.yml
@@ -32,6 +33,7 @@ jobs:
         run: |
           python -m py_compile apps/yui-gallery/archive_engine.py apps/yui-gallery/archive_selftest.py
           python apps/yui-gallery/archive_selftest.py
+          python apps/yui-gallery/test_archive_individual.py
       - name: Live public previews, scroll and paginate
         run: |
           python apps/yui-gallery/archive_engine.py --max-pages 3 --max-images 40
