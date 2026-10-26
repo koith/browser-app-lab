@@ -1,0 +1,47 @@
+name: Yui Named Photobook Preview Import
+on:
+  push:
+    paths:
+      - apps/yui-gallery/fetch_known_album_previews.py
+      - apps/yui-gallery/known-album-preview-urls.json
+      - .github/workflows/yui-named-photobook.yml
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  import:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install requests Pillow
+      - name: Import actual public album previews
+        run: |
+          python -m py_compile apps/yui-gallery/fetch_known_album_previews.py
+          python apps/yui-gallery/fetch_known_album_previews.py
+      - name: Verify actual image files
+        run: |
+          python - <<'PY'
+          import json,hashlib
+          from pathlib import Path
+          root=Path('apps/yui-gallery')
+          groups=json.loads((root/'stored-albums.json').read_text())['albums']
+          v04=next(x for x in groups if x['id']=='v04')
+          count=0
+          for x in v04['images']:
+            p=root/x['url']
+            assert p.exists()
+            assert hashlib.sha256(p.read_bytes()).hexdigest()==x['sha256']
+            count+=1
+          assert count>=3
+          print('VERIFIED_NAMED_PHOTOBOOK',v04['title'],count,'of',v04['expected'])
+          PY
+      - name: Publish to the stored album gallery
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/yui-gallery/stored-albums apps/yui-gallery/stored-albums.json
+          git diff --cached --quiet || (git commit -m "Store actual Teddy Bear publicly displayed album images" && git push)
