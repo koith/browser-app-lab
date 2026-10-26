@@ -1,0 +1,50 @@
+name: 4LEAF source IMG live chat history scroll QA
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/tests/dice-source-native-ui.cjs'
+      - 'apps/4leaf/rog/dice-source-native-chat-scroll.js'
+      - 'apps/4leaf/rog/game.js'
+      - '.github/workflows/rog-native-chat-scroll-qa.yml'
+  workflow_run:
+    workflows: ['Deploy static content to Pages']
+    types: [completed]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  real-native-chat-history:
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          npm install --no-save playwright
+          npx playwright install chromium --with-deps
+      - name: Serve original 2002 working chat controls on PR
+        if: github.event_name != 'workflow_run'
+        run: |
+          nohup python3 -m http.server 8765 --directory apps/4leaf/rog >/tmp/leaf-chat-img.log 2>&1 &
+          for i in 1 2 3 4 5 6 7; do
+            if curl -fSsI http://127.0.0.1:8765/index.html >/dev/null 2>&1; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/leaf-chat-img.log
+          exit 1
+      - name: Real user IMG scroll wheel, genuine buttons, keyboard and transcript preservation
+        env:
+          FOURLEAF_TEST_URL: ${{ github.event_name == 'workflow_run' && 'https://koith.github.io/browser-app-lab/apps/4leaf/rog/' || 'http://127.0.0.1:8765/' }}
+        run: node apps/4leaf/rog/tests/dice-source-native-ui.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: 4leaf-source-chat-scroll-${{ github.event_name }}
+          path: leaf-original-dice-2002-ui-buttons.png
+          retention-days: 14
