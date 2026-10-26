@@ -1,6 +1,6 @@
 {
-  "version": "v0.1.0-beta.1",
-  "date": "2026-10-26",
+  "version": "v0.1.0-beta.2",
+  "date": "2026-10-27",
   "policy": {
     "monthly_charge_krw": 0,
     "payment_card_required": false,
@@ -44,6 +44,15 @@
     "The public index stores only earlier 26 preview files; 405 actual files reside inside a private ZIP.",
     "TeraBox account is not connected; do not claim a cloud gallery or automatic upload is live.",
     "The 405 downloaded images are public web versions, not publisher source originals.",
-    "Listed works, publicly available images, privately stored files, and publisher originals are counted separately."
-  ]
+    "Listed works, publicly available images, privately stored files, and publisher originals are counted separately.",
+    "Since beta.2, active album collectors, the scheduled discovery pipeline, and cloud staging use individually verified files rather than compressed photo bundles."
+  ],
+  "archiving_engine": {
+    "mode": "individual_files",
+    "bundle_generation": false,
+    "dynamic_collector": "per-source SHA256 manifests",
+    "cloud_stage": "verified individual folders",
+    "live_gallery_images": 26,
+    "free_tools": "Python + Playwright + Pillow + rclone"
+  }
 }
