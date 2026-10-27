@@ -22,8 +22,10 @@ jobs:
         include:
           - engine: chromium
             os: ubuntu-24.04
+            workers: 3
           - engine: webkit
             os: ubuntu-24.04
+            workers: 1
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -54,10 +56,11 @@ jobs:
           python apps/yui-gallery/cloud/test_gateway.py
       - name: Verify mobile navigation, decode every image and check original links
         run: |
+          python apps/yui-gallery/test_browser_image_checks.py --engine ${{ matrix.engine }}
           python -m http.server 8765 --directory apps/yui-gallery >/tmp/yui-http.log 2>&1 &
           python apps/yui-gallery/qa_album_covers.py --engine ${{ matrix.engine }} --out yui-covers-${{ matrix.engine }}.json
           python apps/yui-gallery/qa_mobile_navigation.py --engine ${{ matrix.engine }} --out yui-navigation-${{ matrix.engine }}.json
-          python apps/yui-gallery/qa_gallery.py --engine ${{ matrix.engine }} --out yui-${{ matrix.engine }}.json
+          python apps/yui-gallery/qa_gallery.py --engine ${{ matrix.engine }} --workers ${{ matrix.workers }} --out yui-${{ matrix.engine }}.json
           python apps/yui-gallery/qa_owner_media.py --engine ${{ matrix.engine }}
       - name: Re-download all beta.10 selections and verify source SHA-256
         if: matrix.engine == 'chromium'
