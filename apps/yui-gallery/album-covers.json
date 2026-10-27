@@ -1,0 +1,500 @@
+{
+  "schema_version": 1,
+  "not_identity_recognition": true,
+  "source_pixels_unchanged": true,
+  "card_aspect_ratio": [
+    3,
+    2
+  ],
+  "covers": {
+    "yuis-present33": {
+      "sha256": "1ec0e77468044f2fd445b65a544e973e30040c0d4a02cbc1226aa3e9017c7679",
+      "number": 2,
+      "width": 1024,
+      "height": 1515,
+      "face": [
+        388,
+        286,
+        196,
+        196
+      ],
+      "position": [
+        50,
+        7.587
+      ],
+      "fit": "cover",
+      "method": "local_face_region_and_eye_detection",
+      "confidence": 5.186
+    },
+    "athletic-club104": {
+      "sha256": "2a3e366cc1efc368ebb879650a3e297ae5ae5af5fe66cf65082e7425c17f5880",
+      "number": 18,
+      "width": 1024,
+      "height": 1537,
+      "face": [
+        104,
+        292,
+        154,
+        154
+      ],
+      "position": [
+        50,
+        5.636
+      ],
+      "fit": "cover",
+      "method": "local_face_region_and_eye_detection",
+      "confidence": 5.111
+    },
+    "wet-yui80": {
+      "sha256": "7443b55339fa2a2affca7a8cd58962110958cf0319dc0b53cf9ac6b3cc4e6e84",
+      "number": 29,
+      "width": 1024,
+      "height": 683,
+      "face": [
+        73,
+        96,
+        155,
+        155
+      ],
+      "position": [
+        50,
+        0.0
+      ],
+      "fit": "cover",
+      "method": "local_face_region_and_eye_detection",
+      "confidence": 3.634
+    },
+    "teddy-bear97": {
+      "sha256": "60cfe6643a16de5c4f7f2826c1f714392fe141a3be32e15c645beb5d34c5edab",
+      "number": 8,
+      "width": 1800,
+      "height": 2699,
+      "face": [
+        659,
+        563,
+        416,
+        416
+      ],
+      "position": [
+        50,
+        13.809
+      ],
+      "fit": "cover",
+      "method": "local_face_region_and_eye_detection",
+      "confidence": 6.368
+    },
+    "thru-thru117": {
+      "sha256": "ca8b2aa34b550414fd99370d681dbe2f6e80c1ea31332e44262a460b0140cd3c",
+      "number": 2,
+      "width": 1024,
+      "height": 683,
+      "face": [
+        566,
+        94,
+        123,
+        123
+      ],
+      "position": [
+        50,
+        0.0
+      ],
+      "fit": "cover",
+      "method": "local_face_region_and_eye_detection",
+      "confidence": 8.723
+    },
+    "sweet-dream110": {
+      "sha256": "6955e0e25adc958d5251816d7b6aea6ca393141af0529774d38630efca75f891",
+      "number": 8,
+      "width": 1920,
+      "height": 1281,
+      "face": [
+        1285,
+        366,
+        200,
+        200
+      ],
+      "position": [
+        50,
+        0.0
+      ],
+      "fit": "cover",
+      "method": "local_face_region_and_eye_detection",
+      "confidence": 4.91
+    },
+    "cream228": {
+      "sha256": "008b2115886b0165515621dad4e7546ad248d838bb1b99a42be75729518a6428",
+      "number": 2,
+      "width": 1366,
+      "height": 2048,
+      "face": [
+        509,
+        506,
+        350,
+        350
+      ],
+      "position": [
+        50,
+        22.244
+      ],
+      "fit": "cover",
+      "method": "local_face_region_and_eye_detection",
+      "confidence": 6.569
+    },
+    "seethrough80": {
+      "sha256": "e5cda1d2005788923c8573a8ec5c3cac798b37335c177395ce8cefe5e0ffc26a",
+      "number": 2,
+      "width": 1667,
+      "height": 2500,
+      "face": [
+        414,
+        314,
+        373,
+        373
+      ],
+      "position": [
+        50,
+        0.0
+      ],
+      "fit": "cover",
+      "method": "local_face_region_and_eye_detection",
+      "confidence": 6.141
+    },
+    "ramen125": {
+      "sha256": "2a4476e4ee152fa57487d218530d759608346378ddbde433563b25799685bc7c",
+      "number": 8,
+      "width": 1281,
+      "height": 1920,
+      "face": [
+        624,
+        241,
+        285,
+        285
+      ],
+      "position": [
+        50,
+        0.0
+      ],
+      "fit": "cover",
+      "method": "local_face_region_and_eye_detection",
+      "confidence": 4.213
+    },
+    "heart-steal78": {
+      "sha256": "7d089c003915931700f991e3a645138876bdf079a96a62249cc6ff3b493aa832",
+      "number": 3,
+      "width": 1281,
+      "height": 1920,
+      "face": [
+        170,
+        159,
+        335,
+        335
+      ],
+      "position": [
+        50,
+        0.0
+      ],
+      "fit": "cover",
+      "method": "local_face_region_and_eye_detection",
+      "confidence": 4.448
+    },
+    "tracksuit201": {
+      "sha256": "d620c7caed52aca06cdc124f70601a8fb3e01583f1c6a89ed58288f8fcda21cb",
+      "number": 2,
+      "width": 1875,
+      "height": 2500,
+      "face": [
+        545,
+        843,
+        264,
+        264
+      ],
+      "position": [
+        50,
+        31.0
+      ],
+      "fit": "cover",
+      "method": "local_face_region_and_eye_detection",
+      "confidence": 6.362
+    },
+    "maid291": {
+      "sha256": "bdb0316650ed2d142b14a226daf03667545cc6e906de9a65cd8c10632e613802",
+      "number": 10,
+      "width": 1026,
+      "height": 1368,
+      "face": [
+        439,
+        346,
+        109,
+        109
+      ],
+      "position": [
+        50,
+        11.553
+      ],
+      "fit": "cover",
+      "method": "local_face_region_and_eye_detection",
+      "confidence": 4.947
+    },
+    "last-summer192": {
+      "sha256": "d2024b58e35555e7d742986ab5502e50e6183785883c51044894ad30288a3cd2",
+      "number": 8,
+      "width": 912,
+      "height": 1368,
+      "face": [
+        322,
+        259,
+        246,
+        246
+      ],
+      "position": [
+        50,
+        12.663
+      ],
+      "fit": "cover",
+      "method": "local_face_region_and_eye_detection",
+      "confidence": 4.01
+    },
+    "kuro-yui58": {
+      "sha256": "f16d4859bf80ba0d3330ba529df409bc46198d901db049d3097aecfae6bb150e",
+      "number": 37,
+      "width": 1555,
+      "height": 2331,
+      "face": [
+        829,
+        316,
+        216,
+        216
+      ],
+      "position": [
+        50,
+        0.0
+      ],
+      "fit": "cover",
+      "method": "local_face_region_and_eye_detection",
+      "confidence": 3.779
+    },
+    "yui-vol3-106": {
+      "sha256": "9ee67c514500dc5f5a76ea5f2d91e5cfa73b0efc680f2261624b0f6c76cc7a34",
+      "number": 11,
+      "width": 912,
+      "height": 1368,
+      "face": [
+        477,
+        112,
+        256,
+        256
+      ],
+      "position": [
+        50,
+        0.0
+      ],
+      "fit": "cover",
+      "method": "local_face_region_and_eye_detection",
+      "confidence": 7.084
+    },
+    "blackroom145": {
+      "sha256": "9cd774c91873fff11ab8269a0588b1b249693fb34d189e4f9e7075f80a88bd5f",
+      "number": 34,
+      "width": 1368,
+      "height": 912,
+      "face": [
+        472,
+        152,
+        157,
+        157
+      ],
+      "position": [
+        50,
+        50
+      ],
+      "fit": "cover",
+      "method": "local_face_region_and_eye_detection",
+      "confidence": 4.925
+    },
+    "pussylet41-82": {
+      "sha256": "03df535a4393d412a4dca1391f695e58f172e3517da1f47616ecc3f32b219080",
+      "number": 2,
+      "width": 912,
+      "height": 1368,
+      "face": [
+        488,
+        285,
+        132,
+        132
+      ],
+      "position": [
+        50,
+        8.584
+      ],
+      "fit": "cover",
+      "method": "local_face_region_and_eye_detection",
+      "confidence": 4.677
+    },
+    "dec2023-199": {
+      "sha256": "a3f470eb60dd5ecf7acab1b1fe55ab4557319ae8bea98b99e7c7c2edc7cbe4a6",
+      "number": 2,
+      "width": 912,
+      "height": 1368,
+      "face": [
+        282,
+        307,
+        163,
+        163
+      ],
+      "position": [
+        50,
+        13.518
+      ],
+      "fit": "cover",
+      "method": "local_face_region_and_eye_detection",
+      "confidence": 5.505
+    },
+    "artgravia663-ai32": {
+      "sha256": "2a9c5473bd3e31d21590e2a20f4d9aa980fe3c2afe932d93d597076cdf77acae",
+      "number": 1,
+      "width": 1034,
+      "height": 1368,
+      "face": [
+        408,
+        201,
+        245,
+        245
+      ],
+      "position": [
+        50,
+        0.0
+      ],
+      "fit": "cover",
+      "method": "local_face_region_and_eye_detection",
+      "confidence": 4.15
+    },
+    "cn-wantuzhi-everyday": {
+      "sha256": "e8bb0187756825ee444380e241513cdee925e32887003997e7ea48d55e6f871a",
+      "number": 1,
+      "width": 924,
+      "height": 720,
+      "face": [
+        264,
+        216,
+        381,
+        381
+      ],
+      "position": [
+        50,
+        100.0
+      ],
+      "fit": "cover",
+      "method": "local_face_region_and_eye_detection",
+      "confidence": 4.19
+    },
+    "green91": {
+      "sha256": "18b0423c1ab6617b490dacc53dbe2c255d6d6c59542fbe93fbc01bdc5b819ed6",
+      "number": 1,
+      "width": 924,
+      "height": 1368,
+      "face": [
+        370,
+        330,
+        160,
+        170
+      ],
+      "position": [
+        50,
+        16.686
+      ],
+      "fit": "cover",
+      "method": "manual_face_region_review"
+    },
+    "yui-vol2-42": {
+      "sha256": "a4e2b92b57ac52c491d942847b2f9fd58797534f75356a8e83e0b9570f14cadc",
+      "number": 1,
+      "width": 1026,
+      "height": 1368,
+      "face": [
+        484,
+        170,
+        300,
+        255
+      ],
+      "position": [
+        50,
+        0.0
+      ],
+      "fit": "cover",
+      "method": "manual_face_region_review"
+    },
+    "cn-huantuji": {
+      "sha256": "d1e18de42a52f4406cb95bd80e82e74b50c51df0efd8fbc53d5dfe2d4978c095",
+      "number": 1,
+      "width": 2048,
+      "height": 1366,
+      "face": [
+        175,
+        285,
+        430,
+        400
+      ],
+      "position": [
+        50,
+        0.0
+      ],
+      "fit": "cover",
+      "method": "manual_face_region_review"
+    },
+    "cn-chaotuji": {
+      "sha256": "2f834892360882d2b2d98d730d7a26756d96566af676ff714cd0e218b42291e6",
+      "number": 1,
+      "width": 853,
+      "height": 1280,
+      "face": [
+        230,
+        195,
+        210,
+        235
+      ],
+      "position": [
+        50,
+        6.358
+      ],
+      "fit": "cover",
+      "method": "manual_face_region_review"
+    },
+    "cn-yuntu8": {
+      "sha256": "185e982bd6c76df4787fc0d2173116c99a995725692d38ebcfd74e80f3c5497c",
+      "number": 1,
+      "width": 846,
+      "height": 951,
+      "face": [
+        170,
+        220,
+        420,
+        430
+      ],
+      "position": [
+        50,
+        43.907
+      ],
+      "fit": "contain",
+      "method": "manual_face_region_review"
+    },
+    "cn-yingyuge": {
+      "sha256": "a1e0805d5d8bbf792943625f7f82187aadfd58c2151ed2be73ae5d3dbc996f2d",
+      "number": 1,
+      "width": 846,
+      "height": 951,
+      "face": [
+        170,
+        220,
+        420,
+        430
+      ],
+      "position": [
+        50,
+        43.907
+      ],
+      "fit": "contain",
+      "method": "manual_face_region_review"
+    }
+  },
+  "no_confirmed_face_use_upper_fallback": []
+}

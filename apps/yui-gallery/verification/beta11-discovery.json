@@ -1,0 +1,138 @@
+{
+  "version": "v0.1.0-beta.11",
+  "new_verified_source_files": 0,
+  "new_registered_photobook_images": 0,
+  "pages_requested": 20,
+  "public_pages_read": 16,
+  "robots_or_access_errors": 4,
+  "not_acquisition_counts": true,
+  "findings": [
+    "Observed internal category/pagination links used; WordPress query searches are robots-disallowed and were not fetched.",
+    "Known full public web editions found again; no newly verified full edition added from these reads.",
+    "Kaizty combines different Yui names and returns the same first results for compound terms; do not treat keyword hits as model identity.",
+    "A second source URL for the user-excluded 18-photo wrong-model album is now explicitly excluded.",
+    "Wantuzhi latest referenced 93-photo and Everyday194 complete files remain behind paid membership; no bypass or archive download."
+  ],
+  "sources": [
+    {
+      "url": "https://link.inpock.co.kr/super_yuisan",
+      "status": "public_metadata_read",
+      "error": null,
+      "observed_links": 8
+    },
+    {
+      "url": "https://ctee.kr/place/super_yuisan",
+      "status": "public_metadata_read",
+      "error": null,
+      "observed_links": 0
+    },
+    {
+      "url": "https://4kup.net/?s=Yui",
+      "status": "access_restricted",
+      "error": "Disallowed by robots.txt: https://4kup.net/?s=Yui",
+      "observed_links": 0
+    },
+    {
+      "url": "https://4kup.net/?s=Yui+CREAM",
+      "status": "access_restricted",
+      "error": "Disallowed by robots.txt: https://4kup.net/?s=Yui+CREAM",
+      "observed_links": 0
+    },
+    {
+      "url": "https://4kup.net/?s=Yui+Ramen",
+      "status": "access_restricted",
+      "error": "Disallowed by robots.txt: https://4kup.net/?s=Yui+Ramen",
+      "observed_links": 0
+    },
+    {
+      "url": "https://4kup.net/?s=Yui+Everyday",
+      "status": "access_restricted",
+      "error": "Disallowed by robots.txt: https://4kup.net/?s=Yui+Everyday",
+      "observed_links": 0
+    },
+    {
+      "url": "https://www.kaizty.com/search?q=Yui",
+      "status": "public_metadata_read",
+      "error": null,
+      "observed_links": 27
+    },
+    {
+      "url": "https://www.kaizty.com/search?q=Yui+Everyday",
+      "status": "public_metadata_read",
+      "error": null,
+      "observed_links": 27
+    },
+    {
+      "url": "https://www.kaizty.com/search?q=Yui+Green",
+      "status": "public_metadata_read",
+      "error": null,
+      "observed_links": 27
+    },
+    {
+      "url": "https://www.junmeitu.com/en/search/?q=Yui",
+      "status": "public_metadata_read",
+      "error": null,
+      "observed_links": 30
+    },
+    {
+      "url": "https://www.junmeitu.com/search/everyday-1.html",
+      "status": "public_metadata_read",
+      "error": null,
+      "observed_links": 1
+    },
+    {
+      "url": "https://misskon.com/tag/yui/",
+      "status": "public_metadata_read",
+      "error": null,
+      "observed_links": 23
+    },
+    {
+      "url": "https://www.jliji.com/",
+      "status": "public_metadata_read",
+      "error": null,
+      "observed_links": 0
+    },
+    {
+      "url": "https://hub.pixibb.com/model/yui/",
+      "status": "public_metadata_read",
+      "error": null,
+      "observed_links": 14
+    },
+    {
+      "url": "https://wantuzhi.com/tag/yui",
+      "status": "public_metadata_read",
+      "error": null,
+      "observed_links": 10
+    },
+    {
+      "url": "https://4kup.net/category/sweetbox/",
+      "status": "public_metadata_read",
+      "error": null,
+      "observed_links": 2
+    },
+    {
+      "url": "https://4kup.net/category/sweetbox/page/2/",
+      "status": "public_metadata_read",
+      "error": null,
+      "observed_links": 4
+    },
+    {
+      "url": "https://4kup.net/category/sweetbox/page/3/",
+      "status": "public_metadata_read",
+      "error": null,
+      "observed_links": 1
+    },
+    {
+      "url": "https://misskon.com/tag/yui/page/2/",
+      "status": "public_metadata_read",
+      "error": null,
+      "observed_links": 4
+    },
+    {
+      "url": "https://hub.pixibb.com/model/yui/page/2/",
+      "status": "public_metadata_read",
+      "error": null,
+      "observed_links": 12
+    }
+  ]
+}

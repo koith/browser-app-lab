@@ -55,6 +55,7 @@ jobs:
       - name: Verify mobile navigation, decode every image and check original links
         run: |
           python -m http.server 8765 --directory apps/yui-gallery >/tmp/yui-http.log 2>&1 &
+          python apps/yui-gallery/qa_album_covers.py --engine ${{ matrix.engine }} --out yui-covers-${{ matrix.engine }}.json
           python apps/yui-gallery/qa_mobile_navigation.py --engine ${{ matrix.engine }} --out yui-navigation-${{ matrix.engine }}.json
           python apps/yui-gallery/qa_gallery.py --engine ${{ matrix.engine }} --out yui-${{ matrix.engine }}.json
           python apps/yui-gallery/qa_owner_media.py --engine ${{ matrix.engine }}
@@ -72,7 +73,7 @@ jobs:
           from pathlib import Path
           import requests
           base='https://koith.github.io/browser-app-lab/apps/yui-gallery/'
-          pending=['index.html','gallery-labels.js','additional-source-albums.json','identity-exclusions.json']
+          pending=['index.html','gallery-labels.js','additional-source-albums.json','identity-exclusions.json','album-covers.json']
           for attempt in range(30):
               for name in pending[:]:
                   try:
@@ -90,13 +91,26 @@ jobs:
           assert not pending,pending
           print('PRODUCTION_DEPLOYED_CODE_AND_MANIFEST_HASHES_MATCH',flush=True)
           PY
-          python apps/yui-gallery/qa_mobile_navigation.py --base https://koith.github.io/browser-app-lab/apps/yui-gallery/?v=0.1.0-beta.10 --out yui-production-navigation.json
-          python apps/yui-gallery/qa_gallery.py --base https://koith.github.io/browser-app-lab/apps/yui-gallery/?v=0.1.0-beta.10 --out yui-production-gallery.json
+          python apps/yui-gallery/qa_mobile_navigation.py --base https://koith.github.io/browser-app-lab/apps/yui-gallery/?v=0.1.0-beta.11 --out yui-production-navigation.json
+          python apps/yui-gallery/qa_album_covers.py --base https://koith.github.io/browser-app-lab/apps/yui-gallery/?v=0.1.0-beta.11 --out yui-production-covers.json
+          python apps/yui-gallery/qa_gallery.py --base https://koith.github.io/browser-app-lab/apps/yui-gallery/?v=0.1.0-beta.11 --out yui-production-gallery.json
       - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: gallery-${{ matrix.engine }}
           path: yui-${{ matrix.engine }}.json
+          archive: false
+          if-no-files-found: ignore
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          path: yui-covers-${{ matrix.engine }}.json
+          archive: false
+          if-no-files-found: ignore
+      - uses: actions/upload-artifact@v7
+        if: always() && matrix.engine == 'chromium'
+        with:
+          path: yui-production-covers.json
           archive: false
           if-no-files-found: ignore
       - uses: actions/upload-artifact@v7
