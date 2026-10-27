@@ -5,8 +5,9 @@ from pathlib import Path
 from urllib.parse import urlsplit
 from PIL import Image
 from identity_policy import ensure_allowed
+from photo_quality_policy import replacement_reason,watermark_review,watermark_status
 
-ALLOWED=re.compile(r'^(?:cdn\.jliji\.com|cdn\.v2ph\.com|i[012]\.wp\.com|cdn[12]\.thismore\.fun|(?:wes|bis)\.misskon\.com|lux\.mrcong\.com|(?:imgx\d{3}|images\d{2})\.pixibb\.com|s\.wujituku\.com|lh\d\.ggpht\.com)$')
+ALLOWED=re.compile(r'^(?:cdn\.jliji\.com|cdn\.v2ph\.com|i[012]\.wp\.com|cdn[12]\.thismore\.fun|(?:wes|bis)\.misskon\.com|lux\.mrcong\.com|(?:imgx\d{3}|images\d{2})\.pixibb\.com|s\.wujituku\.com|lh\d\.ggpht\.com|www\.girl-atlas\.com)$')
 def build(folders,out,replace=False):
     albums=[]
     for folder in folders:
@@ -23,7 +24,8 @@ def build(folders,out,replace=False):
             with Image.open(f) as im:
                 im.load();w,h=im.size
                 if (w,h)!=(p['width'],p['height']):raise ValueError('Dimension mismatch')
-            seen.add(digest);images.append({k:p[k] for k in ['number','url','sha256','bytes','width','height']})
+            seen.add(digest);images.append({**{k:p[k] for k in ['number','url','sha256','bytes','width','height']},
+                                           'site_watermark_review':watermark_review(p)})
         numbers=[p['number'] for p in images]
         if len(set(numbers))!=len(numbers) or any(not isinstance(n,int) or n<1 or n>m['expected'] for n in numbers):raise ValueError('Invalid or duplicate photo sequence')
         albums.append({'id':m['id'],'title':m['title'],'expected':m['expected'],'images':images,
@@ -44,11 +46,17 @@ def build(folders,out,replace=False):
             for a in albums:
                 previous=existing.get(a['id'])
                 if previous:
+                    if a['quality']=='AI enhanced web edition' and previous.get('quality')!='AI enhanced web edition':
+                        raise ValueError('AI-enhanced copies require a separate edition ID')
                     old={p['number']:p for p in previous['images']}
                     for photo in a['images']:
                         prior=old.get(photo['number'])
-                        if prior and prior['width']*prior['height']>photo['width']*photo['height']:
-                            photo.update(prior)
+                        if prior:
+                            if photo['sha256']==prior['sha256']:
+                                # A rerun must preserve an existing verified review.
+                                if watermark_status(photo)=='unknown':photo['site_watermark_review']=watermark_review(prior)
+                            elif not replacement_reason(photo,prior):
+                                photo.clear();photo.update(prior)
                     # A failed or smaller rerun cannot discard already verified files.
                     incoming={p['number']:p for p in a['images']}
                     old.update(incoming);a['images']=sorted(old.values(),key=lambda p:p['number'])

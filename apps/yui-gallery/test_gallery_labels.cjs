@@ -1,0 +1,14 @@
+'use strict';
+const assert=require('node:assert/strict'),{describe}=require('./gallery-labels.js');
+assert.equal(describe({title:'[SWEETBOX] Yui — CREAM'}).publisher,'SWEETBOX');
+assert.equal(describe({title:'[MilkyBomb] Yui Maid'}).publisher,'MilkyBomb');
+assert.equal(describe({title:'[Yo-U] Yui Dec 2023'}).publisher,'Yo-U');
+assert.equal(describe({source:'https://ctee.kr/item/store/97568'}).publisher,'크티');
+assert.equal(describe({source:'https://bcutrank.com/?w=2060'}).publisher,'B컷');
+assert.equal(describe({title:'Yui',source:'https://sexy.pixibb.com/some-work/'}).publisher,'미확인');
+assert.equal(describe({title:'Yui',quality:'ai_enhanced_web'}).edition,'AI 보정판');
+assert.equal(describe({title:'[AI Enhanced] ArtGravia 663 — Yui'}).publisher,'ArtGravia');
+assert.equal(describe({title:'[AI Enhanced] ArtGravia 663 — Yui',publisher_original_verified:true}).edition,'AI 보정판');
+assert.equal(describe({title:'Yui',publisher_original_verified:false}).edition,'웹판');
+assert.equal(describe({title:'Yui',publisher_original_verified:true}).edition,'원본');
+console.log('PUBLISHER_AND_EDITION_LABELS_NO_MIRROR_OR_MASTER_MISREPRESENTATION_PASS');

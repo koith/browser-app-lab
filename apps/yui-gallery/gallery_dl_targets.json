@@ -53,9 +53,11 @@
       "expected": 82
     },
     {
-      "id": "sexiest18",
-      "url": "https://sexy.pixibb.com/yui-the-sexiest-woman-18-photos-2-videos/",
-      "expected": 18
+      "id": "artgravia663-pixibb-ai32",
+      "url": "https://sexy.pixibb.com/ai-enhanced-artgravia-vol-663-32-photos/",
+      "expected": 32,
+      "requires_canonical_match": true,
+      "alternate_of": "artgravia663-ai32"
     }
   ]
 }

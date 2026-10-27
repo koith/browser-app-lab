@@ -108,7 +108,8 @@ def crawl_one(target:dict, base:Path, *, executable="gallery-dl", max_images=40,
         if not all(p.get("url") for p in entries):
             raise ValueError("Acquired images lack source metadata; gallery registration refused")
         from build_additional_source_manifest import build
-        build([dest],Path(__file__).with_name("additional-source-albums.json"))
+        if not target.get('requires_canonical_match'):
+            build([dest],Path(__file__).with_name("additional-source-albums.json"))
     return record
 
 def run(targets:Path, base:Path, max_sources:int=4,max_images:int=40,executable="gallery-dl"):

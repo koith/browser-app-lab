@@ -1,10 +1,14 @@
 {
-  "version": "v0.1.0-beta.9",
+  "version": "v0.1.0-beta.10",
   "date": "2026-10-27",
   "policy": {
     "monthly_charge_krw": 0,
     "payment_card_required": false,
-    "public_republication_of_paid_originals": false
+    "public_republication_of_paid_originals": false,
+    "source_selection_priority": [
+      "higher_actual_resolution",
+      "same_resolution_verified_no_gallery_watermark"
+    ]
   },
   "storage": {
     "intended_primary": {
@@ -39,27 +43,33 @@
     "source_catalog_duplicated_across_sites": true,
     "iphone_real_device_verified": false,
     "owner_gallery_remote_hosted_count": "pending_authenticated_storage_connection",
-    "newly_acquired_web_images": 2971,
-    "additional_source_gallery_images": 2169,
+    "newly_acquired_web_images": 3288,
+    "additional_source_gallery_images": 2183,
     "source_browser_decode_verified_images": 405,
     "local_browser_download_sha256_verified_images": 26,
-    "new_unique_web_albums": 16,
+    "new_unique_web_albums": 17,
     "new_album_higher_resolution_selections": 106,
     "existing_405_higher_resolution_replacements": 10,
     "beta5_newly_acquired_web_images": 684,
     "beta5_new_complete_web_albums": 3,
-    "gallery_image_entries": 2490,
+    "gallery_image_entries": 2504,
     "existing_local_verified_copies_reused": 10,
     "beta7_new_higher_resolution_files": 160,
     "beta7_full_album_higher_resolution_replacements": 80,
     "beta7_verified_direct_source_files": 80,
-    "new_files_this_session": 1283,
-    "excluded_wrong_model_images": 3,
+    "new_files_this_session": 317,
+    "excluded_wrong_model_images": 21,
     "beta9_new_work_files": 650,
     "beta9_larger_photo_selections": 323,
     "beta9_web_complete_albums": 21,
     "original_link_sha256_verified_images": 23,
-    "gallery_decode_verified_image_entries": 2490
+    "beta10_new_work_photos": 32,
+    "beta10_new_unique_source_files": 317,
+    "beta10_existing_work_larger_replacements": 253,
+    "beta9_retained_new_work_files": 632,
+    "beta10_wrong_model_images_removed": 18,
+    "pre_final_beta10_gallery_decode_verified_image_entries": 2522,
+    "gallery_decode_verification": "pending_final_beta10_CI"
   },
   "notes": [
     "A private Google Drive ZIP is only a temporary safety copy, not the user-approved primary archive.",
@@ -76,7 +86,10 @@
     "beta.7 collected 80 distinct full-size Seethrough files from 15 explicitly linked Kaizty pages (160 duplicate proxy URL responses). All 80 canonical photos matched conservatively and replaced 1368px files with unchanged 2500px files. Keep publisher-master certification false.",
     "The WordPress proxy failed Chromium decoding. Separately downloaded and verified the 80 direct-source files using the source page published imgErrorHF fallback; bytes differ from proxy edition, so each direct file has its own SHA-256. Selected direct files remain 2500px and match all canonical photos.",
     "beta.8 removes the user-identified third-from-last red-costume album cn-miaohuaying (3 photos), excludes its source and image hashes from reimport, and preserves a private audit copy.",
-    "beta.9 connects seven newly collected complete public web editions (650 photos), selects 323 larger unchanged files across four works, resolves duplicate catalogue IDs to acquired works, and directs Teddy Bear v04 to all 97 photos. Highest resolution remains unverified regardless of pixel dimensions."
+    "beta.9 connects seven newly collected complete public web editions (650 photos), selects 323 larger unchanged files across four works, resolves duplicate catalogue IDs to acquired works, and directs Teddy Bear v04 to all 97 photos. Highest resolution remains unverified regardless of pixel dimensions.",
+    "beta.10 ranks verified actual resolution first and verified absence of a gallery-site watermark at equal dimensions second. Unknown is never claimed clean. Preserve source bytes and reject smaller clean replacements and AI replacements of non-AI editions. New ArtGravia 663 public AI-enhanced web edition has all 32 photos (64 distinct files in two editions); 32 larger 1368px files selected. No publisher-original claim. Open-photo overlay is more transparent.",
+    "beta.10 further selects 253 larger unchanged web files: Heart Steal 78/78 at 1920px, CREAM 100/228 at 2048px and RAMEN 75/125 at 1920px. Album cards are half their previous height at equal width, with top-left publisher and dim photo count, top-right AI/web/original verification badge. Detail photo grid dimensions are unchanged.",
+    "beta.10 also removes the user-confirmed wrong-model sexiest18 (18 images) from the public gallery and collection targets, blocks its source and hashes from reimport, and puts search behind a small translucent corner button with history-aware popup."
   ],
   "archiving_engine": {
     "mode": "individual_files",
