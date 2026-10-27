@@ -4,12 +4,14 @@ from datetime import datetime,timezone
 from pathlib import Path
 from urllib.parse import urlsplit
 from PIL import Image
+from identity_policy import ensure_allowed
 
 ALLOWED=re.compile(r'^(?:cdn\.jliji\.com|cdn\.v2ph\.com|i[012]\.wp\.com|cdn1\.thismore\.fun|(?:wes|bis)\.misskon\.com|lux\.mrcong\.com|(?:imgx\d{3}|images\d{2})\.pixibb\.com|s\.wujituku\.com|lh\d\.ggpht\.com)$')
 def build(folders,out,replace=False):
     albums=[]
     for folder in folders:
         m=json.loads((folder/'manifest.json').read_text());images=[];seen=set()
+        ensure_allowed(m['id'],m.get('source_pages',[m.get('source_page',m.get('url',''))]),m['images'])
         for p in m['images']:
             u=urlsplit(p['url'])
             if u.scheme!='https' or not ALLOWED.fullmatch(u.hostname or ''):raise ValueError('Unapproved image URL')

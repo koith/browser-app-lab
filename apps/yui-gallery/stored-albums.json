@@ -81,45 +81,6 @@
       "errors": []
     },
     {
-      "id": "cn-miaohuaying",
-      "title": "Yui · 공개 미리보기 (화보 미분류)",
-      "site": "喵画影",
-      "source": "https://www.miaohuaying.com/yui/",
-      "expected": null,
-      "images": [
-        {
-          "url": "stored-albums/cn-miaohuaying/0001_550f109c4e5c.webp",
-          "source_url": "https://img.miaohuaying.com/2026/06/Yui-22.webp?fm=pjpg&ixlib=php-3.3.1&s=82691d7c2b4642726dadee20aac79ee7",
-          "origin_page": "https://www.miaohuaying.com/yui/",
-          "sha256": "550f109c4e5c6c1e3735778094c0991186b12dfa30e4b92f75e1794109404297",
-          "width": 800,
-          "height": 1009,
-          "bytes": 35582
-        },
-        {
-          "url": "stored-albums/cn-miaohuaying/0002_7c0a673fb0cd.webp",
-          "source_url": "https://img.miaohuaying.com/2026/06/Yui-52.webp?fm=pjpg&ixlib=php-3.3.1&s=35d101dc3d26f9bb8243bbf3ca08000a",
-          "origin_page": "https://www.miaohuaying.com/yui/",
-          "sha256": "7c0a673fb0cdba7dc5520746d49fca16362a825de9698f0ca654e1091f77371d",
-          "width": 640,
-          "height": 835,
-          "bytes": 35738
-        },
-        {
-          "url": "stored-albums/cn-miaohuaying/0003_a0f2738c1fd4.webp",
-          "source_url": "https://img.miaohuaying.com/2026/06/Yui-84.webp?fm=pjpg&ixlib=php-3.3.1&s=9513600e15324db40b48dd0b8d4973bf",
-          "origin_page": "https://www.miaohuaying.com/yui/",
-          "sha256": "a0f2738c1fd4b023df305117b7e9bb3d7758ad9bb7de619ad43a1c1614e03130",
-          "width": 650,
-          "height": 848,
-          "bytes": 53522
-        }
-      ],
-      "status": "public_previews_only_not_complete",
-      "pages_visited": 1,
-      "errors": []
-    },
-    {
       "id": "cn-yuntu8",
       "title": "沈惠星 Yui · 공개 사진 미리보기",
       "site": "云图吧",

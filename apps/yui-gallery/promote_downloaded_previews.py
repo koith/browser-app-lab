@@ -7,6 +7,7 @@ Never create a gallery record without a local file and matching hash.
 from pathlib import Path
 from hashlib import sha256
 import json,shutil,time
+from identity_policy import is_excluded
 ROOT=Path("apps/yui-gallery")
 IN=Path("yui-dynamic-images")
 OUT=ROOT/"stored-albums"
@@ -15,14 +16,13 @@ STORED=ROOT/"stored-albums.json"
 METADATA={
 "huantuji-yui-collection":("cn-huantuji","幻图集","Yui · 공개 미리보기 (화보 미분류)"),
 "chaotuji-yui-collection":("cn-chaotuji","潮图集","Yui · 공개 미리보기 (화보 미분류)"),
-"miaohuaying-yui-collection":("cn-miaohuaying","喵画影","Yui · 공개 미리보기 (화보 미분류)"),
 "yuntu8-yui-profile":("cn-yuntu8","云图吧","沈惠星 Yui · 공개 사진 미리보기"),
 "wantuzhi-everyday-life":("cn-wantuzhi-everyday","玩图志","Yui — Everyday Life (공개 미리보기)"),
 "yingyuge-yui-collection":("cn-yingyuge","影语阁","沈惠星 Yui · 공개 미리보기 (화보 미분류)")
 }
 db=json.loads(ALBUMS.read_text(encoding="utf-8"))
 old=json.loads(STORED.read_text(encoding="utf-8")) if STORED.exists() else {"albums":[]}
-byid={a['id']:a for a in old['albums']}
+byid={a['id']:a for a in old['albums'] if not is_excluded(a['id'],[a.get('source','')],a.get('images',[]))}
 known={a['id'] for a in db['albums']}
 new_count=0
 for src,(aid,site,title) in METADATA.items():
@@ -41,6 +41,7 @@ for src,(aid,site,title) in METADATA.items():
   raw=f.read_bytes()
   digest=sha256(raw).hexdigest()
   if digest!=item["sha256"]:raise ValueError(f"Checksum differs for {f}")
+  if is_excluded(aid,[source["source"]],[{"sha256":digest}]):continue
   dst=OUT/aid/f.name
   dst.parent.mkdir(parents=True,exist_ok=True)
   if not dst.exists():dst.write_bytes(raw)

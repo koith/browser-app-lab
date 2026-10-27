@@ -18,9 +18,6 @@ IMAGES=[
  ("huantuji","https://www.huantuji.com/yui/","https://image.huantuji.com/2026/07/2026070806390473.webp"),
  ("chaotuji","https://www.chaotuji.com/yui/","https://image.chaotuji.com/2026/04/2026042913290312.webp?fit=scale&fm=pjpg&h=1536&ixlib=php-3.3.1&w=1024&wpsize=1536x1536&s=3447f2be9e42a28d166a6a8f65e359de"),
  ("chaotuji","https://www.chaotuji.com/yui/","https://image.chaotuji.com/2026/04/2026042913291272.webp?fit=scale&fm=pjpg&h=1536&ixlib=php-3.3.1&w=1105&wpsize=1536x1536&s=18cce12f0a8bf5cd796dba730a842bf6"),
- ("miaohuaying","https://www.miaohuaying.com/yui/","https://img.miaohuaying.com/2026/06/Yui-22.webp?fm=pjpg&ixlib=php-3.3.1&s=82691d7c2b4642726dadee20aac79ee7"),
- ("miaohuaying","https://www.miaohuaying.com/yui/","https://img.miaohuaying.com/2026/06/Yui-52.webp?fm=pjpg&ixlib=php-3.3.1&s=35d101dc3d26f9bb8243bbf3ca08000a"),
- ("miaohuaying","https://www.miaohuaying.com/yui/","https://img.miaohuaying.com/2026/06/Yui-84.webp?fm=pjpg&ixlib=php-3.3.1&s=9513600e15324db40b48dd0b8d4973bf"),
  ("yuntu8","https://yuntu8.com/1748.html","https://pic1.imgdb.cn/item/67a389fad0e0a243d4fc02d1.jpg"),
  ("yuntu8","https://yuntu8.com/1748.html","https://pic1.imgdb.cn/item/67a3897ed0e0a243d4fc02ca.jpg"),
  ("yuntu8","https://yuntu8.com/1748.html","https://pic1.imgdb.cn/item/67a389e5d0e0a243d4fc02d0.jpg"),
@@ -58,4 +55,3 @@ with zipfile.ZipFile("yui-chinese-free-previews.zip","w",zipfile.ZIP_DEFLATED,co
 with zipfile.ZipFile("yui-chinese-free-previews.zip") as z:
   assert z.testzip() is None
 assert len(success)>=2,f"Only {len(success)} images downloaded"
-print("FINAL_RESULTS "+json.dumps({"downloaded":len(success),"failed":len(results)-len(success),"bytes":sum(x["bytes"] for x in success),"bySite":{site:sum(x["site"]==site for x in success) for site in ["huantuji","chaotuji","miaohuaying","yuntu8"]}}),flush=True)

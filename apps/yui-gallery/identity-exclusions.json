@@ -1,0 +1,19 @@
+{
+  "model": "심유이 / 심혜성 / Yui (Korean SWEETBOX / MilkyBomb / Yo-U model)",
+  "excluded_album_ids": [
+    "cn-miaohuaying"
+  ],
+  "excluded_source_ids": [
+    "miaohuaying-yui-collection"
+  ],
+  "excluded_source_urls": [
+    "https://www.miaohuaying.com/yui/"
+  ],
+  "excluded_image_sha256": [
+    "550f109c4e5c6c1e3735778094c0991186b12dfa30e4b92f75e1794109404297",
+    "7c0a673fb0cdba7dc5520746d49fca16362a825de9698f0ca654e1091f77371d",
+    "a0f2738c1fd4b023df305117b7e9bb3d7758ad9bb7de619ad43a1c1614e03130"
+  ],
+  "reason": "User identified the third-from-last red-costume album as a different model; source alias Yui alone did not establish the requested model.",
+  "decision": "Remove gallery/catalog registration and prevent reimport; preserve private audit copy."
+}
