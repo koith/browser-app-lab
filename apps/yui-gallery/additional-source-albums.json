@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-10-27T11:50:54.531012+00:00",
+  "generated_at": "2026-10-27T16:47:54.946716+00:00",
   "not_private_cloud": true,
   "kind": "physical_files_verified_source_links_only",
   "albums": [
@@ -15735,11 +15735,16 @@
         },
         {
           "number": 50,
-          "url": "https://images06.pixibb.com/2025/03/10/Yui-Vol.3-PixiBB.COM-050.jpg",
-          "sha256": "7fe73b28051d7b73f9c4bdf44acc5aae9f33d6bff51b889a690ae04eaf415816",
-          "bytes": 143176,
-          "width": 1368,
-          "height": 912
+          "url": "https://pic1.imgdb.cn/item/67a3897ed0e0a243d4fc02ca.jpg",
+          "sha256": "5a5fa9a419ca128ee74f2bb3bd004ef33f6025c7087bffa7bd1875d13c2a82bc",
+          "bytes": 411817,
+          "width": 2400,
+          "height": 1600,
+          "origin_page": "https://yuntu8.com/1748.html",
+          "site_watermark_review": {
+            "status": "unknown"
+          },
+          "selection_reason": "higher_resolution_existing_verified_full_frame_match"
         },
         {
           "number": 51,
@@ -15983,11 +15988,16 @@
         },
         {
           "number": 81,
-          "url": "https://images06.pixibb.com/2025/03/10/Yui-Vol.3-PixiBB.COM-081.jpg",
-          "sha256": "03fde45f79f6aaaf8d5d3d7406600b84b675fc2121e284bee5bb2920afd84f09",
-          "bytes": 163258,
-          "width": 1368,
-          "height": 912
+          "url": "https://image.huantuji.com/2026/07/2026070806385046-2048x1366.webp",
+          "sha256": "d1e18de42a52f4406cb95bd80e82e74b50c51df0efd8fbc53d5dfe2d4978c095",
+          "bytes": 97924,
+          "width": 2048,
+          "height": 1366,
+          "origin_page": "https://www.huantuji.com/yui/",
+          "site_watermark_review": {
+            "status": "unknown"
+          },
+          "selection_reason": "higher_resolution_existing_verified_full_frame_match"
         },
         {
           "number": 82,
@@ -16191,7 +16201,9 @@
         }
       ],
       "source_pages": [
-        "https://sexy.pixibb.com/yui-vol-3-106-photos-3-videos-sexy-girl/"
+        "https://sexy.pixibb.com/yui-vol-3-106-photos-3-videos-sexy-girl/",
+        "https://www.huantuji.com/yui/",
+        "https://yuntu8.com/1748.html"
       ],
       "acquired": 106,
       "complete_sequence": true,

@@ -69,7 +69,8 @@
     "beta9_retained_new_work_files": 632,
     "beta10_wrong_model_images_removed": 18,
     "pre_final_beta10_gallery_decode_verified_image_entries": 2504,
-    "gallery_decode_verification": "beta10 production 2504 PASS; beta11 final verification pending"
+    "gallery_decode_verification": "beta10 production 2504 PASS; beta11 final verification pending",
+    "beta11_existing_work_larger_replacements": 2
   },
   "notes": [
     "A private Google Drive ZIP is only a temporary safety copy, not the user-approved primary archive.",
@@ -90,7 +91,8 @@
     "beta.10 ranks verified actual resolution first and verified absence of a gallery-site watermark at equal dimensions second. Unknown is never claimed clean. Preserve source bytes and reject smaller clean replacements and AI replacements of non-AI editions. New ArtGravia 663 public AI-enhanced web edition has all 32 photos (64 distinct files in two editions); 32 larger 1368px files selected. No publisher-original claim. Open-photo overlay is more transparent.",
     "beta.10 further selects 253 larger unchanged web files: Heart Steal 78/78 at 1920px, CREAM 100/228 at 2048px and RAMEN 75/125 at 1920px. Album cards are half their previous height at equal width, with top-left publisher and dim photo count, top-right AI/web/original verification badge. Detail photo grid dimensions are unchanged.",
     "beta.10 also removes the user-confirmed wrong-model sexiest18 (18 images) from the public gallery and collection targets, blocks its source and hashes from reimport, and puts search behind a small translucent corner button with history-aware popup.",
-    "beta.11 uses hash-bound local facial region metadata to select and frame album covers without changing any photo pixels or in-album image order. Cover titles omit publisher branding, use translucent small text, and preserve full original titles for search/accessibility. New acquisitions for beta.11 are not claimed until actual files are verified."
+    "beta.11 uses hash-bound local facial region metadata to select and frame album covers without changing any photo pixels or in-album image order. Cover titles omit publisher branding, use translucent small text, and preserve full original titles for search/accessibility. New acquisitions for beta.11 are not claimed until actual files are verified.",
+    "beta.11 also reuses two existing verified public reference files in their full Yui Vol.3 106-photo edition: photo50 2400x1600 and photo81 2048x1366 replace 1368x912 files after whole-frame comparison. No newly acquired files or publisher-master claim; all input copies remain."
   ],
   "archiving_engine": {
     "mode": "individual_files",

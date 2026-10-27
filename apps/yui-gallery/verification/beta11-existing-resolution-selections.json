@@ -1,0 +1,50 @@
+{
+  "album_id": "yui-vol3-106",
+  "unchanged_photo_count": 106,
+  "newly_acquired_files": 0,
+  "higher_resolution_reused_files": 2,
+  "original_bytes_unchanged": true,
+  "publisher_original_verified": false,
+  "changes": [
+    {
+      "number": 81,
+      "from_sha256": "03fde45f79f6aaaf8d5d3d7406600b84b675fc2121e284bee5bb2920afd84f09",
+      "from_url": "https://images06.pixibb.com/2025/03/10/Yui-Vol.3-PixiBB.COM-081.jpg",
+      "from_pixels": [
+        1368,
+        912
+      ],
+      "to_sha256": "d1e18de42a52f4406cb95bd80e82e74b50c51df0efd8fbc53d5dfe2d4978c095",
+      "to_local_path": "stored-albums/cn-huantuji/0001_d1e18de42a52.webp",
+      "to_original_source_url": "https://image.huantuji.com/2026/07/2026070806385046-2048x1366.webp",
+      "to_pixels": [
+        2048,
+        1366
+      ],
+      "source_page": "https://www.huantuji.com/yui/",
+      "dhash_distance": 0,
+      "whole_frame_rgb_error": 0.45,
+      "newly_acquired_file": false
+    },
+    {
+      "number": 50,
+      "from_sha256": "7fe73b28051d7b73f9c4bdf44acc5aae9f33d6bff51b889a690ae04eaf415816",
+      "from_url": "https://images06.pixibb.com/2025/03/10/Yui-Vol.3-PixiBB.COM-050.jpg",
+      "from_pixels": [
+        1368,
+        912
+      ],
+      "to_sha256": "5a5fa9a419ca128ee74f2bb3bd004ef33f6025c7087bffa7bd1875d13c2a82bc",
+      "to_local_path": "stored-albums/cn-yuntu8/0002_5a5fa9a419ca.jpg",
+      "to_original_source_url": "https://pic1.imgdb.cn/item/67a3897ed0e0a243d4fc02ca.jpg",
+      "to_pixels": [
+        2400,
+        1600
+      ],
+      "source_page": "https://yuntu8.com/1748.html",
+      "dhash_distance": 2,
+      "whole_frame_rgb_error": 0.987,
+      "newly_acquired_file": false
+    }
+  ]
+}
