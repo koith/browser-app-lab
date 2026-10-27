@@ -54,8 +54,14 @@ jobs:
       - uses: actions/upload-artifact@v7
         if: always()
         with:
-          path: |
-            yui-${{ matrix.engine }}.json
-            yui-navigation-${{ matrix.engine }}.json
+          name: gallery-${{ matrix.engine }}
+          path: yui-${{ matrix.engine }}.json
+          archive: false
+          if-no-files-found: ignore
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: navigation-${{ matrix.engine }}
+          path: yui-navigation-${{ matrix.engine }}.json
           archive: false
           if-no-files-found: ignore

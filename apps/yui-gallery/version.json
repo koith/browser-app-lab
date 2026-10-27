@@ -40,14 +40,15 @@
     "iphone_real_device_verified": false,
     "owner_gallery_remote_hosted_count": "pending_authenticated_storage_connection",
     "newly_acquired_web_images": 1528,
-    "additional_source_gallery_images": 1519,
+    "additional_source_gallery_images": 1422,
     "source_browser_decode_verified_images": 405,
     "local_browser_download_sha256_verified_images": 26,
     "new_unique_web_albums": 9,
     "new_album_higher_resolution_selections": 106,
     "existing_405_higher_resolution_replacements": 10,
     "beta5_newly_acquired_web_images": 684,
-    "beta5_new_complete_web_albums": 3
+    "beta5_new_complete_web_albums": 3,
+    "gallery_image_entries": 1853
   },
   "notes": [
     "A private Google Drive ZIP is only a temporary safety copy, not the user-approved primary archive.",

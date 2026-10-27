@@ -40,7 +40,7 @@ async def run(args):
   # Multi-touch and edge swipes must never turn the page or cancel native input.
   before=await page.locator('#position').inner_text()
   allowed=await page.locator('#full').evaluate('''im=>{
-   const fire=(type,points,changed=points)=>{const e=new TouchEvent(type,{bubbles:true,cancelable:true,touches:points.map((p,i)=>new Touch({identifier:i,target:im,clientX:p[0],clientY:p[1]})),changedTouches:changed.map((p,i)=>new Touch({identifier:i,target:im,clientX:p[0],clientY:p[1]}))});return im.dispatchEvent(e)&&!e.defaultPrevented};
+   const fire=(type,points,changed=points)=>{const e=new Event(type,{bubbles:true,cancelable:true});const touches=ps=>ps.map((p,i)=>({identifier:i,target:im,clientX:p[0],clientY:p[1]}));Object.defineProperties(e,{touches:{value:touches(points)},changedTouches:{value:touches(changed)}});return im.dispatchEvent(e)&&!e.defaultPrevented};
    return [fire('touchstart',[[150,300],[250,300]]),fire('touchend',[[300,300]],[[50,300]]),fire('touchend',[],[[300,300]]),fire('touchstart',[[5,300]]),fire('touchend',[],[[200,300]])].every(Boolean)
   }''')
   assert allowed and before==await page.locator('#position').inner_text()
