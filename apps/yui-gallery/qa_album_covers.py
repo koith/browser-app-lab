@@ -6,6 +6,7 @@ from pathlib import Path
 
 import requests
 from playwright.async_api import async_playwright
+from browser_image_checks import decode_image
 
 
 async def run(args):
@@ -29,15 +30,18 @@ async def run(args):
         for aid, meta in configured.items():
             card = page.locator('.album[data-id="'+aid+'"]')
             image = card.locator('img')
-            await image.scroll_into_view_if_needed()
-            await image.evaluate('(im)=>im.decode()')
+            # Scrolling a static card does not require the image's hover
+            # transition to satisfy WebKit actionability/stability checks.
+            await card.evaluate('(card)=>card.scrollIntoView({block:"center"})')
+            retries = await decode_image(image)
             dims = await image.evaluate('(im)=>[im.naturalWidth,im.naturalHeight]')
             assert dims == [meta['width'], meta['height']], (aid, dims)
             selected = await page.evaluate('(id)=>{const a=available().find(a=>a.id===id);return validImages(a).find(p=>p.sha256===albumCovers[id].sha256)}', aid)
             assert selected and await image.get_attribute('src') == selected['url']
             geometry = await image.evaluate('''(im)=>{
               const style=getComputedStyle(im),r=im.getBoundingClientRect();
-              return {width:r.width,height:r.height,fit:style.objectFit,position:style.objectPosition.split(' ').map(parseFloat)}
+              const clip=im.closest('.album').getBoundingClientRect();
+              return {x:r.x,y:r.y,width:r.width,height:r.height,clip:{x:clip.x,y:clip.y,width:clip.width,height:clip.height},fit:style.objectFit,position:style.objectPosition.split(' ').map(parseFloat)}
             }''')
             width, height = geometry['width'], geometry['height']
             scale = (min if geometry['fit'] == 'contain' else max)(width/dims[0], height/dims[1])
@@ -45,10 +49,13 @@ async def run(args):
             oy = (dims[1]*scale-height)*geometry['position'][1]/100
             x, y, w, h = meta['face']
             bounds = [x*scale-ox, y*scale-oy, (x+w)*scale-ox, (y+h)*scale-oy]
-            assert bounds[0] >= -1 and bounds[1] >= -1 and bounds[2] <= width+1 and bounds[3] <= height+1, (aid, bounds, geometry)
+            clip = geometry['clip']
+            visible = [bounds[0]+geometry['x']-clip['x'], bounds[1]+geometry['y']-clip['y'],
+                       bounds[2]+geometry['x']-clip['x'], bounds[3]+geometry['y']-clip['y']]
+            assert visible[0] >= -1 and visible[1] >= -1 and visible[2] <= clip['width']+1 and visible[3] <= clip['height']+1, (aid, visible, geometry)
             title_color = await card.locator('.name').evaluate('e=>getComputedStyle(e).color')
             assert title_color.startswith('rgba(') and float(title_color.split(',')[-1].rstrip(') ')) <= .65, title_color
-            results.append({'id': aid, 'photo': meta['number'], 'face_region_inside_card': True, 'fit': geometry['fit']})
+            results.append({'id': aid, 'photo': meta['number'], 'face_region_inside_card': True, 'fit': geometry['fit'], 'image_decode_retries': retries})
         teddy = page.locator('.album[data-id="teddy-bear97"]')
         assert 'SWEETBOX' not in await teddy.locator('.name').inner_text()
         assert await teddy.locator('.publisher-sticker').inner_text() == 'SWEETBOX'

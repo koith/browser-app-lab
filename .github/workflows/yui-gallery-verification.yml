@@ -23,7 +23,7 @@ jobs:
           - engine: chromium
             os: ubuntu-24.04
           - engine: webkit
-            os: macos-14
+            os: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -36,7 +36,7 @@ jobs:
         timeout-minutes: 7
         run: |
           pip install Pillow requests playwright==1.58.0 gallery-dl fastapi httpx
-          python -m playwright install ${{ matrix.engine }}
+          python -m playwright install --with-deps ${{ matrix.engine }}
       - name: Verify byte preservation and collector behavior
         run: |
           node apps/yui-gallery/test_version.cjs
