@@ -79,6 +79,33 @@
         "Vol.01"
       ],
       "image_route": "published_direct_fallback"
+    },
+    {
+      "id": "ramen125-4kup",
+      "title": "SWEETBOX — Yui RAMEN",
+      "expected": 125,
+      "adapter": "4kup",
+      "url": "https://4kup.net/sweetbox-yui-ramen/",
+      "requires_canonical_match": true,
+      "alternate_of": "ramen125"
+    },
+    {
+      "id": "cream228-4kup",
+      "title": "SWEETBOX — Yui CREAM",
+      "expected": 228,
+      "adapter": "4kup",
+      "url": "https://4kup.net/sweetbox-yui-swtb-vol-18-cream-part1/",
+      "requires_canonical_match": true,
+      "alternate_of": "cream228"
+    },
+    {
+      "id": "heart-steal78-4kup",
+      "title": "SWEETBOX — Yui Heart Steal",
+      "expected": 78,
+      "adapter": "4kup",
+      "url": "https://4kup.net/sweetbox-yui-swtb-vol-30-heart-steal/",
+      "requires_canonical_match": true,
+      "alternate_of": "heart-steal78"
     }
   ]
 }

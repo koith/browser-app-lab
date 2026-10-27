@@ -1,0 +1,36 @@
+{
+  "new_work_photos": 32,
+  "new_work_is_ai_enhanced": true,
+  "new_source_edition_files": 414,
+  "previously_known_sha256_reused": 97,
+  "new_unique_sha256_files": 317,
+  "existing_work_larger_replacements": 253,
+  "editions": [
+    {
+      "id": "teddy-girlatlas97",
+      "verified_files": 97
+    },
+    {
+      "id": "artgravia663-ai32",
+      "verified_files": 32
+    },
+    {
+      "id": "artgravia663-pixibb-ai32",
+      "verified_files": 32
+    },
+    {
+      "id": "ramen125-4kup",
+      "verified_files": 75
+    },
+    {
+      "id": "cream228-4kup",
+      "verified_files": 100
+    },
+    {
+      "id": "heart-steal78-4kup",
+      "verified_files": 78
+    }
+  ],
+  "publisher_original_verified": 0,
+  "private_cloud_verified": 0
+}

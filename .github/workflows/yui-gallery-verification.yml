@@ -39,8 +39,12 @@ jobs:
       - name: Verify byte preservation and collector behavior
         run: |
           node apps/yui-gallery/test_version.cjs
+          node apps/yui-gallery/test_gallery_labels.cjs
           python apps/yui-gallery/test_auto_registration.py
           python apps/yui-gallery/test_merge_higher_resolution.py
+          python apps/yui-gallery/test_photo_quality_policy.py
+          python apps/yui-gallery/test_http_album_girlatlas.py
+          python apps/yui-gallery/test_review_site_watermarks.py
           python apps/yui-gallery/test_identity_policy.py
           python apps/yui-gallery/test_gallery_dl_collector.py
           python apps/yui-gallery/test_source_viewer_manifest.py
@@ -53,6 +57,10 @@ jobs:
           python apps/yui-gallery/qa_mobile_navigation.py --engine ${{ matrix.engine }} --out yui-navigation-${{ matrix.engine }}.json
           python apps/yui-gallery/qa_gallery.py --engine ${{ matrix.engine }} --out yui-${{ matrix.engine }}.json
           python apps/yui-gallery/qa_owner_media.py --engine ${{ matrix.engine }}
+      - name: Re-download all beta.10 selections and verify source SHA-256
+        if: matrix.engine == 'chromium'
+        run: |
+          python apps/yui-gallery/verify_source_selection.py --selection apps/yui-gallery/verification/beta10-resolution-selections.json --album artgravia663-ai32 --out yui-source-readback.json
       - uses: actions/upload-artifact@v7
         if: always()
         with:

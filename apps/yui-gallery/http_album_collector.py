@@ -74,6 +74,24 @@ def discover(target,client,cache):
             elif kind=='junmeitu':
                 # The current photo is scoped to .pictures, excluding related thumbnails.
                 pass
+        if kind=='girlatlas':
+            heading=re.search(r'<h1[^>]*>(.*?)</h1>',html,re.S)
+            title=unescape(re.sub(r'<[^>]+>','',heading.group(1))).strip() if heading else ''
+            if ('Yui' not in title or '유이' not in title
+                    or '/tag?id=68f545da0e41b873a9cfea1c' not in html):
+                raise ValueError('Girl Atlas requested Korean model metadata not confirmed')
+            count=re.search(r'Photos</label>.*?class="field-control"[^>]*>\s*(\d+)/(\d+)',html,re.S)
+            if not count or tuple(map(int,count.groups()))!=(expected,expected):
+                raise ValueError('Girl Atlas full public photo count not confirmed')
+            for tag in re.findall(r'<a\b[^>]*>',html):
+                if 'data-fancybox="Photo"' not in tag or 'visible="True"' not in tag:continue
+                src=re.search(r'data-src="([^"]+)"',tag);number=re.search(r'index="(\d+)"',tag)
+                if not src or not number:continue
+                candidate=urljoin(url,unescape(src.group(1)))
+                album_id=parse_qs(parsed.query).get('id',[''])[0]
+                if not re.fullmatch(r'https://www\.girl-atlas\.com/static/albums/\d{4}-\d{2}-\d{2}/'+re.escape(album_id)+r'/[^/<>?]+\.(?:jpg|png|webp)!lrg',candidate):
+                    raise ValueError('Unexpected public photo route')
+                selected[int(number.group(1))+1]=candidate
         if kind=='junmeitu':
             number_match=re.fullmatch(re.escape(stem.removeprefix('/en'))+r'(?:-(\d+))?\.html',urlsplit(url).path.removeprefix('/en'))
             if not number_match:raise ValueError('Album page path mismatch')

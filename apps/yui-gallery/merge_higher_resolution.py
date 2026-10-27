@@ -6,6 +6,7 @@ This does not certify any publisher master or remove source files.
 import argparse,hashlib,json,shutil
 from pathlib import Path
 from PIL import Image,ImageChops,ImageStat
+from photo_quality_policy import replacement_reason,watermark_review
 
 def signature(path):
     with Image.open(path) as im:
@@ -27,11 +28,11 @@ def merge(primary,alternative,out):
             pixels=hashlib.sha256(str(image.size).encode()+image.convert('RGB').tobytes()).hexdigest()
         unique.setdefault(pixels,photo)
     candidates=[(p,*signature(alternative/p['file'])) for p in unique.values()]
-    used=set();changed=[];images=[];out.mkdir(parents=True,exist_ok=True)
+    used=set();changed=[];watermark_changes=[];images=[];out.mkdir(parents=True,exist_ok=True)
     for photo in a['images']:
         bits,small=signature(primary/photo['file']);matches=[]
         for other,hash_,preview in candidates:
-            if other['number'] in used or other['width']*other['height']<=photo['width']*photo['height']:continue
+            if other['number'] in used or not replacement_reason(other,photo):continue
             if abs(other['width']/other['height']-photo['width']/photo['height'])>.035:continue
             distance=(bits^hash_).bit_count()
             if distance>4:continue
@@ -41,18 +42,22 @@ def merge(primary,alternative,out):
         chosen=photo;folder=primary
         if matches and (len(matches)==1 or matches[1][0]>matches[0][0]+2):
             _,error,other=matches[0];used.add(other['number']);chosen={**other,'number':photo['number']};folder=alternative
-            changed.append({'number':photo['number'],'source_number':other['number'],'from_sha256':photo['sha256'],
+            reason=replacement_reason(other,photo)
+            (changed if reason=='higher_resolution' else watermark_changes).append({'number':photo['number'],'source_number':other['number'],'from_sha256':photo['sha256'],
                             'to_sha256':other['sha256'],'from_pixels':[photo['width'],photo['height']],
-                            'to_pixels':[other['width'],other['height']],'comparison_mean_error':round(error,3)})
+                            'to_pixels':[other['width'],other['height']],'comparison_mean_error':round(error,3),
+                            'reason':reason,'site_watermark_review':watermark_review(other)})
         src=folder/chosen['file'];filename=f"{photo['number']:04d}-{chosen['sha256'][:12]}"+src.suffix
         dest=out/filename;shutil.copyfile(src,dest)
         assert hashlib.sha256(dest.read_bytes()).hexdigest()==chosen['sha256']
         images.append({**chosen,'file':filename})
     result={**a,'images':images,'higher_resolution_web_replacements':changed,
+            'watermark_free_web_replacements':watermark_changes,
             'quality':'public_web_resolution','publisher_original_verified':False,
             'source_pages':list(dict.fromkeys(a.get('source_pages',[])+b.get('source_pages',[])))}
     (out/'manifest.json').write_text(json.dumps(result,ensure_ascii=False,indent=2)+'\n')
     print('UNCHANGED_HIGHER_RESOLUTION_WEB_FILES_SELECTED',len(changed),'of',len(images),flush=True)
+    print('UNCHANGED_SAME_RESOLUTION_WATERMARK_FREE_FILES_SELECTED',len(watermark_changes),flush=True)
     return result
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('primary',type=Path);p.add_argument('alternative',type=Path);p.add_argument('out',type=Path);a=p.parse_args()

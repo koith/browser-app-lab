@@ -1,10 +1,10 @@
 {
-  "checked_at": "2026-10-27T10:41:19.407522+00:00",
+  "checked_at": "2026-10-27T13:34:21.701662+00:00",
   "arbitrary_resolution_completion_threshold": null,
   "not_publisher_master_certification": true,
   "complete_web_albums": 21,
   "preview_or_incomplete_groups": 5,
-  "gallery_entries": 2490,
+  "gallery_entries": 2504,
   "albums": [
     {
       "id": "yuis-present33",
@@ -254,6 +254,14 @@
         [
           1200,
           1799
+        ],
+        [
+          1366,
+          2048
+        ],
+        [
+          2048,
+          1366
         ]
       ],
       "minimum_long_edge": 1200,
@@ -297,15 +305,23 @@
       "dimensions": [
         [
           1024,
-          682
-        ],
-        [
-          1024,
           683
         ],
         [
           1024,
           1535
+        ],
+        [
+          1281,
+          1920
+        ],
+        [
+          1920,
+          1280
+        ],
+        [
+          1920,
+          1281
         ]
       ],
       "minimum_long_edge": 1024,
@@ -324,15 +340,19 @@
       "duplicate_files": 0,
       "dimensions": [
         [
-          1024,
-          683
+          1280,
+          1920
         ],
         [
-          1024,
-          1535
+          1281,
+          1920
+        ],
+        [
+          1920,
+          1281
         ]
       ],
-      "minimum_long_edge": 1024,
+      "minimum_long_edge": 1920,
       "publisher_master_verified": false,
       "highest_resolution_status": "unverified",
       "follow_up_required": true,
@@ -555,30 +575,6 @@
       "reason": "web sequence complete; continue highest-resolution source comparison"
     },
     {
-      "id": "sexiest18",
-      "title": "Yui: The Sexiest Woman (18 photos + 2 videos) Sexy Girl",
-      "acquired": 18,
-      "expected_web_edition": 18,
-      "sequence_complete": true,
-      "missing_numbers": [],
-      "duplicate_files": 0,
-      "dimensions": [
-        [
-          770,
-          1368
-        ],
-        [
-          1368,
-          770
-        ]
-      ],
-      "minimum_long_edge": 1368,
-      "publisher_master_verified": false,
-      "highest_resolution_status": "unverified",
-      "follow_up_required": true,
-      "reason": "web sequence complete; continue highest-resolution source comparison"
-    },
-    {
       "id": "dec2023-199",
       "title": "[Yo-U] Yui: Vol.2 Album Dec 2023 (199 photos + 1 video) Sexy Girl",
       "acquired": 199,
@@ -610,6 +606,86 @@
         [
           2500,
           1667
+        ]
+      ],
+      "minimum_long_edge": 1368,
+      "publisher_master_verified": false,
+      "highest_resolution_status": "unverified",
+      "follow_up_required": true,
+      "reason": "web sequence complete; continue highest-resolution source comparison"
+    },
+    {
+      "id": "artgravia663-ai32",
+      "title": "[AI Enhanced] ArtGravia Vol.663 — Yui",
+      "acquired": 32,
+      "expected_web_edition": 32,
+      "sequence_complete": true,
+      "missing_numbers": [],
+      "duplicate_files": 0,
+      "dimensions": [
+        [
+          1029,
+          1368
+        ],
+        [
+          1033,
+          1368
+        ],
+        [
+          1034,
+          1368
+        ],
+        [
+          1036,
+          1368
+        ],
+        [
+          1050,
+          1368
+        ],
+        [
+          1051,
+          1368
+        ],
+        [
+          1054,
+          1368
+        ],
+        [
+          1056,
+          1368
+        ],
+        [
+          1060,
+          1368
+        ],
+        [
+          1368,
+          997
+        ],
+        [
+          1368,
+          1028
+        ],
+        [
+          1368,
+          1029
+        ],
+        [
+          1368,
+          1030
+        ],
+        [
+          1368,
+          1033
+        ],
+        [
+          1368,
+          1034
+        ],
+        [
+          1368,
+          1036
         ]
       ],
       "minimum_long_edge": 1368,

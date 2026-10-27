@@ -16,7 +16,15 @@
 .logo{font-size:23px;font-weight:850;letter-spacing:.22em;white-space:nowrap}.logo span{font-size:10px;font-weight:500;letter-spacing:.15em;color:#8a8b8e;margin-left:9px}
 .mainnav{display:flex;align-items:center;gap:25px;margin-left:auto}
 .mainnav a{font-size:13px;color:#babac0;transition:color .2s}.mainnav a:hover{color:#fff}
-.topsearch{background:#1b1d22;border:1px solid #393a40;border-radius:8px;min-width:170px;max-width:240px;width:20vw;padding:11px 14px;color:#fff;font-size:13px;outline:none}
+.search-toggle{display:grid;place-items:center;width:40px;height:40px;flex-shrink:0;padding:9px;border:0;border-radius:50%;background:#ffffff0d;color:#ffffff80}
+.search-toggle:hover,.search-toggle:focus-visible{color:#fff;background:#ffffff20}
+.search-toggle svg{width:19px;height:19px}
+#search-dialog{position:fixed;inset:0;width:min(420px,calc(100% - 28px));margin:auto;padding:20px;border:1px solid #ffffff25;border-radius:12px;background:#191b20;color:#f5f5f6;box-shadow:0 12px 48px #0008}
+#search-dialog::backdrop{background:#0009;backdrop-filter:blur(3px)}
+.search-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;font-size:14px}
+#search-close{border:0;background:none;color:#ccc;width:36px;height:36px;font-size:25px}
+.topsearch{background:#101114;border:1px solid #393a40;border-radius:8px;width:100%;padding:12px;color:#fff;font-size:16px;outline:none}
+#search-form button[type=submit]{display:block;margin:14px 0 0 auto;padding:9px 18px;border:1px solid #ffffff25;border-radius:7px;background:#303239;color:#fff;font-size:13px}
 .topsearch:focus{border-color:#bbb4a8}.topsearch::placeholder{color:#888992}
 .titleline{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;padding:36px 0 22px}
 .eyebrow{color:#c7bdac;font-size:11px;font-weight:700;letter-spacing:.22em}
@@ -26,12 +34,17 @@ h1{margin:8px 0 0;font-weight:750;font-size:clamp(34px,5vw,56px);letter-spacing:
 .filter{background:none;border:0;border-bottom:2px solid transparent;color:#999aa0;padding:12px 1px 13px;white-space:nowrap;font-size:13px}
 .filter.active{color:#fff;border-bottom-color:#f4f2ec;font-weight:700}
 .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px;margin-bottom:55px}
-.album{position:relative;background:#1b1d21;overflow:hidden;aspect-ratio:3/4;cursor:pointer;display:block;border:0;width:100%;padding:0;text-align:left}
+.album{position:relative;background:#1b1d21;overflow:hidden;aspect-ratio:3/2;cursor:pointer;display:block;border:0;width:100%;padding:0;text-align:left}
 .album img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform .32s ease;opacity:.92}
 .album:hover img{transform:scale(1.045)}
 .album .gradient{position:absolute;inset:43% 0 0;background:linear-gradient(transparent,#000e)}
-.album .name{position:absolute;bottom:35px;left:17px;right:14px;color:#fff;font-size:clamp(14px,1.45vw,19px);font-weight:720;line-height:1.35;text-shadow:0 2px 13px #000b}
-.album .number{position:absolute;bottom:15px;left:17px;font-size:12px;color:#d5d4d2;text-shadow:0 1px 6px #000b}
+.album .name{position:absolute;bottom:9px;left:9px;right:9px;color:#fff;font-size:clamp(12px,1.1vw,15px);font-weight:650;line-height:1.25;text-shadow:0 2px 13px #000b;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.cover-labels{position:absolute;top:8px;left:8px;max-width:calc(100% - 80px);pointer-events:none}
+.publisher-sticker,.edition-sticker{font-size:9px;font-weight:550;line-height:1.35;padding:3px 5px;border:1px solid #ffffff20;border-radius:4px;background:#17191e85;color:#ffffffe0;backdrop-filter:blur(3px)}
+.publisher-sticker{display:inline-block;max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;vertical-align:top}
+.album-count{display:block;margin-top:3px;font-size:9px;line-height:1.3;color:#ffffff88;text-shadow:0 1px 5px #000b;white-space:nowrap}
+.edition-sticker{position:absolute;top:8px;right:8px;pointer-events:none;color:#ffffffb3}
+.edition-sticker[data-kind="ai"]{color:#e3d1f2;background:#29223799}
 .album .placeholder{display:flex;align-items:center;justify-content:center;position:absolute;inset:0;background:linear-gradient(145deg,#33333a,#1a1c21);color:#6d6e72;font-size:54px;font-weight:800}
 .photo-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:11px;align-items:start;margin-bottom:30px}
 .photo{margin:0;display:block;position:relative;cursor:pointer;background:#24262b;border:0;padding:0;width:100%;overflow:hidden}
@@ -51,14 +64,16 @@ footer{border-top:1px solid #292b30;padding:27px 0 55px;color:#84858b;font-size:
 #full{display:block;max-width:min(100vw,1800px);max-height:calc(100dvh - 71px);width:auto;height:auto;object-fit:contain;touch-action:auto;-webkit-touch-callout:default;user-select:auto}
 .lighttop{position:fixed;top:0;left:0;right:0;min-height:60px;padding:calc(env(safe-area-inset-top) + 9px) clamp(14px,3.2vw,48px) 9px;display:flex;align-items:center;gap:12px;color:#a3a4aa;font-size:11px;z-index:3}
 .lightbtn{border:0;background:#262830b5;color:#f4f4f7;width:41px;height:41px;flex-shrink:0;border-radius:50%;font-size:21px;display:grid;place-items:center}
-#original{position:absolute;right:10px;bottom:10px;border:1px solid #ffffff25;background:#17191e99;color:#fff;border-radius:7px;padding:10px 12px;font-size:12px;line-height:1;backdrop-filter:blur(5px)}
+#original{position:absolute;right:10px;bottom:10px;border:1px solid #ffffff25;background:#17191e55;color:#fff;border-radius:7px;padding:10px 12px;font-size:12px;line-height:1;backdrop-filter:blur(2px);opacity:.55;transition:opacity .15s}
+#original:focus-visible{opacity:1;outline:2px solid #fff;outline-offset:2px}
+@media(hover:hover){#original:hover{opacity:.9}}
 #original:not([href]){display:none}
 #media-status{position:absolute;bottom:65px;left:15px;right:15px;text-align:center;font-size:12px;color:#ccc;pointer-events:none}
 .arrow{position:absolute;top:48%;z-index:2}.arrow.prev{left:17px}.arrow.next{right:17px}
 button:focus-visible,a:focus-visible{outline:2px solid #ddd4c7;outline-offset:3px}
 [hidden]{display:none!important}
 @media(max-width:990px){.grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}.mainnav{gap:15px}.topbar{gap:14px}}
-@media(max-width:680px){.topbar{height:67px;flex-wrap:wrap}.logo{font-size:21px}.logo span{font-size:9px}.mainnav{gap:15px}.mainnav a{font-size:12px}.topsearch{min-width:0;width:100%;max-width:none;order:5;height:39px;margin-top:-1px}.topbar:has(.topsearch){height:111px;align-content:center;padding-bottom:9px}.titleline{padding:25px 0 12px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.album .name{font-size:14px;left:11px;bottom:30px}.album .number{left:11px;bottom:12px;font-size:11px}.photo-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.filters{gap:22px;margin-bottom:13px}.counter{font-size:11px}.arrow{width:35px;height:35px}.arrow.prev{left:6px}.arrow.next{right:6px}}
+@media(max-width:680px){.topbar{height:67px;flex-wrap:wrap}.logo{font-size:21px}.logo span{font-size:9px}.mainnav{gap:15px}.mainnav a{font-size:12px}.titleline{padding:25px 0 12px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.album .name{font-size:12px;left:9px;right:9px;bottom:9px}.photo-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.filters{gap:22px;margin-bottom:13px}.counter{font-size:11px}.arrow{width:35px;height:35px}.arrow.prev{left:6px}.arrow.next{right:6px}}
 @media(prefers-reduced-motion:reduce){.album img,.photo img{transition:none}}
 /* Keep controls in the same place while giving photographs the available space. */
 .topbar{position:sticky;top:0;z-index:10;background:#101114;padding-top:env(safe-area-inset-top);height:calc(76px + env(safe-area-inset-top))}
@@ -71,11 +86,11 @@ button:focus-visible,a:focus-visible{outline:2px solid #ddd4c7;outline-offset:3p
 #albumtotal{font-size:10px;flex-shrink:0}
 #detail{padding-top:10px}
 .detail-view .topbar{height:calc(60px + env(safe-area-inset-top));gap:12px;padding-bottom:0;flex-wrap:nowrap}
-.detail-view .logo,.detail-view .mainnav,.detail-view .topsearch{display:none}
+.detail-view .logo,.detail-view .mainnav,.detail-view .search-toggle{display:none}
 .detail-view .detail-heading{display:flex}
 .detail-view .version-chip{font-size:9px;top:calc(env(safe-area-inset-top) + 2px)}
 footer{padding:15px 0 25px;justify-content:flex-end}
-@media(max-width:680px){.topbar:has(.topsearch){height:calc(111px + env(safe-area-inset-top))}.detail-view .topbar:has(.topsearch){height:calc(60px + env(safe-area-inset-top))}.browse-meta{gap:8px}.inventory{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.counter{font-size:10px}.photo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:680px){.topbar{height:calc(67px + env(safe-area-inset-top))}.browse-meta{gap:8px}.inventory{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.counter{font-size:10px}.photo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
 </head>
 <body>
@@ -84,8 +99,8 @@ footer{padding:15px 0 25px;justify-content:flex-end}
  <a href="./" class="logo" aria-label="YUI 갤러리 홈">YUI<span>GALLERY</span></a>
  <div class="detail-heading"><button class="back" id="back" aria-label="화보 목록으로 돌아가기">‹</button><h2 class="detail-title" id="albumname"></h2><span class="counter" id="albumtotal"></span></div>
  <nav class="mainnav" aria-label="이동"><a href="cloud.html">클라우드</a></nav>
- <input id="search" class="topsearch" type="search" placeholder="화보 검색" aria-label="화보 검색">
- <small id="app-version" class="version-chip">v0.1.0-beta.9</small>
+ <button id="search-toggle" class="search-toggle" aria-label="화보 검색 열기" aria-haspopup="dialog" aria-controls="search-dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button>
+ <small id="app-version" class="version-chip">v0.1.0-beta.10</small>
 </header>
 <div id="browse">
  <div class="browse-meta"><p class="inventory" id="inventory">화보를 불러오는 중</p><span class="counter" id="total"></span></div>
@@ -99,12 +114,20 @@ footer{padding:15px 0 25px;justify-content:flex-end}
 </div>
 <footer><span>개별 이미지 · 수집 파일 화질 유지</span></footer>
 </div>
+<dialog id="search-dialog" aria-labelledby="search-label">
+ <form id="search-form">
+  <div class="search-heading"><label id="search-label" for="search">화보 검색</label><button id="search-close" type="button" aria-label="검색 닫기">×</button></div>
+  <input id="search" class="topsearch" type="search" placeholder="화보명" autocomplete="off" autofocus>
+  <button type="submit">적용</button>
+ </form>
+</dialog>
 <div id="lightbox" role="dialog" aria-label="사진 보기" aria-modal="true">
- <div class="lighttop"><button class="lightbtn" id="close" aria-label="닫기">×</button><span id="position"></span><small class="version-chip">v0.1.0-beta.9</small></div>
+ <div class="lighttop"><button class="lightbtn" id="close" aria-label="닫기">×</button><span id="position"></span><small class="version-chip">v0.1.0-beta.10</small></div>
  <button class="lightbtn arrow prev" id="prev" aria-label="이전 사진">‹</button><div class="media-frame"><img id="full" alt="화보 사진"><a id="original" target="_blank" rel="noopener">사진 열기 ↗</a></div><button class="lightbtn arrow next" id="next" aria-label="다음 사진">›</button>
  <p id="media-status" role="status"></p>
 </div>
 <script src="owner-media.js"></script>
+<script src="gallery-labels.js?v=0.1.0-beta.10"></script>
 <script>
 "use strict";
 const $=id=>document.getElementById(id);
@@ -113,18 +136,18 @@ function canonicalId(id){const seen=new Set();while(albumAliases[id]&&!seen.has(
 const titleMap={'cn-huantuji':'幻图集 · Yui','cn-chaotuji':'潮图集 · Yui','cn-miaohuaying':'喵画影 · Yui','cn-yuntu8':'云图吧 · Yui','cn-wantuzhi-everyday':'Everyday Life','cn-yingyuge':'影语阁 · Yui','v04':'SWEETBOX · Teddy Bear'};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function getName(a){return a.title||catalog.find(x=>x.id===a.id)?.title||titleMap[a.id]||a.id}
-function validImages(a){return (a.images||[]).filter(x=>{if(a.ownerHosted&&x.ownerAlbum===a.id&&x.url==='owner:'+a.id+':'+x.number)return true;if(typeof x.url!=='string')return false;if(x.url.startsWith('stored-albums/'))return true;if(!a.sourceHosted)return false;try{const u=new URL(x.url);return u.protocol==='https:'&&(['cdn.jliji.com','cdn.v2ph.com','i0.wp.com','i1.wp.com','i2.wp.com','cdn1.thismore.fun','cdn2.thismore.fun'].includes(u.hostname)||/^(?:(?:imgx\d{3}|images\d{2})\.pixibb\.com|(?:wes|bis)\.misskon\.com|lux\.mrcong\.com|s\.wujituku\.com|lh\d\.ggpht\.com)$/.test(u.hostname));}catch{return false}})}
+function validImages(a){return (a.images||[]).filter(x=>{if(a.ownerHosted&&x.ownerAlbum===a.id&&x.url==='owner:'+a.id+':'+x.number)return true;if(typeof x.url!=='string')return false;if(x.url.startsWith('stored-albums/'))return true;if(!a.sourceHosted)return false;try{const u=new URL(x.url);return u.protocol==='https:'&&(['www.girl-atlas.com','cdn.jliji.com','cdn.v2ph.com','i0.wp.com','i1.wp.com','i2.wp.com','cdn1.thismore.fun','cdn2.thismore.fun'].includes(u.hostname)||/^(?:(?:imgx\d{3}|images\d{2})\.pixibb\.com|(?:wes|bis)\.misskon\.com|lux\.mrcong\.com|s\.wujituku\.com|lh\d\.ggpht\.com)$/.test(u.hostname));}catch{return false}})}
 function available(){return stored.filter(x=>validImages(x).length).sort((a,b)=>validImages(b).length-validImages(a).length)}
 function setMode(m){mode=m;activeAlbum=null;detailAlbum=null;document.body.classList.remove('detail-view');$('detail').hidden=true;$('browse').hidden=false;document.querySelectorAll('[data-filter]').forEach(b=>b.classList.toggle('active',b.dataset.filter===m));render()}
 function photosFor(a){return validImages(a).map((p,i)=>({...p,name:getName(a),albumId:a.id,number:p.number??i+1}))}
 function card(a,hasImages){
  const owned=stored.find(x=>x.id===a.id)||a;
  const p=validImages(owned),cover=p[0]?.url||'',count=p.length,expected=a.photos??a.expected??catalog.find(x=>x.id===a.id)?.photos??null;
- const label=getName(a);
- const n=count?(count+'장'+(!owned.ownerHosted&&!owned.sourceHosted?' · 일부 공개':'')+(owned.ownerHosted?' · 개인 보관본':owned.sourceHosted?' · 출처 열람':'')+(expected!=null&&expected!==count?' / '+expected+'장':'')):(expected!=null?expected+'장 · 미수집':'미수집');
+ const label=getName(a),labels=YuiLabels.describe(owned);
+ const n=count?(expected!=null&&expected!==count?count+' / '+expected+'장':count+'장'):(expected!=null?expected+'장 · 미확보':'장수 미확인');
  const cloudCover=owned.ownerHosted?p[0]:null;
  const img=cloudCover?'<img data-owner="'+esc(cloudCover.url)+'" alt="'+esc(label)+' 표지">':cover?'<img loading="lazy" referrerpolicy="no-referrer" src="'+esc(cover)+'" alt="'+esc(label)+' 표지">':'<div class="placeholder">Y</div>';
- return '<button class="album" data-id="'+esc(a.id)+'" data-available="'+(hasImages?'1':'0')+'" aria-label="'+esc(label)+'">'+img+'<div class="gradient"></div><strong class="name">'+esc(label)+'</strong><span class="number">'+esc(n)+'</span></button>';
+ return '<button class="album" data-id="'+esc(a.id)+'" data-available="'+(hasImages?'1':'0')+'" aria-label="'+esc(label+' · '+labels.publisher+' · '+n+' · '+labels.edition)+'">'+img+'<div class="gradient"></div><span class="cover-labels"><span class="publisher-sticker" title="발행사: '+esc(labels.publisher)+'">'+esc(labels.publisher)+'</span><span class="album-count">'+esc(n)+'</span></span><span class="edition-sticker" data-kind="'+esc(labels.kind)+'" title="'+esc(labels.detail)+'">'+esc(labels.edition)+'</span><strong class="name">'+esc(label)+'</strong></button>';
 }
 function photoHTML(p,i){return '<button class="photo" data-i="'+i+'" aria-label="'+esc(p.name)+' 사진 '+p.number+'"><img loading="lazy" referrerpolicy="no-referrer" '+(p.ownerAlbum?'data-owner="'+esc(p.url):'src="'+esc(p.url))+'" alt="'+esc(p.name)+' 사진 '+p.number+'"><span>'+esc(p.name)+' · '+p.number+'</span></button>'}
 const ownerObserver=new IntersectionObserver(entries=>{for(const e of entries){if(!e.isIntersecting)continue;ownerObserver.unobserve(e.target);const p=ownerStored.flatMap(a=>a.images).find(p=>p.url===e.target.dataset.owner);if(p)YuiPrivate.asset(p).then(url=>{if(e.target.isConnected)e.target.src=url}).catch(()=>{e.target.alt='보관본 연결을 확인해 주세요'})}},{rootMargin:'200px'});
@@ -183,11 +206,18 @@ function step(n){
 function routeURL(s){const q=new URLSearchParams();if(s.album)q.set('album',s.album);if(s.photo)q.set('photo',s.photo);if(s.fromPhotos)q.set('from','photos');if(s.mode&&s.mode!=='albums')q.set('view',s.mode);return location.pathname+location.search+(q.size?'#'+q:'')}
 function remember(s){history.replaceState({...history.state,scroll:window.scrollY},'');const state={yui:true,key:Date.now().toString(36)+'-'+(++historyEntry),depth:(history.state?.depth||0)+1,scroll:0,...s};history.pushState(state,'',routeURL(state))}
 function goBack(){if(history.state?.yui&&history.state.depth>0)history.back();else{const state={yui:true,depth:0,mode:'albums',scroll:0};history.replaceState(state,'',routeURL(state));applyRoute(state)}}
-function applyRoute(s){s=viewerRoutes.get(s.key)||s;s={...s,album:canonicalId(s.album)};hideViewer();setMode(s.mode||'albums');if(s.album&&!s.fromPhotos)openAlbum(s.album,false);if(s.photo){const a=stored.find(a=>a.id===s.album);const list=s.fromPhotos?available().flatMap(photosFor).filter(p=>p.name.toLocaleLowerCase().includes($('search').value.toLocaleLowerCase().trim())):a?photosFor(a):[];const i=list.findIndex(p=>p.albumId===s.album&&p.number===Number(s.photo));if(i>=0)openViewer(list,i,false)}requestAnimationFrame(()=>window.scrollTo(0,s.scroll||0))}
+function applyRoute(s){$('search-dialog').close();s=viewerRoutes.get(s.key)||s;s={...s,album:canonicalId(s.album)};hideViewer();setMode(s.mode||'albums');if(s.album&&!s.fromPhotos)openAlbum(s.album,false);if(s.photo){const a=stored.find(a=>a.id===s.album);const list=s.fromPhotos?available().flatMap(photosFor).filter(p=>p.name.toLocaleLowerCase().includes($('search').value.toLocaleLowerCase().trim())):a?photosFor(a):[];const i=list.findIndex(p=>p.albumId===s.album&&p.number===Number(s.photo));if(i>=0)openViewer(list,i,false)}if(s.searchOpen)showSearch();requestAnimationFrame(()=>window.scrollTo(0,s.scroll||0))}
 window.addEventListener('popstate',()=>{const s=history.state;if(s?.yui)applyRoute(s)});
 $('prev').onclick=()=>step(-1);$('next').onclick=()=>step(1);$('close').onclick=closeViewer;
 $('back').onclick=goBack;
-$('search').oninput=()=>{hideViewer();setMode(mode);history.replaceState({yui:true,depth:history.state?.depth||0,mode,scroll:0},'',routeURL({mode}));render()};
+function showSearch(){if(!$('search-dialog').open)$('search-dialog').showModal();$('search').focus()}
+function closeSearch(){if(history.state?.searchOpen&&history.state.depth>0)history.back();else $('search-dialog').close()}
+$('search-toggle').onclick=()=>{remember({mode,searchOpen:true});showSearch()};
+$('search-close').onclick=closeSearch;
+$('search-dialog').addEventListener('cancel',e=>{e.preventDefault();closeSearch()});
+$('search-dialog').addEventListener('click',e=>{if(e.target===$('search-dialog')){const r=e.target.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)closeSearch()}});
+$('search-form').onsubmit=e=>{e.preventDefault();closeSearch()};
+$('search').oninput=()=>{hideViewer();setMode(mode);const s={...history.state,yui:true,mode,scroll:0};history.replaceState(s,'',routeURL(s))};
 document.querySelectorAll('[data-filter]').forEach(b=>b.onclick=()=>{setMode(b.dataset.filter);history.replaceState({yui:true,depth:history.state?.depth||0,mode,scroll:window.scrollY},'',routeURL({mode}))});
 $('lightbox').onclick=e=>{if(e.target===$('lightbox'))closeViewer()};
 document.addEventListener('keydown',e=>{if(!$('lightbox').classList.contains('open'))return;if(e.key==='Escape')closeViewer();else if(e.key==='ArrowLeft')step(-1);else if(e.key==='ArrowRight')step(1)});
@@ -204,14 +234,17 @@ Promise.all([
  YuiPrivate.albums().then(albums=>({albums})).catch(error=>({albums:[],error:error.message})),
  fetch('additional-source-albums.json',{cache:'no-store'}).then(r=>r.ok?r.json():{albums:[]}).catch(()=>({albums:[]})),
  fetch('source-viewer-albums.json',{cache:'no-store'}).then(r=>r.ok?r.json():{albums:[]}).catch(()=>({albums:[]})),
+ fetch('identity-exclusions.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('identity exclusions');return r.json()}),
  fetch('album-aliases.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('work aliases');return r.json()})
-]).then(([s,c,owner,extra,remote,aliases])=>{
+]).then(([s,c,owner,extra,remote,exclusions,aliases])=>{
  albumAliases=aliases.aliases||{};
- localStored=s.albums||[];catalog=c.albums||[];
+ const excludedIds=new Set([...exclusions.excluded_album_ids,...exclusions.excluded_source_ids]),excludedSources=new Set(exclusions.excluded_source_urls),excludedHashes=new Set(exclusions.excluded_image_sha256);
+ const allowed=a=>!excludedIds.has(a.id)&&![a.source,...(a.source_pages||[])].some(u=>excludedSources.has(u))&&!(a.images||[]).some(p=>excludedHashes.has(p.sha256));
+ localStored=(s.albums||[]).filter(allowed);catalog=(c.albums||[]).filter(allowed);
  // Identical verified local files remain available when an external host blocks
  // hotlinks. Match exact SHA-256 bytes; never substitute a smaller preview.
  const localByHash=new Map(localStored.flatMap(validImages).filter(p=>p.sha256).map(p=>[p.sha256,p.url]));
- remoteStored=[...new Map([...(remote.albums||[]),...(extra.albums||[])].map(a=>[a.id,a])).values()].filter(a=>a.status==='verified_collected_individual_files_source_hosted_online_view').map(a=>({...a,sourceHosted:true,images:a.images.map(p=>localByHash.has(p.sha256)?{...p,source_url:p.url,url:localByHash.get(p.sha256)}:p)}));
+ remoteStored=[...new Map([...(remote.albums||[]),...(extra.albums||[])].filter(allowed).map(a=>[a.id,a])).values()].filter(a=>a.status==='verified_collected_individual_files_source_hosted_online_view').map(a=>({...a,sourceHosted:true,images:a.images.map(p=>localByHash.has(p.sha256)?{...p,source_url:p.url,url:localByHash.get(p.sha256)}:p)}));
  ownerStored=owner.albums;const ownerIds=new Set(ownerStored.map(a=>a.id));
  // Keep verified local bytes for exact-hash fallback, but show each work once.
  const candidates=[...ownerStored,...remoteStored.filter(a=>!ownerIds.has(a.id)),...localStored];

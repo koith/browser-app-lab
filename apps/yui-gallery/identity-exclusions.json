@@ -1,19 +1,43 @@
 {
   "model": "심유이 / 심혜성 / Yui (Korean SWEETBOX / MilkyBomb / Yo-U model)",
   "excluded_album_ids": [
-    "cn-miaohuaying"
+    "cn-miaohuaying",
+    "sexiest18"
   ],
   "excluded_source_ids": [
     "miaohuaying-yui-collection"
   ],
   "excluded_source_urls": [
-    "https://www.miaohuaying.com/yui/"
+    "https://www.miaohuaying.com/yui/",
+    "https://sexy.pixibb.com/yui-the-sexiest-woman-18-photos-2-videos/"
   ],
   "excluded_image_sha256": [
     "550f109c4e5c6c1e3735778094c0991186b12dfa30e4b92f75e1794109404297",
     "7c0a673fb0cdba7dc5520746d49fca16362a825de9698f0ca654e1091f77371d",
-    "a0f2738c1fd4b023df305117b7e9bb3d7758ad9bb7de619ad43a1c1614e03130"
+    "a0f2738c1fd4b023df305117b7e9bb3d7758ad9bb7de619ad43a1c1614e03130",
+    "caae4f82b0ed907287eaaf7ff0d67ad5075b1bbb7d211104880ed270b5323a25",
+    "2270c9fb9216aad88c782eb27082421634b67d89faa6c2d34d96c87a049a1970",
+    "ca11371be5b8aa0fdb0ea2b080a425a49f6db5ed37d01e0ccd7c85fd5601ad39",
+    "29d7e6b9a21bb8be78e99130198304e9b999655cb8752788a8fb4ce1ba4d85b6",
+    "843c7bab360b4b820301f4d5bb23f9225a072fb7ca63f96335d020771434784d",
+    "412d25f2d6836f7b59320ef9394d4e9bc7e7482e516e0c5e1d0e29767f26197e",
+    "c269befcba33cf4a95db67c2b929f18a5363105965980c111815207314138238",
+    "ed6f9fef23062f4882164a351bdf6ccc8104bf7a8e3ce30905facce4dc2707b1",
+    "f9c180411bad621b5ce79f516784cf94733dc4f7992a89b9ae61ad92d9a8ef2b",
+    "b9a6c3c2c54d887371f4b795d624e1073e84b284fa4c63e9a2bdfc5bcc46b569",
+    "b51d19bfef9b18336caed5c30ded1b3bff9f1ba67106e074f102b3f06f4a91c9",
+    "d9d5e8db94729d403c9406f941be5b3c63f858be6af15f7d1348cf86c69438f8",
+    "a8a3268d17637dd8401db51b138ec18f9528bae9b74cb3be4eabc534b68f6a02",
+    "ccac652f136f0f9e9a1201fad4698558db87e78e916ea334f67fd9ed2621abcc",
+    "7d95e832660f42dafa9c7c025fcdf5d985bfe99eefd2a6496c46e3ca780d9810",
+    "9b6f59162e4381225785560873dcff2b3f10566c46a2203cc53b77da9cf6dfd1",
+    "05cfe30b76c9d1d5e0540675e2c7583f1e181caee9227afd2a5c46b0f0603bc5",
+    "6e31bca3f1827b61e2972f8a227249e0f5867f2f6029f3261ab71049073dab41"
   ],
   "reason": "User identified the third-from-last red-costume album as a different model; source alias Yui alone did not establish the requested model.",
-  "decision": "Remove gallery/catalog registration and prevent reimport; preserve private audit copy."
+  "decision": "Remove gallery/catalog registration and prevent reimport; preserve private audit copy.",
+  "reasons": {
+    "cn-miaohuaying": "User identified red costume set as a different model.",
+    "sexiest18": "User identified The Sexiest Woman 18-photo set as a different model; a shared Yui index is not identity evidence."
+  }
 }

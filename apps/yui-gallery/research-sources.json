@@ -79,10 +79,6 @@
       "status": "discovered_public_page_not_counted_as_files"
     },
     {
-      "url": "https://sexy.pixibb.com/yui-the-sexiest-woman-18-photos-2-videos/",
-      "status": "discovered_public_page_not_counted_as_files"
-    },
-    {
       "url": "https://sexy.pixibb.com/sweetbox-yui-swtb-vol-22-see-through-80-photos-2-videos-sexy-girl/",
       "status": "discovered_public_page_not_counted_as_files"
     },
@@ -269,6 +265,21 @@
       "url": "https://ctee.kr/item/store/86995",
       "model": "심유이 YUI",
       "status": "publisher_title_confirmed_samples_pending"
+    },
+    {
+      "url": "https://djawaphoto.com/portfolio/nikke-privaty-sharp-lesson/",
+      "title": "DJAWA × Yui — Nikke: Privaty – Sharp Lesson",
+      "publisher": "DJAWA",
+      "official_identity_link": "https://link.inpock.co.kr/super_yuisan",
+      "advertised_photos": 190,
+      "advertised_dimensions": [
+        8640,
+        5760
+      ],
+      "public_reference_images": 26,
+      "status": "official_catalogue_verified_full_files_not_acquired",
+      "gallery_added": false,
+      "notes": "Model official profile links directly to publisher. Public samples are not the complete 190-photo edition. Do not replace with unrelated Yui or count video thumbnails as photographs."
     }
   ]
 }
