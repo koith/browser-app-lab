@@ -1,5 +1,5 @@
 {
-  "checked_at": "2026-10-27T13:34:21.701662+00:00",
+  "checked_at": "2026-10-27T16:46:42.596749+00:00",
   "arbitrary_resolution_completion_threshold": null,
   "not_publisher_master_certification": true,
   "complete_web_albums": 21,
@@ -506,6 +506,14 @@
         [
           1368,
           912
+        ],
+        [
+          2048,
+          1366
+        ],
+        [
+          2400,
+          1600
         ]
       ],
       "minimum_long_edge": 1368,

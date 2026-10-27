@@ -9,9 +9,10 @@ from datetime import datetime,timezone
 from pathlib import Path
 from playwright.async_api import async_playwright
 import requests
+from browser_image_checks import decode_image
 
 async def run(args):
- results=[];errors=[];local_verified=set();semaphore=asyncio.Semaphore(args.workers)
+ results=[];errors=[];decode_retries=[];local_verified=set();semaphore=asyncio.Semaphore(args.workers)
  async with async_playwright() as pw:
   browser=await getattr(pw,args.engine).launch()
   context=await browser.new_context(viewport={'width':390,'height':844},is_mobile=True,has_touch=True)
@@ -29,10 +30,14 @@ async def run(args):
   if args.album:
    requested=set(args.album);albums=[a for a in albums if a['id'] in requested]
    assert {a['id'] for a in albums}==requested,'Requested album missing from actual gallery'
-  await page.screenshot(path=str(args.out.with_suffix('.png')));await page.close()
+  await page.screenshot(path=str(args.out.with_suffix('.png')));await context.close()
   async def check(album):
    async with semaphore:
-    page=await context.new_page();js_errors=[]
+    # Release an album's decoded images and pending connections before the
+    # next album. Thousands of files must not accumulate in one WebKit cache.
+    album_context=await browser.new_context(viewport={'width':390,'height':844},is_mobile=True,has_touch=True)
+    if args.http_bridge:await album_context.route('https://**/*',bridge)
+    page=await album_context.new_page();js_errors=[]
     page.on('pageerror',lambda e:(js_errors.append(str(e)),print('BROWSER_JS_ERROR',album['id'],str(e),flush=True)))
     passed=0;hashes=0
     try:
@@ -42,7 +47,10 @@ async def run(args):
      print('QA_ALBUM_BEGIN',album['id'],flush=True)
      for i,image in enumerate(album['images']):
       if i:await page.locator('#next').click()
-      await page.locator('#full').evaluate('(im)=>Promise.race([im.decode(),new Promise((_,reject)=>setTimeout(()=>reject(Error("Image decode timed out: "+im.src)),25000))])')
+      retries=await decode_image(page.locator('#full'))
+      if retries:
+       decode_retries.append({'id':album['id'],'number':image.get('number',i+1),'retries':retries})
+       print('IMAGE_TRANSPORT_RETRY',album['id'],image.get('number',i+1),retries,flush=True)
       dims=await page.locator('#full').evaluate('(im)=>[im.naturalWidth,im.naturalHeight]')
       linked=await page.locator('#original').get_attribute('href')
       assert dims==[image['width'],image['height']],(album['id'],i+1,dims)
@@ -59,9 +67,10 @@ async def run(args):
      errors.append({'id':album['id'],'decoded_before_failure':passed,'error':str(exc),'page_errors':js_errors})
     finally:
      result={'id':album['id'],'decoded_lightbox':passed,'original_link_sha256_checks':hashes}
-     results.append(result);print('GALLERY_REAL_DECODE',args.engine,result,flush=True);await page.close()
+     results.append(result);print('GALLERY_REAL_DECODE',args.engine,result,flush=True);await album_context.close()
   await asyncio.gather(*(check(a) for a in albums));await browser.close()
  report={'checked_at':datetime.now(timezone.utc).isoformat(),'base':args.base,'scope':'selected_albums' if args.album else 'full_gallery','requested_album_ids':args.album,'engine':args.engine,'version':version,'viewport':[390,844],'iphone_real_device':False,'network':'TLS-verified requests bridge' if args.http_bridge else 'direct browser TLS','private_cloud_verified':0,'albums':results,'decoded_image_entries':sum(r['decoded_lightbox'] for r in results),'browser_download_sha256_verified':0,'original_link_sha256_verified':sum(r['original_link_sha256_checks'] for r in results),'unique_original_link_sha256_verified':len(local_verified),'errors':errors}
+ report['image_decode_retries']=decode_retries
  args.out.write_text(json.dumps(report,indent=2)+'\n')
  assert not errors,errors
  assert report['decoded_image_entries']==sum(len(a['images']) for a in albums)
