@@ -54,6 +54,9 @@ jobs:
           const base=fs.existsSync('apps/yui-gallery/source-viewer-albums.json')?JSON.parse(fs.readFileSync('apps/yui-gallery/source-viewer-albums.json')):{albums:[]};
           const remote=[...new Map([...base.albums,...extra.albums].map(a=>[a.id,a])).values()];
           const remoteCount=remote.reduce((n,a)=>n+a.images.length,0);
+          const aliases=JSON.parse(fs.readFileSync('apps/yui-gallery/album-aliases.json')).aliases;
+          const remoteIds=new Set(remote.map(a=>a.id));
+          const localVisible=local.albums.filter(a=>!remoteIds.has(aliases[a.id]||a.id));
           const hasSources=fs.existsSync('apps/yui-gallery/source-viewer-albums.json');
           (async()=>{
             const browser=await chromium.launch({headless:true});
@@ -66,19 +69,19 @@ jobs:
             const vbox=await page.locator('#app-version').boundingBox();
             if(!vbox||vbox.x<190||vbox.y>25||vbox.height>18)throw Error('Version is not small/top-right');
             if(!await page.locator('[data-filter="albums"]').evaluate(x=>x.classList.contains('active')))throw Error('Albums not default view');
-            const albumCount=await page.locator('.album').count(),expectedAlbums=local.albums.length+remote.length;
+            const albumCount=await page.locator('.album').count(),expectedAlbums=localVisible.length+remote.length;
             if(albumCount!==expectedAlbums)throw Error('Expected '+expectedAlbums+' albums, got '+albumCount);
-            await page.locator('.album[data-id="v04"]').scrollIntoViewIfNeeded();
-            await page.locator('.album[data-id="v04"] img').evaluate(i=>i.decode());
-            const localCover=await page.locator('.album[data-id="v04"] img').evaluate(i=>({w:i.naturalWidth,src:i.src}));
-            if(localCover.w<100||!localCover.src.includes('/stored-albums/'))throw Error('Existing stored preview failed');
-            await page.locator('.album[data-id="v04"]').click();
+            if(await page.locator('.album[data-id="v04"]').count())throw Error('Duplicate Teddy preview card remains');
+            await page.locator('.album[data-id="teddy-bear97"]').click();
             const detailCount=await page.locator('#detailphotos .photo').count();
-            if(detailCount!==10)throw Error('Existing 10 Teddy Bear preview images missing');
-            await page.locator('#detailphotos .photo').first().click();
+            if(detailCount!==97)throw Error('Complete 97-photo Teddy Bear edition missing');
+            const localPhoto=page.locator('#detailphotos .photo').filter({has:page.locator('img[src^="stored-albums/"]')}).first();
+            const startIndex=Number(await localPhoto.getAttribute('data-i'));
+            await localPhoto.click();
             await page.waitForFunction(()=>document.querySelector('#full').naturalWidth>0,{timeout:10000});
+            if(!(await page.locator('#full').getAttribute('src')).startsWith('stored-albums/'))throw Error('Exact-hash local fallback missing');
             await page.locator('#next').click();
-            if(!(await page.locator('#position').innerText()).startsWith('2 /'))throw Error('Next image failed');
+            if(!(await page.locator('#position').innerText()).startsWith(((startIndex+1)%97+1)+' /'))throw Error('Next image failed');
             await page.locator('#close').click();
             await page.locator('#back').click();
             if(hasSources){
@@ -95,7 +98,7 @@ jobs:
             }
             await page.locator('[data-filter="photos"]').click();
             const allPhotos=await page.locator('#photogrid .photo').count();
-            const expectedPhotos=local.albums.reduce((n,a)=>n+a.images.length,0)+remoteCount;
+            const expectedPhotos=localVisible.reduce((n,a)=>n+a.images.length,0)+remoteCount;
             if(allPhotos!==expectedPhotos)throw Error('Expected '+expectedPhotos+' photo records, got '+allPhotos);
             await page.screenshot({path:'yui-album-mobile.png',fullPage:false});
             await page.locator('[data-filter="all"]').click();
