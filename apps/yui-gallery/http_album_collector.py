@@ -9,7 +9,7 @@ from concurrent.futures import ThreadPoolExecutor,as_completed
 from datetime import datetime,timezone
 from html import unescape
 from pathlib import Path
-from urllib.parse import urljoin,urlsplit
+from urllib.parse import urljoin,urlsplit,parse_qs
 from urllib.robotparser import RobotFileParser
 import requests
 from PIL import Image
@@ -37,7 +37,7 @@ class PublicPages:
 
 
 def discover(target,client,cache):
-    origin=target['url'];kind=target['adapter'];expected=target['expected'];selected={};seen=set();queue=[origin]
+    origin=target['url'];kind=target['adapter'];expected=target['expected'];selected={};seen=set();queue=[origin];image_order={}
     parsed=urlsplit(origin)
     if kind=='junmeitu':stem=re.sub(r'-\d+(?=\.html$)','',parsed.path)[:-5]
     while queue:
@@ -56,6 +56,15 @@ def discover(target,client,cache):
             elif kind=='4kup':
                 match=re.fullmatch(r'https://lh\d\.ggpht\.com/[^"<> ]+/s0-e7/[^/]*Yui[^/]*-(\d{3})\.(webp|jpg)',absolute,re.I)
                 if match:selected[int(match.group(1))]=absolute
+            elif kind=='kaizty':
+                if not re.search(r'<title>[^<]*Yui[^<]*Seethrough',html,re.I):raise ValueError('Kaizty album identity mismatch')
+                if re.fullmatch(r'https://i[012]\.wp\.com/cdn1\.thismore\.fun/d\d/[^?<> ]+-d\.jpg',absolute):
+                    # Obfuscated source names do not encode canonical photo numbers.
+                    # Preserve distinct observed URLs, then visually match editions.
+                    if absolute not in image_order:image_order[absolute]=len(image_order)+1
+                    selected[image_order[absolute]]=absolute
+                query=parse_qs(u.query)
+                if u.netloc==parsed.netloc and u.path==parsed.path and set(query)<={'page','m'} and all(str(v).isdigit() and 1<=int(v)<=100 for v in query.get('page',['1'])) and absolute not in seen:queue.append(absolute)
             elif kind=='junmeitu':
                 # The current photo is scoped to .pictures, excluding related thumbnails.
                 pass

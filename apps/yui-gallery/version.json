@@ -1,5 +1,5 @@
 {
-  "version": "v0.1.0-beta.6",
+  "version": "v0.1.0-beta.7",
   "date": "2026-10-27",
   "policy": {
     "monthly_charge_krw": 0,
@@ -39,7 +39,7 @@
     "source_catalog_duplicated_across_sites": true,
     "iphone_real_device_verified": false,
     "owner_gallery_remote_hosted_count": "pending_authenticated_storage_connection",
-    "newly_acquired_web_images": 1528,
+    "newly_acquired_web_images": 1608,
     "additional_source_gallery_images": 1422,
     "source_browser_decode_verified_images": 405,
     "local_browser_download_sha256_verified_images": 26,
@@ -49,7 +49,9 @@
     "beta5_newly_acquired_web_images": 684,
     "beta5_new_complete_web_albums": 3,
     "gallery_image_entries": 1853,
-    "existing_local_verified_copies_reused": 10
+    "existing_local_verified_copies_reused": 10,
+    "beta7_new_higher_resolution_files": 80,
+    "beta7_full_album_higher_resolution_replacements": 80
   },
   "notes": [
     "A private Google Drive ZIP is only a temporary safety copy, not the user-approved primary archive.",
@@ -62,7 +64,8 @@
     "844 new downloaded web-edition files include a 106-photo alternate Sweet Dream edition. Select 738 images across six new works for the source gallery; choose 106 larger unchanged 1920px files through conservative cross-edition matching. Existing 405 images are not publisher masters and have no verified higher-resolution replacements.",
     "beta.5 uses browser Back/Forward for albums and photos, native pinch zoom and long-press saving, compact fixed navigation, and aligned two-column thumbnails.",
     "beta.5 collected and registered complete Tracksuit 201, Maid 291 and Last Summer 192 public web editions. Resolution remains under review; ten Teddy Bear photographs matched to unchanged 2699px public V2PH files. Source counts differ between editions; no publisher-master or permanent-cloud claim.",
-    "beta.6 reuses exact SHA-256-matched existing local files for ten higher-resolution Teddy Bear photos because their original CDN returns 403 in production QA. No additional image binaries or reencoding."
+    "beta.6 reuses exact SHA-256-matched existing local files for ten higher-resolution Teddy Bear photos because their original CDN returns 403 in production QA. No additional image binaries or reencoding.",
+    "beta.7 collected 80 distinct full-size Seethrough files from 15 explicitly linked Kaizty pages (160 duplicate proxy URL responses). All 80 canonical photos matched conservatively and replaced 1368px files with unchanged 2500px files. Keep publisher-master certification false."
   ],
   "archiving_engine": {
     "mode": "individual_files",
