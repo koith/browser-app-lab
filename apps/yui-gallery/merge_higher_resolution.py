@@ -17,7 +17,14 @@ def signature(path):
 
 def merge(primary,alternative,out):
     a=json.loads((primary/'manifest.json').read_text());b=json.loads((alternative/'manifest.json').read_text())
-    candidates=[(p,*signature(alternative/p['file'])) for p in b['images']]
+    # Different visible proxy URLs can return exactly the same bytes. Treat
+    # byte-identical candidates once so they do not create false ambiguity.
+    unique={}
+    for photo in b['images']:
+        with Image.open(alternative/photo['file']) as image:
+            pixels=hashlib.sha256(str(image.size).encode()+image.convert('RGB').tobytes()).hexdigest()
+        unique.setdefault(pixels,photo)
+    candidates=[(p,*signature(alternative/p['file'])) for p in unique.values()]
     used=set();changed=[];images=[];out.mkdir(parents=True,exist_ok=True)
     for photo in a['images']:
         bits,small=signature(primary/photo['file']);matches=[]
@@ -46,4 +53,8 @@ def merge(primary,alternative,out):
     print('UNCHANGED_HIGHER_RESOLUTION_WEB_FILES_SELECTED',len(changed),'of',len(images),flush=True)
     return result
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('primary',type=Path);p.add_argument('alternative',type=Path);p.add_argument('out',type=Path);a=p.parse_args();merge(a.primary,a.alternative,a.out)
+    p=argparse.ArgumentParser();p.add_argument('primary',type=Path);p.add_argument('alternative',type=Path);p.add_argument('out',type=Path);a=p.parse_args()
+    if a.out.resolve().is_relative_to(Path(__file__).resolve().parents[2]):p.error('Use a private output outside the repository')
+    merge(a.primary,a.alternative,a.out)
+    from build_additional_source_manifest import build
+    build([a.out],Path(__file__).with_name('additional-source-albums.json'))
