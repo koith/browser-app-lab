@@ -85,7 +85,7 @@ footer{padding:15px 0 25px;justify-content:flex-end}
  <div class="detail-heading"><button class="back" id="back" aria-label="화보 목록으로 돌아가기">‹</button><h2 class="detail-title" id="albumname"></h2><span class="counter" id="albumtotal"></span></div>
  <nav class="mainnav" aria-label="이동"><a href="cloud.html">클라우드</a></nav>
  <input id="search" class="topsearch" type="search" placeholder="화보 검색" aria-label="화보 검색">
- <small id="app-version" class="version-chip">v0.1.0-beta.5</small>
+ <small id="app-version" class="version-chip">v0.1.0-beta.6</small>
 </header>
 <div id="browse">
  <div class="browse-meta"><p class="inventory" id="inventory">화보를 불러오는 중</p><span class="counter" id="total"></span></div>
@@ -100,7 +100,7 @@ footer{padding:15px 0 25px;justify-content:flex-end}
 <footer><span>개별 이미지 · 수집 파일 화질 유지</span></footer>
 </div>
 <div id="lightbox" role="dialog" aria-label="사진 보기" aria-modal="true">
- <div class="lighttop"><button class="lightbtn" id="close" aria-label="닫기">×</button><span id="position"></span><small class="version-chip">v0.1.0-beta.5</small></div>
+ <div class="lighttop"><button class="lightbtn" id="close" aria-label="닫기">×</button><span id="position"></span><small class="version-chip">v0.1.0-beta.6</small></div>
  <button class="lightbtn arrow prev" id="prev" aria-label="이전 사진">‹</button><div class="media-frame"><img id="full" alt="화보 사진"><a id="original" target="_blank" rel="noopener">사진 열기 ↗</a></div><button class="lightbtn arrow next" id="next" aria-label="다음 사진">›</button>
  <p id="media-status" role="status"></p>
 </div>
@@ -204,7 +204,10 @@ Promise.all([
  fetch('source-viewer-albums.json',{cache:'no-store'}).then(r=>r.ok?r.json():{albums:[]}).catch(()=>({albums:[]}))
 ]).then(([s,c,owner,extra,remote])=>{
  localStored=s.albums||[];catalog=c.albums||[];
- remoteStored=[...new Map([...(remote.albums||[]),...(extra.albums||[])].map(a=>[a.id,a])).values()].filter(a=>a.status==='verified_collected_individual_files_source_hosted_online_view').map(a=>({...a,sourceHosted:true}));
+ // Identical verified local files remain available when an external host blocks
+ // hotlinks. Match exact SHA-256 bytes; never substitute a smaller preview.
+ const localByHash=new Map(localStored.flatMap(validImages).filter(p=>p.sha256).map(p=>[p.sha256,p.url]));
+ remoteStored=[...new Map([...(remote.albums||[]),...(extra.albums||[])].map(a=>[a.id,a])).values()].filter(a=>a.status==='verified_collected_individual_files_source_hosted_online_view').map(a=>({...a,sourceHosted:true,images:a.images.map(p=>localByHash.has(p.sha256)?{...p,source_url:p.url,url:localByHash.get(p.sha256)}:p)}));
  ownerStored=owner.albums;const ownerIds=new Set(ownerStored.map(a=>a.id));
  stored=[...ownerStored,...remoteStored.filter(a=>!ownerIds.has(a.id)),...localStored];
  const localCount=localStored.reduce((n,a)=>n+validImages(a).length,0);
