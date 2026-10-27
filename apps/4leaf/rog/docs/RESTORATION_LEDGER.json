@@ -1209,6 +1209,19 @@
         "P0-RELEASE",
         "P0-CHAT"
       ]
+    },
+    {
+      "id": "REQ-20261027-002",
+      "date": "2026-10-27",
+      "origin": "user",
+      "text": "Resume actual original 4LEAF browser webapp restoration where previous work stopped. Reuse all verified original source game, native party HUD, battle and archived screenshot research; do not reset successful commits; ship actual gameplay UI functionality and verify Pages rather than leaving unfinished PRs or documents.",
+      "taskIds": [
+        "P0-CHAT",
+        "P0-RELEASE",
+        "P0-BOARD",
+        "P0-ACTOR",
+        "P0-DICE"
+      ]
     }
   ],
   "tasks": [
@@ -6393,6 +6406,28 @@
         "https://github.com/koith/browser-app-lab/actions/runs/40356522364",
         "https://github.com/koith/browser-app-lab/actions/runs/40356522618"
       ]
+    },
+    {
+      "seq": 266,
+      "date": "2026-10-27",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261027-002",
+      "taskIds": [
+        "P0-CHAT",
+        "P0-RELEASE"
+      ],
+      "details": "Continuation directly requested; latest main beta27/v114 and preserved 19 OBS front pairs and native 164x125 stats. Old PR212 has stale ledger seq262 conflict, must transfer verified wheel QA to new main-based source implementation without corrupting append-only 265-event ledger."
+    },
+    {
+      "seq": 267,
+      "date": "2026-10-27",
+      "type": "ORIGINAL_2002_DICE_SCROLLBUTTON_LONG_HOLD_KEYBOARD_REAL_GAME_PENDING_ACCEPTANCE",
+      "requestId": "REQ-20261027-002",
+      "taskIds": [
+        "P0-CHAT",
+        "P0-RELEASE"
+      ],
+      "details": "Actual original 2002 Dice/IMG.pak scrollButton.bmp extracted 80x16 UI buttons now operate real 4LEAF playable DMP chat transcript on original button press-and-hold, continuous repeat, pointer release/cancel/blur/route stop, and focused Home/End/PageUp/PageDown keyboard transcript navigation. No fake extra chats, NPCs, screen overlays or source asset alterations. Precise original-native timer/key semantics remain UNVERIFIED WEB reconstruction. Carried stable real physical-wheel original source test from old PR212 onto latest beta27 main rather than merge stale historical ledger duplicate seq262; expanded actual Chromium/WebKit native interaction QA, test real game 104 cells, source BMP, live actual form messages and history-not-jumping; app beta28 cache v115 proposed. Original dice D4/D6 native 3D remains NOT RECOVERED. PR/CI/Pages still pending."
     }
   ]
 }
