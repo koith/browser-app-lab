@@ -365,78 +365,6 @@
       "sourceUpdatedAt": "2026-08-14"
     },
     {
-      "id": "m01",
-      "site": "喵画影",
-      "title": "Vol.1 — Kuro Yui",
-      "photos": null,
-      "size": "",
-      "source": "https://www.miaohuaying.com/yui/",
-      "kind": "index"
-    },
-    {
-      "id": "m02",
-      "site": "喵画影",
-      "title": "Vol.2 — Yui Yui",
-      "photos": null,
-      "size": "",
-      "source": "https://www.miaohuaying.com/yui/",
-      "kind": "index"
-    },
-    {
-      "id": "m03",
-      "site": "喵画影",
-      "title": "Vol.3 — Yui",
-      "photos": null,
-      "size": "",
-      "source": "https://www.miaohuaying.com/yui/",
-      "kind": "index"
-    },
-    {
-      "id": "m04",
-      "site": "喵画影",
-      "title": "SWEETBOX Vol.49 — Thru Thru",
-      "photos": null,
-      "size": "",
-      "source": "https://www.miaohuaying.com/yui/",
-      "kind": "index"
-    },
-    {
-      "id": "m05",
-      "site": "喵画影",
-      "title": "Wet Yui",
-      "photos": null,
-      "size": "",
-      "source": "https://www.miaohuaying.com/yui/",
-      "kind": "index"
-    },
-    {
-      "id": "m06",
-      "site": "喵画影",
-      "title": "SWEETBOX — Teddy Bear",
-      "photos": null,
-      "size": "",
-      "source": "https://www.miaohuaying.com/yui/",
-      "kind": "index"
-    },
-    {
-      "id": "m07",
-      "site": "喵画影",
-      "title": "ArtGravia Vol.663",
-      "photos": null,
-      "size": "",
-      "source": "https://www.miaohuaying.com/yui/",
-      "kind": "index"
-    },
-    {
-      "id": "m08",
-      "site": "喵画影",
-      "title": "SWEETBOX Vol.65 — Yui’s Present",
-      "photos": null,
-      "size": "",
-      "source": "https://www.miaohuaying.com/yui/",
-      "kind": "index"
-    },
-    {
       "id": "mf01",
       "site": "MOVIE FANTASY 공식",
       "title": "Yui Sim Vol.1 Baby Blue — 사진집",
@@ -500,15 +428,6 @@
       "title": "Yui · 공개 미리보기 (화보 미분류)",
       "photos": null,
       "source": "https://www.chaotuji.com/yui/",
-      "kind": "local-preview",
-      "sourceUpdatedAt": "2026-10-26"
-    },
-    {
-      "id": "cn-miaohuaying",
-      "site": "喵画影",
-      "title": "Yui · 공개 미리보기 (화보 미분류)",
-      "photos": null,
-      "source": "https://www.miaohuaying.com/yui/",
       "kind": "local-preview",
       "sourceUpdatedAt": "2026-10-26"
     },

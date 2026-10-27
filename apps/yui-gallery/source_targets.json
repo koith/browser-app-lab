@@ -23,19 +23,6 @@
       "declared_photos": null
     },
     {
-      "id": "miaohuaying-yui-collection",
-      "url": "https://www.miaohuaying.com/yui/",
-      "image_hosts": [
-        "img.miaohuaying.com"
-      ],
-      "max_pages": 10,
-      "scroll_limit": 30,
-      "declared_photos": null,
-      "include_image_paths": [
-        "/Yui-[0-9]+\\.webp$"
-      ]
-    },
-    {
       "id": "yuntu8-yui-profile",
       "url": "https://yuntu8.com/1748.html",
       "image_hosts": [

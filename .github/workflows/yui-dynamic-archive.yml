@@ -44,7 +44,7 @@ jobs:
           from pathlib import Path
           m=json.load(open('yui-dynamic-discovery.json'))
           stats=json.load(open('yui-dynamic-images/summary.json'))
-          assert len(m['sources'])==6
+          assert len(m['sources'])==len(json.load(open('apps/yui-gallery/source_targets.json'))['sources'])
           verified=0
           for source in m['sources']:
             directory=Path('yui-dynamic-images')/source['id']
