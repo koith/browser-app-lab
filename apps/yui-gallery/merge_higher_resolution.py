@@ -20,7 +20,10 @@ def merge(primary,alternative,out):
     # Different visible proxy URLs can return exactly the same bytes. Treat
     # byte-identical candidates once so they do not create false ambiguity.
     unique={}
-    for photo in b['images']:unique.setdefault(photo['sha256'],photo)
+    for photo in b['images']:
+        with Image.open(alternative/photo['file']) as image:
+            pixels=hashlib.sha256(str(image.size).encode()+image.convert('RGB').tobytes()).hexdigest()
+        unique.setdefault(pixels,photo)
     candidates=[(p,*signature(alternative/p['file'])) for p in unique.values()]
     used=set();changed=[];images=[];out.mkdir(parents=True,exist_ok=True)
     for photo in a['images']:

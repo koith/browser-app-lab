@@ -61,8 +61,12 @@ def discover(target,client,cache):
                 if re.fullmatch(r'https://i[012]\.wp\.com/cdn1\.thismore\.fun/d\d/[^?<> ]+-d\.jpg',absolute):
                     # Obfuscated source names do not encode canonical photo numbers.
                     # Preserve distinct observed URLs, then visually match editions.
-                    if absolute not in image_order:image_order[absolute]=len(image_order)+1
-                    selected[image_order[absolute]]=absolute
+                    candidate=absolute
+                    if target.get('image_route')=='published_direct_fallback':
+                        if not re.search(r'image\.src\s*=\s*a\.replace\(',html):raise ValueError('Source does not publish a direct fallback route')
+                        candidate=re.sub(r'^https://i[012]\.wp\.com/','https://',candidate)
+                    if candidate not in image_order:image_order[candidate]=len(image_order)+1
+                    selected[image_order[candidate]]=candidate
                 query=parse_qs(u.query)
                 if u.netloc==parsed.netloc and u.path==parsed.path and set(query)<={'page','m'} and all(str(v).isdigit() and 1<=int(v)<=100 for v in query.get('page',['1'])) and absolute not in seen:queue.append(absolute)
             elif kind=='junmeitu':
