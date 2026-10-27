@@ -57,8 +57,10 @@ def discover(target,client,cache):
                 match=re.fullmatch(r'https://lh\d\.ggpht\.com/[^"<> ]+/s0-e7/[^/]*Yui[^/]*-(\d{3})\.(webp|jpg)',absolute,re.I)
                 if match:selected[int(match.group(1))]=absolute
             elif kind=='kaizty':
-                if not re.search(r'<title>[^<]*Yui[^<]*Seethrough',html,re.I):raise ValueError('Kaizty album identity mismatch')
-                if re.fullmatch(r'https://i[012]\.wp\.com/cdn1\.thismore\.fun/d\d/[^?<> ]+-d\.jpg',absolute):
+                heading=re.search(r'<title>(.*?)</title>',html,re.S)
+                terms=target.get('identity_terms',['Yui','Seethrough'])
+                if not heading or any(term.casefold() not in unescape(heading.group(1)).casefold() for term in terms):raise ValueError('Kaizty album identity mismatch')
+                if re.fullmatch(r'https://i[012]\.wp\.com/cdn[12]\.thismore\.fun/[ds]\d/[^?<> ]+-d\.jpg',absolute):
                     # Obfuscated source names do not encode canonical photo numbers.
                     # Preserve distinct observed URLs, then visually match editions.
                     candidate=absolute
@@ -129,7 +131,7 @@ def collect(target,out):
     # Preserve partial real files and expose missing sequence members explicitly.
     manifest['missing_numbers']=sorted(set(range(1,target['expected']+1))-{p['number'] for p in images})
     (folder/'manifest.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2)+'\n')
-    if images:
+    if images and not target.get('requires_canonical_match'):
         from build_additional_source_manifest import build
         gallery=Path(__file__).with_name('additional-source-albums.json')
         existing=json.loads(gallery.read_text())['albums'] if gallery.exists() else []

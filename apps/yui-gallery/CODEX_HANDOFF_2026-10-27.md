@@ -1,3 +1,23 @@
+> ## beta.9 인수인계 — 2026-10-27 KST
+> **현재 코드 버전 v0.1.0-beta.9. 아래 beta.7/beta.4/beta.3 내용은 과거 기록이다.**
+> 갤러리: https://koith.github.io/browser-app-lab/apps/yui-gallery/?v=0.1.0-beta.9
+> beta.8 잘못된 모델 제거 배포: PR #225, 602540bb36b3c2a210ac21c65ff4954ba7786a94. 이후 main의 자동 수집 변경도 확인했다.
+>
+> - 신규 **7개 완전한 공개 웹판 650장** 실파일 수집·SHA-256·디코딩 완료: Kuro Yui 58, Yui Vol.2 42, Yui Vol.3 106, Blackroom 145, Dec 2023 199, PUSSYLET Vol.41 82, The Sexiest Woman 18. 단순 색인/표지 추가가 아니다.
+> - 다른 출처까지 실제 내려받은 검증 파일은 이번 작업 기준 **고유 SHA-256 1283개**. 동일 사진의 판본을 포함하므로 신규 사진 1283장이라고 하지 말 것. 이 중 신규 작품 사진 650장과 기존보다 큰 대체 파일 323장을 갤러리에 선택했다.
+> - **Kuro Yui 58/58 전부 더 큰 파일로 교체**. 추가로 Dec 2023 113/199, Blackroom 59/145, Tracksuit 93/201을 큰 파일로 교체. 선택 파일은 원 응답 바이트 그대로이며 손실 재압축·업스케일하지 않았다. 근거: verification/beta9-resolution-selections.json.
+> - **Teddy Bear는 10장 부분 카드(v04)를 기존 확보 97장 전체에 연결**했다. 기존 10개 2699px 저장 파일은 정확한 SHA-256 폴백으로 계속 사용한다. 새 Kaizty 97장은 전부 1199px로 더 작아서 교체 거부. MissKon 공개 표본도 1024px로 더 작았다. **나머지 87장의 최고 해상도 확보는 여전히 미완료**. 97장 전체를 고해상도로 교체했다고 하지 말 것.
+> - album-aliases.json으로 V2PH/중국 색인에서 이미 확보한 작품을 열었을 때 미수집처럼 보이던 연결을 수정. 신규 7개 작품은 기본/전체 목록 어디서나 열린다. 동일 작품 부분 카드를 별도 화보로 중복 집계하지 않는다.
+> - 갤러리 **2490개 항목 / 26개 그룹 = 완전한 웹판 21개 + 미완료 공개 자료 5개 그룹**. 실제 사진 고유 개수와 구분할 것. 5개는 huantuji 3, chaotuji 3, yuntu8 4, yingyuge 2, Everyday Life 1장. 인덱스/프로필 사진을 완전한 화보로 취급하지 않는다. Everyday Life는 194장 중 실제 사진 전체를 확보하지 못했다.
+> - 해상도 완료 판단의 임의 1920px 기준을 제거했다. 수량이 완전해도 최고 원본 검증은 모두 미완료로 추적한다. AI 보정 판본은 비 AI 판본을 자동 교체할 수 없다. Green은 계속 AI 판본으로 명시.
+> - beta.9 로컬 실제 갤러리 2490개 디코딩·저장 링크 SHA-256 23개 통과. 마지막 Dec 2023 추가 대체분은 별도 재검증하며, 최종 PR CI와 실제 배포 결과를 PR에 기록한다. 이 기록만으로 실제 배포/실기기 iPhone 검증을 주장하지 말 것.
+> - 잘못된 모델 cn-miaohuaying 3개는 공개 저장소에서 삭제했고 사설 감사 사본만 유지한다. 재수입 차단 정책·소스 제거를 보존한다. 얼굴 인식으로 사람을 식별하지 않는다.
+> - 최신 CTEE にゃ〜 공식 페이지는 브라우저에서 공개 API 접근 오류를 재현했다. Bcutrank는 작품 참고 링크이며 성인 인증/구매 장벽을 우회하지 않는다. 새 출처 발견·Teddy/Everyday/기타 최신 작품 원본 탐색은 계속 필요하다.
+> - **개인 영구 클라우드 연결·실업로드·원격 재다운로드 검증 0장**. 작업 환경의 실파일과 갤러리 출처 링크는 영구 개인 보관이 아니다. 유일한 원본 사본 삭제 금지. ZIP/사진 압축파일·TinyFish·유료 수집 서비스·카드·월 요금 사용 없음.
+> - 현재 실파일: /workspace/yui-private/beta8-pixibb/verified-albums; /workspace/yui-private/beta9-alternatives/{best,작품-kaizty}; /workspace/yui-private/beta9-alternatives-second/{best,작품-kaizty}. 기존 소장 입력도 보존했다.
+>
+> ---
+
 > ## beta.7 최종 인수인계 — 2026-10-27 UTC
 > **현재 배포 버전: v0.1.0-beta.7. 이 절이 최신이며 아래 beta.4/beta.3 기록은 과거 상태다.**
 > 갤러리: https://koith.github.io/browser-app-lab/apps/yui-gallery/?v=0.1.0-beta.7

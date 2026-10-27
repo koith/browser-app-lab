@@ -85,7 +85,7 @@ footer{padding:15px 0 25px;justify-content:flex-end}
  <div class="detail-heading"><button class="back" id="back" aria-label="화보 목록으로 돌아가기">‹</button><h2 class="detail-title" id="albumname"></h2><span class="counter" id="albumtotal"></span></div>
  <nav class="mainnav" aria-label="이동"><a href="cloud.html">클라우드</a></nav>
  <input id="search" class="topsearch" type="search" placeholder="화보 검색" aria-label="화보 검색">
- <small id="app-version" class="version-chip">v0.1.0-beta.8</small>
+ <small id="app-version" class="version-chip">v0.1.0-beta.9</small>
 </header>
 <div id="browse">
  <div class="browse-meta"><p class="inventory" id="inventory">화보를 불러오는 중</p><span class="counter" id="total"></span></div>
@@ -100,7 +100,7 @@ footer{padding:15px 0 25px;justify-content:flex-end}
 <footer><span>개별 이미지 · 수집 파일 화질 유지</span></footer>
 </div>
 <div id="lightbox" role="dialog" aria-label="사진 보기" aria-modal="true">
- <div class="lighttop"><button class="lightbtn" id="close" aria-label="닫기">×</button><span id="position"></span><small class="version-chip">v0.1.0-beta.8</small></div>
+ <div class="lighttop"><button class="lightbtn" id="close" aria-label="닫기">×</button><span id="position"></span><small class="version-chip">v0.1.0-beta.9</small></div>
  <button class="lightbtn arrow prev" id="prev" aria-label="이전 사진">‹</button><div class="media-frame"><img id="full" alt="화보 사진"><a id="original" target="_blank" rel="noopener">사진 열기 ↗</a></div><button class="lightbtn arrow next" id="next" aria-label="다음 사진">›</button>
  <p id="media-status" role="status"></p>
 </div>
@@ -108,11 +108,12 @@ footer{padding:15px 0 25px;justify-content:flex-end}
 <script>
 "use strict";
 const $=id=>document.getElementById(id);
-let catalog=[],stored=[],localStored=[],remoteStored=[],ownerStored=[],mode='albums',activeAlbum=null,viewerList=[],viewerIndex=0,detailAlbum=null;
+let catalog=[],stored=[],localStored=[],remoteStored=[],ownerStored=[],albumAliases={},mode='albums',activeAlbum=null,viewerList=[],viewerIndex=0,detailAlbum=null;
+function canonicalId(id){const seen=new Set();while(albumAliases[id]&&!seen.has(id)){seen.add(id);id=albumAliases[id]}return id}
 const titleMap={'cn-huantuji':'幻图集 · Yui','cn-chaotuji':'潮图集 · Yui','cn-miaohuaying':'喵画影 · Yui','cn-yuntu8':'云图吧 · Yui','cn-wantuzhi-everyday':'Everyday Life','cn-yingyuge':'影语阁 · Yui','v04':'SWEETBOX · Teddy Bear'};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function getName(a){return a.title||catalog.find(x=>x.id===a.id)?.title||titleMap[a.id]||a.id}
-function validImages(a){return (a.images||[]).filter(x=>{if(a.ownerHosted&&x.ownerAlbum===a.id&&x.url==='owner:'+a.id+':'+x.number)return true;if(typeof x.url!=='string')return false;if(x.url.startsWith('stored-albums/'))return true;if(!a.sourceHosted)return false;try{const u=new URL(x.url);return u.protocol==='https:'&&(['cdn.jliji.com','cdn.v2ph.com','i0.wp.com','i1.wp.com','i2.wp.com','cdn1.thismore.fun'].includes(u.hostname)||/^(?:(?:imgx\d{3}|images\d{2})\.pixibb\.com|(?:wes|bis)\.misskon\.com|lux\.mrcong\.com|s\.wujituku\.com|lh\d\.ggpht\.com)$/.test(u.hostname));}catch{return false}})}
+function validImages(a){return (a.images||[]).filter(x=>{if(a.ownerHosted&&x.ownerAlbum===a.id&&x.url==='owner:'+a.id+':'+x.number)return true;if(typeof x.url!=='string')return false;if(x.url.startsWith('stored-albums/'))return true;if(!a.sourceHosted)return false;try{const u=new URL(x.url);return u.protocol==='https:'&&(['cdn.jliji.com','cdn.v2ph.com','i0.wp.com','i1.wp.com','i2.wp.com','cdn1.thismore.fun','cdn2.thismore.fun'].includes(u.hostname)||/^(?:(?:imgx\d{3}|images\d{2})\.pixibb\.com|(?:wes|bis)\.misskon\.com|lux\.mrcong\.com|s\.wujituku\.com|lh\d\.ggpht\.com)$/.test(u.hostname));}catch{return false}})}
 function available(){return stored.filter(x=>validImages(x).length).sort((a,b)=>validImages(b).length-validImages(a).length)}
 function setMode(m){mode=m;activeAlbum=null;detailAlbum=null;document.body.classList.remove('detail-view');$('detail').hidden=true;$('browse').hidden=false;document.querySelectorAll('[data-filter]').forEach(b=>b.classList.toggle('active',b.dataset.filter===m));render()}
 function photosFor(a){return validImages(a).map((p,i)=>({...p,name:getName(a),albumId:a.id,number:p.number??i+1}))}
@@ -148,6 +149,7 @@ function render(){
  observeOwner();
 }
 function openAlbum(id,record=true){
+ id=canonicalId(id);
  const a=stored.find(x=>x.id===id);
  if(!a||!validImages(a).length)return;
  if(record)remember({album:id,mode});
@@ -181,7 +183,7 @@ function step(n){
 function routeURL(s){const q=new URLSearchParams();if(s.album)q.set('album',s.album);if(s.photo)q.set('photo',s.photo);if(s.fromPhotos)q.set('from','photos');if(s.mode&&s.mode!=='albums')q.set('view',s.mode);return location.pathname+location.search+(q.size?'#'+q:'')}
 function remember(s){history.replaceState({...history.state,scroll:window.scrollY},'');const state={yui:true,key:Date.now().toString(36)+'-'+(++historyEntry),depth:(history.state?.depth||0)+1,scroll:0,...s};history.pushState(state,'',routeURL(state))}
 function goBack(){if(history.state?.yui&&history.state.depth>0)history.back();else{const state={yui:true,depth:0,mode:'albums',scroll:0};history.replaceState(state,'',routeURL(state));applyRoute(state)}}
-function applyRoute(s){s=viewerRoutes.get(s.key)||s;hideViewer();setMode(s.mode||'albums');if(s.album&&!s.fromPhotos)openAlbum(s.album,false);if(s.photo){const a=stored.find(a=>a.id===s.album);const list=s.fromPhotos?available().flatMap(photosFor).filter(p=>p.name.toLocaleLowerCase().includes($('search').value.toLocaleLowerCase().trim())):a?photosFor(a):[];const i=list.findIndex(p=>p.albumId===s.album&&p.number===Number(s.photo));if(i>=0)openViewer(list,i,false)}requestAnimationFrame(()=>window.scrollTo(0,s.scroll||0))}
+function applyRoute(s){s=viewerRoutes.get(s.key)||s;s={...s,album:canonicalId(s.album)};hideViewer();setMode(s.mode||'albums');if(s.album&&!s.fromPhotos)openAlbum(s.album,false);if(s.photo){const a=stored.find(a=>a.id===s.album);const list=s.fromPhotos?available().flatMap(photosFor).filter(p=>p.name.toLocaleLowerCase().includes($('search').value.toLocaleLowerCase().trim())):a?photosFor(a):[];const i=list.findIndex(p=>p.albumId===s.album&&p.number===Number(s.photo));if(i>=0)openViewer(list,i,false)}requestAnimationFrame(()=>window.scrollTo(0,s.scroll||0))}
 window.addEventListener('popstate',()=>{const s=history.state;if(s?.yui)applyRoute(s)});
 $('prev').onclick=()=>step(-1);$('next').onclick=()=>step(1);$('close').onclick=closeViewer;
 $('back').onclick=goBack;
@@ -201,20 +203,27 @@ Promise.all([
  fetch('albums.json').then(r=>{if(!r.ok)throw Error('catalog');return r.json()}),
  YuiPrivate.albums().then(albums=>({albums})).catch(error=>({albums:[],error:error.message})),
  fetch('additional-source-albums.json',{cache:'no-store'}).then(r=>r.ok?r.json():{albums:[]}).catch(()=>({albums:[]})),
- fetch('source-viewer-albums.json',{cache:'no-store'}).then(r=>r.ok?r.json():{albums:[]}).catch(()=>({albums:[]}))
-]).then(([s,c,owner,extra,remote])=>{
+ fetch('source-viewer-albums.json',{cache:'no-store'}).then(r=>r.ok?r.json():{albums:[]}).catch(()=>({albums:[]})),
+ fetch('album-aliases.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('work aliases');return r.json()})
+]).then(([s,c,owner,extra,remote,aliases])=>{
+ albumAliases=aliases.aliases||{};
  localStored=s.albums||[];catalog=c.albums||[];
  // Identical verified local files remain available when an external host blocks
  // hotlinks. Match exact SHA-256 bytes; never substitute a smaller preview.
  const localByHash=new Map(localStored.flatMap(validImages).filter(p=>p.sha256).map(p=>[p.sha256,p.url]));
  remoteStored=[...new Map([...(remote.albums||[]),...(extra.albums||[])].map(a=>[a.id,a])).values()].filter(a=>a.status==='verified_collected_individual_files_source_hosted_online_view').map(a=>({...a,sourceHosted:true,images:a.images.map(p=>localByHash.has(p.sha256)?{...p,source_url:p.url,url:localByHash.get(p.sha256)}:p)}));
  ownerStored=owner.albums;const ownerIds=new Set(ownerStored.map(a=>a.id));
- stored=[...ownerStored,...remoteStored.filter(a=>!ownerIds.has(a.id)),...localStored];
- const localCount=localStored.reduce((n,a)=>n+validImages(a).length,0);
+ // Keep verified local bytes for exact-hash fallback, but show each work once.
+ const candidates=[...ownerStored,...remoteStored.filter(a=>!ownerIds.has(a.id)),...localStored];
+ const candidateIds=new Set(candidates.map(a=>a.id));
+ stored=[...new Map(candidates.filter(a=>canonicalId(a.id)===a.id||!candidateIds.has(canonicalId(a.id))).reverse().map(a=>[a.id,a])).values()].reverse();
+ // Newly collected works must be openable from the complete catalogue too.
+ catalog=[...new Map([...catalog.map(a=>({...a,id:canonicalId(a.id)})),...stored].map(a=>[a.id,a])).values()];
+ const localCount=stored.filter(a=>!a.ownerHosted&&!a.sourceHosted).reduce((n,a)=>n+validImages(a).length,0);
  const remoteCount=remoteStored.reduce((n,a)=>n+validImages(a).length,0);
  $('inventory').textContent=remoteCount+'장'+(localCount?' · 미리보기 '+localCount+'장':'')+(ownerStored.length?' · 개인 보관본 '+ownerStored.reduce((n,a)=>n+a.images.length,0)+'장':'');
  render();
- const raw=location.hash.slice(1),q=new URLSearchParams(raw);const id=raw&&!raw.includes('=')?decodeURIComponent(raw):q.get('album');const state={yui:true,depth:0,mode:q.get('view')||'albums',album:id,fromPhotos:q.get('from')==='photos',scroll:0};history.replaceState(state,'',routeURL(state));applyRoute(state);if(q.get('photo')){const a=stored.find(a=>a.id===id);if(a){const list=photosFor(a),i=list.findIndex(p=>p.number===Number(q.get('photo')));if(i>=0)openViewer(list,i)}}
+ const raw=location.hash.slice(1),q=new URLSearchParams(raw);const id=canonicalId(raw&&!raw.includes('=')?decodeURIComponent(raw):q.get('album'));const state={yui:true,depth:0,mode:q.get('view')||'albums',album:id,fromPhotos:q.get('from')==='photos',scroll:0};history.replaceState(state,'',routeURL(state));applyRoute(state);if(q.get('photo')){const a=stored.find(a=>a.id===id);if(a){const list=photosFor(a),i=list.findIndex(p=>p.number===Number(q.get('photo')));if(i>=0)openViewer(list,i)}}
 }).catch(()=>{$('total').textContent='—';$('nothing').textContent='이미지를 불러올 수 없습니다.';$('nothing').hidden=false});
 </script>
 </body></html>

@@ -1,5 +1,5 @@
 {
-  "version": "v0.1.0-beta.8",
+  "version": "v0.1.0-beta.9",
   "date": "2026-10-27",
   "policy": {
     "monthly_charge_krw": 0,
@@ -39,22 +39,27 @@
     "source_catalog_duplicated_across_sites": true,
     "iphone_real_device_verified": false,
     "owner_gallery_remote_hosted_count": "pending_authenticated_storage_connection",
-    "newly_acquired_web_images": 1688,
-    "additional_source_gallery_images": 1422,
+    "newly_acquired_web_images": 2971,
+    "additional_source_gallery_images": 2169,
     "source_browser_decode_verified_images": 405,
     "local_browser_download_sha256_verified_images": 26,
-    "new_unique_web_albums": 9,
+    "new_unique_web_albums": 16,
     "new_album_higher_resolution_selections": 106,
     "existing_405_higher_resolution_replacements": 10,
     "beta5_newly_acquired_web_images": 684,
     "beta5_new_complete_web_albums": 3,
-    "gallery_image_entries": 1850,
+    "gallery_image_entries": 2490,
     "existing_local_verified_copies_reused": 10,
     "beta7_new_higher_resolution_files": 160,
     "beta7_full_album_higher_resolution_replacements": 80,
     "beta7_verified_direct_source_files": 80,
-    "new_files_this_session": 844,
-    "excluded_wrong_model_images": 3
+    "new_files_this_session": 1283,
+    "excluded_wrong_model_images": 3,
+    "beta9_new_work_files": 650,
+    "beta9_larger_photo_selections": 323,
+    "beta9_web_complete_albums": 21,
+    "original_link_sha256_verified_images": 23,
+    "gallery_decode_verified_image_entries": 2490
   },
   "notes": [
     "A private Google Drive ZIP is only a temporary safety copy, not the user-approved primary archive.",
@@ -70,14 +75,15 @@
     "beta.6 reuses exact SHA-256-matched existing local files for ten higher-resolution Teddy Bear photos because their original CDN returns 403 in production QA. No additional image binaries or reencoding.",
     "beta.7 collected 80 distinct full-size Seethrough files from 15 explicitly linked Kaizty pages (160 duplicate proxy URL responses). All 80 canonical photos matched conservatively and replaced 1368px files with unchanged 2500px files. Keep publisher-master certification false.",
     "The WordPress proxy failed Chromium decoding. Separately downloaded and verified the 80 direct-source files using the source page published imgErrorHF fallback; bytes differ from proxy edition, so each direct file has its own SHA-256. Selected direct files remain 2500px and match all canonical photos.",
-    "beta.8 removes the user-identified wrong-model red-costume album cn-miaohuaying and blocks its source/IDs/image hashes from future imports. No new photo acquisition is claimed for this exclusion release."
+    "beta.8 removes the user-identified third-from-last red-costume album cn-miaohuaying (3 photos), excludes its source and image hashes from reimport, and preserves a private audit copy.",
+    "beta.9 connects seven newly collected complete public web editions (650 photos), selects 323 larger unchanged files across four works, resolves duplicate catalogue IDs to acquired works, and directs Teddy Bear v04 to all 97 photos. Highest resolution remains unverified regardless of pixel dimensions."
   ],
   "archiving_engine": {
     "mode": "individual_files",
     "bundle_generation": false,
     "dynamic_collector": "per-source SHA256 manifests",
     "cloud_stage": "verified individual folders",
-    "live_gallery_images": 26,
+    "live_gallery_images": 23,
     "free_tools": "Python + Playwright + Pillow + rclone",
     "source_viewer": "source-hosted image manifest, not a cloud storage claim",
     "open_source_crawler": "gallery-dl + browser source-specific collectors",

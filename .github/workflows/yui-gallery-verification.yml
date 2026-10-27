@@ -40,6 +40,7 @@ jobs:
         run: |
           node apps/yui-gallery/test_version.cjs
           python apps/yui-gallery/test_auto_registration.py
+          python apps/yui-gallery/test_merge_higher_resolution.py
           python apps/yui-gallery/test_identity_policy.py
           python apps/yui-gallery/test_gallery_dl_collector.py
           python apps/yui-gallery/test_source_viewer_manifest.py

@@ -1,0 +1,150 @@
+{
+  "checked_at": "2026-10-27T10:36:09.685135+00:00",
+  "base": "http://127.0.0.1:8789/",
+  "engine": "chromium",
+  "version": "v0.1.0-beta.9",
+  "viewport": [
+    390,
+    844
+  ],
+  "iphone_real_device": false,
+  "network": "TLS-verified requests bridge",
+  "private_cloud_verified": 0,
+  "albums": [
+    {
+      "id": "cream228",
+      "decoded_lightbox": 228,
+      "original_link_sha256_checks": 0
+    },
+    {
+      "id": "tracksuit201",
+      "decoded_lightbox": 201,
+      "original_link_sha256_checks": 0
+    },
+    {
+      "id": "dec2023-199",
+      "decoded_lightbox": 199,
+      "original_link_sha256_checks": 0
+    },
+    {
+      "id": "blackroom145",
+      "decoded_lightbox": 145,
+      "original_link_sha256_checks": 0
+    },
+    {
+      "id": "maid291",
+      "decoded_lightbox": 291,
+      "original_link_sha256_checks": 0
+    },
+    {
+      "id": "ramen125",
+      "decoded_lightbox": 125,
+      "original_link_sha256_checks": 0
+    },
+    {
+      "id": "last-summer192",
+      "decoded_lightbox": 192,
+      "original_link_sha256_checks": 0
+    },
+    {
+      "id": "thru-thru117",
+      "decoded_lightbox": 117,
+      "original_link_sha256_checks": 0
+    },
+    {
+      "id": "sweet-dream110",
+      "decoded_lightbox": 110,
+      "original_link_sha256_checks": 0
+    },
+    {
+      "id": "yui-vol3-106",
+      "decoded_lightbox": 106,
+      "original_link_sha256_checks": 0
+    },
+    {
+      "id": "athletic-club104",
+      "decoded_lightbox": 104,
+      "original_link_sha256_checks": 0
+    },
+    {
+      "id": "teddy-bear97",
+      "decoded_lightbox": 97,
+      "original_link_sha256_checks": 10
+    },
+    {
+      "id": "pussylet41-82",
+      "decoded_lightbox": 82,
+      "original_link_sha256_checks": 0
+    },
+    {
+      "id": "wet-yui80",
+      "decoded_lightbox": 80,
+      "original_link_sha256_checks": 0
+    },
+    {
+      "id": "green91",
+      "decoded_lightbox": 91,
+      "original_link_sha256_checks": 0
+    },
+    {
+      "id": "heart-steal78",
+      "decoded_lightbox": 78,
+      "original_link_sha256_checks": 0
+    },
+    {
+      "id": "kuro-yui58",
+      "decoded_lightbox": 58,
+      "original_link_sha256_checks": 0
+    },
+    {
+      "id": "yui-vol2-42",
+      "decoded_lightbox": 42,
+      "original_link_sha256_checks": 0
+    },
+    {
+      "id": "yuis-present33",
+      "decoded_lightbox": 33,
+      "original_link_sha256_checks": 0
+    },
+    {
+      "id": "cn-yuntu8",
+      "decoded_lightbox": 4,
+      "original_link_sha256_checks": 4
+    },
+    {
+      "id": "sexiest18",
+      "decoded_lightbox": 18,
+      "original_link_sha256_checks": 0
+    },
+    {
+      "id": "cn-huantuji",
+      "decoded_lightbox": 3,
+      "original_link_sha256_checks": 3
+    },
+    {
+      "id": "cn-yingyuge",
+      "decoded_lightbox": 2,
+      "original_link_sha256_checks": 2
+    },
+    {
+      "id": "cn-chaotuji",
+      "decoded_lightbox": 3,
+      "original_link_sha256_checks": 3
+    },
+    {
+      "id": "cn-wantuzhi-everyday",
+      "decoded_lightbox": 1,
+      "original_link_sha256_checks": 1
+    },
+    {
+      "id": "seethrough80",
+      "decoded_lightbox": 80,
+      "original_link_sha256_checks": 0
+    }
+  ],
+  "decoded_image_entries": 2490,
+  "browser_download_sha256_verified": 0,
+  "original_link_sha256_verified": 23,
+  "unique_original_link_sha256_verified": 23,
+  "errors": []
+}

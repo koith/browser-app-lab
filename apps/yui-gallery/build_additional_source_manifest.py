@@ -6,7 +6,7 @@ from urllib.parse import urlsplit
 from PIL import Image
 from identity_policy import ensure_allowed
 
-ALLOWED=re.compile(r'^(?:cdn\.jliji\.com|cdn\.v2ph\.com|i[012]\.wp\.com|cdn1\.thismore\.fun|(?:wes|bis)\.misskon\.com|lux\.mrcong\.com|(?:imgx\d{3}|images\d{2})\.pixibb\.com|s\.wujituku\.com|lh\d\.ggpht\.com)$')
+ALLOWED=re.compile(r'^(?:cdn\.jliji\.com|cdn\.v2ph\.com|i[012]\.wp\.com|cdn[12]\.thismore\.fun|(?:wes|bis)\.misskon\.com|lux\.mrcong\.com|(?:imgx\d{3}|images\d{2})\.pixibb\.com|s\.wujituku\.com|lh\d\.ggpht\.com)$')
 def build(folders,out,replace=False):
     albums=[]
     for folder in folders:
@@ -30,7 +30,9 @@ def build(folders,out,replace=False):
                        'source_pages':m.get('source_pages',[m.get('source_page','')]),
                        'acquired':len(images),'complete_sequence':set(numbers)==set(range(1,m['expected']+1)),
                        'missing_numbers':sorted(set(range(1,m['expected']+1))-set(numbers)),
-                       'resolution_review_required':any(max(p['width'],p['height'])<1920 for p in images),
+                       'resolution_review_required':True,
+                       'highest_resolution_status':'unverified_seek_larger_or_publisher_original',
+                       'publisher_original_verified':False,
                        'minimum_long_edge':min((max(p['width'],p['height']) for p in images),default=0),
                        'quality':'AI enhanced web edition' if m.get('ai_enhanced') else 'public web resolution',
                        'status':'verified_collected_individual_files_source_hosted_online_view'})
@@ -54,7 +56,7 @@ def build(folders,out,replace=False):
                     a['acquired']=len(a['images'])
                     a['missing_numbers']=sorted(set(range(1,a['expected']+1))-set(old))
                     a['complete_sequence']=not a['missing_numbers']
-                    a['resolution_review_required']=any(max(p['width'],p['height'])<1920 for p in a['images'])
+                    a['resolution_review_required']=True
                     a['minimum_long_edge']=min(max(p['width'],p['height']) for p in a['images'])
                 existing[a['id']]=a
             albums=list(existing.values())

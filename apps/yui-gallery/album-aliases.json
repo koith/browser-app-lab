@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "basis": "Publisher, volume and work-title metadata; aliases do not certify publisher originals or equal edition counts.",
+  "aliases": {
+    "v01": "athletic-club104", "v02": "yuis-present33", "v04": "teddy-bear97",
+    "v05": "wet-yui80", "v06": "thru-thru117", "v07": "cn-wantuzhi-everyday",
+    "v08": "ramen125", "v09": "sweet-dream110", "v10": "yui-vol3-106",
+    "v11": "yui-vol2-42", "v12": "kuro-yui58", "v13": "blackroom145",
+    "v14": "heart-steal78", "v15": "dec2023-199", "v16": "maid291",
+    "v17": "seethrough80", "v18": "tracksuit201", "v19": "last-summer192", "v20": "cream228",
+    "h01": "kuro-yui58", "h02": "yui-vol2-42", "h03": "yui-vol3-106",
+    "h04": "thru-thru117", "h05": "wet-yui80", "h06": "teddy-bear97",
+    "h07": "v03", "h08": "yuis-present33", "h09": "athletic-club104",
+    "h10": "yuis-present33", "h11": "green91",
+    "c01": "kuro-yui58", "c02": "yui-vol2-42", "c03": "yui-vol3-106",
+    "c04": "thru-thru117", "c05": "wet-yui80", "c06": "teddy-bear97",
+    "c07": "v03", "c08": "yuis-present33", "c09": "athletic-club104"
+  }
+}

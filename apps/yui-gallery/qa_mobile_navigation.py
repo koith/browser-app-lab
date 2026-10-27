@@ -1,5 +1,6 @@
 """Exercise browser history, fixed controls, aligned thumbnails and native gestures."""
 import argparse,asyncio,json
+import requests
 from pathlib import Path
 from playwright.async_api import async_playwright
 
@@ -7,11 +8,19 @@ async def run(args):
  async with async_playwright() as pw:
   browser=await getattr(pw,args.engine).launch()
   context=await browser.new_context(viewport={'width':390,'height':844},is_mobile=True,has_touch=True)
+  if args.http_bridge:
+   async def bridge(route):
+    r=await asyncio.to_thread(lambda:requests.get(route.request.url,timeout=45,allow_redirects=False))
+    headers={k:v for k,v in r.headers.items() if k.lower() not in ('content-encoding','content-length','transfer-encoding','connection')}
+    await route.fulfill(status=r.status_code,headers=headers,body=r.content)
+   await context.route('https://**/*',bridge)
   page=await context.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
-  await page.goto(args.base,wait_until='domcontentloaded');await page.locator('.album[data-id="v04"]').wait_for()
+  await page.goto(args.base,wait_until='domcontentloaded');await page.locator('.album[data-id="teddy-bear97"]').wait_for()
   assert await page.locator('h1,.eyebrow').count()==0
   assert await page.locator('#zoom,#download,.lightbottom').count()==0
-  await page.locator('.album[data-id="v04"]').click()
+  assert await page.locator('.album[data-id="v04"]').count()==0
+  assert await page.locator('.album[data-id="cn-miaohuaying"]').count()==0
+  await page.locator('.album[data-id="teddy-bear97"]').click()
   await page.locator('#detail').wait_for(state='visible')
   first=await page.locator('#detailphotos .photo').nth(0).bounding_box();second=await page.locator('#detailphotos .photo').nth(1).bounding_box()
   assert abs(first['y']-second['y'])<1,(first,second)
@@ -23,7 +32,7 @@ async def run(args):
   # Safari limits history writes. Hundreds of rapid changes must still render.
   await page.evaluate('for(let n=0;n<250;n++)step(1)')
   await page.locator('#full').evaluate('(im)=>im.decode()')
-  assert (await page.locator('#position').inner_text()).startswith('1 / 10')
+  assert (await page.locator('#position').inner_text()).startswith('57 / 97')
   close=await page.locator('#close').bounding_box()
   assert abs(back['x']-close['x'])<1 and abs(back['y']-close['y'])<1,(back,close)
   full=await page.locator('#full').bounding_box();link=await page.locator('#original').bounding_box()
@@ -61,7 +70,19 @@ async def run(args):
   await page.wait_for_function("history.state?.yui")
   await page.go_back();assert page.url=='about:blank',page.url
   # Direct album links still have a working in-app back button.
-  await page.goto(args.base+'#v04',wait_until='domcontentloaded');await page.locator('#detail').wait_for(state='visible')
+  for alias,canonical,count in [('v04','teddy-bear97',97),('v12','kuro-yui58',58),('v15','dec2023-199',199)]:
+   await page.goto(args.base+'#'+alias,wait_until='domcontentloaded')
+   # Loading a deep link starts the app; a same-document hash change does not.
+   await page.reload(wait_until='domcontentloaded');await page.locator('#detail').wait_for(state='visible')
+   assert await page.locator('#detailphotos .photo').count()==count
+   assert canonical in page.url
+  await page.locator('#back').click();await page.locator('#browse').wait_for(state='visible')
+  await page.locator('[data-filter="all"]').click()
+  for aid in ['kuro-yui58','yui-vol2-42','yui-vol3-106','blackroom145','dec2023-199','pussylet41-82','sexiest18']:
+   card=page.locator('.album[data-id="'+aid+'"]');assert await card.count()==1
+   assert '미수집' not in await card.inner_text()
+  await page.locator('.album[data-id="yui-vol2-42"]').click();await page.locator('#detail').wait_for(state='visible')
+  assert await page.locator('#detailphotos .photo').count()==42
   await page.locator('#back').click();await page.locator('#browse').wait_for(state='visible')
   assert not errors,errors
   result={'engine':args.engine,'viewport':[390,844],'history_back_forward':True,'rapid_photo_changes':250,'root_can_leave':True,'fixed_back_close':True,'aligned_two_columns':True,'native_contextmenu_allowed':True,'emulated_browser_zoom_scale':pinch,'physical_pinch_verified':False,'multitouch_and_edge_not_intercepted':True,'iphone_real_device':False}
@@ -69,4 +90,4 @@ async def run(args):
   await browser.close()
 
 if __name__=='__main__':
- p=argparse.ArgumentParser();p.add_argument('--base',default='http://localhost:8765/');p.add_argument('--engine',choices=['chromium','webkit'],default='chromium');p.add_argument('--out',type=Path,default=Path('yui-navigation-qa.json'));asyncio.run(run(p.parse_args()))
+ p=argparse.ArgumentParser();p.add_argument('--base',default='http://localhost:8765/');p.add_argument('--engine',choices=['chromium','webkit'],default='chromium');p.add_argument('--http-bridge',action='store_true');p.add_argument('--out',type=Path,default=Path('yui-navigation-qa.json'));asyncio.run(run(p.parse_args()))

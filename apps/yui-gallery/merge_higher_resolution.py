@@ -17,6 +17,8 @@ def signature(path):
 
 def merge(primary,alternative,out):
     a=json.loads((primary/'manifest.json').read_text());b=json.loads((alternative/'manifest.json').read_text())
+    if b.get('ai_enhanced') and not a.get('ai_enhanced'):
+        raise ValueError('AI-enhanced copies cannot replace a non-AI edition')
     # Different visible proxy URLs can return exactly the same bytes. Treat
     # byte-identical candidates once so they do not create false ambiguity.
     unique={}
