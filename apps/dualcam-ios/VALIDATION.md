@@ -1,31 +1,40 @@
 # Validation
 
-Source commit: `233634e93be9bb6459506dca3c95037dad9cfbf8`
+Version: **1.0.1 (build 2)**
 
-Successful run: https://github.com/koith/browser-app-lab/actions/runs/40368695687
+Source commit: `49696bbb4a0df73da2c8e7331fe85416b320d79c`
+
+Successful run: https://github.com/koith/browser-app-lab/actions/runs/40372915486
 
 Environment: GitHub-hosted macOS 15, Xcode 16.4, iPhoneOS 18.5 SDK; minimum iOS 16.0.
 
 ## Passed
 
-- Swift syntax parsing for all 9 app/test source files.
-- Deterministic Xcode project regeneration and resolution of all 47 project objects.
+- Swift syntax parsing for all 13 app/test source files.
+- Deterministic Xcode project regeneration and resolution of all 57 project objects.
 - Info.plist, shared scheme, asset catalog, Bash/Python scripts, and monorepo workflow paths.
 - Simulator compilation of the app and test target.
-- Five XCTest cases, with zero failures:
-  - Two output movies both contain video and decodable AAC audio.
+- Eleven XCTest cases, with zero failures:
+  - Two output movies both contain video and at least 1.8 seconds of decoded audio from a 2-second microphone input.
   - Stopping before the second camera is ready does not report success.
   - Both cameras use the later first-frame timestamp as their common origin.
   - Each camera accepts monotonically increasing frames independently.
   - Invalid times and repeated starts cannot alter the common origin.
+  - Temporary encoder backpressure preserves queued audio in order.
+  - Buffer overflow reports an error without replacing queued audio.
+  - Failed appends do not consume unwritten audio samples.
+  - Startup permits warmup, then detects a missing microphone.
+  - A frozen rear camera is detected while the other streams continue.
+  - Repeated and invalid timestamps cannot keep a dead stream healthy.
 - Release build for a physical iPhone target (`BUILD SUCCEEDED`).
 - IPA creation and GitHub Actions artifact upload.
-- Downloaded artifact SHA-256 matches GitHub's artifact digest; ZIP CRC checks pass.
-- IPA contains a genuine arm64 Mach-O executable and an iPhoneOS Info.plist, with both camera and microphone permission descriptions.
+- The IPA packager verifies that a compiled device executable exists and that Info.plist identifies an iPhoneOS build, and refuses to package a simulator app.
 
-IPA SHA-256: `2966d288d1a197b7e9a83a1934da25a544ebd74332416f680cd7537b4a585dd5`
+Artifact ZIP SHA-256 reported by GitHub: `1f0bc4020052a6b33d6b9646c2552789cb4f8463ce4d1ca809de58a6cbbb35b2`
 
-Artifact: https://github.com/koith/browser-app-lab/actions/runs/40368695687/artifacts/12672616233
+Artifact: https://github.com/koith/browser-app-lab/actions/runs/40372915486/artifacts/12672959508
+
+This version's artifact has not been independently downloaded and inspected locally. The build, packaging, and test results above are from the successful GitHub Actions run.
 
 ## Remaining device checks
 

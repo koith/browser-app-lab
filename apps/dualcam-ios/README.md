@@ -4,9 +4,9 @@
 
 빌드 실행·결과: [GitHub Actions → DualCam iPhone IPA](https://github.com/koith/browser-app-lab/actions/workflows/dualcam-ios.yml)
 
-첫 성공 빌드: [자동 테스트 5개 통과 + iPhone IPA 생성](https://github.com/koith/browser-app-lab/actions/runs/40368695687)
+최신 검증 빌드: **1.0.1 (빌드 2)** — [자동 테스트 11개 통과 + iPhone IPA 생성](https://github.com/koith/browser-app-lab/actions/runs/40372915486)
 
-설치 파일: [DualCam-unsigned-IPA 다운로드](https://github.com/koith/browser-app-lab/actions/runs/40368695687/artifacts/12672616233). ZIP 안의 IPA를 Windows에서 서명한 뒤 설치합니다. 이 빌드 파일의 보관 기한은 2026-11-09이며 이후에는 Actions를 다시 실행해 생성할 수 있습니다.
+설치 파일: [DualCam 1.0.1 IPA 다운로드](https://github.com/koith/browser-app-lab/actions/runs/40372915486/artifacts/12672959508). ZIP 안의 IPA를 Windows에서 서명한 뒤 설치합니다. 이 빌드 파일의 보관 기한은 2026-11-09이며 이후에는 Actions를 다시 실행해 생성할 수 있습니다.
 
 전면·후면 카메라 영상을 **동시에, 각각의 MOV 파일로 녹화**하는 개인용 네이티브 iPhone 앱입니다. 두 영상 모두 같은 마이크 음성을 포함합니다. 시작·종료 효과음을 재생하는 코드는 넣지 않았습니다.
 
@@ -37,9 +37,9 @@
 
 ## 현재 검증 상태
 
-2026-10-26에 GitHub Actions의 macOS·Xcode 16.4 환경에서 **자동 테스트 5개, 시뮬레이터 앱 컴파일, 실제 iPhone 대상 Release 빌드가 모두 통과**했습니다. 생성된 IPA를 내려받아 iPhone 플랫폼·arm64 실행 파일·권한 설명·ZIP 무결성도 확인했습니다.
+2026-10-26에 GitHub Actions의 macOS·Xcode 16.4 환경에서 **1.0.1(빌드 2)의 자동 테스트 11개, 시뮬레이터 앱 컴파일, 실제 iPhone 대상 Release 빌드가 모두 통과**했습니다. 빌드 과정에서 컴파일된 실행 파일과 iPhoneOS 플랫폼을 확인한 뒤 미서명 IPA를 생성했습니다.
 
-자동 테스트는 두 MOV 파일의 실제 영상·음성 트랙과 AAC 디코딩을 검사합니다. **실제 iPhone의 카메라 동시 촬영, 시작·종료 소리, 밝기 복원, 잠금 시 저장, 장시간 발열은 아직 실기기에서 검증하지 않았습니다.** 설치 후 아래 테스트를 진행해야 합니다. IPA는 개인용 서명 전 상태입니다.
+자동 테스트는 두 MOV 파일의 실제 영상·음성 트랙과 입력 2초 중 최소 1.8초의 AAC 디코딩, 음성 버퍼의 순서·오류 처리, 카메라·마이크 데이터 정지 감지를 검사합니다. **실제 iPhone의 카메라 동시 촬영, 시작·종료 소리, 밝기 복원, 잠금 시 저장, 장시간 발열은 아직 실기기에서 검증하지 않았습니다.** 설치 후 아래 테스트를 진행해야 합니다. IPA는 개인용 서명 전 상태입니다.
 
 ## 맥 없이 GitHub에서 빌드하기
 
@@ -57,6 +57,8 @@ GitHub Actions의 macOS 실행은 계정의 무료 제공 범위와 사용량에
 - 중복·역순·잘못된 타임스탬프를 거부하는지.
 - 합성 영상·음성을 넣어 **전면·후면 MOV 모두 실제 영상 트랙과 디코딩 가능한 AAC 음성을 포함하는지**.
 - 두 번째 카메라가 준비되기 전에 종료하면 성공으로 처리하지 않는지.
+- 인코더 지연·버퍼 초과·파일 쓰기 실패 시 음성 샘플을 올바르게 처리하는지.
+- 마이크 미준비·한쪽 카메라 정지·잘못된 타임스탬프를 감지하는지.
 
 시뮬레이터 테스트는 카메라 하드웨어·시작/종료 소리·발열을 검증하지 않습니다. 아래 실제 기기 검증을 별도로 해야 합니다.
 

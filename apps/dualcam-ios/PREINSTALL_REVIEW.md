@@ -1,5 +1,11 @@
 # 설치 전 재점검 — 1.0.1 (빌드 2)
 
+검증 결과: **자동 테스트 11개, 시뮬레이터 컴파일, iPhone용 Release 빌드 모두 통과**.
+
+- [성공한 GitHub Actions 실행](https://github.com/koith/browser-app-lab/actions/runs/40372915486)
+- [수정판 IPA 다운로드](https://github.com/koith/browser-app-lab/actions/runs/40372915486/artifacts/12672959508)
+- 검증한 소스 커밋: `49696bbb4a0df73da2c8e7331fe85416b320d79c`
+
 ## 발견해 수정한 문제
 
 | 우선순위 | 기존 코드의 문제 | 수정 |
