@@ -1,5 +1,5 @@
 {
-  "version": "v0.1.0-beta.4",
+  "version": "v0.1.0-beta.5",
   "date": "2026-10-27",
   "policy": {
     "monthly_charge_krw": 0,
@@ -39,13 +39,15 @@
     "source_catalog_duplicated_across_sites": true,
     "iphone_real_device_verified": false,
     "owner_gallery_remote_hosted_count": "pending_authenticated_storage_connection",
-    "newly_acquired_web_images": 844,
-    "additional_source_gallery_images": 738,
+    "newly_acquired_web_images": 1528,
+    "additional_source_gallery_images": 1519,
     "source_browser_decode_verified_images": 405,
     "local_browser_download_sha256_verified_images": 26,
-    "new_unique_web_albums": 6,
+    "new_unique_web_albums": 9,
     "new_album_higher_resolution_selections": 106,
-    "existing_405_higher_resolution_replacements": 0
+    "existing_405_higher_resolution_replacements": 10,
+    "beta5_newly_acquired_web_images": 684,
+    "beta5_new_complete_web_albums": 3
   },
   "notes": [
     "A private Google Drive ZIP is only a temporary safety copy, not the user-approved primary archive.",
@@ -55,7 +57,9 @@
     "Since beta.2, active album collectors, the scheduled discovery pipeline, and cloud staging use individually verified files rather than compressed photo bundles.",
     "The source-viewer album layer shows links to originally publicly hosted full web images and is not the private archived binary storage.",
     "beta.4 recovered 405 unchanged individual source files; primary private cloud remains unconnected. Owner-session main-gallery integration is implemented but live deployment is pending.",
-    "844 new downloaded web-edition files include a 106-photo alternate Sweet Dream edition. Select 738 images across six new works for the source gallery; choose 106 larger unchanged 1920px files through conservative cross-edition matching. Existing 405 images are not publisher masters and have no verified higher-resolution replacements."
+    "844 new downloaded web-edition files include a 106-photo alternate Sweet Dream edition. Select 738 images across six new works for the source gallery; choose 106 larger unchanged 1920px files through conservative cross-edition matching. Existing 405 images are not publisher masters and have no verified higher-resolution replacements.",
+    "beta.5 uses browser Back/Forward for albums and photos, native pinch zoom and long-press saving, compact fixed navigation, and aligned two-column thumbnails.",
+    "beta.5 collected and registered complete Tracksuit 201, Maid 291 and Last Summer 192 public web editions. Resolution remains under review; ten Teddy Bear photographs matched to unchanged 2699px public V2PH files. Source counts differ between editions; no publisher-master or permanent-cloud claim."
   ],
   "archiving_engine": {
     "mode": "individual_files",

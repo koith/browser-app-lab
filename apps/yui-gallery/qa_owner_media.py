@@ -38,16 +38,13 @@ async def main():
         await page.locator('#detailphotos .photo').first.click()
         await page.wait_for_function("document.querySelector('#full').naturalWidth===640")
         assert await page.locator('#original').get_attribute('href') is not None
-        async with page.expect_download() as download:
-            await page.locator('#download').click()
-        with tempfile.TemporaryDirectory() as tmp:
-            path=Path(tmp)/'download.jpg';await (await download.value).save_as(path)
-            assert hashlib.sha256(path.read_bytes()).hexdigest()==digest
+        actual=await page.locator('#original').evaluate("async a=>{const b=await(await fetch(a.href)).arrayBuffer();return [...new Uint8Array(await crypto.subtle.digest('SHA-256',b))].map(x=>x.toString(16).padStart(2,'0')).join('')}")
+        assert actual==digest
         await page.locator('#next').click()
         await page.wait_for_function("document.querySelector('#media-status').textContent.includes('SHA-256')")
         assert await page.locator('#full').get_attribute('src') is None,'Corrupt cloud bytes rendered'
         assert await page.evaluate("localStorage.getItem('yui-owner-session')") is None
         await browser.close()
-    print('OWNER_MAIN_GALLERY_FIXTURE_AUTH_DOWNLOAD_AND_CORRUPTION_PASS',args.engine,flush=True)
+    print('OWNER_MAIN_GALLERY_FIXTURE_AUTH_ORIGINAL_LINK_AND_CORRUPTION_PASS',args.engine,flush=True)
 
 if __name__=='__main__':asyncio.run(main())

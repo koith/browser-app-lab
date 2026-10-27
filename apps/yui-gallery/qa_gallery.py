@@ -8,7 +8,7 @@ import argparse
 import asyncio
 import hashlib
 import json
-import tempfile
+
 from datetime import datetime, timezone
 from pathlib import Path
 from playwright.async_api import async_playwright
@@ -50,23 +50,16 @@ async def run(args):
                 await page.locator('#full').evaluate('(im)=>Promise.race([im.decode(),new Promise((_,reject)=>setTimeout(()=>reject(Error("Image decode timed out: "+im.src)),25000))])')
                 dims=await page.locator('#full').evaluate('(im)=>[im.naturalWidth,im.naturalHeight]')
                 assert dims==[image['width'],image['height']],(album['id'],i+1,dims)
-                await page.locator('#zoom').click()
-                assert await page.locator('#zoom').get_attribute('aria-pressed')=='true'
-                await page.locator('#zoom').click()
                 passed+=1
                 if passed%10==0:print('DECODE_PROGRESS',album['id'],passed,flush=True)
-                # Pages-owned binaries permit real downloads. Remote origins may
-                # prohibit CORS downloads; never silently claim those succeeded.
+                # Verify the exact linked bytes with same-origin fetch. Saving
+                # uses the browser's native context menu, with no app download UI.
+                assert await page.locator('#original').get_attribute('href')==image['url']
                 if image['url'].startswith('stored-albums/'):
-                    async with page.expect_download() as event:
-                        await page.locator('#download').click()
-                    download=await event.value
-                    with tempfile.TemporaryDirectory() as tmp:
-                        file=Path(tmp)/download.suggested_filename
-                        await download.save_as(file)
-                        assert hashlib.sha256(file.read_bytes()).hexdigest()==image['sha256']
+                    digest=await page.locator('#original').evaluate("async a=>{const r=await fetch(a.href);if(!r.ok)throw Error(r.status);const b=await r.arrayBuffer();return [...new Uint8Array(await crypto.subtle.digest('SHA-256',b))].map(x=>x.toString(16).padStart(2,'0')).join('')}")
+                    assert digest==image['sha256']
                     downloads+=1
-            results.append({'id':album['id'],'decoded_lightbox':passed,'sha256_browser_downloads':downloads})
+            results.append({'id':album['id'],'decoded_lightbox':passed,'original_link_sha256_checks':downloads})
             print('GALLERY_REAL_DECODE',args.engine,results[-1],flush=True)
             await page.locator('#close').click()
             await page.locator('#back').click()
@@ -78,9 +71,10 @@ async def run(args):
             'network':'TLS-verified requests bridge' if args.http_bridge else 'direct browser TLS',
             'private_cloud_verified':0,'albums':results,
             'decoded_image_entries':sum(r['decoded_lightbox'] for r in results),
-            'browser_download_sha256_verified':sum(r['sha256_browser_downloads'] for r in results)}
+            'browser_download_sha256_verified':0,
+            'original_link_sha256_verified':sum(r['original_link_sha256_checks'] for r in results)}
     args.out.write_text(json.dumps(report,indent=2)+'\n')
-    print('ALL_GALLERY_MEDIA_QA_PASS',report['decoded_image_entries'],report['browser_download_sha256_verified'],flush=True)
+    print('ALL_GALLERY_MEDIA_QA_PASS',report['decoded_image_entries'],report['original_link_sha256_verified'],flush=True)
 
 
 if __name__=='__main__':
