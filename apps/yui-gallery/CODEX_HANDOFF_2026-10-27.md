@@ -1,3 +1,26 @@
+> ## beta.7 최종 인수인계 — 2026-10-27 UTC
+> **현재 배포 버전: v0.1.0-beta.7. 이 절이 최신이며 아래 beta.4/beta.3 기록은 과거 상태다.**
+> 갤러리: https://koith.github.io/browser-app-lab/apps/yui-gallery/?v=0.1.0-beta.7
+> 병합: PR #222 https://github.com/koith/browser-app-lab/pull/222 · PR #223 https://github.com/koith/browser-app-lab/pull/223 · PR #224 https://github.com/koith/browser-app-lab/pull/224
+> **배포 코드 SHA: 50b0b6413447cbca23017c25d9103b25cb62e8a5.** Pages 배포 PASS: https://github.com/koith/browser-app-lab/actions/runs/40460206781
+>
+> - 이번 작업의 신규 실파일은 **844개 고유 SHA-256**: Tracksuit 201 + Maid 291 + Last Summer 192 = 신규 3개 웹판 684장, Seethrough 프록시 판본 80장, 선택된 직접 주소 판본 80장. 같은 사진의 서로 다른 판본을 신규 사진 160장으로 표현하지 말 것. 물리 파일·SHA·디코딩 검증 후 실제 갤러리에 연결했다.
+> - **Seethrough 80장 전부를 기존 장축 1368px에서 2500px로 교체했다.** 15개의 명시적으로 연결된 Kaizty 페이지, 160개 프록시 URL 응답에서 80개 고유 파일을 확인했다. 프록시는 Chromium에서 디코딩에 실패했으므로 원본 페이지의 imgErrorHF가 명시한 직접 주소를 별도로 수집·검증했다. 직접 파일은 프록시와 바이트가 다르므로 이전 해시를 재사용하지 않았다. 80/80 사진을 보수적으로 대조해 정규 순서를 유지했다. 근거: verification/beta7-seethrough-resolution.json.
+> - **Teddy Bear 97장 중 10장은 2699px로 교체**했다. 기존 저장 미리보기 10개와 정확히 같은 SHA-256이므로 신규 확보 10장으로 세지 않는다. V2PH CDN이 작업 환경에서 403을 반환하여, 동일 해시의 기존 stored-albums 파일을 갤러리가 우선 사용한다. 작은 썸네일을 대신 쓰는 방식이 아니다. 기존 405장 중 확인된 고해상도 교체는 이 10장이다.
+> - 갤러리는 **총 1853개 이미지 항목 / 21개 그룹**: 완전한 웹판 14개와 불완전한 공개 미리보기 7개. 중복 작품 및 같은 파일을 재사용한 항목이 있으므로 고유 사진 1853장으로 표현하지 말 것. 수량·해상도 부채: verification/gallery-coverage.json. 발행사 최고해상도 원본 인증은 여전히 0장이다.
+> - UX: 가운데 중복 COLLECTION/Yui Gallery 제거, 좌상단 로고 하나만 유지. 화보명·수량을 작은 고정 상단 정보로 이동. 2열 썸네일 시작점 정렬. 뒤로가기·닫기는 같은 좌상단 위치, 브라우저 Back/Forward 정상 작동. 사진을 빠르게 넘길 때 WebKit History API 제한을 피하도록 주소 갱신을 지연한다.
+> - 확대/축소 및 개별 다운로드 버튼과 하단 버튼 공간을 제거했다. 브라우저 기본 핀치 확대와 이미지 우클릭/길게 누르기를 차단하지 않는다. 사진 열기만 이미지 우하단 반투명 버튼으로 유지. 버전은 우상단의 작은 글씨로 유지한다.
+> - **최종 main Chromium·WebKit CI 모두 PASS**: https://github.com/koith/browser-app-lab/actions/runs/40460207644 . 각각 1853개 사진 디코딩·모바일 Back/Forward·250회 연속 전환·저장 파일 링크 36회 해시 검사(고유 26개 파일) 통과. PR 검증: https://github.com/koith/browser-app-lab/actions/runs/40459777694 .
+> - **배포된 실제 URL에서도 1853개 전부 디코딩 + 링크 해시 36회(고유 26개) PASS**, 오류 0. 근거: verification/beta7-production-qa.json. 관리형 환경의 브라우저 CA 문제 때문에 TLS를 검증하는 requests 브리지를 사용했다. CI는 직접 브라우저 TLS다. 실기기 iPhone의 핀치·저장 메뉴 검증으로 표현하지 말 것.
+> - 수집/품질 도구: http_album_collector.py의 Kaizty 공개 페이지 및 사이트가 제공한 직접 주소 경로, quality_alternative_targets.json, merge_higher_resolution.py의 정확한 바이트/픽셀 중복 제거 및 검증 결과 자동 등록. 기존 파일·수량·더 큰 판본을 보존한다. 손실 재압축·인위적 업스케일·사진 압축파일·TinyFish·유료 수집 서비스 사용 없음.
+> - **미완료:** 7개 부분 미리보기의 완전한 화보 확보, 나머지 낮은 웹판의 더 큰 판본, 최신 발행사 작품/공개 샘플 추가 수집, 실기기 iPhone QA. 인증·유료 제한은 우회하지 않았다.
+> - **개인 영구 클라우드 미연결 / TeraBox 업로드·원격 재다운로드 해시 검증 0장**. 출처 링크와 작업 환경의 파일은 영구 개인 보관 완료가 아니다. 기존 유일한 검증 사본을 삭제하지 말 것. iOS TeraBox QR 로그인은 완료되지 않았으며, 검증되지 않은 스캔 메뉴를 다시 안내하지 말 것.
+> - 사용자 지시: 통상적인 개발·수집·테스트·병합·배포는 별도 승인 질문 없이 진행. 비용·계정 권한 변경·데이터 삭제처럼 중요한 결정만 확인. 확보한 모든 화보는 갤러리에 연결할 것.
+>
+> 작업 환경 원본(환경 유지 시): /workspace/yui-private/beta5-collected/verified-albums/{tracksuit201,maid291,last-summer192}; /workspace/yui-private/beta7-best/seethrough80 (프록시 판본); /workspace/yui-private/beta7-direct-best/seethrough80 (선택 직접 판본); /workspace/yui-private/recovered (기존 405). 입력 판본들은 삭제하지 않았다.
+>
+> ---
+
 > ## beta.4 인수인계 추가 — 2026-10-27 KST
 > 현재 배포 버전은 **v0.1.0-beta.4**. 아래 beta.3 본문은 이전 기록이다.
 > **PR #221 병합**: https://github.com/koith/browser-app-lab/pull/221

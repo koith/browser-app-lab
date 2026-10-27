@@ -1,0 +1,125 @@
+{
+  "checked_at": "2026-10-27T06:19:56.176995+00:00",
+  "base": "https://koith.github.io/browser-app-lab/apps/yui-gallery/?v=0.1.0-beta.7",
+  "engine": "chromium",
+  "version": "v0.1.0-beta.7",
+  "viewport": [
+    390,
+    844
+  ],
+  "iphone_real_device": false,
+  "network": "TLS-verified requests bridge",
+  "private_cloud_verified": 0,
+  "albums": [
+    {
+      "id": "tracksuit201",
+      "decoded_lightbox": 201,
+      "original_link_sha256_checks": 0
+    },
+    {
+      "id": "cream228",
+      "decoded_lightbox": 228,
+      "original_link_sha256_checks": 0
+    },
+    {
+      "id": "maid291",
+      "decoded_lightbox": 291,
+      "original_link_sha256_checks": 0
+    },
+    {
+      "id": "ramen125",
+      "decoded_lightbox": 125,
+      "original_link_sha256_checks": 0
+    },
+    {
+      "id": "last-summer192",
+      "decoded_lightbox": 192,
+      "original_link_sha256_checks": 0
+    },
+    {
+      "id": "thru-thru117",
+      "decoded_lightbox": 117,
+      "original_link_sha256_checks": 0
+    },
+    {
+      "id": "sweet-dream110",
+      "decoded_lightbox": 110,
+      "original_link_sha256_checks": 0
+    },
+    {
+      "id": "athletic-club104",
+      "decoded_lightbox": 104,
+      "original_link_sha256_checks": 0
+    },
+    {
+      "id": "teddy-bear97",
+      "decoded_lightbox": 97,
+      "original_link_sha256_checks": 10
+    },
+    {
+      "id": "green91",
+      "decoded_lightbox": 91,
+      "original_link_sha256_checks": 0
+    },
+    {
+      "id": "wet-yui80",
+      "decoded_lightbox": 80,
+      "original_link_sha256_checks": 0
+    },
+    {
+      "id": "yuis-present33",
+      "decoded_lightbox": 33,
+      "original_link_sha256_checks": 0
+    },
+    {
+      "id": "seethrough80",
+      "decoded_lightbox": 80,
+      "original_link_sha256_checks": 0
+    },
+    {
+      "id": "v04",
+      "decoded_lightbox": 10,
+      "original_link_sha256_checks": 10
+    },
+    {
+      "id": "cn-yuntu8",
+      "decoded_lightbox": 4,
+      "original_link_sha256_checks": 4
+    },
+    {
+      "id": "cn-huantuji",
+      "decoded_lightbox": 3,
+      "original_link_sha256_checks": 3
+    },
+    {
+      "id": "cn-chaotuji",
+      "decoded_lightbox": 3,
+      "original_link_sha256_checks": 3
+    },
+    {
+      "id": "cn-miaohuaying",
+      "decoded_lightbox": 3,
+      "original_link_sha256_checks": 3
+    },
+    {
+      "id": "heart-steal78",
+      "decoded_lightbox": 78,
+      "original_link_sha256_checks": 0
+    },
+    {
+      "id": "cn-yingyuge",
+      "decoded_lightbox": 2,
+      "original_link_sha256_checks": 2
+    },
+    {
+      "id": "cn-wantuzhi-everyday",
+      "decoded_lightbox": 1,
+      "original_link_sha256_checks": 1
+    }
+  ],
+  "decoded_image_entries": 1853,
+  "browser_download_sha256_verified": 0,
+  "original_link_sha256_verified": 36,
+  "unique_original_link_sha256_verified": 26,
+  "errors": []
+}
