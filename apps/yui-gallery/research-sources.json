@@ -280,6 +280,16 @@
       "status": "official_catalogue_verified_full_files_not_acquired",
       "gallery_added": false,
       "notes": "Model official profile links directly to publisher. Public samples are not the complete 190-photo edition. Do not replace with unrelated Yui or count video thumbnails as photographs."
+    },
+    {
+      "url": "https://wantuzhi.com/yui-simyu-kireini-natta",
+      "title": "Yui — きれいになったユイ",
+      "claimed_photo_count": 93,
+      "publisher_reference": "https://ctee.kr/item/store/93478",
+      "status": "metadata_only_paid_member_download_not_accessed",
+      "gallery_added": false,
+      "acquired_files": 0,
+      "notes": "Public page explicitly requires paid membership and links back to the CTEE work. Stop at access restriction; one reference cover is not a complete edition."
     }
   ]
 }

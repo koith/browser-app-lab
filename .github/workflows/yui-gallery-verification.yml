@@ -102,11 +102,19 @@ jobs:
       - uses: actions/upload-artifact@v7
         if: always() && matrix.engine == 'chromium'
         with:
-          name: source-and-production-verification
-          path: |
-            yui-source-readback.json
-            yui-production-navigation.json
-            yui-production-gallery.json
+          path: yui-source-readback.json
+          archive: false
+          if-no-files-found: ignore
+      - uses: actions/upload-artifact@v7
+        if: always() && matrix.engine == 'chromium'
+        with:
+          path: yui-production-navigation.json
+          archive: false
+          if-no-files-found: ignore
+      - uses: actions/upload-artifact@v7
+        if: always() && matrix.engine == 'chromium'
+        with:
+          path: yui-production-gallery.json
           archive: false
           if-no-files-found: ignore
       - uses: actions/upload-artifact@v7
