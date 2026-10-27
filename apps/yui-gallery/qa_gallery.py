@@ -31,7 +31,7 @@ async def run(args):
             await context.route('https://**/*',bridge)
         page=await context.new_page()
         errors=[]
-        page.on('pageerror',lambda e: errors.append(str(e)))
+        page.on('pageerror',lambda e: (errors.append(str(e)),print('BROWSER_JS_ERROR',str(e),flush=True)))
         await page.goto(args.base,wait_until='domcontentloaded')
         await page.wait_for_function("document.querySelector('#total').textContent.includes('albums')")
         version=await page.locator('#app-version').inner_text()
@@ -54,7 +54,8 @@ async def run(args):
                 if passed%10==0:print('DECODE_PROGRESS',album['id'],passed,flush=True)
                 # Verify the exact linked bytes with same-origin fetch. Saving
                 # uses the browser's native context menu, with no app download UI.
-                assert await page.locator('#original').get_attribute('href')==image['url']
+                linked=await page.locator('#original').get_attribute('href')
+                assert linked==image['url'],(album['id'],i+1,linked,image['url'],await page.locator('#position').inner_text(),errors)
                 if image['url'].startswith('stored-albums/'):
                     digest=await page.locator('#original').evaluate("async a=>{const r=await fetch(a.href);if(!r.ok)throw Error(r.status);const b=await r.arrayBuffer();return [...new Uint8Array(await crypto.subtle.digest('SHA-256',b))].map(x=>x.toString(16).padStart(2,'0')).join('')}")
                     assert digest==image['sha256']

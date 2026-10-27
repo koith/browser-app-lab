@@ -100,7 +100,7 @@ footer{padding:15px 0 25px;justify-content:flex-end}
 <footer><span>개별 이미지 · 수집 파일 화질 유지</span></footer>
 </div>
 <div id="lightbox" role="dialog" aria-label="사진 보기" aria-modal="true">
- <div class="lighttop"><button class="lightbtn" id="close" aria-label="닫기">×</button><span id="position"></span></div>
+ <div class="lighttop"><button class="lightbtn" id="close" aria-label="닫기">×</button><span id="position"></span><small class="version-chip">v0.1.0-beta.5</small></div>
  <button class="lightbtn arrow prev" id="prev" aria-label="이전 사진">‹</button><div class="media-frame"><img id="full" alt="화보 사진"><a id="original" target="_blank" rel="noopener">사진 열기 ↗</a></div><button class="lightbtn arrow next" id="next" aria-label="다음 사진">›</button>
  <p id="media-status" role="status"></p>
 </div>
@@ -159,7 +159,7 @@ function openAlbum(id,record=true){
  window.scrollTo(0,0);
 }
 function openViewer(list,i,record=true){if(!list.length)return;viewerList=list;viewerIndex=((i%list.length)+list.length)%list.length;const p=list[viewerIndex];if(record)remember({album:p.albumId,photo:p.number,fromPhotos:!detailAlbum,mode});$('lightbox').classList.add('open');document.body.style.overflow='hidden';showViewer();$('close').focus({preventScroll:true})}
-let viewerGeneration=0;
+let viewerGeneration=0,routeTimer=null,historyEntry=0;const viewerRoutes=new Map();
 function showViewer(){
  const p=viewerList[viewerIndex];if(!p)return;
  viewerGeneration++;
@@ -169,13 +169,19 @@ function showViewer(){
  $('position').textContent=(viewerIndex+1)+' / '+viewerList.length+' · '+p.width+'×'+p.height;
  if(p.ownerAlbum)$('original').removeAttribute('href');else $('original').href=p.url;
 }
-function hideViewer(){viewerGeneration++;$('lightbox').classList.remove('open');document.body.style.overflow='';$('full').removeAttribute('src')}
+function hideViewer(){clearTimeout(routeTimer);viewerGeneration++;$('lightbox').classList.remove('open');document.body.style.overflow='';$('full').removeAttribute('src')}
 function closeViewer(){if(history.state?.yui&&history.state.photo)goBack();else hideViewer()}
-function step(n){viewerIndex=(viewerIndex+n+viewerList.length)%viewerList.length;const p=viewerList[viewerIndex];if(history.state?.yui)history.replaceState({...history.state,photo:p.number,album:p.albumId},'',routeURL({...history.state,photo:p.number,album:p.albumId}));showViewer()}
+function step(n){
+ viewerIndex=(viewerIndex+n+viewerList.length)%viewerList.length;showViewer();
+ if(history.state?.yui){const state={...history.state,photo:viewerList[viewerIndex].number,album:viewerList[viewerIndex].albumId};viewerRoutes.set(state.key,state);clearTimeout(routeTimer);
+ // WebKit rate-limits History API writes. Rapid swipes must keep rendering;
+ // remember the last photo immediately, and update its URL only after a pause.
+ routeTimer=setTimeout(()=>{if($('lightbox').classList.contains('open')&&history.state?.key===state.key)history.replaceState(state,'',routeURL(state))},1000)}
+}
 function routeURL(s){const q=new URLSearchParams();if(s.album)q.set('album',s.album);if(s.photo)q.set('photo',s.photo);if(s.fromPhotos)q.set('from','photos');if(s.mode&&s.mode!=='albums')q.set('view',s.mode);return location.pathname+location.search+(q.size?'#'+q:'')}
-function remember(s){history.replaceState({...history.state,scroll:window.scrollY},'');const state={yui:true,depth:(history.state?.depth||0)+1,scroll:0,...s};history.pushState(state,'',routeURL(state))}
+function remember(s){history.replaceState({...history.state,scroll:window.scrollY},'');const state={yui:true,key:Date.now().toString(36)+'-'+(++historyEntry),depth:(history.state?.depth||0)+1,scroll:0,...s};history.pushState(state,'',routeURL(state))}
 function goBack(){if(history.state?.yui&&history.state.depth>0)history.back();else{const state={yui:true,depth:0,mode:'albums',scroll:0};history.replaceState(state,'',routeURL(state));applyRoute(state)}}
-function applyRoute(s){hideViewer();setMode(s.mode||'albums');if(s.album&&!s.fromPhotos)openAlbum(s.album,false);if(s.photo){const a=stored.find(a=>a.id===s.album);const list=s.fromPhotos?available().flatMap(photosFor).filter(p=>p.name.toLocaleLowerCase().includes($('search').value.toLocaleLowerCase().trim())):a?photosFor(a):[];const i=list.findIndex(p=>p.albumId===s.album&&p.number===Number(s.photo));if(i>=0)openViewer(list,i,false)}requestAnimationFrame(()=>window.scrollTo(0,s.scroll||0))}
+function applyRoute(s){s=viewerRoutes.get(s.key)||s;hideViewer();setMode(s.mode||'albums');if(s.album&&!s.fromPhotos)openAlbum(s.album,false);if(s.photo){const a=stored.find(a=>a.id===s.album);const list=s.fromPhotos?available().flatMap(photosFor).filter(p=>p.name.toLocaleLowerCase().includes($('search').value.toLocaleLowerCase().trim())):a?photosFor(a):[];const i=list.findIndex(p=>p.albumId===s.album&&p.number===Number(s.photo));if(i>=0)openViewer(list,i,false)}requestAnimationFrame(()=>window.scrollTo(0,s.scroll||0))}
 window.addEventListener('popstate',()=>{const s=history.state;if(s?.yui)applyRoute(s)});
 $('prev').onclick=()=>step(-1);$('next').onclick=()=>step(1);$('close').onclick=closeViewer;
 $('back').onclick=goBack;

@@ -20,6 +20,10 @@ async def run(args):
   await page.screenshot(path=str(args.out.with_suffix('.album.png')))
   await page.locator('#detailphotos .photo').first.click()
   await page.locator('#full').evaluate('(im)=>im.decode()')
+  # Safari limits history writes. Hundreds of rapid changes must still render.
+  await page.evaluate('for(let n=0;n<250;n++)step(1)')
+  await page.locator('#full').evaluate('(im)=>im.decode()')
+  assert (await page.locator('#position').inner_text()).startswith('1 / 10')
   close=await page.locator('#close').bounding_box()
   assert abs(back['x']-close['x'])<1 and abs(back['y']-close['y'])<1,(back,close)
   full=await page.locator('#full').bounding_box();link=await page.locator('#original').bounding_box()
@@ -60,7 +64,7 @@ async def run(args):
   await page.goto(args.base+'#v04',wait_until='domcontentloaded');await page.locator('#detail').wait_for(state='visible')
   await page.locator('#back').click();await page.locator('#browse').wait_for(state='visible')
   assert not errors,errors
-  result={'engine':args.engine,'viewport':[390,844],'history_back_forward':True,'root_can_leave':True,'fixed_back_close':True,'aligned_two_columns':True,'native_contextmenu_allowed':True,'emulated_browser_zoom_scale':pinch,'physical_pinch_verified':False,'multitouch_and_edge_not_intercepted':True,'iphone_real_device':False}
+  result={'engine':args.engine,'viewport':[390,844],'history_back_forward':True,'rapid_photo_changes':250,'root_can_leave':True,'fixed_back_close':True,'aligned_two_columns':True,'native_contextmenu_allowed':True,'emulated_browser_zoom_scale':pinch,'physical_pinch_verified':False,'multitouch_and_edge_not_intercepted':True,'iphone_real_device':False}
   args.out.write_text(json.dumps(result,indent=2)+'\n');print('MOBILE_NAVIGATION_QA_PASS',json.dumps(result),flush=True)
   await browser.close()
 
