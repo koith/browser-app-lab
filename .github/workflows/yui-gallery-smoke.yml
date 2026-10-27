@@ -68,6 +68,8 @@ jobs:
             if(!await page.locator('[data-filter="albums"]').evaluate(x=>x.classList.contains('active')))throw Error('Albums not default view');
             const albumCount=await page.locator('.album').count(),expectedAlbums=local.albums.length+remote.length;
             if(albumCount!==expectedAlbums)throw Error('Expected '+expectedAlbums+' albums, got '+albumCount);
+            await page.locator('.album[data-id="v04"]').scrollIntoViewIfNeeded();
+            await page.locator('.album[data-id="v04"] img').evaluate(i=>i.decode());
             const localCover=await page.locator('.album[data-id="v04"] img').evaluate(i=>({w:i.naturalWidth,src:i.src}));
             if(localCover.w<100||!localCover.src.includes('/stored-albums/'))throw Error('Existing stored preview failed');
             await page.locator('.album[data-id="v04"]').click();

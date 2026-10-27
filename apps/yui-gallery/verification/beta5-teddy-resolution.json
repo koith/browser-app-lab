@@ -1,0 +1,155 @@
+{
+  "id": "teddy-bear97",
+  "replacements": [
+    {
+      "number": 1,
+      "source_number": 1,
+      "from_sha256": "302b6d50b2be7528748a980369d8abe62c431b621d35e8035265ef2e3fd3ff03",
+      "to_sha256": "bd8318cfe6e08824b26e1d3206a33400502cec23dc4d82f2c8a039520e6ec90d",
+      "from_pixels": [
+        1024,
+        1535
+      ],
+      "to_pixels": [
+        1800,
+        2699
+      ],
+      "comparison_mean_error": 0.379
+    },
+    {
+      "number": 2,
+      "source_number": 2,
+      "from_sha256": "294cb0ffe00b9fea764a33eb1c68ed2ac55c52e4f3359c0a252ffde20fc1e1c7",
+      "to_sha256": "011b7d8b03206b4c71a8c39ba4b77cc18c0f85995632b5f0bebe4f0ac4e99733",
+      "from_pixels": [
+        1024,
+        1535
+      ],
+      "to_pixels": [
+        1800,
+        2699
+      ],
+      "comparison_mean_error": 0.352
+    },
+    {
+      "number": 3,
+      "source_number": 3,
+      "from_sha256": "5cfd501956fedd3527a81a0946b7be7f9aa6b8aa5ccd7f7d52b017530949c7d3",
+      "to_sha256": "99bffc19f367d6f2c0466b7a021802057c58f604a7a592a69ce47b9b912019ea",
+      "from_pixels": [
+        2303,
+        1536
+      ],
+      "to_pixels": [
+        2699,
+        1800
+      ],
+      "comparison_mean_error": 0.258
+    },
+    {
+      "number": 4,
+      "source_number": 4,
+      "from_sha256": "e940e421e65e84a04cbb1f57b18f02033aa456a8b316a6292cc816add647bb19",
+      "to_sha256": "c8b972c55a7abfa5bf7e8fda736d217136dc99c480cf9a84385eea9da5a71db0",
+      "from_pixels": [
+        2303,
+        1536
+      ],
+      "to_pixels": [
+        2699,
+        1800
+      ],
+      "comparison_mean_error": 0.263
+    },
+    {
+      "number": 5,
+      "source_number": 5,
+      "from_sha256": "989b04529e1f394472f7ca358e33596c46d7d75308761ee95fddd5779502e013",
+      "to_sha256": "2d850a98432fb8b61883b0c81b4e6c36aa417198d725ec4c7b19e2fa391ce930",
+      "from_pixels": [
+        2303,
+        1536
+      ],
+      "to_pixels": [
+        2699,
+        1800
+      ],
+      "comparison_mean_error": 0.219
+    },
+    {
+      "number": 6,
+      "source_number": 6,
+      "from_sha256": "cb96a1413a2bc8f7d017bf33c213e0f252d2d11d3ae25010a1546f06b0ae711b",
+      "to_sha256": "f136f40d090c8854fccb727ca20f460153ab7932553b11722c0421c162c00d84",
+      "from_pixels": [
+        2303,
+        1536
+      ],
+      "to_pixels": [
+        2699,
+        1800
+      ],
+      "comparison_mean_error": 0.283
+    },
+    {
+      "number": 7,
+      "source_number": 7,
+      "from_sha256": "f4905f34588101dcfe4f969a13afec006a4f1727061cb2f05bc057438aa42a22",
+      "to_sha256": "0cfbec537fec314f335b37434d22315680b67e5357f16bd1ea1c63fae4c829be",
+      "from_pixels": [
+        1024,
+        1535
+      ],
+      "to_pixels": [
+        1800,
+        2699
+      ],
+      "comparison_mean_error": 0.254
+    },
+    {
+      "number": 8,
+      "source_number": 8,
+      "from_sha256": "d30bda47db7a42062eb48be496239afaef613cee226f1375e09f308f58d3b672",
+      "to_sha256": "60cfe6643a16de5c4f7f2826c1f714392fe141a3be32e15c645beb5d34c5edab",
+      "from_pixels": [
+        1024,
+        1535
+      ],
+      "to_pixels": [
+        1800,
+        2699
+      ],
+      "comparison_mean_error": 0.34
+    },
+    {
+      "number": 9,
+      "source_number": 9,
+      "from_sha256": "80a52ec716cf7d183063aee9c78b010784d58a8c16f140c8dfc782e00b7897d1",
+      "to_sha256": "290e1966f76ab6c97105ac2ef104b3be7bdb2244c8b70444a70779e973899dda",
+      "from_pixels": [
+        1024,
+        1535
+      ],
+      "to_pixels": [
+        1800,
+        2699
+      ],
+      "comparison_mean_error": 0.343
+    },
+    {
+      "number": 10,
+      "source_number": 10,
+      "from_sha256": "fd47b67119320cde0e30f4cc5992e152d761f5d3961b70a5f6e6f3ac1a80edf4",
+      "to_sha256": "57298c4fcbcd7239a7934e8c921f4ab62d6fe128d9e559c98916a4ab7699db36",
+      "from_pixels": [
+        1024,
+        1535
+      ],
+      "to_pixels": [
+        1800,
+        2699
+      ],
+      "comparison_mean_error": 0.347
+    }
+  ]
+}
