@@ -1,0 +1,93 @@
+{
+  "higher_resolution_teddy_replacements": 10,
+  "v2ph_alternatives": [
+    {
+      "id": "wet-yui80",
+      "url": "https://www.v2ph.com/album/ae47553z.html?hl=ko",
+      "public_files": 0,
+      "status": "login_restricted",
+      "restricted_pages": [
+        "https://www.v2ph.com/album/ae47553z.html?page=2&hl=ko"
+      ]
+    },
+    {
+      "id": "thru-thru117",
+      "url": "https://www.v2ph.com/album/a84nmo7a.html?hl=ko",
+      "public_files": 0,
+      "status": "login_restricted",
+      "restricted_pages": [
+        "https://www.v2ph.com/album/a84nmo7a.html?page=2&hl=ko"
+      ]
+    },
+    {
+      "id": "ramen125",
+      "url": "https://www.v2ph.com/album/z48oe7ez.html?hl=ko",
+      "public_files": 0,
+      "status": "login_restricted",
+      "restricted_pages": [
+        "https://www.v2ph.com/album/z48oe7ez.html?page=2&hl=ko"
+      ]
+    },
+    {
+      "id": "heart-steal78",
+      "url": "https://www.v2ph.com/album/ax7m5n4z.html?hl=ko",
+      "public_files": 0,
+      "status": "login_restricted",
+      "restricted_pages": [
+        "https://www.v2ph.com/album/ax7m5n4z.html?page=2&hl=ko"
+      ]
+    },
+    {
+      "id": "maid291",
+      "url": "https://www.v2ph.com/album/z3mone3z.html?hl=ko",
+      "public_files": 0,
+      "status": "login_restricted",
+      "restricted_pages": [
+        "https://www.v2ph.com/album/z3mone3z.html?page=2&hl=ko"
+      ]
+    },
+    {
+      "id": "seethrough80",
+      "url": "https://www.v2ph.com/album/z4x9x5nz.html?hl=ko",
+      "public_files": 0,
+      "status": "login_restricted",
+      "restricted_pages": [
+        "https://www.v2ph.com/album/z4x9x5nz.html?page=2&hl=ko"
+      ]
+    },
+    {
+      "id": "tracksuit201",
+      "url": "https://www.v2ph.com/album/ae76mn3a.html?hl=ko",
+      "public_files": 0,
+      "status": "login_restricted",
+      "restricted_pages": [
+        "https://www.v2ph.com/album/ae76mn3a.html?page=2&hl=ko"
+      ]
+    },
+    {
+      "id": "last-summer192",
+      "url": "https://www.v2ph.com/album/a88oo5oa.html?hl=ko",
+      "public_files": 0,
+      "status": "login_restricted",
+      "restricted_pages": [
+        "https://www.v2ph.com/album/a88oo5oa.html?page=2&hl=ko"
+      ]
+    },
+    {
+      "id": "cream228",
+      "url": "https://www.v2ph.com/album/amnoe74z.html?hl=ko",
+      "public_files": 0,
+      "status": "login_restricted",
+      "restricted_pages": [
+        "https://www.v2ph.com/album/amnoe74z.html?page=2&hl=ko"
+      ]
+    }
+  ],
+  "fourkup_thru": {
+    "url": "https://4kup.net/sweetbox-yui-swtb-vol-49-thru-thru/",
+    "observed_full_links": 31,
+    "downloaded": 0,
+    "status": "all_31_http_404"
+  },
+  "new_file_count_in_this_research": 0
+}
