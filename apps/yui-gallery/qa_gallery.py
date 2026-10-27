@@ -11,7 +11,7 @@ from playwright.async_api import async_playwright
 import requests
 
 async def run(args):
- results=[];errors=[];semaphore=asyncio.Semaphore(args.workers)
+ results=[];errors=[];local_verified=set();semaphore=asyncio.Semaphore(args.workers)
  async with async_playwright() as pw:
   browser=await getattr(pw,args.engine).launch()
   context=await browser.new_context(viewport={'width':390,'height':844},is_mobile=True,has_touch=True)
@@ -48,7 +48,7 @@ async def run(args):
       if passed%25==0:print('DECODE_PROGRESS',album['id'],passed,flush=True)
       if image['url'].startswith('stored-albums/'):
        digest=await page.locator('#original').evaluate("async a=>{const r=await fetch(a.href);if(!r.ok)throw Error(r.status);const b=await r.arrayBuffer();return [...new Uint8Array(await crypto.subtle.digest('SHA-256',b))].map(x=>x.toString(16).padStart(2,'0')).join('')}")
-       assert digest==image['sha256'];hashes+=1
+       assert digest==image['sha256'];hashes+=1;local_verified.add(digest)
      await page.locator('#close').click();await page.locator('#lightbox').wait_for(state='hidden')
      await page.locator('#back').click();await page.locator('#browse').wait_for(state='visible')
      assert not js_errors,js_errors
@@ -58,7 +58,7 @@ async def run(args):
      result={'id':album['id'],'decoded_lightbox':passed,'original_link_sha256_checks':hashes}
      results.append(result);print('GALLERY_REAL_DECODE',args.engine,result,flush=True);await page.close()
   await asyncio.gather(*(check(a) for a in albums));await browser.close()
- report={'checked_at':datetime.now(timezone.utc).isoformat(),'base':args.base,'engine':args.engine,'version':version,'viewport':[390,844],'iphone_real_device':False,'network':'TLS-verified requests bridge' if args.http_bridge else 'direct browser TLS','private_cloud_verified':0,'albums':results,'decoded_image_entries':sum(r['decoded_lightbox'] for r in results),'browser_download_sha256_verified':0,'original_link_sha256_verified':sum(r['original_link_sha256_checks'] for r in results),'errors':errors}
+ report={'checked_at':datetime.now(timezone.utc).isoformat(),'base':args.base,'engine':args.engine,'version':version,'viewport':[390,844],'iphone_real_device':False,'network':'TLS-verified requests bridge' if args.http_bridge else 'direct browser TLS','private_cloud_verified':0,'albums':results,'decoded_image_entries':sum(r['decoded_lightbox'] for r in results),'browser_download_sha256_verified':0,'original_link_sha256_verified':sum(r['original_link_sha256_checks'] for r in results),'unique_original_link_sha256_verified':len(local_verified),'errors':errors}
  args.out.write_text(json.dumps(report,indent=2)+'\n')
  assert not errors,errors
  assert report['decoded_image_entries']==sum(len(a['images']) for a in albums)
