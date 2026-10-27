@@ -7,6 +7,77 @@
       "alternate_of": "seethrough80",
       "adapter": "kaizty",
       "url": "https://www.kaizty.com/photos/TjFwNWxuRURQZE1BbzBQbmVCUnpZdz09.html?page=13&m=1",
+      "image_route": "published_direct_fallback",
+      "requires_canonical_match": true
+    },
+    {
+      "id": "teddy-kaizty97",
+      "title": "SWEETBOX — Yui Teddy Bear",
+      "expected": 97,
+      "alternate_of": "teddy-bear97",
+      "adapter": "kaizty",
+      "url": "https://www.kaizty.com/photos/bEdQM3gzOVFwYjlTbDJkWjhSMm0ydz09.html",
+      "identity_terms": [
+        "Yui",
+        "Teddy Bear"
+      ],
+      "image_route": "published_direct_fallback",
+      "requires_canonical_match": true
+    },
+    {
+      "id": "dec2023-199-kaizty",
+      "title": "Yo-U Yui Vol.2 Dec 2023",
+      "expected": 199,
+      "alternate_of": "dec2023-199",
+      "requires_canonical_match": true,
+      "adapter": "kaizty",
+      "url": "https://www.kaizty.com/photos/bVd1VVpkZjFMeExVRUpsK1BaSE50UT09.html",
+      "identity_terms": [
+        "YUI",
+        "2023"
+      ],
+      "image_route": "published_direct_fallback"
+    },
+    {
+      "id": "blackroom145-kaizty",
+      "title": "Yo-U Yui Blackroom",
+      "expected": 145,
+      "alternate_of": "blackroom145",
+      "requires_canonical_match": true,
+      "adapter": "kaizty",
+      "url": "https://www.kaizty.com/photos/WUkxbVlRRmwzaGlONkJ3Tm1pQUtyZz09.html",
+      "identity_terms": [
+        "Yui",
+        "blackroom"
+      ],
+      "image_route": "published_direct_fallback"
+    },
+    {
+      "id": "tracksuit201-kaizty",
+      "title": "Yui Vol.2 Tracksuit",
+      "expected": 201,
+      "alternate_of": "tracksuit201",
+      "requires_canonical_match": true,
+      "adapter": "kaizty",
+      "url": "https://www.kaizty.com/photos/Y2xSVzlZd1RCQzdSdW4xbXJXa3ZvZz09.html",
+      "identity_terms": [
+        "Yui",
+        "Tracksuit"
+      ],
+      "image_route": "published_direct_fallback"
+    },
+    {
+      "id": "kuro-yui58-kaizty",
+      "title": "Yui Vol.01",
+      "expected": 58,
+      "alternate_of": "kuro-yui58",
+      "requires_canonical_match": true,
+      "adapter": "kaizty",
+      "url": "https://www.kaizty.com/photos/bGtpaWRMdFhqWkhJd1hiY3pFRnZxZz09.html",
+      "identity_terms": [
+        "Yui",
+        "Vol.01"
+      ],
       "image_route": "published_direct_fallback"
     }
   ]

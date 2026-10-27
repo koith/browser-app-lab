@@ -26,6 +26,9 @@ async def run(args):
   version=await page.locator('#app-version').inner_text();box=await page.locator('#app-version').bounding_box()
   assert box['x']>190 and box['y']<25 and box['height']<18,box
   albums=await page.evaluate('available().map(a=>({id:a.id,images:validImages(a)}))')
+  if args.album:
+   requested=set(args.album);albums=[a for a in albums if a['id'] in requested]
+   assert {a['id'] for a in albums}==requested,'Requested album missing from actual gallery'
   await page.screenshot(path=str(args.out.with_suffix('.png')));await page.close()
   async def check(album):
    async with semaphore:
@@ -58,11 +61,11 @@ async def run(args):
      result={'id':album['id'],'decoded_lightbox':passed,'original_link_sha256_checks':hashes}
      results.append(result);print('GALLERY_REAL_DECODE',args.engine,result,flush=True);await page.close()
   await asyncio.gather(*(check(a) for a in albums));await browser.close()
- report={'checked_at':datetime.now(timezone.utc).isoformat(),'base':args.base,'engine':args.engine,'version':version,'viewport':[390,844],'iphone_real_device':False,'network':'TLS-verified requests bridge' if args.http_bridge else 'direct browser TLS','private_cloud_verified':0,'albums':results,'decoded_image_entries':sum(r['decoded_lightbox'] for r in results),'browser_download_sha256_verified':0,'original_link_sha256_verified':sum(r['original_link_sha256_checks'] for r in results),'unique_original_link_sha256_verified':len(local_verified),'errors':errors}
+ report={'checked_at':datetime.now(timezone.utc).isoformat(),'base':args.base,'scope':'selected_albums' if args.album else 'full_gallery','requested_album_ids':args.album,'engine':args.engine,'version':version,'viewport':[390,844],'iphone_real_device':False,'network':'TLS-verified requests bridge' if args.http_bridge else 'direct browser TLS','private_cloud_verified':0,'albums':results,'decoded_image_entries':sum(r['decoded_lightbox'] for r in results),'browser_download_sha256_verified':0,'original_link_sha256_verified':sum(r['original_link_sha256_checks'] for r in results),'unique_original_link_sha256_verified':len(local_verified),'errors':errors}
  args.out.write_text(json.dumps(report,indent=2)+'\n')
  assert not errors,errors
  assert report['decoded_image_entries']==sum(len(a['images']) for a in albums)
- print('ALL_GALLERY_MEDIA_QA_PASS',report['decoded_image_entries'],report['original_link_sha256_verified'],flush=True)
+ print('SELECTED_GALLERY_MEDIA_QA_PASS' if args.album else 'ALL_GALLERY_MEDIA_QA_PASS',report['decoded_image_entries'],report['original_link_sha256_verified'],flush=True)
 
 if __name__=='__main__':
- p=argparse.ArgumentParser(description=__doc__);p.add_argument('--base',default='http://localhost:8765/');p.add_argument('--engine',choices=['chromium','webkit'],default='chromium');p.add_argument('--out',type=Path,default=Path('yui-gallery-qa.json'));p.add_argument('--http-bridge',action='store_true');p.add_argument('--workers',type=int,choices=range(1,4),default=3);asyncio.run(run(p.parse_args()))
+ p=argparse.ArgumentParser(description=__doc__);p.add_argument('--base',default='http://localhost:8765/');p.add_argument('--engine',choices=['chromium','webkit'],default='chromium');p.add_argument('--out',type=Path,default=Path('yui-gallery-qa.json'));p.add_argument('--http-bridge',action='store_true');p.add_argument('--album',action='append',help='Verify selected acquired work IDs; omit for full gallery');p.add_argument('--workers',type=int,choices=range(1,4),default=3);asyncio.run(run(p.parse_args()))
