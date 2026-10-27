@@ -1,5 +1,5 @@
 {
-  "version": "v0.1.0-beta.10",
+  "version": "v0.1.0-beta.11",
   "date": "2026-10-27",
   "policy": {
     "monthly_charge_krw": 0,
@@ -57,7 +57,7 @@
     "beta7_new_higher_resolution_files": 160,
     "beta7_full_album_higher_resolution_replacements": 80,
     "beta7_verified_direct_source_files": 80,
-    "new_files_this_session": 317,
+    "new_files_this_session": 0,
     "excluded_wrong_model_images": 21,
     "beta9_new_work_files": 650,
     "beta9_larger_photo_selections": 323,
@@ -68,8 +68,8 @@
     "beta10_existing_work_larger_replacements": 253,
     "beta9_retained_new_work_files": 632,
     "beta10_wrong_model_images_removed": 18,
-    "pre_final_beta10_gallery_decode_verified_image_entries": 2522,
-    "gallery_decode_verification": "pending_final_beta10_CI"
+    "pre_final_beta10_gallery_decode_verified_image_entries": 2504,
+    "gallery_decode_verification": "beta10 production 2504 PASS; beta11 final verification pending"
   },
   "notes": [
     "A private Google Drive ZIP is only a temporary safety copy, not the user-approved primary archive.",
@@ -89,7 +89,8 @@
     "beta.9 connects seven newly collected complete public web editions (650 photos), selects 323 larger unchanged files across four works, resolves duplicate catalogue IDs to acquired works, and directs Teddy Bear v04 to all 97 photos. Highest resolution remains unverified regardless of pixel dimensions.",
     "beta.10 ranks verified actual resolution first and verified absence of a gallery-site watermark at equal dimensions second. Unknown is never claimed clean. Preserve source bytes and reject smaller clean replacements and AI replacements of non-AI editions. New ArtGravia 663 public AI-enhanced web edition has all 32 photos (64 distinct files in two editions); 32 larger 1368px files selected. No publisher-original claim. Open-photo overlay is more transparent.",
     "beta.10 further selects 253 larger unchanged web files: Heart Steal 78/78 at 1920px, CREAM 100/228 at 2048px and RAMEN 75/125 at 1920px. Album cards are half their previous height at equal width, with top-left publisher and dim photo count, top-right AI/web/original verification badge. Detail photo grid dimensions are unchanged.",
-    "beta.10 also removes the user-confirmed wrong-model sexiest18 (18 images) from the public gallery and collection targets, blocks its source and hashes from reimport, and puts search behind a small translucent corner button with history-aware popup."
+    "beta.10 also removes the user-confirmed wrong-model sexiest18 (18 images) from the public gallery and collection targets, blocks its source and hashes from reimport, and puts search behind a small translucent corner button with history-aware popup.",
+    "beta.11 uses hash-bound local facial region metadata to select and frame album covers without changing any photo pixels or in-album image order. Cover titles omit publisher branding, use translucent small text, and preserve full original titles for search/accessibility. New acquisitions for beta.11 are not claimed until actual files are verified."
   ],
   "archiving_engine": {
     "mode": "individual_files",

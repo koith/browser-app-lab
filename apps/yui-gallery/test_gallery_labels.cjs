@@ -1,5 +1,5 @@
 'use strict';
-const assert=require('node:assert/strict'),{describe}=require('./gallery-labels.js');
+const assert=require('node:assert/strict'),{describe,coverTitle}=require('./gallery-labels.js');
 assert.equal(describe({title:'[SWEETBOX] Yui — CREAM'}).publisher,'SWEETBOX');
 assert.equal(describe({title:'[MilkyBomb] Yui Maid'}).publisher,'MilkyBomb');
 assert.equal(describe({title:'[Yo-U] Yui Dec 2023'}).publisher,'Yo-U');
@@ -11,4 +11,14 @@ assert.equal(describe({title:'[AI Enhanced] ArtGravia 663 — Yui'}).publisher,'
 assert.equal(describe({title:'[AI Enhanced] ArtGravia 663 — Yui',publisher_original_verified:true}).edition,'AI 보정판');
 assert.equal(describe({title:'Yui',publisher_original_verified:false}).edition,'웹판');
 assert.equal(describe({title:'Yui',publisher_original_verified:true}).edition,'원본');
+assert.equal(coverTitle({title:'SWEETBOX — Teddy Bear'}),'Teddy Bear');
+assert.equal(coverTitle({title:'[SWEETBOX] Yui SWTB Vol.49 Thru Thru'}),'Yui Vol.49 Thru Thru');
+assert.equal(coverTitle({title:'[MilkyBomb] Yui — Maid'}),'Yui — Maid');
+assert.equal(coverTitle({title:'[Yo-U] Yui Dec 2023'}),'Yui Dec 2023');
+assert.equal(coverTitle({title:'[AI Enhanced] ArtGravia Vol.663 — Yui'}),'Vol.663 — Yui');
+assert.equal(coverTitle({title:'[MilkyBomb] Yui: Vol.3 Maid (291 photos + 2 videos) Sexy Girl'}),'Yui: Vol.3 Maid');
+assert.equal(coverTitle({title:'[H.F] Yui Sim Vol.2 Close to You'}),'Yui Sim Vol.2 Close to You');
+assert.equal(coverTitle({title:'Summer day with Yui'}),'Summer day with Yui');
+assert.equal(coverTitle({title:'YuiSWEETBOX Memories'}),'YuiSWEETBOX Memories');
+assert.equal(coverTitle({title:'Studio.+ — Yui',publisher:'Studio.+'}),'Yui');
 console.log('PUBLISHER_AND_EDITION_LABELS_NO_MIRROR_OR_MASTER_MISREPRESENTATION_PASS');
