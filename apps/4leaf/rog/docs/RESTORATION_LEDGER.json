@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "project": "4LEAF 원작 복원 웹앱",
   "canonicalFile": "apps/4leaf/rog/docs/RESTORATION_LEDGER.json",
-  "updatedAt": "2026-10-26",
+  "updatedAt": "2026-10-27",
   "sourceOfTruth": "Git 저장소의 이 JSON과 커밋 이력. 과거 챗 대화는 기록 근거이지 진행 상태의 원본 데이터가 아님.",
   "operatingRule": "새 요청 즉시 작업 등록 → open 목록 조회 → 실제 수정 → 원본 근거/코드/브라우저/배포 검증 → 검증 증거와 함께 상태 전이. 부분 구현을 원작 완성으로 표시 금지.",
   "statusDefinitions": {
@@ -1191,6 +1191,21 @@
         "P0-BOARD",
         "P0-DICE",
         "DIE-01",
+        "P0-RELEASE",
+        "P0-CHAT"
+      ]
+    },
+    {
+      "id": "REQ-20261027-001",
+      "date": "2026-10-27",
+      "origin": "user",
+      "text": "Continue and complete the original 4LEAF source restoration, not merely write a report. Preserve prior merged PRs and outstanding developer ledger; implement actual source OBS action/front improvements, genuine native UI and gameplay; verify and deploy, do not claim unavailable original dice 3D source as finished.",
+      "taskIds": [
+        "P0-ACTOR",
+        "ACT-03",
+        "ACT-04",
+        "P0-DICE",
+        "P0-PODIUM",
         "P0-RELEASE",
         "P0-CHAT"
       ]
@@ -6308,8 +6323,81 @@
     },
     {
       "seq": 262,
+      "date": "2026-10-27",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261027-001",
+      "taskIds": [
+        "P0-ACTOR",
+        "ACT-03",
+        "ACT-04",
+        "P0-DICE",
+        "P0-PODIUM",
+        "P0-RELEASE",
+        "P0-CHAT"
+      ],
+      "details": "User requests all outstanding original 4LEAF restoration work to continue, prioritizing actual code/release over reports. Existing 58 tracked tasks must retain verified statuses. Newly audited source front 25/30 pair for 0044/46/48 and native Dice/IMG.pak stats art selected as independently verifiable next source restorations; source FPS/die 3D remain unknown."
+    },
+    {
+      "seq": 263,
+      "date": "2026-10-27",
+      "type": "SOURCE_OBS_FRONT_WALK_THREE_ADDITIONAL_ACTORS_AND_NATIVE_164x125_STATS_REAL_GAME_PENDING_CI",
+      "requestId": "REQ-20261027-001",
+      "taskIds": [
+        "P0-ACTOR",
+        "ACT-03",
+        "ACT-04",
+        "P0-RELEASE"
+      ],
+      "details": "Genuine 2002 OBS.pak bulk extracted original upside-down frame images 1044-25/30,1046-25/30,1048-25/30 individually visually inspected: matching camera-facing full-body silhouettes between 25 and 30 for three previously front-static actors. In actual game.js Genesis actor controller add original 25->30->25->30 front-preserving WEB walk for these 3 real chessmen (existing approved 0040/42/43 retained); actual native frame index/data provenance exposed, native 2002 action table/FPS unknown. Replace WEB synthetic selected chessman detail portrait/paragraph with actual source IMG.pak stats.png 164x125 bitmap alongside genuine selected CardData portrait and live role/move/attack/defense/intelligence/ability/point DOM fields. Source sprite unmodified and source pixels displayed at exact 164x125, layout NOT claimed native. Existing real right four-up OBS bodies, game stats, 104-cell DMP, 355x113 native podium, chat preserved. New Chromium+WebKit playable browser QA checks 6-source forward animation coverage, live source stats image and actual 800x600 BATTLE vs archived 2004 BATTLE screenshot. beta27 cache v114; this is feature branch work awaiting CI/Pages confirmation; original D4/D6 meshes/UV/physics still missing. Do not mark any prior original-restoration task wholly complete until full evidence.",
+      "evidence": [
+        "https://github.com/koith/browser-app-lab/blob/feat/4leaf-original-obs-front-steps-native-stats-20261027/apps/4leaf/rog/genesis-chessman-actors.js",
+        "https://github.com/koith/browser-app-lab/blob/feat/4leaf-original-obs-front-steps-native-stats-20261027/apps/4leaf/rog/game.js",
+        "https://github.com/koith/browser-app-lab/blob/feat/4leaf-original-obs-front-steps-native-stats-20261027/apps/4leaf/rog/tests/obs-reviewed-front-walk-native-stats.cjs"
+      ]
+    },
+    {
+      "seq": 264,
+      "date": "2026-10-27",
+      "type": "VISUALLY_REVIEWED_19_SOURCE_FRONT_WALK_PAIRS_REAL_GAME_EXTENSION",
+      "requestId": "REQ-20261027-001",
+      "taskIds": [
+        "P0-ACTOR",
+        "ACT-03",
+        "ACT-04",
+        "P0-RELEASE"
+      ],
+      "details": "Append-only expansion of provisional event263: rather than stop after 3 new full-body front walk pairs, individually visually inspected both genuine original OBS.pak indexed palette sprites -25/-30 for 13 more actor IDs (0049, 0051,0052,0053,0054,0055,0056,0058,0059,0060,0061,0062,0064). Thus real 2002 source packets support visually-reviewed front-preserving pair for 19 actors: 0040,0042,0043,0044,0046,0048,0049,0051,0052,0053,0054,0055,0056,0058,0059,0060,0061,0062,0064. The previously reviewed 0045 has verified front packet 18 ONLY and was not misclassified as 25/30 pair. Original 25/30 source PNGs retained byte-exact, no nonactor FX as chessmen; actual game maps 25/30 to WEB animation loop with inferred FPS, NOT original code or action table. QA now tests real DOM gameplay pawn source front facing and 25,30,25,30 sequence for ALL 19 IDs, plus live CardData info and native 164x125 stats GUI on 3 sample actors, and source-versus-live BATTLE state 800x600 with native podium/dice. PR CI and Pages validation pending; no completed task status inflation.",
+      "evidence": [
+        "https://github.com/koith/browser-app-lab/blob/feat/4leaf-original-obs-front-steps-native-stats-20261027/apps/4leaf/rog/genesis-chessman-actors.js",
+        "https://github.com/koith/browser-app-lab/blob/feat/4leaf-original-obs-front-steps-native-stats-20261027/apps/4leaf/rog/tests/obs-reviewed-front-walk-native-stats.cjs"
+      ]
+    },
+    {
+      "seq": 265,
+      "date": "2026-10-27",
+      "type": "PR217_ORIGINAL_19_OBS_FRONT_STEPS_AND_NATIVE_STATS_MERGED_PUBLIC_PAGES_DEPLOYED",
+      "requestId": "REQ-20261027-001",
+      "taskIds": [
+        "P0-ACTOR",
+        "ACT-03",
+        "ACT-04",
+        "P0-PODIUM",
+        "P0-RELEASE"
+      ],
+      "details": "VERIFIED merge of functional 4LEAF source reconstruction PR #217 on GitHub main merge SHA 22c47df17de56f98022f9869d3971bb27dd5ad03, app beta27 PWA cache v114. Genuine recovered 2002 OBS.pak full-body source 25/30 pixels visually independently audited for 19 previously known source-facing members (0040,0042,0043,0044,0046,0048,0049,0051,0052,0053,0054,0055,0056,0058,0059,0060,0061,0062,0064), actual playable game front-pair 25,30,25,30 WEB-inferred movement; source 0045 front18 remains intentionally static. Genuine original 2002 Dice/IMG.pak stats.png 164x125 art replaces plain temporary CardData text-only modal in REAL functional right-chessman click; actual CardData attributes independently rendered, not a pasted screenshot, layout inferred. Original 800x600 historic BATTLE vs newly triggered real BATTLE screenshots and WebKit mobile original stats screenshot emitted as QA artifact. PR head QA run 40355313863 Chromium SUCCESS, earlier source core WebKit run 40353340213 SUCCESS; existing original Region/OBS PR head 40355314112 Chromium/WebKit SUCCESS. Corrected old regression that assumed 0046 still front-static; 0045 static front18 still correctly asserted. Same-merge-SHA GitHub Pages static deploy workflow 40356314070 SUCCESS (separate Jekyll build 40356311602 was canceled by unrelated concurrent Pages build, not a static deploy failure). Public exact-deploy Regions/OBS source QA workflow 40356522364 Chromium and WebKit SUCCESS. Public NEW source-front/stats QA workflow 40356522618 was queued/in_progress at recording; do NOT claim PASS until separately confirmed. Verified original D4/D6 source native 3D geometry/UV/impact keyframes NOT recovered. Native 2002 OBS action-frame timing/direction labels remain UNVERIFIED, other 92-19 source actors remain unverified for true front WALK. Ledger 58 task statuses deliberately unchanged.",
+      "evidence": [
+        "https://github.com/koith/browser-app-lab/pull/217",
+        "https://github.com/koith/browser-app-lab/actions/runs/40355313863",
+        "https://github.com/koith/browser-app-lab/actions/runs/40353340213",
+        "https://github.com/koith/browser-app-lab/actions/runs/40356314070",
+        "https://github.com/koith/browser-app-lab/actions/runs/40356522364",
+        "https://github.com/koith/browser-app-lab/actions/runs/40356522618"
+      ]
+    },
+    {
+      "seq": 266,
       "date": "2026-10-26",
-      "type": "ACTUAL_2004_BATTLE_OBS_RIGHT_PANEL_PR203_PR204_MERGED_AND_CHAT_SCROLL_QA_FIX_PROPOSED",
+      "type": "PR212_AUTHENTIC_2002_CHAT_WHEEL_HISTORY_QA_REBASED_PENDING_MERGE",
       "requestId": "REQ-20261026-003",
       "taskIds": [
         "P0-BOARD",
@@ -6317,7 +6405,7 @@
         "P0-RELEASE",
         "P0-CHAT"
       ],
-      "details": "PR #203 original source IMG/selector.png complete 222x152 playable right-side chessman panel and LIVE same BATTLE-state 800x600 screenshot comparison MERGED at f58d0b6b485065751b464e3a819080af9523ece8. PR #204 original true audited OBS front full-body party chessman sources replacing incomplete head-only preview in right party HUD MERGED at ca26640d4d2726d3d03916b8cb13323a780ef56c; actual same-merge Pages deploy workflow 40342698071 SUCCESS and source BATTLE Chromium/WebKit QA workflow 40342889357 SUCCESS. PUBLIC ChatRoom full workflow 40341201923 FAILED at scroll history line126 after giant Chromium wheel, NOT a reason to claim chat fully passed. Followup test PR #212 replaces unstable transient two-rAF assertion with stable real wheel scrolling/real retry gestures, no programmatic scrollTop or fake chat, and original source interactive scroll buttons still exercised; exact PR targeted Chromium workflow 40343207600 SUCCESS. Main beta26 PWA v113; native D4/D6 source 3D remains missing. PR #212 and post-merge Pages/public 4LEAF ChatRoom acceptance remain pending at event creation; task statuses unchanged.",
+      "details": "PR #203 original source IMG/selector.png complete 222x152 playable right-side chessman panel and LIVE same BATTLE-state 800x600 screenshot comparison MERGED at f58d0b6b485065751b464e3a819080af9523ece8. PR #204 original true audited OBS front full-body party chessman sources replacing incomplete head-only preview in right party HUD MERGED at ca26640d4d2726d3d03916b8cb13323a780ef56c; actual same-merge Pages deploy workflow 40342698071 SUCCESS and source BATTLE Chromium/WebKit QA workflow 40342889357 SUCCESS. PUBLIC ChatRoom full workflow 40341201923 FAILED at scroll history line126 after giant Chromium wheel, NOT a reason to claim chat fully passed. Followup test PR #212 replaces unstable transient two-rAF assertion with stable real wheel scrolling/real retry gestures, no programmatic scrollTop or fake chat, and original source interactive scroll buttons still exercised; exact PR targeted Chromium workflow 40343207600 SUCCESS. Main beta26 PWA v113; native D4/D6 source 3D remains missing. PR #212 and post-merge Pages/public 4LEAF ChatRoom acceptance remain pending at event creation; task statuses unchanged. IMPORTANT correction: preceding event 262 from old branch conflicts with already-preserved main source event #262; rebase records follow-up as append-only event 266 without replacing genuine original OBS/stats history. Other original source app status stays beta27/v114. PR #212 known GitHub tests pass and Vercel unrelated external rate-limit status failure; Pages not Vercel is source hosting.",
       "evidence": [
         "https://github.com/koith/browser-app-lab/pull/203",
         "https://github.com/koith/browser-app-lab/pull/204",
