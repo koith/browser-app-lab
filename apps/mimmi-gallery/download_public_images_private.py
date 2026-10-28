@@ -34,13 +34,20 @@ SESSION.headers.update({
 def permitted(url):
     try:
         p = urlsplit(url)
-        if not (p.scheme == "https" and p.hostname in HOSTS
+        h=p.hostname or ""
+        pixibb=bool(re.fullmatch(r"(?:imgx[0-9]{2,4}|images[0-9]{1,4}|img|cdn|files)[.]pixibb[.]com",h))
+        instagram=bool(re.fullmatch(r"scontent-[a-z0-9.-]+[.]cdninstagram[.]com|scontent-[a-z0-9.-]+[.]fbcdn[.]net",h))
+        if not (p.scheme=="https" and (h in HOSTS or pixibb or instagram)
                 and not p.username and not p.password
-                and not p.port and Path(p.path).suffix.lower() in EXT):
+                and not p.port and not p.fragment
+                and (Path(p.path).suffix.lower() in EXT or instagram)):
             return False
-        if p.hostname == "cdn.v2ph.com":
-            return p.path.startswith("/photos/")
-        return p.path.startswith("/wp-content/uploads/")
+        if h=="cdn.v2ph.com":return p.path.startswith("/photos/")
+        if h in ("djawaphoto.com","www.djawaphoto.com"):
+            return p.path.startswith("/wp-content/uploads/")
+        if pixibb:return p.path.startswith("/")
+        # Signed URLs are public, short-lived Instagram previews, never stable masters.
+        return p.path.startswith("/v/") or p.path.startswith("/o1/v/")
     except (ValueError, TypeError, AttributeError):
         return False
 
