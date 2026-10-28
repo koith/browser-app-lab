@@ -3,7 +3,7 @@
     "id": "mimmi",
     "name": "밈미"
   },
-  "version": "v0.1.0-mimmi.7",
+  "version": "v0.1.0-mimmi.8",
   "albums": [
     {
       "id": "v2ph-actor-a9nxx64z",
@@ -433,8 +433,8 @@
       "title": "Nikke : Alice",
       "publisher": "DJAWA",
       "source": "https://djawaphoto.com/portfolio/nikke-alice/",
-      "expected": null,
-      "photos": null,
+      "expected": 170,
+      "photos": 170,
       "ai_enhanced": false
     },
     {
@@ -505,8 +505,8 @@
       "title": "Rudy² – Codename : Wolfgirl",
       "publisher": "DJAWA",
       "source": "https://djawaphoto.com/portfolio/rudy%c2%b2-codename-wolfgirl/",
-      "expected": null,
-      "photos": null,
+      "expected": 201,
+      "photos": 201,
       "ai_enhanced": false
     },
     {
@@ -550,8 +550,8 @@
       "title": "Your Fishe (Gawr Gura)",
       "publisher": "DJAWA",
       "source": "https://djawaphoto.com/portfolio/your-fishe-gawr-gura/",
-      "expected": null,
-      "photos": null,
+      "expected": 123,
+      "photos": 123,
       "ai_enhanced": false
     },
     {
@@ -582,6 +582,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 52,
+      "previewAlbumId": "djawa-asuna-the-maid",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -595,6 +596,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 51,
+      "previewAlbumId": "djawa-rei-beyond-the-heart",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -608,6 +610,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 50,
+      "previewAlbumId": "djawa-nikke-elegg",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -621,6 +624,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 49,
+      "previewAlbumId": "djawa-my-summer-vacation-vol-5",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -634,6 +638,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 48,
+      "previewAlbumId": "djawa-in-the-summer-sunshine-part-1",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -647,6 +652,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 47,
+      "previewAlbumId": "djawa-rei-beyond-the-heart",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -660,6 +666,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 46,
+      "previewAlbumId": "djawa-christmas-special-2021-mimmi",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -673,6 +680,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 45,
+      "previewAlbumId": "djawa-my-summer-vacation-vol-5",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -686,6 +694,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 44,
+      "previewAlbumId": "djawa-nikke-elegg",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -699,6 +708,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 43,
+      "previewAlbumId": "v2ph-actor-z4ox65ea",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -712,6 +722,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 42,
+      "previewAlbumId": "v2ph-actor-am8o3e7z",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -725,6 +736,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 41,
+      "previewAlbumId": "v2ph-actor-a584e85z",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -738,6 +750,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 40,
+      "previewAlbumId": null,
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -751,6 +764,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 39,
+      "previewAlbumId": "v2ph-actor-z6exx6ma",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -764,6 +778,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 38,
+      "previewAlbumId": "v2ph-actor-amno754z",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -777,6 +792,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 37,
+      "previewAlbumId": "v2ph-actor-amn8o34z",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -790,6 +806,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 36,
+      "previewAlbumId": "v2ph-actor-z7exoo5z",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -803,6 +820,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 35,
+      "previewAlbumId": "v2ph-actor-a584e85z",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -816,6 +834,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 34,
+      "previewAlbumId": "v2ph-actor-a884435a",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -829,6 +848,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 33,
+      "previewAlbumId": "v2ph-actor-a8847m5a",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -842,6 +862,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 32,
+      "previewAlbumId": "v2ph-actor-a5e78m5a",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -855,6 +876,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 31,
+      "previewAlbumId": "v2ph-actor-a88763oa",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -868,6 +890,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 30,
+      "previewAlbumId": "v2ph-sukajan-gal",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -881,6 +904,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 29,
+      "previewAlbumId": "v2ph-azur-lane-tashkent",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -894,6 +918,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 28,
+      "previewAlbumId": "djawa-your-fishe-gawr-gura",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -907,6 +932,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 27,
+      "previewAlbumId": "djawa-your-panties",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -920,6 +946,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 26,
+      "previewAlbumId": "djawa-mademoiselle-mimmi",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -933,6 +960,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 25,
+      "previewAlbumId": "djawa-nikke-alice",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -946,6 +974,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 24,
+      "previewAlbumId": null,
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -959,6 +988,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 23,
+      "previewAlbumId": "v2ph-actor-a8856noa",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -972,6 +1002,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 22,
+      "previewAlbumId": "v2ph-actor-zo5n754z",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -985,6 +1016,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 21,
+      "previewAlbumId": "v2ph-cream-cow-milk",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -998,6 +1030,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 20,
+      "previewAlbumId": "djawa-rudy%c2%b2-codename-wolfgirl",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -1011,6 +1044,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 19,
+      "previewAlbumId": "v2ph-cream-cow-milk",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -1024,6 +1058,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 18,
+      "previewAlbumId": "v2ph-actor-a8n96x7a",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -1037,6 +1072,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 17,
+      "previewAlbumId": null,
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -1050,6 +1086,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 16,
+      "previewAlbumId": "djawa-christmas-special-2021-mimmi",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -1063,6 +1100,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 15,
+      "previewAlbumId": null,
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -1076,6 +1114,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 14,
+      "previewAlbumId": "v2ph-actor-an65656a",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -1089,6 +1128,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 13,
+      "previewAlbumId": null,
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -1102,6 +1142,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 12,
+      "previewAlbumId": "v2ph-actor-z63984ma",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -1115,6 +1156,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 11,
+      "previewAlbumId": "djawa-rudy-the-wolf-of-midnight",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -1128,6 +1170,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 10,
+      "previewAlbumId": "v2ph-actor-z76xe74a",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -1141,6 +1184,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 9,
+      "previewAlbumId": null,
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -1154,6 +1198,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 8,
+      "previewAlbumId": "v2ph-actor-a8n8n85a",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -1167,6 +1212,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 7,
+      "previewAlbumId": "v2ph-actor-a54e445z",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -1180,6 +1226,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 6,
+      "previewAlbumId": null,
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -1193,6 +1240,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 5,
+      "previewAlbumId": "v2ph-girls-frontline-hk416",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -1206,6 +1254,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 4,
+      "previewAlbumId": null,
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -1219,6 +1268,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 3,
+      "previewAlbumId": "v2ph-actor-a8n7me7a",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -1232,6 +1282,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 2,
+      "previewAlbumId": "v2ph-actor-ae57484a",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -1245,17 +1296,18 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 1,
+      "previewAlbumId": null,
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     }
   ],
   "summary": {
     "displayed_albums": 63,
-    "verified_unique_source_images": 740,
-    "input_source_image_occurrences": 770,
+    "verified_unique_source_images": 820,
+    "input_source_image_occurrences": 850,
     "duplicate_hashes_skipped": 30,
     "actual_full_publisher_photobooks": 0,
-    "incomplete_known_count_albums": 22,
+    "incomplete_known_count_albums": 25,
     "curated_research_works": 52
   },
   "notes": "Individual accessible public samples are NOT complete commercial editions."

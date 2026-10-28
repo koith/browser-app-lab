@@ -1,18 +1,18 @@
 {
   "schema_version": 1,
   "model": "mimmi",
-  "version": "v0.1.0-mimmi.7",
+  "version": "v0.1.0-mimmi.8",
   "source_link_only": true,
   "private_cloud_archived_image_files": 0,
   "fully_acquired_paid_photobooks": 0,
   "disclaimer": "Every image is verified public source evidence, not a purchased full photobook. Public sites may block remote image hotlinks.",
   "summary": {
     "displayed_albums": 63,
-    "verified_unique_source_images": 740,
-    "input_source_image_occurrences": 770,
+    "verified_unique_source_images": 820,
+    "input_source_image_occurrences": 850,
     "duplicate_hashes_skipped": 30,
     "actual_full_publisher_photobooks": 0,
-    "incomplete_known_count_albums": 22
+    "incomplete_known_count_albums": 25
   },
   "albums": [
     {
@@ -7677,7 +7677,8 @@
       "publisher": "DJAWA",
       "source": "https://djawaphoto.com/portfolio/nikke-alice/",
       "source_pages": [
-        "https://djawaphoto.com/portfolio/nikke-alice/"
+        "https://djawaphoto.com/portfolio/nikke-alice/",
+        "https://cosplay.pixibb.com/djawa-photo-mimmi-nikke-alice-s-ver-170-photos-cosplay/"
       ],
       "images": [
         {
@@ -7767,6 +7768,226 @@
           "bytes": 410365,
           "quality": "official_public_sample",
           "publisher_original_verified": false
+        },
+        {
+          "number": 9,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-170.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-170.jpg",
+          "sha256": "0af0fecd8654b01a867ab1dd94ff2296724aeefe2d836f4bf573edb60e055f15",
+          "width": 912,
+          "height": 1368,
+          "bytes": 249432,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 10,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-169.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-169.jpg",
+          "sha256": "34be75d2f86f5bbfa77dc0bae1fa68a73a29080cf5f73bb4dff6e47a742ffba8",
+          "width": 912,
+          "height": 1368,
+          "bytes": 204484,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 11,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-168.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-168.jpg",
+          "sha256": "3008248dd0ba8e5760dff49079d22fc48bb18f0fb66a9c8ee5440c733cd2c3cb",
+          "width": 912,
+          "height": 1368,
+          "bytes": 194123,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 12,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-167.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-167.jpg",
+          "sha256": "96dd27e20b14550a99114aefd755a6dca95fa86263db7d016b198ef714739083",
+          "width": 912,
+          "height": 1368,
+          "bytes": 195379,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 13,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-166.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-166.jpg",
+          "sha256": "e51becfa9fe5e43f8b6f3b67337f3813473c73b7b435c4213b1de93da7161ae8",
+          "width": 912,
+          "height": 1368,
+          "bytes": 193086,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 14,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-165.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-165.jpg",
+          "sha256": "813b4ced312d61f61f579514f3aeb45cb75d9443715b5c3b12109367780849ce",
+          "width": 912,
+          "height": 1368,
+          "bytes": 188766,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 15,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-164.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-164.jpg",
+          "sha256": "7aa6d032ee55712409440d0196779bf83191851ec0e64b1572f18af380136ec1",
+          "width": 912,
+          "height": 1368,
+          "bytes": 177973,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 16,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-161.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-161.jpg",
+          "sha256": "0f347635197cdbce63a687996fb22d4d8a0c06f9f9f3a70aaff09ca7543b7791",
+          "width": 1368,
+          "height": 912,
+          "bytes": 203811,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 17,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-163.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-163.jpg",
+          "sha256": "21b1687912c48f6100c804da1edc1226b6e994f359fab520ea1ea5e9e888384a",
+          "width": 912,
+          "height": 1368,
+          "bytes": 234722,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 18,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-162.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-162.jpg",
+          "sha256": "c2a3323334721215f5c81e481e54adf078bfb0b9977f35a2d00d3df2b5313fb9",
+          "width": 912,
+          "height": 1368,
+          "bytes": 242549,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 19,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-160.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-160.jpg",
+          "sha256": "b8f5500735145a1da2f6dbdce19dd771bbf7c31aff3c4c8536df007147214d6a",
+          "width": 912,
+          "height": 1368,
+          "bytes": 185600,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 20,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-159.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-159.jpg",
+          "sha256": "6947a0d50c8c516238a50ff5ea2e727c04b1f77b6513c181b06cbe72029cd831",
+          "width": 912,
+          "height": 1368,
+          "bytes": 190319,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 21,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-158.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-158.jpg",
+          "sha256": "b58bb82f7db6b7de15128a4f6cbae11efca0ef6a22a11af4ee0c0caa8023821a",
+          "width": 912,
+          "height": 1368,
+          "bytes": 224367,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 22,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-157.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-157.jpg",
+          "sha256": "90982388fcaab65dfebe44a7a6835c70615b015d31e013f9f6e7c4cf319813f2",
+          "width": 912,
+          "height": 1368,
+          "bytes": 202939,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 23,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-156.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-156.jpg",
+          "sha256": "0458951863661df37fa6e667d89ca24bea58ee2d227855b84a5add5cce96e78c",
+          "width": 912,
+          "height": 1368,
+          "bytes": 200961,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 24,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-154.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-154.jpg",
+          "sha256": "117262c1c6c7027c543eb7bfb02e190a0c1b18f53c14c36683483b86508469ae",
+          "width": 1368,
+          "height": 912,
+          "bytes": 203468,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 25,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-155.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-155.jpg",
+          "sha256": "b2aadb5a38410a032c83d64a749d86f7ef041af3ee644b4615927e0d91338998",
+          "width": 1368,
+          "height": 912,
+          "bytes": 182535,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 26,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-153.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-153.jpg",
+          "sha256": "390f8cc579e092ebddea5b2674657274074c6d952c501166ceff9b08bd3061a5",
+          "width": 912,
+          "height": 1368,
+          "bytes": 199909,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 27,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-152.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-152.jpg",
+          "sha256": "61b3b9e068fb634da6f012b703b55d456df12e339899e44c2d68f718613fa9ca",
+          "width": 912,
+          "height": 1368,
+          "bytes": 160821,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 28,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-151.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-151.jpg",
+          "sha256": "62709d7c6a68e32a5cafc020718bf07a0008bf99ee070e658cfacfa98728d099",
+          "width": 912,
+          "height": 1368,
+          "bytes": 150763,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
         }
       ],
       "sourceHosted": true,
@@ -7774,8 +7995,8 @@
       "quality": "public_web",
       "publisher_original_verified": false,
       "model": "mimmi",
-      "expected": null,
-      "photos": null,
+      "expected": 170,
+      "photos": 170,
       "ai_enhanced": false,
       "original_sources": [
         {
@@ -7784,6 +8005,13 @@
           "source": "https://djawaphoto.com/portfolio/nikke-alice/",
           "verified_image_count": 8,
           "claimed_image_count": null
+        },
+        {
+          "source_type": "pixibb_public",
+          "id": "pixibb-nikke-alice",
+          "source": "https://cosplay.pixibb.com/djawa-photo-mimmi-nikke-alice-s-ver-170-photos-cosplay/",
+          "verified_image_count": 20,
+          "claimed_image_count": 170
         }
       ],
       "completeness": "partial_public_previews"
@@ -8786,7 +9014,8 @@
       "source": "https://djawaphoto.com/portfolio/rudy-the-wolf-of-midnight/",
       "source_pages": [
         "https://djawaphoto.com/portfolio/rudy-the-wolf-of-midnight/",
-        "https://www.v2ph.com/album/z63e3ena.html"
+        "https://www.v2ph.com/album/z63e3ena.html",
+        "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-the-wolf-of-midnight-230-photos-cosplay/"
       ],
       "images": [
         {
@@ -8986,6 +9215,226 @@
           "bytes": 510524,
           "quality": "third_party_public_web",
           "publisher_original_verified": false
+        },
+        {
+          "number": 19,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-230.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-230.jpg",
+          "sha256": "183bd490ac354c51b9486551d0879207e0e1930c7ded09f4b8d83dbf8527f301",
+          "width": 912,
+          "height": 1368,
+          "bytes": 179033,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 20,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-229.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-229.jpg",
+          "sha256": "d62ac21ebc475c7b6645e267502f2e26b79cbac2980317c0a90efee5da0a288b",
+          "width": 912,
+          "height": 1368,
+          "bytes": 189189,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 21,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-226.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-226.jpg",
+          "sha256": "00db5707c0626e441763d184702af71d2a1731f5ee5599153380677befc2b2d7",
+          "width": 912,
+          "height": 1368,
+          "bytes": 172488,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 22,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-228.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-228.jpg",
+          "sha256": "4f29b410faa74703a6db2f81d8e4589648af0c19e2da82e2fad253c1639f29e5",
+          "width": 912,
+          "height": 1368,
+          "bytes": 162638,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 23,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-227.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-227.jpg",
+          "sha256": "55cc50d5aac7d8745e1671d7932e426c8f109ae2e5a145e076284369e39a43b8",
+          "width": 912,
+          "height": 1368,
+          "bytes": 161498,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 24,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-225.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-225.jpg",
+          "sha256": "d385a14fa485e4d68e5b25fb0c3f82fea5b8eb12efe44130814b77af1957d84b",
+          "width": 912,
+          "height": 1368,
+          "bytes": 178021,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 25,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-224.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-224.jpg",
+          "sha256": "be08021fbab2d7af9af7b39c73059942d16544cb48fc24cc2d38ee83aba38f34",
+          "width": 912,
+          "height": 1368,
+          "bytes": 192143,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 26,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-223.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-223.jpg",
+          "sha256": "584077aebf43cf9f6d84a6cafac433dc093330705757d2ceafa6749a52b9c0c2",
+          "width": 912,
+          "height": 1368,
+          "bytes": 200806,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 27,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-222.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-222.jpg",
+          "sha256": "f73253f7becc180cded326938e107cfcbc3b15ead8e35a5e333f6a3c083090fb",
+          "width": 912,
+          "height": 1368,
+          "bytes": 197254,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 28,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-221.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-221.jpg",
+          "sha256": "50bfc4e35779020e1efbfb3f01f22abc637a52b5fa7e6b0080404113ffb2c07b",
+          "width": 912,
+          "height": 1368,
+          "bytes": 193173,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 29,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-220.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-220.jpg",
+          "sha256": "e07391fe974646e17ddcc7e0484c0fcc5048fc1513920f8ef0cd917a1a3ca741",
+          "width": 912,
+          "height": 1368,
+          "bytes": 184155,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 30,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-219.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-219.jpg",
+          "sha256": "bd02a7ee7483ed8e781bec07a1368810c489d6fe1926a93bfec066994fceacf0",
+          "width": 912,
+          "height": 1368,
+          "bytes": 193776,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 31,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-216.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-216.jpg",
+          "sha256": "49aec2743b9adfabddd928425571621ca25e57aed2b5ffe26abb51349aff8d0c",
+          "width": 912,
+          "height": 1368,
+          "bytes": 213007,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 32,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-218.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-218.jpg",
+          "sha256": "ee466c273b740ed690d5d474b4384fccd275d5a70205d46310c26fb46bdb9c11",
+          "width": 912,
+          "height": 1368,
+          "bytes": 182087,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 33,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-217.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-217.jpg",
+          "sha256": "52677828324134db08b80dc8019b22698e32e6dfffa7f3cd64d8c2c726f06614",
+          "width": 912,
+          "height": 1368,
+          "bytes": 201737,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 34,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-215.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-215.jpg",
+          "sha256": "2ec2c081b1e994ab345e05847fc73429cc3183ce2d90ea29a5b3f8e3151f519d",
+          "width": 912,
+          "height": 1368,
+          "bytes": 202761,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 35,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-214.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-214.jpg",
+          "sha256": "7232086ef211dac4125d8e584a5ecee6513512c8743dcf9fba205b79b18c7066",
+          "width": 912,
+          "height": 1368,
+          "bytes": 161747,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 36,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-213.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-213.jpg",
+          "sha256": "2a4e8dfcccc36c1275a33febe58fa2f8cf40e386a88945605937ca1fac517191",
+          "width": 912,
+          "height": 1368,
+          "bytes": 183749,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 37,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-212.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-212.jpg",
+          "sha256": "8458e549b2417490c35f3f445a474280f289be7428574a94a04bda74f8d89d44",
+          "width": 912,
+          "height": 1368,
+          "bytes": 170650,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 38,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-211.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-211.jpg",
+          "sha256": "27d965e1781cf1ffb1dfee5ce1a486ac18d82fb64974284a262ffe011aed5f95",
+          "width": 912,
+          "height": 1368,
+          "bytes": 176519,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
         }
       ],
       "sourceHosted": true,
@@ -9010,6 +9459,13 @@
           "source": "https://www.v2ph.com/album/z63e3ena.html",
           "verified_image_count": 10,
           "claimed_image_count": null
+        },
+        {
+          "source_type": "pixibb_public",
+          "id": "pixibb-rudy-midnight",
+          "source": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-the-wolf-of-midnight-230-photos-cosplay/",
+          "verified_image_count": 20,
+          "claimed_image_count": 230
         }
       ],
       "completeness": "partial_public_previews"
@@ -9020,7 +9476,8 @@
       "publisher": "DJAWA",
       "source": "https://djawaphoto.com/portfolio/rudy%c2%b2-codename-wolfgirl/",
       "source_pages": [
-        "https://djawaphoto.com/portfolio/rudy%c2%b2-codename-wolfgirl/"
+        "https://djawaphoto.com/portfolio/rudy%c2%b2-codename-wolfgirl/",
+        "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-codename-wolfgirl-201-photos-cosplay/"
       ],
       "images": [
         {
@@ -9110,6 +9567,226 @@
           "bytes": 542357,
           "quality": "official_public_sample",
           "publisher_original_verified": false
+        },
+        {
+          "number": 9,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-200.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-200.jpg",
+          "sha256": "4d1cdaba4d3fd59e4de7609e2fa54cc0fbb20719ab06799ac707679427452e88",
+          "width": 912,
+          "height": 1368,
+          "bytes": 232816,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 10,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-201.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-201.jpg",
+          "sha256": "d68a653c952883dfd68272865487ac213923f4d806a018a2c72def8fef403350",
+          "width": 912,
+          "height": 1368,
+          "bytes": 250370,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 11,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-199.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-199.jpg",
+          "sha256": "885a22049afa8075746fe4493a31e0832a07b7e64697543831290ea407b73ae0",
+          "width": 1368,
+          "height": 912,
+          "bytes": 202740,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 12,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-198.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-198.jpg",
+          "sha256": "b8eaa6f1349e28daded31d732a0d1d04f3f277a3160170d3acf8894b6c57fd01",
+          "width": 1368,
+          "height": 912,
+          "bytes": 207054,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 13,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-197.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-197.jpg",
+          "sha256": "4979da4f7f4e92518f5b97b24d55e38bd994087f64e53f65ee8480bb8222695c",
+          "width": 1368,
+          "height": 912,
+          "bytes": 199001,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 14,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-196.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-196.jpg",
+          "sha256": "1c91130bdb36abb4f376d6044c8d088d69012c3478d2bb53527b4444e9253c40",
+          "width": 1368,
+          "height": 912,
+          "bytes": 192148,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 15,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-195.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-195.jpg",
+          "sha256": "ecf07418a4d5237ef4aa0fb3490b7eb35c0e7dcaf2f4548ba291b4b62179ff95",
+          "width": 912,
+          "height": 1368,
+          "bytes": 196296,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 16,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-192.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-192.jpg",
+          "sha256": "cccc58e2ad2adb06a7fd90491ee82b496493a3c8866e7ad1f5234eb9800d9ce6",
+          "width": 912,
+          "height": 1368,
+          "bytes": 174532,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 17,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-194.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-194.jpg",
+          "sha256": "9f7d8ee22f12deda90f2c1450b0c9ff74b4ea2757ec1a97a184c5c27d7b35d58",
+          "width": 912,
+          "height": 1368,
+          "bytes": 192597,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 18,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-193.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-193.jpg",
+          "sha256": "731695c43ffe16f4ddff7a23bab755f8f8380fbca02bf27767110be69d0c258d",
+          "width": 912,
+          "height": 1368,
+          "bytes": 199483,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 19,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-191.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-191.jpg",
+          "sha256": "b62e2bdbc30ab2a8b783527f2bf92c9e0bbbc3a40df3f56e06a225e018b97ab4",
+          "width": 1368,
+          "height": 912,
+          "bytes": 219406,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 20,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-190.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-190.jpg",
+          "sha256": "945f19de8de2554541ae60aeb89c6a15a9c6ef555592f55fdeebf86caa709c5f",
+          "width": 912,
+          "height": 1368,
+          "bytes": 197216,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 21,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-189.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-189.jpg",
+          "sha256": "d1864d614ae2ee940f92602a407cd5ba21b9a7aafa41e57699cfbbddd12f3b0f",
+          "width": 912,
+          "height": 1368,
+          "bytes": 203003,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 22,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-188.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-188.jpg",
+          "sha256": "c8371dfd71bc8fd6d5f88f806e4cedb34f4b8b6f1669fc4c5adfd90b06085979",
+          "width": 1368,
+          "height": 912,
+          "bytes": 235146,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 23,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-187.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-187.jpg",
+          "sha256": "14f453414919f05d8975d62bf450c12408cfaec12e4bb76d157b6442d72b511e",
+          "width": 1368,
+          "height": 912,
+          "bytes": 241770,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 24,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-186.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-186.jpg",
+          "sha256": "f36fc7e1fc8b8f24289ab4ba9474e1ca0ed107ed1f70258d1c5161fc8c4f515a",
+          "width": 912,
+          "height": 1368,
+          "bytes": 207408,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 25,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-185.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-185.jpg",
+          "sha256": "4039285a3f771cc1f20ebba2aca0ada010011ccb87675ac41c4d254b42d320cb",
+          "width": 912,
+          "height": 1368,
+          "bytes": 210021,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 26,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-182.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-182.jpg",
+          "sha256": "af5208eac1c47998fe90e29006e833a127ac37907c415bd2ec4bf2a69b7db494",
+          "width": 912,
+          "height": 1368,
+          "bytes": 213222,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 27,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-184.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-184.jpg",
+          "sha256": "068989b2c95953b64af4bbf6700a0f2c67715222fffaf3465678066cda20cd1e",
+          "width": 1368,
+          "height": 912,
+          "bytes": 208793,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 28,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-183.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-183.jpg",
+          "sha256": "31c7b42084eae35e6ba0cd87782d7025fa5d6ea41568c19a0d979e09b55a2f6c",
+          "width": 912,
+          "height": 1368,
+          "bytes": 183374,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
         }
       ],
       "sourceHosted": true,
@@ -9117,8 +9794,8 @@
       "quality": "public_web",
       "publisher_original_verified": false,
       "model": "mimmi",
-      "expected": null,
-      "photos": null,
+      "expected": 201,
+      "photos": 201,
       "ai_enhanced": false,
       "original_sources": [
         {
@@ -9127,6 +9804,13 @@
           "source": "https://djawaphoto.com/portfolio/rudy%c2%b2-codename-wolfgirl/",
           "verified_image_count": 8,
           "claimed_image_count": null
+        },
+        {
+          "source_type": "pixibb_public",
+          "id": "pixibb-rudy-codename",
+          "source": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-codename-wolfgirl-201-photos-cosplay/",
+          "verified_image_count": 20,
+          "claimed_image_count": 201
         }
       ],
       "completeness": "partial_public_previews"
@@ -9689,7 +10373,8 @@
       "publisher": "DJAWA",
       "source": "https://djawaphoto.com/portfolio/your-fishe-gawr-gura/",
       "source_pages": [
-        "https://djawaphoto.com/portfolio/your-fishe-gawr-gura/"
+        "https://djawaphoto.com/portfolio/your-fishe-gawr-gura/",
+        "https://cosplay.pixibb.com/djawa-photo-mimmi-your-fishe-gawr-gura-123-photos-cosplay/"
       ],
       "images": [
         {
@@ -9779,6 +10464,226 @@
           "bytes": 607345,
           "quality": "official_public_sample",
           "publisher_original_verified": false
+        },
+        {
+          "number": 9,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-123.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-123.jpg",
+          "sha256": "db47f484e5d93d86b4431e3d0d06825d1115cbc2e2a12e0abaec0e60ad39f35f",
+          "width": 912,
+          "height": 1368,
+          "bytes": 215859,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 10,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-122.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-122.jpg",
+          "sha256": "ad5f89f44e466770e86fc6130ccd96220b4eddb6886a4ee4fb7ffac40c9825e8",
+          "width": 912,
+          "height": 1368,
+          "bytes": 164437,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 11,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-121.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-121.jpg",
+          "sha256": "b2108b9e504c4c4823cb92a26c8266b1f026b25c8ab1066d610adb1065c5953b",
+          "width": 912,
+          "height": 1368,
+          "bytes": 171161,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 12,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-120.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-120.jpg",
+          "sha256": "3edc67d844899988ec2f788c2a05268f3dec1eb0076bb8c6d554bc307f419713",
+          "width": 912,
+          "height": 1368,
+          "bytes": 186931,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 13,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-119.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-119.jpg",
+          "sha256": "fa33487acc4f09ab5e363d668b9d0e3f41d17855d11656e3a171acc37e5b64a5",
+          "width": 912,
+          "height": 1368,
+          "bytes": 176179,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 14,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-118.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-118.jpg",
+          "sha256": "7523efa817d56d54aa8fc9ae48185718b5cf537e9d9a698eac48d5174606328f",
+          "width": 912,
+          "height": 1368,
+          "bytes": 161168,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 15,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-117.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-117.jpg",
+          "sha256": "be76379a24024058603cea532d77a818c3523cf0dacf3fad77d64a3c2198db8e",
+          "width": 912,
+          "height": 1368,
+          "bytes": 150661,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 16,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-114.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-114.jpg",
+          "sha256": "9e6517f3016a8cefd8440643e5de0127b48d1112402be548db8ae8f7e4eccaa9",
+          "width": 912,
+          "height": 1368,
+          "bytes": 210986,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 17,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-116.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-116.jpg",
+          "sha256": "b7f30615ed13568512c30efb416dcec1f1eae96a604b2fffb9e11bb4bd0b090f",
+          "width": 912,
+          "height": 1368,
+          "bytes": 181934,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 18,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-115.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-115.jpg",
+          "sha256": "031ee858202421f30d0a282aec204d78746938645f0d0630ff4cf9a228b5fb31",
+          "width": 912,
+          "height": 1368,
+          "bytes": 207699,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 19,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-113.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-113.jpg",
+          "sha256": "061623b012cc6e71c453b8e6ef0b888c253397dc1a16692b0ba04dbbf2dfb382",
+          "width": 1368,
+          "height": 912,
+          "bytes": 181835,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 20,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-112.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-112.jpg",
+          "sha256": "ae5e679059fd71f90f519f03481f78bf5a2c789082bfeedd8c4862b32d26a438",
+          "width": 912,
+          "height": 1368,
+          "bytes": 199283,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 21,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-111.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-111.jpg",
+          "sha256": "b4d22c0ad11c14d124cc8a53cc388683c0adbceb9e90d74f50b825e9aa6fa74c",
+          "width": 912,
+          "height": 1368,
+          "bytes": 228532,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 22,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-110.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-110.jpg",
+          "sha256": "63b9b8f7d033c0ca8d214f1b6374fb262d78345d4ceec03b02a60d47e815df78",
+          "width": 1368,
+          "height": 912,
+          "bytes": 184911,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 23,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-109.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-109.jpg",
+          "sha256": "34f5f6652a51bb5fee590d39495a50ba66d5b65ec2c19e4d4dc1c63f6c5b121a",
+          "width": 912,
+          "height": 1368,
+          "bytes": 191411,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 24,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-106.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-106.jpg",
+          "sha256": "dfce15bb8e7e246a589e70bcef886866b078391a4a831bbc9ea52ddc14ff151c",
+          "width": 1368,
+          "height": 912,
+          "bytes": 249692,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 25,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-108.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-108.jpg",
+          "sha256": "f42f8bd70babe80323ad0e84918515ab958e0ebbba37834e83c94a7d93a6ae2d",
+          "width": 912,
+          "height": 1368,
+          "bytes": 205749,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 26,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-107.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-107.jpg",
+          "sha256": "a71a66449bc0038387307f4b6f9a07c48643ebad017cfc02c0dde41ed32a97f9",
+          "width": 912,
+          "height": 1368,
+          "bytes": 185449,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 27,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-105.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-105.jpg",
+          "sha256": "035d3eb744c48bac70af1619439947f8942053cb9aefd81919b9f4d8d305e956",
+          "width": 1368,
+          "height": 912,
+          "bytes": 232471,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 28,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-104.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-104.jpg",
+          "sha256": "f87ccf123fb77fe2bd90c882cf61541b96216f52351155ae9afa5a0b84a74189",
+          "width": 1368,
+          "height": 912,
+          "bytes": 257354,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
         }
       ],
       "sourceHosted": true,
@@ -9786,8 +10691,8 @@
       "quality": "public_web",
       "publisher_original_verified": false,
       "model": "mimmi",
-      "expected": null,
-      "photos": null,
+      "expected": 123,
+      "photos": 123,
       "ai_enhanced": false,
       "original_sources": [
         {
@@ -9796,6 +10701,13 @@
           "source": "https://djawaphoto.com/portfolio/your-fishe-gawr-gura/",
           "verified_image_count": 8,
           "claimed_image_count": null
+        },
+        {
+          "source_type": "pixibb_public",
+          "id": "pixibb-your-fishe-gawr-gura",
+          "source": "https://cosplay.pixibb.com/djawa-photo-mimmi-your-fishe-gawr-gura-123-photos-cosplay/",
+          "verified_image_count": 20,
+          "claimed_image_count": 123
         }
       ],
       "completeness": "partial_public_previews"
