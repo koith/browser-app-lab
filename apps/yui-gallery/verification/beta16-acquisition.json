@@ -232,7 +232,8 @@
     "uncredited_player_product_cover_not_registered": 1,
     "publisher_product_cover_mockups_not_registered": 2,
     "publisher_listing_requests": 15,
-    "publisher_listing_exhaustive": false
+    "publisher_listing_exhaustive": false,
+    "distinct_publisher_listing_pages": 6
   },
   "private_cloud_uploads": 0,
   "private_cloud_readbacks": 0,
@@ -307,5 +308,15 @@
     "original_link_sha_checks": 25,
     "selected_source_readbacks": 285,
     "superseded_scope_not_final_2922_verification": true
+  },
+  "initial_pr_ci_webkit": {
+    "head": "8456e6e2494b45d31af64088690cd1cbeed4bb8e",
+    "run": 40670669401,
+    "job": 122756313618,
+    "conclusion": "failure",
+    "selected_new_gallery_decodes": 12,
+    "failed_cover": "sportsseoul-crazy2020-public",
+    "failure": "EncodingError: Loading error",
+    "not_attributed_to_unchanged_photographs": true
   }
 }
