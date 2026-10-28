@@ -66,7 +66,14 @@ Promise.all([
  const legacy=(base.albums||[]).filter(a=>!sourceAlbums.some(x=>x.title.toLocaleLowerCase()===a.title.toLocaleLowerCase()));
  const other=(v2ph.albums||[]).filter(a=>a.id&&a.source&&(a.samples||[]).length);
  const actorAlbums=(actor.albums||[]).filter(a=>a.id&&a.source&&(a.samples||[]).length);
- albums=[...sourceAlbums,...actorAlbums,...other,...legacy];research=inventory.works||[];renderResearch();
+ albums=[...sourceAlbums,...actorAlbums,...other,...legacy];
+ const seenHashes=new Set();
+ for(const a of albums){a.samples=(a.samples||[]).filter(p=>{
+  if(!p.sha256)return false;
+  if(seenHashes.has(p.sha256))return false;
+  seenHashes.add(p.sha256);return true;
+ });}
+ research=inventory.works||[];renderResearch();
  albums.sort((a,b)=>(b.samples?.length||0)-(a.samples?.length||0)||a.title.localeCompare(b.title));
  render();
 }).catch(e=>{$('count').textContent='목록 로딩 실패';$('empty').textContent=e.message;$('empty').hidden=false});
