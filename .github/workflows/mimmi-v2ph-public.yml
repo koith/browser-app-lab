@@ -1,0 +1,57 @@
+name: Mimmi Free V2PH Public Gallery Photo Discovery
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'apps/mimmi-gallery/collect_v2ph_public.py'
+      - 'apps/mimmi-gallery/test_v2ph_public.py'
+      - '.github/workflows/mimmi-v2ph-public.yml'
+  schedule:
+    - cron: '45 4 * * 2,5'
+permissions:
+  contents: write
+concurrency:
+  group: mimmi-v2ph-${{ github.ref_name }}
+  cancel-in-progress: false
+jobs:
+  scan:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 28
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install requests beautifulsoup4 Pillow
+      - name: Verify open-photo extractor syntax and safety
+        run: |
+          python -m py_compile apps/mimmi-gallery/collect_v2ph_public.py
+          python apps/mimmi-gallery/test_v2ph_public.py
+      - name: Verify real public Mimmi V2PH images and browse multiple pages
+        run: python apps/mimmi-gallery/collect_v2ph_public.py --pages 8 --images 50
+      - name: Check genuine image evidence; never count source ads or broken links
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('apps/mimmi-gallery/v2ph-public-previews.json')
+          d=json.loads(p.read_text())
+          assert d['summary']['albums']==6,d['summary']
+          assert d['summary']['preview_images_verified']>=12,d['summary']
+          assert d['summary']['publicly_rehosted_images']==0
+          for a in d['albums']:
+            for image in a['samples']:
+              assert image['url'].startswith('https://cdn.v2ph.com/photos/')
+              assert image['bytes']>=4500 and image['sha256'] and image['width']>=300 and image['height']>=300
+          print('MIMMI_V2PH_REAL_PUBLIC_IMAGE_VERIFY_PASS',d['summary'])
+          PY
+      - name: Publish source URLs and SHA256 metadata only
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/mimmi-gallery/v2ph-public-previews.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Register Mimmi verified public V2PH photo metadata"
+            git fetch origin "$GITHUB_REF_NAME"
+            git rebase "origin/$GITHUB_REF_NAME"
+            git push origin "HEAD:$GITHUB_REF_NAME"
+          fi
