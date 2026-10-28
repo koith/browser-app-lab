@@ -11,12 +11,28 @@ const fs=require('node:fs');
 const path=require('node:path');
 const {chromium,webkit}=require('playwright');
 (async()=>{
+ const sourceRoot=path.resolve(__dirname,'../original/SourceSPRExtra');
+ const manifest=JSON.parse(fs.readFileSync(path.join(sourceRoot,'manifest.json')));
+ for(const index of [0,1,6]){
+  const frame=manifest.sprites['selector.spr'].frames[index];
+  const png=fs.readFileSync(path.join(sourceRoot,'selector-'+String(index).padStart(2,'0')+'.png'));
+  assert.equal(require('node:crypto').createHash('sha256').update(png).digest('hex'),frame.sha256);
+  assert.deepEqual([frame.width,frame.height],[92,72]);
+ }
  const mobile=process.env.FOURLEAF_MOBILE==='1';
  const browserType=process.env.FOURLEAF_BROWSER==='webkit'?webkit:chromium;
  const browser=await browserType.launch({headless:true,args:browserType===chromium?['--no-sandbox']:[]});
  const page=await browser.newPage({viewport:mobile?{width:390,height:844}:{width:1280,height:900},serviceWorkers:'block'});
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.addInitScript(()=>{window.LEAF_CENTRAL_API_URL='';});
+ // Optional repeatable WEB fixture, still running the actual combat rules.
+ // The archive's actors, camera, rolls and scores remain different.
+ await page.addInitScript(seed=>{
+  window.LEAF_CENTRAL_API_URL='';
+  if(Number.isInteger(seed)){
+   let state=seed>>>0;
+   Math.random=()=>((state=(Math.imul(1664525,state)+1013904223)>>>0)/4294967296);
+  }
+ },process.env.FOURLEAF_BATTLE_SEED?Number(process.env.FOURLEAF_BATTLE_SEED):null);
  try{
   await page.goto(process.env.FOURLEAF_TEST_URL||'http://127.0.0.1:8765/');
   await page.waitForFunction(()=>window.__ROG_TEST__&&window.__LEAF_GENESIS_ACTORS__);
@@ -75,7 +91,13 @@ const {chromium,webkit}=require('playwright');
     background:getComputedStyle(source).backgroundImage,backgroundSize:getComputedStyle(source).backgroundSize,
     atlasFrame:buttons.map(b=>({id:b.id,rect:box(b),bg:getComputedStyle(b).backgroundImage,
      enabled:!b.disabled,sourceControls:!!b.onclick||b.hasAttribute('onclick')})),
-    party:document.querySelectorAll('#dice-native-party .dice-chessman-slot.occupied').length};
+    party:document.querySelectorAll('#dice-native-party .dice-chessman-slot.occupied').length,
+    cards:[...document.querySelectorAll('#dice-native-party .dice-chessman-slot')].map(slot=>({
+     rect:box(slot),base:getComputedStyle(slot).backgroundImage,
+     strip:getComputedStyle(slot,'::before').backgroundImage,
+     label:getComputedStyle(slot.querySelector('b')||slot.querySelector('.dice-chessman-empty')).display,
+     badge:slot.querySelector('.dice-chessman-moon')?getComputedStyle(slot.querySelector('.dice-chessman-moon')).display:null
+    }))};
   });
   assert.deepEqual(data.atlas,[222,152],'true source selector IMG, not WEB mock');
   assert.ok(data.party>=3,'right source panel is LIVE selected team');
@@ -85,6 +107,20 @@ const {chromium,webkit}=require('playwright');
    assert.equal(data.backgroundSize,'222px 152px');
    assert.equal(data.root.width,222);
    assert.equal(data.root.height,152);
+   for(let i=0;i<data.cards.length;i++){
+    const card=data.cards[i];
+    assert.equal(card.rect.width,92,'native selector.spr card width');
+    assert.equal(card.rect.height,72,'native selector.spr card height');
+    assert.equal(card.rect.x-data.root.x,30+(i%2)*96,'source 2x2 card columns');
+    assert.equal(card.rect.y-data.root.y,Math.floor(i/2)*76,'source 2x2 card rows');
+    assert.ok(card.base.includes('/SourceSPRExtra/selector-06.png'));
+    assert.equal(card.label,'none','no WEB name/empty band covers original card chrome');
+    if(i<3){
+     assert.ok(card.strip.includes(i===0?'selector-01.png':'selector-00.png'),
+      'normal/selected card surface and ABILITY strip come from source SPR');
+     assert.equal(card.badge,'none','unverified CSS moon is not a native S/P/C assignment');
+    }
+   }
    const y=[24,55,86,117];
    assert.deepEqual(data.atlasFrame.map(x=>x.id),[
     'dice-inspect-tool','dice-next-tool','dice-items-toggle','dice-ability-tool']);
@@ -98,6 +134,9 @@ const {chromium,webkit}=require('playwright');
    await page.locator('#dice-next-tool').click();
    const selected=await page.locator('#dice-native-party').getAttribute('data-selected-index');
    assert.equal(selected,'1','the original sprite button still changes LIVE chessman');
+   assert.ok(await page.locator('#dice-native-party .dice-chessman-slot.selected').evaluate(
+    e=>getComputedStyle(e,'::before').backgroundImage.includes('selector-01.png')),
+    'changing actual selection also changes the native highlighted surface');
    await page.locator('#dice-inspect-tool').click();
    await page.waitForSelector('#modal:not(.hidden)');
    await page.locator('#modal-buttons button').first().click();
@@ -117,6 +156,10 @@ const {chromium,webkit}=require('playwright');
   await page.waitForSelector('#battle-visual');
   await page.waitForFunction(()=>document.querySelector('#battle-visual')
    ?.dataset.nativeBattlePodium==='ready',null,{timeout:16000});
+  // Compare the settled front pose rather than a timing-dependent attack
+  // packet. This remains the game's own action timer, not a forced pose.
+  await page.waitForFunction(()=>[...document.querySelectorAll(
+   '#battle-visual .leaf-battle-chessman')].every(n=>n.dataset.actorPose==='idle'));
   const battle=await page.evaluate(()=>{
    const stage=document.querySelector('#battle-visual');
    return {stage:stage.dataset.nativeBattlePodium,
@@ -126,9 +169,20 @@ const {chromium,webkit}=require('playwright');
      source:n.querySelector('img.leaf-chess-original-obs')?.getAttribute('src')})),
     dice:stage.querySelectorAll('.battle-visual-die').length,
     scores:[...stage.querySelectorAll('.battle-visual-total')].map(n=>n.textContent),
+    heading:(()=>{
+     const h=stage.querySelector('.leaf-native-winbattle-heading').getBoundingClientRect();
+     const p=stage.querySelector('.leaf-native-winbattle-podiums').getBoundingClientRect();
+     const scale=Math.min(p.width/355,p.height/113);
+     return {left:h.left,top:h.top,width:h.width,height:h.height,
+      expectedLeft:p.left+(p.width-355*scale)/2+68*scale,
+      expectedTop:Math.max(stage.getBoundingClientRect().top,p.bottom-113*scale-201*scale),scale};
+    })(),
     atlas:getComputedStyle(document.querySelector('#dice-client-sidebar')).backgroundImage};
   });
   assert.equal(battle.stage,'ready');
+  assert.ok(Math.abs(battle.heading.left-battle.heading.expectedLeft)<1,'native shared SPR pivot X');
+  assert.ok(Math.abs(battle.heading.top-battle.heading.expectedTop)<1,'native shared SPR pivot Y');
+  assert.ok(Math.abs(battle.heading.width-222*battle.heading.scale)<1,'heading follows drawn podium bitmap');
   assert.ok(battle.sprite?.endsWith('/winBattle-01.png'));
   assert.equal(battle.actors.length,2);
   assert.ok(battle.actors.every(n=>n.rig==='original-obs-sprite'&&n.source?.includes('/original/OBS/')),

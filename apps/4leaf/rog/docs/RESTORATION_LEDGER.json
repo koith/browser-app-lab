@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "project": "4LEAF 원작 복원 웹앱",
   "canonicalFile": "apps/4leaf/rog/docs/RESTORATION_LEDGER.json",
-  "updatedAt": "2026-10-28",
+  "updatedAt": "2026-10-29",
   "sourceOfTruth": "Git 저장소의 이 JSON과 커밋 이력. 과거 챗 대화는 기록 근거이지 진행 상태의 원본 데이터가 아님.",
   "operatingRule": "새 요청 즉시 작업 등록 → open 목록 조회 → 실제 수정 → 원본 근거/코드/브라우저/배포 검증 → 검증 증거와 함께 상태 전이. 부분 구현을 원작 완성으로 표시 금지.",
   "statusDefinitions": {
@@ -6478,6 +6478,19 @@
         "P0-BOARD"
       ],
       "details": "Rebased by merging latest main 328b671aa6dd77ee6df719ec44f898ee871c960c into existing PR229; retained event268 and all main game code. Narrowed Pages HTML retry to exact koith.github.io origin and app path with BOTH zero scripts and absent #app, with no pageerror or request failure. Local real Chromium 104-cell minimap pointer/drag/keyboard/mobile navigation PASS. Browser response fault injection: empty-once => 2 documents then full gameplay PASS; empty-always => 3 documents then FAIL; partial #app-only => 1 and FAIL; script-only => 1 and FAIL; real JS exception => 1 and FAIL with exception evidence. Ledger integrity check against main and history regression PASS (58 tasks). Actions and exact-SHA post-merge Pages confirmation pending; no runtime restoration completion claimed."
+    },
+    {
+      "seq": 271,
+      "date": "2026-10-29",
+      "type": "SOURCE_SELECTOR_CARD_CHROME_AND_SHARED_BATTLE_SPR_PIVOT_IMPLEMENTED_LOCAL_QA_PASS",
+      "requestId": "REQ-20261028-001",
+      "taskIds": [
+        "P0-BOARD",
+        "P0-PODIUM",
+        "P0-ACTOR",
+        "P0-RELEASE"
+      ],
+      "details": "Actual code restores desktop right 2x2 cards from source-authenticated 92x72 IMG.pak selector.spr: neutral frame6 and lower normal/highlighted frame0/1 surfaces, 4px gaps, ABILITY strip visible instead of WEB names/borders/CSS moon. Native S/P/C badge-to-CardData assignment is UNVERIFIED: crop excludes glyph and removes invented moon, rather than invent mapping. Names retained in existing tooltip/aria label/CardData dialog. Source 222x152 backing and all four real tool controls preserved. Heading now follows original winBattle SPR signed pivot delta (68,-201) at actual object-fit bitmap scale; mobile top clamped. Extended existing real BATTLE QA asserts source SHA256/dimensions/card geometry/selected surface/heading pivot; optional WEB seed 20261029 yields actual rules scores05:09 and waits for engine idle pose. Local Chromium desktop, WebKit desktop+390x844 real battle/result controls, original podium regression and cold PWA cache97 PASS. Initial 74px CSS cascade assertion exposed later full-frame rule: corrected selector specificity to source72px and reran successfully. Original-vs-restored 800x600 capture still differs in actor identity/size, camera/terrain, score glyphs, die geometry/motion, player rails and chat/minimap state. No pixel equivalence or native 3D/FPS claim. beta29/cache116 preloads three source frames. PR229 cleaned onto current main73a2c4e after unrelated gallery automation pushed into its old head; event268 retained. PR/Actions/Pages acceptance pending; all58 task statuses preserved."
     }
   ]
 }

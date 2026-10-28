@@ -1269,6 +1269,16 @@ function showBattleScene(attacker,defender,attack,defense,attackerPoints,defende
   const sourceDeckY=imageTop+34*imageHeight/113;
   stage.dataset.nativePodiumBitmapFit='object-fit-contain/center-bottom/source-355x113';
   const obsPivot=6; // WEB-inferred OBS foot adjustment; not 2002 MVE plane
+  // Both native SPR frames share a signed source pivot: heading
+  // (-112,-205), podium (-180,-4). Preserve that 68,-201 offset
+  // at the actual object-fit scale instead of a viewport percentage.
+  const sourceScale=imageWidth/355;
+  stage.style.setProperty('--leaf-native-battle-heading-left',
+   (imageLeft-canvas.left+68*sourceScale)+'px');
+  stage.style.setProperty('--leaf-native-battle-heading-top',
+   Math.max(0,imageTop-canvas.top-201*sourceScale)+'px');
+  stage.style.setProperty('--leaf-native-battle-heading-width',(222*sourceScale)+'px');
+  stage.style.setProperty('--leaf-native-battle-heading-height',(42*sourceScale)+'px');
   stage.style.setProperty('--leaf-native-podium-left-x',left+'px');
   stage.style.setProperty('--leaf-native-podium-right-x',right+'px');
   stage.style.setProperty('--leaf-native-podium-actor-bottom',

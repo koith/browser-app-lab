@@ -4,6 +4,8 @@ on:
     branches: [main]
     paths:
       - 'apps/4leaf/rog/dice-original-selector.css'
+      - 'apps/4leaf/rog/dice-native-battle-source-spr.css'
+      - 'apps/4leaf/rog/game.js'
       - 'apps/4leaf/rog/tests/dice-2004-battle-selector-source.cjs'
       - '.github/workflows/rog-native-battle-selector-source.yml'
   workflow_run:
@@ -22,6 +24,8 @@ jobs:
       matrix:
         include:
           - engine: chromium
+            mobile: '0'
+          - engine: webkit
             mobile: '0'
           - engine: webkit
             mobile: '1'
@@ -48,12 +52,13 @@ jobs:
       - name: Original 2004 battle state with actual match dice OBS and 222x152 interactive IMG selector
         env:
           FOURLEAF_TEST_URL: ${{ github.event_name == 'workflow_run' && 'https://koith.github.io/browser-app-lab/apps/4leaf/rog/' || 'http://127.0.0.1:8765/' }}
+          FOURLEAF_BATTLE_SEED: '20261029'
           FOURLEAF_BROWSER: ${{ matrix.engine }}
           FOURLEAF_MOBILE: ${{ matrix.mobile }}
         run: node apps/4leaf/rog/tests/dice-2004-battle-selector-source.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: original-2004-live-battle-${{ matrix.engine }}-${{ github.event_name }}
+          name: original-2004-live-battle-${{ matrix.engine }}-${{ matrix.mobile }}-${{ github.event_name }}
           path: leaf-*.png
           retention-days: 14
