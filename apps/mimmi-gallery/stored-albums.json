@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "model": "mimmi",
-  "updated": "2026-10-28T23:21:18Z",
+  "updated": "2026-10-28T23:21:45Z",
   "storage": "physically committed public previews under GitHub Pages; not licensed publisher masters",
   "albums": [
     {
@@ -19278,10 +19278,172 @@
           "width": 2696,
           "height": 1800,
           "number": 1
+        },
+        {
+          "url": "stored-albums/v2ph-actor-amn8o34z/8511d9eedd4a1653079862e580d4bab970eaceca2821dd62d4edd1c7a52c7ea2.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/LGT71tuDUnBpRAVX.jpg",
+          "sha256": "8511d9eedd4a1653079862e580d4bab970eaceca2821dd62d4edd1c7a52c7ea2",
+          "bytes": 349064,
+          "width": 1800,
+          "height": 2696,
+          "number": 2
+        },
+        {
+          "url": "stored-albums/v2ph-actor-amn8o34z/982f6c5125725ad0cc600fbe2f40899c649281655cbe65bcfda7f03bc186acb4.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/QpDJUg0mcGVDv7Mw.jpg",
+          "sha256": "982f6c5125725ad0cc600fbe2f40899c649281655cbe65bcfda7f03bc186acb4",
+          "bytes": 371752,
+          "width": 2696,
+          "height": 1800,
+          "number": 3
+        },
+        {
+          "url": "stored-albums/v2ph-actor-amn8o34z/82bafc042e334660027f6e60998de9a0c8c6d493a055bd2b210ed77d19d7ed74.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/PirHe1PlpvIRfxb3.jpg",
+          "sha256": "82bafc042e334660027f6e60998de9a0c8c6d493a055bd2b210ed77d19d7ed74",
+          "bytes": 353992,
+          "width": 1800,
+          "height": 2696,
+          "number": 4
+        },
+        {
+          "url": "stored-albums/v2ph-actor-amn8o34z/183fcbb8a8fadab34fb6478074a7152d9f164512546550c012abfe263fd3a7d4.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/KcYBaZsbrRYOphG3.jpg",
+          "sha256": "183fcbb8a8fadab34fb6478074a7152d9f164512546550c012abfe263fd3a7d4",
+          "bytes": 404194,
+          "width": 1800,
+          "height": 2696,
+          "number": 5
+        },
+        {
+          "url": "stored-albums/v2ph-actor-amn8o34z/b5070eb178bb68f02aa716929305a78f20deff278b0fb8efda8a88f70a28f655.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/qY8MfUFaRai_XBCy.jpg",
+          "sha256": "b5070eb178bb68f02aa716929305a78f20deff278b0fb8efda8a88f70a28f655",
+          "bytes": 434133,
+          "width": 1800,
+          "height": 2696,
+          "number": 6
+        },
+        {
+          "url": "stored-albums/v2ph-actor-amn8o34z/01b79b178ec5ece83e364f8029fdb84392c05ee935cc4d4d44956c7cf30da618.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/8U__LlbVdS1knQ3j.jpg",
+          "sha256": "01b79b178ec5ece83e364f8029fdb84392c05ee935cc4d4d44956c7cf30da618",
+          "bytes": 443582,
+          "width": 1800,
+          "height": 2696,
+          "number": 7
+        },
+        {
+          "url": "stored-albums/v2ph-actor-amn8o34z/d95751ab205fa61e92bd79d3f21d7842b8f85b5c35f011a3a12ae240ce727e27.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/XsH_Njvhv3Xo6GIb.jpg",
+          "sha256": "d95751ab205fa61e92bd79d3f21d7842b8f85b5c35f011a3a12ae240ce727e27",
+          "bytes": 411088,
+          "width": 1800,
+          "height": 2696,
+          "number": 8
+        }
+      ],
+      "status": "public_previews_only_not_complete"
+    },
+    {
+      "id": "v2ph-actor-am8o3e7z",
+      "title": "Mimmi - Mimmi (Mimmissu17)– NO.042 Nicole (Zenless Zone Zero)",
+      "publisher": "DJAWA",
+      "source": "https://www.v2ph.com/album/am8o3e7z.html",
+      "images": [
+        {
+          "url": "stored-albums/v2ph-actor-am8o3e7z/a07f0355396f0b7736f722bdc0730d5f5ee1e5a79349e33577fd308bbcb9ecfe.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/Z87U7U1P9HTsVel6.jpg",
+          "sha256": "a07f0355396f0b7736f722bdc0730d5f5ee1e5a79349e33577fd308bbcb9ecfe",
+          "bytes": 1632426,
+          "width": 1802,
+          "height": 2700,
+          "number": 1
+        },
+        {
+          "url": "stored-albums/v2ph-actor-am8o3e7z/b98ec6936364be09b750a21aa2dedc6fd87f2fef8e32774d984cfa6497c5c2b3.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/Hz1EYrSymmK6a2Rl.jpg",
+          "sha256": "b98ec6936364be09b750a21aa2dedc6fd87f2fef8e32774d984cfa6497c5c2b3",
+          "bytes": 1737996,
+          "width": 2700,
+          "height": 1802,
+          "number": 2
+        },
+        {
+          "url": "stored-albums/v2ph-actor-am8o3e7z/56cbf765ada50b4602de9be1c31b07311c28adb3513c824e3cf8b08b8c44be7e.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/Kfb9epBM56Z5_Bdt.jpg",
+          "sha256": "56cbf765ada50b4602de9be1c31b07311c28adb3513c824e3cf8b08b8c44be7e",
+          "bytes": 1557498,
+          "width": 1802,
+          "height": 2700,
+          "number": 3
+        },
+        {
+          "url": "stored-albums/v2ph-actor-am8o3e7z/16d89b575a1b98a30c8d355912abfff751deae264f92f33654424407a733f2c8.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/gGeib_tYMqHRByVB.jpg",
+          "sha256": "16d89b575a1b98a30c8d355912abfff751deae264f92f33654424407a733f2c8",
+          "bytes": 1739026,
+          "width": 1802,
+          "height": 2700,
+          "number": 4
+        },
+        {
+          "url": "stored-albums/v2ph-actor-am8o3e7z/ad7f2a02b78801227058040150cf333aa7065da734fca6e615b57293e25d6aca.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/wmtwgc1nLxfeglQz.jpg",
+          "sha256": "ad7f2a02b78801227058040150cf333aa7065da734fca6e615b57293e25d6aca",
+          "bytes": 1889874,
+          "width": 1802,
+          "height": 2700,
+          "number": 5
+        },
+        {
+          "url": "stored-albums/v2ph-actor-am8o3e7z/049385308b51bdf9044b1f721a9002ddb47e6f3f60b02183f3df48d612b4e616.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/kC6S_EKvolQfvWRU.jpg",
+          "sha256": "049385308b51bdf9044b1f721a9002ddb47e6f3f60b02183f3df48d612b4e616",
+          "bytes": 1577194,
+          "width": 1802,
+          "height": 2700,
+          "number": 6
+        },
+        {
+          "url": "stored-albums/v2ph-actor-am8o3e7z/4df4e054799ae405acba1f94af653ef3a67bff5dedebf87a8810fb17252950cc.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/X1a-Ak2c2CLy6Y0m.jpg",
+          "sha256": "4df4e054799ae405acba1f94af653ef3a67bff5dedebf87a8810fb17252950cc",
+          "bytes": 1568960,
+          "width": 1802,
+          "height": 2700,
+          "number": 7
+        },
+        {
+          "url": "stored-albums/v2ph-actor-am8o3e7z/b887da828818b9181a31fdabccf46c580d92ceb2f42520357c03c82e76366daf.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/qD8Zh3aSAN9hEujR.jpg",
+          "sha256": "b887da828818b9181a31fdabccf46c580d92ceb2f42520357c03c82e76366daf",
+          "bytes": 1308108,
+          "width": 1802,
+          "height": 2700,
+          "number": 8
+        },
+        {
+          "url": "stored-albums/v2ph-actor-am8o3e7z/ffb8f7ea9061b421ac01c582e22739426a9ab71581bb61199abf0f759e1b2cc1.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/DIIyHygm8U6Ip_M2.jpg",
+          "sha256": "ffb8f7ea9061b421ac01c582e22739426a9ab71581bb61199abf0f759e1b2cc1",
+          "bytes": 1456455,
+          "width": 1802,
+          "height": 2700,
+          "number": 9
+        },
+        {
+          "url": "stored-albums/v2ph-actor-am8o3e7z/56aebc0c0b28ab54821dab2618858dd943e8f95e693fe70578e93288db876abb.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/sy90LD2HT57U_fr8.jpg",
+          "sha256": "56aebc0c0b28ab54821dab2618858dd943e8f95e693fe70578e93288db876abb",
+          "bytes": 1622362,
+          "width": 2700,
+          "height": 1802,
+          "number": 10
         }
       ],
       "status": "public_previews_only_not_complete"
     }
   ],
-  "physical_verified_image_count": 2093
+  "physical_verified_image_count": 2110
 }
