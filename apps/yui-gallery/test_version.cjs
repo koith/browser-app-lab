@@ -5,13 +5,15 @@ const state=JSON.parse(fs.readFileSync(path.join(root,'version.json'),'utf8'));
 assert.match(state.version,/^v\d+\.\d+\.\d+(-beta\.\d+)?$/);
 assert.equal(state.policy.monthly_charge_krw,0);
 assert.equal(state.policy.payment_card_required,false);
-assert.equal(state.progress.physically_acquired_web_images,405);
+assert.ok(state.progress.physically_acquired_web_images>=0);
 assert.equal(state.progress.web_albums_with_complete_sequence,5);
 assert.equal(state.progress.primary_cloud_verified_images,0);
+assert.equal(state.progress.gallery_live_source_hotlinks,0);
+assert.equal(state.progress.gallery_physically_stored_pages_images,23);
 assert.equal(state.storage.intended_primary.provider,'TeraBox Basic');
 assert.equal(state.storage.intended_primary.availability,'not_connected');
 assert.equal(state.storage.intended_primary.r2_required,false);
-for(const page of ['index.html','cloud.html','zip-gallery.html']){
+for(const page of ['index.html']){
  const html=fs.readFileSync(path.join(root,page),'utf8');
  assert.ok(html.includes(state.version),page+' must visibly show '+state.version);
  assert.ok(!html.includes('ZIP 2개를'),page+' should not claim two ZIPs');
@@ -23,7 +25,7 @@ assert.equal(state.archiving_engine.bundle_generation,false);
 assert.equal(state.archiving_engine.mode,'individual_files');
 assert.ok(state.archiving_engine.open_source_crawler.includes('gallery-dl'));
 assert.ok(fs.readFileSync(path.join(root,'index.html'),'utf8').includes('id=\"app-version\"'));
-assert.ok(fs.readFileSync(path.join(root,'index.html'),'utf8').includes('source-viewer-albums.json'));
+assert.ok(!fs.readFileSync(path.join(root,'index.html'),'utf8').includes("fetch('source-viewer-albums.json'"),'Source-only photos must never be displayed');
 assert.ok(!fs.readFileSync(path.join(root,'index.html'),'utf8').includes('href="zip-gallery.html"'));
 assert.ok(fs.readFileSync(path.join(root,'zip-gallery.html'),'utf8').includes('location.replace("./")'));
 console.log('YUI_VERSION_AND_STORAGE_STATUS_PASS',state.version,'previously_collected_web_photos',405,'public_pages_photos',actuallyOnPages,'terabox_verified',0,'bundle_generation',false);

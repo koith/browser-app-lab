@@ -1,134 +1,97 @@
-name: Yui Gallery Browser Smoke
+name: Yui Gallery Physical Files Only
 on:
   push:
     paths:
-      - apps/yui-gallery/**
-      - .github/workflows/yui-gallery-smoke.yml
+      - 'apps/yui-gallery/**'
+      - '.github/workflows/yui-gallery-smoke.yml'
+  pull_request:
+    paths:
+      - 'apps/yui-gallery/**'
+      - '.github/workflows/yui-gallery-smoke.yml'
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
-  album-view:
+  stored-only:
     runs-on: ubuntu-24.04
-    timeout-minutes: 10
+    timeout-minutes: 16
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Verify release version and free cloud truth-in-status
-        run: node apps/yui-gallery/test_version.cjs
-      - name: Verify physically stored photos and application syntax
+      - name: Verify the manifest and physical file hashes
         run: |
+          node apps/yui-gallery/test_version.cjs
           node - <<'NODE'
-          const fs=require('fs'), vm=require('vm'),crypto=require('crypto');
-          const root='apps/yui-gallery/';
-          const html=fs.readFileSync(root+'index.html','utf8');
-          const js=html.match(/<script>([\s\S]*?)<\/script>/);
-          if(!js)throw Error('No app JS');
-          new vm.Script(js[1]);
-          const db=JSON.parse(fs.readFileSync(root+'stored-albums.json'));
-          let n=0;
-          for(const album of db.albums){
-            for(const x of album.images){
-              const data=fs.readFileSync(root+x.url);
-              const hash=crypto.createHash('sha256').update(data).digest('hex');
-              if(hash!==x.sha256||data.length!==x.bytes)throw Error('Storage integrity '+x.url);
-              n++;
-            }
+          const fs=require('fs'),crypto=require('crypto'),vm=require('vm');
+          const base='apps/yui-gallery/';
+          const data=JSON.parse(fs.readFileSync(base+'stored-albums.json'));
+          const html=fs.readFileSync(base+'index.html','utf8');
+          const inline=html.match(/<script>([\s\S]*?)<\/script>/);
+          if(!inline)throw Error('Missing inline JavaScript');
+          new vm.Script(inline[1]);
+          if(html.includes("fetch('source-viewer-albums.json'")||html.includes("fetch('additional-source-albums.json'"))throw Error('Source-hosted preview is active');
+          let count=0;
+          for(const a of data.albums)for(const p of a.images){
+            if(!p.url.startsWith('stored-albums/'+a.id+'/'))throw Error('External gallery media');
+            const buf=fs.readFileSync(base+p.url);
+            if(buf.length!==p.bytes||crypto.createHash('sha256').update(buf).digest('hex')!==p.sha256)throw Error('Wrong file '+p.url);
+            count++;
           }
-          if(n<10)throw Error('Insufficient stored photos '+n);
-          console.log('VERIFIED_STORED_PHOTOS',n, 'ALBUMS',db.albums.length);
+          console.log('YUI_PHYSICAL_FILES_VERIFIED',count,data.albums.length);
           NODE
-      - name: Install Playwright
+      - name: Install Chromium and iPhone WebKit
         run: |
           npm install --no-save playwright@1.58.2
-          npx playwright install chromium
-      - name: Test photo-first gallery in mobile browser
+          npx playwright install --with-deps chromium webkit
+      - name: Render saved images only in both mobile engines
         run: |
-          python -m http.server 8765 --directory apps/yui-gallery >/tmp/yui-web.log 2>&1 &
+          python -m http.server 8765 --directory apps/yui-gallery >/tmp/yui-http.log 2>&1 &
           node - <<'NODE'
-          const {chromium}=require('playwright'),fs=require('fs');
-          const local=JSON.parse(fs.readFileSync('apps/yui-gallery/stored-albums.json'));
-          const extra=fs.existsSync('apps/yui-gallery/additional-source-albums.json')?JSON.parse(fs.readFileSync('apps/yui-gallery/additional-source-albums.json')):{albums:[]};
-          const base=fs.existsSync('apps/yui-gallery/source-viewer-albums.json')?JSON.parse(fs.readFileSync('apps/yui-gallery/source-viewer-albums.json')):{albums:[]};
-          const remote=[...new Map([...base.albums,...extra.albums].map(a=>[a.id,a])).values()];
-          const remoteCount=remote.reduce((n,a)=>n+a.images.length,0);
-          const aliases=JSON.parse(fs.readFileSync('apps/yui-gallery/album-aliases.json')).aliases;
-          const remoteIds=new Set(remote.map(a=>a.id));
-          const localVisible=local.albums.filter(a=>!remoteIds.has(aliases[a.id]||a.id));
-          const hasSources=fs.existsSync('apps/yui-gallery/source-viewer-albums.json');
-          (async()=>{
-            const browser=await chromium.launch({headless:true});
-            const page=await browser.newPage({viewport:{width:390,height:844},acceptDownloads:true});
-            const errors=[];page.on('pageerror',e=>errors.push(e.message));
-            await page.goto('http://127.0.0.1:8765/',{waitUntil:'domcontentloaded',timeout:30000});
-            await page.waitForFunction(()=>document.querySelector('#total')?.textContent?.includes('albums'),{timeout:20000});
-            const version=await page.locator('#app-version').innerText();
-            if(version!==JSON.parse(fs.readFileSync('apps/yui-gallery/version.json')).version)throw Error('Current version missing at header top right');
-            const vbox=await page.locator('#app-version').boundingBox();
-            if(!vbox||vbox.x<190||vbox.y>25||vbox.height>18)throw Error('Version is not small/top-right');
-            if(await page.locator('#browse-toggle').getAttribute('data-mode')!=='albums')throw Error('Albums not default view');
-            if(await page.locator('[data-filter]').count())throw Error('Old browse tabs remain visible');
-            const sorted=selector=>page.locator(selector).evaluateAll(els=>{const names=els.map(x=>x.textContent);return JSON.stringify(names)===JSON.stringify([...names].sort((a,b)=>a.localeCompare(b,'ko',{numeric:true,sensitivity:'base'})))});
-            if(!await sorted('#albumgrid .album .name'))throw Error('Album titles not ascending');
-            const albumCount=await page.locator('.album').count(),expectedAlbums=localVisible.length+remote.length;
-            if(albumCount!==expectedAlbums)throw Error('Expected '+expectedAlbums+' albums, got '+albumCount);
-            if(await page.locator('.album[data-id="v04"]').count())throw Error('Duplicate Teddy preview card remains');
-            await page.locator('.album[data-id="teddy-bear97"]').click();
-            const detailCount=await page.locator('#detailphotos .photo').count();
-            if(detailCount!==97)throw Error('Complete 97-photo Teddy Bear edition missing');
-            const localPhoto=page.locator('#detailphotos .photo').filter({has:page.locator('img[src^="stored-albums/"]')}).first();
-            const startIndex=Number(await localPhoto.getAttribute('data-i'));
-            await localPhoto.click();
-            await page.waitForFunction(()=>document.querySelector('#full').naturalWidth>0,{timeout:10000});
-            if(!(await page.locator('#full').getAttribute('src')).startsWith('stored-albums/'))throw Error('Exact-hash local fallback missing');
-            await page.locator('#next').click();
-            if(!(await page.locator('#position').innerText()).startsWith(((startIndex+1)%97+1)+' /'))throw Error('Next image failed');
-            await page.locator('#close').click();
-            await page.locator('#back').click();
-            if(hasSources){
-              for(const [id,expected] of [['athletic-club104',104],['green91',91]]){
-                await page.locator('.album[data-id="'+id+'"]').click();
-                if(await page.locator('#detailphotos .photo').count()!==expected)throw Error('Missing source album photos: '+id);
-                await page.locator('#detailphotos .photo').first().click();
-                try{
-                  await page.waitForFunction(()=>document.querySelector('#full').naturalWidth>100,{timeout:15000});
-                }catch(error){throw Error('Source-host image cannot load in gallery: '+id+': '+await page.locator('#full').getAttribute('src'))}
-                await page.locator('#close').click();
-                await page.locator('#back').click();
-              }
-            }
-            // Hidden global-photo/catalogue controls retain all runtime records.
-            const allPhotos=await page.evaluate(()=>available().reduce((n,a)=>n+validImages(a).length,0));
-            const expectedPhotos=localVisible.reduce((n,a)=>n+a.images.length,0)+remoteCount;
-            if(allPhotos!==expectedPhotos)throw Error('Expected '+expectedPhotos+' photo records, got '+allPhotos);
-            const allWorks=await page.evaluate(()=>catalog.length);
-            if(allWorks<40)throw Error('Catalog collapsed: '+allWorks);
-            await page.locator('#browse-toggle').click();
-            await page.locator('#publishergrid').waitFor({state:'visible'});
-            if(!await sorted('#publishergrid .publisher-info strong'))throw Error('Publishers not ascending');
-            await page.screenshot({path:'yui-album-mobile.png',fullPage:false});
-            await page.locator('[data-publisher="sweetbox"]').click();
-            if(!await sorted('#albumgrid .album .name'))throw Error('Publisher albums not ascending');
-            await page.locator('.album[data-id="teddy-bear97"]').click();
-            if(await page.locator('#detailphotos .photo').count()!==97)throw Error('Publisher/album/photo hierarchy broken');
-            await page.locator('#back').click();
-            await page.waitForFunction(()=>activePublisher==='sweetbox');
-            await page.locator('#browse-toggle').click();
-            if(await page.locator('#browse-toggle').getAttribute('data-mode')!=='albums')throw Error('Toggle did not return to albums');
-            await page.goBack();
-            await page.waitForFunction(()=>activePublisher==='sweetbox');
-            if(await page.locator('#browse-toggle').getAttribute('data-mode')!=='publishers')throw Error('Back lost publisher mode');
-            if(errors.length)throw Error('JavaScript errors: '+errors.join('; '));
-            console.log('YUI_IMAGE_FIRST_GALLERY_MOBILE_PASS',{albumCount,detailCount,allPhotos,allWorks,version,sourceRemoteBrowserQA:hasSources,singleToggleAscendingHierarchy:true});
-            await browser.close();
-          })().catch(e=>{console.error(e);process.exit(1)});
+          const fs=require('fs'),{chromium,webkit}=require('playwright');
+          const data=JSON.parse(fs.readFileSync('apps/yui-gallery/stored-albums.json'));
+          const photos=data.albums.flatMap(a=>a.images);
+          async function check(engine,name){
+            const browser=await engine.launch();
+            try{
+              const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
+              const errors=[],external=[];
+              page.on('pageerror',e=>errors.push(String(e)));
+              page.on('request',r=>{if(r.resourceType()==='image'&&!r.url().startsWith('http://127.0.0.1:8765/'))external.push(r.url())});
+              await page.goto('http://127.0.0.1:8765/',{waitUntil:'domcontentloaded'});
+              await page.waitForFunction(()=>document.querySelector('#total')?.textContent?.includes('albums'));
+              const cards=await page.locator('#albumgrid .album').count();
+              if(cards!==data.albums.length)throw Error('Album count wrong '+cards);
+              if(await page.locator('#inventory').innerText()!==photos.length+'장 · 실제 저장본')throw Error('Inventory counts unarchived media');
+              const urls=await page.evaluate(()=>available().flatMap(a=>validImages(a).map(p=>p.url)));
+              if(urls.length!==photos.length||urls.some(x=>!x.startsWith('stored-albums/')))throw Error('Remote photo shown');
+              const failed=await page.evaluate(async list=>{
+                const bad=[];
+                for(const url of list){
+                  const image=new Image();
+                  const ok=await new Promise(resolve=>{image.onload=()=>resolve(image.naturalWidth>50);image.onerror=()=>resolve(false);image.src=url});
+                  if(!ok)bad.push(url);
+                }
+                return bad;
+              },urls);
+              if(failed.length)throw Error('Stored photo render failure '+failed[0]);
+              await page.locator('#albumgrid .album').first().click();
+              await page.locator('#detailphotos .photo').first().click();
+              await page.waitForFunction(()=>document.querySelector('#full')?.naturalWidth>50);
+              const shown=await page.locator('#full').getAttribute('src');
+              if(!shown.startsWith('stored-albums/'))throw Error('Lightbox hotlink');
+              if(external.length||errors.length)throw Error(JSON.stringify({external,errors}));
+              await page.screenshot({path:'yui-stored-'+name+'.png'});
+              console.log('YUI_LOCAL_ONLY_'+name.toUpperCase()+'_PASS',cards,photos.length);
+            }finally{await browser.close()}
+          }
+          (async()=>{await check(chromium,'chromium');await check(webkit,'webkit')})().catch(e=>{console.error(e.stack||String(e));process.exit(1)});
           NODE
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
-          path: yui-album-mobile.png
-          archive: false
-          retention-days: 90
-          if-no-files-found: warn
+          name: yui-stored-browser-proof
+          path: yui-stored-*.png
+          retention-days: 14
+          if-no-files-found: ignore
