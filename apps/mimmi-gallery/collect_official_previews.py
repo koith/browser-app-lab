@@ -76,9 +76,12 @@ def archive(page_limit=5):
     return list(found.values()),pages
 
 def count_photo_text(text):
-    patterns=[r"total\s+(\d{1,4})\s+(?:extremely[- ]high resolution\s+)?photos",
-              r"(?:total|contains|consists of)\s+(\d{1,4})\s+(?:high[- ]resolution\s+)?photos",
-              r"(\d{1,4})\s+(?:high[- ]resolution\s+)?(?:photos|pics|pictures)"]
+    # DJAWA writes e.g. 'total 75 extremely-high resolution (5000 × 5000) photos'.
+    patterns=[
+        r"total\\s+(\\d{1,4})\\s+(?:extremely[- ]high resolution\\s+)?(?:\\([^)]*\\)\\s+)?photos",
+        r"(?:total|contains|consists of)\\s+(\\d{1,4})\\s+(?:high[- ]resolution\\s+)?(?:\\([^)]*\\)\\s+)?photos",
+        r"(\\d{1,4})\\s+(?:high[- ]resolution\\s+)?(?:\\([^)]*\\)\\s+)?(?:photos|pics|pictures)",
+    ]
     for pat in patterns:
         m=re.search(pat,text,re.I)
         if m and 1<=int(m.group(1))<=1000:return int(m.group(1))
