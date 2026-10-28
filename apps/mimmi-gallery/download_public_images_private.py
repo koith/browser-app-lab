@@ -34,9 +34,13 @@ SESSION.headers.update({
 def permitted(url):
     try:
         p = urlsplit(url)
-        return (p.scheme == "https" and p.hostname in HOSTS
+        if not (p.scheme == "https" and p.hostname in HOSTS
                 and not p.username and not p.password
-                and not p.port and Path(p.path).suffix.lower() in EXT)
+                and not p.port and Path(p.path).suffix.lower() in EXT):
+            return False
+        if p.hostname == "cdn.v2ph.com":
+            return p.path.startswith("/photos/")
+        return p.path.startswith("/wp-content/uploads/")
     except (ValueError, TypeError, AttributeError):
         return False
 
