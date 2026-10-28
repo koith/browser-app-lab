@@ -41,7 +41,7 @@ def verify_130_photo_pagination():
 def verify_batch_rotation():
     catalog=[{"id":f"v2ph-actor-test{i:02}","title":"Mimmi Test","source":f"https://www.v2ph.com/album/test{i:02}.html"} for i in range(22)]
     touched=[]
-    def fake_verify(a,max_samples,max_album_pages):
+    def fake_verify(a,max_samples,max_album_pages,browser_scroll=False):
         touched.append((a["id"],max_samples,max_album_pages))
         return {**a,"samples":[],"images":[],"pages":[],"status":"source_only"}
     with tempfile.TemporaryDirectory() as folder:
