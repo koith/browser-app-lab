@@ -1,5 +1,1411 @@
 {
-  "schema_version": 1,
-  "model": "mimmi",
-  "albums": []
+  "updated": "2026-10-28T17:50:50Z",
+  "storage": "physically committed public previews under GitHub Pages; not licensed publisher masters",
+  "albums": [
+    {
+      "id": "v2ph-actor-a9nxx64z",
+      "title": "[AI Enhanced] DJAWA Photo - Mimmi (밈미) - Nikke Elegg",
+      "publisher": "DJAWA",
+      "source": "https://www.v2ph.com/album/a9nxx64z.html",
+      "images": [
+        {
+          "url": "stored-albums/v2ph-actor-a9nxx64z/00c4b4a4e4c5992035c62973e68d4d34fe157c54f60391f9cae28108d5ae5150.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/oKpig6tg0b0uC-4H.jpg",
+          "sha256": "00c4b4a4e4c5992035c62973e68d4d34fe157c54f60391f9cae28108d5ae5150",
+          "bytes": 1209686,
+          "width": 2000,
+          "height": 3001,
+          "number": 1
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a9nxx64z/ded6e8c979a0b151560da728296270445876a367a89f94ce8a8e8110543c4907.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/M07_C1xp-Lp8YUpS.jpg",
+          "sha256": "ded6e8c979a0b151560da728296270445876a367a89f94ce8a8e8110543c4907",
+          "bytes": 814709,
+          "width": 2000,
+          "height": 3001,
+          "number": 2
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a9nxx64z/c8387a7260120f155c9b9e4eb6d0524d077d614ed3b1820ef2e1f6703b9bcf25.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/pOJCn0IPsqCIuLaK.jpg",
+          "sha256": "c8387a7260120f155c9b9e4eb6d0524d077d614ed3b1820ef2e1f6703b9bcf25",
+          "bytes": 384018,
+          "width": 2000,
+          "height": 1333,
+          "number": 3
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a9nxx64z/36541c698e3806995068c379247dcf6f6373cd9de8c4b17efa59362e51038e58.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/qodLhNCNAXvyBEYF.jpg",
+          "sha256": "36541c698e3806995068c379247dcf6f6373cd9de8c4b17efa59362e51038e58",
+          "bytes": 1447768,
+          "width": 2000,
+          "height": 3001,
+          "number": 4
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a9nxx64z/d3577b0f2fe960261438d8961e4f7b21c00a7140b4a1e29c1aa6b78abd1bd6ea.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/JApCin0Ycqbrx_S0.jpg",
+          "sha256": "d3577b0f2fe960261438d8961e4f7b21c00a7140b4a1e29c1aa6b78abd1bd6ea",
+          "bytes": 1240789,
+          "width": 2000,
+          "height": 3001,
+          "number": 5
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a9nxx64z/5b493737981c73aad14a765441ff0d9b76adaf4fa6463ec6b3adcdb1b2087de3.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/Uxv25RJUuV0930L7.jpg",
+          "sha256": "5b493737981c73aad14a765441ff0d9b76adaf4fa6463ec6b3adcdb1b2087de3",
+          "bytes": 497947,
+          "width": 2000,
+          "height": 1333,
+          "number": 6
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a9nxx64z/897aeb68892b6d9228b1192625b346b4e5fa3504a067e25f268b00f0415f3ac0.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/q_jkqCDtFkuMAjbs.jpg",
+          "sha256": "897aeb68892b6d9228b1192625b346b4e5fa3504a067e25f268b00f0415f3ac0",
+          "bytes": 385493,
+          "width": 2000,
+          "height": 1333,
+          "number": 7
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a9nxx64z/58c37d48d18beebcbabd8edc4d37e2712e055fe41b27fc39fe57c9161ec777b1.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/QGHk1v99Tofiakjj.jpg",
+          "sha256": "58c37d48d18beebcbabd8edc4d37e2712e055fe41b27fc39fe57c9161ec777b1",
+          "bytes": 685423,
+          "width": 2000,
+          "height": 3001,
+          "number": 8
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a9nxx64z/daf788c8339af51bd70279a2763869165f2c441dbb1a70397fc5119b74e72190.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/GuV0RzkndxB-aW5C.jpg",
+          "sha256": "daf788c8339af51bd70279a2763869165f2c441dbb1a70397fc5119b74e72190",
+          "bytes": 474829,
+          "width": 2000,
+          "height": 1333,
+          "number": 9
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a9nxx64z/3aa65f0476e3a978edd81cfee4ebab149a957905dcd82c5ff54103e1f35cd9bc.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/Mb0iA9wVx6JjxxCo.jpg",
+          "sha256": "3aa65f0476e3a978edd81cfee4ebab149a957905dcd82c5ff54103e1f35cd9bc",
+          "bytes": 462472,
+          "width": 2000,
+          "height": 1333,
+          "number": 10
+        }
+      ],
+      "status": "public_previews_only_not_complete"
+    },
+    {
+      "id": "v2ph-actor-zo799eez",
+      "title": "[AI Enhanced] DJAWA Photo - Mimmi (밈미) My Summer Vacation Vol.5",
+      "publisher": "DJAWA",
+      "source": "https://www.v2ph.com/album/zo799eez.html",
+      "images": [
+        {
+          "url": "stored-albums/v2ph-actor-zo799eez/f9acad7ce88443c99b77621ea4d8233811bc4ee546333a6a1d1b8bb690a6190f.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/DE9X72qEkTc2i5aD.jpg",
+          "sha256": "f9acad7ce88443c99b77621ea4d8233811bc4ee546333a6a1d1b8bb690a6190f",
+          "bytes": 1013601,
+          "width": 2000,
+          "height": 3001,
+          "number": 1
+        },
+        {
+          "url": "stored-albums/v2ph-actor-zo799eez/0dbec6db2bf7733aa617c18b9a994b51f0a6de3ef9e159d7354f8742415b53b9.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/hUJmP-P35MG9nFoU.jpg",
+          "sha256": "0dbec6db2bf7733aa617c18b9a994b51f0a6de3ef9e159d7354f8742415b53b9",
+          "bytes": 1105631,
+          "width": 2000,
+          "height": 3001,
+          "number": 2
+        },
+        {
+          "url": "stored-albums/v2ph-actor-zo799eez/ef2a80ed38b6bfae6021dbb5cb2ab9c30054d394183be04fe8d22a61c145d16a.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/GJsWhCMN7tN-0Pxy.jpg",
+          "sha256": "ef2a80ed38b6bfae6021dbb5cb2ab9c30054d394183be04fe8d22a61c145d16a",
+          "bytes": 1066571,
+          "width": 2000,
+          "height": 3001,
+          "number": 3
+        },
+        {
+          "url": "stored-albums/v2ph-actor-zo799eez/47ac7b5243e4f3f31710fca16562ae6b68430f425fb3b808b367f61423221e7d.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/fWbxmMAcvl5ey0bE.jpg",
+          "sha256": "47ac7b5243e4f3f31710fca16562ae6b68430f425fb3b808b367f61423221e7d",
+          "bytes": 944544,
+          "width": 2000,
+          "height": 3001,
+          "number": 4
+        },
+        {
+          "url": "stored-albums/v2ph-actor-zo799eez/a65ae495a06f764b3ff7608ecdef35ec27219b20dbcafd54dd7f2f0f0740512b.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/j9T8L6rwB2QEgeq-.jpg",
+          "sha256": "a65ae495a06f764b3ff7608ecdef35ec27219b20dbcafd54dd7f2f0f0740512b",
+          "bytes": 945985,
+          "width": 2000,
+          "height": 3001,
+          "number": 5
+        },
+        {
+          "url": "stored-albums/v2ph-actor-zo799eez/8840cffbb9fe274e2769f9908e090de3851319044e24485b1c8e3115daff559f.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/NuO0rjaGm4zISbPr.jpg",
+          "sha256": "8840cffbb9fe274e2769f9908e090de3851319044e24485b1c8e3115daff559f",
+          "bytes": 1028907,
+          "width": 2000,
+          "height": 3001,
+          "number": 6
+        },
+        {
+          "url": "stored-albums/v2ph-actor-zo799eez/85894f540d5b7150d0452f1532c028243c9ba30dc80285a44913410244fcd51c.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/0niapqfbf5SDCUyQ.jpg",
+          "sha256": "85894f540d5b7150d0452f1532c028243c9ba30dc80285a44913410244fcd51c",
+          "bytes": 1051467,
+          "width": 2000,
+          "height": 3001,
+          "number": 7
+        },
+        {
+          "url": "stored-albums/v2ph-actor-zo799eez/b1c39865c569d21d6fcc6bb826dd8b6e0f31a6210a70bc0d250fe61ba89fcbdf.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/xE7R3TLbqMbC0VOY.jpg",
+          "sha256": "b1c39865c569d21d6fcc6bb826dd8b6e0f31a6210a70bc0d250fe61ba89fcbdf",
+          "bytes": 1218618,
+          "width": 2000,
+          "height": 3001,
+          "number": 8
+        },
+        {
+          "url": "stored-albums/v2ph-actor-zo799eez/af3be51af7937008721104e9a38876c67a38f9bba8206101e23cbe762b943370.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/82UqDZE4h0YL0peo.jpg",
+          "sha256": "af3be51af7937008721104e9a38876c67a38f9bba8206101e23cbe762b943370",
+          "bytes": 779588,
+          "width": 2000,
+          "height": 3001,
+          "number": 9
+        },
+        {
+          "url": "stored-albums/v2ph-actor-zo799eez/55c5c2d8841c9d56cc800faea1b7012282e7bd2958b2dc90e6e609781ac659fb.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/2Cx4rexxo31wnyl3.jpg",
+          "sha256": "55c5c2d8841c9d56cc800faea1b7012282e7bd2958b2dc90e6e609781ac659fb",
+          "bytes": 1087020,
+          "width": 2000,
+          "height": 3001,
+          "number": 10
+        }
+      ],
+      "status": "public_previews_only_not_complete"
+    },
+    {
+      "id": "v2ph-actor-a884435a",
+      "title": "[CreamSoda] Mimmi (デプワ) - Vol.4 Chic Nerd & Maness Nurse",
+      "publisher": "CreamSoda",
+      "source": "https://www.v2ph.com/album/a884435a.html",
+      "images": [
+        {
+          "url": "stored-albums/v2ph-actor-a884435a/3d83df9da7c8097c37a83b66851fb2d1a7808d25bcfe7bc60c312b9826a8e0f2.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/gqcQHYQ_vO-GVJEG.jpg",
+          "sha256": "3d83df9da7c8097c37a83b66851fb2d1a7808d25bcfe7bc60c312b9826a8e0f2",
+          "bytes": 492930,
+          "width": 1800,
+          "height": 2700,
+          "number": 1
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a884435a/07ea9956f610a384d28bed0cc2bc2c49322caddb323d67d15db6af508a656d43.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/JON89GyHlSiS5ur6.jpg",
+          "sha256": "07ea9956f610a384d28bed0cc2bc2c49322caddb323d67d15db6af508a656d43",
+          "bytes": 505260,
+          "width": 2700,
+          "height": 1800,
+          "number": 2
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a884435a/8ce8e6f55dee151fb6d8152f4467ee757be790dcd12b924009de07625b1d9644.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/waCmZUle8g44gk6Z.jpg",
+          "sha256": "8ce8e6f55dee151fb6d8152f4467ee757be790dcd12b924009de07625b1d9644",
+          "bytes": 488206,
+          "width": 2700,
+          "height": 1800,
+          "number": 3
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a884435a/e537c0dc4d16ca61173f438f23b3242ada658425c8402da0f097fed8b8599d48.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/PsIBw4qgeJ-Pbrr4.jpg",
+          "sha256": "e537c0dc4d16ca61173f438f23b3242ada658425c8402da0f097fed8b8599d48",
+          "bytes": 483306,
+          "width": 2700,
+          "height": 1800,
+          "number": 4
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a884435a/5a24c0ca342eb4d02a235be117b306ff60a286fb9f04b1c94672264b8aac5da6.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/3lhwcw5AJGtTrgVC.jpg",
+          "sha256": "5a24c0ca342eb4d02a235be117b306ff60a286fb9f04b1c94672264b8aac5da6",
+          "bytes": 497792,
+          "width": 2700,
+          "height": 1800,
+          "number": 5
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a884435a/ac1e9eeaac8a3e9a6488ac85d90e22f804f8627b1827a9ccc574b7ba794c3cf4.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/Oso88KtBggERpYzD.jpg",
+          "sha256": "ac1e9eeaac8a3e9a6488ac85d90e22f804f8627b1827a9ccc574b7ba794c3cf4",
+          "bytes": 479813,
+          "width": 2700,
+          "height": 1800,
+          "number": 6
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a884435a/7e405574cbe4f2be1fae0480dc306a8460c48f85fafbb522dc6b54cdad9cc8f8.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/tS3D3494C6nYpvFr.jpg",
+          "sha256": "7e405574cbe4f2be1fae0480dc306a8460c48f85fafbb522dc6b54cdad9cc8f8",
+          "bytes": 560840,
+          "width": 1800,
+          "height": 2700,
+          "number": 7
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a884435a/cb560823941df8b4a254f2d59b466c783d2c5f649cfc1c1b4ad809593c21b230.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/C-GFmnq7DsK8inFA.jpg",
+          "sha256": "cb560823941df8b4a254f2d59b466c783d2c5f649cfc1c1b4ad809593c21b230",
+          "bytes": 551989,
+          "width": 2700,
+          "height": 1800,
+          "number": 8
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a884435a/53fb85e47adf7ef474ebc4516ce42f951e3af9c4b359a3ea0cc0e73b8aa247b6.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/npZR2i-JP51EyEL2.jpg",
+          "sha256": "53fb85e47adf7ef474ebc4516ce42f951e3af9c4b359a3ea0cc0e73b8aa247b6",
+          "bytes": 543659,
+          "width": 2700,
+          "height": 1800,
+          "number": 9
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a884435a/05a2dd51820845f7552f3e8c92460def657db14ff139b456451f88e0ee3e5ee5.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/0-XIUOgHHic5-CNV.jpg",
+          "sha256": "05a2dd51820845f7552f3e8c92460def657db14ff139b456451f88e0ee3e5ee5",
+          "bytes": 614827,
+          "width": 2700,
+          "height": 1800,
+          "number": 10
+        }
+      ],
+      "status": "public_previews_only_not_complete"
+    },
+    {
+      "id": "v2ph-actor-a5e78m5a",
+      "title": "[CreamSoda] Mimmi (デプワ) Vol.2 Neko Mimmi",
+      "publisher": "CreamSoda",
+      "source": "https://www.v2ph.com/album/a5e78m5a.html",
+      "images": [
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/6cd51e28aafe4745b469a8dcd31d33849d5bcfdd6413fb03853f578a42401ae8.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/vBna7s8r2z7l13JK.jpg",
+          "sha256": "6cd51e28aafe4745b469a8dcd31d33849d5bcfdd6413fb03853f578a42401ae8",
+          "bytes": 463492,
+          "width": 1800,
+          "height": 2700,
+          "number": 1
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/36513c536345c5e742b9a0d36760506aae47d0d25e415a838431e2e09844eb5d.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/NMdqNB4G9Nb4QQKE.jpg",
+          "sha256": "36513c536345c5e742b9a0d36760506aae47d0d25e415a838431e2e09844eb5d",
+          "bytes": 341012,
+          "width": 1800,
+          "height": 2700,
+          "number": 2
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/7f5df30de62e8e016243672c081bcc9593ddcd19bc9c3bea3ff977dcf51459b2.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/_Osh4ZNm8gj6-pUc.jpg",
+          "sha256": "7f5df30de62e8e016243672c081bcc9593ddcd19bc9c3bea3ff977dcf51459b2",
+          "bytes": 639342,
+          "width": 2700,
+          "height": 1800,
+          "number": 3
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/fb10d0dabb9ae303f2ea97de3a00877ef09ebcb2b9c73d963e21ffd67c359d75.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/u9aWyeqcrSCzxzn9.jpg",
+          "sha256": "fb10d0dabb9ae303f2ea97de3a00877ef09ebcb2b9c73d963e21ffd67c359d75",
+          "bytes": 446806,
+          "width": 2700,
+          "height": 1800,
+          "number": 4
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/512de2c1a841487fb16806e99f33173ffa798b86b69d9bc055d293761e5d618b.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/APoQ2BZdTFlw7ToW.jpg",
+          "sha256": "512de2c1a841487fb16806e99f33173ffa798b86b69d9bc055d293761e5d618b",
+          "bytes": 579333,
+          "width": 2700,
+          "height": 1800,
+          "number": 5
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/2ee4302235c76752c9359d4c72168f056eae18dd8a1cb56e2b020b67c88b185b.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/adG65n510cnbUWpV.jpg",
+          "sha256": "2ee4302235c76752c9359d4c72168f056eae18dd8a1cb56e2b020b67c88b185b",
+          "bytes": 611047,
+          "width": 1800,
+          "height": 2700,
+          "number": 6
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/c281827d435c5f64e16f92a285594c7db2c691e37cb4acb04f8919e69e16c87b.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/qfYcEsb9HZ0qXYM0.jpg",
+          "sha256": "c281827d435c5f64e16f92a285594c7db2c691e37cb4acb04f8919e69e16c87b",
+          "bytes": 754663,
+          "width": 1800,
+          "height": 2700,
+          "number": 7
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/b961a10961272d8cb678d2f3db3a3554899e5e242edc6e469a5cc0fed2bba7d1.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/0Fsrj9CWqu-scUn6.jpg",
+          "sha256": "b961a10961272d8cb678d2f3db3a3554899e5e242edc6e469a5cc0fed2bba7d1",
+          "bytes": 843159,
+          "width": 1800,
+          "height": 2700,
+          "number": 8
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/6eeca0b833bdf526f3887db14291597e7b647862d9f5a4e777e38673e46361d3.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/gfgDZYLZhUEOsleK.jpg",
+          "sha256": "6eeca0b833bdf526f3887db14291597e7b647862d9f5a4e777e38673e46361d3",
+          "bytes": 546177,
+          "width": 2700,
+          "height": 1800,
+          "number": 9
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/ae7e24acfb1c89163d8a6c22d5c90d95b4b9ced84ec904530c351518a0a6fdca.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/69BCaVctr2k3IM0I.jpg",
+          "sha256": "ae7e24acfb1c89163d8a6c22d5c90d95b4b9ced84ec904530c351518a0a6fdca",
+          "bytes": 464670,
+          "width": 2700,
+          "height": 1800,
+          "number": 10
+        }
+      ],
+      "status": "public_previews_only_not_complete"
+    },
+    {
+      "id": "v2ph-actor-a8847m5a",
+      "title": "[CreamSoda] Mimmi (デプワ) Vol.3 Mashu Mimmi",
+      "publisher": "CreamSoda",
+      "source": "https://www.v2ph.com/album/a8847m5a.html",
+      "images": [
+        {
+          "url": "stored-albums/v2ph-actor-a8847m5a/9a8a6afbc21b8ccdc049dc399717d4ce2f10e7f495792b01bdbe465187932522.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/-UjRmiyAjOOhWtWQ.jpg",
+          "sha256": "9a8a6afbc21b8ccdc049dc399717d4ce2f10e7f495792b01bdbe465187932522",
+          "bytes": 777361,
+          "width": 1800,
+          "height": 2700,
+          "number": 1
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a8847m5a/b97c219c0249884578544d53643e6cd71acdc83b886a635c290ad5b73d073112.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/ulrJQd4eGTz59XPk.jpg",
+          "sha256": "b97c219c0249884578544d53643e6cd71acdc83b886a635c290ad5b73d073112",
+          "bytes": 739957,
+          "width": 1800,
+          "height": 2700,
+          "number": 2
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a8847m5a/1973db634dcfa2dd0a478b159e7313e4c5e0849c145158a04634c7b73c55315c.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/WCYmJHI5wE_HmKNI.jpg",
+          "sha256": "1973db634dcfa2dd0a478b159e7313e4c5e0849c145158a04634c7b73c55315c",
+          "bytes": 533159,
+          "width": 1800,
+          "height": 2700,
+          "number": 3
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a8847m5a/8d8346631717b4cc40d47b974d03884e78f9374d259a0e1b77e9239b5ac5535b.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/XUn4Qjb7CB3Xwq_r.jpg",
+          "sha256": "8d8346631717b4cc40d47b974d03884e78f9374d259a0e1b77e9239b5ac5535b",
+          "bytes": 522104,
+          "width": 2700,
+          "height": 1800,
+          "number": 4
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a8847m5a/1fd7b0f7fe89e3ba97301434c5ddd73cbc4b04f6fb2f85b3e3907e2de69f4253.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/WVFw1OMs2NoNHB-t.jpg",
+          "sha256": "1fd7b0f7fe89e3ba97301434c5ddd73cbc4b04f6fb2f85b3e3907e2de69f4253",
+          "bytes": 711617,
+          "width": 2700,
+          "height": 1800,
+          "number": 5
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a8847m5a/fb295a74f53004c0d42213505f5dc6d73252dfb3890489037e36b52e7e419e76.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/W8xxkxJvRddPFGuv.jpg",
+          "sha256": "fb295a74f53004c0d42213505f5dc6d73252dfb3890489037e36b52e7e419e76",
+          "bytes": 574620,
+          "width": 2700,
+          "height": 1800,
+          "number": 6
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a8847m5a/3aa1f7ae2bd24b9f85e3a3760f0b3af4d3effc059fa22b2808a9f5e6885a5e08.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/pBxZDLQg9TDHOOQP.jpg",
+          "sha256": "3aa1f7ae2bd24b9f85e3a3760f0b3af4d3effc059fa22b2808a9f5e6885a5e08",
+          "bytes": 598414,
+          "width": 2700,
+          "height": 1800,
+          "number": 7
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a8847m5a/2605b999e5c4be939010bdbecbb2a26eb928c584c62cfc921a8d432ccfb72a5d.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/OTgd-mq4qLEPgKaZ.jpg",
+          "sha256": "2605b999e5c4be939010bdbecbb2a26eb928c584c62cfc921a8d432ccfb72a5d",
+          "bytes": 574792,
+          "width": 2700,
+          "height": 1800,
+          "number": 8
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a8847m5a/c754e13a123267c6de3c1bf1403d6f65af56a133b89394f093382926acdff82c.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/Bs55O_i-b_AMNnMw.jpg",
+          "sha256": "c754e13a123267c6de3c1bf1403d6f65af56a133b89394f093382926acdff82c",
+          "bytes": 487525,
+          "width": 2700,
+          "height": 1800,
+          "number": 9
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a8847m5a/b233b13160ab01fc743b3d964b3b6c3b59b994670a2bd9cb98d70f1431dcde6e.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/ROfO97tK8cL8s628.jpg",
+          "sha256": "b233b13160ab01fc743b3d964b3b6c3b59b994670a2bd9cb98d70f1431dcde6e",
+          "bytes": 599848,
+          "width": 2700,
+          "height": 1800,
+          "number": 10
+        }
+      ],
+      "status": "public_previews_only_not_complete"
+    },
+    {
+      "id": "v2ph-actor-ae57484a",
+      "title": "[CreamSoda] Mimmi --Belt choker Photograph",
+      "publisher": "CreamSoda",
+      "source": "https://www.v2ph.com/album/ae57484a.html",
+      "images": [
+        {
+          "url": "stored-albums/v2ph-actor-ae57484a/ab15803aeaa57c2674cae271c0edf79210799b892b791cc395e98a8ceb9e024f.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/UZUVdWqrOzUgaNRJ.jpg",
+          "sha256": "ab15803aeaa57c2674cae271c0edf79210799b892b791cc395e98a8ceb9e024f",
+          "bytes": 277799,
+          "width": 1800,
+          "height": 2700,
+          "number": 1
+        },
+        {
+          "url": "stored-albums/v2ph-actor-ae57484a/94b54148d922f9576821c06cb4e89fd16c981d2a86680a6d060047c095444556.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/9oRhw1wxB2jh6Okf.jpg",
+          "sha256": "94b54148d922f9576821c06cb4e89fd16c981d2a86680a6d060047c095444556",
+          "bytes": 242175,
+          "width": 1800,
+          "height": 2700,
+          "number": 2
+        },
+        {
+          "url": "stored-albums/v2ph-actor-ae57484a/7930769728f0a1e70831a62835c61f2ae5d7d4532666f43f73d3308d8c37e4b1.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/yqsmItlKWfVodSSs.jpg",
+          "sha256": "7930769728f0a1e70831a62835c61f2ae5d7d4532666f43f73d3308d8c37e4b1",
+          "bytes": 255346,
+          "width": 2700,
+          "height": 1800,
+          "number": 3
+        },
+        {
+          "url": "stored-albums/v2ph-actor-ae57484a/02c8103d210309fbc47b73cfbcfa62e897f868f4e3346d5cf6e002228601246d.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/VSt39SeudrPpKqdT.jpg",
+          "sha256": "02c8103d210309fbc47b73cfbcfa62e897f868f4e3346d5cf6e002228601246d",
+          "bytes": 243210,
+          "width": 1800,
+          "height": 2700,
+          "number": 4
+        },
+        {
+          "url": "stored-albums/v2ph-actor-ae57484a/5ee92acf7dd1de5a4670a5edac826b27ee9fa648a0ee85a8f88e661c928402c0.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/4lxVIzKwr4NXhf7O.jpg",
+          "sha256": "5ee92acf7dd1de5a4670a5edac826b27ee9fa648a0ee85a8f88e661c928402c0",
+          "bytes": 252299,
+          "width": 1800,
+          "height": 2700,
+          "number": 5
+        },
+        {
+          "url": "stored-albums/v2ph-actor-ae57484a/2b18522354cec0546fbefeaf5400ddcd1f441311237a13674fd13aece9576d0e.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/t0qB2UoaJ7rsZo9U.jpg",
+          "sha256": "2b18522354cec0546fbefeaf5400ddcd1f441311237a13674fd13aece9576d0e",
+          "bytes": 204076,
+          "width": 1800,
+          "height": 2700,
+          "number": 6
+        },
+        {
+          "url": "stored-albums/v2ph-actor-ae57484a/7639c76afdb02e39cfbdd7232c1ac5eda4db499d157707f19d2bb7ffd6d89019.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/8Gkcw8oRki5O4DbB.jpg",
+          "sha256": "7639c76afdb02e39cfbdd7232c1ac5eda4db499d157707f19d2bb7ffd6d89019",
+          "bytes": 249529,
+          "width": 1800,
+          "height": 2700,
+          "number": 7
+        },
+        {
+          "url": "stored-albums/v2ph-actor-ae57484a/ca0195ad24c70aad94abc04cff7053a792b8f4b87b5ad5e51603c7c09132366b.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/ir8PN9DHQOqCpm7w.jpg",
+          "sha256": "ca0195ad24c70aad94abc04cff7053a792b8f4b87b5ad5e51603c7c09132366b",
+          "bytes": 244532,
+          "width": 1800,
+          "height": 2700,
+          "number": 8
+        },
+        {
+          "url": "stored-albums/v2ph-actor-ae57484a/db473b907e5738f8b238bbfa4d3a751f25155724ed119c64f82dbc04fb4fe662.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/R1XWsa7tR8pvNqbE.jpg",
+          "sha256": "db473b907e5738f8b238bbfa4d3a751f25155724ed119c64f82dbc04fb4fe662",
+          "bytes": 255184,
+          "width": 1800,
+          "height": 2700,
+          "number": 9
+        },
+        {
+          "url": "stored-albums/v2ph-actor-ae57484a/c835ac1deeb6ae5941d2e6eff548971d1dc84dea602c1e4367522ef5fca18dfc.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/jy31FrSR89BNjxvr.jpg",
+          "sha256": "c835ac1deeb6ae5941d2e6eff548971d1dc84dea602c1e4367522ef5fca18dfc",
+          "bytes": 266174,
+          "width": 1800,
+          "height": 2700,
+          "number": 10
+        }
+      ],
+      "status": "public_previews_only_not_complete"
+    },
+    {
+      "id": "djawa-asuna-the-maid",
+      "title": "Asuna the Maid",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/asuna-the-maid/",
+      "images": [
+        {
+          "url": "stored-albums/djawa-asuna-the-maid/3c2d2a509e19a59085ed3e42d0abd2bcaec6e4412803f6aecd53d6dc27134c9d.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2025/12/sample_cv-2.jpg",
+          "sha256": "3c2d2a509e19a59085ed3e42d0abd2bcaec6e4412803f6aecd53d6dc27134c9d",
+          "bytes": 606091,
+          "width": 1200,
+          "height": 1800,
+          "number": 1
+        },
+        {
+          "url": "stored-albums/djawa-asuna-the-maid/a3a7dc88870ea3af50992568935c4d4d996024fbaf751ece21cd9f816a46192e.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2025/12/sample_cv2-1.jpg",
+          "sha256": "a3a7dc88870ea3af50992568935c4d4d996024fbaf751ece21cd9f816a46192e",
+          "bytes": 506101,
+          "width": 1200,
+          "height": 1800,
+          "number": 2
+        },
+        {
+          "url": "stored-albums/djawa-asuna-the-maid/ac53b2aed845aa122a71abeecdc401ad2f9c4257a143cae01b85dbd5c5df73e1.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2025/12/sample_01-3.jpg",
+          "sha256": "ac53b2aed845aa122a71abeecdc401ad2f9c4257a143cae01b85dbd5c5df73e1",
+          "bytes": 423382,
+          "width": 1800,
+          "height": 1200,
+          "number": 3
+        },
+        {
+          "url": "stored-albums/djawa-asuna-the-maid/dd77ddf21696ce416d47013c9e6f4714ddf9639a4b298aa4caaaf68d8a381e83.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2025/12/sample_02-3.jpg",
+          "sha256": "dd77ddf21696ce416d47013c9e6f4714ddf9639a4b298aa4caaaf68d8a381e83",
+          "bytes": 476920,
+          "width": 1200,
+          "height": 1800,
+          "number": 4
+        },
+        {
+          "url": "stored-albums/djawa-asuna-the-maid/d69cc42c1ad75accbe48edaae6229838b986d1ff2dd249c717267472f7285edd.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2025/12/sample_03-3.jpg",
+          "sha256": "d69cc42c1ad75accbe48edaae6229838b986d1ff2dd249c717267472f7285edd",
+          "bytes": 559115,
+          "width": 1200,
+          "height": 1800,
+          "number": 5
+        },
+        {
+          "url": "stored-albums/djawa-asuna-the-maid/19747d0b4d37c703b2b93ea429ffd36832e2c9ce2b9bd61b84fe1f84c70b1238.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2025/12/sample_04-2.jpg",
+          "sha256": "19747d0b4d37c703b2b93ea429ffd36832e2c9ce2b9bd61b84fe1f84c70b1238",
+          "bytes": 599210,
+          "width": 1200,
+          "height": 1800,
+          "number": 6
+        },
+        {
+          "url": "stored-albums/djawa-asuna-the-maid/8c5823bba899158605015d354871e214086b5bb4c8145cf04e4c263c9c620139.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2025/12/sample_05-3.jpg",
+          "sha256": "8c5823bba899158605015d354871e214086b5bb4c8145cf04e4c263c9c620139",
+          "bytes": 498941,
+          "width": 1200,
+          "height": 1800,
+          "number": 7
+        },
+        {
+          "url": "stored-albums/djawa-asuna-the-maid/43488ae67d3607887d473be28da015cc99bbd48c9f31e0e3cf6bb051285bb2f0.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2025/12/sample_05s.jpg",
+          "sha256": "43488ae67d3607887d473be28da015cc99bbd48c9f31e0e3cf6bb051285bb2f0",
+          "bytes": 651797,
+          "width": 1800,
+          "height": 1200,
+          "number": 8
+        },
+        {
+          "url": "stored-albums/djawa-asuna-the-maid/bd197fcf8fb516da2e309f0dc5584a48c0b5cd0987abee7da010abf53e8396d2.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2025/12/sample_06-3.jpg",
+          "sha256": "bd197fcf8fb516da2e309f0dc5584a48c0b5cd0987abee7da010abf53e8396d2",
+          "bytes": 596151,
+          "width": 1200,
+          "height": 1800,
+          "number": 9
+        },
+        {
+          "url": "stored-albums/djawa-asuna-the-maid/e9c69a9f53c632c10b83ffddd312d9d08e42e79a823ab3be4a466681e1645d97.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2025/12/sample_06s.jpg",
+          "sha256": "e9c69a9f53c632c10b83ffddd312d9d08e42e79a823ab3be4a466681e1645d97",
+          "bytes": 497877,
+          "width": 1200,
+          "height": 1800,
+          "number": 10
+        },
+        {
+          "url": "stored-albums/djawa-asuna-the-maid/76d25e458e119fb080d6476a9f39ee349e7ee1a0b67192dd26d17cb31bb2783e.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2025/12/sample_06ss.jpg",
+          "sha256": "76d25e458e119fb080d6476a9f39ee349e7ee1a0b67192dd26d17cb31bb2783e",
+          "bytes": 163735,
+          "width": 1200,
+          "height": 1800,
+          "number": 11
+        },
+        {
+          "url": "stored-albums/djawa-asuna-the-maid/efef2df29f1dc132cf50909b0e0fd2d8751b957d068215e85671da0495029549.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2025/12/sample_07-3.jpg",
+          "sha256": "efef2df29f1dc132cf50909b0e0fd2d8751b957d068215e85671da0495029549",
+          "bytes": 534939,
+          "width": 1200,
+          "height": 1800,
+          "number": 12
+        },
+        {
+          "url": "stored-albums/djawa-asuna-the-maid/94008804f8703113f0620ef0f301ef270b3fbc7cdf0302accede15696d3b15d9.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2025/12/sample_07s.jpg",
+          "sha256": "94008804f8703113f0620ef0f301ef270b3fbc7cdf0302accede15696d3b15d9",
+          "bytes": 211878,
+          "width": 1200,
+          "height": 1800,
+          "number": 13
+        }
+      ],
+      "status": "public_previews_only_not_complete"
+    },
+    {
+      "id": "v2ph-azur-lane-tashkent",
+      "title": "Azur Lane Tashkent · 공개 웹판",
+      "publisher": "DJAWA",
+      "source": "https://www.v2ph.com/album/a887785a.html",
+      "images": [
+        {
+          "url": "stored-albums/v2ph-azur-lane-tashkent/cbd9efb62e03adcea99103d2e3871c3faf06cf22cd39b73c6df970b2de6fb2bb.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/OKEWQUfmuIL8NG04.jpg",
+          "sha256": "cbd9efb62e03adcea99103d2e3871c3faf06cf22cd39b73c6df970b2de6fb2bb",
+          "bytes": 448746,
+          "width": 1800,
+          "height": 2400,
+          "number": 1
+        },
+        {
+          "url": "stored-albums/v2ph-azur-lane-tashkent/65c395abc41088042768ff9d54f7064b06acbf0f2f246bab4f8be179c7c97d32.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/jpFkPmhxUbgufHsC.jpg",
+          "sha256": "65c395abc41088042768ff9d54f7064b06acbf0f2f246bab4f8be179c7c97d32",
+          "bytes": 511043,
+          "width": 2400,
+          "height": 1800,
+          "number": 2
+        },
+        {
+          "url": "stored-albums/v2ph-azur-lane-tashkent/25a5c731bb802534a24839d53fa8a1779dffe7575dc4f094662a0e1ab3760b9f.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/weEjVnIDtDHiqmAp.jpg",
+          "sha256": "25a5c731bb802534a24839d53fa8a1779dffe7575dc4f094662a0e1ab3760b9f",
+          "bytes": 502564,
+          "width": 1800,
+          "height": 2400,
+          "number": 3
+        },
+        {
+          "url": "stored-albums/v2ph-azur-lane-tashkent/6584932c37cb8ad9475d951c64aa55a3e263d1e2a2668af32b9e4f7bfcc573c6.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/70tW-gcbXMxHWzjd.jpg",
+          "sha256": "6584932c37cb8ad9475d951c64aa55a3e263d1e2a2668af32b9e4f7bfcc573c6",
+          "bytes": 565135,
+          "width": 1800,
+          "height": 2400,
+          "number": 4
+        },
+        {
+          "url": "stored-albums/v2ph-azur-lane-tashkent/7f795585a0c01169a9fcdae238ae1cbb41cfe92c7d1786b2320ac08d96e6b73e.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/noE6NuOTghQRzF5q.jpg",
+          "sha256": "7f795585a0c01169a9fcdae238ae1cbb41cfe92c7d1786b2320ac08d96e6b73e",
+          "bytes": 345977,
+          "width": 2400,
+          "height": 1800,
+          "number": 5
+        },
+        {
+          "url": "stored-albums/v2ph-azur-lane-tashkent/fd8c3a14d3ad8c2d36e8f71ddd37030f5754ebc282234ed54c758073bedbed1b.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/5RpZCMSwawVlfHWV.jpg",
+          "sha256": "fd8c3a14d3ad8c2d36e8f71ddd37030f5754ebc282234ed54c758073bedbed1b",
+          "bytes": 297403,
+          "width": 1800,
+          "height": 2400,
+          "number": 6
+        },
+        {
+          "url": "stored-albums/v2ph-azur-lane-tashkent/dfc0d01e81c4bd8f580ab04e141a3cb678f724d662779a3feaf274f3fe3f7ba6.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/3-mIon1Aw_hUaKF5.jpg",
+          "sha256": "dfc0d01e81c4bd8f580ab04e141a3cb678f724d662779a3feaf274f3fe3f7ba6",
+          "bytes": 345978,
+          "width": 1800,
+          "height": 2400,
+          "number": 7
+        },
+        {
+          "url": "stored-albums/v2ph-azur-lane-tashkent/55f882dbbe5c41bb2c40dcf83949fe7ddeaac6b072e02ec5d20cbb7b5a2a05a6.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/QXM4rDKsh8depa7r.jpg",
+          "sha256": "55f882dbbe5c41bb2c40dcf83949fe7ddeaac6b072e02ec5d20cbb7b5a2a05a6",
+          "bytes": 346268,
+          "width": 1800,
+          "height": 2400,
+          "number": 8
+        },
+        {
+          "url": "stored-albums/v2ph-azur-lane-tashkent/aed73b186ef7096b47fb82521fc499bbb5e564d3c089b6322eabaaac99543ddc.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/TgTX0ZnZW6wM6L0C.jpg",
+          "sha256": "aed73b186ef7096b47fb82521fc499bbb5e564d3c089b6322eabaaac99543ddc",
+          "bytes": 339587,
+          "width": 1800,
+          "height": 2400,
+          "number": 9
+        },
+        {
+          "url": "stored-albums/v2ph-azur-lane-tashkent/17b99cbef75b113b4470dbdcd9a541f27e2399f4076b8786bd7325cedcbab0e4.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/dXPZKr8QpH1njS0r.jpg",
+          "sha256": "17b99cbef75b113b4470dbdcd9a541f27e2399f4076b8786bd7325cedcbab0e4",
+          "bytes": 326081,
+          "width": 1800,
+          "height": 2400,
+          "number": 10
+        }
+      ],
+      "status": "public_previews_only_not_complete"
+    },
+    {
+      "id": "djawa-blossom-reverie",
+      "title": "Blossom Reverie",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/blossom-reverie/",
+      "images": [
+        {
+          "url": "stored-albums/djawa-blossom-reverie/7777c0d308b349a0629a47175c8f1029b628e78fb2ba8d6f0dad2e63161e5d88.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2026/05/sample_cv-4.jpg",
+          "sha256": "7777c0d308b349a0629a47175c8f1029b628e78fb2ba8d6f0dad2e63161e5d88",
+          "bytes": 630785,
+          "width": 1200,
+          "height": 1600,
+          "number": 1
+        },
+        {
+          "url": "stored-albums/djawa-blossom-reverie/15be8810cc52b860bdbec0b31a7e0e62c5678fadcdcc41205b151d15dc3f0321.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2026/05/sample_01-4.jpg",
+          "sha256": "15be8810cc52b860bdbec0b31a7e0e62c5678fadcdcc41205b151d15dc3f0321",
+          "bytes": 515632,
+          "width": 1200,
+          "height": 1600,
+          "number": 2
+        },
+        {
+          "url": "stored-albums/djawa-blossom-reverie/c1aee19fccc0998bbd712d48d93b149d733cfb74b482c7123d4b94b8dc7daa8b.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2026/05/sample_02-4.jpg",
+          "sha256": "c1aee19fccc0998bbd712d48d93b149d733cfb74b482c7123d4b94b8dc7daa8b",
+          "bytes": 694984,
+          "width": 1600,
+          "height": 1200,
+          "number": 3
+        },
+        {
+          "url": "stored-albums/djawa-blossom-reverie/bc4d25460af76b6ff164e7ac01ee7db461f1f5af9db7074fb5971fcf320dc835.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2026/05/sample_03-4.jpg",
+          "sha256": "bc4d25460af76b6ff164e7ac01ee7db461f1f5af9db7074fb5971fcf320dc835",
+          "bytes": 582088,
+          "width": 1600,
+          "height": 1200,
+          "number": 4
+        },
+        {
+          "url": "stored-albums/djawa-blossom-reverie/9b98c966091ec0d8be73d0475ef517fee3560dcb01c1c5221847edc79733da9b.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2026/05/sample_04-4.jpg",
+          "sha256": "9b98c966091ec0d8be73d0475ef517fee3560dcb01c1c5221847edc79733da9b",
+          "bytes": 714207,
+          "width": 1200,
+          "height": 1600,
+          "number": 5
+        },
+        {
+          "url": "stored-albums/djawa-blossom-reverie/48f11bdc9c31fe5fbd2e3835a80bc9acf8c998056ed79b2804c943d93b0a270c.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2026/05/sample_05-4.jpg",
+          "sha256": "48f11bdc9c31fe5fbd2e3835a80bc9acf8c998056ed79b2804c943d93b0a270c",
+          "bytes": 1534034,
+          "width": 1600,
+          "height": 1200,
+          "number": 6
+        },
+        {
+          "url": "stored-albums/djawa-blossom-reverie/736306781f17556c9acea77b341f04de1ce91e4442931c73657769de0cb65347.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2026/05/sample_06-4.jpg",
+          "sha256": "736306781f17556c9acea77b341f04de1ce91e4442931c73657769de0cb65347",
+          "bytes": 421858,
+          "width": 1200,
+          "height": 1600,
+          "number": 7
+        },
+        {
+          "url": "stored-albums/djawa-blossom-reverie/72c879e36676ca32b64df95622e0adb711d71fb257ffd3705fccf12203afa6ac.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2026/05/sample_07-3.jpg",
+          "sha256": "72c879e36676ca32b64df95622e0adb711d71fb257ffd3705fccf12203afa6ac",
+          "bytes": 342671,
+          "width": 1200,
+          "height": 1600,
+          "number": 8
+        },
+        {
+          "url": "stored-albums/djawa-blossom-reverie/061f8f582c42036a03f4efbd63147d0bc1e155e2b524c0e00c346a3682268cec.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2026/05/sample_08-4.jpg",
+          "sha256": "061f8f582c42036a03f4efbd63147d0bc1e155e2b524c0e00c346a3682268cec",
+          "bytes": 470072,
+          "width": 1600,
+          "height": 1200,
+          "number": 9
+        },
+        {
+          "url": "stored-albums/djawa-blossom-reverie/78bca5e9c360813431d28a0c6e8225c7000a515894e190c21a198c67102f6e86.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2026/05/sample_09-3.jpg",
+          "sha256": "78bca5e9c360813431d28a0c6e8225c7000a515894e190c21a198c67102f6e86",
+          "bytes": 823547,
+          "width": 1600,
+          "height": 1200,
+          "number": 10
+        }
+      ],
+      "status": "public_previews_only_not_complete"
+    },
+    {
+      "id": "djawa-christmas-special-2021-mimmi",
+      "title": "Christmas Special 2021 : Mimmi",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/christmas-special-2021-mimmi/",
+      "images": [
+        {
+          "url": "stored-albums/djawa-christmas-special-2021-mimmi/b374b9800c724b228e1dfc0f40f2dea51e27542ddb212febd2d16cd3001ad6b6.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2021/12/sample_cv.jpg",
+          "sha256": "b374b9800c724b228e1dfc0f40f2dea51e27542ddb212febd2d16cd3001ad6b6",
+          "bytes": 668092,
+          "width": 1000,
+          "height": 1500,
+          "number": 1
+        },
+        {
+          "url": "stored-albums/djawa-christmas-special-2021-mimmi/877c1388f4e2c3448050d9f272f7c5339f245bb32d038880f523b94faff09eec.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2021/12/sample_01.jpg",
+          "sha256": "877c1388f4e2c3448050d9f272f7c5339f245bb32d038880f523b94faff09eec",
+          "bytes": 542653,
+          "width": 1000,
+          "height": 1500,
+          "number": 2
+        },
+        {
+          "url": "stored-albums/djawa-christmas-special-2021-mimmi/f1803892d628792d96d8a9303820555222d429914fae5b10ec7929401fe77e61.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2021/12/sample_02.jpg",
+          "sha256": "f1803892d628792d96d8a9303820555222d429914fae5b10ec7929401fe77e61",
+          "bytes": 632107,
+          "width": 1000,
+          "height": 1500,
+          "number": 3
+        },
+        {
+          "url": "stored-albums/djawa-christmas-special-2021-mimmi/a005023e84bd41f916a86a886d25841fd41d2e3cbadcd5cf005c261307ed5d3a.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2021/12/sample_03.jpg",
+          "sha256": "a005023e84bd41f916a86a886d25841fd41d2e3cbadcd5cf005c261307ed5d3a",
+          "bytes": 591227,
+          "width": 1500,
+          "height": 1000,
+          "number": 4
+        },
+        {
+          "url": "stored-albums/djawa-christmas-special-2021-mimmi/37d68f4d763bd363c2d6e1eaf45d6455fbbc8d3d3b616e0faaa4a1f2fa5ab36e.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2021/12/sample_04.jpg",
+          "sha256": "37d68f4d763bd363c2d6e1eaf45d6455fbbc8d3d3b616e0faaa4a1f2fa5ab36e",
+          "bytes": 796208,
+          "width": 1500,
+          "height": 1000,
+          "number": 5
+        },
+        {
+          "url": "stored-albums/djawa-christmas-special-2021-mimmi/44a4fc9bc4b786ba5dfc7599307ee8775a233fd86ded57fd99c8f2bc17b16507.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2021/12/sample_05.jpg",
+          "sha256": "44a4fc9bc4b786ba5dfc7599307ee8775a233fd86ded57fd99c8f2bc17b16507",
+          "bytes": 564290,
+          "width": 1000,
+          "height": 1500,
+          "number": 6
+        },
+        {
+          "url": "stored-albums/djawa-christmas-special-2021-mimmi/75e6a47835bda55a6dc28b2e61e9dce9557aaa8a14f14d69e31060468718640e.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2021/12/sample_06.jpg",
+          "sha256": "75e6a47835bda55a6dc28b2e61e9dce9557aaa8a14f14d69e31060468718640e",
+          "bytes": 784042,
+          "width": 1000,
+          "height": 1500,
+          "number": 7
+        },
+        {
+          "url": "stored-albums/djawa-christmas-special-2021-mimmi/6d3d2e9e3101ad62a232f8de3e4dd155c52d838505037d3073f165c0756b0c04.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2021/12/sample_ss.jpg",
+          "sha256": "6d3d2e9e3101ad62a232f8de3e4dd155c52d838505037d3073f165c0756b0c04",
+          "bytes": 329478,
+          "width": 1200,
+          "height": 1700,
+          "number": 8
+        },
+        {
+          "url": "stored-albums/djawa-christmas-special-2021-mimmi/e1671907165a336a8af650ba0977391e6830361a1a7f08056c36229a861b1e63.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/7xIjphIqvWVC6J6k.jpg",
+          "sha256": "e1671907165a336a8af650ba0977391e6830361a1a7f08056c36229a861b1e63",
+          "bytes": 1003652,
+          "width": 1800,
+          "height": 2700,
+          "number": 9
+        },
+        {
+          "url": "stored-albums/djawa-christmas-special-2021-mimmi/a9170351ba480c5c52db324e5f86da49128e41bdd41985e2ce102fde1ab11f5b.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/mSV6vneFTb0klmJb.jpg",
+          "sha256": "a9170351ba480c5c52db324e5f86da49128e41bdd41985e2ce102fde1ab11f5b",
+          "bytes": 1173222,
+          "width": 1800,
+          "height": 2700,
+          "number": 10
+        },
+        {
+          "url": "stored-albums/djawa-christmas-special-2021-mimmi/47a4836b1732968b03ba62bf637d6addfeab79cc1299d8ae763feb63f68c7a4e.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/Ortvg3rqW-TiBT-f.jpg",
+          "sha256": "47a4836b1732968b03ba62bf637d6addfeab79cc1299d8ae763feb63f68c7a4e",
+          "bytes": 1146428,
+          "width": 1800,
+          "height": 2700,
+          "number": 11
+        },
+        {
+          "url": "stored-albums/djawa-christmas-special-2021-mimmi/1b05fb3c192bde3d3833e151c8d67a1c3c6ec62970e6eda69d8bbc140db9e7ee.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/eMs4VcGY_UcJBx1z.jpg",
+          "sha256": "1b05fb3c192bde3d3833e151c8d67a1c3c6ec62970e6eda69d8bbc140db9e7ee",
+          "bytes": 1002331,
+          "width": 1800,
+          "height": 2700,
+          "number": 12
+        },
+        {
+          "url": "stored-albums/djawa-christmas-special-2021-mimmi/346a2019a9053513b0bd8b2af60c0d62d04dfaf45b0d30bd3139d50c4c9e9496.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/uXCY6tF1NwtBwcLl.jpg",
+          "sha256": "346a2019a9053513b0bd8b2af60c0d62d04dfaf45b0d30bd3139d50c4c9e9496",
+          "bytes": 921077,
+          "width": 1800,
+          "height": 2700,
+          "number": 13
+        },
+        {
+          "url": "stored-albums/djawa-christmas-special-2021-mimmi/f8aee71888ff9b5979691ddfa004444fe492bc3a2349f0f827240259ffdebb99.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/eX1BbEzDduzkZXI8.jpg",
+          "sha256": "f8aee71888ff9b5979691ddfa004444fe492bc3a2349f0f827240259ffdebb99",
+          "bytes": 967947,
+          "width": 1800,
+          "height": 2700,
+          "number": 14
+        },
+        {
+          "url": "stored-albums/djawa-christmas-special-2021-mimmi/a645e5b6de71b370fde5ec6567d9d5c9f11c4e01bbc7d9b32648b9a7a06aff17.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/pp8oRoDGbb8da-HY.jpg",
+          "sha256": "a645e5b6de71b370fde5ec6567d9d5c9f11c4e01bbc7d9b32648b9a7a06aff17",
+          "bytes": 1041101,
+          "width": 1800,
+          "height": 2700,
+          "number": 15
+        },
+        {
+          "url": "stored-albums/djawa-christmas-special-2021-mimmi/92ea4d4e19e7a3d2f272f8c29da054766f7cc543ca640d63dec68de587515586.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/D6YHhF1Ja-WgMZxZ.jpg",
+          "sha256": "92ea4d4e19e7a3d2f272f8c29da054766f7cc543ca640d63dec68de587515586",
+          "bytes": 1121447,
+          "width": 1800,
+          "height": 2700,
+          "number": 16
+        },
+        {
+          "url": "stored-albums/djawa-christmas-special-2021-mimmi/fa654e54e3e84db2e8c469b8fd5a7335a47fee57dc95d5e4a5dea0e3df0fd5e7.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/cbwMEUb1iKrr34UA.jpg",
+          "sha256": "fa654e54e3e84db2e8c469b8fd5a7335a47fee57dc95d5e4a5dea0e3df0fd5e7",
+          "bytes": 1132782,
+          "width": 1800,
+          "height": 2700,
+          "number": 17
+        },
+        {
+          "url": "stored-albums/djawa-christmas-special-2021-mimmi/058d12d660f2bf65d25e8a0151dc0b24c3d684131c99a4460db4fe3a1b106c40.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/lRuDILoGzMfwvFOG.jpg",
+          "sha256": "058d12d660f2bf65d25e8a0151dc0b24c3d684131c99a4460db4fe3a1b106c40",
+          "bytes": 1184356,
+          "width": 1800,
+          "height": 2700,
+          "number": 18
+        }
+      ],
+      "status": "public_previews_only_not_complete"
+    },
+    {
+      "id": "v2ph-actor-a8856noa",
+      "title": "Christmas Special 2022 (Super Sonico)",
+      "publisher": "DJAWA",
+      "source": "https://www.v2ph.com/album/a8856noa.html",
+      "images": [
+        {
+          "url": "stored-albums/v2ph-actor-a8856noa/66cd93c73e29b43a15711810e971789827167c0dba08884b5362ee6c32eaa81f.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/2SqjdfEFGL4KBaU1.jpg",
+          "sha256": "66cd93c73e29b43a15711810e971789827167c0dba08884b5362ee6c32eaa81f",
+          "bytes": 1005728,
+          "width": 1800,
+          "height": 2700,
+          "number": 1
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a8856noa/b7c17b63e0ac59148d8d331de27a18acca73f41701db3c16b06672b161bcb423.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/RC3GsOmS83vbq9t2.jpg",
+          "sha256": "b7c17b63e0ac59148d8d331de27a18acca73f41701db3c16b06672b161bcb423",
+          "bytes": 907205,
+          "width": 1800,
+          "height": 2700,
+          "number": 2
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a8856noa/a122f8859324070524b44144eeac786dd37215e808f3ffb4b59ea6910c5096a5.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/G0wNHgnGUA-PKVNg.jpg",
+          "sha256": "a122f8859324070524b44144eeac786dd37215e808f3ffb4b59ea6910c5096a5",
+          "bytes": 1229551,
+          "width": 2700,
+          "height": 1800,
+          "number": 3
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a8856noa/5fca6772fa2fb0b3c83e27d1c2f15417ccaae62d7d9e2246bdc0be9737ca1c13.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/fY_nM4kqPyk6ApPT.jpg",
+          "sha256": "5fca6772fa2fb0b3c83e27d1c2f15417ccaae62d7d9e2246bdc0be9737ca1c13",
+          "bytes": 1239375,
+          "width": 2700,
+          "height": 1800,
+          "number": 4
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a8856noa/81604916da879bf405445c9d03d8d2db82db13ce4e9942097dabc07b1fe3aa45.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/8_u_wT_UgpGOUcDo.jpg",
+          "sha256": "81604916da879bf405445c9d03d8d2db82db13ce4e9942097dabc07b1fe3aa45",
+          "bytes": 1128404,
+          "width": 1800,
+          "height": 2700,
+          "number": 5
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a8856noa/cc5ec350f492031b54c7f2bb99ff487d99d024afe172fca124f65a0c775369f9.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/af5IBAgrQuVi5qm9.jpg",
+          "sha256": "cc5ec350f492031b54c7f2bb99ff487d99d024afe172fca124f65a0c775369f9",
+          "bytes": 1100031,
+          "width": 1800,
+          "height": 2700,
+          "number": 6
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a8856noa/80d669f6630482a5d9655ed86e11598e8e41cf8d521eaf788e3bc8966d642dc0.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/fzBAqetWFMI_t_ZN.jpg",
+          "sha256": "80d669f6630482a5d9655ed86e11598e8e41cf8d521eaf788e3bc8966d642dc0",
+          "bytes": 1066810,
+          "width": 1800,
+          "height": 2700,
+          "number": 7
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a8856noa/70e674c15e9f57ad685f6fc8e12ef6cb4ae001e88f62b8e0ff8c3da31325713d.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/AbpLXnimHvJpcrFR.jpg",
+          "sha256": "70e674c15e9f57ad685f6fc8e12ef6cb4ae001e88f62b8e0ff8c3da31325713d",
+          "bytes": 1102369,
+          "width": 1800,
+          "height": 2700,
+          "number": 8
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a8856noa/5a5378e41796d73eb9a031fd8e9c952d98e453f0a3bfcaef5e75a8ea38d00ca4.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/AiuibtBvN2rV3EWA.jpg",
+          "sha256": "5a5378e41796d73eb9a031fd8e9c952d98e453f0a3bfcaef5e75a8ea38d00ca4",
+          "bytes": 1120430,
+          "width": 1800,
+          "height": 2700,
+          "number": 9
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a8856noa/7791a32d464ccbd439241f8b578c2e0b73aa19821478beab52d963b106bc5e67.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/nYNvAT9aqwpI-_sK.jpg",
+          "sha256": "7791a32d464ccbd439241f8b578c2e0b73aa19821478beab52d963b106bc5e67",
+          "bytes": 944586,
+          "width": 1800,
+          "height": 2700,
+          "number": 10
+        }
+      ],
+      "status": "public_previews_only_not_complete"
+    },
+    {
+      "id": "djawa-christmas-special-2023-mimmi",
+      "title": "Christmas Special 2023 : Mimmi",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/christmas-special-2023-mimmi/",
+      "images": [
+        {
+          "url": "stored-albums/djawa-christmas-special-2023-mimmi/e9ddaa0fd25f20538dc5a968785752c2fbaac3f039e899f3aee9242655ec55b8.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_cv-22.jpg",
+          "sha256": "e9ddaa0fd25f20538dc5a968785752c2fbaac3f039e899f3aee9242655ec55b8",
+          "bytes": 708575,
+          "width": 1200,
+          "height": 1800,
+          "number": 1
+        },
+        {
+          "url": "stored-albums/djawa-christmas-special-2023-mimmi/305b0dc1e43939b1271137dbec975d7921e9c59380467394e2475545192b8656.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_01-27.jpg",
+          "sha256": "305b0dc1e43939b1271137dbec975d7921e9c59380467394e2475545192b8656",
+          "bytes": 582824,
+          "width": 1200,
+          "height": 1800,
+          "number": 2
+        },
+        {
+          "url": "stored-albums/djawa-christmas-special-2023-mimmi/ffe413aff9037e81707b6e1bbb2da75b94b74be90abb326546afe5af32fc814c.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_02-26.jpg",
+          "sha256": "ffe413aff9037e81707b6e1bbb2da75b94b74be90abb326546afe5af32fc814c",
+          "bytes": 700742,
+          "width": 1200,
+          "height": 1800,
+          "number": 3
+        },
+        {
+          "url": "stored-albums/djawa-christmas-special-2023-mimmi/a1c4a47bc57330452187e4c11e61ba4133c3abaa56a2c1292521c03fddafb94c.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_03-27.jpg",
+          "sha256": "a1c4a47bc57330452187e4c11e61ba4133c3abaa56a2c1292521c03fddafb94c",
+          "bytes": 573388,
+          "width": 1200,
+          "height": 1800,
+          "number": 4
+        },
+        {
+          "url": "stored-albums/djawa-christmas-special-2023-mimmi/aacdf253852921c20a1d5ba09bda1455e3c9fbd64ae04b8354a5e8559698b1b3.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_04-25.jpg",
+          "sha256": "aacdf253852921c20a1d5ba09bda1455e3c9fbd64ae04b8354a5e8559698b1b3",
+          "bytes": 470931,
+          "width": 1200,
+          "height": 1800,
+          "number": 5
+        },
+        {
+          "url": "stored-albums/djawa-christmas-special-2023-mimmi/01493331d721bbf019b41279303b336488d0d2c1ee56594846242e96df30cb6b.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_all.jpg",
+          "sha256": "01493331d721bbf019b41279303b336488d0d2c1ee56594846242e96df30cb6b",
+          "bytes": 233193,
+          "width": 1200,
+          "height": 1700,
+          "number": 6
+        }
+      ],
+      "status": "public_previews_only_not_complete"
+    },
+    {
+      "id": "djawa-christmas-special-2024-mimmi-santa-on-the-street",
+      "title": "Christmas Special 2024 : Mimmi – Santa on the Street",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/christmas-special-2024-mimmi-santa-on-the-street/",
+      "images": [
+        {
+          "url": "stored-albums/djawa-christmas-special-2024-mimmi-santa-on-the-street/4367b57131d0941e9cfae6ee3475e62e2653ca0564a7361b5fbeb8d00d949818.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/12/sample_cv1-1.jpg",
+          "sha256": "4367b57131d0941e9cfae6ee3475e62e2653ca0564a7361b5fbeb8d00d949818",
+          "bytes": 670357,
+          "width": 1200,
+          "height": 1800,
+          "number": 1
+        },
+        {
+          "url": "stored-albums/djawa-christmas-special-2024-mimmi-santa-on-the-street/09bdbbc5a1e20cf0db7b1d42f478fed76a4805ed25bb1962acc3e842b67f89a7.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/12/sample_cv2-1.jpg",
+          "sha256": "09bdbbc5a1e20cf0db7b1d42f478fed76a4805ed25bb1962acc3e842b67f89a7",
+          "bytes": 849760,
+          "width": 1200,
+          "height": 1800,
+          "number": 2
+        },
+        {
+          "url": "stored-albums/djawa-christmas-special-2024-mimmi-santa-on-the-street/168302a92ce881fa6b49917de83bc92fb9cd8733766003e38514b863d88b2613.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/12/sample_cv3.jpg",
+          "sha256": "168302a92ce881fa6b49917de83bc92fb9cd8733766003e38514b863d88b2613",
+          "bytes": 950052,
+          "width": 1200,
+          "height": 1800,
+          "number": 3
+        },
+        {
+          "url": "stored-albums/djawa-christmas-special-2024-mimmi-santa-on-the-street/bcae0de17c9bdca756c6eaf58944c3c7a17b0b78324341a511f7b0b2205bb53b.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/12/sample_01-5.jpg",
+          "sha256": "bcae0de17c9bdca756c6eaf58944c3c7a17b0b78324341a511f7b0b2205bb53b",
+          "bytes": 659296,
+          "width": 1800,
+          "height": 1200,
+          "number": 4
+        },
+        {
+          "url": "stored-albums/djawa-christmas-special-2024-mimmi-santa-on-the-street/6e20864d3dedbd6150961869b07b65e3e5d6b1a1161f9c36f3a79c9ee1cfafb0.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/12/sample_02-5.jpg",
+          "sha256": "6e20864d3dedbd6150961869b07b65e3e5d6b1a1161f9c36f3a79c9ee1cfafb0",
+          "bytes": 809353,
+          "width": 1800,
+          "height": 1200,
+          "number": 5
+        },
+        {
+          "url": "stored-albums/djawa-christmas-special-2024-mimmi-santa-on-the-street/5e79bb0d3d5d716d32f0cfba1f8d87230ce42eef417548d240cf19b5e31d4614.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/12/sample_03-5.jpg",
+          "sha256": "5e79bb0d3d5d716d32f0cfba1f8d87230ce42eef417548d240cf19b5e31d4614",
+          "bytes": 741660,
+          "width": 1200,
+          "height": 1800,
+          "number": 6
+        },
+        {
+          "url": "stored-albums/djawa-christmas-special-2024-mimmi-santa-on-the-street/362a972020df0cca5acefdf10bd73c4b7cb61af224b14b193fa2e12bb6ce388b.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/12/sample_04-5.jpg",
+          "sha256": "362a972020df0cca5acefdf10bd73c4b7cb61af224b14b193fa2e12bb6ce388b",
+          "bytes": 653064,
+          "width": 1200,
+          "height": 1800,
+          "number": 7
+        },
+        {
+          "url": "stored-albums/djawa-christmas-special-2024-mimmi-santa-on-the-street/f37ab3c74c52583ebe23190597ec2981ca0db6ea463fdd10677c07df2003024b.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/12/sample_05-5.jpg",
+          "sha256": "f37ab3c74c52583ebe23190597ec2981ca0db6ea463fdd10677c07df2003024b",
+          "bytes": 637705,
+          "width": 1200,
+          "height": 1800,
+          "number": 8
+        },
+        {
+          "url": "stored-albums/djawa-christmas-special-2024-mimmi-santa-on-the-street/d50b6e67931cbc232fa636d5171d39bdcacf3af0b51052096c2e1a73641712e5.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/12/sample_06-5.jpg",
+          "sha256": "d50b6e67931cbc232fa636d5171d39bdcacf3af0b51052096c2e1a73641712e5",
+          "bytes": 869193,
+          "width": 1200,
+          "height": 1800,
+          "number": 9
+        },
+        {
+          "url": "stored-albums/djawa-christmas-special-2024-mimmi-santa-on-the-street/253e704e28235e861440f8323919340db236dabbbd6348ccc1af26a4e7d6a97f.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/12/sample_07-4.jpg",
+          "sha256": "253e704e28235e861440f8323919340db236dabbbd6348ccc1af26a4e7d6a97f",
+          "bytes": 718694,
+          "width": 1800,
+          "height": 1200,
+          "number": 10
+        }
+      ],
+      "status": "public_previews_only_not_complete"
+    },
+    {
+      "id": "djawa-christmas-special-2025-mimmi-the-christmas-witch",
+      "title": "Christmas Special 2025 : Mimmi – The Christmas Witch",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/christmas-special-2025-mimmi-the-christmas-witch/",
+      "images": [
+        {
+          "url": "stored-albums/djawa-christmas-special-2025-mimmi-the-christmas-witch/f8c65513c88d5128d3ec0536dfcd03b25b7e41f986d2264f22b76705daafb6fa.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2025/12/sample_cv-4.jpg",
+          "sha256": "f8c65513c88d5128d3ec0536dfcd03b25b7e41f986d2264f22b76705daafb6fa",
+          "bytes": 570378,
+          "width": 1200,
+          "height": 1800,
+          "number": 1
+        },
+        {
+          "url": "stored-albums/djawa-christmas-special-2025-mimmi-the-christmas-witch/4540d75b495955bb44b428b84f900e5728c5653026a00fd2a43228b77bb2e265.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2025/12/sample_01-5.jpg",
+          "sha256": "4540d75b495955bb44b428b84f900e5728c5653026a00fd2a43228b77bb2e265",
+          "bytes": 588117,
+          "width": 1200,
+          "height": 1800,
+          "number": 2
+        },
+        {
+          "url": "stored-albums/djawa-christmas-special-2025-mimmi-the-christmas-witch/9ad182c9622ca1a02e56938831ac795e3f6aec7d0cad998e26727fd4f786445b.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2025/12/sample_02-5.jpg",
+          "sha256": "9ad182c9622ca1a02e56938831ac795e3f6aec7d0cad998e26727fd4f786445b",
+          "bytes": 476852,
+          "width": 1800,
+          "height": 1200,
+          "number": 3
+        },
+        {
+          "url": "stored-albums/djawa-christmas-special-2025-mimmi-the-christmas-witch/b7431a14d006160e6aaea94b2293f6209a1eb52d0853a0f103cc8e765ddd08dd.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2025/12/sample_03-4.jpg",
+          "sha256": "b7431a14d006160e6aaea94b2293f6209a1eb52d0853a0f103cc8e765ddd08dd",
+          "bytes": 464169,
+          "width": 1200,
+          "height": 1800,
+          "number": 4
+        },
+        {
+          "url": "stored-albums/djawa-christmas-special-2025-mimmi-the-christmas-witch/117341d1ca7436d944cfaacb5ac8fe2619f1979d3a0a7c1ee87d5382ec35bf27.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2025/12/sample_04-4.jpg",
+          "sha256": "117341d1ca7436d944cfaacb5ac8fe2619f1979d3a0a7c1ee87d5382ec35bf27",
+          "bytes": 500821,
+          "width": 1200,
+          "height": 1800,
+          "number": 5
+        }
+      ],
+      "status": "public_previews_only_not_complete"
+    }
+  ],
+  "physical_verified_image_count": 142
 }
