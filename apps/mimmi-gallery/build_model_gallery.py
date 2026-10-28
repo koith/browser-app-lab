@@ -24,8 +24,9 @@ FILES=[
   ("gumroad_promo","gumroad-public-previews.json"),
   ("pixibb_public","pixibb-public-previews.json"),
   ("official_social","social-public-previews.json"),
+  ("xiutu_public","xiutu-public-previews.json"),
 ]
-ALLOWED={"pbs.twimg.com","djawaphoto.com","www.djawaphoto.com","cdn.v2ph.com","public-files.gumroad.com","assets.gumroad.com","static-2.gumroad.com","cosplay.pixibb.com"}
+ALLOWED={"xiutu.me","www.xiutu.me","pbs.twimg.com","djawaphoto.com","www.djawaphoto.com","cdn.v2ph.com","public-files.gumroad.com","assets.gumroad.com","static-2.gumroad.com","cosplay.pixibb.com"}
 MODEL_VERSION="v0.1.0-mimmi.8"
 
 def canonical_title(title):
@@ -57,7 +58,7 @@ def url_allowed(url):
     try:
         p=urlsplit(url)
         host=p.hostname or ""
-        return p.scheme=="https" and not p.username and not p.password and (host in ALLOWED or bool(re.fullmatch(r"imgx\d{2,4}\.pixibb\.com|images\d{1,4}\.pixibb\.com|(?:cdn|img|files)\.pixibb\.com",host)))
+        return p.scheme=="https" and not p.username and not p.password and (host in ALLOWED or host.endswith(".xiutu.me") or bool(re.fullmatch(r"imgx\d{2,4}\.pixibb\.com|images\d{1,4}\.pixibb\.com|(?:cdn|img|files)\.pixibb\.com",host)))
     except (ValueError,TypeError):return False
 
 def build(root=ROOT):
@@ -68,7 +69,7 @@ def build(root=ROOT):
     input_count=0
     for kind,filename in FILES:
         source_file=root/filename
-        if not source_file.exists() and kind in ("gumroad_promo","pixibb_public","official_social"):
+        if not source_file.exists() and kind in ("gumroad_promo","pixibb_public","official_social","xiutu_public"):
             continue
         source=json.loads(source_file.read_text(encoding="utf-8"))
         for record in source["albums"]:
