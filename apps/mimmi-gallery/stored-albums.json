@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "model": "mimmi",
-  "updated": "2026-10-28T18:13:17Z",
+  "updated": "2026-10-28T18:48:00Z",
   "storage": "physically committed public previews under GitHub Pages; not licensed publisher masters",
   "albums": [
     {
@@ -396,6 +396,393 @@
           "width": 2700,
           "height": 1800,
           "number": 10
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/9d4291b7689e87011192da46ea92813e0f949aeb057c977b2c4d25af376e20b2.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/foeoxmhnjpk.jpg",
+          "sha256": "9d4291b7689e87011192da46ea92813e0f949aeb057c977b2c4d25af376e20b2",
+          "bytes": 511601,
+          "width": 2700,
+          "height": 1800,
+          "number": 11
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/f091e08a739f525499d9a163191c23902aea67436ae2e90d1f0249c8c0c5d1a1.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/biv25glr44i.jpg",
+          "sha256": "f091e08a739f525499d9a163191c23902aea67436ae2e90d1f0249c8c0c5d1a1",
+          "bytes": 430959,
+          "width": 1800,
+          "height": 2700,
+          "number": 12
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/11b8c0af0caae3f74554d6f7df27840fe91babb1822d7520785f4285b65bc1f2.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/uhlyrwpbghq.jpg",
+          "sha256": "11b8c0af0caae3f74554d6f7df27840fe91babb1822d7520785f4285b65bc1f2",
+          "bytes": 375307,
+          "width": 1800,
+          "height": 2700,
+          "number": 13
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/53cbb8aaa3a5ef87e9da2d605f71b007880d72040835324ae2e2f33548571c39.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/csvyhjapzvx.jpg",
+          "sha256": "53cbb8aaa3a5ef87e9da2d605f71b007880d72040835324ae2e2f33548571c39",
+          "bytes": 375461,
+          "width": 1800,
+          "height": 2700,
+          "number": 14
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/3705f3234e042c88891ff867ffd7ef34726b9487ec9c9325e4044ad954152350.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/4u4s0gzjbx5.jpg",
+          "sha256": "3705f3234e042c88891ff867ffd7ef34726b9487ec9c9325e4044ad954152350",
+          "bytes": 376453,
+          "width": 2700,
+          "height": 1800,
+          "number": 15
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/c5356a3e8cd952d2a98e64ff5ef5c9edbb723766ea9a7e0e4aabcc647b7abc84.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/2dhhjl5aszl.jpg",
+          "sha256": "c5356a3e8cd952d2a98e64ff5ef5c9edbb723766ea9a7e0e4aabcc647b7abc84",
+          "bytes": 373003,
+          "width": 2700,
+          "height": 1800,
+          "number": 16
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/eb3e3422a61834d4fb687552509832d9394e17d228899b08baad26385a9c500e.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/c11fd3b0feg.jpg",
+          "sha256": "eb3e3422a61834d4fb687552509832d9394e17d228899b08baad26385a9c500e",
+          "bytes": 372790,
+          "width": 2700,
+          "height": 1800,
+          "number": 17
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/b03cebc7a24d6f055e27c260f809c36cf946549e642d0245d1cd1c474f1e0340.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/zfexpnwzzd1.jpg",
+          "sha256": "b03cebc7a24d6f055e27c260f809c36cf946549e642d0245d1cd1c474f1e0340",
+          "bytes": 364323,
+          "width": 2700,
+          "height": 1800,
+          "number": 18
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/61a1d9c78eb1022bec1b68fe4962eea3c13333ee448d8f7e34770462baedc40e.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/ukt0w1eq5oj.jpg",
+          "sha256": "61a1d9c78eb1022bec1b68fe4962eea3c13333ee448d8f7e34770462baedc40e",
+          "bytes": 705658,
+          "width": 2700,
+          "height": 1800,
+          "number": 19
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/2598782f1729e55fdd2b7f41592b242ade2525ec0b9b977ef304c6fef1cff9cf.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/i2pelikvsje.jpg",
+          "sha256": "2598782f1729e55fdd2b7f41592b242ade2525ec0b9b977ef304c6fef1cff9cf",
+          "bytes": 593213,
+          "width": 2700,
+          "height": 1800,
+          "number": 20
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/6d64db43478ae2e2b309c1a0a8fde24d4b7921cbf2ca0c655d094ef714f7c14d.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/demuzvansl2.jpg",
+          "sha256": "6d64db43478ae2e2b309c1a0a8fde24d4b7921cbf2ca0c655d094ef714f7c14d",
+          "bytes": 534044,
+          "width": 2700,
+          "height": 1800,
+          "number": 21
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/413149936d9a9a6f2888ae17ab25ba241c507795baa28f53cb8ee6a2bcbaeda8.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/ttm3cs1cr0i.jpg",
+          "sha256": "413149936d9a9a6f2888ae17ab25ba241c507795baa28f53cb8ee6a2bcbaeda8",
+          "bytes": 457073,
+          "width": 2700,
+          "height": 1800,
+          "number": 22
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/0a80c96104a6766629cbc27113499ff05415aa904d949cd8ad1ce03ec32f909c.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/bwwgvcwnwo3.jpg",
+          "sha256": "0a80c96104a6766629cbc27113499ff05415aa904d949cd8ad1ce03ec32f909c",
+          "bytes": 419754,
+          "width": 1800,
+          "height": 2700,
+          "number": 23
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/799db416cb014e2b4fb74e8eec6fc5008d9befe4b3cfed1fc7c5448df6eab4a8.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/sw2kabvaji5.jpg",
+          "sha256": "799db416cb014e2b4fb74e8eec6fc5008d9befe4b3cfed1fc7c5448df6eab4a8",
+          "bytes": 512145,
+          "width": 2700,
+          "height": 1800,
+          "number": 24
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/4285d438f53b892978b27762dcc5401cb42b1597f0b40509402c3aa9edc13219.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/gejk1sbb2th.jpg",
+          "sha256": "4285d438f53b892978b27762dcc5401cb42b1597f0b40509402c3aa9edc13219",
+          "bytes": 385776,
+          "width": 2700,
+          "height": 1800,
+          "number": 25
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/5c6d4712b89989afa5cd930e2d8f22443afca56bf6487a3b6a62f71c9b2cef45.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/ecdip15p3sf.jpg",
+          "sha256": "5c6d4712b89989afa5cd930e2d8f22443afca56bf6487a3b6a62f71c9b2cef45",
+          "bytes": 418220,
+          "width": 2700,
+          "height": 1800,
+          "number": 26
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/32309f0e341640d736d813926e12bdb830846e5baf22a7c409c1e63e2acaa44e.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/q3v4xysyfhq.jpg",
+          "sha256": "32309f0e341640d736d813926e12bdb830846e5baf22a7c409c1e63e2acaa44e",
+          "bytes": 427717,
+          "width": 2700,
+          "height": 1800,
+          "number": 27
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/9d8c06012600a306e12e951bbb304c665e6ced2cde02b23cb4f6fda1c3de9eae.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/tlucbyuoakp.jpg",
+          "sha256": "9d8c06012600a306e12e951bbb304c665e6ced2cde02b23cb4f6fda1c3de9eae",
+          "bytes": 466416,
+          "width": 2700,
+          "height": 1800,
+          "number": 28
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/f7de39264afdbb5b7f49e45a003a9ebd47ca93efa4fce45b9d4c924662bfc9e1.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/44zekmcbxr2.jpg",
+          "sha256": "f7de39264afdbb5b7f49e45a003a9ebd47ca93efa4fce45b9d4c924662bfc9e1",
+          "bytes": 535790,
+          "width": 2700,
+          "height": 1800,
+          "number": 29
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/6058044d2ae5bf298a0bfa5f99b13e5f0a9758ec6870b34aea25f7011083f3ac.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/ou4v3xekh4n.jpg",
+          "sha256": "6058044d2ae5bf298a0bfa5f99b13e5f0a9758ec6870b34aea25f7011083f3ac",
+          "bytes": 566489,
+          "width": 2700,
+          "height": 1800,
+          "number": 30
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/0febee279f5dabaaf5b98f110c13bce1d4cc21e1f58fcbb1f9380e6e77d633d6.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/dph3jnwegfz.jpg",
+          "sha256": "0febee279f5dabaaf5b98f110c13bce1d4cc21e1f58fcbb1f9380e6e77d633d6",
+          "bytes": 498600,
+          "width": 2700,
+          "height": 1800,
+          "number": 31
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/9a50abec92fa6dde0c8d86febbf7139989079a4740c3499936a23fcd401bbe0d.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/ehc32x3icm0.jpg",
+          "sha256": "9a50abec92fa6dde0c8d86febbf7139989079a4740c3499936a23fcd401bbe0d",
+          "bytes": 486847,
+          "width": 2700,
+          "height": 1800,
+          "number": 32
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/21c19fb5f66157030c0caee3d9ece1a6b5f8fe3312c924d10f1c74955a7c48d6.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/04ioemuuhua.jpg",
+          "sha256": "21c19fb5f66157030c0caee3d9ece1a6b5f8fe3312c924d10f1c74955a7c48d6",
+          "bytes": 433173,
+          "width": 1800,
+          "height": 2700,
+          "number": 33
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/0f08d04e51fe7ba33752ba85d1fb501247acd0944d178ceaa867b0740091c6d4.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/rmx4ml1s2og.jpg",
+          "sha256": "0f08d04e51fe7ba33752ba85d1fb501247acd0944d178ceaa867b0740091c6d4",
+          "bytes": 415674,
+          "width": 1800,
+          "height": 2700,
+          "number": 34
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/fd730d4134f5d7bfc813cafc110533a6503984244efeddfcfbdf723a2019facf.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/cgal0g53au3.jpg",
+          "sha256": "fd730d4134f5d7bfc813cafc110533a6503984244efeddfcfbdf723a2019facf",
+          "bytes": 395169,
+          "width": 1800,
+          "height": 2700,
+          "number": 35
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/0c00a86f1a136aeea9101bf71bc28937c37263565d51dac01c8bba45c1261e5f.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/robf52cdeop.jpg",
+          "sha256": "0c00a86f1a136aeea9101bf71bc28937c37263565d51dac01c8bba45c1261e5f",
+          "bytes": 410744,
+          "width": 1800,
+          "height": 2700,
+          "number": 36
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/ab8bdf816255c294569b857812d0c63f7d54ca6f564c0b46de24e0b7b26c3c7c.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/ysemjsdo0ve.jpg",
+          "sha256": "ab8bdf816255c294569b857812d0c63f7d54ca6f564c0b46de24e0b7b26c3c7c",
+          "bytes": 332017,
+          "width": 2700,
+          "height": 1800,
+          "number": 37
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/8c83e79d6355d7e9f692638e003547c32b0bb70045b6dbf972c243b8380b754f.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/qrgwpikb4dc.jpg",
+          "sha256": "8c83e79d6355d7e9f692638e003547c32b0bb70045b6dbf972c243b8380b754f",
+          "bytes": 297218,
+          "width": 2700,
+          "height": 1800,
+          "number": 38
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/b64824daac88dd9706d2dfd521a0e8ba1901506fed5c5d3809bf943822c7235c.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/wmcdnieg5u5.jpg",
+          "sha256": "b64824daac88dd9706d2dfd521a0e8ba1901506fed5c5d3809bf943822c7235c",
+          "bytes": 488949,
+          "width": 1800,
+          "height": 2700,
+          "number": 39
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/84f25863bf16b1f75245e4b7c7d711a038cfd94c7a9c690a834d3fb2e4116a06.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/fojhnpzmrpx.jpg",
+          "sha256": "84f25863bf16b1f75245e4b7c7d711a038cfd94c7a9c690a834d3fb2e4116a06",
+          "bytes": 367354,
+          "width": 2700,
+          "height": 1800,
+          "number": 40
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/769e4468edf58b456bb94de097c8cc4542d00e4eaae5259b8aee1587cd38e7e1.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/xfdakygt1eo.jpg",
+          "sha256": "769e4468edf58b456bb94de097c8cc4542d00e4eaae5259b8aee1587cd38e7e1",
+          "bytes": 400860,
+          "width": 2700,
+          "height": 1800,
+          "number": 41
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/a65a5ea9951a1a00a4a94927ae6a9d1437046bd86234db34013299911cb79776.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/uzelblnjlbw.jpg",
+          "sha256": "a65a5ea9951a1a00a4a94927ae6a9d1437046bd86234db34013299911cb79776",
+          "bytes": 422658,
+          "width": 2700,
+          "height": 1800,
+          "number": 42
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/260a2a22714a3ac846467f866bd04835d0a555dd00106c05a16f8f517b7337e7.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/qie5xd5tazy.jpg",
+          "sha256": "260a2a22714a3ac846467f866bd04835d0a555dd00106c05a16f8f517b7337e7",
+          "bytes": 480232,
+          "width": 1800,
+          "height": 2700,
+          "number": 43
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/d395db38dc476a448a01e8529b4ac7373941e07dc4c458d64dc6ac07e8a654d6.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/oqlwrhak4ry.jpg",
+          "sha256": "d395db38dc476a448a01e8529b4ac7373941e07dc4c458d64dc6ac07e8a654d6",
+          "bytes": 462843,
+          "width": 1800,
+          "height": 2700,
+          "number": 44
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/343b4dbe7bc0a79e254d37f6e96fbc633f726d6f00a1e88f89ee471655c5d437.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/rocj0hfbojr.jpg",
+          "sha256": "343b4dbe7bc0a79e254d37f6e96fbc633f726d6f00a1e88f89ee471655c5d437",
+          "bytes": 494578,
+          "width": 2700,
+          "height": 1800,
+          "number": 45
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/b14f8be12a482d1f5c6b9400cf919e355f2b6578dc031445481068621d578b73.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/xrzrjfmrqiv.jpg",
+          "sha256": "b14f8be12a482d1f5c6b9400cf919e355f2b6578dc031445481068621d578b73",
+          "bytes": 374283,
+          "width": 2700,
+          "height": 1800,
+          "number": 46
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/d88e42ec5b63f230ed3149cf380431415dcd03fff4749dbddef40de70b1333bf.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/fhhr25gugky.jpg",
+          "sha256": "d88e42ec5b63f230ed3149cf380431415dcd03fff4749dbddef40de70b1333bf",
+          "bytes": 404924,
+          "width": 1800,
+          "height": 2700,
+          "number": 47
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/21b595106aad9223e1e567271af14a49be91f0945bb5dd5f03e8b3748a6c0465.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/eqkneyk3rik.jpg",
+          "sha256": "21b595106aad9223e1e567271af14a49be91f0945bb5dd5f03e8b3748a6c0465",
+          "bytes": 462914,
+          "width": 2700,
+          "height": 1800,
+          "number": 48
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/48301492a06e7c3c4beb6ebc277cfbfd402fb544afe2a681b3022a3a7d5b51f2.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/s3wldfhiw3l.jpg",
+          "sha256": "48301492a06e7c3c4beb6ebc277cfbfd402fb544afe2a681b3022a3a7d5b51f2",
+          "bytes": 440234,
+          "width": 2700,
+          "height": 1800,
+          "number": 49
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/3cecacdcf85fc5126da128f43539933df82484cbea0c3ca67d8e927ccabf5e80.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/nemsi0aqid3.jpg",
+          "sha256": "3cecacdcf85fc5126da128f43539933df82484cbea0c3ca67d8e927ccabf5e80",
+          "bytes": 443385,
+          "width": 2700,
+          "height": 1800,
+          "number": 50
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/8c8e4b5a17a4f96764cdea6d5a60c8afd689c4ca87356e522d357352b3cc3b40.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/5hcz2ihb4j0.jpg",
+          "sha256": "8c8e4b5a17a4f96764cdea6d5a60c8afd689c4ca87356e522d357352b3cc3b40",
+          "bytes": 376124,
+          "width": 2700,
+          "height": 1800,
+          "number": 51
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/7a8365126043dbaa5df8097fd72572fe71b51a936c6da316c343cfba7a4234c6.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/xzpyrl43x4r.jpg",
+          "sha256": "7a8365126043dbaa5df8097fd72572fe71b51a936c6da316c343cfba7a4234c6",
+          "bytes": 451069,
+          "width": 1800,
+          "height": 2700,
+          "number": 52
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/b425d06caf5528c53d0d8a65123bc4c7ac776951600be77c8d6238fe33e1a28a.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/cv0lmfsr5oq.jpg",
+          "sha256": "b425d06caf5528c53d0d8a65123bc4c7ac776951600be77c8d6238fe33e1a28a",
+          "bytes": 330455,
+          "width": 2700,
+          "height": 1800,
+          "number": 53
         }
       ],
       "status": "public_previews_only_not_complete"
@@ -7961,5 +8348,5 @@
       "status": "public_previews_only_not_complete"
     }
   ],
-  "physical_verified_image_count": 849
+  "physical_verified_image_count": 892
 }
