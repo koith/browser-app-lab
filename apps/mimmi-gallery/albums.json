@@ -24,6 +24,42 @@
       "ai_enhanced": true
     },
     {
+      "id": "xiutu-public-1190160",
+      "title": "[CreamSoda] Mimmi (밈미) Vol.2 Neko Mimmi(62P)",
+      "publisher": "CreamSoda",
+      "source": "https://www.xiutu.me/photo/1190160",
+      "expected": null,
+      "photos": null,
+      "ai_enhanced": false
+    },
+    {
+      "id": "xiutu-public-1190158",
+      "title": "[CreamSoda] Mimmi (밈미) Vol.3 Mashu Mimmi(59P)",
+      "publisher": "CreamSoda",
+      "source": "https://www.xiutu.me/photo/1190158",
+      "expected": null,
+      "photos": null,
+      "ai_enhanced": false
+    },
+    {
+      "id": "xiutu-public-1190156",
+      "title": "[CreamSoda] Mimmi (밈미) – Vol.4 Chic Nerd & Maness Nurse(63P)",
+      "publisher": "CreamSoda",
+      "source": "https://www.xiutu.me/photo/1190156",
+      "expected": null,
+      "photos": null,
+      "ai_enhanced": false
+    },
+    {
+      "id": "xiutu-public-1190154",
+      "title": "[CreamSoda] Mimmi (밈미) – Vol.5 Mash Mimmi 2(72P)",
+      "publisher": "CreamSoda",
+      "source": "https://www.xiutu.me/photo/1190154",
+      "expected": null,
+      "photos": null,
+      "ai_enhanced": false
+    },
+    {
       "id": "v2ph-actor-a884435a",
       "title": "[CreamSoda] Mimmi (デプワ) - Vol.4 Chic Nerd & Maness Nurse",
       "publisher": "CreamSoda",
@@ -55,6 +91,15 @@
       "title": "[CreamSoda] Mimmi --Belt choker Photograph",
       "publisher": "CreamSoda",
       "source": "https://www.v2ph.com/album/ae57484a.html",
+      "expected": null,
+      "photos": null,
+      "ai_enhanced": false
+    },
+    {
+      "id": "xiutu-public-1190145",
+      "title": "[CreamSoda] Mimmi – Belt choker 写真套图(46P)",
+      "publisher": "CreamSoda",
+      "source": "https://www.xiutu.me/photo/1190145",
       "expected": null,
       "photos": null,
       "ai_enhanced": false
@@ -1329,11 +1374,11 @@
     }
   ],
   "summary": {
-    "displayed_albums": 66,
-    "verified_unique_source_images": 2280,
-    "input_source_image_occurrences": 2310,
-    "duplicate_hashes_skipped": 30,
-    "photos_with_alternative_public_source": 10,
+    "displayed_albums": 71,
+    "verified_unique_source_images": 2532,
+    "input_source_image_occurrences": 2683,
+    "duplicate_hashes_skipped": 151,
+    "photos_with_alternative_public_source": 111,
     "actual_full_publisher_photobooks": 0,
     "incomplete_known_count_albums": 19,
     "curated_research_works": 52
