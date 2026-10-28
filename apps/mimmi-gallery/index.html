@@ -55,11 +55,13 @@ function render(){
 $('search').oninput=render;$('close').onclick=()=>$('viewer').close();$('viewer').onclick=e=>{if(e.target===$('viewer'))$('viewer').close()};
 Promise.all([
  fetch('./albums.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('base metadata '+r.status);return r.json()}),
- fetch('./official-previews.json',{cache:'no-store'}).then(r=>r.ok?r.json():{albums:[]}).catch(()=>({albums:[]}))
-]).then(([base,official])=>{
+ fetch('./official-previews.json',{cache:'no-store'}).then(r=>r.ok?r.json():{albums:[]}).catch(()=>({albums:[]})),
+ fetch('./v2ph-public-previews.json',{cache:'no-store'}).then(r=>r.ok?r.json():{albums:[]}).catch(()=>({albums:[]}))
+]).then(([base,official,v2ph])=>{
  const sourceAlbums=(official.albums||[]).filter(a=>a.id&&a.source);
  const legacy=(base.albums||[]).filter(a=>!sourceAlbums.some(x=>x.title.toLocaleLowerCase()===a.title.toLocaleLowerCase()));
- albums=[...sourceAlbums,...legacy];
+ const other=(v2ph.albums||[]).filter(a=>a.id&&a.source&&(a.samples||[]).length);
+ albums=[...sourceAlbums,...other,...legacy];
  albums.sort((a,b)=>(b.samples?.length||0)-(a.samples?.length||0)||a.title.localeCompare(b.title));
  render();
 }).catch(e=>{$('count').textContent='목록 로딩 실패';$('empty').textContent=e.message;$('empty').hidden=false});
