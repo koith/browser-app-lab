@@ -105,8 +105,9 @@ def store_one(photo, album_id, output):
 
 def save(output, album_filter="", limit=0, delay=0.6):
     output = Path(output).expanduser().resolve()
-    if output == ROOT or ROOT in output.parents or not output.is_absolute():
-        raise ValueError("Private image destination must be outside the published gallery directory")
+    repo_root = ROOT.parent.parent
+    if output == repo_root or repo_root in output.parents or not output.is_absolute():
+        raise ValueError("Private image destination must be outside the entire public GitHub Pages repository")
     manifest = json.loads((ROOT / "source-viewer-albums.json").read_text(encoding="utf-8"))
     if manifest.get("model") != "mimmi" or not manifest.get("source_link_only"):
         raise ValueError("Expected an external-source-only Mimmi manifest")
