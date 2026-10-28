@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "model": "mimmi",
-  "version": "v0.1.0-mimmi.8",
+  "version": "v0.1.0-mimmi.9",
   "source_link_only": true,
   "private_cloud_archived_image_files": 0,
   "fully_acquired_paid_photobooks": 0,
