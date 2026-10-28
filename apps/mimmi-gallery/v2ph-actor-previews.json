@@ -1,7 +1,7 @@
 {
   "version": "v0.1.0-mimmi.3",
   "model": "mimmi",
-  "generated_at": "2026-10-28T15:52:12.858758+00:00",
+  "generated_at": "2026-10-28T15:56:10.652624+00:00",
   "source": "https://www.v2ph.com/actor/Mimmi",
   "actor_pages": [
     {
@@ -28,10 +28,8 @@
     "actor_albums_discovered": 39,
     "previously_configured_albums": 6,
     "new_album_candidates": 35,
-    "verified_public_image_urls": 330,
-    "private_cloud_photos_archived": 0,
-    "individually_archived_photographs": 0,
-    "consolidation": "Keep individually verified historical public images when subsequent HTTP 429 or page errors reduce new crawl."
+    "verified_public_image_urls": 346,
+    "private_cloud_photos_archived": 0
   },
   "albums": [
     {
@@ -1731,7 +1729,7 @@
     },
     {
       "id": "v2ph-actor-a5e78m5a",
-      "title": "[CreamSoda] Mimmi (デプワ) Vol.2 Neko Mimmi - Page 2",
+      "title": "[CreamSoda] Mimmi (デプワ) Vol.2 Neko Mimmi",
       "source": "https://www.v2ph.com/album/a5e78m5a.html",
       "publisher": "DJAWA or other verified credited studio",
       "samples": [
@@ -1841,17 +1839,13 @@
         {
           "page": 1,
           "candidate_images": 10
-        },
-        {
-          "page": 2,
-          "candidate_images": 0
         }
       ],
       "status": "public_previews_verified"
     },
     {
       "id": "v2ph-actor-a88763oa",
-      "title": "[DJAWA] Mimmi (밈미) × Ceyatic - Pop Kitty Party - Page 2",
+      "title": "[DJAWA] Mimmi (밈미) × Ceyatic - Pop Kitty Party",
       "source": "https://www.v2ph.com/album/a88763oa.html",
       "publisher": "DJAWA or other verified credited studio",
       "samples": [
@@ -1957,16 +1951,7 @@
         }
       ],
       "images": [],
-      "pages": [
-        {
-          "page": 1,
-          "candidate_images": 10
-        },
-        {
-          "page": 2,
-          "candidate_images": 0
-        }
-      ],
+      "pages": [],
       "status": "public_previews_verified"
     },
     {
@@ -2521,7 +2506,12 @@
         }
       ],
       "images": [],
-      "pages": [],
+      "pages": [
+        {
+          "page": 1,
+          "candidate_images": 10
+        }
+      ],
       "status": "public_previews_verified"
     },
     {
@@ -2532,8 +2522,8 @@
       "samples": [
         {
           "url": "https://cdn.v2ph.com/photos/qXQarsmk4XHVWhg7.jpg",
-          "bytes": 900225,
-          "sha256": "67d0d742e014bffd4d5565619111349950ceac7ff6a48e3344749afa57b32882",
+          "bytes": 857283,
+          "sha256": "9d6ed3dad4c6162fdd93c923c0e2a0583f7cfb9e7f473d5a212fa0f111469832",
           "width": 2700,
           "height": 1800,
           "origin": "v2ph_public_page",
@@ -2542,8 +2532,8 @@
         },
         {
           "url": "https://cdn.v2ph.com/photos/CfnhKpyR1H08mkXo.jpg",
-          "bytes": 921888,
-          "sha256": "1f19258f2ea7461a5f7ff4da1b5e892cb173d11d1b3a6ba62d5f2342e884fb5b",
+          "bytes": 876289,
+          "sha256": "29a41cfbeb260b06b6a45b952539666869e31bcab9c03f05cb673c47df204bb0",
           "width": 2700,
           "height": 1800,
           "origin": "v2ph_public_page",
@@ -2572,8 +2562,8 @@
         },
         {
           "url": "https://cdn.v2ph.com/photos/ik0ETqz1Kz3BHUkT.jpg",
-          "bytes": 968733,
-          "sha256": "fe3938e96405562b58034a8de2882cf7bbb62780716933d4bb0a2bdc8add5a52",
+          "bytes": 918819,
+          "sha256": "fb89f61faa10caeea562f2f1cffc5f34b0c9212d99299d9f3b6df84c46070a1d",
           "width": 1800,
           "height": 2700,
           "origin": "v2ph_public_page",
@@ -2592,8 +2582,8 @@
         },
         {
           "url": "https://cdn.v2ph.com/photos/DZnArgOaMzDt0kRb.jpg",
-          "bytes": 963545,
-          "sha256": "d71edbb889b86bf5fc57bf416fe3fc7ec772d3702ad052a7c92b5e01f43cd274",
+          "bytes": 914932,
+          "sha256": "714004ec5feba129ac619a6ee92b3fc4ce5c29c7e3adb75e00ae7d4e166b5400",
           "width": 1800,
           "height": 2700,
           "origin": "v2ph_public_page",
@@ -2602,8 +2592,8 @@
         },
         {
           "url": "https://cdn.v2ph.com/photos/v343K1pg7kqUpyyU.jpg",
-          "bytes": 971658,
-          "sha256": "e7b168dddf427939f8e5939bb03543b153506391fbb02b6858894abb3ba1919b",
+          "bytes": 924380,
+          "sha256": "a3d73460b6a023f0cbad8afd2052d3b14e19c5c7d4f1af8f6222739f0cc685cd",
           "width": 1800,
           "height": 2700,
           "origin": "v2ph_public_page",
@@ -2622,17 +2612,82 @@
         },
         {
           "url": "https://cdn.v2ph.com/photos/a9gjU-fMn4Y7tAyC.jpg",
+          "bytes": 889640,
+          "sha256": "a2bc93ec6f64721c701af48d241c3e375f5ab5c267ebc45e6c8e2a12ba099dfb",
+          "width": 2700,
+          "height": 1800,
+          "origin": "v2ph_public_page",
+          "private_cloud_file": false,
+          "number": 10
+        },
+        {
+          "url": "https://cdn.v2ph.com/photos/qXQarsmk4XHVWhg7.jpg",
+          "bytes": 900225,
+          "sha256": "67d0d742e014bffd4d5565619111349950ceac7ff6a48e3344749afa57b32882",
+          "width": 2700,
+          "height": 1800,
+          "origin": "v2ph_public_page",
+          "private_cloud_file": false,
+          "number": 11
+        },
+        {
+          "url": "https://cdn.v2ph.com/photos/CfnhKpyR1H08mkXo.jpg",
+          "bytes": 921888,
+          "sha256": "1f19258f2ea7461a5f7ff4da1b5e892cb173d11d1b3a6ba62d5f2342e884fb5b",
+          "width": 2700,
+          "height": 1800,
+          "origin": "v2ph_public_page",
+          "private_cloud_file": false,
+          "number": 12
+        },
+        {
+          "url": "https://cdn.v2ph.com/photos/ik0ETqz1Kz3BHUkT.jpg",
+          "bytes": 968733,
+          "sha256": "fe3938e96405562b58034a8de2882cf7bbb62780716933d4bb0a2bdc8add5a52",
+          "width": 1800,
+          "height": 2700,
+          "origin": "v2ph_public_page",
+          "private_cloud_file": false,
+          "number": 13
+        },
+        {
+          "url": "https://cdn.v2ph.com/photos/DZnArgOaMzDt0kRb.jpg",
+          "bytes": 963545,
+          "sha256": "d71edbb889b86bf5fc57bf416fe3fc7ec772d3702ad052a7c92b5e01f43cd274",
+          "width": 1800,
+          "height": 2700,
+          "origin": "v2ph_public_page",
+          "private_cloud_file": false,
+          "number": 14
+        },
+        {
+          "url": "https://cdn.v2ph.com/photos/v343K1pg7kqUpyyU.jpg",
+          "bytes": 971658,
+          "sha256": "e7b168dddf427939f8e5939bb03543b153506391fbb02b6858894abb3ba1919b",
+          "width": 1800,
+          "height": 2700,
+          "origin": "v2ph_public_page",
+          "private_cloud_file": false,
+          "number": 15
+        },
+        {
+          "url": "https://cdn.v2ph.com/photos/a9gjU-fMn4Y7tAyC.jpg",
           "bytes": 929730,
           "sha256": "d9a5fe19a75539eb7f930076ef0d093cb942626fb2012ef37726b5fe8c245dd2",
           "width": 2700,
           "height": 1800,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 10
+          "number": 16
         }
       ],
       "images": [],
-      "pages": [],
+      "pages": [
+        {
+          "page": 1,
+          "candidate_images": 10
+        }
+      ],
       "status": "public_previews_verified"
     },
     {
@@ -3636,13 +3691,123 @@
     },
     {
       "id": "v2ph-actor-a54e445z",
-      "title": "[DJAWA] Mimmi --March Hare Photograph",
+      "title": "[DJAWA] Mimmi --March Hare Photograph - Page 2",
       "source": "https://www.v2ph.com/album/a54e445z.html",
       "publisher": "DJAWA or other verified credited studio",
-      "samples": [],
+      "samples": [
+        {
+          "url": "https://cdn.v2ph.com/photos/whIEGg2nx8CtlVXb.jpg",
+          "bytes": 487801,
+          "sha256": "afd60f3ba754a7d0d4073ef0578085f8e941acb4c21b64e15c17eead8f766d6e",
+          "width": 2401,
+          "height": 1800,
+          "origin": "v2ph_public_page",
+          "private_cloud_file": false,
+          "number": 1
+        },
+        {
+          "url": "https://cdn.v2ph.com/photos/GOq9tXnFPRYIedOQ.jpg",
+          "bytes": 421736,
+          "sha256": "f1ac2464051a627d83ab307b9379de24e28d508366daf6c9524e248ca27eb543",
+          "width": 2401,
+          "height": 1800,
+          "origin": "v2ph_public_page",
+          "private_cloud_file": false,
+          "number": 2
+        },
+        {
+          "url": "https://cdn.v2ph.com/photos/AN8QEpXESHoPJr2c.jpg",
+          "bytes": 391900,
+          "sha256": "25f5f787f97bb731fc262a597397b752e8c211d4ea0b743323f7f75f62b80ca3",
+          "width": 2401,
+          "height": 1800,
+          "origin": "v2ph_public_page",
+          "private_cloud_file": false,
+          "number": 3
+        },
+        {
+          "url": "https://cdn.v2ph.com/photos/xhZgHPYljiB1HteU.jpg",
+          "bytes": 403245,
+          "sha256": "7761423744ea145beb5c8ad31c2c0b6087702b12af2e4bdfd12d120cee8a0f32",
+          "width": 2401,
+          "height": 1800,
+          "origin": "v2ph_public_page",
+          "private_cloud_file": false,
+          "number": 4
+        },
+        {
+          "url": "https://cdn.v2ph.com/photos/mZGbWbnYA28ZYh0Y.jpg",
+          "bytes": 399432,
+          "sha256": "fd9f8b3ba6802a6ac0271f7c2f76957f03a0a6935c9b17511d8457bb0595068e",
+          "width": 2401,
+          "height": 1800,
+          "origin": "v2ph_public_page",
+          "private_cloud_file": false,
+          "number": 5
+        },
+        {
+          "url": "https://cdn.v2ph.com/photos/hgRLFSE6UJXkL9FB.jpg",
+          "bytes": 661522,
+          "sha256": "079aa7b3b829a04a93350a0d4d4b5e6a28fd2c7d9173019384541b8325e724a9",
+          "width": 2401,
+          "height": 1800,
+          "origin": "v2ph_public_page",
+          "private_cloud_file": false,
+          "number": 6
+        },
+        {
+          "url": "https://cdn.v2ph.com/photos/XaaDDk86L0ULID3L.jpg",
+          "bytes": 544976,
+          "sha256": "4c9a75e535a0d79dc9001c48e46b3fcc1858b896ad6502ea013f13619d60ba2c",
+          "width": 2401,
+          "height": 1800,
+          "origin": "v2ph_public_page",
+          "private_cloud_file": false,
+          "number": 7
+        },
+        {
+          "url": "https://cdn.v2ph.com/photos/T4xSEMFRjrpw8UAr.jpg",
+          "bytes": 409224,
+          "sha256": "bf03d74879e1956a39112ab45aa8af4a55621f413161c08ded6940d448ead60b",
+          "width": 1800,
+          "height": 2401,
+          "origin": "v2ph_public_page",
+          "private_cloud_file": false,
+          "number": 8
+        },
+        {
+          "url": "https://cdn.v2ph.com/photos/h0u4zQI3xImz2whd.jpg",
+          "bytes": 505263,
+          "sha256": "8f1f290d068b4a5fea0bdd379850cb843cf369fb2123a8931a8b97c4538721c1",
+          "width": 1800,
+          "height": 2401,
+          "origin": "v2ph_public_page",
+          "private_cloud_file": false,
+          "number": 9
+        },
+        {
+          "url": "https://cdn.v2ph.com/photos/aIqPv7C5PCI8502e.jpg",
+          "bytes": 498950,
+          "sha256": "f568597c1e1f07dc1c609c02dbf5dd6b21bb4953d086eaf26b434fc698240b2a",
+          "width": 1800,
+          "height": 2401,
+          "origin": "v2ph_public_page",
+          "private_cloud_file": false,
+          "number": 10
+        }
+      ],
       "images": [],
-      "pages": [],
-      "status": "source_only"
+      "pages": [
+        {
+          "page": 1,
+          "candidate_images": 10
+        },
+        {
+          "page": 2,
+          "candidate_images": 0
+        }
+      ],
+      "status": "public_previews_verified"
     },
     {
       "id": "v2ph-actor-zo555x4z",
