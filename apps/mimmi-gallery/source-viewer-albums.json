@@ -8,8 +8,8 @@
   "disclaimer": "Every image is verified public source evidence, not a purchased full photobook. Public sites may block remote image hotlinks.",
   "summary": {
     "displayed_albums": 63,
-    "verified_unique_source_images": 568,
-    "input_source_image_occurrences": 598,
+    "verified_unique_source_images": 562,
+    "input_source_image_occurrences": 592,
     "duplicate_hashes_skipped": 30,
     "actual_full_publisher_photobooks": 0,
     "incomplete_known_count_albums": 22
@@ -2844,17 +2844,6 @@
           "bytes": 294022,
           "quality": "official_public_sample",
           "publisher_original_verified": false
-        },
-        {
-          "number": 6,
-          "url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_cv-25-683x1024.jpg",
-          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_cv-25-683x1024.jpg",
-          "sha256": "73af135132d3843b3529b9745467e41051302fa5e46e98540564bcfbceb02b88",
-          "width": 683,
-          "height": 1024,
-          "bytes": 88081,
-          "quality": "official_public_sample",
-          "publisher_original_verified": false
         }
       ],
       "sourceHosted": true,
@@ -2870,7 +2859,7 @@
           "source_type": "official",
           "id": "djawa-janus-scary-lantern-night-vol-2",
           "source": "https://djawaphoto.com/portfolio/janus-scary-lantern-night-vol-2/",
-          "verified_image_count": 6,
+          "verified_image_count": 5,
           "claimed_image_count": null
         }
       ],
@@ -5925,17 +5914,6 @@
           "bytes": 428698,
           "quality": "official_public_sample",
           "publisher_original_verified": false
-        },
-        {
-          "number": 6,
-          "url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_cv-683x1024.jpg",
-          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_cv-683x1024.jpg",
-          "sha256": "ca4c7b3ca762ac34ca971d2b41e92100b6b79c4e2f67eb0e4f87cb34c84f407b",
-          "width": 683,
-          "height": 1024,
-          "bytes": 74340,
-          "quality": "official_public_sample",
-          "publisher_original_verified": false
         }
       ],
       "sourceHosted": true,
@@ -5951,7 +5929,7 @@
           "source_type": "official",
           "id": "djawa-my-summer-vacation-vol-4",
           "source": "https://djawaphoto.com/portfolio/my-summer-vacation-vol-4/",
-          "verified_image_count": 6,
+          "verified_image_count": 5,
           "claimed_image_count": 90
         }
       ],
@@ -6367,50 +6345,6 @@
           "bytes": 401692,
           "quality": "official_public_sample",
           "publisher_original_verified": false
-        },
-        {
-          "number": 3,
-          "url": "https://djawaphoto.com/wp-content/uploads/2023/06/sample_cv1-1-730x1024.jpg",
-          "source_url": "https://djawaphoto.com/wp-content/uploads/2023/06/sample_cv1-1-730x1024.jpg",
-          "sha256": "975c3acf96ca315dd8b1f745b29e174d964f2398e52ef7d5262e8e7fc68b72ad",
-          "width": 730,
-          "height": 1024,
-          "bytes": 71150,
-          "quality": "official_public_sample",
-          "publisher_original_verified": false
-        },
-        {
-          "number": 4,
-          "url": "https://djawaphoto.com/wp-content/uploads/2023/06/sample_cv1-1-768x1077.jpg",
-          "source_url": "https://djawaphoto.com/wp-content/uploads/2023/06/sample_cv1-1-768x1077.jpg",
-          "sha256": "5384bcc6afb578ef502e0a7fc8d588e0c4bad83f90af88420b475e134e037408",
-          "width": 768,
-          "height": 1077,
-          "bytes": 76813,
-          "quality": "official_public_sample",
-          "publisher_original_verified": false
-        },
-        {
-          "number": 5,
-          "url": "https://djawaphoto.com/wp-content/uploads/2023/06/sample_cv1-1-1095x1536.jpg",
-          "source_url": "https://djawaphoto.com/wp-content/uploads/2023/06/sample_cv1-1-1095x1536.jpg",
-          "sha256": "20241a213a3f162fc6188fac728c39eb0960ab79328ca25230fef1fa23fa83f5",
-          "width": 1095,
-          "height": 1536,
-          "bytes": 130834,
-          "quality": "official_public_sample",
-          "publisher_original_verified": false
-        },
-        {
-          "number": 6,
-          "url": "https://djawaphoto.com/wp-content/uploads/2023/06/sample_cv1-1-350x491.jpg",
-          "source_url": "https://djawaphoto.com/wp-content/uploads/2023/06/sample_cv1-1-350x491.jpg",
-          "sha256": "003c9c72c8cbb78a67ed5c805d2177619d02865ec489c6d72266f3abaea5e5d9",
-          "width": 350,
-          "height": 491,
-          "bytes": 22847,
-          "quality": "official_public_sample",
-          "publisher_original_verified": false
         }
       ],
       "sourceHosted": true,
@@ -6426,7 +6360,7 @@
           "source_type": "official",
           "id": "djawa-pop-kitty-party",
           "source": "https://djawaphoto.com/portfolio/pop-kitty-party/",
-          "verified_image_count": 6,
+          "verified_image_count": 2,
           "claimed_image_count": null
         }
       ],
