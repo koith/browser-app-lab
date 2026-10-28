@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 95
     env:
-      RCLONE_CONFIG_ARCHIVE_COOKIE: ${{ secrets.MIMMI_TERABOX_NDUS || secrets.YUI_TERABOX_NDUS }}
+      RCLONE_CONFIG_ARCHIVE_COOKIE: ${{ secrets.MIMMI_TERABOX_NDUS || secrets.YUI_TERABOX_NDUS || secrets.YUI_TERABOX_COOKIE }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
