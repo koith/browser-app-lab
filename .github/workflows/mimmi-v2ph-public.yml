@@ -44,17 +44,21 @@ jobs:
               assert image['bytes']>=4500 and image['sha256'] and image['width']>=300 and image['height']>=300
           print('MIMMI_V2PH_REAL_PUBLIC_IMAGE_VERIFY_PASS',d['summary'])
           PY
-      - name: Rebuild Mimmi latest gallery album index from all verified sources
-        run: |
-          python apps/mimmi-gallery/build_model_gallery.py
-      - name: Publish source URLs and SHA256 metadata only
+      - name: Commit only V2PH source evidence, then rebase before rebuilding derived catalog
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apps/mimmi-gallery/v2ph-public-previews.json apps/mimmi-gallery/source-viewer-albums.json apps/mimmi-gallery/albums.json
+          git add apps/mimmi-gallery/v2ph-public-previews.json
           if ! git diff --cached --quiet; then
-            git commit -m "Register Mimmi verified public V2PH photo metadata"
-            git fetch origin "$GITHUB_REF_NAME"
-            git rebase "origin/$GITHUB_REF_NAME"
-            git push origin "HEAD:$GITHUB_REF_NAME"
+            git commit -m "Update Mimmi V2PH verified public image evidence"
           fi
+          git fetch origin "$GITHUB_REF_NAME"
+          git rebase "origin/$GITHUB_REF_NAME"
+      - name: Regenerate latest Mimmi gallery index from reconciled sources
+        run: |
+          python apps/mimmi-gallery/build_model_gallery.py
+          git add apps/mimmi-gallery/albums.json apps/mimmi-gallery/source-viewer-albums.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Refresh Mimmi deduplicated beta18 album catalogue"
+          fi
+          git push origin "HEAD:$GITHUB_REF_NAME"
