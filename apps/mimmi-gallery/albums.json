@@ -141,6 +141,15 @@
       "ai_enhanced": false
     },
     {
+      "id": "pixibb-auto-djawa-photo-mimmi-cyberpunk-girl-41-photos-cosplay",
+      "title": "Cyberpunk Girl",
+      "publisher": "독립 화보",
+      "source": "https://cosplay.pixibb.com/djawa-photo-mimmi-cyberpunk-girl-41-photos-cosplay/",
+      "expected": 41,
+      "photos": 41,
+      "ai_enhanced": false
+    },
+    {
       "id": "djawa-full-bloom-yamashiiro",
       "title": "Full Bloom Yamashiiro",
       "publisher": "DJAWA",
@@ -154,8 +163,8 @@
       "title": "Girls' Frontline HK416 · 공개 웹판",
       "publisher": "DJAWA",
       "source": "https://www.v2ph.com/album/a54e98nz.html?hl=ko",
-      "expected": 192,
-      "photos": 192,
+      "expected": null,
+      "photos": null,
       "ai_enhanced": false
     },
     {
@@ -210,6 +219,15 @@
       "source": "https://djawaphoto.com/portfolio/janus-scary-lantern-night-vol-2/",
       "expected": null,
       "photos": null,
+      "ai_enhanced": false
+    },
+    {
+      "id": "pixibb-auto-djawa-photo-mimmi-kitsune-miko-a-ver-65-photos-cosplay",
+      "title": "Kitsune Miko (A ver)",
+      "publisher": "독립 화보",
+      "source": "https://cosplay.pixibb.com/djawa-photo-mimmi-kitsune-miko-a-ver-65-photos-cosplay/",
+      "expected": 65,
+      "photos": 65,
       "ai_enhanced": false
     },
     {
@@ -442,8 +460,8 @@
       "title": "Nikke : Elegg",
       "publisher": "DJAWA",
       "source": "https://djawaphoto.com/portfolio/nikke-elegg/",
-      "expected": 152,
-      "photos": 152,
+      "expected": null,
+      "photos": null,
       "ai_enhanced": false
     },
     {
@@ -534,6 +552,15 @@
       "source": "https://www.v2ph.com/album/z6exx6ma.html",
       "expected": null,
       "photos": null,
+      "ai_enhanced": false
+    },
+    {
+      "id": "pixibb-auto-djawa-photo-mimmi-witchs-witchcraft-151-photos-cosplay",
+      "title": "Witch's Witchcraft",
+      "publisher": "독립 화보",
+      "source": "https://cosplay.pixibb.com/djawa-photo-mimmi-witchs-witchcraft-151-photos-cosplay/",
+      "expected": 151,
+      "photos": 151,
       "ai_enhanced": false
     },
     {
@@ -1100,7 +1127,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 15,
-      "previewAlbumId": null,
+      "previewAlbumId": "pixibb-auto-djawa-photo-mimmi-witchs-witchcraft-151-photos-cosplay",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -1226,7 +1253,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 6,
-      "previewAlbumId": null,
+      "previewAlbumId": "pixibb-auto-djawa-photo-mimmi-kitsune-miko-a-ver-65-photos-cosplay",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -1254,7 +1281,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 4,
-      "previewAlbumId": null,
+      "previewAlbumId": "pixibb-auto-djawa-photo-mimmi-cyberpunk-girl-41-photos-cosplay",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -1302,12 +1329,12 @@
     }
   ],
   "summary": {
-    "displayed_albums": 63,
-    "verified_unique_source_images": 1462,
-    "input_source_image_occurrences": 1492,
+    "displayed_albums": 66,
+    "verified_unique_source_images": 2280,
+    "input_source_image_occurrences": 2310,
     "duplicate_hashes_skipped": 30,
     "actual_full_publisher_photobooks": 0,
-    "incomplete_known_count_albums": 21,
+    "incomplete_known_count_albums": 19,
     "curated_research_works": 52
   },
   "notes": "Individual accessible public samples are NOT complete commercial editions."
