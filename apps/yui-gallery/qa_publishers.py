@@ -23,7 +23,23 @@ async def run(args):
         await page.goto(args.base, wait_until='domcontentloaded')
         await page.wait_for_function('history.state?.yui')
         baseline = await page.evaluate('JSON.stringify(available().map(a=>[a.id,validImages(a).map(p=>[p.number,p.sha256,p.url])]))')
-        await page.locator('[data-filter="publishers"]').click()
+        assert await page.locator('[data-filter]').count() == 0
+        assert await page.locator('#browse-toggle').count() == 1
+        assert await page.locator('#browse-mode').inner_text() == '화보'
+        async def sorted_titles(selector):
+            assert await page.locator(selector).evaluate_all("els=>{const names=els.map(e=>e.textContent);return JSON.stringify(names)===JSON.stringify([...names].sort((a,b)=>a.localeCompare(b,'ko',{numeric:true,sensitivity:'base'})))}")
+        await sorted_titles('#albumgrid .album .name')
+        await page.locator('#browse-toggle').click()
+        assert await page.locator('#browse-mode').inner_text() == '발행처'
+        await sorted_titles('#publishergrid .publisher-info strong')
+        await page.locator('#browse-toggle').click()
+        assert await page.locator('#browse-mode').inner_text() == '화보'
+        assert await page.locator('#publishergrid').is_hidden()
+        await page.go_back()
+        await page.locator('#publishergrid').wait_for(state='visible')
+        await page.go_forward()
+        await page.locator('#publishergrid').wait_for(state='hidden')
+        await page.locator('#browse-toggle').click()
         await page.locator('#publishergrid').wait_for(state='visible')
         count = await page.locator('#publishergrid .publisher').count()
         assert count >= 8, count
@@ -39,7 +55,13 @@ async def run(args):
         assert '등록 7' in publisher_counts, publisher_counts
         await page.locator('.publisher[data-publisher="sweetbox"]').click()
         assert await page.locator('#albumname').inner_text() == 'SWEETBOX'
+        await sorted_titles('#albumgrid .album .name')
         assert await page.locator('#albumgrid .album').count() >= 8
+        await page.locator('#browse-toggle').click()
+        assert await page.locator('#browse-mode').inner_text() == '화보'
+        await page.go_back()
+        await page.wait_for_function("activePublisher==='sweetbox'")
+        assert await page.locator('#browse-mode').inner_text() == '발행처'
         assert await page.evaluate("document.body.classList.contains('publisher-view')")
         await page.locator('.album[data-id="teddy-bear97"]').click()
         assert await page.locator('#detailphotos .photo').count() == 97
@@ -75,7 +97,7 @@ async def run(args):
         await browser.close()
     report = {'engine': args.engine, 'publisher_categories': count, 'logo_images_decoded': logo_checks,
               'history_publisher_album_photo_back_forward': True, 'publisher_deep_link_back': True,
-              'publisher_search': True, 'all_photo_order_urls_sha256_unchanged': True,
+              'publisher_search': True, 'single_browse_toggle': True, 'global_photos_and_all_catalogue_controls_hidden': True, 'publishers_and_album_titles_ascending': True, 'all_photo_order_urls_sha256_unchanged': True,
               'physical_iphone_verified': False, 'errors': errors}
     args.out.write_text(json.dumps(report, indent=2)+'\n')
     print('PUBLISHER_MOBILE_BROWSE_QA_PASS', json.dumps(report), flush=True)

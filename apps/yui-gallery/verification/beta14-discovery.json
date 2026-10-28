@@ -1,0 +1,43 @@
+{
+  "version": "v0.1.0-beta.14",
+  "new_verified_photograph_file_sha256": 0,
+  "new_gallery_entries": 0,
+  "new_complete_photobooks": 0,
+  "publisher_original_verified": 0,
+  "private_cloud_verified_new_files": 0,
+  "not_acquisition_counts": true,
+  "findings": [
+    {
+      "url": "https://4kup.net/category/sweetbox/",
+      "status": "public_publisher_index_read",
+      "links": 2
+    },
+    {
+      "url": "https://4kup.net/category/sweetbox/page/2/",
+      "status": "public_publisher_index_read",
+      "links": 4
+    },
+    {
+      "url": "https://4kup.net/category/sweetbox/page/3/",
+      "status": "public_publisher_index_read",
+      "links": 1
+    },
+    {
+      "url": "https://4kup.net/sweetbox-yui-swtb-vol-18-cream-part1/",
+      "status": "100 published large links already collected; no further CREAM part linked from observed publisher index",
+      "new_files": 0
+    },
+    {
+      "url": "https://4kup.net/sweetbox-yui-swtb-vol-65-yuis-present/",
+      "status": "Source says reduced selected previews;20 observed s320 AI-enhanced preview tags;25 advertised samples. No explicitly linked full-size individual files. Reject as non-AI replacement, do not transform URLs or count previews.",
+      "new_files": 0
+    },
+    {
+      "url": "https://www.junmeitu.com/en/beauty/014_vol_18_cream_yui_228p-20.html",
+      "new_files": 0,
+      "error": "robots policy blocks or cannot verify https://www.junmeitu.com/en/beauty/014_vol_18_cream_yui_228p-20.html"
+    }
+  ],
+  "paid_published_works_included_in_research": true,
+  "cost_increase_krw": 0
+}

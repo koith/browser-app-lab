@@ -68,7 +68,10 @@ jobs:
             if(version!==JSON.parse(fs.readFileSync('apps/yui-gallery/version.json')).version)throw Error('Current version missing at header top right');
             const vbox=await page.locator('#app-version').boundingBox();
             if(!vbox||vbox.x<190||vbox.y>25||vbox.height>18)throw Error('Version is not small/top-right');
-            if(!await page.locator('[data-filter="albums"]').evaluate(x=>x.classList.contains('active')))throw Error('Albums not default view');
+            if(await page.locator('#browse-toggle').getAttribute('data-mode')!=='albums')throw Error('Albums not default view');
+            if(await page.locator('[data-filter]').count())throw Error('Old browse tabs remain visible');
+            const sorted=selector=>page.locator(selector).evaluateAll(els=>{const names=els.map(x=>x.textContent);return JSON.stringify(names)===JSON.stringify([...names].sort((a,b)=>a.localeCompare(b,'ko',{numeric:true,sensitivity:'base'})))});
+            if(!await sorted('#albumgrid .album .name'))throw Error('Album titles not ascending');
             const albumCount=await page.locator('.album').count(),expectedAlbums=localVisible.length+remote.length;
             if(albumCount!==expectedAlbums)throw Error('Expected '+expectedAlbums+' albums, got '+albumCount);
             if(await page.locator('.album[data-id="v04"]').count())throw Error('Duplicate Teddy preview card remains');
@@ -96,16 +99,29 @@ jobs:
                 await page.locator('#back').click();
               }
             }
-            await page.locator('[data-filter="photos"]').click();
-            const allPhotos=await page.locator('#photogrid .photo').count();
+            // Hidden global-photo/catalogue controls retain all runtime records.
+            const allPhotos=await page.evaluate(()=>available().reduce((n,a)=>n+validImages(a).length,0));
             const expectedPhotos=localVisible.reduce((n,a)=>n+a.images.length,0)+remoteCount;
             if(allPhotos!==expectedPhotos)throw Error('Expected '+expectedPhotos+' photo records, got '+allPhotos);
-            await page.screenshot({path:'yui-album-mobile.png',fullPage:false});
-            await page.locator('[data-filter="all"]').click();
-            const allWorks=await page.locator('.album').count();
+            const allWorks=await page.evaluate(()=>catalog.length);
             if(allWorks<40)throw Error('Catalog collapsed: '+allWorks);
+            await page.locator('#browse-toggle').click();
+            await page.locator('#publishergrid').waitFor({state:'visible'});
+            if(!await sorted('#publishergrid .publisher-info strong'))throw Error('Publishers not ascending');
+            await page.screenshot({path:'yui-album-mobile.png',fullPage:false});
+            await page.locator('[data-publisher="sweetbox"]').click();
+            if(!await sorted('#albumgrid .album .name'))throw Error('Publisher albums not ascending');
+            await page.locator('.album[data-id="teddy-bear97"]').click();
+            if(await page.locator('#detailphotos .photo').count()!==97)throw Error('Publisher/album/photo hierarchy broken');
+            await page.locator('#back').click();
+            await page.waitForFunction(()=>activePublisher==='sweetbox');
+            await page.locator('#browse-toggle').click();
+            if(await page.locator('#browse-toggle').getAttribute('data-mode')!=='albums')throw Error('Toggle did not return to albums');
+            await page.goBack();
+            await page.waitForFunction(()=>activePublisher==='sweetbox');
+            if(await page.locator('#browse-toggle').getAttribute('data-mode')!=='publishers')throw Error('Back lost publisher mode');
             if(errors.length)throw Error('JavaScript errors: '+errors.join('; '));
-            console.log('YUI_IMAGE_FIRST_GALLERY_MOBILE_PASS',{albumCount,detailCount,allPhotos,allWorks,version,sourceRemoteBrowserQA:hasSources});
+            console.log('YUI_IMAGE_FIRST_GALLERY_MOBILE_PASS',{albumCount,detailCount,allPhotos,allWorks,version,sourceRemoteBrowserQA:hasSources,singleToggleAscendingHierarchy:true});
             await browser.close();
           })().catch(e=>{console.error(e);process.exit(1)});
           NODE

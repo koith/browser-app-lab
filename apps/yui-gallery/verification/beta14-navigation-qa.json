@@ -1,0 +1,22 @@
+{
+  "engine": "chromium",
+  "viewport": [
+    390,
+    844
+  ],
+  "history_back_forward": true,
+  "rapid_photo_changes": 250,
+  "root_can_leave": true,
+  "fixed_back_close": true,
+  "aligned_two_columns": true,
+  "album_card_height_halved": true,
+  "publisher_count_edition_stickers": true,
+  "detail_photo_grid_unchanged": true,
+  "collapsed_search_popup_back_forward_escape_submit_close": true,
+  "stale_wrong_model_manifest_blocked": true,
+  "native_contextmenu_allowed": true,
+  "emulated_browser_zoom_scale": 2,
+  "physical_pinch_verified": false,
+  "multitouch_and_edge_not_intercepted": true,
+  "iphone_real_device": false
+}

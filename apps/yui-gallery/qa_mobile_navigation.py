@@ -100,7 +100,8 @@ async def run(args):
    assert await page.locator('#detailphotos .photo').count()==count
    assert canonical in page.url
   await page.locator('#back').click();await page.locator('#browse').wait_for(state='visible')
-  await page.locator('[data-filter="all"]').click()
+  assert await page.locator('[data-filter]').count()==0
+  assert await page.locator('#browse-mode').inner_text()=='화보'
   assert await page.locator('.album[data-id="sexiest18"]').count()==0
   for aid in ['kuro-yui58','yui-vol2-42','yui-vol3-106','blackroom145','dec2023-199','pussylet41-82','artgravia663-ai32']:
    card=page.locator('.album[data-id="'+aid+'"]');assert await card.count()==1
@@ -115,7 +116,8 @@ async def run(args):
   await context.route('**/additional-source-albums.json',lambda route:route.fulfill(json=stale))
   await page.reload(wait_until='domcontentloaded');await page.wait_for_function('history.state?.yui')
   assert await page.evaluate("stored.every(a=>!['sexiest18','renamed-excluded-fixture'].includes(a.id))")
-  await page.locator('[data-filter="all"]').click()
+  assert await page.locator('[data-filter]').count()==0
+  assert await page.locator('#browse-mode').inner_text()=='화보'
   assert await page.locator('.album[data-id="sexiest18"],.album[data-id="renamed-excluded-fixture"]').count()==0
   assert not errors,errors
   result={'engine':args.engine,'viewport':[390,844],'history_back_forward':True,'rapid_photo_changes':250,'root_can_leave':True,'fixed_back_close':True,'aligned_two_columns':True,'album_card_height_halved':True,'publisher_count_edition_stickers':True,'detail_photo_grid_unchanged':True,'collapsed_search_popup_back_forward_escape_submit_close':True,'stale_wrong_model_manifest_blocked':True,'native_contextmenu_allowed':True,'emulated_browser_zoom_scale':pinch,'physical_pinch_verified':False,'multitouch_and_edge_not_intercepted':True,'iphone_real_device':False}
