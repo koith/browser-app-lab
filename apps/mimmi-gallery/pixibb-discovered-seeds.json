@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "model": "mimmi",
-  "generated_at": "2026-10-28T17:33:00.523394+00:00",
+  "generated_at": "2026-10-28T17:35:38.969215+00:00",
   "source": "actual public PixiBB search results in six model-language variants",
   "summary": {
     "search_terms": [
@@ -10,7 +10,14 @@
       "Mimmissu17",
       "Miss u DJAWA",
       "ミミ DJAWA",
-      "CreamSoda Mimmi"
+      "CreamSoda Mimmi",
+      "밋슈",
+      "DJAWA Mimmi",
+      "Mimmi COSPLAY",
+      "Mimmi Artgravia",
+      "Mimmi Cosplay 2025",
+      "ミンミ DJAWA",
+      "Mimmi 写真"
     ],
     "candidates": 9,
     "verified_mimmi_album_pages": 9,
@@ -137,6 +144,41 @@
     },
     {
       "term": "CreamSoda Mimmi",
+      "page": 1,
+      "found_links": 0
+    },
+    {
+      "term": "밋슈",
+      "page": 1,
+      "found_links": 0
+    },
+    {
+      "term": "DJAWA Mimmi",
+      "page": 1,
+      "found_links": 0
+    },
+    {
+      "term": "Mimmi COSPLAY",
+      "page": 1,
+      "found_links": 0
+    },
+    {
+      "term": "Mimmi Artgravia",
+      "page": 1,
+      "found_links": 0
+    },
+    {
+      "term": "Mimmi Cosplay 2025",
+      "page": 1,
+      "found_links": 0
+    },
+    {
+      "term": "ミンミ DJAWA",
+      "page": 1,
+      "found_links": 0
+    },
+    {
+      "term": "Mimmi 写真",
       "page": 1,
       "found_links": 0
     }
