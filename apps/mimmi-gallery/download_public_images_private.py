@@ -22,7 +22,7 @@ import requests
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parent
-HOSTS = {"djawaphoto.com", "www.djawaphoto.com", "cdn.v2ph.com"}
+HOSTS = {"djawaphoto.com", "www.djawaphoto.com", "cdn.v2ph.com", "public-files.gumroad.com", "assets.gumroad.com", "static-2.gumroad.com"}
 EXT = {".jpg", ".jpeg", ".png", ".webp", ".avif"}
 MAX_BYTES = 30_000_000
 SESSION = requests.Session()
@@ -43,6 +43,8 @@ def permitted(url):
         if h=="cdn.v2ph.com":return p.path.startswith("/photos/")
         if h in ("djawaphoto.com","www.djawaphoto.com"):
             return p.path.startswith("/wp-content/uploads/")
+        if h in ("public-files.gumroad.com","assets.gumroad.com","static-2.gumroad.com"):
+            return p.path.startswith("/") and ".." not in p.path.split("/")
         return pixibb and p.path.startswith("/")
     except (ValueError, TypeError, AttributeError):
         return False
