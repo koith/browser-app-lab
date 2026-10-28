@@ -265,7 +265,7 @@ function render(){
   if(group){$('albumname').textContent=group.name;$('albumtotal').textContent=group.albums.length+'개 · 열람 '+group.viewable}
   const matched=src.filter(a=>match(getName(a))).sort((a,b)=>{const ac=validImages(stored.find(x=>x.id===(a.previewAlbumId||a.id))||a).length,bc=validImages(stored.find(x=>x.id===(b.previewAlbumId||b.id))||b).length;return (bc>0)-(ac>0)||MimmiPublishers.compareNames(MimmiLabels.coverTitle(a),MimmiLabels.coverTitle(b))||MimmiPublishers.compareNames(a.id,b.id)});
   $('albumgrid').innerHTML=matched.map(a=>card(a,validImages(stored.find(x=>x.id===(a.previewAlbumId||a.id))||a).length>0)).join('');
-  $('albumgrid').querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>{const research=src.find(a=>a.id===b.dataset.id);const target=research?.previewAlbumId||b.dataset.id;const a=stored.find(a=>a.id===target);if(a&&validImages(a).length)openAlbum(target);else{const source=research?.source;try{const u=new URL(source);if(u.protocol==='https:'&&!u.username&&!u.password)window.open(u.href,'_blank','noopener,noreferrer')}catch{}}});
+  $('albumgrid').querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>{const a=stored.find(a=>a.id===b.dataset.id);if(a&&validImages(a).length)openAlbum(a.id)});
   $('total').textContent=matched.length+' albums';
   $('nothing').hidden=matched.length>0;
  }
