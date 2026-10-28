@@ -72,7 +72,7 @@ def listing_links(html,base):
             out.append(url)
     return out
 
-def article_media(html,base):
+def article_media(html,base,article_root=None):
     doc=BeautifulSoup(html,"html.parser")
     title=doc.find("h1")
     name=title.get_text(" ",strip=True) if title else ""
@@ -86,7 +86,7 @@ def article_media(html,base):
             val=tag.get("href","")
             if val:
                 u=urljoin(base,val)
-                if safe_page(u,base) and u not in next_pages:next_pages.append(u)
+                if safe_page(u,article_root or base) and u not in next_pages:next_pages.append(u)
                 raw.append(val)
         else:
             for attr in ("data-original","data-full","data-src","data-lazy-src","data-url","srcset","data-srcset","src"):
@@ -99,6 +99,11 @@ def article_media(html,base):
             label=tag.get("alt","").lower()
             if re.search(r"avatar|favicon|emoji|logo|banner|placeholder|advert",label):continue
             photos.append(u)
+    # Many WordPress themes put the page-2/3 navigation outside article HTML.
+    for a in doc.select("nav a[href],.pagination a[href],.page-links a[href],a[rel=next]"):
+        u=urljoin(base,a.get("href",""))
+        if safe_page(u,article_root or base) and u not in next_pages:
+            next_pages.append(u)
     return photos,next_pages,True
 
 def verify(url):
@@ -163,7 +168,7 @@ def run(max_category_pages=2,max_article_pages=12,max_images=180):
                 doc=BeautifulSoup(html,"html.parser")
                 header=doc.find("h1")
                 if header:title=header.get_text(" ",strip=True)[:175]
-                urls,next_pages,identity=article_media(html,current)
+                urls,next_pages,identity=article_media(html,current,article)
                 if not identity:break
                 for u in urls:
                     if len(samples)>=max_images:break
