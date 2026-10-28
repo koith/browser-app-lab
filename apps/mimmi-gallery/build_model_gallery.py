@@ -21,9 +21,10 @@ FILES=[
   ("official","official-previews.json"),
   ("v2ph_seed","v2ph-public-previews.json"),
   ("v2ph_actor","v2ph-actor-previews.json"),
+  ("gumroad_promo","gumroad-public-previews.json"),
 ]
-ALLOWED={"djawaphoto.com","www.djawaphoto.com","cdn.v2ph.com"}
-MODEL_VERSION="v0.1.0-mimmi.6"
+ALLOWED={"djawaphoto.com","www.djawaphoto.com","cdn.v2ph.com","public-files.gumroad.com","assets.gumroad.com","static-2.gumroad.com"}
+MODEL_VERSION="v0.1.0-mimmi.7"
 
 def canonical_title(title):
     s=unicodedata.normalize("NFKC",str(title)).casefold()
@@ -62,7 +63,10 @@ def build(root=ROOT):
     collisions=Counter()
     input_count=0
     for kind,filename in FILES:
-        source=json.loads((root/filename).read_text(encoding="utf-8"))
+        source_file=root/filename
+        if not source_file.exists() and kind=="gumroad_promo":
+            continue
+        source=json.loads(source_file.read_text(encoding="utf-8"))
         for record in source["albums"]:
             samples=record.get("samples",[])
             if not samples:continue
@@ -102,7 +106,7 @@ def build(root=ROOT):
                 g["images"].append({
                     "number":len(g["images"])+1,"url":p["url"],"source_url":p["url"],
                     "sha256":digest,"width":p["width"],"height":p["height"],
-                    "bytes":p["bytes"],"quality":"official_public_sample" if kind=="official" else "third_party_public_web",
+                    "bytes":p["bytes"],"quality":"official_public_sample" if kind in ("official","gumroad_promo") else "third_party_public_web",
                     "publisher_original_verified":False,
                 })
     albums=[]
