@@ -41,7 +41,8 @@ jobs:
       - name: Install free local tools
         timeout-minutes: 7
         run: |
-          pip install Pillow requests beautifulsoup4 playwright==1.58.0 gallery-dl fastapi httpx
+          # setup-python selects a different interpreter from the image's bare pip.
+          python -m pip install Pillow requests beautifulsoup4 playwright==1.58.0 gallery-dl fastapi httpx
       - name: Verify byte preservation and collector behavior
         run: |
           node apps/yui-gallery/test_version.cjs
