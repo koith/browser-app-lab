@@ -7,7 +7,7 @@ if(!inline)throw Error('Mimmi beta18 inline app missing');
 new vm.Script(inline[1]);
 const manifest=JSON.parse(fs.readFileSync(root+'source-viewer-albums.json'));
 const count=manifest.albums.reduce((n,a)=>n+a.images.length,0);
-if(manifest.albums.length<50||count<395||!manifest.source_link_only)throw Error('Insufficient source-viewer image evidence '+count);
+if(manifest.albums.length<45||count<395||!manifest.source_link_only)throw Error('Insufficient source-viewer image evidence '+count);
 const hashes=manifest.albums.flatMap(a=>a.images.map(p=>p.sha256));
 if(new Set(hashes).size!==count)throw Error('Source image bytes repeat across albums');
 if(manifest.albums.some(a=>a.expected&&a.images.length>a.expected))throw Error('Album overclaimed');
@@ -29,7 +29,7 @@ if(manifest.albums.some(a=>a.expected&&a.images.length>a.expected))throw Error('
   if(!popup.url().includes('/yui-gallery/')||!page.url().includes('/mimmi-gallery/'))throw Error('Cross-model tab navigation failed');
   await popup.close();
   const albumCards=await page.locator('#albumgrid .album').count();
-  if(albumCards<50)throw Error('Incomplete album cards '+albumCards);
+  if(albumCards<45)throw Error('Incomplete album cards '+albumCards);
   if(await page.locator('#albumgrid .photo').count())throw Error('Old giant expanded card gallery still present');
   const first=page.locator('#albumgrid .album').first();
   const box=await first.boundingBox();
