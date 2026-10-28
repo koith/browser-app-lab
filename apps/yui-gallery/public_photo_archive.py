@@ -16,7 +16,7 @@ from urllib.parse import urljoin, urlsplit
 import requests
 from PIL import Image
 
-USER_AGENT = 'YuiPublicArchive/0.12 (+https://github.com/koith/browser-app-lab)'
+USER_AGENT = 'YuiPublicArchive/0.13 (+https://github.com/koith/browser-app-lab)'
 
 
 def utcnow():
@@ -81,9 +81,19 @@ class PublicSession:
     def allowed(self, url):
         origin = self._origin(url)
         if origin not in self.robots:
-            response = self._raw(origin + '/robots.txt')
+            policy_url = origin + '/robots.txt'
+            for _ in range(6):
+                response = self._raw(policy_url)
+                if response.status_code not in (301, 302, 303, 307, 308):
+                    break
+                policy_url = urljoin(policy_url, response.headers.get('Location', ''))
             parser = urllib.robotparser.RobotFileParser()
-            if response.status_code == 404:
+            # RFC 9309 §2.3.1.3: an unavailable robots file (4xx) is not
+            # a Disallow directive for a different public resource. Object
+            # storage commonly answers a missing robots.txt with 403.
+            # Authentication, rate/legal restrictions and unreachable policies
+            # remain closed; the actual resource must independently return 2xx.
+            if response.status_code in (403, 404, 410):
                 parser.allow_all = True
             elif response.status_code == 200:
                 parser.parse(response.text.splitlines())
@@ -103,8 +113,8 @@ class PublicSession:
             if response.status_code in (301, 302, 303, 307, 308):
                 url = urljoin(url, response.headers.get('Location', ''))
                 continue
-            # 401/403/429 are recorded, never circumvented or immediately retried.
-            if response.status_code in (401, 403, 429):
+            # Resource access, rate and legal denials stop the origin.
+            if response.status_code in (401, 403, 429, 451):
                 self.blocked_origins.add(self._origin(url))
             response.raise_for_status()
             return response

@@ -1,0 +1,644 @@
+{
+  "version": "v0.1.0-beta.13",
+  "base": "local checkout",
+  "scope": "70 changed Teddy photographs only; not a full-gallery pass",
+  "engine": "chromium",
+  "actual_larger_photos_decoded": 70,
+  "existing_work_metadata_count": 97,
+  "all_97_checked": false,
+  "physical_iphone_verified": false,
+  "errors": [],
+  "images": [
+    {
+      "number": 11,
+      "sha256": "1ea7ad7516b9b9cdbfaa6f1c1a87f4e80e63d210f11707dc466b21ab3bb9d8ff",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 12,
+      "sha256": "a00dc4dcbc130b25d084d29ecbe0d68a245c99b1fa901ac60d12185d7f7cf4f6",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 13,
+      "sha256": "9e3b2df641a44d6187cf32bab986fefd2a193845d2f50035a8110a9c7f914b7c",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 14,
+      "sha256": "cdd1eefcbd8d65a1729b2c92e27e06cb04382786db26e6bb4883b0a200bd068b",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 15,
+      "sha256": "5582f15dce53919bc14d9ac84458bb0507ceb02a62dd3a7d6eaae3f630c30760",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 16,
+      "sha256": "b08ad6b52af42e18ff78100419c593bec9c0717f9239b32251b3efbaadc81b6e",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 17,
+      "sha256": "b978bbd38b4e8129c450bd35a6bb478d2d8aedc0a30bd1674c30013a256bc151",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 18,
+      "sha256": "1ee9f51c2d6a2261c874d76248d2d5b4764017805c64bbd90affd73045acaf5c",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 19,
+      "sha256": "16431bca9256637aa670ef791e22f2508034e2a9647faf9e5c2e53f1e0961f59",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 20,
+      "sha256": "e977b9a71682e2fc9435ced95098183343be08db6b8e8511e398404f66bc16fa",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 21,
+      "sha256": "decb96581a4d43cf29f5c72dd842b412883a674d010639337bc6381a61895c93",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 22,
+      "sha256": "225db27ea6582e57c15259a30f0bd27af123ce664962816e4c2427c8c43da264",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 23,
+      "sha256": "9e79800ae16291505fe8815f91240b89ce13fa2f524909823c425a114f9381e5",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 24,
+      "sha256": "84fc4796e8a6d48b4b15e323fb3e6ed43b4b78f32482391e8de32531e10f6af8",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 25,
+      "sha256": "d1571046ff3aca99b8a13ae1e1890c55aaf9fe080a611343cc82e0ea1c1d4370",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 29,
+      "sha256": "73c4d706b5ce52c43fc634c89abf7e4cebaca45510774b320fbe6153b2357b22",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 30,
+      "sha256": "3775ad24fe1ca83e4dc4fbc3d4e2b468dbd6598e7c42769bf9b6b6a1bd9f2e2b",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 31,
+      "sha256": "134356784c14440807f61c8ffb51748792700733d5aee3043d7269c69a27b03e",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 32,
+      "sha256": "c38a3fcb1ec52545b3b8646db6c17af2646e67f47ce32778856860c48d86e5a2",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 33,
+      "sha256": "498f81394001055c5668f5041d5ed64d025703933b92b8d0c66864ddb870800c",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 34,
+      "sha256": "ad1dd5a1a893ea65c8d4f41382b765af02cf6a471a466b04aff5c627bc72f255",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 39,
+      "sha256": "b6e38f9367fd1c8809815a8ebe96452bc34cdbe23c753df1c77fdf8512ef3683",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 41,
+      "sha256": "08829d00588dee84d176b63c8536ed2e16316abfc6cfbf01603a6b05155661ae",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 42,
+      "sha256": "8ebd75b4aacf06e705eba61e89efeb44905d89b60ea248970e95bb3afcf6f869",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 43,
+      "sha256": "b476848394ffb407d8c7aa03df8d1e454658ab6dfec373a5a6ad4994dc75f15d",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 44,
+      "sha256": "124c5ff0abaf6c21174701725727430ecdcbe69c79115940ae03fd5d946d0dda",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 45,
+      "sha256": "988dffb0cdf4172137d4ca75bb4936a5c733ed3f024391c144be3e8e9505bf66",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 46,
+      "sha256": "709e9b1db0698ec64279c4c40fcb7dee426662790365f8f19869b19b4cc2a797",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 47,
+      "sha256": "3a9a8262cbf3974f37a80dc8f8342ed809e532bc2f332069d2f50f0861a588ea",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 48,
+      "sha256": "f0248dea1c438908ed3f83f42962727ab7172e2730f0906454aef67749cb0a35",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 49,
+      "sha256": "b90f73df552e944750ff054fbf1c3c6a3be0bf028a6bb917ea6f20de8ba7281c",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 50,
+      "sha256": "015bc2dac88cd59b2a2c6fcc6d17e118a99ba56ba9c24b5a4a304a26d1b995ea",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 51,
+      "sha256": "68dd783866e58650d7fdcb427749c26bcb69ff342f37e315e44358d660d466fb",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 52,
+      "sha256": "375aa68c9040ce1a1c0d1497959ebd28017f678e1e269ce7531a19332dbf1dfe",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 53,
+      "sha256": "cc54f3f057a2973f65ee92e0b8895c330088b5319f191b5c0e2e72c213196df3",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 54,
+      "sha256": "204d26ac7c39e242ba3c26c996b32d44acc92e8c3553f99d3727a820f3bf351c",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 55,
+      "sha256": "a88a43482993ddb1e345cf43346917f395d688bca04b74be3bd843eeaa6f992b",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 56,
+      "sha256": "70f61194c4b7b3513501622e4f8494530929f7ec3deb0fc3217c7f213f10ead9",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 57,
+      "sha256": "2caa7b7165dbb23bda9c2c4538c53c61c9ef124acc0711326aab8cc79ad75e21",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 58,
+      "sha256": "f127f59722df97dbb2ebaf45956ba22b740f413006ea0fcc2c6ccae8cd902af9",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 59,
+      "sha256": "25f1d202b5fae155b41e3fab790b6d39a92a69b5a7222c0b4eb9a7d1b99b4aa8",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 60,
+      "sha256": "8a8b08e62f245aebaeb732f200a12f0c89ddf18938bb8c9ec6d9e6a1cab46e7d",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 61,
+      "sha256": "df84adf8e072c917388866fdfb8c75b3237880d97f97b441199058c87fe482bd",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 62,
+      "sha256": "e07078c934d72fcce7c39e98d778129859410426d7faff55a656e665606405f2",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 63,
+      "sha256": "cfc14fa4ba48ccf15034fac37785ecd92be37fe46d2cb06de6ad8621379663b1",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 65,
+      "sha256": "33025a85a9775a9882215a821779a0b50f1cc62c2828e0c55d303a44ed703cd9",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 66,
+      "sha256": "9ac4e84fb5c9f368ff3c0d3f3fe2afe51d233549eb9c47407894f28d5641ccb0",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 67,
+      "sha256": "28615d7cd2295b6a6da75f2d0344a1ca3cfe96e08aa2e05c679bce4776e5af2f",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 68,
+      "sha256": "5ef48409d2381b505d3a136c1c1612ead2fc1cdcd5df15915a0ab486c2bea23d",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 69,
+      "sha256": "0ce05891fbd7d1ec511d95a2f99477ebc3240fa8f5a3fc544cedcad19dcb88ec",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 70,
+      "sha256": "092c5310b944542e1224819c5567ab78469c783d16afeb0e3f0c5fda3e00551e",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 71,
+      "sha256": "259d7b86933ca23faa56799affa521051bf9f6a06f28b545fc74bb3f9a1188df",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 74,
+      "sha256": "d3ed824799072209c3233bfa26dc2874f54126ce64fa0a725cae25fe6a24cf53",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 75,
+      "sha256": "e6ca621df0fa43155a01394b3ac0b74de147a00fc449bf7dd4bee70c28f6288e",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 76,
+      "sha256": "2fcc5863aeda749e8575fb1d0e561a7dd0fba1120f445e29454591bc5c642a31",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 77,
+      "sha256": "98dd5b0df533915e33fb591888568766af195135fed0b8db0f88027e03e21bbf",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 78,
+      "sha256": "045c1cde1d92fc744a51d715abad819701b929f83b5025752ba51436308d7e0f",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 79,
+      "sha256": "fea966b8354eef1bfe535865b166e579f9138e044754c3ef2cf20e001a6c9082",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 81,
+      "sha256": "78011831bc6a5e41ca251be902b630956b857ca7caa3c71b411f7ad87eb3a7cc",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 82,
+      "sha256": "12a32cb53ad6a8bd0aff835d30f2290b92fe9b6b2ba73f17c8f0b4d76ced1bbd",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 83,
+      "sha256": "ff04feed0bfb5ece3097b0f733a3892b85bc9768322783787d52737b3202a128",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 85,
+      "sha256": "89ee8cb8684fb6d3321f65dd1e5982fd75d3e293a9566a22711fe4ca474065f4",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 86,
+      "sha256": "5bc224df265bc0f6ba630e88092f09a425b7958dd9f1b26bce1c19d1756bd6a7",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 87,
+      "sha256": "7843080e8c2395027527b0e60aec10589e1032971930dbb10d44d946a6f60506",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 88,
+      "sha256": "917d7deeced5c89aaaac9a522d976bbef3f8bb613a16d4085b5cf4112445b5cd",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 89,
+      "sha256": "1ac37ba2e5c6748812eac2dc495da8aeb78f69186b3f5cd6ab69f3c508d31280",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 90,
+      "sha256": "92931cbaf2ccd0d193bfe2fb9040c7a0bb58c5adeef091b2d78b45b974945079",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 92,
+      "sha256": "031f62f30d8c0ba702b6cc7c4f5f7729b62fbd63d5bf4166071a367f3c575f8a",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 93,
+      "sha256": "6467197776d50d9799937f2232d30b79212c25027626415c674731d429e8a007",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    },
+    {
+      "number": 94,
+      "sha256": "8b9514aea7aeff643b28627ba1f9a3a96a6dbe57eaeb48fce2b36d3336969664",
+      "dimensions": [
+        1201,
+        1800
+      ],
+      "actual_lightbox_decoded": true
+    }
+  ],
+  "evidence": "Initial 70-image batch plus final Teddy46 browser recheck; all current selected SHAs correspond to actual decodes"
+}

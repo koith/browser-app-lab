@@ -1,18 +1,15 @@
 """Exercise browser history, fixed controls, aligned thumbnails and native gestures."""
 import argparse,asyncio,json
-import requests
 from pathlib import Path
 from playwright.async_api import async_playwright
+from browser_http_bridge import fulfill_verified_request
 
 async def run(args):
  async with async_playwright() as pw:
   browser=await getattr(pw,args.engine).launch()
   context=await browser.new_context(viewport={'width':390,'height':844},is_mobile=True,has_touch=True)
   if args.http_bridge:
-   async def bridge(route):
-    r=await asyncio.to_thread(lambda:requests.get(route.request.url,timeout=45,allow_redirects=False))
-    headers={k:v for k,v in r.headers.items() if k.lower() not in ('content-encoding','content-length','transfer-encoding','connection')}
-    await route.fulfill(status=r.status_code,headers=headers,body=r.content)
+   bridge=fulfill_verified_request
    await context.route('https://**/*',bridge)
   page=await context.new_page();errors=[];page.on('pageerror',lambda e:errors.append(str(e)))
   await page.goto(args.base,wait_until='domcontentloaded');await page.locator('.album[data-id="teddy-bear97"]').wait_for()

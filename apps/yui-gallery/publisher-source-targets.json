@@ -3,20 +3,114 @@
   "scope": "public professional publications, explicit credits, no private accounts or authentication bypass",
   "not_exhaustive": true,
   "sources": [
-    {"adapter":"djawa-index","publisher":"DJAWA","url":"https://djawaphoto.com/yui","max_pages":30},
-    {"adapter":"hacosta","publisher":"Hacosta / acosta!","url":"https://blog.hacosta.co.jp/2026/09/08acosta-15/"},
-    {"adapter":"gamersky","publisher":"GamerSky","url":"https://www.gamersky.com/news/202512/2066711.shtml","max_pages":3},
-    {"adapter":"inven","publisher":"인벤","url":"https://www.inven.co.kr/board/webzine/2097/2735151?iskin=webzine"},
-    {"adapter":"inven","publisher":"인벤","url":"https://www.inven.co.kr/board/webzine/2097/2742111?iskin=webzine"},
-    {"adapter":"photographer","publisher":"photo_vicc","url":"https://photo-gallery-chi-steel.vercel.app/assets/index-C8lxWb67.js"},
-    {"adapter":"bcut","publisher":"BCUT","url":"https://bcutrank.com/models/simyui.html"},
-    {"adapter":"title","publisher":"CTEE","url":"https://ctee.kr/place/super_yuisan"},
-    {"adapter":"title","publisher":"CTEE","url":"https://ctee.kr/item/store/86995"},
-    {"adapter":"title","publisher":"CTEE","url":"https://ctee.kr/item/store/83371"},
-    {"adapter":"title","publisher":"CTEE","url":"https://ctee.kr/item/store/93478"},
-    {"adapter":"title","publisher":"CTEE","url":"https://ctee.kr/item/store/97568"},
-    {"adapter":"title","publisher":"MOVIE FANTASY","url":"https://moviefantasy.co.kr/yuisim"},
-    {"adapter":"title","publisher":"MOVIE FANTASY","url":"https://moviefantasy.co.kr/onlineshop/?idx=436"},
-    {"adapter":"title","publisher":"MOVIE FANTASY","url":"https://moviefantasy.co.kr/125/?idx=446"}
+    {
+      "adapter": "djawa-index",
+      "publisher": "DJAWA",
+      "url": "https://djawaphoto.com/yui",
+      "max_pages": 30
+    },
+    {
+      "adapter": "hacosta",
+      "publisher": "Hacosta / acosta!",
+      "url": "https://blog.hacosta.co.jp/2026/09/08acosta-15/"
+    },
+    {
+      "adapter": "gamersky",
+      "publisher": "GamerSky",
+      "url": "https://www.gamersky.com/news/202512/2066711.shtml",
+      "max_pages": 3
+    },
+    {
+      "adapter": "inven",
+      "publisher": "인벤",
+      "url": "https://www.inven.co.kr/board/webzine/2097/2735151?iskin=webzine"
+    },
+    {
+      "adapter": "inven",
+      "publisher": "인벤",
+      "url": "https://www.inven.co.kr/board/webzine/2097/2742111?iskin=webzine"
+    },
+    {
+      "adapter": "photographer",
+      "publisher": "photo_vicc",
+      "url": "https://photo-gallery-chi-steel.vercel.app/assets/index-C8lxWb67.js"
+    },
+    {
+      "adapter": "bcut",
+      "publisher": "BCUT",
+      "url": "https://bcutrank.com/models/simyui.html"
+    },
+    {
+      "adapter": "title",
+      "publisher": "CTEE",
+      "url": "https://ctee.kr/place/super_yuisan"
+    },
+    {
+      "adapter": "title",
+      "publisher": "CTEE",
+      "url": "https://ctee.kr/item/store/86995"
+    },
+    {
+      "adapter": "title",
+      "publisher": "CTEE",
+      "url": "https://ctee.kr/item/store/83371"
+    },
+    {
+      "adapter": "title",
+      "publisher": "CTEE",
+      "url": "https://ctee.kr/item/store/93478"
+    },
+    {
+      "adapter": "title",
+      "publisher": "CTEE",
+      "url": "https://ctee.kr/item/store/97568"
+    },
+    {
+      "adapter": "title",
+      "publisher": "MOVIE FANTASY",
+      "url": "https://moviefantasy.co.kr/yuisim"
+    },
+    {
+      "adapter": "title",
+      "publisher": "MOVIE FANTASY",
+      "url": "https://moviefantasy.co.kr/onlineshop/?idx=436"
+    },
+    {
+      "adapter": "title",
+      "publisher": "MOVIE FANTASY",
+      "url": "https://moviefantasy.co.kr/125/?idx=446"
+    },
+    {
+      "url": "https://www.imgcup.com/sweetbox-yui-teddy-bear-part01-50p.html",
+      "adapter": "imgcup-teddy",
+      "max_pages": 1,
+      "publisher": "SWEETBOX",
+      "work_id": "teddy-bear97",
+      "selection_requires_whole_frame_comparison": true
+    },
+    {
+      "url": "https://www.imgcup.com/sweetbox-yui-teddy-bear-part02-49p.html",
+      "adapter": "imgcup-teddy",
+      "max_pages": 1,
+      "publisher": "SWEETBOX",
+      "work_id": "teddy-bear97",
+      "selection_requires_whole_frame_comparison": true
+    },
+    {
+      "url": "https://www.imgcup.com/yui-%ec%9c%a0%ec%9d%b4-sweetbox-photobook-%e3%80%8cteddy-bear%e3%80%8d-set-01.html",
+      "adapter": "imgcup-teddy",
+      "max_pages": 1,
+      "publisher": "SWEETBOX",
+      "work_id": "teddy-bear97",
+      "selection_requires_whole_frame_comparison": true
+    },
+    {
+      "url": "https://www.imgcup.com/yui-%ec%9c%a0%ec%9d%b4-sweetbox-photobook-%e3%80%8cteddy-bear%e3%80%8d-set-02.html",
+      "adapter": "imgcup-teddy",
+      "max_pages": 1,
+      "publisher": "SWEETBOX",
+      "work_id": "teddy-bear97",
+      "selection_requires_whole_frame_comparison": true
+    }
   ]
 }

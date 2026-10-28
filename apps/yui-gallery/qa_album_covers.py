@@ -4,8 +4,8 @@ import asyncio
 import json
 from pathlib import Path
 
-import requests
 from playwright.async_api import async_playwright
+from browser_http_bridge import fulfill_verified_request
 from browser_image_checks import decode_image
 
 
@@ -14,11 +14,7 @@ async def run(args):
         browser = await getattr(pw, args.engine).launch()
         context = await browser.new_context(viewport={'width': 390, 'height': 844}, is_mobile=True, has_touch=True)
         if args.http_bridge:
-            async def bridge(route):
-                response = await asyncio.to_thread(lambda: requests.get(route.request.url, timeout=45, allow_redirects=False))
-                headers = {k: v for k, v in response.headers.items()
-                           if k.lower() not in ('content-encoding', 'content-length', 'transfer-encoding', 'connection')}
-                await route.fulfill(status=response.status_code, headers=headers, body=response.content)
+            bridge = fulfill_verified_request
             await context.route('https://**/*', bridge)
         page = await context.new_page()
         await page.goto(args.base, wait_until='domcontentloaded')

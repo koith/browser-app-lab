@@ -9,11 +9,23 @@ from pathlib import Path
 from PIL import Image
 
 from build_additional_source_manifest import build
-from collect_public_sources import (djawa_model_index, djawa_samples, gamersky_article, hacosta_model_photo,
+from collect_public_sources import (djawa_model_index, djawa_samples, gamersky_article, hacosta_model_photo, imgcup_teddy,
                                     inven_article, photographer_portfolio)
 
 
 class SourceAdapterTests(unittest.TestCase):
+    def test_imgcup_teddy_requires_the_named_work_and_article_full_links(self):
+        body = '''<h1 class="entry-title">SWEETBOX Yui 유이 – Teddy Bear Part01</h1>
+        <div class="entry-content"><a href="https://cdn.imgcup.com/2026/Teddy-Bear-full.jpg">
+        <img src="https://cdn.imgcup.com/2026/Teddy-Bear-small.jpg"></a>
+        <img src="https://cdn.imgcup.com/advert.jpg"></div>
+        <aside><img src="https://cdn.imgcup.com/Teddy-Bear-related.jpg"></aside>'''
+        _, photos, _ = imgcup_teddy(body, 'https://www.imgcup.com/teddy.html')
+        self.assertEqual([p['url'] for p in photos], ['https://cdn.imgcup.com/2026/Teddy-Bear-full.jpg'])
+        self.assertEqual(photos[0]['work_id'], 'teddy-bear97')
+        with self.assertRaises(ValueError):
+            imgcup_teddy(body.replace('Yui 유이', 'Other'), 'https://www.imgcup.com/teddy.html')
+
     def test_publisher_model_index_follows_only_its_work_grid(self):
         body = '''<title>Yui – Djawa Photo</title><section class="grid-item">
         <a href="/portfolio/work/">Work</a></section>
