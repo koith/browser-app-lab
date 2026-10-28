@@ -136,6 +136,10 @@ def collect(profile_limit=2,book_limit=45,images_per_book=45):
             try:
                 soup,base=html(a["source"])
                 candidates=image_urls(soup,base)
+                if not candidates and len(result)<2:
+                    debug=[{k:v[:180] for k,v in tag.attrs.items() if isinstance(v,str) and k in ('src','data-src','data-original','data-full','srcset')} for tag in (soup.select('main img') or soup.select('img'))[:12]]
+                    print('KGRAVURE_DEBUG_IMAGE_ATTRS',a['id'],json.dumps(debug)[:2500],flush=True)
+                    print('KGRAVURE_DEBUG_IMAGES_TOTAL',len(soup.select('img')),'MAIN',bool(soup.select_one('main')),flush=True)
                 recorded=[]
                 for src in candidates[:images_per_book*3]:
                     if len(recorded)>=images_per_book:break
