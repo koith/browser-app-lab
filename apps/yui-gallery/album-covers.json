@@ -550,7 +550,7 @@
         50,
         43.907
       ],
-      "fit": "contain",
+      "fit": "cover",
       "method": "manual_face_region_review"
     },
     "cn-wantuzhi-everyday": {
@@ -587,7 +587,7 @@
         50,
         43.907
       ],
-      "fit": "contain",
+      "fit": "cover",
       "method": "manual_face_region_review"
     },
     "crazygiant-yui-may2023-public": {

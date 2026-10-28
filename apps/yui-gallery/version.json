@@ -1,5 +1,5 @@
 {
-  "version": "v0.1.0-beta.16",
+  "version": "v0.1.0-beta.17",
   "date": "2026-10-28",
   "policy": {
     "monthly_charge_krw": 0,
@@ -18,28 +18,6 @@
       "remote_verified_images": 0,
       "conditions": "Free 1024GB advertised as limited-time; unofficial integration not validated",
       "r2_required": false
-    },
-    "temporary_verified_copy": {
-      "provider": "Google Drive (not accepted as primary)",
-      "private": true,
-      "filename": "Yui_405_5albums_web_images_20261026.zip",
-      "zip_bytes": 31383650,
-      "sha256": "39a69c62c67295156d6e8f52d7c0edd858b99bc1b7ce4bd7bed8a7c1e983d8a5",
-      "drive_byte_readback_match": true
-    },
-    "second_temporary_copy": {
-      "provider": "GitHub Actions artifact",
-      "expires_at": "2027-01-24T14:26:26Z",
-      "images": 405
-    },
-    "individual_secondary_copy": {
-      "provider": "Google Drive",
-      "role": "private_secondary_copy_not_primary_cloud",
-      "expected_files": 402,
-      "remote_sha256_verified": 218,
-      "remaining_files": 184,
-      "upload_state": "stopped_after_automatic_review_turn_termination_reason_not_exposed",
-      "photo_bundles": false
     }
   },
   "progress": {
@@ -106,7 +84,6 @@
     "beta15_new_gallery_entries": 0
   },
   "notes": [
-    "A private Google Drive ZIP is only a temporary safety copy, not the user-approved primary archive.",
     "TeraBox account is not connected; do not claim a cloud gallery or automatic upload is live.",
     "The 405 downloaded images are public web versions, not publisher source originals.",
     "Listed works, publicly available images, privately stored files, and publisher originals are counted separately.",
@@ -126,12 +103,13 @@
     "beta.10 also removes the user-confirmed wrong-model sexiest18 (18 images) from the public gallery and collection targets, blocks its source and hashes from reimport, and puts search behind a small translucent corner button with history-aware popup.",
     "beta.11 uses hash-bound local facial region metadata to select and frame album covers without changing any photo pixels or in-album image order. Cover titles omit publisher branding, use translucent small text, and preserve full original titles for search/accessibility. New acquisitions for beta.11 are not claimed until actual files are verified.",
     "beta.11 also reuses two existing verified public reference files in their full Yui Vol.3 106-photo edition: photo50 2400x1600 and photo81 2048x1366 replace 1368x912 files after whole-frame comparison. No newly acquired files or publisher-master claim; all input copies remain.",
-    "beta.12 archives 402 new photograph files plus 80 separate non-photographic inputs from explicit creator posts and Korean/Japanese/Chinese public publishers, events, photographers, editorial and board pages. These are SHA-256 file counts, not unique poses or complete new photobooks. Register 401 image entries in five explicitly incomplete public collections; prefer four larger unchanged creator-source files over lower editorial variants and retain one equal-size duplicate privately. DJAWA provides 24 public sample photos of an advertised 190-photo edition, not the full book. Private Google Drive individual-file backup/readback is recorded in the release PR; it is not the accepted primary cloud or authenticated in-gallery owner storage.",
+    "beta.12 archives 402 new photograph files plus 80 separate non-photographic inputs from explicit creator posts and Korean/Japanese/Chinese public publishers, events, photographers, editorial and board pages. These are SHA-256 file counts, not unique poses or complete new photobooks. Register 401 image entries in five explicitly incomplete public collections; prefer four larger unchanged creator-source files over lower editorial variants and retain one equal-size duplicate privately. DJAWA provides 24 public sample photos of an advertised 190-photo edition, not the full book.",
     "beta.13 adds publisher browsing with verified official-brand logo provenance, catalogued/viewable counts and native history through publisher/album/photo levels. Unconfirmed publishers and public editorial/event/SNS material stay separate. No new photographs are claimed by this UI change.",
     "beta.13 collects 198 unchanged public image variants, conservatively matches 173 whole-frame files to the existing Teddy work and keeps 25 unmatched/cropped/marketing inputs privately unclassified. Replace 70 existing 1024x1535 files with 1201x1800 files; retain ten2699px and seventeen2303px files. The same larger Teddy71 file is reused in its existing editorial item. One alternate source file timed out twice and was recovered by its normal unmodified browser request. No new poses/full books or publisher master are claimed. Eight publisher brand assets include the MAXIM parent mark for BCUT and the SWEETBOX photographer profile image. Yo-U is a plainly labelled name fallback pending logo verification.",
     "beta.14 replaces the four visible browse tabs with a single publisher/album toggle, sorts publishers and displayed album titles in Korean-locale ascending natural order, and hides global photo/all-catalogue navigation. Album photo order, image bytes and source choices remain unchanged. New acquisition counts will change only after verified individual files are obtained.",
     "beta.15 matches publisher card backgrounds to unchanged logo artwork: opaque white logos on white, PUSSY LET on its dominant #f4b544 yellow, transparent marks composite on the card, and the photographic SWEETBOX brand image fills its card without neutral gutters. No image bytes, gallery photo data, source choices or navigation changes.",
-    "beta.16 obtains official public presentations for CRAZY GIANT May 2023 and THE PLAYER ISSUE 5, a separately credited alternative May cover, and seven Sports Seoul article photographs. Register seventeen new unchanged image files (fifteen photograph files and two magazine covers), not complete new books or publisher masters. The seven news photographs are only 500px wide. Preserve the separate DJAWA promotional cover, two product cover mockups and one uncredited product cover privately without registering them. Thirty-two downloaded SNS rows duplicate previous inputs. Existing photo choices and sequences remain unchanged; add one verified publisher logo and scoped source adapters. Primary private cloud remains unconnected."
+    "beta.16 obtains official public presentations for CRAZY GIANT May 2023 and THE PLAYER ISSUE 5, a separately credited alternative May cover, and seven Sports Seoul article photographs. Register seventeen new unchanged image files (fifteen photograph files and two magazine covers), not complete new books or publisher masters. The seven news photographs are only 500px wide. Preserve the separate DJAWA promotional cover, two product cover mockups and one uncredited product cover privately without registering them. Thirty-two downloaded SNS rows duplicate previous inputs. Existing photo choices and sequences remain unchanged; add one verified publisher logo and scoped source adapters. Primary private cloud remains unconnected.",
+    "beta.17 fills every album thumbnail with object-fit:cover and retains the reviewed face position. Remove the two legacy contain settings that left side gutters on cn-yuntu8/cn-yingyuge. Only list presentation changes: original image bytes, image choices, full viewer, in-album photo grid, publisher logos and photo order remain unchanged. New photograph files and high-resolution replacements: zero."
   ],
   "archiving_engine": {
     "mode": "individual_files",
