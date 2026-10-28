@@ -1,0 +1,9 @@
+{
+  "schema_version": 1,
+  "model": "mimmi",
+  "version": "v0.1.0-mimmi.4",
+  "quality_policy": "Public URL source-linked samples. Actual third-party paid photobook pages are NOT complete. No files copied to personal cloud.",
+  "complete_photo_books": 0,
+  "source_link_only": true,
+  "albums": []
+}
