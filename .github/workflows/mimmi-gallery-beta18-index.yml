@@ -47,7 +47,8 @@ jobs:
               assert p["url"].startswith(("https://cdn.v2ph.com/photos/","https://djawaphoto.com/wp-content/"))
           print("MIMMI_BETA18_DEDUP_SOURCE_IMAGES_PASS",len(d["albums"]),len(seen))
           PY
-      - name: Commit gallery data on this branch only, never images or ZIP files
+      - name: Commit gallery data on main only, no feature-branch cross-run conflicts
+        if: github.ref == 'refs/heads/main'
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
