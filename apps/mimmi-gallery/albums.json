@@ -1,83 +1,459 @@
 {
   "model": {
     "id": "mimmi",
-    "name": "밈미",
-    "english": "Mimmi",
-    "aliases": [
-      "Miss u",
-      "밋슈"
-    ],
-    "instagram": "mimmissu17"
+    "name": "밈미"
   },
-  "version": "v0.1.0-mimmi.1",
+  "version": "v0.1.0-mimmi.4",
   "albums": [
     {
-      "id": "cream-cow-milk",
-      "title": "Cream Cow Milk",
+      "id": "v2ph-actor-a9nxx64z",
+      "title": "[AI Enhanced] DJAWA Photo - Mimmi (밈미) - Nikke Elegg",
       "publisher": "DJAWA",
-      "advertised_photos": 164,
-      "source": "https://www.v2ph.com/album/an5o93ez.html?hl=ko",
-      "images": [],
-      "status": "source_indexed_not_archived",
-      "rights": "publisher_owned",
-      "model": "mimmi"
+      "source": "https://www.v2ph.com/album/a9nxx64z.html",
+      "expected": null,
+      "photos": null,
+      "ai_enhanced": true
     },
     {
-      "id": "sukajan-gal",
-      "title": "Sukajan Gal",
+      "id": "v2ph-actor-zo799eez",
+      "title": "[AI Enhanced] DJAWA Photo - Mimmi (밈미) My Summer Vacation Vol.5",
       "publisher": "DJAWA",
-      "advertised_photos": 177,
-      "source": "https://www.v2ph.com/album/axm7n43z.html",
-      "images": [],
-      "status": "source_indexed_not_archived",
-      "rights": "publisher_owned",
-      "model": "mimmi"
+      "source": "https://www.v2ph.com/album/zo799eez.html",
+      "expected": null,
+      "photos": null,
+      "ai_enhanced": true
     },
     {
-      "id": "girls-frontline-hk416",
-      "title": "Girls' Frontline HK416",
-      "publisher": "DJAWA",
-      "advertised_photos": 192,
-      "source": "https://www.v2ph.com/album/a54e98nz.html?hl=ko",
-      "images": [],
-      "status": "source_indexed_not_archived",
-      "rights": "publisher_owned",
-      "model": "mimmi"
+      "id": "v2ph-actor-a884435a",
+      "title": "[CreamSoda] Mimmi (デプワ) - Vol.4 Chic Nerd & Maness Nurse",
+      "publisher": "CreamSoda",
+      "source": "https://www.v2ph.com/album/a884435a.html",
+      "expected": null,
+      "photos": null,
+      "ai_enhanced": false
     },
     {
-      "id": "azur-lane-tashkent",
-      "title": "Azur Lane Tashkent",
+      "id": "v2ph-actor-a5e78m5a",
+      "title": "[CreamSoda] Mimmi (デプワ) Vol.2 Neko Mimmi",
+      "publisher": "CreamSoda",
+      "source": "https://www.v2ph.com/album/a5e78m5a.html",
+      "expected": null,
+      "photos": null,
+      "ai_enhanced": false
+    },
+    {
+      "id": "v2ph-actor-a8847m5a",
+      "title": "[CreamSoda] Mimmi (デプワ) Vol.3 Mashu Mimmi",
+      "publisher": "CreamSoda",
+      "source": "https://www.v2ph.com/album/a8847m5a.html",
+      "expected": null,
+      "photos": null,
+      "ai_enhanced": false
+    },
+    {
+      "id": "djawa-asuna-the-maid",
+      "title": "Asuna the Maid",
       "publisher": "DJAWA",
-      "advertised_photos": 59,
+      "source": "https://djawaphoto.com/portfolio/asuna-the-maid/",
+      "expected": 125,
+      "photos": 125,
+      "ai_enhanced": false
+    },
+    {
+      "id": "v2ph-azur-lane-tashkent",
+      "title": "Azur Lane Tashkent · 공개 웹판",
+      "publisher": "DJAWA",
       "source": "https://www.v2ph.com/album/a887785a.html",
-      "images": [],
-      "status": "source_indexed_not_archived",
-      "rights": "publisher_owned",
-      "model": "mimmi"
+      "expected": 59,
+      "photos": 59,
+      "ai_enhanced": false
     },
     {
-      "id": "your-panties",
-      "title": "Your Panties",
+      "id": "djawa-blossom-reverie",
+      "title": "Blossom Reverie",
       "publisher": "DJAWA",
-      "advertised_photos": 325,
-      "source": "https://www.v2ph.com/album/zo555x4z.html?hl=zh-Hant",
-      "images": [],
-      "status": "source_indexed_not_archived",
-      "rights": "publisher_owned",
-      "model": "mimmi"
+      "source": "https://djawaphoto.com/portfolio/blossom-reverie/",
+      "expected": null,
+      "photos": null,
+      "ai_enhanced": false
     },
     {
-      "id": "mademoiselle-mimmi",
+      "id": "djawa-christmas-special-2021-mimmi",
+      "title": "Christmas Special 2021 : Mimmi",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/christmas-special-2021-mimmi/",
+      "expected": null,
+      "photos": null,
+      "ai_enhanced": false
+    },
+    {
+      "id": "djawa-christmas-special-2023-mimmi",
+      "title": "Christmas Special 2023 : Mimmi",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/christmas-special-2023-mimmi/",
+      "expected": 70,
+      "photos": 70,
+      "ai_enhanced": false
+    },
+    {
+      "id": "djawa-christmas-special-2024-mimmi-santa-on-the-street",
+      "title": "Christmas Special 2024 : Mimmi – Santa on the Street",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/christmas-special-2024-mimmi-santa-on-the-street/",
+      "expected": 92,
+      "photos": 92,
+      "ai_enhanced": false
+    },
+    {
+      "id": "djawa-christmas-special-2025-mimmi-the-christmas-witch",
+      "title": "Christmas Special 2025 : Mimmi – The Christmas Witch",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/christmas-special-2025-mimmi-the-christmas-witch/",
+      "expected": 151,
+      "photos": 151,
+      "ai_enhanced": false
+    },
+    {
+      "id": "v2ph-cream-cow-milk",
+      "title": "Cream Cow Milk · 공개 웹판",
+      "publisher": "DJAWA",
+      "source": "https://www.v2ph.com/album/an5o93ez.html?hl=ko",
+      "expected": 164,
+      "photos": 164,
+      "ai_enhanced": false
+    },
+    {
+      "id": "djawa-full-bloom-yamashiiro",
+      "title": "Full Bloom Yamashiiro",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/full-bloom-yamashiiro/",
+      "expected": null,
+      "photos": null,
+      "ai_enhanced": false
+    },
+    {
+      "id": "v2ph-girls-frontline-hk416",
+      "title": "Girls' Frontline HK416 · 공개 웹판",
+      "publisher": "DJAWA",
+      "source": "https://www.v2ph.com/album/a54e98nz.html?hl=ko",
+      "expected": 192,
+      "photos": 192,
+      "ai_enhanced": false
+    },
+    {
+      "id": "djawa-grin-and-fire",
+      "title": "Grin and Fire!",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/grin-and-fire/",
+      "expected": null,
+      "photos": null,
+      "ai_enhanced": false
+    },
+    {
+      "id": "djawa-holstein-jobs",
+      "title": "Holstein Jobs",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/holstein-jobs/",
+      "expected": null,
+      "photos": null,
+      "ai_enhanced": false
+    },
+    {
+      "id": "djawa-in-the-summer-sunshine-part-1",
+      "title": "In the summer sunshine (part 1)",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/in-the-summer-sunshine-part-1/",
+      "expected": null,
+      "photos": null,
+      "ai_enhanced": false
+    },
+    {
+      "id": "djawa-in-the-summer-sunshine-part-2",
+      "title": "In the summer sunshine (part 2)",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/in-the-summer-sunshine-part-2/",
+      "expected": null,
+      "photos": null,
+      "ai_enhanced": false
+    },
+    {
+      "id": "djawa-janus-scary-lantern-night",
+      "title": "Janus : Scary Lantern Night",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/janus-scary-lantern-night/",
+      "expected": null,
+      "photos": null,
+      "ai_enhanced": false
+    },
+    {
+      "id": "djawa-janus-scary-lantern-night-vol-2",
+      "title": "Janus : Scary Lantern Night Vol. 2",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/janus-scary-lantern-night-vol-2/",
+      "expected": null,
+      "photos": null,
+      "ai_enhanced": false
+    },
+    {
+      "id": "djawa-le-malin-listless-lapin",
+      "title": "Le Malin – Listless Lapin",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/le-malin-listless-lapin/",
+      "expected": 158,
+      "photos": 158,
+      "ai_enhanced": false
+    },
+    {
+      "id": "djawa-mademoiselle-mimmi",
       "title": "Mademoiselle Mimmi",
       "publisher": "DJAWA",
-      "advertised_photos": 170,
-      "source": "https://www.v2ph.com/album/z7e69mnz.html?hl=ar",
-      "images": [],
-      "status": "source_indexed_not_archived",
-      "rights": "publisher_owned",
-      "model": "mimmi"
+      "source": "https://djawaphoto.com/portfolio/mademoiselle-mimmi/",
+      "expected": 170,
+      "photos": 170,
+      "ai_enhanced": false
+    },
+    {
+      "id": "djawa-maid-for-mayhem",
+      "title": "Maid for Mayhem",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/maid-for-mayhem/",
+      "expected": null,
+      "photos": null,
+      "ai_enhanced": false
+    },
+    {
+      "id": "v2ph-actor-amno754z",
+      "title": "Mimmi - Kitsune Miko Ver B",
+      "publisher": "DJAWA",
+      "source": "https://www.v2ph.com/album/amno754z.html",
+      "expected": null,
+      "photos": null,
+      "ai_enhanced": false
+    },
+    {
+      "id": "v2ph-actor-am8o3e7z",
+      "title": "Mimmi - Mimmi (Mimmissu17)– NO.042 Nicole (Zenless Zone Zero)",
+      "publisher": "DJAWA",
+      "source": "https://www.v2ph.com/album/am8o3e7z.html",
+      "expected": null,
+      "photos": null,
+      "ai_enhanced": false
+    },
+    {
+      "id": "v2ph-actor-amn8o34z",
+      "title": "Mimmi - The Pet",
+      "publisher": "DJAWA",
+      "source": "https://www.v2ph.com/album/amn8o34z.html",
+      "expected": null,
+      "photos": null,
+      "ai_enhanced": false
+    },
+    {
+      "id": "v2ph-actor-z7exoo5z",
+      "title": "Mimmi - White",
+      "publisher": "DJAWA",
+      "source": "https://www.v2ph.com/album/z7exoo5z.html",
+      "expected": null,
+      "photos": null,
+      "ai_enhanced": false
+    },
+    {
+      "id": "v2ph-actor-a584e85z",
+      "title": "Mimmi(ミップ) – [CreamSoda] Mimmi - Mashu Mimmi 2",
+      "publisher": "CreamSoda",
+      "source": "https://www.v2ph.com/album/a584e85z.html",
+      "expected": null,
+      "photos": null,
+      "ai_enhanced": false
+    },
+    {
+      "id": "djawa-my-summer-vacation",
+      "title": "My Summer Vacation",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/my-summer-vacation/",
+      "expected": 149,
+      "photos": 149,
+      "ai_enhanced": false
+    },
+    {
+      "id": "djawa-my-summer-vacation-vol-2",
+      "title": "My Summer Vacation Vol. 2",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/my-summer-vacation-vol-2/",
+      "expected": 183,
+      "photos": 183,
+      "ai_enhanced": false
+    },
+    {
+      "id": "djawa-my-summer-vacation-vol-3",
+      "title": "My Summer Vacation Vol. 3",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/my-summer-vacation-vol-3/",
+      "expected": 128,
+      "photos": 128,
+      "ai_enhanced": false
+    },
+    {
+      "id": "djawa-my-summer-vacation-vol-4",
+      "title": "My Summer Vacation Vol. 4",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/my-summer-vacation-vol-4/",
+      "expected": 90,
+      "photos": 90,
+      "ai_enhanced": false
+    },
+    {
+      "id": "djawa-my-summer-vacation-vol-5",
+      "title": "My Summer Vacation Vol. 5",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/my-summer-vacation-vol-5/",
+      "expected": 133,
+      "photos": 133,
+      "ai_enhanced": false
+    },
+    {
+      "id": "djawa-nikke-alice",
+      "title": "Nikke : Alice",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/nikke-alice/",
+      "expected": null,
+      "photos": null,
+      "ai_enhanced": false
+    },
+    {
+      "id": "djawa-nikke-elegg",
+      "title": "Nikke : Elegg",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/nikke-elegg/",
+      "expected": 152,
+      "photos": 152,
+      "ai_enhanced": false
+    },
+    {
+      "id": "djawa-nikke-yuni",
+      "title": "Nikke : Yuni",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/nikke-yuni/",
+      "expected": 213,
+      "photos": 213,
+      "ai_enhanced": false
+    },
+    {
+      "id": "djawa-pop-kitty-party",
+      "title": "Pop Kitty Party",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/pop-kitty-party/",
+      "expected": null,
+      "photos": null,
+      "ai_enhanced": false
+    },
+    {
+      "id": "djawa-rei-beyond-the-heart",
+      "title": "Rei, Beyond the Heart",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/rei-beyond-the-heart/",
+      "expected": 213,
+      "photos": 213,
+      "ai_enhanced": false
+    },
+    {
+      "id": "djawa-retrospection",
+      "title": "Retrospection",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/retrospection/",
+      "expected": 75,
+      "photos": 75,
+      "ai_enhanced": false
+    },
+    {
+      "id": "djawa-rudy-the-wolf-of-midnight",
+      "title": "Rudy : The Wolf of Midnight",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/rudy-the-wolf-of-midnight/",
+      "expected": 228,
+      "photos": 228,
+      "ai_enhanced": false
+    },
+    {
+      "id": "djawa-rudy%c2%b2-codename-wolfgirl",
+      "title": "Rudy² – Codename : Wolfgirl",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/rudy%c2%b2-codename-wolfgirl/",
+      "expected": null,
+      "photos": null,
+      "ai_enhanced": false
+    },
+    {
+      "id": "v2ph-sukajan-gal",
+      "title": "Sukajan Gal · 공개 웹판",
+      "publisher": "DJAWA",
+      "source": "https://www.v2ph.com/album/axm7n43z.html",
+      "expected": 177,
+      "photos": 177,
+      "ai_enhanced": false
+    },
+    {
+      "id": "djawa-twin-bunnies-affair",
+      "title": "Twin Bunnies Affair",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/twin-bunnies-affair/",
+      "expected": 157,
+      "photos": 157,
+      "ai_enhanced": false
+    },
+    {
+      "id": "v2ph-actor-z6exx6ma",
+      "title": "Vol.2 - My small bird",
+      "publisher": "DJAWA",
+      "source": "https://www.v2ph.com/album/z6exx6ma.html",
+      "expected": null,
+      "photos": null,
+      "ai_enhanced": false
+    },
+    {
+      "id": "v2ph-actor-z4ox65ea",
+      "title": "x Innocent - Part 2Mimmi (미미) x Innocent - Part 2",
+      "publisher": "DJAWA",
+      "source": "https://www.v2ph.com/album/z4ox65ea.html",
+      "expected": null,
+      "photos": null,
+      "ai_enhanced": false
+    },
+    {
+      "id": "djawa-your-fishe-gawr-gura",
+      "title": "Your Fishe (Gawr Gura)",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/your-fishe-gawr-gura/",
+      "expected": null,
+      "photos": null,
+      "ai_enhanced": false
+    },
+    {
+      "id": "djawa-your-panties",
+      "title": "Your Panties.",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/your-panties/",
+      "expected": 325,
+      "photos": 325,
+      "ai_enhanced": false
+    },
+    {
+      "id": "v2ph-actor-a88763oa",
+      "title": "× Ceyatic - Pop Kitty Party",
+      "publisher": "DJAWA",
+      "source": "https://www.v2ph.com/album/a88763oa.html",
+      "expected": null,
+      "photos": null,
+      "ai_enhanced": false
     }
   ],
-  "verified_image_files": 0,
-  "notes": "Advertised counts are source claims, not collected files. Do not republish copyrighted photobooks without permission."
+  "summary": {
+    "displayed_albums": 49,
+    "verified_unique_source_images": 402,
+    "input_source_image_occurrences": 412,
+    "duplicate_hashes_skipped": 10,
+    "actual_full_publisher_photobooks": 0,
+    "incomplete_known_count_albums": 22
+  },
+  "notes": "Individual accessible public samples are NOT complete commercial editions."
 }
