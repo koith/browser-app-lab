@@ -7,6 +7,7 @@ on:
     paths:
       - 'apps/mimmi-gallery/collect_pixibb_public.py'
       - 'apps/mimmi-gallery/test_pixibb_public.py'
+      - 'apps/mimmi-gallery/reveal_lazy_images.py'
       - '.github/workflows/mimmi-pixibb-multipage.yml'
 permissions:
   contents: write
@@ -25,14 +26,18 @@ jobs:
       - name: Install crawler runtime and validate sources
         run: |
           python -m pip install 'requests==2.32.5' 'Pillow==11.3.0' 'beautifulsoup4==4.14.2'
-          python -m py_compile apps/mimmi-gallery/collect_pixibb_public.py apps/mimmi-gallery/build_model_gallery.py
+          python -m py_compile apps/mimmi-gallery/collect_pixibb_public.py apps/mimmi-gallery/reveal_lazy_images.py apps/mimmi-gallery/build_model_gallery.py
           python apps/mimmi-gallery/test_pixibb_public.py
+      - name: Install real browser for visible lazy-scroll images
+        run: |
+          python -m pip install 'playwright==1.56.0'
+          python -m playwright install --with-deps chromium
       - name: Follow real published pages and verify public JPEG/PNG/WebP bytes
         run: |
           if [ "$GITHUB_REF_NAME" = main ]; then
-            python apps/mimmi-gallery/collect_pixibb_public.py --pages 25 --images 250
+            python apps/mimmi-gallery/collect_pixibb_public.py --pages 25 --images 250 --scroll
           else
-            python apps/mimmi-gallery/collect_pixibb_public.py --pages 2 --images 30
+            python apps/mimmi-gallery/collect_pixibb_public.py --pages 2 --images 30 --scroll
           fi
       - name: Count only truly verified images, never advertised paid album size
         run: |
