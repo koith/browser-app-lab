@@ -1,0 +1,83 @@
+#!/usr/bin/env python3
+"""Yui-style: publish ONLY real, SHA-verified public preview image bytes.
+
+No TeraBox, no external URL pretending to be an archived image, no paywall.
+GitHub Pages is PUBLIC: only use images whose public rehosting is authorized.
+"""
+import argparse, hashlib, json, os, re, time
+from pathlib import Path
+from urllib.parse import urlsplit
+from PIL import Image
+from download_public_images_private import fetch_verified, permitted
+
+ROOT=Path(__file__).resolve().parent
+MANIFEST=ROOT/"source-viewer-albums.json"
+INDEX=ROOT/"stored-albums.json"
+OUT=ROOT/"stored-albums"
+MAX_FILE=30_000_000
+
+def publish(limit=250, budget_mb=90, allow_rehost=False):
+    if not allow_rehost:
+        raise PermissionError("Public GitHub Pages publication requires explicit permission to rehost these files")
+    src=json.loads(MANIFEST.read_text(encoding="utf-8"))
+    if src.get("model")!="mimmi":raise ValueError("Wrong model")
+    old=json.loads(INDEX.read_text(encoding="utf-8")) if INDEX.exists() else {"albums":[]}
+    byid={a["id"]:a for a in old.get("albums",[])}
+    seen={p["sha256"] for a in byid.values() for p in a.get("images",[]) if p.get("sha256")}
+    new=0;bytes_new=0;failed=0
+    for album in src["albums"]:
+        aid=album["id"]
+        if not re.fullmatch(r"[a-z0-9-]{2,110}",aid):continue
+        row=byid.get(aid,{"id":aid,"title":album["title"],"publisher":album.get("publisher",""),"source":album.get("source",""),"images":[],"status":"public_previews_only_not_complete"})
+        for photo in album.get("images",[]):
+            if new>=limit or bytes_new>=budget_mb*1024*1024:break
+            sha=photo.get("sha256","")
+            url=photo.get("url","")
+            if not re.fullmatch(r"[0-9a-f]{64}",sha) or not permitted(url):continue
+            if sha in seen:continue
+            size=photo.get("bytes",0)
+            if not isinstance(size,int) or size<5000 or size>MAX_FILE or bytes_new+size>budget_mb*1024*1024:continue
+            try:
+                raw=fetch_verified(url,sha,size)
+                suffix=Path(urlsplit(url).path).suffix.lower()
+                path=OUT/aid/(sha+"."+suffix.lstrip("."))
+                path.parent.mkdir(parents=True,exist_ok=True)
+                if path.exists() and hashlib.sha256(path.read_bytes()).hexdigest()!=sha:raise ValueError("Stored file hash conflict")
+                if not path.exists():
+                    tmp=path.with_suffix(path.suffix+".tmp")
+                    tmp.write_bytes(raw);os.replace(tmp,path)
+                if hashlib.sha256(path.read_bytes()).hexdigest()!=sha:raise ValueError("Write hash mismatch")
+                with Image.open(path) as im:
+                    im.verify()
+                row["images"].append({"url":str(path.relative_to(ROOT)).replace(os.sep,"/"),
+                    "source_url":url,"sha256":sha,"bytes":size,"width":photo["width"],
+                    "height":photo["height"],"number":len(row["images"])+1})
+                seen.add(sha);new+=1;bytes_new+=size
+                time.sleep(.3)
+            except Exception as exc:
+                failed+=1
+                print("STORE_FAILED",aid,sha[:12],type(exc).__name__,str(exc)[:100],flush=True)
+        if row["images"]:byid[aid]=row
+        if new>=limit or bytes_new>=budget_mb*1024*1024:break
+    # Re-audit ALL claimed stored files. Missing bytes are never published.
+    physical=0
+    for a in byid.values():
+        for p in a.get("images",[]):
+            f=ROOT/p["url"]
+            if not f.is_file() or f.stat().st_size!=p["bytes"] or hashlib.sha256(f.read_bytes()).hexdigest()!=p["sha256"]:
+                raise ValueError("Missing/corrupt physically archived file: "+str(f))
+            physical+=1
+    INDEX.write_text(json.dumps({"updated":time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime()),
+        "storage":"physically committed public previews under GitHub Pages; not licensed publisher masters",
+        "albums":list(byid.values()),"physical_verified_image_count":physical},ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
+    print("MIMMI_PHYSICAL_FILES",physical,"NEW",new,"FAILED",failed,"BYTES",bytes_new,flush=True)
+    if physical==0:raise RuntimeError("No physical images archived. Refuse success.")
+    return physical
+
+if __name__=="__main__":
+    p=argparse.ArgumentParser()
+    p.add_argument("--limit",type=int,default=250)
+    p.add_argument("--budget-mb",type=int,default=90)
+    p.add_argument("--authorized-public-rehost",action="store_true")
+    a=p.parse_args()
+    publish(a.limit,a.budget_mb,a.authorized_public_rehost)

@@ -1,0 +1,59 @@
+name: Mimmi Yui-Style Physically Stored Gallery
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '25 3 * * 1,4'
+  push:
+    paths:
+      - 'apps/mimmi-gallery/publish_stored_public.py'
+      - 'apps/mimmi-gallery/source-viewer-albums.json'
+      - '.github/workflows/mimmi-stored-public-gallery.yml'
+permissions:
+  contents: write
+concurrency:
+  group: mimmi-physical-publish
+  cancel-in-progress: false
+jobs:
+  publish-real-public-previews:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install file/image verification
+        run: python -m pip install requests Pillow
+      - name: Save verified public photo bytes, not URL-only entries
+        run: python apps/mimmi-gallery/publish_stored_public.py --limit 250 --budget-mb 90 --authorized-public-rehost
+      - name: Recheck all archived image bytes against manifest
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import hashlib,json
+          root=Path('apps/mimmi-gallery')
+          data=json.loads((root/'stored-albums.json').read_text())
+          n=0
+          for album in data['albums']:
+              for p in album['images']:
+                  path=root/p['url']
+                  assert path.is_file() and path.stat().st_size==p['bytes']
+                  assert hashlib.sha256(path.read_bytes()).hexdigest()==p['sha256']
+                  n+=1
+          assert n>0
+          print('MIMMI_PHYSICALLY_STORED_VERIFIED',n)
+          PY
+      - name: Commit real individual files and their physical index
+        if: github.ref == 'refs/heads/main'
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add apps/mimmi-gallery/stored-albums/ apps/mimmi-gallery/stored-albums.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Store and serve actual Mimmi public preview image bytes"
+            git fetch origin main
+            git rebase origin/main
+            git push origin HEAD:main
+          fi
