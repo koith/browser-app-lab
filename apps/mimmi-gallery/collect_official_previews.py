@@ -130,7 +130,7 @@ def probe_image(url):
         print("OFFICIAL_SAMPLE_SKIPPED",type(exc).__name__,url[:130],flush=True)
         return None
 
-def collect(max_pages=5,max_books=80,max_samples=6):
+def collect(max_pages=5,max_books=80,max_samples=16):
     books,pages=archive(max_pages)
     books=books[:max_books]
     for i,book in enumerate(books,1):
@@ -168,10 +168,10 @@ if __name__=="__main__":
     ap=argparse.ArgumentParser()
     ap.add_argument("--pages",type=int,default=5)
     ap.add_argument("--books",type=int,default=80)
-    ap.add_argument("--samples",type=int,default=6)
+    ap.add_argument("--samples",type=int,default=16)
     ap.add_argument("--output",type=Path,default=ROOT/"official-previews.json")
     args=ap.parse_args()
-    if not 1<=args.pages<=8 or not 1<=args.books<=100 or not 1<=args.samples<=10:ap.error("Out of range")
+    if not 1<=args.pages<=8 or not 1<=args.books<=100 or not 1<=args.samples<=25:ap.error("Out of range")
     result=collect(args.pages,args.books,args.samples)
     args.output.parent.mkdir(parents=True,exist_ok=True)
     args.output.write_text(json.dumps(result,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
