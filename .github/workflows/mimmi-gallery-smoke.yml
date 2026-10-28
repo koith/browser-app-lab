@@ -24,6 +24,7 @@ jobs:
         run: |
           python -m pip install requests beautifulsoup4 Pillow
           python apps/mimmi-gallery/test_multipage_cross_source.py
+          python apps/mimmi-gallery/test_xiutu_public.py
       - name: Exercise actual mobile album UX, cross-model new tab, and photo fallback
         run: |
           python -m http.server 8765 --directory apps >/tmp/mimmi-static.log 2>&1 &
