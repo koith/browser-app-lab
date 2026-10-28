@@ -78,9 +78,9 @@ def archive(page_limit=5):
 def count_photo_text(text):
     # DJAWA writes e.g. 'total 75 extremely-high resolution (5000 × 5000) photos'.
     patterns=[
-        r"total\\s+(\\d{1,4})\\s+(?:extremely[- ]high resolution\\s+)?(?:\\([^)]*\\)\\s+)?photos",
-        r"(?:total|contains|consists of)\\s+(\\d{1,4})\\s+(?:high[- ]resolution\\s+)?(?:\\([^)]*\\)\\s+)?photos",
-        r"(\\d{1,4})\\s+(?:high[- ]resolution\\s+)?(?:\\([^)]*\\)\\s+)?(?:photos|pics|pictures)",
+        r"total\s+(\d{1,4})\s+(?:extremely[- ]high resolution\s+)?(?:\([^)]*\)\s+)?photos",
+        r"(?:total|contains|consists of)\s+(\d{1,4})\s+(?:high[- ]resolution\s+)?(?:\([^)]*\)\s+)?photos",
+        r"(\d{1,4})\s+(?:high[- ]resolution\s+)?(?:\([^)]*\)\s+)?(?:photos|pics|pictures)",
     ]
     for pat in patterns:
         m=re.search(pat,text,re.I)
