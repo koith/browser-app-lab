@@ -39,6 +39,8 @@ jobs:
           python-version: '3.12'
       - name: Install file/image verification
         run: python -m pip install requests Pillow
+      - name: Check free Xiutu publisher really writes and SHA-verifies files
+        run: python apps/mimmi-gallery/test_xiutu_physical_store.py
       - name: Save multiple batches of SHA-verified real public photo files (not URLs)
         shell: bash
         run: |
