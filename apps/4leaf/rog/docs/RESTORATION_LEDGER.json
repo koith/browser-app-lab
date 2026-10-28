@@ -6491,6 +6491,19 @@
         "P0-RELEASE"
       ],
       "details": "Actual code restores desktop right 2x2 cards from source-authenticated 92x72 IMG.pak selector.spr: neutral frame6 and lower normal/highlighted frame0/1 surfaces, 4px gaps, ABILITY strip visible instead of WEB names/borders/CSS moon. Native S/P/C badge-to-CardData assignment is UNVERIFIED: crop excludes glyph and removes invented moon, rather than invent mapping. Names retained in existing tooltip/aria label/CardData dialog. Source 222x152 backing and all four real tool controls preserved. Heading now follows original winBattle SPR signed pivot delta (68,-201) at actual object-fit bitmap scale; mobile top clamped. Extended existing real BATTLE QA asserts source SHA256/dimensions/card geometry/selected surface/heading pivot; optional WEB seed 20261029 yields actual rules scores05:09 and waits for engine idle pose. Local Chromium desktop, WebKit desktop+390x844 real battle/result controls, original podium regression and cold PWA cache97 PASS. Initial 74px CSS cascade assertion exposed later full-frame rule: corrected selector specificity to source72px and reran successfully. Original-vs-restored 800x600 capture still differs in actor identity/size, camera/terrain, score glyphs, die geometry/motion, player rails and chat/minimap state. No pixel equivalence or native 3D/FPS claim. beta29/cache116 preloads three source frames. PR229 cleaned onto current main73a2c4e after unrelated gallery automation pushed into its old head; event268 retained. PR/Actions/Pages acceptance pending; all58 task statuses preserved."
+    },
+    {
+      "seq": 272,
+      "date": "2026-10-29",
+      "type": "PR229_MERGED_EVENT268_VERIFIED_AND_SOURCE_CARD_REGRESSION_ALIGNMENT",
+      "requestId": "REQ-20261028-001",
+      "taskIds": [
+        "P0-BOARD",
+        "P0-PODIUM",
+        "P0-ACTOR",
+        "P0-RELEASE"
+      ],
+      "details": "PR229 clean head a5b02004f053d60e902fafe5c587138f0b048901 ALL GitHub Actions completed SUCCESS including real minimap40789998550, same-revision40789998314, scroll40789997969, ledger40789998166, board40789998068, authority40789998246 and world/chat40789998469. Vercel preview rate-limit failure is unrelated to requested Pages hosting. Merged as236cbad17e59fb373f9b456cc8e822fdacd65f3a; remote exact-SHA ledger contains event268 (last270,58tasks43requests). Pages40790512713 pending at time of this append. Local beta29 source selector/BATTLE QA passes Chromium desktop and WebKit desktop+mobile with actual scores05:09. New source PR273 exposed stale tests: source-roles still demanded CardData-only faces despite merged PR204 verified OBS full bodies, full-frame expected provisional193px grid rather than actual92+4+92=188px source, release identity still pinned beta28. Updated exact assertions, preserving source-role/bitmap provenance and CardData fallback requirements; no game errors ignored. Local source-roles PASS; PR273 CI/Pages pending; no task marked complete."
     }
   ]
 }
