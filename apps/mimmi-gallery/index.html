@@ -104,7 +104,7 @@ main{max-width:1250px;margin:auto;padding:26px 16px 90px}
 </header>
 <main>
  <section id="overview">
-  <div class="hero"><div><h1>밈미 <span>Mimmi</span></h1><p>화보를 선택하면 사진을 한 장씩 크게 볼 수 있습니다.</p></div><div id="summary" class="metrics" aria-live="polite">목록 확인 중</div></div>
+  <div class="hero"><div><h1>밈미 <span>Mimmi</span></h1><p>화보를 선택하면 사진을 한 장씩 크게 볼 수 있습니다.</p></div><div class="metrics"><div id="summary" aria-live="polite">목록 확인 중</div><div id="device-health">실제 사진 로딩 확인 중</div></div></div>
   <div class="toolbar">
    <input id="search" class="search" type="search" placeholder="화보 검색" aria-label="화보 검색" autocomplete="off">
    <div class="filter-row" role="group" aria-label="화보 필터">
@@ -134,8 +134,14 @@ main{max-width:1250px;margin:auto;padding:26px 16px 90px}
 <script>
 'use strict';
 const $=id=>document.getElementById(id);
-const state={albums:[],research:[],filter:'all',active:null,photos:[],photo:0};
+const state={albums:[],research:[],filter:'all',active:null,photos:[],photo:0,okUrls:new Set(),failedUrls:new Set()};
 const esc=s=>String(s||'').replace(/\s+/g,' ').trim();
+function markImageHealth(url,ok){
+ if(!url)return;
+ if(ok){state.okUrls.add(url);state.failedUrls.delete(url)}
+ else if(!state.okUrls.has(url))state.failedUrls.add(url);
+ $('device-health').textContent='이 기기에서 로딩된 사진 '+state.okUrls.size+'장 · 연결 실패 '+state.failedUrls.size+'장 (현재 시도분)';
+}
 function safeUrl(input){try{const url=new URL(input,location.href);return url.protocol==='https:'?url.href:null}catch{return null}}
 function displayTitle(title){
  return esc(title)
@@ -175,11 +181,11 @@ function addImageWithFallback(container,candidates,className,alt){
  // Do not display broken image glyph. A blocked host falls back gracefully.
  const fail=()=>{
   if(attempt<urls.length){const next=urls[attempt++];img.removeAttribute('src');img.referrerPolicy=attempt===1?'no-referrer':'strict-origin-when-cross-origin';img.src=next;return}
-  img.remove();const existing=container.querySelector('.cover-fallback,.photo-fallback');
+  urls.forEach(u=>markImageHealth(u,false));img.remove();const existing=container.querySelector('.cover-fallback,.photo-fallback');
   if(existing)existing.hidden=false;
  };
  img.onerror=fail;
- img.onload=()=>{if(img.naturalWidth<50)fail()};
+ img.onload=()=>{if(img.naturalWidth<50)fail();else markImageHealth(img.src,true)};
  if(urls.length){container.append(img);fail()}
  return img;
 }
@@ -328,10 +334,10 @@ function openPhoto(i,push=true){
   let attempt=0;
   const policies=['strict-origin-when-cross-origin','no-referrer','origin'];
   const fail=()=>{
-   if(attempt>=policies.length){image.hidden=true;image.removeAttribute('src');$('viewer-error').hidden=false;return}
+   if(attempt>=policies.length){markImageHealth(url,false);image.hidden=true;image.removeAttribute('src');$('viewer-error').hidden=false;return}
    image.removeAttribute('src');image.referrerPolicy=policies[attempt++];image.src=url;
   };
-  image.onload=()=>{if(image.naturalWidth>100){image.hidden=false;$('viewer-error').hidden=true}else fail()};
+  image.onload=()=>{if(image.naturalWidth>100){markImageHealth(url,true);image.hidden=false;$('viewer-error').hidden=true}else fail()};
   image.onerror=fail;
   fail();
  }else $('viewer-error').hidden=false;
@@ -369,7 +375,7 @@ Promise.all([
  state.research=inventory.works||[];
  const count=state.albums.reduce((n,a)=>n+photosOf(a).length,0);
  const ready=state.albums.filter(a=>photosOf(a).length).length;
- $('summary').textContent='열람 항목 '+ready+'개 · 검증 사진 '+count+'장 · 작품 원장 '+state.research.length+'개';
+ $('summary').textContent='열람 항목 '+ready+'개 · 검증 사진 '+count+'장 (출처 서버 확인) · 작품 원장 '+state.research.length+'개';
  renderOverview();renderResearch();
  if(!history.state?.mimmi)history.replaceState({mimmi:true,kind:routeState().id?'deep-link':'overview'},'',location.href);
  applyRoute();
