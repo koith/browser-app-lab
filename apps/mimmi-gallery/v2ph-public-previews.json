@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "version": "v0.1.0-mimmi.2",
-  "generated_at": "2026-10-28T14:48:18.794152+00:00",
+  "generated_at": "2026-10-28T14:51:47.566989+00:00",
   "source": "public V2PH photobook pages, no private downloads or paid content",
   "summary": {
     "albums": 6,
@@ -19,8 +19,8 @@
       "samples": [
         {
           "url": "https://cdn.v2ph.com/photos/lYBw8yuNmrxmHLDL.jpg",
-          "bytes": 447743,
-          "sha256": "7cdf4fb96199d18307e8f00f7c96b5378095b10a5f1d10d56502224b390526e7",
+          "bytes": 434003,
+          "sha256": "cc1b1223429f6e908564a9eb6d835eb3edd84d0573ea215e3d09ed985c44d5bf",
           "width": 1800,
           "height": 2700,
           "origin": "v2ph_public_page",
@@ -49,8 +49,8 @@
         },
         {
           "url": "https://cdn.v2ph.com/photos/r20NzpHLyooJVZwo.jpg",
-          "bytes": 368462,
-          "sha256": "3d2812301e32a15789880e01a19dd3f409fbeb019386d79ae14e9f9f131a99e4",
+          "bytes": 359538,
+          "sha256": "c4b13fd6a1acde8cdbe61f6fda933c142aa610dc36988a06115ce876ee9826d3",
           "width": 1800,
           "height": 2700,
           "origin": "v2ph_public_page",
@@ -59,8 +59,8 @@
         },
         {
           "url": "https://cdn.v2ph.com/photos/K0kiaP2ZoTD56xwj.jpg",
-          "bytes": 456695,
-          "sha256": "2acaa8dfcde31bb3cb6e1c1372e3dfad91a41e827defba5c0cad1e12b6b81a00",
+          "bytes": 445776,
+          "sha256": "3eb60be1e43d3de85c22efc06f126511e19828f669d86576010acaba25abccb7",
           "width": 1800,
           "height": 2700,
           "origin": "v2ph_public_page",
@@ -69,8 +69,8 @@
         },
         {
           "url": "https://cdn.v2ph.com/photos/G56s9YRS8DnbfU4Z.jpg",
-          "bytes": 562888,
-          "sha256": "fbe2ccf08127eeca0c08de620f9ae9d8e3746f0e80225718d92d37e049acef93",
+          "bytes": 543264,
+          "sha256": "b5643724cd1544d2fe48408fd780d9cb50e07ebbd8c52cee6ad2e55b3963590c",
           "width": 1800,
           "height": 2700,
           "origin": "v2ph_public_page",
@@ -79,8 +79,8 @@
         },
         {
           "url": "https://cdn.v2ph.com/photos/u-9wTI6Hod59HU50.jpg",
-          "bytes": 533348,
-          "sha256": "dc52f080dd6975d4c358203e28fd5fc34bdbc448d53baf62df93be2bd7afbfa5",
+          "bytes": 516131,
+          "sha256": "d0084323cabc1ea17c35ddc20973d4b68cc664ad153cc2ca84e44a840497d6f0",
           "width": 1800,
           "height": 2700,
           "origin": "v2ph_public_page",
@@ -89,8 +89,8 @@
         },
         {
           "url": "https://cdn.v2ph.com/photos/uoAgeteq6NzTLJlQ.jpg",
-          "bytes": 502816,
-          "sha256": "9416df8d6f530427423b6005ba57952bd9459ce1e03cf547d7e1452d0829d461",
+          "bytes": 487292,
+          "sha256": "49946d02e3ffcbc4218659bec18a16b5ef34ef693ee7f472b588332a6d2bc288",
           "width": 1800,
           "height": 2700,
           "origin": "v2ph_public_page",
@@ -99,8 +99,8 @@
         },
         {
           "url": "https://cdn.v2ph.com/photos/uI-nwSpXpxIGWpfX.jpg",
-          "bytes": 544077,
-          "sha256": "843b622e279c7207647d2d7c800da611d610d28acbbfd05cf6f7c2e31a9a2579",
+          "bytes": 528369,
+          "sha256": "1b4e4ab5bddd37c7c8ac9c2df5eb5612c1ee0bee24098740b28e0a1506f1ddff",
           "width": 1800,
           "height": 2700,
           "origin": "v2ph_public_page",
@@ -109,8 +109,8 @@
         },
         {
           "url": "https://cdn.v2ph.com/photos/6MaEn1s6MheFmgvW.jpg",
-          "bytes": 501178,
-          "sha256": "09b49d2fd5fc20aa8dec49997fde97d5cdfd094d46859a9c4654e8b7953e1185",
+          "bytes": 490701,
+          "sha256": "f248a80a6a36d3515d7ab6e039920f364b3696524cafa5574314823f56627845",
           "width": 1800,
           "height": 2700,
           "origin": "v2ph_public_page",
@@ -217,8 +217,8 @@
         },
         {
           "url": "https://cdn.v2ph.com/photos/DS_yUpyIO5uxxXNQ.jpg",
-          "bytes": 841722,
-          "sha256": "23d262ab554d3b3da00061a41e400d30ad9854ddbce861bbd819b745f81f7a32",
+          "bytes": 800236,
+          "sha256": "52d9e0dea8f9006545267220d5b6b71eef9a56da187f24b918bc19830134ef54",
           "width": 1800,
           "height": 2700,
           "origin": "v2ph_public_page",
@@ -227,8 +227,8 @@
         },
         {
           "url": "https://cdn.v2ph.com/photos/qX9Zx6hDsibPdTz1.jpg",
-          "bytes": 737459,
-          "sha256": "73000c2b09bc9e7d68b09c0820d995594601fd19bc4a31599c2e56d287496b81",
+          "bytes": 704344,
+          "sha256": "475e9561359a3297def230355619f2819ff6fbcb1611b4790a724ff81ba6a5ca",
           "width": 1800,
           "height": 2700,
           "origin": "v2ph_public_page",
@@ -373,8 +373,8 @@
       "samples": [
         {
           "url": "https://cdn.v2ph.com/photos/OKEWQUfmuIL8NG04.jpg",
-          "bytes": 463302,
-          "sha256": "0b3f93dda9ec8036f87fde1bfed7d73904360f44cafdf8db92b13821e2e546be",
+          "bytes": 448746,
+          "sha256": "cbd9efb62e03adcea99103d2e3871c3faf06cf22cd39b73c6df970b2de6fb2bb",
           "width": 1800,
           "height": 2400,
           "origin": "v2ph_public_page",
@@ -383,8 +383,8 @@
         },
         {
           "url": "https://cdn.v2ph.com/photos/jpFkPmhxUbgufHsC.jpg",
-          "bytes": 529982,
-          "sha256": "ed9c4e4f46bd2de54b5a2f8b9f4fa01f52d2a4d96ae5f6fcad5d27cee18a94f6",
+          "bytes": 511043,
+          "sha256": "65c395abc41088042768ff9d54f7064b06acbf0f2f246bab4f8be179c7c97d32",
           "width": 2400,
           "height": 1800,
           "origin": "v2ph_public_page",
@@ -393,8 +393,8 @@
         },
         {
           "url": "https://cdn.v2ph.com/photos/weEjVnIDtDHiqmAp.jpg",
-          "bytes": 523755,
-          "sha256": "8fc1fd3d1738ffc803bb01fbf8b20deb38df1c8522b9b951ee35f067c145b29e",
+          "bytes": 502564,
+          "sha256": "25a5c731bb802534a24839d53fa8a1779dffe7575dc4f094662a0e1ab3760b9f",
           "width": 1800,
           "height": 2400,
           "origin": "v2ph_public_page",
@@ -403,8 +403,8 @@
         },
         {
           "url": "https://cdn.v2ph.com/photos/70tW-gcbXMxHWzjd.jpg",
-          "bytes": 589733,
-          "sha256": "aa235ac2d0fbcc6efbe26cfb003f29af5c7bafc1742f5c9969354347d3d1c451",
+          "bytes": 565135,
+          "sha256": "6584932c37cb8ad9475d951c64aa55a3e263d1e2a2668af32b9e4f7bfcc573c6",
           "width": 1800,
           "height": 2400,
           "origin": "v2ph_public_page",
@@ -413,8 +413,8 @@
         },
         {
           "url": "https://cdn.v2ph.com/photos/noE6NuOTghQRzF5q.jpg",
-          "bytes": 356613,
-          "sha256": "153de3d79d7cfa75b4e927eb5ec809a4f7f0bcc6759de08cd5f8b7f02205bbf9",
+          "bytes": 345977,
+          "sha256": "7f795585a0c01169a9fcdae238ae1cbb41cfe92c7d1786b2320ac08d96e6b73e",
           "width": 2400,
           "height": 1800,
           "origin": "v2ph_public_page",
@@ -423,8 +423,8 @@
         },
         {
           "url": "https://cdn.v2ph.com/photos/5RpZCMSwawVlfHWV.jpg",
-          "bytes": 302982,
-          "sha256": "4717b806270194fbdb116643de7b51964941e8e5db736c1011f3f61fde4a8f9a",
+          "bytes": 297403,
+          "sha256": "fd8c3a14d3ad8c2d36e8f71ddd37030f5754ebc282234ed54c758073bedbed1b",
           "width": 1800,
           "height": 2400,
           "origin": "v2ph_public_page",
@@ -433,8 +433,8 @@
         },
         {
           "url": "https://cdn.v2ph.com/photos/3-mIon1Aw_hUaKF5.jpg",
-          "bytes": 359654,
-          "sha256": "0e8e51fdb4a18213d184c252c336a88221afbcb93bbd0e38863c4ee81a6c08bc",
+          "bytes": 345978,
+          "sha256": "dfc0d01e81c4bd8f580ab04e141a3cb678f724d662779a3feaf274f3fe3f7ba6",
           "width": 1800,
           "height": 2400,
           "origin": "v2ph_public_page",
@@ -443,8 +443,8 @@
         },
         {
           "url": "https://cdn.v2ph.com/photos/QXM4rDKsh8depa7r.jpg",
-          "bytes": 360395,
-          "sha256": "1a7b617f8b0d60a36bc800a744f1c4c57bf9bf7dea58367fc7b74213fbb5a321",
+          "bytes": 346268,
+          "sha256": "55f882dbbe5c41bb2c40dcf83949fe7ddeaac6b072e02ec5d20cbb7b5a2a05a6",
           "width": 1800,
           "height": 2400,
           "origin": "v2ph_public_page",
@@ -453,8 +453,8 @@
         },
         {
           "url": "https://cdn.v2ph.com/photos/TgTX0ZnZW6wM6L0C.jpg",
-          "bytes": 354191,
-          "sha256": "5257476d6e2351c83fd379d3874f987c60e665da3446c0e46bbabbf5fad8874f",
+          "bytes": 339587,
+          "sha256": "aed73b186ef7096b47fb82521fc499bbb5e564d3c089b6322eabaaac99543ddc",
           "width": 1800,
           "height": 2400,
           "origin": "v2ph_public_page",
@@ -463,8 +463,8 @@
         },
         {
           "url": "https://cdn.v2ph.com/photos/dXPZKr8QpH1njS0r.jpg",
-          "bytes": 341179,
-          "sha256": "4ced3eb236f1fa7b03b52e7bc550d6191b166d6a71b0c6bdf6f1d65ecd293e37",
+          "bytes": 326081,
+          "sha256": "17b99cbef75b113b4470dbdcd9a541f27e2399f4076b8786bd7325cedcbab0e4",
           "width": 1800,
           "height": 2400,
           "origin": "v2ph_public_page",
