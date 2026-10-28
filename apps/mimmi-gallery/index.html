@@ -116,6 +116,31 @@ button:focus-visible,a:focus-visible{outline:2px solid #ddd4c7;outline-offset:3p
 footer{padding:15px 0 25px;justify-content:flex-end}
 @media(max-width:680px){.topbar{height:calc(67px + env(safe-area-inset-top))}.browse-meta{gap:8px}.inventory{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.counter{font-size:10px}.photo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:680px){.topbar{gap:6px}.logo{font-size:16px;letter-spacing:.02em}.mainnav{gap:4px}.mainnav a{font-size:10px;padding:5px 6px}.search-toggle{width:30px;height:30px;padding:6px}}
+/* Match the latest YUI beta.19 iPhone gallery's compact visual hierarchy.
+   Counts come from physically saved files only, never research URLs. */
+.browse-meta{margin:10px 0 0;min-height:23px}
+.inventory{font-size:12px;color:#98999f;letter-spacing:.01em}
+.counter{font-size:12px;color:#98999f}
+@media(max-width:680px){
+ .shell{padding-left:clamp(13px,3.4vw,24px);padding-right:clamp(13px,3.4vw,24px)}
+ .topbar{height:calc(76px + env(safe-area-inset-top));gap:10px}
+ .logo{font-size:23px;letter-spacing:.2em}
+ .logo span{display:inline;font-size:9px;letter-spacing:.2em;margin-left:7px}
+ .mainnav{margin-left:auto;gap:7px}
+ .mainnav a{font-size:11px;padding:6px 7px}
+ .search-toggle{width:41px;height:41px;padding:9px}
+ .version-chip{font-size:10px}
+ .browse-meta{margin-top:12px}
+ .inventory,.counter{font-size:12px}
+ .filters{margin-top:9px;margin-bottom:25px;gap:22px}
+ .filter{font-size:18px;padding:12px 1px 21px;border-bottom-width:3px}
+ .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+ .album .name{font-size:12px;left:10px;right:10px;bottom:11px}
+ .cover-labels{top:12px;left:10px}
+ .publisher-sticker,.edition-sticker{font-size:12px;padding:5px 7px;border-radius:5px}
+ .edition-sticker{top:12px;right:10px}
+ .album-count{font-size:11px;margin-top:5px}
+}
 </style>
 </head>
 <body>
@@ -125,10 +150,10 @@ footer{padding:15px 0 25px;justify-content:flex-end}
  <div class="detail-heading"><button class="back" id="back" aria-label="화보 목록으로 돌아가기">‹</button><h2 class="detail-title" id="albumname"></h2><span class="counter" id="albumtotal"></span></div>
  <nav class="mainnav" aria-label="모델 전환"><a href="../yui-gallery/" target="_blank" rel="noopener noreferrer" title="심유이 갤러리를 새 탭에서 열기">심유이 ↗</a><a href="./" aria-current="page">밈미</a></nav>
  <button id="search-toggle" class="search-toggle" aria-label="화보 검색 열기" aria-haspopup="dialog" aria-controls="search-dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button>
- <small id="app-version" class="version-chip">v0.1.0-mimmi.8</small>
+ <small id="app-version" class="version-chip">v0.1.0-mimmi.9</small>
 </header>
 <div id="browse">
- <div class="browse-meta"><p class="inventory" id="inventory">화보를 불러오는 중</p><small class="inventory" id="device-health">이 기기에서 이미지 열람 확인 중</small><span class="counter" id="total"></span></div>
+ <div class="browse-meta"><p class="inventory" id="inventory">화보를 불러오는 중</p><span class="counter" id="total"></span></div>
  <div class="filters"><button id="browse-toggle" class="filter active" type="button" aria-controls="albumgrid publishergrid" aria-pressed="false" aria-label="화보 목록 · 발행처 목록으로 전환"><span id="browse-mode">화보</span><span aria-hidden="true" class="switch-icon"> ⇄</span></button></div>
  <div id="publishergrid" class="grid" hidden></div>
  <div id="albumgrid" class="grid"></div>
@@ -148,7 +173,7 @@ footer{padding:15px 0 25px;justify-content:flex-end}
  </form>
 </dialog>
 <div id="lightbox" role="dialog" aria-label="사진 보기" aria-modal="true">
- <div class="lighttop"><button class="lightbtn" id="close" aria-label="닫기">×</button><span id="position"></span><small class="version-chip">v0.1.0-mimmi.8</small></div>
+ <div class="lighttop"><button class="lightbtn" id="close" aria-label="닫기">×</button><span id="position"></span><small class="version-chip">v0.1.0-mimmi.9</small></div>
  <button class="lightbtn arrow prev" id="prev" aria-label="이전 사진">‹</button><div class="media-frame"><img id="full" alt="화보 사진"><a id="original" target="_blank" rel="noopener">사진 열기 ↗</a></div><button class="lightbtn arrow next" id="next" aria-label="다음 사진">›</button>
  <p id="media-status" role="status"></p>
 </div>
@@ -163,8 +188,7 @@ function registerImageHealth(url,ok){
  if(!url||!url.startsWith('https://'))return;
  if(ok){imageHealth.loaded.add(url);imageHealth.failed.delete(url)}
  else if(!imageHealth.loaded.has(url))imageHealth.failed.add(url);
- const node=$('device-health');
- if(node)node.textContent='이 기기에서 사진 로딩 '+imageHealth.loaded.size+'장 · 연결 실패 '+imageHealth.failed.size+'장 (시도한 사진 기준)';
+ // Track failed media internally without changing the compact gallery header.
 }
 document.addEventListener('load',e=>{
  const img=e.target;
@@ -186,7 +210,7 @@ document.addEventListener('error',e=>{
  registerImageHealth(url,false);
  img.hidden=true;container.classList.add('broken-source');
 },true);
-let catalog=[],stored=[],localStored=[],remoteStored=[],ownerStored=[],albumAliases={},albumCovers={},publisherRegistry={publishers:[]},publisherWorkReferences=[],activePublisher=null,mode='all',activeAlbum=null,viewerList=[],viewerIndex=0,detailAlbum=null;
+let catalog=[],stored=[],localStored=[],remoteStored=[],ownerStored=[],albumAliases={},albumCovers={},publisherRegistry={publishers:[]},publisherWorkReferences=[],activePublisher=null,mode='albums',activeAlbum=null,viewerList=[],viewerIndex=0,detailAlbum=null;
 function canonicalId(id){const seen=new Set();while(albumAliases[id]&&!seen.has(id)){seen.add(id);id=albumAliases[id]}return id}
 const titleMap={};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -237,7 +261,7 @@ function render(){
   $('nothing').hidden=visible.length>0;
  }else{
   const group=activePublisher?publisherGroups().find(g=>g.id===activePublisher):null;
-  const src=group?group.albums:mode==='all'?stored:items;
+  const src=group?group.albums:items;
   if(group){$('albumname').textContent=group.name;$('albumtotal').textContent=group.albums.length+'개 · 열람 '+group.viewable}
   const matched=src.filter(a=>match(getName(a))).sort((a,b)=>{const ac=validImages(stored.find(x=>x.id===(a.previewAlbumId||a.id))||a).length,bc=validImages(stored.find(x=>x.id===(b.previewAlbumId||b.id))||b).length;return (bc>0)-(ac>0)||MimmiPublishers.compareNames(MimmiLabels.coverTitle(a),MimmiLabels.coverTitle(b))||MimmiPublishers.compareNames(a.id,b.id)});
   $('albumgrid').innerHTML=matched.map(a=>card(a,validImages(stored.find(x=>x.id===(a.previewAlbumId||a.id))||a).length>0)).join('');
@@ -317,7 +341,7 @@ function goBack(){if(history.state?.mimmi&&history.state.depth>0)history.back();
 function applyRoute(s){$('search-dialog').close();s=viewerRoutes.get(s.key)||s;s={...s,album:canonicalId(s.album)};hideViewer();setMode(s.mode||'albums',s.publisher);if(s.album&&!s.fromPhotos)openAlbum(s.album,false);if(s.photo){const a=stored.find(a=>a.id===s.album);const list=s.fromPhotos?available().flatMap(photosFor).filter(p=>p.name.toLocaleLowerCase().includes($('search').value.toLocaleLowerCase().trim())):a?photosFor(a):[];const i=list.findIndex(p=>p.albumId===s.album&&p.number===Number(s.photo));if(i>=0)openViewer(list,i,false)}if(s.searchOpen)showSearch();requestAnimationFrame(()=>window.scrollTo(0,s.scroll||0))}
 function routeFromLocation(){
  const q=new URLSearchParams(location.hash.replace(/^#/,''));
- return {mimmi:true,depth:0,mode:q.get('view')||'all',publisher:q.get('publisher'),
+ return {mimmi:true,depth:0,mode:q.get('view')||'albums',publisher:q.get('publisher'),
          album:q.get('album'),photo:q.get('photo'),fromPhotos:q.get('from')==='photos',scroll:0};
 }
 window.addEventListener('popstate',()=>{applyRoute(history.state?.mimmi?history.state:routeFromLocation())});
@@ -372,10 +396,10 @@ Promise.all([
  stored=[...ownerStored,...localStored.filter(a=>!ownerIds.has(a.id))];
  catalog=stored.slice();
  const archivedCount=stored.reduce((n,a)=>n+validImages(a).length,0);
- $('inventory').textContent=archivedCount+'장 실제 저장 · 갤러리 등록';
+ $('inventory').textContent=archivedCount+'장 · 실제 저장본';
 
  render();
- const raw=location.hash.slice(1),q=new URLSearchParams(raw);const id=canonicalId(raw&&!raw.includes('=')?decodeURIComponent(raw):q.get('album'));const state={mimmi:true,depth:0,mode:q.get('view')||'all',publisher:q.get('publisher'),album:id,fromPhotos:q.get('from')==='photos',scroll:0};history.replaceState(state,'',routeURL(state));applyRoute(state);if(q.get('photo')){const a=stored.find(a=>a.id===id);if(a){const list=photosFor(a),i=list.findIndex(p=>p.number===Number(q.get('photo')));if(i>=0)openViewer(list,i)}}
+ const raw=location.hash.slice(1),q=new URLSearchParams(raw);const id=canonicalId(raw&&!raw.includes('=')?decodeURIComponent(raw):q.get('album'));const state={mimmi:true,depth:0,mode:q.get('view')||'albums',publisher:q.get('publisher'),album:id,fromPhotos:q.get('from')==='photos',scroll:0};history.replaceState(state,'',routeURL(state));applyRoute(state);if(q.get('photo')){const a=stored.find(a=>a.id===id);if(a){const list=photosFor(a),i=list.findIndex(p=>p.number===Number(q.get('photo')));if(i>=0)openViewer(list,i)}}
 }).catch(()=>{$('total').textContent='—';$('nothing').textContent='이미지를 불러올 수 없습니다.';$('nothing').hidden=false});
 </script>
 </body></html>
