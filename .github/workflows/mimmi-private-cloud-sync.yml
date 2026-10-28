@@ -1,15 +1,9 @@
 name: Mimmi Private Photo Sync
+# Retired optional TeraBox implementation: never auto-run, to avoid failures or
+# suggesting this storage is required. File-backed GitHub Pages uses
+# mimmi-stored-public-gallery.yml and needs no cloud credentials.
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - 'apps/mimmi-gallery/cloud/**'
-      - 'apps/mimmi-gallery/download_public_images_private.py'
-      - 'apps/mimmi-gallery/source-viewer-albums.json'
-      - 'apps/mimmi-gallery/build_model_gallery.py'
-      - '.github/workflows/mimmi-private-cloud-sync.yml'
-  schedule:
-    - cron: '10 17 * * 1,4'
 permissions:
   contents: read
 concurrency:
