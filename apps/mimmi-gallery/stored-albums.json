@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "model": "mimmi",
-  "updated": "2026-10-28T23:21:45Z",
+  "updated": "2026-10-28T23:22:21Z",
   "storage": "physically committed public previews under GitHub Pages; not licensed publisher masters",
   "albums": [
     {
@@ -19341,6 +19341,24 @@
           "width": 1800,
           "height": 2696,
           "number": 8
+        },
+        {
+          "url": "stored-albums/v2ph-actor-amn8o34z/e18e2f2090b7dc52aff886bf643affb628e64ae70d57c14aa3395a8437851211.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/aS5_w9UZKGg7xqzC.jpg",
+          "sha256": "e18e2f2090b7dc52aff886bf643affb628e64ae70d57c14aa3395a8437851211",
+          "bytes": 416683,
+          "width": 1800,
+          "height": 2696,
+          "number": 9
+        },
+        {
+          "url": "stored-albums/v2ph-actor-amn8o34z/8f70bb901d9c369bc65555c1c08b5fd11cdd9a3f1dbe3e1cdbbfb3247ba7af3d.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/pIrS-UEy6yR5rVsg.jpg",
+          "sha256": "8f70bb901d9c369bc65555c1c08b5fd11cdd9a3f1dbe3e1cdbbfb3247ba7af3d",
+          "bytes": 395369,
+          "width": 1800,
+          "height": 2696,
+          "number": 10
         }
       ],
       "status": "public_previews_only_not_complete"
@@ -19443,7 +19461,304 @@
         }
       ],
       "status": "public_previews_only_not_complete"
+    },
+    {
+      "id": "v2ph-actor-z7exoo5z",
+      "title": "Mimmi - White",
+      "publisher": "DJAWA",
+      "source": "https://www.v2ph.com/album/z7exoo5z.html",
+      "images": [
+        {
+          "url": "stored-albums/v2ph-actor-z7exoo5z/0d5898a4a719398a6d84345ff58933425db09e09159342ced4d1db2e2aca4db8.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/WOB24CTao1dMAlj5.jpg",
+          "sha256": "0d5898a4a719398a6d84345ff58933425db09e09159342ced4d1db2e2aca4db8",
+          "bytes": 924588,
+          "width": 2700,
+          "height": 1800,
+          "number": 1
+        },
+        {
+          "url": "stored-albums/v2ph-actor-z7exoo5z/350ad7286d5c05d1acbaa3e251996dbe04e9321585cc62da3aa53461dd1ec1b4.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/bnDxVFyNQSBamLbo.jpg",
+          "sha256": "350ad7286d5c05d1acbaa3e251996dbe04e9321585cc62da3aa53461dd1ec1b4",
+          "bytes": 777667,
+          "width": 2700,
+          "height": 1800,
+          "number": 2
+        },
+        {
+          "url": "stored-albums/v2ph-actor-z7exoo5z/60fa32e80dd647c824d3b7f77887444f61615e0553900761ac359bee8052ae24.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/ewisDKYg0IVv89oZ.jpg",
+          "sha256": "60fa32e80dd647c824d3b7f77887444f61615e0553900761ac359bee8052ae24",
+          "bytes": 879350,
+          "width": 2700,
+          "height": 1800,
+          "number": 3
+        },
+        {
+          "url": "stored-albums/v2ph-actor-z7exoo5z/d84aa3bcab5be0a0fcdcd61dbb179fdda9b25dc9876e60f9cc764a804c32976b.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/ZCKM-55twMmZ8Jg4.jpg",
+          "sha256": "d84aa3bcab5be0a0fcdcd61dbb179fdda9b25dc9876e60f9cc764a804c32976b",
+          "bytes": 813024,
+          "width": 2700,
+          "height": 1800,
+          "number": 4
+        },
+        {
+          "url": "stored-albums/v2ph-actor-z7exoo5z/54f85e5498d9f4266c47cfbd16a7f3b5d55e3a54030505c3c342e7c9a9ea0e4b.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/Dj1ssOI6jVLNVrmM.jpg",
+          "sha256": "54f85e5498d9f4266c47cfbd16a7f3b5d55e3a54030505c3c342e7c9a9ea0e4b",
+          "bytes": 886460,
+          "width": 2700,
+          "height": 1800,
+          "number": 5
+        },
+        {
+          "url": "stored-albums/v2ph-actor-z7exoo5z/16d9d36fc4423b59a1100ef88b72c33d26c5329592e803df42912161ca9927f0.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/KJdJ5Rl6S4i9uZ8L.jpg",
+          "sha256": "16d9d36fc4423b59a1100ef88b72c33d26c5329592e803df42912161ca9927f0",
+          "bytes": 1008306,
+          "width": 2700,
+          "height": 1800,
+          "number": 6
+        },
+        {
+          "url": "stored-albums/v2ph-actor-z7exoo5z/e9dc8ab3ef2c14868dfd6fa2e948ca14dd54ee75380d276a3ae3260793f1cd13.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/SAhni55YHtDjaYcL.jpg",
+          "sha256": "e9dc8ab3ef2c14868dfd6fa2e948ca14dd54ee75380d276a3ae3260793f1cd13",
+          "bytes": 672333,
+          "width": 2700,
+          "height": 1800,
+          "number": 7
+        },
+        {
+          "url": "stored-albums/v2ph-actor-z7exoo5z/e38e9cc003dfc0f3830f5b4ecd3e02786e4dc545a8d0335a77f880ce7517f8c0.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/9x2D50IYTyAQ14FB.jpg",
+          "sha256": "e38e9cc003dfc0f3830f5b4ecd3e02786e4dc545a8d0335a77f880ce7517f8c0",
+          "bytes": 753638,
+          "width": 2700,
+          "height": 1800,
+          "number": 8
+        },
+        {
+          "url": "stored-albums/v2ph-actor-z7exoo5z/a574d8bc49a751bdac503958cfa2698a4f821dca075eb78d20179af272ed10e6.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/HqkEM-8olRkzibDt.jpg",
+          "sha256": "a574d8bc49a751bdac503958cfa2698a4f821dca075eb78d20179af272ed10e6",
+          "bytes": 594322,
+          "width": 1800,
+          "height": 2700,
+          "number": 9
+        },
+        {
+          "url": "stored-albums/v2ph-actor-z7exoo5z/9aed3510e4c440e11f1a1975019e1cead1a307272789a119c6d3af89ef09393d.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/Q520JxqpjGRH2qW8.jpg",
+          "sha256": "9aed3510e4c440e11f1a1975019e1cead1a307272789a119c6d3af89ef09393d",
+          "bytes": 660960,
+          "width": 1800,
+          "height": 2700,
+          "number": 10
+        }
+      ],
+      "status": "public_previews_only_not_complete"
+    },
+    {
+      "id": "v2ph-actor-a8n8n85a",
+      "title": "Mimmi --Mochilero en Violeta Photograph",
+      "publisher": "DJAWA",
+      "source": "https://www.v2ph.com/album/a8n8n85a.html",
+      "images": [
+        {
+          "url": "stored-albums/v2ph-actor-a8n8n85a/6394b22bcae38a154776b69b28c958ccb7eb2f445484a02a81aebe9fae14caa0.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/ZhAGEvHYW8CgfajU.jpg",
+          "sha256": "6394b22bcae38a154776b69b28c958ccb7eb2f445484a02a81aebe9fae14caa0",
+          "bytes": 512868,
+          "width": 1800,
+          "height": 2700,
+          "number": 1
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a8n8n85a/1cda386ecaa805ef9019e0d880c249b0739b4113825da6a2a8d72dc67f8558ef.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/teVvD5Xla2JYUDZS.jpg",
+          "sha256": "1cda386ecaa805ef9019e0d880c249b0739b4113825da6a2a8d72dc67f8558ef",
+          "bytes": 514737,
+          "width": 1800,
+          "height": 2700,
+          "number": 2
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a8n8n85a/4c1e255cf2e7ab8f798b3c6c3a5b8851d688f84425774d42e1a5b3b7cc92676c.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/YqzETNWqCjOXdt4L.jpg",
+          "sha256": "4c1e255cf2e7ab8f798b3c6c3a5b8851d688f84425774d42e1a5b3b7cc92676c",
+          "bytes": 498267,
+          "width": 1800,
+          "height": 2700,
+          "number": 3
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a8n8n85a/b11e0c4f01546b05b01201cdc255b7b6ec3c1b62259ca750f0e0accf73e04711.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/DDA8fURI0qPiFMhV.jpg",
+          "sha256": "b11e0c4f01546b05b01201cdc255b7b6ec3c1b62259ca750f0e0accf73e04711",
+          "bytes": 602300,
+          "width": 1800,
+          "height": 2700,
+          "number": 4
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a8n8n85a/c6402622aaf6526f15ab858663a0822fcf05bc62a0efc1afb08c4b875ea410b9.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/RnoQOIOQp0uQnU5f.jpg",
+          "sha256": "c6402622aaf6526f15ab858663a0822fcf05bc62a0efc1afb08c4b875ea410b9",
+          "bytes": 549068,
+          "width": 1800,
+          "height": 2700,
+          "number": 5
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a8n8n85a/d808668d4cbb270a5b1221cb5dd8d013bc8444fca7470745bb35daa7af2666f3.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/G2BMxdqGU7OtujEM.jpg",
+          "sha256": "d808668d4cbb270a5b1221cb5dd8d013bc8444fca7470745bb35daa7af2666f3",
+          "bytes": 574150,
+          "width": 1800,
+          "height": 2700,
+          "number": 6
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a8n8n85a/de0b6735c26f5f628bacffac22e33ce4e7194fa0ffd3dcea96f6f54ebefa6910.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/AhK3VVHyu4y0QYki.jpg",
+          "sha256": "de0b6735c26f5f628bacffac22e33ce4e7194fa0ffd3dcea96f6f54ebefa6910",
+          "bytes": 510328,
+          "width": 1800,
+          "height": 2700,
+          "number": 7
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a8n8n85a/7fe68aaa2e77f8fedd8b0685c79df8a16ec38d2b609ef63dcc5af13420122912.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/t4tR5RK1a9Xv6lA8.jpg",
+          "sha256": "7fe68aaa2e77f8fedd8b0685c79df8a16ec38d2b609ef63dcc5af13420122912",
+          "bytes": 493432,
+          "width": 1800,
+          "height": 2700,
+          "number": 8
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a8n8n85a/a8c65da4d38a904760590d97de1c574b9bf71a5ef8764ef197bf6853727c17da.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/ZTW71EfRKumoZBdi.jpg",
+          "sha256": "a8c65da4d38a904760590d97de1c574b9bf71a5ef8764ef197bf6853727c17da",
+          "bytes": 544015,
+          "width": 1800,
+          "height": 2700,
+          "number": 9
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a8n8n85a/568658c74937c376b1b6e66208eaf406c12d1c7220058a37d81ff982fadb80ec.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/ue5D027LaN0hs1yk.jpg",
+          "sha256": "568658c74937c376b1b6e66208eaf406c12d1c7220058a37d81ff982fadb80ec",
+          "bytes": 476791,
+          "width": 1800,
+          "height": 2700,
+          "number": 10
+        }
+      ],
+      "status": "public_previews_only_not_complete"
+    },
+    {
+      "id": "v2ph-actor-an65656a",
+      "title": "Mimmi-The Pet Girl Photo Set",
+      "publisher": "DJAWA",
+      "source": "https://www.v2ph.com/album/an65656a.html",
+      "images": [
+        {
+          "url": "stored-albums/v2ph-actor-an65656a/ca520a97ae272a3f5f1a153d28a07389163ffd30c604cf3847a51245dd8a2b01.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/jADNi7yvkEizRfF2.jpg",
+          "sha256": "ca520a97ae272a3f5f1a153d28a07389163ffd30c604cf3847a51245dd8a2b01",
+          "bytes": 555058,
+          "width": 1800,
+          "height": 2700,
+          "number": 1
+        },
+        {
+          "url": "stored-albums/v2ph-actor-an65656a/ee7d2fd4de3cbf869b00edeb8e99524b54125ed4623c4b7933816b399ba56f4a.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/JrjqcxmtzWRXrZOU.jpg",
+          "sha256": "ee7d2fd4de3cbf869b00edeb8e99524b54125ed4623c4b7933816b399ba56f4a",
+          "bytes": 560370,
+          "width": 1800,
+          "height": 2700,
+          "number": 2
+        },
+        {
+          "url": "stored-albums/v2ph-actor-an65656a/5729c8c9645fb096a97095532ea0505f4fd4296510bf3592f328dbccbd94d49d.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/VdDTLB2O8gEGm0Vh.jpg",
+          "sha256": "5729c8c9645fb096a97095532ea0505f4fd4296510bf3592f328dbccbd94d49d",
+          "bytes": 528919,
+          "width": 1800,
+          "height": 2700,
+          "number": 3
+        },
+        {
+          "url": "stored-albums/v2ph-actor-an65656a/e53f1d7a94d6c37e096545a11edf7356f07e8707f9086a44fd414b35ac514a0e.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/ENxpInmdYsRxGbug.jpg",
+          "sha256": "e53f1d7a94d6c37e096545a11edf7356f07e8707f9086a44fd414b35ac514a0e",
+          "bytes": 530029,
+          "width": 1800,
+          "height": 2700,
+          "number": 4
+        },
+        {
+          "url": "stored-albums/v2ph-actor-an65656a/24cdb26b287c3fa1cc455c8c0849809af2892bdf87f6f5b68061f295ddd83dc1.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/FlGqXo2YcItjl5og.jpg",
+          "sha256": "24cdb26b287c3fa1cc455c8c0849809af2892bdf87f6f5b68061f295ddd83dc1",
+          "bytes": 552035,
+          "width": 1800,
+          "height": 2700,
+          "number": 5
+        },
+        {
+          "url": "stored-albums/v2ph-actor-an65656a/d913806cff85b358fca9201d8cba95daf144b3893288241116699285f70d2690.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/Y8HNnfPlBTW0IPPj.jpg",
+          "sha256": "d913806cff85b358fca9201d8cba95daf144b3893288241116699285f70d2690",
+          "bytes": 539756,
+          "width": 1800,
+          "height": 2700,
+          "number": 6
+        },
+        {
+          "url": "stored-albums/v2ph-actor-an65656a/10027c7b253bbd86dbc414450518cbbabe65cd52745220fef6984ea9f57def4a.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/JAAsVN7fpyuxhsnn.jpg",
+          "sha256": "10027c7b253bbd86dbc414450518cbbabe65cd52745220fef6984ea9f57def4a",
+          "bytes": 528049,
+          "width": 1800,
+          "height": 2700,
+          "number": 7
+        },
+        {
+          "url": "stored-albums/v2ph-actor-an65656a/f2593af9efba4024700f362776d5844b3341c175d355b3e00e889f372e678e7b.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/V0pHaiMTj54BtYQR.jpg",
+          "sha256": "f2593af9efba4024700f362776d5844b3341c175d355b3e00e889f372e678e7b",
+          "bytes": 507251,
+          "width": 1800,
+          "height": 2700,
+          "number": 8
+        }
+      ],
+      "status": "public_previews_only_not_complete"
+    },
+    {
+      "id": "v2ph-actor-z6exx6ma",
+      "title": "Vol.2 - My small bird",
+      "publisher": "DJAWA",
+      "source": "https://www.v2ph.com/album/z6exx6ma.html",
+      "images": [
+        {
+          "url": "stored-albums/v2ph-actor-z6exx6ma/5024f216550189f391681f5073f02c25a40ce8b0c48bdf182af0deb19e87e337.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/_pWj_GxoddJz2Jf6.jpg",
+          "sha256": "5024f216550189f391681f5073f02c25a40ce8b0c48bdf182af0deb19e87e337",
+          "bytes": 405122,
+          "width": 2700,
+          "height": 1800,
+          "number": 1
+        }
+      ],
+      "status": "public_previews_only_not_complete"
     }
   ],
-  "physical_verified_image_count": 2110
+  "physical_verified_image_count": 2141
 }
