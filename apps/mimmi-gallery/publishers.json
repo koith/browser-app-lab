@@ -7,7 +7,13 @@
       "aliases": [
         "DJAWA"
       ],
-      "logo": null,
+      "logo": {
+        "path": "../yui-gallery/publisher-logos/djawa.png",
+        "verified_official": true,
+        "theme": "light",
+        "asset_role": "official_publisher_logo",
+        "source_url": "https://djawaphoto.com/wp-content/uploads/2024/08/djawa_logo.png"
+      },
       "official_url": "https://djawaphoto.com/portfolio-cat/mimmi/"
     },
     {
@@ -26,7 +32,12 @@
         "ArtGravia",
         "ARTGRAVIA"
       ],
-      "logo": null
+      "logo": {
+        "path": "../yui-gallery/publisher-logos/artgravia.png",
+        "verified_official": true,
+        "theme": "light",
+        "asset_role": "official_publisher_logo"
+      }
     },
     {
       "id": "independent",
