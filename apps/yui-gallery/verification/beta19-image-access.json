@@ -1,0 +1,25 @@
+{
+  "version": "v0.1.0-beta.19",
+  "incident": "User screenshot shows HTTP 451 from cdn.jliji.com in Korea; partial cached images can still appear.",
+  "reported_restricted_origin": "https://cdn.jliji.com",
+  "registered_photo_urls_using_reported_origin": 155,
+  "all_155_confirmed_failed": false,
+  "cross_origin_image_error_reveals_http_status": false,
+  "new_photograph_files": 0,
+  "higher_resolution_replacements": 0,
+  "actual_gallery_photographs_verified_this_change": 0,
+  "local_chromium_451_503_fixture_pass": true,
+  "fixture_decodes_are_not_actual_photo_verifications": true,
+  "external_photo_requests_by_error_fixture": 0,
+  "source_urls_hashes_and_photo_order_changed": false,
+  "proxy_or_alternate_origin_routing": false,
+  "access_restored": false,
+  "permanent_personal_cloud_verified_new_files": 0,
+  "unfinished": [
+    "Restore actual access to legally restricted source files through an authorized available source; this UI change does not restore it.",
+    "Existing acquisition and publisher-master backlog.",
+    "Primary permanent personal storage remains unconnected.",
+    "Physical iPhone verification."
+  ],
+  "ci": "See release PR for final engine/job/deployment outcomes."
+}
