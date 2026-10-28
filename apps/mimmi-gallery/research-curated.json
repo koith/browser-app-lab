@@ -1,0 +1,1359 @@
+{
+  "model": "mimmi",
+  "generated_at": "2026-10-28T15:02:56.521026+00:00",
+  "warning": "52 catalogue leads are not 52 downloaded photobooks. Entries 4,9,15,43 were corrected against COSmiao model listing. Distinguish available media by actual decoded images.",
+  "sources": [
+    {
+      "source": "xiantuji",
+      "url": "https://www.xiantuji.com/mimmi/",
+      "records": 51,
+      "status": "ok"
+    },
+    {
+      "source": "cosmiao",
+      "url": "https://www.cosmiao.info/mimmi/",
+      "records": 5,
+      "status": "ok"
+    },
+    {
+      "source": "miaohuaying",
+      "url": "https://www.miaohuaying.com/mimmi/",
+      "records": 5,
+      "status": "ok"
+    },
+    {
+      "source": "simimiao",
+      "url": "https://www.simimiao.com/mimmi/",
+      "records": 51,
+      "status": "ok"
+    },
+    {
+      "source": "miaojishe",
+      "url": "https://www.miaojishe.com/mimmi/",
+      "records": 8,
+      "status": "ok"
+    }
+  ],
+  "summary": {
+    "sources_checked": 5,
+    "sources_with_items": 5,
+    "numbered_rows": 52,
+    "photo_files_archived": 0,
+    "rows_with_disagreements": 2,
+    "curated_corrections": 5
+  },
+  "works": [
+    {
+      "number": 52,
+      "title": "DJAWA Photo Mimmi — Asuna the Maid",
+      "advertised_photos": 125,
+      "sources": [
+        {
+          "site": "cosmiao",
+          "url": "https://www.cosmiao.info/mimmi/",
+          "claimed_count": 125
+        }
+      ],
+      "alternate_titles": [
+        "DJAWA Photo Mimmi — Asuna the Maid"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived",
+      "curated": true
+    },
+    {
+      "number": 51,
+      "title": "DJAWA Photo Mimmi Rei, Beyond the Heart",
+      "advertised_photos": 97,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": 97
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": 97
+        }
+      ],
+      "alternate_titles": [
+        "DJAWA Photo Mimmi Rei, Beyond the Heart"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 50,
+      "title": "DJAWA Photo Mimmi Nikke Elegg",
+      "advertised_photos": 154,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": 154
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": 154
+        }
+      ],
+      "alternate_titles": [
+        "DJAWA Photo Mimmi Nikke Elegg"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 49,
+      "title": "DJAWA Photo Mimmi (밈미) My Summer Vacation Vol.5",
+      "advertised_photos": 45,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": 45
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": 45
+        },
+        {
+          "site": "miaojishe",
+          "url": "https://www.miaojishe.com/mimmi/",
+          "claimed_count": null
+        }
+      ],
+      "alternate_titles": [
+        "DJAWA Photo Mimmi (밈미) My Summer Vacation Vol.5",
+        "，共52套作品。作品名称统一保留已有目录中的角色名和系列标题，未补充没有明确依据的编号信息。"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 48,
+      "title": "DJAWA Photo In The Summer Sunshine Part 1",
+      "advertised_photos": 99,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": 99
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": 99
+        }
+      ],
+      "alternate_titles": [
+        "DJAWA Photo In The Summer Sunshine Part 1"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 47,
+      "title": "DJAWA Photo Rei, Beyond the Heart",
+      "advertised_photos": 97,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": 97
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": 97
+        }
+      ],
+      "alternate_titles": [
+        "DJAWA Photo Rei, Beyond the Heart"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 46,
+      "title": "DJAWA Photo Mimmi (밈미) Christmas Special 2021 (+S.ver)",
+      "advertised_photos": 100,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": 100
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": 100
+        }
+      ],
+      "alternate_titles": [
+        "DJAWA Photo Mimmi (밈미) Christmas Special 2021 (+S.ver)"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 45,
+      "title": "DJAWA Photo My Summer Vacation Vol.5",
+      "advertised_photos": 45,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": 45
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": 45
+        },
+        {
+          "site": "miaojishe",
+          "url": "https://www.miaojishe.com/mimmi/",
+          "claimed_count": null
+        }
+      ],
+      "alternate_titles": [
+        "DJAWA Photo My Summer Vacation Vol.5",
+        "。"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 44,
+      "title": "DJAWA Photo Nikke Elegg",
+      "advertised_photos": 68,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": 68
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": 68
+        }
+      ],
+      "alternate_titles": [
+        "DJAWA Photo Nikke Elegg"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 43,
+      "title": "Mimmi x Innocent Part 2",
+      "advertised_photos": 139,
+      "sources": [
+        {
+          "site": "cosmiao",
+          "url": "https://www.cosmiao.info/mimmi/",
+          "claimed_count": 139
+        }
+      ],
+      "alternate_titles": [
+        "Mimmi x Innocent Part 2"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived",
+      "curated": true
+    },
+    {
+      "number": 42,
+      "title": "Nicole (Zenless Zone Zero)",
+      "advertised_photos": 54,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": 54
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": 54
+        },
+        {
+          "site": "miaojishe",
+          "url": "https://www.miaojishe.com/mimmi/",
+          "claimed_count": null
+        }
+      ],
+      "alternate_titles": [
+        "Nicole (Zenless Zone Zero)",
+        "Nicole (Zenless Zone Zero)。这套作品具有较强角色辨识度，服装元素与游戏角色设定结合明显，能够看到角色造型、配色和动作表现之间的联系。"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 41,
+      "title": "CreamSoda Mimmi Mashu Mimmi 2",
+      "advertised_photos": 72,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": 72
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": 72
+        }
+      ],
+      "alternate_titles": [
+        "CreamSoda Mimmi Mashu Mimmi 2"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 40,
+      "title": "(밈미) x Innocent",
+      "advertised_photos": 343,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": 343
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": 343
+        }
+      ],
+      "alternate_titles": [
+        "(밈미) x Innocent"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 39,
+      "title": "(밈미) Vol.2 My small bird",
+      "advertised_photos": 135,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": 135
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": 135
+        }
+      ],
+      "alternate_titles": [
+        "(밈미) Vol.2 My small bird"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 38,
+      "title": "(밈미) DJAWA Photo Kitsune Miko Ver B",
+      "advertised_photos": 93,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": 93
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": 93
+        }
+      ],
+      "alternate_titles": [
+        "(밈미) DJAWA Photo Kitsune Miko Ver B"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 37,
+      "title": "(밈미) The Pet",
+      "advertised_photos": 81,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": 81
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": 81
+        }
+      ],
+      "alternate_titles": [
+        "(밈미) The Pet"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 36,
+      "title": "(밈미) White",
+      "advertised_photos": 136,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": 136
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": 136
+        }
+      ],
+      "alternate_titles": [
+        "(밈미) White"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 35,
+      "title": "CreamSoda (밈미) Vol.5 Mash Mimmi 2",
+      "advertised_photos": 72,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": 72
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": 72
+        }
+      ],
+      "alternate_titles": [
+        "CreamSoda (밈미) Vol.5 Mash Mimmi 2"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 34,
+      "title": "CreamSoda (밈미) Vol.4 Chic Nerd & Maness Nurse",
+      "advertised_photos": 63,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": 63
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": 63
+        }
+      ],
+      "alternate_titles": [
+        "CreamSoda (밈미) Vol.4 Chic Nerd & Maness Nurse"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 33,
+      "title": "CreamSoda (밈미) Vol.3 Mashu Mimmi",
+      "advertised_photos": 59,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": 59
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": 59
+        }
+      ],
+      "alternate_titles": [
+        "CreamSoda (밈미) Vol.3 Mashu Mimmi"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 32,
+      "title": "CreamSoda (밈미) Vol.2 Neko Mimmi",
+      "advertised_photos": 62,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": 62
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": 62
+        }
+      ],
+      "alternate_titles": [
+        "CreamSoda (밈미) Vol.2 Neko Mimmi"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 31,
+      "title": "DJAWA Photo (밈미) × Ceyatic Pop Kitty Party",
+      "advertised_photos": 125,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": 125
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": 125
+        }
+      ],
+      "alternate_titles": [
+        "DJAWA Photo (밈미) × Ceyatic Pop Kitty Party"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 30,
+      "title": "DJAWA Photo (밈미) Sukajan Gal",
+      "advertised_photos": 177,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": 177
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": 177
+        }
+      ],
+      "alternate_titles": [
+        "DJAWA Photo (밈미) Sukajan Gal"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 29,
+      "title": "DJAWA Photo Azur Lane Tashkent",
+      "advertised_photos": 59,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": 59
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": 59
+        }
+      ],
+      "alternate_titles": [
+        "DJAWA Photo Azur Lane Tashkent"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 28,
+      "title": "DJAWA Photo Your Fishe Gawr Gura",
+      "advertised_photos": 119,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": 119
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": 119
+        }
+      ],
+      "alternate_titles": [
+        "DJAWA Photo Your Fishe Gawr Gura"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 27,
+      "title": "DJAWA Photo Mimmi (밈미) Your Panties",
+      "advertised_photos": 386,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": 386
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": 386
+        }
+      ],
+      "alternate_titles": [
+        "DJAWA Photo Mimmi (밈미) Your Panties"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 26,
+      "title": "DJAWA Photo Mimmi (밈미) Mademoiselle Mimmi",
+      "advertised_photos": 169,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": 169
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": 169
+        }
+      ],
+      "alternate_titles": [
+        "DJAWA Photo Mimmi (밈미) Mademoiselle Mimmi"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 25,
+      "title": "DJAWA Photo Mimmi (밈미) Nikke Alice",
+      "advertised_photos": 174,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": 174
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": 174
+        }
+      ],
+      "alternate_titles": [
+        "DJAWA Photo Mimmi (밈미) Nikke Alice"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 24,
+      "title": "Tinnitus",
+      "advertised_photos": 33,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": 33
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": 33
+        }
+      ],
+      "alternate_titles": [
+        "Tinnitus"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 23,
+      "title": "DJAWA Photo Christmas Special 2022：Mimmi (Super Sonico)",
+      "advertised_photos": 91,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": 91
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": 91
+        }
+      ],
+      "alternate_titles": [
+        "DJAWA Photo Christmas Special 2022：Mimmi (Super Sonico)"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 22,
+      "title": "DJAWA Photo Mimmi (밈미) Knotting Class #2",
+      "advertised_photos": 66,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": 66
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": 66
+        }
+      ],
+      "alternate_titles": [
+        "DJAWA Photo Mimmi (밈미) Knotting Class #2"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 21,
+      "title": "DJAWA Photo Mimmi (밈미) Cream Cow Milk +FULL",
+      "advertised_photos": 164,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": 164
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": 164
+        }
+      ],
+      "alternate_titles": [
+        "DJAWA Photo Mimmi (밈미) Cream Cow Milk +FULL"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 20,
+      "title": "DJAWA Photo Mimmi (밈미) Rudy 2 Codename Wolfgirl",
+      "advertised_photos": 201,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": 201
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": 201
+        }
+      ],
+      "alternate_titles": [
+        "DJAWA Photo Mimmi (밈미) Rudy 2 Codename Wolfgirl"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 19,
+      "title": "DJAWA Photo Mimmi (밈미) – Cream Cow Milk",
+      "advertised_photos": 106,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": 106
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": 106
+        }
+      ],
+      "alternate_titles": [
+        "DJAWA Photo Mimmi (밈미) – Cream Cow Milk"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 18,
+      "title": "DJAWA Photo Maruemon (마루에몽) Maid Mansion W²",
+      "advertised_photos": 122,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": 122
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": 122
+        }
+      ],
+      "alternate_titles": [
+        "DJAWA Photo Maruemon (마루에몽) Maid Mansion W²"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 17,
+      "title": "[DJAWA]Naughty Red Hiring Hood",
+      "advertised_photos": 125,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": 125
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": 125
+        }
+      ],
+      "alternate_titles": [
+        "[DJAWA]Naughty Red Hiring Hood"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 16,
+      "title": "[DJAWA]Christmas Special 2021",
+      "advertised_photos": 100,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": 100
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": 100
+        }
+      ],
+      "alternate_titles": [
+        "[DJAWA]Christmas Special 2021"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 15,
+      "title": "DJAWA Photo — Witch’s Witchcraft",
+      "advertised_photos": 151,
+      "sources": [
+        {
+          "site": "cosmiao",
+          "url": "https://www.cosmiao.info/mimmi/",
+          "claimed_count": 151
+        }
+      ],
+      "alternate_titles": [
+        "DJAWA Photo — Witch’s Witchcraft"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived",
+      "curated": true
+    },
+    {
+      "number": 14,
+      "title": "[DJAWA]The Pet Girl",
+      "advertised_photos": null,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": null
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": null
+        }
+      ],
+      "alternate_titles": [
+        "[DJAWA]The Pet Girl"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 13,
+      "title": "[DJAWA]Swimming Lessons #8",
+      "advertised_photos": null,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": null
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": null
+        }
+      ],
+      "alternate_titles": [
+        "[DJAWA]Swimming Lessons #8"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 12,
+      "title": "[DJAWA]St Esther",
+      "advertised_photos": null,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": null
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": null
+        }
+      ],
+      "alternate_titles": [
+        "[DJAWA]St Esther"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 11,
+      "title": "[DJAWA]Rudy – The Wolf of Midnight",
+      "advertised_photos": null,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": null
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": null
+        }
+      ],
+      "alternate_titles": [
+        "[DJAWA]Rudy – The Wolf of Midnight"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 10,
+      "title": "[DJAWA]Realise Loveliness",
+      "advertised_photos": null,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": null
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": null
+        }
+      ],
+      "alternate_titles": [
+        "[DJAWA]Realise Loveliness"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 9,
+      "title": "DJAWA Photo — Model Student",
+      "advertised_photos": 46,
+      "sources": [
+        {
+          "site": "cosmiao",
+          "url": "https://www.cosmiao.info/mimmi/",
+          "claimed_count": 46
+        }
+      ],
+      "alternate_titles": [
+        "DJAWA Photo — Model Student"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived",
+      "curated": true
+    },
+    {
+      "number": 8,
+      "title": "[DJAWA]Mochilero en Violeta",
+      "advertised_photos": null,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": null
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": null
+        }
+      ],
+      "alternate_titles": [
+        "[DJAWA]Mochilero en Violeta"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 7,
+      "title": "[DJAWA]March Hare",
+      "advertised_photos": null,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": null
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": null
+        }
+      ],
+      "alternate_titles": [
+        "[DJAWA]March Hare"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 6,
+      "title": "[DJAWA]Kitsune Miko (A ver)",
+      "advertised_photos": null,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": null
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": null
+        }
+      ],
+      "alternate_titles": [
+        "[DJAWA]Kitsune Miko (A ver)"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 5,
+      "title": "[DJAWA]Girls’ Frontline HK416",
+      "advertised_photos": null,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": null
+        },
+        {
+          "site": "cosmiao",
+          "url": "https://www.cosmiao.info/mimmi/",
+          "claimed_count": null
+        },
+        {
+          "site": "miaohuaying",
+          "url": "https://www.miaohuaying.com/mimmi/",
+          "claimed_count": null
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": null
+        },
+        {
+          "site": "miaojishe",
+          "url": "https://www.miaojishe.com/mimmi/",
+          "claimed_count": null
+        }
+      ],
+      "alternate_titles": [
+        "[DJAWA]Girls’ Frontline HK416",
+        "2"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 4,
+      "title": "DJAWA Photo — Cyberpunk Girl",
+      "advertised_photos": 41,
+      "sources": [
+        {
+          "site": "cosmiao",
+          "url": "https://www.cosmiao.info/mimmi/",
+          "claimed_count": 41
+        }
+      ],
+      "alternate_titles": [
+        "DJAWA Photo — Cyberpunk Girl"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived",
+      "curated": true
+    },
+    {
+      "number": 3,
+      "title": "[DJAWA]Azur Lane IJN Atago & Takao i",
+      "advertised_photos": 120,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": 120
+        },
+        {
+          "site": "cosmiao",
+          "url": "https://www.cosmiao.info/mimmi/",
+          "claimed_count": null
+        },
+        {
+          "site": "miaohuaying",
+          "url": "https://www.miaohuaying.com/mimmi/",
+          "claimed_count": null
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": 120
+        },
+        {
+          "site": "miaojishe",
+          "url": "https://www.miaojishe.com/mimmi/",
+          "claimed_count": null
+        }
+      ],
+      "alternate_titles": [
+        "[DJAWA]Azur Lane IJN Atago & Takao i",
+        "9"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 2,
+      "title": "[CREAMSODA]Belt choker",
+      "advertised_photos": null,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": null
+        },
+        {
+          "site": "cosmiao",
+          "url": "https://www.cosmiao.info/mimmi/",
+          "claimed_count": null
+        },
+        {
+          "site": "miaohuaying",
+          "url": "https://www.miaohuaying.com/mimmi/",
+          "claimed_count": null
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": null
+        },
+        {
+          "site": "miaojishe",
+          "url": "https://www.miaojishe.com/mimmi/",
+          "claimed_count": null
+        }
+      ],
+      "alternate_titles": [
+        "[CREAMSODA]Belt choker",
+        "9"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 1,
+      "title": "[ARTGRAVIA]VOL137",
+      "advertised_photos": null,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": null
+        },
+        {
+          "site": "cosmiao",
+          "url": "https://www.cosmiao.info/mimmi/",
+          "claimed_count": null
+        },
+        {
+          "site": "miaohuaying",
+          "url": "https://www.miaohuaying.com/mimmi/",
+          "claimed_count": null
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": null
+        },
+        {
+          "site": "miaojishe",
+          "url": "https://www.miaojishe.com/mimmi/",
+          "claimed_count": null
+        }
+      ],
+      "alternate_titles": [
+        "[ARTGRAVIA]VOL137",
+        "NO.052",
+        "NO.043）",
+        "至NO.049，共49套公开作品。编号整理已经更新到NO.049，初次查看建议从NO.042 Nicole (Zenless Zone Zero)或NO.006 Kitsune Miko开始，它们能较明显体现角色服装、造型变化和整体风格特点。"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    }
+  ]
+}

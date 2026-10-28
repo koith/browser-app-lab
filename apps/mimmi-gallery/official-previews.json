@@ -10,7 +10,7 @@
     "instagram": "mimmissu17"
   },
   "version": "v0.1.0-mimmi.2",
-  "generated_at": "2026-10-28T15:54:22.352246+00:00",
+  "generated_at": "2026-10-28T16:06:40.123673+00:00",
   "primary_source": "https://djawaphoto.com/portfolio-cat/mimmi/",
   "archive_pages": [
     {
@@ -763,19 +763,10 @@
           "sha256": "08955a91bd103104549b48636b6aefcf4b1321cb427bca5d5d4907a3b0e11c54",
           "hosting": "official_publisher",
           "saved_to_private_cloud": false
-        },
-        {
-          "url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_cv-683x1024.jpg",
-          "width": 683,
-          "height": 1024,
-          "bytes": 74340,
-          "sha256": "ca4c7b3ca762ac34ca971d2b41e92100b6b79c4e2f67eb0e4f87cb34c84f407b",
-          "hosting": "official_publisher",
-          "saved_to_private_cloud": false
         }
       ],
       "status": "official_samples_verified",
-      "sample_count_verified": 6,
+      "sample_count_verified": 5,
       "images": [],
       "collected_image_files": 0
     },
@@ -1035,19 +1026,10 @@
           "sha256": "6d65a3b39d3055aaa0967d00513ddc0a451f887b18356a99ff7607246f3cf8b1",
           "hosting": "official_publisher",
           "saved_to_private_cloud": false
-        },
-        {
-          "url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_cv-25-683x1024.jpg",
-          "width": 683,
-          "height": 1024,
-          "bytes": 88081,
-          "sha256": "73af135132d3843b3529b9745467e41051302fa5e46e98540564bcfbceb02b88",
-          "hosting": "official_publisher",
-          "saved_to_private_cloud": false
         }
       ],
       "status": "official_samples_verified",
-      "sample_count_verified": 6,
+      "sample_count_verified": 5,
       "images": [],
       "collected_image_files": 0
     },
@@ -1416,46 +1398,10 @@
           "sha256": "ecce384877097200d3b253f70d1d1261c30aed92541589781d52d68e59f40513",
           "hosting": "official_publisher",
           "saved_to_private_cloud": false
-        },
-        {
-          "url": "https://djawaphoto.com/wp-content/uploads/2023/06/sample_cv1-1-730x1024.jpg",
-          "width": 730,
-          "height": 1024,
-          "bytes": 71150,
-          "sha256": "975c3acf96ca315dd8b1f745b29e174d964f2398e52ef7d5262e8e7fc68b72ad",
-          "hosting": "official_publisher",
-          "saved_to_private_cloud": false
-        },
-        {
-          "url": "https://djawaphoto.com/wp-content/uploads/2023/06/sample_cv1-1-768x1077.jpg",
-          "width": 768,
-          "height": 1077,
-          "bytes": 76813,
-          "sha256": "5384bcc6afb578ef502e0a7fc8d588e0c4bad83f90af88420b475e134e037408",
-          "hosting": "official_publisher",
-          "saved_to_private_cloud": false
-        },
-        {
-          "url": "https://djawaphoto.com/wp-content/uploads/2023/06/sample_cv1-1-1095x1536.jpg",
-          "width": 1095,
-          "height": 1536,
-          "bytes": 130834,
-          "sha256": "20241a213a3f162fc6188fac728c39eb0960ab79328ca25230fef1fa23fa83f5",
-          "hosting": "official_publisher",
-          "saved_to_private_cloud": false
-        },
-        {
-          "url": "https://djawaphoto.com/wp-content/uploads/2023/06/sample_cv1-1-350x491.jpg",
-          "width": 350,
-          "height": 491,
-          "bytes": 22847,
-          "sha256": "003c9c72c8cbb78a67ed5c805d2177619d02865ec489c6d72266f3abaea5e5d9",
-          "hosting": "official_publisher",
-          "saved_to_private_cloud": false
         }
       ],
       "status": "official_samples_verified",
-      "sample_count_verified": 6,
+      "sample_count_verified": 2,
       "images": [],
       "collected_image_files": 0
     },
@@ -2210,7 +2156,7 @@
   ],
   "summary": {
     "official_works_discovered": 32,
-    "official_sample_urls_verified": 192,
+    "official_sample_urls_verified": 186,
     "individually_archived_photographs": 0,
     "official_pages_failed": 0
   },
