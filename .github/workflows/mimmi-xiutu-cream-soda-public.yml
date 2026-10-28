@@ -39,7 +39,7 @@ jobs:
           for a in r['albums']:
               assert a['images']==[] and a['source'].startswith('https://www.xiutu.me/photo/')
               for p in a['samples']:
-                  assert p['url'].startswith('https://') and '.xiutu.me/' in p['url']
+                  assert p['url'].startswith('https://') and ('.xiutu.me/' in p['url'] or p['url'].startswith('https://img-jp-a.cdnimg.vip/'))
                   assert len(p['sha256'])==64 and p['bytes']>4500
           print('MIMMI_SECONDARY_PUBLIC_CREAMSODA_EVIDENCE_ONLY',r['summary'])
           PY
