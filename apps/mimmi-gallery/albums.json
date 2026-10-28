@@ -91,8 +91,8 @@
       "title": "Christmas Special 2021 : Mimmi",
       "publisher": "DJAWA",
       "source": "https://djawaphoto.com/portfolio/christmas-special-2021-mimmi/",
-      "expected": null,
-      "photos": null,
+      "expected": 100,
+      "photos": 100,
       "ai_enhanced": false
     },
     {
@@ -138,6 +138,15 @@
       "source": "https://www.v2ph.com/album/an5o93ez.html?hl=ko",
       "expected": 164,
       "photos": 164,
+      "ai_enhanced": false
+    },
+    {
+      "id": "pixibb-auto-djawa-photo-mimmi-cyberpunk-girl-41-photos-cosplay",
+      "title": "Cyberpunk Girl",
+      "publisher": "독립 화보",
+      "source": "https://cosplay.pixibb.com/djawa-photo-mimmi-cyberpunk-girl-41-photos-cosplay/",
+      "expected": 41,
+      "photos": 41,
       "ai_enhanced": false
     },
     {
@@ -213,6 +222,15 @@
       "ai_enhanced": false
     },
     {
+      "id": "pixibb-auto-djawa-photo-mimmi-kitsune-miko-a-ver-65-photos-cosplay",
+      "title": "Kitsune Miko (A ver)",
+      "publisher": "독립 화보",
+      "source": "https://cosplay.pixibb.com/djawa-photo-mimmi-kitsune-miko-a-ver-65-photos-cosplay/",
+      "expected": 65,
+      "photos": 65,
+      "ai_enhanced": false
+    },
+    {
       "id": "djawa-le-malin-listless-lapin",
       "title": "Le Malin – Listless Lapin",
       "publisher": "DJAWA",
@@ -280,8 +298,8 @@
       "title": "Mimmi - Azur Lane IJN Atago & Takao",
       "publisher": "DJAWA",
       "source": "https://www.v2ph.com/album/a8n7me7a.html",
-      "expected": null,
-      "photos": null,
+      "expected": 61,
+      "photos": 61,
       "ai_enhanced": false
     },
     {
@@ -433,8 +451,8 @@
       "title": "Nikke : Alice",
       "publisher": "DJAWA",
       "source": "https://djawaphoto.com/portfolio/nikke-alice/",
-      "expected": null,
-      "photos": null,
+      "expected": 170,
+      "photos": 170,
       "ai_enhanced": false
     },
     {
@@ -496,8 +514,8 @@
       "title": "Rudy : The Wolf of Midnight",
       "publisher": "DJAWA",
       "source": "https://djawaphoto.com/portfolio/rudy-the-wolf-of-midnight/",
-      "expected": null,
-      "photos": null,
+      "expected": 228,
+      "photos": 228,
       "ai_enhanced": false
     },
     {
@@ -505,8 +523,8 @@
       "title": "Rudy² – Codename : Wolfgirl",
       "publisher": "DJAWA",
       "source": "https://djawaphoto.com/portfolio/rudy%c2%b2-codename-wolfgirl/",
-      "expected": null,
-      "photos": null,
+      "expected": 201,
+      "photos": 201,
       "ai_enhanced": false
     },
     {
@@ -537,6 +555,15 @@
       "ai_enhanced": false
     },
     {
+      "id": "pixibb-auto-djawa-photo-mimmi-witchs-witchcraft-151-photos-cosplay",
+      "title": "Witch's Witchcraft",
+      "publisher": "독립 화보",
+      "source": "https://cosplay.pixibb.com/djawa-photo-mimmi-witchs-witchcraft-151-photos-cosplay/",
+      "expected": 151,
+      "photos": 151,
+      "ai_enhanced": false
+    },
+    {
       "id": "v2ph-actor-z4ox65ea",
       "title": "x Innocent - Part 2Mimmi (미미) x Innocent - Part 2",
       "publisher": "DJAWA",
@@ -550,8 +577,8 @@
       "title": "Your Fishe (Gawr Gura)",
       "publisher": "DJAWA",
       "source": "https://djawaphoto.com/portfolio/your-fishe-gawr-gura/",
-      "expected": null,
-      "photos": null,
+      "expected": 123,
+      "photos": 123,
       "ai_enhanced": false
     },
     {
@@ -1100,7 +1127,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 15,
-      "previewAlbumId": null,
+      "previewAlbumId": "pixibb-auto-djawa-photo-mimmi-witchs-witchcraft-151-photos-cosplay",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -1226,7 +1253,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 6,
-      "previewAlbumId": null,
+      "previewAlbumId": "pixibb-auto-djawa-photo-mimmi-kitsune-miko-a-ver-65-photos-cosplay",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -1254,7 +1281,7 @@
       "catalogueOnly": true,
       "ai_enhanced": false,
       "research_number": 4,
-      "previewAlbumId": null,
+      "previewAlbumId": "pixibb-auto-djawa-photo-mimmi-cyberpunk-girl-41-photos-cosplay",
       "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
@@ -1302,12 +1329,12 @@
     }
   ],
   "summary": {
-    "displayed_albums": 63,
-    "verified_unique_source_images": 1462,
-    "input_source_image_occurrences": 1492,
+    "displayed_albums": 66,
+    "verified_unique_source_images": 1000,
+    "input_source_image_occurrences": 1030,
     "duplicate_hashes_skipped": 30,
     "actual_full_publisher_photobooks": 0,
-    "incomplete_known_count_albums": 21,
+    "incomplete_known_count_albums": 30,
     "curated_research_works": 52
   },
   "notes": "Individual accessible public samples are NOT complete commercial editions."
