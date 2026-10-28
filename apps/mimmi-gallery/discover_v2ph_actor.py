@@ -105,7 +105,7 @@ def run(max_pages=8,max_albums=70,max_samples=10):
     catalog,pages=scan_actor(max_pages,max_albums)
     known=set()
     try:
-        target=json.loads((ROOT/"albums.json").read_text())
+        target=json.loads((ROOT/"v2ph-targets.json").read_text())
         known={urlsplit(a["source"]).path for a in target["albums"] if safe_source(a["source"])}
     except Exception:pass
     new=[a for a in catalog if urlsplit(a["source"]).path not in known]
