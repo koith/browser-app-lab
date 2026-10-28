@@ -60,8 +60,9 @@ async def run(engine):
             await page.wait_for_function("document.querySelectorAll('#detailphotos .photo[data-image-state=failed]').length===2")
             assert await page.locator('#detail-media-status').inner_text() == '2장 연결 실패 · 사진을 누르면 출처 확인 가능'
             cards = page.locator('#detailphotos .photo')
-            first, second = await cards.nth(0).bounding_box(), await cards.nth(1).bounding_box()
-            assert abs(first['y']-second['y']) < 1 and abs(first['height']-second['height']) < 1
+            await cards.nth(0).locator('img').evaluate('im=>im.decode()')
+            first, second = await cards.evaluate_all('cards=>cards.slice(0,2).map(card=>{const r=card.getBoundingClientRect();return {y:r.y,height:r.height,width:r.width}})')
+            assert abs(first['y']-second['y']) < 1 and abs(first['height']-second['height']) < 1, (first, second)
             assert await cards.nth(1).locator('img').evaluate('im=>getComputedStyle(im).visibility') == 'hidden'
             assert await cards.nth(0).locator('img').evaluate('im=>im.naturalWidth') == 64
             before = {url:counts[url] for url in denied}
@@ -75,6 +76,7 @@ async def run(engine):
             assert before == {url:counts[url] for url in denied}, 'Viewer re-requested failed reported origin'
             await page.locator('#prev').click()
             await page.wait_for_function('document.querySelector("#full").naturalWidth===64')
+            await page.wait_for_function('document.querySelector("#media-status").textContent===""')
             assert await page.locator('.media-frame').get_attribute('data-image-state') is None
             assert await page.locator('#media-status').inner_text() == ''
             assert await page.locator('#original').get_attribute('href') == athletic['images'][0]['url']
