@@ -1,7 +1,7 @@
 {
   "version": "v0.1.0-mimmi.3",
   "model": "mimmi",
-  "generated_at": "2026-10-28T18:14:34.694333+00:00",
+  "generated_at": "2026-10-28T18:17:29.248245+00:00",
   "source": "https://www.v2ph.com/actor/Mimmi",
   "actor_pages": [
     {
@@ -800,8 +800,8 @@
         },
         {
           "url": "https://cdn.v2ph.com/photos/s3CHY3EHHqEyLw-d.jpg",
-          "bytes": 728226,
-          "sha256": "b70a1ff35b537da2a35b31f5076c742451878d87ff5dbaa63dc6ad78ee680b6a",
+          "bytes": 697810,
+          "sha256": "46e06b5b1c017d84e69205bde03e8f0591b7c64288d4722665f66515bdb624d4",
           "width": 1800,
           "height": 2700,
           "origin": "v2ph_public_page",
@@ -810,8 +810,8 @@
         },
         {
           "url": "https://cdn.v2ph.com/photos/s3CHY3EHHqEyLw-d.jpg",
-          "bytes": 697810,
-          "sha256": "46e06b5b1c017d84e69205bde03e8f0591b7c64288d4722665f66515bdb624d4",
+          "bytes": 728226,
+          "sha256": "b70a1ff35b537da2a35b31f5076c742451878d87ff5dbaa63dc6ad78ee680b6a",
           "width": 1800,
           "height": 2700,
           "origin": "v2ph_public_page",
