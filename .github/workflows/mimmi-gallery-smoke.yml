@@ -20,6 +20,10 @@ jobs:
           npm install --no-save playwright@1.58.2
           npx playwright install chromium
           npx playwright install --with-deps webkit
+      - name: Verify multi-source fallback, 130-photo pagination, and V2PH batch rotation
+        run: |
+          python -m pip install requests beautifulsoup4 Pillow
+          python apps/mimmi-gallery/test_multipage_cross_source.py
       - name: Exercise actual mobile album UX, cross-model new tab, and photo fallback
         run: |
           python -m http.server 8765 --directory apps >/tmp/mimmi-static.log 2>&1 &
