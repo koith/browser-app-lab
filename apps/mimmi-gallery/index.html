@@ -124,7 +124,7 @@ footer{padding:15px 0 25px;justify-content:flex-end}
  <div class="detail-heading"><button class="back" id="back" aria-label="화보 목록으로 돌아가기">‹</button><h2 class="detail-title" id="albumname"></h2><span class="counter" id="albumtotal"></span></div>
  <nav class="mainnav" aria-label="모델 전환"><a href="../yui-gallery/" target="_blank" rel="noopener noreferrer" title="심유이 갤러리를 새 탭에서 열기">심유이 ↗</a><a href="./" aria-current="page">밈미</a></nav>
  <button id="search-toggle" class="search-toggle" aria-label="화보 검색 열기" aria-haspopup="dialog" aria-controls="search-dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button>
- <small id="app-version" class="version-chip">v0.1.0-mimmi.4</small>
+ <small id="app-version" class="version-chip">v0.1.0-mimmi.5</small>
 </header>
 <div id="browse">
  <div class="browse-meta"><p class="inventory" id="inventory">화보를 불러오는 중</p><span class="counter" id="total"></span></div>
@@ -147,7 +147,7 @@ footer{padding:15px 0 25px;justify-content:flex-end}
  </form>
 </dialog>
 <div id="lightbox" role="dialog" aria-label="사진 보기" aria-modal="true">
- <div class="lighttop"><button class="lightbtn" id="close" aria-label="닫기">×</button><span id="position"></span><small class="version-chip">v0.1.0-mimmi.4</small></div>
+ <div class="lighttop"><button class="lightbtn" id="close" aria-label="닫기">×</button><span id="position"></span><small class="version-chip">v0.1.0-mimmi.5</small></div>
  <button class="lightbtn arrow prev" id="prev" aria-label="이전 사진">‹</button><div class="media-frame"><img id="full" alt="화보 사진"><a id="original" target="_blank" rel="noopener">사진 열기 ↗</a></div><button class="lightbtn arrow next" id="next" aria-label="다음 사진">›</button>
  <p id="media-status" role="status"></p>
 </div>
@@ -162,7 +162,7 @@ document.addEventListener('error',e=>{
  if(!(img instanceof HTMLImageElement)||!img.closest('.album,.photo'))return;
  img.hidden=true;img.closest('.album,.photo').classList.add('broken-source');
 },true);
-let catalog=[],stored=[],localStored=[],remoteStored=[],ownerStored=[],albumAliases={},albumCovers={},publisherRegistry={publishers:[]},publisherWorkReferences=[],activePublisher=null,mode='albums',activeAlbum=null,viewerList=[],viewerIndex=0,detailAlbum=null;
+let catalog=[],stored=[],localStored=[],remoteStored=[],ownerStored=[],albumAliases={},albumCovers={},publisherRegistry={publishers:[]},publisherWorkReferences=[],activePublisher=null,mode='all',activeAlbum=null,viewerList=[],viewerIndex=0,detailAlbum=null;
 function canonicalId(id){const seen=new Set();while(albumAliases[id]&&!seen.has(id)){seen.add(id);id=albumAliases[id]}return id}
 const titleMap={};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -186,7 +186,7 @@ function card(a,hasImages){
  const style='object-position:'+position[0]+'% '+position[1]+'%;object-fit:cover';
  const n=count?(expected!=null&&expected!==count?count+' / '+expected+'장':(owned.completeness==='partial_public_previews'?count+'장 · 공개분':count+'장')):(expected!=null?'0 / '+expected+'장 · 미확보':'미확보 · 장수 미확인');
  const cloudCover=owned.ownerHosted?selected:null;
- const img=cloudCover?'<img data-owner="'+esc(cloudCover.url)+'" style="'+style+'" alt="'+esc(label)+' 표지">':cover?'<img loading="lazy" referrerpolicy="no-referrer" src="'+esc(cover)+'" style="'+style+'" alt="'+esc(label)+' 표지">':'<div class="placeholder">Y</div>';
+ const img=cloudCover?'<img data-owner="'+esc(cloudCover.url)+'" style="'+style+'" alt="'+esc(label)+' 표지">':cover?'<img loading="lazy" referrerpolicy="no-referrer" src="'+esc(cover)+'" style="'+style+'" alt="'+esc(label)+' 표지">':'<div class="placeholder">M</div>';
  return '<button class="album"'+rotationAttributes(selected)+' data-id="'+esc(a.id)+'" data-available="'+(hasImages?'1':'0')+'" aria-label="'+esc(label+' · '+labels.publisher+' · '+n+' · '+labels.edition)+'">'+img+'<div class="gradient"></div><span class="cover-labels"><span class="publisher-sticker" title="발행사: '+esc(labels.publisher)+'">'+esc(labels.publisher)+'</span><span class="album-count">'+esc(n)+'</span></span><span class="edition-sticker" data-kind="'+esc(labels.kind)+'" title="'+esc(labels.detail)+'">'+esc(labels.edition)+'</span><strong class="name" title="'+esc(label)+'">'+esc(shortTitle)+'</strong></button>';
 }
 function photoHTML(p,i){return '<button class="photo"'+rotationAttributes(p)+' data-i="'+i+'" aria-label="'+esc(p.name)+' 사진 '+p.number+'"><img loading="lazy" referrerpolicy="no-referrer" '+(p.ownerAlbum?'data-owner="'+esc(p.url):'src="'+esc(p.url))+'" alt="'+esc(p.name)+' 사진 '+p.number+'"><span>'+esc(p.name)+' · '+p.number+'</span></button>'}
@@ -207,9 +207,9 @@ function render(){
   const group=activePublisher?publisherGroups().find(g=>g.id===activePublisher):null;
   const src=group?group.albums:mode==='all'?catalog:items;
   if(group){$('albumname').textContent=group.name;$('albumtotal').textContent=group.albums.length+'개 · 열람 '+group.viewable}
-  const matched=src.filter(a=>match(getName(a))).sort((a,b)=>MimmiPublishers.compareNames(MimmiLabels.coverTitle(a),MimmiLabels.coverTitle(b))||MimmiPublishers.compareNames(a.id,b.id));
+  const matched=src.filter(a=>match(getName(a))).sort((a,b)=>{const ac=validImages(stored.find(x=>x.id===a.id)||a).length,bc=validImages(stored.find(x=>x.id===b.id)||b).length;return (bc>0)-(ac>0)||MimmiPublishers.compareNames(MimmiLabels.coverTitle(a),MimmiLabels.coverTitle(b))||MimmiPublishers.compareNames(a.id,b.id)});
   $('albumgrid').innerHTML=matched.map(a=>card(a,validImages(stored.find(x=>x.id===a.id)||a).length>0)).join('');
-  $('albumgrid').querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>{const a=stored.find(a=>a.id===b.dataset.id);if(a&&validImages(a).length)openAlbum(b.dataset.id);else if(group){const source=src.find(a=>a.id===b.dataset.id)?.source;try{const u=new URL(source);if(u.protocol==='https:'&&!u.username&&!u.password)window.open(u.href,'_blank','noopener,noreferrer')}catch{}}});
+  $('albumgrid').querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>{const a=stored.find(a=>a.id===b.dataset.id);if(a&&validImages(a).length)openAlbum(b.dataset.id);else{const source=src.find(a=>a.id===b.dataset.id)?.source;try{const u=new URL(source);if(u.protocol==='https:'&&!u.username&&!u.password)window.open(u.href,'_blank','noopener,noreferrer')}catch{}}});
   $('total').textContent=matched.length+' albums';
   $('nothing').hidden=matched.length>0;
  }
@@ -261,7 +261,13 @@ function routeURL(s){const q=new URLSearchParams();if(s.album)q.set('album',s.al
 function remember(s){history.replaceState({...history.state,scroll:window.scrollY},'');const state={mimmi:true,key:Date.now().toString(36)+'-'+(++historyEntry),depth:(history.state?.depth||0)+1,scroll:0,...s};history.pushState(state,'',routeURL(state))}
 function goBack(){if(history.state?.mimmi&&history.state.depth>0)history.back();else{const state={mimmi:true,depth:0,mode:activePublisher?'publishers':'albums',publisher:history.state?.album?activePublisher:null,scroll:0};history.replaceState(state,'',routeURL(state));applyRoute(state)}}
 function applyRoute(s){$('search-dialog').close();s=viewerRoutes.get(s.key)||s;s={...s,album:canonicalId(s.album)};hideViewer();setMode(s.mode||'albums',s.publisher);if(s.album&&!s.fromPhotos)openAlbum(s.album,false);if(s.photo){const a=stored.find(a=>a.id===s.album);const list=s.fromPhotos?available().flatMap(photosFor).filter(p=>p.name.toLocaleLowerCase().includes($('search').value.toLocaleLowerCase().trim())):a?photosFor(a):[];const i=list.findIndex(p=>p.albumId===s.album&&p.number===Number(s.photo));if(i>=0)openViewer(list,i,false)}if(s.searchOpen)showSearch();requestAnimationFrame(()=>window.scrollTo(0,s.scroll||0))}
-window.addEventListener('popstate',()=>{const s=history.state;if(s?.mimmi)applyRoute(s)});
+function routeFromLocation(){
+ const q=new URLSearchParams(location.hash.replace(/^#/,''));
+ return {mimmi:true,depth:0,mode:q.get('view')||'all',publisher:q.get('publisher'),
+         album:q.get('album'),photo:q.get('photo'),fromPhotos:q.get('from')==='photos',scroll:0};
+}
+window.addEventListener('popstate',()=>{applyRoute(history.state?.mimmi?history.state:routeFromLocation())});
+window.addEventListener('pageshow',event=>{if(event.persisted&&catalog.length)applyRoute(history.state?.mimmi?history.state:routeFromLocation())});
 $('prev').onclick=()=>step(-1);$('next').onclick=()=>step(1);$('close').onclick=closeViewer;
 $('back').onclick=goBack;
 function showSearch(){if(!$('search-dialog').open)$('search-dialog').showModal();$('search').focus()}
@@ -316,7 +322,7 @@ Promise.all([
  const remoteCount=remoteStored.reduce((n,a)=>n+validImages(a).length,0);
  $('inventory').textContent=remoteCount+'장 공개 URL 확인 · 전체 화보는 부분 수집'+(ownerStored.length?' · 개인 보관본 '+ownerStored.reduce((n,a)=>n+a.images.length,0)+'장':'');
  render();
- const raw=location.hash.slice(1),q=new URLSearchParams(raw);const id=canonicalId(raw&&!raw.includes('=')?decodeURIComponent(raw):q.get('album'));const state={mimmi:true,depth:0,mode:q.get('view')||'albums',publisher:q.get('publisher'),album:id,fromPhotos:q.get('from')==='photos',scroll:0};history.replaceState(state,'',routeURL(state));applyRoute(state);if(q.get('photo')){const a=stored.find(a=>a.id===id);if(a){const list=photosFor(a),i=list.findIndex(p=>p.number===Number(q.get('photo')));if(i>=0)openViewer(list,i)}}
+ const raw=location.hash.slice(1),q=new URLSearchParams(raw);const id=canonicalId(raw&&!raw.includes('=')?decodeURIComponent(raw):q.get('album'));const state={mimmi:true,depth:0,mode:q.get('view')||'all',publisher:q.get('publisher'),album:id,fromPhotos:q.get('from')==='photos',scroll:0};history.replaceState(state,'',routeURL(state));applyRoute(state);if(q.get('photo')){const a=stored.find(a=>a.id===id);if(a){const list=photosFor(a),i=list.findIndex(p=>p.number===Number(q.get('photo')));if(i>=0)openViewer(list,i)}}
 }).catch(()=>{$('total').textContent='—';$('nothing').textContent='이미지를 불러올 수 없습니다.';$('nothing').hidden=false});
 </script>
 </body></html>
