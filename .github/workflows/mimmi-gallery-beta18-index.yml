@@ -50,7 +50,7 @@ jobs:
               seen.add(p["sha256"])
               parsed=urlsplit(p["url"])
               h=parsed.hostname or ""
-              safe=(h=="cdn.v2ph.com" and parsed.path.startswith("/photos/")) or (h in ("djawaphoto.com","www.djawaphoto.com") and parsed.path.startswith("/wp-content/uploads/")) or (h in ("public-files.gumroad.com","assets.gumroad.com","static-2.gumroad.com") and parsed.path.startswith("/")) or (h=="pbs.twimg.com" and parsed.path.startswith("/media/")) or (h=="cosplay.pixibb.com" and parsed.path.startswith("/wp-content/uploads/")) or bool(re.fullmatch(r"(?:imgx[0-9]{2,4}|images[0-9]{1,4}|cdn|img|files)\\.pixibb\\.com",h))
+              safe=(h=="cdn.v2ph.com" and parsed.path.startswith("/photos/")) or (h in ("djawaphoto.com","www.djawaphoto.com") and parsed.path.startswith("/wp-content/uploads/")) or (h in ("public-files.gumroad.com","assets.gumroad.com","static-2.gumroad.com") and parsed.path.startswith("/")) or (h=="pbs.twimg.com" and parsed.path.startswith("/media/")) or (h=="cosplay.pixibb.com" and parsed.path.startswith("/wp-content/uploads/")) or (h.endswith(".pixibb.com") and h.split(".")[0] in ("img","cdn","files") or h.endswith(".pixibb.com") and (h.split(".")[0].startswith("imgx") or h.split(".")[0].startswith("images")) and h.split(".")[0][5:].isdigit())
               assert parsed.scheme=="https" and safe and not parsed.username and not parsed.password,p["url"]
           print("MIMMI_BETA18_DEDUP_SOURCE_IMAGES_PASS",len(d["albums"]),len(seen))
           PY
