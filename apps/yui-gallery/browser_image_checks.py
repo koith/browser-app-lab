@@ -5,6 +5,7 @@ Persistent failures still fail verification after two attempts.
 """
 import asyncio
 from playwright.async_api import Error
+from urllib.parse import urlsplit
 
 
 async def decode_image(image, timeout_ms=25000):
@@ -26,3 +27,24 @@ async def decode_image(image, timeout_ms=25000):
               const src=im.getAttribute('src');if(!src)throw Error('Missing image src');
               im.removeAttribute('src');im.setAttribute('src',src)
             }''')
+
+
+class SourceViewPacer:
+    """Space viewer actions for a rate-sensitive public CDN; keep direct requests."""
+    def __init__(self, interval=1.0, hosts=('cdn.imgcup.com',)):
+        self.interval = interval
+        self.hosts = set(hosts)
+        self.lock = asyncio.Lock()
+        self.next_view = 0.0
+        self.views = 0
+
+    async def wait(self, url):
+        if urlsplit(url).hostname not in self.hosts:
+            return
+        async with self.lock:
+            loop = asyncio.get_running_loop()
+            delay = self.next_view - loop.time()
+            if delay > 0:
+                await asyncio.sleep(delay)
+            self.next_view = loop.time() + self.interval
+            self.views += 1

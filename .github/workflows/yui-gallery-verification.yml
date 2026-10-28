@@ -11,7 +11,7 @@ on:
       - .github/workflows/yui-gallery-verification.yml
   workflow_dispatch:
 concurrency:
-  group: yui-full-gallery-external-images
+  group: yui-full-gallery-external-images-paced
   cancel-in-progress: false
 permissions:
   contents: read
