@@ -1,4 +1,6 @@
 # Simple workflow for deploying static content to GitHub Pages
+# Ensure the current SHA-verified Mimmi stored-albums photos are actually served
+# by GitHub Pages; actions-bot image commits alone do not trigger this workflow.
 name: Deploy static content to Pages
 
 on:
