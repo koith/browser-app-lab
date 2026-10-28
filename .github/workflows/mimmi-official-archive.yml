@@ -1,0 +1,64 @@
+name: Mimmi Free Official Portfolio Discovery
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '25 3 * * 2,5'
+  push:
+    paths:
+      - 'apps/mimmi-gallery/collect_official_previews.py'
+      - 'apps/mimmi-gallery/test_official_collector.py'
+      - '.github/workflows/mimmi-official-archive.yml'
+permissions:
+  contents: write
+concurrency:
+  group: mimmi-official-${{ github.ref_name }}
+  cancel-in-progress: false
+jobs:
+  crawl:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install free local crawler dependencies
+        run: python -m pip install requests beautifulsoup4 Pillow
+      - name: Compile and test parser without external services
+        run: |
+          python -m py_compile apps/mimmi-gallery/collect_official_previews.py
+          python apps/mimmi-gallery/test_official_collector.py
+      - name: Crawl official Mimmi photo books and inspect individual public sample bytes
+        run: |
+          python apps/mimmi-gallery/collect_official_previews.py --pages 5 --books 55 --samples 6
+      - name: Verify catalogue statistics and source-only hosting safety
+        run: |
+          python - <<'PY'
+          import json
+          from urllib.parse import urlsplit
+          from pathlib import Path
+          p=Path('apps/mimmi-gallery/official-previews.json')
+          a=json.loads(p.read_text())
+          assert a['summary']['official_works_discovered']>=20,a['summary']
+          assert a['summary']['official_sample_urls_verified']>=8,a['summary']
+          assert a['summary']['individually_archived_photographs']==0
+          for book in a['albums']:
+            assert book['images']==[]
+            assert book['source'].startswith('https://djawaphoto.com/portfolio/')
+            for sample in book['samples']:
+              assert urlsplit(sample['url']).hostname in ('djawaphoto.com','www.djawaphoto.com')
+              assert sample['bytes']>4500 and sample['width']>=250 and sample['height']>=250
+              assert sample['saved_to_private_cloud'] is False
+          print('MIMMI_OFFICIAL_PREVIEWS_VERIFIED',a['summary'])
+          PY
+      - name: Publish verified official source indexes, no photograph bytes
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add apps/mimmi-gallery/official-previews.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Archive Mimmi official photobook catalogue and verified sample URLs"
+            git fetch origin "$GITHUB_REF_NAME"
+            git rebase "origin/$GITHUB_REF_NAME"
+            git push origin "HEAD:$GITHUB_REF_NAME"
+          fi

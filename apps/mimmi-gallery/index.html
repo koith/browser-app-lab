@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#111216"><title>MIMMI GALLERY · 밈미</title>
+<style>
+:root{color-scheme:dark;--bg:#101114;--panel:#1c1e23;--line:#34363d;--muted:#aaaeb8;--accent:#f0c2cf}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:#f7f7f8;font:15px/1.5 -apple-system,BlinkMacSystemFont,"Noto Sans KR",sans-serif}header{position:sticky;top:0;z-index:2;background:#111216ee;backdrop-filter:blur(18px);border-bottom:1px solid var(--line);padding:12px max(18px,env(safe-area-inset-right));display:flex;gap:18px;align-items:center;flex-wrap:wrap}header strong{font-size:19px;letter-spacing:1.4px}nav{display:flex;gap:8px}nav a{color:var(--muted);padding:7px 12px;border-radius:18px;text-decoration:none;border:1px solid var(--line)}nav a[aria-current]{background:#e8b4c4;color:#161217;border-color:#e8b4c4}header small.version{position:absolute;top:6px;right:12px;font-size:10px;color:var(--muted)}main{max-width:1200px;margin:auto;padding:28px 18px 80px}h1{font-size:30px;margin:0}p{color:var(--muted)}.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:22px 0}input{background:var(--panel);color:white;border:1px solid var(--line);border-radius:10px;padding:12px;min-width:220px;flex:1}#count{font-size:12px;color:var(--muted)}.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}.album{border:1px solid var(--line);background:var(--panel);border-radius:12px;overflow:hidden}.cover{height:180px;background:linear-gradient(145deg,#29232b,#131419);display:grid;place-items:center;color:#bd99a7;letter-spacing:2px}.cover img{width:100%;height:100%;object-fit:cover}.info{padding:14px}.info h2{font-size:16px;margin:0 0 8px}.meta{font-size:12px;color:var(--muted)}.album a{display:inline-block;margin-top:12px;color:var(--accent);text-decoration:none}.status{font-size:12px;color:#e8c5a6}.photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px;margin-top:20px}.photos img{width:100%;aspect-ratio:2/3;object-fit:cover;cursor:pointer}.photos button{padding:0;border:0;background:transparent}dialog{border:0;background:#09090b;color:white;max-width:100vw;max-height:100dvh;width:100vw;height:100dvh;margin:0;padding:14px}dialog::backdrop{background:#000}dialog img{display:block;margin:auto;max-width:100%;max-height:85dvh;object-fit:contain}dialog button{background:#24252b;border:1px solid #666;color:white;border-radius:8px;padding:9px 14px}#empty{margin:50px 0;color:var(--muted)}@media(max-width:500px){header{gap:8px;padding:10px}header strong{font-size:15px}header small{font-size:9px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.cover{height:130px}.info{padding:10px}.info h2{font-size:13px}main{padding:20px 12px}nav a{padding:5px 9px}}
+</style></head><body>
+<header><strong>PHOTO GALLERY</strong><nav aria-label="모델 선택"><a href="../yui-gallery/">심유이</a><a href="./" aria-current="page">밈미</a></nav><small class="version" id="app-version">v0.1.0-mimmi.2</small></header>
+<main><h1>밈미 <span style="font-size:16px;color:#aaa">Mimmi</span></h1><p>사진을 누르면 크게 볼 수 있습니다. 작품마다 공식 공개 샘플·개인 보관본을 구분합니다.</p><div class="toolbar"><input id="search" type="search" placeholder="화보명 검색" aria-label="화보 검색"><span id="count">불러오는 중</span></div><section id="grid" class="grid" aria-label="화보 목록"></section><p id="empty" hidden>검색 결과가 없습니다.</p></main>
+<dialog id="viewer"><button id="close" aria-label="사진 닫기">닫기 ×</button><img id="full" alt="선택한 화보 사진"></dialog>
+<script>
+"use strict";
+const $=id=>document.getElementById(id);let albums=[];const grid=$('grid');
+function safeURL(url){try{const u=new URL(url,location.href);return u.protocol==='https:'?u.href:null}catch{return null}}
+function render(){
+ const q=$('search').value.trim().toLocaleLowerCase();
+ grid.replaceChildren();let displayed=0;
+ for(const a of albums){
+  if(![a.title,a.publisher,a.id,a.source].join(' ').toLocaleLowerCase().includes(q))continue;
+  displayed++;
+  const card=document.createElement('article');card.className='album';
+  const cover=document.createElement('div');cover.className='cover';
+  const previews=[...(a.images||[]),...(a.samples||[])].filter(p=>safeURL(p.url));
+  const coverURL=safeURL(previews[0]?.url || a.cover);
+  if(coverURL){
+   const img=new Image();img.loading='lazy';img.referrerPolicy='no-referrer';img.src=coverURL;img.alt=a.title;cover.replaceChildren(img);
+  }else cover.textContent='MIMMI';
+  const info=document.createElement('div');info.className='info';
+  const h=document.createElement('h3');h.style.fontSize='15px';h.style.margin='12px 0 7px';h.textContent=a.title;
+  const meta=document.createElement('div');meta.className='meta';
+  meta.textContent=(a.publisher||'DJAWA')+' · 작품 표기 '+(a.advertised_photos??'?')+'장';
+  const status=document.createElement('div');status.className='status';
+  status.textContent=(a.images?.length||0)+'장 개인 저장 · '+(a.samples?.length||0)+'장 공식 공개 샘플';
+  info.append(h,meta,status);
+  if(previews.length){
+   const photos=document.createElement('div');photos.className='photos';photos.style.marginTop='12px';
+   for(let i=0;i<previews.length;i++){
+    const p=previews[i],url=safeURL(p.url);
+    const btn=document.createElement('button');btn.type='button';btn.setAttribute('aria-label',a.title+' 사진 '+(i+1));
+    const img=new Image();img.loading='lazy';img.referrerPolicy='no-referrer';img.src=url;img.alt=a.title+' '+(i+1);
+    img.onerror=()=>{img.style.opacity='.25';img.title='외부 호스트 이미지 연결 실패'};
+    btn.append(img);btn.onclick=()=>{const v=$('viewer');$('full').src=url;$('full').referrerPolicy='no-referrer';v.showModal()};
+    photos.append(btn);
+   }
+   info.append(photos);
+  }
+  if(safeURL(a.source)){
+   const link=document.createElement('a');link.href=safeURL(a.source);link.target='_blank';link.rel='noopener noreferrer';link.textContent='출처 작품 페이지';info.append(link);
+  }
+  card.append(cover,info);grid.append(card);
+ }
+ $('empty').hidden=displayed>0;
+ const own=albums.reduce((n,a)=>n+(a.images?.length||0),0);
+ const publicSamples=albums.reduce((n,a)=>n+(a.samples?.length||0),0);
+ $('count').textContent=displayed+'개 화보 · '+publicSamples+'장 공개 샘플 · '+own+'장 개인 저장';
+}
+$('search').oninput=render;$('close').onclick=()=>$('viewer').close();$('viewer').onclick=e=>{if(e.target===$('viewer'))$('viewer').close()};
+Promise.all([
+ fetch('./albums.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('base metadata '+r.status);return r.json()}),
+ fetch('./official-previews.json',{cache:'no-store'}).then(r=>r.ok?r.json():{albums:[]}).catch(()=>({albums:[]})),
+ fetch('./v2ph-public-previews.json',{cache:'no-store'}).then(r=>r.ok?r.json():{albums:[]}).catch(()=>({albums:[]}))
+]).then(([base,official,v2ph])=>{
+ const sourceAlbums=(official.albums||[]).filter(a=>a.id&&a.source);
+ const legacy=(base.albums||[]).filter(a=>!sourceAlbums.some(x=>x.title.toLocaleLowerCase()===a.title.toLocaleLowerCase()));
+ const other=(v2ph.albums||[]).filter(a=>a.id&&a.source&&(a.samples||[]).length);
+ albums=[...sourceAlbums,...other,...legacy];
+ albums.sort((a,b)=>(b.samples?.length||0)-(a.samples?.length||0)||a.title.localeCompare(b.title));
+ render();
+}).catch(e=>{$('count').textContent='목록 로딩 실패';$('empty').textContent=e.message;$('empty').hidden=false});
+</script></body></html>
