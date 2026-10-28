@@ -22,9 +22,10 @@ FILES=[
   ("v2ph_seed","v2ph-public-previews.json"),
   ("v2ph_actor","v2ph-actor-previews.json"),
   ("gumroad_promo","gumroad-public-previews.json"),
+  ("pixibb_public","pixibb-public-previews.json"),
 ]
-ALLOWED={"djawaphoto.com","www.djawaphoto.com","cdn.v2ph.com","public-files.gumroad.com","assets.gumroad.com","static-2.gumroad.com"}
-MODEL_VERSION="v0.1.0-mimmi.7"
+ALLOWED={"djawaphoto.com","www.djawaphoto.com","cdn.v2ph.com","public-files.gumroad.com","assets.gumroad.com","static-2.gumroad.com","cosplay.pixibb.com"}
+MODEL_VERSION="v0.1.0-mimmi.8"
 
 def canonical_title(title):
     s=unicodedata.normalize("NFKC",str(title)).casefold()
@@ -54,7 +55,8 @@ def publisher(album,kind):
 def url_allowed(url):
     try:
         p=urlsplit(url)
-        return p.scheme=="https" and p.hostname in ALLOWED and not p.username and not p.password
+        host=p.hostname or ""
+        return p.scheme=="https" and not p.username and not p.password and (host in ALLOWED or bool(re.fullmatch(r"imgx\d{2,4}\.pixibb\.com|images\d{1,4}\.pixibb\.com|(?:cdn|img|files)\.pixibb\.com",host)))
     except (ValueError,TypeError):return False
 
 def build(root=ROOT):
@@ -64,7 +66,7 @@ def build(root=ROOT):
     input_count=0
     for kind,filename in FILES:
         source_file=root/filename
-        if not source_file.exists() and kind=="gumroad_promo":
+        if not source_file.exists() and kind in ("gumroad_promo","pixibb_public"):
             continue
         source=json.loads(source_file.read_text(encoding="utf-8"))
         for record in source["albums"]:
@@ -106,7 +108,7 @@ def build(root=ROOT):
                 g["images"].append({
                     "number":len(g["images"])+1,"url":p["url"],"source_url":p["url"],
                     "sha256":digest,"width":p["width"],"height":p["height"],
-                    "bytes":p["bytes"],"quality":"official_public_sample" if kind in ("official","gumroad_promo") else "third_party_public_web",
+                    "bytes":p["bytes"],"quality":"official_public_sample" if kind in ("official","gumroad_promo") else "third_party_public_watermarked_web" if kind=="pixibb_public" else "third_party_public_web",
                     "publisher_original_verified":False,
                 })
     albums=[]
@@ -146,6 +148,12 @@ def save(root=ROOT):
     # Keep them in the regular 'All albums' tab as honest uncollected cards.
     research_file=root/"research-curated.json"
     work_leads=[]
+    preview_links={}
+    link_file=root/"research-preview-links.json"
+    if link_file.is_file():
+        links=json.loads(link_file.read_text(encoding="utf-8"))
+        if links.get("model")!="mimmi":raise ValueError("Wrong-model preview mapping")
+        preview_links={x["number"]:x["album_id"] for x in links.get("matches",[]) if type(x.get("number")) is int}
     if research_file.is_file():
         curated=json.loads(research_file.read_text(encoding="utf-8"))
         for w in curated.get("works",[]):
@@ -161,7 +169,9 @@ def save(root=ROOT):
                                "expected":w.get("advertised_photos"),
                                "photos":w.get("advertised_photos"),
                                "catalogueOnly":True,"ai_enhanced":False,
-                               "research_number":number,"images":[],
+                               "research_number":number,
+                               "previewAlbumId":preview_links.get(number) if preview_links.get(number) in {a["id"] for a in data["albums"]} else None,
+                               "images":[],
                                "completeness":"source_catalogue_only_not_downloaded"})
         if len({w["research_number"] for w in work_leads})!=52:
             raise ValueError("Expected 52 distinct curated Mimmi works")
