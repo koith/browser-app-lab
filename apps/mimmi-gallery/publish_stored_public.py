@@ -72,7 +72,7 @@ def publish(limit=250, budget_mb=90, allow_rehost=False):
             if not f.is_file() or f.stat().st_size!=p["bytes"] or hashlib.sha256(f.read_bytes()).hexdigest()!=p["sha256"]:
                 raise ValueError("Missing/corrupt physically archived file: "+str(f))
             physical+=1
-    INDEX.write_text(json.dumps({"updated":time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime()),
+    INDEX.write_text(json.dumps({"schema_version":1,"model":"mimmi","updated":time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime()),
         "storage":"physically committed public previews under GitHub Pages; not licensed publisher masters",
         "albums":list(byid.values()),"physical_verified_image_count":physical},ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     print("MIMMI_PHYSICAL_FILES",physical,"NEW",new,"FAILED",failed,"BYTES",bytes_new,flush=True)
