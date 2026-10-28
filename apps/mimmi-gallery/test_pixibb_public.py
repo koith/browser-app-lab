@@ -26,6 +26,13 @@ def main():
         "url":"https://imgx001.pixibb.com/photos/a.jpg"}
     assert len(verified_history([sample,sample],200))==1
     assert verified_history([{**sample,"sha256":"INVALID"}],200)==[]
+    from collect_pixibb_public import all_sources
+    works=all_sources()
+    assert len(works)>=10,len(works)
+    assert len({w["source"].rstrip("/") for w in works})==len(works)
+    assert any("witchs-witchcraft" in w["source"] for w in works)
+    assert any("cyberpunk-girl" in w["source"] for w in works)
+    assert any("kitsune-miko-a-ver" in w["source"] for w in works)
     print("MIMMI_PIXIBB_PAGINATION_LAZY_SRC_AND_SHA_TEST_PASS")
 
 if __name__=="__main__":main()

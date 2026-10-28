@@ -35,6 +35,42 @@ SOURCE = [
      "source":"https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-codename-wolfgirl-201-photos-cosplay/","advertised_photos":201,
      "pages":21},
 ]
+DISCOVERED_TITLES={
+    "nikke-elegg":"Nikke : Elegg",
+    "christmas-special-2021":"Christmas Special 2021 : Mimmi",
+    "girls-frontline-hk416":"Girls' Frontline HK416",
+    "azur-lane-ijn-atago":"Mimmi - Azur Lane IJN Atago & Takao",
+    "witchs-witchcraft":"Witch's Witchcraft",
+    "cyberpunk-girl":"Cyberpunk Girl",
+    "kitsune-miko-a-ver":"Kitsune Miko (A ver)",
+}
+
+def all_sources():
+    """Combine trusted seeded albums and identity-checked public search findings."""
+    rows=list(SOURCE);have={x["source"].rstrip("/") for x in rows}
+    path=ROOT/"pixibb-discovered-seeds.json"
+    if not path.is_file():return rows
+    data=json.loads(path.read_text(encoding="utf-8"))
+    if data.get("model")!="mimmi":raise ValueError("Wrong-model source index")
+    from discover_pixibb_search import allowed_article
+    for item in data.get("albums",[])[:100]:
+        url=item.get("source","")
+        if not allowed_article(url) or url.rstrip("/") in have:continue
+        name=item.get("title","")
+        if not re.search(r"Mimmi|밈미|밈미",name,re.I):continue
+        slug=urlsplit(url).path.strip("/")
+        if not re.fullmatch(r"[a-z0-9-]{8,200}",slug):continue
+        subject=next((t for k,t in DISCOVERED_TITLES.items() if k in slug),name)
+        claimed=item.get("advertised_photos")
+        if type(claimed) is not int or claimed<1:
+            m=re.search(r"(\d{2,4})[ -]photos?",name+" "+slug,re.I)
+            claimed=int(m.group(1)) if m else None
+        pages=min(35,max(item.get("pages",12),(claimed+9)//10+2 if claimed else 12))
+        rows.append({"id":"pixibb-auto-"+slug[:80],"title":subject,
+                     "source":url,"pages":pages,"advertised_photos":claimed})
+        have.add(url.rstrip("/"))
+    return rows
+
 T=(9,28)
 SESSION=requests.Session()
 SESSION.headers.update({"User-Agent":"Mozilla/5.0 (compatible; PersonalMimmiPublicAlbumPreview/1.0)",
@@ -140,7 +176,7 @@ def collect(max_pages=25,max_photos=250,delay=.25,browser_scroll=False):
             previous={a["id"]:a.get("samples",[]) for a in old.get("albums",[])}
         except (ValueError,KeyError,TypeError):pass
     results=[]
-    for album in SOURCE:
+    for album in all_sources():
         seen_urls=set();sha=set();photos=[];pages=[];browser_attempts=0
         limit=min(max_pages,album["pages"])
         for n in range(1,limit+1):
@@ -206,5 +242,5 @@ if __name__=="__main__":
     p.add_argument("--images",type=int,default=250)
     p.add_argument("--scroll",action="store_true",help="Scroll normal public album HTML")
     args=p.parse_args()
-    if not 1<=args.pages<=30 or not 1<=args.images<=350:p.error("bounded public preview collection")
+    if not 1<=args.pages<=35 or not 1<=args.images<=400:p.error("bounded public preview collection")
     collect(args.pages,args.images,browser_scroll=args.scroll)
