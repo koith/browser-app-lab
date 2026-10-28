@@ -28,7 +28,7 @@ jobs:
           python -m py_compile apps/mimmi-gallery/discover_pixibb_search.py
           python apps/mimmi-gallery/test_pixibb_search.py
       - name: Search multiple public variants, verify Mimmi-specific album headings
-        run: python apps/mimmi-gallery/discover_pixibb_search.py --pages 2 --limit 80
+        run: python apps/mimmi-gallery/discover_pixibb_search.py --pages 5 --limit 130
       - name: Verify only real public album URLs and safe UTF-8 work metadata
         run: |
           python - <<'PY'
