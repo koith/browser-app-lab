@@ -7,12 +7,12 @@
   "fully_acquired_paid_photobooks": 0,
   "disclaimer": "Every image is verified public source evidence, not a purchased full photobook. Public sites may block remote image hotlinks.",
   "summary": {
-    "displayed_albums": 63,
-    "verified_unique_source_images": 820,
-    "input_source_image_occurrences": 850,
+    "displayed_albums": 66,
+    "verified_unique_source_images": 960,
+    "input_source_image_occurrences": 990,
     "duplicate_hashes_skipped": 30,
     "actual_full_publisher_photobooks": 0,
-    "incomplete_known_count_albums": 25
+    "incomplete_known_count_albums": 30
   },
   "albums": [
     {
@@ -1452,7 +1452,8 @@
       "source": "https://djawaphoto.com/portfolio/christmas-special-2021-mimmi/",
       "source_pages": [
         "https://djawaphoto.com/portfolio/christmas-special-2021-mimmi/",
-        "https://www.v2ph.com/album/z4m9x9xa.html"
+        "https://www.v2ph.com/album/z4m9x9xa.html",
+        "https://cosplay.pixibb.com/coser-djawa-photo-christmas-special-2021-s-ver-100-photos/"
       ],
       "images": [
         {
@@ -1652,6 +1653,226 @@
           "bytes": 1184356,
           "quality": "third_party_public_web",
           "publisher_original_verified": false
+        },
+        {
+          "number": 19,
+          "url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-001.jpg",
+          "source_url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-001.jpg",
+          "sha256": "ae40679b7797830e607fba4bf999f868b21ee2acdccede279942eb1756256d85",
+          "width": 912,
+          "height": 1368,
+          "bytes": 149497,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 20,
+          "url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-002.jpg",
+          "source_url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-002.jpg",
+          "sha256": "103cb517a90cd4d41b2536f25d984b666e6c8a0ed443fc5f41cd22f088e14153",
+          "width": 912,
+          "height": 1368,
+          "bytes": 187277,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 21,
+          "url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-003.jpg",
+          "source_url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-003.jpg",
+          "sha256": "1669bb6593e319e05599260558c4c90d4c2dab0f6cb2770ac170ec3963789891",
+          "width": 912,
+          "height": 1368,
+          "bytes": 177656,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 22,
+          "url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-004.jpg",
+          "source_url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-004.jpg",
+          "sha256": "e8a69f1d44eb6d9f7f972c117de8870f78135f8791a9c6115b2c5eaba5a6f270",
+          "width": 912,
+          "height": 1368,
+          "bytes": 147114,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 23,
+          "url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-005.jpg",
+          "source_url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-005.jpg",
+          "sha256": "7594dbd602abaf3d617e7f1d9ac38a31d918b578df4e357a2ce715ea1e96be28",
+          "width": 912,
+          "height": 1368,
+          "bytes": 126019,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 24,
+          "url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-006.jpg",
+          "source_url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-006.jpg",
+          "sha256": "577a9861bc6f9fb12e6dda15ba6feadd63dcb8c8b757b58f496a11f8d707e453",
+          "width": 912,
+          "height": 1368,
+          "bytes": 138213,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 25,
+          "url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-007.jpg",
+          "source_url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-007.jpg",
+          "sha256": "c44b16a6a764a94c9533539052d26664df8c529b7b0f964fff87ec6a2ebfcc7d",
+          "width": 912,
+          "height": 1368,
+          "bytes": 153265,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 26,
+          "url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-008.jpg",
+          "source_url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-008.jpg",
+          "sha256": "0d90d95d2ca4f676678e6ff166b8962401a4dbd458503cfcd9956c1f2a0b7c8d",
+          "width": 912,
+          "height": 1368,
+          "bytes": 174257,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 27,
+          "url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-009.jpg",
+          "source_url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-009.jpg",
+          "sha256": "48514450c35a2675acb92c2dff2481b740ad296720dd0c06f37f0c3eac14250c",
+          "width": 912,
+          "height": 1368,
+          "bytes": 179611,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 28,
+          "url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-010.jpg",
+          "source_url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-010.jpg",
+          "sha256": "de7eb3ada1f3f5e02ca2dcc1fb17c792a8a19ae094a4f64438bffb5eab6fbeb9",
+          "width": 912,
+          "height": 1368,
+          "bytes": 192135,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 29,
+          "url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-011.jpg",
+          "source_url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-011.jpg",
+          "sha256": "666e126fdd328359242bfc35291d4cefdfe8b93e7f6af9e80ef3a6c12e0f5e00",
+          "width": 912,
+          "height": 1368,
+          "bytes": 191867,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 30,
+          "url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-012.jpg",
+          "source_url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-012.jpg",
+          "sha256": "10d431b68afbd101fc57b4dc813682d71bee57682547caa1d9efda8083073361",
+          "width": 912,
+          "height": 1368,
+          "bytes": 209651,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 31,
+          "url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-013.jpg",
+          "source_url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-013.jpg",
+          "sha256": "435e72333571c7dc01a4d531093f69d7317407a1ddaf239fbd98f1c84cf5e292",
+          "width": 912,
+          "height": 1368,
+          "bytes": 196884,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 32,
+          "url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-014.jpg",
+          "source_url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-014.jpg",
+          "sha256": "250d7911c4a43b02829927b9f3dac769f6c3b5d717c9e81d3bc40f5ac66d1630",
+          "width": 1368,
+          "height": 912,
+          "bytes": 191000,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 33,
+          "url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-015.jpg",
+          "source_url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-015.jpg",
+          "sha256": "bd4708508d8bca548654a8ee10ec2a97816f79dfd56dd526d195f2eacb60a4cb",
+          "width": 1368,
+          "height": 912,
+          "bytes": 175493,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 34,
+          "url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-016.jpg",
+          "source_url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-016.jpg",
+          "sha256": "7ecc71a0fadebb5c5320693d14dafe8d40cbdf965e0a0e15dac24150d33ef0cf",
+          "width": 1368,
+          "height": 912,
+          "bytes": 165564,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 35,
+          "url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-017.jpg",
+          "source_url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-017.jpg",
+          "sha256": "fbca9cf52e1bab1925a59d0d8fcc64008cd3e89d478a5bec28bd35d93e59f3cc",
+          "width": 1368,
+          "height": 912,
+          "bytes": 189039,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 36,
+          "url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-018.jpg",
+          "source_url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-018.jpg",
+          "sha256": "9961d35a2458a9a6563c1070c24766222fe408a3b1f030ae5b514f20d741d79a",
+          "width": 1368,
+          "height": 912,
+          "bytes": 160437,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 37,
+          "url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-019.jpg",
+          "source_url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-019.jpg",
+          "sha256": "c841fc2e1a93a0a8a61b4fe405e65e46ae24443b31847e755d38db8d524f38bf",
+          "width": 912,
+          "height": 1368,
+          "bytes": 181960,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 38,
+          "url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-020.jpg",
+          "source_url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-020.jpg",
+          "sha256": "b067369b1d8ced7efe81f5b3ef44b34ad429df7c5211efaf2541fc701b1c1b75",
+          "width": 912,
+          "height": 1368,
+          "bytes": 188148,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
         }
       ],
       "sourceHosted": true,
@@ -1659,8 +1880,8 @@
       "quality": "public_web",
       "publisher_original_verified": false,
       "model": "mimmi",
-      "expected": null,
-      "photos": null,
+      "expected": 100,
+      "photos": 100,
       "ai_enhanced": false,
       "original_sources": [
         {
@@ -1676,6 +1897,13 @@
           "source": "https://www.v2ph.com/album/z4m9x9xa.html",
           "verified_image_count": 10,
           "claimed_image_count": null
+        },
+        {
+          "source_type": "pixibb_public",
+          "id": "pixibb-auto-coser-djawa-photo-christmas-special-2021-s-ver-100-photos",
+          "source": "https://cosplay.pixibb.com/coser-djawa-photo-christmas-special-2021-s-ver-100-photos/",
+          "verified_image_count": 20,
+          "claimed_image_count": 100
         }
       ],
       "completeness": "partial_public_previews"
@@ -2647,6 +2875,255 @@
       "completeness": "partial_public_previews"
     },
     {
+      "id": "pixibb-auto-djawa-photo-mimmi-cyberpunk-girl-41-photos-cosplay",
+      "title": "Cyberpunk Girl",
+      "publisher": "독립 화보",
+      "source": "https://cosplay.pixibb.com/djawa-photo-mimmi-cyberpunk-girl-41-photos-cosplay/",
+      "source_pages": [
+        "https://cosplay.pixibb.com/djawa-photo-mimmi-cyberpunk-girl-41-photos-cosplay/"
+      ],
+      "images": [
+        {
+          "number": 1,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Cyberpunk-Girl-Mimmi-PixiBB.COM-041.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Cyberpunk-Girl-Mimmi-PixiBB.COM-041.jpg",
+          "sha256": "236452641d42655507baf1a7c82f5ff39678e5c295f4e6fdd06bce74bfe547dc",
+          "width": 912,
+          "height": 1368,
+          "bytes": 230091,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 2,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Cyberpunk-Girl-Mimmi-PixiBB.COM-040.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Cyberpunk-Girl-Mimmi-PixiBB.COM-040.jpg",
+          "sha256": "914d878da255ab9438a3121a01fd344edd5001eca4ca1d85487f1cca1588b4ef",
+          "width": 912,
+          "height": 1368,
+          "bytes": 253824,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 3,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Cyberpunk-Girl-Mimmi-PixiBB.COM-039.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Cyberpunk-Girl-Mimmi-PixiBB.COM-039.jpg",
+          "sha256": "fbabbf71a1f0977f77fae52e791ce0b43e6ef4997acd1b8c27ae69dfd577067f",
+          "width": 912,
+          "height": 1368,
+          "bytes": 230330,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 4,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Cyberpunk-Girl-Mimmi-PixiBB.COM-037.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Cyberpunk-Girl-Mimmi-PixiBB.COM-037.jpg",
+          "sha256": "9654f47eb365fc55163e30b2d30a185aba926db5d30eca2b4e84c7e1de4661ff",
+          "width": 912,
+          "height": 1368,
+          "bytes": 216423,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 5,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Cyberpunk-Girl-Mimmi-PixiBB.COM-038.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Cyberpunk-Girl-Mimmi-PixiBB.COM-038.jpg",
+          "sha256": "9f4f3bca6b1ccc008e7c8f6c63b02a2e997f1c8abf9d8bfe181f889f70b20f08",
+          "width": 912,
+          "height": 1368,
+          "bytes": 219595,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 6,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Cyberpunk-Girl-Mimmi-PixiBB.COM-035.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Cyberpunk-Girl-Mimmi-PixiBB.COM-035.jpg",
+          "sha256": "f8156a19641cdd2e80946505e038ced9a09429126706161e2d021d8db349f439",
+          "width": 912,
+          "height": 1368,
+          "bytes": 229860,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 7,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Cyberpunk-Girl-Mimmi-PixiBB.COM-036.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Cyberpunk-Girl-Mimmi-PixiBB.COM-036.jpg",
+          "sha256": "24b0a5cbe341f62106ed51d8f7d098bff48f38e8306e8de1e88103ce3f706d70",
+          "width": 912,
+          "height": 1368,
+          "bytes": 231069,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 8,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Cyberpunk-Girl-Mimmi-PixiBB.COM-034.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Cyberpunk-Girl-Mimmi-PixiBB.COM-034.jpg",
+          "sha256": "692e653f1a6aaa516b7e3179012e4d1a585f1fb2dd79eacd5a4ab6f529050cb5",
+          "width": 1368,
+          "height": 912,
+          "bytes": 222752,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 9,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Cyberpunk-Girl-Mimmi-PixiBB.COM-033.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Cyberpunk-Girl-Mimmi-PixiBB.COM-033.jpg",
+          "sha256": "e72db1d9bc2499b8a0014e98fa2f5cce0c5537278dee75a82ae2e41938ea8525",
+          "width": 912,
+          "height": 1368,
+          "bytes": 248670,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 10,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Cyberpunk-Girl-Mimmi-PixiBB.COM-032.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Cyberpunk-Girl-Mimmi-PixiBB.COM-032.jpg",
+          "sha256": "7cd6dc8cc504cc064e4d64980f9479b3aaa228263ef1bfffaef18a37da18b334",
+          "width": 1368,
+          "height": 912,
+          "bytes": 246499,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 11,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Cyberpunk-Girl-Mimmi-PixiBB.COM-031.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Cyberpunk-Girl-Mimmi-PixiBB.COM-031.jpg",
+          "sha256": "1993e165a92dce133b02322a195fc86bc109b80e48e880b2700c699dd22a1255",
+          "width": 1368,
+          "height": 912,
+          "bytes": 274538,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 12,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Cyberpunk-Girl-Mimmi-PixiBB.COM-028.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Cyberpunk-Girl-Mimmi-PixiBB.COM-028.jpg",
+          "sha256": "07cef7ac8588a025739a15bb986dab4a8644a0d1ddf5fcb58d4744c9418ab2a6",
+          "width": 912,
+          "height": 1368,
+          "bytes": 248937,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 13,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Cyberpunk-Girl-Mimmi-PixiBB.COM-030.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Cyberpunk-Girl-Mimmi-PixiBB.COM-030.jpg",
+          "sha256": "9d747ef4d69e545ab7ae3fc26ee39f4c1772ae0ef69dcd074fe86b963891f9e6",
+          "width": 912,
+          "height": 1368,
+          "bytes": 253758,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 14,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Cyberpunk-Girl-Mimmi-PixiBB.COM-029.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Cyberpunk-Girl-Mimmi-PixiBB.COM-029.jpg",
+          "sha256": "be142690f56056b6175e0039a5367a388a40e595d16c377e48a5b47c8a7e2d13",
+          "width": 912,
+          "height": 1368,
+          "bytes": 217579,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 15,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Cyberpunk-Girl-Mimmi-PixiBB.COM-027.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Cyberpunk-Girl-Mimmi-PixiBB.COM-027.jpg",
+          "sha256": "f50ff93c250d900afb0352540d0771dd215ef6f6a197ad98bbe82dd10673abb4",
+          "width": 912,
+          "height": 1368,
+          "bytes": 299673,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 16,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Cyberpunk-Girl-Mimmi-PixiBB.COM-026.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Cyberpunk-Girl-Mimmi-PixiBB.COM-026.jpg",
+          "sha256": "df6d1bf4629286153ced14da44689382aee777d7b30035e39d142b53ba348a54",
+          "width": 912,
+          "height": 1368,
+          "bytes": 324595,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 17,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Cyberpunk-Girl-Mimmi-PixiBB.COM-025.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Cyberpunk-Girl-Mimmi-PixiBB.COM-025.jpg",
+          "sha256": "caeef86eba7c35324d3037f34bd27946ab889e78087a0b58f61f8b9359b14556",
+          "width": 912,
+          "height": 1368,
+          "bytes": 217518,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 18,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Cyberpunk-Girl-Mimmi-PixiBB.COM-024.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Cyberpunk-Girl-Mimmi-PixiBB.COM-024.jpg",
+          "sha256": "661f0f2f87cb7f36118edc9afd90813a95d31e47f77fac28110ae9e115303670",
+          "width": 1368,
+          "height": 912,
+          "bytes": 218818,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 19,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Cyberpunk-Girl-Mimmi-PixiBB.COM-021.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Cyberpunk-Girl-Mimmi-PixiBB.COM-021.jpg",
+          "sha256": "7e9c5b69fb46f6f6e3386b776644aec9bcae1274b7c8af62af0e929bad3fe08f",
+          "width": 912,
+          "height": 1368,
+          "bytes": 234248,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 20,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Cyberpunk-Girl-Mimmi-PixiBB.COM-023.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Cyberpunk-Girl-Mimmi-PixiBB.COM-023.jpg",
+          "sha256": "2006926c27018fc1d61e0c8552bb1bc1470ca7cefb663df46d037c8b10ebd659",
+          "width": 912,
+          "height": 1368,
+          "bytes": 220393,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        }
+      ],
+      "sourceHosted": true,
+      "status": "verified_collected_individual_files_source_hosted_online_view",
+      "quality": "public_web",
+      "publisher_original_verified": false,
+      "model": "mimmi",
+      "expected": 41,
+      "photos": 41,
+      "ai_enhanced": false,
+      "original_sources": [
+        {
+          "source_type": "pixibb_public",
+          "id": "pixibb-auto-djawa-photo-mimmi-cyberpunk-girl-41-photos-cosplay",
+          "source": "https://cosplay.pixibb.com/djawa-photo-mimmi-cyberpunk-girl-41-photos-cosplay/",
+          "verified_image_count": 20,
+          "claimed_image_count": 41
+        }
+      ],
+      "completeness": "partial_public_previews"
+    },
+    {
       "id": "djawa-full-bloom-yamashiiro",
       "title": "Full Bloom Yamashiiro",
       "publisher": "DJAWA",
@@ -2769,7 +3246,8 @@
       "publisher": "DJAWA",
       "source": "https://www.v2ph.com/album/a54e98nz.html?hl=ko",
       "source_pages": [
-        "https://www.v2ph.com/album/a54e98nz.html?hl=ko"
+        "https://www.v2ph.com/album/a54e98nz.html?hl=ko",
+        "https://cosplay.pixibb.com/djawa-photo-mimmi-girls-frontline-hk416-damaged-ver-244-photos-cosplay/"
       ],
       "images": [
         {
@@ -2881,6 +3359,226 @@
           "bytes": 429573,
           "quality": "third_party_public_web",
           "publisher_original_verified": false
+        },
+        {
+          "number": 11,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-244.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-244.jpg",
+          "sha256": "e3920056bd4b6d710f8074fe44ffc65778c6ea0041386c8ba13bc1e42bd18fb6",
+          "width": 912,
+          "height": 1368,
+          "bytes": 219242,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 12,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-243.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-243.jpg",
+          "sha256": "faf150e4cf4339b8a931f5f81f264a8ed784c6f5fbc2cbd95d1475f77b41109d",
+          "width": 912,
+          "height": 1368,
+          "bytes": 227624,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 13,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-242.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-242.jpg",
+          "sha256": "03378ba6449d0027c46cb511ab9a88a9cea45080b33f1d79880668109669d534",
+          "width": 912,
+          "height": 1368,
+          "bytes": 224235,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 14,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-241.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-241.jpg",
+          "sha256": "809b8c6c2d961379c068d532c0733ee0c46f6d0f2e586430911277794ac5279d",
+          "width": 912,
+          "height": 1368,
+          "bytes": 210043,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 15,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-238.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-238.jpg",
+          "sha256": "69c8a476c2a87f53ea5381283a1815a216137151585d17ad820dfbb47fd217cb",
+          "width": 912,
+          "height": 1368,
+          "bytes": 226342,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 16,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-240.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-240.jpg",
+          "sha256": "16f9eca2a6d10a66e61926b9f0f656ffc1d578ed5a1a01b1335f55171f0de4bb",
+          "width": 1368,
+          "height": 912,
+          "bytes": 173914,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 17,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-239.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-239.jpg",
+          "sha256": "63ce1df84bec9104932a9e164bb061deb2dbdc39b5107871b897b7984ecc346c",
+          "width": 912,
+          "height": 1368,
+          "bytes": 152670,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 18,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-237.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-237.jpg",
+          "sha256": "05f901407eddf36b050ced52b14c10d8d611bfafc8a4c84eb0efb3eca6950631",
+          "width": 912,
+          "height": 1368,
+          "bytes": 256935,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 19,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-236.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-236.jpg",
+          "sha256": "d1af66e81f55f81e901e5c46d7a50502d37135f92abe5954ae2faec502f3eac2",
+          "width": 912,
+          "height": 1368,
+          "bytes": 233549,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 20,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-235.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-235.jpg",
+          "sha256": "47e3eefb0af13760d263c009c3bd4100495a5bb479f3ea5cc69a3f3df5298bc1",
+          "width": 912,
+          "height": 1368,
+          "bytes": 213030,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 21,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-234.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-234.jpg",
+          "sha256": "ae28595309804a30d7a1eecc8c3d9ff3885fa82b6d8fc82edcd4d619344fee46",
+          "width": 912,
+          "height": 1368,
+          "bytes": 198120,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 22,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-233.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-233.jpg",
+          "sha256": "c92254f969cf9a3306e5ff0581182b2b7117b5d3dd91dfab1a34470c95d8459b",
+          "width": 912,
+          "height": 1368,
+          "bytes": 216966,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 23,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-230.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-230.jpg",
+          "sha256": "ea5aa8bc4a09c2c2e89d816e388a9949eadd7f04ad5deb0b73537d6131356e7f",
+          "width": 912,
+          "height": 1368,
+          "bytes": 163912,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 24,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-232.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-232.jpg",
+          "sha256": "1fdee6d5fbf853161c38e418da3b2c6bd12afddd7ec608fc1c60781187a5a78d",
+          "width": 912,
+          "height": 1368,
+          "bytes": 210041,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 25,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-231.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-231.jpg",
+          "sha256": "1c70819e3a3a4c781c6cee8d2a5ddddc36e98c692a62bd0cfcfe01639c2ef6b4",
+          "width": 1368,
+          "height": 912,
+          "bytes": 142740,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 26,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-229.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-229.jpg",
+          "sha256": "5b66ea9c27df92fab0d858367246e7f5dca3dd46409ac3f36aad19500f573395",
+          "width": 912,
+          "height": 1368,
+          "bytes": 182376,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 27,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-228.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-228.jpg",
+          "sha256": "7886c6ae53fb4e75b16a1120158e6ace0f70ca142e9cd95f715a191ddaa46ecc",
+          "width": 912,
+          "height": 1368,
+          "bytes": 216497,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 28,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-227.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-227.jpg",
+          "sha256": "09b7ac1b3d01d8f5ab6e113bed367f5492be4bc2beba62f522268964110d345b",
+          "width": 1368,
+          "height": 912,
+          "bytes": 177634,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 29,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-226.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-226.jpg",
+          "sha256": "ac361e87144a06e43a68d316bf41e2a817baf1a6d1c134978c1efe55b831f6d5",
+          "width": 1368,
+          "height": 912,
+          "bytes": 188055,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 30,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-225.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-225.jpg",
+          "sha256": "4db2c6589d69b400f40a01f365467533931392b1275281a720481bfb18ce4c61",
+          "width": 912,
+          "height": 1368,
+          "bytes": 155054,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
         }
       ],
       "sourceHosted": true,
@@ -2898,6 +3596,13 @@
           "source": "https://www.v2ph.com/album/a54e98nz.html?hl=ko",
           "verified_image_count": 10,
           "claimed_image_count": 192
+        },
+        {
+          "source_type": "pixibb_public",
+          "id": "pixibb-auto-djawa-photo-mimmi-girls-frontline-hk416-damaged-ver-244-photos-cosplay",
+          "source": "https://cosplay.pixibb.com/djawa-photo-mimmi-girls-frontline-hk416-damaged-ver-244-photos-cosplay/",
+          "verified_image_count": 20,
+          "claimed_image_count": 244
         }
       ],
       "completeness": "partial_public_previews"
@@ -3793,6 +4498,255 @@
           "source": "https://djawaphoto.com/portfolio/janus-scary-lantern-night-vol-2/",
           "verified_image_count": 1,
           "claimed_image_count": null
+        }
+      ],
+      "completeness": "partial_public_previews"
+    },
+    {
+      "id": "pixibb-auto-djawa-photo-mimmi-kitsune-miko-a-ver-65-photos-cosplay",
+      "title": "Kitsune Miko (A ver)",
+      "publisher": "독립 화보",
+      "source": "https://cosplay.pixibb.com/djawa-photo-mimmi-kitsune-miko-a-ver-65-photos-cosplay/",
+      "source_pages": [
+        "https://cosplay.pixibb.com/djawa-photo-mimmi-kitsune-miko-a-ver-65-photos-cosplay/"
+      ],
+      "images": [
+        {
+          "number": 1,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Kitsune-Miko-A-ver-PixiBB.COM-065.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Kitsune-Miko-A-ver-PixiBB.COM-065.jpg",
+          "sha256": "d325517edd39986afe6724f11d3d19f8d1ff6f8f1c3812d6de1c68beff70c8c7",
+          "width": 912,
+          "height": 1368,
+          "bytes": 195737,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 2,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Kitsune-Miko-A-ver-PixiBB.COM-062.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Kitsune-Miko-A-ver-PixiBB.COM-062.jpg",
+          "sha256": "d84a275abb34cf29401cd64a7b6bb7f6f4b6f0546828318f3d6ffff2d5ef5bb9",
+          "width": 912,
+          "height": 1368,
+          "bytes": 202993,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 3,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Kitsune-Miko-A-ver-PixiBB.COM-064.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Kitsune-Miko-A-ver-PixiBB.COM-064.jpg",
+          "sha256": "3413563184e4d0dcc01d8ebaa776b9ae155811ae48e9a841c31426924d9af38b",
+          "width": 912,
+          "height": 1368,
+          "bytes": 170830,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 4,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Kitsune-Miko-A-ver-PixiBB.COM-063.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Kitsune-Miko-A-ver-PixiBB.COM-063.jpg",
+          "sha256": "ecf40ca2a39bb2b2f6ad8d7379cb52b2b22dec1c3238eb47714a959f2b6a5ec8",
+          "width": 912,
+          "height": 1368,
+          "bytes": 230175,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 5,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Kitsune-Miko-A-ver-PixiBB.COM-061.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Kitsune-Miko-A-ver-PixiBB.COM-061.jpg",
+          "sha256": "136bce809758497a0c2fcf5f311ff329e605170f0e2f0ee3973168110a5ebc95",
+          "width": 1368,
+          "height": 912,
+          "bytes": 209340,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 6,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Kitsune-Miko-A-ver-PixiBB.COM-060.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Kitsune-Miko-A-ver-PixiBB.COM-060.jpg",
+          "sha256": "bb9f70f38b55657ca5e3065079798d3a192d5aa997da91ab05ecb4b6b59a32fb",
+          "width": 912,
+          "height": 1368,
+          "bytes": 215913,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 7,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Kitsune-Miko-A-ver-PixiBB.COM-059.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Kitsune-Miko-A-ver-PixiBB.COM-059.jpg",
+          "sha256": "91630b39675d7c25e98bf2adc444fd9aca45b60fec9a7976587f33edc9a1fbf2",
+          "width": 912,
+          "height": 1368,
+          "bytes": 169438,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 8,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Kitsune-Miko-A-ver-PixiBB.COM-058.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Kitsune-Miko-A-ver-PixiBB.COM-058.jpg",
+          "sha256": "d3ad8437e56f17d169e5b3ae479e175e6dd65d8a7acf41ec12710ef4e6afc10b",
+          "width": 912,
+          "height": 1368,
+          "bytes": 160602,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 9,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Kitsune-Miko-A-ver-PixiBB.COM-057.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Kitsune-Miko-A-ver-PixiBB.COM-057.jpg",
+          "sha256": "bba59b0d8ebc275a5a05001726f696c75019dff16deb66dfaeefbbfcf8784bbf",
+          "width": 1368,
+          "height": 912,
+          "bytes": 224816,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 10,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Kitsune-Miko-A-ver-PixiBB.COM-056.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Kitsune-Miko-A-ver-PixiBB.COM-056.jpg",
+          "sha256": "7ea8a1e46af039ad9a4b2596108fdec6f797f8dbd53bc3dbb5168a02d6bbe3bd",
+          "width": 912,
+          "height": 1368,
+          "bytes": 177532,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 11,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Kitsune-Miko-A-ver-PixiBB.COM-055.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Kitsune-Miko-A-ver-PixiBB.COM-055.jpg",
+          "sha256": "7d786ecfd1265c31143e67f1fd44fd6801cbe493a4377e874bf7993c6f105183",
+          "width": 1368,
+          "height": 912,
+          "bytes": 152031,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 12,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Kitsune-Miko-A-ver-PixiBB.COM-052.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Kitsune-Miko-A-ver-PixiBB.COM-052.jpg",
+          "sha256": "9d5e7cb312df09c396f2af90d20bfc2b1a0a3e2e02f2cdbecbaf2794be936a2f",
+          "width": 912,
+          "height": 1368,
+          "bytes": 141018,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 13,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Kitsune-Miko-A-ver-PixiBB.COM-054.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Kitsune-Miko-A-ver-PixiBB.COM-054.jpg",
+          "sha256": "183efb1f7c9567fbd510e6a6b39a0e8964eb3e5bf069bcb523c548c586af89f2",
+          "width": 912,
+          "height": 1368,
+          "bytes": 186255,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 14,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Kitsune-Miko-A-ver-PixiBB.COM-053.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Kitsune-Miko-A-ver-PixiBB.COM-053.jpg",
+          "sha256": "0c2b8a883d0d955a0bc91f7ddc1b5eb1baaf9638e5c21b1ef2477ec79bcaaf6e",
+          "width": 912,
+          "height": 1368,
+          "bytes": 176918,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 15,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Kitsune-Miko-A-ver-PixiBB.COM-051.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Kitsune-Miko-A-ver-PixiBB.COM-051.jpg",
+          "sha256": "ff2fcfdeb60fd19c0be2ee0601a5d28805e83ff0d6a2560380f374e64e75d2ab",
+          "width": 912,
+          "height": 1368,
+          "bytes": 165316,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 16,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Kitsune-Miko-A-ver-PixiBB.COM-050.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Kitsune-Miko-A-ver-PixiBB.COM-050.jpg",
+          "sha256": "59d6cd7916f1ae246dec56ea393f9b1823105ffebee3314d34a80b997404e01e",
+          "width": 1368,
+          "height": 912,
+          "bytes": 203578,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 17,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Kitsune-Miko-A-ver-PixiBB.COM-049.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Kitsune-Miko-A-ver-PixiBB.COM-049.jpg",
+          "sha256": "e53ff16e2a7770782db9f224565b97e92424be1404774c2f42458c74d717e1b9",
+          "width": 912,
+          "height": 1368,
+          "bytes": 203848,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 18,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Kitsune-Miko-A-ver-PixiBB.COM-048.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Kitsune-Miko-A-ver-PixiBB.COM-048.jpg",
+          "sha256": "987118a496bfaaf1bf6fe2d95cb2c5d1ee43a349b1262ca8af86f99ecb440282",
+          "width": 912,
+          "height": 1368,
+          "bytes": 193935,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 19,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Kitsune-Miko-A-ver-PixiBB.COM-047.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Kitsune-Miko-A-ver-PixiBB.COM-047.jpg",
+          "sha256": "4e2ad93575f633ce768f30c37213d4e3e1b14cb4751f86fa8437d0c652e942ed",
+          "width": 912,
+          "height": 1368,
+          "bytes": 149827,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 20,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Kitsune-Miko-A-ver-PixiBB.COM-044.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Kitsune-Miko-A-ver-PixiBB.COM-044.jpg",
+          "sha256": "573e36c764a2e0326f8d66981305b1999113c16a59552829ae0d29e01f9ac978",
+          "width": 1368,
+          "height": 912,
+          "bytes": 159755,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        }
+      ],
+      "sourceHosted": true,
+      "status": "verified_collected_individual_files_source_hosted_online_view",
+      "quality": "public_web",
+      "publisher_original_verified": false,
+      "model": "mimmi",
+      "expected": 65,
+      "photos": 65,
+      "ai_enhanced": false,
+      "original_sources": [
+        {
+          "source_type": "pixibb_public",
+          "id": "pixibb-auto-djawa-photo-mimmi-kitsune-miko-a-ver-65-photos-cosplay",
+          "source": "https://cosplay.pixibb.com/djawa-photo-mimmi-kitsune-miko-a-ver-65-photos-cosplay/",
+          "verified_image_count": 20,
+          "claimed_image_count": 65
         }
       ],
       "completeness": "partial_public_previews"
@@ -5114,7 +6068,8 @@
       "publisher": "DJAWA",
       "source": "https://www.v2ph.com/album/a8n7me7a.html",
       "source_pages": [
-        "https://www.v2ph.com/album/a8n7me7a.html"
+        "https://www.v2ph.com/album/a8n7me7a.html",
+        "https://cosplay.pixibb.com/djawa-photo-mimmi-azur-lane-ijn-atago-amp-takao-61-photos-cosplay/"
       ],
       "images": [
         {
@@ -5226,6 +6181,226 @@
           "bytes": 619969,
           "quality": "third_party_public_web",
           "publisher_original_verified": false
+        },
+        {
+          "number": 11,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Azur-Lane-IJN-Atago-and-Takao-PixiBB.COM-061.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Azur-Lane-IJN-Atago-and-Takao-PixiBB.COM-061.jpg",
+          "sha256": "4c28eab03b80782777c8ac794e203d12bf024b2439d389b497b386902438f2a1",
+          "width": 912,
+          "height": 1368,
+          "bytes": 261538,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 12,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Azur-Lane-IJN-Atago-and-Takao-PixiBB.COM-060.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Azur-Lane-IJN-Atago-and-Takao-PixiBB.COM-060.jpg",
+          "sha256": "b31518b9a0b9d61bd86d7aed79b4d83e7e332562323746f327df314ce0f033c2",
+          "width": 912,
+          "height": 1368,
+          "bytes": 258969,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 13,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Azur-Lane-IJN-Atago-and-Takao-PixiBB.COM-057.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Azur-Lane-IJN-Atago-and-Takao-PixiBB.COM-057.jpg",
+          "sha256": "64b3cc44398917a2b3afbf86ee61fb507d72016719fb37b2c3277a8d9a97ba77",
+          "width": 912,
+          "height": 1368,
+          "bytes": 321861,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 14,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Azur-Lane-IJN-Atago-and-Takao-PixiBB.COM-059.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Azur-Lane-IJN-Atago-and-Takao-PixiBB.COM-059.jpg",
+          "sha256": "b26c4381a7f637e39f73c441463fb09bbb2badf953cd1d9726ea36d94a7d1321",
+          "width": 912,
+          "height": 1368,
+          "bytes": 287834,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 15,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Azur-Lane-IJN-Atago-and-Takao-PixiBB.COM-058.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Azur-Lane-IJN-Atago-and-Takao-PixiBB.COM-058.jpg",
+          "sha256": "2bb0aef73b339274cbb2a7b0ea78684ee5339e491b38bc2a697d55368b74e5d8",
+          "width": 912,
+          "height": 1368,
+          "bytes": 274399,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 16,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Azur-Lane-IJN-Atago-and-Takao-PixiBB.COM-056.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Azur-Lane-IJN-Atago-and-Takao-PixiBB.COM-056.jpg",
+          "sha256": "5ec9434ea325d9f7ff8ceb90b42f2ca3420226f79cd16f63ed9888e5b01077d8",
+          "width": 912,
+          "height": 1368,
+          "bytes": 213353,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 17,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Azur-Lane-IJN-Atago-and-Takao-PixiBB.COM-055.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Azur-Lane-IJN-Atago-and-Takao-PixiBB.COM-055.jpg",
+          "sha256": "4fe52802ecee50998173f12de0dcd229489ecca65bca98cd027866063f3b9909",
+          "width": 912,
+          "height": 1368,
+          "bytes": 208636,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 18,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Azur-Lane-IJN-Atago-and-Takao-PixiBB.COM-054.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Azur-Lane-IJN-Atago-and-Takao-PixiBB.COM-054.jpg",
+          "sha256": "7546988b6513083136aec2e31f6742ae48f7fe1d9004a4ee48ad4b33d932bee0",
+          "width": 1368,
+          "height": 912,
+          "bytes": 260096,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 19,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Azur-Lane-IJN-Atago-and-Takao-PixiBB.COM-053.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Azur-Lane-IJN-Atago-and-Takao-PixiBB.COM-053.jpg",
+          "sha256": "c558f31ed6f3011c2bf2a75ad28b514ecb5a9f879906adc12d4a6e7a3858e57f",
+          "width": 912,
+          "height": 1368,
+          "bytes": 289970,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 20,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Azur-Lane-IJN-Atago-and-Takao-PixiBB.COM-050.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Azur-Lane-IJN-Atago-and-Takao-PixiBB.COM-050.jpg",
+          "sha256": "94897f8668559c3fb67788f6ea2569a4f226fd437e8aa4ba1c95c0d6bbda0a87",
+          "width": 1368,
+          "height": 912,
+          "bytes": 239679,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 21,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Azur-Lane-IJN-Atago-and-Takao-PixiBB.COM-052.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Azur-Lane-IJN-Atago-and-Takao-PixiBB.COM-052.jpg",
+          "sha256": "36605bfa3f9a11e6939b418ff41c1318de14e7d11eb58a69afe8c62bd0d929e8",
+          "width": 912,
+          "height": 1368,
+          "bytes": 292574,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 22,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Azur-Lane-IJN-Atago-and-Takao-PixiBB.COM-051.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Azur-Lane-IJN-Atago-and-Takao-PixiBB.COM-051.jpg",
+          "sha256": "9e3dedcbfdfb8c761cc266da78d71742ad0c6708bd5e25f80ca80809424a7a25",
+          "width": 912,
+          "height": 1368,
+          "bytes": 359201,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 23,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Azur-Lane-IJN-Atago-and-Takao-PixiBB.COM-049.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Azur-Lane-IJN-Atago-and-Takao-PixiBB.COM-049.jpg",
+          "sha256": "8286de7347087fe203f93709f5e903040e8222862809b3f82de51d6df9740194",
+          "width": 912,
+          "height": 1368,
+          "bytes": 255932,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 24,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Azur-Lane-IJN-Atago-and-Takao-PixiBB.COM-048.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Azur-Lane-IJN-Atago-and-Takao-PixiBB.COM-048.jpg",
+          "sha256": "d885b89d7474bbe95a1818428d9c8075a19804aa9637ffe0db02c94eda2270a2",
+          "width": 1368,
+          "height": 912,
+          "bytes": 272494,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 25,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Azur-Lane-IJN-Atago-and-Takao-PixiBB.COM-047.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Azur-Lane-IJN-Atago-and-Takao-PixiBB.COM-047.jpg",
+          "sha256": "9b8d87a6c12d2202d9016771982e8bd8c9a54bfed6c115dcc55d20ea5b4fa85c",
+          "width": 1368,
+          "height": 912,
+          "bytes": 271273,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 26,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Azur-Lane-IJN-Atago-and-Takao-PixiBB.COM-046.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Azur-Lane-IJN-Atago-and-Takao-PixiBB.COM-046.jpg",
+          "sha256": "051bd3646e665fecb2c42bd7ba3d8d101ba8465779fd1b7e065124fe1d607607",
+          "width": 912,
+          "height": 1368,
+          "bytes": 277374,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 27,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Azur-Lane-IJN-Atago-and-Takao-PixiBB.COM-043.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Azur-Lane-IJN-Atago-and-Takao-PixiBB.COM-043.jpg",
+          "sha256": "7745e0adf09d5cd73478ff345fe863038d7f3d2a3c2bac04013349ac1760ed04",
+          "width": 912,
+          "height": 1368,
+          "bytes": 235437,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 28,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Azur-Lane-IJN-Atago-and-Takao-PixiBB.COM-045.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Azur-Lane-IJN-Atago-and-Takao-PixiBB.COM-045.jpg",
+          "sha256": "319c435142dbe50c7e4e9713b778e79229fb89033a20fac0c294a4255273135c",
+          "width": 912,
+          "height": 1368,
+          "bytes": 299515,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 29,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Azur-Lane-IJN-Atago-and-Takao-PixiBB.COM-044.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Azur-Lane-IJN-Atago-and-Takao-PixiBB.COM-044.jpg",
+          "sha256": "785d6033bdbf8ea5d78dc507618ac1f1d0a57adba6c9d700043a25ea02bceadc",
+          "width": 912,
+          "height": 1368,
+          "bytes": 264010,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 30,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Azur-Lane-IJN-Atago-and-Takao-PixiBB.COM-042.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Azur-Lane-IJN-Atago-and-Takao-PixiBB.COM-042.jpg",
+          "sha256": "33b9b08b1ad8720d835dfa50f8ad158f026b2da14a1f01de6275a952316ad54f",
+          "width": 912,
+          "height": 1368,
+          "bytes": 214673,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
         }
       ],
       "sourceHosted": true,
@@ -5233,8 +6408,8 @@
       "quality": "public_web",
       "publisher_original_verified": false,
       "model": "mimmi",
-      "expected": null,
-      "photos": null,
+      "expected": 61,
+      "photos": 61,
       "ai_enhanced": false,
       "original_sources": [
         {
@@ -5243,6 +6418,13 @@
           "source": "https://www.v2ph.com/album/a8n7me7a.html",
           "verified_image_count": 10,
           "claimed_image_count": null
+        },
+        {
+          "source_type": "pixibb_public",
+          "id": "pixibb-auto-djawa-photo-mimmi-azur-lane-ijn-atago-amp-takao-61-photos-cosplay",
+          "source": "https://cosplay.pixibb.com/djawa-photo-mimmi-azur-lane-ijn-atago-amp-takao-61-photos-cosplay/",
+          "verified_image_count": 20,
+          "claimed_image_count": 61
         }
       ],
       "completeness": "partial_public_previews"
@@ -8022,7 +9204,8 @@
       "publisher": "DJAWA",
       "source": "https://djawaphoto.com/portfolio/nikke-elegg/",
       "source_pages": [
-        "https://djawaphoto.com/portfolio/nikke-elegg/"
+        "https://djawaphoto.com/portfolio/nikke-elegg/",
+        "https://cosplay.pixibb.com/djawa-photo-mimmi-nikke-elegg-154-photos/"
       ],
       "images": [
         {
@@ -8200,6 +9383,226 @@
           "bytes": 206433,
           "quality": "official_public_sample",
           "publisher_original_verified": false
+        },
+        {
+          "number": 17,
+          "url": "https://imgx005.pixibb.com/2026/10/01/57819/DJAWA-Photo-Mimmi-meme-Nikke-Elegg-PixiBB.COM-001.jpg",
+          "source_url": "https://imgx005.pixibb.com/2026/10/01/57819/DJAWA-Photo-Mimmi-meme-Nikke-Elegg-PixiBB.COM-001.jpg",
+          "sha256": "657b82890b2a4c575eb0b007b7ce6e85e7164397fb0728187968f2fc7db4e7a6",
+          "width": 912,
+          "height": 1368,
+          "bytes": 143064,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 18,
+          "url": "https://imgx005.pixibb.com/2026/10/01/57819/DJAWA-Photo-Mimmi-meme-Nikke-Elegg-PixiBB.COM-002.jpg",
+          "source_url": "https://imgx005.pixibb.com/2026/10/01/57819/DJAWA-Photo-Mimmi-meme-Nikke-Elegg-PixiBB.COM-002.jpg",
+          "sha256": "0349ba9c633ff893798510ecdcce7d3f42b9dcd70e0c57cf4b47176fa6fbae05",
+          "width": 912,
+          "height": 1368,
+          "bytes": 153353,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 19,
+          "url": "https://imgx005.pixibb.com/2026/10/01/57819/DJAWA-Photo-Mimmi-meme-Nikke-Elegg-PixiBB.COM-003.jpg",
+          "source_url": "https://imgx005.pixibb.com/2026/10/01/57819/DJAWA-Photo-Mimmi-meme-Nikke-Elegg-PixiBB.COM-003.jpg",
+          "sha256": "9424ed37390b22c88fa2a9c32530fd8c6d846300656fa6d5de273aca476051ff",
+          "width": 912,
+          "height": 1368,
+          "bytes": 137559,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 20,
+          "url": "https://imgx005.pixibb.com/2026/10/01/57819/DJAWA-Photo-Mimmi-meme-Nikke-Elegg-PixiBB.COM-004.jpg",
+          "source_url": "https://imgx005.pixibb.com/2026/10/01/57819/DJAWA-Photo-Mimmi-meme-Nikke-Elegg-PixiBB.COM-004.jpg",
+          "sha256": "f052688dd14be76d091e84978a6c7a9d5e957d0e1e00908576776fa78981a9f2",
+          "width": 912,
+          "height": 1368,
+          "bytes": 130837,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 21,
+          "url": "https://imgx005.pixibb.com/2026/10/01/57819/DJAWA-Photo-Mimmi-meme-Nikke-Elegg-PixiBB.COM-005.jpg",
+          "source_url": "https://imgx005.pixibb.com/2026/10/01/57819/DJAWA-Photo-Mimmi-meme-Nikke-Elegg-PixiBB.COM-005.jpg",
+          "sha256": "7dd18d69af2c9d8120ade5cec553493d9694978f19ca86a162171fe34e19359e",
+          "width": 912,
+          "height": 1368,
+          "bytes": 126450,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 22,
+          "url": "https://imgx005.pixibb.com/2026/10/01/57819/DJAWA-Photo-Mimmi-meme-Nikke-Elegg-PixiBB.COM-006.jpg",
+          "source_url": "https://imgx005.pixibb.com/2026/10/01/57819/DJAWA-Photo-Mimmi-meme-Nikke-Elegg-PixiBB.COM-006.jpg",
+          "sha256": "985139620538cc3fc326dcc4473704a6e84e5ebc3708f09cae98d3341093d13b",
+          "width": 912,
+          "height": 1368,
+          "bytes": 142631,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 23,
+          "url": "https://imgx005.pixibb.com/2026/10/01/57819/DJAWA-Photo-Mimmi-meme-Nikke-Elegg-PixiBB.COM-007.jpg",
+          "source_url": "https://imgx005.pixibb.com/2026/10/01/57819/DJAWA-Photo-Mimmi-meme-Nikke-Elegg-PixiBB.COM-007.jpg",
+          "sha256": "aa3b687cfe2014e388f5c89f65e17bf9df2b1da666f73a3c8ad8e258a4ad8177",
+          "width": 912,
+          "height": 1368,
+          "bytes": 121527,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 24,
+          "url": "https://imgx005.pixibb.com/2026/10/01/57819/DJAWA-Photo-Mimmi-meme-Nikke-Elegg-PixiBB.COM-008.jpg",
+          "source_url": "https://imgx005.pixibb.com/2026/10/01/57819/DJAWA-Photo-Mimmi-meme-Nikke-Elegg-PixiBB.COM-008.jpg",
+          "sha256": "e961f39a084b0b05a31c86f972fed52631ccdbaf385472646d06873329adf545",
+          "width": 912,
+          "height": 1368,
+          "bytes": 121437,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 25,
+          "url": "https://imgx005.pixibb.com/2026/10/01/57819/DJAWA-Photo-Mimmi-meme-Nikke-Elegg-PixiBB.COM-009.jpg",
+          "source_url": "https://imgx005.pixibb.com/2026/10/01/57819/DJAWA-Photo-Mimmi-meme-Nikke-Elegg-PixiBB.COM-009.jpg",
+          "sha256": "e29a9c417feca384257515f9f3e383d92efe5ad0d13b34c9ea424d51c8e16371",
+          "width": 912,
+          "height": 1368,
+          "bytes": 135694,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 26,
+          "url": "https://imgx005.pixibb.com/2026/10/01/57819/DJAWA-Photo-Mimmi-meme-Nikke-Elegg-PixiBB.COM-010.jpg",
+          "source_url": "https://imgx005.pixibb.com/2026/10/01/57819/DJAWA-Photo-Mimmi-meme-Nikke-Elegg-PixiBB.COM-010.jpg",
+          "sha256": "ff6987795692664a16503f35e5f6b7e8f1f61dd79e426ea9965261115959d9b7",
+          "width": 912,
+          "height": 1368,
+          "bytes": 100460,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 27,
+          "url": "https://imgx005.pixibb.com/2026/10/01/57819/DJAWA-Photo-Mimmi-meme-Nikke-Elegg-PixiBB.COM-011.jpg",
+          "source_url": "https://imgx005.pixibb.com/2026/10/01/57819/DJAWA-Photo-Mimmi-meme-Nikke-Elegg-PixiBB.COM-011.jpg",
+          "sha256": "97eae284b95cc1b6543571c8e4111f0d623d8c0a65285c68fecbe78656101758",
+          "width": 912,
+          "height": 1368,
+          "bytes": 92144,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 28,
+          "url": "https://imgx005.pixibb.com/2026/10/01/57819/DJAWA-Photo-Mimmi-meme-Nikke-Elegg-PixiBB.COM-012.jpg",
+          "source_url": "https://imgx005.pixibb.com/2026/10/01/57819/DJAWA-Photo-Mimmi-meme-Nikke-Elegg-PixiBB.COM-012.jpg",
+          "sha256": "3725cbd87298efe917bbda38dd33434dfc9da0d3cf13f902d336cda599b418dc",
+          "width": 912,
+          "height": 1368,
+          "bytes": 153692,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 29,
+          "url": "https://imgx005.pixibb.com/2026/10/01/57819/DJAWA-Photo-Mimmi-meme-Nikke-Elegg-PixiBB.COM-013.jpg",
+          "source_url": "https://imgx005.pixibb.com/2026/10/01/57819/DJAWA-Photo-Mimmi-meme-Nikke-Elegg-PixiBB.COM-013.jpg",
+          "sha256": "e4c787b775ea7574ef1c322a9911b90115d9c0b2daf77f6cf33853daa4b750fb",
+          "width": 912,
+          "height": 1368,
+          "bytes": 151535,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 30,
+          "url": "https://imgx005.pixibb.com/2026/10/01/57819/DJAWA-Photo-Mimmi-meme-Nikke-Elegg-PixiBB.COM-014.jpg",
+          "source_url": "https://imgx005.pixibb.com/2026/10/01/57819/DJAWA-Photo-Mimmi-meme-Nikke-Elegg-PixiBB.COM-014.jpg",
+          "sha256": "e6e23eec92dcf811652c1ef56bbd7646e91648223fe7b73204a7a25c3f57738e",
+          "width": 912,
+          "height": 1368,
+          "bytes": 159860,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 31,
+          "url": "https://imgx005.pixibb.com/2026/10/01/57819/DJAWA-Photo-Mimmi-meme-Nikke-Elegg-PixiBB.COM-015.jpg",
+          "source_url": "https://imgx005.pixibb.com/2026/10/01/57819/DJAWA-Photo-Mimmi-meme-Nikke-Elegg-PixiBB.COM-015.jpg",
+          "sha256": "4478c547ecc8595f83b6415449f34fb3de51948ac3027d01b71738a7757a8c9a",
+          "width": 1368,
+          "height": 912,
+          "bytes": 104199,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 32,
+          "url": "https://imgx005.pixibb.com/2026/10/01/57819/DJAWA-Photo-Mimmi-meme-Nikke-Elegg-PixiBB.COM-016.jpg",
+          "source_url": "https://imgx005.pixibb.com/2026/10/01/57819/DJAWA-Photo-Mimmi-meme-Nikke-Elegg-PixiBB.COM-016.jpg",
+          "sha256": "6baf2eebf32e040bd6cbd28dfdfb2ad2e4f94b5ebe5a726251da4fdefed43012",
+          "width": 1368,
+          "height": 912,
+          "bytes": 189554,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 33,
+          "url": "https://imgx005.pixibb.com/2026/10/01/57819/DJAWA-Photo-Mimmi-meme-Nikke-Elegg-PixiBB.COM-017.jpg",
+          "source_url": "https://imgx005.pixibb.com/2026/10/01/57819/DJAWA-Photo-Mimmi-meme-Nikke-Elegg-PixiBB.COM-017.jpg",
+          "sha256": "e100761144837a693de39033d4fd18b4c0ea0041e1a9a6e91fdb489a35d92304",
+          "width": 912,
+          "height": 1368,
+          "bytes": 157845,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 34,
+          "url": "https://imgx005.pixibb.com/2026/10/01/57819/DJAWA-Photo-Mimmi-meme-Nikke-Elegg-PixiBB.COM-018.jpg",
+          "source_url": "https://imgx005.pixibb.com/2026/10/01/57819/DJAWA-Photo-Mimmi-meme-Nikke-Elegg-PixiBB.COM-018.jpg",
+          "sha256": "daebb3c1a669963ccfdb8fba68e5cd7d5a19ae1b3c2eba71dcd2cc7380bb97f9",
+          "width": 1368,
+          "height": 912,
+          "bytes": 171782,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 35,
+          "url": "https://imgx005.pixibb.com/2026/10/01/57819/DJAWA-Photo-Mimmi-meme-Nikke-Elegg-PixiBB.COM-019.jpg",
+          "source_url": "https://imgx005.pixibb.com/2026/10/01/57819/DJAWA-Photo-Mimmi-meme-Nikke-Elegg-PixiBB.COM-019.jpg",
+          "sha256": "a5fe15b62f0ad948b726d1fdefb0bd2f8e6c2801eaca65f9f6ac27ad2bfcf2aa",
+          "width": 1368,
+          "height": 912,
+          "bytes": 169173,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 36,
+          "url": "https://imgx005.pixibb.com/2026/10/01/57819/DJAWA-Photo-Mimmi-meme-Nikke-Elegg-PixiBB.COM-020.jpg",
+          "source_url": "https://imgx005.pixibb.com/2026/10/01/57819/DJAWA-Photo-Mimmi-meme-Nikke-Elegg-PixiBB.COM-020.jpg",
+          "sha256": "f2c90cf73935115da7846dd33d0ea82afdc45a6534311ca3e16b9befeae49244",
+          "width": 1368,
+          "height": 912,
+          "bytes": 144337,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
         }
       ],
       "sourceHosted": true,
@@ -8224,6 +9627,13 @@
           "source": "https://djawaphoto.com/portfolio/nikke-elegg/",
           "verified_image_count": 1,
           "claimed_image_count": null
+        },
+        {
+          "source_type": "pixibb_public",
+          "id": "pixibb-auto-djawa-photo-mimmi-nikke-elegg-154-photos",
+          "source": "https://cosplay.pixibb.com/djawa-photo-mimmi-nikke-elegg-154-photos/",
+          "verified_image_count": 20,
+          "claimed_image_count": 154
         }
       ],
       "completeness": "partial_public_previews"
@@ -10224,6 +11634,255 @@
           "source": "https://www.v2ph.com/album/z6exx6ma.html",
           "verified_image_count": 10,
           "claimed_image_count": null
+        }
+      ],
+      "completeness": "partial_public_previews"
+    },
+    {
+      "id": "pixibb-auto-djawa-photo-mimmi-witchs-witchcraft-151-photos-cosplay",
+      "title": "Witch's Witchcraft",
+      "publisher": "독립 화보",
+      "source": "https://cosplay.pixibb.com/djawa-photo-mimmi-witchs-witchcraft-151-photos-cosplay/",
+      "source_pages": [
+        "https://cosplay.pixibb.com/djawa-photo-mimmi-witchs-witchcraft-151-photos-cosplay/"
+      ],
+      "images": [
+        {
+          "number": 1,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Witchs-Witchcraft-PixiBB.COM-151.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Witchs-Witchcraft-PixiBB.COM-151.jpg",
+          "sha256": "25dec1e42025c600189f4cbfb6bcf0849590719675a3e4a1648475fa1a3786e9",
+          "width": 912,
+          "height": 1368,
+          "bytes": 271506,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 2,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Witchs-Witchcraft-PixiBB.COM-150.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Witchs-Witchcraft-PixiBB.COM-150.jpg",
+          "sha256": "3f6680633e2a43baa1f9a95db17007350da55239cc6be1c22be3f2b8af9a2545",
+          "width": 1368,
+          "height": 912,
+          "bytes": 272722,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 3,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Witchs-Witchcraft-PixiBB.COM-149.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Witchs-Witchcraft-PixiBB.COM-149.jpg",
+          "sha256": "058d7d18aed966545e380ebe8cef936e23ed51ff5aad58f8fc895749ad887d02",
+          "width": 912,
+          "height": 1368,
+          "bytes": 154812,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 4,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Witchs-Witchcraft-PixiBB.COM-148.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Witchs-Witchcraft-PixiBB.COM-148.jpg",
+          "sha256": "4113cd52281bbcb8009bced7f8b4a58fb2e32788a33e26f97eda1cebf461c51f",
+          "width": 912,
+          "height": 1368,
+          "bytes": 156789,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 5,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Witchs-Witchcraft-PixiBB.COM-147.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Witchs-Witchcraft-PixiBB.COM-147.jpg",
+          "sha256": "f66d8f657435de125873c11ccc02068b7aaad9d82d6e0d7cb6e179996d5304fa",
+          "width": 912,
+          "height": 1368,
+          "bytes": 151601,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 6,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Witchs-Witchcraft-PixiBB.COM-144.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Witchs-Witchcraft-PixiBB.COM-144.jpg",
+          "sha256": "212a879c6e4903ec9bd23c7182e5839d7f8c44628fe2f1d6cf80375474869a47",
+          "width": 912,
+          "height": 1368,
+          "bytes": 202948,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 7,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Witchs-Witchcraft-PixiBB.COM-146.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Witchs-Witchcraft-PixiBB.COM-146.jpg",
+          "sha256": "c1e1d5dbe4e952fa4d13a10c1b8746d2c69f54ba2dd99ed14f28427e1f8d13ad",
+          "width": 912,
+          "height": 1368,
+          "bytes": 221495,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 8,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Witchs-Witchcraft-PixiBB.COM-145.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Witchs-Witchcraft-PixiBB.COM-145.jpg",
+          "sha256": "5b3a0da9842db1c24275e2866147e495a3e4baa0eba10b9702a7eb38fa6e7041",
+          "width": 912,
+          "height": 1368,
+          "bytes": 221842,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 9,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Witchs-Witchcraft-PixiBB.COM-143.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Witchs-Witchcraft-PixiBB.COM-143.jpg",
+          "sha256": "7d591578665192fcfd4ab038b0a6b5167d852d1d0e5a3f77d2d585fbf18429ca",
+          "width": 912,
+          "height": 1368,
+          "bytes": 206384,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 10,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Witchs-Witchcraft-PixiBB.COM-142.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Witchs-Witchcraft-PixiBB.COM-142.jpg",
+          "sha256": "d6df292aa88335b5cc5878265894cce929b9a878ce35a2a1e3c4244a674140f6",
+          "width": 912,
+          "height": 1368,
+          "bytes": 194861,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 11,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Witchs-Witchcraft-PixiBB.COM-141.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Witchs-Witchcraft-PixiBB.COM-141.jpg",
+          "sha256": "1b562ae893c80daa1e5c3525e2e4eb0ae0213b162894d77dd3e555b5ca329dce",
+          "width": 912,
+          "height": 1368,
+          "bytes": 191686,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 12,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Witchs-Witchcraft-PixiBB.COM-140.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Witchs-Witchcraft-PixiBB.COM-140.jpg",
+          "sha256": "1dff8e83b962d378bb35648c78884fd349fabeb8f469ea71a0f57c6294caefb9",
+          "width": 1368,
+          "height": 912,
+          "bytes": 216206,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 13,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Witchs-Witchcraft-PixiBB.COM-139.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Witchs-Witchcraft-PixiBB.COM-139.jpg",
+          "sha256": "1f53d860b0652e8a0455b5fe500c544060dd8fba909df89ac8e5aedf89889e14",
+          "width": 912,
+          "height": 1368,
+          "bytes": 207060,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 14,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Witchs-Witchcraft-PixiBB.COM-136.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Witchs-Witchcraft-PixiBB.COM-136.jpg",
+          "sha256": "85b485ba6263cbd7abed7377331156c6186cb2c4f9dcae7abf9cb31431198d25",
+          "width": 1368,
+          "height": 912,
+          "bytes": 206860,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 15,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Witchs-Witchcraft-PixiBB.COM-138.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Witchs-Witchcraft-PixiBB.COM-138.jpg",
+          "sha256": "2cbd0fe97a61150db8b0e48dc44ba14c4695c659065b894f8112f6ae3d3a4e76",
+          "width": 912,
+          "height": 1368,
+          "bytes": 224465,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 16,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Witchs-Witchcraft-PixiBB.COM-137.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Witchs-Witchcraft-PixiBB.COM-137.jpg",
+          "sha256": "35c6d7266d0e6a6eb65eb96608e751598f0ea47a395ad51bafe39f63fb8bc7bb",
+          "width": 912,
+          "height": 1368,
+          "bytes": 196119,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 17,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Witchs-Witchcraft-PixiBB.COM-135.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Witchs-Witchcraft-PixiBB.COM-135.jpg",
+          "sha256": "20c19b4ee7983c795b8a205fe451d958ecc43957f370ff9067ec28cdc0f27df1",
+          "width": 912,
+          "height": 1368,
+          "bytes": 222156,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 18,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Witchs-Witchcraft-PixiBB.COM-134.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Witchs-Witchcraft-PixiBB.COM-134.jpg",
+          "sha256": "7fe1c31f7f47343d2545e525c4781fbc2720544dba73f866b94e27a5d27c9aa7",
+          "width": 912,
+          "height": 1368,
+          "bytes": 207359,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 19,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Witchs-Witchcraft-PixiBB.COM-133.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Witchs-Witchcraft-PixiBB.COM-133.jpg",
+          "sha256": "e840b2fbdc46911bc05c3866f5f5858faa731eb5ac53b132e01b25907ff490f7",
+          "width": 912,
+          "height": 1368,
+          "bytes": 226189,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        },
+        {
+          "number": 20,
+          "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Witchs-Witchcraft-PixiBB.COM-132.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Witchs-Witchcraft-PixiBB.COM-132.jpg",
+          "sha256": "a1a6ca4a0ac1dd8f7545c8f4c8bc497c28b1f4934099bb67776544e4cd8992dd",
+          "width": 912,
+          "height": 1368,
+          "bytes": 246270,
+          "quality": "third_party_public_watermarked_web",
+          "publisher_original_verified": false
+        }
+      ],
+      "sourceHosted": true,
+      "status": "verified_collected_individual_files_source_hosted_online_view",
+      "quality": "public_web",
+      "publisher_original_verified": false,
+      "model": "mimmi",
+      "expected": 151,
+      "photos": 151,
+      "ai_enhanced": false,
+      "original_sources": [
+        {
+          "source_type": "pixibb_public",
+          "id": "pixibb-auto-djawa-photo-mimmi-witchs-witchcraft-151-photos-cosplay",
+          "source": "https://cosplay.pixibb.com/djawa-photo-mimmi-witchs-witchcraft-151-photos-cosplay/",
+          "verified_image_count": 20,
+          "claimed_image_count": 151
         }
       ],
       "completeness": "partial_public_previews"
