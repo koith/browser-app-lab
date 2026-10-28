@@ -71,9 +71,45 @@ def get_bytes_verified(url):
         print("V2PH_IMAGE_SKIPPED",type(error).__name__,url[:100],flush=True)
         return None
 
+def preserve_verified_samples(fresh, historical, limit):
+    """Retain SHA-verified public URLs during transient failures.
+
+    Past HTTP success is NOT a claim of current client availability.
+    Never confuse source links with permanently stored originals.
+    """
+    output=[]
+    seen=set()
+    fresh_hashes={p.get("sha256") for p in fresh}
+    for photo in fresh+historical:
+        digest=photo.get("sha256","")
+        url=photo.get("url","")
+        if (not re.fullmatch(r"[a-f0-9]{64}",digest) or not safe_photo(url)
+            or not isinstance(photo.get("bytes"),int) or photo["bytes"]<4500
+            or not isinstance(photo.get("width"),int) or not isinstance(photo.get("height"),int)
+            or min(photo["width"],photo["height"])<300 or digest in seen):
+            continue
+        out=dict(photo)
+        out["number"]=len(output)+1
+        if digest not in fresh_hashes:
+            out["carried_from_previous_verification"]=True
+        else:
+            out.pop("carried_from_previous_verification",None)
+        output.append(out)
+        seen.add(digest)
+        if len(output)>=limit:break
+    return output
+
 def run(max_pages=10,max_per_album=40):
     d=json.loads((ROOT/"v2ph-targets.json").read_text())
     found=[]
+    prior_path=ROOT/"v2ph-public-previews.json"
+    prior={}
+    if prior_path.exists():
+        try:
+            past=json.loads(prior_path.read_text(encoding="utf-8"))
+            prior={a["id"]:a.get("samples",[]) for a in past.get("albums",[]) if isinstance(a,dict) and a.get("id")}
+        except (OSError,ValueError,KeyError,TypeError):
+            print("V2PH_PREVIOUS_EVIDENCE_UNAVAILABLE",flush=True)
     for album in d["albums"]:
         aid=album["id"]
         raw_url=album["source"]
@@ -109,9 +145,14 @@ def run(max_pages=10,max_per_album=40):
             except Exception as err:
                 print("V2PH_PAGE_ERROR",aid,page,type(err).__name__,str(err)[:120],flush=True)
                 break
-        found.append({"id":"v2ph-"+aid,"title":title+" · 공개 웹판","publisher":"DJAWA",
+        record_id="v2ph-"+aid
+        fresh_count=len(entries)
+        entries=preserve_verified_samples(entries,prior.get(record_id,[]),max_per_album)
+        found.append({"id":record_id,"title":title+" · 공개 웹판","publisher":"DJAWA",
                       "source":raw_url,"advertised_photos":album.get("advertised_photos"),
                       "images":[],"samples":entries,"pages":visited_pages,
+                      "fresh_http_verified":fresh_count,
+                      "carried_from_previous_verification":sum(bool(p.get("carried_from_previous_verification")) for p in entries),
                       "status":"v2ph_public_samples_verified" if entries else "no_public_samples_verified"})
     payload={"schema_version":1,"version":"v0.1.0-mimmi.2",
              "generated_at":datetime.now(timezone.utc).isoformat(),
