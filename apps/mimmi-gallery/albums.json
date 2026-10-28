@@ -3,7 +3,7 @@
     "id": "mimmi",
     "name": "밈미"
   },
-  "version": "v0.1.0-mimmi.6",
+  "version": "v0.1.0-mimmi.7",
   "albums": [
     {
       "id": "v2ph-actor-a9nxx64z",
@@ -1251,8 +1251,8 @@
   ],
   "summary": {
     "displayed_albums": 63,
-    "verified_unique_source_images": 718,
-    "input_source_image_occurrences": 748,
+    "verified_unique_source_images": 719,
+    "input_source_image_occurrences": 749,
     "duplicate_hashes_skipped": 30,
     "actual_full_publisher_photobooks": 0,
     "incomplete_known_count_albums": 22,
