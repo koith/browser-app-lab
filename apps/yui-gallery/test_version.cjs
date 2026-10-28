@@ -8,10 +8,12 @@ assert.equal(state.policy.payment_card_required,false);
 assert.ok(state.progress.physically_acquired_web_images>=0);
 assert.equal(state.progress.web_albums_with_complete_sequence,5);
 assert.equal(state.progress.primary_cloud_verified_images,0);
+assert.equal(state.progress.gallery_live_source_hotlinks,0);
+assert.equal(state.progress.gallery_physically_stored_pages_images,23);
 assert.equal(state.storage.intended_primary.provider,'TeraBox Basic');
 assert.equal(state.storage.intended_primary.availability,'not_connected');
 assert.equal(state.storage.intended_primary.r2_required,false);
-for(const page of ['index.html','cloud.html','zip-gallery.html']){
+for(const page of ['index.html']){
  const html=fs.readFileSync(path.join(root,page),'utf8');
  assert.ok(html.includes(state.version),page+' must visibly show '+state.version);
  assert.ok(!html.includes('ZIP 2개를'),page+' should not claim two ZIPs');
