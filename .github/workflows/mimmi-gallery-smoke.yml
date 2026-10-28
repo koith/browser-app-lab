@@ -26,14 +26,21 @@ jobs:
           node apps/mimmi-gallery/test_mobile_album.cjs
       - name: Verify iPhone-like WebKit source-host images and graceful fallback
         run: node apps/mimmi-gallery/test_webkit_photo.cjs
-      - name: Save individual screenshot evidence, without archive packaging
+      - name: Save individual Chromium screenshot evidence
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: mimmi-gallery-mobile-preview
-          path: |
-            mimmi-mobile-v4.png
-            mimmi-webkit-v4.png
+          name: mimmi-chromium-single-screenshot
+          path: mimmi-mobile-v4.png
+          archive: false
+          retention-days: 30
+          if-no-files-found: ignore
+      - name: Save individual WebKit screenshot evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: mimmi-webkit-single-screenshot
+          path: mimmi-webkit-v4.png
           archive: false
           retention-days: 30
           if-no-files-found: ignore
