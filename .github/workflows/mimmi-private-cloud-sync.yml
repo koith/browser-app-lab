@@ -5,6 +5,8 @@ on:
     paths:
       - 'apps/mimmi-gallery/cloud/**'
       - 'apps/mimmi-gallery/download_public_images_private.py'
+      - 'apps/mimmi-gallery/source-viewer-albums.json'
+      - 'apps/mimmi-gallery/build_model_gallery.py'
       - '.github/workflows/mimmi-private-cloud-sync.yml'
   schedule:
     - cron: '10 17 * * 1,4'
@@ -16,7 +18,7 @@ concurrency:
 jobs:
   sync:
     runs-on: ubuntu-24.04
-    timeout-minutes: 95
+    timeout-minutes: 115
     env:
       RCLONE_CONFIG_ARCHIVE_COOKIE: ${{ secrets.MIMMI_TERABOX_NDUS || secrets.YUI_TERABOX_NDUS || secrets.YUI_TERABOX_COOKIE }}
     steps:
@@ -24,5 +26,14 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Offline QA and authenticated Mimmi-only cloud sync
+      - name: Fail visibly if the private TeraBox account is not connected
+        shell: bash
+        run: |
+          if [[ -z "${RCLONE_CONFIG_ARCHIVE_COOKIE:-}" ]]; then
+            echo "::error title=NO PRIVATE ARCHIVE::MIMMI_TERABOX_NDUS (or YUI_TERABOX_COOKIE) is not set. No files were stored. Add the secret in GitHub Settings > Secrets and variables > Actions."
+            echo "### ⚠️ 밈미 사진 실제 저장 0장 — TeraBox 인증 정보가 연결되지 않았습니다." >> "$GITHUB_STEP_SUMMARY"
+            echo "계정 세션은 GitHub Actions Secret에만 입력하세요. 채팅/코드/이슈에 붙여넣지 마세요." >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+      - name: Download every verified public photo and upload with remote SHA-256 readback
         run: bash apps/mimmi-gallery/cloud/run_private_sync.sh
