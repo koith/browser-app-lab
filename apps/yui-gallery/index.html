@@ -66,6 +66,11 @@ h1{margin:8px 0 0;font-weight:750;font-size:clamp(34px,5vw,56px);letter-spacing:
 .photo{margin:0;display:block;position:relative;cursor:pointer;background:#24262b;border:0;padding:0;width:100%;overflow:hidden}
 .photo img{display:block;width:100%;height:auto;aspect-ratio:2/3;object-fit:cover;transition:transform .25s}
 .photo:hover img{transform:scale(1.035)}
+.photo[data-image-state="failed"] img,.album[data-image-state="failed"] img{visibility:hidden}
+.photo[data-image-state="failed"]{aspect-ratio:2/3}
+.photo[data-image-state="failed"] img{position:absolute;inset:0;width:100%;height:100%;aspect-ratio:auto}
+.photo[data-image-state="failed"]::after,.album[data-image-state="failed"]::after{content:attr(data-image-error);position:absolute;inset:0;display:grid;place-items:center;padding:24px 12px;color:#999aa0;font-size:11px;line-height:1.6;text-align:center;pointer-events:none}
+#detail-media-status{margin:0 0 9px;color:#999aa0;font-size:11px;line-height:1.5}
 .photo[data-rotation]{aspect-ratio:2/3}
 .photo[data-rotation] img{position:absolute;left:50%;top:50%;width:150%;height:66.666667%;aspect-ratio:auto;transform:translate(-50%,-50%) rotate(var(--photo-rotation))}
 .photo[data-rotation]:hover img{transform:translate(-50%,-50%) rotate(var(--photo-rotation)) scale(1.035)}
@@ -81,6 +86,8 @@ footer{border-top:1px solid #292b30;padding:27px 0 55px;color:#84858b;font-size:
 #lightbox{position:fixed;inset:0;z-index:20;background:#07080af8;display:none;align-items:center;justify-content:center;padding:65px 0 6px;touch-action:auto}
 #lightbox.open{display:flex}
 .media-frame{position:relative;display:flex;max-width:100%;line-height:0}
+.media-frame[data-image-state="failed"]{min-width:min(90vw,420px);min-height:220px}
+.media-frame[data-image-state="failed"] #full{visibility:hidden}
 #full{display:block;max-width:min(100vw,1800px);max-height:calc(100dvh - 71px);width:auto;height:auto;object-fit:contain;touch-action:auto;-webkit-touch-callout:default;user-select:auto}
 .lighttop{position:fixed;top:0;left:0;right:0;min-height:60px;padding:calc(env(safe-area-inset-top) + 9px) clamp(14px,3.2vw,48px) 9px;display:flex;align-items:center;gap:12px;color:#a3a4aa;font-size:11px;z-index:3}
 .lightbtn{border:0;background:#262830b5;color:#f4f4f7;width:41px;height:41px;flex-shrink:0;border-radius:50%;font-size:21px;display:grid;place-items:center}
@@ -120,7 +127,7 @@ footer{padding:15px 0 25px;justify-content:flex-end}
  <div class="detail-heading"><button class="back" id="back" aria-label="화보 목록으로 돌아가기">‹</button><h2 class="detail-title" id="albumname"></h2><span class="counter" id="albumtotal"></span></div>
  <nav class="mainnav" aria-label="이동"><a href="cloud.html">클라우드</a></nav>
  <button id="search-toggle" class="search-toggle" aria-label="화보 검색 열기" aria-haspopup="dialog" aria-controls="search-dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button>
- <small id="app-version" class="version-chip">v0.1.0-beta.18</small>
+ <small id="app-version" class="version-chip">v0.1.0-beta.19</small>
 </header>
 <div id="browse">
  <div class="browse-meta"><p class="inventory" id="inventory">화보를 불러오는 중</p><span class="counter" id="total"></span></div>
@@ -131,6 +138,7 @@ footer{padding:15px 0 25px;justify-content:flex-end}
  <div id="nothing" class="empty" hidden>표시할 사진이 없습니다.</div>
 </div>
 <div id="detail" hidden>
+ <p id="detail-media-status" role="status" hidden></p>
  <div id="detailphotos" class="photo-grid"></div>
 </div>
 <footer><span>개별 이미지 · 수집 파일 화질 유지</span></footer>
@@ -143,7 +151,7 @@ footer{padding:15px 0 25px;justify-content:flex-end}
  </form>
 </dialog>
 <div id="lightbox" role="dialog" aria-label="사진 보기" aria-modal="true">
- <div class="lighttop"><button class="lightbtn" id="close" aria-label="닫기">×</button><span id="position"></span><small class="version-chip">v0.1.0-beta.18</small></div>
+ <div class="lighttop"><button class="lightbtn" id="close" aria-label="닫기">×</button><span id="position"></span><small class="version-chip">v0.1.0-beta.19</small></div>
  <button class="lightbtn arrow prev" id="prev" aria-label="이전 사진">‹</button><div class="media-frame"><img id="full" alt="화보 사진"><a id="original" target="_blank" rel="noopener">사진 열기 ↗</a></div><button class="lightbtn arrow next" id="next" aria-label="다음 사진">›</button>
  <p id="media-status" role="status"></p>
 </div>
@@ -166,6 +174,22 @@ function setMode(m,publisher=null){mode=['albums','photos','all','publishers'].i
 function publisherCard(group){const asset=YuiPublishers.logo(group),assetLabel=group.logo?.asset_role==='publisher_profile_branding'?' 발행처 프로필':group.logo?.asset_role==='parent_publisher_brand_reference'?' 발행사 로고':' 로고',image=asset?'<img src="'+esc(asset)+'" alt="'+esc(group.name)+assetLabel+'">':'<span class="publisher-wordmark" role="img" aria-label="'+esc(group.name)+' — 로고 미확인">'+esc(group.name)+'</span>';return '<button class="publisher" data-publisher="'+esc(group.id)+'" data-logo-theme="'+(group.logo?.theme==='light'?'light':'dark')+'" aria-label="'+esc(group.name)+' · 등록 '+group.albums.length+' · 열람 '+group.viewable+'">'+image+'<span class="publisher-info"><strong>'+esc(group.name)+'</strong>등록 '+group.albums.length+' · 열람 '+group.viewable+'</span></button>'}
 function openPublisher(id,record=true){if(!publisherGroups().some(g=>g.id===id))return;if(record)remember({mode:'publishers',publisher:id});setMode('publishers',id);window.scrollTo(0,0)}
 function photosFor(a){return validImages(a).map((p,i)=>({...p,name:getName(a),albumId:a.id,number:p.number??i+1}))}
+// A cross-origin image error does not expose its HTTP status. The user reported
+// a Korean HTTP 451 response from this origin; never call every failure a 451,
+// retry a denied URL automatically, proxy it or replace its original bytes.
+const reportedRestrictedHosts=new Set(['cdn.jliji.com']),failedRestrictedImages=new Set();
+function reportedRestrictedSource(url){try{return reportedRestrictedHosts.has(new URL(url,location.href).hostname)}catch{return false}}
+function imageFailureText(url){return reportedRestrictedSource(url)?'원본 서버 연결 실패 · 한국에서 HTTP 451 접근 제한이 보고된 출처입니다.':'사진 연결 실패 · 원본 서버 또는 네트워크 상태를 확인해 주세요.'}
+function updateImageNotice(){const count=$('detailphotos').querySelectorAll('.photo[data-image-state="failed"]').length;const notice=$('detail-media-status');notice.hidden=!count;notice.textContent=count?count+'장 연결 실패 · 사진을 누르면 출처 확인 가능':''}
+function imageState(image,failed){
+ const container=image.closest('.photo,.album,.media-frame');if(!container)return;
+ if(failed){container.dataset.imageState='failed';container.dataset.imageError=reportedRestrictedSource(image.src)?'원본 서버 접근 제한 가능':'사진 연결 실패';if(reportedRestrictedSource(image.src))failedRestrictedImages.add(image.src)}
+ else{delete container.dataset.imageState;delete container.dataset.imageError;failedRestrictedImages.delete(image.src)}
+ if(image.id==='full')$('media-status').textContent=failed?imageFailureText(image.src):'';
+ updateImageNotice();
+}
+document.addEventListener('error',e=>{if(e.target instanceof HTMLImageElement)imageState(e.target,true)},true);
+document.addEventListener('load',e=>{if(e.target instanceof HTMLImageElement)imageState(e.target,false)},true);
 function photoRotation(p){return [90,270].includes(p?.display_rotation)?p.display_rotation:0}
 function rotationAttributes(p){const angle=photoRotation(p);return angle?' data-rotation="'+angle+'" style="--photo-rotation:'+angle+'deg"':''}
 function card(a,hasImages){
@@ -214,6 +238,7 @@ function openAlbum(id,record=true){
  const photos=photosFor(a);detailAlbum=a;document.body.classList.add('detail-view');$('browse').hidden=true;$('detail').hidden=false;
  $('albumname').textContent=getName(a);$('albumtotal').textContent=photos.length+'장'+(a.expected&&photos.length<a.expected?' / '+a.expected+'장 · 일부':'');
  $('detailphotos').innerHTML=photos.map(photoHTML).join('');
+ updateImageNotice();
  $('detailphotos').querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>openViewer(photos,Number(b.dataset.i)));
  observeOwner();
  window.scrollTo(0,0);
@@ -233,9 +258,9 @@ function showViewer(){
  const p=viewerList[viewerIndex];if(!p)return;
  viewerGeneration++;
  layoutViewer();
+ delete $('full').parentElement.dataset.imageState;
  $('media-status').textContent='불러오는 중';
- $('full').onload=()=>{$('media-status').textContent=''};$('full').onerror=()=>{$('media-status').textContent='사진을 불러오지 못했습니다. 사진 열기로 출처를 확인해 주세요.'};
- $('full').removeAttribute('src');$('full').referrerPolicy='no-referrer';if(p.ownerAlbum){const generation=viewerGeneration;YuiPrivate.asset(p).then(url=>{if(generation===viewerGeneration){$('full').src=url;$('original').href=url}}).catch(error=>{if(generation===viewerGeneration)$('media-status').textContent=error.message})}else $('full').src=p.url;$('full').alt=p.name+' · '+p.number;
+ $('full').removeAttribute('src');$('full').referrerPolicy='no-referrer';if(p.ownerAlbum){const generation=viewerGeneration;YuiPrivate.asset(p).then(url=>{if(generation===viewerGeneration){$('full').src=url;$('original').href=url}}).catch(error=>{if(generation===viewerGeneration)$('media-status').textContent=error.message})}else if(failedRestrictedImages.has(p.url)){$('full').parentElement.dataset.imageState='failed';$('media-status').textContent=imageFailureText(p.url)}else $('full').src=p.url;$('full').alt=p.name+' · '+p.number;
  $('position').textContent=(viewerIndex+1)+' / '+viewerList.length+' · '+p.width+'×'+p.height;
  if(p.ownerAlbum)$('original').removeAttribute('href');else $('original').href=p.url;
 }
