@@ -4,322 +4,319 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#101114">
-<title>MIMMI GALLERY · 밈미</title>
+<meta name="color-scheme" content="dark">
+<title>MIMMI — Gallery</title>
 <style>
-:root{color-scheme:dark;--bg:#101114;--panel:#1a1b20;--line:#34353d;--soft:#24242c;--text:#f5f5f7;--muted:#a4a4b0;--pink:#e9b4c4}
-*{box-sizing:border-box}
+:root{font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Segoe UI",system-ui,sans-serif;color:#f5f5f6;background:#101114;color-scheme:dark}
+*{box-sizing:border-box}body{margin:0}a{color:inherit;text-decoration:none}button,input{font:inherit}button{cursor:pointer}
+.shell{max-width:1480px;margin:0 auto;padding:0 clamp(14px,3.2vw,48px)}
+.topbar{position:relative;height:76px;display:flex;align-items:center;gap:34px;border-bottom:1px solid #2a2b2e}
+.version-chip{position:absolute;top:5px;right:1px;font-size:10px;font-weight:450;letter-spacing:.02em;color:#878891;white-space:nowrap;pointer-events:none}
+.inventory{margin:10px 0 0;color:#999aa0;font-size:12px}
+.mainnav a{border:1px solid #46464d;padding:7px 11px;border-radius:24px;white-space:nowrap}
+.mainnav a[aria-current]{border-color:#d9a6b7;background:#d9a6b7;color:#171419}
+.broken-source img[hidden]{display:none}.album.broken-source::before{content:'출처 이미지 연결 실패';position:absolute;left:12px;top:40%;z-index:2;font-size:12px;color:#ccc}.photo.broken-source::before{content:'원본 사이트 이미지 연결 실패';font-size:11px;color:#bbb;display:block;padding:24px 8px}
+@media(max-width:680px){.logo{font-size:16px;letter-spacing:.06em}.logo span{display:none}.topbar{gap:9px}.mainnav{gap:6px;margin-left:auto}.mainnav a{padding:6px 8px;font-size:11px}.search-toggle{width:32px;height:32px;padding:7px}.version-chip{font-size:9px}}
+.logo{font-size:23px;font-weight:850;letter-spacing:.22em;white-space:nowrap}.logo span{font-size:10px;font-weight:500;letter-spacing:.15em;color:#8a8b8e;margin-left:9px}
+.mainnav{display:flex;align-items:center;gap:25px;margin-left:auto}
+.mainnav a{font-size:13px;color:#babac0;transition:color .2s}.mainnav a:hover{color:#fff}
+.search-toggle{display:grid;place-items:center;width:40px;height:40px;flex-shrink:0;padding:9px;border:0;border-radius:50%;background:#ffffff0d;color:#ffffff80}
+.search-toggle:hover,.search-toggle:focus-visible{color:#fff;background:#ffffff20}
+.search-toggle svg{width:19px;height:19px}
+#search-dialog{position:fixed;inset:0;width:min(420px,calc(100% - 28px));margin:auto;padding:20px;border:1px solid #ffffff25;border-radius:12px;background:#191b20;color:#f5f5f6;box-shadow:0 12px 48px #0008}
+#search-dialog::backdrop{background:#0009;backdrop-filter:blur(3px)}
+.search-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;font-size:14px}
+#search-close{border:0;background:none;color:#ccc;width:36px;height:36px;font-size:25px}
+.topsearch{background:#101114;border:1px solid #393a40;border-radius:8px;width:100%;padding:12px;color:#fff;font-size:16px;outline:none}
+#search-form button[type=submit]{display:block;margin:14px 0 0 auto;padding:9px 18px;border:1px solid #ffffff25;border-radius:7px;background:#303239;color:#fff;font-size:13px}
+.topsearch:focus{border-color:#bbb4a8}.topsearch::placeholder{color:#888992}
+.titleline{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;padding:36px 0 22px}
+.eyebrow{color:#c7bdac;font-size:11px;font-weight:700;letter-spacing:.22em}
+h1{margin:8px 0 0;font-weight:750;font-size:clamp(34px,5vw,56px);letter-spacing:-.055em;line-height:1.05}
+.counter{font-size:12px;color:#98999f;white-space:nowrap}
+.filters{display:flex;align-items:center;gap:25px;border-bottom:1px solid #303136;margin-bottom:22px;overflow:auto}
+.filter{background:none;border:0;border-bottom:2px solid transparent;color:#999aa0;padding:12px 1px 13px;white-space:nowrap;font-size:13px}
+.switch-icon{opacity:.5;margin-left:7px}
+.filter.active{color:#fff;border-bottom-color:#f4f2ec;font-weight:700}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px;margin-bottom:55px}
+.album{position:relative;background:#1b1d21;overflow:hidden;aspect-ratio:3/2;cursor:pointer;display:block;border:0;width:100%;padding:0;text-align:left}
+.album img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 20%;transition:transform .32s ease;opacity:.92}
+.album:hover img{transform:scale(1.045)}
+.publisher{position:relative;display:flex;align-items:center;justify-content:center;aspect-ratio:3/2;width:100%;border:1px solid #ffffff12;background:#1b1d21;color:#f5f5f6;overflow:hidden;padding:26px 18px 42px}
+.publisher img{display:block;max-width:88%;max-height:100%;object-fit:contain}
+.publisher[data-logo-theme="light"]{background:#fff}
+.publisher[data-publisher="pussylet"]{background:#f4b544}
+.publisher[data-publisher="sweetbox"]{padding:0}
+.publisher[data-publisher="sweetbox"] img{position:absolute;inset:0;width:100%;height:100%;max-width:none;max-height:none;object-fit:cover}
+.publisher[data-publisher="sweetbox"] .publisher-info{text-shadow:0 1px 5px #000}
+.publisher[data-logo-theme="light"] .publisher-info{color:#333}
+.publisher-wordmark{font-size:clamp(15px,2vw,24px);font-weight:650;letter-spacing:.04em;text-align:center}
+.publisher-info{position:absolute;left:10px;right:10px;bottom:9px;color:#ffffff80;font-size:10px;text-align:left}
+.publisher-info strong{display:block;font-size:11px;font-weight:500;margin-bottom:3px}
+.publisher-view .detail-heading{display:flex}
+.publisher-view .logo,.publisher-view .mainnav{display:none}
+.publisher-view .topbar{height:calc(60px + env(safe-area-inset-top));gap:12px;flex-wrap:nowrap}
+.publisher-view .browse-meta{display:none}
+.album .gradient{position:absolute;inset:60% 0 0;background:linear-gradient(transparent,#0008)}
+.album .name{position:absolute;bottom:9px;left:9px;right:9px;color:#ffffff73;font-size:clamp(11px,1vw,13px);font-weight:500;line-height:1.25;text-shadow:0 1px 6px #0008;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+.cover-labels{position:absolute;top:8px;left:8px;max-width:calc(100% - 80px);pointer-events:none}
+.publisher-sticker,.edition-sticker{font-size:9px;font-weight:550;line-height:1.35;padding:3px 5px;border:1px solid #ffffff20;border-radius:4px;background:#17191e85;color:#ffffffe0;backdrop-filter:blur(3px)}
+.publisher-sticker{display:inline-block;max-width:100%;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;vertical-align:top}
+.album-count{display:block;margin-top:3px;font-size:9px;line-height:1.3;color:#ffffff88;text-shadow:0 1px 5px #000b;white-space:nowrap}
+.edition-sticker{position:absolute;top:8px;right:8px;pointer-events:none;color:#ffffffb3}
+.edition-sticker[data-kind="ai"]{color:#e3d1f2;background:#29223799}
+.album .placeholder{display:flex;align-items:center;justify-content:center;position:absolute;inset:0;background:linear-gradient(145deg,#33333a,#1a1c21);color:#6d6e72;font-size:54px;font-weight:800}
+.photo-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:11px;align-items:start;margin-bottom:30px}
+.photo{margin:0;display:block;position:relative;cursor:pointer;background:#24262b;border:0;padding:0;width:100%;overflow:hidden}
+.photo img{display:block;width:100%;height:auto;aspect-ratio:2/3;object-fit:cover;transition:transform .25s}
+.photo:hover img{transform:scale(1.035)}
+.photo[data-rotation]{aspect-ratio:2/3}
+.photo[data-rotation] img{position:absolute;left:50%;top:50%;width:150%;height:66.666667%;aspect-ratio:auto;transform:translate(-50%,-50%) rotate(var(--photo-rotation))}
+.photo[data-rotation]:hover img{transform:translate(-50%,-50%) rotate(var(--photo-rotation)) scale(1.035)}
+.album[data-rotation] img{inset:auto;left:50%;top:50%;width:66.666667%;height:150%;transform:translate(-50%,-50%) rotate(var(--photo-rotation))}
+.photo span{position:absolute;bottom:0;left:0;right:0;padding:20px 10px 9px;background:linear-gradient(transparent,#000c);font-size:11px;color:#f5f5f5;opacity:0;transition:opacity .2s;text-align:left}
+.photo:hover span{opacity:1}
+.subnav{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:24px}
+.back{background:none;border:0;color:#c9c9cb;padding:0;font-size:13px}
+.detail-title{font-size:clamp(24px,4vw,38px);font-weight:750;letter-spacing:-.035em;margin:0 0 5px}
+.detail-count{font-size:12px;color:#92939a;margin:0 0 22px}
+.empty{padding:90px 18px;text-align:center;color:#98999f}
+footer{border-top:1px solid #292b30;padding:27px 0 55px;color:#84858b;font-size:11px;display:flex;justify-content:space-between;gap:18px}
+#lightbox{position:fixed;inset:0;z-index:20;background:#07080af8;display:none;align-items:center;justify-content:center;padding:65px 0 6px;touch-action:auto}
+#lightbox.open{display:flex}
+.media-frame{position:relative;display:flex;max-width:100%;line-height:0}
+#full{display:block;max-width:min(100vw,1800px);max-height:calc(100dvh - 71px);width:auto;height:auto;object-fit:contain;touch-action:auto;-webkit-touch-callout:default;user-select:auto}
+.lighttop{position:fixed;top:0;left:0;right:0;min-height:60px;padding:calc(env(safe-area-inset-top) + 9px) clamp(14px,3.2vw,48px) 9px;display:flex;align-items:center;gap:12px;color:#a3a4aa;font-size:11px;z-index:3}
+.lightbtn{border:0;background:#262830b5;color:#f4f4f7;width:41px;height:41px;flex-shrink:0;border-radius:50%;font-size:21px;display:grid;place-items:center}
+#original{position:absolute;right:10px;bottom:10px;border:1px solid #ffffff25;background:#17191e55;color:#fff;border-radius:7px;padding:10px 12px;font-size:12px;line-height:1;backdrop-filter:blur(2px);opacity:.55;transition:opacity .15s}
+#original:focus-visible{opacity:1;outline:2px solid #fff;outline-offset:2px}
+@media(hover:hover){#original:hover{opacity:.9}}
+#original:not([href]){display:none}
+#media-status{position:absolute;bottom:65px;left:15px;right:15px;text-align:center;font-size:12px;color:#ccc;pointer-events:none}
+.arrow{position:absolute;top:48%;z-index:2}.arrow.prev{left:17px}.arrow.next{right:17px}
+button:focus-visible,a:focus-visible{outline:2px solid #ddd4c7;outline-offset:3px}
 [hidden]{display:none!important}
-body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Noto Sans KR",sans-serif}
-button,input,a{font:inherit}
-button{cursor:pointer}
-a{color:var(--pink)}
-.site-header{position:sticky;top:0;z-index:30;background:#101114ef;border-bottom:1px solid var(--line);backdrop-filter:blur(18px);padding:24px max(14px,env(safe-area-inset-right)) 12px;min-height:78px}
-.header-inner{max-width:1250px;margin:auto;display:flex;align-items:center;gap:13px}
-.brand{font-size:clamp(14px,3.4vw,21px);font-weight:800;letter-spacing:1.3px;white-space:nowrap}
-.model-nav{display:flex;gap:8px;align-items:center}
-.model-nav a{padding:7px 13px;border:1px solid #34343b;border-radius:24px;color:#b9bac3;text-decoration:none;white-space:nowrap;font-weight:600}
-.model-nav a[aria-current]{background:var(--pink);color:#161217;border-color:var(--pink)}
-.version{position:absolute;top:5px;right:max(14px,env(safe-area-inset-right));color:#888894;font-size:10px;letter-spacing:.01em;line-height:1}
-main{max-width:1250px;margin:auto;padding:26px 16px 90px}
-.hero{display:flex;justify-content:space-between;gap:14px;align-items:flex-end;margin-bottom:22px}
-.hero h1{margin:0;font-size:29px;letter-spacing:-.6px}
-.hero h1 span{font-size:16px;color:#a2a2ae;font-weight:500;letter-spacing:0}
-.hero p{margin:8px 0 0;color:var(--muted);font-size:13px}
-.metrics{text-align:right;font-size:12px;color:var(--muted);min-width:100px}
-.toolbar{margin:20px 0 18px;display:flex;flex-direction:column;gap:12px}
-.search{display:block;width:100%;border:1px solid #393a44;border-radius:12px;padding:13px 15px;background:var(--panel);color:#fafafa;outline-offset:3px}
-.filter-row{display:flex;gap:7px;align-items:center;overflow-x:auto;scrollbar-width:none}
-.filter-row button{border:1px solid #34343e;border-radius:25px;background:#1a1b20;color:#bbbcc5;padding:8px 14px;white-space:nowrap;font-size:13px}
-.filter-row button[aria-pressed="true"]{background:#e8b5c4;color:#171318;font-weight:700;border-color:#e8b5c4}
-#result-info{margin-left:auto;white-space:nowrap;font-size:12px;color:var(--muted)}
-.album-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
-.album{min-width:0;background:#1b1c22;border:1px solid #36343b;border-radius:14px;overflow:hidden}
-.album-open{display:block;width:100%;border:0;text-align:left;color:inherit;background:transparent;padding:0}
-.cover{display:flex;align-items:center;justify-content:center;aspect-ratio:3/4;background:linear-gradient(145deg,#37303b,#1a1b20);position:relative;overflow:hidden}
-.cover img{display:block;width:100%;height:100%;object-fit:cover}
-.cover-fallback{display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:center;padding:18px;text-align:center;width:100%;height:100%;color:#c8a6b6;font-weight:700;letter-spacing:.08em}
-.cover-fallback small{font-size:11px;color:#9d99a2;font-weight:400;letter-spacing:0}
-.cover-count{position:absolute;right:8px;bottom:8px;color:white;background:#1119;backdrop-filter:blur(6px);border-radius:8px;padding:3px 8px;font-size:11px}
-.album-info{padding:12px}
-.album-title{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-clamp:2;overflow:hidden;font-size:14px;font-weight:680;line-height:1.42;min-height:40px;word-break:break-word}
-.album-meta{margin-top:7px;font-size:11px;color:#a9aab4}
-.album-source{display:flex;justify-content:space-between;gap:7px;align-items:center;margin-top:6px;color:#e0b9ca;font-size:11px}
-.empty{padding:55px 10px;color:var(--muted);text-align:center}
-.album-detail{max-width:1050px;margin:auto}
-.back{display:inline-flex;gap:6px;align-items:center;border:1px solid var(--line);border-radius:10px;background:#202127;color:#fafafa;padding:9px 15px;margin-bottom:19px}
-.detail-header{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;margin-bottom:14px}
-.detail-header h2{font-size:23px;margin:0 0 8px;line-height:1.3;overflow-wrap:anywhere}
-.detail-meta{color:var(--muted);font-size:12px}
-.detail-origin{display:inline-block;text-decoration:none;border:1px solid #5d4852;border-radius:9px;padding:8px 12px;white-space:nowrap;font-size:12px}
-.detail-photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(136px,1fr));gap:9px}
-.photo-tile{border:0;border-radius:8px;position:relative;background:linear-gradient(145deg,#2d2732,#1b1b20);padding:0;aspect-ratio:2/3;overflow:hidden;color:#c6afbe;display:grid;place-items:center}
-.photo-tile img{display:block;width:100%;height:100%;object-fit:cover}
-.photo-tile .photo-fallback{padding:8px;font-size:12px;text-align:center}
-.photo-tile .photo-number{position:absolute;left:6px;bottom:6px;font-size:11px;color:white;background:#1119;border-radius:5px;padding:2px 6px}
-.viewer{border:0;padding:0;margin:0;width:100vw;height:100dvh;max-width:none;max-height:none;background:#0a0a0d;color:white}
-.viewer::backdrop{background:#000}
-.viewer-bar{position:absolute;top:0;left:0;right:0;min-height:60px;padding:14px 15px;display:flex;align-items:center;gap:10px;z-index:2;background:linear-gradient(180deg,#000b,#0000)}
-.viewer-bar .viewer-title{flex:1;text-overflow:ellipsis;overflow:hidden;white-space:nowrap;font-size:13px;color:#eee}
-.viewer button{background:#26262de8;color:white;border:1px solid #555;border-radius:9px;padding:8px 13px}
-.viewer-image-area{width:100%;height:100%;padding:70px 4px 80px;display:flex;align-items:center;justify-content:center;overflow:auto}
-.viewer-image-area img{display:block;max-width:100%;max-height:100%;object-fit:contain}
-.viewer-error{text-align:center;padding:25px;font-size:13px;color:#ddd}
-.viewer-error a{display:inline-block;margin-top:14px;border:1px solid #6f5b66;padding:10px;border-radius:8px;text-decoration:none}
-.viewer-bottom{position:absolute;bottom:0;left:0;right:0;padding:12px 15px max(16px,env(safe-area-inset-bottom));background:linear-gradient(0deg,#000c,#0000);display:flex;justify-content:space-between;align-items:center}
-.research{margin:48px 0 20px;border-top:1px solid #34343b;padding-top:18px}
-.research summary{cursor:pointer;font-weight:700}
-.research-note{font-size:12px;color:var(--muted)}
-.research-row{display:flex;justify-content:space-between;align-items:center;gap:9px;border-bottom:1px solid #292930;padding:9px 0;font-size:12px;color:#c5c5cd}
-.research-row strong{font-weight:500}
-.research-row a{white-space:nowrap}
-@media(max-width:540px){
- .site-header{padding:24px 12px 12px;min-height:72px}
- .header-inner{gap:8px}
- .model-nav{gap:5px}
- .model-nav a{padding:6px 11px;font-size:13px}
- .brand{font-size:14px}
- main{padding:22px 12px 70px}
- .hero h1{font-size:27px}
- .hero p{max-width:270px;font-size:12px}
- .album-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
- .album-info{padding:10px}
- .album-title{font-size:13px}
- .detail-photos{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
- .detail-header h2{font-size:20px}
- .detail-header{flex-wrap:wrap}
-}
-@media(prefers-reduced-motion:no-preference){.album-open:active{transform:scale(.99)}}
+@media(max-width:990px){.grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}.mainnav{gap:15px}.topbar{gap:14px}}
+@media(max-width:680px){.topbar{height:67px;flex-wrap:wrap}.logo{font-size:21px}.logo span{font-size:9px}.mainnav{gap:15px}.mainnav a{font-size:12px}.titleline{padding:25px 0 12px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.album .name{font-size:12px;left:9px;right:9px;bottom:9px}.photo-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.filters{gap:22px;margin-bottom:13px}.counter{font-size:11px}.arrow{width:35px;height:35px}.arrow.prev{left:6px}.arrow.next{right:6px}}
+@media(prefers-reduced-motion:reduce){.album img,.photo img{transition:none}}
+/* Keep controls in the same place while giving photographs the available space. */
+.topbar{position:sticky;top:0;z-index:10;background:#101114;padding-top:env(safe-area-inset-top);height:calc(76px + env(safe-area-inset-top))}
+.browse-meta{display:flex;gap:12px;align-items:center;justify-content:space-between;margin:10px 0 0;font-size:11px;color:#92939a}
+.inventory{margin:0;font-size:11px;min-width:0}
+.filters{margin-top:3px}
+#back{width:41px;height:41px;flex-shrink:0;background:#262830b5;border-radius:50%;font-size:21px;color:#f4f4f7}
+.detail-heading{min-width:0;display:none;align-items:center;gap:10px;flex:1}
+.detail-title{font-size:13px;font-weight:550;line-height:1.4;letter-spacing:0;margin:0;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#albumtotal{font-size:10px;flex-shrink:0}
+#detail{padding-top:10px}
+.detail-view .topbar{height:calc(60px + env(safe-area-inset-top));gap:12px;padding-bottom:0;flex-wrap:nowrap}
+.detail-view .logo,.detail-view .mainnav,.detail-view .search-toggle{display:none}
+.detail-view .detail-heading{display:flex}
+.detail-view .version-chip{font-size:9px;top:calc(env(safe-area-inset-top) + 2px)}
+footer{padding:15px 0 25px;justify-content:flex-end}
+@media(max-width:680px){.topbar{height:calc(67px + env(safe-area-inset-top))}.browse-meta{gap:8px}.inventory{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.counter{font-size:10px}.photo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
 </head>
 <body>
-<header class="site-header">
- <div class="header-inner">
-  <strong class="brand">PHOTO GALLERY</strong>
-  <nav class="model-nav" aria-label="모델 선택">
-   <a id="yui-link" href="../yui-gallery/" target="_blank" rel="noopener noreferrer" aria-label="심유이 갤러리를 새 탭에서 열기">심유이 <span aria-hidden="true">↗</span></a>
-   <a href="./" aria-current="page">밈미</a>
-  </nav>
- </div>
- <small class="version" id="app-version">v0.1.0-mimmi.4</small>
+<div class="shell">
+<header class="topbar">
+ <a href="./" class="logo" aria-label="밈미 갤러리 홈">MIMMI<span>GALLERY</span></a>
+ <div class="detail-heading"><button class="back" id="back" aria-label="화보 목록으로 돌아가기">‹</button><h2 class="detail-title" id="albumname"></h2><span class="counter" id="albumtotal"></span></div>
+ <nav class="mainnav" aria-label="모델 전환"><a href="../yui-gallery/" target="_blank" rel="noopener noreferrer" title="심유이 갤러리를 새 탭에서 열기">심유이 ↗</a><a href="./" aria-current="page">밈미</a></nav>
+ <button id="search-toggle" class="search-toggle" aria-label="화보 검색 열기" aria-haspopup="dialog" aria-controls="search-dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button>
+ <small id="app-version" class="version-chip">v0.1.0-mimmi.4</small>
 </header>
-<main>
- <section id="overview">
-  <div class="hero"><div><h1>밈미 <span>Mimmi</span></h1><p>화보를 선택하면 사진을 한 장씩 크게 볼 수 있습니다.</p></div><div id="summary" class="metrics" aria-live="polite">목록 확인 중</div></div>
-  <div class="toolbar">
-   <input id="search" class="search" type="search" placeholder="화보 검색" aria-label="화보 검색" autocomplete="off">
-   <div class="filter-row" role="group" aria-label="화보 필터">
-    <button id="filter-ready" aria-pressed="true" type="button">사진 있는 화보</button>
-    <button id="filter-all" aria-pressed="false" type="button">모든 화보</button>
-    <span id="result-info"></span>
-   </div>
-  </div>
-  <section id="albums" class="album-grid" aria-label="밈미 화보 카드"></section>
-  <p id="empty" class="empty" hidden>조건에 맞는 화보가 없습니다.</p>
-  <details class="research" id="research"><summary id="research-title">추가 작품 조사 목록</summary><p class="research-note">작품명·장수 정보는 사진 실물 확보와 별개입니다.</p><div id="research-list"></div></details>
- </section>
- <section id="album-detail" class="album-detail" hidden>
-  <button class="back" id="back" type="button">← 화보 목록</button>
-  <div class="detail-header">
-   <div><h2 id="detail-title"></h2><div id="detail-meta" class="detail-meta"></div></div>
-   <a id="detail-source" class="detail-origin" target="_blank" rel="noopener noreferrer">출처 확인 ↗</a>
-  </div>
-  <section id="detail-photos" class="detail-photos" aria-label="화보 사진"></section>
- </section>
-</main>
-<dialog id="viewer" class="viewer" aria-label="사진 전체 화면">
- <div class="viewer-bar"><span id="viewer-title" class="viewer-title"></span><button id="viewer-close" type="button">닫기 ×</button></div>
- <div class="viewer-image-area"><img id="viewer-image" alt="전체화면 사진" hidden><div id="viewer-error" class="viewer-error" hidden>이미지 주소가 응답하지 않습니다.<div><a id="viewer-origin" href="#" target="_blank" rel="noopener noreferrer">출처 페이지에서 보기 ↗</a></div></div></div>
- <div class="viewer-bottom"><button id="viewer-prev" type="button">← 이전</button><span id="viewer-position"></span><button id="viewer-next" type="button">다음 →</button></div>
+<div id="browse">
+ <div class="browse-meta"><p class="inventory" id="inventory">화보를 불러오는 중</p><span class="counter" id="total"></span></div>
+ <div class="filters"><button id="browse-toggle" class="filter active" type="button" aria-controls="albumgrid publishergrid" aria-pressed="false" aria-label="화보 목록 · 발행처 목록으로 전환"><span id="browse-mode">화보</span><span aria-hidden="true" class="switch-icon"> ⇄</span></button></div>
+ <div id="publishergrid" class="grid" hidden></div>
+ <div id="albumgrid" class="grid"></div>
+ <div id="photogrid" class="photo-grid" hidden></div>
+ <div id="nothing" class="empty" hidden>표시할 사진이 없습니다.</div>
+</div>
+<div id="detail" hidden>
+ <div id="detailphotos" class="photo-grid"></div>
+</div>
+<footer><span>밈미 · 이미지 출처 연결과 개인 저장본 구분 · 무압축</span></footer>
+</div>
+<dialog id="search-dialog" aria-labelledby="search-label">
+ <form id="search-form">
+  <div class="search-heading"><label id="search-label" for="search">화보 검색</label><button id="search-close" type="button" aria-label="검색 닫기">×</button></div>
+  <input id="search" class="topsearch" type="search" placeholder="화보명" autocomplete="off" autofocus>
+  <button type="submit">적용</button>
+ </form>
 </dialog>
+<div id="lightbox" role="dialog" aria-label="사진 보기" aria-modal="true">
+ <div class="lighttop"><button class="lightbtn" id="close" aria-label="닫기">×</button><span id="position"></span><small class="version-chip">v0.1.0-mimmi.4</small></div>
+ <button class="lightbtn arrow prev" id="prev" aria-label="이전 사진">‹</button><div class="media-frame"><img id="full" alt="화보 사진"><a id="original" target="_blank" rel="noopener">사진 열기 ↗</a></div><button class="lightbtn arrow next" id="next" aria-label="다음 사진">›</button>
+ <p id="media-status" role="status"></p>
+</div>
+<script src="owner-media.js"></script>
+<script src="gallery-labels.js?v=0.1.0-beta.10"></script>
+<script src="publishers.js?v=0.1.0-beta.13"></script>
 <script>
-'use strict';
+"use strict";
 const $=id=>document.getElementById(id);
-const state={albums:[],research:[],filter:'ready',active:null,photos:[],photo:0};
-const esc=s=>String(s||'').replace(/\s+/g,' ').trim();
-function safeUrl(input){try{const url=new URL(input,location.href);return url.protocol==='https:'?url.href:null}catch{return null}}
-function displayTitle(title){
- return esc(title)
- .replace(/^\[(?:AI Enhanced|DJAWA)\]\s*/i,'')
- .replace(/^(?:DJAWA Photo\s*-\s*)?(?:Mimmi\s*\((?:밈미|밈미)\)\s*-\s*)/i,'')
- .replace(/\s*-\s*Page\s+\d+\s*$/i,'')
- .replace(/^DJAWA Photo\s*-\s*Mimmi\s*/i,'')
- .replace(/^Mimmi\s*-\s*Mimmi\s*/i,'')
- .replace(/^Mimmi\s*(?:\(Mimmissu17\))?\s*[\-–]\s*/i,'') || '밈미 화보';
+document.addEventListener('error',e=>{
+ const img=e.target;
+ if(!(img instanceof HTMLImageElement)||!img.closest('.album,.photo'))return;
+ img.hidden=true;img.closest('.album,.photo').classList.add('broken-source');
+},true);
+let catalog=[],stored=[],localStored=[],remoteStored=[],ownerStored=[],albumAliases={},albumCovers={},publisherRegistry={publishers:[]},publisherWorkReferences=[],activePublisher=null,mode='albums',activeAlbum=null,viewerList=[],viewerIndex=0,detailAlbum=null;
+function canonicalId(id){const seen=new Set();while(albumAliases[id]&&!seen.has(id)){seen.add(id);id=albumAliases[id]}return id}
+const titleMap={};
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function getName(a){return a.title||catalog.find(x=>x.id===a.id)?.title||titleMap[a.id]||a.id}
+const publicPhotoHosts=['djawaphoto.com','www.djawaphoto.com','cdn.v2ph.com'];
+function validImages(a){return (a.images||[]).filter(x=>{if(a.ownerHosted&&x.ownerAlbum===a.id&&x.url==='owner:'+a.id+':'+x.number)return true;if(typeof x.url!=='string')return false;if(x.url.startsWith('stored-albums/'))return true;if(!a.sourceHosted)return false;try{const u=new URL(x.url);return u.protocol==='https:'&&!u.username&&!u.password&&([...publicPhotoHosts,'www.girl-atlas.com','cdn.jliji.com','cdn.v2ph.com','i0.wp.com','i1.wp.com','i2.wp.com','cdn1.thismore.fun','cdn2.thismore.fun'].includes(u.hostname)||/^(?:(?:imgx\d{3}|images\d{2})\.pixibb\.com|(?:wes|bis)\.misskon\.com|lux\.mrcong\.com|s\.wujituku\.com|lh\d\.ggpht\.com)$/.test(u.hostname));}catch{return false}})}
+function available(){return stored.filter(x=>validImages(x).length).sort((a,b)=>validImages(b).length-validImages(a).length)}
+function publisherGroups(){const known=new Set(catalog.flatMap(a=>[a.source,...(a.source_pages||[])].filter(Boolean)));const entries=[...catalog,...publisherWorkReferences.filter(a=>!known.has(a.source))];return MimmiPublishers.groups(entries,publisherRegistry,MimmiLabels.describe,validImages)}
+function setMode(m,publisher=null){mode=['albums','photos','all','publishers'].includes(m)?m:'albums';activePublisher=mode==='publishers'&&publisherGroups().some(g=>g.id===publisher)?publisher:null;activeAlbum=null;detailAlbum=null;document.body.classList.remove('detail-view');document.body.classList.toggle('publisher-view',!!activePublisher);$('detail').hidden=true;$('browse').hidden=false;const isPublisher=mode==='publishers';$('browse-mode').textContent=isPublisher?'발행처':'화보';$('browse-toggle').dataset.mode=isPublisher?'publishers':'albums';$('browse-toggle').setAttribute('aria-pressed',String(isPublisher));$('browse-toggle').setAttribute('aria-label',isPublisher?'발행처 목록 · 화보 목록으로 전환':'화보 목록 · 발행처 목록으로 전환');render()}
+function publisherCard(group){const asset=MimmiPublishers.logo(group),assetLabel=group.logo?.asset_role==='publisher_profile_branding'?' 발행처 프로필':group.logo?.asset_role==='parent_publisher_brand_reference'?' 발행사 로고':' 로고',image=asset?'<img src="'+esc(asset)+'" alt="'+esc(group.name)+assetLabel+'">':'<span class="publisher-wordmark" role="img" aria-label="'+esc(group.name)+' — 로고 미확인">'+esc(group.name)+'</span>';return '<button class="publisher" data-publisher="'+esc(group.id)+'" data-logo-theme="'+(group.logo?.theme==='light'?'light':'dark')+'" aria-label="'+esc(group.name)+' · 등록 '+group.albums.length+' · 열람 '+group.viewable+'">'+image+'<span class="publisher-info"><strong>'+esc(group.name)+'</strong>등록 '+group.albums.length+' · 열람 '+group.viewable+'</span></button>'}
+function openPublisher(id,record=true){if(!publisherGroups().some(g=>g.id===id))return;if(record)remember({mode:'publishers',publisher:id});setMode('publishers',id);window.scrollTo(0,0)}
+function photosFor(a){return validImages(a).map((p,i)=>({...p,name:getName(a),albumId:a.id,number:p.number??i+1}))}
+function photoRotation(p){return [90,270].includes(p?.display_rotation)?p.display_rotation:0}
+function rotationAttributes(p){const angle=photoRotation(p);return angle?' data-rotation="'+angle+'" style="--photo-rotation:'+angle+'deg"':''}
+function card(a,hasImages){
+ const owned=stored.find(x=>x.id===a.id)||a;
+ const p=validImages(owned),configuration=albumCovers[owned.id],selected=p.find(p=>p.sha256&&p.sha256===configuration?.sha256)||p[0],cover=selected?.url||'',count=p.length,expected=a.photos??a.expected??catalog.find(x=>x.id===a.id)?.photos??null;
+ const label=getName(a),labels=MimmiLabels.describe(owned),shortTitle=MimmiLabels.coverTitle({...owned,title:label});
+ const focused=selected?.sha256&&selected.sha256===configuration?.sha256;
+ const position=focused&&Array.isArray(configuration.position)&&configuration.position.length===2&&configuration.position.every(n=>Number.isFinite(n)&&n>=0&&n<=100)?configuration.position:[50,20];
+ const style='object-position:'+position[0]+'% '+position[1]+'%;object-fit:cover';
+ const n=count?(expected!=null&&expected!==count?count+' / '+expected+'장':(owned.completeness==='partial_public_previews'?count+'장 · 공개분':count+'장')):(expected!=null?'0 / '+expected+'장 · 미확보':'미확보 · 장수 미확인');
+ const cloudCover=owned.ownerHosted?selected:null;
+ const img=cloudCover?'<img data-owner="'+esc(cloudCover.url)+'" style="'+style+'" alt="'+esc(label)+' 표지">':cover?'<img loading="lazy" referrerpolicy="no-referrer" src="'+esc(cover)+'" style="'+style+'" alt="'+esc(label)+' 표지">':'<div class="placeholder">Y</div>';
+ return '<button class="album"'+rotationAttributes(selected)+' data-id="'+esc(a.id)+'" data-available="'+(hasImages?'1':'0')+'" aria-label="'+esc(label+' · '+labels.publisher+' · '+n+' · '+labels.edition)+'">'+img+'<div class="gradient"></div><span class="cover-labels"><span class="publisher-sticker" title="발행사: '+esc(labels.publisher)+'">'+esc(labels.publisher)+'</span><span class="album-count">'+esc(n)+'</span></span><span class="edition-sticker" data-kind="'+esc(labels.kind)+'" title="'+esc(labels.detail)+'">'+esc(labels.edition)+'</span><strong class="name" title="'+esc(label)+'">'+esc(shortTitle)+'</strong></button>';
 }
-function photosOf(album){
- return [...(album.images||[]),...(album.samples||[])].filter(p=>safeUrl(p.url));
-}
-function isOfficial(album){return album.id?.startsWith('djawa-')}
-function dedupe(albums){
- const seenHashes=new Set();
- for(const a of albums){
-  a.samples=(a.samples||[]).filter(p=>{
-   if(!p.sha256||seenHashes.has(p.sha256))return false;
-   seenHashes.add(p.sha256);return true;
-  });
+function photoHTML(p,i){return '<button class="photo"'+rotationAttributes(p)+' data-i="'+i+'" aria-label="'+esc(p.name)+' 사진 '+p.number+'"><img loading="lazy" referrerpolicy="no-referrer" '+(p.ownerAlbum?'data-owner="'+esc(p.url):'src="'+esc(p.url))+'" alt="'+esc(p.name)+' 사진 '+p.number+'"><span>'+esc(p.name)+' · '+p.number+'</span></button>'}
+const ownerObserver=new IntersectionObserver(entries=>{for(const e of entries){if(!e.isIntersecting)continue;ownerObserver.unobserve(e.target);const p=ownerStored.flatMap(a=>a.images).find(p=>p.url===e.target.dataset.owner);if(p)MimmiPrivate.asset(p).then(url=>{if(e.target.isConnected)e.target.src=url}).catch(()=>{e.target.alt='보관본 연결을 확인해 주세요'})}},{rootMargin:'200px'});
+function observeOwner(){document.querySelectorAll('img[data-owner]:not([src])').forEach(i=>ownerObserver.observe(i))}
+function render(){
+ const q=$('search').value.toLocaleLowerCase().trim();
+ const items=available(),all=items.flatMap(photosFor),match=s=>String(s).toLocaleLowerCase().includes(q);
+ const publisherIndex=mode==='publishers'&&!activePublisher;
+ $('publishergrid').hidden=!publisherIndex;$('albumgrid').hidden=mode==='photos'||publisherIndex;$('photogrid').hidden=mode!=='photos';$('nothing').hidden=true;
+ if(publisherIndex){const groups=publisherGroups().filter(g=>match(g.name)||g.albums.some(a=>match(getName(a))));$('publishergrid').innerHTML=groups.map(publisherCard).join('');$('publishergrid').querySelectorAll('[data-publisher]').forEach(b=>b.onclick=()=>openPublisher(b.dataset.publisher));$('total').textContent=groups.length+' publishers';$('nothing').hidden=groups.length>0;
+ }else if(mode==='photos'){
+  const visible=all.filter(p=>match(p.name));$('photogrid').innerHTML=visible.map(photoHTML).join('');
+  $('photogrid').querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>openViewer(visible,Number(b.dataset.i)));
+  $('total').textContent=visible.length+' photos';
+  $('nothing').hidden=visible.length>0;
+ }else{
+  const group=activePublisher?publisherGroups().find(g=>g.id===activePublisher):null;
+  const src=group?group.albums:mode==='all'?catalog:items;
+  if(group){$('albumname').textContent=group.name;$('albumtotal').textContent=group.albums.length+'개 · 열람 '+group.viewable}
+  const matched=src.filter(a=>match(getName(a))).sort((a,b)=>MimmiPublishers.compareNames(MimmiLabels.coverTitle(a),MimmiLabels.coverTitle(b))||MimmiPublishers.compareNames(a.id,b.id));
+  $('albumgrid').innerHTML=matched.map(a=>card(a,validImages(stored.find(x=>x.id===a.id)||a).length>0)).join('');
+  $('albumgrid').querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>{const a=stored.find(a=>a.id===b.dataset.id);if(a&&validImages(a).length)openAlbum(b.dataset.id);else if(group){const source=src.find(a=>a.id===b.dataset.id)?.source;try{const u=new URL(source);if(u.protocol==='https:'&&!u.username&&!u.password)window.open(u.href,'_blank','noopener,noreferrer')}catch{}}});
+  $('total').textContent=matched.length+' albums';
+  $('nothing').hidden=matched.length>0;
  }
+ observeOwner();
 }
-function sortedAlbums(albums){
- // Publisher's own releases first: their thumbnails are official, and
- // secondary-site hotlinks can be blocked for ordinary Safari visitors.
- return [...albums].sort((a,b)=>{
-  const weight=x=>(isOfficial(x)?1000:0)+(photosOf(x).length>0?100:0);
-  return weight(b)-weight(a)||displayTitle(a.title).localeCompare(displayTitle(b.title));
- });
-}
-function addImageWithFallback(container,candidates,className,alt){
- const urls=[...new Set(candidates.map(x=>safeUrl(x)).filter(Boolean))].slice(0,3);
- let attempt=0;
- const img=new Image();img.className=className;img.loading='lazy';img.decoding='async';img.alt=alt;
- // Do not display broken image glyph. A blocked host falls back gracefully.
- const fail=()=>{
-  if(attempt<urls.length){const next=urls[attempt++];img.removeAttribute('src');img.referrerPolicy=attempt===1?'no-referrer':'strict-origin-when-cross-origin';img.src=next;return}
-  img.remove();const existing=container.querySelector('.cover-fallback,.photo-fallback');
-  if(existing)existing.hidden=false;
- };
- img.onerror=fail;
- img.onload=()=>{if(img.naturalWidth<50)fail()};
- if(urls.length){container.append(img);fail()}
- return img;
-}
-function coverFor(album){
- const cover=document.createElement('div');cover.className='cover';
- const fallback=document.createElement('div');fallback.className='cover-fallback';fallback.textContent='MIMMI';
- const sub=document.createElement('small');sub.textContent='사진을 열려면 화보 선택';fallback.append(sub);cover.append(fallback);
- const candidates=photosOf(album).slice(0,3).map(p=>p.url);
- if(candidates.length)fallback.hidden=true;
- addImageWithFallback(cover,candidates,'cover-image',displayTitle(album.title)+' 표지');
- const badge=document.createElement('span');badge.className='cover-count';
- badge.textContent=photosOf(album).length+'장';cover.append(badge);
- return cover;
-}
-function makeAlbumCard(album){
- const card=document.createElement('article');card.className='album';
- const button=document.createElement('button');button.type='button';button.className='album-open';
- button.setAttribute('aria-label',displayTitle(album.title)+' 화보 열기');
- const info=document.createElement('div');info.className='album-info';
- const name=document.createElement('div');name.className='album-title';name.textContent=displayTitle(album.title);
- const meta=document.createElement('div');meta.className='album-meta';
- meta.textContent=(isOfficial(album)?'DJAWA 공식 공개 샘플':album.publisher||'공개 웹판')+' · '+photosOf(album).length+'장 확인';
- const foot=document.createElement('div');foot.className='album-source';
- foot.textContent=album.advertised_photos?'화보 표기 '+album.advertised_photos+'장':'전체 장수 미확인';
- const arrow=document.createElement('span');arrow.textContent='사진 보기 ›';foot.append(arrow);
- info.append(name,meta,foot);button.append(coverFor(album),info);button.onclick=()=>openAlbum(album.id,true);
- card.append(button);return card;
-}
-function renderOverview(){
- const query=esc($('search').value).toLowerCase();
- const items=state.albums.filter(a=>(state.filter!=='ready'||photosOf(a).length)&&[a.title,a.publisher,a.id].join(' ').toLowerCase().includes(query));
- const root=$('albums');root.replaceChildren();
- const fragment=document.createDocumentFragment();
- items.forEach(a=>fragment.append(makeAlbumCard(a)));
- root.append(fragment);
- $('empty').hidden=items.length>0;
- $('result-info').textContent=items.length+'개 표시';
- $('filter-ready').setAttribute('aria-pressed',state.filter==='ready');
- $('filter-all').setAttribute('aria-pressed',state.filter==='all');
-}
-function renderResearch(){
- const target=$('research-list');target.replaceChildren();
- $('research-title').textContent='추가 작품 조사 목록 · '+state.research.length+'개 번호';
- const fragment=document.createDocumentFragment();
- for(const item of state.research){
-  const row=document.createElement('div');row.className='research-row';
-  const title=document.createElement('strong');title.textContent=String(item.number).padStart(3,'0')+' · '+esc(item.title);
-  const right=document.createElement('span');right.textContent=item.advertised_photos?item.advertised_photos+'장 표기 ':'장수 미확인 ';
-  const source=safeUrl(item.sources?.[0]?.url);
-  if(source){const link=document.createElement('a');link.href=source;link.target='_blank';link.rel='noopener noreferrer';link.textContent='출처 ↗';right.append(link)}
-  row.append(title,right);fragment.append(row);
- }
- target.append(fragment);
-}
-function routeId(){const hash=new URLSearchParams(location.hash.replace(/^#/,''));return hash.get('album')}
-function openAlbum(id,push){
- const album=state.albums.find(x=>x.id===id);
- if(!album){showOverview(false);return}
- state.active=album;state.photos=photosOf(album);
- $('detail-title').textContent=displayTitle(album.title);
- $('detail-meta').textContent=state.photos.length+'장 공개 이미지 · '+(album.advertised_photos||'미상')+'장 전체 표기 · '+(album.publisher||'DJAWA');
- const source=safeUrl(album.source);
- $('detail-source').hidden=!source;
- if(source)$('detail-source').href=source;
- const panel=$('detail-photos');panel.replaceChildren();
- const fragment=document.createDocumentFragment();
- state.photos.forEach((photo,i)=>{
-  const tile=document.createElement('button');tile.type='button';tile.className='photo-tile';
-  tile.setAttribute('aria-label','사진 '+(i+1)+' 크게 보기');
-  const fallback=document.createElement('span');fallback.className='photo-fallback';
-  fallback.textContent='이미지 연결 실패';fallback.hidden=true;tile.append(fallback);
-  addImageWithFallback(tile,[photo.url],'photo-thumb','사진 '+(i+1));
-  const counter=document.createElement('span');counter.className='photo-number';counter.textContent=(i+1)+' / '+state.photos.length;tile.append(counter);
-  tile.onclick=()=>openPhoto(i);fragment.append(tile);
- });
- panel.append(fragment);
- $('overview').hidden=true;$('album-detail').hidden=false;
- if(push)history.pushState({album:id},'',location.pathname+location.search+'#album='+encodeURIComponent(id));
+function openAlbum(id,record=true){
+ id=canonicalId(id);
+ const a=stored.find(x=>x.id===id);
+ if(!a||!validImages(a).length)return;
+ if(record)remember({album:id,mode,publisher:activePublisher});
+ const photos=photosFor(a);detailAlbum=a;document.body.classList.add('detail-view');$('browse').hidden=true;$('detail').hidden=false;
+ $('albumname').textContent=getName(a);$('albumtotal').textContent=photos.length+'장'+(a.expected&&photos.length<a.expected?' / '+a.expected+'장 · 누락 '+(a.expected-photos.length)+'장':a.completeness==='partial_public_previews'?' · 공개분만 확보':'');
+ $('detailphotos').innerHTML=photos.map(photoHTML).join('');
+ $('detailphotos').querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>openViewer(photos,Number(b.dataset.i)));
+ observeOwner();
  window.scrollTo(0,0);
 }
-function showOverview(updateHistory=true){
- if($('viewer').open)$('viewer').close();
- state.active=null;state.photos=[];
- $('album-detail').hidden=true;$('overview').hidden=false;
- if(updateHistory)history.pushState({},'',location.pathname+location.search);
- window.scrollTo(0,0);
+function openViewer(list,i,record=true){if(!list.length)return;viewerList=list;viewerIndex=((i%list.length)+list.length)%list.length;const p=list[viewerIndex];if(record)remember({album:p.albumId,photo:p.number,fromPhotos:!detailAlbum,mode,publisher:activePublisher});$('lightbox').classList.add('open');document.body.style.overflow='hidden';showViewer();$('close').focus({preventScroll:true})}
+let viewerGeneration=0,routeTimer=null,historyEntry=0;const viewerRoutes=new Map();
+function layoutViewer(){
+ const p=viewerList[viewerIndex],angle=photoRotation(p),image=$('full'),frame=image.parentElement;
+ image.style.cssText='';frame.style.cssText='';
+ if(!angle)return;
+ const scale=Math.min(1,Math.min(innerWidth,1800)/p.height,Math.max(1,innerHeight-71)/p.width);
+ frame.style.width=p.height*scale+'px';frame.style.height=p.width*scale+'px';
+ Object.assign(image.style,{position:'absolute',left:'50%',top:'50%',width:p.width*scale+'px',height:p.height*scale+'px',maxWidth:'none',maxHeight:'none',transform:'translate(-50%,-50%) rotate('+angle+'deg)'});
 }
-function openPhoto(i){
- if(!state.photos.length)return;
- state.photo=(i+state.photos.length)%state.photos.length;
- const p=state.photos[state.photo],image=$('viewer-image');
- $('viewer-title').textContent=displayTitle(state.active.title);
- $('viewer-position').textContent=(state.photo+1)+' / '+state.photos.length;
- $('viewer-prev').disabled=state.photos.length<2;
- $('viewer-next').disabled=state.photos.length<2;
- $('viewer-error').hidden=true;
- image.hidden=true;image.removeAttribute('src');
- const source=safeUrl(state.active.source);$('viewer-origin').href=source||'#';
- const url=safeUrl(p.url);
- if(url){
-  image.onload=()=>{if(image.naturalWidth>100){image.hidden=false;$('viewer-error').hidden=true}else image.onerror()};
-  image.onerror=()=>{image.hidden=true;image.removeAttribute('src');$('viewer-error').hidden=false};
-  image.referrerPolicy='no-referrer';image.src=url;
- }else $('viewer-error').hidden=false;
- if(!$('viewer').open)$('viewer').showModal();
+window.addEventListener('resize',()=>{if($('lightbox').classList.contains('open'))layoutViewer()});
+function showViewer(){
+ const p=viewerList[viewerIndex];if(!p)return;
+ viewerGeneration++;
+ layoutViewer();
+ $('media-status').textContent='불러오는 중';
+ $('full').onload=()=>{$('media-status').textContent=''};$('full').onerror=()=>{$('media-status').textContent='사진을 불러오지 못했습니다. 사진 열기로 출처를 확인해 주세요.'};
+ $('full').removeAttribute('src');$('full').referrerPolicy='no-referrer';if(p.ownerAlbum){const generation=viewerGeneration;MimmiPrivate.asset(p).then(url=>{if(generation===viewerGeneration){$('full').src=url;$('original').href=url}}).catch(error=>{if(generation===viewerGeneration)$('media-status').textContent=error.message})}else $('full').src=p.url;$('full').alt=p.name+' · '+p.number;
+ $('position').textContent=(viewerIndex+1)+' / '+viewerList.length+' · '+p.width+'×'+p.height;
+ if(p.ownerAlbum)$('original').removeAttribute('href');else $('original').href=p.url;
 }
-function loadJSON(file,fallback){return fetch(file,{cache:'no-store'}).then(r=>r.ok?r.json():fallback).catch(()=>fallback)}
-$('search').oninput=renderOverview;
-$('filter-ready').onclick=()=>{state.filter='ready';renderOverview()};
-$('filter-all').onclick=()=>{state.filter='all';renderOverview()};
-$('back').onclick=()=>{if(routeId())history.back();else showOverview()};
-$('viewer-close').onclick=()=>$('viewer').close();
-$('viewer-prev').onclick=()=>openPhoto(state.photo-1);
-$('viewer-next').onclick=()=>openPhoto(state.photo+1);
-$('viewer').onclick=e=>{if(e.target===$('viewer'))$('viewer').close()};
-document.addEventListener('keydown',e=>{if(!$('viewer').open)return;if(e.key==='ArrowRight')openPhoto(state.photo+1);if(e.key==='ArrowLeft')openPhoto(state.photo-1)});
-window.addEventListener('popstate',()=>{const id=routeId();if(id)openAlbum(id,false);else showOverview(false)});
+function hideViewer(){clearTimeout(routeTimer);viewerGeneration++;$('lightbox').classList.remove('open');document.body.style.overflow='';$('full').removeAttribute('src')}
+function closeViewer(){if(history.state?.mimmi&&history.state.photo)goBack();else hideViewer()}
+function step(n){
+ viewerIndex=(viewerIndex+n+viewerList.length)%viewerList.length;showViewer();
+ if(history.state?.mimmi){const state={...history.state,photo:viewerList[viewerIndex].number,album:viewerList[viewerIndex].albumId};viewerRoutes.set(state.key,state);clearTimeout(routeTimer);
+ // WebKit rate-limits History API writes. Rapid swipes must keep rendering;
+ // remember the last photo immediately, and update its URL only after a pause.
+ routeTimer=setTimeout(()=>{if($('lightbox').classList.contains('open')&&history.state?.key===state.key)history.replaceState(state,'',routeURL(state))},1000)}
+}
+function routeURL(s){const q=new URLSearchParams();if(s.album)q.set('album',s.album);if(s.photo)q.set('photo',s.photo);if(s.fromPhotos)q.set('from','photos');if(s.publisher)q.set('publisher',s.publisher);if(s.mode&&s.mode!=='albums')q.set('view',s.mode);return location.pathname+location.search+(q.size?'#'+q:'')}
+function remember(s){history.replaceState({...history.state,scroll:window.scrollY},'');const state={mimmi:true,key:Date.now().toString(36)+'-'+(++historyEntry),depth:(history.state?.depth||0)+1,scroll:0,...s};history.pushState(state,'',routeURL(state))}
+function goBack(){if(history.state?.mimmi&&history.state.depth>0)history.back();else{const state={mimmi:true,depth:0,mode:activePublisher?'publishers':'albums',publisher:history.state?.album?activePublisher:null,scroll:0};history.replaceState(state,'',routeURL(state));applyRoute(state)}}
+function applyRoute(s){$('search-dialog').close();s=viewerRoutes.get(s.key)||s;s={...s,album:canonicalId(s.album)};hideViewer();setMode(s.mode||'albums',s.publisher);if(s.album&&!s.fromPhotos)openAlbum(s.album,false);if(s.photo){const a=stored.find(a=>a.id===s.album);const list=s.fromPhotos?available().flatMap(photosFor).filter(p=>p.name.toLocaleLowerCase().includes($('search').value.toLocaleLowerCase().trim())):a?photosFor(a):[];const i=list.findIndex(p=>p.albumId===s.album&&p.number===Number(s.photo));if(i>=0)openViewer(list,i,false)}if(s.searchOpen)showSearch();requestAnimationFrame(()=>window.scrollTo(0,s.scroll||0))}
+window.addEventListener('popstate',()=>{const s=history.state;if(s?.mimmi)applyRoute(s)});
+$('prev').onclick=()=>step(-1);$('next').onclick=()=>step(1);$('close').onclick=closeViewer;
+$('back').onclick=goBack;
+function showSearch(){if(!$('search-dialog').open)$('search-dialog').showModal();$('search').focus()}
+function closeSearch(){if(history.state?.searchOpen&&history.state.depth>0)history.back();else $('search-dialog').close()}
+$('search-toggle').onclick=()=>{remember({mode,publisher:activePublisher,searchOpen:true});showSearch()};
+$('search-close').onclick=closeSearch;
+$('search-dialog').addEventListener('cancel',e=>{e.preventDefault();closeSearch()});
+$('search-dialog').addEventListener('click',e=>{if(e.target===$('search-dialog')){const r=e.target.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)closeSearch()}});
+$('search-form').onsubmit=e=>{e.preventDefault();closeSearch()};
+$('search').oninput=()=>{hideViewer();setMode(mode,activePublisher);const s={...history.state,mimmi:true,mode,scroll:0};history.replaceState(s,'',routeURL(s))};
+$('browse-toggle').onclick=()=>{const next=mode==='publishers'?'albums':'publishers';remember({mode:next});setMode(next);window.scrollTo(0,0)};
+$('lightbox').onclick=e=>{if(e.target===$('lightbox'))closeViewer()};
+document.addEventListener('keydown',e=>{if(!$('lightbox').classList.contains('open'))return;if(e.key==='Escape')closeViewer();else if(e.key==='ArrowLeft')step(-1);else if(e.key==='ArrowRight')step(1)});
+// Never cancel native pinch/long-press or iOS edge navigation. A multi-touch
+// gesture remains ineligible for swiping until every finger has been lifted.
+let gesture=null;
+$('lightbox').addEventListener('touchstart',e=>{if(e.touches.length!==1){gesture=null;return}const t=e.touches[0];gesture={x:t.clientX,y:t.clientY,valid:t.clientX>28&&t.clientX<innerWidth-28&&(visualViewport?.scale||1)<=1.01}},{passive:true});
+$('lightbox').addEventListener('touchmove',e=>{if(e.touches.length!==1&&gesture)gesture.valid=false},{passive:true});
+$('lightbox').addEventListener('touchcancel',()=>{gesture=null},{passive:true});
+$('lightbox').addEventListener('touchend',e=>{if(e.touches.length){gesture=null;return}const g=gesture;gesture=null;const t=e.changedTouches[0];if(!g?.valid||!t||(visualViewport?.scale||1)>1.01)return;const dx=t.clientX-g.x,dy=t.clientY-g.y;if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.5)step(dx>0?-1:1)},{passive:true});
 Promise.all([
- loadJSON('albums.json',{albums:[]}),
- loadJSON('official-previews.json',{albums:[]}),
- loadJSON('v2ph-public-previews.json',{albums:[]}),
- loadJSON('v2ph-actor-previews.json',{albums:[]}),
- loadJSON('research-catalogue.json',{works:[]})
-]).then(([base,official,v2ph,actor,inventory])=>{
- const officialAlbums=(official.albums||[]).filter(a=>a.id&&a.source);
- const secondary=(v2ph.albums||[]).filter(a=>a.id&&a.source&&photosOf(a).length);
- const actorAlbums=(actor.albums||[]).filter(a=>a.id&&a.source&&photosOf(a).length);
- const legacy=(base.albums||[]).filter(a=>!officialAlbums.some(x=>x.title.toLowerCase()===a.title.toLowerCase()));
- const sourceAlbums=[...officialAlbums,...secondary,...actorAlbums,...legacy];
- dedupe(sourceAlbums);
- state.albums=sortedAlbums(sourceAlbums);
- state.research=inventory.works||[];
- const count=state.albums.reduce((n,a)=>n+photosOf(a).length,0);
- const ready=state.albums.filter(a=>photosOf(a).length).length;
- $('summary').textContent=ready+'개 화보 · '+count+'장 공개 이미지';
- renderOverview();renderResearch();
- const id=routeId();if(id)openAlbum(id,false);
-}).catch(error=>{
- $('summary').textContent='목록 로딩 실패';
- $('empty').textContent='화보 목록을 불러오지 못했습니다. '+error.message;$('empty').hidden=false;
-});
+ fetch('stored-albums.json').then(r=>{if(!r.ok)throw Error('stored data');return r.json()}),
+ fetch('albums.json').then(r=>{if(!r.ok)throw Error('catalog');return r.json()}),
+ MimmiPrivate.albums().then(albums=>({albums})).catch(error=>({albums:[],error:error.message})),
+ fetch('additional-source-albums.json',{cache:'no-store'}).then(r=>r.ok?r.json():{albums:[]}).catch(()=>({albums:[]})),
+ fetch('source-viewer-albums.json',{cache:'no-store'}).then(r=>r.ok?r.json():{albums:[]}).catch(()=>({albums:[]})),
+ fetch('identity-exclusions.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('identity exclusions');return r.json()}),
+ fetch('album-covers.json',{cache:'no-store'}).then(r=>r.ok?r.json():{}).catch(()=>({})),
+ fetch('album-aliases.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('work aliases');return r.json()}),
+ fetch('publishers.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('publisher registry');return r.json()}),
+ fetch('publisher-catalogue.json',{cache:'no-store'}).then(r=>r.ok?r.json():{works:[]}).catch(()=>({works:[]}))
+]).then(([s,c,owner,extra,remote,exclusions,covers,aliases,publishers,workReferences])=>{
+ publisherRegistry=publishers;
+ albumCovers=covers.covers||{};
+ albumAliases=aliases.aliases||{};
+ const excludedIds=new Set([...exclusions.excluded_album_ids,...exclusions.excluded_source_ids]),excludedSources=new Set(exclusions.excluded_source_urls),excludedHashes=new Set(exclusions.excluded_image_sha256);
+ const allowed=a=>!excludedIds.has(a.id)&&![a.source,...(a.source_pages||[])].some(u=>excludedSources.has(u))&&!(a.images||[]).some(p=>excludedHashes.has(p.sha256));
+ publisherWorkReferences=(workReferences.works||[]).map((w,i)=>({id:'publisher-reference-'+i,title:w.title,publisher:w.publisher,source:w.url,photos:w.advertised_photos??null,images:[],catalogueOnly:true})).filter(allowed);
+ localStored=(s.albums||[]).filter(allowed);catalog=(c.albums||[]).filter(allowed);
+ // Identical verified local files remain available when an external host blocks
+ // hotlinks. Match exact SHA-256 bytes; never substitute a smaller preview.
+ const localByHash=new Map(localStored.flatMap(validImages).filter(p=>p.sha256).map(p=>[p.sha256,p.url]));
+ remoteStored=[...new Map([...(remote.albums||[]),...(extra.albums||[])].filter(allowed).map(a=>[a.id,a])).values()].filter(a=>a.status==='verified_collected_individual_files_source_hosted_online_view').map(a=>({...a,sourceHosted:true,images:a.images.map(p=>localByHash.has(p.sha256)?{...p,source_url:p.url,url:localByHash.get(p.sha256)}:p)}));
+ ownerStored=owner.albums;const ownerIds=new Set(ownerStored.map(a=>a.id));
+ // Keep verified local bytes for exact-hash fallback, but show each work once.
+ const candidates=[...ownerStored,...remoteStored.filter(a=>!ownerIds.has(a.id)),...localStored];
+ const candidateIds=new Set(candidates.map(a=>a.id));
+ stored=[...new Map(candidates.filter(a=>canonicalId(a.id)===a.id||!candidateIds.has(canonicalId(a.id))).reverse().map(a=>[a.id,a])).values()].reverse();
+ // Newly collected works must be openable from the complete catalogue too.
+ catalog=[...new Map([...catalog.map(a=>({...a,id:canonicalId(a.id)})),...stored].map(a=>[a.id,a])).values()];
+ const localCount=stored.filter(a=>!a.ownerHosted&&!a.sourceHosted).reduce((n,a)=>n+validImages(a).length,0);
+ const remoteCount=remoteStored.reduce((n,a)=>n+validImages(a).length,0);
+ $('inventory').textContent=remoteCount+'장 공개 URL 확인 · 전체 화보는 부분 수집'+(ownerStored.length?' · 개인 보관본 '+ownerStored.reduce((n,a)=>n+a.images.length,0)+'장':'');
+ render();
+ const raw=location.hash.slice(1),q=new URLSearchParams(raw);const id=canonicalId(raw&&!raw.includes('=')?decodeURIComponent(raw):q.get('album'));const state={mimmi:true,depth:0,mode:q.get('view')||'albums',publisher:q.get('publisher'),album:id,fromPhotos:q.get('from')==='photos',scroll:0};history.replaceState(state,'',routeURL(state));applyRoute(state);if(q.get('photo')){const a=stored.find(a=>a.id===id);if(a){const list=photosFor(a),i=list.findIndex(p=>p.number===Number(q.get('photo')));if(i>=0)openViewer(list,i)}}
+}).catch(()=>{$('total').textContent='—';$('nothing').textContent='이미지를 불러올 수 없습니다.';$('nothing').hidden=false});
 </script>
-</body>
-</html>
+</body></html>

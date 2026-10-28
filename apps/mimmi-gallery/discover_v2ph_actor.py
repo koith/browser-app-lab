@@ -105,7 +105,7 @@ def run(max_pages=8,max_albums=70,max_samples=10):
     catalog,pages=scan_actor(max_pages,max_albums)
     known=set()
     try:
-        target=json.loads((ROOT/"albums.json").read_text())
+        target=json.loads((ROOT/"v2ph-targets.json").read_text())
         known={urlsplit(a["source"]).path for a in target["albums"] if safe_source(a["source"])}
     except Exception:pass
     new=[a for a in catalog if urlsplit(a["source"]).path not in known]
@@ -114,10 +114,31 @@ def run(max_pages=8,max_albums=70,max_samples=10):
         result=verify_album(book,max_samples)
         results.append(result)
         print("MIMMI_ACTOR_ALBUM",i,len(new),result["id"],len(result["samples"]),flush=True)
+    # Preserve earlier verified photographs when a source responds with 429,
+    # a paywall, or a temporary network error. Never replace 10 old images by 0.
+    previous_file=ROOT/"v2ph-actor-previews.json"
+    if previous_file.exists():
+        historical=json.loads(previous_file.read_text(encoding="utf-8"))
+        by_id={a["id"]:a for a in results}
+        for old in historical.get("albums",[]):
+            if old["id"] not in by_id:
+                by_id[old["id"]]=old
+                results.append(old)
+                continue
+            fresh=by_id[old["id"]]
+            have={p.get("sha256") for p in fresh.get("samples",[])}
+            for item in old.get("samples",[]):
+                if item.get("sha256") not in have:
+                    fresh["samples"].append(item)
+                    have.add(item.get("sha256"))
+            for i,photo in enumerate(fresh["samples"],1):
+                photo["number"]=i
+            if fresh["samples"]:
+                fresh["status"]="public_previews_verified"
     result={"version":"v0.1.0-mimmi.3","model":"mimmi","generated_at":datetime.now(timezone.utc).isoformat(),
             "source":ACTOR_URL,"actor_pages":pages,
             "summary":{"actor_albums_discovered":len(catalog),"previously_configured_albums":len(catalog)-len(new),
-                       "new_album_candidates":len(new),
+                       "new_album_candidates":len(results),
                        "verified_public_image_urls":sum(len(a["samples"]) for a in results),
                        "private_cloud_photos_archived":0},
             "albums":results}

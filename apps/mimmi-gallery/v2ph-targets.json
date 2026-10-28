@@ -1,0 +1,73 @@
+{
+  "schema_version": 1,
+  "model": "mimmi",
+  "description": "Stable seed list; never rewrite this from derived album-viewer catalogue.",
+  "albums": [
+    {
+      "id": "cream-cow-milk",
+      "title": "Cream Cow Milk",
+      "publisher": "DJAWA",
+      "advertised_photos": 164,
+      "source": "https://www.v2ph.com/album/an5o93ez.html?hl=ko",
+      "images": [],
+      "status": "source_indexed_not_archived",
+      "rights": "publisher_owned",
+      "model": "mimmi"
+    },
+    {
+      "id": "sukajan-gal",
+      "title": "Sukajan Gal",
+      "publisher": "DJAWA",
+      "advertised_photos": 177,
+      "source": "https://www.v2ph.com/album/axm7n43z.html",
+      "images": [],
+      "status": "source_indexed_not_archived",
+      "rights": "publisher_owned",
+      "model": "mimmi"
+    },
+    {
+      "id": "girls-frontline-hk416",
+      "title": "Girls' Frontline HK416",
+      "publisher": "DJAWA",
+      "advertised_photos": 192,
+      "source": "https://www.v2ph.com/album/a54e98nz.html?hl=ko",
+      "images": [],
+      "status": "source_indexed_not_archived",
+      "rights": "publisher_owned",
+      "model": "mimmi"
+    },
+    {
+      "id": "azur-lane-tashkent",
+      "title": "Azur Lane Tashkent",
+      "publisher": "DJAWA",
+      "advertised_photos": 59,
+      "source": "https://www.v2ph.com/album/a887785a.html",
+      "images": [],
+      "status": "source_indexed_not_archived",
+      "rights": "publisher_owned",
+      "model": "mimmi"
+    },
+    {
+      "id": "your-panties",
+      "title": "Your Panties",
+      "publisher": "DJAWA",
+      "advertised_photos": 325,
+      "source": "https://www.v2ph.com/album/zo555x4z.html?hl=zh-Hant",
+      "images": [],
+      "status": "source_indexed_not_archived",
+      "rights": "publisher_owned",
+      "model": "mimmi"
+    },
+    {
+      "id": "mademoiselle-mimmi",
+      "title": "Mademoiselle Mimmi",
+      "publisher": "DJAWA",
+      "advertised_photos": 170,
+      "source": "https://www.v2ph.com/album/z7e69mnz.html?hl=ar",
+      "images": [],
+      "status": "source_indexed_not_archived",
+      "rights": "publisher_owned",
+      "model": "mimmi"
+    }
+  ]
+}

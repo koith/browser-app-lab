@@ -72,7 +72,7 @@ def get_bytes_verified(url):
         return None
 
 def run(max_pages=10,max_per_album=40):
-    d=json.loads((ROOT/"albums.json").read_text())
+    d=json.loads((ROOT/"v2ph-targets.json").read_text())
     found=[]
     for album in d["albums"]:
         aid=album["id"]

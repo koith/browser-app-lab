@@ -1,0 +1,51 @@
+{
+  "schema_version": 1,
+  "publishers": [
+    {
+      "id": "djawa",
+      "name": "DJAWA",
+      "aliases": [
+        "DJAWA"
+      ],
+      "logo": {
+        "path": "../yui-gallery/publisher-logos/djawa.png",
+        "verified_official": true,
+        "theme": "light",
+        "asset_role": "official_publisher_logo",
+        "source_url": "https://djawaphoto.com/wp-content/uploads/2024/08/djawa_logo.png"
+      },
+      "official_url": "https://djawaphoto.com/portfolio-cat/mimmi/"
+    },
+    {
+      "id": "creamsoda",
+      "name": "CreamSoda",
+      "aliases": [
+        "CreamSoda",
+        "CREAMSODA"
+      ],
+      "logo": null
+    },
+    {
+      "id": "artgravia",
+      "name": "ArtGravia",
+      "aliases": [
+        "ArtGravia",
+        "ARTGRAVIA"
+      ],
+      "logo": {
+        "path": "../yui-gallery/publisher-logos/artgravia.png",
+        "verified_official": true,
+        "theme": "light",
+        "asset_role": "official_publisher_logo"
+      }
+    },
+    {
+      "id": "independent",
+      "name": "독립 화보",
+      "aliases": [
+        "독립 화보"
+      ],
+      "logo": null
+    }
+  ]
+}

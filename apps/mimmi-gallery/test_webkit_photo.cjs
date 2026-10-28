@@ -1,55 +1,44 @@
-/* Browser-engine check approximating iOS Safari. Source-hosted media
-   must never show a broken-image glyph, even if CDN hotlinking fails. */
-const fs=require('fs');
-const {webkit}=require('playwright');
-const folder='apps/mimmi-gallery/';
-const official=JSON.parse(fs.readFileSync(folder+'official-previews.json','utf8'));
-const actor=JSON.parse(fs.readFileSync(folder+'v2ph-actor-previews.json','utf8'));
-const secondary=JSON.parse(fs.readFileSync(folder+'v2ph-public-previews.json','utf8'));
-const seeds=[
- {type:'official',url:official.albums[0].samples[0].url},
- {type:'official',url:official.albums[1].samples[0].url},
- {type:'v2ph-actor',url:actor.albums[0].samples[0].url},
- {type:'v2ph-seed',url:secondary.albums[0].samples[0].url}
-];
-async function probe(page,url,policy){
- return await page.evaluate(async ({url,policy})=>new Promise(resolve=>{
-  const img=new Image();
-  img.referrerPolicy=policy; img.onload=()=>resolve({ok:img.naturalWidth>=100,width:img.naturalWidth,height:img.naturalHeight});
-  img.onerror=()=>resolve({ok:false,width:0,error:'onerror'});
-  img.src=url;
-  setTimeout(()=>resolve({ok:false,error:'timeout'}),10000);
- }),{url,policy});
-}
+/* iPhone-like WebKit test of latest gallery and original-host link reliability. */
+const fs=require('fs'),{webkit}=require('playwright');
+const root='apps/mimmi-gallery/';
+const albums=JSON.parse(fs.readFileSync(root+'source-viewer-albums.json')).albums;
+const official=albums.find(a=>a.id==='djawa-in-the-summer-sunshine-part-2');
+const v2ph=albums.find(a=>a.id==='v2ph-cream-cow-milk');
+async function probe(page,url,policy){return page.evaluate(async ({url,policy})=>new Promise(resolve=>{
+ const image=new Image();image.referrerPolicy=policy;
+ const end=v=>resolve({...v,origin:url.split('/')[2]});
+ image.onload=()=>end({ok:image.naturalWidth>100,width:image.naturalWidth});
+ image.onerror=()=>end({ok:false,reason:'onerror'});
+ image.src=url;setTimeout(()=>end({ok:false,reason:'timeout'}),10000);
+ }),{url,policy})}
 (async()=>{
  const browser=await webkit.launch({headless:true});
  try{
   const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
-  const errs=[];page.on('pageerror',err=>errs.push(err.message));
-  await page.goto('http://127.0.0.1:8765/mimmi-gallery/',{waitUntil:'domcontentloaded'});
-  await page.waitForFunction(()=>document.querySelector('#summary')?.textContent.includes('개 화보'),{timeout:30000});
-  if(await page.locator('#yui-link').getAttribute('target')!=='_blank')throw Error('Yui not new tab');
-  const result=[];
-  for(const item of seeds){
-   const no=await probe(page,item.url,'no-referrer');
-   const origin=await probe(page,item.url,'origin');
-   const strict=await probe(page,item.url,'strict-origin-when-cross-origin');
-   result.push({type:item.type,noReferrer:no,origin,strict});
+  const exceptions=[];page.on('pageerror',e=>exceptions.push(e.message));
+  await page.goto('http://127.0.0.1:8765/mimmi-gallery/',{waitUntil:'domcontentloaded',timeout:20000});
+  await page.waitForFunction(()=>document.querySelector('#total')?.textContent.includes('albums'),{timeout:20000});
+  const health=[];
+  for(const a of [official,v2ph]){
+   for(const policy of ['no-referrer','origin']){
+    health.push({id:a.id,policy,...await probe(page,a.images[0].url,policy)});
+   }
   }
-  console.log('MIMMI_WEBKIT_CDN_HOST_HEALTH',JSON.stringify(result));
-  const card=page.locator('.album').first();
-  await card.locator('.album-open').click();
-  if(!await page.locator('#album-detail').isVisible())throw Error('WebKit album detail hidden');
-  await page.locator('.photo-tile').first().click();
-  if(!await page.locator('#viewer').isVisible())throw Error('WebKit fullscreen hidden');
+  const card=page.locator('#albumgrid [data-id="djawa-in-the-summer-sunshine-part-2"]');
+  await card.click();
+  if(!await page.locator('#detail').isVisible())throw Error('Missing latest photo detail view');
+  if(await page.locator('#detailphotos .photo').count()!==6)throw Error('Wrong DJAWA sample count');
+  await page.locator('#detailphotos .photo').first().click();
   await page.waitForFunction(()=>{
-   const img=document.querySelector('#viewer-image'),error=document.querySelector('#viewer-error');
-   return (!!img&&!img.hidden&&img.naturalWidth>100)||(!!error&&!error.hidden);
+   const image=document.querySelector('#full'),status=document.querySelector('#media-status');
+   return (image?.complete&&image?.naturalWidth>100)||status?.textContent.includes('불러오지 못');
   },{timeout:20000});
-  const imageWidth=await page.locator('#viewer-image').evaluate(x=>x.naturalWidth);
-  if(imageWidth<=100&&!await page.locator('#viewer-error').isVisible())throw Error('Broken image without readable fallback in Safari');
-  if(errs.length)throw Error('WebKit app exceptions: '+errs.join(';'));
-  await page.screenshot({path:'mimmi-webkit-v4.png',fullPage:false});
-  console.log('MIMMI_WEBKIT_MOBILE_QA_PASS',JSON.stringify({imageWidth,firstAlbum:await page.locator('#detail-title').innerText()}));
+  const loaded=await page.locator('#full').evaluate(x=>x.naturalWidth>100);
+  if(!loaded&&!String(await page.locator('#media-status').innerText()).includes('불러오지 못'))throw Error('Broken image without failure message');
+  const brokenIcons=await page.locator('.album.broken-source img:not([hidden]),.photo.broken-source img:not([hidden])').count();
+  if(brokenIcons)throw Error('Broken source icons are visible');
+  if(exceptions.length)throw Error('WebKit JavaScript exception: '+exceptions.join(';'));
+  await page.screenshot({path:'mimmi-beta18-clone-webkit.png',fullPage:false});
+  console.log('MIMMI_BETA18_WEBKIT_PASS',JSON.stringify({health,loaded,errors:exceptions.length}));
  }finally{await browser.close()}
 })().catch(e=>{console.error(e.stack||String(e));process.exit(1)});
