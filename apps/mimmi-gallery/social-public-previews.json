@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "model": "mimmi",
+  "source": "Twoucan publicly indexed Mimmi_official X images",
+  "generated_at": "2026-10-28T17:16:04.480167+00:00",
+  "summary": {
+    "official_social_images_verified": 0,
+    "new_http_verified": 0,
+    "private_cloud_archived": 0
+  },
+  "albums": [
+    {
+      "id": "mimmi-official-social-public",
+      "title": "Mimmi (@Mimmi_official) · 공개 코스프레 SNS",
+      "publisher": "Mimmi",
+      "source": "https://twoucan.com/profile/Mimmi_official",
+      "advertised_photos": null,
+      "images": [],
+      "samples": [],
+      "pages": [
+        {
+          "page": 1,
+          "error": "HTTPError"
+        }
+      ],
+      "status": "no_public_social_media",
+      "fresh_http_verified": 0
+    }
+  ]
+}
