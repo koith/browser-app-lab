@@ -23,7 +23,7 @@ FILES=[
   ("v2ph_actor","v2ph-actor-previews.json"),
 ]
 ALLOWED={"djawaphoto.com","www.djawaphoto.com","cdn.v2ph.com"}
-MODEL_VERSION="v0.1.0-mimmi.5"
+MODEL_VERSION="v0.1.0-mimmi.6"
 
 def canonical_title(title):
     s=unicodedata.normalize("NFKC",str(title)).casefold()

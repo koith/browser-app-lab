@@ -115,6 +115,7 @@ button:focus-visible,a:focus-visible{outline:2px solid #ddd4c7;outline-offset:3p
 .detail-view .version-chip{font-size:9px;top:calc(env(safe-area-inset-top) + 2px)}
 footer{padding:15px 0 25px;justify-content:flex-end}
 @media(max-width:680px){.topbar{height:calc(67px + env(safe-area-inset-top))}.browse-meta{gap:8px}.inventory{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.counter{font-size:10px}.photo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:680px){.topbar{gap:6px}.logo{font-size:16px;letter-spacing:.02em}.mainnav{gap:4px}.mainnav a{font-size:10px;padding:5px 6px}.search-toggle{width:30px;height:30px;padding:6px}}
 </style>
 </head>
 <body>
@@ -122,9 +123,9 @@ footer{padding:15px 0 25px;justify-content:flex-end}
 <header class="topbar">
  <a href="./" class="logo" aria-label="밈미 갤러리 홈">MIMMI<span>GALLERY</span></a>
  <div class="detail-heading"><button class="back" id="back" aria-label="화보 목록으로 돌아가기">‹</button><h2 class="detail-title" id="albumname"></h2><span class="counter" id="albumtotal"></span></div>
- <nav class="mainnav" aria-label="모델 전환"><a href="../yui-gallery/" target="_blank" rel="noopener noreferrer" title="심유이 갤러리를 새 탭에서 열기">심유이 ↗</a><a href="./" aria-current="page">밈미</a></nav>
+ <nav class="mainnav" aria-label="모델 전환"><a href="../yui-gallery/" target="_blank" rel="noopener noreferrer" title="심유이 갤러리를 새 탭에서 열기">심유이 ↗</a><a href="./" aria-current="page">밈미</a><a href="cloud.html" title="비공개 원본 보관소 연결">보관소</a></nav>
  <button id="search-toggle" class="search-toggle" aria-label="화보 검색 열기" aria-haspopup="dialog" aria-controls="search-dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button>
- <small id="app-version" class="version-chip">v0.1.0-mimmi.5</small>
+ <small id="app-version" class="version-chip">v0.1.0-mimmi.6</small>
 </header>
 <div id="browse">
  <div class="browse-meta"><p class="inventory" id="inventory">화보를 불러오는 중</p><small class="inventory" id="device-health">이 기기에서 이미지 열람 확인 중</small><span class="counter" id="total"></span></div>
@@ -147,7 +148,7 @@ footer{padding:15px 0 25px;justify-content:flex-end}
  </form>
 </dialog>
 <div id="lightbox" role="dialog" aria-label="사진 보기" aria-modal="true">
- <div class="lighttop"><button class="lightbtn" id="close" aria-label="닫기">×</button><span id="position"></span><small class="version-chip">v0.1.0-mimmi.5</small></div>
+ <div class="lighttop"><button class="lightbtn" id="close" aria-label="닫기">×</button><span id="position"></span><small class="version-chip">v0.1.0-mimmi.6</small></div>
  <button class="lightbtn arrow prev" id="prev" aria-label="이전 사진">‹</button><div class="media-frame"><img id="full" alt="화보 사진"><a id="original" target="_blank" rel="noopener">사진 열기 ↗</a></div><button class="lightbtn arrow next" id="next" aria-label="다음 사진">›</button>
  <p id="media-status" role="status"></p>
 </div>

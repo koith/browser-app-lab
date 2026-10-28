@@ -1,0 +1,28 @@
+name: Mimmi Private Photo Sync
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'apps/mimmi-gallery/cloud/**'
+      - 'apps/mimmi-gallery/download_public_images_private.py'
+      - '.github/workflows/mimmi-private-cloud-sync.yml'
+  schedule:
+    - cron: '10 17 * * 1,4'
+permissions:
+  contents: read
+concurrency:
+  group: mimmi-private-photo-upload
+  cancel-in-progress: false
+jobs:
+  sync:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 95
+    env:
+      RCLONE_CONFIG_ARCHIVE_COOKIE: ${{ secrets.MIMMI_TERABOX_NDUS || secrets.YUI_TERABOX_NDUS }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Offline QA and authenticated Mimmi-only cloud sync
+        run: bash apps/mimmi-gallery/cloud/run_private_sync.sh
