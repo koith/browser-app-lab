@@ -40,7 +40,11 @@ h1{margin:8px 0 0;font-weight:750;font-size:clamp(34px,5vw,56px);letter-spacing:
 .album:hover img{transform:scale(1.045)}
 .publisher{position:relative;display:flex;align-items:center;justify-content:center;aspect-ratio:3/2;width:100%;border:1px solid #ffffff12;background:#1b1d21;color:#f5f5f6;overflow:hidden;padding:26px 18px 42px}
 .publisher img{display:block;max-width:88%;max-height:100%;object-fit:contain}
-.publisher[data-logo-theme="light"]{background:#eee}
+.publisher[data-logo-theme="light"]{background:#fff}
+.publisher[data-publisher="pussylet"]{background:#f4b544}
+.publisher[data-publisher="sweetbox"]{padding:0}
+.publisher[data-publisher="sweetbox"] img{position:absolute;inset:0;width:100%;height:100%;max-width:none;max-height:none;object-fit:cover}
+.publisher[data-publisher="sweetbox"] .publisher-info{text-shadow:0 1px 5px #000}
 .publisher[data-logo-theme="light"] .publisher-info{color:#333}
 .publisher-wordmark{font-size:clamp(15px,2vw,24px);font-weight:650;letter-spacing:.04em;text-align:center}
 .publisher-info{position:absolute;left:10px;right:10px;bottom:9px;color:#ffffff80;font-size:10px;text-align:left}
@@ -112,7 +116,7 @@ footer{padding:15px 0 25px;justify-content:flex-end}
  <div class="detail-heading"><button class="back" id="back" aria-label="화보 목록으로 돌아가기">‹</button><h2 class="detail-title" id="albumname"></h2><span class="counter" id="albumtotal"></span></div>
  <nav class="mainnav" aria-label="이동"><a href="cloud.html">클라우드</a></nav>
  <button id="search-toggle" class="search-toggle" aria-label="화보 검색 열기" aria-haspopup="dialog" aria-controls="search-dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button>
- <small id="app-version" class="version-chip">v0.1.0-beta.14</small>
+ <small id="app-version" class="version-chip">v0.1.0-beta.15</small>
 </header>
 <div id="browse">
  <div class="browse-meta"><p class="inventory" id="inventory">화보를 불러오는 중</p><span class="counter" id="total"></span></div>
@@ -135,7 +139,7 @@ footer{padding:15px 0 25px;justify-content:flex-end}
  </form>
 </dialog>
 <div id="lightbox" role="dialog" aria-label="사진 보기" aria-modal="true">
- <div class="lighttop"><button class="lightbtn" id="close" aria-label="닫기">×</button><span id="position"></span><small class="version-chip">v0.1.0-beta.14</small></div>
+ <div class="lighttop"><button class="lightbtn" id="close" aria-label="닫기">×</button><span id="position"></span><small class="version-chip">v0.1.0-beta.15</small></div>
  <button class="lightbtn arrow prev" id="prev" aria-label="이전 사진">‹</button><div class="media-frame"><img id="full" alt="화보 사진"><a id="original" target="_blank" rel="noopener">사진 열기 ↗</a></div><button class="lightbtn arrow next" id="next" aria-label="다음 사진">›</button>
  <p id="media-status" role="status"></p>
 </div>
