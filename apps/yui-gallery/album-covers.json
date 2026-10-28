@@ -83,6 +83,24 @@
       "method": "local_face_region_and_eye_detection",
       "confidence": 6.368
     },
+    "green91": {
+      "sha256": "18b0423c1ab6617b490dacc53dbe2c255d6d6c59542fbe93fbc01bdc5b819ed6",
+      "number": 1,
+      "width": 924,
+      "height": 1368,
+      "face": [
+        370,
+        330,
+        160,
+        170
+      ],
+      "position": [
+        50,
+        16.686
+      ],
+      "fit": "cover",
+      "method": "manual_face_region_review"
+    },
     "thru-thru117": {
       "sha256": "ca8b2aa34b550414fd99370d681dbe2f6e80c1ea31332e44262a460b0140cd3c",
       "number": 2,
@@ -254,6 +272,24 @@
       "method": "local_face_region_and_eye_detection",
       "confidence": 4.01
     },
+    "yui-vol2-42": {
+      "sha256": "a4e2b92b57ac52c491d942847b2f9fd58797534f75356a8e83e0b9570f14cadc",
+      "number": 1,
+      "width": 1026,
+      "height": 1368,
+      "face": [
+        484,
+        170,
+        300,
+        255
+      ],
+      "position": [
+        50,
+        0.0
+      ],
+      "fit": "cover",
+      "method": "manual_face_region_review"
+    },
     "kuro-yui58": {
       "sha256": "f16d4859bf80ba0d3330ba529df409bc46198d901db049d3097aecfae6bb150e",
       "number": 37,
@@ -368,60 +404,100 @@
       "method": "local_face_region_and_eye_detection",
       "confidence": 4.15
     },
-    "cn-wantuzhi-everyday": {
-      "sha256": "e8bb0187756825ee444380e241513cdee925e32887003997e7ea48d55e6f871a",
-      "number": 1,
-      "width": 924,
-      "height": 720,
+    "public-yui-sns": {
+      "sha256": "9973b074e7f053aa3fa338cb32c067c3e86e5bc00f033c8acc434fee1d3628c5",
+      "number": 4,
+      "width": 800,
+      "height": 1200,
       "face": [
-        264,
-        216,
-        381,
-        381
-      ],
-      "position": [
-        50,
-        100.0
-      ],
-      "fit": "cover",
-      "method": "local_face_region_and_eye_detection",
-      "confidence": 4.19
-    },
-    "green91": {
-      "sha256": "18b0423c1ab6617b490dacc53dbe2c255d6d6c59542fbe93fbc01bdc5b819ed6",
-      "number": 1,
-      "width": 924,
-      "height": 1368,
-      "face": [
-        370,
-        330,
-        160,
-        170
-      ],
-      "position": [
-        50,
-        16.686
-      ],
-      "fit": "cover",
-      "method": "manual_face_region_review"
-    },
-    "yui-vol2-42": {
-      "sha256": "a4e2b92b57ac52c491d942847b2f9fd58797534f75356a8e83e0b9570f14cadc",
-      "number": 1,
-      "width": 1026,
-      "height": 1368,
-      "face": [
-        484,
-        170,
-        300,
-        255
+        311,
+        185,
+        109,
+        109
       ],
       "position": [
         50,
         0.0
       ],
       "fit": "cover",
-      "method": "manual_face_region_review"
+      "method": "local_face_region_and_eye_detection",
+      "confidence": 6.343
+    },
+    "djawa-privaty-public-samples": {
+      "sha256": "6ba824273de1158aac7311d05c06263f502df14566e5a91d339f156b90d00031",
+      "number": 1,
+      "width": 1200,
+      "height": 1800,
+      "face": [
+        383,
+        359,
+        364,
+        364
+      ],
+      "position": [
+        50,
+        16.5
+      ],
+      "fit": "cover",
+      "method": "local_face_region_and_eye_detection",
+      "confidence": 3.911
+    },
+    "acosta-japan-public-report": {
+      "sha256": "724f041d9ca1953790f644e43ecac9eb58a48d194a071268a4a9a32cf33843cb",
+      "number": 1,
+      "width": 1280,
+      "height": 853,
+      "face": [
+        522,
+        158,
+        222,
+        222
+      ],
+      "position": [
+        0.0,
+        50
+      ],
+      "fit": "cover",
+      "method": "local_face_region_and_eye_detection",
+      "confidence": 9.033
+    },
+    "gamersky-public-editorial": {
+      "sha256": "6eeea5f7217bc2414caf0ba474850b52bc1c88eb4df62a59c462681f896c313a",
+      "number": 2,
+      "width": 965,
+      "height": 1286,
+      "face": [
+        431,
+        512,
+        124,
+        124
+      ],
+      "position": [
+        50,
+        42.267
+      ],
+      "fit": "cover",
+      "method": "local_face_region_and_eye_detection",
+      "confidence": 3.639
+    },
+    "inven-public-photos": {
+      "sha256": "960c509eb2c0af92b14391612883112ac44db660625e7f488055d9f2c9d937ed",
+      "number": 1,
+      "width": 800,
+      "height": 1067,
+      "face": [
+        310,
+        186,
+        168,
+        168
+      ],
+      "position": [
+        50,
+        3.623
+      ],
+      "fit": "cover",
+      "method": "local_face_region_and_eye_detection",
+      "confidence": 6.171
     },
     "cn-huantuji": {
       "sha256": "d1e18de42a52f4406cb95bd80e82e74b50c51df0efd8fbc53d5dfe2d4978c095",
@@ -476,6 +552,25 @@
       ],
       "fit": "contain",
       "method": "manual_face_region_review"
+    },
+    "cn-wantuzhi-everyday": {
+      "sha256": "e8bb0187756825ee444380e241513cdee925e32887003997e7ea48d55e6f871a",
+      "number": 1,
+      "width": 924,
+      "height": 720,
+      "face": [
+        264,
+        216,
+        381,
+        381
+      ],
+      "position": [
+        50,
+        100.0
+      ],
+      "fit": "cover",
+      "method": "local_face_region_and_eye_detection",
+      "confidence": 4.19
     },
     "cn-yingyuge": {
       "sha256": "a1e0805d5d8bbf792943625f7f82187aadfd58c2151ed2be73ae5d3dbc996f2d",

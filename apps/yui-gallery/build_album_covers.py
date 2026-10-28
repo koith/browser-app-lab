@@ -28,7 +28,7 @@ def framing(width, height, face):
     return positions, fits
 
 
-def build(root, private_root):
+def build(root, private_root, only_ids=None):
     import cv2
     import numpy as np
     from PIL import Image
@@ -60,6 +60,10 @@ def build(root, private_root):
     current_path = root/'album-covers.json'
     current = json.loads(current_path.read_text()).get('covers', {}) if current_path.exists() else {}
     for aid, album in albums.items():
+        if only_ids and aid not in only_ids:
+            if aid in current:
+                covers[aid] = current[aid]
+            continue
         if is_excluded(aid, album.get('source_pages', []), album['images']):
             continue
         reviewed = current.get(aid)
@@ -122,8 +126,9 @@ if __name__ == '__main__':
     parser.add_argument('--root', type=Path, default=Path(__file__).parent)
     parser.add_argument('--private-root', type=Path, required=True)
     parser.add_argument('--out', type=Path, required=True)
+    parser.add_argument('--only', action='append', help='Update only these album IDs; preserve existing covers')
     args = parser.parse_args()
-    result = build(args.root, args.private_root)
+    result = build(args.root, args.private_root, set(args.only or []))
     args.out.write_text(json.dumps(result, ensure_ascii=False, indent=2)+'\n')
     print('VERIFIED_FACE_COVERS', len(result['covers']),
           'FALLBACKS', len(result['no_confirmed_face_use_upper_fallback']), flush=True)

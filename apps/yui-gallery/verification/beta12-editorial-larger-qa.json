@@ -1,0 +1,30 @@
+{
+  "checked_at": "2026-10-28T00:45:56.856894+00:00",
+  "base": "http://127.0.0.1:8782/",
+  "scope": "selected_albums",
+  "requested_album_ids": [
+    "gamersky-public-editorial"
+  ],
+  "engine": "chromium",
+  "version": "v0.1.0-beta.12",
+  "viewport": [
+    390,
+    844
+  ],
+  "iphone_real_device": false,
+  "network": "TLS-verified requests bridge",
+  "private_cloud_verified": 0,
+  "albums": [
+    {
+      "id": "gamersky-public-editorial",
+      "decoded_lightbox": 12,
+      "original_link_sha256_checks": 0
+    }
+  ],
+  "decoded_image_entries": 12,
+  "browser_download_sha256_verified": 0,
+  "original_link_sha256_verified": 0,
+  "unique_original_link_sha256_verified": 0,
+  "errors": [],
+  "image_decode_retries": []
+}

@@ -1,0 +1,193 @@
+{
+  "version": "v0.1.0-beta.12",
+  "not_exhaustive": true,
+  "source_editorial_countries": [
+    "KR",
+    "JP",
+    "CN"
+  ],
+  "creator_profile_pages": 31,
+  "creator_posts_with_photo_links": 337,
+  "creator_attachment_urls": 452,
+  "creator_unique_image_sha256": 441,
+  "other_public_source_pages_attempted": 18,
+  "other_public_image_urls": 43,
+  "all_image_responses_decoded": 495,
+  "new_unique_image_sha256": 482,
+  "new_photograph_file_sha256": 402,
+  "same_photograph_different_editions_may_exist": true,
+  "new_non_photographic_input_sha256": 80,
+  "new_gallery_entries": 401,
+  "new_public_collections": 5,
+  "new_complete_photobooks": 0,
+  "advertised_djawa_photos": 190,
+  "acquired_djawa_photo_samples": 24,
+  "publisher_original_verified": 0,
+  "larger_creator_variants_selected_over_editorial": 4,
+  "equal_size_same_frame_variants_consolidated": 1,
+  "publisher_catalogue_sku_records": 28,
+  "primary_publisher_work_records": 5,
+  "retained_existing_complete_web_editions": 21,
+  "source_pages_and_errors": [
+    {
+      "url": "https://djawaphoto.com/yui",
+      "adapter": "djawa-index",
+      "works": 0,
+      "photos": 0,
+      "response_sha256": "c029ac19d74f3da76bce5acd7092dc4f87f82ef2c19496f748d967aaa0f80569",
+      "snapshot": "5e1176e0e0cae2a9.html"
+    },
+    {
+      "url": "https://djawaphoto.com/portfolio/nikke-privaty-sharp-lesson/",
+      "adapter": "djawa",
+      "works": 1,
+      "photos": 24,
+      "response_sha256": "9e4c8f292e2a83c15d41c0ed68d1d610cb985ad73122f78c09a38d4c8d82433f",
+      "snapshot": "74c8d1d25cd5c468.html"
+    },
+    {
+      "url": "https://blog.hacosta.co.jp/2026/09/08acosta-15/",
+      "adapter": "hacosta",
+      "works": 0,
+      "photos": 1,
+      "response_sha256": "2d970ca6888eb12d6c8c59df1352180e5c8c22a2cf92471829aa36634c515546",
+      "snapshot": "045a4809cbdf508f.html"
+    },
+    {
+      "url": "https://www.gamersky.com/news/202512/2066711.shtml",
+      "adapter": "gamersky",
+      "works": 0,
+      "photos": 4,
+      "response_sha256": "5b9a4e468565f1c46c604eab930d1579eefa89c675e50cd764da2bba215215db",
+      "snapshot": "e0461579cf4c767f.html"
+    },
+    {
+      "url": "https://www.gamersky.com/news/202512/2066711_2.shtml",
+      "adapter": "gamersky",
+      "works": 0,
+      "photos": 4,
+      "response_sha256": "83603c51dee2fe615478d4b1bd42a0db52b70977e1dd13f649f64765246dfa99",
+      "snapshot": "f221df4c343e605e.html"
+    },
+    {
+      "url": "https://www.gamersky.com/news/202512/2066711_3.shtml",
+      "adapter": "gamersky",
+      "works": 0,
+      "photos": 4,
+      "response_sha256": "5fec0128a4a34d34decc5c54a9d8ac678d41fafbbf11d3b9502c065981107269",
+      "snapshot": "f4cf23bba4325c35.html"
+    },
+    {
+      "url": "https://www.inven.co.kr/board/webzine/2097/2735151?iskin=webzine",
+      "adapter": "inven",
+      "works": 0,
+      "photos": 2,
+      "response_sha256": "5ff6c2eb71b9cbd647d2738330e11f1ff442f39186483e5f9205acf859b44d7e",
+      "snapshot": "dc70f7843ee09bb1.html"
+    },
+    {
+      "url": "https://www.inven.co.kr/board/webzine/2097/2742111?iskin=webzine",
+      "adapter": "inven",
+      "works": 0,
+      "photos": 1,
+      "response_sha256": "1a3b629eea6e614a72076f0d3c37396db9a838d2a0c648ff9ea7b1a29b5a30c2",
+      "snapshot": "a6e9bf4464ed3fc0.html"
+    },
+    {
+      "url": "https://photo-gallery-chi-steel.vercel.app/assets/index-C8lxWb67.js",
+      "adapter": "photographer",
+      "works": 0,
+      "photos": 3,
+      "response_sha256": "fdeb33210e009c112e4a43b1c7d50998f6fb37fe64784291374c2e68842c6d32",
+      "snapshot": "c5561f5be5a626dd.html"
+    },
+    {
+      "url": "https://bcutrank.com/models/simyui.html",
+      "adapter": "bcut",
+      "works": 23,
+      "photos": 0,
+      "response_sha256": "dadaec31ef0d88a3b32fbe84b2abed4fd369e7e705e09efa03b6908e0abca09f",
+      "snapshot": "8dedf5a89746d3b4.html"
+    },
+    {
+      "url": "https://ctee.kr/place/super_yuisan",
+      "adapter": "title",
+      "works": 0,
+      "photos": 0,
+      "response_sha256": "9e366f898bbfae362594de137b3a7226b6667b868f352040023b3ec53aee7491",
+      "snapshot": "c8fabe785a4d5434.html"
+    },
+    {
+      "url": "https://ctee.kr/item/store/86995",
+      "adapter": "title",
+      "works": 1,
+      "photos": 0,
+      "response_sha256": "7f5cba4958937067b6c39a19e4cc4214f151653a62575d5e8f379fd4cc9791c1",
+      "snapshot": "24c7d20b1d0a4baa.html"
+    },
+    {
+      "url": "https://ctee.kr/item/store/83371",
+      "adapter": "title",
+      "works": 1,
+      "photos": 0,
+      "response_sha256": "b8e236bd32a2917cabf53fb2232177e98165c144d1a3e39bd79b05883be025d7",
+      "snapshot": "171c232cf254fd2a.html"
+    },
+    {
+      "url": "https://ctee.kr/item/store/93478",
+      "adapter": "title",
+      "works": 1,
+      "photos": 0,
+      "response_sha256": "ff155bba98808fdf3a4ca968054597c5b6b7c3f54532cf0c76f2ca8496754129",
+      "snapshot": "fc8bec036355aabe.html"
+    },
+    {
+      "url": "https://ctee.kr/item/store/97568",
+      "adapter": "title",
+      "works": 1,
+      "photos": 0,
+      "response_sha256": "a944a96ef8d40ec8f70a5c987229da02f0ac52ee6f82549902e087878ef1d030",
+      "snapshot": "337ed6e9c307d967.html"
+    },
+    {
+      "url": "https://moviefantasy.co.kr/yuisim",
+      "adapter": "title",
+      "works": 0,
+      "photos": 0,
+      "response_sha256": "d69cc86a0b67b1dca58da9512ce88b6e113f819bc79fd16f5ccbf4f11d5317fd",
+      "snapshot": "571ee7f0f19530d1.html"
+    },
+    {
+      "url": "https://moviefantasy.co.kr/onlineshop/?idx=436",
+      "adapter": "title",
+      "error": "Publisher metadata does not name this model"
+    },
+    {
+      "url": "https://moviefantasy.co.kr/125/?idx=446",
+      "adapter": "title",
+      "error": "Publisher metadata does not name this model"
+    }
+  ],
+  "original_bytes_unchanged": true,
+  "photo_archive_bundles": false,
+  "primary_cloud_verified": 0,
+  "private_secondary_individual_file_readback": "in progress; final release PR records completed real uploads and SHA-256 checks",
+  "iphone_physical_device_verified": false,
+  "remaining": [
+    "complete publisher editions and highest original resolution",
+    "unacquired publisher work histories",
+    "CTEE public API returns access-is-abnormal",
+    "MOVIE FANTASY requires login",
+    "primary authenticated owner storage integration",
+    "physical iPhone QA"
+  ],
+  "existing_larger_file_reused_in_editorial": 1,
+  "additional_visible_cursor_recheck": {
+    "pages": 35,
+    "photo_links": 452,
+    "added": 0,
+    "missing": 0,
+    "stopped_on_empty_cursor_limit": true,
+    "exhaustive_coverage_claimed": false
+  }
+}

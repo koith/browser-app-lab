@@ -15,6 +15,10 @@ permissions:
 jobs:
   verified-viewing:
     runs-on: ${{ matrix.os }}
+    container:
+      # Browser/system libraries are preinstalled; avoid the observed slow apt mirror.
+      image: mcr.microsoft.com/playwright/python:v1.58.0-noble@sha256:cd8493e380df200a471821e2690b710eab8d793dde3c0946fd0a39a961022914
+      options: --init --ipc=host
     timeout-minutes: 25
     strategy:
       fail-fast: false
@@ -37,13 +41,14 @@ jobs:
       - name: Install free local tools
         timeout-minutes: 7
         run: |
-          pip install Pillow requests playwright==1.58.0 gallery-dl fastapi httpx
-          python -m playwright install --with-deps ${{ matrix.engine }}
+          pip install Pillow requests beautifulsoup4 playwright==1.58.0 gallery-dl fastapi httpx
       - name: Verify byte preservation and collector behavior
         run: |
           node apps/yui-gallery/test_version.cjs
           node apps/yui-gallery/test_gallery_labels.cjs
           python apps/yui-gallery/test_auto_registration.py
+          python apps/yui-gallery/test_public_photo_archive.py
+          python apps/yui-gallery/test_public_source_adapters.py
           python apps/yui-gallery/test_merge_higher_resolution.py
           python apps/yui-gallery/test_photo_quality_policy.py
           python apps/yui-gallery/test_http_album_girlatlas.py
@@ -94,9 +99,9 @@ jobs:
           assert not pending,pending
           print('PRODUCTION_DEPLOYED_CODE_AND_MANIFEST_HASHES_MATCH',flush=True)
           PY
-          python apps/yui-gallery/qa_mobile_navigation.py --base https://koith.github.io/browser-app-lab/apps/yui-gallery/?v=0.1.0-beta.11 --out yui-production-navigation.json
-          python apps/yui-gallery/qa_album_covers.py --base https://koith.github.io/browser-app-lab/apps/yui-gallery/?v=0.1.0-beta.11 --out yui-production-covers.json
-          python apps/yui-gallery/qa_gallery.py --base https://koith.github.io/browser-app-lab/apps/yui-gallery/?v=0.1.0-beta.11 --out yui-production-gallery.json
+          python apps/yui-gallery/qa_mobile_navigation.py --base https://koith.github.io/browser-app-lab/apps/yui-gallery/?v=0.1.0-beta.12 --out yui-production-navigation.json
+          python apps/yui-gallery/qa_album_covers.py --base https://koith.github.io/browser-app-lab/apps/yui-gallery/?v=0.1.0-beta.12 --out yui-production-covers.json
+          python apps/yui-gallery/qa_gallery.py --base https://koith.github.io/browser-app-lab/apps/yui-gallery/?v=0.1.0-beta.12 --out yui-production-gallery.json
       - uses: actions/upload-artifact@v7
         if: always()
         with:

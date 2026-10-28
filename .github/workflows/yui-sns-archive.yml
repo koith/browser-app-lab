@@ -1,8 +1,21 @@
-name: Public Photo Review QA
+name: Public Photo Individual File QA
 on:
   push:
+    branches: [main]
     paths:
       - apps/yui-gallery/sns_archive.py
+      - apps/yui-gallery/public_photo_archive.py
+      - apps/yui-gallery/test_public_photo_archive.py
+      - apps/yui-gallery/test_public_source_adapters.py
+      - apps/yui-gallery/collect_public_sources.py
+      - .github/workflows/yui-sns-archive.yml
+  pull_request:
+    paths:
+      - apps/yui-gallery/sns_archive.py
+      - apps/yui-gallery/public_photo_archive.py
+      - apps/yui-gallery/test_public_photo_archive.py
+      - apps/yui-gallery/test_public_source_adapters.py
+      - apps/yui-gallery/collect_public_sources.py
       - .github/workflows/yui-sns-archive.yml
   workflow_dispatch:
 permissions:
@@ -10,19 +23,13 @@ permissions:
 jobs:
   check:
     runs-on: ubuntu-24.04
-    timeout-minutes: 35
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       - run: pip install beautifulsoup4 requests Pillow
-      - run: python -m py_compile apps/yui-gallery/sns_archive.py
-      - run: python apps/yui-gallery/sns_archive.py --max-pages 85 --workers 5 --part-size 50
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: public-photo-archive
-          path: |
-            yui-sns-archive/*.zip
-            yui-sns-archive/*.json
+      - run: python -m py_compile apps/yui-gallery/sns_archive.py apps/yui-gallery/public_photo_archive.py
+      - run: python apps/yui-gallery/test_public_photo_archive.py
+      - run: python apps/yui-gallery/test_public_source_adapters.py

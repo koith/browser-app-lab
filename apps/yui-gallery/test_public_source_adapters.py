@@ -1,0 +1,100 @@
+"""Cross-model exclusions, full displayed links and subset registration regression."""
+import hashlib
+import io
+import json
+import tempfile
+import unittest
+from pathlib import Path
+
+from PIL import Image
+
+from build_additional_source_manifest import build
+from collect_public_sources import (djawa_model_index, djawa_samples, gamersky_article, hacosta_model_photo,
+                                    inven_article, photographer_portfolio)
+
+
+class SourceAdapterTests(unittest.TestCase):
+    def test_publisher_model_index_follows_only_its_work_grid(self):
+        body = '''<title>Yui – Djawa Photo</title><section class="grid-item">
+        <a href="/portfolio/work/">Work</a></section>
+        <nav><a href="/portfolio/unrelated/">Other model</a></nav>'''
+        _, _, nexts = djawa_model_index(body, 'https://djawaphoto.com/yui')
+        self.assertEqual(nexts, ['https://djawaphoto.com/portfolio/work/'])
+
+    def test_djawa_excludes_covers_video_and_related_thumbnails(self):
+        body = '''<title>Sharp Lesson – Djawa Photo</title><p>Djawa × Yui
+        total 190 extremely-high resolution (8640 × 5760) photos</p>
+        <div class="lightbox-photoswipe">
+        <img class="grid-item-img" alt="sample_01" data-src="https://djawaphoto.com/a-small.jpg"
+          data-srcset="https://djawaphoto.com/a-small.jpg 300w, https://djawaphoto.com/a.jpg 1200w">
+        <img class="grid-item-img" alt="sample_cv1" data-src="https://djawaphoto.com/cover.jpg">
+        <img class="grid-item-img" alt="sample_video_thumbnail" data-src="https://djawaphoto.com/video.jpg">
+        </div><img alt="sample_02" data-src="https://djawaphoto.com/related.jpg">'''
+        works, photos, _ = djawa_samples(body, 'https://djawaphoto.com/work/')
+        self.assertEqual([p['url'] for p in photos], ['https://djawaphoto.com/a.jpg'])
+        self.assertEqual(works[0]['advertised_photos'], 190)
+        self.assertFalse(works[0]['full_edition_acquired'])
+
+    def test_event_selects_only_adjacent_explicitly_credited_exhibitor(self):
+        body = '''<img src="https://blog.hacosta.co.jp/before.jpg">
+        <p><span><a href="https://x.com/super_yuisan">シム・ゆい</a></span><br>
+        <img src="https://blog.hacosta.co.jp/correct.jpg"></p>
+        <p><a href="https://x.com/other">Other</a><img src="https://blog.hacosta.co.jp/other.jpg"></p>'''
+        _, photos, _ = hacosta_model_photo(body, 'https://blog.hacosta.co.jp/report/')
+        self.assertEqual([p['url'] for p in photos], ['https://blog.hacosta.co.jp/correct.jpg'])
+
+    def test_article_body_full_links_and_same_article_pagination(self):
+        body = '''<div class="Mid2L_con"><p class="GsImageLabel"><a
+        href="https://www.gamersky.com/showimage/id_gamersky.shtml?https://img1.gamersky.com/full.jpg">
+        <img src="https://img1.gamersky.com/full_S.jpg"></a></p></div>
+        <img src="https://img1.gamersky.com/advert.jpg"><div class="page_css">
+        <a href="/news/202512/2066711_2.shtml">2</a><a href="/news/202512/other.shtml">Related</a></div>'''
+        _, photos, nexts = gamersky_article(body, 'https://www.gamersky.com/news/202512/2066711.shtml')
+        self.assertEqual([p['url'] for p in photos], ['https://img1.gamersky.com/full.jpg'])
+        self.assertEqual(nexts, ['https://www.gamersky.com/news/202512/2066711_2.shtml'])
+
+    def test_board_body_excludes_comments_and_preserves_observed_resize_url(self):
+        body = '''<title>심유이 인스타</title><div id="powerbbsContent">
+        <img src="https://upload3.inven.co.kr/photo.jpg?MW=800"></div>
+        <div class="comments"><img src="https://upload3.inven.co.kr/comment.jpg"></div>'''
+        _, photos, _ = inven_article(body, 'https://www.inven.co.kr/board/1')
+        self.assertEqual([p['url'] for p in photos], ['https://upload3.inven.co.kr/photo.jpg?MW=800'])
+        with self.assertRaisesRegex(ValueError, 'does not credit'):
+            inven_article(body.replace('심유이', 'Other'), 'https://www.inven.co.kr/board/1')
+
+    def test_portfolio_requires_exact_subject_and_original_post(self):
+        post = {'tweetId':'1','cosplayer':'@super_yuisan','author':'@super_yuisan',
+                'originalUrl':'https://x.com/super_yuisan/status/1',
+                'photos':[{'original':'https://pbs.twimg.com/media/full.jpg:orig'}]}
+        other = {**post, 'cosplayer':'@other', 'photos':[{'original':'https://pbs.twimg.com/media/other.jpg:orig'}]}
+        _, photos, _ = photographer_portfolio('const data='+json.dumps([post, other]), 'https://example.com/app.js')
+        self.assertEqual(len(photos), 1)
+        self.assertEqual(photos[0]['photographer_credit'], '@photo_vicc')
+
+    def test_new_timeline_rows_append_without_replacing_previous_pose(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            folder = root/'collection';folder.mkdir()
+            def photo(number, color, stem):
+                stream=io.BytesIO();Image.new('RGB',(300,400),color).save(stream,format='PNG')
+                raw=stream.getvalue();path=folder/(stem+'.png');path.write_bytes(raw)
+                return {'number':number,'url':'https://pbs.twimg.com/media/'+stem+'.png?name=orig',
+                        'sha256':hashlib.sha256(raw).hexdigest(),'bytes':len(raw),'width':300,
+                        'height':400,'file':path.name,'origin_page':'https://x.com/super_yuisan/status/1'}
+            old = photo(1, 'red', 'old')
+            new = photo(1, 'blue', 'new')
+            def incoming(rows):
+                (folder/'manifest.json').write_text(json.dumps({'id':'public-test','title':'Public subset',
+                'expected':len(rows),'images':rows,'not_complete_photobook':True,
+                'expected_total_unknown':True,'collection_kind':'creator_public_photographs'}))
+            out=root/'out.json';incoming([old]);build([folder],out)
+            incoming([new,{**old,'number':2}]);build([folder],out)
+            album=json.loads(out.read_text())['albums'][0]
+            self.assertEqual([p['sha256'] for p in album['images']], [old['sha256'],new['sha256']])
+            self.assertEqual([p['number'] for p in album['images']], [1,2])
+            self.assertFalse(album['complete_sequence'])
+            self.assertIsNone(album['missing_numbers'])
+
+
+if __name__ == '__main__':
+    unittest.main()

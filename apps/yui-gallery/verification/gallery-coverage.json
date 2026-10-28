@@ -1,16 +1,18 @@
 {
-  "checked_at": "2026-10-27T16:46:42.596749+00:00",
+  "checked_at": "2026-10-28T01:25:50.557309+00:00",
   "arbitrary_resolution_completion_threshold": null,
   "not_publisher_master_certification": true,
   "complete_web_albums": 21,
-  "preview_or_incomplete_groups": 5,
-  "gallery_entries": 2504,
+  "preview_or_incomplete_groups": 10,
+  "gallery_entries": 2905,
   "albums": [
     {
       "id": "yuis-present33",
       "title": "SWEETBOX — Yui's Present",
       "acquired": 33,
       "expected_web_edition": 33,
+      "advertised_publisher_photos": null,
+      "collection_kind": null,
       "sequence_complete": true,
       "missing_numbers": [],
       "duplicate_files": 0,
@@ -39,6 +41,8 @@
       "title": "Yui — Athletic Club",
       "acquired": 104,
       "expected_web_edition": 104,
+      "advertised_publisher_photos": null,
+      "collection_kind": null,
       "sequence_complete": true,
       "missing_numbers": [],
       "duplicate_files": 0,
@@ -75,6 +79,8 @@
       "title": "Yui — Wet Yui",
       "acquired": 80,
       "expected_web_edition": 80,
+      "advertised_publisher_photos": null,
+      "collection_kind": null,
       "sequence_complete": true,
       "missing_numbers": [],
       "duplicate_files": 0,
@@ -99,6 +105,8 @@
       "title": "SWEETBOX — Teddy Bear",
       "acquired": 97,
       "expected_web_edition": 97,
+      "advertised_publisher_photos": null,
+      "collection_kind": null,
       "sequence_complete": true,
       "missing_numbers": [],
       "duplicate_files": 0,
@@ -131,6 +139,8 @@
       "title": "Yui — Green (AI 보정본)",
       "acquired": 91,
       "expected_web_edition": 91,
+      "advertised_publisher_photos": null,
+      "collection_kind": null,
       "sequence_complete": true,
       "missing_numbers": [],
       "duplicate_files": 0,
@@ -179,6 +189,8 @@
       "title": "SWEETBOX — Yui Thru Thru",
       "acquired": 117,
       "expected_web_edition": 117,
+      "advertised_publisher_photos": null,
+      "collection_kind": null,
       "sequence_complete": true,
       "missing_numbers": [],
       "duplicate_files": 0,
@@ -203,6 +215,8 @@
       "title": "SWEETBOX — Yui Sweet Dream",
       "acquired": 110,
       "expected_web_edition": 110,
+      "advertised_publisher_photos": null,
+      "collection_kind": null,
       "sequence_complete": true,
       "missing_numbers": [],
       "duplicate_files": 0,
@@ -235,6 +249,8 @@
       "title": "SWEETBOX — Yui CREAM",
       "acquired": 228,
       "expected_web_edition": 228,
+      "advertised_publisher_photos": null,
+      "collection_kind": null,
       "sequence_complete": true,
       "missing_numbers": [],
       "duplicate_files": 0,
@@ -275,6 +291,8 @@
       "title": "[SWEETBOX] Yui (유이): SWTB Vol.22 See-through (80 photos + 2 videos) Sexy Girl",
       "acquired": 80,
       "expected_web_edition": 80,
+      "advertised_publisher_photos": null,
+      "collection_kind": null,
       "sequence_complete": true,
       "missing_numbers": [],
       "duplicate_files": 0,
@@ -299,6 +317,8 @@
       "title": "SWEETBOX — Yui RAMEN",
       "acquired": 125,
       "expected_web_edition": 125,
+      "advertised_publisher_photos": null,
+      "collection_kind": null,
       "sequence_complete": true,
       "missing_numbers": [],
       "duplicate_files": 0,
@@ -335,6 +355,8 @@
       "title": "SWEETBOX — Yui Heart Steal",
       "acquired": 78,
       "expected_web_edition": 78,
+      "advertised_publisher_photos": null,
+      "collection_kind": null,
       "sequence_complete": true,
       "missing_numbers": [],
       "duplicate_files": 0,
@@ -363,6 +385,8 @@
       "title": "[MilkyBomb] Yui: Vol.2 Tracksuit (유이 체육복) (201 photos + 1 video) Sexy Girl",
       "acquired": 201,
       "expected_web_edition": 201,
+      "advertised_publisher_photos": null,
+      "collection_kind": null,
       "sequence_complete": true,
       "missing_numbers": [],
       "duplicate_files": 0,
@@ -395,6 +419,8 @@
       "title": "[MilkyBomb] Yui: Vol.3 Maid (291 photos + 2 videos) Sexy Girl",
       "acquired": 291,
       "expected_web_edition": 291,
+      "advertised_publisher_photos": null,
+      "collection_kind": null,
       "sequence_complete": true,
       "missing_numbers": [],
       "duplicate_files": 0,
@@ -419,6 +445,8 @@
       "title": "[MilkyBomb] Yui: Vol.1 Last Summer (192 photos) Sexy Girl",
       "acquired": 192,
       "expected_web_edition": 192,
+      "advertised_publisher_photos": null,
+      "collection_kind": null,
       "sequence_complete": true,
       "missing_numbers": [],
       "duplicate_files": 0,
@@ -447,6 +475,8 @@
       "title": "Yui (유이) Vol.2: ゆい ゆい (42 photos + 1 video) Sexy Girl",
       "acquired": 42,
       "expected_web_edition": 42,
+      "advertised_publisher_photos": null,
+      "collection_kind": null,
       "sequence_complete": true,
       "missing_numbers": [],
       "duplicate_files": 0,
@@ -471,6 +501,8 @@
       "title": "Yui (유이) Vol.1: クロ ゆい (58 photos + 2 videos) Sexy Girl",
       "acquired": 58,
       "expected_web_edition": 58,
+      "advertised_publisher_photos": null,
+      "collection_kind": null,
       "sequence_complete": true,
       "missing_numbers": [],
       "duplicate_files": 0,
@@ -495,6 +527,8 @@
       "title": "Yui (유이) Vol.3: ゆい (106 photos + 3 videos) Sexy Girl",
       "acquired": 106,
       "expected_web_edition": 106,
+      "advertised_publisher_photos": null,
+      "collection_kind": null,
       "sequence_complete": true,
       "missing_numbers": [],
       "duplicate_files": 0,
@@ -527,6 +561,8 @@
       "title": "[Yo-U] Yui: Blackroom (145 photos + 2 videos) Sexy Girl",
       "acquired": 145,
       "expected_web_edition": 145,
+      "advertised_publisher_photos": null,
+      "collection_kind": null,
       "sequence_complete": true,
       "missing_numbers": [],
       "duplicate_files": 0,
@@ -559,6 +595,8 @@
       "title": "[PUSSYLET] Vol.41: Yui No.01 (82 photos) Sexy Girl",
       "acquired": 82,
       "expected_web_edition": 82,
+      "advertised_publisher_photos": null,
+      "collection_kind": null,
       "sequence_complete": true,
       "missing_numbers": [],
       "duplicate_files": 0,
@@ -587,6 +625,8 @@
       "title": "[Yo-U] Yui: Vol.2 Album Dec 2023 (199 photos + 1 video) Sexy Girl",
       "acquired": 199,
       "expected_web_edition": 199,
+      "advertised_publisher_photos": null,
+      "collection_kind": null,
       "sequence_complete": true,
       "missing_numbers": [],
       "duplicate_files": 0,
@@ -627,6 +667,8 @@
       "title": "[AI Enhanced] ArtGravia Vol.663 — Yui",
       "acquired": 32,
       "expected_web_edition": 32,
+      "advertised_publisher_photos": null,
+      "collection_kind": null,
       "sequence_complete": true,
       "missing_numbers": [],
       "duplicate_files": 0,
@@ -703,10 +745,506 @@
       "reason": "web sequence complete; continue highest-resolution source comparison"
     },
     {
+      "id": "public-yui-sns",
+      "title": "심유이 — 코스프레·공개 사진",
+      "acquired": 361,
+      "expected_web_edition": null,
+      "advertised_publisher_photos": null,
+      "collection_kind": "creator_public_photographs",
+      "sequence_complete": false,
+      "missing_numbers": null,
+      "duplicate_files": 0,
+      "dimensions": [
+        [
+          576,
+          1024
+        ],
+        [
+          768,
+          1024
+        ],
+        [
+          800,
+          1200
+        ],
+        [
+          820,
+          1024
+        ],
+        [
+          857,
+          1047
+        ],
+        [
+          1061,
+          1169
+        ],
+        [
+          1070,
+          853
+        ],
+        [
+          1080,
+          720
+        ],
+        [
+          1080,
+          1350
+        ],
+        [
+          1152,
+          2048
+        ],
+        [
+          1178,
+          1542
+        ],
+        [
+          1178,
+          1550
+        ],
+        [
+          1178,
+          1553
+        ],
+        [
+          1178,
+          1572
+        ],
+        [
+          1178,
+          1596
+        ],
+        [
+          1179,
+          1179
+        ],
+        [
+          1179,
+          1443
+        ],
+        [
+          1179,
+          1454
+        ],
+        [
+          1179,
+          1474
+        ],
+        [
+          1179,
+          1528
+        ],
+        [
+          1179,
+          1623
+        ],
+        [
+          1179,
+          1769
+        ],
+        [
+          1179,
+          2041
+        ],
+        [
+          1200,
+          1799
+        ],
+        [
+          1200,
+          1800
+        ],
+        [
+          1206,
+          1618
+        ],
+        [
+          1300,
+          1950
+        ],
+        [
+          1362,
+          2048
+        ],
+        [
+          1363,
+          2048
+        ],
+        [
+          1364,
+          2048
+        ],
+        [
+          1365,
+          2048
+        ],
+        [
+          1366,
+          2048
+        ],
+        [
+          1367,
+          2048
+        ],
+        [
+          1372,
+          2048
+        ],
+        [
+          1404,
+          2048
+        ],
+        [
+          1412,
+          2048
+        ],
+        [
+          1418,
+          2048
+        ],
+        [
+          1424,
+          2048
+        ],
+        [
+          1432,
+          2048
+        ],
+        [
+          1440,
+          1796
+        ],
+        [
+          1462,
+          2048
+        ],
+        [
+          1470,
+          2048
+        ],
+        [
+          1476,
+          2048
+        ],
+        [
+          1480,
+          2048
+        ],
+        [
+          1488,
+          2048
+        ],
+        [
+          1492,
+          2048
+        ],
+        [
+          1494,
+          2048
+        ],
+        [
+          1496,
+          2018
+        ],
+        [
+          1496,
+          2048
+        ],
+        [
+          1500,
+          2048
+        ],
+        [
+          1502,
+          2048
+        ],
+        [
+          1508,
+          2048
+        ],
+        [
+          1520,
+          2048
+        ],
+        [
+          1522,
+          2048
+        ],
+        [
+          1526,
+          2048
+        ],
+        [
+          1530,
+          2048
+        ],
+        [
+          1535,
+          2040
+        ],
+        [
+          1536,
+          2048
+        ],
+        [
+          1537,
+          2048
+        ],
+        [
+          1538,
+          2048
+        ],
+        [
+          1540,
+          2048
+        ],
+        [
+          1546,
+          2048
+        ],
+        [
+          1548,
+          2048
+        ],
+        [
+          1550,
+          2048
+        ],
+        [
+          1552,
+          2048
+        ],
+        [
+          1553,
+          2048
+        ],
+        [
+          1554,
+          2048
+        ],
+        [
+          1566,
+          2048
+        ],
+        [
+          1574,
+          2048
+        ],
+        [
+          1576,
+          2048
+        ],
+        [
+          1578,
+          2048
+        ],
+        [
+          1586,
+          2048
+        ],
+        [
+          1590,
+          2048
+        ],
+        [
+          1593,
+          2048
+        ],
+        [
+          1630,
+          2048
+        ],
+        [
+          1638,
+          2048
+        ],
+        [
+          1640,
+          2048
+        ],
+        [
+          1648,
+          2048
+        ],
+        [
+          1652,
+          2048
+        ],
+        [
+          1654,
+          2048
+        ],
+        [
+          1702,
+          2048
+        ],
+        [
+          1950,
+          1300
+        ],
+        [
+          2047,
+          1441
+        ],
+        [
+          2048,
+          1366
+        ],
+        [
+          2048,
+          1536
+        ],
+        [
+          2048,
+          1538
+        ],
+        [
+          2048,
+          1940
+        ],
+        [
+          2048,
+          2048
+        ]
+      ],
+      "minimum_long_edge": 1024,
+      "publisher_master_verified": false,
+      "highest_resolution_status": "unverified",
+      "follow_up_required": true,
+      "reason": "public subset; publisher full edition/total coverage unverified"
+    },
+    {
+      "id": "djawa-privaty-public-samples",
+      "title": "DJAWA — Privaty Sharp Lesson · 공개 샘플",
+      "acquired": 24,
+      "expected_web_edition": null,
+      "advertised_publisher_photos": 190,
+      "collection_kind": "official_public_samples",
+      "sequence_complete": false,
+      "missing_numbers": null,
+      "duplicate_files": 0,
+      "dimensions": [
+        [
+          1200,
+          1800
+        ],
+        [
+          1800,
+          1200
+        ]
+      ],
+      "minimum_long_edge": 1800,
+      "publisher_master_verified": false,
+      "highest_resolution_status": "unverified",
+      "follow_up_required": true,
+      "reason": "public subset; publisher full edition/total coverage unverified"
+    },
+    {
+      "id": "acosta-japan-public-report",
+      "title": "일본 공식 행사 후기",
+      "acquired": 1,
+      "expected_web_edition": null,
+      "advertised_publisher_photos": null,
+      "collection_kind": "official_event_report",
+      "sequence_complete": false,
+      "missing_numbers": null,
+      "duplicate_files": 0,
+      "dimensions": [
+        [
+          1280,
+          853
+        ]
+      ],
+      "minimum_long_edge": 1280,
+      "publisher_master_verified": false,
+      "highest_resolution_status": "unverified",
+      "follow_up_required": true,
+      "reason": "public subset; publisher full edition/total coverage unverified"
+    },
+    {
+      "id": "gamersky-public-editorial",
+      "title": "GamerSky — 공개 기사 사진",
+      "acquired": 12,
+      "expected_web_edition": null,
+      "advertised_publisher_photos": null,
+      "collection_kind": "public_editorial_photos",
+      "sequence_complete": false,
+      "missing_numbers": null,
+      "duplicate_files": 0,
+      "dimensions": [
+        [
+          964,
+          1287
+        ],
+        [
+          965,
+          1207
+        ],
+        [
+          965,
+          1286
+        ],
+        [
+          965,
+          1288
+        ],
+        [
+          965,
+          1448
+        ],
+        [
+          1024,
+          1535
+        ],
+        [
+          1536,
+          2048
+        ]
+      ],
+      "minimum_long_edge": 1207,
+      "publisher_master_verified": false,
+      "highest_resolution_status": "unverified",
+      "follow_up_required": true,
+      "reason": "public subset; publisher full edition/total coverage unverified"
+    },
+    {
+      "id": "inven-public-photos",
+      "title": "인벤 — 공개 게시 사진",
+      "acquired": 3,
+      "expected_web_edition": null,
+      "advertised_publisher_photos": null,
+      "collection_kind": "public_board_photographs",
+      "sequence_complete": false,
+      "missing_numbers": null,
+      "duplicate_files": 0,
+      "dimensions": [
+        [
+          480,
+          640
+        ],
+        [
+          800,
+          800
+        ],
+        [
+          800,
+          1067
+        ]
+      ],
+      "minimum_long_edge": 640,
+      "publisher_master_verified": false,
+      "highest_resolution_status": "unverified",
+      "follow_up_required": true,
+      "reason": "public subset; publisher full edition/total coverage unverified"
+    },
+    {
       "id": "cn-huantuji",
       "title": "Yui · 공개 미리보기 (화보 미분류)",
       "acquired": 3,
       "expected_web_edition": null,
+      "advertised_publisher_photos": null,
+      "collection_kind": null,
       "sequence_complete": false,
       "missing_numbers": null,
       "duplicate_files": 0,
@@ -735,6 +1273,8 @@
       "title": "Yui · 공개 미리보기 (화보 미분류)",
       "acquired": 3,
       "expected_web_edition": null,
+      "advertised_publisher_photos": null,
+      "collection_kind": null,
       "sequence_complete": false,
       "missing_numbers": null,
       "duplicate_files": 0,
@@ -763,6 +1303,8 @@
       "title": "沈惠星 Yui · 공개 사진 미리보기",
       "acquired": 4,
       "expected_web_edition": null,
+      "advertised_publisher_photos": null,
+      "collection_kind": null,
       "sequence_complete": false,
       "missing_numbers": null,
       "duplicate_files": 0,
@@ -795,6 +1337,8 @@
       "title": "Yui — Everyday Life (공개 미리보기)",
       "acquired": 1,
       "expected_web_edition": 194,
+      "advertised_publisher_photos": null,
+      "collection_kind": null,
       "sequence_complete": false,
       "missing_numbers": [
         2,
@@ -1009,6 +1553,8 @@
       "title": "沈惠星 Yui · 공개 미리보기 (화보 미분류)",
       "acquired": 2,
       "expected_web_edition": null,
+      "advertised_publisher_photos": null,
+      "collection_kind": null,
       "sequence_complete": false,
       "missing_numbers": null,
       "duplicate_files": 0,

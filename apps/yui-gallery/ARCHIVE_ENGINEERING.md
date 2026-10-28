@@ -17,16 +17,19 @@ DISCOVER -> SOURCE/GALLERY ID -> PAGE ENUMERATION -> LAZY IMAGE RESOLUTION -> BE
 4. Record separately advertised count (e.g. 194P), actual publicly visible preview count (e.g. 1), downloaded count and failed count; missing images means PARTIAL not COMPLETE.
 5. Use responsive srcset/data-original/data-src lazy-loading values, scripted pagination and infinite scrolling; do not only parse initially loaded HTML.
 6. Deduplicate exact byte hashes across sites; mark near-duplicate perceptual matches for review but do not delete distinct poses.
-7. Validate with Pillow opening each image, archive CRC/zipfile.testzip and mobile browser QA including image.naturalWidth.
+7. Validate every individual file with Pillow, byte count, SHA-256 and mobile browser image.naturalWidth. Never create or consume compressed photo bundles.
 8. Never claim an empty file hierarchy or a list of remote links is an image archive. Re-check physical stored bytes.
 9. External storage needs a real connected account and test upload/download. Unconnected TeraBox/Telegram remains UNVERIFIED.
 10. Entire paid photobooks may require licensed purchase; do not bypass authentication, DRM or paid access.
 
 ## Implemented
-- archive_engine.py: Playwright scripted scroll, dynamic image candidate collection, same-album pagination, permitted CDN/path filters, verified file downloader, manifest and ZIP.
+- archive_engine.py: Playwright scripted scroll, dynamic image candidate collection, same-album pagination, permitted CDN/path filters, verified individual-file downloader and manifests.
 - archive_selftest.py: synthetic test of next page + newly inserted lazy image + srcset largest variant.
 - source_targets.json: six known public preview pages, source-scoped filters.
-- yui-dynamic-archive.yml: GitHub Actions syntax + synthetic + live crawling tests; private 90-day artifact.
+- yui-dynamic-archive.yml: GitHub Actions syntax + synthetic + live crawling tests.
+- public_photo_archive.py + sns_archive.py: explicitly public creator attachments, visible pagination, robots checks, access/rate-limit stop, original bytes, resumable content-addressed individual files.
+- collect_public_sources.py + publisher-source-targets.json: publisher model index, public samples, credited Japanese event photographs, photographer portfolio, editorial full-image links/pagination and Korean board article bodies. Catalogue SKUs are separate from acquired photographs and complete editions.
+- register_public_photos.py: reviewed photograph types and whole-frame variants, preserved inputs and source provenance, SHA-based append for public timelines, explicit incomplete/public-subset flags.
 
 ## Unfinished (do not represent as completed)
 - Complete coverage of all individual photobooks rather than six catalogue pages.
