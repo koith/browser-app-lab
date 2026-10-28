@@ -30,9 +30,11 @@ jobs:
           from pathlib import Path
           root=Path("apps/mimmi-gallery")
           d=json.loads((root/"source-viewer-albums.json").read_text())
-          assert d["model"]=="mimmi" and d["version"]=="v0.1.0-mimmi.4"
+          assert d["model"]=="mimmi" and d["version"]=="v0.1.0-mimmi.5"
           assert d["summary"]["verified_unique_source_images"]>=390,d["summary"]
           assert len(d["albums"])>=30
+          catalog=json.loads((root/"albums.json").read_text())
+          assert sum(a["id"].startswith("research-no-") for a in catalog["albums"])==52
           assert d["fully_acquired_paid_photobooks"]==0
           assert d["private_cloud_archived_image_files"]==0
           seen=set()
