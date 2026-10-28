@@ -1,4 +1,4 @@
-name: Mimmi Broad Research Inventory — Five Public Sources
+name: Mimmi Broad Research Inventory — Five Independent Sources
 on:
   workflow_dispatch:
   schedule:
