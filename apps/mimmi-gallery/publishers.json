@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "publishers": [
+    {
+      "id": "djawa",
+      "name": "DJAWA",
+      "aliases": [
+        "DJAWA"
+      ],
+      "logo": null,
+      "official_url": "https://djawaphoto.com/portfolio-cat/mimmi/"
+    },
+    {
+      "id": "creamsoda",
+      "name": "CreamSoda",
+      "aliases": [
+        "CreamSoda",
+        "CREAMSODA"
+      ],
+      "logo": null
+    },
+    {
+      "id": "artgravia",
+      "name": "ArtGravia",
+      "aliases": [
+        "ArtGravia",
+        "ARTGRAVIA"
+      ],
+      "logo": null
+    },
+    {
+      "id": "independent",
+      "name": "독립 화보",
+      "aliases": [
+        "독립 화보"
+      ],
+      "logo": null
+    }
+  ]
+}
