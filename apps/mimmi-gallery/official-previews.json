@@ -1,0 +1,2218 @@
+{
+  "model": {
+    "id": "mimmi",
+    "name": "밈미",
+    "english": "Mimmi",
+    "aliases": [
+      "Miss u",
+      "밋슈"
+    ],
+    "instagram": "mimmissu17"
+  },
+  "version": "v0.1.0-mimmi.2",
+  "generated_at": "2026-10-28T14:45:23.909755+00:00",
+  "primary_source": "https://djawaphoto.com/portfolio-cat/mimmi/",
+  "archive_pages": [
+    {
+      "url": "https://djawaphoto.com/portfolio-cat/mimmi/",
+      "links": 10
+    },
+    {
+      "url": "https://djawaphoto.com/portfolio-cat/mimmi/page/2/",
+      "links": 10
+    },
+    {
+      "url": "https://djawaphoto.com/portfolio-cat/mimmi/page/3/",
+      "links": 10
+    },
+    {
+      "url": "https://djawaphoto.com/portfolio-cat/mimmi/page/4/",
+      "links": 2
+    }
+  ],
+  "albums": [
+    {
+      "id": "djawa-in-the-summer-sunshine-part-2",
+      "title": "In the summer sunshine (part 2)",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/in-the-summer-sunshine-part-2/",
+      "model": "mimmi",
+      "advertised_photos": null,
+      "samples": [
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2026/09/sample_cv1.jpg",
+          "width": 1200,
+          "height": 1600,
+          "bytes": 601795,
+          "sha256": "d1ac453d65bccae7e9d6d49f9a570289f73a4c9ec7c23e06377af6114ca6429f",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2026/09/sample_cv2.jpg",
+          "width": 1200,
+          "height": 1600,
+          "bytes": 508145,
+          "sha256": "59d2b6376903d4dafe8654e4233e1f280d01055f9c36beb8397b1b24e0298f79",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2026/09/sample_cv3.jpg",
+          "width": 1200,
+          "height": 1600,
+          "bytes": 565284,
+          "sha256": "f083148e2e841b989fb351b15f10358c63db1acbe1c0c5b620e8f9c8aa342f0c",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2026/09/sample_01-4.jpg",
+          "width": 1200,
+          "height": 1600,
+          "bytes": 452106,
+          "sha256": "838537ac36ff8dd49574833452007a0898b7551a05c8b55520b77b724ef90bc0",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2026/09/sample_02-4.jpg",
+          "width": 1200,
+          "height": 1600,
+          "bytes": 609671,
+          "sha256": "495ea4700fcdfc98a6a8671b0eacf15eecd802ed5d60bcc1cff5502e2677ed28",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2026/09/sample_03-4.jpg",
+          "width": 1200,
+          "height": 1600,
+          "bytes": 569664,
+          "sha256": "b64f72aa699a68e1f1f08cc2416a5ac98a4fc6ee812b051eeb8153aff1aded0b",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "status": "official_samples_verified",
+      "sample_count_verified": 6,
+      "images": [],
+      "collected_image_files": 0
+    },
+    {
+      "id": "djawa-in-the-summer-sunshine-part-1",
+      "title": "In the summer sunshine (part 1)",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/in-the-summer-sunshine-part-1/",
+      "model": "mimmi",
+      "advertised_photos": null,
+      "samples": [
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2026/07/sample_cv1-2.jpg",
+          "width": 1200,
+          "height": 1600,
+          "bytes": 602156,
+          "sha256": "4182ea78d1925c3cd6e8c025f46f7ac328d19f7bfa5fc13faee7ac22575220e1",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2026/07/sample_cv2-2.jpg",
+          "width": 1200,
+          "height": 1600,
+          "bytes": 562056,
+          "sha256": "99dea91849d59d00c3baa9048a3a23536ce329b4c630d91802412255d046eca4",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2026/07/sample_01-6.jpg",
+          "width": 1200,
+          "height": 1600,
+          "bytes": 470631,
+          "sha256": "afbdca2e19f571572962ba6e81b09839eb8520109997f951983640e9442e1182",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2026/07/sample_02-6.jpg",
+          "width": 1200,
+          "height": 1600,
+          "bytes": 390969,
+          "sha256": "0f4abcebf09d4c486f2fc15f750594247a1a79000a4738764a6f230c925f527c",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2026/07/sample_03-6.jpg",
+          "width": 1200,
+          "height": 1600,
+          "bytes": 451111,
+          "sha256": "54edb9ec75d665ad7e0b38ff33bb1de3d81807d60ef189466d0ac206d2a3460e",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2026/07/sample_04-6.jpg",
+          "width": 1200,
+          "height": 1600,
+          "bytes": 605569,
+          "sha256": "3b451e80d42a7917d7fec654035d90e90ee92b2f84317b1b6ef33e6e28f59181",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "status": "official_samples_verified",
+      "sample_count_verified": 6,
+      "images": [],
+      "collected_image_files": 0
+    },
+    {
+      "id": "djawa-blossom-reverie",
+      "title": "Blossom Reverie",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/blossom-reverie/",
+      "model": "mimmi",
+      "advertised_photos": null,
+      "samples": [
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2026/05/sample_cv-4.jpg",
+          "width": 1200,
+          "height": 1600,
+          "bytes": 709913,
+          "sha256": "33d6bf848a736549e57fc18cbcd5af149775c35f8d41bbbe6a7f6ea987d9e991",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2026/05/sample_01-4.jpg",
+          "width": 1200,
+          "height": 1600,
+          "bytes": 515632,
+          "sha256": "15be8810cc52b860bdbec0b31a7e0e62c5678fadcdcc41205b151d15dc3f0321",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2026/05/sample_02-4.jpg",
+          "width": 1600,
+          "height": 1200,
+          "bytes": 694984,
+          "sha256": "c1aee19fccc0998bbd712d48d93b149d733cfb74b482c7123d4b94b8dc7daa8b",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2026/05/sample_03-4.jpg",
+          "width": 1600,
+          "height": 1200,
+          "bytes": 649112,
+          "sha256": "100407ad79ed1fc58702603ad5346700ad7942ec3108b8d580fdf89081902663",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2026/05/sample_04-4.jpg",
+          "width": 1200,
+          "height": 1600,
+          "bytes": 785497,
+          "sha256": "7dc6a6967940e4eec663b57364ec5ed6b8e2579553edb3707a32eaf6348d6847",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2026/05/sample_05-4.jpg",
+          "width": 1600,
+          "height": 1200,
+          "bytes": 1534034,
+          "sha256": "48f11bdc9c31fe5fbd2e3835a80bc9acf8c998056ed79b2804c943d93b0a270c",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "status": "official_samples_verified",
+      "sample_count_verified": 6,
+      "images": [],
+      "collected_image_files": 0
+    },
+    {
+      "id": "djawa-christmas-special-2025-mimmi-the-christmas-witch",
+      "title": "Christmas Special 2025 : Mimmi – The Christmas Witch",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/christmas-special-2025-mimmi-the-christmas-witch/",
+      "model": "mimmi",
+      "advertised_photos": 151,
+      "samples": [
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2025/12/sample_cv-4.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 614870,
+          "sha256": "33b659679a86e4691cc5b6482b70c9a567a4c91452c1c2651d0ce8f7c110ebc0",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2025/12/sample_01-5.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 588117,
+          "sha256": "4540d75b495955bb44b428b84f900e5728c5653026a00fd2a43228b77bb2e265",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2025/12/sample_02-5.jpg",
+          "width": 1800,
+          "height": 1200,
+          "bytes": 476852,
+          "sha256": "9ad182c9622ca1a02e56938831ac795e3f6aec7d0cad998e26727fd4f786445b",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2025/12/sample_03-4.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 527625,
+          "sha256": "b7287f18ac7f9bf62275a77d1bc70bd5a9a9ebdab3be741790bbd7a6175f8be4",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2025/12/sample_04-4.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 500821,
+          "sha256": "117341d1ca7436d944cfaacb5ac8fe2619f1979d3a0a7c1ee87d5382ec35bf27",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2025/12/sample_05-5.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 510196,
+          "sha256": "0fadc0878e18ad22cd513b4b28e94accf73391fb853bdb75176b54de66c3dcd2",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "status": "official_samples_verified",
+      "sample_count_verified": 6,
+      "images": [],
+      "collected_image_files": 0
+    },
+    {
+      "id": "djawa-asuna-the-maid",
+      "title": "Asuna the Maid",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/asuna-the-maid/",
+      "model": "mimmi",
+      "advertised_photos": 125,
+      "samples": [
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2025/12/sample_cv-2.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 606091,
+          "sha256": "3c2d2a509e19a59085ed3e42d0abd2bcaec6e4412803f6aecd53d6dc27134c9d",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2025/12/sample_cv2-1.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 506101,
+          "sha256": "a3a7dc88870ea3af50992568935c4d4d996024fbaf751ece21cd9f816a46192e",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2025/12/sample_01-3.jpg",
+          "width": 1800,
+          "height": 1200,
+          "bytes": 423382,
+          "sha256": "ac53b2aed845aa122a71abeecdc401ad2f9c4257a143cae01b85dbd5c5df73e1",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2025/12/sample_02-3.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 533326,
+          "sha256": "ebfb0f1b3ff38c8084a3c48960eb22263a32e11779c77969075f6a290f2bd97f",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2025/12/sample_03-3.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 635280,
+          "sha256": "00f899f6bb3dc5a0e322b7a113b0213da3364604c614ca7a3ab4755499db4b48",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2025/12/sample_04-2.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 670995,
+          "sha256": "058d06cb414edce6b9d8d83398ac1e6900d1ad0a984a115e23d6dbf461573e21",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "status": "official_samples_verified",
+      "sample_count_verified": 6,
+      "images": [],
+      "collected_image_files": 0
+    },
+    {
+      "id": "djawa-nikke-elegg",
+      "title": "Nikke : Elegg",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/nikke-elegg/",
+      "model": "mimmi",
+      "advertised_photos": 152,
+      "samples": [
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2025/10/sample_cv-2.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 951379,
+          "sha256": "c2fc8ad8dccd416fed65aa68e791926b7701c8d7b8d7d676176396a74f7cb209",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2025/10/sample_cv2.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 1476482,
+          "sha256": "d2304de2efd7441c350e2464b55ffeff5cfc59217b59c2c7cdf9b16c98801f85",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2025/10/sample_02-2.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 707301,
+          "sha256": "37e699af09dcfeebd5c001327bf113ec841a8c4208ad4349e72d8e4cfa9ad183",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2025/10/sample_03-2.jpg",
+          "width": 1800,
+          "height": 1200,
+          "bytes": 831844,
+          "sha256": "ae2ef3f70b5b44b35884919c8382b8bbe1c4d53e776f1a661fc42573be06575e",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2025/10/sample_03s.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 814527,
+          "sha256": "d5ba75ee9cb1228d8e2a4a7dd5ab4ef7818c212a99a4cfbb8409daabb0ce1327",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2025/10/sample_03ss.jpg",
+          "width": 1800,
+          "height": 1200,
+          "bytes": 556400,
+          "sha256": "a0661ff80d5ebffa8a15d944dbf7d99251933717c8779604e2e50550dd21f096",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "status": "official_samples_verified",
+      "sample_count_verified": 6,
+      "images": [],
+      "collected_image_files": 0
+    },
+    {
+      "id": "djawa-my-summer-vacation-vol-5",
+      "title": "My Summer Vacation Vol. 5",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/my-summer-vacation-vol-5/",
+      "model": "mimmi",
+      "advertised_photos": 133,
+      "samples": [
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2025/07/sample_cv1.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 873595,
+          "sha256": "51c6f5413e200b27a83a5903dea28af014c4e52c7b93d9f8db0df48f66778704",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2025/07/sample_cv2.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 869719,
+          "sha256": "38b27e97f414798674faac74ce4456d1f42a4b6be335926b1500e961ecd5312b",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2025/07/sample_cv3.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 807738,
+          "sha256": "3286b79cea0bfef645659faa62d4c709a30ed7acdf658d493656162f57a8c74f",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2025/07/sample_01-3.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 897522,
+          "sha256": "3c77429cd104af157186758035100c4d9d1b4bfb9dd82187bdc5af8c92dcd227",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2025/07/sample_02-3.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 1296018,
+          "sha256": "2632277c09ffd57ade1d670dc610cd878ea8b586628f2791d10a621ca2e2d744",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2025/07/sample_03-3.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 624408,
+          "sha256": "7b0f37549628b27b4f5370b4536ca87144868913dc477c8ffc848b52c0ac701d",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "status": "official_samples_verified",
+      "sample_count_verified": 6,
+      "images": [],
+      "collected_image_files": 0
+    },
+    {
+      "id": "djawa-christmas-special-2024-mimmi-santa-on-the-street",
+      "title": "Christmas Special 2024 : Mimmi – Santa on the Street",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/christmas-special-2024-mimmi-santa-on-the-street/",
+      "model": "mimmi",
+      "advertised_photos": 92,
+      "samples": [
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/12/sample_cv1-1.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 670357,
+          "sha256": "4367b57131d0941e9cfae6ee3475e62e2653ca0564a7361b5fbeb8d00d949818",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/12/sample_cv2-1.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 913287,
+          "sha256": "a4b6721babe37d8f206da5b6bb1a7958395f47c4c916e0e0ba98dde55dc1200c",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/12/sample_cv3.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 1036224,
+          "sha256": "07f8793180868454fcc17d71f555b61f434a6940713e2a7f108dc9352a163275",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/12/sample_01-5.jpg",
+          "width": 1800,
+          "height": 1200,
+          "bytes": 710688,
+          "sha256": "bc13753bddb1b5a6f1746785f9e618953f28dbdb1e42593ba93e05dca1d7191c",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/12/sample_02-5.jpg",
+          "width": 1800,
+          "height": 1200,
+          "bytes": 809353,
+          "sha256": "6e20864d3dedbd6150961869b07b65e3e5d6b1a1161f9c36f3a79c9ee1cfafb0",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/12/sample_03-5.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 801687,
+          "sha256": "52318039255afe70535e7cd254ede5785bcdd9154038ef230947e9fb59c7e63a",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "status": "official_samples_verified",
+      "sample_count_verified": 6,
+      "images": [],
+      "collected_image_files": 0
+    },
+    {
+      "id": "djawa-rei-beyond-the-heart",
+      "title": "Rei, Beyond the Heart",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/rei-beyond-the-heart/",
+      "model": "mimmi",
+      "advertised_photos": 213,
+      "samples": [
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/12/sample_cv1.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 661522,
+          "sha256": "9af222b516a799dcd2277a354edf34c8020fc9b3fef4a4f8a96ba85bbaeadad8",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/12/sample_cv2.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 761487,
+          "sha256": "ef2e428fb377384bec06467469a07df09a9a9e5cb5bf78c7cbec05b4144d30ca",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/12/sample_01-4.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 499338,
+          "sha256": "acd06b6ad2ed0e121ab450de4cac06066d7d52ed11bf86b66c1f806fc9fd2421",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/12/sample_03-4.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 483860,
+          "sha256": "26bace2748b3beb43171982a7295b9a2ff257c5d6074fe603ff772e7b998375d",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/12/sample_04-4.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 549982,
+          "sha256": "ce2dce236e75467e151425e5c0411a3476266b6876f522e3ebc8208231260ff6",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/12/sample_05-4.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 601333,
+          "sha256": "db21ebfe5de0e9d4b344a870d5eb9296c29e4ad232e2e49d722e533f06cfcf53",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "status": "official_samples_verified",
+      "sample_count_verified": 6,
+      "images": [],
+      "collected_image_files": 0
+    },
+    {
+      "id": "djawa-le-malin-listless-lapin",
+      "title": "Le Malin – Listless Lapin",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/le-malin-listless-lapin/",
+      "model": "mimmi",
+      "advertised_photos": 158,
+      "samples": [
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/09/sample_cv-8.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 396904,
+          "sha256": "c77df28d805f03dce1dab6983c9a805cd433c327f6845187458be970ff2ffa51",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/09/sample_01-8.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 382245,
+          "sha256": "6d555c7b012b5b883c89446aa0f78de47a0578229bf7d7ff2bb05374c8a507e8",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/09/sample_02-8.jpg",
+          "width": 1800,
+          "height": 1200,
+          "bytes": 691029,
+          "sha256": "dcefb5d282be7eac0d4aa71f3cc0fe3344b8df08e424a36afe7a800bc57766b1",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/09/sample_03_2.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 322263,
+          "sha256": "a23a453b6be1d16376f6e6b4e349d1114a66c0507d9a0e6e01fb27632bcbf84a",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/09/sample_03-8.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 327604,
+          "sha256": "0bb44e599c43909aea9fb88d17b3cb7f890a80f43e8760be78b93e5b7407f464",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/09/sample_04-8.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 374429,
+          "sha256": "46ce304bbfc7ad63a5d3796c59c5a983f69b0ecc661f01c2190069f22fd8770e",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "status": "official_samples_verified",
+      "sample_count_verified": 6,
+      "images": [],
+      "collected_image_files": 0
+    },
+    {
+      "id": "djawa-my-summer-vacation-vol-4",
+      "title": "My Summer Vacation Vol. 4",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/my-summer-vacation-vol-4/",
+      "model": "mimmi",
+      "advertised_photos": 90,
+      "samples": [
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_cv.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 602215,
+          "sha256": "2da2cd9c0bd10eaae8ba4f99ee3ad0e5a375d202ef216eb4071f887e571abda8",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_01-1.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 668563,
+          "sha256": "55872186cdb2527ccd49471391ff05fa2946b82c88830e74ca07717376d20f0f",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_02-1.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 553428,
+          "sha256": "67d38f0b54339e823caeeffe95e27bfc4f5b69c50bd50b5dada3fc12b60cc465",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_03-1.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 557209,
+          "sha256": "ffb3ca9b99dc6f79363d265019be42858b1d1c72759fb93e1fa71eebd549171e",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_04-1.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 485149,
+          "sha256": "cad76eac45866bac4a6db82c3c1138c0649e2741f79c52c2fa6bbddff1d5286e",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_cv-683x1024.jpg",
+          "width": 683,
+          "height": 1024,
+          "bytes": 76876,
+          "sha256": "f901cdfa315aa09d41be7e3133ca9c0541cd17d01c568286ac5cbb6b809ae56a",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "status": "official_samples_verified",
+      "sample_count_verified": 6,
+      "images": [],
+      "collected_image_files": 0
+    },
+    {
+      "id": "djawa-my-summer-vacation-vol-3",
+      "title": "My Summer Vacation Vol. 3",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/my-summer-vacation-vol-3/",
+      "model": "mimmi",
+      "advertised_photos": 128,
+      "samples": [
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_cv2.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 499325,
+          "sha256": "35e50faec4360f6865950360e92f6c5f2549d63d5aa7388ffccf6850b5dfce24",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_cv1.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 603959,
+          "sha256": "832da4da906996a2106bd11587c8040479097e235feb1f6542a57d0072820c07",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_05.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 649531,
+          "sha256": "5f8f59290f18d6b617baad63db8ed7aa5103b6cdc0ec927e0df615d397d55065",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_04.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 712837,
+          "sha256": "779d4c245229b9836ef517b024e49fa79e4a9114dfc6d2086bee677826d0b5eb",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_03.jpg",
+          "width": 1600,
+          "height": 1200,
+          "bytes": 723460,
+          "sha256": "ca30d70e86b82c3a388c470939b83967c15b54a00a7b63079c77279cbba4166a",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_02.jpg",
+          "width": 1800,
+          "height": 1200,
+          "bytes": 673818,
+          "sha256": "eea28ad26076c6fb592ccbfe7f17de7041722eddcb54227f645bbe4cfcb4ae34",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "status": "official_samples_verified",
+      "sample_count_verified": 6,
+      "images": [],
+      "collected_image_files": 0
+    },
+    {
+      "id": "djawa-retrospection",
+      "title": "Retrospection",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/retrospection/",
+      "model": "mimmi",
+      "advertised_photos": 75,
+      "samples": [
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_cv-12.jpg",
+          "width": 1600,
+          "height": 1600,
+          "bytes": 937089,
+          "sha256": "74023a8f942054dde904e80a16a8401ab0ba1aa17210bbe236b037fda0bae225",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_bw_1.jpg",
+          "width": 1600,
+          "height": 1600,
+          "bytes": 931321,
+          "sha256": "ebaa9f5c71354b264126341f34be0fb1605efdf9ecd36bff2a927e4d18098cab",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_bw_2.jpg",
+          "width": 1600,
+          "height": 1600,
+          "bytes": 847093,
+          "sha256": "cbf5562c46c8f091c11535dd44eb400ae40c943c1e0b93c61d85ccc5ce1c221b",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_bw_3.jpg",
+          "width": 1600,
+          "height": 1600,
+          "bytes": 896194,
+          "sha256": "f4e850d3c6756176e6c7ffdb0c2e278fa7cb6ed6303aa3d6baa0640e394f11ac",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_color_1.jpg",
+          "width": 1800,
+          "height": 1200,
+          "bytes": 917057,
+          "sha256": "993a4bc6fd168f2a5c540543bdd76576cf685661401149ea3e3f52fdc2ef4c0f",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_color_2.jpg",
+          "width": 1800,
+          "height": 1200,
+          "bytes": 620501,
+          "sha256": "b52e5de7070ba09d7df44eec874445327427f39d2b61f42f886aa54f75b69428",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "status": "official_samples_verified",
+      "sample_count_verified": 6,
+      "images": [],
+      "collected_image_files": 0
+    },
+    {
+      "id": "djawa-christmas-special-2023-mimmi",
+      "title": "Christmas Special 2023 : Mimmi",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/christmas-special-2023-mimmi/",
+      "model": "mimmi",
+      "advertised_photos": 70,
+      "samples": [
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_cv-22.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 790358,
+          "sha256": "604180bd5656d44d7783c11d8dc134d35bb225d28aff9f7491d683eea0669f54",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_01-27.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 652695,
+          "sha256": "ca0c793728804dc8b98a29263359a70c93e3643d7fa7a4516e8ddfc2b0539b26",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_02-26.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 770430,
+          "sha256": "bbc96fac71dcbe3e944589e9a6295ca808c2200ff0ef41461b0090389a4a1bd6",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_03-27.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 645546,
+          "sha256": "f73e76bc6f02afb3452535f018a3197ef650b4f30859f6e2cb949e39253ca101",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_04-25.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 545358,
+          "sha256": "63640496f234dc8bc8358e69dff1b79ca1e905f5324be3990a251e1b15870292",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_all.jpg",
+          "width": 1200,
+          "height": 1700,
+          "bytes": 299634,
+          "sha256": "0d5311ac551d56a0f253e14a80765e090bc927d348a83e3906d95f45d50ee536",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "status": "official_samples_verified",
+      "sample_count_verified": 6,
+      "images": [],
+      "collected_image_files": 0
+    },
+    {
+      "id": "djawa-janus-scary-lantern-night-vol-2",
+      "title": "Janus : Scary Lantern Night Vol. 2",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/janus-scary-lantern-night-vol-2/",
+      "model": "mimmi",
+      "advertised_photos": null,
+      "samples": [
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_cv-25.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 684287,
+          "sha256": "4d144cf18551b39555c3641508f5047fc55e3327260df66370d74d523edaa2c5",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_01-30.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 513565,
+          "sha256": "6d9473504749500d5b540168a9b4280801dfc78295dac54be595cd271541e33a",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_02-29.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 461935,
+          "sha256": "0522c9fc58b60f22a5b4e328eaec72823691c416e767b086d961f3f92a55cf7a",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_03-30.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 654884,
+          "sha256": "dd099be44553d0fbdc41e74485029863e29e3103d2839ea7a6e3fa0b50a3e443",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_all-3.jpg",
+          "width": 1200,
+          "height": 1600,
+          "bytes": 294022,
+          "sha256": "6d65a3b39d3055aaa0967d00513ddc0a451f887b18356a99ff7607246f3cf8b1",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_cv-25-683x1024.jpg",
+          "width": 683,
+          "height": 1024,
+          "bytes": 91643,
+          "sha256": "7e2f28ac838869196df0811b7d7bc54d35d10c8614bd529567ad343a72f5f4e4",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "status": "official_samples_verified",
+      "sample_count_verified": 6,
+      "images": [],
+      "collected_image_files": 0
+    },
+    {
+      "id": "djawa-janus-scary-lantern-night",
+      "title": "Janus : Scary Lantern Night",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/janus-scary-lantern-night/",
+      "model": "mimmi",
+      "advertised_photos": null,
+      "samples": [
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/10/sample_cv.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 716150,
+          "sha256": "c8f577720401cb9c3ffe75f1c69e2f108c013fc0542e6c5ab974f15035ab968d",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/10/sample_01.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 626946,
+          "sha256": "bc9efbb8883e0b43eb2b0ac00ff118d07351175f9530f81e7fe702d252c36a6e",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/10/sample_02.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 670234,
+          "sha256": "8ebbdfb601f3fc0b866910c9b4132ea76e2d01d97e7c91024be0fabc68257aed",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/10/sample_03.jpg",
+          "width": 1800,
+          "height": 1200,
+          "bytes": 680768,
+          "sha256": "d74e63350e8a43ff10de8beded566e1210e1ab5a0878e56b026915cf9884c482",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/10/sample_04.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 621680,
+          "sha256": "e55005abf690b7d88eac128cfa289ed78cc74b846baa8f54d9fe477160a6a269",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/10/sample_05.jpg",
+          "width": 1800,
+          "height": 1200,
+          "bytes": 712579,
+          "sha256": "7d2966b86c3900601628dd7854e68ff607ce2d10bce918907329a68de1f8ef44",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "status": "official_samples_verified",
+      "sample_count_verified": 6,
+      "images": [],
+      "collected_image_files": 0
+    },
+    {
+      "id": "djawa-maid-for-mayhem",
+      "title": "Maid for Mayhem",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/maid-for-mayhem/",
+      "model": "mimmi",
+      "advertised_photos": null,
+      "samples": [
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/10/sample_cv-1.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 819659,
+          "sha256": "0427ffeede9bc48233a65abbe1070f0f3a9a85ee13aa23213aeb94e69a415f2b",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/10/sample_01-1.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 770966,
+          "sha256": "b627c25db7b2b5311f9dfb8fd955074ca16000f5991682a9cee4276372920567",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/10/sample_02-1.jpg",
+          "width": 1200,
+          "height": 1600,
+          "bytes": 866237,
+          "sha256": "61c4232e24ef8c0b4a95709d1657de71506adf9e09de62cf7655369367031648",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/10/sample_03-1.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 553850,
+          "sha256": "0bf65edb7c862994144847423f278e16187d44053d5a3f76de1711f4b3475bcb",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/10/sample_04-1.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 783446,
+          "sha256": "76293efed44f0af75dbd3b024b6c136e862e1abca43a536a7f896e088cb6be34",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/10/sample_05-1.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 805988,
+          "sha256": "34bddb5f1c890ef4964679d72f9d8f8c9b6822cef7ad58485e78f8f9be2d3e19",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "status": "official_samples_verified",
+      "sample_count_verified": 6,
+      "images": [],
+      "collected_image_files": 0
+    },
+    {
+      "id": "djawa-my-summer-vacation-vol-2",
+      "title": "My Summer Vacation Vol. 2",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/my-summer-vacation-vol-2/",
+      "model": "mimmi",
+      "advertised_photos": 183,
+      "samples": [
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/09/sample_cv-2.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 953895,
+          "sha256": "6e0c3a6747703371bd95d7443a70dd2377f26b487ee7fbd9a59a513f62210cce",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/09/sample_01-1.jpg",
+          "width": 1800,
+          "height": 1200,
+          "bytes": 772285,
+          "sha256": "9420f463f5348298135debad8f65ddd02ab836512de68e97f2ab3fb8bb7824f4",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/09/sample_02-1.jpg",
+          "width": 1800,
+          "height": 1200,
+          "bytes": 634980,
+          "sha256": "d7f414d99f9cc78bf9ad5ce1ac3543fd5c90d7e1b7076f8445edf312bff9e3dc",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/09/sample_03-1.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 663543,
+          "sha256": "39f445407cc4dc4019a39eb645340a3ffc0318617cc458c754fcf35c823cc050",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/09/sample_04-1.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 832644,
+          "sha256": "1d3059223cc7d54f9a97d79d680ad33de1da93b9f313af288c06b5db497b5cba",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/09/sample_05-1.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 822054,
+          "sha256": "b0beb95c4d398138be7eb77b8b6b69ea134307b0ee91c4cd6274a6132205508e",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "status": "official_samples_verified",
+      "sample_count_verified": 6,
+      "images": [],
+      "collected_image_files": 0
+    },
+    {
+      "id": "djawa-my-summer-vacation",
+      "title": "My Summer Vacation",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/my-summer-vacation/",
+      "model": "mimmi",
+      "advertised_photos": 149,
+      "samples": [
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/08/sample_cv.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 1154800,
+          "sha256": "31293b7ab05f4b6a72bdc3c259f0b067571ae4e29c1095fa5787493aea5676b6",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/08/sample_01-1.jpg",
+          "width": 1800,
+          "height": 1200,
+          "bytes": 848469,
+          "sha256": "015cfe91a3b80a9a396e58f94a5507af01667f64e3d09971ccfc94c8e4fb0358",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/08/sample_02-1.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 1047374,
+          "sha256": "d8ccc0fe5be459b945fb23e447fc94189f5885b40e9f0b9a254689b017fa067e",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/08/sample_03-1.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 865389,
+          "sha256": "ddb2aca222d64d0bebe8bd87eb19708028c8ccad399433cab9d05d06b4cfab08",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/08/sample_04-1.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 975955,
+          "sha256": "5b432ba70d026353fa560fef5728fee11a6e94e7008378fe00c2cd3e12b6b68d",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/08/sample_05-1.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 872082,
+          "sha256": "3952835aed3fffb8be8c91700940710dcf1540199040dcf2110110f8fe3d2c6c",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "status": "official_samples_verified",
+      "sample_count_verified": 6,
+      "images": [],
+      "collected_image_files": 0
+    },
+    {
+      "id": "djawa-nikke-yuni",
+      "title": "Nikke : Yuni",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/nikke-yuni/",
+      "model": "mimmi",
+      "advertised_photos": 213,
+      "samples": [
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/07/sample_cv-2.jpg",
+          "width": 1000,
+          "height": 1500,
+          "bytes": 359564,
+          "sha256": "daa64916273a3f4de27408029461ccbbb96d02c7acb3c591e88a87880f5857bb",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/07/sample_01-2.jpg",
+          "width": 1500,
+          "height": 1000,
+          "bytes": 259277,
+          "sha256": "1e76c77d2d7f2122d9addc71b8d48e3666c75f8a909e874b20011a3bc4972ab0",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/07/sample_02-2.jpg",
+          "width": 1000,
+          "height": 1500,
+          "bytes": 285376,
+          "sha256": "82873f37d3f616da5bdca9d4d23e4c4fa303be16323be791ea5baef985916807",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/07/sample_03-1.jpg",
+          "width": 1000,
+          "height": 1500,
+          "bytes": 243332,
+          "sha256": "b1606439282638ae56ad5fe68fb5fd8c6e4fc482eec75f2539aca2185c28ddda",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/07/sample_04-2.jpg",
+          "width": 1000,
+          "height": 1500,
+          "bytes": 356127,
+          "sha256": "2c8814b030eb7e4810f645b25db32f9a045b9ffe7c9f282b44043c05a1b6ef64",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/07/sample_05-2.jpg",
+          "width": 1000,
+          "height": 1500,
+          "bytes": 354041,
+          "sha256": "f78e1910c61407c8a9e98225239a3b659db9dafbbe8228d5d0251154a561dd3b",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "status": "official_samples_verified",
+      "sample_count_verified": 6,
+      "images": [],
+      "collected_image_files": 0
+    },
+    {
+      "id": "djawa-pop-kitty-party",
+      "title": "Pop Kitty Party",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/pop-kitty-party/",
+      "model": "mimmi",
+      "advertised_photos": null,
+      "samples": [
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/06/sample_cv1-1.jpg",
+          "width": 1200,
+          "height": 1683,
+          "bytes": 549996,
+          "sha256": "9900a8cd7e8f3ff14462add2f7e0fa205a16e8f4213062bd882088a026149099",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/06/sample_cv2-1.jpg",
+          "width": 1200,
+          "height": 1683,
+          "bytes": 489966,
+          "sha256": "c309310f45ccbec6e759c87097ea547ee02067fa151bc4601c6899c34dba2c68",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/06/sample_cv1-1-730x1024.jpg",
+          "width": 730,
+          "height": 1024,
+          "bytes": 76421,
+          "sha256": "55f80fc9b974d611da77b3a72cec05b520820e256b46caffe95f52e026d07b15",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/06/sample_cv1-1-768x1077.jpg",
+          "width": 768,
+          "height": 1077,
+          "bytes": 82721,
+          "sha256": "6f6fd1f3c33e69c68388716b23f413864eb235d115961703621dccf75cf8735c",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/06/sample_cv1-1-1095x1536.jpg",
+          "width": 1095,
+          "height": 1536,
+          "bytes": 142517,
+          "sha256": "374d6d2ee02b4d5479c52a099386763a1bd4505a1da043de1b0e76d890513a91",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/06/sample_cv1-1-350x491.jpg",
+          "width": 350,
+          "height": 491,
+          "bytes": 24221,
+          "sha256": "8679bd7f1d564298e52005ca296c282555b2b93719ead972d1a9feb66b44d653",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "status": "official_samples_verified",
+      "sample_count_verified": 6,
+      "images": [],
+      "collected_image_files": 0
+    },
+    {
+      "id": "djawa-full-bloom-yamashiiro",
+      "title": "Full Bloom Yamashiiro",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/full-bloom-yamashiiro/",
+      "model": "mimmi",
+      "advertised_photos": null,
+      "samples": [
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/04/sample_cv.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 964494,
+          "sha256": "27dae84901ef70deb3f37670b8d1af28dc4752928342ad1603f8d67e28b4a1be",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/04/sample_01.jpg",
+          "width": 1800,
+          "height": 1200,
+          "bytes": 958162,
+          "sha256": "f6cc311e88d7895246de0efe973bc50bdd6c1d3ef9a0aacdbbdc97a3e320bb8c",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/04/sample_02.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 925578,
+          "sha256": "0aefd0e54cc0c242da2d36f033bf140eb27e73ec50e60c62ec320a993db5ba09",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/04/sample_03.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 714318,
+          "sha256": "1b69fd43ae0edc3eabef16886211ed1453a4fdfc4591bc7a01a03d96cef2f9e9",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/04/sample_04.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 899698,
+          "sha256": "ed33d8348dabdeeed32f99d0e51dfedf2a0d439e746be11e627abe9c9d707b1d",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/04/sample_05.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 770088,
+          "sha256": "7b3a3e42151ff8525a09919a39c3d1a32142d15a6d141152dd127cc3268f74ef",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "status": "official_samples_verified",
+      "sample_count_verified": 6,
+      "images": [],
+      "collected_image_files": 0
+    },
+    {
+      "id": "djawa-your-fishe-gawr-gura",
+      "title": "Your Fishe (Gawr Gura)",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/your-fishe-gawr-gura/",
+      "model": "mimmi",
+      "advertised_photos": null,
+      "samples": [
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/03/sample_cvs-1.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 689689,
+          "sha256": "0a082ee6a103300f6424c5239101b99bd271da88e241e081b1d9179b618ea851",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/03/sample_cv-1.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 676638,
+          "sha256": "900906cd1795d4f25e3fa74a72c6e6b9f56dae05b76587bbe853fe74d555271d",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/03/sample_02-2.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 535677,
+          "sha256": "00d5a98f4192522620f2147768dac9a90d25066a5eb6fa222f49623b2b88febd",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/03/sample_03-2.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 591627,
+          "sha256": "9841e88ee8110bf2f5cbf57fb5f686ea1746e0587acbe3bd6dcca771f9e36521",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/03/sample_04-2.jpg",
+          "width": 1800,
+          "height": 1200,
+          "bytes": 664214,
+          "sha256": "02e4abf2dd9d851976202bc07e7215c72286c8920476d41432f39b82e77f75fd",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/03/sample_05-2.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 684635,
+          "sha256": "e500511875fcbf323b88e3bad8c2dad42fd8c838567a4ebaff21231b71bdb57d",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "status": "official_samples_verified",
+      "sample_count_verified": 6,
+      "images": [],
+      "collected_image_files": 0
+    },
+    {
+      "id": "djawa-your-panties",
+      "title": "Your Panties.",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/your-panties/",
+      "model": "mimmi",
+      "advertised_photos": null,
+      "samples": [
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/01/sample_cvs.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 1136937,
+          "sha256": "5872c1abd3e13a406f86e21829286858f5625ef25a6b5bdb5d964ce20204bfe9",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/01/sample_cv.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 1048951,
+          "sha256": "0537c0d6bc0939a4ae8642b01d77a854861ccd3b9dfac1c51280844ffb5f5199",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/01/sample_01.jpg",
+          "width": 1800,
+          "height": 1200,
+          "bytes": 543144,
+          "sha256": "cfffbef29720b36fc47d2e90b1efa5e8af6fdbf509c6e35d7a148531586d482d",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/01/sample_02.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 801435,
+          "sha256": "54727d00e02ceae550f2f7536c0fd432183bd4e0cf90fce7218ee796a9543b2c",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/01/sample_03.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 673989,
+          "sha256": "2671130e64b362e6a490766da5f0b84f2b81f3ea489b520a7f170560920fcb99",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2023/01/sample_04.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 683898,
+          "sha256": "a21f5de2cf97b1efd1175571afee17b36d7715783a725422067badc6a6e9569e",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "status": "official_samples_verified",
+      "sample_count_verified": 6,
+      "images": [],
+      "collected_image_files": 0
+    },
+    {
+      "id": "djawa-nikke-alice",
+      "title": "Nikke : Alice",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/nikke-alice/",
+      "model": "mimmi",
+      "advertised_photos": null,
+      "samples": [
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/10/sample_cv-2.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 963393,
+          "sha256": "fa9b92f053e1b79d3c1e416143c65cea7181baa146fd0cf169df319bd43f4c61",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/10/sample_01-1.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 643910,
+          "sha256": "29fdd889b051112d2648f7c57a10188b0fc2f4fa5b554b77243c2c0e89a37c38",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/10/sample_02-2.jpg",
+          "width": 1800,
+          "height": 1200,
+          "bytes": 720984,
+          "sha256": "0a6af0f81988e1637a94d1d136dfd7159f30d05fd62ee6239d8a52f437adf1d3",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/10/sample_03-2.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 638210,
+          "sha256": "3f85f5a3da0cb25c88829c2560fbc0da40dbe41367520522713092f270c3b36d",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/10/sample_04-2.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 735890,
+          "sha256": "70013d36f569d0d50610a03bce95da492dc52a6631205dc120a3622395087cce",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/10/sample_05-1.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 579821,
+          "sha256": "05e67dd0f8deb77128d1db21ad0b8ded5fd84084f3b619f04a7733487fc0e730",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "status": "official_samples_verified",
+      "sample_count_verified": 6,
+      "images": [],
+      "collected_image_files": 0
+    },
+    {
+      "id": "djawa-holstein-jobs",
+      "title": "Holstein Jobs",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/holstein-jobs/",
+      "model": "mimmi",
+      "advertised_photos": null,
+      "samples": [
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2022/11/sample_cvs-1.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 538290,
+          "sha256": "70585dadaafd7ad29aff09fb6171cdb906f5e7d4fb8636dda490568b10f72970",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2022/11/sample_cv-2.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 626030,
+          "sha256": "f2d94de3f8bb476406638968ef1e4b7bde8cee0d42d8f83a91f5737ac5adfa5e",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2022/11/sample_01-2.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 488211,
+          "sha256": "05e9243308d86200c57dbc33432733e26e70eef211eb3d5043ed3e599788169a",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2022/11/sample_02-2.jpg",
+          "width": 1800,
+          "height": 1200,
+          "bytes": 637636,
+          "sha256": "13269d43c2ae3891fec593a115610d1f21780cde48e0c35d0399aab6a68b558a",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2022/11/sample_03-2.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 589717,
+          "sha256": "e3068abbcdff8b8e133c38c24c9e2ca447391a181c219df7b737727d4dcc5068",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2022/11/sample_04-2.jpg",
+          "width": 1800,
+          "height": 1200,
+          "bytes": 532518,
+          "sha256": "3c56f794a77eda0edbf07a363206f52c5f2915cb237877ecc7ad3506f07a502f",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "status": "official_samples_verified",
+      "sample_count_verified": 6,
+      "images": [],
+      "collected_image_files": 0
+    },
+    {
+      "id": "djawa-grin-and-fire",
+      "title": "Grin and Fire!",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/grin-and-fire/",
+      "model": "mimmi",
+      "advertised_photos": null,
+      "samples": [
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/10/sample_cv-3.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 670710,
+          "sha256": "1fe06d9619a341c729364cadd90c1ed2346d3075bb639c49d0a1f32ae338eeae",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/10/sample_01-2.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 651155,
+          "sha256": "0ffc6bbf0dec6e6c500007f1ba33aa42aefb0502e4b615d2b94f9c3b2bcdd20b",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/10/sample_02-3.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 654172,
+          "sha256": "fa654a1ed8a7b46614f7677f5dd3cd6a769d5cc45113fceccbe0edea778c4114",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/10/sample_03-3.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 547617,
+          "sha256": "9474eca800c7245ba64f0747f9ad5047830224956102afc3285716ce14e72666",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/10/sample_04-3.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 476296,
+          "sha256": "19a29fce5a1ecbe28e3fd60e9a2ce388482a969044e754194f6312d3b259f326",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2024/10/sample_05-2.jpg",
+          "width": 1200,
+          "height": 1800,
+          "bytes": 647817,
+          "sha256": "25c77a445a26f560848a844ed428ed594749716790e4a1bff43624a8e2f93f2a",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "status": "official_samples_verified",
+      "sample_count_verified": 6,
+      "images": [],
+      "collected_image_files": 0
+    },
+    {
+      "id": "djawa-twin-bunnies-affair",
+      "title": "Twin Bunnies Affair",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/twin-bunnies-affair/",
+      "model": "mimmi",
+      "advertised_photos": 157,
+      "samples": [
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2025/05/sample_cv-3.jpg",
+          "width": 1000,
+          "height": 1500,
+          "bytes": 569280,
+          "sha256": "1eaaa6883ea652015d0040303a07d6142e8625e0c1f53a33995d42aba8cd40d0",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2025/05/sample_01-4.jpg",
+          "width": 1000,
+          "height": 1500,
+          "bytes": 579603,
+          "sha256": "d946cbaa791c78c93101bdcf62405ea563139f8211795682244d809eda52e586",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2025/05/sample_02-4.jpg",
+          "width": 1000,
+          "height": 1500,
+          "bytes": 696158,
+          "sha256": "5878e8ccefd213ee1a0757cb4f3e4c83d3cdce604660d9fa794eca0d7b5753d6",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2025/05/sample_03-3.jpg",
+          "width": 1000,
+          "height": 1500,
+          "bytes": 739720,
+          "sha256": "ee9a1034033ab1194d634d3596dbcedffcbbb22facf66f01e73cc7da06aeb29c",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2025/05/sample_04-4.jpg",
+          "width": 1000,
+          "height": 1500,
+          "bytes": 295697,
+          "sha256": "6edbb195c7aba3b36ea60b80198eb3d971bcc8eaae2b91717d74e5031843ab7f",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2025/05/sample_05-4.jpg",
+          "width": 1500,
+          "height": 1000,
+          "bytes": 510428,
+          "sha256": "4644e1fac356c2acadfcc5d5e6c0b4049113f748cc114389d3ebb27018a0684d",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "status": "official_samples_verified",
+      "sample_count_verified": 6,
+      "images": [],
+      "collected_image_files": 0
+    },
+    {
+      "id": "djawa-mademoiselle-mimmi",
+      "title": "Mademoiselle Mimmi",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/mademoiselle-mimmi/",
+      "model": "mimmi",
+      "advertised_photos": null,
+      "samples": [
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2022/08/sample_cv2.jpg",
+          "width": 1000,
+          "height": 1512,
+          "bytes": 507635,
+          "sha256": "494bcba2244b938af4b984de2fb84ba883328d8bcf5ae43fe58332c08b4098c1",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2022/08/sample_cv.jpg",
+          "width": 1000,
+          "height": 1512,
+          "bytes": 521606,
+          "sha256": "b142c480cad825680193289c093c85f15d7a82f257710f2e7731e9c263466f75",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2022/08/sample_01.jpg",
+          "width": 1000,
+          "height": 1512,
+          "bytes": 497241,
+          "sha256": "43df3f3271965d8a338c667797a0a6dd9694846bffbd5e22a7dce00ff6bdfb31",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2022/08/sample_02.jpg",
+          "width": 1000,
+          "height": 1512,
+          "bytes": 528185,
+          "sha256": "f8e0847898dcf1beab6b1d8981dca8a8a5469e00ef7de9dd458007f1998efbec",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2022/08/sample_03.jpg",
+          "width": 1512,
+          "height": 1000,
+          "bytes": 577038,
+          "sha256": "3849f2f5826d68157d710756860488526baf428227d0d62e8df477341a3d02f1",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2022/08/sample_04.jpg",
+          "width": 1512,
+          "height": 1000,
+          "bytes": 725211,
+          "sha256": "92d2830532a93268ee31c97f41d916fad313a8caf01df1fb69f5fcaa77990df3",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "status": "official_samples_verified",
+      "sample_count_verified": 6,
+      "images": [],
+      "collected_image_files": 0
+    },
+    {
+      "id": "djawa-rudy%c2%b2-codename-wolfgirl",
+      "title": "Rudy² – Codename : Wolfgirl",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/rudy%c2%b2-codename-wolfgirl/",
+      "model": "mimmi",
+      "advertised_photos": null,
+      "samples": [
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2022/07/sample_cv-1.jpg",
+          "width": 1000,
+          "height": 1500,
+          "bytes": 676019,
+          "sha256": "a701dbc15aa09f8a891fea83de873105f07743cce994ef5c45821159e6ce2c0c",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2022/07/sample_01-1.jpg",
+          "width": 1500,
+          "height": 1000,
+          "bytes": 533964,
+          "sha256": "87c1fec7a0e7b1f9e8598bf7fbf55d2f9ed180b2edef73962f84677580ef4741",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2022/07/sample_02-1.jpg",
+          "width": 1000,
+          "height": 1500,
+          "bytes": 633053,
+          "sha256": "6c5ac3775a13186bf3519fbf3bbbd23f66751be93897bb1100c2066b11a5837a",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2022/07/sample_03-1.jpg",
+          "width": 1500,
+          "height": 1000,
+          "bytes": 536188,
+          "sha256": "9c64721c9d4029897bf329a171f44b71a9dad841c1e7b9694baa2b02c765e746",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2022/07/sample_04-1.jpg",
+          "width": 1000,
+          "height": 1500,
+          "bytes": 581280,
+          "sha256": "24989d60e802308a4b9abe86b4c5e520d69777430c69d76b3f4eb0ad1914fc39",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2022/07/sample_05-1.jpg",
+          "width": 1000,
+          "height": 1500,
+          "bytes": 675787,
+          "sha256": "d7065ffe71a6ce5df3071aa8ed27f870025d7045c433deba674d6af5c083d2b3",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "status": "official_samples_verified",
+      "sample_count_verified": 6,
+      "images": [],
+      "collected_image_files": 0
+    },
+    {
+      "id": "djawa-christmas-special-2021-mimmi",
+      "title": "Christmas Special 2021 : Mimmi",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/christmas-special-2021-mimmi/",
+      "model": "mimmi",
+      "advertised_photos": null,
+      "samples": [
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2021/12/sample_cv.jpg",
+          "width": 1000,
+          "height": 1500,
+          "bytes": 741100,
+          "sha256": "a3871ade1c2165c796bc10f1a232f01db1ce40a8dbcb6f4c11b02b9dd46e9114",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2021/12/sample_01.jpg",
+          "width": 1000,
+          "height": 1500,
+          "bytes": 608129,
+          "sha256": "24e2841c038d6a74a631dd83e3cd3c4764d9e9ef13ee3a8bdf534180e725c5b4",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2021/12/sample_02.jpg",
+          "width": 1000,
+          "height": 1500,
+          "bytes": 703620,
+          "sha256": "0ae7da9158e4e04e3b87eabe2abfb4c4126c25d1b2b58937a85d031871fd3ebc",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2021/12/sample_03.jpg",
+          "width": 1500,
+          "height": 1000,
+          "bytes": 659394,
+          "sha256": "1891a9497f29ab9c8149b593cdaa71e28d97edaced1f434b591a8aa1242d706c",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2021/12/sample_04.jpg",
+          "width": 1500,
+          "height": 1000,
+          "bytes": 874463,
+          "sha256": "02c11163040a6e5abb84a59b4d64b8835316ceb3f9577e5d1f326dda1b0bb8aa",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2021/12/sample_05.jpg",
+          "width": 1000,
+          "height": 1500,
+          "bytes": 628681,
+          "sha256": "a3a3613dcdc4e7a490f70b01b532d45126082203adeac59bbb16dd6af34c129a",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "status": "official_samples_verified",
+      "sample_count_verified": 6,
+      "images": [],
+      "collected_image_files": 0
+    },
+    {
+      "id": "djawa-rudy-the-wolf-of-midnight",
+      "title": "Rudy : The Wolf of Midnight",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/rudy-the-wolf-of-midnight/",
+      "model": "mimmi",
+      "advertised_photos": 228,
+      "samples": [
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2021/02/sample_01c.jpg",
+          "width": 1000,
+          "height": 1500,
+          "bytes": 537756,
+          "sha256": "71002b0af0de66475ac2bc6281e92f2dfa792145764a5248cdc42429d51e90c3",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2021/02/sample_02c.jpg",
+          "width": 1000,
+          "height": 1500,
+          "bytes": 673606,
+          "sha256": "09935c546c2ae6e9b223633fda7369dcea5755456dd0c5b1c3261a4129b6ab0c",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2021/02/sample_03.jpg",
+          "width": 1000,
+          "height": 1500,
+          "bytes": 571639,
+          "sha256": "2be30c9a736b3de030cfbbb924822f654cb2328acf403bba595dd175f0b0a271",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2021/02/sample_04.jpg",
+          "width": 1000,
+          "height": 1500,
+          "bytes": 621403,
+          "sha256": "18ba80f30904b7859127ff7d80e9b4d22257f25526763d58eecad8292bc23e6e",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2021/02/sample_05.jpg",
+          "width": 1000,
+          "height": 1500,
+          "bytes": 539928,
+          "sha256": "60e6b051e6799ce9cf7d29f8e440514b1e886caf50585bf2e520ebff9b8359e4",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://djawaphoto.com/wp-content/uploads/2021/02/sample_06.jpg",
+          "width": 1500,
+          "height": 1000,
+          "bytes": 586984,
+          "sha256": "8fbc5762cdbcfaf2be8c554ee46beb8234a76330f9a25ba143874ddfe5b878a3",
+          "hosting": "official_publisher",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "status": "official_samples_verified",
+      "sample_count_verified": 6,
+      "images": [],
+      "collected_image_files": 0
+    }
+  ],
+  "summary": {
+    "official_works_discovered": 32,
+    "official_sample_urls_verified": 192,
+    "individually_archived_photographs": 0,
+    "official_pages_failed": 0
+  },
+  "rights": "Official public promos linked from publisher; no copying paid sets to open hosting. Source sample URLs may change."
+}
