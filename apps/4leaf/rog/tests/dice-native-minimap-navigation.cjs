@@ -38,7 +38,39 @@ const {chromium}=require('playwright');
  const neq=(a,b,label)=>assert.notDeepEqual(a,b,label);
  try{
   const url=process.env.FOURLEAF_TEST_URL||'file://'+path.resolve(__dirname,'../index.html');
-  await page.goto(url,{waitUntil:'domcontentloaded'});
+  // GitHub Pages occasionally serves a transient non-app HTML response
+  // (0 script tags, 0 actual game DOM; no JS request failures) while another
+  // published public QA path succeeds. Such a DOCUMENT is not the game:
+  // retry retrieving actual public HTML, never fabricate the source state.
+  // If source app HTML has scripts and fails to initialize, preserve the
+  // stricter existing real JS error/network rule below without retries.
+  const shellAttempts=[];
+  for(let attempt=0;attempt<3;attempt++){
+   const target=attempt===0?url:
+    url+(url.includes('?')?'&':'?')+'fourleaf_public_html_retry='+attempt;
+   const response=await page.goto(target,{waitUntil:'domcontentloaded'});
+   const shell=await page.evaluate(()=>({
+    scriptCount:document.scripts.length,
+    appPresent:!!document.querySelector('#app'),
+    title:document.title,
+    location:location.href,
+    htmlSnippet:document.documentElement?.outerHTML.slice(0,160)||''
+   }));
+   shellAttempts.push({responseStatus:response?.status()||null,...shell});
+   // Original playable shell must be real, with both the live application
+   // and its actual game script sources. Do not count an error page as QA.
+   if(shell.appPresent&&shell.scriptCount>0)break;
+   const publicPage=new URL(url);
+   const emptyDocument=!shell.appPresent&&shell.scriptCount===0;
+   const retryable=publicPage.origin==='https://koith.github.io'&&
+    publicPage.pathname.startsWith('/browser-app-lab/apps/4leaf/rog/')&&
+    emptyDocument&&errors.length===0&&networkFailures.length===0;
+   if(!retryable||attempt===2)
+    throw Error('Public Pages returned NON-APP HTML; no source gameplay to test: '+
+     JSON.stringify({shellAttempts,errors,networkFailures}));
+   console.warn('RETRY_REAL_PAGES_HTML_NOT_SOURCE_GAME',JSON.stringify(shellAttempts.at(-1)));
+   await page.waitForTimeout(350*(attempt+1));
+  }
   try{
    await page.waitForFunction(()=>window.__ROG_TEST__&&window.__LEAF_CAMERA__&&
     window.__LEAF_MINIMAP_NAV__,null,{timeout:13000});
