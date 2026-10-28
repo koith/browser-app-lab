@@ -101,7 +101,7 @@ def scan(max_books=70,max_per_album=5):
     for i,album in enumerate(catalog["albums"][:max_books],1):
         doc_url=album["source"]
         if not (doc_url.startswith("https://djawaphoto.com/portfolio/") or doc_url.startswith("https://www.djawaphoto.com/portfolio/")):continue
-        urls=[];samples=[];errors=[]
+        urls=[];samples=[];errors=[];links=[]
         try:
             body=html_doc(doc_url,lambda u:urlsplit(u).scheme=="https" and urlsplit(u).hostname in ("djawaphoto.com","www.djawaphoto.com") and urlsplit(u).path.startswith("/portfolio/"))
             links=from_portfolio(body,doc_url)
@@ -130,7 +130,7 @@ def scan(max_books=70,max_per_album=5):
                 min(old["width"],old["height"])<300):continue
             p=dict(old);p["carried_from_previous_verification"]=True;samples.append(p);seen.add(p["sha256"])
         results.append({"id":album["id"],"title":album["title"],"publisher":"DJAWA",
-                        "source":album["source"],"product_urls":links if 'links' in locals() else [],
+                        "source":album["source"],"product_urls":links,
                         "samples":samples,"images":[],"fresh_http_verified":fresh_count,
                         "errors":errors,"status":"verified_public_promo_only" if samples else "no_public_promo_photo"})
         print("MIMMI_PUBLIC_GUMROAD",i,len(results),album["id"],len(samples),flush=True)
