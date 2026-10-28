@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "model": "mimmi",
-  "updated": "2026-10-28T23:19:01Z",
+  "updated": "2026-10-28T23:19:45Z",
   "storage": "physically committed public previews under GitHub Pages; not licensed publisher masters",
   "albums": [
     {
@@ -9612,6 +9612,15 @@
           "width": 912,
           "height": 1368,
           "number": 70
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a8n7me7a/10142b714f53776a61be360b8c3a2a94274557247b2dc06e0a8cee8e203d2ba1.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Azur-Lane-IJN-Atago-and-Takao-PixiBB.COM-041.jpg",
+          "sha256": "10142b714f53776a61be360b8c3a2a94274557247b2dc06e0a8cee8e203d2ba1",
+          "bytes": 213689,
+          "width": 912,
+          "height": 1368,
+          "number": 71
         }
       ],
       "status": "public_previews_only_not_complete"
@@ -17964,10 +17973,514 @@
           "width": 912,
           "height": 1368,
           "number": 98
+        },
+        {
+          "url": "stored-albums/djawa-your-fishe-gawr-gura/6969080b74d08a86c945cacb74727ca72fb91eff6cad3d3ae934fba130eda21c.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-035.jpg",
+          "sha256": "6969080b74d08a86c945cacb74727ca72fb91eff6cad3d3ae934fba130eda21c",
+          "bytes": 197874,
+          "width": 912,
+          "height": 1368,
+          "number": 99
+        },
+        {
+          "url": "stored-albums/djawa-your-fishe-gawr-gura/b6a82bab19b5517346be3e438dcd68ebc95209f5d4b999d44741a39685cdf797.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-033.jpg",
+          "sha256": "b6a82bab19b5517346be3e438dcd68ebc95209f5d4b999d44741a39685cdf797",
+          "bytes": 312464,
+          "width": 1368,
+          "height": 912,
+          "number": 100
+        },
+        {
+          "url": "stored-albums/djawa-your-fishe-gawr-gura/aaa21f7bfa214d3b1efbbd1393d8207e1ae26211cea1f131c69a4ffc5ff9938b.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-032.jpg",
+          "sha256": "aaa21f7bfa214d3b1efbbd1393d8207e1ae26211cea1f131c69a4ffc5ff9938b",
+          "bytes": 259920,
+          "width": 912,
+          "height": 1368,
+          "number": 101
+        },
+        {
+          "url": "stored-albums/djawa-your-fishe-gawr-gura/5af9fd00edae59878276a1995f2647dce66aad53cf0d63be95c9ea322312dcb4.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-031.jpg",
+          "sha256": "5af9fd00edae59878276a1995f2647dce66aad53cf0d63be95c9ea322312dcb4",
+          "bytes": 238335,
+          "width": 1368,
+          "height": 912,
+          "number": 102
+        },
+        {
+          "url": "stored-albums/djawa-your-fishe-gawr-gura/dab405dce2cf46cea2d71d7e9b394c6ba4eb849a9b33166968ba064786be4344.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-030.jpg",
+          "sha256": "dab405dce2cf46cea2d71d7e9b394c6ba4eb849a9b33166968ba064786be4344",
+          "bytes": 179609,
+          "width": 912,
+          "height": 1368,
+          "number": 103
+        },
+        {
+          "url": "stored-albums/djawa-your-fishe-gawr-gura/6d9cbbfe3bb0950d9639ce1433f29dc7c915c409a6b48fbf13dcc4eac4b7a124.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-029.jpg",
+          "sha256": "6d9cbbfe3bb0950d9639ce1433f29dc7c915c409a6b48fbf13dcc4eac4b7a124",
+          "bytes": 193001,
+          "width": 912,
+          "height": 1368,
+          "number": 104
+        },
+        {
+          "url": "stored-albums/djawa-your-fishe-gawr-gura/4a4db0d6729532d9fa2725d83499f5e98683db72de9352c71562ea38eb6d495e.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-028.jpg",
+          "sha256": "4a4db0d6729532d9fa2725d83499f5e98683db72de9352c71562ea38eb6d495e",
+          "bytes": 214583,
+          "width": 912,
+          "height": 1368,
+          "number": 105
+        },
+        {
+          "url": "stored-albums/djawa-your-fishe-gawr-gura/9ab868baef9177d8e51b7f2e0fb3cb0ede4d9cb56e469b83935f4ee7da0b81fb.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-027.jpg",
+          "sha256": "9ab868baef9177d8e51b7f2e0fb3cb0ede4d9cb56e469b83935f4ee7da0b81fb",
+          "bytes": 174355,
+          "width": 912,
+          "height": 1368,
+          "number": 106
+        },
+        {
+          "url": "stored-albums/djawa-your-fishe-gawr-gura/dd81acf0eb1d687807e12f1ae449802859a3e1930db62e81b69203d97b371961.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-026.jpg",
+          "sha256": "dd81acf0eb1d687807e12f1ae449802859a3e1930db62e81b69203d97b371961",
+          "bytes": 157124,
+          "width": 912,
+          "height": 1368,
+          "number": 107
+        },
+        {
+          "url": "stored-albums/djawa-your-fishe-gawr-gura/eaffaaeab87c1675697cd49daea3cc1dfcaea8f8f63520800455813578e984cb.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-024.jpg",
+          "sha256": "eaffaaeab87c1675697cd49daea3cc1dfcaea8f8f63520800455813578e984cb",
+          "bytes": 212274,
+          "width": 912,
+          "height": 1368,
+          "number": 108
+        },
+        {
+          "url": "stored-albums/djawa-your-fishe-gawr-gura/89c3135696ee886f75136c3311722bf003d7a91e311c6a5703d5fb05bd926ead.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-023.jpg",
+          "sha256": "89c3135696ee886f75136c3311722bf003d7a91e311c6a5703d5fb05bd926ead",
+          "bytes": 190170,
+          "width": 912,
+          "height": 1368,
+          "number": 109
+        },
+        {
+          "url": "stored-albums/djawa-your-fishe-gawr-gura/576db172abcc2bf9989e302b5acd139192e0360bd5f9cee6e01ff78d95b15a06.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-022.jpg",
+          "sha256": "576db172abcc2bf9989e302b5acd139192e0360bd5f9cee6e01ff78d95b15a06",
+          "bytes": 246559,
+          "width": 912,
+          "height": 1368,
+          "number": 110
+        },
+        {
+          "url": "stored-albums/djawa-your-fishe-gawr-gura/f29bf58abff3a7032f0e31be4ea250fd8139317bb344ce7223c13c4bbaeaed8b.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-021.jpg",
+          "sha256": "f29bf58abff3a7032f0e31be4ea250fd8139317bb344ce7223c13c4bbaeaed8b",
+          "bytes": 190878,
+          "width": 912,
+          "height": 1368,
+          "number": 111
+        },
+        {
+          "url": "stored-albums/djawa-your-fishe-gawr-gura/ec201ddcbf8790cd40f949b676bff3fbc9fb954d80168798c5e73521fcf0c971.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-020.jpg",
+          "sha256": "ec201ddcbf8790cd40f949b676bff3fbc9fb954d80168798c5e73521fcf0c971",
+          "bytes": 232664,
+          "width": 912,
+          "height": 1368,
+          "number": 112
+        },
+        {
+          "url": "stored-albums/djawa-your-fishe-gawr-gura/288723acaaf1e1bd751f2a9ccf623d0f6491b73bc742db1e32b5ba95200bbc2f.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-017.jpg",
+          "sha256": "288723acaaf1e1bd751f2a9ccf623d0f6491b73bc742db1e32b5ba95200bbc2f",
+          "bytes": 249608,
+          "width": 912,
+          "height": 1368,
+          "number": 113
+        },
+        {
+          "url": "stored-albums/djawa-your-fishe-gawr-gura/547ad41383f24eab0f0a95b2d8afff81e1ba513db6a483d830a3b9bd296a6ff4.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-019.jpg",
+          "sha256": "547ad41383f24eab0f0a95b2d8afff81e1ba513db6a483d830a3b9bd296a6ff4",
+          "bytes": 253279,
+          "width": 912,
+          "height": 1368,
+          "number": 114
+        },
+        {
+          "url": "stored-albums/djawa-your-fishe-gawr-gura/695911cd32b355279bfc6b75193853749e9f4e3067247ceead47f0beb0a0b3ce.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-018.jpg",
+          "sha256": "695911cd32b355279bfc6b75193853749e9f4e3067247ceead47f0beb0a0b3ce",
+          "bytes": 262440,
+          "width": 912,
+          "height": 1368,
+          "number": 115
+        },
+        {
+          "url": "stored-albums/djawa-your-fishe-gawr-gura/bcd9e39d5e32ae7fd358c87f66ae063e3242ccd24c2e544c34ff88ee2e7877fc.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-016.jpg",
+          "sha256": "bcd9e39d5e32ae7fd358c87f66ae063e3242ccd24c2e544c34ff88ee2e7877fc",
+          "bytes": 226931,
+          "width": 1368,
+          "height": 912,
+          "number": 116
+        },
+        {
+          "url": "stored-albums/djawa-your-fishe-gawr-gura/ca2dae0a560778ac1a84ea9a135c586092fa5e102eb27a45c06ed7ec6174d519.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-015.jpg",
+          "sha256": "ca2dae0a560778ac1a84ea9a135c586092fa5e102eb27a45c06ed7ec6174d519",
+          "bytes": 172622,
+          "width": 912,
+          "height": 1368,
+          "number": 117
+        },
+        {
+          "url": "stored-albums/djawa-your-fishe-gawr-gura/6afa1543e5762f08296904444046c7070ef3e1d265b8df16ee77bc0181df562d.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-014.jpg",
+          "sha256": "6afa1543e5762f08296904444046c7070ef3e1d265b8df16ee77bc0181df562d",
+          "bytes": 232128,
+          "width": 1368,
+          "height": 912,
+          "number": 118
+        },
+        {
+          "url": "stored-albums/djawa-your-fishe-gawr-gura/72695b14a7fcab226d8d8fd5fe79b89df5c5b4a197dea805262c740390ad754b.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-013.jpg",
+          "sha256": "72695b14a7fcab226d8d8fd5fe79b89df5c5b4a197dea805262c740390ad754b",
+          "bytes": 225975,
+          "width": 1368,
+          "height": 912,
+          "number": 119
+        },
+        {
+          "url": "stored-albums/djawa-your-fishe-gawr-gura/708b0a51a40b516c5eba359a8b5a75c2e4e0b6b9dd5d957a7c1a1db6bb6495b8.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-012.jpg",
+          "sha256": "708b0a51a40b516c5eba359a8b5a75c2e4e0b6b9dd5d957a7c1a1db6bb6495b8",
+          "bytes": 230697,
+          "width": 1368,
+          "height": 912,
+          "number": 120
+        },
+        {
+          "url": "stored-albums/djawa-your-fishe-gawr-gura/1eb45653f2dd69790a879deb1b5639b770197a5b2a181c16c6a07dc11afff663.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-011.jpg",
+          "sha256": "1eb45653f2dd69790a879deb1b5639b770197a5b2a181c16c6a07dc11afff663",
+          "bytes": 201632,
+          "width": 1368,
+          "height": 912,
+          "number": 121
+        },
+        {
+          "url": "stored-albums/djawa-your-fishe-gawr-gura/fc856984c3429f2c1ed11f2a8e13de3e136b96f9fe1dc2799657fc233c08a854.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-008.jpg",
+          "sha256": "fc856984c3429f2c1ed11f2a8e13de3e136b96f9fe1dc2799657fc233c08a854",
+          "bytes": 197052,
+          "width": 912,
+          "height": 1368,
+          "number": 122
+        },
+        {
+          "url": "stored-albums/djawa-your-fishe-gawr-gura/428b3d2dcd2fd69bcf93fb97eb73629bdaf053aaf679e86cca12d224817f042c.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-010.jpg",
+          "sha256": "428b3d2dcd2fd69bcf93fb97eb73629bdaf053aaf679e86cca12d224817f042c",
+          "bytes": 208280,
+          "width": 912,
+          "height": 1368,
+          "number": 123
+        },
+        {
+          "url": "stored-albums/djawa-your-fishe-gawr-gura/5ece1c598e9cd30850a33bede4019f1fd6e59016d73cee092e3d82c11db24d61.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-009.jpg",
+          "sha256": "5ece1c598e9cd30850a33bede4019f1fd6e59016d73cee092e3d82c11db24d61",
+          "bytes": 198003,
+          "width": 912,
+          "height": 1368,
+          "number": 124
+        },
+        {
+          "url": "stored-albums/djawa-your-fishe-gawr-gura/b668a0b124b55e9a9dc8a064fb383df77bd9c34ba9b157a9e5124cc8be7673ef.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-007.jpg",
+          "sha256": "b668a0b124b55e9a9dc8a064fb383df77bd9c34ba9b157a9e5124cc8be7673ef",
+          "bytes": 190343,
+          "width": 912,
+          "height": 1368,
+          "number": 125
+        },
+        {
+          "url": "stored-albums/djawa-your-fishe-gawr-gura/652e5ae0500827458da0cb9d66783d9e32a003e5b2753ba87d581bf362c2e8d1.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-006.jpg",
+          "sha256": "652e5ae0500827458da0cb9d66783d9e32a003e5b2753ba87d581bf362c2e8d1",
+          "bytes": 214417,
+          "width": 912,
+          "height": 1368,
+          "number": 126
+        },
+        {
+          "url": "stored-albums/djawa-your-fishe-gawr-gura/dc029cd39df046849e766113908f462553e90bdf7f7332c62b349c0ed392cc6d.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-005.jpg",
+          "sha256": "dc029cd39df046849e766113908f462553e90bdf7f7332c62b349c0ed392cc6d",
+          "bytes": 222123,
+          "width": 912,
+          "height": 1368,
+          "number": 127
+        },
+        {
+          "url": "stored-albums/djawa-your-fishe-gawr-gura/61f3e5f99b58a5540b2590113a9ee9c7af306f7acfc0d38451093b8d4adf5851.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-004.jpg",
+          "sha256": "61f3e5f99b58a5540b2590113a9ee9c7af306f7acfc0d38451093b8d4adf5851",
+          "bytes": 221229,
+          "width": 1368,
+          "height": 912,
+          "number": 128
+        },
+        {
+          "url": "stored-albums/djawa-your-fishe-gawr-gura/402570e5ac18fadbbc18aa4242def950112aa1fb128a58e61ed9f31f6794c5f5.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-003.jpg",
+          "sha256": "402570e5ac18fadbbc18aa4242def950112aa1fb128a58e61ed9f31f6794c5f5",
+          "bytes": 223306,
+          "width": 912,
+          "height": 1368,
+          "number": 129
+        },
+        {
+          "url": "stored-albums/djawa-your-fishe-gawr-gura/1a4d013b997be9a3418b8b85682901e903f20cd383c9867a1bfe6dd012a6973f.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-002.jpg",
+          "sha256": "1a4d013b997be9a3418b8b85682901e903f20cd383c9867a1bfe6dd012a6973f",
+          "bytes": 194794,
+          "width": 1368,
+          "height": 912,
+          "number": 130
+        },
+        {
+          "url": "stored-albums/djawa-your-fishe-gawr-gura/aec8f57338beac54ff21f6a3b9a8c0951bf635b663e1365a8745fa87edbe8f6a.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-001.jpg",
+          "sha256": "aec8f57338beac54ff21f6a3b9a8c0951bf635b663e1365a8745fa87edbe8f6a",
+          "bytes": 199782,
+          "width": 912,
+          "height": 1368,
+          "number": 131
+        }
+      ],
+      "status": "public_previews_only_not_complete"
+    },
+    {
+      "id": "djawa-rei-beyond-the-heart",
+      "title": "Rei, Beyond the Heart",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/rei-beyond-the-heart/",
+      "images": [
+        {
+          "url": "stored-albums/djawa-rei-beyond-the-heart/5d81c0beebc157a344595718f625e7c62ec0093bdbb3052baba6d6efca03b614.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/12/sample_cv1.jpg",
+          "sha256": "5d81c0beebc157a344595718f625e7c62ec0093bdbb3052baba6d6efca03b614",
+          "bytes": 613259,
+          "width": 1200,
+          "height": 1800,
+          "number": 1
+        },
+        {
+          "url": "stored-albums/djawa-rei-beyond-the-heart/e37ba6746658909c2528a73e86db12876e12090e56ea14bd38bccba108be80e1.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/12/sample_cv2.jpg",
+          "sha256": "e37ba6746658909c2528a73e86db12876e12090e56ea14bd38bccba108be80e1",
+          "bytes": 698885,
+          "width": 1200,
+          "height": 1800,
+          "number": 2
+        },
+        {
+          "url": "stored-albums/djawa-rei-beyond-the-heart/bc29ad07298a67d03acdba7b2712c2d8fe0b6ab2274ac68ff639a1611a71b5d8.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/12/sample_01-4.jpg",
+          "sha256": "bc29ad07298a67d03acdba7b2712c2d8fe0b6ab2274ac68ff639a1611a71b5d8",
+          "bytes": 461722,
+          "width": 1200,
+          "height": 1800,
+          "number": 3
+        },
+        {
+          "url": "stored-albums/djawa-rei-beyond-the-heart/ebac032566a43bbb6056eaa3c47e790e90284c5566840ba3212dff59e12ef552.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/12/sample_03-4.jpg",
+          "sha256": "ebac032566a43bbb6056eaa3c47e790e90284c5566840ba3212dff59e12ef552",
+          "bytes": 450900,
+          "width": 1200,
+          "height": 1800,
+          "number": 4
+        },
+        {
+          "url": "stored-albums/djawa-rei-beyond-the-heart/fdfaff360a80723f2f8a4d8da7cbed3c6380b8fd4531a32980117679858080c0.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/12/sample_04-4.jpg",
+          "sha256": "fdfaff360a80723f2f8a4d8da7cbed3c6380b8fd4531a32980117679858080c0",
+          "bytes": 511038,
+          "width": 1200,
+          "height": 1800,
+          "number": 5
+        },
+        {
+          "url": "stored-albums/djawa-rei-beyond-the-heart/8e65e2b0a91fc3aae9a0df078493561b2981e35d06e9427c023f58932e0e0f13.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/12/sample_05-4.jpg",
+          "sha256": "8e65e2b0a91fc3aae9a0df078493561b2981e35d06e9427c023f58932e0e0f13",
+          "bytes": 560361,
+          "width": 1200,
+          "height": 1800,
+          "number": 6
+        },
+        {
+          "url": "stored-albums/djawa-rei-beyond-the-heart/12ce04cc42b4b5939fd1265f76ca903a9e5e6dcdb579b38f3f2513b394bd2135.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/12/sample_06-4.jpg",
+          "sha256": "12ce04cc42b4b5939fd1265f76ca903a9e5e6dcdb579b38f3f2513b394bd2135",
+          "bytes": 584075,
+          "width": 1800,
+          "height": 1200,
+          "number": 7
+        },
+        {
+          "url": "stored-albums/djawa-rei-beyond-the-heart/04fc50cbed1313edb808f1ff399d78e59669bf99efb4806736e6c4b175a09cd0.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/12/sample_07-3.jpg",
+          "sha256": "04fc50cbed1313edb808f1ff399d78e59669bf99efb4806736e6c4b175a09cd0",
+          "bytes": 585971,
+          "width": 1800,
+          "height": 1200,
+          "number": 8
+        },
+        {
+          "url": "stored-albums/djawa-rei-beyond-the-heart/b2d762176194434fb93d6c52c5926fc4726cb502023cca4203f1aac93db55353.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/12/sample_08-3.jpg",
+          "sha256": "b2d762176194434fb93d6c52c5926fc4726cb502023cca4203f1aac93db55353",
+          "bytes": 548348,
+          "width": 1200,
+          "height": 1800,
+          "number": 9
+        },
+        {
+          "url": "stored-albums/djawa-rei-beyond-the-heart/e6b276b473c08df6a1ae292efdb75f52cbcd83d26e5378382e669e21c70205d1.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/12/sample_02-4.jpg",
+          "sha256": "e6b276b473c08df6a1ae292efdb75f52cbcd83d26e5378382e669e21c70205d1",
+          "bytes": 555454,
+          "width": 1800,
+          "height": 1200,
+          "number": 10
+        },
+        {
+          "url": "stored-albums/djawa-rei-beyond-the-heart/f87bab2d3c8b5367472112e003b69bc02cc02e35abd817d0c1e4436614939291.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/12/sample_09-2.jpg",
+          "sha256": "f87bab2d3c8b5367472112e003b69bc02cc02e35abd817d0c1e4436614939291",
+          "bytes": 458552,
+          "width": 1200,
+          "height": 1800,
+          "number": 11
+        },
+        {
+          "url": "stored-albums/djawa-rei-beyond-the-heart/9923386028967d44e87e92c8f2d155ca4374b258364fbb216f73a9e20c3b726f.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/12/sample_11-2.jpg",
+          "sha256": "9923386028967d44e87e92c8f2d155ca4374b258364fbb216f73a9e20c3b726f",
+          "bytes": 380848,
+          "width": 1200,
+          "height": 1800,
+          "number": 12
+        },
+        {
+          "url": "stored-albums/djawa-rei-beyond-the-heart/60aa58765fa818686e0012c664718b219ad38416b52bf62e3fc9a3b3d245e1e6.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/12/sample_12-2.jpg",
+          "sha256": "60aa58765fa818686e0012c664718b219ad38416b52bf62e3fc9a3b3d245e1e6",
+          "bytes": 641812,
+          "width": 1800,
+          "height": 1200,
+          "number": 13
+        },
+        {
+          "url": "stored-albums/djawa-rei-beyond-the-heart/bc8ff6bb4baf19f990ce2179cf717217aacf1d9e6f69adb9815b5331da6e9747.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/12/sample_13-1.jpg",
+          "sha256": "bc8ff6bb4baf19f990ce2179cf717217aacf1d9e6f69adb9815b5331da6e9747",
+          "bytes": 434964,
+          "width": 1200,
+          "height": 1800,
+          "number": 14
+        },
+        {
+          "url": "stored-albums/djawa-rei-beyond-the-heart/44fa590a8c37ea054ab4771752d0e4f3e1fffd76bf155ef13fb11815a53e0ff6.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/12/sample_14-1.jpg",
+          "sha256": "44fa590a8c37ea054ab4771752d0e4f3e1fffd76bf155ef13fb11815a53e0ff6",
+          "bytes": 501465,
+          "width": 1200,
+          "height": 1800,
+          "number": 15
+        },
+        {
+          "url": "stored-albums/djawa-rei-beyond-the-heart/c23ff76a763ac4e140e609187720ae1847c61ac9edbf667f42234f9d87720c61.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/12/sample_15-1.jpg",
+          "sha256": "c23ff76a763ac4e140e609187720ae1847c61ac9edbf667f42234f9d87720c61",
+          "bytes": 355393,
+          "width": 1200,
+          "height": 1800,
+          "number": 16
+        },
+        {
+          "url": "stored-albums/djawa-rei-beyond-the-heart/5c438ae4ca13b463f1901babdab71a84a1686262054992db0ca4234ce196a76f.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/I7EjNEEvxkdaIRXn.jpg",
+          "sha256": "5c438ae4ca13b463f1901babdab71a84a1686262054992db0ca4234ce196a76f",
+          "bytes": 1090678,
+          "width": 2000,
+          "height": 3001,
+          "number": 17
+        },
+        {
+          "url": "stored-albums/djawa-rei-beyond-the-heart/98fce2d4600efbfb4fca3aa10be1889406b4fc3f5bd45eb43de33c105fe4cd89.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/KRM3gZ4eSrzZ3Qvu.jpg",
+          "sha256": "98fce2d4600efbfb4fca3aa10be1889406b4fc3f5bd45eb43de33c105fe4cd89",
+          "bytes": 388292,
+          "width": 2000,
+          "height": 1333,
+          "number": 18
+        },
+        {
+          "url": "stored-albums/djawa-rei-beyond-the-heart/89e4f8a6ef64664bd84882f2ab2caf814efb9a81b95d74f7870664a762771277.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/lI4KsgdARfcQHKAL.jpg",
+          "sha256": "89e4f8a6ef64664bd84882f2ab2caf814efb9a81b95d74f7870664a762771277",
+          "bytes": 435342,
+          "width": 2000,
+          "height": 1333,
+          "number": 19
+        },
+        {
+          "url": "stored-albums/djawa-rei-beyond-the-heart/96fcf571bc71b8cdd65066dba1b253254361e630995c71d50ece7851bdb9c667.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/5qivDIXRUcpneANi.jpg",
+          "sha256": "96fcf571bc71b8cdd65066dba1b253254361e630995c71d50ece7851bdb9c667",
+          "bytes": 1022420,
+          "width": 2000,
+          "height": 3001,
+          "number": 20
+        }
+      ],
+      "status": "public_previews_only_not_complete"
+    },
+    {
+      "id": "v2ph-actor-a88763oa",
+      "title": "× Ceyatic - Pop Kitty Party",
+      "publisher": "DJAWA",
+      "source": "https://www.v2ph.com/album/a88763oa.html",
+      "images": [
+        {
+          "url": "stored-albums/v2ph-actor-a88763oa/fbfc9bb919caa228fc41742c1ad2415b308a572f8d3bb47feb022d68989d941f.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/DTqUjK64eHqvA5sb.jpg",
+          "sha256": "fbfc9bb919caa228fc41742c1ad2415b308a572f8d3bb47feb022d68989d941f",
+          "bytes": 236413,
+          "width": 1800,
+          "height": 2700,
+          "number": 1
         }
       ],
       "status": "public_previews_only_not_complete"
     }
   ],
-  "physical_verified_image_count": 1955
+  "physical_verified_image_count": 2010
 }
