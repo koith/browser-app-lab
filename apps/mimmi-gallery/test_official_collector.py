@@ -17,6 +17,9 @@ def main():
     from bs4 import BeautifulSoup
     urls=c.image_candidates(BeautifulSoup(html,'html.parser'),c.CATEGORY)
     assert len(urls)==2,urls
+    variant_html='''<img src="https://djawaphoto.com/wp-content/uploads/2026/09/sample_01.jpg"><img src="https://djawaphoto.com/wp-content/uploads/2026/09/sample_01-768x1024.jpg"><img src="https://djawaphoto.com/wp-content/uploads/2026/09/sample_01-350x467.jpg">'''
+    variants=c.image_candidates(BeautifulSoup(variant_html,'html.parser'),c.CATEGORY)
+    assert variants==['https://djawaphoto.com/wp-content/uploads/2026/09/sample_01.jpg'],variants
     assert c.count_photo_text("This book consists of film works with total 75 extremely-high resolution (5000 x 5000) photos.")==75
     assert c.norm("Happy Mimmi!")=="happy-mimmi"
     data=BytesIO()
