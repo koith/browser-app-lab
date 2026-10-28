@@ -1,0 +1,58 @@
+name: Mimmi Latest Beta18 Archive Data Integrity and Index
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - apps/mimmi-gallery/build_model_gallery.py
+      - apps/mimmi-gallery/official-previews.json
+      - apps/mimmi-gallery/v2ph-public-previews.json
+      - apps/mimmi-gallery/v2ph-actor-previews.json
+      - .github/workflows/mimmi-gallery-beta18-index.yml
+permissions:
+  contents: write
+concurrency:
+  group: mimmi-beta18-index-${{ github.ref_name }}
+  cancel-in-progress: false
+jobs:
+  indexed-photo-view:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Generate complete catalog from verified source image evidence
+        run: |
+          python -m py_compile apps/mimmi-gallery/build_model_gallery.py
+          python apps/mimmi-gallery/build_model_gallery.py
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path("apps/mimmi-gallery")
+          d=json.loads((root/"source-viewer-albums.json").read_text())
+          assert d["model"]=="mimmi" and d["version"]=="v0.1.0-mimmi.4"
+          assert d["summary"]["verified_unique_source_images"]>=390,d["summary"]
+          assert len(d["albums"])>=30
+          assert d["fully_acquired_paid_photobooks"]==0
+          assert d["private_cloud_archived_image_files"]==0
+          seen=set()
+          for a in d["albums"]:
+            assert a["images"] and a["sourceHosted"] and a["id"]
+            assert a["completeness"] in ("partial_public_previews","advertised_public_sequence_verified")
+            for p in a["images"]:
+              assert p["sha256"] not in seen
+              seen.add(p["sha256"])
+              assert p["url"].startswith(("https://cdn.v2ph.com/photos/","https://djawaphoto.com/wp-content/"))
+          print("MIMMI_BETA18_DEDUP_SOURCE_IMAGES_PASS",len(d["albums"]),len(seen))
+          PY
+      - name: Commit gallery data on this branch only, never images or ZIP files
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add apps/mimmi-gallery/albums.json apps/mimmi-gallery/source-viewer-albums.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Index Mimmi verified image albums using latest beta18 gallery schema"
+            git fetch origin "$GITHUB_REF_NAME"
+            git rebase "origin/$GITHUB_REF_NAME"
+            git push origin "HEAD:$GITHUB_REF_NAME"
+          fi
