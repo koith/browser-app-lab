@@ -10,10 +10,34 @@ from PIL import Image
 
 from build_additional_source_manifest import build
 from collect_public_sources import (djawa_model_index, djawa_samples, gamersky_article, hacosta_model_photo, imgcup_teddy,
-                                    inven_article, photographer_portfolio)
+                                    inven_article, photographer_portfolio, crazygiant_samples, sportsseoul_daum_article)
 
 
 class SourceAdapterTests(unittest.TestCase):
+    def test_crazygiant_requires_issue_credit_and_excludes_related_work(self):
+        url = 'https://cdn.imweb.me/upload/S202010013208049566f15/photo.png'
+        body = f'''<title>5월 사랑스러운 아내 _ 유이 : 크레이지자이언트</title>
+        <div class="board_txt_area">크레이지 자이언트 23년 5월호<img src="{url}"></div>
+        <aside><img src="https://cdn.imweb.me/upload/S202010013208049566f15/other.png"></aside>'''
+        works, photos, _ = crazygiant_samples(body, 'https://crazygiant.imweb.me/giantgirl/')
+        self.assertEqual([r['url'] for r in photos], [url])
+        self.assertFalse(works[0]['full_edition_acquired'])
+        for changed in (body.replace('_ 유이', '_ 다른모델'), body.replace('23년 5월호', '24년 5월호')):
+            with self.assertRaises(ValueError):
+                crazygiant_samples(changed, 'https://crazygiant.imweb.me/giantgirl/')
+
+    def test_news_uses_explicit_original_and_individual_caption_only(self):
+        url = 'https://t1.daumcdn.net/news/202003/26/SPORTSSEOUL/original.jpg'
+        body = f'''<article><h3 class="tit_view">심혜성 촬영 기사</h3>
+        <div class="article_view"><img alt="심혜성. 이주상기자" data-org-src="{url}"
+        src="https://img1.daumcdn.net/thumb/R658x0.q70/?fname={url}">
+        <img alt="다른 모델" data-org-src="{url.replace('original', 'other')}"></div></article>
+        <aside><img alt="심혜성" data-org-src="{url.replace('original', 'related')}"></aside>'''
+        _, photos, _ = sportsseoul_daum_article(body, 'https://v.daum.net/v/1')
+        self.assertEqual([r['url'] for r in photos], [url])
+        with self.assertRaises(ValueError):
+            sportsseoul_daum_article(body.replace('심혜성 촬영 기사', '다른 모델'), 'https://v.daum.net/v/1')
+
     def test_imgcup_teddy_requires_the_named_work_and_article_full_links(self):
         body = '''<h1 class="entry-title">SWEETBOX Yui 유이 – Teddy Bear Part01</h1>
         <div class="entry-content"><a href="https://cdn.imgcup.com/2026/Teddy-Bear-full.jpg">

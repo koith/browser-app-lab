@@ -148,6 +148,50 @@ def inven_article(raw, page):
     return [], records, []
 
 
+def crazygiant_samples(raw, page):
+    soup = soup_for(raw)
+    title = soup.title.get_text(' ', strip=True) if soup.title else ''
+    body = soup.select_one('.board_txt_area')
+    if (not body or '5월 사랑스러운 아내 _ 유이' not in title
+            or '크레이지자이언트' not in title
+            or '크레이지 자이언트 23년 5월호' not in body.get_text(' ', strip=True)):
+        raise ValueError('Missing publisher issue and explicit Yui work credit')
+    records = []
+    for image in body.select('img[src]'):
+        url = image['src']
+        if not url.startswith('https://cdn.imweb.me/upload/S202010013208049566f15/'):
+            continue
+        records.append(image_record(url, page, 'official_public_samples', 'KR',
+                                    publisher='CRAZY GIANT', photographer_credit='z-one',
+                                    publisher_issue='2023-05', includes_publisher_layout=True))
+    return [{'publisher': 'CRAZY GIANT', 'source_country': 'KR', 'official_source': True,
+             'title': '2023년 5월호 — 사랑스러운 아내 · 유이', 'url': page,
+             'kind': 'magazine', 'published_at': '2023-05',
+             'visible_photo_samples': len(records), 'full_edition_acquired': False,
+             'access_status': 'official_public_samples_not_complete_magazine'}], records, []
+
+
+def sportsseoul_daum_article(raw, page):
+    soup = soup_for(raw)
+    title = soup.select_one('article .tit_view')
+    body = soup.select_one('article .article_view')
+    if not title or '심혜성' not in title.get_text() or not body:
+        raise ValueError('Article does not explicitly credit the requested model historical name')
+    records = []
+    for image in body.select('img[data-org-src]'):
+        # The public article explicitly supplies this unresized address. Never
+        # remove a resize parameter to invent a larger unpublished image.
+        url = image['data-org-src']
+        if (not re.fullmatch(r'https://t1\.daumcdn\.net/news/\d{6}/\d{2}/SPORTSSEOUL/[^/?]+\.jpg', url)
+                or '심혜성' not in image.get('alt', '')):
+            continue
+        records.append(image_record(url, page, 'public_editorial_photos', 'KR',
+                                    publisher='스포츠서울', photographer_credit='이주상 / 스포츠서울',
+                                    source_attribute='explicit_article_data_org_src',
+                                    subject_evidence='article title and individual photograph caption: 심혜성'))
+    return [], records, []
+
+
 def photographer_portfolio(raw, page):
     text = raw.decode('utf-8') if isinstance(raw, bytes) else raw
     decoder = json.JSONDecoder()
@@ -233,7 +277,8 @@ def imgcup_teddy(raw, page):
 
 ADAPTERS = {'djawa-index': djawa_model_index, 'djawa': djawa_samples, 'hacosta': hacosta_model_photo, 'gamersky': gamersky_article,
             'inven': inven_article, 'photographer': photographer_portfolio, 'bcut': bcut_catalogue,
-            'imgcup-teddy': imgcup_teddy}
+            'imgcup-teddy': imgcup_teddy, 'crazygiant': crazygiant_samples,
+            'sportsseoul-daum': sportsseoul_daum_article}
 
 
 def collect(targets, output, download=True, client=None):

@@ -116,7 +116,7 @@ footer{padding:15px 0 25px;justify-content:flex-end}
  <div class="detail-heading"><button class="back" id="back" aria-label="화보 목록으로 돌아가기">‹</button><h2 class="detail-title" id="albumname"></h2><span class="counter" id="albumtotal"></span></div>
  <nav class="mainnav" aria-label="이동"><a href="cloud.html">클라우드</a></nav>
  <button id="search-toggle" class="search-toggle" aria-label="화보 검색 열기" aria-haspopup="dialog" aria-controls="search-dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button>
- <small id="app-version" class="version-chip">v0.1.0-beta.15</small>
+ <small id="app-version" class="version-chip">v0.1.0-beta.16</small>
 </header>
 <div id="browse">
  <div class="browse-meta"><p class="inventory" id="inventory">화보를 불러오는 중</p><span class="counter" id="total"></span></div>
@@ -139,7 +139,7 @@ footer{padding:15px 0 25px;justify-content:flex-end}
  </form>
 </dialog>
 <div id="lightbox" role="dialog" aria-label="사진 보기" aria-modal="true">
- <div class="lighttop"><button class="lightbtn" id="close" aria-label="닫기">×</button><span id="position"></span><small class="version-chip">v0.1.0-beta.15</small></div>
+ <div class="lighttop"><button class="lightbtn" id="close" aria-label="닫기">×</button><span id="position"></span><small class="version-chip">v0.1.0-beta.16</small></div>
  <button class="lightbtn arrow prev" id="prev" aria-label="이전 사진">‹</button><div class="media-frame"><img id="full" alt="화보 사진"><a id="original" target="_blank" rel="noopener">사진 열기 ↗</a></div><button class="lightbtn arrow next" id="next" aria-label="다음 사진">›</button>
  <p id="media-status" role="status"></p>
 </div>
@@ -154,7 +154,7 @@ function canonicalId(id){const seen=new Set();while(albumAliases[id]&&!seen.has(
 const titleMap={'cn-huantuji':'幻图集 · Yui','cn-chaotuji':'潮图集 · Yui','cn-miaohuaying':'喵画影 · Yui','cn-yuntu8':'云图吧 · Yui','cn-wantuzhi-everyday':'Everyday Life','cn-yingyuge':'影语阁 · Yui','v04':'SWEETBOX · Teddy Bear'};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function getName(a){return a.title||catalog.find(x=>x.id===a.id)?.title||titleMap[a.id]||a.id}
-const publicPhotoHosts=['blogger.googleusercontent.com','cdn.imgcup.com','pbs.twimg.com','djawaphoto.com','blog.hacosta.co.jp','img1.gamersky.com','upload3.inven.co.kr','pub-376e2756f81341f087a414464f9a25ec.r2.dev'];
+const publicPhotoHosts=['cdn.imweb.me','t1.daumcdn.net','blogger.googleusercontent.com','cdn.imgcup.com','pbs.twimg.com','djawaphoto.com','blog.hacosta.co.jp','img1.gamersky.com','upload3.inven.co.kr','pub-376e2756f81341f087a414464f9a25ec.r2.dev'];
 function validImages(a){return (a.images||[]).filter(x=>{if(a.ownerHosted&&x.ownerAlbum===a.id&&x.url==='owner:'+a.id+':'+x.number)return true;if(typeof x.url!=='string')return false;if(x.url.startsWith('stored-albums/'))return true;if(!a.sourceHosted)return false;try{const u=new URL(x.url);return u.protocol==='https:'&&!u.username&&!u.password&&([...publicPhotoHosts,'www.girl-atlas.com','cdn.jliji.com','cdn.v2ph.com','i0.wp.com','i1.wp.com','i2.wp.com','cdn1.thismore.fun','cdn2.thismore.fun'].includes(u.hostname)||/^(?:(?:imgx\d{3}|images\d{2})\.pixibb\.com|(?:wes|bis)\.misskon\.com|lux\.mrcong\.com|s\.wujituku\.com|lh\d\.ggpht\.com)$/.test(u.hostname));}catch{return false}})}
 function available(){return stored.filter(x=>validImages(x).length).sort((a,b)=>validImages(b).length-validImages(a).length)}
 function publisherGroups(){const known=new Set(catalog.flatMap(a=>[a.source,...(a.source_pages||[])].filter(Boolean)));const entries=[...catalog,...publisherWorkReferences.filter(a=>!known.has(a.source))];return YuiPublishers.groups(entries,publisherRegistry,YuiLabels.describe,validImages)}

@@ -7,7 +7,7 @@ from PIL import Image
 from identity_policy import ensure_allowed
 from photo_quality_policy import replacement_reason,watermark_review,watermark_status
 
-ALLOWED=re.compile(r'^(?:blogger\.googleusercontent\.com|cdn\.imgcup\.com|cdn\.jliji\.com|cdn\.v2ph\.com|i[012]\.wp\.com|cdn[12]\.thismore\.fun|(?:wes|bis)\.misskon\.com|lux\.mrcong\.com|(?:imgx\d{3}|images\d{2})\.pixibb\.com|s\.wujituku\.com|lh\d\.ggpht\.com|www\.girl-atlas\.com|pbs\.twimg\.com|djawaphoto\.com|blog\.hacosta\.co\.jp|img1\.gamersky\.com|upload3\.inven\.co\.kr|pub-376e2756f81341f087a414464f9a25ec\.r2\.dev)$')
+ALLOWED=re.compile(r'^(?:cdn\.imweb\.me|t1\.daumcdn\.net|blogger\.googleusercontent\.com|cdn\.imgcup\.com|cdn\.jliji\.com|cdn\.v2ph\.com|i[012]\.wp\.com|cdn[12]\.thismore\.fun|(?:wes|bis)\.misskon\.com|lux\.mrcong\.com|(?:imgx\d{3}|images\d{2})\.pixibb\.com|s\.wujituku\.com|lh\d\.ggpht\.com|www\.girl-atlas\.com|pbs\.twimg\.com|djawaphoto\.com|blog\.hacosta\.co\.jp|img1\.gamersky\.com|upload3\.inven\.co\.kr|pub-376e2756f81341f087a414464f9a25ec\.r2\.dev)$')
 def build(folders,out,replace=False):
     albums=[]
     for folder in folders:

@@ -155,6 +155,24 @@
         "verified_official": true,
         "theme": "light"
       }
+    },
+    {
+      "id": "crazygiant",
+      "name": "CRAZY GIANT",
+      "aliases": [
+        "CRAZY GIANT",
+        "크레이지 자이언트"
+      ],
+      "official_url": "https://crazygiant.co.kr/",
+      "logo": {
+        "path": "publisher-logos/crazygiant.png",
+        "source_url": "https://cdn.imweb.me/thumbnail/20230316/93f6438d7648a.png",
+        "origin_page": "https://crazygiant.co.kr/crazymall/?idx=797",
+        "sha256": "9f22b07f5c18642f997bf5ec1ea01d071eca64b3bc5ad0e07edc2948dc7ecdbb",
+        "bytes": 5900,
+        "verified_official": true,
+        "theme": "light"
+      }
     }
   ],
   "logo_policy": "Only verified publisher brand assets; missing logos display a clearly labelled name fallback. Photograph hosts are not publishers."

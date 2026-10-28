@@ -111,6 +111,16 @@
       "publisher": "SWEETBOX",
       "work_id": "teddy-bear97",
       "selection_requires_whole_frame_comparison": true
+    },
+    {
+      "adapter": "crazygiant",
+      "publisher": "CRAZY GIANT",
+      "url": "https://crazygiant.imweb.me/giantgirl/?bmode=view&idx=15224627"
+    },
+    {
+      "adapter": "sportsseoul-daum",
+      "publisher": "스포츠서울",
+      "url": "https://v.daum.net/v/20200326055735105"
     }
   ]
 }
