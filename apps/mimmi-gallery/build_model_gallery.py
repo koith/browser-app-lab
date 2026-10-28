@@ -23,8 +23,9 @@ FILES=[
   ("v2ph_actor","v2ph-actor-previews.json"),
   ("gumroad_promo","gumroad-public-previews.json"),
   ("pixibb_public","pixibb-public-previews.json"),
+  ("official_social","social-public-previews.json"),
 ]
-ALLOWED={"djawaphoto.com","www.djawaphoto.com","cdn.v2ph.com","public-files.gumroad.com","assets.gumroad.com","static-2.gumroad.com","cosplay.pixibb.com"}
+ALLOWED={"pbs.twimg.com","djawaphoto.com","www.djawaphoto.com","cdn.v2ph.com","public-files.gumroad.com","assets.gumroad.com","static-2.gumroad.com","cosplay.pixibb.com"}
 MODEL_VERSION="v0.1.0-mimmi.8"
 
 def canonical_title(title):
@@ -66,7 +67,7 @@ def build(root=ROOT):
     input_count=0
     for kind,filename in FILES:
         source_file=root/filename
-        if not source_file.exists() and kind in ("gumroad_promo","pixibb_public"):
+        if not source_file.exists() and kind in ("gumroad_promo","pixibb_public","official_social"):
             continue
         source=json.loads(source_file.read_text(encoding="utf-8"))
         for record in source["albums"]:
