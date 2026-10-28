@@ -242,5 +242,5 @@ if __name__=="__main__":
     p.add_argument("--images",type=int,default=250)
     p.add_argument("--scroll",action="store_true",help="Scroll normal public album HTML")
     args=p.parse_args()
-    if not 1<=args.pages<=30 or not 1<=args.images<=350:p.error("bounded public preview collection")
+    if not 1<=args.pages<=35 or not 1<=args.images<=400:p.error("bounded public preview collection")
     collect(args.pages,args.images,browser_scroll=args.scroll)
