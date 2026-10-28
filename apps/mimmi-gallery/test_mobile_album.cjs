@@ -24,7 +24,7 @@ if(unique.size<390)throw Error('Missing validated public photo source metadata: 
   const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   await page.goto('http://127.0.0.1:8765/mimmi-gallery/',{waitUntil:'domcontentloaded'});
-  await page.waitForFunction(()=>document.querySelector('#summary')?.textContent.includes('개 화보'),{timeout:25000});
+  await page.waitForFunction(()=>document.querySelector('#summary')?.textContent.includes('열람 항목'),{timeout:25000});
   const link=page.locator('#yui-link');
   if(await link.getAttribute('target')!=='_blank')throw Error('Yui gallery must open new tab');
   if(await link.getAttribute('rel')!=='noopener noreferrer')throw Error('External tab security missing');
