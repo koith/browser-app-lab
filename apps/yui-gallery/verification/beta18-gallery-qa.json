@@ -1,0 +1,152 @@
+{
+  "version": "v0.1.0-beta.18",
+  "engine": "chromium",
+  "viewport": [
+    390,
+    844
+  ],
+  "scope": "427 selected replacement photographs through actual gallery controls; not a new full-gallery claim",
+  "decoded_unique_selected_photographs": 427,
+  "selected_albums": 6,
+  "phases": [
+    {
+      "scope": "selected_photographs",
+      "decoded_image_entries": 391,
+      "albums": [
+        {
+          "id": "ramen125",
+          "decoded_lightbox": 50,
+          "original_link_sha256_checks": 0
+        },
+        {
+          "id": "thru-thru117",
+          "decoded_lightbox": 117,
+          "original_link_sha256_checks": 0
+        },
+        {
+          "id": "yui-vol3-106",
+          "decoded_lightbox": 103,
+          "original_link_sha256_checks": 0
+        },
+        {
+          "id": "wet-yui80",
+          "decoded_lightbox": 79,
+          "original_link_sha256_checks": 0
+        },
+        {
+          "id": "yui-vol2-42",
+          "decoded_lightbox": 42,
+          "original_link_sha256_checks": 0
+        }
+      ],
+      "errors": []
+    },
+    {
+      "scope": "selected_photographs",
+      "decoded_image_entries": 36,
+      "albums": [
+        {
+          "id": "yui-vol3-106",
+          "decoded_lightbox": 1,
+          "original_link_sha256_checks": 0
+        },
+        {
+          "id": "kuro-yui58",
+          "decoded_lightbox": 35,
+          "original_link_sha256_checks": 0
+        }
+      ],
+      "errors": []
+    }
+  ],
+  "selected_cover_qa": {
+    "engine": "chromium",
+    "base": "http://127.0.0.1:8785/",
+    "version": "v0.1.0-beta.18",
+    "verified_cover_count": 5,
+    "covers": [
+      {
+        "id": "wet-yui80",
+        "photo": 29,
+        "face_region_inside_card": true,
+        "card_filled_without_letterboxing": true,
+        "fit": "cover",
+        "image_decode_retries": 0
+      },
+      {
+        "id": "thru-thru117",
+        "photo": 2,
+        "face_region_inside_card": true,
+        "card_filled_without_letterboxing": true,
+        "fit": "cover",
+        "image_decode_retries": 0
+      },
+      {
+        "id": "ramen125",
+        "photo": 8,
+        "face_region_inside_card": true,
+        "card_filled_without_letterboxing": true,
+        "fit": "cover",
+        "image_decode_retries": 0
+      },
+      {
+        "id": "yui-vol2-42",
+        "photo": 1,
+        "face_region_inside_card": true,
+        "card_filled_without_letterboxing": true,
+        "fit": "cover",
+        "image_decode_retries": 0
+      },
+      {
+        "id": "yui-vol3-106",
+        "photo": 11,
+        "face_region_inside_card": true,
+        "card_filled_without_letterboxing": true,
+        "fit": "cover",
+        "image_decode_retries": 0
+      }
+    ],
+    "title_translucency_verified": true,
+    "publisher_removed_only_from_cover_title": true,
+    "detail_image_order_and_urls_unchanged": true,
+    "not_identity_recognition": true,
+    "iphone_real_device": false
+  },
+  "navigation": {
+    "engine": "chromium",
+    "viewport": [
+      390,
+      844
+    ],
+    "history_back_forward": true,
+    "rapid_photo_changes": 250,
+    "root_can_leave": true,
+    "fixed_back_close": true,
+    "aligned_two_columns": true,
+    "album_card_height_halved": true,
+    "publisher_count_edition_stickers": true,
+    "detail_photo_grid_unchanged": true,
+    "collapsed_search_popup_back_forward_escape_submit_close": true,
+    "stale_wrong_model_manifest_blocked": true,
+    "native_contextmenu_allowed": true,
+    "emulated_browser_zoom_scale": 2,
+    "physical_pinch_verified": false,
+    "multitouch_and_edge_not_intercepted": true,
+    "iphone_real_device": false,
+    "source_rotation_without_reencoding": true,
+    "rotation_resize_viewports": [
+      [
+        390,
+        844
+      ],
+      [
+        844,
+        390
+      ]
+    ]
+  },
+  "source_sha256_readback": "separate CI job verifies every selected file against its public source URL",
+  "private_cloud_verified_new_files": 0,
+  "iphone_real_device": false,
+  "legacy_source_limitation": "A separate full Wet check stopped on unchanged canonical photo2: its previous source robots policy is unavailable/denied in this executor. Keep that original full frame; the new source supplies a crop rather than a complete matching frame. Do not count it as a higher-resolution replacement."
+}

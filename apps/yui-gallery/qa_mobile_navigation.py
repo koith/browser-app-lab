@@ -3,6 +3,7 @@ import argparse,asyncio,json
 from pathlib import Path
 from playwright.async_api import async_playwright
 from browser_http_bridge import fulfill_verified_request
+from browser_image_checks import decode_image
 
 async def run(args):
  async with async_playwright() as pw:
@@ -109,6 +110,26 @@ async def run(args):
   await page.locator('.album[data-id="yui-vol2-42"]').click();await page.locator('#detail').wait_for(state='visible')
   assert await page.locator('#detailphotos .photo').count()==42
   await page.locator('#back').click();await page.locator('#browse').wait_for(state='visible')
+  # Source files may encode a landscape photograph sideways. Keep the bytes
+  # and direct link unchanged, but fill thumbnails and fit the upright viewer
+  # after both portrait and landscape viewport resizes.
+  await page.goto(args.base+'#album=thru-thru117&photo=2',wait_until='domcontentloaded')
+  await page.reload(wait_until='domcontentloaded');await page.locator('#lightbox').wait_for(state='visible')
+  await decode_image(page.locator('#full'))
+  angle=await page.evaluate('photoRotation(viewerList[viewerIndex])')
+  assert angle in (90,270),angle
+  for viewport in [{'width':390,'height':844},{'width':844,'height':390}]:
+   await page.set_viewport_size(viewport)
+   await page.wait_for_function('''()=>{const r=document.querySelector('#full').getBoundingClientRect();return r.left>=-1&&r.top>=64&&r.right<=innerWidth+1&&r.bottom<=innerHeight+1}''')
+   geometry=await page.locator('#full').evaluate('''im=>{const r=im.getBoundingClientRect(),a=document.querySelector('#original').getBoundingClientRect();return {ratio:r.width/r.height,expected:im.naturalHeight/im.naturalWidth,linkInside:a.left>=r.left&&a.top>=r.top&&a.right<=r.right+1&&a.bottom<=r.bottom+1,touch:getComputedStyle(im).touchAction}}''')
+   assert abs(geometry['ratio']-geometry['expected'])<.001 and geometry['linkInside'] and geometry['touch']=='auto',geometry
+  await page.set_viewport_size({'width':390,'height':844})
+  await page.locator('#close').click();await page.locator('#lightbox').wait_for(state='hidden')
+  await page.locator('#detailphotos .photo[data-rotation]').first.evaluate('''card=>{
+   const r=card.getBoundingClientRect(),im=card.querySelector('img').getBoundingClientRect();
+   if(Math.abs(r.width-im.width)>1||Math.abs(r.height-im.height)>1)throw Error('Rotated thumbnail does not fill the existing grid cell');
+  }''')
+  await page.locator('#back').click();await page.locator('#browse').wait_for(state='visible')
   # A cached or concurrent manifest must not bring a user-excluded model back.
   excluded=json.loads(Path(__file__).with_name('identity-exclusions.json').read_text())
   stale={'albums':[{'id':'sexiest18','title':'Excluded stale fixture','status':'verified_collected_individual_files_source_hosted_online_view','images':[]},
@@ -121,6 +142,7 @@ async def run(args):
   assert await page.locator('.album[data-id="sexiest18"],.album[data-id="renamed-excluded-fixture"]').count()==0
   assert not errors,errors
   result={'engine':args.engine,'viewport':[390,844],'history_back_forward':True,'rapid_photo_changes':250,'root_can_leave':True,'fixed_back_close':True,'aligned_two_columns':True,'album_card_height_halved':True,'publisher_count_edition_stickers':True,'detail_photo_grid_unchanged':True,'collapsed_search_popup_back_forward_escape_submit_close':True,'stale_wrong_model_manifest_blocked':True,'native_contextmenu_allowed':True,'emulated_browser_zoom_scale':pinch,'physical_pinch_verified':False,'multitouch_and_edge_not_intercepted':True,'iphone_real_device':False}
+  result.update(source_rotation_without_reencoding=True,rotation_resize_viewports=[[390,844],[844,390]])
   args.out.write_text(json.dumps(result,indent=2)+'\n');print('MOBILE_NAVIGATION_QA_PASS',json.dumps(result),flush=True)
   await browser.close()
 

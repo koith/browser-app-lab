@@ -4,6 +4,8 @@ import io
 import json
 import tempfile
 import unittest
+from types import SimpleNamespace
+from unittest.mock import Mock
 from pathlib import Path
 
 from PIL import Image
@@ -11,10 +13,62 @@ from PIL import Image
 from build_additional_source_manifest import build
 from collect_public_sources import (djawa_model_index, djawa_samples, gamersky_article, hacosta_model_photo, imgcup_teddy,
                                     inven_article, photographer_portfolio, crazygiant_samples, sportsseoul_daum_article,
-                                    ajunews_may_cover)
+                                    ajunews_may_cover, imgcup_model_index, imgcup_work, collect)
 
 
 class SourceAdapterTests(unittest.TestCase):
+    def test_imgcup_pagination_dispatches_articles_to_the_work_adapter(self):
+        index='https://www.imgcup.com/keyword/yui-%EC%9C%A0%EC%9D%B4'
+        pages={index:'''<h2 class="entry-title"><a href="/wet1.html">Yui 유이 Wet Set.01</a></h2>
+               <div class="penci-pagination"><a href="'''+index+'''/page/2">2</a></div>''',
+               index+'/page/2':'<h2 class="entry-title"><a href="/wet2.html">Yui 유이 Wet Set.02</a></h2>'}
+        for number in (1,2):
+            pages[f'https://www.imgcup.com/wet{number}.html']=f'''<h1>Yui 유이 Wet Set.0{number}</h1>
+            <div class="entry-content"><img src="https://cdn.imgcup.com/wet{number}.jpg"></div>'''
+        client=Mock();client.get.side_effect=lambda url:SimpleNamespace(content=pages[url].encode(),url=url)
+        with tempfile.TemporaryDirectory() as temporary:
+            result=collect([{'url':index,'adapter':'imgcup-yui-index','max_pages':4}],temporary,
+                           download=False,client=client)
+        self.assertEqual(len(result['works']),2)
+        self.assertEqual(len(result['public_photo_candidates']),2)
+        self.assertEqual([p['adapter'] for p in result['pages']],
+                         ['imgcup-yui-index','imgcup-work','imgcup-yui-index','imgcup-work'])
+
+    def test_imgcup_model_discovery_keeps_credited_cards_and_observed_index_pages(self):
+        body = '''<h2 class="entry-title"><a href="/wet.html">Yui 유이, Wet ゆい Set.02</a></h2>
+        <h2 class="entry-title"><a href="/other.html">Other model</a></h2>
+        <h2 class="entry-title"><a href="/video.html">Yui 유이 Vol.3 Videos EP1</a></h2>
+        <nav class="nav-links"><a href="/keyword/yui-%EC%9C%A0%EC%9D%B4/page/2">2</a>
+        <a href="/keyword/other/page/2">Other</a><a href="https://outside.test/page/2">Offsite</a></nav>
+        <aside><a href="/unreviewed.html">Yui 유이</a></aside>'''
+        _, _, nexts = imgcup_model_index(body, 'https://www.imgcup.com/keyword/yui-%EC%9C%A0%EC%9D%B4')
+        self.assertEqual(nexts, ['https://www.imgcup.com/wet.html',
+                                'https://www.imgcup.com/keyword/yui-%EC%9C%A0%EC%9D%B4/page/2'])
+        with self.assertRaises(ValueError):
+            imgcup_model_index(body, 'https://www.imgcup.com/keyword/other')
+
+    def test_imgcup_work_does_not_guess_book_identity_or_count_from_article_links(self):
+        body = '''<h1>Yui 유이, Yo-U Vol.03 Photobook Set.01</h1>
+        <div class="entry-content"><a href="https://cdn.imgcup.com/full.jpg?v=1">
+        <img src="https://cdn.imgcup.com/thumb.jpg"></a>
+        <img srcset="https://cdn.imgcup.com/small.webp 400w, https://cdn.imgcup.com/large.webp 1200w">
+        <img src="https://cdn.imgcup.com/advert.gif"><img src="https://outside.test/other.jpg"></div>
+        <aside><img src="https://cdn.imgcup.com/related.jpg"></aside>'''
+        works, photos, nexts = imgcup_work(body, 'https://www.imgcup.com/work.html')
+        self.assertEqual([p['url'] for p in photos], ['https://cdn.imgcup.com/full.jpg?v=1',
+                                                     'https://cdn.imgcup.com/large.webp'])
+        self.assertIsNone(works[0]['candidate_work_id'])
+        self.assertFalse(works[0]['full_edition_acquired'])
+        self.assertEqual(nexts, [])
+        works, _, _ = imgcup_work(body.replace('Yo-U Vol.03', 'SWEETBOX Vol.39'),
+                                 'https://www.imgcup.com/work.html')
+        self.assertEqual(works[0]['candidate_work_id'], 'ramen125')
+        for changed in (body.replace('Yui 유이', 'Other'), body.replace('Photobook', 'Videos EP1')):
+            with self.assertRaises(ValueError):
+                imgcup_work(changed, 'https://www.imgcup.com/work.html')
+        with self.assertRaisesRegex(ValueError, 'AI editions'):
+            imgcup_work(body.replace('Photobook', 'AI Enhanced Photobook'), 'https://www.imgcup.com/work.html')
+
     def test_player_named_samples_exclude_uncredited_generic_product_cover(self):
         stem = 'https://cdn.imweb.me/upload/S202010013208049566f15/'
         body = f'''<title>THE PLAYER ISSUE 5 [심혜성] : 크레이지자이언트</title>

@@ -27,6 +27,12 @@ async def run(args):
   if args.album:
    requested=set(args.album);albums=[a for a in albums if a['id'] in requested]
    assert {a['id'] for a in albums}==requested,'Requested album missing from actual gallery'
+  if args.photo_selection:
+   choices=json.loads(args.photo_selection.read_text())
+   selected={a['id']:{p['number'] for p in a['replacements']} for a in choices['albums']}
+   albums=[{**a,'images':[{**p,'grid_index':i} for i,p in enumerate(a['images']) if p['number'] in selected.get(a['id'],set())]} for a in albums if a['id'] in selected]
+   assert {a['id'] for a in albums}==set(selected),'Selected work missing from actual gallery'
+   assert all({p['number'] for p in a['images']}==selected[a['id']] for a in albums),'Selected photographs missing from actual gallery'
   await page.screenshot(path=str(args.out.with_suffix('.png')));await context.close()
   async def check(album):
    async with semaphore:
@@ -45,8 +51,13 @@ async def run(args):
       # Collection succeeded at 1s spacing; avoid synthetic bursts of CDN views.
       # Image decode timeout, URL, dimensions, SHA and total count stay unchanged.
       await source_pacer.wait(image['url'])
-      if i:await page.locator('#next').click()
-      else:await page.locator('#detailphotos .photo').first.click()
+      grid_index=image.get('grid_index',i)
+      if i and grid_index==album['images'][i-1].get('grid_index',i-1)+1:
+       await page.locator('#next').click()
+      else:
+       if i:
+        await page.locator('#close').click();await page.locator('#lightbox').wait_for(state='hidden')
+       await page.locator('#detailphotos .photo').nth(grid_index).click()
       retries=await decode_image(page.locator('#full'))
       if retries:
        decode_retries.append({'id':album['id'],'number':image.get('number',i+1),'retries':retries})
@@ -55,6 +66,21 @@ async def run(args):
       linked=await page.locator('#original').get_attribute('href')
       assert dims==[image['width'],image['height']],(album['id'],i+1,dims)
       assert linked==image['url'],(album['id'],i+1,linked,image['url'],await page.locator('#position').inner_text(),js_errors)
+      orientation=await page.locator('#full').evaluate('''im=>{
+       const r=im.getBoundingClientRect(),frame=im.parentElement.getBoundingClientRect();
+       const transform=getComputedStyle(im).transform,m=new DOMMatrix(transform);
+       return {transform,a:m.a,b:m.b,c:m.c,d:m.d,width:r.width,height:r.height,
+        contained:r.left>=frame.left-1&&r.top>=frame.top-1&&r.right<=frame.right+1&&r.bottom<=frame.bottom+1,
+        onScreen:r.left>=-1&&r.right<=innerWidth+1&&r.top>=64&&r.bottom<=innerHeight+1};
+      }''')
+      angle=image.get('display_rotation',0)
+      if angle:
+       sign=1 if angle==90 else -1
+       assert abs(orientation['a'])<.001 and abs(orientation['d'])<.001 and abs(orientation['b']-sign)<.001 and abs(orientation['c']+sign)<.001,(album['id'],i+1,orientation)
+       assert orientation['contained'] and orientation['onScreen'],(album['id'],i+1,orientation)
+       assert abs(orientation['width']/orientation['height']-image['height']/image['width'])<.001
+      else:
+       assert orientation['transform']=='none',(album['id'],i+1,'previous photo rotation not cleared',orientation)
       passed+=1
       if passed%25==0:print('DECODE_PROGRESS',album['id'],passed,flush=True)
       if image['url'].startswith('stored-albums/'):
@@ -69,14 +95,14 @@ async def run(args):
      result={'id':album['id'],'decoded_lightbox':passed,'original_link_sha256_checks':hashes}
      results.append(result);print('GALLERY_REAL_DECODE',args.engine,result,flush=True);await album_context.close()
   await asyncio.gather(*(check(a) for a in albums));await browser.close()
- report={'checked_at':datetime.now(timezone.utc).isoformat(),'base':args.base,'scope':'selected_albums' if args.album else 'full_gallery','requested_album_ids':args.album,'engine':args.engine,'version':version,'viewport':[390,844],'iphone_real_device':False,'network':'TLS-verified requests bridge' if args.http_bridge else 'direct browser TLS','private_cloud_verified':0,'albums':results,'decoded_image_entries':sum(r['decoded_lightbox'] for r in results),'browser_download_sha256_verified':0,'original_link_sha256_verified':sum(r['original_link_sha256_checks'] for r in results),'unique_original_link_sha256_verified':len(local_verified),'errors':errors}
+ report={'checked_at':datetime.now(timezone.utc).isoformat(),'base':args.base,'scope':'selected_photographs' if args.photo_selection else 'selected_albums' if args.album else 'full_gallery','requested_album_ids':args.album,'engine':args.engine,'version':version,'viewport':[390,844],'iphone_real_device':False,'network':'TLS-verified requests bridge' if args.http_bridge else 'direct browser TLS','private_cloud_verified':0,'albums':results,'decoded_image_entries':sum(r['decoded_lightbox'] for r in results),'browser_download_sha256_verified':0,'original_link_sha256_verified':sum(r['original_link_sha256_checks'] for r in results),'unique_original_link_sha256_verified':len(local_verified),'errors':errors}
  report['image_decode_retries']=decode_retries
  report['source_view_interval_seconds']={'cdn.imgcup.com':source_pacer.interval}
  report['paced_source_views']=source_pacer.views
  args.out.write_text(json.dumps(report,indent=2)+'\n')
  assert not errors,errors
  assert report['decoded_image_entries']==sum(len(a['images']) for a in albums)
- print('SELECTED_GALLERY_MEDIA_QA_PASS' if args.album else 'ALL_GALLERY_MEDIA_QA_PASS',report['decoded_image_entries'],report['original_link_sha256_verified'],flush=True)
+ print('SELECTED_GALLERY_MEDIA_QA_PASS' if args.album or args.photo_selection else 'ALL_GALLERY_MEDIA_QA_PASS',report['decoded_image_entries'],report['original_link_sha256_verified'],flush=True)
 
 if __name__=='__main__':
- p=argparse.ArgumentParser(description=__doc__);p.add_argument('--base',default='http://localhost:8765/');p.add_argument('--engine',choices=['chromium','webkit'],default='chromium');p.add_argument('--out',type=Path,default=Path('yui-gallery-qa.json'));p.add_argument('--http-bridge',action='store_true');p.add_argument('--album',action='append',help='Verify selected acquired work IDs; omit for full gallery');p.add_argument('--workers',type=int,choices=range(1,4),default=3);asyncio.run(run(p.parse_args()))
+ p=argparse.ArgumentParser(description=__doc__);p.add_argument('--base',default='http://localhost:8765/');p.add_argument('--engine',choices=['chromium','webkit'],default='chromium');p.add_argument('--out',type=Path,default=Path('yui-gallery-qa.json'));p.add_argument('--http-bridge',action='store_true');p.add_argument('--album',action='append',help='Verify selected acquired work IDs; omit for full gallery');p.add_argument('--photo-selection',type=Path,help='Check only explicitly selected replacement numbers; default still checks the full gallery');p.add_argument('--workers',type=int,choices=range(1,4),default=3);asyncio.run(run(p.parse_args()))

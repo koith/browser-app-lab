@@ -42,7 +42,7 @@ async def run(args):
             geometry = await image.evaluate('''(im)=>{
               const style=getComputedStyle(im),r=im.getBoundingClientRect();
               const clip=im.closest('.album').getBoundingClientRect();
-              return {x:r.x,y:r.y,width:r.width,height:r.height,clip:{x:clip.x,y:clip.y,width:clip.width,height:clip.height},fit:style.objectFit,position:style.objectPosition.split(' ').map(parseFloat)}
+              return {x:r.x,y:r.y,width:parseFloat(style.width),height:parseFloat(style.height),rotation:Number(im.closest('.album').dataset.rotation||0),clip:{x:clip.x,y:clip.y,width:clip.width,height:clip.height},fit:style.objectFit,position:style.objectPosition.split(' ').map(parseFloat)}
             }''')
             width, height = geometry['width'], geometry['height']
             assert geometry['fit'] == 'cover', (aid, 'Thumbnail must fill the card', geometry)
@@ -52,11 +52,19 @@ async def run(args):
             x, y, w, h = meta['face']
             bounds = [x*scale-ox, y*scale-oy, (x+w)*scale-ox, (y+h)*scale-oy]
             clip = geometry['clip']
-            content = [geometry['x']-ox, geometry['y']-oy,
-                       geometry['x']-ox+dims[0]*scale, geometry['y']-oy+dims[1]*scale]
+            def oriented(rect):
+                left, top, right, bottom = rect
+                if geometry['rotation'] == 90:
+                    rect = [height-bottom, left, height-top, right]
+                elif geometry['rotation'] == 270:
+                    rect = [top, width-right, bottom, width-left]
+                return [rect[0]+geometry['x'], rect[1]+geometry['y'],
+                        rect[2]+geometry['x'], rect[3]+geometry['y']]
+            content = oriented([-ox, -oy, dims[0]*scale-ox, dims[1]*scale-oy])
             assert content[0] <= clip['x']+1 and content[1] <= clip['y']+1 and content[2] >= clip['x']+clip['width']-1 and content[3] >= clip['y']+clip['height']-1, (aid, 'Thumbnail has letterbox gaps', content, clip)
-            visible = [bounds[0]+geometry['x']-clip['x'], bounds[1]+geometry['y']-clip['y'],
-                       bounds[2]+geometry['x']-clip['x'], bounds[3]+geometry['y']-clip['y']]
+            bounds = oriented(bounds)
+            visible = [bounds[0]-clip['x'], bounds[1]-clip['y'],
+                       bounds[2]-clip['x'], bounds[3]-clip['y']]
             assert visible[0] >= -1 and visible[1] >= -1 and visible[2] <= clip['width']+1 and visible[3] <= clip['height']+1, (aid, visible, geometry)
             title_color = await card.locator('.name').evaluate('e=>getComputedStyle(e).color')
             assert title_color.startswith('rgba(') and float(title_color.split(',')[-1].rstrip(') ')) <= .65, title_color

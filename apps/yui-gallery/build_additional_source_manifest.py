@@ -7,7 +7,7 @@ from PIL import Image
 from identity_policy import ensure_allowed
 from photo_quality_policy import replacement_reason,watermark_review,watermark_status
 
-ALLOWED=re.compile(r'^(?:image\.ajunews\.com|cdn\.imweb\.me|t1\.daumcdn\.net|blogger\.googleusercontent\.com|cdn\.imgcup\.com|cdn\.jliji\.com|cdn\.v2ph\.com|i[012]\.wp\.com|cdn[12]\.thismore\.fun|(?:wes|bis)\.misskon\.com|lux\.mrcong\.com|(?:imgx\d{3}|images\d{2})\.pixibb\.com|s\.wujituku\.com|lh\d\.ggpht\.com|www\.girl-atlas\.com|pbs\.twimg\.com|djawaphoto\.com|blog\.hacosta\.co\.jp|img1\.gamersky\.com|upload3\.inven\.co\.kr|pub-376e2756f81341f087a414464f9a25ec\.r2\.dev)$')
+ALLOWED=re.compile(r'^(?:pic1\.imgdb\.cn|image\.huantuji\.com|image\.ajunews\.com|cdn\.imweb\.me|t1\.daumcdn\.net|blogger\.googleusercontent\.com|cdn\.imgcup\.com|cdn\.jliji\.com|cdn\.v2ph\.com|i[012]\.wp\.com|cdn[12]\.thismore\.fun|(?:wes|bis)\.misskon\.com|lux\.mrcong\.com|(?:imgx\d{3}|images\d{2})\.pixibb\.com|s\.wujituku\.com|lh\d\.ggpht\.com|www\.girl-atlas\.com|pbs\.twimg\.com|djawaphoto\.com|blog\.hacosta\.co\.jp|img1\.gamersky\.com|upload3\.inven\.co\.kr|pub-376e2756f81341f087a414464f9a25ec\.r2\.dev)$')
 def build(folders,out,replace=False):
     albums=[]
     for folder in folders:
@@ -24,8 +24,9 @@ def build(folders,out,replace=False):
             with Image.open(f) as im:
                 im.load();w,h=im.size
                 if (w,h)!=(p['width'],p['height']):raise ValueError('Dimension mismatch')
+            if p.get('display_rotation',0) not in (0,90,270):raise ValueError('Unreviewed display rotation')
             seen.add(digest);images.append({**{k:p[k] for k in ['number','url','sha256','bytes','width','height']},
-                                           **{k:p[k] for k in ['origin_page','discovery_page','source_country','source_attribute','published_at','published_at_text','photographer_credit','sample_label','alternative_sources'] if k in p},
+                                           **{k:p[k] for k in ['origin_page','discovery_page','source_country','source_attribute','published_at','published_at_text','photographer_credit','sample_label','alternative_sources','display_rotation'] if k in p},
                                            'site_watermark_review':watermark_review(p)})
         numbers=[p['number'] for p in images]
         if len(set(numbers))!=len(numbers) or any(not isinstance(n,int) or n<1 or n>m['expected'] for n in numbers):raise ValueError('Invalid or duplicate photo sequence')
