@@ -1,5 +1,5 @@
 {
-  "version": "v0.1.0-beta.12",
+  "version": "v0.1.0-beta.13",
   "date": "2026-10-28",
   "policy": {
     "monthly_charge_krw": 0,
@@ -31,6 +31,15 @@
       "provider": "GitHub Actions artifact",
       "expires_at": "2027-01-24T14:26:26Z",
       "images": 405
+    },
+    "individual_secondary_copy": {
+      "provider": "Google Drive",
+      "role": "private_secondary_copy_not_primary_cloud",
+      "expected_files": 402,
+      "remote_sha256_verified": 218,
+      "remaining_files": 184,
+      "upload_state": "stopped_after_automatic_review_turn_termination_reason_not_exposed",
+      "photo_bundles": false
     }
   },
   "progress": {
@@ -57,7 +66,7 @@
     "beta7_new_higher_resolution_files": 160,
     "beta7_full_album_higher_resolution_replacements": 80,
     "beta7_verified_direct_source_files": 80,
-    "new_files_this_session": 402,
+    "new_files_this_session": 172,
     "excluded_wrong_model_images": 21,
     "beta9_new_work_files": 650,
     "beta9_larger_photo_selections": 323,
@@ -77,9 +86,20 @@
     "beta12_new_gallery_entries": 401,
     "beta12_new_complete_photobooks": 0,
     "beta12_public_collections": 5,
-    "beta12_publisher_catalogue_sku_records": 28,
-    "beta12_primary_source_work_records": 5,
-    "beta12_existing_larger_file_reused_in_editorial": 1
+    "beta12_publisher_catalogue_sku_records": 31,
+    "beta12_primary_source_work_records": 8,
+    "beta12_existing_larger_file_reused_in_editorial": 1,
+    "beta13_new_photograph_file_sha256": 173,
+    "beta13_new_gallery_entries": 0,
+    "beta13_collected_input_image_sha256": 198,
+    "beta13_unclassified_input_images": 25,
+    "beta13_teddy_higher_resolution_replacements": 70,
+    "beta13_cross_collection_larger_reuse": 1,
+    "beta13_publisher_categories": 11,
+    "beta13_publisher_brand_assets": 8,
+    "beta13_unconfirmed_publisher_logos": [
+      "Yo-U"
+    ]
   },
   "notes": [
     "A private Google Drive ZIP is only a temporary safety copy, not the user-approved primary archive.",
@@ -102,7 +122,9 @@
     "beta.10 also removes the user-confirmed wrong-model sexiest18 (18 images) from the public gallery and collection targets, blocks its source and hashes from reimport, and puts search behind a small translucent corner button with history-aware popup.",
     "beta.11 uses hash-bound local facial region metadata to select and frame album covers without changing any photo pixels or in-album image order. Cover titles omit publisher branding, use translucent small text, and preserve full original titles for search/accessibility. New acquisitions for beta.11 are not claimed until actual files are verified.",
     "beta.11 also reuses two existing verified public reference files in their full Yui Vol.3 106-photo edition: photo50 2400x1600 and photo81 2048x1366 replace 1368x912 files after whole-frame comparison. No newly acquired files or publisher-master claim; all input copies remain.",
-    "beta.12 archives 402 new photograph files plus 80 separate non-photographic inputs from explicit creator posts and Korean/Japanese/Chinese public publishers, events, photographers, editorial and board pages. These are SHA-256 file counts, not unique poses or complete new photobooks. Register 401 image entries in five explicitly incomplete public collections; prefer four larger unchanged creator-source files over lower editorial variants and retain one equal-size duplicate privately. DJAWA provides 24 public sample photos of an advertised 190-photo edition, not the full book. Private Google Drive individual-file backup/readback is recorded in the release PR; it is not the accepted primary cloud or authenticated in-gallery owner storage."
+    "beta.12 archives 402 new photograph files plus 80 separate non-photographic inputs from explicit creator posts and Korean/Japanese/Chinese public publishers, events, photographers, editorial and board pages. These are SHA-256 file counts, not unique poses or complete new photobooks. Register 401 image entries in five explicitly incomplete public collections; prefer four larger unchanged creator-source files over lower editorial variants and retain one equal-size duplicate privately. DJAWA provides 24 public sample photos of an advertised 190-photo edition, not the full book. Private Google Drive individual-file backup/readback is recorded in the release PR; it is not the accepted primary cloud or authenticated in-gallery owner storage.",
+    "beta.13 adds publisher browsing with verified official-brand logo provenance, catalogued/viewable counts and native history through publisher/album/photo levels. Unconfirmed publishers and public editorial/event/SNS material stay separate. No new photographs are claimed by this UI change.",
+    "beta.13 collects 198 unchanged public image variants, conservatively matches 173 whole-frame files to the existing Teddy work and keeps 25 unmatched/cropped/marketing inputs privately unclassified. Replace 70 existing 1024x1535 files with 1201x1800 files; retain ten2699px and seventeen2303px files. The same larger Teddy71 file is reused in its existing editorial item. One alternate source file timed out twice and was recovered by its normal unmodified browser request. No new poses/full books or publisher master are claimed. Eight publisher brand assets include the MAXIM parent mark for BCUT and the SWEETBOX photographer profile image. Yo-U is a plainly labelled name fallback pending logo verification."
   ],
   "archiving_engine": {
     "mode": "individual_files",

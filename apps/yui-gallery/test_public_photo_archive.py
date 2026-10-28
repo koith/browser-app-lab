@@ -8,6 +8,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
 from PIL import Image
+from requests import HTTPError
 
 from public_photo_archive import PublicSession, download_individuals, verified_record
 from sns_archive import discover, record_page
@@ -101,6 +102,73 @@ class PublicPhotoTests(unittest.TestCase):
                 (root / row['file']).write_bytes(fixture + b'changed')
                 with self.assertRaisesRegex(ValueError, 'integrity mismatch'):
                     verified_record(root, row)
+        finally:
+            server.shutdown()
+            server.server_close()
+
+    def test_missing_policy_on_object_storage_and_resource_denials_are_distinct(self):
+        seen = []
+
+        class Handler(BaseHTTPRequestHandler):
+            def log_message(self, *args):
+                pass
+
+            def do_GET(self):
+                seen.append(self.path)
+                status = 403 if self.path == '/robots.txt' else int(self.path[1:]) if self.path[1:].isdigit() else 200
+                self.send_response(status)
+                self.send_header('Content-Length', '0')
+                self.end_headers()
+
+        server = ThreadingHTTPServer(('127.0.0.1', 0), Handler)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            base = 'http://127.0.0.1:' + str(server.server_port)
+            self.assertEqual(PublicSession(delay=0, allow_local_test=True).get(base+'/public').status_code, 200)
+            for status in (401, 403, 429, 451):
+                client = PublicSession(delay=0, allow_local_test=True)
+                with self.assertRaises(HTTPError):
+                    client.get(base+'/'+str(status))
+                count = len(seen)
+                with self.assertRaises(PermissionError):
+                    client.get(base+'/another-public-resource')
+                self.assertEqual(len(seen), count, 'Denied origin must not be retried')
+        finally:
+            server.shutdown()
+            server.server_close()
+
+    def test_redirected_robots_policy_rules_are_followed(self):
+        seen = []
+
+        class Handler(BaseHTTPRequestHandler):
+            def log_message(self, *args):
+                pass
+
+            def do_GET(self):
+                seen.append(self.path)
+                if self.path == '/robots.txt':
+                    self.send_response(302)
+                    self.send_header('Location', '/published-policy')
+                    raw = b''
+                else:
+                    self.send_response(200)
+                    raw = b'User-agent: *\nDisallow: /denied\n' if self.path == '/published-policy' else b'public'
+                self.send_header('Content-Length', str(len(raw)))
+                self.end_headers()
+                self.wfile.write(raw)
+
+        server = ThreadingHTTPServer(('127.0.0.1', 0), Handler)
+        thread = threading.Thread(target=server.serve_forever, daemon=True)
+        thread.start()
+        try:
+            base = 'http://127.0.0.1:' + str(server.server_port)
+            client = PublicSession(delay=0, allow_local_test=True)
+            self.assertEqual(client.get(base+'/public').content, b'public')
+            with self.assertRaises(PermissionError):
+                client.get(base+'/denied')
+            self.assertIn('/published-policy', seen)
+            self.assertNotIn('/denied', seen)
         finally:
             server.shutdown()
             server.server_close()

@@ -36,3 +36,11 @@ DISCOVER -> SOURCE/GALLERY ID -> PAGE ENUMERATION -> LAZY IMAGE RESOLUTION -> BE
 - Full source-rights / photographer-origin verification, original licensed acquisitions.
 - Identity confirmation of all downloaded previews and a permanent independent large storage account.
 - Long-lived backing storage and gallery browser of the actual bytes rather than outgoing links.
+
+## beta.13 publisher browsing and unchanged higher-resolution variants
+
+`publishers.js` groups the catalogue without manufacturing photo acquisitions. Nine publishers plus public/unknown categories expose registered versus actually viewable counts. Eight byte-preserved branding assets have provenance in `publishers.json`; SWEETBOX profile branding and MAXIM parent branding are distinguished from standalone wordmarks, and Yo-U remains unverified.
+
+Four public ImgCup article bodies provide 198 separate image inputs. Conservative whole-frame matching verifies 173 new file SHAs for existing Teddy poses; 25 remain unclassified and unpublished. Select 70 larger 1201x1800 files while retaining the 27 previously larger files. This adds no new complete book or pose and certifies no publisher master. Individual input bytes, alternate sources and SHA-bound selections are preserved. One twice-timed-out file was recovered through its normal browser request and rechecked in the actual lightbox.
+
+`browser_http_bridge.py` preserves the actual browser method, headers and body with normal TLS verification; it does not inject authentication or synthesize an alternate identity. RFC9309 robots unavailable 4xx handling never overrides an actual content denial. CI serializes external-image runs across PR/main without reducing full-gallery criteria. Private cloud upload remains stopped after automatic review interrupted earlier Drive uploads; no alternative upload route is used to evade that interruption.

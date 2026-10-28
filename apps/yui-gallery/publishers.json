@@ -1,0 +1,161 @@
+{
+  "schema_version": 1,
+  "publishers": [
+    {
+      "id": "sweetbox",
+      "name": "SWEETBOX",
+      "aliases": [
+        "SWEETBOX",
+        "SWTB"
+      ],
+      "official_url": "https://x.com/sweetbox_s2",
+      "logo": {
+        "path": "publisher-logos/sweetbox.jpg",
+        "source_url": "https://pbs.twimg.com/profile_images/1484168345624911873/ovc1rM28_400x400.jpg",
+        "origin_page": "https://teapawt.net/sweetbox_s2",
+        "sha256": "472098bd9cb17934301a6986b2723d63b0bf17345bf9b8cb2cff8d134606c445",
+        "bytes": 21859,
+        "verified_official": true,
+        "theme": "dark",
+        "asset_role": "publisher_profile_branding",
+        "evidence": "Public @sweetbox_s2 photographer profile uses this TAEHYEONG PICTURES brand image. It is a profile brand image, not a separately verified SWEETBOX wordmark."
+      }
+    },
+    {
+      "id": "artgravia",
+      "name": "ArtGravia",
+      "aliases": [
+        "ArtGravia"
+      ],
+      "official_url": "https://us.artgravia.co.kr/ARTGRAVIA",
+      "logo": {
+        "path": "publisher-logos/artgravia.png",
+        "source_url": "https://cdn.imweb.me/upload/S201802235a8ef201f080a/12a00a7e8dcd9.png",
+        "origin_page": "https://www.artgravia.com/",
+        "sha256": "a1dc6c086cbd52697de00a879308c73a87ab5f2a16fb786d32713651aaaab118",
+        "bytes": 18802,
+        "verified_official": true,
+        "theme": "light"
+      }
+    },
+    {
+      "id": "milkybomb",
+      "name": "MilkyBomb",
+      "aliases": [
+        "MilkyBomb"
+      ],
+      "official_url": "https://milkybomb.gumroad.com/",
+      "logo": {
+        "path": "publisher-logos/milkybomb.jpg",
+        "source_url": "https://public-files.gumroad.com/brj8zxyjd1dm16lzfhg53312cz97",
+        "origin_page": "https://milkybomb.gumroad.com/",
+        "sha256": "4391daa59432be5d00212a10f7db562cd3cc8392bbbf9e990c7e9bb6f768e7fa",
+        "bytes": 29820,
+        "verified_official": true,
+        "theme": "light",
+        "asset_role": "official_store_identity_icon"
+      }
+    },
+    {
+      "id": "yo-u",
+      "name": "Yo-U",
+      "aliases": [
+        "Yo-U"
+      ],
+      "logo": null
+    },
+    {
+      "id": "pussylet",
+      "name": "PUSSYLET",
+      "aliases": [
+        "PUSSYLET"
+      ],
+      "official_url": "https://pussylet.gumroad.com/",
+      "logo": {
+        "path": "publisher-logos/pussylet.jpg",
+        "source_url": "https://public-files.gumroad.com/s6rwvernctkvlo7qifsgbasz8rrj",
+        "origin_page": "https://pussylet.gumroad.com/",
+        "sha256": "af762e620a15856f392be6ab15f381af1228322fae766a35f1bf2925e989503f",
+        "bytes": 29283,
+        "verified_official": true,
+        "theme": "light",
+        "asset_role": "official_store_logo",
+        "evidence": "Store identifies PUSSY LET and the same Yui first pictorial; viewed branding spells PUSSY LET."
+      }
+    },
+    {
+      "id": "movie-fantasy",
+      "name": "MOVIE FANTASY",
+      "aliases": [
+        "MOVIE FANTASY"
+      ],
+      "official_url": "https://moviefantasy.co.kr/",
+      "logo": {
+        "path": "publisher-logos/movie-fantasy.png",
+        "source_url": "https://cdn.imweb.me/thumbnail/20261020/9543ee2a2d949.png",
+        "origin_page": "https://moviefantasy.co.kr/",
+        "sha256": "d64a7c03e5be2184a3fb3a446dbecc39b451c841c35ca34b1e02d60740dd16a6",
+        "bytes": 13372,
+        "verified_official": true,
+        "theme": "dark"
+      }
+    },
+    {
+      "id": "bcut",
+      "name": "맥심 B컷",
+      "aliases": [
+        "B컷",
+        "BCUT"
+      ],
+      "official_url": "https://bcut.maximkorea.net/creator/354",
+      "logo": {
+        "path": "publisher-logos/bcut.png",
+        "source_url": "https://seeklogo.com/images/M/maxim-logo-B237761956-seeklogo.com.png",
+        "origin_page": "https://seeklogo.com/vector-logo/89565/maxim-magazine",
+        "sha256": "3bebbe24b2450dbdab5445030676ea98c3ab6b394c9cb5bea6de67f032fdf78f",
+        "bytes": 8550,
+        "verified_official": true,
+        "theme": "light",
+        "asset_role": "parent_publisher_brand_reference",
+        "evidence": "MAXIM is the parent publisher of bcut.maximkorea.net. This asset is the MAXIM publisher mark from a public brand reference, not a separately verified BCUT logotype."
+      }
+    },
+    {
+      "id": "ctee",
+      "name": "크티",
+      "aliases": [
+        "크티",
+        "CTEE"
+      ],
+      "official_url": "https://ctee.kr/place/super_yuisan",
+      "logo": {
+        "path": "publisher-logos/ctee.svg",
+        "source_url": "https://assets.ctee.kr/common/landing-v2/logo-ctee-color.svg",
+        "origin_page": "https://ctee.kr/",
+        "sha256": "db79502ca1206aa1c6cb071e7090f581be24fb6d66d40a2cf03d4e90180e9a65",
+        "bytes": 6546,
+        "verified_official": true,
+        "theme": "light",
+        "asset_role": "official_site_logo"
+      }
+    },
+    {
+      "id": "djawa",
+      "name": "DJAWA",
+      "aliases": [
+        "DJAWA"
+      ],
+      "official_url": "https://djawaphoto.com/yui",
+      "logo": {
+        "path": "publisher-logos/djawa.png",
+        "source_url": "https://djawaphoto.com/wp-content/uploads/2024/08/djawa_logo.png",
+        "origin_page": "https://djawaphoto.com/",
+        "sha256": "f3cac2497eda69480b94faf8a4486a1c1b44ae2658df6342d2ed348a6293b685",
+        "bytes": 24952,
+        "verified_official": true,
+        "theme": "light"
+      }
+    }
+  ],
+  "logo_policy": "Only verified publisher brand assets; missing logos display a clearly labelled name fallback. Photograph hosts are not publishers."
+}

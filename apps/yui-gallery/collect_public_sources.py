@@ -209,8 +209,31 @@ def publisher_title(raw, page, publisher):
              'full_edition_acquired': False, 'access_status': 'public_title_only_no_full_file_access'}], [], []
 
 
+def imgcup_teddy(raw, page):
+    soup = soup_for(raw)
+    heading = soup.select_one('h1.entry-title') or soup.select_one('h1')
+    title = heading.get_text(' ', strip=True) if heading else ''
+    if not all(re.search(term, title, re.I) for term in (r'\bYui\b', '유이', 'SWEETBOX', r'Teddy\s*Bear')):
+        raise ValueError('ImgCup page does not explicitly credit the requested Yui Teddy Bear work')
+    body = soup.select_one('.entry-content')
+    if not body:
+        raise ValueError('Missing ImgCup article body')
+    images = []
+    for image in body.select('img'):
+        url = largest_displayed_image(image, page)
+        if not url or urlsplit(url).hostname != 'cdn.imgcup.com':
+            continue
+        if not re.search(r'Teddy.?Bear|YUITEBEAR', url, re.I):
+            continue
+        images.append(image_record(url, page, 'public_web_photobook_alternative', 'VN',
+                                   publisher='SWEETBOX', work_id='teddy-bear97',
+                                   source_order=len(images)+1, source_title=title))
+    return [], list({r['url']: r for r in images}.values()), []
+
+
 ADAPTERS = {'djawa-index': djawa_model_index, 'djawa': djawa_samples, 'hacosta': hacosta_model_photo, 'gamersky': gamersky_article,
-            'inven': inven_article, 'photographer': photographer_portfolio, 'bcut': bcut_catalogue}
+            'inven': inven_article, 'photographer': photographer_portfolio, 'bcut': bcut_catalogue,
+            'imgcup-teddy': imgcup_teddy}
 
 
 def collect(targets, output, download=True, client=None):

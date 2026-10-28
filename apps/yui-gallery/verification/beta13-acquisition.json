@@ -1,0 +1,19 @@
+{
+  "version": "v0.1.0-beta.13",
+  "public_image_files_collected": 198,
+  "verified_same_frame_work_file_sha256": 173,
+  "new_verified_photograph_file_sha256": 173,
+  "existing_sha256_reused": 0,
+  "unclassified_source_inputs_preserved_not_published": 25,
+  "source_files_expected": 198,
+  "source_file_failures": 0,
+  "higher_resolution_teddy_replacements": 70,
+  "existing_larger_photograph_reused_in_editorial": 1,
+  "new_gallery_entries": 0,
+  "new_complete_photobooks": 0,
+  "publisher_original_verified": 0,
+  "private_cloud_verified_new_files": 0,
+  "physical_iphone_verified": 0,
+  "cost_increase_krw": 0,
+  "image_reencoding_or_upscaling": false
+}

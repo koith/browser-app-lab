@@ -8,7 +8,7 @@ import argparse,asyncio,json
 from datetime import datetime,timezone
 from pathlib import Path
 from playwright.async_api import async_playwright
-import requests
+from browser_http_bridge import fulfill_verified_request
 from browser_image_checks import decode_image
 
 async def run(args):
@@ -17,10 +17,7 @@ async def run(args):
   browser=await getattr(pw,args.engine).launch()
   context=await browser.new_context(viewport={'width':390,'height':844},is_mobile=True,has_touch=True)
   if args.http_bridge:
-   async def bridge(route):
-    r=await asyncio.to_thread(lambda:requests.get(route.request.url,timeout=45,allow_redirects=False))
-    headers={k:v for k,v in r.headers.items() if k.lower() not in ('content-encoding','content-length','transfer-encoding','connection')}
-    await route.fulfill(status=r.status_code,headers=headers,body=r.content)
+   bridge=fulfill_verified_request
    await context.route('https://**/*',bridge)
   page=await context.new_page();await page.goto(args.base,wait_until='domcontentloaded')
   await page.wait_for_function("document.querySelector('#total').textContent.includes('albums')")
