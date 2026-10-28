@@ -13,7 +13,7 @@ const images=albums.flatMap(a=>a.images.map(p=>({album:a.id,...p})));
   await page.waitForFunction(()=>document.querySelector('#total')?.textContent?.includes('albums'),{timeout:20000});
   if(await page.locator('#albumgrid .album').count()!==albums.length)throw Error('Unstored album shown in WebKit');
   if(!images.length){
-   if(!await page.locator('#inventory').innerText().then(s=>s.includes('0장 실제 저장')))throw Error('Unstored gallery not labeled zero');
+   if(!await page.locator('#inventory').innerText().then(s=>s.includes('0장 · 실제 저장본')))throw Error('Unstored gallery not labeled zero');
    console.log('MIMMI_WEBKIT_EMPTY_ARCHIVE_NO_FALSE_PHOTOS_PASS');
    return;
   }

@@ -40,7 +40,12 @@ if(index.physical_verified_image_count!==undefined&&index.physical_verified_imag
   if(await cards.count()!==albums.length)throw Error('Displayed album count must equal physical stored albums: '+(await cards.count())+' vs '+albums.length);
   if(await page.locator('#albumgrid [data-id^="research-no-"]').count())throw Error('Research-only photobooks must never appear in gallery');
   const meta=await page.locator('#inventory').innerText();
-  if(!meta.includes(images.length+'장 실제 저장'))throw Error('Physical stored count wrong '+meta);
+  if(!meta.includes(images.length+'장 · 실제 저장본'))throw Error('Physical stored count wrong '+meta);
+  if(await page.locator('#device-health').count())throw Error('Yui-style header must not show technical image health');
+  if(await page.locator('#browse-mode').innerText()!=='화보')throw Error('Yui-style gallery must default to album view');
+  const viewport=await page.evaluate(()=>({columns:getComputedStyle(document.querySelector('#albumgrid')).gridTemplateColumns.split(' ').length,
+    logo:document.querySelector('.logo span')?.getClientRects().length||0}));
+  if(viewport.columns!==2||!viewport.logo)throw Error('Yui beta.19 iPhone layout mismatch '+JSON.stringify(viewport));
   if(!images.length){
    if(await page.locator('#photogrid .photo').count())throw Error('Unstored photos displayed');
    if(errors.length)throw Error('JS errors '+errors);
