@@ -16,8 +16,11 @@
   return [...by.values()].filter(g=>g.albums.length).map(g=>({...g,viewable:g.albums.filter(a=>images(a).length>0).length})).sort((a,b)=>compareNames(a.name,b.name)||compareNames(a.id,b.id));
  }
  function logo(publisher){
-  const asset=publisher.logo;
-  return asset?.verified_official===true&&/^publisher-logos\/[a-z0-9-]+\.(?:svg|png|jpe?g|webp|ico)$/.test(asset.path)?asset.path:null;
+  const asset=publisher.logo, path=asset?.path;
+  if(asset?.verified_official!==true||typeof path!=='string')return null;
+  const allowed=/^publisher-logos\/[a-z0-9-]+\.(?:svg|png|jpe?g|webp|ico)$/.test(path) ||
+    /^\.\.\/yui-gallery\/publisher-logos\/[a-z0-9-]+\.(?:svg|png|jpe?g|webp|ico)$/.test(path);
+  return allowed?path:null;
  }
  const api={key,groups,logo,compareNames};if(typeof module!=='undefined'&&module.exports)module.exports=api;root.MimmiPublishers=api;
 })(globalThis);
