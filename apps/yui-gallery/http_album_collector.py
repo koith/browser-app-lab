@@ -13,6 +13,7 @@ from urllib.parse import urljoin,urlsplit,parse_qs
 from urllib.robotparser import RobotFileParser
 import requests
 from PIL import Image
+from bs4 import BeautifulSoup
 
 AGENT='YuiPersonalArchive/0.1 (+https://github.com/koith/browser-app-lab)'
 
@@ -36,6 +37,35 @@ class PublicPages:
         return r.text
 
 
+def fourkup_individual_links(html, origin, target):
+    """Only body-scoped, explicitly published original-size links and sibling parts."""
+    soup=BeautifulSoup(html,'html.parser');heading=soup.select_one('h1');body=soup.select_one('.entry-content')
+    title=heading.get_text(' ',strip=True) if heading else ''
+    if not body or not re.search(r'\bYui\b',title,re.I) or 'SWEETBOX' not in title.upper():
+        raise ValueError('4kup requested model/publisher body not confirmed')
+    observed=[urljoin(origin,u) for u in links(str(body))]
+    if re.search(r'AI[\s_-]*Enhanced',title+' '+' '.join(observed),re.I) and not target.get('ai_enhanced'):
+        raise ValueError('Source declares AI-enhanced; keep a separately labelled edition')
+    images={}
+    for url in observed:
+        parsed=urlsplit(url)
+        old=re.fullmatch(r'lh\d\.ggpht\.com',parsed.hostname or '') and '/s0-e7/' in parsed.path
+        new=parsed.hostname=='blogger.googleusercontent.com' and re.search(r'/(?:s0|s0-e7)/',parsed.path)
+        number=re.search(r'Yui[^/]*-(\d{3})\.(?:webp|jpg)$',parsed.path,re.I)
+        if parsed.scheme!='https' or parsed.username or parsed.password or not (old or new) or not number:continue
+        n=int(number.group(1))
+        if 1<=n<=target['expected']:
+            if n in images and images[n]!=url:raise ValueError('Ambiguous full-size photo number')
+            images[n]=url
+    if not images:raise ValueError('Only preview-sized photos; no published full-size individual links')
+    base=re.sub(r'-part\d+/$', '-part',origin)
+    parts=[]
+    if base!=origin:
+        for a in soup.select('a[href]'):
+            url=urljoin(origin,a['href'])
+            if re.fullmatch(re.escape(base)+r'\d+/',url):parts.append(url)
+    return images,parts
+
 def discover(target,client,cache):
     origin=target['url'];kind=target['adapter'];expected=target['expected'];selected={};seen=set();queue=[origin];image_order={}
     parsed=urlsplit(origin)
@@ -54,8 +84,7 @@ def discover(target,client,cache):
                 if match:selected[int(match.group(1))]=absolute
                 if re.fullmatch(re.escape(origin)+r'\d+/',absolute) and absolute not in seen:queue.append(absolute)
             elif kind=='4kup':
-                match=re.fullmatch(r'https://lh\d\.ggpht\.com/[^"<> ]+/s0-e7/[^/]*Yui[^/]*-(\d{3})\.(webp|jpg)',absolute,re.I)
-                if match:selected[int(match.group(1))]=absolute
+                pass
             elif kind=='kaizty':
                 heading=re.search(r'<title>(.*?)</title>',html,re.S)
                 terms=target.get('identity_terms',['Yui','Seethrough'])
@@ -74,6 +103,12 @@ def discover(target,client,cache):
             elif kind=='junmeitu':
                 # The current photo is scoped to .pictures, excluding related thumbnails.
                 pass
+        if kind=='4kup':
+            found,parts=fourkup_individual_links(html,url,target)
+            for n,u in found.items():
+                if n in selected and selected[n]!=u:raise ValueError('Conflicting sibling-part image number')
+                selected[n]=u
+            queue.extend(u for u in parts if u not in seen and u not in queue)
         if kind=='girlatlas':
             heading=re.search(r'<h1[^>]*>(.*?)</h1>',html,re.S)
             title=unescape(re.sub(r'<[^>]+>','',heading.group(1))).strip() if heading else ''

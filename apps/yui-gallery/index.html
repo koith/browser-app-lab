@@ -32,6 +32,7 @@ h1{margin:8px 0 0;font-weight:750;font-size:clamp(34px,5vw,56px);letter-spacing:
 .counter{font-size:12px;color:#98999f;white-space:nowrap}
 .filters{display:flex;align-items:center;gap:25px;border-bottom:1px solid #303136;margin-bottom:22px;overflow:auto}
 .filter{background:none;border:0;border-bottom:2px solid transparent;color:#999aa0;padding:12px 1px 13px;white-space:nowrap;font-size:13px}
+.switch-icon{opacity:.5;margin-left:7px}
 .filter.active{color:#fff;border-bottom-color:#f4f2ec;font-weight:700}
 .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px;margin-bottom:55px}
 .album{position:relative;background:#1b1d21;overflow:hidden;aspect-ratio:3/2;cursor:pointer;display:block;border:0;width:100%;padding:0;text-align:left}
@@ -111,11 +112,11 @@ footer{padding:15px 0 25px;justify-content:flex-end}
  <div class="detail-heading"><button class="back" id="back" aria-label="화보 목록으로 돌아가기">‹</button><h2 class="detail-title" id="albumname"></h2><span class="counter" id="albumtotal"></span></div>
  <nav class="mainnav" aria-label="이동"><a href="cloud.html">클라우드</a></nav>
  <button id="search-toggle" class="search-toggle" aria-label="화보 검색 열기" aria-haspopup="dialog" aria-controls="search-dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button>
- <small id="app-version" class="version-chip">v0.1.0-beta.13</small>
+ <small id="app-version" class="version-chip">v0.1.0-beta.14</small>
 </header>
 <div id="browse">
  <div class="browse-meta"><p class="inventory" id="inventory">화보를 불러오는 중</p><span class="counter" id="total"></span></div>
- <div class="filters"><button class="filter active" data-filter="albums">화보</button><button class="filter" data-filter="publishers">발행처</button><button class="filter" data-filter="photos">사진</button><button class="filter" data-filter="all">전체 작품 목록</button></div>
+ <div class="filters"><button id="browse-toggle" class="filter active" type="button" aria-controls="albumgrid publishergrid" aria-pressed="false" aria-label="화보 목록 · 발행처 목록으로 전환"><span id="browse-mode">화보</span><span aria-hidden="true" class="switch-icon"> ⇄</span></button></div>
  <div id="publishergrid" class="grid" hidden></div>
  <div id="albumgrid" class="grid"></div>
  <div id="photogrid" class="photo-grid" hidden></div>
@@ -134,7 +135,7 @@ footer{padding:15px 0 25px;justify-content:flex-end}
  </form>
 </dialog>
 <div id="lightbox" role="dialog" aria-label="사진 보기" aria-modal="true">
- <div class="lighttop"><button class="lightbtn" id="close" aria-label="닫기">×</button><span id="position"></span><small class="version-chip">v0.1.0-beta.13</small></div>
+ <div class="lighttop"><button class="lightbtn" id="close" aria-label="닫기">×</button><span id="position"></span><small class="version-chip">v0.1.0-beta.14</small></div>
  <button class="lightbtn arrow prev" id="prev" aria-label="이전 사진">‹</button><div class="media-frame"><img id="full" alt="화보 사진"><a id="original" target="_blank" rel="noopener">사진 열기 ↗</a></div><button class="lightbtn arrow next" id="next" aria-label="다음 사진">›</button>
  <p id="media-status" role="status"></p>
 </div>
@@ -149,11 +150,11 @@ function canonicalId(id){const seen=new Set();while(albumAliases[id]&&!seen.has(
 const titleMap={'cn-huantuji':'幻图集 · Yui','cn-chaotuji':'潮图集 · Yui','cn-miaohuaying':'喵画影 · Yui','cn-yuntu8':'云图吧 · Yui','cn-wantuzhi-everyday':'Everyday Life','cn-yingyuge':'影语阁 · Yui','v04':'SWEETBOX · Teddy Bear'};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function getName(a){return a.title||catalog.find(x=>x.id===a.id)?.title||titleMap[a.id]||a.id}
-const publicPhotoHosts=['cdn.imgcup.com','pbs.twimg.com','djawaphoto.com','blog.hacosta.co.jp','img1.gamersky.com','upload3.inven.co.kr','pub-376e2756f81341f087a414464f9a25ec.r2.dev'];
+const publicPhotoHosts=['blogger.googleusercontent.com','cdn.imgcup.com','pbs.twimg.com','djawaphoto.com','blog.hacosta.co.jp','img1.gamersky.com','upload3.inven.co.kr','pub-376e2756f81341f087a414464f9a25ec.r2.dev'];
 function validImages(a){return (a.images||[]).filter(x=>{if(a.ownerHosted&&x.ownerAlbum===a.id&&x.url==='owner:'+a.id+':'+x.number)return true;if(typeof x.url!=='string')return false;if(x.url.startsWith('stored-albums/'))return true;if(!a.sourceHosted)return false;try{const u=new URL(x.url);return u.protocol==='https:'&&!u.username&&!u.password&&([...publicPhotoHosts,'www.girl-atlas.com','cdn.jliji.com','cdn.v2ph.com','i0.wp.com','i1.wp.com','i2.wp.com','cdn1.thismore.fun','cdn2.thismore.fun'].includes(u.hostname)||/^(?:(?:imgx\d{3}|images\d{2})\.pixibb\.com|(?:wes|bis)\.misskon\.com|lux\.mrcong\.com|s\.wujituku\.com|lh\d\.ggpht\.com)$/.test(u.hostname));}catch{return false}})}
 function available(){return stored.filter(x=>validImages(x).length).sort((a,b)=>validImages(b).length-validImages(a).length)}
 function publisherGroups(){const known=new Set(catalog.flatMap(a=>[a.source,...(a.source_pages||[])].filter(Boolean)));const entries=[...catalog,...publisherWorkReferences.filter(a=>!known.has(a.source))];return YuiPublishers.groups(entries,publisherRegistry,YuiLabels.describe,validImages)}
-function setMode(m,publisher=null){mode=['albums','photos','all','publishers'].includes(m)?m:'albums';activePublisher=mode==='publishers'&&publisherGroups().some(g=>g.id===publisher)?publisher:null;activeAlbum=null;detailAlbum=null;document.body.classList.remove('detail-view');document.body.classList.toggle('publisher-view',!!activePublisher);$('detail').hidden=true;$('browse').hidden=false;document.querySelectorAll('[data-filter]').forEach(b=>b.classList.toggle('active',b.dataset.filter===mode));render()}
+function setMode(m,publisher=null){mode=['albums','photos','all','publishers'].includes(m)?m:'albums';activePublisher=mode==='publishers'&&publisherGroups().some(g=>g.id===publisher)?publisher:null;activeAlbum=null;detailAlbum=null;document.body.classList.remove('detail-view');document.body.classList.toggle('publisher-view',!!activePublisher);$('detail').hidden=true;$('browse').hidden=false;const isPublisher=mode==='publishers';$('browse-mode').textContent=isPublisher?'발행처':'화보';$('browse-toggle').dataset.mode=isPublisher?'publishers':'albums';$('browse-toggle').setAttribute('aria-pressed',String(isPublisher));$('browse-toggle').setAttribute('aria-label',isPublisher?'발행처 목록 · 화보 목록으로 전환':'화보 목록 · 발행처 목록으로 전환');render()}
 function publisherCard(group){const asset=YuiPublishers.logo(group),assetLabel=group.logo?.asset_role==='publisher_profile_branding'?' 발행처 프로필':group.logo?.asset_role==='parent_publisher_brand_reference'?' 발행사 로고':' 로고',image=asset?'<img src="'+esc(asset)+'" alt="'+esc(group.name)+assetLabel+'">':'<span class="publisher-wordmark" role="img" aria-label="'+esc(group.name)+' — 로고 미확인">'+esc(group.name)+'</span>';return '<button class="publisher" data-publisher="'+esc(group.id)+'" data-logo-theme="'+(group.logo?.theme==='light'?'light':'dark')+'" aria-label="'+esc(group.name)+' · 등록 '+group.albums.length+' · 열람 '+group.viewable+'">'+image+'<span class="publisher-info"><strong>'+esc(group.name)+'</strong>등록 '+group.albums.length+' · 열람 '+group.viewable+'</span></button>'}
 function openPublisher(id,record=true){if(!publisherGroups().some(g=>g.id===id))return;if(record)remember({mode:'publishers',publisher:id});setMode('publishers',id);window.scrollTo(0,0)}
 function photosFor(a){return validImages(a).map((p,i)=>({...p,name:getName(a),albumId:a.id,number:p.number??i+1}))}
@@ -187,7 +188,7 @@ function render(){
   const group=activePublisher?publisherGroups().find(g=>g.id===activePublisher):null;
   const src=group?group.albums:mode==='all'?catalog:items;
   if(group){$('albumname').textContent=group.name;$('albumtotal').textContent=group.albums.length+'개 · 열람 '+group.viewable}
-  const matched=src.filter(a=>match(getName(a)));
+  const matched=src.filter(a=>match(getName(a))).sort((a,b)=>YuiPublishers.compareNames(YuiLabels.coverTitle(a),YuiLabels.coverTitle(b))||YuiPublishers.compareNames(a.id,b.id));
   $('albumgrid').innerHTML=matched.map(a=>card(a,validImages(stored.find(x=>x.id===a.id)||a).length>0)).join('');
   $('albumgrid').querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>{const a=stored.find(a=>a.id===b.dataset.id);if(a&&validImages(a).length)openAlbum(b.dataset.id);else if(group){const source=src.find(a=>a.id===b.dataset.id)?.source;try{const u=new URL(source);if(u.protocol==='https:'&&!u.username&&!u.password)window.open(u.href,'_blank','noopener,noreferrer')}catch{}}});
   $('total').textContent=matched.length+' albums';
@@ -242,7 +243,7 @@ $('search-dialog').addEventListener('cancel',e=>{e.preventDefault();closeSearch(
 $('search-dialog').addEventListener('click',e=>{if(e.target===$('search-dialog')){const r=e.target.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)closeSearch()}});
 $('search-form').onsubmit=e=>{e.preventDefault();closeSearch()};
 $('search').oninput=()=>{hideViewer();setMode(mode,activePublisher);const s={...history.state,yui:true,mode,scroll:0};history.replaceState(s,'',routeURL(s))};
-document.querySelectorAll('[data-filter]').forEach(b=>b.onclick=()=>{setMode(b.dataset.filter);history.replaceState({yui:true,depth:history.state?.depth||0,mode,scroll:window.scrollY},'',routeURL({mode}))});
+$('browse-toggle').onclick=()=>{const next=mode==='publishers'?'albums':'publishers';remember({mode:next});setMode(next);window.scrollTo(0,0)};
 $('lightbox').onclick=e=>{if(e.target===$('lightbox'))closeViewer()};
 document.addEventListener('keydown',e=>{if(!$('lightbox').classList.contains('open'))return;if(e.key==='Escape')closeViewer();else if(e.key==='ArrowLeft')step(-1);else if(e.key==='ArrowRight')step(1)});
 // Never cancel native pinch/long-press or iOS edge navigation. A multi-touch

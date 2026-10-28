@@ -57,6 +57,7 @@ jobs:
           python apps/yui-gallery/test_merge_higher_resolution.py
           python apps/yui-gallery/test_photo_quality_policy.py
           python apps/yui-gallery/test_http_album_girlatlas.py
+          python apps/yui-gallery/test_http_album_4kup.py
           python apps/yui-gallery/test_review_site_watermarks.py
           python apps/yui-gallery/test_identity_policy.py
           python apps/yui-gallery/test_gallery_dl_collector.py
@@ -106,10 +107,10 @@ jobs:
           assert not pending,pending
           print('PRODUCTION_DEPLOYED_CODE_AND_MANIFEST_HASHES_MATCH',flush=True)
           PY
-          python apps/yui-gallery/qa_publishers.py --base https://koith.github.io/browser-app-lab/apps/yui-gallery/?v=0.1.0-beta.13 --out yui-production-publishers.json
-          python apps/yui-gallery/qa_mobile_navigation.py --base https://koith.github.io/browser-app-lab/apps/yui-gallery/?v=0.1.0-beta.13 --out yui-production-navigation.json
-          python apps/yui-gallery/qa_album_covers.py --base https://koith.github.io/browser-app-lab/apps/yui-gallery/?v=0.1.0-beta.13 --out yui-production-covers.json
-          python apps/yui-gallery/qa_gallery.py --base https://koith.github.io/browser-app-lab/apps/yui-gallery/?v=0.1.0-beta.13 --out yui-production-gallery.json
+          python apps/yui-gallery/qa_publishers.py --base https://koith.github.io/browser-app-lab/apps/yui-gallery/?v=0.1.0-beta.14 --out yui-production-publishers.json
+          python apps/yui-gallery/qa_mobile_navigation.py --base https://koith.github.io/browser-app-lab/apps/yui-gallery/?v=0.1.0-beta.14 --out yui-production-navigation.json
+          python apps/yui-gallery/qa_album_covers.py --base https://koith.github.io/browser-app-lab/apps/yui-gallery/?v=0.1.0-beta.14 --out yui-production-covers.json
+          python apps/yui-gallery/qa_gallery.py --base https://koith.github.io/browser-app-lab/apps/yui-gallery/?v=0.1.0-beta.14 --out yui-production-gallery.json
       - uses: actions/upload-artifact@v7
         if: always()
         with:

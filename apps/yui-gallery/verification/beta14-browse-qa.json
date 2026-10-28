@@ -1,0 +1,14 @@
+{
+  "engine": "chromium",
+  "publisher_categories": 11,
+  "logo_images_decoded": 8,
+  "history_publisher_album_photo_back_forward": true,
+  "publisher_deep_link_back": true,
+  "publisher_search": true,
+  "single_browse_toggle": true,
+  "global_photos_and_all_catalogue_controls_hidden": true,
+  "publishers_and_album_titles_ascending": true,
+  "all_photo_order_urls_sha256_unchanged": true,
+  "physical_iphone_verified": false,
+  "errors": []
+}
