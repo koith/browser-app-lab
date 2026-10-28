@@ -26,6 +26,9 @@ XIUTU_EDITION_LINKS={
     "xiutu-public-1190158":"v2ph-actor-a8847m5a",  # Mashu Mimmi (59)
     "xiutu-public-1190156":"v2ph-actor-a884435a",  # Chic Nerd & Maness Nurse (63)
     "xiutu-public-1190145":"v2ph-actor-ae57484a",  # Belt choker (46)
+    # 1190152's 71 SHA-verified photos are an exact subset of the 72 photos
+    # in 1190154. It is a source alias, NOT another physically stored album.
+    "xiutu-public-1190152":"xiutu-public-1190154",
 }
 
 def xiutu_verified_public_editions(root=ROOT):

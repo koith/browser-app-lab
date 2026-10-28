@@ -34,6 +34,7 @@ def main():
     assert LINKS["xiutu-public-1190158"]=="v2ph-actor-a8847m5a"
     assert LINKS["xiutu-public-1190156"]=="v2ph-actor-a884435a"
     assert LINKS["xiutu-public-1190145"]=="v2ph-actor-ae57484a"
+    assert LINKS["xiutu-public-1190152"]=="xiutu-public-1190154"
     blob=jpeg();other=blob+b"x"
     # Images must be valid JPEG bytes: use an independently generated JPEG.
     im=Image.new("RGB",(1100,860),(135,190,220))
@@ -45,6 +46,10 @@ def main():
        "source":SITE+"1190160","samples":[photo(blob,1)],"images":[]},
       {"id":"xiutu-public-1190154","title":"CreamSoda Mash Mimmi 2 (72P)",
        "source":SITE+"1190154","samples":[photo(alternative,2)],"images":[]},
+      # The alternate 71-photo source is the SAME edition as the 72-photo one:
+      # its SHA must not produce a duplicate card or stored file.
+      {"id":"xiutu-public-1190152","title":"CreamSoda Mashu Mimmi 2 (71P)",
+       "source":SITE+"1190152","samples":[photo(alternative,2)],"images":[]},
       {"id":"xiutu-public-invalid","title":"bad","source":"https://evil.test/p",
        "samples":[photo(blob,3)],"images":[]},
     ]
@@ -54,7 +59,8 @@ def main():
         (root/"source-viewer-albums.json").write_text(json.dumps({"model":"mimmi","albums":[]}))
         previews=publisher.xiutu_verified_public_editions(root)
         assert [p["id"] for p in previews]==[
-            "v2ph-actor-a5e78m5a","xiutu-public-1190154"],previews
+            "v2ph-actor-a5e78m5a","xiutu-public-1190154",
+            "xiutu-public-1190154"],previews
         bytes_by_hash={hashlib.sha256(blob).hexdigest():blob,
                        hashlib.sha256(alternative).hexdigest():alternative}
         def stub(meta,downloader=None):
@@ -77,6 +83,17 @@ def main():
                     assert p["url"].startswith("stored-albums/"+a["id"]+"/")
             again=publisher.publish(limit=10,budget_mb=5,allow_rehost=True)
             assert again==2,"Idempotence violated, duplicated physical photo rows"
+        # Also assert actual previously verified public set overlap, when both
+        # independent sources are present. A future source change must not be
+        # silently merged with an unrelated edition.
+        source=json.loads((Path(__file__).parent/"xiutu-public-previews.json").read_text())
+        bysource={a["id"]:{p["sha256"] for p in a.get("samples",[]) if p.get("sha256")}
+                  for a in source.get("albums",[])}
+        if "xiutu-public-1190152" in bysource and "xiutu-public-1190154" in bysource:
+            shorter=bysource["xiutu-public-1190152"]
+            longer=bysource["xiutu-public-1190154"]
+            assert shorter and shorter.issubset(longer), "CreamSoda edition alias requires SHA-identical photos"
+            assert len(shorter)==71 and len(longer)==72, "Review edition source inventory before aliasing"
         print("MIMMI_XIUTU_PHYSICAL_FILES_TWO_EDITIONS_SHA_IDEMPOTENT_PASS")
 
 if __name__=="__main__":main()
