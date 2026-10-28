@@ -579,8 +579,10 @@
       "source": "https://www.cosmiao.info/mimmi/",
       "expected": 125,
       "photos": 125,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 52,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -590,8 +592,10 @@
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": 97,
       "photos": 97,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 51,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -601,8 +605,10 @@
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": 154,
       "photos": 154,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 50,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -612,8 +618,10 @@
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": 45,
       "photos": 45,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 49,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -623,8 +631,10 @@
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": 99,
       "photos": 99,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 48,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -634,8 +644,10 @@
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": 97,
       "photos": 97,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 47,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -645,8 +657,10 @@
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": 100,
       "photos": 100,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 46,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -656,8 +670,10 @@
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": 45,
       "photos": 45,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 45,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -667,8 +683,10 @@
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": 68,
       "photos": 68,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 44,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -678,8 +696,10 @@
       "source": "https://www.cosmiao.info/mimmi/",
       "expected": 139,
       "photos": 139,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 43,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -689,8 +709,10 @@
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": 54,
       "photos": 54,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 42,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -700,8 +722,10 @@
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": 72,
       "photos": 72,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 41,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -711,8 +735,10 @@
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": 343,
       "photos": 343,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 40,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -722,8 +748,10 @@
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": 135,
       "photos": 135,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 39,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -733,8 +761,10 @@
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": 93,
       "photos": 93,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 38,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -744,8 +774,10 @@
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": 81,
       "photos": 81,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 37,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -755,8 +787,10 @@
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": 136,
       "photos": 136,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 36,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -766,8 +800,10 @@
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": 72,
       "photos": 72,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 35,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -777,8 +813,10 @@
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": 63,
       "photos": 63,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 34,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -788,8 +826,10 @@
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": 59,
       "photos": 59,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 33,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -799,8 +839,10 @@
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": 62,
       "photos": 62,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 32,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -810,8 +852,10 @@
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": 125,
       "photos": 125,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 31,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -821,8 +865,10 @@
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": 177,
       "photos": 177,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 30,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -832,8 +878,10 @@
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": 59,
       "photos": 59,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 29,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -843,8 +891,10 @@
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": 119,
       "photos": 119,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 28,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -854,8 +904,10 @@
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": 386,
       "photos": 386,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 27,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -865,8 +917,10 @@
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": 169,
       "photos": 169,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 26,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -876,8 +930,10 @@
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": 174,
       "photos": 174,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 25,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -887,8 +943,10 @@
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": 33,
       "photos": 33,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 24,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -898,8 +956,10 @@
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": 91,
       "photos": 91,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 23,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -909,19 +969,23 @@
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": 66,
       "photos": 66,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 22,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
       "id": "research-no-021",
       "title": "NO.021 DJAWA Photo Mimmi (밈미) Cream Cow Milk +FULL",
-      "publisher": "DJAWA",
+      "publisher": "CreamSoda",
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": 164,
       "photos": 164,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 21,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -931,19 +995,23 @@
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": 201,
       "photos": 201,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 20,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
       "id": "research-no-019",
       "title": "NO.019 DJAWA Photo Mimmi (밈미) – Cream Cow Milk",
-      "publisher": "DJAWA",
+      "publisher": "CreamSoda",
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": 106,
       "photos": 106,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 19,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -953,8 +1021,10 @@
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": 122,
       "photos": 122,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 18,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -964,8 +1034,10 @@
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": 125,
       "photos": 125,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 17,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -975,8 +1047,10 @@
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": 100,
       "photos": 100,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 16,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -986,8 +1060,10 @@
       "source": "https://www.cosmiao.info/mimmi/",
       "expected": 151,
       "photos": 151,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 15,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -997,8 +1073,10 @@
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": null,
       "photos": null,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 14,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -1008,8 +1086,10 @@
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": null,
       "photos": null,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 13,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -1019,8 +1099,10 @@
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": null,
       "photos": null,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 12,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -1030,8 +1112,10 @@
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": null,
       "photos": null,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 11,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -1041,8 +1125,10 @@
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": null,
       "photos": null,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 10,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -1052,8 +1138,10 @@
       "source": "https://www.cosmiao.info/mimmi/",
       "expected": 46,
       "photos": 46,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 9,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -1063,8 +1151,10 @@
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": null,
       "photos": null,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 8,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -1074,8 +1164,10 @@
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": null,
       "photos": null,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 7,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -1085,8 +1177,10 @@
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": null,
       "photos": null,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 6,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -1096,8 +1190,10 @@
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": null,
       "photos": null,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 5,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -1107,8 +1203,10 @@
       "source": "https://www.cosmiao.info/mimmi/",
       "expected": 41,
       "photos": 41,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 4,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -1118,8 +1216,10 @@
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": 120,
       "photos": 120,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 3,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -1129,8 +1229,10 @@
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": null,
       "photos": null,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 2,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     },
     {
@@ -1140,8 +1242,10 @@
       "source": "https://www.xiantuji.com/mimmi/",
       "expected": null,
       "photos": null,
-      "ai_enhanced": false,
       "catalogueOnly": true,
+      "ai_enhanced": false,
+      "research_number": 1,
+      "images": [],
       "completeness": "source_catalogue_only_not_downloaded"
     }
   ],
@@ -1154,5 +1258,5 @@
     "incomplete_known_count_albums": 22,
     "curated_research_works": 52
   },
-  "notes": "Current verified public previews are not complete commercial editions. 52 additional research leads are catalogue-only, not archived images."
+  "notes": "Individual accessible public samples are NOT complete commercial editions."
 }
