@@ -103,7 +103,7 @@ def image_candidates(doc,origin):
                 if not re.search(r"\.(?:jpe?g|png|webp|avif)(?:$|[?#])",url,re.I):continue
                 # A WordPress -WxH derivative is the same photo at lower quality,
                 # not an additional image. Keep only source-sized image filenames.
-                if re.search(r"-\\d{2,4}x\\d{2,4}\\.(?:jpe?g|png|webp|avif)$",parsed.path,re.I):continue
+                if re.search(r"-\d{2,4}x\d{2,4}\.(?:jpe?g|png|webp|avif)$",parsed.path,re.I):continue
                 if re.search(r"avatar|logo|favicon|icon|spacer|pixel|emoji|banner|woff",url,re.I):continue
                 path=urlunsplit((parsed.scheme,parsed.netloc,parsed.path,parsed.query,""))
                 if path not in found:found.append(path)
