@@ -15,6 +15,8 @@ MANIFEST=ROOT/"source-viewer-albums.json"
 INDEX=ROOT/"stored-albums.json"
 OUT=ROOT/"stored-albums"
 MAX_FILE=30_000_000
+# Keep the full multi-app GitHub Pages site below the provider's size limit.
+MAX_PUBLIC_IMAGE_BYTES=780*1024*1024
 
 def publish(limit=250, budget_mb=90, allow_rehost=False):
     if not allow_rehost:
@@ -24,6 +26,9 @@ def publish(limit=250, budget_mb=90, allow_rehost=False):
     old=json.loads(INDEX.read_text(encoding="utf-8")) if INDEX.exists() else {"albums":[]}
     byid={a["id"]:a for a in old.get("albums",[])}
     seen={p["sha256"] for a in byid.values() for p in a.get("images",[]) if p.get("sha256")}
+    existing_bytes=sum(p.get("bytes",0) for a in byid.values() for p in a.get("images",[]))
+    if existing_bytes>MAX_PUBLIC_IMAGE_BYTES:
+        raise ValueError("Current public archive already exceeds maximum Pages file budget")
     new=0;bytes_new=0;failed=0
     for album in src["albums"]:
         aid=album["id"]
@@ -36,7 +41,7 @@ def publish(limit=250, budget_mb=90, allow_rehost=False):
             if not re.fullmatch(r"[0-9a-f]{64}",sha) or not permitted(url):continue
             if sha in seen:continue
             size=photo.get("bytes",0)
-            if not isinstance(size,int) or size<5000 or size>MAX_FILE or bytes_new+size>budget_mb*1024*1024:continue
+            if not isinstance(size,int) or size<5000 or size>MAX_FILE or bytes_new+size>budget_mb*1024*1024 or existing_bytes+bytes_new+size>MAX_PUBLIC_IMAGE_BYTES:continue
             try:
                 raw=fetch_verified(url,sha,size)
                 suffix=Path(urlsplit(url).path).suffix.lower()
@@ -67,7 +72,7 @@ def publish(limit=250, budget_mb=90, allow_rehost=False):
             if not f.is_file() or f.stat().st_size!=p["bytes"] or hashlib.sha256(f.read_bytes()).hexdigest()!=p["sha256"]:
                 raise ValueError("Missing/corrupt physically archived file: "+str(f))
             physical+=1
-    INDEX.write_text(json.dumps({"updated":time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime()),
+    INDEX.write_text(json.dumps({"schema_version":1,"model":"mimmi","updated":time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime()),
         "storage":"physically committed public previews under GitHub Pages; not licensed publisher masters",
         "albums":list(byid.values()),"physical_verified_image_count":physical},ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     print("MIMMI_PHYSICAL_FILES",physical,"NEW",new,"FAILED",failed,"BYTES",bytes_new,flush=True)

@@ -1,8 +1,19 @@
 name: Mimmi Yui-Style Physically Stored Gallery
 on:
   workflow_dispatch:
+  # github-actions[bot] source index commits do NOT trigger ordinary push workflows.
+  # A workflow_run completion DOES trigger this real-file storage pipeline.
+  workflow_run:
+    workflows:
+      - Mimmi Multi-Page Public Photo Crawl
+      - Mimmi DJAWA Public Promotional Image Search
+      - Mimmi Official Social Public Photo Discovery
+      - Mimmi Free Official Portfolio Discovery
+      - Mimmi Free V2PH Public Gallery Photo Discovery
+      - Mimmi V2PH Actor Wide Discovery
+    types: [completed]
   schedule:
-    - cron: '25 3 * * 1,4'
+    - cron: '25 3,9,15,21 * * *'
   push:
     paths:
       - 'apps/mimmi-gallery/publish_stored_public.py'
@@ -15,6 +26,7 @@ concurrency:
   cancel-in-progress: false
 jobs:
   publish-real-public-previews:
+    if: github.ref == 'refs/heads/main' && (github.event_name != 'workflow_run' || (github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.conclusion == 'success'))
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     steps:
@@ -26,8 +38,19 @@ jobs:
           python-version: '3.12'
       - name: Install file/image verification
         run: python -m pip install requests Pillow
-      - name: Save verified public photo bytes, not URL-only entries
-        run: python apps/mimmi-gallery/publish_stored_public.py --limit 250 --budget-mb 90 --authorized-public-rehost
+      - name: Save multiple batches of SHA-verified real public photo files (not URLs)
+        shell: bash
+        run: |
+          for pass in 1 2 3; do
+            before=$(python -c "import json;from pathlib import Path;p=Path('apps/mimmi-gallery/stored-albums.json');d=json.loads(p.read_text());print(sum(len(a.get('images',[])) for a in d['albums']))")
+            python apps/mimmi-gallery/publish_stored_public.py --limit 250 --budget-mb 90 --authorized-public-rehost
+            after=$(python -c "import json;from pathlib import Path;p=Path('apps/mimmi-gallery/stored-albums.json');d=json.loads(p.read_text());print(sum(len(a.get('images',[])) for a in d['albums']))")
+            echo "MIMMI_REAL_ARCHIVE_BATCH=$pass PHYSICAL_FILES=$after NEW=$((after-before))"
+            if [[ "$after" -le "$before" ]]; then
+              echo "No additional unchanged-byte images available within the public storage budget."
+              break
+            fi
+          done
       - name: Recheck all archived image bytes against manifest
         run: |
           python - <<'PY'
@@ -45,6 +68,13 @@ jobs:
           assert n>0
           print('MIMMI_PHYSICALLY_STORED_VERIFIED',n)
           PY
+      - name: iPhone-style local file gallery QA (Chromium and WebKit)
+        run: |
+          npm install --no-save playwright@1.58.2
+          npx playwright install --with-deps chromium webkit
+          python -m http.server 8765 --directory apps >/tmp/mimmi-static.log 2>&1 &
+          node apps/mimmi-gallery/test_mobile_album.cjs
+          node apps/mimmi-gallery/test_webkit_photo.cjs
       - name: Commit real individual files and their physical index
         if: github.ref == 'refs/heads/main'
         run: |

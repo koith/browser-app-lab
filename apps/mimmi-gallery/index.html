@@ -350,7 +350,7 @@ Promise.all([
  fetch('album-aliases.json',{cache:'no-store'}).then(r=>r.ok?r.json():{}).catch(()=>({})),
  fetch('publishers.json',{cache:'no-store'}).then(r=>r.ok?r.json():{publishers:[]}).catch(()=>({publishers:[]}))
 ]).then(([s,owner,exclusions,covers,aliases,publishers])=>{
- if(!Array.isArray(s.albums)||s.model!=='mimmi')throw Error('Invalid physical archive index');
+ if(!Array.isArray(s.albums)||(s.model&&s.model!=='mimmi'))throw Error('Invalid physical archive index');
  publisherRegistry=publishers;
  albumCovers=covers.covers||{};
  albumAliases=aliases.aliases||{};
