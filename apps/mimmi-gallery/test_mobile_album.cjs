@@ -54,7 +54,7 @@ if(manifest.albums.some(a=>a.expected&&a.images.length>a.expected))throw Error('
   const v2ph=page.locator('#albumgrid [data-id="v2ph-cream-cow-milk"]');
   await v2ph.click();
   const partial=await page.locator('#albumtotal').innerText();
-  if(!partial.includes('10')||!partial.includes('164')||!partial.includes('누락'))throw Error('Lying about incomplete 164-photo album '+partial);
+  if(!/^[0-9]+장 \/ 164장 · 누락 [0-9]+장$/.test(partial))throw Error('Lying about incomplete 164-photo album '+partial);
   await page.locator('#back').click();
   await page.locator('#browse-toggle').click();
   if(!await page.locator('#publishergrid').isVisible())throw Error('Latest publisher switch broken');
