@@ -1,0 +1,230 @@
+{
+  "engine": "chromium",
+  "base": "http://127.0.0.1:8782/",
+  "version": "v0.1.0-beta.12",
+  "verified_cover_count": 31,
+  "covers": [
+    {
+      "id": "yuis-present33",
+      "photo": 2,
+      "face_region_inside_card": true,
+      "fit": "cover",
+      "image_decode_retries": 0
+    },
+    {
+      "id": "athletic-club104",
+      "photo": 18,
+      "face_region_inside_card": true,
+      "fit": "cover",
+      "image_decode_retries": 0
+    },
+    {
+      "id": "wet-yui80",
+      "photo": 29,
+      "face_region_inside_card": true,
+      "fit": "cover",
+      "image_decode_retries": 0
+    },
+    {
+      "id": "teddy-bear97",
+      "photo": 8,
+      "face_region_inside_card": true,
+      "fit": "cover",
+      "image_decode_retries": 0
+    },
+    {
+      "id": "green91",
+      "photo": 1,
+      "face_region_inside_card": true,
+      "fit": "cover",
+      "image_decode_retries": 0
+    },
+    {
+      "id": "thru-thru117",
+      "photo": 2,
+      "face_region_inside_card": true,
+      "fit": "cover",
+      "image_decode_retries": 0
+    },
+    {
+      "id": "sweet-dream110",
+      "photo": 8,
+      "face_region_inside_card": true,
+      "fit": "cover",
+      "image_decode_retries": 0
+    },
+    {
+      "id": "cream228",
+      "photo": 2,
+      "face_region_inside_card": true,
+      "fit": "cover",
+      "image_decode_retries": 0
+    },
+    {
+      "id": "seethrough80",
+      "photo": 2,
+      "face_region_inside_card": true,
+      "fit": "cover",
+      "image_decode_retries": 0
+    },
+    {
+      "id": "ramen125",
+      "photo": 8,
+      "face_region_inside_card": true,
+      "fit": "cover",
+      "image_decode_retries": 0
+    },
+    {
+      "id": "heart-steal78",
+      "photo": 3,
+      "face_region_inside_card": true,
+      "fit": "cover",
+      "image_decode_retries": 0
+    },
+    {
+      "id": "tracksuit201",
+      "photo": 2,
+      "face_region_inside_card": true,
+      "fit": "cover",
+      "image_decode_retries": 0
+    },
+    {
+      "id": "maid291",
+      "photo": 10,
+      "face_region_inside_card": true,
+      "fit": "cover",
+      "image_decode_retries": 0
+    },
+    {
+      "id": "last-summer192",
+      "photo": 8,
+      "face_region_inside_card": true,
+      "fit": "cover",
+      "image_decode_retries": 0
+    },
+    {
+      "id": "yui-vol2-42",
+      "photo": 1,
+      "face_region_inside_card": true,
+      "fit": "cover",
+      "image_decode_retries": 0
+    },
+    {
+      "id": "kuro-yui58",
+      "photo": 37,
+      "face_region_inside_card": true,
+      "fit": "cover",
+      "image_decode_retries": 0
+    },
+    {
+      "id": "yui-vol3-106",
+      "photo": 11,
+      "face_region_inside_card": true,
+      "fit": "cover",
+      "image_decode_retries": 0
+    },
+    {
+      "id": "blackroom145",
+      "photo": 34,
+      "face_region_inside_card": true,
+      "fit": "cover",
+      "image_decode_retries": 0
+    },
+    {
+      "id": "pussylet41-82",
+      "photo": 2,
+      "face_region_inside_card": true,
+      "fit": "cover",
+      "image_decode_retries": 0
+    },
+    {
+      "id": "dec2023-199",
+      "photo": 2,
+      "face_region_inside_card": true,
+      "fit": "cover",
+      "image_decode_retries": 0
+    },
+    {
+      "id": "artgravia663-ai32",
+      "photo": 1,
+      "face_region_inside_card": true,
+      "fit": "cover",
+      "image_decode_retries": 0
+    },
+    {
+      "id": "public-yui-sns",
+      "photo": 4,
+      "face_region_inside_card": true,
+      "fit": "cover",
+      "image_decode_retries": 0
+    },
+    {
+      "id": "djawa-privaty-public-samples",
+      "photo": 1,
+      "face_region_inside_card": true,
+      "fit": "cover",
+      "image_decode_retries": 0
+    },
+    {
+      "id": "acosta-japan-public-report",
+      "photo": 1,
+      "face_region_inside_card": true,
+      "fit": "cover",
+      "image_decode_retries": 0
+    },
+    {
+      "id": "gamersky-public-editorial",
+      "photo": 2,
+      "face_region_inside_card": true,
+      "fit": "cover",
+      "image_decode_retries": 0
+    },
+    {
+      "id": "inven-public-photos",
+      "photo": 1,
+      "face_region_inside_card": true,
+      "fit": "cover",
+      "image_decode_retries": 0
+    },
+    {
+      "id": "cn-huantuji",
+      "photo": 1,
+      "face_region_inside_card": true,
+      "fit": "cover",
+      "image_decode_retries": 0
+    },
+    {
+      "id": "cn-chaotuji",
+      "photo": 1,
+      "face_region_inside_card": true,
+      "fit": "cover",
+      "image_decode_retries": 0
+    },
+    {
+      "id": "cn-yuntu8",
+      "photo": 1,
+      "face_region_inside_card": true,
+      "fit": "contain",
+      "image_decode_retries": 0
+    },
+    {
+      "id": "cn-wantuzhi-everyday",
+      "photo": 1,
+      "face_region_inside_card": true,
+      "fit": "cover",
+      "image_decode_retries": 0
+    },
+    {
+      "id": "cn-yingyuge",
+      "photo": 1,
+      "face_region_inside_card": true,
+      "fit": "contain",
+      "image_decode_retries": 0
+    }
+  ],
+  "title_translucency_verified": true,
+  "publisher_removed_only_from_cover_title": true,
+  "detail_image_order_and_urls_unchanged": true,
+  "not_identity_recognition": true,
+  "iphone_real_device": false
+}

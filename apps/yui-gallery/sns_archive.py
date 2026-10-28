@@ -1,187 +1,153 @@
 #!/usr/bin/env python3
-"""Archive creator-published public social media across paginated pages.
+"""Collect creator-published public post attachments into individual original files.
 
-Follows only the normal public Next cursor visible on /super_yuisan/media.
-No login, account session, DRM, paid images or access-control circumvention.
+Only explicit post attachments and visible same-profile pagination are followed.
+Quoted posts, avatars, video stills and unrelated retweets are excluded.
 """
 from __future__ import annotations
-import argparse, concurrent.futures, hashlib, io, json, re, time, zipfile
-from datetime import datetime, timezone
+
+import argparse
+import json
+import re
+import time
 from pathlib import Path
-from urllib.parse import urljoin, urlsplit, urlunsplit, parse_qs, urlencode
-import requests
+from urllib.parse import parse_qs, urljoin, urlsplit
+
 from bs4 import BeautifulSoup
-from PIL import Image
 
-ROOT='https://teapawt.net/super_yuisan/media'
-OUTPUT=Path('yui-sns-archive')
-PROFILE='super_yuisan'
-MEDIA=re.compile(r'https?://pbs\.twimg\.com/media/([A-Za-z0-9_-]+)(?:\.(jpe?g|png|webp))?(?:\?[^\'"\s<>]*)?',re.I)
-STATUS=re.compile(r'(?:teapawt\.net|x\.com|xitter\.cf)/super_yuisan/status/(\d+)',re.I)
-HEADERS={'User-Agent':'Mozilla/5.0 (compatible; personal photo archival; +https://github.com/koith/browser-app-lab)','Accept':'text/html,application/xhtml+xml;q=0.9,*/*;q=0.8'}
-ALLOWED='teapawt.net'
-MIN_BYTES=9000
+from public_photo_archive import PublicSession, atomic_json, download_individuals, utcnow
 
-def normalize_photo(u):
-    m=MEDIA.search(u)
-    if not m: return None
-    return 'https://pbs.twimg.com/media/'+m.group(1)+'.'+(m.group(2) or 'jpg').lower()+'?name=orig'
+ROOT = 'https://teapawt.net/super_yuisan/media'
+PROFILE = 'super_yuisan'
+MEDIA = re.compile(r'^https://pbs\.twimg\.com/media/[A-Za-z0-9_-]+\.(?:jpg|jpeg|png|webp)(?:\?[^\s]*)?$', re.I)
+STATUS = re.compile(r'^/([A-Za-z0-9_]+)/status/(\d+)(?:#m)?$')
 
-def record_page(html,url):
-    soup=BeautifulSoup(html,'html.parser')
-    photos={}
-    def add(u,el):
-        original=normalize_photo(u)
-        if not original:return
-        photo_id=original.split('/media/')[1].split('.')[0]
-        post=''
-        cur=el
-        for _ in range(8):
-            if not cur or not hasattr(cur,'find_all'):break
-            try:
-                anchors=cur.find_all('a',href=True,limit=20)
-                for a in anchors:
-                    m=STATUS.search(urljoin(url,a['href']))
-                    if m:
-                        post='https://x.com/super_yuisan/status/'+m.group(1)
-                        break
-            except Exception:pass
-            if post:break
-            cur=cur.parent
-        photos[photo_id]={'id':photo_id,'url':original,'post':post,'date':'','source_page':url,'name':photo_id+'.jpg'}
-    for a in soup.find_all('a',href=True):
-        if 'pbs.twimg.com/media/' in a['href']:add(a['href'],a)
-    for img in soup.find_all('img'):
-        for attr in ('src','data-src','srcset','data-srcset'):
-            value=img.get(attr,'')
-            if not value:continue
-            if 'pbs.twimg.com/media/' in value:
-                for piece in value.split(','):
-                    add(piece.strip().split(' ')[0],img)
-    cursor_links=[]
-    for a in soup.find_all('a',href=True):
-        candidate=urljoin(url,a['href'])
-        p=urlsplit(candidate)
-        if p.hostname!=ALLOWED or p.path!='/super_yuisan/media':continue
-        if not parse_qs(p.query).get('cursor'):continue
-        if candidate != url:
-            cursor_links.append(candidate)
-    # Normal Teapawt appends the "Show more" cursor last. A stale previous cursor is excluded by visited set.
-    return photos, list(dict.fromkeys(cursor_links)), {'title':soup.title.get_text(' ',strip=True) if soup.title else '', 'page_bytes':len(html), 'photos':len(photos)}
 
-def crawl_pages(session,max_pages,delay):
-    url=ROOT;seen=set();allphotos={};pages=[];empty_streak=0
-    for page_index in range(1,max_pages+1):
-        if url in seen:break
-        seen.add(url)
+def record_page(html, url, profile=PROFILE):
+    soup = BeautifulSoup(html, 'html.parser')
+    photos = {}
+    for post in soup.select('.timeline-item[data-username]'):
+        author = post.get('data-username', '')
+        if author.casefold() != profile.casefold():
+            continue
+        link = post.select_one('a.tweet-link[href]')
+        match = STATUS.fullmatch(link['href']) if link else None
+        if not match or match[1].casefold() != profile.casefold():
+            continue
+        caption = post.select_one('.tweet-content')
+        work_links = [a['href'] for a in caption.select('a[href]')
+                      if any((urlsplit(a['href']).hostname or '') == domain or (urlsplit(a['href']).hostname or '').endswith('.'+domain) for domain in
+                             ['ctee.kr','djawaphoto.com','moviefantasy.co.kr','gumroad.com','linktoma.to'])] if caption else []
+        caption = caption.get_text(' ', strip=True) if caption else ''
+        date = post.select_one('.tweet-date a[title]')
+        # A quoted image may belong to a different person even inside this author's post.
+        for image in post.select('.attachments a.still-image[href]'):
+            if image.find_parent(class_='timeline-item') is not post:
+                continue
+            if any('quote' in c for parent in image.parents if parent is not post
+                   for c in parent.get('class', [])):
+                continue
+            image_url = image['href']
+            if not MEDIA.fullmatch(image_url):
+                continue
+            # Prefer only the site's explicit original-size attachment link.
+            if parse_qs(urlsplit(image_url).query).get('name') != ['orig']:
+                continue
+            photo_id = urlsplit(image_url).path.rsplit('/', 1)[-1].split('.')[0]
+            photos[image_url] = {
+                'id': photo_id, 'url': image_url,
+                'origin_page': 'https://x.com/' + profile + '/status/' + match[2],
+                'post': 'https://x.com/' + profile + '/status/' + match[2],
+                'author': profile, 'caption': caption,
+                'public_work_links': list(dict.fromkeys(work_links)),
+                'published_at_text': date['title'] if date else None,
+                'discovery_page': url, 'source_attribute': 'public_post_original_attachment',
+            }
+    next_urls = []
+    parsed = urlsplit(url)
+    for link in soup.select('.show-more a[href], a.more[href]'):
+        candidate = urljoin(url, link['href'])
+        target = urlsplit(candidate)
+        if (target.scheme == 'https' and target.netloc == parsed.netloc
+                and target.path == '/' + profile + '/media'
+                and parse_qs(target.query).get('cursor')):
+            next_urls.append(candidate)
+    # Current frontend wraps its Load more link in a show-more div; the fallback
+    # still requires an explicit same-profile media cursor visible in an anchor.
+    if not next_urls:
+        for link in soup.select('a[href]'):
+            candidate = urljoin(url, link['href'])
+            target = urlsplit(candidate)
+            if (target.scheme == 'https' and target.netloc == parsed.netloc
+                    and target.path == '/' + profile + '/media'
+                    and parse_qs(target.query).get('cursor')):
+                next_urls.append(candidate)
+    return list(photos.values()), list(dict.fromkeys(next_urls))
+
+
+def discover(client, max_pages=85, delay=1.0, root=ROOT):
+    url, visited, records, pages = root, set(), {}, []
+    empty_streak = 0
+    while url and len(pages) < max_pages and url not in visited:
+        visited.add(url)
         try:
-            resp=session.get(url,timeout=(15,30),headers=HEADERS)
-            resp.raise_for_status()
-            photos,nexts,meta=record_page(resp.text,url)
-            added=0
-            for k,im in photos.items():
-                if k not in allphotos:
-                    allphotos[k]=im;added+=1
-                elif not allphotos[k].get('post') and im.get('post'):
-                    allphotos[k]['post']=im['post']
-            next_url=next((candidate for candidate in reversed(nexts) if candidate not in seen),None)
-            pages.append({'index':page_index,'url':url,'found':len(photos),'new':added,'next':bool(next_url),'response_bytes':meta['page_bytes']})
-            empty_streak=(empty_streak+1) if added==0 else 0
-            print('SNS_PAGE',page_index,'found',len(photos),'new',added,'overall',len(allphotos),'next',bool(next_url),'empty_streak',empty_streak,'url',url[:130],flush=True)
-            if not next_url or empty_streak>=7:
+            response = client.get(url)
+            photos, next_urls = record_page(response.text, url)
+            new = 0
+            for row in photos:
+                if row['url'] not in records:
+                    records[row['url']] = row
+                    new += 1
+            next_url = next((u for u in next_urls if u not in visited), None)
+            pages.append({'url': url, 'found': len(photos), 'new': new,
+                          'response_sha256': __import__('hashlib').sha256(response.content).hexdigest(),
+                          'next_url': next_url})
+            print('PUBLIC_POST_PAGE', len(pages), 'new', new, 'total', len(records), flush=True)
+            url = next_url
+            empty_streak = empty_streak + 1 if not new else 0
+            # A page of videos/filtered posts does not imply the end of photos.
+            # Some frontends emit an endless changing empty cursor at the end.
+            if empty_streak >= 7:
                 break
-            url=next_url
             time.sleep(delay)
-        except Exception as e:
-            pages.append({'index':page_index,'url':url,'error':str(e)[:220]})
-            print('SNS_PAGE_ERROR',page_index,type(e).__name__,str(e)[:180],flush=True)
+        except Exception as error:
+            pages.append({'url': url, 'error': str(error)[:350]})
             break
-    return list(allphotos.values()),pages
+    return {'generated_at': utcnow(), 'source': root, 'pages': pages,
+            'images': list(records.values()), 'truncated': bool(url),
+            'stopped_on_empty_cursor_limit': empty_streak >= 7,
+            'not_complete_photobook': True, 'public_creator_posts_only': True}
 
-def download_image(item,session):
-    original=item['url']
-    for n in range(3):
-        try:
-            resp=session.get(original,headers={'User-Agent':'Mozilla/5.0','Accept':'image/*'},timeout=(15,35))
-            resp.raise_for_status()
-            if len(resp.content)>24_000_000:raise ValueError('Image >24MB')
-            raw=resp.content
-            if len(raw)<MIN_BYTES:raise ValueError('Too few image bytes')
-            with Image.open(io.BytesIO(raw)) as img:
-                img.verify()
-            with Image.open(io.BytesIO(raw)) as img:
-                fmt=img.format;w,h=img.size
-            if min(w,h)<250:raise ValueError('Too small')
-            extension={'JPEG':'jpg','PNG':'png','WEBP':'webp'}.get(fmt)
-            if extension is None:raise ValueError('Unknown image format '+str(fmt))
-            return {**item,'status':'ok','width':w,'height':h,'bytes':len(raw),'sha256':hashlib.sha256(raw).hexdigest(),'extension':extension},raw
-        except Exception as e:
-            error=str(e)
-            if n<2:time.sleep((n+1)*.8)
-    return {**item,'status':'error','error':error[:240]},None
-
-def save_archive(photos,pages,workers,part_size):
-    OUTPUT.mkdir(exist_ok=True)
-    session=requests.Session()
-    session.headers.update({'User-Agent':'Mozilla/5.0'})
-    downloaded=[]
-    with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
-        futures={pool.submit(download_image,p,session):i for i,p in enumerate(photos)}
-        result={}
-        for f in concurrent.futures.as_completed(futures):
-            i=futures[f]
-            try:result[i]=f.result()
-            except Exception as e:result[i]=({**photos[i],'status':'error','error':str(e)},None)
-            if len(result)%25==0:print('SNS_DOWNLOAD_PROGRESS',len(result),'/',len(photos),flush=True)
-    chunks=[];part=[];digest_to_file={}
-    for i in sorted(result):
-        row,raw=result[i]
-        if raw:
-            filename='images/%04d_%s.%s'%(i+1,row['id'],row['extension'])
-            row['filename']=filename
-            if row['sha256'] in digest_to_file:
-                row['status']='duplicate';row['duplicate_of']=digest_to_file[row['sha256']]
-            else:
-                digest_to_file[row['sha256']]=filename
-                part.append((filename,raw))
-        downloaded.append(row)
-        if len(part)>=part_size:
-            chunks.append(part);part=[]
-    if part:chunks.append(part)
-    if not chunks:raise RuntimeError('No images successfully downloaded; refusing empty archive.')
-    for n,chunk in enumerate(chunks,1):
-        zip_path=OUTPUT/('Yui_SNS_%03d.zip'%n)
-        with zipfile.ZipFile(zip_path,'w',zipfile.ZIP_DEFLATED,compresslevel=4) as z:
-            for filename,data in chunk:z.writestr(filename,data)
-            z.writestr('ABOUT.txt','Personal archive of publicly displayed posts from @super_yuisan; original photographs remain credited to their authors.\n')
-        with zipfile.ZipFile(zip_path) as z:
-            bad=z.testzip()
-            if bad is not None:raise RuntimeError('Zip CRC invalid: '+bad)
-        print('SNS_ARCHIVE_PART',n,'files',len(chunk),'size',zip_path.stat().st_size,flush=True)
-    report={'generated':datetime.now(timezone.utc).isoformat(),'source':ROOT,'pages':pages,
-            'total_discovered':len(photos),'actual_downloaded':sum(x['status']=='ok' for x in downloaded),
-            'duplicates':sum(x['status']=='duplicate' for x in downloaded),
-            'failures':sum(x['status']=='error' for x in downloaded),
-            'archive_parts':len(chunks),'items':downloaded}
-    (OUTPUT/'manifest.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
-    (OUTPUT/'summary.json').write_text(json.dumps({k:v for k,v in report.items() if k!='items'},ensure_ascii=False,indent=2),encoding='utf-8')
-    (OUTPUT/'feed.json').write_text(json.dumps({'updated':report['generated'],'source':ROOT,
-        'images':[{'url':p['url'],'post':p.get('post',''),'date':p.get('date',''),'name':p['name'],'caption':'심유이 공개 SNS'} for p in downloaded if p['status'] in ('ok','duplicate')]},ensure_ascii=False,indent=2),encoding='utf-8')
-    print('SNS_ARCHIVE_FINAL',json.dumps({k:report[k] for k in ('total_discovered','actual_downloaded','duplicates','failures','archive_parts')},ensure_ascii=False),flush=True)
 
 def main():
-    ap=argparse.ArgumentParser()
-    ap.add_argument('--max-pages',type=int,default=30)
-    ap.add_argument('--delay',type=float,default=.35)
-    ap.add_argument('--workers',type=int,default=5)
-    ap.add_argument('--part-size',type=int,default=65)
-    ap.add_argument('--discover-only',action='store_true')
-    args=ap.parse_args()
-    session=requests.Session()
-    photos,pages=crawl_pages(session,args.max_pages,args.delay)
-    if not photos:raise SystemExit('No public images found. Archive not generated.')
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--max-pages', type=int, default=85)
+    parser.add_argument('--delay', type=float, default=1.0)
+    parser.add_argument('--output', type=Path, default=Path('yui-sns-individuals'))
+    parser.add_argument('--discovery', type=Path)
+    parser.add_argument('--discover-only', action='store_true')
+    parser.add_argument('--max-images', type=int)
+    args = parser.parse_args()
+    client = PublicSession(delay=max(args.delay, 0.2))
+    if args.discovery:
+        discovery = json.loads(args.discovery.read_text())
+    else:
+        discovery = discover(client, max_pages=args.max_pages, delay=args.delay)
+    args.output.mkdir(parents=True, exist_ok=True)
+    atomic_json(args.output / 'discovery.json', discovery)
     if args.discover_only:
-        Path('yui-sns-discovery.json').write_text(json.dumps({'pages':pages,'images':photos},ensure_ascii=False,indent=2),encoding='utf-8')
-        print('SNS_DISCOVERY_FINAL',len(photos),len(pages),flush=True)
-    else:save_archive(photos,pages,args.workers,args.part_size)
-if __name__=='__main__':main()
+        print('PUBLIC_POST_DISCOVERY', len(discovery['images']), 'pages', len(discovery['pages']), flush=True)
+        return
+    records = discovery['images']
+    if args.max_images is not None:
+        records = records[:args.max_images]
+    report = download_individuals(records, args.output, client)
+    print('PUBLIC_POST_FINAL', json.dumps({key: report[key] for key in
+          ('unique_files', 'new_unique_files_this_run', 'skipped_existing_urls')}),
+          'failures', len(report['failures']), flush=True)
+    if report['failures'] or not report['images']:
+        raise SystemExit(1)
+
+
+if __name__ == '__main__':
+    main()

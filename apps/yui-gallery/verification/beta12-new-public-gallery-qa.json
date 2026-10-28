@@ -1,0 +1,54 @@
+{
+  "checked_at": "2026-10-28T00:33:33.220490+00:00",
+  "base": "http://127.0.0.1:8782/",
+  "scope": "selected_albums",
+  "requested_album_ids": [
+    "public-yui-sns",
+    "djawa-privaty-public-samples",
+    "acosta-japan-public-report",
+    "gamersky-public-editorial",
+    "inven-public-photos"
+  ],
+  "engine": "chromium",
+  "version": "v0.1.0-beta.12",
+  "viewport": [
+    390,
+    844
+  ],
+  "iphone_real_device": false,
+  "network": "TLS-verified requests bridge",
+  "private_cloud_verified": 0,
+  "albums": [
+    {
+      "id": "djawa-privaty-public-samples",
+      "decoded_lightbox": 24,
+      "original_link_sha256_checks": 0
+    },
+    {
+      "id": "gamersky-public-editorial",
+      "decoded_lightbox": 12,
+      "original_link_sha256_checks": 0
+    },
+    {
+      "id": "inven-public-photos",
+      "decoded_lightbox": 3,
+      "original_link_sha256_checks": 0
+    },
+    {
+      "id": "acosta-japan-public-report",
+      "decoded_lightbox": 1,
+      "original_link_sha256_checks": 0
+    },
+    {
+      "id": "public-yui-sns",
+      "decoded_lightbox": 361,
+      "original_link_sha256_checks": 0
+    }
+  ],
+  "decoded_image_entries": 401,
+  "browser_download_sha256_verified": 0,
+  "original_link_sha256_verified": 0,
+  "unique_original_link_sha256_verified": 0,
+  "errors": [],
+  "image_decode_retries": []
+}
