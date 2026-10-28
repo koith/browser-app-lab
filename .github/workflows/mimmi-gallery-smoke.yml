@@ -1,4 +1,4 @@
-name: Mimmi Gallery Mobile Browser Smoke
+name: Mimmi Gallery Mobile Album and Image Fallback QA
 on:
   push:
     paths:
@@ -10,61 +10,25 @@ permissions:
 jobs:
   album:
     runs-on: ubuntu-24.04
-    timeout-minutes: 12
+    timeout-minutes: 14
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: {node-version: '22'}
-      - name: Test static Mimmi catalogue and script syntax
-        run: |
-          node - <<'NODE'
-          const fs=require('fs'),vm=require('vm'),path='apps/mimmi-gallery/';
-          const html=fs.readFileSync(path+'index.html','utf8');
-          const m=html.match(/<script>([\s\S]+?)<\/script>/);
-          if(!m)throw Error('No Mimmi script');
-          new vm.Script(m[1]);
-          const c=JSON.parse(fs.readFileSync(path+'albums.json','utf8'));
-          if(c.model.id!=='mimmi'||c.albums.length<6)throw Error('Model mixed or missing');
-          if(!html.includes('id="app-version"')||!html.includes('v0.1.0-mimmi.3'))throw Error('Version missing');
-          if(!html.includes('official-previews.json')||!html.includes('v2ph-actor-previews.json')||!html.includes('research-catalogue.json'))throw Error('Missing broad image sources and research index');
-          console.log('MIMMI_GALLERY_SYNTAX_AND_VERSION_PASS',c.albums.length);
-          NODE
-      - name: Install headless Chromium
+      - name: Install browser test runtime
         run: |
           npm install --no-save playwright@1.58.2
           npx playwright install chromium
-      - name: Verify mobile photo gallery opens real externally hosted official images
+      - name: Exercise actual mobile album UX, cross-model new tab, and photo fallback
         run: |
-          python -m http.server 8765 --directory apps/mimmi-gallery >/tmp/mimmi-static.log 2>&1 &
-          node - <<'NODE'
-          const fs=require('fs'),{chromium}=require('playwright');
-          (async()=>{
-           const browser=await chromium.launch({headless:true});
-           try {
-             const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
-             const errors=[];page.on('pageerror',e=>errors.push(e.message));
-             await page.goto('http://127.0.0.1:8765/',{waitUntil:'domcontentloaded'});
-             await page.waitForFunction(()=>document.querySelector('#count')?.textContent.includes('개 화보'),{timeout:15000});
-             if(!await page.locator('#app-version').isVisible())throw Error('Upper-right version hidden');
-             if(!(await page.locator('#app-version').innerText()).includes('v0.1.0-mimmi.3'))throw Error('Wrong version');
-             const official=fs.existsSync('apps/mimmi-gallery/official-previews.json');
-             const expectedMin=official?32:6;
-             const works=await page.locator('.album').count();
-             if(works<expectedMin)throw Error('Unexpected albums: '+works);
-             if(official){
-               const sampleTotal=JSON.parse(fs.readFileSync('apps/mimmi-gallery/official-previews.json')).summary.official_sample_urls_verified;
-               if(sampleTotal<150)throw Error('Too few official sample files verified: '+sampleTotal);
-               const first=page.locator('.album .photos img').first();
-               await first.scrollIntoViewIfNeeded();
-               await page.waitForFunction(()=>{const im=document.querySelector('.album .photos img');return !!im&&im.complete&&im.naturalWidth>=250},{timeout:20000});
-               const firstPhoto=page.locator('.album .photos button').first();
-               await firstPhoto.click();
-               if(!await page.locator('#viewer').isVisible())throw Error('Full photo not open');
-               await page.waitForFunction(()=>document.querySelector('#full')?.naturalWidth>=250,{timeout:15000});
-               await page.locator('#close').click();
-             }
-             if(errors.length)throw Error(errors.join(';'));
-             console.log('MIMMI_GALLERY_MOBILE_PASS',{works,official,version:'v0.1.0-mimmi.3'});
-           }finally{await browser.close()}
-          })().catch(err=>{console.error(err.stack);process.exit(1)});
-          NODE
+          python -m http.server 8765 --directory apps >/tmp/mimmi-static.log 2>&1 &
+          node apps/mimmi-gallery/test_mobile_album.cjs
+      - name: Save individual screenshot evidence, without archive packaging
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: mimmi-gallery-mobile-preview
+          path: mimmi-mobile-v4.png
+          archive: false
+          retention-days: 30
+          if-no-files-found: ignore
