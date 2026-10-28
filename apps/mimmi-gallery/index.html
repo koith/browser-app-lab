@@ -108,14 +108,14 @@ main{max-width:1250px;margin:auto;padding:26px 16px 90px}
   <div class="toolbar">
    <input id="search" class="search" type="search" placeholder="화보 검색" aria-label="화보 검색" autocomplete="off">
    <div class="filter-row" role="group" aria-label="화보 필터">
-    <button id="filter-ready" aria-pressed="true" type="button">사진 있는 화보</button>
-    <button id="filter-all" aria-pressed="false" type="button">모든 화보</button>
+    <button id="filter-ready" aria-pressed="false" type="button">사진 있는 화보</button>
+    <button id="filter-all" aria-pressed="true" type="button">모든 화보</button>
     <span id="result-info"></span>
    </div>
   </div>
   <section id="albums" class="album-grid" aria-label="밈미 화보 카드"></section>
   <p id="empty" class="empty" hidden>조건에 맞는 화보가 없습니다.</p>
-  <details class="research" id="research"><summary id="research-title">추가 작품 조사 목록</summary><p class="research-note">작품명·장수 정보는 사진 실물 확보와 별개입니다.</p><div id="research-list"></div></details>
+  <details class="research" id="research"><summary id="research-title">추가 작품 조사 근거 보기</summary><p class="research-note">52개 작품은 전체 수집 목표이며, 사진 파일이 아직 확보되지 않은 화보도 목록에 표시합니다. 장수 표기는 출처에 적힌 수치입니다.</p><div id="research-list"></div></details>
  </section>
  <section id="album-detail" class="album-detail" hidden>
   <button class="back" id="back" type="button">← 화보 목록</button>
@@ -134,7 +134,7 @@ main{max-width:1250px;margin:auto;padding:26px 16px 90px}
 <script>
 'use strict';
 const $=id=>document.getElementById(id);
-const state={albums:[],research:[],filter:'ready',active:null,photos:[],photo:0};
+const state={albums:[],research:[],filter:'all',active:null,photos:[],photo:0};
 const esc=s=>String(s||'').replace(/\s+/g,' ').trim();
 function safeUrl(input){try{const url=new URL(input,location.href);return url.protocol==='https:'?url.href:null}catch{return null}}
 function displayTitle(title){
@@ -150,6 +150,7 @@ function photosOf(album){
  return [...(album.images||[]),...(album.samples||[])].filter(p=>safeUrl(p.url));
 }
 function isOfficial(album){return album.id?.startsWith('djawa-')}
+function isResearch(album){return !!album.researchOnly}
 function dedupe(albums){
  const seenHashes=new Set();
  for(const a of albums){
@@ -163,7 +164,7 @@ function sortedAlbums(albums){
  // Publisher's own releases first: their thumbnails are official, and
  // secondary-site hotlinks can be blocked for ordinary Safari visitors.
  return [...albums].sort((a,b)=>{
-  const weight=x=>(isOfficial(x)?1000:0)+(photosOf(x).length>0?100:0);
+  const weight=x=>(photosOf(x).length>0?2000:0)+(isOfficial(x)?1000:0)+(isResearch(x)?-100:0);
   return weight(b)-weight(a)||displayTitle(a.title).localeCompare(displayTitle(b.title));
  });
 }
@@ -184,8 +185,8 @@ function addImageWithFallback(container,candidates,className,alt){
 }
 function coverFor(album){
  const cover=document.createElement('div');cover.className='cover';
- const fallback=document.createElement('div');fallback.className='cover-fallback';fallback.textContent='MIMMI';
- const sub=document.createElement('small');sub.textContent='사진을 열려면 화보 선택';fallback.append(sub);cover.append(fallback);
+ const fallback=document.createElement('div');fallback.className='cover-fallback';fallback.textContent=isResearch(album)?'작품 조사됨':'MIMMI';
+ const sub=document.createElement('small');sub.textContent=isResearch(album)?'사진 수집·검증 대기':'사진을 열려면 화보 선택';fallback.append(sub);cover.append(fallback);
  const candidates=photosOf(album).slice(0,3).map(p=>p.url);
  if(candidates.length)fallback.hidden=true;
  addImageWithFallback(cover,candidates,'cover-image',displayTitle(album.title)+' 표지');
@@ -200,10 +201,10 @@ function makeAlbumCard(album){
  const info=document.createElement('div');info.className='album-info';
  const name=document.createElement('div');name.className='album-title';name.textContent=displayTitle(album.title);
  const meta=document.createElement('div');meta.className='album-meta';
- meta.textContent=(isOfficial(album)?'DJAWA 공식 공개 샘플':album.publisher||'공개 웹판')+' · '+photosOf(album).length+'장 확인';
+ meta.textContent=isResearch(album)?'추가 작품 원장 · 아직 저장 사진 없음':(isOfficial(album)?'DJAWA 공식 공개 샘플':album.publisher||'공개 웹판')+' · '+photosOf(album).length+'장 확인';
  const foot=document.createElement('div');foot.className='album-source';
- foot.textContent=album.advertised_photos?'화보 표기 '+album.advertised_photos+'장':'전체 장수 미확인';
- const arrow=document.createElement('span');arrow.textContent='사진 보기 ›';foot.append(arrow);
+ foot.textContent=album.advertised_photos?'화보 표기 '+album.advertised_photos+'장 / 확인 '+photosOf(album).length+'장':'전체 장수 미확인';
+ const arrow=document.createElement('span');arrow.textContent=isResearch(album)?'자료 확인 ›':'사진 보기 ›';foot.append(arrow);
  info.append(name,meta,foot);button.append(coverFor(album),info);button.onclick=()=>openAlbum(album.id,true);
  card.append(button);return card;
 }
@@ -233,17 +234,56 @@ function renderResearch(){
  }
  target.append(fragment);
 }
-function routeId(){const hash=new URLSearchParams(location.hash.replace(/^#/,''));return hash.get('album')}
+function baseRoute(){return location.pathname+location.search}
+function albumRoute(id,photo=null){
+ const q=new URLSearchParams();q.set('album',id);
+ if(Number.isInteger(photo)&&photo>=0)q.set('photo',String(photo+1));
+ return baseRoute()+'#'+q.toString();
+}
+function routeState(){
+ const q=new URLSearchParams(location.hash.replace(/^#/,''));
+ return {id:q.get('album'),photo:q.has('photo')?Number(q.get('photo'))-1:null};
+}
+function routeId(){return routeState().id}
+function closeViewerForRoute(){
+ const v=$('viewer');if(v.open)v.close();
+ $('viewer-image').onload=null;$('viewer-image').onerror=null;
+ $('viewer-image').removeAttribute('src');
+}
+function applyRoute(){
+ if(!state.albums.length)return;
+ const route=routeState();
+ if(route.id&&state.albums.some(a=>a.id===route.id)){
+  openAlbum(route.id,false);
+  if(Number.isInteger(route.photo)&&route.photo>=0&&route.photo<state.photos.length){
+   openPhoto(route.photo,false);
+  }else closeViewerForRoute();
+ }else showOverview(false);
+}
+function returnToList(){
+ const r=routeState();
+ if(r.id&&history.state?.mimmi&&history.state?.fromOverview)history.back();
+ else{history.replaceState({mimmi:true,kind:'overview'},'',baseRoute());showOverview(false)}
+}
+function closePhoto(){
+ if(routeState().photo!==null&&history.state?.fromAlbum)history.back();
+ else{
+  const id=routeState().id||state.active?.id;
+  if(id)history.replaceState({mimmi:true,kind:'album',fromOverview:false},'',albumRoute(id));
+  closeViewerForRoute();
+ }
+}
 function openAlbum(id,push){
  const album=state.albums.find(x=>x.id===id);
  if(!album){showOverview(false);return}
  state.active=album;state.photos=photosOf(album);
  $('detail-title').textContent=displayTitle(album.title);
- $('detail-meta').textContent=state.photos.length+'장 공개 이미지 · '+(album.advertised_photos||'미상')+'장 전체 표기 · '+(album.publisher||'DJAWA');
+ $('detail-meta').textContent=state.photos.length+'장 검증된 공개 사진 · '+(album.advertised_photos||'미상')+'장 전체 표기 · 누락 '+(album.advertised_photos?Math.max(0,album.advertised_photos-state.photos.length)+'장':'수량 미확인')+' · '+(album.publisher||'DJAWA');
  const source=safeUrl(album.source);
  $('detail-source').hidden=!source;
  if(source)$('detail-source').href=source;
  const panel=$('detail-photos');panel.replaceChildren();
+ if(!state.photos.length){const notice=document.createElement('p');notice.className='empty';notice.textContent='이 작품은 화보명과 표기 장수만 확인됐습니다. 실제 열람 가능한 사진은 아직 수집되지 않았습니다.';panel.append(notice)}
  const fragment=document.createDocumentFragment();
  state.photos.forEach((photo,i)=>{
   const tile=document.createElement('button');tile.type='button';tile.className='photo-tile';
@@ -256,32 +296,44 @@ function openAlbum(id,push){
  });
  panel.append(fragment);
  $('overview').hidden=true;$('album-detail').hidden=false;
- if(push)history.pushState({album:id},'',location.pathname+location.search+'#album='+encodeURIComponent(id));
+ if(push)history.pushState({mimmi:true,kind:'album',fromOverview:true},'',albumRoute(id));
  window.scrollTo(0,0);
 }
 function showOverview(updateHistory=true){
  if($('viewer').open)$('viewer').close();
  state.active=null;state.photos=[];
  $('album-detail').hidden=true;$('overview').hidden=false;
- if(updateHistory)history.pushState({},'',location.pathname+location.search);
+ if(updateHistory)history.replaceState({mimmi:true,kind:'overview'},'',baseRoute());
  window.scrollTo(0,0);
 }
-function openPhoto(i){
- if(!state.photos.length)return;
+function openPhoto(i,push=true){
+ if(!state.photos.length||!state.active)return;
+ const isFirstPhoto=routeState().photo===null;
  state.photo=(i+state.photos.length)%state.photos.length;
  const p=state.photos[state.photo],image=$('viewer-image');
+ if(push){
+  const first=isFirstPhoto;
+  const next=albumRoute(state.active.id,state.photo);
+  if(first)history.pushState({mimmi:true,kind:'photo',fromAlbum:true},'',next);
+  else history.replaceState({...(history.state||{}),mimmi:true,kind:'photo'},'',next);
+ }
  $('viewer-title').textContent=displayTitle(state.active.title);
  $('viewer-position').textContent=(state.photo+1)+' / '+state.photos.length;
- $('viewer-prev').disabled=state.photos.length<2;
- $('viewer-next').disabled=state.photos.length<2;
- $('viewer-error').hidden=true;
- image.hidden=true;image.removeAttribute('src');
+ $('viewer-prev').disabled=state.photos.length<2;$('viewer-next').disabled=state.photos.length<2;
+ $('viewer-error').hidden=true;image.hidden=true;image.onload=null;image.onerror=null;
+ image.removeAttribute('src');
  const source=safeUrl(state.active.source);$('viewer-origin').href=source||'#';
  const url=safeUrl(p.url);
  if(url){
-  image.onload=()=>{if(image.naturalWidth>100){image.hidden=false;$('viewer-error').hidden=true}else image.onerror()};
-  image.onerror=()=>{image.hidden=true;image.removeAttribute('src');$('viewer-error').hidden=false};
-  image.referrerPolicy='no-referrer';image.src=url;
+  let attempt=0;
+  const policies=['strict-origin-when-cross-origin','no-referrer','origin'];
+  const fail=()=>{
+   if(attempt>=policies.length){image.hidden=true;image.removeAttribute('src');$('viewer-error').hidden=false;return}
+   image.removeAttribute('src');image.referrerPolicy=policies[attempt++];image.src=url;
+  };
+  image.onload=()=>{if(image.naturalWidth>100){image.hidden=false;$('viewer-error').hidden=true}else fail()};
+  image.onerror=fail;
+  fail();
  }else $('viewer-error').hidden=false;
  if(!$('viewer').open)$('viewer').showModal();
 }
@@ -289,33 +341,38 @@ function loadJSON(file,fallback){return fetch(file,{cache:'no-store'}).then(r=>r
 $('search').oninput=renderOverview;
 $('filter-ready').onclick=()=>{state.filter='ready';renderOverview()};
 $('filter-all').onclick=()=>{state.filter='all';renderOverview()};
-$('back').onclick=()=>{if(routeId())history.back();else showOverview()};
-$('viewer-close').onclick=()=>$('viewer').close();
+$('back').onclick=returnToList;
+$('viewer-close').onclick=closePhoto;
+$('viewer').addEventListener('cancel',e=>{e.preventDefault();closePhoto()});
 $('viewer-prev').onclick=()=>openPhoto(state.photo-1);
 $('viewer-next').onclick=()=>openPhoto(state.photo+1);
-$('viewer').onclick=e=>{if(e.target===$('viewer'))$('viewer').close()};
+$('viewer').onclick=e=>{if(e.target===$('viewer'))closePhoto()};
 document.addEventListener('keydown',e=>{if(!$('viewer').open)return;if(e.key==='ArrowRight')openPhoto(state.photo+1);if(e.key==='ArrowLeft')openPhoto(state.photo-1)});
-window.addEventListener('popstate',()=>{const id=routeId();if(id)openAlbum(id,false);else showOverview(false)});
+window.addEventListener('popstate',applyRoute);
+window.addEventListener('hashchange',applyRoute);
+window.addEventListener('pageshow',e=>{if(e.persisted)applyRoute()});
 Promise.all([
  loadJSON('albums.json',{albums:[]}),
  loadJSON('official-previews.json',{albums:[]}),
  loadJSON('v2ph-public-previews.json',{albums:[]}),
  loadJSON('v2ph-actor-previews.json',{albums:[]}),
- loadJSON('research-catalogue.json',{works:[]})
+ loadJSON('research-curated.json',{works:[]})
 ]).then(([base,official,v2ph,actor,inventory])=>{
  const officialAlbums=(official.albums||[]).filter(a=>a.id&&a.source);
  const secondary=(v2ph.albums||[]).filter(a=>a.id&&a.source&&photosOf(a).length);
  const actorAlbums=(actor.albums||[]).filter(a=>a.id&&a.source&&photosOf(a).length);
  const legacy=(base.albums||[]).filter(a=>!officialAlbums.some(x=>x.title.toLowerCase()===a.title.toLowerCase()));
- const sourceAlbums=[...officialAlbums,...secondary,...actorAlbums,...legacy];
+ const researchCards=(inventory.works||[]).filter(x=>Number.isInteger(x.number)&&x.number>=1&&x.number<=250).map(x=>({id:'research-no-'+String(x.number).padStart(3,'0'),title:x.title,publisher:x.title.toLowerCase().includes('creamsoda')?'CreamSoda':'DJAWA / 기타',advertised_photos:x.advertised_photos,source:x.sources?.[0]?.url||'https://www.cosmiao.info/mimmi/',images:[],samples:[],researchOnly:true,number:x.number}));
+ const sourceAlbums=[...officialAlbums,...secondary,...actorAlbums,...legacy,...researchCards];
  dedupe(sourceAlbums);
  state.albums=sortedAlbums(sourceAlbums);
  state.research=inventory.works||[];
  const count=state.albums.reduce((n,a)=>n+photosOf(a).length,0);
  const ready=state.albums.filter(a=>photosOf(a).length).length;
- $('summary').textContent=ready+'개 화보 · '+count+'장 공개 이미지';
+ $('summary').textContent='열람 항목 '+ready+'개 · 검증 사진 '+count+'장 · 작품 원장 '+state.research.length+'개';
  renderOverview();renderResearch();
- const id=routeId();if(id)openAlbum(id,false);
+ if(!history.state?.mimmi)history.replaceState({mimmi:true,kind:routeState().id?'deep-link':'overview'},'',location.href);
+ applyRoute();
 }).catch(error=>{
  $('summary').textContent='목록 로딩 실패';
  $('empty').textContent='화보 목록을 불러오지 못했습니다. '+error.message;$('empty').hidden=false;
