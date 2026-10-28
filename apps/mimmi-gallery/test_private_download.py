@@ -27,6 +27,12 @@ def main():
     assert not d.permitted("http://cdn.v2ph.com/photos/photo.jpg")
     assert not d.permitted("https://cdn.v2ph.com/login/photo.jpg?bad=1")
     assert d.permitted("https://cdn.v2ph.com/photos/good.jpg")
+    assert d.permitted("https://images08.pixibb.com/2025/05/08/photo.jpg")
+    assert not d.permitted("https://images08.pixibb.com.evil.test/photo.jpg")
+    assert d.permitted("https://scontent-ord5-2.cdninstagram.com/v/t51.2885-15/123.jpg?sig=public-short-lived")
+    assert not d.permitted("https://scontent-ord5-2.cdninstagram.com/login/private.jpg")
+    assert not d.permitted("https://scontent-ord5-2.cdninstagram.com.evil.test/v/123.jpg")
+
     img = Image.new("RGB", (510, 710), (150, 130, 105))
     b = BytesIO()
     img.save(b, format="JPEG", quality=97)
