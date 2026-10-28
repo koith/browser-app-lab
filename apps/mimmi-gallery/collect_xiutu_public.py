@@ -169,6 +169,21 @@ def run(max_category_pages=2,max_article_pages=12,max_images=180):
                 header=doc.find("h1")
                 if header:title=header.get_text(" ",strip=True)[:175]
                 urls,next_pages,identity=article_media(html,current,article)
+                if not urls:
+                    # Diagnostics only: identify which public CDN the publisher
+                    # page actually references, instead of guessing URLs/files.
+                    dom=BeautifulSoup(html,"html.parser")
+                    hostnames=set()
+                    props=set()
+                    for im in dom.select("img,source"):
+                        for attr in ("src","srcset","data-src","data-original","data-lazy-src","data-url","data-full"):
+                            raw=im.get(attr,"")
+                            if raw:
+                                props.add(attr)
+                                u=urljoin(current,raw.split(",")[0].strip().split()[0])
+                                if urlsplit(u).hostname:hostnames.add(urlsplit(u).hostname)
+                    print("MIMMI_XIUTU_PUBLIC_IMAGE_DOMAINS",aid,sorted(hostnames)[:15],
+                          "attributes",sorted(props),flush=True)
                 if not identity:break
                 for u in urls:
                     if len(samples)>=max_images:break
