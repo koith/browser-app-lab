@@ -12,6 +12,23 @@
 "use strict";
 const $=id=>document.getElementById(id);let albums=[],research=[];const grid=$('grid');
 function safeURL(url){try{const u=new URL(url,location.href);return u.protocol==='https:'?u.href:null}catch{return null}}
+function renderResearch(){
+ const dest=$('research-list');
+ dest.replaceChildren();
+ $('research-title').textContent='추가 작품 조사 목록 · '+research.length+'개 항목';
+ for(const item of research){
+  const row=document.createElement('div');row.className='research-row';
+  const label=document.createElement('strong');label.textContent=String(item.number).padStart(3,'0')+' · '+item.title;
+  const side=document.createElement('span');
+  const count=document.createElement('small');count.textContent=item.advertised_photos?item.advertised_photos+'장 표기':'장수 미확인';
+  side.append(count);
+  const source=item.sources?.[0]?.url;
+  if(safeURL(source)){
+   const link=document.createElement('a');link.href=safeURL(source);link.target='_blank';link.rel='noopener noreferrer';link.textContent=' · 출처 보기';side.append(link);
+  }
+  row.append(label,side);dest.append(row);
+ }
+}
 function render(){
  const q=$('search').value.trim().toLocaleLowerCase();
  grid.replaceChildren();let displayed=0;
