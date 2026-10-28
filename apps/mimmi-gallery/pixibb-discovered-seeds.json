@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "model": "mimmi",
-  "generated_at": "2026-10-28T17:24:20.925729+00:00",
+  "generated_at": "2026-10-28T17:26:01.862577+00:00",
   "source": "actual public PixiBB search results in six model-language variants",
   "summary": {
     "search_terms": [
@@ -21,7 +21,8 @@
       "id": "pixibb-auto-djawa-photo-mimmi-nikke-elegg-154-photos",
       "title": "DJAWA Photo: Mimmi (밈미) – Nikke Elegg (154 photos)",
       "source": "https://cosplay.pixibb.com/djawa-photo-mimmi-nikke-elegg-154-photos/",
-      "pages": 12,
+      "pages": 18,
+      "advertised_photos": 154,
       "publisher": "DJAWA",
       "source_evidence": "search_link_and_live_article_heading"
     },
@@ -30,6 +31,7 @@
       "title": "DJAWA Photo: Mimmi (밈미) – Christmas Special 2021 (+S.ver) (100 photos) Sexy Cosplay",
       "source": "https://cosplay.pixibb.com/coser-djawa-photo-christmas-special-2021-s-ver-100-photos/",
       "pages": 12,
+      "advertised_photos": 100,
       "publisher": "DJAWA",
       "source_evidence": "search_link_and_live_article_heading"
     },
@@ -37,7 +39,8 @@
       "id": "pixibb-auto-djawa-photo-mimmi-girls-frontline-hk416-damaged-ver-244-photos-cosplay",
       "title": "DJAWA Photo – Mimmi (밈미): “Girls’ Frontline – HK416 (Damaged ver.)”",
       "source": "https://cosplay.pixibb.com/djawa-photo-mimmi-girls-frontline-hk416-damaged-ver-244-photos-cosplay/",
-      "pages": 12,
+      "pages": 27,
+      "advertised_photos": 244,
       "publisher": "DJAWA",
       "source_evidence": "search_link_and_live_article_heading"
     },
@@ -45,7 +48,8 @@
       "id": "pixibb-auto-djawa-photo-mimmi-azur-lane-ijn-atago-amp-takao-61-photos-cosplay",
       "title": "DJAWA Photo – Mimmi (밈미): “Azur Lane IJN Atago & Takao”",
       "source": "https://cosplay.pixibb.com/djawa-photo-mimmi-azur-lane-ijn-atago-amp-takao-61-photos-cosplay/",
-      "pages": 12,
+      "pages": 9,
+      "advertised_photos": 61,
       "publisher": "DJAWA",
       "source_evidence": "search_link_and_live_article_heading"
     },
@@ -53,7 +57,8 @@
       "id": "pixibb-auto-djawa-photo-mimmi-witchs-witchcraft-151-photos-cosplay",
       "title": "DJAWA Photo – Mimmi (밈미): “Witch’s Witchcraft”",
       "source": "https://cosplay.pixibb.com/djawa-photo-mimmi-witchs-witchcraft-151-photos-cosplay/",
-      "pages": 12,
+      "pages": 18,
+      "advertised_photos": 151,
       "publisher": "DJAWA",
       "source_evidence": "search_link_and_live_article_heading"
     },
@@ -61,7 +66,8 @@
       "id": "pixibb-auto-djawa-photo-mimmi-cyberpunk-girl-41-photos-cosplay",
       "title": "DJAWA Photo – Mimmi (밈미): “Cyberpunk Girl”",
       "source": "https://cosplay.pixibb.com/djawa-photo-mimmi-cyberpunk-girl-41-photos-cosplay/",
-      "pages": 12,
+      "pages": 7,
+      "advertised_photos": 41,
       "publisher": "DJAWA",
       "source_evidence": "search_link_and_live_article_heading"
     },
@@ -69,7 +75,8 @@
       "id": "pixibb-auto-djawa-photo-mimmi-rudy-the-wolf-of-midnight-230-photos-cosplay",
       "title": "DJAWA Photo – Mimmi (밈미): “Rudy The Wolf of Midnight”",
       "source": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-the-wolf-of-midnight-230-photos-cosplay/",
-      "pages": 12,
+      "pages": 25,
+      "advertised_photos": 230,
       "publisher": "DJAWA",
       "source_evidence": "search_link_and_live_article_heading"
     },
@@ -77,7 +84,8 @@
       "id": "pixibb-auto-djawa-photo-mimmi-kitsune-miko-a-ver-65-photos-cosplay",
       "title": "DJAWA Photo – Mimmi (밈미): “Kitsune Miko (A ver)”",
       "source": "https://cosplay.pixibb.com/djawa-photo-mimmi-kitsune-miko-a-ver-65-photos-cosplay/",
-      "pages": 12,
+      "pages": 9,
+      "advertised_photos": 65,
       "publisher": "DJAWA",
       "source_evidence": "search_link_and_live_article_heading"
     },
@@ -85,7 +93,8 @@
       "id": "pixibb-auto-djawa-photo-mimmi-rudy-codename-wolfgirl-201-photos-cosplay",
       "title": "DJAWA Photo – Mimmi (밈미): “Rudy Codename Wolfgirl”",
       "source": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-codename-wolfgirl-201-photos-cosplay/",
-      "pages": 12,
+      "pages": 23,
+      "advertised_photos": 201,
       "publisher": "DJAWA",
       "source_evidence": "search_link_and_live_article_heading"
     }
