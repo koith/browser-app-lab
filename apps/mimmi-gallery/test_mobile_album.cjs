@@ -7,7 +7,7 @@ const inline=html.match(/<script>([\s\S]*?)<\/script>/);
 if(!inline)throw Error('Missing Mimmi gallery script');
 new vm.Script(inline[1]);
 const index=JSON.parse(fs.readFileSync(path.join(root,'stored-albums.json'),'utf8'));
-if(index.model!=='mimmi'||!Array.isArray(index.albums))throw Error('Invalid physical storage manifest');
+if((index.model&&index.model!=='mimmi')||!Array.isArray(index.albums))throw Error('Invalid physical storage manifest');
 const albums=index.albums.filter(a=>a.images?.length);
 const images=albums.flatMap(a=>a.images.map(p=>({album:a.id,...p})));
 for(const p of images){
