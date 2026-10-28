@@ -348,6 +348,15 @@
       "ai_enhanced": false
     },
     {
+      "id": "v2ph-actor-a54e445z",
+      "title": "Mimmi --March Hare Photograph",
+      "publisher": "DJAWA",
+      "source": "https://www.v2ph.com/album/a54e445z.html",
+      "expected": null,
+      "photos": null,
+      "ai_enhanced": false
+    },
+    {
       "id": "v2ph-actor-a8n8n85a",
       "title": "Mimmi --Mochilero en Violeta Photograph",
       "publisher": "DJAWA",
@@ -565,9 +574,9 @@
     }
   ],
   "summary": {
-    "displayed_albums": 62,
-    "verified_unique_source_images": 552,
-    "input_source_image_occurrences": 582,
+    "displayed_albums": 63,
+    "verified_unique_source_images": 568,
+    "input_source_image_occurrences": 598,
     "duplicate_hashes_skipped": 30,
     "actual_full_publisher_photobooks": 0,
     "incomplete_known_count_albums": 22
