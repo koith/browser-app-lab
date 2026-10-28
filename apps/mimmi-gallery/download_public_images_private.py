@@ -40,7 +40,7 @@ def permitted(url):
         if not (p.scheme=="https" and (h in HOSTS or pixibb or instagram)
                 and not p.username and not p.password
                 and not p.port and not p.fragment
-                and (Path(p.path).suffix.lower() in EXT or instagram)):
+                and Path(p.path).suffix.lower() in EXT):
             return False
         if h=="cdn.v2ph.com":return p.path.startswith("/photos/")
         if h in ("djawaphoto.com","www.djawaphoto.com"):
