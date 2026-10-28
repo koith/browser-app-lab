@@ -70,6 +70,7 @@ jobs:
           python apps/yui-gallery/test_browser_http_bridge.py --engine ${{ matrix.engine }}
           python apps/yui-gallery/test_browser_image_checks.py --engine ${{ matrix.engine }}
           python -m http.server 8765 --directory apps/yui-gallery >/tmp/yui-http.log 2>&1 &
+          python apps/yui-gallery/qa_gallery.py --engine ${{ matrix.engine }} --album crazygiant-yui-may2023-public --album sportsseoul-crazy2020-public --album crazygiant-player5-public --workers 1 --out yui-new-source-${{ matrix.engine }}.json
           python apps/yui-gallery/qa_album_covers.py --engine ${{ matrix.engine }} --out yui-covers-${{ matrix.engine }}.json
           python apps/yui-gallery/qa_publishers.py --engine ${{ matrix.engine }} --out yui-publishers-${{ matrix.engine }}.json
           python apps/yui-gallery/qa_mobile_navigation.py --engine ${{ matrix.engine }} --out yui-navigation-${{ matrix.engine }}.json
@@ -107,10 +108,16 @@ jobs:
           assert not pending,pending
           print('PRODUCTION_DEPLOYED_CODE_AND_MANIFEST_HASHES_MATCH',flush=True)
           PY
-          python apps/yui-gallery/qa_publishers.py --base https://koith.github.io/browser-app-lab/apps/yui-gallery/?v=0.1.0-beta.15 --out yui-production-publishers.json
-          python apps/yui-gallery/qa_mobile_navigation.py --base https://koith.github.io/browser-app-lab/apps/yui-gallery/?v=0.1.0-beta.15 --out yui-production-navigation.json
-          python apps/yui-gallery/qa_album_covers.py --base https://koith.github.io/browser-app-lab/apps/yui-gallery/?v=0.1.0-beta.15 --out yui-production-covers.json
-          python apps/yui-gallery/qa_gallery.py --base https://koith.github.io/browser-app-lab/apps/yui-gallery/?v=0.1.0-beta.15 --out yui-production-gallery.json
+          python apps/yui-gallery/qa_publishers.py --base https://koith.github.io/browser-app-lab/apps/yui-gallery/?v=0.1.0-beta.16 --out yui-production-publishers.json
+          python apps/yui-gallery/qa_mobile_navigation.py --base https://koith.github.io/browser-app-lab/apps/yui-gallery/?v=0.1.0-beta.16 --out yui-production-navigation.json
+          python apps/yui-gallery/qa_album_covers.py --base https://koith.github.io/browser-app-lab/apps/yui-gallery/?v=0.1.0-beta.16 --out yui-production-covers.json
+          python apps/yui-gallery/qa_gallery.py --base https://koith.github.io/browser-app-lab/apps/yui-gallery/?v=0.1.0-beta.16 --out yui-production-gallery.json
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          path: yui-new-source-${{ matrix.engine }}.json
+          archive: false
+          if-no-files-found: ignore
       - uses: actions/upload-artifact@v7
         if: always()
         with:

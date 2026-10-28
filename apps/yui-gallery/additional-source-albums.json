@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-10-28T06:55:31.448838+00:00",
+  "generated_at": "2026-10-28T10:24:03.747206+00:00",
   "not_private_cloud": true,
   "kind": "physical_files_verified_source_links_only",
   "albums": [
@@ -29158,6 +29158,355 @@
       "highest_resolution_status": "unverified_seek_larger_or_publisher_original",
       "publisher_original_verified": false,
       "minimum_long_edge": 640,
+      "quality": "public web resolution",
+      "status": "verified_collected_individual_files_source_hosted_online_view"
+    },
+    {
+      "id": "crazygiant-yui-may2023-public",
+      "title": "CRAZY GIANT — 2023년 5월 · 사랑스러운 아내 · 공개본",
+      "expected": 6,
+      "images": [
+        {
+          "number": 1,
+          "url": "https://cdn.imweb.me/upload/S202010013208049566f15/58c0c3ef65838.png",
+          "sha256": "ed7aa7021a6d8ed61d65ce7aee84c7baf3a77d9e77b1bf2e106e2712c1ca5873",
+          "bytes": 572044,
+          "width": 1000,
+          "height": 523,
+          "origin_page": "https://crazygiant.imweb.me/giantgirl/?bmode=view&idx=15224627",
+          "discovery_page": "https://crazygiant.imweb.me/giantgirl/?bmode=view&idx=15224627",
+          "source_country": "KR",
+          "source_attribute": "explicit_public_full_image_link",
+          "photographer_credit": "z-one",
+          "site_watermark_review": {
+            "status": "unknown"
+          }
+        },
+        {
+          "number": 2,
+          "url": "https://cdn.imweb.me/upload/S202010013208049566f15/cfb3ba6b596c8.png",
+          "sha256": "75492ace57a632d680243287cfb4a28bf1398e08a97ffcbfbbfc503399f2fbe0",
+          "bytes": 2151202,
+          "width": 1080,
+          "height": 1350,
+          "origin_page": "https://crazygiant.imweb.me/giantgirl/?bmode=view&idx=15224627",
+          "discovery_page": "https://crazygiant.imweb.me/giantgirl/?bmode=view&idx=15224627",
+          "source_country": "KR",
+          "source_attribute": "explicit_public_full_image_link",
+          "photographer_credit": "z-one",
+          "site_watermark_review": {
+            "status": "unknown"
+          }
+        },
+        {
+          "number": 3,
+          "url": "https://cdn.imweb.me/upload/S202010013208049566f15/d8d6bc27dde09.png",
+          "sha256": "84711eb42d52968f42f52eb0a9118ddbf4b4e4485c0f8b362ccb83d093524ea0",
+          "bytes": 1692203,
+          "width": 1080,
+          "height": 1350,
+          "origin_page": "https://crazygiant.imweb.me/giantgirl/?bmode=view&idx=15224627",
+          "discovery_page": "https://crazygiant.imweb.me/giantgirl/?bmode=view&idx=15224627",
+          "source_country": "KR",
+          "source_attribute": "explicit_public_full_image_link",
+          "photographer_credit": "z-one",
+          "site_watermark_review": {
+            "status": "unknown"
+          }
+        },
+        {
+          "number": 4,
+          "url": "https://cdn.imweb.me/upload/S202010013208049566f15/5015048d24c70.png",
+          "sha256": "af53339cd9fe65c99d28ee301d406d900a0822a3126adba12a4855bce6a36757",
+          "bytes": 1693461,
+          "width": 1080,
+          "height": 1350,
+          "origin_page": "https://crazygiant.imweb.me/giantgirl/?bmode=view&idx=15224627",
+          "discovery_page": "https://crazygiant.imweb.me/giantgirl/?bmode=view&idx=15224627",
+          "source_country": "KR",
+          "source_attribute": "explicit_public_full_image_link",
+          "photographer_credit": "z-one",
+          "site_watermark_review": {
+            "status": "unknown"
+          }
+        },
+        {
+          "number": 5,
+          "url": "https://cdn.imweb.me/upload/S202010013208049566f15/50fb44d141cb2.jpg",
+          "sha256": "4565f5d4770e0409a83aecaeb5ece0f1d434ba1baf142dc20447197d7840fcb6",
+          "bytes": 1200021,
+          "width": 1240,
+          "height": 1618,
+          "origin_page": "https://crazygiant.imweb.me/giantgirl/?bmode=view&idx=15224627",
+          "discovery_page": "https://crazygiant.imweb.me/giantgirl/?bmode=view&idx=15224627",
+          "source_country": "KR",
+          "source_attribute": "explicit_public_full_image_link",
+          "photographer_credit": "z-one",
+          "site_watermark_review": {
+            "status": "unknown"
+          }
+        },
+        {
+          "number": 6,
+          "url": "https://image.ajunews.com/content/image/2023/04/26/20230426002657766283.jpg",
+          "sha256": "17c836c4a36596a8cca8b37c9b2b92322f6de00a0946f1210be6a405b43f6b6f",
+          "bytes": 88048,
+          "width": 640,
+          "height": 835,
+          "origin_page": "https://www5.ajunews.com/view/20230426002601068",
+          "discovery_page": "https://www5.ajunews.com/view/20230426002601068",
+          "source_country": "KR",
+          "source_attribute": "explicit_public_full_image_link",
+          "site_watermark_review": {
+            "status": "unknown"
+          }
+        }
+      ],
+      "publisher": "CRAZY GIANT",
+      "collection_kind": "official_public_samples",
+      "not_complete_photobook": true,
+      "expected_total_unknown": true,
+      "numbering_kind": "display_order_not_publisher_book_sequence",
+      "source_countries": [
+        "KR"
+      ],
+      "source_pages": [
+        "https://crazygiant.imweb.me/giantgirl/?bmode=view&idx=15224627",
+        "https://www5.ajunews.com/view/20230426002601068"
+      ],
+      "acquired": 6,
+      "complete_sequence": false,
+      "missing_numbers": null,
+      "resolution_review_required": true,
+      "highest_resolution_status": "unverified_seek_larger_or_publisher_original",
+      "publisher_original_verified": false,
+      "minimum_long_edge": 835,
+      "quality": "public web resolution",
+      "status": "verified_collected_individual_files_source_hosted_online_view"
+    },
+    {
+      "id": "sportsseoul-crazy2020-public",
+      "title": "크레이지 자이언트 촬영 · 스포츠서울 공개 기사",
+      "expected": 7,
+      "images": [
+        {
+          "number": 1,
+          "url": "https://t1.daumcdn.net/news/202003/26/SPORTSSEOUL/20200326061205477katw.jpg",
+          "sha256": "ab1d0a13f9ff70de3c9935ad923a05e6225bbb757fd10eb11e5b8924185d831e",
+          "bytes": 124233,
+          "width": 500,
+          "height": 690,
+          "origin_page": "https://v.daum.net/v/20200326055735105",
+          "discovery_page": "https://v.daum.net/v/20200326055735105",
+          "source_country": "KR",
+          "source_attribute": "explicit_article_data_org_src",
+          "photographer_credit": "이주상 / 스포츠서울",
+          "site_watermark_review": {
+            "status": "unknown"
+          }
+        },
+        {
+          "number": 2,
+          "url": "https://t1.daumcdn.net/news/202003/26/SPORTSSEOUL/20200326061308015mgvu.jpg",
+          "sha256": "02eb2eb4a2146588848baa3b49a8ea0fef4de71f23adaff3284647b33a63a8df",
+          "bytes": 133551,
+          "width": 500,
+          "height": 706,
+          "origin_page": "https://v.daum.net/v/20200326055735105",
+          "discovery_page": "https://v.daum.net/v/20200326055735105",
+          "source_country": "KR",
+          "source_attribute": "explicit_article_data_org_src",
+          "photographer_credit": "이주상 / 스포츠서울",
+          "site_watermark_review": {
+            "status": "unknown"
+          }
+        },
+        {
+          "number": 3,
+          "url": "https://t1.daumcdn.net/news/202003/26/SPORTSSEOUL/20200326061309319qefb.jpg",
+          "sha256": "a221755069b89edadb23930b4973f2fb2f8e4c57154351ca4e0016a81578a5cc",
+          "bytes": 90358,
+          "width": 500,
+          "height": 669,
+          "origin_page": "https://v.daum.net/v/20200326055735105",
+          "discovery_page": "https://v.daum.net/v/20200326055735105",
+          "source_country": "KR",
+          "source_attribute": "explicit_article_data_org_src",
+          "photographer_credit": "이주상 / 스포츠서울",
+          "site_watermark_review": {
+            "status": "unknown"
+          }
+        },
+        {
+          "number": 4,
+          "url": "https://t1.daumcdn.net/news/202003/26/SPORTSSEOUL/20200326061310385fgjb.jpg",
+          "sha256": "f0b587530b7f09c4d884a7933aba9af29a7f36752dbf90209b5b1af70f6734d2",
+          "bytes": 91947,
+          "width": 500,
+          "height": 648,
+          "origin_page": "https://v.daum.net/v/20200326055735105",
+          "discovery_page": "https://v.daum.net/v/20200326055735105",
+          "source_country": "KR",
+          "source_attribute": "explicit_article_data_org_src",
+          "photographer_credit": "이주상 / 스포츠서울",
+          "site_watermark_review": {
+            "status": "unknown"
+          }
+        },
+        {
+          "number": 5,
+          "url": "https://t1.daumcdn.net/news/202003/26/SPORTSSEOUL/20200326061311610vmqf.jpg",
+          "sha256": "177832d14e8df5bc82c084bc2a3d70dcc689eb9b3f29ef01360843badae36927",
+          "bytes": 88418,
+          "width": 500,
+          "height": 635,
+          "origin_page": "https://v.daum.net/v/20200326055735105",
+          "discovery_page": "https://v.daum.net/v/20200326055735105",
+          "source_country": "KR",
+          "source_attribute": "explicit_article_data_org_src",
+          "photographer_credit": "이주상 / 스포츠서울",
+          "site_watermark_review": {
+            "status": "unknown"
+          }
+        },
+        {
+          "number": 6,
+          "url": "https://t1.daumcdn.net/news/202003/26/SPORTSSEOUL/20200326061312645gykd.jpg",
+          "sha256": "98daebfb5eb8bee822a6d503987094107855f32eb9d92015c05b6a05254a3952",
+          "bytes": 94418,
+          "width": 500,
+          "height": 667,
+          "origin_page": "https://v.daum.net/v/20200326055735105",
+          "discovery_page": "https://v.daum.net/v/20200326055735105",
+          "source_country": "KR",
+          "source_attribute": "explicit_article_data_org_src",
+          "photographer_credit": "이주상 / 스포츠서울",
+          "site_watermark_review": {
+            "status": "unknown"
+          }
+        },
+        {
+          "number": 7,
+          "url": "https://t1.daumcdn.net/news/202003/26/SPORTSSEOUL/20200326061313765codw.jpg",
+          "sha256": "0a900feeea2e4749427a1ad111ae77c525a99ab17576cff277fbfa82bc0033a2",
+          "bytes": 78424,
+          "width": 500,
+          "height": 658,
+          "origin_page": "https://v.daum.net/v/20200326055735105",
+          "discovery_page": "https://v.daum.net/v/20200326055735105",
+          "source_country": "KR",
+          "source_attribute": "explicit_article_data_org_src",
+          "photographer_credit": "이주상 / 스포츠서울",
+          "site_watermark_review": {
+            "status": "unknown"
+          }
+        }
+      ],
+      "publisher": "스포츠서울",
+      "collection_kind": "public_editorial_photos",
+      "not_complete_photobook": true,
+      "expected_total_unknown": true,
+      "numbering_kind": "display_order_not_publisher_book_sequence",
+      "source_countries": [
+        "KR"
+      ],
+      "source_pages": [
+        "https://v.daum.net/v/20200326055735105"
+      ],
+      "acquired": 7,
+      "complete_sequence": false,
+      "missing_numbers": null,
+      "resolution_review_required": true,
+      "highest_resolution_status": "unverified_seek_larger_or_publisher_original",
+      "publisher_original_verified": false,
+      "minimum_long_edge": 635,
+      "quality": "public web resolution",
+      "status": "verified_collected_individual_files_source_hosted_online_view"
+    },
+    {
+      "id": "crazygiant-player5-public",
+      "title": "CRAZY GIANT — THE PLAYER ISSUE 5 · 심혜성 · 공개본",
+      "expected": 4,
+      "images": [
+        {
+          "number": 1,
+          "url": "https://cdn.imweb.me/upload/S202010013208049566f15/09d5d1b45bfaa.jpg",
+          "sha256": "d304f11ff4429b4594aa321c86f722050171f2c621077cbc7e472c2245cd0c34",
+          "bytes": 86353,
+          "width": 1000,
+          "height": 523,
+          "origin_page": "https://crazygiant.imweb.me/giantgirl/?bmode=view&idx=13530259",
+          "discovery_page": "https://crazygiant.imweb.me/giantgirl/?bmode=view&idx=13530259",
+          "source_country": "KR",
+          "source_attribute": "explicit_public_full_image_link",
+          "site_watermark_review": {
+            "status": "unknown"
+          }
+        },
+        {
+          "number": 2,
+          "url": "https://cdn.imweb.me/upload/S202010013208049566f15/6d297eef5e5c4.jpg",
+          "sha256": "8082fa02eb13f4f27cd5683a78aa9336c5b44c3773a07e88ffaf22cf6e8d3c03",
+          "bytes": 75018,
+          "width": 600,
+          "height": 1000,
+          "origin_page": "https://crazygiant.imweb.me/giantgirl/?bmode=view&idx=13530259",
+          "discovery_page": "https://crazygiant.imweb.me/giantgirl/?bmode=view&idx=13530259",
+          "source_country": "KR",
+          "source_attribute": "explicit_public_full_image_link",
+          "site_watermark_review": {
+            "status": "unknown"
+          }
+        },
+        {
+          "number": 3,
+          "url": "https://cdn.imweb.me/upload/S202010013208049566f15/6c41e69b25631.jpg",
+          "sha256": "d445a894f907117a5935bcb9755a812e1bbaa9613c58ee923b6feef22cd03b65",
+          "bytes": 60959,
+          "width": 600,
+          "height": 1000,
+          "origin_page": "https://crazygiant.imweb.me/giantgirl/?bmode=view&idx=13530259",
+          "discovery_page": "https://crazygiant.imweb.me/giantgirl/?bmode=view&idx=13530259",
+          "source_country": "KR",
+          "source_attribute": "explicit_public_full_image_link",
+          "site_watermark_review": {
+            "status": "unknown"
+          }
+        },
+        {
+          "number": 4,
+          "url": "https://cdn.imweb.me/upload/S202010013208049566f15/9f23b2b6b2f09.jpg",
+          "sha256": "5c81f675816a2495df5ecb0f2d711f5509e3bc00e8333d91ada242250d2d1e79",
+          "bytes": 112111,
+          "width": 600,
+          "height": 1000,
+          "origin_page": "https://crazygiant.imweb.me/giantgirl/?bmode=view&idx=13530259",
+          "discovery_page": "https://crazygiant.imweb.me/giantgirl/?bmode=view&idx=13530259",
+          "source_country": "KR",
+          "source_attribute": "explicit_public_full_image_link",
+          "site_watermark_review": {
+            "status": "unknown"
+          }
+        }
+      ],
+      "publisher": "CRAZY GIANT",
+      "collection_kind": "official_public_samples",
+      "not_complete_photobook": true,
+      "expected_total_unknown": true,
+      "numbering_kind": "display_order_not_publisher_book_sequence",
+      "source_countries": [
+        "KR"
+      ],
+      "source_pages": [
+        "https://crazygiant.imweb.me/giantgirl/?bmode=view&idx=13530259"
+      ],
+      "acquired": 4,
+      "complete_sequence": false,
+      "missing_numbers": null,
+      "resolution_review_required": true,
+      "highest_resolution_status": "unverified_seek_larger_or_publisher_original",
+      "publisher_original_verified": false,
+      "minimum_long_edge": 1000,
       "quality": "public web resolution",
       "status": "verified_collected_individual_files_source_hosted_online_view"
     }

@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-28T00:30:20.430460+00:00",
+  "generated_at": "2026-10-28T10:24:03.776057+00:00",
   "model": "심유이 / Yui Sim / @super_yuisan",
   "not_exhaustive": true,
   "records_are_skus_not_unique_works": true,
@@ -391,6 +391,29 @@
       "full_edition_acquired": false,
       "access_status": "public_profile_product_metadata_only_no_full_file_access",
       "evidence": "Normal public frontend response; exact place alias super_yuisan; cover is not acquired photobook"
+    },
+    {
+      "publisher": "CRAZY GIANT",
+      "source_country": "KR",
+      "official_source": true,
+      "title": "2023년 5월호 — 사랑스러운 아내 · 유이",
+      "url": "https://crazygiant.imweb.me/giantgirl/?bmode=view&idx=15224627",
+      "kind": "magazine",
+      "published_at": "2023-05",
+      "visible_photo_samples": 5,
+      "full_edition_acquired": false,
+      "access_status": "official_public_samples_not_complete_magazine"
+    },
+    {
+      "publisher": "CRAZY GIANT",
+      "source_country": "KR",
+      "official_source": true,
+      "title": "THE PLAYER ISSUE 5 — 심혜성",
+      "url": "https://crazygiant.imweb.me/giantgirl/?bmode=view&idx=13530259",
+      "kind": "magazine",
+      "visible_photo_samples": 4,
+      "full_edition_acquired": false,
+      "access_status": "official_public_samples_not_complete_magazine"
     }
   ],
   "pages": [

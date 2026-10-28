@@ -22,8 +22,13 @@ async def run(args):
         configured = await page.evaluate('albumCovers')
         count = await page.locator('#albumgrid .album').count()
         assert count == len(configured), (count, len(configured))
+        if args.album:
+            requested = set(args.album)
+            assert requested <= set(configured), 'Requested cover is missing from actual gallery'
+            configured = {aid: meta for aid, meta in configured.items() if aid in requested}
         results = []
         for aid, meta in configured.items():
+            print('COVER_QA_BEGIN', aid, flush=True)
             card = page.locator('.album[data-id="'+aid+'"]')
             image = card.locator('img')
             # Scrolling a static card does not require the image's hover
@@ -76,5 +81,6 @@ if __name__ == '__main__':
     parser.add_argument('--base', default='http://localhost:8765/')
     parser.add_argument('--engine', choices=['chromium', 'webkit'], default='chromium')
     parser.add_argument('--http-bridge', action='store_true')
+    parser.add_argument('--album', action='append', help='Check selected acquired covers; omit to verify every cover')
     parser.add_argument('--out', type=Path, default=Path('yui-covers-qa.json'))
     asyncio.run(run(parser.parse_args()))

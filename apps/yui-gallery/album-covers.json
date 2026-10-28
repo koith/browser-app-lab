@@ -589,6 +589,60 @@
       ],
       "fit": "contain",
       "method": "manual_face_region_review"
+    },
+    "crazygiant-yui-may2023-public": {
+      "sha256": "75492ace57a632d680243287cfb4a28bf1398e08a97ffcbfbbfc503399f2fbe0",
+      "number": 2,
+      "width": 1080,
+      "height": 1350,
+      "face": [
+        240,
+        295,
+        610,
+        640
+      ],
+      "position": [
+        50,
+        42
+      ],
+      "fit": "cover",
+      "method": "manual_visible_face_region_not_identity_recognition"
+    },
+    "sportsseoul-crazy2020-public": {
+      "sha256": "ab1d0a13f9ff70de3c9935ad923a05e6225bbb757fd10eb11e5b8924185d831e",
+      "number": 1,
+      "width": 500,
+      "height": 690,
+      "face": [
+        170,
+        85,
+        155,
+        175
+      ],
+      "position": [
+        50,
+        12
+      ],
+      "fit": "cover",
+      "method": "manual_visible_face_region_not_identity_recognition"
+    },
+    "crazygiant-player5-public": {
+      "sha256": "8082fa02eb13f4f27cd5683a78aa9336c5b44c3773a07e88ffaf22cf6e8d3c03",
+      "number": 2,
+      "width": 600,
+      "height": 1000,
+      "face": [
+        170,
+        140,
+        190,
+        260
+      ],
+      "position": [
+        50,
+        13
+      ],
+      "fit": "cover",
+      "method": "manual_visible_face_region_not_identity_recognition"
     }
   },
   "no_confirmed_face_use_upper_fallback": []

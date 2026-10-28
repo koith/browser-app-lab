@@ -1,0 +1,322 @@
+{
+  "version": "v0.1.0-beta.16",
+  "new_gallery_image_files": 17,
+  "photograph_files_excluding_covers": 15,
+  "magazine_covers_in_gallery": 2,
+  "new_promotional_cover_not_registered": 1,
+  "new_complete_photobooks": 0,
+  "new_publisher_masters": 0,
+  "new_high_resolution_replacements_of_existing_rows": 0,
+  "prior_private_file_hashes_compared": 4416,
+  "previous_gallery_photo_arrays_unchanged": 22,
+  "source_redownload_sha256_verified": 17,
+  "actual_local_gallery_lightbox_decodes": 17,
+  "local_qa": {
+    "checked_at": "2026-10-28T10:24:59.312914+00:00",
+    "base": "http://127.0.0.1:8783/",
+    "scope": "selected_albums",
+    "requested_album_ids": [
+      "crazygiant-yui-may2023-public",
+      "sportsseoul-crazy2020-public",
+      "crazygiant-player5-public"
+    ],
+    "engine": "chromium",
+    "version": "v0.1.0-beta.16",
+    "viewport": [
+      390,
+      844
+    ],
+    "iphone_real_device": false,
+    "network": "TLS-verified requests bridge",
+    "private_cloud_verified": 0,
+    "albums": [
+      {
+        "id": "sportsseoul-crazy2020-public",
+        "decoded_lightbox": 7,
+        "original_link_sha256_checks": 0
+      },
+      {
+        "id": "crazygiant-yui-may2023-public",
+        "decoded_lightbox": 6,
+        "original_link_sha256_checks": 0
+      },
+      {
+        "id": "crazygiant-player5-public",
+        "decoded_lightbox": 4,
+        "original_link_sha256_checks": 0
+      }
+    ],
+    "decoded_image_entries": 17,
+    "browser_download_sha256_verified": 0,
+    "original_link_sha256_verified": 0,
+    "unique_original_link_sha256_verified": 0,
+    "errors": [],
+    "image_decode_retries": [],
+    "source_view_interval_seconds": {
+      "cdn.imgcup.com": 1.0
+    },
+    "paced_source_views": 0
+  },
+  "source_readback": {
+    "verified_at": "2026-10-28T10:25:07.943828+00:00",
+    "files": [
+      {
+        "url": "https://cdn.imweb.me/upload/S202010013208049566f15/58c0c3ef65838.png",
+        "sha256": "ed7aa7021a6d8ed61d65ce7aee84c7baf3a77d9e77b1bf2e106e2712c1ca5873",
+        "bytes": 572044,
+        "width": 1000,
+        "height": 523,
+        "source_readback_match": true
+      },
+      {
+        "url": "https://cdn.imweb.me/upload/S202010013208049566f15/cfb3ba6b596c8.png",
+        "sha256": "75492ace57a632d680243287cfb4a28bf1398e08a97ffcbfbbfc503399f2fbe0",
+        "bytes": 2151202,
+        "width": 1080,
+        "height": 1350,
+        "source_readback_match": true
+      },
+      {
+        "url": "https://cdn.imweb.me/upload/S202010013208049566f15/d8d6bc27dde09.png",
+        "sha256": "84711eb42d52968f42f52eb0a9118ddbf4b4e4485c0f8b362ccb83d093524ea0",
+        "bytes": 1692203,
+        "width": 1080,
+        "height": 1350,
+        "source_readback_match": true
+      },
+      {
+        "url": "https://cdn.imweb.me/upload/S202010013208049566f15/5015048d24c70.png",
+        "sha256": "af53339cd9fe65c99d28ee301d406d900a0822a3126adba12a4855bce6a36757",
+        "bytes": 1693461,
+        "width": 1080,
+        "height": 1350,
+        "source_readback_match": true
+      },
+      {
+        "url": "https://cdn.imweb.me/upload/S202010013208049566f15/50fb44d141cb2.jpg",
+        "sha256": "4565f5d4770e0409a83aecaeb5ece0f1d434ba1baf142dc20447197d7840fcb6",
+        "bytes": 1200021,
+        "width": 1240,
+        "height": 1618,
+        "source_readback_match": true
+      },
+      {
+        "url": "https://t1.daumcdn.net/news/202003/26/SPORTSSEOUL/20200326061205477katw.jpg",
+        "sha256": "ab1d0a13f9ff70de3c9935ad923a05e6225bbb757fd10eb11e5b8924185d831e",
+        "bytes": 124233,
+        "width": 500,
+        "height": 690,
+        "source_readback_match": true
+      },
+      {
+        "url": "https://t1.daumcdn.net/news/202003/26/SPORTSSEOUL/20200326061308015mgvu.jpg",
+        "sha256": "02eb2eb4a2146588848baa3b49a8ea0fef4de71f23adaff3284647b33a63a8df",
+        "bytes": 133551,
+        "width": 500,
+        "height": 706,
+        "source_readback_match": true
+      },
+      {
+        "url": "https://t1.daumcdn.net/news/202003/26/SPORTSSEOUL/20200326061309319qefb.jpg",
+        "sha256": "a221755069b89edadb23930b4973f2fb2f8e4c57154351ca4e0016a81578a5cc",
+        "bytes": 90358,
+        "width": 500,
+        "height": 669,
+        "source_readback_match": true
+      },
+      {
+        "url": "https://t1.daumcdn.net/news/202003/26/SPORTSSEOUL/20200326061310385fgjb.jpg",
+        "sha256": "f0b587530b7f09c4d884a7933aba9af29a7f36752dbf90209b5b1af70f6734d2",
+        "bytes": 91947,
+        "width": 500,
+        "height": 648,
+        "source_readback_match": true
+      },
+      {
+        "url": "https://t1.daumcdn.net/news/202003/26/SPORTSSEOUL/20200326061311610vmqf.jpg",
+        "sha256": "177832d14e8df5bc82c084bc2a3d70dcc689eb9b3f29ef01360843badae36927",
+        "bytes": 88418,
+        "width": 500,
+        "height": 635,
+        "source_readback_match": true
+      },
+      {
+        "url": "https://t1.daumcdn.net/news/202003/26/SPORTSSEOUL/20200326061312645gykd.jpg",
+        "sha256": "98daebfb5eb8bee822a6d503987094107855f32eb9d92015c05b6a05254a3952",
+        "bytes": 94418,
+        "width": 500,
+        "height": 667,
+        "source_readback_match": true
+      },
+      {
+        "url": "https://t1.daumcdn.net/news/202003/26/SPORTSSEOUL/20200326061313765codw.jpg",
+        "sha256": "0a900feeea2e4749427a1ad111ae77c525a99ab17576cff277fbfa82bc0033a2",
+        "bytes": 78424,
+        "width": 500,
+        "height": 658,
+        "source_readback_match": true
+      },
+      {
+        "url": "https://image.ajunews.com/content/image/2023/04/26/20230426002657766283.jpg",
+        "sha256": "17c836c4a36596a8cca8b37c9b2b92322f6de00a0946f1210be6a405b43f6b6f",
+        "bytes": 88048,
+        "width": 640,
+        "height": 835,
+        "source_readback_match": true
+      },
+      {
+        "url": "https://cdn.imweb.me/upload/S202010013208049566f15/09d5d1b45bfaa.jpg",
+        "sha256": "d304f11ff4429b4594aa321c86f722050171f2c621077cbc7e472c2245cd0c34",
+        "bytes": 86353,
+        "width": 1000,
+        "height": 523,
+        "source_readback_match": true
+      },
+      {
+        "url": "https://cdn.imweb.me/upload/S202010013208049566f15/6d297eef5e5c4.jpg",
+        "sha256": "8082fa02eb13f4f27cd5683a78aa9336c5b44c3773a07e88ffaf22cf6e8d3c03",
+        "bytes": 75018,
+        "width": 600,
+        "height": 1000,
+        "source_readback_match": true
+      },
+      {
+        "url": "https://cdn.imweb.me/upload/S202010013208049566f15/6c41e69b25631.jpg",
+        "sha256": "d445a894f907117a5935bcb9755a812e1bbaa9613c58ee923b6feef22cd03b65",
+        "bytes": 60959,
+        "width": 600,
+        "height": 1000,
+        "source_readback_match": true
+      },
+      {
+        "url": "https://cdn.imweb.me/upload/S202010013208049566f15/9f23b2b6b2f09.jpg",
+        "sha256": "5c81f675816a2495df5ecb0f2d711f5509e3bc00e8333d91ada242250d2d1e79",
+        "bytes": 112111,
+        "width": 600,
+        "height": 1000,
+        "source_readback_match": true
+      }
+    ],
+    "verified_count": 17,
+    "private_cloud_readback_count": 0
+  },
+  "discovery": {
+    "official_publisher_public_may2023_files": 5,
+    "sportsseoul_article_public_files": 7,
+    "sportsseoul_width_px": 500,
+    "not_high_resolution_photobook": true,
+    "huantuji_catalogue_update": "2026-10-02",
+    "huantuji_catalogue_entries": 11,
+    "huantuji_new_full_works": 0,
+    "djawa_public_model_index_works": 1,
+    "bcut_public_model_catalogue_skus": 23,
+    "ctee_yellang_yui_official_title": "Yume of Denji",
+    "ctee_yellang_yui_official_source": "https://ctee.kr/item/store/100884",
+    "new_physical_books_to_research": [
+      "백묘블랑",
+      "Summer day with Yui"
+    ],
+    "physical_books_source": "https://instalker.org/sweetbox_s2",
+    "unverified_full_editions": [
+      "Everyday Life 194",
+      "DJAWA Privaty 190",
+      "latest CTEE and BCUT works"
+    ],
+    "v2ph_http_403_stopped": true,
+    "blogspot_source_robots_denial_stopped": true,
+    "sns_attachment_rows_downloaded": 33,
+    "sns_rows_matching_previous_private_inputs": 32,
+    "sns_unique_response_files": 31,
+    "separately_credited_alternative_may_cover_files": 1,
+    "official_player5_named_photograph_files": 4,
+    "uncredited_player_product_cover_not_registered": 1,
+    "publisher_product_cover_mockups_not_registered": 2,
+    "publisher_listing_requests": 15,
+    "publisher_listing_exhaustive": false,
+    "distinct_publisher_listing_pages": 6
+  },
+  "private_cloud_uploads": 0,
+  "private_cloud_readbacks": 0,
+  "iphone_real_device": false,
+  "unfinished": [
+    "complete missing photobooks",
+    "highest publisher originals",
+    "permanent private primary storage",
+    "iPhone device verification"
+  ],
+  "new_cover_face_regions": {
+    "engine": "chromium",
+    "base": "http://127.0.0.1:8783/",
+    "version": "v0.1.0-beta.16",
+    "verified_cover_count": 3,
+    "covers": [
+      {
+        "id": "crazygiant-yui-may2023-public",
+        "photo": 2,
+        "face_region_inside_card": true,
+        "fit": "cover",
+        "image_decode_retries": 0
+      },
+      {
+        "id": "sportsseoul-crazy2020-public",
+        "photo": 1,
+        "face_region_inside_card": true,
+        "fit": "cover",
+        "image_decode_retries": 0
+      },
+      {
+        "id": "crazygiant-player5-public",
+        "photo": 2,
+        "face_region_inside_card": true,
+        "fit": "cover",
+        "image_decode_retries": 0
+      }
+    ],
+    "title_translucency_verified": true,
+    "publisher_removed_only_from_cover_title": true,
+    "detail_image_order_and_urls_unchanged": true,
+    "not_identity_recognition": true,
+    "iphone_real_device": false
+  },
+  "publisher_browsing": {
+    "engine": "chromium",
+    "publisher_categories": 12,
+    "logo_images_decoded": 9,
+    "history_publisher_album_photo_back_forward": true,
+    "publisher_deep_link_back": true,
+    "publisher_search": true,
+    "single_browse_toggle": true,
+    "global_photos_and_all_catalogue_controls_hidden": true,
+    "publishers_and_album_titles_ascending": true,
+    "all_photo_order_urls_sha256_unchanged": true,
+    "physical_iphone_verified": false,
+    "errors": []
+  },
+  "full_33_cover_local_check": "failed external image decode; not a full-cover PASS",
+  "new_source_adapters_unit_tests": 12,
+  "public_archive_unit_tests": 5,
+  "new_response_files_including_unregistered_inputs": 21,
+  "new_unregistered_input_files": 4,
+  "gallery_total_image_entries": 2922,
+  "gallery_viewable_groups": 34,
+  "initial_pr_ci_chromium": {
+    "head": "8456e6e2494b45d31af64088690cd1cbeed4bb8e",
+    "run": 40670669401,
+    "job": 122756313188,
+    "conclusion": "success",
+    "gallery_decodes": 2917,
+    "original_link_sha_checks": 25,
+    "selected_source_readbacks": 285,
+    "superseded_scope_not_final_2922_verification": true
+  },
+  "initial_pr_ci_webkit": {
+    "head": "8456e6e2494b45d31af64088690cd1cbeed4bb8e",
+    "run": 40670669401,
+    "job": 122756313618,
+    "conclusion": "failure",
+    "selected_new_gallery_decodes": 12,
+    "failed_cover": "sportsseoul-crazy2020-public",
+    "failure": "EncodingError: Loading error",
+    "not_attributed_to_unchanged_photographs": true
+  }
+}
