@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "model": "mimmi",
-  "generated_at": "2026-10-28T17:35:38.969215+00:00",
+  "generated_at": "2026-10-28T17:39:38.981167+00:00",
   "source": "actual public PixiBB search results in six model-language variants",
   "summary": {
     "search_terms": [
@@ -21,8 +21,7 @@
     ],
     "candidates": 14,
     "verified_mimmi_album_pages": 14,
-    "verified_photo_files": 0,
-    "verification_run": "40737145797"
+    "verified_photo_files": 0
   },
   "albums": [
     {
@@ -108,48 +107,48 @@
     },
     {
       "id": "pixibb-auto-djawa-photo-mimmi-christmas-special-2022-super-sonico-91-photos-cosplay",
-      "title": "Mimmi - Christmas Special 2022 (Super Sonico)",
+      "title": "DJAWA Photo – Mimmi (밈미): “Christmas Special 2022” (Super Sonico)",
       "source": "https://cosplay.pixibb.com/djawa-photo-mimmi-christmas-special-2022-super-sonico-91-photos-cosplay/",
       "pages": 12,
       "advertised_photos": 91,
       "publisher": "DJAWA",
-      "source_evidence": "Mimmi search result and live article heading verified in GitHub Actions run 40737145797"
+      "source_evidence": "search_link_and_live_article_heading"
     },
     {
       "id": "pixibb-auto-djawa-photo-mimmi-nikke-alice-s-ver-170-photos-cosplay",
-      "title": "Mimmi - Nikke Alice (+S.Ver)",
+      "title": "DJAWA Photo – Mimmi (밈미): “Nikke Alice” (+S.Ver)",
       "source": "https://cosplay.pixibb.com/djawa-photo-mimmi-nikke-alice-s-ver-170-photos-cosplay/",
       "pages": 19,
       "advertised_photos": 170,
       "publisher": "DJAWA",
-      "source_evidence": "Mimmi search result and live article heading verified in GitHub Actions run 40737145797"
+      "source_evidence": "search_link_and_live_article_heading"
     },
     {
       "id": "pixibb-auto-djawa-photo-mimmi-your-fishe-gawr-gura-123-photos-cosplay",
-      "title": "Mimmi - Your Fishe Gawr Gura",
+      "title": "DJAWA Photo – Mimmi (밈미): “Your Fishe Gawr Gura”",
       "source": "https://cosplay.pixibb.com/djawa-photo-mimmi-your-fishe-gawr-gura-123-photos-cosplay/",
       "pages": 15,
       "advertised_photos": 123,
       "publisher": "DJAWA",
-      "source_evidence": "Mimmi search result and live article heading verified in GitHub Actions run 40737145797"
+      "source_evidence": "search_link_and_live_article_heading"
     },
     {
       "id": "pixibb-auto-djawa-photo-mimmi-azur-lane-tashkent-59-photos-cosplay",
-      "title": "Mimmi - Azur Lane Tashkent",
+      "title": "DJAWA Photo – Mimmi (밈미): “Azur Lane Tashkent”",
       "source": "https://cosplay.pixibb.com/djawa-photo-mimmi-azur-lane-tashkent-59-photos-cosplay/",
       "pages": 8,
       "advertised_photos": 59,
       "publisher": "DJAWA",
-      "source_evidence": "Mimmi search result and live article heading verified in GitHub Actions run 40737145797"
+      "source_evidence": "search_link_and_live_article_heading"
     },
     {
       "id": "pixibb-auto-creamsoda-mimmi-vol-2-neko-mimmi-62-photos-cosplay",
-      "title": "CreamSoda Mimmi Vol.2 Neko Mimmi",
+      "title": "[CreamSoda] Mimmi (밈미): Vol.2 Neko Mimmi",
       "source": "https://cosplay.pixibb.com/creamsoda-mimmi-vol-2-neko-mimmi-62-photos-cosplay/",
       "pages": 9,
       "advertised_photos": 62,
-      "publisher": "CreamSoda",
-      "source_evidence": "Mimmi search result and live article heading verified in GitHub Actions run 40737145797"
+      "publisher": "other public photographer",
+      "source_evidence": "search_link_and_live_article_heading"
     }
   ],
   "search_pages": [
@@ -164,6 +163,16 @@
       "found_links": 5
     },
     {
+      "term": "Mimmi",
+      "page": 3,
+      "found_links": 5
+    },
+    {
+      "term": "Mimmi",
+      "page": 4,
+      "found_links": 0
+    },
+    {
       "term": "밈미",
       "page": 1,
       "found_links": 4
@@ -172,6 +181,16 @@
       "term": "밈미",
       "page": 2,
       "found_links": 5
+    },
+    {
+      "term": "밈미",
+      "page": 3,
+      "found_links": 5
+    },
+    {
+      "term": "밈미",
+      "page": 4,
+      "found_links": 0
     },
     {
       "term": "Mimmissu17",
@@ -228,6 +247,5 @@
       "page": 1,
       "found_links": 0
     }
-  ],
-  "description": "14 real Mimmi album URLs verified by 13 aliases and five public PixiBB search pages. GHA run 40737145797 failed only at git rebase during simultaneous branch updates; verified URLs recovered from logs."
+  ]
 }
