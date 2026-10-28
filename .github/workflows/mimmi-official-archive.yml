@@ -30,7 +30,7 @@ jobs:
           python apps/mimmi-gallery/test_official_collector.py
       - name: Crawl official Mimmi photo books and inspect individual public sample bytes
         run: |
-          python apps/mimmi-gallery/collect_official_previews.py --pages 5 --books 55 --samples 6
+          python apps/mimmi-gallery/collect_official_previews.py --pages 8 --books 100 --samples 24
       - name: Verify catalogue statistics and source-only hosting safety
         run: |
           python - <<'PY'
@@ -49,6 +49,8 @@ jobs:
               assert urlsplit(sample['url']).hostname in ('djawaphoto.com','www.djawaphoto.com')
               assert sample['bytes']>4500 and sample['width']>=250 and sample['height']>=250
               assert sample['saved_to_private_cloud'] is False
+              import re
+              assert not re.search(r'-\d{2,4}x\d{2,4}\.',sample['url']), 'Duplicate resized version counted as new photo'
           print('MIMMI_OFFICIAL_PREVIEWS_VERIFIED',a['summary'])
           PY
       - name: Commit only official source evidence, then rebase before rebuilding derived catalog
