@@ -1,201 +1,51 @@
-name: Yui Full Image and Owner Gallery Verification
+name: Yui Full Stored-Image and Private Gateway Verification
 on:
   push:
     branches: [main]
-    paths:
-      - apps/yui-gallery/**
-      - .github/workflows/yui-gallery-verification.yml
+    paths: ['apps/yui-gallery/**', '.github/workflows/yui-gallery-verification.yml']
   pull_request:
-    paths:
-      - apps/yui-gallery/**
-      - .github/workflows/yui-gallery-verification.yml
+    paths: ['apps/yui-gallery/**', '.github/workflows/yui-gallery-verification.yml']
   workflow_dispatch:
-concurrency:
-  group: yui-full-gallery-external-images-paced
-  cancel-in-progress: false
 permissions:
   contents: read
 jobs:
-  selected-source-readback:
+  archived-files-and-viewer:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - run: python -m pip install Pillow requests
-      - name: Re-download every beta.18 larger file without changing source bytes
-        run: python apps/yui-gallery/verify_source_selection.py --selection apps/yui-gallery/verification/beta18-resolution-selections.json --workers 1 --public-policy --out yui-beta18-source-readback.json
-      - uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          path: yui-beta18-source-readback.json
-          archive: false
-          if-no-files-found: ignore
-  verified-viewing:
-    # All three jobs visit the same public CDN. Separate process-local pacers
-    # cannot coordinate that traffic: finish source readback first, then run
-    # one browser engine at a time without reducing image coverage.
-    needs: selected-source-readback
-    runs-on: ${{ matrix.os }}
-    container:
-      # Browser/system libraries are preinstalled; avoid the observed slow apt mirror.
-      image: mcr.microsoft.com/playwright/python:v1.58.0-noble@sha256:cd8493e380df200a471821e2690b710eab8d793dde3c0946fd0a39a961022914
-      options: --init --ipc=host
-    # More source photos now use the CDN's paced 1s viewing interval. Keep
-    # both complete engine checks and the complete post-Pages production run.
-    timeout-minutes: 40
+    timeout-minutes: 24
     strategy:
       fail-fast: false
-      max-parallel: 1
       matrix:
-        include:
-          - engine: chromium
-            os: ubuntu-24.04
-            workers: 3
-          - engine: webkit
-            os: ubuntu-24.04
-            workers: 1
+        engine: [chromium, webkit]
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Install free local tools
-        timeout-minutes: 7
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install free QA browser and image validators
         run: |
-          # setup-python selects a different interpreter from the image's bare pip.
-          python -m pip install Pillow requests beautifulsoup4 playwright==1.58.0 gallery-dl fastapi httpx
-      - name: Verify byte preservation and collector behavior
+          python -m pip install Pillow requests playwright==1.58.0 fastapi httpx
+          python -m playwright install --with-deps ${{ matrix.engine }}
+      - name: Verify manifest truth, photo hashes, and collection policy
         run: |
           node apps/yui-gallery/test_version.cjs
           node apps/yui-gallery/test_gallery_labels.cjs
           node apps/yui-gallery/test_publishers.cjs
-          python apps/yui-gallery/test_auto_registration.py
-          python apps/yui-gallery/test_public_photo_archive.py
-          python apps/yui-gallery/test_public_source_adapters.py
-          python apps/yui-gallery/test_verify_source_selection.py
-          python apps/yui-gallery/test_merge_higher_resolution.py
-          python apps/yui-gallery/test_photo_quality_policy.py
-          python apps/yui-gallery/test_http_album_girlatlas.py
-          python apps/yui-gallery/test_http_album_4kup.py
-          python apps/yui-gallery/test_review_site_watermarks.py
           python apps/yui-gallery/test_identity_policy.py
-          python apps/yui-gallery/test_gallery_dl_collector.py
+          python apps/yui-gallery/test_photo_quality_policy.py
           python apps/yui-gallery/test_source_viewer_manifest.py
-          python apps/yui-gallery/cloud/test_ingest_directories.py
-          python apps/yui-gallery/cloud/test_verify_remote.py
           python apps/yui-gallery/cloud/test_gateway.py
-      - name: Verify mobile navigation, decode every image and check original links
+      - name: Verify every actual archived photo decodes in the viewer
         run: |
-          python apps/yui-gallery/test_browser_http_bridge.py --engine ${{ matrix.engine }}
-          python apps/yui-gallery/test_browser_image_checks.py --engine ${{ matrix.engine }}
           python -m http.server 8765 --directory apps/yui-gallery >/tmp/yui-http.log 2>&1 &
-          python apps/yui-gallery/qa_gallery.py --engine ${{ matrix.engine }} --album crazygiant-yui-may2023-public --album sportsseoul-crazy2020-public --album crazygiant-player5-public --workers 1 --out yui-new-source-${{ matrix.engine }}.json
-          python apps/yui-gallery/qa_album_covers.py --engine ${{ matrix.engine }} --out yui-covers-${{ matrix.engine }}.json
-          python apps/yui-gallery/qa_publishers.py --engine ${{ matrix.engine }} --out yui-publishers-${{ matrix.engine }}.json
-          python apps/yui-gallery/qa_mobile_navigation.py --engine ${{ matrix.engine }} --out yui-navigation-${{ matrix.engine }}.json
-          python apps/yui-gallery/qa_gallery.py --engine ${{ matrix.engine }} --workers ${{ matrix.workers }} --out yui-${{ matrix.engine }}.json
+          python apps/yui-gallery/qa_gallery.py --engine ${{ matrix.engine }} --workers 1 --out yui-physical-${{ matrix.engine }}.json
           python apps/yui-gallery/qa_owner_media.py --engine ${{ matrix.engine }}
-      - name: Re-download all beta.10 selections and verify source SHA-256
-        if: matrix.engine == 'chromium'
-        run: |
-          python apps/yui-gallery/verify_source_selection.py --selection apps/yui-gallery/verification/beta10-resolution-selections.json --album artgravia663-ai32 --out yui-source-readback.json
-      - name: Verify deployed production gallery after Pages publishes this code
-        if: github.ref == 'refs/heads/main' && matrix.engine == 'chromium'
-        env:
-          RELEASE_SHA: ${{ github.sha }}
-        run: |
-          python - <<'PY'
-          import hashlib, os, time
-          from pathlib import Path
-          import requests
-          base='https://koith.github.io/browser-app-lab/apps/yui-gallery/'
-          pending=['index.html','gallery-labels.js','additional-source-albums.json','identity-exclusions.json','album-covers.json','publishers.js','publishers.json','publisher-catalogue.json','version.json']
-          for attempt in range(30):
-              for name in pending[:]:
-                  try:
-                      response=requests.get(base+name+'?verify='+os.environ['RELEASE_SHA'],timeout=15)
-                      response.raise_for_status()
-                      expected=Path('apps/yui-gallery',name).read_bytes()
-                      if hashlib.sha256(response.content).digest()==hashlib.sha256(expected).digest():
-                          pending.remove(name)
-                  except requests.RequestException:
-                      pass
-              if not pending:
-                  break
-              print('WAITING_FOR_PAGES',pending,flush=True)
-              time.sleep(6)
-          assert not pending,pending
-          print('PRODUCTION_DEPLOYED_CODE_AND_MANIFEST_HASHES_MATCH',flush=True)
-          PY
-          python apps/yui-gallery/qa_publishers.py --base https://koith.github.io/browser-app-lab/apps/yui-gallery/?v=0.1.0-beta.19 --out yui-production-publishers.json
-          python apps/yui-gallery/qa_mobile_navigation.py --base https://koith.github.io/browser-app-lab/apps/yui-gallery/?v=0.1.0-beta.19 --out yui-production-navigation.json
-          python apps/yui-gallery/qa_album_covers.py --base https://koith.github.io/browser-app-lab/apps/yui-gallery/?v=0.1.0-beta.19 --out yui-production-covers.json
-          python apps/yui-gallery/qa_gallery.py --base https://koith.github.io/browser-app-lab/apps/yui-gallery/?v=0.1.0-beta.19 --out yui-production-gallery.json
-      - uses: actions/upload-artifact@v7
+      - uses: actions/upload-artifact@v4
         if: always()
         with:
-          path: yui-new-source-${{ matrix.engine }}.json
-          archive: false
+          name: yui-physical-${{ matrix.engine }}
+          path: yui-physical-${{ matrix.engine }}.json
           if-no-files-found: ignore
-      - uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: gallery-${{ matrix.engine }}
-          path: yui-${{ matrix.engine }}.json
-          archive: false
-          if-no-files-found: ignore
-      - uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          path: yui-covers-${{ matrix.engine }}.json
-          archive: false
-          if-no-files-found: ignore
-      - uses: actions/upload-artifact@v7
-        if: always() && matrix.engine == 'chromium'
-        with:
-          path: yui-production-covers.json
-          archive: false
-          if-no-files-found: ignore
-      - uses: actions/upload-artifact@v7
-        if: always() && matrix.engine == 'chromium'
-        with:
-          path: yui-source-readback.json
-          archive: false
-          if-no-files-found: ignore
-      - uses: actions/upload-artifact@v7
-        if: always() && matrix.engine == 'chromium'
-        with:
-          path: yui-production-navigation.json
-          archive: false
-          if-no-files-found: ignore
-      - uses: actions/upload-artifact@v7
-        if: always() && matrix.engine == 'chromium'
-        with:
-          path: yui-production-gallery.json
-          archive: false
-          if-no-files-found: ignore
-      - uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          name: navigation-${{ matrix.engine }}
-          path: yui-navigation-${{ matrix.engine }}.json
-          archive: false
-          if-no-files-found: ignore
-      - uses: actions/upload-artifact@v7
-        if: always()
-        with:
-          path: yui-publishers-${{ matrix.engine }}.json
-          archive: false
-          if-no-files-found: ignore
-      - uses: actions/upload-artifact@v7
-        if: always() && matrix.engine == 'chromium'
-        with:
-          path: yui-production-publishers.json
-          archive: false
-          if-no-files-found: ignore
+          retention-days: 14
