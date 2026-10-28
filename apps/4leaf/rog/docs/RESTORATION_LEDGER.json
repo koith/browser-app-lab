@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "project": "4LEAF 원작 복원 웹앱",
   "canonicalFile": "apps/4leaf/rog/docs/RESTORATION_LEDGER.json",
-  "updatedAt": "2026-10-27",
+  "updatedAt": "2026-10-28",
   "sourceOfTruth": "Git 저장소의 이 JSON과 커밋 이력. 과거 챗 대화는 기록 근거이지 진행 상태의 원본 데이터가 아님.",
   "operatingRule": "새 요청 즉시 작업 등록 → open 목록 조회 → 실제 수정 → 원본 근거/코드/브라우저/배포 검증 → 검증 증거와 함께 상태 전이. 부분 구현을 원작 완성으로 표시 금지.",
   "statusDefinitions": {
@@ -1219,6 +1219,19 @@
         "P0-CHAT",
         "P0-RELEASE",
         "P0-BOARD",
+        "P0-ACTOR",
+        "P0-DICE"
+      ]
+    },
+    {
+      "id": "REQ-20261028-001",
+      "date": "2026-10-28",
+      "origin": "user",
+      "text": "4LEAF 원작 복원 개발 인수인계: 최신 main과 열린 PR #229부터 확인하고 기존 성과 및 원장 이력을 보존한다. 실제 게임 오류나 미니맵 실패를 무조건 재시도하지 않는다. 검증 후 PR 병합 및 동일 SHA Pages 배포를 확인하고, 기존 실제 BATTLE 비교를 확장하여 원본 리소스로 시각 차이를 수정한다. 검증된 OBS 19종을 보존하며 미확인 행동 순서 및 D4/D6 원본 3D 복구를 완료로 주장하지 않는다.",
+      "taskIds": [
+        "P0-RELEASE",
+        "P0-BOARD",
+        "P0-PODIUM",
         "P0-ACTOR",
         "P0-DICE"
       ]
@@ -6428,6 +6441,43 @@
         "P0-RELEASE"
       ],
       "details": "Actual original 2002 Dice/IMG.pak scrollButton.bmp extracted 80x16 UI buttons now operate real 4LEAF playable DMP chat transcript on original button press-and-hold, continuous repeat, pointer release/cancel/blur/route stop, and focused Home/End/PageUp/PageDown keyboard transcript navigation. No fake extra chats, NPCs, screen overlays or source asset alterations. Precise original-native timer/key semantics remain UNVERIFIED WEB reconstruction. Carried stable real physical-wheel original source test from old PR212 onto latest beta27 main rather than merge stale historical ledger duplicate seq262; expanded actual Chromium/WebKit native interaction QA, test real game 104 cells, source BMP, live actual form messages and history-not-jumping; app beta28 cache v115 proposed. Original dice D4/D6 native 3D remains NOT RECOVERED. PR/CI/Pages still pending."
+    },
+    {
+      "seq": 268,
+      "date": "2026-10-27",
+      "type": "POST_DEPLOY_BETA28_PUBLISHED_ORIGINAL_MINIMAP_NON_APP_HTML_SHELL_RETRY_PENDING_QA",
+      "requestId": "REQ-20261027-002",
+      "taskIds": [
+        "P0-BOARD",
+        "P0-CHAT",
+        "P0-RELEASE"
+      ],
+      "details": "Functional beta28 original IMG/scrollButton.bmp physical held navigation+keyboard original 104-cell DMP ChatRoom release PR #227 merged 665d391a0e10838601484d8cf39de3666058b669 and exact same SHA GitHub Pages static deploy workflow 40519479648 SUCCESS; source chat real Chromium+WebKit published QA run 40519651898 PASS, old pull request #212 closed as superseded. Complete released public ChatRoom workflow 40519652078 failed AFTER >20 native UI/source tests PASS in separate dice-native-minimap-navigation.cjs bootstrap: browser document.readyState complete, ZERO script tags, no game #app, no JavaScript errors, no JS fetch-failed. This is a transient non-app HTML Pages response, not a defect in source minimap clicks; old test only retried actual JS script fetch failures. New PR adds STRICT bounded real `page.goto` re-request only if actual SOURCE HTML itself absent, with cache-busting query and explicit original index.html app+scripts source validation; if all attempts fail, QA fails loudly with HTTP status/title/HTML snippet. If actual source HTML loads but game bootstrap fails, pre-existing hard JS-failure checks remain unchanged. PR and exact post-merge public repeat acceptance PENDING. No original player D4/D6 3D or other unverified source fidelity claimed as complete."
+    },
+    {
+      "seq": 269,
+      "date": "2026-10-28",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261028-001",
+      "taskIds": [
+        "P0-RELEASE",
+        "P0-BOARD",
+        "P0-PODIUM",
+        "P0-ACTOR",
+        "P0-DICE"
+      ],
+      "details": "Resume actual implementation, validation, PR merge and Pages deployment; preserve existing source restoration, immutable events and task acceptance gates."
+    },
+    {
+      "seq": 270,
+      "date": "2026-10-28",
+      "type": "PR229_REBASED_STRICT_EMPTY_DOCUMENT_POLICY_LOCAL_QA_PASS",
+      "requestId": "REQ-20261028-001",
+      "taskIds": [
+        "P0-RELEASE",
+        "P0-BOARD"
+      ],
+      "details": "Rebased by merging latest main 328b671aa6dd77ee6df719ec44f898ee871c960c into existing PR229; retained event268 and all main game code. Narrowed Pages HTML retry to exact koith.github.io origin and app path with BOTH zero scripts and absent #app, with no pageerror or request failure. Local real Chromium 104-cell minimap pointer/drag/keyboard/mobile navigation PASS. Browser response fault injection: empty-once => 2 documents then full gameplay PASS; empty-always => 3 documents then FAIL; partial #app-only => 1 and FAIL; script-only => 1 and FAIL; real JS exception => 1 and FAIL with exception evidence. Ledger integrity check against main and history regression PASS (58 tasks). Actions and exact-SHA post-merge Pages confirmation pending; no runtime restoration completion claimed."
     }
   ]
 }
