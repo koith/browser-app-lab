@@ -30,7 +30,7 @@ jobs:
           python apps/mimmi-gallery/test_official_collector.py
       - name: Crawl official Mimmi photo books and inspect individual public sample bytes
         run: |
-          python apps/mimmi-gallery/collect_official_previews.py --pages 5 --books 55 --samples 6
+          python apps/mimmi-gallery/collect_official_previews.py --pages 8 --books 100 --samples 24
       - name: Verify catalogue statistics and source-only hosting safety
         run: |
           python - <<'PY'
