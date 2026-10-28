@@ -11,7 +11,7 @@ on:
 permissions:
   contents: write
 concurrency:
-  group: mimmi-beta18-index-${{ github.ref_name }}
+  group: mimmi-source-index-writer-${{ github.ref_name }}
   cancel-in-progress: false
 jobs:
   indexed-photo-view:
