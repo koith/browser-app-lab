@@ -131,7 +131,7 @@ def verified_history(rows,limit):
         if len(out)>=limit:break
     return out
 
-def collect(max_pages=25,max_photos=250,delay=.25):
+def collect(max_pages=25,max_photos=250,delay=.25,browser_scroll=False):
     previous={}
     manifest=ROOT/"pixibb-public-previews.json"
     if manifest.exists():
@@ -141,7 +141,7 @@ def collect(max_pages=25,max_photos=250,delay=.25):
         except (ValueError,KeyError,TypeError):pass
     results=[]
     for album in SOURCE:
-        seen_urls=set();sha=set();photos=[];pages=[]
+        seen_urls=set();sha=set();photos=[];pages=[];browser_attempts=0
         limit=min(max_pages,album["pages"])
         for n in range(1,limit+1):
             url=album["source"] if n==1 else album["source"]+str(n)+"/"
@@ -151,6 +151,16 @@ def collect(max_pages=25,max_photos=250,delay=.25):
                 if r.status_code!=200 or not safe_page(r.url,album["source"]):
                     pages.append({"page":n,"status":"nonpublic_or_redirect"});break
                 urls,matched=page_photos(r.text,url)
+                if matched and browser_scroll and browser_attempts<2 and (n==1 or len(urls)<6):
+                    browser_attempts+=1
+                    try:
+                        from reveal_lazy_images import reveal
+                        extra=reveal(url,album["source"],max_scrolls=28)
+                        for v in extra:
+                            if v not in urls:urls.append(v)
+                        print("MIMMI_PIXIBB_SCROLL_REVEALED",album["id"],n,len(extra),len(urls),flush=True)
+                    except Exception as error:
+                        print("MIMMI_PIXIBB_BROWSER_SCROLL_UNAVAILABLE",album["id"],n,type(error).__name__,flush=True)
                 if not matched:
                     pages.append({"page":n,"status":"not_mimmi_page"});break
                 new=[u for u in urls if u not in seen_urls]
@@ -194,6 +204,7 @@ if __name__=="__main__":
     p=argparse.ArgumentParser()
     p.add_argument("--pages",type=int,default=25)
     p.add_argument("--images",type=int,default=250)
+    p.add_argument("--scroll",action="store_true",help="Scroll normal public album HTML")
     args=p.parse_args()
     if not 1<=args.pages<=30 or not 1<=args.images<=350:p.error("bounded public preview collection")
-    collect(args.pages,args.images)
+    collect(args.pages,args.images,browser_scroll=args.scroll)
