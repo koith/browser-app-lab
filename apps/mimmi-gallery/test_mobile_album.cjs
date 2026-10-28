@@ -29,6 +29,11 @@ if(unique.size<390)throw Error('Missing validated public photo source metadata: 
   if(await link.getAttribute('rel')!=='noopener noreferrer')throw Error('External tab security missing');
   const yuiUrl=await link.evaluate(x=>x.href);
   if(!yuiUrl.endsWith('/apps/yui-gallery/')&&!yuiUrl.endsWith('/yui-gallery/'))throw Error('Yui href wrong: '+yuiUrl);
+  const [separateTab]=await Promise.all([page.waitForEvent('popup',{timeout:12000}),link.click()]);
+  await separateTab.waitForLoadState('domcontentloaded',{timeout:15000});
+  if(!separateTab.url().includes('/yui-gallery/'))throw Error('Yui new tab opened wrong URL: '+separateTab.url());
+  if(!page.url().includes('/mimmi-gallery/'))throw Error('Mimmi tab was replaced rather than preserved');
+  await separateTab.close();
   if(!await page.locator('#app-version').isVisible())throw Error('Version label invisible');
   const version=await page.locator('#app-version').innerText();
   if(version!=='v0.1.0-mimmi.4')throw Error('Wrong Mimmi version');
@@ -55,6 +60,9 @@ if(unique.size<390)throw Error('Missing validated public photo source metadata: 
    broken:!!node.querySelector('img')&&node.querySelector('img').complete&&node.querySelector('img').naturalWidth===0
   }));
   if(coverState.broken)throw Error('Broken image icon is visible');
+  const tileRect=await cards.first().locator('.cover').boundingBox();
+  const cardRect=await cards.first().boundingBox();
+  if(!tileRect||tileRect.height>350||!cardRect||cardRect.height>470)throw Error('Oversized album card reintroduces screenshot bug: '+JSON.stringify({tileRect,cardRect}));
   await cards.first().locator('.album-open').click();
   if(!await page.locator('#album-detail').isVisible())throw Error('Album details not open');
   if(await page.locator('#overview').isVisible())throw Error('Album list not hidden');
