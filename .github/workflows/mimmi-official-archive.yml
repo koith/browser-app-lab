@@ -51,11 +51,14 @@ jobs:
               assert sample['saved_to_private_cloud'] is False
           print('MIMMI_OFFICIAL_PREVIEWS_VERIFIED',a['summary'])
           PY
+      - name: Rebuild Mimmi latest gallery album index from all verified sources
+        run: |
+          python apps/mimmi-gallery/build_model_gallery.py
       - name: Publish verified official source indexes, no photograph bytes
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add apps/mimmi-gallery/official-previews.json
+          git add apps/mimmi-gallery/official-previews.json apps/mimmi-gallery/source-viewer-albums.json apps/mimmi-gallery/albums.json
           if ! git diff --cached --quiet; then
             git commit -m "Archive Mimmi official photobook catalogue and verified sample URLs"
             git fetch origin "$GITHUB_REF_NAME"
