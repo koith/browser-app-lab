@@ -34,13 +34,16 @@ SESSION.headers.update({
 def permitted(url):
     try:
         p = urlsplit(url)
-        if not (p.scheme == "https" and p.hostname in HOSTS
-                and not p.username and not p.password
-                and not p.port and Path(p.path).suffix.lower() in EXT):
+        h=p.hostname or ""
+        pixibb=bool(re.fullmatch(r"(?:imgx[0-9]{2,4}|images[0-9]{1,4}|img|cdn|files)[.]pixibb[.]com",h))
+        if not (p.scheme=="https" and (h in HOSTS or pixibb)
+                and not p.username and not p.password and not p.port
+                and not p.fragment and Path(p.path).suffix.lower() in EXT):
             return False
-        if p.hostname == "cdn.v2ph.com":
-            return p.path.startswith("/photos/")
-        return p.path.startswith("/wp-content/uploads/")
+        if h=="cdn.v2ph.com":return p.path.startswith("/photos/")
+        if h in ("djawaphoto.com","www.djawaphoto.com"):
+            return p.path.startswith("/wp-content/uploads/")
+        return pixibb and p.path.startswith("/")
     except (ValueError, TypeError, AttributeError):
         return False
 
