@@ -67,11 +67,11 @@ def scan_actor(max_pages=8,max_album_candidates=80):
             break
     return list(found.values())[:max_album_candidates],pages
 
-def verify_album(album,max_samples=10):
+def verify_album(album,max_samples=180,max_album_pages=35):
     url=album["source"]
     outputs=[]
     pages=[]
-    for page in range(1,9):
+    for page in range(1,max_album_pages+1):
         loc=url if page==1 else url+"?page="+str(page)
         try:
             r=S.get(loc,timeout=T)
@@ -101,7 +101,7 @@ def verify_album(album,max_samples=10):
     album.update(samples=outputs,images=[],pages=pages,status="public_previews_verified" if outputs else "source_only")
     return album
 
-def run(max_pages=8,max_albums=70,max_samples=10):
+def run(max_pages=8,max_albums=70,max_samples=180,max_album_pages=35,batch_index=0,batch_size=8):
     catalog,pages=scan_actor(max_pages,max_albums)
     known=set()
     try:
@@ -109,9 +109,15 @@ def run(max_pages=8,max_albums=70,max_samples=10):
         known={urlsplit(a["source"]).path for a in target["albums"] if safe_source(a["source"])}
     except Exception:pass
     new=[a for a in catalog if urlsplit(a["source"]).path not in known]
+    # Do not confuse a first-page 10-image sample with an entire photobook.
+    # Bound one job to a subset of works, retaining earlier verified work data.
+    new=sorted(new,key=lambda x:x["id"])
+    if batch_size>0:
+        start=batch_index*batch_size
+        new=new[start:start+batch_size]
     results=[]
     for i,book in enumerate(new,1):
-        result=verify_album(book,max_samples)
+        result=verify_album(book,max_samples,max_album_pages)
         results.append(result)
         print("MIMMI_ACTOR_ALBUM",i,len(new),result["id"],len(result["samples"]),flush=True)
     # Preserve earlier verified photographs when a source responds with 429,
@@ -150,7 +156,12 @@ if __name__=="__main__":
     parser=argparse.ArgumentParser()
     parser.add_argument("--pages",type=int,default=6)
     parser.add_argument("--albums",type=int,default=60)
-    parser.add_argument("--images",type=int,default=10)
+    parser.add_argument("--images",type=int,default=180)
+    parser.add_argument("--album-pages",type=int,default=35)
+    parser.add_argument("--batch-index",type=int,default=0)
+    parser.add_argument("--batch-size",type=int,default=8)
     args=parser.parse_args()
-    if not 1<=args.pages<=12 or not 1<=args.albums<=90 or not 1<=args.images<=25:parser.error("bounded crawl only")
-    run(args.pages,args.albums,args.images)
+    if not (1<=args.pages<=12 and 1<=args.albums<=90 and 1<=args.images<=300
+            and 1<=args.album_pages<=40 and 0<=args.batch_index<=20 and 1<=args.batch_size<=20):
+        parser.error("bounded public photo crawl: images per set, album pages and batched works")
+    run(args.pages,args.albums,args.images,args.album_pages,args.batch_index,args.batch_size)
