@@ -9,10 +9,10 @@ from datetime import datetime,timezone
 from pathlib import Path
 from playwright.async_api import async_playwright
 from browser_http_bridge import fulfill_verified_request
-from browser_image_checks import decode_image
+from browser_image_checks import decode_image, SourceViewPacer
 
 async def run(args):
- results=[];errors=[];decode_retries=[];local_verified=set();semaphore=asyncio.Semaphore(args.workers)
+ results=[];errors=[];decode_retries=[];local_verified=set();semaphore=asyncio.Semaphore(args.workers);source_pacer=SourceViewPacer()
  async with async_playwright() as pw:
   browser=await getattr(pw,args.engine).launch()
   context=await browser.new_context(viewport={'width':390,'height':844},is_mobile=True,has_touch=True)
@@ -40,10 +40,13 @@ async def run(args):
     try:
      await page.goto(args.base,wait_until='domcontentloaded')
      await page.locator(f'.album[data-id="{album["id"]}"]').click()
-     await page.locator('#detailphotos .photo').first.click()
      print('QA_ALBUM_BEGIN',album['id'],flush=True)
      for i,image in enumerate(album['images']):
+      # Collection succeeded at 1s spacing; avoid synthetic bursts of CDN views.
+      # Image decode timeout, URL, dimensions, SHA and total count stay unchanged.
+      await source_pacer.wait(image['url'])
       if i:await page.locator('#next').click()
+      else:await page.locator('#detailphotos .photo').first.click()
       retries=await decode_image(page.locator('#full'))
       if retries:
        decode_retries.append({'id':album['id'],'number':image.get('number',i+1),'retries':retries})
@@ -68,6 +71,8 @@ async def run(args):
   await asyncio.gather(*(check(a) for a in albums));await browser.close()
  report={'checked_at':datetime.now(timezone.utc).isoformat(),'base':args.base,'scope':'selected_albums' if args.album else 'full_gallery','requested_album_ids':args.album,'engine':args.engine,'version':version,'viewport':[390,844],'iphone_real_device':False,'network':'TLS-verified requests bridge' if args.http_bridge else 'direct browser TLS','private_cloud_verified':0,'albums':results,'decoded_image_entries':sum(r['decoded_lightbox'] for r in results),'browser_download_sha256_verified':0,'original_link_sha256_verified':sum(r['original_link_sha256_checks'] for r in results),'unique_original_link_sha256_verified':len(local_verified),'errors':errors}
  report['image_decode_retries']=decode_retries
+ report['source_view_interval_seconds']={'cdn.imgcup.com':source_pacer.interval}
+ report['paced_source_views']=source_pacer.views
  args.out.write_text(json.dumps(report,indent=2)+'\n')
  assert not errors,errors
  assert report['decoded_image_entries']==sum(len(a['images']) for a in albums)

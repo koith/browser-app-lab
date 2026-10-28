@@ -93,6 +93,11 @@ async def run(args):
         await page.locator('#back').click()
         await page.locator('#publishergrid').wait_for(state='visible')
         assert not errors, errors
+        # Back re-renders the root: await the new elements, not stale decoded ones.
+        current_logos = page.locator('#publishergrid img')
+        assert await current_logos.count() == logo_checks
+        for i in range(logo_checks):
+            await decode_image(current_logos.nth(i))
         await page.screenshot(path=str(args.out.with_suffix('.png')))
         await browser.close()
     report = {'engine': args.engine, 'publisher_categories': count, 'logo_images_decoded': logo_checks,
