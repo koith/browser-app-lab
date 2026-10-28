@@ -61,11 +61,14 @@ def inspect_work(url):
     if not MIMMI.search(title):raise ValueError("Not Mimmi subject")
     pagination=soup.get_text(" ",strip=True)[:3000]
     m=re.search(r"Page\s+\d+\s+of\s+(\d{1,3})",pagination,re.I)
-    pages=min(30,int(m.group(1))) if m else 12
+    count=re.search(r"(\d{2,4})[ -]photos?",title+" "+urlsplit(url).path,re.I)
+    advertised=int(count.group(1)) if count else None
+    suggested=(advertised+9)//10+2 if advertised else 12
+    pages=min(35,max(int(m.group(1)) if m else 1,suggested))
     slug=urlsplit(url).path.strip("/")
     return {"id":"pixibb-auto-"+slug[:80],
             "title":re.sub(r"\s*\(\d{1,4}\s+photos?\)\s*Cosplay\s*$","",title,flags=re.I)[:180],
-            "source":url,"pages":pages,
+            "source":url,"pages":pages,"advertised_photos":advertised,
             "publisher":"DJAWA" if "DJAWA" in title.upper() else "other public photographer",
             "source_evidence":"search_link_and_live_article_heading"}
 
