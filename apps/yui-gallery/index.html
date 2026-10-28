@@ -184,16 +184,13 @@ function setMode(m,publisher=null){mode=['albums','photos','all','publishers'].i
 function publisherCard(group){const asset=YuiPublishers.logo(group),assetLabel=group.logo?.asset_role==='publisher_profile_branding'?' 발행처 프로필':group.logo?.asset_role==='parent_publisher_brand_reference'?' 발행사 로고':' 로고',image=asset?'<img src="'+esc(asset)+'" alt="'+esc(group.name)+assetLabel+'">':'<span class="publisher-wordmark" role="img" aria-label="'+esc(group.name)+' — 로고 미확인">'+esc(group.name)+'</span>';return '<button class="publisher" data-publisher="'+esc(group.id)+'" data-logo-theme="'+(group.logo?.theme==='light'?'light':'dark')+'" aria-label="'+esc(group.name)+' · 등록 '+group.albums.length+' · 열람 '+group.viewable+'">'+image+'<span class="publisher-info"><strong>'+esc(group.name)+'</strong>등록 '+group.albums.length+' · 열람 '+group.viewable+'</span></button>'}
 function openPublisher(id,record=true){if(!publisherGroups().some(g=>g.id===id))return;if(record)remember({mode:'publishers',publisher:id});setMode('publishers',id);window.scrollTo(0,0)}
 function photosFor(a){return validImages(a).map((p,i)=>({...p,name:getName(a),albumId:a.id,number:p.number??i+1}))}
-// A cross-origin image error does not expose its HTTP status. The user reported
-// a Korean HTTP 451 response from this origin; never call every failure a 451,
-// retry a denied URL automatically, proxy it or replace its original bytes.
-const reportedRestrictedHosts=new Set(['cdn.jliji.com']),failedRestrictedImages=new Set();
-function reportedRestrictedSource(url){try{return reportedRestrictedHosts.has(new URL(url,location.href).hostname)}catch{return false}}
-function imageFailureText(url){return reportedRestrictedSource(url)?'원본 서버 연결 실패 · 한국에서 HTTP 451 접근 제한이 보고된 출처입니다.':'사진 연결 실패 · 원본 서버 또는 네트워크 상태를 확인해 주세요.'}
-function updateImageNotice(){const count=$('detailphotos').querySelectorAll('.photo[data-image-state="failed"]').length;const notice=$('detail-media-status');notice.hidden=!count;notice.textContent=count?count+'장 연결 실패 · 사진을 누르면 출처 확인 가능':''}
+// Gallery image failures now refer to stored local/private bytes, not source hosts.
+const failedRestrictedImages=new Set();
+function imageFailureText(){return '저장된 사진을 불러오지 못했습니다. 보관 파일과 연결 상태를 확인해 주세요.'}
+function updateImageNotice(){const count=$('detailphotos').querySelectorAll('.photo[data-image-state="failed"]').length;const notice=$('detail-media-status');notice.hidden=!count;notice.textContent=count?count+'장 로딩 실패 · 저장 파일을 확인해 주세요':''}
 function imageState(image,failed){
  const container=image.closest('.photo,.album,.media-frame');if(!container)return;
- if(failed){container.dataset.imageState='failed';container.dataset.imageError=reportedRestrictedSource(image.src)?'원본 서버 접근 제한 가능':'사진 연결 실패';if(reportedRestrictedSource(image.src))failedRestrictedImages.add(image.src)}
+ if(failed){container.dataset.imageState='failed';container.dataset.imageError='저장된 파일 로딩 실패'}
  else{delete container.dataset.imageState;delete container.dataset.imageError;failedRestrictedImages.delete(image.src)}
  if(image.id==='full')$('media-status').textContent=failed?imageFailureText(image.src):'';
  updateImageNotice();
