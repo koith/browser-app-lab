@@ -24,6 +24,8 @@ jobs:
         run: |
           python -m http.server 8765 --directory apps >/tmp/mimmi-static.log 2>&1 &
           node apps/mimmi-gallery/test_mobile_album.cjs
+      - name: Verify iPhone-like WebKit private authentication UI
+        run: node apps/mimmi-gallery/test_private_cloud_ui.cjs
       - name: Verify iPhone-like WebKit source-host images and graceful fallback
         run: node apps/mimmi-gallery/test_webkit_photo.cjs
       - name: Save individual Chromium screenshot evidence
