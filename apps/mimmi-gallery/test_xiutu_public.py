@@ -12,6 +12,8 @@ def main():
     assert safe_page(root+"/19",root)
     assert not safe_page("https://www.xiutu.me/photo/654321",root)
     assert safe_media("https://cdn.xiutu.me/uploads/public-photo-03.jpg")
+    assert safe_media("https://img-jp-a.cdnimg.vip/uploads/real-public-mimmi-photo.jpg")
+    assert not safe_media("https://img-jp-a.cdnimg.vip.evil.test/photo.jpg")
     assert not safe_media("https://cdn.xiutu.me.evil.com/uploads/f.jpg")
     assert not safe_media("https://cdn.xiutu.me/api/private/f.jpg")
     assert not safe_media("http://cdn.xiutu.me/uploads/a.jpg")
