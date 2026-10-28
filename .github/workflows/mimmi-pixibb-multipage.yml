@@ -8,6 +8,8 @@ on:
       - 'apps/mimmi-gallery/collect_pixibb_public.py'
       - 'apps/mimmi-gallery/test_pixibb_public.py'
       - 'apps/mimmi-gallery/reveal_lazy_images.py'
+      - 'apps/mimmi-gallery/pixibb-discovered-seeds.json'
+      - 'apps/mimmi-gallery/discover_pixibb_search.py'
       - '.github/workflows/mimmi-pixibb-multipage.yml'
 permissions:
   contents: write
@@ -35,7 +37,7 @@ jobs:
       - name: Follow real published pages and verify public JPEG/PNG/WebP bytes
         run: |
           if [ "$GITHUB_REF_NAME" = main ]; then
-            python apps/mimmi-gallery/collect_pixibb_public.py --pages 25 --images 250 --scroll
+            python apps/mimmi-gallery/collect_pixibb_public.py --pages 32 --images 350 --scroll
           else
             python apps/mimmi-gallery/collect_pixibb_public.py --pages 2 --images 30 --scroll
           fi
@@ -46,11 +48,11 @@ jobs:
           from pathlib import Path
           p=Path("apps/mimmi-gallery/pixibb-public-previews.json")
           d=json.loads(p.read_text(encoding="utf-8"))
-          assert d["model"]=="mimmi" and len(d["albums"])==4
+          assert d["model"]=="mimmi" and len(d["albums"])>=10
           assert d["summary"]["private_cloud_archived"]==0
           for album in d["albums"]:
               assert album["images"]==[]
-              assert len(album["samples"])<=250
+              assert len(album["samples"])<=350
               assert len({v["sha256"] for v in album["samples"]})==len(album["samples"])
               for v in album["samples"]:
                   assert len(v["sha256"])==64 and v["bytes"]>=4500
