@@ -23,7 +23,7 @@ FILES=[
   ("v2ph_actor","v2ph-actor-previews.json"),
 ]
 ALLOWED={"djawaphoto.com","www.djawaphoto.com","cdn.v2ph.com"}
-MODEL_VERSION="v0.1.0-mimmi.4"
+MODEL_VERSION="v0.1.0-mimmi.5"
 
 def canonical_title(title):
     s=unicodedata.normalize("NFKC",str(title)).casefold()
@@ -138,8 +138,32 @@ def save(root=ROOT):
     (root/"source-viewer-albums.json").write_text(json.dumps(data,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     # Product-list metadata is separate from the photos. No duplicate empty cards.
     meta=[{k:a.get(k) for k in ("id","title","publisher","source","expected","photos","ai_enhanced")} for a in data["albums"]]
+    # The 52 cross-checked named editions are research targets, not images.
+    # Keep them in the regular 'All albums' tab as honest uncollected cards.
+    research_file=root/"research-curated.json"
+    work_leads=[]
+    if research_file.is_file():
+        curated=json.loads(research_file.read_text(encoding="utf-8"))
+        for w in curated.get("works",[]):
+            number=w.get("number")
+            title=str(w.get("title","")).strip()
+            if type(number) is not int or not 1<=number<=250 or not title:continue
+            src=next((z.get("url") for z in w.get("sources",[]) if isinstance(z.get("url"),str) and z.get("url","").startswith("https://")),None)
+            pub=("CreamSoda" if "cream" in title.casefold() else
+                 "ArtGravia" if "artgravia" in title.casefold() else
+                 "DJAWA" if "djawa" in title.casefold() else "독립 화보")
+            work_leads.append({"id":f"research-no-{number:03d}","title":f"NO.{number:03d} {title}",
+                               "publisher":pub,"source":src or "https://www.cosmiao.info/mimmi/",
+                               "expected":w.get("advertised_photos"),
+                               "photos":w.get("advertised_photos"),
+                               "catalogueOnly":True,"ai_enhanced":False,
+                               "research_number":number,"images":[],
+                               "completeness":"source_catalogue_only_not_downloaded"})
+        if len({w["research_number"] for w in work_leads})!=52:
+            raise ValueError("Expected 52 distinct curated Mimmi works")
+    meta.extend(work_leads)
     base={"model":{"id":"mimmi","name":"밈미"},"version":MODEL_VERSION,
-          "albums":meta,"summary":data["summary"],
+          "albums":meta,"summary":{**data["summary"],"curated_research_works":len(work_leads)},
           "notes":"Individual accessible public samples are NOT complete commercial editions."}
     (root/"albums.json").write_text(json.dumps(base,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     print("MIMMI_LATEST_GALLERY_DATA",json.dumps(data["summary"],ensure_ascii=False),flush=True)
