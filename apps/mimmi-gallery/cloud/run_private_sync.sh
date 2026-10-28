@@ -8,9 +8,9 @@ python -m pip install -r apps/mimmi-gallery/cloud/gateway/requirements.txt 'http
 python apps/mimmi-gallery/cloud/test_gateway.py
 
 if [[ -z "${RCLONE_CONFIG_ARCHIVE_COOKIE:-}" ]]; then
-  echo "::notice::MIMMI_PRIVATE_CLOUD_NOT_CONNECTED: no approved personal TeraBox session configured"
-  echo "MIMMI_PRIVATE_CLOUD_RESULT=NOT_CONNECTED" >> "${GITHUB_STEP_SUMMARY:-/dev/null}"
-  exit 0
+  echo "::error title=NO PRIVATE ARCHIVE::MIMMI_PRIVATE_CLOUD_NOT_CONNECTED — zero photos uploaded. Personal TeraBox session not configured."
+  echo "MIMMI_PRIVATE_CLOUD_RESULT=NOT_CONNECTED; ARCHIVED_PHOTOS=0" >> "${GITHUB_STEP_SUMMARY:-/dev/null}"
+  exit 3
 fi
 
 export RCLONE_CONFIG_ARCHIVE_TYPE=terabox
@@ -23,6 +23,13 @@ mkdir -p /tmp/mimmi-rclone-bin
 unzip -q /tmp/mimmi-rclone.zip -d /tmp/mimmi-rclone-bin
 find /tmp/mimmi-rclone-bin -type f -name rclone -exec sudo install -m 755 {} /usr/local/bin/rclone \;
 rclone listremotes | grep -qx 'archive:'
+# Verify the real authenticated remote *before* downloading thousands of
+# originals into ephemeral CI disk. A configured backend is not a login.
+if ! rclone lsd archive: --timeout 50s --retries 2 >/dev/null; then
+  echo "::error title=TERABOX AUTH INVALID::Configured TeraBox session could not list the personal root; archived count unchanged."
+  exit 4
+fi
+echo "MIMMI_TERABOX_ACCOUNT_AUTHENTICATED" >&2
 
 python apps/mimmi-gallery/download_public_images_private.py --output-dir "$PRIVATE_DOWNLOAD_DIR" --limit 0
 mkdir -p "$PRIVATE_STAGE_DIR/originals"
