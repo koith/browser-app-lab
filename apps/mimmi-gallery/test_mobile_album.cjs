@@ -62,6 +62,16 @@ if(manifest.albums.some(a=>a.expected&&a.images.length>a.expected))throw Error('
   await page.waitForFunction(()=>!document.querySelector('#lightbox').classList.contains('open'),{timeout:12000});
   await page.locator('#back').click();
   await page.waitForFunction(()=>!document.querySelector('#browse').hidden,{timeout:12000});
+  // Numbered research work MUST open actually verified public photo previews,
+  // never just take the user to a paywalled source listing.
+  const researchCard=page.locator('#albumgrid [data-id="research-no-052"]');
+  await researchCard.click();
+  if(!await page.locator('#detail').isVisible())throw Error('Numbered researched Asuna preview not openable');
+  const researchCount=await page.locator('#detailphotos .photo').count();
+  if(researchCount<10)throw Error('Research NO.052 did not link to real verified Asuna photos: '+researchCount);
+  if(!String(await page.locator('#albumname').innerText()).includes('Asuna'))throw Error('Research edition matched wrong album');
+  await page.locator('#back').click();
+  await page.waitForFunction(()=>!document.querySelector('#browse').hidden,{timeout:12000});
   const v2ph=page.locator('#albumgrid [data-id="v2ph-cream-cow-milk"]');
   await v2ph.click();
   const partial=await page.locator('#albumtotal').innerText();
