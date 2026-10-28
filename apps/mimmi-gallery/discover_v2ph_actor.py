@@ -71,7 +71,7 @@ def verify_album(album,max_samples=10):
     url=album["source"]
     outputs=[]
     pages=[]
-    for page in range(1,4):
+    for page in range(1,9):
         loc=url if page==1 else url+"?page="+str(page)
         try:
             r=S.get(loc,timeout=T)
