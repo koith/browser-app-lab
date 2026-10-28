@@ -27,7 +27,7 @@ async function probe(page,url,policy){
   const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
   const errs=[];page.on('pageerror',err=>errs.push(err.message));
   await page.goto('http://127.0.0.1:8765/mimmi-gallery/',{waitUntil:'domcontentloaded'});
-  await page.waitForFunction(()=>document.querySelector('#summary')?.textContent.includes('개 화보'),{timeout:30000});
+  await page.waitForFunction(()=>document.querySelector('#summary')?.textContent.includes('열람 항목'),{timeout:30000});
   if(await page.locator('#yui-link').getAttribute('target')!=='_blank')throw Error('Yui not new tab');
   const result=[];
   for(const item of seeds){
