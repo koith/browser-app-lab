@@ -1,0 +1,52 @@
+name: Mimmi Broad Research Inventory — Five Public Sources
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '08 10 * * 3,6'
+  push:
+    paths:
+      - apps/mimmi-gallery/discover_source_inventory.py
+      - .github/workflows/mimmi-research-index.yml
+permissions:
+  contents: write
+concurrency:
+  group: mimmi-research-${{ github.ref_name }}
+  cancel-in-progress: false
+jobs:
+  discover:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install requests beautifulsoup4
+      - name: Syntax and fixture checks
+        run: |
+          python -m py_compile apps/mimmi-gallery/discover_source_inventory.py
+          python apps/mimmi-gallery/test_source_inventory.py
+      - name: Scrape five public Mimmi photo work index sites
+        run: python apps/mimmi-gallery/discover_source_inventory.py
+      - name: Confirm source counts and keep real-image count separate
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path('apps/mimmi-gallery/research-catalogue.json').read_text())
+          assert d['summary']['sources_checked']>=5,d['summary']
+          assert d['summary']['numbered_rows']>=45,d['summary']
+          assert d['summary']['photo_files_archived']==0
+          assert len(set(x['number'] for x in d['works']))==len(d['works'])
+          print('MIMMI_RESEARCH_WORKS_VERIFIED',d['summary'])
+          PY
+      - name: Commit research catalogue, no photos nor compressed artifacts
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps/mimmi-gallery/research-catalogue.json
+          if ! git diff --cached --quiet; then
+            git commit -m "Index Mimmi cross-site catalogue leads and distinguish real image counts"
+            git fetch origin "$GITHUB_REF_NAME"
+            git rebase "origin/$GITHUB_REF_NAME"
+            git push origin "HEAD:$GITHUB_REF_NAME"
+          fi
