@@ -67,7 +67,7 @@ def scan_actor(max_pages=8,max_album_candidates=80):
             break
     return list(found.values())[:max_album_candidates],pages
 
-def verify_album(album,max_samples=180,max_album_pages=35):
+def verify_album(album,max_samples=180,max_album_pages=35,browser_scroll=False):
     url=album["source"]
     outputs=[]
     pages=[]
@@ -85,6 +85,15 @@ def verify_album(album,max_samples=180,max_album_pages=35):
             if not MIMMI.search(soup.get_text(" ",strip=True)[:2000]):break
             album["title"]=title[:210]
             urls=photos_on_page(soup,r.url)
+            if browser_scroll and (page==1 or not urls):
+                try:
+                    from reveal_v2ph_album import reveal
+                    extra=reveal(loc,url,max_scrolls=30)
+                    for u in extra:
+                        if u not in urls:urls.append(u)
+                    print("MIMMI_V2PH_BROWSER_SCROLL",album["id"],page,len(extra),len(urls),flush=True)
+                except Exception as error:
+                    print("MIMMI_V2PH_BROWSER_SCROLL_UNAVAILABLE",album["id"],page,type(error).__name__,flush=True)
             new=[x for x in urls if x not in {i["url"] for i in outputs}]
             pages.append({"page":page,"candidate_images":len(new)})
             for img in new:
@@ -101,7 +110,7 @@ def verify_album(album,max_samples=180,max_album_pages=35):
     album.update(samples=outputs,images=[],pages=pages,status="public_previews_verified" if outputs else "source_only")
     return album
 
-def run(max_pages=8,max_albums=70,max_samples=180,max_album_pages=35,batch_index=0,batch_size=8):
+def run(max_pages=8,max_albums=70,max_samples=180,max_album_pages=35,batch_index=0,batch_size=8,browser_scroll=False):
     catalog,pages=scan_actor(max_pages,max_albums)
     known=set()
     try:
@@ -117,7 +126,7 @@ def run(max_pages=8,max_albums=70,max_samples=180,max_album_pages=35,batch_index
         new=new[start:start+batch_size]
     results=[]
     for i,book in enumerate(new,1):
-        result=verify_album(book,max_samples,max_album_pages)
+        result=verify_album(book,max_samples,max_album_pages,browser_scroll=browser_scroll)
         results.append(result)
         print("MIMMI_ACTOR_ALBUM",i,len(new),result["id"],len(result["samples"]),flush=True)
     # Preserve earlier verified photographs when a source responds with 429,
@@ -160,8 +169,9 @@ if __name__=="__main__":
     parser.add_argument("--album-pages",type=int,default=35)
     parser.add_argument("--batch-index",type=int,default=0)
     parser.add_argument("--batch-size",type=int,default=8)
+    parser.add_argument("--scroll",action="store_true",help="Scroll normally in Chromium to reveal public lazy-loaded images")
     args=parser.parse_args()
     if not (1<=args.pages<=12 and 1<=args.albums<=90 and 1<=args.images<=300
             and 1<=args.album_pages<=40 and 0<=args.batch_index<=20 and 1<=args.batch_size<=20):
         parser.error("bounded public photo crawl: images per set, album pages and batched works")
-    run(args.pages,args.albums,args.images,args.album_pages,args.batch_index,args.batch_size)
+    run(args.pages,args.albums,args.images,args.album_pages,args.batch_index,args.batch_size,args.scroll)
