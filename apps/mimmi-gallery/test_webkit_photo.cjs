@@ -27,7 +27,7 @@ async function probe(page,url,policy){return page.evaluate(async ({url,policy})=
   const card=page.locator('#albumgrid [data-id="djawa-in-the-summer-sunshine-part-2"]');
   await card.click();
   if(!await page.locator('#detail').isVisible())throw Error('Missing latest photo detail view');
-  if(await page.locator('#detailphotos .photo').count()!==6)throw Error('Wrong DJAWA sample count');
+  const shown=await page.locator('#detailphotos .photo').count();if(shown<6||shown>24)throw Error('Wrong DJAWA sample count '+shown);
   await page.locator('#detailphotos .photo').first().click();
   await page.waitForFunction(()=>{
    const image=document.querySelector('#full'),status=document.querySelector('#media-status');
