@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "model": "mimmi",
+  "generated_at": "2026-10-28T17:21:04.204168+00:00",
+  "source": "Publicly served Instagram-mirror images; URLs may expire and require fresh verification",
+  "summary": {
+    "public_media_verified": 0,
+    "fresh_verified": 0,
+    "public_post_pages_visited": 0,
+    "private_cloud_archived": 0,
+    "errors": [
+      "HTTPError"
+    ]
+  },
+  "albums": [
+    {
+      "id": "mimmi-instagram-public",
+      "title": "Mimmi (@mimmissu17) · 공개 Instagram",
+      "publisher": "Mimmi",
+      "source": "https://imginn.com/mimmissu17/",
+      "samples": [],
+      "images": [],
+      "advertised_photos": null,
+      "fresh_http_verified": 0,
+      "pages": [],
+      "status": "no_verifiable_public_photos"
+    }
+  ]
+}
