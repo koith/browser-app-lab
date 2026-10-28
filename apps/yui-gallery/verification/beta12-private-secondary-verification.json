@@ -1,0 +1,19 @@
+{
+  "version": "v0.1.0-beta.12",
+  "checked_at": "2026-10-28T05:08:37.194013+00:00",
+  "provider": "Google Drive",
+  "role": "private_secondary_copy_not_primary_gallery_storage",
+  "expected_photograph_files": 402,
+  "expected_original_bytes": 129319596,
+  "individually_uploaded_remote_sha256_verified": 217,
+  "verified_original_bytes": 68589014,
+  "remaining_files": 185,
+  "all_files_complete": false,
+  "all_217_folder_search_metadata_shared_false": true,
+  "verification": "Connector raw-file readback materialized locally; original byte count and SHA-256 compared per individual file. No recompression or image bundles.",
+  "interruption": "Upload work stopped after user supplied evidence that automatic review ended the turn. Review reason was not exposed; no alternate upload path or review bypass attempted.",
+  "private_file_ids_and_urls_published": false,
+  "primary_cloud_gallery_integration_verified": 0,
+  "terabox_uploaded_verified": 0,
+  "physical_iphone_verification": 0
+}

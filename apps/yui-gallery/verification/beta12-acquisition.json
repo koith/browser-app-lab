@@ -25,8 +25,8 @@
   "publisher_original_verified": 0,
   "larger_creator_variants_selected_over_editorial": 4,
   "equal_size_same_frame_variants_consolidated": 1,
-  "publisher_catalogue_sku_records": 28,
-  "primary_publisher_work_records": 5,
+  "publisher_catalogue_sku_records": 31,
+  "primary_publisher_work_records": 8,
   "retained_existing_complete_web_editions": 21,
   "source_pages_and_errors": [
     {
@@ -176,7 +176,6 @@
   "remaining": [
     "complete publisher editions and highest original resolution",
     "unacquired publisher work histories",
-    "CTEE public API returns access-is-abnormal",
     "MOVIE FANTASY requires login",
     "primary authenticated owner storage integration",
     "physical iPhone QA"
@@ -189,5 +188,20 @@
     "missing": 0,
     "stopped_on_empty_cursor_limit": true,
     "exhaustive_coverage_claimed": false
+  },
+  "ctee_public_frontend_recheck": {
+    "source": "https://ctee.kr/place/super_yuisan",
+    "result": "success_with_normal_browser_request_method_headers_and_body",
+    "earlier_error_cause": "Research bridge discarded request semantics; earlier state=error is not evidence of a site authentication gate",
+    "visible_profile_products": 3,
+    "featured_product_also_observed": true,
+    "advertised_profile_item_count": 19,
+    "complete_profile_catalogue_acquired": false,
+    "new_photo_files": 0,
+    "observed_product_urls": [
+      "https://ctee.kr/item/store/108572",
+      "https://ctee.kr/item/store/100904",
+      "https://ctee.kr/item/store/74974"
+    ]
   }
 }

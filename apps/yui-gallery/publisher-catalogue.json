@@ -358,6 +358,39 @@
       "kind": "photobook",
       "full_edition_acquired": false,
       "access_status": "public_title_only_no_full_file_access"
+    },
+    {
+      "publisher": "CTEE",
+      "source_country": "KR",
+      "official_source": true,
+      "title": "☕️🍰 デート・ユイ ☕️🍰[데이트 유이]",
+      "url": "https://ctee.kr/item/store/108572",
+      "kind": "publisher_product_type_not_yet_verified",
+      "full_edition_acquired": false,
+      "access_status": "public_profile_product_metadata_only_no_full_file_access",
+      "evidence": "Normal public frontend response; exact place alias super_yuisan; cover is not acquired photobook"
+    },
+    {
+      "publisher": "CTEE",
+      "source_country": "KR",
+      "official_source": true,
+      "title": "🌱✨ 緑のゆい 🌱✨ [초록유이]",
+      "url": "https://ctee.kr/item/store/100904",
+      "kind": "publisher_product_type_not_yet_verified",
+      "full_edition_acquired": false,
+      "access_status": "public_profile_product_metadata_only_no_full_file_access",
+      "evidence": "Normal public frontend response; exact place alias super_yuisan; cover is not acquired photobook"
+    },
+    {
+      "publisher": "CTEE",
+      "source_country": "KR",
+      "official_source": true,
+      "title": "よるねこ",
+      "url": "https://ctee.kr/item/store/74974",
+      "kind": "publisher_product_type_not_yet_verified",
+      "full_edition_acquired": false,
+      "access_status": "public_profile_product_metadata_only_no_full_file_access",
+      "evidence": "Normal public frontend response; exact place alias super_yuisan; cover is not acquired photobook"
     }
   ],
   "pages": [
@@ -1593,10 +1626,6 @@
   "existing_web_editions_not_new_acquisitions": true,
   "access_failures": [
     {
-      "source": "CTEE public frontend API",
-      "result": "200 response with state=error: access is abnormal; no authentication/access bypass attempted"
-    },
-    {
       "source": "MOVIE FANTASY official notice/shop",
       "result": "login_required; search-index title references only; full content not accessed"
     }
@@ -1622,5 +1651,20 @@
       "url": "https://linktoma.to/store/product/6139312784736256",
       "result": "public response title Your Link; no verified product files obtained"
     }
-  ]
+  ],
+  "public_frontend_recheck": {
+    "source": "https://ctee.kr/place/super_yuisan",
+    "result": "success_with_normal_browser_request_method_headers_and_body",
+    "earlier_error_cause": "Research bridge discarded request semantics; earlier state=error is not evidence of a site authentication gate",
+    "visible_profile_products": 3,
+    "featured_product_also_observed": true,
+    "advertised_profile_item_count": 19,
+    "complete_profile_catalogue_acquired": false,
+    "new_photo_files": 0,
+    "observed_product_urls": [
+      "https://ctee.kr/item/store/108572",
+      "https://ctee.kr/item/store/100904",
+      "https://ctee.kr/item/store/74974"
+    ]
+  }
 }
