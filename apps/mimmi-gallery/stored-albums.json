@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "model": "mimmi",
-  "updated": "2026-10-28T18:50:28Z",
+  "updated": "2026-10-28T18:50:54Z",
   "storage": "physically committed public previews under GitHub Pages; not licensed publisher masters",
   "albums": [
     {
@@ -9729,10 +9729,316 @@
           "width": 1800,
           "height": 2700,
           "number": 4
+        },
+        {
+          "url": "stored-albums/xiutu-public-1190154/ba4da916ad8e44cc7333e418b144e7b40468bfbdb3bff4ee2a247de5aa01ecf5.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/m4etx2tlaqi.jpg",
+          "sha256": "ba4da916ad8e44cc7333e418b144e7b40468bfbdb3bff4ee2a247de5aa01ecf5",
+          "bytes": 616185,
+          "width": 2700,
+          "height": 1800,
+          "number": 5
+        },
+        {
+          "url": "stored-albums/xiutu-public-1190154/cd3a184e57ea56eafd4490e154dfb0085e43794b93831afa4551d2877c1e6a13.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/13exown4jot.jpg",
+          "sha256": "cd3a184e57ea56eafd4490e154dfb0085e43794b93831afa4551d2877c1e6a13",
+          "bytes": 630763,
+          "width": 1800,
+          "height": 2700,
+          "number": 6
+        },
+        {
+          "url": "stored-albums/xiutu-public-1190154/50056b3154b4fbf3a775e36341af6975defd20dbe337fdc43b07bfd954d0c592.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/i4xiihvkeuh.jpg",
+          "sha256": "50056b3154b4fbf3a775e36341af6975defd20dbe337fdc43b07bfd954d0c592",
+          "bytes": 649058,
+          "width": 1800,
+          "height": 2700,
+          "number": 7
+        },
+        {
+          "url": "stored-albums/xiutu-public-1190154/99f81a7d412cf6b4b4d684bcc0f886480905e91c358ffc9d9e86696ae1fa78e9.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/vwlhatphh1s.jpg",
+          "sha256": "99f81a7d412cf6b4b4d684bcc0f886480905e91c358ffc9d9e86696ae1fa78e9",
+          "bytes": 497066,
+          "width": 1800,
+          "height": 2700,
+          "number": 8
+        },
+        {
+          "url": "stored-albums/xiutu-public-1190154/2d102ce1f356531faebf7d00db215ec99b1ef5a7158701af36ef88129193ca7a.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/iir00wxyokj.jpg",
+          "sha256": "2d102ce1f356531faebf7d00db215ec99b1ef5a7158701af36ef88129193ca7a",
+          "bytes": 494062,
+          "width": 1800,
+          "height": 2700,
+          "number": 9
+        },
+        {
+          "url": "stored-albums/xiutu-public-1190154/595b14e120cdc1d60cc3c7ba9845a0fbf778f1e2917e4ff31cab0367a5cb8d04.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/neokagxf3qq.jpg",
+          "sha256": "595b14e120cdc1d60cc3c7ba9845a0fbf778f1e2917e4ff31cab0367a5cb8d04",
+          "bytes": 524271,
+          "width": 1800,
+          "height": 2700,
+          "number": 10
+        },
+        {
+          "url": "stored-albums/xiutu-public-1190154/6dce80353b78778fdf6b63d2e4b837bc0ae00dbcc0d7529b3fd35f826047ed59.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/rxq1xvpgwfg.jpg",
+          "sha256": "6dce80353b78778fdf6b63d2e4b837bc0ae00dbcc0d7529b3fd35f826047ed59",
+          "bytes": 650771,
+          "width": 1800,
+          "height": 2700,
+          "number": 11
+        },
+        {
+          "url": "stored-albums/xiutu-public-1190154/a7b46cc38898c11036ba4cdba757228bbc8267d2e286add02b58f9a8bf996cbd.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/xzrbpjfj2nv.jpg",
+          "sha256": "a7b46cc38898c11036ba4cdba757228bbc8267d2e286add02b58f9a8bf996cbd",
+          "bytes": 605159,
+          "width": 1800,
+          "height": 2700,
+          "number": 12
+        },
+        {
+          "url": "stored-albums/xiutu-public-1190154/62ad0fe5c839f96a87b6aa13236af5b6390417ae5014591db28dac23ff27f4f6.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/ofzfxrnxrnm.jpg",
+          "sha256": "62ad0fe5c839f96a87b6aa13236af5b6390417ae5014591db28dac23ff27f4f6",
+          "bytes": 590813,
+          "width": 2700,
+          "height": 1800,
+          "number": 13
+        },
+        {
+          "url": "stored-albums/xiutu-public-1190154/c7dbdd4b9ecf4cc4b9b632d6eb1ad981d91785e62a1326301695ef16b01834ce.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/qth2ahwbwad.jpg",
+          "sha256": "c7dbdd4b9ecf4cc4b9b632d6eb1ad981d91785e62a1326301695ef16b01834ce",
+          "bytes": 545399,
+          "width": 2700,
+          "height": 1800,
+          "number": 14
+        },
+        {
+          "url": "stored-albums/xiutu-public-1190154/57dff5556732c59124acd32a288534babc0c8a38d261d7c3e0bf454705c9c9ba.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/f1owcp10mko.jpg",
+          "sha256": "57dff5556732c59124acd32a288534babc0c8a38d261d7c3e0bf454705c9c9ba",
+          "bytes": 594516,
+          "width": 2700,
+          "height": 1800,
+          "number": 15
+        },
+        {
+          "url": "stored-albums/xiutu-public-1190154/1adcbc962e8add201f679ebe869741da4be652026164428282d4c4105ea4f9ce.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/4d0eer4jqjm.jpg",
+          "sha256": "1adcbc962e8add201f679ebe869741da4be652026164428282d4c4105ea4f9ce",
+          "bytes": 510469,
+          "width": 1800,
+          "height": 2700,
+          "number": 16
+        },
+        {
+          "url": "stored-albums/xiutu-public-1190154/4adb981e6122d8638f8cda2c915dbd1a1a43d549e1edb49df0be24ca732982a3.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/5ey5ekeroh3.jpg",
+          "sha256": "4adb981e6122d8638f8cda2c915dbd1a1a43d549e1edb49df0be24ca732982a3",
+          "bytes": 542814,
+          "width": 1800,
+          "height": 2700,
+          "number": 17
+        },
+        {
+          "url": "stored-albums/xiutu-public-1190154/3af9b253a6e9a2d0007bf5a1091e3a9f9a68e2f4a0b42f6673bc1fee5b8be5f3.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/1ysqip25g0c.jpg",
+          "sha256": "3af9b253a6e9a2d0007bf5a1091e3a9f9a68e2f4a0b42f6673bc1fee5b8be5f3",
+          "bytes": 547105,
+          "width": 1800,
+          "height": 2700,
+          "number": 18
+        },
+        {
+          "url": "stored-albums/xiutu-public-1190154/64234df1e669f99d19a290198431cbb6ab365690bedb6685f31706f41641f636.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/0kcf3ugvl1n.jpg",
+          "sha256": "64234df1e669f99d19a290198431cbb6ab365690bedb6685f31706f41641f636",
+          "bytes": 502313,
+          "width": 2700,
+          "height": 1800,
+          "number": 19
+        },
+        {
+          "url": "stored-albums/xiutu-public-1190154/cbc37ca741501dcb7b2a41f388c3d18d02cc162d5f2cc348a01938e598c05168.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/kgyhlhnanvq.jpg",
+          "sha256": "cbc37ca741501dcb7b2a41f388c3d18d02cc162d5f2cc348a01938e598c05168",
+          "bytes": 623490,
+          "width": 2700,
+          "height": 1800,
+          "number": 20
+        },
+        {
+          "url": "stored-albums/xiutu-public-1190154/7912fe98d90b90a612a42922adf5c41d24a55695f4346ec9fcf45156568d9817.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/53i2vyfvqsq.jpg",
+          "sha256": "7912fe98d90b90a612a42922adf5c41d24a55695f4346ec9fcf45156568d9817",
+          "bytes": 557241,
+          "width": 1800,
+          "height": 2700,
+          "number": 21
+        },
+        {
+          "url": "stored-albums/xiutu-public-1190154/7d23d3bca39da6c09e83c75cc1dc1b7b757210c93b363a0b081c2c644b87eb89.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/eeruryzwh2d.jpg",
+          "sha256": "7d23d3bca39da6c09e83c75cc1dc1b7b757210c93b363a0b081c2c644b87eb89",
+          "bytes": 604059,
+          "width": 1800,
+          "height": 2700,
+          "number": 22
+        },
+        {
+          "url": "stored-albums/xiutu-public-1190154/6f63e7e90d35d9630a89c1a3a972054f58d9f844ec7464da12a0e9c2eab37063.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/iqhevuowhzq.jpg",
+          "sha256": "6f63e7e90d35d9630a89c1a3a972054f58d9f844ec7464da12a0e9c2eab37063",
+          "bytes": 570047,
+          "width": 1800,
+          "height": 2700,
+          "number": 23
+        },
+        {
+          "url": "stored-albums/xiutu-public-1190154/9d17db102ada34d7d19088ca1be57cd05ddb45decb9f104e4e6e2f0068390d57.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/ac3rgn1we5o.jpg",
+          "sha256": "9d17db102ada34d7d19088ca1be57cd05ddb45decb9f104e4e6e2f0068390d57",
+          "bytes": 578284,
+          "width": 2700,
+          "height": 1800,
+          "number": 24
+        },
+        {
+          "url": "stored-albums/xiutu-public-1190154/365c7e351690500c57c7f3bd290b18717e852cf3beabda01867dad21c054180f.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/d4p5ijso0vv.jpg",
+          "sha256": "365c7e351690500c57c7f3bd290b18717e852cf3beabda01867dad21c054180f",
+          "bytes": 528715,
+          "width": 2700,
+          "height": 1800,
+          "number": 25
+        },
+        {
+          "url": "stored-albums/xiutu-public-1190154/7fd42df03525583a804fa090b57a28976b7643f61e025a3470e31a8b6091137a.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/qq4ts4k3fz2.jpg",
+          "sha256": "7fd42df03525583a804fa090b57a28976b7643f61e025a3470e31a8b6091137a",
+          "bytes": 499882,
+          "width": 2700,
+          "height": 1800,
+          "number": 26
+        },
+        {
+          "url": "stored-albums/xiutu-public-1190154/502ea09fce9617e77973adc39b7a94a8f3cefe7ce9fec2cf3ccef2d0ab2f9c24.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/vwxw0d2osfj.jpg",
+          "sha256": "502ea09fce9617e77973adc39b7a94a8f3cefe7ce9fec2cf3ccef2d0ab2f9c24",
+          "bytes": 533525,
+          "width": 2700,
+          "height": 1800,
+          "number": 27
+        },
+        {
+          "url": "stored-albums/xiutu-public-1190154/76ab7a94d02a28eeedf5063b471247dfed021c6b5c98fe08e0cad7ee18b93bd4.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/ro5zuuv2qfm.jpg",
+          "sha256": "76ab7a94d02a28eeedf5063b471247dfed021c6b5c98fe08e0cad7ee18b93bd4",
+          "bytes": 581567,
+          "width": 2700,
+          "height": 1800,
+          "number": 28
+        },
+        {
+          "url": "stored-albums/xiutu-public-1190154/5ec7a2bb227134bec777c06b182e1b5556d158f570cabd86b0b48070022f76b5.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/fmzge3lopwm.jpg",
+          "sha256": "5ec7a2bb227134bec777c06b182e1b5556d158f570cabd86b0b48070022f76b5",
+          "bytes": 577964,
+          "width": 2700,
+          "height": 1800,
+          "number": 29
+        },
+        {
+          "url": "stored-albums/xiutu-public-1190154/a3185e6275445b079e29a301d69cd309c6317e5bdb25014f5d61ce6e92160121.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/jj4tphyucor.jpg",
+          "sha256": "a3185e6275445b079e29a301d69cd309c6317e5bdb25014f5d61ce6e92160121",
+          "bytes": 621243,
+          "width": 2700,
+          "height": 1800,
+          "number": 30
+        },
+        {
+          "url": "stored-albums/xiutu-public-1190154/ce5c7899cf897894531305d4cc600ed29feaa0f34d422ded32956705ca2218c5.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/tav4oyrukas.jpg",
+          "sha256": "ce5c7899cf897894531305d4cc600ed29feaa0f34d422ded32956705ca2218c5",
+          "bytes": 506467,
+          "width": 2700,
+          "height": 1800,
+          "number": 31
+        },
+        {
+          "url": "stored-albums/xiutu-public-1190154/d3ae42553b9cd7faf5d05833d6624e329b37d3d9ba8206c480fd24defc73ec82.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/tujk01w5cjq.jpg",
+          "sha256": "d3ae42553b9cd7faf5d05833d6624e329b37d3d9ba8206c480fd24defc73ec82",
+          "bytes": 499448,
+          "width": 1800,
+          "height": 2700,
+          "number": 32
+        },
+        {
+          "url": "stored-albums/xiutu-public-1190154/db68ce85d81371b08e7222ef6fb5ed20a38dcfedea2b90343bc633f5f4dcb04a.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/v0fgmwea4jb.jpg",
+          "sha256": "db68ce85d81371b08e7222ef6fb5ed20a38dcfedea2b90343bc633f5f4dcb04a",
+          "bytes": 435675,
+          "width": 2700,
+          "height": 1800,
+          "number": 33
+        },
+        {
+          "url": "stored-albums/xiutu-public-1190154/e3e8d70b54bb05cd6b9bd526131b23251d3f1434a142af8e50f5e75a62c764cc.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/jaezicsrywd.jpg",
+          "sha256": "e3e8d70b54bb05cd6b9bd526131b23251d3f1434a142af8e50f5e75a62c764cc",
+          "bytes": 558708,
+          "width": 2700,
+          "height": 1800,
+          "number": 34
+        },
+        {
+          "url": "stored-albums/xiutu-public-1190154/3d97f75496d0daf3c4b79e6c2bf6543878d75fe8077a2bfa831754f124f14987.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/cy3jw4wnz52.jpg",
+          "sha256": "3d97f75496d0daf3c4b79e6c2bf6543878d75fe8077a2bfa831754f124f14987",
+          "bytes": 546581,
+          "width": 1800,
+          "height": 2700,
+          "number": 35
+        },
+        {
+          "url": "stored-albums/xiutu-public-1190154/febbb3e5ff4e3370dca4c3672b458e3d3d9ae7e737d9e1fce81498ea3d7aa81f.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/ghj45d55jor.jpg",
+          "sha256": "febbb3e5ff4e3370dca4c3672b458e3d3d9ae7e737d9e1fce81498ea3d7aa81f",
+          "bytes": 490133,
+          "width": 1800,
+          "height": 2700,
+          "number": 36
+        },
+        {
+          "url": "stored-albums/xiutu-public-1190154/b15b0832282ef9242853851702ae4cb7e4c7fbdc7990f4e7eaa36cf04462d276.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/ndcayiizqev.jpg",
+          "sha256": "b15b0832282ef9242853851702ae4cb7e4c7fbdc7990f4e7eaa36cf04462d276",
+          "bytes": 510634,
+          "width": 2700,
+          "height": 1800,
+          "number": 37
+        },
+        {
+          "url": "stored-albums/xiutu-public-1190154/48587b2d0d4235ee17e6e0766965e1fa817021cd70f20ebea1218f4d017005bb.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/aznasyif2bf.jpg",
+          "sha256": "48587b2d0d4235ee17e6e0766965e1fa817021cd70f20ebea1218f4d017005bb",
+          "bytes": 513021,
+          "width": 2700,
+          "height": 1800,
+          "number": 38
         }
       ],
       "status": "public_previews_only_not_complete"
     }
   ],
-  "physical_verified_image_count": 1044
+  "physical_verified_image_count": 1078
 }
