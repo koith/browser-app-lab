@@ -10,7 +10,7 @@
     "instagram": "mimmissu17"
   },
   "version": "v0.1.0-mimmi.2",
-  "generated_at": "2026-10-28T14:55:52.230524+00:00",
+  "generated_at": "2026-10-28T14:52:04.292355+00:00",
   "primary_source": "https://djawaphoto.com/portfolio-cat/mimmi/",
   "archive_pages": [
     {
@@ -895,8 +895,8 @@
           "url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_color_1.jpg",
           "width": 1800,
           "height": 1200,
-          "bytes": 917057,
-          "sha256": "993a4bc6fd168f2a5c540543bdd76576cf685661401149ea3e3f52fdc2ef4c0f",
+          "bytes": 1050166,
+          "sha256": "be83d9bf56f83dade695bcb20ff4dadd8900534f7e93866a5cad2f3d6e612d34",
           "hosting": "official_publisher",
           "saved_to_private_cloud": false
         },
@@ -1199,8 +1199,8 @@
           "url": "https://djawaphoto.com/wp-content/uploads/2023/09/sample_cv-2.jpg",
           "width": 1200,
           "height": 1800,
-          "bytes": 953895,
-          "sha256": "6e0c3a6747703371bd95d7443a70dd2377f26b487ee7fbd9a59a513f62210cce",
+          "bytes": 1042206,
+          "sha256": "d93165e1aee4eedc5a05bb405e50e4dd95eb34cd1f20379eb33d8d6681ccf901",
           "hosting": "official_publisher",
           "saved_to_private_cloud": false
         },
@@ -1226,8 +1226,8 @@
           "url": "https://djawaphoto.com/wp-content/uploads/2023/09/sample_03-1.jpg",
           "width": 1200,
           "height": 1800,
-          "bytes": 733058,
-          "sha256": "76b139aa2173efb01cd1686d590815cbf75ea96d62dc651eded8e5583de19248",
+          "bytes": 663543,
+          "sha256": "39f445407cc4dc4019a39eb645340a3ffc0318617cc458c754fcf35c823cc050",
           "hosting": "official_publisher",
           "saved_to_private_cloud": false
         },
@@ -1235,8 +1235,8 @@
           "url": "https://djawaphoto.com/wp-content/uploads/2023/09/sample_04-1.jpg",
           "width": 1200,
           "height": 1800,
-          "bytes": 914406,
-          "sha256": "3b9433102e9a155f3ff74b842499a6112c436186cad8860ec595f30e8005f250",
+          "bytes": 832644,
+          "sha256": "1d3059223cc7d54f9a97d79d680ad33de1da93b9f313af288c06b5db497b5cba",
           "hosting": "official_publisher",
           "saved_to_private_cloud": false
         },
@@ -1584,8 +1584,8 @@
           "url": "https://djawaphoto.com/wp-content/uploads/2023/03/sample_05-2.jpg",
           "width": 1200,
           "height": 1800,
-          "bytes": 627636,
-          "sha256": "6341533c517b3b1f68a637e9262f9364594f26eb145245f12bb8e35a403f3ed5",
+          "bytes": 684635,
+          "sha256": "e500511875fcbf323b88e3bad8c2dad42fd8c838567a4ebaff21231b71bdb57d",
           "hosting": "official_publisher",
           "saved_to_private_cloud": false
         }
