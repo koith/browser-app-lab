@@ -128,7 +128,7 @@ main{max-width:1250px;margin:auto;padding:26px 16px 90px}
 </main>
 <dialog id="viewer" class="viewer" aria-label="사진 전체 화면">
  <div class="viewer-bar"><span id="viewer-title" class="viewer-title"></span><button id="viewer-close" type="button">닫기 ×</button></div>
- <div class="viewer-image-area"><img id="viewer-image" alt="전체화면 사진" hidden><div id="viewer-error" class="viewer-error" hidden>이미지 주소가 응답하지 않습니다.<div><a id="viewer-origin" href="#" target="_blank" rel="noopener noreferrer">출처 페이지에서 보기 ↗</a></div></div></div>
+ <div class="viewer-image-area"><img id="viewer-image" alt="전체화면 사진" hidden><div id="viewer-error" class="viewer-error" hidden>현재 브라우저에서 외부 이미지 서버의 응답을 받지 못했습니다.<div><a id="viewer-direct" href="#" target="_blank" rel="noopener noreferrer">사진 주소 직접 열기 ↗</a></div><div><a id="viewer-origin" href="#" target="_blank" rel="noopener noreferrer">화보 출처 페이지 ↗</a></div></div></div>
  <div class="viewer-bottom"><button id="viewer-prev" type="button">← 이전</button><span id="viewer-position"></span><button id="viewer-next" type="button">다음 →</button></div>
 </dialog>
 <script>
@@ -323,7 +323,7 @@ function openPhoto(i,push=true){
  $('viewer-error').hidden=true;image.hidden=true;image.onload=null;image.onerror=null;
  image.removeAttribute('src');
  const source=safeUrl(state.active.source);$('viewer-origin').href=source||'#';
- const url=safeUrl(p.url);
+ const url=safeUrl(p.url);$('viewer-direct').href=url||source||'#';
  if(url){
   let attempt=0;
   const policies=['strict-origin-when-cross-origin','no-referrer','origin'];
