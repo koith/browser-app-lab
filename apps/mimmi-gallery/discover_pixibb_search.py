@@ -17,7 +17,7 @@ from bs4 import BeautifulSoup
 
 ROOT=Path(__file__).resolve().parent
 BASE="https://cosplay.pixibb.com"
-TERMS=["Mimmi","밈미","Mimmissu17","Miss u DJAWA","ミミ DJAWA","CreamSoda Mimmi"]
+TERMS=["Mimmi","밈미","Mimmissu17","Miss u DJAWA","ミミ DJAWA","CreamSoda Mimmi","밋슈","DJAWA Mimmi","Mimmi COSPLAY","Mimmi Artgravia","Mimmi Cosplay 2025","ミンミ DJAWA","Mimmi 写真"]
 USER_AGENT="Mozilla/5.0 (compatible; PublicMimmiAlbumSearch/1.0)"
 S=requests.Session()
 S.headers.update({"User-Agent":USER_AGENT,"Accept":"text/html,application/xhtml+xml"})
@@ -72,7 +72,7 @@ def inspect_work(url):
             "publisher":"DJAWA" if "DJAWA" in title.upper() else "other public photographer",
             "source_evidence":"search_link_and_live_article_heading"}
 
-def search(max_search_pages=2,max_candidates=80):
+def search(max_search_pages=5,max_candidates=130):
     found={};status=[]
     for word in TERMS:
         for page in range(1,max_search_pages+1):
@@ -115,8 +115,8 @@ def search(max_search_pages=2,max_candidates=80):
 
 if __name__=="__main__":
     p=argparse.ArgumentParser()
-    p.add_argument("--pages",type=int,default=2)
-    p.add_argument("--limit",type=int,default=80)
+    p.add_argument("--pages",type=int,default=5)
+    p.add_argument("--limit",type=int,default=130)
     args=p.parse_args()
-    if not 1<=args.pages<=5 or not 1<=args.limit<=150:p.error("bounded public work search")
+    if not 1<=args.pages<=7 or not 1<=args.limit<=160:p.error("bounded public work search")
     search(args.pages,args.limit)
