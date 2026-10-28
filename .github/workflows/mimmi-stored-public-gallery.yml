@@ -1,35 +1,26 @@
 name: Mimmi Yui-Style Physically Stored Gallery
 on:
   workflow_dispatch:
-  # github-actions[bot] source index commits do NOT trigger ordinary push workflows.
-  # A workflow_run completion DOES trigger this real-file storage pipeline.
-  workflow_run:
-    workflows:
-      - Mimmi Multi-Page Public Photo Crawl
-      - Mimmi DJAWA Public Promotional Image Search
-      - Mimmi Official Social Public Photo Discovery
-      - Mimmi Free Official Portfolio Discovery
-      - Mimmi Free V2PH Public Gallery Photo Discovery
-      - Mimmi V2PH Actor Wide Discovery
-      - Mimmi Secondary CreamSoda Public Gallery Crawl
-    types: [completed]
+  # Fast catch-up with small durable commits instead of one enormous push.
   schedule:
-    - cron: '25 3,9,15,21 * * *'
+    - cron: '25 0,3,6,9,12,15,18,21 * * *'
   push:
     paths:
       - 'apps/mimmi-gallery/publish_stored_public.py'
-      - 'apps/mimmi-gallery/source-viewer-albums.json'
+      - 'apps/mimmi-gallery/test_xiutu_physical_store.py'
       - '.github/workflows/mimmi-stored-public-gallery.yml'
 permissions:
   contents: write
+  actions: write
 concurrency:
   group: mimmi-physical-publish
-  cancel-in-progress: false
+  # Replace one currently stalled large 100+ MB commit with durable small pushes.
+  cancel-in-progress: true
 jobs:
   publish-real-public-previews:
-    if: github.ref == 'refs/heads/main' && (github.event_name != 'workflow_run' || (github.event.workflow_run.head_branch == 'main' && github.event.workflow_run.conclusion == 'success'))
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
-    timeout-minutes: 90
+    timeout-minutes: 115
     steps:
       - uses: actions/checkout@v4
         with:
@@ -37,57 +28,63 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - name: Install file/image verification
-        run: python -m pip install requests Pillow
-      - name: Check free Xiutu publisher really writes and SHA-verifies files
-        run: python apps/mimmi-gallery/test_xiutu_physical_store.py
-      - name: Save multiple batches of SHA-verified real public photo files (not URLs)
-        shell: bash
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install only free photo and iPhone browser QA software
         run: |
-          # Keep each bot commit small enough to push reliably; repeat every 6h.
-          for pass in 1 2; do
-            before=$(python -c "import json;from pathlib import Path;p=Path('apps/mimmi-gallery/stored-albums.json');d=json.loads(p.read_text());print(sum(len(a.get('images',[])) for a in d['albums']))")
-            python apps/mimmi-gallery/publish_stored_public.py --limit 250 --budget-mb 50 --authorized-public-rehost
-            after=$(python -c "import json;from pathlib import Path;p=Path('apps/mimmi-gallery/stored-albums.json');d=json.loads(p.read_text());print(sum(len(a.get('images',[])) for a in d['albums']))")
-            echo "MIMMI_REAL_ARCHIVE_BATCH=$pass PHYSICAL_FILES=$after NEW=$((after-before))"
-            if [[ "$after" -le "$before" ]]; then
-              echo "No additional unchanged-byte images available within the public storage budget."
-              break
-            fi
-          done
-      - name: Recheck all archived image bytes against manifest
-        run: |
-          python - <<'PY'
-          from pathlib import Path
-          import hashlib,json
-          root=Path('apps/mimmi-gallery')
-          data=json.loads((root/'stored-albums.json').read_text())
-          n=0
-          for album in data['albums']:
-              for p in album['images']:
-                  path=root/p['url']
-                  assert path.is_file() and path.stat().st_size==p['bytes']
-                  assert hashlib.sha256(path.read_bytes()).hexdigest()==p['sha256']
-                  n+=1
-          assert n>0
-          print('MIMMI_PHYSICALLY_STORED_VERIFIED',n)
-          PY
-      - name: iPhone-style local file gallery QA (Chromium and WebKit)
-        run: |
+          python -m pip install 'requests==2.32.5' 'Pillow==11.3.0'
           npm install --no-save playwright@1.58.2
           npx playwright install --with-deps chromium webkit
-          python -m http.server 8765 --directory apps >/tmp/mimmi-static.log 2>&1 &
-          node apps/mimmi-gallery/test_mobile_album.cjs
-          node apps/mimmi-gallery/test_webkit_photo.cjs
-      - name: Commit real individual files and their physical index
-        if: github.ref == 'refs/heads/main'
+      - name: Validate true image writes, pinned album matches and SHA idempotence
+        run: python apps/mimmi-gallery/test_xiutu_physical_store.py
+      - name: Save, rehash, browser-render and commit SMALL batches independently
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
+          set -euo pipefail
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add apps/mimmi-gallery/stored-albums/ apps/mimmi-gallery/stored-albums.json
-          if ! git diff --cached --quiet; then
-            git commit -m "Store and serve actual Mimmi public preview image bytes"
-            git fetch origin main
-            git rebase origin/main
-            git push origin HEAD:main
-          fi
+          python -m http.server 8765 --directory apps >/tmp/mimmi-static.log 2>&1 &
+          did_push=0
+          # GITHUB_TOKEN bot commits do not start Pages workflows from push.
+          # workflow_dispatch is explicitly allowed and does NOT require PAT.
+          trap 'if [[ "$did_push" == "1" ]]; then gh workflow run static.yml --ref main; fi' EXIT
+          for pass in 1 2 3 4 5 6 7 8 9 10 11 12; do
+            before=$(python -c "import json;from pathlib import Path;d=json.loads(Path('apps/mimmi-gallery/stored-albums.json').read_text());print(sum(len(a.get('images',[])) for a in d['albums']))")
+            python apps/mimmi-gallery/publish_stored_public.py --limit 120 --budget-mb 18 --authorized-public-rehost
+            after=$(python -c "import json;from pathlib import Path;d=json.loads(Path('apps/mimmi-gallery/stored-albums.json').read_text());print(sum(len(a.get('images',[])) for a in d['albums']))")
+            echo "MIMMI_PHYSICAL_COMMIT_BATCH=$pass BEFORE=$before AFTER=$after NEW=$((after-before))"
+            if [[ "$after" -le "$before" ]]; then
+              echo "No more verified downloadable public files (or Pages storage capacity reached)"
+              break
+            fi
+            python - <<'PY'
+          import json,hashlib
+          from pathlib import Path
+          root=Path('apps/mimmi-gallery')
+          d=json.loads((root/'stored-albums.json').read_text())
+          n=0
+          for a in d['albums']:
+              for p in a['images']:
+                  f=root/p['url']
+                  assert f.is_file() and f.stat().st_size==p['bytes'],str(f)
+                  assert hashlib.sha256(f.read_bytes()).hexdigest()==p['sha256'],str(f)
+                  n+=1
+          assert n==d['physical_verified_image_count'] and n>0
+          print('MIMMI_PHYSICAL_COMMITTED_IMAGE_SHA_VALID',n)
+          PY
+            # If any photo cannot render in mobile Chrome/WebKit, DO NOT commit it.
+            node apps/mimmi-gallery/test_mobile_album.cjs
+            node apps/mimmi-gallery/test_webkit_photo.cjs
+            git add apps/mimmi-gallery/stored-albums/ apps/mimmi-gallery/stored-albums.json
+            if ! git diff --cached --quiet; then
+              git commit -m "Store Mimmi real gallery image batch $pass, $after total SHA-verified photos"
+              git fetch origin main
+              git rebase origin/main
+              git push origin HEAD:main
+              did_push=1
+            fi
+          done
+          echo "### Mimmi actually stored image files: $(python -c "import json;from pathlib import Path;d=json.loads(Path('apps/mimmi-gallery/stored-albums.json').read_text());print(d['physical_verified_image_count'])")" >> "$GITHUB_STEP_SUMMARY"
