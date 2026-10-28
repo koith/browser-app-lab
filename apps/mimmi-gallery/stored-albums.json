@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "model": "mimmi",
-  "updated": "2026-10-28T23:22:21Z",
+  "updated": "2026-10-28T23:22:52Z",
   "storage": "physically committed public previews under GitHub Pages; not licensed publisher masters",
   "albums": [
     {
@@ -19737,6 +19737,24 @@
           "width": 1800,
           "height": 2700,
           "number": 8
+        },
+        {
+          "url": "stored-albums/v2ph-actor-an65656a/7366b877672c3cc7fb500af5aafb89569cf2da3341e580adc8a82d54492fe3bf.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/myblu7OgZlXAaIbn.jpg",
+          "sha256": "7366b877672c3cc7fb500af5aafb89569cf2da3341e580adc8a82d54492fe3bf",
+          "bytes": 640386,
+          "width": 1800,
+          "height": 2700,
+          "number": 9
+        },
+        {
+          "url": "stored-albums/v2ph-actor-an65656a/8e918762505977340fef15f6cbfc56cde4dfa4aa58fd88238c3eb0e039cd95dc.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/CH6yhfuHDt8XAWE4.jpg",
+          "sha256": "8e918762505977340fef15f6cbfc56cde4dfa4aa58fd88238c3eb0e039cd95dc",
+          "bytes": 528369,
+          "width": 1800,
+          "height": 2700,
+          "number": 10
         }
       ],
       "status": "public_previews_only_not_complete"
@@ -19758,7 +19776,205 @@
         }
       ],
       "status": "public_previews_only_not_complete"
+    },
+    {
+      "id": "djawa-my-summer-vacation",
+      "title": "My Summer Vacation",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/my-summer-vacation/",
+      "images": [
+        {
+          "url": "stored-albums/djawa-my-summer-vacation/8b98d542e62ad1a4a28b55226428372d3077681ec52daeff19af501299ad584d.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2023/08/sample_cv.jpg",
+          "sha256": "8b98d542e62ad1a4a28b55226428372d3077681ec52daeff19af501299ad584d",
+          "bytes": 1042645,
+          "width": 1200,
+          "height": 1800,
+          "number": 1
+        },
+        {
+          "url": "stored-albums/djawa-my-summer-vacation/170bf79f495613835771bb886cecd39c0772a3fc1fce03febaab2fe39542544d.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2023/08/sample_01-1.jpg",
+          "sha256": "170bf79f495613835771bb886cecd39c0772a3fc1fce03febaab2fe39542544d",
+          "bytes": 749059,
+          "width": 1800,
+          "height": 1200,
+          "number": 2
+        },
+        {
+          "url": "stored-albums/djawa-my-summer-vacation/731633dfa866dcf1f441fbbb971600d79743de5890d2858278c8638ffd1edf7f.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2023/08/sample_02-1.jpg",
+          "sha256": "731633dfa866dcf1f441fbbb971600d79743de5890d2858278c8638ffd1edf7f",
+          "bytes": 942460,
+          "width": 1200,
+          "height": 1800,
+          "number": 3
+        },
+        {
+          "url": "stored-albums/djawa-my-summer-vacation/bd31f08acde009ebfdd6b27a272e4020a1fb18409c9d9840cf061df00d4b5cee.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2023/08/sample_03-1.jpg",
+          "sha256": "bd31f08acde009ebfdd6b27a272e4020a1fb18409c9d9840cf061df00d4b5cee",
+          "bytes": 765907,
+          "width": 1200,
+          "height": 1800,
+          "number": 4
+        },
+        {
+          "url": "stored-albums/djawa-my-summer-vacation/ee5d4f541dad6af714c5464d821dd28f19fb83c6710b7e0765e84cb0f29cd1b7.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2023/08/sample_04-1.jpg",
+          "sha256": "ee5d4f541dad6af714c5464d821dd28f19fb83c6710b7e0765e84cb0f29cd1b7",
+          "bytes": 873959,
+          "width": 1200,
+          "height": 1800,
+          "number": 5
+        },
+        {
+          "url": "stored-albums/djawa-my-summer-vacation/3b0db9a2ce7c0134b7b56d54f827fb90fc0ff40943244019064bb19cb6184954.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2023/08/sample_05-1.jpg",
+          "sha256": "3b0db9a2ce7c0134b7b56d54f827fb90fc0ff40943244019064bb19cb6184954",
+          "bytes": 771350,
+          "width": 1200,
+          "height": 1800,
+          "number": 6
+        },
+        {
+          "url": "stored-albums/djawa-my-summer-vacation/c9a58a22ab846e16ad7703f6189bce00e6b7a1ec59464c6b171e4824f44068fc.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2023/08/sample_06.jpg",
+          "sha256": "c9a58a22ab846e16ad7703f6189bce00e6b7a1ec59464c6b171e4824f44068fc",
+          "bytes": 810482,
+          "width": 1200,
+          "height": 1800,
+          "number": 7
+        },
+        {
+          "url": "stored-albums/djawa-my-summer-vacation/1b9529e1b195b623cf6f2f837b7a56b36d99a5ce367b7a6fe9e586df4ab28219.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2023/08/sample_07.jpg",
+          "sha256": "1b9529e1b195b623cf6f2f837b7a56b36d99a5ce367b7a6fe9e586df4ab28219",
+          "bytes": 1173460,
+          "width": 1800,
+          "height": 1200,
+          "number": 8
+        },
+        {
+          "url": "stored-albums/djawa-my-summer-vacation/f86565088e760b5efc31458cbfbf033fac1fe9818e1456a83440f7ad05ac108a.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2023/08/sample_08.jpg",
+          "sha256": "f86565088e760b5efc31458cbfbf033fac1fe9818e1456a83440f7ad05ac108a",
+          "bytes": 930066,
+          "width": 1800,
+          "height": 1200,
+          "number": 9
+        }
+      ],
+      "status": "public_previews_only_not_complete"
+    },
+    {
+      "id": "v2ph-actor-z76xe74a",
+      "title": "Realise Loveliness",
+      "publisher": "DJAWA",
+      "source": "https://www.v2ph.com/album/z76xe74a.html",
+      "images": [
+        {
+          "url": "stored-albums/v2ph-actor-z76xe74a/c1f13fa1ee847274d42bc5b581773013ed5f002fe963e1396c56c68d79941be9.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/iyTbxF3ROi6e2q5r.jpg",
+          "sha256": "c1f13fa1ee847274d42bc5b581773013ed5f002fe963e1396c56c68d79941be9",
+          "bytes": 812573,
+          "width": 1800,
+          "height": 2700,
+          "number": 1
+        },
+        {
+          "url": "stored-albums/v2ph-actor-z76xe74a/8f9ac636decffa5393439c5eabf0203b395c8d10817a7809d05c2cd816b5d3f2.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/bZj2N-DW7ZeQqVm8.jpg",
+          "sha256": "8f9ac636decffa5393439c5eabf0203b395c8d10817a7809d05c2cd816b5d3f2",
+          "bytes": 946248,
+          "width": 2700,
+          "height": 1800,
+          "number": 2
+        },
+        {
+          "url": "stored-albums/v2ph-actor-z76xe74a/e1b47d3abb60323cabfc576cd181496881fbdaad7333ae7e6b0584a7cb65f752.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/7KKsWj5HtqbJKdB3.jpg",
+          "sha256": "e1b47d3abb60323cabfc576cd181496881fbdaad7333ae7e6b0584a7cb65f752",
+          "bytes": 901900,
+          "width": 1800,
+          "height": 2700,
+          "number": 3
+        },
+        {
+          "url": "stored-albums/v2ph-actor-z76xe74a/98916afef4e716016ef025609a20e48fdd32d22fd5bcf86ba9e1c925f16f0339.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/AwB1gxAt5jNIvial.jpg",
+          "sha256": "98916afef4e716016ef025609a20e48fdd32d22fd5bcf86ba9e1c925f16f0339",
+          "bytes": 919005,
+          "width": 1800,
+          "height": 2700,
+          "number": 4
+        },
+        {
+          "url": "stored-albums/v2ph-actor-z76xe74a/dc262adadf2a4297a6e809c5b711db631c2969ea3ec77f9950cd17699fd7ca10.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/dIYn9Xq4Z8ozEn90.jpg",
+          "sha256": "dc262adadf2a4297a6e809c5b711db631c2969ea3ec77f9950cd17699fd7ca10",
+          "bytes": 918458,
+          "width": 1800,
+          "height": 2700,
+          "number": 5
+        },
+        {
+          "url": "stored-albums/v2ph-actor-z76xe74a/eaffaaf6b63a4109341c5abb02a88baa3d8f1df8d524ee1dcb391e65ab3376ee.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/HDb1SWKMnNNOqLJk.jpg",
+          "sha256": "eaffaaf6b63a4109341c5abb02a88baa3d8f1df8d524ee1dcb391e65ab3376ee",
+          "bytes": 924833,
+          "width": 1800,
+          "height": 2700,
+          "number": 6
+        },
+        {
+          "url": "stored-albums/v2ph-actor-z76xe74a/4265222bb799e097ecab5ba82a487cb1ee75ce2ffec0defec8d1f2d976c1d32a.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/L6y3HG6DHjD9x_N0.jpg",
+          "sha256": "4265222bb799e097ecab5ba82a487cb1ee75ce2ffec0defec8d1f2d976c1d32a",
+          "bytes": 926169,
+          "width": 2700,
+          "height": 1800,
+          "number": 7
+        },
+        {
+          "url": "stored-albums/v2ph-actor-z76xe74a/2828519cbfb85b5e59b7046129a446b1ea3b9e0c20437cd4429ac23e67842dd8.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/ztrDtGcjgepoGghF.jpg",
+          "sha256": "2828519cbfb85b5e59b7046129a446b1ea3b9e0c20437cd4429ac23e67842dd8",
+          "bytes": 1094268,
+          "width": 1800,
+          "height": 2700,
+          "number": 8
+        },
+        {
+          "url": "stored-albums/v2ph-actor-z76xe74a/5156fd7d492ddd9993df0a2997d592ac64f49ccd76805e6295e757a4a0b35dd7.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/1hKgphsCBNhHnGGr.jpg",
+          "sha256": "5156fd7d492ddd9993df0a2997d592ac64f49ccd76805e6295e757a4a0b35dd7",
+          "bytes": 901445,
+          "width": 2700,
+          "height": 1800,
+          "number": 9
+        }
+      ],
+      "status": "public_previews_only_not_complete"
+    },
+    {
+      "id": "v2ph-sukajan-gal",
+      "title": "Sukajan Gal · 공개 웹판",
+      "publisher": "DJAWA",
+      "source": "https://www.v2ph.com/album/axm7n43z.html",
+      "images": [
+        {
+          "url": "stored-albums/v2ph-sukajan-gal/2a5598de148a87733e5e4a41923372f527adc47fb9329e6d8ab289fb92160211.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/OTWu16__bs8dZxAq.jpg",
+          "sha256": "2a5598de148a87733e5e4a41923372f527adc47fb9329e6d8ab289fb92160211",
+          "bytes": 1295597,
+          "width": 1800,
+          "height": 2700,
+          "number": 1
+        }
+      ],
+      "status": "public_previews_only_not_complete"
     }
   ],
-  "physical_verified_image_count": 2141
+  "physical_verified_image_count": 2162
 }
