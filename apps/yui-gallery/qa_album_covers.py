@@ -1,4 +1,4 @@
-"""Verify actual cover images keep their reviewed face regions in the card."""
+"""Verify covers fill their cards and keep reviewed face regions visible."""
 import argparse
 import asyncio
 import json
@@ -45,18 +45,22 @@ async def run(args):
               return {x:r.x,y:r.y,width:r.width,height:r.height,clip:{x:clip.x,y:clip.y,width:clip.width,height:clip.height},fit:style.objectFit,position:style.objectPosition.split(' ').map(parseFloat)}
             }''')
             width, height = geometry['width'], geometry['height']
-            scale = (min if geometry['fit'] == 'contain' else max)(width/dims[0], height/dims[1])
+            assert geometry['fit'] == 'cover', (aid, 'Thumbnail must fill the card', geometry)
+            scale = max(width/dims[0], height/dims[1])
             ox = (dims[0]*scale-width)*geometry['position'][0]/100
             oy = (dims[1]*scale-height)*geometry['position'][1]/100
             x, y, w, h = meta['face']
             bounds = [x*scale-ox, y*scale-oy, (x+w)*scale-ox, (y+h)*scale-oy]
             clip = geometry['clip']
+            content = [geometry['x']-ox, geometry['y']-oy,
+                       geometry['x']-ox+dims[0]*scale, geometry['y']-oy+dims[1]*scale]
+            assert content[0] <= clip['x']+1 and content[1] <= clip['y']+1 and content[2] >= clip['x']+clip['width']-1 and content[3] >= clip['y']+clip['height']-1, (aid, 'Thumbnail has letterbox gaps', content, clip)
             visible = [bounds[0]+geometry['x']-clip['x'], bounds[1]+geometry['y']-clip['y'],
                        bounds[2]+geometry['x']-clip['x'], bounds[3]+geometry['y']-clip['y']]
             assert visible[0] >= -1 and visible[1] >= -1 and visible[2] <= clip['width']+1 and visible[3] <= clip['height']+1, (aid, visible, geometry)
             title_color = await card.locator('.name').evaluate('e=>getComputedStyle(e).color')
             assert title_color.startswith('rgba(') and float(title_color.split(',')[-1].rstrip(') ')) <= .65, title_color
-            results.append({'id': aid, 'photo': meta['number'], 'face_region_inside_card': True, 'fit': geometry['fit'], 'image_decode_retries': retries})
+            results.append({'id': aid, 'photo': meta['number'], 'face_region_inside_card': True, 'card_filled_without_letterboxing': True, 'fit': geometry['fit'], 'image_decode_retries': retries})
         teddy = page.locator('.album[data-id="teddy-bear97"]')
         assert 'SWEETBOX' not in await teddy.locator('.name').inner_text()
         assert await teddy.locator('.publisher-sticker').inner_text() == 'SWEETBOX'

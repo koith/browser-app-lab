@@ -1,0 +1,140 @@
+{
+  "checks": [
+    {
+      "fit": "contain",
+      "width": 176.5,
+      "height": 117.65625,
+      "naturalWidth": 846,
+      "naturalHeight": 951,
+      "src": "stored-albums/cn-yuntu8/0001_185e982bd6c7.jpg",
+      "position": "50% 43.907%",
+      "paintedWidth": 104.66581230283911,
+      "paintedHeight": 117.65625,
+      "id": "cn-yuntu8",
+      "label": "before",
+      "filled": false
+    },
+    {
+      "fit": "contain",
+      "width": 176.5,
+      "height": 117.65625,
+      "naturalWidth": 846,
+      "naturalHeight": 951,
+      "src": "stored-albums/cn-yingyuge/0001_a1e0805d5d8b.jpg",
+      "position": "50% 43.907%",
+      "paintedWidth": 104.66581230283911,
+      "paintedHeight": 117.65625,
+      "id": "cn-yingyuge",
+      "label": "before",
+      "filled": false
+    },
+    {
+      "fit": "cover",
+      "width": 176.5,
+      "height": 117.65625,
+      "naturalWidth": 846,
+      "naturalHeight": 951,
+      "src": "stored-albums/cn-yuntu8/0001_185e982bd6c7.jpg",
+      "position": "50% 43.907%",
+      "paintedWidth": 176.5,
+      "paintedHeight": 198.40602836879432,
+      "id": "cn-yuntu8",
+      "label": "after-mobile",
+      "filled": true
+    },
+    {
+      "fit": "cover",
+      "width": 176.5,
+      "height": 117.65625,
+      "naturalWidth": 846,
+      "naturalHeight": 951,
+      "src": "stored-albums/cn-yingyuge/0001_a1e0805d5d8b.jpg",
+      "position": "50% 43.907%",
+      "paintedWidth": 176.5,
+      "paintedHeight": 198.40602836879432,
+      "id": "cn-yingyuge",
+      "label": "after-mobile",
+      "filled": true
+    },
+    {
+      "fit": "cover",
+      "width": 288.265625,
+      "height": 192.171875,
+      "naturalWidth": 846,
+      "naturalHeight": 951,
+      "src": "stored-albums/cn-yuntu8/0001_185e982bd6c7.jpg",
+      "position": "50% 43.907%",
+      "paintedWidth": 288.265625,
+      "paintedHeight": 324.0432734929078,
+      "id": "cn-yuntu8",
+      "label": "after-desktop",
+      "filled": true
+    },
+    {
+      "fit": "cover",
+      "width": 288.28125,
+      "height": 192.1875,
+      "naturalWidth": 846,
+      "naturalHeight": 951,
+      "src": "stored-albums/cn-yingyuge/0001_a1e0805d5d8b.jpg",
+      "position": "50% 43.907%",
+      "paintedWidth": 288.28125,
+      "paintedHeight": 324.06083776595744,
+      "id": "cn-yingyuge",
+      "label": "after-desktop",
+      "filled": true
+    }
+  ],
+  "photo_arrays_unchanged": true,
+  "original_viewer_links_preserved": true,
+  "legacy_contain_configuration_cannot_restore_gutters": true,
+  "physical_iphone_verified": false,
+  "version": "v0.1.0-beta.17",
+  "base_commit": "ac6c80ababf8a185a1486e4bbe63fe05c7e18ab0",
+  "new_image_files": 0,
+  "new_complete_photobooks": 0,
+  "new_high_resolution_replacements": 0,
+  "gallery_image_entries": 2922,
+  "viewable_groups": 34,
+  "changed_cover_ids": [
+    "cn-yuntu8",
+    "cn-yingyuge"
+  ],
+  "all_existing_photo_arrays_and_image_choices_unchanged": true,
+  "full_local_cover_check": {
+    "status": "failed",
+    "cover": "yuis-present33",
+    "reason": "Unchanged source returned HTTP451 legal-unavailability HTML instead of an image; stopped this source, no bypass attempted. Not a full34 PASS.",
+    "http_status": 451,
+    "content_type": "text/html; charset=UTF-8"
+  },
+  "changed_cover_check": {
+    "engine": "chromium",
+    "base": "http://127.0.0.1:8784/",
+    "version": "v0.1.0-beta.17",
+    "verified_cover_count": 2,
+    "covers": [
+      {
+        "id": "cn-yuntu8",
+        "photo": 1,
+        "face_region_inside_card": true,
+        "card_filled_without_letterboxing": true,
+        "fit": "cover",
+        "image_decode_retries": 0
+      },
+      {
+        "id": "cn-yingyuge",
+        "photo": 1,
+        "face_region_inside_card": true,
+        "card_filled_without_letterboxing": true,
+        "fit": "cover",
+        "image_decode_retries": 0
+      }
+    ],
+    "title_translucency_verified": true,
+    "publisher_removed_only_from_cover_title": true,
+    "detail_image_order_and_urls_unchanged": true,
+    "not_identity_recognition": true,
+    "iphone_real_device": false
+  }
+}
