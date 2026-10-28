@@ -20,7 +20,7 @@ def main():
     assert c.count_photo_text("This book consists of film works with total 75 extremely-high resolution (5000 x 5000) photos.")==75
     assert c.norm("Happy Mimmi!")=="happy-mimmi"
     data=BytesIO()
-    Image.new("RGB",(640,960),"#444477").save(data,"PNG")
+    Image.effect_noise((640,960),48).convert("RGB").save(data,"PNG")
     class FakeResponse:
         def __init__(self):self.url="https://djawaphoto.com/wp-content/uploads/2026/08/sample_cv.jpg"
         def raise_for_status(self):pass
