@@ -4,6 +4,8 @@ python -m pip install 'requests==2.32.5' 'Pillow==11.3.0'
 python -m py_compile apps/mimmi-gallery/download_public_images_private.py apps/mimmi-gallery/cloud/*.py
 python apps/mimmi-gallery/test_private_download.py
 python apps/mimmi-gallery/cloud/test_stage_private_archive.py
+python -m pip install -r apps/mimmi-gallery/cloud/gateway/requirements.txt 'httpx==0.28.1'
+python apps/mimmi-gallery/cloud/test_gateway.py
 
 if [[ -z "${RCLONE_CONFIG_ARCHIVE_COOKIE:-}" ]]; then
   echo "::notice::MIMMI_PRIVATE_CLOUD_NOT_CONNECTED: no approved personal TeraBox session configured"
