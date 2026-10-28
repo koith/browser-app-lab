@@ -25,7 +25,7 @@ input:focus{outline:2px solid #c3aeaa;outline-offset:1px}button{font:inherit;cur
 <p>공개 웹사이트에 원본 사진이나 비밀번호를 업로드하지 않습니다. 개인 인증 게이트웨이가 연결되면 보관한 원본을 우선 표시하고, 연결되지 않으면 기존 공개 출처 사진을 표시합니다.</p>
 <form id="connect">
 <fieldset><label for="api">비공개 보관소 게이트웨이 주소</label>
-<input id="api" type="url" inputmode="url" placeholder="https://내-보관소-주소" autocomplete="url" required>
+<input id="api" type="url" inputmode="url" placeholder="https://mimmi-private-gallery-free.onrender.com" autocomplete="url" required>
 <label for="token">보관소 접근 토큰</label>
 <input id="token" type="password" autocomplete="off" placeholder="접근 토큰" required>
 </fieldset><div class="actions"><button class="primary" type="submit">연결 확인 후 갤러리 열기</button>
@@ -44,7 +44,7 @@ function originOf(s){
    throw Error('HTTPS 기반 보관소 주소만 입력할 수 있습니다.');
  return u.origin;
 }
-try{const existing=JSON.parse(sessionStorage.getItem(KEY)||'null');if(existing?.api)$('api').value=existing.api;}catch{}
+try{const existing=JSON.parse(sessionStorage.getItem(KEY)||'null');if(existing?.api)$('api').value=existing.api;else $('api').value='https://mimmi-private-gallery-free.onrender.com';}catch{}
 $('disconnect').onclick=()=>{sessionStorage.removeItem(KEY);$('token').value='';$('status').dataset.error='false';$('status').textContent='이 브라우저 탭에서 보관소 연결 정보를 해제했습니다.'};
 $('connect').onsubmit=async e=>{
  e.preventDefault();const status=$('status');status.removeAttribute('data-error');status.textContent='인증 및 보관소 연결 확인 중…';
