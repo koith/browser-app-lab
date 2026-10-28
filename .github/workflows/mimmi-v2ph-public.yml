@@ -16,7 +16,7 @@ concurrency:
 jobs:
   scan:
     runs-on: ubuntu-24.04
-    timeout-minutes: 28
+    timeout-minutes: 55
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -27,7 +27,7 @@ jobs:
           python -m py_compile apps/mimmi-gallery/collect_v2ph_public.py
           python apps/mimmi-gallery/test_v2ph_public.py
       - name: Verify real public Mimmi V2PH images and browse multiple pages
-        run: python apps/mimmi-gallery/collect_v2ph_public.py --pages 8 --images 50
+        run: python apps/mimmi-gallery/collect_v2ph_public.py --pages 14 --images 120
       - name: Check genuine image evidence; never count source ads or broken links
         run: |
           python - <<'PY'
