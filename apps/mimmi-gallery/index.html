@@ -100,7 +100,7 @@ main{max-width:1250px;margin:auto;padding:26px 16px 90px}
    <a href="./" aria-current="page">밈미</a>
   </nav>
  </div>
- <small class="version" id="app-version">v0.1.0-mimmi.4</small>
+ <small class="version" id="app-version">v0.1.0-mimmi.5</small>
 </header>
 <main>
  <section id="overview">
@@ -195,7 +195,7 @@ function coverFor(album){
  return cover;
 }
 function makeAlbumCard(album){
- const card=document.createElement('article');card.className='album';
+ const card=document.createElement('article');card.className='album';card.dataset.id=album.id;
  const button=document.createElement('button');button.type='button';button.className='album-open';
  button.setAttribute('aria-label',displayTitle(album.title)+' 화보 열기');
  const info=document.createElement('div');info.className='album-info';
@@ -350,7 +350,7 @@ $('viewer').onclick=e=>{if(e.target===$('viewer'))closePhoto()};
 document.addEventListener('keydown',e=>{if(!$('viewer').open)return;if(e.key==='ArrowRight')openPhoto(state.photo+1);if(e.key==='ArrowLeft')openPhoto(state.photo-1)});
 window.addEventListener('popstate',applyRoute);
 window.addEventListener('hashchange',applyRoute);
-window.addEventListener('pageshow',e=>{if(e.persisted)applyRoute()});
+window.addEventListener('pageshow',()=>{if(state.albums.length)applyRoute()});
 Promise.all([
  loadJSON('albums.json',{albums:[]}),
  loadJSON('official-previews.json',{albums:[]}),
