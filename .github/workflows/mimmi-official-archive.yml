@@ -16,7 +16,7 @@ concurrency:
 jobs:
   crawl:
     runs-on: ubuntu-24.04
-    timeout-minutes: 40
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -30,7 +30,7 @@ jobs:
           python apps/mimmi-gallery/test_official_collector.py
       - name: Crawl official Mimmi photo books and inspect individual public sample bytes
         run: |
-          python apps/mimmi-gallery/collect_official_previews.py --pages 8 --books 100 --samples 24
+          python apps/mimmi-gallery/collect_official_previews.py --pages 8 --books 100 --samples 36
       - name: Verify catalogue statistics and source-only hosting safety
         run: |
           python - <<'PY'

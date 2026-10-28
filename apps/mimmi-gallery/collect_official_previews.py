@@ -133,9 +133,35 @@ def probe_image(url):
         print("OFFICIAL_SAMPLE_SKIPPED",type(exc).__name__,url[:130],flush=True)
         return None
 
-def collect(max_pages=5,max_books=80,max_samples=16):
+def reconcile_public_samples(fresh, historical, limit):
+    """Keep earlier SHA evidence across temporary source outages."""
+    out=[];seen=set()
+    now={x.get("sha256") for x in fresh}
+    for p in [*fresh,*historical]:
+        h=p.get("sha256","");url=p.get("url","")
+        if (not re.fullmatch("[0-9a-f]{64}",h) or not valid_official(url)
+            or not urlsplit(url).path.startswith("/wp-content/uploads/")
+            or type(p.get("bytes")) is not int or p["bytes"]<4500
+            or type(p.get("width")) is not int or type(p.get("height")) is not int
+            or min(p["width"],p["height"])<250 or h in seen):continue
+        row=dict(p);seen.add(h)
+        if h not in now:row["carried_from_previous_verification"]=True
+        else:row.pop("carried_from_previous_verification",None)
+        out.append(row)
+        if len(out)>=limit:break
+    return out
+
+def collect(max_pages=8,max_books=100,max_samples=25):
     books,pages=archive(max_pages)
     books=books[:max_books]
+    previous={}
+    prior_file=ROOT/"official-previews.json"
+    if prior_file.is_file():
+        try:
+            old=json.loads(prior_file.read_text(encoding="utf-8"))
+            previous={x["id"]:x for x in old.get("albums",[]) if x.get("id")}
+        except (ValueError,TypeError,KeyError):
+            print("MIMMI_OFFICIAL_PRIOR_MANIFEST_UNAVAILABLE",flush=True)
     for i,book in enumerate(books,1):
         try:
             doc=fetch_html(book["source"])
@@ -150,14 +176,26 @@ def collect(max_pages=5,max_books=80,max_samples=16):
                 result=probe_image(url)
                 if result and result["sha256"] not in {p["sha256"] for p in book["samples"]}:
                     book["samples"].append(result)
+            book["fresh_http_verified"]=len(book["samples"])
+            book["samples"]=reconcile_public_samples(book["samples"],previous.get(book["id"],{}).get("samples",[]),max_samples)
             book["status"]="official_samples_verified" if book["samples"] else "official_source_verified_no_samples"
             book["sample_count_verified"]=len(book["samples"])
             book["images"]=[] # no user-owned archived files yet
             book["collected_image_files"]=0
         except Exception as exc:
-            book.update(status="official_page_failed",samples=[],images=[],sample_count_verified=0,collected_image_files=0,error=type(exc).__name__+": "+str(exc)[:160])
+            retained=reconcile_public_samples([],previous.get(book["id"],{}).get("samples",[]),max_samples)
+            book.update(status="official_page_failed_previous_evidence_kept" if retained else "official_page_failed",
+                        samples=retained,images=[],sample_count_verified=len(retained),
+                        collected_image_files=0,error=type(exc).__name__+": "+str(exc)[:160])
         print("OFFICIAL_BOOK",i,len(books),book["id"],book["status"],book["sample_count_verified"],"of",book.get("advertised_photos"),flush=True)
         time.sleep(.25)
+    known={b["id"] for b in books}
+    for old in previous.values():
+        if old["id"] not in known:
+            retained=dict(old)
+            retained["samples"]=reconcile_public_samples([],retained.get("samples",[]),max_samples)
+            retained["status"]="previously_verified_source_unavailable"
+            if retained["samples"]:books.append(retained)
     return {"model":{"id":"mimmi","name":"밈미","english":"Mimmi","aliases":["Miss u","밋슈"],"instagram":"mimmissu17"},
             "version":"v0.1.0-mimmi.2","generated_at":datetime.now(timezone.utc).isoformat(),
             "primary_source":CATEGORY,"archive_pages":pages,
@@ -174,7 +212,7 @@ if __name__=="__main__":
     ap.add_argument("--samples",type=int,default=16)
     ap.add_argument("--output",type=Path,default=ROOT/"official-previews.json")
     args=ap.parse_args()
-    if not 1<=args.pages<=8 or not 1<=args.books<=100 or not 1<=args.samples<=25:ap.error("Out of range")
+    if not 1<=args.pages<=10 or not 1<=args.books<=100 or not 1<=args.samples<=40:ap.error("Out of range")
     result=collect(args.pages,args.books,args.samples)
     args.output.parent.mkdir(parents=True,exist_ok=True)
     args.output.write_text(json.dumps(result,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")

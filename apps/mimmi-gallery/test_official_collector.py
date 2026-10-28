@@ -36,5 +36,11 @@ def main():
         c.SESSION.get=original
     assert p["width"]==640 and p["height"]==960 and p["sha256"]
     assert p["saved_to_private_cloud"] is False
+    v={"url":"https://djawaphoto.com/wp-content/uploads/2026/08/sample_cv.jpg",
+       "bytes":9000,"width":640,"height":960,"sha256":"a"*64}
+    assert len(c.reconcile_public_samples([v],[v],40))==1
+    recovered=c.reconcile_public_samples([],[v],40)
+    assert len(recovered)==1 and recovered[0]["carried_from_previous_verification"] is True
+    assert c.reconcile_public_samples([], [{**v,"url":"https://evil.test/photo.jpg"}],40)==[]
     print("MIMMI_OFFICIAL_PREVIEW_EXTRACTOR_UNIT_QA_PASS")
 if __name__=="__main__": main()

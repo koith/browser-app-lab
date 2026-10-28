@@ -19,7 +19,7 @@ if(manifest.albums.some(a=>a.expected&&a.images.length>a.expected))throw Error('
   await page.goto('http://127.0.0.1:8765/mimmi-gallery/',{waitUntil:'domcontentloaded',timeout:25000});
   await page.waitForFunction(()=>document.querySelector('#total')?.textContent?.includes('albums'),{timeout:20000});
   const version=await page.locator('#app-version').innerText();
-  if(version!=='v0.1.0-mimmi.6')throw Error('Wrong version '+version);
+  if(version!=='v0.1.0-mimmi.7')throw Error('Wrong version '+version);
   const pos=await page.locator('#app-version').boundingBox();
   if(!pos||pos.y>25||pos.height>20||pos.x<180)throw Error('Version not small upper-right '+JSON.stringify(pos));
   const yui=page.locator('.mainnav a').first();
