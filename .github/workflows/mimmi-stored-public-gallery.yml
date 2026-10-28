@@ -38,8 +38,19 @@ jobs:
           python-version: '3.12'
       - name: Install file/image verification
         run: python -m pip install requests Pillow
-      - name: Save verified public photo bytes, not URL-only entries
-        run: python apps/mimmi-gallery/publish_stored_public.py --limit 250 --budget-mb 90 --authorized-public-rehost
+      - name: Save multiple batches of SHA-verified real public photo files (not URLs)
+        shell: bash
+        run: |
+          for pass in 1 2 3; do
+            before=$(python -c "import json;from pathlib import Path;p=Path('apps/mimmi-gallery/stored-albums.json');d=json.loads(p.read_text());print(sum(len(a.get('images',[])) for a in d['albums']))")
+            python apps/mimmi-gallery/publish_stored_public.py --limit 250 --budget-mb 90 --authorized-public-rehost
+            after=$(python -c "import json;from pathlib import Path;p=Path('apps/mimmi-gallery/stored-albums.json');d=json.loads(p.read_text());print(sum(len(a.get('images',[])) for a in d['albums']))")
+            echo "MIMMI_REAL_ARCHIVE_BATCH=$pass PHYSICAL_FILES=$after NEW=$((after-before))"
+            if [[ "$after" -le "$before" ]]; then
+              echo "No additional unchanged-byte images available within the public storage budget."
+              break
+            fi
+          done
       - name: Recheck all archived image bytes against manifest
         run: |
           python - <<'PY'
