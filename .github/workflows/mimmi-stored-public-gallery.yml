@@ -8,8 +8,9 @@ on:
       - Mimmi Multi-Page Public Photo Crawl
       - Mimmi DJAWA Public Promotional Image Search
       - Mimmi Official Social Public Photo Discovery
-      - Mimmi Instagram Public Carousel Photos
-      - Mimmi V2PH Actor Expansion
+      - Mimmi Free Official Portfolio Discovery
+      - Mimmi Free V2PH Public Gallery Photo Discovery
+      - Mimmi V2PH Actor Wide Discovery
     types: [completed]
   schedule:
     - cron: '25 3,9,15,21 * * *'
