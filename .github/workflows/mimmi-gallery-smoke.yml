@@ -31,7 +31,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: mimmi-chromium-single-screenshot
-          path: mimmi-mobile-v4.png
+          path: mimmi-mobile-v5.png
           archive: false
           retention-days: 30
           if-no-files-found: ignore
@@ -40,7 +40,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: mimmi-webkit-single-screenshot
-          path: mimmi-webkit-v4.png
+          path: mimmi-webkit-v5.png
           archive: false
           retention-days: 30
           if-no-files-found: ignore
