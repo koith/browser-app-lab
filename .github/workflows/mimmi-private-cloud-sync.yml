@@ -1,107 +1,28 @@
-name: Mimmi Private Source Photo Cloud Sync
+name: Mimmi Private Photo Sync
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '10 17 * * 1,4'
   push:
     paths:
       - 'apps/mimmi-gallery/cloud/**'
       - 'apps/mimmi-gallery/download_public_images_private.py'
       - '.github/workflows/mimmi-private-cloud-sync.yml'
+  schedule:
+    - cron: '10 17 * * 1,4'
 permissions:
   contents: read
 concurrency:
-  group: mimmi-private-cloud-sync
+  group: mimmi-private-photo-upload
   cancel-in-progress: false
 jobs:
-  original-byte-sync:
+  sync:
     runs-on: ubuntu-24.04
     timeout-minutes: 95
     env:
-      # If the owner's existing personal TeraBox session is authorized, use a
-      # separate MimmiArchive folder. Never touch archive:YuiArchive.
       RCLONE_CONFIG_ARCHIVE_COOKIE: ${{ secrets.MIMMI_TERABOX_NDUS || secrets.YUI_TERABOX_NDUS }}
-      RCLONE_CONFIG_ARCHIVE_TYPE: terabox
-      ARCHIVE_REMOTE: archive:MimmiArchive
-      PRIVATE_DOWNLOAD_DIR: ${{ runner.temp }}/mimmi-private-download
-      PRIVATE_STAGE_DIR: ${{ runner.temp }}/mimmi-stage
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
-        with: {python-version: '3.12'}
-      - name: Install source verifier and offline tests
-        run: |
-          pip install 'requests==2.32.5' 'Pillow==11.3.0'
-          python -m py_compile apps/mimmi-gallery/download_public_images_private.py apps/mimmi-gallery/cloud/*.py
-          python apps/mimmi-gallery/test_private_download.py
-          python apps/mimmi-gallery/cloud/test_stage_private_archive.py
-      - name: Report personal cloud availability without revealing credentials
-        run: |
-          if [ -z "$RCLONE_CONFIG_ARCHIVE_COOKIE" ]; then
-            echo "::notice::MIMMI_PRIVATE_STORAGE_NOT_CONNECTED: valid personal TeraBox session is not configured."
-            echo "MIMMI_PRIVATE_CLOUD_RESULT=NOT_CONNECTED" >> "$GITHUB_STEP_SUMMARY"
-          else
-            echo "MIMMI_PRIVATE_CLOUD_CREDENTIAL_PRESENT=true" >> "$GITHUB_STEP_SUMMARY"
-          fi
-      - name: Install digest pinned TeraBox rclone
-        if: env.RCLONE_CONFIG_ARCHIVE_COOKIE != ''
-        run: |
-          curl -fsSL https://github.com/gulp79/rclone-extra/releases/download/v1.75.2-extra/rclone-linux-amd64.zip -o /tmp/mimmi-rclone.zip
-          echo "78855325a2a8d83b3feee3a8363d32e1211babbf4cda6356fa8ca5f472075062  /tmp/mimmi-rclone.zip" | sha256sum -c -
-          unzip -q /tmp/mimmi-rclone.zip -d /tmp
-          find /tmp -type f -name rclone -exec sudo install -m 755 {} /usr/local/bin/rclone \;
-          rclone listremotes | grep -qx 'archive:'
-      - name: Individually download and validate all available Mimmi public originals
-        if: env.RCLONE_CONFIG_ARCHIVE_COOKIE != ''
-        run: |
-          python apps/mimmi-gallery/download_public_images_private.py --output-dir "$PRIVATE_DOWNLOAD_DIR" --limit 0
-      - name: Load existing verified Mimmi metadata safely
-        if: env.RCLONE_CONFIG_ARCHIVE_COOKIE != ''
-        run: |
-          mkdir -p "$PRIVATE_STAGE_DIR/originals"
-          rclone mkdir "$ARCHIVE_REMOTE/metadata"
-          rclone lsf "$ARCHIVE_REMOTE/metadata" --files-only > "$RUNNER_TEMP/mimmi-meta-files.txt"
-          if grep -qx 'catalog.json' "$RUNNER_TEMP/mimmi-meta-files.txt"; then
-            rclone cat "$ARCHIVE_REMOTE/metadata/catalog.json" > "$RUNNER_TEMP/mimmi-previous-catalog.json"
-            python - "$RUNNER_TEMP/mimmi-previous-catalog.json" <<'PY'
-          import json,sys
-          doc=json.load(open(sys.argv[1]))
-          assert doc.get("model")=="mimmi" and doc.get("schema_version")==1,"Wrong archive; upload blocked"
-          print("MIMMI_EXISTING_PRIVATE_CATALOG",len(doc.get("albums",[])))
-          PY
-          else
-            : > "$RUNNER_TEMP/mimmi-previous-catalog.json"
-            echo "MIMMI_PRIVATE_ARCHIVE_FIRST_INITIALIZATION"
-          fi
-      - name: Prepare additive private archive
-        if: env.RCLONE_CONFIG_ARCHIVE_COOKIE != ''
-        run: |
-          python apps/mimmi-gallery/cloud/stage_private_archive.py \
-            --source apps/mimmi-gallery/source-viewer-albums.json \
-            --private "$PRIVATE_DOWNLOAD_DIR" \
-            --out "$PRIVATE_STAGE_DIR" \
-            --previous "$RUNNER_TEMP/mimmi-previous-catalog.json"
-      - name: Upload image files only into isolated MimmiArchive
-        if: env.RCLONE_CONFIG_ARCHIVE_COOKIE != ''
-        run: |
-          rclone copy "$PRIVATE_STAGE_DIR/originals" "$ARCHIVE_REMOTE/originals" --ignore-existing --transfers 3 --checkers 4 --retries 3 --timeout=60s
-      - name: Verify every staged remote photo by byte count and SHA256 readback
-        if: env.RCLONE_CONFIG_ARCHIVE_COOKIE != ''
-        run: |
-          python apps/mimmi-gallery/cloud/verify_private_cloud.py --stage "$PRIVATE_STAGE_DIR" --remote "$ARCHIVE_REMOTE" --mode media
-      - name: Publish metadata only AFTER image readback verification
-        if: env.RCLONE_CONFIG_ARCHIVE_COOKIE != ''
-        run: |
-          rclone copyto "$PRIVATE_STAGE_DIR/metadata/catalog.json" "$ARCHIVE_REMOTE/metadata/catalog.json"
-          python apps/mimmi-gallery/cloud/verify_private_cloud.py --stage "$PRIVATE_STAGE_DIR" --remote "$ARCHIVE_REMOTE" --mode catalog
-          python - <<'PY'
-          import json,os
-          from pathlib import Path
-          path=Path(os.environ["PRIVATE_STAGE_DIR"])/"metadata/catalog.json"
-          result=json.loads(path.read_text())
-          summary=result["summary"]
-          assert summary["private_photo_records"]>0
-          with open(os.environ["GITHUB_STEP_SUMMARY"],"a") as f:
-            f.write("MIMMI_PRIVATE_REMOTE_READBACK_VERIFIED="+str(summary["private_photo_records"])+"\n")
-          print("MIMMI_VERIFIED_PRIVATE_CLOUD_PHOTOS",summary["private_photo_records"])
-          PY
+        with:
+          python-version: '3.12'
+      - name: Offline QA and authenticated Mimmi-only cloud sync
+        run: bash apps/mimmi-gallery/cloud/run_private_sync.sh
