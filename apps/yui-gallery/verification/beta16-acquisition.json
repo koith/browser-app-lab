@@ -1,23 +1,24 @@
 {
   "version": "v0.1.0-beta.16",
-  "new_gallery_image_files": 12,
-  "photograph_files_excluding_covers": 11,
-  "magazine_covers_in_gallery": 1,
+  "new_gallery_image_files": 17,
+  "photograph_files_excluding_covers": 15,
+  "magazine_covers_in_gallery": 2,
   "new_promotional_cover_not_registered": 1,
   "new_complete_photobooks": 0,
   "new_publisher_masters": 0,
   "new_high_resolution_replacements_of_existing_rows": 0,
   "prior_private_file_hashes_compared": 4416,
   "previous_gallery_photo_arrays_unchanged": 22,
-  "source_redownload_sha256_verified": 12,
-  "actual_local_gallery_lightbox_decodes": 12,
+  "source_redownload_sha256_verified": 17,
+  "actual_local_gallery_lightbox_decodes": 17,
   "local_qa": {
-    "checked_at": "2026-10-28T10:07:38.112956+00:00",
+    "checked_at": "2026-10-28T10:24:59.312914+00:00",
     "base": "http://127.0.0.1:8783/",
     "scope": "selected_albums",
     "requested_album_ids": [
       "crazygiant-yui-may2023-public",
-      "sportsseoul-crazy2020-public"
+      "sportsseoul-crazy2020-public",
+      "crazygiant-player5-public"
     ],
     "engine": "chromium",
     "version": "v0.1.0-beta.16",
@@ -36,11 +37,16 @@
       },
       {
         "id": "crazygiant-yui-may2023-public",
-        "decoded_lightbox": 5,
+        "decoded_lightbox": 6,
+        "original_link_sha256_checks": 0
+      },
+      {
+        "id": "crazygiant-player5-public",
+        "decoded_lightbox": 4,
         "original_link_sha256_checks": 0
       }
     ],
-    "decoded_image_entries": 12,
+    "decoded_image_entries": 17,
     "browser_download_sha256_verified": 0,
     "original_link_sha256_verified": 0,
     "unique_original_link_sha256_verified": 0,
@@ -52,7 +58,7 @@
     "paced_source_views": 0
   },
   "source_readback": {
-    "verified_at": "2026-10-28T10:08:29.078339+00:00",
+    "verified_at": "2026-10-28T10:25:07.943828+00:00",
     "files": [
       {
         "url": "https://cdn.imweb.me/upload/S202010013208049566f15/58c0c3ef65838.png",
@@ -149,9 +155,49 @@
         "width": 500,
         "height": 658,
         "source_readback_match": true
+      },
+      {
+        "url": "https://image.ajunews.com/content/image/2023/04/26/20230426002657766283.jpg",
+        "sha256": "17c836c4a36596a8cca8b37c9b2b92322f6de00a0946f1210be6a405b43f6b6f",
+        "bytes": 88048,
+        "width": 640,
+        "height": 835,
+        "source_readback_match": true
+      },
+      {
+        "url": "https://cdn.imweb.me/upload/S202010013208049566f15/09d5d1b45bfaa.jpg",
+        "sha256": "d304f11ff4429b4594aa321c86f722050171f2c621077cbc7e472c2245cd0c34",
+        "bytes": 86353,
+        "width": 1000,
+        "height": 523,
+        "source_readback_match": true
+      },
+      {
+        "url": "https://cdn.imweb.me/upload/S202010013208049566f15/6d297eef5e5c4.jpg",
+        "sha256": "8082fa02eb13f4f27cd5683a78aa9336c5b44c3773a07e88ffaf22cf6e8d3c03",
+        "bytes": 75018,
+        "width": 600,
+        "height": 1000,
+        "source_readback_match": true
+      },
+      {
+        "url": "https://cdn.imweb.me/upload/S202010013208049566f15/6c41e69b25631.jpg",
+        "sha256": "d445a894f907117a5935bcb9755a812e1bbaa9613c58ee923b6feef22cd03b65",
+        "bytes": 60959,
+        "width": 600,
+        "height": 1000,
+        "source_readback_match": true
+      },
+      {
+        "url": "https://cdn.imweb.me/upload/S202010013208049566f15/9f23b2b6b2f09.jpg",
+        "sha256": "5c81f675816a2495df5ecb0f2d711f5509e3bc00e8333d91ada242250d2d1e79",
+        "bytes": 112111,
+        "width": 600,
+        "height": 1000,
+        "source_readback_match": true
       }
     ],
-    "verified_count": 12,
+    "verified_count": 17,
     "private_cloud_readback_count": 0
   },
   "discovery": {
@@ -180,7 +226,13 @@
     "blogspot_source_robots_denial_stopped": true,
     "sns_attachment_rows_downloaded": 33,
     "sns_rows_matching_previous_private_inputs": 32,
-    "sns_unique_response_files": 31
+    "sns_unique_response_files": 31,
+    "separately_credited_alternative_may_cover_files": 1,
+    "official_player5_named_photograph_files": 4,
+    "uncredited_player_product_cover_not_registered": 1,
+    "publisher_product_cover_mockups_not_registered": 2,
+    "publisher_listing_requests": 15,
+    "publisher_listing_exhaustive": false
   },
   "private_cloud_uploads": 0,
   "private_cloud_readbacks": 0,
@@ -195,7 +247,7 @@
     "engine": "chromium",
     "base": "http://127.0.0.1:8783/",
     "version": "v0.1.0-beta.16",
-    "verified_cover_count": 2,
+    "verified_cover_count": 3,
     "covers": [
       {
         "id": "crazygiant-yui-may2023-public",
@@ -207,6 +259,13 @@
       {
         "id": "sportsseoul-crazy2020-public",
         "photo": 1,
+        "face_region_inside_card": true,
+        "fit": "cover",
+        "image_decode_retries": 0
+      },
+      {
+        "id": "crazygiant-player5-public",
+        "photo": 2,
         "face_region_inside_card": true,
         "fit": "cover",
         "image_decode_retries": 0
@@ -233,6 +292,20 @@
     "errors": []
   },
   "full_33_cover_local_check": "failed external image decode; not a full-cover PASS",
-  "new_source_adapters_unit_tests": 10,
-  "public_archive_unit_tests": 5
+  "new_source_adapters_unit_tests": 12,
+  "public_archive_unit_tests": 5,
+  "new_response_files_including_unregistered_inputs": 21,
+  "new_unregistered_input_files": 4,
+  "gallery_total_image_entries": 2922,
+  "gallery_viewable_groups": 34,
+  "initial_pr_ci_chromium": {
+    "head": "8456e6e2494b45d31af64088690cd1cbeed4bb8e",
+    "run": 40670669401,
+    "job": 122756313188,
+    "conclusion": "success",
+    "gallery_decodes": 2917,
+    "original_link_sha_checks": 25,
+    "selected_source_readbacks": 285,
+    "superseded_scope_not_final_2922_verification": true
+  }
 }

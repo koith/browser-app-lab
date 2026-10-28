@@ -121,6 +121,16 @@
       "adapter": "sportsseoul-daum",
       "publisher": "스포츠서울",
       "url": "https://v.daum.net/v/20200326055735105"
+    },
+    {
+      "adapter": "crazygiant",
+      "publisher": "CRAZY GIANT",
+      "url": "https://crazygiant.imweb.me/giantgirl/?bmode=view&idx=13530259"
+    },
+    {
+      "adapter": "ajunews-cover",
+      "publisher": "CRAZY GIANT",
+      "url": "https://www5.ajunews.com/view/20230426002601068"
     }
   ]
 }

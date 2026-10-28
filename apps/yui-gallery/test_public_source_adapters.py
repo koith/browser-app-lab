@@ -10,10 +10,31 @@ from PIL import Image
 
 from build_additional_source_manifest import build
 from collect_public_sources import (djawa_model_index, djawa_samples, gamersky_article, hacosta_model_photo, imgcup_teddy,
-                                    inven_article, photographer_portfolio, crazygiant_samples, sportsseoul_daum_article)
+                                    inven_article, photographer_portfolio, crazygiant_samples, sportsseoul_daum_article,
+                                    ajunews_may_cover)
 
 
 class SourceAdapterTests(unittest.TestCase):
+    def test_player_named_samples_exclude_uncredited_generic_product_cover(self):
+        stem = 'https://cdn.imweb.me/upload/S202010013208049566f15/'
+        body = f'''<title>THE PLAYER ISSUE 5 [심혜성] : 크레이지자이언트</title>
+        <div class="board_txt_area">ISSUE 5 [심혜성]<img src="{stem}sample.jpg">
+        <img src="{stem}5bb2d6488f51d.png"></div>'''
+        works, photos, _ = crazygiant_samples(body, 'https://crazygiant.imweb.me/giantgirl/')
+        self.assertEqual([r['url'] for r in photos], [stem+'sample.jpg'])
+        self.assertEqual(works[0]['title'], 'THE PLAYER ISSUE 5 — 심혜성')
+        self.assertFalse(works[0]['full_edition_acquired'])
+
+    def test_cover_article_excludes_related_images_and_other_subject(self):
+        url = 'https://image.ajunews.com/content/image/2023/04/26/cover.jpg'
+        body = f'''<h1>모델 유이, 크레이지 자이언트 5월 호 표지</h1>
+        <div id="articleBody"><div class="imgBox"><img src="{url}"></div></div>
+        <aside class="imgBox"><img src="{url.replace('cover', 'other')}"></aside>'''
+        _, photos, _ = ajunews_may_cover(body, 'https://www5.ajunews.com/view/1')
+        self.assertEqual([r['url'] for r in photos], [url])
+        with self.assertRaises(ValueError):
+            ajunews_may_cover(body.replace('모델 유이', '다른 모델'), 'https://www5.ajunews.com/view/1')
+
     def test_crazygiant_requires_issue_credit_and_excludes_related_work(self):
         url = 'https://cdn.imweb.me/upload/S202010013208049566f15/photo.png'
         body = f'''<title>5월 사랑스러운 아내 _ 유이 : 크레이지자이언트</title>

@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-10-28T10:06:45.492863+00:00",
+  "generated_at": "2026-10-28T10:24:03.747206+00:00",
   "not_private_cloud": true,
   "kind": "physical_files_verified_source_links_only",
   "albums": [
@@ -29164,7 +29164,7 @@
     {
       "id": "crazygiant-yui-may2023-public",
       "title": "CRAZY GIANT — 2023년 5월 · 사랑스러운 아내 · 공개본",
-      "expected": 5,
+      "expected": 6,
       "images": [
         {
           "number": 1,
@@ -29245,6 +29245,21 @@
           "site_watermark_review": {
             "status": "unknown"
           }
+        },
+        {
+          "number": 6,
+          "url": "https://image.ajunews.com/content/image/2023/04/26/20230426002657766283.jpg",
+          "sha256": "17c836c4a36596a8cca8b37c9b2b92322f6de00a0946f1210be6a405b43f6b6f",
+          "bytes": 88048,
+          "width": 640,
+          "height": 835,
+          "origin_page": "https://www5.ajunews.com/view/20230426002601068",
+          "discovery_page": "https://www5.ajunews.com/view/20230426002601068",
+          "source_country": "KR",
+          "source_attribute": "explicit_public_full_image_link",
+          "site_watermark_review": {
+            "status": "unknown"
+          }
         }
       ],
       "publisher": "CRAZY GIANT",
@@ -29256,15 +29271,16 @@
         "KR"
       ],
       "source_pages": [
-        "https://crazygiant.imweb.me/giantgirl/?bmode=view&idx=15224627"
+        "https://crazygiant.imweb.me/giantgirl/?bmode=view&idx=15224627",
+        "https://www5.ajunews.com/view/20230426002601068"
       ],
-      "acquired": 5,
+      "acquired": 6,
       "complete_sequence": false,
       "missing_numbers": null,
       "resolution_review_required": true,
       "highest_resolution_status": "unverified_seek_larger_or_publisher_original",
       "publisher_original_verified": false,
-      "minimum_long_edge": 1000,
+      "minimum_long_edge": 835,
       "quality": "public web resolution",
       "status": "verified_collected_individual_files_source_hosted_online_view"
     },
@@ -29404,6 +29420,93 @@
       "highest_resolution_status": "unverified_seek_larger_or_publisher_original",
       "publisher_original_verified": false,
       "minimum_long_edge": 635,
+      "quality": "public web resolution",
+      "status": "verified_collected_individual_files_source_hosted_online_view"
+    },
+    {
+      "id": "crazygiant-player5-public",
+      "title": "CRAZY GIANT — THE PLAYER ISSUE 5 · 심혜성 · 공개본",
+      "expected": 4,
+      "images": [
+        {
+          "number": 1,
+          "url": "https://cdn.imweb.me/upload/S202010013208049566f15/09d5d1b45bfaa.jpg",
+          "sha256": "d304f11ff4429b4594aa321c86f722050171f2c621077cbc7e472c2245cd0c34",
+          "bytes": 86353,
+          "width": 1000,
+          "height": 523,
+          "origin_page": "https://crazygiant.imweb.me/giantgirl/?bmode=view&idx=13530259",
+          "discovery_page": "https://crazygiant.imweb.me/giantgirl/?bmode=view&idx=13530259",
+          "source_country": "KR",
+          "source_attribute": "explicit_public_full_image_link",
+          "site_watermark_review": {
+            "status": "unknown"
+          }
+        },
+        {
+          "number": 2,
+          "url": "https://cdn.imweb.me/upload/S202010013208049566f15/6d297eef5e5c4.jpg",
+          "sha256": "8082fa02eb13f4f27cd5683a78aa9336c5b44c3773a07e88ffaf22cf6e8d3c03",
+          "bytes": 75018,
+          "width": 600,
+          "height": 1000,
+          "origin_page": "https://crazygiant.imweb.me/giantgirl/?bmode=view&idx=13530259",
+          "discovery_page": "https://crazygiant.imweb.me/giantgirl/?bmode=view&idx=13530259",
+          "source_country": "KR",
+          "source_attribute": "explicit_public_full_image_link",
+          "site_watermark_review": {
+            "status": "unknown"
+          }
+        },
+        {
+          "number": 3,
+          "url": "https://cdn.imweb.me/upload/S202010013208049566f15/6c41e69b25631.jpg",
+          "sha256": "d445a894f907117a5935bcb9755a812e1bbaa9613c58ee923b6feef22cd03b65",
+          "bytes": 60959,
+          "width": 600,
+          "height": 1000,
+          "origin_page": "https://crazygiant.imweb.me/giantgirl/?bmode=view&idx=13530259",
+          "discovery_page": "https://crazygiant.imweb.me/giantgirl/?bmode=view&idx=13530259",
+          "source_country": "KR",
+          "source_attribute": "explicit_public_full_image_link",
+          "site_watermark_review": {
+            "status": "unknown"
+          }
+        },
+        {
+          "number": 4,
+          "url": "https://cdn.imweb.me/upload/S202010013208049566f15/9f23b2b6b2f09.jpg",
+          "sha256": "5c81f675816a2495df5ecb0f2d711f5509e3bc00e8333d91ada242250d2d1e79",
+          "bytes": 112111,
+          "width": 600,
+          "height": 1000,
+          "origin_page": "https://crazygiant.imweb.me/giantgirl/?bmode=view&idx=13530259",
+          "discovery_page": "https://crazygiant.imweb.me/giantgirl/?bmode=view&idx=13530259",
+          "source_country": "KR",
+          "source_attribute": "explicit_public_full_image_link",
+          "site_watermark_review": {
+            "status": "unknown"
+          }
+        }
+      ],
+      "publisher": "CRAZY GIANT",
+      "collection_kind": "official_public_samples",
+      "not_complete_photobook": true,
+      "expected_total_unknown": true,
+      "numbering_kind": "display_order_not_publisher_book_sequence",
+      "source_countries": [
+        "KR"
+      ],
+      "source_pages": [
+        "https://crazygiant.imweb.me/giantgirl/?bmode=view&idx=13530259"
+      ],
+      "acquired": 4,
+      "complete_sequence": false,
+      "missing_numbers": null,
+      "resolution_review_required": true,
+      "highest_resolution_status": "unverified_seek_larger_or_publisher_original",
+      "publisher_original_verified": false,
+      "minimum_long_edge": 1000,
       "quality": "public web resolution",
       "status": "verified_collected_individual_files_source_hosted_online_view"
     }

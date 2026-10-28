@@ -625,6 +625,24 @@
       ],
       "fit": "cover",
       "method": "manual_visible_face_region_not_identity_recognition"
+    },
+    "crazygiant-player5-public": {
+      "sha256": "8082fa02eb13f4f27cd5683a78aa9336c5b44c3773a07e88ffaf22cf6e8d3c03",
+      "number": 2,
+      "width": 600,
+      "height": 1000,
+      "face": [
+        170,
+        140,
+        190,
+        260
+      ],
+      "position": [
+        50,
+        13
+      ],
+      "fit": "cover",
+      "method": "manual_visible_face_region_not_identity_recognition"
     }
   },
   "no_confirmed_face_use_upper_fallback": []

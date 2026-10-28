@@ -152,23 +152,47 @@ def crazygiant_samples(raw, page):
     soup = soup_for(raw)
     title = soup.title.get_text(' ', strip=True) if soup.title else ''
     body = soup.select_one('.board_txt_area')
-    if (not body or '5월 사랑스러운 아내 _ 유이' not in title
-            or '크레이지자이언트' not in title
-            or '크레이지 자이언트 23년 5월호' not in body.get_text(' ', strip=True)):
+    content = body.get_text(' ', strip=True) if body else ''
+    may = '5월 사랑스러운 아내 _ 유이' in title and '크레이지 자이언트 23년 5월호' in content
+    player = 'THE PLAYER ISSUE 5 [심혜성]' in title and 'ISSUE 5 [심혜성]' in content
+    if not body or '크레이지자이언트' not in title or not (may or player):
         raise ValueError('Missing publisher issue and explicit Yui work credit')
     records = []
     for image in body.select('img[src]'):
         url = image['src']
         if not url.startswith('https://cdn.imweb.me/upload/S202010013208049566f15/'):
             continue
+        if player and url.endswith('/5bb2d6488f51d.png'):
+            # Generic product cover does not explicitly credit this subject.
+            # Preserve it privately; only the four named article photos belong
+            # to this reviewed public sample group.
+            continue
         records.append(image_record(url, page, 'official_public_samples', 'KR',
-                                    publisher='CRAZY GIANT', photographer_credit='z-one',
-                                    publisher_issue='2023-05', includes_publisher_layout=True))
+                                    publisher='CRAZY GIANT',
+                                    **({'photographer_credit': 'z-one'} if may else {}),
+                                    publisher_issue='2023-05' if may else 'THE PLAYER ISSUE 5',
+                                    includes_publisher_layout=True))
     return [{'publisher': 'CRAZY GIANT', 'source_country': 'KR', 'official_source': True,
-             'title': '2023년 5월호 — 사랑스러운 아내 · 유이', 'url': page,
-             'kind': 'magazine', 'published_at': '2023-05',
+             'title': '2023년 5월호 — 사랑스러운 아내 · 유이' if may else 'THE PLAYER ISSUE 5 — 심혜성', 'url': page,
+             'kind': 'magazine', **({'published_at': '2023-05'} if may else {}),
              'visible_photo_samples': len(records), 'full_edition_acquired': False,
              'access_status': 'official_public_samples_not_complete_magazine'}], records, []
+
+
+def ajunews_may_cover(raw, page):
+    soup = soup_for(raw)
+    heading = soup.select_one('h1')
+    body = soup.select_one('#articleBody')
+    title = heading.get_text(' ', strip=True) if heading else ''
+    if not body or not all(term in title for term in ('모델 유이', '크레이지 자이언트', '5월 호 표지')):
+        raise ValueError('Missing explicitly credited magazine cover article')
+    rows = []
+    for image in body.select('.imgBox img[src]'):
+        url = image['src']
+        if re.fullmatch(r'https://image\.ajunews\.com/content/image/2023/04/26/[^/?]+\.jpg', url):
+            rows.append(image_record(url, page, 'public_magazine_cover', 'KR', publisher='CRAZY GIANT',
+                                     source_credit='크레이지 자이언트 / 아주경제', is_magazine_cover=True))
+    return [], rows, []
 
 
 def sportsseoul_daum_article(raw, page):
@@ -278,7 +302,7 @@ def imgcup_teddy(raw, page):
 ADAPTERS = {'djawa-index': djawa_model_index, 'djawa': djawa_samples, 'hacosta': hacosta_model_photo, 'gamersky': gamersky_article,
             'inven': inven_article, 'photographer': photographer_portfolio, 'bcut': bcut_catalogue,
             'imgcup-teddy': imgcup_teddy, 'crazygiant': crazygiant_samples,
-            'sportsseoul-daum': sportsseoul_daum_article}
+            'sportsseoul-daum': sportsseoul_daum_article, 'ajunews-cover': ajunews_may_cover}
 
 
 def collect(targets, output, download=True, client=None):
