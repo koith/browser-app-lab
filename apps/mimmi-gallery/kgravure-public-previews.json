@@ -1,0 +1,407 @@
+{
+  "version": "v0.1.0-mimmi.4",
+  "model": "mimmi",
+  "generated_at": "2026-10-28T15:05:55.283929+00:00",
+  "profiles": [
+    "https://kgravure.vip/en/models/mimmi/",
+    "https://kgravure.vip/en/models/mimmi-%EB%B0%88%EB%AF%B8/"
+  ],
+  "errors": [],
+  "summary": {
+    "sets_discovered": 39,
+    "verified_public_photo_occurrences": 0,
+    "private_cloud_originals": 0
+  },
+  "albums": [
+    {
+      "id": "kgravure-680b96dc116d",
+      "title": "Mimmi 밈미, [DJAWA] Nikke Alice Set.01 60 photos · Mimmi · DJAWA",
+      "source": "https://kgravure.vip/en/sets/mimmi-djawa-nikke-alice-set01/",
+      "publisher": "DJAWA or credited source",
+      "images": [],
+      "samples": [],
+      "status": "source_no_public_image_evidence",
+      "candidate_image_urls": 0
+    },
+    {
+      "id": "kgravure-732ae19803c5",
+      "title": "Mimmi 밈미, [DJAWA] Nikke Alice Set.02 56 photos · Mimmi · DJAWA",
+      "source": "https://kgravure.vip/en/sets/mimmi-djawa-nikke-alice-set02/",
+      "publisher": "DJAWA or credited source",
+      "images": [],
+      "samples": [],
+      "status": "source_no_public_image_evidence",
+      "candidate_image_urls": 0
+    },
+    {
+      "id": "kgravure-a98233cafd0c",
+      "title": "Mimmi 밈미, [DJAWA] Nikke Alice Set.03 59 photos · Mimmi · DJAWA",
+      "source": "https://kgravure.vip/en/sets/mimmi-djawa-nikke-alice-set03/",
+      "publisher": "DJAWA or credited source",
+      "images": [],
+      "samples": [],
+      "status": "source_no_public_image_evidence",
+      "candidate_image_urls": 0
+    },
+    {
+      "id": "kgravure-f3f714ec0806",
+      "title": "Mimmi 밈미, DJAWA ‘Rudy The Wolf of Midnight’ Set.04 1 photos · Mimmi · DJAWA",
+      "source": "https://kgravure.vip/en/sets/mimmi-%EB%B0%88%EB%AF%B8-djawa-rudy-the-wolf-of-midnight-set-04-2/",
+      "publisher": "DJAWA or credited source",
+      "images": [],
+      "samples": [],
+      "status": "source_no_public_image_evidence",
+      "candidate_image_urls": 0
+    },
+    {
+      "id": "kgravure-746342bf5718",
+      "title": "Mimmi , (DJAWA) Kitsune Miko A.Ver (65P) 65 photos · Mimmi · DJAWA",
+      "source": "https://kgravure.vip/en/sets/mimmi-djawa-kitsune-miko-a-ver-65p/",
+      "publisher": "DJAWA or credited source",
+      "images": [],
+      "samples": [],
+      "status": "source_no_public_image_evidence",
+      "candidate_image_urls": 0
+    },
+    {
+      "id": "kgravure-1971168f4e81",
+      "title": "DJAWA Photo – Mimmi (밈미) – Mochilero en Violeta (Backpacker-Girl) 62 photos · Mimmi · DJAWA",
+      "source": "https://kgravure.vip/en/sets/djawa-photo-mimmi-%EB%B0%88%EB%AF%B8-mochilero-en-violeta-backpacker-girl/",
+      "publisher": "DJAWA or credited source",
+      "images": [],
+      "samples": [],
+      "status": "source_no_public_image_evidence",
+      "candidate_image_urls": 0
+    },
+    {
+      "id": "kgravure-ab0089dfafff",
+      "title": "DJAWA Photo – Mimmi (밈미) – Azur Lane IJN Atago & Takao 62 photos · Mimmi · DJAWA",
+      "source": "https://kgravure.vip/en/sets/djawa-photo-mimmi-%EB%B0%88%EB%AF%B8-azur-lane-ijn-atago-takao/",
+      "publisher": "DJAWA or credited source",
+      "images": [],
+      "samples": [],
+      "status": "source_no_public_image_evidence",
+      "candidate_image_urls": 0
+    },
+    {
+      "id": "kgravure-75514d306a02",
+      "title": "DJAWA Photo – Mimmi (밈미) – Azur Lane Tashkent 60 photos · Mimmi · DJAWA",
+      "source": "https://kgravure.vip/en/sets/djawa-photo-mimmi-%EB%B0%88%EB%AF%B8-azur-lane-tashkent/",
+      "publisher": "DJAWA or credited source",
+      "images": [],
+      "samples": [],
+      "status": "source_no_public_image_evidence",
+      "candidate_image_urls": 0
+    },
+    {
+      "id": "kgravure-edd133627b2d",
+      "title": "DJAWA Photo – Mimmi (밈미) – Cream Cow Milk 107 photos · Mimmi · DJAWA",
+      "source": "https://kgravure.vip/en/sets/djawa-photo-mimmi-%EB%B0%88%EB%AF%B8-cream-cow-milk/",
+      "publisher": "DJAWA or credited source",
+      "images": [],
+      "samples": [],
+      "status": "source_no_public_image_evidence",
+      "candidate_image_urls": 0
+    },
+    {
+      "id": "kgravure-ede45378918a",
+      "title": "DJAWA Photo – Mimmi (밈미) – Cream Cow Milk (+S.Ver) 165 photos · Mimmi · DJAWA",
+      "source": "https://kgravure.vip/en/sets/djawa-photo-mimmi-%EB%B0%88%EB%AF%B8-cream-cow-milk-s-ver/",
+      "publisher": "DJAWA or credited source",
+      "images": [],
+      "samples": [],
+      "status": "source_no_public_image_evidence",
+      "candidate_image_urls": 0
+    },
+    {
+      "id": "kgravure-ce18fc46917c",
+      "title": "DJAWA Photo – Mimmi (밈미) – Cyberpunk Girl 42 photos · Mimmi · DJAWA",
+      "source": "https://kgravure.vip/en/sets/djawa-photo-mimmi-%EB%B0%88%EB%AF%B8-cyberpunk-girl/",
+      "publisher": "DJAWA or credited source",
+      "images": [],
+      "samples": [],
+      "status": "source_no_public_image_evidence",
+      "candidate_image_urls": 0
+    },
+    {
+      "id": "kgravure-3e6442f555b5",
+      "title": "DJAWA Photo – Mimmi (밈미) – Cyberpunk Girl 42 photos · Mimmi · DJAWA",
+      "source": "https://kgravure.vip/en/sets/djawa-photo-mimmi-%EB%B0%88%EB%AF%B8-cyberpunk-girl-2/",
+      "publisher": "DJAWA or credited source",
+      "images": [],
+      "samples": [],
+      "status": "source_no_public_image_evidence",
+      "candidate_image_urls": 0
+    },
+    {
+      "id": "kgravure-4010031c91ed",
+      "title": "DJAWA Photo – Mimmi (밈미) – Mademoiselle Mimmi (+S.Ver) 172 photos · Mimmi · DJAWA",
+      "source": "https://kgravure.vip/en/sets/djawa-photo-mimmi-%EB%B0%88%EB%AF%B8-mademoiselle-mimmi-s-ver/",
+      "publisher": "DJAWA or credited source",
+      "images": [],
+      "samples": [],
+      "status": "source_no_public_image_evidence",
+      "candidate_image_urls": 0
+    },
+    {
+      "id": "kgravure-00e75df47ace",
+      "title": "DJAWA Photo – Mimmi (밈미) – Kitsune Miko (A ver) 66 photos · Mimmi · DJAWA",
+      "source": "https://kgravure.vip/en/sets/djawa-photo-mimmi-%EB%B0%88%EB%AF%B8-kitsune-miko-a-ver/",
+      "publisher": "DJAWA or credited source",
+      "images": [],
+      "samples": [],
+      "status": "source_no_public_image_evidence",
+      "candidate_image_urls": 0
+    },
+    {
+      "id": "kgravure-18ed8c75d2ff",
+      "title": "DJAWA Photo – Mimmi (밈미) – March Hare 85 photos · Mimmi · DJAWA",
+      "source": "https://kgravure.vip/en/sets/djawa-photo-mimmi-%EB%B0%88%EB%AF%B8-march-hare/",
+      "publisher": "DJAWA or credited source",
+      "images": [],
+      "samples": [],
+      "status": "source_no_public_image_evidence",
+      "candidate_image_urls": 0
+    },
+    {
+      "id": "kgravure-2cc1e3dd9216",
+      "title": "DJAWA Photo – Mimmi (밈미) – Nikke Alice (+S.Ver) 171 photos · Mimmi · DJAWA",
+      "source": "https://kgravure.vip/en/sets/djawa-photo-mimmi-%EB%B0%88%EB%AF%B8-nikke-alice-s-ver/",
+      "publisher": "DJAWA or credited source",
+      "images": [],
+      "samples": [],
+      "status": "source_no_public_image_evidence",
+      "candidate_image_urls": 0
+    },
+    {
+      "id": "kgravure-ba0616589ca8",
+      "title": "DJAWA Photo – Mimmi (밈미) – Naughty Red Hiring Hood 126 photos · Mimmi · DJAWA",
+      "source": "https://kgravure.vip/en/sets/djawa-photo-mimmi-%EB%B0%88%EB%AF%B8-naughty-red-hiring-hood/",
+      "publisher": "DJAWA or credited source",
+      "images": [],
+      "samples": [],
+      "status": "source_no_public_image_evidence",
+      "candidate_image_urls": 0
+    },
+    {
+      "id": "kgravure-9deaa315d1fa",
+      "title": "DJAWA Photo – Mimmi (밈미) – Realise Loveliness 32 photos · Mimmi · DJAWA",
+      "source": "https://kgravure.vip/en/sets/djawa-photo-mimmi-%EB%B0%88%EB%AF%B8-realise-loveliness/",
+      "publisher": "DJAWA or credited source",
+      "images": [],
+      "samples": [],
+      "status": "source_no_public_image_evidence",
+      "candidate_image_urls": 0
+    },
+    {
+      "id": "kgravure-9fa40b202c90",
+      "title": "DJAWA Photo – Mimmi (밈미) – Rudy² Codename Wolfgirl 202 photos · Mimmi · DJAWA",
+      "source": "https://kgravure.vip/en/sets/djawa-photo-mimmi-%EB%B0%88%EB%AF%B8-rudy-codename-wolfgirl/",
+      "publisher": "DJAWA or credited source",
+      "images": [],
+      "samples": [],
+      "status": "source_no_public_image_evidence",
+      "candidate_image_urls": 0
+    },
+    {
+      "id": "kgravure-9c788590402b",
+      "title": "DJAWA Photo – Mimmi (밈미) – St. Esther 137 photos · Mimmi · DJAWA",
+      "source": "https://kgravure.vip/en/sets/djawa-photo-mimmi-%EB%B0%88%EB%AF%B8-st-esther/",
+      "publisher": "DJAWA or credited source",
+      "images": [],
+      "samples": [],
+      "status": "source_no_public_image_evidence",
+      "candidate_image_urls": 0
+    },
+    {
+      "id": "kgravure-bc3a44520122",
+      "title": "DJAWA Photo – Mimmi (밈미) – Rudy The Wolf of Midnight 231 photos · Mimmi · DJAWA",
+      "source": "https://kgravure.vip/en/sets/djawa-photo-mimmi-%EB%B0%88%EB%AF%B8-rudy-the-wolf-of-midnight/",
+      "publisher": "DJAWA or credited source",
+      "images": [],
+      "samples": [],
+      "status": "source_no_public_image_evidence",
+      "candidate_image_urls": 0
+    },
+    {
+      "id": "kgravure-6c972b6a454a",
+      "title": "DJAWA Photo – Mimmi (밈미) – The Pet Girl 52 photos · Mimmi · DJAWA",
+      "source": "https://kgravure.vip/en/sets/djawa-photo-mimmi-%EB%B0%88%EB%AF%B8-the-pet-girl/",
+      "publisher": "DJAWA or credited source",
+      "images": [],
+      "samples": [],
+      "status": "source_no_public_image_evidence",
+      "candidate_image_urls": 0
+    },
+    {
+      "id": "kgravure-75b510293485",
+      "title": "DJAWA Photo – Mimmi (밈미) – Sukajan Gal 178 photos · Mimmi · DJAWA",
+      "source": "https://kgravure.vip/en/sets/djawa-photo-mimmi-%EB%B0%88%EB%AF%B8-sukajan-gal/",
+      "publisher": "DJAWA or credited source",
+      "images": [],
+      "samples": [],
+      "status": "source_no_public_image_evidence",
+      "candidate_image_urls": 0
+    },
+    {
+      "id": "kgravure-05bb95833c83",
+      "title": "DJAWA Photo – Mimmi (밈미) × Ceyatic – Pop Kitty Party 126 photos · Mimmi · DJAWA",
+      "source": "https://kgravure.vip/en/sets/djawa-photo-mimmi-%EB%B0%88%EB%AF%B8-x-ceyatic-pop-kitty-party/",
+      "publisher": "DJAWA or credited source",
+      "images": [],
+      "samples": [],
+      "status": "source_no_public_image_evidence",
+      "candidate_image_urls": 0
+    },
+    {
+      "id": "kgravure-a76de1039845",
+      "title": "DJAWA Photo – Mimmi (밈미) – Witch’s Witchcraft",
+      "source": "https://kgravure.vip/en/sets/djawa-photo-mimmi-%EB%B0%88%EB%AF%B8-witchs-witchcraft/",
+      "publisher": "DJAWA or credited source",
+      "images": [],
+      "samples": [],
+      "status": "source_no_public_image_evidence",
+      "candidate_image_urls": 0
+    },
+    {
+      "id": "kgravure-ea67c8b4b506",
+      "title": "DJAWA Photo – Mimmi (밈미) – Your Panties",
+      "source": "https://kgravure.vip/en/sets/djawa-photo-mimmi-%EB%B0%88%EB%AF%B8-your-panties/",
+      "publisher": "DJAWA or credited source",
+      "images": [],
+      "samples": [],
+      "status": "source_no_public_image_evidence",
+      "candidate_image_urls": 0
+    },
+    {
+      "id": "kgravure-19ec74972c0b",
+      "title": "DJAWA Photo – Mimmi (밈미) – Your Fishe Gawr Gura",
+      "source": "https://kgravure.vip/en/sets/djawa-photo-mimmi-%EB%B0%88%EB%AF%B8-your-fishe-gawr-gura/",
+      "publisher": "DJAWA or credited source",
+      "images": [],
+      "samples": [],
+      "status": "source_no_public_image_evidence",
+      "candidate_image_urls": 0
+    },
+    {
+      "id": "kgravure-3dba9659f8b5",
+      "title": "DJAWA Photo – Mimmi (밈미) – Knotting Class #2",
+      "source": "https://kgravure.vip/en/sets/djawa-photo-mimmi-%EB%B0%88%EB%AF%B8-knotting-class-2/",
+      "publisher": "DJAWA or credited source",
+      "images": [],
+      "samples": [],
+      "status": "source_no_public_image_evidence",
+      "candidate_image_urls": 0
+    },
+    {
+      "id": "kgravure-09e8108b0fa0",
+      "title": "DJAWA Photo – Mimmi (밈미) – Swimming Lessons #8",
+      "source": "https://kgravure.vip/en/sets/djawa-photo-mimmi-%EB%B0%88%EB%AF%B8-swimming-lessons-8/",
+      "publisher": "DJAWA or credited source",
+      "images": [],
+      "samples": [],
+      "status": "source_no_public_image_evidence",
+      "candidate_image_urls": 0
+    },
+    {
+      "id": "kgravure-cc93cd14742d",
+      "title": "DJAWA Photo – Mimmi (밈미) – Girls’ Frontline – HK416 (Damaged ver.)",
+      "source": "https://kgravure.vip/en/sets/djawa-photo-mimmi-%EB%B0%88%EB%AF%B8-girls-frontline-hk416-damaged-ver/",
+      "publisher": "DJAWA or credited source",
+      "images": [],
+      "samples": [],
+      "status": "source_no_public_image_evidence",
+      "candidate_image_urls": 0
+    },
+    {
+      "id": "kgravure-6b19002945ce",
+      "title": "DJAWA Photo – Mimmi (밈미) – Christmas Special 2021",
+      "source": "https://kgravure.vip/en/sets/djawa-photo-mimmi-%EB%B0%88%EB%AF%B8-christmas-special-2021/",
+      "publisher": "DJAWA or credited source",
+      "images": [],
+      "samples": [],
+      "status": "source_no_public_image_evidence",
+      "candidate_image_urls": 0
+    },
+    {
+      "id": "kgravure-a235268b0224",
+      "title": "DJAWA Photo – Mimmi (밈미) – Nikke Elegg 69 photos · Mimmi 밈미 · DJAWA",
+      "source": "https://kgravure.vip/en/sets/djawa-photo-mimmi-%EB%B0%88%EB%AF%B8-nikke-elegg/",
+      "publisher": "DJAWA or credited source",
+      "images": [],
+      "samples": [],
+      "status": "source_no_public_image_evidence",
+      "candidate_image_urls": 0
+    },
+    {
+      "id": "kgravure-07133bf61934",
+      "title": "DJAWA Photo – Mimmi (밈미) – In The Summer Sunshine Part 1 100 photos · Mimmi 밈미 · DJAWA",
+      "source": "https://kgravure.vip/en/sets/djawa-photo-mimmi-%EB%B0%88%EB%AF%B8-in-the-summer-sunshine-part-1/",
+      "publisher": "DJAWA or credited source",
+      "images": [],
+      "samples": [],
+      "status": "source_no_public_image_evidence",
+      "candidate_image_urls": 0
+    },
+    {
+      "id": "kgravure-deb51fafe2d0",
+      "title": "DJAWA Photo – Mimmi (밈미) – Christmas Special 2021 (+S.ver) 101 photos · Mimmi 밈미 · DJAWA",
+      "source": "https://kgravure.vip/en/sets/djawa-photo-mimmi-%EB%B0%88%EB%AF%B8-christmas-special-2021-s-ver/",
+      "publisher": "DJAWA or credited source",
+      "images": [],
+      "samples": [],
+      "status": "source_no_public_image_evidence",
+      "candidate_image_urls": 0
+    },
+    {
+      "id": "kgravure-3c65479e9512",
+      "title": "DJAWA Photo – Mimmi (밈미) – Rei, Beyond the Heart 98 photos · Mimmi 밈미 · DJAWA",
+      "source": "https://kgravure.vip/en/sets/djawa-photo-mimmi-%EB%B0%88%EB%AF%B8-rei-beyond-the-heart/",
+      "publisher": "DJAWA or credited source",
+      "images": [],
+      "samples": [],
+      "status": "source_no_public_image_evidence",
+      "candidate_image_urls": 0
+    },
+    {
+      "id": "kgravure-3e926fc3cd1d",
+      "title": "Mimmi 밈미 – DJAWA 「Rei, Beyond the Heart」 16 photos · Mimmi 밈미 · DJAWA",
+      "source": "https://kgravure.vip/en/sets/mimmi-%EB%B0%88%EB%AF%B8-djawa-%E3%80%8Crei-beyond-the-heart%E3%80%8D/",
+      "publisher": "DJAWA or credited source",
+      "images": [],
+      "samples": [],
+      "status": "source_no_public_image_evidence",
+      "candidate_image_urls": 0
+    },
+    {
+      "id": "kgravure-16c7a9087388",
+      "title": "Mimmi 밈미 – DJAWA 「Christmas Special 2021 +S.ver」 15 photos · Mimmi 밈미 · DJAWA",
+      "source": "https://kgravure.vip/en/sets/mimmi-%EB%B0%88%EB%AF%B8-djawa-%E3%80%8Cchristmas-special-2021-s-ver%E3%80%8D/",
+      "publisher": "DJAWA or credited source",
+      "images": [],
+      "samples": [],
+      "status": "source_no_public_image_evidence",
+      "candidate_image_urls": 0
+    },
+    {
+      "id": "kgravure-41fb2b5b7527",
+      "title": "Mimmi 밈미 – DJAWA 「Nikke Elegg」 14 photos · Mimmi 밈미 · DJAWA",
+      "source": "https://kgravure.vip/en/sets/mimmi-%EB%B0%88%EB%AF%B8-djawa-%E3%80%8Cnikke-elegg%E3%80%8D/",
+      "publisher": "DJAWA or credited source",
+      "images": [],
+      "samples": [],
+      "status": "source_no_public_image_evidence",
+      "candidate_image_urls": 0
+    },
+    {
+      "id": "kgravure-28b9018215ed",
+      "title": "Mimmi 밈미 – DJAWA 「My Summer Vacation Vol.5」 15 photos · Mimmi 밈미 · DJAWA",
+      "source": "https://kgravure.vip/en/sets/mimmi-%EB%B0%88%EB%AF%B8-djawa-%E3%80%8Cmy-summer-vacation-vol-5%E3%80%8D/",
+      "publisher": "DJAWA or credited source",
+      "images": [],
+      "samples": [],
+      "status": "source_no_public_image_evidence",
+      "candidate_image_urls": 0
+    }
+  ]
+}
