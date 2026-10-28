@@ -34,7 +34,10 @@ for a in targets[:3]:
             try:
                 q=s.get(item["url"],timeout=(10,18))
                 page=BeautifulSoup(q.content,"html.parser")
-                im=[im.get("data-src") or im.get("src") for im in page.select("img") if "cdn.v2ph.com/photos/" in str(im)]\n                examples=[{k:v[:150] for k,v in img.attrs.items() if isinstance(v,str)} for img in page.select("img")[:8]]\n                cdnRaw=[re.sub(r"[^a-zA-Z0-9/._:-]"," ",q)[:150] for q in re.findall(r".{0,60}(?:v2ph.com|\.jpg|\.webp).{0,60}",q.text,re.I)[:6]]\n                print("MIMMI_PAGE2_RAW",json.dumps({"album":a["id"],"url":q.url,"all_img_tags":len(page.select("img")),"examples":examples,"cdn_snippets":cdnRaw},ensure_ascii=False),flush=True)
+                im=[im.get("data-src") or im.get("src") for im in page.select("img") if "cdn.v2ph.com/photos/" in str(im)]
+                examples=[{k:v[:150] for k,v in img.attrs.items() if isinstance(v,str)} for img in page.select("img")[:8]]
+                cdnRaw=[re.sub(r"[^a-zA-Z0-9/._:-]"," ",q)[:150] for q in re.findall(r".{0,60}(?:v2ph.com|\.jpg|\.webp).{0,60}",q.text,re.I)[:6]]
+                print("MIMMI_PAGE2_RAW",json.dumps({"album":a["id"],"url":q.url,"all_img_tags":len(page.select("img")),"examples":examples,"cdn_snippets":cdnRaw},ensure_ascii=False),flush=True)
                 probes.append({"url":q.url,"code":q.status_code,"images":len(im),"h1":page.find("h1").get_text(" ",strip=True)[:70] if page.find("h1") else ""})
             except Exception as e:probes.append({"url":item["url"],"error":str(e)[:140]})
         print("MIMMI_REAL_PAGINATION",json.dumps({"album":a["id"],"url":r.url,"code":r.status_code,"anchor_links":links[:35],"probe":probes},ensure_ascii=False),flush=True)
