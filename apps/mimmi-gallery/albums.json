@@ -433,8 +433,8 @@
       "title": "Nikke : Alice",
       "publisher": "DJAWA",
       "source": "https://djawaphoto.com/portfolio/nikke-alice/",
-      "expected": 170,
-      "photos": 170,
+      "expected": null,
+      "photos": null,
       "ai_enhanced": false
     },
     {
@@ -496,8 +496,8 @@
       "title": "Rudy : The Wolf of Midnight",
       "publisher": "DJAWA",
       "source": "https://djawaphoto.com/portfolio/rudy-the-wolf-of-midnight/",
-      "expected": 228,
-      "photos": 228,
+      "expected": null,
+      "photos": null,
       "ai_enhanced": false
     },
     {
@@ -505,8 +505,8 @@
       "title": "Rudy² – Codename : Wolfgirl",
       "publisher": "DJAWA",
       "source": "https://djawaphoto.com/portfolio/rudy%c2%b2-codename-wolfgirl/",
-      "expected": 201,
-      "photos": 201,
+      "expected": null,
+      "photos": null,
       "ai_enhanced": false
     },
     {
@@ -550,8 +550,8 @@
       "title": "Your Fishe (Gawr Gura)",
       "publisher": "DJAWA",
       "source": "https://djawaphoto.com/portfolio/your-fishe-gawr-gura/",
-      "expected": 123,
-      "photos": 123,
+      "expected": null,
+      "photos": null,
       "ai_enhanced": false
     },
     {
@@ -1303,11 +1303,11 @@
   ],
   "summary": {
     "displayed_albums": 63,
-    "verified_unique_source_images": 820,
-    "input_source_image_occurrences": 850,
+    "verified_unique_source_images": 1462,
+    "input_source_image_occurrences": 1492,
     "duplicate_hashes_skipped": 30,
     "actual_full_publisher_photobooks": 0,
-    "incomplete_known_count_albums": 25,
+    "incomplete_known_count_albums": 21,
     "curated_research_works": 52
   },
   "notes": "Individual accessible public samples are NOT complete commercial editions."
