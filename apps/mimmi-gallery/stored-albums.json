@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "model": "mimmi",
-  "updated": "2026-10-28T18:51:17Z",
+  "updated": "2026-10-28T18:51:46Z",
   "storage": "physically committed public previews under GitHub Pages; not licensed publisher masters",
   "albums": [
     {
@@ -10251,10 +10251,361 @@
           "width": 2700,
           "height": 1800,
           "number": 62
+        },
+        {
+          "url": "stored-albums/xiutu-public-1190154/a62e664f9348faa73704a39c88aa72aa35100aa0cc52bcc9c5b30ce6f73c05a1.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/oxatewzs4c0.jpg",
+          "sha256": "a62e664f9348faa73704a39c88aa72aa35100aa0cc52bcc9c5b30ce6f73c05a1",
+          "bytes": 1215634,
+          "width": 2700,
+          "height": 1800,
+          "number": 63
+        },
+        {
+          "url": "stored-albums/xiutu-public-1190154/4cd2dd7e6dccf29f39a36b08059972db666f118654d345992425aae904c04d2a.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/zui0ejs4whh.jpg",
+          "sha256": "4cd2dd7e6dccf29f39a36b08059972db666f118654d345992425aae904c04d2a",
+          "bytes": 1137776,
+          "width": 2700,
+          "height": 1800,
+          "number": 64
+        },
+        {
+          "url": "stored-albums/xiutu-public-1190154/e58cfe772a31fdc3b28c7b61f519d0d4d0449470d3132502bb01fd4ec77ee50f.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/rlhchwilfrj.jpg",
+          "sha256": "e58cfe772a31fdc3b28c7b61f519d0d4d0449470d3132502bb01fd4ec77ee50f",
+          "bytes": 1176104,
+          "width": 2700,
+          "height": 1800,
+          "number": 65
+        },
+        {
+          "url": "stored-albums/xiutu-public-1190154/091cf113f37444e15ade2d6f28bee5e146ef8c81a1d327c08ee9fa11d538d1c1.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/cxi4zn0vede.jpg",
+          "sha256": "091cf113f37444e15ade2d6f28bee5e146ef8c81a1d327c08ee9fa11d538d1c1",
+          "bytes": 1224001,
+          "width": 2700,
+          "height": 1800,
+          "number": 66
+        },
+        {
+          "url": "stored-albums/xiutu-public-1190154/42e5eb447d74388b708bc68f1895c01996b764d1e31fb5295142d1cfd30187c5.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/j4z1a4kb031.jpg",
+          "sha256": "42e5eb447d74388b708bc68f1895c01996b764d1e31fb5295142d1cfd30187c5",
+          "bytes": 659437,
+          "width": 2700,
+          "height": 1800,
+          "number": 67
+        },
+        {
+          "url": "stored-albums/xiutu-public-1190154/a5df9eb2d9e69c61c25ca59aa5117d2c14dfe0817eb25b21808dfe2df2e78bda.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/yjieqi5uupi.jpg",
+          "sha256": "a5df9eb2d9e69c61c25ca59aa5117d2c14dfe0817eb25b21808dfe2df2e78bda",
+          "bytes": 394169,
+          "width": 1800,
+          "height": 2700,
+          "number": 68
+        },
+        {
+          "url": "stored-albums/xiutu-public-1190154/e3c8cc2ef7a6def81c21b9ce7a9efaf8ea65d17a587199b97dd9058e75c9607d.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/f1xx0melhn5.jpg",
+          "sha256": "e3c8cc2ef7a6def81c21b9ce7a9efaf8ea65d17a587199b97dd9058e75c9607d",
+          "bytes": 403181,
+          "width": 1800,
+          "height": 2700,
+          "number": 69
+        },
+        {
+          "url": "stored-albums/xiutu-public-1190154/76939bfe582412a9acb267c776c4b3a9b8860f074b63e15fd05adbd465b3414e.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/vv3anfkbcia.jpg",
+          "sha256": "76939bfe582412a9acb267c776c4b3a9b8860f074b63e15fd05adbd465b3414e",
+          "bytes": 502577,
+          "width": 1800,
+          "height": 2700,
+          "number": 70
+        },
+        {
+          "url": "stored-albums/xiutu-public-1190154/c56eb20d230a8fc8bde96e9fd43de6654f3e408c9a14a504ba74e7f117278670.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/pxysnkxosye.jpg",
+          "sha256": "c56eb20d230a8fc8bde96e9fd43de6654f3e408c9a14a504ba74e7f117278670",
+          "bytes": 570558,
+          "width": 1800,
+          "height": 2700,
+          "number": 71
+        },
+        {
+          "url": "stored-albums/xiutu-public-1190154/d059a633904c5609d166cfd3b8567242bfb175bd8df346ffad0cc7c52ed04947.jpg",
+          "source_url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/v22zlxnsmf0.jpg",
+          "sha256": "d059a633904c5609d166cfd3b8567242bfb175bd8df346ffad0cc7c52ed04947",
+          "bytes": 319027,
+          "width": 2700,
+          "height": 1800,
+          "number": 72
+        }
+      ],
+      "status": "public_previews_only_not_complete"
+    },
+    {
+      "id": "djawa-rudy-the-wolf-of-midnight",
+      "title": "Rudy : The Wolf of Midnight",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/rudy-the-wolf-of-midnight/",
+      "images": [
+        {
+          "url": "stored-albums/djawa-rudy-the-wolf-of-midnight/71002b0af0de66475ac2bc6281e92f2dfa792145764a5248cdc42429d51e90c3.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2021/02/sample_01c.jpg",
+          "sha256": "71002b0af0de66475ac2bc6281e92f2dfa792145764a5248cdc42429d51e90c3",
+          "bytes": 537756,
+          "width": 1000,
+          "height": 1500,
+          "number": 1
+        },
+        {
+          "url": "stored-albums/djawa-rudy-the-wolf-of-midnight/86af0f896cfb5dcd795311dfb1f31917c2760cb53ebe164effc96da82b839df2.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2021/02/sample_02c.jpg",
+          "sha256": "86af0f896cfb5dcd795311dfb1f31917c2760cb53ebe164effc96da82b839df2",
+          "bytes": 594095,
+          "width": 1000,
+          "height": 1500,
+          "number": 2
+        },
+        {
+          "url": "stored-albums/djawa-rudy-the-wolf-of-midnight/d90ca1a2e54b6fee8ebce91e8e573217f8a35365778066e9a1da86233e9c9efd.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2021/02/sample_03.jpg",
+          "sha256": "d90ca1a2e54b6fee8ebce91e8e573217f8a35365778066e9a1da86233e9c9efd",
+          "bytes": 501395,
+          "width": 1000,
+          "height": 1500,
+          "number": 3
+        },
+        {
+          "url": "stored-albums/djawa-rudy-the-wolf-of-midnight/be4102d1b459d81596f15ab913f58c0edf0eb5f61053f062857b910c9835c1c7.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2021/02/sample_04.jpg",
+          "sha256": "be4102d1b459d81596f15ab913f58c0edf0eb5f61053f062857b910c9835c1c7",
+          "bytes": 552071,
+          "width": 1000,
+          "height": 1500,
+          "number": 4
+        },
+        {
+          "url": "stored-albums/djawa-rudy-the-wolf-of-midnight/1d5e6fd8fec955ff6f6e85fc17adf127c119f1a1c48d6d05bd802381fa6a87ea.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2021/02/sample_05.jpg",
+          "sha256": "1d5e6fd8fec955ff6f6e85fc17adf127c119f1a1c48d6d05bd802381fa6a87ea",
+          "bytes": 466542,
+          "width": 1000,
+          "height": 1500,
+          "number": 5
+        },
+        {
+          "url": "stored-albums/djawa-rudy-the-wolf-of-midnight/e1cfd874f31d97461df3027b7ae6c3dfa5b6d187408b594c3306383c65db21ae.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2021/02/sample_06.jpg",
+          "sha256": "e1cfd874f31d97461df3027b7ae6c3dfa5b6d187408b594c3306383c65db21ae",
+          "bytes": 514617,
+          "width": 1500,
+          "height": 1000,
+          "number": 6
+        },
+        {
+          "url": "stored-albums/djawa-rudy-the-wolf-of-midnight/9c92a4f6ffe0588a84149e18c222ea036e8fcf91baee7e76282c5101b3a523b6.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2021/02/sample_07.jpg",
+          "sha256": "9c92a4f6ffe0588a84149e18c222ea036e8fcf91baee7e76282c5101b3a523b6",
+          "bytes": 476693,
+          "width": 1000,
+          "height": 1500,
+          "number": 7
+        },
+        {
+          "url": "stored-albums/djawa-rudy-the-wolf-of-midnight/5eff54572e147fe172a994a29b8e7ab7d0c5559a4695471fd22794e77fa45eea.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2021/02/sample_08.jpg",
+          "sha256": "5eff54572e147fe172a994a29b8e7ab7d0c5559a4695471fd22794e77fa45eea",
+          "bytes": 543808,
+          "width": 1000,
+          "height": 1500,
+          "number": 8
+        },
+        {
+          "url": "stored-albums/djawa-rudy-the-wolf-of-midnight/3160ad576c16ca8f8c74bc7cd8412530dd52dcdb61b8fbe5f46337bfc0bb5825.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/8FhwXcIcVCF0by8q.jpg",
+          "sha256": "3160ad576c16ca8f8c74bc7cd8412530dd52dcdb61b8fbe5f46337bfc0bb5825",
+          "bytes": 514007,
+          "width": 1800,
+          "height": 2700,
+          "number": 9
+        },
+        {
+          "url": "stored-albums/djawa-rudy-the-wolf-of-midnight/cbd2f7ac5490587589b1ca1963d73c2254ca5ecba04571c703c65c7e2b2e0fe5.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/BfYiUDyJAM9SJzSe.jpg",
+          "sha256": "cbd2f7ac5490587589b1ca1963d73c2254ca5ecba04571c703c65c7e2b2e0fe5",
+          "bytes": 534864,
+          "width": 1800,
+          "height": 2700,
+          "number": 10
+        },
+        {
+          "url": "stored-albums/djawa-rudy-the-wolf-of-midnight/3a9ed01a464ae483ed0d46d6b05313c35521ee237a5041cb8875094a6f7ed000.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/jS1gs1VT7gYqOqI4.jpg",
+          "sha256": "3a9ed01a464ae483ed0d46d6b05313c35521ee237a5041cb8875094a6f7ed000",
+          "bytes": 547821,
+          "width": 1800,
+          "height": 2700,
+          "number": 11
+        },
+        {
+          "url": "stored-albums/djawa-rudy-the-wolf-of-midnight/0801d09e198daff92a5d954e52d606b8748a1cfc043023754cb2c6b6d516934a.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/rIe5ARQTsG0qOFfC.jpg",
+          "sha256": "0801d09e198daff92a5d954e52d606b8748a1cfc043023754cb2c6b6d516934a",
+          "bytes": 563302,
+          "width": 1800,
+          "height": 2700,
+          "number": 12
+        },
+        {
+          "url": "stored-albums/djawa-rudy-the-wolf-of-midnight/ac70ae89ae25a36ca46e6b50018a2ffc189fcec6b6db5b03e589b47b78672d90.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/AXSHMUaOxDcTh14t.jpg",
+          "sha256": "ac70ae89ae25a36ca46e6b50018a2ffc189fcec6b6db5b03e589b47b78672d90",
+          "bytes": 535406,
+          "width": 1800,
+          "height": 2700,
+          "number": 13
+        },
+        {
+          "url": "stored-albums/djawa-rudy-the-wolf-of-midnight/7016595e398e8e62276878105bfd9a84cafc15c3f2931af7176bd2cc95c9db47.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/BlS0Y0vWrXG4bsJV.jpg",
+          "sha256": "7016595e398e8e62276878105bfd9a84cafc15c3f2931af7176bd2cc95c9db47",
+          "bytes": 484364,
+          "width": 1800,
+          "height": 2700,
+          "number": 14
+        },
+        {
+          "url": "stored-albums/djawa-rudy-the-wolf-of-midnight/25161e654e822e55ee7c64c8967125f96f2431070580529106eaf04b53e2121d.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/XK0XXGz5N5FMxPEF.jpg",
+          "sha256": "25161e654e822e55ee7c64c8967125f96f2431070580529106eaf04b53e2121d",
+          "bytes": 482399,
+          "width": 1800,
+          "height": 2700,
+          "number": 15
+        },
+        {
+          "url": "stored-albums/djawa-rudy-the-wolf-of-midnight/9baf7da5be244847811f2dfe509a4a8ceeec93ff800eda3d5c4e9eaba2a4cf8e.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/Se8ivNDwQBwpbMiU.jpg",
+          "sha256": "9baf7da5be244847811f2dfe509a4a8ceeec93ff800eda3d5c4e9eaba2a4cf8e",
+          "bytes": 513992,
+          "width": 1800,
+          "height": 2700,
+          "number": 16
+        },
+        {
+          "url": "stored-albums/djawa-rudy-the-wolf-of-midnight/1b698360741845fe262e2d61e640c921266e2c1601e982c20bbca3fd0545167c.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/81JrIl0Lkaq6slNR.jpg",
+          "sha256": "1b698360741845fe262e2d61e640c921266e2c1601e982c20bbca3fd0545167c",
+          "bytes": 573447,
+          "width": 1800,
+          "height": 2700,
+          "number": 17
+        },
+        {
+          "url": "stored-albums/djawa-rudy-the-wolf-of-midnight/40f57ade9ad16716d0f9627cc9ae0c3deaa9b8f9e2d5c22b73c891dd6189a71b.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/9ahTe5PQ33xrSyFN.jpg",
+          "sha256": "40f57ade9ad16716d0f9627cc9ae0c3deaa9b8f9e2d5c22b73c891dd6189a71b",
+          "bytes": 510524,
+          "width": 1800,
+          "height": 2700,
+          "number": 18
+        },
+        {
+          "url": "stored-albums/djawa-rudy-the-wolf-of-midnight/183bd490ac354c51b9486551d0879207e0e1930c7ded09f4b8d83dbf8527f301.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-230.jpg",
+          "sha256": "183bd490ac354c51b9486551d0879207e0e1930c7ded09f4b8d83dbf8527f301",
+          "bytes": 179033,
+          "width": 912,
+          "height": 1368,
+          "number": 19
+        },
+        {
+          "url": "stored-albums/djawa-rudy-the-wolf-of-midnight/d62ac21ebc475c7b6645e267502f2e26b79cbac2980317c0a90efee5da0a288b.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-229.jpg",
+          "sha256": "d62ac21ebc475c7b6645e267502f2e26b79cbac2980317c0a90efee5da0a288b",
+          "bytes": 189189,
+          "width": 912,
+          "height": 1368,
+          "number": 20
+        },
+        {
+          "url": "stored-albums/djawa-rudy-the-wolf-of-midnight/00db5707c0626e441763d184702af71d2a1731f5ee5599153380677befc2b2d7.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-226.jpg",
+          "sha256": "00db5707c0626e441763d184702af71d2a1731f5ee5599153380677befc2b2d7",
+          "bytes": 172488,
+          "width": 912,
+          "height": 1368,
+          "number": 21
+        },
+        {
+          "url": "stored-albums/djawa-rudy-the-wolf-of-midnight/4f29b410faa74703a6db2f81d8e4589648af0c19e2da82e2fad253c1639f29e5.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-228.jpg",
+          "sha256": "4f29b410faa74703a6db2f81d8e4589648af0c19e2da82e2fad253c1639f29e5",
+          "bytes": 162638,
+          "width": 912,
+          "height": 1368,
+          "number": 22
+        },
+        {
+          "url": "stored-albums/djawa-rudy-the-wolf-of-midnight/55cc50d5aac7d8745e1671d7932e426c8f109ae2e5a145e076284369e39a43b8.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-227.jpg",
+          "sha256": "55cc50d5aac7d8745e1671d7932e426c8f109ae2e5a145e076284369e39a43b8",
+          "bytes": 161498,
+          "width": 912,
+          "height": 1368,
+          "number": 23
+        },
+        {
+          "url": "stored-albums/djawa-rudy-the-wolf-of-midnight/d385a14fa485e4d68e5b25fb0c3f82fea5b8eb12efe44130814b77af1957d84b.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-225.jpg",
+          "sha256": "d385a14fa485e4d68e5b25fb0c3f82fea5b8eb12efe44130814b77af1957d84b",
+          "bytes": 178021,
+          "width": 912,
+          "height": 1368,
+          "number": 24
+        },
+        {
+          "url": "stored-albums/djawa-rudy-the-wolf-of-midnight/be08021fbab2d7af9af7b39c73059942d16544cb48fc24cc2d38ee83aba38f34.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-224.jpg",
+          "sha256": "be08021fbab2d7af9af7b39c73059942d16544cb48fc24cc2d38ee83aba38f34",
+          "bytes": 192143,
+          "width": 912,
+          "height": 1368,
+          "number": 25
+        },
+        {
+          "url": "stored-albums/djawa-rudy-the-wolf-of-midnight/584077aebf43cf9f6d84a6cafac433dc093330705757d2ceafa6749a52b9c0c2.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-223.jpg",
+          "sha256": "584077aebf43cf9f6d84a6cafac433dc093330705757d2ceafa6749a52b9c0c2",
+          "bytes": 200806,
+          "width": 912,
+          "height": 1368,
+          "number": 26
+        },
+        {
+          "url": "stored-albums/djawa-rudy-the-wolf-of-midnight/f73253f7becc180cded326938e107cfcbc3b15ead8e35a5e333f6a3c083090fb.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-222.jpg",
+          "sha256": "f73253f7becc180cded326938e107cfcbc3b15ead8e35a5e333f6a3c083090fb",
+          "bytes": 197254,
+          "width": 912,
+          "height": 1368,
+          "number": 27
+        },
+        {
+          "url": "stored-albums/djawa-rudy-the-wolf-of-midnight/e07391fe974646e17ddcc7e0484c0fcc5048fc1513920f8ef0cd917a1a3ca741.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-220.jpg",
+          "sha256": "e07391fe974646e17ddcc7e0484c0fcc5048fc1513920f8ef0cd917a1a3ca741",
+          "bytes": 184155,
+          "width": 912,
+          "height": 1368,
+          "number": 28
         }
       ],
       "status": "public_previews_only_not_complete"
     }
   ],
-  "physical_verified_image_count": 1102
+  "physical_verified_image_count": 1140
 }
