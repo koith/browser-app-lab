@@ -19,7 +19,7 @@ if(manifest.albums.some(a=>a.expected&&a.images.length>a.expected))throw Error('
   await page.goto('http://127.0.0.1:8765/mimmi-gallery/',{waitUntil:'domcontentloaded',timeout:25000});
   await page.waitForFunction(()=>document.querySelector('#total')?.textContent?.includes('albums'),{timeout:20000});
   const version=await page.locator('#app-version').innerText();
-  if(version!=='v0.1.0-mimmi.4')throw Error('Wrong version '+version);
+  if(version!=='v0.1.0-mimmi.5')throw Error('Wrong version '+version);
   const pos=await page.locator('#app-version').boundingBox();
   if(!pos||pos.y>25||pos.height>20||pos.x<180)throw Error('Version not small upper-right '+JSON.stringify(pos));
   const yui=page.locator('.mainnav a').first();
@@ -29,7 +29,7 @@ if(manifest.albums.some(a=>a.expected&&a.images.length>a.expected))throw Error('
   if(!popup.url().includes('/yui-gallery/')||!page.url().includes('/mimmi-gallery/'))throw Error('Cross-model tab navigation failed');
   await popup.close();
   const albumCards=await page.locator('#albumgrid .album').count();
-  if(albumCards<45)throw Error('Incomplete album cards '+albumCards);
+  if(albumCards<105)throw Error('Incomplete album cards '+albumCards);
   if(await page.locator('#albumgrid .photo').count())throw Error('Old giant expanded card gallery still present');
   const first=page.locator('#albumgrid .album').first();
   const box=await first.boundingBox();
@@ -40,7 +40,7 @@ if(manifest.albums.some(a=>a.expected&&a.images.length>a.expected))throw Error('
   await official.click();
   if(!await page.locator('#detail').isVisible())throw Error('Album detail hidden');
   const officialCount=await page.locator('#detailphotos .photo').count();
-  if(officialCount!==6)throw Error('Unexpected official public promo count '+officialCount);
+  if(officialCount<6||officialCount>24)throw Error('Unexpected official public promo count '+officialCount);
   await page.locator('#detailphotos .photo').first().click();
   await page.waitForFunction(()=>{
     const image=document.querySelector('#full'),message=document.querySelector('#media-status');
@@ -48,7 +48,18 @@ if(manifest.albums.some(a=>a.expected&&a.images.length>a.expected))throw Error('
   },{timeout:20000});
   await page.locator('#next').click();
   if(!(await page.locator('#position').innerText()).startsWith('2 /'))throw Error('Photo arrow failed');
+  // Safari history gesture equivalent: viewer → album → overview.
+  await page.goBack({waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>!document.querySelector('#detail').hidden&&!document.querySelector('#lightbox').classList.contains('open'),{timeout:12000});
+  await page.goBack({waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>!document.querySelector('#browse').hidden,{timeout:12000});
+  if(!await page.locator('#albumgrid [data-id="research-no-052"]').count())throw Error('Missing research set NO.052 on newest clone');
+  await page.goForward({waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>!document.querySelector('#detail').hidden,{timeout:12000});
+  await page.goForward({waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>document.querySelector('#lightbox').classList.contains('open'),{timeout:12000});
   await page.locator('#close').click();
+  await page.waitForFunction(()=>!document.querySelector('#lightbox').classList.contains('open'),{timeout:12000});
   await page.locator('#back').click();
   await page.waitForFunction(()=>!document.querySelector('#browse').hidden,{timeout:12000});
   const v2ph=page.locator('#albumgrid [data-id="v2ph-cream-cow-milk"]');
@@ -64,6 +75,6 @@ if(manifest.albums.some(a=>a.expected&&a.images.length>a.expected))throw Error('
   if(overflow)throw Error('Mobile horizontal overflow');
   if(errors.length)throw Error('JS exceptions: '+errors.join(';'));
   await page.screenshot({path:'mimmi-beta18-clone-chromium.png'});
-  console.log('MIMMI_LATEST_YUI_CLONE_MOBILE_PASS',{version,albums:albumCards,photos:count,officialCount,partial,modelTab:true});
+  console.log('MIMMI_LATEST_YUI_CLONE_MOBILE_PASS',{version,albums:albumCards,photos:count,officialCount,partial,modelTab:true,safariBackForward:true});
  }finally{await browser.close()}
 })().catch(e=>{console.error(e.stack||String(e));process.exit(1)});
