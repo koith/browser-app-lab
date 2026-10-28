@@ -1,5 +1,5 @@
 {
-  "version": "v0.1.0-beta.14",
+  "version": "v0.1.0-beta.15",
   "date": "2026-10-28",
   "policy": {
     "monthly_charge_krw": 0,
@@ -101,7 +101,9 @@
       "Yo-U"
     ],
     "beta14_new_photograph_file_sha256": 0,
-    "beta14_new_gallery_entries": 0
+    "beta14_new_gallery_entries": 0,
+    "beta15_new_photograph_file_sha256": 0,
+    "beta15_new_gallery_entries": 0
   },
   "notes": [
     "A private Google Drive ZIP is only a temporary safety copy, not the user-approved primary archive.",
@@ -127,7 +129,8 @@
     "beta.12 archives 402 new photograph files plus 80 separate non-photographic inputs from explicit creator posts and Korean/Japanese/Chinese public publishers, events, photographers, editorial and board pages. These are SHA-256 file counts, not unique poses or complete new photobooks. Register 401 image entries in five explicitly incomplete public collections; prefer four larger unchanged creator-source files over lower editorial variants and retain one equal-size duplicate privately. DJAWA provides 24 public sample photos of an advertised 190-photo edition, not the full book. Private Google Drive individual-file backup/readback is recorded in the release PR; it is not the accepted primary cloud or authenticated in-gallery owner storage.",
     "beta.13 adds publisher browsing with verified official-brand logo provenance, catalogued/viewable counts and native history through publisher/album/photo levels. Unconfirmed publishers and public editorial/event/SNS material stay separate. No new photographs are claimed by this UI change.",
     "beta.13 collects 198 unchanged public image variants, conservatively matches 173 whole-frame files to the existing Teddy work and keeps 25 unmatched/cropped/marketing inputs privately unclassified. Replace 70 existing 1024x1535 files with 1201x1800 files; retain ten2699px and seventeen2303px files. The same larger Teddy71 file is reused in its existing editorial item. One alternate source file timed out twice and was recovered by its normal unmodified browser request. No new poses/full books or publisher master are claimed. Eight publisher brand assets include the MAXIM parent mark for BCUT and the SWEETBOX photographer profile image. Yo-U is a plainly labelled name fallback pending logo verification.",
-    "beta.14 replaces the four visible browse tabs with a single publisher/album toggle, sorts publishers and displayed album titles in Korean-locale ascending natural order, and hides global photo/all-catalogue navigation. Album photo order, image bytes and source choices remain unchanged. New acquisition counts will change only after verified individual files are obtained."
+    "beta.14 replaces the four visible browse tabs with a single publisher/album toggle, sorts publishers and displayed album titles in Korean-locale ascending natural order, and hides global photo/all-catalogue navigation. Album photo order, image bytes and source choices remain unchanged. New acquisition counts will change only after verified individual files are obtained.",
+    "beta.15 matches publisher card backgrounds to unchanged logo artwork: opaque white logos on white, PUSSY LET on its dominant #f4b544 yellow, transparent marks composite on the card, and the photographic SWEETBOX brand image fills its card without neutral gutters. No image bytes, gallery photo data, source choices or navigation changes."
   ],
   "archiving_engine": {
     "mode": "individual_files",
