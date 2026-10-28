@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "version": "v0.1.0-mimmi.2",
-  "generated_at": "2026-10-28T15:59:51.403477+00:00",
+  "generated_at": "2026-10-28T16:29:15.651429+00:00",
   "source": "public V2PH photobook pages, no private downloads or paid content",
   "summary": {
     "albums": 6,
@@ -125,6 +125,8 @@
           "candidates": 10
         }
       ],
+      "fresh_http_verified": 10,
+      "carried_from_previous_verification": 0,
       "status": "v2ph_public_samples_verified"
     },
     {
@@ -243,6 +245,8 @@
           "candidates": 10
         }
       ],
+      "fresh_http_verified": 10,
+      "carried_from_previous_verification": 0,
       "status": "v2ph_public_samples_verified"
     },
     {
@@ -361,6 +365,8 @@
           "candidates": 10
         }
       ],
+      "fresh_http_verified": 10,
+      "carried_from_previous_verification": 0,
       "status": "v2ph_public_samples_verified"
     },
     {
@@ -479,6 +485,8 @@
           "candidates": 10
         }
       ],
+      "fresh_http_verified": 10,
+      "carried_from_previous_verification": 0,
       "status": "v2ph_public_samples_verified"
     },
     {
@@ -597,6 +605,8 @@
           "candidates": 10
         }
       ],
+      "fresh_http_verified": 10,
+      "carried_from_previous_verification": 0,
       "status": "v2ph_public_samples_verified"
     },
     {
@@ -715,6 +725,8 @@
           "candidates": 10
         }
       ],
+      "fresh_http_verified": 10,
+      "carried_from_previous_verification": 0,
       "status": "v2ph_public_samples_verified"
     }
   ]
