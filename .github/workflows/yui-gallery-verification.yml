@@ -34,6 +34,10 @@ jobs:
           archive: false
           if-no-files-found: ignore
   verified-viewing:
+    # All three jobs visit the same public CDN. Separate process-local pacers
+    # cannot coordinate that traffic: finish source readback first, then run
+    # one browser engine at a time without reducing image coverage.
+    needs: selected-source-readback
     runs-on: ${{ matrix.os }}
     container:
       # Browser/system libraries are preinstalled; avoid the observed slow apt mirror.
@@ -44,6 +48,7 @@ jobs:
     timeout-minutes: 40
     strategy:
       fail-fast: false
+      max-parallel: 1
       matrix:
         include:
           - engine: chromium
