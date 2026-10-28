@@ -24,8 +24,9 @@ jobs:
       - run: python -m pip install requests beautifulsoup4 Pillow
       - name: Verify open-photo extractor syntax and safety
         run: |
-          python -m py_compile apps/mimmi-gallery/collect_v2ph_public.py
+          python -m py_compile apps/mimmi-gallery/collect_v2ph_public.py apps/mimmi-gallery/download_public_images_private.py
           python apps/mimmi-gallery/test_v2ph_public.py
+          python apps/mimmi-gallery/test_private_download.py
       - name: Verify real public Mimmi V2PH images and browse multiple pages
         run: python apps/mimmi-gallery/collect_v2ph_public.py --pages 14 --images 120
       - name: Check genuine image evidence; never count source ads or broken links
