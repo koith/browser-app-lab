@@ -2062,10 +2062,10 @@
           "number": 5,
           "url": "https://djawaphoto.com/wp-content/uploads/2022/11/sample_03-2.jpg",
           "source_url": "https://djawaphoto.com/wp-content/uploads/2022/11/sample_03-2.jpg",
-          "sha256": "5a6f4f76d1301eb189be2a4ccc691e121c871f624acc5896007b99d28d200998",
+          "sha256": "e3068abbcdff8b8e133c38c24c9e2ca447391a181c219df7b737727d4dcc5068",
           "width": 1200,
           "height": 1800,
-          "bytes": 650421,
+          "bytes": 589717,
           "quality": "official_public_sample",
           "publisher_original_verified": false
         },
@@ -2548,10 +2548,10 @@
           "number": 6,
           "url": "https://djawaphoto.com/wp-content/uploads/2024/09/sample_04-8.jpg",
           "source_url": "https://djawaphoto.com/wp-content/uploads/2024/09/sample_04-8.jpg",
-          "sha256": "46ce304bbfc7ad63a5d3796c59c5a983f69b0ecc661f01c2190069f22fd8770e",
+          "sha256": "063633e9e709b9546404cf85feb1ef3c08cc4c8ed0dfcb99944f862af987b9b6",
           "width": 1200,
           "height": 1800,
-          "bytes": 374429,
+          "bytes": 314798,
           "quality": "official_public_sample",
           "publisher_original_verified": false
         }
