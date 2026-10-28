@@ -19,16 +19,21 @@ jobs:
         run: |
           npm install --no-save playwright@1.58.2
           npx playwright install chromium
+          npx playwright install --with-deps webkit
       - name: Exercise actual mobile album UX, cross-model new tab, and photo fallback
         run: |
           python -m http.server 8765 --directory apps >/tmp/mimmi-static.log 2>&1 &
           node apps/mimmi-gallery/test_mobile_album.cjs
+      - name: Verify iPhone-like WebKit source-host images and graceful fallback
+        run: node apps/mimmi-gallery/test_webkit_photo.cjs
       - name: Save individual screenshot evidence, without archive packaging
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: mimmi-gallery-mobile-preview
-          path: mimmi-mobile-v4.png
+          path: |
+            mimmi-mobile-v4.png
+            mimmi-webkit-v4.png
           archive: false
           retention-days: 30
           if-no-files-found: ignore
