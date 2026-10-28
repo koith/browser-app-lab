@@ -18,6 +18,54 @@ MAX_FILE=30_000_000
 # Keep the full multi-app GitHub Pages site below the provider's size limit.
 MAX_PUBLIC_IMAGE_BYTES=780*1024*1024
 
+# Independently confirmed: exact same CreamSoda editions in the existing
+# ten-image V2PH teasers and the publicly visible Xiutu photo galleries.
+# Save to the existing edition folder, not six misleading duplicate cards.
+XIUTU_EDITION_LINKS={
+    "xiutu-public-1190160":"v2ph-actor-a5e78m5a",  # Neko Mimmi (62 public photos)
+    "xiutu-public-1190158":"v2ph-actor-a8847m5a",  # Mashu Mimmi (59)
+    "xiutu-public-1190156":"v2ph-actor-a884435a",  # Chic Nerd & Maness Nurse (63)
+    "xiutu-public-1190145":"v2ph-actor-ae57484a",  # Belt choker (46)
+}
+
+def xiutu_verified_public_editions(root=ROOT):
+    """Convert real SHA-backed public image URLs into existing physical albums.
+
+    This is a list of image *candidates* for archival, not stored-image proof.
+    The actual byte download, SHA matching and file write remain mandatory.
+    """
+    path=root/"xiutu-public-previews.json"
+    if not path.is_file():return []
+    source=json.loads(path.read_text(encoding="utf-8"))
+    if source.get("model")!="mimmi":raise ValueError("Wrong model in independent photo source")
+    albums=[]
+    for a in source.get("albums",[]):
+        original=a.get("id","")
+        if not re.fullmatch(r"xiutu-public-[0-9]{4,12}",original):continue
+        if not a.get("source","").startswith("https://www.xiutu.me/photo/"):continue
+        photos=[]
+        for p in a.get("samples",[]):
+            url=p.get("url","")
+            digest=p.get("sha256","")
+            size=p.get("bytes")
+            if (not permitted(url) or not re.fullmatch(r"[0-9a-f]{64}",digest)
+                or type(size) is not int or not 5000<=size<=MAX_FILE
+                or type(p.get("width")) is not int or type(p.get("height")) is not int
+                or min(p["width"],p["height"])<300):
+                continue
+            photos.append({"url":url,"sha256":digest,"bytes":size,
+                           "width":p["width"],"height":p["height"],"alternate_source_urls":[]})
+        if not photos:continue
+        albums.append({"id":XIUTU_EDITION_LINKS.get(original,original),
+            "title":a.get("title","Mimmi CreamSoda public photo collection"),
+            "publisher":"CreamSoda","source":a["source"],
+            "original_work_id":original,"images":photos})
+    priority={"xiutu-public-1190160":0,"xiutu-public-1190158":1,
+              "xiutu-public-1190156":2,"xiutu-public-1190145":3,
+              "xiutu-public-1190154":4,"xiutu-public-1190152":5}
+    albums.sort(key=lambda a:priority.get(a["original_work_id"],100))
+    return albums
+
 def fetch_from_verified_alternates(photo, downloader=fetch_verified):
     """Try only independently SHA-identical public URLs, never guessed files."""
     digest=photo["sha256"]
@@ -46,9 +94,12 @@ def publish(limit=250, budget_mb=90, allow_rehost=False):
     if existing_bytes>MAX_PUBLIC_IMAGE_BYTES:
         raise ValueError("Current public archive already exceeds maximum Pages file budget")
     new=0;bytes_new=0;failed=0
-    # Complete the deepest independently verified public sets first, rather
-    # than indefinitely publishing the first ten from many alphabetical works.
-    for album in sorted(src["albums"],key=lambda a:(-len(a.get("images",[])),str(a.get("title","")).casefold())):
+    # First complete the six independently SHA-verified CreamSoda editions,
+    # merging four matching V2PH teaser folders into the SAME work.
+    # Then continue all other deep, publicly accessible source albums.
+    candidates=[*xiutu_verified_public_editions(ROOT),
+                *sorted(src["albums"],key=lambda a:(-len(a.get("images",[])),str(a.get("title","")).casefold()))]
+    for album in candidates:
         aid=album["id"]
         if not re.fullmatch(r"[a-z0-9-]{2,110}",aid):continue
         row=byid.get(aid,{"id":aid,"title":album["title"],"publisher":album.get("publisher",""),"source":album.get("source",""),"images":[],"status":"public_previews_only_not_complete"})
