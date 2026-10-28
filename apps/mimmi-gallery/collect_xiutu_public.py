@@ -44,7 +44,7 @@ def safe_page(url,root):
         if not (p.scheme=="https" and p.hostname in DOMAIN and not p.port
                 and not p.username and not p.password and not p.fragment):return False
         if p.path.rstrip("/")==q.path.rstrip("/") and not p.query:return True
-        return bool(re.fullmatch(re.escape(q.path.rstrip("/"))+r"/[2-9][0-9]?",p.path.rstrip("/"))) and not p.query
+        return bool(re.fullmatch(re.escape(q.path.rstrip("/"))+r"/(?:[2-9]|[1-9][0-9])",p.path.rstrip("/"))) and not p.query
     except (ValueError,TypeError):return False
 
 def safe_media(url):
