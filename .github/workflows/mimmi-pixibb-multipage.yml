@@ -1,0 +1,70 @@
+name: Mimmi Multi-Page Public Photo Crawl
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '15 1 * * 2,5'
+  push:
+    paths:
+      - 'apps/mimmi-gallery/collect_pixibb_public.py'
+      - 'apps/mimmi-gallery/test_pixibb_public.py'
+      - 'apps/mimmi-gallery/reveal_lazy_images.py'
+      - '.github/workflows/mimmi-pixibb-multipage.yml'
+permissions:
+  contents: write
+concurrency:
+  group: mimmi-source-index-writer-${{ github.ref_name }}
+  cancel-in-progress: false
+jobs:
+  crawl:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 115
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install crawler runtime and validate sources
+        run: |
+          python -m pip install 'requests==2.32.5' 'Pillow==11.3.0' 'beautifulsoup4==4.14.2'
+          python -m py_compile apps/mimmi-gallery/collect_pixibb_public.py apps/mimmi-gallery/reveal_lazy_images.py apps/mimmi-gallery/build_model_gallery.py
+          python apps/mimmi-gallery/test_pixibb_public.py
+      - name: Install real browser for visible lazy-scroll images
+        run: |
+          python -m pip install 'playwright==1.56.0'
+          python -m playwright install --with-deps chromium
+      - name: Follow real published pages and verify public JPEG/PNG/WebP bytes
+        run: |
+          if [ "$GITHUB_REF_NAME" = main ]; then
+            python apps/mimmi-gallery/collect_pixibb_public.py --pages 25 --images 250 --scroll
+          else
+            python apps/mimmi-gallery/collect_pixibb_public.py --pages 2 --images 30 --scroll
+          fi
+      - name: Count only truly verified images, never advertised paid album size
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path("apps/mimmi-gallery/pixibb-public-previews.json")
+          d=json.loads(p.read_text(encoding="utf-8"))
+          assert d["model"]=="mimmi" and len(d["albums"])==4
+          assert d["summary"]["private_cloud_archived"]==0
+          for album in d["albums"]:
+              assert album["images"]==[]
+              assert len(album["samples"])<=250
+              assert len({v["sha256"] for v in album["samples"]})==len(album["samples"])
+              for v in album["samples"]:
+                  assert len(v["sha256"])==64 and v["bytes"]>=4500
+          print("MIMMI_PIXIBB_REAL_MULTIPAGE_VERIFIED",d["summary"])
+          PY
+      - name: Commit verified public photo URLs and rebuild album viewer
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add apps/mimmi-gallery/pixibb-public-previews.json
+          if ! git diff --cached --quiet; then git commit -m "Archive evidence: public Mimmi PixiBB paginated photo previews"; fi
+          git fetch origin "$GITHUB_REF_NAME"
+          git rebase "origin/$GITHUB_REF_NAME"
+          python apps/mimmi-gallery/build_model_gallery.py
+          git add apps/mimmi-gallery/source-viewer-albums.json apps/mimmi-gallery/albums.json
+          if ! git diff --cached --quiet; then git commit -m "Expand Mimmi numbered research photo galleries from verified multipage sources"; fi
+          git push origin "HEAD:$GITHUB_REF_NAME"

@@ -1,0 +1,222 @@
+{
+  "schema_version": 1,
+  "model": "mimmi",
+  "description": "Editorially checked subject/series links for numbered research works. They lead to already verified public PHOTO previews, never to publisher-complete paid editions. Numbered research works remain separate from associated preview albums.",
+  "matches": [
+    {
+      "number": 52,
+      "album_id": "djawa-asuna-the-maid",
+      "relationship": "related_public_preview_not_full_edition"
+    },
+    {
+      "number": 51,
+      "album_id": "djawa-rei-beyond-the-heart",
+      "relationship": "related_public_preview_not_full_edition"
+    },
+    {
+      "number": 50,
+      "album_id": "djawa-nikke-elegg",
+      "relationship": "related_public_preview_not_full_edition"
+    },
+    {
+      "number": 49,
+      "album_id": "djawa-my-summer-vacation-vol-5",
+      "relationship": "related_public_preview_not_full_edition"
+    },
+    {
+      "number": 48,
+      "album_id": "djawa-in-the-summer-sunshine-part-1",
+      "relationship": "related_public_preview_not_full_edition"
+    },
+    {
+      "number": 47,
+      "album_id": "djawa-rei-beyond-the-heart",
+      "relationship": "related_public_preview_not_full_edition"
+    },
+    {
+      "number": 46,
+      "album_id": "djawa-christmas-special-2021-mimmi",
+      "relationship": "related_public_preview_not_full_edition"
+    },
+    {
+      "number": 45,
+      "album_id": "djawa-my-summer-vacation-vol-5",
+      "relationship": "related_public_preview_not_full_edition"
+    },
+    {
+      "number": 44,
+      "album_id": "djawa-nikke-elegg",
+      "relationship": "related_public_preview_not_full_edition"
+    },
+    {
+      "number": 43,
+      "album_id": "v2ph-actor-z4ox65ea",
+      "relationship": "related_public_preview_not_full_edition"
+    },
+    {
+      "number": 42,
+      "album_id": "v2ph-actor-am8o3e7z",
+      "relationship": "related_public_preview_not_full_edition"
+    },
+    {
+      "number": 41,
+      "album_id": "v2ph-actor-a584e85z",
+      "relationship": "related_public_preview_not_full_edition"
+    },
+    {
+      "number": 39,
+      "album_id": "v2ph-actor-z6exx6ma",
+      "relationship": "related_public_preview_not_full_edition"
+    },
+    {
+      "number": 38,
+      "album_id": "v2ph-actor-amno754z",
+      "relationship": "related_public_preview_not_full_edition"
+    },
+    {
+      "number": 37,
+      "album_id": "v2ph-actor-amn8o34z",
+      "relationship": "related_public_preview_not_full_edition"
+    },
+    {
+      "number": 36,
+      "album_id": "v2ph-actor-z7exoo5z",
+      "relationship": "related_public_preview_not_full_edition"
+    },
+    {
+      "number": 35,
+      "album_id": "v2ph-actor-a584e85z",
+      "relationship": "related_public_preview_not_full_edition"
+    },
+    {
+      "number": 34,
+      "album_id": "v2ph-actor-a884435a",
+      "relationship": "related_public_preview_not_full_edition"
+    },
+    {
+      "number": 33,
+      "album_id": "v2ph-actor-a8847m5a",
+      "relationship": "related_public_preview_not_full_edition"
+    },
+    {
+      "number": 32,
+      "album_id": "v2ph-actor-a5e78m5a",
+      "relationship": "related_public_preview_not_full_edition"
+    },
+    {
+      "number": 31,
+      "album_id": "v2ph-actor-a88763oa",
+      "relationship": "related_public_preview_not_full_edition"
+    },
+    {
+      "number": 30,
+      "album_id": "v2ph-sukajan-gal",
+      "relationship": "related_public_preview_not_full_edition"
+    },
+    {
+      "number": 29,
+      "album_id": "v2ph-azur-lane-tashkent",
+      "relationship": "related_public_preview_not_full_edition"
+    },
+    {
+      "number": 28,
+      "album_id": "djawa-your-fishe-gawr-gura",
+      "relationship": "related_public_preview_not_full_edition"
+    },
+    {
+      "number": 27,
+      "album_id": "djawa-your-panties",
+      "relationship": "related_public_preview_not_full_edition"
+    },
+    {
+      "number": 26,
+      "album_id": "djawa-mademoiselle-mimmi",
+      "relationship": "related_public_preview_not_full_edition"
+    },
+    {
+      "number": 25,
+      "album_id": "djawa-nikke-alice",
+      "relationship": "related_public_preview_not_full_edition"
+    },
+    {
+      "number": 23,
+      "album_id": "v2ph-actor-a8856noa",
+      "relationship": "related_public_preview_not_full_edition"
+    },
+    {
+      "number": 22,
+      "album_id": "v2ph-actor-zo5n754z",
+      "relationship": "related_public_preview_not_full_edition"
+    },
+    {
+      "number": 21,
+      "album_id": "v2ph-cream-cow-milk",
+      "relationship": "related_public_preview_not_full_edition"
+    },
+    {
+      "number": 20,
+      "album_id": "djawa-rudy%c2%b2-codename-wolfgirl",
+      "relationship": "related_public_preview_not_full_edition"
+    },
+    {
+      "number": 19,
+      "album_id": "v2ph-cream-cow-milk",
+      "relationship": "related_public_preview_not_full_edition"
+    },
+    {
+      "number": 18,
+      "album_id": "v2ph-actor-a8n96x7a",
+      "relationship": "related_public_preview_not_full_edition"
+    },
+    {
+      "number": 16,
+      "album_id": "djawa-christmas-special-2021-mimmi",
+      "relationship": "related_public_preview_not_full_edition"
+    },
+    {
+      "number": 14,
+      "album_id": "v2ph-actor-an65656a",
+      "relationship": "related_public_preview_not_full_edition"
+    },
+    {
+      "number": 12,
+      "album_id": "v2ph-actor-z63984ma",
+      "relationship": "related_public_preview_not_full_edition"
+    },
+    {
+      "number": 11,
+      "album_id": "djawa-rudy-the-wolf-of-midnight",
+      "relationship": "related_public_preview_not_full_edition"
+    },
+    {
+      "number": 10,
+      "album_id": "v2ph-actor-z76xe74a",
+      "relationship": "related_public_preview_not_full_edition"
+    },
+    {
+      "number": 8,
+      "album_id": "v2ph-actor-a8n8n85a",
+      "relationship": "related_public_preview_not_full_edition"
+    },
+    {
+      "number": 7,
+      "album_id": "v2ph-actor-a54e445z",
+      "relationship": "related_public_preview_not_full_edition"
+    },
+    {
+      "number": 5,
+      "album_id": "v2ph-girls-frontline-hk416",
+      "relationship": "related_public_preview_not_full_edition"
+    },
+    {
+      "number": 3,
+      "album_id": "v2ph-actor-a8n7me7a",
+      "relationship": "related_public_preview_not_full_edition"
+    },
+    {
+      "number": 2,
+      "album_id": "v2ph-actor-ae57484a",
+      "relationship": "related_public_preview_not_full_edition"
+    }
+  ]
+}
