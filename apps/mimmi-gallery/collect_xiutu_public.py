@@ -53,7 +53,7 @@ def safe_media(url):
         host=p.hostname or ""
         # Allow only the originating photo site's image subdomains.
         # Never trust similarly named attacker suffixes.
-        return (p.scheme=="https" and (host in DOMAIN or host.endswith(".xiutu.me"))
+        return (p.scheme=="https" and (host in DOMAIN or host.endswith(".xiutu.me") or host=="img-jp-a.cdnimg.vip")
                 and not p.username and not p.password and not p.port and not p.fragment
                 and bool(re.search(r"\.(?:jpe?g|png|webp|avif)$",p.path,re.I))
                 and "/api/" not in p.path and "/private/" not in p.path
