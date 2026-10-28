@@ -18,6 +18,22 @@ MAX_FILE=30_000_000
 # Keep the full multi-app GitHub Pages site below the provider's size limit.
 MAX_PUBLIC_IMAGE_BYTES=780*1024*1024
 
+def fetch_from_verified_alternates(photo, downloader=fetch_verified):
+    """Try only independently SHA-identical public URLs, never guessed files."""
+    digest=photo["sha256"]
+    count=photo["bytes"]
+    attempts=[]
+    for url in [photo["url"],*photo.get("alternate_source_urls",[])[:12]]:
+        if url in attempts or not permitted(url):continue
+        attempts.append(url)
+        try:
+            return downloader(url,digest,count),url
+        except (ValueError,OSError,Exception) as exc:
+            # A public mirror may go offline/change bytes; the exact SHA and
+            # byte count are still compulsory on EVERY alternative.
+            print("MIMMI_MULTISOURCE_FAILED",type(exc).__name__,url[:140],flush=True)
+    raise ValueError(f"No SHA-identical public source currently downloadable ({len(attempts)} attempts)")
+
 def publish(limit=250, budget_mb=90, allow_rehost=False):
     if not allow_rehost:
         raise PermissionError("Public GitHub Pages publication requires explicit permission to rehost these files")
@@ -30,7 +46,9 @@ def publish(limit=250, budget_mb=90, allow_rehost=False):
     if existing_bytes>MAX_PUBLIC_IMAGE_BYTES:
         raise ValueError("Current public archive already exceeds maximum Pages file budget")
     new=0;bytes_new=0;failed=0
-    for album in src["albums"]:
+    # Complete the deepest independently verified public sets first, rather
+    # than indefinitely publishing the first ten from many alphabetical works.
+    for album in sorted(src["albums"],key=lambda a:(-len(a.get("images",[])),str(a.get("title","")).casefold())):
         aid=album["id"]
         if not re.fullmatch(r"[a-z0-9-]{2,110}",aid):continue
         row=byid.get(aid,{"id":aid,"title":album["title"],"publisher":album.get("publisher",""),"source":album.get("source",""),"images":[],"status":"public_previews_only_not_complete"})
@@ -43,8 +61,8 @@ def publish(limit=250, budget_mb=90, allow_rehost=False):
             size=photo.get("bytes",0)
             if not isinstance(size,int) or size<5000 or size>MAX_FILE or bytes_new+size>budget_mb*1024*1024 or existing_bytes+bytes_new+size>MAX_PUBLIC_IMAGE_BYTES:continue
             try:
-                raw=fetch_verified(url,sha,size)
-                suffix=Path(urlsplit(url).path).suffix.lower()
+                raw,working_url=fetch_from_verified_alternates(photo)
+                suffix=Path(urlsplit(working_url).path).suffix.lower()
                 path=OUT/aid/(sha+"."+suffix.lstrip("."))
                 path.parent.mkdir(parents=True,exist_ok=True)
                 if path.exists() and hashlib.sha256(path.read_bytes()).hexdigest()!=sha:raise ValueError("Stored file hash conflict")
@@ -55,7 +73,7 @@ def publish(limit=250, budget_mb=90, allow_rehost=False):
                 with Image.open(path) as im:
                     im.verify()
                 row["images"].append({"url":str(path.relative_to(ROOT)).replace(os.sep,"/"),
-                    "source_url":url,"sha256":sha,"bytes":size,"width":photo["width"],
+                    "source_url":working_url,"sha256":sha,"bytes":size,"width":photo["width"],
                     "height":photo["height"],"number":len(row["images"])+1})
                 seen.add(sha);new+=1;bytes_new+=size
                 time.sleep(.3)
