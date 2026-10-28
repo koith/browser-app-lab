@@ -66,6 +66,10 @@ h1{margin:8px 0 0;font-weight:750;font-size:clamp(34px,5vw,56px);letter-spacing:
 .photo{margin:0;display:block;position:relative;cursor:pointer;background:#24262b;border:0;padding:0;width:100%;overflow:hidden}
 .photo img{display:block;width:100%;height:auto;aspect-ratio:2/3;object-fit:cover;transition:transform .25s}
 .photo:hover img{transform:scale(1.035)}
+.photo[data-rotation]{aspect-ratio:2/3}
+.photo[data-rotation] img{position:absolute;left:50%;top:50%;width:150%;height:66.666667%;aspect-ratio:auto;transform:translate(-50%,-50%) rotate(var(--photo-rotation))}
+.photo[data-rotation]:hover img{transform:translate(-50%,-50%) rotate(var(--photo-rotation)) scale(1.035)}
+.album[data-rotation] img{inset:auto;left:50%;top:50%;width:66.666667%;height:150%;transform:translate(-50%,-50%) rotate(var(--photo-rotation))}
 .photo span{position:absolute;bottom:0;left:0;right:0;padding:20px 10px 9px;background:linear-gradient(transparent,#000c);font-size:11px;color:#f5f5f5;opacity:0;transition:opacity .2s;text-align:left}
 .photo:hover span{opacity:1}
 .subnav{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:24px}
@@ -116,7 +120,7 @@ footer{padding:15px 0 25px;justify-content:flex-end}
  <div class="detail-heading"><button class="back" id="back" aria-label="화보 목록으로 돌아가기">‹</button><h2 class="detail-title" id="albumname"></h2><span class="counter" id="albumtotal"></span></div>
  <nav class="mainnav" aria-label="이동"><a href="cloud.html">클라우드</a></nav>
  <button id="search-toggle" class="search-toggle" aria-label="화보 검색 열기" aria-haspopup="dialog" aria-controls="search-dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button>
- <small id="app-version" class="version-chip">v0.1.0-beta.17</small>
+ <small id="app-version" class="version-chip">v0.1.0-beta.18</small>
 </header>
 <div id="browse">
  <div class="browse-meta"><p class="inventory" id="inventory">화보를 불러오는 중</p><span class="counter" id="total"></span></div>
@@ -139,7 +143,7 @@ footer{padding:15px 0 25px;justify-content:flex-end}
  </form>
 </dialog>
 <div id="lightbox" role="dialog" aria-label="사진 보기" aria-modal="true">
- <div class="lighttop"><button class="lightbtn" id="close" aria-label="닫기">×</button><span id="position"></span><small class="version-chip">v0.1.0-beta.17</small></div>
+ <div class="lighttop"><button class="lightbtn" id="close" aria-label="닫기">×</button><span id="position"></span><small class="version-chip">v0.1.0-beta.18</small></div>
  <button class="lightbtn arrow prev" id="prev" aria-label="이전 사진">‹</button><div class="media-frame"><img id="full" alt="화보 사진"><a id="original" target="_blank" rel="noopener">사진 열기 ↗</a></div><button class="lightbtn arrow next" id="next" aria-label="다음 사진">›</button>
  <p id="media-status" role="status"></p>
 </div>
@@ -154,7 +158,7 @@ function canonicalId(id){const seen=new Set();while(albumAliases[id]&&!seen.has(
 const titleMap={'cn-huantuji':'幻图集 · Yui','cn-chaotuji':'潮图集 · Yui','cn-miaohuaying':'喵画影 · Yui','cn-yuntu8':'云图吧 · Yui','cn-wantuzhi-everyday':'Everyday Life','cn-yingyuge':'影语阁 · Yui','v04':'SWEETBOX · Teddy Bear'};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function getName(a){return a.title||catalog.find(x=>x.id===a.id)?.title||titleMap[a.id]||a.id}
-const publicPhotoHosts=['image.ajunews.com','cdn.imweb.me','t1.daumcdn.net','blogger.googleusercontent.com','cdn.imgcup.com','pbs.twimg.com','djawaphoto.com','blog.hacosta.co.jp','img1.gamersky.com','upload3.inven.co.kr','pub-376e2756f81341f087a414464f9a25ec.r2.dev'];
+const publicPhotoHosts=['pic1.imgdb.cn','image.huantuji.com','image.ajunews.com','cdn.imweb.me','t1.daumcdn.net','blogger.googleusercontent.com','cdn.imgcup.com','pbs.twimg.com','djawaphoto.com','blog.hacosta.co.jp','img1.gamersky.com','upload3.inven.co.kr','pub-376e2756f81341f087a414464f9a25ec.r2.dev'];
 function validImages(a){return (a.images||[]).filter(x=>{if(a.ownerHosted&&x.ownerAlbum===a.id&&x.url==='owner:'+a.id+':'+x.number)return true;if(typeof x.url!=='string')return false;if(x.url.startsWith('stored-albums/'))return true;if(!a.sourceHosted)return false;try{const u=new URL(x.url);return u.protocol==='https:'&&!u.username&&!u.password&&([...publicPhotoHosts,'www.girl-atlas.com','cdn.jliji.com','cdn.v2ph.com','i0.wp.com','i1.wp.com','i2.wp.com','cdn1.thismore.fun','cdn2.thismore.fun'].includes(u.hostname)||/^(?:(?:imgx\d{3}|images\d{2})\.pixibb\.com|(?:wes|bis)\.misskon\.com|lux\.mrcong\.com|s\.wujituku\.com|lh\d\.ggpht\.com)$/.test(u.hostname));}catch{return false}})}
 function available(){return stored.filter(x=>validImages(x).length).sort((a,b)=>validImages(b).length-validImages(a).length)}
 function publisherGroups(){const known=new Set(catalog.flatMap(a=>[a.source,...(a.source_pages||[])].filter(Boolean)));const entries=[...catalog,...publisherWorkReferences.filter(a=>!known.has(a.source))];return YuiPublishers.groups(entries,publisherRegistry,YuiLabels.describe,validImages)}
@@ -162,6 +166,8 @@ function setMode(m,publisher=null){mode=['albums','photos','all','publishers'].i
 function publisherCard(group){const asset=YuiPublishers.logo(group),assetLabel=group.logo?.asset_role==='publisher_profile_branding'?' 발행처 프로필':group.logo?.asset_role==='parent_publisher_brand_reference'?' 발행사 로고':' 로고',image=asset?'<img src="'+esc(asset)+'" alt="'+esc(group.name)+assetLabel+'">':'<span class="publisher-wordmark" role="img" aria-label="'+esc(group.name)+' — 로고 미확인">'+esc(group.name)+'</span>';return '<button class="publisher" data-publisher="'+esc(group.id)+'" data-logo-theme="'+(group.logo?.theme==='light'?'light':'dark')+'" aria-label="'+esc(group.name)+' · 등록 '+group.albums.length+' · 열람 '+group.viewable+'">'+image+'<span class="publisher-info"><strong>'+esc(group.name)+'</strong>등록 '+group.albums.length+' · 열람 '+group.viewable+'</span></button>'}
 function openPublisher(id,record=true){if(!publisherGroups().some(g=>g.id===id))return;if(record)remember({mode:'publishers',publisher:id});setMode('publishers',id);window.scrollTo(0,0)}
 function photosFor(a){return validImages(a).map((p,i)=>({...p,name:getName(a),albumId:a.id,number:p.number??i+1}))}
+function photoRotation(p){return [90,270].includes(p?.display_rotation)?p.display_rotation:0}
+function rotationAttributes(p){const angle=photoRotation(p);return angle?' data-rotation="'+angle+'" style="--photo-rotation:'+angle+'deg"':''}
 function card(a,hasImages){
  const owned=stored.find(x=>x.id===a.id)||a;
  const p=validImages(owned),configuration=albumCovers[owned.id],selected=p.find(p=>p.sha256&&p.sha256===configuration?.sha256)||p[0],cover=selected?.url||'',count=p.length,expected=a.photos??a.expected??catalog.find(x=>x.id===a.id)?.photos??null;
@@ -172,9 +178,9 @@ function card(a,hasImages){
  const n=count?(expected!=null&&expected!==count?count+' / '+expected+'장':count+'장'):(expected!=null?expected+'장 · 미확보':'미확보 · 장수 미확인');
  const cloudCover=owned.ownerHosted?selected:null;
  const img=cloudCover?'<img data-owner="'+esc(cloudCover.url)+'" style="'+style+'" alt="'+esc(label)+' 표지">':cover?'<img loading="lazy" referrerpolicy="no-referrer" src="'+esc(cover)+'" style="'+style+'" alt="'+esc(label)+' 표지">':'<div class="placeholder">Y</div>';
- return '<button class="album" data-id="'+esc(a.id)+'" data-available="'+(hasImages?'1':'0')+'" aria-label="'+esc(label+' · '+labels.publisher+' · '+n+' · '+labels.edition)+'">'+img+'<div class="gradient"></div><span class="cover-labels"><span class="publisher-sticker" title="발행사: '+esc(labels.publisher)+'">'+esc(labels.publisher)+'</span><span class="album-count">'+esc(n)+'</span></span><span class="edition-sticker" data-kind="'+esc(labels.kind)+'" title="'+esc(labels.detail)+'">'+esc(labels.edition)+'</span><strong class="name" title="'+esc(label)+'">'+esc(shortTitle)+'</strong></button>';
+ return '<button class="album"'+rotationAttributes(selected)+' data-id="'+esc(a.id)+'" data-available="'+(hasImages?'1':'0')+'" aria-label="'+esc(label+' · '+labels.publisher+' · '+n+' · '+labels.edition)+'">'+img+'<div class="gradient"></div><span class="cover-labels"><span class="publisher-sticker" title="발행사: '+esc(labels.publisher)+'">'+esc(labels.publisher)+'</span><span class="album-count">'+esc(n)+'</span></span><span class="edition-sticker" data-kind="'+esc(labels.kind)+'" title="'+esc(labels.detail)+'">'+esc(labels.edition)+'</span><strong class="name" title="'+esc(label)+'">'+esc(shortTitle)+'</strong></button>';
 }
-function photoHTML(p,i){return '<button class="photo" data-i="'+i+'" aria-label="'+esc(p.name)+' 사진 '+p.number+'"><img loading="lazy" referrerpolicy="no-referrer" '+(p.ownerAlbum?'data-owner="'+esc(p.url):'src="'+esc(p.url))+'" alt="'+esc(p.name)+' 사진 '+p.number+'"><span>'+esc(p.name)+' · '+p.number+'</span></button>'}
+function photoHTML(p,i){return '<button class="photo"'+rotationAttributes(p)+' data-i="'+i+'" aria-label="'+esc(p.name)+' 사진 '+p.number+'"><img loading="lazy" referrerpolicy="no-referrer" '+(p.ownerAlbum?'data-owner="'+esc(p.url):'src="'+esc(p.url))+'" alt="'+esc(p.name)+' 사진 '+p.number+'"><span>'+esc(p.name)+' · '+p.number+'</span></button>'}
 const ownerObserver=new IntersectionObserver(entries=>{for(const e of entries){if(!e.isIntersecting)continue;ownerObserver.unobserve(e.target);const p=ownerStored.flatMap(a=>a.images).find(p=>p.url===e.target.dataset.owner);if(p)YuiPrivate.asset(p).then(url=>{if(e.target.isConnected)e.target.src=url}).catch(()=>{e.target.alt='보관본 연결을 확인해 주세요'})}},{rootMargin:'200px'});
 function observeOwner(){document.querySelectorAll('img[data-owner]:not([src])').forEach(i=>ownerObserver.observe(i))}
 function render(){
@@ -214,9 +220,19 @@ function openAlbum(id,record=true){
 }
 function openViewer(list,i,record=true){if(!list.length)return;viewerList=list;viewerIndex=((i%list.length)+list.length)%list.length;const p=list[viewerIndex];if(record)remember({album:p.albumId,photo:p.number,fromPhotos:!detailAlbum,mode,publisher:activePublisher});$('lightbox').classList.add('open');document.body.style.overflow='hidden';showViewer();$('close').focus({preventScroll:true})}
 let viewerGeneration=0,routeTimer=null,historyEntry=0;const viewerRoutes=new Map();
+function layoutViewer(){
+ const p=viewerList[viewerIndex],angle=photoRotation(p),image=$('full'),frame=image.parentElement;
+ image.style.cssText='';frame.style.cssText='';
+ if(!angle)return;
+ const scale=Math.min(1,Math.min(innerWidth,1800)/p.height,Math.max(1,innerHeight-71)/p.width);
+ frame.style.width=p.height*scale+'px';frame.style.height=p.width*scale+'px';
+ Object.assign(image.style,{position:'absolute',left:'50%',top:'50%',width:p.width*scale+'px',height:p.height*scale+'px',maxWidth:'none',maxHeight:'none',transform:'translate(-50%,-50%) rotate('+angle+'deg)'});
+}
+window.addEventListener('resize',()=>{if($('lightbox').classList.contains('open'))layoutViewer()});
 function showViewer(){
  const p=viewerList[viewerIndex];if(!p)return;
  viewerGeneration++;
+ layoutViewer();
  $('media-status').textContent='불러오는 중';
  $('full').onload=()=>{$('media-status').textContent=''};$('full').onerror=()=>{$('media-status').textContent='사진을 불러오지 못했습니다. 사진 열기로 출처를 확인해 주세요.'};
  $('full').removeAttribute('src');$('full').referrerPolicy='no-referrer';if(p.ownerAlbum){const generation=viewerGeneration;YuiPrivate.asset(p).then(url=>{if(generation===viewerGeneration){$('full').src=url;$('original').href=url}}).catch(error=>{if(generation===viewerGeneration)$('media-status').textContent=error.message})}else $('full').src=p.url;$('full').alt=p.name+' · '+p.number;

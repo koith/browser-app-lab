@@ -11,7 +11,7 @@ import hashlib
 import json
 import re
 from pathlib import Path
-from urllib.parse import parse_qs, urljoin, urlsplit
+from urllib.parse import parse_qs, unquote, urljoin, urlsplit
 
 from bs4 import BeautifulSoup
 
@@ -299,10 +299,86 @@ def imgcup_teddy(raw, page):
     return [], list({r['url']: r for r in images}.values()), []
 
 
+def imgcup_yui_title(title):
+    return bool(re.search(r'\bYui\b', title, re.I) and '유이' in title
+                and not re.search(r'\b(?:videos?|EP\s*\d+)\b', title, re.I))
+
+
+def imgcup_model_index(raw, page):
+    """Follow named article cards and observed pagination, never related models."""
+    source = urlsplit(page)
+    query = parse_qs(source.query)
+    stem = re.sub(r'/page/\d+/?$', '', unquote(source.path)).rstrip('/')
+    if (source.hostname != 'www.imgcup.com' or source.scheme != 'https'
+            or not (stem in ('/keyword/yui-유이', '/keyword/유이')
+                    or (stem == '' and query.get('s') == ['유이']))):
+        raise ValueError('Not a reviewed ImgCup model index')
+    soup = soup_for(raw)
+    nexts = []
+    for anchor in soup.select('.entry-title a[href], .nav-links a[href], .penci-pagination a[href]'):
+        url = urljoin(page, anchor['href']); target = urlsplit(url)
+        if target.scheme != 'https' or target.hostname != source.hostname or target.username or target.password:
+            continue
+        if anchor.find_parent(class_='entry-title'):
+            if imgcup_yui_title(anchor.get_text(' ', strip=True)) and target.path.endswith('.html'):
+                nexts.append(url)
+        else:
+            other_stem = re.sub(r'/page/\d+/?$', '', unquote(target.path)).rstrip('/')
+            if other_stem == stem and parse_qs(target.query) == query:
+                nexts.append(url)
+    return [], [], list(dict.fromkeys(nexts))
+
+
+def imgcup_work(raw, page):
+    """Extract the displayed edition; matching/registration is a separate step."""
+    source = urlsplit(page)
+    if source.scheme != 'https' or source.hostname != 'www.imgcup.com' or not source.path.endswith('.html'):
+        raise ValueError('Not an ImgCup public article')
+    soup = soup_for(raw)
+    heading = soup.select_one('h1.entry-title') or soup.select_one('h1')
+    title = heading.get_text(' ', strip=True) if heading else ''
+    body = soup.select_one('.entry-content')
+    if not imgcup_yui_title(title) or not body:
+        raise ValueError('Missing explicit Yui 유이 photo-work credit or article body')
+    if re.search(r'\bAI\b|upscaled|修复|보정', title, re.I):
+        raise ValueError('AI editions need a separately reviewed edition ID')
+    # Numbered Yo-U editions and generic Yui Vol.3 have different numbering.
+    # In particular, do not guess that Yo-U Vol.03 means Everyday Life.
+    mapping = [(r'Thru\s*Thru', 'thru-thru117'), (r'\bWet\b', 'wet-yui80'),
+               (r'RAMEN|SWEETBOX.*Vol\.?\s*39\b', 'ramen125'),
+               (r'Sweet\s*Dream', 'sweet-dream110'), (r'\bCREAM\b', 'cream228'),
+               (r'Teddy\s*Bear', 'teddy-bear97'), (r'Blackroom', 'blackroom145')]
+    candidate = next((id for pattern, id in mapping if re.search(pattern, title, re.I)), None)
+    if candidate is None and not re.search(r'Yo[-– ]?U', title, re.I):
+        for volume, id in [(1, 'kuro-yui58'), (2, 'yui-vol2-42'), (3, 'yui-vol3-106')]:
+            if re.search(r'Vol\.?\s*0?'+str(volume)+r'\b', title, re.I):
+                candidate = id
+                break
+    images = []
+    for image in body.select('img'):
+        url = largest_displayed_image(image, page)
+        target = urlsplit(url or '')
+        if (target.scheme != 'https' or target.hostname != 'cdn.imgcup.com'
+                or target.username or target.password
+                or not re.search(r'\.(?:jpe?g|png|webp)$', target.path, re.I)):
+            continue
+        images.append(image_record(url, page, 'public_web_photobook_alternative', 'VN',
+                                   candidate_work_id=candidate,
+                                   classification_status='requires_whole_frame_review',
+                                   source_order=len(images)+1, source_title=title))
+    images = list({r['url']: r for r in images}.values())
+    works = [{'title': title, 'url': page, 'candidate_work_id': candidate,
+              'visible_image_links': len(images), 'full_edition_acquired': False,
+              'publisher_original_verified': False,
+              'access_status': 'public_individual_links_require_download_and_cross_edition_review'}]
+    return works, images, []
+
+
 ADAPTERS = {'djawa-index': djawa_model_index, 'djawa': djawa_samples, 'hacosta': hacosta_model_photo, 'gamersky': gamersky_article,
             'inven': inven_article, 'photographer': photographer_portfolio, 'bcut': bcut_catalogue,
             'imgcup-teddy': imgcup_teddy, 'crazygiant': crazygiant_samples,
-            'sportsseoul-daum': sportsseoul_daum_article, 'ajunews-cover': ajunews_may_cover}
+            'sportsseoul-daum': sportsseoul_daum_article, 'ajunews-cover': ajunews_may_cover,
+            'imgcup-yui-index': imgcup_model_index, 'imgcup-work': imgcup_work}
 
 
 def collect(targets, output, download=True, client=None):
@@ -328,8 +404,12 @@ def collect(targets, output, download=True, client=None):
                     works[work['url']] = work
                 for image in images:
                     photos[image['url']] = image
-                child_adapter = 'djawa' if adapter_name == 'djawa-index' else adapter_name
-                queue.extend((u, child_adapter) for u in nexts if u not in seen and (u, child_adapter) not in queue)
+                for child in nexts:
+                    child_adapter = ('djawa' if adapter_name == 'djawa-index' else
+                                     'imgcup-work' if adapter_name == 'imgcup-yui-index'
+                                     and urlsplit(child).path.endswith('.html') else adapter_name)
+                    if child not in seen and (child, child_adapter) not in queue:
+                        queue.append((child, child_adapter))
                 pages.append({'url': url, 'adapter': adapter_name, 'works': len(found),
                               'photos': len(images), 'response_sha256': hashlib.sha256(response.content).hexdigest(),
                               'snapshot': snapshot})

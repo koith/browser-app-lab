@@ -131,6 +131,18 @@
       "adapter": "ajunews-cover",
       "publisher": "CRAZY GIANT",
       "url": "https://www5.ajunews.com/view/20230426002601068"
+    },
+    {
+      "adapter": "imgcup-yui-index",
+      "url": "https://www.imgcup.com/keyword/yui-%EC%9C%A0%EC%9D%B4",
+      "max_pages": 45,
+      "scope": "explicit named public article photographs; conservative cross-edition review before registration"
+    },
+    {
+      "adapter": "imgcup-yui-index",
+      "url": "https://www.imgcup.com/?s=%EC%9C%A0%EC%9D%B4",
+      "max_pages": 45,
+      "scope": "explicit named public article photographs; conservative cross-edition review before registration"
     }
   ]
 }

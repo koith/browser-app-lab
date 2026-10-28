@@ -1,0 +1,57 @@
+{
+  "version": "v0.1.0-beta.18",
+  "new_verified_selected_photograph_file_sha256": 427,
+  "higher_resolution_gallery_replacements": 427,
+  "collected_input_image_sha256": 683,
+  "new_gallery_entries": 0,
+  "new_complete_photobooks": 0,
+  "publisher_original_verified": 0,
+  "private_cloud_verified_new_files": 0,
+  "physical_iphone_verified": 0,
+  "cost_increase_krw": 0,
+  "image_reencoding_or_upscaling": false,
+  "albums": [
+    {
+      "id": "wet-yui80",
+      "canonical_photos": 80,
+      "higher_resolution_replacements": 79,
+      "retained_larger_or_not_matched": 1,
+      "minimum_long_edge": 1024
+    },
+    {
+      "id": "thru-thru117",
+      "canonical_photos": 117,
+      "higher_resolution_replacements": 117,
+      "retained_larger_or_not_matched": 0,
+      "minimum_long_edge": 1874
+    },
+    {
+      "id": "ramen125",
+      "canonical_photos": 125,
+      "higher_resolution_replacements": 50,
+      "retained_larger_or_not_matched": 75,
+      "minimum_long_edge": 1799
+    },
+    {
+      "id": "yui-vol2-42",
+      "canonical_photos": 42,
+      "higher_resolution_replacements": 42,
+      "retained_larger_or_not_matched": 0,
+      "minimum_long_edge": 1600
+    },
+    {
+      "id": "kuro-yui58",
+      "canonical_photos": 58,
+      "higher_resolution_replacements": 35,
+      "retained_larger_or_not_matched": 23,
+      "minimum_long_edge": 1799
+    },
+    {
+      "id": "yui-vol3-106",
+      "canonical_photos": 106,
+      "higher_resolution_replacements": 104,
+      "retained_larger_or_not_matched": 2,
+      "minimum_long_edge": 1799
+    }
+  ]
+}

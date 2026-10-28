@@ -46,23 +46,24 @@
       "confidence": 5.111
     },
     "wet-yui80": {
-      "sha256": "7443b55339fa2a2affca7a8cd58962110958cf0319dc0b53cf9ac6b3cc4e6e84",
+      "sha256": "a16108a371b0f3295a46c55738aeb77b9721b968878aef064598f34a4191f570",
       "number": 29,
-      "width": 1024,
-      "height": 683,
+      "width": 1280,
+      "height": 1919,
       "face": [
-        73,
-        96,
-        155,
-        155
+        809.605,
+        136.804,
+        290.483,
+        290.474
       ],
       "position": [
-        50,
-        0.0
+        100.0,
+        50
       ],
       "fit": "cover",
-      "method": "local_face_region_and_eye_detection",
-      "confidence": 3.634
+      "method": "same_frame_scaled_reviewed_region_display_rotation",
+      "confidence": 3.634,
+      "display_rotation": 270
     },
     "teddy-bear97": {
       "sha256": "60cfe6643a16de5c4f7f2826c1f714392fe141a3be32e15c645beb5d34c5edab",
@@ -102,23 +103,24 @@
       "method": "manual_face_region_review"
     },
     "thru-thru117": {
-      "sha256": "ca8b2aa34b550414fd99370d681dbe2f6e80c1ea31332e44262a460b0140cd3c",
+      "sha256": "70ce2d6bce434dcb07774241c909f1a8cc84f47180dfcc165250eabe697c79a5",
       "number": 2,
-      "width": 1024,
-      "height": 683,
+      "width": 1250,
+      "height": 1874,
       "face": [
-        566,
-        94,
-        123,
-        123
+        852.855,
+        1035.824,
+        225.11,
+        225.1
       ],
       "position": [
-        50,
-        0.0
+        100.0,
+        50
       ],
       "fit": "cover",
-      "method": "local_face_region_and_eye_detection",
-      "confidence": 8.723
+      "method": "same_frame_scaled_reviewed_region_display_rotation",
+      "confidence": 8.723,
+      "display_rotation": 270
     },
     "sweet-dream110": {
       "sha256": "6955e0e25adc958d5251816d7b6aea6ca393141af0529774d38630efca75f891",
@@ -273,22 +275,23 @@
       "confidence": 4.01
     },
     "yui-vol2-42": {
-      "sha256": "a4e2b92b57ac52c491d942847b2f9fd58797534f75356a8e83e0b9570f14cadc",
+      "sha256": "7237e4013560babbfb7a1c12dbeea663b34b8cd58940de00e7d93ac9e7b153c1",
       "number": 1,
-      "width": 1026,
-      "height": 1368,
+      "width": 1200,
+      "height": 1600,
       "face": [
-        484,
-        170,
-        300,
-        255
+        566.082,
+        198.83,
+        350.877,
+        298.246
       ],
       "position": [
         50,
         0.0
       ],
       "fit": "cover",
-      "method": "manual_face_region_review"
+      "method": "same_frame_scaled_reviewed_region_display_rotation",
+      "display_rotation": 0
     },
     "kuro-yui58": {
       "sha256": "f16d4859bf80ba0d3330ba529df409bc46198d901db049d3097aecfae6bb150e",
@@ -310,23 +313,24 @@
       "confidence": 3.779
     },
     "yui-vol3-106": {
-      "sha256": "9ee67c514500dc5f5a76ea5f2d91e5cfa73b0efc680f2261624b0f6c76cc7a34",
+      "sha256": "f56ea51ebbed96ca1c05a02bc480a78c1e9436c0bf00435a5fb3fb46fe835c25",
       "number": 11,
-      "width": 912,
-      "height": 1368,
+      "width": 1200,
+      "height": 1799,
       "face": [
-        477,
-        112,
-        256,
-        256
+        627.632,
+        147.287,
+        336.842,
+        336.655
       ],
       "position": [
         50,
         0.0
       ],
       "fit": "cover",
-      "method": "local_face_region_and_eye_detection",
-      "confidence": 7.084
+      "method": "same_frame_scaled_reviewed_region_display_rotation",
+      "confidence": 7.084,
+      "display_rotation": 0
     },
     "blackroom145": {
       "sha256": "9cd774c91873fff11ab8269a0588b1b249693fb34d189e4f9e7075f80a88bd5f",

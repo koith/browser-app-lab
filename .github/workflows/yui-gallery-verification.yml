@@ -16,15 +16,39 @@ concurrency:
 permissions:
   contents: read
 jobs:
+  selected-source-readback:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install Pillow requests
+      - name: Re-download every beta.18 larger file without changing source bytes
+        run: python apps/yui-gallery/verify_source_selection.py --selection apps/yui-gallery/verification/beta18-resolution-selections.json --workers 1 --public-policy --out yui-beta18-source-readback.json
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          path: yui-beta18-source-readback.json
+          archive: false
+          if-no-files-found: ignore
   verified-viewing:
+    # All three jobs visit the same public CDN. Separate process-local pacers
+    # cannot coordinate that traffic: finish source readback first, then run
+    # one browser engine at a time without reducing image coverage.
+    needs: selected-source-readback
     runs-on: ${{ matrix.os }}
     container:
       # Browser/system libraries are preinstalled; avoid the observed slow apt mirror.
       image: mcr.microsoft.com/playwright/python:v1.58.0-noble@sha256:cd8493e380df200a471821e2690b710eab8d793dde3c0946fd0a39a961022914
       options: --init --ipc=host
-    timeout-minutes: 25
+    # More source photos now use the CDN's paced 1s viewing interval. Keep
+    # both complete engine checks and the complete post-Pages production run.
+    timeout-minutes: 40
     strategy:
       fail-fast: false
+      max-parallel: 1
       matrix:
         include:
           - engine: chromium
@@ -54,6 +78,7 @@ jobs:
           python apps/yui-gallery/test_auto_registration.py
           python apps/yui-gallery/test_public_photo_archive.py
           python apps/yui-gallery/test_public_source_adapters.py
+          python apps/yui-gallery/test_verify_source_selection.py
           python apps/yui-gallery/test_merge_higher_resolution.py
           python apps/yui-gallery/test_photo_quality_policy.py
           python apps/yui-gallery/test_http_album_girlatlas.py
@@ -108,10 +133,10 @@ jobs:
           assert not pending,pending
           print('PRODUCTION_DEPLOYED_CODE_AND_MANIFEST_HASHES_MATCH',flush=True)
           PY
-          python apps/yui-gallery/qa_publishers.py --base https://koith.github.io/browser-app-lab/apps/yui-gallery/?v=0.1.0-beta.17 --out yui-production-publishers.json
-          python apps/yui-gallery/qa_mobile_navigation.py --base https://koith.github.io/browser-app-lab/apps/yui-gallery/?v=0.1.0-beta.17 --out yui-production-navigation.json
-          python apps/yui-gallery/qa_album_covers.py --base https://koith.github.io/browser-app-lab/apps/yui-gallery/?v=0.1.0-beta.17 --out yui-production-covers.json
-          python apps/yui-gallery/qa_gallery.py --base https://koith.github.io/browser-app-lab/apps/yui-gallery/?v=0.1.0-beta.17 --out yui-production-gallery.json
+          python apps/yui-gallery/qa_publishers.py --base https://koith.github.io/browser-app-lab/apps/yui-gallery/?v=0.1.0-beta.18 --out yui-production-publishers.json
+          python apps/yui-gallery/qa_mobile_navigation.py --base https://koith.github.io/browser-app-lab/apps/yui-gallery/?v=0.1.0-beta.18 --out yui-production-navigation.json
+          python apps/yui-gallery/qa_album_covers.py --base https://koith.github.io/browser-app-lab/apps/yui-gallery/?v=0.1.0-beta.18 --out yui-production-covers.json
+          python apps/yui-gallery/qa_gallery.py --base https://koith.github.io/browser-app-lab/apps/yui-gallery/?v=0.1.0-beta.18 --out yui-production-gallery.json
       - uses: actions/upload-artifact@v7
         if: always()
         with:
