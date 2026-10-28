@@ -1,0 +1,29 @@
+name: Mimmi Free Source-to-Real-File Archive Unit QA
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'apps/mimmi-gallery/publish_stored_public.py'
+      - 'apps/mimmi-gallery/test_xiutu_physical_store.py'
+      - '.github/workflows/mimmi-xiutu-storage-unit.yml'
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          filter: blob:none
+          sparse-checkout-cone-mode: false
+          sparse-checkout: |
+            apps/mimmi-gallery/publish_stored_public.py
+            apps/mimmi-gallery/test_xiutu_physical_store.py
+            apps/mimmi-gallery/download_public_images_private.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install 'Pillow==11.3.0' 'requests==2.32.5'
+      - name: Confirm mock image bytes actually persist with SHA and correct album IDs
+        run: python apps/mimmi-gallery/test_xiutu_physical_store.py
