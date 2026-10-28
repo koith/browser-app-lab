@@ -28,6 +28,8 @@ def main():
     assert not d.permitted("https://cdn.v2ph.com/login/photo.jpg?bad=1")
     assert d.permitted("https://cdn.v2ph.com/photos/good.jpg")
     assert d.permitted("https://cdn.xiutu.me/uploads/public/photo.jpg")
+    assert d.permitted("https://img-jp-a.cdnimg.vip/uploads/public/photo.jpg")
+    assert not d.permitted("https://img-jp-a.cdnimg.vip.evil.com/uploads/photo.jpg")
     assert not d.permitted("https://evil-xiutu.me/uploads/photo.jpg")
     assert d.permitted("https://public-files.gumroad.com/verified-public-promo.jpg")
     assert d.permitted("https://assets.gumroad.com/verified-public-promo.webp")
