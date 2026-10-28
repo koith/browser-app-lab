@@ -21,6 +21,7 @@ jobs:
             apps/mimmi-gallery/publish_stored_public.py
             apps/mimmi-gallery/test_xiutu_physical_store.py
             apps/mimmi-gallery/download_public_images_private.py
+            apps/mimmi-gallery/xiutu-public-previews.json
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
