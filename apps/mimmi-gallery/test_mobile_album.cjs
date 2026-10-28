@@ -8,12 +8,13 @@ const html=fs.readFileSync(root+'index.html','utf8');
 const match=html.match(/<script>([\s\S]*?)<\/script>/);
 if(!match)throw Error('Inline UI script missing');
 new vm.Script(match[1]);
-if(!html.includes('v0.1.0-mimmi.4'))throw Error('App version missing');
+if(!html.includes('v0.1.0-mimmi.5'))throw Error('App version missing');
 const official=JSON.parse(fs.readFileSync(root+'official-previews.json'));
 const actor=JSON.parse(fs.readFileSync(root+'v2ph-actor-previews.json'));
 const secondary=JSON.parse(fs.readFileSync(root+'v2ph-public-previews.json'));
-const inventory=JSON.parse(fs.readFileSync(root+'research-catalogue.json'));
-if(official.albums.length<32||inventory.works.length<50||actor.albums.length<30)throw Error('Lost existing source data');
+const inventory=JSON.parse(fs.readFileSync(root+'research-curated.json'));
+if(official.albums.length<32||inventory.works.length!==52||actor.albums.length<30)throw Error('Lost 52-set source data');
+for(const n of [4,9,15,43,52]){const w=inventory.works.find(x=>x.number===n);if(!w||w.title.includes('夜店')||w.title.includes('黄豆粉')||w.title.includes('绝区零 千夏'))throw Error('Wrong-model research entry '+n)}
 const unique=new Set([...official.albums,...actor.albums,...secondary.albums].flatMap(a=>(a.samples||[]).map(s=>s.sha256)));
 if(unique.size<390)throw Error('Missing validated public photo source metadata: '+unique.size);
 
@@ -36,13 +37,14 @@ if(unique.size<390)throw Error('Missing validated public photo source metadata: 
   await separateTab.close();
   if(!await page.locator('#app-version').isVisible())throw Error('Version label invisible');
   const version=await page.locator('#app-version').innerText();
-  if(version!=='v0.1.0-mimmi.4')throw Error('Wrong Mimmi version');
+  if(version!=='v0.1.0-mimmi.5')throw Error('Wrong Mimmi version');
   const bbox=await page.locator('#app-version').boundingBox();
   if(!bbox||bbox.height>15||bbox.x<270||bbox.y>14)throw Error('Version not small in upper right: '+JSON.stringify(bbox));
   const cards=page.locator('.album');
   await cards.first().waitFor();
   const total=await cards.count();
-  if(total<35)throw Error('Too few Mimmi albums: '+total);
+  if(total<95)throw Error('Missing 52 research cards from main gallery: '+total);
+  if(await page.locator('.album[data-id="research-no-052"]').count()!==1)throw Error('Asuna the Maid research set 52 not shown as album card');
   if(await cards.first().locator('.photos').count())throw Error('All thumbnails are expanded on album list');
   const title=await cards.first().locator('.album-title').innerText();
   // Browser QA checks actual individual image decoding, not just URL candidates.
@@ -82,7 +84,19 @@ if(unique.size<390)throw Error('Missing validated public photo source metadata: 
   }
   await page.locator('#viewer-next').click();
   if(!(await page.locator('#viewer-position').innerText()).startsWith('2 /'))throw Error('Next photo navigation failed');
+  // iOS Safari gesture-equivalent browser history: PHOTO -> ALBUM -> OVERVIEW.
+  await page.goBack({waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>!document.querySelector('#album-detail').hidden&&!document.querySelector('#viewer').open,{timeout:8000});
+  if(!page.url().includes('album='))throw Error('Photo back must stay in same album');
+  await page.goBack({waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>!document.querySelector('#overview').hidden,{timeout:8000});
+  if(page.url().includes('album='))throw Error('Album back must show overview URL');
+  await page.goForward({waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>!document.querySelector('#album-detail').hidden,{timeout:8000});
+  await page.goForward({waitUntil:'domcontentloaded'});
+  await page.waitForFunction(()=>document.querySelector('#viewer').open,{timeout:8000});
   await page.locator('#viewer-close').click();
+  await page.waitForFunction(()=>!document.querySelector('#viewer').open,{timeout:8000});
   await page.locator('#back').click();
   await page.waitForFunction(()=>!document.querySelector('#overview').hidden,{timeout:8000});
   await page.locator('#search').fill('Elegg');
@@ -93,10 +107,10 @@ if(unique.size<390)throw Error('Missing validated public photo source metadata: 
   const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2);
   if(overflow)throw Error('Mobile layout horizontally overflows');
   if(errors.length)throw Error('JS exceptions: '+errors.join(';'));
-  await page.screenshot({path:'mimmi-mobile-v4.png',fullPage:false});
+  await page.screenshot({path:'mimmi-mobile-v5.png',fullPage:false});
   console.log('MIMMI_PHOTO_FIRST_MOBILE_PASS',{
    version,photoSetCount:total,firstCover:coverState,firstFullWidth:full.w,
-   firstAlbumPhotos:tileCount,uniqueSourceImages:unique.size,yuiOpensNewTab:true
+   firstAlbumPhotos:tileCount,uniqueSourceImages:unique.size,yuiOpensNewTab:true,researchWorks:inventory.works.length,safariBackForwardTested:true
   });
  }finally{await browser.close()}
 })().catch(e=>{console.error(e.stack||String(e));process.exit(1)});
