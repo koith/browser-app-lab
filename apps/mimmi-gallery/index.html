@@ -127,7 +127,7 @@ footer{padding:15px 0 25px;justify-content:flex-end}
  <small id="app-version" class="version-chip">v0.1.0-mimmi.5</small>
 </header>
 <div id="browse">
- <div class="browse-meta"><p class="inventory" id="inventory">화보를 불러오는 중</p><span class="counter" id="total"></span></div>
+ <div class="browse-meta"><p class="inventory" id="inventory">화보를 불러오는 중</p><small class="inventory" id="device-health">이 기기에서 이미지 열람 확인 중</small><span class="counter" id="total"></span></div>
  <div class="filters"><button id="browse-toggle" class="filter active" type="button" aria-controls="albumgrid publishergrid" aria-pressed="false" aria-label="화보 목록 · 발행처 목록으로 전환"><span id="browse-mode">화보</span><span aria-hidden="true" class="switch-icon"> ⇄</span></button></div>
  <div id="publishergrid" class="grid" hidden></div>
  <div id="albumgrid" class="grid"></div>
@@ -157,10 +157,33 @@ footer{padding:15px 0 25px;justify-content:flex-end}
 <script>
 "use strict";
 const $=id=>document.getElementById(id);
-document.addEventListener('error',e=>{
+const imageHealth={loaded:new Set(),failed:new Set()};
+function registerImageHealth(url,ok){
+ if(!url||!url.startsWith('https://'))return;
+ if(ok){imageHealth.loaded.add(url);imageHealth.failed.delete(url)}
+ else if(!imageHealth.loaded.has(url))imageHealth.failed.add(url);
+ const node=$('device-health');
+ if(node)node.textContent='이 기기에서 사진 로딩 '+imageHealth.loaded.size+'장 · 연결 실패 '+imageHealth.failed.size+'장 (시도한 사진 기준)';
+}
+document.addEventListener('load',e=>{
  const img=e.target;
- if(!(img instanceof HTMLImageElement)||!img.closest('.album,.photo'))return;
- img.hidden=true;img.closest('.album,.photo').classList.add('broken-source');
+ if(img instanceof HTMLImageElement&&img.closest('.album,.photo')&&img.naturalWidth>=100)
+  registerImageHealth(img.currentSrc||img.src,true);
+},true);
+document.addEventListener('error',e=>{
+ const img=e.target,container=img instanceof HTMLImageElement?img.closest('.album,.photo'):null;
+ if(!container)return;
+ const url=img.getAttribute('src')||'',n=Number(img.dataset.sourceRetry||0);
+ const policies=['strict-origin-when-cross-origin','origin'];
+ if(url.startsWith('https://')&&n<policies.length){
+  img.dataset.sourceRetry=String(n+1);
+  img.referrerPolicy=policies[n];
+  img.removeAttribute('src');
+  requestAnimationFrame(()=>{if(img.isConnected)img.src=url});
+  return;
+ }
+ registerImageHealth(url,false);
+ img.hidden=true;container.classList.add('broken-source');
 },true);
 let catalog=[],stored=[],localStored=[],remoteStored=[],ownerStored=[],albumAliases={},albumCovers={},publisherRegistry={publishers:[]},publisherWorkReferences=[],activePublisher=null,mode='all',activeAlbum=null,viewerList=[],viewerIndex=0,detailAlbum=null;
 function canonicalId(id){const seen=new Set();while(albumAliases[id]&&!seen.has(id)){seen.add(id);id=albumAliases[id]}return id}
@@ -241,12 +264,34 @@ window.addEventListener('resize',()=>{if($('lightbox').classList.contains('open'
 function showViewer(){
  const p=viewerList[viewerIndex];if(!p)return;
  viewerGeneration++;
+ const generation=viewerGeneration;
  layoutViewer();
- $('media-status').textContent='불러오는 중';
- $('full').onload=()=>{$('media-status').textContent=''};$('full').onerror=()=>{$('media-status').textContent='사진을 불러오지 못했습니다. 사진 열기로 출처를 확인해 주세요.'};
- $('full').removeAttribute('src');$('full').referrerPolicy='no-referrer';if(p.ownerAlbum){const generation=viewerGeneration;MimmiPrivate.asset(p).then(url=>{if(generation===viewerGeneration){$('full').src=url;$('original').href=url}}).catch(error=>{if(generation===viewerGeneration)$('media-status').textContent=error.message})}else $('full').src=p.url;$('full').alt=p.name+' · '+p.number;
+ const image=$('full'),status=$('media-status');
+ status.textContent='불러오는 중';
+ image.removeAttribute('src');image.hidden=true;
+ const src=p.url;
+ function install(url){
+  const policies=['no-referrer','strict-origin-when-cross-origin','origin'];
+  let retry=0;
+  const fail=()=>{
+   if(generation!==viewerGeneration)return;
+   if(retry>=policies.length){
+    image.hidden=true;image.removeAttribute('src');
+    status.textContent='이 기기에서는 이미지 서버 연결이 차단되었습니다. 사진 열기 ↗를 통해 사진 주소를 직접 열어 보세요.';
+    registerImageHealth(url,false);return;
+   }
+   image.removeAttribute('src');image.referrerPolicy=policies[retry++];
+   requestAnimationFrame(()=>{if(generation===viewerGeneration)image.src=url});
+  };
+  image.onload=()=>{if(generation!==viewerGeneration)return;if(image.naturalWidth>100){image.hidden=false;status.textContent='';registerImageHealth(url,true)}else fail()};
+  image.onerror=fail;fail();
+ }
+ if(p.ownerAlbum){
+  MimmiPrivate.asset(p).then(url=>{if(generation===viewerGeneration){install(url);$('original').href=url}}).catch(error=>{if(generation===viewerGeneration)status.textContent=error.message});
+ }else install(src);
+ image.alt=p.name+' · '+p.number;
  $('position').textContent=(viewerIndex+1)+' / '+viewerList.length+' · '+p.width+'×'+p.height;
- if(p.ownerAlbum)$('original').removeAttribute('href');else $('original').href=p.url;
+ if(p.ownerAlbum)$('original').removeAttribute('href');else $('original').href=src;
 }
 function hideViewer(){clearTimeout(routeTimer);viewerGeneration++;$('lightbox').classList.remove('open');document.body.style.overflow='';$('full').removeAttribute('src')}
 function closeViewer(){if(history.state?.mimmi&&history.state.photo)goBack();else hideViewer()}
