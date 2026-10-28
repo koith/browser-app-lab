@@ -25,8 +25,8 @@ jobs:
           new vm.Script(m[1]);
           const c=JSON.parse(fs.readFileSync(path+'albums.json','utf8'));
           if(c.model.id!=='mimmi'||c.albums.length<6)throw Error('Model mixed or missing');
-          if(!html.includes('id="app-version"')||!html.includes('v0.1.0-mimmi.2'))throw Error('Version missing');
-          if(!html.includes('official-previews.json'))throw Error('Missing official images');
+          if(!html.includes('id="app-version"')||!html.includes('v0.1.0-mimmi.3'))throw Error('Version missing');
+          if(!html.includes('official-previews.json')||!html.includes('v2ph-actor-previews.json')||!html.includes('research-catalogue.json'))throw Error('Missing broad image sources and research index');
           console.log('MIMMI_GALLERY_SYNTAX_AND_VERSION_PASS',c.albums.length);
           NODE
       - name: Install headless Chromium
@@ -46,7 +46,7 @@ jobs:
              await page.goto('http://127.0.0.1:8765/',{waitUntil:'domcontentloaded'});
              await page.waitForFunction(()=>document.querySelector('#count')?.textContent.includes('개 화보'),{timeout:15000});
              if(!await page.locator('#app-version').isVisible())throw Error('Upper-right version hidden');
-             if(!(await page.locator('#app-version').innerText()).includes('v0.1.0-mimmi.2'))throw Error('Wrong version');
+             if(!(await page.locator('#app-version').innerText()).includes('v0.1.0-mimmi.3'))throw Error('Wrong version');
              const official=fs.existsSync('apps/mimmi-gallery/official-previews.json');
              const expectedMin=official?32:6;
              const works=await page.locator('.album').count();
@@ -64,7 +64,7 @@ jobs:
                await page.locator('#close').click();
              }
              if(errors.length)throw Error(errors.join(';'));
-             console.log('MIMMI_GALLERY_MOBILE_PASS',{works,official,version:'v0.1.0-mimmi.2'});
+             console.log('MIMMI_GALLERY_MOBILE_PASS',{works,official,version:'v0.1.0-mimmi.3'});
            }finally{await browser.close()}
           })().catch(err=>{console.error(err.stack);process.exit(1)});
           NODE
