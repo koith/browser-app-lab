@@ -192,7 +192,194 @@ const titleMap={};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function getName(a){return a.title||catalog.find(x=>x.id===a.id)?.title||titleMap[a.id]||a.id}
 const publicPhotoHosts=['djawaphoto.com','www.djawaphoto.com','cdn.v2ph.com','cosplay.pixibb.com'];
-function validImages(a){return (a.images||[]).filter(x=>{if(a.ownerHosted&&x.ownerAlbum===a.id&&x.url==='owner:'+a.id+':'+x.number)return true;if(typeof x.url!=='string')return false;if(/^stored-albums\/[a-z0-9-]+\/[a-zA-Z0-9._-]+$/.test(x.url))return true;if(!a.sourceHosted)return false;try{const u=new URL(x.url);return u.protocol==='https:'&&!u.username&&!u.password&&([...publicPhotoHosts,'www.girl-atlas.com','cdn.jliji.com','cdn.v2ph.com','i0.wp.com','i1.wp.com','i2.wp.com','cdn1.thismore.fun','cdn2.thismore.fun','pbs.twimg.com'].includes(u.hostname)||/^(?:(?:imgx\d{3}|images\d{2})\.pixibb\.com|(?:wes|bis)\.misskon\.com|lux\.mrcong\.com|s\.wujituku\.com|lh\d\.ggpht\.com)$/.test(u.hostname));}catch{return false}})}
+function validImages(a){
+ return (a.images||[]).filter(p=>{
+  if(a.ownerHosted&&p.ownerAlbum===a.id&&p.url==='owner:'+a.id+':'+p.number)return true;
+  if(typeof p.url!=='string'||typeof p.sha256!=='string'||!/^[a-f0-9]{64}$/.test(p.sha256))return false;
+  if(!Number.isSafeInteger(p.bytes)||p.bytes<4500)return false;
+  return /^[a-z0-9-]{2,110}$/.test(a.id)
+    && new RegExp('^stored-albums/'+a.id+'/[a-zA-Z0-9._-]+\\.(?:jpe?g|png|webp|avif)
+function available(){return stored.filter(x=>validImages(x).length).sort((a,b)=>validImages(b).length-validImages(a).length)}
+function publisherGroups(){const known=new Set(catalog.flatMap(a=>[a.source,...(a.source_pages||[])].filter(Boolean)));const entries=[...catalog,...publisherWorkReferences.filter(a=>!known.has(a.source))];return MimmiPublishers.groups(entries,publisherRegistry,MimmiLabels.describe,validImages)}
+function setMode(m,publisher=null){mode=['albums','photos','all','publishers'].includes(m)?m:'albums';activePublisher=mode==='publishers'&&publisherGroups().some(g=>g.id===publisher)?publisher:null;activeAlbum=null;detailAlbum=null;document.body.classList.remove('detail-view');document.body.classList.toggle('publisher-view',!!activePublisher);$('detail').hidden=true;$('browse').hidden=false;const isPublisher=mode==='publishers';$('browse-mode').textContent=isPublisher?'발행처':'화보';$('browse-toggle').dataset.mode=isPublisher?'publishers':'albums';$('browse-toggle').setAttribute('aria-pressed',String(isPublisher));$('browse-toggle').setAttribute('aria-label',isPublisher?'발행처 목록 · 화보 목록으로 전환':'화보 목록 · 발행처 목록으로 전환');render()}
+function publisherCard(group){const asset=MimmiPublishers.logo(group),assetLabel=group.logo?.asset_role==='publisher_profile_branding'?' 발행처 프로필':group.logo?.asset_role==='parent_publisher_brand_reference'?' 발행사 로고':' 로고',image=asset?'<img src="'+esc(asset)+'" alt="'+esc(group.name)+assetLabel+'">':'<span class="publisher-wordmark" role="img" aria-label="'+esc(group.name)+' — 로고 미확인">'+esc(group.name)+'</span>';return '<button class="publisher" data-publisher="'+esc(group.id)+'" data-logo-theme="'+(group.logo?.theme==='light'?'light':'dark')+'" aria-label="'+esc(group.name)+' · 등록 '+group.albums.length+' · 열람 '+group.viewable+'">'+image+'<span class="publisher-info"><strong>'+esc(group.name)+'</strong>등록 '+group.albums.length+' · 열람 '+group.viewable+'</span></button>'}
+function openPublisher(id,record=true){if(!publisherGroups().some(g=>g.id===id))return;if(record)remember({mode:'publishers',publisher:id});setMode('publishers',id);window.scrollTo(0,0)}
+function photosFor(a){return validImages(a).map((p,i)=>({...p,name:getName(a),albumId:a.id,number:p.number??i+1}))}
+function photoRotation(p){return [90,270].includes(p?.display_rotation)?p.display_rotation:0}
+function rotationAttributes(p){const angle=photoRotation(p);return angle?' data-rotation="'+angle+'" style="--photo-rotation:'+angle+'deg"':''}
+function card(a,hasImages){
+ const owned=stored.find(x=>x.id===(a.previewAlbumId||a.id))||a;
+ const p=validImages(owned),configuration=albumCovers[owned.id],selected=p.find(p=>p.sha256&&p.sha256===configuration?.sha256)||p[0],cover=selected?.url||'',count=p.length,expected=a.photos??a.expected??catalog.find(x=>x.id===a.id)?.photos??null;
+ const label=getName(a),labels=MimmiLabels.describe(owned),shortTitle=MimmiLabels.coverTitle({...owned,title:label});
+ const focused=selected?.sha256&&selected.sha256===configuration?.sha256;
+ const position=focused&&Array.isArray(configuration.position)&&configuration.position.length===2&&configuration.position.every(n=>Number.isFinite(n)&&n>=0&&n<=100)?configuration.position:[50,20];
+ const style='object-position:'+position[0]+'% '+position[1]+'%;object-fit:cover';
+ const n=count+'장 · 저장됨';
+ const cloudCover=owned.ownerHosted?selected:null;
+ const img=cloudCover?'<img data-owner="'+esc(cloudCover.url)+'" style="'+style+'" alt="'+esc(label)+' 표지">':cover?'<img loading="lazy" referrerpolicy="no-referrer" src="'+esc(cover)+'" style="'+style+'" alt="'+esc(label)+' 표지">':'<div class="placeholder">M</div>';
+ return '<button class="album"'+rotationAttributes(selected)+' data-id="'+esc(a.id)+'" data-available="'+(hasImages?'1':'0')+'" aria-label="'+esc(label+' · '+labels.publisher+' · '+n+' · '+labels.edition)+'">'+img+'<div class="gradient"></div><span class="cover-labels"><span class="publisher-sticker" title="발행사: '+esc(labels.publisher)+'">'+esc(labels.publisher)+'</span><span class="album-count">'+esc(n)+'</span></span><span class="edition-sticker" data-kind="'+esc(labels.kind)+'" title="'+esc(labels.detail)+'">'+esc(labels.edition)+'</span><strong class="name" title="'+esc(label)+'">'+esc(shortTitle)+'</strong></button>';
+}
+function photoHTML(p,i){return '<button class="photo"'+rotationAttributes(p)+' data-i="'+i+'" aria-label="'+esc(p.name)+' 사진 '+p.number+'"><img loading="lazy" referrerpolicy="no-referrer" '+(p.ownerAlbum?'data-owner="'+esc(p.url):'src="'+esc(p.url))+'" alt="'+esc(p.name)+' 사진 '+p.number+'"><span>'+esc(p.name)+' · '+p.number+'</span></button>'}
+const ownerObserver=new IntersectionObserver(entries=>{for(const e of entries){if(!e.isIntersecting)continue;ownerObserver.unobserve(e.target);const p=ownerStored.flatMap(a=>a.images).find(p=>p.url===e.target.dataset.owner);if(p)MimmiPrivate.asset(p).then(url=>{if(e.target.isConnected)e.target.src=url}).catch(()=>{e.target.alt='보관본 연결을 확인해 주세요'})}},{rootMargin:'200px'});
+function observeOwner(){document.querySelectorAll('img[data-owner]:not([src])').forEach(i=>ownerObserver.observe(i))}
+function render(){
+ const q=$('search').value.toLocaleLowerCase().trim();
+ const items=available(),all=items.flatMap(photosFor),match=s=>String(s).toLocaleLowerCase().includes(q);
+ const publisherIndex=mode==='publishers'&&!activePublisher;
+ $('publishergrid').hidden=!publisherIndex;$('albumgrid').hidden=mode==='photos'||publisherIndex;$('photogrid').hidden=mode!=='photos';$('nothing').hidden=true;
+ if(publisherIndex){const groups=publisherGroups().filter(g=>match(g.name)||g.albums.some(a=>match(getName(a))));$('publishergrid').innerHTML=groups.map(publisherCard).join('');$('publishergrid').querySelectorAll('[data-publisher]').forEach(b=>b.onclick=()=>openPublisher(b.dataset.publisher));$('total').textContent=groups.length+' publishers';$('nothing').hidden=groups.length>0;
+ }else if(mode==='photos'){
+  const visible=all.filter(p=>match(p.name));$('photogrid').innerHTML=visible.map(photoHTML).join('');
+  $('photogrid').querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>openViewer(visible,Number(b.dataset.i)));
+  $('total').textContent=visible.length+' photos';
+  $('nothing').hidden=visible.length>0;
+ }else{
+  const group=activePublisher?publisherGroups().find(g=>g.id===activePublisher):null;
+  const src=group?group.albums:mode==='all'?stored:items;
+  if(group){$('albumname').textContent=group.name;$('albumtotal').textContent=group.albums.length+'개 · 열람 '+group.viewable}
+  const matched=src.filter(a=>match(getName(a))).sort((a,b)=>{const ac=validImages(stored.find(x=>x.id===(a.previewAlbumId||a.id))||a).length,bc=validImages(stored.find(x=>x.id===(b.previewAlbumId||b.id))||b).length;return (bc>0)-(ac>0)||MimmiPublishers.compareNames(MimmiLabels.coverTitle(a),MimmiLabels.coverTitle(b))||MimmiPublishers.compareNames(a.id,b.id)});
+  $('albumgrid').innerHTML=matched.map(a=>card(a,validImages(stored.find(x=>x.id===(a.previewAlbumId||a.id))||a).length>0)).join('');
+  $('albumgrid').querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>{const research=src.find(a=>a.id===b.dataset.id);const target=research?.previewAlbumId||b.dataset.id;const a=stored.find(a=>a.id===target);if(a&&validImages(a).length)openAlbum(target);else{const source=research?.source;try{const u=new URL(source);if(u.protocol==='https:'&&!u.username&&!u.password)window.open(u.href,'_blank','noopener,noreferrer')}catch{}}});
+  $('total').textContent=matched.length+' albums';
+  $('nothing').hidden=matched.length>0;
+ }
+ observeOwner();
+}
+function openAlbum(id,record=true){
+ id=canonicalId(id);
+ const a=stored.find(x=>x.id===id);
+ if(!a||!validImages(a).length)return;
+ if(record)remember({album:id,mode,publisher:activePublisher});
+ const photos=photosFor(a);detailAlbum=a;document.body.classList.add('detail-view');$('browse').hidden=true;$('detail').hidden=false;
+ $('albumname').textContent=getName(a);$('albumtotal').textContent=photos.length+'장 · 저장됨';
+ $('detailphotos').innerHTML=photos.map(photoHTML).join('');
+ $('detailphotos').querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>openViewer(photos,Number(b.dataset.i)));
+ observeOwner();
+ window.scrollTo(0,0);
+}
+function openViewer(list,i,record=true){if(!list.length)return;viewerList=list;viewerIndex=((i%list.length)+list.length)%list.length;const p=list[viewerIndex];if(record)remember({album:p.albumId,photo:p.number,fromPhotos:!detailAlbum,mode,publisher:activePublisher});$('lightbox').classList.add('open');document.body.style.overflow='hidden';showViewer();$('close').focus({preventScroll:true})}
+let viewerGeneration=0,routeTimer=null,historyEntry=0;const viewerRoutes=new Map();
+function layoutViewer(){
+ const p=viewerList[viewerIndex],angle=photoRotation(p),image=$('full'),frame=image.parentElement;
+ image.style.cssText='';frame.style.cssText='';
+ if(!angle)return;
+ const scale=Math.min(1,Math.min(innerWidth,1800)/p.height,Math.max(1,innerHeight-71)/p.width);
+ frame.style.width=p.height*scale+'px';frame.style.height=p.width*scale+'px';
+ Object.assign(image.style,{position:'absolute',left:'50%',top:'50%',width:p.width*scale+'px',height:p.height*scale+'px',maxWidth:'none',maxHeight:'none',transform:'translate(-50%,-50%) rotate('+angle+'deg)'});
+}
+window.addEventListener('resize',()=>{if($('lightbox').classList.contains('open'))layoutViewer()});
+function showViewer(){
+ const p=viewerList[viewerIndex];if(!p)return;
+ viewerGeneration++;
+ const generation=viewerGeneration;
+ layoutViewer();
+ const image=$('full'),status=$('media-status');
+ status.textContent='불러오는 중';
+ image.removeAttribute('src');image.hidden=true;
+ const src=p.url;
+ function install(url){
+  const policies=['no-referrer','strict-origin-when-cross-origin','origin'];
+  let retry=0;
+  const fail=()=>{
+   if(generation!==viewerGeneration)return;
+   if(retry>=policies.length){
+    image.hidden=true;image.removeAttribute('src');
+    status.textContent='이 기기에서는 이미지 서버 연결이 차단되었습니다. 사진 열기 ↗를 통해 사진 주소를 직접 열어 보세요.';
+    registerImageHealth(url,false);return;
+   }
+   image.removeAttribute('src');image.referrerPolicy=policies[retry++];
+   requestAnimationFrame(()=>{if(generation===viewerGeneration)image.src=url});
+  };
+  image.onload=()=>{if(generation!==viewerGeneration)return;if(image.naturalWidth>100){image.hidden=false;status.textContent='';registerImageHealth(url,true)}else fail()};
+  image.onerror=fail;fail();
+ }
+ if(p.ownerAlbum){
+  MimmiPrivate.asset(p).then(url=>{if(generation===viewerGeneration){install(url);$('original').href=url}}).catch(error=>{if(generation===viewerGeneration)status.textContent=error.message});
+ }else install(src);
+ image.alt=p.name+' · '+p.number;
+ $('position').textContent=(viewerIndex+1)+' / '+viewerList.length+' · '+p.width+'×'+p.height;
+ if(p.ownerAlbum)$('original').removeAttribute('href');else $('original').href=src;
+}
+function hideViewer(){clearTimeout(routeTimer);viewerGeneration++;$('lightbox').classList.remove('open');document.body.style.overflow='';$('full').removeAttribute('src')}
+function closeViewer(){if(history.state?.mimmi&&history.state.photo)goBack();else hideViewer()}
+function step(n){
+ viewerIndex=(viewerIndex+n+viewerList.length)%viewerList.length;showViewer();
+ if(history.state?.mimmi){const state={...history.state,photo:viewerList[viewerIndex].number,album:viewerList[viewerIndex].albumId};viewerRoutes.set(state.key,state);clearTimeout(routeTimer);
+ // WebKit rate-limits History API writes. Rapid swipes must keep rendering;
+ // remember the last photo immediately, and update its URL only after a pause.
+ routeTimer=setTimeout(()=>{if($('lightbox').classList.contains('open')&&history.state?.key===state.key)history.replaceState(state,'',routeURL(state))},1000)}
+}
+function routeURL(s){const q=new URLSearchParams();if(s.album)q.set('album',s.album);if(s.photo)q.set('photo',s.photo);if(s.fromPhotos)q.set('from','photos');if(s.publisher)q.set('publisher',s.publisher);if(s.mode&&s.mode!=='albums')q.set('view',s.mode);return location.pathname+location.search+(q.size?'#'+q:'')}
+function remember(s){history.replaceState({...history.state,scroll:window.scrollY},'');const state={mimmi:true,key:Date.now().toString(36)+'-'+(++historyEntry),depth:(history.state?.depth||0)+1,scroll:0,...s};history.pushState(state,'',routeURL(state))}
+function goBack(){if(history.state?.mimmi&&history.state.depth>0)history.back();else{const state={mimmi:true,depth:0,mode:activePublisher?'publishers':'albums',publisher:history.state?.album?activePublisher:null,scroll:0};history.replaceState(state,'',routeURL(state));applyRoute(state)}}
+function applyRoute(s){$('search-dialog').close();s=viewerRoutes.get(s.key)||s;s={...s,album:canonicalId(s.album)};hideViewer();setMode(s.mode||'albums',s.publisher);if(s.album&&!s.fromPhotos)openAlbum(s.album,false);if(s.photo){const a=stored.find(a=>a.id===s.album);const list=s.fromPhotos?available().flatMap(photosFor).filter(p=>p.name.toLocaleLowerCase().includes($('search').value.toLocaleLowerCase().trim())):a?photosFor(a):[];const i=list.findIndex(p=>p.albumId===s.album&&p.number===Number(s.photo));if(i>=0)openViewer(list,i,false)}if(s.searchOpen)showSearch();requestAnimationFrame(()=>window.scrollTo(0,s.scroll||0))}
+function routeFromLocation(){
+ const q=new URLSearchParams(location.hash.replace(/^#/,''));
+ return {mimmi:true,depth:0,mode:q.get('view')||'all',publisher:q.get('publisher'),
+         album:q.get('album'),photo:q.get('photo'),fromPhotos:q.get('from')==='photos',scroll:0};
+}
+window.addEventListener('popstate',()=>{applyRoute(history.state?.mimmi?history.state:routeFromLocation())});
+window.addEventListener('pageshow',event=>{if(event.persisted&&catalog.length)applyRoute(history.state?.mimmi?history.state:routeFromLocation())});
+$('prev').onclick=()=>step(-1);$('next').onclick=()=>step(1);$('close').onclick=closeViewer;
+$('back').onclick=goBack;
+function showSearch(){if(!$('search-dialog').open)$('search-dialog').showModal();$('search').focus()}
+function closeSearch(){if(history.state?.searchOpen&&history.state.depth>0)history.back();else $('search-dialog').close()}
+$('search-toggle').onclick=()=>{remember({mode,publisher:activePublisher,searchOpen:true});showSearch()};
+$('search-close').onclick=closeSearch;
+$('search-dialog').addEventListener('cancel',e=>{e.preventDefault();closeSearch()});
+$('search-dialog').addEventListener('click',e=>{if(e.target===$('search-dialog')){const r=e.target.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)closeSearch()}});
+$('search-form').onsubmit=e=>{e.preventDefault();closeSearch()};
+$('search').oninput=()=>{hideViewer();setMode(mode,activePublisher);const s={...history.state,mimmi:true,mode,scroll:0};history.replaceState(s,'',routeURL(s))};
+$('browse-toggle').onclick=()=>{const next=mode==='publishers'?'albums':'publishers';remember({mode:next});setMode(next);window.scrollTo(0,0)};
+$('lightbox').onclick=e=>{if(e.target===$('lightbox'))closeViewer()};
+document.addEventListener('keydown',e=>{if(!$('lightbox').classList.contains('open'))return;if(e.key==='Escape')closeViewer();else if(e.key==='ArrowLeft')step(-1);else if(e.key==='ArrowRight')step(1)});
+// Never cancel native pinch/long-press or iOS edge navigation. A multi-touch
+// gesture remains ineligible for swiping until every finger has been lifted.
+let gesture=null;
+$('lightbox').addEventListener('touchstart',e=>{if(e.touches.length!==1){gesture=null;return}const t=e.touches[0];gesture={x:t.clientX,y:t.clientY,valid:t.clientX>28&&t.clientX<innerWidth-28&&(visualViewport?.scale||1)<=1.01}},{passive:true});
+$('lightbox').addEventListener('touchmove',e=>{if(e.touches.length!==1&&gesture)gesture.valid=false},{passive:true});
+$('lightbox').addEventListener('touchcancel',()=>{gesture=null},{passive:true});
+$('lightbox').addEventListener('touchend',e=>{if(e.touches.length){gesture=null;return}const g=gesture;gesture=null;const t=e.changedTouches[0];if(!g?.valid||!t||(visualViewport?.scale||1)>1.01)return;const dx=t.clientX-g.x,dy=t.clientY-g.y;if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.5)step(dx>0?-1:1)},{passive:true});
+Promise.all([
+ fetch('stored-albums.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('stored index unavailable');return r.json()}),
+ MimmiPrivate.albums().then(albums=>({albums})).catch(error=>({albums:[],error:error.message})),
+ fetch('identity-exclusions.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('identity exclusions');return r.json()}),
+ fetch('album-covers.json',{cache:'no-store'}).then(r=>r.ok?r.json():{}).catch(()=>({})),
+ fetch('album-aliases.json',{cache:'no-store'}).then(r=>r.ok?r.json():{}).catch(()=>({})),
+ fetch('publishers.json',{cache:'no-store'}).then(r=>r.ok?r.json():{publishers:[]}).catch(()=>({publishers:[]}))
+]).then(([s,owner,exclusions,covers,aliases,publishers])=>{
+ if(!Array.isArray(s.albums)||s.model!=='mimmi')throw Error('Invalid physical archive index');
+ publisherRegistry=publishers;
+ albumCovers=covers.covers||{};
+ albumAliases=aliases.aliases||{};
+ const excludedIds=new Set([...(exclusions.excluded_album_ids||[]),...(exclusions.excluded_source_ids||[])]),
+       excludedSources=new Set(exclusions.excluded_source_urls||[]),
+       excludedHashes=new Set(exclusions.excluded_image_sha256||[]);
+ const allowed=a=>!excludedIds.has(a.id)&&![a.source,...(a.source_pages||[])].some(u=>excludedSources.has(u));
+ // Never load research-only titles or verified source-host URL indexes as viewable albums.
+ // Only physically committed images from this exact local directory can enter the gallery.
+ localStored=s.albums.filter(allowed).map(a=>({
+  ...a,sourceHosted:false,
+  images:(a.images||[]).filter(p=>!excludedHashes.has(p.sha256))
+ })).filter(a=>validImages(a).length);
+ ownerStored=(owner.albums||[]).filter(allowed).map(a=>({
+  ...a,images:(a.images||[]).filter(p=>!excludedHashes.has(p.sha256))
+ })).filter(a=>validImages(a).length);
+ remoteStored=[];publisherWorkReferences=[];
+ const ownerIds=new Set(ownerStored.map(a=>a.id));
+ stored=[...ownerStored,...localStored.filter(a=>!ownerIds.has(a.id))];
+ catalog=stored.slice();
+ const archivedCount=stored.reduce((n,a)=>n+validImages(a).length,0);
+ $('inventory').textContent=archivedCount+'장 실제 보관 · 갤러리 등록';
+
+ render();
+ const raw=location.hash.slice(1),q=new URLSearchParams(raw);const id=canonicalId(raw&&!raw.includes('=')?decodeURIComponent(raw):q.get('album'));const state={mimmi:true,depth:0,mode:q.get('view')||'all',publisher:q.get('publisher'),album:id,fromPhotos:q.get('from')==='photos',scroll:0};history.replaceState(state,'',routeURL(state));applyRoute(state);if(q.get('photo')){const a=stored.find(a=>a.id===id);if(a){const list=photosFor(a),i=list.findIndex(p=>p.number===Number(q.get('photo')));if(i>=0)openViewer(list,i)}}
+}).catch(()=>{$('total').textContent='—';$('nothing').textContent='이미지를 불러올 수 없습니다.';$('nothing').hidden=false});
+</script>
+</body></html>
+).test(p.url);
+ });
+}
 function available(){return stored.filter(x=>validImages(x).length).sort((a,b)=>validImages(b).length-validImages(a).length)}
 function publisherGroups(){const known=new Set(catalog.flatMap(a=>[a.source,...(a.source_pages||[])].filter(Boolean)));const entries=[...catalog,...publisherWorkReferences.filter(a=>!known.has(a.source))];return MimmiPublishers.groups(entries,publisherRegistry,MimmiLabels.describe,validImages)}
 function setMode(m,publisher=null){mode=['albums','photos','all','publishers'].includes(m)?m:'albums';activePublisher=mode==='publishers'&&publisherGroups().some(g=>g.id===publisher)?publisher:null;activeAlbum=null;detailAlbum=null;document.body.classList.remove('detail-view');document.body.classList.toggle('publisher-view',!!activePublisher);$('detail').hidden=true;$('browse').hidden=false;const isPublisher=mode==='publishers';$('browse-mode').textContent=isPublisher?'발행처':'화보';$('browse-toggle').dataset.mode=isPublisher?'publishers':'albums';$('browse-toggle').setAttribute('aria-pressed',String(isPublisher));$('browse-toggle').setAttribute('aria-label',isPublisher?'발행처 목록 · 화보 목록으로 전환':'화보 목록 · 발행처 목록으로 전환');render()}
