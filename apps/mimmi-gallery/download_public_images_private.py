@@ -36,7 +36,8 @@ def permitted(url):
         p = urlsplit(url)
         h=p.hostname or ""
         pixibb=bool(re.fullmatch(r"(?:imgx[0-9]{2,4}|images[0-9]{1,4}|img|cdn|files)[.]pixibb[.]com",h))
-        if not (p.scheme=="https" and (h in HOSTS or pixibb)
+        xiutu=h in ("xiutu.me","www.xiutu.me") or h.endswith(".xiutu.me") or h=="img-jp-a.cdnimg.vip"
+        if not (p.scheme=="https" and (h in HOSTS or pixibb or xiutu)
                 and not p.username and not p.password and not p.port
                 and not p.fragment and Path(p.path).suffix.lower() in EXT):
             return False
@@ -45,6 +46,8 @@ def permitted(url):
             return p.path.startswith("/wp-content/uploads/")
         if h in ("public-files.gumroad.com","assets.gumroad.com","static-2.gumroad.com"):
             return p.path.startswith("/") and ".." not in p.path.split("/")
+        if xiutu:return (p.path.startswith("/") and "/private/" not in p.path
+                           and "/api/" not in p.path and ".." not in p.path.split("/"))
         return pixibb and p.path.startswith("/")
     except (ValueError, TypeError, AttributeError):
         return False

@@ -11,6 +11,7 @@ on:
       - Mimmi Free Official Portfolio Discovery
       - Mimmi Free V2PH Public Gallery Photo Discovery
       - Mimmi V2PH Actor Wide Discovery
+      - Mimmi Secondary CreamSoda Public Gallery Crawl
     types: [completed]
   schedule:
     - cron: '25 3,9,15,21 * * *'
@@ -41,9 +42,10 @@ jobs:
       - name: Save multiple batches of SHA-verified real public photo files (not URLs)
         shell: bash
         run: |
-          for pass in 1 2 3; do
+          # Keep each bot commit small enough to push reliably; repeat every 6h.
+          for pass in 1 2; do
             before=$(python -c "import json;from pathlib import Path;p=Path('apps/mimmi-gallery/stored-albums.json');d=json.loads(p.read_text());print(sum(len(a.get('images',[])) for a in d['albums']))")
-            python apps/mimmi-gallery/publish_stored_public.py --limit 250 --budget-mb 90 --authorized-public-rehost
+            python apps/mimmi-gallery/publish_stored_public.py --limit 250 --budget-mb 50 --authorized-public-rehost
             after=$(python -c "import json;from pathlib import Path;p=Path('apps/mimmi-gallery/stored-albums.json');d=json.loads(p.read_text());print(sum(len(a.get('images',[])) for a in d['albums']))")
             echo "MIMMI_REAL_ARCHIVE_BATCH=$pass PHYSICAL_FILES=$after NEW=$((after-before))"
             if [[ "$after" -le "$before" ]]; then

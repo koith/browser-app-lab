@@ -24,8 +24,9 @@ FILES=[
   ("gumroad_promo","gumroad-public-previews.json"),
   ("pixibb_public","pixibb-public-previews.json"),
   ("official_social","social-public-previews.json"),
+  ("xiutu_public","xiutu-public-previews.json"),
 ]
-ALLOWED={"pbs.twimg.com","djawaphoto.com","www.djawaphoto.com","cdn.v2ph.com","public-files.gumroad.com","assets.gumroad.com","static-2.gumroad.com","cosplay.pixibb.com"}
+ALLOWED={"xiutu.me","www.xiutu.me","img-jp-a.cdnimg.vip","pbs.twimg.com","djawaphoto.com","www.djawaphoto.com","cdn.v2ph.com","public-files.gumroad.com","assets.gumroad.com","static-2.gumroad.com","cosplay.pixibb.com"}
 MODEL_VERSION="v0.1.0-mimmi.8"
 
 def canonical_title(title):
@@ -57,17 +58,18 @@ def url_allowed(url):
     try:
         p=urlsplit(url)
         host=p.hostname or ""
-        return p.scheme=="https" and not p.username and not p.password and (host in ALLOWED or bool(re.fullmatch(r"imgx\d{2,4}\.pixibb\.com|images\d{1,4}\.pixibb\.com|(?:cdn|img|files)\.pixibb\.com",host)))
+        return p.scheme=="https" and not p.username and not p.password and (host in ALLOWED or host.endswith(".xiutu.me") or bool(re.fullmatch(r"imgx\d{2,4}\.pixibb\.com|images\d{1,4}\.pixibb\.com|(?:cdn|img|files)\.pixibb\.com",host)))
     except (ValueError,TypeError):return False
 
 def build(root=ROOT):
     groups={}
     seen_hashes=set()
+    photo_by_hash={}
     collisions=Counter()
     input_count=0
     for kind,filename in FILES:
         source_file=root/filename
-        if not source_file.exists() and kind in ("gumroad_promo","pixibb_public","official_social"):
+        if not source_file.exists() and kind in ("gumroad_promo","pixibb_public","official_social","xiutu_public"):
             continue
         source=json.loads(source_file.read_text(encoding="utf-8"))
         for record in source["albums"]:
@@ -102,16 +104,27 @@ def build(root=ROOT):
                 if not re.fullmatch(r"[0-9a-f]{64}",digest) or not url_allowed(p.get("url")):
                     collisions["invalid"]+=1;continue
                 if digest in seen_hashes:
-                    collisions["sha256_duplicate"]+=1;continue
+                    # SHA identity proves that alternate independently verified
+                    # source URLs serve the EXACT SAME photo bytes.
+                    # Keep them as download failover, never fake extra photos.
+                    previous=photo_by_hash[digest]
+                    u=p["url"]
+                    if u!=previous["url"] and u not in previous["alternate_source_urls"]:
+                        previous["alternate_source_urls"].append(u)
+                    collisions["sha256_duplicate"]+=1
+                    continue
                 if not isinstance(p.get("bytes"),int) or p["bytes"]<4500 or min(p.get("width",0),p.get("height",0))<250:
                     collisions["invalid_image_evidence"]+=1;continue
                 seen_hashes.add(digest)
-                g["images"].append({
+                image={
                     "number":len(g["images"])+1,"url":p["url"],"source_url":p["url"],
                     "sha256":digest,"width":p["width"],"height":p["height"],
                     "bytes":p["bytes"],"quality":"official_public_sample" if kind in ("official","gumroad_promo") else "third_party_public_watermarked_web" if kind=="pixibb_public" else "third_party_public_web",
                     "publisher_original_verified":False,
-                })
+                    "alternate_source_urls":[],
+                }
+                g["images"].append(image)
+                photo_by_hash[digest]=image
     albums=[]
     for group in groups.values():
         if not group["images"]:continue
@@ -135,6 +148,7 @@ def build(root=ROOT):
         "summary":{"displayed_albums":len(albums),"verified_unique_source_images":count,
                    "input_source_image_occurrences":input_count,
                    "duplicate_hashes_skipped":collisions["sha256_duplicate"],
+                   "photos_with_alternative_public_source":sum(bool(p["alternate_source_urls"]) for g in albums for p in g["images"]),
                    "actual_full_publisher_photobooks":0,
                    "incomplete_known_count_albums":sum(a["expected"] is not None and len(a["images"])<a["expected"] for a in albums)},
         "albums":albums,
