@@ -6,19 +6,46 @@
   "version": "v0.1.0-mimmi.4",
   "albums": [
     {
-      "id": "v2ph-actor-z4xoo5nz",
-      "title": "[CreamSoda] Mimmi (ミップ) - Vol.5 Mash Mimmi 2",
+      "id": "v2ph-actor-a9nxx64z",
+      "title": "[AI Enhanced] DJAWA Photo - Mimmi (밈미) - Nikke Elegg",
+      "publisher": "DJAWA",
+      "source": "https://www.v2ph.com/album/a9nxx64z.html",
+      "expected": null,
+      "photos": null,
+      "ai_enhanced": true
+    },
+    {
+      "id": "v2ph-actor-zo799eez",
+      "title": "[AI Enhanced] DJAWA Photo - Mimmi (밈미) My Summer Vacation Vol.5",
+      "publisher": "DJAWA",
+      "source": "https://www.v2ph.com/album/zo799eez.html",
+      "expected": null,
+      "photos": null,
+      "ai_enhanced": true
+    },
+    {
+      "id": "v2ph-actor-a884435a",
+      "title": "[CreamSoda] Mimmi (デプワ) - Vol.4 Chic Nerd & Maness Nurse",
       "publisher": "CreamSoda",
-      "source": "https://www.v2ph.com/album/z4xoo5nz.html",
+      "source": "https://www.v2ph.com/album/a884435a.html",
       "expected": null,
       "photos": null,
       "ai_enhanced": false
     },
     {
-      "id": "v2ph-actor-ae57484a",
-      "title": "[CreamSoda] Mimmi --Belt choker Photograph",
+      "id": "v2ph-actor-a5e78m5a",
+      "title": "[CreamSoda] Mimmi (デプワ) Vol.2 Neko Mimmi",
       "publisher": "CreamSoda",
-      "source": "https://www.v2ph.com/album/ae57484a.html",
+      "source": "https://www.v2ph.com/album/a5e78m5a.html",
+      "expected": null,
+      "photos": null,
+      "ai_enhanced": false
+    },
+    {
+      "id": "v2ph-actor-a8847m5a",
+      "title": "[CreamSoda] Mimmi (デプワ) Vol.3 Mashu Mimmi",
+      "publisher": "CreamSoda",
+      "source": "https://www.v2ph.com/album/a8847m5a.html",
       "expected": null,
       "photos": null,
       "ai_enhanced": false
@@ -55,15 +82,6 @@
       "title": "Christmas Special 2021 : Mimmi",
       "publisher": "DJAWA",
       "source": "https://djawaphoto.com/portfolio/christmas-special-2021-mimmi/",
-      "expected": null,
-      "photos": null,
-      "ai_enhanced": false
-    },
-    {
-      "id": "v2ph-actor-a8856noa",
-      "title": "Christmas Special 2022 (Super Sonico)",
-      "publisher": "DJAWA",
-      "source": "https://www.v2ph.com/album/a8856noa.html",
       "expected": null,
       "photos": null,
       "ai_enhanced": false
@@ -204,91 +222,46 @@
       "ai_enhanced": false
     },
     {
-      "id": "v2ph-actor-a8n96x7a",
-      "title": "Maruemon & Mimmi - Maid Mansion W²",
+      "id": "v2ph-actor-amno754z",
+      "title": "Mimmi - Kitsune Miko Ver B",
       "publisher": "DJAWA",
-      "source": "https://www.v2ph.com/album/a8n96x7a.html",
+      "source": "https://www.v2ph.com/album/amno754z.html",
       "expected": null,
       "photos": null,
       "ai_enhanced": false
     },
     {
-      "id": "v2ph-actor-z4x6o3nz",
-      "title": "Mimi - Nikke Alice",
+      "id": "v2ph-actor-am8o3e7z",
+      "title": "Mimmi - Mimmi (Mimmissu17)– NO.042 Nicole (Zenless Zone Zero)",
       "publisher": "DJAWA",
-      "source": "https://www.v2ph.com/album/z4x6o3nz.html",
+      "source": "https://www.v2ph.com/album/am8o3e7z.html",
       "expected": null,
       "photos": null,
       "ai_enhanced": false
     },
     {
-      "id": "v2ph-actor-a54385nz",
-      "title": "Mimmi (English) - Rudy Codename Wolfgirl",
+      "id": "v2ph-actor-amn8o34z",
+      "title": "Mimmi - The Pet",
       "publisher": "DJAWA",
-      "source": "https://www.v2ph.com/album/a54385nz.html",
+      "source": "https://www.v2ph.com/album/amn8o34z.html",
       "expected": null,
       "photos": null,
       "ai_enhanced": false
     },
     {
-      "id": "v2ph-actor-z7e396nz",
-      "title": "Mimmi (Language) - Rudy2 Codename Wolfgirl",
+      "id": "v2ph-actor-z7exoo5z",
+      "title": "Mimmi - White",
       "publisher": "DJAWA",
-      "source": "https://www.v2ph.com/album/z7e396nz.html",
+      "source": "https://www.v2ph.com/album/z7exoo5z.html",
       "expected": null,
       "photos": null,
       "ai_enhanced": false
     },
     {
-      "id": "v2ph-actor-a8n7me7a",
-      "title": "Mimmi - Azur Lane IJN Atago & Takao",
-      "publisher": "DJAWA",
-      "source": "https://www.v2ph.com/album/a8n7me7a.html",
-      "expected": null,
-      "photos": null,
-      "ai_enhanced": false
-    },
-    {
-      "id": "v2ph-actor-zo5n754z",
-      "title": "Mimmi - Knotting Class #2",
-      "publisher": "DJAWA",
-      "source": "https://www.v2ph.com/album/zo5n754z.html",
-      "expected": null,
-      "photos": null,
-      "ai_enhanced": false
-    },
-    {
-      "id": "v2ph-actor-z63984ma",
-      "title": "Mimmi - St. Esther",
-      "publisher": "DJAWA",
-      "source": "https://www.v2ph.com/album/z63984ma.html",
-      "expected": null,
-      "photos": null,
-      "ai_enhanced": false
-    },
-    {
-      "id": "v2ph-actor-a5eenena",
-      "title": "Mimmi - Your Fish Gawr Gura",
-      "publisher": "DJAWA",
-      "source": "https://www.v2ph.com/album/a5eenena.html",
-      "expected": null,
-      "photos": null,
-      "ai_enhanced": false
-    },
-    {
-      "id": "v2ph-actor-a8n8n85a",
-      "title": "Mimmi --Mochilero en Violeta Photograph",
-      "publisher": "DJAWA",
-      "source": "https://www.v2ph.com/album/a8n8n85a.html",
-      "expected": null,
-      "photos": null,
-      "ai_enhanced": false
-    },
-    {
-      "id": "v2ph-actor-an65656a",
-      "title": "Mimmi-The Pet Girl Photo Set",
-      "publisher": "DJAWA",
-      "source": "https://www.v2ph.com/album/an65656a.html",
+      "id": "v2ph-actor-a584e85z",
+      "title": "Mimmi(ミップ) – [CreamSoda] Mimmi - Mashu Mimmi 2",
+      "publisher": "CreamSoda",
+      "source": "https://www.v2ph.com/album/a584e85z.html",
       "expected": null,
       "photos": null,
       "ai_enhanced": false
@@ -375,15 +348,6 @@
       "ai_enhanced": false
     },
     {
-      "id": "v2ph-actor-z76xe74a",
-      "title": "Realise Loveliness",
-      "publisher": "DJAWA",
-      "source": "https://www.v2ph.com/album/z76xe74a.html",
-      "expected": null,
-      "photos": null,
-      "ai_enhanced": false
-    },
-    {
       "id": "djawa-rei-beyond-the-heart",
       "title": "Rei, Beyond the Heart",
       "publisher": "DJAWA",
@@ -438,6 +402,24 @@
       "ai_enhanced": false
     },
     {
+      "id": "v2ph-actor-z6exx6ma",
+      "title": "Vol.2 - My small bird",
+      "publisher": "DJAWA",
+      "source": "https://www.v2ph.com/album/z6exx6ma.html",
+      "expected": null,
+      "photos": null,
+      "ai_enhanced": false
+    },
+    {
+      "id": "v2ph-actor-z4ox65ea",
+      "title": "x Innocent - Part 2Mimmi (미미) x Innocent - Part 2",
+      "publisher": "DJAWA",
+      "source": "https://www.v2ph.com/album/z4ox65ea.html",
+      "expected": null,
+      "photos": null,
+      "ai_enhanced": false
+    },
+    {
       "id": "djawa-your-fishe-gawr-gura",
       "title": "Your Fishe (Gawr Gura)",
       "publisher": "DJAWA",
@@ -457,10 +439,10 @@
     }
   ],
   "summary": {
-    "displayed_albums": 50,
-    "verified_unique_source_images": 432,
-    "input_source_image_occurrences": 452,
-    "duplicate_hashes_skipped": 20,
+    "displayed_albums": 48,
+    "verified_unique_source_images": 392,
+    "input_source_image_occurrences": 402,
+    "duplicate_hashes_skipped": 10,
     "actual_full_publisher_photobooks": 0,
     "incomplete_known_count_albums": 22
   },
