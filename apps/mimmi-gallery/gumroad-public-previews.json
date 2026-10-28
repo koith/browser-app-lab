@@ -1,0 +1,694 @@
+{
+  "schema_version": 1,
+  "model": "mimmi",
+  "generated_at": "2026-10-28T17:02:03.638788+00:00",
+  "source": "only public DJAWA-linked Gumroad promo HTML, never paid files",
+  "summary": {
+    "albums_checked": 32,
+    "promotional_image_urls_verified": 21,
+    "fresh_promotional_urls_verified": 21,
+    "private_cloud_saved": 0
+  },
+  "albums": [
+    {
+      "id": "djawa-in-the-summer-sunshine-part-2",
+      "title": "In the summer sunshine (part 2)",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/in-the-summer-sunshine-part-2/",
+      "product_urls": [
+        "https://djawaphoto.gumroad.com/l/inthesummersunshine2"
+      ],
+      "samples": [
+        {
+          "url": "https://public-files.gumroad.com/2t2cytfxwin42c5lzv8jdtdyog2m",
+          "width": 1005,
+          "height": 1005,
+          "bytes": 18604,
+          "sha256": "2835a3c5f15bc2f435a8a911c3cae87cde4e9aa3a3f8efa5937ddc3be38c1bd9",
+          "source_kind": "public_publisher_promo",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "images": [],
+      "fresh_http_verified": 1,
+      "errors": [],
+      "status": "verified_public_promo_only"
+    },
+    {
+      "id": "djawa-in-the-summer-sunshine-part-1",
+      "title": "In the summer sunshine (part 1)",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/in-the-summer-sunshine-part-1/",
+      "product_urls": [
+        "https://djawaphoto.gumroad.com/l/inthesummersunshine1"
+      ],
+      "samples": [
+        {
+          "url": "https://public-files.gumroad.com/5jmb92ro8sn8xeqqcbx1911dwbp4",
+          "width": 1005,
+          "height": 1005,
+          "bytes": 193109,
+          "sha256": "fc3937978bdbde729b94d5720c53b061c047c09851ae1b5d3301a67edef65276",
+          "source_kind": "public_publisher_promo",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "images": [],
+      "fresh_http_verified": 1,
+      "errors": [],
+      "status": "verified_public_promo_only"
+    },
+    {
+      "id": "djawa-blossom-reverie",
+      "title": "Blossom Reverie",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/blossom-reverie/",
+      "product_urls": [
+        "https://djawaphoto.gumroad.com/l/blossomreverie"
+      ],
+      "samples": [
+        {
+          "url": "https://public-files.gumroad.com/6c3u4znaeo1crtmsd4rmj2xrjc8b",
+          "width": 1005,
+          "height": 1340,
+          "bytes": 627780,
+          "sha256": "30c16f6f26f77d4600c85759c370e5b8652810830de65ded9cdeaea69e0b62d0",
+          "source_kind": "public_publisher_promo",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "images": [],
+      "fresh_http_verified": 1,
+      "errors": [],
+      "status": "verified_public_promo_only"
+    },
+    {
+      "id": "djawa-christmas-special-2025-mimmi-the-christmas-witch",
+      "title": "Christmas Special 2025 : Mimmi – The Christmas Witch",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/christmas-special-2025-mimmi-the-christmas-witch/",
+      "product_urls": [
+        "https://djawaphoto.gumroad.com/l/xmasspecial2025mimmi"
+      ],
+      "samples": [
+        {
+          "url": "https://public-files.gumroad.com/h9gvlhakifymziyibzykyubx4e22",
+          "width": 1005,
+          "height": 1005,
+          "bytes": 169265,
+          "sha256": "be1f13845b7eab8e1e57ce10f60fe11d3cdaaaba7a081864251bc6f248ce7584",
+          "source_kind": "public_publisher_promo",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "images": [],
+      "fresh_http_verified": 1,
+      "errors": [],
+      "status": "verified_public_promo_only"
+    },
+    {
+      "id": "djawa-asuna-the-maid",
+      "title": "Asuna the Maid",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/asuna-the-maid/",
+      "product_urls": [
+        "https://djawaphoto.gumroad.com/l/asunathemaid"
+      ],
+      "samples": [
+        {
+          "url": "https://public-files.gumroad.com/kid7v7lchzdecjxhxigzwjlavant",
+          "width": 1005,
+          "height": 1005,
+          "bytes": 24768,
+          "sha256": "15be6679a76b69a2c965e8a575a12b2668f9ed166f4a6afbd273655af01cf47b",
+          "source_kind": "public_publisher_promo",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "images": [],
+      "fresh_http_verified": 1,
+      "errors": [],
+      "status": "verified_public_promo_only"
+    },
+    {
+      "id": "djawa-nikke-elegg",
+      "title": "Nikke : Elegg",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/nikke-elegg/",
+      "product_urls": [
+        "https://djawaphoto.gumroad.com/l/nikkeelegg"
+      ],
+      "samples": [
+        {
+          "url": "https://public-files.gumroad.com/plc0rioiugkkum6a5caq4c1rlstq",
+          "width": 1005,
+          "height": 1005,
+          "bytes": 206433,
+          "sha256": "6ea4ca4c1f49447f0a5d2f1e1982bf792de42eaae9ca2a13acaf1c65d9a96137",
+          "source_kind": "public_publisher_promo",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "images": [],
+      "fresh_http_verified": 1,
+      "errors": [],
+      "status": "verified_public_promo_only"
+    },
+    {
+      "id": "djawa-my-summer-vacation-vol-5",
+      "title": "My Summer Vacation Vol. 5",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/my-summer-vacation-vol-5/",
+      "product_urls": [
+        "https://djawaphoto.gumroad.com/l/mysummervacationvol5"
+      ],
+      "samples": [
+        {
+          "url": "https://public-files.gumroad.com/fj0kuefvaft6bu3o4m0oo52iq9uw",
+          "width": 1005,
+          "height": 1005,
+          "bytes": 14258,
+          "sha256": "d88b4f975f485bb6fb5f3a90d1b9769f429db1d40d4951ef6b93351cf33f7448",
+          "source_kind": "public_publisher_promo",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "images": [],
+      "fresh_http_verified": 1,
+      "errors": [],
+      "status": "verified_public_promo_only"
+    },
+    {
+      "id": "djawa-christmas-special-2024-mimmi-santa-on-the-street",
+      "title": "Christmas Special 2024 : Mimmi – Santa on the Street",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/christmas-special-2024-mimmi-santa-on-the-street/",
+      "product_urls": [
+        "https://djawaphoto.gumroad.com/l/xmasspecial2024mimmi"
+      ],
+      "samples": [
+        {
+          "url": "https://public-files.gumroad.com/s0kvpszyrw78avcl1ngij03y872r",
+          "width": 1005,
+          "height": 1005,
+          "bytes": 293362,
+          "sha256": "388e6f6984216c584446c10413fff7852e629def154c53a02ce4ade547eee2ef",
+          "source_kind": "public_publisher_promo",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "images": [],
+      "fresh_http_verified": 1,
+      "errors": [],
+      "status": "verified_public_promo_only"
+    },
+    {
+      "id": "djawa-rei-beyond-the-heart",
+      "title": "Rei, Beyond the Heart",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/rei-beyond-the-heart/",
+      "product_urls": [
+        "https://djawaphoto.gumroad.com/l/reibeyondtheheart"
+      ],
+      "samples": [
+        {
+          "url": "https://public-files.gumroad.com/7lo3n52jy8vkov5ehs4qxztbvkwb",
+          "width": 1005,
+          "height": 1005,
+          "bytes": 194381,
+          "sha256": "cf9d86c2edae9f512fa0b75910affb364d1c1aaa1a81740eb3ec931fa06bdc3b",
+          "source_kind": "public_publisher_promo",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "images": [],
+      "fresh_http_verified": 1,
+      "errors": [],
+      "status": "verified_public_promo_only"
+    },
+    {
+      "id": "djawa-le-malin-listless-lapin",
+      "title": "Le Malin – Listless Lapin",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/le-malin-listless-lapin/",
+      "product_urls": [
+        "https://djawaphoto.gumroad.com/l/lemalinlistlesslapin"
+      ],
+      "samples": [
+        {
+          "url": "https://public-files.gumroad.com/bx4j2gnbx3y3a262dxjwef3bfm8k",
+          "width": 1005,
+          "height": 1005,
+          "bytes": 154181,
+          "sha256": "1573ae8267d83fb4c9163c74bcfddc3072929f1726679a2ca791e6b5603cb0ca",
+          "source_kind": "public_publisher_promo",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "images": [],
+      "fresh_http_verified": 1,
+      "errors": [],
+      "status": "verified_public_promo_only"
+    },
+    {
+      "id": "djawa-my-summer-vacation-vol-4",
+      "title": "My Summer Vacation Vol. 4",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/my-summer-vacation-vol-4/",
+      "product_urls": [
+        "https://djawaphoto.gumroad.com/l/mysummervacationvol4"
+      ],
+      "samples": [
+        {
+          "url": "https://public-files.gumroad.com/8lxbmfys4wwfwfpvghk2af4mrl9z",
+          "width": 1005,
+          "height": 1005,
+          "bytes": 188538,
+          "sha256": "135267ab10b471934f2beb4212edde79dbb84a9166153a4412766d00dcad0e79",
+          "source_kind": "public_publisher_promo",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "images": [],
+      "fresh_http_verified": 1,
+      "errors": [],
+      "status": "verified_public_promo_only"
+    },
+    {
+      "id": "djawa-my-summer-vacation-vol-3",
+      "title": "My Summer Vacation Vol. 3",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/my-summer-vacation-vol-3/",
+      "product_urls": [
+        "https://djawaphoto.gumroad.com/l/mysummervacationvol3"
+      ],
+      "samples": [
+        {
+          "url": "https://public-files.gumroad.com/clzkjgn3nod8ki4p331nw97scuug",
+          "width": 1005,
+          "height": 1005,
+          "bytes": 134506,
+          "sha256": "d06abd3d83a07ef6a8aaa90028ce7a08776b725830d09a3068b075678363c181",
+          "source_kind": "public_publisher_promo",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "images": [],
+      "fresh_http_verified": 1,
+      "errors": [],
+      "status": "verified_public_promo_only"
+    },
+    {
+      "id": "djawa-retrospection",
+      "title": "Retrospection",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/retrospection/",
+      "product_urls": [
+        "https://djawaphoto.gumroad.com/l/retrospection"
+      ],
+      "samples": [
+        {
+          "url": "https://public-files.gumroad.com/ek1doag571m1abvaswkq74n2da5g",
+          "width": 1005,
+          "height": 1005,
+          "bytes": 78051,
+          "sha256": "2b621e54d1012c6b6a5ed34a163c165e89e0487c9fbaa19c4090c5a96a982850",
+          "source_kind": "public_publisher_promo",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "images": [],
+      "fresh_http_verified": 1,
+      "errors": [],
+      "status": "verified_public_promo_only"
+    },
+    {
+      "id": "djawa-christmas-special-2023-mimmi",
+      "title": "Christmas Special 2023 : Mimmi",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/christmas-special-2023-mimmi/",
+      "product_urls": [
+        "https://djawaphoto.gumroad.com/l/xmasspecial2023mimmi"
+      ],
+      "samples": [
+        {
+          "url": "https://public-files.gumroad.com/ku2iblicx5bibpetcwtfn38i2x4n",
+          "width": 1005,
+          "height": 1005,
+          "bytes": 225361,
+          "sha256": "8072d2db4ecc4b16e9c573a02dfbc655f0e30c745e6575536dc0681cb012c39f",
+          "source_kind": "public_publisher_promo",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "images": [],
+      "fresh_http_verified": 1,
+      "errors": [],
+      "status": "verified_public_promo_only"
+    },
+    {
+      "id": "djawa-janus-scary-lantern-night-vol-2",
+      "title": "Janus : Scary Lantern Night Vol. 2",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/janus-scary-lantern-night-vol-2/",
+      "product_urls": [
+        "https://djawaphoto.gumroad.com/l/scarylanternnightvol2"
+      ],
+      "samples": [
+        {
+          "url": "https://public-files.gumroad.com/9b951rv11cubq2e46g78cfc4k7nf",
+          "width": 1005,
+          "height": 1005,
+          "bytes": 279545,
+          "sha256": "686aa1e1d7c5a9ebe9c5efc45fc67230e6dc4204ae1b34494804d283ba2a86c1",
+          "source_kind": "public_publisher_promo",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "images": [],
+      "fresh_http_verified": 1,
+      "errors": [],
+      "status": "verified_public_promo_only"
+    },
+    {
+      "id": "djawa-janus-scary-lantern-night",
+      "title": "Janus : Scary Lantern Night",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/janus-scary-lantern-night/",
+      "product_urls": [
+        "https://djawaphoto.gumroad.com/l/scarylanternnight"
+      ],
+      "samples": [
+        {
+          "url": "https://public-files.gumroad.com/wb1wzd9or6isk2q3ur2chy6lsklo",
+          "width": 1005,
+          "height": 1005,
+          "bytes": 281343,
+          "sha256": "c88e7ebe5f8549b7eb7e1f5ca37b2549d3d746b5c1ead96cd4be56281a677ebb",
+          "source_kind": "public_publisher_promo",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "images": [],
+      "fresh_http_verified": 1,
+      "errors": [],
+      "status": "verified_public_promo_only"
+    },
+    {
+      "id": "djawa-maid-for-mayhem",
+      "title": "Maid for Mayhem",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/maid-for-mayhem/",
+      "product_urls": [
+        "https://djawaphoto.gumroad.com/l/maidformayhem"
+      ],
+      "samples": [
+        {
+          "url": "https://public-files.gumroad.com/i4jei0qbr3l6dy6pj8d3qzqn74pc",
+          "width": 1005,
+          "height": 1005,
+          "bytes": 182632,
+          "sha256": "65b12be95281994ba034384ac1f0c69370e9404f685ebb7df690c97301562f1b",
+          "source_kind": "public_publisher_promo",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "images": [],
+      "fresh_http_verified": 1,
+      "errors": [],
+      "status": "verified_public_promo_only"
+    },
+    {
+      "id": "djawa-my-summer-vacation-vol-2",
+      "title": "My Summer Vacation Vol. 2",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/my-summer-vacation-vol-2/",
+      "product_urls": [
+        "https://djawaphoto.gumroad.com/l/mysummervacationvol2"
+      ],
+      "samples": [
+        {
+          "url": "https://public-files.gumroad.com/4zc7k1euqhhfxh1dstrjqyviz808",
+          "width": 1005,
+          "height": 1005,
+          "bytes": 200207,
+          "sha256": "089d165e9b82d89bbc3e9157a927de045bce04528f13c35e6a67307bb25d8712",
+          "source_kind": "public_publisher_promo",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "images": [],
+      "fresh_http_verified": 1,
+      "errors": [],
+      "status": "verified_public_promo_only"
+    },
+    {
+      "id": "djawa-my-summer-vacation",
+      "title": "My Summer Vacation",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/my-summer-vacation/",
+      "product_urls": [
+        "https://djawaphoto.gumroad.com/l/mysummervacation"
+      ],
+      "samples": [
+        {
+          "url": "https://public-files.gumroad.com/tphm1pli1wf43s3eyu063vpovz27",
+          "width": 1005,
+          "height": 1005,
+          "bytes": 173710,
+          "sha256": "3668ec9231ac874d0b6ede4b033db7f1450c7d37a4c396e2a66c824d4cd8a69c",
+          "source_kind": "public_publisher_promo",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "images": [],
+      "fresh_http_verified": 1,
+      "errors": [],
+      "status": "verified_public_promo_only"
+    },
+    {
+      "id": "djawa-nikke-yuni",
+      "title": "Nikke : Yuni",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/nikke-yuni/",
+      "product_urls": [
+        "https://djawaphoto.gumroad.com/l/nikkeyuni"
+      ],
+      "samples": [
+        {
+          "url": "https://public-files.gumroad.com/oua4bj5fpektlvzbs1xi4dd9aoob",
+          "width": 1005,
+          "height": 1005,
+          "bytes": 198914,
+          "sha256": "91e534d5619ead0a1fbd8742314b0a82a43ef5b79a82a77f426130485a6c3738",
+          "source_kind": "public_publisher_promo",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "images": [],
+      "fresh_http_verified": 1,
+      "errors": [],
+      "status": "verified_public_promo_only"
+    },
+    {
+      "id": "djawa-pop-kitty-party",
+      "title": "Pop Kitty Party",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/pop-kitty-party/",
+      "product_urls": [
+        "https://djawaphoto.gumroad.com/l/popkittyparty"
+      ],
+      "samples": [],
+      "images": [],
+      "fresh_http_verified": 0,
+      "errors": [
+        "HTTPError"
+      ],
+      "status": "no_public_promo_photo"
+    },
+    {
+      "id": "djawa-full-bloom-yamashiiro",
+      "title": "Full Bloom Yamashiiro",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/full-bloom-yamashiiro/",
+      "product_urls": [
+        "https://djawaphoto.gumroad.com/l/bxafrmimmi"
+      ],
+      "samples": [],
+      "images": [],
+      "fresh_http_verified": 0,
+      "errors": [
+        "HTTPError"
+      ],
+      "status": "no_public_promo_photo"
+    },
+    {
+      "id": "djawa-your-fishe-gawr-gura",
+      "title": "Your Fishe (Gawr Gura)",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/your-fishe-gawr-gura/",
+      "product_urls": [
+        "https://djawaphoto.gumroad.com/l/heupqjmimmi"
+      ],
+      "samples": [],
+      "images": [],
+      "fresh_http_verified": 0,
+      "errors": [
+        "HTTPError"
+      ],
+      "status": "no_public_promo_photo"
+    },
+    {
+      "id": "djawa-your-panties",
+      "title": "Your Panties.",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/your-panties/",
+      "product_urls": [
+        "https://djawaphoto.gumroad.com/l/zqbqjitzmimmi"
+      ],
+      "samples": [],
+      "images": [],
+      "fresh_http_verified": 0,
+      "errors": [
+        "HTTPError"
+      ],
+      "status": "no_public_promo_photo"
+    },
+    {
+      "id": "djawa-nikke-alice",
+      "title": "Nikke : Alice",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/nikke-alice/",
+      "product_urls": [
+        "https://djawaphoto.gumroad.com/l/vyuhl"
+      ],
+      "samples": [],
+      "images": [],
+      "fresh_http_verified": 0,
+      "errors": [
+        "HTTPError"
+      ],
+      "status": "no_public_promo_photo"
+    },
+    {
+      "id": "djawa-holstein-jobs",
+      "title": "Holstein Jobs",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/holstein-jobs/",
+      "product_urls": [
+        "https://djawaphoto.gumroad.com/l/iaowe"
+      ],
+      "samples": [],
+      "images": [],
+      "fresh_http_verified": 0,
+      "errors": [
+        "HTTPError"
+      ],
+      "status": "no_public_promo_photo"
+    },
+    {
+      "id": "djawa-grin-and-fire",
+      "title": "Grin and Fire!",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/grin-and-fire/",
+      "product_urls": [
+        "https://djawaphoto.gumroad.com/l/snozj"
+      ],
+      "samples": [],
+      "images": [],
+      "fresh_http_verified": 0,
+      "errors": [
+        "HTTPError"
+      ],
+      "status": "no_public_promo_photo"
+    },
+    {
+      "id": "djawa-twin-bunnies-affair",
+      "title": "Twin Bunnies Affair",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/twin-bunnies-affair/",
+      "product_urls": [
+        "https://djawaphoto.gumroad.com/l/yxvwh"
+      ],
+      "samples": [
+        {
+          "url": "https://public-files.gumroad.com/84x7t9hwmqi8jp0qh3tw440ryifl",
+          "width": 1005,
+          "height": 1005,
+          "bytes": 208018,
+          "sha256": "4d71daeebfa6db286a4c8b8b11d3d4296a53110b3cec1d8fc4d2b0fe0b4f2d89",
+          "source_kind": "public_publisher_promo",
+          "saved_to_private_cloud": false
+        }
+      ],
+      "images": [],
+      "fresh_http_verified": 1,
+      "errors": [],
+      "status": "verified_public_promo_only"
+    },
+    {
+      "id": "djawa-mademoiselle-mimmi",
+      "title": "Mademoiselle Mimmi",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/mademoiselle-mimmi/",
+      "product_urls": [
+        "https://djawaphoto.gumroad.com/l/sgoel"
+      ],
+      "samples": [],
+      "images": [],
+      "fresh_http_verified": 0,
+      "errors": [
+        "HTTPError"
+      ],
+      "status": "no_public_promo_photo"
+    },
+    {
+      "id": "djawa-rudy%c2%b2-codename-wolfgirl",
+      "title": "Rudy² – Codename : Wolfgirl",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/rudy%c2%b2-codename-wolfgirl/",
+      "product_urls": [
+        "https://djawaphoto.gumroad.com/l/gvddv"
+      ],
+      "samples": [],
+      "images": [],
+      "fresh_http_verified": 0,
+      "errors": [
+        "HTTPError"
+      ],
+      "status": "no_public_promo_photo"
+    },
+    {
+      "id": "djawa-christmas-special-2021-mimmi",
+      "title": "Christmas Special 2021 : Mimmi",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/christmas-special-2021-mimmi/",
+      "product_urls": [
+        "https://djawaphoto.gumroad.com/l/gfqtt"
+      ],
+      "samples": [],
+      "images": [],
+      "fresh_http_verified": 0,
+      "errors": [
+        "HTTPError"
+      ],
+      "status": "no_public_promo_photo"
+    },
+    {
+      "id": "djawa-rudy-the-wolf-of-midnight",
+      "title": "Rudy : The Wolf of Midnight",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/rudy-the-wolf-of-midnight/",
+      "product_urls": [
+        "https://djawaphoto.gumroad.com/l/KZfEjm"
+      ],
+      "samples": [],
+      "images": [],
+      "fresh_http_verified": 0,
+      "errors": [
+        "HTTPError"
+      ],
+      "status": "no_public_promo_photo"
+    }
+  ]
+}
