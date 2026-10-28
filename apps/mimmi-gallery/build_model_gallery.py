@@ -26,7 +26,7 @@ FILES=[
   ("official_social","social-public-previews.json"),
   ("xiutu_public","xiutu-public-previews.json"),
 ]
-ALLOWED={"xiutu.me","www.xiutu.me","pbs.twimg.com","djawaphoto.com","www.djawaphoto.com","cdn.v2ph.com","public-files.gumroad.com","assets.gumroad.com","static-2.gumroad.com","cosplay.pixibb.com"}
+ALLOWED={"xiutu.me","www.xiutu.me","img-jp-a.cdnimg.vip","pbs.twimg.com","djawaphoto.com","www.djawaphoto.com","cdn.v2ph.com","public-files.gumroad.com","assets.gumroad.com","static-2.gumroad.com","cosplay.pixibb.com"}
 MODEL_VERSION="v0.1.0-mimmi.8"
 
 def canonical_title(title):
