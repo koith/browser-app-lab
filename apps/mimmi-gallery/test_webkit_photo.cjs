@@ -49,7 +49,7 @@ async function probe(page,url,policy){
   const imageWidth=await page.locator('#viewer-image').evaluate(x=>x.naturalWidth);
   if(imageWidth<=100&&!await page.locator('#viewer-error').isVisible())throw Error('Broken image without readable fallback in Safari');
   if(errs.length)throw Error('WebKit app exceptions: '+errs.join(';'));
-  await page.screenshot({path:'mimmi-webkit-v4.png',fullPage:false});
+  await page.screenshot({path:'mimmi-webkit-v5.png',fullPage:false});
   console.log('MIMMI_WEBKIT_MOBILE_QA_PASS',JSON.stringify({imageWidth,firstAlbum:await page.locator('#detail-title').innerText()}));
  }finally{await browser.close()}
 })().catch(e=>{console.error(e.stack||String(e));process.exit(1)});
