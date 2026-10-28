@@ -1333,6 +1333,7 @@
     "verified_unique_source_images": 2280,
     "input_source_image_occurrences": 2310,
     "duplicate_hashes_skipped": 30,
+    "photos_with_alternative_public_source": 10,
     "actual_full_publisher_photobooks": 0,
     "incomplete_known_count_albums": 19,
     "curated_research_works": 52
