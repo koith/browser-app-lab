@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Archive Mimmi's 370 researched-but-unsaved candidate SHA files as PRIVATE byte-verified ZIPs.
+"""Archive Mimmi researched photo positions as PRIVATE SHA-256-verified ZIPs.
 
 Keeps existing committed public saved files intact. No URL is displayed unless its
 unchanged SHA-256-verified bytes have been downloaded and kept persistently.
@@ -43,7 +43,7 @@ def main():
         report = archive(a, folder, workers=args.workers, timeout=14, model="mimmi")
         results.append(report)
     audit = {"generated_at": datetime.now(timezone.utc).isoformat(),
-             "model": "mimmi", "real_files_only": True, "originally_saved_sha": len(existing),
+             "model": "mimmi", "real_files_only": True, "originally_saved_photo_positions": len(existing),
              "researched_missing_photo_positions": researched_missing_positions,
              "batch": args.batch, "batches": args.batches,
              "albums": results,
