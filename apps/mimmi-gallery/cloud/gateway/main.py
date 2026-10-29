@@ -15,6 +15,8 @@ import re
 import os
 import secrets
 import time
+from collections import OrderedDict
+from io import BytesIO
 import jwt
 from pathlib import PurePosixPath
 from typing import AsyncGenerator
@@ -25,7 +27,8 @@ try:
 except ModuleNotFoundError:
     from portal import COOKIE_NAME, install_portal, session_valid
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import JSONResponse, StreamingResponse, Response
+from PIL import Image, ImageOps, UnidentifiedImageError
 
 app = FastAPI(title="Mimmi Private Archive Media Gateway", docs_url=None, redoc_url=None)
 app.add_middleware(
@@ -270,6 +273,120 @@ async def yui_media(album_id: str, image_num: int, kind: str, download: bool = Q
         headers["Content-Disposition"] = f'attachment; filename="{album_id}-{image_num:05d}.{ext}"'
     return StreamingResponse(iter([payload]), media_type=mime, headers=headers)
 
+
+
+
+# Safari album-cover fast path.  An album card never needs a full 4K original:
+# derive a compact 420px WebP from a SHA-verified stored file, keep a bounded
+# in-process LRU, and let the phone reuse its disk cache across refreshes.
+_COVER_LIMIT_BYTES = 24 * 1024 * 1024
+_cover_cache = OrderedDict()
+_cover_cache_size = 0
+_cover_pending = {}
+_cover_lock = asyncio.Lock()
+_cover_workers = asyncio.Semaphore(2)
+Image.MAX_IMAGE_PIXELS = 40_000_000
+
+
+def _encode_cover(data: bytes, original_type: str) -> tuple[bytes, str]:
+    try:
+        with Image.open(BytesIO(data)) as source:
+            if source.width * source.height > Image.MAX_IMAGE_PIXELS:
+                raise ValueError("Source photo too large for cover decoding")
+            if source.format == "JPEG":
+                source.draft("RGB", (420, 560))
+            photo = ImageOps.exif_transpose(source)
+            photo.thumbnail((420, 560), Image.Resampling.LANCZOS)
+            if photo.mode != "RGB":
+                photo = photo.convert("RGB")
+            output = BytesIO()
+            photo.save(output, format="WEBP", quality=68, method=3)
+            return output.getvalue(), "image/webp"
+    except (UnidentifiedImageError, OSError, ValueError, Image.DecompressionBombError):
+        # Preserve the verified existing image if the optional WebP thumbnail
+        # transform cannot decode a particular archived extension.
+        return data, original_type
+
+
+async def _read_cover(model: str, album_id: str, image_num: int,
+                      has_preview: bool) -> tuple[bytes, str]:
+    async with _cover_workers:
+        kind = "preview" if has_preview else "original"
+        response = await (
+            yui_media(album_id, image_num, kind, download=False)
+            if model == "yui" else media(album_id, image_num, kind, download=False)
+        )
+        chunks = []
+        total = 0
+        async for chunk in response.body_iterator:
+            total += len(chunk)
+            if total > 36_000_000:
+                raise HTTPException(status_code=413, detail="Cover source too large")
+            chunks.append(chunk)
+        return await asyncio.to_thread(
+            _encode_cover, b"".join(chunks), response.media_type or "application/octet-stream"
+        )
+
+
+@app.get("/api/cover/{model}/{album_id}/{image_num}")
+async def album_cover(model: str, album_id: str, image_num: int, request: Request):
+    if model not in ("yui", "mimmi") or not re.fullmatch(
+        r"[a-z0-9][a-z0-9-]{1,99}", album_id
+    ) or image_num < 1:
+        raise HTTPException(status_code=404, detail="Unknown stored cover")
+    catalog = await (yui_catalog_bytes() if model == "yui" else get_catalog())
+    album = next((a for a in catalog["albums"] if a.get("id") == album_id), None)
+    photo = next((p for p in album.get("images", [])
+                  if p.get("number") == image_num), None) if album else None
+    if photo is None:
+        raise HTTPException(status_code=404, detail="Unknown stored photo")
+    has_preview = bool(photo.get("preview"))
+    digest = photo.get("preview_sha256" if has_preview else "sha256")
+    if not isinstance(digest, str) or not re.fullmatch(r"[a-f0-9]{64}", digest):
+        raise HTTPException(status_code=502, detail="Invalid stored photo digest")
+    etag = '"cover-v1-' + digest[:32] + '"'
+    cache_headers = {
+        "Cache-Control": "private, max-age=604800, immutable",
+        "ETag": etag,
+        "X-Content-Type-Options": "nosniff",
+    }
+    if request.headers.get("if-none-match") == etag:
+        return Response(status_code=304, headers=cache_headers)
+
+    key = (model, album_id, image_num, digest)
+    async with _cover_lock:
+        hit = _cover_cache.get(key)
+        if hit is not None:
+            _cover_cache.move_to_end(key)
+            task = None
+        else:
+            task = _cover_pending.get(key)
+            if task is None:
+                task = asyncio.create_task(
+                    _read_cover(model, album_id, image_num, has_preview)
+                )
+                _cover_pending[key] = task
+
+    if hit is None:
+        try:
+            hit = await asyncio.shield(task)
+        finally:
+            async with _cover_lock:
+                if _cover_pending.get(key) is task and task.done():
+                    del _cover_pending[key]
+        if len(hit[0]) <= 1_000_000:
+            async with _cover_lock:
+                global _cover_cache_size
+                if key not in _cover_cache:
+                    _cover_cache[key] = hit
+                    _cover_cache_size += len(hit[0])
+                    while _cover_cache_size > _COVER_LIMIT_BYTES:
+                        _, expired = _cover_cache.popitem(last=False)
+                        _cover_cache_size -= len(expired[0])
+    return Response(
+        content=hit[0], media_type=hit[1],
+        headers={**cache_headers, "Content-Length": str(len(hit[0]))}
+    )
 
 
 # A signed GitHub Actions OIDC identity (not a password supplied by visitors)
