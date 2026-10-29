@@ -169,7 +169,7 @@ footer{padding:15px 0 25px;justify-content:flex-end}
 <div id="detail" hidden>
  <div id="detailphotos" class="photo-grid"></div>
 </div>
-<footer><span>밈미 · 이미지 출처 연결과 개인 저장본 구분 · 무압축</span></footer>
+<footer><span>밈미 · 실제 저장된 이미지 파일만 표시</span></footer>
 </div>
 <dialog id="search-dialog" aria-labelledby="search-label">
  <form id="search-form">
@@ -318,7 +318,7 @@ function showViewer(){
    if(generation!==viewerGeneration)return;
    if(retry>=policies.length){
     image.hidden=true;image.removeAttribute('src');
-    status.textContent='이 기기에서는 이미지 서버 연결이 차단되었습니다. 사진 열기 ↗를 통해 사진 주소를 직접 열어 보세요.';
+    status.textContent='저장된 사진을 불러오지 못했습니다. 원본 파일이나 이 기기의 보관본을 확인해 주세요.';
     registerImageHealth(url,false);return;
    }
    image.removeAttribute('src');image.referrerPolicy=policies[retry++];
