@@ -8,7 +8,7 @@ window.YuiPrivate=(()=>{
   if(location.pathname.startsWith('/gallery/'))return {api:location.origin,token:null,cookie:true};
   try{const s=JSON.parse(sessionStorage.getItem('yui-owner-session'));if(!s?.token)return null;const u=new URL(s.api);if(u.username||u.password||u.pathname!=='/'||u.search||u.hash)return null;if(u.protocol!=='https:'&&!(u.protocol==='http:'&&['localhost','127.0.0.1'].includes(u.hostname)))return null;return {api:u.origin,token:s.token}}catch{return null}
  }
- async function request(path){const r=await fetch(session.api+path,{headers:session.token?{Authorization:'Bearer '+session.token}:{},credentials:session.cookie?'same-origin':'omit',cache:'no-store'});if(!r.ok)throw Error('보관소 HTTP '+r.status);return r}
+ async function request(path){const r=await fetch(session.api+path,{headers:session.token?{Authorization:'Bearer '+session.token}:{},credentials:session.cookie?'same-origin':'omit',cache:'default'});if(!r.ok)throw Error('보관소 HTTP '+r.status);return r}
  async function albums(){
   session=readSession();if(!session)return [];
   const d=await (await request('/api/yui/catalog')).json();if(d.schema_version!==1||!Array.isArray(d.albums))throw Error('보관소 목록 형식 오류');
@@ -23,6 +23,10 @@ window.YuiPrivate=(()=>{
  async function asset(p,kind='original'){
   if(!session)session=readSession();
   if(!session)throw Error('보관소 연결 없음');
+  if(kind==='cover'){
+   const version=(p.preview_sha256||p.sha256||'').slice(0,24);
+   return session.api+'/api/cover/yui/'+encodeURIComponent(p.ownerAlbum)+'/'+p.number+'?v='+version;
+  }
   const selected=kind==='preview'&&p.preview?'preview':'original';
   // The server verifies SHA-256 before returning the image. Returning the
   // same-origin URL lets Safari decode and cache it natively without loading
