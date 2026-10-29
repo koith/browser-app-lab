@@ -8,6 +8,7 @@ Render origin, avoiding cross-site cookie restrictions. No import UI is needed.
 from __future__ import annotations
 
 import hashlib
+import time
 import hmac
 import html
 import re
@@ -69,7 +70,15 @@ def secure_headers() -> dict[str, str]:
             "Content-Security-Policy": PORTAL_CSP}
 
 
+_public_asset_cache: dict[tuple[str, str], tuple[float, bytes, str]] = {}
+
 async def public_asset(model: str, asset_path: str) -> tuple[bytes, str]:
+    # The HTML, JS, and metadata are immutable for a short period. Avoid a
+    # GitHub Pages round-trip on every iPhone refresh and album navigation.
+    key = (model, asset_path)
+    cached = _public_asset_cache.get(key)
+    if cached and time.monotonic() - cached[0] < (90 if asset_path.endswith('.json') else 240):
+        return cached[1], cached[2]
     url = f"{SOURCE_BASE}/{model}-gallery/{asset_path}"
     async with httpx.AsyncClient(timeout=25, follow_redirects=False) as client:
         result = await client.get(url, headers={"User-Agent": "ArchiveFirstPartyViewer/1.0"})
@@ -79,6 +88,8 @@ async def public_asset(model: str, asset_path: str) -> tuple[bytes, str]:
         raise HTTPException(status_code=502, detail="Gallery metadata too large")
     content_type = "application/json" if asset_path.endswith(".json") else (
         "application/javascript" if asset_path.endswith(".js") else "text/html")
+    if len(result.content) <= 1_500_000:
+        _public_asset_cache[key] = (time.monotonic(), result.content, content_type)
     return result.content, content_type
 
 
