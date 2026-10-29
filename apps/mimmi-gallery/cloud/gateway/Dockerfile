@@ -12,7 +12,7 @@ RUN curl -fsSL "$RCLONE_EXTRA_URL" -o /tmp/rclone.zip \
   && rm -rf /tmp/rclone*
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
-COPY main.py ./
+COPY main.py portal.py ./
 ENV PYTHONUNBUFFERED=1
 EXPOSE 10000
 CMD ["sh","-c","exec uvicorn main:app --host 0.0.0.0 --port ${PORT:-10000}"]
