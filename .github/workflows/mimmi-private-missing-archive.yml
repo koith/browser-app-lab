@@ -1,5 +1,8 @@
 name: Mimmi Missing SHA Public Photos To Private ZIP Archive
 on:
+  schedule:
+    # Daily actual missing-photo byte sweep even if research index is unchanged.
+    - cron: '36 3,15 * * *'
   push:
     branches: [main]
     paths:
