@@ -185,18 +185,9 @@ footer{padding:15px 0 25px;justify-content:flex-end}
 <script src="publishers.js?v=0.1.0-beta.13"></script>
 <script>
 "use strict";
-// This public backup URL hands off to the owner-only original-file gallery
-// only after the deployed gateway proves it can serve the login route.
-// When private hosting is unavailable, the existing physically saved public
-// gallery remains available; research-only source URLs are never inserted.
+// Open the stored-media viewer directly without requiring a login page.
 if(location.hostname==='koith.github.io'){
- const ownerUrl='https://mimmi-private-gallery-free.onrender.com/gallery/mimmi/';
- fetch(ownerUrl,{credentials:'omit',cache:'no-store',mode:'cors'})
-   .then(async response=>response.ok ? response.text() : '')
-   .then(body=>{
-     if(body.includes('PRIVATE PHOTO ARCHIVE')&&body.includes('name="code"'))
-       location.replace(ownerUrl+location.hash);
-   }).catch(()=>{});
+ location.replace('https://mimmi-private-gallery-free.onrender.com/gallery/mimmi/'+location.hash);
 }
 
 const $=id=>document.getElementById(id);

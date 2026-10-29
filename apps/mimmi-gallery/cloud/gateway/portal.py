@@ -69,30 +69,6 @@ def secure_headers() -> dict[str, str]:
             "Content-Security-Policy": PORTAL_CSP}
 
 
-def login_page(model: str, message: str = "") -> HTMLResponse:
-    label = "심유이" if model == "yui" else "밈미"
-    failure = f'<p class="error" role="alert">{html.escape(message)}</p>' if message else ""
-    body = f"""<!doctype html><html lang="ko"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="robots" content="noindex,nofollow"><title>{label} 갤러리</title>
-<style>
-:root{{font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;color-scheme:dark;background:#101114;color:#f0f1f4}}
-*{{box-sizing:border-box}}body{{margin:0}}main{{max-width:410px;margin:0 auto;padding:clamp(36px,11vh,105px) 22px}}
-small{{font-size:11px;letter-spacing:.17em;color:#90909b}}h1{{font-size:28px;letter-spacing:-.04em;margin:18px 0 9px}}
-p{{color:#a2a3ae;font-size:13px;line-height:1.7}}label{{display:block;margin:32px 0 9px;font-size:13px}}
-input{{width:100%;padding:15px;border:1px solid #4a4a54;background:#1d1d23;border-radius:8px;color:#fff;font-size:16px}}
-button{{background:#e7e7ec;color:#111;border:0;border-radius:8px;padding:14px;width:100%;font-size:15px;font-weight:700;margin-top:16px}}
-.error{{color:#ffc5c5}}
-</style></head><body><main><small>PRIVATE PHOTO ARCHIVE</small><h1>{label} 갤러리</h1>
-<p>보관한 사진은 비공개로 유지됩니다. 최초 인증 후 이 기기에서 자동으로 열립니다.</p>
-<form method="post" action="/gallery/login" autocomplete="off">
-<input name="model" type="hidden" value="{model}">
-<label for="code">개인 갤러리 접근 코드</label>
-<input name="code" id="code" type="password" autocomplete="current-password" required maxlength="2048">
-<button type="submit">갤러리 열기</button></form>{failure}</main></body></html>"""
-    return HTMLResponse(body, headers=secure_headers())
-
-
 async def public_asset(model: str, asset_path: str) -> tuple[bytes, str]:
     url = f"{SOURCE_BASE}/{model}-gallery/{asset_path}"
     async with httpx.AsyncClient(timeout=25, follow_redirects=False) as client:
@@ -107,14 +83,9 @@ async def public_asset(model: str, asset_path: str) -> tuple[bytes, str]:
 
 
 def install_portal(app, *, token_getter, configured, catalog_for_model):
-    def authorized(request: Request) -> bool:
-        return session_valid(token_getter(), request.cookies.get(COOKIE_NAME))
-
     async def serve_gallery(model: str, request: Request):
         if model not in ("yui", "mimmi"):
             raise HTTPException(status_code=404)
-        if not authorized(request):
-            return login_page(model)
         try:
             document, _ = await public_asset(model, "index.html")
         except (httpx.HTTPError, HTTPException):
@@ -140,45 +111,12 @@ def install_portal(app, *, token_getter, configured, catalog_for_model):
             return RedirectResponse("/gallery/mimmi/", status_code=307)
         return await serve_gallery(model,request)
 
-    @app.post("/gallery/login")
-    async def gallery_login(request: Request):
-        payload=await request.body()
-        if len(payload)>4200 or not configured():
-            raise HTTPException(status_code=503,detail="Gallery login unavailable")
-        data=parse_qs(payload.decode("utf-8",errors="replace"),keep_blank_values=False)
-        model=(data.get("model") or [""])[0]
-        code=(data.get("code") or [""])[0]
-        if model not in ("yui","mimmi"):
-            raise HTTPException(status_code=400)
-        if not code or not secrets.compare_digest(code,token_getter()):
-            return login_page(model,"접근 코드를 확인해 주세요.")
-        try:
-            remote=await catalog_for_model(model)
-            if not isinstance(remote.get("albums"),list) or remote.get("model")!=model:
-                raise ValueError("Incorrect model archive")
-        except Exception:
-            return login_page(model,"원본 보관소와 연결되지 않았습니다.")
-        response=RedirectResponse(f"/gallery/{model}/",status_code=303,headers=secure_headers())
-        response.set_cookie(COOKIE_NAME,session_sign(code,int(time.time())+COOKIE_AGE),
-                            httponly=True,secure=True,samesite="lax",path="/",max_age=COOKIE_AGE)
-        return response
-
-    @app.post("/gallery/logout")
-    async def gallery_logout(request: Request):
-        # Avoid other sites forcing a logout.
-        origin=request.headers.get("origin")
-        if origin and origin != str(request.base_url).rstrip("/"):
-            raise HTTPException(status_code=403)
-        r=RedirectResponse("/gallery/",status_code=303,headers=secure_headers())
-        r.delete_cookie(COOKIE_NAME,path="/",secure=True,httponly=True,samesite="lax")
-        return r
-
     @app.get("/gallery/{model}/{asset_path:path}")
     async def gallery_asset(model: str,asset_path: str,request: Request):
         if model in ("yui-gallery","mimmi-gallery"):
             destination=model.split("-")[0]
             return RedirectResponse(f"/gallery/{destination}/{asset_path}",status_code=307)
-        if model not in ("yui","mimmi") or not authorized(request):
+        if model not in ("yui","mimmi"):
             raise HTTPException(status_code=401)
         if asset_path=="index.html":
             return await serve_gallery(model,request)
