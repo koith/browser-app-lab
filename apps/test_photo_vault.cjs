@@ -1,6 +1,21 @@
 /* Smoke actual imported original image bytes in Chromium and iPhone WebKit. */
 'use strict';
 const {chromium,webkit}=require('playwright');
+const {readFileSync}=require('node:fs');
+const {join}=require('node:path');
+// Compute expected physical gallery images from committed evidence; harvest workflows
+// continuously add files, so fixed numbers must never make QA stale.
+function physicalCount(model){
+ const path=join(__dirname,model+'-gallery','stored-albums.json');
+ const data=JSON.parse(readFileSync(path,'utf8'));
+ if(!Array.isArray(data.albums))throw Error('Invalid physical manifest '+model);
+ const images=data.albums.flatMap(a=>a.images||[]);
+ if(!images.every(p=>typeof p.url==='string'&&p.url.startsWith('stored-albums/')&&/^[a-f0-9]{64}$/.test(p.sha256||'')))
+   throw Error('Non-local or unverified image in '+model+' public manifest');
+ return images.length;
+}
+const baselines={yui:physicalCount('yui'),mimmi:physicalCount('mimmi')};
+
 const engineName=process.argv[2]||'chromium';
 const engine={chromium,webkit}[engineName];if(!engine)throw Error('Unknown engine');
 (async()=>{
@@ -38,6 +53,16 @@ const engine={chromium,webkit}[engineName];if(!engine)throw Error('Unknown engin
    const expanded=await page.evaluate(async m=>PhotoVault.albums(m).then(rows=>rows.find(a=>a.id==='vault-fixture-'+m)),model);
    if(!expanded||expanded.images.length!==2||expanded.images[0].number!==1||expanded.images[1].number!==2)
      throw Error('Incremental ZIP overwrote previous photos or collapsed duplicate SHA positions');
+   // The same two numbered photos must survive a compressed Actions wrapper ZIP.
+   // The wrapper has no root manifest and contains two nested private-import ZIPs.
+   await Promise.all([
+     page.waitForEvent('framenavigated',{timeout:25000}),
+     page.locator('#vault-file').setInputFiles('/tmp/photo-vault-qa/'+model+'-actions.zip')
+   ]);
+   await page.waitForFunction(n=>document.querySelector('#inventory')?.textContent?.startsWith(n+'장'),baseline+2,{timeout:15000});
+   const wrapped=await page.evaluate(async m=>PhotoVault.albums(m).then(rows=>rows.find(a=>a.id==='vault-fixture-'+m)),model);
+   if(!wrapped||wrapped.images.length!==2||wrapped.images[0].number!==1||wrapped.images[1].number!==2)
+     throw Error('Actions wrapper ZIP import did not preserve numbered image positions');
    // Reimporting an older partial ZIP must not erase the additional second photo.
    await Promise.all([
      page.waitForEvent('framenavigated',{timeout:25000}),
@@ -49,14 +74,14 @@ const engine={chromium,webkit}[engineName];if(!engine)throw Error('Unknown engin
    await page.waitForFunction(()=>document.querySelector('#vault-status')?.textContent?.includes('가져오기 실패'),{timeout:15000});
    if((await page.locator('#inventory').innerText()).startsWith((baseline+3)+'장'))throw Error('Corrupt ZIP was counted');
   }
-  await open('yui',23);
-  await importOne('yui',23);
-  await open('mimmi',2162);
+  await open('yui',baselines.yui);
+  await importOne('yui',baselines.yui);
+  await open('mimmi',baselines.mimmi);
   if(await page.locator('#albumgrid [data-id="vault-fixture-yui"]').count())throw Error('Cross-model private vault leakage');
-  await importOne('mimmi',2162);
+  await importOne('mimmi',baselines.mimmi);
   await page.goto('http://127.0.0.1:8765/yui-gallery/');
-  await page.waitForFunction(()=>document.querySelector('#inventory')?.textContent?.startsWith('25장'));
+  await page.waitForFunction(n=>document.querySelector('#inventory')?.textContent?.startsWith(n+'장'),baselines.yui+2);
   if(errors.length||external.length)throw Error('Browser errors or source media requested '+JSON.stringify({errors,external:external.slice(0,5)}));
-  console.log('TWO_MODELS_SHA_VERIFIED_ZIP_IMPORT_'+engineName.toUpperCase()+'_PASS',JSON.stringify({yui:25,mimmi:2164,persistent:true,incrementalMerged:true,duplicateShaNumbersKept:true,corruptRejected:true,externalImageRequests:0}));
+  console.log('TWO_MODELS_SHA_VERIFIED_ZIP_IMPORT_'+engineName.toUpperCase()+'_PASS',JSON.stringify({yui:baselines.yui+2,mimmi:baselines.mimmi+2,persistent:true,incrementalMerged:true,duplicateShaNumbersKept:true,nestedActionsZip:true,corruptRejected:true,externalImageRequests:0}));
  }finally{await browser.close()}
 })().catch(e=>{console.error(e.stack||e);process.exit(1)});

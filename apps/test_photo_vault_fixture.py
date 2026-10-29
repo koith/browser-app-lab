@@ -28,4 +28,10 @@ for model in ('yui','mimmi'):
  with zipfile.ZipFile(out/(model+'-incremental.zip'),'w',compression=zipfile.ZIP_STORED) as z:
   z.writestr('TEST/manifest.json',json.dumps(incremental,ensure_ascii=False))
   z.writestr('TEST/'+rel,data)
+ # GitHub Actions artifacts contain nested private-import ZIP files.
+ # Deflate compression reproduces the wrapper format downloaded from Actions.
+ with zipfile.ZipFile(out/(model+'-actions.zip'),'w',compression=zipfile.ZIP_DEFLATED) as outer:
+  outer.write(out/(model+'-good.zip'),arcname='vault-part1-private-import.zip')
+  outer.write(out/(model+'-incremental.zip'),arcname='vault-part2-private-import.zip')
+  outer.writestr('audit.json',json.dumps({'artifact':'fixture','model':model}))
  print('FIXTURE_CREATED',model,len(data))

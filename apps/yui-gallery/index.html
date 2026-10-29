@@ -132,11 +132,11 @@ footer{padding:15px 0 25px;justify-content:flex-end}
  <div class="detail-heading"><button class="back" id="back" aria-label="화보 목록으로 돌아가기">‹</button><h2 class="detail-title" id="albumname"></h2><span class="counter" id="albumtotal"></span></div>
  <nav class="mainnav" aria-label="이동"><a href="../mimmi-gallery/" target="_blank" rel="noopener noreferrer">밈미 ↗</a><a href="cloud.html">클라우드</a></nav>
  <button id="search-toggle" class="search-toggle" aria-label="화보 검색 열기" aria-haspopup="dialog" aria-controls="search-dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button>
- <small id="app-version" class="version-chip">v0.1.0-beta.21</small>
+ <small id="app-version" class="version-chip">v0.1.0-beta.22</small>
 </header>
 <div id="browse">
  <div class="browse-meta"><p class="inventory" id="inventory">화보를 불러오는 중</p><span class="counter" id="total"></span></div>
- <div class="vault-actions"><button id="vault-import" type="button">내 ZIP 보관본 가져오기</button><input id="vault-file" type="file" accept=".zip,application/zip" hidden><span id="vault-status" role="status">이 기기에 저장 · 외부 이미지 서버 불필요</span></div>
+ <div class="vault-actions"><button id="vault-import" type="button">내 ZIP·Actions 보관본 가져오기</button><input id="vault-file" type="file" accept=".zip,application/zip" hidden><span id="vault-status" role="status">이 기기에 저장 · 외부 이미지 서버 불필요</span></div>
   <div class="filters"><button id="browse-toggle" class="filter active" type="button" aria-controls="albumgrid publishergrid" aria-pressed="false" aria-label="화보 목록 · 발행처 목록으로 전환"><span id="browse-mode">화보</span><span aria-hidden="true" class="switch-icon"> ⇄</span></button></div>
  <div id="publishergrid" class="grid" hidden></div>
  <div id="albumgrid" class="grid"></div>
@@ -157,7 +157,7 @@ footer{padding:15px 0 25px;justify-content:flex-end}
  </form>
 </dialog>
 <div id="lightbox" role="dialog" aria-label="사진 보기" aria-modal="true">
- <div class="lighttop"><button class="lightbtn" id="close" aria-label="닫기">×</button><span id="position"></span><small class="version-chip">v0.1.0-beta.21</small></div>
+ <div class="lighttop"><button class="lightbtn" id="close" aria-label="닫기">×</button><span id="position"></span><small class="version-chip">v0.1.0-beta.22</small></div>
  <button class="lightbtn arrow prev" id="prev" aria-label="이전 사진">‹</button><div class="media-frame"><img id="full" alt="화보 사진"><a id="original" target="_blank" rel="noopener">사진 열기 ↗</a></div><button class="lightbtn arrow next" id="next" aria-label="다음 사진">›</button>
  <p id="media-status" role="status"></p>
 </div>
@@ -319,7 +319,7 @@ vaultInput.onchange=async()=>{
  const file=vaultInput.files?.[0];if(!file)return;
  vaultButton.disabled=true;
  try{const result=await PhotoVault.importZip(file,'yui',message=>{vaultStatus.textContent=message});
-  vaultStatus.textContent='검증 완료 '+result.images+'장 · 이 기기에 보관';location.reload()}
+  vaultStatus.textContent='실파일 '+result.images+'개 항목 검증 · 이 기기에 반영';location.reload()}
  catch(error){vaultStatus.textContent='가져오기 실패: '+error.message;vaultButton.disabled=false;vaultInput.value=''}
 };
 Promise.all([
