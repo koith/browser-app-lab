@@ -149,16 +149,19 @@ async def media(album_id: str, image_num: int, kind: str, download: bool = Query
     img = next((i for i in album["images"] if i["number"] == image_num), None)
     if img is None:
         raise HTTPException(status_code=404, detail="Unknown photo")
-    key = img["key"]  # serve unchanged source bytes for either display or original
-    if not media_key_valid(key):
-        raise HTTPException(status_code=500, detail="Manifest contains unsafe path")
-    # The exact media key is read from a verified private manifest, not URL input.
-    expected_prefix = "originals"  # previews are exact source bytes; avoid storing two physical copies
+    has_separate_preview = (kind == "preview" and bool(img.get("preview")))
+    key_field = "preview" if has_separate_preview else "key"
+    digest_field = "preview_sha256" if has_separate_preview else "sha256"
+    size_field = "preview_bytes" if has_separate_preview else "bytes"
+    key = img.get(key_field)
+    if not isinstance(key, str) or not media_key_valid(key):
+        raise HTTPException(status_code=502, detail="Invalid private media path")
+    # Older TeraBox catalogs stored one physical full-size file only; new ones
+    # contain a separate small thumbnail with its own verified digest.
+    expected_prefix = "previews" if has_separate_preview else "originals"
     if not key.startswith(expected_prefix + "/" + album_id + "/"):
-        raise HTTPException(status_code=500, detail="Manifest media path mismatch")
-    limit = 140_000_000  # preview endpoints also preserve full source bytes
-    digest_field = "sha256"
-    size_field = "bytes"
+        raise HTTPException(status_code=502, detail="Manifest media path mismatch")
+    limit = 35_000_000 if has_separate_preview else 140_000_000
     declared_digest = img.get(digest_field)
     declared_bytes = img.get(size_field)
 
@@ -171,7 +174,7 @@ async def media(album_id: str, image_num: int, kind: str, download: bool = Query
 
     source = "terabox"
     blob = None
-    if kind == "preview" and R2_READY:
+    if kind == "preview" and R2_READY and not has_separate_preview:
         try:
             cached = await rclone_bytes(key, limit, remote=R2_PREVIEW_REMOTE)
             if integrity_ok(cached):

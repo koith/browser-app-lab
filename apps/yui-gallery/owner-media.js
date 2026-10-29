@@ -17,18 +17,23 @@ window.YuiPrivate=(()=>{
    })};
   });
  }
- async function asset(p){
-  if(cache.has(p.url))return cache.get(p.url);
-  if(inflight.has(p.url))return inflight.get(p.url);
+ async function asset(p,kind='original'){
+  const smaller=kind==='preview'&&!!p.preview;
+  const selected=smaller?'preview':'original';
+  const cacheId=p.url+':'+selected;
+  if(cache.has(cacheId))return cache.get(cacheId);
+  if(inflight.has(cacheId))return inflight.get(cacheId);
   const job=(async()=>{
-   const r=await request('/api/yui/media/'+encodeURIComponent(p.ownerAlbum)+'/'+p.number+'/original');const b=await r.blob();
-   if(b.size!==p.bytes)throw Error('보관본 크기 불일치');
+   const r=await request('/api/yui/media/'+encodeURIComponent(p.ownerAlbum)+'/'+p.number+'/'+selected);const b=await r.blob();
+   const expectedSize=smaller?p.preview_bytes:p.bytes;
+   const expectedSha=smaller?p.preview_sha256:p.sha256;
+   if(b.size!==expectedSize)throw Error('보관본 크기 불일치');
    const sha=[...new Uint8Array(await crypto.subtle.digest('SHA-256',await b.arrayBuffer()))].map(v=>v.toString(16).padStart(2,'0')).join('');
-   if(sha!==p.sha256)throw Error('보관본 SHA-256 불일치');
-   const url=URL.createObjectURL(b);cache.set(p.url,url);
+   if(sha!==expectedSha)throw Error('보관본 SHA-256 불일치');
+   const url=URL.createObjectURL(b);cache.set(cacheId,url);
    if(cache.size>64){const oldest=cache.keys().next().value;URL.revokeObjectURL(cache.get(oldest));cache.delete(oldest)}
    return url;
-  })();inflight.set(p.url,job);try{return await job}finally{inflight.delete(p.url)}
+  })();inflight.set(cacheId,job);try{return await job}finally{inflight.delete(cacheId)}
  }
  return {albums,asset};
 })();
