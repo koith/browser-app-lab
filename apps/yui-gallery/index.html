@@ -163,10 +163,7 @@ footer{padding:15px 0 25px;justify-content:flex-end}
 <script src="publishers.js?v=0.1.0-beta.13"></script>
 <script>
 "use strict";
-// Open the complete stored-media gallery directly; no login or CORS probe.
-if(location.hostname==='koith.github.io'){
- location.replace('https://mimmi-private-gallery-free.onrender.com/gallery/yui/'+location.hash);
-}
+// The gallery itself is served by always-available GitHub Pages; never redirect to a sleeping Render instance.
 
 const $=id=>document.getElementById(id);
 let catalog=[],stored=[],localStored=[],remoteStored=[],ownerStored=[],vaultStored=[],albumAliases={},albumCovers={},publisherRegistry={publishers:[]},publisherWorkReferences=[],activePublisher=null,mode='albums',activeAlbum=null,viewerList=[],viewerIndex=0,detailAlbum=null;
@@ -342,7 +339,7 @@ vaultInput.onchange=async()=>{
 };
 Promise.all([
  fetch('stored-albums.json').then(r=>{if(!r.ok)throw Error('stored data');return r.json()}),
- YuiPrivate.albums().then(albums=>({albums})).catch(error=>({albums:[],error:error.message})),
+ {albums:[]}, // Render's startup must never block the initial gallery.
  PhotoVault.albums('yui').then(albums=>({albums})).catch(error=>({albums:[],error:error.message})),
  fetch('identity-exclusions.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('identity exclusions');return r.json()}),
  fetch('album-covers.json',{cache:'no-store'}).then(r=>r.ok?r.json():{}).catch(()=>({})),
@@ -361,6 +358,7 @@ Promise.all([
  vaultStored=(vault.albums||[]).filter(allowed).map(a=>({...a,images:(a.images||[]).filter(p=>!excludedHashes.has(p.sha256))})).filter(a=>validImages(a).length);
  remoteStored=[];publisherWorkReferences=[];
  // Union of real saved files; no count for source-only links or duplicate hashes.
+ function rebuildStored(){
  const combined=new Map();
  for(const a of [...localStored,...ownerStored,...vaultStored]){
   if(!combined.has(a.id))combined.set(a.id,{...a,images:[]});
@@ -380,12 +378,26 @@ Promise.all([
  for(const row of combined.values())row.images.sort((a,b)=>(a.number??Number.MAX_SAFE_INTEGER)-(b.number??Number.MAX_SAFE_INTEGER));
  stored=[...combined.values()];
  catalog=stored.slice();
+ }
+ rebuildStored();
 
  try{const message=sessionStorage.getItem(vaultImportResultKey);if(message){vaultStatus.textContent=message;sessionStorage.removeItem(vaultImportResultKey)}}catch{}
  const archivedCount=stored.reduce((n,a)=>n+validImages(a).length,0);
  $('inventory').textContent=archivedCount+'장 · 실제 저장본';
  render();
  const raw=location.hash.slice(1),q=new URLSearchParams(raw);const id=canonicalId(raw&&!raw.includes('=')?decodeURIComponent(raw):q.get('album'));const state={yui:true,depth:0,mode:q.get('view')||'albums',publisher:q.get('publisher'),album:id,fromPhotos:q.get('from')==='photos',scroll:0};history.replaceState(state,'',routeURL(state));applyRoute(state);if(q.get('photo')){const a=stored.find(a=>a.id===id);if(a){const list=photosFor(a),i=list.findIndex(p=>p.number===Number(q.get('photo')));if(i>=0)openViewer(list,i)}}
+
+ // Enrich the already-visible gallery when Render wakes; no loading/splash screen.
+ YuiPrivate.albums().then(albums=>{
+  if(!Array.isArray(albums)||!albums.length)return;
+  ownerStored=albums.filter(allowed).map(a=>({...a,images:(a.images||[]).filter(p=>!excludedHashes.has(p.sha256))})).filter(a=>validImages(a).length);
+  if(!ownerStored.length)return;
+  rebuildStored();
+  $('inventory').textContent=stored.reduce((n,a)=>n+validImages(a).length,0)+'장 · 실제 저장본';
+  const current=history.state;
+  render();
+  if(current?.album)applyRoute(current);
+ }).catch(()=>{});
 }).catch(()=>{$('total').textContent='—';$('nothing').textContent='이미지를 불러올 수 없습니다.';$('nothing').hidden=false});
 </script>
 </body></html>
