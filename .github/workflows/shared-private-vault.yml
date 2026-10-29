@@ -3,6 +3,8 @@ on:
   pull_request:
     paths:
       - 'apps/photo-vault.js'
+      - 'apps/yui-gallery/photo-vault.js'
+      - 'apps/mimmi-gallery/photo-vault.js'
       - 'apps/yui-gallery/index.html'
       - 'apps/mimmi-gallery/index.html'
       - 'apps/test_photo_vault*'
@@ -10,6 +12,8 @@ on:
   push:
     paths:
       - 'apps/photo-vault.js'
+      - 'apps/yui-gallery/photo-vault.js'
+      - 'apps/mimmi-gallery/photo-vault.js'
       - 'apps/yui-gallery/index.html'
       - 'apps/mimmi-gallery/index.html'
       - 'apps/test_photo_vault*'
@@ -27,6 +31,10 @@ jobs:
         with: {python-version: '3.12'}
       - uses: actions/setup-node@v4
         with: {node-version: '22'}
+      - name: Keep all three vault implementations exactly identical
+        run: |
+          cmp apps/photo-vault.js apps/yui-gallery/photo-vault.js
+          cmp apps/photo-vault.js apps/mimmi-gallery/photo-vault.js
       - name: Generate real-image ZIP fixtures from committed physical bytes
         run: python apps/test_photo_vault_fixture.py
       - name: Install browsers
