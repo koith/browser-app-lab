@@ -1,0 +1,80 @@
+name: Yui 137 Public Web Album Bytes Private Recovery
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/yui-137-public-photo-private-backfill.yml'
+      - 'apps/gallery-archive/package_yui_public_collections.py'
+permissions:
+  contents: read
+concurrency:
+  group: yui-137-normal-public-photo-byte-recovery
+  cancel-in-progress: false
+jobs:
+  collect-137-and-stage-privately:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 65
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Install free source browsing and image verification tools
+        run: |
+          python -m pip install 'requests==2.32.5' 'Pillow==11.3.0' 'playwright==1.58.0'
+          python -m playwright install --with-deps chromium
+      - name: Test the two existing byte-verification collectors
+        run: |
+          python -m py_compile apps/yui-gallery/download_jliji_collections.py
+          python -m py_compile apps/gallery-archive/package_yui_public_collections.py
+      - name: Visit complete publicly visible album pages and save every real photo byte
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Stop normally when source blocks access; do not evade 451,
+          # a login, a paywall, or any access restrictions.
+          python apps/yui-gallery/download_jliji_collections.py \
+            --albums yuis-present33,athletic-club104
+      - name: Rehash, decode and turn 137 real downloaded files into private ZIPs
+        shell: bash
+        run: |
+          set -euo pipefail
+          python apps/gallery-archive/package_yui_public_collections.py \
+            --source yui-jliji-full-private \
+            --out "$RUNNER_TEMP/yui-137"
+          python - <<'PY'
+          import json,os,zipfile,hashlib
+          from pathlib import Path
+          path=Path(os.environ["RUNNER_TEMP"])/"yui-137"
+          audit=json.loads((path/"audit.json").read_text())
+          assert audit["total_actual_photos"]==137
+          for zfile in sorted(path.glob("*-private-import.zip")):
+              with zipfile.ZipFile(zfile) as z:
+                  assert z.testzip() is None
+                  manifest=json.loads(z.read("manifest.json"))
+                  assert manifest["model"]=="yui"
+                  assert manifest["physical_verified_image_count"] in (33,104)
+                  for album in manifest["albums"]:
+                      for p in album["images"]:
+                          data=z.read(p["url"])
+                          assert len(data)==p["bytes"]
+                          assert hashlib.sha256(data).hexdigest()==p["sha256"]
+          print("YUI_REAL_PHOTO_PRIVATE_BACKFILL_137_VERIFIED")
+          PY
+      - name: Hand only acquired private photo files to existing cloud SHA verifier
+        uses: actions/upload-artifact@v4
+        with:
+          name: yui-original-verified-jliji-137
+          path: ${{ runner.temp }}/yui-137/*-private-import.zip
+          if-no-files-found: error
+          retention-days: 5
+      - name: Preserve failure and real-byte evidence, not invented gallery counts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: yui-137-normal-public-source-audit
+          path: |
+            yui-jliji-full-private/summary.json
+            ${{ runner.temp }}/yui-137/audit.json
+          if-no-files-found: warn
+          retention-days: 15
