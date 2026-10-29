@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "source_scope": "Creator-owned public social posts only. No logins, private feeds, retweets, paid photo archives, or leaked copies.",
+  "yui": [
+    {
+      "id": "yui-public-official-x",
+      "title": "심유이 · 공식 X 공개 촬영 이미지",
+      "kind": "twitter",
+      "account": "super_yuisan",
+      "url": "https://x.com/super_yuisan/media"
+    }
+  ],
+  "mimmi": [
+    {
+      "id": "mimmi-public-official-x",
+      "title": "밈미 · 공식 X 공개 이미지",
+      "kind": "twitter",
+      "account": "Mimmi_official",
+      "url": "https://x.com/Mimmi_official/media"
+    },
+    {
+      "id": "mimmi-public-official-instagram",
+      "title": "밈미 · 공식 Instagram 공개 이미지",
+      "kind": "instagram",
+      "account": "mimmissu17",
+      "url": "https://www.instagram.com/mimmissu17/"
+    }
+  ]
+}

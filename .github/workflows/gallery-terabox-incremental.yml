@@ -7,6 +7,7 @@ on:
       - "Yui Known Missing 18 Photo Slots Physical Recovery"
       - "Yui Public SNS Photo Archive"
       - "Independent Yui and Mimmi Photoshoot Original Byte Archive"
+      - "Gallery Public Creator Social Bulk Photo Bytes"
     types: [completed]
   schedule:
     - cron: '17 0,6,12,18 * * *'
@@ -74,13 +75,16 @@ jobs:
           model="${{ matrix.model }}"
           if [[ "$model" == yui ]]; then workflow='yui-private-bulk-archive.yml';pattern='^yui-original-verified-';else workflow='mimmi-private-missing-archive.yml';pattern='^mimmi-original-new-private-';fi
           if [[ "$EVENT_NAME" == workflow_run ]]; then
-            if [[ "$model" == yui && "$SOURCE_NAME" != 'Yui Public Sources To Private Original-Byte Archives' && "$SOURCE_NAME" != 'Yui Known Missing 18 Photo Slots Physical Recovery' && "$SOURCE_NAME" != 'Yui Public SNS Photo Archive' && "$SOURCE_NAME" != 'Independent Yui and Mimmi Photoshoot Original Byte Archive' ]] || [[ "$model" == mimmi && "$SOURCE_NAME" != 'Mimmi Missing SHA Public Photos To Private ZIP Archive' && "$SOURCE_NAME" != 'Independent Yui and Mimmi Photoshoot Original Byte Archive' ]]; then
+            if [[ "$model" == yui && "$SOURCE_NAME" != 'Yui Public Sources To Private Original-Byte Archives' && "$SOURCE_NAME" != 'Yui Known Missing 18 Photo Slots Physical Recovery' && "$SOURCE_NAME" != 'Yui Public SNS Photo Archive' && "$SOURCE_NAME" != 'Independent Yui and Mimmi Photoshoot Original Byte Archive' && "$SOURCE_NAME" != 'Gallery Public Creator Social Bulk Photo Bytes' ]] || [[ "$model" == mimmi && "$SOURCE_NAME" != 'Mimmi Missing SHA Public Photos To Private ZIP Archive' && "$SOURCE_NAME" != 'Independent Yui and Mimmi Photoshoot Original Byte Archive' && "$SOURCE_NAME" != 'Gallery Public Creator Social Bulk Photo Bytes' ]]; then
               echo 'skip=true' >> "$GITHUB_OUTPUT";exit 0
             fi
             if [[ "$SOURCE_NAME" == 'Independent Yui and Mimmi Photoshoot Original Byte Archive' ]]; then
               # This collector emits model-separated physical ZIP artifacts
               # rather than the historical single-source naming convention.
               pattern="^gallery-$model-independent-originals$"
+            fi
+            if [[ "$SOURCE_NAME" == 'Gallery Public Creator Social Bulk Photo Bytes' ]]; then
+              pattern="^gallery-$model-social-originals$"
             fi
             run="$SOURCE_RUN_ID"
           else
