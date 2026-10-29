@@ -7,7 +7,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from zipfile import ZipFile
 from PIL import Image
-from capture_independent_shoots import archive,source_images,allowed_image
+from capture_independent_shoots import archive,source_images,allowed_image,source_photo_pages
 
 def make_jpg(color):
     im=Image.new("RGB",(640,820),color)
@@ -49,6 +49,19 @@ def main():
     assert source_images(yui_src,html)==[yui_photo]
     assert not allowed_image("https://evil.example/unsafe.jpg",yui_src)
     assert source_images(yui_src,html.replace("@super_yuisan","@not_yui"))==[]
+    # A photographer's second/third public page must be visited and only
+    # specifically model-tagged photos from those pages may enter the archive.
+    page2_url=yui_src["url"]+"?cursor=second"
+    later_image="https://pbs.twimg.com/media/YuiPhotographerSecond.jpg"
+    first_page=html.replace("</html>",'<a href="?cursor=second">Load more</a></html>')
+    later_page=html.replace(yui_photo,later_image)
+    paginated=Fake({yui_src["url"]:first_page,page2_url:later_page},{})
+    yui_src["max_pages"]=5
+    links,pages,errors=source_photo_pages(paginated,yui_src)
+    assert pages==2 and links==[yui_photo,later_image] and not errors,(links,pages,errors)
+    yui_src["max_pages"]=1
+    limited_links,limited_pages,_=source_photo_pages(paginated,yui_src)
+    assert limited_pages==1 and limited_links==[yui_photo]
     mimmi_url="https://upload2.inven.co.kr/upload/2019/11/20/bbs/test.jpg?MW=800"
     mimmi_src={"id":"mimmi-test-sana","title":"SANA independent",
          "kind":"inven-article","url":"https://www.inven.co.kr/board/webzine/2898/1741",
