@@ -1,0 +1,74 @@
+name: Gallery TeraBox Private Connection Check
+on:
+  workflow_dispatch:
+    inputs:
+      model:
+        description: Choose which privately configured login to check
+        required: true
+        type: choice
+        default: both
+        options: [both, yui, mimmi]
+permissions:
+  contents: read
+concurrency:
+  group: gallery-terabox-connection-check
+  cancel-in-progress: false
+jobs:
+  check-login:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 9
+    env:
+      YUI_COOKIE: ${{ secrets.YUI_TERABOX_COOKIE }}
+      MIMMI_COOKIE: ${{ secrets.MIMMI_TERABOX_NDUS }}
+    steps:
+      - name: Install checksum-pinned unofficial TeraBox client
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL 'https://github.com/gulp79/rclone-extra/releases/download/v1.75.2-extra/rclone-linux-amd64.zip' -o "$RUNNER_TEMP/rclone.zip"
+          echo "78855325a2a8d83b3feee3a8363d32e1211babbf4cda6356fa8ca5f472075062  $RUNNER_TEMP/rclone.zip" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/unpack" "$RUNNER_TEMP/bin"
+          unzip -q "$RUNNER_TEMP/rclone.zip" -d "$RUNNER_TEMP/unpack"
+          client="$(find "$RUNNER_TEMP/unpack" -type f -name rclone -print -quit)"
+          test -n "$client"
+          install -m 0755 "$client" "$RUNNER_TEMP/bin/rclone"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+      - name: Check configured TeraBox authentication without revealing cookies
+        env:
+          SELECTED_MODEL: ${{ inputs.model }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          export RCLONE_CONFIG_ARCHIVE_TYPE=terabox
+          check_one() {
+            local model="$1" value="$2"
+            if [[ -z "$value" ]]; then
+              echo "::error title=TERABOX_NOT_CONFIGURED::$model: repository secret is missing."
+              echo "- $model: GitHub Secret 미설정" >> "$GITHUB_STEP_SUMMARY"
+              return 1
+            fi
+            export RCLONE_CONFIG_ARCHIVE_COOKIE="$value"
+            # Do not print remote errors: backend traces can include credentials.
+            if rclone lsd archive: --timeout=35s --retries=1 --low-level-retries=1 \
+                > "$RUNNER_TEMP/terabox-list.txt" 2> "$RUNNER_TEMP/terabox-errors.txt"; then
+              echo "- $model: 테라박스 인증 및 비공개 폴더 목록 조회 성공" >> "$GITHUB_STEP_SUMMARY"
+              echo "TERABOX_ACCOUNT_$model_AUTHENTICATED"
+            else
+              echo "- $model: 인증 실패 — TeraBox 웹사이트에서 다시 로그인하고 Secret을 갱신하세요" >> "$GITHUB_STEP_SUMMARY"
+              echo "::error title=TERABOX_AUTH_FAILED::$model: cannot list account root."
+              return 1
+            fi
+            unset RCLONE_CONFIG_ARCHIVE_COOKIE
+          }
+          failed=0
+          case "$SELECTED_MODEL" in
+            yui) check_one YUI "$YUI_COOKIE" || failed=1 ;;
+            mimmi) check_one MIMMI "$MIMMI_COOKIE" || failed=1 ;;
+            both)
+              check_one YUI "$YUI_COOKIE" || failed=1
+              check_one MIMMI "$MIMMI_COOKIE" || failed=1
+              ;;
+            *) echo "::error::Invalid model selection"; exit 2 ;;
+          esac
+          echo "이 검사는 로그인 여부만 확인합니다. 사진 업로드·파일 삭제는 하지 않습니다." >> "$GITHUB_STEP_SUMMARY"
+          exit "$failed"
