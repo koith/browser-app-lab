@@ -316,10 +316,19 @@ async def _read_cover(model: str, album_id: str, image_num: int,
                       has_preview: bool) -> tuple[bytes, str]:
     async with _cover_workers:
         kind = "preview" if has_preview else "original"
-        response = await (
-            yui_media(album_id, image_num, kind, download=False)
-            if model == "yui" else media(album_id, image_num, kind, download=False)
-        )
+        async def verified_photo(request_kind: str):
+            return await (
+                yui_media(album_id, image_num, request_kind, download=False)
+                if model == "yui" else media(album_id, image_num, request_kind, download=False)
+            )
+        try:
+            response = await verified_photo(kind)
+        except HTTPException as error:
+            if not has_preview or error.status_code not in (502, 503, 504):
+                raise
+            # Some archived preview files no longer match their recorded SHA.
+            # A cover can safely use the separately SHA-verified original.
+            response = await verified_photo("original")
         chunks = []
         total = 0
         async for chunk in response.body_iterator:
