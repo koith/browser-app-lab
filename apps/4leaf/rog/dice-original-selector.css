@@ -143,3 +143,53 @@
   opacity:.75;
  }
 }
+
+/* Original IMG.pak selector.spr: seven authenticated 92x72 card frames.
+ * Frame 6 is neutral chrome. The lower region of frames 0/1 contains the
+ * native ABILITY strip and normal/highlighted card surface. Use those
+ * pixels without the S/P/C glyph at top left: its original assignment to
+ * CardData has not been established. Never infer that badge from element.
+ * Names remain in the existing tooltip, accessible label and live detail
+ * dialog; a WEB name band must not cover the original ABILITY artwork.
+ */
+@media(min-width:812px){
+ #app.app-classic-dice #dice-client-sidebar #dice-native-party{
+  position:absolute!important;
+  left:30px!important;top:0!important;
+  width:188px!important;min-width:188px!important;max-width:188px!important;
+  height:148px!important;
+  margin:0!important;
+  grid-template-columns:repeat(2,92px)!important;
+  grid-template-rows:repeat(2,72px)!important;
+  gap:4px!important;
+ }
+ #app.app-classic-dice #dice-client-sidebar #dice-native-party .dice-chessman-slot{
+  width:92px!important;height:72px!important;
+  border:0!important;box-shadow:none!important;
+  opacity:1!important;
+  background:transparent url('./original/SourceSPRExtra/selector-06.png') 0 0 / 92px 72px no-repeat!important;
+ }
+ #app.app-classic-dice #dice-client-sidebar #dice-native-party .dice-chessman-slot.occupied::before{
+  content:'';
+  position:absolute;left:0;top:26px;
+  width:92px;height:46px;
+  background:url('./original/SourceSPRExtra/selector-00.png') 0 -26px / 92px 72px no-repeat;
+  pointer-events:none;
+ }
+ #app.app-classic-dice #dice-client-sidebar #dice-native-party .dice-chessman-slot.selected::before{
+  background-image:url('./original/SourceSPRExtra/selector-01.png');
+ }
+ #app.app-classic-dice #dice-client-sidebar #dice-native-party button.dice-chessman-slot:is(:hover,:focus-visible){
+  filter:none;
+  outline:1px solid #ffedac;
+ }
+ #app.app-classic-dice #dice-client-sidebar #dice-native-party .dice-chessman-face{
+  z-index:1;
+  top:1px;
+ }
+ #app.app-classic-dice #dice-client-sidebar #dice-native-party .dice-chessman-slot b,
+ #app.app-classic-dice #dice-client-sidebar #dice-native-party .dice-chessman-moon,
+ #app.app-classic-dice #dice-client-sidebar #dice-native-party .dice-chessman-empty{
+  display:none;
+ }
+}

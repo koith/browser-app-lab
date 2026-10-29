@@ -2,7 +2,8 @@
 /* Original 2004 4LEAF battle HUD separates THREE distinct source archives:
  * player-side face: Registry/sava (player's selected avatar);
  * gameplay board / duel actor: Dice/OBS native chessman pixels;
- * lower-right selected party: CardData/chm portrait.
+ * lower-right selected party: reviewed OBS full body or CardData fallback.
+ * Party detail artwork always retains the actual CardData identity.
  * Never reuse one resource for all three contexts.
  */
 const assert=require('node:assert/strict');
@@ -44,8 +45,17 @@ const {chromium}=require('playwright');
    board:[...document.querySelectorAll('#board-pawns .board-pawn')]
     .map(x=>({id:x.dataset.chessmanId,source:x.dataset.actorSource,rig:x.dataset.actorRig,
       png:x.querySelector('.leaf-chess-original-obs')?.getAttribute('src')})),
-   party:[...document.querySelectorAll('#dice-native-party .dice-chessman-face')]
-    .map(x=>x.getAttribute('src'))
+   party:[...document.querySelectorAll('#dice-native-party .dice-chessman-slot.occupied')]
+    .map(slot=>{
+     const img=slot.querySelector('.dice-chessman-face');
+     const id=slot.dataset.cardId.slice(2);
+     const front=window.__LEAF_GENESIS_ACTORS__.getState().originalFrontVisualAudited[id];
+     const expected=window.ORIGINAL_LEAF_OBS_FRAMES[id]?.frames.find(f=>f.index===front)?.url;
+     return {src:img.getAttribute('src'),card:slot.dataset.cardId,
+      artwork:slot.dataset.sourceCardArtwork,source:slot.dataset.rightPortraitSource,
+      evidence:slot.dataset.rightPortraitFacingEvidence,expected,
+      front:img.dataset.nativeFrontFrame,flip:getComputedStyle(img).transform};
+    })
   }));
   assert.deepEqual(snap.players,['c_0045','c_0042']);
   assert.deepEqual(snap.rails.map(x=>x.wh),[[75,141],[75,141]],
@@ -58,8 +68,23 @@ const {chromium}=require('playwright');
    'current selected avatar is reflected on original 1P rail');
   assert.deepEqual(snap.board.map(x=>x.rig),['original-obs-sprite','original-obs-sprite']);
   assert.ok(snap.board.every(x=>x.source.startsWith('OBS/')&&x.png?.includes('./original/OBS/')));
-  assert.ok(snap.party.length>=1&&snap.party.every(x=>x.startsWith('./original/CardData/chm_')),
-   'lower-right 2x2 party pane uses CardData not player SAVA/OBS');
+  assert.ok(snap.party.length>=1);
+  for(const actor of snap.party){
+   assert.ok(actor.artwork.startsWith('./original/CardData/chm_'),
+    'live party detail retains actual original CardData artwork');
+   assert.ok(!actor.src.includes('/Registry/'),'player avatar cannot impersonate a party chessman');
+   if(actor.source==='OBS.pak/verified-front'){
+    assert.equal(actor.evidence,'visually-reviewed');
+    assert.ok(actor.expected,'OBS party full body must have an audited front packet');
+    assert.equal(actor.src,actor.expected);
+    assert.ok(actor.flip.startsWith('matrix('),'original upside-down OBS packet is corrected');
+   }else{
+    assert.ok(actor.source.startsWith('CardData/original-fallback-'));
+    assert.equal(actor.src,actor.artwork,'unverified/missing OBS uses its original CardData face');
+   }
+  }
+  assert.ok(snap.party.some(x=>x.card==='c_0045'&&x.source==='OBS.pak/verified-front'),
+   'preserve PR204 verified original full-body restoration rather than demanding obsolete face-only HUD');
   await page.evaluate(()=>{
    const m=window.__ROG_TEST__.getMatch();
    window.__ROG_TEST__.resolveBattle(m.players[0],m.players[1],false);

@@ -62,7 +62,8 @@ const {chromium}=require('playwright');
   eq('#board-mini','x',0);eq('#board-mini','w',172);
   eq('.messenger','x',172);eq('.messenger','w',406);
   eq('#dice-original-selector','x',578);eq('#dice-original-selector','w',29);
-  eq('#dice-native-party','x',607);eq('#dice-native-party','w',193);
+  // Two actual 92px selector.spr cards plus the source 4px gap.
+  eq('#dice-native-party','x',608);eq('#dice-native-party','w',188);
   eq('#app>.workspace>.sidebar','x',578);eq('#app>.workspace>.sidebar','w',222);
   eq('#dice-source-roll','x',400-37);eq('#dice-source-roll','w',74);
   assert.ok(Math.abs(a['.messenger'].y-a['#board-mini'].y)<2

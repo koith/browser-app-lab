@@ -25,6 +25,7 @@ const {chromium}=require('playwright');
    'dice-native-dialog-event.css','original/IMG/dialog.png','original/IMG/eventmsgbox.png',
    'world-perspective.css','original-tiles.css','board-camera.js','dice-original-obs.css',
    'dice-native-source-events.js','dice-native-source-events.css',
+   ...[0,1,6].map(i=>'original/SourceSPRExtra/selector-'+String(i).padStart(2,'0')+'.png'),
    'original/SourceSPRExtra/winJail-00.png',
    'original/SourceSPRExtra/winDoa-00.png',
    ...Array.from({length:6},(_,i)=>'original/SourceSPRExtra/winAbility-'+String(i).padStart(2,'0')+'.png'),

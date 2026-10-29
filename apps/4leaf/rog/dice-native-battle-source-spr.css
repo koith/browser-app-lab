@@ -108,3 +108,19 @@
  * The source image's top deck is evidence; its 2002 MVE geometry is not.
  * Both actors use independently positioned native OBS pixels on that deck.
  */
+
+/* The source SPR header offsets are in the SAME coordinate system as
+ * the podium frame. game.js follows the drawn bitmap through resize;
+ * Apply this historical 800px composition on desktop; retain the existing
+ * responsive mobile header/score arrangement. */
+@media(min-width:812px){
+#app.app-classic-dice #game #battle-visual[data-native-battle-podium="ready"]
+ .leaf-native-winbattle-heading{
+ left:var(--leaf-native-battle-heading-left)!important;
+ top:var(--leaf-native-battle-heading-top)!important;
+ width:var(--leaf-native-battle-heading-width)!important;
+ height:var(--leaf-native-battle-heading-height)!important;
+ max-width:none!important;
+ transform:none!important;
+}
+}
