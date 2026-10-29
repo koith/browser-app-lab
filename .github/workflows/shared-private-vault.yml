@@ -1,0 +1,40 @@
+name: Both Galleries Private ZIP Archive Mobile QA
+on:
+  pull_request:
+    paths:
+      - 'apps/photo-vault.js'
+      - 'apps/yui-gallery/index.html'
+      - 'apps/mimmi-gallery/index.html'
+      - 'apps/test_photo_vault*'
+      - '.github/workflows/shared-private-vault.yml'
+  push:
+    paths:
+      - 'apps/photo-vault.js'
+      - 'apps/yui-gallery/index.html'
+      - 'apps/mimmi-gallery/index.html'
+      - 'apps/test_photo_vault*'
+      - '.github/workflows/shared-private-vault.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - name: Generate real-image ZIP fixtures from committed physical bytes
+        run: python apps/test_photo_vault_fixture.py
+      - name: Install browsers
+        run: |
+          npm install --no-save playwright@1.58.2
+          npx playwright install --with-deps chromium webkit
+      - name: Verify imports, SHA protection, persistence, isolation and iPhone WebKit rendering
+        run: |
+          python -m http.server 8765 --directory apps >/tmp/photo-vault-web.log 2>&1 &
+          node apps/test_photo_vault.cjs chromium
+          node apps/test_photo_vault.cjs webkit
