@@ -71,9 +71,18 @@ jobs:
           mkdir -p "$RUNNER_TEMP/input"
           download() {
             local run="$1" archive="$2"
-            mkdir -p "$RUNNER_TEMP/input/$archive"
-            gh run download "$run" --repo "$GITHUB_REPOSITORY" --name "$archive" --dir "$RUNNER_TEMP/input/$archive"
-            test "$(find "$RUNNER_TEMP/input/$archive" -name '*-private-import.zip' | wc -l)" -gt 0
+            local destination="$RUNNER_TEMP/input/$run/$archive"
+            mkdir -p "$destination"
+            gh run download "$run" --repo "$GITHUB_REPOSITORY" --name "$archive" --dir "$destination"
+            if [[ "$(find "$destination" -name '*-private-import.zip' | wc -l)" -eq 0 ]]; then
+              # The recovered 17-photo Actions artifact holds an outer ZIP.
+              wrapper="$(find "$destination" -maxdepth 2 -type f -name '*.actions.zip' -print -quit)"
+              if [[ -n "$wrapper" ]]; then
+                mkdir -p "$destination/unpacked"
+                unzip -q "$wrapper" -d "$destination/unpacked"
+              fi
+            fi
+            test "$(find "$destination" -name '*-private-import.zip' | wc -l)" -gt 0
           }
           if [[ "${{ matrix.model }}" == "yui" ]]; then
             for archive in yui-original-verified-pixibb-large yui-original-verified-pixibb-other yui-original-verified-public-editorial yui-original-verified-source-variety-one yui-original-verified-source-variety-two; do
