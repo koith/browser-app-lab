@@ -52,7 +52,7 @@ jobs:
             if rclone lsd archive: --timeout=35s --retries=1 --low-level-retries=1 \
                 > "$RUNNER_TEMP/terabox-list.txt" 2> "$RUNNER_TEMP/terabox-errors.txt"; then
               echo "- $model: 테라박스 인증 및 비공개 폴더 목록 조회 성공" >> "$GITHUB_STEP_SUMMARY"
-              echo "TERABOX_ACCOUNT_$model_AUTHENTICATED"
+              echo "TERABOX_ACCOUNT_${model}_AUTHENTICATED"
             else
               echo "- $model: 인증 실패 — TeraBox 웹사이트에서 다시 로그인하고 Secret을 갱신하세요" >> "$GITHUB_STEP_SUMMARY"
               echo "::error title=TERABOX_AUTH_FAILED::$model: cannot list account root."
