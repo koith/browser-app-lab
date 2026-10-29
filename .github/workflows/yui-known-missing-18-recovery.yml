@@ -1,6 +1,11 @@
 name: Yui Known Missing 18 Photo Slots Physical Recovery
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/yui-known-missing-18-recovery.yml'
+      - 'apps/yui-gallery/collect_private_batch.py'
+      - 'apps/yui-gallery/additional-source-albums.json'
   push:
     branches: [main]
     paths:
@@ -14,7 +19,31 @@ concurrency:
   group: yui-private-known-18-slot-capture
   cancel-in-progress: false
 jobs:
+  code-and-missing-slot-qa:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install 'requests==2.32.5' 'Pillow==11.3.0'
+      - run: |
+          python -m py_compile apps/yui-gallery/collect_private_batch.py
+          python apps/yui-gallery/test_collect_private_batch.py
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          data=json.loads(Path('apps/yui-gallery/additional-source-albums.json').read_text())
+          albums={a['id']:a for a in data['albums']}
+          for aid in ('teddy-bear97','wet-yui80'):
+              assert aid in albums
+              assert isinstance(albums[aid]['images'],list)
+              print(aid,'source-records=',len(albums[aid]['images']),
+                    'not yet saved photo count')
+          PY
   known-gap-photos-to-private-zip:
+    needs: code-and-missing-slot-qa
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     timeout-minutes: 62
     strategy:
