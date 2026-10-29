@@ -1,0 +1,124 @@
+{
+  "version": 1,
+  "purpose": "Only physically accessible photos with strong model attribution, distinct from paid editions and mere event notices. Photo candidates are never gallery inventory.",
+  "yui": {
+    "identity": [
+      "심유이",
+      "@super_yuisan"
+    ],
+    "source_jobs": [
+      {
+        "id": "yui-indie-photographer-cos-swee-2026",
+        "title": "심유이 — 개인 사진사 cos_swee · 니케 프리바티",
+        "kind": "teapawt-tagged",
+        "url": "https://teapawt.net/cos_swee",
+        "author": "cos_swee",
+        "required_mention": "@super_yuisan",
+        "photo_host": "pbs.twimg.com",
+        "source_category": "independent-photographer"
+      },
+      {
+        "id": "yui-indie-photographer-cos-swee-tag-2026",
+        "title": "심유이 — 개인 사진사 cos_swee · 메프바",
+        "kind": "sotwe-tagged",
+        "url": "https://www.sotwe.com/hashtag/%EB%A9%94%ED%94%84%EB%B0%94?lang=en",
+        "author": "cos_swee",
+        "required_mention": "@super_yuisan",
+        "photo_host": "pbs.twimg.com",
+        "source_category": "event-photographer"
+      }
+    ],
+    "event_evidence_not_pictures": [
+      {
+        "date": "2026-06-20",
+        "event": "ARTS LAB 촬영회",
+        "url": "https://site.twstalker.com/ARTS_LAB_",
+        "note": "Model participation confirmed; organizer photo advertisements are NOT model photos"
+      },
+      {
+        "date": "2026-08-23",
+        "event": "Cos Stage 촬영회",
+        "url": "https://witchform.com/payform/?uuid=CNXWFAUMSH",
+        "note": "Session confirmed; uploader may require model return permission"
+      },
+      {
+        "date": "2026-10-24",
+        "event": "수원 코믹월드 촬영",
+        "url": "https://teapawt.net/super_yuisan",
+        "note": "Creator says event photo public posting is permitted; identify photographers before import"
+      },
+      {
+        "date": "2026-11-15",
+        "event": "MYMU x EVOTO 촬영회 예정",
+        "url": "https://teapawt.net/mymu_cos",
+        "note": "Future event as of Oct 29, 2026; never report as captured photography"
+      }
+    ]
+  },
+  "mimmi": {
+    "identity": [
+      "밈미",
+      "mimmissu17",
+      "@Mimmi_official"
+    ],
+    "source_jobs": [
+      {
+        "id": "mimmi-indie-sana-sopmod2-2019",
+        "title": "밈미 — SANA 개인 촬영 · 소녀전선 M4 SOPMOD II (2019)",
+        "kind": "inven-article",
+        "url": "https://www.inven.co.kr/board/webzine/2898/1741",
+        "required_mention": "촬영 : SANA",
+        "photo_host": "upload2.inven.co.kr",
+        "source_category": "independent-photographer",
+        "direct_public_images": [
+          "https://upload2.inven.co.kr/upload/2019/11/20/bbs/i14109578592.jpg?MW=800",
+          "https://upload2.inven.co.kr/upload/2019/11/20/bbs/i14101109909.jpg?MW=800",
+          "https://upload2.inven.co.kr/upload/2019/11/20/bbs/i14180970102.jpg?MW=800",
+          "https://upload2.inven.co.kr/upload/2019/11/20/bbs/i14159256198.jpg?MW=800",
+          "https://upload2.inven.co.kr/upload/2019/11/20/bbs/i14195118573.jpg?MW=800",
+          "https://upload2.inven.co.kr/upload/2019/11/20/bbs/i14175377671.jpg?MW=800"
+        ]
+      },
+      {
+        "id": "mimmi-public-historical-x-2020-22",
+        "title": "밈미 — 공식 X 공개 코스프레 사진 (2020~2022)",
+        "kind": "twoucan-author",
+        "url": "https://twoucan.com/profile/Mimmi_official",
+        "author": "Mimmi_official",
+        "required_mention": "@Mimmi_official",
+        "photo_host": "pbs.twimg.com",
+        "source_category": "historical-official-social"
+      }
+    ],
+    "event_evidence_not_pictures": [
+      {
+        "date": "2025-09-12",
+        "event": "팝콘 코스프레 · 니케 누아르",
+        "photographer": "2e_se",
+        "url": "https://socialauditor.io/profile/mimmissu17",
+        "note": "Creator credits photographer @2e_se; image post URL requires discovery"
+      },
+      {
+        "date": "2025-08-13",
+        "event": "청주 일러스타 카페 · 데지코",
+        "photographer": "owen_portrait",
+        "url": "https://socialauditor.io/profile/mimmissu17",
+        "note": "Event and photographer credited in creator posts"
+      },
+      {
+        "date": "2025-10-17",
+        "event": "포천 드론대전 · 티니핑",
+        "photographer": "owen_portrait",
+        "url": "https://socialauditor.io/profile/mimmissu17",
+        "note": "Public model post credits photographer"
+      },
+      {
+        "date": "2019-11-20",
+        "event": "SANA 촬영 소녀전선",
+        "photographer": "SANA",
+        "url": "https://www.inven.co.kr/board/webzine/2898/1741",
+        "note": "Six public article photos; only actually downloaded bytes get stored"
+      }
+    ]
+  }
+}
