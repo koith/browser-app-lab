@@ -1,0 +1,83 @@
+name: Split Yui Public Editorial Private Archives Under 100MB
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/yui-split-editorial-private.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  split:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        part: [sns-1-180, sns-181-361, non-sns-editorial]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 40798481649
+          name: yui-original-verified-public-editorial
+          path: /tmp/input
+          github-token: ${{ github.token }}
+      - name: Split with byte-perfect SHA-256 and numbered sequence checks
+        env:
+          PART: ${{ matrix.part }}
+        run: |
+          python - <<'PY'
+          import hashlib,json,os,zipfile
+          from pathlib import Path
+          part=os.environ['PART'];src=Path('/tmp/input');dst=Path('/tmp/output');dst.mkdir(exist_ok=True)
+          assert (src/'public-yui-sns-private-import.zip').is_file()
+          verified=0
+          if part.startswith('sns-'):
+            with zipfile.ZipFile(src/'public-yui-sns-private-import.zip') as z:
+              manifest=json.loads(z.read('manifest.json'))
+              assert manifest['model']=='yui' and manifest['physical_verified_image_count']==361
+              assert len(manifest['albums'])==1 and manifest['albums'][0]['id']=='public-yui-sns'
+              photos=manifest['albums'][0]['images']
+              assert [p['number'] for p in photos]==list(range(1,362))
+              low,high=(1,180) if part=='sns-1-180' else (181,361)
+              selected=[p for p in photos if low<=p['number']<=high]
+              assert len(selected)==high-low+1
+              selected_manifest=json.loads(json.dumps(manifest))
+              selected_manifest['albums'][0]['images']=selected
+              selected_manifest['physical_verified_image_count']=len(selected)
+              outfile=dst/('yui-public-sns-'+part+'-private-import.zip')
+              with zipfile.ZipFile(outfile,'w',compression=zipfile.ZIP_STORED) as out:
+                out.writestr('manifest.json',json.dumps(selected_manifest,ensure_ascii=False))
+                for item in selected:
+                  data=z.read(item['url'])
+                  assert len(data)==item['bytes']
+                  assert hashlib.sha256(data).hexdigest()==item['sha256']
+                  out.writestr(item['url'],data)
+                  verified+=1
+          else:
+            expected={'acosta-japan-public-report','crazygiant-player5-public','crazygiant-yui-may2023-public','djawa-privaty-public-samples','gamersky-public-editorial','inven-public-photos','sportsseoul-crazy2020-public'}
+            found={p.name[:-len('-private-import.zip')] for p in src.glob('*-private-import.zip') if p.name!='public-yui-sns-private-import.zip'}
+            assert expected<=found,(expected-found,found)
+            for p in src.glob('*-private-import.zip'):
+              if p.name=='public-yui-sns-private-import.zip':continue
+              with zipfile.ZipFile(p) as z:
+                m=json.loads(z.read('manifest.json'))
+                assert m['model']=='yui'
+                imgs=[im for a in m['albums'] for im in a['images']]
+                assert len(imgs)==m['physical_verified_image_count']
+                for im in imgs:
+                  raw=z.read(im['url'])
+                  assert len(raw)==im['bytes'] and hashlib.sha256(raw).hexdigest()==im['sha256']
+                  verified+=1
+              (dst/p.name).write_bytes(p.read_bytes())
+          files=list(dst.glob('*'));assert files and verified>0
+          assert sum(x.stat().st_size for x in files)<100*1024*1024
+          print('YUI_PRIVATE_EDITORIAL_SPLIT_SHA_VERIFIED',part,'photo_records',verified,'files',len(files),'bytes',sum(x.stat().st_size for x in files))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: yui-private-editorial-${{ matrix.part }}
+          path: /tmp/output/*
+          retention-days: 14
+          if-no-files-found: error
