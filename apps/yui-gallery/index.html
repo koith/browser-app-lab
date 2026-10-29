@@ -118,12 +118,6 @@ button:focus-visible,a:focus-visible{outline:2px solid #ddd4c7;outline-offset:3p
 .detail-view .version-chip{font-size:9px;top:calc(env(safe-area-inset-top) + 2px)}
 footer{padding:15px 0 25px;justify-content:flex-end}
 @media(max-width:680px){.topbar{height:calc(67px + env(safe-area-inset-top))}.browse-meta{gap:8px}.inventory{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.counter{font-size:10px}.photo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-.vault-actions{display:flex;align-items:center;gap:10px;margin:12px 0 2px;flex-wrap:wrap}
-.vault-actions button{font-size:12px;border:1px solid #494a52;border-radius:8px;background:#25262c;color:#f2f2f6;padding:8px 11px;cursor:pointer}
-.vault-actions button:disabled{opacity:.55;cursor:wait}
-.drive-sync-link{font-size:12px;border:1px solid #494a52;border-radius:8px;background:#25262c;color:#f2f2f6;padding:8px 11px;text-decoration:none}
-#vault-status{font-size:11px;color:#999aa5}
-@media(max-width:680px){.vault-actions{gap:8px;margin-top:10px}.vault-actions button{font-size:11px;padding:7px 9px}#vault-status{font-size:10px}}
 </style>
 </head>
 <body>
@@ -131,13 +125,13 @@ footer{padding:15px 0 25px;justify-content:flex-end}
 <header class="topbar">
  <a href="./" class="logo" aria-label="YUI 갤러리 홈">YUI<span>GALLERY</span></a>
  <div class="detail-heading"><button class="back" id="back" aria-label="화보 목록으로 돌아가기">‹</button><h2 class="detail-title" id="albumname"></h2><span class="counter" id="albumtotal"></span></div>
- <nav class="mainnav" aria-label="이동"><a href="../mimmi-gallery/" target="_blank" rel="noopener noreferrer">밈미 ↗</a><a href="cloud.html">클라우드</a></nav>
+ <nav class="mainnav" aria-label="이동"><a href="../mimmi-gallery/" target="_blank" rel="noopener noreferrer">밈미 ↗</a></nav>
  <button id="search-toggle" class="search-toggle" aria-label="화보 검색 열기" aria-haspopup="dialog" aria-controls="search-dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button>
  <small id="app-version" class="version-chip">v0.1.0-beta.25</small>
 </header>
 <div id="browse">
  <div class="browse-meta"><p class="inventory" id="inventory">화보를 불러오는 중</p><span class="counter" id="total"></span></div>
- <div class="vault-actions"><button id="vault-import" type="button">내 ZIP 여러 개 가져오기</button><a class="drive-sync-link" href="drive-sync.html">내 Drive 원본 연결</a><input id="vault-file" type="file" accept=".zip,application/zip" multiple hidden><span id="vault-status" role="status">이 기기에 저장 · 외부 이미지 서버 불필요</span></div>
+
   <div class="filters"><button id="browse-toggle" class="filter active" type="button" aria-controls="albumgrid publishergrid" aria-pressed="false" aria-label="화보 목록 · 발행처 목록으로 전환"><span id="browse-mode">화보</span><span aria-hidden="true" class="switch-icon"> ⇄</span></button></div>
  <div id="publishergrid" class="grid" hidden></div>
  <div id="albumgrid" class="grid"></div>
@@ -314,32 +308,7 @@ $('lightbox').addEventListener('touchstart',e=>{if(e.touches.length!==1){gesture
 $('lightbox').addEventListener('touchmove',e=>{if(e.touches.length!==1&&gesture)gesture.valid=false},{passive:true});
 $('lightbox').addEventListener('touchcancel',()=>{gesture=null},{passive:true});
 $('lightbox').addEventListener('touchend',e=>{if(e.touches.length){gesture=null;return}const g=gesture;gesture=null;const t=e.changedTouches[0];if(!g?.valid||!t||(visualViewport?.scale||1)>1.01)return;const dx=t.clientX-g.x,dy=t.clientY-g.y;if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.5)step(dx>0?-1:1)},{passive:true});
-const vaultInput=$('vault-file'),vaultButton=$('vault-import'),vaultStatus=$('vault-status');
-const vaultImportResultKey='photo-vault-import-result-yui';
-vaultButton.onclick=()=>vaultInput.click();
-vaultInput.onchange=async()=>{
- const files=Array.from(vaultInput.files||[]);if(!files.length)return;
- vaultButton.disabled=true;
- let imported=0,verifiedRows=0;const failures=[];
- // Sequential processing keeps memory pressure lower on mobile Safari.
- for(const [i,file] of files.entries()){
-  vaultStatus.textContent='ZIP '+(i+1)+' / '+files.length+' · '+file.name;
-  try{
-   const result=await PhotoVault.importZip(file,'yui',message=>{
-    vaultStatus.textContent='ZIP '+(i+1)+' / '+files.length+' · '+message;
-   });
-   imported++;verifiedRows+=result.images;
-  }catch(error){failures.push(file.name+': '+(error?.message||String(error)))}
- }
- vaultButton.disabled=false;vaultInput.value='';
- const detail=failures.length?' · 실패 '+failures.length+'개: '+failures.slice(0,2).join('; '):'';
- const summary=imported?'검증 완료 ZIP '+imported+' / '+files.length+'개 · 사진 '+verifiedRows+'개 항목 처리'+detail:
-   '가져오기 실패: '+failures.slice(0,2).join('; ');
- if(imported){
-  try{sessionStorage.setItem(vaultImportResultKey,summary)}catch{}
-  location.reload();
- }else vaultStatus.textContent=summary;
-};
+// Archive photos are ingested and verified by the private backend. The viewer has no manual import UI.
 Promise.all([
  fetch('stored-albums.json').then(r=>{if(!r.ok)throw Error('stored data');return r.json()}),
  YuiPrivate.albums().then(albums=>({albums})).catch(error=>({albums:[],error:error.message})),
@@ -380,8 +349,7 @@ Promise.all([
  for(const row of combined.values())row.images.sort((a,b)=>(a.number??Number.MAX_SAFE_INTEGER)-(b.number??Number.MAX_SAFE_INTEGER));
  stored=[...combined.values()];
  catalog=stored.slice();
- if(vaultStored.length)vaultStatus.textContent='이 기기의 개인 보관본 '+vaultStored.reduce((n,a)=>n+a.images.length,0)+'장';
- try{const message=sessionStorage.getItem(vaultImportResultKey);if(message){vaultStatus.textContent=message;sessionStorage.removeItem(vaultImportResultKey)}}catch{}
+
  const archivedCount=stored.reduce((n,a)=>n+validImages(a).length,0);
  $('inventory').textContent=archivedCount+'장 · 실제 저장본';
  render();
