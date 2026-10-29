@@ -22,16 +22,16 @@ def fetch(path, auth=True, method="GET", headers=None):
     request=urllib.request.Request(BASE+path,method=method,headers=actual_headers)
     try:
         with urllib.request.urlopen(request,timeout=110) as response:
-            return response.status,dict(response.headers),response.read()
+            return response.status,{k.lower():v for k,v in response.headers.items()},response.read()
     except urllib.error.HTTPError as error:
-        return error.code,dict(error.headers),error.read()
+        return error.code,{k.lower():v for k,v in error.headers.items()},error.read()
 
 for model,route in (("yui","/api/yui"),("mimmi","/api")):
     status,_,body=fetch(route+"/catalog",auth=False)
     assert status==401,(model,"unauthenticated listing must not leak",status)
     status,headers,body=fetch(route+"/catalog")
     assert status==200,(model,"authenticated catalog",status,body[:100])
-    assert headers.get("Access-Control-Allow-Origin")=="https://koith.github.io"
+    assert headers.get("access-control-allow-origin")=="https://koith.github.io"
     catalog=json.loads(body)
     assert catalog.get("model")==model and catalog.get("schema_version")==1
     assert isinstance(catalog.get("albums"),list)
