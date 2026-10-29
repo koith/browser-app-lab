@@ -7,14 +7,17 @@ import json
 from pathlib import Path
 import subprocess
 
-def verify(stage: Path, remote: str, workers: int):
+def verify(stage: Path, remote: str, workers: int, only_staged: bool = False):
     manifest=json.loads((stage/"metadata/catalog.json").read_text(encoding="utf-8"))
     specs=[]
     for album in manifest["albums"]:
         for photo in album["images"]:
             specs.append((photo["key"],photo["bytes"],photo["sha256"]))
             specs.append((photo["preview"],photo["preview_bytes"],photo["preview_sha256"]))
-    if not specs:raise ValueError("No photo bytes to verify")
+    if only_staged:
+        specs = [row for row in specs if (stage / row[0]).is_file()]
+    if not specs and not only_staged:
+        raise ValueError("No photo bytes to verify")
     def readback(row):
         key,size,sha=row
         # Streaming subprocess avoids storing large albums in memory.
@@ -60,6 +63,8 @@ if __name__=="__main__":
     p.add_argument("--stage",type=Path,required=True)
     p.add_argument("--remote",required=True)
     p.add_argument("--workers",type=int,default=8)
+    p.add_argument("--only-staged",action="store_true",
+                   help="For incremental import, only re-read files newly present in local staging")
     a=p.parse_args()
     if not 1<=a.workers<=12:raise SystemExit("workers must be 1..12")
-    verify(a.stage,a.remote,a.workers)
+    verify(a.stage,a.remote,a.workers,a.only_staged)
