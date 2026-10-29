@@ -1,0 +1,82 @@
+name: Keep both galleries connected to stored TeraBox originals
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/gallery-terabox-render-session-sync.yml'
+      - 'apps/mimmi-gallery/cloud/gateway/main.py'
+  schedule:
+    - cron: '*/15 * * * *'
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: galleries-secure-terabox-render-session-sync
+  cancel-in-progress: false
+jobs:
+  synchronize:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 9
+    env:
+      ARCHIVE_COOKIE: ${{ secrets.MIMMI_TERABOX_NDUS }}
+    steps:
+      - name: Securely refresh Render storage session without exposing cookies or viewer passwords
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$ARCHIVE_COOKIE"
+          echo "::add-mask::$ARCHIVE_COOKIE"
+          python - <<'PY'
+          import json
+          import os
+          import time
+          import urllib.error
+          import urllib.request
+
+          origin="https://mimmi-private-gallery-free.onrender.com"
+          audience="gallery-archive-terabox-sync"
+          cookie=os.environ["ARCHIVE_COOKIE"]
+          if len(cookie)<8:
+              raise SystemExit("TeraBox secret missing")
+
+          for attempt in range(1,13):
+              try:
+                  identity_request=urllib.request.Request(
+                      os.environ["ACTIONS_ID_TOKEN_REQUEST_URL"]+"&audience="+audience,
+                      headers={"Authorization":"Bearer "+os.environ["ACTIONS_ID_TOKEN_REQUEST_TOKEN"]})
+                  with urllib.request.urlopen(identity_request,timeout=30) as identity_response:
+                      identity=json.load(identity_response)["value"]
+                  request=urllib.request.Request(
+                      origin+"/internal/terabox-session-refresh",
+                      method="POST",
+                      data=json.dumps({"cookie":cookie}).encode(),
+                      headers={"Authorization":"Bearer "+identity,
+                               "Content-Type":"application/json"})
+                  with urllib.request.urlopen(request,timeout=120) as response:
+                      result=json.load(response)
+                  if result.get("synced") is not True:
+                      raise ValueError("No acknowledged storage refresh")
+                  print("RENDER_TERABOX_SESSION_REFRESHED")
+                  break
+              except urllib.error.HTTPError as error:
+                  print("RENDER_SESSION_REFRESH_HTTP",error.code,"attempt",attempt)
+                  if error.code not in (404,502,503,504):
+                      raise SystemExit("Session refresh rejected")
+              except (urllib.error.URLError,TimeoutError) as error:
+                  print("RENDER_SESSION_REFRESH_NETWORK_RETRY",attempt)
+              if attempt==12:
+                  raise SystemExit("Render storage refresh unavailable")
+              time.sleep(15)
+
+          for model,path,expected in (
+              ("yui","/api/yui/catalog",2700),
+              ("mimmi","/api/catalog",2600)):
+              with urllib.request.urlopen(origin+path,timeout=115) as response:
+                  catalog=json.load(response)
+              count=sum(len(album["images"]) for album in catalog.get("albums",[]))
+              if catalog.get("model")!=model or count<expected:
+                  raise SystemExit("Gallery catalog verification failed: "+model)
+              print("CONNECTED_GALLERY",model,"albums",len(catalog["albums"]),"images",count)
+          PY
+          echo 'Both passwordless galleries are connected to verified TeraBox albums.' >> "$GITHUB_STEP_SUMMARY"

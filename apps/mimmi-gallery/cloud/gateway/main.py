@@ -15,6 +15,7 @@ import re
 import os
 import secrets
 import time
+import jwt
 from pathlib import PurePosixPath
 from typing import AsyncGenerator
 
@@ -269,6 +270,96 @@ async def yui_media(album_id: str, image_num: int, kind: str, download: bool = Q
         headers["Content-Disposition"] = f'attachment; filename="{album_id}-{image_num:05d}.{ext}"'
     return StreamingResponse(iter([payload]), media_type=mime, headers=headers)
 
+
+
+# A signed GitHub Actions OIDC identity (not a password supplied by visitors)
+# allows the same working private TeraBox session used in archive QA to be
+# refreshed securely on this Render process. Never store it in Pages or logs.
+_SYNC_AUDIENCE = "gallery-archive-terabox-sync"
+_SYNC_WORKFLOW = (
+    "koith/browser-app-lab/.github/workflows/"
+    "gallery-terabox-render-session-sync.yml@refs/heads/main"
+)
+_SYNC_JWKS = jwt.PyJWKClient(
+    "https://token.actions.githubusercontent.com/.well-known/jwks",
+    cache_jwk_set=True, lifespan=3600
+)
+_sync_lock = asyncio.Lock()
+
+
+def _verify_sync_identity(value: str) -> bool:
+    if not value or len(value) > 12000:
+        return False
+    try:
+        header = jwt.get_unverified_header(value)
+        if header.get("alg") != "RS256" or any(
+            k in header for k in ("jku", "jwk", "x5u")
+        ):
+            return False
+        key = _SYNC_JWKS.get_signing_key_from_jwt(value).key
+        claims = jwt.decode(
+            value, key, algorithms=["RS256"], audience=_SYNC_AUDIENCE,
+            issuer="https://token.actions.githubusercontent.com",
+            leeway=30,
+            options={"require": ["exp", "iat", "iss", "aud", "sub"]},
+        )
+        return (
+            claims.get("sub") == "repo:koith/browser-app-lab:ref:refs/heads/main"
+            and claims.get("repository") == "koith/browser-app-lab"
+            and str(claims.get("repository_id")) == "1284121913"
+            and claims.get("ref") == "refs/heads/main"
+            and claims.get("workflow_ref") == _SYNC_WORKFLOW
+        )
+    except Exception:
+        return False
+
+
+@app.post("/internal/terabox-session-refresh")
+async def sync_archive_session(request: Request):
+    authorization = request.headers.get("Authorization", "")
+    if not authorization.startswith("Bearer ") or not _verify_sync_identity(
+        authorization[len("Bearer "):]
+    ):
+        raise HTTPException(status_code=403, detail="Invalid workflow identity")
+    payload = await request.body()
+    if len(payload) > 18000:
+        raise HTTPException(status_code=413, detail="Request too large")
+    try:
+        cookie = json.loads(payload).get("cookie")
+    except (ValueError, TypeError, AttributeError):
+        raise HTTPException(status_code=400, detail="Invalid session payload")
+    if (
+        not isinstance(cookie, str) or not (8 <= len(cookie) <= 16000)
+        or any(ord(ch) < 32 or ord(ch) == 127 for ch in cookie)
+    ):
+        raise HTTPException(status_code=400, detail="Invalid storage session")
+    async with _sync_lock:
+        old_cookie = os.environ.get("RCLONE_CONFIG_ARCHIVE_COOKIE", "")
+        os.environ["RCLONE_CONFIG_ARCHIVE_COOKIE"] = cookie
+        try:
+            for model, remote in (("mimmi", REMOTE), ("yui", YUI_REMOTE)):
+                catalog_raw = await rclone_bytes(
+                    "metadata/catalog.json", 6_000_000, remote=remote
+                )
+                catalog_data = json.loads(catalog_raw)
+                if (
+                    catalog_data.get("model") != model
+                    or not isinstance(catalog_data.get("albums"), list)
+                ):
+                    raise ValueError("Incompatible archive")
+        except Exception:
+            os.environ["RCLONE_CONFIG_ARCHIVE_COOKIE"] = old_cookie
+            raise HTTPException(
+                status_code=422, detail="TeraBox session validation failed"
+            )
+        global COOKIE
+        COOKIE = cookie
+        _cache.update(catalog=None, time=0.0)
+        _yui_cache.update(catalog=None, time=0.0)
+    return JSONResponse(
+        {"synced": True, "models": ["yui", "mimmi"]},
+        headers={"Cache-Control": "no-store"},
+    )
 
 # Owner-only mobile gallery. It preserves all prior /api/* bearer clients and
 # adds an HttpOnly, same-origin session for Safari, not public photo URLs.
