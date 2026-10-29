@@ -26,10 +26,8 @@ with sync_playwright() as pw:
         )
         key=f"{model}-owner-session"
         context.add_init_script(
-            """({key,api,token}) => {"""
-            """sessionStorage.setItem(key, JSON.stringify({api, token}));"""
-            """}""",
-            {"key":key,"api":API,"token":TOKEN}
+            "sessionStorage.setItem(" + json.dumps(key) + ", JSON.stringify("
+            + json.dumps({"api": API, "token": TOKEN}) + "));"
         )
         page=context.new_page()
         page.goto(f"http://localhost:8765/apps/{model}-gallery/",wait_until="domcontentloaded",timeout=30000)
