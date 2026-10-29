@@ -1,5 +1,10 @@
 name: Gallery TeraBox Private Connection Check
 on:
+  # Run exactly when this workflow file is updated on main; still allows manual checks.
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/gallery-terabox-connection-check.yml'
   workflow_dispatch:
     inputs:
       model:
@@ -35,7 +40,7 @@ jobs:
           echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
       - name: Check configured TeraBox authentication without revealing cookies
         env:
-          SELECTED_MODEL: ${{ inputs.model }}
+          SELECTED_MODEL: ${{ inputs.model || 'both' }}
         shell: bash
         run: |
           set -euo pipefail
