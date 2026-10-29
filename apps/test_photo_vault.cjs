@@ -53,6 +53,16 @@ const engine={chromium,webkit}[engineName];if(!engine)throw Error('Unknown engin
    const expanded=await page.evaluate(async m=>PhotoVault.albums(m).then(rows=>rows.find(a=>a.id==='vault-fixture-'+m)),model);
    if(!expanded||expanded.images.length!==2||expanded.images[0].number!==1||expanded.images[1].number!==2)
      throw Error('Incremental ZIP overwrote previous photos or collapsed duplicate SHA positions');
+   // The same two numbered photos must survive a compressed Actions wrapper ZIP.
+   // The wrapper has no root manifest and contains two nested private-import ZIPs.
+   await Promise.all([
+     page.waitForEvent('framenavigated',{timeout:25000}),
+     page.locator('#vault-file').setInputFiles('/tmp/photo-vault-qa/'+model+'-actions.zip')
+   ]);
+   await page.waitForFunction(n=>document.querySelector('#inventory')?.textContent?.startsWith(n+'장'),baseline+2,{timeout:15000});
+   const wrapped=await page.evaluate(async m=>PhotoVault.albums(m).then(rows=>rows.find(a=>a.id==='vault-fixture-'+m)),model);
+   if(!wrapped||wrapped.images.length!==2||wrapped.images[0].number!==1||wrapped.images[1].number!==2)
+     throw Error('Actions wrapper ZIP import did not preserve numbered image positions');
    // Reimporting an older partial ZIP must not erase the additional second photo.
    await Promise.all([
      page.waitForEvent('framenavigated',{timeout:25000}),
@@ -72,6 +82,6 @@ const engine={chromium,webkit}[engineName];if(!engine)throw Error('Unknown engin
   await page.goto('http://127.0.0.1:8765/yui-gallery/');
   await page.waitForFunction(n=>document.querySelector('#inventory')?.textContent?.startsWith(n+'장'),baselines.yui+2);
   if(errors.length||external.length)throw Error('Browser errors or source media requested '+JSON.stringify({errors,external:external.slice(0,5)}));
-  console.log('TWO_MODELS_SHA_VERIFIED_ZIP_IMPORT_'+engineName.toUpperCase()+'_PASS',JSON.stringify({yui:baselines.yui+2,mimmi:baselines.mimmi+2,persistent:true,incrementalMerged:true,duplicateShaNumbersKept:true,corruptRejected:true,externalImageRequests:0}));
+  console.log('TWO_MODELS_SHA_VERIFIED_ZIP_IMPORT_'+engineName.toUpperCase()+'_PASS',JSON.stringify({yui:baselines.yui+2,mimmi:baselines.mimmi+2,persistent:true,incrementalMerged:true,duplicateShaNumbersKept:true,nestedActionsZip:true,corruptRejected:true,externalImageRequests:0}));
  }finally{await browser.close()}
 })().catch(e=>{console.error(e.stack||e);process.exit(1)});
