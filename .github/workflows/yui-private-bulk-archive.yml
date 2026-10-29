@@ -1,14 +1,19 @@
 name: Yui Public Sources To Private Original-Byte Archives
 on:
+  schedule:
+    # Revisit all published public source-indexed photo positions daily; save real bytes only.
+    - cron: '8 3 * * *'
   push:
     branches: [main]
     paths:
       - 'apps/yui-gallery/collect_private_batch.py'
+      - 'apps/yui-gallery/additional-source-albums.json'
       - 'apps/yui-gallery/test_collect_private_batch.py'
       - '.github/workflows/yui-private-bulk-archive.yml'
   pull_request:
     paths:
       - 'apps/yui-gallery/collect_private_batch.py'
+      - 'apps/yui-gallery/additional-source-albums.json'
       - 'apps/yui-gallery/test_collect_private_batch.py'
       - '.github/workflows/yui-private-bulk-archive.yml'
   workflow_dispatch:
