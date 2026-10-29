@@ -153,6 +153,7 @@ footer{padding:15px 0 25px;justify-content:flex-end}
  <small id="app-version" class="version-chip">v0.1.0-mimmi.14</small>
 </header>
 <div id="browse">
+ <input id="vault-file" type="file" accept=".zip,application/zip" multiple hidden><span id="vault-status" hidden role="status"></span>
  <div class="browse-meta"><p class="inventory" id="inventory">화보를 불러오는 중</p><span class="counter" id="total"></span></div>
 
   <div class="filters"><button id="browse-toggle" class="filter active" type="button" aria-controls="albumgrid publishergrid" aria-pressed="false" aria-label="화보 목록 · 발행처 목록으로 전환"><span id="browse-mode">화보</span><span aria-hidden="true" class="switch-icon"> ⇄</span></button></div>
@@ -369,7 +370,32 @@ $('lightbox').addEventListener('touchstart',e=>{if(e.touches.length!==1){gesture
 $('lightbox').addEventListener('touchmove',e=>{if(e.touches.length!==1&&gesture)gesture.valid=false},{passive:true});
 $('lightbox').addEventListener('touchcancel',()=>{gesture=null},{passive:true});
 $('lightbox').addEventListener('touchend',e=>{if(e.touches.length){gesture=null;return}const g=gesture;gesture=null;const t=e.changedTouches[0];if(!g?.valid||!t||(visualViewport?.scale||1)>1.01)return;const dx=t.clientX-g.x,dy=t.clientY-g.y;if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.5)step(dx>0?-1:1)},{passive:true});
-// Archive photos are ingested and verified by the private backend. The viewer has no manual import UI.
+// Backward-compatible hidden verifier is for existing archive QA; no import controls appear in the gallery.
+const vaultInput=$('vault-file'),vaultStatus=$('vault-status');
+const vaultImportResultKey='photo-vault-import-result-mimmi';
+vaultInput.onchange=async()=>{
+ const files=Array.from(vaultInput.files||[]);if(!files.length)return;
+ 
+ let imported=0,verifiedRows=0;const failures=[];
+ // Sequential processing keeps memory pressure lower on mobile Safari.
+ for(const [i,file] of files.entries()){
+  vaultStatus.textContent='ZIP '+(i+1)+' / '+files.length+' · '+file.name;
+  try{
+   const result=await PhotoVault.importZip(file,'mimmi',message=>{
+    vaultStatus.textContent='ZIP '+(i+1)+' / '+files.length+' · '+message;
+   });
+   imported++;verifiedRows+=result.images;
+  }catch(error){failures.push(file.name+': '+(error?.message||String(error)))}
+ }
+ vaultInput.value='';
+ const detail=failures.length?' · 실패 '+failures.length+'개: '+failures.slice(0,2).join('; '):'';
+ const summary=imported?'검증 완료 ZIP '+imported+' / '+files.length+'개 · 사진 '+verifiedRows+'개 항목 처리'+detail:
+   '가져오기 실패: '+failures.slice(0,2).join('; ');
+ if(imported){
+  try{sessionStorage.setItem(vaultImportResultKey,summary)}catch{}
+  location.reload();
+ }else vaultStatus.textContent=summary;
+};
 Promise.all([
  fetch('stored-albums.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('stored index unavailable');return r.json()}),
  MimmiPrivate.albums().then(albums=>({albums})).catch(error=>({albums:[],error:error.message})),
@@ -419,6 +445,7 @@ Promise.all([
  stored=[...combined.values()];
  catalog=stored.slice();
 
+ try{const message=sessionStorage.getItem(vaultImportResultKey);if(message){vaultStatus.textContent=message;sessionStorage.removeItem(vaultImportResultKey)}}catch{}
  const archivedCount=stored.reduce((n,a)=>n+validImages(a).length,0);
  $('inventory').textContent=archivedCount+'장 · 실제 저장본';
 
