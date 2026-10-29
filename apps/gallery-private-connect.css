@@ -1,0 +1,31 @@
+/* Owner-only TeraBox connector. This panel never renders private media URLs. */
+.private-gallery-connector{
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;
+  gap:12px;padding:14px 16px;margin:14px 0;
+  border:1px solid #41454d;border-radius:12px;background:#1a1d22;color:#f5f5f6
+}
+.private-gallery-connector[hidden]{display:none}
+.private-gallery-connector .pg-copy{flex:1 1 240px;min-width:0}
+.private-gallery-connector .pg-title{font-size:14px;font-weight:700;margin:0 0 5px}
+.private-gallery-connector .pg-caption{font-size:12px;line-height:1.6;color:#afb3bc;margin:0}
+.private-gallery-connector button{
+  font:inherit;font-size:12px;min-height:37px;
+  color:#f7f7fa;background:#292d35;border:1px solid #626772;
+  border-radius:8px;padding:8px 13px;cursor:pointer
+}
+.private-gallery-connector button:disabled{opacity:.5;cursor:wait}
+.private-gallery-connector .pg-action{background:#d8dce6;color:#171a20;border-color:#d8dce6;font-weight:700}
+.private-gallery-connector .pg-status{flex:0 0 100%;margin:0;font-size:11px;color:#d7c79a;line-height:1.6;overflow-wrap:anywhere}
+.private-gallery-connector .pg-status[data-good="true"]{color:#b2dec3}
+.private-gallery-connector .pg-form{display:flex;flex-wrap:wrap;align-items:center;gap:8px;width:100%}
+.private-gallery-connector .pg-form[hidden]{display:none}
+.private-gallery-connector input[type=password]{
+  font:inherit;font-size:16px;flex:1 1 190px;min-width:0;min-height:40px;
+  border:1px solid #626772;background:#101217;color:#f9f9fb;padding:9px 11px;border-radius:8px
+}
+.private-gallery-connector a{color:#c4cadb;font-size:11px;text-decoration:underline}
+@media(max-width:680px){
+  .private-gallery-connector{padding:12px;gap:9px}
+  .private-gallery-connector .pg-action{width:100%}
+  .private-gallery-connector .pg-form button{flex:1}
+}
