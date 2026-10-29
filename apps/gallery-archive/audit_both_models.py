@@ -83,6 +83,7 @@ def rows(root: Path, model: str, owner: Path | None = None) -> dict:
 
     owner_count = 0
     owner_albums = 0
+    public_private_position_conflicts = set()
     if owner is not None and owner.is_file():
         o = read_json(owner)
         if o.get("model") != model or o.get("schema_version") != 1:
@@ -97,8 +98,12 @@ def rows(root: Path, model: str, owner: Path | None = None) -> dict:
                 position = photo_number(p, i)
                 old = saved[album["id"]].get(position)
                 if old is not None and old != p["sha256"]:
-                    raise ValueError(f"Physical/public position conflict in {album['id']}")
-                saved[album["id"]][position] = p["sha256"]
+                    # Re-encoded previews, alternate editions and originals can
+                    # have different SHA in the same numbered slot. Audit this,
+                    # never silently merge or replace a published image.
+                    public_private_position_conflicts.add((album["id"], position))
+                else:
+                    saved[album["id"]][position] = p["sha256"]
                 stored_sha.add(p["sha256"])
                 owner_count += 1
 
@@ -172,6 +177,7 @@ def rows(root: Path, model: str, owner: Path | None = None) -> dict:
         "private_catalog_entries": owner_count if owner is not None and owner.exists() else None,
         "private_catalog_albums": owner_albums if owner is not None and owner.exists() else None,
         "combined_unique_album_number_positions": saved_positions,
+        "public_private_position_conflicts_for_manual_identity_review": len(public_private_position_conflicts),
         "research_album_ids": len(work_ids),
         "research_distinct_sha_candidates": len(known_source_sha),
         "research_distinct_sha_not_in_saved_catalog": len(unarchived_shas),
