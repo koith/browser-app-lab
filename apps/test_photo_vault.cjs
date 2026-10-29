@@ -39,9 +39,11 @@ const engine={chromium,webkit}[engineName];if(!engine)throw Error('Unknown engin
    if(!expanded||expanded.images.length!==2||expanded.images[0].number!==1||expanded.images[1].number!==2)
      throw Error('Incremental ZIP overwrote previous photos or collapsed duplicate SHA positions');
    // Reimporting an older partial ZIP must not erase the additional second photo.
-   await page.locator('#vault-file').setInputFiles(importName);
-   await page.waitForFunction(()=>document.querySelector('#vault-status')?.textContent?.includes('검증 완료'),{timeout:15000});
-   await page.reload();
+   await Promise.all([
+     page.waitForEvent('framenavigated',{timeout:25000}),
+     page.locator('#vault-file').setInputFiles(importName)
+   ]);
+   // Import success triggers its own navigation. Do not call reload concurrently.
    await page.waitForFunction(n=>document.querySelector('#inventory')?.textContent?.startsWith(n+'장'),baseline+2,{timeout:15000});
    await page.locator('#vault-file').setInputFiles('/tmp/photo-vault-qa/'+model+'-corrupt.zip');
    await page.waitForFunction(()=>document.querySelector('#vault-status')?.textContent?.includes('가져오기 실패'),{timeout:15000});
