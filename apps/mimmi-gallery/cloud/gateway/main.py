@@ -143,7 +143,9 @@ async def health():
 
 @app.get("/api/catalog")
 async def catalog():
-    return await get_catalog()
+    return JSONResponse(await get_catalog(), headers={
+        "Cache-Control": "private, max-age=180, stale-while-revalidate=300"
+    })
 
 
 @app.get("/api/media/{album_id}/{image_num}/{kind}")
@@ -232,7 +234,9 @@ async def yui_catalog_bytes():
 
 @app.get("/api/yui/catalog")
 async def yui_catalog():
-    return await yui_catalog_bytes()
+    return JSONResponse(await yui_catalog_bytes(), headers={
+        "Cache-Control": "private, max-age=180, stale-while-revalidate=300"
+    })
 
 
 @app.get("/api/yui/media/{album_id}/{image_num}/{kind}")
