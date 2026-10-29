@@ -120,7 +120,7 @@ const engine={chromium,webkit}[engineName];if(!engine)throw Error('Unknown engin
     // secrets or Drive network requests ever enter CI.
     await page.route('https://accounts.google.com/gsi/client',r=>r.fulfill({
       status:200,contentType:'application/javascript',
-      body:'window.google={accounts:{oauth2:{initTokenClient:({callback})=>({requestAccessToken:()=>callback({access_token:"fixture-token"})})}}}};'
+      body:'window.google={accounts:{oauth2:{initTokenClient:({callback})=>({requestAccessToken:()=>callback({access_token:"fixture-token"})})}}};'
     }));
     await page.route('https://www.googleapis.com/drive/v3/**',async r=>{
       if(r.request().headers().authorization!=='Bearer fixture-token')
