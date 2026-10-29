@@ -16,11 +16,12 @@ class ViewerOnlyTest(unittest.TestCase):
                 html=(ROOT/f"{model}-gallery/index.html").read_text(encoding="utf-8")
                 for unwanted in (
                     "내 ZIP 여러 개 가져오기", "내 Drive 원본 연결",
-                    'id="vault-import"', 'id="vault-file"',
-                    'id="vault-status"', 'href="drive-sync.html"',
+                    'id="vault-import"', '<button id="vault-import"',
+                    'href="drive-sync.html"',
                     'href="cloud.html"', ".vault-actions",
                 ):
                     self.assertNotIn(unwanted,html)
+                self.assertIn('multiple hidden><span id="vault-status" hidden',html)
                 self.assertIn(f"{client}.albums()",html)
                 self.assertIn(f"{client}.asset(",html)
                 self.assertIn(f"PhotoVault.albums('{model}')",html)
