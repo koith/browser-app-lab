@@ -13,6 +13,13 @@ on:
     paths:
       - 'apps/gallery-archive/qa_real_gallery_browser.py'
       - 'apps/gallery-archive/test_viewer_only_ui.py'
+      - 'apps/mimmi-gallery/cloud/gateway/main.py'
+      - 'apps/mimmi-gallery/cloud/gateway/portal.py'
+      - 'apps/mimmi-gallery/cloud/gateway/requirements.txt'
+      - 'apps/mimmi-gallery/cloud/gateway/Dockerfile'
+      - 'apps/mimmi-gallery/cloud/test_first_party_portal.py'
+      - 'apps/yui-gallery/owner-media.js'
+      - 'apps/mimmi-gallery/owner-media.js'
       - 'apps/yui-gallery/index.html'
       - 'apps/mimmi-gallery/index.html'
       - '.github/workflows/gallery-real-private-browser-qa.yml'
@@ -21,6 +28,13 @@ on:
     paths:
       - 'apps/gallery-archive/qa_real_gallery_browser.py'
       - 'apps/gallery-archive/test_viewer_only_ui.py'
+      - 'apps/mimmi-gallery/cloud/gateway/main.py'
+      - 'apps/mimmi-gallery/cloud/gateway/portal.py'
+      - 'apps/mimmi-gallery/cloud/gateway/requirements.txt'
+      - 'apps/mimmi-gallery/cloud/gateway/Dockerfile'
+      - 'apps/mimmi-gallery/cloud/test_first_party_portal.py'
+      - 'apps/yui-gallery/owner-media.js'
+      - 'apps/mimmi-gallery/owner-media.js'
       - 'apps/yui-gallery/index.html'
       - 'apps/mimmi-gallery/index.html'
       - '.github/workflows/gallery-real-private-browser-qa.yml'
@@ -37,6 +51,8 @@ jobs:
       - run: |
           python -m py_compile apps/gallery-archive/qa_real_gallery_browser.py
           python apps/gallery-archive/test_viewer_only_ui.py
+          python -m pip install -r apps/mimmi-gallery/cloud/gateway/requirements.txt
+          python apps/mimmi-gallery/cloud/test_first_party_portal.py
   real-original-gallery-chromium:
     needs: private-photo-browser-code-qa
     if: |
