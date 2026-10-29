@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/gallery-comprehensive-backfill.yml'
+      - 'apps/gallery-archive/audit_both_models.py'
   schedule:
     - cron: '8 19 * * *'
 permissions:
@@ -115,6 +116,10 @@ jobs:
             gallery-public-social-bulk.yml
             mimmi-stored-public-gallery.yml
             gallery-terabox-remote-inventory.yml
+            yui-dynamic-archive.yml
+            mimmi-official-archive.yml
+            mimmi-v2ph-actor-expansion.yml
+            mimmi-pixibb-alias-search.yml
           )
           failures=0
           for workflow in "${workflows[@]}"; do
