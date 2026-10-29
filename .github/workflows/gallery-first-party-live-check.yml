@@ -1,0 +1,45 @@
+name: Gallery Real Render First-Party Owner Login Smoke
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/mimmi-gallery/cloud/gateway/portal.py'
+      - 'apps/mimmi-gallery/cloud/gateway/main.py'
+      - 'apps/mimmi-gallery/cloud/gateway/Dockerfile'
+      - '.github/workflows/gallery-first-party-live-check.yml'
+permissions:
+  contents: read
+jobs:
+  deployed-first-party-owner-login:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - name: Confirm live private Render gallery has real configured gateway and no anonymous leak
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://mimmi-private-gallery-free.onrender.com'
+          # Free Render instances may wake slowly; retry without storing tokens.
+          for attempt in $(seq 1 12); do
+            health="$(curl -fsS --max-time 45 "$base/api/health" || true)"
+            yui="$(curl -fsS --max-time 45 "$base/gallery/yui/" || true)"
+            mimmi="$(curl -fsS --max-time 45 "$base/gallery/mimmi/" || true)"
+            if [[ -n "$health" && "$yui" == *'name="code"'* && "$mimmi" == *'name="code"'* ]]; then break; fi
+            sleep 15
+          done
+          export GALLERY_HEALTH="$health"
+          python - <<'PY'
+          import json,os
+          data=json.loads(os.environ['GALLERY_HEALTH'])
+          if data.get('configured') is not True:
+              raise SystemExit('LIVE_RENDER_OWNER_STORAGE_NOT_CONFIGURED')
+          print('LIVE_RENDER_STORAGE_CONFIGURED_AND_LOGIN_PAGE_REACHABLE')
+          PY
+          [[ "$yui" == *'name="code"'* && "$mimmi" == *'name="code"'* ]]
+          [[ "$yui" != *'내 ZIP 여러 개 가져오기'* && "$mimmi" != *'내 Drive 원본 연결'* ]]
+          for url in "$base/api/catalog" "$base/api/yui/catalog"; do
+            status="$(curl -sS -o /dev/null -w '%{http_code}' --max-time 45 "$url")"
+            test "$status" = 401 || { echo "::error::Unauthenticated catalog not protected: $status"; exit 1; }
+          done
+          echo 'LIVE_RENDER_FIRST_PARTY_LOGIN_AND_PRIVATE_CATALOG_GUARD_PASS' >> "$GITHUB_STEP_SUMMARY"
