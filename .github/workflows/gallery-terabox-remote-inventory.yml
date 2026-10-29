@@ -1,0 +1,56 @@
+name: Gallery TeraBox Remote Physical Photo Inventory
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/gallery-terabox-remote-inventory.yml'
+permissions:
+  contents: read
+jobs:
+  count-real-cloud-objects:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      YUI_COOKIE: ${{ secrets.YUI_TERABOX_COOKIE }}
+      MIMMI_COOKIE: ${{ secrets.MIMMI_TERABOX_NDUS }}
+      RCLONE_CONFIG_ARCHIVE_TYPE: terabox
+    steps:
+      - name: Install pinned TeraBox client without showing cookies
+        run: |
+          set -euo pipefail
+          curl -fsSL 'https://github.com/gulp79/rclone-extra/releases/download/v1.75.2-extra/rclone-linux-amd64.zip' -o "$RUNNER_TEMP/rclone.zip"
+          echo "78855325a2a8d83b3feee3a8363d32e1211babbf4cda6356fa8ca5f472075062  $RUNNER_TEMP/rclone.zip" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/unpack" "$RUNNER_TEMP/bin"
+          unzip -q "$RUNNER_TEMP/rclone.zip" -d "$RUNNER_TEMP/unpack"
+          f="$(find "$RUNNER_TEMP/unpack" -type f -name rclone -print -quit)"
+          install -m 755 "$f" "$RUNNER_TEMP/bin/rclone"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+      - name: Read-only count of private physically present images
+        shell: bash
+        run: |
+          set -euo pipefail
+          for model in yui mimmi; do
+            if [[ "$model" == yui ]]; then
+              export RCLONE_CONFIG_ARCHIVE_COOKIE="$YUI_COOKIE"
+              remote="archive:YuiArchive"
+            else
+              export RCLONE_CONFIG_ARCHIVE_COOKIE="$MIMMI_COOKIE"
+              remote="archive:MimmiArchive"
+            fi
+            test -n "$RCLONE_CONFIG_ARCHIVE_COOKIE"
+            echo "::add-mask::$RCLONE_CONFIG_ARCHIVE_COOKIE"
+            originals=0
+            previews=0
+            if rclone lsf "$remote/originals" --recursive --files-only --timeout=40s --retries=1 > "$RUNNER_TEMP/$model-originals.txt" 2>"$RUNNER_TEMP/remote-error"; then
+              originals="$(wc -l < "$RUNNER_TEMP/$model-originals.txt" | xargs)"
+            fi
+            if rclone lsf "$remote/previews" --recursive --files-only --timeout=40s --retries=1 > "$RUNNER_TEMP/$model-previews.txt" 2>"$RUNNER_TEMP/remote-error"; then
+              previews="$(wc -l < "$RUNNER_TEMP/$model-previews.txt" | xargs)"
+            fi
+            echo "### $model TeraBox object inventory" >> "$GITHUB_STEP_SUMMARY"
+            echo "- Real uploaded original FILES (not SHA-validated yet): $originals" >> "$GITHUB_STEP_SUMMARY"
+            echo "- Real uploaded preview FILES (not SHA-validated yet): $previews" >> "$GITHUB_STEP_SUMMARY"
+            echo "- Completed gallery catalog: not assumed until readback job publishes metadata" >> "$GITHUB_STEP_SUMMARY"
+            echo "TERABOX_REMOTE_$model: ORIGINALS=$originals PREVIEWS=$previews"
+          done
