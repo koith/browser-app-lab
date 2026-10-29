@@ -33,10 +33,10 @@ class MissingCandidatesTests(unittest.TestCase):
         self.assertEqual([[p["number"] for p in a["images"]] for a in batches],
                          [[2, 3], [1], [1]])
 
-    def test_same_position_different_byte_sha_remains_candidate(self):
+    def test_same_position_different_sha_requires_identity_review(self):
         batches, count = select_missing(self.source, {("album-a", 3, C)}, 0, 1)
-        self.assertEqual(count, 6)
-        self.assertIn(3, [p["number"] for p in batches[0]["images"]])
+        self.assertEqual(count, 5)
+        self.assertNotIn(3, [p["number"] for p in batches[0]["images"]])
 
     def test_batches_partition_without_losing_duplicate_shas(self):
         first, first_total = select_missing(self.source, set(), 0, 2)
@@ -53,7 +53,7 @@ class MissingCandidatesTests(unittest.TestCase):
         self.assertEqual(positions, {("album-a", 1, A), ("album-a", 2, A),
                                       ("album-b", 1, C)})
         batches, count = select_missing(self.source, positions, 0, 1)
-        self.assertEqual(count, 4)
+        self.assertEqual(count, 3)
         self.assertEqual(len(batches[0]["images"]), 1)
 
     def test_source_rejects_wrong_model_or_research_incomplete(self):
