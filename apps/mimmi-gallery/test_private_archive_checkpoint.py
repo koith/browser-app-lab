@@ -79,5 +79,52 @@ class CheckpointTests(unittest.TestCase):
             self.assertFalse(partial["complete"])
             self.assertTrue(complete["complete"])
 
+    def test_published_fallback_sha_matches_but_restricted_origin_not_retried(self):
+        from io import BytesIO
+        from PIL import Image
+        from collect_private_batch import verify_one
+        import hashlib
+        image=Image.new("RGB",(480,640),(120,80,30))
+        buff=BytesIO();image.save(buff,format="JPEG",quality=90)
+        raw=buff.getvalue()
+        sha=hashlib.sha256(raw).hexdigest()
+        calls=[]
+        class Response:
+            status_code=200
+            def __enter__(self):return self
+            def __exit__(self,*args):return False
+            def iter_content(self,chunk_size):yield raw
+        def fake_request(url,**kwargs):
+            calls.append(url)
+            return Response()
+        item={"number":2,"url":"https://cdn.jliji.com/not-retry.jpg",
+              "alternate_source_urls":["https://img-jp-a.cdnimg.vip/korea/public.jpg"],
+              "sha256":sha,"bytes":len(raw),"width":480,"height":640}
+        with patch("collect_private_batch.requests.get",side_effect=fake_request):
+            verified,error=verify_one(item,"https://www.xiutu.me/public-album")
+        self.assertIsNone(error)
+        self.assertEqual(verified[0]["sha256"],sha)
+        self.assertEqual(calls,["https://img-jp-a.cdnimg.vip/korea/public.jpg"])
+
+    def test_public_alternate_never_accepted_if_sha_differs(self):
+        from io import BytesIO
+        from PIL import Image
+        from collect_private_batch import verify_one
+        import hashlib
+        im=Image.new("RGB",(480,640));b=BytesIO();im.save(b,format="JPEG")
+        raw=b.getvalue()
+        class Response:
+            status_code=200
+            def __enter__(self):return self
+            def __exit__(self,*args):return False
+            def iter_content(self,chunk_size):yield raw
+        item={"number":1,"url":"https://cdn.jliji.com/not-retry.jpg",
+              "alternate_source_urls":["https://img-jp-a.cdnimg.vip/korea/wrong.jpg"],
+              "sha256":"a"*64,"bytes":len(raw),"width":480,"height":640}
+        with patch("collect_private_batch.requests.get",return_value=Response()):
+            verified,error=verify_one(item,"https://www.xiutu.me/public-album")
+        self.assertIsNone(verified)
+        self.assertEqual(error["reason"],"sha256_or_byte_length_mismatch")
+
 if __name__=="__main__":
     unittest.main()
