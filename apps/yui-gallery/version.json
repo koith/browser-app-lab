@@ -1,5 +1,5 @@
 {
-  "version": "v0.1.0-beta.20",
+  "version": "v0.1.0-beta.21",
   "date": "2026-10-29",
   "policy": {
     "monthly_charge_krw": 0,
@@ -87,7 +87,9 @@
     "source_hosted_gallery_image_entries": 2909,
     "gallery_physically_stored_pages_images": 23,
     "gallery_live_source_hotlinks": 0,
-    "gallery_private_gateway_connected_images": 0
+    "gallery_private_gateway_connected_images": 0,
+    "browser_vault_import_images": 0,
+    "private_drive_backup_verified_individual_photos": 218
   },
   "notes": [
     "TeraBox account is not connected; do not claim a cloud gallery or automatic upload is live.",
@@ -118,7 +120,8 @@
     "beta.17 fills every album thumbnail with object-fit:cover and retains the reviewed face position. Remove the two legacy contain settings that left side gutters on cn-yuntu8/cn-yingyuge. Only list presentation changes: original image bytes, image choices, full viewer, in-album photo grid, publisher logos and photo order remain unchanged. New photograph files and high-resolution replacements: zero.",
     "beta.18 collects 683 unchanged individual input files and selects 427 newly verified larger same-frame files for six existing works: Thru Thru 117/117, Yui Vol.2 42/42, Wet 79/80, RAMEN 50/125, Kuro 35/58 and Yui Vol.3 104/106. Retain the already larger RAMEN 75, Kuro 23 and Vol.3 two files; Wet photo2 remains a full-frame match still to obtain. Compare 90/270 degree source orientation and correct display with CSS without reencoding or changing original URLs, hashes or encoded dimensions. Two named model indexes and explicitly credited article bodies extend the free collector. No new complete books, publisher masters or personal-cloud verification are claimed; highest resolution remains under review.",
     "beta.19 displays explicit image-load failure states in album cards, aligned photo grids and the viewer. The user reported HTTP 451 from cdn.jliji.com in Korea; a cross-origin image error cannot reveal its actual status and is not claimed to be 451. Do not automatically re-request a failed image from that reported origin when opening its viewer, and retain the original direct open link. No proxy, alternate origin, image replacement, new acquisition, legal-restriction bypass or restored-access claim. CI success outside the affected region does not verify Korean access.",
-    "beta.20 gallery: only physically stored SHA-256 files or authenticated owner-backed bytes count as gallery images. Source URLs are research records, not active photos."
+    "beta.20 gallery: only physically stored SHA-256 files or authenticated owner-backed bytes count as gallery images. Source URLs are research records, not active photos.",
+    "beta.21: both galleries accept a SHA-256-verified user ZIP and persist JPEG bytes in per-device IndexedDB. Private Drive backup 218 images is packaged separately and is not falsely counted as online imported photos until the user imports the file on their device."
   ],
   "archiving_engine": {
     "mode": "individual_files",
