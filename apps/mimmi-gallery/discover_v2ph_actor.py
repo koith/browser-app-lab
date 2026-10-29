@@ -122,7 +122,10 @@ def run(max_pages=8,max_albums=70,max_samples=180,max_album_pages=35,batch_index
     candidates=sorted(catalog,key=lambda x:x["id"])
     discovered_work_count=len(candidates)
     if batch_size>0:
-        start=batch_index*batch_size
+        # Cycle through *all* discovered works, even if an actor has fewer
+        # albums than the configured maximum. No permanently empty batches.
+        batch_count=max(1,(discovered_work_count+batch_size-1)//batch_size)
+        start=(batch_index % batch_count)*batch_size
         candidates=candidates[start:start+batch_size]
     results=[]
     for i,book in enumerate(candidates,1):
@@ -174,6 +177,6 @@ if __name__=="__main__":
     parser.add_argument("--scroll",action="store_true",help="Scroll normally in Chromium to reveal public lazy-loaded images")
     args=parser.parse_args()
     if not (1<=args.pages<=12 and 1<=args.albums<=90 and 1<=args.images<=300
-            and 1<=args.album_pages<=40 and 0<=args.batch_index<=20 and 1<=args.batch_size<=20):
+            and 1<=args.album_pages<=40 and 0<=args.batch_index<=1000000 and 1<=args.batch_size<=20):
         parser.error("bounded public photo crawl: images per set, album pages and batched works")
     run(args.pages,args.albums,args.images,args.album_pages,args.batch_index,args.batch_size,args.scroll)
