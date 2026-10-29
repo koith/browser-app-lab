@@ -137,12 +137,12 @@ async def health():
             "data_connected": bool(_cache["catalog"]), "r2_preview_cache_configured": R2_READY}
 
 
-@app.get("/api/catalog", dependencies=[Depends(authenticated)])
+@app.get("/api/catalog")
 async def catalog():
     return await get_catalog()
 
 
-@app.get("/api/media/{album_id}/{image_num}/{kind}", dependencies=[Depends(authenticated)])
+@app.get("/api/media/{album_id}/{image_num}/{kind}")
 async def media(album_id: str, image_num: int, kind: str, download: bool = Query(False)):
     if not (2 <= len(album_id) <= 100 and album_id.replace("-", "").isalnum()) or image_num < 1:
         raise HTTPException(status_code=400, detail="Invalid media ID")
@@ -226,12 +226,12 @@ async def yui_catalog_bytes():
         return d
 
 
-@app.get("/api/yui/catalog", dependencies=[Depends(authenticated)])
+@app.get("/api/yui/catalog")
 async def yui_catalog():
     return await yui_catalog_bytes()
 
 
-@app.get("/api/yui/media/{album_id}/{image_num}/{kind}", dependencies=[Depends(authenticated)])
+@app.get("/api/yui/media/{album_id}/{image_num}/{kind}")
 async def yui_media(album_id: str, image_num: int, kind: str, download: bool = Query(False)):
     if (not 2 <= len(album_id) <= 100
             or not re.fullmatch("[a-z0-9][a-z0-9-]{1,99}", album_id)
