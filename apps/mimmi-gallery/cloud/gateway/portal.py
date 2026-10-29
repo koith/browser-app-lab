@@ -8,7 +8,6 @@ Render origin, avoiding cross-site cookie restrictions. No import UI is needed.
 from __future__ import annotations
 
 import hashlib
-import time
 import hmac
 import html
 import re
@@ -145,4 +144,6 @@ def install_portal(app, *, token_getter, configured, catalog_for_model):
             data,content_type=await public_asset(model,asset_path)
         except (httpx.HTTPError,HTTPException):
             raise HTTPException(status_code=502,detail="Gallery app resource unavailable")
-        return Response(data,media_type=content_type,headers=secure_headers())
+        headers = secure_headers()
+        headers["Cache-Control"] = "private, max-age=90"
+        return Response(data,media_type=content_type,headers=headers)
