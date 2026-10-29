@@ -15,9 +15,11 @@ for model in ('yui','mimmi'):
  manifest={'version':1,'model':model,'physical_verified_image_count':1,'albums':[album]}
  for bad in (False,True):
   m=json.loads(json.dumps(manifest))
-  if bad:m['albums'][0]['images'][0]['sha256']='0'*64
+  if bad:
+   m['albums'][0]['images'][0]['sha256']='0'*64
+   m['albums'][0]['images'][0]['url']='photos/'+'0'*64+ext
   name=f'{model}-corrupt.zip' if bad else f'{model}-good.zip'
   with zipfile.ZipFile(out/name,'w',compression=zipfile.ZIP_STORED) as z:
    z.writestr('TEST/manifest.json',json.dumps(m,ensure_ascii=False))
-   z.writestr('TEST/'+rel,data)
+   z.writestr('TEST/'+(m['albums'][0]['images'][0]['url'] if bad else rel),data)
  print('FIXTURE_CREATED',model,len(data))
