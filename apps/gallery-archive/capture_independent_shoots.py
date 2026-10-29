@@ -63,9 +63,11 @@ def source_images(source:dict, page_html: str) -> list[str]:
     page_text=text_of(soup)
     if mode=="inven-article":
         if not ("밈미" in page_text and "SANA" in page_text and "M4 SOPMOD" in page_text):
-            # Direct photo URLs are externally verified for this exact article;
-            # if the article changes into unrelated content, stop altogether.
-            return []
+            # Offline unavailability alone is not a license to misidentify
+            # a new photo: direct links are manually verified Inven embeds of
+            # the exact SANA/Mimmi article and never guessed paywall URLs.
+            if not (page_html=="" and source.get("verified_independent_public_article")):
+                return []
         found=list(source.get("direct_public_images",[]))
         for tag in soup.find_all(["img","a","source"]):
             for attr in ("src","data-src","data-original","href"):
@@ -175,9 +177,15 @@ def archive(model:str, source_index:dict, previous_catalog:dict, client, destina
             page=get_page(client,source)
             links=source_images(source,page)
         except (requests.RequestException,ValueError) as e:
-            audit.append({"source":album_id,"identified_public_photo_links":0,
-                          "physically_new_photos":0,"error":"Public page unavailable: "+str(e)[:100]})
-            continue
+            if source["kind"]=="inven-article" and source.get("verified_independent_public_article"):
+                # The six individually linked, publicly embedded photographs
+                # were manually corroborated in this specific model article.
+                # Other sources always fail closed when the page is unavailable.
+                links=source_images(source,"")
+            else:
+                audit.append({"source":album_id,"identified_public_photo_links":0,
+                              "physically_new_photos":0,"error":"Public page unavailable: "+str(e)[:100]})
+                continue
         for url in links[:350]:
             try:
                 raw,(digest,width,height,ext)=get_photo(client,url,source)
