@@ -15,7 +15,8 @@
         "author": "cos_swee",
         "required_mention": "@super_yuisan",
         "photo_host": "pbs.twimg.com",
-        "source_category": "independent-photographer"
+        "source_category": "independent-photographer",
+        "max_pages": 40
       },
       {
         "id": "yui-indie-photographer-cos-swee-tag-2026",
@@ -25,7 +26,8 @@
         "author": "cos_swee",
         "required_mention": "@super_yuisan",
         "photo_host": "pbs.twimg.com",
-        "source_category": "event-photographer"
+        "source_category": "event-photographer",
+        "max_pages": 6
       }
     ],
     "event_evidence_not_pictures": [
@@ -78,7 +80,8 @@
           "https://upload2.inven.co.kr/upload/2019/11/20/bbs/i14195118573.jpg?MW=800",
           "https://upload2.inven.co.kr/upload/2019/11/20/bbs/i14175377671.jpg?MW=800"
         ],
-        "verified_independent_public_article": true
+        "verified_independent_public_article": true,
+        "max_pages": 1
       },
       {
         "id": "mimmi-public-historical-x-2020-22",
@@ -88,7 +91,8 @@
         "author": "Mimmi_official",
         "required_mention": "@Mimmi_official",
         "photo_host": "pbs.twimg.com",
-        "source_category": "historical-official-social"
+        "source_category": "historical-official-social",
+        "max_pages": 12
       }
     ],
     "event_evidence_not_pictures": [
