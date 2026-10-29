@@ -14,7 +14,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT.parent / "yui-gallery"))
 from collect_private_batch import archive
-from missing_candidates import select_missing, saved_positions
+from missing_candidates import select_missing, saved_positions, safe_id
 
 
 def main():
