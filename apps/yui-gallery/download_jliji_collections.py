@@ -102,4 +102,15 @@ async def main():
   await browser.close()
  (ROOT/'summary.json').write_text(json.dumps(report,ensure_ascii=False,indent=2))
  print('ALL_ALBUMS_FILES_OK',sum(x['downloaded'] for x in report),flush=True)
-if __name__=='__main__':asyncio.run(main())
+if __name__=='__main__':
+ import argparse
+ parser=argparse.ArgumentParser()
+ parser.add_argument('--albums',help='Comma-separated exact IDs, default all four public albums')
+ args=parser.parse_args()
+ if args.albums:
+  ids=[x.strip() for x in args.albums.split(',') if x.strip()]
+  known={entry['id'] for entry in CONFIG}
+  if not ids or len(ids)!=len(set(ids)) or any(x not in known for x in ids):
+   parser.error('Unknown or duplicated album ID')
+  CONFIG[:]=[entry for entry in CONFIG if entry['id'] in ids]
+ asyncio.run(main())
