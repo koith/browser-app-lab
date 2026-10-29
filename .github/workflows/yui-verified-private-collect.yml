@@ -1,0 +1,31 @@
+name: Archive Yui Verified Public Photo Bytes Privately
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/yui-gallery/collect_verified_source_privately.py'
+      - '.github/workflows/yui-verified-private-collect.yml'
+permissions:
+  contents: read
+jobs:
+  private-archive:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Install free image verification tools
+        run: python -m pip install requests Pillow
+      - name: Download all 91 publicly indexed Green photos, verify unchanged SHA bytes
+        run: python apps/yui-gallery/collect_verified_source_privately.py --album green91 --out /tmp/yui-private-archive
+      - name: Keep only actual verified files in a private temporary artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: yui-green91-real-private-files
+          path: |
+            /tmp/yui-private-archive/green91-private-import.zip
+            /tmp/yui-private-archive/audit.json
+          retention-days: 30
+          if-no-files-found: error
