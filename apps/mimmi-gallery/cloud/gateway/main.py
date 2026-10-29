@@ -468,10 +468,15 @@ async def sync_archive_session(request: Request):
                     or not isinstance(catalog_data.get("albums"), list)
                 ):
                     raise ValueError("Incompatible archive")
-        except Exception:
+        except Exception as error:
+            # Do not log any cookie, access token, or remote error message.
+            # Error class and model identify temporary read failure vs. schema.
+            print("TERABOX_SYNC_ERROR", model, type(error).__name__,
+                  getattr(error, "status_code", "-"), flush=True)
             os.environ["RCLONE_CONFIG_ARCHIVE_COOKIE"] = old_cookie
             raise HTTPException(
-                status_code=422, detail="TeraBox session validation failed"
+                status_code=503 if isinstance(error, (HTTPException, OSError, asyncio.TimeoutError)) else 422,
+                detail="TeraBox session validation failed"
             )
         global COOKIE
         COOKIE = cookie
