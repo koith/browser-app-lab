@@ -19,7 +19,7 @@ const engine={chromium,webkit}[engineName];if(!engine)throw Error('Unknown engin
   async function importOne(model,baseline){
    const importName='/tmp/photo-vault-qa/'+model+'-good.zip';
    await page.locator('#vault-file').setInputFiles(importName);
-   await page.waitForFunction(n=>document.querySelector('#inventory')?.textContent?.startsWith(n+'장'),baseline+1,{timeout:30000});
+   try{await page.waitForFunction(n=>document.querySelector('#inventory')?.textContent?.startsWith(n+'장'),baseline+1,{timeout:30000})}catch(error){throw Error('Import did not appear: '+model+' '+engineName+' status='+await page.locator('#vault-status').innerText()+' inventory='+await page.locator('#inventory').innerText()+' errors='+JSON.stringify(errors)+' cause='+error.message)}
    if(await page.locator('#albumgrid [data-id="vault-fixture-'+model+'"]').count()!==1)throw Error('Imported album not shown '+model);
    await page.locator('#albumgrid [data-id="vault-fixture-'+model+'"]').click();
    await page.waitForFunction(()=>!document.querySelector('#detail').hidden);
