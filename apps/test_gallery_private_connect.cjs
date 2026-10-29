@@ -23,6 +23,8 @@ async function run(model, options={}) {
   const elements=new Map();
   for(const name of ['browse','pg-toggle','pg-form','pg-token','pg-status','pg-submit','pg-cancel'])
     elements.set(name,fakeElement(name));
+  // Form is injected with an HTML hidden attribute, unlike a bare fake element.
+  elements.get('pg-form').hidden=true;
   const vault=fakeElement('vault');
   const browse=elements.get('browse');
   browse.querySelector=selector=>selector==='.vault-actions'?vault:null;
