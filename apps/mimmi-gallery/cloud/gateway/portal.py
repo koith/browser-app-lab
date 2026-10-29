@@ -24,8 +24,8 @@ COOKIE_AGE = 28 * 24 * 60 * 60
 SOURCE_BASE = "https://koith.github.io/browser-app-lab/apps"
 SAFE_ASSET = re.compile(r"^[a-zA-Z0-9._/-]{1,220}$")
 SAFE_IMAGE = re.compile(
-    r"^(?:stored-albums/[a-z0-9-]{2,110}/[a-zA-Z0-9._-]+\\.(?:jpg|jpeg|png|webp|avif)"
-    r"|publisher-logos/[a-zA-Z0-9._-]+\\.(?:jpg|jpeg|png|webp|svg))$"
+    r"^(?:stored-albums/[a-z0-9-]{2,110}/[a-zA-Z0-9._-]+\.(?:jpg|jpeg|png|webp|avif)"
+    r"|publisher-logos/[a-zA-Z0-9._-]+\.(?:jpg|jpeg|png|webp|svg))$"
 )
 ALLOWED_ASSETS = {
     "owner-media.js", "photo-vault.js", "gallery-labels.js",
