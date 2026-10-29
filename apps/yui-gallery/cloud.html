@@ -60,8 +60,10 @@ async function link(){
    if(!Array.isArray(d.albums)||d.schema_version!==1)throw Error('카탈로그 형식 오류');
    catalog=d;localStorage.setItem('yui-private-api-url',api);sessionStorage.setItem('yui-owner-session',JSON.stringify({api,token}));get('main-gallery').hidden=false;
    const total=d.albums.reduce((n,a)=>n+a.images.length,0);
-   status('연결됨 · 실제 저장 이미지 '+total+'개 · 작품 '+d.albums.length+'개');
-   displayAlbums();
+   status('연결됨 · 실제 저장 이미지 '+total+'개 · 작품 '+d.albums.length+'개 · 기존 화보 갤러리로 이동합니다.');
+   // Private media is merged by owner-media.js on the *original* gallery URL.
+   // Do not strand the user in a second duplicate gallery after signing in.
+   location.assign('./');
  }catch(e){catalog=null;status('연결 실패 · '+e.message)}
  finally{get('connect').disabled=false;}
 }
