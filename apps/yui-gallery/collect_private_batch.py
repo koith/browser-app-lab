@@ -32,6 +32,7 @@ ALLOWED_EXACT = {
     "djawaphoto.com", "blog.hacosta.co.jp",
     "img1.gamersky.com", "upload3.inven.co.kr",
     "cdn.imweb.me", "image.ajunews.com", "t1.daumcdn.net",
+    "public-files.gumroad.com", "assets.gumroad.com", "static-2.gumroad.com",
 }
 ALLOWED_PIXIBB = re.compile(r"(?:imgx\d{3}|images\d{2})\.pixibb\.com\Z", re.I)
 BLOCKED_ORIGINS = {"cdn.jliji.com"}
@@ -105,7 +106,7 @@ def verify_one(item: dict, source: str, timeout_seconds: int = 18) -> tuple[tupl
         return None, {"number": number, "reason": str(exc)[:150]}
 
 
-def archive(album: dict, out: Path, workers: int = 2, timeout: int = 18) -> dict:
+def archive(album: dict, out: Path, workers: int = 2, timeout: int = 18, model: str = "yui") -> dict:
     aid = album["id"]
     if not re.fullmatch(r"[a-z0-9][a-z0-9-]{1,100}", aid):
         raise ValueError("invalid_album_id")
@@ -127,7 +128,7 @@ def archive(album: dict, out: Path, workers: int = 2, timeout: int = 18) -> dict
     saved.sort(key=lambda record: record[0]["number"])
     manifest = {
         "version": 1, "updated": datetime.now(timezone.utc).isoformat(),
-        "model": "yui",
+        "model": model,
         "storage": "unchanged physically downloaded public source bytes, private import only",
         "physical_verified_image_count": len(saved),
         "albums": [{
