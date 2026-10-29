@@ -193,3 +193,69 @@ async def media(album_id: str, image_num: int, kind: str, download: bool = Query
     if download:
         headers["Content-Disposition"] = f'attachment; filename="{album_id}-{image_num:04d}.{extension}"'
     return StreamingResponse(iter([blob]),media_type=content_type,headers=headers)
+
+
+# One already deployed FREE Render gateway serves two *separate* personal
+# TeraBox folders. A GitHub Actions secret does not automatically appear in
+# Render; the owner must configure its RCLONE_CONFIG_ARCHIVE_COOKIE separately.
+YUI_REMOTE = "archive:YuiArchive"
+_yui_cache = {"catalog": None, "time": 0.0}
+_yui_cache_lock = asyncio.Lock()
+
+
+async def yui_catalog_bytes():
+    if _yui_cache["catalog"] and time.time() - _yui_cache["time"] < 180:
+        return _yui_cache["catalog"]
+    async with _yui_cache_lock:
+        if _yui_cache["catalog"] and time.time() - _yui_cache["time"] < 180:
+            return _yui_cache["catalog"]
+        data = await rclone_bytes("metadata/catalog.json", 6_000_000, remote=YUI_REMOTE)
+        d = json.loads(data)
+        if d.get("schema_version") != 1 or d.get("model") != "yui" or not isinstance(d.get("albums"), list):
+            raise HTTPException(status_code=502, detail="Incorrect Yui private catalog")
+        _yui_cache.update(catalog=d, time=time.time())
+        return d
+
+
+@app.get("/api/yui/catalog", dependencies=[Depends(authenticated)])
+async def yui_catalog():
+    return await yui_catalog_bytes()
+
+
+@app.get("/api/yui/media/{album_id}/{image_num}/{kind}", dependencies=[Depends(authenticated)])
+async def yui_media(album_id: str, image_num: int, kind: str, download: bool = Query(False)):
+    if (not 2 <= len(album_id) <= 100
+            or not re.fullmatch("[a-z0-9][a-z0-9-]{1,99}", album_id)
+            or image_num < 1 or kind not in ("preview", "original")):
+        raise HTTPException(status_code=400, detail="Invalid private photo")
+    catalog = await yui_catalog_bytes()
+    album = next((a for a in catalog["albums"] if a.get("id") == album_id), None)
+    if album is None:
+        raise HTTPException(status_code=404, detail="Unknown private album")
+    img = next((p for p in album.get("images", []) if p.get("number") == image_num), None)
+    if img is None:
+        raise HTTPException(status_code=404, detail="Unknown private photo")
+    key_field, sha_field, size_field = (
+        ("preview", "preview_sha256", "preview_bytes") if kind == "preview"
+        else ("key", "sha256", "bytes"))
+    key = img.get(key_field)
+    digest = img.get(sha_field)
+    size = img.get(size_field)
+    prefix = "previews" if kind == "preview" else "originals"
+    if (not isinstance(key, str) or not media_key_valid(key)
+            or not key.startswith(prefix + "/" + album_id + "/")
+            or not isinstance(digest, str) or not re.fullmatch("[a-f0-9]{64}", digest)
+            or type(size) is not int or not 1 <= size <= 35 * 1024 * 1024):
+        raise HTTPException(status_code=502, detail="Invalid private media manifest")
+    payload = await rclone_bytes(key, size + 1, remote=YUI_REMOTE)
+    if len(payload) != size or hashlib.sha256(payload).hexdigest() != digest:
+        raise HTTPException(status_code=502, detail="Private photo SHA verification failed")
+    ext = key.rsplit(".", 1)[-1]
+    mime = {"jpg":"image/jpeg","jpeg":"image/jpeg","png":"image/png","webp":"image/webp"}.get(ext)
+    if not mime:
+        raise HTTPException(status_code=502, detail="Unsupported private photo format")
+    headers = {"Cache-Control":"private, max-age=300",
+               "X-Content-Type-Options":"nosniff", "Content-Length":str(size)}
+    if download:
+        headers["Content-Disposition"] = f'attachment; filename="{album_id}-{image_num:05d}.{ext}"'
+    return StreamingResponse(iter([payload]), media_type=mime, headers=headers)
