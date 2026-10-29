@@ -23,6 +23,10 @@ window.MimmiPrivate=(()=>{
  async function asset(p,kind='original'){
   if(!session)session=readSession();
   if(!session)throw Error('보관소 연결 없음');
+  if(kind==='cover'){
+   const version=(p.preview_sha256||p.sha256||'').slice(0,24);
+   return session.api+'/api/cover/mimmi/'+encodeURIComponent(p.ownerAlbum)+'/'+p.number+'?v='+version;
+  }
   const selected=kind==='preview'&&p.preview?'preview':'original';
   // The server verifies SHA-256 before returning the image. Returning the
   // same-origin URL lets Safari decode and cache it natively without loading
