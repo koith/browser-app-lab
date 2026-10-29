@@ -110,11 +110,63 @@ const engine={chromium,webkit}[engineName];if(!engine)throw Error('Unknown engin
      throw Error('Mixed-validity ZIP batch did not preserve partial-success feedback: '+mixedResult);
 
   }
+
+  async function driveSyncSmoke(model,baseline){
+    const driveId='1fixturearchivedrivemedia0000000001';
+    const folderId='1fixturearchivefolder00000000001';
+    const fixture=readFileSync('/tmp/photo-vault-qa/'+model+'-actions.zip');
+    let downloadCalls=0;
+    // The Google sign-in JS and REST API are locally mocked. No real OAuth
+    // secrets or Drive network requests ever enter CI.
+    await page.route('https://accounts.google.com/gsi/client',r=>r.fulfill({
+      status:200,contentType:'application/javascript',
+      body:'window.google={accounts:{oauth2:{initTokenClient:({callback})=>({requestAccessToken:()=>callback({access_token:"fixture-token"})})}}}};'
+    }));
+    await page.route('https://www.googleapis.com/drive/v3/**',async r=>{
+      if(r.request().headers().authorization!=='Bearer fixture-token')
+       return r.fulfill({status:401,body:'No credentials'});
+      const u=new URL(r.request().url());
+      if(u.pathname==='/drive/v3/files'){
+        return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify({
+          files:[{id:driveId,name:model+'-fixture.actions.zip',size:String(fixture.length),
+                  mimeType:'application/zip',modifiedTime:'2026-10-29T07:00:00Z'}]
+        })});
+      }
+      if(u.pathname==='/drive/v3/files/'+driveId){
+        downloadCalls++;
+        return r.fulfill({status:200,contentType:'application/zip',body:fixture});
+      }
+      return r.fulfill({status:404,body:'unknown path'});
+    });
+    await page.goto('http://127.0.0.1:8765/'+model+'-gallery/drive-sync.html');
+    await page.locator('#drive-client-id').fill('1234567890-mockclient.apps.googleusercontent.com');
+    await page.locator('#drive-folder').fill('https://drive.google.com/drive/folders/'+folderId);
+    await page.locator('#drive-connect').click();
+    await page.waitForFunction(()=>document.querySelector('#drive-status')?.textContent?.includes('신규 검증 1개'),{timeout:30000});
+    const imported=await page.locator('#drive-status').innerText();
+    if(!imported.includes('실패 0개')||downloadCalls!==1)
+      throw Error('Authenticated Drive ZIP import failed '+imported+' calls='+downloadCalls);
+    // A repeated sync checks the same file's durable IndexedDB marker and
+    // must NOT re-download its bytes.
+    await page.locator('#drive-connect').click();
+    await page.waitForFunction(()=>document.querySelector('#drive-status')?.textContent?.includes('이미 저장 1개'),{timeout:15000});
+    if(downloadCalls!==1)throw Error('Drive checkpoint failed; identical ZIP re-downloaded');
+    if(await page.locator('#gallery-link').getAttribute('href')!=='./')throw Error('Missing gallery return');
+    await page.goto('http://127.0.0.1:8765/'+model+'-gallery/');
+    await page.waitForFunction(n=>document.querySelector('#inventory')?.textContent?.startsWith(n+'장'),baseline+2,{timeout:20000});
+    const saved=await page.evaluate(async m=>PhotoVault.albums(m).then(a=>a.find(x=>x.id==='vault-fixture-'+m)),model);
+    if(!saved||saved.images.length!==2)throw Error('Drive verification did not persist real archive photos');
+    await page.unroute('https://accounts.google.com/gsi/client');
+    await page.unroute('https://www.googleapis.com/drive/v3/**');
+    return downloadCalls;
+  }
   await open('yui',baselines.yui);
   await importOne('yui',baselines.yui);
   await open('mimmi',baselines.mimmi);
   if(await page.locator('#albumgrid [data-id="vault-fixture-yui"]').count())throw Error('Cross-model private vault leakage');
   await importOne('mimmi',baselines.mimmi);
+  await driveSyncSmoke('yui',baselines.yui);
+  await driveSyncSmoke('mimmi',baselines.mimmi);
   await page.goto('http://127.0.0.1:8765/yui-gallery/');
   await page.waitForFunction(n=>document.querySelector('#inventory')?.textContent?.startsWith(n+'장'),baselines.yui+2);
   if(errors.length||external.length)throw Error('Browser errors or source media requested '+JSON.stringify({errors,external:external.slice(0,5)}));
