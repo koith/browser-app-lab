@@ -6,7 +6,8 @@ out=Path('/tmp/photo-vault-qa');out.mkdir(exist_ok=True)
 for model in ('yui','mimmi'):
  root=Path('apps')/(model+'-gallery')
  albums=json.loads((root/'stored-albums.json').read_text())['albums']
- item=next(p for a in albums for p in a['images'] if p.get('url','').startswith('stored-albums/'))
+ source_album=next(a for a in albums if any(p.get('url','').startswith('stored-albums/') for p in a['images']))
+ item=next(p for p in source_album['images'] if p.get('url','').startswith('stored-albums/'))
  data=(root/item['url']).read_bytes()
  assert len(data)==item['bytes'] and hashlib.sha256(data).hexdigest()==item['sha256']
  ext=Path(item['url']).suffix
@@ -34,4 +35,12 @@ for model in ('yui','mimmi'):
   outer.write(out/(model+'-good.zip'),arcname='vault-part1-private-import.zip')
   outer.write(out/(model+'-incremental.zip'),arcname='vault-part2-private-import.zip')
   outer.writestr('audit.json',json.dumps({'artifact':'fixture','model':model}))
+ # Import a verified byte-identical private copy of public photo number one.
+ # The gallery must not double-count it, and should use its private Blob on ties.
+ overlap=json.loads(json.dumps(manifest))
+ overlap['albums'][0]['id']=source_album['id']
+ overlap['albums'][0]['title']=source_album['title']
+ with zipfile.ZipFile(out/(model+'-overlap.zip'),'w',compression=zipfile.ZIP_STORED) as z:
+  z.writestr('TEST/manifest.json',json.dumps(overlap,ensure_ascii=False))
+  z.writestr('TEST/'+rel,data)
  print('FIXTURE_CREATED',model,len(data))
