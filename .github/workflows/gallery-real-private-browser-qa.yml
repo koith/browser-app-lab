@@ -1,6 +1,14 @@
 name: Actual Original Galleries Real Private TeraBox Mobile Browser QA
 on:
   workflow_dispatch:
+  # Every successful photo-byte archive import must prove the physical photos
+  # are visible in the existing Yui and Mimmi gallery, not merely uploaded.
+  workflow_run:
+    workflows:
+      - "Gallery Automatic New Photo Bytes to Private TeraBox"
+    types: [completed]
+  schedule:
+    - cron: '48 4 * * *'
   pull_request:
     paths:
       - 'apps/gallery-archive/qa_real_gallery_browser.py'
@@ -23,7 +31,12 @@ jobs:
       - run: python -m py_compile apps/gallery-archive/qa_real_gallery_browser.py
   real-original-gallery-chromium:
     needs: private-photo-browser-code-qa
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    if: |
+      github.ref == 'refs/heads/main' && github.event_name != 'pull_request' &&
+      (github.event_name != 'workflow_run' ||
+       (github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.head_branch == 'main' &&
+        github.event.workflow_run.head_repository.full_name == github.repository))
     runs-on: ubuntu-24.04
     timeout-minutes: 29
     env:
