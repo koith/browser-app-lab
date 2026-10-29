@@ -89,3 +89,35 @@ with TestClient(gateway.app) as client:
     failed=client.get("/api/yui/media/yui-only/4/original",headers=headers)
     assert failed.status_code==502 and b"SHA" in failed.content
 print("YUI_AND_MIMMI_SHARED_RENDER_GATEWAY_AUTH_SHA_AND_MODEL_ISOLATION_PASS")
+
+
+# Actual lightweight preview bytes must be read from previews/, not the original.
+preview_data=b"mimmi-small-verified-webp-thumbnail"*100
+preview_sha=hashlib.sha256(preview_data).hexdigest()
+preview_catalog=json.loads(json.dumps(catalog))
+preview_catalog["albums"][0]["images"][0].update({
+    "preview":"previews/mimmi-test/0001-small.webp",
+    "preview_sha256":preview_sha,
+    "preview_bytes":len(preview_data),
+})
+async def preview_read(key,limit,*,remote=None):
+    if key=="metadata/catalog.json":return json.dumps(preview_catalog).encode()
+    if key=="previews/mimmi-test/0001-small.webp":return preview_data
+    if key=="originals/mimmi-test/0001.jpg":return raw
+    raise ValueError("Unexpected archive asset")
+gateway.rclone_bytes=preview_read
+gateway._cache["catalog"]=None
+with TestClient(gateway.app) as client:
+    auth={"Authorization":"Bearer offline-mimmi-test-token"}
+    thumb=client.get("/api/media/mimmi-test/1/preview",headers=auth)
+    assert thumb.status_code==200 and thumb.content==preview_data
+    assert thumb.headers["content-type"].startswith("image/webp")
+    full=client.get("/api/media/mimmi-test/1/original",headers=auth)
+    assert full.status_code==200 and full.content==raw
+    async def corrupt_preview(key,limit,*,remote=None):
+        if key=="previews/mimmi-test/0001-small.webp":return b"incorrect-thumbnail"
+        return await preview_read(key,limit,remote=remote)
+    gateway.rclone_bytes=corrupt_preview
+    failed=client.get("/api/media/mimmi-test/1/preview",headers=auth)
+    assert failed.status_code==502
+print("MIMMI_SEPARATE_PREVIEW_SHA_REMOTE_BYTE_QA_PASS")
