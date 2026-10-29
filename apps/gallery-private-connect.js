@@ -86,6 +86,11 @@
       status.dataset.good = String(good);
     };
     btn.addEventListener('click', () => {
+      if (session()) {
+        sessionStorage.removeItem(KEY);
+        location.reload();
+        return;
+      }
       const open = form.hidden;
       form.hidden = !open;
       btn.setAttribute('aria-expanded', String(open));
@@ -124,14 +129,6 @@
     }
     btn.textContent = '연결 해제';
     btn.classList.remove('pg-action');
-    btn.addEventListener('click', () => {}, {once:true}); // Replaced below without changing initial focus.
-    btn.onclick = e => { // Button can show the token field for reconnect on click.
-      if (form.hidden) {
-        e.stopImmediatePropagation();
-        sessionStorage.removeItem(KEY);
-        location.reload();
-      }
-    };
     // Cached membership is not proof of real stored photos; confirm live API.
     setStatus('개인 원본 저장소에 연결 중…');
     request(saved.token).then(physical => {
