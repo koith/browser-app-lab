@@ -19,7 +19,7 @@ from pathlib import PurePosixPath
 from typing import AsyncGenerator
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
-from portal import COOKIE_NAME, install_portal, session_valid
+from gateway.portal import COOKIE_NAME, install_portal, session_valid
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 
