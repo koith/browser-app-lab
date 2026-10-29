@@ -163,6 +163,20 @@ footer{padding:15px 0 25px;justify-content:flex-end}
 <script src="publishers.js?v=0.1.0-beta.13"></script>
 <script>
 "use strict";
+// This public backup URL hands off to the owner-only original-file gallery
+// only after the deployed gateway proves it can serve the login route.
+// When private hosting is unavailable, the existing physically saved public
+// gallery remains available; research-only source URLs are never inserted.
+if(location.hostname==='koith.github.io'){
+ const ownerUrl='https://mimmi-private-gallery-free.onrender.com/gallery/yui/';
+ fetch(ownerUrl,{credentials:'omit',cache:'no-store',mode:'cors'})
+   .then(async response=>response.ok ? response.text() : '')
+   .then(body=>{
+     if(body.includes('PRIVATE PHOTO ARCHIVE')&&body.includes('name="code"'))
+       location.replace(ownerUrl+location.hash);
+   }).catch(()=>{});
+}
+
 const $=id=>document.getElementById(id);
 let catalog=[],stored=[],localStored=[],remoteStored=[],ownerStored=[],vaultStored=[],albumAliases={},albumCovers={},publisherRegistry={publishers:[]},publisherWorkReferences=[],activePublisher=null,mode='albums',activeAlbum=null,viewerList=[],viewerIndex=0,detailAlbum=null;
 function canonicalId(id){const original=id,seen=new Set();while(albumAliases[id]&&!seen.has(id)){seen.add(id);id=albumAliases[id]}return stored.some(a=>a.id===id)||!stored.some(a=>a.id===original)?id:original}
