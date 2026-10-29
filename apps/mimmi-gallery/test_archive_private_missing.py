@@ -1,4 +1,4 @@
-"""Mimmi private missing-photograph selection is SHA-based and no-network."""
+"""Mimmi private missing-photograph selection tracks each physical numbered slot."""
 import sys
 import unittest
 from pathlib import Path
@@ -12,7 +12,7 @@ class Tests(unittest.TestCase):
         self.assertTrue(result.startswith('djawa-rudy2-codename-wolfgirl'))
         self.assertNotIn('%',result)
 
-    def test_missing_excludes_stored_and_cross_source_sha_duplicates(self):
+    def test_missing_keeps_cross_source_sha_for_distinct_photo_slots(self):
         shas=['a'*64,'b'*64,'c'*64,'d'*64]
         photo=lambda sha,n:{"sha256":sha,"number":n,"bytes":11000,
                              "width":800,"height":1200,"url":"https://images08.pixibb.com/test.jpg"}
@@ -21,15 +21,16 @@ class Tests(unittest.TestCase):
             {"id":"two","title":"Two","images":[photo(shas[1],1),photo(shas[2],2)]},
             {"id":"three","title":"Three","images":[photo(shas[3],1)]}
         ]}
-        first,total=select_missing(source,{shas[0]},0,2)
-        second,other=select_missing(source,{shas[0]},1,2)
-        self.assertEqual(total,3)
-        self.assertEqual(other,3)
+        first,total=select_missing(source,{('one',1,shas[0])},0,2)
+        second,other=select_missing(source,{('one',1,shas[0])},1,2)
+        self.assertEqual(total,4)
+        self.assertEqual(other,4)
         self.assertEqual([a['id'] for a in first],['one','three'])
         self.assertEqual([a['id'] for a in second],['two'])
         chosen=[p["sha256"] for a in first+second for p in a["images"]]
         self.assertEqual(set(chosen),{shas[1],shas[2],shas[3]})
-        self.assertEqual(len(chosen),3)
+        self.assertEqual(len(chosen),4)
+        self.assertEqual(chosen.count(shas[1]),2)
 
 
 if __name__=="__main__":
