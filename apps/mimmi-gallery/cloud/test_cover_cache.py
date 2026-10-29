@@ -20,17 +20,23 @@ fetches = {"yui": 0, "mimmi": 0}
 
 def manifest(model):
     aid = model + "-thumbnail"
+    photo = {"number": 1, "key": f"originals/{aid}/1.jpg",
+             "bytes": len(raw), "sha256": digest}
+    if model == "mimmi":
+        # Reproduce an archived thumbnail whose bytes fail its manifest SHA.
+        photo.update(preview=f"previews/{aid}/1.webp",
+                     preview_bytes=1000, preview_sha256="f" * 64)
     return {
         "schema_version": 1, "model": model,
-        "albums": [{"id": aid, "title": "Photo album",
-                    "images": [{"number": 1, "key": f"originals/{aid}/1.jpg",
-                                "bytes": len(raw), "sha256": digest}]}],
+        "albums": [{"id": aid, "title": "Photo album", "images": [photo]}],
     }
 
 async def mock_read(key, limit, *, remote=None):
     model = "yui" if remote == "archive:YuiArchive" else "mimmi"
     if key == "metadata/catalog.json":
         return json.dumps(manifest(model)).encode()
+    if model == "mimmi" and key == "previews/mimmi-thumbnail/1.webp":
+        return b"corrupted-preview-byte-stream"
     if key == f"originals/{model}-thumbnail/1.jpg":
         fetches[model] += 1
         return raw
