@@ -132,7 +132,7 @@ footer{padding:15px 0 25px;justify-content:flex-end}
  <div class="detail-heading"><button class="back" id="back" aria-label="화보 목록으로 돌아가기">‹</button><h2 class="detail-title" id="albumname"></h2><span class="counter" id="albumtotal"></span></div>
  <nav class="mainnav" aria-label="이동"><a href="../mimmi-gallery/" target="_blank" rel="noopener noreferrer">밈미 ↗</a><a href="cloud.html">클라우드</a></nav>
  <button id="search-toggle" class="search-toggle" aria-label="화보 검색 열기" aria-haspopup="dialog" aria-controls="search-dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button>
- <small id="app-version" class="version-chip">v0.1.0-beta.22</small>
+ <small id="app-version" class="version-chip">v0.1.0-beta.23</small>
 </header>
 <div id="browse">
  <div class="browse-meta"><p class="inventory" id="inventory">화보를 불러오는 중</p><span class="counter" id="total"></span></div>
@@ -157,7 +157,7 @@ footer{padding:15px 0 25px;justify-content:flex-end}
  </form>
 </dialog>
 <div id="lightbox" role="dialog" aria-label="사진 보기" aria-modal="true">
- <div class="lighttop"><button class="lightbtn" id="close" aria-label="닫기">×</button><span id="position"></span><small class="version-chip">v0.1.0-beta.22</small></div>
+ <div class="lighttop"><button class="lightbtn" id="close" aria-label="닫기">×</button><span id="position"></span><small class="version-chip">v0.1.0-beta.23</small></div>
  <button class="lightbtn arrow prev" id="prev" aria-label="이전 사진">‹</button><div class="media-frame"><img id="full" alt="화보 사진"><a id="original" target="_blank" rel="noopener">사진 열기 ↗</a></div><button class="lightbtn arrow next" id="next" aria-label="다음 사진">›</button>
  <p id="media-status" role="status"></p>
 </div>
@@ -338,7 +338,7 @@ Promise.all([
        excludedSources=new Set(exclusions.excluded_source_urls||[]),
        excludedHashes=new Set(exclusions.excluded_image_sha256||[]);
  const allowed=a=>!excludedIds.has(a.id)&&![a.source,...(a.source_pages||[])].some(u=>excludedSources.has(u));
- localStored=(s.albums||[]).filter(allowed).map(a=>({...a,sourceHosted:false,images:(a.images||[]).filter(p=>!excludedHashes.has(p.sha256))})).filter(a=>validImages(a).length);
+ localStored=(s.albums||[]).filter(allowed).map(a=>({...a,sourceHosted:false,images:(a.images||[]).map((p,i)=>({...p,number:Number.isSafeInteger(p.number)&&p.number>=1?p.number:i+1})).filter(p=>!excludedHashes.has(p.sha256))})).filter(a=>validImages(a).length);
  ownerStored=(owner.albums||[]).filter(allowed).map(a=>({...a,images:(a.images||[]).filter(p=>!excludedHashes.has(p.sha256))})).filter(a=>validImages(a).length);
  vaultStored=(vault.albums||[]).filter(allowed).map(a=>({...a,images:(a.images||[]).filter(p=>!excludedHashes.has(p.sha256))})).filter(a=>validImages(a).length);
  remoteStored=[];publisherWorkReferences=[];
@@ -347,8 +347,19 @@ Promise.all([
  for(const a of [...localStored,...ownerStored,...vaultStored]){
   if(!combined.has(a.id))combined.set(a.id,{...a,images:[]});
   const row=combined.get(a.id);
-  for(const p of a.images)if(!row.images.some(x=>(Number.isSafeInteger(p.number)&&Number.isSafeInteger(x.number)?x.number===p.number:x.sha256===p.sha256)))row.images.push(p);
+  row.expected=Math.max(row.expected||0,a.expected||0)||null;
+  for(const p of a.images){
+   const index=row.images.findIndex(x=>Number.isSafeInteger(p.number)&&Number.isSafeInteger(x.number)?x.number===p.number:x.sha256===p.sha256);
+   if(index<0){row.images.push(p);continue}
+   const previous=row.images[index];
+   const pixels=q=>(q.width||0)*(q.height||0);
+   const privateFile=q=>Boolean(q.vaultAlbum||q.ownerAlbum);
+   // Keep the highest available resolution. Private verified bytes win ties.
+   if(pixels(p)>pixels(previous)||(pixels(p)===pixels(previous)&&privateFile(p)&&!privateFile(previous)))
+    row.images[index]={...previous,...p};
+  }
  }
+ for(const row of combined.values())row.images.sort((a,b)=>(a.number??Number.MAX_SAFE_INTEGER)-(b.number??Number.MAX_SAFE_INTEGER));
  stored=[...combined.values()];
  catalog=stored.slice();
  if(vaultStored.length)vaultStatus.textContent='이 기기의 개인 보관본 '+vaultStored.reduce((n,a)=>n+a.images.length,0)+'장';
