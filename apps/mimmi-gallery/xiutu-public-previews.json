@@ -2,11 +2,11 @@
   "schema_version": 1,
   "model": "mimmi",
   "source": "public Xiutu CreamSoda pages visible without login; file counts NOT asserted",
-  "generated_at": "2026-10-29T08:26:55.304416+00:00",
+  "generated_at": "2026-10-29T19:40:55.293882+00:00",
   "summary": {
     "works": 6,
     "actual_sha_verified_public_photo_urls": 373,
-    "fresh_http_verified": 373,
+    "fresh_http_verified": 372,
     "physical_files_archived": 0
   },
   "albums": [
@@ -1191,16 +1191,6 @@
           "number": 53
         },
         {
-          "url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/t3ov2cl15a2.jpg",
-          "sha256": "19a6725233dda4d91dab97f309fe688a1c153162899c94c6cf8d4110b556e026",
-          "bytes": 486575,
-          "width": 2700,
-          "height": 1800,
-          "publisher_original_verified": false,
-          "private_cloud_file": false,
-          "number": 54
-        },
-        {
           "url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/ilbwi20ciux.jpg",
           "sha256": "9489f78a8ff734fa53cac3d26a3c603142d4bf7fa3db0443ff2de0e322b01cbd",
           "bytes": 428105,
@@ -1208,7 +1198,7 @@
           "height": 2700,
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 55
+          "number": 54
         },
         {
           "url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/crcs1btwnzf.jpg",
@@ -1218,7 +1208,7 @@
           "height": 2700,
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 56
+          "number": 55
         },
         {
           "url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/1a00qj35lh1.jpg",
@@ -1228,7 +1218,7 @@
           "height": 1800,
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 57
+          "number": 56
         },
         {
           "url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/2s3adsfkjhb.jpg",
@@ -1238,7 +1228,7 @@
           "height": 2700,
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 58
+          "number": 57
         },
         {
           "url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/m240mokh0ha.jpg",
@@ -1248,10 +1238,21 @@
           "height": 1800,
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 59
+          "number": 58
+        },
+        {
+          "url": "https://img-jp-a.cdnimg.vip/korea/2025/12/10/t3ov2cl15a2.jpg",
+          "sha256": "19a6725233dda4d91dab97f309fe688a1c153162899c94c6cf8d4110b556e026",
+          "bytes": 486575,
+          "width": 2700,
+          "height": 1800,
+          "publisher_original_verified": false,
+          "private_cloud_file": false,
+          "number": 54,
+          "previously_verified_only": true
         }
       ],
-      "fresh_http_verified": 59,
+      "fresh_http_verified": 58,
       "status": "public_photos_sha_verified"
     },
     {
