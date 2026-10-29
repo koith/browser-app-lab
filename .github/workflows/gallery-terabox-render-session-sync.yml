@@ -8,6 +8,9 @@ on:
       - 'apps/mimmi-gallery/cloud/gateway/main.py'
   schedule:
     - cron: '*/15 * * * *'
+  workflow_run:
+    workflows: ["Deploy static content to Pages"]
+    types: [completed]
 permissions:
   contents: read
   id-token: write
@@ -16,6 +19,11 @@ concurrency:
   cancel-in-progress: false
 jobs:
   synchronize:
+    if: >-
+      github.event_name != 'workflow_run' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'main' &&
+       github.event.workflow_run.head_repository.full_name == github.repository)
     runs-on: ubuntu-24.04
     timeout-minutes: 9
     env:
@@ -78,5 +86,25 @@ jobs:
               if catalog.get("model")!=model or count<expected:
                   raise SystemExit("Gallery catalog verification failed: "+model)
               print("CONNECTED_GALLERY",model,"albums",len(catalog["albums"]),"images",count)
+              # Exercise the first-party reduced thumbnail endpoint as well as
+              # the metadata connection; preview SHA is verified on the server.
+              choice=next((
+                  (a,p) for a in catalog["albums"]
+                  for p in a.get("images",[])
+                  if p.get("preview") and 0 < p.get("preview_bytes",0) <= 2000000
+              ),None)
+              if not choice:
+                  raise SystemExit("Gallery has no stored preview: "+model)
+              album,photo=choice
+              cover_path="/api/cover/{}/{}/{}?v={}".format(
+                  model,album["id"],photo["number"],photo["preview_sha256"][:24])
+              with urllib.request.urlopen(origin+cover_path,timeout=115) as response:
+                  cover=response.read(1000001)
+                  media_type=response.headers.get("Content-Type","")
+                  cache_header=response.headers.get("Cache-Control","")
+              if not (200<len(cover)<=1000000 and media_type.startswith("image/") and
+                      "max-age=604800" in cache_header):
+                  raise SystemExit("Gallery cover cache failed: "+model)
+              print("LIVE_COVER_CACHED",model,"bytes",len(cover))
           PY
           echo 'Both passwordless galleries are connected to verified TeraBox albums.' >> "$GITHUB_STEP_SUMMARY"
