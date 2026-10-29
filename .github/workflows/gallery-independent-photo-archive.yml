@@ -1,0 +1,105 @@
+name: Independent Yui and Mimmi Photoshoot Original Byte Archive
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '21 1,7,13,19 * * *'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/gallery-independent-photo-archive.yml'
+      - 'apps/gallery-archive/capture_independent_shoots.py'
+      - 'apps/gallery-archive/independent_shoot_sources.json'
+  pull_request:
+    paths:
+      - '.github/workflows/gallery-independent-photo-archive.yml'
+      - 'apps/gallery-archive/capture_independent_shoots.py'
+      - 'apps/gallery-archive/independent_shoot_sources.json'
+      - 'apps/gallery-archive/test_capture_independent_shoots.py'
+permissions:
+  contents: read
+  actions: read
+concurrency:
+  group: owner-private-independent-photoshoot-bytes
+  cancel-in-progress: false
+jobs:
+  independent-source-and-photo-qa:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Install independent photo parser and byte verifier
+        run: python -m pip install 'requests==2.32.5' 'beautifulsoup4==4.14.2' 'Pillow==11.3.0'
+      - name: Prevent other-person attribution, fake photo entries and duplicate SHA
+        run: |
+          python -m py_compile apps/gallery-archive/capture_independent_shoots.py
+          python apps/gallery-archive/test_capture_independent_shoots.py
+  acquire-private-physical-photographs:
+    needs: independent-source-and-photo-qa
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        model: [yui, mimmi]
+    env:
+      YUI_COOKIE: ${{ secrets.YUI_TERABOX_COOKIE }}
+      MIMMI_COOKIE: ${{ secrets.MIMMI_TERABOX_NDUS }}
+      RCLONE_CONFIG_ARCHIVE_TYPE: terabox
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install 'requests==2.32.5' 'beautifulsoup4==4.14.2' 'Pillow==11.3.0'
+      - name: Install pinned owner-only TeraBox client
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL 'https://github.com/gulp79/rclone-extra/releases/download/v1.75.2-extra/rclone-linux-amd64.zip' -o "$RUNNER_TEMP/client.zip"
+          echo "78855325a2a8d83b3feee3a8363d32e1211babbf4cda6356fa8ca5f472075062  $RUNNER_TEMP/client.zip" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/unpack" "$RUNNER_TEMP/bin"
+          unzip -q "$RUNNER_TEMP/client.zip" -d "$RUNNER_TEMP/unpack"
+          binary="$(find "$RUNNER_TEMP/unpack" -type f -name rclone -print -quit)"
+          install -m 755 "$binary" "$RUNNER_TEMP/bin/rclone"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+      - name: Read owner-private existing catalog to avoid rearchiving thousands of photographs
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "${{ matrix.model }}" == yui ]];then
+            export RCLONE_CONFIG_ARCHIVE_COOKIE="$YUI_COOKIE"
+            remote="archive:YuiArchive"
+          else
+            export RCLONE_CONFIG_ARCHIVE_COOKIE="$MIMMI_COOKIE"
+            remote="archive:MimmiArchive"
+          fi
+          test -n "$RCLONE_CONFIG_ARCHIVE_COOKIE"
+          echo "::add-mask::$RCLONE_CONFIG_ARCHIVE_COOKIE"
+          rclone cat "$remote/metadata/catalog.json" > "$RUNNER_TEMP/owner-catalog.json"
+          test -s "$RUNNER_TEMP/owner-catalog.json"
+      - name: Crawl historically verified independent photographer and actual event photo sources
+        shell: bash
+        run: |
+          set -euo pipefail
+          python apps/gallery-archive/capture_independent_shoots.py \
+            --model "${{ matrix.model }}" \
+            --previous "$RUNNER_TEMP/owner-catalog.json" \
+            --output "$RUNNER_TEMP/physical-shoots"
+      - name: Temporarily pass actual independent photo ZIPs to SHA-verifying TeraBox importer
+        uses: actions/upload-artifact@v4
+        with:
+          name: gallery-${{ matrix.model }}-independent-originals
+          path: ${{ runner.temp }}/physical-shoots/*-private-import.zip
+          if-no-files-found: warn
+          retention-days: 1
+      - name: Retain source failure and real new bytes stats separately from photo artifacts
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gallery-${{ matrix.model }}-independent-photo-audit
+          path: ${{ runner.temp }}/physical-shoots/independent-shoot-audit.json
+          if-no-files-found: warn
+          retention-days: 30
