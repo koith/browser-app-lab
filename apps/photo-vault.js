@@ -88,9 +88,11 @@ async function importZip(file,model,progress=()=>{}){
  progress('실제 사진 '+count+'장의 바이트와 SHA-256을 검증합니다.');
  for(const a of albums)for(const p of a.images){
   if(!seen.has(p.sha256)){
-   const blob=await extract(prefix+p.url);
-   if(blob.size!==p.bytes||await digest(blob)!==p.sha256)throw Error('사진 SHA-256 검증 실패: '+p.sha256.slice(0,12));
-   await put('media',model+':'+p.sha256,blob);
+   const blob=await extract(prefix+p.url),bytes=await blob.arrayBuffer();
+   if(bytes.byteLength!==p.bytes||hex(await crypto.subtle.digest('SHA-256',bytes))!==p.sha256)throw Error('사진 SHA-256 검증 실패: '+p.sha256.slice(0,12));
+   // WebKit cannot reliably persist file-backed Blob slices in IndexedDB.
+   // Store a structured-cloneable ArrayBuffer; create a Blob only for display.
+   await put('media',model+':'+p.sha256,bytes);
    seen.add(p.sha256);
   }
   done++;if(done%10===0||done===count)progress('검증·보관 '+done+' / '+count+'장');
@@ -109,8 +111,10 @@ const cache=new Map();
 async function asset(p){
  const key=p.vaultModel+':'+p.sha256;
  if(cache.has(key))return cache.get(key);
- const blob=await get('media',key);
- if(!(blob instanceof Blob)||blob.size!==p.bytes||await digest(blob)!==p.sha256)throw Error('이 기기의 저장본이 없거나 손상되었습니다. ZIP을 다시 가져오세요.');
+ const saved=await get('media',key);
+ const mime=/\.webp$/i.test(p.url)?'image/webp':/\.png$/i.test(p.url)?'image/png':'image/jpeg';
+ const blob=saved instanceof ArrayBuffer?new Blob([saved],{type:mime}):saved instanceof Blob?saved:null;
+ if(!blob||blob.size!==p.bytes||await digest(blob)!==p.sha256)throw Error('이 기기의 저장본이 없거나 손상되었습니다. ZIP을 다시 가져오세요.');
  const url=URL.createObjectURL(blob);cache.set(key,url);
  if(cache.size>40){const first=cache.keys().next().value;URL.revokeObjectURL(cache.get(first));cache.delete(first)}
  return url;
