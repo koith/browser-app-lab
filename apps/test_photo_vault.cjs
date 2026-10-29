@@ -32,9 +32,20 @@ const engine={chromium,webkit}[engineName];if(!engine)throw Error('Unknown engin
    await page.waitForFunction(n=>document.querySelector('#inventory')?.textContent?.startsWith(n+'장'),baseline+1);
    const saved=await page.evaluate(async m=>PhotoVault.albums(m).then(rows=>rows.filter(a=>a.id==='vault-fixture-'+m)),model);
    if(saved.length!==1||saved[0].images.length!==1)throw Error('IndexedDB persistence failed');
+   // Import a second partial archive of the SAME work. The first photo must survive.
+   await page.locator('#vault-file').setInputFiles('/tmp/photo-vault-qa/'+model+'-incremental.zip');
+   await page.waitForFunction(n=>document.querySelector('#inventory')?.textContent?.startsWith(n+'장'),baseline+2,{timeout:15000});
+   const expanded=await page.evaluate(async m=>PhotoVault.albums(m).then(rows=>rows.find(a=>a.id==='vault-fixture-'+m)),model);
+   if(!expanded||expanded.images.length!==2||expanded.images[0].number!==1||expanded.images[1].number!==2)
+     throw Error('Incremental ZIP overwrote previous photos or collapsed duplicate SHA positions');
+   // Reimporting an older partial ZIP must not erase the additional second photo.
+   await page.locator('#vault-file').setInputFiles(importName);
+   await page.waitForFunction(()=>document.querySelector('#vault-status')?.textContent?.includes('검증 완료'),{timeout:15000});
+   await page.reload();
+   await page.waitForFunction(n=>document.querySelector('#inventory')?.textContent?.startsWith(n+'장'),baseline+2,{timeout:15000});
    await page.locator('#vault-file').setInputFiles('/tmp/photo-vault-qa/'+model+'-corrupt.zip');
    await page.waitForFunction(()=>document.querySelector('#vault-status')?.textContent?.includes('가져오기 실패'),{timeout:15000});
-   if((await page.locator('#inventory').innerText()).startsWith((baseline+2)+'장'))throw Error('Corrupt ZIP was counted');
+   if((await page.locator('#inventory').innerText()).startsWith((baseline+3)+'장'))throw Error('Corrupt ZIP was counted');
   }
   await open('yui',23);
   await importOne('yui',23);
@@ -42,8 +53,8 @@ const engine={chromium,webkit}[engineName];if(!engine)throw Error('Unknown engin
   if(await page.locator('#albumgrid [data-id="vault-fixture-yui"]').count())throw Error('Cross-model private vault leakage');
   await importOne('mimmi',2162);
   await page.goto('http://127.0.0.1:8765/yui-gallery/');
-  await page.waitForFunction(()=>document.querySelector('#inventory')?.textContent?.startsWith('24장'));
+  await page.waitForFunction(()=>document.querySelector('#inventory')?.textContent?.startsWith('25장'));
   if(errors.length||external.length)throw Error('Browser errors or source media requested '+JSON.stringify({errors,external:external.slice(0,5)}));
-  console.log('TWO_MODELS_SHA_VERIFIED_ZIP_IMPORT_'+engineName.toUpperCase()+'_PASS',JSON.stringify({yui:24,mimmi:2163,persistent:true,corruptRejected:true,externalImageRequests:0}));
+  console.log('TWO_MODELS_SHA_VERIFIED_ZIP_IMPORT_'+engineName.toUpperCase()+'_PASS',JSON.stringify({yui:25,mimmi:2164,persistent:true,incrementalMerged:true,duplicateShaNumbersKept:true,corruptRejected:true,externalImageRequests:0}));
  }finally{await browser.close()}
 })().catch(e=>{console.error(e.stack||e);process.exit(1)});
