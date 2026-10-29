@@ -6,6 +6,7 @@ on:
       - "Yui Public Sources To Private Original-Byte Archives"
       - "Yui Known Missing 18 Photo Slots Physical Recovery"
       - "Yui Public SNS Photo Archive"
+      - "Independent Yui and Mimmi Photoshoot Original Byte Archive"
     types: [completed]
   schedule:
     - cron: '17 0,6,12,18 * * *'
@@ -73,7 +74,7 @@ jobs:
           model="${{ matrix.model }}"
           if [[ "$model" == yui ]]; then workflow='yui-private-bulk-archive.yml';pattern='^yui-original-verified-';else workflow='mimmi-private-missing-archive.yml';pattern='^mimmi-original-new-private-';fi
           if [[ "$EVENT_NAME" == workflow_run ]]; then
-            if [[ "$model" == yui && "$SOURCE_NAME" != 'Yui Public Sources To Private Original-Byte Archives' && "$SOURCE_NAME" != 'Yui Known Missing 18 Photo Slots Physical Recovery' && "$SOURCE_NAME" != 'Yui Public SNS Photo Archive' ]] || [[ "$model" == mimmi && "$SOURCE_NAME" != 'Mimmi Missing SHA Public Photos To Private ZIP Archive' ]]; then
+            if [[ "$model" == yui && "$SOURCE_NAME" != 'Yui Public Sources To Private Original-Byte Archives' && "$SOURCE_NAME" != 'Yui Known Missing 18 Photo Slots Physical Recovery' && "$SOURCE_NAME" != 'Yui Public SNS Photo Archive' && "$SOURCE_NAME" != 'Independent Yui and Mimmi Photoshoot Original Byte Archive' ]] || [[ "$model" == mimmi && "$SOURCE_NAME" != 'Mimmi Missing SHA Public Photos To Private ZIP Archive' && "$SOURCE_NAME" != 'Independent Yui and Mimmi Photoshoot Original Byte Archive' ]]; then
               echo 'skip=true' >> "$GITHUB_OUTPUT";exit 0
             fi
             run="$SOURCE_RUN_ID"
