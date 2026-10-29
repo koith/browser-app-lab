@@ -14,7 +14,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT.parent / "yui-gallery"))
 from collect_private_batch import archive
-from missing_candidates import select_missing, saved_positions, safe_id
+from missing_candidates import select_missing, saved_positions, archived_positions, safe_id
 
 
 def main():
@@ -24,11 +24,16 @@ def main():
     p.add_argument("--out", default="/tmp/mimmi-private-candidates")
     p.add_argument("--workers", type=int, default=2)
     p.add_argument("--dry-run", action="store_true")
+    p.add_argument("--private-checkpoint", default=str(ROOT / "private-archive-checkpoint.json"))
     args = p.parse_args()
     stored = json.loads((ROOT / "stored-albums.json").read_text(encoding="utf-8"))
     if stored.get("model") != "mimmi":
         raise ValueError("Wrong stored index")
-    existing = saved_positions(stored)
+    public = saved_positions(stored)
+    checkpoint = json.loads(Path(args.private_checkpoint).read_text(encoding="utf-8"))
+    private = archived_positions(checkpoint)
+    existing = public | private
+    print("ALREADY_PHYSICALLY_SAVED", "public", len(public), "private", len(private), flush=True)
     source = json.loads((ROOT / "source-viewer-albums.json").read_text(encoding="utf-8"))
     albums, researched_missing_positions = select_missing(source, existing, args.batch, args.batches)
     print("UNSAVED_CANDIDATES", args.batch, len(albums),
@@ -43,7 +48,8 @@ def main():
         report = archive(a, folder, workers=args.workers, timeout=14, model="mimmi")
         results.append(report)
     audit = {"generated_at": datetime.now(timezone.utc).isoformat(),
-             "model": "mimmi", "real_files_only": True, "originally_saved_photo_positions": len(existing),
+             "model": "mimmi", "real_files_only": True, "public_saved_photo_positions": len(public),
+             "private_drive_preserved_photo_positions": len(private),
              "researched_missing_photo_positions": researched_missing_positions,
              "batch": args.batch, "batches": args.batches,
              "albums": results,
