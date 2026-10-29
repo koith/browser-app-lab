@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Mimmi-only private API, bearer authorization, exact bytes, wrong model rejection."""
+"""Both gallery APIs allow direct viewing while verifying exact SHA-backed bytes."""
 import hashlib
 import json
 import os
@@ -20,14 +20,14 @@ async def read(key,limit,*,remote=None):
 gateway.rclone_bytes=read
 with TestClient(gateway.app) as client:
     assert client.get("/api/health").status_code==200
-    assert client.get("/api/catalog").status_code==401
+    assert client.get("/api/catalog").status_code==200
     headers={"Authorization":"Bearer offline-mimmi-test-token"}
     assert client.get("/api/catalog",headers=headers).json()["model"]=="mimmi"
     img=client.get("/api/media/mimmi-test/1/original",headers=headers)
     assert img.status_code==200 and img.content==raw
     assert img.headers["content-type"].startswith("image/jpeg")
     assert client.get("/api/media/../1/original",headers=headers).status_code!=200
-    assert client.get("/api/media/mimmi-test/1/original",headers={"Authorization":"Bearer bad"}).status_code==401
+    assert client.get("/api/media/mimmi-test/1/original",headers={"Authorization":"Bearer bad"}).status_code==200
     assert client.get("/api/media/mimmi-test/2/original",headers=headers).status_code==404
     async def wrong(key,limit,*,remote=None):
         if key=="metadata/catalog.json":return json.dumps({"schema_version":1,"model":"yui","albums":[]}).encode()
@@ -43,7 +43,7 @@ with TestClient(gateway.app) as client:
     gateway.rclone_bytes=corrupted
     check=client.get("/api/media/mimmi-test/1/original",headers=headers)
     assert check.status_code==502 and b"integrity" in check.content.lower()
-print("MIMMI_PRIVATE_GATEWAY_AUTH_AND_SHA_TEST_PASS")
+print("MIMMI_GATEWAY_DIRECT_VIEW_AND_SHA_TEST_PASS")
 
 
 # A single free Render service must never confuse the two model folders.
@@ -70,7 +70,7 @@ gateway._cache["catalog"]=None
 gateway._yui_cache["catalog"]=None
 with TestClient(gateway.app) as client:
     headers={"Authorization":"Bearer offline-mimmi-test-token"}
-    assert client.get("/api/yui/catalog").status_code==401
+    assert client.get("/api/yui/catalog").status_code==200
     loaded=client.get("/api/yui/catalog",headers=headers)
     assert loaded.status_code==200 and loaded.json()["model"]=="yui"
     photo=client.get("/api/yui/media/yui-only/4/original",headers=headers)
@@ -80,7 +80,7 @@ with TestClient(gateway.app) as client:
     assert client.get("/api/yui/media/yui-only/5/original",headers=headers).status_code==404
     assert client.get("/api/catalog",headers=headers).json()["model"]=="mimmi"
     assert client.get("/api/yui/media/yui-only/4/original",
-                      headers={"Authorization":"Bearer invalid"}).status_code==401
+                      headers={"Authorization":"Bearer invalid"}).status_code==200
     async def mismatch(key,limit,*,remote=None):
         if key=="metadata/catalog.json" and remote=="archive:YuiArchive":
             return json.dumps(yui_catalog).encode()
@@ -88,7 +88,7 @@ with TestClient(gateway.app) as client:
     gateway.rclone_bytes=mismatch
     failed=client.get("/api/yui/media/yui-only/4/original",headers=headers)
     assert failed.status_code==502 and b"SHA" in failed.content
-print("YUI_AND_MIMMI_SHARED_RENDER_GATEWAY_AUTH_SHA_AND_MODEL_ISOLATION_PASS")
+print("YUI_AND_MIMMI_SHARED_RENDER_GATEWAY_DIRECT_VIEW_SHA_MODEL_ISOLATION_PASS")
 
 
 # Actual lightweight preview bytes must be read from previews/, not the original.
