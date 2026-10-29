@@ -347,7 +347,7 @@ Promise.all([
  for(const a of [...localStored,...ownerStored,...vaultStored]){
   if(!combined.has(a.id))combined.set(a.id,{...a,images:[]});
   const row=combined.get(a.id);
-  for(const p of a.images)if(!row.images.some(x=>x.sha256===p.sha256||(Number.isSafeInteger(p.number)&&x.number===p.number)))row.images.push(p);
+  for(const p of a.images)if(!row.images.some(x=>(Number.isSafeInteger(p.number)&&Number.isSafeInteger(x.number)?x.number===p.number:x.sha256===p.sha256)))row.images.push(p);
  }
  stored=[...combined.values()];
  catalog=stored.slice();
