@@ -73,6 +73,20 @@ const engine={chromium,webkit}[engineName];if(!engine)throw Error('Unknown engin
    await page.locator('#vault-file').setInputFiles('/tmp/photo-vault-qa/'+model+'-corrupt.zip');
    await page.waitForFunction(()=>document.querySelector('#vault-status')?.textContent?.includes('가져오기 실패'),{timeout:15000});
    if((await page.locator('#inventory').innerText()).startsWith((baseline+3)+'장'))throw Error('Corrupt ZIP was counted');
+   // When a private SHA-verified copy overlaps an already committed physical
+   // cover/photo position, prefer its Blob but count that position only once.
+   await Promise.all([
+     page.waitForEvent('framenavigated',{timeout:25000}),
+     page.locator('#vault-file').setInputFiles('/tmp/photo-vault-qa/'+model+'-overlap.zip')
+   ]);
+   await page.waitForFunction(n=>document.querySelector('#inventory')?.textContent?.startsWith(n+'장'),baseline+2,{timeout:15000});
+   const originalAlbum=JSON.parse(readFileSync(join(__dirname,model+'-gallery','stored-albums.json'),'utf8')).albums.find(a=>a.images?.some(p=>p.url?.startsWith('stored-albums/')));
+   await page.locator('#albumgrid [data-id="'+originalAlbum.id+'"]').click();
+   await page.waitForFunction(()=>!document.querySelector('#detail').hidden);
+   await page.waitForFunction(()=>document.querySelector('#detailphotos .photo img')?.src?.startsWith('blob:'),{timeout:15000});
+   if((await page.locator('#detailphotos .photo img').first().getAttribute('src'))?.startsWith('http'))
+     throw Error('Saved private photo was shadowed by a public preview');
+
   }
   await open('yui',baselines.yui);
   await importOne('yui',baselines.yui);
@@ -82,6 +96,6 @@ const engine={chromium,webkit}[engineName];if(!engine)throw Error('Unknown engin
   await page.goto('http://127.0.0.1:8765/yui-gallery/');
   await page.waitForFunction(n=>document.querySelector('#inventory')?.textContent?.startsWith(n+'장'),baselines.yui+2);
   if(errors.length||external.length)throw Error('Browser errors or source media requested '+JSON.stringify({errors,external:external.slice(0,5)}));
-  console.log('TWO_MODELS_SHA_VERIFIED_ZIP_IMPORT_'+engineName.toUpperCase()+'_PASS',JSON.stringify({yui:baselines.yui+2,mimmi:baselines.mimmi+2,persistent:true,incrementalMerged:true,duplicateShaNumbersKept:true,nestedActionsZip:true,corruptRejected:true,externalImageRequests:0}));
+  console.log('TWO_MODELS_SHA_VERIFIED_ZIP_IMPORT_'+engineName.toUpperCase()+'_PASS',JSON.stringify({yui:baselines.yui+2,mimmi:baselines.mimmi+2,persistent:true,incrementalMerged:true,duplicateShaNumbersKept:true,nestedActionsZip:true,physicalOverlapPrefersPrivate:true,corruptRejected:true,externalImageRequests:0}));
  }finally{await browser.close()}
 })().catch(e=>{console.error(e.stack||e);process.exit(1)});
