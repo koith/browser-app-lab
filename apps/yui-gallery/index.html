@@ -118,6 +118,11 @@ button:focus-visible,a:focus-visible{outline:2px solid #ddd4c7;outline-offset:3p
 .detail-view .version-chip{font-size:9px;top:calc(env(safe-area-inset-top) + 2px)}
 footer{padding:15px 0 25px;justify-content:flex-end}
 @media(max-width:680px){.topbar{height:calc(67px + env(safe-area-inset-top))}.browse-meta{gap:8px}.inventory{overflow:hidden;white-space:nowrap;text-overflow:ellipsis}.counter{font-size:10px}.photo-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.vault-actions{display:flex;align-items:center;gap:10px;margin:12px 0 2px;flex-wrap:wrap}
+.vault-actions button{font-size:12px;border:1px solid #494a52;border-radius:8px;background:#25262c;color:#f2f2f6;padding:8px 11px;cursor:pointer}
+.vault-actions button:disabled{opacity:.55;cursor:wait}
+#vault-status{font-size:11px;color:#999aa5}
+@media(max-width:680px){.vault-actions{gap:8px;margin-top:10px}.vault-actions button{font-size:11px;padding:7px 9px}#vault-status{font-size:10px}}
 </style>
 </head>
 <body>
@@ -125,13 +130,14 @@ footer{padding:15px 0 25px;justify-content:flex-end}
 <header class="topbar">
  <a href="./" class="logo" aria-label="YUI 갤러리 홈">YUI<span>GALLERY</span></a>
  <div class="detail-heading"><button class="back" id="back" aria-label="화보 목록으로 돌아가기">‹</button><h2 class="detail-title" id="albumname"></h2><span class="counter" id="albumtotal"></span></div>
- <nav class="mainnav" aria-label="이동"><a href="cloud.html">클라우드</a></nav>
+ <nav class="mainnav" aria-label="이동"><a href="../mimmi-gallery/" target="_blank" rel="noopener noreferrer">밈미 ↗</a><a href="cloud.html">클라우드</a></nav>
  <button id="search-toggle" class="search-toggle" aria-label="화보 검색 열기" aria-haspopup="dialog" aria-controls="search-dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button>
  <small id="app-version" class="version-chip">v0.1.0-beta.20</small>
 </header>
 <div id="browse">
  <div class="browse-meta"><p class="inventory" id="inventory">화보를 불러오는 중</p><span class="counter" id="total"></span></div>
- <div class="filters"><button id="browse-toggle" class="filter active" type="button" aria-controls="albumgrid publishergrid" aria-pressed="false" aria-label="화보 목록 · 발행처 목록으로 전환"><span id="browse-mode">화보</span><span aria-hidden="true" class="switch-icon"> ⇄</span></button></div>
+ <div class="vault-actions"><button id="vault-import" type="button">내 ZIP 보관본 가져오기</button><input id="vault-file" type="file" accept=".zip,application/zip" hidden><span id="vault-status" role="status">이 기기에 저장 · 외부 이미지 서버 불필요</span></div>
+  <div class="filters"><button id="browse-toggle" class="filter active" type="button" aria-controls="albumgrid publishergrid" aria-pressed="false" aria-label="화보 목록 · 발행처 목록으로 전환"><span id="browse-mode">화보</span><span aria-hidden="true" class="switch-icon"> ⇄</span></button></div>
  <div id="publishergrid" class="grid" hidden></div>
  <div id="albumgrid" class="grid"></div>
  <div id="photogrid" class="photo-grid" hidden></div>
@@ -155,13 +161,14 @@ footer{padding:15px 0 25px;justify-content:flex-end}
  <button class="lightbtn arrow prev" id="prev" aria-label="이전 사진">‹</button><div class="media-frame"><img id="full" alt="화보 사진"><a id="original" target="_blank" rel="noopener">사진 열기 ↗</a></div><button class="lightbtn arrow next" id="next" aria-label="다음 사진">›</button>
  <p id="media-status" role="status"></p>
 </div>
+<script src="../photo-vault.js"></script>
 <script src="owner-media.js"></script>
 <script src="gallery-labels.js?v=0.1.0-beta.10"></script>
 <script src="publishers.js?v=0.1.0-beta.13"></script>
 <script>
 "use strict";
 const $=id=>document.getElementById(id);
-let catalog=[],stored=[],localStored=[],remoteStored=[],ownerStored=[],albumAliases={},albumCovers={},publisherRegistry={publishers:[]},publisherWorkReferences=[],activePublisher=null,mode='albums',activeAlbum=null,viewerList=[],viewerIndex=0,detailAlbum=null;
+let catalog=[],stored=[],localStored=[],remoteStored=[],ownerStored=[],vaultStored=[],albumAliases={},albumCovers={},publisherRegistry={publishers:[]},publisherWorkReferences=[],activePublisher=null,mode='albums',activeAlbum=null,viewerList=[],viewerIndex=0,detailAlbum=null;
 function canonicalId(id){const original=id,seen=new Set();while(albumAliases[id]&&!seen.has(id)){seen.add(id);id=albumAliases[id]}return stored.some(a=>a.id===id)||!stored.some(a=>a.id===original)?id:original}
 const titleMap={'cn-huantuji':'幻图集 · Yui','cn-chaotuji':'潮图集 · Yui','cn-miaohuaying':'喵画影 · Yui','cn-yuntu8':'云图吧 · Yui','cn-wantuzhi-everyday':'Everyday Life','cn-yingyuge':'影语阁 · Yui','v04':'SWEETBOX · Teddy Bear'};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -170,6 +177,7 @@ const publicPhotoHosts=['pic1.imgdb.cn','image.huantuji.com','image.ajunews.com'
 function validImages(a){
  // Local SHA-indexed originals or authenticated, SHA-verified private files only.
  return (a.images||[]).filter(p=>{
+  if(p.vaultAlbum)return p.url==='vault:'+p.vaultModel+':'+p.vaultAlbum+':'+p.number&&/^[a-f0-9]{64}$/.test(p.sha256)&&Number.isSafeInteger(p.bytes)&&p.bytes>0;
   if(a.ownerHosted)return p.ownerAlbum===a.id&&p.url==='owner:'+a.id+':'+p.number&&/^[a-f0-9]{64}$/.test(p.sha256)&&Number.isSafeInteger(p.bytes)&&p.bytes>0;
   if(typeof p.url!=='string'||typeof a.id!=='string')return false;
   return /^[a-z0-9][a-z0-9-]{1,100}$/.test(a.id)
@@ -207,12 +215,12 @@ function card(a,hasImages){
  const position=focused&&Array.isArray(configuration.position)&&configuration.position.length===2&&configuration.position.every(n=>Number.isFinite(n)&&n>=0&&n<=100)?configuration.position:[50,20];
  const style='object-position:'+position[0]+'% '+position[1]+'%;object-fit:cover';
  const n=count?(expected!=null&&expected!==count?count+' / '+expected+'장':count+'장'):(expected!=null?expected+'장 · 미확보':'미확보 · 장수 미확인');
- const cloudCover=owned.ownerHosted?selected:null;
+ const cloudCover=(selected?.ownerAlbum||selected?.vaultAlbum)?selected:null;
  const img=cloudCover?'<img data-owner="'+esc(cloudCover.url)+'" style="'+style+'" alt="'+esc(label)+' 표지">':cover?'<img loading="lazy" referrerpolicy="no-referrer" src="'+esc(cover)+'" style="'+style+'" alt="'+esc(label)+' 표지">':'<div class="placeholder">Y</div>';
  return '<button class="album"'+rotationAttributes(selected)+' data-id="'+esc(a.id)+'" data-available="'+(hasImages?'1':'0')+'" aria-label="'+esc(label+' · '+labels.publisher+' · '+n+' · '+labels.edition)+'">'+img+'<div class="gradient"></div><span class="cover-labels"><span class="publisher-sticker" title="발행사: '+esc(labels.publisher)+'">'+esc(labels.publisher)+'</span><span class="album-count">'+esc(n)+'</span></span><span class="edition-sticker" data-kind="'+esc(labels.kind)+'" title="'+esc(labels.detail)+'">'+esc(labels.edition)+'</span><strong class="name" title="'+esc(label)+'">'+esc(shortTitle)+'</strong></button>';
 }
-function photoHTML(p,i){return '<button class="photo"'+rotationAttributes(p)+' data-i="'+i+'" aria-label="'+esc(p.name)+' 사진 '+p.number+'"><img loading="lazy" referrerpolicy="no-referrer" '+(p.ownerAlbum?'data-owner="'+esc(p.url):'src="'+esc(p.url))+'" alt="'+esc(p.name)+' 사진 '+p.number+'"><span>'+esc(p.name)+' · '+p.number+'</span></button>'}
-const ownerObserver=new IntersectionObserver(entries=>{for(const e of entries){if(!e.isIntersecting)continue;ownerObserver.unobserve(e.target);const p=ownerStored.flatMap(a=>a.images).find(p=>p.url===e.target.dataset.owner);if(p)YuiPrivate.asset(p).then(url=>{if(e.target.isConnected)e.target.src=url}).catch(()=>{e.target.alt='보관본 연결을 확인해 주세요'})}},{rootMargin:'200px'});
+function photoHTML(p,i){return '<button class="photo"'+rotationAttributes(p)+' data-i="'+i+'" aria-label="'+esc(p.name)+' 사진 '+p.number+'"><img loading="lazy" referrerpolicy="no-referrer" '+((p.ownerAlbum||p.vaultAlbum)?'data-owner="'+esc(p.url):'src="'+esc(p.url))+'" alt="'+esc(p.name)+' 사진 '+p.number+'"><span>'+esc(p.name)+' · '+p.number+'</span></button>'}
+const ownerObserver=new IntersectionObserver(entries=>{for(const e of entries){if(!e.isIntersecting)continue;ownerObserver.unobserve(e.target);const p=stored.flatMap(a=>a.images).find(p=>p.url===e.target.dataset.owner);if(p)(p.vaultAlbum?PhotoVault.asset(p):YuiPrivate.asset(p)).then(url=>{if(e.target.isConnected)e.target.src=url}).catch(()=>{e.target.alt='보관본 연결을 확인해 주세요'})}},{rootMargin:'200px'});
 function observeOwner(){document.querySelectorAll('img[data-owner]:not([src])').forEach(i=>ownerObserver.observe(i))}
 function render(){
  const q=$('search').value.toLocaleLowerCase().trim();
@@ -267,9 +275,9 @@ function showViewer(){
  layoutViewer();
  delete $('full').parentElement.dataset.imageState;
  $('media-status').textContent='불러오는 중';
- $('full').removeAttribute('src');$('full').referrerPolicy='no-referrer';if(p.ownerAlbum){const generation=viewerGeneration;YuiPrivate.asset(p).then(url=>{if(generation===viewerGeneration){$('full').src=url;$('original').href=url}}).catch(error=>{if(generation===viewerGeneration)$('media-status').textContent=error.message})}else if(failedRestrictedImages.has(p.url)){$('full').parentElement.dataset.imageState='failed';$('media-status').textContent=imageFailureText(p.url)}else $('full').src=p.url;$('full').alt=p.name+' · '+p.number;
+ $('full').removeAttribute('src');$('full').referrerPolicy='no-referrer';if(p.ownerAlbum||p.vaultAlbum){const generation=viewerGeneration;(p.vaultAlbum?PhotoVault.asset(p):YuiPrivate.asset(p)).then(url=>{if(generation===viewerGeneration){$('full').src=url;$('original').href=url}}).catch(error=>{if(generation===viewerGeneration)$('media-status').textContent=error.message})}else if(failedRestrictedImages.has(p.url)){$('full').parentElement.dataset.imageState='failed';$('media-status').textContent=imageFailureText(p.url)}else $('full').src=p.url;$('full').alt=p.name+' · '+p.number;
  $('position').textContent=(viewerIndex+1)+' / '+viewerList.length+' · '+p.width+'×'+p.height;
- if(p.ownerAlbum)$('original').removeAttribute('href');else $('original').href=p.url;
+ if(p.ownerAlbum||p.vaultAlbum)$('original').removeAttribute('href');else $('original').href=p.url;
 }
 function hideViewer(){clearTimeout(routeTimer);viewerGeneration++;$('lightbox').classList.remove('open');document.body.style.overflow='';$('full').removeAttribute('src')}
 function closeViewer(){if(history.state?.yui&&history.state.photo)goBack();else hideViewer()}
@@ -305,14 +313,24 @@ $('lightbox').addEventListener('touchstart',e=>{if(e.touches.length!==1){gesture
 $('lightbox').addEventListener('touchmove',e=>{if(e.touches.length!==1&&gesture)gesture.valid=false},{passive:true});
 $('lightbox').addEventListener('touchcancel',()=>{gesture=null},{passive:true});
 $('lightbox').addEventListener('touchend',e=>{if(e.touches.length){gesture=null;return}const g=gesture;gesture=null;const t=e.changedTouches[0];if(!g?.valid||!t||(visualViewport?.scale||1)>1.01)return;const dx=t.clientX-g.x,dy=t.clientY-g.y;if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.5)step(dx>0?-1:1)},{passive:true});
+const vaultInput=$('vault-file'),vaultButton=$('vault-import'),vaultStatus=$('vault-status');
+vaultButton.onclick=()=>vaultInput.click();
+vaultInput.onchange=async()=>{
+ const file=vaultInput.files?.[0];if(!file)return;
+ vaultButton.disabled=true;
+ try{const result=await PhotoVault.importZip(file,'yui',message=>{vaultStatus.textContent=message});
+  vaultStatus.textContent='검증 완료 '+result.images+'장 · 이 기기에 보관';location.reload()}
+ catch(error){vaultStatus.textContent='가져오기 실패: '+error.message;vaultButton.disabled=false;vaultInput.value=''}
+};
 Promise.all([
  fetch('stored-albums.json').then(r=>{if(!r.ok)throw Error('stored data');return r.json()}),
  YuiPrivate.albums().then(albums=>({albums})).catch(error=>({albums:[],error:error.message})),
+ PhotoVault.albums('yui').then(albums=>({albums})).catch(error=>({albums:[],error:error.message})),
  fetch('identity-exclusions.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('identity exclusions');return r.json()}),
  fetch('album-covers.json',{cache:'no-store'}).then(r=>r.ok?r.json():{}).catch(()=>({})),
  fetch('album-aliases.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('work aliases');return r.json()}),
  fetch('publishers.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('publisher registry');return r.json()})
-]).then(([s,owner,exclusions,covers,aliases,publishers])=>{
+]).then(([s,owner,vault,exclusions,covers,aliases,publishers])=>{
  publisherRegistry=publishers;
  albumCovers=covers.covers||{};
  albumAliases=aliases.aliases||{};
@@ -322,10 +340,18 @@ Promise.all([
  const allowed=a=>!excludedIds.has(a.id)&&![a.source,...(a.source_pages||[])].some(u=>excludedSources.has(u));
  localStored=(s.albums||[]).filter(allowed).map(a=>({...a,sourceHosted:false,images:(a.images||[]).filter(p=>!excludedHashes.has(p.sha256))})).filter(a=>validImages(a).length);
  ownerStored=(owner.albums||[]).filter(allowed).map(a=>({...a,images:(a.images||[]).filter(p=>!excludedHashes.has(p.sha256))})).filter(a=>validImages(a).length);
+ vaultStored=(vault.albums||[]).filter(allowed).map(a=>({...a,images:(a.images||[]).filter(p=>!excludedHashes.has(p.sha256))})).filter(a=>validImages(a).length);
  remoteStored=[];publisherWorkReferences=[];
- const ownerIds=new Set(ownerStored.map(a=>a.id));
- stored=[...ownerStored,...localStored.filter(a=>!ownerIds.has(a.id))];
+ // Union of real saved files; no count for source-only links or duplicate hashes.
+ const combined=new Map();
+ for(const a of [...localStored,...ownerStored,...vaultStored]){
+  if(!combined.has(a.id))combined.set(a.id,{...a,images:[]});
+  const row=combined.get(a.id);
+  for(const p of a.images)if(!row.images.some(x=>x.sha256===p.sha256||x.number===p.number))row.images.push(p);
+ }
+ stored=[...combined.values()];
  catalog=stored.slice();
+ if(vaultStored.length)vaultStatus.textContent='이 기기의 개인 보관본 '+vaultStored.reduce((n,a)=>n+a.images.length,0)+'장';
  const archivedCount=stored.reduce((n,a)=>n+validImages(a).length,0);
  $('inventory').textContent=archivedCount+'장 · 실제 저장본';
  render();
