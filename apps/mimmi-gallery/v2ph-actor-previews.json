@@ -1,34 +1,19 @@
 {
   "version": "v0.1.0-mimmi.3",
   "model": "mimmi",
-  "generated_at": "2026-10-29T21:54:13.801378+00:00",
+  "generated_at": "2026-10-29T23:47:22.605174+00:00",
   "source": "https://www.v2ph.com/actor/Mimmi",
   "actor_pages": [
     {
       "url": "https://www.v2ph.com/actor/Mimmi",
-      "candidate_links": 16,
-      "new_works": 16
-    },
-    {
-      "url": "https://www.v2ph.com/actor/Mimmi?page=2",
-      "candidate_links": 16,
-      "new_works": 16
-    },
-    {
-      "url": "https://www.v2ph.com/actor/Mimmi?page=3",
-      "candidate_links": 7,
-      "new_works": 7
-    },
-    {
-      "url": "https://www.v2ph.com/actor/Mimmi?page=4",
-      "error": "HTTPError: 404 Client Error: Not Found for url: https://www.v2ph.com/actor/Mimmi?page=4"
+      "error": "HTTPError: 403 Client Error: Forbidden for url: https://www.v2ph.com/actor/Mimmi"
     }
   ],
   "summary": {
-    "actor_albums_discovered": 39,
-    "previously_configured_albums": 6,
-    "works_selected_for_revisit": 8,
-    "actor_work_count": 39,
+    "actor_albums_discovered": 0,
+    "previously_configured_albums": 0,
+    "works_selected_for_revisit": 0,
+    "actor_work_count": 0,
     "new_album_candidates": 38,
     "verified_public_image_urls": 427,
     "private_cloud_photos_archived": 0
