@@ -5,6 +5,9 @@ on:
       - 'apps/mimmi-gallery/archive_private_missing.py'
       - 'apps/mimmi-gallery/missing_candidates.py'
       - 'apps/mimmi-gallery/test_missing_candidates.py'
+      - 'apps/mimmi-gallery/test_private_archive_checkpoint.py'
+      - 'apps/mimmi-gallery/private-archive-checkpoint.json'
+      - 'apps/yui-gallery/collect_private_batch.py'
       - '.github/workflows/mimmi-private-candidate-selection.yml'
   pull_request:
     paths:
@@ -22,7 +25,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Install physical archive testing dependencies
+        run: python -m pip install 'requests==2.32.5' 'Pillow==11.3.0'
       - name: Verify duplicate SHA positions and batch partition
-        run: python -m unittest discover -s apps/mimmi-gallery -p test_missing_candidates.py -v
+        run: |
+          python -m unittest discover -s apps/mimmi-gallery -p test_missing_candidates.py -v
+          python -m unittest discover -s apps/mimmi-gallery -p test_private_archive_checkpoint.py -v
       - name: Python syntax checks
         run: python -m py_compile apps/mimmi-gallery/archive_private_missing.py apps/mimmi-gallery/missing_candidates.py
