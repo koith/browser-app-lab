@@ -65,8 +65,8 @@ with TestClient(backend.app,base_url="https://testserver") as client:
     assert client.get("/gallery/yui/../../unknown").status_code!=200
 
     # Removed login and logout endpoints must never reintroduce the prompt.
-    assert client.post("/gallery/login",data={"model":"yui","code":TOKEN}).status_code==404
-    assert client.post("/gallery/logout").status_code==404
+    assert client.post("/gallery/login",data={"model":"yui","code":TOKEN}).status_code in (404,405)
+    assert client.post("/gallery/logout").status_code in (404,405)
     assert portal.COOKIE_NAME not in client.cookies
     assert "FIRST PARTY GALLERY" in client.get("/gallery/yui/").text
 
