@@ -180,9 +180,15 @@ const {chromium,webkit}=require('playwright');
     atlas:getComputedStyle(document.querySelector('#dice-client-sidebar')).backgroundImage};
   });
   assert.equal(battle.stage,'ready');
-  assert.ok(Math.abs(battle.heading.left-battle.heading.expectedLeft)<1,'native shared SPR pivot X');
-  assert.ok(Math.abs(battle.heading.top-battle.heading.expectedTop)<1,'native shared SPR pivot Y');
-  assert.ok(Math.abs(battle.heading.width-222*battle.heading.scale)<1,'heading follows drawn podium bitmap');
+  if(!mobile){
+   assert.ok(Math.abs(battle.heading.left-battle.heading.expectedLeft)<1,'native shared SPR pivot X');
+   assert.ok(Math.abs(battle.heading.top-battle.heading.expectedTop)<1,'native shared SPR pivot Y');
+   assert.ok(Math.abs(battle.heading.width-222*battle.heading.scale)<1,'heading follows drawn podium bitmap');
+  }else{
+   assert.ok(await page.locator('.leaf-native-winbattle-heading').evaluate(h=>
+    h.getBoundingClientRect().bottom<=document.querySelector('.battle-visual-total').getBoundingClientRect().top),
+    'mobile retains responsive title above live scores rather than separating them across tall terrain');
+  }
   assert.ok(battle.sprite?.endsWith('/winBattle-01.png'));
   assert.equal(battle.actors.length,2);
   assert.ok(battle.actors.every(n=>n.rig==='original-obs-sprite'&&n.source?.includes('/original/OBS/')),

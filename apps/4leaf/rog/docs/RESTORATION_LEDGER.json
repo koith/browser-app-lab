@@ -6504,6 +6504,18 @@
         "P0-RELEASE"
       ],
       "details": "PR229 clean head a5b02004f053d60e902fafe5c587138f0b048901 ALL GitHub Actions completed SUCCESS including real minimap40789998550, same-revision40789998314, scroll40789997969, ledger40789998166, board40789998068, authority40789998246 and world/chat40789998469. Vercel preview rate-limit failure is unrelated to requested Pages hosting. Merged as236cbad17e59fb373f9b456cc8e822fdacd65f3a; remote exact-SHA ledger contains event268 (last270,58tasks43requests). Pages40790512713 pending at time of this append. Local beta29 source selector/BATTLE QA passes Chromium desktop and WebKit desktop+mobile with actual scores05:09. New source PR273 exposed stale tests: source-roles still demanded CardData-only faces despite merged PR204 verified OBS full bodies, full-frame expected provisional193px grid rather than actual92+4+92=188px source, release identity still pinned beta28. Updated exact assertions, preserving source-role/bitmap provenance and CardData fallback requirements; no game errors ignored. Local source-roles PASS; PR273 CI/Pages pending; no task marked complete."
+    },
+    {
+      "seq": 273,
+      "date": "2026-10-29",
+      "type": "PR229_EXACT_SHA_PAGES_AND_PUBLIC_MINIMAP_PASS_MOBILE_COMPOSITION_CORRECTED",
+      "requestId": "REQ-20261028-001",
+      "taskIds": [
+        "P0-BOARD",
+        "P0-PODIUM",
+        "P0-RELEASE"
+      ],
+      "details": "PR229 merge236cbad17e59fb373f9b456cc8e822fdacd65f3a Pages workflow40790512713 SUCCESS and actual published real-source HTML/minimap workflow40790853970 SUCCESS on identical headSHA. Event268 independently read from exact merged ledger; all58tasks preserved. During PR273 WebKit screenshot inspection, source pivot alignment on tall mobile moved heading down away from live score row; reverted responsive header to previous mobile arrangement, restricted native shared-pivot CSS to historical desktop>=812px, and added actual mobile title-above-scores assertion. Local WebKit390x844 corrected battle/exit PASS. Original source numeral lead: existing excluded non-character OBS1167 frames0..7 visually depict large digits0..7 matching battle score style, frame10 small0 and18 small8. Large8/9 and full numeral sequence are not decoded/verified here, so no partial mixed-font score renderer or native die-body claim introduced. Source battle PR273 final Actions/Pages still pending; no restoration task falsely completed."
     }
   ]
 }

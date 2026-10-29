@@ -111,7 +111,9 @@
 
 /* The source SPR header offsets are in the SAME coordinate system as
  * the podium frame. game.js follows the drawn bitmap through resize;
- * clamp only at the top of narrow responsive stages. */
+ * Apply this historical 800px composition on desktop; retain the existing
+ * responsive mobile header/score arrangement. */
+@media(min-width:812px){
 #app.app-classic-dice #game #battle-visual[data-native-battle-podium="ready"]
  .leaf-native-winbattle-heading{
  left:var(--leaf-native-battle-heading-left)!important;
@@ -120,4 +122,5 @@
  height:var(--leaf-native-battle-heading-height)!important;
  max-width:none!important;
  transform:none!important;
+}
 }
