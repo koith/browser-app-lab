@@ -21,22 +21,14 @@ window.YuiPrivate=(()=>{
   });
  }
  async function asset(p,kind='original'){
-  const smaller=kind==='preview'&&!!p.preview;
-  const selected=smaller?'preview':'original';
-  const cacheId=p.url+':'+selected;
-  if(cache.has(cacheId))return cache.get(cacheId);
-  if(inflight.has(cacheId))return inflight.get(cacheId);
-  const job=(async()=>{
-   const r=await request('/api/yui/media/'+encodeURIComponent(p.ownerAlbum)+'/'+p.number+'/'+selected);const b=await r.blob();
-   const expectedSize=smaller?p.preview_bytes:p.bytes;
-   const expectedSha=smaller?p.preview_sha256:p.sha256;
-   if(b.size!==expectedSize)throw Error('보관본 크기 불일치');
-   const sha=[...new Uint8Array(await crypto.subtle.digest('SHA-256',await b.arrayBuffer()))].map(v=>v.toString(16).padStart(2,'0')).join('');
-   if(sha!==expectedSha)throw Error('보관본 SHA-256 불일치');
-   const url=URL.createObjectURL(b);cache.set(cacheId,url);
-   if(cache.size>64){const oldest=cache.keys().next().value;URL.revokeObjectURL(cache.get(oldest));cache.delete(oldest)}
-   return url;
-  })();inflight.set(cacheId,job);try{return await job}finally{inflight.delete(cacheId)}
+  if(!session)session=readSession();
+  if(!session)throw Error('보관소 연결 없음');
+  const selected=kind==='preview'&&p.preview?'preview':'original';
+  // The server verifies SHA-256 before returning the image. Returning the
+  // same-origin URL lets Safari decode and cache it natively without loading
+  // thousands of image blobs into JavaScript memory or hashing on the phone.
+  return session.api+'/api/yui/media/'+encodeURIComponent(p.ownerAlbum)+'/'+p.number+'/'+selected;
  }
+
  return {albums,asset};
 })();
