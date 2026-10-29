@@ -1,0 +1,129 @@
+name: Yui Mimmi Full Stored-Photo Gap Audit and Backfill
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/gallery-comprehensive-backfill.yml'
+  schedule:
+    - cron: '8 19 * * *'
+permissions:
+  contents: read
+  actions: write
+concurrency:
+  group: gallery-full-physical-coverage-audit
+  cancel-in-progress: false
+
+jobs:
+  audit-both-models:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      RCLONE_CONFIG_ARCHIVE_TYPE: terabox
+      YUI_COOKIE: ${{ secrets.YUI_TERABOX_COOKIE }}
+      MIMMI_COOKIE: ${{ secrets.MIMMI_TERABOX_NDUS }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Verify audit code before touching any source
+        run: python -m py_compile apps/gallery-archive/audit_both_models.py
+      - name: Install pinned owner-private TeraBox reader for read-only catalog comparison
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL 'https://github.com/gulp79/rclone-extra/releases/download/v1.75.2-extra/rclone-linux-amd64.zip' -o "$RUNNER_TEMP/rclone.zip"
+          echo "78855325a2a8d83b3feee3a8363d32e1211babbf4cda6356fa8ca5f472075062  $RUNNER_TEMP/rclone.zip" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/unpack" "$RUNNER_TEMP/bin"
+          unzip -q "$RUNNER_TEMP/rclone.zip" -d "$RUNNER_TEMP/unpack"
+          client="$(find "$RUNNER_TEMP/unpack" -type f -name rclone -print -quit)"
+          install -m 755 "$client" "$RUNNER_TEMP/bin/rclone"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+      - name: Read only the existing private catalog; never expose credentials or photo bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/owner"
+          for model in yui mimmi; do
+            if [[ "$model" == "yui" ]]; then
+              export RCLONE_CONFIG_ARCHIVE_COOKIE="$YUI_COOKIE"
+              remote="archive:YuiArchive"
+            else
+              export RCLONE_CONFIG_ARCHIVE_COOKIE="$MIMMI_COOKIE"
+              remote="archive:MimmiArchive"
+            fi
+            if [[ -z "$RCLONE_CONFIG_ARCHIVE_COOKIE" ]]; then
+              echo "$model: PRIVATE_CATALOG_CREDENTIAL_UNAVAILABLE" >> "$GITHUB_STEP_SUMMARY"
+              continue
+            fi
+            echo "::add-mask::$RCLONE_CONFIG_ARCHIVE_COOKIE"
+            if rclone cat "$remote/metadata/catalog.json" --timeout 45s --retries 1 > "$RUNNER_TEMP/owner/$model.json" 2>"$RUNNER_TEMP/reader-error"; then
+              echo "$model: PRIVATE_CATALOG_READ_OK" >> "$GITHUB_STEP_SUMMARY"
+            else
+              rm -f "$RUNNER_TEMP/owner/$model.json"
+              echo "$model: PRIVATE_CATALOG_READ_FAILED (public archive still audited)" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done
+      - name: Compare physical SHA bytes, private slots, all research source manifests
+        shell: bash
+        run: |
+          set -euo pipefail
+          python apps/gallery-archive/audit_both_models.py \
+            --owner-dir "$RUNNER_TEMP/owner" \
+            --output "$RUNNER_TEMP/gap-audit.json"
+          python - <<'PY'
+          import json, os
+          from pathlib import Path
+          doc=json.loads((Path(os.environ['RUNNER_TEMP'])/'gap-audit.json').read_text())
+          with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as f:
+              for model,v in doc['models'].items():
+                  f.write(f"\n### {model} physical-photo coverage\n")
+                  for key in ('public_sha_verified_files', 'private_catalog_entries',
+                              'combined_unique_album_number_positions', 'research_album_ids',
+                              'research_distinct_sha_candidates',
+                              'research_distinct_sha_not_in_saved_catalog',
+                              'advertised_numbered_positions_not_in_matching_id'):
+                      f.write(f"- {key}: {v.get(key)}\n")
+                  f.write("- Coverage gaps are NOT gallery photos until real files are saved, read back and displayed.\n")
+          PY
+      - name: Save audit metadata only; no photos or owner-private catalog
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: yui-mimmi-full-physical-gap-audit
+          path: ${{ runner.temp }}/gap-audit.json
+          if-no-files-found: warn
+          retention-days: 30
+
+  launch-safely-deduplicated-captures:
+    needs: audit-both-models
+    if: github.ref == 'refs/heads/main' && github.event_name != 'schedule'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Trigger existing normal-access photo byte acquisition, verification and cloud linking
+        shell: bash
+        run: |
+          set -euo pipefail
+          workflows=(
+            yui-known-missing-18-recovery.yml
+            yui-private-bulk-archive.yml
+            mimmi-private-missing-archive.yml
+            gallery-independent-photo-archive.yml
+            gallery-public-social-bulk.yml
+            mimmi-stored-public-gallery.yml
+            gallery-terabox-remote-inventory.yml
+          )
+          failures=0
+          for workflow in "${workflows[@]}"; do
+            if gh workflow run "$workflow" --repo "$GITHUB_REPOSITORY" --ref main; then
+              echo "- Dispatched: $workflow" >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "- Dispatch failed: $workflow" >> "$GITHUB_STEP_SUMMARY"
+              failures=$((failures+1))
+            fi
+          done
+          echo "Completion requires physically saved photos and gallery browser QA, not successful dispatch." >> "$GITHUB_STEP_SUMMARY"
+          test "$failures" -eq 0
