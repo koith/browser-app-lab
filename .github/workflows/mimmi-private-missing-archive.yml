@@ -4,12 +4,18 @@ on:
     branches: [main]
     paths:
       - 'apps/mimmi-gallery/archive_private_missing.py'
+      - 'apps/mimmi-gallery/missing_candidates.py'
+      - 'apps/mimmi-gallery/source-viewer-albums.json'
+      - 'apps/mimmi-gallery/private-archive-checkpoint.json'
       - 'apps/mimmi-gallery/test_archive_private_missing.py'
       - 'apps/yui-gallery/collect_private_batch.py'
       - '.github/workflows/mimmi-private-missing-archive.yml'
   pull_request:
     paths:
       - 'apps/mimmi-gallery/archive_private_missing.py'
+      - 'apps/mimmi-gallery/missing_candidates.py'
+      - 'apps/mimmi-gallery/source-viewer-albums.json'
+      - 'apps/mimmi-gallery/private-archive-checkpoint.json'
       - 'apps/mimmi-gallery/test_archive_private_missing.py'
       - 'apps/yui-gallery/collect_private_batch.py'
       - '.github/workflows/mimmi-private-missing-archive.yml'
