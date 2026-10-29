@@ -17,7 +17,7 @@ import json
 import re
 import sys
 from pathlib import Path
-from urllib.parse import urlsplit, urlunsplit
+from urllib.parse import urlsplit, urlunsplit, urljoin, parse_qs
 from zipfile import ZIP_STORED, ZipFile
 
 import requests
@@ -127,12 +127,56 @@ def check_photo(data:bytes) -> tuple[str,int,int,str]:
         if not ext:raise ValueError("Unsupported photo byte encoding")
         return sha,img.width,img.height,ext
 
-def get_page(client,source):
-    response=client.get(source["url"],timeout=32,headers={"User-Agent":UA})
+def get_page(client,source,page_url=None):
+    requested=page_url or source["url"]
+    if urlsplit(requested).hostname!=urlsplit(source["url"]).hostname:
+        raise ValueError("Untrusted pagination domain")
+    response=client.get(requested,timeout=32,headers={"User-Agent":UA})
     response.raise_for_status()
     if urlsplit(response.url).hostname!=urlsplit(source["url"]).hostname:
         raise ValueError("Unexpected public source redirect host")
     return response.text
+
+def visible_next_page(page_html, current_url, source, visited):
+    """Only follow explicitly visible same-collection pagination; no URL guessing."""
+    here=urlsplit(current_url)
+    soup=BeautifulSoup(page_html,"html.parser")
+    found=[]
+    for a in soup.select("a[href]"):
+        href=urljoin(current_url,a.get("href",""))
+        p=urlsplit(href)
+        if p.scheme!="https" or p.hostname!=here.hostname or p.path!=here.path:
+            continue
+        if href in visited:continue
+        params=parse_qs(p.query)
+        if not any(k in params for k in ("cursor","page","paged","max_position")):
+            continue
+        label=text_of(a).lower()
+        if ("cursor" in params or
+                any(x in label for x in ("next","load more","more","다음","다음 페이지","»","›","older")) or
+                (params.get("page") and params["page"][0].isdigit())):
+            found.append(href)
+    return found[0] if found else None
+
+def source_photo_pages(client,source):
+    max_pages=min(max(int(source.get("max_pages",1)),1),50)
+    current=source["url"]
+    visited=set()
+    combined=[]
+    errors=[]
+    while current and current not in visited and len(visited)<max_pages:
+        visited.add(current)
+        try:
+            html=get_page(client,source,current)
+        except (requests.RequestException,ValueError) as exc:
+            errors.append(str(exc)[:130])
+            if len(visited)==1 and source["kind"]=="inven-article" and source.get("verified_independent_public_article"):
+                combined.extend(source_images(source,""))
+            break
+        combined.extend(source_images(source,html))
+        if len(combined)>=350:break
+        current=visible_next_page(html,current,source,visited)
+    return list(dict.fromkeys(combined)),len(visited),errors
 
 def get_photo(client,url,source):
     last_error=None
@@ -173,19 +217,12 @@ def archive(model:str, source_index:dict, previous_catalog:dict, client, destina
         current_num=max((p["number"] for p in previous["images"]),default=0)
         rows=[]
         rejected=0
-        try:
-            page=get_page(client,source)
-            links=source_images(source,page)
-        except (requests.RequestException,ValueError) as e:
-            if source["kind"]=="inven-article" and source.get("verified_independent_public_article"):
-                # The six individually linked, publicly embedded photographs
-                # were manually corroborated in this specific model article.
-                # Other sources always fail closed when the page is unavailable.
-                links=source_images(source,"")
-            else:
-                audit.append({"source":album_id,"identified_public_photo_links":0,
-                              "physically_new_photos":0,"error":"Public page unavailable: "+str(e)[:100]})
-                continue
+        links,pages_seen,page_errors=source_photo_pages(client,source)
+        if not links:
+            audit.append({"source":album_id,"identified_public_photo_links":0,
+                          "physically_new_photos":0,"pages_visited":pages_seen,
+                          "errors":page_errors[:3]})
+            continue
         for url in links[:350]:
             try:
                 raw,(digest,width,height,ext)=get_photo(client,url,source)
@@ -200,7 +237,9 @@ def archive(model:str, source_index:dict, previous_catalog:dict, client, destina
             except (requests.RequestException,OSError,ValueError):
                 rejected+=1
         audit.append({"source":album_id,"identified_public_photo_links":len(links),
-                      "physically_new_photos":len(rows),"inaccessible_or_bad_images":rejected,
+                      "physically_new_photos":len(rows),"pages_visited":pages_seen,
+                      "page_errors":page_errors[:3],
+                      "inaccessible_or_bad_images":rejected,
                       "photo_links_are_not_stored_counts":True})
         if rows:
             results.append({"id":album_id,"title":source["title"],"images":rows})
