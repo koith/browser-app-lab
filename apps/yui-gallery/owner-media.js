@@ -8,7 +8,7 @@ window.YuiPrivate=(()=>{
  async function request(path){const r=await fetch(session.api+path,{headers:{Authorization:'Bearer '+session.token},cache:'no-store'});if(!r.ok)throw Error('보관소 HTTP '+r.status);return r}
  async function albums(){
   session=readSession();if(!session)return [];
-  const d=await (await request('/api/catalog')).json();if(d.schema_version!==1||!Array.isArray(d.albums))throw Error('보관소 목록 형식 오류');
+  const d=await (await request('/api/yui/catalog')).json();if(d.schema_version!==1||!Array.isArray(d.albums))throw Error('보관소 목록 형식 오류');
   return d.albums.map(a=>{
    if(!/^[a-z0-9][a-z0-9-]{1,100}$/.test(a.id)||!Array.isArray(a.images))throw Error('보관소 작품 형식 오류');
    return {...a,ownerHosted:true,images:a.images.map(p=>{
@@ -21,7 +21,7 @@ window.YuiPrivate=(()=>{
   if(cache.has(p.url))return cache.get(p.url);
   if(inflight.has(p.url))return inflight.get(p.url);
   const job=(async()=>{
-   const r=await request('/api/media/'+encodeURIComponent(p.ownerAlbum)+'/'+p.number+'/original');const b=await r.blob();
+   const r=await request('/api/yui/media/'+encodeURIComponent(p.ownerAlbum)+'/'+p.number+'/original');const b=await r.blob();
    if(b.size!==p.bytes)throw Error('보관본 크기 불일치');
    const sha=[...new Uint8Array(await crypto.subtle.digest('SHA-256',await b.arrayBuffer()))].map(v=>v.toString(16).padStart(2,'0')).join('');
    if(sha!==p.sha256)throw Error('보관본 SHA-256 불일치');
