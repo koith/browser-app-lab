@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "model": "mimmi",
-  "updated": "2026-10-29T01:07:12Z",
+  "updated": "2026-10-29T01:07:35Z",
   "storage": "physically committed public previews under GitHub Pages; not licensed publisher masters",
   "albums": [
     {
@@ -20538,10 +20538,226 @@
           "width": 1500,
           "height": 1000,
           "number": 6
+        },
+        {
+          "url": "stored-albums/djawa-twin-bunnies-affair/4644e1fac356c2acadfcc5d5e6c0b4049113f748cc114389d3ebb27018a0684d.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2025/05/sample_05-4.jpg",
+          "sha256": "4644e1fac356c2acadfcc5d5e6c0b4049113f748cc114389d3ebb27018a0684d",
+          "bytes": 510428,
+          "width": 1500,
+          "height": 1000,
+          "number": 7
+        },
+        {
+          "url": "stored-albums/djawa-twin-bunnies-affair/29abfac81339617336dea5accfdc6a6636c5778be077805ef99f962503177b10.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2025/05/sample_ss-1.jpg",
+          "sha256": "29abfac81339617336dea5accfdc6a6636c5778be077805ef99f962503177b10",
+          "bytes": 306101,
+          "width": 1050,
+          "height": 2100,
+          "number": 8
+        }
+      ],
+      "status": "public_previews_only_not_complete"
+    },
+    {
+      "id": "djawa-nikke-yuni",
+      "title": "Nikke : Yuni",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/nikke-yuni/",
+      "images": [
+        {
+          "url": "stored-albums/djawa-nikke-yuni/daa64916273a3f4de27408029461ccbbb96d02c7acb3c591e88a87880f5857bb.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2023/07/sample_cv-2.jpg",
+          "sha256": "daa64916273a3f4de27408029461ccbbb96d02c7acb3c591e88a87880f5857bb",
+          "bytes": 359564,
+          "width": 1000,
+          "height": 1500,
+          "number": 1
+        },
+        {
+          "url": "stored-albums/djawa-nikke-yuni/1e76c77d2d7f2122d9addc71b8d48e3666c75f8a909e874b20011a3bc4972ab0.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2023/07/sample_01-2.jpg",
+          "sha256": "1e76c77d2d7f2122d9addc71b8d48e3666c75f8a909e874b20011a3bc4972ab0",
+          "bytes": 259277,
+          "width": 1500,
+          "height": 1000,
+          "number": 2
+        },
+        {
+          "url": "stored-albums/djawa-nikke-yuni/82873f37d3f616da5bdca9d4d23e4c4fa303be16323be791ea5baef985916807.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2023/07/sample_02-2.jpg",
+          "sha256": "82873f37d3f616da5bdca9d4d23e4c4fa303be16323be791ea5baef985916807",
+          "bytes": 285376,
+          "width": 1000,
+          "height": 1500,
+          "number": 3
+        },
+        {
+          "url": "stored-albums/djawa-nikke-yuni/b1606439282638ae56ad5fe68fb5fd8c6e4fc482eec75f2539aca2185c28ddda.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2023/07/sample_03-1.jpg",
+          "sha256": "b1606439282638ae56ad5fe68fb5fd8c6e4fc482eec75f2539aca2185c28ddda",
+          "bytes": 243332,
+          "width": 1000,
+          "height": 1500,
+          "number": 4
+        },
+        {
+          "url": "stored-albums/djawa-nikke-yuni/2c8814b030eb7e4810f645b25db32f9a045b9ffe7c9f282b44043c05a1b6ef64.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2023/07/sample_04-2.jpg",
+          "sha256": "2c8814b030eb7e4810f645b25db32f9a045b9ffe7c9f282b44043c05a1b6ef64",
+          "bytes": 356127,
+          "width": 1000,
+          "height": 1500,
+          "number": 5
+        },
+        {
+          "url": "stored-albums/djawa-nikke-yuni/f78e1910c61407c8a9e98225239a3b659db9dafbbe8228d5d0251154a561dd3b.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2023/07/sample_05-2.jpg",
+          "sha256": "f78e1910c61407c8a9e98225239a3b659db9dafbbe8228d5d0251154a561dd3b",
+          "bytes": 354041,
+          "width": 1000,
+          "height": 1500,
+          "number": 6
+        },
+        {
+          "url": "stored-albums/djawa-nikke-yuni/47c1ce5ce0f9ca090c6dad90f6f0c8c1831869428ba33e3ed705a0524b9bb47e.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2023/07/sample_blur-2.jpg",
+          "sha256": "47c1ce5ce0f9ca090c6dad90f6f0c8c1831869428ba33e3ed705a0524b9bb47e",
+          "bytes": 244354,
+          "width": 1200,
+          "height": 1800,
+          "number": 7
+        }
+      ],
+      "status": "public_previews_only_not_complete"
+    },
+    {
+      "id": "djawa-retrospection",
+      "title": "Retrospection",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/retrospection/",
+      "images": [
+        {
+          "url": "stored-albums/djawa-retrospection/cbc248764a67d63795df411f45e64e54fc7277e39bc2c35a6a0d198e010f0813.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_cv-12.jpg",
+          "sha256": "cbc248764a67d63795df411f45e64e54fc7277e39bc2c35a6a0d198e010f0813",
+          "bytes": 761676,
+          "width": 1600,
+          "height": 1600,
+          "number": 1
+        },
+        {
+          "url": "stored-albums/djawa-retrospection/24b21c325747a5358441be3fd20f1489bd7bc3d09f0b122ef2b1a22c66aa9384.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_bw_1.jpg",
+          "sha256": "24b21c325747a5358441be3fd20f1489bd7bc3d09f0b122ef2b1a22c66aa9384",
+          "bytes": 760848,
+          "width": 1600,
+          "height": 1600,
+          "number": 2
+        },
+        {
+          "url": "stored-albums/djawa-retrospection/013b208f9a2c00b89dcbf05951e2d64ad2609ebd9c36398e9f4b20ed7bd3aed2.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_bw_2.jpg",
+          "sha256": "013b208f9a2c00b89dcbf05951e2d64ad2609ebd9c36398e9f4b20ed7bd3aed2",
+          "bytes": 689543,
+          "width": 1600,
+          "height": 1600,
+          "number": 3
+        },
+        {
+          "url": "stored-albums/djawa-retrospection/f4e850d3c6756176e6c7ffdb0c2e278fa7cb6ed6303aa3d6baa0640e394f11ac.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_bw_3.jpg",
+          "sha256": "f4e850d3c6756176e6c7ffdb0c2e278fa7cb6ed6303aa3d6baa0640e394f11ac",
+          "bytes": 896194,
+          "width": 1600,
+          "height": 1600,
+          "number": 4
+        },
+        {
+          "url": "stored-albums/djawa-retrospection/993a4bc6fd168f2a5c540543bdd76576cf685661401149ea3e3f52fdc2ef4c0f.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_color_1.jpg",
+          "sha256": "993a4bc6fd168f2a5c540543bdd76576cf685661401149ea3e3f52fdc2ef4c0f",
+          "bytes": 917057,
+          "width": 1800,
+          "height": 1200,
+          "number": 5
+        },
+        {
+          "url": "stored-albums/djawa-retrospection/6e0e582e66e3b7f93aef359f23a7c57d501d398ee47d1a5c1beaabd793094af1.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_color_2.jpg",
+          "sha256": "6e0e582e66e3b7f93aef359f23a7c57d501d398ee47d1a5c1beaabd793094af1",
+          "bytes": 537206,
+          "width": 1800,
+          "height": 1200,
+          "number": 6
+        },
+        {
+          "url": "stored-albums/djawa-retrospection/369c70b906585097389927385a34c9715e47780547727c6c1228519657f78af6.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_color_3.jpg",
+          "sha256": "369c70b906585097389927385a34c9715e47780547727c6c1228519657f78af6",
+          "bytes": 883956,
+          "width": 1200,
+          "height": 1800,
+          "number": 7
+        }
+      ],
+      "status": "public_previews_only_not_complete"
+    },
+    {
+      "id": "djawa-my-summer-vacation-vol-4",
+      "title": "My Summer Vacation Vol. 4",
+      "publisher": "DJAWA",
+      "source": "https://djawaphoto.com/portfolio/my-summer-vacation-vol-4/",
+      "images": [
+        {
+          "url": "stored-albums/djawa-my-summer-vacation-vol-4/0e59d2b60a1855b0c0919837d4a9bba3a33cce883fb430885fc84421192e1194.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_cv.jpg",
+          "sha256": "0e59d2b60a1855b0c0919837d4a9bba3a33cce883fb430885fc84421192e1194",
+          "bytes": 541765,
+          "width": 1200,
+          "height": 1800,
+          "number": 1
+        },
+        {
+          "url": "stored-albums/djawa-my-summer-vacation-vol-4/c3bacf5ae2fe3f26654b03f4c41110f3013a6587232e59efdf0d9e7f27f2720e.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_01-1.jpg",
+          "sha256": "c3bacf5ae2fe3f26654b03f4c41110f3013a6587232e59efdf0d9e7f27f2720e",
+          "bytes": 586795,
+          "width": 1200,
+          "height": 1800,
+          "number": 2
+        },
+        {
+          "url": "stored-albums/djawa-my-summer-vacation-vol-4/c618ebd07000745554b9870be2accf5144948610dd38811f692aa1f48e74c778.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_02-1.jpg",
+          "sha256": "c618ebd07000745554b9870be2accf5144948610dd38811f692aa1f48e74c778",
+          "bytes": 487928,
+          "width": 1200,
+          "height": 1800,
+          "number": 3
+        },
+        {
+          "url": "stored-albums/djawa-my-summer-vacation-vol-4/cf60a394cca24d606d9b0c7ec0e88b057302471c078a093a511b7e7fc862c153.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_03-1.jpg",
+          "sha256": "cf60a394cca24d606d9b0c7ec0e88b057302471c078a093a511b7e7fc862c153",
+          "bytes": 498005,
+          "width": 1200,
+          "height": 1800,
+          "number": 4
+        },
+        {
+          "url": "stored-albums/djawa-my-summer-vacation-vol-4/08955a91bd103104549b48636b6aefcf4b1321cb427bca5d5d4907a3b0e11c54.jpg",
+          "source_url": "https://djawaphoto.com/wp-content/uploads/2024/08/sample_04-1.jpg",
+          "sha256": "08955a91bd103104549b48636b6aefcf4b1321cb427bca5d5d4907a3b0e11c54",
+          "bytes": 428698,
+          "width": 1200,
+          "height": 1800,
+          "number": 5
         }
       ],
       "status": "public_previews_only_not_complete"
     }
   ],
-  "physical_verified_image_count": 2221
+  "physical_verified_image_count": 2242
 }
