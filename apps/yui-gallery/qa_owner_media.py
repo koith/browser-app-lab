@@ -25,7 +25,7 @@ async def main():
             if route.request.method=='OPTIONS':return await route.fulfill(status=204,headers=headers)
             assert route.request.headers.get('authorization')=='Bearer fixture-secret'
             assert 'fixture-secret' not in route.request.url
-            if route.request.url.endswith('/api/catalog'):
+            if route.request.url.endswith('/api/yui/catalog'):
                 await route.fulfill(json=catalog,headers=headers)
             elif '/1/original' in route.request.url:
                 await route.fulfill(body=photo,content_type='image/jpeg',headers=headers)
