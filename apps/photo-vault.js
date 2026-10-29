@@ -1,7 +1,7 @@
 /* Personal archive: verified, device-local image bytes. No external image origins or credentials. */
 (function(root){
 'use strict';
-const DB='photobook-personal-vault-v1',MAX_ENTRY=30*1024*1024,MAX_ITEMS=15000;
+const DB='photobook-personal-vault-v1',MAX_ENTRY=30*1024*1024,MAX_NESTED_ZIP=128*1024*1024,MAX_ITEMS=15000;
 const hex=b=>Array.from(new Uint8Array(b),x=>x.toString(16).padStart(2,'0')).join('');
 const digest=async b=>hex(await crypto.subtle.digest('SHA-256',await b.arrayBuffer()));
 function database(){
@@ -23,7 +23,7 @@ const get=(store,key)=>operation(store,'readonly',s=>s.get(key));
 const put=(store,key,value)=>operation(store,'readwrite',s=>s.put(value,key));
 const readAll=store=>operation(store,'readonly',s=>s.getAll());
 const u16=(v,n)=>v.getUint16(n,true),u32=(v,n)=>v.getUint32(n,true);
-async function zipEntries(file){
+async function zipEntries(file,allowNested=false){
  if(!file||!file.name.toLowerCase().endsWith('.zip')||file.size>2*1024**3)throw Error('2GB 이하 ZIP 보관본을 선택하세요.');
  const tailBytes=await file.slice(Math.max(0,file.size-65557)).arrayBuffer(),v=new DataView(tailBytes);
  let e=-1;for(let i=v.byteLength-22;i>=0;i--)if(u32(v,i)===0x06054b50){e=i;break}
@@ -38,7 +38,8 @@ async function zipEntries(file){
   if(p+46+nl+el+cl>central.byteLength)throw Error('ZIP 경로가 손상되었습니다.');
   const name=decoder.decode(new Uint8Array(central.buffer,central.byteOffset+p+46,nl));
   if(name&&!name.endsWith('/')&&!name.startsWith('/')&&!name.split('/').some(s=>s==='..'||s==='.')&&!entries.has(name)){
-   if(![0,8].includes(method)||bytes>MAX_ENTRY)throw Error('지원하지 않는 압축 방식 또는 30MB 초과 파일: '+name);
+   const limit=allowNested&&name.endsWith('-private-import.zip')?MAX_NESTED_ZIP:MAX_ENTRY;
+   if(![0,8].includes(method)||bytes>limit)throw Error('지원하지 않는 압축 방식 또는 ZIP 파일 크기 초과: '+name);
    entries.set(name,{method,compressed,bytes,offset});
   }
   p+=46+nl+el+cl;
@@ -79,10 +80,26 @@ function validate(manifest,model){
  if(!count||manifest.physical_verified_image_count!==undefined&&manifest.physical_verified_image_count!==count)throw Error('사진 수량이 일치하지 않습니다.');
  return {albums,count};
 }
-async function importZip(file,model,progress=()=>{}){
- const {entries,extract}=await zipEntries(file);
+async function importZip(file,model,progress=()=>{},depth=0){
+ const {entries,extract}=await zipEntries(file,depth===0);
  const path=[...entries.keys()].find(x=>x==='manifest.json'||x.endsWith('/manifest.json'));
- if(!path)throw Error('manifest.json이 없는 ZIP입니다.');
+ if(!path){
+  // GitHub Actions downloads are wrapper ZIPs containing one or more
+  // SHA-verified, numbered, model-specific private import ZIPs.
+  const inner=[...entries.keys()].filter(x=>x.endsWith('-private-import.zip')).sort();
+  if(depth!==0||!inner.length||inner.length>100)
+   throw Error('manifest.json이 없거나 지원하지 않는 보관본입니다.');
+  const total={albums:0,images:0,unique:0};
+  for(let i=0;i<inner.length;i++){
+   const name=inner[i];
+   progress('보관본 '+(i+1)+' / '+inner.length+'개 확인: '+name);
+   const zip=await extract(name);
+   const nestedFile=new File([zip],name,{type:'application/zip'});
+   const result=await importZip(nestedFile,model,message=>progress('('+ (i+1)+'/'+inner.length+') '+message),depth+1);
+   total.albums+=result.albums;total.images+=result.images;total.unique+=result.unique;
+  }
+  return total;
+ }
  const manifest=JSON.parse(await (await extract(path)).text());
  const {albums,count}=validate(manifest,model),prefix=path.slice(0,-'manifest.json'.length),seen=new Set();let done=0;
  progress('실제 사진 '+count+'장의 바이트와 SHA-256을 검증합니다.');
