@@ -100,7 +100,9 @@ const engine={chromium,webkit}[engineName];if(!engine)throw Error('Unknown engin
        '/tmp/photo-vault-qa/'+model+'-overlap.zip'
      ])
    ]);
-   await page.waitForFunction(n=>document.querySelector('#inventory')?.textContent?.startsWith(n+'장'),baseline+2,{timeout:15000});
+   // Inventory was already baseline+2 before this re-import. Wait for the
+   // post-navigation *completed summary*, not a stale counter or in-flight text.
+   await page.waitForFunction(()=>document.querySelector('#vault-status')?.textContent?.includes('검증 완료 ZIP 1 / 2개'),{timeout:20000});
    const mixedResult=await page.locator('#vault-status').innerText();
    if(!mixedResult.includes('검증 완료 ZIP 1 / 2개')||!mixedResult.includes('실패 1개'))
      throw Error('Mixed-validity ZIP batch did not preserve partial-success feedback: '+mixedResult);
