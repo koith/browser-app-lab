@@ -45,14 +45,23 @@ with sync_playwright() as pw:
         assert reported["private"] >= (2700 if model=="yui" else 400),reported
         assert reported["count"] >= (2700 if model=="yui" else 2600),reported
         assert "실제 저장본" in reported["actualBanner"],reported
-        # Open an album whose *first* picture was sourced from TeraBox,
-        # so the grid, list and lightbox all exercise authenticated bytes.
-        album_id=page.evaluate("""() => {
-          const a=stored.find(x=>Array.isArray(x.images)&&x.images.length
-              && x.images[0].ownerAlbum);
-          return a?.id||null;
-        }""")
-        assert album_id,(model,"No archived photobook appears with private media")
+        # Only PASS if a newly acquired independently photographed picture,
+        # NOT an earlier unrelated photobook, actually appears in the existing
+        # gallery grid and its real authenticated original opens.
+        album_id = {
+            "yui": "yui-indie-photographer-cos-swee-2026",
+            "mimmi": "mimmi-indie-sana-sopmod2-2019",
+        }[model]
+        new_photos = page.evaluate("""(id) => {
+          const a=stored.find(x=>x.id===id);
+          return a ? {
+            count:a.images.length,
+            private:a.images.filter(p=>!!p.ownerAlbum).length,
+            numbers:a.images.map(p=>p.number)
+          } : null;
+        }""",album_id)
+        assert new_photos and new_photos["count"] >= 7,(model,"New independent photographed albums not added to gallery",new_photos)
+        assert new_photos["private"]==new_photos["count"],(model,"Research links, not all physically saved",new_photos)
         album=page.locator(f'#albumgrid .album[data-id="{album_id}"]')
         album.scroll_into_view_if_needed(timeout=10000)
         album.click(timeout=12000)
@@ -81,6 +90,8 @@ with sync_playwright() as pw:
               json.dumps({"model":model,"all_saved_album_photos":reported["count"],
                           "authenticated_owner_photos":reported["private"],
                           "album_count":reported["works"],
+                          "new_independent_album_photos":new_photos["count"],
+                          "verified_independent_album":True,
                           "preview_loaded":True,"original_lightbox_loaded":True}),flush=True)
         context.close()
     browser.close()
