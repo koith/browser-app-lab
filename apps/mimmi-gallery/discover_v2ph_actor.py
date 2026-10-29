@@ -117,18 +117,18 @@ def run(max_pages=8,max_albums=70,max_samples=180,max_album_pages=35,batch_index
         target=json.loads((ROOT/"v2ph-targets.json").read_text())
         known={urlsplit(a["source"]).path for a in target["albums"] if safe_source(a["source"])}
     except Exception:pass
-    new=[a for a in catalog if urlsplit(a["source"]).path not in known]
-    # Do not confuse a first-page 10-image sample with an entire photobook.
-    # Bound one job to a subset of works, retaining earlier verified work data.
-    new=sorted(new,key=lambda x:x["id"])
+    # Previously known seed works must be revisited: a 10-photo preview is
+    # never proof that the rest of a 100+ photo work was collected.
+    candidates=sorted(catalog,key=lambda x:x["id"])
+    discovered_work_count=len(candidates)
     if batch_size>0:
         start=batch_index*batch_size
-        new=new[start:start+batch_size]
+        candidates=candidates[start:start+batch_size]
     results=[]
-    for i,book in enumerate(new,1):
+    for i,book in enumerate(candidates,1):
         result=verify_album(book,max_samples,max_album_pages,browser_scroll=browser_scroll)
         results.append(result)
-        print("MIMMI_ACTOR_ALBUM",i,len(new),result["id"],len(result["samples"]),flush=True)
+        print("MIMMI_ACTOR_ALBUM",i,len(candidates),result["id"],len(result["samples"]),flush=True)
     # Preserve earlier verified photographs when a source responds with 429,
     # a paywall, or a temporary network error. Never replace 10 old images by 0.
     previous_file=ROOT/"v2ph-actor-previews.json"
@@ -152,7 +152,9 @@ def run(max_pages=8,max_albums=70,max_samples=180,max_album_pages=35,batch_index
                 fresh["status"]="public_previews_verified"
     result={"version":"v0.1.0-mimmi.3","model":"mimmi","generated_at":datetime.now(timezone.utc).isoformat(),
             "source":ACTOR_URL,"actor_pages":pages,
-            "summary":{"actor_albums_discovered":len(catalog),"previously_configured_albums":len(catalog)-len(new),
+            "summary":{"actor_albums_discovered":len(catalog),"previously_configured_albums":sum(urlsplit(a["source"]).path in known for a in catalog),
+                       "works_selected_for_revisit":len(candidates),
+                       "actor_work_count":discovered_work_count,
                        "new_album_candidates":len(results),
                        "verified_public_image_urls":sum(len(a["samples"]) for a in results),
                        "private_cloud_photos_archived":0},
