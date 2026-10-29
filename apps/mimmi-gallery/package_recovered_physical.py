@@ -28,9 +28,9 @@ PHOTO = re.compile(r"photos/([a-f0-9]{64})\.(jpg|jpeg|png|webp)\Z", re.I)
 def pack(archive_paths: list[Path], public: dict, checkpoint: dict, target: Path) -> dict:
     if not archive_paths or public.get("model") != "mimmi":
         raise ValueError("A real Mimmi source wrapper and public physical index are required")
-    occupied = {(a, n) for a, n, *_ in saved_positions(public)}
+    public_slots = {(a, n) for a, n, *_ in saved_positions(public)}
     private = archived_positions(checkpoint)
-    occupied.update(private)
+    occupied = public_slots | private
     candidates = {}
     source_rows = 0
     duplicates = 0
@@ -93,7 +93,7 @@ def pack(archive_paths: list[Path], public: dict, checkpoint: dict, target: Path
     target.parent.mkdir(parents=True, exist_ok=True)
     audit = {
         "schema_version": 1, "model": "mimmi", "real_saved_bytes_only": True,
-        "previous_public_photo_positions": len(occupied - private),
+        "previous_public_photo_positions": len(public_slots),
         "previous_private_photo_positions": len(private),
         "input_wrapper_count": len(archive_paths), "input_verified_photo_rows": source_rows,
         "existing_or_duplicate_rows": duplicates, "new_verified_photo_positions": len(candidates),
