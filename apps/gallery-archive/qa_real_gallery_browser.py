@@ -68,18 +68,19 @@ with sync_playwright() as pw:
         assert page.locator("#detail").is_visible()
         photo=page.locator("#detailphotos .photo").first
         photo.scroll_into_view_if_needed()
-        # Actual image downloaded via the authenticated on-demand gateway,
-        # checked against the SHA by the original owner-media.js client.
+        # The preview is displayed as a native browser URL; the server checks
+        # the downloaded bytes against the archived SHA before responding.
         page.wait_for_function(
             """() => [...document.querySelectorAll('#detailphotos img')].some(
-              img => img.src.startsWith('blob:') && img.naturalWidth>=160)""",
+              img => (img.src.startsWith('blob:') || img.src.includes('/api/'))
+                     && img.naturalWidth>=160)""",
             timeout=110000
         )
         photo.click(timeout=10000)
         page.wait_for_function(
             """() => {
               const img=document.querySelector('#full');
-              return !!img && img.src.startsWith('blob:') && img.naturalWidth>=160;
+              return !!img && (img.src.startsWith('blob:') || img.src.includes('/api/')) && img.naturalWidth>=160;
             }""",
             timeout=110000
         )
