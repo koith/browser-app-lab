@@ -6,6 +6,7 @@ on:
       - "Yui Public Sources To Private Original-Byte Archives"
       - "Yui Known Missing 18 Photo Slots Physical Recovery"
       - "Yui 137 Public Web Album Bytes Private Recovery"
+      - "Yui 18 Missing Web Photo Numbers Byte Recovery"
       - "Yui Public SNS Photo Archive"
       - "Independent Yui and Mimmi Photoshoot Original Byte Archive"
       - "Gallery Public Creator Social Bulk Photo Bytes"
@@ -80,11 +81,14 @@ jobs:
           model="${{ matrix.model }}"
           if [[ "$model" == yui ]]; then workflow='yui-private-bulk-archive.yml';pattern='^yui-original-verified-';else workflow='mimmi-private-missing-archive.yml';pattern='^mimmi-original-new-private-';fi
           if [[ "$EVENT_NAME" == workflow_run ]]; then
-            if [[ "$model" == yui && "$SOURCE_NAME" != 'Yui Public Sources To Private Original-Byte Archives' && "$SOURCE_NAME" != 'Yui Known Missing 18 Photo Slots Physical Recovery' && "$SOURCE_NAME" != 'Yui 137 Public Web Album Bytes Private Recovery' && "$SOURCE_NAME" != 'Yui Public SNS Photo Archive' && "$SOURCE_NAME" != 'Independent Yui and Mimmi Photoshoot Original Byte Archive' && "$SOURCE_NAME" != 'Gallery Public Creator Social Bulk Photo Bytes' ]] || [[ "$model" == mimmi && "$SOURCE_NAME" != 'Mimmi Missing SHA Public Photos To Private ZIP Archive' && "$SOURCE_NAME" != 'Independent Yui and Mimmi Photoshoot Original Byte Archive' && "$SOURCE_NAME" != 'Gallery Public Creator Social Bulk Photo Bytes' ]]; then
+            if [[ "$model" == yui && "$SOURCE_NAME" != 'Yui Public Sources To Private Original-Byte Archives' && "$SOURCE_NAME" != 'Yui Known Missing 18 Photo Slots Physical Recovery' && "$SOURCE_NAME" != 'Yui 137 Public Web Album Bytes Private Recovery' && "$SOURCE_NAME" != 'Yui 18 Missing Web Photo Numbers Byte Recovery' && "$SOURCE_NAME" != 'Yui Public SNS Photo Archive' && "$SOURCE_NAME" != 'Independent Yui and Mimmi Photoshoot Original Byte Archive' && "$SOURCE_NAME" != 'Gallery Public Creator Social Bulk Photo Bytes' ]] || [[ "$model" == mimmi && "$SOURCE_NAME" != 'Mimmi Missing SHA Public Photos To Private ZIP Archive' && "$SOURCE_NAME" != 'Independent Yui and Mimmi Photoshoot Original Byte Archive' && "$SOURCE_NAME" != 'Gallery Public Creator Social Bulk Photo Bytes' ]]; then
               echo 'skip=true' >> "$GITHUB_OUTPUT";exit 0
             fi
             if [[ "$SOURCE_NAME" == 'Yui 137 Public Web Album Bytes Private Recovery' ]]; then
               pattern='^yui-original-verified-jliji-137$'
+            fi
+            if [[ "$SOURCE_NAME" == 'Yui 18 Missing Web Photo Numbers Byte Recovery' ]]; then
+              pattern='^yui-original-verified-jliji-missing-18$'
             fi
             if [[ "$SOURCE_NAME" == 'Independent Yui and Mimmi Photoshoot Original Byte Archive' ]]; then
               # This collector emits model-separated physical ZIP artifacts
