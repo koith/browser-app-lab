@@ -90,6 +90,8 @@ const engine={chromium,webkit}[engineName];if(!engine)throw Error('Unknown engin
    await page.locator('#albumgrid [data-id="'+originalAlbum.id+'"]').click();
    await page.waitForFunction(()=>!document.querySelector('#detail').hidden);
    await page.waitForFunction(()=>document.querySelector('#detailphotos .photo img')?.src?.startsWith('blob:'),{timeout:15000});
+   if((await page.locator('#detailphotos .photo img').first().getAttribute('src'))?.startsWith('http'))
+     throw Error('Saved private photo was shadowed by a public preview');
    // A corrupt ZIP in a multi-selection must not prevent another valid ZIP
    // from being imported and reported after the navigation.
    await page.goto('http://127.0.0.1:8765/'+model+'-gallery/');
@@ -106,9 +108,6 @@ const engine={chromium,webkit}[engineName];if(!engine)throw Error('Unknown engin
    const mixedResult=await page.locator('#vault-status').innerText();
    if(!mixedResult.includes('검증 완료 ZIP 1 / 2개')||!mixedResult.includes('실패 1개'))
      throw Error('Mixed-validity ZIP batch did not preserve partial-success feedback: '+mixedResult);
-
-   if((await page.locator('#detailphotos .photo img').first().getAttribute('src'))?.startsWith('http'))
-     throw Error('Saved private photo was shadowed by a public preview');
 
   }
   await open('yui',baselines.yui);
