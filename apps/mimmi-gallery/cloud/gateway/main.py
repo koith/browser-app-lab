@@ -18,7 +18,11 @@ import time
 from pathlib import PurePosixPath
 from typing import AsyncGenerator
 
-from fastapi import Depends, FastAPI, Header, HTTPException, Query
+from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
+try:
+    from gateway.portal import COOKIE_NAME, install_portal, session_valid
+except ModuleNotFoundError:
+    from portal import COOKIE_NAME, install_portal, session_valid
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse
 
@@ -56,11 +60,13 @@ def media_key_valid(key: str) -> bool:
     return bool(parts) and all(p not in ("..", ".", "") for p in parts) and parts[0] in ("originals", "previews")
 
 
-async def authenticated(authorization: str | None = Header(default=None)):
+async def authenticated(request: Request, authorization: str | None = Header(default=None)):
     if not TOKEN or not COOKIE:
         raise HTTPException(status_code=503, detail="Cloud gateway is not connected")
     expected = "Bearer " + TOKEN
-    if not authorization or not secrets.compare_digest(authorization, expected):
+    bearer_ok = bool(authorization) and secrets.compare_digest(authorization, expected)
+    first_party_ok = session_valid(TOKEN, request.cookies.get(COOKIE_NAME))
+    if not (bearer_ok or first_party_ok):
         raise HTTPException(status_code=401, detail="Authorization required", headers={"WWW-Authenticate": "Bearer"})
 
 
@@ -262,3 +268,13 @@ async def yui_media(album_id: str, image_num: int, kind: str, download: bool = Q
     if download:
         headers["Content-Disposition"] = f'attachment; filename="{album_id}-{image_num:05d}.{ext}"'
     return StreamingResponse(iter([payload]), media_type=mime, headers=headers)
+
+
+# Owner-only mobile gallery. It preserves all prior /api/* bearer clients and
+# adds an HttpOnly, same-origin session for Safari, not public photo URLs.
+async def _portal_catalog_for(model: str):
+    return await (yui_catalog_bytes() if model == "yui" else get_catalog())
+
+install_portal(app, token_getter=lambda: TOKEN,
+               configured=lambda: bool(TOKEN and COOKIE),
+               catalog_for_model=_portal_catalog_for)

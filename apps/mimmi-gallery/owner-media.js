@@ -3,9 +3,12 @@
 window.MimmiPrivate=(()=>{
  const cache=new Map(),inflight=new Map();let session=null;
  function readSession(){
+  // Render's first-party owner gallery uses a Secure HttpOnly cookie instead
+  // of a client-visible bearer token. GitHub Pages preserves old session flow.
+  if(location.pathname.startsWith('/gallery/'))return {api:location.origin,token:null,cookie:true};
   try{const s=JSON.parse(sessionStorage.getItem('mimmi-owner-session'));if(!s?.token)return null;const u=new URL(s.api);if(u.username||u.password||u.pathname!=='/'||u.search||u.hash)return null;if(u.protocol!=='https:'&&!(u.protocol==='http:'&&['localhost','127.0.0.1'].includes(u.hostname)))return null;return {api:u.origin,token:s.token}}catch{return null}
  }
- async function request(path){const r=await fetch(session.api+path,{headers:{Authorization:'Bearer '+session.token},cache:'no-store'});if(!r.ok)throw Error('보관소 HTTP '+r.status);return r}
+ async function request(path){const r=await fetch(session.api+path,{headers:session.token?{Authorization:'Bearer '+session.token}:{},credentials:session.cookie?'same-origin':'omit',cache:'no-store'});if(!r.ok)throw Error('보관소 HTTP '+r.status);return r}
  async function albums(){
   session=readSession();if(!session)return [];
   const d=await (await request('/api/catalog')).json();if(d.schema_version!==1||!Array.isArray(d.albums))throw Error('보관소 목록 형식 오류');
