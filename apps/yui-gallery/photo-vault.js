@@ -97,14 +97,26 @@ async function importZip(file,model,progress=()=>{}){
   }
   done++;if(done%10===0||done===count)progress('검증·보관 '+done+' / '+count+'장');
  }
- for(const a of albums)await put('albums',model+':'+a.id,{...a,model,imported_at:new Date().toISOString()});
+ // Merge incremental verified batches by album and photo number. Do not discard previously saved positions.
+ for(const a of albums){
+  const key=model+':'+a.id,previous=await get('albums',key),byNumber=new Map();
+  for(const p of previous?.images||[])byNumber.set(p.number,p);
+  for(const p of a.images){
+   const prior=byNumber.get(p.number);
+   // Higher actual image resolution wins. Equal resolution prefers the newly imported bytes.
+   if(!prior||p.width*p.height>=prior.width*prior.height)byNumber.set(p.number,p);
+  }
+  const images=[...byNumber.values()].sort((x,y)=>x.number-y.number);
+  const expected=Math.max(previous?.expected||0,a.expected||0)||null;
+  await put('albums',key,{...previous,...a,model,expected,images,imported_at:new Date().toISOString()});
+ }
  if(root.navigator?.storage?.persist)try{await root.navigator.storage.persist()}catch{}
  return {albums:albums.length,images:count,unique:seen.size};
 }
 async function albums(model){
  const rows=await readAll('albums');
  return rows.filter(a=>a.model===model).map(a=>({...a,vaultHosted:true,images:a.images.map(p=>({
-  ...p,url:'vault:'+model+':'+a.id+':'+p.number,vaultAlbum:a.id,vaultModel:model
+  ...p,originalExtension:p.url?.split('.').pop(),url:'vault:'+model+':'+a.id+':'+p.number,vaultAlbum:a.id,vaultModel:model
  }))}));
 }
 const cache=new Map();
@@ -112,7 +124,8 @@ async function asset(p){
  const key=p.vaultModel+':'+p.sha256;
  if(cache.has(key))return cache.get(key);
  const saved=await get('media',key);
- const mime=/\.webp$/i.test(p.url)?'image/webp':/\.png$/i.test(p.url)?'image/png':'image/jpeg';
+ const ext=p.originalExtension||'';
+ const mime=ext==='webp'?'image/webp':ext==='png'?'image/png':'image/jpeg';
  const blob=saved instanceof ArrayBuffer?new Blob([saved],{type:mime}):saved instanceof Blob?saved:null;
  if(!blob||blob.size!==p.bytes||await digest(blob)!==p.sha256)throw Error('이 기기의 저장본이 없거나 손상되었습니다. ZIP을 다시 가져오세요.');
  const url=URL.createObjectURL(blob);cache.set(key,url);
