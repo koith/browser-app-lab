@@ -149,5 +149,15 @@ async function asset(p){
  if(cache.size>40){const first=cache.keys().next().value;URL.revokeObjectURL(cache.get(first));cache.delete(first)}
  return url;
 }
-root.PhotoVault={importZip,albums,asset};
+async function archiveSynced(model,id,signature){
+ if(!['yui','mimmi'].includes(model)||!/^[A-Za-z0-9_-]{10,100}$/.test(id))throw Error('동기화 키 오류');
+ const row=await get('albums','drive-sync:'+model+':'+id);
+ return row?.signature===signature;
+}
+async function markArchiveSynced(model,id,signature){
+ if(!['yui','mimmi'].includes(model)||!/^[A-Za-z0-9_-]{10,100}$/.test(id))throw Error('동기화 키 오류');
+ if(typeof signature!=='string'||signature.length>180)throw Error('동기화 버전 오류');
+ await put('albums','drive-sync:'+model+':'+id,{model:'__sync_marker__',signature,verified_at:new Date().toISOString()});
+}
+root.PhotoVault={importZip,albums,asset,archiveSynced,markArchiveSynced};
 })(globalThis);
