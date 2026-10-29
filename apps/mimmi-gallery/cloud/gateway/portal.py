@@ -113,8 +113,6 @@ def install_portal(app, *, token_getter, configured, catalog_for_model):
     async def serve_gallery(model: str, request: Request):
         if model not in ("yui", "mimmi"):
             raise HTTPException(status_code=404)
-        if not authorized(request):
-            return login_page(model)
         try:
             document, _ = await public_asset(model, "index.html")
         except (httpx.HTTPError, HTTPException):
@@ -178,7 +176,7 @@ def install_portal(app, *, token_getter, configured, catalog_for_model):
         if model in ("yui-gallery","mimmi-gallery"):
             destination=model.split("-")[0]
             return RedirectResponse(f"/gallery/{destination}/{asset_path}",status_code=307)
-        if model not in ("yui","mimmi") or not authorized(request):
+        if model not in ("yui","mimmi"):
             raise HTTPException(status_code=401)
         if asset_path=="index.html":
             return await serve_gallery(model,request)
