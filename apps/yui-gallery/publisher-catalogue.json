@@ -18,7 +18,14 @@
       ],
       "visible_photo_samples": 24,
       "full_edition_acquired": false,
-      "access_status": "public_samples_only_purchase_required_for_full_edition"
+      "access_status": "public_samples_only_purchase_required_for_full_edition",
+      "official_announcement_at_utc": "2026-10-28T09:26:00Z",
+      "official_announcement_at_kst": "2026-10-28T18:26:00+09:00",
+      "official_announcement_url": "https://x.com/super_yuisan/status/2115374736679309345",
+      "publisher_release_date": null,
+      "publisher_listing_date": null,
+      "release_date_status": "unverified_not_invented",
+      "last_source_checked": "2026-10-30"
     },
     {
       "publisher": "BCUT",
