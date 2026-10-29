@@ -1,0 +1,61 @@
+name: Split Yui Verified Private Archive Artifacts For Drive
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/yui-split-real-private-artifacts.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+  actions: read
+jobs:
+  split:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        include:
+          - album: maid291
+            from_artifact: yui-original-verified-pixibb-large
+          - album: last-summer192
+            from_artifact: yui-original-verified-pixibb-large
+          - album: tracksuit201
+            from_artifact: yui-original-verified-pixibb-large
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          run-id: 40798481649
+          name: ${{ matrix.from_artifact }}
+          path: /tmp/input
+          github-token: ${{ github.token }}
+      - name: Prove actual extracted original bytes and number sequence
+        env:
+          ALBUM_ID: ${{ matrix.album }}
+        run: |
+          python - <<'PY'
+          import hashlib,json,os,zipfile
+          from pathlib import Path
+          album=os.environ['ALBUM_ID']
+          f=Path('/tmp/input')/(album+'-private-import.zip')
+          assert f.is_file(),f
+          with zipfile.ZipFile(f) as z:
+              manifest=json.loads(z.read('manifest.json'))
+              assert manifest['model']=='yui'
+              assert manifest['albums'][0]['id']==album
+              images=manifest['albums'][0]['images']
+              assert len(images)==manifest['physical_verified_image_count'] and len(images)>0
+              for row in images:
+                  raw=z.read(row['url'])
+                  assert len(raw)==row['bytes']
+                  assert hashlib.sha256(raw).hexdigest()==row['sha256']
+          assert f.stat().st_size<100*1024*1024,'Too large for private upload tool'
+          print('YUI_SPLIT_REAL_SHA_VERIFIED',album,len(images),f.stat().st_size)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: yui-verified-album-${{ matrix.album }}
+          path: /tmp/input/${{ matrix.album }}-private-import.zip
+          retention-days: 14
+          if-no-files-found: error
