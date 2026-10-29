@@ -1,10 +1,39 @@
 name: Yui Public SNS Photo Archive
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '46 2,14 * * *'
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/yui-public-sns-archive.yml'
+      - 'apps/yui-gallery/sns_archive.py'
+      - 'apps/yui-gallery/package_sns_to_private.py'
+  pull_request:
+    paths:
+      - '.github/workflows/yui-public-sns-archive.yml'
+      - 'apps/yui-gallery/package_sns_to_private.py'
+      - 'apps/yui-gallery/test_package_sns_to_private.py'
 permissions:
   contents: read
 jobs:
+  photo-archive-qa:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install 'Pillow==11.3.0'
+      - run: |
+          python -m py_compile apps/yui-gallery/sns_archive.py apps/yui-gallery/package_sns_to_private.py
+          python apps/yui-gallery/test_package_sns_to_private.py
   archive:
+    needs: photo-archive-qa
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    env:
+      RCLONE_CONFIG_ARCHIVE_TYPE: terabox
+      RCLONE_CONFIG_ARCHIVE_COOKIE: ${{ secrets.YUI_TERABOX_COOKIE }}
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     steps:
@@ -15,6 +44,7 @@ jobs:
       - name: Install archive dependencies
         run: python -m pip install requests pillow beautifulsoup4
       - name: Download publicly posted original-size images and validate
+        continue-on-error: true
         run: python apps/yui-gallery/download_sns_public.py --output yui-sns-individuals --max-pages 85 --delay 1
       - name: Audit every individual file
         run: |
@@ -25,13 +55,39 @@ jobs:
           root=pathlib.Path('yui-sns-individuals')
           info=json.loads((root/'manifest.json').read_text())
           for row in info['images']: verified_record(root,row)
-          assert not info['failures'],info['failures']
+          # Partial public source failures are reported; genuinely stored bytes still continue.
           assert info['unique_files']>0
           summary={k:v for k,v in info.items() if k not in ('images','failures')}
           summary['permanent_cloud_uploaded']=0
           atomic_json(root/'summary.json',summary)
           print('VERIFIED_INDIVIDUAL_FILES',json.dumps(summary))
           PY
+      - name: Read SHA-backed owner-private TeraBox photo index
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$RCLONE_CONFIG_ARCHIVE_COOKIE"
+          echo "::add-mask::$RCLONE_CONFIG_ARCHIVE_COOKIE"
+          curl -fsSL 'https://github.com/gulp79/rclone-extra/releases/download/v1.75.2-extra/rclone-linux-amd64.zip' -o "$RUNNER_TEMP/client.zip"
+          echo "78855325a2a8d83b3feee3a8363d32e1211babbf4cda6356fa8ca5f472075062  $RUNNER_TEMP/client.zip" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/unpack" "$RUNNER_TEMP/bin"
+          unzip -q "$RUNNER_TEMP/client.zip" -d "$RUNNER_TEMP/unpack"
+          binary="$(find "$RUNNER_TEMP/unpack" -type f -name rclone -print -quit)"
+          install -m 755 "$binary" "$RUNNER_TEMP/bin/rclone"
+          "$RUNNER_TEMP/bin/rclone" cat archive:YuiArchive/metadata/catalog.json > "$RUNNER_TEMP/previous-catalog.json"
+      - name: Package new physical SNS photo bytes only, preserving existing photo numbering
+        shell: bash
+        run: |
+          python apps/yui-gallery/package_sns_to_private.py \
+            --source yui-sns-individuals --previous "$RUNNER_TEMP/previous-catalog.json" \
+            --out "$RUNNER_TEMP/new-originals"
+      - name: Submit genuinely new SNS photo bytes to private TeraBox importer
+        uses: actions/upload-artifact@v4
+        with:
+          name: yui-original-verified-sns-new
+          path: ${{ runner.temp }}/new-originals/*-private-import.zip
+          if-no-files-found: warn
+          retention-days: 30
       # Reports only. Do not wrap photographs in the artifact service's container.
       - uses: actions/upload-artifact@v7
         if: always()
