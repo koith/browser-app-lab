@@ -22,4 +22,10 @@ for model in ('yui','mimmi'):
   with zipfile.ZipFile(out/name,'w',compression=zipfile.ZIP_STORED) as z:
    z.writestr('TEST/manifest.json',json.dumps(m,ensure_ascii=False))
    z.writestr('TEST/'+(m['albums'][0]['images'][0]['url'] if bad else rel),data)
+ incremental=json.loads(json.dumps(manifest))
+ incremental['albums'][0]['images'][0]['number']=2
+ # A repeated SHA at a different numbered position is an independent album entry.
+ with zipfile.ZipFile(out/(model+'-incremental.zip'),'w',compression=zipfile.ZIP_STORED) as z:
+  z.writestr('TEST/manifest.json',json.dumps(incremental,ensure_ascii=False))
+  z.writestr('TEST/'+rel,data)
  print('FIXTURE_CREATED',model,len(data))
