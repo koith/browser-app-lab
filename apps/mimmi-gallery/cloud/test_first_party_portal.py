@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Owner gallery login: two model catalogs, first-party cookie, no leaked token."""
+"""Passwordless gallery: two model catalogs and real SHA-verified bytes."""
 from __future__ import annotations
 import hashlib
 import os
@@ -43,24 +43,16 @@ async def fake_public_asset(model,asset):
 portal.public_asset=fake_public_asset
 
 with TestClient(backend.app,base_url="https://testserver") as client:
-    assert client.get("/gallery/yui/").status_code==200
-    assert "접근 코드" in client.get("/gallery/yui/").text
-    assert client.get("/gallery/yui/owner-media.js").status_code==401
-    assert client.get("/api/yui/catalog").status_code==401
-    wrong=client.post("/gallery/login",data={"model":"yui","code":"incorrect"})
-    assert wrong.status_code==200 and "접근 코드를 확인" in wrong.text
-    assert portal.COOKIE_NAME not in wrong.cookies
-    valid=client.post("/gallery/login",data={"model":"yui","code":TOKEN},
-                      follow_redirects=False)
-    assert valid.status_code==303 and valid.headers["location"]=="/gallery/yui/"
-    assert "httponly" in valid.headers["set-cookie"].lower()
-    assert "secure" in valid.headers["set-cookie"].lower()
-    assert "samesite=lax" in valid.headers["set-cookie"].lower()
-    assert TOKEN not in valid.headers["set-cookie"]
-    assert portal.COOKIE_NAME in client.cookies
-    assert client.get("/gallery/yui/").status_code==200
-    assert "FIRST PARTY GALLERY" in client.get("/gallery/mimmi/").text
-    assert client.get("/gallery/mimmi/owner-media.js").status_code==200
+    for model in ("yui", "mimmi"):
+        page=client.get(f"/gallery/{model}/")
+        assert page.status_code==200
+        assert f"{model} FIRST PARTY GALLERY" in page.text
+        assert 'type="password"' not in page.text
+        assert "접근 코드" not in page.text
+        script=client.get(f"/gallery/{model}/owner-media.js")
+        assert script.status_code==200
+        assert "PrivateTest" in script.text
+
     assert client.get("/gallery/yui/stored-albums.json").json()=={"albums":[]}
     assert client.get("/api/yui/catalog").json()["model"]=="yui"
     assert client.get("/api/catalog").json()["model"]=="mimmi"
@@ -71,12 +63,11 @@ with TestClient(backend.app,base_url="https://testserver") as client:
     assert redirect.status_code==307
     assert redirect.headers["location"].startswith("https://koith.github.io/")
     assert client.get("/gallery/yui/../../unknown").status_code!=200
-    logout=client.post("/gallery/logout",follow_redirects=False)
-    assert logout.status_code==303
-    assert client.get("/api/yui/catalog").status_code==401
-    assert "접근 코드" in client.get("/gallery/yui/").text
 
-assert not portal.session_valid(TOKEN,"12345.bad")
-assert not portal.session_valid(TOKEN,portal.session_sign("different-key",int(__import__('time').time())+200))
-assert not portal.session_valid(TOKEN,portal.session_sign(TOKEN,int(__import__('time').time())-10))
-print("FIRST_PARTY_YUI_MIMMI_REAL_BYTES_COOKIE_BROWSER_ENTRY_SECURITY_PASS")
+    # Removed login and logout endpoints must never reintroduce the prompt.
+    assert client.post("/gallery/login",data={"model":"yui","code":TOKEN}).status_code==404
+    assert client.post("/gallery/logout").status_code==404
+    assert portal.COOKIE_NAME not in client.cookies
+    assert "FIRST PARTY GALLERY" in client.get("/gallery/yui/").text
+
+print("FIRST_PARTY_YUI_MIMMI_PASSWORDLESS_REAL_BYTES_QA_PASS")
