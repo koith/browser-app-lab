@@ -1,0 +1,31 @@
+name: Shared Owner-Private TeraBox Media Gateway QA
+on:
+  push:
+    paths:
+      - 'apps/mimmi-gallery/cloud/gateway/main.py'
+      - 'apps/mimmi-gallery/cloud/test_gateway.py'
+      - 'apps/yui-gallery/owner-media.js'
+      - 'apps/yui-gallery/cloud.html'
+      - '.github/workflows/gallery-shared-gateway-qa.yml'
+  pull_request:
+    paths:
+      - 'apps/mimmi-gallery/cloud/gateway/main.py'
+      - 'apps/mimmi-gallery/cloud/test_gateway.py'
+      - 'apps/yui-gallery/owner-media.js'
+      - 'apps/yui-gallery/cloud.html'
+      - '.github/workflows/gallery-shared-gateway-qa.yml'
+permissions:
+  contents: read
+jobs:
+  verify-dual-model-authenticated-photos:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install -r apps/mimmi-gallery/cloud/gateway/requirements.txt 'httpx==0.28.1'
+      - run: |
+          python -m py_compile apps/mimmi-gallery/cloud/gateway/main.py
+          python apps/mimmi-gallery/cloud/test_gateway.py
+          node --check apps/yui-gallery/owner-media.js
