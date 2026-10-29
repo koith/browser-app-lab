@@ -111,7 +111,8 @@ def archive(album: dict, out: Path, workers: int = 2, timeout: int = 18, model: 
     if not re.fullmatch(r"[a-z0-9][a-z0-9-]{1,100}", aid):
         raise ValueError("invalid_album_id")
     images = album.get("images") or []
-    expected = album.get("expected") or len(images)
+    reported = album.get("expected")
+    expected = reported if type(reported) is int and reported > 0 else None
     if len(images) > 15000 or len(images) != len({p.get("number") for p in images}):
         raise ValueError("duplicate_or_oversized_album_sequence")
     saved, rejected = [], []
@@ -126,6 +127,7 @@ def archive(album: dict, out: Path, workers: int = 2, timeout: int = 18, model: 
             if index % 40 == 0 or index == len(images):
                 print("CHECKED", aid, index, "of", len(images), "verified", len(saved), flush=True)
     saved.sort(key=lambda record: record[0]["number"])
+    complete = expected is not None and len(images) == expected and len(saved) == expected
     manifest = {
         "version": 1, "updated": datetime.now(timezone.utc).isoformat(),
         "model": model,
@@ -133,7 +135,7 @@ def archive(album: dict, out: Path, workers: int = 2, timeout: int = 18, model: 
         "physical_verified_image_count": len(saved),
         "albums": [{
             "id": aid, "title": album.get("title") or aid,
-            "expected": expected, "status": "complete_downloaded" if len(saved) == expected else "partial_downloaded",
+            "expected": expected, "status": "complete_downloaded" if complete else "partial_downloaded",
             "images": [p for p, _ in saved],
         }] if saved else [],
     }
@@ -141,7 +143,7 @@ def archive(album: dict, out: Path, workers: int = 2, timeout: int = 18, model: 
               "physically_saved": len(saved),
               "distinct_sha256": len({p["sha256"] for p, _ in saved}),
               "failed": sorted(rejected, key=lambda p: p.get("number") or 0),
-              "complete": len(saved) == expected}
+              "complete": complete}
     if saved:
         path = out / (aid + "-private-import.zip")
         with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_STORED, allowZip64=False) as zip_out:
