@@ -14,7 +14,7 @@ from PIL import Image
 
 ROOT=Path(__file__).resolve().parent
 MAX_FILE=24_000_000
-ALLOWED_HOST=re.compile(r"^(?:imgx\d{3}|images\d{2})\.pixibb\.com$",re.I)
+ALLOWED_HOST=re.compile(r"^(?:(?:imgx\d{3}|images\d{2})\.pixibb\.com|pbs\.twimg\.com|pub-376e2756f81341f087a414464f9a25ec\.r2\.dev)$",re.I)
 
 def verify(item,source):
     url=item.get("url") or ""
@@ -57,18 +57,20 @@ def verify(item,source):
 
 def main():
     p=argparse.ArgumentParser()
-    p.add_argument("--album",default="green91",choices=("green91",))
+    p.add_argument("--album",default="green91",choices=("green91","public-yui-sns"))
     p.add_argument("--out",default="/tmp/yui-private-archive")
     p.add_argument("--workers",type=int,default=2)
     args=p.parse_args()
-    source=json.loads((ROOT/"source-viewer-albums.json").read_text(encoding="utf-8"))
+    source_path="additional-source-albums.json" if args.album=="public-yui-sns" else "source-viewer-albums.json"
+    source=json.loads((ROOT/source_path).read_text(encoding="utf-8"))
     album=next(a for a in source["albums"] if a["id"]==args.album)
     images=album["images"]
     assert len(images)==len(set(p["number"] for p in images)) and len(images)>10
     out=Path(args.out);out.mkdir(parents=True,exist_ok=True)
     passed=[];errors=[]
     with concurrent.futures.ThreadPoolExecutor(max_workers=min(max(args.workers,1),3)) as ex:
-        tasks={ex.submit(verify,image,album["source"]):image["number"] for image in images}
+        referrer=album.get("source") or ("https://x.com/" if args.album=="public-yui-sns" else "")
+        tasks={ex.submit(verify,image,referrer):image["number"] for image in images}
         for i,f in enumerate(concurrent.futures.as_completed(tasks),1):
             result,error=f.result()
             if result:passed.append(result)
