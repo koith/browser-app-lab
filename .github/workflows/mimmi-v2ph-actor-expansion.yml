@@ -36,9 +36,11 @@ jobs:
       - name: Crawl full public album pagination in rotating batches, not 10-photo previews
         shell: bash
         run: |
-          batch=$(( GITHUB_RUN_NUMBER % 5 ))
-          echo "MIMMI_V2PH_BATCH=$batch (five 8-work batches)"
-          python apps/mimmi-gallery/discover_v2ph_actor.py --pages 8 --albums 70 --images 180 --album-pages 35 --batch-index "$batch" --batch-size 8 --scroll
+          # The crawler dynamically wraps the ever-increasing run number by
+          # actual discovered album count. No configured work is skipped.
+          batch="$GITHUB_RUN_NUMBER"
+          echo "MIMMI_V2PH_SWEEP_SEQUENCE=$batch (all known and newly discovered actor works)"
+          python apps/mimmi-gallery/discover_v2ph_actor.py --pages 12 --albums 90 --images 300 --album-pages 40 --batch-index "$batch" --batch-size 8 --scroll
       - name: Validate verified public image manifests
         run: |
           python - <<'PY'

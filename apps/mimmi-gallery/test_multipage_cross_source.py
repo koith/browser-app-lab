@@ -54,6 +54,46 @@ def verify_batch_rotation():
         assert touched[-1][0]=="v2ph-actor-test15",touched
         assert all(x[1:]==(180,35) for x in touched)
 
+def verify_seeded_albums_revisited_and_every_work_rotated():
+    # Source seeds cannot mean completion; 10 previews of a 100-photo work
+    # must never exclude that work from a later whole-page reacquisition.
+    catalog=[{"id":f"v2ph-actor-test{i:02}",
+              "title":"Mimmi Verified Work",
+              "source":f"https://www.v2ph.com/album/test{i:02}.html"}
+             for i in range(39)]
+    touched=[]
+    def fake_verify(album,max_samples,max_pages,browser_scroll=False):
+        touched.append(album["id"])
+        return {**album,"samples":[],"images":[],"pages":[],"status":"source_only"}
+    with tempfile.TemporaryDirectory() as folder:
+        root=Path(folder)
+        (root/"v2ph-targets.json").write_text(json.dumps({
+            "albums":[{"source":catalog[0]["source"]},
+                      {"source":catalog[11]["source"]}]}))
+        # A real gallery may have 39 albums while actor discovery is scheduled
+        # at most 8 per run. All 39 must be revisited, including seeded ones.
+        with patch.object(actor,"ROOT",root), \
+             patch.object(actor,"scan_actor",return_value=(catalog,[])), \
+             patch.object(actor,"verify_album",side_effect=fake_verify):
+            for batch in range(5):
+                actor.run(8,90,300,40,batch_index=batch,batch_size=8)
+        assert len(touched)==39,(len(touched),touched)
+        assert len(set(touched))==39
+        assert catalog[0]["id"] in touched
+        assert catalog[11]["id"] in touched
+        assert (root/"v2ph-actor-previews.json").is_file()
+        result=json.loads((root/"v2ph-actor-previews.json").read_text())
+        assert result["summary"]["actor_work_count"]==39
+        assert result["summary"]["works_selected_for_revisit"]==7
+    # Modulo wraps the sequence even after 100+ workflow executions.
+    touched.clear()
+    with tempfile.TemporaryDirectory() as folder:
+        with patch.object(actor,"ROOT",Path(folder)), \
+             patch.object(actor,"scan_actor",return_value=(catalog,[])), \
+             patch.object(actor,"verify_album",side_effect=fake_verify):
+            actor.run(8,90,300,40,batch_index=105,batch_size=8)
+    assert touched==[a["id"] for a in sorted(catalog,key=lambda x:x["id"])[:8]]
+
 def verify_sha_identical_alternates():
     digest=hashlib.sha256(b"fake image bytes").hexdigest()
     a={"title":"Mimmi Some Edition","id":"mimmi-a","publisher":"DJAWA",
@@ -88,5 +128,6 @@ def verify_sha_identical_alternates():
 if __name__=="__main__":
     verify_130_photo_pagination()
     verify_batch_rotation()
+    verify_seeded_albums_revisited_and_every_work_rotated()
     verify_sha_identical_alternates()
     print("MIMMI_FULL_ALBUM_130_PHOTOS_ROTATING_BATCH_CROSS_SOURCE_SHA_FAILOVER_PASS")

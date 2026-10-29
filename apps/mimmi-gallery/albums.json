@@ -1375,9 +1375,9 @@
   ],
   "summary": {
     "displayed_albums": 71,
-    "verified_unique_source_images": 2534,
-    "input_source_image_occurrences": 2685,
-    "duplicate_hashes_skipped": 151,
+    "verified_unique_source_images": 2541,
+    "input_source_image_occurrences": 2702,
+    "duplicate_hashes_skipped": 161,
     "photos_with_alternative_public_source": 111,
     "actual_full_publisher_photobooks": 0,
     "incomplete_known_count_albums": 19,
