@@ -199,9 +199,11 @@ def main():
     p.add_argument("--inputs", type=Path, required=True)
     p.add_argument("--out", type=Path, required=True)
     p.add_argument("--include-public", action="store_true")
+    p.add_argument("--minimum", type=int, default=None)
     a = p.parse_args()
     report = prepare(a.model, a.out, a.inputs, a.include_public)
-    if report["physical_positions"] < (2500 if a.model == "yui" else 2200):
+    minimum = a.minimum if a.minimum is not None else (2500 if a.model == "yui" else 2200)
+    if minimum < 1 or report["physical_positions"] < minimum:
         raise ValueError("Unexpectedly incomplete original byte archive: " + str(report))
 
 
