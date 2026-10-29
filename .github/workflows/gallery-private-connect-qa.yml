@@ -1,0 +1,50 @@
+name: Yui and Mimmi Private TeraBox Photo Connection UI QA
+on:
+  pull_request:
+    paths:
+      - 'apps/gallery-private-connect.js'
+      - 'apps/gallery-private-connect.css'
+      - 'apps/yui-gallery/index.html'
+      - 'apps/mimmi-gallery/index.html'
+      - 'apps/test_gallery_private_connect.cjs'
+      - '.github/workflows/gallery-private-connect-qa.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/gallery-private-connect.js'
+      - 'apps/gallery-private-connect.css'
+      - 'apps/yui-gallery/index.html'
+      - 'apps/mimmi-gallery/index.html'
+      - 'apps/test_gallery_private_connect.cjs'
+      - '.github/workflows/gallery-private-connect-qa.yml'
+permissions:
+  contents: read
+jobs:
+  owner-only-client:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate model-specific owner gallery JavaScript and complete public/private code paths
+        run: |
+          node --check apps/gallery-private-connect.js
+          node --check apps/yui-gallery/owner-media.js
+          node --check apps/mimmi-gallery/owner-media.js
+          node apps/test_gallery_private_connect.cjs
+          python - <<'PY'
+          from pathlib import Path
+          for model in ('yui','mimmi'):
+              html=Path(f'apps/{model}-gallery/index.html').read_text()
+              assert f'../gallery-private-connect.js?v=1" data-model="{model}"' in html
+              assert 'gallery-private-connect.css?v=1' in html
+              assert 'owner-media.js' in html
+              assert 'stored-albums.json' in html
+          source=Path('apps/gallery-private-connect.js').read_text()
+          assert "https://mimmi-private-gallery-free.onrender.com" in source
+          assert "sessionStorage" in source
+          assert "ndus" not in source.lower()
+          print('GALLERY_PRIVATE_STORAGE_STATIC_MODEL_ISOLATION_PASS')
+          PY
