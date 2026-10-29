@@ -52,7 +52,7 @@ for model,route in (("yui","/api/yui"),("mimmi","/api")):
                 exp_size=photo["bytes"];exp_sha=photo["sha256"]
             assert len(blob)==exp_size,(model,kind,"wrong bytes",len(blob),exp_size)
             assert hashlib.sha256(blob).hexdigest()==exp_sha,(model,kind,"wrong sha256")
-            assert headers.get("Access-Control-Allow-Origin")=="https://koith.github.io"
+            assert headers.get("access-control-allow-origin")=="https://koith.github.io"
         visited.append(number)
     status,_,_=fetch(route+"/media/"+catalog["albums"][0]["id"]+"/"+str(catalog["albums"][0]["images"][0]["number"])+"/original",auth=False)
     assert status==401,(model,"unauthenticated original exposed",status)
