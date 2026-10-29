@@ -32,6 +32,7 @@ ALLOWED_EXACT = {
     "djawaphoto.com", "blog.hacosta.co.jp",
     "img1.gamersky.com", "upload3.inven.co.kr",
     "cdn.imweb.me", "image.ajunews.com", "t1.daumcdn.net",
+    "img-jp-a.cdnimg.vip",
     "public-files.gumroad.com", "assets.gumroad.com", "static-2.gumroad.com",
 }
 ALLOWED_PIXIBB = re.compile(r"(?:imgx\d{3}|images\d{2})\.pixibb\.com\Z", re.I)
@@ -58,60 +59,74 @@ def allowed_url(raw: str) -> tuple[bool, str]:
 
 def verify_one(item: dict, source: str, timeout_seconds: int = 18) -> tuple[tuple[dict, bytes] | None, dict | None]:
     number = item.get("number")
-    url = item.get("url") or ""
-    approved, host = allowed_url(url)
-    if not approved:
-        return None, {"number": number, "reason": host}
     if (not isinstance(number, int) or number < 1
             or not re.fullmatch(r"[a-f0-9]{64}", str(item.get("sha256") or ""))
             or not isinstance(item.get("bytes"), int) or item["bytes"] < 5000 or item["bytes"] > MAX_FILE):
         return None, {"number": number, "reason": "invalid_source_integrity_metadata"}
-    # All host calls are paced. No rotating IPs, mirror or restricted-origin retries.
-    with HOST_LOCKS[host]:
-        delay = PACING_SECONDS - (time.monotonic() - HOST_LAST[host])
-        if delay > 0:
-            time.sleep(delay)
-        HOST_LAST[host] = time.monotonic()
-    headers = {"User-Agent": "Mozilla/5.0 (compatible; PersonalImageArchive/1.0)",
-               "Accept": "image/avif,image/webp,image/png,image/jpeg,image/*"}
-    if isinstance(source, str) and source.startswith("https://"):
-        headers["Referer"] = source
-    try:
-        with requests.get(url, headers=headers, timeout=(8, timeout_seconds),
-                          stream=True, allow_redirects=False) as response:
-            if response.status_code != 200:
-                return None, {"number": number, "reason": "http_" + str(response.status_code)}
-            payload = bytearray()
-            for chunk in response.iter_content(chunk_size=65536):
-                payload.extend(chunk)
-                if len(payload) > MAX_FILE:
-                    raise ValueError("source_file_exceeds_limit")
-        raw = bytes(payload)
-        if len(raw) != item["bytes"] or hashlib.sha256(raw).hexdigest() != item["sha256"]:
-            raise ValueError("sha256_or_byte_length_mismatch")
-        with Image.open(io.BytesIO(raw)) as check:
-            check.verify()
-        with Image.open(io.BytesIO(raw)) as decoded:
-            decoded.load()
-            if [decoded.width, decoded.height] != [item.get("width"), item.get("height")]:
-                raise ValueError("decoded_dimensions_mismatch")
-            ext = {"JPEG": "jpg", "WEBP": "webp", "PNG": "png"}.get(decoded.format)
-            if not ext:
-                raise ValueError("image_format_not_supported")
-        p = {"number": number, "url": "photos/" + item["sha256"] + "." + ext,
-             "sha256": item["sha256"], "bytes": len(raw),
-             "width": item["width"], "height": item["height"]}
-        return (p, raw), None
-    except (requests.RequestException, ValueError, OSError) as exc:
-        return None, {"number": number, "reason": str(exc)[:150]}
-
+    alternatives = item.get("alternate_source_urls") or []
+    if not isinstance(alternatives, list):
+        alternatives = []
+    # Unmodified explicitly published alternate URLs are allowed only if they
+    # produce the *same expected SHA, bytes and decoded dimensions*.
+    # We do not rewrite URL hosts, use proxy access, retry a blocked origin or
+    # accept a visually similar but different response as an original.
+    urls = list(dict.fromkeys([item.get("url") or ""] +
+                              [v for v in alternatives[:4] if isinstance(v, str)]))
+    errors = []
+    for url in urls:
+        approved, host = allowed_url(url)
+        if not approved:
+            errors.append(host)
+            continue
+        with HOST_LOCKS[host]:
+            delay = PACING_SECONDS - (time.monotonic() - HOST_LAST[host])
+            if delay > 0:
+                time.sleep(delay)
+            HOST_LAST[host] = time.monotonic()
+        headers = {"User-Agent": "Mozilla/5.0 (compatible; PersonalImageArchive/1.0)",
+                   "Accept": "image/avif,image/webp,image/png,image/jpeg,image/*"}
+        if isinstance(source, str) and source.startswith("https://"):
+            headers["Referer"] = source
+        try:
+            with requests.get(url, headers=headers, timeout=(8, timeout_seconds),
+                              stream=True, allow_redirects=False) as response:
+                if response.status_code != 200:
+                    errors.append("http_" + str(response.status_code))
+                    continue
+                payload = bytearray()
+                for chunk in response.iter_content(chunk_size=65536):
+                    payload.extend(chunk)
+                    if len(payload) > MAX_FILE:
+                        raise ValueError("source_file_exceeds_limit")
+            raw = bytes(payload)
+            if len(raw) != item["bytes"] or hashlib.sha256(raw).hexdigest() != item["sha256"]:
+                raise ValueError("sha256_or_byte_length_mismatch")
+            with Image.open(io.BytesIO(raw)) as check:
+                check.verify()
+            with Image.open(io.BytesIO(raw)) as decoded:
+                decoded.load()
+                if [decoded.width, decoded.height] != [item.get("width"), item.get("height")]:
+                    raise ValueError("decoded_dimensions_mismatch")
+                ext = {"JPEG": "jpg", "WEBP": "webp", "PNG": "png"}.get(decoded.format)
+                if not ext:
+                    raise ValueError("image_format_not_supported")
+            p = {"number": number, "url": "photos/" + item["sha256"] + "." + ext,
+                 "sha256": item["sha256"], "bytes": len(raw),
+                 "width": item["width"], "height": item["height"]}
+            return (p, raw), None
+        except (requests.RequestException, ValueError, OSError) as exc:
+            errors.append(str(exc)[:120])
+    return None, {"number": number,
+                  "reason": errors[-1] if errors else "missing_public_source",
+                  "attempts": len(urls)}
 
 def archive(album: dict, out: Path, workers: int = 2, timeout: int = 18, model: str = "yui") -> dict:
     aid = album["id"]
     if not re.fullmatch(r"[a-z0-9][a-z0-9-]{1,100}", aid):
         raise ValueError("invalid_album_id")
     images = album.get("images") or []
-    expected = album.get("expected") or len(images)
+    reported = album.get("expected")
+    expected = reported if type(reported) is int and reported > 0 else None
     if len(images) > 15000 or len(images) != len({p.get("number") for p in images}):
         raise ValueError("duplicate_or_oversized_album_sequence")
     saved, rejected = [], []
@@ -126,6 +141,7 @@ def archive(album: dict, out: Path, workers: int = 2, timeout: int = 18, model: 
             if index % 40 == 0 or index == len(images):
                 print("CHECKED", aid, index, "of", len(images), "verified", len(saved), flush=True)
     saved.sort(key=lambda record: record[0]["number"])
+    complete = expected is not None and len(images) == expected and len(saved) == expected
     manifest = {
         "version": 1, "updated": datetime.now(timezone.utc).isoformat(),
         "model": model,
@@ -133,7 +149,7 @@ def archive(album: dict, out: Path, workers: int = 2, timeout: int = 18, model: 
         "physical_verified_image_count": len(saved),
         "albums": [{
             "id": aid, "title": album.get("title") or aid,
-            "expected": expected, "status": "complete_downloaded" if len(saved) == expected else "partial_downloaded",
+            "expected": expected, "status": "complete_downloaded" if complete else "partial_downloaded",
             "images": [p for p, _ in saved],
         }] if saved else [],
     }
@@ -141,7 +157,7 @@ def archive(album: dict, out: Path, workers: int = 2, timeout: int = 18, model: 
               "physically_saved": len(saved),
               "distinct_sha256": len({p["sha256"] for p, _ in saved}),
               "failed": sorted(rejected, key=lambda p: p.get("number") or 0),
-              "complete": len(saved) == expected}
+              "complete": complete}
     if saved:
         path = out / (aid + "-private-import.zip")
         with zipfile.ZipFile(path, "w", compression=zipfile.ZIP_STORED, allowZip64=False) as zip_out:

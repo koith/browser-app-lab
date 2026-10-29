@@ -1,0 +1,152 @@
+{
+  "schema_version": 1,
+  "model": "mimmi",
+  "last_full_drive_readback": "2026-10-29",
+  "source": "verified-private-drive-wrapper-zip-readback",
+  "backed_up_zip_count": 3,
+  "position_count": 252,
+  "albums": {
+    "djawa-asuna-the-maid": [
+      [
+        14,
+        14
+      ]
+    ],
+    "djawa-blossom-reverie": [
+      [
+        11,
+        11
+      ]
+    ],
+    "djawa-christmas-special-2023-mimmi": [
+      [
+        7,
+        7
+      ]
+    ],
+    "djawa-christmas-special-2024-mimmi-santa-on-the-street": [
+      [
+        11,
+        11
+      ]
+    ],
+    "djawa-christmas-special-2025-mimmi-the-christmas-witch": [
+      [
+        15,
+        15
+      ]
+    ],
+    "djawa-in-the-summer-sunshine-part-1": [
+      [
+        15,
+        15
+      ]
+    ],
+    "djawa-in-the-summer-sunshine-part-2": [
+      [
+        17,
+        17
+      ]
+    ],
+    "djawa-janus-scary-lantern-night": [
+      [
+        8,
+        8
+      ]
+    ],
+    "djawa-janus-scary-lantern-night-vol-2": [
+      [
+        6,
+        6
+      ]
+    ],
+    "djawa-le-malin-listless-lapin": [
+      [
+        13,
+        13
+      ]
+    ],
+    "djawa-maid-for-mayhem": [
+      [
+        9,
+        9
+      ]
+    ],
+    "djawa-my-summer-vacation": [
+      [
+        10,
+        10
+      ]
+    ],
+    "djawa-my-summer-vacation-vol-2": [
+      [
+        9,
+        9
+      ]
+    ],
+    "djawa-my-summer-vacation-vol-3": [
+      [
+        9,
+        9
+      ]
+    ],
+    "djawa-my-summer-vacation-vol-4": [
+      [
+        1,
+        6
+      ]
+    ],
+    "djawa-my-summer-vacation-vol-5": [
+      [
+        12,
+        12
+      ]
+    ],
+    "djawa-nikke-elegg": [
+      [
+        16,
+        16
+      ]
+    ],
+    "djawa-nikke-yuni": [
+      [
+        1,
+        8
+      ]
+    ],
+    "djawa-pop-kitty-party": [
+      [
+        1,
+        2
+      ]
+    ],
+    "djawa-rei-beyond-the-heart": [
+      [
+        27,
+        27
+      ]
+    ],
+    "djawa-retrospection": [
+      [
+        1,
+        7
+      ]
+    ],
+    "djawa-rudy2-codename-wolfgirl-9b4e68": [
+      [
+        1,
+        209
+      ]
+    ],
+    "djawa-twin-bunnies-affair": [
+      [
+        6,
+        6
+      ],
+      [
+        8,
+        9
+      ]
+    ]
+  }
+}
