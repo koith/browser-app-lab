@@ -8,6 +8,8 @@ on:
       - 'apps/yui-gallery/index.html'
       - 'apps/mimmi-gallery/index.html'
       - 'apps/test_photo_vault*'
+      - 'apps/yui-gallery/stored-albums.json'
+      - 'apps/mimmi-gallery/stored-albums.json'
       - '.github/workflows/shared-private-vault.yml'
   push:
     paths:
