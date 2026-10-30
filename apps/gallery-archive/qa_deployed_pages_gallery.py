@@ -9,16 +9,54 @@ from __future__ import annotations
 import argparse
 import json
 import time
-from playwright.sync_api import sync_playwright
+from playwright.sync_api import sync_playwright, Error as PlaywrightError
 
 ROOT = "https://koith.github.io/browser-app-lab"
 RENDER = "mimmi-private-gallery-free.onrender.com"
 MODELS = {
     "yui": {"min_count": 3022, "min_private": 2999,
             "album_ids": ("yuis-present33", "athletic-club104", "teddy-bear97")},
-    "mimmi": {"min_count": 2977, "min_private": 2977,
+    "mimmi": {"min_count": 3178, "min_private": 3178,
               "album_ids": ("mimmi-indie-sana-sopmod2-2019", "djawa-rei-beyond-the-heart")},
 }
+
+
+
+def scroll_current(page, selector: str, *, timeout: float = 35):
+    """Refetch a live locator after asynchronous gallery card replacement."""
+    deadline = time.monotonic() + timeout
+    last_error = None
+    while time.monotonic() < deadline:
+        try:
+            current = page.locator(selector).first
+            current.wait_for(state="visible", timeout=4000)
+            current.scroll_into_view_if_needed(timeout=4000)
+            return
+        except PlaywrightError as exc:
+            last_error = exc
+            detail = str(exc).lower()
+            if not ("not attached" in detail or "detached" in detail
+                    or "not stable" in detail):
+                raise
+            page.wait_for_timeout(250)
+    raise AssertionError(("dynamic gallery did not stabilize", selector, str(last_error)))
+
+
+def click_current(page, selector: str, *, timeout: float = 35):
+    deadline = time.monotonic() + timeout
+    last_error = None
+    while time.monotonic() < deadline:
+        try:
+            page.locator(selector).first.click(timeout=5000)
+            return
+        except PlaywrightError as exc:
+            last_error = exc
+            detail = str(exc).lower()
+            if not ("not attached" in detail or "detached" in detail
+                    or "not stable" in detail):
+                raise
+            page.wait_for_timeout(250)
+    raise AssertionError(("dynamic gallery click did not stabilize", selector, str(last_error)))
 
 
 def exercise(browser, model: str, rule: dict, engine: str):
@@ -55,7 +93,7 @@ def exercise(browser, model: str, rule: dict, engine: str):
         for album_id in rule["album_ids"]:
             album = page.locator(f'#albumgrid .album[data-id="{album_id}"]')
             assert album.count() == 1, (model, "missing gallery album", album_id)
-            album.scroll_into_view_if_needed(timeout=30000)
+            scroll_current(page, f'#albumgrid .album[data-id="{album_id}"]')
             # First-party owner preview must decode; not just a URL or placeholder.
             img = album.locator("img")
             assert img.count() >= 1, (model, album_id, "missing cover")
@@ -64,14 +102,14 @@ def exercise(browser, model: str, rule: dict, engine: str):
               const img=album?.querySelector('img');
               return !!img && img.complete && img.naturalWidth>=160;
             }""", arg=album_id, timeout=105000)
-            album.click(timeout=30000)
+            click_current(page, f'#albumgrid .album[data-id="{album_id}"]')
             assert page.locator("#detail").is_visible(), (model, album_id, "detail hidden")
             photo = page.locator("#detailphotos .photo").first
-            photo.scroll_into_view_if_needed(timeout=30000)
+            scroll_current(page, "#detailphotos .photo")
             page.wait_for_function("""() => [...document.querySelectorAll('#detailphotos img')].some(img =>
               img.complete && img.naturalWidth>=160 && 
               (img.src.includes('/api/') || img.src.startsWith('blob:')))""", timeout=110000)
-            photo.click(timeout=20000)
+            click_current(page, "#detailphotos .photo")
             page.wait_for_function("""() => {
               const img=document.querySelector('#full');
               return !!img && img.complete && img.naturalWidth>=160
