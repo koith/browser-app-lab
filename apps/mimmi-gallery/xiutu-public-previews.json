@@ -2,12 +2,14 @@
   "schema_version": 1,
   "model": "mimmi",
   "source": "public Xiutu CreamSoda pages visible without login; file counts NOT asserted",
-  "generated_at": "2026-10-30T00:41:36.635853+00:00",
+  "generated_at": "2026-10-30T04:49:25.104948+00:00",
   "summary": {
     "works": 6,
     "actual_sha_verified_public_photo_urls": 373,
     "fresh_http_verified": 373,
-    "physical_files_archived": 0
+    "physical_files_archived": 0,
+    "fresh_verified": 373,
+    "private_cloud_archived": 0
   },
   "albums": [
     {
@@ -645,7 +647,8 @@
         }
       ],
       "fresh_http_verified": 62,
-      "status": "public_photos_sha_verified"
+      "status": "public_photos_sha_verified",
+      "visited_pages": []
     },
     {
       "id": "xiutu-public-1190158",
@@ -1252,7 +1255,8 @@
         }
       ],
       "fresh_http_verified": 59,
-      "status": "public_photos_sha_verified"
+      "status": "public_photos_sha_verified",
+      "visited_pages": []
     },
     {
       "id": "xiutu-public-1190156",
@@ -1899,7 +1903,8 @@
         }
       ],
       "fresh_http_verified": 63,
-      "status": "public_photos_sha_verified"
+      "status": "public_photos_sha_verified",
+      "visited_pages": []
     },
     {
       "id": "xiutu-public-1190154",
@@ -2636,7 +2641,8 @@
         }
       ],
       "fresh_http_verified": 72,
-      "status": "public_photos_sha_verified"
+      "status": "public_photos_sha_verified",
+      "visited_pages": []
     },
     {
       "id": "xiutu-public-1190152",
@@ -3363,7 +3369,8 @@
         }
       ],
       "fresh_http_verified": 71,
-      "status": "public_photos_sha_verified"
+      "status": "public_photos_sha_verified",
+      "visited_pages": []
     },
     {
       "id": "xiutu-public-1190145",
@@ -3840,7 +3847,8 @@
         }
       ],
       "fresh_http_verified": 46,
-      "status": "public_photos_sha_verified"
+      "status": "public_photos_sha_verified",
+      "visited_pages": []
     }
   ]
 }
