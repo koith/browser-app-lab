@@ -19,6 +19,7 @@ from PIL import Image
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "mimmi-gallery"))
+sys.path.insert(0, str(ROOT / "yui-gallery"))
 from collect_private_batch import allowed_url
 from missing_candidates import saved_positions, safe_id
 
