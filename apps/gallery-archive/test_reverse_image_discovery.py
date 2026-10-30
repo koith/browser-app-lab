@@ -136,6 +136,7 @@ def main():
     assert len(both["links"]) == 2, both
 
     class BingResponse:
+        url = "https://www.bing.com/images/search?test=1"
         status_code = 200
         headers = {"Content-Type": "text/html"}
         content = b"<a href='https://www.4kgirl.com/mimmi'>Mimmi public set</a>"
@@ -145,6 +146,7 @@ def main():
             assert endpoint == "https://www.bing.com/images/search"
             assert params["q"].startswith("imgurl:https://")
             assert params["iss"] == "sbi"
+            assert kw["allow_redirects"] is True
             return BingResponse()
     found = mod.bing_visual_query(BingSession(), "https://koith.github.io/photo.jpg")
     assert found["status"] == "leads_found" and len(found["links"]) == 1, found
