@@ -339,7 +339,7 @@ vaultInput.onchange=async()=>{
 };
 Promise.all([
  fetch('stored-albums.json').then(r=>{if(!r.ok)throw Error('stored data');return r.json()}),
- {albums:[]}, // Render's startup must never block the initial gallery.
+ fetch('owner-index.json',{cache:'no-store'}).then(r=>r.ok?r.json():{schema_version:1,model:'yui',albums:[]}).then(d=>({albums:YuiPrivate.fromIndex(d)})).catch(error=>({albums:[],error:error.message})), // Complete saved-photo metadata from static Pages; originals remain on TeraBox.
  PhotoVault.albums('yui').then(albums=>({albums})).catch(error=>({albums:[],error:error.message})),
  fetch('identity-exclusions.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('identity exclusions');return r.json()}),
  fetch('album-covers.json',{cache:'no-store'}).then(r=>r.ok?r.json():{}).catch(()=>({})),
