@@ -8,8 +8,8 @@
   "disclaimer": "Every image is verified public source evidence, not a purchased full photobook. Public sites may block remote image hotlinks.",
   "summary": {
     "displayed_albums": 72,
-    "verified_unique_source_images": 2814,
-    "input_source_image_occurrences": 2985,
+    "verified_unique_source_images": 2828,
+    "input_source_image_occurrences": 2999,
     "duplicate_hashes_skipped": 171,
     "photos_with_alternative_public_source": 111,
     "actual_full_publisher_photobooks": 0,
@@ -5048,6 +5048,18 @@
           "number": 21,
           "url": "https://public-files.gumroad.com/6c3u4znaeo1crtmsd4rmj2xrjc8b",
           "source_url": "https://public-files.gumroad.com/6c3u4znaeo1crtmsd4rmj2xrjc8b",
+          "sha256": "df36f4400b66463bcc1a717699f1fab35f2c5a6f7aed79ba5f7da53980b7e30f",
+          "width": 1005,
+          "height": 1340,
+          "bytes": 144286,
+          "quality": "official_public_sample",
+          "publisher_original_verified": false,
+          "alternate_source_urls": []
+        },
+        {
+          "number": 22,
+          "url": "https://public-files.gumroad.com/6c3u4znaeo1crtmsd4rmj2xrjc8b",
+          "source_url": "https://public-files.gumroad.com/6c3u4znaeo1crtmsd4rmj2xrjc8b",
           "sha256": "30c16f6f26f77d4600c85759c370e5b8652810830de65ded9cdeaea69e0b62d0",
           "width": 1005,
           "height": 1340,
@@ -5077,7 +5089,7 @@
           "source_type": "gumroad_promo",
           "id": "djawa-blossom-reverie",
           "source": "https://djawaphoto.com/portfolio/blossom-reverie/",
-          "verified_image_count": 1,
+          "verified_image_count": 2,
           "claimed_image_count": null
         }
       ],
@@ -6994,6 +7006,18 @@
           "number": 12,
           "url": "https://public-files.gumroad.com/ku2iblicx5bibpetcwtfn38i2x4n",
           "source_url": "https://public-files.gumroad.com/ku2iblicx5bibpetcwtfn38i2x4n",
+          "sha256": "d4d00e000045ea637e070ad70ad6532df001cca7f869d0c08c0bfe930e79e287",
+          "width": 1005,
+          "height": 1005,
+          "bytes": 48138,
+          "quality": "official_public_sample",
+          "publisher_original_verified": false,
+          "alternate_source_urls": []
+        },
+        {
+          "number": 13,
+          "url": "https://public-files.gumroad.com/ku2iblicx5bibpetcwtfn38i2x4n",
+          "source_url": "https://public-files.gumroad.com/ku2iblicx5bibpetcwtfn38i2x4n",
           "sha256": "8072d2db4ecc4b16e9c573a02dfbc655f0e30c745e6575536dc0681cb012c39f",
           "width": 1005,
           "height": 1005,
@@ -7023,7 +7047,7 @@
           "source_type": "gumroad_promo",
           "id": "djawa-christmas-special-2023-mimmi",
           "source": "https://djawaphoto.com/portfolio/christmas-special-2023-mimmi/",
-          "verified_image_count": 1,
+          "verified_image_count": 2,
           "claimed_image_count": null
         }
       ],
@@ -7282,6 +7306,18 @@
           "number": 21,
           "url": "https://public-files.gumroad.com/s0kvpszyrw78avcl1ngij03y872r",
           "source_url": "https://public-files.gumroad.com/s0kvpszyrw78avcl1ngij03y872r",
+          "sha256": "69469415adc793954bf8e2dc99c7077589b74a3920c7226cf997ccb632cb22d4",
+          "width": 1005,
+          "height": 1005,
+          "bytes": 35270,
+          "quality": "official_public_sample",
+          "publisher_original_verified": false,
+          "alternate_source_urls": []
+        },
+        {
+          "number": 22,
+          "url": "https://public-files.gumroad.com/s0kvpszyrw78avcl1ngij03y872r",
+          "source_url": "https://public-files.gumroad.com/s0kvpszyrw78avcl1ngij03y872r",
           "sha256": "388e6f6984216c584446c10413fff7852e629def154c53a02ce4ade547eee2ef",
           "width": 1005,
           "height": 1005,
@@ -7311,7 +7347,7 @@
           "source_type": "gumroad_promo",
           "id": "djawa-christmas-special-2024-mimmi-santa-on-the-street",
           "source": "https://djawaphoto.com/portfolio/christmas-special-2024-mimmi-santa-on-the-street/",
-          "verified_image_count": 1,
+          "verified_image_count": 2,
           "claimed_image_count": null
         }
       ],
@@ -7666,6 +7702,18 @@
           "number": 29,
           "url": "https://public-files.gumroad.com/h9gvlhakifymziyibzykyubx4e22",
           "source_url": "https://public-files.gumroad.com/h9gvlhakifymziyibzykyubx4e22",
+          "sha256": "1319f4609cc2fdfab01d8be79a91fa8275d72f3ac21db880177fbcd7f1ad56c9",
+          "width": 1005,
+          "height": 1005,
+          "bytes": 15916,
+          "quality": "official_public_sample",
+          "publisher_original_verified": false,
+          "alternate_source_urls": []
+        },
+        {
+          "number": 30,
+          "url": "https://public-files.gumroad.com/h9gvlhakifymziyibzykyubx4e22",
+          "source_url": "https://public-files.gumroad.com/h9gvlhakifymziyibzykyubx4e22",
           "sha256": "be1f13845b7eab8e1e57ce10f60fe11d3cdaaaba7a081864251bc6f248ce7584",
           "width": 1005,
           "height": 1005,
@@ -7695,7 +7743,7 @@
           "source_type": "gumroad_promo",
           "id": "djawa-christmas-special-2025-mimmi-the-christmas-witch",
           "source": "https://djawaphoto.com/portfolio/christmas-special-2025-mimmi-the-christmas-witch/",
-          "verified_image_count": 1,
+          "verified_image_count": 2,
           "claimed_image_count": null
         }
       ],
@@ -12688,6 +12736,18 @@
           "number": 29,
           "url": "https://public-files.gumroad.com/5jmb92ro8sn8xeqqcbx1911dwbp4",
           "source_url": "https://public-files.gumroad.com/5jmb92ro8sn8xeqqcbx1911dwbp4",
+          "sha256": "ca45a73fbf75bb0cc8e3ca48ddc21868bf9f277ed78d6e6d10a6239fe004cfe3",
+          "width": 1005,
+          "height": 1005,
+          "bytes": 20492,
+          "quality": "official_public_sample",
+          "publisher_original_verified": false,
+          "alternate_source_urls": []
+        },
+        {
+          "number": 30,
+          "url": "https://public-files.gumroad.com/5jmb92ro8sn8xeqqcbx1911dwbp4",
+          "source_url": "https://public-files.gumroad.com/5jmb92ro8sn8xeqqcbx1911dwbp4",
           "sha256": "fc3937978bdbde729b94d5720c53b061c047c09851ae1b5d3301a67edef65276",
           "width": 1005,
           "height": 1005,
@@ -12717,7 +12777,7 @@
           "source_type": "gumroad_promo",
           "id": "djawa-in-the-summer-sunshine-part-1",
           "source": "https://djawaphoto.com/portfolio/in-the-summer-sunshine-part-1/",
-          "verified_image_count": 1,
+          "verified_image_count": 2,
           "claimed_image_count": null
         }
       ],
@@ -13420,6 +13480,18 @@
           "number": 11,
           "url": "https://public-files.gumroad.com/9b951rv11cubq2e46g78cfc4k7nf",
           "source_url": "https://public-files.gumroad.com/9b951rv11cubq2e46g78cfc4k7nf",
+          "sha256": "2bd9b6c2735855e3f9d75c1761dfd5bafea283ce1b12eec2c46d7c765892e567",
+          "width": 1005,
+          "height": 1005,
+          "bytes": 39042,
+          "quality": "official_public_sample",
+          "publisher_original_verified": false,
+          "alternate_source_urls": []
+        },
+        {
+          "number": 12,
+          "url": "https://public-files.gumroad.com/9b951rv11cubq2e46g78cfc4k7nf",
+          "source_url": "https://public-files.gumroad.com/9b951rv11cubq2e46g78cfc4k7nf",
           "sha256": "686aa1e1d7c5a9ebe9c5efc45fc67230e6dc4204ae1b34494804d283ba2a86c1",
           "width": 1005,
           "height": 1005,
@@ -13449,7 +13521,7 @@
           "source_type": "gumroad_promo",
           "id": "djawa-janus-scary-lantern-night-vol-2",
           "source": "https://djawaphoto.com/portfolio/janus-scary-lantern-night-vol-2/",
-          "verified_image_count": 1,
+          "verified_image_count": 2,
           "claimed_image_count": null
         }
       ],
@@ -14565,6 +14637,18 @@
           "number": 25,
           "url": "https://public-files.gumroad.com/bx4j2gnbx3y3a262dxjwef3bfm8k",
           "source_url": "https://public-files.gumroad.com/bx4j2gnbx3y3a262dxjwef3bfm8k",
+          "sha256": "2b2381f191d38b2f9453bec3933dafdee8bbfdedf22bb8800aa5d07afeeac6a3",
+          "width": 1005,
+          "height": 1005,
+          "bytes": 14786,
+          "quality": "official_public_sample",
+          "publisher_original_verified": false,
+          "alternate_source_urls": []
+        },
+        {
+          "number": 26,
+          "url": "https://public-files.gumroad.com/bx4j2gnbx3y3a262dxjwef3bfm8k",
+          "source_url": "https://public-files.gumroad.com/bx4j2gnbx3y3a262dxjwef3bfm8k",
           "sha256": "1573ae8267d83fb4c9163c74bcfddc3072929f1726679a2ca791e6b5603cb0ca",
           "width": 1005,
           "height": 1005,
@@ -14594,7 +14678,7 @@
           "source_type": "gumroad_promo",
           "id": "djawa-le-malin-listless-lapin",
           "source": "https://djawaphoto.com/portfolio/le-malin-listless-lapin/",
-          "verified_image_count": 1,
+          "verified_image_count": 2,
           "claimed_image_count": null
         }
       ],
@@ -15174,6 +15258,18 @@
           "number": 17,
           "url": "https://public-files.gumroad.com/i4jei0qbr3l6dy6pj8d3qzqn74pc",
           "source_url": "https://public-files.gumroad.com/i4jei0qbr3l6dy6pj8d3qzqn74pc",
+          "sha256": "b4057be7fab52045f97522c8c27ca124413369f766d27da69821fa234787aa2b",
+          "width": 1005,
+          "height": 1005,
+          "bytes": 19108,
+          "quality": "official_public_sample",
+          "publisher_original_verified": false,
+          "alternate_source_urls": []
+        },
+        {
+          "number": 18,
+          "url": "https://public-files.gumroad.com/i4jei0qbr3l6dy6pj8d3qzqn74pc",
+          "source_url": "https://public-files.gumroad.com/i4jei0qbr3l6dy6pj8d3qzqn74pc",
           "sha256": "65b12be95281994ba034384ac1f0c69370e9404f685ebb7df690c97301562f1b",
           "width": 1005,
           "height": 1005,
@@ -15203,7 +15299,7 @@
           "source_type": "gumroad_promo",
           "id": "djawa-maid-for-mayhem",
           "source": "https://djawaphoto.com/portfolio/maid-for-mayhem/",
-          "verified_image_count": 1,
+          "verified_image_count": 2,
           "claimed_image_count": null
         }
       ],
@@ -19130,6 +19226,18 @@
           "number": 19,
           "url": "https://public-files.gumroad.com/tphm1pli1wf43s3eyu063vpovz27",
           "source_url": "https://public-files.gumroad.com/tphm1pli1wf43s3eyu063vpovz27",
+          "sha256": "a16bff569edb1913e4f3e5867716029cc08da675d58ad9449b90d27f99a45a72",
+          "width": 1005,
+          "height": 1005,
+          "bytes": 17232,
+          "quality": "official_public_sample",
+          "publisher_original_verified": false,
+          "alternate_source_urls": []
+        },
+        {
+          "number": 20,
+          "url": "https://public-files.gumroad.com/tphm1pli1wf43s3eyu063vpovz27",
+          "source_url": "https://public-files.gumroad.com/tphm1pli1wf43s3eyu063vpovz27",
           "sha256": "3668ec9231ac874d0b6ede4b033db7f1450c7d37a4c396e2a66c824d4cd8a69c",
           "width": 1005,
           "height": 1005,
@@ -19159,7 +19267,7 @@
           "source_type": "gumroad_promo",
           "id": "djawa-my-summer-vacation",
           "source": "https://djawaphoto.com/portfolio/my-summer-vacation/",
-          "verified_image_count": 1,
+          "verified_image_count": 2,
           "claimed_image_count": null
         }
       ],
@@ -19610,6 +19718,18 @@
           "number": 17,
           "url": "https://public-files.gumroad.com/clzkjgn3nod8ki4p331nw97scuug",
           "source_url": "https://public-files.gumroad.com/clzkjgn3nod8ki4p331nw97scuug",
+          "sha256": "0b1e2129a3a77ab89a670388e5fc6f85a94bb5efc39eabb495148d5d4a0c763d",
+          "width": 1005,
+          "height": 1005,
+          "bytes": 16348,
+          "quality": "official_public_sample",
+          "publisher_original_verified": false,
+          "alternate_source_urls": []
+        },
+        {
+          "number": 18,
+          "url": "https://public-files.gumroad.com/clzkjgn3nod8ki4p331nw97scuug",
+          "source_url": "https://public-files.gumroad.com/clzkjgn3nod8ki4p331nw97scuug",
           "sha256": "d06abd3d83a07ef6a8aaa90028ce7a08776b725830d09a3068b075678363c181",
           "width": 1005,
           "height": 1005,
@@ -19639,7 +19759,7 @@
           "source_type": "gumroad_promo",
           "id": "djawa-my-summer-vacation-vol-3",
           "source": "https://djawaphoto.com/portfolio/my-summer-vacation-vol-3/",
-          "verified_image_count": 1,
+          "verified_image_count": 2,
           "claimed_image_count": null
         }
       ],
@@ -19778,6 +19898,18 @@
           "number": 11,
           "url": "https://public-files.gumroad.com/8lxbmfys4wwfwfpvghk2af4mrl9z",
           "source_url": "https://public-files.gumroad.com/8lxbmfys4wwfwfpvghk2af4mrl9z",
+          "sha256": "13b5d643dcee4204c05b8c546547675ebfd76ab7569ac78701fdd4e1f2258d5b",
+          "width": 1005,
+          "height": 1005,
+          "bytes": 18678,
+          "quality": "official_public_sample",
+          "publisher_original_verified": false,
+          "alternate_source_urls": []
+        },
+        {
+          "number": 12,
+          "url": "https://public-files.gumroad.com/8lxbmfys4wwfwfpvghk2af4mrl9z",
+          "source_url": "https://public-files.gumroad.com/8lxbmfys4wwfwfpvghk2af4mrl9z",
           "sha256": "135267ab10b471934f2beb4212edde79dbb84a9166153a4412766d00dcad0e79",
           "width": 1005,
           "height": 1005,
@@ -19807,7 +19939,7 @@
           "source_type": "gumroad_promo",
           "id": "djawa-my-summer-vacation-vol-4",
           "source": "https://djawaphoto.com/portfolio/my-summer-vacation-vol-4/",
-          "verified_image_count": 1,
+          "verified_image_count": 2,
           "claimed_image_count": null
         }
       ],
@@ -24839,6 +24971,18 @@
           "number": 15,
           "url": "https://public-files.gumroad.com/oua4bj5fpektlvzbs1xi4dd9aoob",
           "source_url": "https://public-files.gumroad.com/oua4bj5fpektlvzbs1xi4dd9aoob",
+          "sha256": "fa6cd457e99cb5462df7469e4484b1252e867c5aa6306dc8cc7a593d8d7d2b88",
+          "width": 1005,
+          "height": 1005,
+          "bytes": 23474,
+          "quality": "official_public_sample",
+          "publisher_original_verified": false,
+          "alternate_source_urls": []
+        },
+        {
+          "number": 16,
+          "url": "https://public-files.gumroad.com/oua4bj5fpektlvzbs1xi4dd9aoob",
+          "source_url": "https://public-files.gumroad.com/oua4bj5fpektlvzbs1xi4dd9aoob",
           "sha256": "91e534d5619ead0a1fbd8742314b0a82a43ef5b79a82a77f426130485a6c3738",
           "width": 1005,
           "height": 1005,
@@ -24868,7 +25012,7 @@
           "source_type": "gumroad_promo",
           "id": "djawa-nikke-yuni",
           "source": "https://djawaphoto.com/portfolio/nikke-yuni/",
-          "verified_image_count": 1,
+          "verified_image_count": 2,
           "claimed_image_count": null
         }
       ],
@@ -25618,6 +25762,18 @@
           "number": 43,
           "url": "https://public-files.gumroad.com/7lo3n52jy8vkov5ehs4qxztbvkwb",
           "source_url": "https://public-files.gumroad.com/7lo3n52jy8vkov5ehs4qxztbvkwb",
+          "sha256": "63e809c14a42ea5310a0ef77e2af99a8ada4e570a2eb05f3a884a4ee7e1502e0",
+          "width": 1005,
+          "height": 1005,
+          "bytes": 20274,
+          "quality": "official_public_sample",
+          "publisher_original_verified": false,
+          "alternate_source_urls": []
+        },
+        {
+          "number": 44,
+          "url": "https://public-files.gumroad.com/7lo3n52jy8vkov5ehs4qxztbvkwb",
+          "source_url": "https://public-files.gumroad.com/7lo3n52jy8vkov5ehs4qxztbvkwb",
           "sha256": "cf9d86c2edae9f512fa0b75910affb364d1c1aaa1a81740eb3ec931fa06bdc3b",
           "width": 1005,
           "height": 1005,
@@ -25654,7 +25810,7 @@
           "source_type": "gumroad_promo",
           "id": "djawa-rei-beyond-the-heart",
           "source": "https://djawaphoto.com/portfolio/rei-beyond-the-heart/",
-          "verified_image_count": 1,
+          "verified_image_count": 2,
           "claimed_image_count": null
         }
       ],
@@ -25841,6 +25997,18 @@
           "number": 15,
           "url": "https://public-files.gumroad.com/ek1doag571m1abvaswkq74n2da5g",
           "source_url": "https://public-files.gumroad.com/ek1doag571m1abvaswkq74n2da5g",
+          "sha256": "c0a37864a8c89a9625ef1f9ddde637d8d45d71220ed5e6f9b4074e88c1e4bfec",
+          "width": 1005,
+          "height": 1005,
+          "bytes": 8508,
+          "quality": "official_public_sample",
+          "publisher_original_verified": false,
+          "alternate_source_urls": []
+        },
+        {
+          "number": 16,
+          "url": "https://public-files.gumroad.com/ek1doag571m1abvaswkq74n2da5g",
+          "source_url": "https://public-files.gumroad.com/ek1doag571m1abvaswkq74n2da5g",
           "sha256": "2b621e54d1012c6b6a5ed34a163c165e89e0487c9fbaa19c4090c5a96a982850",
           "width": 1005,
           "height": 1005,
@@ -25870,7 +26038,7 @@
           "source_type": "gumroad_promo",
           "id": "djawa-retrospection",
           "source": "https://djawaphoto.com/portfolio/retrospection/",
-          "verified_image_count": 1,
+          "verified_image_count": 2,
           "claimed_image_count": null
         }
       ],
