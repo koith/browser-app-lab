@@ -246,8 +246,8 @@ MODEL_MATCH = {
     "mimmi": re.compile(r"mimmi|mimmissu17|밈미|밈미", re.I),
     "yui": re.compile(r"sim\s*yui|yui\s*sim|심유이|심혜성|super_yuisan|沈惠星|沈慧圣|ゆい|유이", re.I),
 }
-YUI_SINGLE = re.compile(r"\\byui\\b", re.I)
-STUDIO = re.compile(r"\\bsweet\\s?box\\b|\\bswtb\\b|artgravia|athletic club|"
+YUI_SINGLE = re.compile(r"\byui\b", re.I)
+STUDIO = re.compile(r"\bsweet\s?box\b|\bswtb\b|artgravia|athletic club|"
                     r"wet yui|teddy bear|thru thru|yui.s present|cream soda", re.I)
 
 
