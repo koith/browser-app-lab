@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "version": "v0.1.0-mimmi.2",
-  "generated_at": "2026-10-28T16:33:49.556589+00:00",
+  "generated_at": "2026-10-30T00:36:20.467001+00:00",
   "source": "public V2PH photobook pages, no private downloads or paid content",
   "summary": {
     "albums": 6,
@@ -25,7 +25,8 @@
           "height": 2700,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 1
+          "number": 1,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/w5sCYVO9PuXh8XYh.jpg",
@@ -35,7 +36,8 @@
           "height": 2700,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 2
+          "number": 2,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/WFy-h4HwYTu3Nlza.jpg",
@@ -45,7 +47,8 @@
           "height": 2700,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 3
+          "number": 3,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/r20NzpHLyooJVZwo.jpg",
@@ -55,7 +58,8 @@
           "height": 2700,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 4
+          "number": 4,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/K0kiaP2ZoTD56xwj.jpg",
@@ -65,7 +69,8 @@
           "height": 2700,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 5
+          "number": 5,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/G56s9YRS8DnbfU4Z.jpg",
@@ -75,7 +80,8 @@
           "height": 2700,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 6
+          "number": 6,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/u-9wTI6Hod59HU50.jpg",
@@ -85,7 +91,8 @@
           "height": 2700,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 7
+          "number": 7,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/uoAgeteq6NzTLJlQ.jpg",
@@ -95,7 +102,8 @@
           "height": 2700,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 8
+          "number": 8,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/uI-nwSpXpxIGWpfX.jpg",
@@ -105,7 +113,8 @@
           "height": 2700,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 9
+          "number": 9,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/6MaEn1s6MheFmgvW.jpg",
@@ -115,18 +124,13 @@
           "height": 2700,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 10
+          "number": 10,
+          "carried_from_previous_verification": true
         }
       ],
-      "pages": [
-        {
-          "page": 1,
-          "url": "https://www.v2ph.com/album/an5o93ez.html?hl=ko",
-          "candidates": 10
-        }
-      ],
-      "fresh_http_verified": 10,
-      "carried_from_previous_verification": 0,
+      "pages": [],
+      "fresh_http_verified": 0,
+      "carried_from_previous_verification": 10,
       "status": "v2ph_public_samples_verified"
     },
     {
@@ -145,7 +149,8 @@
           "height": 2700,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 1
+          "number": 1,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/suEjkb2eNsi0Ql6y.jpg",
@@ -155,7 +160,8 @@
           "height": 2700,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 2
+          "number": 2,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/3y-jKW-LxqjMdydq.jpg",
@@ -165,7 +171,8 @@
           "height": 2700,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 3
+          "number": 3,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/cfMGYeXHrXNjFiO-.jpg",
@@ -175,7 +182,8 @@
           "height": 2700,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 4
+          "number": 4,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/fQOi-MIMVaR8OopH.jpg",
@@ -185,7 +193,8 @@
           "height": 1800,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 5
+          "number": 5,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/6AXKji4xYUJ4Lpfu.jpg",
@@ -195,7 +204,8 @@
           "height": 2700,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 6
+          "number": 6,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/X5TQQ4H-PVUYhLp-.jpg",
@@ -205,7 +215,8 @@
           "height": 2700,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 7
+          "number": 7,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/Rd00siaZLUSxmwDj.jpg",
@@ -215,7 +226,8 @@
           "height": 2700,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 8
+          "number": 8,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/DS_yUpyIO5uxxXNQ.jpg",
@@ -225,7 +237,8 @@
           "height": 2700,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 9
+          "number": 9,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/qX9Zx6hDsibPdTz1.jpg",
@@ -235,18 +248,13 @@
           "height": 2700,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 10
+          "number": 10,
+          "carried_from_previous_verification": true
         }
       ],
-      "pages": [
-        {
-          "page": 1,
-          "url": "https://www.v2ph.com/album/axm7n43z.html",
-          "candidates": 10
-        }
-      ],
-      "fresh_http_verified": 10,
-      "carried_from_previous_verification": 0,
+      "pages": [],
+      "fresh_http_verified": 0,
+      "carried_from_previous_verification": 10,
       "status": "v2ph_public_samples_verified"
     },
     {
@@ -265,7 +273,8 @@
           "height": 2700,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 1
+          "number": 1,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/6CbnvWNtft0t66GU.jpg",
@@ -275,7 +284,8 @@
           "height": 2700,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 2
+          "number": 2,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/R8ir84Y5ERyqpcpr.jpg",
@@ -285,7 +295,8 @@
           "height": 2700,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 3
+          "number": 3,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/RtPu573rkLXhaI7l.jpg",
@@ -295,7 +306,8 @@
           "height": 2700,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 4
+          "number": 4,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/es3WPnWZMjgeuGXd.jpg",
@@ -305,7 +317,8 @@
           "height": 2700,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 5
+          "number": 5,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/rP13RpZuEHNOZLqf.jpg",
@@ -315,7 +328,8 @@
           "height": 2700,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 6
+          "number": 6,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/XX9OPrdS14RoeNji.jpg",
@@ -325,7 +339,8 @@
           "height": 2700,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 7
+          "number": 7,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/uYFLTnBlGAsc9V2T.jpg",
@@ -335,7 +350,8 @@
           "height": 2700,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 8
+          "number": 8,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/n3T7kXvfs90cR1Ca.jpg",
@@ -345,7 +361,8 @@
           "height": 2700,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 9
+          "number": 9,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/leirCgKvl8KFQpJn.jpg",
@@ -355,18 +372,13 @@
           "height": 1800,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 10
+          "number": 10,
+          "carried_from_previous_verification": true
         }
       ],
-      "pages": [
-        {
-          "page": 1,
-          "url": "https://www.v2ph.com/album/a54e98nz.html?hl=ko",
-          "candidates": 10
-        }
-      ],
-      "fresh_http_verified": 10,
-      "carried_from_previous_verification": 0,
+      "pages": [],
+      "fresh_http_verified": 0,
+      "carried_from_previous_verification": 10,
       "status": "v2ph_public_samples_verified"
     },
     {
@@ -385,7 +397,8 @@
           "height": 2400,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 1
+          "number": 1,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/jpFkPmhxUbgufHsC.jpg",
@@ -395,7 +408,8 @@
           "height": 1800,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 2
+          "number": 2,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/weEjVnIDtDHiqmAp.jpg",
@@ -405,7 +419,8 @@
           "height": 2400,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 3
+          "number": 3,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/70tW-gcbXMxHWzjd.jpg",
@@ -415,7 +430,8 @@
           "height": 2400,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 4
+          "number": 4,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/noE6NuOTghQRzF5q.jpg",
@@ -425,7 +441,8 @@
           "height": 1800,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 5
+          "number": 5,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/5RpZCMSwawVlfHWV.jpg",
@@ -435,7 +452,8 @@
           "height": 2400,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 6
+          "number": 6,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/3-mIon1Aw_hUaKF5.jpg",
@@ -445,7 +463,8 @@
           "height": 2400,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 7
+          "number": 7,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/QXM4rDKsh8depa7r.jpg",
@@ -455,7 +474,8 @@
           "height": 2400,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 8
+          "number": 8,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/TgTX0ZnZW6wM6L0C.jpg",
@@ -465,7 +485,8 @@
           "height": 2400,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 9
+          "number": 9,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/dXPZKr8QpH1njS0r.jpg",
@@ -475,18 +496,13 @@
           "height": 2400,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 10
+          "number": 10,
+          "carried_from_previous_verification": true
         }
       ],
-      "pages": [
-        {
-          "page": 1,
-          "url": "https://www.v2ph.com/album/a887785a.html",
-          "candidates": 10
-        }
-      ],
-      "fresh_http_verified": 10,
-      "carried_from_previous_verification": 0,
+      "pages": [],
+      "fresh_http_verified": 0,
+      "carried_from_previous_verification": 10,
       "status": "v2ph_public_samples_verified"
     },
     {
@@ -505,7 +521,8 @@
           "height": 2700,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 1
+          "number": 1,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/lAp8n2zS6yRhO6YR.jpg",
@@ -515,7 +532,8 @@
           "height": 2700,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 2
+          "number": 2,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/ekyLFANSqt3QXhoF.jpg",
@@ -525,7 +543,8 @@
           "height": 2700,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 3
+          "number": 3,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/DIZ5NH8SUf1J-WR9.jpg",
@@ -535,7 +554,8 @@
           "height": 2700,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 4
+          "number": 4,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/EwPEKpyrdhgvJUkR.jpg",
@@ -545,7 +565,8 @@
           "height": 2700,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 5
+          "number": 5,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/aYWjlFA5aUPduEAj.jpg",
@@ -555,7 +576,8 @@
           "height": 2700,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 6
+          "number": 6,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/_NEYIVTHuug8mSoM.jpg",
@@ -565,7 +587,8 @@
           "height": 2700,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 7
+          "number": 7,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/gRH56yF1jWGEbQpy.jpg",
@@ -575,7 +598,8 @@
           "height": 2700,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 8
+          "number": 8,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/b9RDUnHLosaYIrf8.jpg",
@@ -585,7 +609,8 @@
           "height": 2700,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 9
+          "number": 9,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/wnFLw85PD9FfJ2iS.jpg",
@@ -595,18 +620,13 @@
           "height": 2700,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 10
+          "number": 10,
+          "carried_from_previous_verification": true
         }
       ],
-      "pages": [
-        {
-          "page": 1,
-          "url": "https://www.v2ph.com/album/zo555x4z.html?hl=zh-Hant",
-          "candidates": 10
-        }
-      ],
-      "fresh_http_verified": 10,
-      "carried_from_previous_verification": 0,
+      "pages": [],
+      "fresh_http_verified": 0,
+      "carried_from_previous_verification": 10,
       "status": "v2ph_public_samples_verified"
     },
     {
@@ -625,7 +645,8 @@
           "height": 2722,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 1
+          "number": 1,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/G5Uyj91IJb-Vb1J5.jpg",
@@ -635,7 +656,8 @@
           "height": 1800,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 2
+          "number": 2,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/9RIhv78y62AEjW84.jpg",
@@ -645,7 +667,8 @@
           "height": 1800,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 3
+          "number": 3,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/HQ7NfN_3II6aHj2s.jpg",
@@ -655,7 +678,8 @@
           "height": 2722,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 4
+          "number": 4,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/a7TwBO3mm0jtxRsy.jpg",
@@ -665,7 +689,8 @@
           "height": 1800,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 5
+          "number": 5,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/xyMw395lPw-1dkQS.jpg",
@@ -675,7 +700,8 @@
           "height": 2722,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 6
+          "number": 6,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/ssIWX-whoqpmsHYl.jpg",
@@ -685,7 +711,8 @@
           "height": 2722,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 7
+          "number": 7,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/xtXdC_fF0pLf1o4t.jpg",
@@ -695,7 +722,8 @@
           "height": 2722,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 8
+          "number": 8,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/X_FI9Atz-nmtwBao.jpg",
@@ -705,7 +733,8 @@
           "height": 1800,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 9
+          "number": 9,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://cdn.v2ph.com/photos/S-SARYN2pHZ0VFPM.jpg",
@@ -715,18 +744,13 @@
           "height": 2722,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
-          "number": 10
+          "number": 10,
+          "carried_from_previous_verification": true
         }
       ],
-      "pages": [
-        {
-          "page": 1,
-          "url": "https://www.v2ph.com/album/z7e69mnz.html?hl=ar",
-          "candidates": 10
-        }
-      ],
-      "fresh_http_verified": 10,
-      "carried_from_previous_verification": 0,
+      "pages": [],
+      "fresh_http_verified": 0,
+      "carried_from_previous_verification": 10,
       "status": "v2ph_public_samples_verified"
     }
   ]
