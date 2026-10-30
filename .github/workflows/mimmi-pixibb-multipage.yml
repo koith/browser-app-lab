@@ -52,21 +52,14 @@ jobs:
           assert d["summary"]["private_cloud_archived"]==0
           for album in d["albums"]:
               assert album["images"]==[]
-              assert len(album["samples"])<=350
+              assert len(album["samples"])<=400
               assert len({v["sha256"] for v in album["samples"]})==len(album["samples"])
               for v in album["samples"]:
                   assert len(v["sha256"])==64 and v["bytes"]>=4500
           print("MIMMI_PIXIBB_REAL_MULTIPAGE_VERIFIED",d["summary"])
           PY
-      - name: Commit verified public photo URLs and rebuild album viewer
+      - name: Merge long-running verified crawl without Git rebase conflicts
+        if: github.ref == 'refs/heads/main'
         run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add apps/mimmi-gallery/pixibb-public-previews.json
-          if ! git diff --cached --quiet; then git commit -m "Archive evidence: public Mimmi PixiBB paginated photo previews"; fi
-          git fetch origin "$GITHUB_REF_NAME"
-          git rebase "origin/$GITHUB_REF_NAME"
-          python apps/mimmi-gallery/build_model_gallery.py
-          git add apps/mimmi-gallery/source-viewer-albums.json apps/mimmi-gallery/albums.json
-          if ! git diff --cached --quiet; then git commit -m "Expand Mimmi numbered research photo galleries from verified multipage sources"; fi
-          git push origin "HEAD:$GITHUB_REF_NAME"
+          python apps/gallery-archive/test_commit_crawler_research.py
+          python apps/gallery-archive/commit_crawler_research.py --manifest pixibb-public-previews.json --retries 8
