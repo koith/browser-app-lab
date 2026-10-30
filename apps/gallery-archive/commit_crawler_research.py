@@ -14,7 +14,8 @@ import subprocess
 import sys
 from pathlib import Path
 
-ALLOWED = {"pixibb-public-previews.json", "xiutu-public-previews.json"}
+ALLOWED = {"pixibb-public-previews.json", "xiutu-public-previews.json",
+           "v2ph-actor-previews.json"}
 PROJECT = Path(__file__).resolve().parents[2]
 
 
