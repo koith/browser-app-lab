@@ -57,7 +57,32 @@ def allowed_url(raw: str) -> tuple[bool, str]:
         return False, "invalid_source_url"
 
 
-def verify_one(item: dict, source: str, timeout_seconds: int = 18) -> tuple[tuple[dict, bytes] | None, dict | None]:
+def safe_reencoded_public_preview(item: dict, raw: bytes, image_format: str,
+                                  width: int, height: int, url: str) -> bool:
+    """Opt-in recovery only for same-URL public JPEG CDN re-encodes.
+
+    Old hashes remain evidence of historical bytes, not a claim the current CDN
+    serves identical bytes. The image MUST be fully decoded and dimension
+    compatible; reject unknown domains, resized previews and tiny placeholders.
+    Gumroad heavily compressed previews are intentionally excluded until
+    independently quality-reviewed. Existing archived photos are not replaced.
+    """
+    try:
+        host = urlsplit(url).hostname
+        old_size = item["bytes"]
+        return (host == "cdn.v2ph.com"
+                and url == item.get("url")
+                and image_format == "JPEG"
+                and type(old_size) is int and old_size >= 50000
+                and len(raw) >= 50000 and 0.70 <= len(raw) / old_size <= 1.30
+                and min(width,height) >= 300
+                and [width,height] == [item.get("width"),item.get("height")])
+    except (ValueError,TypeError,ZeroDivisionError,KeyError):
+        return False
+
+
+def verify_one(item: dict, source: str, timeout_seconds: int = 18,
+               allow_public_revision: bool = False) -> tuple[tuple[dict, bytes] | None, dict | None]:
     number = item.get("number")
     if (not isinstance(number, int) or number < 1
             or not re.fullmatch(r"[a-f0-9]{64}", str(item.get("sha256") or ""))
@@ -99,7 +124,9 @@ def verify_one(item: dict, source: str, timeout_seconds: int = 18) -> tuple[tupl
                     if len(payload) > MAX_FILE:
                         raise ValueError("source_file_exceeds_limit")
             raw = bytes(payload)
-            if len(raw) != item["bytes"] or hashlib.sha256(raw).hexdigest() != item["sha256"]:
+            actual_hash = hashlib.sha256(raw).hexdigest()
+            exact_hash = (len(raw) == item["bytes"] and actual_hash == item["sha256"])
+            if not exact_hash and not allow_public_revision:
                 raise ValueError("sha256_or_byte_length_mismatch")
             with Image.open(io.BytesIO(raw)) as check:
                 check.verify()
@@ -110,9 +137,16 @@ def verify_one(item: dict, source: str, timeout_seconds: int = 18) -> tuple[tupl
                 ext = {"JPEG": "jpg", "WEBP": "webp", "PNG": "png"}.get(decoded.format)
                 if not ext:
                     raise ValueError("image_format_not_supported")
-            p = {"number": number, "url": "photos/" + item["sha256"] + "." + ext,
-                 "sha256": item["sha256"], "bytes": len(raw),
+                image_format = decoded.format
+            if not exact_hash and not safe_reencoded_public_preview(
+                    item, raw, image_format, item["width"], item["height"], url):
+                raise ValueError("changed_bytes_outside_safe_revision_policy")
+            p = {"number": number, "url": "photos/" + actual_hash + "." + ext,
+                 "sha256": actual_hash, "bytes": len(raw),
                  "width": item["width"], "height": item["height"]}
+            if not exact_hash:
+                # Saved as exact *current* bytes, never mislabelled the old file.
+                p["public_source_reencoded"] = True
             return (p, raw), None
         except (requests.RequestException, ValueError, OSError) as exc:
             errors.append(str(exc)[:120])
@@ -120,7 +154,8 @@ def verify_one(item: dict, source: str, timeout_seconds: int = 18) -> tuple[tupl
                   "reason": errors[-1] if errors else "missing_public_source",
                   "attempts": len(urls)}
 
-def archive(album: dict, out: Path, workers: int = 2, timeout: int = 18, model: str = "yui") -> dict:
+def archive(album: dict, out: Path, workers: int = 2, timeout: int = 18, model: str = "yui",
+            allow_public_revision: bool = False) -> dict:
     aid = album["id"]
     if not re.fullmatch(r"[a-z0-9][a-z0-9-]{1,100}", aid):
         raise ValueError("invalid_album_id")
@@ -131,7 +166,8 @@ def archive(album: dict, out: Path, workers: int = 2, timeout: int = 18, model: 
         raise ValueError("duplicate_or_oversized_album_sequence")
     saved, rejected = [], []
     with ThreadPoolExecutor(max_workers=max(1, min(workers, 3))) as pool:
-        futures = [pool.submit(verify_one, image, album.get("source") or "", timeout) for image in images]
+        futures = [pool.submit(verify_one, image, album.get("source") or "", timeout,
+                               allow_public_revision) for image in images]
         for index, future in enumerate(as_completed(futures), 1):
             actual, issue = future.result()
             if actual is not None:
@@ -155,6 +191,7 @@ def archive(album: dict, out: Path, workers: int = 2, timeout: int = 18, model: 
     }
     report = {"album": aid, "source_indexed": len(images), "expected": expected,
               "physically_saved": len(saved),
+              "reencoded_public_preview_files": sum(bool(p.get("public_source_reencoded")) for p,_ in saved),
               "distinct_sha256": len({p["sha256"] for p, _ in saved}),
               "failed": sorted(rejected, key=lambda p: p.get("number") or 0),
               "complete": complete}
