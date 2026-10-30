@@ -1,7 +1,7 @@
 {
   "version": "v0.1.0-mimmi.3",
   "model": "mimmi",
-  "generated_at": "2026-10-30T16:02:38.224230+00:00",
+  "generated_at": "2026-10-30T21:38:50.658518+00:00",
   "source": "https://www.v2ph.com/actor/Mimmi",
   "actor_pages": [
     {
@@ -25,12 +25,12 @@
     }
   ],
   "summary": {
-    "actor_albums_discovered": 0,
-    "previously_configured_albums": 0,
-    "works_selected_for_revisit": 0,
-    "actor_work_count": 0,
+    "actor_albums_discovered": 39,
+    "previously_configured_albums": 6,
+    "works_selected_for_revisit": 8,
+    "actor_work_count": 39,
     "new_album_candidates": 38,
-    "verified_public_image_urls": 427,
+    "verified_public_image_urls": 428,
     "private_cloud_photos_archived": 0,
     "works": 38,
     "fresh_verified": 0,
@@ -2287,8 +2287,8 @@
         },
         {
           "url": "https://cdn.v2ph.com/photos/eX1BbEzDduzkZXI8.jpg",
-          "bytes": 1028266,
-          "sha256": "b033af27e523ddb4cd04c813314b490b6f7d5e8db278e0041a4ddca979ba27e6",
+          "bytes": 967947,
+          "sha256": "f8aee71888ff9b5979691ddfa004444fe492bc3a2349f0f827240259ffdebb99",
           "width": 1800,
           "height": 2700,
           "origin": "v2ph_public_page",
@@ -2337,8 +2337,8 @@
         },
         {
           "url": "https://cdn.v2ph.com/photos/eX1BbEzDduzkZXI8.jpg",
-          "bytes": 967947,
-          "sha256": "f8aee71888ff9b5979691ddfa004444fe492bc3a2349f0f827240259ffdebb99",
+          "bytes": 1028266,
+          "sha256": "b033af27e523ddb4cd04c813314b490b6f7d5e8db278e0041a4ddca979ba27e6",
           "width": 1800,
           "height": 2700,
           "origin": "v2ph_public_page",
@@ -2489,8 +2489,8 @@
       "samples": [
         {
           "url": "https://cdn.v2ph.com/photos/2ZfOSlv6rPZNyD8i.jpg",
-          "bytes": 1340262,
-          "sha256": "5682107c84e15408352c3061a9b64f1e72c6dfd8a4c4398e8d780a33b699928b",
+          "bytes": 1425834,
+          "sha256": "9f992b5c2ee3453758b0eae63a11153a565dff62370834d0955ef6d9c868d59d",
           "width": 1800,
           "height": 2700,
           "origin": "v2ph_public_page",
@@ -2549,8 +2549,8 @@
         },
         {
           "url": "https://cdn.v2ph.com/photos/OPNjxtEX84dimstr.jpg",
-          "bytes": 527544,
-          "sha256": "0c81613a7222830b0453331d6490c4c8bc73ea7593d1cc78deaade7a8a78a724",
+          "bytes": 508790,
+          "sha256": "495aded4fdb9070b4e1badfedea4fa373b43c4796471c1ef81d8e703bb6e8851",
           "width": 1800,
           "height": 2700,
           "origin": "v2ph_public_page",
@@ -2588,14 +2588,24 @@
           "number": 10
         },
         {
-          "url": "https://cdn.v2ph.com/photos/OPNjxtEX84dimstr.jpg",
-          "bytes": 508790,
-          "sha256": "495aded4fdb9070b4e1badfedea4fa373b43c4796471c1ef81d8e703bb6e8851",
+          "url": "https://cdn.v2ph.com/photos/2ZfOSlv6rPZNyD8i.jpg",
+          "bytes": 1340262,
+          "sha256": "5682107c84e15408352c3061a9b64f1e72c6dfd8a4c4398e8d780a33b699928b",
           "width": 1800,
           "height": 2700,
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
           "number": 11
+        },
+        {
+          "url": "https://cdn.v2ph.com/photos/OPNjxtEX84dimstr.jpg",
+          "bytes": 527544,
+          "sha256": "0c81613a7222830b0453331d6490c4c8bc73ea7593d1cc78deaade7a8a78a724",
+          "width": 1800,
+          "height": 2700,
+          "origin": "v2ph_public_page",
+          "private_cloud_file": false,
+          "number": 12
         }
       ],
       "images": [],
@@ -2745,7 +2755,7 @@
     },
     {
       "id": "v2ph-actor-z63984ma",
-      "title": "[DJAWA] Mimmi - St. Esther - Page 2",
+      "title": "[DJAWA] Mimmi - St. Esther",
       "source": "https://www.v2ph.com/album/z63984ma.html",
       "publisher": "DJAWA or other verified credited studio",
       "samples": [
