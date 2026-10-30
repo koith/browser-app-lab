@@ -8,7 +8,8 @@ from pathlib import Path
 
 from PIL import Image
 from collect_teapawt_public import (
-    capture, download_one, public_images_from_author, public_original_variant, safe_media_url)
+    capture, download_one, public_images_from_author, public_original_variant, safe_media_url,
+    get_public_page_with_retry)
 
 SRC={"id":"yui-public-official-x-teapawt","title":"Yui photo feed",
      "account":"super_yuisan","kind":"teapawt","url":"https://teapawt.net/super_yuisan"}
@@ -73,6 +74,27 @@ def main():
             photo=Path(tmp)/(digest+".jpg")
             assert photo.is_file()
             assert json.loads(photo.with_suffix(".json").read_text())["author"]["screen_name"]=="super_yuisan"
+    import requests
+    import unittest.mock
+    class RecoveringClient:
+        def __init__(self):
+            self.calls = 0
+        def get(self, url, **_):
+            self.calls += 1
+            if self.calls <= 2:
+                raise requests.ReadTimeout("temporary")
+            return Response(P1, url)
+    recovering = RecoveringClient()
+    with unittest.mock.patch("collect_teapawt_public.time.sleep"):
+        recovered = get_public_page_with_retry(recovering, SRC["url"], {})
+    assert recovering.calls == 3 and recovered.status_code == 200
+    class DeniedClient:
+        def get(self, url, **_):
+            class Denied:
+                status_code = 403
+            return Denied()
+    denied = DeniedClient()
+    assert get_public_page_with_retry(denied, SRC["url"], {}).status_code == 403
     print("TEAPAWT_PUBLIC_AUTHOR_CURSOR_TWO_REAL_FILES_PASS")
 
 if __name__=="__main__":main()
