@@ -15,6 +15,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import io
+import os
 import json
 import re
 import subprocess
@@ -207,6 +208,12 @@ def downloader_config(directory: Path) -> Path:
     return dest
 
 
+def public_author_timeline_limits(environment=None):
+    """One-time push backfill scans more normal cursor pages; routine stays cheap."""
+    env = os.environ if environment is None else environment
+    return (100, 1800) if env.get("GALLERY_DEEP_PUBLIC_TIMELINE") == "1" else (35, 650)
+
+
 def collect(model: str, config: dict, previous: dict, out: Path,
             runner=None):
     sources = sources_for(config, model)
@@ -231,7 +238,9 @@ def collect(model: str, config: dict, previous: dict, out: Path,
                 code = runner(command, s, folder)
             elif s["kind"] == "teapawt":
                 from collect_teapawt_public import capture
-                mirror=capture(s,folder,max_pages=35,max_photos=650,workers=3)
+                page_limit, photo_limit = public_author_timeline_limits()
+                mirror=capture(s,folder,max_pages=page_limit,
+                               max_photos=photo_limit,workers=3)
                 code=0 if mirror["physical_decoded_files"] else 1
             else:
                 process = subprocess.run(command, capture_output=True,

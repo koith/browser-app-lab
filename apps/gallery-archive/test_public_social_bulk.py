@@ -9,7 +9,7 @@ from zipfile import ZipFile
 
 from PIL import Image, ImageDraw
 from collect_public_social_bulk import (account_from_metadata, collect, previous_photos,
-                                        sources_for, verify_bytes)
+                                        sources_for, verify_bytes, public_author_timeline_limits)
 
 
 def photo(index: int) -> bytes:
@@ -21,6 +21,8 @@ def photo(index: int) -> bytes:
 
 
 def main():
+    assert public_author_timeline_limits({}) == (35, 650)
+    assert public_author_timeline_limits({"GALLERY_DEEP_PUBLIC_TIMELINE": "1"}) == (100, 1800)
     with tempfile.TemporaryDirectory(prefix="gallery-social-test-") as td:
         base = Path(td)
         source = {"id": "yui-public-official-x", "title": "Yui creator test",
