@@ -49,6 +49,7 @@ jobs:
       matrix:
         model: [yui, mimmi]
     env:
+      GALLERY_DEEP_PUBLIC_TIMELINE: ${{ github.event_name == 'push' && '1' || '0' }}
       YUI_COOKIE: ${{ secrets.YUI_TERABOX_COOKIE }}
       MIMMI_COOKIE: ${{ secrets.MIMMI_TERABOX_NDUS }}
       RCLONE_CONFIG_ARCHIVE_TYPE: terabox
