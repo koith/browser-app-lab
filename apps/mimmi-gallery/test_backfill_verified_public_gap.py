@@ -8,6 +8,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT))
 from backfill_verified_public_gap import candidates, known_saved_hashes
+from mimmi_verified_album_alias import align
 
 def album(aid, hash_char, source="https://cosplay.pixibb.com/djawa-photo-mimmi-any/"):
     return {"id":aid,"source":source,"title":"Mimmi sample set","advertised_photos":2,
@@ -59,6 +60,37 @@ class TestFullPhotoBackfill(unittest.TestCase):
         self.assertTrue(any("tashkent" in x["id"] and len(x["images"])>=55 for x in work))
         for a in work:
             self.assertEqual(len({p["number"] for p in a["images"]}),len(a["images"]))
+
+
+    def test_source_alias_new_sha_appends_after_last_owner_position(self):
+        source=album("pixibb-sample","a")
+        source["samples"]=[
+            {"sha256":letter*64} for letter in ("a","b","c","d","e","f")]
+        old=owner([{"id":"djawa-original","images":[
+            {"number":i+1,"sha256":x*64} for i,x in enumerate("abcd")]}])
+        target=[{"id":"pixibb-sample","title":"same work","source":source["source"],
+                 "images":[{"number":5,"sha256":"e"*64},
+                           {"number":6,"sha256":"f"*64}]}]
+        result,proof=align(target,{"albums":[source]},
+                           {"albums":[]},old)
+        self.assertEqual(len(result),1)
+        self.assertEqual(result[0]["id"],"djawa-original")
+        self.assertEqual([p["number"] for p in result[0]["images"]],[5,6])
+        self.assertEqual(proof[0]["shared_sha"],4)
+        self.assertEqual(result[0]["expected"],None)
+
+    def test_ambiguous_source_matches_are_not_attributed(self):
+        item=album("pixibb-sample","a")
+        item["samples"]=[{"sha256":x*64} for x in "abcde"]
+        old=owner([{"id":"one","images":[{"number":i+1,"sha256":x*64}
+                for i,x in enumerate("abc")]},
+                   {"id":"two","images":[{"number":i+1,"sha256":x*64}
+                for i,x in enumerate("abd")]}])
+        target=[{"id":"pixibb-sample","title":"ambiguous",
+                 "source":item["source"],"images":[{"number":6,"sha256":"e"*64}]}]
+        found,proof=align(target,{"albums":[item]},{"albums":[]},old)
+        self.assertEqual(found,[])
+        self.assertEqual(proof,[])
 
     def test_bad_owner_record_causes_fail_closed(self):
         invalid=owner([{"id":"album-private","images":[{"number":1,

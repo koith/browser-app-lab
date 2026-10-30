@@ -18,6 +18,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 sys.path.insert(0, str(ROOT.parent / "yui-gallery"))
 from collect_private_batch import archive, allowed_url
+from mimmi_verified_album_alias import align
 from missing_candidates import owner_catalog_positions
 
 HEX = re.compile(r"[a-f0-9]{64}\Z")
@@ -160,6 +161,9 @@ def main() -> None:
                               "stored_aliases": matches.most_common(5)}, ensure_ascii=False),
                   flush=True)
     targets, report = candidates(source, saved, args.batch, args.batches)
+    targets, proof = align(targets, source, public, owner)
+    report['verified_owner_album_aliases'] = proof
+    report['canonical_work_candidates'] = sum(len(a['images']) for a in targets)
     args.output.mkdir(parents=True, exist_ok=True)
     if not args.dry_run:
         result = [archive(album, args.output, args.workers, timeout=28, model=EXPECTED_MODEL)
