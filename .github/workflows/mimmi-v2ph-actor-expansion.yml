@@ -33,6 +33,7 @@ jobs:
           python -m py_compile apps/mimmi-gallery/discover_v2ph_actor.py apps/mimmi-gallery/reveal_v2ph_album.py
           python apps/mimmi-gallery/test_v2ph_actor.py
           python apps/mimmi-gallery/test_multipage_cross_source.py
+          python apps/gallery-archive/test_commit_crawler_research.py
       - name: Crawl full public album pagination in rotating batches, not 10-photo previews
         shell: bash
         run: |
@@ -55,21 +56,11 @@ jobs:
               assert i['sha256'] and i['bytes']>4000
           print('MIMMI_ACTOR_WIDE_VERIFY_RESULT',d['summary'])
           PY
-      - name: Commit only actor source evidence, then rebase before rebuilding derived catalog
+      - name: Publish verified actor images safely despite simultaneous source updates
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        shell: bash
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apps/mimmi-gallery/v2ph-actor-previews.json
-          if ! git diff --cached --quiet; then
-            git commit -m "Update Mimmi actor verified public image evidence"
-          fi
-          git fetch origin "$GITHUB_REF_NAME"
-          git rebase "origin/$GITHUB_REF_NAME"
-      - name: Regenerate latest Mimmi gallery index from reconciled sources
-        run: |
-          python apps/mimmi-gallery/build_model_gallery.py
-          git add apps/mimmi-gallery/albums.json apps/mimmi-gallery/source-viewer-albums.json
-          if ! git diff --cached --quiet; then
-            git commit -m "Refresh Mimmi deduplicated beta18 album catalogue"
-          fi
-          git push origin "HEAD:$GITHUB_REF_NAME"
+          # Preserve current crawled manifest in memory, merge with latest main
+          # and retry racing writes without losing previously saved SHA evidence.
+          python apps/gallery-archive/commit_crawler_research.py \
+            --manifest v2ph-actor-previews.json --retries 8
