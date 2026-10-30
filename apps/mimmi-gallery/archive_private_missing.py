@@ -54,7 +54,8 @@ def main():
     folder.mkdir(parents=True, exist_ok=True)
     results = []
     for a in albums:
-        report = archive(a, folder, workers=args.workers, timeout=14, model="mimmi")
+        report = archive(a, folder, workers=args.workers, timeout=14, model="mimmi",
+                         allow_public_revision=True)
         results.append(report)
     audit = {"generated_at": datetime.now(timezone.utc).isoformat(),
              "model": "mimmi", "real_files_only": True, "public_saved_photo_positions": len(public),
@@ -64,9 +65,11 @@ def main():
              "batch": args.batch, "batches": args.batches,
              "albums": results,
              "physically_downloaded": sum(v["physically_saved"] for v in results),
+             "current_public_cdn_reencoded_files": sum(v.get("reencoded_public_preview_files",0) for v in results),
              "missing_or_rejected": sum(v["source_indexed"] - v["physically_saved"] for v in results)}
     (folder / "audit.json").write_text(json.dumps(audit, ensure_ascii=False, indent=2)+"\n")
     print("MIMMI_NEW_PRIVATE_VERIFIED_BYTES", audit["physically_downloaded"],
+          "current_public_cdn_reencoded", audit["current_public_cdn_reencoded_files"],
           "rejected", audit["missing_or_rejected"], flush=True)
 
 
