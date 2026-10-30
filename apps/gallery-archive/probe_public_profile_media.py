@@ -18,6 +18,7 @@ from bs4 import BeautifulSoup
 
 SOURCES = [
     {"model": "yui", "account": "super_yuisan", "url": "https://teapawt.net/super_yuisan"},
+    {"model": "mimmi", "account": "Mimmi_official", "url": "https://teapawt.net/Mimmi_official"},
     {"model": "mimmi", "account": "Mimmi_official", "url": "https://www6.twstalker.com/Mimmi_official"},
     {"model": "mimmi", "account": "Mimmi_official", "url": "https://twoucan.com/profile/Mimmi_official"},
 ]
