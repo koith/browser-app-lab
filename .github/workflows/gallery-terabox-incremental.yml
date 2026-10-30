@@ -50,7 +50,9 @@ jobs:
         github.event.workflow_run.head_repository.full_name == github.repository))
     needs: offline-integrity-tests
     concurrency:
-      group: gallery-terabox-private-mass-upload
+      # Each owner model has an independent folder and catalog; do not let
+      # the pending Yui import cancel the Mimmi matrix job (or vice versa).
+      group: gallery-terabox-private-mass-upload-${{ matrix.model }}
       cancel-in-progress: false
     runs-on: ubuntu-24.04
     timeout-minutes: 115
@@ -101,8 +103,8 @@ jobs:
             run="$SOURCE_RUN_ID"
           else
             if [[ "$model" == yui ]]; then
-              workflow='yui-137-public-photo-private-backfill.yml'
-              pattern='^yui-original-verified-jliji-137$'
+              workflow='yui-18-public-missing-byte-recovery.yml'
+              pattern='^yui-original-verified-jliji-missing-18$'
             fi
             run="$(gh run list --repo "$GITHUB_REPOSITORY" -w "$workflow" --branch main \
                     --json databaseId,conclusion --limit 20 \
