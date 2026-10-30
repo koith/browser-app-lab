@@ -370,7 +370,7 @@ Promise.all([
  // Enrich the already-visible gallery when Render wakes; no loading/splash screen.
  YuiPrivate.albums().then(albums=>{
   if(!Array.isArray(albums)||!albums.length)return;
-  ownerStored=albums.filter(allowed).map(a=>({...a,images:(a.images||[]).filter(p=>!excludedHashes.has(p.sha256))})).filter(a=>validImages(a).length);
+  ownerStored=YuiPrivate.reconcile(ownerStored,albums).filter(allowed).map(a=>({...a,images:(a.images||[]).filter(p=>!excludedHashes.has(p.sha256))})).filter(a=>validImages(a).length);
   if(!ownerStored.length)return;
   rebuildStored();
   $('inventory').textContent=stored.reduce((n,a)=>n+validImages(a).length,0)+'장 · 실제 저장본';

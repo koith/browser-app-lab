@@ -160,6 +160,27 @@ async def get_catalog():
         return catalog
 
 
+async def catalog_photo(loader, cache, album_id, number, kind, version):
+    """Never cache an older photo under a newly published SHA-pinned URL."""
+    if version and not re.fullmatch(r'[a-f0-9]{24,64}', version):
+        raise HTTPException(status_code=400, detail='Invalid media version', headers={'Cache-Control':'no-store'})
+    for attempt in range(2 if version else 1):
+        catalog = await loader()
+        album = next((a for a in catalog['albums'] if a.get('id') == album_id), None)
+        photo = next((p for p in (album or {}).get('images', []) if p.get('number') == number), None)
+        digest_field = 'preview_sha256' if kind == 'preview' and photo and photo.get('preview') else 'sha256'
+        if photo and (not version or str(photo.get(digest_field, '')).startswith(version)):
+            return photo
+        if not version:
+            raise HTTPException(status_code=404, detail='Unknown stored photo')
+        # Invalidate this snapshot only. The loader's existing lock coalesces
+        # concurrent requests and prevents replacing a newer catalogue.
+        if attempt == 0 and cache['catalog'] is catalog:
+            cache['time'] = 0
+    raise HTTPException(status_code=409, detail='Stored photo version is not published yet',
+                        headers={'Cache-Control':'no-store'})
+
+
 @app.get("/api/health")
 async def health():
     # Never disclose credentials or confirm account identity through health.
@@ -175,18 +196,12 @@ async def catalog():
 
 
 @app.get("/api/media/{album_id}/{image_num}/{kind}")
-async def media(album_id: str, image_num: int, kind: str, download: bool = Query(False)):
+async def media(album_id: str, image_num: int, kind: str, download: bool = Query(False), v: str = Query("")):
     if not (2 <= len(album_id) <= 100 and album_id.replace("-", "").isalnum()) or image_num < 1:
         raise HTTPException(status_code=400, detail="Invalid media ID")
     if kind not in ("preview", "original"):
         raise HTTPException(status_code=404, detail="Unknown media type")
-    catalog = await get_catalog()
-    album = next((a for a in catalog["albums"] if a["id"] == album_id), None)
-    if album is None:
-        raise HTTPException(status_code=404, detail="Unknown album")
-    img = next((i for i in album["images"] if i["number"] == image_num), None)
-    if img is None:
-        raise HTTPException(status_code=404, detail="Unknown photo")
+    img = await catalog_photo(get_catalog, _cache, album_id, image_num, kind, v)
     has_separate_preview = (kind == "preview" and bool(img.get("preview")))
     key_field = "preview" if has_separate_preview else "key"
     digest_field = "preview_sha256" if has_separate_preview else "sha256"
@@ -228,12 +243,12 @@ async def media(album_id: str, image_num: int, kind: str, download: bool = Query
         except HTTPException as error:
             if not has_separate_preview or error.status_code not in (502, 504):
                 raise
-            fallback = await media(album_id, image_num, 'original', download=download)
+            fallback = await media(album_id, image_num, 'original', download=download, v="")
             fallback.headers['X-Archive-Variant'] = 'verified-original-fallback'
             return fallback
     extension = key.rsplit(".", 1)[-1].lower()
     content_type = {"jpg":"image/jpeg","jpeg":"image/jpeg","png":"image/png","webp":"image/webp","avif":"image/avif"}.get(extension,"application/octet-stream")
-    headers={"Cache-Control":"private, max-age=600","X-Content-Type-Options":"nosniff",
+    headers={"Cache-Control":"private, max-age=600","ETag":'"'+declared_digest+'"',"X-Content-Type-Options":"nosniff",
              "Content-Length":str(len(blob)), "X-Archive-Source":source}
     if download:
         headers["Content-Disposition"] = f'attachment; filename="{album_id}-{image_num:04d}.{extension}"'
@@ -270,18 +285,12 @@ async def yui_catalog():
 
 
 @app.get("/api/yui/media/{album_id}/{image_num}/{kind}")
-async def yui_media(album_id: str, image_num: int, kind: str, download: bool = Query(False)):
+async def yui_media(album_id: str, image_num: int, kind: str, download: bool = Query(False), v: str = Query("")):
     if (not 2 <= len(album_id) <= 100
             or not re.fullmatch("[a-z0-9][a-z0-9-]{1,99}", album_id)
             or image_num < 1 or kind not in ("preview", "original")):
         raise HTTPException(status_code=400, detail="Invalid private photo")
-    catalog = await yui_catalog_bytes()
-    album = next((a for a in catalog["albums"] if a.get("id") == album_id), None)
-    if album is None:
-        raise HTTPException(status_code=404, detail="Unknown private album")
-    img = next((p for p in album.get("images", []) if p.get("number") == image_num), None)
-    if img is None:
-        raise HTTPException(status_code=404, detail="Unknown private photo")
+    img = await catalog_photo(yui_catalog_bytes, _yui_cache, album_id, image_num, kind, v)
     key_field, sha_field, size_field = (
         ("preview", "preview_sha256", "preview_bytes") if kind == "preview"
         else ("key", "sha256", "bytes"))
@@ -299,7 +308,7 @@ async def yui_media(album_id: str, image_num: int, kind: str, download: bool = Q
     except HTTPException as error:
         if kind != 'preview' or error.status_code not in (502, 504):
             raise
-        fallback = await yui_media(album_id, image_num, 'original', download=download)
+        fallback = await yui_media(album_id, image_num, 'original', download=download, v="")
         fallback.headers['X-Archive-Variant'] = 'verified-original-fallback'
         return fallback
     ext = key.rsplit(".", 1)[-1]
@@ -307,6 +316,7 @@ async def yui_media(album_id: str, image_num: int, kind: str, download: bool = Q
     if not mime:
         raise HTTPException(status_code=502, detail="Unsupported private photo format")
     headers = {"Cache-Control":"private, max-age=300",
+               "ETag":'"'+digest+'"',
                "X-Content-Type-Options":"nosniff", "Content-Length":str(size)}
     if download:
         headers["Content-Disposition"] = f'attachment; filename="{album_id}-{image_num:05d}.{ext}"'
@@ -348,13 +358,13 @@ def _encode_cover(data: bytes, original_type: str) -> tuple[bytes, str]:
 
 
 async def _read_cover(model: str, album_id: str, image_num: int,
-                      has_preview: bool) -> tuple[bytes, str]:
+                      has_preview: bool, version: str) -> tuple[bytes, str]:
     async with _cover_workers:
         kind = "preview" if has_preview else "original"
         async def verified_photo(request_kind: str):
             return await (
-                yui_media(album_id, image_num, request_kind, download=False)
-                if model == "yui" else media(album_id, image_num, request_kind, download=False)
+                yui_media(album_id, image_num, request_kind, download=False, v=version if request_kind == kind else "")
+                if model == "yui" else media(album_id, image_num, request_kind, download=False, v=version if request_kind == kind else "")
             )
         try:
             response = await verified_photo(kind)
@@ -384,12 +394,8 @@ async def album_cover(model: str, album_id: str, image_num: int, request: Reques
         r"[a-z0-9][a-z0-9-]{1,99}", album_id
     ) or image_num < 1:
         raise HTTPException(status_code=404, detail="Unknown stored cover")
-    catalog = await (yui_catalog_bytes() if model == "yui" else get_catalog())
-    album = next((a for a in catalog["albums"] if a.get("id") == album_id), None)
-    photo = next((p for p in album.get("images", [])
-                  if p.get("number") == image_num), None) if album else None
-    if photo is None:
-        raise HTTPException(status_code=404, detail="Unknown stored photo")
+    photo = await catalog_photo(yui_catalog_bytes if model == "yui" else get_catalog,
+        _yui_cache if model == "yui" else _cache, album_id, image_num, 'preview', request.query_params.get('v', ''))
     has_preview = bool(photo.get("preview"))
     digest = photo.get("preview_sha256" if has_preview else "sha256")
     if not isinstance(digest, str) or not re.fullmatch(r"[a-f0-9]{64}", digest):
@@ -413,7 +419,7 @@ async def album_cover(model: str, album_id: str, image_num: int, request: Reques
             task = _cover_pending.get(key)
             if task is None:
                 task = asyncio.create_task(
-                    _read_cover(model, album_id, image_num, has_preview)
+                    _read_cover(model, album_id, image_num, has_preview, digest)
                 )
                 _cover_pending[key] = task
 
