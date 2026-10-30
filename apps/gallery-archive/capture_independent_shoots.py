@@ -182,8 +182,14 @@ def get_photo(client,url,source):
     last_error=None
     for candidate in dict.fromkeys(origin_variant(url)):
         try:
+            # Ordinary public Twitter photo CDN requests must not inherit
+            # a third-party site's Referer: those produced HTTP 403 for Yui.
+            # Preserve the normal referring article for other public hosts.
+            headers={"User-Agent":UA}
+            if urlsplit(candidate).hostname!="pbs.twimg.com":
+                headers["Referer"]=source["url"]
             response=client.get(candidate,timeout=35,
-                headers={"User-Agent":UA,"Referer":source["url"]},stream=True)
+                headers=headers,stream=True)
             response.raise_for_status()
             if not allowed_image(response.url,source):
                 raise ValueError("Image redirected off authorized public media host")
