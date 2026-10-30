@@ -37,7 +37,7 @@ jobs:
       - name: Follow real published pages and verify public JPEG/PNG/WebP bytes
         run: |
           if [ "$GITHUB_REF_NAME" = main ]; then
-            python apps/mimmi-gallery/collect_pixibb_public.py --pages 32 --images 350 --scroll
+            python apps/mimmi-gallery/collect_pixibb_public.py --pages 35 --images 400 --scroll
           else
             python apps/mimmi-gallery/collect_pixibb_public.py --pages 2 --images 30 --scroll
           fi
