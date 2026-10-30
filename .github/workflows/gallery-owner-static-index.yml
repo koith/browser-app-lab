@@ -1,0 +1,99 @@
+name: Gallery Full Real-Photo Static Album Index From TeraBox
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/gallery-archive/publish_owner_index.py'
+      - 'apps/gallery-archive/commit_owner_index.py'
+      - 'apps/gallery-archive/test_publish_owner_index.py'
+      - '.github/workflows/gallery-owner-static-index.yml'
+  workflow_run:
+    workflows:
+      - "Gallery Automatic New Photo Bytes to Private TeraBox"
+    types: [completed]
+  schedule:
+    - cron: '57 0,6,12,18 * * *'
+permissions:
+  contents: write
+  actions: write
+  pages: write
+concurrency:
+  group: publish-gallery-physical-owner-static-catalog
+  cancel-in-progress: false
+jobs:
+  index-both-models:
+    if: |
+      github.ref == 'refs/heads/main' &&
+      (github.event_name != 'workflow_run' ||
+       (github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.head_branch == 'main' &&
+        github.event.workflow_run.head_repository.full_name == github.repository))
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      GH_TOKEN: ${{ github.token }}
+      YUI_COOKIE: ${{ secrets.YUI_TERABOX_COOKIE }}
+      MIMMI_COOKIE: ${{ secrets.MIMMI_TERABOX_NDUS }}
+      RCLONE_CONFIG_ARCHIVE_TYPE: terabox
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            apps/gallery-archive
+          sparse-checkout-cone-mode: true
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Validate metadata privacy and integrity before reading real owner files
+        run: |
+          python -m py_compile apps/gallery-archive/publish_owner_index.py apps/gallery-archive/commit_owner_index.py
+          python apps/gallery-archive/test_publish_owner_index.py
+      - name: Install SHA-pinned TeraBox reader
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL 'https://github.com/gulp79/rclone-extra/releases/download/v1.75.2-extra/rclone-linux-amd64.zip' -o "$RUNNER_TEMP/client.zip"
+          echo "78855325a2a8d83b3feee3a8363d32e1211babbf4cda6356fa8ca5f472075062  $RUNNER_TEMP/client.zip" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/unpack" "$RUNNER_TEMP/bin"
+          unzip -q "$RUNNER_TEMP/client.zip" -d "$RUNNER_TEMP/unpack"
+          binary="$(find "$RUNNER_TEMP/unpack" -type f -name rclone -print -quit)"
+          install -m 755 "$binary" "$RUNNER_TEMP/bin/rclone"
+      - name: Read SHA-audited owner catalogs, publish safe album-number indexes for Pages
+        id: publish
+        shell: bash
+        run: |
+          set -euo pipefail
+          changed=0
+          for model in yui mimmi; do
+            if [[ "$model" == yui ]]; then
+              export RCLONE_CONFIG_ARCHIVE_COOKIE="$YUI_COOKIE"
+              remote="archive:YuiArchive"
+            else
+              export RCLONE_CONFIG_ARCHIVE_COOKIE="$MIMMI_COOKIE"
+              remote="archive:MimmiArchive"
+            fi
+            test -n "$RCLONE_CONFIG_ARCHIVE_COOKIE"
+            echo "::add-mask::$RCLONE_CONFIG_ARCHIVE_COOKIE"
+            "$RUNNER_TEMP/bin/rclone" cat "$remote/metadata/catalog.json" \
+              --timeout 75s --retries 2 > "$RUNNER_TEMP/$model-owner-catalog.json" \
+              2> "$RUNNER_TEMP/remote-reader-error"
+            python apps/gallery-archive/publish_owner_index.py \
+              --model "$model" --input "$RUNNER_TEMP/$model-owner-catalog.json" \
+              --output "$RUNNER_TEMP/$model-owner-index.json"
+            before="$(git ls-remote --exit-code origin refs/heads/main | cut -f1)"
+            python apps/gallery-archive/commit_owner_index.py \
+              --model "$model" --input "$RUNNER_TEMP/$model-owner-index.json"
+            after="$(git ls-remote --exit-code origin refs/heads/main | cut -f1)"
+            if [[ "$before" != "$after" ]];then changed=1;fi
+            echo "- $model: sanitized validated photo metadata on Pages; owner files remain in TeraBox" >> "$GITHUB_STEP_SUMMARY"
+          done
+          echo "changed=$changed" >> "$GITHUB_OUTPUT"
+      - name: Request native Pages rebuild and deployed gallery real-photo browser QA
+        if: steps.publish.outputs.changed == '1'
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api --method POST "repos/$GITHUB_REPOSITORY/pages/builds" \
+            --silent || echo "Pages branch rebuild may already be scheduled by the metadata commit."
+          gh workflow run gallery-deployed-pages-photo-qa.yml \
+            --repo "$GITHUB_REPOSITORY" --ref main
