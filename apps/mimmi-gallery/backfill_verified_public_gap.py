@@ -142,6 +142,23 @@ def main() -> None:
     public = json.loads((ROOT / "stored-albums.json").read_text(encoding="utf-8"))
     owner = json.loads(args.owner_catalog.read_text(encoding="utf-8"))
     saved = known_saved_hashes(public, owner)
+    # Read-only identity diagnostics: show where each real source SHA is
+    # already archived, so 10-image preview aliases can be grouped under
+    # the corresponding complete album without copying or inventing photos.
+    from collections import Counter
+    locations = {}
+    for document in (public, owner):
+        for album in document.get("albums", []):
+            for photo in album.get("images", []):
+                locations.setdefault(photo["sha256"], set()).add(album["id"])
+    if args.batch == 0:
+        for album in source["albums"]:
+            matches = Counter(aid for p in album.get("samples", [])
+                              for aid in locations.get(p.get("sha256"), ()))
+            print("MIMMI_PUBLIC_WORK_VERIFIED_SHA_MATCH",
+                  json.dumps({"id": album["id"], "verified": len(album.get("samples", [])),
+                              "stored_aliases": matches.most_common(5)}, ensure_ascii=False),
+                  flush=True)
     targets, report = candidates(source, saved, args.batch, args.batches)
     args.output.mkdir(parents=True, exist_ok=True)
     if not args.dry_run:
