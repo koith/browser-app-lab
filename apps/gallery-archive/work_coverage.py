@@ -120,7 +120,8 @@ def build(root,model,owner=None,gallery=None):
         web_totals={e['total'] for e in evidence if e['kind']=='web_edition_claim'}
         selected=publisher_totals or web_totals
         expected=next(iter(selected)) if len(selected)==1 else None
-        numbering_verified=(not publisher_totals and len(web_totals)==1 and
+        numbering_verified=(len(owned)==len(positions)==len({p['sha256'] for p in owned}) and
+            not publisher_totals and len(web_totals)==1 and
             any(len(anchor_sources.get((e['document'],e['source']),set()))>=3
                 for e in evidence if e['kind']=='web_edition_claim'))
         missing=sorted(set(range(1,expected+1))-positions) if expected and numbering_verified else None
@@ -135,7 +136,7 @@ def build(root,model,owner=None,gallery=None):
             'owner_stored_rows':len(owned),'owner_distinct_sha256':len({p['sha256'] for p in owned}),
             'stored_numbers':sorted(positions),'public_stored_rows':len(pub),
             'gallery_displayed_rows':visible.get(aid,{}).get('images_count') if gallery is not None else None,
-            'count_gap_against_declared_total':max(0,expected-len(positions)) if expected else None,
+            'count_gap_against_declared_total':max(0,expected-len({p['sha256'] for p in owned})) if expected else None,
             'numbering_identity_verified':numbering_verified,'missing_photo_numbers':missing,
             'missing_photo_number_ranges':ranges(missing) if missing is not None else None,
             'known_source_numbers_not_in_owner':sorted(source_numbers-positions),

@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   workflow_run:
     workflows:
-      - "Gallery Automatic New Photo Bytes to Private TeraBox"
+      - "Deploy static content to Pages"
     types: [completed]
   push:
     branches: [main]
@@ -27,11 +27,11 @@ jobs:
       - run: python -m py_compile apps/gallery-archive/qa_deployed_pages_gallery.py
   gallery-deployed-visual:
     if: |
-      github.event_name != 'pull_request' &&
-      (github.event_name != 'workflow_run' ||
+      (github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_run' &&
       (github.event.workflow_run.conclusion == 'success' &&
        github.event.workflow_run.head_branch == 'main' &&
-       github.event.workflow_run.head_repository.full_name == github.repository))
+       github.event.workflow_run.head_repository.full_name == github.repository)))
     runs-on: ubuntu-24.04
     timeout-minutes: 29
     strategy:

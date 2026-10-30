@@ -20,7 +20,9 @@ class CoverageTests(unittest.TestCase):
             (base/'source-viewer-albums.json').write_text(json.dumps({'albums':[{'id':'work-aa','title':'Work','expected':8,'source':'https://example.org/work','images':photos}]}))
             result=build(root,'mimmi',owner)
             self.assertEqual(result['owner_rows'],4);self.assertEqual(result['owner_unique_sha256'],3)
-            work=result['albums'][0];self.assertEqual(work['missing_photo_numbers'],[5,6,7,8])
+            work=result['albums'][0];self.assertIsNone(work['missing_photo_numbers'],'Repeated SHA positions cannot prove file numbering')
+            clean={'schema_version':1,'model':'mimmi','albums':[{'id':'work-aa','title':'Work','images':photos}]}
+            self.assertEqual(build(root,'mimmi',clean)['albums'][0]['missing_photo_numbers'],[4,5,6,7,8])
             self.assertEqual(work['gallery_displayed_rows'],None)
             (base/'source-viewer-albums.json').write_text(json.dumps({'albums':[{'id':'work-aa','source':'https://example.org/older-edition','images':photos}]}))
             (base/'public-work-pages.json').write_text(json.dumps({'albums':[{'id':'work-aa','source':'https://example.org/new-edition','advertised_photos':8}]}))

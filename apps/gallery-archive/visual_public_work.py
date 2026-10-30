@@ -76,12 +76,11 @@ def collect_work(book,previous,client,out,budget,seen_sha,model):
             info['failures'].append('Conflicting public filename number');return None,info
         numbered[n]=url
     info['observed_filename_numbers']=sorted(numbered);info['pages']=len(visited)
-    if set(numbered)!=set(range(1,claimed+1)):
-        info['failures'].append('Public edition does not expose all declared file numbers');return None,info
-    anchors=set();pending=[];pending_bytes=0;uncertain=[];prior_by_sha={p['sha256']:p for p in previous}
+    info['unobserved_source_numbers']=sorted(set(range(1,claimed+1))-set(numbered))
+    anchors=set();pending=[];pending_bytes=0;uncertain=[];decoded=set();failed=set();prior_by_sha={p['sha256']:p for p in previous}
     for source_number,url in sorted(numbered.items()):
         try:
-            raw=client.get(url).content;meta,preview,_=inspect(raw)
+            raw=client.get(url).content;meta,preview,_=inspect(raw);decoded.add(source_number)
             pending_bytes+=len(raw)+len(preview)
             if pending_bytes>384*1024*1024:raise ValueError('Bounded work memory limit exceeded')
             exact=prior_by_sha.get(meta['sha256'])
@@ -98,14 +97,17 @@ def collect_work(book,previous,client,out,budget,seen_sha,model):
                 pending.append((source_number,url,raw,meta,preview,old['number']))
             elif best[0]<9:
                 uncertain.append(source_number)
+                atomic_bytes(out/'review'/aid/(str(source_number)+'.'+meta['extension']),raw)
             elif meta['sha256'] not in seen_sha:
                 pending.append((source_number,url,raw,meta,preview,None))
-        except Exception as e:info['failures'].append({'source_number':source_number,'reason':type(e).__name__})
+        except Exception as e:
+            failed.add(source_number);info['failures'].append({'source_number':source_number,'reason':type(e).__name__})
         if source_number%20==0:
             print('PUBLIC_EDITION_ACTUAL_DECODE_PROGRESS',aid,source_number,'/',claimed,'saved_cut_anchors',len(anchors),flush=True)
     info['saved_reference_anchors']=len(anchors);info['uncertain_source_numbers']=uncertain
-    if len(anchors)<3 or uncertain or info['failures']:
-        info['failures'].append('Work withheld: need at least 3 clear saved-cut anchors and no uncertain/missing files')
+    info['unresolved_source_numbers']=sorted(set(info['unobserved_source_numbers'])|set(uncertain)|failed)
+    if len(anchors)<3:
+        info['failures'].append('Work withheld: fewer than 3 clear saved-cut anchors')
         return None,info
     images=[];next_number=max(p['number'] for p in previous)+1
     for source_number,url,raw,meta,preview,replacement in pending:
@@ -121,5 +123,6 @@ def collect_work(book,previous,client,out,budget,seen_sha,model):
              'higher_resolution_replacement':replacement is not None,
              'work_identity_saved_cut_anchors':len(anchors),'watermark_review':'site_watermarked_public_edition'}
         images.append(row);seen_sha.add(row['sha256'])
-    info['individual_files_saved']=len(images);info['source_edition_all_files_decoded']=claimed
+    info['individual_files_saved']=len(images);info['source_files_decoded']=len(decoded)
+    info['source_edition_all_files_accounted_for']=not info['unresolved_source_numbers']
     return ({'id':aid,'title':book['title'],'expected':None,'complete':False,'images':images} if images else None),info
