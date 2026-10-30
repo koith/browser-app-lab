@@ -236,8 +236,10 @@ def bing_visual_query(session: requests.Session, public_image_url: str, timeout=
             params={"view": "detailv2", "iss": "sbi", "FORM": "SBIHMP",
                     "sbisrc": "UrlPaste", "q": "imgurl:" + public_image_url,
                     "idpbck": "1"},
-            timeout=(8, timeout), allow_redirects=False,
+            timeout=(8, timeout), allow_redirects=True,
             headers={"Accept": "text/html,application/xhtml+xml"})
+        if urlsplit(response.url).hostname not in ("www.bing.com", "bing.com"):
+            return {"status": "unexpected_redirect", "links": []}
         if response.status_code != 200:
             return {"status": f"http_{response.status_code}", "links": []}
         if "text/html" not in response.headers.get("Content-Type", "").lower():
