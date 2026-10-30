@@ -1,50 +1,37 @@
-name: Both Galleries Private ZIP Archive Mobile QA
+name: Both Galleries Individual Original Archive QA
 on:
   pull_request:
     paths:
-      - 'apps/photo-vault.js'
-      - 'apps/yui-gallery/photo-vault.js'
-      - 'apps/mimmi-gallery/photo-vault.js'
-      - 'apps/yui-gallery/index.html'
-      - 'apps/mimmi-gallery/index.html'
-      - 'apps/test_photo_vault*'
-      - 'apps/yui-gallery/stored-albums.json'
-      - 'apps/mimmi-gallery/stored-albums.json'
-      - '.github/workflows/shared-private-vault.yml'
+      - apps/gallery-archive/**
+      - apps/yui-gallery/index.html
+      - apps/mimmi-gallery/index.html
+      - .github/workflows/shared-private-vault.yml
   push:
     paths:
-      - 'apps/photo-vault.js'
-      - 'apps/yui-gallery/photo-vault.js'
-      - 'apps/mimmi-gallery/photo-vault.js'
-      - 'apps/yui-gallery/index.html'
-      - 'apps/mimmi-gallery/index.html'
-      - 'apps/test_photo_vault*'
-      - '.github/workflows/shared-private-vault.yml'
+      - apps/gallery-archive/**
+      - apps/yui-gallery/index.html
+      - apps/mimmi-gallery/index.html
+      - .github/workflows/shared-private-vault.yml
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
   verify:
     runs-on: ubuntu-24.04
-    timeout-minutes: 20
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
-      - uses: actions/setup-node@v4
-        with: {node-version: '22'}
-      - name: Keep all three vault implementations exactly identical
+      - name: Install free individual-image validators
+        run: python -m pip install requests beautifulsoup4 Pillow
+      - name: Verify unchanged original bytes, resume, corruption refusal and no photo bundles
         run: |
-          cmp apps/photo-vault.js apps/yui-gallery/photo-vault.js
-          cmp apps/photo-vault.js apps/mimmi-gallery/photo-vault.js
-      - name: Generate real-image ZIP fixtures from committed physical bytes
-        run: python apps/test_photo_vault_fixture.py
-      - name: Install browsers
+          python apps/gallery-archive/test_direct_photo_pipeline.py
+          python apps/gallery-archive/test_visual_public_work.py
+          python apps/gallery-archive/test_remote_readback_deadline.py
+          python apps/gallery-archive/test_work_coverage.py
+      - name: Require deployed new-photo QA separately from fixture tests
         run: |
-          npm install --no-save playwright@1.58.2
-          npx playwright install --with-deps chromium webkit
-      - name: Verify imports, SHA protection, persistence, isolation and iPhone WebKit rendering
-        run: |
-          python -m http.server 8765 --directory apps >/tmp/photo-vault-web.log 2>&1 &
-          node apps/test_photo_vault.cjs chromium
-          node apps/test_photo_vault.cjs webkit
+          echo 'Individual file fixtures passed. This is not a new-photo acquisition or deployed browser result.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Real Chromium/WebKit decoding and complete download SHA are checked by Gallery Newly Stored Exact Original Mobile QA.' >> "$GITHUB_STEP_SUMMARY"
