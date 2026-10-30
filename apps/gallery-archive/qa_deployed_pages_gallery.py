@@ -14,9 +14,9 @@ from playwright.sync_api import sync_playwright, Error as PlaywrightError
 ROOT = "https://koith.github.io/browser-app-lab"
 RENDER = "mimmi-private-gallery-free.onrender.com"
 MODELS = {
-    "yui": {"min_count": 3022, "min_private": 2999,
+    "yui": {"min_count": 3022, "min_private": 2999, "raw_owner_index":2999,
             "album_ids": ("yuis-present33", "athletic-club104", "teddy-bear97")},
-    "mimmi": {"min_count": 3178, "min_private": 3178,
+    "mimmi": {"min_count": 3157, "min_private": 3156, "raw_owner_index":3178,
               "album_ids": ("mimmi-indie-sana-sopmod2-2019", "djawa-rei-beyond-the-heart")},
 }
 
@@ -87,6 +87,18 @@ def exercise(browser, model: str, rule: dict, engine: str):
           albums:stored.filter(a=>a.images&&a.images.length).length,
           banner:document.querySelector('#inventory')?.textContent,
         })""")
+        # The raw owner ledger can contain the same work/number across aliases;
+        # the visible viewer intentionally deduplicates those positions.
+        # Verify both inventories instead of equating raw rows with photo cards.
+        owner_raw = page.evaluate("""async () => {
+          const response=await fetch('owner-index.json', {cache:'no-store'});
+          if(!response.ok) throw Error('Deployed owner index unavailable');
+          const document=await response.json();
+          return {model:document.model, physical:document.physical_originals_indexed,
+            albums:document.albums?.length || 0};
+        }""")
+        assert owner_raw["model"] == model, (model, owner_raw)
+        assert owner_raw["physical"] >= rule["raw_owner_index"], (model, owner_raw)
         assert "실제 저장본" in counts["banner"], (model, counts)
         assert page.locator("#albumgrid .album").count() >= 1, model
         verified = []
@@ -132,6 +144,7 @@ def exercise(browser, model: str, rule: dict, engine: str):
               json.dumps({"model":model,"browser":engine,
                           "album_count":counts["albums"],"visible_photo_rows":counts["total"],
                           "owner_private_photo_rows":counts["owner"],
+                          "owner_index_raw_verified_photos":owner_raw["physical"],
                           "opened_albums":verified,
                           "reloaded_direct_pages":True,"elapsed_seconds":elapsed,
                           "unhandled_page_errors":failures[:3]},ensure_ascii=False), flush=True)
