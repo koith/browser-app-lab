@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
   "model": "mimmi",
-  "generated_at": "2026-10-30T00:37:34.214095+00:00",
+  "generated_at": "2026-10-30T00:44:37.153975+00:00",
   "source": "only public DJAWA-linked Gumroad promo HTML, never paid files",
   "summary": {
     "albums_checked": 32,
-    "promotional_image_urls_verified": 35,
-    "fresh_promotional_urls_verified": 20,
+    "promotional_image_urls_verified": 41,
+    "fresh_promotional_urls_verified": 24,
     "private_cloud_saved": 0
   },
   "albums": [
@@ -173,10 +173,20 @@
           "url": "https://public-files.gumroad.com/plc0rioiugkkum6a5caq4c1rlstq",
           "width": 1005,
           "height": 1005,
+          "bytes": 23854,
+          "sha256": "3910b673a3a70c63e71c1ce045c155b8fd2532bddeb395d21c0e4e17a456c3a0",
+          "source_kind": "public_publisher_promo",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://public-files.gumroad.com/plc0rioiugkkum6a5caq4c1rlstq",
+          "width": 1005,
+          "height": 1005,
           "bytes": 206433,
           "sha256": "6ea4ca4c1f49447f0a5d2f1e1982bf792de42eaae9ca2a13acaf1c65d9a96137",
           "source_kind": "public_publisher_promo",
-          "saved_to_private_cloud": false
+          "saved_to_private_cloud": false,
+          "carried_from_previous_verification": true
         }
       ],
       "images": [],
@@ -551,10 +561,20 @@
           "url": "https://public-files.gumroad.com/4zc7k1euqhhfxh1dstrjqyviz808",
           "width": 1005,
           "height": 1005,
+          "bytes": 23416,
+          "sha256": "fd750f4c67638a473d8381b6fa44d96b52195381112b0d55814d0eaab696f87f",
+          "source_kind": "public_publisher_promo",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://public-files.gumroad.com/4zc7k1euqhhfxh1dstrjqyviz808",
+          "width": 1005,
+          "height": 1005,
           "bytes": 200207,
           "sha256": "089d165e9b82d89bbc3e9157a927de045bce04528f13c35e6a67307bb25d8712",
           "source_kind": "public_publisher_promo",
-          "saved_to_private_cloud": false
+          "saved_to_private_cloud": false,
+          "carried_from_previous_verification": true
         }
       ],
       "images": [],
@@ -777,13 +797,21 @@
       "product_urls": [
         "https://djawaphoto.gumroad.com/l/sgoel"
       ],
-      "samples": [],
-      "images": [],
-      "fresh_http_verified": 0,
-      "errors": [
-        "HTTPError"
+      "samples": [
+        {
+          "url": "https://public-files.gumroad.com/jay2kzxuei0md73aqz9tk1pagxwv",
+          "width": 1005,
+          "height": 1005,
+          "bytes": 165776,
+          "sha256": "41b2b57ad6e0393ebfb7a53445b693e186b0d453e31dd367d50377b60da236ff",
+          "source_kind": "public_publisher_promo",
+          "saved_to_private_cloud": false
+        }
       ],
-      "status": "no_public_promo_photo"
+      "images": [],
+      "fresh_http_verified": 1,
+      "errors": [],
+      "status": "verified_public_promo_only"
     },
     {
       "id": "djawa-rudy%c2%b2-codename-wolfgirl",
@@ -793,13 +821,21 @@
       "product_urls": [
         "https://djawaphoto.gumroad.com/l/gvddv"
       ],
-      "samples": [],
-      "images": [],
-      "fresh_http_verified": 0,
-      "errors": [
-        "HTTPError"
+      "samples": [
+        {
+          "url": "https://public-files.gumroad.com/t38kl5wj0ynhzs1g977hl6mlti50",
+          "width": 1005,
+          "height": 1005,
+          "bytes": 182491,
+          "sha256": "5a7e8f1239cb074e52ec5596f42b272b93c9f255b6216d51703980816608c51d",
+          "source_kind": "public_publisher_promo",
+          "saved_to_private_cloud": false
+        }
       ],
-      "status": "no_public_promo_photo"
+      "images": [],
+      "fresh_http_verified": 1,
+      "errors": [],
+      "status": "verified_public_promo_only"
     },
     {
       "id": "djawa-christmas-special-2021-mimmi",
@@ -809,13 +845,21 @@
       "product_urls": [
         "https://djawaphoto.gumroad.com/l/gfqtt"
       ],
-      "samples": [],
-      "images": [],
-      "fresh_http_verified": 0,
-      "errors": [
-        "HTTPError"
+      "samples": [
+        {
+          "url": "https://public-files.gumroad.com/0cdvgvzc6wi7y4oi5agmh99xmt4l",
+          "width": 1005,
+          "height": 1005,
+          "bytes": 21744,
+          "sha256": "7da030738da9db990bc27cfc28a941137ecc2c8b7863d1e887efdb7c02d4e663",
+          "source_kind": "public_publisher_promo",
+          "saved_to_private_cloud": false
+        }
       ],
-      "status": "no_public_promo_photo"
+      "images": [],
+      "fresh_http_verified": 1,
+      "errors": [],
+      "status": "verified_public_promo_only"
     },
     {
       "id": "djawa-rudy-the-wolf-of-midnight",
@@ -825,13 +869,21 @@
       "product_urls": [
         "https://djawaphoto.gumroad.com/l/KZfEjm"
       ],
-      "samples": [],
-      "images": [],
-      "fresh_http_verified": 0,
-      "errors": [
-        "HTTPError"
+      "samples": [
+        {
+          "url": "https://public-files.gumroad.com/q3ajvl7ogh6895lcljkeiowqixra",
+          "width": 1005,
+          "height": 1005,
+          "bytes": 198017,
+          "sha256": "e18ff0f4ea2b477efb407911cfe9162d9767f9a9aa24ded8d6e6a0d3df118137",
+          "source_kind": "public_publisher_promo",
+          "saved_to_private_cloud": false
+        }
       ],
-      "status": "no_public_promo_photo"
+      "images": [],
+      "fresh_http_verified": 1,
+      "errors": [],
+      "status": "verified_public_promo_only"
     }
   ]
 }
