@@ -134,6 +134,21 @@ def main():
     assert both["engine_statuses"]["yandex"] == "http_403", both
     assert both["engine_statuses"]["tineye"] == "leads_found", both
     assert len(both["links"]) == 2, both
+
+    class BingResponse:
+        status_code = 200
+        headers = {"Content-Type": "text/html"}
+        content = b"<a href='https://www.4kgirl.com/mimmi'>Mimmi public set</a>"
+        text = content.decode()
+    class BingSession:
+        def get(self, endpoint, params, **kw):
+            assert endpoint == "https://www.bing.com/images/search"
+            assert params["q"].startswith("imgurl:https://")
+            assert params["iss"] == "sbi"
+            return BingResponse()
+    found = mod.bing_visual_query(BingSession(), "https://koith.github.io/photo.jpg")
+    assert found["status"] == "leads_found" and len(found["links"]) == 1, found
+    assert found["links"][0]["url"].startswith("https://www.4kgirl.com/")
     print("GALLERY_REVERSE_IMAGE_DISCOVERY_FIXTURE_PASS")
 
 

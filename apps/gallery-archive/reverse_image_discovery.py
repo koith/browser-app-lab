@@ -227,11 +227,35 @@ def yandex_query(session: requests.Session, public_image_url: str, timeout=20) -
         return {"status": "network_" + type(err).__name__, "links": []}
 
 
+
+def bing_visual_query(session: requests.Session, public_image_url: str, timeout=20) -> dict:
+    """Ordinary public Bing Visual Search URL-paste flow, not paid Bing API."""
+    try:
+        response = session.get(
+            "https://www.bing.com/images/search",
+            params={"view": "detailv2", "iss": "sbi", "FORM": "SBIHMP",
+                    "sbisrc": "UrlPaste", "q": "imgurl:" + public_image_url,
+                    "idpbck": "1"},
+            timeout=(8, timeout), allow_redirects=False,
+            headers={"Accept": "text/html,application/xhtml+xml"})
+        if response.status_code != 200:
+            return {"status": f"http_{response.status_code}", "links": []}
+        if "text/html" not in response.headers.get("Content-Type", "").lower():
+            return {"status": "not_html", "links": []}
+        if len(response.content) > 4_000_000:
+            return {"status": "response_too_large", "links": []}
+        links = leads_from_html(response.text)
+        return {"status": "leads_found" if links else "no_readable_public_matches",
+                "links": links[:80]}
+    except requests.RequestException as err:
+        return {"status": "network_" + type(err).__name__, "links": []}
+
+
 def multi_search(session: requests.Session, public_image_url: str) -> dict:
     """Independent paths: an inaccessible Lens result does not stop image search."""
     merged, seen, statuses = [], set(), {}
     for name, method in (("lens", lens_query), ("tineye", tineye_query),
-                         ("yandex", yandex_query)):
+                         ("yandex", yandex_query), ("bing", bing_visual_query)):
         outcome = method(session, public_image_url)
         statuses[name] = outcome["status"]
         for link in outcome.get("links", []):
@@ -285,7 +309,7 @@ def discover(root: Path = ROOT, max_seeds=10, offset=0, delay=2.0,
         evidence = engine(session, seed["public_image_url"])
         links = evidence.get("links", [])
         relevant = [link for link in links if identity_supported(seed, link)]
-        rows.append({**seed, "engine": "google_lens_tineye_yandex_public",
+        rows.append({**seed, "engine": "google_lens_tineye_yandex_bing_public",
                      "search_status": evidence.get("status"),
                      "engine_statuses": evidence.get("engine_statuses", {}),
                      "off_model_match_rejected": len(links) - len(relevant),
@@ -303,7 +327,7 @@ def discover(root: Path = ROOT, max_seeds=10, offset=0, delay=2.0,
         "engine_status_counts": {name: {status: sum(
             r["engine_statuses"].get(name, "not_run") == status for r in rows)
             for status in sorted(set(r["engine_statuses"].get(name, "not_run") for r in rows))}
-            for name in ("lens", "tineye", "yandex")},
+            for name in ("lens", "tineye", "yandex", "bing")},
         "candidate_page_urls": len({p["url"] for x in rows for p in x["candidate_pages"]}),
         "off_model_match_rejected": sum(x["off_model_match_rejected"] for x in rows),
         "new_private_photos_stored": 0, "gallery_images_added": 0,
