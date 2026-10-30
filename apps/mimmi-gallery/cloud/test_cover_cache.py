@@ -48,7 +48,9 @@ gateway._yui_cache.update(catalog=None, time=0)
 
 with TestClient(gateway.app) as client:
     for model in ("yui", "mimmi"):
-        path = f"/api/cover/{model}/{model}-thumbnail/1?v={digest[:24]}"
+        saved = manifest(model)['albums'][0]['images'][0]
+        version = saved.get('preview_sha256') or saved['sha256']
+        path = f"/api/cover/{model}/{model}-thumbnail/1?v={version[:24]}"
         first = client.get(path)
         assert first.status_code == 200, (model, first.status_code, first.text[:200])
         assert first.headers["content-type"].startswith("image/webp")

@@ -23,6 +23,18 @@ window.MimmiPrivate=(()=>{
    })};
   });
  }
+ function reconcile(current,incoming){
+  const merged=new Map(current.map(a=>[a.id,{...a,images:a.images.slice()}]));
+  for(const album of incoming){
+   const prior=merged.get(album.id);if(!prior){merged.set(album.id,album);continue;}
+   const photos=new Map(prior.images.map(p=>[p.number,p]));
+   for(const p of album.images){const old=photos.get(p.number);
+    if(!old||p.width*p.height>old.width*old.height)photos.set(p.number,p);
+   }
+   merged.set(album.id,{...album,...prior,images:[...photos.values()].sort((a,b)=>a.number-b.number)});
+  }
+  return [...merged.values()];
+ }
  async function albums(){
   session=readSession();if(!session)return [];
   return fromIndex(await (await request('/api/catalog')).json());
@@ -38,8 +50,8 @@ window.MimmiPrivate=(()=>{
   // The server verifies SHA-256 before returning the image. Returning the
   // same-origin URL lets Safari decode and cache it natively without loading
   // thousands of image blobs into JavaScript memory or hashing on the phone.
-  return session.api+'/api/media/'+encodeURIComponent(p.ownerAlbum)+'/'+(p.storageNumber??p.number)+'/'+selected;
+  return session.api+'/api/media/'+encodeURIComponent(p.ownerAlbum)+'/'+(p.storageNumber??p.number)+'/'+selected+'?v='+(selected==='preview'?p.preview_sha256:p.sha256);
  }
 
- return {albums,asset,fromIndex};
+ return {albums,asset,fromIndex,reconcile};
 })();

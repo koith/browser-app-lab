@@ -4,6 +4,9 @@ on:
     paths:
       - 'apps/mimmi-gallery/cloud/gateway/main.py'
       - 'apps/mimmi-gallery/cloud/test_gateway.py'
+      - 'apps/mimmi-gallery/cloud/test_media_versions.py'
+      - 'apps/gallery-archive/test_owner_snapshot.cjs'
+      - 'apps/mimmi-gallery/owner-media.js'
       - 'apps/mimmi-gallery/cloud/test_cover_cache.py'
       - 'apps/mimmi-gallery/cloud/gateway/media_cache.py'
       - 'apps/mimmi-gallery/cloud/test_media_cache.py'
@@ -14,6 +17,9 @@ on:
     paths:
       - 'apps/mimmi-gallery/cloud/gateway/main.py'
       - 'apps/mimmi-gallery/cloud/test_gateway.py'
+      - 'apps/mimmi-gallery/cloud/test_media_versions.py'
+      - 'apps/gallery-archive/test_owner_snapshot.cjs'
+      - 'apps/mimmi-gallery/owner-media.js'
       - 'apps/mimmi-gallery/cloud/test_cover_cache.py'
       - 'apps/mimmi-gallery/cloud/gateway/media_cache.py'
       - 'apps/mimmi-gallery/cloud/test_media_cache.py'
@@ -36,4 +42,6 @@ jobs:
           python apps/mimmi-gallery/cloud/test_gateway.py
           python apps/mimmi-gallery/cloud/test_cover_cache.py
           python apps/mimmi-gallery/cloud/test_media_cache.py
+          python apps/mimmi-gallery/cloud/test_media_versions.py
+          node apps/gallery-archive/test_owner_snapshot.cjs
           node --check apps/yui-gallery/owner-media.js
