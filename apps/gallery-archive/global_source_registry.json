@@ -1,0 +1,173 @@
+{
+  "schema_version": 1,
+  "policy": "Discovery leads only. No photos are archived or exposed to the gallery by this registry.",
+  "sources": [
+    {
+      "id": "mimmi-djawa-official",
+      "model": "mimmi",
+      "region": "KR",
+      "tier": "official",
+      "mode": "portfolio",
+      "url": "https://djawaphoto.com/portfolio-cat/mimmi/",
+      "max_pages": 4
+    },
+    {
+      "id": "mimmi-xiantuji",
+      "model": "mimmi",
+      "region": "CN",
+      "tier": "third_party_catalogue",
+      "mode": "numbered",
+      "url": "https://www.xiantuji.com/mimmi/"
+    },
+    {
+      "id": "mimmi-cosmiao",
+      "model": "mimmi",
+      "region": "CN",
+      "tier": "third_party_catalogue",
+      "mode": "numbered",
+      "url": "https://www.cosmiao.info/mimmi/"
+    },
+    {
+      "id": "mimmi-miaohuaying",
+      "model": "mimmi",
+      "region": "CN",
+      "tier": "third_party_catalogue",
+      "mode": "numbered",
+      "url": "https://www.miaohuaying.com/mimmi/"
+    },
+    {
+      "id": "mimmi-simimiao",
+      "model": "mimmi",
+      "region": "CN",
+      "tier": "third_party_catalogue",
+      "mode": "numbered",
+      "url": "https://www.simimiao.com/mimmi/"
+    },
+    {
+      "id": "mimmi-miaojishe",
+      "model": "mimmi",
+      "region": "CN",
+      "tier": "third_party_catalogue",
+      "mode": "numbered",
+      "url": "https://www.miaojishe.com/mimmi/"
+    },
+    {
+      "id": "mimmi-miaoyingji",
+      "model": "mimmi",
+      "region": "CN",
+      "tier": "reference_only",
+      "mode": "reference",
+      "url": "https://www.miaoyingji.com/mimmi/"
+    },
+    {
+      "id": "mimmi-cosjun",
+      "model": "mimmi",
+      "region": "CN",
+      "tier": "reference_only",
+      "mode": "reference",
+      "url": "https://www.cosjun.net/cat-group/zxgx"
+    },
+    {
+      "id": "mimmi-eciyuancos",
+      "model": "mimmi",
+      "region": "CN",
+      "tier": "third_party_catalogue",
+      "mode": "numbered",
+      "url": "https://www.eciyuancos.com/post/1860.html",
+      "reported_titles": 45
+    },
+    {
+      "id": "mimmi-xiutu-creamsoda",
+      "model": "mimmi",
+      "region": "CN",
+      "tier": "third_party_catalogue",
+      "mode": "reference",
+      "url": "https://www.xiutu.me/korea/creamsoda"
+    },
+    {
+      "id": "mimmi-twoucan",
+      "model": "mimmi",
+      "region": "JP",
+      "tier": "public_profile",
+      "mode": "profile",
+      "url": "https://twoucan.com/profile/Mimmi_official",
+      "identity": "Mimmi_official"
+    },
+    {
+      "id": "yui-djawa-official",
+      "model": "yui",
+      "region": "KR",
+      "tier": "official",
+      "mode": "single",
+      "url": "https://djawaphoto.com/portfolio/nikke-privaty-sharp-lesson/",
+      "title": "Nikke: Privaty – Sharp Lesson"
+    },
+    {
+      "id": "yui-huantuji",
+      "model": "yui",
+      "region": "CN",
+      "tier": "third_party_catalogue",
+      "mode": "numbered",
+      "url": "https://www.huantuji.com/yui/"
+    },
+    {
+      "id": "yui-chaotuji",
+      "model": "yui",
+      "region": "CN",
+      "tier": "third_party_catalogue",
+      "mode": "numbered",
+      "url": "https://www.chaotuji.com/yui/"
+    },
+    {
+      "id": "yui-yingyuge",
+      "model": "yui",
+      "region": "CN",
+      "tier": "reference_only",
+      "mode": "reference",
+      "url": "https://www.yingyuge.com/809.html"
+    },
+    {
+      "id": "yui-yuntu8",
+      "model": "yui",
+      "region": "CN",
+      "tier": "reference_only",
+      "mode": "reference",
+      "url": "https://yuntu8.com/1748.html"
+    },
+    {
+      "id": "yui-teapawt",
+      "model": "yui",
+      "region": "GLOBAL",
+      "tier": "public_profile",
+      "mode": "profile",
+      "url": "https://teapawt.net/super_yuisan",
+      "identity": "super_yuisan"
+    },
+    {
+      "id": "yui-v2ph-actor",
+      "model": "yui",
+      "region": "GLOBAL",
+      "tier": "third_party_catalogue",
+      "mode": "reference",
+      "url": "https://www.v2ph.com/actor/Yui"
+    },
+    {
+      "id": "yui-wantuzhi",
+      "model": "yui",
+      "region": "CN",
+      "tier": "reference_only",
+      "mode": "reference",
+      "url": "https://wantuzhi.com/yui-simyu-everyday-life"
+    },
+    {
+      "id": "yui-movie-fantasy-vol2",
+      "model": "yui",
+      "region": "KR",
+      "tier": "official",
+      "mode": "single",
+      "url": "https://moviefantasy.co.kr/notice/?bmode=view&idx=166748378",
+      "title": "Yui Sim Vol.2 — Close to You",
+      "advertised_photos": 64
+    }
+  ]
+}

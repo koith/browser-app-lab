@@ -1,0 +1,75 @@
+name: Yui Mimmi Global Public Source Discovery
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "apps/gallery-archive/global_source_registry.json"
+      - "apps/gallery-archive/discover_global_sources.py"
+      - "apps/gallery-archive/test_discover_global_sources.py"
+      - ".github/workflows/gallery-global-source-discovery.yml"
+  push:
+    branches:
+      - main
+      - feat/gallery-global-discovery-20261030
+    paths:
+      - "apps/gallery-archive/global_source_registry.json"
+      - "apps/gallery-archive/discover_global_sources.py"
+      - "apps/gallery-archive/test_discover_global_sources.py"
+      - ".github/workflows/gallery-global-source-discovery.yml"
+  schedule:
+    - cron: "42 16 * * 1,4"
+
+permissions:
+  contents: read
+concurrency:
+  group: gallery-global-source-discovery
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 24
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install open-source HTML parsing dependency
+        run: python -m pip install requests beautifulsoup4
+      - name: Syntax and isolated fixture regression tests
+        run: |
+          python -m py_compile apps/gallery-archive/discover_global_sources.py
+          python apps/gallery-archive/test_discover_global_sources.py
+      - name: Scan worldwide public catalogue pages only
+        run: |
+          python apps/gallery-archive/discover_global_sources.py \
+            --out "/tmp/gallery-global-source-leads.json" --timeout 18
+      - name: Publish honest acquisition-versus-discovery summary
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          d=json.loads(Path("/tmp/gallery-global-source-leads.json").read_text())
+          s=d["summary"]
+          assert s["sources_checked"] >= 15
+          assert s["gallery_images_added"] == s["new_photos_stored"] == 0
+          assert all(x["discovery_only_not_gallery"] for x in d["leads"])
+          with open(os.environ["GITHUB_STEP_SUMMARY"],"a") as f:
+            f.write("## Yui + Mimmi global discovery (research only)\n\n")
+            for k,v in s.items():
+              f.write(f"- {k}: {v}\n")
+            f.write("\n| Source | Region | Result | Page count | Catalogue entries |\n")
+            f.write("|---|---|---|---:|---:|\n")
+            for row in d["sources"]:
+              f.write(f"| {row['id']} | {row['region']} | {row['status']} | {row['pages_checked']} | {len(row['items'])} |\n")
+            f.write("\n**Not a photo import.** Nothing is appended to the user-facing galleries until physical storage and browser loading pass QA.\n")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: yui-mimmi-global-source-leads
+          path: /tmp/gallery-global-source-leads.json
+          if-no-files-found: warn
+          retention-days: 30
