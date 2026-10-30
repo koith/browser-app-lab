@@ -21,6 +21,11 @@ jobs:
     timeout-minutes: 9
     steps:
       - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            apps/mimmi-gallery
+            apps/gallery-archive
+          sparse-checkout-cone-mode: true
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
       - name: Install parser dependencies; do not open any external photo sites in tests
