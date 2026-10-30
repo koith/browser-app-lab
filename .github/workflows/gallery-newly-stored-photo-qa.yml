@@ -27,9 +27,11 @@ jobs:
     timeout-minutes: 24
     strategy:
       fail-fast: false
+      max-parallel: 4
       matrix:
         model: [yui, mimmi]
         browser: [chromium, webkit]
+        shard: [0, 1, 2, 3]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -39,7 +41,7 @@ jobs:
           python -m playwright install --with-deps ${{ matrix.browser }}
       - name: Decode exact archived thumbnails and full images, then download and SHA check actual bytes
         run: |
-          python apps/gallery-archive/qa_new_physical_photos.py --model '${{ matrix.model }}' --browser '${{ matrix.browser }}' --out "$RUNNER_TEMP/physical-${{ matrix.model }}-${{ matrix.browser }}.json"
+          python apps/gallery-archive/qa_new_physical_photos.py --model '${{ matrix.model }}' --browser '${{ matrix.browser }}' --shard '${{ matrix.shard }}' --shards 4 --since-commit e4b633fc189429e79c9b70038ef6f2b6b9fdd0a5 --out "$RUNNER_TEMP/physical-${{ matrix.model }}-${{ matrix.browser }}-${{ matrix.shard }}.json"
       - name: Summarize real deployed results without any photo bundles
         if: always()
         run: |
