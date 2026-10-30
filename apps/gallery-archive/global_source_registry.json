@@ -71,9 +71,10 @@
       "id": "mimmi-eciyuancos",
       "model": "mimmi",
       "region": "CN",
-      "tier": "reference_only",
-      "mode": "reference",
-      "url": "https://www.eciyuancos.com/"
+      "tier": "third_party_catalogue",
+      "mode": "numbered",
+      "url": "https://www.eciyuancos.com/post/1860.html",
+      "reported_titles": 45
     },
     {
       "id": "mimmi-xiutu-creamsoda",
@@ -157,6 +158,16 @@
       "tier": "reference_only",
       "mode": "reference",
       "url": "https://wantuzhi.com/yui-simyu-everyday-life"
+    },
+    {
+      "id": "yui-movie-fantasy-vol2",
+      "model": "yui",
+      "region": "KR",
+      "tier": "official",
+      "mode": "single",
+      "url": "https://moviefantasy.co.kr/notice/?bmode=view&idx=166748378",
+      "title": "Yui Sim Vol.2 — Close to You",
+      "advertised_photos": 64
     }
   ]
 }
