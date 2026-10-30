@@ -22,7 +22,10 @@ def run():
         try:
             r=requests.get(page_url,timeout=(8,22),headers=HEADERS,allow_redirects=False)
             row.update(status=r.status_code,content_type=r.headers.get("content-type","")[:90],bytes=len(r.content))
-            if r.status_code!=200 or "html" not in r.headers.get("content-type","").lower():result.append(row);continue
+            if r.status_code!=200 or "html" not in r.headers.get("content-type","").lower():
+                result.append(row)
+                print("MIMMI_IMGINN_PUBLIC_PROBE",json.dumps(row,ensure_ascii=False),flush=True)
+                continue
             soup=BeautifulSoup(r.content,"html.parser")
             row["handle_present"]="mimmissu17" in soup.get_text(" ",strip=True).casefold()
             photo_urls=[]
