@@ -27,11 +27,14 @@ class Fake:
     def __init__(self,pages,images):
         self.pages=pages
         self.images=images
+        self.image_headers=[]
     def get(self,url,**kwargs):
         if url in self.pages:return FakeResult(url,html=self.pages[url])
         # All synthetic photos use same supported public image endpoint
         urlbase=url.split("?")[0]
-        if urlbase in self.images:return FakeResult(url,data=self.images[urlbase])
+        if urlbase in self.images:
+            self.image_headers.append((urlbase,kwargs.get("headers",{})))
+            return FakeResult(url,data=self.images[urlbase])
         raise ValueError("Fake source not present")
 
 def main():
@@ -82,6 +85,9 @@ def main():
         fake=Fake({yui_src["url"]:html},{yui_photo:yui_raw,wrong_photo:make_jpg((100,90,90))})
         n=archive("yui",yui_sources,yui_catalog,fake,base/"yui")
         assert n==1,n
+        assert fake.image_headers and all(
+            "Referer" not in header for _,header in fake.image_headers
+        ), fake.image_headers
         with ZipFile(base/"yui/yui-indie-private-import.zip") as z:
             m=json.loads(z.read("manifest.json"))
             assert m["physical_verified_image_count"]==1
@@ -100,6 +106,9 @@ def main():
         n=archive("mimmi",mimmi_sources,{"schema_version":1,"model":"mimmi","albums":[]},
                   mimmi_fake,base/"mimmi")
         assert n==1
+        assert mimmi_fake.image_headers and all(
+            "Referer" in headers for _,headers in mimmi_fake.image_headers
+        ), mimmi_fake.image_headers
         with ZipFile(base/"mimmi/mimmi-indie-private-import.zip") as z:
             m=json.loads(z.read("manifest.json"))
             assert z.read(m["albums"][0]["images"][0]["url"])==mimmi_raw
