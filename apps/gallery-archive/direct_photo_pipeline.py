@@ -180,7 +180,8 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None):
             if work:
                 new_albums.append(work);new_total+=len(work['images']);downloaded_now+=len(work['images'])
             results.append(info)
-            print('VISUAL_PUBLIC_WORK',model,aid,json.dumps(info,ensure_ascii=False),flush=True)
+            print('VISUAL_PUBLIC_WORK',model,aid,json.dumps({k:v for k,v in info.items()
+                if k not in ('observed_filename_numbers','saved_cut_correspondence')},ensure_ascii=False),flush=True)
             continue
         images=list(resumed.get(aid,[]));occupied.update(p['number'] for p in images);next_number=max(occupied,default=0)+1
         queue=list(dict.fromkeys([book['source']]+[u for u in book.get('source_pages',[]) if safe_page(u)]));visited=set();errors=[];candidate_count=0
