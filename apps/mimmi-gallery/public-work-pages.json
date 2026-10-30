@@ -1,0 +1,24 @@
+{
+  "schema_version": 1,
+  "model": "mimmi",
+  "albums": [
+    {
+      "id": "v2ph-actor-z7exoo5z",
+      "title": "Mimmi — White",
+      "source": "https://sexy.pixibb.com/mimmi-white-136-photos-sexy-girl/",
+      "priority": 0,
+      "public_web_edition_photos": 136,
+      "visual_reference_required": true,
+      "identity_evidence": "Observed ordinary Mimmi search result and exact work heading; full public file numbering must be observed, with at least three whole-frame matches against SHA-verified existing saved photos. No archive or protected endpoint."
+    },
+    {
+      "id": "v2ph-actor-z76xe74a",
+      "title": "Realise Loveliness",
+      "source": "https://sexy.pixibb.com/djawa-photo-mimmi-realise-loveliness-31-photos-sexy-girl/",
+      "priority": 1,
+      "public_web_edition_photos": 31,
+      "visual_reference_required": true,
+      "identity_evidence": "Observed ordinary Mimmi search result and exact work heading; full public file numbering must be observed, with at least three whole-frame matches against SHA-verified existing saved photos. No archive or protected endpoint."
+    }
+  ]
+}
