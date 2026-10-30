@@ -1,0 +1,29 @@
+name: Mimmi Verified Image Response Shift Diagnostic
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'apps/gallery-archive/probe_stale_photo_responses.py'
+      - '.github/workflows/gallery-image-response-diagnostic.yml'
+  push:
+    branches: [main, feat/gallery-smart-source-recovery-20261030]
+    paths:
+      - 'apps/gallery-archive/probe_stale_photo_responses.py'
+      - '.github/workflows/gallery-image-response-diagnostic.yml'
+permissions:
+  contents: read
+jobs:
+  check-public-response-bytes:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Validate safe metadata probe imports
+        run: |
+          python -m pip install 'requests==2.32.5' 'Pillow==11.3.0'
+          python -m py_compile apps/gallery-archive/probe_stale_photo_responses.py
+      - name: Probe published image bytes without saving or claiming new photos
+        run: |
+          python apps/gallery-archive/probe_stale_photo_responses.py --limit 80 --workers 3
