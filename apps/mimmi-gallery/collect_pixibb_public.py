@@ -167,6 +167,27 @@ def verified_history(rows,limit):
         if len(out)>=limit:break
     return out
 
+def cached_verified_photo(url, prior, day=None, rotation=20):
+    """Reuse previous genuine SHA checks; rotate 1/20 of known URLs daily.
+
+    A cached record is explicitly tagged historical and NEVER counted as
+    freshly verified or physically downloaded. Actual backfill independently
+    downloads and checks exact bytes before owner-private storage.
+    """
+    if prior is None or prior.get("url") != url:
+        return None
+    valid = verified_history([prior], 1)
+    if not valid:
+        return None
+    today = day or datetime.now(timezone.utc).date().isoformat()
+    slot = int(hashlib.sha256((url + "|" + today).encode()).hexdigest()[:8], 16)
+    if rotation < 1 or slot % rotation == 0:
+        return None
+    output = dict(valid[0])
+    output["carried_from_previous_verification"] = True
+    return output
+
+
 def collect(max_pages=25,max_photos=250,delay=.25,browser_scroll=False):
     previous={}
     manifest=ROOT/"pixibb-public-previews.json"
@@ -178,6 +199,9 @@ def collect(max_pages=25,max_photos=250,delay=.25,browser_scroll=False):
     results=[]
     for album in all_sources():
         seen_urls=set();sha=set();photos=[];pages=[];browser_attempts=0
+        by_url={p["url"]:p for p in verified_history(previous.get(album["id"],[]), max_photos)
+                if isinstance(p.get("url"),str)}
+        actual_new_checks=0;reused_checks=0
         limit=min(max_pages,album["pages"])
         for n in range(1,limit+1):
             url=album["source"] if n==1 else album["source"]+str(n)+"/"
@@ -201,15 +225,22 @@ def collect(max_pages=25,max_photos=250,delay=.25,browser_scroll=False):
                     pages.append({"page":n,"status":"not_mimmi_page"});break
                 new=[u for u in urls if u not in seen_urls]
                 seen_urls.update(new)
-                page_verified=0
+                page_verified=0;page_cached=0
                 for image_url in new:
                     if len(photos)>=max_photos:break
-                    result=public_image(image_url)
+                    result=cached_verified_photo(image_url,by_url.get(image_url))
+                    if result is None:
+                        result=public_image(image_url)
+                        if result:
+                            page_verified+=1;actual_new_checks+=1
+                        time.sleep(delay)
+                    else:
+                        page_cached+=1;reused_checks+=1
                     if result and result["sha256"] not in sha:
                         sha.add(result["sha256"]);result["number"]=len(photos)+1
-                        photos.append(result);page_verified+=1
-                    time.sleep(delay)
-                pages.append({"page":n,"url":url,"candidates":len(new),"sha_verified":page_verified})
+                        photos.append(result)
+                pages.append({"page":n,"url":url,"candidates":len(new),
+                              "sha_verified":page_verified,"cached_from_previous_sha_checks":page_cached})
                 print("MIMMI_PIXIBB_PAGE",album["id"],n,len(new),page_verified,len(photos),flush=True)
                 if len(photos)>=max_photos:break
                 time.sleep(delay)
@@ -217,7 +248,7 @@ def collect(max_pages=25,max_photos=250,delay=.25,browser_scroll=False):
                 pages.append({"page":n,"status":type(exc).__name__})
                 print("MIMMI_PIXIBB_PAGE_UNAVAILABLE",album["id"],n,type(exc).__name__,flush=True)
                 break
-        fresh=len(photos)
+        fresh=actual_new_checks
         for old in verified_history(previous.get(album["id"],[]),max_photos):
             if len(photos)>=max_photos:break
             if old["sha256"] not in sha:
@@ -225,11 +256,13 @@ def collect(max_pages=25,max_photos=250,delay=.25,browser_scroll=False):
                 photos.append(old);sha.add(old["sha256"])
         for i,photo in enumerate(photos,1):photo["number"]=i
         results.append({**album,"samples":photos,"images":[],"visited_pages":pages,
-                        "fresh_http_verified":fresh,"status":"verified_public_web_previews" if photos else "no_public_images_verified"})
+                        "fresh_http_verified":fresh,"reused_previous_sha_checks":reused_checks,
+                        "status":"verified_public_web_previews" if photos else "no_public_images_verified"})
     data={"schema_version":1,"model":"mimmi","source":"public visible multi-page PixiBB web previews only",
           "generated_at":datetime.now(timezone.utc).isoformat(),
           "summary":{"works":len(results),"images_verified":sum(len(a["samples"]) for a in results),
                      "fresh_verified":sum(a["fresh_http_verified"] for a in results),
+                     "cached_previous_sha_checks":sum(a["reused_previous_sha_checks"] for a in results),
                      "private_cloud_archived":0},
           "albums":results}
     manifest.write_text(json.dumps(data,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
