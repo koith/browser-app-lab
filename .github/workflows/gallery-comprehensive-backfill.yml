@@ -115,6 +115,11 @@ jobs:
             gallery-independent-photo-archive.yml
             gallery-public-social-bulk.yml
             mimmi-stored-public-gallery.yml
+            mimmi-pixibb-multipage.yml
+            mimmi-xiutu-cream-soda-public.yml
+            mimmi-official-social-public.yml
+            mimmi-v2ph-public.yml
+            mimmi-public-promo.yml
             gallery-terabox-remote-inventory.yml
             yui-dynamic-archive.yml
             mimmi-official-archive.yml
