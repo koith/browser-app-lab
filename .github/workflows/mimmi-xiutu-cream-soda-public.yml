@@ -19,6 +19,11 @@ jobs:
     timeout-minutes: 110
     steps:
       - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            apps/mimmi-gallery
+            apps/gallery-archive
+          sparse-checkout-cone-mode: true
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
       - name: Install public-photo verification dependencies
