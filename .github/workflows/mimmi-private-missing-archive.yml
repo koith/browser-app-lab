@@ -1,5 +1,14 @@
 name: Mimmi Missing SHA Public Photos To Private ZIP Archive
 on:
+  workflow_run:
+    workflows:
+      - "Mimmi Multi-Page Public Photo Crawl"
+      - "Mimmi V2PH Actor Wide Discovery"
+      - "Mimmi Secondary CreamSoda Public Gallery Crawl"
+      - "Mimmi Free Official Portfolio Discovery"
+      - "Mimmi Official Social Public Photo Discovery"
+      - "Mimmi V2PH Public Photo Archive"
+    types: [completed]
   schedule:
     # Daily actual missing-photo byte sweep even if research index is unchanged.
     - cron: '36 3,15 * * *'
@@ -44,7 +53,12 @@ jobs:
           python apps/mimmi-gallery/archive_private_missing.py --dry-run --batch 0 --batches 3
   save-new-photos-private:
     needs: code-qa
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    if: |
+      github.ref == 'refs/heads/main' && github.event_name != 'pull_request' &&
+      (github.event_name != 'workflow_run' ||
+       (github.event.workflow_run.conclusion == 'success' &&
+        github.event.workflow_run.head_branch == 'main' &&
+        github.event.workflow_run.head_repository.full_name == github.repository))
     runs-on: ubuntu-24.04
     timeout-minutes: 70
     strategy:
