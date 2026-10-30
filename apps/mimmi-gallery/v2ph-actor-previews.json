@@ -1,7 +1,7 @@
 {
   "version": "v0.1.0-mimmi.3",
   "model": "mimmi",
-  "generated_at": "2026-10-30T07:19:29.823402+00:00",
+  "generated_at": "2026-10-30T09:19:38.687001+00:00",
   "source": "https://www.v2ph.com/actor/Mimmi",
   "actor_pages": [
     {
@@ -25,13 +25,17 @@
     }
   ],
   "summary": {
-    "actor_albums_discovered": 39,
-    "previously_configured_albums": 6,
-    "works_selected_for_revisit": 8,
-    "actor_work_count": 39,
+    "actor_albums_discovered": 0,
+    "previously_configured_albums": 0,
+    "works_selected_for_revisit": 0,
+    "actor_work_count": 0,
     "new_album_candidates": 38,
     "verified_public_image_urls": 427,
-    "private_cloud_photos_archived": 0
+    "private_cloud_photos_archived": 0,
+    "works": 38,
+    "fresh_verified": 0,
+    "private_cloud_archived": 0,
+    "physical_files_archived": 0
   },
   "albums": [
     {
@@ -242,7 +246,8 @@
           "candidate_images": 0
         }
       ],
-      "status": "public_previews_verified"
+      "status": "public_previews_verified",
+      "visited_pages": []
     },
     {
       "id": "v2ph-actor-a54e445z",
@@ -462,7 +467,8 @@
           "candidate_images": 0
         }
       ],
-      "status": "public_previews_verified"
+      "status": "public_previews_verified",
+      "visited_pages": []
     },
     {
       "id": "v2ph-actor-a54e98nz",
@@ -582,7 +588,8 @@
           "candidate_images": 0
         }
       ],
-      "status": "public_previews_verified"
+      "status": "public_previews_verified",
+      "visited_pages": []
     },
     {
       "id": "v2ph-actor-a584e85z",
@@ -702,7 +709,8 @@
           "candidate_images": 0
         }
       ],
-      "status": "public_previews_verified"
+      "status": "public_previews_verified",
+      "visited_pages": []
     },
     {
       "id": "v2ph-actor-a5e78m5a",
@@ -822,7 +830,8 @@
           "candidate_images": 0
         }
       ],
-      "status": "public_previews_verified"
+      "status": "public_previews_verified",
+      "visited_pages": []
     },
     {
       "id": "v2ph-actor-a5eenena",
@@ -1013,7 +1022,8 @@
       ],
       "images": [],
       "pages": [],
-      "status": "public_previews_verified"
+      "status": "public_previews_verified",
+      "visited_pages": []
     },
     {
       "id": "v2ph-actor-a884435a",
@@ -1124,7 +1134,8 @@
       ],
       "images": [],
       "pages": [],
-      "status": "public_previews_verified"
+      "status": "public_previews_verified",
+      "visited_pages": []
     },
     {
       "id": "v2ph-actor-a8847m5a",
@@ -1235,7 +1246,8 @@
       ],
       "images": [],
       "pages": [],
-      "status": "public_previews_verified"
+      "status": "public_previews_verified",
+      "visited_pages": []
     },
     {
       "id": "v2ph-actor-z76xe74a",
@@ -1355,7 +1367,8 @@
           "candidate_images": 0
         }
       ],
-      "status": "public_previews_verified"
+      "status": "public_previews_verified",
+      "visited_pages": []
     },
     {
       "id": "v2ph-actor-z7e396nz",
@@ -1485,7 +1498,8 @@
           "candidate_images": 0
         }
       ],
-      "status": "public_previews_verified"
+      "status": "public_previews_verified",
+      "visited_pages": []
     },
     {
       "id": "v2ph-actor-z7e69mnz",
@@ -1615,7 +1629,8 @@
           "candidate_images": 0
         }
       ],
-      "status": "public_previews_verified"
+      "status": "public_previews_verified",
+      "visited_pages": []
     },
     {
       "id": "v2ph-actor-z7exoo5z",
@@ -1735,7 +1750,8 @@
           "candidate_images": 0
         }
       ],
-      "status": "public_previews_verified"
+      "status": "public_previews_verified",
+      "visited_pages": []
     },
     {
       "id": "v2ph-actor-zo555x4z",
@@ -1855,7 +1871,8 @@
           "candidate_images": 0
         }
       ],
-      "status": "public_previews_verified"
+      "status": "public_previews_verified",
+      "visited_pages": []
     },
     {
       "id": "v2ph-actor-zo5n754z",
@@ -1976,7 +1993,8 @@
       ],
       "images": [],
       "pages": [],
-      "status": "public_previews_verified"
+      "status": "public_previews_verified",
+      "visited_pages": []
     },
     {
       "id": "v2ph-actor-zo799eez",
@@ -2087,7 +2105,8 @@
       ],
       "images": [],
       "pages": [],
-      "status": "public_previews_verified"
+      "status": "public_previews_verified",
+      "visited_pages": []
     },
     {
       "id": "v2ph-actor-z4m985xa",
@@ -2207,7 +2226,8 @@
           "candidate_images": 0
         }
       ],
-      "status": "public_previews_verified"
+      "status": "public_previews_verified",
+      "visited_pages": []
     },
     {
       "id": "v2ph-actor-z4m9x9xa",
@@ -2337,7 +2357,8 @@
           "candidate_images": 0
         }
       ],
-      "status": "public_previews_verified"
+      "status": "public_previews_verified",
+      "visited_pages": []
     },
     {
       "id": "v2ph-actor-z4ox65ea",
@@ -2457,7 +2478,8 @@
           "candidate_images": 0
         }
       ],
-      "status": "public_previews_verified"
+      "status": "public_previews_verified",
+      "visited_pages": []
     },
     {
       "id": "v2ph-actor-z4x6o3nz",
@@ -2587,7 +2609,8 @@
           "candidate_images": 0
         }
       ],
-      "status": "public_previews_verified"
+      "status": "public_previews_verified",
+      "visited_pages": []
     },
     {
       "id": "v2ph-actor-z4xoo5nz",
@@ -2717,7 +2740,8 @@
           "candidate_images": 0
         }
       ],
-      "status": "public_previews_verified"
+      "status": "public_previews_verified",
+      "visited_pages": []
     },
     {
       "id": "v2ph-actor-z63984ma",
@@ -2847,7 +2871,8 @@
           "candidate_images": 0
         }
       ],
-      "status": "public_previews_verified"
+      "status": "public_previews_verified",
+      "visited_pages": []
     },
     {
       "id": "v2ph-actor-z63e3ena",
@@ -2958,7 +2983,8 @@
       ],
       "images": [],
       "pages": [],
-      "status": "public_previews_verified"
+      "status": "public_previews_verified",
+      "visited_pages": []
     },
     {
       "id": "v2ph-actor-z6exx6ma",
@@ -3079,7 +3105,8 @@
       ],
       "images": [],
       "pages": [],
-      "status": "public_previews_verified"
+      "status": "public_previews_verified",
+      "visited_pages": []
     },
     {
       "id": "v2ph-actor-ae57484a",
@@ -3299,7 +3326,8 @@
           "candidate_images": 0
         }
       ],
-      "status": "public_previews_verified"
+      "status": "public_previews_verified",
+      "visited_pages": []
     },
     {
       "id": "v2ph-actor-ae7694ma",
@@ -3314,7 +3342,8 @@
           "candidate_images": 0
         }
       ],
-      "status": "source_only"
+      "status": "source_only",
+      "visited_pages": []
     },
     {
       "id": "v2ph-actor-am8o3e7z",
@@ -3454,7 +3483,8 @@
           "candidate_images": 0
         }
       ],
-      "status": "public_previews_verified"
+      "status": "public_previews_verified",
+      "visited_pages": []
     },
     {
       "id": "v2ph-actor-amn8o34z",
@@ -3594,7 +3624,8 @@
           "candidate_images": 0
         }
       ],
-      "status": "public_previews_verified"
+      "status": "public_previews_verified",
+      "visited_pages": []
     },
     {
       "id": "v2ph-actor-amno754z",
@@ -3724,7 +3755,8 @@
           "candidate_images": 0
         }
       ],
-      "status": "public_previews_verified"
+      "status": "public_previews_verified",
+      "visited_pages": []
     },
     {
       "id": "v2ph-actor-an5o93ez",
@@ -3840,7 +3872,8 @@
           "candidate_images": 10
         }
       ],
-      "status": "public_previews_verified"
+      "status": "public_previews_verified",
+      "visited_pages": []
     },
     {
       "id": "v2ph-actor-an65656a",
@@ -3951,7 +3984,8 @@
       ],
       "images": [],
       "pages": [],
-      "status": "public_previews_verified"
+      "status": "public_previews_verified",
+      "visited_pages": []
     },
     {
       "id": "v2ph-actor-axm7n43z",
@@ -3961,7 +3995,8 @@
       "samples": [],
       "images": [],
       "pages": [],
-      "status": "source_only"
+      "status": "source_only",
+      "visited_pages": []
     },
     {
       "id": "v2ph-actor-a8856noa",
@@ -4121,7 +4156,8 @@
           "candidate_images": 0
         }
       ],
-      "status": "public_previews_verified"
+      "status": "public_previews_verified",
+      "visited_pages": []
     },
     {
       "id": "v2ph-actor-a9nxx64z",
@@ -4241,7 +4277,8 @@
           "candidate_images": 0
         }
       ],
-      "status": "public_previews_verified"
+      "status": "public_previews_verified",
+      "visited_pages": []
     },
     {
       "id": "v2ph-actor-a88763oa",
@@ -4352,7 +4389,8 @@
       ],
       "images": [],
       "pages": [],
-      "status": "public_previews_verified"
+      "status": "public_previews_verified",
+      "visited_pages": []
     },
     {
       "id": "v2ph-actor-a93xn3oa",
@@ -4522,7 +4560,8 @@
           "candidate_images": 0
         }
       ],
-      "status": "public_previews_verified"
+      "status": "public_previews_verified",
+      "visited_pages": []
     },
     {
       "id": "v2ph-actor-a8n96x7a",
@@ -4722,7 +4761,8 @@
           "candidate_images": 0
         }
       ],
-      "status": "public_previews_verified"
+      "status": "public_previews_verified",
+      "visited_pages": []
     },
     {
       "id": "v2ph-actor-a8n7me7a",
@@ -4842,7 +4882,8 @@
           "candidate_images": 0
         }
       ],
-      "status": "public_previews_verified"
+      "status": "public_previews_verified",
+      "visited_pages": []
     },
     {
       "id": "v2ph-actor-a8n8n85a",
@@ -4962,7 +5003,8 @@
           "candidate_images": 0
         }
       ],
-      "status": "public_previews_verified"
+      "status": "public_previews_verified",
+      "visited_pages": []
     }
   ]
 }
