@@ -24,7 +24,7 @@ from collect_private_batch import allowed_url, safe_reencoded_public_preview
 
 MODEL_PATTERNS={'mimmi':re.compile(r'(?<![a-z])mimmi(?![a-z])|밈미|밈미',re.I),
                 'yui':re.compile(r'(?<![a-z])yui(?![a-z])|유이|심혜성|super_yuisan',re.I)}
-PAGE_HOSTS={'djawaphoto.com','www.djawaphoto.com','cosplay.pixibb.com','www.v2ph.com','v2ph.com',
+PAGE_HOSTS={'djawaphoto.com','www.djawaphoto.com','cosplay.pixibb.com','sexy.pixibb.com','www.v2ph.com','v2ph.com',
             'blog.hacosta.co.jp','www.gamersky.com','www.inven.co.kr','photo.inven.co.kr',
             'www.ajunews.com','sportsseoul.com','www.sportsseoul.com','crazygiant.imweb.me'}
 FORMATS={'JPEG':'jpg','PNG':'png','WEBP':'webp'}
@@ -149,6 +149,7 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None):
             if a['id'] in books:
                 prior=books[a['id']]
                 prior['source_pages']=list(dict.fromkeys(prior.get('source_pages',[])+[source]+a.get('source_pages',[])))
+                if a.get('visual_reference_required'):prior.update(a)
             else:books[a['id']]=dict(a)
     client=client or PublicSession(delay=.8)
     results=[];new_albums=[];new_total=0;downloaded_now=0;seen_urls=set();seen_sha=set(saved_sha)
@@ -164,12 +165,21 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None):
                 data=(out/name).read_bytes()
                 if len(data)!=row[size] or hashlib.sha256(data).hexdigest()!=row[digest]:raise ValueError('Staged file corrupted during interruption')
             resumed[entry['album']].append(row);seen_sha.add(row['sha256']);seen_urls.add(entry['source']);new_total+=1
-    books=sorted(books.values(),key=lambda a:(len(old_albums.get(a['id'],{}).get('images',[])),a['id']))
+    books=sorted(books.values(),key=lambda a:(a.get('priority',100),len(old_albums.get(a['id'],{}).get('images',[])),a['id']))
     if set(resumed)-{a['id'] for a in books}:
         raise ValueError('Resumed work no longer in source scope; preserve staged files for review')
     for book in books:
         if new_total>=max_new and not resumed.get(book['id']):continue
         aid=book['id'];previous=old_albums.get(aid,{}).get('images',[]);occupied={p['number'] for p in previous};next_number=max(occupied,default=0)+1
+        if book.get('visual_reference_required'):
+            if resumed.get(aid):raise ValueError('Visual-edition resume requires finalized work transaction')
+            from visual_public_work import collect_work
+            work,info=collect_work(book,previous,client,out,max_new-new_total,seen_sha,model)
+            if work:
+                new_albums.append(work);new_total+=len(work['images']);downloaded_now+=len(work['images'])
+            results.append(info)
+            print('VISUAL_PUBLIC_WORK',model,aid,json.dumps(info,ensure_ascii=False),flush=True)
+            continue
         images=list(resumed.get(aid,[]));occupied.update(p['number'] for p in images);next_number=max(occupied,default=0)+1
         queue=list(dict.fromkeys([book['source']]+[u for u in book.get('source_pages',[]) if safe_page(u)]));visited=set();errors=[];candidate_count=0
         while queue and len(visited)<max_pages and new_total<max_new:

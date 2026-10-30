@@ -11,13 +11,28 @@ from pathlib import Path
 import sys
 import time
 
-from playwright.async_api import async_playwright
+from playwright.async_api import async_playwright,Error as PlaywrightError
 
 ROOT=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT/'apps/yui-gallery'))
 from browser_http_bridge import fulfill_verified_request
 
 SITE='https://koith.github.io/browser-app-lab/apps'
+
+
+async def current_card(page,selector,click=False):
+    # The background owner catalog replaces album cards after first paint.
+    # Refetch detached WebKit nodes, retaining the same action/image deadline.
+    deadline=time.monotonic()+30
+    while True:
+        try:
+            locator=page.locator(selector)
+            await locator.scroll_into_view_if_needed(timeout=4000)
+            if click:await page.locator(selector).click(timeout=4000)
+            return
+        except PlaywrightError as error:
+            if time.monotonic()>=deadline or not any(word in str(error).lower() for word in ('not attached','detached','not stable')):raise
+            await asyncio.sleep(.15)
 
 
 async def run(args):
@@ -55,11 +70,11 @@ async def run(args):
                 distinct_sha:new Set(stored.flatMap(a=>validImages(a).map(p=>p.sha256))).size,
                 owner_rows:ownerStored.reduce((n,a)=>n+validImages(a).length,0)})''')
             for album in selected:
-                aid=album['id'];card=page.locator(f'#albumgrid .album[data-id="{aid}"]')
-                await card.scroll_into_view_if_needed()
+                aid=album['id'];card=f'#albumgrid .album[data-id="{aid}"]'
+                await current_card(page,card)
                 await page.wait_for_function('''id=>{const im=document.querySelector('#albumgrid [data-id="'+id+'"] img');
                     return im?.complete&&im.naturalWidth>=160}''',arg=aid,timeout=105000)
-                await card.click();await page.locator('#detail').wait_for(state='visible')
+                await current_card(page,card,click=True);await page.locator('#detail').wait_for(state='visible')
                 for expected in album['images']:
                     number=expected['number']
                     position=await page.evaluate('''([id,n])=>photosFor(stored.find(a=>a.id===id))
