@@ -1,12 +1,12 @@
 {
   "schema_version": 1,
   "model": "mimmi",
-  "generated_at": "2026-10-30T00:44:37.153975+00:00",
+  "generated_at": "2026-10-30T09:19:55.134441+00:00",
   "source": "only public DJAWA-linked Gumroad promo HTML, never paid files",
   "summary": {
     "albums_checked": 32,
-    "promotional_image_urls_verified": 41,
-    "fresh_promotional_urls_verified": 24,
+    "promotional_image_urls_verified": 43,
+    "fresh_promotional_urls_verified": 20,
     "private_cloud_saved": 0
   },
   "albums": [
@@ -207,10 +207,20 @@
           "url": "https://public-files.gumroad.com/fj0kuefvaft6bu3o4m0oo52iq9uw",
           "width": 1005,
           "height": 1005,
+          "bytes": 152457,
+          "sha256": "1438f697cad2a9a2f807ab4981fab44fe4a9726eaeabec8caf63fd43fa7ec8cc",
+          "source_kind": "public_publisher_promo",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://public-files.gumroad.com/fj0kuefvaft6bu3o4m0oo52iq9uw",
+          "width": 1005,
+          "height": 1005,
           "bytes": 14258,
           "sha256": "d88b4f975f485bb6fb5f3a90d1b9769f429db1d40d4951ef6b93351cf33f7448",
           "source_kind": "public_publisher_promo",
-          "saved_to_private_cloud": false
+          "saved_to_private_cloud": false,
+          "carried_from_previous_verification": true
         }
       ],
       "images": [],
@@ -503,10 +513,20 @@
           "url": "https://public-files.gumroad.com/wb1wzd9or6isk2q3ur2chy6lsklo",
           "width": 1005,
           "height": 1005,
+          "bytes": 36676,
+          "sha256": "3dfd6b0767195a2fa8e3d2da319a790ae235a994f67beef2596491770962a653",
+          "source_kind": "public_publisher_promo",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://public-files.gumroad.com/wb1wzd9or6isk2q3ur2chy6lsklo",
+          "width": 1005,
+          "height": 1005,
           "bytes": 281343,
           "sha256": "c88e7ebe5f8549b7eb7e1f5ca37b2549d3d746b5c1ead96cd4be56281a677ebb",
           "source_kind": "public_publisher_promo",
-          "saved_to_private_cloud": false
+          "saved_to_private_cloud": false,
+          "carried_from_previous_verification": true
         }
       ],
       "images": [],
@@ -805,12 +825,15 @@
           "bytes": 165776,
           "sha256": "41b2b57ad6e0393ebfb7a53445b693e186b0d453e31dd367d50377b60da236ff",
           "source_kind": "public_publisher_promo",
-          "saved_to_private_cloud": false
+          "saved_to_private_cloud": false,
+          "carried_from_previous_verification": true
         }
       ],
       "images": [],
-      "fresh_http_verified": 1,
-      "errors": [],
+      "fresh_http_verified": 0,
+      "errors": [
+        "HTTPError"
+      ],
       "status": "verified_public_promo_only"
     },
     {
@@ -829,12 +852,15 @@
           "bytes": 182491,
           "sha256": "5a7e8f1239cb074e52ec5596f42b272b93c9f255b6216d51703980816608c51d",
           "source_kind": "public_publisher_promo",
-          "saved_to_private_cloud": false
+          "saved_to_private_cloud": false,
+          "carried_from_previous_verification": true
         }
       ],
       "images": [],
-      "fresh_http_verified": 1,
-      "errors": [],
+      "fresh_http_verified": 0,
+      "errors": [
+        "HTTPError"
+      ],
       "status": "verified_public_promo_only"
     },
     {
@@ -853,12 +879,15 @@
           "bytes": 21744,
           "sha256": "7da030738da9db990bc27cfc28a941137ecc2c8b7863d1e887efdb7c02d4e663",
           "source_kind": "public_publisher_promo",
-          "saved_to_private_cloud": false
+          "saved_to_private_cloud": false,
+          "carried_from_previous_verification": true
         }
       ],
       "images": [],
-      "fresh_http_verified": 1,
-      "errors": [],
+      "fresh_http_verified": 0,
+      "errors": [
+        "HTTPError"
+      ],
       "status": "verified_public_promo_only"
     },
     {
@@ -877,12 +906,15 @@
           "bytes": 198017,
           "sha256": "e18ff0f4ea2b477efb407911cfe9162d9767f9a9aa24ded8d6e6a0d3df118137",
           "source_kind": "public_publisher_promo",
-          "saved_to_private_cloud": false
+          "saved_to_private_cloud": false,
+          "carried_from_previous_verification": true
         }
       ],
       "images": [],
-      "fresh_http_verified": 1,
-      "errors": [],
+      "fresh_http_verified": 0,
+      "errors": [
+        "HTTPError"
+      ],
       "status": "verified_public_promo_only"
     }
   ]
