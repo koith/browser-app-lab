@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "model": "mimmi",
-  "generated_at": "2026-10-30T09:19:55.134441+00:00",
+  "generated_at": "2026-10-30T09:25:25.744342+00:00",
   "source": "only public DJAWA-linked Gumroad promo HTML, never paid files",
   "summary": {
     "albums_checked": 32,
@@ -207,8 +207,8 @@
           "url": "https://public-files.gumroad.com/fj0kuefvaft6bu3o4m0oo52iq9uw",
           "width": 1005,
           "height": 1005,
-          "bytes": 152457,
-          "sha256": "1438f697cad2a9a2f807ab4981fab44fe4a9726eaeabec8caf63fd43fa7ec8cc",
+          "bytes": 14258,
+          "sha256": "d88b4f975f485bb6fb5f3a90d1b9769f429db1d40d4951ef6b93351cf33f7448",
           "source_kind": "public_publisher_promo",
           "saved_to_private_cloud": false
         },
@@ -216,8 +216,8 @@
           "url": "https://public-files.gumroad.com/fj0kuefvaft6bu3o4m0oo52iq9uw",
           "width": 1005,
           "height": 1005,
-          "bytes": 14258,
-          "sha256": "d88b4f975f485bb6fb5f3a90d1b9769f429db1d40d4951ef6b93351cf33f7448",
+          "bytes": 152457,
+          "sha256": "1438f697cad2a9a2f807ab4981fab44fe4a9726eaeabec8caf63fd43fa7ec8cc",
           "source_kind": "public_publisher_promo",
           "saved_to_private_cloud": false,
           "carried_from_previous_verification": true
