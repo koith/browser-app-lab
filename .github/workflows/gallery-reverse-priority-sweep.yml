@@ -20,7 +20,7 @@ on:
       - .github/workflows/gallery-reverse-priority-sweep.yml
 permissions:
   contents: read
-  actions: read
+  actions: write
 concurrency:
   group: gallery-reverse-priority-${{ github.ref_name }}
   cancel-in-progress: false
@@ -57,6 +57,25 @@ jobs:
                   f.write(f"- {k}: {d[k]}\n")
               f.write("\nCandidate URLs are not yet saved images.\n")
           PY
+      - name: Resume existing SHA-verified public photo backfill when visual matches exist
+        if: github.event_name != 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          count="$(python - <<'PY'
+          import json,os
+          from pathlib import Path
+          d=json.loads((Path(os.environ["RUNNER_TEMP"])/"reverse-leads.json").read_text())
+          print(d["source_pages_accepted"])
+          PY
+          )"
+          # Runs once per roughly 24 hours, not after every 3-hour image sweep.
+          if [[ "$count" -gt 0 && "$((GITHUB_RUN_NUMBER % 8))" == 0 ]]; then
+            gh workflow run gallery-comprehensive-backfill.yml --ref main
+            echo "Dispatched existing physical-photo collection and cloud import pipeline" >> "$GITHUB_STEP_SUMMARY"
+          fi
       - uses: actions/upload-artifact@v4
         if: github.event_name != 'pull_request'
         with:
