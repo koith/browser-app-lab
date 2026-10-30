@@ -9,7 +9,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor,as_completed
 from datetime import datetime,timezone
 from pathlib import Path
-from urllib.parse import urlsplit
+from urllib.parse import urlsplit,urljoin
 
 import requests
 from reverse_seed_priority import seeds
@@ -22,8 +22,18 @@ BING_URL="https://www.bing.com/images/search"
 
 def query_page(client,source,params):
     try:
-        r=client.get(source,params=params,timeout=(9,26),allow_redirects=False,
-                     headers={"User-Agent":RESEARCH_UA,"Accept":"text/html"})
+        current=source
+        for hop in range(4):
+            r=client.get(current,params=params if hop==0 else None,timeout=(9,26),allow_redirects=False,
+                         headers={"User-Agent":RESEARCH_UA,"Accept":"text/html"})
+            if r.status_code not in (301,302,303,307,308):break
+            target=urljoin(current,r.headers.get('Location',''));parsed=urlsplit(target)
+            if (parsed.scheme!='https' or parsed.hostname!=urlsplit(source).hostname or
+                parsed.username or parsed.password or parsed.port not in (None,443) or
+                any(word in parsed.path.casefold() for word in ('captcha','challenge','login','signin','verify'))):
+                return 'redirect_access_boundary_not_followed',[]
+            current=target
+        else:return 'redirect_limit',[]
         if r.status_code!=200:
             return "http_"+str(r.status_code),[]
         if "html" not in r.headers.get("Content-Type","").lower():

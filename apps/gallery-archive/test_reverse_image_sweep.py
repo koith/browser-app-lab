@@ -7,7 +7,7 @@ from pathlib import Path
 
 from reverse_seed_priority import seeds
 from reverse_sites_parser import sites_from_html
-from reverse_image_sweep import search_one,sweep
+from reverse_image_sweep import search_one,sweep,query_page
 from reverse_image_discovery import untrack
 
 def fixture(base):
@@ -46,6 +46,20 @@ class FakeClient:
         return FakeResponse(text)
 
 def main():
+    class RedirectClient:
+        def __init__(self,location):self.location=location;self.calls=0
+        def get(self,url,**kw):
+            self.calls+=1
+            if self.calls==1:
+                r=FakeResponse('');r.status_code=302;r.headers={'Location':self.location};return r
+            return FakeResponse('<html>normal search results</html>')
+    normal=RedirectClient('/images/search?q=public')
+    assert query_page(normal,'https://www.bing.com/images/search',{})[0]=='ok'
+    assert normal.calls==2
+    for location in ['https://other.example/result','/captcha/verify','/login']:
+        boundary=RedirectClient(location)
+        assert query_page(boundary,'https://www.bing.com/images/search',{})[0]=='redirect_access_boundary_not_followed'
+        assert boundary.calls==1
     with tempfile.TemporaryDirectory() as tmp:
         base=Path(tmp)
         fixture(base)

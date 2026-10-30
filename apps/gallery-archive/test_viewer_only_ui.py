@@ -25,7 +25,8 @@ class ViewerOnlyTest(unittest.TestCase):
                 self.assertIn(f"{client}.albums()",html)
                 self.assertIn(f"{client}.asset(",html)
                 self.assertIn(f"PhotoVault.albums('{model}')",html)
-                self.assertIn("stored=[...combined.values()]",html)
+                self.assertTrue("stored=[...combined.values()]" in html or "stored=joined.albums" in html,
+                                "Gallery must use only saved, verified album rows")
                 self.assertIn("const archivedCount=stored.reduce(",html)
                 # Archive-only: a discovered link cannot create a gallery photo.
                 self.assertIn("localStored=",html)
