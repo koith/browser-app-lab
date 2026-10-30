@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from collect_pixibb_public import safe_page,safe_photo,page_photos,verified_history,SOURCE
+from collect_pixibb_public import safe_page,safe_photo,page_photos,verified_history,cached_verified_photo,SOURCE
 def main():
     root=SOURCE[0]["source"]
     assert safe_page(root,root)
@@ -24,6 +24,14 @@ def main():
     assert not m and not bad
     sample={"sha256":"a"*64,"bytes":10000,"width":1200,"height":800,
         "url":"https://imgx001.pixibb.com/photos/a.jpg"}
+    # Cached records skip needless rereads, but are tagged historical.
+    historic=None
+    for day in ("2026-10-25","2026-10-26","2026-10-27","2026-10-28"):
+        historic=cached_verified_photo(sample["url"],sample,day=day)
+        if historic:break
+    assert historic and historic["carried_from_previous_verification"]
+    assert cached_verified_photo(sample["url"],sample,rotation=1) is None
+    assert cached_verified_photo("https://evil.test/no.jpg",sample) is None
     assert len(verified_history([sample,sample],200))==1
     assert verified_history([{**sample,"sha256":"INVALID"}],200)==[]
     from collect_pixibb_public import all_sources
