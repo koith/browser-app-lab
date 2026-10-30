@@ -42,7 +42,7 @@ def exercise(browser, model: str, rule: dict, engine: str):
           const total=stored.reduce((n,a)=>n+(a.images||[]).length,0);
           const owner=stored.reduce((n,a)=>n+(a.images||[]).filter(p=>!!p.ownerAlbum).length,0);
           return total>=minimum && owner>=privateMinimum;
-        }""", [rule["min_count"], rule["min_private"]], timeout=170000)
+        }""", arg=[rule["min_count"], rule["min_private"]], timeout=170000)
         counts = page.evaluate("""() => ({
           total:stored.reduce((n,a)=>n+a.images.length,0),
           owner:stored.reduce((n,a)=>n+a.images.filter(p=>!!p.ownerAlbum).length,0),
@@ -63,7 +63,7 @@ def exercise(browser, model: str, rule: dict, engine: str):
               const album=document.querySelector('#albumgrid .album[data-id="'+id+'"]');
               const img=album?.querySelector('img');
               return !!img && img.complete && img.naturalWidth>=160;
-            }""", album_id, timeout=105000)
+            }""", arg=album_id, timeout=105000)
             album.click(timeout=30000)
             assert page.locator("#detail").is_visible(), (model, album_id, "detail hidden")
             photo = page.locator("#detailphotos .photo").first
