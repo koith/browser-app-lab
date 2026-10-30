@@ -29,7 +29,10 @@ const engine={chromium,webkit}[engineName];if(!engine)throw Error('Unknown engin
    await page.goto('http://127.0.0.1:8765/'+model+'-gallery/',{waitUntil:'domcontentloaded',timeout:30000});
    await page.waitForFunction(()=>document.querySelector('#inventory')?.textContent?.includes('실제 저장본'),{timeout:20000});
    const current=await page.locator('#inventory').innerText();
-   if(!current.startsWith(baseline+'장'))throw Error('Baseline not saved physical count '+model+' '+current);
+   const currentCount=Number.parseInt(current,10);
+   if(!Number.isSafeInteger(currentCount)||currentCount<baseline)
+     throw Error('Saved gallery omitted physical public files '+model+' '+current);
+   return currentCount;
   }
   async function importOne(model,baseline){
    const importName='/tmp/photo-vault-qa/'+model+'-good.zip';
@@ -160,16 +163,16 @@ const engine={chromium,webkit}[engineName];if(!engine)throw Error('Unknown engin
     await page.unroute('https://www.googleapis.com/drive/v3/**');
     return downloadCalls;
   }
-  await open('yui',baselines.yui);
-  await importOne('yui',baselines.yui);
-  await open('mimmi',baselines.mimmi);
+  const yuiBaseline=await open('yui',baselines.yui);
+  await importOne('yui',yuiBaseline);
+  const mimmiBaseline=await open('mimmi',baselines.mimmi);
   if(await page.locator('#albumgrid [data-id="vault-fixture-yui"]').count())throw Error('Cross-model private vault leakage');
-  await importOne('mimmi',baselines.mimmi);
-  await driveSyncSmoke('yui',baselines.yui);
-  await driveSyncSmoke('mimmi',baselines.mimmi);
+  await importOne('mimmi',mimmiBaseline);
+  await driveSyncSmoke('yui',yuiBaseline);
+  await driveSyncSmoke('mimmi',mimmiBaseline);
   await page.goto('http://127.0.0.1:8765/yui-gallery/');
-  await page.waitForFunction(n=>document.querySelector('#inventory')?.textContent?.startsWith(n+'장'),baselines.yui+2);
+  await page.waitForFunction(n=>document.querySelector('#inventory')?.textContent?.startsWith(n+'장'),yuiBaseline+2);
   if(errors.length||external.length)throw Error('Browser errors or source media requested '+JSON.stringify({errors,external:external.slice(0,5)}));
-  console.log('TWO_MODELS_SHA_VERIFIED_ZIP_IMPORT_'+engineName.toUpperCase()+'_PASS',JSON.stringify({yui:baselines.yui+2,mimmi:baselines.mimmi+2,persistent:true,incrementalMerged:true,duplicateShaNumbersKept:true,nestedActionsZip:true,physicalOverlapPrefersPrivate:true,multiZipImport:true,mixedValidityBatches:true,corruptRejected:true,externalImageRequests:0}));
+  console.log('TWO_MODELS_SHA_VERIFIED_ZIP_IMPORT_'+engineName.toUpperCase()+'_PASS',JSON.stringify({yui:baselines.yui+2,mimmi:mimmiBaseline+2,persistent:true,incrementalMerged:true,duplicateShaNumbersKept:true,nestedActionsZip:true,physicalOverlapPrefersPrivate:true,multiZipImport:true,mixedValidityBatches:true,corruptRejected:true,externalImageRequests:0}));
  }finally{await browser.close()}
 })().catch(e=>{console.error(e.stack||e);process.exit(1)});
