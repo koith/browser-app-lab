@@ -15,12 +15,6 @@ on:
   pull_request:
     paths:
       - 'apps/gallery-archive/collect_public_social_bulk.py'
-      - 'apps/gallery-archive/public_social_bulk_sources.json'
-      - 'apps/gallery-archive/test_public_social_bulk.py'
-      - '.github/workflows/gallery-public-social-bulk.yml'
-  pull_request:
-    paths:
-      - 'apps/gallery-archive/collect_public_social_bulk.py'
       - 'apps/gallery-archive/collect_teapawt_public.py'
       - 'apps/gallery-archive/test_teapawt_public.py'
       - 'apps/gallery-archive/public_social_bulk_sources.json'
