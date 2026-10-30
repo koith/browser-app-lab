@@ -133,8 +133,9 @@ def main():
             return NoYandex()
     both = mod.multi_search(MultiEngineSession(), "https://koith.github.io/photo.jpg")
     assert both["engine_statuses"]["yandex"] == "http_403", both
-    assert both["engine_statuses"]["tineye"] == "leads_found", both
-    assert len(both["links"]) == 2, both
+    assert "tineye" not in both["engine_statuses"], both
+    assert "lens" not in both["engine_statuses"], both
+    assert len(both["links"]) == 0, both
 
     class BingResponse:
         url = "https://www.bing.com/images/search?test=1"
