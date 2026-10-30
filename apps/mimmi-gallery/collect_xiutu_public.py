@@ -15,6 +15,9 @@ import time
 from datetime import datetime,timezone
 from io import BytesIO
 from pathlib import Path
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "gallery-archive"))
+from public_crawl_transport import build_session
 from urllib.parse import urljoin,urlsplit
 import requests
 from bs4 import BeautifulSoup
@@ -25,8 +28,7 @@ CATEGORY="https://www.xiutu.me/korea/creamsoda"
 DOMAIN={"xiutu.me","www.xiutu.me"}
 NAME=re.compile(r"Mimmi|밈미|밈미|ミミ|デプワ",re.I)
 ARTICLE=re.compile(r"/photo/[0-9]{3,12}/?$")
-S=requests.Session()
-S.headers.update({"User-Agent":"Mozilla/5.0 (compatible; MimmiPublicPhotoResearch/1.0)",
+S=build_session({"User-Agent":"Mozilla/5.0 (compatible; MimmiPublicPhotoResearch/1.0)",
                   "Accept":"text/html,image/jpeg,image/png,image/webp,image/*;q=.7"})
 T=(10,28)
 
