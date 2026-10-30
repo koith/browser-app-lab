@@ -50,7 +50,7 @@ class DirectTests(unittest.TestCase):
     def test_scope_original_links_pagination_and_other_models(self):
         page='https://djawaphoto.com/portfolio/mimmi-book/'
         raw='''<h1>Mimmi book</h1><article>Mimmi
-          <a href="/wp-content/uploads/photo.jpg"><img src="/wp-content/uploads/photo-300x450.jpg"></a>
+          <a href="/wp-content/uploads/photo.jpg"><img src="/wp-content/uploads/photo-3000x4500.jpg"></a>
           <aside class="related"><img src="/wp-content/uploads/other.jpg"></aside>
           <a rel="next" href="?page=2">Next</a></article>'''
         urls,pages,status=page_images(raw,page,'mimmi')

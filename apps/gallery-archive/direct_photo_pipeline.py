@@ -84,9 +84,11 @@ def page_images(raw,url,model):
                 derivative=re.search(r'-(\d{2,5})x(\d{2,5})(?=\.)',p.path)
                 identity=re.sub(r'-\d{2,5}x\d{2,5}(?=\.)','',p.path)
                 key=(p.hostname,identity)
-                score=0 if derivative else 100000
-                if derivative:score=int(derivative[1])*int(derivative[2])**.5
-                if len(bits)>1 and bits[1].endswith('w') and bits[1][:-1].isdigit():score+=int(bits[1][:-1])
+                descriptor=int(bits[1][:-1]) if len(bits)>1 and bits[1].endswith('w') and bits[1][:-1].isdigit() else 0
+                resized=bool(derivative) or any(k.casefold() in {'w','width','h','height','mw','resize'} for k,_ in parse_qsl(p.query))
+                # An arbitrary numeric bonus let a 3000px resize beat its
+                # observed native original. Rank native identity first.
+                score=(not resized,descriptor,int(derivative[1])*int(derivative[2]) if derivative else 0)
                 if key not in candidates:order.append(key)
                 if key not in candidates or score>candidates[key][0]:candidates[key]=(score,image)
     links=[]
