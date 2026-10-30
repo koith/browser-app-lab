@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Independent CreamSoda public gallery parser, model ID, page 2+ and photo origin."""
-from collect_xiutu_public import safe_article,safe_page,safe_media,listing_links,article_media
+from collect_xiutu_public import safe_article,safe_page,safe_media,listing_links,article_media,previous_verified_photo
 
 def main():
     root="https://www.xiutu.me/photo/123456"
@@ -34,6 +34,15 @@ def main():
     assert matched and len(photos)==2,photos
     assert pages==[root+"/2",root+"/3"],pages
     assert article_media(html.replace("Mimmi","WrongModel").replace("밈미","다른모델"),root,root)[2] is False
+    verified={"url":"https://cdn.xiutu.me/uploads/mimmi0001.jpg",
+              "sha256":"f"*64,"bytes":10240,"width":640,"height":920}
+    cached=None
+    for day in ("2026-10-25","2026-10-26","2026-10-27","2026-10-28"):
+        cached=previous_verified_photo(verified["url"],verified,day=day)
+        if cached:break
+    assert cached and cached["previously_verified_only"]
+    assert previous_verified_photo(verified["url"],verified,refresh_every=1) is None
+    assert previous_verified_photo("https://evil.com/photo.jpg",verified) is None
     print("MIMMI_XIUTU_2ND_SOURCE_ID_PAGINATION_AND_PUBLIC_IMAGE_TEST_PASS")
 
 if __name__=="__main__":main()
