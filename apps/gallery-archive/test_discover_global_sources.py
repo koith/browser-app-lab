@@ -15,6 +15,8 @@ def main():
     extracted = numbered_entries(cn, "mimmi")
     assert len(extracted) == 2, extracted
     assert {p["number"]: p["advertised_photos"] for p in extracted} == {51: 97, 52: 125}
+    nested = """<ul><li><span>NO.053</span><span> DJAWA Photo Mimmi</span><span> Twilight [88P]</span></li></ul>"""
+    assert numbered_entries(nested, "mimmi")[0]["advertised_photos"] == 88
     assert normalized("DJAWA Photo Mimmi Asuna the Maid") == normalized("Asuna the Maid")
     assert not relevant("Yui from another creator", "mimmi")
     assert relevant("심혜성 photographs", "yui")
