@@ -57,6 +57,7 @@ jobs:
           print('MIMMI_ACTOR_WIDE_VERIFY_RESULT',d['summary'])
           PY
       - name: Publish verified actor images safely despite simultaneous source updates
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         shell: bash
         run: |
           # Preserve current crawled manifest in memory, merge with latest main
