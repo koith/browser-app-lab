@@ -2,9 +2,11 @@ name: Gallery Social Public Timeline Source Probe
 on:
   workflow_dispatch:
   push:
-    branches: [main, feat/gallery-public-social-mirror-20261030]
+    branches: [main, feat/gallery-public-social-mirror-20261030, fix/gallery-social-cdn-failure-analysis-20261030]
     paths:
       - 'apps/gallery-archive/probe_public_profile_media.py'
+      - 'apps/gallery-archive/probe_mimmi_imginn.py'
+      - 'apps/gallery-archive/collect_teapawt_public.py'
       - '.github/workflows/gallery-public-profile-probe.yml'
 permissions:
   contents: read
@@ -16,6 +18,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
-      - run: python -m pip install requests beautifulsoup4
+      - run: python -m pip install requests beautifulsoup4 Pillow
       - run: python -m py_compile apps/gallery-archive/probe_public_profile_media.py
       - run: python apps/gallery-archive/probe_public_profile_media.py
+      - run: python apps/gallery-archive/probe_mimmi_imginn.py

@@ -70,6 +70,17 @@ def run():
                 row["pagination_candidates"]=len(pages)
                 row["article_elements"]=len(BeautifulSoup(r.text,"html.parser").select("article,.timeline-item,.tweet,.status"))
                 row["page_contains_expected_handle"]=source["account"].casefold() in r.text.casefold()
+                if source["model"]=="yui" and source["url"].startswith("https://teapawt.net/"):
+                    from collect_teapawt_public import public_images_from_author,download_one
+                    own,_,_=public_images_from_author(r.text,{
+                        "id":"diagnostic","account":source["account"],"kind":"teapawt",
+                        "url":source["url"]},source["url"])
+                    probed=[]
+                    for media in own[:4]:
+                        saved,issue=download_one(media,source)
+                        probed.append({"success":saved is not None,
+                            "error":issue,"bytes":len(saved["bytes"]) if saved else 0})
+                    row["direct_public_media_probes"]=probed
                 soup=BeautifulSoup(r.text,"html.parser")
                 row["sample_articles"]=[{
                     "tag":el.name,"class":el.get("class",[])[:4],

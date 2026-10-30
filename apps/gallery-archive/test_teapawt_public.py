@@ -8,7 +8,7 @@ from pathlib import Path
 
 from PIL import Image
 from collect_teapawt_public import (
-    capture, public_images_from_author, public_original_variant, safe_media_url)
+    capture, download_one, public_images_from_author, public_original_variant, safe_media_url)
 
 SRC={"id":"yui-public-official-x-teapawt","title":"Yui photo feed",
      "account":"super_yuisan","kind":"teapawt","url":"https://teapawt.net/super_yuisan"}
@@ -44,6 +44,20 @@ def main():
     assert public_original_variant(urls[0])[0].endswith("name=orig")
     assert not safe_media_url("https://pbs.twimg.com.evil.test/media/Foo123456",SRC["url"])
     assert not safe_media_url("https://pbs.twimg.com/protected/privatephoto",SRC["url"])
+    # CDN rejects explicit cross-site Referer; public media works with a
+    # normal no-Referer request. Prevent regression to 403 for all photos.
+    import unittest.mock
+    class FakeMediaResponse:
+        status_code=200
+        url="https://pbs.twimg.com/media/FirstPhoto1234?format=jpg&name=orig"
+        def __enter__(self):return self
+        def __exit__(self,*args):return False
+        def iter_content(self,chunk_size):yield render_bytes("teal")
+    with unittest.mock.patch("collect_teapawt_public.requests.get",return_value=FakeMediaResponse()) as get:
+        first,error=download_one(urls[0],SRC)
+        assert error is None and first["bytes"] == render_bytes("teal")
+        headers=get.call_args.kwargs["headers"]
+        assert "Referer" not in headers, headers
     with tempfile.TemporaryDirectory() as tmp:
         payloads=[render_bytes("red"),render_bytes("blue")]
         def downloader(url,_):
