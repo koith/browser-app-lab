@@ -106,6 +106,48 @@ jobs:
             --out /tmp/mimmi-private-batch \
             --workers 2 \
             --owner-catalog "$RUNNER_TEMP/mimmi-live-catalog.json"
+      - name: Report unresolved photo failures without exposing personal media URLs
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, collections, os
+          from pathlib import Path
+          audit=json.loads(Path('/tmp/mimmi-private-batch/audit.json').read_text())
+          reasons=collections.Counter()
+          albums=[]
+          for album in audit['albums']:
+              failed=album.get('failed',[])
+              for item in failed:
+                  reason=str(item.get('reason') or 'unknown').lower()
+                  if reason.startswith('http_'):
+                      category=reason.split()[0].split(':')[0][:30]
+                  elif 'sha256_or_byte_length_mismatch' in reason:
+                      category='changed_bytes_vs_index'
+                  elif 'timeout' in reason or 'timed out' in reason:
+                      category='source_timeout'
+                  elif 'ssl' in reason or 'connection' in reason:
+                      category='source_connection'
+                  elif 'origin_451' in reason:
+                      category='restricted_origin_451'
+                  elif 'unapproved' in reason:
+                      category='unapproved_origin'
+                  else:
+                      category='other_unavailable'
+                  reasons[category]+=1
+              albums.append({'album':album['album'],
+                             'saved':album['physically_saved'],'rejected':len(failed)})
+          result={'physically_saved':audit['physically_downloaded'],
+                  'rejected':audit['missing_or_rejected'],
+                  'rejection_causes':dict(reasons.most_common()),
+                  'albums':albums}
+          print('MIMMI_FAILED_GAP_DIAGNOSTICS',json.dumps(result,ensure_ascii=False),flush=True)
+          with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as out:
+              out.write('### Mimmi actual photo gap download audit\\n')
+              out.write('New downloaded real photos: '+str(result['physically_saved'])+'\\n')
+              out.write('Remaining inaccessible/changed candidates: '+str(result['rejected'])+'\\n')
+              for key,count in reasons.most_common():
+                  out.write('- '+key+': '+str(count)+'\\n')
+          PY
       - uses: actions/upload-artifact@v4
         if: always()
         with:
