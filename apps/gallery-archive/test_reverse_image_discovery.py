@@ -87,6 +87,38 @@ def main():
     result = mod.lens_query(FakeSession(), "https://koith.github.io/example.jpg")
     assert result["status"] == "leads_found"
     assert len(result["links"]) == 1
+
+    class TinEyeResponse:
+        status_code = 200
+        headers = {"Content-Type": "application/json"}
+        def json(self):
+            return {"matches": [
+                {"score": 99.0, "width": 2800, "height": 3600,
+                 "backlinks": [{"backlink": "https://www.4khd.com/show/mimmi"}]},
+                {"score": 20.0, "backlinks": [
+                    {"backlink": "https://cosmeitu.com/weak-match"}]}
+            ]}
+    class TinEyeSession:
+        def get(self, endpoint, params, **kw):
+            assert endpoint == "https://tineye.com/api/v1/result_json/"
+            assert params["page"] == 1
+            return TinEyeResponse()
+    tin = mod.tineye_query(TinEyeSession(), "https://koith.github.io/photo.jpg")
+    assert tin["status"] == "leads_found" and len(tin["links"]) == 1, tin
+    assert tin["links"][0]["visual_match_score"] == 99
+    class MultiEngineSession:
+        def get(self, endpoint, params, **kw):
+            if "lens.google" in endpoint:
+                return FakeResponse()
+            if "tineye" in endpoint:
+                return TinEyeResponse()
+            class NoYandex:
+                status_code = 403
+            return NoYandex()
+    both = mod.multi_search(MultiEngineSession(), "https://koith.github.io/photo.jpg")
+    assert both["engine_statuses"]["yandex"] == "http_403", both
+    assert both["engine_statuses"]["tineye"] == "leads_found", both
+    assert len(both["links"]) == 2, both
     print("GALLERY_REVERSE_IMAGE_DISCOVERY_FIXTURE_PASS")
 
 
