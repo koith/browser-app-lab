@@ -17,7 +17,7 @@ def diagnostic(raw):
 
 
 def run(args):
-    if not args or args[0] not in ('cat','copy','copyto'):raise ValueError('Unsupported storage operation')
+    if not args or args[0] not in ('cat','copy','copyto','about'):raise ValueError('Unsupported storage operation')
     # stdout remains the caller's byte stream, including catalog redirections.
     # Never relay raw stderr: rclone embeds signed download URLs in errors.
     with tempfile.TemporaryFile() as errors:

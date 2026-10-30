@@ -97,6 +97,14 @@ jobs:
           assert d['model']==os.environ['MODEL'] and d['schema_version']==1
           print('ACTUAL_OWNER_BASELINE',d['model'],'albums',len(d['albums']),'stored_rows',sum(len(a['images']) for a in d['albums']))
           PY
+          if python apps/gallery-archive/safe_rclone.py about "$remote" --json --timeout 60s --retries 1 > "$RUNNER_TEMP/quota-before.json"; then
+            python - <<'PY'
+          import json,os
+          from pathlib import Path
+          d=json.loads((Path(os.environ['RUNNER_TEMP'])/'quota-before.json').read_text())
+          print('OWNER_STORAGE_QUOTA_BYTES',{k:d[k] for k in ('total','used','free') if k in d})
+          PY
+          fi
       - name: Collect all observed public pages into individually verified files, without photo ZIPs
         run: |
           mkdir -p "$RUNNER_TEMP/stage/originals" "$RUNNER_TEMP/stage/previews"

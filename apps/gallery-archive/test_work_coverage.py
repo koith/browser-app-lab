@@ -23,6 +23,9 @@ class CoverageTests(unittest.TestCase):
             work=result['albums'][0];self.assertIsNone(work['missing_photo_numbers'],'Repeated SHA positions cannot prove file numbering')
             clean={'schema_version':1,'model':'mimmi','albums':[{'id':'work-aa','title':'Work','images':photos}]}
             self.assertEqual(build(root,'mimmi',clean)['albums'][0]['missing_photo_numbers'],[4,5,6,7,8])
+            imported=json.loads(json.dumps(clean));imported['albums'][0]['images'][0]['source_numbering']='public_web_filename_not_publisher_original'
+            self.assertIsNone(build(root,'mimmi',imported)['albums'][0]['missing_photo_numbers'],
+                              'Appended alternate-source slots are not the former edition file numbers')
             self.assertEqual(work['gallery_displayed_rows'],None)
             (base/'source-viewer-albums.json').write_text(json.dumps({'albums':[{'id':'work-aa','source':'https://example.org/older-edition','images':photos}]}))
             (base/'public-work-pages.json').write_text(json.dumps({'albums':[{'id':'work-aa','source':'https://example.org/new-edition','advertised_photos':8}]}))
