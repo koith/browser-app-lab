@@ -447,7 +447,16 @@ Promise.all([
     row.images[index]={...previous,...p};
   }
  }
- for(const row of combined.values())row.images.sort((a,b)=>(a.number??Number.MAX_SAFE_INTEGER)-(b.number??Number.MAX_SAFE_INTEGER));
+ for(const row of combined.values()){
+  // A SHA-identical source file repeated under two numbers is one picture,
+  // never two separate recovered cuts. Keep the original catalog immutable.
+  const seenSHA=new Set();
+  row.images=row.images.filter(p=>{
+   if(!p.sha256||seenSHA.has(p.sha256))return false;
+   seenSHA.add(p.sha256);return true;
+  });
+  row.images.sort((a,b)=>(a.number??Number.MAX_SAFE_INTEGER)-(b.number??Number.MAX_SAFE_INTEGER));
+ }
  const joined=MimmiAlbumGrouping.combine([...combined.values()],albumAliases);
  stored=joined.albums;
  catalog=stored.slice();
