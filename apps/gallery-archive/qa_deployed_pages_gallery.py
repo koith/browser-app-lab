@@ -16,8 +16,8 @@ RENDER = "mimmi-private-gallery-free.onrender.com"
 MODELS = {
     "yui": {"min_count": 3022, "min_private": 2999,
             "album_ids": ("yuis-present33", "athletic-club104", "teddy-bear97")},
-    "mimmi": {"min_count": 2708, "min_private": 2708,
-              "album_ids": ("mimmi-indie-sana-sopmod2-2019",)},
+    "mimmi": {"min_count": 2977, "min_private": 2977,
+              "album_ids": ("mimmi-indie-sana-sopmod2-2019", "djawa-rei-beyond-the-heart")},
 }
 
 
