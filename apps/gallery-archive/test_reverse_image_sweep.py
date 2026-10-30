@@ -52,6 +52,9 @@ def main():
         entries=seeds(base)
         assert len(entries)==12,len(entries)
         assert entries[0]["owner_saved_count"]==3,entries
+        large=[x for x in entries if x["album_id"]=="full"]
+        assert large and all(x["owner_saved_count"]==10 for x in large),large
+        assert all(x["owner_slot_count"]==75 for x in large),large
         assert entries[0]["seed_kind"]=="public-gateway-cover"
         assert all("cookie" not in s["public_image_url"] for s in entries)
         matches=sites_from_html(FakeClient().get("",{},allow_redirects=False).text,untrack)
