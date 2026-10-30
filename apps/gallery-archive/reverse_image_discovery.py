@@ -164,8 +164,83 @@ def lens_query(session: requests.Session, public_image_url: str, timeout=18) -> 
         return {"status": "network_" + type(error).__name__, "links": []}
 
 
+
+def tineye_query(session: requests.Session, public_image_url: str, timeout=20) -> dict:
+    """Public URL search used by SearXNG's TinEye engine; no paid API or login."""
+    try:
+        response = session.get("https://tineye.com/api/v1/result_json/",
+                               params={"page": 1, "url": public_image_url},
+                               timeout=(8, timeout), allow_redirects=False,
+                               headers={"Accept": "application/json"})
+        if response.status_code != 200:
+            return {"status": f"http_{response.status_code}", "links": []}
+        if "json" not in response.headers.get("Content-Type", "").lower():
+            return {"status": "not_json", "links": []}
+        payload = response.json()
+        if not isinstance(payload, dict) or not isinstance(payload.get("matches"), list):
+            return {"status": "invalid_results", "links": []}
+        links, seen = [], set()
+        for match in payload["matches"][:100]:
+            if not isinstance(match, dict):
+                continue
+            score = match.get("score", 0)
+            # High visual similarity; discovery only, not an album identity.
+            if not isinstance(score, (int, float)) or score < 75:
+                continue
+            for back in match.get("backlinks", [])[:10]:
+                if not isinstance(back, dict):
+                    continue
+                target = untrack(back.get("backlink", ""))
+                if target and target not in seen:
+                    links.append({"url": target, "label": "TinEye visual match",
+                                  "visual_match_score": score,
+                                  "matched_width": match.get("width"),
+                                  "matched_height": match.get("height")})
+                    seen.add(target)
+        return {"status": "leads_found" if links else "no_readable_public_matches",
+                "links": links[:80]}
+    except (requests.RequestException, ValueError, TypeError) as err:
+        return {"status": "request_" + type(err).__name__, "links": []}
+
+
+def yandex_query(session: requests.Session, public_image_url: str, timeout=20) -> dict:
+    """Ordinary Yandex Images image-URL results; do not bypass bot challenges."""
+    try:
+        response = session.get("https://yandex.com/images/search",
+                               params={"rpt": "imageview", "url": public_image_url},
+                               timeout=(8, timeout), allow_redirects=False)
+        if response.status_code != 200:
+            return {"status": f"http_{response.status_code}", "links": []}
+        if "text/html" not in response.headers.get("Content-Type", "").lower():
+            return {"status": "not_html", "links": []}
+        if response.headers.get("x-yandex-captcha") == "captcha":
+            return {"status": "captcha_not_bypassed", "links": []}
+        if len(response.content) > 4_000_000:
+            return {"status": "response_too_large", "links": []}
+        links = leads_from_html(response.text)
+        return {"status": "leads_found" if links else "no_readable_public_matches",
+                "links": links[:80]}
+    except requests.RequestException as err:
+        return {"status": "network_" + type(err).__name__, "links": []}
+
+
+def multi_search(session: requests.Session, public_image_url: str) -> dict:
+    """Independent paths: an inaccessible Lens result does not stop image search."""
+    merged, seen, statuses = [], set(), {}
+    for name, method in (("lens", lens_query), ("tineye", tineye_query),
+                         ("yandex", yandex_query)):
+        outcome = method(session, public_image_url)
+        statuses[name] = outcome["status"]
+        for link in outcome.get("links", []):
+            if link["url"] not in seen:
+                merged.append({**link, "search_engine": name})
+                seen.add(link["url"])
+    return {"status": " | ".join(f"{k}={v}" for k, v in statuses.items()),
+            "engine_statuses": statuses, "links": merged[:100]}
+
+
 def discover(root: Path = ROOT, max_seeds=10, offset=0, delay=2.0,
-             engine=lens_query, session=None) -> dict:
+             engine=multi_search, session=None) -> dict:
     seeds = physical_seeds(root)
     if max_seeds < 1 or max_seeds > 30 or offset < 0:
         raise ValueError("Limit each image search to 1–30 public seed photos")
@@ -176,8 +251,9 @@ def discover(root: Path = ROOT, max_seeds=10, offset=0, delay=2.0,
     for n, seed in enumerate(selected):
         evidence = engine(session, seed["public_image_url"])
         links = evidence.get("links", [])
-        rows.append({**seed, "engine": "google_lens_public",
+        rows.append({**seed, "engine": "google_lens_tineye_yandex_public",
                      "search_status": evidence.get("status"),
+                     "engine_statuses": evidence.get("engine_statuses", {}),
                      "candidate_pages": links,
                      "new_private_photos_stored": 0,
                      "new_gallery_photos_visible": 0})
@@ -189,6 +265,10 @@ def discover(root: Path = ROOT, max_seeds=10, offset=0, delay=2.0,
         "total_public_seed_candidates": len(seeds),
         "seed_queries": len(rows),
         "search_readable_results": sum(bool(x["candidate_pages"]) for x in rows),
+        "engine_status_counts": {name: {status: sum(
+            r["engine_statuses"].get(name, "not_run") == status for r in rows)
+            for status in sorted(set(r["engine_statuses"].get(name, "not_run") for r in rows))}
+            for name in ("lens", "tineye", "yandex")},
         "candidate_page_urls": len({p["url"] for x in rows for p in x["candidate_pages"]}),
         "new_private_photos_stored": 0, "gallery_images_added": 0,
         "research_only_not_acquired": True, "results": rows,
@@ -210,7 +290,7 @@ def main():
                            encoding="utf-8")
     print("GALLERY_REVERSE_IMAGE_RESEARCH", json.dumps({
         k: result[k] for k in ("seed_queries", "search_readable_results",
-                               "candidate_page_urls", "new_private_photos_stored",
+                               "candidate_page_urls", "engine_status_counts", "new_private_photos_stored",
                                "gallery_images_added")}, ensure_ascii=False))
 
 

@@ -22,7 +22,7 @@ concurrency:
 jobs:
   reverse-public-photos:
     runs-on: ubuntu-24.04
-    timeout-minutes: 16
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -39,7 +39,7 @@ jobs:
         run: |
           # A search result is NOT a photo download or a new gallery entry.
           python apps/gallery-archive/reverse_image_discovery.py \
-            --seeds 12 --offset "$((GITHUB_RUN_NUMBER * 12))" \
+            --seeds 6 --offset "$((GITHUB_RUN_NUMBER * 6))" \
             --output "$RUNNER_TEMP/reverse-leads.json" --delay 2
           python - <<'PY'
           from pathlib import Path
@@ -52,6 +52,7 @@ jobs:
               out.write("## Real-photo reverse image discovery\n\n")
               out.write(f"Public stored photo seeds searched: {doc['seed_queries']}\n\n")
               out.write(f"Source result pages found: {doc['candidate_page_urls']}\n\n")
+              out.write(f"Engine outcomes: {doc['engine_status_counts']}\n\n")
               out.write("Research only: no original downloaded, rehosted or added to gallery.\n")
               out.write("Only Google Lens ordinary public results; blocked/login results are not bypassed.\n")
           PY
