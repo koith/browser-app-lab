@@ -1,0 +1,120 @@
+{
+  "schema_version": 1,
+  "evidence_actions_run": 41081770293,
+  "selection": {
+    "yui": [
+      {
+        "id": "inven-public-photos",
+        "new_photo_positions": 10,
+        "higher_resolution_replacements": 1,
+        "images": [
+          {
+            "number": 4,
+            "sha256": "ddeeb3cf9736fcd2986e5163617f747a251993d2b36e5280d36925d85c12ef57",
+            "width": 3072,
+            "height": 4096,
+            "bytes": 1067333
+          },
+          {
+            "number": 5,
+            "sha256": "235e013d4d0713bfccc2c28927a75ee94f34c43d36ab44b5b904a68aff9b04f5",
+            "width": 3077,
+            "height": 4096,
+            "bytes": 1215094
+          },
+          {
+            "number": 6,
+            "sha256": "72343debe863d7e44a30bb761dde4b412125f72159bf97a64da8ec5fa0b27044",
+            "width": 3072,
+            "height": 4096,
+            "bytes": 773014
+          },
+          {
+            "number": 7,
+            "sha256": "f2b5eb18249f85b37afc43008b29c517a3b0a82081c8523cd40c956118766d76",
+            "width": 3072,
+            "height": 4096,
+            "bytes": 763600
+          },
+          {
+            "number": 8,
+            "sha256": "1e626507974fabb7b0c879097426bba387b371db4454dbd01f12bc4a4d898000",
+            "width": 3072,
+            "height": 4096,
+            "bytes": 1052791
+          },
+          {
+            "number": 9,
+            "sha256": "6306d122164c4123b6304ecb1632f04a0a79c9d03ab87bdc6d8afe17bcede9d6",
+            "width": 3072,
+            "height": 4096,
+            "bytes": 837466
+          },
+          {
+            "number": 1,
+            "sha256": "5cdb6fae464aa46812f0ba0bb134cbf4ac0e91f1938d2cec48a490ba15670b16",
+            "width": 1365,
+            "height": 1820,
+            "bytes": 270419
+          },
+          {
+            "number": 10,
+            "sha256": "7732e0a74f415c118d9ab09cbecc1ecce0309eee0e9ed2ad5d7f4927af9292a1",
+            "width": 2316,
+            "height": 3088,
+            "bytes": 698412
+          },
+          {
+            "number": 11,
+            "sha256": "c1ae4fdf5a173a1b67f1a0b1e2669432b7e175b3cb7f8eb8b92e0f76c4c3c200",
+            "width": 2316,
+            "height": 3088,
+            "bytes": 758346
+          },
+          {
+            "number": 12,
+            "sha256": "f9ce1ea913643df55395fb450184d5973e549960408371001f6464c05825b71a",
+            "width": 2259,
+            "height": 3009,
+            "bytes": 527464
+          },
+          {
+            "number": 13,
+            "sha256": "2ae293fbc32fa57ac59d07e93bb61eac775d1f29797c21479038499ef5658a34",
+            "width": 2151,
+            "height": 2845,
+            "bytes": 487778
+          }
+        ]
+      }
+    ],
+    "mimmi": [
+      {
+        "id": "mimmi-indie-sana-sopmod2-2019",
+        "new_photo_positions": 0,
+        "images": [
+          {
+            "number": 1,
+            "sha256": "ce39e23bb094068b43791544367522a168f66aec78af9c7d93154a3380727ed5",
+            "width": 1400,
+            "height": 2043,
+            "bytes": 407880
+          }
+        ]
+      },
+      {
+        "id": "djawa-rei-beyond-the-heart",
+        "new_photo_positions": 0,
+        "images": [
+          {
+            "number": 1,
+            "sha256": "5d81c0beebc157a344595718f625e7c62ec0093bdbb3052baba6d6efca03b614",
+            "width": 1200,
+            "height": 1800,
+            "bytes": 613259
+          }
+        ]
+      }
+    ]
+  }
+}

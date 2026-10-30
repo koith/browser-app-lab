@@ -97,20 +97,34 @@ jobs:
           mkdir -p "$RUNNER_TEMP/stage/originals" "$RUNNER_TEMP/stage/previews"
           python apps/gallery-archive/direct_photo_pipeline.py --model "$MODEL" --owner "$RUNNER_TEMP/owner-before.json" --out "$RUNNER_TEMP/stage" --max-new 180 --max-pages 24
           python apps/gallery-archive/merge_incremental.py --model "$MODEL" --previous "$RUNNER_TEMP/owner-before.json" --stage "$RUNNER_TEMP/stage"
+      - name: Distinguish a real new-file transaction from a no-op
+        id: delta
+        run: |
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          d=json.loads((Path(os.environ['RUNNER_TEMP'])/'stage/metadata/incremental-merge.json').read_text())
+          changed=d['new_photos']+d['upgraded_photos']>0
+          with open(os.environ['GITHUB_OUTPUT'],'a') as out:out.write('changed='+str(changed).lower()+'\n')
+          print('ACTUAL_NEW_PHOTO_TRANSACTION',changed,d['new_photos'],d['upgraded_photos'])
+          PY
       - name: Copy individual originals and lossless previews, then re-download and SHA-verify new files
+        if: steps.delta.outputs.changed == 'true'
         run: |
           set -euo pipefail
           python apps/gallery-archive/safe_rclone.py copy "$RUNNER_TEMP/stage/originals" "$ARCHIVE_REMOTE/originals" --ignore-existing --transfers 2 --checkers 2 --timeout 60s --retries 1
           python apps/gallery-archive/safe_rclone.py copy "$RUNNER_TEMP/stage/previews" "$ARCHIVE_REMOTE/previews" --ignore-existing --transfers 2 --checkers 2 --timeout 60s --retries 1
           python apps/gallery-archive/verify_terabox.py --stage "$RUNNER_TEMP/stage" --remote "$ARCHIVE_REMOTE" --workers 2 --only-staged
-          python apps/gallery-archive/safe_rclone.py copyto "$RUNNER_TEMP/stage/metadata/catalog.json" "$ARCHIVE_REMOTE/metadata/catalog.json" --timeout 60s --retries 1
+          python apps/gallery-archive/safe_rclone.py copyto "$RUNNER_TEMP/stage/metadata/catalog.json" "$ARCHIVE_REMOTE/metadata/catalog.json" --ignore-times --timeout 60s --retries 1
           python apps/gallery-archive/safe_rclone.py cat "$ARCHIVE_REMOTE/metadata/catalog.json" --timeout 60s --retries 1 > "$RUNNER_TEMP/catalog-readback.json"
           cmp "$RUNNER_TEMP/stage/metadata/catalog.json" "$RUNNER_TEMP/catalog-readback.json"
       - name: Publish only verified owner metadata, never original image bytes or storage keys
+        if: steps.delta.outputs.changed == 'true'
         run: |
           python apps/gallery-archive/publish_owner_index.py --model "$MODEL" --input "$RUNNER_TEMP/catalog-readback.json" --output "$RUNNER_TEMP/owner-index.json"
           python apps/gallery-archive/commit_owner_index.py --model "$MODEL" --input "$RUNNER_TEMP/owner-index.json"
       - name: Deploy verified metadata, followed by real deployed browser QA
+        if: steps.delta.outputs.changed == 'true'
         run: |
           gh workflow run static.yml --ref main
           gh workflow run gallery-deployed-pages-photo-qa.yml --ref main
