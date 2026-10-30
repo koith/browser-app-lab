@@ -14,8 +14,9 @@ from playwright.sync_api import sync_playwright, Error as PlaywrightError
 ROOT = "https://koith.github.io/browser-app-lab"
 RENDER = "mimmi-private-gallery-free.onrender.com"
 MODELS = {
-    "yui": {"min_count": 3022, "min_private": 2999, "raw_owner_index":2999,
-            "album_ids": ("yuis-present33", "athletic-club104", "teddy-bear97")},
+    "yui": {"min_count": 3053, "min_private": 3030, "raw_owner_index":3030,
+            "album_ids": ("yuis-present33", "athletic-club104", "teddy-bear97",
+                          "yui-public-official-x-teapawt")},
     "mimmi": {"min_count": 3157, "min_private": 3156, "raw_owner_index":3178,
               "album_ids": ("mimmi-indie-sana-sopmod2-2019", "djawa-rei-beyond-the-heart")},
 }
