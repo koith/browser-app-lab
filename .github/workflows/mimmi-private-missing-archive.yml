@@ -7,7 +7,8 @@ on:
       - "Mimmi Secondary CreamSoda Public Gallery Crawl"
       - "Mimmi Free Official Portfolio Discovery"
       - "Mimmi Official Social Public Photo Discovery"
-      - "Mimmi V2PH Public Photo Archive"
+      - "Mimmi Free V2PH Public Gallery Photo Discovery"
+      - "Mimmi DJAWA Public Promotional Image Search"
     types: [completed]
   schedule:
     # Daily actual missing-photo byte sweep even if research index is unchanged.
