@@ -75,12 +75,12 @@ def run():
                     own,_,_=public_images_from_author(r.text,{
                         "id":"diagnostic","account":source["account"],"kind":"teapawt",
                         "url":source["url"]},source["url"])
-                    result=[]
+                    probed=[]
                     for media in own[:4]:
                         saved,issue=download_one(media,source)
-                        result.append({"success":saved is not None,
+                        probed.append({"success":saved is not None,
                             "error":issue,"bytes":len(saved["bytes"]) if saved else 0})
-                    row["direct_public_media_probes"]=result
+                    row["direct_public_media_probes"]=probed
                 soup=BeautifulSoup(r.text,"html.parser")
                 row["sample_articles"]=[{
                     "tag":el.name,"class":el.get("class",[])[:4],
