@@ -72,7 +72,7 @@ jobs:
           PY
           )"
           # Runs once per roughly 24 hours, not after every 3-hour image sweep.
-          if [[ "$count" -gt 0 && "$((GITHUB_RUN_NUMBER % 8))" == 0 ]]; then
+          if [[ "$count" -gt 0 ]] && { [[ "$GITHUB_EVENT_NAME" == "push" ]] || [[ "$((GITHUB_RUN_NUMBER % 8))" == 0 ]]; }; then
             gh workflow run gallery-comprehensive-backfill.yml --ref main
             echo "Dispatched existing physical-photo collection and cloud import pipeline" >> "$GITHUB_STEP_SUMMARY"
           fi
