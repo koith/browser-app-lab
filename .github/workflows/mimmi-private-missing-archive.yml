@@ -87,7 +87,7 @@ jobs:
           unzip -q "$RUNNER_TEMP/client.zip" -d "$RUNNER_TEMP/unpack"
           binary="$(find "$RUNNER_TEMP/unpack" -type f -name rclone -print -quit)"
           install -m 755 "$binary" "$RUNNER_TEMP/bin/rclone"
-          rclone cat 'archive:MimmiArchive/metadata/catalog.json' \
+          "$RUNNER_TEMP/bin/rclone" cat 'archive:MimmiArchive/metadata/catalog.json' \
             --timeout 50s --retries 2 > "$RUNNER_TEMP/mimmi-live-catalog.json" \
             2> "$RUNNER_TEMP/terabox-reader-errors.txt"
           python - <<'PY'
