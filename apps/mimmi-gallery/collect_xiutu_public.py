@@ -136,6 +136,23 @@ def get_html(url):
     if len(r.content)>4_000_000:raise ValueError("Oversized HTML")
     return r.text
 
+def previous_verified_photo(url, record, day=None, refresh_every=20):
+    """Use previous SHA evidence only; periodically re-fetch to detect changes."""
+    if not isinstance(record,dict) or record.get("url")!=url or not safe_media(url):
+        return None
+    if (not re.fullmatch(r"[0-9a-f]{64}",record.get("sha256",""))
+            or type(record.get("bytes")) is not int or record["bytes"]<4500
+            or type(record.get("width")) is not int or type(record.get("height")) is not int
+            or min(record["width"],record["height"])<300):
+        return None
+    current=day or datetime.now(timezone.utc).date().isoformat()
+    if refresh_every<1 or int(hashlib.sha256((current+"|"+url).encode()).hexdigest()[:8],16)%refresh_every==0:
+        return None
+    result=dict(record)
+    result["previously_verified_only"]=True
+    return result
+
+
 def run(max_category_pages=2,max_article_pages=12,max_images=180):
     manifest=ROOT/"xiutu-public-previews.json"
     old={}
@@ -158,6 +175,9 @@ def run(max_category_pages=2,max_article_pages=12,max_images=180):
         slug=urlsplit(article).path.rstrip("/").split("/")[-1]
         aid="xiutu-public-"+slug
         queue=[article];seen_pages=set();samples=[];seen_hashes=set();source_pages=[]
+        old_by_url={p.get("url"):p for p in old.get(aid,{}).get("samples",[])
+                    if isinstance(p.get("url"),str)}
+        fresh=0;cached=0
         title="Mimmi · public CreamSoda photo page"
         while queue and len(seen_pages)<max_article_pages and len(samples)<max_images:
             current=queue.pop(0)
@@ -187,11 +207,16 @@ def run(max_category_pages=2,max_article_pages=12,max_images=180):
                 if not identity:break
                 for u in urls:
                     if len(samples)>=max_images:break
-                    photo=verify(u)
+                    photo=previous_verified_photo(u,old_by_url.get(u))
+                    if photo is None:
+                        photo=verify(u)
+                        if photo:fresh+=1
+                        time.sleep(.3)
+                    else:
+                        cached+=1
                     if photo and photo["sha256"] not in seen_hashes:
                         photo["number"]=len(samples)+1;samples.append(photo)
                         seen_hashes.add(photo["sha256"])
-                    time.sleep(.3)
                 for nxt in next_pages:
                     if nxt not in seen_pages and nxt not in queue:queue.append(nxt)
                 source_pages.append({"url":current,"images_visible":len(urls)})
@@ -199,7 +224,6 @@ def run(max_category_pages=2,max_article_pages=12,max_images=180):
             except (requests.RequestException,ValueError) as err:
                 print("MIMMI_XIUTU_PUBLIC_PAGE_UNAVAILABLE",aid,type(err).__name__,flush=True)
                 break
-        fresh=len(samples)
         # Historical HTTP hash evidence is preserved but NOT counted as newly fetched.
         for p in old.get(aid,{}).get("samples",[]):
             if len(samples)>=max_images:break
@@ -210,7 +234,7 @@ def run(max_category_pages=2,max_article_pages=12,max_images=180):
             samples.append(q);seen_hashes.add(q["sha256"])
         results.append({"id":aid,"title":title,"publisher":"CreamSoda","source":article,
                         "source_pages":source_pages,"images":[],"samples":samples,
-                        "fresh_http_verified":fresh,
+                        "fresh_http_verified":fresh,"cached_previous_sha_checks":cached,
                         "status":"public_photos_sha_verified" if samples else "no_public_images_verified"})
     for old_id,item in old.items():
         if old_id not in {a["id"] for a in results} and item.get("samples"):
@@ -220,6 +244,7 @@ def run(max_category_pages=2,max_article_pages=12,max_images=180):
              "generated_at":datetime.now(timezone.utc).isoformat(),
              "summary":{"works":len(results),"actual_sha_verified_public_photo_urls":sum(len(a["samples"]) for a in results),
                         "fresh_http_verified":sum(a.get("fresh_http_verified",0) for a in results),
+                        "cached_previous_sha_checks":sum(a.get("cached_previous_sha_checks",0) for a in results),
                         "physical_files_archived":0},"albums":results}
     manifest.write_text(json.dumps(payload,ensure_ascii=False,indent=2)+"\n",encoding="utf-8")
     print("MIMMI_XIUTU_PUBLIC_SUMMARY",json.dumps(payload["summary"]),flush=True)
