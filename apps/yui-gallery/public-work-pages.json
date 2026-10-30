@@ -1,0 +1,17 @@
+{
+  "schema_version": 1,
+  "model": "yui",
+  "albums": [
+    {
+      "id": "inven-public-photos",
+      "title": "인벤 — 공개 게시 사진",
+      "publisher": "인벤",
+      "source": "https://www.inven.co.kr/board/webzine/2097/2720586",
+      "source_pages": [
+        "https://www.inven.co.kr/board/webzine/2097/2735151",
+        "https://www.inven.co.kr/board/webzine/2097/2706589"
+      ],
+      "identity_evidence": "Each exact post title explicitly names 심유이. Only #powerbbsContent media, excluding comments and related posts. Public Inven MW width variant is compared with unscaled same image."
+    }
+  ]
+}

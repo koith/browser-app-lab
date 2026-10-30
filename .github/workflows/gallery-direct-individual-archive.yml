@@ -1,0 +1,129 @@
+name: Gallery Direct Individual Photo Collection and Verified Storage
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - apps/gallery-archive/direct_photo_pipeline.py
+      - apps/gallery-archive/work_coverage.py
+      - apps/*-gallery/public-work-pages.json
+      - .github/workflows/gallery-direct-individual-archive.yml
+  pull_request:
+    paths:
+      - apps/gallery-archive/direct_photo_pipeline.py
+      - apps/gallery-archive/work_coverage.py
+      - apps/*-gallery/public-work-pages.json
+      - apps/gallery-archive/test_direct_photo_pipeline.py
+      - apps/gallery-archive/test_work_coverage.py
+      - apps/mimmi-gallery/cloud/gateway/media_cache.py
+      - apps/mimmi-gallery/cloud/test_media_cache.py
+      - .github/workflows/gallery-direct-individual-archive.yml
+permissions:
+  contents: read
+jobs:
+  offline-regressions:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install -r apps/mimmi-gallery/cloud/gateway/requirements.txt requests beautifulsoup4
+      - run: |
+          python apps/gallery-archive/test_direct_photo_pipeline.py
+          python apps/gallery-archive/test_work_coverage.py
+          python apps/gallery-archive/test_remote_readback_deadline.py
+          python apps/gallery-archive/test_reverse_image_sweep.py
+          python apps/mimmi-gallery/cloud/test_media_cache.py
+          python apps/mimmi-gallery/cloud/test_gateway.py
+          python apps/mimmi-gallery/cloud/test_cover_cache.py
+  collect-store-readback:
+    needs: offline-regressions
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 110
+    permissions:
+      contents: write
+      actions: write
+    concurrency:
+      group: gallery-terabox-private-mass-upload-${{ matrix.model }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        model: [mimmi, yui]
+    env:
+      GH_TOKEN: ${{ github.token }}
+      MIMMI_COOKIE: ${{ secrets.MIMMI_TERABOX_NDUS }}
+      YUI_COOKIE: ${{ secrets.YUI_TERABOX_COOKIE }}
+      RCLONE_CONFIG_ARCHIVE_TYPE: terabox
+      MODEL: ${{ matrix.model }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install requests beautifulsoup4 Pillow
+      - name: Install pinned owner storage client, not a photo archive
+        run: |
+          set -euo pipefail
+          curl -fsSL https://github.com/gulp79/rclone-extra/releases/download/v1.75.2-extra/rclone-linux-amd64.zip -o "$RUNNER_TEMP/client.zip"
+          echo "78855325a2a8d83b3feee3a8363d32e1211babbf4cda6356fa8ca5f472075062  $RUNNER_TEMP/client.zip" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/client" "$RUNNER_TEMP/bin"
+          unzip -q "$RUNNER_TEMP/client.zip" -d "$RUNNER_TEMP/client"
+          binary="$(find "$RUNNER_TEMP/client" -type f -name rclone -print -quit)"
+          install -m 755 "$binary" "$RUNNER_TEMP/bin/rclone"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+      - name: Requery actual private catalog before collecting any new bytes
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$MODEL" == mimmi ]]; then cookie="$MIMMI_COOKIE";remote='archive:MimmiArchive';else cookie="$YUI_COOKIE";remote='archive:YuiArchive';fi
+          test -n "$cookie"
+          echo "::add-mask::$cookie"
+          echo "RCLONE_CONFIG_ARCHIVE_COOKIE=$cookie" >> "$GITHUB_ENV"
+          echo "ARCHIVE_REMOTE=$remote" >> "$GITHUB_ENV"
+          export RCLONE_CONFIG_ARCHIVE_COOKIE="$cookie"
+          python apps/gallery-archive/safe_rclone.py cat "$remote/metadata/catalog.json" --timeout 60s --retries 1 > "$RUNNER_TEMP/owner-before.json"
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          d=json.loads((Path(os.environ['RUNNER_TEMP'])/'owner-before.json').read_text())
+          assert d['model']==os.environ['MODEL'] and d['schema_version']==1
+          print('ACTUAL_OWNER_BASELINE',d['model'],'albums',len(d['albums']),'stored_rows',sum(len(a['images']) for a in d['albums']))
+          PY
+      - name: Collect all observed public pages into individually verified files, without photo ZIPs
+        run: |
+          mkdir -p "$RUNNER_TEMP/stage/originals" "$RUNNER_TEMP/stage/previews"
+          python apps/gallery-archive/direct_photo_pipeline.py --model "$MODEL" --owner "$RUNNER_TEMP/owner-before.json" --out "$RUNNER_TEMP/stage" --max-new 180 --max-pages 24
+          python apps/gallery-archive/merge_incremental.py --model "$MODEL" --previous "$RUNNER_TEMP/owner-before.json" --stage "$RUNNER_TEMP/stage"
+      - name: Copy individual originals and lossless previews, then re-download and SHA-verify new files
+        run: |
+          set -euo pipefail
+          python apps/gallery-archive/safe_rclone.py copy "$RUNNER_TEMP/stage/originals" "$ARCHIVE_REMOTE/originals" --ignore-existing --transfers 2 --checkers 2 --timeout 60s --retries 1
+          python apps/gallery-archive/safe_rclone.py copy "$RUNNER_TEMP/stage/previews" "$ARCHIVE_REMOTE/previews" --ignore-existing --transfers 2 --checkers 2 --timeout 60s --retries 1
+          python apps/gallery-archive/verify_terabox.py --stage "$RUNNER_TEMP/stage" --remote "$ARCHIVE_REMOTE" --workers 2 --only-staged
+          python apps/gallery-archive/safe_rclone.py copyto "$RUNNER_TEMP/stage/metadata/catalog.json" "$ARCHIVE_REMOTE/metadata/catalog.json" --timeout 60s --retries 1
+          python apps/gallery-archive/safe_rclone.py cat "$ARCHIVE_REMOTE/metadata/catalog.json" --timeout 60s --retries 1 > "$RUNNER_TEMP/catalog-readback.json"
+          cmp "$RUNNER_TEMP/stage/metadata/catalog.json" "$RUNNER_TEMP/catalog-readback.json"
+      - name: Publish only verified owner metadata, never original image bytes or storage keys
+        run: |
+          python apps/gallery-archive/publish_owner_index.py --model "$MODEL" --input "$RUNNER_TEMP/catalog-readback.json" --output "$RUNNER_TEMP/owner-index.json"
+          python apps/gallery-archive/commit_owner_index.py --model "$MODEL" --input "$RUNNER_TEMP/owner-index.json"
+      - name: Deploy verified metadata, followed by real deployed browser QA
+        run: |
+          gh workflow run static.yml --ref main
+          gh workflow run gallery-deployed-pages-photo-qa.yml --ref main
+      - name: Report file persistence and remote verification separately from browser QA
+        if: always()
+        run: |
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          metadata=Path(os.environ['RUNNER_TEMP'])/'stage/metadata'
+          for name in ('collection-audit.json','incremental-merge.json','remote-verification.json'):
+              p=metadata/name
+              if p.exists():
+                  d=json.loads(p.read_text())
+                  print('DIRECT_ARCHIVE_OUTCOME',name,{k:v for k,v in d.items() if k not in ('results','errors')})
+          PY

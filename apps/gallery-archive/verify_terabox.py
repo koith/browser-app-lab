@@ -6,6 +6,36 @@ import hashlib
 import json
 from pathlib import Path
 import subprocess
+import selectors
+import time
+
+
+def read_remote(row,remote,deadline_seconds=75,command=None):
+    key,size,sha=row
+    process=subprocess.Popen(command or ["rclone","cat",remote.rstrip("/")+"/"+key,
+                              "--timeout=65s","--retries=1"],
+                             stdout=subprocess.PIPE,stderr=subprocess.DEVNULL)
+    count=0;digest=hashlib.sha256();deadline=time.monotonic()+deadline_seconds
+    try:
+        with selectors.DefaultSelector() as selector:
+            selector.register(process.stdout,selectors.EVENT_READ)
+            while True:
+                remaining=deadline-time.monotonic()
+                if remaining<=0 or not selector.select(remaining):
+                    raise TimeoutError('Remote byte stream deadline exceeded')
+                data=process.stdout.read1(256*1024)
+                if not data:break
+                count+=len(data)
+                if count>size:raise ValueError('Remote exceeds expected size')
+                digest.update(data)
+        rc=process.wait(timeout=max(.01,deadline-time.monotonic()))
+        if rc or count!=size or digest.hexdigest()!=sha:
+            raise ValueError('SHA or length readback mismatch')
+    finally:
+        if process.poll() is None:
+            process.kill();process.wait()
+        process.stdout.close()
+    return key
 
 def verify(stage: Path, remote: str, workers: int, only_staged: bool = False):
     manifest=json.loads((stage/"metadata/catalog.json").read_text(encoding="utf-8"))
@@ -19,28 +49,7 @@ def verify(stage: Path, remote: str, workers: int, only_staged: bool = False):
     if not specs and not only_staged:
         raise ValueError("No photo bytes to verify")
     def readback(row):
-        key,size,sha=row
-        # Streaming subprocess avoids storing large albums in memory.
-        process=subprocess.Popen(["rclone","cat",remote.rstrip("/")+"/"+key,
-                                  "--timeout=65s","--retries=1"],
-                                 stdout=subprocess.PIPE,stderr=subprocess.DEVNULL)
-        count=0;digest=hashlib.sha256()
-        try:
-            while True:
-                data=process.stdout.read(256*1024)
-                if not data:break
-                count+=len(data)
-                if count>size:raise ValueError("Remote exceeds expected size")
-                digest.update(data)
-            rc=process.wait(timeout=75)
-            if rc or count!=size or digest.hexdigest()!=sha:
-                raise ValueError("SHA or length readback mismatch")
-        finally:
-            if process.poll() is None:
-                process.kill()
-                process.wait()
-            process.stdout.close()
-        return key
+        return read_remote(row,remote)
     passed=0
     errors=[]
     with ThreadPoolExecutor(max_workers=workers) as executor:

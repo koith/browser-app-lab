@@ -46,7 +46,7 @@ for model,route in (("yui","/api/yui"),("mimmi","/api")):
             assert status==200,(model,kind,status,blob[:100])
             exp_size=photo.get("preview_bytes") if kind=="preview" else photo["bytes"]
             exp_sha=photo.get("preview_sha256") if kind=="preview" else photo["sha256"]
-            if kind=="preview" and not photo.get("preview"):
+            if kind=="preview" and (not photo.get("preview") or headers.get("x-archive-variant")=="verified-original-fallback"):
                 exp_size=photo["bytes"];exp_sha=photo["sha256"]
             assert len(blob)==exp_size,(model,kind,"wrong bytes",len(blob),exp_size)
             assert hashlib.sha256(blob).hexdigest()==exp_sha,(model,kind,"wrong sha256")
