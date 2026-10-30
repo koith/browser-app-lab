@@ -8,6 +8,7 @@ photographers are rejected. Pagination is followed only from visible "Load
 more" anchors carrying a cursor; no guessed page offsets or endpoints.
 """
 from __future__ import annotations
+import collections
 import hashlib
 import io
 import json
@@ -100,8 +101,10 @@ def download_one(url,source):
             with requests.get(variant,timeout=(8,24),stream=True,allow_redirects=False,headers={
                 "User-Agent":"Mozilla/5.0 (compatible; PersonalPublicPhotoArchive/1.0)",
                 "Referer":source["url"],"Accept":"image/jpeg,image/png,image/webp,image/*"}) as response:
-                if response.status_code!=200 or urlsplit(response.url).hostname!=IMAGE_HOST:
-                    raise ValueError("Public media not available")
+                if response.status_code!=200:
+                    raise ValueError("HTTP_"+str(response.status_code))
+                if urlsplit(response.url).hostname!=IMAGE_HOST:
+                    raise ValueError("Unexpected media redirect host")
                 data=bytearray()
                 for chunk in response.iter_content(65536):
                     data.extend(chunk)
@@ -117,7 +120,7 @@ def download_one(url,source):
             return {"bytes":bytes(data),"sha256":digest,"width":width,
                     "height":height,"extension":ext},None
         except (requests.RequestException,OSError,ValueError) as err:
-            errors.append(type(err).__name__)
+            errors.append(str(err)[:60] if isinstance(err,ValueError) else type(err).__name__)
     return None,errors[-1] if errors else "unsupported_media"
 
 def capture(source,folder,max_pages=40,max_photos=650,workers=3,client=None,fetch=download_one):
@@ -154,6 +157,7 @@ def capture(source,folder,max_pages=40,max_photos=650,workers=3,client=None,fetc
     folder.mkdir(parents=True,exist_ok=True)
     success=0
     failed=0
+    failure_causes=collections.Counter()
     hashes=set()
     with ThreadPoolExecutor(max_workers=max(1,min(workers,4))) as pool:
         futures=[pool.submit(fetch,url,source) for url in photo_urls.values()]
@@ -161,6 +165,7 @@ def capture(source,folder,max_pages=40,max_photos=650,workers=3,client=None,fetc
             result,error=future.result()
             if result is None:
                 failed+=1
+                failure_causes[str(error or "unknown")[:60]]+=1
                 continue
             sha=result["sha256"]
             if sha in hashes:continue
@@ -173,7 +178,9 @@ def capture(source,folder,max_pages=40,max_photos=650,workers=3,client=None,fetc
             success+=1
     report={"source":source["id"],"source_pages":len(visited),
             "owner_authored_posts":articles,"distinct_public_media_urls":len(photo_urls),
-            "physical_decoded_files":success,"failed_media":failed,"page_error_types":errors,
+            "physical_decoded_files":success,"failed_media":failed,
+            "media_failure_types":dict(failure_causes.most_common()),
+            "page_error_types":errors,
             "site_media_links_are_not_saved_images":True}
     print("PUBLIC_CREATOR_MIRROR_PHYSICAL_BYTES",json.dumps(report),flush=True)
     return report
