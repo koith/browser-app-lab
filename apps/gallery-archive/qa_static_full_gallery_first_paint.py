@@ -15,7 +15,7 @@ BASE = "https://koith.github.io/browser-app-lab/apps"
 MODELS = {
   "yui": {"owner": 2999,"minimum_visible":2999,"min_albums":30,
           "checks": [("teddy-bear97",97),("athletic-club104",104)]},
-  "mimmi": {"owner":3168,"minimum_visible":3150,"min_albums":65,
+  "mimmi": {"owner":3167,"minimum_visible":3168,"min_albums":65,
             "checks":[("v2ph-actor-a8856noa",91),
                       ("v2ph-azur-lane-tashkent",59),
                       ("djawa-rudy2-codename-wolfgirl-9b4e68",201),
