@@ -9,6 +9,13 @@ on:
     branches: [main]
     paths:
       - 'apps/mimmi-gallery/backfill_verified_public_gap.py'
+      - 'apps/mimmi-gallery/mimmi_verified_album_alias.py'
+      - 'apps/mimmi-gallery/test_backfill_verified_public_gap.py'
+      - '.github/workflows/mimmi-pixibb-original-gap-backfill.yml'
+  pull_request:
+    paths:
+      - 'apps/mimmi-gallery/backfill_verified_public_gap.py'
+      - 'apps/mimmi-gallery/mimmi_verified_album_alias.py'
       - 'apps/mimmi-gallery/test_backfill_verified_public_gap.py'
       - '.github/workflows/mimmi-pixibb-original-gap-backfill.yml'
   schedule:
@@ -33,15 +40,15 @@ jobs:
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
       - run: python -m pip install 'requests==2.32.5' 'Pillow==11.3.0'
-      - name: Validate public SHA indexes, safety, complete-photo candidate sequence, owner-aware exclusion
+      - name: Validate public SHA indexes, canonical album aliases and owner-aware exclusion
         run: |
-          python -m py_compile apps/mimmi-gallery/backfill_verified_public_gap.py
+          python -m py_compile apps/mimmi-gallery/backfill_verified_public_gap.py apps/mimmi-gallery/mimmi_verified_album_alias.py
           python apps/mimmi-gallery/test_backfill_verified_public_gap.py
 
   save-unarchived-originals:
     needs: offline-tests
     if: |
-      github.ref == 'refs/heads/main' &&
+      github.ref == 'refs/heads/main' && github.event_name != 'pull_request' &&
       (github.event_name != 'workflow_run' ||
        (github.event.workflow_run.conclusion == 'success' &&
         github.event.workflow_run.head_branch == 'main' &&
