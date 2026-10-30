@@ -100,7 +100,7 @@ def download_one(url,source):
         try:
             with requests.get(variant,timeout=(8,24),stream=True,allow_redirects=False,headers={
                 "User-Agent":"Mozilla/5.0 (compatible; PersonalPublicPhotoArchive/1.0)",
-                "Referer":source["url"],"Accept":"image/jpeg,image/png,image/webp,image/*"}) as response:
+                "Accept":"image/jpeg,image/png,image/webp,image/*"}) as response:
                 if response.status_code!=200:
                     raise ValueError("HTTP_"+str(response.status_code))
                 if urlsplit(response.url).hostname!=IMAGE_HOST:
