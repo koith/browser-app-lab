@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - 'apps/gallery-archive/commit_crawler_research.py'
+      - 'apps/gallery-archive/public_crawl_transport.py'
+      - 'apps/gallery-archive/test_public_crawl_transport.py'
       - 'apps/gallery-archive/test_commit_crawler_research.py'
       - 'apps/mimmi-gallery/collect_pixibb_public.py'
       - 'apps/mimmi-gallery/test_pixibb_public.py'
@@ -27,15 +29,18 @@ jobs:
         run: |
           python -m py_compile \
             apps/gallery-archive/commit_crawler_research.py \
+            apps/gallery-archive/public_crawl_transport.py \
+            apps/gallery-archive/test_public_crawl_transport.py \
             apps/gallery-archive/test_commit_crawler_research.py \
             apps/mimmi-gallery/collect_pixibb_public.py \
             apps/mimmi-gallery/collect_xiutu_public.py
       - name: Verify git conflict recovery and both HTML-only crawling adapters
         run: |
           python apps/gallery-archive/test_commit_crawler_research.py
+          python apps/gallery-archive/test_public_crawl_transport.py
           python apps/mimmi-gallery/test_pixibb_public.py
           python apps/mimmi-gallery/test_xiutu_public.py
       - name: Mark code validated; physical photo counts require independent TeraBox and deployed browser QA
         run: |
-          echo 'PASS: two crawlers avoid re-reading previous SHA-verified bytes; retryable evidence merge retains source results' >> "$GITHUB_STEP_SUMMARY"
+          echo 'PASS: two crawlers avoid re-reading previous SHA-verified bytes; retryable evidence merge retains source results; transient retry policy respects 403/451' >> "$GITHUB_STEP_SUMMARY"
           echo 'This does not certify newly stored original image files.' >> "$GITHUB_STEP_SUMMARY"
