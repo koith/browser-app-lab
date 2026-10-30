@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "model": "mimmi",
-  "updated": "2026-10-29T01:07:35Z",
+  "updated": "2026-10-30T01:12:32Z",
   "storage": "physically committed public previews under GitHub Pages; not licensed publisher masters",
   "albums": [
     {
@@ -1341,6 +1341,15 @@
           "width": 2700,
           "height": 1800,
           "number": 62
+        },
+        {
+          "url": "stored-albums/v2ph-actor-a5e78m5a/a1ea71dba9d8ac562af1cd3f6dc2f3f81196e500e7285790884187e41578505d.jpg",
+          "source_url": "https://images08.pixibb.com/2025/05/08/CreamSoda-Mimmi-Vol.2-Neko-Mimmi-PixiBB.COM-054.jpg",
+          "sha256": "a1ea71dba9d8ac562af1cd3f6dc2f3f81196e500e7285790884187e41578505d",
+          "bytes": 105906,
+          "width": 1368,
+          "height": 912,
+          "number": 63
         }
       ],
       "status": "public_previews_only_not_complete"
@@ -20759,5 +20768,5 @@
       "status": "public_previews_only_not_complete"
     }
   ],
-  "physical_verified_image_count": 2242
+  "physical_verified_image_count": 2243
 }
