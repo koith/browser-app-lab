@@ -54,7 +54,7 @@ def main():
         assert entries[0]["owner_saved_count"]==3,entries
         assert entries[0]["seed_kind"]=="public-gateway-cover"
         assert all("cookie" not in s["public_image_url"] for s in entries)
-        matches=sites_from_html(FakeClient().get("",{}).text,untrack)
+        matches=sites_from_html(FakeClient().get("",{},allow_redirects=False).text,untrack)
         assert len(matches)==1,matches
         assert matches[0]["matched_width"]==2200,matches
         accepted=search_one(entries[0],FakeClient())
