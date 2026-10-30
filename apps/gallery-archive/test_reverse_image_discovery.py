@@ -1,0 +1,94 @@
+#!/usr/bin/env python3
+"""Offline fixture checks for prioritized public-only reverse-image leads."""
+import importlib.util
+import json
+import tempfile
+from pathlib import Path
+
+FILE = Path(__file__).with_name("reverse_image_discovery.py")
+spec = importlib.util.spec_from_file_location("reverse_image_discovery", FILE)
+mod = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(mod)
+
+
+def fixture(root):
+    for model in ("yui", "mimmi"):
+        dest = root / (model + "-gallery")
+        dest.mkdir()
+        albums = [
+            {"id": "tiny", "title": "Real small album", "images": [
+                {"url": "stored-albums/tiny/" + "a" * 64 + ".jpg", "sha256": "a" * 64}
+            ]},
+            {"id": "ai", "title": "[AI Enhanced] fake version", "images": [
+                {"url": "stored-albums/ai/" + "b" * 64 + ".jpg", "sha256": "b" * 64}
+            ]},
+            {"id": "private", "title": "Private URL", "images": [
+                {"url": "https://private.example/x.jpg", "sha256": "c" * 64},
+                {"url": "stored-albums/../../secrets.jpg", "sha256": "d" * 64}
+            ]},
+            {"id": "large", "title": "Large public album", "images": [
+                {"url": f"stored-albums/large/{i:03d}.webp", "sha256": str(i % 10) * 64}
+                for i in range(12)
+            ]},
+        ]
+        (dest / "stored-albums.json").write_text(json.dumps({
+            "model": model, "albums": albums
+        }))
+
+
+def main():
+    with tempfile.TemporaryDirectory() as path:
+        root = Path(path)
+        fixture(root)
+        seeds = mod.physical_seeds(root)
+        assert len(seeds) == 8, seeds  # 1 + 3, twice
+        assert seeds[0]["album_id"] == "tiny"
+        assert all(s["public_image_url"].startswith(mod.PAGES + "/") for s in seeds)
+        assert all("private.example" not in s["public_image_url"] for s in seeds)
+        assert all("ai/" not in s["public_image_url"] for s in seeds)
+        calls = []
+
+        def pretend(session, url):
+            calls.append(url)
+            return {"status": "leads_found", "links": [
+                {"url": "https://coserbox.com/model/mimmi", "label": "candidate"}]}
+        output = mod.discover(root, max_seeds=3, offset=2, delay=0, engine=pretend)
+        assert output["seed_queries"] == 3
+        assert output["candidate_page_urls"] == 1
+        assert not output["gallery_images_added"]
+        assert output["research_only_not_acquired"]
+        assert len(calls) == 3
+
+    html = ('<a href="https://www.google.com/url?q=https%3A%2F%2F'
+            'cosmeitu.com%2Fshow%2Fmimmi&sa=U">Mimmi original</a>'
+            '<a href="javascript:alert(1)">attack</a>'
+            '<a href="https://unknown.example/pic.jpg">untrusted</a>'
+            '<a href="https://cosmeitu.com/show/mimmi">duplicate</a>')
+    leads = mod.leads_from_html(html)
+    assert len(leads) == 1, leads
+    assert leads[0]["label"] == "Mimmi original"
+    assert mod.untrack("http://cosmeitu.com/mimmi") is None
+    assert mod.untrack("https://private.example/path") is None
+    assert mod.untrack("https://x:secret@cosmeitu.com/mimmi") is None
+
+    class FakeResponse:
+        status_code = 200
+        url = "https://www.google.com/search?vsrid=abc"
+        headers = {"Content-Type": "text/html"}
+        text = html
+
+    class FakeSession:
+        def get(self, endpoint, params, **kw):
+            assert endpoint.startswith("https://lens.google.com/")
+            assert "url" in params and params["url"].startswith("https://")
+            assert kw["allow_redirects"] is True
+            return FakeResponse()
+
+    result = mod.lens_query(FakeSession(), "https://koith.github.io/example.jpg")
+    assert result["status"] == "leads_found"
+    assert len(result["links"]) == 1
+    print("GALLERY_REVERSE_IMAGE_DISCOVERY_FIXTURE_PASS")
+
+
+if __name__ == "__main__":
+    main()
