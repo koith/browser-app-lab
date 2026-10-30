@@ -38,6 +38,11 @@ async def run(engine):
                     await route.fulfill(status=503, body='Retry fixture')
                 else:
                     await route.continue_()
+            # This fault-injection fixture is deliberately local-only. Real
+            # owner media is separately exercised by deployed exact-SHA QA.
+            await page.route('**/owner-index.json',lambda route:route.fulfill(
+                content_type='application/json',body=json.dumps({'schema_version':1,'model':'yui','albums':[]})))
+            await page.route('https://mimmi-private-gallery-free.onrender.com/**',lambda route:route.fulfill(status=503,body='Local fault fixture'))
             await page.route('**/stored-albums/**', fixtures)
             await page.goto(f'http://127.0.0.1:{server.server_port}/')
             await page.wait_for_function("document.querySelector('#total').textContent.includes('albums')")

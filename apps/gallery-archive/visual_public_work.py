@@ -36,9 +36,13 @@ def collect_work(book,previous,client,out,budget,seen_sha,model):
         info['failures'].append('Focused recovery requires an existing low-count saved work');return None,info
     if claimed-len(previous)>budget:
         info['failures'].append('Defer whole work to next bounded batch, do not publish a truncated edition');return None,info
-    refs=[];reference_dir=out/'references'/aid;reference_dir.mkdir(parents=True,exist_ok=True)
+    refs=[];reference_hashes=set();reference_dir=out/'references'/aid;reference_dir.mkdir(parents=True,exist_ok=True)
     try:
         for photo in previous:
+            # Old ledgers sometimes assign one exact SHA to two numbers. Those
+            # are one reference cut, not competing visual matches.
+            if photo['sha256'] in reference_hashes:continue
+            reference_hashes.add(photo['sha256'])
             digest=photo.get('preview_sha256') or photo['sha256'];path=reference_dir/(digest+'.bin')
             if path.exists():raw=path.read_bytes()
             else:
@@ -85,6 +89,9 @@ def collect_work(book,previous,client,out,budget,seen_sha,model):
             best=errors[0]
             if exact or (best[0]<=4 and (len(errors)==1 or errors[1][0]-best[0]>=2)):
                 old=exact or best[2];anchors.add(old['number'])
+                info.setdefault('saved_cut_correspondence',[]).append({'source_file_number':source_number,
+                    'owner_archive_number':old['number'],'owner_sha256':old['sha256'],
+                    'source_sha256':meta['sha256'],'whole_frame_visual_error':best[0]})
                 # Never trade a larger unwatermarked saved original for a
                 # smaller site-watermarked rendition of exactly the same cut.
                 if meta['width']*meta['height']<=old['width']*old['height']:continue

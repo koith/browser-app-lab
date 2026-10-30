@@ -22,6 +22,10 @@ class CoverageTests(unittest.TestCase):
             self.assertEqual(result['owner_rows'],4);self.assertEqual(result['owner_unique_sha256'],3)
             work=result['albums'][0];self.assertEqual(work['missing_photo_numbers'],[5,6,7,8])
             self.assertEqual(work['gallery_displayed_rows'],None)
+            (base/'source-viewer-albums.json').write_text(json.dumps({'albums':[{'id':'work-aa','source':'https://example.org/older-edition','images':photos}]}))
+            (base/'public-work-pages.json').write_text(json.dumps({'albums':[{'id':'work-aa','source':'https://example.org/new-edition','advertised_photos':8}]}))
+            work=build(root,'mimmi',owner)['albums'][0]
+            self.assertIsNone(work['missing_photo_numbers'],'Anchors from a different edition cannot prove the new source numbering')
             (base/'official-previews.json').write_text(json.dumps({'albums':[{'id':'work-aa','title':'Work','source':'https://djawaphoto.com/portfolio/work/','advertised_photos':100,'samples':[]}]}))
             work=build(root,'mimmi',owner)['albums'][0]
             self.assertEqual(work['known_total'],100)

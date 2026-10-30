@@ -1,6 +1,6 @@
 {
-  "version": "v0.1.0-beta.25",
-  "date": "2026-10-29",
+  "version": "v0.1.0-beta.26",
+  "date": "2026-10-30",
   "policy": {
     "monthly_charge_krw": 0,
     "payment_card_required": false,
@@ -13,17 +13,17 @@
   "storage": {
     "intended_primary": {
       "provider": "TeraBox Basic",
-      "max_advertised_storage_gb": 1024,
-      "availability": "not_connected",
-      "remote_verified_images": 0,
-      "conditions": "Free 1024GB advertised as limited-time; unofficial integration not validated",
+      "max_advertised_storage_gb": null,
+      "availability": "connected",
+      "remote_verified_images": 3040,
+      "conditions": "Existing owner account. Originals are individually stored and SHA read back. Account capacity is not asserted.",
       "r2_required": false
     }
   },
   "progress": {
     "physically_acquired_web_images": 405,
     "web_albums_with_complete_sequence": 5,
-    "primary_cloud_verified_images": 0,
+    "primary_cloud_verified_images": 3040,
     "publisher_original_high_resolution_verified_images": 0,
     "source_catalog_v2ph_works": 20,
     "source_catalog_huantuji_entries": 11,
@@ -122,7 +122,8 @@
     "beta.19 displays explicit image-load failure states in album cards, aligned photo grids and the viewer. The user reported HTTP 451 from cdn.jliji.com in Korea; a cross-origin image error cannot reveal its actual status and is not claimed to be 451. Do not automatically re-request a failed image from that reported origin when opening its viewer, and retain the original direct open link. No proxy, alternate origin, image replacement, new acquisition, legal-restriction bypass or restored-access claim. CI success outside the affected region does not verify Korean access.",
     "beta.20 gallery: only physically stored SHA-256 files or authenticated owner-backed bytes count as gallery images. Source URLs are research records, not active photos.",
     "beta.21: both galleries accept a SHA-256-verified user ZIP and persist JPEG bytes in per-device IndexedDB. Private Drive backup 218 images is packaged separately and is not falsely counted as online imported photos until the user imports the file on their device.",
-    "beta.25: Add optional private Google Drive OAuth readonly ZIP importer; tokens remain in memory, files are SHA-verified into local IndexedDB, successful archive syncs are checkpointed on device. Requires user-provided Google OAuth client ID and owner folder; no live cloud sync is claimed until configured."
+    "beta.25: Add optional private Google Drive OAuth readonly ZIP importer; tokens remain in memory, files are SHA-verified into local IndexedDB, successful archive syncs are checkpointed on device. Requires user-provided Google OAuth client ID and owner folder; no live cloud sync is claimed until configured.",
+    "beta.26: individual public-file collection, verified owner storage, original download QA, and exact-SHA duplicate display protection; no photo bundles."
   ],
   "archiving_engine": {
     "mode": "individual_files",

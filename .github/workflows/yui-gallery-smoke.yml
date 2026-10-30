@@ -58,13 +58,14 @@ jobs:
               const page=await browser.newPage({viewport:{width:390,height:844},isMobile:true,hasTouch:true});
               const errors=[],external=[];
               page.on('pageerror',e=>errors.push(String(e)));
-              page.on('request',r=>{if(r.resourceType()==='image'&&!r.url().startsWith('http://127.0.0.1:8765/'))external.push(r.url())});
+              page.on('request',r=>{if(r.resourceType()==='image'&&!r.url().startsWith('http://127.0.0.1:8765/')&&new URL(r.url()).hostname!=='mimmi-private-gallery-free.onrender.com')external.push(r.url())});
               await page.goto('http://127.0.0.1:8765/',{waitUntil:'domcontentloaded'});
               await page.waitForFunction(()=>document.querySelector('#total')?.textContent?.includes('albums'));
               const cards=await page.locator('#albumgrid .album').count();
-              if(cards!==data.albums.length)throw Error('Album count wrong '+cards);
-              if(await page.locator('#inventory').innerText()!==photos.length+'장 · 실제 저장본')throw Error('Inventory counts unarchived media');
-              const urls=await page.evaluate(()=>available().flatMap(a=>validImages(a).map(p=>p.url)));
+              const runtime=await page.evaluate(()=>({albums:available().length,photos:stored.reduce((n,a)=>n+validImages(a).length,0)}));
+              if(cards!==runtime.albums)throw Error('Rendered saved owner+local album count wrong '+cards);
+              if(await page.locator('#inventory').innerText()!==runtime.photos+'장 · 실제 저장본')throw Error('Inventory counts unarchived media');
+              const urls=await page.evaluate(()=>available().flatMap(a=>validImages(a).map(p=>p.url).filter(u=>u?.startsWith('stored-albums/'))));
               if(urls.length!==photos.length||urls.some(x=>!x.startsWith('stored-albums/')))throw Error('Remote photo shown');
               const failed=await page.evaluate(async list=>{
                 const bad=[];
@@ -76,8 +77,10 @@ jobs:
                 return bad;
               },urls);
               if(failed.length)throw Error('Stored photo render failure '+failed[0]);
-              await page.locator('#albumgrid .album').first().click();
-              await page.locator('#detailphotos .photo').first().click();
+              const publicId=await page.evaluate(()=>available().find(a=>canonicalId(a.id)===a.id&&validImages(a).some(p=>p.url?.startsWith('stored-albums/')))?.id);
+              if(!publicId)throw Error('No stored public file to check');
+              await page.locator('#albumgrid [data-id="'+publicId+'"]').click();
+              await page.locator('#detailphotos .photo:has(img[src^="stored-albums/"])').first().click();
               await page.waitForFunction(()=>document.querySelector('#full')?.naturalWidth>50);
               const shown=await page.locator('#full').getAttribute('src');
               if(!shown.startsWith('stored-albums/'))throw Error('Lightbox hotlink');

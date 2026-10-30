@@ -100,7 +100,7 @@ jobs:
       - name: Collect all observed public pages into individually verified files, without photo ZIPs
         run: |
           mkdir -p "$RUNNER_TEMP/stage/originals" "$RUNNER_TEMP/stage/previews"
-          python apps/gallery-archive/direct_photo_pipeline.py --model "$MODEL" --owner "$RUNNER_TEMP/owner-before.json" --out "$RUNNER_TEMP/stage" --max-new 180 --max-pages 24
+          python apps/gallery-archive/direct_photo_pipeline.py --model "$MODEL" --owner "$RUNNER_TEMP/owner-before.json" --out "$RUNNER_TEMP/stage" --max-new 500 --max-pages 40
           python apps/gallery-archive/merge_incremental.py --model "$MODEL" --previous "$RUNNER_TEMP/owner-before.json" --stage "$RUNNER_TEMP/stage"
       - name: Distinguish a real new-file transaction from a no-op
         id: delta
@@ -133,6 +133,7 @@ jobs:
         run: |
           gh workflow run static.yml --ref main
           gh workflow run gallery-deployed-pages-photo-qa.yml --ref main
+          gh workflow run gallery-newly-stored-photo-qa.yml --ref main
       - name: Report file persistence and remote verification separately from browser QA
         if: always()
         run: |

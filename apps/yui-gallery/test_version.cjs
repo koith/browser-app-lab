@@ -7,11 +7,14 @@ assert.equal(state.policy.monthly_charge_krw,0);
 assert.equal(state.policy.payment_card_required,false);
 assert.ok(state.progress.physically_acquired_web_images>=0);
 assert.equal(state.progress.web_albums_with_complete_sequence,5);
-assert.equal(state.progress.primary_cloud_verified_images,0);
+assert.ok(state.progress.primary_cloud_verified_images>0);
 assert.equal(state.progress.gallery_live_source_hotlinks,0);
 assert.equal(state.progress.gallery_physically_stored_pages_images,23);
 assert.equal(state.storage.intended_primary.provider,'TeraBox Basic');
-assert.equal(state.storage.intended_primary.availability,'not_connected');
+assert.equal(state.storage.intended_primary.availability,'connected');
+assert.equal(state.storage.intended_primary.remote_verified_images,state.progress.primary_cloud_verified_images);
+const owner=JSON.parse(fs.readFileSync(path.join(root,'owner-index.json'),'utf8'));
+assert.ok(owner.physical_originals_indexed>=state.progress.primary_cloud_verified_images);
 assert.equal(state.storage.intended_primary.r2_required,false);
 for(const page of ['index.html']){
  const html=fs.readFileSync(path.join(root,page),'utf8');
@@ -28,4 +31,4 @@ assert.ok(fs.readFileSync(path.join(root,'index.html'),'utf8').includes('id=\"ap
 assert.ok(!fs.readFileSync(path.join(root,'index.html'),'utf8').includes("fetch('source-viewer-albums.json'"),'Source-only photos must never be displayed');
 assert.ok(!fs.readFileSync(path.join(root,'index.html'),'utf8').includes('href="zip-gallery.html"'));
 assert.ok(fs.readFileSync(path.join(root,'zip-gallery.html'),'utf8').includes('location.replace("./")'));
-console.log('YUI_VERSION_AND_STORAGE_STATUS_PASS',state.version,'previously_collected_web_photos',405,'public_pages_photos',actuallyOnPages,'terabox_verified',0,'bundle_generation',false);
+console.log('YUI_VERSION_AND_STORAGE_STATUS_PASS',state.version,'previously_collected_web_photos',405,'public_pages_photos',actuallyOnPages,'terabox_verified_snapshot',state.progress.primary_cloud_verified_images,'bundle_generation',false);

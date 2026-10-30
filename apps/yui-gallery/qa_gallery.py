@@ -11,6 +11,16 @@ from playwright.async_api import async_playwright
 from browser_http_bridge import fulfill_verified_request
 from browser_image_checks import decode_image, SourceViewPacer
 
+async def static_owner_fixture(route):
+ await route.fulfill(content_type='application/json',body='{"schema_version":1,"model":"yui","albums":[]}')
+
+async def static_gateway_fixture(route):
+ await route.fulfill(status=503,body='Static individual-file unit scope; deployed owner media is tested separately')
+
+async def isolate_static_scope(context):
+ await context.route('**/owner-index.json',static_owner_fixture)
+ await context.route('https://mimmi-private-gallery-free.onrender.com/**',static_gateway_fixture)
+
 async def run(args):
  results=[];errors=[];decode_retries=[];local_verified=set();semaphore=asyncio.Semaphore(args.workers);source_pacer=SourceViewPacer()
  async with async_playwright() as pw:
@@ -19,11 +29,15 @@ async def run(args):
   if args.http_bridge:
    bridge=fulfill_verified_request
    await context.route('https://**/*',bridge)
+  if args.public_pages_files:await isolate_static_scope(context)
   page=await context.new_page();await page.goto(args.base,wait_until='domcontentloaded')
   await page.wait_for_function("document.querySelector('#total').textContent.includes('albums')")
   version=await page.locator('#app-version').inner_text();box=await page.locator('#app-version').bounding_box()
   assert box['x']>190 and box['y']<25 and box['height']<18,box
-  albums=await page.evaluate('available().map(a=>({id:a.id,images:validImages(a)}))')
+  albums=await page.evaluate('''async onlyPublic=>Promise.all(available().map(async a=>{
+   const photos=validImages(a).map((p,i)=>({...p,grid_index:i})).filter(p=>!onlyPublic||p.url?.startsWith('stored-albums/'));
+   return {id:a.id,images:await Promise.all(photos.map(async p=>({...p,url:p.ownerAlbum?await YuiPrivate.asset(p):p.url})))};
+  })).then(rows=>rows.filter(a=>a.images.length))''',args.public_pages_files)
   if args.album:
    requested=set(args.album);albums=[a for a in albums if a['id'] in requested]
    assert {a['id'] for a in albums}==requested,'Requested album missing from actual gallery'
@@ -40,6 +54,7 @@ async def run(args):
     # next album. Thousands of files must not accumulate in one WebKit cache.
     album_context=await browser.new_context(viewport={'width':390,'height':844},is_mobile=True,has_touch=True)
     if args.http_bridge:await album_context.route('https://**/*',bridge)
+    if args.public_pages_files:await isolate_static_scope(album_context)
     page=await album_context.new_page();js_errors=[]
     page.on('pageerror',lambda e:(js_errors.append(str(e)),print('BROWSER_JS_ERROR',album['id'],str(e),flush=True)))
     passed=0;hashes=0
@@ -95,14 +110,14 @@ async def run(args):
      result={'id':album['id'],'decoded_lightbox':passed,'original_link_sha256_checks':hashes}
      results.append(result);print('GALLERY_REAL_DECODE',args.engine,result,flush=True);await album_context.close()
   await asyncio.gather(*(check(a) for a in albums));await browser.close()
- report={'checked_at':datetime.now(timezone.utc).isoformat(),'base':args.base,'scope':'selected_photographs' if args.photo_selection else 'selected_albums' if args.album else 'full_gallery','requested_album_ids':args.album,'engine':args.engine,'version':version,'viewport':[390,844],'iphone_real_device':False,'network':'TLS-verified requests bridge' if args.http_bridge else 'direct browser TLS','private_cloud_verified':0,'albums':results,'decoded_image_entries':sum(r['decoded_lightbox'] for r in results),'browser_download_sha256_verified':0,'original_link_sha256_verified':sum(r['original_link_sha256_checks'] for r in results),'unique_original_link_sha256_verified':len(local_verified),'errors':errors}
+ report={'checked_at':datetime.now(timezone.utc).isoformat(),'base':args.base,'scope':'public_pages_files' if args.public_pages_files else 'selected_photographs' if args.photo_selection else 'selected_albums' if args.album else 'full_gallery','requested_album_ids':args.album,'engine':args.engine,'version':version,'viewport':[390,844],'iphone_real_device':False,'network':'TLS-verified requests bridge' if args.http_bridge else 'direct browser TLS','static_owner_fixture':args.public_pages_files,'private_cloud_verified':0,'albums':results,'decoded_image_entries':sum(r['decoded_lightbox'] for r in results),'browser_download_sha256_verified':0,'original_link_sha256_verified':sum(r['original_link_sha256_checks'] for r in results),'unique_original_link_sha256_verified':len(local_verified),'errors':errors}
  report['image_decode_retries']=decode_retries
  report['source_view_interval_seconds']={'cdn.imgcup.com':source_pacer.interval}
  report['paced_source_views']=source_pacer.views
  args.out.write_text(json.dumps(report,indent=2)+'\n')
  assert not errors,errors
  assert report['decoded_image_entries']==sum(len(a['images']) for a in albums)
- print('SELECTED_GALLERY_MEDIA_QA_PASS' if args.album or args.photo_selection else 'ALL_GALLERY_MEDIA_QA_PASS',report['decoded_image_entries'],report['original_link_sha256_verified'],flush=True)
+ print('PUBLIC_PAGES_FILE_VIEWER_QA_PASS' if args.public_pages_files else 'SELECTED_GALLERY_MEDIA_QA_PASS' if args.album or args.photo_selection else 'ALL_GALLERY_MEDIA_QA_PASS',report['decoded_image_entries'],report['original_link_sha256_verified'],flush=True)
 
 if __name__=='__main__':
- p=argparse.ArgumentParser(description=__doc__);p.add_argument('--base',default='http://localhost:8765/');p.add_argument('--engine',choices=['chromium','webkit'],default='chromium');p.add_argument('--out',type=Path,default=Path('yui-gallery-qa.json'));p.add_argument('--http-bridge',action='store_true');p.add_argument('--album',action='append',help='Verify selected acquired work IDs; omit for full gallery');p.add_argument('--photo-selection',type=Path,help='Check only explicitly selected replacement numbers; default still checks the full gallery');p.add_argument('--workers',type=int,choices=range(1,4),default=3);asyncio.run(run(p.parse_args()))
+ p=argparse.ArgumentParser(description=__doc__);p.add_argument('--base',default='http://localhost:8765/');p.add_argument('--engine',choices=['chromium','webkit'],default='chromium');p.add_argument('--out',type=Path,default=Path('yui-gallery-qa.json'));p.add_argument('--http-bridge',action='store_true');p.add_argument('--album',action='append',help='Verify selected acquired work IDs; omit for full gallery');p.add_argument('--photo-selection',type=Path,help='Check only explicitly selected replacement numbers; default still checks the full gallery');p.add_argument('--workers',type=int,choices=range(1,4),default=3);p.add_argument('--public-pages-files',action='store_true',help='CI scope: every physically published Pages file; private originals have separate deployed SHA QA');asyncio.run(run(p.parse_args()))

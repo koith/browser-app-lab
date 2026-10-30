@@ -10,6 +10,8 @@ import json
 from pathlib import Path
 import sys
 import time
+import re
+import requests
 
 from playwright.async_api import async_playwright,Error as PlaywrightError
 
@@ -38,11 +40,38 @@ async def current_card(page,selector,click=False):
 async def run(args):
     document=json.loads(args.selection.read_text())
     selected=document['selection'][args.model]
-    if not selected:raise ValueError('No exact stored photographs selected')
+    if args.since_commit:
+        if not re.fullmatch('[a-f0-9]{40}',args.since_commit):raise ValueError('Exact baseline commit required')
+        def owner(ref):
+            url=f'https://raw.githubusercontent.com/koith/browser-app-lab/{ref}/apps/{args.model}-gallery/owner-index.json'
+            r=requests.get(url,timeout=(12,45));r.raise_for_status();d=r.json()
+            if d.get('model')!=args.model:raise ValueError('Wrong model in deployed comparison')
+            return d
+        before=await asyncio.to_thread(owner,args.since_commit)
+        after=await asyncio.to_thread(owner,'main')
+        old={(a['id'],p['number']):p['sha256'] for a in before['albums'] for p in a['images']}
+        selected=[{'id':a['id'],'images':[p for p in a['images'] if old.get((a['id'],p['number']))!=p['sha256']]} for a in after['albums']]
+        selected=[a for a in selected if a['images']]
+    all_selected=sum(len(a['images']) for a in selected)
+    offset=0;sharded=[]
+    for album in selected:
+        images=[]
+        for photo in album['images']:
+            if offset%args.shards==args.shard:images.append(photo)
+            offset+=1
+        if images:sharded.append({**album,'images':images})
+    selected=sharded
     report={'model':args.model,'browser':args.browser,'real_iphone_device':False,
             'deployed_url':f'{SITE}/{args.model}-gallery/',
-            'TLS_verified_bridge':args.http_bridge,'photos':[],'page_errors':[]}
+            'TLS_verified_bridge':args.http_bridge,'photos':[],'page_errors':[],
+            'since_commit':args.since_commit,'all_new_or_upgraded_rows':all_selected,
+            'shard':args.shard,'shards':args.shards}
     args.out.parent.mkdir(parents=True,exist_ok=True)
+    if not selected:
+        report['no_selected_new_photographs']=True
+        args.out.write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
+        print('NO_NEW_PHOTOGRAPHS_IN_THIS_SHARD',args.model,args.shard,flush=True)
+        return
     async with async_playwright() as pw:
         browser=await getattr(pw,args.browser).launch()
         context=await browser.new_context(viewport={'width':390,'height':844},
@@ -65,6 +94,8 @@ async def run(args):
                 if time.monotonic()>=deadline:raise AssertionError('Exact newly stored SHA not in deployed gallery')
                 await asyncio.sleep(3)
             report['version']=await page.locator('#app-version').inner_text()
+            report['work_counts']=await page.evaluate('''()=>stored.map(a=>({id:a.id,
+                images_count:validImages(a).length,distinct_sha:new Set(validImages(a).map(p=>p.sha256)).size}))''')
             report['inventory']=await page.evaluate('''()=>({albums:stored.length,
                 displayed:stored.reduce((n,a)=>n+validImages(a).length,0),
                 distinct_sha:new Set(stored.flatMap(a=>validImages(a).map(p=>p.sha256))).size,
@@ -91,11 +122,17 @@ async def run(args):
                     assert size==[expected['width'],expected['height']],(aid,number,size)
                     original=await page.locator('#original').get_attribute('href')
                     assert original and '/api/' in original,(aid,number,'not owner storage media')
-                    async with page.expect_download(timeout=105000) as pending:
-                        await page.evaluate('''url=>{const a=document.createElement('a');
+                    await page.evaluate('''url=>{const a=document.createElement('a');
+                            a.id='qa-original-download';a.textContent='검증용 원본 저장';
+                            a.style='position:fixed;top:80px;left:12px;z-index:999999';
                             a.href=url+(url.includes('?')?'&':'?')+'download=true';a.download='photo';
-                            document.body.append(a);a.click();a.remove()}''',original)
+                            document.body.append(a)}''',original)
+                    # WebKit correctly requires a trusted user gesture for a
+                    # cross-origin attachment. A JS a.click() is not that gesture.
+                    async with page.expect_download(timeout=105000) as pending:
+                        await page.locator('#qa-original-download').click()
                     download=await pending.value
+                    await page.locator('#qa-original-download').evaluate('a=>a.remove()')
                     path=await download.path();raw=Path(path).read_bytes()
                     assert len(raw)==expected['bytes'],(aid,number,'download length mismatch')
                     assert hashlib.sha256(raw).hexdigest()==expected['sha256'],(aid,number,'download SHA mismatch')
@@ -122,5 +159,10 @@ if __name__=='__main__':
     parser.add_argument('--browser',choices=['chromium','webkit'],required=True)
     parser.add_argument('--selection',type=Path,default=Path(__file__).parent/'verification/new-physical-photos-2026-10-30.json')
     parser.add_argument('--http-bridge',action='store_true')
+    parser.add_argument('--since-commit',help='Exact public owner-index baseline; verify every changed/new SHA since it')
+    parser.add_argument('--shard',type=int,default=0)
+    parser.add_argument('--shards',type=int,default=1)
     parser.add_argument('--out',type=Path,required=True)
-    asyncio.run(run(parser.parse_args()))
+    args=parser.parse_args()
+    if not 1<=args.shards<=8 or not 0<=args.shard<args.shards:parser.error('Invalid bounded QA shard')
+    asyncio.run(run(args))

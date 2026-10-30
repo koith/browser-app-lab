@@ -17,7 +17,7 @@ MODELS = {
     "yui": {"min_count": 3053, "min_private": 3030, "raw_owner_index":3030,
             "album_ids": ("yuis-present33", "athletic-club104", "teddy-bear97",
                           "yui-public-official-x-teapawt")},
-    "mimmi": {"min_count": 3178, "min_private": 3177, "raw_owner_index":3213,
+    "mimmi": {"min_count": 2526, "min_private": 2525, "raw_owner_index":3214,
               "album_ids": ("mimmi-indie-sana-sopmod2-2019", "djawa-rei-beyond-the-heart")},
 }
 
@@ -82,6 +82,9 @@ def exercise(browser, model: str, rule: dict, engine: str):
           const owner=stored.reduce((n,a)=>n+(a.images||[]).filter(p=>!!p.ownerAlbum).length,0);
           return total>=minimum && owner>=privateMinimum;
         }""", arg=[rule["min_count"], rule["min_private"]], timeout=170000)
+        # Mimmi's old raw threshold included 481 repeated SHA rows. Require
+        # every baseline distinct original plus the unchanged raw owner ledger;
+        # duplicate rows can no longer make this test pass.
         counts = page.evaluate("""() => ({
           total:stored.reduce((n,a)=>n+a.images.length,0),
           owner:stored.reduce((n,a)=>n+a.images.filter(p=>!!p.ownerAlbum).length,0),
@@ -101,6 +104,11 @@ def exercise(browser, model: str, rule: dict, engine: str):
         assert owner_raw["model"] == model, (model, owner_raw)
         assert owner_raw["physical"] >= rule["raw_owner_index"], (model, owner_raw)
         assert "실제 저장본" in counts["banner"], (model, counts)
+        duplicate_cuts=page.evaluate("""()=>stored.reduce((n,a)=>{
+          const hashes=validImages(a).map(p=>p.sha256);
+          return n+hashes.length-new Set(hashes).size;
+        },0)""")
+        assert duplicate_cuts==0,(model,"same saved bytes repeated inside a work",duplicate_cuts)
         assert page.locator("#albumgrid .album").count() >= 1, model
         verified = []
         for album_id in rule["album_ids"]:

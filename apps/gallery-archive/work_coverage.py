@@ -15,7 +15,7 @@ from urllib.parse import unquote, urlsplit
 SOURCE_FILES = {
     'mimmi': ['source-viewer-albums.json','official-previews.json','v2ph-actor-previews.json',
               'v2ph-public-previews.json','pixibb-public-previews.json','xiutu-public-previews.json',
-              'gumroad-public-previews.json','social-public-previews.json','research-catalogue.json'],
+              'gumroad-public-previews.json','social-public-previews.json','research-catalogue.json','public-work-pages.json'],
     'yui': ['source-viewer-albums.json','additional-source-albums.json','publisher-catalogue.json',
             'public-album-candidates.json','research-sources.json'],
 }
@@ -100,7 +100,7 @@ def build(root,model,owner=None,gallery=None):
         owned=saved[aid];pub=public_rows[aid]
         hashes={p['sha256'] for p in owned+pub if p.get('sha256')}
         positions={p['number'] for p in owned if type(p.get('number')) is int}
-        proposals=[];evidence=[];sources=set();names=[];candidates=[];source_numbers=set();anchors=set()
+        proposals=[];evidence=[];sources=set();names=[];candidates=[];source_numbers=set();anchors=set();anchor_sources=defaultdict(set)
         for filename,a in group:
             if a.get('title') and a['title'] not in names:names.append(a['title'])
             if a.get('source') or a.get('url'):sources.add(a.get('source') or a.get('url'))
@@ -110,7 +110,8 @@ def build(root,model,owner=None,gallery=None):
                 n=p.get('number');sha=p.get('sha256')
                 if type(n) is int and n>0:
                     source_numbers.add(n)
-                    if any(q.get('number')==n and q.get('sha256')==sha for q in owned):anchors.add((n,sha))
+                    if any(q.get('number')==n and q.get('sha256')==sha for q in owned):
+                        anchors.add((n,sha));anchor_sources[(filename,a.get('source') or a.get('url'))].add((n,sha))
                 if sha and sha not in hashes and p.get('url'):
                     candidates.append({'number':n,'url':p['url'],'historical_sha256':sha,'source_document':filename,
                                        'occupied_owner_number':n in positions,'downloaded_this_run':False})
@@ -119,7 +120,9 @@ def build(root,model,owner=None,gallery=None):
         web_totals={e['total'] for e in evidence if e['kind']=='web_edition_claim'}
         selected=publisher_totals or web_totals
         expected=next(iter(selected)) if len(selected)==1 else None
-        numbering_verified=len(anchors)>=3 and not publisher_totals and len(web_totals)==1
+        numbering_verified=(not publisher_totals and len(web_totals)==1 and
+            any(len(anchor_sources.get((e['document'],e['source']),set()))>=3
+                for e in evidence if e['kind']=='web_edition_claim'))
         missing=sorted(set(range(1,expected+1))-positions) if expected and numbering_verified else None
         shared=defaultdict(int)
         for sha in hashes:

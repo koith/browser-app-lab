@@ -37,10 +37,10 @@ jobs:
           python apps/yui-gallery/test_photo_quality_policy.py
           python apps/yui-gallery/test_source_viewer_manifest.py
           python apps/yui-gallery/cloud/test_gateway.py
-      - name: Verify every actual archived photo decodes in the viewer
+      - name: Verify every published Pages file; private originals have separate deployed SHA QA
         run: |
           python -m http.server 8765 --directory apps/yui-gallery >/tmp/yui-http.log 2>&1 &
-          python apps/yui-gallery/qa_gallery.py --engine ${{ matrix.engine }} --workers 1 --out yui-physical-${{ matrix.engine }}.json
+          python apps/yui-gallery/qa_gallery.py --public-pages-files --engine ${{ matrix.engine }} --workers 1 --out yui-physical-${{ matrix.engine }}.json
           python apps/yui-gallery/qa_owner_media.py --engine ${{ matrix.engine }}
       - uses: actions/upload-artifact@v4
         if: always()

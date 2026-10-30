@@ -25,7 +25,7 @@ if(index.physical_verified_image_count!==undefined&&index.physical_verified_imag
   const errors=[];page.on('pageerror',e=>errors.push(e.message));
   const publicPhotoRequests=[];
   page.on('request',r=>{
-   if(/\/(?:photos|media)\//.test(r.url())&&!r.url().includes('127.0.0.1'))publicPhotoRequests.push(r.url());
+   if(/\/(?:photos|media)\//.test(r.url())&&!r.url().includes('127.0.0.1')&&new URL(r.url()).hostname!=='mimmi-private-gallery-free.onrender.com')publicPhotoRequests.push(r.url());
   });
   await page.goto('http://127.0.0.1:8765/mimmi-gallery/',{waitUntil:'domcontentloaded',timeout:25000});
   await page.waitForFunction(()=>document.querySelector('#total')?.textContent?.includes('albums'),{timeout:20000});
@@ -37,33 +37,50 @@ if(index.physical_verified_image_count!==undefined&&index.physical_verified_imag
   if(!popup.url().includes('yui-gallery'))throw Error('Cross-model tab selection failed');
   await popup.close();
   const cards=page.locator('#albumgrid .album');
-  if(await cards.count()!==albums.length)throw Error('Displayed album count must equal physical stored albums: '+(await cards.count())+' vs '+albums.length);
+  const runtime=await page.evaluate(()=>({
+    albums:available().length,
+    photos:stored.reduce((n,a)=>n+validImages(a).length,0),
+    duplicates:stored.reduce((n,a)=>{
+      const sha=validImages(a).map(p=>p.sha256);
+      return n+sha.length-new Set(sha).size;
+    },0)
+  }));
+  if(runtime.duplicates)throw Error('Identical image SHA displayed repeatedly: '+runtime.duplicates);
+  if(await cards.count()!==runtime.albums)throw Error('Rendered cards mismatch saved owner+local album manifest: '+(await cards.count())+' vs '+runtime.albums);
   if(await page.locator('#albumgrid [data-id^="research-no-"]').count())throw Error('Research-only photobooks must never appear in gallery');
   const meta=await page.locator('#inventory').innerText();
-  if(!meta.includes(images.length+'장 · 실제 저장본'))throw Error('Physical stored count wrong '+meta);
+  if(!meta.includes(runtime.photos+'장 · 실제 저장본'))throw Error('Saved local+owner unique image count wrong '+meta);
   if(await page.locator('#device-health').count())throw Error('Yui-style header must not show technical image health');
   if(await page.locator('#browse-mode').innerText()!=='화보')throw Error('Yui-style gallery must default to album view');
   const viewport=await page.evaluate(()=>({columns:getComputedStyle(document.querySelector('#albumgrid')).gridTemplateColumns.split(' ').length,
     logo:document.querySelector('.logo span')?.getClientRects().length||0}));
   if(viewport.columns!==2||!viewport.logo)throw Error('Yui beta.19 iPhone layout mismatch '+JSON.stringify(viewport));
-  if(!images.length){
+  if(!images.length && !runtime.photos){
    if(await page.locator('#photogrid .photo').count())throw Error('Unstored photos displayed');
    if(errors.length)throw Error('JS errors '+errors);
    console.log('MIMMI_ZERO_STORED_IMAGES_NO_FAKE_ALBUMS_PASS');
    return;
   }
-  const first=albums[0];
-  const card=page.locator('#albumgrid [data-id="'+first.id+'"]');
-  if(!await card.count())throw Error('Physical album card missing '+first.id);
+  // Exercise a *real local file*, not a sleeping private-cloud API endpoint.
+  const publicAlbum=await page.evaluate(()=>{
+    const a=stored.find(x=>validImages(x).some(p=>p.url?.startsWith('stored-albums/')));
+    return a?.id||null;
+  });
+  if(!publicAlbum)throw Error('No physical public image to check in the gallery');
+  const card=page.locator('#albumgrid [data-id="'+publicAlbum+'"]');
+  if(!await card.count())throw Error('Saved public album card missing '+publicAlbum);
   await card.click();
   await page.waitForFunction(()=>!document.querySelector('#detail').hidden,{timeout:12000});
+  const actual=await page.evaluate(id=>validImages(stored.find(x=>x.id===id)).length,publicAlbum);
   const rendered=await page.locator('#detailphotos .photo').count();
-  if(rendered!==first.images.length)throw Error('Only physical photo files count: '+rendered+' vs '+first.images.length);
-  await page.locator('#detailphotos .photo').first().click();
+  if(rendered!==actual)throw Error('Rendered photo count mismatch: '+rendered+' vs '+actual);
+  const localPhoto=page.locator('#detailphotos .photo:has(img[src^="stored-albums/"])').first();
+  if(!await localPhoto.count())throw Error('Gallery did not expose physical public photo');
+  await localPhoto.click();
   await page.waitForFunction(()=>document.querySelector('#full')?.naturalWidth>100||document.querySelector('#media-status')?.textContent?.includes('불러오지 못'),{timeout:20000});
-  if(await page.locator('#full').evaluate(e=>e.naturalWidth)<=100)throw Error('First physically stored photo did not display');
+  if(await page.locator('#full').evaluate(e=>e.naturalWidth)<=100)throw Error('Saved public photo did not decode in browser');
   const src=await page.locator('#full').getAttribute('src');
-  if(!src?.startsWith('stored-albums/'))throw Error('Viewer used external photo URL instead of stored bytes: '+src);
+  if(!src?.startsWith('stored-albums/'))throw Error('Expected physically stored static file: '+src);
   await page.locator('#close').click();
   await page.locator('#back').click();
   await page.locator('#browse-toggle').click();
@@ -88,6 +105,6 @@ if(index.physical_verified_image_count!==undefined&&index.physical_verified_imag
   if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth+2))throw Error('Mobile overflow');
   if(errors.length)throw Error('JS exceptions: '+errors.join('; '));
   await page.screenshot({path:'mimmi-beta18-clone-chromium.png'});
-  console.log('MIMMI_PHYSICALLY_STORED_CHROMIUM_MOBILE_PASS',JSON.stringify({version,albums:albums.length,verifiedFiles:images.length,browserRendered:probe.length}));
+  console.log('MIMMI_PHYSICALLY_STORED_CHROMIUM_MOBILE_PASS',JSON.stringify({version,albums:runtime.albums,uniqueVisiblePhotos:runtime.photos,verifiedPublicFiles:images.length,browserRendered:probe.length}));
  }finally{await browser.close()}
 })().catch(e=>{console.error(e.stack||String(e));process.exit(1)});

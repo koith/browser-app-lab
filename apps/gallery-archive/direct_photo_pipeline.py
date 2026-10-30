@@ -84,9 +84,11 @@ def page_images(raw,url,model):
                 derivative=re.search(r'-(\d{2,5})x(\d{2,5})(?=\.)',p.path)
                 identity=re.sub(r'-\d{2,5}x\d{2,5}(?=\.)','',p.path)
                 key=(p.hostname,identity)
-                score=0 if derivative else 100000
-                if derivative:score=int(derivative[1])*int(derivative[2])**.5
-                if len(bits)>1 and bits[1].endswith('w') and bits[1][:-1].isdigit():score+=int(bits[1][:-1])
+                descriptor=int(bits[1][:-1]) if len(bits)>1 and bits[1].endswith('w') and bits[1][:-1].isdigit() else 0
+                resized=bool(derivative) or any(k.casefold() in {'w','width','h','height','mw','resize'} for k,_ in parse_qsl(p.query))
+                # An arbitrary numeric bonus let a 3000px resize beat its
+                # observed native original. Rank native identity first.
+                score=(not resized,descriptor,int(derivative[1])*int(derivative[2]) if derivative else 0)
                 if key not in candidates:order.append(key)
                 if key not in candidates or score>candidates[key][0]:candidates[key]=(score,image)
     links=[]
@@ -178,7 +180,8 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None):
             if work:
                 new_albums.append(work);new_total+=len(work['images']);downloaded_now+=len(work['images'])
             results.append(info)
-            print('VISUAL_PUBLIC_WORK',model,aid,json.dumps(info,ensure_ascii=False),flush=True)
+            print('VISUAL_PUBLIC_WORK',model,aid,json.dumps({k:v for k,v in info.items()
+                if k not in ('observed_filename_numbers','saved_cut_correspondence')},ensure_ascii=False),flush=True)
             continue
         images=list(resumed.get(aid,[]));occupied.update(p['number'] for p in images);next_number=max(occupied,default=0)+1
         queue=list(dict.fromkeys([book['source']]+[u for u in book.get('source_pages',[]) if safe_page(u)]));visited=set();errors=[];candidate_count=0

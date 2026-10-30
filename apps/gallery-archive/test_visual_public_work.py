@@ -13,6 +13,7 @@ class VisualWorkTests(unittest.TestCase):
             data={n:photo(seed) for n,seed in enumerate((0,40,80,140,210),1)}
             prior=[{'number':n,'sha256':hashlib.sha256(data[n]).hexdigest(),
                     'preview_sha256':hashlib.sha256(data[n]).hexdigest(),'width':800,'height':1200} for n in (1,2,3)]
+            prior.append({**prior[2],'number':8})
             page='https://sexy.pixibb.com/mimmi-fixture/'
             class Client:
                 omit=False;corrupt=False
@@ -29,7 +30,7 @@ class VisualWorkTests(unittest.TestCase):
             saved={p['sha256'] for p in prior};out=Path(temporary);client=Client()
             work,report=collect_work(book,prior,client,out,5,saved,'mimmi')
             self.assertEqual(report['saved_reference_anchors'],3)
-            self.assertEqual([p['number'] for p in work['images']],[4,5])
+            self.assertEqual([p['number'] for p in work['images']],[9,10])
             self.assertEqual([p['source_photo_number'] for p in work['images']],[4,5])
             for row in work['images']:
                 self.assertEqual((out/row['key']).read_bytes(),data[row['source_photo_number']])
