@@ -40,6 +40,25 @@ jobs:
           python apps/gallery-archive/test_public_crawl_transport.py
           python apps/mimmi-gallery/test_pixibb_public.py
           python apps/mimmi-gallery/test_xiutu_public.py
+      - name: Estimate real redundant HTTP GETs avoided from the verified source catalogs
+        run: |
+          python - <<'PY'
+          import json,sys
+          from pathlib import Path
+          root=Path("apps/mimmi-gallery")
+          sys.path.insert(0,str(root.resolve()))
+          from collect_pixibb_public import cached_verified_photo
+          from collect_xiutu_public import previous_verified_photo
+          for name,fn in (("PixiBB",cached_verified_photo),("CreamSoda",previous_verified_photo)):
+              file=root/("pixibb-public-previews.json" if name=="PixiBB" else "xiutu-public-previews.json")
+              d=json.loads(file.read_text(encoding="utf-8"))
+              samples=[p for a in d["albums"] for p in a.get("samples",[])]
+              reusable=sum(fn(p["url"],p) is not None for p in samples)
+              measured=round(reusable/max(1,len(samples))*100,1)
+              print("SHA_CACHE_BENCHMARK",name,"previously_checked",len(samples),
+                    "reusable_without_image_GET",reusable,"percent",measured)
+              assert len(samples)>20 and reusable/len(samples)>0.8
+          PY
       - name: Mark code validated; physical photo counts require independent TeraBox and deployed browser QA
         run: |
           echo 'PASS: two crawlers avoid re-reading previous SHA-verified bytes; retryable evidence merge retains source results; transient retry policy respects 403/451' >> "$GITHUB_STEP_SUMMARY"
