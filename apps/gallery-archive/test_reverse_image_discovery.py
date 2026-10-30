@@ -51,13 +51,28 @@ def main():
         def pretend(session, url):
             calls.append(url)
             return {"status": "leads_found", "links": [
-                {"url": "https://coserbox.com/model/mimmi", "label": "candidate"}]}
+                {"url": "https://coserbox.com/model/yui" if "/yui-gallery/" in url
+                        else "https://coserbox.com/model/mimmi",
+                 "label": "Sim Yui photo" if "/yui-gallery/" in url else "Mimmi photo"}]}
         output = mod.discover(root, max_seeds=3, offset=2, delay=0, engine=pretend)
         assert output["seed_queries"] == 3
-        assert output["candidate_page_urls"] == 1
+        assert output["candidate_page_urls"] == 2
         assert not output["gallery_images_added"]
         assert output["research_only_not_acquired"]
         assert len(calls) == 3
+
+    assert mod.identity_supported({"model": "mimmi", "album_title": "Retrospection"},
+                                  {"url": "https://www.4khd.com/content/jvid-other",
+                                   "label": "JVID Li Feier"}) is False
+    assert mod.identity_supported({"model": "mimmi", "album_title": "Nikke Yuni"},
+                                  {"url": "https://cosmeitu.com/mimmi/nikke",
+                                   "label": "Mimmi Nikke Yuni"}) is True
+    assert mod.identity_supported({"model": "yui", "album_title": "Teddy Bear"},
+                                  {"url": "https://coserbox.com/yui/teddy-bear",
+                                   "label": "Yui SWEETBOX Teddy Bear"}) is True
+    assert mod.identity_supported({"model": "yui", "album_title": "Teddy Bear"},
+                                  {"url": "https://coserbox.com/yui-nomodel",
+                                   "label": "Other model"}) is False
 
     html = ('<a href="https://www.google.com/url?q=https%3A%2F%2F'
             'cosmeitu.com%2Fshow%2Fmimmi&sa=U">Mimmi original</a>'
