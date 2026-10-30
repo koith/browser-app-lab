@@ -252,7 +252,8 @@ def discover(root: Path = ROOT, max_seeds=10, offset=0, delay=2.0,
         evidence = engine(session, seed["public_image_url"])
         links = evidence.get("links", [])
         rows.append({**seed, "engine": "google_lens_tineye_yandex_public",
-                     "search_status": evidence.get("status"),\n                     "engine_statuses": evidence.get("engine_statuses", {}),
+                     "search_status": evidence.get("status"),
+                     "engine_statuses": evidence.get("engine_statuses", {}),
                      "candidate_pages": links,
                      "new_private_photos_stored": 0,
                      "new_gallery_photos_visible": 0})
@@ -265,7 +266,7 @@ def discover(root: Path = ROOT, max_seeds=10, offset=0, delay=2.0,
         "seed_queries": len(rows),
         "search_readable_results": sum(bool(x["candidate_pages"]) for x in rows),
         "engine_status_counts": {name: {status: sum(
-            r["engine_statuses"].get(name) == status for r in rows)
+            r["engine_statuses"].get(name, "not_run") == status for r in rows)
             for status in sorted(set(r["engine_statuses"].get(name, "not_run") for r in rows))}
             for name in ("lens", "tineye", "yandex")},
         "candidate_page_urls": len({p["url"] for x in rows for p in x["candidate_pages"]}),
