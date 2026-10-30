@@ -109,7 +109,7 @@ def rows(root: Path, model: str, owner: Path | None = None) -> dict:
 
     seen_sources = set()
     known_source_sha = set()
-    per_album = defaultdict(lambda: {"sha": set(), "numbers": set(), "expected": None})
+    per_album = defaultdict(lambda: {"sha": set(), "numbers": set(), "by_number": defaultdict(set), "expected": None})
     invalid_entries = 0
     work_ids = set()
     for filename in SOURCE_FILES[model]:
@@ -137,6 +137,7 @@ def rows(root: Path, model: str, owner: Path | None = None) -> dict:
                 seen_sources.add(key)
                 record["sha"].add(p["sha256"])
                 record["numbers"].add(n)
+                record["by_number"][n].add(p["sha256"])
                 known_source_sha.add(p["sha256"])
 
     # SHA equality is objective evidence across mirrored IDs. Identical titles
@@ -145,17 +146,28 @@ def rows(root: Path, model: str, owner: Path | None = None) -> dict:
     missing = []
     known_missing = 0
     advertised_missing = 0
+    unfilled_source_positions = 0
+    alternate_versions_at_filled_positions = 0
     for aid, info in per_album.items():
         absent = info["sha"] - stored_sha
         known_missing += len(absent)
         expected = info["expected"]
         filled_positions = set(saved.get(aid, {}))
+        source_unfilled = info["numbers"] - filled_positions
+        source_alternative_hashes = sum(
+            len(hashes - stored_sha) for number, hashes in info["by_number"].items()
+            if number in filled_positions
+        )
+        unfilled_source_positions += len(source_unfilled)
+        alternate_versions_at_filled_positions += source_alternative_hashes
         if expected is not None:
             advertised_missing += len(set(range(1, expected + 1)) - filled_positions)
-        if absent or (expected is not None and len(filled_positions) < expected):
+        if source_unfilled or (expected is not None and len(filled_positions) < expected) or source_alternative_hashes:
             missing.append({
                 "id": aid,
                 "source_sha_not_yet_stored": len(absent),
+                "source_numbered_positions_not_stored": len(source_unfilled),
+                "alternate_source_sha_at_saved_number": source_alternative_hashes,
                 "stored_numbered_positions": len(filled_positions),
                 "source_known_numbers": len(info["numbers"]),
                 "web_expected_numbered_positions": expected,
@@ -165,8 +177,9 @@ def rows(root: Path, model: str, owner: Path | None = None) -> dict:
                 ),
             })
     missing.sort(key=lambda a: (
-        -(a["source_sha_not_yet_stored"]),
-        -(a["missing_numbered_positions"] or 0), a["id"]
+        -(a["source_numbered_positions_not_stored"]),
+        -(a["missing_numbered_positions"] or 0),
+        -(a["alternate_source_sha_at_saved_number"]), a["id"]
     ))
     saved_positions = sum(len(x) for x in saved.values())
     return {
@@ -182,10 +195,12 @@ def rows(root: Path, model: str, owner: Path | None = None) -> dict:
         "research_distinct_sha_candidates": len(known_source_sha),
         "research_distinct_sha_not_in_saved_catalog": len(unarchived_shas),
         "missing_source_sha_album_observations": known_missing,
+        "source_numbered_positions_not_stored": unfilled_source_positions,
+        "source_sha_alternatives_for_already_filled_positions": alternate_versions_at_filled_positions,
         "advertised_numbered_positions_not_in_matching_id": advertised_missing,
         "research_records_skipped_without_valid_sha": invalid_entries,
         "albums_needing_review": missing,
-        "caution": "Research, advertised totals, and private-catalog entries are not newly downloaded images. Missing positions can include equivalent cross-site albums with different IDs. Paid-edition completeness and publisher masters are not certified.",
+        "caution": "Source SHA differences at an occupied number are ALTERNATE IMAGE VERSIONS, not a missing photo. Research, advertised totals, and private-catalog entries are not newly downloaded images. Cross-site album IDs may differ. Paid-edition completeness and publisher masters are not certified.",
     }
 
 
