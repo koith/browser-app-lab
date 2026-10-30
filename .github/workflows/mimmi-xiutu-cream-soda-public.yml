@@ -43,20 +43,8 @@ jobs:
                   assert len(p['sha256'])==64 and p['bytes']>4500
           print('MIMMI_SECONDARY_PUBLIC_CREAMSODA_EVIDENCE_ONLY',r['summary'])
           PY
-      - name: Reconcile source evidence without publishing unverified photographs
+      - name: Merge long-running verified crawl without Git rebase conflicts
         if: github.ref == 'refs/heads/main'
         run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add apps/mimmi-gallery/xiutu-public-previews.json
-          if ! git diff --cached --quiet; then
-            git commit -m "Verify secondary public Mimmi CreamSoda photo pages and SHA image links"
-          fi
-          git fetch origin main
-          git rebase origin/main
-          python apps/mimmi-gallery/build_model_gallery.py
-          git add apps/mimmi-gallery/source-viewer-albums.json apps/mimmi-gallery/albums.json
-          if ! git diff --cached --quiet; then
-            git commit -m "Reconcile Mimmi multi-source public SHA evidence"
-          fi
-          git push origin HEAD:main
+          python apps/gallery-archive/test_commit_crawler_research.py
+          python apps/gallery-archive/commit_crawler_research.py --manifest xiutu-public-previews.json --retries 8
