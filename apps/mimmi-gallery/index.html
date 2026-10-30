@@ -400,7 +400,7 @@ vaultInput.onchange=async()=>{
 };
 Promise.all([
  fetch('stored-albums.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('stored index unavailable');return r.json()}),
- {albums:[]}, // Render's startup must never block the initial gallery.
+ fetch('owner-index.json',{cache:'no-store'}).then(r=>r.ok?r.json():{schema_version:1,model:'mimmi',albums:[]}).then(d=>({albums:MimmiPrivate.fromIndex(d)})).catch(error=>({albums:[],error:error.message})), // Complete saved-photo metadata from static Pages; originals remain on TeraBox.
  PhotoVault.albums('mimmi').then(albums=>({albums})).catch(error=>({albums:[],error:error.message})),
  fetch('identity-exclusions.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('identity exclusions');return r.json()}),
  fetch('album-covers.json',{cache:'no-store'}).then(r=>r.ok?r.json():{}).catch(()=>({})),
