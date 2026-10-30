@@ -27,18 +27,36 @@ def inspect(browser,model,spec):
     ctx=browser.new_context(viewport={"width":390,"height":844},
                             is_mobile=True,has_touch=True,locale="ko-KR")
     page=ctx.new_page()
+    errors=[];responses=[]
+    page.on("pageerror",lambda error:errors.append(str(error)[:260]))
+    page.on("response",lambda response:responses.append(
+        (response.status,response.url.split('/')[-1]) )
+        if "owner-index.json" in response.url else None)
     page.route("**/*onrender.com/**",lambda route:route.abort("blockedbyclient"))
     try:
         for round in range(2):
             response=page.goto(f"{BASE}/{model}-gallery/",wait_until="domcontentloaded",timeout=45000)
             assert response.status==200,response.status
             assert page.url.startswith(f"{BASE}/{model}-gallery/")
-            page.wait_for_function("""([expected,minimum])=>{
-                if(typeof stored==='undefined'||!Array.isArray(stored))return false;
-                const owner=stored.reduce((n,a)=>n+(a.images||[]).filter(p=>p.ownerAlbum).length,0);
-                const all=stored.reduce((n,a)=>n+(a.images||[]).length,0);
-                return owner>=expected && all>=minimum;
-            }""",arg=[spec["owner"],spec["minimum_visible"]],timeout=45000)
+            try:
+                page.wait_for_function("""([expected,minimum])=>{
+                    if(typeof stored==='undefined'||!Array.isArray(stored))return false;
+                    const owner=stored.reduce((n,a)=>n+(a.images||[]).filter(p=>p.ownerAlbum).length,0);
+                    const all=stored.reduce((n,a)=>n+(a.images||[]).length,0);
+                    return owner>=expected && all>=minimum;
+                }""",arg=[spec["owner"],spec["minimum_visible"]],timeout=45000)
+            except Exception:
+                debug=page.evaluate("""()=>({
+                  visible:typeof stored==='undefined'?null:stored.reduce((n,a)=>n+a.images.length,0),
+                  owners:typeof stored==='undefined'?null:stored.reduce((n,a)=>n+a.images.filter(p=>p.ownerAlbum).length,0),
+                  albums:typeof stored==='undefined'?null:stored.length,
+                  message:document.querySelector('#nothing')?.textContent,
+                  bodyText:document.body.innerText.slice(0,250),
+                })""")
+                print("GALLERY_FIRST_PAINT_DEBUG",model,json.dumps({
+                    "debug":debug,"script_errors":errors[-5:],
+                    "owner_index_response":responses[-5:]},ensure_ascii=False),flush=True)
+                raise
             info=page.evaluate("""()=>({
                albums:stored.length,
                visible:stored.reduce((n,a)=>n+(a.images||[]).length,0),
