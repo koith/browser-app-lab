@@ -375,7 +375,16 @@ Promise.all([
     row.images[index]={...previous,...p};
   }
  }
- for(const row of combined.values())row.images.sort((a,b)=>(a.number??Number.MAX_SAFE_INTEGER)-(b.number??Number.MAX_SAFE_INTEGER));
+ for(const row of combined.values()){
+  // Keep each physically archived SHA once in the viewer, even when an old
+  // backup indexes the same byte file at several positions.
+  const shaSeen=new Set();
+  row.images=row.images.filter(p=>{
+   if(!p.sha256||shaSeen.has(p.sha256))return false;
+   shaSeen.add(p.sha256);return true;
+  });
+  row.images.sort((a,b)=>(a.number??Number.MAX_SAFE_INTEGER)-(b.number??Number.MAX_SAFE_INTEGER));
+ }
  stored=[...combined.values()];
  catalog=stored.slice();
  }
