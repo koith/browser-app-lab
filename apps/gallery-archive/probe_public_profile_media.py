@@ -69,6 +69,20 @@ def run():
                 row["pagination_candidates"]=len(pages)
                 row["article_elements"]=len(BeautifulSoup(r.text,"html.parser").select("article,.timeline-item,.tweet,.status"))
                 row["page_contains_expected_handle"]=source["account"].casefold() in r.text.casefold()
+                soup=BeautifulSoup(r.text,"html.parser")
+                row["sample_articles"]=[{
+                    "tag":el.name,"class":el.get("class",[])[:4],
+                    "data_username":el.get("data-username"),
+                    "has_handle":source["account"].casefold() in el.get_text(" ",strip=True).casefold(),
+                    "media_url_count":len(media_urls(source,str(el))[0])
+                } for el in soup.select("article,.timeline-item,.tweet,.status")[:4]]
+                row["next_link_candidates"]=[{
+                    "label":a.get_text(" ",strip=True)[:40],
+                    "href_path":urlsplit(urljoin(source["url"],a.get("href",""))).path[:150],
+                    "query_keys":sorted(__import__("urllib.parse",fromlist=["parse_qs"]).parse_qs(
+                        urlsplit(urljoin(source["url"],a.get("href",""))).query).keys())[:5]
+                } for a in soup.select("a[href]") if any(t in a.get_text(" ",strip=True).lower()
+                    for t in ("next","older","load more","다음","もっと","›","»"))][:8]
             else:
                 row["media_url_count"]=0
         except requests.RequestException as e:
