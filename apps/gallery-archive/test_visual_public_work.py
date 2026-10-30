@@ -35,7 +35,10 @@ class VisualWorkTests(unittest.TestCase):
             for row in work['images']:
                 self.assertEqual((out/row['key']).read_bytes(),data[row['source_photo_number']])
             client.omit=True
-            self.assertIsNone(collect_work(book,prior,client,out,5,saved,'mimmi')[0])
+            partial,coverage=collect_work(book,prior,client,out,5,{p['sha256'] for p in prior},'mimmi')
+            self.assertEqual([p['source_photo_number'] for p in partial['images']],[4])
+            self.assertEqual(coverage['unresolved_source_numbers'],[5])
+            self.assertFalse(coverage['source_edition_all_files_accounted_for'])
             client.omit=False;client.corrupt=True
             # Cached verified reference bytes remain acceptable. A new empty
             # stage must reject the corrupted remote response.

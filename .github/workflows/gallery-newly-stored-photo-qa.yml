@@ -14,6 +14,9 @@ on:
       - .github/workflows/gallery-newly-stored-photo-qa.yml
 permissions:
   contents: read
+concurrency:
+  group: newly-stored-exact-originals-${{ github.ref }}
+  cancel-in-progress: false
 jobs:
   syntax:
     runs-on: ubuntu-24.04
@@ -29,9 +32,27 @@ jobs:
       fail-fast: false
       max-parallel: 4
       matrix:
-        model: [yui, mimmi]
-        browser: [chromium, webkit]
-        shard: [0, 1, 2, 3]
+        include:
+          - {model: yui, browser: chromium, shard: 0, shards: 2}
+          - {model: yui, browser: webkit, shard: 0, shards: 2}
+          - {model: yui, browser: chromium, shard: 1, shards: 2}
+          - {model: yui, browser: webkit, shard: 1, shards: 2}
+          - {model: mimmi, browser: chromium, shard: 0, shards: 8}
+          - {model: mimmi, browser: webkit, shard: 0, shards: 8}
+          - {model: mimmi, browser: chromium, shard: 1, shards: 8}
+          - {model: mimmi, browser: webkit, shard: 1, shards: 8}
+          - {model: mimmi, browser: chromium, shard: 2, shards: 8}
+          - {model: mimmi, browser: webkit, shard: 2, shards: 8}
+          - {model: mimmi, browser: chromium, shard: 3, shards: 8}
+          - {model: mimmi, browser: webkit, shard: 3, shards: 8}
+          - {model: mimmi, browser: chromium, shard: 4, shards: 8}
+          - {model: mimmi, browser: webkit, shard: 4, shards: 8}
+          - {model: mimmi, browser: chromium, shard: 5, shards: 8}
+          - {model: mimmi, browser: webkit, shard: 5, shards: 8}
+          - {model: mimmi, browser: chromium, shard: 6, shards: 8}
+          - {model: mimmi, browser: webkit, shard: 6, shards: 8}
+          - {model: mimmi, browser: chromium, shard: 7, shards: 8}
+          - {model: mimmi, browser: webkit, shard: 7, shards: 8}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -41,7 +62,7 @@ jobs:
           python -m playwright install --with-deps ${{ matrix.browser }}
       - name: Decode exact archived thumbnails and full images, then download and SHA check actual bytes
         run: |
-          python apps/gallery-archive/qa_new_physical_photos.py --model '${{ matrix.model }}' --browser '${{ matrix.browser }}' --shard '${{ matrix.shard }}' --shards 4 --since-commit e4b633fc189429e79c9b70038ef6f2b6b9fdd0a5 --out "$RUNNER_TEMP/physical-${{ matrix.model }}-${{ matrix.browser }}-${{ matrix.shard }}.json"
+          python apps/gallery-archive/qa_new_physical_photos.py --model '${{ matrix.model }}' --browser '${{ matrix.browser }}' --shard '${{ matrix.shard }}' --shards '${{ matrix.shards }}' --since-commit e4b633fc189429e79c9b70038ef6f2b6b9fdd0a5 --out "$RUNNER_TEMP/physical-${{ matrix.model }}-${{ matrix.browser }}-${{ matrix.shard }}.json"
       - name: Summarize real deployed results without any photo bundles
         if: always()
         run: |

@@ -53,6 +53,9 @@ async def run(args):
         selected=[{'id':a['id'],'images':[p for p in a['images'] if old.get((a['id'],p['number']))!=p['sha256']]} for a in after['albums']]
         selected=[a for a in selected if a['images']]
     all_selected=sum(len(a['images']) for a in selected)
+    html=(ROOT/'apps'/(args.model+'-gallery')/'index.html').read_text()
+    expected_version=re.search(r'id="app-version"[^>]*>([^<]+)',html).group(1)
+    version_numbers=lambda value:tuple(int(n) for n in re.findall(r'\d+',value))
     offset=0;sharded=[]
     for album in selected:
         images=[]
@@ -90,7 +93,10 @@ async def run(args):
                     const saved=stored.find(x=>x.id===a.id);
                     return !!saved && a.images.every(p=>validImages(saved).some(q=>q.number===p.number&&q.sha256===p.sha256));
                 })''',selected)
-                if present:break
+                version=await page.locator('#app-version').inner_text()
+                duplicates=await page.evaluate('''()=>stored.reduce((n,a)=>{
+                    const sha=validImages(a).map(p=>p.sha256);return n+sha.length-new Set(sha).size},0)''')
+                if present and version_numbers(version)>=version_numbers(expected_version) and not duplicates:break
                 if time.monotonic()>=deadline:raise AssertionError('Exact newly stored SHA not in deployed gallery')
                 await asyncio.sleep(3)
             report['version']=await page.locator('#app-version').inner_text()
@@ -112,10 +118,11 @@ async def run(args):
                         .findIndex(p=>p.number===n)''',[aid,number])
                     assert position>=0,(aid,number,'saved slot missing')
                     photo=page.locator(f'#detailphotos .photo[data-i="{position}"]')
-                    await photo.scroll_into_view_if_needed()
+                    await current_card(page,f'#detailphotos .photo[data-i="{position}"]')
                     await page.wait_for_function('''i=>{const im=document.querySelector('#detailphotos .photo[data-i="'+i+'"] img');
                         return im?.complete&&im.naturalWidth>=160}''',arg=position,timeout=105000)
-                    await photo.click();await page.locator('#lightbox').wait_for(state='visible')
+                    await current_card(page,f'#detailphotos .photo[data-i="{position}"]',click=True)
+                    await page.locator('#lightbox').wait_for(state='visible')
                     await page.wait_for_function('''()=>{const im=document.querySelector('#full');
                         return im?.complete&&im.naturalWidth>=160}''',timeout=105000)
                     size=await page.locator('#full').evaluate('im=>[im.naturalWidth,im.naturalHeight]')

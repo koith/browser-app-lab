@@ -150,10 +150,9 @@ footer{padding:15px 0 25px;justify-content:flex-end}
  <div class="detail-heading"><button class="back" id="back" aria-label="화보 목록으로 돌아가기">‹</button><h2 class="detail-title" id="albumname"></h2><span class="counter" id="albumtotal"></span></div>
  <nav class="mainnav" aria-label="모델 전환"><a href="../yui-gallery/" target="_blank" rel="noopener noreferrer" title="심유이 갤러리를 새 탭에서 열기">심유이 ↗</a><a href="./" aria-current="page">밈미</a></nav>
  <button id="search-toggle" class="search-toggle" aria-label="화보 검색 열기" aria-haspopup="dialog" aria-controls="search-dialog"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m15.5 15.5 5 5"/></svg></button>
- <small id="app-version" class="version-chip">v0.1.0-mimmi.15</small>
+ <small id="app-version" class="version-chip">v0.1.0-mimmi.16</small>
 </header>
 <div id="browse">
- <input id="vault-file" type="file" accept=".zip,application/zip" multiple hidden><span id="vault-status" hidden role="status"></span>
  <div class="browse-meta"><p class="inventory" id="inventory">화보를 불러오는 중</p><span class="counter" id="total"></span></div>
 
   <div class="filters"><button id="browse-toggle" class="filter active" type="button" aria-controls="albumgrid publishergrid" aria-pressed="false" aria-label="화보 목록 · 발행처 목록으로 전환"><span id="browse-mode">화보</span><span aria-hidden="true" class="switch-icon"> ⇄</span></button></div>
@@ -175,7 +174,7 @@ footer{padding:15px 0 25px;justify-content:flex-end}
  </form>
 </dialog>
 <div id="lightbox" role="dialog" aria-label="사진 보기" aria-modal="true">
- <div class="lighttop"><button class="lightbtn" id="close" aria-label="닫기">×</button><span id="position"></span><small class="version-chip">v0.1.0-mimmi.15</small></div>
+ <div class="lighttop"><button class="lightbtn" id="close" aria-label="닫기">×</button><span id="position"></span><small class="version-chip">v0.1.0-mimmi.16</small></div>
  <button class="lightbtn arrow prev" id="prev" aria-label="이전 사진">‹</button><div class="media-frame"><img id="full" alt="화보 사진"><a id="original" target="_blank" rel="noopener">사진 열기 ↗</a></div><button class="lightbtn arrow next" id="next" aria-label="다음 사진">›</button>
  <p id="media-status" role="status"></p>
 </div>
@@ -376,31 +375,6 @@ $('lightbox').addEventListener('touchmove',e=>{if(e.touches.length!==1&&gesture)
 $('lightbox').addEventListener('touchcancel',()=>{gesture=null},{passive:true});
 $('lightbox').addEventListener('touchend',e=>{if(e.touches.length){gesture=null;return}const g=gesture;gesture=null;const t=e.changedTouches[0];if(!g?.valid||!t||(visualViewport?.scale||1)>1.01)return;const dx=t.clientX-g.x,dy=t.clientY-g.y;if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.5)step(dx>0?-1:1)},{passive:true});
 // Backward-compatible hidden verifier is for existing archive QA; no import controls appear in the gallery.
-const vaultInput=$('vault-file'),vaultStatus=$('vault-status');
-const vaultImportResultKey='photo-vault-import-result-mimmi';
-vaultInput.onchange=async()=>{
- const files=Array.from(vaultInput.files||[]);if(!files.length)return;
- 
- let imported=0,verifiedRows=0;const failures=[];
- // Sequential processing keeps memory pressure lower on mobile Safari.
- for(const [i,file] of files.entries()){
-  vaultStatus.textContent='ZIP '+(i+1)+' / '+files.length+' · '+file.name;
-  try{
-   const result=await PhotoVault.importZip(file,'mimmi',message=>{
-    vaultStatus.textContent='ZIP '+(i+1)+' / '+files.length+' · '+message;
-   });
-   imported++;verifiedRows+=result.images;
-  }catch(error){failures.push(file.name+': '+(error?.message||String(error)))}
- }
- vaultInput.value='';
- const detail=failures.length?' · 실패 '+failures.length+'개: '+failures.slice(0,2).join('; '):'';
- const summary=imported?'검증 완료 ZIP '+imported+' / '+files.length+'개 · 사진 '+verifiedRows+'개 항목 처리'+detail:
-   '가져오기 실패: '+failures.slice(0,2).join('; ');
- if(imported){
-  try{sessionStorage.setItem(vaultImportResultKey,summary)}catch{}
-  location.reload();
- }else vaultStatus.textContent=summary;
-};
 Promise.all([
  fetch('stored-albums.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('stored index unavailable');return r.json()}),
  fetch('owner-index.json',{cache:'no-store'}).then(r=>r.ok?r.json():{schema_version:1,model:'mimmi',albums:[]}).then(d=>({albums:MimmiPrivate.fromIndex(d)})).catch(error=>({albums:[],error:error.message})), // Complete saved-photo metadata from static Pages; originals remain on TeraBox.
@@ -461,7 +435,6 @@ Promise.all([
  }
  rebuildStored();
 
- try{const message=sessionStorage.getItem(vaultImportResultKey);if(message){vaultStatus.textContent=message;sessionStorage.removeItem(vaultImportResultKey)}}catch{}
  const archivedCount=stored.reduce((n,a)=>n+validImages(a).length,0);
  $('inventory').textContent=archivedCount+'장 · 실제 저장본';
 
@@ -475,9 +448,9 @@ Promise.all([
   if(!ownerStored.length)return;
   rebuildStored();
   $('inventory').textContent=stored.reduce((n,a)=>n+validImages(a).length,0)+'장 · 실제 저장본';
-  const current=history.state;
+  // Background catalogue refresh must not replace the photo being scrolled,
+  // pressed, or viewed. The next navigation uses the rebuilt saved catalogue.
   render();
-  if(current?.album)applyRoute(current);
  }).catch(()=>{});
 }).catch(()=>{$('total').textContent='—';$('nothing').textContent='이미지를 불러올 수 없습니다.';$('nothing').hidden=false});
 </script>

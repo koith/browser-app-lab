@@ -134,6 +134,25 @@ jobs:
           gh workflow run static.yml --ref main
           gh workflow run gallery-deployed-pages-photo-qa.yml --ref main
           gh workflow run gallery-newly-stored-photo-qa.yml --ref main
+      - name: Preserve per-file source coverage in the same private owner archive
+        if: steps.delta.outputs.changed == 'true'
+        run: |
+          set -euo pipefail
+          audit_path="metadata/audits/${GITHUB_RUN_ID}-${MODEL}.json"
+          python - <<'PY'
+          import os,json
+          from pathlib import Path
+          root=Path(os.environ['RUNNER_TEMP'])/'stage/metadata'
+          path=root/'collection-audit.json';audit=json.loads(path.read_text())
+          verified=json.loads((root/'remote-verification.json').read_text())
+          assert verified['failed']==0 and verified['media_checked']==verified['full_SHA256_verified']
+          audit.update(remote_verified_files=verified['photos'],remote_verified_media_objects=verified['full_SHA256_verified'],owner_index_published=True,
+              gallery_qa_workflow='gallery-newly-stored-photo-qa.yml')
+          path.write_text(json.dumps(audit,ensure_ascii=False,indent=2)+'\n')
+          PY
+          python apps/gallery-archive/safe_rclone.py copyto "$RUNNER_TEMP/stage/metadata/collection-audit.json" "$ARCHIVE_REMOTE/$audit_path" --ignore-times --timeout 60s --retries 1
+          python apps/gallery-archive/safe_rclone.py cat "$ARCHIVE_REMOTE/$audit_path" --timeout 60s --retries 1 > "$RUNNER_TEMP/audit-readback.json"
+          cmp "$RUNNER_TEMP/stage/metadata/collection-audit.json" "$RUNNER_TEMP/audit-readback.json"
       - name: Report file persistence and remote verification separately from browser QA
         if: always()
         run: |

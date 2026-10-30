@@ -208,6 +208,7 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None):
                 former=next((p for p in previous if p['number']==number),None)
                 if number in occupied and not variant:continue
                 if variant and former and former['sha256']!=old.get('sha256'):
+                    if former.get('variant_of_sha256')==old.get('sha256'):continue
                     errors.append({'number':number,'reason':'variant_slot_identity_not_proven'});continue
                 try:
                     r=client.get(url);raw=r.content;p,preview,fmt=inspect(raw)

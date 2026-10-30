@@ -36,6 +36,10 @@ class DirectTests(unittest.TestCase):
             self.assertEqual(report['new_photo_positions'],0)
             p=json.loads((root/'stage/metadata/catalog.json').read_text())['albums'][0]['images'][0]
             self.assertEqual(p['number'],1);self.assertEqual(p['variant_of_sha256'],oldsha)
+            updated={**owner,'albums':[{'id':'public-board','images':[p]}]}
+            again=collect(root,'yui',updated,root/'second-stage',2,2,Client())
+            self.assertEqual(again['new_local_individual_files'],0)
+            self.assertFalse(again['results'][0]['failures'],'Already proven higher-resolution originals must remain idempotent')
 
     def test_public_width_variant_and_scoped_board(self):
         raw='''<title>심유이 공개 사진</title><article><div id="powerbbsContent">

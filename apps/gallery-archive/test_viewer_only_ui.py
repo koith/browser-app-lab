@@ -21,7 +21,11 @@ class ViewerOnlyTest(unittest.TestCase):
                     'href="cloud.html"', ".vault-actions",
                 ):
                     self.assertNotIn(unwanted,html)
-                self.assertIn('multiple hidden><span id="vault-status" hidden',html)
+                for forbidden in ('id="vault-file"','PhotoVault.importZip','vaultInput.onchange'):
+                    self.assertNotIn(forbidden,html)
+                local_reader=(ROOT/f"{model}-gallery/photo-vault.js").read_text(encoding="utf-8")
+                for forbidden in ('importZip','zipEntries','DecompressionStream'):
+                    self.assertNotIn(forbidden,local_reader)
                 self.assertIn(f"{client}.albums()",html)
                 self.assertIn(f"{client}.asset(",html)
                 self.assertIn(f"PhotoVault.albums('{model}')",html)
