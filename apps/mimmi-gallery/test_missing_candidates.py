@@ -1,7 +1,7 @@
 """Check that photo positions are retained even when identical bytes appear elsewhere."""
 import unittest
 
-from missing_candidates import safe_id, saved_positions, select_missing
+from missing_candidates import safe_id, saved_positions, select_missing, owner_catalog_positions
 
 A = "a" * 64
 B = "b" * 64
@@ -68,6 +68,33 @@ class MissingCandidatesTests(unittest.TestCase):
         rows, total = select_missing(source, set(), 0, 1)
         self.assertEqual(total, 2)
         self.assertEqual([p["number"] for p in rows[0]["images"]], [1, 2])
+
+    def test_latest_private_cloud_catalog_skips_saved_positions(self):
+        cloud = {"schema_version": 1, "model": "mimmi",
+                 "storage": "owner-private-terabox-sha-verified-bytes",
+                 "albums": [{"id": "album-a", "images": [{
+                     "number": 1, "sha256": A, "bytes": 9000,
+                     "key": "originals/album-a/00001-aa.jpg"
+                 }]}]}
+        cloud_positions = owner_catalog_positions(cloud)
+        self.assertEqual(cloud_positions, {("album-a", 1)})
+        remaining, count = select_missing(self.source, cloud_positions, 0, 1)
+        self.assertEqual(count, 5)
+        self.assertEqual([p["number"] for p in remaining[0]["images"]], [2, 3])
+
+    def test_invalid_remote_catalog_never_treated_as_saved_files(self):
+        bad = {"schema_version": 1, "model": "mimmi",
+               "storage": "owner-private-terabox-sha-verified-bytes",
+               "albums": [{"id": "album-a", "images": [{
+                   "number": 1, "sha256": A, "bytes": 9000,
+                   "key": "external/album-a/1.jpg"
+               }]}]}
+        with self.assertRaises(ValueError):
+            owner_catalog_positions(bad)
+        bad["albums"][0]["images"][0]["key"] = "originals/album-a/00001.jpg"
+        bad["albums"][0]["images"].append(dict(bad["albums"][0]["images"][0]))
+        with self.assertRaises(ValueError):
+            owner_catalog_positions(bad)
 
     def test_encoded_id_is_stable(self):
         expected = safe_id("name%20encoded")
