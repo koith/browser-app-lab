@@ -127,8 +127,8 @@
       "title": "Azur Lane Tashkent · 공개 웹판",
       "publisher": "DJAWA",
       "source": "https://www.v2ph.com/album/a887785a.html",
-      "expected": 59,
-      "photos": 59,
+      "expected": null,
+      "photos": null,
       "ai_enhanced": false
     },
     {
@@ -1384,12 +1384,12 @@
   ],
   "summary": {
     "displayed_albums": 72,
-    "verified_unique_source_images": 2856,
-    "input_source_image_occurrences": 3027,
+    "verified_unique_source_images": 3068,
+    "input_source_image_occurrences": 3239,
     "duplicate_hashes_skipped": 171,
     "photos_with_alternative_public_source": 111,
     "actual_full_publisher_photobooks": 0,
-    "incomplete_known_count_albums": 19,
+    "incomplete_known_count_albums": 18,
     "curated_research_works": 52
   },
   "notes": "Individual accessible public samples are NOT complete commercial editions."
