@@ -43,8 +43,8 @@ SHA = re.compile(r"^[a-f0-9]{64}$")
 
 
 def physical_seeds(root: Path = ROOT) -> list[dict]:
-    """Only use already PUBLIC GitHub Pages photos, never private owner catalog."""
-    all_seeds = []
+    """Rotate among distinct smallest albums before trying another frame."""
+    albums = []
     for model in MODELS:
         path = root / f"{model}-gallery" / "stored-albums.json"
         doc = json.loads(path.read_text(encoding="utf-8"))
@@ -56,31 +56,34 @@ def physical_seeds(root: Path = ROOT) -> list[dict]:
                 continue
             valid = []
             for photo in images:
-                file = photo.get("url", "")
-                digest = photo.get("sha256", "")
-                # No external links, "..", URL schemes or nonphysical photo rows.
-                if (not isinstance(file, str) or not file.startswith("stored-albums/")
-                    or any(bit in ("", ".", "..") for bit in file.split("/"))
+                rel, digest = photo.get("url", ""), photo.get("sha256", "")
+                if (not isinstance(rel, str) or not rel.startswith("stored-albums/")
+                    or any(bit in ("", ".", "..") for bit in rel.split("/"))
                     or not SHA.fullmatch(digest)
-                    or not re.search(r"\.(?:jpe?g|png|webp)$", file, re.I)):
+                    or not re.search(r"\.(?:jpe?g|png|webp)$", rel, re.I)):
                     continue
-                valid.append((file, digest))
+                valid.append((rel, digest))
             if not valid:
                 continue
-            # Balanced edge/center choices, with few-photo albums first.
             positions = list(dict.fromkeys((0, len(valid) // 2, len(valid) - 1)))
+            photos = []
             for position in positions:
                 rel, digest = valid[position]
-                url = f"{PAGES}/{model}-gallery/{quote(rel, safe='/')}"
-                all_seeds.append({
+                photos.append({
                     "model": model, "album_id": album["id"],
                     "album_title": album.get("title", ""),
                     "album_saved_public_count": len(valid),
-                    "photo_sha256": digest, "public_image_url": url,
+                    "photo_sha256": digest,
+                    "public_image_url": f"{PAGES}/{model}-gallery/{quote(rel, safe='/')}",
                 })
-    return sorted(all_seeds, key=lambda row: (
-        row["album_saved_public_count"], row["model"], row["album_id"],
-        row["public_image_url"]))
+            albums.append(photos)
+    albums.sort(key=lambda photos: (
+        photos[0]["album_saved_public_count"],
+        photos[0]["model"], photos[0]["album_id"]))
+    # Seek first distinct album, then the second and third frame.
+    # This avoids exhausting a run on three photos from one 7-photo album.
+    return [photo for index in range(3) for album in albums
+            for photo in album[index:index + 1]]
 
 
 def untrack(url: str) -> str | None:
@@ -239,6 +242,36 @@ def multi_search(session: requests.Session, public_image_url: str) -> dict:
             "engine_statuses": statuses, "links": merged[:100]}
 
 
+MODEL_MATCH = {
+    "mimmi": re.compile(r"mimmi|mimmissu17|밈미|밈미", re.I),
+    "yui": re.compile(r"sim\s*yui|yui\s*sim|심유이|심혜성|super_yuisan|沈惠星|沈慧圣|ゆい|유이", re.I),
+}
+YUI_SINGLE = re.compile(r"\byui\b", re.I)
+STUDIO = re.compile(r"\bsweet\s?box\b|\bswtb\b|artgravia|athletic club|"
+                    r"wet yui|teddy bear|thru thru|yui.s present|cream soda", re.I)
+
+
+def identity_supported(row: dict, link: dict) -> bool:
+    """Check exact artist hints, never mistake an arbitrary visual neighbor for her."""
+    url = link.get("url", "")
+    label = link.get("label", "")
+    if not isinstance(url, str) or not isinstance(label, str):
+        return False
+    target = unquote(urlsplit(url).path).replace("-", " ").replace("_", " ")
+    combined = f"{label} {target}"
+    model = row["model"]
+    if MODEL_MATCH[model].search(combined):
+        return True
+    if model == "yui" and YUI_SINGLE.search(combined):
+        # Generic Yui alone is insufficient; require her work/studio context.
+        title = row.get("album_title", "")
+        relevant = [x for x in re.findall(r"[a-z]{4,}", title.lower())
+                    if x not in {"sweetbox", "photo", "public", "swtb", "yui"}]
+        return bool(STUDIO.search(combined)
+                    or any(token in combined.lower() for token in relevant))
+    return False
+
+
 def discover(root: Path = ROOT, max_seeds=10, offset=0, delay=2.0,
              engine=multi_search, session=None) -> dict:
     seeds = physical_seeds(root)
@@ -251,10 +284,12 @@ def discover(root: Path = ROOT, max_seeds=10, offset=0, delay=2.0,
     for n, seed in enumerate(selected):
         evidence = engine(session, seed["public_image_url"])
         links = evidence.get("links", [])
+        relevant = [link for link in links if identity_supported(seed, link)]
         rows.append({**seed, "engine": "google_lens_tineye_yandex_public",
                      "search_status": evidence.get("status"),
                      "engine_statuses": evidence.get("engine_statuses", {}),
-                     "candidate_pages": links,
+                     "off_model_match_rejected": len(links) - len(relevant),
+                     "candidate_pages": relevant,
                      "new_private_photos_stored": 0,
                      "new_gallery_photos_visible": 0})
         if n + 1 < len(selected) and delay:
@@ -270,6 +305,7 @@ def discover(root: Path = ROOT, max_seeds=10, offset=0, delay=2.0,
             for status in sorted(set(r["engine_statuses"].get(name, "not_run") for r in rows))}
             for name in ("lens", "tineye", "yandex")},
         "candidate_page_urls": len({p["url"] for x in rows for p in x["candidate_pages"]}),
+        "off_model_match_rejected": sum(x["off_model_match_rejected"] for x in rows),
         "new_private_photos_stored": 0, "gallery_images_added": 0,
         "research_only_not_acquired": True, "results": rows,
     }
@@ -290,7 +326,7 @@ def main():
                            encoding="utf-8")
     print("GALLERY_REVERSE_IMAGE_RESEARCH", json.dumps({
         k: result[k] for k in ("seed_queries", "search_readable_results",
-                               "candidate_page_urls", "engine_status_counts", "new_private_photos_stored",
+                               "candidate_page_urls", "off_model_match_rejected", "engine_status_counts", "new_private_photos_stored",
                                "gallery_images_added")}, ensure_ascii=False))
 
 
