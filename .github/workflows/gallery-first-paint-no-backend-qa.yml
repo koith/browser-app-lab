@@ -1,0 +1,66 @@
+name: Yui Mimmi Full Static Gallery Without Render QA
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/yui-gallery/index.html'
+      - 'apps/mimmi-gallery/index.html'
+      - 'apps/yui-gallery/owner-media.js'
+      - 'apps/mimmi-gallery/owner-media.js'
+      - 'apps/mimmi-gallery/album-grouping.js'
+      - 'apps/mimmi-gallery/test_album_grouping.js'
+      - 'apps/mimmi-gallery/album-aliases.json'
+      - 'apps/gallery-archive/qa_static_full_gallery_first_paint.py'
+      - '.github/workflows/gallery-first-paint-no-backend-qa.yml'
+permissions:
+  contents: read
+concurrency:
+  group: gallery-full-static-first-paint-qa
+  cancel-in-progress: false
+jobs:
+  offline-and-real-pages:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 17
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        browser: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Prove grouped edition images retain exact original SHA and backend numbers
+        run: |
+          node --check apps/mimmi-gallery/album-grouping.js
+          node --check apps/mimmi-gallery/owner-media.js
+          node --check apps/yui-gallery/owner-media.js
+          node apps/mimmi-gallery/test_album_grouping.js
+      - name: Guard against malformed gallery HTML or any source URL/count mistaken for a file
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json,re,subprocess,tempfile
+          from pathlib import Path
+          for model in ('yui','mimmi'):
+              root=Path('apps')/f'{model}-gallery'
+              html=(root/'index.html').read_text()
+              assert html.count('</body></html>')==1
+              scripts=re.findall(r'<script>(.*?)</script>',html,re.S)
+              assert len(scripts)==1,(model,len(scripts))
+              with tempfile.NamedTemporaryFile(suffix='.js',mode='w') as f:
+                  f.write(scripts[0]);f.flush()
+                  subprocess.run(['node','--check',f.name],check=True)
+              index=json.loads((root/'owner-index.json').read_text())
+              assert index['model']==model
+              assert index['physical_originals_indexed'] >= (2999 if model=='yui' else 3168)
+              assert not any('key' in p or 'source_url' in p or 'token' in p
+                             for a in index['albums'] for p in a['images'])
+          PY
+      - name: Install mobile-web browser
+        run: |
+          python -m pip install 'playwright==1.58.0'
+          python -m playwright install --with-deps ${{ matrix.browser }}
+      - name: Open real deployed gallery twice with Render deliberately offline
+        run: python apps/gallery-archive/qa_static_full_gallery_first_paint.py --browser ${{ matrix.browser }}
