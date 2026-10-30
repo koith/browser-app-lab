@@ -24,8 +24,10 @@ from typing import AsyncGenerator
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
 try:
     from gateway.portal import COOKIE_NAME, install_portal, session_valid
+    from gateway.media_cache import VerifiedMediaCache
 except ModuleNotFoundError:
     from portal import COOKIE_NAME, install_portal, session_valid
+    from media_cache import VerifiedMediaCache
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse, Response
 from PIL import Image, ImageOps, UnidentifiedImageError
@@ -53,6 +55,28 @@ TOKEN = os.environ.get("GALLERY_ACCESS_TOKEN", "")
 COOKIE = os.environ.get("RCLONE_CONFIG_ARCHIVE_COOKIE", "")
 _cache = {"time": 0.0, "catalog": None}
 _cache_lock = asyncio.Lock()
+_media_cache = VerifiedMediaCache()
+
+
+def safe_remote_diagnostic(error: str) -> str:
+    # rclone errors include signed download URLs. Remove the entire URL before
+    # truncation so the useful trailing failure reason survives without tokens.
+    value = re.sub(r'https?://[^\s"<>]+', '[remote URL]', error)
+    value = re.sub(r'(?i)(cookie|authorization|ndus|token)[=:]\s*[^\s]+', r'\1=[redacted]', value)
+    lines = [line for line in value.splitlines() if 'Config file' not in line]
+    return ' '.join(lines)[-600:]
+
+
+async def verified_remote_media(key: str, size: int, digest: str, remote: str):
+    if (type(size) is not int or not 1 <= size <= 140_000_000
+            or not isinstance(digest, str) or not re.fullmatch(r'[a-f0-9]{64}', digest)):
+        raise HTTPException(status_code=502, detail='Invalid private media integrity metadata')
+    async def load():
+        return await rclone_bytes(key, size + 1, remote=remote)
+    try:
+        return await _media_cache.get(remote, key, size, digest, load)
+    except ValueError:
+        raise HTTPException(status_code=502, detail='Cloud media SHA-256 integrity check failed')
 
 
 def media_key_valid(key: str) -> bool:
@@ -104,7 +128,9 @@ async def rclone_bytes(path: str, limit: int, *, remote: str | None = None) -> b
             rc = await proc.wait()
             error = await stderr_task
             if rc:
-                print("RCLONE_REMOTE_READ_FAILED", path, error[:300], flush=True)
+                print("RCLONE_REMOTE_READ_FAILED", path, safe_remote_diagnostic(error), flush=True)
+                if 'Failed to login' in error:
+                    raise HTTPException(status_code=503, detail="Storage session unavailable", headers={"Retry-After":"30"})
                 raise HTTPException(status_code=502, detail="Cloud media unavailable")
             return bytes(content)
 
@@ -197,10 +223,14 @@ async def media(album_id: str, image_num: int, kind: str, download: bool = Query
             # A cache outage must not break access to a verified origin preview.
             print("R2_PREVIEW_CACHE_UNAVAILABLE", album_id, image_num, type(exc).__name__, flush=True)
     if blob is None:
-        blob = await rclone_bytes(key, limit)
-        if not integrity_ok(blob):
-            print("CLOUD_MEDIA_INTEGRITY_FAILED", album_id, image_num, kind, flush=True)
-            raise HTTPException(status_code=502, detail="Cloud media integrity check failed")
+        try:
+            blob = await verified_remote_media(key, declared_bytes, declared_digest, REMOTE)
+        except HTTPException as error:
+            if not has_separate_preview or error.status_code not in (502, 504):
+                raise
+            fallback = await media(album_id, image_num, 'original', download=download)
+            fallback.headers['X-Archive-Variant'] = 'verified-original-fallback'
+            return fallback
     extension = key.rsplit(".", 1)[-1].lower()
     content_type = {"jpg":"image/jpeg","jpeg":"image/jpeg","png":"image/png","webp":"image/webp","avif":"image/avif"}.get(extension,"application/octet-stream")
     headers={"Cache-Control":"private, max-age=600","X-Content-Type-Options":"nosniff",
@@ -264,9 +294,14 @@ async def yui_media(album_id: str, image_num: int, kind: str, download: bool = Q
             or not isinstance(digest, str) or not re.fullmatch("[a-f0-9]{64}", digest)
             or type(size) is not int or not 1 <= size <= 35 * 1024 * 1024):
         raise HTTPException(status_code=502, detail="Invalid private media manifest")
-    payload = await rclone_bytes(key, size + 1, remote=YUI_REMOTE)
-    if len(payload) != size or hashlib.sha256(payload).hexdigest() != digest:
-        raise HTTPException(status_code=502, detail="Private photo SHA verification failed")
+    try:
+        payload = await verified_remote_media(key, size, digest, YUI_REMOTE)
+    except HTTPException as error:
+        if kind != 'preview' or error.status_code not in (502, 504):
+            raise
+        fallback = await yui_media(album_id, image_num, 'original', download=download)
+        fallback.headers['X-Archive-Variant'] = 'verified-original-fallback'
+        return fallback
     ext = key.rsplit(".", 1)[-1]
     mime = {"jpg":"image/jpeg","jpeg":"image/jpeg","png":"image/png","webp":"image/webp"}.get(ext)
     if not mime:
@@ -324,6 +359,8 @@ async def _read_cover(model: str, album_id: str, image_num: int,
         try:
             response = await verified_photo(kind)
         except HTTPException as error:
+            if error.detail == 'Storage session unavailable':
+                raise
             if not has_preview or error.status_code not in (502, 503, 504):
                 raise
             # Some archived preview files no longer match their recorded SHA.

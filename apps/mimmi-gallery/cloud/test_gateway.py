@@ -18,6 +18,7 @@ async def read(key,limit,*,remote=None):
     if key=="originals/mimmi-test/0001.jpg":return raw
     raise ValueError("Unexpected key")
 gateway.rclone_bytes=read
+gateway._media_cache.clear()  # The next test must exercise its new origin fixture.
 with TestClient(gateway.app) as client:
     assert client.get("/api/health").status_code==200
     assert client.get("/api/catalog").status_code==200
@@ -33,14 +34,17 @@ with TestClient(gateway.app) as client:
         if key=="metadata/catalog.json":return json.dumps({"schema_version":1,"model":"yui","albums":[]}).encode()
         return raw
     gateway.rclone_bytes=wrong
+    gateway._media_cache.clear()  # The next test must exercise its new origin fixture.
     gateway._cache["catalog"]=None
     assert client.get("/api/catalog",headers=headers).status_code==502
     gateway.rclone_bytes=read
+    gateway._media_cache.clear()  # The next test must exercise its new origin fixture.
     gateway._cache["catalog"]=None
     async def corrupted(key,limit,*,remote=None):
         if key=="metadata/catalog.json":return json.dumps(catalog).encode()
         return b"wrong"+raw
     gateway.rclone_bytes=corrupted
+    gateway._media_cache.clear()  # The next test must exercise its new origin fixture.
     check=client.get("/api/media/mimmi-test/1/original",headers=headers)
     assert check.status_code==502 and b"integrity" in check.content.lower()
 print("MIMMI_GATEWAY_DIRECT_VIEW_AND_SHA_TEST_PASS")
@@ -66,6 +70,7 @@ async def both_models(key,limit,*,remote=None):
     if key=="originals/mimmi-test/0001.jpg":return raw
     raise ValueError("Unknown Mimmi media request")
 gateway.rclone_bytes=both_models
+gateway._media_cache.clear()  # The next test must exercise its new origin fixture.
 gateway._cache["catalog"]=None
 gateway._yui_cache["catalog"]=None
 with TestClient(gateway.app) as client:
@@ -86,6 +91,7 @@ with TestClient(gateway.app) as client:
             return json.dumps(yui_catalog).encode()
         return b"corrupted"
     gateway.rclone_bytes=mismatch
+    gateway._media_cache.clear()  # The next test must exercise its new origin fixture.
     failed=client.get("/api/yui/media/yui-only/4/original",headers=headers)
     assert failed.status_code==502 and b"SHA" in failed.content
 print("YUI_AND_MIMMI_SHARED_RENDER_GATEWAY_DIRECT_VIEW_SHA_MODEL_ISOLATION_PASS")
@@ -106,6 +112,7 @@ async def preview_read(key,limit,*,remote=None):
     if key=="originals/mimmi-test/0001.jpg":return raw
     raise ValueError("Unexpected archive asset")
 gateway.rclone_bytes=preview_read
+gateway._media_cache.clear()  # The next test must exercise its new origin fixture.
 gateway._cache["catalog"]=None
 with TestClient(gateway.app) as client:
     auth={"Authorization":"Bearer offline-mimmi-test-token"}
@@ -118,6 +125,16 @@ with TestClient(gateway.app) as client:
         if key=="previews/mimmi-test/0001-small.webp":return b"incorrect-thumbnail"
         return await preview_read(key,limit,remote=remote)
     gateway.rclone_bytes=corrupt_preview
+    gateway._media_cache.clear()  # The next test must exercise its new origin fixture.
     failed=client.get("/api/media/mimmi-test/1/preview",headers=auth)
-    assert failed.status_code==502
+    assert failed.status_code==200 and failed.content==raw
+    assert failed.headers['X-Archive-Variant']=='verified-original-fallback'
+    assert hashlib.sha256(failed.content).hexdigest()==h
+    async def both_corrupted(key,limit,*,remote=None):
+        if key=='metadata/catalog.json':return json.dumps(preview_catalog).encode()
+        return b'incorrect-original-and-preview'
+    gateway.rclone_bytes=both_corrupted
+    gateway._media_cache.clear()
+    failed=client.get('/api/media/mimmi-test/1/preview',headers=auth)
+    assert failed.status_code==502 and b'SHA' in failed.content
 print("MIMMI_SEPARATE_PREVIEW_SHA_REMOTE_BYTE_QA_PASS")

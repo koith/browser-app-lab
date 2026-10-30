@@ -5,6 +5,8 @@ on:
       - 'apps/mimmi-gallery/cloud/gateway/main.py'
       - 'apps/mimmi-gallery/cloud/test_gateway.py'
       - 'apps/mimmi-gallery/cloud/test_cover_cache.py'
+      - 'apps/mimmi-gallery/cloud/gateway/media_cache.py'
+      - 'apps/mimmi-gallery/cloud/test_media_cache.py'
       - 'apps/yui-gallery/owner-media.js'
       - 'apps/yui-gallery/cloud.html'
       - '.github/workflows/gallery-shared-gateway-qa.yml'
@@ -13,6 +15,8 @@ on:
       - 'apps/mimmi-gallery/cloud/gateway/main.py'
       - 'apps/mimmi-gallery/cloud/test_gateway.py'
       - 'apps/mimmi-gallery/cloud/test_cover_cache.py'
+      - 'apps/mimmi-gallery/cloud/gateway/media_cache.py'
+      - 'apps/mimmi-gallery/cloud/test_media_cache.py'
       - 'apps/yui-gallery/owner-media.js'
       - 'apps/yui-gallery/cloud.html'
       - '.github/workflows/gallery-shared-gateway-qa.yml'
@@ -31,4 +35,5 @@ jobs:
           python -m py_compile apps/mimmi-gallery/cloud/gateway/main.py
           python apps/mimmi-gallery/cloud/test_gateway.py
           python apps/mimmi-gallery/cloud/test_cover_cache.py
+          python apps/mimmi-gallery/cloud/test_media_cache.py
           node --check apps/yui-gallery/owner-media.js
