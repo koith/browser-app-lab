@@ -52,13 +52,16 @@ const engine={chromium,webkit}[engineName];if(!engine)throw Error('Unknown engin
    if(saved.length!==1||saved[0].images.length!==1)throw Error('IndexedDB persistence failed');
    // Repeated SHA under another stored slot must survive in the archive but display only once.
    if(await page.locator('#vault-file').getAttribute('multiple')===null)throw Error('Multi-ZIP selection not enabled');
-   await page.locator('#vault-file').setInputFiles([
-     importName,
-     '/tmp/photo-vault-qa/'+model+'-incremental.zip'
+   await Promise.all([
+     page.waitForEvent('framenavigated',{timeout:30000}),
+     page.locator('#vault-file').setInputFiles([
+       importName,
+       '/tmp/photo-vault-qa/'+model+'-incremental.zip'
+     ])
    ]);
-   await page.waitForFunction(n=>document.querySelector('#inventory')?.textContent?.startsWith(n+'장'),baseline+1,{timeout:15000});
-   if(!(await page.locator('#vault-status').innerText()).includes('검증 완료 ZIP 2 / 2개'))
-     throw Error('Multi-ZIP import confirmation was lost on reload');
+   await page.waitForFunction(()=>document.querySelector('#vault-status')?.textContent?.includes('검증 완료 ZIP 2 / 2개'),{timeout:20000});
+   if(!(await page.locator('#inventory').innerText()).startsWith((baseline+1)+'장'))
+     throw Error('Duplicate SHA was wrongly counted as a second picture');
    const expanded=await page.evaluate(async m=>PhotoVault.albums(m).then(rows=>rows.find(a=>a.id==='vault-fixture-'+m)),model);
    if(!expanded||expanded.images.length!==2||expanded.images[0].number!==1||expanded.images[1].number!==2)
      throw Error('Incremental ZIP overwrote previous photos or collapsed duplicate SHA positions');
