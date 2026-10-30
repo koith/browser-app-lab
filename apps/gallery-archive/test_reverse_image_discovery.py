@@ -129,6 +129,7 @@ def main():
                 return TinEyeResponse()
             class NoYandex:
                 status_code = 403
+                url = "https://www.bing.com/images/search"
             return NoYandex()
     both = mod.multi_search(MultiEngineSession(), "https://koith.github.io/photo.jpg")
     assert both["engine_statuses"]["yandex"] == "http_403", both
