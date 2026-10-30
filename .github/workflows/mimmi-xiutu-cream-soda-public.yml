@@ -28,7 +28,7 @@ jobs:
           python -m py_compile apps/mimmi-gallery/collect_xiutu_public.py
           python apps/mimmi-gallery/test_xiutu_public.py
       - name: Visit actually published CreamSoda works and fetch individually accessible image bytes
-        run: python apps/mimmi-gallery/collect_xiutu_public.py --category-pages 2 --article-pages 20 --images 180
+        run: python apps/mimmi-gallery/collect_xiutu_public.py --category-pages 4 --article-pages 30 --images 400
       - name: Verify each SHA and distinguish source-link evidence from stored media
         run: |
           python - <<'PY'
