@@ -117,12 +117,8 @@ jobs:
             mimmi-stored-public-gallery.yml
             mimmi-pixibb-multipage.yml
             mimmi-xiutu-cream-soda-public.yml
-            mimmi-official-social-public.yml
-            mimmi-v2ph-public.yml
-            mimmi-public-promo.yml
             gallery-terabox-remote-inventory.yml
             yui-dynamic-archive.yml
-            mimmi-official-archive.yml
             mimmi-v2ph-actor-expansion.yml
             mimmi-pixibb-alias-search.yml
           )
@@ -136,4 +132,58 @@ jobs:
             fi
           done
           echo "Completion requires physically saved photos and gallery browser QA, not successful dispatch." >> "$GITHUB_STEP_SUMMARY"
+          test "$failures" -eq 0
+
+  serialize-committing-source-discoveries:
+    needs: audit-both-models
+    if: github.ref == 'refs/heads/main' && github.event_name != 'schedule'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 260
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Avoid cancelling unrun source scans sharing the same Mimmi index writer
+        shell: bash
+        run: |
+          set -euo pipefail
+          # These source discovery workflows share a GitHub concurrency group;
+          # dispatching all together cancels pending work. Run them one by one.
+          workflows=(
+            mimmi-official-archive.yml
+            mimmi-official-social-public.yml
+            mimmi-v2ph-public.yml
+            mimmi-public-promo.yml
+          )
+          failures=0
+          for workflow in "${workflows[@]}"; do
+            before="$(gh run list --repo "$GITHUB_REPOSITORY" -w "$workflow" \
+                       --event workflow_dispatch --branch main --limit 1 \
+                       --json databaseId --jq '.[0].databaseId // empty')"
+            gh workflow run "$workflow" --repo "$GITHUB_REPOSITORY" --ref main
+            run=''
+            for attempt in $(seq 1 24); do
+              candidate="$(gh run list --repo "$GITHUB_REPOSITORY" -w "$workflow" \
+                             --event workflow_dispatch --branch main --limit 1 \
+                             --json databaseId --jq '.[0].databaseId // empty')"
+              if [[ -n "$candidate" && "$candidate" != "$before" ]]; then
+                run="$candidate"
+                break
+              fi
+              sleep 5
+            done
+            if [[ -z "$run" ]]; then
+              echo "- Missing dispatched run: $workflow" >> "$GITHUB_STEP_SUMMARY"
+              failures=$((failures+1))
+              continue
+            fi
+            echo "MIMMI_SOURCE_WORKFLOW_STARTED $workflow $run"
+            if gh run watch "$run" --repo "$GITHUB_REPOSITORY" --exit-status --interval 20; then
+              echo "- Source crawl verified: $workflow, run $run" >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "- Source crawl unsuccessful: $workflow, run $run" >> "$GITHUB_STEP_SUMMARY"
+              failures=$((failures+1))
+            fi
+          done
+          echo "Source URLs and research data are NOT physically saved images." >> "$GITHUB_STEP_SUMMARY"
+          echo "Mimmi private missing-photo archiver is triggered by each successful source discovery completion." >> "$GITHUB_STEP_SUMMARY"
           test "$failures" -eq 0
