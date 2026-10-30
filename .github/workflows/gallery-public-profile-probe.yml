@@ -2,7 +2,7 @@ name: Gallery Social Public Timeline Source Probe
 on:
   workflow_dispatch:
   push:
-    branches: [main, feat/gallery-public-social-mirror-20261030]
+    branches: [main, feat/gallery-public-social-mirror-20261030, fix/gallery-social-cdn-failure-analysis-20261030]
     paths:
       - 'apps/gallery-archive/probe_public_profile_media.py'
       - 'apps/gallery-archive/collect_teapawt_public.py'
