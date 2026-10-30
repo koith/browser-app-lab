@@ -10,6 +10,10 @@ on:
     paths:
       - '.github/workflows/gallery-deployed-pages-photo-qa.yml'
       - 'apps/gallery-archive/qa_deployed_pages_gallery.py'
+  pull_request:
+    paths:
+      - '.github/workflows/gallery-deployed-pages-photo-qa.yml'
+      - 'apps/gallery-archive/qa_deployed_pages_gallery.py'
 permissions:
   contents: read
 concurrency:
