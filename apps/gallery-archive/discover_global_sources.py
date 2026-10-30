@@ -54,7 +54,11 @@ def numbered_entries(html: str, model: str) -> list[dict]:
     for node in soup(["script", "style", "noscript", "nav", "footer"]):
         node.decompose()
     found = {}
-    for line in soup.get_text("\n", strip=True).splitlines():
+    lines = list(soup.get_text("\n", strip=True).splitlines())
+    # Some photo catalogues nest individual list entries inside blockquotes or
+    # display them as inline spans: parse each structural item as a fallback.
+    lines.extend(el.get_text(" ", strip=True) for el in soup.select("li,p,blockquote,tr"))
+    for line in lines:
         line = re.sub(r"\s+", " ", line).strip()
         match = NUMBERED.search(line)
         if not match:
@@ -146,7 +150,16 @@ def discover_source(source: dict, session: requests.Session, timeout: int) -> di
             link = pending.pop(0)
             if link in visited:
                 continue
-            html = fetch_html(session, link, host, timeout)
+            try:
+                html = fetch_html(session, link, host, timeout)
+            except (requests.RequestException, ValueError) as page_error:
+                row.setdefault("page_errors", []).append({
+                    "url": link, "reason": type(page_error).__name__ + ": " + str(page_error)[:100]
+                })
+                if not visited:
+                    raise
+                # Continue along other explicitly linked publisher pages.
+                continue
             visited.add(link)
             row["pages_checked"] = len(visited)
             if mode == "numbered":
@@ -160,7 +173,8 @@ def discover_source(source: dict, session: requests.Session, timeout: int) -> di
                 if not relevant(html, source["model"]):
                     raise ValueError("MODEL_IDENTITY_NOT_CONFIRMED")
                 row["items"] = [{"title": source["title"],
-                                 "work_url": link, "advertised_photos": None}]
+                                 "work_url": link,
+                                 "advertised_photos": source.get("advertised_photos")}]
             elif mode == "profile":
                 if source["identity"].casefold() not in html.casefold():
                     raise ValueError("PROFILE_IDENTITY_NOT_CONFIRMED")
@@ -173,6 +187,8 @@ def discover_source(source: dict, session: requests.Session, timeout: int) -> di
                 break
         row["status"] = "inspected" if mode in ("profile", "reference") else (
             "parsed" if row["items"] else "visible_but_no_parsed_works")
+        if row.get("page_errors"):
+            row["status"] = "partial"
         # Site numbering is local, never use it to dedupe works across sites.
         row["items"] = list({(x.get("work_url") or str(x.get("number"))):
                              x for x in row["items"]}.values())
