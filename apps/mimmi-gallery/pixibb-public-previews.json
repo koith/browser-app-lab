@@ -2,12 +2,13 @@
   "schema_version": 1,
   "model": "mimmi",
   "source": "public visible multi-page PixiBB web previews only",
-  "generated_at": "2026-10-30T00:51:04.007867+00:00",
+  "generated_at": "2026-10-30T05:13:43.999940+00:00",
   "summary": {
     "works": 14,
     "images_verified": 1752,
-    "fresh_verified": 1752,
-    "private_cloud_archived": 0
+    "fresh_verified": 1751,
+    "private_cloud_archived": 0,
+    "physical_files_archived": 0
   },
   "albums": [
     {
@@ -20136,17 +20137,6 @@
           "number": 22
         },
         {
-          "url": "https://images08.pixibb.com/2025/05/08/CreamSoda-Mimmi-Vol.2-Neko-Mimmi-PixiBB.COM-041.jpg",
-          "bytes": 173510,
-          "sha256": "4ee635fee03f4fd70062292da87cf1c26a1b615e81bdb0d1fddbc9cf2fd8cc43",
-          "width": 912,
-          "height": 1368,
-          "quality": "public_watermarked_web_preview",
-          "publisher_original_verified": false,
-          "private_cloud_file": false,
-          "number": 23
-        },
-        {
           "url": "https://images08.pixibb.com/2025/05/08/CreamSoda-Mimmi-Vol.2-Neko-Mimmi-PixiBB.COM-040.jpg",
           "bytes": 130133,
           "sha256": "b1c6599c141d26a2fd3a496702d576f084c34716953f019c0bacff76e8f9eedc",
@@ -20155,7 +20145,7 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 24
+          "number": 23
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/CreamSoda-Mimmi-Vol.2-Neko-Mimmi-PixiBB.COM-037.jpg",
@@ -20166,7 +20156,7 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 25
+          "number": 24
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/CreamSoda-Mimmi-Vol.2-Neko-Mimmi-PixiBB.COM-038.jpg",
@@ -20177,7 +20167,7 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 26
+          "number": 25
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/CreamSoda-Mimmi-Vol.2-Neko-Mimmi-PixiBB.COM-036.jpg",
@@ -20188,7 +20178,7 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 27
+          "number": 26
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/CreamSoda-Mimmi-Vol.2-Neko-Mimmi-PixiBB.COM-035.jpg",
@@ -20199,7 +20189,7 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 28
+          "number": 27
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/CreamSoda-Mimmi-Vol.2-Neko-Mimmi-PixiBB.COM-034.jpg",
@@ -20210,7 +20200,7 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 29
+          "number": 28
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/CreamSoda-Mimmi-Vol.2-Neko-Mimmi-PixiBB.COM-033.jpg",
@@ -20221,7 +20211,7 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 30
+          "number": 29
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/CreamSoda-Mimmi-Vol.2-Neko-Mimmi-PixiBB.COM-032.jpg",
@@ -20232,7 +20222,7 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 31
+          "number": 30
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/CreamSoda-Mimmi-Vol.2-Neko-Mimmi-PixiBB.COM-029.jpg",
@@ -20243,7 +20233,7 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 32
+          "number": 31
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/CreamSoda-Mimmi-Vol.2-Neko-Mimmi-PixiBB.COM-031.jpg",
@@ -20254,7 +20244,7 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 33
+          "number": 32
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/CreamSoda-Mimmi-Vol.2-Neko-Mimmi-PixiBB.COM-030.jpg",
@@ -20265,7 +20255,7 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 34
+          "number": 33
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/CreamSoda-Mimmi-Vol.2-Neko-Mimmi-PixiBB.COM-028.jpg",
@@ -20276,7 +20266,7 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 35
+          "number": 34
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/CreamSoda-Mimmi-Vol.2-Neko-Mimmi-PixiBB.COM-027.jpg",
@@ -20287,7 +20277,7 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 36
+          "number": 35
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/CreamSoda-Mimmi-Vol.2-Neko-Mimmi-PixiBB.COM-026.jpg",
@@ -20298,7 +20288,7 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 37
+          "number": 36
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/CreamSoda-Mimmi-Vol.2-Neko-Mimmi-PixiBB.COM-025.jpg",
@@ -20309,7 +20299,7 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 38
+          "number": 37
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/CreamSoda-Mimmi-Vol.2-Neko-Mimmi-PixiBB.COM-022.jpg",
@@ -20320,7 +20310,7 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 39
+          "number": 38
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/CreamSoda-Mimmi-Vol.2-Neko-Mimmi-PixiBB.COM-024.jpg",
@@ -20331,7 +20321,7 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 40
+          "number": 39
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/CreamSoda-Mimmi-Vol.2-Neko-Mimmi-PixiBB.COM-023.jpg",
@@ -20342,7 +20332,7 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 41
+          "number": 40
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/CreamSoda-Mimmi-Vol.2-Neko-Mimmi-PixiBB.COM-021.jpg",
@@ -20353,7 +20343,7 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 42
+          "number": 41
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/CreamSoda-Mimmi-Vol.2-Neko-Mimmi-PixiBB.COM-020.jpg",
@@ -20364,7 +20354,7 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 43
+          "number": 42
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/CreamSoda-Mimmi-Vol.2-Neko-Mimmi-PixiBB.COM-019.jpg",
@@ -20375,7 +20365,7 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 44
+          "number": 43
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/CreamSoda-Mimmi-Vol.2-Neko-Mimmi-PixiBB.COM-018.jpg",
@@ -20386,7 +20376,7 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 45
+          "number": 44
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/CreamSoda-Mimmi-Vol.2-Neko-Mimmi-PixiBB.COM-015.jpg",
@@ -20397,7 +20387,7 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 46
+          "number": 45
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/CreamSoda-Mimmi-Vol.2-Neko-Mimmi-PixiBB.COM-017.jpg",
@@ -20408,7 +20398,7 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 47
+          "number": 46
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/CreamSoda-Mimmi-Vol.2-Neko-Mimmi-PixiBB.COM-016.jpg",
@@ -20419,7 +20409,7 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 48
+          "number": 47
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/CreamSoda-Mimmi-Vol.2-Neko-Mimmi-PixiBB.COM-014.jpg",
@@ -20430,7 +20420,7 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 49
+          "number": 48
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/CreamSoda-Mimmi-Vol.2-Neko-Mimmi-PixiBB.COM-013.jpg",
@@ -20441,7 +20431,7 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 50
+          "number": 49
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/CreamSoda-Mimmi-Vol.2-Neko-Mimmi-PixiBB.COM-012.jpg",
@@ -20452,7 +20442,7 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 51
+          "number": 50
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/CreamSoda-Mimmi-Vol.2-Neko-Mimmi-PixiBB.COM-011.jpg",
@@ -20463,7 +20453,7 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 52
+          "number": 51
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/CreamSoda-Mimmi-Vol.2-Neko-Mimmi-PixiBB.COM-008.jpg",
@@ -20474,7 +20464,7 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 53
+          "number": 52
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/CreamSoda-Mimmi-Vol.2-Neko-Mimmi-PixiBB.COM-010.jpg",
@@ -20485,7 +20475,7 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 54
+          "number": 53
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/CreamSoda-Mimmi-Vol.2-Neko-Mimmi-PixiBB.COM-009.jpg",
@@ -20496,7 +20486,7 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 55
+          "number": 54
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/CreamSoda-Mimmi-Vol.2-Neko-Mimmi-PixiBB.COM-007.jpg",
@@ -20507,7 +20497,7 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 56
+          "number": 55
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/CreamSoda-Mimmi-Vol.2-Neko-Mimmi-PixiBB.COM-006.jpg",
@@ -20518,7 +20508,7 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 57
+          "number": 56
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/CreamSoda-Mimmi-Vol.2-Neko-Mimmi-PixiBB.COM-005.jpg",
@@ -20529,7 +20519,7 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 58
+          "number": 57
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/CreamSoda-Mimmi-Vol.2-Neko-Mimmi-PixiBB.COM-004.jpg",
@@ -20540,7 +20530,7 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 59
+          "number": 58
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/CreamSoda-Mimmi-Vol.2-Neko-Mimmi-PixiBB.COM-003.jpg",
@@ -20551,7 +20541,7 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 60
+          "number": 59
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/CreamSoda-Mimmi-Vol.2-Neko-Mimmi-PixiBB.COM-002.jpg",
@@ -20562,7 +20552,7 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 61
+          "number": 60
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/CreamSoda-Mimmi-Vol.2-Neko-Mimmi-PixiBB.COM-001.jpg",
@@ -20573,7 +20563,19 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 62
+          "number": 61
+        },
+        {
+          "url": "https://images08.pixibb.com/2025/05/08/CreamSoda-Mimmi-Vol.2-Neko-Mimmi-PixiBB.COM-041.jpg",
+          "bytes": 173510,
+          "sha256": "4ee635fee03f4fd70062292da87cf1c26a1b615e81bdb0d1fddbc9cf2fd8cc43",
+          "width": 912,
+          "height": 1368,
+          "quality": "public_watermarked_web_preview",
+          "publisher_original_verified": false,
+          "private_cloud_file": false,
+          "number": 62,
+          "carried_from_previous_verification": true
         }
       ],
       "images": [],
@@ -20594,7 +20596,7 @@
           "page": 3,
           "url": "https://cosplay.pixibb.com/creamsoda-mimmi-vol-2-neko-mimmi-62-photos-cosplay/3/",
           "candidates": 10,
-          "sha_verified": 10
+          "sha_verified": 9
         },
         {
           "page": 4,
@@ -20625,7 +20627,7 @@
           "status": "nonpublic_or_redirect"
         }
       ],
-      "fresh_http_verified": 62,
+      "fresh_http_verified": 61,
       "status": "verified_public_web_previews"
     }
   ]
