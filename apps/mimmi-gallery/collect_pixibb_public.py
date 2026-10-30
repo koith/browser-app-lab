@@ -13,6 +13,9 @@ import re
 import time
 from io import BytesIO
 from pathlib import Path
+import sys
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "gallery-archive"))
+from public_crawl_transport import build_session
 from urllib.parse import urljoin, urlsplit, urlunsplit
 from datetime import datetime, timezone
 import requests
@@ -72,8 +75,7 @@ def all_sources():
     return rows
 
 T=(9,28)
-SESSION=requests.Session()
-SESSION.headers.update({"User-Agent":"Mozilla/5.0 (compatible; PersonalMimmiPublicAlbumPreview/1.0)",
+SESSION=build_session({"User-Agent":"Mozilla/5.0 (compatible; PersonalMimmiPublicAlbumPreview/1.0)",
     "Accept":"text/html,image/avif,image/webp,image/jpeg,image/png,image/*;q=0.8,*/*;q=0.4"})
 
 def safe_page(url,root=None):
