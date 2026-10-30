@@ -1,0 +1,64 @@
+name: Yui Mimmi Image-First Reverse Source Search
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "44 1,9,17 * * *"
+  push:
+    branches: [main]
+    paths:
+      - apps/gallery-archive/reverse_image_discovery.py
+      - apps/gallery-archive/test_reverse_image_discovery.py
+      - .github/workflows/gallery-image-first-reverse-search.yml
+  pull_request:
+    paths:
+      - apps/gallery-archive/reverse_image_discovery.py
+      - apps/gallery-archive/test_reverse_image_discovery.py
+      - .github/workflows/gallery-image-first-reverse-search.yml
+permissions:
+  contents: read
+concurrency:
+  group: gallery-image-first-search
+  cancel-in-progress: false
+jobs:
+  reverse-public-photos:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 16
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install 'requests==2.32.5'
+      - name: Check public photo URL safety and search-result extraction
+        run: |
+          python -m py_compile apps/gallery-archive/reverse_image_discovery.py
+          python apps/gallery-archive/test_reverse_image_discovery.py
+      - name: Reverse search real on-disk public photo seeds
+        if: github.event_name != 'pull_request'
+        shell: bash
+        run: |
+          # A search result is NOT a photo download or a new gallery entry.
+          python apps/gallery-archive/reverse_image_discovery.py \
+            --seeds 12 --offset "$((GITHUB_RUN_NUMBER * 12))" \
+            --output "$RUNNER_TEMP/reverse-leads.json" --delay 2
+          python - <<'PY'
+          from pathlib import Path
+          import json,os
+          path=Path(os.environ["RUNNER_TEMP"])/"reverse-leads.json"
+          doc=json.loads(path.read_text())
+          assert doc["research_only_not_acquired"]
+          assert doc["new_private_photos_stored"] == doc["gallery_images_added"] == 0
+          with open(os.environ["GITHUB_STEP_SUMMARY"],"a") as out:
+              out.write("## Real-photo reverse image discovery\n\n")
+              out.write(f"Public stored photo seeds searched: {doc['seed_queries']}\n\n")
+              out.write(f"Source result pages found: {doc['candidate_page_urls']}\n\n")
+              out.write("Research only: no original downloaded, rehosted or added to gallery.\n")
+              out.write("Only Google Lens ordinary public results; blocked/login results are not bypassed.\n")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: github.event_name != 'pull_request'
+        with:
+          name: yui-mimmi-reverse-image-source-leads
+          path: ${{ runner.temp }}/reverse-leads.json
+          retention-days: 30
+          if-no-files-found: warn
