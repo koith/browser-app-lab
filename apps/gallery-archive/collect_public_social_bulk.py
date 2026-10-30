@@ -52,7 +52,9 @@ def sources_for(config: dict, model: str) -> list[dict]:
         allowed = ((kind == "twitter" and host == "x.com"
                     and parsed.path == "/" + account + "/media") or
                    (kind == "instagram" and host == "www.instagram.com"
-                    and parsed.path == "/" + account + "/"))
+                    and parsed.path == "/" + account + "/") or
+                   (kind == "teapawt" and host == "teapawt.net"
+                    and parsed.path == "/" + account))
         if (not allowed or parsed.scheme != "https" or parsed.username
                 or parsed.password or parsed.port or parsed.query or parsed.fragment
                 or not re.fullmatch(r"[a-zA-Z0-9_]{3,30}", account)):
@@ -227,12 +229,16 @@ def collect(model: str, config: dict, previous: dict, out: Path,
         try:
             if runner:
                 code = runner(command, s, folder)
+            elif s["kind"] == "teapawt":
+                from collect_teapawt_public import capture
+                mirror=capture(s,folder,max_pages=35,max_photos=650,workers=3)
+                code=0 if mirror["physical_decoded_files"] else 1
             else:
                 process = subprocess.run(command, capture_output=True,
                                          text=True, timeout=2700, check=False)
                 code = process.returncode
             status = "completed" if code == 0 else "source_unavailable_or_partial"
-        except (OSError, subprocess.TimeoutExpired):
+        except (OSError, subprocess.TimeoutExpired, ValueError, AssertionError):
             status = "source_unavailable_or_partial"
         details = package_source(folder, out, model, s, old, numbers)
         details["extractor_status"] = status
