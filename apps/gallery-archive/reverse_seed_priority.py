@@ -34,11 +34,26 @@ def seeds(root=ROOT):
                    and SHA.fullmatch(str(x.get("sha256","")))
                    and type(x.get("bytes")) is int and x["bytes"]>1024]
             if not owned:continue
+            occupied_slot_count=len(owned)
+            unique_owned=[]
+            hashes=set()
+            for image in owned:
+                if image["sha256"] in hashes:continue
+                hashes.add(image["sha256"])
+                unique_owned.append(image)
+            owned=unique_owned
             public_photos=[x for x in public_by_id.get(aid,{}).get("images",[])
                            if isinstance(x.get("url"),str)
                            and x["url"].startswith("stored-albums/")
                            and ".." not in x["url"].split("/")
                            and SHA.fullmatch(str(x.get("sha256","")))]
+            unique_public=[]
+            seen_public=set()
+            for image in public_photos:
+                if image["sha256"] in seen_public:continue
+                seen_public.add(image["sha256"])
+                unique_public.append(image)
+            public_photos=unique_public
             samples=[]
             if public_photos:
                 choices=list(dict.fromkeys([0,len(public_photos)//2,len(public_photos)-1]))
@@ -58,7 +73,7 @@ def seeds(root=ROOT):
             expected=album.get("expected")
             missing=max(0,expected-len(owned)) if type(expected) is int else None
             all_albums.append([{"model":model,"album_id":aid,"album_title":title,
-                 "owner_saved_count":len(owned),"expected_gap":missing,
+                 "owner_saved_count":len(owned),"owner_slot_count":occupied_slot_count,"expected_gap":missing,
                  "photo_sha256":sha,"public_image_url":url,"seed_kind":kind}
                  for sha,url,kind in samples])
     all_albums.sort(key=lambda album:(
