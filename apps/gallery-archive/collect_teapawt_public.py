@@ -123,6 +123,26 @@ def download_one(url,source):
             errors.append(str(err)[:60] if isinstance(err,ValueError) else type(err).__name__)
     return None,errors[-1] if errors else "unsupported_media"
 
+
+def get_public_page_with_retry(client, url, headers, attempts=3):
+    """Only retry transient transport/5xx errors, never access denial."""
+    if attempts < 1 or attempts > 4:
+        raise ValueError("Unbounded retry budget")
+    for attempt in range(attempts):
+        try:
+            response = client.get(url, timeout=(8, 32), headers=headers,
+                                  allow_redirects=False)
+            if response.status_code in (502, 503, 504) and attempt + 1 < attempts:
+                time.sleep(min(2 * (attempt + 1), 6))
+                continue
+            return response
+        except (requests.Timeout, requests.ConnectionError):
+            if attempt + 1 == attempts:
+                raise
+            time.sleep(min(2 * (attempt + 1), 6))
+    raise ValueError("Unexpected public page retry exit")
+
+
 def capture(source,folder,max_pages=40,max_photos=650,workers=3,client=None,fetch=download_one):
     validate_source(source)
     client=client or requests.Session()
@@ -136,7 +156,7 @@ def capture(source,folder,max_pages=40,max_photos=650,workers=3,client=None,fetc
     while page and page not in visited and len(visited)<max_pages:
         visited.add(page)
         try:
-            response=client.get(page,timeout=(8,22),headers=headers,allow_redirects=False)
+            response=get_public_page_with_retry(client,page,headers)
             if (response.status_code!=200 or urlsplit(response.url).hostname!=HOST
                 or "html" not in response.headers.get("Content-Type","").lower()
                 or len(response.content)>3_000_000):
