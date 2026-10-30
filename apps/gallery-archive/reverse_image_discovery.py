@@ -60,7 +60,7 @@ def physical_seeds(root: Path = ROOT) -> list[dict]:
                 if (not isinstance(rel, str) or not rel.startswith("stored-albums/")
                     or any(bit in ("", ".", "..") for bit in rel.split("/"))
                     or not SHA.fullmatch(digest)
-                    or not re.search(r"\\.(?:jpe?g|png|webp)$", rel, re.I)):
+                    or not re.search(r"\.(?:jpe?g|png|webp)$", rel, re.I)):
                     continue
                 valid.append((rel, digest))
             if not valid:
