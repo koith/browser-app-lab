@@ -78,6 +78,38 @@ def archived_positions(checkpoint: dict) -> set[tuple[str, int]]:
     return rows
 
 
+def owner_catalog_positions(owner: dict) -> set[tuple[str, int]]:
+    """Use the current, remotely verified TeraBox catalog instead of a stale ZIP checkpoint.
+
+    An album/number is covered only when the saved physical original's SHA,
+    byte count and storage key are present. No source URL counts as a file.
+    """
+    if (owner.get("schema_version") != 1 or owner.get("model") != "mimmi"
+            or owner.get("storage") != "owner-private-terabox-sha-verified-bytes"
+            or not isinstance(owner.get("albums"), list)):
+        raise ValueError("Expected owner-private Mimmi TeraBox catalog")
+    result = set()
+    for album in owner["albums"]:
+        aid = album.get("id")
+        if not isinstance(aid, str) or not ID.fullmatch(aid):
+            raise ValueError("Invalid private album id")
+        for photo in album.get("images", []):
+            number = photo.get("number")
+            sha = photo.get("sha256")
+            size = photo.get("bytes")
+            key = photo.get("key")
+            if (type(number) is not int or number < 1 or number > 20000
+                    or not isinstance(sha, str) or not SHA.fullmatch(sha)
+                    or type(size) is not int or not 1024 <= size <= 35 * 1024 * 1024
+                    or not isinstance(key, str) or not key.startswith(f"originals/{aid}/")
+                    or ".." in key or "\\" in key):
+                raise ValueError("Invalid private physical image record")
+            if (aid, number) in result:
+                raise ValueError("Duplicate original slot in private catalog")
+            result.add((aid, number))
+    return result
+
+
 def select_missing(source: dict, already: set[tuple],
                    batch: int, batches: int) -> tuple[list[dict], int]:
     if source.get("model") != "mimmi" or not source.get("source_link_only"):
