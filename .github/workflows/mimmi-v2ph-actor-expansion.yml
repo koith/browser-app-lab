@@ -33,6 +33,7 @@ jobs:
           python -m py_compile apps/mimmi-gallery/discover_v2ph_actor.py apps/mimmi-gallery/reveal_v2ph_album.py
           python apps/mimmi-gallery/test_v2ph_actor.py
           python apps/mimmi-gallery/test_multipage_cross_source.py
+          python apps/gallery-archive/test_commit_crawler_research.py
       - name: Crawl full public album pagination in rotating batches, not 10-photo previews
         shell: bash
         run: |
