@@ -40,6 +40,7 @@ jobs:
       - run: |
           python -m py_compile apps/mimmi-gallery/archive_private_missing.py
           python apps/mimmi-gallery/test_archive_private_missing.py
+          python apps/mimmi-gallery/test_missing_candidates.py
           python apps/mimmi-gallery/archive_private_missing.py --dry-run --batch 0 --batches 3
   save-new-photos-private:
     needs: code-qa
@@ -51,18 +52,45 @@ jobs:
       max-parallel: 2
       matrix:
         batch: [0,1,2]
+    env:
+      RCLONE_CONFIG_ARCHIVE_TYPE: terabox
+      RCLONE_CONFIG_ARCHIVE_COOKIE: ${{ secrets.MIMMI_TERABOX_NDUS }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
       - run: python -m pip install 'requests==2.32.5' 'Pillow==11.3.0'
+      - name: Read current private TeraBox numbered slots to exclude already saved originals
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$RCLONE_CONFIG_ARCHIVE_COOKIE"
+          echo "::add-mask::$RCLONE_CONFIG_ARCHIVE_COOKIE"
+          curl -fsSL 'https://github.com/gulp79/rclone-extra/releases/download/v1.75.2-extra/rclone-linux-amd64.zip' -o "$RUNNER_TEMP/client.zip"
+          echo "78855325a2a8d83b3feee3a8363d32e1211babbf4cda6356fa8ca5f472075062  $RUNNER_TEMP/client.zip" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/unpack" "$RUNNER_TEMP/bin"
+          unzip -q "$RUNNER_TEMP/client.zip" -d "$RUNNER_TEMP/unpack"
+          binary="$(find "$RUNNER_TEMP/unpack" -type f -name rclone -print -quit)"
+          install -m 755 "$binary" "$RUNNER_TEMP/bin/rclone"
+          rclone cat 'archive:MimmiArchive/metadata/catalog.json' \
+            --timeout 50s --retries 2 > "$RUNNER_TEMP/mimmi-live-catalog.json" \
+            2> "$RUNNER_TEMP/terabox-reader-errors.txt"
+          python - <<'PY'
+          from pathlib import Path
+          import json, os, sys
+          sys.path.insert(0, 'apps/mimmi-gallery')
+          from missing_candidates import owner_catalog_positions
+          data=json.loads((Path(os.environ["RUNNER_TEMP"])/"mimmi-live-catalog.json").read_text())
+          print("MIMMI_LIVE_OWNER_SAVED_POSITIONS",len(owner_catalog_positions(data)))
+          PY
       - name: Save only previously missing, unchanged SHA-256 image bytes into private ZIPs
         run: |
           python apps/mimmi-gallery/archive_private_missing.py \
             --batch ${{ matrix.batch }} \
             --batches 3 \
             --out /tmp/mimmi-private-batch \
-            --workers 2
+            --workers 2 \
+            --owner-catalog "$RUNNER_TEMP/mimmi-live-catalog.json"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
