@@ -25,13 +25,13 @@ from typing import AsyncGenerator
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
 try:
     from gateway.portal import COOKIE_NAME, install_portal, session_valid
-    from gateway.media_cache import VerifiedMediaCache
+    from gateway.media_cache import VerifiedMediaCache, read_media_with_transport_recovery
     from gateway.cookie_format import cookie_header
     from gateway.catalog_view import gallery_catalog
     from gateway.sealed_session import restore as restore_storage_state, seal as seal_storage_state
 except ModuleNotFoundError:
     from portal import COOKIE_NAME, install_portal, session_valid
-    from media_cache import VerifiedMediaCache
+    from media_cache import VerifiedMediaCache, read_media_with_transport_recovery
     from cookie_format import cookie_header
     from catalog_view import gallery_catalog
     from sealed_session import restore as restore_storage_state, seal as seal_storage_state
@@ -86,7 +86,8 @@ async def verified_remote_media(key: str, size: int, digest: str, remote: str):
             or not isinstance(digest, str) or not re.fullmatch(r'[a-f0-9]{64}', digest)):
         raise HTTPException(status_code=502, detail='Invalid private media integrity metadata')
     async def load():
-        return await rclone_bytes(key, size + 1, remote=remote)
+        async def read():return await rclone_bytes(key, size + 1, remote=remote)
+        return await read_media_with_transport_recovery(read)
     try:
         return await _media_cache.get(remote, key, size, digest, load)
     except ValueError:
