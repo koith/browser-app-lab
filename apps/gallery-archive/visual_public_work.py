@@ -56,9 +56,14 @@ def collect_work(book,previous,client,out,budget,seen_sha,model,reference_reader
           'publisher_original_numbering_known':False,'individual_files_saved':0,
           'saved_reference_anchors':0,'failures':[],'engine':'public_pagination_with_verified_visual_references'}
     if len({p['sha256'] for p in previous})>=claimed:
-        info['already_saved_web_edition']=True;return None,info
+        # Different public/publisher editions and resized duplicates can exceed
+        # this count without covering all source cuts. This is only a focused
+        # batch deferral, never evidence of a complete saved edition.
+        info['deferred_for_source_coverage_review']=True
+        info['stored_count_alone_is_not_completeness_proof']=True
+        return None,info
     previous_unique=len({p['sha256'] for p in previous})
-    if not previous or previous_unique>20:
+    if not previous or previous_unique>40:
         info['failures'].append('Focused recovery requires an existing low-count saved work');return None,info
     if claimed-previous_unique>budget:
         info['failures'].append('Defer whole work to next bounded batch, do not publish a truncated edition');return None,info
@@ -103,7 +108,10 @@ def collect_work(book,previous,client,out,budget,seen_sha,model,reference_reader
             break
     numbered={}
     for url in urls:
-        match=re.search(r'PixiBB\.COM-(\d{1,4})\.(?:jpe?g|webp|png)$',url,re.I)
+        host=urlsplit(url).hostname
+        pattern=(r'ShyPetal\.com@-(\d{1,4})\.webp$' if host=='image.shypetal.com' else
+                 r'PixiBB\.COM-(\d{1,4})\.(?:jpe?g|webp|png)$')
+        match=re.search(pattern,url,re.I)
         if not match:continue
         n=int(match[1])
         if n in numbered and numbered[n]!=url:

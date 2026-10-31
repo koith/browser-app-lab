@@ -181,7 +181,7 @@ jobs:
         if: steps.delta.outputs.changed == 'true'
         run: |
           set -euo pipefail
-          audit_path="metadata/audits/${GITHUB_RUN_ID}-${MODEL}.json"
+          audit_path="metadata/audits/${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${MODEL}.json"
           python - <<'PY'
           import os,json
           from pathlib import Path
