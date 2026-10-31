@@ -6,6 +6,8 @@ on:
     paths:
       - apps/gallery-archive/direct_photo_pipeline.py
       - apps/gallery-archive/defer_verified_batch.py
+      - apps/gallery-archive/private_collection_snapshot.py
+      - apps/gallery-archive/test_private_collection_snapshot.py
       - apps/gallery-archive/test_deferred_verified_batch.py
       - apps/gallery-archive/transfer_individual_files.py
       - apps/gallery-archive/test_transfer_individual_files.py
@@ -30,6 +32,8 @@ on:
     paths:
       - apps/gallery-archive/direct_photo_pipeline.py
       - apps/gallery-archive/defer_verified_batch.py
+      - apps/gallery-archive/private_collection_snapshot.py
+      - apps/gallery-archive/test_private_collection_snapshot.py
       - apps/gallery-archive/test_deferred_verified_batch.py
       - apps/gallery-archive/transfer_individual_files.py
       - apps/gallery-archive/test_transfer_individual_files.py
@@ -68,6 +72,7 @@ jobs:
       - run: |
           python apps/gallery-archive/test_direct_photo_pipeline.py
           python apps/gallery-archive/test_deferred_verified_batch.py
+          python apps/gallery-archive/test_private_collection_snapshot.py
           python apps/gallery-archive/test_transfer_individual_files.py
           python apps/gallery-archive/test_teapawt_public.py
           python apps/gallery-archive/test_public_failures.py
@@ -179,6 +184,9 @@ jobs:
       - name: Content-address focused files for an unpublished private batch
         if: env.ARCHIVE_PUBLICATION_MODE == 'deferred' && steps.incoming.outputs.found != 'true'
         run: python apps/gallery-archive/defer_verified_batch.py prepare --stage "$RUNNER_TEMP/stage" --owner "$RUNNER_TEMP/owner-before.json"
+      - name: Preserve unverified source correspondence privately before any original transfer
+        if: steps.incoming.outputs.found != 'true'
+        run: python apps/gallery-archive/private_collection_snapshot.py --stage "$RUNNER_TEMP/stage" --model "$MODEL" --remote "$ARCHIVE_REMOTE" --run-key "${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
       - name: Merge measured new rows without replacing existing owner photos
         run: python apps/gallery-archive/merge_incremental.py --model "$MODEL" --previous "$RUNNER_TEMP/owner-before.json" --stage "$RUNNER_TEMP/stage"
       - name: Distinguish a real new-file transaction from a no-op
