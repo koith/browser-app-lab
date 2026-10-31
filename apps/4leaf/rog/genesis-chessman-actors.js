@@ -107,14 +107,22 @@
   const approved=Object.hasOwn(AUDITED_FRONT_SOURCE,id)&&
    facing.evidence.startsWith('visual-original-OBS-reviewed/');
   const movement=REVIEWED_FRONT_MOTION[id]?.map(at).filter(Boolean)||[];
+  // Authenticated native PNGs 25..30 were independently reviewed on
+  // 2026-11-01. These six source pixels contain a frontal moving pose cycle.
+  // Sequence timing and its assignment to WEB walk are inferred, not an
+  // authenticated 2002 EXE action table. Never promote missing indices.
+  const fullFrontCycle=REVIEWED_FRONT_MOTION[id]
+    ?[25,26,27,28,29,30].map(at).filter(Boolean):[];
   if(action==='idle')return front?[front]:[];
   if(approved){
    // Do not display verified BACK/SIDE 0..7 during an ordinary forward
    // movement, attack recovery or victory. One static authentic FRONT is
    // more truthful than a rapidly pirouetting chessman.
-   if(action==='walk')return movement.length===2
-    ?[movement[0],movement[1],movement[0],movement[1]]
-    :front?[front]:[];
+   if(action==='walk')return fullFrontCycle.length===6
+    ?fullFrontCycle
+    :movement.length===2
+     ?[movement[0],movement[1],movement[0],movement[1]]
+     :front?[front]:[];
    if(action==='victory')return movement.length===2
     ?[movement[0],movement[1],movement[0]]
     :front?[front]:[];
@@ -263,6 +271,10 @@
    // Expose EXACT SOURCE packet indexes independently from inferred labels;
    // QA can inspect what was really rendered during genuine gameplay.
    pawn.dataset.sourceFrameSequence=seq.map(frame=>frame.index).join(',');
+   pawn.dataset.sourceFrontCycleCoverage=REVIEWED_FRONT_MOTION[id]&&
+     [25,26,27,28,29,30].every(index=>native.frames.some(f=>f.index===index))
+       ?'six-original-pixel-frames/WEB-walk-timing-inferred'
+       :'partial-2002-source-front-cycle';
    pawn.dataset.sourceActionEvidence=Object.hasOwn(AUDITED_FRONT_SOURCE,id)
     ?(pawn.dataset.sourceFrontWalkVerified==='true'
        ?'front-source-pair/visual-reviewed; WEB-movement-and-FPS-inferred'
