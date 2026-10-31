@@ -4,7 +4,7 @@
 Never download or mirror image bytes to the public GitHub repository.
 Preserve previously indexed media if a transient network result is shorter.
 """
-import json, requests
+import json
 from datetime import datetime, timezone
 from pathlib import Path
 from sns_archive import discover
