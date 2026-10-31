@@ -69,7 +69,10 @@ if os.environ.get('ARCHIVE_STORAGE_STATE_SEALED'):
         print('OWNER_STORAGE_CONNECTION_STATE_INVALID',flush=True)
 _cache = {"time": 0.0, "catalog": None}
 _cache_lock = asyncio.Lock()
-_media_cache = VerifiedMediaCache()
+# Measured usage was about 200 MiB with the 48 MiB cache on the existing
+# 512 MiB free service. Retain exact originals across cover/detail/popup traffic
+# without changing worker count, read deadlines or the service plan.
+_media_cache = VerifiedMediaCache(max_bytes=128*1024*1024)
 
 
 def safe_remote_diagnostic(error: str) -> str:
