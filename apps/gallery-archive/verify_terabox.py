@@ -10,7 +10,6 @@ import selectors
 import time
 import tempfile
 import re
-from io import BytesIO
 from safe_rclone import diagnostic
 from merge_incremental import checked_row
 
@@ -118,7 +117,7 @@ def read_remote_with_recovery(row,remote,deadline_seconds=75,command=None,copyto
     deadline=time.monotonic()+deadline_seconds
     try:return read_remote(row,remote,deadline_seconds,command)
     except ProviderReadChallenge as error:
-        if error.errno!=400141 or deadline-time.monotonic()<=2:raise
+        if error.errno!=400141 or (command is not None and copyto_command is None) or deadline-time.monotonic()<=2:raise
         # A live same-account experiment proved rclone copyto can retrieve the
         # exact original while cat returns a 112-byte provider JSON response.
         # The alternative MUST independently pass the complete SHA-256.
