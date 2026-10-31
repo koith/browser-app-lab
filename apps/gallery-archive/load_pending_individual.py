@@ -95,7 +95,8 @@ if __name__=='__main__':
         # must never be mistaken for another model's verified pending queue.
         if type(entry.get('Size')) is not int or not 0<entry['Size']<=2_000_000:
             raise ValueError('Pending metadata entry has an invalid declared size')
-        data=storage(['cat',prefix+'/'+name])
+        from read_owner_metadata import read
+        data=read(prefix+'/'+name,args.model,batch=name[:-5])
         if data is None or len(data)>2_000_000:raise ValueError('Pending queue unavailable or too large')
         documents.append((name,json.loads(data)))
     delta,batches=load(json.loads(args.owner.read_text()),documents,args.model)
