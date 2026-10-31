@@ -33,7 +33,7 @@ def import_reviewed(audit_directory, live_manifest, live_png_dir):
         raise ValueError("Unique verified OBS.pak not found")
     source = {m["name"]: m for m in source_packs[0]["members"]}
     old_text = live_manifest.read_text(encoding="utf-8")
-    start = old_text.index("{", old_text.index("window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign"))
+    start = old_text.index("\n{\n", old_text.index("window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign")) + 1
     end = old_text.rindex("}") + 1
     native = json.loads(old_text[start:end])
     staged = []
