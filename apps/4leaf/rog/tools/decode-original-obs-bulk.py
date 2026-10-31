@@ -60,7 +60,7 @@ def unpack_frames(source):
         raise ValueError("Missing native 256-colour OBS palette at frame boundary")
     return frames,palette
 
-def decode_rows(body,width,height,palette):
+def decode_rows(body,width,height,palette,minimum_opaque_pixels=45):
     """Decode the exact 2002 FAST.PAL.COLORKEY 640-stride run stream.
 
     Same native packet format as verified Dice/IMG.pak roll.spr:
@@ -117,7 +117,9 @@ def decode_rows(body,width,height,palette):
     # rejects genuine sparse source animation frames.
     if cursor<=0 or cursor>(height-1)*640+width:
         raise ValueError("OBS source last VIDEO packet exceeds native canvas")
-    if opaque<45:
+    if not 0<=minimum_opaque_pixels<=45:
+        raise ValueError("Invalid native opacity admission threshold")
+    if opaque<minimum_opaque_pixels:
         raise ValueError("OBS native source too transparent after strict decoding")
     img=Image.frombytes("P",(width,height),bytes(pixels))
     img.putpalette(palette)
