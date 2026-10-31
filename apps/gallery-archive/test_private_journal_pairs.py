@@ -9,7 +9,9 @@ from unittest.mock import patch
 from PIL import Image
 import test_deferred_verified_batch as fixtures
 from private_collection_snapshot import STATE
-from recover_private_journal_pairs import recover,producer_proof,CREATORS
+from recover_private_journal_pairs import recover,producer_proof,prior_recovery_proof,CREATORS
+from merge_incremental import checked_row,merge
+from publish_owner_index import clean_catalog
 
 
 class JournalPairsTests(unittest.TestCase):
@@ -113,6 +115,65 @@ class JournalPairsTests(unittest.TestCase):
         with patch.object(sys,'argv',args),patch('recover_private_journal_pairs.producer_proof'),patch('recover_private_journal_pairs.storage') as external:
             with self.assertRaisesRegex(ValueError,'QA-completed publication baseline'):main()
             external.assert_not_called()
+
+    def test_preview_only_hold_reads_exact_original_once_never_denied_preview_or_original(self):
+        source,reviewed,reader,calls=self.source()
+        audit={'model':'mimmi','held_photos':[
+            {'work':'saved-work','archive_collection_number':11,'role':'preview'},
+            {'work':'saved-work','archive_collection_number':12,'role':'original'}]}
+        target=self.stage/'original-only'
+        result=recover(source,self.owner,reviewed,target,reader,preview_hold_audit=audit)
+        self.assertEqual(result,{'photos':1,'held':0,'skipped':0})
+        self.assertEqual(len(calls),1);self.assertIn('/originals/',calls[0])
+        doc=json.loads((target/'metadata/catalog.json').read_text());row=doc['albums'][0]['images'][0]
+        self.assertEqual((target/row['key']).read_bytes(),self.original_bytes)
+        self.assertEqual(row['preview_fallback'],'verified-original')
+        self.assertTrue(all(k not in row for k in ('preview','preview_bytes','preview_sha256')))
+        doc['storage']='owner-private-terabox-sha-verified-bytes'
+        self.assertNotIn('preview',clean_catalog(doc,'mimmi')['albums'][0]['images'][0])
+        proof=json.loads((target/'metadata/remote-verification.json').read_text())
+        self.assertEqual((proof['photos'],proof['media_checked'],proof['full_SHA256_verified']),(1,1,1))
+
+    def test_original_corruption_is_still_held_and_is_not_retried(self):
+        source,reviewed,reader,calls=self.source();calls=[]
+        def corrupted(args,limit):calls.append(args);return self.original_bytes[:-1]+b'!'
+        audit={'model':'mimmi','held_photos':[{'work':'saved-work','archive_collection_number':11,'role':'preview'}]}
+        target=self.stage/'corruption';result=recover(source,self.owner,reviewed,target,corrupted,preview_hold_audit=audit)
+        self.assertEqual((result['photos'],result['held'],len(calls)),(0,1,1))
+        self.assertEqual(json.loads((target/'metadata/collection-audit.json').read_text())['held_photos'][0]['role'],'original')
+
+    def test_original_thumbnail_schema_cannot_mask_missing_previews_or_affect_yui(self):
+        row={k:v for k,v in self.photo.items() if not k.startswith('preview')}
+        with self.assertRaises(ValueError):checked_row('mimmi','saved-work',row)
+        row['preview_fallback']='verified-original';checked_row('mimmi','saved-work',row)
+        with self.assertRaises(ValueError):checked_row('yui','saved-work',row)
+        for field,value in [('preview',self.photo['preview']),('preview_sha256','a'*64),('preview_bytes',500)]:
+            with self.subTest(field=field),self.assertRaises(ValueError):
+                checked_row('mimmi','saved-work',{**row,field:value})
+
+    def test_original_only_baseline_survives_merge_and_only_staged_readback_counts_photos(self):
+        import verify_terabox
+        source,reviewed,reader,calls=self.source()
+        audit={'model':'mimmi','held_photos':[{'work':'saved-work','archive_collection_number':11,'role':'preview'}]}
+        target=self.stage/'roundtrip';recover(source,self.owner,reviewed,target,reader,preview_hold_audit=audit)
+        old=copy.deepcopy(self.owner);old['albums'][0]['images']=[{**self.photo,'number':10,'sha256':'a'*64,
+            'key':'originals/saved-work/old.jpg','preview':'previews/saved-work/old.webp'}]
+        previous=self.stage/'previous.json';previous.write_text(json.dumps(old))
+        merge(target,previous,'mimmi')
+        with patch.object(verify_terabox,'read_remote_with_recovery',side_effect=lambda row,remote:row[0]) as remote:
+            proof=verify_terabox.verify(target,'archive:MimmiArchive',1,only_staged=True)
+        self.assertEqual((proof['photos'],proof['media_checked'],remote.call_count),(1,1,1))
+        previous.write_bytes((target/'metadata/catalog.json').read_bytes())
+        # An unchanged original-only row has no separate preview to delete.
+        report=merge(target,previous,'mimmi');self.assertEqual(report['unchanged'],2)
+
+    def test_unpreserved_prior_audit_cannot_select_any_private_photo(self):
+        run={'head_sha':'a'*40,'head_branch':'main','head_repository':{'full_name':'koith/browser-app-lab'},
+             'path':'.github/workflows/gallery-existing-private-journal-recovery.yml'}
+        jobs={'total_count':1,'jobs':[{'name':'recover-already-stored-pairs (mimmi)','steps':[]}]}
+        with patch('recover_private_journal_pairs.github',side_effect=[run,jobs]):
+            with self.assertRaisesRegex(ValueError,'independently preserved'):
+                prior_recovery_proof({'run':123,'attempt':1,'head':'a'*40},'mimmi')
 
 
 if __name__=='__main__':unittest.main(verbosity=2)

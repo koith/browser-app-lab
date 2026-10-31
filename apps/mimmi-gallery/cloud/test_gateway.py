@@ -32,6 +32,14 @@ with TestClient(gateway.app) as client:
     img=client.get("/api/media/mimmi-test/1/original",headers=headers)
     assert img.status_code==200 and img.content==raw
     assert img.headers["content-type"].startswith("image/jpeg")
+    # A verified original-only row uses the same bytes for the thumbnail and
+    # native download; a failed separate preview is never requested.
+    catalog['albums'][0]['images'][0]['preview_fallback']='verified-original'
+    thumb=client.get('/api/media/mimmi-test/1/preview')
+    saved=client.get('/api/media/mimmi-test/1/original?download=true')
+    assert thumb.status_code==saved.status_code==200 and thumb.content==saved.content==raw
+    assert saved.headers['content-disposition'].startswith('attachment;')
+    assert 'preview' not in client.get('/api/catalog').json()['albums'][0]['images'][0]
     assert client.get("/api/media/../1/original",headers=headers).status_code!=200
     assert client.get("/api/media/mimmi-test/1/original",headers={"Authorization":"Bearer bad"}).status_code==200
     assert client.get("/api/media/mimmi-test/2/original",headers=headers).status_code==404

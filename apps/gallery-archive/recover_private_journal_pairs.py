@@ -1,8 +1,10 @@
 """Recover individually verified pairs from an exact private producer journal.
 
-Originals/previews are READ ONLY. Only complete SHA-verified pairs become a
-delta. Failed pairs remain explicitly held; no retry, alternate identity,
-source recrawl, replacement, re-encoding or live upload endpoint is used.
+Originals/previews are READ ONLY. Normally both variants must verify. The
+explicit Mimmi preview-hold mode reads only the already healthy original;
+the existing viewer can use those exact bytes for its thumbnail as well.
+No denied preview/original retry, alternate identity, source recrawl,
+replacement, re-encoding or live upload endpoint is used.
 """
 import argparse
 import hashlib
@@ -67,6 +69,39 @@ def producer_proof(request):
 class HeldPhoto(ValueError):pass
 
 
+def preview_hold_selection(audit,model):
+    if model!='mimmi' or audit.get('model')!=model:
+        raise ValueError('Original thumbnail recovery is restricted to Mimmi')
+    held=audit.get('held_photos')
+    if not isinstance(held,list) or len(held)>500:raise ValueError('Invalid prior private held-photo audit')
+    selected=set()
+    for p in held:
+        if p.get('role')!='preview':continue
+        key=(p.get('work'),p.get('archive_collection_number'))
+        if not isinstance(key[0],str) or type(key[1]) is not int or key[1]<1 or key in selected:
+            raise ValueError('Ambiguous prior preview-only hold')
+        selected.add(key)
+    return selected
+
+
+def prior_recovery_proof(request,model):
+    run_id=request['run'];attempt=request['attempt'];head=request['head']
+    if (type(run_id) is not int or run_id<1 or type(attempt) is not int or not 1<=attempt<=1000
+            or not isinstance(head,str) or not re.fullmatch('[a-f0-9]{40}',head)):
+        raise ValueError('Invalid exact prior recovery request')
+    run=github('/actions/runs/'+str(run_id))
+    if (run.get('head_sha')!=head or run.get('head_branch')!='main'
+            or run.get('head_repository',{}).get('full_name')!=REPO
+            or run.get('path')!='.github/workflows/gallery-existing-private-journal-recovery.yml'):
+        raise ValueError('Prior private audit is not from the exact same-repository recovery')
+    jobs=github(f'/actions/runs/{run_id}/attempts/{attempt}/jobs?per_page=100')
+    if jobs.get('total_count',101)>100:raise ValueError('Prior recovery job bound exceeded')
+    matches=[j for j in jobs['jobs'] if j['name']=='recover-already-stored-pairs ('+model+')']
+    if len(matches)!=1 or not any(s.get('name')=='Preserve complete per-photo held reasons in the SAME private account'
+            and s.get('conclusion')=='success' for s in matches[0].get('steps',[])):
+        raise ValueError('Prior private held-photo audit was not independently preserved')
+
+
 def exact_image(photo,field,remote,reader):
     size,digest=('bytes','sha256') if field=='key' else ('preview_bytes','preview_sha256')
     raw=reader(['cat',remote+'/'+photo[field]],limit=photo[size]+1)
@@ -88,8 +123,9 @@ def exact_image(photo,field,remote,reader):
     return raw
 
 
-def recover(snapshot,owner,reviewed,stage,reader=storage):
+def recover(snapshot,owner,reviewed,stage,reader=storage,preview_hold_audit=None):
     model=owner['model'];remote=REMOTES[model]
+    preview_holds=None if preview_hold_audit is None else preview_hold_selection(preview_hold_audit,model)
     if (snapshot.get('schema_version')!=1 or snapshot.get('model')!=model
             or snapshot.get('state')!=STATE or snapshot.get('remote_media_verified') is not False
             or snapshot.get('pending_admission_queue') is not False):
@@ -106,7 +142,7 @@ def recover(snapshot,owner,reviewed,stage,reader=storage):
         nonlocal processed
         processed+=1
         if processed%10==0:print('EXISTING_PRIVATE_PAIR_CHECK_PROGRESS',model,processed,
-            'COMPLETE_PAIRS',len(specs)//2,'HELD',len(held),flush=True)
+            'COMPLETE_PHOTOS',sum(len(a['images']) for a in accepted)+len(rows),'HELD',len(held),flush=True)
     for album in catalog['albums']:
         aid=album['id'];book=reviewed.get(aid);context=evidence.get(aid,{})
         if aid not in existing or not book:raise ValueError('Recovery only supplements reviewed existing works')
@@ -122,6 +158,7 @@ def recover(snapshot,owner,reviewed,stage,reader=storage):
             raise ValueError('Nonvisual recovery requires the reviewed professional creator feed')
         rows=[];next_number=max(p['number'] for p in existing[aid]['images'])+1
         for photo in album['images']:
+            if preview_holds is not None and (aid,photo['number']) not in preview_holds:continue
             checked_row(model,aid,photo)
             for field,prefix,extensions in [('key','originals','jpg|jpeg|png|webp'),('preview','previews','webp')]:
                 if not re.fullmatch(re.escape(prefix+'/'+aid+'/')+r'[a-z0-9-]+\.(?:'+extensions+r')',photo[field]):
@@ -139,23 +176,32 @@ def recover(snapshot,owner,reviewed,stage,reader=storage):
                 if not 300<=photo['width']<=20000 or not 300<=photo['height']<=20000 or photo['width']*photo['height']>40_000_000:
                     raise HeldPhoto('original_dimensions_outside_existing_budget')
                 failure['role']='original';original=exact_image(photo,'key',remote,reader)
-                failure['role']='preview';preview=exact_image(photo,'preview',remote,reader)
+                if preview_holds is None:
+                    failure['role']='preview';preview=exact_image(photo,'preview',remote,reader)
             except Exception as error:
                 failure['cause']=str(error) if isinstance(error,HeldPhoto) else 'private_read_or_image_decode_failed'
                 held.append(failure);progress();continue
-            for field,raw in [('key',original),('preview',preview)]:
+            variants=[('key',original)] if preview_holds is not None else [('key',original),('preview',preview)]
+            for field,raw in variants:
                 path=stage/photo[field];path.parent.mkdir(parents=True,exist_ok=True)
                 if path.exists():
                     if path.read_bytes()!=raw:raise ValueError('Existing staged bytes differ')
                 else:
                     with path.open('xb') as output:output.write(raw)
             row={**photo,'number':next_number,'numbering_provenance':'archive_append_order_not_publisher_number'}
+            if preview_holds is not None:
+                for key in ('preview','preview_bytes','preview_sha256'):row.pop(key,None)
+                row['preview_fallback']='verified-original'
+                checked_row(model,aid,row)
             next_number+=1;rows.append(row);seen.add(row['sha256'])
-            specs.extend([(row['key'],row['bytes'],row['sha256']),
-                          (row['preview'],row['preview_bytes'],row['preview_sha256'])])
+            specs.append((row['key'],row['bytes'],row['sha256']))
+            if preview_holds is None:specs.append((row['preview'],row['preview_bytes'],row['preview_sha256']))
             progress()
         if rows:accepted.append({'id':aid,'title':existing[aid]['title'],'images':rows,'complete':False})
-        source_held=[h['source_file_number'] for h in held if h['work']==aid and type(h.get('source_file_number')) is int]
+        prior_held=[] if preview_hold_audit is None else preview_hold_audit['held_photos']
+        recovered_numbers={r.get('source_photo_number') for r in rows}
+        source_held=[h['source_file_number'] for h in held+prior_held
+            if h['work']==aid and type(h.get('source_file_number')) is int and h['source_file_number'] not in recovered_numbers]
         results.append({**context,'id':aid,'recovered_existing_remote_photos':len(rows),
             'unresolved_source_numbers':sorted(set(context.get('unresolved_source_numbers',[]))|set(source_held)),
             'source_edition_all_files_accounted_for':False,'publisher_original_numbering_known':False})
@@ -165,12 +211,17 @@ def recover(snapshot,owner,reviewed,stage,reader=storage):
     (metadata/'catalog.json').write_bytes(serialize({'schema_version':1,'model':model,'albums':accepted}))
     (metadata/'remote-verification.json').write_bytes(serialize({'model':model,'media_checked':len(specs),
         'full_SHA256_verified':len(specs),'failed':0,'photos':count,'verified_specs_sha256':fingerprint,
-        'scope':'only_selected_complete_existing_remote_pairs_not_the_whole_source_journal'}))
+        'scope':('selected_prior_preview_holds_exact_original_readonly_no_preview_request'
+                 if preview_holds is not None else 'only_selected_complete_existing_remote_pairs_not_the_whole_source_journal')}))
     (metadata/'collection-audit.json').write_bytes(serialize({'model':model,'new_local_individual_files':0,
         'recovered_existing_remote_files':count,'new_photo_positions':count,'higher_resolution_replacements':0,
         'remote_verified_files':count,'gallery_open_verified_files':0,'photo_bundles_created':0,
-        'held_photos':held,'already_indexed_source_rows_skipped':skipped,'results':results}))
-    print('EXISTING_PRIVATE_PAIRS_RECOVERED',model,count,'HELD_PHOTOS',len(held),'ALREADY_INDEXED',skipped,
+        'held_photos':held,'already_indexed_source_rows_skipped':skipped,'results':results,
+        'prior_held_photos_not_retried':[] if preview_hold_audit is None else [h for h in preview_hold_audit['held_photos']
+            if h.get('role')!='preview'],
+        'exact_original_used_as_thumbnail':preview_holds is not None}))
+    print('EXISTING_PRIVATE_ORIGINAL_THUMBNAILS_RECOVERED' if preview_holds is not None else 'EXISTING_PRIVATE_PAIRS_RECOVERED',
+        model,count,'HELD_PHOTOS',len(held),'ALREADY_INDEXED',skipped,
         'ORIGINALS_OR_PREVIEWS_UPLOADED',0,'GALLERY_PUBLISHED',False,flush=True)
     return {'photos':count,'held':len(held),'skipped':skipped}
 
@@ -202,8 +253,15 @@ def main():
     data=json.loads(raw)
     if sum(len(x['images']) for x in data['catalog']['albums'])!=request['expected_collected_photos']:
         raise ValueError('Private producer photo count changed')
+    hold_audit=None
+    if request.get('preview_only_hold_from') is not None:
+        prior=request['preview_only_hold_from'];prior_recovery_proof(prior,a.model)
+        key=f"metadata/audits/{prior['run']}-{prior['attempt']}-{a.model}-existing-pair-recovery.json"
+        raw=storage(['cat',REMOTES[a.model]+'/'+key],limit=2_000_000)
+        if raw is None:raise ValueError('Prior private hold audit unavailable; no image requested')
+        hold_audit=json.loads(raw);preview_hold_selection(hold_audit,a.model)
     reviewed={b['id']:b for b in json.loads((ROOT/f'apps/{a.model}-gallery/public-work-pages.json').read_text())['albums']}
-    result=recover(data,owner,reviewed,a.stage)
+    result=recover(data,owner,reviewed,a.stage,preview_hold_audit=hold_audit)
     with a.github_output.open('a') as output:
         output.write('changed='+str(bool(result['photos'])).lower()+'\nheld='+str(result['held'])+'\n')
 
