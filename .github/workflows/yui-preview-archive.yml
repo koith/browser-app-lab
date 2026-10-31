@@ -1,28 +1,13 @@
-name: Yui Chinese Public Preview Archive
+name: "Retired photo-bundle path — Yui Chinese Public Preview Archive"
 on:
-  push:
-    paths:
-      - apps/yui-gallery/download_previews.py
-      - .github/workflows/yui-preview-archive.yml
   workflow_dispatch:
 permissions:
   contents: read
 jobs:
-  build:
+  individual-files-only:
     runs-on: ubuntu-24.04
-    timeout-minutes: 12
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - run: python -m pip install pillow
-      - run: python apps/yui-gallery/download_previews.py
-      - uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: yui-chinese-free-previews
-          path: |
-            yui-chinese-free-previews.zip
-            yui-chinese-free-previews/manifest.json
-          if-no-files-found: warn
+      - name: Keep originals in the supported individual-file pipeline
+        run: |
+          echo "Photo-bundle generation and ingestion are retired."
+          echo "Use Gallery Direct Individual Photo Collection and Verified Storage."

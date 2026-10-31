@@ -7,7 +7,90 @@
     "v2ph-actor-a54385nz": "djawa-rudy2-codename-wolfgirl-9b4e68",
     "v2ph-actor-z7e396nz": "djawa-rudy2-codename-wolfgirl-9b4e68",
     "v2ph-actor-a584e85z": "xiutu-public-1190154",
-    "v2ph-actor-z4xoo5nz": "xiutu-public-1190154"
+    "v2ph-actor-z4xoo5nz": "xiutu-public-1190154",
+    "v2ph-actor-z7e69mnz": "djawa-mademoiselle-mimmi",
+    "v2ph-actor-zo555x4z": "djawa-your-panties",
+    "v2ph-actor-z4m985xa": "djawa-rei-beyond-the-heart",
+    "v2ph-actor-z4m9x9xa": "djawa-christmas-special-2021-mimmi",
+    "v2ph-actor-an5o93ez": "v2ph-cream-cow-milk",
+    "v2ph-actor-axm7n43z": "v2ph-sukajan-gal",
+    "v2ph-actor-a93xn3oa": "v2ph-cream-cow-milk"
   },
-  "notes": "Only manually reviewed, clearly identical published works. Photo SHA data and original filenames remain unchanged; alternate web previews are kept rather than misreported as missing originals."
+  "notes": "Only manually reviewed, clearly identical published works. Photo SHA data and original filenames remain unchanged; alternate web previews are kept rather than misreported as missing originals.",
+  "evidence": {
+    "v2ph-actor-z7e69mnz": {
+      "kind": "public_source_membership",
+      "target": "djawa-mademoiselle-mimmi",
+      "source": "https://www.v2ph.com/album/z7e69mnz.html",
+      "canonical_sources": [
+        "https://djawaphoto.com/portfolio/mademoiselle-mimmi/",
+        "https://www.v2ph.com/album/z7e69mnz.html?hl=ar",
+        "https://www.v2ph.com/album/z7e69mnz.html"
+      ],
+      "shared_public_source_sha_count": 11
+    },
+    "v2ph-actor-zo555x4z": {
+      "kind": "public_source_membership",
+      "target": "djawa-your-panties",
+      "source": "https://www.v2ph.com/album/zo555x4z.html",
+      "canonical_sources": [
+        "https://djawaphoto.com/portfolio/your-panties/",
+        "https://www.v2ph.com/album/zo555x4z.html?hl=zh-Hant",
+        "https://www.v2ph.com/album/zo555x4z.html"
+      ],
+      "shared_public_source_sha_count": 10
+    },
+    "v2ph-actor-z4m985xa": {
+      "kind": "public_source_membership",
+      "target": "djawa-rei-beyond-the-heart",
+      "source": "https://www.v2ph.com/album/z4m985xa.html",
+      "canonical_sources": [
+        "https://djawaphoto.com/portfolio/rei-beyond-the-heart/",
+        "https://www.v2ph.com/album/z4m985xa.html"
+      ],
+      "shared_public_source_sha_count": 10
+    },
+    "v2ph-actor-z4m9x9xa": {
+      "kind": "public_source_membership",
+      "target": "djawa-christmas-special-2021-mimmi",
+      "source": "https://www.v2ph.com/album/z4m9x9xa.html",
+      "canonical_sources": [
+        "https://djawaphoto.com/portfolio/christmas-special-2021-mimmi/",
+        "https://www.v2ph.com/album/z4m9x9xa.html",
+        "https://cosplay.pixibb.com/coser-djawa-photo-christmas-special-2021-s-ver-100-photos/"
+      ],
+      "shared_public_source_sha_count": 11
+    },
+    "v2ph-actor-an5o93ez": {
+      "kind": "public_source_membership",
+      "target": "v2ph-cream-cow-milk",
+      "source": "https://www.v2ph.com/album/an5o93ez.html",
+      "canonical_sources": [
+        "https://www.v2ph.com/album/an5o93ez.html?hl=ko",
+        "https://www.v2ph.com/album/an5o93ez.html",
+        "https://www.v2ph.com/album/a93xn3oa.html"
+      ],
+      "shared_public_source_sha_count": 10
+    },
+    "v2ph-actor-axm7n43z": {
+      "kind": "public_source_membership",
+      "target": "v2ph-sukajan-gal",
+      "source": "https://www.v2ph.com/album/axm7n43z.html",
+      "canonical_sources": [
+        "https://www.v2ph.com/album/axm7n43z.html"
+      ],
+      "shared_public_source_sha_count": 0
+    },
+    "v2ph-actor-a93xn3oa": {
+      "kind": "public_source_membership",
+      "target": "v2ph-cream-cow-milk",
+      "source": "https://www.v2ph.com/album/a93xn3oa.html",
+      "canonical_sources": [
+        "https://www.v2ph.com/album/an5o93ez.html?hl=ko",
+        "https://www.v2ph.com/album/an5o93ez.html",
+        "https://www.v2ph.com/album/a93xn3oa.html"
+      ],
+      "shared_public_source_sha_count": 15
+    }
+  }
 }

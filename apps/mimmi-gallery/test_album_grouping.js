@@ -40,4 +40,19 @@ const other={id:'not-the-same-work',title:'[AI Enhanced] Mimmi Original Photoboo
  const result=combine([preview],{'v2ph-short':'djawa-full'});
  assert.equal(result.albums.length,1); // no full saved album: retain small preview.
 }
+{
+ const id='v2ph-actor-abc123',target='djawa-known';
+ const small={id,title:'Mimmi known work — Page 2',images:[media(id,1,'e')]};
+ const saved={id:target,title:'Mimmi known work',images:[media(target,9,'f')]};
+ const evidence={[id]:{kind:'public_source_membership',target,source:'https://www.v2ph.com/album/abc123.html',
+   canonical_sources:['https://www.v2ph.com/album/abc123.html?hl=ko']}};
+ const result=combine([saved,small],{[id]:target},evidence);
+ assert.equal(result.albums.length,1);assert.equal(result.albums[0].images.length,2);
+ assert.equal(result.albums[0].images[1].storageNumber,1);
+ assert.equal(result.albums[0].images[1].ownerAlbum,id);
+ const wrong=JSON.parse(JSON.stringify(evidence));wrong[id].canonical_sources=['https://www.v2ph.com/album/other.html'];
+ assert.equal(combine([saved,small],{[id]:target},wrong).albums.length,2);
+ const ai={...small,title:'[AI Enhanced] Mimmi known work'};
+ assert.equal(combine([saved,ai],{[id]:target},evidence).albums.length,2);
+}
 console.log('MIMMI_FULL_ALBUM_GROUPING_NO_LOST_IMAGE_BYTES_AND_ORIGINAL_MEDIA_NUMBERS_PASS');

@@ -1,0 +1,23 @@
+{
+  "workflows": [
+    "gallery-independent-photo-archive.yml",
+    "gallery-public-social-bulk.yml",
+    "gallery-terabox-incremental.yml",
+    "gallery-terabox-mass-archive.yml",
+    "gallery-terabox-mimmi-recovery-once.yml",
+    "mimmi-private-candidate-selection.yml",
+    "mimmi-private-missing-archive.yml",
+    "mimmi-recovered-physical-private.yml",
+    "mimmi-pixibb-original-gap-backfill.yml",
+    "yui-137-public-photo-private-backfill.yml",
+    "yui-18-public-missing-byte-recovery.yml",
+    "yui-known-missing-18-recovery.yml",
+    "yui-present-33.yml",
+    "yui-preview-archive.yml",
+    "yui-private-bulk-archive.yml",
+    "yui-public-sns-archive.yml",
+    "yui-verified-private-collect.yml",
+    "yui-split-editorial-private.yml",
+    "yui-split-real-private-artifacts.yml"
+  ]
+}

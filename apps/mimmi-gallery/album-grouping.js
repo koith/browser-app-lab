@@ -8,7 +8,16 @@
  function isAI(album){
   return album.ai_enhanced===true||/\bAI\s*(?:Enhanced|보정)\b/i.test(album.title||'');
  }
- function combine(rows,aliases){
+ function samePublicSource(from,to,evidence){
+  const p=evidence?.[from];
+  if(p?.kind!=='public_source_membership'||p.target!==to||!Array.isArray(p.canonical_sources))return false;
+  try{
+   const u=new URL(p.source),match=u.pathname.match(/^\/album\/([a-z0-9]+)\.html$/);
+   if(u.protocol!=='https:'||!['www.v2ph.com','v2ph.com'].includes(u.hostname)||!match||from!=='v2ph-actor-'+match[1])return false;
+   return p.canonical_sources.some(value=>{const v=new URL(value);return v.origin===u.origin&&v.pathname===u.pathname});
+  }catch{return false}
+ }
+ function combine(rows,aliases,evidence={}){
   const originalCount=rows.reduce((n,a)=>n+(a.images||[]).length,0);
   const combined=new Map(rows.map(a=>[a.id,{...a,images:(a.images||[]).map(p=>({...p}))}]));
   const verifiedMappings=[];
@@ -16,7 +25,7 @@
    if(from===to||typeof from!=='string'||typeof to!=='string')continue;
    const small=combined.get(from),large=combined.get(to);
    if(!small||!large||!Array.isArray(small.images)||!Array.isArray(large.images)
-      ||large.images.length<30||large.images.length<small.images.length*2
+      ||!large.images.length||(!samePublicSource(from,to,evidence)&&(large.images.length<30||large.images.length<small.images.length*2))
       ||isAI(small)!==isAI(large))continue;
    const sha=new Set(large.images.map(p=>p.sha256));
    let next=Math.max(0,...large.images.map(p=>Number.isInteger(p.number)?p.number:0));

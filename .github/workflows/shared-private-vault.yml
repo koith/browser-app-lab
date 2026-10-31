@@ -31,6 +31,7 @@ jobs:
           python apps/gallery-archive/test_visual_public_work.py
           python apps/gallery-archive/test_remote_readback_deadline.py
           python apps/gallery-archive/test_work_coverage.py
+          python apps/gallery-archive/test_individual_only_workflows.py
       - name: Require deployed new-photo QA separately from fixture tests
         run: |
           echo 'Individual file fixtures passed. This is not a new-photo acquisition or deployed browser result.' >> "$GITHUB_STEP_SUMMARY"
