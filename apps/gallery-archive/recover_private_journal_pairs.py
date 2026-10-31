@@ -102,6 +102,19 @@ def prior_recovery_proof(request,model):
         raise ValueError('Prior private held-photo audit was not independently preserved')
 
 
+def completed_baseline_proof(document):
+    run_id=document.get('completed_baseline_native_QA_run')
+    head=document.get('completed_owner_index_commit')
+    if type(run_id) is not int or run_id<1 or not isinstance(head,str) or not re.fullmatch('[a-f0-9]{40}',head):
+        raise ValueError('An exact completed native baseline is required')
+    run=github('/actions/runs/'+str(run_id))
+    if (run.get('conclusion')!='success' or run.get('status')!='completed'
+            or run.get('head_sha')!=head or run.get('head_branch')!='main'
+            or run.get('head_repository',{}).get('full_name')!=REPO
+            or run.get('path')!='.github/workflows/gallery-newly-stored-photo-qa.yml'):
+        raise ValueError('Exact baseline native QA has not completed successfully')
+
+
 def exact_image(photo,field,remote,reader):
     size,digest=('bytes','sha256') if field=='key' else ('preview_bytes','preview_sha256')
     raw=reader(['cat',remote+'/'+photo[field]],limit=photo[size]+1)
@@ -246,6 +259,8 @@ def main():
     owner=json.loads(a.owner.read_text())
     if metadata_fingerprint(clean_catalog(owner,a.model))!=request['baseline_owner_fingerprint']:
         raise ValueError('Current inventory differs from the explicitly QA-completed publication baseline')
+    if request.get('preview_only_hold_from') is not None:
+        completed_baseline_proof(document)
     key=f"metadata/unverified-collection-staging/{request['producer_run']}-{request['producer_attempt']}-{a.model}.json"
     raw=storage(['cat',REMOTES[a.model]+'/'+key],limit=2_000_000)
     if raw is None or hashlib.sha256(raw).hexdigest()!=request['journal_sha256']:
