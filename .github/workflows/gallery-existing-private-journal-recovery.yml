@@ -1,0 +1,144 @@
+name: Recover Existing Private Photo Pairs Without Source Recrawl
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - apps/gallery-archive/verification/private-journal-pair-recovery-request.json
+  pull_request:
+    paths:
+      - .github/workflows/gallery-existing-private-journal-recovery.yml
+      - apps/gallery-archive/recover_private_journal_pairs.py
+      - apps/gallery-archive/test_private_journal_pairs.py
+      - apps/gallery-archive/verification/private-journal-pair-recovery-request.json
+permissions:
+  contents: read
+jobs:
+  validate-pair-recovery:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install requests beautifulsoup4 Pillow
+      - run: |
+          python -m py_compile apps/gallery-archive/recover_private_journal_pairs.py
+          python apps/gallery-archive/test_private_journal_pairs.py
+          python apps/gallery-archive/test_pending_individual.py
+  recover-already-stored-pairs:
+    needs: validate-pair-recovery
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 80
+    permissions:
+      contents: write
+      actions: read
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        model: [mimmi, yui]
+    concurrency:
+      group: gallery-terabox-private-mass-upload-${{ matrix.model }}
+      cancel-in-progress: false
+    env:
+      GH_TOKEN: ${{ github.token }}
+      MIMMI_COOKIE: ${{ secrets.MIMMI_TERABOX_NDUS }}
+      YUI_COOKIE: ${{ secrets.YUI_TERABOX_COOKIE }}
+      RCLONE_CONFIG_ARCHIVE_TYPE: terabox
+      MODEL: ${{ matrix.model }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install requests beautifulsoup4 Pillow
+      - name: Install pinned existing storage client, not a photo bundle
+        run: |
+          set -euo pipefail
+          curl -fsSL https://github.com/gulp79/rclone-extra/releases/download/v1.75.2-extra/rclone-linux-amd64.zip -o "$RUNNER_TEMP/client.zip"
+          echo "78855325a2a8d83b3feee3a8363d32e1211babbf4cda6356fa8ca5f472075062  $RUNNER_TEMP/client.zip" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/client" "$RUNNER_TEMP/bin"
+          unzip -q "$RUNNER_TEMP/client.zip" -d "$RUNNER_TEMP/client"
+          binary="$(find "$RUNNER_TEMP/client" -type f -name rclone -print -quit)"
+          install -m 755 "$binary" "$RUNNER_TEMP/bin/rclone"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+      - name: Use the same existing credential and requery the current owner archive
+        run: |
+          python - <<'PY'
+          import os,sys
+          sys.path.insert(0,'apps/mimmi-gallery/cloud/gateway')
+          from cookie_format import cookie_header
+          model=os.environ['MODEL'];header=cookie_header(os.environ['MIMMI_COOKIE' if model=='mimmi' else 'YUI_COOKIE'])
+          if not header:raise ValueError('Existing model storage credential missing')
+          print('::add-mask::'+header)
+          with open(os.environ['GITHUB_ENV'],'a') as output:
+              output.write('RCLONE_CONFIG_ARCHIVE_COOKIE='+header+'\n')
+              output.write('ARCHIVE_REMOTE=archive:'+('MimmiArchive' if model=='mimmi' else 'YuiArchive')+'\n')
+          PY
+      - name: Read fresh private metadata under the normal per-model publication lock
+        run: python apps/gallery-archive/read_owner_metadata.py --remote "$ARCHIVE_REMOTE" --model "$MODEL" --out "$RUNNER_TEMP/owner-before.json" --published-index "apps/$MODEL-gallery/owner-index.json"
+      - name: Bind exact trusted private producer metadata and decode every selected remote pair
+        id: restore
+        run: python apps/gallery-archive/recover_private_journal_pairs.py --request apps/gallery-archive/verification/private-journal-pair-recovery-request.json --model "$MODEL" --owner "$RUNNER_TEMP/owner-before.json" --stage "$RUNNER_TEMP/pair-recovery" --github-output "$GITHUB_OUTPUT"
+      - name: Append only the pairs that both passed full remote SHA and decoding
+        if: steps.restore.outputs.changed == 'true'
+        run: python apps/gallery-archive/merge_incremental.py --model "$MODEL" --previous "$RUNNER_TEMP/owner-before.json" --stage "$RUNNER_TEMP/pair-recovery"
+      - name: Commit private catalog metadata and independently compare the exact catalog readback
+        if: steps.restore.outputs.changed == 'true'
+        run: |
+          set -euo pipefail
+          python apps/gallery-archive/safe_rclone.py copyto "$RUNNER_TEMP/pair-recovery/metadata/catalog.json" "$ARCHIVE_REMOTE/metadata/catalog.json" --ignore-times --timeout 60s --retries 1
+          python apps/gallery-archive/safe_rclone.py cat "$ARCHIVE_REMOTE/metadata/catalog.json" --timeout 60s --retries 1 > "$RUNNER_TEMP/catalog-readback.json"
+          cmp "$RUNNER_TEMP/pair-recovery/metadata/catalog.json" "$RUNNER_TEMP/catalog-readback.json"
+      - name: Publish sanitized verified inventory without any original bytes or private provenance
+        if: steps.restore.outputs.changed == 'true'
+        run: |
+          python apps/gallery-archive/publish_owner_index.py --model "$MODEL" --input "$RUNNER_TEMP/catalog-readback.json" --output "$RUNNER_TEMP/owner-index.json"
+          python apps/gallery-archive/commit_owner_index.py --model "$MODEL" --input "$RUNNER_TEMP/owner-index.json"
+      - name: Preserve complete per-photo held reasons in the SAME private account
+        if: steps.restore.outcome == 'success'
+        run: |
+          set -euo pipefail
+          target="$ARCHIVE_REMOTE/metadata/audits/${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}-${MODEL}-existing-pair-recovery.json"
+          python apps/gallery-archive/safe_rclone.py copyto "$RUNNER_TEMP/pair-recovery/metadata/collection-audit.json" "$target" --ignore-existing --timeout 60s --retries 1
+          python apps/gallery-archive/safe_rclone.py cat "$target" --timeout 60s --retries 1 > "$RUNNER_TEMP/recovery-audit-readback.json"
+          cmp "$RUNNER_TEMP/pair-recovery/metadata/collection-audit.json" "$RUNNER_TEMP/recovery-audit-readback.json"
+      - name: Keep the source failure visible when any original or preview remains held
+        if: steps.restore.outcome == 'success' && steps.restore.outputs.held != '0'
+        run: |
+          echo "Selected complete pairs were processed; held source photos remain incomplete." >> "$GITHUB_STEP_SUMMARY"
+          exit 1
+  deploy-and-request-real-native-qa:
+    needs: [validate-pair-recovery, recover-already-stored-pairs]
+    if: always() && needs.validate-pair-recovery.result == 'success' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      actions: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with: {ref: main}
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install requests
+      - name: Detect a real published inventory change before deploying any page or running QA
+        id: changes
+        run: |
+          python - <<'PY'
+          import json,os,sys
+          from pathlib import Path
+          sys.path.insert(0,'apps/gallery-archive')
+          from native_qa_checkpoint import metadata_fingerprint
+          request=json.loads(Path('apps/gallery-archive/verification/private-journal-pair-recovery-request.json').read_text())
+          changed=any(metadata_fingerprint(json.loads(Path(f'apps/{model}-gallery/owner-index.json').read_text()))!=r['baseline_owner_fingerprint'] for model,r in request['models'].items())
+          with open(os.environ['GITHUB_OUTPUT'],'a') as output:output.write('changed='+str(changed).lower()+'\n')
+          print('ACTUAL_RECOVERED_OWNER_INVENTORY_PUBLISHED',changed)
+          PY
+      - name: Deploy current verified indices and request actual Chromium WebKit checks
+        if: steps.changes.outputs.changed == 'true'
+        run: |
+          gh workflow run static.yml --ref main
+          gh workflow run gallery-deployed-pages-photo-qa.yml --ref main
+          gh workflow run gallery-newly-stored-photo-qa.yml --ref main
