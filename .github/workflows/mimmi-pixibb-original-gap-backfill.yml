@@ -1,126 +1,13 @@
-name: Mimmi Full Public PixiBB SHA Photo Gap Backfill
+name: "Retired photo-bundle path — Mimmi Full Public PixiBB SHA Photo Gap Backfill"
 on:
   workflow_dispatch:
-  workflow_run:
-    workflows:
-      - "Mimmi Multi-Page Public Photo Crawl"
-    types: [completed]
-  push:
-    branches: [main]
-    paths:
-      - 'apps/mimmi-gallery/backfill_verified_public_gap.py'
-      - 'apps/mimmi-gallery/mimmi_verified_album_alias.py'
-      - 'apps/mimmi-gallery/test_backfill_verified_public_gap.py'
-      - '.github/workflows/mimmi-pixibb-original-gap-backfill.yml'
-  pull_request:
-    paths:
-      - 'apps/mimmi-gallery/backfill_verified_public_gap.py'
-      - 'apps/mimmi-gallery/mimmi_verified_album_alias.py'
-      - 'apps/mimmi-gallery/test_backfill_verified_public_gap.py'
-      - '.github/workflows/mimmi-pixibb-original-gap-backfill.yml'
-  schedule:
-    - cron: '31 3 * * *'
 permissions:
   contents: read
-concurrency:
-  group: mimmi-full-public-photo-gap-backfill
-  cancel-in-progress: false
 jobs:
-  offline-tests:
+  individual-files-only:
     runs-on: ubuntu-24.04
-    timeout-minutes: 12
     steps:
-      - uses: actions/checkout@v4
-        with:
-          sparse-checkout: |
-            apps/mimmi-gallery
-            apps/yui-gallery
-            apps/gallery-archive
-          sparse-checkout-cone-mode: true
-      - uses: actions/setup-python@v5
-        with: {python-version: '3.12'}
-      - run: python -m pip install 'requests==2.32.5' 'Pillow==11.3.0'
-      - name: Validate public SHA indexes, canonical album aliases and owner-aware exclusion
+      - name: Keep originals in the supported individual-file pipeline
         run: |
-          python -m py_compile apps/mimmi-gallery/backfill_verified_public_gap.py apps/mimmi-gallery/mimmi_verified_album_alias.py
-          python apps/mimmi-gallery/test_backfill_verified_public_gap.py
-
-  save-unarchived-originals:
-    needs: offline-tests
-    if: |
-      github.ref == 'refs/heads/main' && github.event_name != 'pull_request' &&
-      (github.event_name != 'workflow_run' ||
-       (github.event.workflow_run.conclusion == 'success' &&
-        github.event.workflow_run.head_branch == 'main' &&
-        github.event.workflow_run.head_repository.full_name == github.repository))
-    runs-on: ubuntu-24.04
-    timeout-minutes: 90
-    strategy:
-      fail-fast: false
-      max-parallel: 2
-      matrix:
-        batch: [0,1,2,3]
-    env:
-      RCLONE_CONFIG_ARCHIVE_TYPE: terabox
-      RCLONE_CONFIG_ARCHIVE_COOKIE: ${{ secrets.MIMMI_TERABOX_NDUS }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          sparse-checkout: |
-            apps/mimmi-gallery
-            apps/yui-gallery
-            apps/gallery-archive
-          sparse-checkout-cone-mode: true
-      - uses: actions/setup-python@v5
-        with: {python-version: '3.12'}
-      - run: python -m pip install 'requests==2.32.5' 'Pillow==11.3.0'
-      - name: Read the current real TeraBox owner-private original catalog
-        shell: bash
-        run: |
-          set -euo pipefail
-          test -n "$RCLONE_CONFIG_ARCHIVE_COOKIE"
-          echo "::add-mask::$RCLONE_CONFIG_ARCHIVE_COOKIE"
-          curl -fsSL 'https://github.com/gulp79/rclone-extra/releases/download/v1.75.2-extra/rclone-linux-amd64.zip' -o "$RUNNER_TEMP/client.zip"
-          echo "78855325a2a8d83b3feee3a8363d32e1211babbf4cda6356fa8ca5f472075062  $RUNNER_TEMP/client.zip" | sha256sum -c -
-          mkdir -p "$RUNNER_TEMP/unpack" "$RUNNER_TEMP/bin"
-          unzip -q "$RUNNER_TEMP/client.zip" -d "$RUNNER_TEMP/unpack"
-          client="$(find "$RUNNER_TEMP/unpack" -type f -name rclone -print -quit)"
-          install -m 755 "$client" "$RUNNER_TEMP/bin/rclone"
-          "$RUNNER_TEMP/bin/rclone" cat 'archive:MimmiArchive/metadata/catalog.json' \
-            --timeout 65s --retries 2 > "$RUNNER_TEMP/mimmi-owner-current.json" \
-            2> "$RUNNER_TEMP/owner-read-error.log"
-      - name: Download exact publicly displayed photo URLs only when original SHA is not already saved
-        shell: bash
-        run: |
-          set -euo pipefail
-          python apps/mimmi-gallery/backfill_verified_public_gap.py \
-            --owner-catalog "$RUNNER_TEMP/mimmi-owner-current.json" \
-            --output "$RUNNER_TEMP/new-public-mimmi" \
-            --batch ${{ matrix.batch }} --batches 4 --workers 2
-          python - <<'PY'
-          from pathlib import Path
-          import json,os
-          d=json.loads((Path(os.environ["RUNNER_TEMP"])/"new-public-mimmi"/"audit.json").read_text())
-          print("MIMMI_REAL_PUBLIC_SHA_BACKFILL_RESULT", json.dumps({
-            k:v for k,v in d.items() if k in (
-              "batch","new_sha_unique_before_download","new_sha_for_this_batch",
-              "original_files_verified","original_files_rejected",
-              "excluded_alternate_editions","targets"
-            )
-          },ensure_ascii=False),flush=True)
-          PY
-      - name: Transfer only real downloaded photos to the shared owner-private cloud SHA verifier
-        uses: actions/upload-artifact@v4
-        with:
-          name: mimmi-pixibb-new-verified-${{ matrix.batch }}
-          path: ${{ runner.temp }}/new-public-mimmi/*-private-import.zip
-          if-no-files-found: ignore
-          retention-days: 7
-      - name: Preserve small gap audit (never photo bytes in public GitHub)
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: mimmi-pixibb-gap-audit-${{ matrix.batch }}
-          path: ${{ runner.temp }}/new-public-mimmi/audit.json
-          if-no-files-found: warn
-          retention-days: 30
+          echo "Photo-bundle generation and ingestion are retired."
+          echo "Use Gallery Direct Individual Photo Collection and Verified Storage."

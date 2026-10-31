@@ -1,88 +1,13 @@
-name: Mimmi Recover Verified Physically Missing Private Album Slots
+name: "Retired photo-bundle path — Mimmi Recover Verified Physically Missing Private Album Slots"
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'apps/mimmi-gallery/package_recovered_physical.py'
-      - 'apps/mimmi-gallery/test_package_recovered_physical.py'
-      - '.github/workflows/mimmi-recovered-physical-private.yml'
-  pull_request:
-    paths:
-      - 'apps/mimmi-gallery/package_recovered_physical.py'
-      - 'apps/mimmi-gallery/test_package_recovered_physical.py'
-      - '.github/workflows/mimmi-recovered-physical-private.yml'
+  workflow_dispatch:
 permissions:
   contents: read
-  actions: read
 jobs:
-  verify:
+  individual-files-only:
     runs-on: ubuntu-24.04
-    timeout-minutes: 12
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with: {python-version: '3.12'}
-      - name: Install image verifier
-        run: python -m pip install 'Pillow==11.3.0'
-      - name: Verify physical bytes, duplicate avoidance and private-only packaging
+      - name: Keep originals in the supported individual-file pipeline
         run: |
-          python -m py_compile apps/mimmi-gallery/package_recovered_physical.py
-          python apps/mimmi-gallery/test_package_recovered_physical.py
-  preserve-recovered-only:
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-    needs: verify
-    runs-on: ubuntu-24.04
-    timeout-minutes: 25
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with: {python-version: '3.12'}
-      - name: Install image verifier
-        run: python -m pip install 'Pillow==11.3.0'
-      - name: Download prior verified Actions artifacts from this repository
-        env:
-          GH_TOKEN: ${{ github.token }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          mkdir -p "$RUNNER_TEMP/recovered"
-          for batch in 0 1 2; do
-            mkdir -p "$RUNNER_TEMP/recovered/input-$batch"
-            gh run download 40836863341 --repo "$GITHUB_REPOSITORY" \
-              --name "mimmi-original-new-private-$batch" \
-              --dir "$RUNNER_TEMP/recovered/input-$batch"
-          done
-          python - <<'PY'
-          import os,zipfile
-          from pathlib import Path
-          root=Path(os.environ['RUNNER_TEMP'])/'recovered'
-          for i in range(3):
-              p=root/f'input-{i}'
-              contents=[f for f in p.rglob('*') if f.is_file()]
-              assert any(f.name.endswith('-private-import.zip') for f in contents)
-              with zipfile.ZipFile(root/f'prior-{i}.actions.zip','w',compression=zipfile.ZIP_STORED) as z:
-                  for f in contents:
-                      z.write(f,arcname=f.name)
-          PY
-      - name: Repackage only missing numbered photo positions without external source requests
-        shell: bash
-        run: |
-          python apps/mimmi-gallery/package_recovered_physical.py \
-            --archives "$RUNNER_TEMP/recovered/prior-0.actions.zip" "$RUNNER_TEMP/recovered/prior-1.actions.zip" "$RUNNER_TEMP/recovered/prior-2.actions.zip" \
-            --out "$RUNNER_TEMP/recovered/mimmi-recovered-unfilled-17.actions.zip"
-          python - <<'PY'
-          import os,json,zipfile
-          from pathlib import Path
-          p=Path(os.environ['RUNNER_TEMP'])/'recovered/mimmi-recovered-unfilled-17.actions.zip'
-          with zipfile.ZipFile(p) as z:
-              d=json.loads(z.read('audit.json'))
-              assert d['new_verified_photo_positions']==17,d
-              assert d['complete_photobooks_claimed']==0
-              print('MIMMI_17_ORIGINAL_PHYSICAL_ARCHIVE_READY',d['albums'])
-          PY
-      - uses: actions/upload-artifact@v4
-        with:
-          name: mimmi-recovered-unfilled-17-private
-          path: ${{ runner.temp }}/recovered/mimmi-recovered-unfilled-17.actions.zip
-          retention-days: 30
-          if-no-files-found: error
+          echo "Photo-bundle generation and ingestion are retired."
+          echo "Use Gallery Direct Individual Photo Collection and Verified Storage."

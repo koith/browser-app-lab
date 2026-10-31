@@ -89,10 +89,18 @@ async def run(args):
             while True:
                 await page.goto(report['deployed_url'],wait_until='domcontentloaded',timeout=60000)
                 await page.wait_for_function('typeof stored!=="undefined" && stored.length>0',timeout=45000)
-                present=await page.evaluate('''selection=>selection.every(a=>{
-                    const saved=stored.find(x=>x.id===a.id);
-                    return !!saved && a.images.every(p=>validImages(saved).some(q=>q.number===p.number&&q.sha256===p.sha256));
-                })''',selected)
+                routes=await page.evaluate('''selection=>selection.flatMap(a=>a.images.map(p=>{
+                    let work=stored.find(w=>validImages(w).some(q=>q.ownerAlbum===a.id&&
+                        (q.storageNumber??q.number)===p.number&&q.sha256===p.sha256));
+                    let q=work&&validImages(work).find(q=>q.ownerAlbum===a.id&&
+                        (q.storageNumber??q.number)===p.number&&q.sha256===p.sha256);
+                    let identical=false;
+                    if(!q){work=stored.find(w=>w.id===canonicalId(a.id)&&validImages(w).some(q=>q.sha256===p.sha256));
+                        q=work&&validImages(work).find(q=>q.sha256===p.sha256);identical=!!q;}
+                    return q?{...p,physical_album:a.id,gallery_album:work.id,
+                        display_number:q.number,byte_identical_existing_display:identical}:null;
+                }))''',selected)
+                present=all(routes)
                 version=await page.locator('#app-version').inner_text()
                 duplicates=await page.evaluate('''()=>stored.reduce((n,a)=>{
                     const sha=validImages(a).map(p=>p.sha256);return n+sha.length-new Set(sha).size},0)''')
@@ -106,6 +114,9 @@ async def run(args):
                 displayed:stored.reduce((n,a)=>n+validImages(a).length,0),
                 distinct_sha:new Set(stored.flatMap(a=>validImages(a).map(p=>p.sha256))).size,
                 owner_rows:ownerStored.reduce((n,a)=>n+validImages(a).length,0)})''')
+            routed={}
+            for photo in routes:routed.setdefault(photo['gallery_album'],[]).append(photo)
+            selected=[{'id':aid,'images':photos} for aid,photos in routed.items()]
             for album in selected:
                 aid=album['id'];card=f'#albumgrid .album[data-id="{aid}"]'
                 await current_card(page,card)
@@ -114,8 +125,8 @@ async def run(args):
                 await current_card(page,card,click=True);await page.locator('#detail').wait_for(state='visible')
                 for expected in album['images']:
                     number=expected['number']
-                    position=await page.evaluate('''([id,n])=>photosFor(stored.find(a=>a.id===id))
-                        .findIndex(p=>p.number===n)''',[aid,number])
+                    position=await page.evaluate('''([id,n,sha])=>photosFor(stored.find(a=>a.id===id))
+                        .findIndex(p=>p.number===n&&p.sha256===sha)''',[aid,expected['display_number'],expected['sha256']])
                     assert position>=0,(aid,number,'saved slot missing')
                     photo=page.locator(f'#detailphotos .photo[data-i="{position}"]')
                     await current_card(page,f'#detailphotos .photo[data-i="{position}"]')
@@ -143,7 +154,9 @@ async def run(args):
                     path=await download.path();raw=Path(path).read_bytes()
                     assert len(raw)==expected['bytes'],(aid,number,'download length mismatch')
                     assert hashlib.sha256(raw).hexdigest()==expected['sha256'],(aid,number,'download SHA mismatch')
-                    report['photos'].append({'album':aid,'number':number,'dimensions':size,
+                    report['photos'].append({'album':expected['physical_album'],'number':number,'dimensions':size,
+                        'gallery_album':aid,'display_number':expected['display_number'],
+                        'byte_identical_existing_display':expected['byte_identical_existing_display'],
                         'thumbnail_decoded':True,'lightbox_decoded':True,'download_sha256_verified':True})
                     print('DEPLOYED_EXACT_ORIGINAL_PASS',args.model,args.browser,aid,number,flush=True)
                     if len(report['photos'])==1:await page.screenshot(path=str(args.out.with_suffix('.png')))

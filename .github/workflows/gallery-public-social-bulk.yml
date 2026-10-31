@@ -1,110 +1,13 @@
-name: Gallery Public Creator Social Bulk Photo Bytes
+name: "Retired photo-bundle path — Gallery Public Creator Social Bulk Photo Bytes"
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '42 2 * * 2,6'
-  push:
-    branches: [main]
-    paths:
-      - 'apps/gallery-archive/collect_public_social_bulk.py'
-      - 'apps/gallery-archive/collect_teapawt_public.py'
-      - 'apps/gallery-archive/test_teapawt_public.py'
-      - 'apps/gallery-archive/public_social_bulk_sources.json'
-      - 'apps/gallery-archive/test_public_social_bulk.py'
-      - '.github/workflows/gallery-public-social-bulk.yml'
-  pull_request:
-    paths:
-      - 'apps/gallery-archive/collect_public_social_bulk.py'
-      - 'apps/gallery-archive/collect_teapawt_public.py'
-      - 'apps/gallery-archive/test_teapawt_public.py'
-      - 'apps/gallery-archive/public_social_bulk_sources.json'
-      - '.github/workflows/gallery-public-social-bulk.yml'
 permissions:
   contents: read
-concurrency:
-  group: gallery-public-social-bulk-${{ github.ref_name }}
-  cancel-in-progress: false
 jobs:
-  offline-photo-byte-tests:
+  individual-files-only:
     runs-on: ubuntu-24.04
-    timeout-minutes: 9
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with: {python-version: '3.12'}
-      - run: python -m pip install 'Pillow==11.3.0' 'requests==2.32.5' 'beautifulsoup4==4.14.2'
-      - name: Verify offline SHA integrity, author filtering, and 344-photo pagination-scale batches
+      - name: Keep originals in the supported individual-file pipeline
         run: |
-          python -m py_compile apps/gallery-archive/collect_public_social_bulk.py
-          python apps/gallery-archive/test_public_social_bulk.py
-          python apps/gallery-archive/test_teapawt_public.py
-  private-owner-social-photo-acquisition:
-    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-    needs: offline-photo-byte-tests
-    runs-on: ubuntu-24.04
-    timeout-minutes: 115
-    strategy:
-      fail-fast: false
-      max-parallel: 2
-      matrix:
-        model: [yui, mimmi]
-    env:
-      GALLERY_DEEP_PUBLIC_TIMELINE: ${{ github.event_name == 'push' && '1' || '0' }}
-      YUI_COOKIE: ${{ secrets.YUI_TERABOX_COOKIE }}
-      MIMMI_COOKIE: ${{ secrets.MIMMI_TERABOX_NDUS }}
-      RCLONE_CONFIG_ARCHIVE_TYPE: terabox
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with: {python-version: '3.12'}
-      - name: Install public gallery extractor and JPEG/PNG/WebP decoder
-        run: python -m pip install 'Pillow==11.3.0' 'gallery-dl>=1.30,<2' 'requests==2.32.5' 'beautifulsoup4==4.14.2'
-      - name: Install checksum-pinned owner-private TeraBox reader
-        shell: bash
-        run: |
-          set -euo pipefail
-          curl -fsSL 'https://github.com/gulp79/rclone-extra/releases/download/v1.75.2-extra/rclone-linux-amd64.zip' -o "$RUNNER_TEMP/client.zip"
-          echo "78855325a2a8d83b3feee3a8363d32e1211babbf4cda6356fa8ca5f472075062  $RUNNER_TEMP/client.zip" | sha256sum -c -
-          mkdir -p "$RUNNER_TEMP/unpacked" "$RUNNER_TEMP/bin"
-          unzip -q "$RUNNER_TEMP/client.zip" -d "$RUNNER_TEMP/unpacked"
-          binary="$(find "$RUNNER_TEMP/unpacked" -type f -name rclone -print -quit)"
-          install -m 755 "$binary" "$RUNNER_TEMP/bin/rclone"
-          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
-      - name: Read SHA-verified owner archive first for exact deduplication
-        shell: bash
-        run: |
-          set -euo pipefail
-          if [[ "${{ matrix.model }}" == "yui" ]]; then
-            export RCLONE_CONFIG_ARCHIVE_COOKIE="$YUI_COOKIE"
-            remote="archive:YuiArchive"
-          else
-            export RCLONE_CONFIG_ARCHIVE_COOKIE="$MIMMI_COOKIE"
-            remote="archive:MimmiArchive"
-          fi
-          test -n "$RCLONE_CONFIG_ARCHIVE_COOKIE"
-          echo "::add-mask::$RCLONE_CONFIG_ARCHIVE_COOKIE"
-          rclone cat "$remote/metadata/catalog.json" > "$RUNNER_TEMP/previous-owner-catalog.json"
-          test -s "$RUNNER_TEMP/previous-owner-catalog.json"
-      - name: Collect all ordinarily available owner-authored public photographs
-        shell: bash
-        run: |
-          set -euo pipefail
-          python apps/gallery-archive/collect_public_social_bulk.py \
-            --model "${{ matrix.model }}" \
-            --previous "$RUNNER_TEMP/previous-owner-catalog.json" \
-            --output "$RUNNER_TEMP/social-output"
-      - name: Pass only real private ZIP photographs to existing cloud SHA-readback importer
-        uses: actions/upload-artifact@v4
-        with:
-          name: gallery-${{ matrix.model }}-social-originals
-          path: ${{ runner.temp }}/social-output/*-private-import.zip
-          if-no-files-found: warn
-          retention-days: 7
-      - name: Keep honest image counts and inaccessible-source audit separate
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: gallery-${{ matrix.model }}-social-audit
-          path: ${{ runner.temp }}/social-output/social-bulk-audit.json
-          if-no-files-found: warn
-          retention-days: 30
+          echo "Photo-bundle generation and ingestion are retired."
+          echo "Use Gallery Direct Individual Photo Collection and Verified Storage."
