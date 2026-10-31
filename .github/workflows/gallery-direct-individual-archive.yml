@@ -24,6 +24,7 @@ on:
       - apps/gallery-archive/recover_verified_work_batches.py
       - apps/gallery-archive/test_verified_work_recovery.py
       - apps/gallery-archive/test_remote_readback_deadline.py
+      - apps/gallery-archive/test_owner_copyto_fallback.py
       - apps/gallery-archive/collect_teapawt_public.py
       - apps/gallery-archive/test_teapawt_public.py
       - apps/gallery-archive/visual_public_work.py
@@ -69,6 +70,7 @@ jobs:
           python apps/mimmi-gallery/cloud/test_sealed_session.py
           python apps/mimmi-gallery/cloud/test_cookie_format.py
           python apps/gallery-archive/test_remote_readback_deadline.py
+          python apps/gallery-archive/test_owner_copyto_fallback.py
           python apps/gallery-archive/test_verified_work_recovery.py
           python apps/gallery-archive/test_reverse_image_sweep.py
           python apps/mimmi-gallery/cloud/test_media_cache.py

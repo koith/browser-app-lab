@@ -24,6 +24,53 @@ class RemoteCommandFailure(ValueError):
         super().__init__(f'{self.cause}: exit={rc}, received={count}, expected={size}; '+diagnostic(detail)[:500])
 
 
+
+class ProviderReadChallenge(ValueError):
+    """The ordinary authenticated read returned a provider JSON challenge, not media."""
+    def __init__(self, code, received):
+        self.errno=code
+        super().__init__('Owner provider response instead of image: errno='+str(code)+
+                         ', verification_required='+str(code==400141)+', received='+str(received))
+
+
+def read_remote_via_copyto(row, remote, deadline_seconds=75, command=None):
+    """Same authenticated owner account, different supported rclone read operation.
+
+    The full original SHA is required; never accept a provider JSON response,
+    a JPEG-looking placeholder, or a mere successful exit code. No writes occur
+    on TeraBox. This is a client I/O fallback, not a login/challenge bypass.
+    """
+    key,size,sha=row
+    if not 0<deadline_seconds<=75:raise ValueError('Invalid alternate read deadline')
+    with tempfile.TemporaryDirectory(prefix='archive-owner-copyto-') as tmp:
+        destination=Path(tmp)/'original.readback'
+        cmd=([str(item).replace('{dest}',str(destination)) for item in command]
+             if command is not None else
+             ['rclone','copyto',remote.rstrip('/')+'/'+key,str(destination),
+              '--timeout=65s','--retries=1'])
+        with tempfile.TemporaryFile() as errors:
+            try:
+                proc=subprocess.run(cmd,stdout=subprocess.DEVNULL,stderr=errors,
+                                    check=False,timeout=deadline_seconds)
+            except subprocess.TimeoutExpired:
+                raise TimeoutError('Alternate owner read deadline exceeded') from None
+            if proc.returncode:
+                errors.seek(0)
+                raise ValueError('Owner copyto read failed (same account): '+
+                                 diagnostic(errors.read(32000).decode('utf-8','replace'))[:320])
+        if not destination.is_file() or destination.stat().st_size!=size:
+            raise ValueError('Owner copyto returned wrong byte length')
+        digest=hashlib.sha256()
+        with destination.open('rb') as media:
+            for block in iter(lambda:media.read(256*1024),b''):
+                digest.update(block)
+        if digest.hexdigest()!=sha:
+            raise ValueError('Owner copyto SHA256 integrity mismatch')
+        print('OWNER_COPYTO_EXACT_SHA256_RECOVERED',flush=True)
+        return key
+
+
+
 def read_remote(row,remote,deadline_seconds=75,command=None):
     key,size,sha=row
     errors=tempfile.TemporaryFile()
@@ -56,8 +103,7 @@ def read_remote(row,remote,deadline_seconds=75,command=None):
                 if type(code) is int:
                     # No raw provider message, request ID, URL or cookie leaves
                     # this process, and this exception is never retried.
-                    raise ValueError('Owner provider response instead of image: errno='+str(code)+
-                        ', verification_required='+str(code==400141)+', received='+str(count))
+                    raise ProviderReadChallenge(code,count)
             raise ValueError(f'Remote integrity mismatch: received={count}, expected={size}; command exited successfully')
     finally:
         if process.poll() is None:
@@ -67,9 +113,15 @@ def read_remote(row,remote,deadline_seconds=75,command=None):
     return key
 
 
-def read_remote_with_recovery(row,remote,deadline_seconds=75,command=None):
+def read_remote_with_recovery(row,remote,deadline_seconds=75,command=None,copyto_command=None):
     deadline=time.monotonic()+deadline_seconds
     try:return read_remote(row,remote,deadline_seconds,command)
+    except ProviderReadChallenge as error:
+        if error.errno!=400141 or (command is not None and copyto_command is None) or deadline-time.monotonic()<=2:raise
+        # A live same-account experiment proved rclone copyto can retrieve the
+        # exact original while cat returns a 112-byte provider JSON response.
+        # The alternative MUST independently pass the complete SHA-256.
+        return read_remote_via_copyto(row,remote,min(75,deadline-time.monotonic()),copyto_command)
     except RemoteCommandFailure as error:
         if not error.retryable_transport or deadline-time.monotonic()<=2:raise
         time.sleep(1)
