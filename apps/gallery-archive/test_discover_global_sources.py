@@ -20,6 +20,17 @@ def main():
     assert normalized("DJAWA Photo Mimmi Asuna the Maid") == normalized("Asuna the Maid")
     assert not relevant("Yui from another creator", "mimmi")
     assert relevant("심혜성 photographs", "yui")
+    assert not relevant("Yuina and Yuiro", "yui")
+    assert not relevant("Mimmiana archive", "mimmi")
+    mixed="""<h1>Yui SWEETBOX catalogue</h1><ul>
+      <li>NO.072 Yui SWTB Vol.65 Present [33P]</li>
+      <li>NO.077 Nyangsarang SWTB Vol.83 Ocean [114P]</li>
+      <li>NO.078 Miyao Debut [125P]</li>
+      <li>NO.079 Yuina unrelated [90P]</li></ul>"""
+    assert [p['number'] for p in numbered_entries(mixed,'yui')]==[72]
+    assert not numbered_entries('<p>NO.001 Other [20P] NO.002 Yui Green [91P]</p>','yui')
+    assert not numbered_entries('<p>NO.008的Yui’s Present标题完整，是说明而不是目录条目。</p>','yui')
+    assert numbered_entries('<li>NO.024 SWTB CREAM YUI 【228P3V】</li>','yui')[0]['advertised_photos']==228
 
     official = """<html><body>
     <h2><a href="/portfolio/asuna-the-maid/">Asuna the Maid</a></h2>

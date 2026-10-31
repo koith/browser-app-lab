@@ -24,8 +24,8 @@ APPS = ROOT.parent
 REGISTRY = ROOT / "global_source_registry.json"
 OUTPUT = ROOT / "global-source-leads.json"
 AGENT = "PhotoCatalogueAudit/1.0 (public HTML metadata only; no image downloads)"
-NUMBERED = re.compile(r"\bNO\.\s*0*(\d{1,3})\s*[\-–:.：]?\s*(.{3,190})", re.I)
-PHOTOS = re.compile(r"[\[【〖(（]\s*(\d{1,4})\s*P\b", re.I)
+NUMBERED = re.compile(r"\bNO\.\s*0*(\d{1,3})(?:\s+|\s*[\-–:.：]\s*)(.{3,190})", re.I)
+PHOTOS = re.compile(r"[\[【〖(（]\s*(\d{1,4})\s*P(?=[^A-Za-z]|$)", re.I)
 MODEL_WORDS = {
     "yui": ("심유이", "심혜성", "沈惠星", "沈慧圣", "super_yuisan", "Yui Sim", "ゆい", "Yui"),
     "mimmi": ("밈미", "밈미", "Mimmi", "Mimmissu17", "Mimmi_official"),
@@ -46,7 +46,12 @@ def normalized(text: str) -> str:
 
 def relevant(text: str, model: str) -> bool:
     s = unicodedata.normalize("NFKC", text).casefold()
-    return any(unicodedata.normalize("NFKC", word).casefold() in s for word in MODEL_WORDS[model])
+    for word in MODEL_WORDS[model]:
+        word=unicodedata.normalize("NFKC",word).casefold()
+        if word.isascii():
+            if re.search(r'(?<![a-z0-9_])'+re.escape(word)+r'(?![a-z0-9_])',s):return True
+        elif word in s:return True
+    return False
 
 
 def numbered_entries(html: str, model: str) -> list[dict]:
@@ -67,8 +72,12 @@ def numbered_entries(html: str, model: str) -> list[dict]:
         if number < 1 or number > 250:
             continue
         title = match.group(2).strip(" -:·")
-        # Numbered items must occur in a MODEL-SPECIFIC page. They are not
-        # proof that a collaborator pictured in that set is the same model.
+        # A URL named /yui/ can list an entire mixed-model publisher.
+        # Require identity in this entry, not elsewhere on the page.
+        if NUMBERED.search(title):continue
+        prefix=line[:match.start()].strip()
+        if not (relevant(title,model) or (len(prefix)<=40 and relevant(prefix,model))):
+            continue
         if len(title) < 4 or len(title) > 180:
             continue
         count = PHOTOS.search(title)
