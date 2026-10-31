@@ -9,6 +9,7 @@ The container does not keep originals on its ephemeral disk. They live remotely.
 from __future__ import annotations
 
 import asyncio
+import httpx
 import hashlib
 import json
 import re
@@ -572,8 +573,12 @@ install_portal(app, token_getter=lambda: TOKEN,
 # worker can only append permit-pinned individual bytes plus a private queue.
 try:
     from gateway.individual_import import install as install_individual_import
+    from gateway.terabox_web_state import OwnerUploadState, WebStateUnavailable
 except ModuleNotFoundError:
     from individual_import import install as install_individual_import
+    from terabox_web_state import OwnerUploadState, WebStateUnavailable
+
+owner_upload_state=OwnerUploadState()
 
 
 async def _individual_read(model,key,limit):
@@ -586,6 +591,13 @@ async def _individual_put(model,local,key,overwrite):
         raise HTTPException(400,'Invalid individual transfer destination')
     child=os.environ.copy()
     child['RCLONE_CONFIG_ARCHIVE_COOKIE']=cookie_header(child.get('RCLONE_CONFIG_ARCHIVE_COOKIE',''))
+    try:
+        child['RCLONE_CONFIG_ARCHIVE_JSTOKEN']=await owner_upload_state.get(
+            child['RCLONE_CONFIG_ARCHIVE_COOKIE'],child.get('RCLONE_CONFIG_ARCHIVE_DOMAIN','https://www.terabox.com'))
+    except (WebStateUnavailable,httpx.RequestError) as error:
+        reason=str(error) if isinstance(error,WebStateUnavailable) else type(error).__name__
+        print('OWNER_UPLOAD_WEB_STATE_UNAVAILABLE',reason,flush=True)
+        raise HTTPException(503,'Owner web upload session is unavailable') from None
     process=await asyncio.create_subprocess_exec('rclone','copyto',str(local),remote+'/'+key,
         '--ignore-existing','--timeout=60s','--retries=1',
         stdout=asyncio.subprocess.DEVNULL,stderr=asyncio.subprocess.PIPE,env=child)
