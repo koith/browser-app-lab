@@ -68,6 +68,53 @@ def page_images(raw,url,model):
         urls,next_page,cards=public_images_from_author(raw,{'account':account},url)
         return urls,[next_page] if next_page else [],'scoped_public_page' if cards else 'missing_model_context'
     soup=BeautifulSoup(raw,'html.parser')
+    if urlsplit(url).hostname in ('www.v2ph.com','v2ph.com'):
+        # Ordinary publicly visible album page only. Pagination past its
+        # login boundary must stop: never guess signed assets or fetch members'
+        # galleries through an alternate endpoint.
+        title=soup.select_one('h1')
+        heading=title.get_text(' ',strip=True) if title else ''
+        if not MODEL_PATTERNS[model].search(heading):
+            return [],[],'missing_model_context'
+        if re.search(r'need to log in to view more|login to view more|请登录|ログインして',soup.get_text(' ',strip=True),re.I):
+            return [],[],'login_required_for_additional_pages'
+        selected=[]
+        seen=set()
+        def candidate(raw_link):
+            full=urljoin(url,str(raw_link or '').strip())
+            p=urlsplit(full)
+            # V2PH's public photo CDN is distinct from its related-album
+            # thumbnails. Admit only observed individual-image URLs.
+            if (p.scheme!='https' or p.hostname!='cdn.v2ph.com' or p.query
+                    or p.fragment or not re.fullmatch(r'/photos/[A-Za-z0-9_-]{8,80}\.(?:jpg|jpeg|png|webp)',p.path,re.I)):
+                return
+            if full not in seen:
+                seen.add(full);selected.append(full)
+        for a in soup.select('a[href]'):
+            if a.find_parent(class_=re.compile(r'related|recommend|sidebar',re.I)):
+                continue
+            if a.find('img') is not None:
+                candidate(a.get('href'))
+        # Covers sites that expose native photo src on the image node itself.
+        for img in soup.select('img'):
+            if img.find_parent(class_=re.compile(r'related|recommend|sidebar',re.I)):
+                continue
+            for key in ('data-original','data-src','src'):
+                candidate(img.get(key))
+        more=[]
+        here=urlsplit(url)
+        for a in soup.select('a[href]'):
+            target=urljoin(url,a['href']);q=urlsplit(target)
+            if q.scheme!='https' or q.hostname!=here.hostname or q.path!=here.path:
+                continue
+            params=dict(parse_qsl(q.query))
+            if set(params)!={'page'} or not params['page'].isdigit():
+                continue
+            page_number=int(params['page'])
+            if 2<=page_number<=60 and target!=url and target not in more:
+                more.append(target)
+        # No source identity/album content should be inferred from gallery count.
+        return selected,more,'scoped_public_page' if selected else 'no_public_photos'
     if urlsplit(url).hostname=='www.shypetal.com':
         # The ordinary page declares its individual lightbox image list. Read
         # that public JSON only; never click its compressed-download controls.
@@ -155,7 +202,7 @@ def atomic_bytes(path,data):
     tmp=path.with_name(path.name+'.pending');tmp.write_bytes(data);tmp.replace(path)
 
 
-def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_only=False):
+def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_only=False,album_ids=None):
     root=Path(root);out=Path(out)
     if owner.get('model')!=model or owner.get('schema_version')!=1 or not owner.get('albums'):
         raise ValueError('Current owner catalog required; do not assume empty archive')
@@ -214,7 +261,12 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                 data=(out/name).read_bytes()
                 if len(data)!=row[size] or hashlib.sha256(data).hexdigest()!=row[digest]:raise ValueError('Staged file corrupted during interruption')
             resumed[entry['album']].append(row);seen_sha.add(row['sha256']);seen_urls.add(entry['source']);new_total+=1
-    books=sorted((a for a in books.values() if not focused_only or a.get('visual_reference_required')),
+    selected=set(album_ids or [])
+    if selected and (len(selected)>12 or any(not re.fullmatch(r'[a-z0-9][a-z0-9-]{1,100}',v) for v in selected)):
+        raise ValueError('Invalid bounded album selection')
+    books=sorted((a for a in books.values()
+                  if (not focused_only or a.get('visual_reference_required'))
+                  and (not selected or a['id'] in selected)),
         key=lambda a:(a.get('priority',100),len(old_albums.get(a['id'],{}).get('images',[])),a['id']))
     if set(resumed)-{a['id'] for a in books}:
         raise ValueError('Resumed work no longer in source scope; preserve staged files for review')
@@ -313,7 +365,7 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
 
 
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('--root',type=Path,default=ROOT);p.add_argument('--model',choices=['mimmi','yui'],required=True);p.add_argument('--owner',type=Path,required=True);p.add_argument('--out',type=Path,required=True);p.add_argument('--max-new',type=int,default=180);p.add_argument('--max-pages',type=int,default=24);p.add_argument('--focused-only',action='store_true');a=p.parse_args()
+    p=argparse.ArgumentParser();p.add_argument('--root',type=Path,default=ROOT);p.add_argument('--model',choices=['mimmi','yui'],required=True);p.add_argument('--owner',type=Path,required=True);p.add_argument('--out',type=Path,required=True);p.add_argument('--max-new',type=int,default=180);p.add_argument('--max-pages',type=int,default=24);p.add_argument('--focused-only',action='store_true');p.add_argument('--album-id',action='append',default=[]);a=p.parse_args()
     if not 1<=a.max_new<=500 or not 1<=a.max_pages<=60:raise SystemExit('Bounded collection budget required')
-    report=collect(a.root,a.model,json.loads(a.owner.read_text()),a.out,a.max_new,a.max_pages,focused_only=a.focused_only)
+    report=collect(a.root,a.model,json.loads(a.owner.read_text()),a.out,a.max_new,a.max_pages,focused_only=a.focused_only,album_ids=a.album_id)
     print('DIRECT_FILE_COLLECTION_COMPLETE',report['model'],report['new_local_individual_files'],'REMOTE_VERIFIED',0,'GALLERY_VERIFIED',0)
