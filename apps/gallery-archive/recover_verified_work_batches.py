@@ -43,7 +43,8 @@ def recover(stage,owner,remote):
             held+=1;continue
         # Existing catalog rows have no files in the incremental staging tree.
         # Do not infer their source positions or add them to this new queue.
-        rows=[p for p in album['images'] if (stage/p['key']).is_file() or (stage/p['preview']).is_file()]
+        rows=[p for p in album['images'] if (stage/p['key']).is_file()
+              or (p.get('preview') and (stage/p['preview']).is_file())]
         if not rows:continue
         specs=[]
         for p in rows:

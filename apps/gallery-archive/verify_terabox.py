@@ -11,6 +11,7 @@ import time
 import tempfile
 import re
 from safe_rclone import diagnostic
+from merge_incremental import checked_row
 
 
 class RemoteCommandFailure(ValueError):
@@ -78,18 +79,24 @@ def read_remote_with_recovery(row,remote,deadline_seconds=75,command=None):
 
 def verify(stage: Path, remote: str, workers: int, only_staged: bool = False):
     manifest=json.loads((stage/"metadata/catalog.json").read_text(encoding="utf-8"))
-    specs=[];object_work={}
+    specs=[];object_work={};photo_specs=[]
     for album in manifest["albums"]:
         for photo in album["images"]:
+            checked_row(manifest['model'],album['id'],photo)
             specs.append((photo["key"],photo["bytes"],photo["sha256"]))
-            specs.append((photo["preview"],photo["preview_bytes"],photo["preview_sha256"]))
+            if photo.get('preview'):
+                specs.append((photo["preview"],photo["preview_bytes"],photo["preview_sha256"]))
+            photo_specs.append([photo[k] for k in ('key','preview') if photo.get(k)])
             for field in ('key','preview'):
+                if not photo.get(field):continue
                 key=photo[field]
                 if key in object_work and object_work[key]!=album['id']:
                     raise ValueError('Remote object belongs to conflicting works')
                 object_work[key]=album['id']
     if only_staged:
         specs = [row for row in specs if (stage / row[0]).is_file()]
+    selected_keys={r[0] for r in specs}
+    photos=sum(bool(selected_keys.intersection(keys)) for keys in photo_specs)
     if not specs and not only_staged:
         raise ValueError("No photo bytes to verify")
     def readback(row):
@@ -110,7 +117,7 @@ def verify(stage: Path, remote: str, workers: int, only_staged: bool = False):
             if passed and passed%250==0:print("REMOTE_SHA256_READBACK_PROGRESS",passed,"/",len(specs),flush=True)
     report={"model":manifest["model"],"media_checked":len(specs),
             "full_SHA256_verified":passed,"failed":len(errors),
-            "photos":len(specs)//2,"errors":errors[:20],"work_verification":{}}
+            "photos":photos,"errors":errors[:20],"work_verification":{}}
     for aid,rows in work_specs.items():
         result={'media_checked':len(rows),'full_SHA256_verified':work_passed[aid],
                 'failed':work_failed[aid]}

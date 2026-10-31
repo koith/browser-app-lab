@@ -3,33 +3,14 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
+    # Storage-only fixes must not recrawl/reupload known held source objects.
+    # All offline regressions still run on pull requests; manual collection stays available.
     paths:
       - apps/gallery-archive/direct_photo_pipeline.py
-      - apps/gallery-archive/defer_verified_batch.py
-      - apps/gallery-archive/private_collection_snapshot.py
-      - apps/gallery-archive/test_private_collection_snapshot.py
-      - apps/gallery-archive/test_deferred_verified_batch.py
-      - apps/gallery-archive/transfer_individual_files.py
-      - apps/gallery-archive/test_transfer_individual_files.py
-      - apps/gallery-archive/verify_terabox.py
-      - apps/gallery-archive/recover_verified_work_batches.py
-      - apps/gallery-archive/test_verified_work_recovery.py
-      - apps/gallery-archive/test_remote_readback_deadline.py
       - apps/gallery-archive/collect_teapawt_public.py
-      - apps/gallery-archive/test_teapawt_public.py
       - apps/gallery-archive/visual_public_work.py
-      - apps/gallery-archive/load_pending_individual.py
-      - apps/gallery-archive/read_owner_metadata.py
-      - apps/gallery-archive/test_owner_metadata.py
-      - apps/gallery-archive/test_pending_individual.py
-      - apps/mimmi-gallery/cloud/gateway/individual_import.py
-      - apps/mimmi-gallery/cloud/test_individual_import.py
-      - apps/gallery-archive/test_public_failures.py
       - apps/yui-gallery/public_photo_archive.py
-      - apps/gallery-archive/test_visual_public_work.py
-      - apps/gallery-archive/work_coverage.py
       - apps/*-gallery/public-work-pages.json
-      - .github/workflows/gallery-direct-individual-archive.yml
   pull_request:
     paths:
       - apps/gallery-archive/direct_photo_pipeline.py

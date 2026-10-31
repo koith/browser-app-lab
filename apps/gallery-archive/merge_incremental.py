@@ -21,7 +21,12 @@ def checked_row(model: str, album_id: str, image: dict):
     number = image.get("number")
     if type(number) is not int or number < 1 or number > 20000:
         raise ValueError("Invalid prior numbered slot")
-    for field, suffix in (("key", "originals"), ("preview", "previews")):
+    original_thumbnail = image.get('preview_fallback') == 'verified-original'
+    if original_thumbnail and (model != 'mimmi' or any(image.get(k) is not None
+            for k in ('preview','preview_sha256','preview_bytes'))):
+        raise ValueError('Original thumbnail requires Mimmi and no separate preview metadata')
+    fields = (("key", "originals"),) if original_thumbnail else (("key", "originals"), ("preview", "previews"))
+    for field, suffix in fields:
         path = image.get(field)
         if not isinstance(path, str) or not path.startswith(f"{suffix}/{album_id}/"):
             raise ValueError("Unsafe prior remote image key")
@@ -73,6 +78,7 @@ def merge(stage: Path, previous: Path, model: str):
             if former["sha256"]==photo["sha256"]:
                 unchanged+=1
                 for field in ("key","preview"):
+                    if not photo.get(field):continue
                     old_file=stage/photo[field]
                     if old_file.exists():
                         old_file.unlink()
@@ -85,6 +91,7 @@ def merge(stage: Path, previous: Path, model: str):
             else:
                 lower_or_conflict+=1
                 for field in ("key","preview"):
+                    if not photo.get(field):continue
                     old_file=stage/photo[field]
                     if old_file.exists():
                         old_file.unlink()
