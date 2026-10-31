@@ -15,6 +15,39 @@ def photo(seed):
 
 
 class DirectTests(unittest.TestCase):
+    def test_legacy_observed_pages_recover_only_curated_existing_work(self):
+        with tempfile.TemporaryDirectory() as name:
+            root=Path(name);base=root/'apps/yui-gallery';base.mkdir(parents=True)
+            (base/'stored-albums.json').write_text('{"model":"yui","albums":[]}')
+            page='https://www.inven.co.kr/board/webzine/2097/123'
+            known='https://upload3.inven.co.kr/known.jpg'
+            other='https://upload3.inven.co.kr/other-model.jpg'
+            raw=photo(31)
+            record={'number':2,'url':known,'sha256':hashlib.sha256(raw).hexdigest(),
+                    'bytes':len(raw),'width':400,'height':600}
+            albums=[{'id':'legacy-work','source_pages':['https://unreviewed.invalid/page',page],
+                     'images':[record]},
+                    {'id':'previously-removed-work','source_pages':[page],'images':[record]}]
+            (base/'additional-source-albums.json').write_text(json.dumps({'albums':albums}))
+            owner={'schema_version':1,'model':'yui','albums':[{'id':'legacy-work',
+                   'images':[{'number':1,'sha256':hashlib.sha256(photo(0)).hexdigest()}]}]}
+            class Client:
+                calls=[]
+                def get(self,url):
+                    self.calls.append(url)
+                    if url==page:
+                        data=f'<title>심유이 행사</title><article>여러 모델 <img src="{known}"><img src="{other}"></article>'.encode()
+                    elif url==known:data=raw
+                    else:raise AssertionError('Must not request unreviewed images or hosts')
+                    return type('Response',(),{'content':data})()
+            client=Client();report=collect(root,'yui',owner,root/'stage',5,3,client)
+            self.assertEqual(report['new_local_individual_files'],1)
+            self.assertEqual(client.calls,[page,known])
+            self.assertEqual(len(report['results']),1,'Removed works must stay removed')
+            self.assertEqual(report['results'][0]['unreviewed_legacy_image_candidates_skipped'],1)
+            saved=json.loads((root/'stage/metadata/catalog.json').read_text())['albums'][0]
+            self.assertEqual(saved['id'],'legacy-work');self.assertEqual(saved['images'][0]['number'],2)
+
     def test_full_public_variant_replaces_proven_same_slot_only(self):
         with tempfile.TemporaryDirectory() as name:
             root=Path(name);base=root/'apps/yui-gallery';base.mkdir(parents=True)
