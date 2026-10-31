@@ -29,7 +29,7 @@ def read_remote(row,remote,deadline_seconds=75,command=None):
     process=subprocess.Popen(command or ["rclone","cat",remote.rstrip("/")+"/"+key,
                               "--timeout=65s","--retries=1"],
                              stdout=subprocess.PIPE,stderr=errors)
-    count=0;digest=hashlib.sha256();deadline=time.monotonic()+deadline_seconds
+    count=0;digest=hashlib.sha256();prefix=bytearray();deadline=time.monotonic()+deadline_seconds
     try:
         with selectors.DefaultSelector() as selector:
             selector.register(process.stdout,selectors.EVENT_READ)
@@ -40,6 +40,7 @@ def read_remote(row,remote,deadline_seconds=75,command=None):
                 data=process.stdout.read1(256*1024)
                 if not data:break
                 count+=len(data)
+                if len(prefix)<512:prefix.extend(data[:512-len(prefix)])
                 if count>size:raise ValueError('Remote exceeds expected size')
                 digest.update(data)
         rc=process.wait(timeout=max(.01,deadline-time.monotonic()))
@@ -47,6 +48,15 @@ def read_remote(row,remote,deadline_seconds=75,command=None):
             errors.seek(0)
             raise RemoteCommandFailure(rc,count,size,errors.read(32000).decode('utf-8','replace'))
         if count!=size or digest.hexdigest()!=sha:
+            if count<=512:
+                try:response=json.loads(prefix)
+                except (ValueError,TypeError):response={}
+                code=response.get('errno') if isinstance(response,dict) else None
+                if type(code) is int:
+                    # No raw provider message, request ID, URL or cookie leaves
+                    # this process, and this exception is never retried.
+                    raise ValueError('Owner provider response instead of image: errno='+str(code)+
+                        ', verification_required='+str(code==400141)+', received='+str(count))
             raise ValueError(f'Remote integrity mismatch: received={count}, expected={size}; command exited successfully')
     finally:
         if process.poll() is None:

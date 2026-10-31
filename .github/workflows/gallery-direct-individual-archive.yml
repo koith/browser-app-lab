@@ -77,6 +77,7 @@ jobs:
           python apps/gallery-archive/test_owner_metadata.py
           python apps/mimmi-gallery/cloud/test_individual_import.py
           python apps/mimmi-gallery/cloud/test_sealed_session.py
+          python apps/mimmi-gallery/cloud/test_cookie_format.py
           python apps/gallery-archive/test_remote_readback_deadline.py
           python apps/gallery-archive/test_reverse_image_sweep.py
           python apps/mimmi-gallery/cloud/test_media_cache.py
@@ -127,6 +128,18 @@ jobs:
         run: |
           set -euo pipefail
           if [[ "$MODEL" == mimmi ]]; then cookie="$MIMMI_COOKIE";remote='archive:MimmiArchive';else cookie="$YUI_COOKIE";remote='archive:YuiArchive';fi
+          # The pinned client mistakes a padded raw ndus token for a complete
+          # Cookie header. Preserve the same credential in its normal format.
+          cookie="$(python - <<'PY'
+          import os,sys
+          sys.path.insert(0,'apps/mimmi-gallery/cloud/gateway')
+          from cookie_format import cookie_header
+          raw=os.environ['MIMMI_COOKIE' if os.environ['MODEL']=='mimmi' else 'YUI_COOKIE']
+          header=cookie_header(raw)
+          print('OWNER_STORAGE_AUTH_HEADER_NORMALIZED',header!=raw,file=sys.stderr)
+          print(header)
+          PY
+          )"
           test -n "$cookie"
           echo "::add-mask::$cookie"
           echo "RCLONE_CONFIG_ARCHIVE_COOKIE=$cookie" >> "$GITHUB_ENV"

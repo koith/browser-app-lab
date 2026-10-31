@@ -68,11 +68,13 @@ def collect_work(book,previous,client,out,budget,seen_sha,model,reference_reader
     if claimed-previous_unique>budget:
         info['failures'].append('Defer whole work to next bounded batch, do not publish a truncated edition');return None,info
     refs=[];reference_hashes=set();reference_dir=out/'references'/aid;reference_dir.mkdir(parents=True,exist_ok=True)
+    active_reference=None
     try:
         for photo in previous:
             # Old ledgers sometimes assign one exact SHA to two numbers. Those
             # are one reference cut, not competing visual matches.
             if photo['sha256'] in reference_hashes:continue
+            active_reference=photo['number']
             reference_hashes.add(photo['sha256'])
             digest=photo.get('preview_sha256') or photo['sha256'];path=reference_dir/(digest+'.bin')
             raw=None
@@ -96,6 +98,8 @@ def collect_work(book,previous,client,out,budget,seen_sha,model,reference_reader
             atomic_bytes(path,raw);refs.append((photo,raw))
     except Exception as e:
         info['failures'].append('reference_'+type(e).__name__)
+        info['failed_reference_number']=active_reference
+        if isinstance(e,ValueError):info['reference_validation_reason']=str(e)[:120]
         info.setdefault('request_failures',[]).append({'stage':'owner_reference',**public_failure(e)})
         return None,info
     queue=[book['source']];visited=set();urls=[]

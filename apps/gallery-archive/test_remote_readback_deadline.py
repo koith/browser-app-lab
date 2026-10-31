@@ -42,6 +42,19 @@ class RemoteDeadlineTests(unittest.TestCase):
                 [sys.executable,'-c','import time,sys;sys.stdout.buffer.write(b"a");sys.stdout.flush();time.sleep(30)'])
         self.assertLess(time.monotonic()-start,2)
 
+    def test_provider_verification_body_is_rejected_without_retry_or_payload_leak(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            state=Path(tmp)/'attempt'
+            script=('from pathlib import Path;import sys;'
+                    'p=Path(sys.argv[1]);p.write_text(p.read_text()+"x" if p.exists() else "x");'
+                    'print(\'{"errno":400141,"errmsg":"private-response-not-for-logs"}\')')
+            with self.assertRaises(ValueError) as failed:
+                read_remote_with_recovery(('fixture',1000,'a'*64),'unused',3,
+                    [sys.executable,'-c',script,str(state)])
+            self.assertEqual(state.read_text(),'x')
+            self.assertIn('errno=400141',str(failed.exception));self.assertIn('verification_required=True',str(failed.exception))
+            self.assertNotIn('private-response',str(failed.exception))
+
     def test_exact_byte_readback_and_corruption(self):
         row=('fixture',3,hashlib.sha256(b'abc').hexdigest())
         self.assertEqual(read_remote(row,'unused',2,[sys.executable,'-c','print("abc",end="")']),'fixture')
