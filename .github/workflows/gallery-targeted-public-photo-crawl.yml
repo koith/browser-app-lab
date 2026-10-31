@@ -23,6 +23,8 @@ jobs:
         run: |
           python -m py_compile apps/gallery-archive/direct_photo_pipeline.py
           (cd apps/gallery-archive && python test_direct_photo_pipeline.py)
+          (cd apps/gallery-archive && python test_remote_readback_deadline.py)
+          (cd apps/gallery-archive && python test_owner_copyto_fallback.py)
   acquire:
     needs: offline
     runs-on: ubuntu-24.04
