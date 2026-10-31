@@ -10,6 +10,14 @@ from qa_new_physical_photos import parse_cli
 
 
 class PhysicalMatrixTests(unittest.TestCase):
+    def test_current_index_is_an_explicit_exact_snapshot_with_a_baseline(self):
+        common=['--model','mimmi','--browser','webkit','--out','unused.json']
+        args=parse_cli(common+['--since-commit','a'*40,'--current-commit','b'*40])
+        self.assertEqual(args.current_commit,'b'*40)
+        for extra in [['--current-commit','b'*40],['--since-commit','main'],
+                      ['--since-commit','a'*40,'--current-commit','main']]:
+            with contextlib.redirect_stderr(io.StringIO()),self.assertRaises(SystemExit):parse_cli(common+extra)
+
     def test_every_real_matrix_job_parses_and_partitions_all_photos(self):
         root=Path(__file__).resolve().parents[2]
         workflow=yaml.safe_load((root/'.github/workflows/gallery-newly-stored-photo-qa.yml').read_text())
