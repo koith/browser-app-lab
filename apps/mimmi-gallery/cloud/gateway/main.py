@@ -27,11 +27,13 @@ try:
     from gateway.portal import COOKIE_NAME, install_portal, session_valid
     from gateway.media_cache import VerifiedMediaCache
     from gateway.cookie_format import cookie_header
+    from gateway.catalog_view import gallery_catalog
     from gateway.sealed_session import restore as restore_storage_state, seal as seal_storage_state
 except ModuleNotFoundError:
     from portal import COOKIE_NAME, install_portal, session_valid
     from media_cache import VerifiedMediaCache
     from cookie_format import cookie_header
+    from catalog_view import gallery_catalog
     from sealed_session import restore as restore_storage_state, seal as seal_storage_state
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse, Response
@@ -212,7 +214,7 @@ async def health():
 
 @app.get("/api/catalog")
 async def catalog():
-    return JSONResponse(await get_catalog(), headers={
+    return JSONResponse(gallery_catalog(await get_catalog()), headers={
         "Cache-Control": "private, max-age=180, stale-while-revalidate=300"
     })
 
@@ -301,7 +303,7 @@ async def yui_catalog_bytes():
 
 @app.get("/api/yui/catalog")
 async def yui_catalog():
-    return JSONResponse(await yui_catalog_bytes(), headers={
+    return JSONResponse(gallery_catalog(await yui_catalog_bytes()), headers={
         "Cache-Control": "private, max-age=180, stale-while-revalidate=300"
     })
 
