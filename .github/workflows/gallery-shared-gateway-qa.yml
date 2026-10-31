@@ -12,6 +12,8 @@ on:
       - 'apps/mimmi-gallery/cloud/test_media_cache.py'
       - 'apps/mimmi-gallery/cloud/test_cookie_format.py'
       - 'apps/mimmi-gallery/cloud/gateway/cookie_format.py'
+      - 'apps/mimmi-gallery/cloud/gateway/Dockerfile'
+      - 'apps/mimmi-gallery/cloud/test_container_import.py'
       - 'apps/yui-gallery/owner-media.js'
       - 'apps/yui-gallery/cloud.html'
       - '.github/workflows/gallery-shared-gateway-qa.yml'
@@ -27,6 +29,8 @@ on:
       - 'apps/mimmi-gallery/cloud/test_media_cache.py'
       - 'apps/mimmi-gallery/cloud/test_cookie_format.py'
       - 'apps/mimmi-gallery/cloud/gateway/cookie_format.py'
+      - 'apps/mimmi-gallery/cloud/gateway/Dockerfile'
+      - 'apps/mimmi-gallery/cloud/test_container_import.py'
       - 'apps/yui-gallery/owner-media.js'
       - 'apps/yui-gallery/cloud.html'
       - '.github/workflows/gallery-shared-gateway-qa.yml'
@@ -48,5 +52,6 @@ jobs:
           python apps/mimmi-gallery/cloud/test_media_cache.py
           python apps/mimmi-gallery/cloud/test_media_versions.py
           python apps/mimmi-gallery/cloud/test_cookie_format.py
+          python apps/mimmi-gallery/cloud/test_container_import.py
           node apps/gallery-archive/test_owner_snapshot.cjs
           node --check apps/yui-gallery/owner-media.js
