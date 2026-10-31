@@ -111,6 +111,7 @@ def exercise(browser, model: str, rule: dict, engine: str):
         assert duplicate_cuts==0,(model,"same saved bytes repeated inside a work",duplicate_cuts)
         assert page.locator("#albumgrid .album").count() >= 1, model
         verified = []
+        controls_verified = []
         for album_id in rule["album_ids"]:
             album = page.locator(f'#albumgrid .album[data-id="{album_id}"]')
             assert album.count() == 1, (model, "missing gallery album", album_id)
@@ -137,6 +138,30 @@ def exercise(browser, model: str, rule: dict, engine: str):
                 && (img.src.includes('/api/') || img.src.startsWith('blob:'));
             }""", timeout=110000)
             assert page.locator("#lightbox").is_visible(), (model, album_id)
+            if album_id == rule["album_ids"][0]:
+                # Use real mobile taps and decoded stored images. A local HTTP
+                # bridge can time out before the native browser's image gate;
+                # this check always runs with the native deployed transport.
+                original = page.locator("#full").get_attribute("src")
+                position = page.locator("#position").inner_text()
+                close_box = page.locator("#close").bounding_box()
+                page.locator("#next").tap()
+                page.wait_for_function("""old => {
+                  const im=document.querySelector('#full');
+                  return im?.complete && im.naturalWidth>=160 && im.src!==old;
+                }""", arg=original, timeout=105000)
+                assert page.locator("#position").inner_text() != position
+                assert page.locator("#close").bounding_box() == close_box
+                page.locator("#prev").tap()
+                page.wait_for_function("""old => {
+                  const im=document.querySelector('#full');
+                  return im?.complete && im.naturalWidth>=160 && im.src===old;
+                }""", arg=original, timeout=105000)
+                assert page.locator("#position").inner_text() == position
+                assert page.locator("#close").bounding_box() == close_box
+                viewport=page.locator('meta[name="viewport"]').get_attribute("content")
+                assert "user-scalable=no" not in viewport and "maximum-scale=1" not in viewport
+                controls_verified.append(album_id)
             verified.append(album_id)
             page.locator("#close").click(timeout=18000)
             page.go_back(wait_until="domcontentloaded", timeout=30000)
@@ -149,12 +174,15 @@ def exercise(browser, model: str, rule: dict, engine: str):
         assert page.url.startswith(url), (model, "reload left gallery", page.url)
         page.wait_for_function("()=>document.querySelectorAll('#albumgrid .album').length>0", timeout=50000)
         elapsed = round(time.monotonic() - start, 2)
+        assert not failures, (model, failures)
         print("DEPLOYED_GALLERY_PHYSICAL_ORIGINAL_OPEN_PASS",
               json.dumps({"model":model,"browser":engine,
                           "album_count":counts["albums"],"visible_photo_rows":counts["total"],
                           "owner_private_photo_rows":counts["owner"],
                           "owner_index_raw_verified_photos":owner_raw["physical"],
                           "opened_albums":verified,
+                          "next_previous_fixed_close_and_zoom_markup":controls_verified,
+                          "real_iphone_hardware_tested":False,
                           "reloaded_direct_pages":True,"elapsed_seconds":elapsed,
                           "unhandled_page_errors":failures[:3]},ensure_ascii=False), flush=True)
         return counts
