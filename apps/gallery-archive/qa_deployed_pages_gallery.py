@@ -13,6 +13,7 @@ from playwright.sync_api import sync_playwright, Error as PlaywrightError
 
 ROOT = "https://koith.github.io/browser-app-lab"
 RENDER = "mimmi-private-gallery-free.onrender.com"
+TASK_BASELINE = "e4b633fc189429e79c9b70038ef6f2b6b9fdd0a5"
 MODELS = {
     "yui": {"min_count": 3053, "min_private": 3030, "raw_owner_index":3030,
             "album_ids": ("yuis-present33", "athletic-club104", "teddy-bear97",
@@ -20,6 +21,53 @@ MODELS = {
     "mimmi": {"min_count": 2526, "min_private": 2525, "raw_owner_index":3214,
               "album_ids": ("mimmi-indie-sana-sopmod2-2019", "djawa-rei-beyond-the-heart")},
 }
+
+
+def verify_saved_routes(context, page, model):
+    """Check every saved file has a usable route in its actual canonical work.
+
+    This is visibility coverage, separate from the per-photo browser decode and
+    download-SHA jobs. A duplicate may share a route only inside the same work.
+    """
+    baseline_url = ("https://raw.githubusercontent.com/koith/browser-app-lab/"
+                    f"{TASK_BASELINE}/apps/{model}-gallery/owner-index.json")
+    before_response = context.request.get(baseline_url, timeout=60000)
+    assert before_response.status == 200, (model, "baseline index unavailable")
+    before = before_response.json()
+    current_response = context.request.get(
+        f"{ROOT}/apps/{model}-gallery/owner-index.json", timeout=60000,
+        headers={"Cache-Control": "no-cache"})
+    assert current_response.status == 200, (model, "current index unavailable")
+    current = current_response.json()
+    assert before.get("model") == current.get("model") == model
+    old = {(a["id"], p["number"]): p["sha256"]
+           for a in before["albums"] for p in a["images"]}
+    expected = sum(len(a["images"]) for a in current["albums"])
+    changed = sum(old.get((a["id"], p["number"])) != p["sha256"]
+                  for a in current["albums"] for p in a["images"])
+    routes = page.evaluate("""selection => {
+      const exact = new Set(), byWork = new Set();
+      for (const work of stored) for (const p of validImages(work)) {
+        if(p.ownerAlbum) exact.add(JSON.stringify([p.ownerAlbum,
+            p.storageNumber??p.number,p.sha256,p.width,p.height,p.bytes]));
+        byWork.add(JSON.stringify([work.id,p.sha256,p.width,p.height,p.bytes]));
+      }
+      let checked=0,shared=0;const missing=[];
+      for(const a of selection) for(const p of a.images) {
+        if(exact.has(JSON.stringify([a.id,p.number,p.sha256,p.width,p.height,p.bytes]))) checked++;
+        else if(byWork.has(JSON.stringify([canonicalId(a.id),p.sha256,p.width,p.height,p.bytes]))) {
+          checked++;shared++;
+        } else missing.push([a.id,p.number]);
+      }
+      return {checked,byte_identical_routes_in_same_work:shared,
+        missing_count:missing.length,first_missing:missing.slice(0,5)};
+    }""", current["albums"])
+    assert routes["missing_count"] == 0 and routes["checked"] == expected, (model, routes)
+    return {"baseline_commit": TASK_BASELINE, "saved_rows_checked": expected,
+            "task_changed_rows_present": changed,
+            "byte_identical_routes_in_same_work": routes["byte_identical_routes_in_same_work"],
+            "all_saved_rows_routed_in_correct_work": True,
+            "this_is_visibility_not_image_decode_coverage": True}
 
 
 
@@ -103,6 +151,7 @@ def exercise(browser, model: str, rule: dict, engine: str):
         }""")
         assert owner_raw["model"] == model, (model, owner_raw)
         assert owner_raw["physical"] >= rule["raw_owner_index"], (model, owner_raw)
+        saved_routes = verify_saved_routes(context, page, model)
         assert "실제 저장본" in counts["banner"], (model, counts)
         duplicate_cuts=page.evaluate("""()=>stored.reduce((n,a)=>{
           const hashes=validImages(a).map(p=>p.sha256);
@@ -180,6 +229,7 @@ def exercise(browser, model: str, rule: dict, engine: str):
                           "album_count":counts["albums"],"visible_photo_rows":counts["total"],
                           "owner_private_photo_rows":counts["owner"],
                           "owner_index_raw_verified_photos":owner_raw["physical"],
+                          "saved_file_routes":saved_routes,
                           "opened_albums":verified,
                           "next_previous_fixed_close_and_zoom_markup":controls_verified,
                           "real_iphone_hardware_tested":False,
