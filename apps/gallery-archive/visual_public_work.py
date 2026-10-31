@@ -48,7 +48,7 @@ def visual_error(left,right):
         return max(ImageStat.Stat(ImageChops.difference(a,b)).mean)
 
 
-def collect_work(book,previous,client,out,budget,seen_sha,model,reference_reader=None):
+def collect_work(book,previous,client,out,budget,seen_sha,model,reference_reader=None,reference_paths=None):
     from direct_photo_pipeline import page_images,inspect,atomic_bytes,safe_page
     aid=book['id'];claimed=book['public_web_edition_photos']
     if type(claimed) is not int or not 3<=claimed<=500:raise ValueError('Bounded verified public work size required')
@@ -71,6 +71,10 @@ def collect_work(book,previous,client,out,budget,seen_sha,model,reference_reader
             reference_hashes.add(photo['sha256'])
             digest=photo.get('preview_sha256') or photo['sha256'];path=reference_dir/(digest+'.bin')
             if path.exists():raw=path.read_bytes()
+            elif reference_paths and photo['sha256'] in reference_paths:
+                # The user already has this exact original committed locally.
+                # Verify its SHA below, without depending on a sleeping gateway.
+                raw=Path(reference_paths[photo['sha256']]).read_bytes()
             else:
                 route='/api/yui' if model=='yui' else '/api'
                 raw=(reference_reader or owner_reference)(f'https://mimmi-private-gallery-free.onrender.com{route}/media/{aid}/{photo["number"]}/preview')

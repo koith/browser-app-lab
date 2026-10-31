@@ -58,6 +58,14 @@ class VisualWorkTests(unittest.TestCase):
             # Cached verified reference bytes remain acceptable. A new empty
             # stage must reject the corrupted remote response.
             self.assertIsNone(collect_work(book,prior,client,out/'fresh',5,saved,'mimmi',lambda u:client.get(u).content)[0])
+            local={}
+            for n in (1,2,3):
+                path=out/(str(n)+'.jpg');path.write_bytes(data[n]);local[prior[n-1]['sha256']]=path
+            def unavailable(url):raise RuntimeError('Owner API unavailable')
+            work,info=collect_work(book,prior,client,out/'from-local',5,{p['sha256'] for p in prior},'mimmi',unavailable,local)
+            self.assertEqual(len(work['images']),2)
+            local[prior[0]['sha256']].write_bytes(b'corrupted local reference')
+            self.assertIsNone(collect_work(book,prior,client,out/'bad-local',5,saved,'mimmi',unavailable,local)[0])
             self.assertEqual(list(out.rglob('*.zip')),[])
 
     def test_different_picture_is_not_visual_duplicate(self):
