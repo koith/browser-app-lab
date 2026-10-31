@@ -12,6 +12,7 @@ import sys
 import time
 import re
 import requests
+from native_qa_checkpoint import in_partition
 
 from playwright.async_api import async_playwright,Error as PlaywrightError
 
@@ -67,7 +68,7 @@ async def run(args):
     for album in selected:
         images=[]
         for photo in album['images']:
-            if offset%args.shards==args.shard:images.append(photo)
+            if in_partition(offset,all_selected,args.shard,args.shards,args.partition):images.append(photo)
             offset+=1
         if images:sharded.append({**album,'images':images})
     selected=sharded
@@ -77,7 +78,7 @@ async def run(args):
             'resumed_photos':[],
             'since_commit':args.since_commit,'all_new_or_upgraded_rows':all_selected,
             'current_owner_index_ref':args.current_commit or 'main',
-            'shard':args.shard,'shards':args.shards}
+            'shard':args.shard,'shards':args.shards,'partition':args.partition}
     args.out.parent.mkdir(parents=True,exist_ok=True)
     if not selected:
         report['no_selected_new_photographs']=True
@@ -91,6 +92,16 @@ async def run(args):
         if args.http_bridge:await context.route('https://**/*',fulfill_verified_request)
         page=await context.new_page()
         page.on('pageerror',lambda error:report['page_errors'].append(str(error)[:220]))
+        report['recent_media_failures']=[]
+        def media_failure(request,status=None):
+            from urllib.parse import urlsplit
+            parsed=urlsplit(request.url)
+            if parsed.hostname!='mimmi-private-gallery-free.onrender.com' or '/media/' not in parsed.path:return
+            report['recent_media_failures'].append({'path':parsed.path,'status':status,
+                'failure':request.failure if status is None else None})
+            report['recent_media_failures']=report['recent_media_failures'][-12:]
+        context.on('requestfailed',media_failure)
+        context.on('response',lambda response:media_failure(response.request,response.status) if response.status>=400 else None)
         try:
             # Pages deployment may finish after metadata publication. Poll only
             # its public ledger, never pretend an old deployment is current.
@@ -139,6 +150,7 @@ async def run(args):
                 await current_card(page,card,click=True);await page.locator('#detail').wait_for(state='visible')
                 for expected in album['images']:
                     number=expected['number']
+                    report['active_photo']={'album':expected['physical_album'],'number':number}
                     position=await page.evaluate('''([id,n,sha])=>photosFor(stored.find(a=>a.id===id))
                         .findIndex(p=>p.number===n&&p.sha256===sha)''',[aid,expected['display_number'],expected['sha256']])
                     assert position>=0,(aid,number,'saved slot missing')
@@ -238,6 +250,8 @@ def parse_cli(argv=None):
     parser.add_argument('--current-commit',help='Pin the current owner-index snapshot for consistent matrix coverage')
     parser.add_argument('--checkpoint',type=Path,help='Previously successful native jobs, verified by prerequisite CI')
     parser.add_argument('--checkpoint-sha',help='Exact checkpoint digest emitted by independent source-job verification')
+    parser.add_argument('--partition',choices=['contiguous','modulo'],default='contiguous',
+                        help='Consecutive photos avoid loading unused intervening lazy thumbnails')
     parser.add_argument('--shard',type=int,default=0)
     parser.add_argument('--shards',type=int,default=1)
     parser.add_argument('--out',type=Path,required=True)
