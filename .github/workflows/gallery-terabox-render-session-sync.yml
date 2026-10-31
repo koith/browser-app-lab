@@ -91,7 +91,11 @@ jobs:
               choice=next((
                   (a,p) for a in catalog["albums"]
                   for p in a.get("images",[])
-                  if p.get("preview") and 0 < p.get("preview_bytes",0) <= 2000000
+                  # Public metadata exposes a preview flag and SHA, not its
+                  # private path/byte count. Check actual cover bytes below.
+                  if p.get("preview") is True and
+                     isinstance(p.get("preview_sha256"), str) and
+                     len(p["preview_sha256"]) == 64
               ),None)
               if not choice:
                   raise SystemExit("Gallery has no stored preview: "+model)
