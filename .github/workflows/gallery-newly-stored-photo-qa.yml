@@ -37,8 +37,9 @@ jobs:
       max-parallel: 4
       matrix:
         model: [mimmi]
-        browser: [chromium, webkit]
         shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
+        # Adjacent browser pairs share the gateway's SHA-verified media cache.
+        browser: [chromium, webkit]
         shards: [24]
         include:
           - {model: yui, browser: chromium, shard: 0, shards: 2}

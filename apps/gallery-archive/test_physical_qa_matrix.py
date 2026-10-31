@@ -16,6 +16,10 @@ class PhysicalMatrixTests(unittest.TestCase):
         matrix=workflow['jobs']['actual-deployed-originals']['strategy']['matrix']
         axes={k:v for k,v in matrix.items() if k!='include'}
         rows=[dict(zip(axes,values)) for values in itertools.product(*axes.values())]+matrix['include']
+        mimmi=[r for r in rows if r['model']=='mimmi']
+        for first,second in zip(mimmi[::2],mimmi[1::2]):
+            self.assertEqual(first['shard'],second['shard'])
+            self.assertEqual({first['browser'],second['browser']},{'chromium','webkit'})
         for row in rows:
             args=parse_cli(['--model',row['model'],'--browser',row['browser'],
                 '--shard',str(row['shard']),'--shards',str(row['shards']),'--out','unused.json'])
