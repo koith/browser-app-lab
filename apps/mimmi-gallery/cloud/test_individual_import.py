@@ -1,5 +1,6 @@
 """Real signatures, immutable bytes and private queue publication guards."""
 import base64
+import copy
 import hashlib
 from io import BytesIO
 import json
@@ -88,6 +89,55 @@ class TransferTests(unittest.TestCase):
         self.assertEqual(self.call('PUT','/internal/individual-import/file/'+h,self.raw).status_code,502)
         self.assertEqual(self.call('POST','/internal/individual-import/finish').status_code,409)
         self.assertFalse(any(p.startswith('metadata/') for p in self.writes))
+
+    def test_resume_acknowledges_only_fully_verified_objects_and_complete_work(self):
+        path='/internal/individual-import/manifest'
+        self.assertEqual(self.call('POST',path,self.manifest).json()['remote_verified_sha256'],[])
+        h=hashlib.sha256(self.raw).hexdigest()
+        self.call('PUT','/internal/individual-import/file/'+h,self.raw)
+        self.assertEqual(self.call('POST',path,self.manifest).json()['remote_verified_sha256'],[h])
+        self.assertEqual(self.call('POST','/internal/individual-import/finish/saved-work').status_code,409)
+        ph=hashlib.sha256(self.thumb).hexdigest();self.call('PUT','/internal/individual-import/file/'+ph,self.thumb)
+        result=self.call('POST','/internal/individual-import/finish/saved-work')
+        self.assertEqual(result.status_code,200,result.text)
+        self.assertEqual(result.json()['remote_verified_photos'],1)
+        self.assertFalse(result.json()['catalog_published'])
+        self.assertEqual(self.call('POST','/internal/individual-import/finish/unlisted-work').status_code,409)
+        self.assertNotIn('metadata/catalog.json',self.writes)
+
+    def test_only_classified_transport_read_is_retried_once_without_duplicate_write(self):
+        self.call('POST','/internal/individual-import/manifest',self.manifest)
+        calls=[]
+        async def read(model,key,limit):
+            calls.append(key)
+            if len(calls)==1:raise HTTPException(502,'Cloud unavailable',headers={'X-Archive-Read-Cause':'transport_interruption'})
+            return self.remote[key]
+        self.worker.read=read;h=hashlib.sha256(self.raw).hexdigest()
+        response=self.call('PUT','/internal/individual-import/file/'+h,self.raw)
+        self.assertEqual(response.status_code,200,response.text)
+        self.assertEqual(len(calls),2);self.assertEqual(len(self.writes),1)
+        async def denied(model,key,limit):raise HTTPException(451,'restricted')
+        self.worker.read=denied;ph=hashlib.sha256(self.thumb).hexdigest()
+        self.assertEqual(self.call('PUT','/internal/individual-import/file/'+ph,self.thumb).status_code,451)
+        self.assertNotIn(ph,self.worker.verified)
+
+    def test_completed_work_queue_never_admits_the_unfinished_other_work(self):
+        second=copy.deepcopy(self.plan['albums'][0]);second['id']='other-saved-work'
+        second['images'][0].update(sha256='c'*64,preview_sha256='d'*64)
+        self.plan['albums'].append(second)
+        self.manifest=json.dumps(self.plan,sort_keys=True).encode();self.pin=hashlib.sha256(self.manifest).hexdigest()
+        os.environ['ARCHIVE_IMPORT_MANIFEST_SHA256']=self.pin
+        async def catalog(model):return {'albums':[{'id':'saved-work'},{'id':'other-saved-work'}]}
+        self.worker.catalog=catalog
+        self.assertEqual(self.call('POST','/internal/individual-import/manifest',self.manifest).status_code,200)
+        for data in (self.raw,self.thumb):
+            h=hashlib.sha256(data).hexdigest();self.assertEqual(self.call('PUT','/internal/individual-import/file/'+h,data).status_code,200)
+        self.assertEqual(self.call('POST','/internal/individual-import/finish').status_code,409)
+        reply=self.call('POST','/internal/individual-import/finish/saved-work')
+        self.assertEqual(reply.status_code,200,reply.text)
+        queue=json.loads(self.remote['metadata/pending-individual/mimmi/'+reply.json()['pending_batch']+'.json'])
+        self.assertEqual([a['id'] for a in queue['albums']],['saved-work'])
+        self.assertEqual(queue['remote_verified_objects'],2)
 
     def test_encrypted_restart_state_requires_exact_active_operator_permit(self):
         called=[];cookie='ndus=offline-owner-cookie';owner_key='offline-existing-private-server-key'

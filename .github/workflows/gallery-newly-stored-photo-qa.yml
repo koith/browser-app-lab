@@ -16,7 +16,7 @@ permissions:
   contents: read
 concurrency:
   group: newly-stored-exact-originals-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   syntax:
     runs-on: ubuntu-24.04
