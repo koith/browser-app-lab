@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
   "model": "mimmi",
-  "generated_at": "2026-10-30T09:25:25.744342+00:00",
+  "generated_at": "2026-10-31T13:51:27.828966+00:00",
   "source": "only public DJAWA-linked Gumroad promo HTML, never paid files",
   "summary": {
     "albums_checked": 32,
-    "promotional_image_urls_verified": 43,
+    "promotional_image_urls_verified": 44,
     "fresh_promotional_urls_verified": 20,
     "private_cloud_saved": 0
   },
@@ -47,8 +47,8 @@
           "url": "https://public-files.gumroad.com/5jmb92ro8sn8xeqqcbx1911dwbp4",
           "width": 1005,
           "height": 1005,
-          "bytes": 20492,
-          "sha256": "ca45a73fbf75bb0cc8e3ca48ddc21868bf9f277ed78d6e6d10a6239fe004cfe3",
+          "bytes": 193109,
+          "sha256": "fc3937978bdbde729b94d5720c53b061c047c09851ae1b5d3301a67edef65276",
           "source_kind": "public_publisher_promo",
           "saved_to_private_cloud": false
         },
@@ -56,8 +56,8 @@
           "url": "https://public-files.gumroad.com/5jmb92ro8sn8xeqqcbx1911dwbp4",
           "width": 1005,
           "height": 1005,
-          "bytes": 193109,
-          "sha256": "fc3937978bdbde729b94d5720c53b061c047c09851ae1b5d3301a67edef65276",
+          "bytes": 20492,
+          "sha256": "ca45a73fbf75bb0cc8e3ca48ddc21868bf9f277ed78d6e6d10a6239fe004cfe3",
           "source_kind": "public_publisher_promo",
           "saved_to_private_cloud": false,
           "carried_from_previous_verification": true
@@ -115,8 +115,8 @@
           "url": "https://public-files.gumroad.com/h9gvlhakifymziyibzykyubx4e22",
           "width": 1005,
           "height": 1005,
-          "bytes": 15916,
-          "sha256": "1319f4609cc2fdfab01d8be79a91fa8275d72f3ac21db880177fbcd7f1ad56c9",
+          "bytes": 169265,
+          "sha256": "be1f13845b7eab8e1e57ce10f60fe11d3cdaaaba7a081864251bc6f248ce7584",
           "source_kind": "public_publisher_promo",
           "saved_to_private_cloud": false
         },
@@ -124,8 +124,8 @@
           "url": "https://public-files.gumroad.com/h9gvlhakifymziyibzykyubx4e22",
           "width": 1005,
           "height": 1005,
-          "bytes": 169265,
-          "sha256": "be1f13845b7eab8e1e57ce10f60fe11d3cdaaaba7a081864251bc6f248ce7584",
+          "bytes": 15916,
+          "sha256": "1319f4609cc2fdfab01d8be79a91fa8275d72f3ac21db880177fbcd7f1ad56c9",
           "source_kind": "public_publisher_promo",
           "saved_to_private_cloud": false,
           "carried_from_previous_verification": true
@@ -149,10 +149,20 @@
           "url": "https://public-files.gumroad.com/kid7v7lchzdecjxhxigzwjlavant",
           "width": 1005,
           "height": 1005,
+          "bytes": 210032,
+          "sha256": "0d88f7e53bf58c902f43385e0272b59af61d6dd2a4463db52c247a81fd6d15bb",
+          "source_kind": "public_publisher_promo",
+          "saved_to_private_cloud": false
+        },
+        {
+          "url": "https://public-files.gumroad.com/kid7v7lchzdecjxhxigzwjlavant",
+          "width": 1005,
+          "height": 1005,
           "bytes": 24768,
           "sha256": "15be6679a76b69a2c965e8a575a12b2668f9ed166f4a6afbd273655af01cf47b",
           "source_kind": "public_publisher_promo",
-          "saved_to_private_cloud": false
+          "saved_to_private_cloud": false,
+          "carried_from_previous_verification": true
         }
       ],
       "images": [],
@@ -173,8 +183,8 @@
           "url": "https://public-files.gumroad.com/plc0rioiugkkum6a5caq4c1rlstq",
           "width": 1005,
           "height": 1005,
-          "bytes": 23854,
-          "sha256": "3910b673a3a70c63e71c1ce045c155b8fd2532bddeb395d21c0e4e17a456c3a0",
+          "bytes": 206433,
+          "sha256": "6ea4ca4c1f49447f0a5d2f1e1982bf792de42eaae9ca2a13acaf1c65d9a96137",
           "source_kind": "public_publisher_promo",
           "saved_to_private_cloud": false
         },
@@ -182,8 +192,8 @@
           "url": "https://public-files.gumroad.com/plc0rioiugkkum6a5caq4c1rlstq",
           "width": 1005,
           "height": 1005,
-          "bytes": 206433,
-          "sha256": "6ea4ca4c1f49447f0a5d2f1e1982bf792de42eaae9ca2a13acaf1c65d9a96137",
+          "bytes": 23854,
+          "sha256": "3910b673a3a70c63e71c1ce045c155b8fd2532bddeb395d21c0e4e17a456c3a0",
           "source_kind": "public_publisher_promo",
           "saved_to_private_cloud": false,
           "carried_from_previous_verification": true
@@ -207,8 +217,8 @@
           "url": "https://public-files.gumroad.com/fj0kuefvaft6bu3o4m0oo52iq9uw",
           "width": 1005,
           "height": 1005,
-          "bytes": 14258,
-          "sha256": "d88b4f975f485bb6fb5f3a90d1b9769f429db1d40d4951ef6b93351cf33f7448",
+          "bytes": 152457,
+          "sha256": "1438f697cad2a9a2f807ab4981fab44fe4a9726eaeabec8caf63fd43fa7ec8cc",
           "source_kind": "public_publisher_promo",
           "saved_to_private_cloud": false
         },
@@ -216,8 +226,8 @@
           "url": "https://public-files.gumroad.com/fj0kuefvaft6bu3o4m0oo52iq9uw",
           "width": 1005,
           "height": 1005,
-          "bytes": 152457,
-          "sha256": "1438f697cad2a9a2f807ab4981fab44fe4a9726eaeabec8caf63fd43fa7ec8cc",
+          "bytes": 14258,
+          "sha256": "d88b4f975f485bb6fb5f3a90d1b9769f429db1d40d4951ef6b93351cf33f7448",
           "source_kind": "public_publisher_promo",
           "saved_to_private_cloud": false,
           "carried_from_previous_verification": true
@@ -343,8 +353,8 @@
           "url": "https://public-files.gumroad.com/8lxbmfys4wwfwfpvghk2af4mrl9z",
           "width": 1005,
           "height": 1005,
-          "bytes": 18678,
-          "sha256": "13b5d643dcee4204c05b8c546547675ebfd76ab7569ac78701fdd4e1f2258d5b",
+          "bytes": 188538,
+          "sha256": "135267ab10b471934f2beb4212edde79dbb84a9166153a4412766d00dcad0e79",
           "source_kind": "public_publisher_promo",
           "saved_to_private_cloud": false
         },
@@ -352,8 +362,8 @@
           "url": "https://public-files.gumroad.com/8lxbmfys4wwfwfpvghk2af4mrl9z",
           "width": 1005,
           "height": 1005,
-          "bytes": 188538,
-          "sha256": "135267ab10b471934f2beb4212edde79dbb84a9166153a4412766d00dcad0e79",
+          "bytes": 18678,
+          "sha256": "13b5d643dcee4204c05b8c546547675ebfd76ab7569ac78701fdd4e1f2258d5b",
           "source_kind": "public_publisher_promo",
           "saved_to_private_cloud": false,
           "carried_from_previous_verification": true
@@ -411,8 +421,8 @@
           "url": "https://public-files.gumroad.com/ek1doag571m1abvaswkq74n2da5g",
           "width": 1005,
           "height": 1005,
-          "bytes": 8508,
-          "sha256": "c0a37864a8c89a9625ef1f9ddde637d8d45d71220ed5e6f9b4074e88c1e4bfec",
+          "bytes": 78051,
+          "sha256": "2b621e54d1012c6b6a5ed34a163c165e89e0487c9fbaa19c4090c5a96a982850",
           "source_kind": "public_publisher_promo",
           "saved_to_private_cloud": false
         },
@@ -420,8 +430,8 @@
           "url": "https://public-files.gumroad.com/ek1doag571m1abvaswkq74n2da5g",
           "width": 1005,
           "height": 1005,
-          "bytes": 78051,
-          "sha256": "2b621e54d1012c6b6a5ed34a163c165e89e0487c9fbaa19c4090c5a96a982850",
+          "bytes": 8508,
+          "sha256": "c0a37864a8c89a9625ef1f9ddde637d8d45d71220ed5e6f9b4074e88c1e4bfec",
           "source_kind": "public_publisher_promo",
           "saved_to_private_cloud": false,
           "carried_from_previous_verification": true
@@ -445,8 +455,8 @@
           "url": "https://public-files.gumroad.com/ku2iblicx5bibpetcwtfn38i2x4n",
           "width": 1005,
           "height": 1005,
-          "bytes": 48138,
-          "sha256": "d4d00e000045ea637e070ad70ad6532df001cca7f869d0c08c0bfe930e79e287",
+          "bytes": 225361,
+          "sha256": "8072d2db4ecc4b16e9c573a02dfbc655f0e30c745e6575536dc0681cb012c39f",
           "source_kind": "public_publisher_promo",
           "saved_to_private_cloud": false
         },
@@ -454,8 +464,8 @@
           "url": "https://public-files.gumroad.com/ku2iblicx5bibpetcwtfn38i2x4n",
           "width": 1005,
           "height": 1005,
-          "bytes": 225361,
-          "sha256": "8072d2db4ecc4b16e9c573a02dfbc655f0e30c745e6575536dc0681cb012c39f",
+          "bytes": 48138,
+          "sha256": "d4d00e000045ea637e070ad70ad6532df001cca7f869d0c08c0bfe930e79e287",
           "source_kind": "public_publisher_promo",
           "saved_to_private_cloud": false,
           "carried_from_previous_verification": true
