@@ -32,6 +32,28 @@ jobs:
           [[ "$yui" != *'name="code"'* && "$mimmi" != *'name="code"'* ]]
           [[ "$yui" != *'type="password"'* && "$mimmi" != *'type="password"'* ]]
           [[ "$yui" != *'내 ZIP 여러 개 가져오기'* && "$mimmi" != *'내 Drive 원본 연결'* ]]
+          # Two gallery portals must serve their actual static owner indexes.
+          # A 200 HTML shell with 404 metadata produced blank individual photos.
+          for asset in gallery/yui/owner-index.json gallery/mimmi/owner-index.json gallery/mimmi/album-grouping.js; do
+            status=''
+            for attempt in $(seq 1 16); do
+              status="$(curl -sSL -o "$RUNNER_TEMP/gallery-required-asset" -w '%{http_code}' --max-time 35 "$base/$asset" || true)"
+              if [[ "$status" == '200' ]]; then break; fi
+              echo "GALLERY_ASSET_NOT_READY $asset HTTP=$status attempt=$attempt"
+              sleep 12
+            done
+            if [[ "$status" != '200' ]]; then
+              echo "::error::Live Render gallery asset unavailable: $asset (HTTP $status)"
+              exit 1
+            fi
+            case "$asset" in
+              */owner-index.json)
+                python -c 'import json,sys; d=json.load(open(sys.argv[1])); assert d["schema_version"]==1 and len(d["albums"])>0' "$RUNNER_TEMP/gallery-required-asset" ;;
+              */album-grouping.js)
+                grep -q 'MimmiAlbumGrouping' "$RUNNER_TEMP/gallery-required-asset" ;;
+            esac
+            echo "LIVE_GALLERY_ASSET_OK $asset"
+          done
           curl -fsS --retry 3 --max-time 110 "$base/api/yui/catalog" -o "$RUNNER_TEMP/yui.json"
           curl -fsS --retry 3 --max-time 110 "$base/api/catalog" -o "$RUNNER_TEMP/mimmi.json"
           python - <<'PY'
