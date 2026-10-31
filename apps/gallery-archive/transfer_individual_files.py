@@ -157,12 +157,18 @@ def upload(args):
         if not reply.get('remote_sha256_verified'):raise ValueError('No remote original readback acknowledgement')
         return sha,reply
     count=len(completed)
-    workers=ThreadPoolExecutor(max_workers=2)
-    futures=[workers.submit(send,item) for item in files.items() if item[0] not in completed]
+    workers=ThreadPoolExecutor(max_workers=args.workers)
+    futures={workers.submit(send,item):item[0] for item in files.items() if item[0] not in completed}
     try:
         with (root/'remote-object-receipts.jsonl').open('a') as receipts:
             for future in as_completed(futures):
-                sha,reply=future.result();count+=1;completed.add(sha)
+                try:sha,reply=future.result()
+                except Exception as error:
+                    (root/'last-failed-object-private.json').write_text(json.dumps({
+                        'sha256':futures[future],'exception':type(error).__name__,
+                        'message':str(error)[:240],'remote_sha_verified':False})+'\n')
+                    raise
+                count+=1;completed.add(sha)
                 receipts.write(json.dumps({'sha256':sha,**reply})+'\n');receipts.flush()
                 if count%20==0 or count==len(files):print('ACTUAL_REMOTE_INDIVIDUAL_READBACK',count,'/',len(files),flush=True)
                 publish_finished_works()
@@ -183,4 +189,5 @@ if __name__=='__main__':
     for action in ('upload','connection-state'):
         a=sub.add_parser(action);a.add_argument('--plan',type=Path,required=True)
         a.add_argument('--origin',default='https://mimmi-private-gallery-free.onrender.com')
+        if action=='upload':a.add_argument('--workers',type=int,choices=[1,2],default=2)
     args=p.parse_args();{'prepare':prepare,'upload':upload,'connection-state':connection_state}[args.mode](args)
