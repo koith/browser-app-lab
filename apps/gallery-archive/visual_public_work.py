@@ -26,7 +26,7 @@ def owner_reference(url):
     target=urlsplit(url)
     if (target.scheme!='https' or target.netloc!='mimmi-private-gallery-free.onrender.com'
             or target.query or target.fragment
-            or not re.fullmatch(r'/api/(?:yui/)?media/[a-z0-9][a-z0-9-]{1,100}/[1-9][0-9]*/preview',target.path)):
+            or not re.fullmatch(r'/api/(?:yui/)?media/[a-z0-9][a-z0-9-]{1,100}/[1-9][0-9]*/(?:preview|original)',target.path)):
         raise ValueError('Only the existing fixed owner-archive reference API is allowed')
     with requests.get(url,timeout=(12,45),allow_redirects=False,stream=True) as response:
         response.raise_for_status()
@@ -68,6 +68,10 @@ def collect_work(book,previous,client,out,budget,seen_sha,model,reference_reader
     if claimed-previous_unique>budget:
         info['failures'].append('Defer whole work to next bounded batch, do not publish a truncated edition');return None,info
     refs=[];reference_hashes=set();reference_dir=out/'references'/aid;reference_dir.mkdir(parents=True,exist_ok=True)
+    preview_origins={}
+    for photo in previous:
+        if photo.get('preview_sha256'):
+            preview_origins.setdefault(photo['preview_sha256'],set()).add(photo['sha256'])
     active_reference=None
     try:
         for photo in previous:
@@ -76,7 +80,12 @@ def collect_work(book,previous,client,out,budget,seen_sha,model,reference_reader
             if photo['sha256'] in reference_hashes:continue
             active_reference=photo['number']
             reference_hashes.add(photo['sha256'])
-            digest=photo.get('preview_sha256') or photo['sha256'];path=reference_dir/(digest+'.bin')
+            # A SHA-valid legacy preview can still be associated with several
+            # DIFFERENT originals. It is not independent reference evidence for
+            # each of those photos; require the exact original in that case.
+            original_required=len(preview_origins.get(photo.get('preview_sha256'),set()))>1
+            digest=photo['sha256'] if original_required else photo.get('preview_sha256') or photo['sha256']
+            path=reference_dir/(digest+'.bin')
             raw=None
             candidates=list(dict.fromkeys([path,reference_dir/(photo['sha256']+'.bin')]))
             if reference_paths and photo['sha256'] in reference_paths:
@@ -92,7 +101,8 @@ def collect_work(book,previous,client,out,budget,seen_sha,model,reference_reader
                 # Read the owner's existing reference and retain the exact SHA
                 # gate; no changed bytes are accepted as the old photograph.
                 route='/api/yui' if model=='yui' else '/api'
-                raw=(reference_reader or owner_reference)(f'https://mimmi-private-gallery-free.onrender.com{route}/media/{aid}/{photo["number"]}/preview')
+                kind='original' if original_required else 'preview'
+                raw=(reference_reader or owner_reference)(f'https://mimmi-private-gallery-free.onrender.com{route}/media/{aid}/{photo["number"]}/{kind}')
             if hashlib.sha256(raw).hexdigest() not in (digest,photo['sha256']):
                 raise ValueError('Saved reference did not match declared SHA')
             # The gateway may return the verified original when a preview is

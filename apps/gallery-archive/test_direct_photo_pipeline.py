@@ -15,6 +15,21 @@ def photo(seed):
 
 
 class DirectTests(unittest.TestCase):
+    def test_provider_verification_hold_does_not_redownload_or_reupload_the_work(self):
+        with tempfile.TemporaryDirectory() as name:
+            root=Path(name);base=root/'apps/mimmi-gallery';base.mkdir(parents=True)
+            (base/'stored-albums.json').write_text('{"model":"mimmi","albums":[]}')
+            (base/'public-work-pages.json').write_text(json.dumps({'albums':[{
+                'id':'held-work','source':'https://djawaphoto.com/portfolio/mimmi-held/',
+                'storage_verification_hold':True,'visual_reference_required':True}]}))
+            owner={'schema_version':1,'model':'mimmi','albums':[{'id':'held-work','images':[{'number':1,'sha256':'a'*64}]}]}
+            class Client:
+                def get(self,url):raise AssertionError('A challenged work must not be collected again')
+            report=collect(root,'mimmi',owner,root/'stage',5,3,Client())
+            self.assertEqual(report['new_local_individual_files'],0)
+            self.assertTrue(report['results'][0]['storage_verification_required'])
+            self.assertTrue(report['results'][0]['source_not_redownloaded'])
+
     def test_declared_individual_public_edition_excludes_other_models_and_hosts(self):
         page='https://www.shypetal.com/albums/mimmi-public-work/'
         images=[f'https://image.shypetal.com/image/Mimmi_Work/ShyPetal.com@-{n:03d}.webp' for n in (1,2,3)]

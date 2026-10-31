@@ -130,7 +130,10 @@
       "public_web_edition_photos": 171,
       "advertised_photos": 171,
       "visual_reference_required": true,
-      "identity_evidence": "Observed ordinary Mimmi search title and work URL. At least three SHA-verified whole-frame saved-cut anchors required before any new photo publication. Source numbering is separate from publisher original sequence."
+      "identity_evidence": "Observed ordinary Mimmi search title and work URL. At least three SHA-verified whole-frame saved-cut anchors required before any new photo publication. Source numbering is separate from publisher original sequence.",
+      "storage_verification_hold": true,
+      "storage_hold_reason": "Owner provider errno 400141 requires normal account verification. Keep existing objects; no source re-download, re-upload, rename or alternate-credential retry.",
+      "storage_hold_evidence_run": 41193670543
     },
     {
       "id": "djawa-your-panties",

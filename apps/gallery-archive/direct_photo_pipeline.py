@@ -221,6 +221,11 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
     for book in books:
         if new_total>=max_new and not resumed.get(book['id']):continue
         aid=book['id'];previous=old_albums.get(aid,{}).get('images',[]);occupied={p['number'] for p in previous};next_number=max(occupied,default=0)+1
+        if book.get('storage_verification_hold') is True:
+            results.append({'id':aid,'individual_files_saved':0,'storage_verification_required':True,
+                'source_not_redownloaded':True,'failures':['owner_provider_verification_required']})
+            print('OWNER_WORK_STORAGE_VERIFICATION_HELD',model,aid,'SOURCE_NOT_REDOWNLOADED',True,flush=True)
+            continue
         if book.get('visual_reference_required'):
             if resumed.get(aid):raise ValueError('Visual-edition resume requires finalized work transaction')
             from visual_public_work import collect_work
