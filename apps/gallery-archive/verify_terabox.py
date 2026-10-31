@@ -8,13 +8,27 @@ from pathlib import Path
 import subprocess
 import selectors
 import time
+import tempfile
+import re
+from safe_rclone import diagnostic
+
+
+class RemoteCommandFailure(ValueError):
+    def __init__(self,rc,count,size,detail):
+        denied=bool(re.search(r'\b(?:401|403|429|451)\b|failed to login|access denied',detail,re.I))
+        self.retryable_transport=(count<size and not denied and bool(re.search(
+            r'i/o timeout|connection reset|unexpected EOF|TLS handshake timeout',detail,re.I)))
+        self.returncode,self.received_bytes,self.expected_bytes=rc,count,size
+        self.cause='transport_interruption' if self.retryable_transport else 'remote_command_failed'
+        super().__init__(f'{self.cause}: exit={rc}, received={count}, expected={size}; '+diagnostic(detail)[:500])
 
 
 def read_remote(row,remote,deadline_seconds=75,command=None):
     key,size,sha=row
+    errors=tempfile.TemporaryFile()
     process=subprocess.Popen(command or ["rclone","cat",remote.rstrip("/")+"/"+key,
                               "--timeout=65s","--retries=1"],
-                             stdout=subprocess.PIPE,stderr=subprocess.DEVNULL)
+                             stdout=subprocess.PIPE,stderr=errors)
     count=0;digest=hashlib.sha256();deadline=time.monotonic()+deadline_seconds
     try:
         with selectors.DefaultSelector() as selector:
@@ -29,13 +43,28 @@ def read_remote(row,remote,deadline_seconds=75,command=None):
                 if count>size:raise ValueError('Remote exceeds expected size')
                 digest.update(data)
         rc=process.wait(timeout=max(.01,deadline-time.monotonic()))
-        if rc or count!=size or digest.hexdigest()!=sha:
-            raise ValueError('SHA or length readback mismatch')
+        if rc:
+            errors.seek(0)
+            raise RemoteCommandFailure(rc,count,size,errors.read(32000).decode('utf-8','replace'))
+        if count!=size or digest.hexdigest()!=sha:
+            raise ValueError(f'Remote integrity mismatch: received={count}, expected={size}; command exited successfully')
     finally:
         if process.poll() is None:
             process.kill();process.wait()
         process.stdout.close()
+        errors.close()
     return key
+
+
+def read_remote_with_recovery(row,remote,deadline_seconds=75,command=None):
+    deadline=time.monotonic()+deadline_seconds
+    try:return read_remote(row,remote,deadline_seconds,command)
+    except RemoteCommandFailure as error:
+        if not error.retryable_transport or deadline-time.monotonic()<=2:raise
+        time.sleep(1)
+        # The original total per-file deadline stays fixed. Never retry a
+        # successful-command SHA mismatch, access denial or write operation.
+        return read_remote(row,remote,deadline-time.monotonic(),command)
 
 def verify(stage: Path, remote: str, workers: int, only_staged: bool = False):
     manifest=json.loads((stage/"metadata/catalog.json").read_text(encoding="utf-8"))
@@ -49,7 +78,7 @@ def verify(stage: Path, remote: str, workers: int, only_staged: bool = False):
     if not specs and not only_staged:
         raise ValueError("No photo bytes to verify")
     def readback(row):
-        return read_remote(row,remote)
+        return read_remote_with_recovery(row,remote)
     passed=0
     errors=[]
     with ThreadPoolExecutor(max_workers=workers) as executor:
