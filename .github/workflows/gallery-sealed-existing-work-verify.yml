@@ -1,0 +1,87 @@
+name: Verify Existing Private Originals From Sealed Metadata
+on:
+  workflow_dispatch:
+    inputs:
+      metadata_sha256:
+        description: Exact predeclared metadata-only SHA-256; never image bytes or credentials
+        required: true
+        type: string
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/gallery-sealed-existing-work-verify.yml
+      - apps/gallery-archive/sealed_work_metadata.py
+      - apps/gallery-archive/verify_sealed_existing_work.py
+      - apps/gallery-archive/test_sealed_work_metadata.py
+      - apps/gallery-archive/test_existing_owner_object_recovery.py
+  pull_request:
+    paths:
+      - .github/workflows/gallery-sealed-existing-work-verify.yml
+      - apps/gallery-archive/sealed_work_metadata.py
+      - apps/gallery-archive/verify_sealed_existing_work.py
+      - apps/gallery-archive/test_sealed_work_metadata.py
+      - apps/gallery-archive/test_existing_owner_object_recovery.py
+permissions:
+  contents: read
+jobs:
+  validate-metadata-scope:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install requests beautifulsoup4 'Pillow==11.3.0' cryptography
+      - run: |
+          python -m py_compile apps/gallery-archive/verify_sealed_existing_work.py
+          python apps/gallery-archive/test_sealed_work_metadata.py
+          python apps/gallery-archive/test_existing_owner_object_recovery.py
+          python apps/gallery-archive/test_deferred_verified_batch.py
+  verify-existing-private-files:
+    needs: validate-metadata-scope
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 70
+    permissions:
+      contents: write
+    concurrency:
+      group: constrained-sealed-existing-work-verification
+      cancel-in-progress: false
+    env:
+      GH_TOKEN: ${{ github.token }}
+      MIMMI_COOKIE: ${{ secrets.MIMMI_TERABOX_NDUS }}
+      RCLONE_CONFIG_ARCHIVE_TYPE: terabox
+      EXPECTED_METADATA_SHA256: ${{ inputs.metadata_sha256 }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install requests beautifulsoup4 'Pillow==11.3.0' cryptography
+      - name: Install pinned storage client, not a photo bundle
+        run: |
+          set -euo pipefail
+          curl -fsSL https://github.com/gulp79/rclone-extra/releases/download/v1.75.2-extra/rclone-linux-amd64.zip -o "$RUNNER_TEMP/client.zip"
+          echo "78855325a2a8d83b3feee3a8363d32e1211babbf4cda6356fa8ca5f472075062  $RUNNER_TEMP/client.zip" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/client" "$RUNNER_TEMP/bin"
+          unzip -q "$RUNNER_TEMP/client.zip" -d "$RUNNER_TEMP/client"
+          binary="$(find "$RUNNER_TEMP/client" -type f -name rclone -print -quit)"
+          install -m 755 "$binary" "$RUNNER_TEMP/bin/rclone"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+      - name: Normalize the SAME existing storage credential; do not change live services
+        run: |
+          python - <<'PY'
+          import os,sys
+          sys.path.insert(0,'apps/mimmi-gallery/cloud/gateway')
+          from cookie_format import cookie_header
+          header=cookie_header(os.environ['MIMMI_COOKIE'])
+          if not header:raise ValueError('Existing owner storage credential missing')
+          print('::add-mask::'+header)
+          with open(os.environ['GITHUB_ENV'],'a') as output:output.write('RCLONE_CONFIG_ARCHIVE_COOKIE='+header+'\n')
+          PY
+      - name: Receive encrypted METADATA ONLY and verify existing private original bytes
+        run: python apps/gallery-archive/verify_sealed_existing_work.py
+      - name: Require later publication and deployed-browser QA
+        if: success()
+        run: |
+          echo "Existing originals were read and SHA-checked; no original photo bytes were uploaded." >> "$GITHUB_STEP_SUMMARY"
+          echo "Only independently verified per-work metadata queues are eligible for later gallery publication." >> "$GITHUB_STEP_SUMMARY"
+          echo "Render permissions, its closed import endpoint and the current gallery index were unchanged." >> "$GITHUB_STEP_SUMMARY"
