@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "model": "mimmi",
-  "generated_at": "2026-10-30T20:43:11.051957+00:00",
+  "generated_at": "2026-10-31T05:32:24.564715+00:00",
   "source": "actual public PixiBB search results in six model-language variants",
   "summary": {
     "search_terms": [
@@ -19,233 +19,76 @@
       "ミンミ DJAWA",
       "Mimmi 写真"
     ],
-    "candidates": 14,
-    "verified_mimmi_album_pages": 14,
+    "candidates": 0,
+    "verified_mimmi_album_pages": 0,
     "verified_photo_files": 0
   },
-  "albums": [
-    {
-      "id": "pixibb-auto-djawa-photo-mimmi-nikke-elegg-154-photos",
-      "title": "DJAWA Photo: Mimmi (밈미) – Nikke Elegg (154 photos)",
-      "source": "https://cosplay.pixibb.com/djawa-photo-mimmi-nikke-elegg-154-photos/",
-      "pages": 18,
-      "advertised_photos": 154,
-      "publisher": "DJAWA",
-      "source_evidence": "search_link_and_live_article_heading"
-    },
-    {
-      "id": "pixibb-auto-coser-djawa-photo-christmas-special-2021-s-ver-100-photos",
-      "title": "DJAWA Photo: Mimmi (밈미) – Christmas Special 2021 (+S.ver) (100 photos) Sexy Cosplay",
-      "source": "https://cosplay.pixibb.com/coser-djawa-photo-christmas-special-2021-s-ver-100-photos/",
-      "pages": 12,
-      "advertised_photos": 100,
-      "publisher": "DJAWA",
-      "source_evidence": "search_link_and_live_article_heading"
-    },
-    {
-      "id": "pixibb-auto-djawa-photo-mimmi-girls-frontline-hk416-damaged-ver-244-photos-cosplay",
-      "title": "DJAWA Photo – Mimmi (밈미): “Girls’ Frontline – HK416 (Damaged ver.)”",
-      "source": "https://cosplay.pixibb.com/djawa-photo-mimmi-girls-frontline-hk416-damaged-ver-244-photos-cosplay/",
-      "pages": 27,
-      "advertised_photos": 244,
-      "publisher": "DJAWA",
-      "source_evidence": "search_link_and_live_article_heading"
-    },
-    {
-      "id": "pixibb-auto-djawa-photo-mimmi-azur-lane-ijn-atago-amp-takao-61-photos-cosplay",
-      "title": "DJAWA Photo – Mimmi (밈미): “Azur Lane IJN Atago & Takao”",
-      "source": "https://cosplay.pixibb.com/djawa-photo-mimmi-azur-lane-ijn-atago-amp-takao-61-photos-cosplay/",
-      "pages": 9,
-      "advertised_photos": 61,
-      "publisher": "DJAWA",
-      "source_evidence": "search_link_and_live_article_heading"
-    },
-    {
-      "id": "pixibb-auto-djawa-photo-mimmi-witchs-witchcraft-151-photos-cosplay",
-      "title": "DJAWA Photo – Mimmi (밈미): “Witch’s Witchcraft”",
-      "source": "https://cosplay.pixibb.com/djawa-photo-mimmi-witchs-witchcraft-151-photos-cosplay/",
-      "pages": 18,
-      "advertised_photos": 151,
-      "publisher": "DJAWA",
-      "source_evidence": "search_link_and_live_article_heading"
-    },
-    {
-      "id": "pixibb-auto-djawa-photo-mimmi-cyberpunk-girl-41-photos-cosplay",
-      "title": "DJAWA Photo – Mimmi (밈미): “Cyberpunk Girl”",
-      "source": "https://cosplay.pixibb.com/djawa-photo-mimmi-cyberpunk-girl-41-photos-cosplay/",
-      "pages": 7,
-      "advertised_photos": 41,
-      "publisher": "DJAWA",
-      "source_evidence": "search_link_and_live_article_heading"
-    },
-    {
-      "id": "pixibb-auto-djawa-photo-mimmi-rudy-the-wolf-of-midnight-230-photos-cosplay",
-      "title": "DJAWA Photo – Mimmi (밈미): “Rudy The Wolf of Midnight”",
-      "source": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-the-wolf-of-midnight-230-photos-cosplay/",
-      "pages": 25,
-      "advertised_photos": 230,
-      "publisher": "DJAWA",
-      "source_evidence": "search_link_and_live_article_heading"
-    },
-    {
-      "id": "pixibb-auto-djawa-photo-mimmi-kitsune-miko-a-ver-65-photos-cosplay",
-      "title": "DJAWA Photo – Mimmi (밈미): “Kitsune Miko (A ver)”",
-      "source": "https://cosplay.pixibb.com/djawa-photo-mimmi-kitsune-miko-a-ver-65-photos-cosplay/",
-      "pages": 9,
-      "advertised_photos": 65,
-      "publisher": "DJAWA",
-      "source_evidence": "search_link_and_live_article_heading"
-    },
-    {
-      "id": "pixibb-auto-djawa-photo-mimmi-rudy-codename-wolfgirl-201-photos-cosplay",
-      "title": "DJAWA Photo – Mimmi (밈미): “Rudy Codename Wolfgirl”",
-      "source": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-codename-wolfgirl-201-photos-cosplay/",
-      "pages": 23,
-      "advertised_photos": 201,
-      "publisher": "DJAWA",
-      "source_evidence": "search_link_and_live_article_heading"
-    },
-    {
-      "id": "pixibb-auto-djawa-photo-mimmi-christmas-special-2022-super-sonico-91-photos-cosplay",
-      "title": "DJAWA Photo – Mimmi (밈미): “Christmas Special 2022” (Super Sonico)",
-      "source": "https://cosplay.pixibb.com/djawa-photo-mimmi-christmas-special-2022-super-sonico-91-photos-cosplay/",
-      "pages": 12,
-      "advertised_photos": 91,
-      "publisher": "DJAWA",
-      "source_evidence": "search_link_and_live_article_heading"
-    },
-    {
-      "id": "pixibb-auto-djawa-photo-mimmi-nikke-alice-s-ver-170-photos-cosplay",
-      "title": "DJAWA Photo – Mimmi (밈미): “Nikke Alice” (+S.Ver)",
-      "source": "https://cosplay.pixibb.com/djawa-photo-mimmi-nikke-alice-s-ver-170-photos-cosplay/",
-      "pages": 19,
-      "advertised_photos": 170,
-      "publisher": "DJAWA",
-      "source_evidence": "search_link_and_live_article_heading"
-    },
-    {
-      "id": "pixibb-auto-djawa-photo-mimmi-your-fishe-gawr-gura-123-photos-cosplay",
-      "title": "DJAWA Photo – Mimmi (밈미): “Your Fishe Gawr Gura”",
-      "source": "https://cosplay.pixibb.com/djawa-photo-mimmi-your-fishe-gawr-gura-123-photos-cosplay/",
-      "pages": 15,
-      "advertised_photos": 123,
-      "publisher": "DJAWA",
-      "source_evidence": "search_link_and_live_article_heading"
-    },
-    {
-      "id": "pixibb-auto-djawa-photo-mimmi-azur-lane-tashkent-59-photos-cosplay",
-      "title": "DJAWA Photo – Mimmi (밈미): “Azur Lane Tashkent”",
-      "source": "https://cosplay.pixibb.com/djawa-photo-mimmi-azur-lane-tashkent-59-photos-cosplay/",
-      "pages": 8,
-      "advertised_photos": 59,
-      "publisher": "DJAWA",
-      "source_evidence": "search_link_and_live_article_heading"
-    },
-    {
-      "id": "pixibb-auto-creamsoda-mimmi-vol-2-neko-mimmi-62-photos-cosplay",
-      "title": "[CreamSoda] Mimmi (밈미): Vol.2 Neko Mimmi",
-      "source": "https://cosplay.pixibb.com/creamsoda-mimmi-vol-2-neko-mimmi-62-photos-cosplay/",
-      "pages": 9,
-      "advertised_photos": 62,
-      "publisher": "other public photographer",
-      "source_evidence": "search_link_and_live_article_heading"
-    }
-  ],
+  "albums": [],
   "search_pages": [
     {
       "term": "Mimmi",
       "page": 1,
-      "found_links": 4
-    },
-    {
-      "term": "Mimmi",
-      "page": 2,
-      "found_links": 5
-    },
-    {
-      "term": "Mimmi",
-      "page": 3,
-      "found_links": 5
-    },
-    {
-      "term": "Mimmi",
-      "page": 4,
-      "found_links": 0
+      "error": "HTTPError"
     },
     {
       "term": "밈미",
       "page": 1,
-      "found_links": 4
-    },
-    {
-      "term": "밈미",
-      "page": 2,
-      "found_links": 5
-    },
-    {
-      "term": "밈미",
-      "page": 3,
-      "found_links": 5
-    },
-    {
-      "term": "밈미",
-      "page": 4,
-      "found_links": 0
+      "error": "HTTPError"
     },
     {
       "term": "Mimmissu17",
       "page": 1,
-      "found_links": 0
+      "error": "HTTPError"
     },
     {
       "term": "Miss u DJAWA",
       "page": 1,
-      "found_links": 0
+      "error": "HTTPError"
     },
     {
       "term": "ミミ DJAWA",
       "page": 1,
-      "found_links": 0
+      "error": "HTTPError"
     },
     {
       "term": "CreamSoda Mimmi",
       "page": 1,
-      "found_links": 0
+      "error": "HTTPError"
     },
     {
       "term": "밋슈",
       "page": 1,
-      "found_links": 0
+      "error": "HTTPError"
     },
     {
       "term": "DJAWA Mimmi",
       "page": 1,
-      "found_links": 0
+      "error": "HTTPError"
     },
     {
       "term": "Mimmi COSPLAY",
       "page": 1,
-      "found_links": 0
+      "error": "HTTPError"
     },
     {
       "term": "Mimmi Artgravia",
       "page": 1,
-      "found_links": 0
+      "error": "HTTPError"
     },
     {
       "term": "Mimmi Cosplay 2025",
       "page": 1,
-      "found_links": 0
+      "error": "HTTPError"
     },
     {
       "term": "ミンミ DJAWA",
       "page": 1,
-      "found_links": 0
+      "error": "HTTPError"
     },
     {
       "term": "Mimmi 写真",
       "page": 1,
-      "found_links": 0
+      "error": "HTTPError"
     }
   ]
 }
