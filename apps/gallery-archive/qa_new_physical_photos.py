@@ -214,7 +214,7 @@ async def run(args):
     print('DEPLOYED_PHYSICAL_PHOTOS_QA_PASS',json.dumps(report,ensure_ascii=False),flush=True)
 
 
-if __name__=='__main__':
+def parse_cli(argv=None):
     parser=argparse.ArgumentParser()
     parser.add_argument('--model',choices=['mimmi','yui'],required=True)
     parser.add_argument('--browser',choices=['chromium','webkit'],required=True)
@@ -224,6 +224,10 @@ if __name__=='__main__':
     parser.add_argument('--shard',type=int,default=0)
     parser.add_argument('--shards',type=int,default=1)
     parser.add_argument('--out',type=Path,required=True)
-    args=parser.parse_args()
-    if not 1<=args.shards<=8 or not 0<=args.shard<args.shards:parser.error('Invalid bounded QA shard')
-    asyncio.run(run(args))
+    args=parser.parse_args(argv)
+    if not 1<=args.shards<=24 or not 0<=args.shard<args.shards:parser.error('Invalid bounded QA shard')
+    return args
+
+
+if __name__=='__main__':
+    asyncio.run(run(parse_cli()))
