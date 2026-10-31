@@ -1,6 +1,6 @@
 {
   "model": "mimmi",
-  "generated_at": "2026-10-28T15:02:56.521026+00:00",
+  "generated_at": "2026-10-31T15:42:38.765971+00:00",
   "warning": "Research source listing != individually acquired and verified images. Catalogues can include duplicates, inconsistent counts, mixed-model collaboration.",
   "sources": [
     {
@@ -1048,7 +1048,32 @@
     },
     {
       "number": 10,
-      "title": "[DJAWA]Realise Loveliness",
+      "title": "碧蓝航线 奥古斯特 活跃在二次元同人视频与静态正片圈...",
+      "advertised_photos": 19,
+      "sources": [
+        {
+          "site": "xiantuji",
+          "url": "https://www.xiantuji.com/mimmi/",
+          "claimed_count": 19
+        },
+        {
+          "site": "simimiao",
+          "url": "https://www.simimiao.com/mimmi/",
+          "claimed_count": null
+        }
+      ],
+      "alternate_titles": [
+        "碧蓝航线 奥古斯特 活跃在二次元同人视频与静态正片圈...",
+        "[DJAWA]Realise Loveliness"
+      ],
+      "count_disagreement": false,
+      "samples": [],
+      "images": [],
+      "status": "research_only_not_archived"
+    },
+    {
+      "number": 9,
+      "title": "[DJAWA]Model Student",
       "advertised_photos": null,
       "sources": [
         {
@@ -1063,31 +1088,6 @@
         }
       ],
       "alternate_titles": [
-        "[DJAWA]Realise Loveliness"
-      ],
-      "count_disagreement": false,
-      "samples": [],
-      "images": [],
-      "status": "research_only_not_archived"
-    },
-    {
-      "number": 9,
-      "title": "伊莱格泳装 活跃在二次元同人视频与静态正片圈子里的呙呙...",
-      "advertised_photos": 18,
-      "sources": [
-        {
-          "site": "xiantuji",
-          "url": "https://www.xiantuji.com/mimmi/",
-          "claimed_count": 18
-        },
-        {
-          "site": "simimiao",
-          "url": "https://www.simimiao.com/mimmi/",
-          "claimed_count": null
-        }
-      ],
-      "alternate_titles": [
-        "伊莱格泳装 活跃在二次元同人视频与静态正片圈子里的呙呙...",
         "[DJAWA]Model Student"
       ],
       "count_disagreement": false,
@@ -1362,7 +1362,6 @@
       "alternate_titles": [
         "[ARTGRAVIA]VOL137",
         "NO.052",
-        "NO.043）",
         "至NO.049，共49套公开作品。编号整理已经更新到NO.049，初次查看建议从NO.042 Nicole (Zenless Zone Zero)或NO.006 Kitsune Miko开始，它们能较明显体现角色服装、造型变化和整体风格特点。"
       ],
       "count_disagreement": false,
