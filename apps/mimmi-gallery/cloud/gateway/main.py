@@ -25,9 +25,11 @@ from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
 try:
     from gateway.portal import COOKIE_NAME, install_portal, session_valid
     from gateway.media_cache import VerifiedMediaCache
+    from gateway.cookie_format import cookie_header
 except ModuleNotFoundError:
     from portal import COOKIE_NAME, install_portal, session_valid
     from media_cache import VerifiedMediaCache
+    from cookie_format import cookie_header
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse, Response
 from PIL import Image, ImageOps, UnidentifiedImageError
@@ -104,9 +106,17 @@ async def rclone_bytes(path: str, limit: int, *, remote: str | None = None) -> b
     A single StreamReader.read(limit) may return only the first network chunk.
     Never treat such a partial read as a successfully fetched photograph.
     """
+    client_env=os.environ.copy()
+    try:
+        configured=client_env.get('RCLONE_CONFIG_ARCHIVE_COOKIE','')
+        client_env['RCLONE_CONFIG_ARCHIVE_COOKIE']=cookie_header(configured)
+    except ValueError:
+        raise HTTPException(status_code=503,detail='Invalid storage session configuration')
+    if client_env['RCLONE_CONFIG_ARCHIVE_COOKIE']!=configured:
+        print('OWNER_STORAGE_COOKIE_HEADER_NORMALIZED',flush=True)
     proc = await asyncio.create_subprocess_exec(
         "rclone", "cat", f"{remote or REMOTE}/{path}", "--timeout=50s", "--retries=2",
-        stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE
+        stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE, env=client_env
     )
 
     async def drain_stderr() -> str:
