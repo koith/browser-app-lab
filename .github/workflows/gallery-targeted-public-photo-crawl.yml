@@ -1,0 +1,152 @@
+name: Targeted Verified Public Photos to Private Gallery
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/gallery-targeted-public-photo-crawl.yml'
+permissions:
+  contents: read
+concurrency:
+  group: targeted-public-photo-crawl-${{ github.ref_name }}
+  cancel-in-progress: false
+jobs:
+  offline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install requests beautifulsoup4 Pillow
+      - name: Verify normal public HTML and one-photo-per-file regression
+        run: |
+          python -m py_compile apps/gallery-archive/direct_photo_pipeline.py
+          (cd apps/gallery-archive && python test_direct_photo_pipeline.py)
+  acquire:
+    needs: offline
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    permissions:
+      contents: write
+      actions: write
+    concurrency:
+      group: gallery-terabox-private-mass-upload-${{ matrix.model }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        model: [mimmi, yui]
+    env:
+      MODEL: ${{ matrix.model }}
+      GH_TOKEN: ${{ github.token }}
+      RCLONE_CONFIG_ARCHIVE_TYPE: terabox
+      MIMMI_COOKIE: ${{ secrets.MIMMI_TERABOX_NDUS }}
+      YUI_COOKIE: ${{ secrets.YUI_TERABOX_COOKIE }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install requests beautifulsoup4 Pillow
+      - name: Install checksum pinned private owner storage client
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL https://github.com/gulp79/rclone-extra/releases/download/v1.75.2-extra/rclone-linux-amd64.zip -o "$RUNNER_TEMP/client.zip"
+          echo "78855325a2a8d83b3feee3a8363d32e1211babbf4cda6356fa8ca5f472075062  $RUNNER_TEMP/client.zip" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/unpack" "$RUNNER_TEMP/bin"
+          unzip -q "$RUNNER_TEMP/client.zip" -d "$RUNNER_TEMP/unpack"
+          binary="$(find "$RUNNER_TEMP/unpack" -type f -name rclone -print -quit)"
+          test -n "$binary"
+          install -m 755 "$binary" "$RUNNER_TEMP/bin/rclone"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+      - name: Load latest actual owner catalog, keep existing originals unchanged
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$MODEL" == "mimmi" ]]; then
+            export SOURCE_COOKIE="$MIMMI_COOKIE"
+            remote="archive:MimmiArchive"
+          else
+            export SOURCE_COOKIE="$YUI_COOKIE"
+            remote="archive:YuiArchive"
+          fi
+          test -n "$SOURCE_COOKIE"
+          cookie="$(python - <<'PY'
+          import os,sys
+          sys.path.insert(0,'apps/mimmi-gallery/cloud/gateway')
+          from cookie_format import cookie_header
+          print(cookie_header(os.environ['SOURCE_COOKIE']))
+          PY
+          )"
+          echo "::add-mask::$cookie"
+          echo "RCLONE_CONFIG_ARCHIVE_COOKIE=$cookie" >> "$GITHUB_ENV"
+          echo "ARCHIVE_REMOTE=$remote" >> "$GITHUB_ENV"
+          export RCLONE_CONFIG_ARCHIVE_COOKIE="$cookie"
+          python apps/gallery-archive/read_owner_metadata.py --remote "$remote" --model "$MODEL" --out "$RUNNER_TEMP/owner-before.json" --published-index "apps/$MODEL-gallery/owner-index.json"
+      - name: Directly download and decode public photo files of selected low-coverage works
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/stage/originals" "$RUNNER_TEMP/stage/previews"
+          if [[ "$MODEL" == "mimmi" ]]; then
+            focus=(--album-id v2ph-actor-a887785a --album-id v2ph-actor-a93xn3oa)
+          else
+            focus=(--album-id djawa-privaty-public-samples --album-id public-yui-sns)
+          fi
+          python apps/gallery-archive/direct_photo_pipeline.py --model "$MODEL" --owner "$RUNNER_TEMP/owner-before.json" --out "$RUNNER_TEMP/stage" --max-new 40 --max-pages 4 "${focus[@]}"
+      - name: Merge independently decoded originals without replacing owner files
+        id: delta
+        shell: bash
+        run: |
+          set -euo pipefail
+          python apps/gallery-archive/merge_incremental.py --model "$MODEL" --previous "$RUNNER_TEMP/owner-before.json" --stage "$RUNNER_TEMP/stage"
+          python - <<'PY'
+          import os,json
+          from pathlib import Path
+          root=Path(os.environ['RUNNER_TEMP'])/'stage/metadata'
+          summary=json.loads((root/'collection-audit.json').read_text())
+          merge=json.loads((root/'incremental-merge.json').read_text())
+          changed=merge['new_photos']+merge['upgraded_photos']>0
+          print('TARGETED_DOWNLOADED_DECODED',os.environ['MODEL'],summary['new_local_individual_files'])
+          print('TARGETED_OWNER_NEW_PHOTOS',merge['new_photos'],'UPGRADED',merge['upgraded_photos'])
+          with open(os.environ['GITHUB_OUTPUT'],'a') as out:out.write('changed='+str(changed).lower()+'\n')
+          with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as out:
+              out.write(f"### {os.environ['MODEL']} targeted public file crawl\n")
+              out.write(f"- Decoded new files: {summary['new_local_individual_files']}\n")
+              out.write(f"- Owner catalog additions before remote audit: {merge['new_photos']}\n")
+              out.write("- Nothing counts as published until exact TeraBox readback and browser QA.\n")
+          PY
+      - name: Write individual photos to private owner storage and SHA read back
+        if: steps.delta.outputs.changed == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python apps/gallery-archive/safe_rclone.py copy "$RUNNER_TEMP/stage/originals" "$ARCHIVE_REMOTE/originals" --ignore-existing --transfers 2 --checkers 2 --timeout 60s --retries 1
+          python apps/gallery-archive/safe_rclone.py copy "$RUNNER_TEMP/stage/previews" "$ARCHIVE_REMOTE/previews" --ignore-existing --transfers 2 --checkers 2 --timeout 60s --retries 1
+          python apps/gallery-archive/verify_terabox.py --stage "$RUNNER_TEMP/stage" --remote "$ARCHIVE_REMOTE" --workers 2 --only-staged
+      - name: Publish catalog ONLY when every newly uploaded original and preview passed SHA verification
+        if: steps.delta.outputs.changed == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          python apps/gallery-archive/safe_rclone.py copyto "$RUNNER_TEMP/stage/metadata/catalog.json" "$ARCHIVE_REMOTE/metadata/catalog.json" --ignore-times --timeout 60s --retries 1
+          python apps/gallery-archive/safe_rclone.py cat "$ARCHIVE_REMOTE/metadata/catalog.json" --timeout 60s --retries 1 > "$RUNNER_TEMP/catalog-readback.json"
+          cmp "$RUNNER_TEMP/stage/metadata/catalog.json" "$RUNNER_TEMP/catalog-readback.json"
+          python apps/gallery-archive/publish_owner_index.py --model "$MODEL" --input "$RUNNER_TEMP/catalog-readback.json" --output "$RUNNER_TEMP/owner-index.json"
+          python apps/gallery-archive/commit_owner_index.py --model "$MODEL" --input "$RUNNER_TEMP/owner-index.json"
+          echo "TARGETED_OWNER_PHOTOS_REMOTELY_VERIFIED_AND_PUBLISHED $MODEL" >> "$GITHUB_STEP_SUMMARY"
+          gh workflow run static.yml --ref main
+          gh workflow run gallery-deployed-pages-photo-qa.yml --ref main
+          gh workflow run gallery-newly-stored-photo-qa.yml --ref main
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: targeted-source-crawl-audit-${{ matrix.model }}
+          path: |
+            ${{ runner.temp }}/stage/metadata/collection-audit.json
+            ${{ runner.temp }}/stage/metadata/incremental-merge.json
+            ${{ runner.temp }}/stage/metadata/remote-verification.json
+          retention-days: 14
+          if-no-files-found: ignore
