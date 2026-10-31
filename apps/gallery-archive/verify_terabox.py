@@ -78,28 +78,46 @@ def read_remote_with_recovery(row,remote,deadline_seconds=75,command=None):
 
 def verify(stage: Path, remote: str, workers: int, only_staged: bool = False):
     manifest=json.loads((stage/"metadata/catalog.json").read_text(encoding="utf-8"))
-    specs=[]
+    specs=[];object_work={}
     for album in manifest["albums"]:
         for photo in album["images"]:
             specs.append((photo["key"],photo["bytes"],photo["sha256"]))
             specs.append((photo["preview"],photo["preview_bytes"],photo["preview_sha256"]))
+            for field in ('key','preview'):
+                key=photo[field]
+                if key in object_work and object_work[key]!=album['id']:
+                    raise ValueError('Remote object belongs to conflicting works')
+                object_work[key]=album['id']
     if only_staged:
         specs = [row for row in specs if (stage / row[0]).is_file()]
     if not specs and not only_staged:
         raise ValueError("No photo bytes to verify")
     def readback(row):
         return read_remote_with_recovery(row,remote)
+    work_specs={}
+    for row in specs:work_specs.setdefault(object_work[row[0]],[]).append(row)
+    work_passed={aid:0 for aid in work_specs};work_failed={aid:0 for aid in work_specs}
     passed=0
     errors=[]
     with ThreadPoolExecutor(max_workers=workers) as executor:
         future={executor.submit(readback,item):item[0] for item in specs}
         for f in as_completed(future):
-            try: f.result();passed+=1
-            except Exception as e:errors.append({"name":future[f],"error":str(e)[:140]})
+            aid=object_work[future[f]]
+            try: f.result();passed+=1;work_passed[aid]+=1
+            except Exception as e:
+                work_failed[aid]+=1
+                errors.append({"name":future[f],"error":str(e)[:140]})
             if passed and passed%250==0:print("REMOTE_SHA256_READBACK_PROGRESS",passed,"/",len(specs),flush=True)
     report={"model":manifest["model"],"media_checked":len(specs),
             "full_SHA256_verified":passed,"failed":len(errors),
-            "photos":len(specs)//2,"errors":errors[:20]}
+            "photos":len(specs)//2,"errors":errors[:20],"work_verification":{}}
+    for aid,rows in work_specs.items():
+        result={'media_checked':len(rows),'full_SHA256_verified':work_passed[aid],
+                'failed':work_failed[aid]}
+        if not result['failed'] and result['media_checked']==result['full_SHA256_verified']:
+            result['verified_specs_sha256']=hashlib.sha256(
+                json.dumps(sorted(rows),separators=(',',':')).encode()).hexdigest()
+        report['work_verification'][aid]=result
     if not errors and passed==len(specs):
         report['verified_specs_sha256']=hashlib.sha256(
             json.dumps(sorted(specs),separators=(',',':')).encode()).hexdigest()
