@@ -131,7 +131,7 @@ def upload(args):
                 reply=request('POST','/internal/individual-import/finish/'+aid,b'')
                 with (root/'completed-work-queues.jsonl').open('a') as out:out.write(json.dumps({'album':aid,**reply})+'\n')
                 queued.add(aid)
-                print('WHOLE_WORK_REMOTE_VERIFIED_PENDING_PUBLICATION',aid,len(album['images']),flush=True)
+                print('PLANNED_WORK_SUPPLEMENT_REMOTE_VERIFIED_PENDING_PUBLICATION',aid,len(album['images']),flush=True)
     publish_finished_works()
     def send(item):
         sha,path=item;body=Path(path).read_bytes()
