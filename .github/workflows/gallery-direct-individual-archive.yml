@@ -43,6 +43,7 @@ on:
       - apps/gallery-archive/test_work_coverage.py
       - apps/mimmi-gallery/cloud/gateway/media_cache.py
       - apps/mimmi-gallery/cloud/test_media_cache.py
+      - apps/mimmi-gallery/cloud/test_copyto_media_fallback.py
       - .github/workflows/gallery-direct-individual-archive.yml
 permissions:
   contents: read
@@ -75,6 +76,7 @@ jobs:
           python apps/gallery-archive/test_reverse_image_sweep.py
           python apps/mimmi-gallery/cloud/test_media_cache.py
           python apps/mimmi-gallery/cloud/test_gateway.py
+          python apps/mimmi-gallery/cloud/test_copyto_media_fallback.py
           python apps/mimmi-gallery/cloud/test_cover_cache.py
   collect-store-readback:
     needs: offline-regressions
