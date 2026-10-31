@@ -210,6 +210,19 @@ document.addEventListener('load',e=>{
 document.addEventListener('error',e=>{
  const img=e.target,container=img instanceof HTMLImageElement?img.closest('.album,.photo'):null;
  if(!container)return;
+ // A failed separately stored preview must not hide a SHA-verified original.
+ // Retry the same saved photo's original before declaring this tile broken.
+ if(img.dataset.owner&&img.dataset.ownerVariant!=='original'){
+  const p=stored.flatMap(a=>a.images).find(p=>p.url===img.dataset.owner&&p.ownerAlbum);
+  if(p&&p.preview){
+   img.dataset.ownerVariant='original';
+   MimmiPrivate.asset(p,'original').then(url=>{
+    if(!img.isConnected)return;
+    img.hidden=false;img.removeAttribute('src');img.src=url;
+   }).catch(()=>{if(img.isConnected&&!recoverSavedCover(img)){img.hidden=true;container.classList.add('broken-source')}});
+   return;
+  }
+ }
  if(recoverSavedCover(img))return;
  const url=img.getAttribute('src')||'',n=Number(img.dataset.sourceRetry||0);
  const policies=['strict-origin-when-cross-origin','origin'];
@@ -323,12 +336,21 @@ function showViewer(){
  status.textContent='불러오는 중';
  image.removeAttribute('src');image.hidden=true;
  const src=p.url;
- function install(url){
-  const policies=['no-referrer','strict-origin-when-cross-origin','origin'];
+ function install(url,allowPreviewFallback=false){
+  // Retrying referrer headers cannot repair a failed private original.
+  const policies=allowPreviewFallback?['no-referrer']:['no-referrer','strict-origin-when-cross-origin','origin'];
   let retry=0;
   const fail=()=>{
    if(generation!==viewerGeneration)return;
    if(retry>=policies.length){
+    if(allowPreviewFallback&&p.ownerAlbum&&p.preview){
+     status.textContent='원본 연결 오류 · 보관 미리보기 확인 중';
+     MimmiPrivate.asset(p,'preview').then(previewUrl=>{
+      if(generation!==viewerGeneration)return;
+      install(previewUrl,false);$('original').href=previewUrl;
+     }).catch(error=>{if(generation===viewerGeneration)status.textContent=error.message});
+     return;
+    }
     image.hidden=true;image.removeAttribute('src');
     status.textContent='저장된 사진을 불러오지 못했습니다. 원본 파일이나 이 기기의 보관본을 확인해 주세요.';
     registerImageHealth(url,false);return;
@@ -340,7 +362,9 @@ function showViewer(){
   image.onerror=fail;fail();
  }
  if(p.ownerAlbum||p.vaultAlbum){
-  (p.vaultAlbum?PhotoVault.asset(p):MimmiPrivate.asset(p)).then(url=>{if(generation===viewerGeneration){install(url);$('original').href=url}}).catch(error=>{if(generation===viewerGeneration)status.textContent=error.message});
+  (p.vaultAlbum?PhotoVault.asset(p):MimmiPrivate.asset(p,'original')).then(url=>{
+   if(generation===viewerGeneration){install(url,!!p.ownerAlbum);$('original').href=url}
+  }).catch(error=>{if(generation===viewerGeneration)status.textContent=error.message});
  }else install(src);
  image.alt=p.name+' · '+p.number;
  $('position').textContent=(viewerIndex+1)+' / '+viewerList.length+' · '+p.width+'×'+p.height;
