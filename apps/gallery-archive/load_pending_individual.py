@@ -25,7 +25,7 @@ def load(owner,documents,model):
     old={a['id']:a for a in owner['albums']}
     seen={p['sha256'] for a in old.values() for p in a['images']}
     next_number={aid:max(p['number'] for p in a['images'])+1 for aid,a in old.items()}
-    albums={};batches=[]
+    albums={};batches=[];coverage={}
     for name,data in documents:
         match=re.fullmatch(r'([a-f0-9]{64})\.json',name)
         if not match:raise ValueError('Invalid individual queue filename')
@@ -34,6 +34,7 @@ def load(owner,documents,model):
         for album in data['albums']:
             aid=album['id']
             if aid not in old:raise ValueError('Queued work must already belong to this owner')
+            if album.get('source_coverage'):coverage[aid]=album['source_coverage']
             for photo in sorted(album['images'],key=lambda p:p['source_photo_number']):
                 checked_row(model,aid,photo)
                 if (photo.get('work_identity_saved_cut_anchors',0)<3
@@ -50,7 +51,8 @@ def load(owner,documents,model):
                 next_number[aid]+=1
                 albums.setdefault(aid,{'id':aid,'title':old[aid].get('title',aid),'images':[]})['images'].append(row)
         batches.append(match[1])
-    return {'schema_version':1,'model':model,'albums':list(albums.values())},batches
+    return {'schema_version':1,'model':model,'albums':[
+        {**a,'source_coverage':coverage.get(a['id'],{})} for a in albums.values()]},batches
 
 
 if __name__=='__main__':
@@ -77,6 +79,7 @@ if __name__=='__main__':
                'higher_resolution_replacements':0,'new_remote_pending_photos':count,'photo_bundles_created':0,
                'remote_verified_files':0,'gallery_open_verified_files':0,'source_batches':batches,
                'results':[{'id':a['id'],'individual_files_saved':len(a['images']),
+                   'source_coverage':a.get('source_coverage',{}),
                    'engine':'signed_individual_bytes_then_independent_Actions_SHA_readback'} for a in delta['albums']]}
         (root/'collection-audit.json').write_text(json.dumps(audit,ensure_ascii=False,indent=2)+'\n')
     with args.github_output.open('a') as out:out.write('found='+str(bool(count)).lower()+'\n')

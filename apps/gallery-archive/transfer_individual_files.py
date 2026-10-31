@@ -42,6 +42,10 @@ def prepare(args):
         doc=json.loads(metadata.read_text())
         albums=[doc['work']] if 'work' in doc and doc['work'] else doc.get('albums',[])
         root=metadata.parent.parent if metadata.parent.name=='metadata' else metadata.parent
+        audits=[doc['info']] if 'info' in doc else []
+        auditfile=root/'metadata/collection-audit.json'
+        if auditfile.exists():audits+=json.loads(auditfile.read_text()).get('results',[])
+        coverage={a['id']:a for a in audits if 'id' in a}
         for album in albums:
             aid=album['id']
             if aid not in old:raise ValueError('Transfers may only supplement existing owner works')
@@ -58,7 +62,12 @@ def prepare(args):
                 row={k:p[k] for k in ('sha256','bytes','width','height','preview_sha256','preview_bytes',
                     'source_photo_number','work_identity_saved_cut_anchors')}
                 row.update(extension=ext,preview_width=thumb[0],preview_height=thumb[1])
-                groups.setdefault(aid,{'id':aid,'title':old[aid].get('title',aid),'images':[]})['images'].append(row)
+                evidence={k:v for k,v in coverage.get(aid,{}).items() if k in (
+                    'source','known_web_edition_photos','observed_filename_numbers','saved_cut_correspondence',
+                    'uncertain_source_numbers','unresolved_source_numbers','source_files_decoded',
+                    'source_edition_all_files_decoded','source_edition_all_files_accounted_for')}
+                groups.setdefault(aid,{'id':aid,'title':old[aid].get('title',aid),
+                    'source_coverage':evidence,'images':[]})['images'].append(row)
                 files[p['sha256']]=str(original);files[p['preview_sha256']]=str(preview);seen.add(p['sha256'])
     plan={'schema_version':1,'model':model,'expires_at':int(time.time())+6*3600,'albums':list(groups.values())}
     raw=(json.dumps(plan,ensure_ascii=False,sort_keys=True,separators=(',',':'))+'\n').encode()

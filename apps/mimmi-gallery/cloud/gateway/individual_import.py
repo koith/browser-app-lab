@@ -92,8 +92,9 @@ class IndividualImport:
                                 or ext not in ('jpg','jpeg','png','webp') or type(w) is not int
                                 or type(height) is not int or min(w,height)<100 or w*height>40_000_000):raise ValueError()
                         target=('previews' if preview else 'originals')+'/'+aid+'/'+h+'.'+ext
-                        obj=objects.setdefault(h,{'bytes':size,'width':w,'height':height,'targets':[]})
-                        if (obj['bytes'],obj['width'],obj['height'])!=(size,w,height):raise ValueError()
+                        fmt={'jpg':'JPEG','jpeg':'JPEG','png':'PNG','webp':'WEBP'}[ext]
+                        obj=objects.setdefault(h,{'bytes':size,'width':w,'height':height,'format':fmt,'targets':[]})
+                        if (obj['bytes'],obj['width'],obj['height'],obj['format'])!=(size,w,height,fmt):raise ValueError()
                         if target not in obj['targets']:obj['targets'].append(target);total+=size
             if not 1<=count<=1200 or total>512_000_000:raise ValueError()
         except HTTPException:raise
@@ -113,7 +114,7 @@ class IndividualImport:
             with Image.open(BytesIO(raw)) as im:im.verify()
             with Image.open(BytesIO(raw)) as im:
                 im.load()
-                if im.size!=(spec['width'],spec['height']) or im.format not in ('JPEG','PNG','WEBP'):raise ValueError()
+                if im.size!=(spec['width'],spec['height']) or im.format!=spec['format']:raise ValueError()
         except Exception:raise HTTPException(422,'Transferred photo did not decode as declared')
         async with self.locks.setdefault(digest,asyncio.Lock()):
             if digest not in self.verified:
@@ -148,7 +149,8 @@ class IndividualImport:
                     preview='previews/'+album['id']+'/'+p['preview_sha256']+'.webp',
                     source_numbering='public_web_filename_not_publisher_original')
                 images.append(row)
-            albums.append({'id':album['id'],'title':album.get('title',album['id']),'images':images})
+            albums.append({'id':album['id'],'title':album.get('title',album['id']),'images':images,
+                           'source_coverage':album.get('source_coverage',{})})
         document={'schema_version':1,'model':self.plan['model'],'source_batch_sha256':pin,
                   'remote_verified_objects':sum(len(x['targets']) for x in self.objects.values()),'albums':albums}
         raw=(json.dumps(document,ensure_ascii=False,sort_keys=True,separators=(',',':'))+'\n').encode()
