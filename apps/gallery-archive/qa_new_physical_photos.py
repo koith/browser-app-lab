@@ -40,6 +40,7 @@ async def current_card(page,selector,click=False):
 async def run(args):
     document=json.loads(args.selection.read_text())
     selected=document['selection'][args.model]
+    resumed={}
     if args.since_commit:
         if not re.fullmatch('[a-f0-9]{40}',args.since_commit):raise ValueError('Exact baseline commit required')
         def owner(ref):
@@ -52,6 +53,12 @@ async def run(args):
         old={(a['id'],p['number']):p['sha256'] for a in before['albums'] for p in a['images']}
         selected=[{'id':a['id'],'images':[p for p in a['images'] if old.get((a['id'],p['number']))!=p['sha256']]} for a in after['albums']]
         selected=[a for a in selected if a['images']]
+        if args.checkpoint:
+            from native_qa_checkpoint import resume_keys
+            raw=args.checkpoint.read_bytes()
+            if hashlib.sha256(raw).hexdigest()!=args.checkpoint_sha:
+                raise ValueError('Checkpoint was not independently verified by the prerequisite job')
+            resumed=resume_keys(json.loads(raw),before,after,args.model,args.browser,args.since_commit)
     all_selected=sum(len(a['images']) for a in selected)
     html=(ROOT/'apps'/(args.model+'-gallery')/'index.html').read_text()
     expected_version=re.search(r'id="app-version"[^>]*>([^<]+)',html).group(1)
@@ -67,6 +74,7 @@ async def run(args):
     report={'model':args.model,'browser':args.browser,'real_iphone_device':False,
             'deployed_url':f'{SITE}/{args.model}-gallery/',
             'TLS_verified_bridge':args.http_bridge,'photos':[],'page_errors':[],
+            'resumed_photos':[],
             'since_commit':args.since_commit,'all_new_or_upgraded_rows':all_selected,
             'current_owner_index_ref':args.current_commit or 'main',
             'shard':args.shard,'shards':args.shards}
@@ -116,7 +124,12 @@ async def run(args):
                 distinct_sha:new Set(stored.flatMap(a=>validImages(a).map(p=>p.sha256))).size,
                 owner_rows:ownerStored.reduce((n,a)=>n+validImages(a).length,0)})''')
             routed={}
-            for photo in routes:routed.setdefault(photo['gallery_album'],[]).append(photo)
+            for photo in routes:
+                proof=resumed.get((photo['physical_album'],photo['number']))
+                if proof:
+                    report['resumed_photos'].append({'album':photo['physical_album'],'number':photo['number'],
+                        'prior_successful_native_job':proof,'current_gallery_exact_SHA_route_verified':True})
+                else:routed.setdefault(photo['gallery_album'],[]).append(photo)
             selected=[{'id':aid,'images':photos} for aid,photos in routed.items()]
             for album in selected:
                 aid=album['id'];card=f'#albumgrid .album[data-id="{aid}"]'
@@ -223,6 +236,8 @@ def parse_cli(argv=None):
     parser.add_argument('--http-bridge',action='store_true')
     parser.add_argument('--since-commit',help='Exact public owner-index baseline; verify every changed/new SHA since it')
     parser.add_argument('--current-commit',help='Pin the current owner-index snapshot for consistent matrix coverage')
+    parser.add_argument('--checkpoint',type=Path,help='Previously successful native jobs, verified by prerequisite CI')
+    parser.add_argument('--checkpoint-sha',help='Exact checkpoint digest emitted by independent source-job verification')
     parser.add_argument('--shard',type=int,default=0)
     parser.add_argument('--shards',type=int,default=1)
     parser.add_argument('--out',type=Path,required=True)
@@ -230,6 +245,10 @@ def parse_cli(argv=None):
     if args.current_commit and not args.since_commit:parser.error('Current snapshot requires an exact baseline')
     for ref in [args.since_commit,args.current_commit]:
         if ref is not None and not re.fullmatch('[a-f0-9]{40}',ref):parser.error('Exact owner-index commit required')
+    if bool(args.checkpoint)!=bool(args.checkpoint_sha) or (args.checkpoint and not args.since_commit):
+        parser.error('A checkpoint requires its independent digest and exact baseline')
+    if args.checkpoint_sha and not re.fullmatch('[a-f0-9]{64}',args.checkpoint_sha):
+        parser.error('Invalid independently verified checkpoint digest')
     if not 1<=args.shards<=24 or not 0<=args.shard<args.shards:parser.error('Invalid bounded QA shard')
     return args
 

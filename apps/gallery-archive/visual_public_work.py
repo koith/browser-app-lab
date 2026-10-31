@@ -75,12 +75,20 @@ def collect_work(book,previous,client,out,budget,seen_sha,model,reference_reader
             if photo['sha256'] in reference_hashes:continue
             reference_hashes.add(photo['sha256'])
             digest=photo.get('preview_sha256') or photo['sha256'];path=reference_dir/(digest+'.bin')
-            if path.exists():raw=path.read_bytes()
-            elif reference_paths and photo['sha256'] in reference_paths:
-                # The user already has this exact original committed locally.
-                # Verify its SHA below, without depending on a sleeping gateway.
-                raw=Path(reference_paths[photo['sha256']]).read_bytes()
-            else:
+            raw=None
+            candidates=[path]
+            if reference_paths and photo['sha256'] in reference_paths:
+                candidates.append(Path(reference_paths[photo['sha256']]))
+            for candidate in candidates:
+                if not candidate.is_file():continue
+                data=candidate.read_bytes()
+                if hashlib.sha256(data).hexdigest() in (digest,photo['sha256']):
+                    raw=data;break
+                info.setdefault('stale_local_reference_numbers',[]).append(photo['number'])
+            if raw is None:
+                # A stale local convenience copy cannot poison the whole work.
+                # Read the owner's existing reference and retain the exact SHA
+                # gate; no changed bytes are accepted as the old photograph.
                 route='/api/yui' if model=='yui' else '/api'
                 raw=(reference_reader or owner_reference)(f'https://mimmi-private-gallery-free.onrender.com{route}/media/{aid}/{photo["number"]}/preview')
             if hashlib.sha256(raw).hexdigest() not in (digest,photo['sha256']):

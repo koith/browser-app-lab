@@ -15,7 +15,10 @@ class PhysicalMatrixTests(unittest.TestCase):
         args=parse_cli(common+['--since-commit','a'*40,'--current-commit','b'*40])
         self.assertEqual(args.current_commit,'b'*40)
         for extra in [['--current-commit','b'*40],['--since-commit','main'],
-                      ['--since-commit','a'*40,'--current-commit','main']]:
+                      ['--since-commit','a'*40,'--current-commit','main'],
+                      ['--checkpoint','unverified.json'],
+                      ['--since-commit','a'*40,'--checkpoint','unverified.json'],
+                      ['--since-commit','a'*40,'--checkpoint-sha','c'*64]]:
             with contextlib.redirect_stderr(io.StringIO()),self.assertRaises(SystemExit):parse_cli(common+extra)
 
     def test_every_real_matrix_job_parses_and_partitions_all_photos(self):
