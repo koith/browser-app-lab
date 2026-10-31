@@ -37,7 +37,8 @@ class DeferredBatchTests(unittest.TestCase):
         self.write('catalog.json',{'schema_version':1,'model':'mimmi','albums':[
             {'id':'saved-work','title':'Saved work','images':[self.photo]}]})
         self.write('collection-audit.json',{'results':[{'id':'saved-work',
-            'source_edition_all_files_accounted_for':True,'known_web_edition_photos':27}]})
+            'source_edition_all_files_accounted_for':True,'known_web_edition_photos':27,
+            'source_files_decoded':27,'unresolved_source_numbers':[]}]})
 
     def write(self,name,data):
         (self.stage/'metadata'/name).write_text(json.dumps(data))
@@ -63,7 +64,7 @@ class DeferredBatchTests(unittest.TestCase):
         self.assertEqual(result['sha256'],photo['sha256'])
         self.assertEqual(batches,[pin])
 
-    def test_unidentified_replacement_or_incomplete_edition_never_enters_deferred_queue(self):
+    def test_unidentified_replacement_or_unspecified_coverage_never_enters_deferred_queue(self):
         doc=json.loads((self.stage/'metadata/catalog.json').read_text())
         doc['albums'][0]['images'][0]['work_identity_saved_cut_anchors']=2
         self.write('catalog.json',doc)
@@ -76,6 +77,20 @@ class DeferredBatchTests(unittest.TestCase):
         self.write('catalog.json',doc)
         self.write('collection-audit.json',{'results':[{'id':'saved-work',
             'source_edition_all_files_accounted_for':False}]})
+        with self.assertRaises(ValueError):deferred.prepare(self.stage,self.owner)
+
+    def test_good_files_from_partial_edition_keep_the_exact_unresolved_numbers(self):
+        self.write('collection-audit.json',{'results':[{'id':'saved-work',
+            'source_edition_all_files_accounted_for':False,'known_web_edition_photos':27,
+            'source_files_decoded':26,'unresolved_source_numbers':[26]}]})
+        deferred.prepare(self.stage,self.owner);self.readback_proof()
+        _,raw=deferred.verified_queue(self.stage)
+        coverage=json.loads(raw)['albums'][0]['source_coverage']
+        self.assertFalse(coverage['source_edition_all_files_accounted_for'])
+        self.assertEqual(coverage['unresolved_source_numbers'],[26])
+        self.write('collection-audit.json',{'results':[{'id':'saved-work',
+            'source_edition_all_files_accounted_for':False,'known_web_edition_photos':27,
+            'source_files_decoded':26,'unresolved_source_numbers':[27]}]})
         with self.assertRaises(ValueError):deferred.prepare(self.stage,self.owner)
 
     def test_equal_readback_counts_cannot_acknowledge_different_objects_or_failed_media(self):

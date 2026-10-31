@@ -100,6 +100,14 @@ class VisualWorkTests(unittest.TestCase):
             self.assertEqual(len(work['images']),2)
             local[prior[0]['sha256']].write_bytes(b'corrupted local reference')
             self.assertIsNone(collect_work(book,prior,client,out/'bad-local',5,saved,'mimmi',unavailable,local)[0])
+            client.corrupt=False;reads=[]
+            def existing_owner(url):
+                reads.append(url);return client.get(url).content
+            work,info=collect_work(book,prior,client,out/'local-repaired-from-owner',5,
+                {p['sha256'] for p in prior},'mimmi',existing_owner,local)
+            self.assertEqual(len(work['images']),2)
+            self.assertEqual(info['stale_local_reference_numbers'],[1])
+            self.assertEqual(len(reads),1)
             self.assertEqual(list(out.rglob('*.zip')),[])
 
     def test_different_picture_is_not_visual_duplicate(self):

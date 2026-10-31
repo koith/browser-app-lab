@@ -6,11 +6,21 @@ No photo bundles, public source mapping, credentials, or new upload capability.
 import argparse
 import hashlib
 import json
+from io import BytesIO
 from pathlib import Path
 import subprocess
 
+from PIL import Image
 from merge_incremental import checked_row
-from transfer_individual_files import checked
+
+
+def checked(path,digest,size):
+    # Deferred storage does not use ephemeral signing keys or cryptography.
+    raw=path.read_bytes()
+    if len(raw)!=size or hashlib.sha256(raw).hexdigest()!=digest:raise ValueError('Staged bytes changed')
+    with Image.open(BytesIO(raw)) as image:image.verify()
+    with Image.open(BytesIO(raw)) as image:
+        image.load();return raw,image.size,{'JPEG':'jpg','PNG':'png','WEBP':'webp'}[image.format]
 
 
 def serialize(document):
@@ -31,15 +41,23 @@ def prepare(stage,owner):
         aid=album['id']
         if aid not in old:raise ValueError('Deferred publication only supplements existing works')
         source=evidence.get(aid,{})
-        if not source.get('source_edition_all_files_accounted_for'):
-            raise ValueError('Incomplete public edition must remain in local review')
+        unresolved=source.get('unresolved_source_numbers')
+        total=source.get('known_web_edition_photos')
+        if (type(source.get('source_edition_all_files_accounted_for')) is not bool
+                or type(total) is not int or not 3<=total<=500
+                or not isinstance(unresolved,list) or any(type(n) is not int or not 1<=n<=total for n in unresolved)
+                or source['source_edition_all_files_accounted_for']!=bool(not unresolved)
+                or type(source.get('source_files_decoded')) is not int
+                or source['source_files_decoded']<len(album['images'])+3):
+            raise ValueError('Explicit decoded-file and unresolved-number evidence is required')
         images=[]
         for photo in album['images']:
             checked_row(document['model'],aid,photo)
             if (photo['sha256'] in existing or photo.get('higher_resolution_replacement')
                     or photo.get('work_identity_saved_cut_anchors',0)<3
                     or type(photo.get('source_photo_number')) is not int
-                    or photo['source_photo_number']<1):
+                    or not 1<=photo['source_photo_number']<=total
+                    or photo['source_photo_number'] in unresolved):
                 raise ValueError('Deferred queue requires independently identified missing cuts')
             targets={}
             for field,digest,size,prefix in [('key','sha256','bytes','originals'),
@@ -72,9 +90,11 @@ def verified_queue(stage):
     document=json.loads((stage/'metadata/deferred-delta.json').read_text())
     audit=json.loads((stage/'metadata/remote-verification.json').read_text())
     for album in document['albums']:
+        unresolved=album.get('source_coverage',{}).get('unresolved_source_numbers')
+        if not isinstance(unresolved,list):raise ValueError('Queued source coverage is missing')
         for photo in album['images']:
             checked_row(document['model'],album['id'],photo)
-            if photo.get('work_identity_saved_cut_anchors',0)<3:
+            if photo.get('work_identity_saved_cut_anchors',0)<3 or photo['source_photo_number'] in unresolved:
                 raise ValueError('Work correspondence evidence changed')
             _,dimensions,_=checked(stage/photo['key'],photo['sha256'],photo['bytes'])
             if dimensions!=(photo['width'],photo['height']):raise ValueError('Queued dimensions changed')

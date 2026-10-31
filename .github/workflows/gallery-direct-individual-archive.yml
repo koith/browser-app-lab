@@ -99,9 +99,9 @@ jobs:
       YUI_COOKIE: ${{ secrets.YUI_TERABOX_COOKIE }}
       RCLONE_CONFIG_ARCHIVE_TYPE: terabox
       MODEL: ${{ matrix.model }}
-      # Keep the new Mimmi batch private until the pinned full-photo QA ends.
+      # Keep both models' new batches private until pinned full-photo QA ends.
       # Release by changing deferred to immediate after that actual QA passes.
-      ARCHIVE_PUBLICATION_MODE: ${{ matrix.model == 'mimmi' && 'deferred' || 'immediate' }}
+      ARCHIVE_PUBLICATION_MODE: deferred
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
