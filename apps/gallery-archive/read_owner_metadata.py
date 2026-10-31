@@ -15,6 +15,10 @@ from merge_incremental import flatten
 from safe_rclone import diagnostic
 
 
+class ProviderVerificationRequired(ValueError):
+    """The provider requires an interactive verification; never automate it."""
+
+
 def matches(raw,model,batch,minimum):
     try:
         document=json.loads(raw)
@@ -55,6 +59,8 @@ def read(remote,model,*,batch=None,minimum=1,reader=None):
     if raw is not None and matches(raw,model,batch,minimum):return raw
     evidence=summary(raw,model,batch)
     print('OWNER_METADATA_STREAM_INVALID',json.dumps(evidence,sort_keys=True),file=sys.stderr,flush=True)
+    if evidence['provider_errno']==400141:
+        raise ProviderVerificationRequired('Owner storage requires provider verification (400141)')
     with tempfile.TemporaryDirectory(prefix='owner-metadata-') as temporary:
         local=Path(temporary)/'metadata.json'
         with tempfile.TemporaryFile() as errors:
