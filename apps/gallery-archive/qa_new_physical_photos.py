@@ -140,24 +140,40 @@ async def run(args):
                     assert size==[expected['width'],expected['height']],(aid,number,size)
                     original=await page.locator('#original').get_attribute('href')
                     assert original and '/api/' in original,(aid,number,'not owner storage media')
-                    await page.evaluate('''url=>{const a=document.createElement('a');
+                    # Use the actual photo-open control. WebKit ignores the
+                    # download attribute across origins and can show an image
+                    # inline despite Content-Disposition. In the original tab,
+                    # native image saving is same-origin; verify that real path.
+                    async with page.expect_popup(timeout=105000) as opened:
+                        await page.locator('#original').click()
+                    original_page=await opened.value
+                    await original_page.wait_for_load_state('domcontentloaded',timeout=105000)
+                    await original_page.wait_for_function('''()=>{const im=document.images[0];
+                        return im?.complete&&im.naturalWidth>=160}''',timeout=105000)
+                    tab_size=await original_page.locator('img').first.evaluate('im=>[im.naturalWidth,im.naturalHeight]')
+                    assert tab_size==[expected['width'],expected['height']],(aid,number,'original tab',tab_size)
+                    # Chromium already supports this attachment from the
+                    # gallery; preserve its verified path. WebKit needs the
+                    # same-origin image tab for its native download attribute.
+                    download_page=original_page if args.browser=='webkit' else page
+                    await download_page.evaluate('''url=>{const a=document.createElement('a');
                             a.id='qa-original-download';a.textContent='검증용 원본 저장';
                             a.style='position:fixed;top:80px;left:12px;z-index:999999';
                             a.href=url+(url.includes('?')?'&':'?')+'download=true';a.download='photo';
                             document.body.append(a)}''',original)
-                    # WebKit correctly requires a trusted user gesture for a
-                    # cross-origin attachment. A JS a.click() is not that gesture.
-                    async with page.expect_download(timeout=105000) as pending:
-                        await page.locator('#qa-original-download').click()
+                    async with download_page.expect_download(timeout=105000) as pending:
+                        await download_page.locator('#qa-original-download').click()
                     download=await pending.value
-                    await page.locator('#qa-original-download').evaluate('a=>a.remove()')
                     path=await download.path();raw=Path(path).read_bytes()
                     assert len(raw)==expected['bytes'],(aid,number,'download length mismatch')
                     assert hashlib.sha256(raw).hexdigest()==expected['sha256'],(aid,number,'download SHA mismatch')
+                    await download_page.locator('#qa-original-download').evaluate('a=>a.remove()')
+                    await original_page.close()
                     report['photos'].append({'album':expected['physical_album'],'number':number,'dimensions':size,
                         'gallery_album':aid,'display_number':expected['display_number'],
                         'byte_identical_existing_display':expected['byte_identical_existing_display'],
-                        'thumbnail_decoded':True,'lightbox_decoded':True,'download_sha256_verified':True})
+                        'thumbnail_decoded':True,'lightbox_decoded':True,'original_tab_decoded':True,
+                        'download_sha256_verified':True})
                     print('DEPLOYED_EXACT_ORIGINAL_PASS',args.model,args.browser,aid,number,flush=True)
                     if len(report['photos'])==1:await page.screenshot(path=str(args.out.with_suffix('.png')))
                     await page.locator('#close').click();await page.locator('#lightbox').wait_for(state='hidden')
