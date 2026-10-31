@@ -1,7 +1,7 @@
 {
   "version": "v0.1.0-mimmi.3",
   "model": "mimmi",
-  "generated_at": "2026-10-31T05:29:10.612571+00:00",
+  "generated_at": "2026-10-31T07:07:10.103329+00:00",
   "source": "https://www.v2ph.com/actor/Mimmi",
   "actor_pages": [
     {
@@ -27,7 +27,7 @@
   "summary": {
     "actor_albums_discovered": 39,
     "previously_configured_albums": 6,
-    "works_selected_for_revisit": 7,
+    "works_selected_for_revisit": 8,
     "actor_work_count": 39,
     "new_album_candidates": 38,
     "verified_public_image_urls": 437,
@@ -1021,7 +1021,12 @@
         }
       ],
       "images": [],
-      "pages": [],
+      "pages": [
+        {
+          "page": 1,
+          "candidate_images": 10
+        }
+      ],
       "status": "public_previews_verified",
       "visited_pages": []
     },
