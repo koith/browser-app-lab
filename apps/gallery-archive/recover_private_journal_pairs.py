@@ -48,9 +48,15 @@ def producer_proof(request):
     if not any(s.get('name')=='Preserve unverified source correspondence privately before any original transfer'
             and s.get('conclusion')=='success' for s in job.get('steps',[])):
         raise ValueError('Source journal was not independently preserved by the producer')
-    response=requests.get(f"https://api.github.com/repos/{REPO}/actions/jobs/{job['id']}/logs",
-        headers={'Authorization':'Bearer '+os.environ['GH_TOKEN']},timeout=(12,45))
-    response.raise_for_status()
+    try:
+        response=requests.get(f"https://api.github.com/repos/{REPO}/actions/jobs/{job['id']}/logs",
+            headers={'Authorization':'Bearer '+os.environ['GH_TOKEN']},timeout=(12,45))
+        response.raise_for_status()
+    except requests.RequestException as error:
+        # Redirected log URLs may contain temporary credentials. Never include
+        # a requests exception/URL in a public Actions traceback.
+        raise ValueError('Exact producer log retrieval failed HTTP '+str(
+            getattr(error.response,'status_code',None))) from None
     if len(response.content)>5_000_000:raise ValueError('Producer logs exceed bound')
     pattern=r'PRIVATE_UNVERIFIED_SOURCE_JOURNAL_PRESERVED '+request['model']+r' (\d+) METADATA_SHA ([a-f0-9]{64})'
     evidence=re.findall(pattern,response.text)

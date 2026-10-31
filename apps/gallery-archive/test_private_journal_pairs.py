@@ -98,5 +98,21 @@ class JournalPairsTests(unittest.TestCase):
         with patch.dict('os.environ',{'GH_TOKEN':'unit-test-only'}),patch('recover_private_journal_pairs.github',side_effect=[run,jobs]),patch('recover_private_journal_pairs.requests.get',return_value=response):
             with self.assertRaisesRegex(ValueError,'producer log digest'):producer_proof(request)
 
+    def test_a_changed_inventory_fails_before_reading_any_private_journal_or_image(self):
+        import sys
+        from recover_private_journal_pairs import main
+        owner=copy.deepcopy(self.owner);owner['storage']='owner-private-terabox-sha-verified-bytes'
+        owner['albums'][0]['images']=[{**self.photo,'number':10,'sha256':'a'*64}]
+        owner_path=self.stage/'owner.json';owner_path.write_text(json.dumps(owner))
+        request={'schema_version':1,'scope':'existing_private_photos_only','models':{'mimmi':{
+            'model':'mimmi','producer_run':123,'producer_attempt':1,'producer_head':'a'*40,
+            'expected_collected_photos':2,'journal_sha256':'b'*64,'baseline_owner_fingerprint':'0'*64}}}
+        request_path=self.stage/'request.json';request_path.write_text(json.dumps(request))
+        args=['recovery','--request',str(request_path),'--model','mimmi','--owner',str(owner_path),
+              '--stage',str(self.stage/'guarded'),'--github-output',str(self.stage/'out')]
+        with patch.object(sys,'argv',args),patch('recover_private_journal_pairs.producer_proof'),patch('recover_private_journal_pairs.storage') as external:
+            with self.assertRaisesRegex(ValueError,'QA-completed publication baseline'):main()
+            external.assert_not_called()
+
 
 if __name__=='__main__':unittest.main(verbosity=2)
