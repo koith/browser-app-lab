@@ -12,6 +12,8 @@ on:
       - apps/gallery-archive/transfer_individual_files.py
       - apps/gallery-archive/test_transfer_individual_files.py
       - apps/gallery-archive/verify_terabox.py
+      - apps/gallery-archive/recover_verified_work_batches.py
+      - apps/gallery-archive/test_verified_work_recovery.py
       - apps/gallery-archive/test_remote_readback_deadline.py
       - apps/gallery-archive/collect_teapawt_public.py
       - apps/gallery-archive/test_teapawt_public.py
@@ -38,6 +40,8 @@ on:
       - apps/gallery-archive/transfer_individual_files.py
       - apps/gallery-archive/test_transfer_individual_files.py
       - apps/gallery-archive/verify_terabox.py
+      - apps/gallery-archive/recover_verified_work_batches.py
+      - apps/gallery-archive/test_verified_work_recovery.py
       - apps/gallery-archive/test_remote_readback_deadline.py
       - apps/gallery-archive/collect_teapawt_public.py
       - apps/gallery-archive/test_teapawt_public.py
@@ -84,6 +88,7 @@ jobs:
           python apps/mimmi-gallery/cloud/test_sealed_session.py
           python apps/mimmi-gallery/cloud/test_cookie_format.py
           python apps/gallery-archive/test_remote_readback_deadline.py
+          python apps/gallery-archive/test_verified_work_recovery.py
           python apps/gallery-archive/test_reverse_image_sweep.py
           python apps/mimmi-gallery/cloud/test_media_cache.py
           python apps/mimmi-gallery/cloud/test_gateway.py
@@ -207,6 +212,9 @@ jobs:
           python apps/gallery-archive/safe_rclone.py copy "$RUNNER_TEMP/stage/originals" "$ARCHIVE_REMOTE/originals" --ignore-existing --transfers 2 --checkers 2 --timeout 60s --retries 1
           python apps/gallery-archive/safe_rclone.py copy "$RUNNER_TEMP/stage/previews" "$ARCHIVE_REMOTE/previews" --ignore-existing --transfers 2 --checkers 2 --timeout 60s --retries 1
           python apps/gallery-archive/verify_terabox.py --stage "$RUNNER_TEMP/stage" --remote "$ARCHIVE_REMOTE" --workers 2 --only-staged
+      - name: Retain whole independently verified works after a different work fails
+        if: failure() && steps.delta.outputs.changed == 'true' && steps.incoming.outputs.found != 'true'
+        run: python apps/gallery-archive/recover_verified_work_batches.py --stage "$RUNNER_TEMP/stage" --owner "$RUNNER_TEMP/owner-before.json" --remote "$ARCHIVE_REMOTE"
       - name: Persist the exact remotely verified batch without resetting deployed gallery QA
         if: steps.delta.outputs.changed == 'true' && env.ARCHIVE_PUBLICATION_MODE == 'deferred' && steps.incoming.outputs.found != 'true'
         run: python apps/gallery-archive/defer_verified_batch.py persist --stage "$RUNNER_TEMP/stage" --remote "$ARCHIVE_REMOTE"
