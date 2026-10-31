@@ -15,6 +15,55 @@ def photo(seed):
 
 
 class DirectTests(unittest.TestCase):
+    def test_v2ph_public_first_page_and_login_stop(self):
+        page='https://www.v2ph.com/album/a887785a.html'
+        first='https://cdn.v2ph.com/photos/A12345678.jpg'
+        second='https://cdn.v2ph.com/photos/B12345678.jpg'
+        raw=f'''<h1>[DJAWA] Mimmi - cosplay</h1>
+          <div class="photo-gallery">
+            <a href="{first}"><img src="{first}"></a>
+            <img data-src="{second}">
+          </div>
+          <aside class="related"><img src="https://cdn.v2ph.com/photos/UNRELATED99.jpg"></aside>
+          <a href="?page=2">Next</a><a href="/album/other.html">Other gallery</a>'''
+        urls,pages,status=page_images(raw,page,'mimmi')
+        self.assertEqual(status,'scoped_public_page')
+        self.assertEqual(urls,[first,second])
+        self.assertEqual(pages,[page+'?page=2'])
+        self.assertEqual(page_images(raw,page,'yui')[2],'missing_model_context')
+        login='<h1>Mimmi - Page 2</h1><p>You need to log in to view more content of this album.</p>'
+        self.assertEqual(page_images(login,page+'?page=2','mimmi'),
+                         ([],[],'login_required_for_additional_pages'))
+
+    def test_targeted_v2ph_photo_is_stored_as_individual_file(self):
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);base=root/'apps/mimmi-gallery';base.mkdir(parents=True)
+            (base/'stored-albums.json').write_text('{"model":"mimmi","albums":[]}')
+            source='https://www.v2ph.com/album/a887785a.html'
+            url='https://cdn.v2ph.com/photos/A12345678.jpg'
+            (base/'v2ph-actor-previews.json').write_text(json.dumps({'albums':[
+                {'id':'focus-work','title':'Mimmi focus','source':source},
+                {'id':'untouched-work','title':'Other Mimmi','source':source}]}))
+            existing=photo(1);fresh=photo(30)
+            owner={'schema_version':1,'model':'mimmi','albums':[
+                {'id':'another-existing','images':[{'number':1,'sha256':hashlib.sha256(existing).hexdigest()}]}]}
+            class Client:
+                calls=[]
+                def get(self,u):
+                    self.calls.append(u)
+                    if u==source:
+                        return type('R',(),{'content':f'<h1>Mimmi</h1><a href="{url}"><img src="{url}"></a>'.encode()})()
+                    if u==url:return type('R',(),{'content':fresh})()
+                    raise AssertionError('Out-of-scope URL')
+            client=Client()
+            result=collect(root,'mimmi',owner,root/'stage',3,2,client,album_ids=['focus-work'])
+            self.assertEqual(result['new_local_individual_files'],1)
+            self.assertEqual(client.calls,[source,url])
+            album=json.loads((root/'stage/metadata/catalog.json').read_text())['albums'][0]
+            self.assertEqual(album['id'],'focus-work')
+            self.assertEqual(album['images'][0]['sha256'],hashlib.sha256(fresh).hexdigest())
+            self.assertFalse(list((root/'stage').rglob('*.zip')))
+
     def test_provider_verification_hold_does_not_redownload_or_reupload_the_work(self):
         with tempfile.TemporaryDirectory() as name:
             root=Path(name);base=root/'apps/mimmi-gallery';base.mkdir(parents=True)
