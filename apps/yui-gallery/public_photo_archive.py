@@ -19,6 +19,30 @@ from PIL import Image
 USER_AGENT = 'YuiPublicArchive/0.13 (+https://github.com/koith/browser-app-lab)'
 
 
+class PublicOriginPaused(PermissionError):
+    def __init__(self,status,reason,retry_after=None,*,policy=False):
+        self.status_code,self.reason,self.retry_after=status,reason,retry_after
+        self.policy=policy
+        super().__init__(reason)
+
+
+def public_failure(error):
+    """Classify failures without response bodies, cookies or signed URLs."""
+    response=getattr(error,'response',None)
+    status=response.status_code if response is not None else getattr(error,'status_code',None)
+    cause=({401:'authentication_required',403:'access_denied',404:'public_resource_missing',
+            410:'public_resource_gone',429:'rate_limited',451:'legal_restriction'}).get(status)
+    if status is not None and status>=500:cause='origin_temporarily_unavailable'
+    if not cause:
+        cause=('transport_timeout' if isinstance(error,requests.Timeout) else
+               'robots_or_origin_paused' if isinstance(error,PermissionError) else
+               'transport_error' if isinstance(error,requests.RequestException) else 'validation_error')
+    result={'exception':type(error).__name__,'http_status':status,'cause':cause}
+    result['response_scope']='robots_policy' if getattr(error,'policy',False) else 'resource' if status is not None else 'unknown'
+    if getattr(error,'retry_after',None) is not None:result['retry_after_seconds']=error.retry_after
+    return result
+
+
 def utcnow():
     return datetime.now(timezone.utc).isoformat()
 
@@ -46,7 +70,10 @@ class PublicSession:
         self.delay = delay
         self.allow_local_test = allow_local_test
         self.robots = {}
+        self.robot_status = {}
         self.blocked_origins = set()
+        self.block_status = {}
+        self.cooldowns = {}
         self.last_request = {}
         self.lock = threading.Lock()
 
@@ -101,14 +128,19 @@ class PublicSession:
                 # An inaccessible/redirected policy is unverified, never implicit permission.
                 parser.disallow_all = True
             self.robots[origin] = parser
+            self.robot_status[origin]=response.status_code
         return self.robots[origin].can_fetch(USER_AGENT, url)
 
     def get(self, url):
         for _ in range(6):
-            if self._origin(url) in self.blocked_origins:
-                raise PermissionError('Stopped this origin after an access/rate-limit response')
+            origin=self._origin(url)
+            if origin in self.blocked_origins:
+                raise PublicOriginPaused(self.block_status.get(origin),'Stopped this origin after an access/rate-limit response')
+            until,status=self.cooldowns.get(origin,(0,None))
+            if time.monotonic()<until:
+                raise PublicOriginPaused(status,'Origin is cooling down after an unavailable response',int(until-time.monotonic())+1)
             if not self.allowed(url):
-                raise PermissionError('robots policy blocks or cannot verify ' + url)
+                raise PublicOriginPaused(self.robot_status.get(origin),'robots policy blocks or cannot verify the public origin',policy=True)
             response = self._raw(url)
             if response.status_code in (301, 302, 303, 307, 308):
                 url = urljoin(url, response.headers.get('Location', ''))
@@ -116,6 +148,13 @@ class PublicSession:
             # Resource access, rate and legal denials stop the origin.
             if response.status_code in (401, 403, 429, 451):
                 self.blocked_origins.add(self._origin(url))
+                self.block_status[self._origin(url)]=response.status_code
+            elif response.status_code in (500,502,503,504,521,522,523,524):
+                # A broken origin should not receive the same request once for
+                # every candidate work. No automatic retries or host changes.
+                delay=response.headers.get('Retry-After','')
+                seconds=min(900,max(120,int(delay))) if delay.isascii() and delay.isdigit() and len(delay)<=6 else 300
+                self.cooldowns[self._origin(url)]=(time.monotonic()+seconds,response.status_code)
             response.raise_for_status()
             return response
         raise ValueError('Too many public redirects')
