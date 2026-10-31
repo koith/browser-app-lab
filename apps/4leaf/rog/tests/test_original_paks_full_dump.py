@@ -55,12 +55,11 @@ class FullFrameSourceAudit(unittest.TestCase):
     def test_incomplete_member_does_not_invent_missing_palette(self):
         with tempfile.TemporaryDirectory() as d:
             root = pathlib.Path(d)
-            (root / "OBS2.pak").write_bytes(pack([("1042.obs", obs(3, broken=True))]))
+            (root / "OBS2.pak").write_bytes(pack([("1042.obs", obs(3)[:-768])]))
             summary = auditor.collect(root, root / "result", ["0042"])
             self.assertEqual(summary["strictDecodedFrames"], 0)
             self.assertEqual(summary["unparsedDeclaredFrames"], 3)
-            self.assertIn("palette", json.dumps(summary).lower() if False else
-                          (json.loads((root / "result/full-frame-report.json").read_text())
+            self.assertIn("palette", (json.loads((root / "result/full-frame-report.json").read_text())
                            ["packs"][0]["members"][0]["parseError"]).lower())
 
     def test_rle_failure_recorded_as_failure_not_acceptance(self):
