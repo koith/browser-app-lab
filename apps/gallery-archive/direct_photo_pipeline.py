@@ -150,13 +150,24 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None):
                     historic[(a['id'],p['url'])]={**p,'number':p.get('number',n)}
                     full=public_full_variant(p['url'])
                     if full!=p['url']:historic[(a['id'],full)]={**p,'number':p.get('number',n),'public_full_variant':True}
-            source=a.get('source')
+            # The original Yui ledger records observed pages as source_pages,
+            # while newer reviewed entries have a primary source. Do not silently
+            # omit that entire ledger, invent a URL, or widen its image scope.
+            legacy=not a.get('source')
+            pages=[u for u in a.get('source_pages',[]) if safe_page(u)]
+            source=a.get('source') or next(iter(pages),None)
             if not source or not safe_page(source):continue
             if not re.fullmatch(r'[a-z0-9][a-z0-9-]{1,100}',str(a.get('id',''))):continue
+            # A shared event/report can mention Yui while showing other models.
+            # Legacy records admit only already curated image URLs in an existing
+            # owner work. New URLs need a separate, explicitly reviewed source.
+            if legacy and a['id'] not in old_albums:continue
             if KNOWN_ALTERNATE_EDITIONS.get(a['id']) in old_albums:continue
+            a={**a,'source':source,'source_pages':pages,'curated_images_only':legacy}
             if a['id'] in books:
                 prior=books[a['id']]
                 prior['source_pages']=list(dict.fromkeys(prior.get('source_pages',[])+[source]+a.get('source_pages',[])))
+                prior['curated_images_only']=prior['curated_images_only'] and legacy
                 if a.get('visual_reference_required'):prior.update(a)
             else:books[a['id']]=dict(a)
     client=client or PublicSession(delay=.8)
@@ -190,7 +201,7 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None):
                 if k not in ('observed_filename_numbers','saved_cut_correspondence')},ensure_ascii=False),flush=True)
             continue
         images=list(resumed.get(aid,[]));occupied.update(p['number'] for p in images);next_number=max(occupied,default=0)+1
-        queue=list(dict.fromkeys([book['source']]+[u for u in book.get('source_pages',[]) if safe_page(u)]));visited=set();errors=[];candidate_count=0
+        queue=list(dict.fromkeys([book['source']]+[u for u in book.get('source_pages',[]) if safe_page(u)]));visited=set();errors=[];candidate_count=0;unreviewed_count=0
         while queue and len(visited)<max_pages and new_total<max_new:
             page=queue.pop(0)
             if page in visited:continue
@@ -205,8 +216,11 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None):
             for url in urls:
                 if new_total>=max_new:break
                 candidate_count+=1
+                old=historic.get((aid,url))
+                if book.get('curated_images_only') and not old:
+                    unreviewed_count+=1;continue
                 if url in seen_urls:continue
-                seen_urls.add(url);old=historic.get((aid,url));variant=bool(old and old.get('public_full_variant'))
+                seen_urls.add(url);variant=bool(old and old.get('public_full_variant'))
                 if old and old.get('sha256') in seen_sha and not variant:continue
                 # Published source sequence positions are used only within the
                 # exact same existing work. New unknown URLs append once by SHA.
@@ -247,6 +261,7 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None):
             'expected':None,'complete':False,'images':images})
         results.append({'id':aid,'engine':'requests_scoped_public_pagination','pages':len(visited),
                         'published_image_candidates':candidate_count,'individual_files_saved':len(images),
+                        'unreviewed_legacy_image_candidates_skipped':unreviewed_count,
                         'failures':errors,'cloud_readback_pass':0,'gallery_open_pass':0})
         print('DIRECT_INDIVIDUAL_PHOTO_COLLECTION',model,aid,'saved',len(images),'failures',len(errors),flush=True)
     catalog={'schema_version':1,'model':model,'storage':'owner-private-terabox-sha-verified-bytes','albums':new_albums}
