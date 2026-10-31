@@ -15,6 +15,17 @@ def photo(seed):
 
 
 class DirectTests(unittest.TestCase):
+    def test_declared_individual_public_edition_excludes_other_models_and_hosts(self):
+        page='https://www.shypetal.com/albums/mimmi-public-work/'
+        images=[f'https://image.shypetal.com/image/Mimmi_Work/ShyPetal.com@-{n:03d}.webp' for n in (1,2,3)]
+        raw=f'''<h1>Mimmi public work</h1><div data-images='{json.dumps(images)}'></div>
+                <aside><img src="https://image.shypetal.com/image/Other/ShyPetal.com@-001.webp"></aside>'''
+        self.assertEqual(page_images(raw,page,'mimmi'),(images,[],'scoped_public_page'))
+        self.assertEqual(page_images(raw,page,'yui')[0],[])
+        self.assertEqual(page_images(raw.replace('image.shypetal.com/image/Mimmi_Work','evil.invalid/image/Mimmi_Work'),page,'mimmi')[0],[])
+        mixed=raw.replace('Mimmi_Work/ShyPetal.com@-003','Other_Work/ShyPetal.com@-003')
+        self.assertEqual(page_images(mixed,page,'mimmi')[2],'mixed_public_editions_rejected')
+
     def test_creator_feed_keeps_observed_original_and_rejects_quote_media(self):
         page='https://teapawt.net/super_yuisan'
         own='https://pbs.twimg.com/media/OwnPhoto1234.jpg?name=orig'

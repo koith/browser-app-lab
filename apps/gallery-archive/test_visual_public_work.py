@@ -9,6 +9,40 @@ from visual_public_work import collect_work,visual_error,owner_reference
 
 
 class VisualWorkTests(unittest.TestCase):
+    def test_count_alone_never_claims_complete_edition(self):
+        book={'id':'saved-work','source':'https://www.shypetal.com/albums/saved-work/',
+              'public_web_edition_photos':3}
+        previous=[{'sha256':str(i)*64} for i in (1,2,3)]
+        work,info=collect_work(book,previous,None,Path('/unused'),5,set(),'mimmi')
+        self.assertIsNone(work);self.assertTrue(info['deferred_for_source_coverage_review'])
+        self.assertNotIn('already_saved_web_edition',info)
+
+    def test_independent_declared_public_files_keep_numbers_without_bundle_download(self):
+        import json
+        with tempfile.TemporaryDirectory() as temporary:
+            data={n:photo(seed) for n,seed in enumerate((0,40,80,140,210),1)}
+            previous=[{'number':n,'sha256':hashlib.sha256(data[n]).hexdigest(),
+                       'width':800,'height':1200} for n in (1,2,3)]
+            page='https://www.shypetal.com/albums/mimmi-fixture/'
+            urls=[f'https://image.shypetal.com/image/Mimmi_Fixture/ShyPetal.com@-{n:03d}.webp' for n in range(1,6)]
+            class Client:
+                def get(self,url):
+                    if url==page:
+                        raw=f'''<h1>Mimmi fixture</h1><div data-images='{json.dumps(urls)}'></div>
+                                <a href="/never-fetch.zip">Download ZIP</a>'''.encode()
+                    elif url in urls:raw=data[urls.index(url)+1]
+                    else:raise AssertionError('Only declared individual public images may be fetched')
+                    return type('Response',(),{'content':raw})()
+            book={'id':'mimmi-fixture','title':'Mimmi fixture','source':page,'public_web_edition_photos':5}
+            client=Client();out=Path(temporary)
+            work,info=collect_work(book,previous,client,out,5,{p['sha256'] for p in previous},'mimmi',
+                                   lambda url:data[int(url.split('/')[-2])])
+            self.assertEqual(info['saved_reference_anchors'],3)
+            self.assertEqual(info['source_files_decoded'],5)
+            self.assertEqual(info['unresolved_source_numbers'],[])
+            self.assertEqual([p['source_photo_number'] for p in work['images']],[4,5])
+            self.assertEqual(list(out.rglob('*.zip')),[])
+
     def test_owner_api_reader_is_fixed_no_auth_and_no_redirects(self):
         with patch('visual_public_work.requests.get') as get:
             response=MagicMock();response.status_code=200;response.iter_content.return_value=[b'owner bytes']

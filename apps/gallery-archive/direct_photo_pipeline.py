@@ -26,7 +26,7 @@ MODEL_PATTERNS={'mimmi':re.compile(r'(?<![a-z])mimmi(?![a-z])|밈미|밈�
                 'yui':re.compile(r'(?<![a-z])yui(?![a-z])|유이|심혜성|super_yuisan',re.I)}
 PAGE_HOSTS={'djawaphoto.com','www.djawaphoto.com','cosplay.pixibb.com','sexy.pixibb.com','www.v2ph.com','v2ph.com',
             'blog.hacosta.co.jp','www.gamersky.com','www.inven.co.kr','photo.inven.co.kr',
-            'www.ajunews.com','sportsseoul.com','www.sportsseoul.com','crazygiant.imweb.me','teapawt.net'}
+            'www.ajunews.com','sportsseoul.com','www.sportsseoul.com','crazygiant.imweb.me','teapawt.net','www.shypetal.com'}
 CREATOR_ACCOUNTS={'yui':'super_yuisan','mimmi':'Mimmi_official'}
 FORMATS={'JPEG':'jpg','PNG':'png','WEBP':'webp'}
 KNOWN_ALTERNATE_EDITIONS={
@@ -68,6 +68,26 @@ def page_images(raw,url,model):
         urls,next_page,cards=public_images_from_author(raw,{'account':account},url)
         return urls,[next_page] if next_page else [],'scoped_public_page' if cards else 'missing_model_context'
     soup=BeautifulSoup(raw,'html.parser')
+    if urlsplit(url).hostname=='www.shypetal.com':
+        # The ordinary page declares its individual lightbox image list. Read
+        # that public JSON only; never click its compressed-download controls.
+        title=' '.join(t.get_text(' ',strip=True) for t in soup.select('h1,title'))
+        if not MODEL_PATTERNS[model].search(title):return [],[],'missing_model_context'
+        declaration=soup.select_one('[data-images]')
+        try:images=json.loads(declaration['data-images']) if declaration else []
+        except (TypeError,ValueError):return [],[],'invalid_public_image_declaration'
+        if not isinstance(images,list) or not 1<=len(images)<=500:return [],[],'invalid_public_image_declaration'
+        accepted=[];folders=set()
+        for image in images:
+            if not isinstance(image,str):return [],[],'invalid_public_image_declaration'
+            p=urlsplit(image)
+            if (p.scheme!='https' or p.hostname!='image.shypetal.com' or p.username or p.password
+                    or p.port not in (None,443) or p.query or p.fragment
+                    or not re.fullmatch(r'/image/[^/]+/ShyPetal\.com@-\d{1,4}\.webp',p.path)):
+                return [],[],'invalid_public_image_declaration'
+            folders.add(p.path.rsplit('/',1)[0]);accepted.append(image)
+        if len(folders)!=1:return [],[],'mixed_public_editions_rejected'
+        return list(dict.fromkeys(accepted)),[],'scoped_public_page'
     article=(soup.select_one('#powerbbsContent') or soup.select_one('.portfolio-content') or soup.select_one('article')
              or soup.select_one('.entry-content') or soup.select_one('main'))
     if article is None:return [],[], 'unscoped_page_rejected'

@@ -3,6 +3,16 @@
   "model": "mimmi",
   "albums": [
     {
+      "id": "djawa-my-summer-vacation-vol-5",
+      "title": "My Summer Vacation Vol. 5",
+      "source": "https://www.shypetal.com/albums/mimmimimmi-djawa-photo-my-summer-vacation-vol/",
+      "priority": 4,
+      "public_web_edition_photos": 45,
+      "advertised_photos": 45,
+      "visual_reference_required": true,
+      "identity_evidence": "Observed Mimmi model-index link, album title and public individual-image JSON declaration. Local full-edition decoding found 9 clear whole-frame matches to SHA-verified saved originals and 36 new files. Keep all larger saved originals; require independent private-storage readback before publication."
+    },
+    {
       "id": "v2ph-actor-z7exoo5z",
       "title": "Mimmi — White",
       "source": "https://sexy.pixibb.com/mimmi-white-136-photos-sexy-girl/",
