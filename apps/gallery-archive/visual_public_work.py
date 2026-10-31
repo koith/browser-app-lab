@@ -78,7 +78,7 @@ def collect_work(book,previous,client,out,budget,seen_sha,model,reference_reader
             reference_hashes.add(photo['sha256'])
             digest=photo.get('preview_sha256') or photo['sha256'];path=reference_dir/(digest+'.bin')
             raw=None
-            candidates=[path]
+            candidates=list(dict.fromkeys([path,reference_dir/(photo['sha256']+'.bin')]))
             if reference_paths and photo['sha256'] in reference_paths:
                 candidates.append(Path(reference_paths[photo['sha256']]))
             for candidate in candidates:
@@ -95,7 +95,11 @@ def collect_work(book,previous,client,out,budget,seen_sha,model,reference_reader
                 raw=(reference_reader or owner_reference)(f'https://mimmi-private-gallery-free.onrender.com{route}/media/{aid}/{photo["number"]}/preview')
             if hashlib.sha256(raw).hexdigest() not in (digest,photo['sha256']):
                 raise ValueError('Saved reference did not match declared SHA')
-            atomic_bytes(path,raw);refs.append((photo,raw))
+            # The gateway may return the verified original when a preview is
+            # unavailable. Cache those bytes under their ACTUAL digest: two
+            # different originals may share stale legacy preview metadata.
+            actual_digest=hashlib.sha256(raw).hexdigest()
+            atomic_bytes(reference_dir/(actual_digest+'.bin'),raw);refs.append((photo,raw))
     except Exception as e:
         info['failures'].append('reference_'+type(e).__name__)
         info['failed_reference_number']=active_reference

@@ -43,6 +43,19 @@ class VisualWorkTests(unittest.TestCase):
             self.assertEqual([p['source_photo_number'] for p in work['images']],[4,5])
             self.assertEqual(list(out.rglob('*.zip')),[])
 
+            # Legacy preview metadata can be shared by distinct originals.
+            # An original fallback must not collide in that preview's cache.
+            shared=[{**p,'preview_sha256':'9'*64} for p in previous]
+            recovered=out/'shared-preview-cache';cache=recovered/'references'/'mimmi-fixture'
+            cache.mkdir(parents=True);stale=cache/('9'*64+'.bin');stale.write_bytes(data[1])
+            complete,info=collect_work(book,shared,client,recovered,5,
+                {p['sha256'] for p in shared},'mimmi',lambda url:data[int(url.split('/')[-2])])
+            self.assertEqual(info['saved_reference_anchors'],3)
+            self.assertEqual(len(complete['images']),2)
+            self.assertEqual(stale.read_bytes(),data[1])
+            for p in shared:
+                self.assertEqual((cache/(p['sha256']+'.bin')).read_bytes(),data[p['number']])
+
     def test_owner_api_reader_is_fixed_no_auth_and_no_redirects(self):
         with patch('visual_public_work.requests.get') as get:
             response=MagicMock();response.status_code=200;response.iter_content.return_value=[b'owner bytes']
