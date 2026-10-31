@@ -9,8 +9,33 @@ from io import BytesIO
 import json
 from pathlib import Path
 import re
+from urllib.parse import urlsplit
 
 from PIL import Image,ImageChops,ImageStat
+import requests
+
+
+def owner_reference(url):
+    """Read the user's existing archive API, separately from public crawling.
+
+    The owner's no-index robots policy is not an API authorization check.
+    No credential is added and no HTTP denial/redirect is bypassed. Callers
+    construct this fixed first-party URL; downloaded bytes must match the
+    owner's original/preview SHA before they can become reference evidence.
+    """
+    target=urlsplit(url)
+    if (target.scheme!='https' or target.netloc!='mimmi-private-gallery-free.onrender.com'
+            or target.query or target.fragment
+            or not re.fullmatch(r'/api/(?:yui/)?media/[a-z0-9][a-z0-9-]{1,100}/[1-9][0-9]*/preview',target.path)):
+        raise ValueError('Only the existing fixed owner-archive reference API is allowed')
+    with requests.get(url,timeout=(12,45),allow_redirects=False,stream=True) as response:
+        response.raise_for_status()
+        if response.status_code!=200:raise ValueError('Owner reference redirected or unavailable')
+        data=bytearray()
+        for chunk in response.iter_content(65536):
+            data.extend(chunk)
+            if len(data)>35_000_000:raise ValueError('Owner reference exceeds bounded image size')
+        return bytes(data)
 
 
 def visual_error(left,right):
@@ -23,7 +48,7 @@ def visual_error(left,right):
         return max(ImageStat.Stat(ImageChops.difference(a,b)).mean)
 
 
-def collect_work(book,previous,client,out,budget,seen_sha,model):
+def collect_work(book,previous,client,out,budget,seen_sha,model,reference_reader=None,reference_paths=None):
     from direct_photo_pipeline import page_images,inspect,atomic_bytes,safe_page
     aid=book['id'];claimed=book['public_web_edition_photos']
     if type(claimed) is not int or not 3<=claimed<=500:raise ValueError('Bounded verified public work size required')
@@ -32,9 +57,10 @@ def collect_work(book,previous,client,out,budget,seen_sha,model):
           'saved_reference_anchors':0,'failures':[],'engine':'public_pagination_with_verified_visual_references'}
     if len({p['sha256'] for p in previous})>=claimed:
         info['already_saved_web_edition']=True;return None,info
-    if not previous or len(previous)>20:
+    previous_unique=len({p['sha256'] for p in previous})
+    if not previous or previous_unique>20:
         info['failures'].append('Focused recovery requires an existing low-count saved work');return None,info
-    if claimed-len(previous)>budget:
+    if claimed-previous_unique>budget:
         info['failures'].append('Defer whole work to next bounded batch, do not publish a truncated edition');return None,info
     refs=[];reference_hashes=set();reference_dir=out/'references'/aid;reference_dir.mkdir(parents=True,exist_ok=True)
     try:
@@ -45,9 +71,13 @@ def collect_work(book,previous,client,out,budget,seen_sha,model):
             reference_hashes.add(photo['sha256'])
             digest=photo.get('preview_sha256') or photo['sha256'];path=reference_dir/(digest+'.bin')
             if path.exists():raw=path.read_bytes()
+            elif reference_paths and photo['sha256'] in reference_paths:
+                # The user already has this exact original committed locally.
+                # Verify its SHA below, without depending on a sleeping gateway.
+                raw=Path(reference_paths[photo['sha256']]).read_bytes()
             else:
                 route='/api/yui' if model=='yui' else '/api'
-                raw=client.get(f'https://mimmi-private-gallery-free.onrender.com{route}/media/{aid}/{photo["number"]}/preview').content
+                raw=(reference_reader or owner_reference)(f'https://mimmi-private-gallery-free.onrender.com{route}/media/{aid}/{photo["number"]}/preview')
             if hashlib.sha256(raw).hexdigest() not in (digest,photo['sha256']):
                 raise ValueError('Saved reference did not match declared SHA')
             atomic_bytes(path,raw);refs.append((photo,raw))
@@ -108,6 +138,9 @@ def collect_work(book,previous,client,out,budget,seen_sha,model):
     info['unresolved_source_numbers']=sorted(set(info['unobserved_source_numbers'])|set(uncertain)|failed)
     if len(anchors)<3:
         info['failures'].append('Work withheld: fewer than 3 clear saved-cut anchors')
+        return None,info
+    if len(pending)>budget:
+        info['failures'].append('Verified missing files exceed remaining bounded batch; defer whole work')
         return None,info
     images=[];next_number=max(p['number'] for p in previous)+1
     for source_number,url,raw,meta,preview,replacement in pending:

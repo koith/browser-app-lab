@@ -133,6 +133,12 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None):
     inputs=(['official-previews.json','v2ph-actor-previews.json','pixibb-public-previews.json'] if model=='mimmi' else ['additional-source-albums.json'])+['public-work-pages.json']
     old_albums={a['id']:a for a in owner['albums']};saved_sha={p['sha256'] for a in owner['albums'] for p in a['images']}
     public=json.loads((base/'stored-albums.json').read_text())
+    reference_paths={}
+    for album in public['albums']:
+        for photo in album['images']:
+            path=(base/str(photo.get('url',''))).resolve()
+            if path.is_relative_to(base.resolve()) and str(photo.get('url','')).startswith('stored-albums/') and path.is_file():
+                reference_paths[photo['sha256']]=path
     saved_sha.update(p['sha256'] for a in public['albums'] for p in a['images'])
     books={};historic={}
     for filename in inputs:
@@ -176,7 +182,7 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None):
         if book.get('visual_reference_required'):
             if resumed.get(aid):raise ValueError('Visual-edition resume requires finalized work transaction')
             from visual_public_work import collect_work
-            work,info=collect_work(book,previous,client,out,max_new-new_total,seen_sha,model)
+            work,info=collect_work(book,previous,client,out,max_new-new_total,seen_sha,model,reference_paths=reference_paths)
             if work:
                 new_albums.append(work);new_total+=len(work['images']);downloaded_now+=len(work['images'])
             results.append(info)

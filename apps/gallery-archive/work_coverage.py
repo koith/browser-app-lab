@@ -121,6 +121,8 @@ def build(root,model,owner=None,gallery=None):
         selected=publisher_totals or web_totals
         expected=next(iter(selected)) if len(selected)==1 else None
         numbering_verified=(len(owned)==len(positions)==len({p['sha256'] for p in owned}) and
+            not any(p.get('numbering_provenance')=='archive_append_order_not_publisher_number'
+                    or p.get('source_numbering')=='public_web_filename_not_publisher_original' for p in owned) and
             not publisher_totals and len(web_totals)==1 and
             any(len(anchor_sources.get((e['document'],e['source']),set()))>=3
                 for e in evidence if e['kind']=='web_edition_claim'))
