@@ -7,16 +7,33 @@ import argparse
 import json
 from pathlib import Path
 import re
+import selectors
 import subprocess
+import time
 from merge_incremental import checked_row
 
 
-def storage(args):
-    result=subprocess.run(['rclone',*args,'--timeout=60s','--retries=1'],
-        stdout=subprocess.PIPE,stderr=subprocess.DEVNULL,timeout=75)
-    if result.returncode in (3,4):return None
-    if result.returncode:raise ValueError('Owner pending-object read failed')
-    return result.stdout
+def storage(args,*,limit=2_000_001,command=None):
+    process=subprocess.Popen(command or ['rclone',*args,'--timeout=60s','--retries=1'],
+        stdout=subprocess.PIPE,stderr=subprocess.DEVNULL)
+    result=bytearray();deadline=time.monotonic()+75
+    try:
+        with selectors.DefaultSelector() as selector:
+            selector.register(process.stdout,selectors.EVENT_READ)
+            while True:
+                remaining=deadline-time.monotonic()
+                if remaining<=0 or not selector.select(remaining):raise TimeoutError('Pending-object read deadline')
+                chunk=process.stdout.read1(min(65536,limit+1-len(result)))
+                if not chunk:break
+                result.extend(chunk)
+                if len(result)>limit:raise ValueError('Pending metadata exceeds bounded read size')
+        rc=process.wait(timeout=max(.01,deadline-time.monotonic()))
+        if rc in (3,4):return None
+        if rc:raise ValueError('Owner pending-object read failed')
+        return bytes(result)
+    finally:
+        if process.poll() is None:process.kill();process.wait()
+        process.stdout.close()
 
 
 def load(owner,documents,model):
@@ -29,8 +46,14 @@ def load(owner,documents,model):
     for name,data in documents:
         match=re.fullmatch(r'([a-f0-9]{64})\.json',name)
         if not match:raise ValueError('Invalid individual queue filename')
-        if (data.get('model')!=model or data.get('schema_version')!=1
-                or data.get('source_batch_sha256')!=match[1]):raise ValueError('Wrong queued owner archive')
+        if (not isinstance(data,dict) or data.get('model')!=model or data.get('schema_version')!=1
+                or data.get('source_batch_sha256')!=match[1]):
+            value=data if isinstance(data,dict) else {}
+            diagnostic={'queue_prefix':name[:12],'payload_type':type(data).__name__,
+                'model_matches':value.get('model')==model,'schema_matches':value.get('schema_version')==1,
+                'batch_matches_filename':value.get('source_batch_sha256')==match[1],
+                'provider_errno':value.get('errno') if type(value.get('errno')) is int else None}
+            raise ValueError('Invalid pending metadata envelope '+json.dumps(diagnostic,sort_keys=True))
         for album in data['albums']:
             aid=album['id']
             if aid not in old:raise ValueError('Queued work must already belong to this owner')
@@ -67,7 +90,12 @@ if __name__=='__main__':
     for entry in entries:
         name=entry.get('Path','')
         if not re.fullmatch(r'[a-f0-9]{64}\.json',name):continue
-        data=storage(['cat',prefix+'/'+name,'--head','2000001'])
+        # These small, individually bounded JSON documents require a complete
+        # response. Range/head reads can yield a provider error document that
+        # must never be mistaken for another model's verified pending queue.
+        if type(entry.get('Size')) is not int or not 0<entry['Size']<=2_000_000:
+            raise ValueError('Pending metadata entry has an invalid declared size')
+        data=storage(['cat',prefix+'/'+name])
         if data is None or len(data)>2_000_000:raise ValueError('Pending queue unavailable or too large')
         documents.append((name,json.loads(data)))
     delta,batches=load(json.loads(args.owner.read_text()),documents,args.model)
