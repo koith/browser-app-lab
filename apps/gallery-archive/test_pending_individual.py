@@ -1,6 +1,7 @@
 import copy
+import sys
 import unittest
-from load_pending_individual import load
+from load_pending_individual import load,storage
 
 
 class PendingTests(unittest.TestCase):
@@ -29,6 +30,19 @@ class PendingTests(unittest.TestCase):
                 with self.assertRaises(ValueError):load(self.owner,[('d'*64+'.json',q)],'mimmi')
         with self.assertRaises(ValueError):load(self.owner,[('../invalid',self.queue)],'mimmi')
         with self.assertRaises(ValueError):load(self.owner,[('d'*64+'.json',self.queue)],'yui')
+
+    def test_provider_error_is_not_admitted_and_diagnostic_does_not_expose_payload(self):
+        for bad in [{'errno':-9,'errmsg':'private-cookie-must-not-be-logged'},
+                    {**self.queue,'source_batch_sha256':'e'*64},[]]:
+            with self.assertRaises(ValueError) as error:load(self.owner,[('d'*64+'.json',bad)],'mimmi')
+            self.assertIn('queue_prefix',str(error.exception))
+            self.assertNotIn('private-cookie',str(error.exception))
+            self.assertNotIn('originals/',str(error.exception))
+
+    def test_full_metadata_stream_is_bounded_and_preserves_exact_response(self):
+        command=[sys.executable,'-c',"import sys;sys.stdout.buffer.write(b'full-individual-json')"]
+        self.assertEqual(storage([],limit=64,command=command),b'full-individual-json')
+        with self.assertRaises(ValueError):storage([],limit=4,command=command)
 
 
 if __name__=='__main__':unittest.main(verbosity=2)
