@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Stage visually reviewed source OBS front-cycle frames on an ISOLATED branch.
 
-Original PAK pixels come only from SHA-verified CI provenance. The 19 bodies'
+Original PAK pixels come only from SHA-verified CI provenance. The 18 bodies'
 25/30 front frames were separately reviewed; intermediates 26..29 were visually
 checked in 2026-11-01 contact sheets. These are authentic 2002 pixels, but
 the actual EXE action table / native FPS remain UNKNOWN.
@@ -15,7 +15,7 @@ import shutil
 from pathlib import Path
 
 REVIEWED_IDS = (
-    "0040", "0042", "0043", "0044", "0046", "0048",
+    "0040", "0043", "0044", "0046", "0048",
     "0049", "0051", "0052", "0053", "0054", "0055",
     "0056", "0058", "0059", "0060", "0061", "0062", "0064"
 )
