@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - apps/gallery-archive/direct_photo_pipeline.py
+      - apps/gallery-archive/verify_terabox.py
+      - apps/gallery-archive/test_remote_readback_deadline.py
       - apps/gallery-archive/collect_teapawt_public.py
       - apps/gallery-archive/test_teapawt_public.py
       - apps/gallery-archive/visual_public_work.py
@@ -21,6 +23,8 @@ on:
   pull_request:
     paths:
       - apps/gallery-archive/direct_photo_pipeline.py
+      - apps/gallery-archive/verify_terabox.py
+      - apps/gallery-archive/test_remote_readback_deadline.py
       - apps/gallery-archive/collect_teapawt_public.py
       - apps/gallery-archive/test_teapawt_public.py
       - apps/gallery-archive/visual_public_work.py
