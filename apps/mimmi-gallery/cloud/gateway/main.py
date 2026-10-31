@@ -15,11 +15,12 @@ import json
 import re
 import os
 import secrets
+import tempfile
 import time
 from collections import OrderedDict
 from io import BytesIO
 import jwt
-from pathlib import PurePosixPath
+from pathlib import Path, PurePosixPath
 from typing import AsyncGenerator
 
 from fastapi import Depends, FastAPI, Header, HTTPException, Query, Request
@@ -116,6 +117,46 @@ async def authenticated(request: Request, authorization: str | None = Header(def
         raise HTTPException(status_code=401, detail="Authorization required", headers={"WWW-Authenticate": "Bearer"})
 
 
+
+async def read_owner_media_via_copyto(path: str, limit: int, client_env: dict,
+                                      remote: str | None = None) -> bytes:
+    """Read an existing own-account original by a proven alternative rclone method.
+
+    Exact SHA verification remains mandatory in verified_remote_media().
+    This doesn't alter source credentials, any remote object or access controls.
+    """
+    if not media_key_valid(path) or not 1 <= limit <= 140_000_001:
+        raise HTTPException(status_code=502,detail='Invalid owner media read request')
+    with tempfile.TemporaryDirectory(prefix='gallery-media-copyto-') as tmp:
+        destination=Path(tmp)/'owner-media'
+        proc=await asyncio.create_subprocess_exec(
+            'rclone','copyto',f"{remote or REMOTE}/{path}",str(destination),
+            '--timeout=50s','--retries=1',
+            stdout=asyncio.subprocess.DEVNULL,stderr=asyncio.subprocess.PIPE,
+            env=client_env)
+        try:
+            _,stderr=await asyncio.wait_for(proc.communicate(),timeout=110)
+        except asyncio.TimeoutError:
+            proc.kill()
+            await proc.wait()
+            raise HTTPException(status_code=504,detail='Owner media alternate read timed out')
+        if proc.returncode:
+            print('OWNER_MEDIA_COPYTO_READ_FAILED',
+                  safe_remote_diagnostic(stderr.decode('utf-8','replace')),flush=True)
+            raise HTTPException(status_code=502,detail='Cloud media unavailable')
+        if not destination.is_file() or not 0 < destination.stat().st_size <= limit:
+            raise HTTPException(status_code=502,detail='Owner media alternate read invalid size')
+        raw=await asyncio.to_thread(destination.read_bytes)
+        if len(raw)<=512:
+            try: response=json.loads(raw)
+            except (ValueError,TypeError):response={}
+            if isinstance(response,dict) and type(response.get('errno')) is int:
+                raise HTTPException(status_code=502,detail='Owner media still unavailable')
+        print('OWNER_MEDIA_COPYTO_FALLBACK_FULL_SHA_CHECK_REQUIRED',flush=True)
+        return raw
+
+
+
 async def rclone_bytes(path: str, limit: int, *, remote: str | None = None) -> bytes:
     """Drain the *entire* remote stream, with size/timeout bounds.
 
@@ -160,7 +201,14 @@ async def rclone_bytes(path: str, limit: int, *, remote: str | None = None) -> b
                 retryable=bool(re.search(r'i/o timeout|connection reset|unexpected EOF',error,re.I))
                 raise HTTPException(status_code=502, detail="Cloud media unavailable",
                     headers={'X-Archive-Read-Cause':'transport_interruption'} if retryable else None)
-            return bytes(content)
+            raw=bytes(content)
+            if path.startswith(('originals/','previews/')) and len(raw)<=512:
+                try: body=json.loads(raw)
+                except (ValueError,TypeError):body={}
+                if isinstance(body,dict) and body.get('errno')==400141:
+                    # Full SHA remains mandatory in verified_remote_media().
+                    return await read_owner_media_via_copyto(path,limit,client_env,remote)
+            return raw
 
         return await asyncio.wait_for(read_all(), timeout=115)
     except asyncio.TimeoutError:
