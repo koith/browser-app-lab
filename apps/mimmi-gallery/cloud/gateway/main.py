@@ -151,7 +151,9 @@ async def rclone_bytes(path: str, limit: int, *, remote: str | None = None) -> b
                 print("RCLONE_REMOTE_READ_FAILED", path, safe_remote_diagnostic(error), flush=True)
                 if 'Failed to login' in error:
                     raise HTTPException(status_code=503, detail="Storage session unavailable", headers={"Retry-After":"30"})
-                raise HTTPException(status_code=502, detail="Cloud media unavailable")
+                retryable=bool(re.search(r'i/o timeout|connection reset|unexpected EOF',error,re.I))
+                raise HTTPException(status_code=502, detail="Cloud media unavailable",
+                    headers={'X-Archive-Read-Cause':'transport_interruption'} if retryable else None)
             return bytes(content)
 
         return await asyncio.wait_for(read_all(), timeout=115)

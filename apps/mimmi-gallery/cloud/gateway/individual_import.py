@@ -102,7 +102,8 @@ class IndividualImport:
         if self.plan is None:
             self.plan=plan;self.objects=objects;self.root.mkdir(parents=True,exist_ok=True)
         return {'accepted':True,'photos':count,'objects':len(objects),'bytes':total,
-                'remote_verified_objects':len(self.verified),'catalog_published':False}
+                'remote_verified_objects':len(self.verified),'remote_verified_sha256':sorted(self.verified),
+                'catalog_published':False}
 
     async def file(self,request,digest):
         _,body_digest=self.authorize(request)
@@ -124,7 +125,15 @@ class IndividualImport:
                     try:
                         for target in spec['targets']:
                             await self.put(self.plan['model'],local,target,False)
-                            back=await self.read(self.plan['model'],target,spec['bytes']+1)
+                            # One fresh remote read after a classified network
+                            # interruption. Never retry a write, access denial,
+                            # or byte/hash mismatch as a successful photo.
+                            try:
+                                back=await self.read(self.plan['model'],target,spec['bytes']+1)
+                            except HTTPException as error:
+                                if error.status_code!=502 or (error.headers or {}).get('X-Archive-Read-Cause')!='transport_interruption':raise
+                                await asyncio.sleep(1)
+                                back=await self.read(self.plan['model'],target,spec['bytes']+1)
                             if len(back)!=spec['bytes'] or hashlib.sha256(back).hexdigest()!=digest:
                                 raise HTTPException(502,'Remote individual photo SHA mismatch')
                         self.verified.add(digest)
@@ -132,15 +141,17 @@ class IndividualImport:
         return {'remote_sha256_verified':True,'objects':len(spec['targets']),
                 'verified':len(self.verified),'total':len(self.objects),'catalog_published':False}
 
-    async def finish(self,request):
+    async def finish(self,request,album_id=None):
         pin,digest=self.authorize(request)
         await self.body(request,0,digest)
-        if not self.plan or len(self.verified)!=len(self.objects):
+        selected=[a for a in self.plan['albums'] if album_id is None or a['id']==album_id] if self.plan else []
+        required={p[field] for a in selected for p in a['images'] for field in ('sha256','preview_sha256')}
+        if not selected or not required.issubset(self.verified):
             raise HTTPException(409,'Some individual objects are not remotely verified')
         # Only an existing, concurrency-locked Actions import can merge/publish
         # the live catalogue. This endpoint writes a separate private queue.
         albums=[]
-        for album in self.plan['albums']:
+        for album in selected:
             images=[]
             for i,p in enumerate(album['images'],1):
                 row={k:p[k] for k in ('sha256','bytes','width','height','preview_sha256','preview_bytes',
@@ -151,17 +162,18 @@ class IndividualImport:
                 images.append(row)
             albums.append({'id':album['id'],'title':album.get('title',album['id']),'images':images,
                            'source_coverage':album.get('source_coverage',{})})
-        document={'schema_version':1,'model':self.plan['model'],'source_batch_sha256':pin,
-                  'remote_verified_objects':sum(len(x['targets']) for x in self.objects.values()),'albums':albums}
+        batch=pin if album_id is None else hashlib.sha256((pin+'\n'+album_id).encode()).hexdigest()
+        document={'schema_version':1,'model':self.plan['model'],'source_batch_sha256':batch,
+                  'parent_manifest_sha256':pin,'remote_verified_objects':sum(len(self.objects[h]['targets']) for h in required),'albums':albums}
         raw=(json.dumps(document,ensure_ascii=False,sort_keys=True,separators=(',',':'))+'\n').encode()
-        path=self.root/(pin+'.json');path.write_bytes(raw)
-        target='metadata/pending-individual/'+self.plan['model']+'/'+pin+'.json'
+        path=self.root/(batch+'.json');path.write_bytes(raw)
+        target='metadata/pending-individual/'+self.plan['model']+'/'+batch+'.json'
         try:
             await self.put(self.plan['model'],path,target,False)
             if await self.read(self.plan['model'],target,len(raw)+1)!=raw:
                 raise HTTPException(502,'Private transfer queue readback mismatch')
         finally:path.unlink(missing_ok=True)
-        return {'pending_batch':pin,'remote_verified_photos':sum(len(a['images']) for a in albums),
+        return {'pending_batch':batch,'remote_verified_photos':sum(len(a['images']) for a in albums),
                 'catalog_published':False,'gallery_qa_passed':False}
 
     async def connection_state(self,request):
@@ -181,6 +193,8 @@ def install(app,catalog,put,read,state_provider=None):
     async def file(digest:str,request:Request):return await transfer.file(request,digest)
     @app.post('/internal/individual-import/finish')
     async def finish(request:Request):return await transfer.finish(request)
+    @app.post('/internal/individual-import/finish/{album_id}')
+    async def finish_album(album_id:str,request:Request):return await transfer.finish(request,album_id)
     @app.post('/internal/individual-import/connection-state')
     async def connection_state(request:Request):return await transfer.connection_state(request)
     return transfer

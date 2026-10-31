@@ -120,22 +120,35 @@ def connection_state(args):
 def upload(args):
     root=args.plan;request,raw=gateway_client(root,args.origin)
     files=json.loads((root/'files.json').read_text())
-    request('POST','/internal/individual-import/manifest',raw)
+    state=request('POST','/internal/individual-import/manifest',raw)
+    completed=set(state.get('remote_verified_sha256',[]))
+    if not completed.issubset(files):raise ValueError('Server acknowledgement outside the exact manifest')
+    plan=json.loads(raw);queued=set()
+    def publish_finished_works():
+        for album in plan['albums']:
+            aid=album['id'];required={p[k] for p in album['images'] for k in ('sha256','preview_sha256')}
+            if aid not in queued and required.issubset(completed):
+                reply=request('POST','/internal/individual-import/finish/'+aid,b'')
+                with (root/'completed-work-queues.jsonl').open('a') as out:out.write(json.dumps({'album':aid,**reply})+'\n')
+                queued.add(aid)
+                print('WHOLE_WORK_REMOTE_VERIFIED_PENDING_PUBLICATION',aid,len(album['images']),flush=True)
+    publish_finished_works()
     def send(item):
         sha,path=item;body=Path(path).read_bytes()
         if hashlib.sha256(body).hexdigest()!=sha:raise ValueError('Private staged photo changed before transfer')
         reply=request('PUT','/internal/individual-import/file/'+sha,body)
         if not reply.get('remote_sha256_verified'):raise ValueError('No remote original readback acknowledgement')
         return sha,reply
-    count=0
+    count=len(completed)
     workers=ThreadPoolExecutor(max_workers=2)
-    futures=[workers.submit(send,item) for item in files.items()]
+    futures=[workers.submit(send,item) for item in files.items() if item[0] not in completed]
     try:
         with (root/'remote-object-receipts.jsonl').open('a') as receipts:
             for future in as_completed(futures):
-                sha,reply=future.result();count+=1
+                sha,reply=future.result();count+=1;completed.add(sha)
                 receipts.write(json.dumps({'sha256':sha,**reply})+'\n');receipts.flush()
                 if count%20==0 or count==len(files):print('ACTUAL_REMOTE_INDIVIDUAL_READBACK',count,'/',len(files),flush=True)
+                publish_finished_works()
     finally:
         # An access/transport failure stops queued writes. Do not repeat the
         # same failing storage operation for hundreds of remaining objects.
