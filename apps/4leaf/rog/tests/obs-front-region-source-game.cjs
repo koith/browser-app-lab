@@ -79,7 +79,8 @@ const {chromium,webkit}=require('playwright');
      image:image.getAttribute('src'),rig:pawn.dataset.actorRig};
    },id);
    assert.equal(row.idle,'25',id+' source-verified front idle');
-   assert.equal(row.walking,'25,30,25,30',id+' forward-facing source-only movement (not BACK 0..7)');
+   assert.equal(row.walking,id==='0042'?'25,30,25,30':'25,26,27,28,29,30',
+    id+' forward-facing original source movement without a BACK 0..7 spin');
    assert.equal(row.continuity,'true');
    assert.equal(row.attack,'25,18,25',id+' existing original event packet within front recovery');
    assert.equal(row.hurt,'25',id+' unrecovered native hit direction must stay front, not jump to rear');
