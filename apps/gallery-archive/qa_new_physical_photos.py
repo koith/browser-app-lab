@@ -156,23 +156,48 @@ async def run(args):
                     # gallery; preserve its verified path. WebKit needs the
                     # same-origin image tab for its native download attribute.
                     download_page=original_page if args.browser=='webkit' else page
+                    await download_page.bring_to_front()
+                    diagnostic={'album':aid,'number':number,'browser':args.browser,'responses':[]}
+                    def attachment_response(response,item=diagnostic):
+                        if 'download=true' in response.url:
+                            item['responses'].append({'status':response.status,
+                                'content_type':response.headers.get('content-type'),
+                                'attachment':response.headers.get('content-disposition','').lower().startswith('attachment;')})
+                    download_page.on('response',attachment_response)
+                    download_url=original+('&' if '?' in original else '?')+'download=true'
+                    received=asyncio.get_running_loop().create_future()
+                    def exact_download(download):
+                        # WebKit can attribute an image-tab download to its
+                        # opener. Require the actual event for this exact URL
+                        # from either of the two real pages, then check bytes.
+                        if download.url==download_url and not received.done():received.set_result(download)
+                    event_pages={page,original_page}
+                    for source_page in event_pages:source_page.on('download',exact_download)
                     await download_page.evaluate('''url=>{const a=document.createElement('a');
                             a.id='qa-original-download';a.textContent='검증용 원본 저장';
                             a.style='position:fixed;top:80px;left:12px;z-index:999999';
                             a.href=url+(url.includes('?')?'&':'?')+'download=true';a.download='photo';
                             document.body.append(a)}''',original)
-                    async with download_page.expect_download(timeout=105000) as pending:
+                    try:
                         await download_page.locator('#qa-original-download').click()
-                    download=await pending.value
-                    path=await download.path();raw=Path(path).read_bytes()
+                        download=await asyncio.wait_for(received,timeout=105)
+                        path=await download.path();raw=Path(path).read_bytes()
+                    except Exception:
+                        report['failed_download']=diagnostic
+                        raise
+                    finally:
+                        download_page.remove_listener('response',attachment_response)
+                        for source_page in event_pages:source_page.remove_listener('download',exact_download)
                     assert len(raw)==expected['bytes'],(aid,number,'download length mismatch')
                     assert hashlib.sha256(raw).hexdigest()==expected['sha256'],(aid,number,'download SHA mismatch')
-                    await download_page.locator('#qa-original-download').evaluate('a=>a.remove()')
-                    await original_page.close()
+                    if not download_page.is_closed():await download_page.locator('#qa-original-download').evaluate('a=>a.remove()')
+                    if not original_page.is_closed():await original_page.close()
+                    await page.bring_to_front()
                     report['photos'].append({'album':expected['physical_album'],'number':number,'dimensions':size,
                         'gallery_album':aid,'display_number':expected['display_number'],
                         'byte_identical_existing_display':expected['byte_identical_existing_display'],
                         'thumbnail_decoded':True,'lightbox_decoded':True,'original_tab_decoded':True,
+                        'download_event_page':'original_tab' if download.page==original_page else 'gallery',
                         'download_sha256_verified':True})
                     print('DEPLOYED_EXACT_ORIGINAL_PASS',args.model,args.browser,aid,number,flush=True)
                     if len(report['photos'])==1:await page.screenshot(path=str(args.out.with_suffix('.png')))
