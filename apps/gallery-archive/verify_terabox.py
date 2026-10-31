@@ -90,6 +90,9 @@ def verify(stage: Path, remote: str, workers: int, only_staged: bool = False):
     report={"model":manifest["model"],"media_checked":len(specs),
             "full_SHA256_verified":passed,"failed":len(errors),
             "photos":len(specs)//2,"errors":errors[:20]}
+    if not errors and passed==len(specs):
+        report['verified_specs_sha256']=hashlib.sha256(
+            json.dumps(sorted(specs),separators=(',',':')).encode()).hexdigest()
     (stage/"metadata/remote-verification.json").write_text(
         json.dumps(report,ensure_ascii=False,indent=2)+"\n")
     print("REMOTE_FULL_BYTE_SHA256_AUDIT",json.dumps(report,ensure_ascii=False),flush=True)
