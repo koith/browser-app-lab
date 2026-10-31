@@ -16,11 +16,18 @@ from cryptography.hazmat.primitives.serialization import Encoding,PublicFormat
 from fastapi import FastAPI,HTTPException
 from fastapi.testclient import TestClient
 from PIL import Image
-from gateway.individual_import import IndividualImport,install
+from gateway.individual_import import IndividualImport,install,metadata_visibility_write_failure
 from gateway.sealed_session import seal,restore
 
 
 class TransferTests(unittest.TestCase):
+    def test_metadata_visibility_classifier_never_accepts_access_or_generic_failures(self):
+        failure='ERROR : Failed to copy: object not found\nNOTICE: Failed to copyto: object not found\n'
+        self.assertTrue(metadata_visibility_write_failure(failure))
+        for detail in ['Failed to copyto: connection reset','Failed to copyto: HTTP 403',
+                       'Failed to login\n'+failure,'HTTP 451 denied\n'+failure,'status code 429\n'+failure]:
+            self.assertFalse(metadata_visibility_write_failure(detail))
+
     def setUp(self):
         self.directory=tempfile.TemporaryDirectory();self.remote={};self.writes=[];self.corrupt=False
         self.private=Ed25519PrivateKey.generate()
@@ -89,6 +96,37 @@ class TransferTests(unittest.TestCase):
         self.assertEqual(self.call('PUT','/internal/individual-import/file/'+h,self.raw).status_code,502)
         self.assertEqual(self.call('POST','/internal/individual-import/finish').status_code,409)
         self.assertFalse(any(p.startswith('metadata/') for p in self.writes))
+
+    def test_metadata_lag_requires_actual_readback_and_never_repeats_a_write(self):
+        self.call('POST','/internal/individual-import/manifest',self.manifest)
+        original_put=self.worker.put;reads=[]
+        async def delayed(model,path,key,overwrite):
+            await original_put(model,path,key,overwrite)
+            raise HTTPException(502,'Write metadata unavailable',headers={'X-Archive-Write-Cause':'metadata_visibility'})
+        async def read(model,key,limit):reads.append(key);return self.remote[key]
+        self.worker.put=delayed;self.worker.read=read
+        for data in [self.raw,self.thumb]:
+            h=hashlib.sha256(data).hexdigest()
+            reply=self.call('PUT','/internal/individual-import/file/'+h,data)
+            self.assertEqual(reply.status_code,200,reply.text)
+        self.assertEqual(self.call('POST','/internal/individual-import/finish').status_code,200)
+        self.assertEqual(len(self.writes),3);self.assertEqual(len(reads),3)
+        self.assertEqual(len(set(self.writes)),3)
+
+    def test_metadata_lag_with_wrong_bytes_or_denied_write_never_acknowledges(self):
+        self.call('POST','/internal/individual-import/manifest',self.manifest)
+        async def delayed(model,path,key,overwrite):
+            self.writes.append(key)
+            raise HTTPException(502,'Write metadata unavailable',headers={'X-Archive-Write-Cause':'metadata_visibility'})
+        async def wrong(model,key,limit):return b'incorrect remote photo'
+        self.worker.put=delayed;self.worker.read=wrong;h=hashlib.sha256(self.raw).hexdigest()
+        self.assertEqual(self.call('PUT','/internal/individual-import/file/'+h,self.raw).status_code,502)
+        self.assertNotIn(h,self.worker.verified);self.assertEqual(len(self.writes),1)
+        async def denied(model,path,key,overwrite):raise HTTPException(403,'Access denied')
+        async def unreadable(*args):raise AssertionError('A denied write must not trigger readback recovery')
+        self.worker.put=denied;self.worker.read=unreadable
+        self.assertEqual(self.call('PUT','/internal/individual-import/file/'+h,self.raw).status_code,403)
+        self.assertNotIn(h,self.worker.verified)
 
     def test_resume_acknowledges_only_fully_verified_objects_and_complete_work(self):
         path='/internal/individual-import/manifest'

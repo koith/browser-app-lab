@@ -576,10 +576,10 @@ install_portal(app, token_getter=lambda: TOKEN,
 # Optional short-lived transfer worker. No account secret is exported, and this
 # worker can only append permit-pinned individual bytes plus a private queue.
 try:
-    from gateway.individual_import import install as install_individual_import
+    from gateway.individual_import import install as install_individual_import,metadata_visibility_write_failure
     from gateway.terabox_web_state import OwnerUploadState, WebStateUnavailable
 except ModuleNotFoundError:
-    from individual_import import install as install_individual_import
+    from individual_import import install as install_individual_import,metadata_visibility_write_failure
     from terabox_web_state import OwnerUploadState, WebStateUnavailable
 
 owner_upload_state=OwnerUploadState()
@@ -610,7 +610,8 @@ async def _individual_put(model,local,key,overwrite):
         if process.returncode:
             detail=error.decode('utf-8','replace')
             print('INDIVIDUAL_REMOTE_WRITE_FAILED',safe_remote_diagnostic(detail),flush=True)
-            raise HTTPException(503 if 'Failed to login' in detail else 502,'Owner individual-file write failed')
+            raise HTTPException(503 if 'Failed to login' in detail else 502,'Owner individual-file write failed',
+                headers={'X-Archive-Write-Cause':'metadata_visibility'} if metadata_visibility_write_failure(detail) else None)
     except asyncio.TimeoutError:
         raise HTTPException(504,'Owner individual-file write timed out')
     finally:
