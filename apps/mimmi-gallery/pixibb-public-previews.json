@@ -2,14 +2,14 @@
   "schema_version": 1,
   "model": "mimmi",
   "source": "public visible multi-page PixiBB web previews only",
-  "generated_at": "2026-10-30T09:28:31.948791+00:00",
+  "generated_at": "2026-10-31T05:33:03.993984+00:00",
   "summary": {
     "works": 14,
     "images_verified": 1752,
-    "fresh_verified": 92,
+    "fresh_verified": 0,
     "private_cloud_archived": 0,
     "physical_files_archived": 0,
-    "cached_previous_sha_checks": 1660
+    "cached_previous_sha_checks": 0
   },
   "albums": [
     {
@@ -112,7 +112,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 8
+          "number": 8,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-163.jpg",
@@ -147,7 +148,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 11
+          "number": 11,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-159.jpg",
@@ -158,7 +160,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 12
+          "number": 12,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-158.jpg",
@@ -181,7 +184,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 14
+          "number": 14,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-156.jpg",
@@ -396,7 +400,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 32
+          "number": 32,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-139.jpg",
@@ -527,7 +532,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 43
+          "number": 43,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-127.jpg",
@@ -574,7 +580,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 47
+          "number": 47,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-121.jpg",
@@ -681,7 +688,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 56
+          "number": 56,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-115.jpg",
@@ -932,7 +940,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 77
+          "number": 77,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-093.jpg",
@@ -979,7 +988,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 81
+          "number": 81,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-089.jpg",
@@ -990,7 +1000,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 82
+          "number": 82,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-088.jpg",
@@ -1097,7 +1108,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 91
+          "number": 91,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-079.jpg",
@@ -1300,7 +1312,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 108
+          "number": 108,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-062.jpg",
@@ -1347,7 +1360,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 112
+          "number": 112,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-059.jpg",
@@ -1682,7 +1696,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 140
+          "number": 140,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-030.jpg",
@@ -1957,7 +1972,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 163
+          "number": 163,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-008.jpg",
@@ -1968,7 +1984,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 164
+          "number": 164,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Nikke-Alice-S.Ver-PixiBB.COM-007.jpg",
@@ -2047,134 +2064,12 @@
       "visited_pages": [
         {
           "page": 1,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-nikke-alice-s-ver-170-photos-cosplay/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 2,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-nikke-alice-s-ver-170-photos-cosplay/2/",
-          "candidates": 10,
-          "sha_verified": 3,
-          "cached_from_previous_sha_checks": 7
-        },
-        {
-          "page": 3,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-nikke-alice-s-ver-170-photos-cosplay/3/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 4,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-nikke-alice-s-ver-170-photos-cosplay/4/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 5,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-nikke-alice-s-ver-170-photos-cosplay/5/",
-          "candidates": 10,
-          "sha_verified": 2,
-          "cached_from_previous_sha_checks": 8
-        },
-        {
-          "page": 6,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-nikke-alice-s-ver-170-photos-cosplay/6/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 7,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-nikke-alice-s-ver-170-photos-cosplay/7/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 8,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-nikke-alice-s-ver-170-photos-cosplay/8/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 9,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-nikke-alice-s-ver-170-photos-cosplay/9/",
-          "candidates": 10,
-          "sha_verified": 2,
-          "cached_from_previous_sha_checks": 8
-        },
-        {
-          "page": 10,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-nikke-alice-s-ver-170-photos-cosplay/10/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 11,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-nikke-alice-s-ver-170-photos-cosplay/11/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 12,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-nikke-alice-s-ver-170-photos-cosplay/12/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 13,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-nikke-alice-s-ver-170-photos-cosplay/13/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 14,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-nikke-alice-s-ver-170-photos-cosplay/14/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 15,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-nikke-alice-s-ver-170-photos-cosplay/15/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 16,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-nikke-alice-s-ver-170-photos-cosplay/16/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 17,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-nikke-alice-s-ver-170-photos-cosplay/17/",
-          "candidates": 10,
-          "sha_verified": 2,
-          "cached_from_previous_sha_checks": 8
-        },
-        {
-          "page": 18,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-nikke-alice-s-ver-170-photos-cosplay/18/",
-          "candidates": 0,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 0
+          "status": "HTTPError"
         }
       ],
-      "fresh_http_verified": 17,
+      "fresh_http_verified": 0,
       "status": "verified_public_web_previews",
-      "reused_previous_sha_checks": 153
+      "reused_previous_sha_checks": 0
     },
     {
       "id": "pixibb-your-fishe-gawr-gura",
@@ -2540,7 +2435,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 30
+          "number": 30,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-093.jpg",
@@ -2707,7 +2603,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 44
+          "number": 44,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-079.jpg",
@@ -2862,7 +2759,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 57
+          "number": 57,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-067.jpg",
@@ -2969,7 +2867,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 66
+          "number": 66,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-057.jpg",
@@ -2980,7 +2879,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 67
+          "number": 67,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-056.jpg",
@@ -3051,7 +2951,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 73
+          "number": 73,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-050.jpg",
@@ -3158,7 +3059,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 82
+          "number": 82,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Your-Fishe-Gawr-Gura-PixiBB.COM-041.jpg",
@@ -3657,99 +3559,12 @@
       "visited_pages": [
         {
           "page": 1,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-your-fishe-gawr-gura-123-photos-cosplay/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 2,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-your-fishe-gawr-gura-123-photos-cosplay/2/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 3,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-your-fishe-gawr-gura-123-photos-cosplay/3/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 4,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-your-fishe-gawr-gura-123-photos-cosplay/4/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 5,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-your-fishe-gawr-gura-123-photos-cosplay/5/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 6,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-your-fishe-gawr-gura-123-photos-cosplay/6/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 7,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-your-fishe-gawr-gura-123-photos-cosplay/7/",
-          "candidates": 10,
-          "sha_verified": 2,
-          "cached_from_previous_sha_checks": 8
-        },
-        {
-          "page": 8,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-your-fishe-gawr-gura-123-photos-cosplay/8/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 9,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-your-fishe-gawr-gura-123-photos-cosplay/9/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 10,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-your-fishe-gawr-gura-123-photos-cosplay/10/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 11,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-your-fishe-gawr-gura-123-photos-cosplay/11/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 12,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-your-fishe-gawr-gura-123-photos-cosplay/12/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 13,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-your-fishe-gawr-gura-123-photos-cosplay/13/",
-          "candidates": 3,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 3
+          "status": "HTTPError"
         }
       ],
-      "fresh_http_verified": 7,
+      "fresh_http_verified": 0,
       "status": "verified_public_web_previews",
-      "reused_previous_sha_checks": 116
+      "reused_previous_sha_checks": 0
     },
     {
       "id": "pixibb-rudy-midnight",
@@ -3911,7 +3726,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 13
+          "number": 13,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-218.jpg",
@@ -4486,7 +4302,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 61
+          "number": 61,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-170.jpg",
@@ -4557,7 +4374,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 67
+          "number": 67,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-161.jpg",
@@ -4700,7 +4518,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 79
+          "number": 79,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-151.jpg",
@@ -4747,7 +4566,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 83
+          "number": 83,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-147.jpg",
@@ -4974,7 +4794,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 102
+          "number": 102,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-129.jpg",
@@ -5021,7 +4842,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 106
+          "number": 106,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-124.jpg",
@@ -5092,7 +4914,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 112
+          "number": 112,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-119.jpg",
@@ -5127,7 +4950,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 115
+          "number": 115,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-115.jpg",
@@ -5762,7 +5586,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 168
+          "number": 168,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-The-Wolf-of-Midnight-PixiBB.COM-062.jpg",
@@ -6513,176 +6338,12 @@
       "visited_pages": [
         {
           "page": 1,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-the-wolf-of-midnight-230-photos-cosplay/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 2,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-the-wolf-of-midnight-230-photos-cosplay/2/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 3,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-the-wolf-of-midnight-230-photos-cosplay/3/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 4,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-the-wolf-of-midnight-230-photos-cosplay/4/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 5,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-the-wolf-of-midnight-230-photos-cosplay/5/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 6,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-the-wolf-of-midnight-230-photos-cosplay/6/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 7,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-the-wolf-of-midnight-230-photos-cosplay/7/",
-          "candidates": 10,
-          "sha_verified": 2,
-          "cached_from_previous_sha_checks": 8
-        },
-        {
-          "page": 8,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-the-wolf-of-midnight-230-photos-cosplay/8/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 9,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-the-wolf-of-midnight-230-photos-cosplay/9/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 10,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-the-wolf-of-midnight-230-photos-cosplay/10/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 11,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-the-wolf-of-midnight-230-photos-cosplay/11/",
-          "candidates": 10,
-          "sha_verified": 2,
-          "cached_from_previous_sha_checks": 8
-        },
-        {
-          "page": 12,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-the-wolf-of-midnight-230-photos-cosplay/12/",
-          "candidates": 10,
-          "sha_verified": 2,
-          "cached_from_previous_sha_checks": 8
-        },
-        {
-          "page": 13,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-the-wolf-of-midnight-230-photos-cosplay/13/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 14,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-the-wolf-of-midnight-230-photos-cosplay/14/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 15,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-the-wolf-of-midnight-230-photos-cosplay/15/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 16,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-the-wolf-of-midnight-230-photos-cosplay/16/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 17,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-the-wolf-of-midnight-230-photos-cosplay/17/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 18,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-the-wolf-of-midnight-230-photos-cosplay/18/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 19,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-the-wolf-of-midnight-230-photos-cosplay/19/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 20,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-the-wolf-of-midnight-230-photos-cosplay/20/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 21,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-the-wolf-of-midnight-230-photos-cosplay/21/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 22,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-the-wolf-of-midnight-230-photos-cosplay/22/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 23,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-the-wolf-of-midnight-230-photos-cosplay/23/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 24,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-the-wolf-of-midnight-230-photos-cosplay/24/",
-          "candidates": 0,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 0
+          "status": "HTTPError"
         }
       ],
-      "fresh_http_verified": 10,
+      "fresh_http_verified": 0,
       "status": "verified_public_web_previews",
-      "reused_previous_sha_checks": 220
+      "reused_previous_sha_checks": 0
     },
     {
       "id": "pixibb-rudy-codename",
@@ -6844,7 +6505,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 13
+          "number": 13,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-188.jpg",
@@ -6987,7 +6649,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 25
+          "number": 25,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-174.jpg",
@@ -7130,7 +6793,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 37
+          "number": 37,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-164.jpg",
@@ -7153,7 +6817,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 39
+          "number": 39,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-162.jpg",
@@ -7296,7 +6961,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 51
+          "number": 51,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-150.jpg",
@@ -7727,7 +7393,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 87
+          "number": 87,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-114.jpg",
@@ -7930,7 +7597,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 104
+          "number": 104,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-097.jpg",
@@ -8037,7 +7705,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 113
+          "number": 113,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-089.jpg",
@@ -8144,7 +7813,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 122
+          "number": 122,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-079.jpg",
@@ -8215,7 +7885,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 128
+          "number": 128,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-074.jpg",
@@ -8322,7 +7993,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 137
+          "number": 137,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-065.jpg",
@@ -8333,7 +8005,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 138
+          "number": 138,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-064.jpg",
@@ -8740,7 +8413,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 172
+          "number": 172,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-030.jpg",
@@ -8763,7 +8437,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 174
+          "number": 174,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-027.jpg",
@@ -8942,7 +8617,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 189
+          "number": 189,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-013.jpg",
@@ -9001,7 +8677,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 194
+          "number": 194,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Rudy-Codename-Wolfgirl-PixiBB.COM-007.jpg",
@@ -9092,155 +8769,12 @@
       "visited_pages": [
         {
           "page": 1,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-codename-wolfgirl-201-photos-cosplay/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 2,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-codename-wolfgirl-201-photos-cosplay/2/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 3,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-codename-wolfgirl-201-photos-cosplay/3/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 4,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-codename-wolfgirl-201-photos-cosplay/4/",
-          "candidates": 10,
-          "sha_verified": 2,
-          "cached_from_previous_sha_checks": 8
-        },
-        {
-          "page": 5,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-codename-wolfgirl-201-photos-cosplay/5/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 6,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-codename-wolfgirl-201-photos-cosplay/6/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 7,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-codename-wolfgirl-201-photos-cosplay/7/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 8,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-codename-wolfgirl-201-photos-cosplay/8/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 9,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-codename-wolfgirl-201-photos-cosplay/9/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 10,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-codename-wolfgirl-201-photos-cosplay/10/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 11,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-codename-wolfgirl-201-photos-cosplay/11/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 12,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-codename-wolfgirl-201-photos-cosplay/12/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 13,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-codename-wolfgirl-201-photos-cosplay/13/",
-          "candidates": 10,
-          "sha_verified": 2,
-          "cached_from_previous_sha_checks": 8
-        },
-        {
-          "page": 14,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-codename-wolfgirl-201-photos-cosplay/14/",
-          "candidates": 10,
-          "sha_verified": 2,
-          "cached_from_previous_sha_checks": 8
-        },
-        {
-          "page": 15,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-codename-wolfgirl-201-photos-cosplay/15/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 16,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-codename-wolfgirl-201-photos-cosplay/16/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 17,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-codename-wolfgirl-201-photos-cosplay/17/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 18,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-codename-wolfgirl-201-photos-cosplay/18/",
-          "candidates": 10,
-          "sha_verified": 2,
-          "cached_from_previous_sha_checks": 8
-        },
-        {
-          "page": 19,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-codename-wolfgirl-201-photos-cosplay/19/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 20,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-codename-wolfgirl-201-photos-cosplay/20/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 21,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-rudy-codename-wolfgirl-201-photos-cosplay/21/",
-          "candidates": 1,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 1
+          "status": "HTTPError"
         }
       ],
-      "fresh_http_verified": 16,
+      "fresh_http_verified": 0,
       "status": "verified_public_web_previews",
-      "reused_previous_sha_checks": 185
+      "reused_previous_sha_checks": 0
     },
     {
       "id": "pixibb-auto-djawa-photo-mimmi-nikke-elegg-154-photos",
@@ -9714,7 +9248,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 39
+          "number": 39,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://imgx005.pixibb.com/2026/10/01/57819/DJAWA-Photo-Mimmi-meme-Nikke-Elegg-PixiBB.COM-040.jpg",
@@ -10793,7 +10328,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 129
+          "number": 129,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://imgx005.pixibb.com/2026/10/01/57819/DJAWA-Photo-Mimmi-meme-Nikke-Elegg-PixiBB.COM-130.jpg",
@@ -11008,7 +10544,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 147
+          "number": 147,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://imgx005.pixibb.com/2026/10/01/57819/DJAWA-Photo-Mimmi-meme-Nikke-Elegg-PixiBB.COM-148.jpg",
@@ -11099,124 +10636,12 @@
       "visited_pages": [
         {
           "page": 1,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-nikke-elegg-154-photos/",
-          "candidates": 11,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 2,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-nikke-elegg-154-photos/2/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 3,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-nikke-elegg-154-photos/3/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 4,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-nikke-elegg-154-photos/4/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 5,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-nikke-elegg-154-photos/5/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 6,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-nikke-elegg-154-photos/6/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 7,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-nikke-elegg-154-photos/7/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 8,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-nikke-elegg-154-photos/8/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 9,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-nikke-elegg-154-photos/9/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 10,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-nikke-elegg-154-photos/10/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 11,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-nikke-elegg-154-photos/11/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 12,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-nikke-elegg-154-photos/12/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 13,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-nikke-elegg-154-photos/13/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 14,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-nikke-elegg-154-photos/14/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 15,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-nikke-elegg-154-photos/15/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 16,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-nikke-elegg-154-photos/16/",
-          "candidates": 4,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 4
-        },
-        {
-          "page": 17,
-          "status": "nonpublic_or_redirect"
+          "status": "HTTPError"
         }
       ],
-      "fresh_http_verified": 3,
+      "fresh_http_verified": 0,
       "status": "verified_public_web_previews",
-      "reused_previous_sha_checks": 151
+      "reused_previous_sha_checks": 0
     },
     {
       "id": "pixibb-auto-coser-djawa-photo-christmas-special-2021-s-ver-100-photos",
@@ -11330,7 +10755,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 9
+          "number": 9,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-010.jpg",
@@ -11485,7 +10911,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 22
+          "number": 22,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-023.jpg",
@@ -11904,7 +11331,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 57
+          "number": 57,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-058.jpg",
@@ -11987,7 +11415,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 64
+          "number": 64,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-065.jpg",
@@ -12094,7 +11523,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 73
+          "number": 73,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-074.jpg",
@@ -12141,7 +11571,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 77
+          "number": 77,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://imgx003.pixibb.com/2026/06/11/33311/DJAWA-Photo-Mimmi-meme-Christmas-Special-2021-S.ver-PixiBB.COM-078.jpg",
@@ -12424,82 +11855,12 @@
       "visited_pages": [
         {
           "page": 1,
-          "url": "https://cosplay.pixibb.com/coser-djawa-photo-christmas-special-2021-s-ver-100-photos/",
-          "candidates": 11,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 2,
-          "url": "https://cosplay.pixibb.com/coser-djawa-photo-christmas-special-2021-s-ver-100-photos/2/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 3,
-          "url": "https://cosplay.pixibb.com/coser-djawa-photo-christmas-special-2021-s-ver-100-photos/3/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 4,
-          "url": "https://cosplay.pixibb.com/coser-djawa-photo-christmas-special-2021-s-ver-100-photos/4/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 5,
-          "url": "https://cosplay.pixibb.com/coser-djawa-photo-christmas-special-2021-s-ver-100-photos/5/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 6,
-          "url": "https://cosplay.pixibb.com/coser-djawa-photo-christmas-special-2021-s-ver-100-photos/6/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 7,
-          "url": "https://cosplay.pixibb.com/coser-djawa-photo-christmas-special-2021-s-ver-100-photos/7/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 8,
-          "url": "https://cosplay.pixibb.com/coser-djawa-photo-christmas-special-2021-s-ver-100-photos/8/",
-          "candidates": 10,
-          "sha_verified": 2,
-          "cached_from_previous_sha_checks": 8
-        },
-        {
-          "page": 9,
-          "url": "https://cosplay.pixibb.com/coser-djawa-photo-christmas-special-2021-s-ver-100-photos/9/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 10,
-          "url": "https://cosplay.pixibb.com/coser-djawa-photo-christmas-special-2021-s-ver-100-photos/10/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 11,
-          "status": "nonpublic_or_redirect"
+          "status": "HTTPError"
         }
       ],
-      "fresh_http_verified": 6,
+      "fresh_http_verified": 0,
       "status": "verified_public_web_previews",
-      "reused_previous_sha_checks": 94
+      "reused_previous_sha_checks": 0
     },
     {
       "id": "pixibb-auto-djawa-photo-mimmi-girls-frontline-hk416-damaged-ver-244-photos-cosplay",
@@ -12529,7 +11890,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 2
+          "number": 2,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-242.jpg",
@@ -12588,7 +11950,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 7
+          "number": 7,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-237.jpg",
@@ -12647,7 +12010,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 12
+          "number": 12,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-230.jpg",
@@ -12838,7 +12202,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 28
+          "number": 28,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-216.jpg",
@@ -12849,7 +12214,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 29
+          "number": 29,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-213.jpg",
@@ -12944,7 +12310,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 37
+          "number": 37,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-205.jpg",
@@ -12979,7 +12346,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 40
+          "number": 40,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-204.jpg",
@@ -13530,7 +12898,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 86
+          "number": 86,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-158.jpg",
@@ -14417,7 +13786,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 160
+          "number": 160,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-085.jpg",
@@ -14944,7 +14314,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 204
+          "number": 204,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-041.jpg",
@@ -15075,7 +14446,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 215
+          "number": 215,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-029.jpg",
@@ -15086,7 +14458,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 216
+          "number": 216,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-028.jpg",
@@ -15109,7 +14482,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 218
+          "number": 218,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-026.jpg",
@@ -15216,7 +14590,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 227
+          "number": 227,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Girls-Frontline-HK416-Damaged-ver.-PixiBB.COM-017.jpg",
@@ -15427,187 +14802,12 @@
       "visited_pages": [
         {
           "page": 1,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-girls-frontline-hk416-damaged-ver-244-photos-cosplay/",
-          "candidates": 10,
-          "sha_verified": 2,
-          "cached_from_previous_sha_checks": 8
-        },
-        {
-          "page": 2,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-girls-frontline-hk416-damaged-ver-244-photos-cosplay/2/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 3,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-girls-frontline-hk416-damaged-ver-244-photos-cosplay/3/",
-          "candidates": 10,
-          "sha_verified": 2,
-          "cached_from_previous_sha_checks": 8
-        },
-        {
-          "page": 4,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-girls-frontline-hk416-damaged-ver-244-photos-cosplay/4/",
-          "candidates": 10,
-          "sha_verified": 2,
-          "cached_from_previous_sha_checks": 8
-        },
-        {
-          "page": 5,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-girls-frontline-hk416-damaged-ver-244-photos-cosplay/5/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 6,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-girls-frontline-hk416-damaged-ver-244-photos-cosplay/6/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 7,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-girls-frontline-hk416-damaged-ver-244-photos-cosplay/7/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 8,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-girls-frontline-hk416-damaged-ver-244-photos-cosplay/8/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 9,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-girls-frontline-hk416-damaged-ver-244-photos-cosplay/9/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 10,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-girls-frontline-hk416-damaged-ver-244-photos-cosplay/10/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 11,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-girls-frontline-hk416-damaged-ver-244-photos-cosplay/11/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 12,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-girls-frontline-hk416-damaged-ver-244-photos-cosplay/12/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 13,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-girls-frontline-hk416-damaged-ver-244-photos-cosplay/13/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 14,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-girls-frontline-hk416-damaged-ver-244-photos-cosplay/14/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 15,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-girls-frontline-hk416-damaged-ver-244-photos-cosplay/15/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 16,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-girls-frontline-hk416-damaged-ver-244-photos-cosplay/16/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 17,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-girls-frontline-hk416-damaged-ver-244-photos-cosplay/17/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 18,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-girls-frontline-hk416-damaged-ver-244-photos-cosplay/18/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 19,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-girls-frontline-hk416-damaged-ver-244-photos-cosplay/19/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 20,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-girls-frontline-hk416-damaged-ver-244-photos-cosplay/20/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 21,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-girls-frontline-hk416-damaged-ver-244-photos-cosplay/21/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 22,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-girls-frontline-hk416-damaged-ver-244-photos-cosplay/22/",
-          "candidates": 10,
-          "sha_verified": 3,
-          "cached_from_previous_sha_checks": 7
-        },
-        {
-          "page": 23,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-girls-frontline-hk416-damaged-ver-244-photos-cosplay/23/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 24,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-girls-frontline-hk416-damaged-ver-244-photos-cosplay/24/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 25,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-girls-frontline-hk416-damaged-ver-244-photos-cosplay/25/",
-          "candidates": 4,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 4
-        },
-        {
-          "page": 26,
-          "status": "nonpublic_or_redirect"
+          "status": "HTTPError"
         }
       ],
-      "fresh_http_verified": 14,
+      "fresh_http_verified": 0,
       "status": "verified_public_web_previews",
-      "reused_previous_sha_checks": 230
+      "reused_previous_sha_checks": 0
     },
     {
       "id": "pixibb-auto-djawa-photo-mimmi-azur-lane-ijn-atago-amp-takao-61-photos-cosplay",
@@ -15889,7 +15089,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 23
+          "number": 23,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Azur-Lane-IJN-Atago-and-Takao-PixiBB.COM-036.jpg",
@@ -15900,7 +15101,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 24
+          "number": 24,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Azur-Lane-IJN-Atago-and-Takao-PixiBB.COM-038.jpg",
@@ -16351,61 +15553,12 @@
       "visited_pages": [
         {
           "page": 1,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-azur-lane-ijn-atago-amp-takao-61-photos-cosplay/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 2,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-azur-lane-ijn-atago-amp-takao-61-photos-cosplay/2/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 3,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-azur-lane-ijn-atago-amp-takao-61-photos-cosplay/3/",
-          "candidates": 10,
-          "sha_verified": 2,
-          "cached_from_previous_sha_checks": 8
-        },
-        {
-          "page": 4,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-azur-lane-ijn-atago-amp-takao-61-photos-cosplay/4/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 5,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-azur-lane-ijn-atago-amp-takao-61-photos-cosplay/5/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 6,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-azur-lane-ijn-atago-amp-takao-61-photos-cosplay/6/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 7,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-azur-lane-ijn-atago-amp-takao-61-photos-cosplay/7/",
-          "candidates": 1,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 1
-        },
-        {
-          "page": 8,
-          "status": "nonpublic_or_redirect"
+          "status": "HTTPError"
         }
       ],
-      "fresh_http_verified": 2,
+      "fresh_http_verified": 0,
       "status": "verified_public_web_previews",
-      "reused_previous_sha_checks": 59
+      "reused_previous_sha_checks": 0
     },
     {
       "id": "pixibb-auto-djawa-photo-mimmi-witchs-witchcraft-151-photos-cosplay",
@@ -16495,7 +15648,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 7
+          "number": 7,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Witchs-Witchcraft-PixiBB.COM-145.jpg",
@@ -16578,7 +15732,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 14
+          "number": 14,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Witchs-Witchcraft-PixiBB.COM-138.jpg",
@@ -16997,7 +16152,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 49
+          "number": 49,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Witchs-Witchcraft-PixiBB.COM-103.jpg",
@@ -17536,7 +16692,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 94
+          "number": 94,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Witchs-Witchcraft-PixiBB.COM-057.jpg",
@@ -17619,7 +16776,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 101
+          "number": 101,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Witchs-Witchcraft-PixiBB.COM-051.jpg",
@@ -18226,124 +17384,12 @@
       "visited_pages": [
         {
           "page": 1,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-witchs-witchcraft-151-photos-cosplay/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 2,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-witchs-witchcraft-151-photos-cosplay/2/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 3,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-witchs-witchcraft-151-photos-cosplay/3/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 4,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-witchs-witchcraft-151-photos-cosplay/4/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 5,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-witchs-witchcraft-151-photos-cosplay/5/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 6,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-witchs-witchcraft-151-photos-cosplay/6/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 7,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-witchs-witchcraft-151-photos-cosplay/7/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 8,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-witchs-witchcraft-151-photos-cosplay/8/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 9,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-witchs-witchcraft-151-photos-cosplay/9/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 10,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-witchs-witchcraft-151-photos-cosplay/10/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 11,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-witchs-witchcraft-151-photos-cosplay/11/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 12,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-witchs-witchcraft-151-photos-cosplay/12/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 13,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-witchs-witchcraft-151-photos-cosplay/13/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 14,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-witchs-witchcraft-151-photos-cosplay/14/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 15,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-witchs-witchcraft-151-photos-cosplay/15/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 16,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-witchs-witchcraft-151-photos-cosplay/16/",
-          "candidates": 1,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 1
-        },
-        {
-          "page": 17,
-          "status": "nonpublic_or_redirect"
+          "status": "HTTPError"
         }
       ],
-      "fresh_http_verified": 5,
+      "fresh_http_verified": 0,
       "status": "verified_public_web_previews",
-      "reused_previous_sha_checks": 146
+      "reused_previous_sha_checks": 0
     },
     {
       "id": "pixibb-auto-djawa-photo-mimmi-cyberpunk-girl-41-photos-cosplay",
@@ -18373,7 +17419,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 2
+          "number": 2,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Cyberpunk-Girl-Mimmi-PixiBB.COM-039.jpg",
@@ -18504,7 +17551,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 13
+          "number": 13,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Cyberpunk-Girl-Mimmi-PixiBB.COM-029.jpg",
@@ -18683,7 +17731,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 28
+          "number": 28,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Cyberpunk-Girl-Mimmi-PixiBB.COM-014.jpg",
@@ -18814,7 +17863,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 39
+          "number": 39,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Cyberpunk-Girl-Mimmi-PixiBB.COM-002.jpg",
@@ -18845,47 +17895,12 @@
       "visited_pages": [
         {
           "page": 1,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-cyberpunk-girl-41-photos-cosplay/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 2,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-cyberpunk-girl-41-photos-cosplay/2/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 3,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-cyberpunk-girl-41-photos-cosplay/3/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 4,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-cyberpunk-girl-41-photos-cosplay/4/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 5,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-cyberpunk-girl-41-photos-cosplay/5/",
-          "candidates": 1,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 1
-        },
-        {
-          "page": 6,
-          "status": "nonpublic_or_redirect"
+          "status": "HTTPError"
         }
       ],
-      "fresh_http_verified": 4,
+      "fresh_http_verified": 0,
       "status": "verified_public_web_previews",
-      "reused_previous_sha_checks": 37
+      "reused_previous_sha_checks": 0
     },
     {
       "id": "pixibb-auto-djawa-photo-mimmi-kitsune-miko-a-ver-65-photos-cosplay",
@@ -19131,7 +18146,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 20
+          "number": 20,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Kitsune-Miko-A-ver-PixiBB.COM-046.jpg",
@@ -19538,7 +18554,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 54
+          "number": 54,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Kitsune-Miko-A-ver-PixiBB.COM-012.jpg",
@@ -19677,61 +18694,12 @@
       "visited_pages": [
         {
           "page": 1,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-kitsune-miko-a-ver-65-photos-cosplay/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 2,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-kitsune-miko-a-ver-65-photos-cosplay/2/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 3,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-kitsune-miko-a-ver-65-photos-cosplay/3/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 4,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-kitsune-miko-a-ver-65-photos-cosplay/4/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 5,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-kitsune-miko-a-ver-65-photos-cosplay/5/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 6,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-kitsune-miko-a-ver-65-photos-cosplay/6/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 7,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-kitsune-miko-a-ver-65-photos-cosplay/7/",
-          "candidates": 5,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 5
-        },
-        {
-          "page": 8,
-          "status": "nonpublic_or_redirect"
+          "status": "HTTPError"
         }
       ],
-      "fresh_http_verified": 2,
+      "fresh_http_verified": 0,
       "status": "verified_public_web_previews",
-      "reused_previous_sha_checks": 63
+      "reused_previous_sha_checks": 0
     },
     {
       "id": "pixibb-auto-djawa-photo-mimmi-christmas-special-2022-super-sonico-91-photos-cosplay",
@@ -19857,7 +18825,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 10
+          "number": 10,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Christmas-Special-2022-Super-Sonico-PixiBB.COM-082.jpg",
@@ -19976,7 +18945,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 20
+          "number": 20,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Christmas-Special-2022-Super-Sonico-PixiBB.COM-071.jpg",
@@ -20023,7 +18993,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 24
+          "number": 24,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Christmas-Special-2022-Super-Sonico-PixiBB.COM-067.jpg",
@@ -20834,82 +19805,12 @@
       "visited_pages": [
         {
           "page": 1,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-christmas-special-2022-super-sonico-91-photos-cosplay/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 2,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-christmas-special-2022-super-sonico-91-photos-cosplay/2/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 3,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-christmas-special-2022-super-sonico-91-photos-cosplay/3/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 4,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-christmas-special-2022-super-sonico-91-photos-cosplay/4/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 5,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-christmas-special-2022-super-sonico-91-photos-cosplay/5/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 6,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-christmas-special-2022-super-sonico-91-photos-cosplay/6/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 7,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-christmas-special-2022-super-sonico-91-photos-cosplay/7/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 8,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-christmas-special-2022-super-sonico-91-photos-cosplay/8/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 9,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-christmas-special-2022-super-sonico-91-photos-cosplay/9/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 10,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-christmas-special-2022-super-sonico-91-photos-cosplay/10/",
-          "candidates": 1,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 1
-        },
-        {
-          "page": 11,
-          "status": "nonpublic_or_redirect"
+          "status": "HTTPError"
         }
       ],
-      "fresh_http_verified": 3,
+      "fresh_http_verified": 0,
       "status": "verified_public_web_previews",
-      "reused_previous_sha_checks": 88
+      "reused_previous_sha_checks": 0
     },
     {
       "id": "pixibb-auto-djawa-photo-mimmi-azur-lane-tashkent-59-photos-cosplay",
@@ -21047,7 +19948,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 11
+          "number": 11,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Azur-Lane-Tashkent-PixiBB.COM-048.jpg",
@@ -21610,7 +20512,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 58
+          "number": 58,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/DJAWA-Photo-Mimmi-Azur-Lane-Tashkent-PixiBB.COM-001.jpg",
@@ -21629,54 +20532,12 @@
       "visited_pages": [
         {
           "page": 1,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-azur-lane-tashkent-59-photos-cosplay/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 2,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-azur-lane-tashkent-59-photos-cosplay/2/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 3,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-azur-lane-tashkent-59-photos-cosplay/3/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 4,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-azur-lane-tashkent-59-photos-cosplay/4/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 5,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-azur-lane-tashkent-59-photos-cosplay/5/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 6,
-          "url": "https://cosplay.pixibb.com/djawa-photo-mimmi-azur-lane-tashkent-59-photos-cosplay/6/",
-          "candidates": 9,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 8
-        },
-        {
-          "page": 7,
-          "status": "nonpublic_or_redirect"
+          "status": "HTTPError"
         }
       ],
-      "fresh_http_verified": 2,
+      "fresh_http_verified": 0,
       "status": "verified_public_web_previews",
-      "reused_previous_sha_checks": 57
+      "reused_previous_sha_checks": 0
     },
     {
       "id": "pixibb-auto-creamsoda-mimmi-vol-2-neko-mimmi-62-photos-cosplay",
@@ -22246,7 +21107,8 @@
           "quality": "public_watermarked_web_preview",
           "publisher_original_verified": false,
           "private_cloud_file": false,
-          "number": 47
+          "number": 47,
+          "carried_from_previous_verification": true
         },
         {
           "url": "https://images08.pixibb.com/2025/05/08/CreamSoda-Mimmi-Vol.2-Neko-Mimmi-PixiBB.COM-016.jpg",
@@ -22433,61 +21295,12 @@
       "visited_pages": [
         {
           "page": 1,
-          "url": "https://cosplay.pixibb.com/creamsoda-mimmi-vol-2-neko-mimmi-62-photos-cosplay/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 2,
-          "url": "https://cosplay.pixibb.com/creamsoda-mimmi-vol-2-neko-mimmi-62-photos-cosplay/2/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 3,
-          "url": "https://cosplay.pixibb.com/creamsoda-mimmi-vol-2-neko-mimmi-62-photos-cosplay/3/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 4,
-          "url": "https://cosplay.pixibb.com/creamsoda-mimmi-vol-2-neko-mimmi-62-photos-cosplay/4/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 5,
-          "url": "https://cosplay.pixibb.com/creamsoda-mimmi-vol-2-neko-mimmi-62-photos-cosplay/5/",
-          "candidates": 10,
-          "sha_verified": 1,
-          "cached_from_previous_sha_checks": 9
-        },
-        {
-          "page": 6,
-          "url": "https://cosplay.pixibb.com/creamsoda-mimmi-vol-2-neko-mimmi-62-photos-cosplay/6/",
-          "candidates": 10,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 10
-        },
-        {
-          "page": 7,
-          "url": "https://cosplay.pixibb.com/creamsoda-mimmi-vol-2-neko-mimmi-62-photos-cosplay/7/",
-          "candidates": 2,
-          "sha_verified": 0,
-          "cached_from_previous_sha_checks": 2
-        },
-        {
-          "page": 8,
-          "status": "nonpublic_or_redirect"
+          "status": "HTTPError"
         }
       ],
-      "fresh_http_verified": 1,
+      "fresh_http_verified": 0,
       "status": "verified_public_web_previews",
-      "reused_previous_sha_checks": 61
+      "reused_previous_sha_checks": 0
     }
   ]
 }
