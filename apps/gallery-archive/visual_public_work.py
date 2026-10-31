@@ -175,8 +175,12 @@ def collect_work(book,previous,client,out,budget,seen_sha,model,reference_reader
         if meta['sha256'] in seen_sha:continue
         number=replacement or next_number
         if replacement is None:next_number+=1
-        ext=meta.pop('extension');filename=f'{number:05d}-{meta["sha256"][:16]}'
-        key=f'originals/{aid}/{filename}.{ext}';thumbnail=f'previews/{aid}/{filename}.webp'
+        ext=meta.pop('extension')
+        # Immediate publication must reuse the same immutable objects as a
+        # deferred batch. Archive/source numbering lives in metadata, not the
+        # filename; recovery must not upload another copy of identical bytes.
+        key=f'originals/{aid}/{meta["sha256"]}.{ext}'
+        thumbnail=f'previews/{aid}/{hashlib.sha256(preview).hexdigest()}.webp'
         atomic_bytes(out/key,raw);atomic_bytes(out/thumbnail,preview)
         row={**meta,'number':number,'key':key,'preview':thumbnail,
              'preview_bytes':len(preview),'preview_sha256':hashlib.sha256(preview).hexdigest(),
