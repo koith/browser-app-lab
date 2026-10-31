@@ -96,6 +96,8 @@ class VisualWorkTests(unittest.TestCase):
             self.assertEqual([p['source_photo_number'] for p in work['images']],[4,5])
             for row in work['images']:
                 self.assertEqual((out/row['key']).read_bytes(),data[row['source_photo_number']])
+                self.assertEqual(row['key'],f"originals/mimmi-fixture/{row['sha256']}.jpg")
+                self.assertEqual(row['preview'],f"previews/mimmi-fixture/{row['preview_sha256']}.webp")
             client.omit=True
             partial,coverage=collect_work(book,prior,client,out,5,{p['sha256'] for p in prior},'mimmi',lambda u:client.get(u).content)
             self.assertEqual([p['source_photo_number'] for p in partial['images']],[4])

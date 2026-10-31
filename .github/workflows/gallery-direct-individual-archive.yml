@@ -105,9 +105,9 @@ jobs:
       YUI_COOKIE: ${{ secrets.YUI_TERABOX_COOKIE }}
       RCLONE_CONFIG_ARCHIVE_TYPE: terabox
       MODEL: ${{ matrix.model }}
-      # Keep both models' new batches private until pinned full-photo QA ends.
-      # Release by changing deferred to immediate after that actual QA passes.
-      ARCHIVE_PUBLICATION_MODE: deferred
+      # The first cohort is fully proven before this release is merged.
+      # Incoming batches still require independent exact media SHA readback.
+      ARCHIVE_PUBLICATION_MODE: immediate
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
