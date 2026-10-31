@@ -5,6 +5,7 @@ on:
       - '.github/workflows/rog-obs-bulk-recovery.yml'
       - 'apps/4leaf/rog/tools/decode-original-obs-bulk.py'
       - 'apps/4leaf/rog/tools/dump-original-paks.py'
+      - 'apps/4leaf/rog/tools/promote-reviewed-front-frames.py'
       - 'apps/4leaf/rog/tests/test_original_paks_full_dump.py'
       - 'apps/4leaf/rog/tests/test_obs_native_640stride.py'
       - 'apps/4leaf/rog/tools/probe-original-obs-near-rows.py'
@@ -215,6 +216,20 @@ jobs:
           assert frames['roll.spr']['frames'][0]['height']==100
           print('VERIFIED_GENUINE_2002_IMG_SPR',len(list(path.glob('*.png'))))
           PY
+      - name: Stage independently inspected 18 native frontal chessman motion cycles only on feature branch
+        if: github.ref == 'refs/heads/feat/4leaf-reviewed-native-front-cycle-20261101'
+        run: |
+          python3 -m py_compile apps/4leaf/rog/tools/promote-reviewed-front-frames.py
+          python3 apps/4leaf/rog/tools/promote-reviewed-front-frames.py \
+            /tmp/leaf-obs-exhaustive-audit \
+            apps/4leaf/rog/original/OBS/animation-extra.js \
+            apps/4leaf/rog/original/OBS/front-reviewed \
+            --sw apps/4leaf/rog/sw.js \
+            --version apps/4leaf/rog/app-version.json \
+            --html apps/4leaf/rog/index.html
+          node --check apps/4leaf/rog/original/OBS/animation-extra.js
+          node --check apps/4leaf/rog/genesis-chessman-actors.js
+          node --check apps/4leaf/rog/sw.js
       - name: Keep offline PWA sprite inventory synchronized with every verified source frame
         run: |
           python3 - <<'PY'
@@ -252,6 +267,18 @@ jobs:
           else:
               print('SOURCE_OBS_OFFLINE_CACHE_UNCHANGED',len(sprites))
           PY
+      - name: Commit and push source-SHA-checked frontal pixels to isolated PR branch
+        if: github.ref == 'refs/heads/feat/4leaf-reviewed-native-front-cycle-20261101'
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add apps/4leaf/rog/original/OBS/front-reviewed \
+            apps/4leaf/rog/original/OBS/animation-extra.js \
+            apps/4leaf/rog/sw.js apps/4leaf/rog/app-version.json \
+            apps/4leaf/rog/index.html
+          git diff --cached --quiet && { echo 'Expected source front PNGs not staged'; exit 1; }
+          git commit -m 'assets(4leaf): promote 72 audited native OBS front motion PNGs for 18 models'
+          git push origin HEAD:feat/4leaf-reviewed-native-front-cycle-20261101
       - name: Import strictly decoded OBS pixels into isolated feature branch ONLY
         if: github.ref == 'refs/heads/restore-4leaf-obs-source-motion-20261021'
         run: |

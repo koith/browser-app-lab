@@ -108,6 +108,42 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
       },
       {
         "height": 70,
+        "index": 26,
+        "originX": -15,
+        "originY": -60,
+        "sha256": "282035d64cf1606567da9eaea58778f702f699a39142f4562a21091b89dda43e",
+        "url": "./original/OBS/front-reviewed/1040-26.png",
+        "width": 35
+      },
+      {
+        "height": 70,
+        "index": 27,
+        "originX": -13,
+        "originY": -59,
+        "sha256": "1da1048d0cafcd22f88371ced706af012bc7566b3a3f6edc529514e03e5cdd6d",
+        "url": "./original/OBS/front-reviewed/1040-27.png",
+        "width": 33
+      },
+      {
+        "height": 71,
+        "index": 28,
+        "originX": -17,
+        "originY": -61,
+        "sha256": "1c51679f3b0f4f91fd8a264c6ab7b0388982ef224962c51f47f7f76cb74e9f25",
+        "url": "./original/OBS/front-reviewed/1040-28.png",
+        "width": 39
+      },
+      {
+        "height": 70,
+        "index": 29,
+        "originX": -16,
+        "originY": -60,
+        "sha256": "7e91fccac5bfb29385a56bf554d7268bcad1704f3e72113d3880ac6f9de88c78",
+        "url": "./original/OBS/front-reviewed/1040-29.png",
+        "width": 35
+      },
+      {
+        "height": 70,
         "index": 30,
         "originX": -16,
         "originY": -59,
@@ -116,6 +152,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 33
       }
     ],
+    "frontCycleEvidence": "AUTHENTIC_SOURCE_PIXELS_25_TO_30; VISUAL_REVIEW_20261101; WEB_WALK_MAPPING_INFERRED; HISTORICAL_EXE_TIMING_UNKNOWN",
     "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "ORIGINAL-640-VIDEO-RLE exact destination",
     "name": "마르자나",
@@ -229,6 +266,42 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 64
       },
       {
+        "height": 71,
+        "index": 26,
+        "originX": -25,
+        "originY": -57,
+        "sha256": "1ba3bc5e7235872c9933729bc4995346c1f1655e05b29109ae5e4d9dd2b54131",
+        "url": "./original/OBS/front-reviewed/1043-26.png",
+        "width": 63
+      },
+      {
+        "height": 75,
+        "index": 27,
+        "originX": -35,
+        "originY": -61,
+        "sha256": "31c85f6fb8a52b2759afd06ec5c2e48c37bab5d8083115dbb8635785b8a19929",
+        "url": "./original/OBS/front-reviewed/1043-27.png",
+        "width": 68
+      },
+      {
+        "height": 70,
+        "index": 28,
+        "originX": -38,
+        "originY": -56,
+        "sha256": "1a1892b1ba2781526d25fabdfdebfd9ce025d4843732cb2b245e1fb2d7ee29b2",
+        "url": "./original/OBS/front-reviewed/1043-28.png",
+        "width": 64
+      },
+      {
+        "height": 68,
+        "index": 29,
+        "originX": -34,
+        "originY": -54,
+        "sha256": "32a2b3d0e95d5975bbe33e58a708c110003f6b0e81161339d474c34d56f03d8e",
+        "url": "./original/OBS/front-reviewed/1043-29.png",
+        "width": 63
+      },
+      {
         "height": 63,
         "index": 30,
         "originX": -29,
@@ -238,6 +311,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 68
       }
     ],
+    "frontCycleEvidence": "AUTHENTIC_SOURCE_PIXELS_25_TO_30; VISUAL_REVIEW_20261101; WEB_WALK_MAPPING_INFERRED; HISTORICAL_EXE_TIMING_UNKNOWN",
     "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "ORIGINAL-640-VIDEO-RLE exact destination",
     "name": "플랑드르",
@@ -351,6 +425,42 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 34
       },
       {
+        "height": 70,
+        "index": 26,
+        "originX": -16,
+        "originY": -62,
+        "sha256": "20567f20e0e72b90d0ecfa3a85dc3c040d4c86a752a16d36aa76ea8e075387e6",
+        "url": "./original/OBS/front-reviewed/1044-26.png",
+        "width": 32
+      },
+      {
+        "height": 71,
+        "index": 27,
+        "originX": -13,
+        "originY": -62,
+        "sha256": "a2878a6263b31ade74699070f7731446e6afb85ca65e7246d150562f2ece831f",
+        "url": "./original/OBS/front-reviewed/1044-27.png",
+        "width": 28
+      },
+      {
+        "height": 69,
+        "index": 28,
+        "originX": -18,
+        "originY": -62,
+        "sha256": "55481c84514e9b7b8fb21e0e7c244ebb765d359412b5d8db70962ac7274eef9f",
+        "url": "./original/OBS/front-reviewed/1044-28.png",
+        "width": 34
+      },
+      {
+        "height": 70,
+        "index": 29,
+        "originX": -18,
+        "originY": -62,
+        "sha256": "97fa890f95573a7dde647175204e3a77d8e4c05f0251f764f991902390a54c4d",
+        "url": "./original/OBS/front-reviewed/1044-29.png",
+        "width": 32
+      },
+      {
         "height": 71,
         "index": 30,
         "originX": -17,
@@ -360,6 +470,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 28
       }
     ],
+    "frontCycleEvidence": "AUTHENTIC_SOURCE_PIXELS_25_TO_30; VISUAL_REVIEW_20261101; WEB_WALK_MAPPING_INFERRED; HISTORICAL_EXE_TIMING_UNKNOWN",
     "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "ORIGINAL-640-VIDEO-RLE exact destination",
     "name": "발라",
@@ -473,6 +584,42 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 37
       },
       {
+        "height": 85,
+        "index": 26,
+        "originX": -17,
+        "originY": -63,
+        "sha256": "0e5f4c55e18725798f7848f07d96f86d99c5b3025d1d9628ca96ae6b8345d2ee",
+        "url": "./original/OBS/front-reviewed/1046-26.png",
+        "width": 35
+      },
+      {
+        "height": 76,
+        "index": 27,
+        "originX": -15,
+        "originY": -63,
+        "sha256": "6deed43c65caef4570faebb67f4bceefdb0e20a4a92fa692328d6a95605acf22",
+        "url": "./original/OBS/front-reviewed/1046-27.png",
+        "width": 43
+      },
+      {
+        "height": 86,
+        "index": 28,
+        "originX": -19,
+        "originY": -62,
+        "sha256": "fbed2b1448221aa9b493a3fc06caa454609340f6ac5976c4b0c841fe40436e58",
+        "url": "./original/OBS/front-reviewed/1046-28.png",
+        "width": 37
+      },
+      {
+        "height": 79,
+        "index": 29,
+        "originX": -20,
+        "originY": -62,
+        "sha256": "b666c5bc3c8e5426a86853b61f4b366dc33034238c7c2dc82bf40413d65f6e9d",
+        "url": "./original/OBS/front-reviewed/1046-29.png",
+        "width": 37
+      },
+      {
         "height": 71,
         "index": 30,
         "originX": -19,
@@ -482,6 +629,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 34
       }
     ],
+    "frontCycleEvidence": "AUTHENTIC_SOURCE_PIXELS_25_TO_30; VISUAL_REVIEW_20261101; WEB_WALK_MAPPING_INFERRED; HISTORICAL_EXE_TIMING_UNKNOWN",
     "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "ORIGINAL-640-VIDEO-RLE exact destination",
     "name": "이븐사이드",
@@ -717,6 +865,42 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 38
       },
       {
+        "height": 71,
+        "index": 26,
+        "originX": -19,
+        "originY": -65,
+        "sha256": "69c5434ee6f071348744238a4d4d157ef78c5ddf428b1e7eb168970725dce0b0",
+        "url": "./original/OBS/front-reviewed/1048-26.png",
+        "width": 38
+      },
+      {
+        "height": 70,
+        "index": 27,
+        "originX": -18,
+        "originY": -64,
+        "sha256": "7b30b668dc8de3c2fb0c0f528beddb3b12702a0513cda3b49f93a6911ae97ede",
+        "url": "./original/OBS/front-reviewed/1048-27.png",
+        "width": 34
+      },
+      {
+        "height": 72,
+        "index": 28,
+        "originX": -21,
+        "originY": -66,
+        "sha256": "9871eec95f9fabd823f86f805d57f858e9ea8e328435b11509911c7d43a5faf0",
+        "url": "./original/OBS/front-reviewed/1048-28.png",
+        "width": 38
+      },
+      {
+        "height": 71,
+        "index": 29,
+        "originX": -21,
+        "originY": -65,
+        "sha256": "27b46b5c5831382473226430e08d9be85a6d346d7df1fe8ca4038c69794c0ee9",
+        "url": "./original/OBS/front-reviewed/1048-29.png",
+        "width": 38
+      },
+      {
         "height": 70,
         "index": 30,
         "originX": -18,
@@ -726,6 +910,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 34
       }
     ],
+    "frontCycleEvidence": "AUTHENTIC_SOURCE_PIXELS_25_TO_30; VISUAL_REVIEW_20261101; WEB_WALK_MAPPING_INFERRED; HISTORICAL_EXE_TIMING_UNKNOWN",
     "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "ORIGINAL-640-VIDEO-RLE exact destination",
     "name": "이븐시나",
@@ -840,6 +1025,42 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
       },
       {
         "height": 73,
+        "index": 26,
+        "originX": -16,
+        "originY": -64,
+        "sha256": "d8cac5299fca4ddbf9e89cb31ac5d19e596ecefd41fab5dc9a688b582a6ae927",
+        "url": "./original/OBS/front-reviewed/1049-26.png",
+        "width": 33
+      },
+      {
+        "height": 73,
+        "index": 27,
+        "originX": -16,
+        "originY": -63,
+        "sha256": "1732614993955fb69fa76abdc615a264b80a663e3d7f1733814394226e13d914",
+        "url": "./original/OBS/front-reviewed/1049-27.png",
+        "width": 33
+      },
+      {
+        "height": 74,
+        "index": 28,
+        "originX": -17,
+        "originY": -65,
+        "sha256": "652d8fd95e4dafbf8d736b9dbc0e81941119bcab51535f1f12009f87e5e3e461",
+        "url": "./original/OBS/front-reviewed/1049-28.png",
+        "width": 34
+      },
+      {
+        "height": 73,
+        "index": 29,
+        "originX": -17,
+        "originY": -64,
+        "sha256": "76063154a652a1bb3e64e4b6481d6b4116c37ff6ff7d65b7962fa24d4b42abad",
+        "url": "./original/OBS/front-reviewed/1049-29.png",
+        "width": 33
+      },
+      {
+        "height": 73,
         "index": 30,
         "originX": -17,
         "originY": -63,
@@ -848,6 +1069,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 33
       }
     ],
+    "frontCycleEvidence": "AUTHENTIC_SOURCE_PIXELS_25_TO_30; VISUAL_REVIEW_20261101; WEB_WALK_MAPPING_INFERRED; HISTORICAL_EXE_TIMING_UNKNOWN",
     "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "ORIGINAL-640-VIDEO-RLE exact destination",
     "name": "샤프리아르",
@@ -1083,6 +1305,42 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 29
       },
       {
+        "height": 66,
+        "index": 26,
+        "originX": -13,
+        "originY": -60,
+        "sha256": "5d6101f0e5247a8f712ab95eef87e14b3459405a47645f919815e5c1825b3549",
+        "url": "./original/OBS/front-reviewed/1051-26.png",
+        "width": 28
+      },
+      {
+        "height": 69,
+        "index": 27,
+        "originX": -13,
+        "originY": -60,
+        "sha256": "59b9b6669414f1f45b53d9f97237b6e7cfae9361a9e5f9aa37737b36ffd2d557",
+        "url": "./original/OBS/front-reviewed/1051-27.png",
+        "width": 28
+      },
+      {
+        "height": 70,
+        "index": 28,
+        "originX": -13,
+        "originY": -60,
+        "sha256": "8138e6938fece3cdccd2ba81a2a7861fdb89a4b47cb2b3c055287b46239144cf",
+        "url": "./original/OBS/front-reviewed/1051-28.png",
+        "width": 29
+      },
+      {
+        "height": 66,
+        "index": 29,
+        "originX": -13,
+        "originY": -60,
+        "sha256": "0294fb422305010eca6077d4dd507133abf6928517963bbe17eb556fcb5b52ef",
+        "url": "./original/OBS/front-reviewed/1051-29.png",
+        "width": 28
+      },
+      {
         "height": 69,
         "index": 30,
         "originX": -13,
@@ -1092,6 +1350,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 29
       }
     ],
+    "frontCycleEvidence": "AUTHENTIC_SOURCE_PIXELS_25_TO_30; VISUAL_REVIEW_20261101; WEB_WALK_MAPPING_INFERRED; HISTORICAL_EXE_TIMING_UNKNOWN",
     "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "ORIGINAL-640-VIDEO-RLE exact destination",
     "name": "얀지슈카",
@@ -1205,6 +1464,42 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 38
       },
       {
+        "height": 70,
+        "index": 26,
+        "originX": -20,
+        "originY": -59,
+        "sha256": "f6b41e2b3b73d4d9e0c8185598bd9e205f82154c476916dfd4b66ae7997460ee",
+        "url": "./original/OBS/front-reviewed/1052-26.png",
+        "width": 36
+      },
+      {
+        "height": 74,
+        "index": 27,
+        "originX": -18,
+        "originY": -63,
+        "sha256": "9cff8fdc6d6bcf4230735ee6ae80f9320f1bd66e12eedfd2579e67f9ea9d4166",
+        "url": "./original/OBS/front-reviewed/1052-27.png",
+        "width": 35
+      },
+      {
+        "height": 74,
+        "index": 28,
+        "originX": -19,
+        "originY": -63,
+        "sha256": "3827bcc5b7854713e8bd28491ebcdfd1ebf41fbfd7ee546f7d8c4ce9b5f68b9e",
+        "url": "./original/OBS/front-reviewed/1052-28.png",
+        "width": 37
+      },
+      {
+        "height": 70,
+        "index": 29,
+        "originX": -18,
+        "originY": -59,
+        "sha256": "9ef8c20145785e332b247a8146a5075285434c1051f309140d8d7d3d808685e0",
+        "url": "./original/OBS/front-reviewed/1052-29.png",
+        "width": 36
+      },
+      {
         "height": 67,
         "index": 30,
         "originX": -19,
@@ -1214,6 +1509,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 37
       }
     ],
+    "frontCycleEvidence": "AUTHENTIC_SOURCE_PIXELS_25_TO_30; VISUAL_REVIEW_20261101; WEB_WALK_MAPPING_INFERRED; HISTORICAL_EXE_TIMING_UNKNOWN",
     "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "ORIGINAL-640-VIDEO-RLE exact destination",
     "name": "아두스베이",
@@ -1327,6 +1623,42 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 39
       },
       {
+        "height": 77,
+        "index": 26,
+        "originX": -16,
+        "originY": -69,
+        "sha256": "1cdf2d690fb1f5dd4a2e57534a62cbddb0f64aa3e04a9cfe9e9f051ed0c2834a",
+        "url": "./original/OBS/front-reviewed/1053-26.png",
+        "width": 36
+      },
+      {
+        "height": 85,
+        "index": 27,
+        "originX": -15,
+        "originY": -74,
+        "sha256": "3c8132e227907352c89e0a2b52abfdacc9f55c68aafbf3fb24985ec1b8f4660f",
+        "url": "./original/OBS/front-reviewed/1053-27.png",
+        "width": 44
+      },
+      {
+        "height": 80,
+        "index": 28,
+        "originX": -18,
+        "originY": -72,
+        "sha256": "bc8c40012b150172c4e49e20bdb5a6dea37ba7c77c6d2d5afb5dc0033143e4a2",
+        "url": "./original/OBS/front-reviewed/1053-28.png",
+        "width": 39
+      },
+      {
+        "height": 76,
+        "index": 29,
+        "originX": -16,
+        "originY": -68,
+        "sha256": "b0fd294b25d8fa5a7d7e75db4f34273143365723a85648cef175906aae8da6f3",
+        "url": "./original/OBS/front-reviewed/1053-29.png",
+        "width": 36
+      },
+      {
         "height": 68,
         "index": 30,
         "originX": -25,
@@ -1336,6 +1668,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 44
       }
     ],
+    "frontCycleEvidence": "AUTHENTIC_SOURCE_PIXELS_25_TO_30; VISUAL_REVIEW_20261101; WEB_WALK_MAPPING_INFERRED; HISTORICAL_EXE_TIMING_UNKNOWN",
     "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "ORIGINAL-640-VIDEO-RLE exact destination",
     "name": "알이스파니히",
@@ -1449,6 +1782,42 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 34
       },
       {
+        "height": 62,
+        "index": 26,
+        "originX": -17,
+        "originY": -56,
+        "sha256": "f6cd4c94809dcf35c1c862f76055d5d75bbfbf2685a9bd221e44e63d2ed4c71c",
+        "url": "./original/OBS/front-reviewed/1054-26.png",
+        "width": 34
+      },
+      {
+        "height": 61,
+        "index": 27,
+        "originX": -17,
+        "originY": -55,
+        "sha256": "aefe7bf0f292bf9da9a91f1f685083aacba076eb198cf7e5d773e2b23caa1155",
+        "url": "./original/OBS/front-reviewed/1054-27.png",
+        "width": 34
+      },
+      {
+        "height": 63,
+        "index": 28,
+        "originX": -17,
+        "originY": -57,
+        "sha256": "c5ca1eb8d328b8a40f86068ff02d3611b99107be65784831e76788165774f478",
+        "url": "./original/OBS/front-reviewed/1054-28.png",
+        "width": 34
+      },
+      {
+        "height": 62,
+        "index": 29,
+        "originX": -17,
+        "originY": -56,
+        "sha256": "8803ffed1529ee5d872b19a33800aebd0343b0b60d5da6103639ff5ce1416ff0",
+        "url": "./original/OBS/front-reviewed/1054-29.png",
+        "width": 34
+      },
+      {
         "height": 61,
         "index": 30,
         "originX": -17,
@@ -1458,6 +1827,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 34
       }
     ],
+    "frontCycleEvidence": "AUTHENTIC_SOURCE_PIXELS_25_TO_30; VISUAL_REVIEW_20261101; WEB_WALK_MAPPING_INFERRED; HISTORICAL_EXE_TIMING_UNKNOWN",
     "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "ORIGINAL-640-VIDEO-RLE exact destination",
     "name": "알파라비",
@@ -1571,6 +1941,42 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 26
       },
       {
+        "height": 71,
+        "index": 26,
+        "originX": -12,
+        "originY": -63,
+        "sha256": "0ec40be5d4b290bc388e605539213ba9c3d8dc7efd93d9aecbf0a6db30227be0",
+        "url": "./original/OBS/front-reviewed/1055-26.png",
+        "width": 26
+      },
+      {
+        "height": 74,
+        "index": 27,
+        "originX": -12,
+        "originY": -64,
+        "sha256": "b9d54d321443599e255e085ea90099577164d04d06ab42ffac5b414f7d05fc33",
+        "url": "./original/OBS/front-reviewed/1055-27.png",
+        "width": 26
+      },
+      {
+        "height": 73,
+        "index": 28,
+        "originX": -12,
+        "originY": -63,
+        "sha256": "3615618172b58f2010702b723a6dc5f029923aec8d82ae137c8db1dfaa77c926",
+        "url": "./original/OBS/front-reviewed/1055-28.png",
+        "width": 26
+      },
+      {
+        "height": 71,
+        "index": 29,
+        "originX": -13,
+        "originY": -63,
+        "sha256": "f41bc7040363088265590cc861524b716ab924c6f32fb87366f8a9002f4f9bd1",
+        "url": "./original/OBS/front-reviewed/1055-29.png",
+        "width": 26
+      },
+      {
         "height": 73,
         "index": 30,
         "originX": -13,
@@ -1580,6 +1986,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 26
       }
     ],
+    "frontCycleEvidence": "AUTHENTIC_SOURCE_PIXELS_25_TO_30; VISUAL_REVIEW_20261101; WEB_WALK_MAPPING_INFERRED; HISTORICAL_EXE_TIMING_UNKNOWN",
     "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "ORIGINAL-640-VIDEO-RLE exact destination",
     "name": "알아샤",
@@ -1694,6 +2101,42 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
       },
       {
         "height": 70,
+        "index": 26,
+        "originX": -17,
+        "originY": -61,
+        "sha256": "47135736b8694383dd7191f6b783c1547c961eb10e6ba742a793c44455cb8d8b",
+        "url": "./original/OBS/front-reviewed/1056-26.png",
+        "width": 35
+      },
+      {
+        "height": 70,
+        "index": 27,
+        "originX": -15,
+        "originY": -60,
+        "sha256": "5262737c7fd4bc0300415ec6f086d48c2b4687db4131050f0fd99179641e0131",
+        "url": "./original/OBS/front-reviewed/1056-27.png",
+        "width": 33
+      },
+      {
+        "height": 71,
+        "index": 28,
+        "originX": -19,
+        "originY": -62,
+        "sha256": "d9d9ab54d8d10781f932be21d60e3429e902bd2baf67bd971512d90a0cd6e7c0",
+        "url": "./original/OBS/front-reviewed/1056-28.png",
+        "width": 39
+      },
+      {
+        "height": 70,
+        "index": 29,
+        "originX": -18,
+        "originY": -61,
+        "sha256": "53d5abc721b166d95bd7823213b8cddfeef865857ec9d7b4a9fecf379d878d61",
+        "url": "./original/OBS/front-reviewed/1056-29.png",
+        "width": 35
+      },
+      {
+        "height": 70,
         "index": 30,
         "originX": -18,
         "originY": -60,
@@ -1702,6 +2145,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 33
       }
     ],
+    "frontCycleEvidence": "AUTHENTIC_SOURCE_PIXELS_25_TO_30; VISUAL_REVIEW_20261101; WEB_WALK_MAPPING_INFERRED; HISTORICAL_EXE_TIMING_UNKNOWN",
     "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "ORIGINAL-640-VIDEO-RLE exact destination",
     "name": "이슈탈",
@@ -1815,6 +2259,42 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 65
       },
       {
+        "height": 70,
+        "index": 26,
+        "originX": -17,
+        "originY": -59,
+        "sha256": "ba7eb3657c97e436980325166f7741edf8dc9dc5af6d2d771539f5a4b9716904",
+        "url": "./original/OBS/front-reviewed/1058-26.png",
+        "width": 65
+      },
+      {
+        "height": 69,
+        "index": 27,
+        "originX": -17,
+        "originY": -58,
+        "sha256": "d87e3917f4703ee3d8df445332e5e9447c39357619fc8971e179ee0b2ed1d1f6",
+        "url": "./original/OBS/front-reviewed/1058-27.png",
+        "width": 65
+      },
+      {
+        "height": 71,
+        "index": 28,
+        "originX": -17,
+        "originY": -60,
+        "sha256": "04c919f78892b7b89c653e4e5dfe2c500761da51d36da9d5bc429e3494c5720b",
+        "url": "./original/OBS/front-reviewed/1058-28.png",
+        "width": 65
+      },
+      {
+        "height": 70,
+        "index": 29,
+        "originX": -17,
+        "originY": -59,
+        "sha256": "504db1ae69d977ce86cd1fa64fa96d335b440dc9f71950221563731bc9ac504b",
+        "url": "./original/OBS/front-reviewed/1058-29.png",
+        "width": 65
+      },
+      {
         "height": 69,
         "index": 30,
         "originX": -17,
@@ -1824,6 +2304,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 65
       }
     ],
+    "frontCycleEvidence": "AUTHENTIC_SOURCE_PIXELS_25_TO_30; VISUAL_REVIEW_20261101; WEB_WALK_MAPPING_INFERRED; HISTORICAL_EXE_TIMING_UNKNOWN",
     "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "ORIGINAL-640-VIDEO-RLE exact destination",
     "name": "오스만누리파사",
@@ -1937,6 +2418,42 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 36
       },
       {
+        "height": 66,
+        "index": 26,
+        "originX": -17,
+        "originY": -55,
+        "sha256": "e0a84efa01407252fa4e2a53b9948e365d35e9bdf67d27cd57682b36555ae934",
+        "url": "./original/OBS/front-reviewed/1059-26.png",
+        "width": 34
+      },
+      {
+        "height": 65,
+        "index": 27,
+        "originX": -15,
+        "originY": -54,
+        "sha256": "7517f6fc695c28c6608c00468b422726353af45fcc32c6ae0621a6d3dd7caabc",
+        "url": "./original/OBS/front-reviewed/1059-27.png",
+        "width": 32
+      },
+      {
+        "height": 68,
+        "index": 28,
+        "originX": -18,
+        "originY": -56,
+        "sha256": "929ea706596398e86247bf04c19f19cf2348ae72dfd81390b8170a5163a33c02",
+        "url": "./original/OBS/front-reviewed/1059-28.png",
+        "width": 36
+      },
+      {
+        "height": 68,
+        "index": 29,
+        "originX": -17,
+        "originY": -55,
+        "sha256": "222a1e5ed1035018445f9b08028ec24fdc9242242f2a3a00f272e1bc59b12064",
+        "url": "./original/OBS/front-reviewed/1059-29.png",
+        "width": 34
+      },
+      {
         "height": 67,
         "index": 30,
         "originX": -17,
@@ -1946,6 +2463,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 32
       }
     ],
+    "frontCycleEvidence": "AUTHENTIC_SOURCE_PIXELS_25_TO_30; VISUAL_REVIEW_20261101; WEB_WALK_MAPPING_INFERRED; HISTORICAL_EXE_TIMING_UNKNOWN",
     "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "ORIGINAL-640-VIDEO-RLE exact destination",
     "name": "라쉬카",
@@ -2060,6 +2578,42 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
       },
       {
         "height": 74,
+        "index": 26,
+        "originX": -18,
+        "originY": -65,
+        "sha256": "4b6b19a1c242da3cacef600b7e31d1ebddabd92c56c7ac3b895375c39d55dafc",
+        "url": "./original/OBS/front-reviewed/1060-26.png",
+        "width": 37
+      },
+      {
+        "height": 74,
+        "index": 27,
+        "originX": -16,
+        "originY": -65,
+        "sha256": "2162dc01d23219a83838aa0399c5cbda43680694104d400ba9508d488a721ecc",
+        "url": "./original/OBS/front-reviewed/1060-27.png",
+        "width": 32
+      },
+      {
+        "height": 75,
+        "index": 28,
+        "originX": -16,
+        "originY": -65,
+        "sha256": "a1ed6e1e25c159c76d70cb9401fee8e4bc5ad4510173d52a0842021cb5c99603",
+        "url": "./original/OBS/front-reviewed/1060-28.png",
+        "width": 35
+      },
+      {
+        "height": 74,
+        "index": 29,
+        "originX": -17,
+        "originY": -65,
+        "sha256": "b9077a6f34b207f8cfd7d55b3225aba0d1d816065c7dde6b6bca6f5666b47f88",
+        "url": "./original/OBS/front-reviewed/1060-29.png",
+        "width": 37
+      },
+      {
+        "height": 74,
         "index": 30,
         "originX": -14,
         "originY": -65,
@@ -2068,6 +2622,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 32
       }
     ],
+    "frontCycleEvidence": "AUTHENTIC_SOURCE_PIXELS_25_TO_30; VISUAL_REVIEW_20261101; WEB_WALK_MAPPING_INFERRED; HISTORICAL_EXE_TIMING_UNKNOWN",
     "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "ORIGINAL-640-VIDEO-RLE exact destination",
     "name": "바이올라",
@@ -2181,6 +2736,42 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 32
       },
       {
+        "height": 58,
+        "index": 26,
+        "originX": -17,
+        "originY": -57,
+        "sha256": "3e19468cdf0fed5031b7a0976d0ff9d21da69ef787df29bc89fce0443adbe59a",
+        "url": "./original/OBS/front-reviewed/1061-26.png",
+        "width": 32
+      },
+      {
+        "height": 66,
+        "index": 27,
+        "originX": -17,
+        "originY": -57,
+        "sha256": "daf6a03370a4d150d4ddd6caae5942abbdf2b16cdb88c83f5eda65365e618137",
+        "url": "./original/OBS/front-reviewed/1061-27.png",
+        "width": 32
+      },
+      {
+        "height": 67,
+        "index": 28,
+        "originX": -17,
+        "originY": -58,
+        "sha256": "da742c9757a9afe3143787e4764ff24d2f89d893683c0470d57c321fb8bbf7d3",
+        "url": "./original/OBS/front-reviewed/1061-28.png",
+        "width": 32
+      },
+      {
+        "height": 58,
+        "index": 29,
+        "originX": -17,
+        "originY": -57,
+        "sha256": "80257dc087ffad7fbad44d72b8b87970599af82292410ac3001b9da87fbad3fb",
+        "url": "./original/OBS/front-reviewed/1061-29.png",
+        "width": 32
+      },
+      {
         "height": 66,
         "index": 30,
         "originX": -17,
@@ -2190,6 +2781,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 32
       }
     ],
+    "frontCycleEvidence": "AUTHENTIC_SOURCE_PIXELS_25_TO_30; VISUAL_REVIEW_20261101; WEB_WALK_MAPPING_INFERRED; HISTORICAL_EXE_TIMING_UNKNOWN",
     "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "ORIGINAL-640-VIDEO-RLE exact destination",
     "name": "록슬리",
@@ -2303,6 +2895,42 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 55
       },
       {
+        "height": 69,
+        "index": 26,
+        "originX": -24,
+        "originY": -59,
+        "sha256": "459278811ac6cac9c7ad5efa8ad9d4fbce7f97968fa58bf347224cf6147213ac",
+        "url": "./original/OBS/front-reviewed/1062-26.png",
+        "width": 55
+      },
+      {
+        "height": 68,
+        "index": 27,
+        "originX": -24,
+        "originY": -58,
+        "sha256": "68347c37243144ad171aed4689d8abf0a9806786737779388b9381c600df2e2c",
+        "url": "./original/OBS/front-reviewed/1062-27.png",
+        "width": 55
+      },
+      {
+        "height": 70,
+        "index": 28,
+        "originX": -24,
+        "originY": -60,
+        "sha256": "5e5e6886ca9da772248e57be346a054bbccc41b220a021ce703718f0f7a0d100",
+        "url": "./original/OBS/front-reviewed/1062-28.png",
+        "width": 55
+      },
+      {
+        "height": 69,
+        "index": 29,
+        "originX": -24,
+        "originY": -59,
+        "sha256": "687c8f066db269e32824ec583950c5b49f4942d55fec647be8f344542d2110ce",
+        "url": "./original/OBS/front-reviewed/1062-29.png",
+        "width": 55
+      },
+      {
         "height": 68,
         "index": 30,
         "originX": -24,
@@ -2312,6 +2940,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 55
       }
     ],
+    "frontCycleEvidence": "AUTHENTIC_SOURCE_PIXELS_25_TO_30; VISUAL_REVIEW_20261101; WEB_WALK_MAPPING_INFERRED; HISTORICAL_EXE_TIMING_UNKNOWN",
     "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "ORIGINAL-640-VIDEO-RLE exact destination",
     "name": "죠엘",
@@ -2548,6 +3177,42 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
       },
       {
         "height": 71,
+        "index": 26,
+        "originX": -18,
+        "originY": -61,
+        "sha256": "6151dcf666186a3dab09eba07bb6d78ded9e81b69c76f537907dc9028a2323cd",
+        "url": "./original/OBS/front-reviewed/1064-26.png",
+        "width": 39
+      },
+      {
+        "height": 71,
+        "index": 27,
+        "originX": -17,
+        "originY": -60,
+        "sha256": "319605f5da9ebee7ed80c9dadeb8fad43143d73b72f06e4b0241f7be37b54249",
+        "url": "./original/OBS/front-reviewed/1064-27.png",
+        "width": 37
+      },
+      {
+        "height": 72,
+        "index": 28,
+        "originX": -19,
+        "originY": -62,
+        "sha256": "ce3cb57de64037c2eea1001ae03d395ee0c177d75343ccd9230321cd6d622269",
+        "url": "./original/OBS/front-reviewed/1064-28.png",
+        "width": 40
+      },
+      {
+        "height": 71,
+        "index": 29,
+        "originX": -19,
+        "originY": -61,
+        "sha256": "948d243d8cc2069eb8a973fb84bab1b5898a7b08174fa903ca9cb72330598de6",
+        "url": "./original/OBS/front-reviewed/1064-29.png",
+        "width": 38
+      },
+      {
+        "height": 71,
         "index": 30,
         "originX": -19,
         "originY": -60,
@@ -2556,6 +3221,7 @@ window.ORIGINAL_LEAF_OBS_FRAMES=Object.assign(
         "width": 38
       }
     ],
+    "frontCycleEvidence": "AUTHENTIC_SOURCE_PIXELS_25_TO_30; VISUAL_REVIEW_20261101; WEB_WALK_MAPPING_INFERRED; HISTORICAL_EXE_TIMING_UNKNOWN",
     "hasVerifiedFrameZero": true,
     "horizontalScanlineOrigin": "ORIGINAL-640-VIDEO-RLE exact destination",
     "name": "아델라이데",

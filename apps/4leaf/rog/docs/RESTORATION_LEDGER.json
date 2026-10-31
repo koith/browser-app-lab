@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "project": "4LEAF 원작 복원 웹앱",
   "canonicalFile": "apps/4leaf/rog/docs/RESTORATION_LEDGER.json",
-  "updatedAt": "2026-10-29",
+  "updatedAt": "2026-11-01",
   "sourceOfTruth": "Git 저장소의 이 JSON과 커밋 이력. 과거 챗 대화는 기록 근거이지 진행 상태의 원본 데이터가 아님.",
   "operatingRule": "새 요청 즉시 작업 등록 → open 목록 조회 → 실제 수정 → 원본 근거/코드/브라우저/배포 검증 → 검증 증거와 함께 상태 전이. 부분 구현을 원작 완성으로 표시 금지.",
   "statusDefinitions": {
@@ -6516,6 +6516,31 @@
         "P0-RELEASE"
       ],
       "details": "PR229 merge236cbad17e59fb373f9b456cc8e822fdacd65f3a Pages workflow40790512713 SUCCESS and actual published real-source HTML/minimap workflow40790853970 SUCCESS on identical headSHA. Event268 independently read from exact merged ledger; all58tasks preserved. During PR273 WebKit screenshot inspection, source pivot alignment on tall mobile moved heading down away from live score row; reverted responsive header to previous mobile arrangement, restricted native shared-pivot CSS to historical desktop>=812px, and added actual mobile title-above-scores assertion. Local WebKit390x844 corrected battle/exit PASS. Original source numeral lead: existing excluded non-character OBS1167 frames0..7 visually depict large digits0..7 matching battle score style, frame10 small0 and18 small8. Large8/9 and full numeral sequence are not decoded/verified here, so no partial mixed-font score renderer or native die-body claim introduced. Source battle PR273 final Actions/Pages still pending; no restoration task falsely completed."
+    },
+    {
+      "seq": 274,
+      "date": "2026-11-01",
+      "type": "REAL_2002_OBS_ALL_FRAME_AUDIT_VERIFIED",
+      "taskIds": [
+        "M00",
+        "P0-ACTOR",
+        "ACT-01",
+        "ACT-02",
+        "P0-DICE"
+      ],
+      "details": "PR416 merged 8ecbc98887a10e622238b41f55214f2506d50603. SHA1-verified archive 86526d89679ae39b85fe9808da97ad871b7888d9 used in GitHub Actions 41220003908. OBS/OBS2/OBS3 245 members; original 6725 declared source frames, 6655 parsed+attempted, 6601 strict decoded source PNG (independent SHA256/PNG/geometry validation 0 mismatches); 54 LOW_OPACITY strict rejections, 70 frame-structure parse failures in 4 members. Source manifest 2853 refers to different scope; no direct completeness equivalence. PAK per-actor identities, action/direction tables and native FPS remain UNVERIFIED. 2002 package source evidence in short-retention private CI artifact 13049193788, not deployed as a 6601-frame game."
+    },
+    {
+      "seq": 275,
+      "date": "2026-11-01",
+      "type": "18_ACTOR_ORIGINAL_FRONTAL_CYCLE_SOURCE_BYTES_STAGED",
+      "taskIds": [
+        "P0-ACTOR",
+        "ACT-01",
+        "ACT-02",
+        "P0-RELEASE"
+      ],
+      "details": "Feature branch feat/4leaf-reviewed-native-front-cycle-20261101: eighteen visually reviewed native original OBS model IDs 0040,0043,0044,0046,0048,0049,0051,0052,0053,0054,0055,0056,0058,0059,0060,0061,0062,0064; each has native 25-30 frontal source frame sequence. SHA matched original 25/30 published frames and verified 72 new 26-29 PNG from SHA-validated original CI PAK; source manifest/actual board actor walk renderer uses all six original frames. This playback mapping/FPS remains WEB INFERRED, original 2002 action labels/direction table unknown. 0042 separately sourced, deliberately not promoted. beta30 PWA v117 staged. Do not mark any task as done until merged CI and actual Pages QA."
     }
   ]
 }
