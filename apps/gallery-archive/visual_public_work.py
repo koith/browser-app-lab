@@ -49,7 +49,7 @@ def visual_error(left,right):
 
 
 def collect_work(book,previous,client,out,budget,seen_sha,model,reference_reader=None,reference_paths=None):
-    from direct_photo_pipeline import page_images,inspect,atomic_bytes,safe_page
+    from direct_photo_pipeline import page_images,inspect,atomic_bytes,safe_page,public_failure
     aid=book['id'];claimed=book['public_web_edition_photos']
     if type(claimed) is not int or not 3<=claimed<=500:raise ValueError('Bounded verified public work size required')
     info={'id':aid,'source':book['source'],'known_web_edition_photos':claimed,
@@ -82,7 +82,9 @@ def collect_work(book,previous,client,out,budget,seen_sha,model,reference_reader
                 raise ValueError('Saved reference did not match declared SHA')
             atomic_bytes(path,raw);refs.append((photo,raw))
     except Exception as e:
-        info['failures'].append('reference_'+type(e).__name__);return None,info
+        info['failures'].append('reference_'+type(e).__name__)
+        info.setdefault('request_failures',[]).append({'stage':'owner_reference',**public_failure(e)})
+        return None,info
     queue=[book['source']];visited=set();urls=[]
     while queue and len(visited)<45:
         page=queue.pop(0)
@@ -96,7 +98,9 @@ def collect_work(book,previous,client,out,budget,seen_sha,model,reference_reader
             for link in more:
                 if safe_page(link) and link not in visited and link not in queue:queue.append(link)
         except Exception as e:
-            info['failures'].append('page_'+type(e).__name__);break
+            info['failures'].append('page_'+type(e).__name__)
+            info.setdefault('request_failures',[]).append({'stage':'public_page','page':page,**public_failure(e)})
+            break
     numbered={}
     for url in urls:
         match=re.search(r'PixiBB\.COM-(\d{1,4})\.(?:jpe?g|webp|png)$',url,re.I)
@@ -131,7 +135,7 @@ def collect_work(book,previous,client,out,budget,seen_sha,model,reference_reader
             elif meta['sha256'] not in seen_sha:
                 pending.append((source_number,url,raw,meta,preview,None))
         except Exception as e:
-            failed.add(source_number);info['failures'].append({'source_number':source_number,'reason':type(e).__name__})
+            failed.add(source_number);info['failures'].append({'source_number':source_number,'reason':type(e).__name__,**public_failure(e)})
         if source_number%20==0:
             print('PUBLIC_EDITION_ACTUAL_DECODE_PROGRESS',aid,source_number,'/',claimed,'saved_cut_anchors',len(anchors),flush=True)
     info['saved_reference_anchors']=len(anchors);info['uncertain_source_numbers']=uncertain

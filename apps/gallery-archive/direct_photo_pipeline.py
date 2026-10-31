@@ -19,7 +19,7 @@ from PIL import Image, ImageStat
 
 ROOT=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT/'apps/yui-gallery'))
-from public_photo_archive import PublicSession
+from public_photo_archive import PublicSession,public_failure
 from collect_private_batch import allowed_url, safe_reencoded_public_preview
 
 MODEL_PATTERNS={'mimmi':re.compile(r'(?<![a-z])mimmi(?![a-z])|밈미|밈미',re.I),
@@ -201,7 +201,7 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None):
                     if p not in visited and p not in queue:queue.append(p)
                 if status!='scoped_public_page':errors.append({'page':page,'reason':status});continue
             except Exception as e:
-                errors.append({'page':page,'reason':type(e).__name__+': '+str(e)[:160]});break
+                errors.append({'page':page,'reason':type(e).__name__,**public_failure(e)});break
             for url in urls:
                 if new_total>=max_new:break
                 candidate_count+=1
@@ -242,7 +242,7 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None):
                          'numbering_provenance':'published_source_order' if old else 'archive_append_order_not_publisher_number'}
                     images.append(row);new_total+=1;downloaded_now+=1
                     with journal.open('a') as log:log.write(json.dumps({'album':aid,'number':number,'source':url,'photo':row,'remote_verified':False})+'\n')
-                except Exception as e:errors.append({'number':number,'url':url,'reason':type(e).__name__+': '+str(e)[:160]})
+                except Exception as e:errors.append({'number':number,'url':url,'reason':type(e).__name__,**public_failure(e)})
         if images:new_albums.append({'id':aid,'title':book.get('title') or aid,'publisher':book.get('publisher'),
             'expected':None,'complete':False,'images':images})
         results.append({'id':aid,'engine':'requests_scoped_public_pagination','pages':len(visited),
