@@ -14,6 +14,8 @@ on:
       - 'apps/mimmi-gallery/cloud/gateway/cookie_format.py'
       - 'apps/mimmi-gallery/cloud/gateway/Dockerfile'
       - 'apps/mimmi-gallery/cloud/test_container_import.py'
+      - 'apps/mimmi-gallery/cloud/gateway/terabox_web_state.py'
+      - 'apps/mimmi-gallery/cloud/test_terabox_web_state.py'
       - 'apps/mimmi-gallery/cloud/gateway/individual_import.py'
       - 'apps/mimmi-gallery/cloud/gateway/sealed_session.py'
       - 'apps/mimmi-gallery/cloud/test_sealed_session.py'
@@ -35,6 +37,8 @@ on:
       - 'apps/mimmi-gallery/cloud/gateway/cookie_format.py'
       - 'apps/mimmi-gallery/cloud/gateway/Dockerfile'
       - 'apps/mimmi-gallery/cloud/test_container_import.py'
+      - 'apps/mimmi-gallery/cloud/gateway/terabox_web_state.py'
+      - 'apps/mimmi-gallery/cloud/test_terabox_web_state.py'
       - 'apps/mimmi-gallery/cloud/gateway/individual_import.py'
       - 'apps/mimmi-gallery/cloud/gateway/sealed_session.py'
       - 'apps/mimmi-gallery/cloud/test_sealed_session.py'
@@ -63,5 +67,6 @@ jobs:
           python apps/mimmi-gallery/cloud/test_container_import.py
           python apps/mimmi-gallery/cloud/test_individual_import.py
           python apps/mimmi-gallery/cloud/test_sealed_session.py
+          python apps/mimmi-gallery/cloud/test_terabox_web_state.py
           node apps/gallery-archive/test_owner_snapshot.cjs
           node --check apps/yui-gallery/owner-media.js
