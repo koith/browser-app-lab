@@ -8,6 +8,7 @@ import unittest
 import yaml
 from qa_new_physical_photos import parse_cli
 from native_qa_checkpoint import in_partition
+from physical_qa_matrix import matrix as build_matrix
 
 
 class PhysicalMatrixTests(unittest.TestCase):
@@ -25,9 +26,12 @@ class PhysicalMatrixTests(unittest.TestCase):
     def test_every_real_matrix_job_parses_and_partitions_all_photos(self):
         root=Path(__file__).resolve().parents[2]
         workflow=yaml.safe_load((root/'.github/workflows/gallery-newly-stored-photo-qa.yml').read_text())
-        matrix=workflow['jobs']['actual-deployed-originals']['strategy']['matrix']
-        axes={k:v for k,v in matrix.items() if k!='include'}
-        rows=[dict(zip(axes,values)) for values in itertools.product(*axes.values())]+matrix['include']
+        job=workflow['jobs']['actual-deployed-originals']
+        self.assertEqual(job['strategy']['matrix'],'${{ fromJSON(needs.syntax.outputs.matrix) }}')
+        self.assertEqual(job['timeout-minutes'],24)
+        self.assertEqual(job['strategy']['max-parallel'],4)
+        self.assertIn("needs.syntax.outputs.has_changes == 'true'",job['if'])
+        rows=build_matrix({'mimmi':1029,'yui':14})
         mimmi=[r for r in rows if r['model']=='mimmi']
         for first,second in zip(mimmi[::2],mimmi[1::2]):
             self.assertEqual(first['shard'],second['shard'])
@@ -47,6 +51,21 @@ class PhysicalMatrixTests(unittest.TestCase):
                             self.assertEqual(chunk,list(range(chunk[0],chunk[-1]+1)))
                         positions.extend(chunk)
                     self.assertEqual(sorted(positions),list(range(count)),(model,browser,count,partition))
+
+    def test_dynamic_counts_never_drop_a_new_row_or_create_empty_photo_jobs(self):
+        self.assertEqual(build_matrix({'mimmi':0,'yui':0}),[])
+        for count in (1,12,20,21,253,408,558,991,1029,1200):
+            rows=build_matrix({'mimmi':count,'yui':3})
+            self.assertEqual(rows[0]['model'],'yui' if count>3 else 'mimmi')
+            for model,number in [('mimmi',count),('yui',3)]:
+                for browser in ('chromium','webkit'):
+                    positions=[]
+                    for row in rows:
+                        if row['model']!=model or row['browser']!=browser:continue
+                        chunk=[n for n in range(number) if in_partition(n,number,row['shard'],row['shards'],'contiguous')]
+                        self.assertTrue(chunk);positions.extend(chunk)
+                    self.assertEqual(positions,list(range(number)))
+        self.assertTrue(all(row['model']=='yui' for row in build_matrix({'mimmi':0,'yui':3})))
 
     def test_invalid_and_unbounded_shards_still_fail(self):
         for shard,shards in [(0,0),(0,25),(-1,24),(24,24)]:
