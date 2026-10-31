@@ -73,7 +73,7 @@ def import_reviewed(audit_directory, live_manifest, live_png_dir):
             staged.append((dest, payload))
             w,h,ox,oy = observed["geometry"]
             prior[i] = {
-                "index": i, "url": "./original/OBS/bulk/" + dest.name,
+                "index": i, "url": "./original/OBS/front-reviewed/" + dest.name,
                 "width": w, "height": h, "originX": ox, "originY": oy,
                 "sha256": observed["pngSHA256"]
             }
