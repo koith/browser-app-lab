@@ -14,6 +14,7 @@ on:
       - 'apps/gallery-archive/qa_real_gallery_browser.py'
       - 'apps/gallery-archive/test_viewer_only_ui.py'
       - 'apps/mimmi-gallery/cloud/gateway/main.py'
+      - 'apps/mimmi-gallery/cloud/test_copyto_media_fallback.py'
       - 'apps/mimmi-gallery/cloud/gateway/portal.py'
       - 'apps/mimmi-gallery/cloud/gateway/requirements.txt'
       - 'apps/mimmi-gallery/cloud/gateway/Dockerfile'
@@ -53,6 +54,7 @@ jobs:
           python apps/gallery-archive/test_viewer_only_ui.py
           python -m pip install -r apps/mimmi-gallery/cloud/gateway/requirements.txt
           python apps/mimmi-gallery/cloud/test_first_party_portal.py
+          python apps/mimmi-gallery/cloud/test_copyto_media_fallback.py
   real-original-gallery-chromium:
     needs: private-photo-browser-code-qa
     if: |
