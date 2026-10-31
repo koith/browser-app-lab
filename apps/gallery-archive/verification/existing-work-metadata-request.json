@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "model": "mimmi",
+  "metadata_only": true,
+  "scope": "already_uploaded_originals_readonly",
+  "metadata_sha256": "bc2199700617c226e58b48e8bc57e4c6f63e27e178515faf92286a6286e80c65",
+  "expected_originals": 253,
+  "request": "2026-10-31-three-existing-reviewed-works",
+  "image_bytes_included": 0,
+  "live_service_permission_changes": false
+}
