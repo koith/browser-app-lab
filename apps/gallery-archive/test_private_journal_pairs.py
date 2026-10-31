@@ -9,7 +9,7 @@ from unittest.mock import patch
 from PIL import Image
 import test_deferred_verified_batch as fixtures
 from private_collection_snapshot import STATE
-from recover_private_journal_pairs import recover,producer_proof,prior_recovery_proof,CREATORS
+from recover_private_journal_pairs import recover,producer_proof,prior_recovery_proof,completed_baseline_proof,CREATORS
 from merge_incremental import checked_row,merge
 from publish_owner_index import clean_catalog
 
@@ -174,6 +174,16 @@ class JournalPairsTests(unittest.TestCase):
         with patch('recover_private_journal_pairs.github',side_effect=[run,jobs]):
             with self.assertRaisesRegex(ValueError,'independently preserved'):
                 prior_recovery_proof({'run':123,'attempt':1,'head':'a'*40},'mimmi')
+
+    def test_partial_or_wrong_native_baseline_never_authorizes_the_next_publication(self):
+        document={'completed_baseline_native_QA_run':123,'completed_owner_index_commit':'a'*40}
+        run={'head_sha':'a'*40,'head_branch':'main','head_repository':{'full_name':'koith/browser-app-lab'},
+             'path':'.github/workflows/gallery-newly-stored-photo-qa.yml','status':'completed','conclusion':'success'}
+        with patch('recover_private_journal_pairs.github',return_value=run):completed_baseline_proof(document)
+        for change in [{'conclusion':'failure'},{'status':'in_progress'},{'head_sha':'b'*40},{'head_branch':'other'},
+                       {'path':'.github/workflows/static.yml'}]:
+            with self.subTest(change=change),patch('recover_private_journal_pairs.github',return_value={**run,**change}):
+                with self.assertRaisesRegex(ValueError,'has not completed'):completed_baseline_proof(document)
 
 
 if __name__=='__main__':unittest.main(verbosity=2)

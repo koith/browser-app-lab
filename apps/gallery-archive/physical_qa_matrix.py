@@ -8,7 +8,8 @@ import subprocess
 import requests
 from native_qa_checkpoint import changed_rows
 
-BASELINE='9b38a8169240b8d084bf2e1f4f3f85e0ff644858'
+# Both native browsers completed every changed row in run 41202443783 (attempt 2).
+BASELINE='c6f2a2cf634ec3c7d58acd6054b6eaab15073023'
 MODELS=('yui','mimmi')
 ROOT=Path(__file__).resolve().parents[2]
 
