@@ -4,6 +4,8 @@ on:
     paths:
       - '.github/workflows/rog-obs-bulk-recovery.yml'
       - 'apps/4leaf/rog/tools/decode-original-obs-bulk.py'
+      - 'apps/4leaf/rog/tools/dump-original-paks.py'
+      - 'apps/4leaf/rog/tests/test_original_paks_full_dump.py'
       - 'apps/4leaf/rog/tests/test_obs_native_640stride.py'
       - 'apps/4leaf/rog/tools/probe-original-obs-near-rows.py'
       - 'apps/4leaf/rog/tools/probe-original-obs-640stride.py'
@@ -63,6 +65,35 @@ jobs:
           unzip -q /tmp/leaf-obs-installer/client.zip 'data1.cab' 'data1.hdr' -d /tmp/leaf-obs-installer
           unshield x -d /tmp/leaf-obs-resources /tmp/leaf-obs-installer/data1.cab >/dev/null
           rm -f /tmp/leaf-obs-installer/client.zip
+      - name: Unit-test complete OBS frame enumeration independently of historical data
+        run: |
+          python3 -m py_compile apps/4leaf/rog/tools/dump-original-paks.py
+          python3 apps/4leaf/rog/tests/test_original_paks_full_dump.py
+      - name: Quarantine complete original OBS OBS2 OBS3 member/frame audit
+        run: |
+          python3 apps/4leaf/rog/tools/dump-original-paks.py \
+            /tmp/leaf-obs-resources /tmp/leaf-obs-exhaustive-audit \
+            --cards apps/4leaf/rog/original/chessmen.json
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          root=Path('/tmp/leaf-obs-exhaustive-audit')
+          report=json.loads((root/'full-frame-report.json').read_text())
+          assert report['totalAttemptedFrames']>0,report
+          assert report['totalAttemptedFrames']==(report['strictDecodedFrames']+
+                 report['failedFrameDecodes']),report
+          assert sum(1 for p in (root/'frames').rglob('*.png'))<=report['strictDecodedFrames']
+          print('OBS_EXHAUSTIVE_ORIGINAL_SOURCE_AUDIT',report['totalNativeDeclaredFrames'],
+                report['strictDecodedFrames'],report['failedFrameDecodes'],
+                'PRIOR_MANIFEST_REFERENCE',report['priorManifestFrames'])
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: 4leaf-original-obs-all-frame-quarantine
+          path: /tmp/leaf-obs-exhaustive-audit
+          retention-days: 7
+          if-no-files-found: warn
       - name: Inventory historical Dice 3D, sprite, model and battle resource names from SHA-verified client
         run: |
           python3 -m py_compile apps/4leaf/rog/tools/audit-original-dice-resources.py
