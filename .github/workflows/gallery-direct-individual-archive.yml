@@ -15,6 +15,8 @@ on:
       - apps/gallery-archive/test_teapawt_public.py
       - apps/gallery-archive/visual_public_work.py
       - apps/gallery-archive/load_pending_individual.py
+      - apps/gallery-archive/read_owner_metadata.py
+      - apps/gallery-archive/test_owner_metadata.py
       - apps/gallery-archive/test_pending_individual.py
       - apps/mimmi-gallery/cloud/gateway/individual_import.py
       - apps/mimmi-gallery/cloud/test_individual_import.py
@@ -37,6 +39,8 @@ on:
       - apps/gallery-archive/test_teapawt_public.py
       - apps/gallery-archive/visual_public_work.py
       - apps/gallery-archive/load_pending_individual.py
+      - apps/gallery-archive/read_owner_metadata.py
+      - apps/gallery-archive/test_owner_metadata.py
       - apps/gallery-archive/test_pending_individual.py
       - apps/mimmi-gallery/cloud/gateway/individual_import.py
       - apps/mimmi-gallery/cloud/test_individual_import.py
@@ -70,6 +74,7 @@ jobs:
           python apps/gallery-archive/test_visual_public_work.py
           python apps/gallery-archive/test_work_coverage.py
           python apps/gallery-archive/test_pending_individual.py
+          python apps/gallery-archive/test_owner_metadata.py
           python apps/mimmi-gallery/cloud/test_individual_import.py
           python apps/mimmi-gallery/cloud/test_sealed_session.py
           python apps/gallery-archive/test_remote_readback_deadline.py
@@ -127,7 +132,7 @@ jobs:
           echo "RCLONE_CONFIG_ARCHIVE_COOKIE=$cookie" >> "$GITHUB_ENV"
           echo "ARCHIVE_REMOTE=$remote" >> "$GITHUB_ENV"
           export RCLONE_CONFIG_ARCHIVE_COOKIE="$cookie"
-          python apps/gallery-archive/safe_rclone.py cat "$remote/metadata/catalog.json" --timeout 60s --retries 1 > "$RUNNER_TEMP/owner-before.json"
+          python apps/gallery-archive/read_owner_metadata.py --remote "$remote" --model "$MODEL" --out "$RUNNER_TEMP/owner-before.json" --published-index "apps/$MODEL-gallery/owner-index.json"
           python - <<'PY'
           import json,os
           from pathlib import Path
