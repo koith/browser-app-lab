@@ -1,0 +1,27 @@
+name: Yui public feed adapter QA
+on:
+  pull_request:
+    paths:
+      - apps/yui-gallery/sync_feed.py
+      - apps/yui-gallery/test_sync_feed_offline.py
+      - .github/workflows/yui-feed-adapter-qa.yml
+  push:
+    paths:
+      - apps/yui-gallery/sync_feed.py
+      - apps/yui-gallery/test_sync_feed_offline.py
+      - .github/workflows/yui-feed-adapter-qa.yml
+permissions:
+  contents: read
+jobs:
+  offline:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile the public feed adapter
+        run: python -m py_compile apps/yui-gallery/sync_feed.py
+      - name: Test source API and preserve prior records
+        run: python apps/yui-gallery/test_sync_feed_offline.py
