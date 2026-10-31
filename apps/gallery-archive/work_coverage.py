@@ -52,14 +52,19 @@ def publisher(record):
 
 
 def total_evidence(a,filename):
-    source=a.get('source') or a.get('url')
+    source=a.get('source') or a.get('url') or next(iter(a.get('source_pages',[])),None)
     official=(urlsplit(str(source)).hostname or '').lower() in ('djawaphoto.com','www.djawaphoto.com')
     out=[]
-    for field in ('advertised_photos','expected','photos'):
+    samples=(a.get('collection_kind')=='official_public_samples' or
+             str(a.get('status','')).startswith('official_samples'))
+    for field in ('advertised_publisher_photos','public_web_edition_photos','advertised_photos','expected','photos','sample_count_verified'):
         n=a.get(field)
         if type(n) is int and 1<=n<=25000:
+            kind=('official_public_samples' if field=='sample_count_verified' or (samples and field=='expected') else
+                  'web_edition_claim' if field=='public_web_edition_photos' else
+                  'publisher_advertised' if official else 'web_edition_claim')
             out.append({'total':n,'field':field,'source':source,'document':filename,
-                        'kind':'publisher_advertised' if official else 'web_edition_claim'})
+                        'kind':kind})
     return out
 
 
@@ -86,10 +91,13 @@ def build(root,model,owner=None,gallery=None):
             aid=a.get('id')
             if not aid:
                 # Keep previously unindexed works, but do not guess an owner ID.
-                source=a.get('source') or a.get('url')
-                if not source:continue
+                source=a.get('source') or a.get('url') or next((s.get('url') for s in a.get('sources',[]) if isinstance(s,dict) and s.get('url')),None)
+                if not source or not a.get('title'):continue
                 import hashlib
-                aid='catalogue-'+hashlib.sha256(str(source).encode()).hexdigest()[:16]
+                # A model index URL can document many different named works.
+                # Keep each work distinct; title similarity only suggests review.
+                identity='\n'.join((model,title_key(a['title']),str(source)))
+                aid='catalogue-'+hashlib.sha256(identity.encode()).hexdigest()[:16]
             records[canonical(aid,aliases)].append((filename,a))
     visible={a['id']:a for a in (gallery or {}).get('albums',[])}
     global_sha=defaultdict(set)
@@ -104,6 +112,8 @@ def build(root,model,owner=None,gallery=None):
         for filename,a in group:
             if a.get('title') and a['title'] not in names:names.append(a['title'])
             if a.get('source') or a.get('url'):sources.add(a.get('source') or a.get('url'))
+            sources.update(u for u in a.get('source_pages',[]) if isinstance(u,str))
+            sources.update(s['url'] for s in a.get('sources',[]) if isinstance(s,dict) and isinstance(s.get('url'),str))
             proposals.extend(total_evidence(a,filename))
             if filename in ('owner','public'):continue
             for p in a.get('samples') or a.get('images') or []:
@@ -118,6 +128,7 @@ def build(root,model,owner=None,gallery=None):
         unique={(p['total'],p['kind'],p['source']):p for p in proposals};evidence=list(unique.values())
         publisher_totals={e['total'] for e in evidence if e['kind']=='publisher_advertised'}
         web_totals={e['total'] for e in evidence if e['kind']=='web_edition_claim'}
+        sample_totals={e['total'] for e in evidence if e['kind']=='official_public_samples'}
         selected=publisher_totals or web_totals
         expected=next(iter(selected)) if len(selected)==1 else None
         numbering_verified=(len(owned)==len(positions)==len({p['sha256'] for p in owned}) and
@@ -135,6 +146,8 @@ def build(root,model,owner=None,gallery=None):
         result.append({'id':aid,'model':model,'title':name,'title_variants':names,
             'publisher':next((publisher(a) for _,a in group if publisher(a)),None),'sources':sorted(sources),
             'known_total':expected,'total_evidence':evidence,'conflicting_totals':len(selected)>1,
+            'publisher_claimed_totals':sorted(publisher_totals),'web_edition_claimed_totals':sorted(web_totals),
+            'official_public_sample_counts':sorted(sample_totals),
             'owner_stored_rows':len(owned),'owner_distinct_sha256':len({p['sha256'] for p in owned}),
             'stored_numbers':sorted(positions),'public_stored_rows':len(pub),
             'gallery_displayed_rows':visible.get(aid,{}).get('images_count') if gallery is not None else None,
@@ -148,7 +161,12 @@ def build(root,model,owner=None,gallery=None):
     return {'schema_version':1,'model':model,'owner_rows':sum(len(a.get('images',[])) for a in owner['albums']),
         'owner_albums':sum(bool(a.get('images')) for a in owner['albums']),
         'owner_unique_sha256':len(global_sha),'gallery_measurement_supplied':gallery is not None,
+        'canonical_owner_works':sum(bool(photos) for photos in saved.values()),
+        'gallery_displayed_rows':sum(a['images_count'] for a in visible.values()) if gallery is not None else None,
         'raw_albums_10_or_fewer':sum(0<len(a.get('images',[]))<=10 for a in owner['albums']),
+        'known_incomplete_stored_works_10_or_fewer':sum(0<a['owner_distinct_sha256']<=10 and
+            a['known_total'] is not None and a['owner_distinct_sha256']<a['known_total'] for a in result),
+        'catalogue_records_without_stored_photos':sum(not a['owner_stored_rows'] and not a['public_stored_rows'] for a in result),
         'confirmed_missing_number_count':sum(len(a['missing_photo_numbers'] or []) for a in result),
         'unknown_numbering_album_count':sum(a['missing_photo_numbers'] is None for a in result),
         'same_normalized_title_review_only':[{'title_key':k,'ids':v} for k,v in titles.items() if len(v)>1],

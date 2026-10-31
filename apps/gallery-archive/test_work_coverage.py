@@ -6,6 +6,39 @@ from work_coverage import build,canonical,ranges,title_key
 
 
 class CoverageTests(unittest.TestCase):
+    def test_official_samples_are_not_publisher_edition_or_missing_numbers(self):
+        with tempfile.TemporaryDirectory() as name:
+            root=Path(name);base=root/'apps/yui-gallery';base.mkdir(parents=True)
+            photos=[{'number':i,'sha256':str(i)*64} for i in (1,2,3)]
+            owner={'model':'yui','albums':[{'id':'public-samples','images':photos}]}
+            (base/'stored-albums.json').write_text('{"model":"yui","albums":[]}')
+            record={'id':'public-samples','title':'Public work','expected':24,
+                    'advertised_publisher_photos':190,'collection_kind':'official_public_samples',
+                    'source_pages':['https://djawaphoto.com/portfolio/public-work/'],'images':photos}
+            (base/'additional-source-albums.json').write_text(json.dumps({'albums':[record]}))
+            result=build(root,'yui',owner,{'albums':[{'id':'public-samples','images_count':3}]})
+            work=result['albums'][0]
+            self.assertEqual(work['publisher_claimed_totals'],[190])
+            self.assertEqual(work['official_public_sample_counts'],[24])
+            self.assertEqual(work['known_total'],190);self.assertFalse(work['conflicting_totals'])
+            self.assertIsNone(work['missing_photo_numbers'])
+            self.assertEqual(result['gallery_displayed_rows'],3)
+            self.assertEqual(result['known_incomplete_stored_works_10_or_fewer'],1)
+
+    def test_multiple_research_works_on_same_model_index_are_preserved(self):
+        with tempfile.TemporaryDirectory() as name:
+            root=Path(name);base=root/'apps/mimmi-gallery';base.mkdir(parents=True)
+            (base/'stored-albums.json').write_text('{"model":"mimmi","albums":[]}')
+            works=[{'title':title,'advertised_photos':100,
+                    'sources':[{'url':'https://example.org/mimmi/'}]} for title in ('Work One','Work Two')]
+            (base/'research-catalogue.json').write_text(json.dumps({'works':works}))
+            result=build(root,'mimmi',{'model':'mimmi','albums':[]})
+            self.assertEqual(len(result['albums']),2)
+            self.assertEqual(len({a['id'] for a in result['albums']}),2)
+            self.assertEqual(result['catalogue_records_without_stored_photos'],2)
+            self.assertEqual(result['owner_rows'],0)
+            self.assertTrue(all(a['sources']==['https://example.org/mimmi/'] for a in result['albums']))
+
     def test_alias_cycle_rejected_and_ranges(self):
         with self.assertRaises(ValueError):canonical('a',{'a':'b','b':'a'})
         self.assertEqual(ranges([1,2,5,6,7]),[[1,2],[5,7]])
