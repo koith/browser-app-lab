@@ -5,7 +5,7 @@ from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
-from read_owner_metadata import read,matches
+from read_owner_metadata import read,matches,ProviderVerificationRequired
 
 
 class OwnerMetadataTests(unittest.TestCase):
@@ -47,6 +47,12 @@ class OwnerMetadataTests(unittest.TestCase):
             with self.assertRaises(ValueError):read(self.remote,'mimmi',reader=denied)
             run.assert_not_called()
         with self.assertRaises(ValueError):read('archive:OtherOwner/metadata/catalog.json','mimmi',reader=denied)
+
+    def test_known_provider_verification_never_uses_a_download_alternative(self):
+        with patch('read_owner_metadata.subprocess.run') as run:
+            with self.assertRaises(ProviderVerificationRequired):
+                read(self.remote,'mimmi',reader=lambda *a,**k:b'{"errno":400141}')
+            run.assert_not_called()
 
 
 if __name__=='__main__':unittest.main(verbosity=2)

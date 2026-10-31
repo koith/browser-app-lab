@@ -78,6 +78,34 @@ def load(owner,documents,model):
         {**a,'source_coverage':coverage.get(a['id'],{})} for a in albums.values()]},batches
 
 
+def accessible_documents(entries,remote,model,reader=None):
+    """Keep inaccessible queues intact without blocking independent acquisition.
+
+    A challenged object is never imported, deleted, retried with other credentials
+    or treated as verified. All other malformed/untrusted metadata still fails.
+    """
+    from read_owner_metadata import read,ProviderVerificationRequired
+    if reader is None:reader=read
+    if not isinstance(entries,list) or len(entries)>30:
+        raise ValueError('Invalid bounded individual queue list')
+    documents=[];held=0
+    prefix=remote.rstrip('/')+'/metadata/pending-individual/'+model
+    for entry in entries:
+        name=entry.get('Path','')
+        if not re.fullmatch(r'[a-f0-9]{64}\.json',name):continue
+        if type(entry.get('Size')) is not int or not 0<entry['Size']<=2_000_000:
+            raise ValueError('Pending metadata entry has an invalid declared size')
+        try:data=reader(prefix+'/'+name,model,batch=name[:-5])
+        except ProviderVerificationRequired:
+            held+=1
+            print('OWNER_PENDING_PROVIDER_VERIFICATION_HELD',model,name[:12],
+                  'IMPORTED',False,'REMOVED',False,'RETRIED',False,flush=True)
+            continue
+        if data is None or len(data)>2_000_000:raise ValueError('Pending queue unavailable or too large')
+        documents.append((name,json.loads(data)))
+    return documents,held
+
+
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('--owner',type=Path,required=True);p.add_argument('--stage',type=Path,required=True)
     p.add_argument('--remote',required=True);p.add_argument('--model',choices=['mimmi','yui'],required=True)
@@ -85,20 +113,7 @@ if __name__=='__main__':
     prefix=args.remote.rstrip('/')+'/metadata/pending-individual/'+args.model
     raw=storage(['lsjson',prefix,'--files-only','--max-depth','1'])
     entries=json.loads(raw) if raw else []
-    if len(entries)>30:raise ValueError('Bounded individual queue list exceeded')
-    documents=[]
-    for entry in entries:
-        name=entry.get('Path','')
-        if not re.fullmatch(r'[a-f0-9]{64}\.json',name):continue
-        # These small, individually bounded JSON documents require a complete
-        # response. Range/head reads can yield a provider error document that
-        # must never be mistaken for another model's verified pending queue.
-        if type(entry.get('Size')) is not int or not 0<entry['Size']<=2_000_000:
-            raise ValueError('Pending metadata entry has an invalid declared size')
-        from read_owner_metadata import read
-        data=read(prefix+'/'+name,args.model,batch=name[:-5])
-        if data is None or len(data)>2_000_000:raise ValueError('Pending queue unavailable or too large')
-        documents.append((name,json.loads(data)))
+    documents,held=accessible_documents(entries,args.remote,args.model)
     delta,batches=load(json.loads(args.owner.read_text()),documents,args.model)
     count=sum(len(a['images']) for a in delta['albums'])
     if count:
@@ -111,5 +126,8 @@ if __name__=='__main__':
                    'source_coverage':a.get('source_coverage',{}),
                    'engine':'signed_individual_bytes_then_independent_Actions_SHA_readback'} for a in delta['albums']]}
         (root/'collection-audit.json').write_text(json.dumps(audit,ensure_ascii=False,indent=2)+'\n')
-    with args.github_output.open('a') as out:out.write('found='+str(bool(count)).lower()+'\n')
+    with args.github_output.open('a') as out:
+        out.write('found='+str(bool(count)).lower()+'\n')
+        out.write('provider_held_batches='+str(held)+'\n')
+    print('OWNER_PENDING_PROVIDER_HELD_BATCHES',args.model,held,'NOT_IMPORTED_OR_REMOVED',True,flush=True)
     print('OWNER_PENDING_INDIVIDUAL_ROWS',args.model,count,'REMOTE_REVERIFICATION_REQUIRED',bool(count),flush=True)
