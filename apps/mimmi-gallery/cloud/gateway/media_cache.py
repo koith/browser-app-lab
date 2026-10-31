@@ -2,6 +2,28 @@
 import asyncio
 import hashlib
 from collections import OrderedDict
+from fastapi import HTTPException
+
+
+async def read_media_with_transport_recovery(reader, *, deadline_seconds=115):
+    """One retry for an explicitly classified interrupted read, same total cap.
+
+    Never retry authorization, verification, legal denials or integrity errors.
+    The caller still checks every returned byte against the original SHA.
+    """
+    if not 0<deadline_seconds<=115:raise ValueError('Invalid existing media read deadline')
+    async def bounded_read():
+        try:return await reader()
+        except HTTPException as error:
+            if (error.status_code!=502 or
+                    (error.headers or {}).get('X-Archive-Read-Cause')!='transport_interruption'):
+                raise
+            print('OWNER_MEDIA_CLASSIFIED_TRANSPORT_READ_RECOVERY',flush=True)
+            await asyncio.sleep(.2)
+            return await reader()
+    try:return await asyncio.wait_for(bounded_read(),timeout=deadline_seconds)
+    except asyncio.TimeoutError:
+        raise HTTPException(status_code=504,detail='Cloud read timed out') from None
 
 
 class VerifiedMediaCache:
