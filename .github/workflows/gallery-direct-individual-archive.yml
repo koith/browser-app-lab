@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - apps/gallery-archive/direct_photo_pipeline.py
+      - apps/gallery-archive/defer_verified_batch.py
+      - apps/gallery-archive/test_deferred_verified_batch.py
       - apps/gallery-archive/transfer_individual_files.py
       - apps/gallery-archive/test_transfer_individual_files.py
       - apps/gallery-archive/verify_terabox.py
@@ -25,6 +27,8 @@ on:
   pull_request:
     paths:
       - apps/gallery-archive/direct_photo_pipeline.py
+      - apps/gallery-archive/defer_verified_batch.py
+      - apps/gallery-archive/test_deferred_verified_batch.py
       - apps/gallery-archive/transfer_individual_files.py
       - apps/gallery-archive/test_transfer_individual_files.py
       - apps/gallery-archive/verify_terabox.py
@@ -59,6 +63,7 @@ jobs:
       - run: python -m pip install -r apps/mimmi-gallery/cloud/gateway/requirements.txt requests beautifulsoup4
       - run: |
           python apps/gallery-archive/test_direct_photo_pipeline.py
+          python apps/gallery-archive/test_deferred_verified_batch.py
           python apps/gallery-archive/test_transfer_individual_files.py
           python apps/gallery-archive/test_teapawt_public.py
           python apps/gallery-archive/test_public_failures.py
@@ -94,6 +99,9 @@ jobs:
       YUI_COOKIE: ${{ secrets.YUI_TERABOX_COOKIE }}
       RCLONE_CONFIG_ARCHIVE_TYPE: terabox
       MODEL: ${{ matrix.model }}
+      # Keep the new Mimmi batch private until the pinned full-photo QA ends.
+      # Release by changing deferred to immediate after that actual QA passes.
+      ARCHIVE_PUBLICATION_MODE: ${{ matrix.model == 'mimmi' && 'deferred' || 'immediate' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -147,7 +155,12 @@ jobs:
         if: steps.incoming.outputs.found != 'true'
         run: |
           mkdir -p "$RUNNER_TEMP/stage/originals" "$RUNNER_TEMP/stage/previews"
-          python apps/gallery-archive/direct_photo_pipeline.py --model "$MODEL" --owner "$RUNNER_TEMP/owner-before.json" --out "$RUNNER_TEMP/stage" --max-new 500 --max-pages 40
+          focused=()
+          if [[ "$ARCHIVE_PUBLICATION_MODE" == deferred ]]; then focused=(--focused-only); fi
+          python apps/gallery-archive/direct_photo_pipeline.py --model "$MODEL" --owner "$RUNNER_TEMP/owner-before.json" --out "$RUNNER_TEMP/stage" --max-new 500 --max-pages 40 "${focused[@]}"
+      - name: Content-address focused files for an unpublished private batch
+        if: env.ARCHIVE_PUBLICATION_MODE == 'deferred' && steps.incoming.outputs.found != 'true'
+        run: python apps/gallery-archive/defer_verified_batch.py prepare --stage "$RUNNER_TEMP/stage" --owner "$RUNNER_TEMP/owner-before.json"
       - name: Merge measured new rows without replacing existing owner photos
         run: python apps/gallery-archive/merge_incremental.py --model "$MODEL" --previous "$RUNNER_TEMP/owner-before.json" --stage "$RUNNER_TEMP/stage"
       - name: Distinguish a real new-file transaction from a no-op
@@ -168,20 +181,23 @@ jobs:
           python apps/gallery-archive/safe_rclone.py copy "$RUNNER_TEMP/stage/originals" "$ARCHIVE_REMOTE/originals" --ignore-existing --transfers 2 --checkers 2 --timeout 60s --retries 1
           python apps/gallery-archive/safe_rclone.py copy "$RUNNER_TEMP/stage/previews" "$ARCHIVE_REMOTE/previews" --ignore-existing --transfers 2 --checkers 2 --timeout 60s --retries 1
           python apps/gallery-archive/verify_terabox.py --stage "$RUNNER_TEMP/stage" --remote "$ARCHIVE_REMOTE" --workers 2 --only-staged
+      - name: Persist the exact remotely verified batch without resetting deployed gallery QA
+        if: steps.delta.outputs.changed == 'true' && env.ARCHIVE_PUBLICATION_MODE == 'deferred' && steps.incoming.outputs.found != 'true'
+        run: python apps/gallery-archive/defer_verified_batch.py persist --stage "$RUNNER_TEMP/stage" --remote "$ARCHIVE_REMOTE"
       - name: Commit the owner catalogue only after full new-object readback
-        if: steps.delta.outputs.changed == 'true'
+        if: steps.delta.outputs.changed == 'true' && env.ARCHIVE_PUBLICATION_MODE != 'deferred'
         run: |
           set -euo pipefail
           python apps/gallery-archive/safe_rclone.py copyto "$RUNNER_TEMP/stage/metadata/catalog.json" "$ARCHIVE_REMOTE/metadata/catalog.json" --ignore-times --timeout 60s --retries 1
           python apps/gallery-archive/safe_rclone.py cat "$ARCHIVE_REMOTE/metadata/catalog.json" --timeout 60s --retries 1 > "$RUNNER_TEMP/catalog-readback.json"
           cmp "$RUNNER_TEMP/stage/metadata/catalog.json" "$RUNNER_TEMP/catalog-readback.json"
       - name: Publish only verified owner metadata, never original image bytes or storage keys
-        if: steps.delta.outputs.changed == 'true'
+        if: steps.delta.outputs.changed == 'true' && env.ARCHIVE_PUBLICATION_MODE != 'deferred'
         run: |
           python apps/gallery-archive/publish_owner_index.py --model "$MODEL" --input "$RUNNER_TEMP/catalog-readback.json" --output "$RUNNER_TEMP/owner-index.json"
           python apps/gallery-archive/commit_owner_index.py --model "$MODEL" --input "$RUNNER_TEMP/owner-index.json"
       - name: Deploy verified metadata, followed by real deployed browser QA
-        if: steps.delta.outputs.changed == 'true'
+        if: steps.delta.outputs.changed == 'true' && env.ARCHIVE_PUBLICATION_MODE != 'deferred'
         run: |
           gh workflow run static.yml --ref main
           gh workflow run gallery-deployed-pages-photo-qa.yml --ref main
@@ -198,7 +214,9 @@ jobs:
           path=root/'collection-audit.json';audit=json.loads(path.read_text())
           verified=json.loads((root/'remote-verification.json').read_text())
           assert verified['failed']==0 and verified['media_checked']==verified['full_SHA256_verified']
-          audit.update(remote_verified_files=verified['photos'],remote_verified_media_objects=verified['full_SHA256_verified'],owner_index_published=True,
+          audit.update(remote_verified_files=verified['photos'],remote_verified_media_objects=verified['full_SHA256_verified'],
+              owner_index_published=os.environ['ARCHIVE_PUBLICATION_MODE']!='deferred',
+              publication_mode=os.environ['ARCHIVE_PUBLICATION_MODE'],
               gallery_qa_workflow='gallery-newly-stored-photo-qa.yml')
           path.write_text(json.dumps(audit,ensure_ascii=False,indent=2)+'\n')
           PY
