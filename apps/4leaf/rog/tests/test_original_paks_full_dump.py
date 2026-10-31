@@ -19,7 +19,7 @@ def pack(members):
     directory = b""
     for name, blob in members:
         body += blob
-        filename = name.encode("ascii").ljust(24, b"\\x00")
+        filename = name.encode("ascii").ljust(24, b"\x00")
         directory += bytes(x ^ 255 for x in filename)
         directory += struct.pack("<I", (len(body) - 1) ^ 0xffffffff)
     return struct.pack("<I", len(members) ^ 0xffffffff) + directory + body
