@@ -25,12 +25,12 @@ def pack(members):
     return struct.pack("<I", len(members) ^ 0xffffffff) + directory + body
 
 
-def obs(frame_count=2, broken=False):
+def obs(frame_count=2, broken=False, thin=False):
     header = bytearray(132)
     struct.pack_into("<H", header, 70, frame_count)
     frames = bytearray()
     for frame in range(frame_count):
-        payload = struct.pack("<HHBB", 1, 0, 11, 1) + bytes([frame + 1]) * 45
+        payload = struct.pack("<HHBB", 1, 0, 11, 1) + bytes([0 if thin else frame + 1]) * 45
         if broken and frame == frame_count - 1:
             payload = payload[:9]
         frames += struct.pack("<IHHhh", len(payload), 50, 1, 0, 0) + payload
@@ -61,6 +61,24 @@ class FullFrameSourceAudit(unittest.TestCase):
             self.assertEqual(summary["unparsedDeclaredFrames"], 3)
             self.assertIn("palette", (json.loads((root / "result/full-frame-report.json").read_text())
                            ["packs"][0]["members"][0]["parseError"]).lower())
+
+    def test_sparse_source_is_quarantined_without_strict_admission(self):
+        with tempfile.TemporaryDirectory() as d:
+            root = pathlib.Path(d)
+            (root / "OBS.pak").write_bytes(pack([("1040.obs", obs(1, thin=True))]))
+            summary = auditor.collect(root, root / "result", ["0040"])
+            self.assertEqual(summary["strictDecodedFrames"], 0)
+            self.assertEqual(summary["failedFrameDecodes"], 1)
+            self.assertEqual(summary["quarantinedLowOpacityFrames"], 1)
+            report = json.loads((root / "result/full-frame-report.json").read_text())
+            frame = report["packs"][0]["members"][0]["frames"][0]
+            self.assertEqual(frame["status"], "QUARANTINED_LOW_OPACITY_SOURCE")
+            self.assertEqual(frame["nativeOpaquePixels"], 0)
+            self.assertTrue(frame["forensicOnly"])
+            self.assertFalse(frame.get("artifactPath"))
+            art = root / "result" / frame["forensicPNGPath"]
+            self.assertTrue(art.is_file())
+            self.assertEqual(len(art.read_bytes()) > 10, True)
 
     def test_rle_failure_recorded_as_failure_not_acceptance(self):
         with tempfile.TemporaryDirectory() as d:

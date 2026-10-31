@@ -90,6 +90,7 @@ def collect(archive_dir, output_dir, card_ids=None):
                "packs": [], "totalNativeDeclaredFrames": 0,
                "totalAttemptedFrames": 0, "strictDecodedFrames": 0,
                "failedFrameDecodes": 0, "unparsedDeclaredFrames": 0,
+               "quarantinedLowOpacityFrames": 0, "quarantinedLowOpacityPNGBytes": 0,
                "exportedPNGBytes": 0, "exportLimitReached": False,
                "actorIdentityUnverified": True, "directionActionMappingUnverified": True}
     for pack in files:
@@ -143,6 +144,31 @@ def collect(archive_dir, output_dir, card_ids=None):
                     state["errorClass"] = classify(str(exc))
                     state["error"] = str(exc)
                     summary["failedFrameDecodes"] += 1
+                    # Source-authentic transparent/particle frames can contain
+                    # fewer than 45 nonzero pixels. Never reclassify as strict
+                    # or promote as character art. A forensic-only override
+                    # preserves the FULLY VALIDATED 640-stride packet format
+                    # and quarantines genuine bytes for future investigation.
+                    if "too transparent after strict decoding" in str(exc):
+                        forensic, evidence = codec.decode_rows(
+                            body, width, height, palette, minimum_opaque_pixels=0)
+                        import io
+                        buf = io.BytesIO()
+                        forensic.save(buf, format="PNG", optimize=True)
+                        content = buf.getvalue()
+                        target_dir = output_dir / "quarantine-low-opacity" / pack.name
+                        target_dir.mkdir(parents=True, exist_ok=True)
+                        target = target_dir / (str(len(entry["members"]) - 1).zfill(4) +
+                                               "-f" + str(index).zfill(3) + ".png")
+                        target.write_bytes(content)
+                        state["status"] = "QUARANTINED_LOW_OPACITY_SOURCE"
+                        state["nativeOpaquePixels"] = evidence["opaquePixels"]
+                        state["forensicOnly"] = True
+                        state["sourceAdmission"] = "UNVERIFIED-AS-PLAYABLE/NOT-STRICT"
+                        state["forensicPNGPath"] = target.relative_to(output_dir).as_posix()
+                        state["forensicPNGSHA256"] = hashlib.sha256(content).hexdigest()
+                        summary["quarantinedLowOpacityFrames"] += 1
+                        summary["quarantinedLowOpacityPNGBytes"] += len(content)
                 else:
                     state["status"] = "STRICT_DECODED"
                     state["decoder"] = diagnostic["decoder"]
@@ -188,7 +214,8 @@ def main():
     print("ORIGINAL_OBS_FULL_AUDIT", json.dumps({
         k: summary[k] for k in ("totalNativeDeclaredFrames", "totalAttemptedFrames",
                                 "strictDecodedFrames", "failedFrameDecodes",
-                                "unparsedDeclaredFrames", "exportedPNGBytes",
+                                "unparsedDeclaredFrames", "quarantinedLowOpacityFrames",
+                                "quarantinedLowOpacityPNGBytes", "exportedPNGBytes",
                                 "exportLimitReached")}, sort_keys=True))
     if summary["totalAttemptedFrames"] == 0:
         raise RuntimeError("No source frame payloads parsed; full recovery NOT verified")
