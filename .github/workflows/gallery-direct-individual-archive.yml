@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - apps/gallery-archive/direct_photo_pipeline.py
+      - apps/gallery-archive/transfer_individual_files.py
+      - apps/gallery-archive/test_transfer_individual_files.py
       - apps/gallery-archive/verify_terabox.py
       - apps/gallery-archive/test_remote_readback_deadline.py
       - apps/gallery-archive/collect_teapawt_public.py
@@ -23,6 +25,8 @@ on:
   pull_request:
     paths:
       - apps/gallery-archive/direct_photo_pipeline.py
+      - apps/gallery-archive/transfer_individual_files.py
+      - apps/gallery-archive/test_transfer_individual_files.py
       - apps/gallery-archive/verify_terabox.py
       - apps/gallery-archive/test_remote_readback_deadline.py
       - apps/gallery-archive/collect_teapawt_public.py
@@ -55,6 +59,7 @@ jobs:
       - run: python -m pip install -r apps/mimmi-gallery/cloud/gateway/requirements.txt requests beautifulsoup4
       - run: |
           python apps/gallery-archive/test_direct_photo_pipeline.py
+          python apps/gallery-archive/test_transfer_individual_files.py
           python apps/gallery-archive/test_teapawt_public.py
           python apps/gallery-archive/test_public_failures.py
           python apps/gallery-archive/test_visual_public_work.py

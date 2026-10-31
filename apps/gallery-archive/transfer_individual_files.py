@@ -117,13 +117,30 @@ def connection_state(args):
     print('ENCRYPTED_OWNER_RESTART_STATE_PREPARED','PLAINTEXT_CREDENTIAL_EXPORTED',False,flush=True)
 
 
+def previously_verified_queues(root,raw,completed):
+    """Skip a repeated immutable queue only with current server object ACKs."""
+    path=root/'completed-work-queues.jsonl'
+    if not path.exists():return set()
+    pin=hashlib.sha256(raw).hexdigest();albums={a['id']:a for a in json.loads(raw)['albums']};queued=set()
+    for line in path.read_text().splitlines():
+        entry=json.loads(line);aid=entry.get('album');album=albums.get(aid)
+        if album is None:continue
+        required={p[k] for p in album['images'] for k in ('sha256','preview_sha256')}
+        expected=hashlib.sha256((pin+'\n'+aid).encode()).hexdigest()
+        if (required.issubset(completed) and entry.get('pending_batch')==expected
+                and type(entry.get('remote_verified_photos')) is int
+                and entry['remote_verified_photos']==len(album['images'])):queued.add(aid)
+    return queued
+
+
 def upload(args):
     root=args.plan;request,raw=gateway_client(root,args.origin)
     files=json.loads((root/'files.json').read_text())
     state=request('POST','/internal/individual-import/manifest',raw)
     completed=set(state.get('remote_verified_sha256',[]))
     if not completed.issubset(files):raise ValueError('Server acknowledgement outside the exact manifest')
-    plan=json.loads(raw);queued=set()
+    plan=json.loads(raw);queued=previously_verified_queues(root,raw,completed)
+    print('ALREADY_VERIFIED_IMMUTABLE_QUEUES_WITH_SERVER_ACKS',len(queued),flush=True)
     def publish_finished_works():
         for album in plan['albums']:
             aid=album['id'];required={p[k] for p in album['images'] for k in ('sha256','preview_sha256')}
