@@ -12,6 +12,7 @@ raw=b"verified-mimmi-image-byte-payload"*300
 h=hashlib.sha256(raw).hexdigest()
 catalog={"schema_version":1,"model":"mimmi","albums":[{"id":"mimmi-test",
     "title":"Offline sample", "images":[{"number":1,"key":"originals/mimmi-test/0001.jpg",
+        "source_photo_number":27,"historical_sha256":"private-source-correspondence",
         "bytes":len(raw),"sha256":h,"width":600,"height":800}]}]}
 async def read(key,limit,*,remote=None):
     if key=="metadata/catalog.json":return json.dumps(catalog).encode()
@@ -24,6 +25,10 @@ with TestClient(gateway.app) as client:
     assert client.get("/api/catalog").status_code==200
     headers={"Authorization":"Bearer offline-mimmi-test-token"}
     assert client.get("/api/catalog",headers=headers).json()["model"]=="mimmi"
+    viewer=client.get('/api/catalog').json()['albums'][0]['images'][0]
+    assert viewer['sha256']==h and viewer['width']==600
+    assert not {'key','source_photo_number','historical_sha256'}&viewer.keys()
+    assert catalog['albums'][0]['images'][0]['key']=='originals/mimmi-test/0001.jpg'
     img=client.get("/api/media/mimmi-test/1/original",headers=headers)
     assert img.status_code==200 and img.content==raw
     assert img.headers["content-type"].startswith("image/jpeg")
