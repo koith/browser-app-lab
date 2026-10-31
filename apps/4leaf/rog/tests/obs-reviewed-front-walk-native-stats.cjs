@@ -51,7 +51,8 @@ const {chromium,webkit}=require('playwright');
    assert.equal(evidence.rig,'original-obs-sprite',id);
    assert.ok(evidence.audited?.includes('visual-original-OBS-reviewed/front/'+id),JSON.stringify(evidence));
    assert.equal(evidence.frontWalk,'true','only inspected source front pair is allowed');
-   assert.equal(evidence.sequence,'25,30,25,30','moving character must NEVER spin through source back 0..7');
+   assert.equal(evidence.sequence,id==='0042'?'25,30,25,30':'25,26,27,28,29,30',
+    'verified original front frames only; moving chessman must NEVER spin through back 0..7');
    assert.equal(evidence.pose,'walk');
    assert.ok(evidence.src?.includes('/original/OBS/')&&
     evidence.src.endsWith('/10'+id.slice(2)+'-25.png'),JSON.stringify(evidence));
