@@ -23,6 +23,14 @@ SHA=re.compile(r'[a-f0-9]{64}\Z')
 ALBUM=re.compile(r'[a-z0-9][a-z0-9-]{1,100}\Z')
 
 
+def metadata_visibility_write_failure(detail):
+    # The pinned backend returns NewObject after successful apiFileUpload.
+    # A delayed filemetas result can therefore report this exact final error.
+    # It is only permission to read back, never permission to assume success.
+    return (bool(re.search(r'Failed to copyto:\s*object not found\s*$',detail))
+            and not re.search(r'Failed to login|\b(?:HTTP|status)[^\n]{0,25}\b(?:401|403|429|451)\b',detail,re.I))
+
+
 class IndividualImport:
     def __init__(self,catalog,put,read,root=None,state_provider=None):
         self.catalog,self.put,self.read=catalog,put,read
@@ -30,6 +38,19 @@ class IndividualImport:
         self.plan=None;self.objects={};self.verified=set();self.locks={}
         self.workers=asyncio.Semaphore(2)
         self.state_provider=state_provider
+
+    async def copy_and_read(self,model,local,target,limit):
+        try:await self.put(model,local,target,False)
+        except HTTPException as error:
+            if error.status_code!=502 or (error.headers or {}).get('X-Archive-Write-Cause')!='metadata_visibility':raise
+            # A single fresh read of the same owner object after metadata lag.
+            # No second write; callers still require full byte/SHA agreement.
+            await asyncio.sleep(1)
+        try:return await self.read(model,target,limit)
+        except HTTPException as error:
+            if error.status_code!=502 or (error.headers or {}).get('X-Archive-Read-Cause')!='transport_interruption':raise
+            await asyncio.sleep(1)
+            return await self.read(model,target,limit)
 
     def authorize(self,request):
         pin=os.environ.get('ARCHIVE_IMPORT_MANIFEST_SHA256','')
@@ -124,16 +145,7 @@ class IndividualImport:
                     local.write_bytes(raw)
                     try:
                         for target in spec['targets']:
-                            await self.put(self.plan['model'],local,target,False)
-                            # One fresh remote read after a classified network
-                            # interruption. Never retry a write, access denial,
-                            # or byte/hash mismatch as a successful photo.
-                            try:
-                                back=await self.read(self.plan['model'],target,spec['bytes']+1)
-                            except HTTPException as error:
-                                if error.status_code!=502 or (error.headers or {}).get('X-Archive-Read-Cause')!='transport_interruption':raise
-                                await asyncio.sleep(1)
-                                back=await self.read(self.plan['model'],target,spec['bytes']+1)
+                            back=await self.copy_and_read(self.plan['model'],local,target,spec['bytes']+1)
                             if len(back)!=spec['bytes'] or hashlib.sha256(back).hexdigest()!=digest:
                                 raise HTTPException(502,'Remote individual photo SHA mismatch')
                         self.verified.add(digest)
@@ -169,8 +181,7 @@ class IndividualImport:
         path=self.root/(batch+'.json');path.write_bytes(raw)
         target='metadata/pending-individual/'+self.plan['model']+'/'+batch+'.json'
         try:
-            await self.put(self.plan['model'],path,target,False)
-            if await self.read(self.plan['model'],target,len(raw)+1)!=raw:
+            if await self.copy_and_read(self.plan['model'],path,target,len(raw)+1)!=raw:
                 raise HTTPException(502,'Private transfer queue readback mismatch')
         finally:path.unlink(missing_ok=True)
         return {'pending_batch':batch,'remote_verified_photos':sum(len(a['images']) for a in albums),
