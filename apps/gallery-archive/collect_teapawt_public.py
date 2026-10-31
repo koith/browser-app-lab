@@ -54,6 +54,11 @@ def public_images_from_author(html,source,current):
             continue
         cards+=1
         for element in card.select("img,source,a[href]"):
+            # An author card can quote another person or an event poster.
+            # Those attachments are not the author's own photo attachments.
+            if element.find_parent(class_=re.compile(r'^(?:quote|quoted-tweet|retweet-header)$')):continue
+            nearest=element.find_parent(class_='timeline-item')
+            if nearest is not card:continue
             for field in (("href",) if element.name=="a" else
                           ("data-original","data-src","data-lazy-src","src","srcset","data-srcset")):
                 val=element.get(field)
@@ -65,7 +70,8 @@ def public_images_from_author(html,source,current):
                         # One public source image per canonical media ID; CDN
                         # format/resolution variants are not distinct photos.
                         key=p.path
-                        if key not in found:found[key]=u
+                        rank=lambda value:{'orig':3,'large':2,'medium':1}.get(dict(parse_qsl(urlsplit(value).query)).get('name'),0)
+                        if key not in found or rank(u)>rank(found[key]):found[key]=u
     next_page=None
     for a in soup.select("a[href]"):
         label=a.get_text(" ",strip=True).casefold()

@@ -15,6 +15,19 @@ def photo(seed):
 
 
 class DirectTests(unittest.TestCase):
+    def test_creator_feed_keeps_observed_original_and_rejects_quote_media(self):
+        page='https://teapawt.net/super_yuisan'
+        own='https://pbs.twimg.com/media/OwnPhoto1234.jpg?name=orig'
+        other='https://pbs.twimg.com/media/OtherPhoto1234.jpg?name=orig'
+        raw=f'''<div class="timeline-item" data-username="super_yuisan">
+          <img src="{own}"><div class="quote"><img src="{other}"></div>
+          <div class="timeline-item" data-username="other"><img src="{other}"></div></div>
+          <a href="/super_yuisan?cursor=observed">Load more</a>'''
+        urls,pages,status=page_images(raw,page,'yui')
+        self.assertEqual(urls,[own]);self.assertEqual(pages,[page+'?cursor=observed'])
+        self.assertEqual(status,'scoped_public_page')
+        self.assertEqual(page_images(raw,page,'mimmi')[0],[])
+
     def test_legacy_observed_pages_recover_only_curated_existing_work(self):
         with tempfile.TemporaryDirectory() as name:
             root=Path(name);base=root/'apps/yui-gallery';base.mkdir(parents=True)
