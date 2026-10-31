@@ -135,7 +135,13 @@ def restore_work(album,owner,stage):
 
 def main():
     os.umask(0o077)
-    digest=os.environ['EXPECTED_METADATA_SHA256'];run_id=int(os.environ['GITHUB_RUN_ID'])
+    request_path=ROOT/'apps/gallery-archive/verification/existing-work-metadata-request.json'
+    request=json.loads(request_path.read_text()) if request_path.exists() else {}
+    digest=os.environ.get('EXPECTED_METADATA_SHA256') or request.get('metadata_sha256','')
+    if not os.environ.get('EXPECTED_METADATA_SHA256') and (request.get('model')!='mimmi'
+            or request.get('metadata_only') is not True or request.get('scope')!='already_uploaded_originals_readonly'):
+        raise ValueError('A concrete protected-branch metadata-only request is required')
+    run_id=int(os.environ['GITHUB_RUN_ID'])
     attempt=int(os.environ['GITHUB_RUN_ATTEMPT'])
     if os.environ.get('GITHUB_REPOSITORY')!=REPOSITORY or not HEX.fullmatch(digest):
         raise ValueError('Only the same repository and exact predeclared metadata are allowed')
@@ -158,6 +164,8 @@ def main():
         if payload.get('size',0)>2800000:raise ValueError('Metadata envelope exceeds bounded size')
         envelope=json.loads(base64.b64decode(payload['content'],validate=False))
         data=unseal(envelope,recipient,private)
+        if request and sum(len(a['images']) for a in data['albums'])!=request['expected_originals']:
+            raise ValueError('Metadata does not match the concrete requested file count')
         raw=read_owner(REMOTE+'/metadata/catalog.json','mimmi',minimum=sum(len(a['images']) for a in
             json.loads((ROOT/'apps/mimmi-gallery/owner-index.json').read_text())['albums']))
         owner=json.loads(raw)

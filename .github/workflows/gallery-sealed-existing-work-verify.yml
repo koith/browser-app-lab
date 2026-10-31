@@ -9,13 +9,10 @@ on:
   push:
     branches: [main]
     paths:
-      - .github/workflows/gallery-sealed-existing-work-verify.yml
-      - apps/gallery-archive/sealed_work_metadata.py
-      - apps/gallery-archive/verify_sealed_existing_work.py
-      - apps/gallery-archive/test_sealed_work_metadata.py
-      - apps/gallery-archive/test_existing_owner_object_recovery.py
+      - apps/gallery-archive/verification/existing-work-metadata-request.json
   pull_request:
     paths:
+      - apps/gallery-archive/verification/existing-work-metadata-request.json
       - .github/workflows/gallery-sealed-existing-work-verify.yml
       - apps/gallery-archive/sealed_work_metadata.py
       - apps/gallery-archive/verify_sealed_existing_work.py
@@ -38,7 +35,7 @@ jobs:
           python apps/gallery-archive/test_deferred_verified_batch.py
   verify-existing-private-files:
     needs: validate-metadata-scope
-    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    if: (github.event_name == 'workflow_dispatch' || github.event_name == 'push') && github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     timeout-minutes: 70
     permissions:
