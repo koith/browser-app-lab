@@ -31,6 +31,12 @@ ALLOWED_ASSETS = {
     "owner-media.js", "photo-vault.js", "gallery-labels.js",
     "publishers.js", "stored-albums.json", "identity-exclusions.json",
     "album-covers.json", "album-aliases.json", "publishers.json",
+    # Required by the GitHub Pages Mimmi album composer and both owner-backed
+    # inventories. These files are already public static app metadata; the
+    # private TeraBox catalog and original media stay on the gateway.
+    "album-grouping.js", "owner-index.json",
+    # Forward-compatible with the Pages collision-recovery manifest.
+    "number-collision-distinct.json",
 }
 PORTAL_CSP = (
     "default-src 'self'; base-uri 'none'; frame-ancestors 'none'; "
