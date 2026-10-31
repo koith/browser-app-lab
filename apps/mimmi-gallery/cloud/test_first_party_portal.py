@@ -39,6 +39,10 @@ async def fake_public_asset(model,asset):
         return (b'{"albums":[]}',"application/json")
     if asset=="owner-media.js":
         return (b"window.PrivateTest=true;","application/javascript")
+    if asset=="album-grouping.js" and model=="mimmi":
+        return (b"window.MimmiAlbumGrouping={};","application/javascript")
+    if asset in ("owner-index.json", "number-collision-distinct.json"):
+        return (b'{"schema_version":1,"albums":[]}',"application/json")
     raise AssertionError(("Unauthorized public asset",model,asset))
 portal.public_asset=fake_public_asset
 
@@ -52,6 +56,16 @@ with TestClient(backend.app,base_url="https://testserver") as client:
         script=client.get(f"/gallery/{model}/owner-media.js")
         assert script.status_code==200
         assert "PrivateTest" in script.text
+        # A mounted Render gallery must serve the same public metadata files
+        # as GitHub Pages, not silently fail the owner album index.
+        owner_index=client.get(f"/gallery/{model}/owner-index.json")
+        assert owner_index.status_code==200
+        assert owner_index.json()["schema_version"]==1
+
+    # Mimmi depends on album-grouping.js during its initial render; the
+    # number-collision manifest is needed for distinct committed photos.
+    assert client.get("/gallery/mimmi/album-grouping.js").status_code==200
+    assert client.get("/gallery/mimmi/number-collision-distinct.json").status_code==200
 
     assert client.get("/gallery/yui/stored-albums.json").json()=={"albums":[]}
     assert client.get("/api/yui/catalog").json()["model"]=="yui"
