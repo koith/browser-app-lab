@@ -48,7 +48,7 @@ async def run(args):
             if d.get('model')!=args.model:raise ValueError('Wrong model in deployed comparison')
             return d
         before=await asyncio.to_thread(owner,args.since_commit)
-        after=await asyncio.to_thread(owner,'main')
+        after=await asyncio.to_thread(owner,args.current_commit or 'main')
         old={(a['id'],p['number']):p['sha256'] for a in before['albums'] for p in a['images']}
         selected=[{'id':a['id'],'images':[p for p in a['images'] if old.get((a['id'],p['number']))!=p['sha256']]} for a in after['albums']]
         selected=[a for a in selected if a['images']]
@@ -68,6 +68,7 @@ async def run(args):
             'deployed_url':f'{SITE}/{args.model}-gallery/',
             'TLS_verified_bridge':args.http_bridge,'photos':[],'page_errors':[],
             'since_commit':args.since_commit,'all_new_or_upgraded_rows':all_selected,
+            'current_owner_index_ref':args.current_commit or 'main',
             'shard':args.shard,'shards':args.shards}
     args.out.parent.mkdir(parents=True,exist_ok=True)
     if not selected:
@@ -221,10 +222,14 @@ def parse_cli(argv=None):
     parser.add_argument('--selection',type=Path,default=Path(__file__).parent/'verification/new-physical-photos-2026-10-30.json')
     parser.add_argument('--http-bridge',action='store_true')
     parser.add_argument('--since-commit',help='Exact public owner-index baseline; verify every changed/new SHA since it')
+    parser.add_argument('--current-commit',help='Pin the current owner-index snapshot for consistent matrix coverage')
     parser.add_argument('--shard',type=int,default=0)
     parser.add_argument('--shards',type=int,default=1)
     parser.add_argument('--out',type=Path,required=True)
     args=parser.parse_args(argv)
+    if args.current_commit and not args.since_commit:parser.error('Current snapshot requires an exact baseline')
+    for ref in [args.since_commit,args.current_commit]:
+        if ref is not None and not re.fullmatch('[a-f0-9]{40}',ref):parser.error('Exact owner-index commit required')
     if not 1<=args.shards<=24 or not 0<=args.shard<args.shards:parser.error('Invalid bounded QA shard')
     return args
 
