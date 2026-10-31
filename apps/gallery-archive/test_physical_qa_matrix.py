@@ -7,6 +7,7 @@ import unittest
 
 import yaml
 from qa_new_physical_photos import parse_cli
+from native_qa_checkpoint import in_partition
 
 
 class PhysicalMatrixTests(unittest.TestCase):
@@ -37,9 +38,15 @@ class PhysicalMatrixTests(unittest.TestCase):
             self.assertEqual((args.shard,args.shards),(row['shard'],row['shards']))
         for model,browser in itertools.product(['mimmi','yui'],['chromium','webkit']):
             jobs=[r for r in rows if r['model']==model and r['browser']==browser]
-            for count in [1,12,558,991,1200]:
-                positions=[i for r in jobs for i in range(count) if i%r['shards']==r['shard']]
-                self.assertEqual(sorted(positions),list(range(count)),(model,browser,count))
+            for count in [1,12,558,991,1029,1200]:
+                for partition in ['modulo','contiguous']:
+                    positions=[]
+                    for r in jobs:
+                        chunk=[i for i in range(count) if in_partition(i,count,r['shard'],r['shards'],partition)]
+                        if partition=='contiguous' and chunk:
+                            self.assertEqual(chunk,list(range(chunk[0],chunk[-1]+1)))
+                        positions.extend(chunk)
+                    self.assertEqual(sorted(positions),list(range(count)),(model,browser,count,partition))
 
     def test_invalid_and_unbounded_shards_still_fail(self):
         for shard,shards in [(0,0),(0,25),(-1,24),(24,24)]:

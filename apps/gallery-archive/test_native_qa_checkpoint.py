@@ -81,6 +81,29 @@ class NativeCheckpointTests(unittest.TestCase):
             **changed['albums'][0]['images'][1],'number':4})
         self.assertEqual(resume_keys(self.document,self.before,changed,'mimmi','webkit',self.baseline),{})
         self.assertEqual(resume_keys(self.document,self.before,self.after,'mimmi','webkit','c'*40),{})
+        reordered=copy.deepcopy(self.after);reordered['albums'][0]['images'].reverse()
+        self.assertEqual(resume_keys(self.document,self.before,reordered,'mimmi','webkit',self.baseline),{})
+
+    def test_successful_nonoverlapping_jobs_from_two_runs_are_independently_verified(self):
+        second_ref='c'*40
+        first_job={**self.document['jobs'][0],'shards':2}
+        second_job={**first_job,'job_id':18,'shard':1,'source_run_id':456,'source_owner_index_ref':second_ref}
+        self.document['jobs']=[first_job,second_job]
+        first_report={**self.report,'shards':2,'photos':[self.report['photos'][0]]}
+        second_report={**self.report,'current_owner_index_ref':second_ref,'shards':2,'shard':1,
+                       'photos':[self.report['photos'][1]]}
+        def fetch(path,text=False):
+            if path=='/actions/jobs/17/logs':return 'DEPLOYED_PHYSICAL_PHOTOS_QA_PASS '+json.dumps(first_report)
+            if path=='/actions/runs/456':return {**self.run,'head_sha':second_ref}
+            if path=='/actions/runs/456/jobs?per_page=100':return {'total_count':1,'jobs':[{**self.job,'id':18}]}
+            if path=='/actions/jobs/18/logs':return 'DEPLOYED_PHYSICAL_PHOTOS_QA_PASS '+json.dumps(second_report)
+            if path=='raw:'+second_ref+':mimmi':return self.after
+            return self.fetch(path,text)
+        self.assertEqual(verify(self.document,fetch),2)
+        self.assertEqual(resume_keys(self.document,self.before,self.after,'mimmi','webkit',self.baseline),
+                         {('saved-work',2):17,('saved-work',3):18})
+        second_job['shard']=0;second_report.update({'shard':0,'photos':[self.report['photos'][0]]})
+        with self.assertRaises(ValueError):verify(self.document,fetch)
 
 
 if __name__=='__main__':unittest.main(verbosity=2)
