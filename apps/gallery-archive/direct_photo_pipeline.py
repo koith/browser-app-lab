@@ -26,7 +26,8 @@ MODEL_PATTERNS={'mimmi':re.compile(r'(?<![a-z])mimmi(?![a-z])|밈미|밈�
                 'yui':re.compile(r'(?<![a-z])yui(?![a-z])|유이|심혜성|super_yuisan',re.I)}
 PAGE_HOSTS={'djawaphoto.com','www.djawaphoto.com','cosplay.pixibb.com','sexy.pixibb.com','www.v2ph.com','v2ph.com',
             'blog.hacosta.co.jp','www.gamersky.com','www.inven.co.kr','photo.inven.co.kr',
-            'www.ajunews.com','sportsseoul.com','www.sportsseoul.com','crazygiant.imweb.me'}
+            'www.ajunews.com','sportsseoul.com','www.sportsseoul.com','crazygiant.imweb.me','teapawt.net'}
+CREATOR_ACCOUNTS={'yui':'super_yuisan','mimmi':'Mimmi_official'}
 FORMATS={'JPEG':'jpg','PNG':'png','WEBP':'webp'}
 KNOWN_ALTERNATE_EDITIONS={
     'pixibb-auto-creamsoda-mimmi-vol-2-neko-mimmi-62-photos-cosplay':'xiutu-public-1190160',
@@ -36,7 +37,8 @@ KNOWN_ALTERNATE_EDITIONS={
 def safe_page(url):
     try:
         p=urlsplit(url)
-        return p.scheme=='https' and p.hostname in PAGE_HOSTS and not p.username and not p.password and p.port in (None,443)
+        return (p.scheme=='https' and p.hostname in PAGE_HOSTS and not p.username and not p.password and p.port in (None,443)
+                and (p.hostname!='teapawt.net' or p.path in {'/'+a for a in CREATOR_ACCOUNTS.values()}))
     except (ValueError,TypeError):return False
 
 
@@ -57,6 +59,14 @@ def same_variant(old_raw,new_raw):
 
 
 def page_images(raw,url,model):
+    if urlsplit(url).hostname=='teapawt.net':
+        account=CREATOR_ACCOUNTS[model]
+        if urlsplit(url).path!='/'+account:return [],[],'different_creator_account_rejected'
+        from collect_teapawt_public import public_images_from_author
+        # Use exact media URLs exposed by the normal page, preserving its
+        # original-size query. No guessed CDN hosts, protected API or login.
+        urls,next_page,cards=public_images_from_author(raw,{'account':account},url)
+        return urls,[next_page] if next_page else [],'scoped_public_page' if cards else 'missing_model_context'
     soup=BeautifulSoup(raw,'html.parser')
     article=(soup.select_one('#powerbbsContent') or soup.select_one('.portfolio-content') or soup.select_one('article')
              or soup.select_one('.entry-content') or soup.select_one('main'))

@@ -3,6 +3,14 @@
   "model": "yui",
   "albums": [
     {
+      "id": "public-yui-sns",
+      "title": "심유이 — 코스프레·공개 사진",
+      "publisher": "공개 SNS",
+      "priority": 20,
+      "source": "https://teapawt.net/super_yuisan",
+      "identity_evidence": "Only direct attachments of timeline-item cards with the exact professional author account super_yuisan. Quoted and nested other-author attachments are excluded. Follow observed Load more cursor links; preserve observed pbs.twimg.com media URLs and original-size query without rewriting them. Every decoded file still requires private remote SHA readback before publication."
+    },
+    {
       "id": "inven-public-photos",
       "title": "인벤 — 공개 게시 사진",
       "publisher": "인벤",
