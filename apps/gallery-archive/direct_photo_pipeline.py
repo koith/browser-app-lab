@@ -86,11 +86,13 @@ def page_images(raw,url,model):
             # V2PH's public photo CDN is distinct from its related-album
             # thumbnails. Admit only observed individual-image URLs.
             if (p.scheme!='https' or p.hostname!='cdn.v2ph.com' or p.query
-                    or p.fragment or not re.fullmatch(r'/photos/[A-Za-z0-9_-]{8,80}\\.(?:jpg|jpeg|png|webp)',p.path,re.I)):
+                    or p.fragment or not re.fullmatch(r'/photos/[A-Za-z0-9_-]{8,80}\.(?:jpg|jpeg|png|webp)',p.path,re.I)):
                 return
             if full not in seen:
                 seen.add(full);selected.append(full)
         for a in soup.select('a[href]'):
+            if a.find_parent(class_=re.compile(r'related|recommend|sidebar',re.I)):
+                continue
             if a.find('img') is not None:
                 candidate(a.get('href'))
         # Covers sites that expose native photo src on the image node itself.
