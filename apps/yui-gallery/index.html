@@ -200,7 +200,24 @@ function imageState(image,failed){
  if(image.id==='full')$('media-status').textContent=failed?imageFailureText(image.src):'';
  updateImageNotice();
 }
-document.addEventListener('error',e=>{if(e.target instanceof HTMLImageElement)imageState(e.target,true)},true);
+document.addEventListener('error',e=>{
+ const img=e.target;
+ if(!(img instanceof HTMLImageElement))return;
+ // For private archived tiles, a broken preview is not evidence that the
+ // separately SHA-verified original is unavailable.
+ if(img.dataset.owner&&img.dataset.ownerVariant!=='original'){
+  const photo=stored.flatMap(a=>a.images).find(p=>p.url===img.dataset.owner&&p.ownerAlbum);
+  if(photo&&photo.preview){
+   img.dataset.ownerVariant='original';
+   YuiPrivate.asset(photo,'original').then(url=>{
+    if(!img.isConnected)return;
+    img.hidden=false;img.removeAttribute('src');img.src=url;
+   }).catch(()=>{if(img.isConnected)imageState(img,true)});
+   return;
+  }
+ }
+ imageState(img,true);
+},true);
 document.addEventListener('load',e=>{if(e.target instanceof HTMLImageElement)imageState(e.target,false)},true);
 function photoRotation(p){return [90,270].includes(p?.display_rotation)?p.display_rotation:0}
 function rotationAttributes(p){const angle=photoRotation(p);return angle?' data-rotation="'+angle+'" style="--photo-rotation:'+angle+'deg"':''}
@@ -268,13 +285,43 @@ function layoutViewer(){
 window.addEventListener('resize',()=>{if($('lightbox').classList.contains('open'))layoutViewer()});
 function showViewer(){
  const p=viewerList[viewerIndex];if(!p)return;
- viewerGeneration++;
+ const generation=++viewerGeneration;
  layoutViewer();
- delete $('full').parentElement.dataset.imageState;
- $('media-status').textContent='불러오는 중';
- $('full').removeAttribute('src');$('full').referrerPolicy='no-referrer';if(p.ownerAlbum||p.vaultAlbum){const generation=viewerGeneration;(p.vaultAlbum?PhotoVault.asset(p):YuiPrivate.asset(p)).then(url=>{if(generation===viewerGeneration){$('full').src=url;$('original').href=url;$('media-status').textContent='';}}).catch(error=>{if(generation===viewerGeneration)$('media-status').textContent=error.message})}else if(failedRestrictedImages.has(p.url)){$('full').parentElement.dataset.imageState='failed';$('media-status').textContent=imageFailureText(p.url)}else $('full').src=p.url;$('full').alt=p.name+' · '+p.number;
+ const image=$('full'),status=$('media-status'),frame=image.parentElement;
+ delete frame.dataset.imageState;
+ status.textContent='불러오는 중';
+ image.removeAttribute('src');image.hidden=true;image.referrerPolicy='no-referrer';
+ let variant='original';
+ function fail(){
+  if(generation!==viewerGeneration)return;
+  if(p.ownerAlbum&&p.preview&&variant==='original'){
+   variant='preview';
+   status.textContent='원본 연결 오류 · 보관 미리보기 확인 중';
+   YuiPrivate.asset(p,'preview').then(url=>{
+    if(generation!==viewerGeneration)return;
+    delete frame.dataset.imageState;image.src=url;$('original').href=url;
+   }).catch(error=>{if(generation===viewerGeneration){frame.dataset.imageState='failed';status.textContent=error.message}});
+   return;
+  }
+  image.hidden=true;frame.dataset.imageState='failed';
+  status.textContent=imageFailureText();
+ }
+ image.onload=()=>{
+  if(generation!==viewerGeneration)return;
+  if(image.naturalWidth<100){fail();return}
+  image.hidden=false;delete frame.dataset.imageState;status.textContent='';
+ };
+ image.onerror=fail;
+ if(p.ownerAlbum||p.vaultAlbum){
+  (p.vaultAlbum?PhotoVault.asset(p):YuiPrivate.asset(p,'original')).then(url=>{
+   if(generation===viewerGeneration){image.src=url;$('original').href=url}
+  }).catch(error=>{if(generation===viewerGeneration){frame.dataset.imageState='failed';status.textContent=error.message}});
+ }else if(failedRestrictedImages.has(p.url)){
+  frame.dataset.imageState='failed';status.textContent=imageFailureText();
+ }else{image.src=p.url;$('original').href=p.url}
+ image.alt=p.name+' · '+p.number;
  $('position').textContent=(viewerIndex+1)+' / '+viewerList.length+' · '+p.width+'×'+p.height;
- if(p.ownerAlbum||p.vaultAlbum)$('original').removeAttribute('href');else $('original').href=p.url;
+ if(p.ownerAlbum||p.vaultAlbum)$('original').removeAttribute('href');
 }
 function hideViewer(){clearTimeout(routeTimer);viewerGeneration++;$('lightbox').classList.remove('open');document.body.style.overflow='';$('full').removeAttribute('src')}
 function closeViewer(){if(history.state?.yui&&history.state.photo)goBack();else hideViewer()}
