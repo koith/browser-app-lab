@@ -6,6 +6,10 @@ on:
     paths:
       - apps/gallery-archive/direct_photo_pipeline.py
       - apps/gallery-archive/visual_public_work.py
+      - apps/gallery-archive/load_pending_individual.py
+      - apps/gallery-archive/test_pending_individual.py
+      - apps/mimmi-gallery/cloud/gateway/individual_import.py
+      - apps/mimmi-gallery/cloud/test_individual_import.py
       - apps/gallery-archive/test_visual_public_work.py
       - apps/gallery-archive/work_coverage.py
       - apps/*-gallery/public-work-pages.json
@@ -14,6 +18,10 @@ on:
     paths:
       - apps/gallery-archive/direct_photo_pipeline.py
       - apps/gallery-archive/visual_public_work.py
+      - apps/gallery-archive/load_pending_individual.py
+      - apps/gallery-archive/test_pending_individual.py
+      - apps/mimmi-gallery/cloud/gateway/individual_import.py
+      - apps/mimmi-gallery/cloud/test_individual_import.py
       - apps/gallery-archive/test_visual_public_work.py
       - apps/gallery-archive/work_coverage.py
       - apps/*-gallery/public-work-pages.json
@@ -37,6 +45,9 @@ jobs:
           python apps/gallery-archive/test_direct_photo_pipeline.py
           python apps/gallery-archive/test_visual_public_work.py
           python apps/gallery-archive/test_work_coverage.py
+          python apps/gallery-archive/test_pending_individual.py
+          python apps/mimmi-gallery/cloud/test_individual_import.py
+          python apps/mimmi-gallery/cloud/test_sealed_session.py
           python apps/gallery-archive/test_remote_readback_deadline.py
           python apps/gallery-archive/test_reverse_image_sweep.py
           python apps/mimmi-gallery/cloud/test_media_cache.py
@@ -105,11 +116,21 @@ jobs:
           print('OWNER_STORAGE_QUOTA_BYTES',{k:d[k] for k in ('total','used','free') if k in d})
           PY
           fi
+      - name: Admit only pre-uploaded individual-photo queues from this same private archive
+        id: incoming
+        run: |
+          mkdir -p "$RUNNER_TEMP/stage/originals" "$RUNNER_TEMP/stage/previews"
+          python apps/gallery-archive/load_pending_individual.py --owner "$RUNNER_TEMP/owner-before.json" --stage "$RUNNER_TEMP/stage" --remote "$ARCHIVE_REMOTE" --model "$MODEL" --github-output "$GITHUB_OUTPUT"
+      - name: Independently re-download and SHA-check every incoming original and preview
+        if: steps.incoming.outputs.found == 'true'
+        run: python apps/gallery-archive/verify_terabox.py --stage "$RUNNER_TEMP/stage" --remote "$ARCHIVE_REMOTE" --workers 2
       - name: Collect all observed public pages into individually verified files, without photo ZIPs
+        if: steps.incoming.outputs.found != 'true'
         run: |
           mkdir -p "$RUNNER_TEMP/stage/originals" "$RUNNER_TEMP/stage/previews"
           python apps/gallery-archive/direct_photo_pipeline.py --model "$MODEL" --owner "$RUNNER_TEMP/owner-before.json" --out "$RUNNER_TEMP/stage" --max-new 500 --max-pages 40
-          python apps/gallery-archive/merge_incremental.py --model "$MODEL" --previous "$RUNNER_TEMP/owner-before.json" --stage "$RUNNER_TEMP/stage"
+      - name: Merge measured new rows without replacing existing owner photos
+        run: python apps/gallery-archive/merge_incremental.py --model "$MODEL" --previous "$RUNNER_TEMP/owner-before.json" --stage "$RUNNER_TEMP/stage"
       - name: Distinguish a real new-file transaction from a no-op
         id: delta
         run: |
@@ -122,12 +143,16 @@ jobs:
           print('ACTUAL_NEW_PHOTO_TRANSACTION',changed,d['new_photos'],d['upgraded_photos'])
           PY
       - name: Copy individual originals and lossless previews, then re-download and SHA-verify new files
-        if: steps.delta.outputs.changed == 'true'
+        if: steps.delta.outputs.changed == 'true' && steps.incoming.outputs.found != 'true'
         run: |
           set -euo pipefail
           python apps/gallery-archive/safe_rclone.py copy "$RUNNER_TEMP/stage/originals" "$ARCHIVE_REMOTE/originals" --ignore-existing --transfers 2 --checkers 2 --timeout 60s --retries 1
           python apps/gallery-archive/safe_rclone.py copy "$RUNNER_TEMP/stage/previews" "$ARCHIVE_REMOTE/previews" --ignore-existing --transfers 2 --checkers 2 --timeout 60s --retries 1
           python apps/gallery-archive/verify_terabox.py --stage "$RUNNER_TEMP/stage" --remote "$ARCHIVE_REMOTE" --workers 2 --only-staged
+      - name: Commit the owner catalogue only after full new-object readback
+        if: steps.delta.outputs.changed == 'true'
+        run: |
+          set -euo pipefail
           python apps/gallery-archive/safe_rclone.py copyto "$RUNNER_TEMP/stage/metadata/catalog.json" "$ARCHIVE_REMOTE/metadata/catalog.json" --ignore-times --timeout 60s --retries 1
           python apps/gallery-archive/safe_rclone.py cat "$ARCHIVE_REMOTE/metadata/catalog.json" --timeout 60s --retries 1 > "$RUNNER_TEMP/catalog-readback.json"
           cmp "$RUNNER_TEMP/stage/metadata/catalog.json" "$RUNNER_TEMP/catalog-readback.json"

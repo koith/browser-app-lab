@@ -26,10 +26,12 @@ try:
     from gateway.portal import COOKIE_NAME, install_portal, session_valid
     from gateway.media_cache import VerifiedMediaCache
     from gateway.cookie_format import cookie_header
+    from gateway.sealed_session import restore as restore_storage_state, seal as seal_storage_state
 except ModuleNotFoundError:
     from portal import COOKIE_NAME, install_portal, session_valid
     from media_cache import VerifiedMediaCache
     from cookie_format import cookie_header
+    from sealed_session import restore as restore_storage_state, seal as seal_storage_state
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, StreamingResponse, Response
 from PIL import Image, ImageOps, UnidentifiedImageError
@@ -55,6 +57,13 @@ R2_READY = bool(
 )
 TOKEN = os.environ.get("GALLERY_ACCESS_TOKEN", "")
 COOKIE = os.environ.get("RCLONE_CONFIG_ARCHIVE_COOKIE", "")
+if os.environ.get('ARCHIVE_STORAGE_STATE_SEALED'):
+    try:
+        COOKIE=restore_storage_state(os.environ['ARCHIVE_STORAGE_STATE_SEALED'],TOKEN)
+        os.environ['RCLONE_CONFIG_ARCHIVE_COOKIE']=COOKIE
+        print('OWNER_STORAGE_CONNECTION_RESTORED',flush=True)
+    except ValueError:
+        print('OWNER_STORAGE_CONNECTION_STATE_INVALID',flush=True)
 _cache = {"time": 0.0, "catalog": None}
 _cache_lock = asyncio.Lock()
 _media_cache = VerifiedMediaCache()
@@ -557,3 +566,46 @@ async def _portal_catalog_for(model: str):
 install_portal(app, token_getter=lambda: TOKEN,
                configured=lambda: bool(TOKEN and COOKIE),
                catalog_for_model=_portal_catalog_for)
+
+
+# Optional short-lived transfer worker. No account secret is exported, and this
+# worker can only append permit-pinned individual bytes plus a private queue.
+try:
+    from gateway.individual_import import install as install_individual_import
+except ModuleNotFoundError:
+    from individual_import import install as install_individual_import
+
+
+async def _individual_read(model,key,limit):
+    return await rclone_bytes(key,limit,remote=YUI_REMOTE if model=='yui' else REMOTE)
+
+
+async def _individual_put(model,local,key,overwrite):
+    remote=YUI_REMOTE if model=='yui' else REMOTE
+    if not (media_key_valid(key) or re.fullmatch(r'metadata/pending-individual/(mimmi|yui)/[a-f0-9]{64}\.json',key)):
+        raise HTTPException(400,'Invalid individual transfer destination')
+    child=os.environ.copy()
+    child['RCLONE_CONFIG_ARCHIVE_COOKIE']=cookie_header(child.get('RCLONE_CONFIG_ARCHIVE_COOKIE',''))
+    process=await asyncio.create_subprocess_exec('rclone','copyto',str(local),remote+'/'+key,
+        '--ignore-existing','--timeout=60s','--retries=1',
+        stdout=asyncio.subprocess.DEVNULL,stderr=asyncio.subprocess.PIPE,env=child)
+    try:
+        _,error=await asyncio.wait_for(process.communicate(),timeout=75)
+        if process.returncode:
+            detail=error.decode('utf-8','replace')
+            print('INDIVIDUAL_REMOTE_WRITE_FAILED',safe_remote_diagnostic(detail),flush=True)
+            raise HTTPException(503 if 'Failed to login' in detail else 502,'Owner individual-file write failed')
+    except asyncio.TimeoutError:
+        raise HTTPException(504,'Owner individual-file write timed out')
+    finally:
+        if process.returncode is None:process.kill();await process.wait()
+
+
+async def _sealed_owner_connection():
+    for model,remote in (('mimmi',REMOTE),('yui',YUI_REMOTE)):
+        data=json.loads(await rclone_bytes('metadata/catalog.json',6_000_000,remote=remote))
+        if data.get('model')!=model:raise HTTPException(502,'Owner connection verification failed')
+    return seal_storage_state(os.environ.get('RCLONE_CONFIG_ARCHIVE_COOKIE',''),TOKEN)
+
+
+individual_transfer=install_individual_import(app,_portal_catalog_for,_individual_put,_individual_read,_sealed_owner_connection)
