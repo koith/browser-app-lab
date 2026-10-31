@@ -107,7 +107,7 @@ def collect(archive_dir, output_dir, card_ids=None):
             record = {"name": filename, "sourceSHA256": hashlib.sha256(blob).hexdigest(),
                       "cardIdCandidate": None, "identityStatus": "UNVERIFIED"}
             entry["members"].append(record)
-            match = re.fullmatch(r"1([0-9]{3})\\.obs", filename.lower())
+            match = re.fullmatch(r"1([0-9]{3})\.obs", filename.lower())
             if not match:
                 record["kind"] = "NON_OBS_MEMBER"
                 continue
