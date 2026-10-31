@@ -5,11 +5,13 @@ on:
     branches: [main]
     paths:
       - apps/gallery-archive/qa_new_physical_photos.py
+      - apps/gallery-archive/test_physical_qa_matrix.py
       - apps/gallery-archive/verification/new-physical-photos-2026-10-30.json
       - .github/workflows/gallery-newly-stored-photo-qa.yml
   pull_request:
     paths:
       - apps/gallery-archive/qa_new_physical_photos.py
+      - apps/gallery-archive/test_physical_qa_matrix.py
       - apps/gallery-archive/verification/new-physical-photos-2026-10-30.json
       - .github/workflows/gallery-newly-stored-photo-qa.yml
 permissions:
@@ -22,7 +24,9 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+      - run: python -m pip install 'playwright==1.58.0' requests PyYAML
       - run: python -m py_compile apps/gallery-archive/qa_new_physical_photos.py
+      - run: python apps/gallery-archive/test_physical_qa_matrix.py
   actual-deployed-originals:
     needs: syntax
     if: github.ref == 'refs/heads/main'
