@@ -195,6 +195,13 @@ function registerImageHealth(url,ok){
  else if(!imageHealth.loaded.has(url))imageHealth.failed.add(url);
  // Track failed media internally without changing the compact gallery header.
 }
+function recoverSavedCover(img){
+ const fallback=img.dataset.savedCoverFallback;
+ if(!fallback)return false;
+ delete img.dataset.savedCoverFallback;
+ img.hidden=false;img.closest('.album')?.classList.remove('broken-source');
+ img.src=fallback;return true;
+}
 document.addEventListener('load',e=>{
  const img=e.target;
  if(img instanceof HTMLImageElement&&img.closest('.album,.photo')&&img.naturalWidth>=100)
@@ -203,6 +210,7 @@ document.addEventListener('load',e=>{
 document.addEventListener('error',e=>{
  const img=e.target,container=img instanceof HTMLImageElement?img.closest('.album,.photo'):null;
  if(!container)return;
+ if(recoverSavedCover(img))return;
  const url=img.getAttribute('src')||'',n=Number(img.dataset.sourceRetry||0);
  const policies=['strict-origin-when-cross-origin','origin'];
  if(url.startsWith('https://')&&n<policies.length){
@@ -250,11 +258,15 @@ function card(a,hasImages){
  const style='object-position:'+position[0]+'% '+position[1]+'%;object-fit:cover';
  const n=count+'장 · 저장됨'+(owned.variantPreviewCount?' (다른 웹판 '+owned.variantPreviewCount+'장 포함)':'');
  const cloudCover=(selected?.ownerAlbum||selected?.vaultAlbum)?selected:null;
- const img=cloudCover?'<img data-owner="'+esc(cloudCover.url)+'" style="'+style+'" alt="'+esc(label)+' 표지">':cover?'<img loading="lazy" referrerpolicy="no-referrer" src="'+esc(cover)+'" style="'+style+'" alt="'+esc(label)+' 표지">':'<div class="placeholder">M</div>';
+ // An already committed, byte-identical copy can recover a failed cloud
+ // cover without changing the selected photograph, crop or original route.
+ const localCopy=cloudCover?localStored.filter(a=>canonicalId(a.id)===owned.id).flatMap(validImages).find(q=>q.sha256===selected.sha256&&q.bytes===selected.bytes&&q.width===selected.width&&q.height===selected.height):null;
+ const fallback=localCopy?' data-saved-cover-fallback="'+esc(localCopy.url)+'"':'';
+ const img=cloudCover?'<img data-owner="'+esc(cloudCover.url)+'"'+fallback+' style="'+style+'" alt="'+esc(label)+' 표지">':cover?'<img loading="lazy" referrerpolicy="no-referrer" src="'+esc(cover)+'" style="'+style+'" alt="'+esc(label)+' 표지">':'<div class="placeholder">M</div>';
  return '<button class="album"'+rotationAttributes(selected)+' data-id="'+esc(a.id)+'" data-available="'+(hasImages?'1':'0')+'" aria-label="'+esc(label+' · '+labels.publisher+' · '+n+' · '+labels.edition)+'">'+img+'<div class="gradient"></div><span class="cover-labels"><span class="publisher-sticker" title="발행사: '+esc(labels.publisher)+'">'+esc(labels.publisher)+'</span><span class="album-count">'+esc(n)+'</span></span><span class="edition-sticker" data-kind="'+esc(labels.kind)+'" title="'+esc(labels.detail)+'">'+esc(labels.edition)+'</span><strong class="name" title="'+esc(label)+'">'+esc(shortTitle)+'</strong></button>';
 }
 function photoHTML(p,i){return '<button class="photo"'+rotationAttributes(p)+' data-i="'+i+'" aria-label="'+esc(p.name)+' 사진 '+p.number+'"><img loading="lazy" referrerpolicy="no-referrer" '+((p.ownerAlbum||p.vaultAlbum)?'data-owner="'+esc(p.url):'src="'+esc(p.url))+'" alt="'+esc(p.name)+' 사진 '+p.number+'"><span>'+esc(p.name)+' · '+p.number+'</span></button>'}
-const ownerObserver=new IntersectionObserver(entries=>{for(const e of entries){if(!e.isIntersecting)continue;ownerObserver.unobserve(e.target);const p=stored.flatMap(a=>a.images).find(p=>p.url===e.target.dataset.owner);if(p){const isCover=!!e.target.closest('.album');(p.vaultAlbum?PhotoVault.asset(p):MimmiPrivate.asset(p,isCover?'cover':'preview')).then(url=>{if(e.target.isConnected){e.target.loading='eager';e.target.decoding='async';e.target.src=url}}).catch(()=>{e.target.alt='보관본 연결을 확인해 주세요'})}}},{rootMargin:'64px'});
+const ownerObserver=new IntersectionObserver(entries=>{for(const e of entries){if(!e.isIntersecting)continue;ownerObserver.unobserve(e.target);const p=stored.flatMap(a=>a.images).find(p=>p.url===e.target.dataset.owner);if(p){const isCover=!!e.target.closest('.album');(p.vaultAlbum?PhotoVault.asset(p):MimmiPrivate.asset(p,isCover?'cover':'preview')).then(url=>{if(e.target.isConnected){e.target.loading='eager';e.target.decoding='async';e.target.src=url}}).catch(()=>{if(!recoverSavedCover(e.target))e.target.alt='보관본 연결을 확인해 주세요'})}}},{rootMargin:'64px'});
 function observeOwner(){document.querySelectorAll('img[data-owner]:not([src])').forEach(i=>ownerObserver.observe(i))}
 function render(){
  const q=$('search').value.toLocaleLowerCase().trim();
