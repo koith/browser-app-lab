@@ -93,15 +93,63 @@ def import_reviewed(audit_directory, live_manifest, live_png_dir):
             "sourcePackSHA256":source_packs[0]["sha256"], "nativeActionMapping":"UNVERIFIED"}
 
 
+
+def update_release_assets(sw_file, version_file, html_file):
+    # New PNGs are independent of the original sampled bulk inventory.
+    filenames = [str(1000 + int(cid)) + "-" + str(frame).zfill(2)
+                 for cid in REVIEWED_IDS for frame in NEW_FRAMES]
+    worker = sw_file.read_text(encoding="utf-8")
+    new_list = "const NATIVE_OBS_FRONT_FILES='" + " ".join(filenames) + "'.split(' ');"
+    anchor = "const NATIVE_TIS_FILES="
+    if new_list in worker or "const NATIVE_OBS_FRONT_FILES=" in worker:
+        raise ValueError("Refusing duplicate native front file inventory")
+    if worker.count(anchor) != 1:
+        raise ValueError("PWA native source table no longer uniquely identifiable")
+    worker = worker.replace(anchor, new_list + "\n" + anchor)
+    original = ".concat(ORIGINAL_SOURCE_SPR_FILES.map(id=>'./original/SourceSPR/'+id+'.png'))"
+    if worker.count(original) != 1:
+        raise ValueError("PWA asset map no longer uniquely identifiable")
+    worker = worker.replace(original,
+      ".concat(NATIVE_OBS_FRONT_FILES.map(id=>'./original/OBS/front-reviewed/'+id+'.png'))" +
+      original)
+    pattern = r"const REVISION='4leaf-revival-pwa-v([0-9]+)'"
+    match = re.search(pattern, worker)
+    if not match:
+        raise ValueError("PWA revision not found")
+    next_revision = "4leaf-revival-pwa-v" + str(int(match.group(1)) + 1)
+    worker = re.sub(pattern, "const REVISION='" + next_revision + "'", worker, count=1)
+
+    v = json.loads(version_file.read_text(encoding="utf-8"))
+    if v["version"] != "0.86.0-beta.29" or v["pwaCache"] != "4leaf-revival-pwa-v116":
+        raise ValueError("Unexpected release baseline; rebase and audit first")
+    v["version"] = "0.86.0-beta.30"
+    v["releaseDate"] = "2026-11-01"
+    v["pwaCache"] = next_revision
+    html = html_file.read_text(encoding="utf-8")
+    marker = 'name="leaf-revival-version" content="0.86.0-beta.29"'
+    if html.count(marker) != 1:
+        raise ValueError("Could not match source HTML release marker")
+    html = html.replace(marker, 'name="leaf-revival-version" content="' + v["version"] + '"')
+    # Commit all release metadata only after all strict validators succeed.
+    sw_file.write_text(worker, encoding="utf-8")
+    version_file.write_text(json.dumps(v, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    html_file.write_text(html, encoding="utf-8")
+    return {"newOfflineNativeFrames":len(filenames), "pwaCache":next_revision,
+            "version":v["version"]}
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("audit_directory", type=Path)
     parser.add_argument("live_manifest", type=Path)
     parser.add_argument("live_png_dir", type=Path)
+    parser.add_argument("--sw", type=Path, required=True)
+    parser.add_argument("--version", type=Path, required=True)
+    parser.add_argument("--html", type=Path, required=True)
     args = parser.parse_args()
-    print("REVIEWED_SOURCE_FRAME_PROMOTION",
-          json.dumps(import_reviewed(args.audit_directory, args.live_manifest,
-                                     args.live_png_dir), sort_keys=True))
+    result = import_reviewed(args.audit_directory, args.live_manifest, args.live_png_dir)
+    result["release"] = update_release_assets(args.sw, args.version, args.html)
+    print("REVIEWED_SOURCE_FRAME_PROMOTION", json.dumps(result, sort_keys=True))
 
 
 if __name__ == "__main__":
