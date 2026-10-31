@@ -56,6 +56,21 @@ class VisualWorkTests(unittest.TestCase):
             for p in shared:
                 self.assertEqual((cache/(p['sha256']+'.bin')).read_bytes(),data[p['number']])
 
+            # Unlike the stale-cache case above, these wrong shared previews
+            # really DO match their declared SHA. Reusing them for all three
+            # originals loses every clear source anchor. Read each ORIGINAL.
+            shared_valid=[{**p,'preview_sha256':hashlib.sha256(data[1]).hexdigest()} for p in previous]
+            routes=[]
+            def reference(url):
+                routes.append(url)
+                return data[int(url.split('/')[-2])] if url.endswith('/original') else data[1]
+            valid_work,valid_info=collect_work(book,shared_valid,client,out/'valid-shared-preview',5,
+                {p['sha256'] for p in shared_valid},'mimmi',reference)
+            self.assertEqual(valid_info['saved_reference_anchors'],3)
+            self.assertEqual(len(valid_work['images']),2)
+            self.assertEqual(len(routes),3)
+            self.assertTrue(all(url.endswith('/original') for url in routes))
+
     def test_owner_api_reader_is_fixed_no_auth_and_no_redirects(self):
         with patch('visual_public_work.requests.get') as get:
             response=MagicMock();response.status_code=200;response.iter_content.return_value=[b'owner bytes']
