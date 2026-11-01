@@ -650,4 +650,99 @@ if(cloudMode){
 }else loadBatch(true);
 })();
 </script>
+
+<script>
+/* Interactive halftone: touching/dragging locally removes dots, and the
+   removed region grows back over ~1.7 s. Built with Canvas2D; no dependencies.
+   A pre-rendered dot atlas prevents per-dot work on every animation frame. */
+(function(){
+  "use strict";
+  var canvas=document.getElementById("dotField");
+  if(!canvas||!canvas.getContext)return;
+  var ctx=canvas.getContext("2d",{alpha:true});
+  if(!ctx)return;
+  var reduced=window.matchMedia("(prefers-reduced-motion: reduce)");
+  var atlas=document.createElement("canvas"),actx=atlas.getContext("2d",{alpha:true});
+  if(!actx)return;
+  var W=0,H=0,scale=1,margin=42,hits=[],frameId=0,lastFrame=0,lastHit=0;
+  var idleTime=1750,maxHits=36;
+  function makeAtlas(){
+    W=window.innerWidth;H=window.innerHeight;
+    scale=Math.min(window.devicePixelRatio||1,1.6);
+    canvas.width=Math.max(1,Math.round(W*scale));
+    canvas.height=Math.max(1,Math.round(H*scale));
+    ctx.setTransform(scale,0,0,scale,0,0);
+    atlas.width=Math.round((W+2*margin)*scale);
+    atlas.height=Math.round((H+2*margin)*scale);
+    actx.setTransform(scale,0,0,scale,0,0);
+    actx.clearRect(0,0,W+2*margin,H+2*margin);
+    var step=W<740?12:13;
+    // Scanned-style density fields — more dots in upper right & lower left.
+    for(var y=-margin;y<H+margin+step;y+=step){
+      for(var x=-margin;x<W+margin+step;x+=step){
+        var nx=x/Math.max(1,W),ny=y/Math.max(1,H);
+        var d1=Math.pow((nx-.79)/.59,2)+Math.pow((ny-.14)/.6,2);
+        var d2=Math.pow((nx-.11)/.54,2)+Math.pow((ny-.8)/.57,2);
+        var focus=Math.min(1,Math.exp(-d1*1.65)*.92+Math.exp(-d2*2.1)*.68);
+        var alpha=.10+.57*focus;
+        var radius=.68+1.05*focus;
+        actx.beginPath();actx.fillStyle="rgba(34,65,59,"+alpha.toFixed(3)+")";
+        actx.arc(x+margin,y+margin,radius,0,Math.PI*2);actx.fill();
+      }
+    }
+    render(performance.now(),true);
+  }
+  function render(now,force){
+    if(!force&&now-lastFrame<33){frameId=requestAnimationFrame(render);return}
+    lastFrame=now;
+    ctx.clearRect(0,0,W,H);
+    var dx=reduced.matches?0:Math.sin(now*.00024)*11;
+    var dy=reduced.matches?0:Math.cos(now*.00019)*9;
+    ctx.drawImage(atlas,Math.round((margin+dx)*scale),
+      Math.round((margin+dy)*scale),Math.round(W*scale),Math.round(H*scale),
+      0,0,W,H);
+    if(hits.length){
+      ctx.save();ctx.globalCompositeOperation="destination-out";
+      for(var i=0;i<hits.length;i++){
+        var hit=hits[i],age=now-hit.t;
+        if(age>=idleTime)continue;
+        var strength=age<100?Math.min(1,age/36):Math.pow(Math.max(0,1-(age-100)/(idleTime-100)),1.45);
+        var r=hit.r;
+        var grad=ctx.createRadialGradient(hit.x,hit.y,0,hit.x,hit.y,r);
+        grad.addColorStop(0,"rgba(0,0,0,"+(.98*strength)+")");
+        grad.addColorStop(.38,"rgba(0,0,0,"+(.91*strength)+")");
+        grad.addColorStop(1,"rgba(0,0,0,0)");
+        ctx.fillStyle=grad;ctx.fillRect(hit.x-r,hit.y-r,2*r,2*r);
+      }
+      ctx.restore();
+      hits=hits.filter(function(h){return now-h.t<idleTime});
+    }
+    if(!document.hidden&&(!reduced.matches||hits.length))frameId=requestAnimationFrame(render);
+    else frameId=0;
+  }
+  function redraw(){if(!frameId)frameId=requestAnimationFrame(render)}
+  function record(e){
+    if(!e||!Number.isFinite(e.clientX)||!Number.isFinite(e.clientY))return;
+    var now=performance.now();
+    if(e.type==="pointermove"){
+      if(e.pointerType!=="mouse"&&e.buttons===0)return;
+      if(now-lastHit<35)return;
+      var last=hits[hits.length-1];
+      if(last&&Math.hypot(e.clientX-last.x,e.clientY-last.y)<18)return;
+    }
+    lastHit=now;
+    hits.push({x:e.clientX,y:e.clientY,t:now,r:W<740?104:136});
+    if(hits.length>maxHits)hits.splice(0,hits.length-maxHits);
+    redraw();
+  }
+  document.addEventListener("pointerdown",record,{passive:true});
+  document.addEventListener("pointermove",record,{passive:true});
+  document.addEventListener("visibilitychange",redraw,{passive:true});
+  window.addEventListener("resize",function(){
+    cancelAnimationFrame(frameId);frameId=0;makeAtlas();redraw();
+  },{passive:true});
+  if(reduced.addEventListener)reduced.addEventListener("change",redraw);
+  makeAtlas();redraw();
+})();
+</script>
 </body></html>
