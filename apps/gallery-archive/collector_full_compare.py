@@ -162,7 +162,7 @@ def gallery_dl_work(url):
           '1-'+str(GDL_PAGE_LIMIT),'--',url]
     try:
         done=subprocess.run(args,capture_output=True,text=True,timeout=45)
-        urls=list(dict.fromkeys(s.strip() for s in done.stdout.splitlines() if safe_photo(s.strip())))
+        urls=list(dict.fromkeys(s.strip() for s in done.stdout.splitlines() if alternative_safe_photo(s.strip())))
         if done.returncode==64:return [],'unsupported_extractor'
         return urls[:GDL_PAGE_LIMIT],('ok' if done.returncode==0 else 'exit_'+str(done.returncode))
     except subprocess.TimeoutExpired:return [],'timeout_45s'
@@ -188,7 +188,7 @@ def inspect_work(row,client,browser,max_pages=500,max_images=650,
                  max_browser_pages=500,wall_seconds=240):
     result=make_status(row)
     initial=list(dict.fromkeys(u for u in row.get('urls',[]) if u.startswith('https://')))
-    initial_direct=list(dict.fromkeys(u for u in row.get('direct_image_urls',[]) if safe_photo(u)))
+    initial_direct=list(dict.fromkeys(u for u in row.get('direct_image_urls',[]) if alternative_safe_photo(u)))
     if not initial and not initial_direct:
         result['reason']='no_physical_public_source_registered' if row['kind']!='visual_lead' else 'title_only_search_needed'
         return result
@@ -242,19 +242,19 @@ def inspect_work(row,client,browser,max_pages=500,max_images=650,
         if safe_page(url):
             try:
                 base,more,bs=page_images(raw,url,row['model'])
-                methods['existing_scoped'].extend(u for u in base if safe_photo(u))
+                methods['existing_scoped'].extend(u for u in base if alternative_safe_photo(u))
                 next_pages.extend(more)
                 engine_statuses['existing_scoped:'+bs]+=1
             except Exception as exc:engine_statuses['existing_scoped:'+type(exc).__name__]+=1
         else:engine_statuses['existing_scoped:unsupported_origin']+=1
         try:
             scrape,st=scoped_generic_html(raw,url,row['model'])
-            methods['scrapy_selectors'].extend(u for u in scrape if safe_photo(u))
+            methods['scrapy_selectors'].extend(u for u in scrape if alternative_safe_photo(u))
             engine_statuses['scrapy:'+st]+=1
         except Exception as exc:engine_statuses['scrapy:'+type(exc).__name__]+=1
         if browser_visits<max_browser_pages:
             urls,bs=browser.extract(url,row['model'])
-            methods['playwright_dom'].extend(u for u in urls if safe_photo(u))
+            methods['playwright_dom'].extend(u for u in urls if alternative_safe_photo(u))
             engine_statuses['browser:'+bs]+=1
             browser_visits+=1
         else:
@@ -274,7 +274,7 @@ def inspect_work(row,client,browser,max_pages=500,max_images=650,
     if queue:result['limits'].append('pending_page_queue_'+str(len(queue)))
     accepted={}
     for engine,urls in methods.items():
-        items=list(dict.fromkeys(u for u in urls if safe_photo(u)))
+        items=list(dict.fromkeys(u for u in urls if alternative_safe_photo(u)))
         accepted[engine]=items
         result['engine_photo_urls'][engine]=len(items)
         result['candidate_asset_groups_by_engine'][engine]=len(set(asset_group(u) for u in items))
