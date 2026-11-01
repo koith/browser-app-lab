@@ -1,0 +1,95 @@
+name: 4LEAF targeted original extract (D6, score numerals, action evidence, D4 search)
+# Runs the SHA1-verified 2002 client through tools/extract-targeted-original-frames.py.
+# Commits ONLY apps/4leaf/rog/original/OBS/ui/* (the two UI members the game
+# uses: 1171 D6 and 1167 score numerals) to the pushed non-main branch.
+# Per-member geometry, contact sheets, 37-frame action GIFs and D4 candidates
+# go to a short-lived artifact for review, never to the repository.
+on:
+  push:
+    branches-ignore: [main]
+    paths:
+      - '.github/workflows/rog-original-targeted-extract.yml'
+      - 'apps/4leaf/rog/tools/extract-targeted-original-frames.py'
+      - 'apps/4leaf/rog/tests/test_targeted_original_extract.py'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: leaf-targeted-extract-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  extract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install extractor and Pillow
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -qq -y unshield
+          python3 -m pip install --break-system-packages pillow
+      - name: Synthetic regression (no original bytes)
+        run: |
+          python3 apps/4leaf/rog/tests/test_obs_native_640stride.py
+          python3 apps/4leaf/rog/tests/test_targeted_original_extract.py
+      - name: Download and SHA1-verify the archived 2002 client, unpack resources only
+        run: |
+          mkdir -p /tmp/leaf-installer /tmp/leaf-resources
+          python3 - <<'PY'
+          from pathlib import Path
+          import urllib.request, hashlib, time
+          target = Path('/tmp/leaf-installer/client.zip')
+          expected = '86526d89679ae39b85fe9808da97ad871b7888d9'
+          urls = ['https://archive.org/download/4leaf/4leaf.zip',
+                  'https://archive.org/download/4leaf/4leaf.zip?download=1']
+          for attempt in range(5):
+              try:
+                  req = urllib.request.Request(urls[attempt % 2], headers={'User-Agent': 'Mozilla/5.0 (4LEAF preservation scan)'})
+                  h = hashlib.sha1(); count = 0
+                  with urllib.request.urlopen(req, timeout=120) as r, target.open('wb') as f:
+                      while data := r.read(1 << 20):
+                          count += len(data)
+                          if count > 90 * 1024 * 1024: raise ValueError('archive exceeds size limit')
+                          h.update(data); f.write(data)
+                  if h.hexdigest() != expected: raise ValueError('SHA1 mismatch; refusing unverified archive')
+                  print('VERIFIED_ORIGINAL_2002_CLIENT_SHA1', h.hexdigest(), count)
+                  break
+              except Exception as e:
+                  if attempt == 4: raise
+                  print('retry', attempt + 1, str(e)[:160], flush=True)
+                  target.unlink(missing_ok=True); time.sleep(4 + attempt * 2)
+          PY
+          unzip -q /tmp/leaf-installer/client.zip 'data1.cab' 'data1.hdr' -d /tmp/leaf-installer
+          unshield x -d /tmp/leaf-resources /tmp/leaf-installer/data1.cab >/dev/null
+          rm -f /tmp/leaf-installer/client.zip
+      - name: Extract all UI frames and per-member action evidence
+        run: |
+          python3 apps/4leaf/rog/tools/extract-targeted-original-frames.py \
+            /tmp/leaf-resources "$GITHUB_WORKSPACE" /tmp/leaf-targeted
+          node --check apps/4leaf/rog/original/OBS/ui/manifest.js
+          python3 - <<'PY'
+          import json
+          r = json.load(open('apps/4leaf/rog/original/OBS/ui/report.json'))
+          print('UI', json.dumps({k: {x: v[x] for x in ('declared', 'written', 'allWritten')} for k, v in r['ui'].items()}))
+          for k, v in r['ui'].items():
+              for c in v['regression']:
+                  for side in ('vsLegacyBulk', 'vsCorrected'):
+                      s = c[side]
+                      if s.get('old'):
+                          print(k, c['index'], side, json.dumps(s))
+          print('UNPARSED', json.dumps(r['unparsedMembers']))
+          print('D4_CANDIDATES', open('/tmp/leaf-targeted/d4-candidates.json').read()[:2000])
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: 4leaf-targeted-original-evidence
+          path: /tmp/leaf-targeted
+          retention-days: 30
+      - name: Commit the UI frames to this non-main branch
+        if: github.ref != 'refs/heads/main'
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898699+github-actions[bot]@users.noreply.github.com'
+          git add apps/4leaf/rog/original/OBS/ui
+          git diff --cached --quiet || git commit -m 'data(4leaf): original 1171 D6 and 1167 numeral frames (written-run alpha, SHA-verified client)'
+          git push || echo 'push skipped'
