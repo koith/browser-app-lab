@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/gallery-parallel-mimmi-public-gap-probe.yml'
       - 'apps/gallery-archive/parallel_mimmi_public_gap_probe.py'
+      - 'apps/gallery-archive/parallel_mimmi_observed_cdn.py'
       - 'apps/mimmi-gallery/public-work-pages.json'
   workflow_dispatch:
 permissions:
@@ -47,12 +48,10 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          python apps/gallery-archive/direct_photo_pipeline.py \
-            --model mimmi \
+          python apps/gallery-archive/parallel_mimmi_observed_cdn.py \
             --owner apps/mimmi-gallery/owner-index.json \
-            --out "$RUNNER_TEMP/stage" \
-            --max-new 30 --max-pages 3 \
-            --album-id public-mimmi-official-x
+            --public apps/mimmi-gallery/stored-albums.json \
+            --out "$RUNNER_TEMP/stage"
           python - <<'PY'
           import json,os,hashlib
           from pathlib import Path
