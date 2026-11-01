@@ -69,9 +69,11 @@ class Targeted(unittest.TestCase):
         res.mkdir(parents=True)
         d6 = [square(30, 9, hole=(i == 0)) for i in range(28)]
         numerals = [square(40, 20 + i) for i in range(25)]
+        d4 = [square(36, 60 + i) for i in range(22)]
         chessman = [square(24, 40 + i) for i in range(37)]
         (res / "OBS.pak").write_bytes(pak([
             ("1171.obs", member(d6)), ("1167.obs", member(numerals)),
+            ("1223.obs", member(d4)),
             ("1040.obs", member(chessman)), ("1046.obs", member(chessman[:5], bad_at=2)),
             ("0074.obs", b"\x01" * 166)]))
         (res / "OBS2.pak").write_bytes(pak([("1199.obs", member([square(40, 3) for _ in range(6)]))]))
@@ -92,10 +94,14 @@ class Targeted(unittest.TestCase):
         ui = self.repo / "apps/4leaf/rog/original/OBS/ui"
         self.assertEqual(len(list(ui.glob("1171-*.png"))), 28)
         self.assertEqual(len(list(ui.glob("1167-*.png"))), 25)
+        self.assertEqual(len(list(ui.glob("1223-*.png"))), 22)
         js = (ui / "manifest.js").read_text()
         data = json.loads(js[js.index("UI_FRAMES=") + 10:js.rindex(";")])
         self.assertEqual(len(data["1171"]["frames"]), 28)
         self.assertEqual(data["1167"]["frames"][9]["url"], "./original/OBS/ui/1167-009.png")
+        self.assertEqual(data["1223"]["role"], "d4")
+        self.assertEqual(len(data["1223"]["frames"]), 22)
+        self.assertEqual(data["1223"]["frames"][0]["url"], "./original/OBS/ui/1223-000.png")
         self.assertTrue(self.report["ui"]["1171"]["allWritten"])
 
     def test_written_index0_is_opaque_and_regression_explains_the_only_difference(self):
@@ -106,7 +112,7 @@ class Targeted(unittest.TestCase):
         self.assertEqual(check["onlyIndex0MadeOpaque"], 1)
 
     def test_all_members_inventoried_including_broken_and_secondary_pak(self):
-        self.assertEqual(self.report["members"], 6)
+        self.assertEqual(self.report["members"], 7)
         names = {u["member"] for u in self.report["unparsedMembers"]}
         self.assertEqual(names, {"1046.obs", "0074.obs"})
         self.assertTrue((self.art / "members/OBS2/1199.png").exists())
@@ -121,6 +127,7 @@ class Targeted(unittest.TestCase):
         cands = json.loads((self.art / "d4-candidates.json").read_text())
         members = {c["member"] for c in cands}
         self.assertNotIn("1171.obs", members)
+        self.assertNotIn("1223.obs", members)
         self.assertIn("1199.obs", members)
 
 
