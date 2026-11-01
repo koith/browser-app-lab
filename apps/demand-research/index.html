@@ -404,11 +404,20 @@ function addPost(p,term){
   if(!p||!p.uri||typeof p.record?.text!=="string"||!p.record.text.includes(term))return false;
   let uri=String(p.uri),old=ids.get(uri);
   if(old){old.terms.add(term);return false}
-  let a=p.author||{},rkey=uri.split("/").pop(),did=uri.split("/")[2]||"",handle=a.did||did||a.handle;
-  if(!rkey||!handle)return false;
-  let url="https://bsky.app/profile/"+encodeURIComponent(handle)+"/post/"+encodeURIComponent(rkey);
+  // Prefer the official handle for bsky.app links. Previous code encoded a
+  // DID's colon as %3A and often generated "Invalid DID or handle" pages.
+  // DID is only a fallback when the handle is absent or invalid.
+  let a=p.author||{},match=/^at:\/\/(did:[^/]+)\/app\.bsky\.feed\.post\/([a-z0-9]+)$/i.exec(uri);
+  if(!match)return false;
+  let did=match[1],rkey=match[2],handle=String(a.handle||"").toLowerCase().trim();
+  if(!/^(?:[a-z0-9][a-z0-9-]*\.)+[a-z]{2,}$/i.test(handle)||handle.endsWith(".invalid"))handle="";
+  let actor=handle||did;
+  let profileUrl="https://bsky.app/profile/"+actor;
+  let url=profileUrl+"/post/"+rkey;
   let policy=mediaPolicy(p);
-  let rec={id:uri,author:a.displayName||a.handle||"게시글",text:p.record.text,posted:p.record.createdAt||p.indexedAt||"",indexed:p.indexedAt||p.record.createdAt||"",url,
+  let rec={id:uri,platform:"bluesky",author:a.displayName||a.handle||"게시글",
+      profileUrl,text:p.record.text,posted:p.record.createdAt||p.indexedAt||"",
+      indexed:p.indexedAt||p.record.createdAt||"",url,
       terms:new Set([term]),media:getMedia(p),adultLabeled:policy.adult,restricted:policy.restricted};
   posts.push(rec);ids.set(uri,rec);return true;
 }
@@ -461,9 +470,9 @@ function filtered(){
 }
 
 const SERVICES={
-  bluesky:{name:"Bluesky",favicon:"https://bsky.app/favicon.ico"},
-  mastodon:{name:"Mastodon",favicon:"https://mastodon.social/favicon.ico"},
-  lemmy:{name:"Lemmy",favicon:"https://lemmy.world/favicon.ico"},
+  bluesky:{name:"Bluesky",favicon:"https://cdn.jsdelivr.net/npm/simple-icons@15/icons/bluesky.svg"},
+  mastodon:{name:"Mastodon",favicon:"https://cdn.jsdelivr.net/npm/simple-icons@15/icons/mastodon.svg"},
+  lemmy:{name:"Lemmy",favicon:"https://cdn.jsdelivr.net/npm/simple-icons@15/icons/lemmy.svg"},
   cloud:{name:"Archive",favicon:""}
 };
 function sourceBadge(p){
@@ -684,7 +693,7 @@ async function loadCloud(reset){
     for(let p of data.posts||[]){
       if(ids.has(p.id))continue;
       let media=(p.media||[]).map(m=>({type:String(m.mime||"").startsWith("video/")?"video":"image",url:validUrl(new URL(m.url,location.origin).href),thumb:validUrl(new URL(m.url,location.origin).href),alt:"첨부파일"}));
-      let row={id:p.id,author:p.platform||"SNS",text:p.text||"",posted:p.posted_at,indexed:p.posted_at,url:validUrl(p.source_url),terms:new Set(["클라우드"]),media,adultLabeled:false,restricted:false};
+      let row={id:p.id,platform:"cloud",author:p.platform||"SNS",profileUrl:"",text:p.text||"",posted:p.posted_at,indexed:p.posted_at,url:validUrl(p.source_url),terms:new Set(["클라우드"]),media,adultLabeled:false,restricted:false};
       ids.set(p.id,row);posts.push(row);
     }
     cloudOffset+=(data.posts||[]).length;
