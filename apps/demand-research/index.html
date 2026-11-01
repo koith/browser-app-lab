@@ -94,6 +94,7 @@ dialog::backdrop{background:#061223bb;backdrop-filter:blur(3px)}
 </div>
 <div class="ad-row" id="adFilters">
 <label class="ad-toggle"><input type="checkbox" id="hideAds" checked>광고 숨김</label>
+<label class="ad-toggle"><input type="checkbox" id="showAdultMedia" checked>성인 미디어 표시</label>
 <select id="adLevel" aria-label="광고 필터 강도"><option value="strong" selected>강력 필터</option><option value="standard">기본 필터</option></select>
 <span class="ad-note" id="adSummary">반복 홍보·링크 유도·판매 문구 필터링</span>
 </div>
@@ -134,7 +135,27 @@ function getMedia(p){
   if(m.external&&m.external.thumb)return [{type:"external",url:validUrl(m.external.uri),thumb:validUrl(m.external.thumb)}];
   return [];
 }
-const sensitive=p=>(p.labels||[]).some(x=>["porn","sexual","nudity","graphic-media","gore","csam"].includes(String(x.val||"").toLowerCase()));
+// Bluesky label settings distinguish adult-media warnings from mandatory
+// restriction labels. Warn-class adult labels must not hide media by default
+// when the viewer explicitly requests them. Never derive missing media URLs.
+const ADULT_MEDIA_LABELS=new Set(["porn","sexual","nudity","adult","suggestive","nsfw","sexual-figurative","sexual-cartoon"]);
+const RESTRICTED_LABELS=new Set(["!hide","!takedown","csam","graphic-media","gore","self-harm"]);
+function mediaLabels(p){
+  let collected=[];
+  for(let x of p.labels||[])if(typeof x.val==="string")collected.push(x.val.toLowerCase());
+  for(let x of p.record?.labels?.values||[])if(typeof x.val==="string")collected.push(x.val.toLowerCase());
+  for(let x of p.author?.labels||[])if(typeof x.val==="string")collected.push(x.val.toLowerCase());
+  for(let x of p.embed?.labels||[])if(typeof x.val==="string")collected.push(x.val.toLowerCase());
+  return [...new Set(collected)];
+}
+function mediaPolicy(p){
+  let values=mediaLabels(p);
+  return {adult:values.some(v=>ADULT_MEDIA_LABELS.has(v)),
+          restricted:values.some(v=>RESTRICTED_LABELS.has(v))};
+}
+function hideMedia(p){
+  return !!p.restricted || (!!p.adultLabeled && !$("showAdultMedia").checked);
+}
 function addPost(p,term){
   if(!p||!p.uri||typeof p.record?.text!=="string"||!p.record.text.includes(term))return false;
   let uri=String(p.uri),old=ids.get(uri);
@@ -142,8 +163,9 @@ function addPost(p,term){
   let a=p.author||{},rkey=uri.split("/").pop(),did=uri.split("/")[2]||"",handle=a.did||did||a.handle;
   if(!rkey||!handle)return false;
   let url="https://bsky.app/profile/"+encodeURIComponent(handle)+"/post/"+encodeURIComponent(rkey);
+  let policy=mediaPolicy(p);
   let rec={id:uri,author:a.displayName||a.handle||"게시글",text:p.record.text,posted:p.record.createdAt||p.indexedAt||"",indexed:p.indexedAt||p.record.createdAt||"",url,
-      terms:new Set([term]),media:getMedia(p),noPreview:sensitive(p)};
+      terms:new Set([term]),media:getMedia(p),adultLabeled:policy.adult,restricted:policy.restricted};
   posts.push(rec);ids.set(uri,rec);return true;
 }
 
@@ -195,16 +217,17 @@ function filtered(){
 }
 function tile(p){
   let article=el("article","post"),button=el("button","post-open");button.type="button";button.setAttribute("aria-label","게시글 상세 보기");
-  let thumb=el("div","post-thumb"),first=p.media[0];
-  if(first&&!p.noPreview&&first.thumb){
+  article.dataset.mediaPolicy=p.restricted?"restricted":p.adultLabeled?"adult":"general";
+  let thumb=el("div","post-thumb"),first=p.media[0],blocked=hideMedia(p);
+  if(first&&!blocked&&first.thumb){
     let img=el("img");img.src=first.thumb;img.alt="게시글 대표 이미지";img.loading="lazy";img.referrerPolicy="no-referrer";
     img.addEventListener("error",()=>img.remove());thumb.append(img);
   }else{
-    let label=p.noPreview?"민감한 미디어":first?.type==="video"?"영상 보기":"글 보기";
-    thumb.append(el("span","text-icon"+(p.noPreview?" hide-icon":""),label));
+    let label=blocked?(p.restricted?"제한된 미디어":"성인 미디어 숨김"):first?.type==="video"?"영상 보기":first?"미리보기 없음":"글 보기";
+    thumb.append(el("span","text-icon"+(blocked?" hide-icon":""),label));
   }
-  if(first?.type==="video"&&!p.noPreview)thumb.append(el("span","video-mark","▶ 영상"));
-  if(p.media.length>1&&!p.noPreview)thumb.append(el("span","media-num","+"+(p.media.length-1)));
+  if(first?.type==="video"&&!blocked)thumb.append(el("span","video-mark","▶ 영상"));
+  if(p.media.length>1&&!blocked)thumb.append(el("span","media-num","+"+(p.media.length-1)));
   let body=el("div","post-body"),title=el("div","post-title");
   title.append(el("span","author",p.author),el("span","tag",Array.from(p.terms)[0]));
   if(suspectedAd(p))title.append(el("span","post-ad-marker","광고 의심"));
@@ -245,11 +268,14 @@ function openDetail(p){
   }
   node.append(el("p","dialog-text",p.text||"(본문 없음)"));
   if(p.media.length){
-    if(p.noPreview)node.append(el("div","dialog-notice","민감도 표시가 있는 미디어는 원문에서 확인할 수 있습니다."));
-    else{
+    if(hideMedia(p)){
+      let message=p.restricted?"서비스 제한 라벨이 적용된 미디어입니다. SNS 원문에서 확인하세요.":"성인 미디어 표시가 꺼져 있습니다.";
+      node.append(el("div","dialog-notice",message));
+    }else{
       let media=el("div","dialog-media");
       for(let m of p.media.slice(0,30))appendMedia(media,m,p,p.media.length===1);
-      node.append(media);
+      if(media.childNodes.length)node.append(media);
+      else node.append(el("div","dialog-notice","현재 제공된 이미지·영상 주소가 없습니다. SNS 원문에서 확인하세요."));
     }
   }
   let actions=el("div","dialog-actions");actions.append(sourceLink(p,"SNS 원문 보기"));node.append(actions);
@@ -383,7 +409,7 @@ async function loadCloud(reset){
     for(let p of data.posts||[]){
       if(ids.has(p.id))continue;
       let media=(p.media||[]).map(m=>({type:String(m.mime||"").startsWith("video/")?"video":"image",url:validUrl(new URL(m.url,location.origin).href),thumb:validUrl(new URL(m.url,location.origin).href),alt:"첨부파일"}));
-      let row={id:p.id,author:p.platform||"SNS",text:p.text||"",posted:p.posted_at,indexed:p.posted_at,url:validUrl(p.source_url),terms:new Set(["클라우드"]),media,noPreview:false};
+      let row={id:p.id,author:p.platform||"SNS",text:p.text||"",posted:p.posted_at,indexed:p.posted_at,url:validUrl(p.source_url),terms:new Set(["클라우드"]),media,adultLabeled:false,restricted:false};
       ids.set(p.id,row);posts.push(row);
     }
     cloudOffset+=(data.posts||[]).length;
@@ -403,6 +429,7 @@ $("showMore").addEventListener("click",()=>{visibleLimit+=180;draw()});
 $("tabs").addEventListener("click",e=>{let button=e.target.closest("button[data-term]");if(!button)return;active=button.dataset.term;visibleLimit=270;for(let b of $("tabs").querySelectorAll("button"))b.classList.toggle("active",b===button);draw()});
 $("presets").addEventListener("click",e=>{let b=e.target.closest("button[data-days]");if(!b)return;setPreset(Number(b.dataset.days));loadBatch(true)});
 $("hideAds").addEventListener("change",()=>{visibleLimit=270;draw()});
+$("showAdultMedia").addEventListener("change",()=>{visibleLimit=270;draw()});
 $("adLevel").addEventListener("change",()=>{visibleLimit=270;draw()});
 $("find").addEventListener("click",()=>{needle=$("q").value.trim().toLowerCase();visibleLimit=270;draw()});
 $("q").addEventListener("keydown",e=>{if(e.key==="Enter"){$("find").click()}});
