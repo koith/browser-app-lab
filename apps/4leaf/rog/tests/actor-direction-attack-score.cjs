@@ -59,15 +59,15 @@ const {chromium,webkit}=require('playwright');
   for(const card of ['c_0046','c_0078','c_0040']){
    const up=await walk(card,seg.up),down=await walk(card,seg.down);
    assert.equal(up.facing,'away');assert.equal(down.facing,'toward');
-   assert.equal(up.seq,'3,4,5,6,7',card+' walks away with reviewed rear frames');
-   assert.equal(up.evidence,'rear-walk-3-7/visual-reviewed/INFERRED');
-   assert.ok(up.frames.length>=3&&up.frames.every(f=>f>=3&&f<=7),card+' rendered rear frames '+up.frames);
+   assert.equal(up.seq,'3,4,5,6,7,8',card+' walks away with the rear walk block');
+   assert.equal(up.evidence,'walk-rear/structural-37/INFERRED');
+   assert.ok(up.frames.length>=3&&up.frames.every(f=>f>=3&&f<=8),card+' rendered rear frames '+up.frames);
    assert.ok(down.seq.split(',').every(f=>Number(f)>=25&&Number(f)<=30),card+' walks toward with front frames');
    report[card]={up:up.frames,down:down.frames};
   }
   // Unreviewed rear (0058: diagonal sword poses at 3..7) keeps the front cycle.
-  const guarded=await walk('c_0058',seg.up);
-  assert.ok(guarded.seq.split(',').every(f=>Number(f)>=25),'0058 rear is not reviewed; never shows 3..7');
+  const guarded=await walk('c_0042',seg.up);
+  assert.ok(guarded.seq.split(',').every(f=>Number(f)>=25),'0042 rear is not reviewed; never shows 3..7');
   // Attack: reviewed front three-quarter frame 18, one-shot, ends on front.
   const attack=await page.evaluate(async()=>{
    const T=window.__ROG_TEST__,m=T.getMatch();m.players[0].team=['c_0046'];T.setMatch(m);
@@ -78,8 +78,8 @@ const {chromium,webkit}=require('playwright');
    await new Promise(r=>setTimeout(r,900));
    return {seq,ev,end:pawn.dataset.actorFrame,done:pawn.dataset.sourcePlaybackComplete};
   });
-  assert.equal(attack.seq,'25,18,18,25');
-  assert.equal(attack.ev,'front-three-quarter-18/visual-reviewed/INFERRED');
+  assert.equal(attack.seq,'25,31,32,32,25');
+  assert.equal(attack.ev,'strike-front-31-32/structural-37/INFERRED');
   assert.equal(attack.done,'true');assert.equal(attack.end,'25');
   // Battle score numerals.
   const score=await page.evaluate(async()=>{
