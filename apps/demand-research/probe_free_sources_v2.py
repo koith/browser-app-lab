@@ -31,7 +31,7 @@ def request(url, method="GET", body=None, headers=None):
         with urllib.request.urlopen(req,timeout=TIMEOUT) as res:
             return res.status,res.read(400000).decode("utf-8","replace"),None
     except urllib.error.HTTPError as e:
-        return e.code,"", "HTTP denied"
+        return e.code,e.read(1000).decode("utf-8","replace"), "HTTP denied"
     except Exception as e:
         return 0,"",type(e).__name__
 
@@ -60,7 +60,7 @@ def probe(kind,query=""):
         try: count=int(bool(json.loads(body)))
         except Exception: count=0
     elif kind=="opentg":
-        url="https://opentg.ai/v1/search?"+urllib.parse.urlencode({"q":query,"limit":5})
+        url="https://api.opentg.ai/v1/search?"+urllib.parse.urlencode({"q":query,"limit":5})
         status,body,err=request(url)
         try: 
             obj=json.loads(body);count=len(obj.get("results",obj.get("posts",[]))) if isinstance(obj,dict) else 0
@@ -105,6 +105,17 @@ def probe(kind,query=""):
         try: count=int(bool(json.loads(body).get("title")))
         except Exception: count=0
     else: raise ValueError(kind)
+    if kind=="arctic_scoped" and status==422:
+        try:
+            d=json.loads(body).get("detail",[])
+            detail=d[0] if isinstance(d,list) and d else d
+            if isinstance(detail,dict):
+                result["validation_field"]=str(detail.get("loc",[]))[:80]
+                result["validation_type"]=str(detail.get("type",""))[:60]
+                result["validation_msg"]=str(detail.get("msg","")).replace(query,"<term>")[:120]
+            elif isinstance(detail,str):
+                result["validation_msg"]=detail.replace(query,"<term>")[:120]
+        except Exception: pass
     result.update(http=status,valid_public_records=count)
     if err: result["error"]=err
     return result
@@ -120,7 +131,7 @@ TASKS=[
 ]
 
 def nostr(relay,query):
-    result={"source":"nostr:"+relay.split("/")[2],"query":"target" if query==TARGET else "control"}
+    result={"source":"nostr:"+relay.split("/")[2],"query":"control" if query==CONTROL else ("target:"+str(("일탈계","섹트","뒷계").index(query)+1) if query in ("일탈계","섹트","뒷계") else "other") }
     try:
         import websocket
         conn=websocket.create_connection(relay,timeout=7,header=["User-Agent: "+UA])
