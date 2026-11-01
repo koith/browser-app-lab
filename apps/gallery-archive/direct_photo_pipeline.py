@@ -50,6 +50,25 @@ def public_full_variant(url):
     return url
 
 
+
+def rotated_registered_page_queue(primary, source_pages, max_pages, page_cycle=0):
+    """Visit different already-registered pages across bounded repeated runs.
+
+    Always fetch the exact verified primary work page. Only the order of
+    explicitly recorded public source pages changes; no URLs are guessed.
+    A zero cycle preserves historical order for offline tests and callers.
+    """
+    registered=list(dict.fromkeys([primary]+list(source_pages)))
+    if not isinstance(page_cycle,int) or page_cycle<0:
+        raise ValueError('page_cycle_must_be_nonnegative')
+    if page_cycle==0 or len(registered)<=max_pages:
+        return registered
+    first,tail=registered[0],registered[1:]
+    window=max(1,max_pages-1)
+    offset=((page_cycle-1)*window)%len(tail)
+    return [first]+tail[offset:]+tail[:offset]
+
+
 def same_variant(old_raw,new_raw):
     """Same observed public asset only; never identify people or merge works."""
     with Image.open(BytesIO(old_raw)) as old, Image.open(BytesIO(new_raw)) as new:
@@ -301,7 +320,7 @@ def atomic_bytes(path,data):
     tmp=path.with_name(path.name+'.pending');tmp.write_bytes(data);tmp.replace(path)
 
 
-def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_only=False,album_ids=None):
+def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_only=False,album_ids=None,page_cycle=0):
     root=Path(root);out=Path(out)
     if owner.get('model')!=model or owner.get('schema_version')!=1 or not owner.get('albums'):
         raise ValueError('Current owner catalog required; do not assume empty archive')
@@ -388,7 +407,7 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                 if k not in ('observed_filename_numbers','saved_cut_correspondence')},ensure_ascii=False),flush=True)
             continue
         images=list(resumed.get(aid,[]));occupied.update(p['number'] for p in images);next_number=max(occupied,default=0)+1
-        queue=list(dict.fromkeys([book['source']]+[u for u in book.get('source_pages',[]) if safe_page(u)]));visited=set();errors=[];candidate_count=0;unreviewed_count=0
+        queue=rotated_registered_page_queue(book['source'],[u for u in book.get('source_pages',[]) if safe_page(u)],max_pages,page_cycle);visited=set();errors=[];candidate_count=0;unreviewed_count=0
         while queue and len(visited)<max_pages and new_total<max_new:
             page=queue.pop(0)
             if page in visited:continue
@@ -489,7 +508,7 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
 
 
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('--root',type=Path,default=ROOT);p.add_argument('--model',choices=['mimmi','yui'],required=True);p.add_argument('--owner',type=Path,required=True);p.add_argument('--out',type=Path,required=True);p.add_argument('--max-new',type=int,default=180);p.add_argument('--max-pages',type=int,default=24);p.add_argument('--focused-only',action='store_true');p.add_argument('--album-id',action='append',default=[]);a=p.parse_args()
+    p=argparse.ArgumentParser();p.add_argument('--root',type=Path,default=ROOT);p.add_argument('--model',choices=['mimmi','yui'],required=True);p.add_argument('--owner',type=Path,required=True);p.add_argument('--out',type=Path,required=True);p.add_argument('--max-new',type=int,default=180);p.add_argument('--max-pages',type=int,default=24);p.add_argument('--focused-only',action='store_true');p.add_argument('--album-id',action='append',default=[]);p.add_argument('--page-cycle',type=int,default=0);a=p.parse_args()
     if not 1<=a.max_new<=500 or not 1<=a.max_pages<=60:raise SystemExit('Bounded collection budget required')
-    report=collect(a.root,a.model,json.loads(a.owner.read_text()),a.out,a.max_new,a.max_pages,focused_only=a.focused_only,album_ids=a.album_id)
+    report=collect(a.root,a.model,json.loads(a.owner.read_text()),a.out,a.max_new,a.max_pages,focused_only=a.focused_only,album_ids=a.album_id,page_cycle=a.page_cycle)
     print('DIRECT_FILE_COLLECTION_COMPLETE',report['model'],report['new_local_individual_files'],'REMOTE_VERIFIED',0,'GALLERY_VERIFIED',0)

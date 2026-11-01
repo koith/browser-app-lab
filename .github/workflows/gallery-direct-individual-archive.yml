@@ -170,7 +170,7 @@ jobs:
           mkdir -p "$RUNNER_TEMP/stage/originals" "$RUNNER_TEMP/stage/previews"
           focused=()
           if [[ "$ARCHIVE_PUBLICATION_MODE" == deferred ]]; then focused=(--focused-only); fi
-          python apps/gallery-archive/direct_photo_pipeline.py --model "$MODEL" --owner "$RUNNER_TEMP/owner-before.json" --out "$RUNNER_TEMP/stage" --max-new 500 --max-pages 40 "${focused[@]}"
+          python apps/gallery-archive/direct_photo_pipeline.py --model "$MODEL" --owner "$RUNNER_TEMP/owner-before.json" --out "$RUNNER_TEMP/stage" --max-new 500 --max-pages 40 --page-cycle "$GITHUB_RUN_NUMBER" "${focused[@]}"
       - name: Content-address focused files for an unpublished private batch
         if: env.ARCHIVE_PUBLICATION_MODE == 'deferred' && steps.incoming.outputs.found != 'true'
         run: python apps/gallery-archive/defer_verified_batch.py prepare --stage "$RUNNER_TEMP/stage" --owner "$RUNNER_TEMP/owner-before.json"
