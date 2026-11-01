@@ -53,6 +53,31 @@ class JournalPairsTests(unittest.TestCase):
         self.assertEqual(audit['held_photos'][0]['cause'],'provider_errno_400141')
         self.assertIsNone(audit['held_photos'][0]['source_file_number'],'Archive slots are not public source numbers')
 
+    def test_400141_preview_can_be_recovered_by_full_sha_copyto(self):
+        source,reviewed,reader,calls=self.source()
+        source['catalog']['albums'][0]['images']=source['catalog']['albums'][0]['images'][:1]
+        preview=(self.stage/self.photo['preview']).read_bytes()
+        def provider(args,limit):
+            return b'{"errno":400141}' if '/previews/' in args[1] else self.original_bytes
+        attempts=[]
+        def alternate(path,limit):
+            attempts.append(path)
+            return preview
+        accepted=recover(source,self.owner,reviewed,self.stage/'copyto-accepted',provider,copyto=alternate)
+        self.assertEqual((accepted['photos'],accepted['held']),(1,0))
+        self.assertEqual(len(attempts),1)
+        self.assertIn('/previews/',attempts[0])
+        corrupted=recover(source,self.owner,reviewed,self.stage/'copyto-wrong-sha',provider,
+                          copyto=lambda path,limit:preview[:-1]+b'x')
+        self.assertEqual((corrupted['photos'],corrupted['held']),(0,1))
+        report=json.loads((self.stage/'copyto-wrong-sha/metadata/collection-audit.json').read_text())
+        self.assertEqual(report['held_photos'][0]['cause'],'copyto_exact_SHA_or_byte_length_mismatch')
+        attempts.clear()
+        denied=recover(source,self.owner,reviewed,self.stage/'other-provider-error',
+                       lambda args,limit:b'{"errno":31045}' if '/previews/' in args[1] else self.original_bytes,
+                       copyto=lambda path,limit:attempts.append(path))
+        self.assertEqual((denied['photos'],denied['held'],attempts),(0,1,[]))
+
     def test_bad_preview_is_not_a_valid_pair_and_existing_originals_are_never_replaced(self):
         source,reviewed,reader,calls=self.source();source['catalog']['albums'][0]['images']=source['catalog']['albums'][0]['images'][:1]
         def bad_preview(args,limit):

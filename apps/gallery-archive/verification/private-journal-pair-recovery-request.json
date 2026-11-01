@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "scope": "existing_private_photos_only",
-  "completed_baseline_native_QA_run": 41185541278,
+  "completed_baseline_native_QA_run": 41202443783,
   "originals_and_previews_are_readonly": true,
   "no_private_metadata_handoff_to_github": true,
   "models": {
@@ -12,7 +12,7 @@
       "producer_head": "d1a83a082dc6f321853b520e8daf10ad5f74f0b5",
       "journal_sha256": "2883816e50d572782188bb214837e237182cc42081fc1ac8fc9eac9d11ffb76b",
       "expected_collected_photos": 408,
-      "baseline_owner_fingerprint": "26d5de514bf015317d6f7d87718efef2cbae4c35d40571bd93c91968de5705db"
+      "baseline_owner_fingerprint": "866be2330006906cf6283cc84141f55c6cc9be26bf07717c2b856b8999fd9694"
     },
     "yui": {
       "model": "yui",
@@ -21,7 +21,9 @@
       "producer_head": "967640c95bd31e6d5ad174c4f8e644322586afdc",
       "journal_sha256": "c4261a778f7af9dc6ea3ccd75e34a4c3549a0f30c1d37246acd3f0be6de6d7e6",
       "expected_collected_photos": 4,
-      "baseline_owner_fingerprint": "485af9c4fc35e78b028b1d0a9ac80d40e83889caf520d601f177a8e6cfc3d27f"
+      "baseline_owner_fingerprint": "0c3298e9ba3b2e7503a4a014dae258054a58b8b7513aeea2b5c127393c33e33b"
     }
-  }
+  },
+  "completed_owner_index_commit": "c6f2a2cf634ec3c7d58acd6054b6eaab15073023",
+  "retry_reason": "same producer journals; exact-SHA verified original/preview 400141 reads may use same-account normal copyto client"
 }

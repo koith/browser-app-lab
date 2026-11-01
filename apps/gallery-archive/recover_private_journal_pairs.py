@@ -13,6 +13,8 @@ import json
 import os
 from pathlib import Path
 import re
+import subprocess
+import tempfile
 
 import requests
 from PIL import Image
@@ -115,16 +117,40 @@ def completed_baseline_proof(document):
         raise ValueError('Exact baseline native QA has not completed successfully')
 
 
-def exact_image(photo,field,remote,reader):
+def copyto_bytes(path,limit,command=None):
+    """Normal read via the SAME authenticated account; no remote mutation.
+
+    Called only after the exact source returned errno 400141. The caller
+    verifies complete byte length, SHA-256 and image decoding independently.
+    """
+    with tempfile.TemporaryDirectory(prefix='pair-recovery-copyto-') as tmp:
+        dest=Path(tmp)/'readback'
+        cmd=([str(x).replace('{dest}',str(dest)).replace('{src}',path) for x in command] if command
+             else ['rclone','copyto',path,str(dest),'--timeout=65s','--retries=1'])
+        try:proc=subprocess.run(cmd,stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL,check=False,timeout=75)
+        except subprocess.TimeoutExpired:raise HeldPhoto('copyto_read_deadline') from None
+        except FileNotFoundError:raise HeldPhoto('copyto_client_unavailable') from None
+        if proc.returncode or not dest.is_file():raise HeldPhoto('copyto_read_failed')
+        if dest.stat().st_size>limit:raise HeldPhoto('copyto_oversized')
+        return dest.read_bytes()
+
+
+def exact_image(photo,field,remote,reader,copyto=None):
     size,digest=('bytes','sha256') if field=='key' else ('preview_bytes','preview_sha256')
     raw=reader(['cat',remote+'/'+photo[field]],limit=photo[size]+1)
     if raw is None:raise HeldPhoto('missing_existing_object')
     if len(raw)!=photo[size] or hashlib.sha256(raw).hexdigest()!=photo[digest]:
+        code=None
         if len(raw)<=512:
             try:code=json.loads(raw).get('errno')
             except (ValueError,TypeError,AttributeError):code=None
-            if type(code) is int:raise HeldPhoto('provider_errno_'+str(code))
-        raise HeldPhoto('exact_SHA_or_byte_length_mismatch')
+        if code==400141 and copyto is not None:
+            raw=copyto(remote+'/'+photo[field],photo[size])
+            if len(raw)!=photo[size] or hashlib.sha256(raw).hexdigest()!=photo[digest]:
+                raise HeldPhoto('copyto_exact_SHA_or_byte_length_mismatch')
+            print('PAIR_RECOVERY_COPYTO_EXACT_SHA256',field,flush=True)
+        elif type(code) is int:raise HeldPhoto('provider_errno_'+str(code))
+        else:raise HeldPhoto('exact_SHA_or_byte_length_mismatch')
     with Image.open(BytesIO(raw)) as image:image.verify()
     with Image.open(BytesIO(raw)) as image:
         image.load()
@@ -136,7 +162,7 @@ def exact_image(photo,field,remote,reader):
     return raw
 
 
-def recover(snapshot,owner,reviewed,stage,reader=storage,preview_hold_audit=None):
+def recover(snapshot,owner,reviewed,stage,reader=storage,preview_hold_audit=None,copyto=None):
     model=owner['model'];remote=REMOTES[model]
     preview_holds=None if preview_hold_audit is None else preview_hold_selection(preview_hold_audit,model)
     if (snapshot.get('schema_version')!=1 or snapshot.get('model')!=model
@@ -188,9 +214,9 @@ def recover(snapshot,owner,reviewed,stage,reader=storage,preview_hold_audit=None
             try:
                 if not 300<=photo['width']<=20000 or not 300<=photo['height']<=20000 or photo['width']*photo['height']>40_000_000:
                     raise HeldPhoto('original_dimensions_outside_existing_budget')
-                failure['role']='original';original=exact_image(photo,'key',remote,reader)
+                failure['role']='original';original=exact_image(photo,'key',remote,reader,copyto)
                 if preview_holds is None:
-                    failure['role']='preview';preview=exact_image(photo,'preview',remote,reader)
+                    failure['role']='preview';preview=exact_image(photo,'preview',remote,reader,copyto)
             except Exception as error:
                 failure['cause']=str(error) if isinstance(error,HeldPhoto) else 'private_read_or_image_decode_failed'
                 held.append(failure);progress();continue
@@ -276,7 +302,7 @@ def main():
         if raw is None:raise ValueError('Prior private hold audit unavailable; no image requested')
         hold_audit=json.loads(raw);preview_hold_selection(hold_audit,a.model)
     reviewed={b['id']:b for b in json.loads((ROOT/f'apps/{a.model}-gallery/public-work-pages.json').read_text())['albums']}
-    result=recover(data,owner,reviewed,a.stage,preview_hold_audit=hold_audit)
+    result=recover(data,owner,reviewed,a.stage,preview_hold_audit=hold_audit,copyto=copyto_bytes)
     with a.github_output.open('a') as output:
         output.write('changed='+str(bool(result['photos'])).lower()+'\nheld='+str(result['held'])+'\n')
 
