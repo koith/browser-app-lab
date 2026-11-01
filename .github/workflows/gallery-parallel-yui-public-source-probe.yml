@@ -1,0 +1,64 @@
+name: Independent Yui Public Photo Crawl - Physical Bytes
+on:
+  push:
+    branches: ['research/parallel-yui-public-photos-20261101']
+    paths: ['.github/workflows/gallery-parallel-yui-public-source-probe.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: independent-yui-public-acquisition
+  cancel-in-progress: false
+jobs:
+  crawl:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install requests beautifulsoup4 Pillow
+      - name: Crawl only public model-authored and reviewed public pages
+        shell: bash
+        run: |
+          set -euo pipefail
+          python apps/gallery-archive/direct_photo_pipeline.py \
+            --model yui \
+            --owner apps/yui-gallery/owner-index.json \
+            --out "$RUNNER_TEMP/stage" \
+            --max-new 48 --max-pages 3 \
+            --album-id public-yui-sns \
+            --album-id djawa-privaty-public-samples \
+            --album-id inven-public-photos
+          python - <<'PY'
+          import hashlib,json,os
+          from pathlib import Path
+          root=Path(os.environ['RUNNER_TEMP'])/'stage'
+          report=json.loads((root/'metadata/collection-audit.json').read_text())
+          catalog=json.loads((root/'metadata/catalog.json').read_text())
+          sha=set()
+          for a in catalog['albums']:
+              for p in a['images']:
+                  assert p['sha256'] not in sha
+                  sha.add(p['sha256'])
+                  for field,dig in [('key','sha256'),('preview','preview_sha256')]:
+                      f=(root/p[field]).resolve()
+                      assert f.is_relative_to(root.resolve()) and f.is_file()
+                      assert hashlib.sha256(f.read_bytes()).hexdigest()==p[dig]
+          assert len(sha)==report['new_local_individual_files']
+          results=[{'album_id':x['id'],'actual_decoded_new':x['individual_files_saved'],
+                    'public_source_candidates':x.get('published_image_candidates'),
+                    'failures':[{k:e.get(k) for k in ('reason','http_status','cause','exception')}
+                                for e in x.get('failures',[])]} for x in report['results']]
+          print('INDEPENDENT_YUI_NEW_ACTUAL_BYTES',len(sha),flush=True)
+          print('INDEPENDENT_YUI_SOURCE_OUTCOMES',json.dumps(results,ensure_ascii=False),flush=True)
+          with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as f:
+              f.write(f"Yui newly decoded local originals: {len(sha)}. No remote or index changes.\n")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: independent-yui-public-photo-staging
+          path: ${{ runner.temp }}/stage/
+          retention-days: 2
+          if-no-files-found: ignore
