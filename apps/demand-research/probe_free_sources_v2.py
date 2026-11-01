@@ -36,7 +36,7 @@ def request(url, method="GET", body=None, headers=None):
         return 0,"",type(e).__name__
 
 def probe(kind,query=""):
-    result={"source":kind,"query":"target" if query==TARGET else ("control" if query==CONTROL else "none")}
+    result={"source":kind,"query":("control" if query==CONTROL else ("none" if not query else "target:"+str(("일탈계","섹트","뒷계").index(query)+1) if query in ("일탈계","섹트","뒷계") else "other"))}
     if kind=="x_fxtwitter":
         status,body,err=request("https://api.fxtwitter.com/status/20")
         try: count=int(bool(json.loads(body).get("tweet",{}).get("id")))
@@ -65,8 +65,8 @@ def probe(kind,query=""):
         try: 
             obj=json.loads(body);count=len(obj.get("results",obj.get("posts",[]))) if isinstance(obj,dict) else 0
         except Exception: count=0
-    elif kind=="arctic_global":
-        url="https://arctic-shift.photon-reddit.com/api/posts/search?"+urllib.parse.urlencode({"query":query,"limit":3,"sort":"desc"})
+    elif kind=="arctic_scoped":
+        url="https://arctic-shift.photon-reddit.com/api/posts/search?"+urllib.parse.urlencode({"subreddit":"Coffee" if query==CONTROL else "korea","query":query,"limit":3,"sort":"desc"})
         status,body,err=request(url)
         try:
             obj=json.loads(body);count=len(obj.get("data",[])) if isinstance(obj,dict) else 0
@@ -112,9 +112,9 @@ def probe(kind,query=""):
 TASKS=[
     ("x_fxtwitter",""),("x_vxtwitter",""),("ig_profile",""),("telegram_preview",""),("telegramme",""),
     ("opentg",TARGET),("opentg",CONTROL),
-    ("arctic_global",TARGET),("arctic_global",CONTROL),("arctic_subreddit",""),("reddit_public",""),
+    ("arctic_scoped",TARGET),("arctic_scoped",CONTROL),("arctic_subreddit",""),("reddit_public",""),
     ("misskey_m544",TARGET),("misskey_m544",CONTROL),
-    ("misskey_sushi",TARGET),("misskey_sushi",CONTROL),
+    ("misskey_sushi",TARGET),("misskey_sushi","섹트"),("misskey_sushi","뒷계"),("misskey_sushi",CONTROL),
     ("invidious",TARGET),("invidious",CONTROL),
     ("youtube_oembed",""),("tiktok_oembed","")
 ]
@@ -153,7 +153,7 @@ def main():
         for item in pool.map(execute,TASKS):
             print(json.dumps(item,ensure_ascii=False),flush=True)
     probes=[("wss://relay.nostr.band",TARGET),("wss://relay.nostr.band",CONTROL),
-            ("wss://search.nos.today",TARGET),("wss://search.nos.today",CONTROL)]
+            ("wss://search.nos.today",TARGET),("wss://search.nos.today","섹트"),("wss://search.nos.today","뒷계"),("wss://search.nos.today",CONTROL)]
     with ThreadPoolExecutor(max_workers=4) as pool:
         for item in pool.map(lambda pair:nostr(*pair),probes):
             print(json.dumps(item,ensure_ascii=False),flush=True)
