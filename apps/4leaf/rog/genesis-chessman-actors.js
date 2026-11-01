@@ -46,8 +46,16 @@
   '0169':'pumpkin-prop',
   '0171':'HUD-card-icon'
  });
- const originalFor=id=>Object.hasOwn(NON_ACTOR_OBS,id)?null:
-  window.ORIGINAL_LEAF_OBS_FRAMES?.[id]||null;
+ const originalFor=id=>{
+  if(Object.hasOwn(NON_ACTOR_OBS,id))return null;
+  // Prefer the complete 37 verified source frames only for the three
+  // historically inspected actor IDs. Existing partial verified packets
+  // remain the fallback for every other chessman and cold-cache failure.
+  const full=window.ORIGINAL_LEAF_FULL_ACTION_FRAMES?.[id];
+  if(full?.frames?.length===37&&full.originalAnimationCount===37&&
+    full.frames.every((f,i)=>f.index===i))return full;
+  return window.ORIGINAL_LEAF_OBS_FRAMES?.[id]||null;
+ };
  const poses=['idle','walk','attack','hurt','victory'];
  // VISUALLY COMPARED against recovered original pixels, 2026-10-24.
  // Sample frame 0 is NOT a front-facing pose: original 1040/1042/1043/
@@ -98,6 +106,18 @@
   '0082','0083','0166'
  ]));
  const BACK_WALK_INDICES=[3,4,5,6,7];
+ // Original left-profile silhouettes (frames 14..17) were individually
+ // inspected in the full 37-frame contact sheets of 1040/1046/1078.
+ // The source PIXELS and facing are verified; their mapping to live
+ // horizontal DMP motion and playback period are still INFERRED.
+ const LEFT_PROFILE_SOURCE=Object.freeze(new Set(['0040','0046','0078']));
+ const LEFT_PROFILE_WALK_INDICES=[14,15,16,17];
+ // The same full 37-frame sheets show source wind-up, weapon-strike and
+ // follow-through silhouettes at 31,33,35 in these three actors. Their
+ // classification as battle ATTACK and WEB 175ms frame period are INFERRED.
+ // Keep the older reviewed frame18 path for all other source characters.
+ const FULL_SOURCE_ATTACK=Object.freeze(new Set(['0040','0046','0078']));
+ const FULL_SOURCE_ATTACK_INDICES=[25,31,33,35,25];
  function frontFacingSource(native,id){
   const available=native?.frames||[];
   const approved=AUDITED_FRONT_SOURCE[id];
@@ -162,6 +182,10 @@
    // more truthful than a rapidly pirouetting chessman.
    // Moving AWAY from the camera (up the screen) shows the reviewed rear
    // walk 3..7 instead of a front body sliding backwards. INFERRED.
+   if(action==='walk'&&travel==='left'&&LEFT_PROFILE_SOURCE.has(id)){
+    const side=LEFT_PROFILE_WALK_INDICES.map(at);
+    if(side.every(Boolean))return side;
+   }
    if(action==='walk'&&travel==='away'&&REVIEWED_BACK_WALK.has(id)){
     const back=BACK_WALK_INDICES.map(at);
     if(back.every(Boolean))return back;
@@ -174,6 +198,10 @@
    if(action==='victory')return movement.length===2
     ?[movement[0],movement[1],movement[0]]
     :front?[front]:[];
+   if(action==='attack'&&FULL_SOURCE_ATTACK.has(id)){
+    const reviewed=FULL_SOURCE_ATTACK_INDICES.map(at);
+    if(reviewed.every(Boolean))return reviewed;
+   }
    if(action==='attack'&&REVIEWED_FRONT_ATTACK.has(id)&&at(18))
     return [front,at(18),at(18),front];
    // Original directional action-table does not confirm any other attack,
@@ -318,12 +346,20 @@
    const travel=action==='walk'?(pawn.dataset.travelFacing||'toward'):'toward';
    const seq=sequenceFor(native,action,id,travel);
    pawn.dataset.actorWalkFacing=action==='walk'?travel:'';
-   pawn.dataset.sourceTravelFacing=action==='walk'&&travel==='away'&&
-     seq.length&&seq[0].index===BACK_WALK_INDICES[0]
-    ?'rear-walk-3-7/visual-reviewed/INFERRED'
-    :action==='walk'?'front/INFERRED':'n/a';
-   pawn.dataset.sourceAttackEvidence=action==='attack'&&REVIEWED_FRONT_ATTACK.has(id)
-    ?'front-three-quarter-18/visual-reviewed/INFERRED':'n/a';
+   pawn.dataset.sourceTravelFacing=action==='walk'&&travel==='left'&&
+     seq.length&&seq[0].index===LEFT_PROFILE_WALK_INDICES[0]
+    ?'left-profile-14-17/visual-reviewed/WEB-direction-timing-INFERRED'
+    :action==='walk'&&travel==='away'&&
+      seq.length&&seq[0].index===BACK_WALK_INDICES[0]
+     ?'rear-walk-3-7/visual-reviewed/INFERRED'
+     :action==='walk'?'front/INFERRED':'n/a';
+   pawn.dataset.sourceAttackEvidence=action==='attack'&&FULL_SOURCE_ATTACK.has(id)&&
+     seq.length===FULL_SOURCE_ATTACK_INDICES.length&&seq[1].index===31
+    ?'original-full-attack-31-33-35/visual-reviewed/WEB-action-FPS-INFERRED'
+    :action==='attack'&&REVIEWED_FRONT_ATTACK.has(id)
+     ?'front-three-quarter-18/visual-reviewed/INFERRED':'n/a';
+   if(action==='walk'&&travel==='left'&&seq.length===4&&seq[0].index===14)
+    pawn.dataset.sourceDirection='left-profile-source-14-17/2002-EXE-direction-unverified';
    // Expose EXACT SOURCE packet indexes independently from inferred labels;
    // QA can inspect what was really rendered during genuine gameplay.
    pawn.dataset.sourceFrameSequence=seq.map(frame=>frame.index).join(',');

@@ -1,0 +1,80 @@
+{
+  "artifactId": 13079399441,
+  "sourceRunId": 41297724959,
+  "source2002ArchiveSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+  "members": [
+    {
+      "file": "members-OBS-1040.png",
+      "artifactPath": "members/OBS/1040.png",
+      "sha256": "10a22319127a765e70b18a0bdb8e8cc415d05aa0f68922f896025b2f80564c2c",
+      "bytes": 58027
+    },
+    {
+      "file": "members-OBS-1040.json",
+      "artifactPath": "members/OBS/1040.json",
+      "sha256": "41a60926e9745fa7cba61fd6020c0962a230a0bd7ebe40ffd24a881053fd039f",
+      "bytes": 9466
+    },
+    {
+      "file": "members-OBS-1046.png",
+      "artifactPath": "members/OBS/1046.png",
+      "sha256": "15d20b89a75fc02072bd74efbbf5567751c5a019aea2a279bbcafee01df20479",
+      "bytes": 76896
+    },
+    {
+      "file": "members-OBS-1046.json",
+      "artifactPath": "members/OBS/1046.json",
+      "sha256": "b570f9be8d6aa930fcebdde3d573a545bdbc221f08a770cb05a79aa5af4dbc6e",
+      "bytes": 9467
+    },
+    {
+      "file": "members-OBS-1078.png",
+      "artifactPath": "members/OBS/1078.png",
+      "sha256": "bec863c2e3f88ee529df907155af775ee79ba96c4053b22b96385f7994afdd78",
+      "bytes": 65065
+    },
+    {
+      "file": "members-OBS-1078.json",
+      "artifactPath": "members/OBS/1078.json",
+      "sha256": "5c50af078177872f48d1387603dee6cf8680a056de3a964c391ff1fb720dce70",
+      "bytes": 9465
+    },
+    {
+      "file": "members-OBS-1084.png",
+      "artifactPath": "members/OBS/1084.png",
+      "sha256": "10f5b14195cd09f77dd89c6c14a82ca02c86b930d9d049b96bd057d1f6c30c12",
+      "bytes": 40073
+    },
+    {
+      "file": "members-OBS-1084.json",
+      "artifactPath": "members/OBS/1084.json",
+      "sha256": "f92ab6d639f2daf21020c3298ee89e853829349661d9b67586da35dd723e2a35",
+      "bytes": 9394
+    },
+    {
+      "file": "members-OBS-1088.png",
+      "artifactPath": "members/OBS/1088.png",
+      "sha256": "c7cde8bd8581c65880ea2f6a3f385099b0c7fab629481fb81443b94173f4cc89",
+      "bytes": 240068
+    },
+    {
+      "file": "members-OBS-1088.json",
+      "artifactPath": "members/OBS/1088.json",
+      "sha256": "45e43925c901af847842985db1c15d59117a53a142b5fde47b2a6946e5df7c54",
+      "bytes": 9478
+    },
+    {
+      "file": "members-OBS-1166.png",
+      "artifactPath": "members/OBS/1166.png",
+      "sha256": "7d88d610c56e7eab1494e587bcbb0fdfe6b40dfa6bd77e8b89453ebbd4a461bd",
+      "bytes": 64067
+    },
+    {
+      "file": "members-OBS-1166.json",
+      "artifactPath": "members/OBS/1166.json",
+      "sha256": "cdebbb0118f0e8273868f672edb8d16e61db0244692392aea0db2772e9f0fb03",
+      "bytes": 9464
+    }
+  ],
+  "sourceActionTableConfirmed": false
+}
