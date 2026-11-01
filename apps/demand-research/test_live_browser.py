@@ -108,6 +108,11 @@ def run(live=False):
                       body=json.dumps(rows,ensure_ascii=False))
                 page.route("https://misskey.io/api/**",misskey_api)
                 page.route("https://planet.moe/api/**",misskey_api)
+                # Source logos exist on this branch but not yet on GitHub Pages
+                # until merge; isolate fixture from the previous Pages release.
+                page.route("https://koith.github.io/browser-app-lab/apps/demand-research/assets/*.svg",
+                    lambda route:route.fulfill(status=200,content_type="image/svg+xml",
+                      body='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/></svg>'))
                 page.route("https://example.com/qa.png",
                     lambda route:route.fulfill(status=200,content_type="image/png",body=PNG))
             page.goto(PAGE,wait_until="domcontentloaded",timeout=30000)
