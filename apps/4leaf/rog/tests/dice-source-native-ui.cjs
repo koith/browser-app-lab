@@ -132,10 +132,19 @@ const path=require('node:path');
   let atOldest=false;
   for(let i=0;i<4;i++){
    await page.mouse.wheel(0,-Math.min(100000,2000*(i+1)));
-   await page.waitForFunction(()=>{
-    const log=document.getElementById('chat-log');
-    return log.scrollTop<2&&log.scrollHeight-log.clientHeight>60;
-   },null,{timeout:9000});
+   // An individual wheel might be interrupted by scroll anchoring while
+   // the 44 real messages settle. A timeout must NOT abort the advertised
+   // four physical retries: leave a genuine UI defect to the final assert.
+   // Never force scrollTop or use synthetic DOM events to fake a PASS.
+   try{
+    await page.waitForFunction(()=>{
+     const log=document.getElementById('chat-log');
+     return log.scrollTop<2&&log.scrollHeight-log.clientHeight>60;
+    },null,{timeout:2500});
+   }catch(error){
+    if(i===3)break;
+    continue;
+   }
    if(await readerStable()){atOldest=true;break;}
   }
   assert.ok(atOldest,
