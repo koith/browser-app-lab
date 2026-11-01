@@ -43,6 +43,7 @@ const {chromium,webkit}=require('playwright');
    overlay:getComputedStyle(document.querySelector('#leaf-dice-fall-layer')).pointerEvents,
    pos:document.querySelector('#leaf-dice-fall-layer').getBoundingClientRect().toJSON(),
    original:document.querySelectorAll('#board-nodes>.tile').length,
+   tumbleUrls:(window.ORIGINAL_LEAF_UI_FRAMES?.['1171']?.frames||[]).filter(f=>f.index>=6).map(f=>f.url),
    sprites:[...document.querySelectorAll('#leaf-dice-fall-layer .leaf-fall-piece[data-sides="6"]')].map(n=>({
     src:n.querySelector('.leaf-fall-original-d6')?.getAttribute('src')||null,
     original:n.classList.contains('leaf-fall-original'),faceSource:n.dataset.faceSource})),
@@ -76,7 +77,7 @@ const {chromium,webkit}=require('playwright');
   assert.equal(mid.count,0,'game dice result MUST NOT appear before bounce and landing');
   // D6 in flight: ORIGINAL 1171.obs tumble frames (partial set 6,7,10,18,25).
   assert.ok(mid.sprites.every(x=>x.original&&
-    /\/OBS\/d6-colorkey-corrected\/1171-(06|07|10|18|25)\.png$/.test(x.src||'')&&
+    mid.tumbleUrls.length>=5&&mid.tumbleUrls.includes(x.src)&&
     x.faceSource==='original-OBS-1171.obs/face-VERIFIED-by-pip-count'),
    'airborne D6 paints original tumble frames: '+JSON.stringify(mid.sprites));
   assert.equal(mid.disabled,true,'other player cannot double-roll during drop');
@@ -193,10 +194,11 @@ const {chromium,webkit}=require('playwright');
        .transformPoint(new DOMPoint(0,0,1,0)).z.toFixed(3))};
     });
     const sprite=document.querySelector('#leaf-dice-fall-layer .leaf-fall-original-d6');
+    const expectedFace=window.ORIGINAL_LEAF_UI_FRAMES['1171'].frames.find(f=>f.index===eye-1).url;
     const landedSprite={src:sprite?.getAttribute('src'),frame:sprite?.dataset.frame,
      cubeOpacity:getComputedStyle(node).opacity};
     const realValues=await pending;
-    return {landedSprite,result:realValues,expected:window.__LEAF_DICE_FALL__.faces[eye],
+    return {landedSprite,expectedFace,result:realValues,expected:window.__LEAF_DICE_FALL__.faces[eye],
      coordinates:layout,columns:xs.length,rows:ys.length,normals,
      originalMesh:window.__LEAF_DICE_FALL__.getState().originalFramesRecovered};
    },eye);
@@ -213,7 +215,7 @@ const {chromium,webkit}=require('playwright');
     'result '+eye+' must show correct geometrical eyes, not auto-packed pips');
    assert.equal(proof.normals[eye-1].towardsCamera,1,
     'actual 3D result-face normal must face front for '+eye+': '+JSON.stringify(proof.normals));
-   assert.equal(proof.landedSprite.src,'./original/OBS/d6-colorkey-corrected/1171-0'+(eye-1)+'.png',
+   assert.equal(proof.landedSprite.src,proof.expectedFace,
     'landed D6 shows the original face for '+eye);
    assert.equal(proof.landedSprite.cubeOpacity,'0','WEB cube is only a hidden fallback');
    assert.equal(proof.originalMesh,false,

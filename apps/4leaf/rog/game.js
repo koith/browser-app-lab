@@ -1215,7 +1215,11 @@ function showBattleScene(attacker,defender,attack,defense,attackerPoints,defende
    // white, red-outlined digits 0..7 of battle.jpg (filed as card 0167).
    // Digits 8/9 are not extracted yet, so a score containing 8 or 9 keeps
    // the WEB text. Text stays in the DOM for accessibility and tests.
-   const numerals=window.ORIGINAL_LEAF_OBS_FRAMES?.['0167']?.frames||[];
+   // Prefer the full UI manifest (every 1167 frame once extracted). Digit d
+   // = large frame d: 0-7 VERIFIED by eye; 8 and 9 INFERRED from the
+   // sequence (0-7 in order, small set 10=='0', 18=='8').
+   const numerals=window.ORIGINAL_LEAF_UI_FRAMES?.['1167']?.frames||
+    window.ORIGINAL_LEAF_OBS_FRAMES?.['0167']?.frames||[];
    const digits=score.textContent.split('').map(d=>numerals.find(f=>f.index===Number(d)));
    if(digits.length&&digits.every(Boolean)){
     const text=document.createElement('span');text.className='battle-total-text';
@@ -1228,7 +1232,9 @@ function showBattleScene(attacker,defender,attack,defense,attackerPoints,defende
      score.append(img);
     }
     score.classList.add('battle-total-original');
-    score.dataset.numeralSource='original-OBS-1167.obs/digits-0-7';
+    score.dataset.numeralSource=/[89]/.test(score.querySelector('.battle-total-text').textContent)
+     ?'original-OBS-1167.obs/digits-0-7-verified/8-9-INFERRED'
+     :'original-OBS-1167.obs/digits-0-7';
    }else{
     score.dataset.numeralSource=numerals.length?'web-text/digit-8-or-9-not-extracted':'web-text';
    }
