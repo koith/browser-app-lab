@@ -26,7 +26,7 @@ ROOT = Path(__file__).resolve().parent
 MAX_FILE = 24_000_000
 ALLOWED_EXACT = {
     "cdn.imgcup.com", "lh5.ggpht.com", "bis.misskon.com",
-    "s.wujituku.com", "cdn1.thismore.fun", "cdn.v2ph.com",
+    "s.wujituku.com", "i.wujituku.com", "cdn1.thismore.fun", "cdn.v2ph.com",
     "pic1.imgdb.cn", "image.huantuji.com", "pbs.twimg.com",
     "pub-376e2756f81341f087a414464f9a25ec.r2.dev",
     "djawaphoto.com", "blog.hacosta.co.jp",
