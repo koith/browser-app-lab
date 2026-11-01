@@ -17,7 +17,7 @@ PNG=base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAFElEQVR4nG
 def fake_post(term, i=1):
     return {
       "uri":f"at://did:plc:synthetic{term}{i}/app.bsky.feed.post/{i+100}",
-      "author":{"did":"did:plc:safe-synthetic", "handle":"sample.invalid", "displayName":"TEST"},
+      "author":{"did":"did:plc:safe-synthetic", "handle":"qa-feed.bsky.social", "displayName":"TEST"},
       "record":{"text":term+(" 광고 판매 홍보 할인 구독 문의 텔레그램 "+str(i) if i%15==0 else " synthetic QA sample without personal details "+str(i)),
                 "createdAt":datetime.now(timezone.utc).isoformat()},
       "indexedAt":datetime.now(timezone.utc).isoformat(),
@@ -32,6 +32,7 @@ def fake_post(term, i=1):
 def run(live=False):
     errors=[]
     api_calls=[]
+    provider_on={"enabled":False}
     with sync_playwright() as p:
         browser=p.chromium.launch(headless=True,args=["--no-sandbox"])
         try:
@@ -51,6 +52,42 @@ def run(live=False):
                       headers={"Access-Control-Allow-Origin":"*"},
                       body=json.dumps({"posts":records},ensure_ascii=False))
                 page.route("https://api.bsky.app/xrpc/app.bsky.feed.searchPosts**",mock_api)
+                def mastodon_api(route):
+                    from urllib.parse import unquote
+                    term=unquote(route.request.url.split("/api/v1/timelines/tag/")[-1].split("?")[0])
+                    if not provider_on["enabled"] or "mstdn.social" in route.request.url:
+                        rows=[]
+                    else:
+                        rows=[{
+                          "id":"112233"+str(TERMS.index(term)),
+                          "uri":"https://mastodon.social/@sample/"+str(TERMS.index(term)+100),
+                          "url":"https://mastodon.social/@sample/"+str(TERMS.index(term)+100),
+                          "visibility":"public","content":"<p>"+term+" synthetic Mastodon test</p>",
+                          "created_at":datetime.now(timezone.utc).isoformat(),
+                          "account":{"display_name":"Mastodon QA","acct":"qa","url":"https://mastodon.social/@qa"},
+                          "media_attachments":[{"type":"image","url":"https://example.com/qa.png",
+                                                "preview_url":"https://example.com/qa.png"}]
+                        }]
+                    route.fulfill(status=200,content_type="application/json",
+                      headers={"Access-Control-Allow-Origin":"*"},body=json.dumps(rows,ensure_ascii=False))
+                def lemmy_api(route):
+                    q=parse_qs(urlparse(route.request.url).query)
+                    term=q.get("q",[""])[0]
+                    records=[]
+                    if provider_on["enabled"] and term in TERMS:
+                        i=TERMS.index(term)
+                        records=[{
+                          "post":{"id":300+i,"ap_id":"https://lemmy.world/post/"+str(300+i),
+                            "name":term+" synthetic Lemmy test",
+                            "body":"test content","published":datetime.now(timezone.utc).isoformat()},
+                          "creator":{"name":"qa","actor_id":"https://lemmy.world/u/qa"},
+                        }]
+                    route.fulfill(status=200,content_type="application/json",
+                      headers={"Access-Control-Allow-Origin":"*"},
+                      body=json.dumps({"posts":records},ensure_ascii=False))
+                page.route("https://mastodon.social/api/**",mastodon_api)
+                page.route("https://mstdn.social/api/**",mastodon_api)
+                page.route("https://lemmy.world/api/**",lemmy_api)
                 page.route("https://example.com/qa.png",
                     lambda route:route.fulfill(status=200,body=PNG,content_type="image/png"))
             page.goto(PAGE,wait_until="domcontentloaded",timeout=30000)
@@ -74,7 +111,9 @@ def run(live=False):
             assert page.locator("#q, #find, .search-row").count()==0
             assert page.locator("#refresh").is_visible()
             assert page.locator("#datePanel input[type=date]").count()==2
-            assert page.locator("#count").inner_text().endswith("건") or "표시" in page.locator("#count").inner_text()
+            assert "건" in page.locator("#count").inner_text()
+            assert "B315" in page.locator("#count").inner_text() or live
+            assert page.locator("footer, #footnote, #showMore, #listMore").count()==0
             assert page.locator("#dotField").evaluate("e=>e.width>0 && e.height>0")
             # Touch scrub reveals a local round hole in the halftone and
             # automatically regrows the removed dots without page navigation.
@@ -143,12 +182,12 @@ def run(live=False):
                 assert "건" in page.locator("#count").inner_text()
                 assert page.locator("#hideAds").is_checked()
                 assert "광고 의심 21건" in page.locator("#adSummary").inner_text()
-                assert page.locator("#showMore").is_visible()
-                page.locator("#showMore").click()
+                assert page.locator("#more").is_visible()
+                page.locator("#more").click()
                 assert page.locator("article.post").count()==294
                 page.locator("#hideAds").uncheck()
                 assert page.locator("article.post").count()==270
-                page.locator("#showMore").click()
+                page.locator("#more").click()
                 assert page.locator("article.post").count()==315
                 assert page.locator(".post-ad-marker").count()>=1
                 page.locator(".post-ad-marker").first.click()
@@ -184,6 +223,27 @@ def run(live=False):
                 assert page.locator('input[type="date"]#startDate').input_value()
                 assert page.locator('input[type="date"]#endDate').input_value()
                 assert page.locator("article.post").count()==270
+                provider_on["enabled"]=True
+                page.locator("#refresh").click()
+                page.wait_for_function("document.getElementById('refresh').disabled === false",timeout=120000)
+                assert "M3" in page.locator("#count").inner_text()
+                assert "L3" in page.locator("#count").inner_text()
+                assert page.locator('.source-badge[aria-label="출처: Mastodon"]').count()>0 or (
+                  page.locator("#more").click() is None and
+                  page.locator('.source-badge[aria-label="출처: Mastodon"]').count()>0)
+                assert page.locator('.source-badge[aria-label="출처: Lemmy"]').count()>0
+                mast=page.locator('article.post').filter(has=page.locator('.source-badge[aria-label="출처: Mastodon"]')).first
+                assert mast.locator('a.author').get_attribute("href")=="https://mastodon.social/@qa"
+                lemmy=page.locator('article.post').filter(has=page.locator('.source-badge[aria-label="출처: Lemmy"]')).first
+                assert lemmy.locator('a.author').get_attribute("href")=="https://lemmy.world/u/qa"
+                bsky=page.locator('article.post').filter(has=page.locator('.source-badge[aria-label="출처: Bluesky"]')).first
+                assert "/profile/qa-feed.bsky.social/post/" in bsky.locator('a.author').get_attribute("href").replace("/post/","/post/") or (
+                    bsky.locator('a.author').get_attribute("href")=="https://bsky.app/profile/qa-feed.bsky.social")
+                bsky.locator(".post-open").click(position={"x":30,"y":30})
+                assert page.locator("#detail").is_visible()
+                assert page.locator("#detailContent .source-badge").count()==1
+                assert page.locator("#detailContent .profile-link").count()==1
+                page.locator("#closeDetail").click()
             assert not errors,"JavaScript exceptions: "+repr(errors[:5])
             print("REAL_PUBLIC_BROWSER_SMOKE" if live else "THREE_COLUMN_MODAL_DATE_QA",
                   json.dumps({"visible_post_cards":n,"thumbs":imgs,"columns":cols,
