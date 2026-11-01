@@ -68,7 +68,7 @@ def test_home_has_no_login_or_password(connected_gateway):
     assert "noindex" in page.headers["x-robots-tag"]
     assert 'type="password"' not in page.text
     assert 'id="login"' not in page.text
-    assert "전용 주소만 열면 자동" in page.text
+    assert "공개 게시글" in page.text and "소비조사" in page.text
 
 
 def test_one_click_activation_cookie_and_auto_session(connected_gateway):
