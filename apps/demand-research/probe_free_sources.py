@@ -88,6 +88,14 @@ def pullpush():
     valid=sum(bool(isinstance(x,dict) and (x.get("permalink") or x.get("id"))) for x in entries)
     return {"source":"pullpush","platform":"reddit","http":status,"items":len(entries),"valid_records":valid}
 
+def arctic(term):
+    url="https://arctic-shift.photon-reddit.com/api/posts/search?"+urlencode({"query":term,"limit":5,"sort":"desc"})
+    status,data=get(url,"application/json")
+    obj=json.loads(data)
+    entries=obj.get("data",[]) if isinstance(obj,dict) else []
+    valid=sum(bool(isinstance(x,dict) and x.get("id") and x.get("created_utc")) for x in entries)
+    return {"source":"arctic_shift","platform":"reddit","query":"project" if term==TERM else "control","http":status,"items":len(entries),"valid_records":valid}
+
 def run(fn,platform):
     try:
         return fn(platform) if platform else fn()
