@@ -287,3 +287,23 @@
  background-position:-294px -481px!important;
  opacity:1!important;cursor:not-allowed!important;
 }
+
+/* Original 2002 Magic Carden table sprites at pixel-verified original
+ * stage positions; use as selection highlight remains INFERRED. */
+#shop .shop-stock .tabline .group-tab[data-group="normal"]{
+ left:272px!important;top:147px!important;width:111px!important;height:90px!important;
+}
+#shop .shop-stock .tabline .group-tab[data-group="valuable"]{
+ left:430px!important;top:142px!important;width:160px!important;height:123px!important;
+}
+#shop .shop-stock .tabline .group-tab:is([data-group="normal"],[data-group="valuable"]){
+ border:0!important;outline:0!important;background-color:transparent!important;
+ background-repeat:no-repeat!important;background-position:0 0!important;
+ background-size:100% 100%!important;image-rendering:pixelated;
+}
+#shop .shop-stock .tabline .group-tab[data-group="normal"]:is(:hover,:focus-visible,.selected){
+ background-image:url('./original/CardShop/normalcard.png')!important;
+}
+#shop .shop-stock .tabline .group-tab[data-group="valuable"]:is(:hover,:focus-visible,.selected){
+ background-image:url('./original/CardShop/valuablecard.png')!important;
+}
