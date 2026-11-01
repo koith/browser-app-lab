@@ -639,12 +639,14 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                         if (browser is not None and rendered_pages<render_budget
                                 and (not alternative or not original_urls)):
                             rendered_pages+=1
+                            rendered_raw=response.content
                             rendered,browser_status=browser.extract(page,model)
                             if browser.page is not None and browser_status not in (
                                     'not_run', 'http_401', 'http_403', 'http_429', 'http_451'):
                                 try:
                                     from public_work_photo_extractor import recover_public_work_photo_urls
                                     actual_dom=browser.page.content().encode('utf-8')
+                                    rendered_raw=actual_dom
                                     additional_dom,_=recover_public_work_photo_urls(
                                         actual_dom,page,model,trusted_work=True)
                                     rendered=list(dict.fromkeys(rendered+additional_dom))
@@ -657,7 +659,7 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                                                    'reason':'chromium_photo_dom_'+type(exc).__name__})
                             if rendered:
                                 alternative,_=verified_alternative_candidates(
-                                    response.content,page,model,original_urls,
+                                    rendered_raw,page,model,original_urls,
                                     known_work_urls,rendered=rendered)
                         alt_candidate_count+=len(alternative)
                         alt_photo_urls.update(alternative)
