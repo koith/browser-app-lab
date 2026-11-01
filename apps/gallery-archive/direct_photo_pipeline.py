@@ -727,12 +727,21 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
         alt_photo_urls=set()
         alt_candidate_count=0
         alt_new_staged=0
+        rendered_work_pages=0
+        blocked_origin_pages=0
         known_work_urls=[url for work_id,url in historic if work_id==aid]
 
         queue=rotated_registered_page_queue(book['source'],[u for u in book.get('source_pages',[]) if safe_registered_public_page(u,model)],max_pages,page_cycle);visited=set();errors=[];candidate_count=0;unreviewed_count=0
         while queue and len(visited)<max_pages and new_total<max_new:
             page=queue.pop(0)
             if page in visited:continue
+            origin=urlsplit(page).scheme+'://'+urlsplit(page).netloc
+            if origin in getattr(client,'blocked_origins',set()):
+                # The crawler has already observed an access/rate/legal block.
+                # Skip this host in the current run; spend remaining work
+                # budget on other explicitly registered public sources.
+                blocked_origin_pages+=1
+                continue
             visited.add(page)
             try:
                 response=client.get(page);urls,more,status=page_images(response.content,page,model)
@@ -786,8 +795,10 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                         # extraction is weak, not the first eight already-full
                         # pages. Reuse the actual dynamically rendered image URLs.
                         if (browser is not None and rendered_pages<render_budget
+                                and rendered_work_pages<3
                                 and (not alternative or not original_urls)):
                             rendered_pages+=1
+                            rendered_work_pages+=1
                             rendered_raw=response.content
                             rendered,browser_status=browser.extract(page,model)
                             if browser.page is not None and browser_status not in (
@@ -900,7 +911,9 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
             if isinstance(e,dict) else str(e)
             for e in errors))
         work_result={'id':aid,'engine':'requests_scrapy_chromium_article_photo',
-                     'pages':len(visited),'source_pages_registered':
+                     'pages':len(visited),'chromium_pages_visited_for_work':rendered_work_pages,
+                     'blocked_origin_pages_not_retried':blocked_origin_pages,
+                     'source_pages_registered':
                          len(set([book['source']]+book.get('source_pages',[]))),
                      'published_image_candidates':candidate_count,
                      'individual_files_saved':len(images),

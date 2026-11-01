@@ -12,6 +12,7 @@ on:
     paths:
       - apps/gallery-archive/direct_photo_pipeline.py
       - apps/gallery-archive/private_collection_snapshot.py
+      - apps/gallery-archive/upload_verified_individual.py
       - apps/gallery-archive/collect_teapawt_public.py
       - apps/gallery-archive/visual_public_work.py
       - apps/yui-gallery/public_photo_archive.py
@@ -21,6 +22,7 @@ on:
       - apps/gallery-archive/direct_photo_pipeline.py
       - apps/gallery-archive/defer_verified_batch.py
       - apps/gallery-archive/private_collection_snapshot.py
+      - apps/gallery-archive/upload_verified_individual.py
       - apps/gallery-archive/test_private_collection_snapshot.py
       - apps/gallery-archive/test_deferred_verified_batch.py
       - apps/gallery-archive/transfer_individual_files.py
@@ -89,6 +91,7 @@ jobs:
           PY
           python apps/gallery-archive/test_deferred_verified_batch.py
           python apps/gallery-archive/test_private_collection_snapshot.py
+          python apps/gallery-archive/test_upload_verified_individual.py
           python apps/gallery-archive/test_transfer_individual_files.py
           python apps/gallery-archive/test_teapawt_public.py
           python apps/gallery-archive/test_public_failures.py
@@ -128,6 +131,7 @@ jobs:
       MIMMI_COOKIE: ${{ secrets.MIMMI_TERABOX_NDUS }}
       YUI_COOKIE: ${{ secrets.YUI_TERABOX_COOKIE }}
       RCLONE_CONFIG_ARCHIVE_TYPE: terabox
+      RCLONE_CONFIG_ARCHIVE_UPLOAD_THREADS: '1'
       MODEL: ${{ matrix.model }}
       # The first cohort is fully proven before this release is merged.
       # Incoming batches still require independent exact media SHA readback.
@@ -230,13 +234,17 @@ jobs:
           with open(os.environ['GITHUB_OUTPUT'],'a') as out:out.write('changed='+str(changed).lower()+'\n')
           print('ACTUAL_NEW_PHOTO_TRANSACTION',changed,d['new_photos'],d['upgraded_photos'])
           PY
-      - name: Copy individual originals and lossless previews, then re-download and SHA-verify new files
+      - name: Upload originals and previews per photo with independent full SHA readback
         if: steps.delta.outputs.changed == 'true' && steps.incoming.outputs.found != 'true'
         run: |
           set -euo pipefail
-          python apps/gallery-archive/safe_rclone.py copy "$RUNNER_TEMP/stage/originals" "$ARCHIVE_REMOTE/originals" --ignore-existing --transfers 2 --checkers 2 --timeout 60s --retries 1
-          python apps/gallery-archive/safe_rclone.py copy "$RUNNER_TEMP/stage/previews" "$ARCHIVE_REMOTE/previews" --ignore-existing --transfers 2 --checkers 2 --timeout 60s --retries 1
-          python apps/gallery-archive/verify_terabox.py --stage "$RUNNER_TEMP/stage" --remote "$ARCHIVE_REMOTE" --workers 2 --only-staged
+          python apps/gallery-archive/upload_verified_individual.py \
+            --stage "$RUNNER_TEMP/stage" \
+            --previous "$RUNNER_TEMP/owner-before.json" \
+            --model "$MODEL" --remote "$ARCHIVE_REMOTE"
+          python apps/gallery-archive/verify_terabox.py \
+            --stage "$RUNNER_TEMP/stage" --remote "$ARCHIVE_REMOTE" \
+            --workers 2 --only-staged
       - name: Retain whole independently verified works after a different work fails
         if: failure() && steps.delta.outputs.changed == 'true' && steps.incoming.outputs.found != 'true'
         run: python apps/gallery-archive/recover_verified_work_batches.py --stage "$RUNNER_TEMP/stage" --owner "$RUNNER_TEMP/owner-before.json" --remote "$ARCHIVE_REMOTE"
