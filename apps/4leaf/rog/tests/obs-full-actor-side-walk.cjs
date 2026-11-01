@@ -65,12 +65,12 @@ const {chromium,webkit}=require('playwright');
    },start.id);
    assert.equal(state.missing,undefined,card+' actual source pawn exists');
    assert.equal(state.rig,'original-obs-sprite',card+' never uses fabricated proxy');
-   assert.equal(state.seq,'14,15,16,17',card+' reviewed side walk frames');
-   assert.equal(state.source,'left-profile-14-17/visual-reviewed/WEB-direction-timing-INFERRED');
+   assert.equal(state.seq,'14,15,16,17,18,19',card+' side walk block');
+   assert.equal(state.source,'walk-side/structural-37/INFERRED');
    const stem=card.slice(-4).replace(/^0/,'1');
    assert.ok(state.src?.includes('/original/OBS/action-full/'+stem+'-'),
     'source must be the actual complete 2002 actor sprites: '+JSON.stringify(state));
-   assert.ok(state.seen.length>=3&&state.seen.every(f=>f>=14&&f<=17),
+   assert.ok(state.seen.length>=3&&state.seen.every(f=>f>=14&&f<=19),
     'actual moving pawn renders distinct original side frames: '+JSON.stringify(state));
    // WebKit may still be downloading the changing sprite at 660ms.
    // Verify eventual real decoded pixels on the live pawn (not a mocked
@@ -106,7 +106,7 @@ const {chromium,webkit}=require('playwright');
         resolve({seq,evidence,seen:[...seen]});
       },1450);
       const check=setInterval(()=>{
-        if(![31,33,35].every(f=>seen.has(f)))return;
+        if(![31,32].every(f=>seen.has(f)))return;
         clearInterval(check);
         clearTimeout(cutoff);
         observer.disconnect();
@@ -114,11 +114,11 @@ const {chromium,webkit}=require('playwright');
       },35);
     });
    },start.id);
-   assert.equal(attack.seq,'25,31,33,35,25',
+   assert.equal(attack.seq,'25,31,32,32,25',
     card+' uses original wind-up, strike and follow-through frames');
    assert.equal(attack.evidence,
-    'original-full-attack-31-33-35/visual-reviewed/WEB-action-FPS-INFERRED');
-   assert.ok([31,33,35].every(f=>attack.seen.includes(f)),
+    'strike-front-31-32/structural-37/INFERRED');
+   assert.ok([31,32].every(f=>attack.seen.includes(f)),
     card+' actually renders all three distinct original attack poses '+JSON.stringify(attack));
    probe.push({card,side:state.seen,attack:attack.seen});
   }
