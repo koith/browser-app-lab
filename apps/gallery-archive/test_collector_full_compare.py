@@ -64,6 +64,17 @@ def test():
               'owner_registered':True,'owner_slots':0,'owner_distinct_sha':0}
         got=full.inspect_work(work,Client(),Browser(),max_pages=4,max_images=4)
         assert got['registered_page_attempts']==2,got
+        assert got['gallery_dl_pages_attempted']==1,got
+        assert got['gallery_dl_unsupported_page_skips']==1,got
+        call_log=[]
+        def supported_extract(url):
+            call_log.append(url)
+            return [],'ok'
+        full.gallery_dl_work=supported_extract
+        full_run=full.inspect_work(work,Client(),Browser(),max_pages=4,max_images=4)
+        assert len(call_log)==2,call_log
+        assert full_run['gallery_dl_pages_attempted']==2,full_run
+        full.gallery_dl_work=lambda url:([],'unsupported_extractor')
         assert got['actual_public_images_decoded']==1,got
         assert got['new_private_originals_stored']==0,got
         assert got['extra_decoded_sha_not_in_baseline']==0,got
