@@ -63,6 +63,7 @@ jobs:
       - run: |
           python apps/gallery-archive/test_direct_photo_pipeline.py
           python apps/gallery-archive/test_public_work_photo_extractor.py
+          python apps/gallery-archive/test_reverse_source_bridge.py
       - name: Measure every registered owner work and excluded public source host
         run: |
           python - <<'PY'
@@ -193,13 +194,22 @@ jobs:
       - name: Independently re-download and SHA-check every incoming original and preview
         if: steps.incoming.outputs.found == 'true'
         run: python apps/gallery-archive/verify_terabox.py --stage "$RUNNER_TEMP/stage" --remote "$ARCHIVE_REMOTE" --workers 2
+      - name: Feed saved image-first source leads back into real photo acquisition
+        if: steps.incoming.outputs.found != 'true'
+        run: |
+          mkdir -p "$RUNNER_TEMP/reverse-shards"
+          last="$(gh run list --workflow gallery-reverse-full-corpus-ab.yml             --limit 20 --json databaseId,conclusion             --jq '[.[] | select(.conclusion=="success")][0].databaseId' 2>/dev/null || true)"
+          if [[ "$last" =~ ^[0-9]+$ ]]; then
+            gh run download "$last" --pattern 'reverse-full-*'               --dir "$RUNNER_TEMP/reverse-shards" || true
+          fi
+          python apps/gallery-archive/reverse_source_bridge.py             --dir "$RUNNER_TEMP/reverse-shards" --model "$MODEL"             --owner "$RUNNER_TEMP/owner-before.json"             --out "$RUNNER_TEMP/reverse-page-leads.json"
       - name: Collect all observed public pages into individually verified files, without photo ZIPs
         if: steps.incoming.outputs.found != 'true'
         run: |
           mkdir -p "$RUNNER_TEMP/stage/originals" "$RUNNER_TEMP/stage/previews"
           focused=()
           if [[ "$ARCHIVE_PUBLICATION_MODE" == deferred ]]; then focused=(--focused-only); fi
-          python apps/gallery-archive/direct_photo_pipeline.py --model "$MODEL" --owner "$RUNNER_TEMP/owner-before.json" --out "$RUNNER_TEMP/stage" --max-new 500 --max-pages 60 --page-cycle "$GITHUB_RUN_NUMBER" --alternative-engines --render-budget 30 "${focused[@]}"
+          python apps/gallery-archive/direct_photo_pipeline.py --model "$MODEL" --owner "$RUNNER_TEMP/owner-before.json" --out "$RUNNER_TEMP/stage" --max-new 500 --max-pages 60 --page-cycle "$GITHUB_RUN_NUMBER" --alternative-engines --render-budget 30 --reverse-evidence "$RUNNER_TEMP/reverse-page-leads.json" "${focused[@]}"
       - name: Content-address focused files for an unpublished private batch
         if: env.ARCHIVE_PUBLICATION_MODE == 'deferred' && steps.incoming.outputs.found != 'true'
         run: python apps/gallery-archive/defer_verified_batch.py prepare --stage "$RUNNER_TEMP/stage" --owner "$RUNNER_TEMP/owner-before.json"
