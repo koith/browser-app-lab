@@ -58,6 +58,28 @@ jobs:
       - run: python -m pip install -r apps/mimmi-gallery/cloud/gateway/requirements.txt requests beautifulsoup4 Scrapy
       - run: |
           python apps/gallery-archive/test_direct_photo_pipeline.py
+      - name: Measure every registered owner work and excluded public source host
+        run: |
+          python - <<'PY'
+          import sys
+          from collections import Counter
+          from urllib.parse import urlsplit
+          from pathlib import Path
+          sys.path.insert(0,'apps/gallery-archive')
+          from collector_full_census import census
+          from direct_photo_pipeline import safe_page
+          data=census(Path('.'))
+          for model in ('yui','mimmi'):
+              rows=[v for v in data['targets'] if v['kind']=='work' and v['model']==model and v.get('owner_registered')]
+              urls=[u for row in rows for u in row.get('urls',[])]
+              safe=[u for u in urls if safe_page(u)]
+              blocked=Counter(urlsplit(u).hostname for u in urls if not safe_page(u))
+              info={'registered_owner_works':len(rows),
+                    'works_with_approved_source':sum(any(safe_page(u) for u in row['urls']) for row in rows),
+                    'source_urls':len(urls),'approved_source_urls':len(safe),
+                    'excluded_source_hosts':blocked.most_common(12)}
+              print('OWNER_CENSUS_PUBLIC_SOURCE_SCOPE',model,info,flush=True)
+          PY
           python apps/gallery-archive/test_deferred_verified_batch.py
           python apps/gallery-archive/test_private_collection_snapshot.py
           python apps/gallery-archive/test_transfer_individual_files.py
