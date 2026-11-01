@@ -39,7 +39,7 @@ def run(live=False):
             page=browser.new_page(viewport={"width":1200,"height":900},color_scheme="light")
             page.on("pageerror",lambda error:errors.append(str(error)[:220]))
             if live:
-                hosts={"mastodon.social","mstdn.social","lemmy.world","misskey.io","planet.moe"}
+                hosts={"mastodon.social","planet.moe","twingyeo.kr","lemmy.world","misskey.io","hoto.moe"}
                 page.on("response",lambda resp:provider_http.append({
                     "host":urlparse(resp.url).hostname,"status":resp.status
                 }) if urlparse(resp.url).hostname in hosts and "/api/" in resp.url else None)
@@ -62,7 +62,7 @@ def run(live=False):
                     from urllib.parse import unquote
                     term=unquote(route.request.url.split("/api/v1/timelines/tag/")[-1].split("?")[0])
                     rows=[]
-                    if provider_on["enabled"] and "mstdn.social" not in route.request.url and term in TERMS:
+                    if provider_on["enabled"] and "mastodon.social" in route.request.url and term in TERMS:
                         i=TERMS.index(term)
                         rows=[{
                           "id":"112233"+str(i),"uri":"https://mastodon.social/@sample/"+str(i+100),
@@ -77,7 +77,8 @@ def run(live=False):
                       headers={"Access-Control-Allow-Origin":"*"},
                       body=json.dumps(rows,ensure_ascii=False))
                 page.route("https://mastodon.social/api/**",mastodon_api)
-                page.route("https://mstdn.social/api/**",mastodon_api)
+                page.route("https://planet.moe/api/**",mastodon_api)
+                page.route("https://twingyeo.kr/api/**",mastodon_api)
                 def lemmy_api(route):
                     term=parse_qs(urlparse(route.request.url).query).get("q",[""])[0]
                     rows=[]
@@ -95,7 +96,7 @@ def run(live=False):
                     payload=route.request.post_data_json or {}
                     term=payload.get("query","")
                     rows=[]
-                    if provider_on["enabled"] and "planet.moe" not in route.request.url and term in TERMS:
+                    if provider_on["enabled"] and "misskey.io" in route.request.url and term in TERMS:
                         i=TERMS.index(term)
                         rows=[{"id":"mtest"+str(i),
                                "createdAt":datetime.now(timezone.utc).isoformat(),
@@ -107,7 +108,7 @@ def run(live=False):
                       headers={"Access-Control-Allow-Origin":"*"},
                       body=json.dumps(rows,ensure_ascii=False))
                 page.route("https://misskey.io/api/**",misskey_api)
-                page.route("https://planet.moe/api/**",misskey_api)
+                page.route("https://hoto.moe/api/**",misskey_api)
                 # Source logos exist on this branch but not yet on GitHub Pages
                 # until merge; isolate fixture from the previous Pages release.
                 page.route("https://koith.github.io/browser-app-lab/apps/demand-research/assets/*.svg",
