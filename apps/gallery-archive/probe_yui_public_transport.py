@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Normal public-origin transport diagnosis; no credentials or image saves."""
 import sys
+import re
 from pathlib import Path
 from urllib.parse import urlsplit
 
@@ -41,6 +42,7 @@ def inspect(url):
                 candidate_sections={css:len(bs.select(css)) for css in ('article','.entry-content','.article-content','.post-content','.entry','.post')},
                 native_preview_img_count=sum('nicewww.com/wp-content/uploads/2026/05/' in (im.get('src') or '') for im in bs.select('img')),
                 section_native_counts={css:sum('nicewww.com/wp-content/uploads/2026/05/' in ' '.join(str(im.get(k) or '') for k in ('src','data-original','data-src')) for im in bs.select(css+' img')) for css in ('article','.entry-content','.article-content','.post','.post-content')},
+                native_preview_rejected_ancestors=[(im.find_parent(class_=re.compile(r'related|recommend|comment|advert|sidebar',re.I)).get('class') if im.find_parent(class_=re.compile(r'related|recommend|comment|advert|sidebar',re.I)) else None) for im in bs.select('.entry-content img') if 'nicewww.com/wp-content/uploads/2026/05/' in (im.get('src') or '')][:5],
                 native_preview_urls=[{key:im.get(key) for key in ('src','data-original','data-src') if im.get(key)} for im in bs.select('.entry-content img') if 'nicewww.com/wp-content/uploads/2026/05/' in (im.get('src') or '')][:5],
                 native_preview_ancestors=[
                     [(node.name or '')+'.'+'.'.join(node.get('class') or []) for node in list(im.parents)[:5]]
