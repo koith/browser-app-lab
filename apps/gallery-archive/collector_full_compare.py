@@ -248,12 +248,17 @@ def inspect_work(row,client,browser,max_pages=500,max_images=650,
               if k in trusted for u in accepted[k]))
     decoded_sha={k:set() for k in methods}
     by_url={}
+    class PublicImageFetcher:
+        def get(self,url,**_kwargs):
+            # Reuse the same origin/robots/rate state as public page discovery.
+            return client.get(url)
+    image_fetcher=PublicImageFetcher()
     for url in image_urls:
         if result['actual_public_image_downloads']>=max_images:
             result['limits'].append('max_image_gets_per_target');break
         if time.monotonic()-begun>=wall_seconds:
             result['limits'].append('target_wall_time');break
-        evidence=verify_public(client.session,url)
+        evidence=verify_public(image_fetcher,url)
         result['actual_public_image_downloads']+=1
         by_url[url]=evidence
     for engine,urls in accepted.items():
