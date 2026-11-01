@@ -14,6 +14,23 @@
  };
  const ROTATION={1:[0,0],2:[0,-90],3:[-90,0],
   4:[90,0],5:[0,90],6:[0,180]};
+ // The original 2002 Dice/OBS.pak 1223.obs contains D4 sprites:
+ // 0..3 are the 1..4-pip result faces (visually VERIFIED), 4..21 are
+ // rotating poses. Their original timing/trajectory is still INFERRED.
+ // The original D4 source PNGs are stored bottom-up, as with 1171 D6.
+ const ORIGINAL_D4_MEMBER_SHA='f6f9792b1fdfa6185cfc89cb8e44be4bbdaf69b7d5cc3b792868354fc8a28f89';
+ function originalD4(){
+  const ui=window.ORIGINAL_LEAF_UI_FRAMES?.['1223'];
+  if(!ui||ui.sourceSHA256!==ORIGINAL_D4_MEMBER_SHA||
+     ui.declaredFrames!==22||ui.frames?.length!==22)return null;
+  const frames=[...ui.frames].sort((a,b)=>a.index-b.index);
+  // Reject a partial/mismatched source map instead of silently associating
+  // an arbitrary 4-eye WEB result with a different source sprite.
+  if(!frames.every((f,i)=>f.index===i&&
+     f.url==='./original/OBS/ui/1223-'+String(i).padStart(3,'0')+'.png'))return null;
+  return {member:'1223.obs',faces:frames.slice(0,4),tumble:frames.slice(4),
+   declared:22,partial:false};
+ }
  // Result-face normals use the regular tetrahedral dihedral angle
  // acos(-1/3)=109.471 degrees. This is still a WEB fallback mesh,
  // NOT original 2002 MVE geometry/keyframes.
@@ -31,9 +48,9 @@
   * pip) - the same art as the dice in the archived 800x600 battle.jpg -
   * and frames 6+ are a white die tumbling in 3D (60x71). Face index =
   * pips - 1 is VERIFIED by counting pips in each frame. Only tumble frames
-  * 6,7,10,18,25 are extracted so far (28 declared), so the tumble below is
-  * a PARTIAL original sequence, and the drop height/bounce path is still
-  * the WEB reconstruction. No D4 art has been found; D4 keeps the WEB mesh. */
+  * 6,7,10,18,25 were the initial partial set; now all 28 are available
+  * through the extracted UI manifest. D4 1223.obs source faces have been
+  * visually reviewed, but physics and frame timings remain WEB inferred. */
  const D6_MEMBER='0171';
  const D6_TUMBLE=[6,7,10,18,25];
  function originalD6(){
@@ -64,7 +81,8 @@
   originalFramesRecovered:false,
   originalD6Faces:!!originalD6(),
   originalD6TumbleFrames:originalD6()?.tumble.map(f=>f.index)||[],
-  originalD4Art:false});
+  originalD4Art:!!originalD4(),
+  originalD4TumbleFrames:originalD4()?.tumble.map(f=>f.index)||[]});
  function makeFace(n){
   const face=document.createElement('span');
   face.className='leaf-die-face leaf-die-face-'+n;
@@ -108,11 +126,11 @@
    for(let n=1;n<=6;n++)cube.append(makeFace(n));
   }
   node.append(cube);
-  const source=sides===6?originalD6():null;
+  const source=sides===4?originalD4():originalD6();
   let sprite=null;
   if(source){
    sprite=document.createElement('img');
-   sprite.className='leaf-fall-original-d6';
+   sprite.className=sides===4?'leaf-fall-original-d4':'leaf-fall-original-d6';
    sprite.alt='';sprite.draggable=false;
    sprite.setAttribute('aria-hidden','true');
    const first=source.tumble[0]||source.faces[result-1];
@@ -120,7 +138,8 @@
    sprite.dataset.frame=String(first.index);
    node.classList.add('leaf-fall-original');
    node.dataset.faceSource='original-OBS-'+source.member+'/face-VERIFIED-by-pip-count';
-   node.dataset.tumbleSource='original-OBS-'+source.member+'/partial-'+source.tumble.length+'-frames';
+   node.dataset.tumbleSource='original-OBS-'+source.member+'/' +
+    (source.partial?'partial-':'index-ordered-INFERRED-')+source.tumble.length+'-frames';
    // If the original PNG cannot load, show the WEB cube instead of nothing.
    sprite.addEventListener('error',()=>{
     node.classList.remove('leaf-fall-original');
@@ -258,6 +277,6 @@
   }
  }
  window.__LEAF_DICE_FALL__={roll,getState:state,
-  faces:PIPS,orientation:ROTATION,originalD6,
+  faces:PIPS,orientation:ROTATION,originalD6,originalD4,
   tetraOrientation:{...TETRA_LAND},tetraDihedralDegrees:TETRA_ANGLE};
 })();
