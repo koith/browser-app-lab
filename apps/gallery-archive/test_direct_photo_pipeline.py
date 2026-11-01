@@ -16,6 +16,24 @@ def photo(seed):
 
 
 class DirectTests(unittest.TestCase):
+    def test_ambiguous_named_model_on_public_gallery_is_not_our_yui_sim(self):
+        from direct_photo_pipeline import (
+            PUBLIC_STRONG_MODEL, RESEARCH_WORK_HOSTS, _work_token_matched_in_heading,
+            verified_alternative_candidates)
+        page='https://www.junmeitu.com/beauty/yui-cream.html'
+        self.assertIn('www.junmeitu.com',RESEARCH_WORK_HOSTS)
+        known='https://i.wujituku.com/Yui-Cream-38.jpg'
+        finder=lambda raw,url,model:([known],'independent_scrapy_selector')
+        correct='<h1>Yui Sim Cream</h1><article>Yui Sim Cream</article>'
+        different='<h1>Yui Nagase Cream</h1><article>Yui Nagase Cream</article>'
+        self.assertTrue(_work_token_matched_in_heading(
+            correct,'Yui Cream','cream228','yui'))
+        self.assertFalse(PUBLIC_STRONG_MODEL['yui'].search('Yui Nagase Cream'))
+        self.assertEqual(verified_alternative_candidates(
+            correct,page,'yui',[],[],scrapy_extractor=finder)[0],[known])
+        self.assertEqual(verified_alternative_candidates(
+            different,page,'yui',[],[],scrapy_extractor=finder)[0],[])
+
     def test_registered_public_photo_hosts_are_crawled_but_social_login_and_offsite_media_are_not(self):
         for host in ('www.junmeitu.com','www.kaizty.com','misskon.com','www.imgcup.com'):
             self.assertTrue(safe_page('https://'+host+'/yui-cream/'),host)
