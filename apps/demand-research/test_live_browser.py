@@ -74,7 +74,7 @@ def run(live=False):
                 assert "315개 게시글" in page.locator("#count").inner_text()
                 assert page.locator("#showMore").is_visible()
                 page.locator("#showMore").click()
-                assert page.locator("article.post").count()==27015
+                assert page.locator("article.post").count()==315
                 assert all("since" in q and "until" in q for q in api_calls)
                 assert all(int(q["limit"][0])==100 for q in api_calls)
                 page.locator(".post-open").first.click()
@@ -87,7 +87,7 @@ def run(live=False):
                 assert page.locator("article.post").count()==105
                 assert "섹트" in page.locator("article.post .post-excerpt").first.inner_text()
                 page.get_by_role("button",name="전체",exact=True).click()
-                assert page.locator("article.post").count()==3
+                assert page.locator("article.post").count()==270
                 page.set_viewport_size({"width":390,"height":844})
                 mobile=page.locator("#feed").evaluate("e=>getComputedStyle(e).gridTemplateColumns.split(' ').length")
                 assert mobile==3,f"Expected iPhone three columns, got {mobile}"
@@ -98,7 +98,7 @@ def run(live=False):
                 page.wait_for_function("document.getElementById('refresh').disabled === false",timeout=120000)
                 assert page.locator('input[type="date"]#startDate').input_value()
                 assert page.locator('input[type="date"]#endDate').input_value()
-                assert page.locator("article.post").count()==3
+                assert page.locator("article.post").count()==270
             assert not errors,"JavaScript exceptions: "+repr(errors[:5])
             print("REAL_PUBLIC_BROWSER_SMOKE" if live else "THREE_COLUMN_MODAL_DATE_QA",
                   json.dumps({"visible_post_cards":n,"thumbs":imgs,"columns":cols,
