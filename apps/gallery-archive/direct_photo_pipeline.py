@@ -16,6 +16,7 @@ from urllib.parse import urljoin, urlsplit, urlunsplit, parse_qsl, urlencode
 
 from bs4 import BeautifulSoup
 from PIL import Image, ImageStat
+from photo_quality_evidence import preferred_pair
 
 ROOT=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT/'apps/yui-gallery'))
@@ -325,8 +326,22 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                         reference=client.get(old['url']).content
                         if hashlib.sha256(reference).hexdigest()!=old['sha256'] or not same_variant(reference,raw):
                             raise ValueError('full_variant_identity_or_visual_match_failed')
-                        if former and p['width']*p['height']<=former['width']*former['height']:continue
-                        p['variant_of_sha256']=old['sha256'];p['higher_resolution_replacement']=bool(former)
+                        # Only replace the same position when a decoded
+                        # visual comparison establishes better image quality.
+                        # Watermark absence breaks an actual visual-quality
+                        # tie ONLY when both statuses are independently verified.
+                        earlier=old.get('watermark_status','unknown')
+                        later=book.get('candidate_watermark_status','unknown')
+                        better,evidence=preferred_pair(reference,raw,old['sha256'],earlier,later)
+                        if not better:
+                            errors.append({'number':number,'url':url,
+                                'reason':'visual_quality_not_proven_better',
+                                'visual_relation':evidence.get('relation')})
+                            continue
+                        p['visual_quality']=evidence
+                        p['variant_of_sha256']=old['sha256']
+                        p['higher_resolution_replacement']=bool(former)
+                        p['higher_visual_quality_replacement']=bool(former)
                     elif old and (p['sha256']!=old.get('sha256') or p['bytes']!=old.get('bytes')):
                         if not safe_reencoded_public_preview(old,raw,fmt,p['width'],p['height'],url):
                             raise ValueError('historical_bytes_changed_outside_conservative_policy')
