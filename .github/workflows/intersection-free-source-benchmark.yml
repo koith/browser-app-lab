@@ -5,6 +5,7 @@ on:
       - "apps/demand-research/probe_free_sources_v2.py"
       - "apps/demand-research/probe_free_index_v2.py"
       - "apps/demand-research/probe_keyless_search.py"
+      - "apps/demand-research/probe_live_verify.py"
       - ".github/workflows/intersection-free-source-benchmark.yml"
   workflow_dispatch:
 permissions:
@@ -23,3 +24,5 @@ jobs:
         run: python apps/demand-research/probe_free_index_v2.py
       - name: Compare keyless Firecrawl and Keenable on canonical post discovery
         run: python apps/demand-research/probe_keyless_search.py
+      - name: Cross-validate canonical links, overlap, CORS and X status originals
+        run: python apps/demand-research/probe_live_verify.py
