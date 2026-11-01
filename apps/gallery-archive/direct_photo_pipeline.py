@@ -70,6 +70,65 @@ def rotated_registered_page_queue(primary, source_pages, max_pages, page_cycle=0
 
 
 
+def _work_token_matched_in_heading(raw,work_title,album_id,model):
+    """A legacy source earns new-cut admission only for its named edition.
+
+    A generic Yui/Mimmi timeline or photo article is not album identity proof.
+    """
+    soup=BeautifulSoup(raw,'html.parser')
+    heading=' '.join(t.get_text(' ',strip=True) for t in soup.select('h1,title')).casefold()
+    if not MODEL_PATTERNS[model].search(heading):
+        return False
+    # Neither the model name nor generic publishing terms distinguish a work.
+    generic={'photo','photos','gallery','album','cosplay','image','images','public',
+             'mimmi','yui','sim','vol','djawa','artgravia','edition','preview',
+             'private','official','collection','part','the','and','set','girl'}
+    tokens=re.findall(r'[a-z0-9]{4,}',str(work_title or '').casefold())
+    tokens.extend(re.findall(r'[a-z]{4,}',str(album_id or '').casefold()))
+    distinct=[t for t in dict.fromkeys(tokens) if t not in generic]
+    return any(re.search(r'(?<![a-z0-9])'+re.escape(t)+r'(?![a-z0-9])',heading)
+               for t in distinct)
+
+
+def merge_owner_census_sources(books, owner, rows, model, safe_source=None):
+    """Include every already-registered OWNER work with a public source.
+
+    The benchmark used the full registered census, but the uploader read just a
+    subset of manifests. This mismatch made verified detector improvements
+    appear as zero new candidates during actual collection.
+    """
+    allowed=safe_source or safe_page
+    known={a['id']:a for a in owner['albums']}
+    stats={'census_owner_work_count':0,'census_eligible_work_count':0,
+           'newly_scheduled_work_count':0,'additional_registered_pages':0,
+           'registered_source_rejected':0}
+    for row in rows:
+        if row.get('model')!=model or row.get('kind')!='work':
+            continue
+        aid=row['id']
+        if aid not in known:continue
+        stats['census_owner_work_count']+=1
+        candidate=list(dict.fromkeys(row.get('urls') or []))
+        verified=[u for u in candidate if allowed(u)]
+        stats['registered_source_rejected']+=len(candidate)-len(verified)
+        if not verified:continue
+        stats['census_eligible_work_count']+=1
+        if aid in books:
+            book=books[aid]
+            before=set([book['source']]+book.get('source_pages',[]))
+            book['source_pages']=list(dict.fromkeys(
+                list(book.get('source_pages',[]))+verified))
+            stats['additional_registered_pages']+=len(
+                set(book['source_pages'])-before)
+        else:
+            held=known[aid]
+            books[aid]={'id':aid,'title':held.get('title') or aid,
+                        'source':verified[0],'source_pages':verified[1:],
+                        'curated_images_only':True,'census_existing_owner':True}
+            stats['newly_scheduled_work_count']+=1
+    return stats
+
+
 def _photo_asset_group(url):
     """Canonicalize observed resized renditions without inventing a photo URL."""
     p=urlsplit(url)
@@ -416,6 +475,19 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                 prior['curated_images_only']=prior['curated_images_only'] and legacy
                 if a.get('visual_reference_required'):prior.update(a)
             else:books[a['id']]=dict(a)
+    from collector_full_census import census
+    registry=root/'apps/gallery-archive/global_source_registry.json'
+    if registry.exists():
+        source_census=census(root)
+        source_scope=merge_owner_census_sources(
+            books,owner,source_census['targets'],model)
+    elif root.resolve()==ROOT.resolve():
+        raise ValueError('Real registry missing: cannot assert exhaustive owner work coverage')
+    else:
+        # Tiny synthetic test roots need not reproduce every research manifest.
+        source_scope={'census_status':'synthetic_fixture_without_registry'}
+    print('PRODUCTION_REGISTERED_WORK_COVERAGE',model,
+          json.dumps(source_scope,ensure_ascii=False),flush=True)
     client=client or PublicSession(delay=.8)
     if not isinstance(render_budget,int) or not 0<=render_budget<=50:
         raise ValueError('Invalid bounded Chromium page budget')
@@ -482,12 +554,11 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                 original_urls=list(urls)
                 # An explicit login, wrong work/volume, or missing identity is
                 # still a hard reject. Alternative parsers do not bypass it.
-                legacy_verified=(not book.get('curated_images_only') or (
-                    bool(previous) and page in ([book['source']]+book.get('source_pages',[]))
-                    and bool(MODEL_PATTERNS[model].search(' '.join(
-                        h.get_text(' ',strip=True)
-                        for h in BeautifulSoup(response.content,'html.parser').select('h1,title'))))))
-                eligible=(alternative_engines and legacy_verified
+                legacy_work_proven=(bool(previous) and book.get('curated_images_only')
+                                    and _work_token_matched_in_heading(
+                                        response.content,book.get('title'),aid,model))
+                eligible=(alternative_engines
+                          and (not book.get('curated_images_only') or legacy_work_proven)
                           and status in ('scoped_public_page','no_public_photos','unscoped_page_rejected')
                           and (urlsplit(page).hostname not in ('showartx.net','www.nicesss.com')
                                or status=='scoped_public_page'))
@@ -591,6 +662,7 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
             'new_photo_positions':sum(not p.get('higher_resolution_replacement') for a in new_albums for p in a['images']),
             'higher_resolution_replacements':sum(bool(p.get('higher_resolution_replacement')) for a in new_albums for p in a['images']),
             'remote_verified_files':0,'gallery_open_verified_files':0,'photo_bundles_created':0,
+            'owner_census_source_coverage':source_scope,
             'alternative_engines_enabled':bool(alternative_engines),
             'chromium_page_visits':rendered_pages,
             'alternative_candidate_url_groups':sum(r.get('alternative_engine_url_candidates',0) for r in results),
