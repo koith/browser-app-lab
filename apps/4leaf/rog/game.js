@@ -544,7 +544,14 @@ function drawPawns(){
      // sliding backwards. Direction choice is INFERRED, not an EXE table.
      const from=PATH[Math.min(previous,PATH.length-1)];
      const dy=from&&point?point.y-from.y:0;
-     pawn.dataset.travelFacing=dy< -0.5?'away':'toward';
+     const dx=from&&point?point.x-from.x:0;
+     // Source 1040/1046/1078 OBS contact sheets contain genuine left-profile
+     // walk pixels 14..17. Only choose that reviewed pose when this real
+     // DMP step is actually horizontal; diagonal and vertical steps retain
+     // the old source-backed rear/front mapping. Historic EXE facing
+     // thresholds and FPS are not yet decoded.
+     pawn.dataset.travelFacing=Math.abs(dy)<0.5&&Math.abs(dx)>1
+      ?(dx<0?'left':'right'):(dy< -0.5?'away':'toward');
      // The original source 0..7 bitmap frames take 7*120ms before frame 7
      // appears at the current explicitly WEB-provisional playback interval.
      // A 240ms timeout truncated EVERY real rolled movement to 0..1. Extend
