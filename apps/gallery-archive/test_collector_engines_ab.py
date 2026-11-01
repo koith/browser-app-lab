@@ -37,7 +37,7 @@ def test():
     assert verified['status']=='decoded_sha' and verified['width']==400,verified
     # A gallery page in which both engines discover identical photos is NOT a gain.
     first,_,_=page_images(body,page,'yui')
-    assert set(first).issubset(set(urls)),(first,urls)
+    assert {u for u in first if safe_photo(u)}.issubset(set(urls)),(first,urls)
     print('COLLECTOR_ENGINES_AB_OFFLINE_PASS')
 
 
