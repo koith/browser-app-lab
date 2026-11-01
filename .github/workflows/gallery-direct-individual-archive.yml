@@ -1,6 +1,10 @@
 name: Gallery Direct Individual Photo Collection and Verified Storage
 on:
   workflow_dispatch:
+  # Repeat bounded public-source windows so thousands of registered pages are
+  # eventually inspected, without brute-force or bypassing source controls.
+  schedule:
+    - cron: '17 */6 * * *'
   push:
     branches: [main]
     # Storage-only fixes must not recrawl/reupload known held source objects.
@@ -58,6 +62,7 @@ jobs:
       - run: python -m pip install -r apps/mimmi-gallery/cloud/gateway/requirements.txt requests beautifulsoup4 Scrapy
       - run: |
           python apps/gallery-archive/test_direct_photo_pipeline.py
+          python apps/gallery-archive/test_public_work_photo_extractor.py
       - name: Measure every registered owner work and excluded public source host
         run: |
           python - <<'PY'
@@ -194,7 +199,7 @@ jobs:
           mkdir -p "$RUNNER_TEMP/stage/originals" "$RUNNER_TEMP/stage/previews"
           focused=()
           if [[ "$ARCHIVE_PUBLICATION_MODE" == deferred ]]; then focused=(--focused-only); fi
-          python apps/gallery-archive/direct_photo_pipeline.py --model "$MODEL" --owner "$RUNNER_TEMP/owner-before.json" --out "$RUNNER_TEMP/stage" --max-new 500 --max-pages 40 --page-cycle "$GITHUB_RUN_NUMBER" --alternative-engines --render-budget 8 "${focused[@]}"
+          python apps/gallery-archive/direct_photo_pipeline.py --model "$MODEL" --owner "$RUNNER_TEMP/owner-before.json" --out "$RUNNER_TEMP/stage" --max-new 500 --max-pages 60 --page-cycle "$GITHUB_RUN_NUMBER" --alternative-engines --render-budget 30 "${focused[@]}"
       - name: Content-address focused files for an unpublished private batch
         if: env.ARCHIVE_PUBLICATION_MODE == 'deferred' && steps.incoming.outputs.found != 'true'
         run: python apps/gallery-archive/defer_verified_batch.py prepare --stage "$RUNNER_TEMP/stage" --owner "$RUNNER_TEMP/owner-before.json"
