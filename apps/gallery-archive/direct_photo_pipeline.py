@@ -282,6 +282,36 @@ def in_excluded_article_section(tag,article):
 
 
 def page_images(raw,url,model):
+    if urlsplit(url).hostname in X_PUBLIC_HOSTS:
+        if not safe_registered_public_page(url,model):
+            return [],[],'unrelated_social_account_rejected'
+        # Only media embedded in the author's actual public status article.
+        # A sign-in wall is not a public photograph.
+        account=CREATOR_ACCOUNTS[model]
+        soup=BeautifulSoup(raw,'html.parser')
+        originals=[]
+        for article in soup.select('article'):
+            identity=bool(article.select(
+                'a[href="/'+account+'"],a[href^="/'+account+'/"]'))
+            identity=identity or bool(re.search(
+                r'(?<![a-z0-9_])@'+re.escape(account)+r'(?![a-z0-9_])',
+                article.get_text(' ',strip=True),re.I))
+            if not identity:
+                continue
+            for tag in article.select('img[src],img[data-src],source[srcset]'):
+                values=[tag.get('src'),tag.get('data-src')]
+                values.extend(part.strip().split()[0]
+                              for part in (tag.get('srcset') or '').split(',')
+                              if part.strip())
+                for value in values:
+                    if not value:
+                        continue
+                    u=urljoin(url,value)
+                    p=urlsplit(u)
+                    if (p.scheme=='https' and p.hostname=='pbs.twimg.com'
+                            and p.path.startswith('/media/') and u not in originals):
+                        originals.append(u)
+        return originals,[],'scoped_public_page' if originals else 'no_public_photos'
     if urlsplit(url).hostname=='teapawt.net':
         account=CREATOR_ACCOUNTS[model]
         if urlsplit(url).path!='/'+account:return [],[],'different_creator_account_rejected'
@@ -653,7 +683,9 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
             visited.add(page)
             try:
                 response=client.get(page);urls,more,status=page_images(response.content,page,model)
-                if urlsplit(page).hostname in RESEARCH_WORK_HOSTS:
+                if (urlsplit(page).hostname in RESEARCH_WORK_HOSTS or
+                        urlsplit(page).hostname not in PAGE_HOSTS
+                        and urlsplit(page).hostname not in X_PUBLIC_HOSTS):
                     title_line=' '.join(h.get_text(' ',strip=True)
                         for h in BeautifulSoup(response.content,'html.parser').select('h1,title'))
                     if not (PUBLIC_STRONG_MODEL[model].search(title_line)
@@ -664,9 +696,12 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                 original_urls=list(urls)
                 # An explicit login, wrong work/volume, or missing identity is
                 # still a hard reject. Alternative parsers do not bypass it.
+                social_proven=(urlsplit(page).hostname in X_PUBLIC_HOSTS
+                               and safe_registered_public_page(page,model)
+                               and status=='scoped_public_page')
                 legacy_work_proven=(bool(previous) and book.get('curated_images_only')
-                                    and _work_token_matched_in_heading(
-                                        response.content,book.get('title'),aid,model))
+                                    and (social_proven or _work_token_matched_in_heading(
+                                        response.content,book.get('title'),aid,model)))
                 eligible=(alternative_engines
                           and (not book.get('curated_images_only') or legacy_work_proven)
                           and status in ('scoped_public_page','no_public_photos','unscoped_page_rejected')
