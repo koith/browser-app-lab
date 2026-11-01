@@ -1311,6 +1311,22 @@
         "ACT-04",
         "P0-RELEASE"
       ]
+    },
+    {
+      "id": "REQ-20261101-003",
+      "date": "2026-11-01",
+      "origin": "user",
+      "text": "4LEAF 원작 복원 대량 개발: 37프레임 체스맨 행동, D4/D6, 전투, 상점, 보드, 채팅, 월드맵, 규칙과 QA",
+      "taskIds": [
+        "ACT-02",
+        "ACT-03",
+        "ACT-04",
+        "P0-ACTOR",
+        "M05",
+        "DIE-02",
+        "DIE-04",
+        "SHOP-01"
+      ]
     }
   ],
   "tasks": [
@@ -2584,9 +2600,9 @@
       "id": "SHOP-01",
       "priority": "P1",
       "title": "원작 Normal/Valuable/Rare 상점 탭·목록 복원",
-      "status": "todo",
+      "status": "in_progress",
       "milestone": "M02",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원작 shop_ref.png은 카드 4×2+등급 탭·오른쪽 목록/소유자·정보, 현재 화면은 3×3 카드 그리드/착용 목록이라 구성 차이 큼 | 구현 목표: 원본 카드 8칸 보기/페이지/가격·선택·카드 정보·구매/판매 버튼을 원본 544x?? 클라이언트 GUI 기준 정렬; 원본 설치 팩 CardShop/cardshopback.png 794x404 자체의 카드 뒷면은 3×3 9개로 검증. 원작 2003~2004 별도 shop_ref.png 캡처의 4×2와 버전/장면이 다를 수 있어 실제 원본 9개를 삭제하지 않음. 판매 버튼 y481 source sprite 새 UI 연결. 이후 어떤 원작 클라이언트 버전이 최종 수용 기준인지 확인 필요.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원작 shop_ref.png은 카드 4×2+등급 탭·오른쪽 목록/소유자·정보, 현재 화면은 3×3 카드 그리드/착용 목록이라 구성 차이 큼 | 구현 목표: 원본 카드 8칸 보기/페이지/가격·선택·카드 정보·구매/판매 버튼을 원본 544x?? 클라이언트 GUI 기준 정렬; 원본 설치 팩 CardShop/cardshopback.png 794x404 자체의 카드 뒷면은 3×3 9개로 검증. 원작 2003~2004 별도 shop_ref.png 캡처의 4×2와 버전/장면이 다를 수 있어 실제 원본 9개를 삭제하지 않음. 판매 버튼 y481 source sprite 새 UI 연결. 이후 어떤 원작 클라이언트 버전이 최종 수용 기준인지 확인 필요.; 2026-11-02 original table sprites & stage hotspot positions 272,147 / 430,142 applied (selection use inferred); later version Rare tab not applied.",
       "acceptance": [
         "동일 카드 보유·선택 상태에서 탭/카드 개수/결과 정보·스크롤/현금 표시까지 원작 비교"
       ],
@@ -2597,7 +2613,7 @@
         "apps/4leaf/rog/original/CardShop/cardshopbutton.png"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-18",
+      "lastReviewed": "2026-11-02",
       "verifiedAcceptance": null,
       "dependencies": [
         "WORLD-01"
@@ -7005,6 +7021,107 @@
         "P0-RELEASE"
       ],
       "details": "Post-beta.39 published ChatRoom workflow encountered transient DMP explorer script readiness failure on first run and chat-log mouse wheel oldest-line timeout on retry. The real-browser regression claimed four wheel retries but threw unconditionally on the first 9-second page.waitForFunction timeout. Reworked to perform up to 4 physical mouse wheel gestures; any unsuccessful 2500ms poll continues without synthetic scrollTop, and the final stable 4-frame oldest-line assertion still fails true functionality regressions with diagnostic. Only QA source and append-only ledger changed; production UI/cache/version untouched. PR/CI and public QA pending."
+    },
+    {
+      "seq": 306,
+      "date": "2026-11-02",
+      "type": "ACTION_TABLE_37_STRUCTURAL",
+      "taskIds": [
+        "ACT-03",
+        "ACT-02",
+        "P0-ACTOR",
+        "M05"
+      ],
+      "details": "45 source actors with 37 OBS frames were visually reviewed by Claude. 41 humanoid members share inferred directional idle/walk/strike blocks: rear 0-10, side 11-21, front 22-32, duel 33-36. Exclude nonhumanoids 0084/0085/0086/0088. INFERRED, 2002 EXE action map and FPS UNVERIFIED."
+    },
+    {
+      "seq": 307,
+      "date": "2026-11-02",
+      "type": "RUNTIME_ACTION_TABLE_37_APPLIED",
+      "taskIds": [
+        "ACT-03",
+        "ACT-04",
+        "P0-ACTOR"
+      ],
+      "details": "Applied 41-member structural table; rear walk 3-8, side walk 14-19 (mirror right, anchor -(originX+width)), front walk 25-30, board strike 25,31,32,32,25, duel 25,33-36,25 with left attacker mirrored. Origin PNG untouched. Claude reported 26 maps/1,920 movement steps; independent post-merge QA pending."
+    },
+    {
+      "seq": 308,
+      "date": "2026-11-02",
+      "type": "MAPPING_CORRECTION",
+      "taskIds": [
+        "ACT-03"
+      ],
+      "details": "Replaces #425 inferred attack frame18 (actually side walking) and 3-7 rear with source-sheet inferred 31/32 strike and 3-8 rear. 0058 rear now approved by sheet review; EXE mapping remains UNVERIFIED."
+    },
+    {
+      "seq": 309,
+      "date": "2026-11-02",
+      "type": "DICE_ROW_AND_PREFETCH",
+      "taskIds": [
+        "DIE-04",
+        "DIE-02"
+      ],
+      "details": "Native battle dice on one centered nowrap row. Native D6 cache remains separate (28 frames); original 1167 numeral cache prefetches 25 score frames alongside existing D4 and D6 preloads."
+    },
+    {
+      "seq": 310,
+      "date": "2026-11-02",
+      "type": "SHOP_ORIGINAL_TABLES",
+      "taskIds": [
+        "SHOP-01"
+      ],
+      "details": "NCC-based original normalcard.png 111x90 at (272,147), valuablecard.png 160x123 at (430,142) on 794x404 CardShop stage. Source positions VERIFIED from original image comparison; using as hover/selected highlights INFERRED; later-version Rare-tab UI not merged."
+    },
+    {
+      "seq": 311,
+      "date": "2026-11-02",
+      "type": "STATUS_CHANGED",
+      "taskIds": [
+        "SHOP-01"
+      ],
+      "details": "SHOP-01 todo→in_progress: native 2002 table hotspots/highlights implemented; later client UI and full acceptance remain open."
+    },
+    {
+      "seq": 312,
+      "date": "2026-11-02",
+      "type": "REQUEST_REGISTERED",
+      "taskIds": [
+        "ACT-02",
+        "ACT-03",
+        "ACT-04",
+        "P0-ACTOR",
+        "M05",
+        "DIE-02",
+        "DIE-04",
+        "SHOP-01"
+      ],
+      "details": "Claude round3 broad autonomous actor/dice/shop restoration request. Source is user-provided round3 archive; no claim of final original match."
+    },
+    {
+      "seq": 313,
+      "date": "2026-11-02",
+      "type": "REBASED_ONTO_MAIN",
+      "taskIds": [
+        "ACT-03",
+        "P0-ACTOR",
+        "M05"
+      ],
+      "details": "Claude patch originally reworked on 63e57907 after preserving audited 0067/0068/0074, D6 prefetch and non-humanoid coverage. This integration was branched from later main 24c28978 without changes in 4leaf path."
+    },
+    {
+      "seq": 314,
+      "date": "2026-11-02",
+      "type": "CLAUDE_ROUND3_INTEGRATION",
+      "taskIds": [
+        "P0-ACTOR",
+        "ACT-03",
+        "DIE-02",
+        "DIE-04",
+        "SHOP-01",
+        "P0-RELEASE"
+      ],
+      "details": "Imported original ZIP 4leaf-round3-20261102 source behavior into GitHub branch; reviewed source-action evidence remains INFERRED, WebKit/iPhone PASS UNVERIFIED; GitHub Actions and published Pages QA pending."
     }
   ]
 }
