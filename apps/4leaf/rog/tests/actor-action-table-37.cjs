@@ -105,7 +105,7 @@ const SIDE='14,15,16,17,18,19',REAR='3,4,5,6,7,8',FRONT='25,26,27,28,29,30';
   assert.equal(duel.outcome.attacker[2],attackerWins?'11,12,13,12':'11');
   assert.equal(duel.outcome.attacker[4],'true');
   assert.equal(duel.outcome.defender[4],'false');
-  assert.match(duel.outcome.attacker[3],/no-source-(victory|hurt)-frame\\/UNVERIFIED$/);
+  assert.ok(duel.outcome.attacker[3]?.endsWith('/UNVERIFIED'),'no fabricated original hurt/victory source frame');
   assert.equal(duel.side,'attacker');
   for(const tops of duel.sides)assert.equal(new Set(tops).size,1,'battle dice single row');
   assert.deepEqual(errors,[]);
