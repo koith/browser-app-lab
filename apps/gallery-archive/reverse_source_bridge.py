@@ -29,7 +29,7 @@ def collect_evidence(directory,model,owner_ids,max_pages_per_work=40):
                    'identity_supported_source_page_hits':0,
                    'named_title_page_hits':0}
     seen_files=set()
-    for p in sorted(Path(directory).glob('reverse-full-*.json')):
+    for p in sorted(Path(directory).rglob('reverse-full-*.json')):
         doc=json.loads(p.read_text(encoding='utf-8'))
         if doc.get('summary',{}).get('model')!=model:
             continue
