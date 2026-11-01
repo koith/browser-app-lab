@@ -33,4 +33,4 @@ jobs:
       - name: Render mobile real gallery, photo decode, lightbox, reload
         run: |
           python -m py_compile apps/gallery-archive/qa_render_gallery_browser.py
-          python apps/gallery-archive/qa_render_gallery_browser.py --browser ${{ matrix.browser }}
+          python apps/gallery-archive/qa_render_gallery_browser.py --browser ${{ matrix.browser }} ${{ github.event_name == 'pull_request' && '--branch-html' || '' }}
