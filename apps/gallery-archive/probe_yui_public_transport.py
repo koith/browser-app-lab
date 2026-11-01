@@ -5,6 +5,8 @@ from pathlib import Path
 from urllib.parse import urlsplit
 
 import requests
+from PIL import Image, ImageStat
+from io import BytesIO
 
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'yui-gallery'))
 from public_photo_archive import PublicSession, public_failure
@@ -29,6 +31,10 @@ def inspect(url):
         row.update(public_session_status=r.status_code,
                    public_session_type=r.headers.get('Content-Type','').split(';')[0],
                    public_session_bytes=len(r.content))
+        if r.headers.get('Content-Type','').lower().startswith('image/'):
+            with Image.open(BytesIO(r.content)) as im:
+                im.load();row.update(image_dimensions=(im.width,im.height),image_format=im.format,
+                    image_sample_stddev=round(max(ImageStat.Stat(im.convert('RGB').resize((32,32))).stddev),2))
     except Exception as e:
         row.update(public_session_error=type(e).__name__, public_session_details=public_failure(e))
     row['robots_status']=s.robot_status
