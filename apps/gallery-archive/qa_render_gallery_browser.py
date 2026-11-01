@@ -24,7 +24,7 @@ def exercise(browser,model,branch_html=False):
         # Candidate quality policy must run with the real Render media/API.
         selector=Path(f"apps/{model}-gallery/image-quality.js").read_text(encoding="utf-8")
         page.route(f"{url}image-quality.js?v=2",lambda route,body=selector:route.fulfill(
-            status=200,content_type="application/javascript",body=selector))
+            status=200,content_type="application/javascript",body=body))
     try:
         resp=page.goto(url,wait_until="domcontentloaded",timeout=70000)
         assert resp and resp.status==200,(model,"HTTP",resp.status if resp else None)
