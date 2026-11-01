@@ -63,13 +63,43 @@ def run(live=False):
             assert page.locator('input[type="date"]').count()==2
             cols=page.locator("#feed").evaluate("e=>getComputedStyle(e).gridTemplateColumns.split(' ').length")
             assert cols==3,f"Expected desktop three columns, got {cols}"
-            assert page.locator(".halftone").count()==2
+            assert page.title()=="INTERSECTION"
+            assert page.locator("h1").inner_text()=="INTERSECTION"
+            assert page.locator("h1").evaluate("e=>parseFloat(getComputedStyle(e).fontSize)")<=44
+            assert page.locator("#dotField").count()==1
             assert page.locator("#filterDetails").count()==1
-            assert page.locator("#dateDisclosure").count()==1
-            assert page.locator("#dateDisclosure").evaluate("e=>!e.open"),"Date controls should start compact"
             assert page.locator("#filterDetails").evaluate("e=>!e.open"),"Filters should start compact"
-            assert page.locator("body").evaluate("e=>getComputedStyle(e).color")=="rgb(23, 24, 21)"
-            assert page.locator(".halftone-a").evaluate("e=>getComputedStyle(e).animationName")=="dot-drift"
+            assert page.locator("#datePanel").is_visible()
+            assert page.locator("#dateDisclosure").count()==0
+            assert page.locator("#q, #find, .search-row").count()==0
+            assert page.locator("#refresh").is_visible()
+            assert page.locator("#datePanel input[type=date]").count()==2
+            assert page.locator("#count").inner_text().endswith("건") or "표시" in page.locator("#count").inner_text()
+            assert page.locator("#dotField").evaluate("e=>e.width>0 && e.height>0")
+            # Touch scrub reveals a local round hole in the halftone and
+            # automatically regrows the removed dots without page navigation.
+            def dot_alpha():
+                return page.locator("#dotField").evaluate("""c=>{
+                    const context=c.getContext('2d');
+                    const px=Math.round(c.width*.79),py=Math.round(c.height*.16);
+                    const d=context.getImageData(px-45,py-45,90,90).data;
+                    let sum=0; for(let i=3;i<d.length;i+=4)sum+=d[i];
+                    return sum;
+                }""")
+            base=dot_alpha()
+            assert base>12000, f"No visible animated dot field: {base}"
+            page.evaluate("""()=>{
+                document.dispatchEvent(new PointerEvent('pointerdown',{
+                    clientX:innerWidth*.79,clientY:innerHeight*.16,pointerType:'touch',
+                    bubbles:true,isPrimary:true
+                }));
+            }""")
+            page.wait_for_timeout(180)
+            cleared=dot_alpha()
+            assert cleared<base*.65, f"Touch failed to clear local dots: {base}, {cleared}"
+            page.wait_for_timeout(2100)
+            grown=dot_alpha()
+            assert grown>base*.78, f"Dot field failed to regrow: {base}, {grown}"
             assert page.locator("#showAdultMedia").is_checked()
             # Advanced switches stay collapsed until deliberately opened.
             page.locator("#filterDetails summary").click()
@@ -84,7 +114,7 @@ def run(live=False):
                 # Warn-class adult labels are no longer blanked by app code.
                 if adult.count():
                     assert adult_thumb>=1,"Public adult-labeled media with thumbnails should display"
-                assert page.locator("#count").inner_text().find("조회")!=-1
+                assert "건" in page.locator("#count").inner_text()
                 page.locator(".post-open").first.click()
                 assert page.locator("dialog#detail").is_visible()
                 assert page.locator("#detailContent .dialog-text").inner_text().strip()
@@ -110,7 +140,7 @@ def run(live=False):
                 assert page.locator("#detailContent .dialog-media img").count()==0
                 page.locator("#closeDetail").click()
                 assert len(api_calls)>=21, f"Expected daily shards, got {len(api_calls)}"
-                assert "315개 조회" in page.locator("#count").inner_text()
+                assert "건" in page.locator("#count").inner_text()
                 assert page.locator("#hideAds").is_checked()
                 assert "광고 의심 21건" in page.locator("#adSummary").inner_text()
                 assert page.locator("#showMore").is_visible()
@@ -144,8 +174,11 @@ def run(live=False):
                 page.locator(".post-open").first.click()
                 assert page.locator("dialog#detail").is_visible()
                 page.locator("#closeDetail").click()
-                page.locator("#dateDisclosure summary").click()
-                assert page.locator("#dateDisclosure").evaluate("e=>e.open")
+                assert page.locator("h1").evaluate("e=>parseFloat(getComputedStyle(e).fontSize)")<=35
+                date_boxes=page.locator("#datePanel input[type=date]").evaluate_all("els=>els.map(e=>e.getBoundingClientRect().toJSON())")
+                assert abs(date_boxes[0]["y"]-date_boxes[1]["y"])<4,"Date inputs should stay side by side on iPhone"
+                assert date_boxes[1]["right"]<=395,"Date picker overflows iPhone width"
+                assert page.locator("#applyDate").is_visible()
                 page.locator('button[data-days="7"]').click()
                 page.wait_for_function("document.getElementById('refresh').disabled === false",timeout=120000)
                 assert page.locator('input[type="date"]#startDate').input_value()
