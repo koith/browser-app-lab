@@ -1,0 +1,21 @@
+{
+  "sourcePakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+  "actorCount": 3,
+  "totalFrames": 111,
+  "members": {
+    "0040": {
+      "name": "1040.obs",
+      "sha256": "ac954b320e56b8c34ffbf1249a9905a4a53e9ac1e91c291cc398216cd8db0734"
+    },
+    "0046": {
+      "name": "1046.obs",
+      "sha256": "dbc29b323135c119d5d44bdf77064d4cfc5b1d262669bd947e7f7bad9e9682e1"
+    },
+    "0078": {
+      "name": "1078.obs",
+      "sha256": "4218c5b6d60905f02e793feb2533ecc8658195e4619017f3cfea1a461a844bfe"
+    }
+  },
+  "originalExeActionTableDecoded": false,
+  "review": "per-frame source body angle verified visually, action FPS and direction control INFERRED"
+}
