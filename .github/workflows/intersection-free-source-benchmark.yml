@@ -4,6 +4,7 @@ on:
     paths:
       - "apps/demand-research/probe_free_sources_v2.py"
       - "apps/demand-research/probe_free_index_v2.py"
+      - "apps/demand-research/probe_keyless_search.py"
       - ".github/workflows/intersection-free-source-benchmark.yml"
   workflow_dispatch:
 permissions:
@@ -20,3 +21,5 @@ jobs:
         run: python apps/demand-research/probe_free_sources_v2.py
       - name: Compare public indexed-search recall of canonical SNS post links
         run: python apps/demand-research/probe_free_index_v2.py
+      - name: Compare keyless Firecrawl and Keenable on canonical post discovery
+        run: python apps/demand-research/probe_keyless_search.py
