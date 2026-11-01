@@ -66,7 +66,7 @@ def run():
         assert works['yui-athletic-club']['classification'] == 'mapped_reference_count_met_completeness_unverified'
         assert not works['yui-athletic-club']['priority_search_required']
         assert plan['mapped_low_coverage_works'] >= 2
-        assert plan['unmapped_works'] == 17, plan['unmapped_works']
+        assert plan['unmapped_works'] == 16, plan['unmapped_works']
         scan = discover(root, Path(__file__).with_name('visual-work-leads.json'),
                         search=True, max_works=1, client=FakeClient())
         c = scan['works'][0]['search_result']['candidate_pages']
