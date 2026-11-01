@@ -422,6 +422,141 @@ function addPost(p,term){
   posts.push(rec);ids.set(uri,rec);return true;
 }
 
+
+/* Federated public search adapters. Each service is read-only, does not use
+   credentials or bypass private feeds, and may have different coverage.
+   CORS/auth-disabled sites yield no results and are reported as unverified. */
+const FEDERATED=[
+  {id:"mastodon",origin:"https://mastodon.social",type:"mastodon"},
+  {id:"mastodon",origin:"https://mstdn.social",type:"mastodon"},
+  {id:"lemmy",origin:"https://lemmy.world",type:"lemmy"}
+];
+let federationCursors=new Map(),serviceCounts={bluesky:0,mastodon:0,lemmy:0};
+function safePublicLink(s,origin){
+  let href=validUrl(s);
+  if(!href)return "";
+  let host=new URL(href).hostname;
+  // Reject localhost, loopback and private IPs in external links.
+  if(/^(localhost|127\.|10\.|192\.168\.|169\.254\.|172\.(1[6-9]|2\d|3[01])\.)/.test(host))return "";
+  return href;
+}
+function textFromHtml(html){
+  try{let doc=new DOMParser().parseFromString(String(html||""),"text/html");
+    doc.querySelectorAll("script,style,noscript").forEach(n=>n.remove());
+    return (doc.body.textContent||"").trim()}catch{return ""}
+}
+function addFederatedRow(row,term,start,end){
+  if(!row||!row.id||!row.text)return false;
+  let stamp=Date.parse(row.posted||"");
+  if(!Number.isFinite(stamp)||stamp<start||stamp>=end)return false;
+  if(!row.text.includes(term))return false;
+  if(ids.has(row.id)){ids.get(row.id).terms.add(term);return false}
+  row.terms=new Set([term]);
+  row.url=safePublicLink(row.url);
+  row.profileUrl=safePublicLink(row.profileUrl);
+  if(!row.url||!row.profileUrl)return false;
+  row.media=(row.media||[]).filter(m=>validUrl(m.url)||validUrl(m.thumb));
+  row.adultLabeled=!!row.adultLabeled;
+  row.restricted=!!row.restricted;
+  ids.set(row.id,row);posts.push(row);return true;
+}
+function addMastodonStatus(item,term,start,end){
+  if(!item||!item.id||item.visibility!=="public")return false;
+  const account=item.account||{},body=textFromHtml(item.content||"");
+  const media=(item.media_attachments||[]).slice(0,12).map(m=>{
+    let typ=m.type==="video"||m.type==="gifv"?"video":"image";
+    return {type:typ,url:safePublicLink(m.url),thumb:safePublicLink(m.preview_url||m.url),alt:m.description||"첨부 파일"}
+  }).filter(m=>m.url);
+  return addFederatedRow({
+    id:"mastodon:"+String(item.uri||item.url||item.id),platform:"mastodon",
+    author:account.display_name||account.acct||"Mastodon",
+    profileUrl:account.url,url:item.url,posted:item.created_at,indexed:item.created_at,
+    text:body,media,adultLabeled:!!item.sensitive,restricted:false
+  },term,start,end);
+}
+function addLemmyPost(entry,term,start,end){
+  const p=entry?.post||{},a=entry?.creator||{};
+  let text=[p.name||"",p.body||""].filter(Boolean).join("\n").trim();
+  let media=[],imageUrl=safePublicLink(p.url);
+  if(imageUrl&&/\.(?:jpg|jpeg|png|webp|gif)(?:\?|$)/i.test(imageUrl))
+    media.push({type:"image",url:imageUrl,thumb:safePublicLink(p.thumbnail_url)||imageUrl,alt:"Lemmy 이미지"});
+  else if(safePublicLink(p.thumbnail_url))
+    media.push({type:"image",url:safePublicLink(p.thumbnail_url),thumb:safePublicLink(p.thumbnail_url),alt:"Lemmy 썸네일"});
+  const profileUrl=safePublicLink(a.actor_id)||"https://lemmy.world/u/"+encodeURIComponent(a.name||"");
+  const canonical=safePublicLink(p.ap_id)||"https://lemmy.world/post/"+encodeURIComponent(p.id||"");
+  return addFederatedRow({
+    id:"lemmy:"+String(p.ap_id||p.id||""),platform:"lemmy",
+    author:a.display_name||a.name||"Lemmy",profileUrl,
+    url:canonical,posted:p.published,indexed:p.published,
+    text,media,adultLabeled:!!p.nsfw,restricted:!!p.removed||!!p.deleted
+  },term,start,end);
+}
+async function publicJson(url){
+  const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),11000);
+  try{
+    const res=await fetch(url,{signal:controller.signal,mode:"cors",credentials:"omit",cache:"no-store",
+       headers:{"Accept":"application/json"}});
+    if(!res.ok)throw Error("HTTP "+res.status);
+    return await res.json();
+  }finally{clearTimeout(timer)}
+}
+async function scanFederated(source,term,start,end,epoch){
+  const key=source.origin+"|"+term;
+  let cursor=federationCursors.get(key)||{page:1,maxId:"",done:false};
+  if(cursor.done)return {added:0,checked:0};
+  let added=0,checked=0;
+  for(let page=0;page<3&&epoch===runID&&posts.length<MAX_POSTS;page++){
+    let u=new URL(source.type==="mastodon"?
+      "/api/v1/timelines/tag/"+encodeURIComponent(term):"/api/v3/search",source.origin);
+    let data=[],lowest=Infinity;
+    if(source.type==="mastodon"){
+      u.searchParams.set("limit","40");
+      if(cursor.maxId)u.searchParams.set("max_id",cursor.maxId);
+      data=await publicJson(u.href);if(!Array.isArray(data))throw Error("Unexpected Mastodon response");
+      if(data.length)cursor.maxId=String(data[data.length-1].id||"");
+    }else{
+      u.searchParams.set("q",term);
+      u.searchParams.set("type_","Posts");u.searchParams.set("sort","New");
+      u.searchParams.set("limit","40");u.searchParams.set("page",cursor.page);
+      let response=await publicJson(u.href);data=response.posts||[];
+      if(!Array.isArray(data))throw Error("Unexpected Lemmy response");
+      cursor.page++;
+    }
+    checked++;
+    if(!data.length){cursor.done=true;break}
+    for(let item of data){
+      let date=Date.parse(source.type==="mastodon"?item.created_at:item.post?.published);
+      if(Number.isFinite(date))lowest=Math.min(lowest,date);
+      if(source.type==="mastodon"?addMastodonStatus(item,term,start,end):
+        addLemmyPost(item,term,start,end))added++;
+    }
+    if(data.length<25){cursor.done=true;break}
+    if(lowest<start)break;
+  }
+  federationCursors.set(key,cursor);
+  return {added,checked};
+}
+async function fetchFederated(start,end,epoch){
+  const jobs=[];
+  for(let source of FEDERATED)for(let term of TERMS)
+    jobs.push(scanFederated(source,term,start,end,epoch));
+  let results=await Promise.allSettled(jobs);
+  if(epoch!==runID)return;
+  let successful=0;
+  for(let i=0;i<results.length;i++){
+    let result=results[i];
+    if(result.status==="fulfilled"){successful+=result.value.checked}
+    else{failed++}
+  }
+  updateServiceCounts();
+  if(successful)status("공개 SNS 통합 조회 · "+posts.length.toLocaleString()+"건");
+  draw();
+}
+function updateServiceCounts(){
+  serviceCounts={bluesky:0,mastodon:0,lemmy:0};
+  for(let p of posts)if(p.platform in serviceCounts)serviceCounts[p.platform]++;
+}
+
 /*
  * Explicit advertising-content heuristic, not a judgement about the author's
  * identity, sexual activity or legitimacy. Scores only text/links and globally
