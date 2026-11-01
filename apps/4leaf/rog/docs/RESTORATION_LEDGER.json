@@ -7138,6 +7138,18 @@
         "P0-RELEASE"
       ],
       "details": "User requested parallel independent work while Claude continues actor/dice/shop. WorldMap original six region canvases retain true green-key alpha. Mouse pointer events now sample native rendered sprite alpha at transformed source coordinates instead of routing over entire rectangular hitboxes; transparent original pixels reject navigation; source-opaque regions continue real routes, keyboard activation and image decode failure retain accessible fallback. Exact 2002 EXE hit-test rule is UNVERIFIED (source-pixel approximation). New physical-pointer Chromium browser test and world/chat CI integration; beta.41/PWA v128. PR/CI/Pages pending; no task marked done."
+    },
+    {
+      "seq": 316,
+      "date": "2026-11-02",
+      "type": "ORIGINAL_CHAT_NATIVE_HISTORY_READING",
+      "taskIds": [
+        "CHT-02",
+        "P0-CHAT",
+        "M03",
+        "QA-03"
+      ],
+      "details": "In original 794x528 ChatRoom the same 390x97 #chat-log is shared with ChatRoom/scrollbar.png (52x40). Incoming two-peer messages and real /help system notices previously called log.scrollTop=log.scrollHeight unconditionally, ejecting readers of older messages. Runtime now tracks whether listener was at bottom and preserves a scrolled-up position, compensating for pruned rows up to the 110-line DOM cap; no cloned transcript or fake actors. Original native source scrollbar is keyboard-operable via ArrowUp/Down, PageUp/Down, Home/End and exposes accessible progress. CSS overflow-anchor disabled to prevent browser jumps. Dedicated Chromium + WebKit two real browser peers regression and existing scroll source QA added. Historical 2002 event semantics and precise CP949 source encoding still UNVERIFIED; do NOT mark CHT-02 done. beta.42/PWA v129. PR/CI/public Pages QA pending."
     }
   ]
 }

@@ -106,6 +106,7 @@ on:
       - 'apps/4leaf/rog/tests/dice-native-dialog-event.cjs'
       - 'apps/4leaf/rog/tests/dice-chessmen-hud.cjs'
       - 'apps/4leaf/rog/tests/registry-native-portraits.cjs'
+      - 'apps/4leaf/rog/tests/chatroom-native-history-reading.cjs'
       - 'apps/4leaf/rog/tests/world-chat.cjs'
       - 'apps/4leaf/rog/tests/chatroom-native-toolbar-six.cjs'
       - 'apps/4leaf/rog/tests/permanent-chatrooms.cjs'
@@ -199,6 +200,8 @@ jobs:
         run: node apps/4leaf/rog/tests/native-offline-cache.cjs
       - name: Verify original 52x40 ChatRoom scrollbar with real messages and pointer drag
         run: node apps/4leaf/rog/tests/chat-native-scrollbar.cjs
+      - name: Preserve old ChatRoom conversation position during two-peer live messages and keyboard source scrollbar
+        run: node apps/4leaf/rog/tests/chatroom-native-history-reading.cjs
       - name: Verify live source Registry chroma key, true side player portraits, game turns and mobile
         run: node apps/4leaf/rog/tests/registry-native-portraits.cjs
       - name: Verify live six-sided combat dice pips and 2004 screenshot arrangement
@@ -287,6 +290,11 @@ jobs:
           FOURLEAF_ONLY_WEBKIT: '1'
           FOURLEAF_TEST_URL: http://127.0.0.1:8765/
         run: node apps/4leaf/rog/tests/chatroom-native-toolbar-six.cjs
+      - name: Verify real two-peer original ChatRoom history and keyboard source rail on WebKit
+        env:
+          FOURLEAF_BROWSER: webkit
+          FOURLEAF_TEST_URL: http://127.0.0.1:8765/
+        run: node apps/4leaf/rog/tests/chatroom-native-history-reading.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
