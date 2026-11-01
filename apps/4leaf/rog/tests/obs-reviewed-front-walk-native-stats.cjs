@@ -58,10 +58,12 @@ const {chromium,webkit}=require('playwright');
    assert.equal(evidence.rig,'original-obs-sprite',id);
    assert.ok(evidence.audited?.includes('visual-original-OBS-reviewed/front/'+id),JSON.stringify(evidence));
    assert.equal(evidence.frontWalk,'true','only inspected source front pair is allowed');
-   const twoFrameFront=id==='0042'||['0047','0050','0063','0065','0066','0069','0070','0071','0072','0073',
-    '0075','0076','0077','0079','0080','0081','0082','0083','0084','0085','0166'].includes(id);
+   // The SHA-verified OBS source census now includes all 37 frames
+   // for the 40 visually front-reviewed actor members. Only 0042 has
+   // no complete 37-frame member and still uses its native two-frame pair.
+   const twoFrameFront=id==='0042';
    assert.equal(evidence.sequence,twoFrameFront?'25,30,25,30':'25,26,27,28,29,30',
-    'verified original front frames only; complete 0078 now has original 26..29 too');
+    'verified front frames only; original 37-frame actors use all 25..30 poses');
    assert.equal(evidence.pose,'walk');
    assert.ok(evidence.src?.includes('/original/OBS/')&&
     evidence.src.endsWith('/1'+id.slice(1)+'-25.png'),JSON.stringify(evidence));
