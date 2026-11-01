@@ -29,6 +29,15 @@
       "source": "https://djawaphoto.com/portfolio/nikke-privaty-sharp-lesson/",
       "priority": 0,
       "identity_evidence": "DJAWA ordinary official portfolio explicitly identifies Yui as its model and publishes its sample and cover image links; only these public image bytes may be collected, not the 190-photo paid product."
+    },
+    {
+      "id": "artgravia-693-yui-public-samples",
+      "title": "ArtGravia Vol.693 [Yui] — 공개 사진 미리보기",
+      "publisher": "ArtGravia (source page: ShowArtx)",
+      "priority": 15,
+      "source": "https://showartx.net/artgravia-vol-693-yui/",
+      "source_claimed_total_edition_photos": 84,
+      "identity_evidence": "Public HTML names ArtGravia VOL.693 [Yui]. Capture only individually observed native ART_693_{number}.jpg image URLs inside that same article. Photo catalogue count 84 is a source claim, not the number of publicly accessible/stored images. No generated filenames, paid product access, related models or resized duplicates. Remote original+preview SHA readback needed before gallery publication."
     }
   ]
 }
