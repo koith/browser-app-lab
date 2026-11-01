@@ -96,7 +96,7 @@ def safe_registered_public_page(url,model=None):
             # Public, explicitly recorded posts by the actual creator only.
             # Do not visit generic timelines, search pages or arbitrary actors.
             return bool(re.fullmatch(
-                '/'+re.escape(CREATOR_ACCOUNTS[model])+r'/status/[0-9]{5,30}/?',
+                '/'+re.escape(CREATOR_ACCOUNTS[model])+r'/status/[0-9]{5,30}(?:/photo/[1-4])?/?',
                 p.path,re.I))
         return True
     except (ValueError, TypeError):
@@ -697,8 +697,7 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                 # An explicit login, wrong work/volume, or missing identity is
                 # still a hard reject. Alternative parsers do not bypass it.
                 social_proven=(urlsplit(page).hostname in X_PUBLIC_HOSTS
-                               and safe_registered_public_page(page,model)
-                               and status=='scoped_public_page')
+                               and safe_registered_public_page(page,model))
                 legacy_work_proven=(bool(previous) and book.get('curated_images_only')
                                     and (social_proven or _work_token_matched_in_heading(
                                         response.content,book.get('title'),aid,model)))
@@ -729,6 +728,10 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                                     from public_work_photo_extractor import recover_public_work_photo_urls
                                     actual_dom=browser.page.content().encode('utf-8')
                                     rendered_raw=actual_dom
+                                    if urlsplit(page).hostname in X_PUBLIC_HOSTS:
+                                        posted,_,_ = page_images(actual_dom,page,model)
+                                        rendered=list(dict.fromkeys(rendered+posted))
+                                        urls=list(dict.fromkeys(urls+posted))
                                     additional_dom,_=recover_public_work_photo_urls(
                                         actual_dom,page,model,trusted_work=True)
                                     rendered=list(dict.fromkeys(rendered+additional_dom))
