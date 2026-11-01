@@ -1,23 +1,16 @@
-name: 4LEAF Pages deployment record status audit
+name: Inspect deployment cleanup eligibility
 on:
   push:
     branches: [ops/4leaf-pages-release-recovery-20261101]
     paths: ['.github/workflows/4leaf-pages-recovery.yml']
 permissions:
-  contents: read
-  deployments: read
+  deployments: write
 jobs:
   inspect:
     runs-on: ubuntu-latest
     steps:
-      - name: Inspect stale Pages deployment records and statuses without mutation
+      - name: Check duplicate status
         env:
           GH_TOKEN: ${{ github.token }}
-        shell: bash
         run: |
-          set -euo pipefail
-          for id in 7470745401 7470734689 7470870691; do
-            echo "DEPLOYMENT $id"
-            gh api "repos/$GITHUB_REPOSITORY/deployments/$id" --jq '{id,sha,environment,created_at,updated_at}'
-            gh api "repos/$GITHUB_REPOSITORY/deployments/$id/statuses" --jq '[.[] | {id,state,created_at,description}][:6]'
-          done
+          gh api "repos/$GITHUB_REPOSITORY/deployments/7470734689/statuses" --jq '.[0].state'
