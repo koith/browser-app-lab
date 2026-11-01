@@ -1,0 +1,59 @@
+name: Gallery Existing vs Full Open Source Engines Real Photo A-B
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - apps/gallery-archive/collector_engines_ab.py
+      - apps/gallery-archive/test_collector_engines_ab.py
+      - .github/workflows/gallery-full-engines-ab.yml
+permissions:
+  contents: read
+jobs:
+  verify-comparison:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install requests Pillow beautifulsoup4 gallery-dl Scrapy playwright
+      - run: |
+          python -m py_compile apps/gallery-archive/collector_engines_ab.py
+          python apps/gallery-archive/test_collector_engines_ab.py
+  compare-real-public-pages:
+    needs: verify-comparison
+    runs-on: ubuntu-24.04
+    timeout-minutes: 23
+    strategy:
+      fail-fast: false
+      matrix:
+        model: [yui, mimmi]
+    env:
+      MODEL: ${{ matrix.model }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install requests Pillow beautifulsoup4 gallery-dl Scrapy playwright
+      - run: python -m playwright install --with-deps chromium
+      - name: Compare same public work sources and verify real bytes and SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$MODEL" == yui ]]; then
+            python apps/gallery-archive/collector_engines_ab.py --out "/tmp/ab-${MODEL}.json" \
+              --work djawa-privaty --work artgravia-677-alt \
+              --work artgravia-693 --work sns-yui-cross-platform
+          else
+            python apps/gallery-archive/collector_engines_ab.py --out "/tmp/ab-${MODEL}.json" \
+              --work djawa-summer-2 --work shypetal-summer-5 \
+              --work pixibb-my-small-bird --work v2ph-public --work sns-mimmi-cross-platform
+          fi
+      - name: Publish plain evidence report, NEVER image files or owner keys
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: real-image-AB-${{ matrix.model }}
+          path: /tmp/ab-${{ matrix.model }}.json
+          if-no-files-found: warn
+          retention-days: 14
