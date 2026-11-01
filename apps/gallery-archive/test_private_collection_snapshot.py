@@ -41,6 +41,9 @@ class PrivateSnapshotTests(unittest.TestCase):
         self.assertEqual(pause.call_count,2)
 
     def test_private_journal_file_download_is_independent_readback(self):
+        audit=json.loads((self.stage/'metadata/collection-audit.json').read_text())
+        audit['model']='mimmi'
+        self.write('collection-audit.json',audit)
         raw,_=recovery.snapshot(self.stage,'mimmi')
         def download(args):
             if args[0]=='copyto' and 'unverified-collection-journal-readback.tmp' in args[2]:
@@ -56,6 +59,9 @@ class PrivateSnapshotTests(unittest.TestCase):
         self.assertFalse((self.stage/'metadata/unverified-collection-journal-readback.tmp').exists())
 
     def test_both_remote_read_methods_must_match_exact_sha(self):
+        audit=json.loads((self.stage/'metadata/collection-audit.json').read_text())
+        audit['model']='mimmi'
+        self.write('collection-audit.json',audit)
         raw,_=recovery.snapshot(self.stage,'mimmi')
         def wrong_download(args):
             if args[0]=='copyto':
