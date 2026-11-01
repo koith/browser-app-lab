@@ -68,7 +68,7 @@ const path=require('node:path');
    const pawn=document.querySelector('#board-pawns .board-pawn[data-id="'+id+'"]');
    const portrait=pawn.querySelector('img.leaf-chess-portrait').getAttribute('src');
    window.__LEAF_GENESIS_ACTORS__.mount(pawn,{team:['c_0046']},portrait);
-   return {samePawn:pawn.dataset.id===id,flag:pawn.dataset.sourceFullUnavailable||null};
+   return {samePawn:pawn.dataset.id===String(id),flag:pawn.dataset.sourceFullUnavailable||null};
   },start.id);
   assert.equal(switchResult.samePawn,true);
   assert.equal(switchResult.flag,null,'a fresh actor cannot inherit another full-source failure');
