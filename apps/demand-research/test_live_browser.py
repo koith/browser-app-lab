@@ -12,7 +12,7 @@ from playwright.sync_api import sync_playwright
 HTML=Path(__file__).with_name("index.html").read_text(encoding="utf-8")
 PAGE="https://koith.github.io/browser-app-lab/apps/demand-research/"
 TERMS=("뒷계","섹트","일탈계")
-PNG=base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScL/nwAAAABJRU5ErkJggg==")
+PNG=base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAFElEQVR4nGPUit7yn4GBgYGJAQoAIS4CPGFQl4cAAAAASUVORK5CYII=")
 
 def fake_post(term, i=1):
     return {
