@@ -722,7 +722,7 @@ function draw(){
 }
 function startBusy(){busy=true;$("refresh").disabled=true;$("applyDate").disabled=true;$("more").disabled=true}
 function endBusy(){busy=false;$("refresh").disabled=false;$("applyDate").disabled=false;$("more").disabled=false}
-function resetData(){posts=[];ids.clear();pending=[];visibleLimit=270;requestCount=0;daysCovered=0;failed=0;incomplete=0;draw()}
+function resetData(){posts=[];ids.clear();pending=[];federationCursors.clear();visibleLimit=270;requestCount=0;daysCovered=0;failed=0;incomplete=0;draw()}
 async function fetchWindow(segment){
   let url=new URL(API);url.searchParams.set("q",segment.term);url.searchParams.set("sort","latest");url.searchParams.set("limit","100");
   url.searchParams.set("since",new Date(segment.start).toISOString());url.searchParams.set("until",new Date(segment.end).toISOString());
