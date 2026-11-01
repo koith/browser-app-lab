@@ -239,7 +239,7 @@ jobs:
           PY
       - name: Refresh existing authenticated owner web token before individual upload
         if: steps.delta.outputs.changed == 'true' && steps.incoming.outputs.found != 'true'
-        run: python apps/gallery-archive/owner_upload_web_token.py --github-env "$GITHUB_ENV"
+        run: python apps/gallery-archive/owner_upload_web_token.py --github-env "$GITHUB_ENV" --best-effort
       - name: Upload originals and previews per photo with independent full SHA readback
         if: steps.delta.outputs.changed == 'true' && steps.incoming.outputs.found != 'true'
         run: |
@@ -259,7 +259,7 @@ jobs:
         run: python apps/gallery-archive/defer_verified_batch.py persist --stage "$RUNNER_TEMP/stage" --remote "$ARCHIVE_REMOTE"
       - name: Renew normal owner web upload state before verified catalog commit
         if: steps.delta.outputs.changed == 'true' && env.ARCHIVE_PUBLICATION_MODE != 'deferred'
-        run: python apps/gallery-archive/owner_upload_web_token.py --github-env "$GITHUB_ENV"
+        run: python apps/gallery-archive/owner_upload_web_token.py --github-env "$GITHUB_ENV" --best-effort
       - name: Commit the owner catalogue only after full new-object readback
         if: steps.delta.outputs.changed == 'true' && env.ARCHIVE_PUBLICATION_MODE != 'deferred'
         run: |
