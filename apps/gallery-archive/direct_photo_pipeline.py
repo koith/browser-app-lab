@@ -177,18 +177,27 @@ def verified_alternative_candidates(raw,page,model,baseline,known_urls,
         scrapy_extractor=independent_scrapy_extract
     discovered,status=scrapy_extractor(raw,page,model)
     from collector_full_compare import alternative_safe_photo
+    from public_work_photo_extractor import (
+        recover_public_work_photo_urls, ordinary_public_https_image)
+    # The old selector missed unfamiliar article templates, original lightbox
+    # URLs and image CDN endpoints without .jpg suffixes. Only image attributes
+    # actually present in this registered page can extend the CDN set.
+    recovered,recovery_status=recover_public_work_photo_urls(
+        raw,page,model,trusted_work=True)
+    observed=set(recovered)
     prior={_photo_asset_group(u) for u in list(baseline)+list(known_urls)}
     groups={}
-    for u in list(discovered)+list(rendered):
-        if not alternative_safe_photo(u):
+    for u in list(discovered)+list(rendered)+recovered:
+        if not ordinary_public_https_image(u,page):
             continue
         approved,_=allowed_url(u)
         p=urlsplit(u)
-        # A public image actually embedded inside the work article of an
-        # explicitly registered source may use its exact source origin.
-        # Do not admit unregistered cross-site media or private IP hosts.
-        if not approved and not (p.hostname==urlsplit(page).hostname
-                                 and p.hostname in SAME_HOST_WORK_IMAGE_SOURCES):
+        # Previously unknown CDN domains are accepted ONLY when a photo link
+        # appears inside the model-scoped article/picture element, not because
+        # the domain was included in a benchmark or search result.
+        if not approved and u not in observed and not (
+            alternative_safe_photo(u) and p.hostname==urlsplit(page).hostname
+            and p.hostname in SAME_HOST_WORK_IMAGE_SOURCES):
             continue
         if p.hostname in ('djawaphoto.com','www.djawaphoto.com') and not p.path.startswith('/wp-content/uploads/'):
             continue
@@ -200,7 +209,7 @@ def verified_alternative_candidates(raw,page,model,baseline,known_urls,
         rank=(not resized,len(p.path))
         if key not in groups or rank>groups[key][0]:
             groups[key]=(rank,u)
-    return [x[1] for x in groups.values()],status
+    return [x[1] for x in groups.values()],status+'|'+recovery_status
 
 
 def same_variant(old_raw,new_raw):
