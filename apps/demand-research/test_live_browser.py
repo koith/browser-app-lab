@@ -117,7 +117,7 @@ def run(live=False):
             assert page.title()=="INTERSECTION"
             assert page.locator("h1").inner_text()=="INTERSECTION"
             assert page.locator("input[type=password],#login,#refresh,#filterDetails,#hideAds,#showAdultMedia,#adLevel").count()==0
-            assert page.locator("#count").is_hidden(), "Verbose index statistics must be offscreen"
+            assert page.locator("#count").evaluate("e=>getComputedStyle(e).clipPath==='inset(50%)'"), "Verbose statistics must be screen-reader-only"
             assert page.locator("footer,#footnote,#showMore,#listMore").count()==0
             assert page.locator("#tabs button").count()==4
             assert page.locator('#tabs button[data-term="all"]').inner_text()=="All"
