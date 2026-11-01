@@ -43,7 +43,21 @@ SHA = re.compile(r"^[a-f0-9]{64}$")
 
 
 def physical_seeds(root: Path = ROOT) -> list[dict]:
-    """Rotate among distinct smallest albums before trying another frame."""
+    """Include actual owner-stored photos, not just the tiny static public subset.
+
+    The existing independent reverse-priority index already supplies public
+    cover URLs for SHA-verified private storage photos. Never expose private
+    originals, storage paths, cookies or authenticated links.
+    """
+    from reverse_seed_priority import seeds as owner_photo_seeds
+    try:
+        owned = owner_photo_seeds(root)
+    except FileNotFoundError:
+        # Offline/static-only fixtures and older repositories remain supported.
+        owned = []
+    if owned:
+        return [{**item, "album_saved_public_count": item["owner_saved_count"],
+                 "public_cover_kind": item["seed_kind"]} for item in owned]
     albums = []
     for model in MODELS:
         path = root / f"{model}-gallery" / "stored-albums.json"

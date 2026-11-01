@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "model": "yui",
-  "evidence": "User-supplied screenshots dated 2026-11-01; item counts are the user's visible folder counts, not publisher expected counts or repository stored-file counts.",
+  "evidence": "User-provided personal folder screenshots (2026-11-01). Counts describe user's collection only; never conflate with publisher totals, complete editions, or verified gallery files. Truncated labels are interpreted conservatively.",
   "works": [
     {
       "key": "artgravia-639",
@@ -142,6 +142,76 @@
       "work_name": "Wet Yui",
       "title": "Yui — Wet Yui",
       "observed_items": 81
+    },
+    {
+      "key": "yui-yo-u-vol03",
+      "series": "Yui",
+      "work_name": "Vol03 Photobook",
+      "title": "Yo-U Vol03 Photobook",
+      "observed_items": 108
+    },
+    {
+      "key": "yui-yo-u-dec-2023",
+      "series": "Yui",
+      "work_name": "Vol.2 Album Dec 2023",
+      "title": "Yo-U Yui Vol.2 Album Dec 2023",
+      "observed_items": 202
+    },
+    {
+      "key": "yui-swtb-cream",
+      "series": "Yui",
+      "work_name": "CREAM",
+      "title": "SWEETBOX Yui Vol.18 CREAM",
+      "observed_items": 225
+    },
+    {
+      "key": "yui-everyday-life",
+      "series": "Yui",
+      "work_name": "Everyday Life",
+      "title": "Yo-U Yui Everyday Life",
+      "observed_items": 197
+    },
+    {
+      "key": "yui-yui-vol1",
+      "series": "Yui",
+      "work_name": "Vol.1 Kuro Yui",
+      "title": "Yui Vol.1 Kuro Yui",
+      "observed_items": 59
+    },
+    {
+      "key": "yui-yui-vol2",
+      "series": "Yui",
+      "work_name": "Vol.2 Yui",
+      "title": "Yui Vol.2 Yui Yui",
+      "observed_items": 43
+    },
+    {
+      "key": "yui-close-to-you",
+      "series": "Yui",
+      "work_name": "Close To You",
+      "title": "Yui Sim Close To You",
+      "observed_items": 13
+    },
+    {
+      "key": "yui-rabbit",
+      "series": "Yui",
+      "work_name": "Rabbit",
+      "title": "YUIsan Rabbit",
+      "observed_items": 12
+    },
+    {
+      "key": "yui-swtb-thru-thru",
+      "series": "Yui",
+      "work_name": "Thru Thru",
+      "title": "SWEETBOX Yui Thru Thru",
+      "observed_items": 82
+    },
+    {
+      "key": "yui-swtb-ramen",
+      "series": "Yui",
+      "work_name": "RAMEN",
+      "title": "SWEETBOX Yui RAMEN",
+      "observed_items": 118
     }
   ]
 }
