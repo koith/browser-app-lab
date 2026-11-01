@@ -136,6 +136,19 @@ class DirectTests(unittest.TestCase):
             self.assertEqual(len(list((root/'stage/originals').rglob('*.jpg'))),1)
             self.assertEqual(result['remote_verified_files'],0)
 
+    def test_publisher_article_keeps_photos_when_global_body_has_sidebar_class(self):
+        page='https://djawaphoto.com/portfolio/mimmi-sample/'
+        image='https://djawaphoto.com/wp-content/uploads/2026/10/mimmi-sample01.jpg'
+        related='https://djawaphoto.com/wp-content/uploads/2026/10/mimmi-related02.jpg'
+        html=(f'<body class="single sidebar-right"><h1>DJAWA Mimmi photo sample</h1>'
+              f'<article><img src="{image}"><div class="related"><img src="{related}"></div>'
+              '</article></body>')
+        pictures,pages,status=page_images(html,page,'mimmi')
+        self.assertEqual(status,'scoped_public_page')
+        self.assertEqual(pictures,[image])
+        self.assertEqual(pages,[])
+        self.assertEqual(page_images(html,page,'yui')[2],'missing_model_context')
+
     def test_v2ph_public_first_page_and_login_stop(self):
         page='https://www.v2ph.com/album/a887785a.html'
         first='https://cdn.v2ph.com/photos/A12345678.jpg'
