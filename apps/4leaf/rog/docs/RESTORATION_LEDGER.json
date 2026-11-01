@@ -1604,7 +1604,7 @@
       "title": "상설 채팅방 원작 화면 정밀 복원",
       "status": "in_progress",
       "milestone": "M03",
-      "current": "실제 채팅은 가능하지만 배치·창틀/전경 등 원작 외형 미달; 2026-10-18 실제 Chromium 통합회귀 발견: 원본 ringbtn.png 캐릭터정보 메뉴가 원본 매직카덴 툴바(상위 CSS 쌓임맥락) 아래 가려짐. 2004 ChatRoom 프레임 CSS :has() 특이성 재조정으로 메뉴가 열릴 때만 z=150, 닫히면 본래 z=106. 브라우저 실제 elementFromPoint 클릭 QA 성공. 전체 채팅 원작 픽셀 동등성은 아직 미완료.; 2026-10-18: Real 2004 ChatRoom source room3 seat 9 torso now receives clicks instead of source toolbar. All scene screenshot pixel fidelity/multiuser seating still outstanding.",
+      "current": "실제 채팅은 가능하지만 배치·창틀/전경 등 원작 외형 미달; 2026-10-18 실제 Chromium 통합회귀 발견: 원본 ringbtn.png 캐릭터정보 메뉴가 원본 매직카덴 툴바(상위 CSS 쌓임맥락) 아래 가려짐. 2004 ChatRoom 프레임 CSS :has() 특이성 재조정으로 메뉴가 열릴 때만 z=150, 닫히면 본래 z=106. 브라우저 실제 elementFromPoint 클릭 QA 성공. 전체 채팅 원작 픽셀 동등성은 아직 미완료.; 2026-10-18: Real 2004 ChatRoom source room3 seat 9 torso now receives clicks instead of source toolbar. All scene screenshot pixel fidelity/multiuser seating still outstanding. | 2026-11-02 public beta.39 QA: chat scroll physical wheel retry test now actually retries four times before reporting failure; runtime chat code unchanged, public revalidation pending.",
       "acceptance": [
         "원본 794×528/2004 화면의 입력·가구·좌석·상설 목록을 실제 참가자 그대로 재현"
       ],
@@ -1617,7 +1617,7 @@
         "https://github.com/koith/browser-app-lab/pull/118"
       ],
       "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
-      "lastReviewed": "2026-10-18",
+      "lastReviewed": "2026-11-02",
       "verifiedAcceptance": null
     },
     {
@@ -2824,7 +2824,7 @@
       "title": "아이폰 Safari 세로·가로 4LEAF HUD 오버랩 재검증",
       "status": "in_progress",
       "milestone": "M09",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 제보된 iPhone 390px 화면에서 육각 겹침/체스맨/주사위 및 하단 HUD 클리핑이 발생했으며 자동 WebKit 시뮬레이션만으로 실기기 완전 재현은 부족 | 구현 목표: iPhone Safari 세로+가로/PWA/주소줄 변화/핀치/롤/가구링 버튼/키보드 동작과 viewport-safearea 검사; 2026-10-19 실제 iPhone 폭390 세로 검증에 더해 844×390 회전 가로 viewport 검사 추가. 진짜 TIS 145x97/원본 OBS/모든 104 DMP 칸/ROLL 실제 클릭·화면 경계 390px을 검사. WebKit 실제 Safari/PWA 가로 세션 확인 전까지 완료 불가.; WebKit 가상 iPhone 390x844->844x390 실제 회전 후 104개 DMP TIS(145x97), 2명 원본 OBS, 물리 ROLL 버튼 클릭, 턴 이동 미변경을 검증하는 E2E 추가. 실제 물리 iOS 단말/사파리 주소줄 환경은 미검증.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 제보된 iPhone 390px 화면에서 육각 겹침/체스맨/주사위 및 하단 HUD 클리핑이 발생했으며 자동 WebKit 시뮬레이션만으로 실기기 완전 재현은 부족 | 구현 목표: iPhone Safari 세로+가로/PWA/주소줄 변화/핀치/롤/가구링 버튼/키보드 동작과 viewport-safearea 검사; 2026-10-19 실제 iPhone 폭390 세로 검증에 더해 844×390 회전 가로 viewport 검사 추가. 진짜 TIS 145x97/원본 OBS/모든 104 DMP 칸/ROLL 실제 클릭·화면 경계 390px을 검사. WebKit 실제 Safari/PWA 가로 세션 확인 전까지 완료 불가.; WebKit 가상 iPhone 390x844->844x390 실제 회전 후 104개 DMP TIS(145x97), 2명 원본 OBS, 물리 ROLL 버튼 클릭, 턴 이동 미변경을 검증하는 E2E 추가. 실제 물리 iOS 단말/사파리 주소줄 환경은 미검증. | 2026-11-02 public beta.39 QA: chat scroll physical wheel retry test now actually retries four times before reporting failure; runtime chat code unchanged, public revalidation pending.",
       "acceptance": [
         "실제 iOS 또는 공개 Safari 실행 증빙 포함; 390/430/768/800+ 화면의 조작/텍스트/버튼 가림 0건"
       ],
@@ -2835,7 +2835,7 @@
         "apps/4leaf/rog/tests/dice-landscape-webkit-release.cjs"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-19",
+      "lastReviewed": "2026-11-02",
       "verifiedAcceptance": null,
       "dependencies": [
         "QA-02",
@@ -6994,6 +6994,17 @@
         "M05"
       ],
       "details": "Independently inspected archived native OBS action-full originals: IDs 0067/0068/0074 members 1067/1068/1074, upright silhouette at frame0 and each frame25..30. Genuine camera-front-looking 25..30 six-image movement cycles visually distinguishable from frame0; source frame PNGs unchanged. Promoted these three actor identities to full original 37-frame manifest with WEB-inferred 25..30 locomotion; browser test checks genuine naturalWidth/Height and source URLs. Full reviewed original members progress 40→43/45, while 0086/0088 rock/monster stay unreviewed. Exact native EXE action/frame mapping, 3D contact, FPS and gameplay direction table remain UNVERIFIED. Code committed, PR browser CI, Pages and iPhone acceptance pending."
+    },
+    {
+      "seq": 305,
+      "date": "2026-11-02",
+      "type": "PUBLIC_CHAT_SCROLL_REAL_WHEEL_QA_RETRY_FIX",
+      "taskIds": [
+        "P0-CHAT",
+        "QA-03",
+        "P0-RELEASE"
+      ],
+      "details": "Post-beta.39 published ChatRoom workflow encountered transient DMP explorer script readiness failure on first run and chat-log mouse wheel oldest-line timeout on retry. The real-browser regression claimed four wheel retries but threw unconditionally on the first 9-second page.waitForFunction timeout. Reworked to perform up to 4 physical mouse wheel gestures; any unsuccessful 2500ms poll continues without synthetic scrollTop, and the final stable 4-frame oldest-line assertion still fails true functionality regressions with diagnostic. Only QA source and append-only ledger changed; production UI/cache/version untouched. PR/CI and public QA pending."
     }
   ]
 }
