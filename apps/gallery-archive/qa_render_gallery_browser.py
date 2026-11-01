@@ -2,19 +2,25 @@
 """Real Render user-entry gallery browser QA; no login, private artifacts or credentials."""
 import argparse
 import json
+from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 ROOT="https://mimmi-private-gallery-free.onrender.com/gallery"
 WORKS={"yui":["yuis-present33","athletic-club104","teddy-bear97"],"mimmi":["mimmi-indie-sana-sopmod2-2019","djawa-rei-beyond-the-heart"]}
 MIN={"yui":3050,"mimmi":4000}
 
-def exercise(browser,model):
+def exercise(browser,model,branch_html=False):
     context=browser.new_context(viewport={"width":390,"height":844},device_scale_factor=2,is_mobile=True,has_touch=True,locale="ko-KR")
     page=context.new_page()
     errors=[];bad=[]
     page.on("pageerror",lambda e:errors.append(str(e)[:240]))
     page.on("response",lambda r:bad.append((r.status,r.url.split("?")[0][-130:])) if r.status>=400 and "/gallery/" in r.url else None)
     url=f"{ROOT}/{model}/"
+    # PR builds test their candidate UI against the REAL deployed Render API;
+    # production main runs must use real, unmodified Render HTML end-to-end.
+    if branch_html:
+        body=Path(f"apps/{model}-gallery/index.html").read_text(encoding="utf-8")
+        page.route(url,lambda route:route.fulfill(status=200,content_type="text/html",body=body))
     try:
         resp=page.goto(url,wait_until="domcontentloaded",timeout=70000)
         assert resp and resp.status==200,(model,"HTTP",resp.status if resp else None)
@@ -41,16 +47,17 @@ def exercise(browser,model):
         page.reload(wait_until="domcontentloaded",timeout=70000)
         page.wait_for_function("()=>document.querySelectorAll('#albumgrid .album').length>0",timeout=90000)
         assert not errors and not bad,(model,"errors after reload",errors,bad)
-        print("RENDER_USER_ENTRY_REAL_PHOTO_BROWSER_PASS",json.dumps({"model":model,**stats,"opened":WORKS[model],"reload":True,"real_iphone_hardware":False}),flush=True)
+        print("RENDER_BRANCH_UI_LIVE_API_BROWSER_PASS" if branch_html else "RENDER_USER_ENTRY_REAL_PHOTO_BROWSER_PASS",json.dumps({"model":model,**stats,"opened":WORKS[model],"reload":True,"real_iphone_hardware":False}),flush=True)
     finally:context.close()
 
 if __name__=="__main__":
     parser=argparse.ArgumentParser()
     parser.add_argument("--browser",choices=["webkit","chromium"],required=True)
+    parser.add_argument("--branch-html",action="store_true",help="Only for PR: checkout HTML + production API")
     args=parser.parse_args()
     with sync_playwright() as p:
         browser=getattr(p,args.browser).launch(headless=True)
         try:
-            for m in ("yui","mimmi"):exercise(browser,m)
+            for m in ("yui","mimmi"):exercise(browser,m,args.branch_html)
         finally:browser.close()
-    print("BOTH_RENDER_GALLERIES_REAL_BROWSER_PASS",args.browser,flush=True)
+    print("BOTH_RENDER_BRANCH_UI_BROWSER_PASS" if args.branch_html else "BOTH_RENDER_GALLERIES_REAL_BROWSER_PASS",args.browser,flush=True)
