@@ -71,8 +71,12 @@ jobs:
       - name: Genuine winBattle podium, independent OBS actors and actual dice sum
         run: node apps/4leaf/rog/tests/dice-battle-podium.cjs
       - name: Verify 41 humanoid original OBS action tables, mirror anchors and battle dice row
+        env:
+          FOURLEAF_TEST_URL: http://127.0.0.1:8765/
         run: node apps/4leaf/rog/tests/actor-action-table-37.cjs
       - name: Verify original Magic Carden table sprites and hotspots
+        env:
+          FOURLEAF_TEST_URL: http://127.0.0.1:8765/
         run: node apps/4leaf/rog/tests/shop-original-tables.cjs
       - name: Original IMG.pak event sprites on real game events
         run: node apps/4leaf/rog/tests/dice-native-original-source-events.cjs
