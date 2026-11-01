@@ -1,0 +1,59 @@
+name: Independent Yui TeraBox Catalog Readback Check
+on:
+  push:
+    branches: ['research/parallel-yui-public-photos-20261101']
+    paths: ['.github/workflows/gallery-parallel-yui-owner-read-probe.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  authenticated-read:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      RCLONE_CONFIG_ARCHIVE_TYPE: terabox
+      YUI_COOKIE: ${{ secrets.YUI_TERABOX_COOKIE }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Install existing pinned TeraBox client
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL https://github.com/gulp79/rclone-extra/releases/download/v1.75.2-extra/rclone-linux-amd64.zip -o "$RUNNER_TEMP/client.zip"
+          echo "78855325a2a8d83b3feee3a8363d32e1211babbf4cda6356fa8ca5f472075062  $RUNNER_TEMP/client.zip" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/unpack" "$RUNNER_TEMP/bin"
+          unzip -q "$RUNNER_TEMP/client.zip" -d "$RUNNER_TEMP/unpack"
+          binary="$(find "$RUNNER_TEMP/unpack" -type f -name rclone -print -quit)"
+          install -m 755 "$binary" "$RUNNER_TEMP/bin/rclone"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+      - name: Read-only authenticated standard catalog download and validate entire inventory
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$YUI_COOKIE"
+          cookie="$(python - <<'PY'
+          import os,sys
+          sys.path.insert(0,'apps/mimmi-gallery/cloud/gateway')
+          from cookie_format import cookie_header
+          print(cookie_header(os.environ['YUI_COOKIE']))
+          PY
+          )"
+          echo "::add-mask::$cookie"
+          export RCLONE_CONFIG_ARCHIVE_COOKIE="$cookie"
+          rclone copyto archive:YuiArchive/metadata/catalog.json "$RUNNER_TEMP/yui-owner-catalog.json" --timeout=65s --retries=1
+          python - <<'PY'
+          import json,os,sys
+          from pathlib import Path
+          sys.path.insert(0,'apps/gallery-archive')
+          from merge_incremental import flatten
+          doc=json.loads((Path(os.environ['RUNNER_TEMP'])/'yui-owner-catalog.json').read_text())
+          assert doc['schema_version']==1 and doc['model']=='yui'
+          assert doc['storage']=='owner-private-terabox-sha-verified-bytes'
+          albums=flatten(doc,'yui')
+          photos=sum(len(z['images']) for z in albums.values())
+          baseline=json.loads(Path('apps/yui-gallery/owner-index.json').read_text())
+          assert photos>=baseline['physical_originals_indexed'],(photos,baseline['physical_originals_indexed'])
+          print('INDEPENDENT_AUTHORIZED_YUI_OWNER_READBACK_PASS','albums',len(albums),'photos',photos)
+          PY
