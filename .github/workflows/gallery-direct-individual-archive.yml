@@ -13,6 +13,7 @@ on:
       - apps/gallery-archive/direct_photo_pipeline.py
       - apps/gallery-archive/private_collection_snapshot.py
       - apps/gallery-archive/upload_verified_individual.py
+      - apps/gallery-archive/commit_verified_owner_catalog.py
       - apps/gallery-archive/owner_upload_web_token.py
       - apps/gallery-archive/collect_teapawt_public.py
       - apps/gallery-archive/visual_public_work.py
@@ -24,6 +25,7 @@ on:
       - apps/gallery-archive/defer_verified_batch.py
       - apps/gallery-archive/private_collection_snapshot.py
       - apps/gallery-archive/upload_verified_individual.py
+      - apps/gallery-archive/commit_verified_owner_catalog.py
       - apps/gallery-archive/owner_upload_web_token.py
       - apps/gallery-archive/test_private_collection_snapshot.py
       - apps/gallery-archive/test_deferred_verified_batch.py
@@ -93,6 +95,7 @@ jobs:
           PY
           python apps/gallery-archive/test_deferred_verified_batch.py
           python apps/gallery-archive/test_private_collection_snapshot.py
+          python apps/gallery-archive/test_commit_verified_owner_catalog.py
           python apps/gallery-archive/test_upload_verified_individual.py
           python apps/gallery-archive/test_owner_upload_web_token.py
           python apps/gallery-archive/test_transfer_individual_files.py
@@ -260,13 +263,14 @@ jobs:
       - name: Renew normal owner web upload state before verified catalog commit
         if: steps.delta.outputs.changed == 'true' && env.ARCHIVE_PUBLICATION_MODE != 'deferred'
         run: python apps/gallery-archive/owner_upload_web_token.py --github-env "$GITHUB_ENV" --best-effort
-      - name: Commit the owner catalogue only after full new-object readback
+      - name: Commit only remotely SHA-verified catalogue with exact delayed-visibility readback
         if: steps.delta.outputs.changed == 'true' && env.ARCHIVE_PUBLICATION_MODE != 'deferred'
         run: |
           set -euo pipefail
-          python apps/gallery-archive/safe_rclone.py copyto "$RUNNER_TEMP/stage/metadata/catalog.json" "$ARCHIVE_REMOTE/metadata/catalog.json" --ignore-times --timeout 60s --retries 1
-          python apps/gallery-archive/safe_rclone.py cat "$ARCHIVE_REMOTE/metadata/catalog.json" --timeout 60s --retries 1 > "$RUNNER_TEMP/catalog-readback.json"
-          cmp "$RUNNER_TEMP/stage/metadata/catalog.json" "$RUNNER_TEMP/catalog-readback.json"
+          python apps/gallery-archive/commit_verified_owner_catalog.py \
+            --stage "$RUNNER_TEMP/stage" --model "$MODEL" \
+            --remote "$ARCHIVE_REMOTE" \
+            --out "$RUNNER_TEMP/catalog-readback.json"
       - name: Publish only verified owner metadata, never original image bytes or storage keys
         if: steps.delta.outputs.changed == 'true' && env.ARCHIVE_PUBLICATION_MODE != 'deferred'
         run: |
