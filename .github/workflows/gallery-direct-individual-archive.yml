@@ -11,6 +11,7 @@ on:
     # All offline regressions still run on pull requests; manual collection stays available.
     paths:
       - apps/gallery-archive/direct_photo_pipeline.py
+      - apps/gallery-archive/private_collection_snapshot.py
       - apps/gallery-archive/collect_teapawt_public.py
       - apps/gallery-archive/visual_public_work.py
       - apps/yui-gallery/public_photo_archive.py
