@@ -7080,7 +7080,10 @@
       "taskIds": [
         "SHOP-01"
       ],
-      "details": "SHOP-01 todo→in_progress: native 2002 table hotspots/highlights implemented; later client UI and full acceptance remain open."
+      "details": "SHOP-01 todo→in_progress: native 2002 table hotspots/highlights implemented; later client UI and full acceptance remain open.",
+      "taskId": "SHOP-01",
+      "from": "todo",
+      "to": "in_progress"
     },
     {
       "seq": 312,
@@ -7096,7 +7099,8 @@
         "DIE-04",
         "SHOP-01"
       ],
-      "details": "Claude round3 broad autonomous actor/dice/shop restoration request. Source is user-provided round3 archive; no claim of final original match."
+      "details": "Claude round3 broad autonomous actor/dice/shop restoration request. Source is user-provided round3 archive; no claim of final original match.",
+      "requestId": "REQ-20261101-003"
     },
     {
       "seq": 313,
