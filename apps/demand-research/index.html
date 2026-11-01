@@ -1,135 +1,347 @@
 <!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer"><meta name="theme-color" content="#121c2b"><title>소비조사 · 게시글 보기</title>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="theme-color" content="#111c2b">
+<title>소비조사 · 게시글 보기</title>
 <style>
-:root{font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",system-ui,sans-serif;color:#1c293a;background:#f4f6fa}*{box-sizing:border-box}body{margin:0}header{background:#121c2b;color:white;padding:19px max(16px,calc((100vw - 1080px)/2))}header h1{font-size:22px;letter-spacing:-.6px;margin:0 0 3px}header small{color:#b5c4d8;font-size:12px}main{max-width:1112px;padding:18px 16px 65px;margin:auto}.toolbar{background:white;border-radius:14px;border:1px solid #e2e8f0;padding:14px;margin-bottom:14px}.toolbar-top{display:flex;align-items:center;justify-content:space-between;gap:8px}.status{font-size:12px;color:#65758b}button{border:0;border-radius:9px;background:#1d4c82;color:white;cursor:pointer;font-weight:650;padding:10px 13px;white-space:nowrap}button:disabled{opacity:.45;cursor:default}.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-top:13px}.tabs button{background:#edf2f8;color:#315170}.tabs button.active{background:#1d4c82;color:white}input{min-width:0;padding:11px;border-radius:9px;border:1px solid #d5deea;font:inherit;width:100%}.filter-row{display:flex;gap:9px;margin-top:12px}.filter-row button{padding:9px 16px}.counter{color:#52657d;font-size:13px;margin:14px 2px}.feed{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.post{background:white;border:1px solid #e4e9f0;border-radius:14px;overflow:hidden;min-width:0;align-self:start;box-shadow:0 1px 4px #152a3e09}.post header{padding:14px 15px;background:white;color:#24334a;display:flex;align-items:center;gap:8px;flex-wrap:wrap}.post header b{font-size:13px;max-width:80%;overflow-wrap:anywhere}.post header time{font-size:11px;color:#8290a2;margin-left:auto}.post p{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6;padding:0 15px;margin:1px 0 13px;font-size:14px}.media{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:3px;background:#e8edf4}.media img,.media video{width:100%;max-height:360px;min-height:95px;object-fit:contain;display:block;background:#152031}.media .single{grid-column:1/-1}.media a{display:block;min-width:0;background:#152031}.media a.single{grid-column:1/-1}.media a img{min-height:0}.post-footer{display:flex;justify-content:space-between;align-items:center;padding:12px 15px;border-top:1px solid #f0f2f7;gap:10px}.post-footer a{color:#20568f;text-decoration:none;font-size:12px;font-weight:650}.post-footer small{font-size:11px;color:#8391a3}.empty{grid-column:1/-1;text-align:center;background:white;border:1px dashed #cbd5e1;border-radius:14px;padding:54px 15px;line-height:1.8;color:#6a7990}.more{display:flex;justify-content:center;margin-top:22px}.more button{width:min(300px,100%)}.hidden{display:none!important}.badge{font-size:11px;color:#517296;background:#eff5fa;padding:4px 7px;border-radius:6px}footer{padding:18px 2px;color:#78889a;font-size:11px;line-height:1.6}@media(max-width:760px){.feed{grid-template-columns:1fr}header{padding:15px}main{padding:11px 10px 50px}.toolbar{padding:12px}.post p{font-size:14px}.post header time{margin-left:0}.media img,.media video{max-height:420px}}
-</style></head>
-<body><header><h1>소비조사</h1><small id="source">공개 게시글 · 글/사진/동영상 통합 보기</small></header>
-<main><section class="toolbar">
-<div class="toolbar-top"><span class="status" id="status" role="status">게시글 불러오는 중…</span><button id="refresh" type="button">새로고침</button></div>
-<div class="tabs" id="tabs"><button type="button" data-term="all" class="active">전체</button><button type="button" data-term="뒷계">뒷계</button><button type="button" data-term="섹트">섹트</button><button type="button" data-term="일탈계">일탈계</button></div>
-<div class="filter-row"><input type="search" id="q" placeholder="게시글 내용 검색" aria-label="게시글 내용 검색"><button type="button" id="find">검색</button></div>
-</section>
-<div id="count" class="counter">게시글을 불러오고 있습니다.</div>
-<section id="feed" class="feed" aria-live="polite"><div class="empty">게시글 불러오는 중…</div></section>
-<div id="paging" class="more hidden"><button id="more" type="button">이전 게시글 더 보기</button></div>
-<footer id="footnote">공개 SNS 원문을 실시간으로 조회합니다. 원문·사진·동영상은 이 사이트나 휴대폰에 일괄 저장하지 않습니다. 테라박스 보관 자료는 별도 연결 전까지 포함되지 않습니다.</footer>
+:root{font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",system-ui,sans-serif;color:#203047;background:#f4f6fa}
+*{box-sizing:border-box}
+body{margin:0}
+body.modal-open{overflow:hidden}
+body>header{background:#111c2b;color:#fff;padding:17px max(14px,calc((100vw - 1240px)/2))}
+body>header h1{font-size:21px;letter-spacing:-.6px;margin:0 0 3px}
+body>header small{color:#b6c5d8;font-size:12px}
+main{max-width:1260px;margin:auto;padding:14px 10px 65px}
+.toolbar{background:#fff;border:1px solid #e1e6f0;border-radius:13px;padding:14px;margin-bottom:12px}
+.toolbar-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.status{font-size:12px;color:#61738b;line-height:1.5;overflow-wrap:anywhere}
+button{font:inherit;border:0;border-radius:9px;background:#1c4d83;color:white;cursor:pointer;font-size:13px;font-weight:650;padding:10px 12px}
+button:disabled{opacity:.45;cursor:default}
+button:focus-visible,input:focus-visible{outline:3px solid #77afff;outline-offset:2px}
+.tabs,.presets{display:flex;gap:6px;flex-wrap:wrap}
+.tabs{margin-top:12px}
+.tabs button,.presets button{background:#eef3fa;color:#315272}
+.tabs button.active,.presets button.active{background:#1d4d84;color:white}
+.search-row{display:flex;gap:8px;margin-top:11px}
+input{min-width:0;border:1px solid #d2dce8;border-radius:8px;background:#fff;font:inherit;font-size:13px;padding:10px}
+.search-row input{flex:1}
+.date-row{display:flex;align-items:end;gap:8px;flex-wrap:wrap;margin-top:12px}
+.date-row label{display:grid;gap:4px;color:#60728a;font-size:11px;font-weight:650;flex:0 1 165px}
+.date-row label input{width:100%}
+.presets{align-self:end}
+.date-row .apply{align-self:end;background:#245e91}
+.counter{margin:12px 2px;color:#536780;font-size:12px;line-height:1.6}
+.feed{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.post{min-width:0;overflow:hidden;background:white;border:1px solid #e1e7ef;border-radius:12px;box-shadow:0 1px 4px #152a3e0a}
+.post-open{display:flex;flex-direction:column;gap:0;text-align:left;width:100%;height:100%;padding:0;color:inherit;background:transparent;border-radius:0;font-weight:400}
+.post-open:focus-visible{outline:3px solid #72b2ff;outline-offset:-3px}
+.post-thumb{position:relative;background:#e7edf4;width:100%;aspect-ratio:1.23/1;overflow:hidden;display:flex;align-items:center;justify-content:center}
+.post-thumb img{display:block;width:100%;height:100%;object-fit:cover;filter:none}
+.post-thumb .text-icon{display:flex;align-items:center;justify-content:center;width:100%;height:100%;background:linear-gradient(145deg,#e6f0fb,#ceddf2);color:#5a779f;font-weight:700;font-size:13px}
+.post-thumb .hide-icon{background:#edf0f4;color:#78889b;font-size:12px}
+.post-thumb .media-num{position:absolute;bottom:6px;right:7px;border-radius:6px;background:#101929cc;color:#fff;padding:3px 6px;font-size:11px;font-weight:650}
+.post-thumb .video-mark{position:absolute;top:7px;left:7px;border-radius:20px;background:#101929cc;color:#fff;padding:4px 7px;font-size:11px}
+.post-body{padding:10px 10px 11px;min-width:0;width:100%;flex:1}
+.post-title{font-size:11px;color:#39638c;font-weight:700;display:flex;align-items:center;gap:5px;overflow:hidden;white-space:nowrap}
+.post-title .author{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.post-title .tag{border-radius:5px;background:#eef3f8;color:#607a96;padding:2px 5px;font-size:10px}
+.post-excerpt{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;overflow:hidden;min-height:3.8em;line-height:1.4;font-size:12px;font-weight:400;color:#27394d;margin:7px 0}
+.post-date{font-size:10px;color:#8a97a8}
+.empty{grid-column:1/-1;text-align:center;padding:55px 15px;background:white;border:1px dashed #cbd5e1;border-radius:13px;color:#61758b;line-height:1.7}
+.more{display:flex;justify-content:center;margin-top:20px}
+.more button{min-width:230px}
+.hidden{display:none!important}
+footer{color:#8493a5;font-size:11px;margin:18px 3px;line-height:1.6}
+dialog{width:min(820px,calc(100vw - 20px));max-width:820px;max-height:calc(100dvh - 22px);margin:auto;border:0;border-radius:16px;padding:0;background:#fff;box-shadow:0 18px 65px #07122377;color:#1e2b3d}
+dialog::backdrop{background:#061223bb;backdrop-filter:blur(3px)}
+.dialog-head{position:sticky;top:0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:10px;background:#fff;border-bottom:1px solid #e5eaf2;padding:11px 16px}
+.dialog-head b{font-size:15px}
+.dialog-head button{background:#e7edf5;color:#2a4568;font-size:22px;line-height:1;padding:7px 13px}
+.dialog-content{padding:17px;max-height:calc(100dvh - 85px);overflow-y:auto;overscroll-behavior:contain}
+.dialog-author{font-size:13px;font-weight:700;color:#264a73}
+.dialog-date{font-size:11px;color:#7d8b9c;margin:4px 0 12px}
+.dialog-text{white-space:pre-wrap;overflow-wrap:anywhere;font-size:15px;line-height:1.7;margin:0 0 16px}
+.dialog-media{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:8px;margin:14px 0}
+.dialog-media img,.dialog-media video{display:block;width:100%;max-height:70vh;object-fit:contain;border-radius:7px;background:#111926}
+.dialog-media a{color:#205a90;font-size:13px}
+.dialog-actions{display:flex;gap:8px;border-top:1px solid #e6ebf1;padding-top:14px;margin-top:12px}
+.dialog-actions a{background:#1c4d83;color:white;border-radius:8px;text-decoration:none;padding:11px 15px;font-size:13px;font-weight:650}
+.dialog-notice{font-size:12px;color:#71829a;margin:12px 0}
+@media(max-width:720px){main{padding:9px 7px 48px}.toolbar{padding:11px}.feed{gap:6px}.post{border-radius:8px}.post-body{padding:7px}.post-title{font-size:10px}.post-title .tag{display:none}.post-excerpt{font-size:11px;line-height:1.35;min-height:3.7em;-webkit-line-clamp:3}.post-thumb{aspect-ratio:1/1.05}.post-date{font-size:9px}.date-row{gap:6px}.date-row label{flex:1 1 125px}.presets{width:100%}.presets button{padding:9px 10px}.date-row .apply{flex:1}.dialog-content{padding:13px}.dialog-text{font-size:14px}.dialog-media{grid-template-columns:1fr}dialog{width:calc(100vw - 14px);max-height:calc(100dvh - 14px)}.dialog-content{max-height:calc(100dvh - 72px)}}
+</style>
+</head>
+<body>
+<header><h1>소비조사</h1><small id="source">공개 게시글 · 사진/영상 통합 보기</small></header>
+<main>
+<section class="toolbar">
+<div class="toolbar-top"><span class="status" id="status" role="status">게시글 불러오는 중…</span><button type="button" id="refresh">다시 조회</button></div>
+<div class="tabs" id="tabs">
+<button type="button" data-term="all" class="active">전체</button>
+<button type="button" data-term="뒷계">뒷계</button>
+<button type="button" data-term="섹트">섹트</button>
+<button type="button" data-term="일탈계">일탈계</button>
+</div>
+<div class="search-row"><input type="search" id="q" placeholder="본문 검색" aria-label="본문 검색"><button id="find" type="button">검색</button></div>
+<div id="datePanel">
+<div class="date-row">
+<label>시작 날짜<input type="date" id="startDate"></label>
+<label>종료 날짜<input type="date" id="endDate"></label>
+<div class="presets" id="presets"><button type="button" data-days="7">7일</button><button type="button" data-days="30" class="active">30일</button><button type="button" data-days="90">90일</button></div>
+<button type="button" id="applyDate" class="apply">기간 조회</button>
+</div></div></section>
+<div class="counter" id="count">불러오는 중…</div>
+<section class="feed" id="feed" aria-live="polite"><div class="empty">게시글 불러오는 중…</div></section>
+<div class="more hidden" id="paging"><button type="button" id="more">이전 기간 더 수집</button></div>
+<footer id="footnote">검색 기간은 SNS 인덱싱 날짜 기준입니다. 표시 건수는 실제 조회 결과이며 전체 게시물의 수집률을 보장하지 않습니다. 테라박스 원본 저장은 별도 연결 전입니다.</footer>
 </main>
+<dialog id="detail" aria-label="게시글 상세"><div class="dialog-head"><b>게시글 상세</b><button id="closeDetail" type="button" aria-label="닫기">×</button></div><div class="dialog-content" id="detailContent"></div></dialog>
 <script>
 (function(){
 "use strict";
-var terms=["뒷계","섹트","일탈계"],api="https://api.bsky.app/xrpc/app.bsky.feed.searchPosts";
-var storedMode=location.hostname!=="koith.github.io",all=[],known=new Set(),active="all",needle="",loading=false,windowEnd=null;
-var $=id=>document.getElementById(id);
+const API="https://api.bsky.app/xrpc/app.bsky.feed.searchPosts";
+const TERMS=["뒷계","섹트","일탈계"];
+const DAY=86400000, MIN_WINDOW=3600000, CHUNK_DAYS=7, MAX_REQUESTS=85, MAX_POSTS=4500;
+const cloudMode=location.hostname!=="koith.github.io";
+let posts=[],ids=new Map(),active="all",needle="",fromMs=0,toMs=0,nextEnd=0,pending=[],requestCount=0,daysCovered=0,incomplete=0,failed=0,runID=0,busy=false,shown=0,cloudOffset=0,cloudTotal=0;
+const $=id=>document.getElementById(id);
+const el=(tag,className,text)=>{let n=document.createElement(tag);if(className)n.className=className;if(text!==undefined)n.textContent=String(text);return n};
+const dayText=ms=>new Date(ms).toISOString().slice(0,10);
+const parseDay=s=>Date.parse(s+"T00:00:00Z");
+const validUrl=s=>{try{let u=new URL(s);return u.protocol==="https:"?u.href:""}catch{return ""}};
+const niceDate=s=>{let d=new Date(s);return isNaN(d)? "날짜 미상":d.toLocaleString("ko-KR",{month:"numeric",day:"numeric",hour:"2-digit",minute:"2-digit"})};
 function status(s){$("status").textContent=s}
-function elem(tag,className,text){var e=document.createElement(tag);if(className)e.className=className;if(text!==undefined)e.textContent=String(text);return e}
-function postUrl(p){var parts=String(p.uri||"").split("/");var rkey=parts[parts.length-1];var handle=p.author&&p.author.handle;return handle&&rkey?"https://bsky.app/profile/"+encodeURIComponent(handle)+"/post/"+encodeURIComponent(rkey):""}
-function typeIsVideo(m){return String(m&&m.$type||"").includes("video#view")||Boolean(m&&m.playlist)}
-function getEmbedded(p){var e=p.embed||{},m=e.media||e;if(Array.isArray(m.images))return m.images.map(i=>({type:"image",url:i.fullsize||i.thumb,thumb:i.thumb||i.fullsize,alt:i.alt||"게시글 사진"})).filter(i=>i.url);if(typeIsVideo(m))return [{type:"video",url:m.playlist||"",poster:m.thumbnail||""}];if(m.external&&m.external.thumb)return [{type:"external",url:m.external.uri||"",poster:m.external.thumb}];return []}
-function labelHidden(p){return (p.labels||[]).some(x=>["porn","sexual","nudity","graphic-media","gore","csam"].includes(String(x.val||"").toLowerCase()))}
-function parsePost(p,term){
-  if(!p||!p.uri||!p.record||typeof p.record.text!=="string")return null;
-  if(!p.record.text.includes(term))return null;
-  var url=postUrl(p);if(!url)return null;
-  return {id:p.uri,uri:p.uri,term:term,author:p.author&&p.author.displayName||p.author&&p.author.handle||"게시글",
-    text:p.record.text,posted:p.record.createdAt||p.indexedAt||"",url:url,
-    media:getEmbedded(p),labels:p.labels||[],noPreview:labelHidden(p)};
+function getMedia(p){
+  let e=p.embed||{},m=e.media||e;
+  if(Array.isArray(m.images))return m.images.map(i=>({type:"image",url:validUrl(i.fullsize||i.thumb),thumb:validUrl(i.thumb||i.fullsize),alt:i.alt||"첨부 이미지"})).filter(x=>x.url);
+  if(String(m.$type||"").includes("video")||m.playlist)return [{type:"video",url:validUrl(m.playlist),thumb:validUrl(m.thumbnail)}];
+  if(m.external&&m.external.thumb)return [{type:"external",url:validUrl(m.external.uri),thumb:validUrl(m.external.thumb)}];
+  return [];
 }
-function card(p){
-  var article=elem("article","post"),h=elem("header"),name=elem("b","",p.author),tag=elem("span","badge",p.term),tm=elem("time","",p.posted?new Date(p.posted).toLocaleString("ko-KR"):"");
-  if(p.posted)tm.dateTime=p.posted;h.append(name,tag,tm);article.append(h);
-  article.append(elem("p","",p.text||"(본문 없음)"));
-  if(p.media&&p.media.length){
-    if(p.noPreview){
-      article.append(elem("p","badge","민감한 미디어 · 원문에서 확인"));
-    }else{
-      var media=elem("div","media");
-      for(var m of p.media.slice(0,10)){
-        if(m.type==="image"||m.type==="external"){
-          var a=elem("a",p.media.length===1?"single":"");a.href=m.type==="external"?m.url:p.url;a.rel="noopener noreferrer";a.target="_blank";
-          var image=elem("img");image.src=m.thumb||m.poster;image.loading="lazy";image.alt=m.alt||"게시글 첨부 이미지";image.referrerPolicy="no-referrer";
-          image.addEventListener("error",()=>{image.style.display="none"});
-          a.append(image);media.append(a);
-        }else if(m.type==="video"&&m.url){
-          var v=elem("video",p.media.length===1?"single":"");v.controls=true;v.preload="none";v.playsInline=true;
-          v.poster=m.poster||"";v.src=m.url;v.referrerPolicy="no-referrer";
-          v.addEventListener("error",()=>{var a=elem("a","","영상 원문 보기");a.href=p.url;a.target="_blank";a.rel="noopener noreferrer";v.replaceWith(a)});
-          media.append(v);
-        }
-      }
-      if(media.childNodes.length)article.append(media);
+const sensitive=p=>(p.labels||[]).some(x=>["porn","sexual","nudity","graphic-media","gore","csam"].includes(String(x.val||"").toLowerCase()));
+function addPost(p,term){
+  if(!p||!p.uri||typeof p.record?.text!=="string"||!p.record.text.includes(term))return false;
+  let uri=String(p.uri),old=ids.get(uri);
+  if(old){old.terms.add(term);return false}
+  let a=p.author||{},rkey=uri.split("/").pop(),did=uri.split("/")[2]||"",handle=a.did||did||a.handle;
+  if(!rkey||!handle)return false;
+  let url="https://bsky.app/profile/"+encodeURIComponent(handle)+"/post/"+encodeURIComponent(rkey);
+  let rec={id:uri,author:a.displayName||a.handle||"게시글",text:p.record.text,posted:p.record.createdAt||p.indexedAt||"",indexed:p.indexedAt||p.record.createdAt||"",url,
+      terms:new Set([term]),media:getMedia(p),noPreview:sensitive(p)};
+  posts.push(rec);ids.set(uri,rec);return true;
+}
+function filtered(){
+  return posts.filter(p=>(active==="all"||p.terms.has(active))&&(!needle||p.text.toLowerCase().includes(needle))).sort((a,b)=>String(b.indexed).localeCompare(String(a.indexed)));
+}
+function tile(p){
+  let article=el("article","post"),button=el("button","post-open");button.type="button";button.setAttribute("aria-label","게시글 상세 보기");
+  let thumb=el("div","post-thumb"),first=p.media[0];
+  if(first&&!p.noPreview&&first.thumb){
+    let img=el("img");img.src=first.thumb;img.alt="게시글 대표 이미지";img.loading="lazy";img.referrerPolicy="no-referrer";
+    img.addEventListener("error",()=>img.remove());thumb.append(img);
+  }else{
+    let label=p.noPreview?"민감한 미디어":first?.type==="video"?"영상 보기":"글 보기";
+    thumb.append(el("span","text-icon"+(p.noPreview?" hide-icon":""),label));
+  }
+  if(first?.type==="video"&&!p.noPreview)thumb.append(el("span","video-mark","▶ 영상"));
+  if(p.media.length>1&&!p.noPreview)thumb.append(el("span","media-num","+"+(p.media.length-1)));
+  let body=el("div","post-body"),title=el("div","post-title");
+  title.append(el("span","author",p.author),el("span","tag",Array.from(p.terms)[0]));
+  body.append(title,el("p","post-excerpt",p.text),el("div","post-date",niceDate(p.posted)));
+  button.append(thumb,body);
+  button.addEventListener("click",()=>openDetail(p));
+  article.append(button);return article;
+}
+function appendMedia(parent,m,post,one){
+  if(m.type==="image"){
+    let src=validUrl(m.url);if(!src)return;
+    let link=el("a",one?"single":"");link.href=src;link.target="_blank";link.rel="noopener noreferrer";
+    let img=el("img");img.src=src;img.loading="lazy";img.alt=m.alt||"첨부 사진";img.referrerPolicy="no-referrer";
+    link.append(img);parent.append(link);
+  }else if(m.type==="video"){
+    let src=validUrl(m.url),poster=validUrl(m.thumb);
+    if(src){
+      let v=el("video",one?"single":"");v.controls=true;v.playsInline=true;v.preload="metadata";v.referrerPolicy="no-referrer";v.src=src;
+      if(poster)v.poster=poster;
+      v.addEventListener("error",()=>{v.replaceWith(sourceLink(post,"영상 원문에서 보기"))});
+      parent.append(v);
+    }else parent.append(sourceLink(post,"영상 원문에서 보기"));
+  }else if(m.type==="external"){
+    let link=sourceLink(post,"외부 미디어 원문 열기");parent.append(link);
+  }
+}
+function sourceLink(p,text){
+  let a=el("a","",text||"원문 보기");
+  let url=validUrl(p.url);
+  if(url){a.href=url;a.target="_blank";a.rel="noopener noreferrer"}else a.removeAttribute("href");
+  return a;
+}
+function openDetail(p){
+  let node=$("detailContent");node.replaceChildren();
+  node.append(el("div","dialog-author",p.author),el("div","dialog-date",niceDate(p.posted)),el("p","dialog-text",p.text||"(본문 없음)"));
+  if(p.media.length){
+    if(p.noPreview)node.append(el("div","dialog-notice","민감도 표시가 있는 미디어는 원문에서 확인할 수 있습니다."));
+    else{
+      let media=el("div","dialog-media");
+      for(let m of p.media.slice(0,30))appendMedia(media,m,p,p.media.length===1);
+      node.append(media);
     }
   }
-  var foot=elem("div","post-footer"),meta=elem("small","",(p.media||[]).length+"개 첨부 · 공개 SNS"),link=elem("a","","원문 보기");
-  link.href=p.url;link.target="_blank";link.rel="noopener noreferrer";foot.append(meta,link);article.append(foot);return article
+  let actions=el("div","dialog-actions");actions.append(sourceLink(p,"SNS 원문 보기"));node.append(actions);
+  document.body.classList.add("modal-open");
+  $("detail").showModal();
 }
-function filtered(){return all.filter(p=>(active==="all"||p.term===active)&&(!needle||p.text.toLowerCase().includes(needle)))}
+function closeDetail(){
+  $("detail").close();document.body.classList.remove("modal-open");$("detailContent").replaceChildren();
+}
 function draw(){
-  var rows=filtered(),node=$("feed");node.replaceChildren();
-  $("count").textContent=rows.length+"개 게시글 · 실제 공개 SNS 조회";
-  if(!rows.length)node.append(elem("div","empty",loading?"게시글을 불러오는 중…":"조건에 맞는 게시글이 없습니다."));
-  else{var frag=document.createDocumentFragment();for(var p of rows.slice(0,180))frag.append(card(p));node.append(frag)}
+  let rows=filtered(),list=$("feed");list.replaceChildren();
+  let limit=270,frag=document.createDocumentFragment();
+  for(let p of rows.slice(0,limit))frag.append(tile(p));
+  if(!rows.length)frag.append(el("div","empty",busy?"게시글 검색 중…":"해당 기간·검색 조건의 게시글이 없습니다."));
+  list.append(frag);shown=Math.min(rows.length,limit);
+  let coverage=cloudMode?" · 테라박스 저장본":" · 조회 "+daysCovered+"일 / "+(Math.ceil((toMs-fromMs)/DAY))+"일";
+  let warnings=(failed||incomplete)?" · 일부 구간 미확인 "+(failed+incomplete)+"건":"";
+  $("count").textContent=rows.length.toLocaleString()+"개 게시글"+coverage+warnings+(rows.length>limit?" · 최근 "+limit+"개 표시":"");
 }
-async function fetchSearch(term,start,end,limit){
-  var url=new URL(api);url.searchParams.set("q",term);url.searchParams.set("sort","latest");url.searchParams.set("limit",limit||25);
-  if(start)url.searchParams.set("since",start);if(end)url.searchParams.set("until",end);
-  var controller=new AbortController(),timer=setTimeout(()=>controller.abort(),18000);
-  try{
-    var r=await fetch(url.href,{mode:"cors",cache:"no-store",signal:controller.signal,headers:{"Accept":"application/json"}});
-    if(!r.ok)throw Error("API HTTP "+r.status);
-    var j=await r.json();if(!Array.isArray(j.posts))throw Error("응답 형식 오류");
-    return {term:term,posts:j.posts,next:Boolean(j.cursor),hint:j.hitsTotal||null};
-  }finally{clearTimeout(timer)}
+function startBusy(){busy=true;$("refresh").disabled=true;$("applyDate").disabled=true;$("more").disabled=true}
+function endBusy(){busy=false;$("refresh").disabled=false;$("applyDate").disabled=false;$("more").disabled=false}
+function resetData(){posts=[];ids.clear();pending=[];requestCount=0;daysCovered=0;failed=0;incomplete=0;draw()}
+async function fetchWindow(segment){
+  let url=new URL(API);url.searchParams.set("q",segment.term);url.searchParams.set("sort","latest");url.searchParams.set("limit","100");
+  url.searchParams.set("since",new Date(segment.start).toISOString());url.searchParams.set("until",new Date(segment.end).toISOString());
+  for(let attempt=0;attempt<3;attempt++){
+    let controller=new AbortController(),timer=setTimeout(()=>controller.abort(),18000);
+    try{
+      let res=await fetch(url.href,{mode:"cors",cache:"no-store",headers:{"Accept":"application/json"},signal:controller.signal});
+      if((res.status===429||res.status>=500)&&attempt<2){await new Promise(r=>setTimeout(r,500*(attempt+1)));continue}
+      if(!res.ok)throw Error("HTTP "+res.status);
+      let j=await res.json();if(!Array.isArray(j.posts))throw Error("Bad API response");
+      return j;
+    }catch(e){if(attempt===2||String(e).includes("403")||String(e).includes("400"))throw e;await new Promise(r=>setTimeout(r,300*(attempt+1)))}
+    finally{clearTimeout(timer)}
+  }
 }
-async function loadLive(more){
-  if(loading)return;
-  loading=true;$("refresh").disabled=true;$("more").disabled=true;status("게시글 불러오는 중…");
-  if(!more){all=[];known.clear();windowEnd=null;draw()}
-  var end=more?windowEnd:null;
-  if(more&&!end){loading=false;$("refresh").disabled=false;return}
-  var tasks=terms.map(t=>fetchSearch(t,null,end,30));
-  var rs=await Promise.allSettled(tasks),added=0,failed=0,oldest=null,total=0;
-  for(var result of rs){
-    if(result.status!=="fulfilled"){failed++;continue}
-    var r=result.value;total+=r.posts.length;
-    for(var p of r.posts){
-      var rec=parsePost(p,r.term);if(!rec||known.has(rec.id))continue;
-      known.add(rec.id);all.push(rec);added++;
-      var when=rec.posted;if(when&&(!oldest||when<oldest))oldest=when;
+async function processWork(work,epoch){
+  // Process a bounded number of official time-window requests.
+  // Search cursor requests previously yielded HTTP 403; split saturated windows.
+  let queue=work,done=0,added=0;
+  async function worker(){
+    while(queue.length&&requestCount<MAX_REQUESTS&&epoch===runID){
+      let item=queue.shift();requestCount++;
+      try{
+        let j=await fetchWindow(item);
+        if(epoch!==runID)return;
+        for(let p of j.posts){if(posts.length>=MAX_POSTS)break;if(addPost(p,item.term))added++}
+        let needSplit=(!!j.cursor||j.posts.length>=95||(typeof j.hitsTotal==="number"&&j.hitsTotal>j.posts.length+2));
+        if(needSplit&&item.end-item.start>MIN_WINDOW&&requestCount<MAX_REQUESTS){
+          let middle=Math.floor((item.start+item.end)/2);
+          if(middle>item.start&&middle<item.end){
+            queue.unshift({term:item.term,start:middle,end:item.end},{term:item.term,start:item.start,end:middle});
+          }else incomplete++;
+        }else if(needSplit)incomplete++;
+      }catch(e){failed++}
+      done++;if(done%3===0||!queue.length){
+        status("수집 중 · "+posts.length.toLocaleString()+"건 · 요청 "+requestCount+"/"+MAX_REQUESTS);
+        draw();
+      }
+      if(posts.length>=MAX_POSTS)break;
     }
   }
-  all.sort((a,b)=>String(b.posted).localeCompare(String(a.posted)));
-  if(oldest){var dt=new Date(oldest);dt.setMilliseconds(dt.getMilliseconds()-1);windowEnd=dt.toISOString()}
-  loading=false;$("refresh").disabled=false;$("more").disabled=false;
-  status(failed===3?"공개 SNS 연결에 실패했습니다":failed?"일부 자료만 불러왔습니다":"공개 게시글 최신 조회");
-  $("paging").classList.toggle("hidden",!windowEnd||failed===3);
+  await Promise.all([worker(),worker(),worker()]);
+  return {left:queue,added};
+}
+function setPreset(days){
+  let today=new Date(),end=Date.UTC(today.getFullYear(),today.getMonth(),today.getDate());
+  $("startDate").value=dayText(end-(days-1)*DAY);$("endDate").value=dayText(end);
+  for(let btn of $("presets").querySelectorAll("button"))btn.classList.toggle("active",Number(btn.dataset.days)===days);
+}
+function getDates(){
+  let s=parseDay($("startDate").value),e=parseDay($("endDate").value);
+  if(!Number.isFinite(s)||!Number.isFinite(e)||e<s)throw Error("시작·종료 날짜를 확인해주세요.");
+  if(e-s>365*DAY)throw Error("한 번에 최대 365일을 선택할 수 있습니다.");
+  if(e>Date.now()+DAY)throw Error("미래 날짜는 조회할 수 없습니다.");
+  return [s,e+DAY];
+}
+async function loadBatch(reset){
+  if(busy)return;
+  if(reset){
+    let dates;try{dates=getDates()}catch(e){status(e.message);return}
+    runID++;fromMs=dates[0];toMs=dates[1];nextEnd=toMs;resetData();
+  }
+  if(!pending.length&&nextEnd<=fromMs){status("선택 기간 조회를 마쳤습니다 · "+posts.length+"건");$("paging").classList.add("hidden");return}
+  startBusy();let epoch=runID;
+  let queue=pending.splice(0);
+  if(!queue.length){
+    let batchStart=Math.max(fromMs,nextEnd-CHUNK_DAYS*DAY);
+    for(let d=nextEnd-DAY;d>=batchStart;d-=DAY){
+      let end=Math.min(d+DAY,nextEnd);
+      for(let term of TERMS)queue.push({term,start:d,end});
+    }
+    daysCovered+=Math.ceil((nextEnd-batchStart)/DAY);
+    nextEnd=batchStart;
+  }
+  // The request cap is reset per load, not across the whole historical range.
+  requestCount=0;
+  status("날짜별 검색 시작 · "+posts.length+"건");draw();
+  let r=await processWork(queue,epoch);
+  pending=r.left;
+  endBusy();posts.sort((a,b)=>String(b.indexed).localeCompare(String(a.indexed)));
+  if(!pending.length&&nextEnd<=fromMs)status("선택 기간 조회 완료 · "+posts.length.toLocaleString()+"건"+((failed||incomplete)?" · 일부 구간 미확인":""));
+  else status("조회 "+daysCovered+"일 · "+posts.length.toLocaleString()+"건 · 이전 기간 추가 수집 가능");
+  $("paging").classList.toggle("hidden",!pending.length&&nextEnd<=fromMs);
+  $("more").textContent=pending.length?"누락 위험 구간 이어서 조회":"이전 7일 더 수집";
   draw();
-  if(failed===3){
-    $("feed").replaceChildren(elem("div","empty","현재 SNS 연결이 원활하지 않습니다. 새로고침하면 다시 조회합니다."));
-  }
 }
-async function loadCloud(){
+let cloudBusy=false;
+async function loadCloud(reset){
+  if(cloudBusy)return;cloudBusy=true;startBusy();
+  if(reset){resetData();cloudOffset=0;cloudTotal=0}
   try{
-    var params=new URLSearchParams(location.hash.slice(1)),key=params.get("access");
-    if(key){
-      history.replaceState(null,"",location.pathname+location.search);
-      var a=await fetch("/api/activate",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"same-origin",cache:"no-store",body:JSON.stringify({token:key})});
-      if(!a.ok)throw Error("전용 주소를 확인할 수 없습니다.");
+    if(reset){
+      let key=new URLSearchParams(location.hash.slice(1)).get("access");
+      if(key){
+        history.replaceState(null,"",location.pathname+location.search);
+        let result=await fetch("/api/activate",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"same-origin",cache:"no-store",body:JSON.stringify({token:key})});
+        if(!result.ok)throw Error("전용 주소가 유효하지 않습니다.");
+      }
     }
-    var r=await fetch("/api/session",{credentials:"same-origin",cache:"no-store"});
-    if(!r.ok)throw Error("전용 주소를 다시 열어주세요.");
-    var p=await fetch("/api/posts?limit=60",{credentials:"same-origin",cache:"no-store"});if(!p.ok)throw Error("보관 자료를 불러올 수 없습니다.");
-    var j=await p.json();if(!Array.isArray(j.posts))throw Error("자료 형식 오류");
-    all=j.posts.map(p=>({id:p.id,term:p.platform||"클라우드",author:p.platform||"게시글",text:p.text,posted:p.posted_at,url:p.source_url,media:(p.media||[]).map(m=>({type:String(m.mime||"").startsWith("video/")?"video":"image",url:m.url,thumb:m.url})),labels:[],noPreview:false}));
-    $("tabs").classList.add("hidden");$("paging").classList.add("hidden");$("footnote").textContent="원문은 테라박스에 저장되어 있으며 표시할 때만 불러옵니다.";
-    status("테라박스 게시글");draw()
-  }catch(e){status("보관 자료 연결 전");$("feed").replaceChildren(elem("div","empty",e.message))}
+    let r=await fetch("/api/posts?limit=60&offset="+cloudOffset,{credentials:"same-origin",cache:"no-store"});
+    if(!r.ok)throw Error("테라박스 목록을 불러올 수 없습니다.");
+    let data=await r.json();cloudTotal=data.total;
+    for(let p of data.posts||[]){
+      if(ids.has(p.id))continue;
+      let media=(p.media||[]).map(m=>({type:String(m.mime||"").startsWith("video/")?"video":"image",url:validUrl(new URL(m.url,location.origin).href),thumb:validUrl(new URL(m.url,location.origin).href),alt:"첨부파일"}));
+      let row={id:p.id,author:p.platform||"SNS",text:p.text||"",posted:p.posted_at,indexed:p.posted_at,url:validUrl(p.source_url),terms:new Set(["클라우드"]),media,noPreview:false};
+      ids.set(p.id,row);posts.push(row);
+    }
+    cloudOffset+=(data.posts||[]).length;
+    status("테라박스 저장 게시글");$("paging").classList.toggle("hidden",cloudOffset>=cloudTotal);
+    $("more").textContent="저장된 게시글 더 보기";
+    draw();
+  }catch(e){status(e.message);if(!posts.length)$("feed").replaceChildren(el("div","empty",e.message))}
+  finally{cloudBusy=false;endBusy()}
 }
-$("refresh").addEventListener("click",()=>storedMode?loadCloud():loadLive(false));
-$("more").addEventListener("click",()=>loadLive(true));
-$("tabs").addEventListener("click",e=>{var btn=e.target.closest("button[data-term]");if(!btn)return;active=btn.dataset.term;for(var b of $("tabs").querySelectorAll("button"))b.classList.toggle("active",b===btn);draw()});
+$("detail").addEventListener("close",()=>{document.body.classList.remove("modal-open");$("detailContent").replaceChildren()});
+$("detail").addEventListener("click",e=>{if(e.target===$("detail"))closeDetail()});
+$("closeDetail").addEventListener("click",closeDetail);
+$("refresh").addEventListener("click",()=>cloudMode?loadCloud(true):loadBatch(true));
+$("applyDate").addEventListener("click",()=>loadBatch(true));
+$("more").addEventListener("click",()=>cloudMode?loadCloud(false):loadBatch(false));
+$("tabs").addEventListener("click",e=>{let button=e.target.closest("button[data-term]");if(!button)return;active=button.dataset.term;for(let b of $("tabs").querySelectorAll("button"))b.classList.toggle("active",b===button);draw()});
+$("presets").addEventListener("click",e=>{let b=e.target.closest("button[data-days]");if(!b)return;setPreset(Number(b.dataset.days));loadBatch(true)});
 $("find").addEventListener("click",()=>{needle=$("q").value.trim().toLowerCase();draw()});
 $("q").addEventListener("keydown",e=>{if(e.key==="Enter"){$("find").click()}});
-if(storedMode){$("source").textContent="테라박스 게시글 · 글/사진/동영상";loadCloud()}
-else loadLive(false);
+setPreset(30);
+if(cloudMode){
+  $("source").textContent="테라박스 저장 게시글 · 글/사진/영상";
+  $("tabs").classList.add("hidden");$("datePanel").classList.add("hidden");
+  $("footnote").textContent="게시글별 원문과 미디어는 테라박스에서 필요할 때만 불러옵니다.";
+  loadCloud(true);
+}else loadBatch(true);
 })();
-</script></body></html>
+</script>
+</body></html>
