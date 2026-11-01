@@ -19,5 +19,5 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: {python-version: "3.12"}
-      - run: python -m pip install 'requests==2.32.5'
+      - run: python -m pip install 'requests==2.32.5' 'Pillow==11.3.0'
       - run: python apps/gallery-archive/probe_yui_public_transport.py
