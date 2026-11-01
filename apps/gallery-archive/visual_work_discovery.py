@@ -218,7 +218,7 @@ def discover(root=ROOT, leads_path=LEADS, search=False, max_works=30, client=Non
         'research_only_not_gallery_inventory': True,
         'total_works': len(rows),
         'unmapped_works': sum(not r['catalogue_matches'] for r in rows),
-        'mapped_low_coverage_works': sum(r['catalogue_matches'] and r['priority_search_required'] for r in rows),
+        'mapped_low_coverage_works': sum(bool(r['catalogue_matches']) and r['priority_search_required'] for r in rows),
         'priority_search_works': sum(r['priority_search_required'] for r in rows),
         'actual_search_attempts': sum('search_result' in r for r in rows),
         'physical_new_files': 0, 'visible_new_files': 0,
