@@ -144,6 +144,15 @@
       "advertised_photos": 325,
       "visual_reference_required": true,
       "identity_evidence": "Observed ordinary Mimmi search title and work URL. At least three SHA-verified whole-frame saved-cut anchors required before any new photo publication. Source numbering is separate from publisher original sequence."
+    },
+    {
+      "id": "public-mimmi-official-x",
+      "title": "Mimmi (@Mimmi_official) — 공식 공개 코스프레 사진",
+      "source": "https://teapawt.net/Mimmi_official",
+      "publisher": "Mimmi_official",
+      "priority": 1,
+      "identity_evidence": "Mimmi_official is verified against historical Mimmissu17 public creator profile at twoucan.com/profile/Mimmi_official. Only ordinary public posts authored by that exact handle are considered.",
+      "visual_reference_required": false
     }
   ]
 }
