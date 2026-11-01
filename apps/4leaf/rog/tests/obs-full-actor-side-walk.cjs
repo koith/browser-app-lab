@@ -73,7 +73,29 @@ const {chromium,webkit}=require('playwright');
     position:window.__ROG_TEST__.getMatch().players[0].position}));
    assert.deepEqual(end,{turn:start.turn,position:start.position},
     'source-only side pose must never change authoritative game turn or path');
-   probe.push({card,source:state.source,seen:state.seen});
+   // Follow through with the actual Genesis actor controller's battle
+   // attack signal. These are source-verified weapon poses, but interpreting
+   // 31/33/35 as a 2002 attack animation is still WEB inferred.
+   const attack=await page.evaluate(id=>{
+    const pawn=document.querySelector('#board-pawns .board-pawn[data-id="'+id+'"]');
+    const seen=new Set();
+    const observer=new MutationObserver(()=>seen.add(Number(pawn.dataset.actorFrame)));
+    observer.observe(pawn,{attributes:true,attributeFilter:['data-actor-frame']});
+    window.__LEAF_GENESIS_ACTORS__.poseByPlayer(id,'attack',900);
+    const seq=pawn.dataset.sourceFrameSequence;
+    const evidence=pawn.dataset.sourceAttackEvidence;
+    return new Promise(resolve=>setTimeout(()=>{
+      observer.disconnect();
+      resolve({seq,evidence,seen:[...seen]});
+    },660));
+   },start.id);
+   assert.equal(attack.seq,'25,31,33,35,25',
+    card+' uses original wind-up, strike and follow-through frames');
+   assert.equal(attack.evidence,
+    'original-full-attack-31-33-35/visual-reviewed/WEB-action-FPS-INFERRED');
+   assert.ok([31,33,35].every(f=>attack.seen.includes(f)),
+    card+' actually renders all three distinct original attack poses '+JSON.stringify(attack));
+   probe.push({card,side:state.seen,attack:attack.seen});
   }
   assert.deepEqual(errors,[],'no browser errors from complete original actor source');
   console.log('4LEAF COMPLETE ORIGINAL ACTOR SIDE WALK PASS',JSON.stringify({which,mobile,available:available.length,probe}));
