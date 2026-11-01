@@ -124,6 +124,13 @@ const {chromium,webkit}=require('playwright');
   // purely visual probe never mutates the real game turn/roll count.
   await page.waitForFunction(()=>!window.__LEAF_DICE_FALL__.getState().active,
    null,{timeout:12000});
+  const d4Preload=await page.evaluate(()=>({
+   count:window.__LEAF_DICE_FALL__.prefetchD4(),
+   reported:window.__LEAF_DICE_FALL__.getState().originalD4PrefetchCount,
+   available:window.__LEAF_DICE_FALL__.getState().originalD4TumbleFrames.length
+  }));
+  assert.deepEqual(d4Preload,{count:22,reported:22,available:18},
+   'first D4 roll must have all original 1223 frames pre-requested: '+JSON.stringify(d4Preload));
   const d4Air=await page.evaluate(()=>{
    window.__LEAF_D4_AIR_TEST__=window.__LEAF_DICE_FALL__.roll([3],{sides:4});
    const track=document.querySelector('#leaf-dice-fall-layer .leaf-fall-track');
