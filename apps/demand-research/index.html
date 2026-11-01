@@ -429,9 +429,11 @@ function addPost(p,term){
 const FEDERATED=[
   {id:"mastodon",origin:"https://mastodon.social",type:"mastodon"},
   {id:"mastodon",origin:"https://mstdn.social",type:"mastodon"},
-  {id:"lemmy",origin:"https://lemmy.world",type:"lemmy"}
+  {id:"lemmy",origin:"https://lemmy.world",type:"lemmy"},
+  {id:"misskey",origin:"https://misskey.io",type:"misskey"},
+  {id:"misskey",origin:"https://planet.moe",type:"misskey"}
 ];
-let federationCursors=new Map(),serviceCounts={bluesky:0,mastodon:0,lemmy:0};
+let federationCursors=new Map(),serviceCounts={bluesky:0,mastodon:0,lemmy:0,misskey:0};
 function safePublicLink(s,origin){
   let href=validUrl(s);
   if(!href)return "";
@@ -491,6 +493,39 @@ function addLemmyPost(entry,term,start,end){
     text,media,adultLabeled:!!p.nsfw,restricted:!!p.removed||!!p.deleted
   },term,start,end);
 }
+
+function addMisskeyNote(note,term,start,end,origin){
+  if(!note||note.visibility!=="public"||!note.id||!note.user)return false;
+  let u=note.user,username=String(u.username||"").trim();
+  let noteUrl=safePublicLink(note.url)||safePublicLink(note.uri)||origin+"/notes/"+encodeURIComponent(note.id);
+  let profileUrl=safePublicLink(u.uri)||origin+"/@"+encodeURIComponent(username)+(u.host?"@"+u.host:"");
+  let media=(note.files||[]).slice(0,12).map(file=>{
+    let type=String(file.type||"").startsWith("video/")?"video":"image";
+    if(!String(file.type||"").match(/^(image|video)\//))return null;
+    return {type,url:safePublicLink(file.url),thumb:safePublicLink(file.thumbnailUrl||file.url),
+      alt:file.comment||"첨부 파일"};
+  }).filter(m=>m&&m.url);
+  return addFederatedRow({
+    id:"misskey:"+origin+":"+note.id,platform:"misskey",
+    author:u.name||username||"Misskey",profileUrl,url:noteUrl,
+    posted:note.createdAt,indexed:note.createdAt,
+    text:[note.cw,note.text].filter(Boolean).join("\n"),media,
+    adultLabeled:(note.files||[]).some(f=>f.isSensitive),restricted:false
+  },term,start,end);
+}
+async function misskeyJson(url,term,offset){
+  let controller=new AbortController(),timer=setTimeout(()=>controller.abort(),11000);
+  try{
+    let res=await fetch(url,{method:"POST",mode:"cors",credentials:"omit",
+      headers:{"Content-Type":"application/json","Accept":"application/json"},
+      body:JSON.stringify({query:term,limit:40,offset}),signal:controller.signal});
+    if(!res.ok)throw Error("HTTP "+res.status);
+    let data=await res.json();
+    if(!Array.isArray(data))throw Error("Bad Misskey response");
+    return data;
+  }finally{clearTimeout(timer)}
+}
+
 async function publicJson(url){
   const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),11000);
   try{
@@ -509,7 +544,11 @@ async function scanFederated(source,term,start,end,epoch){
     let u=new URL(source.type==="mastodon"?
       "/api/v1/timelines/tag/"+encodeURIComponent(term):"/api/v3/search",source.origin);
     let data=[],lowest=Infinity;
-    if(source.type==="mastodon"){
+    if(source.type==="misskey"){
+      // Misskey's public note-search endpoint is POST with no account token.
+      data=await misskeyJson(source.origin+"/api/notes/search",term,(cursor.page-1)*40);
+      cursor.page++;
+    }else if(source.type==="mastodon"){
       u.searchParams.set("limit","40");
       if(cursor.maxId)u.searchParams.set("max_id",cursor.maxId);
       data=await publicJson(u.href);if(!Array.isArray(data))throw Error("Unexpected Mastodon response");
@@ -525,10 +564,12 @@ async function scanFederated(source,term,start,end,epoch){
     checked++;
     if(!data.length){cursor.done=true;break}
     for(let item of data){
-      let date=Date.parse(source.type==="mastodon"?item.created_at:item.post?.published);
+      let date=Date.parse(source.type==="mastodon"?item.created_at:
+        source.type==="misskey"?item.createdAt:item.post?.published);
       if(Number.isFinite(date))lowest=Math.min(lowest,date);
-      if(source.type==="mastodon"?addMastodonStatus(item,term,start,end):
-        addLemmyPost(item,term,start,end))added++;
+      if((source.type==="mastodon"&&addMastodonStatus(item,term,start,end))||
+         (source.type==="misskey"&&addMisskeyNote(item,term,start,end,source.origin))||
+         (source.type==="lemmy"&&addLemmyPost(item,term,start,end)))added++;
     }
     if(data.length<25){cursor.done=true;break}
     if(lowest<start)break;
@@ -553,7 +594,7 @@ async function fetchFederated(start,end,epoch){
   draw();
 }
 function updateServiceCounts(){
-  serviceCounts={bluesky:0,mastodon:0,lemmy:0};
+  serviceCounts={bluesky:0,mastodon:0,lemmy:0,misskey:0};
   for(let p of posts)if(p.platform in serviceCounts)serviceCounts[p.platform]++;
 }
 
@@ -608,6 +649,7 @@ const SERVICES={
   bluesky:{name:"Bluesky",favicon:"https://cdn.jsdelivr.net/npm/simple-icons@15/icons/bluesky.svg"},
   mastodon:{name:"Mastodon",favicon:"https://cdn.jsdelivr.net/npm/simple-icons@15/icons/mastodon.svg"},
   lemmy:{name:"Lemmy",favicon:"https://cdn.jsdelivr.net/npm/simple-icons@15/icons/lemmy.svg"},
+  misskey:{name:"Misskey",favicon:"https://cdn.jsdelivr.net/npm/simple-icons@15/icons/misskey.svg"},
   cloud:{name:"Archive",favicon:""}
 };
 function sourceBadge(p){
@@ -716,7 +758,7 @@ function draw(){
   let coverage=cloudMode?" · 테라박스 저장본":" · 조회 "+daysCovered+"일 / "+(Math.ceil((toMs-fromMs)/DAY))+"일";
   let warnings=(failed||incomplete)?" · 일부 구간 미확인 "+(failed+incomplete)+"건":"";
   updateServiceCounts();
-  let sources=" · B"+serviceCounts.bluesky+" M"+serviceCounts.mastodon+" L"+serviceCounts.lemmy;
+  let sources=" · B"+serviceCounts.bluesky+" M"+serviceCounts.mastodon+" L"+serviceCounts.lemmy+" K"+serviceCounts.misskey;
   $("count").textContent=rows.length.toLocaleString()+"건"+(cloudMode?"":sources)+(hidden?" · 광고 "+hidden.toLocaleString()+"건 제외":"")+(rows.length>limit?" · "+limit+"건 표시":"");
   $("count").setAttribute("aria-label",rows.length.toLocaleString()+"개 표시 / "+matching.length.toLocaleString()+"개 조회"+coverage+warnings);
 }
