@@ -39,7 +39,11 @@ def inspect(url):
             row.update(parser_status=status,parser_photo_count=len(urls),
                 page_heading=(bs.select_one('h1').get_text(' ',strip=True)[:90] if bs.select_one('h1') else None),
                 candidate_sections={css:len(bs.select(css)) for css in ('article','.entry-content','.article-content','.post-content','.entry','.post')},
-                native_preview_img_count=sum('nicewww.com/wp-content/uploads/2026/05/' in (im.get('src') or '') for im in bs.select('img')))
+                native_preview_img_count=sum('nicewww.com/wp-content/uploads/2026/05/' in (im.get('src') or '') for im in bs.select('img')),
+                section_native_counts={css:sum('nicewww.com/wp-content/uploads/2026/05/' in ' '.join(str(im.get(k) or '') for k in ('src','data-original','data-src')) for im in bs.select(css+' img')) for css in ('article','.entry-content','.article-content','.post','.post-content')},
+                native_preview_ancestors=[
+                    [(node.name or '')+'.'+'.'.join(node.get('class') or []) for node in list(im.parents)[:5]]
+                    for im in bs.select('img') if 'nicewww.com/wp-content/uploads/2026/05/' in (im.get('src') or '')][:2])
         if r.headers.get('Content-Type','').lower().startswith('image/'):
             with Image.open(BytesIO(r.content)) as im:
                 im.load();row.update(image_dimensions=(im.width,im.height),image_format=im.format,
