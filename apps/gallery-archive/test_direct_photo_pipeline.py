@@ -101,6 +101,14 @@ class DirectTests(unittest.TestCase):
           <img src="{image}"><img src="{unrelated}">
           <aside class="related"><img src="{unrelated}"></aside></article>'''
         self.assertEqual(page_images(raw,alternate,'yui'),([image],[],'scoped_public_page'))
+        # Live nicesss.com body carries sidebar-right even though the image
+        # belongs to .entry-content. Global ancestor matching was rejecting it.
+        wrapped=('<body class="post-template-default sidebar-right">'
+                 '<div class="entry-content">'+raw+'</div></body>')
+        self.assertEqual(page_images(wrapped,alternate,'yui'),([image],[],'scoped_public_page'))
+        # The actual inner sidebar remains excluded.
+        inner=wrapped.replace('</article>','<div class="related"><img src="'+image.replace('3739','9999')+'"></div></article>')
+        self.assertEqual(page_images(inner,alternate,'yui'),([image],[],'scoped_public_page'))
         self.assertEqual(page_images(raw,alternate,'mimmi')[0],[])
         self.assertEqual(page_images(raw.replace('Vol.677','Vol.693'),alternate,'yui')[2],
                          'missing_model_or_volume_context')

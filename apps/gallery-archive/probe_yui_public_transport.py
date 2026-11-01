@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 """Normal public-origin transport diagnosis; no credentials or image saves."""
 import sys
+import re
 from pathlib import Path
 from urllib.parse import urlsplit
 
 import requests
 from PIL import Image, ImageStat
+from bs4 import BeautifulSoup
+from direct_photo_pipeline import page_images
 from io import BytesIO
 
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'yui-gallery'))
@@ -31,6 +34,19 @@ def inspect(url):
         row.update(public_session_status=r.status_code,
                    public_session_type=r.headers.get('Content-Type','').split(';')[0],
                    public_session_bytes=len(r.content))
+        if urlsplit(url).hostname=='www.nicesss.com' and r.headers.get('Content-Type','').lower().startswith('text/html'):
+            bs=BeautifulSoup(r.content,'html.parser')
+            urls,pages,status=page_images(r.content,url,'yui')
+            row.update(parser_status=status,parser_photo_count=len(urls),
+                page_heading=(bs.select_one('h1').get_text(' ',strip=True)[:90] if bs.select_one('h1') else None),
+                candidate_sections={css:len(bs.select(css)) for css in ('article','.entry-content','.article-content','.post-content','.entry','.post')},
+                native_preview_img_count=sum('nicewww.com/wp-content/uploads/2026/05/' in (im.get('src') or '') for im in bs.select('img')),
+                section_native_counts={css:sum('nicewww.com/wp-content/uploads/2026/05/' in ' '.join(str(im.get(k) or '') for k in ('src','data-original','data-src')) for im in bs.select(css+' img')) for css in ('article','.entry-content','.article-content','.post','.post-content')},
+                native_preview_rejected_ancestors=[(im.find_parent(class_=re.compile(r'related|recommend|comment|advert|sidebar',re.I)).get('class') if im.find_parent(class_=re.compile(r'related|recommend|comment|advert|sidebar',re.I)) else None) for im in bs.select('.entry-content img') if 'nicewww.com/wp-content/uploads/2026/05/' in (im.get('src') or '')][:5],
+                native_preview_urls=[{key:im.get(key) for key in ('src','data-original','data-src') if im.get(key)} for im in bs.select('.entry-content img') if 'nicewww.com/wp-content/uploads/2026/05/' in (im.get('src') or '')][:5],
+                native_preview_ancestors=[
+                    [(node.name or '')+'.'+'.'.join(node.get('class') or []) for node in list(im.parents)[:5]]
+                    for im in bs.select('img') if 'nicewww.com/wp-content/uploads/2026/05/' in (im.get('src') or '')][:2])
         if r.headers.get('Content-Type','').lower().startswith('image/'):
             with Image.open(BytesIO(r.content)) as im:
                 im.load();row.update(image_dimensions=(im.width,im.height),image_format=im.format,
