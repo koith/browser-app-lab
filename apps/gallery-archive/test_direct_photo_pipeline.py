@@ -67,6 +67,31 @@ class DirectTests(unittest.TestCase):
             self.assertEqual(catalog['albums'][0]['images'][0]['sha256'],hashlib.sha256(raw).hexdigest())
             self.assertEqual(len(list((root/'stage/originals').rglob('*.jpg'))),1)
 
+    def test_named_yui_work_images_are_exact_slug_and_prefix_scoped(self):
+        cases=[
+            ('meow','Meow','Yui_Meow_'),
+            ('night-cat','Night Cat','NightCat_'),
+            ('asuna-qipao','Asuna Qipao','Yui_Asuna-Qipao_'),
+            ('summer','Summer','Yui_Sum_'),
+            ('pure','Pure','Yui_pure_'),
+            ('become-beautiful','Become Beautiful','yui_beautiful_'),
+            ('night-training','Night Training','Yui_Night-Training_'),
+        ]
+        for slug,title,prefix in cases:
+            with self.subTest(slug=slug):
+                page='https://showartx.net/yui-'+slug+'/'
+                native='https://showartx.net/wp-content/uploads/2026/03/'+prefix+'7.jpg'
+                resized='https://showartx.net/wp-content/uploads/2026/03/'+prefix+'7-768x512.jpg'
+                wrong='https://showartx.net/wp-content/uploads/2026/03/Yui_OTHER_2.jpg'
+                html=(f'<h1>Yui – [{title}]</h1><article>'
+                      f'<img src="{resized}"><a href="{native}"><img src="{resized}"></a>'
+                      f'<img src="{wrong}"><img src="https://other.example/ev.jpg">'
+                      '</article>')
+                self.assertEqual(page_images(html,page,'yui'),([native],[],'scoped_public_page'))
+                self.assertEqual(page_images(html,page,'mimmi')[0],[])
+                self.assertEqual(page_images(html.replace(title,'Wrong Album'),page,'yui')[2],
+                                 'missing_model_or_volume_context')
+
     def test_v2ph_public_first_page_and_login_stop(self):
         page='https://www.v2ph.com/album/a887785a.html'
         first='https://cdn.v2ph.com/photos/A12345678.jpg'
