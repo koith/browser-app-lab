@@ -29,7 +29,7 @@ window.MimmiPrivate=(()=>{
    const prior=merged.get(album.id);if(!prior){merged.set(album.id,album);continue;}
    const photos=new Map(prior.images.map(p=>[p.number,p]));
    for(const p of album.images){const old=photos.get(p.number);
-    if(!old||p.width*p.height>old.width*old.height)photos.set(p.number,p);
+    if(!old||globalThis.GalleryPhotoQuality?.preferred(old,p)===p)photos.set(p.number,p);
    }
    merged.set(album.id,{...album,...prior,images:[...photos.values()].sort((a,b)=>a.number-b.number)});
   }
