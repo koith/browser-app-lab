@@ -580,7 +580,7 @@ def atomic_bytes(path,data):
     tmp=path.with_name(path.name+'.pending');tmp.write_bytes(data);tmp.replace(path)
 
 
-def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_only=False,album_ids=None,page_cycle=0,alternative_engines=False,render_budget=8):
+def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_only=False,album_ids=None,page_cycle=0,alternative_engines=False,render_budget=8,reverse_evidence=None):
     root=Path(root);out=Path(out)
     if owner.get('model')!=model or owner.get('schema_version')!=1 or not owner.get('albums'):
         raise ValueError('Current owner catalog required; do not assume empty archive')
@@ -636,6 +636,41 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
     else:
         # Tiny synthetic test roots need not reproduce every research manifest.
         source_scope={'census_status':'synthetic_fixture_without_registry'}
+    reverse_counts={'reverse_source_pages_admitted':0,
+                    'reverse_works_with_source':0,
+                    'reverse_unverified_targets_rejected':0}
+    if reverse_evidence is not None and Path(reverse_evidence).exists():
+        evidence=json.loads(Path(reverse_evidence).read_text(encoding='utf-8'))
+        if evidence.get('model')!=model:
+            raise ValueError('Reverse-source model mismatch')
+        for target in evidence.get('targets',[]):
+            aid=target.get('id')
+            if not isinstance(aid,str) or not re.fullmatch(
+                    r'[a-z0-9][a-z0-9-]{1,100}',aid):
+                reverse_counts['reverse_unverified_targets_rejected']+=1
+                continue
+            links=list(dict.fromkeys(
+                u for u in target.get('urls',[])
+                if safe_registered_public_page(u,model)))
+            if not links:
+                reverse_counts['reverse_unverified_targets_rejected']+=1
+                continue
+            if aid in books:
+                book=books[aid]
+                book['source_pages']=list(dict.fromkeys(
+                    book.get('source_pages',[])+links))
+            else:
+                held=old_albums.get(aid,{})
+                book={'id':aid,'title':held.get('title') or target.get('title') or aid,
+                      'source':links[0],'source_pages':links[1:],
+                      'curated_images_only':bool(held),
+                      'census_new_work':not bool(held)}
+                books[aid]=book
+            book['reverse_unverified_pages']=list(dict.fromkeys(
+                book.get('reverse_unverified_pages',[])+links))
+            reverse_counts['reverse_works_with_source']+=1
+            reverse_counts['reverse_source_pages_admitted']+=len(links)
+    source_scope.update(reverse_counts)
     print('PRODUCTION_REGISTERED_WORK_COVERAGE',model,
           json.dumps(source_scope,ensure_ascii=False),flush=True)
     client=client or PublicSession(delay=.8)
@@ -701,6 +736,17 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
             visited.add(page)
             try:
                 response=client.get(page);urls,more,status=page_images(response.content,page,model)
+                if page in book.get('reverse_unverified_pages',[]):
+                    # Search-engine matches are only leads, never proof of a
+                    # model, edition or photo. Verify source article firsthand.
+                    reverse_heading=' '.join(h.get_text(' ',strip=True)
+                        for h in BeautifulSoup(response.content,'html.parser').select('h1,title'))
+                    if not (PUBLIC_STRONG_MODEL[model].search(reverse_heading)
+                            and _work_token_matched_in_heading(
+                                response.content,book.get('title'),aid,model)):
+                        errors.append({'page':page,
+                                       'reason':'reverse_page_model_or_work_not_proven'})
+                        continue
                 if book.get('census_new_work') and not _work_token_matched_in_heading(
                         response.content,book.get('title'),aid,model):
                     errors.append({'page':page,'reason':'new_work_identity_not_proven'})
