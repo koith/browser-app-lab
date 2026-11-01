@@ -17,6 +17,41 @@ def photo(seed):
 
 class DirectTests(unittest.TestCase):
     @unittest.skipUnless(importlib.util.find_spec('scrapy') is not None,
+                         'Real selector engine required')
+    def test_reverse_image_source_lead_can_become_decoded_individual_photo(self):
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);(root/'apps/yui-gallery').mkdir(parents=True)
+            (root/'apps/gallery-archive').mkdir(parents=True)
+            (root/'apps/gallery-archive/global_source_registry.json').write_text('{"sources":[]}')
+            (root/'apps/yui-gallery/stored-albums.json').write_text('{"model":"yui","albums":[]}')
+            lead=root/'reverse.json'
+            page='https://public-gallery.example.org/summer/source-page'
+            asset='https://images.public-gallery.example.org/summer/17.jpg'
+            lead.write_text(json.dumps({'model':'yui','targets':[{
+                'id':'missing-summer','title':'Yui Sim Summer',
+                'urls':[page],'owner_registered':False}]}))
+            before=photo(10);new=photo(99)
+            owner={'model':'yui','schema_version':1,'albums':[{
+              'id':'older-gallery','images':[{'number':1,
+              'sha256':hashlib.sha256(before).hexdigest()}]}]}
+            class Client:
+                def get(self,url):
+                    if url==page:return type('R',(),{'content':
+                        f'<h1>Yui Sim Summer</h1><article><img src="{asset}"></article>'.encode()})()
+                    if url==asset:return type('R',(),{'content':new})()
+                    raise ValueError('unexpected')
+            with patch('collector_full_census.census',return_value={'targets':[]}),patch(
+                    'direct_photo_pipeline.page_images',return_value=([],[],'no_public_photos')):
+                report=collect(root,'yui',owner,root/'stage',2,3,Client(),
+                    alternative_engines=True,render_budget=0,reverse_evidence=lead)
+            self.assertEqual(report['new_local_individual_files'],1,report)
+            self.assertEqual(report['owner_census_source_coverage']['reverse_source_pages_admitted'],1)
+            rows=json.loads((root/'stage/metadata/catalog.json').read_text())['albums']
+            self.assertEqual(rows[0]['id'],'missing-summer')
+            self.assertEqual((root/'stage'/rows[0]['images'][0]['key']).read_bytes(),new)
+
+    @unittest.skipUnless(importlib.util.find_spec('scrapy') is not None,
                          'Actual Scrapy dependency required')
     def test_unowned_named_work_becomes_staged_album_only_after_identity_evidence(self):
         from unittest.mock import patch
