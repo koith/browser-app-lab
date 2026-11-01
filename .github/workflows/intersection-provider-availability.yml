@@ -1,0 +1,25 @@
+name: INTERSECTION Existing Provider Availability
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/intersection-provider-availability.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  existing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    env:
+      SOCIALCRAWL_AVAILABLE: ${{ secrets.SOCIALCRAWL_API_KEY != '' }}
+      SOCIALCRAWL_DEMAND_AVAILABLE: ${{ secrets.DEMAND_SOCIALCRAWL_API_KEY != '' }}
+      APIFY_AVAILABLE: ${{ secrets.APIFY_TOKEN != '' }}
+      XAPI_AVAILABLE: ${{ secrets.TWITTERXAPI_KEY != '' }}
+    steps:
+      - name: Report presence only, without using credentials or charging any API
+        run: |
+          echo "SOCIALCRAWL_API_KEY configured: $SOCIALCRAWL_AVAILABLE" >> "$GITHUB_STEP_SUMMARY"
+          echo "DEMAND_SOCIALCRAWL_API_KEY configured: $SOCIALCRAWL_DEMAND_AVAILABLE" >> "$GITHUB_STEP_SUMMARY"
+          echo "APIFY_TOKEN configured: $APIFY_AVAILABLE" >> "$GITHUB_STEP_SUMMARY"
+          echo "TWITTERXAPI_KEY configured: $XAPI_AVAILABLE" >> "$GITHUB_STEP_SUMMARY"
+          echo "No API searches or paid requests were performed." >> "$GITHUB_STEP_SUMMARY"

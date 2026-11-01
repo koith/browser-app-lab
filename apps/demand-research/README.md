@@ -48,3 +48,39 @@ reliable official full-text access requires separate approved API credentials,
 and no paid requests have been enabled. Neither synthetic browser fixtures nor
 an API adapter alone establish real-world ingestion. Live provider counts and
 mobile deployment remain independent acceptance checks.
+
+## Opt-in authenticated cross-network search (2026-11-02)
+
+The private FastAPI gateway now includes a **server-side SocialCrawl adapter**
+for public X, Threads, Instagram Reels and Reddit keyword searches. The
+browser never receives its upstream API key. Results use a shared post schema,
+strict origin/profile URL checks, keyword/date filtering, de-duplication and
+one-page requests. An explicit SNS search button in the **private viewer**
+requests one provider and one term; there is no automatic paid search on page
+load. All results are memory-only with a 10-minute cache, and **not uploaded**
+to GitHub Pages or TeraBox. Users must follow provider/platform terms and
+deletion requirements.
+
+Required runtime values (private gateway only):
+
+- `DEMAND_SOCIALCRAWL_API_KEY`: operator-controlled key from https://www.socialcrawl.dev/.
+- `DEMAND_SOCIAL_SEARCH_ENABLED=1`: explicitly opt in after reviewing cost.
+- `DEMAND_SOCIAL_MAX_DAILY_CALLS=1`: one **best-effort per-process** daily request limit; increase deliberately with billing monitoring. This is not a global or hard financial cap, particularly when multiple workers or redeploys are involved. Configure a hard provider-side spending cap or durable shared rate limiter before broad production use.
+- Existing `DEMAND_VIEWER_TOKEN`, TeraBox secret and HTTPS private gateway must be configured; `/api/discovery` requires the signed private-viewer session cookie.
+
+Status and source search: `GET /api/discovery/status` and
+`GET /api/discovery?platform=x&term=...&start=2026-10-01&end=2026-11-01`.
+The latter is disabled unless all opt-in configuration is present.
+All search results are restricted to the requested 30-day window
+(up to 32 calendar days).
+
+`/api/discovery` is **not** served by GitHub Pages; this is intentional
+because a public keyless proxy could create unbounded API charges. The
+public viewer remains limited to public no-token adapters, whose
+actual X/Threads/Instagram coverage is zero. Full live collection,
+private gateway deployment, vendor-account connection and iPhone testing
+are **NOT YET VERIFIED**.
+
+Validation: `cd apps/demand-research && python -m pytest -q test_gateway.py test_social_sources.py`.
+Fixtures represent synthetic rows only; passing these tests does not imply
+live records exist.

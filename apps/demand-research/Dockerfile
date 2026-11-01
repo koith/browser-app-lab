@@ -10,6 +10,7 @@ RUN curl -fsSL https://github.com/gulp79/rclone-extra/releases/download/v1.75.2-
 RUN python -m pip install --no-cache-dir fastapi==0.115.12 uvicorn==0.35.0
 WORKDIR /app
 COPY apps/demand-research/gateway.py /app/gateway.py
+COPY apps/demand-research/social_sources.py /app/social_sources.py
 COPY apps/demand-research/index.html /app/index.html
 RUN useradd --create-home --uid 10001 appuser && chown -R appuser:appuser /app
 USER appuser

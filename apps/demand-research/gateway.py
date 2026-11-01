@@ -6,6 +6,8 @@ from typing import AsyncIterator
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
+from datetime import datetime, timezone, timedelta
+from social_sources import TERMS, ROUTES, request_one_page
 
 app=FastAPI(title="Demand Research Private Cloud",docs_url=None,redoc_url=None)
 app.add_middleware(CORSMiddleware,allow_origins=["https://koith.github.io","http://localhost:8765"],allow_methods=["GET","OPTIONS"],allow_headers=["Authorization","Content-Type"])
@@ -144,6 +146,73 @@ def media_signature(post_id,index,expires):
 @app.get("/api/health")
 async def health():
     return {"service":"demand-research-terabox","cloud":"terabox","configured":configured(),"data_cached":_cache["posts"] is not None}
+
+# An authenticated, operator-enabled, one-page provider bridge.
+# Default OFF. No API key, cookies, personal results or media bytes are exposed
+# through public Pages, the repo, job artifacts or the cloud catalog.
+_search_cache={}
+_search_lock=asyncio.Lock()
+_search_usage={"date":"","requests":0}
+_SEARCH_TTL_SECONDS=600
+
+@app.get("/api/discovery/status")
+async def discovery_status(request:Request):
+    check_auth(request)
+    enabled=os.getenv("DEMAND_SOCIAL_SEARCH_ENABLED","")=="1"
+    key=os.getenv("DEMAND_SOCIALCRAWL_API_KEY","")
+    budget=int(os.getenv("DEMAND_SOCIAL_MAX_DAILY_CALLS","0") or "0")
+    return JSONResponse({"enabled":enabled and bool(key) and budget>0,
+                         "providers":list(ROUTES),"terms":list(TERMS),
+                         "max_daily_calls":max(0,budget)},
+                        headers={"Cache-Control":"private, no-store"})
+
+@app.get("/api/discovery")
+async def discovery(request:Request,
+                    platform:str=Query(...,min_length=1,max_length=20),
+                    term:str=Query(...,min_length=1,max_length=20),
+                    start:str=Query(...,min_length=10,max_length=10),
+                    end:str=Query(...,min_length=10,max_length=10),
+                    cursor:str=Query("",max_length=900)):
+    check_auth(request)
+    if platform not in ROUTES or term not in TERMS:
+        raise HTTPException(400,"unsupported source or term")
+    if os.getenv("DEMAND_SOCIAL_SEARCH_ENABLED","")!="1":
+        raise HTTPException(503,"External social search disabled")
+    key=os.getenv("DEMAND_SOCIALCRAWL_API_KEY","")
+    limit=int(os.getenv("DEMAND_SOCIAL_MAX_DAILY_CALLS","0") or "0")
+    if len(key)<12 or limit<=0:
+        raise HTTPException(503,"External social provider not configured")
+    try:
+        begin=datetime.strptime(start,"%Y-%m-%d").replace(tzinfo=timezone.utc)
+        finish=datetime.strptime(end,"%Y-%m-%d").replace(tzinfo=timezone.utc)+timedelta(days=1)
+    except ValueError:
+        raise HTTPException(400,"invalid dates") from None
+    now=datetime.now(timezone.utc)
+    if finish<=begin or finish-begin>timedelta(days=32) or begin>now or finish>now+timedelta(days=2):
+        raise HTTPException(400,"invalid date window")
+    cache_key=(platform,term,start,end,cursor)
+    async with _search_lock:
+        cached=_search_cache.get(cache_key)
+        if cached and time.monotonic()-cached["at"]<_SEARCH_TTL_SECONDS:
+            return JSONResponse({**cached["response"],"cache":"gateway"},
+                                headers={"Cache-Control":"private, no-store"})
+        today=now.date().isoformat()
+        if _search_usage["date"]!=today:
+            _search_usage.update(date=today,requests=0)
+        if _search_usage["requests"]>=min(limit,80):
+            raise HTTPException(429,"Daily operator-configured call guard reached")
+        _search_usage["requests"]+=1
+        try:
+            result=await asyncio.to_thread(request_one_page,key,platform,term,begin,finish,cursor)
+        except ValueError as error:
+            # Fail closed; never forward paid-provider responses or credentials.
+            raise HTTPException(502,str(error)[:100]) from None
+        _search_cache[cache_key]={"at":time.monotonic(),"response":result}
+        # Do not retain all searches indefinitely in long-lived workers.
+        if len(_search_cache)>100:
+            for key_to_del,_ in sorted(_search_cache.items(),key=lambda pair:pair[1]["at"])[:40]:
+                del _search_cache[key_to_del]
+        return JSONResponse(result,headers={"Cache-Control":"private, no-store"})
 
 @app.get("/api/posts")
 async def list_posts(request:Request,offset:int=Query(0,ge=0),limit:int=Query(30,ge=1,le=60),q:str=Query("",max_length=100)):
