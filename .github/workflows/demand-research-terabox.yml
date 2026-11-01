@@ -51,7 +51,9 @@ jobs:
           echo 'TeraBox account: READ CONNECTIVITY VERIFIED' >> "$GITHUB_STEP_SUMMARY"
           echo 'Research post files: NOT uploaded by this QA job' >> "$GITHUB_STEP_SUMMARY"
       - name: Verify actual TeraBox write, post bundling and remote SHA256 readback
-        if: env.RCLONE_CONFIG_ARCHIVE_COOKIE != ''
+        # Mutating cloud integrity checks are isolated from normal code/PR CI.
+        # They must be explicitly dispatched to avoid orphaning QA prefixes.
+        if: env.RCLONE_CONFIG_ARCHIVE_COOKIE != '' && github.event_name == 'workflow_dispatch'
         run: |
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/demand-smoke/posts/0123456789abcdef/media"
