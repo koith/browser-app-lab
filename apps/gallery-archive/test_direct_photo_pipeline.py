@@ -16,6 +16,42 @@ def photo(seed):
 
 
 class DirectTests(unittest.TestCase):
+    @unittest.skipUnless(importlib.util.find_spec('scrapy') is not None,
+                         'Real Scrapy required for production additional extraction')
+    def test_observed_cdn_without_extension_becomes_real_staged_image(self):
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d)
+            base=root/'apps/mimmi-gallery'
+            base.mkdir(parents=True)
+            (base/'stored-albums.json').write_text('{"model":"mimmi","albums":[]}')
+            source='https://djawaphoto.com/portfolio/mimmi-new-gallery/'
+            image='https://public-photo-cdn.example.com/image?photo=904'
+            html=f'<h1>Mimmi New Gallery</h1><article class="post-content"><img data-original="{image}"></article>'
+            (base/'official-previews.json').write_text(json.dumps({'albums':[
+                {'id':'mimmi-extra','title':'Mimmi New Gallery','source':source}]}))
+            original=photo(5)
+            second=photo(50)
+            owner={'model':'mimmi','schema_version':1,'albums':[{'id':'mimmi-extra',
+              'images':[{'number':1,'sha256':hashlib.sha256(original).hexdigest()}]}]}
+            class Client:
+                def get(self,url):
+                    if url==source:return type('R',(),{'content':html.encode()})()
+                    if url==image:return type('R',(),{'content':second})()
+                    raise ValueError('unregistered_url')
+            with patch('direct_photo_pipeline.page_images',
+                       return_value=([],[],'no_public_photos')):
+                got=collect(root,'mimmi',owner,root/'stage',2,2,Client(),
+                            alternative_engines=True,render_budget=0)
+            self.assertEqual(got['new_local_individual_files'],1,got)
+            self.assertEqual(got['alternative_staged_new_files'],1)
+            catalog=json.loads((root/'stage/metadata/catalog.json').read_text())
+            p=catalog['albums'][0]['images'][0]
+            self.assertEqual((root/'stage'/p['key']).read_bytes(),second)
+            self.assertEqual(p['measured_image_quality']['original_bytes'],len(second))
+            self.assertEqual(p['measured_image_quality']['watermark_status'],'unverified')
+            self.assertEqual(got['remote_verified_files'],0)
+
     def test_ambiguous_named_model_on_public_gallery_is_not_our_yui_sim(self):
         from direct_photo_pipeline import (
             PUBLIC_STRONG_MODEL, RESEARCH_WORK_HOSTS, _work_token_matched_in_heading,
