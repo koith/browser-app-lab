@@ -5,7 +5,7 @@ from pathlib import Path
 import tempfile
 import unittest
 from PIL import Image
-from direct_photo_pipeline import collect, inspect, page_images, same_variant, public_full_variant, rotated_registered_page_queue
+from direct_photo_pipeline import collect, inspect, page_images, same_variant, public_full_variant, rotated_registered_page_queue, verified_alternative_candidates
 
 
 def photo(seed):
@@ -15,6 +15,59 @@ def photo(seed):
 
 
 class DirectTests(unittest.TestCase):
+    def test_scrapy_candidate_keeps_work_identity_and_rejects_existing_resizes(self):
+        page='https://djawaphoto.com/portfolio/mimmi-book/'
+        new='https://djawaphoto.com/wp-content/uploads/2026/09/new-cut.jpg'
+        known='https://djawaphoto.com/wp-content/uploads/2026/09/old-cut.jpg'
+        resized='https://djawaphoto.com/wp-content/uploads/2026/09/old-cut-480x640.jpg'
+        html=f'<h1>Mimmi book</h1><article><img src="{new}"></article>'
+        extractor=lambda raw,page,model:([resized,new,known,new],'independent_scrapy_selector')
+        urls,status=verified_alternative_candidates(html,page,'mimmi',[],
+                            [known],scrapy_extractor=extractor)
+        self.assertEqual(urls,[new])
+        self.assertEqual(status,'independent_scrapy_selector')
+        other=html.replace('Mimmi book','Other person')
+        self.assertEqual(verified_alternative_candidates(other,page,'mimmi',[],
+                             [known],scrapy_extractor=extractor)[0],[])
+        # No new photos from generic actor timelines without verified work scope.
+        self.assertEqual(verified_alternative_candidates(
+            '<h1>Mimmi</h1>', 'https://teapawt.net/Mimmi_official','mimmi',
+            [],[],scrapy_extractor=extractor)[0],[])
+
+    def test_real_scrapy_discovered_image_enters_individual_storage_pipeline(self):
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);base=root/'apps/mimmi-gallery';base.mkdir(parents=True)
+            (base/'stored-albums.json').write_text('{"model":"mimmi","albums":[]}')
+            page='https://djawaphoto.com/portfolio/mimmi-book/'
+            image='https://djawaphoto.com/wp-content/uploads/2026/09/additional-cut.jpg'
+            (base/'official-previews.json').write_text(json.dumps(
+                {'albums':[{'id':'mimmi-book','title':'Mimmi book','source':page}]}))
+            previously=photo(1)
+            incoming=photo(40)
+            owner={'schema_version':1,'model':'mimmi','albums':[{
+                'id':'mimmi-book','images':[{'number':1,
+                'sha256':hashlib.sha256(previously).hexdigest()}]}]}
+            html=f'<html><h1>Mimmi book</h1><article>Mimmi <img src="{image}"></article></html>'
+            class Client:
+                def get(self,url):
+                    return type('Response',(),{'content':html.encode() if url==page else incoming})()
+            # Reproduce a page type that the legacy scoped parser missed.
+            with patch('direct_photo_pipeline.page_images',
+                       return_value=([],[],'no_public_photos')):
+                report=collect(root,'mimmi',owner,root/'stage',3,2,
+                               Client(),alternative_engines=True,render_budget=0)
+            self.assertEqual(report['new_local_individual_files'],1,report)
+            row=report['results'][0]
+            self.assertEqual(row['alternative_engine_url_candidates'],1)
+            self.assertEqual(row['new_staged_files_from_alternative_engines'],1)
+            catalog=json.loads((root/'stage/metadata/catalog.json').read_text())
+            saved=catalog['albums'][0]['images'][0]
+            self.assertEqual((root/'stage'/saved['key']).read_bytes(),incoming)
+            self.assertEqual(saved['number'],2)
+            self.assertEqual(report['remote_verified_files'],0)
+            self.assertEqual(report['gallery_open_verified_files'],0)
+
     def test_repeated_bounded_runs_rotate_all_registered_public_pages(self):
         first='https://djawaphoto.com/portfolio/mimmi-work/'
         pages=[first+'?page='+str(i) for i in range(2,82)]
