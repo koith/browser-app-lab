@@ -50,10 +50,10 @@ def acquire(owner_path:Path,public_path:Path,out:Path,client=None):
     for url in OBSERVED_PUBLIC_IMAGE_URLS:
         parsed=urlsplit(url)
         if parsed.scheme!='https' or parsed.hostname!='cdn.v2ph.com' or not re.fullmatch(
-                r'/photos/[a-zA-Z0-9_-]{16}\\.jpg',parsed.path) or parsed.query or parsed.fragment:
+                r'/photos/[a-zA-Z0-9_-]{16}\.jpg',parsed.path) or parsed.query or parsed.fragment:
             raise ValueError('Source URL outside observed public media scope')
     client=client or requests.Session()
-    seen=set(allhashes);images=[];failure_types=[]
+    seen=set(allhashes);images=[];failure_types=[];duplicates=0
     out.mkdir(parents=True,exist_ok=True)
     for position,url in enumerate(OBSERVED_PUBLIC_IMAGE_URLS,1):
         try:
@@ -71,6 +71,7 @@ def acquire(owner_path:Path,public_path:Path,out:Path,client=None):
             meta,preview,fmt=inspect(raw)
             digest=meta['sha256']
             if digest in seen:
+                duplicates+=1
                 print('OBSERVED_PUBLIC_PHOTO_ALREADY_STORED',position,flush=True)
                 continue
             seen.add(digest)
@@ -98,7 +99,7 @@ def acquire(owner_path:Path,public_path:Path,out:Path,client=None):
     audit={'model':MODEL,'source':PUBLIC_SOURCE,'album':ALBUM,
            'existing_album_owner_rows':oldcount,'first_page_links_observed':len(OBSERVED_PUBLIC_IMAGE_URLS),
            'downloaded_new_this_invocation':len(images),'new_local_individual_files':len(images),
-           'duplicate_sha_skipped':len(seen)-len(allhashes)-len(images),
+           'duplicate_sha_skipped':duplicates,
            'remote_verified_files':0,'gallery_open_verified_files':0,'failures':failure_types,
            'results':[{'id':ALBUM,'pages':1,'published_image_candidates':10,
                        'individual_files_saved':len(images),'failures':failure_types}]}
