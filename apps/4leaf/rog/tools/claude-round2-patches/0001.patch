@@ -1,0 +1,521 @@
+From e8b641395c934d8f896c2104a4061bf01a3dfa5c Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sun, 1 Nov 2026 17:37:16 +0900
+Subject: [PATCH 1/5] research(4leaf): targeted extract of every 1171/1167
+ frame plus action and D4 evidence
+
+New workflow rog-original-targeted-extract.yml (non-main branches only):
+SHA1-verifies the archived 2002 client, then
+tools/extract-targeted-original-frames.py
+- decodes EVERY frame of OBS.pak 1171.obs (D6, 28 declared) and 1167.obs
+  (score numerals, 25 declared) with decode_rows(alpha_from_runs=True) and
+  commits them to original/OBS/ui/ with manifest.js and report.json;
+- compares each against the published bulk PNG and the colour-key
+  corrected copy pixel by pixel (differences that are only index-0 pixels
+  made opaque are counted separately);
+- writes per-frame geometry and a contact sheet for EVERY member of
+  OBS/OBS2/OBS3, an origin-aligned animated GIF for every 37-frame member
+  (action-table review), and d4-candidates.json, to a 30-day artifact.
+Unreadable members are listed, never dropped. No labels are asserted.
+
+tests/test_targeted_original_extract.py: 5 synthetic cases, no original
+bytes. Not yet run on the original archive.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_011qw76wwfZ8kaKojeP97FsR
+---
+ .../rog-original-targeted-extract.yml         |  95 +++++++
+ .../tests/test_targeted_original_extract.py   | 128 +++++++++
+ .../tools/extract-targeted-original-frames.py | 243 ++++++++++++++++++
+ 3 files changed, 466 insertions(+)
+ create mode 100644 .github/workflows/rog-original-targeted-extract.yml
+ create mode 100644 apps/4leaf/rog/tests/test_targeted_original_extract.py
+ create mode 100644 apps/4leaf/rog/tools/extract-targeted-original-frames.py
+
+diff --git a/.github/workflows/rog-original-targeted-extract.yml b/.github/workflows/rog-original-targeted-extract.yml
+new file mode 100644
+index 00000000..953fcd13
+--- /dev/null
++++ b/.github/workflows/rog-original-targeted-extract.yml
+@@ -0,0 +1,95 @@
++name: 4LEAF targeted original extract (D6, score numerals, action evidence, D4 search)
++# Runs the SHA1-verified 2002 client through tools/extract-targeted-original-frames.py.
++# Commits ONLY apps/4leaf/rog/original/OBS/ui/* (the two UI members the game
++# uses: 1171 D6 and 1167 score numerals) to the pushed non-main branch.
++# Per-member geometry, contact sheets, 37-frame action GIFs and D4 candidates
++# go to a short-lived artifact for review, never to the repository.
++on:
++  push:
++    branches-ignore: [main]
++    paths:
++      - '.github/workflows/rog-original-targeted-extract.yml'
++      - 'apps/4leaf/rog/tools/extract-targeted-original-frames.py'
++      - 'apps/4leaf/rog/tests/test_targeted_original_extract.py'
++  workflow_dispatch:
++permissions:
++  contents: write
++concurrency:
++  group: leaf-targeted-extract-${{ github.ref }}
++  cancel-in-progress: true
++jobs:
++  extract:
++    runs-on: ubuntu-latest
++    timeout-minutes: 30
++    steps:
++      - uses: actions/checkout@v4
++      - name: Install extractor and Pillow
++        run: |
++          sudo apt-get update -qq
++          sudo apt-get install -qq -y unshield
++          python3 -m pip install --break-system-packages pillow
++      - name: Synthetic regression (no original bytes)
++        run: |
++          python3 apps/4leaf/rog/tests/test_obs_native_640stride.py
++          python3 apps/4leaf/rog/tests/test_targeted_original_extract.py
++      - name: Download and SHA1-verify the archived 2002 client, unpack resources only
++        run: |
++          mkdir -p /tmp/leaf-installer /tmp/leaf-resources
++          python3 - <<'PY'
++          from pathlib import Path
++          import urllib.request, hashlib, time
++          target = Path('/tmp/leaf-installer/client.zip')
++          expected = '86526d89679ae39b85fe9808da97ad871b7888d9'
++          urls = ['https://archive.org/download/4leaf/4leaf.zip',
++                  'https://archive.org/download/4leaf/4leaf.zip?download=1']
++          for attempt in range(5):
++              try:
++                  req = urllib.request.Request(urls[attempt % 2], headers={'User-Agent': 'Mozilla/5.0 (4LEAF preservation scan)'})
++                  h = hashlib.sha1(); count = 0
++                  with urllib.request.urlopen(req, timeout=120) as r, target.open('wb') as f:
++                      while data := r.read(1 << 20):
++                          count += len(data)
++                          if count > 90 * 1024 * 1024: raise ValueError('archive exceeds size limit')
++                          h.update(data); f.write(data)
++                  if h.hexdigest() != expected: raise ValueError('SHA1 mismatch; refusing unverified archive')
++                  print('VERIFIED_ORIGINAL_2002_CLIENT_SHA1', h.hexdigest(), count)
++                  break
++              except Exception as e:
++                  if attempt == 4: raise
++                  print('retry', attempt + 1, str(e)[:160], flush=True)
++                  target.unlink(missing_ok=True); time.sleep(4 + attempt * 2)
++          PY
++          unzip -q /tmp/leaf-installer/client.zip 'data1.cab' 'data1.hdr' -d /tmp/leaf-installer
++          unshield x -d /tmp/leaf-resources /tmp/leaf-installer/data1.cab >/dev/null
++          rm -f /tmp/leaf-installer/client.zip
++      - name: Extract all UI frames and per-member action evidence
++        run: |
++          python3 apps/4leaf/rog/tools/extract-targeted-original-frames.py \
++            /tmp/leaf-resources "$GITHUB_WORKSPACE" /tmp/leaf-targeted
++          node --check apps/4leaf/rog/original/OBS/ui/manifest.js
++          python3 - <<'PY'
++          import json
++          r = json.load(open('apps/4leaf/rog/original/OBS/ui/report.json'))
++          print('UI', json.dumps({k: {x: v[x] for x in ('declared', 'written', 'allWritten')} for k, v in r['ui'].items()}))
++          for k, v in r['ui'].items():
++              for c in v['regression']:
++                  for side in ('vsLegacyBulk', 'vsCorrected'):
++                      s = c[side]
++                      if s.get('old'):
++                          print(k, c['index'], side, json.dumps(s))
++          print('UNPARSED', json.dumps(r['unparsedMembers']))
++          print('D4_CANDIDATES', open('/tmp/leaf-targeted/d4-candidates.json').read()[:2000])
++          PY
++      - uses: actions/upload-artifact@v4
++        with:
++          name: 4leaf-targeted-original-evidence
++          path: /tmp/leaf-targeted
++          retention-days: 30
++      - name: Commit the UI frames to this non-main branch
++        if: github.ref != 'refs/heads/main'
++        run: |
++          git config user.name 'github-actions[bot]'
++          git config user.email '41898699+github-actions[bot]@users.noreply.github.com'
++          git add apps/4leaf/rog/original/OBS/ui
++          git diff --cached --quiet || git commit -m 'data(4leaf): original 1171 D6 and 1167 numeral frames (written-run alpha, SHA-verified client)'
++          git push || echo 'push skipped'
+diff --git a/apps/4leaf/rog/tests/test_targeted_original_extract.py b/apps/4leaf/rog/tests/test_targeted_original_extract.py
+new file mode 100644
+index 00000000..0c4b7d1b
+--- /dev/null
++++ b/apps/4leaf/rog/tests/test_targeted_original_extract.py
+@@ -0,0 +1,128 @@
++#!/usr/bin/env python3
++"""Synthetic regression for tools/extract-targeted-original-frames.py.
++No original 4LEAF bytes: builds XOR-indexed PAKs with the 2002 grammar."""
++import importlib.util
++import json
++import pathlib
++import struct
++import sys
++import tempfile
++import unittest
++
++from PIL import Image
++
++ROOT = pathlib.Path(__file__).resolve().parents[1]
++spec = importlib.util.spec_from_file_location("leaf_targeted", ROOT / "tools/extract-targeted-original-frames.py")
++tool = importlib.util.module_from_spec(spec)
++sys.modules[spec.name] = tool
++spec.loader.exec_module(tool)
++
++
++def rle(width, height, rows):
++    """rows: list of (y, x, bytes). Returns a 640-stride body."""
++    body = bytearray(struct.pack("<HH", len(rows), rows[0][0] * 640 + rows[0][1]))
++    cursor = rows[0][0] * 640 + rows[0][1]
++    for i, (y, x, data) in enumerate(rows):
++        pos = y * 640 + x
++        if i:
++            body += struct.pack("<H", pos - cursor)
++            cursor = pos
++        body += bytes((len(data) // 4, len(data) % 4)) + data
++        cursor += len(data)
++    return bytes(body)
++
++
++def square(size, value, hole=False):
++    rows = []
++    for y in range(size):
++        data = bytearray([value] * size)
++        if hole and y == size // 2:
++            data[size // 2] = 0          # written palette index 0 (like the "1" pip)
++        rows.append((y, 0, bytes(data)))
++    return size, size, rle(size, size, rows)
++
++
++def member(frames, bad_at=None):
++    out = bytearray(132)
++    struct.pack_into("<H", out, 70, len(frames))
++    for i, (w, h, body) in enumerate(frames):
++        out += struct.pack("<IHHhh", len(body), 0 if i == bad_at else w, h, -w // 2, -h) + body
++    out += bytes(c for x in range(256) for c in (x, 255 - x, 7))
++    return bytes(out)
++
++
++def pak(entries):
++    index = bytearray(struct.pack("<I", len(entries) ^ 0xFFFFFFFF))
++    blob = bytearray()
++    for name, data in entries:
++        blob += data
++        index += bytes(b ^ 0xFF for b in name.encode().ljust(24, b"\0"))
++        index += struct.pack("<I", (len(blob) - 1) ^ 0xFFFFFFFF)
++    return bytes(index + blob)
++
++
++class Targeted(unittest.TestCase):
++    def setUp(self):
++        self.tmp = tempfile.TemporaryDirectory()
++        t = pathlib.Path(self.tmp.name)
++        res = t / "res" / "Dice"
++        res.mkdir(parents=True)
++        d6 = [square(30, 9, hole=(i == 0)) for i in range(28)]
++        numerals = [square(40, 20 + i) for i in range(25)]
++        chessman = [square(24, 40 + i) for i in range(37)]
++        (res / "OBS.pak").write_bytes(pak([
++            ("1171.obs", member(d6)), ("1167.obs", member(numerals)),
++            ("1040.obs", member(chessman)), ("1046.obs", member(chessman[:5], bad_at=2)),
++            ("0074.obs", b"\x01" * 166)]))
++        (res / "OBS2.pak").write_bytes(pak([("1199.obs", member([square(40, 3) for _ in range(6)]))]))
++        self.repo = t / "repo"
++        bulk = self.repo / "apps/4leaf/rog/original/OBS/bulk"
++        bulk.mkdir(parents=True)
++        # Legacy export of 1171 frame 0: same pixels, but index-0 pixel transparent.
++        legacy = tool.codec.decode_rows(d6[0][2], 30, 30, bytes(c for x in range(256) for c in (x, 255 - x, 7)),
++                                        minimum_opaque_pixels=0)[0]
++        legacy.save(bulk / "1171-00.png")
++        self.art = t / "art"
++        self.report = tool.run(t / "res", self.repo, self.art)
++
++    def tearDown(self):
++        self.tmp.cleanup()
++
++    def test_every_ui_frame_written_with_manifest(self):
++        ui = self.repo / "apps/4leaf/rog/original/OBS/ui"
++        self.assertEqual(len(list(ui.glob("1171-*.png"))), 28)
++        self.assertEqual(len(list(ui.glob("1167-*.png"))), 25)
++        js = (ui / "manifest.js").read_text()
++        data = json.loads(js[js.index("UI_FRAMES=") + 10:js.rindex(";")])
++        self.assertEqual(len(data["1171"]["frames"]), 28)
++        self.assertEqual(data["1167"]["frames"][9]["url"], "./original/OBS/ui/1167-009.png")
++        self.assertTrue(self.report["ui"]["1171"]["allWritten"])
++
++    def test_written_index0_is_opaque_and_regression_explains_the_only_difference(self):
++        img = Image.open(self.repo / "apps/4leaf/rog/original/OBS/ui/1171-000.png").convert("RGBA")
++        self.assertEqual(img.getpixel((15, 30 - 1 - 15))[3], 255)
++        check = self.report["ui"]["1171"]["regression"][0]["vsLegacyBulk"]
++        self.assertEqual(check["differentPixels"], 1)
++        self.assertEqual(check["onlyIndex0MadeOpaque"], 1)
++
++    def test_all_members_inventoried_including_broken_and_secondary_pak(self):
++        self.assertEqual(self.report["members"], 6)
++        names = {u["member"] for u in self.report["unparsedMembers"]}
++        self.assertEqual(names, {"1046.obs", "0074.obs"})
++        self.assertTrue((self.art / "members/OBS2/1199.png").exists())
++        self.assertTrue((self.art / "members/OBS/1046.json").exists())
++
++    def test_37_frame_member_gets_action_gif(self):
++        gif = Image.open(self.art / "actions/OBS-1040.gif")
++        self.assertEqual(gif.n_frames, 37)
++        self.assertEqual(self.report["actionGifs"], 1)
++
++    def test_d4_candidates_exclude_ui_members(self):
++        cands = json.loads((self.art / "d4-candidates.json").read_text())
++        members = {c["member"] for c in cands}
++        self.assertNotIn("1171.obs", members)
++        self.assertIn("1199.obs", members)
++
++
++if __name__ == "__main__":
++    unittest.main()
+diff --git a/apps/4leaf/rog/tools/extract-targeted-original-frames.py b/apps/4leaf/rog/tools/extract-targeted-original-frames.py
+new file mode 100644
+index 00000000..2ef58fa7
+--- /dev/null
++++ b/apps/4leaf/rog/tools/extract-targeted-original-frames.py
+@@ -0,0 +1,243 @@
++#!/usr/bin/env python3
++"""Targeted, verifiable extraction of the original 4LEAF Dice UI members and
++chessman action evidence from the SHA1-verified 2002 client.
++
++Inputs : unshield resource directory (contains Dice/OBS.pak, OBS2.pak, OBS3.pak)
++Outputs:
++  REPO_OUT/original/OBS/ui/<member>-NNN.png   EVERY frame of the UI members that
++                                             the game uses (1171 D6, 1167 numerals),
++                                             decoded with alpha_from_runs=True
++  REPO_OUT/original/OBS/ui/manifest.js       window.ORIGINAL_LEAF_UI_FRAMES
++  REPO_OUT/original/OBS/ui/report.json       counts, SHA-256, regression vs old PNGs
++  ARTIFACT/members/<pak>/<member>.json        per-frame geometry for EVERY member
++  ARTIFACT/members/<pak>/<member>.png         contact sheet (upright) for review
++  ARTIFACT/actions/<member>.gif               37-frame chessmen as an index-ordered
++                                             animation with frame numbers, for
++                                             action-table review
++  ARTIFACT/d4-candidates.json                 members whose frames look like small
++                                             square/triangular dice sprites
++
++Only the two UI members go to the repository (small, used by the game). Everything
++else stays in the short-lived Actions artifact. No Windows code is executed.
++Action / direction labels are NOT asserted here.
++"""
++import argparse
++import hashlib
++import importlib.util
++import io
++import json
++import re
++from pathlib import Path
++
++from PIL import Image, ImageDraw
++
++HERE = Path(__file__).resolve().parent
++_spec = importlib.util.spec_from_file_location("leaf_obs_codec_t", HERE / "decode-original-obs-bulk.py")
++codec = importlib.util.module_from_spec(_spec)
++_spec.loader.exec_module(codec)
++
++UI_MEMBERS = {"1171.obs": "d6", "1167.obs": "score-numerals"}
++PACKS = ("obs.pak", "obs2.pak", "obs3.pak")
++
++
++def sha(b):
++    return hashlib.sha256(b).hexdigest()
++
++
++def png_bytes(img):
++    buf = io.BytesIO()
++    img.save(buf, format="PNG", optimize=True)
++    return buf.getvalue()
++
++
++def decode_member(blob):
++    """Return (frames_info, images, palette, error). Every frame is attempted;
++    a failing frame is recorded, never skipped silently."""
++    try:
++        frames, palette = codec.unpack_frames(blob)
++    except ValueError as exc:
++        return [], {}, None, str(exc)
++    info, images = [], {}
++    for index, (body, w, h, ox, oy) in enumerate(frames):
++        rec = {"index": index, "width": w, "height": h, "originX": ox, "originY": oy,
++               "bodyBytes": len(body), "bodySHA256": sha(body)}
++        try:
++            img, diag = codec.decode_rows(body, w, h, palette, minimum_opaque_pixels=0,
++                                          alpha_from_runs=True)
++            rec["opaquePixels"] = diag["opaquePixels"]
++            rec["status"] = "DECODED"
++            images[index] = img
++        except (ValueError, OverflowError) as exc:
++            rec["status"] = "FAILED"
++            rec["error"] = str(exc)[:200]
++        info.append(rec)
++    return info, images, palette, None
++
++
++def contact_sheet(images, path, cell=96, cols=10):
++    if not images:
++        return
++    keys = sorted(images)
++    rows = (len(keys) + cols - 1) // cols
++    sheet = Image.new("RGB", (cols * cell, rows * (cell + 14)), (52, 56, 96))
++    d = ImageDraw.Draw(sheet)
++    for k, idx in enumerate(keys):
++        im = images[idx].transpose(Image.Transpose.FLIP_TOP_BOTTOM)
++        if im.width > cell - 4 or im.height > cell - 4:
++            im.thumbnail((cell - 4, cell - 4))
++        x, y = (k % cols) * cell, (k // cols) * (cell + 14)
++        sheet.paste(im, (x + (cell - im.width) // 2, y + cell - 2 - im.height), im)
++        d.text((x + 3, y + cell), str(idx), fill=(255, 220, 90))
++    sheet.save(path, optimize=True)
++
++
++def action_gif(images, info, path):
++    """Index-ordered animation on a shared canvas aligned by native origin, so
++    a reviewer sees real limb motion and sequence boundaries."""
++    if not images:
++        return
++    geo = {r["index"]: r for r in info}
++    left = min(geo[i]["originX"] for i in images)
++    top = min(geo[i]["originY"] for i in images)
++    right = max(geo[i]["originX"] + geo[i]["width"] for i in images)
++    bottom = max(geo[i]["originY"] + geo[i]["height"] for i in images)
++    W, H = right - left + 8, bottom - top + 22
++    frames = []
++    for i in sorted(images):
++        canvas = Image.new("RGB", (W, H), (52, 56, 96))
++        im = images[i].transpose(Image.Transpose.FLIP_TOP_BOTTOM)
++        canvas.paste(im, (geo[i]["originX"] - left + 4, geo[i]["originY"] - top + 4), im)
++        ImageDraw.Draw(canvas).text((3, H - 15), "frame %d" % i, fill=(255, 220, 90))
++        frames.append(canvas.resize((W * 2, H * 2), Image.NEAREST))
++    frames[0].save(path, save_all=True, append_images=frames[1:], duration=160, loop=0)
++
++
++def d4_score(info, images):
++    """Heuristic only: small near-square frames with few colours (a die body).
++    Used to rank candidates for human review, never to label a member."""
++    small = [r for r in info if r.get("status") == "DECODED" and 20 <= r["width"] <= 90
++             and 20 <= r["height"] <= 90 and 0.7 <= r["width"] / r["height"] <= 1.4]
++    if not small:
++        return 0.0
++    return round(len(small) / max(1, len(info)), 3)
++
++
++def regression(old_path, new_img):
++    """Compare an already published PNG with the new run-alpha decode."""
++    if not old_path.exists():
++        return {"old": None}
++    old = Image.open(old_path).convert("RGBA")
++    new = new_img.convert("RGBA")
++    if old.size != new.size:
++        return {"old": old_path.as_posix(), "sizeMatch": False}
++    a, b = old.load(), new.load()
++    diff = alpha_only = 0
++    for y in range(old.height):
++        for x in range(old.width):
++            if a[x, y] != b[x, y]:
++                diff += 1
++                if a[x, y][3] == 0 and b[x, y][3] == 255 and a[x, y][:3] == b[x, y][:3]:
++                    alpha_only += 1
++    return {"old": old_path.as_posix(), "sizeMatch": True, "differentPixels": diff,
++            "onlyIndex0MadeOpaque": alpha_only, "identical": diff == 0}
++
++
++def run(resource_dir, repo_root, artifact):
++    paks = sorted(p for p in resource_dir.rglob("*") if p.is_file() and p.name.lower() in PACKS)
++    if not paks:
++        raise SystemExit("no OBS/OBS2/OBS3 pak under " + str(resource_dir))
++    ui_dir = repo_root / "apps/4leaf/rog/original/OBS/ui"
++    ui_dir.mkdir(parents=True, exist_ok=True)
++    (artifact / "members").mkdir(parents=True, exist_ok=True)
++    (artifact / "actions").mkdir(parents=True, exist_ok=True)
++    report = {"format": "4LEAF_TARGETED_ORIGINAL_V1", "alpha": "written-runs",
++              "packs": [], "ui": {}, "members": 0, "declaredFrames": 0,
++              "decodedFrames": 0, "failedFrames": 0, "unparsedMembers": [],
++              "actionGifs": 0}
++    manifest, d4 = {}, []
++    for pak in paks:
++        data = pak.read_bytes()
++        report["packs"].append({"name": pak.name, "sha256": sha(data)})
++        for name, blob in codec.source_members(data):
++            if not name.lower().endswith(".obs"):
++                continue
++            report["members"] += 1
++            info, images, palette, error = decode_member(blob)
++            stem = Path(name).stem
++            meta = {"pak": pak.name, "member": name, "sourceSHA256": sha(blob),
++                    "declaredFrames": len(info) if not error else None,
++                    "parseError": error, "frames": info}
++            target = artifact / "members" / pak.stem
++            target.mkdir(parents=True, exist_ok=True)
++            (target / (stem + ".json")).write_text(json.dumps(meta, indent=1))
++            if error:
++                report["unparsedMembers"].append({"pak": pak.name, "member": name, "error": error})
++                continue
++            report["declaredFrames"] += len(info)
++            report["decodedFrames"] += len(images)
++            report["failedFrames"] += len(info) - len(images)
++            contact_sheet(images, target / (stem + ".png"))
++            if len(info) == 37:
++                action_gif(images, info, artifact / "actions" / (pak.stem + "-" + stem + ".gif"))
++                report["actionGifs"] += 1
++            score = d4_score(info, images)
++            is_ui = pak.name.lower() == "obs.pak" and name.lower() in UI_MEMBERS
++            if score >= 0.5 and not is_ui:
++                d4.append({"pak": pak.name, "member": name, "score": score, "frames": len(info)})
++            role = UI_MEMBERS.get(name.lower()) if pak.name.lower() == "obs.pak" else None
++            if not role:
++                continue
++            frames = []
++            checks = []
++            for rec in info:
++                if rec["status"] != "DECODED":
++                    continue
++                img = images[rec["index"]]
++                payload = png_bytes(img)
++                fname = "%s-%03d.png" % (stem, rec["index"])
++                (ui_dir / fname).write_bytes(payload)
++                frames.append({"index": rec["index"], "url": "./original/OBS/ui/" + fname,
++                               "width": rec["width"], "height": rec["height"],
++                               "originX": rec["originX"], "originY": rec["originY"],
++                               "sha256": sha(payload)})
++                old = repo_root / "apps/4leaf/rog/original/OBS/bulk" / ("%s-%02d.png" % (stem, rec["index"]))
++                corrected = repo_root / "apps/4leaf/rog/original/OBS/d6-colorkey-corrected" / ("%s-%02d.png" % (stem, rec["index"]))
++                checks.append({"index": rec["index"], "vsLegacyBulk": regression(old, img),
++                               "vsCorrected": regression(corrected, img)})
++            manifest[stem] = {"role": role, "pak": pak.name, "member": name,
++                              "sourceSHA256": sha(blob), "declaredFrames": len(info),
++                              "frames": frames}
++            report["ui"][stem] = {"declared": len(info), "written": len(frames),
++                                  "allWritten": len(frames) == len(info), "regression": checks}
++    js = ("/* Original Dice/OBS.pak UI members (written-run alpha). Generated by\n"
++          " * tools/extract-targeted-original-frames.py from the SHA1-verified 2002 client.\n"
++          " * 1171 = D6 (0-5 result faces, rest tumble); 1167 = score numerals. */\n"
++          "window.ORIGINAL_LEAF_UI_FRAMES=" + json.dumps(manifest, indent=1, sort_keys=True) + ";\n")
++    (ui_dir / "manifest.js").write_text(js)
++    d4.sort(key=lambda r: -r["score"])
++    (artifact / "d4-candidates.json").write_text(json.dumps(d4, indent=1))
++    report["d4CandidateCount"] = len(d4)
++    (ui_dir / "report.json").write_text(json.dumps(report, indent=1) + "\n")
++    (artifact / "report.json").write_text(json.dumps(report, indent=1) + "\n")
++    return report
++
++
++def main(argv=None):
++    ap = argparse.ArgumentParser()
++    ap.add_argument("resource_dir", type=Path)
++    ap.add_argument("repo_root", type=Path)
++    ap.add_argument("artifact_dir", type=Path)
++    a = ap.parse_args(argv)
++    r = run(a.resource_dir, a.repo_root, a.artifact_dir)
++    print("LEAF_TARGETED_EXTRACT " + json.dumps({k: r[k] for k in (
++        "members", "declaredFrames", "decodedFrames", "failedFrames", "actionGifs",
++        "d4CandidateCount")} | {"ui": {k: {x: v[x] for x in ("declared", "written", "allWritten")}
++                                       for k, v in r["ui"].items()},
++                                "unparsed": len(r["unparsedMembers"])}))
++    for stem, v in r["ui"].items():
++        if not v["allWritten"]:
++            raise SystemExit("UI member %s not fully decoded: %s" % (stem, v))
++
++
++if __name__ == "__main__":
++    main()
+-- 
+2.43.0
+

@@ -1,0 +1,230 @@
+From 91c1656b8addbdb909c95fab98b9851d6115ccc0 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sun, 1 Nov 2026 17:37:37 +0900
+Subject: [PATCH 5/5] chore(4leaf): ledger for round 2; release 0.86.0-beta.32
+ (PWA v119)
+
+Ledger (append-only, check --against HEAD passes): EVID-01 and EVID-02
+todo -> in_progress; events for the battle anchors, targeted extraction,
+UI manifest, PR #420 follow-up and the D4 search; intake recorded.
+Nothing marked done: no merge or Pages deployment from this session.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_011qw76wwfZ8kaKojeP97FsR
+---
+ apps/4leaf/rog/app-version.json             |   4 +-
+ apps/4leaf/rog/docs/RESTORATION_LEDGER.json | 119 +++++++++++++++++++-
+ apps/4leaf/rog/sw.js                        |   2 +-
+ apps/4leaf/rog/tests/release-identity.cjs   |   2 +-
+ 4 files changed, 117 insertions(+), 10 deletions(-)
+
+diff --git a/apps/4leaf/rog/app-version.json b/apps/4leaf/rog/app-version.json
+index 9f6dc1cf..2e6c0760 100644
+--- a/apps/4leaf/rog/app-version.json
++++ b/apps/4leaf/rog/app-version.json
+@@ -1,9 +1,9 @@
+ {
+   "application": "4LEAF Browser Revival",
+-  "version": "0.86.0-beta.31",
++  "version": "0.86.0-beta.32",
+   "releaseDate": "2026-11-01",
+   "channel": "source-restoration-beta",
+-  "pwaCache": "4leaf-revival-pwa-v118",
++  "pwaCache": "4leaf-revival-pwa-v119",
+   "originalClient": "4LEAF 2002–2004 reference; not this web build",
+   "sourceFidelity": "partial-original-assets/not-complete"
+ }
+diff --git a/apps/4leaf/rog/docs/RESTORATION_LEDGER.json b/apps/4leaf/rog/docs/RESTORATION_LEDGER.json
+index e8114a30..ad900ed8 100644
+--- a/apps/4leaf/rog/docs/RESTORATION_LEDGER.json
++++ b/apps/4leaf/rog/docs/RESTORATION_LEDGER.json
+@@ -1253,6 +1253,24 @@
+         "ACT-05",
+         "SRC-04"
+       ]
++    },
++    {
++      "id": "REQ-20261101-002",
++      "date": "2026-11-01",
++      "origin": "user",
++      "text": "2026-11-01 2차 집중 개발 지시: 원본 D4/D6 주사위와 낙하·회전·바운스 연출, 체스맨 방향별 이동·공격·피격·승리 행동표, 원작 전투 화면 정밀 복원, 점수 8·9·미해독 70·격리 54 프레임, PR #420 처리, PR·CI·병합·Pages 배포, 원장 관리.",
++      "taskIds": [
++        "DIE-01",
++        "DIE-02",
++        "DIE-04",
++        "ACT-02",
++        "ACT-03",
++        "ACT-05",
++        "BTL-02",
++        "SRC-04",
++        "EVID-01",
++        "EVID-02"
++      ]
+     }
+   ],
+   "tasks": [
+@@ -2626,9 +2644,9 @@
+       "id": "EVID-01",
+       "priority": "P0",
+       "title": "같은 상태 원작-웹 A/B 800×600·794×528 재현",
+-      "status": "todo",
++      "status": "in_progress",
+       "milestone": "M09",
+-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 참조 2004 전투 사진 5~6인 배치와 현재 실플레이 2인 시작화면/다른 방 1인 캡처가 달라 픽셀 차이를 수치 비교할 수 없음 | 구현 목표: 원작 screenshot마다 DMP 맵ID/턴/채팅방ID/참여자 수/게임카드/화면 줌을 가능한 한 통일한 실제 웹 캡처 추가",
++      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 참조 2004 전투 사진 5~6인 배치와 현재 실플레이 2인 시작화면/다른 방 1인 캡처가 달라 픽셀 차이를 수치 비교할 수 없음 | 구현 목표: 원작 screenshot마다 DMP 맵ID/턴/채팅방ID/참여자 수/게임카드/화면 줌을 가능한 한 통일한 실제 웹 캡처 추가; 2026-11-01 battle.jpg와 같은 주사위(4·1)·800×600 상태 재현 비교 자동화",
+       "acceptance": [
+         "board/battle/chat/chat_ref/street/shop 6개 장면별 source-state/live-state 메타와 재현 가능 테스트 스텝 보존"
+       ],
+@@ -2639,7 +2657,7 @@
+         "tests/dice-original-visual-qa.cjs"
+       ],
+       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+-      "lastReviewed": "2026-10-18",
++      "lastReviewed": "2026-11-01",
+       "verifiedAcceptance": null,
+       "dependencies": [],
+       "category": "원본 정밀 비교"
+@@ -2648,9 +2666,9 @@
+       "id": "EVID-02",
+       "priority": "P0",
+       "title": "원본 픽셀·앵커 위치 정량 오차 보고",
+-      "status": "todo",
++      "status": "in_progress",
+       "milestone": "M09",
+-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 현재 브라우저 CI는 일부 소스 이미지 표시 확인과 좌표·클립 검증을 하지만 2004 동일 장면 SSIM/앵커 오차 정량 게이트는 미구현 | 구현 목표: 복구 PNG와 2004 캡처의 주요 ROI 분리, 발판·아바타·채팅·HUD 앵커 bounding boxes, 알파 차/SSIM 비교",
++      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 현재 브라우저 CI는 일부 소스 이미지 표시 확인과 좌표·클립 검증을 하지만 2004 동일 장면 SSIM/앵커 오차 정량 게이트는 미구현 | 구현 목표: 복구 PNG와 2004 캡처의 주요 ROI 분리, 발판·아바타·채팅·HUD 앵커 bounding boxes, 알파 차/SSIM 비교; 2026-11-01 전투 화면 6개 앵커의 원작 대비 정량 오차 보고와 자동 테스트 추가",
+       "acceptance": [
+         "동일 상태에 대해 영역별 오차표·허용치·before/after diff 산출하고 임계값 초과 장면 자동 실패"
+       ],
+@@ -2659,7 +2677,7 @@
+         "tests/visual-fourleaf-room-source.cjs"
+       ],
+       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+-      "lastReviewed": "2026-10-18",
++      "lastReviewed": "2026-11-01",
+       "verifiedAcceptance": null,
+       "dependencies": [
+         "EVID-01"
+@@ -6700,6 +6718,95 @@
+         "ACT-05",
+         "SRC-04"
+       ]
++    },
++    {
++      "seq": 287,
++      "date": "2026-11-01",
++      "type": "BATTLE_ANCHORS_MATCH_BATTLE_JPG",
++      "taskIds": [
++        "BTL-02",
++        "EVID-02",
++        "EVID-01"
++      ],
++      "details": "battle.jpg에서 원본 winBattle-01 발판 스프라이트를 (220,265)에 템플릿 매칭(중앙값 오차 21, 61% 일치). 발판 기준 원본 좌표: 왼쪽 주사위 중심 24.0, 오른쪽 273.5, 주사위 윗변 75, 왼쪽 점수 중심 62.0, 오른쪽 285.0, 점수 윗변 -153 (source px). 수정 전 웹: 77.0/278.0/105/76.5/278.0/-160. 수정 후 DOM 측정 오차 ≤0.9px, 흰 픽셀 측정 왼쪽 점수 \"05\" 일치. 숫자 겹침 7.5px, 주사위 간격 5px. 데스크톱 전용, --leaf-native-podium-scale로 축척 추종. tests/battle-anchor-compare.cjs (허용 3px)."
++    },
++    {
++      "seq": 288,
++      "date": "2026-11-01",
++      "type": "TARGETED_ORIGINAL_EXTRACT_READY",
++      "taskIds": [
++        "SRC-04",
++        "DIE-01",
++        "DIE-02",
++        "ACT-02",
++        "ACT-03"
++      ],
++      "details": "tools/extract-targeted-original-frames.py + workflow rog-original-targeted-extract.yml: SHA1 검증 2002 설치본에서 1171(D6) 28프레임, 1167(점수) 25프레임 전체를 alpha_from_runs로 추출해 original/OBS/ui/에 커밋(비-main 브랜치), 기존 PNG와 픽셀 회귀 비교, 모든 OBS/OBS2/OBS3 멤버 geometry·컨택트시트, 37프레임 멤버 행동 GIF, D4 후보 목록을 artifact로 출력. 합성 테스트 5건 PASS. 원본 실행은 이 세션에서 불가(archive.org·GitHub 쓰기 차단) → 미실행."
++    },
++    {
++      "seq": 289,
++      "date": "2026-11-01",
++      "type": "RUNTIME_UI_MANIFEST",
++      "taskIds": [
++        "DIE-02",
++        "DIE-04"
++      ],
++      "details": "window.ORIGINAL_LEAF_UI_FRAMES 도입. 주사위는 1171 index>=6 전체를 회전 프레임으로, 점수는 1167 digit d=frame d(0-7 VERIFIED, 8-9 INFERRED)로 자동 사용. 현재는 저장소 기존 프레임으로 만든 임시 매니페스트(1171 11/28, 1167 10/25)."
++    },
++    {
++      "seq": 290,
++      "date": "2026-11-01",
++      "type": "PR420_FOLLOWUP",
++      "taskIds": [
++        "ACT-02",
++        "ACT-03"
++      ],
++      "details": "audit-obs-action-evidence.py에 unreadableMembers(프레임 수 판독 불가 멤버 보존)와 geometryRuns(연속 프레임 크기 구간, 행동 명칭 미부여) 추가, 테스트 2건 PASS. PR #420과 같은 파일을 개선한 형태로 이 브랜치에 포함."
++    },
++    {
++      "seq": 291,
++      "date": "2026-11-01",
++      "type": "D4_SEARCH_STATUS",
++      "taskIds": [
++        "DIE-01"
++      ],
++      "details": "저장소 내 추출본(OBS bulk 945, front-reviewed 72, IMG/SourceSPR/Gif/D1Region)에서 D4 본체 미발견. D1Region/d1regionbtn.png의 1-4눈 버튼은 채널 UI라 D4 근거로 쓰지 않음(UNVERIFIED). 비카드 OBS·OBS2/3 전체는 표적 추출 워크플로의 d4-candidates.json으로 검토 예정."
++    },
++    {
++      "seq": 292,
++      "date": "2026-11-01",
++      "type": "STATUS_CHANGED",
++      "taskId": "EVID-02",
++      "from": "todo",
++      "to": "in_progress",
++      "details": "전투 화면 6개 앵커의 원작 대비 정량 오차 보고와 자동 테스트 추가"
++    },
++    {
++      "seq": 293,
++      "date": "2026-11-01",
++      "type": "STATUS_CHANGED",
++      "taskId": "EVID-01",
++      "from": "todo",
++      "to": "in_progress",
++      "details": "battle.jpg와 같은 주사위(4·1)·800×600 상태 재현 비교 자동화"
++    },
++    {
++      "seq": 294,
++      "date": "2026-11-01",
++      "type": "REQUEST_REGISTERED",
++      "requestId": "REQ-20261101-002",
++      "taskIds": [
++        "DIE-01",
++        "DIE-02",
++        "DIE-04",
++        "ACT-02",
++        "ACT-03",
++        "ACT-05",
++        "BTL-02",
++        "SRC-04",
++        "EVID-01",
++        "EVID-02"
++      ]
+     }
+   ]
+ }
+diff --git a/apps/4leaf/rog/sw.js b/apps/4leaf/rog/sw.js
+index 0a6ea0cc..34def979 100644
+--- a/apps/4leaf/rog/sw.js
++++ b/apps/4leaf/rog/sw.js
+@@ -1,5 +1,5 @@
+ 'use strict';
+-const REVISION='4leaf-revival-pwa-v118';
++const REVISION='4leaf-revival-pwa-v119';
+ // 32 genuinely archived 145×97 original TIS platform images. First offline
+ // Genesis match must draw the same extracted raised platforms, not replace
+ // uncached native source art with a CSS placeholder on first room entry.
+diff --git a/apps/4leaf/rog/tests/release-identity.cjs b/apps/4leaf/rog/tests/release-identity.cjs
+index dcf86898..3b95b64a 100644
+--- a/apps/4leaf/rog/tests/release-identity.cjs
++++ b/apps/4leaf/rog/tests/release-identity.cjs
+@@ -10,7 +10,7 @@ const root=path.resolve(__dirname,'..');
+ const meta=JSON.parse(fs.readFileSync(path.join(root,'app-version.json'),'utf8'));
+ const index=fs.readFileSync(path.join(root,'index.html'),'utf8');
+ const sw=fs.readFileSync(path.join(root,'sw.js'),'utf8');
+-assert.equal(meta.version,'0.86.0-beta.31');
++assert.equal(meta.version,'0.86.0-beta.32');
+ assert.match(meta.channel,/beta/,'original client exact copy was not completed');
+ assert.ok(meta.sourceFidelity.includes('not-complete'),'do not falsely claim original is finished');
+ assert.ok(!meta.originalClient.includes(meta.version),'web revival is separate from 2002–2004 release');
+-- 
+2.43.0
+

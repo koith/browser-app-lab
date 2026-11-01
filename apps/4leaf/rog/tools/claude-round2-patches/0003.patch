@@ -1,0 +1,172 @@
+From 889236af92bca431fc494820af36e4d4b64dacac Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sun, 1 Nov 2026 17:37:36 +0900
+Subject: [PATCH 3/5] fix(4leaf): place battle dice and scores where battle.jpg
+ draws them
+
+Measured relative to the original winBattle-01 podium sprite, which a
+template match places at (220,265) in the archived 800x600 battle.jpg
+(median |diff| 21, 61% exact pixels). In source pixels from the sprite edge:
+
+  anchor              battle.jpg   before   after
+  left dice centre        24.0      77.0     24.0
+  right dice centre      273.5     278.0    273.5
+  dice top (white)        75       105       75
+  left score centre       62.0      76.5     62.5
+  right score centre     285.0     278.0    285.0
+  score top (white)     -153      -160     -153
+
+The original draws the LEFT dice and score left of the left deck; the live
+duel centred them. Also: numerals overlap by 7.5 px and dice pairs sit 5 px
+apart as in battle.jpg. Offsets are multiplied by a new
+--leaf-native-podium-scale variable so they follow the drawn sprite.
+Desktop (>=651 px) only; the phone layout is unchanged.
+
+tests/battle-anchor-compare.cjs reproduces battle.jpg's left dice (4, 1)
+and requires all six anchors within 3 source px (currently <= 0.9).
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_011qw76wwfZ8kaKojeP97FsR
+---
+ apps/4leaf/rog/dice-native-battle-podium.css  | 29 +++++++
+ apps/4leaf/rog/game.js                        |  3 +
+ .../4leaf/rog/tests/battle-anchor-compare.cjs | 76 +++++++++++++++++++
+ 3 files changed, 108 insertions(+)
+ create mode 100644 apps/4leaf/rog/tests/battle-anchor-compare.cjs
+
+diff --git a/apps/4leaf/rog/dice-native-battle-podium.css b/apps/4leaf/rog/dice-native-battle-podium.css
+index 90c02e0e..e3ad1b88 100644
+--- a/apps/4leaf/rog/dice-native-battle-podium.css
++++ b/apps/4leaf/rog/dice-native-battle-podium.css
+@@ -279,3 +279,32 @@
+  * top-left minimap dock (z 21) so the original numerals are not clipped.
+  * The minimap stays clickable because the overlay never takes input. */
+ #app.app-classic-dice #game #battle-visual{z-index:22!important}
++/* 2026-11-01 battle.jpg anchors, measured RELATIVE TO THE ORIGINAL
++ * winBattle-01 podium sprite. Template match places that sprite at (220,265)
++ * in the archived 800x600 battle.jpg (median |diff| 21, 61% exact pixels).
++ * Original vs live (source px from the sprite's left/top edge):
++ *   left dice centre   24.0 (live 77.0)   right dice centre  273.5 (278.0)
++ *   dice top           75.0 (live 105)    score top         -153   (-160)
++ * (vertical values use the white-pixel tops, as measured on battle.jpg)
++ *   left score centre  62.0 (live 76.5)   right score centre 285.0 (278.0)
++ * The original draws the LEFT dice and score left of the left deck; the live
++ * duel centred them. Offsets are multiplied by the live podium scale so they
++ * follow the drawn sprite. Desktop only (phones keep their compact layout).
++ * tests/battle-anchor-compare.cjs re-measures every anchor (<= 3 px). */
++@media(min-width:651px){
++ #app.app-classic-dice #game #battle-visual .battle-visual-side.attacker>.battle-visual-dice{
++  translate:calc(var(--leaf-native-podium-scale,1) * -53px) calc(var(--leaf-native-podium-scale,1) * -34px)}
++ #app.app-classic-dice #game #battle-visual .battle-visual-side.defender>.battle-visual-dice{
++  translate:calc(var(--leaf-native-podium-scale,1) * -4.5px) calc(var(--leaf-native-podium-scale,1) * -34px)}
++ #app.app-classic-dice #game #battle-visual .battle-visual-side.attacker .battle-visual-total{
++  translate:calc(var(--leaf-native-podium-scale,1) * -14.5px) calc(var(--leaf-native-podium-scale,1) * 3px)}
++ #app.app-classic-dice #game #battle-visual .battle-visual-side.defender .battle-visual-total{
++  translate:calc(var(--leaf-native-podium-scale,1) * 7px) calc(var(--leaf-native-podium-scale,1) * 3px)}
++ /* battle.jpg "05": white centres of the two numerals are 49.5 px apart;
++  * the 1167 digit images (with outline) laid edge to edge give 57 px. */
++ #app.app-classic-dice #game #battle-visual .battle-visual-total.battle-total-original .battle-total-digit+.battle-total-digit{
++  margin-left:calc(var(--leaf-native-podium-scale,1) * -7.5px)!important}
++ /* battle.jpg dice pairs: face centres 51-51.5 px apart (46 px sprites). */
++ #app.app-classic-dice #game #battle-visual .battle-visual-side>.battle-visual-dice{
++  gap:calc(var(--leaf-native-podium-scale,1) * 5px)!important}
++}
+diff --git a/apps/4leaf/rog/game.js b/apps/4leaf/rog/game.js
+index 9f9ee726..ca990999 100644
+--- a/apps/4leaf/rog/game.js
++++ b/apps/4leaf/rog/game.js
+@@ -1353,6 +1353,9 @@ function showBattleScene(attacker,defender,attack,defense,attackerPoints,defende
+    Math.max(0,imageTop-canvas.top-201*sourceScale)+'px');
+   stage.style.setProperty('--leaf-native-battle-heading-width',(222*sourceScale)+'px');
+   stage.style.setProperty('--leaf-native-battle-heading-height',(42*sourceScale)+'px');
++  // Scale of the drawn 355x113 source podium; battle.jpg anchor offsets in
++  // dice-native-battle-podium.css are source pixels multiplied by this.
++  stage.style.setProperty('--leaf-native-podium-scale',String(sourceScale));
+   stage.style.setProperty('--leaf-native-podium-left-x',left+'px');
+   stage.style.setProperty('--leaf-native-podium-right-x',right+'px');
+   stage.style.setProperty('--leaf-native-podium-actor-bottom',
+diff --git a/apps/4leaf/rog/tests/battle-anchor-compare.cjs b/apps/4leaf/rog/tests/battle-anchor-compare.cjs
+new file mode 100644
+index 00000000..67179fc5
+--- /dev/null
++++ b/apps/4leaf/rog/tests/battle-anchor-compare.cjs
+@@ -0,0 +1,76 @@
++'use strict';
++/* Battle layout vs the archived 800x600 battle.jpg, in ORIGINAL SOURCE PIXELS
++ * relative to the original winBattle-01 podium sprite (355x113).
++ *
++ * Reference (measured once on apps/4leaf/assets/battle.jpg):
++ *   podium sprite drawn at (220,265) - template match, median |diff| 21
++ *   white-pixel anchors relative to the sprite's left / top edge:
++ *     left dice pair centre 24.0, right dice pair centre 273.5, dice top 75
++ *     left score centre 62.0, right score centre 285.0, score top -153
++ * The live DOM boxes include a 4 px outline/shadow band above the white
++ * pixels, so vertical expectations are the white-pixel values minus 4.
++ * This compares geometry of REAL game elements; nothing is pasted from the
++ * screenshot. Desktop 800x600 only (phones use a compact layout). */
++const assert=require('node:assert/strict');
++const path=require('node:path');
++const {chromium,webkit}=require('playwright');
++const ORIGINAL={leftDice:24.0,rightDice:273.5,diceTop:75-4,leftScore:62.0,rightScore:285.0,scoreTop:-153-4};
++const TOLERANCE=3;
++(async()=>{
++ const engine=process.env.FOURLEAF_BROWSER==='webkit'?'webkit':'chromium';
++ const browser=await (engine==='webkit'?webkit:chromium).launch({headless:true,
++  args:engine==='webkit'?[]:['--no-sandbox']});
++ const page=await browser.newPage({viewport:{width:800,height:600},serviceWorkers:'block'});
++ const errors=[];page.on('pageerror',e=>errors.push(String(e)));
++ await page.addInitScript(()=>{window.LEAF_CENTRAL_API_URL='';});
++ try{
++  await page.goto(process.env.FOURLEAF_TEST_URL||'file://'+path.resolve(__dirname,'../index.html'));
++  await page.waitForFunction(()=>window.__ROG_TEST__&&window.__LEAF_DICE_FALL__);
++  await page.locator('[data-route="lobby"]').first().click();
++  await page.locator('#lobby-create').click();
++  await page.locator('#game-mode').selectOption('hotseat');
++  await page.locator('#bot-count').selectOption('3');
++  await page.locator('#start-game').click();
++  await page.waitForSelector('#game:not(.hidden)');
++  // Same dice as battle.jpg on the left (4 and 1), two dice on the right.
++  await page.evaluate(()=>{
++   const T=window.__ROG_TEST__,m=T.getMatch();
++   const teams=[['c_0046','c_0043'],['c_0078','c_0072'],['c_0050'],['c_0081']];
++   m.players.forEach((p,i)=>{p.team=teams[i];p.position=5;});T.setMatch(m);
++   const seq=[.55,0,.99,.99,.4,.4,.4,.4];let k=0;const R=Math.random;
++   Math.random=()=>k<seq.length?seq[k++]:R();
++   T.resolveBattle(m.players[0],m.players[1]);setTimeout(()=>{Math.random=R;},2000);
++  });
++  await page.waitForFunction(()=>document.querySelector('#battle-visual')?.dataset.nativeBattlePodium==='ready'
++   &&document.querySelectorAll('#battle-visual .battle-visual-die').length>=4
++   &&[...document.querySelectorAll('#battle-visual .battle-die-original')].every(i=>i.complete&&i.naturalWidth>0),
++   null,{timeout:8000});
++  await page.waitForTimeout(400);
++  const live=await page.evaluate(()=>{
++   const box=e=>e.getBoundingClientRect();
++   const pod=box(document.querySelector('#battle-visual .leaf-native-winbattle-podiums'));
++   const scale=Math.min(pod.width,pod.height*355/113)/355;
++   const left=pod.left+(pod.width-355*scale)/2,top=pod.bottom-113*scale;
++   const rx=x=>(x-left)/scale,ry=y=>(y-top)/scale;
++   const side=cls=>document.querySelector('#battle-visual .battle-visual-side.'+cls);
++   const pair=cls=>{const d=[...side(cls).querySelectorAll('.battle-visual-die')].map(box);
++    return {centre:rx((d[0].left+d.at(-1).right)/2),top:ry(d[0].top),eyes:[...side(cls).querySelectorAll('.battle-visual-die')].map(e=>Number(e.dataset.eye))};};
++   const score=cls=>{const d=[...side(cls).querySelectorAll('.battle-total-digit')].map(box);
++    return {centre:rx((d[0].left+d.at(-1).right)/2),top:ry(d[0].top),text:side(cls).querySelector('.battle-visual-total').textContent};};
++   return {scale,podium:[pod.left,pod.top,pod.width,pod.height],
++    leftDice:pair('attacker'),rightDice:pair('defender'),leftScore:score('attacker'),rightScore:score('defender'),
++    scaleVar:getComputedStyle(document.getElementById('battle-visual')).getPropertyValue('--leaf-native-podium-scale').trim()};
++  });
++  assert.ok(Number(live.scaleVar)>0,'podium scale variable is published');
++  assert.deepEqual(live.leftDice.eyes,[4,1],'left dice reproduce battle.jpg (4, 1)');
++  const measured={leftDice:live.leftDice.centre,rightDice:live.rightDice.centre,diceTop:live.leftDice.top,
++   leftScore:live.leftScore.centre,rightScore:live.rightScore.centre,scoreTop:live.leftScore.top};
++  const rows=Object.keys(ORIGINAL).map(k=>({anchor:k,original:ORIGINAL[k],live:+measured[k].toFixed(1),
++   delta:+(measured[k]-ORIGINAL[k]).toFixed(1)}));
++  console.table(rows);
++  for(const r of rows)assert.ok(Math.abs(r.delta)<=TOLERANCE,
++   'battle anchor '+r.anchor+' must be within '+TOLERANCE+' source px of battle.jpg: '+JSON.stringify(r));
++  assert.deepEqual(errors,[]);
++  console.log('BATTLE ANCHORS MATCH battle.jpg',JSON.stringify({engine,rows}));
++ }finally{await browser.close();}
++})().catch(e=>{console.error('BATTLE ANCHOR COMPARE FAILED',e.stack||e);process.exit(1);});
+-- 
+2.43.0
+

@@ -1,0 +1,441 @@
+From 5b4ed5cc7c73ab47f5ce7e823e658bd3aa68a673 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sun, 1 Nov 2026 17:37:36 +0900
+Subject: [PATCH 2/5] feat(4leaf): dice and score read one original UI
+ manifest, ready for full extraction
+
+- original/OBS/ui/manifest.js defines window.ORIGINAL_LEAF_UI_FRAMES for
+  1171 (D6) and 1167 (score numerals). This interim version is built from
+  frames already in the repository (1171: 11 of 28, colour-key corrected;
+  1167: 10 of 25). The targeted-extract workflow overwrites it with every
+  frame; no code change is needed afterwards.
+- dice-fall.js: faces = 1171 frames 0-5 (VERIFIED by pip count); tumble =
+  every frame >= 6 in native order (order INFERRED). Old path kept as fallback.
+- game.js battle score: digit d = 1167 frame d. 0-7 VERIFIED by eye; 8 and 9
+  are INFERRED from the sequence (0-7 in order, small '0'=10, '8'=18) and
+  labelled as such when shown.
+- index.html loads the manifest; sw.js precaches it.
+- Dice/score tests read the manifest instead of hard-coded file paths, so
+  they keep checking the real source after the full extraction lands.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_011qw76wwfZ8kaKojeP97FsR
+---
+ apps/4leaf/rog/dice-fall.js                   |  16 +-
+ apps/4leaf/rog/game.js                        |  10 +-
+ apps/4leaf/rog/index.html                     |   4 +-
+ apps/4leaf/rog/original/OBS/ui/manifest.js    | 215 ++++++++++++++++++
+ apps/4leaf/rog/sw.js                          |   2 +-
+ .../tests/actor-direction-attack-score.cjs    |   8 +-
+ apps/4leaf/rog/tests/dice-fall.cjs            |   8 +-
+ .../rog/tests/dice-native-battle-dice.cjs     |   3 +-
+ 8 files changed, 251 insertions(+), 15 deletions(-)
+ create mode 100644 apps/4leaf/rog/original/OBS/ui/manifest.js
+
+diff --git a/apps/4leaf/rog/dice-fall.js b/apps/4leaf/rog/dice-fall.js
+index fd080115..8b0a5f90 100644
+--- a/apps/4leaf/rog/dice-fall.js
++++ b/apps/4leaf/rog/dice-fall.js
+@@ -37,16 +37,26 @@
+  const D6_MEMBER='0171';
+  const D6_TUMBLE=[6,7,10,18,25];
+  function originalD6(){
++  // Preferred: the UI manifest (tools/extract-targeted-original-frames.py)
++  // holding every decoded 1171 frame with written-run alpha. Faces 0-5 are
++  // VERIFIED by pip count; tumble order = native frame order (INFERRED).
++  const ui=window.ORIGINAL_LEAF_UI_FRAMES?.['1171'];
++  if(ui?.frames?.length){
++   const at=i=>ui.frames.find(f=>f.index===i)||null;
++   const faces=[0,1,2,3,4,5].map(at);
++   if(faces.every(Boolean))return {member:ui.member||'1171.obs',faces,
++    tumble:ui.frames.filter(f=>f.index>=6).sort((a,b)=>a.index-b.index),
++    declared:ui.declaredFrames,partial:!!ui.partial};
++  }
+   const member=window.ORIGINAL_LEAF_OBS_FRAMES?.[D6_MEMBER];
+   if(!member?.frames)return null;
+-  // Use the colour-key corrected copies (tools/correct-obs-colorkey-holes.py):
+-  // the legacy export turned the palette-0 pink-red "1" pip into a hole.
++  // Legacy fallback: colour-key corrected copies of the 11 sampled frames.
+   const fix=f=>f&&{...f,url:f.url.replace('/OBS/bulk/1171-','/OBS/d6-colorkey-corrected/1171-')};
+   const at=i=>fix(member.frames.find(f=>f.index===i)||null);
+   const faces=[0,1,2,3,4,5].map(at);
+   if(!faces.every(Boolean))return null;
+   return {member:member.originalMember||'1171.obs',faces,
+-   tumble:D6_TUMBLE.map(at).filter(Boolean)};
++   tumble:D6_TUMBLE.map(at).filter(Boolean),declared:28,partial:true};
+  }
+  const state=()=>({active:active>0,last:last.slice(),lastSides:lastSides.slice(),complete,
+   source:'user-reported fall/bounce; outcome from live game engine',
+diff --git a/apps/4leaf/rog/game.js b/apps/4leaf/rog/game.js
+index a13920ff..9f9ee726 100644
+--- a/apps/4leaf/rog/game.js
++++ b/apps/4leaf/rog/game.js
+@@ -1215,7 +1215,11 @@ function showBattleScene(attacker,defender,attack,defense,attackerPoints,defende
+    // white, red-outlined digits 0..7 of battle.jpg (filed as card 0167).
+    // Digits 8/9 are not extracted yet, so a score containing 8 or 9 keeps
+    // the WEB text. Text stays in the DOM for accessibility and tests.
+-   const numerals=window.ORIGINAL_LEAF_OBS_FRAMES?.['0167']?.frames||[];
++   // Prefer the full UI manifest (every 1167 frame once extracted). Digit d
++   // = large frame d: 0-7 VERIFIED by eye; 8 and 9 INFERRED from the
++   // sequence (0-7 in order, small set 10=='0', 18=='8').
++   const numerals=window.ORIGINAL_LEAF_UI_FRAMES?.['1167']?.frames||
++    window.ORIGINAL_LEAF_OBS_FRAMES?.['0167']?.frames||[];
+    const digits=score.textContent.split('').map(d=>numerals.find(f=>f.index===Number(d)));
+    if(digits.length&&digits.every(Boolean)){
+     const text=document.createElement('span');text.className='battle-total-text';
+@@ -1228,7 +1232,9 @@ function showBattleScene(attacker,defender,attack,defense,attackerPoints,defende
+      score.append(img);
+     }
+     score.classList.add('battle-total-original');
+-    score.dataset.numeralSource='original-OBS-1167.obs/digits-0-7';
++    score.dataset.numeralSource=/[89]/.test(score.querySelector('.battle-total-text').textContent)
++     ?'original-OBS-1167.obs/digits-0-7-verified/8-9-INFERRED'
++     :'original-OBS-1167.obs/digits-0-7';
+    }else{
+     score.dataset.numeralSource=numerals.length?'web-text/digit-8-or-9-not-extracted':'web-text';
+    }
+diff --git a/apps/4leaf/rog/index.html b/apps/4leaf/rog/index.html
+index 1d3f7e83..715ba405 100644
+--- a/apps/4leaf/rog/index.html
++++ b/apps/4leaf/rog/index.html
+@@ -1,4 +1,4 @@
+-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="leaf-central-api" content="https://fourleaf-central-chat-free.onrender.com"><meta name="theme-color" content="#1b1941"><meta name="leaf-revival-version" content="0.86.0-beta.31"><meta name="leaf-restoration" content="partial-original-source-assets"><title>4LEAF Browser · 월드맵과 채팅</title><link rel="icon" href="./icon.svg" type="image/svg+xml"><link rel="manifest" href="./manifest.webmanifest"><link rel="stylesheet" href="./style.css"><link rel="stylesheet" href="./original.css"><link rel="stylesheet" href="./network.css"><link rel="stylesheet" href="./lobby.css"><link rel="stylesheet" href="./game-authentic.css"><link rel="stylesheet" href="./classic-focus.css"><link rel="stylesheet" href="./world-perspective.css"><link rel="stylesheet" href="./original-stage.css"><link rel="stylesheet" href="./original-tiles.css"><link rel="stylesheet" href="./world-social.css"><link rel="stylesheet" href="./world-map-source-moon.css"><link rel="stylesheet" href="./mainframe-native-snapshot.css"><link rel="stylesheet" href="./original-shell-accurate.css"><link rel="stylesheet" href="./mainframe-native-toolbar.css"><link rel="stylesheet" href="./dice-native-stage.css"><link rel="stylesheet" href="./dice-native-map-buttons.css"><link rel="stylesheet" href="./dice-native-room-buttons.css"><link rel="stylesheet" href="./town-native-room-hotspots.css"><link rel="stylesheet" href="./native-chattown-scale.css"><link rel="stylesheet" href="./knighttown-native.css"><link rel="stylesheet" href="./original-chat-input.css"><link rel="stylesheet" href="./chatroom-native-exit.css"><link rel="stylesheet" href="./original-world-notice.css"><link rel="stylesheet" href="./chatroom-native-talkbox.css"><link rel="stylesheet" href="./cardshop-native-controls.css"><link rel="stylesheet" href="./cardshop-original-2003.css"><link rel="stylesheet" href="./dice-native-client-frame.css"><link rel="stylesheet" href="./dice-native-minimap-navigation.css"><link rel="stylesheet" href="./dice-native-minipanel-spr.css"><link rel="stylesheet" href="./chatroom-native-panels.css"><link rel="stylesheet" href="./chatroom-native-ringbtn.css"><link rel="stylesheet" href="./chatroom-native-owner-dialog.css"><link rel="stylesheet" href="./registry-native-avatar-dialog.css"><link rel="stylesheet" href="./chatroom-native-expressions.css"><link rel="stylesheet" href="./chatroom-native-scrollbar.css"><link rel="stylesheet" href="./dice-native-player-portraits.css"><link rel="stylesheet" href="./dice-native-chessmen-hud.css"><link rel="stylesheet" href="./dice-original-selector.css"><link rel="stylesheet" href="./dice-original-chessman-stats.css"><link rel="stylesheet" href="./dice-native-tis-clean.css"><link rel="stylesheet" href="./dice-native-tis-depth.css"><link rel="stylesheet" href="./dice-native-pawn-dmp-depth.css"><link rel="stylesheet" href="./dice-dmp-camera-controls.css"><link rel="stylesheet" href="./dice-source-dmp-terrain-explorer.css"><link rel="stylesheet" href="./dice-ai-autoplay.css"><link rel="stylesheet" href="./dice-native-menu-chrome.css"><link rel="stylesheet" href="./dice-native-dialog-event.css"><link rel="stylesheet" href="./dice-native-battle-podium.css"><link rel="stylesheet" href="./dice-native-battle-dice.css"><link rel="stylesheet" href="./dice-source-roll.css"><link rel="stylesheet" href="./dice-source-native-ui.css"><link rel="stylesheet" href="./dice-fall.css"><link rel="stylesheet" href="./genesis-chessman-actors.css"><link rel="stylesheet" href="./dice-2004-full-frame.css"><link rel="stylesheet" href="./dice-source-tile-pitch.css"><link rel="stylesheet" href="./dice-native-tis-orientation.css"><link rel="stylesheet" href="./dice-d4-source-fallback.css"><link rel="stylesheet" href="./dice-source-chessman-battle.css"><link rel="stylesheet" href="./dice-original-obs.css"><link rel="stylesheet" href="./dice-native-battle-source-spr.css"><link rel="stylesheet" href="./dice-original-battle-unobstructed.css"><link rel="stylesheet" href="./dice-native-source-events.css"><link rel="stylesheet" href="./dice-original-ability-spr.css"><link rel="stylesheet" href="./chatroom-native-2004-frame.css"></head><body>
++<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="leaf-central-api" content="https://fourleaf-central-chat-free.onrender.com"><meta name="theme-color" content="#1b1941"><meta name="leaf-revival-version" content="0.86.0-beta.32"><meta name="leaf-restoration" content="partial-original-source-assets"><title>4LEAF Browser · 월드맵과 채팅</title><link rel="icon" href="./icon.svg" type="image/svg+xml"><link rel="manifest" href="./manifest.webmanifest"><link rel="stylesheet" href="./style.css"><link rel="stylesheet" href="./original.css"><link rel="stylesheet" href="./network.css"><link rel="stylesheet" href="./lobby.css"><link rel="stylesheet" href="./game-authentic.css"><link rel="stylesheet" href="./classic-focus.css"><link rel="stylesheet" href="./world-perspective.css"><link rel="stylesheet" href="./original-stage.css"><link rel="stylesheet" href="./original-tiles.css"><link rel="stylesheet" href="./world-social.css"><link rel="stylesheet" href="./world-map-source-moon.css"><link rel="stylesheet" href="./mainframe-native-snapshot.css"><link rel="stylesheet" href="./original-shell-accurate.css"><link rel="stylesheet" href="./mainframe-native-toolbar.css"><link rel="stylesheet" href="./dice-native-stage.css"><link rel="stylesheet" href="./dice-native-map-buttons.css"><link rel="stylesheet" href="./dice-native-room-buttons.css"><link rel="stylesheet" href="./town-native-room-hotspots.css"><link rel="stylesheet" href="./native-chattown-scale.css"><link rel="stylesheet" href="./knighttown-native.css"><link rel="stylesheet" href="./original-chat-input.css"><link rel="stylesheet" href="./chatroom-native-exit.css"><link rel="stylesheet" href="./original-world-notice.css"><link rel="stylesheet" href="./chatroom-native-talkbox.css"><link rel="stylesheet" href="./cardshop-native-controls.css"><link rel="stylesheet" href="./cardshop-original-2003.css"><link rel="stylesheet" href="./dice-native-client-frame.css"><link rel="stylesheet" href="./dice-native-minimap-navigation.css"><link rel="stylesheet" href="./dice-native-minipanel-spr.css"><link rel="stylesheet" href="./chatroom-native-panels.css"><link rel="stylesheet" href="./chatroom-native-ringbtn.css"><link rel="stylesheet" href="./chatroom-native-owner-dialog.css"><link rel="stylesheet" href="./registry-native-avatar-dialog.css"><link rel="stylesheet" href="./chatroom-native-expressions.css"><link rel="stylesheet" href="./chatroom-native-scrollbar.css"><link rel="stylesheet" href="./dice-native-player-portraits.css"><link rel="stylesheet" href="./dice-native-chessmen-hud.css"><link rel="stylesheet" href="./dice-original-selector.css"><link rel="stylesheet" href="./dice-original-chessman-stats.css"><link rel="stylesheet" href="./dice-native-tis-clean.css"><link rel="stylesheet" href="./dice-native-tis-depth.css"><link rel="stylesheet" href="./dice-native-pawn-dmp-depth.css"><link rel="stylesheet" href="./dice-dmp-camera-controls.css"><link rel="stylesheet" href="./dice-source-dmp-terrain-explorer.css"><link rel="stylesheet" href="./dice-ai-autoplay.css"><link rel="stylesheet" href="./dice-native-menu-chrome.css"><link rel="stylesheet" href="./dice-native-dialog-event.css"><link rel="stylesheet" href="./dice-native-battle-podium.css"><link rel="stylesheet" href="./dice-native-battle-dice.css"><link rel="stylesheet" href="./dice-source-roll.css"><link rel="stylesheet" href="./dice-source-native-ui.css"><link rel="stylesheet" href="./dice-fall.css"><link rel="stylesheet" href="./genesis-chessman-actors.css"><link rel="stylesheet" href="./dice-2004-full-frame.css"><link rel="stylesheet" href="./dice-source-tile-pitch.css"><link rel="stylesheet" href="./dice-native-tis-orientation.css"><link rel="stylesheet" href="./dice-d4-source-fallback.css"><link rel="stylesheet" href="./dice-source-chessman-battle.css"><link rel="stylesheet" href="./dice-original-obs.css"><link rel="stylesheet" href="./dice-native-battle-source-spr.css"><link rel="stylesheet" href="./dice-original-battle-unobstructed.css"><link rel="stylesheet" href="./dice-native-source-events.css"><link rel="stylesheet" href="./dice-original-ability-spr.css"><link rel="stylesheet" href="./chatroom-native-2004-frame.css"></head><body>
+ <div id="app" role="application" aria-label="4LEAF 브라우저">
+ <header class="titlebar"><div class="win-logo">♣</div><b>4LEAF Browser</b><small>Ver 0.96d · World & Chat</small><span class="top-space"></span><div class="window-buttons"><span>─</span><span>□</span><span>×</span></div></header>
+ <nav class="toolbar" aria-label="원본 MainFrame 도구모음 · 웹 복원 이동"><button data-route="sky" title="월드맵" aria-label="월드맵으로 이동" data-native-icon-row="0">⌂<span>HOME</span></button><button data-route="city" title="켈티카의 거리" aria-label="켈티카 거리로 이동" data-native-icon-row="2">♜<span>STREET</span></button><button data-route="rooms" title="채팅방" aria-label="하이아칸 채팅방으로 이동" data-native-icon-row="3">♧<span>CHAT</span></button><button data-route="shop" title="매직카덴" aria-label="매직카덴 상점으로 이동" data-native-icon-row="4">♠<span>SHOP</span></button><button data-route="lobby" title="주사위의 잔영" aria-label="주사위의 잔영으로 이동" data-native-icon-row="1">⚄<span>DICE</span></button><div class="tool-spacer"></div><span id="where">포리프 월드맵</span><button id="rename" class="smalltool" title="닉네임 변경" aria-label="닉네임 변경" data-native-icon-row="6">✎</button><button id="audio" class="smalltool" title="효과음" aria-label="효과음 켜기 또는 끄기" data-native-icon-row="5">♪</button><button id="help" class="smalltool" title="게임 안내" aria-label="게임 안내" data-native-icon-row="7">?</button></nav>
+@@ -22,4 +22,4 @@
+ <div class="modal hidden" id="modal"><div class="modal-window"><div class="modal-title" id="modal-title">4LEAF</div><div id="modal-content"></div><div class="modal-buttons" id="modal-buttons"></div></div></div>
+ </div><script src="./original/maps.js"></script><script src="./original/tiles.js"></script><script src="./original/chessmen.js"></script><script src="./original/Tiles/art.js"></script><script src="./board-camera.js"></script><script src="./dice-native-tis-alpha.js"></script><script src="./dice-native-source-events.js"></script>
+ <script src="./dice-native-minipanel-spr.js"></script>
+-<script src="./dice-original-ability-spr.js"></script><script src="./dice-fall.js"></script><script src="./original/OBS/animation-manifest.js"></script><script src="./original/OBS/animation-extra.js"></script><script src="./registry-native-chroma.js"></script><script src="./genesis-chessman-actors.js"></script><script src="./game.js"></script><script src="./dice-source-dmp-terrain-explorer.js"></script><script src="./network.js"></script><script src="./lobby-ui.js"></script><script src="./dice-native-stage.js"></script><script src="./dice-native-map-buttons.js"></script><script src="./dice-native-room-buttons.js"></script><script src="./mainframe-native-snapshot.js"></script><script src="./knighttown-native.js"></script><script src="./world-map.js"></script><script src="./street-world.js"></script><script src="./shop-native.js"></script><script src="./cardshop-native-controls.js"></script><script src="./central-client.js"></script><script src="./chatroom-native-owner-dialog.js"></script><script src="./registry-native-avatar-dialog.js"></script><script src="./chatroom-native-expressions.js"></script><script src="./social-chat.js"></script><script src="./chatroom-native-exit.js"></script><script src="./chatroom-native-talkbox.js"></script><script src="./chatroom-native-panels.js"></script><script src="./chatroom-native-scrollbar.js"></script><script src="./dice-native-client-frame.js"></script><script src="./dice-source-roll.js"></script><script src="./dice-source-native-chat-scroll.js"></script><script src="./pwa-runtime.js"></script></body></html>
+\ No newline at end of file
++<script src="./dice-original-ability-spr.js"></script><script src="./dice-fall.js"></script><script src="./original/OBS/animation-manifest.js"></script><script src="./original/OBS/animation-extra.js"></script><script src="./original/OBS/ui/manifest.js"></script><script src="./registry-native-chroma.js"></script><script src="./genesis-chessman-actors.js"></script><script src="./game.js"></script><script src="./dice-source-dmp-terrain-explorer.js"></script><script src="./network.js"></script><script src="./lobby-ui.js"></script><script src="./dice-native-stage.js"></script><script src="./dice-native-map-buttons.js"></script><script src="./dice-native-room-buttons.js"></script><script src="./mainframe-native-snapshot.js"></script><script src="./knighttown-native.js"></script><script src="./world-map.js"></script><script src="./street-world.js"></script><script src="./shop-native.js"></script><script src="./cardshop-native-controls.js"></script><script src="./central-client.js"></script><script src="./chatroom-native-owner-dialog.js"></script><script src="./registry-native-avatar-dialog.js"></script><script src="./chatroom-native-expressions.js"></script><script src="./social-chat.js"></script><script src="./chatroom-native-exit.js"></script><script src="./chatroom-native-talkbox.js"></script><script src="./chatroom-native-panels.js"></script><script src="./chatroom-native-scrollbar.js"></script><script src="./dice-native-client-frame.js"></script><script src="./dice-source-roll.js"></script><script src="./dice-source-native-chat-scroll.js"></script><script src="./pwa-runtime.js"></script></body></html>
+\ No newline at end of file
+diff --git a/apps/4leaf/rog/original/OBS/ui/manifest.js b/apps/4leaf/rog/original/OBS/ui/manifest.js
+new file mode 100644
+index 00000000..413fb4a6
+--- /dev/null
++++ b/apps/4leaf/rog/original/OBS/ui/manifest.js
+@@ -0,0 +1,215 @@
++/* Original Dice/OBS.pak UI members. INTERIM: built from frames already in the
++ * repository (11 of 28 for 1171, colour-key corrected; 10 of 25 for 1167).
++ * The workflow rog-original-targeted-extract.yml overwrites this file with
++ * every frame decoded from the SHA1-verified 2002 client. */
++window.ORIGINAL_LEAF_UI_FRAMES={
++ "1167": {
++  "declaredFrames": 25,
++  "frames": [
++   {
++    "height": 65,
++    "index": 0,
++    "originX": -31,
++    "originY": -32,
++    "sha256": "728d95dae1224450cc4ea48b620cf7707a0d1a445ef7e332b99942786070a350",
++    "url": "./original/OBS/bulk/1167-00.png",
++    "width": 63
++   },
++   {
++    "height": 65,
++    "index": 1,
++    "originX": -22,
++    "originY": -32,
++    "sha256": "66deac9da97f8148abae8a7432da422fcd1278b17f528d61f5f3911024123762",
++    "url": "./original/OBS/bulk/1167-01.png",
++    "width": 44
++   },
++   {
++    "height": 65,
++    "index": 2,
++    "originX": -29,
++    "originY": -32,
++    "sha256": "288a34e5e900e5acc1cf80d397bf4663bcf88635f5d90de58d6094cf3dcb52a4",
++    "url": "./original/OBS/bulk/1167-02.png",
++    "width": 58
++   },
++   {
++    "height": 65,
++    "index": 3,
++    "originX": -25,
++    "originY": -32,
++    "sha256": "e660de09ca681091bc8f60fe7cc5b04994995272ddcfe071786fb3d2ae8890ad",
++    "url": "./original/OBS/bulk/1167-03.png",
++    "width": 50
++   },
++   {
++    "height": 65,
++    "index": 4,
++    "originX": -31,
++    "originY": -32,
++    "sha256": "8cb30792588acff9acc966c517b268d15e8b836bb1167bb7132a3aa5b95ec4bf",
++    "url": "./original/OBS/bulk/1167-04.png",
++    "width": 62
++   },
++   {
++    "height": 65,
++    "index": 5,
++    "originX": -26,
++    "originY": -32,
++    "sha256": "98e9eedff97d8a81567af3c6833d062e47ef516f738e428036022ce54bed26ec",
++    "url": "./original/OBS/bulk/1167-05.png",
++    "width": 52
++   },
++   {
++    "height": 66,
++    "index": 6,
++    "originX": -31,
++    "originY": -33,
++    "sha256": "2f4ccd37dac177ec932ea7f973c2fa3440bb72d4a51df0215979c8debaf52e11",
++    "url": "./original/OBS/bulk/1167-06.png",
++    "width": 62
++   },
++   {
++    "height": 65,
++    "index": 7,
++    "originX": -28,
++    "originY": -32,
++    "sha256": "906e29d99cda5e433b7e92c210c24152a85cf7c10b2c9defa51575f07a4d1f1f",
++    "url": "./original/OBS/bulk/1167-07.png",
++    "width": 57
++   },
++   {
++    "height": 30,
++    "index": 10,
++    "originX": -14,
++    "originY": -15,
++    "sha256": "f7095d1cf672492974328f0126109264619b4e8b59857f9e27152df9b20f2151",
++    "url": "./original/OBS/bulk/1167-10.png",
++    "width": 29
++   },
++   {
++    "height": 31,
++    "index": 18,
++    "originX": -13,
++    "originY": -15,
++    "sha256": "d61d7afb5ec80752978dc7b922fe3367e0771e3e783ad9215a08e0c73f29ca27",
++    "url": "./original/OBS/bulk/1167-18.png",
++    "width": 27
++   }
++  ],
++  "member": "1167.obs",
++  "pak": "OBS.pak",
++  "partial": true,
++  "role": "score-numerals",
++  "sourceSHA256": "c7619c55e0588a52f7fba6d2c631755e346f61ab08f90e1fde665408f2face26"
++ },
++ "1171": {
++  "declaredFrames": 28,
++  "frames": [
++   {
++    "height": 49,
++    "index": 0,
++    "originX": -23,
++    "originY": -24,
++    "sha256": "481894093f4d6ee9b0331dea26615c5c5b4111efc27a1afb5bf235001df6dfda",
++    "url": "./original/OBS/d6-colorkey-corrected/1171-00.png",
++    "width": 46
++   },
++   {
++    "height": 49,
++    "index": 1,
++    "originX": -23,
++    "originY": -24,
++    "sha256": "9ff1ccb06f15a50ac182485bf7ce16704e362e9ee6e47571574d8941f5c6de3d",
++    "url": "./original/OBS/d6-colorkey-corrected/1171-01.png",
++    "width": 46
++   },
++   {
++    "height": 49,
++    "index": 2,
++    "originX": -23,
++    "originY": -24,
++    "sha256": "befcc1e0e17487b3c41f927848db487bc06e3b6a3caa8d8cf5faf749d9d2ef77",
++    "url": "./original/OBS/d6-colorkey-corrected/1171-02.png",
++    "width": 46
++   },
++   {
++    "height": 49,
++    "index": 3,
++    "originX": -23,
++    "originY": -24,
++    "sha256": "e7ef724526c61ba9fbde7a35e9ed2cbc4b0191c14ae5e7f06508a33c1c5c84e8",
++    "url": "./original/OBS/d6-colorkey-corrected/1171-03.png",
++    "width": 46
++   },
++   {
++    "height": 49,
++    "index": 4,
++    "originX": -23,
++    "originY": -24,
++    "sha256": "da3b8179d39ff45b27cc16eaa516cffa6842f7963421e62a1a4cfee519682b15",
++    "url": "./original/OBS/d6-colorkey-corrected/1171-04.png",
++    "width": 46
++   },
++   {
++    "height": 49,
++    "index": 5,
++    "originX": -23,
++    "originY": -24,
++    "sha256": "9e2861ec68fdcc0e26b0536c5113acf409d194f31f778c0e4a9d77d1595d9f0f",
++    "url": "./original/OBS/d6-colorkey-corrected/1171-05.png",
++    "width": 46
++   },
++   {
++    "height": 71,
++    "index": 6,
++    "originX": -30,
++    "originY": -35,
++    "sha256": "cbac455a45fd06efd27f9f7894b2e5314e5bd91b7e10d40dfe22e9f17aa3fa98",
++    "url": "./original/OBS/d6-colorkey-corrected/1171-06.png",
++    "width": 60
++   },
++   {
++    "height": 71,
++    "index": 7,
++    "originX": -30,
++    "originY": -35,
++    "sha256": "652c412eabebf6c91459bc14af34eea7dfba1d2848673cb0a95181b172e4bcec",
++    "url": "./original/OBS/d6-colorkey-corrected/1171-07.png",
++    "width": 61
++   },
++   {
++    "height": 71,
++    "index": 10,
++    "originX": -30,
++    "originY": -35,
++    "sha256": "e2a63fdaacebfe08924826013e8cd57c56aff970cfe600b50c75eec1aabf11c3",
++    "url": "./original/OBS/d6-colorkey-corrected/1171-10.png",
++    "width": 61
++   },
++   {
++    "height": 71,
++    "index": 18,
++    "originX": -30,
++    "originY": -35,
++    "sha256": "e0f42bf4dcb94fe42e15634a771e93f0dbe9e490587edf1c1a4315fa63293d44",
++    "url": "./original/OBS/d6-colorkey-corrected/1171-18.png",
++    "width": 60
++   },
++   {
++    "height": 70,
++    "index": 25,
++    "originX": -30,
++    "originY": -35,
++    "sha256": "47904d14799b9b820a90c019015fe864840e493c0e591c0ddeb8e8bc4af2ed7d",
++    "url": "./original/OBS/d6-colorkey-corrected/1171-25.png",
++    "width": 60
++   }
++  ],
++  "member": "1171.obs",
++  "pak": "OBS.pak",
++  "partial": true,
++  "role": "d6",
++  "sourceSHA256": "d49a20290f5953f5e09d656686e2eb6305bd8c808d1974452381556261d497ff"
++ }
++};
+diff --git a/apps/4leaf/rog/sw.js b/apps/4leaf/rog/sw.js
+index 4304860d..0a6ea0cc 100644
+--- a/apps/4leaf/rog/sw.js
++++ b/apps/4leaf/rog/sw.js
+@@ -9,7 +9,7 @@ const NATIVE_OBS_FRONT_FILES='1040-26 1040-27 1040-28 1040-29 1043-26 1043-27 10
+ const NATIVE_TIS_FILES='0000 0001 0006 0007 0008 0009 0010 0011 0012 0013 0014 0015 0016 0017 0018 0019 0020 0021 0022 0023 0024 0025 0026 0027 0028 0029 0030 0031 0035 0041 0043 0046'.split(' ');
+ const CORE=['./','./index.html','./app-version.json','./pwa-runtime.js','./manifest.webmanifest','./icon.svg','./game.js','./style.css','./world-perspective.css','./original-tiles.css','./original.css','./lobby.css','./game-authentic.css','./network.css','./network.js','./original-shell-accurate.css','./mainframe-native-toolbar.css','./original/MainFrame/toolbarbtn.png','./original/MainFrame/pannel.png','./shop-native.js','./cardshop-native-controls.css','./cardshop-original-2003.css','./cardshop-native-controls.js','./original/CardShop/cardshopbutton.png','./dice-native-stage.js','./dice-native-stage.css','./dice-native-map-buttons.css','./dice-native-map-buttons.js','./dice-native-room-buttons.js','./dice-native-room-buttons.css','./original/Room/roombutton.png','./original/Map/mapbutton.png','./original/Map/maplist.png','./town-native-room-hotspots.css','./native-chattown-scale.css','./knighttown-native.js','./knighttown-native.css','./original/KnightTown/knightback.png','./original/KnightTown/sea01.png','./original/KnightTown/sea02.png','./original/KnightTown/sea03.png','./original/KnightTown/snow01.png','./original/KnightTown/plain01.png','./original/KnightTown/plain02.png','./original-chat-input.css','./chatroom-native-exit.css','./chatroom-native-exit.js','./chatroom-native-talkbox.css','./chatroom-native-talkbox.js','./dice-native-player-portraits.css','./original/IMG/avatarback.png','./dice-native-chessmen-hud.css','./dice-original-selector.css','./original/SourceSPRExtra/selector-00.png','./original/SourceSPRExtra/selector-01.png','./original/SourceSPRExtra/selector-06.png','./dice-original-chessman-stats.css','./dice-native-menu-chrome.css','./dice-native-dialog-event.css','./original/IMG/dialog.png','./original/IMG/eventmsgbox.png','./original/IMG/menu.png','./original/MainFrame/toolbarbtn.png','./board-camera.js','./dice-dmp-camera-controls.css','./dice-source-dmp-terrain-explorer.js','./dice-source-dmp-terrain-explorer.css','./dice-native-tis-clean.css','./dice-native-battle-podium.css','./dice-native-battle-dice.css','./dice-2004-full-frame.css','./dice-source-roll.css','./dice-source-roll.js','./dice-source-native-ui.css','./dice-source-native-chat-scroll.js','./original/IMG/okcancelbut.png','./original/IMG/scrollbutton.png','./original/IMG/stats.png','./dice-fall.js','./dice-fall.css','./genesis-chessman-actors.js','./registry-native-chroma.js','./genesis-chessman-actors.css','./original/IMG/selector.png','./original/CardData/chm_12.png','./original/CardData/chm_33.png','./original/CardData/chm_8.png','./chatroom-native-panels.css','./chatroom-native-2004-frame.css','./chatroom-native-ringbtn.css','./chatroom-native-scrollbar.css','./chatroom-native-scrollbar.js','./original/ChatRoom/scrollbar.png','./original/ChatRoom/ringbtn.png','./chatroom-native-panels.js','./chatroom-native-owner-dialog.js','./chatroom-native-owner-dialog.css','./registry-native-avatar-dialog.js','./registry-native-avatar-dialog.css','./original/Registry/avatardialog1.png','./original/Registry/avatardialog2.png','./original/Registry/avatardialog3.png','./chatroom-native-expressions.js','./chatroom-native-expressions.css','./original/ChatRoom/expdialogbtn.png','./original/ChatRoom/ownerdialog.png','./original/ChatRoom/talkbox.png','./original/ChatRoom/exitbtn.png','./original-world-notice.css','./original/WorldMap/notice.png','./original/ChatRoom/chatbaredit.png','./original/Region/1234.png','./original/Region/regionback.png','./original/Map/mapback.png','./original/Room/roomback.png','./original/MainFrame/title.png','./original/MainFrame/borderbtn.png','./original/CardShop/cardshopback.png','./central-client.js','./world-map.js','./world-social.css','./world-map-source-moon.css','./social-chat.js','./lobby-ui.js','./original/maps.js','./original/tiles.js','./original/chessmen.js','./original/Gif/d1lobby.png','./original/Gif/d1waitroom.png','./original/WorldMap/worldmapback.png','./original/CardShop/cardshopback.png','./original/IMG/bgtile.png','./dice-native-client-frame.css','./dice-native-minimap-navigation.css','./dice-native-client-frame.js','./original/IMG/chatwnd.png','./original/IMG/abilitybar.png','./original/IMG/topbar.png','./original/IMG/minimap.png','./original/WorldMap/mainstreet.png','./original/WorldMap/knights.png','./original/WorldMap/northchatrgn.png','./original/WorldMap/southchatrgn.png','./original/WorldMap/dice.png','./original/WorldMap/m4leaf.png','./original/ChatTown/northback.png','./original/ChatTown/southback.png','./original/ChatTown/plainbtn.png','./original/ChatTown/seabtn.png','./original/ChatTown/snowbtn.png','./original/ChatRoom/room0.png','./original/ChatRoom/room1.png','./original/ChatRoom/room2.png','./original/ChatRoom/room3.png','./original/ChatRoom/room4.png','./original/ChatRoom/room5.png','./original/ChatRoom/room3t.png','./original/ChatRoom/room4t.png','./original/ChatRoom/room5t.png','./original/Registry/sava00.png','./original/Registry/sava82.png','./original/Registry/sava06.png','./original/Registry/sava01.png','./original/Registry/sava85.png','./original/Registry/sava02.png','./original/Registry/sava84.png','./original/Registry/sava04.png','./original/Registry/sava03.png','./original/Registry/sava83.png','./original/Registry/sava05.png','./original/Registry/sava86.png','./mainframe-native-snapshot.js','./mainframe-native-snapshot.css','./original/MainFrame/snaplogo.png','./original/MainFrame/snapnumber.png','./original/MainFrame/wallpaper.png','./dice-native-tis-depth.css','./dice-native-tis-orientation.css','./dice-ai-autoplay.css','./dice-native-pawn-dmp-depth.css','./dice-native-tis-alpha.js'].concat(
+  NATIVE_TIS_FILES.map(name=>'./original/Tiles/'+name+'.png')
+-).concat(['./original/OBS/animation-manifest.js','./original/OBS/animation-extra.js','./dice-original-obs.css','./dice-native-battle-source-spr.css','./dice-native-source-events.js','./dice-native-minipanel-spr.js','./dice-native-minipanel-spr.css','./dice-original-ability-spr.js','./dice-original-ability-spr.css','./dice-native-source-events.css',
++).concat(['./original/OBS/animation-manifest.js','./original/OBS/animation-extra.js','./original/OBS/ui/manifest.js','./dice-original-obs.css','./dice-native-battle-source-spr.css','./dice-native-source-events.js','./dice-native-minipanel-spr.js','./dice-native-minipanel-spr.css','./dice-original-ability-spr.js','./dice-original-ability-spr.css','./dice-native-source-events.css',
+  './dice-source-tile-pitch.css','./dice-d4-source-fallback.css',
+  './dice-source-chessman-battle.css',
+  ...['1042-00','1042-01','1042-02','1042-03','1042-10','1042-18','1042-25','1042-30',
+diff --git a/apps/4leaf/rog/tests/actor-direction-attack-score.cjs b/apps/4leaf/rog/tests/actor-direction-attack-score.cjs
+index 4f5ddb39..2993c4b9 100644
+--- a/apps/4leaf/rog/tests/actor-direction-attack-score.cjs
++++ b/apps/4leaf/rog/tests/actor-direction-attack-score.cjs
+@@ -90,16 +90,18 @@ const {chromium,webkit}=require('playwright');
+    await new Promise(r=>setTimeout(r,1300));
+    return [...document.querySelectorAll('#battle-visual .battle-visual-total')].map(el=>({
+     text:el.textContent,source:el.dataset.numeralSource,
++    expect:el.querySelector('.battle-total-text')?.textContent.split('').map(d=>(window.ORIGINAL_LEAF_UI_FRAMES?.['1167']?.frames||[]).find(f=>f.index===Number(d))?.url||null),
+     digits:[...el.querySelectorAll('img.battle-total-digit')].map(i=>({src:i.getAttribute('src'),ok:i.complete&&i.naturalHeight>=65}))}));
+   });
+   assert.equal(score.length,2,'two battle scores');
+   for(const s of score){
+    assert.match(s.text,/^\d\d$/);
+-   if(/[89]/.test(s.text)){
++   if(s.expect===undefined||s.expect.some(u=>!u)){
++    // digit 8/9 frame not in the manifest yet -> labelled WEB text
+     assert.equal(s.source,'web-text/digit-8-or-9-not-extracted');assert.equal(s.digits.length,0);
+    }else{
+-    assert.equal(s.source,'original-OBS-1167.obs/digits-0-7');
+-    assert.deepEqual(s.digits.map(d=>d.src),s.text.split('').map(d=>'./original/OBS/bulk/1167-0'+d+'.png'));
++    assert.equal(s.source,/[89]/.test(s.text)?'original-OBS-1167.obs/digits-0-7-verified/8-9-INFERRED':'original-OBS-1167.obs/digits-0-7');
++    assert.deepEqual(s.digits.map(d=>d.src),s.expect,'numerals come from the 1167 UI manifest');
+     assert.ok(s.digits.every(d=>d.ok),'original numerals loaded');
+    }
+   }
+diff --git a/apps/4leaf/rog/tests/dice-fall.cjs b/apps/4leaf/rog/tests/dice-fall.cjs
+index b6413c87..7c0fa847 100644
+--- a/apps/4leaf/rog/tests/dice-fall.cjs
++++ b/apps/4leaf/rog/tests/dice-fall.cjs
+@@ -43,6 +43,7 @@ const {chromium,webkit}=require('playwright');
+    overlay:getComputedStyle(document.querySelector('#leaf-dice-fall-layer')).pointerEvents,
+    pos:document.querySelector('#leaf-dice-fall-layer').getBoundingClientRect().toJSON(),
+    original:document.querySelectorAll('#board-nodes>.tile').length,
++   tumbleUrls:(window.ORIGINAL_LEAF_UI_FRAMES?.['1171']?.frames||[]).filter(f=>f.index>=6).map(f=>f.url),
+    sprites:[...document.querySelectorAll('#leaf-dice-fall-layer .leaf-fall-piece[data-sides="6"]')].map(n=>({
+     src:n.querySelector('.leaf-fall-original-d6')?.getAttribute('src')||null,
+     original:n.classList.contains('leaf-fall-original'),faceSource:n.dataset.faceSource})),
+@@ -76,7 +77,7 @@ const {chromium,webkit}=require('playwright');
+   assert.equal(mid.count,0,'game dice result MUST NOT appear before bounce and landing');
+   // D6 in flight: ORIGINAL 1171.obs tumble frames (partial set 6,7,10,18,25).
+   assert.ok(mid.sprites.every(x=>x.original&&
+-    /\/OBS\/d6-colorkey-corrected\/1171-(06|07|10|18|25)\.png$/.test(x.src||'')&&
++    mid.tumbleUrls.length>=5&&mid.tumbleUrls.includes(x.src)&&
+     x.faceSource==='original-OBS-1171.obs/face-VERIFIED-by-pip-count'),
+    'airborne D6 paints original tumble frames: '+JSON.stringify(mid.sprites));
+   assert.equal(mid.disabled,true,'other player cannot double-roll during drop');
+@@ -193,10 +194,11 @@ const {chromium,webkit}=require('playwright');
+        .transformPoint(new DOMPoint(0,0,1,0)).z.toFixed(3))};
+     });
+     const sprite=document.querySelector('#leaf-dice-fall-layer .leaf-fall-original-d6');
++    const expectedFace=window.ORIGINAL_LEAF_UI_FRAMES['1171'].frames.find(f=>f.index===eye-1).url;
+     const landedSprite={src:sprite?.getAttribute('src'),frame:sprite?.dataset.frame,
+      cubeOpacity:getComputedStyle(node).opacity};
+     const realValues=await pending;
+-    return {landedSprite,result:realValues,expected:window.__LEAF_DICE_FALL__.faces[eye],
++    return {landedSprite,expectedFace,result:realValues,expected:window.__LEAF_DICE_FALL__.faces[eye],
+      coordinates:layout,columns:xs.length,rows:ys.length,normals,
+      originalMesh:window.__LEAF_DICE_FALL__.getState().originalFramesRecovered};
+    },eye);
+@@ -213,7 +215,7 @@ const {chromium,webkit}=require('playwright');
+     'result '+eye+' must show correct geometrical eyes, not auto-packed pips');
+    assert.equal(proof.normals[eye-1].towardsCamera,1,
+     'actual 3D result-face normal must face front for '+eye+': '+JSON.stringify(proof.normals));
+-   assert.equal(proof.landedSprite.src,'./original/OBS/d6-colorkey-corrected/1171-0'+(eye-1)+'.png',
++   assert.equal(proof.landedSprite.src,proof.expectedFace,
+     'landed D6 shows the original face for '+eye);
+    assert.equal(proof.landedSprite.cubeOpacity,'0','WEB cube is only a hidden fallback');
+    assert.equal(proof.originalMesh,false,
+diff --git a/apps/4leaf/rog/tests/dice-native-battle-dice.cjs b/apps/4leaf/rog/tests/dice-native-battle-dice.cjs
+index b47e0441..6aae25ba 100644
+--- a/apps/4leaf/rog/tests/dice-native-battle-dice.cjs
++++ b/apps/4leaf/rog/tests/dice-native-battle-dice.cjs
+@@ -36,6 +36,7 @@ const cells={
+       background:getComputedStyle(p).backgroundColor
+      })),
+      original:el.querySelector('img.battle-die-original')?.getAttribute('src')||null,
++     expected:(window.ORIGINAL_LEAF_UI_FRAMES?.['1171']?.frames||[]).find(f=>f.index===Number(el.dataset.eye)-1)?.url||'manifest-missing',
+      originalVisible:(()=>{const i=el.querySelector('img.battle-die-original');return !!i&&getComputedStyle(i).display!=='none'&&i.complete&&i.naturalWidth===46&&i.naturalHeight===49})(),
+      frame:el.dataset.originalFrame,
+      pipsHidden:[...el.querySelectorAll('.battle-die-pip')].every(p=>getComputedStyle(p).visibility==='hidden'),
+@@ -71,7 +72,7 @@ const cells={
+     assert.equal(die.label,'주사위 '+die.eye+'눈','accessible text matches actual roll');
+     assert.equal(die.faceText,'','do not overlay system font Unicode die characters');
+     assert.equal(die.frame,String(die.eye-1),'face frame index = pips - 1');
+-    assert.equal(die.original,'./original/OBS/d6-colorkey-corrected/1171-0'+(die.eye-1)+'.png');
++    assert.equal(die.original,die.expected,'face comes from the original 1171 UI manifest');
+     assert.ok(die.originalVisible,'original 46x49 face is painted: '+JSON.stringify(die));
+     assert.ok(die.pipsHidden,'fallback pips must not paint over the original face');
+     assert.deepEqual(die.pips.map(x=>x.cell),cells[die.eye],'fallback keeps exact 3x3 pip arrangement');
+-- 
+2.43.0
+
