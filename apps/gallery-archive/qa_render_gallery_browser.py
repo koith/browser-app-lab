@@ -41,12 +41,12 @@ def exercise(browser,model,branch_html=False):
         page.wait_for_function("""()=>typeof GalleryPhotoQuality!=='undefined'
             &&typeof GalleryPhotoQuality.preferred==='function'
             &&!!document.querySelector('script[src^="image-quality.js"]')""",timeout=30000)
+        page.wait_for_function("""limit=>typeof stored!=='undefined'&&stored.reduce((n,a)=>n+a.images.length,0)>=limit&&document.querySelectorAll('#albumgrid .album').length>0&&document.querySelector('#inventory')?.textContent.includes('실제 저장본')""",arg=MIN[model],timeout=90000)
         if model=="yui":
             assert page.evaluate("""()=>['sweetbox','bcut','milkybomb'].every(id=>{
                 const group=publisherRegistry.publishers.find(x=>x.id===id);
                 return group && YuiPublishers.logo(group)===null;
             })"""),"Unverified publisher logos reappeared"
-        page.wait_for_function("""limit=>typeof stored!=='undefined'&&stored.reduce((n,a)=>n+a.images.length,0)>=limit&&document.querySelectorAll('#albumgrid .album').length>0&&document.querySelector('#inventory')?.textContent.includes('실제 저장본')""",arg=MIN[model],timeout=90000)
         stats=page.evaluate("""()=>({photos:stored.reduce((n,a)=>n+a.images.length,0),owner:stored.reduce((n,a)=>n+a.images.filter(p=>p.ownerAlbum).length,0),works:document.querySelectorAll('#albumgrid .album').length})""")
         assert not errors and not bad,(model,"script or asset failures",errors,bad)
         for album_id in WORKS[model]:
