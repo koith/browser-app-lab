@@ -80,6 +80,7 @@ def persist_new_photos(stage, previous, remote, model, uploader=run,
     by_id={a['id']:a for a in new_catalog['albums']}
     attempts=0;accepted=[];failed=[];statuses=Counter()
     held_local=[]
+    consecutive_provider_rejections=0
     for album in current['albums']:
         aid=album['id']
         old_slots={p['number']:p for p in existing.get(aid,{}).get('images',[])}
@@ -104,6 +105,12 @@ def persist_new_photos(stage, previous, remote, model, uploader=run,
             preview=_verified_local(stage,photo['preview'],photo['preview_sha256'],
                                     photo['preview_bytes'],ext='webp')
             outcomes=[]
+            if consecutive_provider_rejections>=3:
+                failed.append({'id':aid,'number':photo['number'],
+                               'reason':'provider_writes_paused_after_three_rejections'})
+                held_local.extend([original,preview])
+                statuses['provider_write_circuit_open']+=1
+                continue
             for local,field,hashkey,byteskey in (
                     (original,'key','sha256','bytes'),
                     (preview,'preview','preview_sha256','preview_bytes')):
@@ -127,10 +134,15 @@ def persist_new_photos(stage, previous, remote, model, uploader=run,
                 current_album['images'].sort(key=lambda p:p['number'])
                 accepted.append({'id':aid,'number':row['number'],
                                  'sha256':row['sha256']})
+                consecutive_provider_rejections=0
             else:
                 failed.append({'id':aid,'number':photo['number'],
                                'reason':outcomes[-1] if outcomes else 'missing_pair'})
                 held_local.extend([original,preview])
+                if 'upload_rejected' in outcomes:
+                    consecutive_provider_rejections+=1
+                else:
+                    consecutive_provider_rejections=0
     # Exclude failed local files from the subsequent strict --only-staged read.
     # They were fully validated locally, but still CANNOT reach the owner index.
     for local in held_local:
