@@ -13,4 +13,5 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
+          gh api -X POST "repos/$GITHUB_REPOSITORY/deployments/7470734689/statuses" -f state=inactive -f description='Superseded duplicate deployment record' -F auto_inactive=false
           gh api "repos/$GITHUB_REPOSITORY/deployments/7470734689/statuses" --jq '.[0].state'
