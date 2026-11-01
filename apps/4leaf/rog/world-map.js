@@ -63,6 +63,34 @@
    attempt();
    return canvas;
  }
+ // Source-pixel hit gating: unlike the old rectangular web hotspots, only
+ // pixels surviving the original WorldMap green-key conversion can activate
+ // native pointer navigation. The 2002 executable's own hit testing is still
+ // UNVERIFIED; retain keyboard and asset-load fallback for accessibility.
+ function nativePointerSourceHit(event,sprite,button){
+   if(!event?.detail)return true; // keyboard/programmatic activation
+   if(!sprite||sprite.dataset.ready!=='true')return true;
+   const rect=sprite.getBoundingClientRect();
+   if(!(rect.width>0&&rect.height>0))return true;
+   const x=Math.floor((event.clientX-rect.left)*sprite.width/rect.width);
+   const y=Math.floor((event.clientY-rect.top)*sprite.height/rect.height);
+   button.dataset.nativeSourcePoint=x+','+y;
+   if(x<0||y<0||x>=sprite.width||y>=sprite.height){
+     button.dataset.nativeSourceHit='false';
+     return false;
+   }
+   try{
+     const alpha=sprite.getContext('2d',{willReadFrequently:true}).getImageData(x,y,1,1).data[3];
+     const allowed=alpha>=16;
+     button.dataset.nativeSourceHit=String(allowed);
+     button.dataset.nativeSourceAlpha=String(alpha);
+     return allowed;
+   }catch(error){
+     // Canvas security/taint failure must not make a world route unreachable.
+     button.dataset.nativeSourceHit='fallback';
+     return true;
+   }
+ }
  function renderLayer(regionId,index){
    const layer=ref.layers.get(regionId);if(!layer)return;
    const ctx=layer.canvas.getContext('2d');ctx.clearRect(0,0,layer.canvas.width,layer.canvas.height);
@@ -203,7 +231,9 @@
    notice.textContent='월드맵에서 지역을 선택하세요';
    stage.append(notice);
    for(const region of REGIONS){
-     stage.append(makeCanvasSprite(region));
+     const sourceCanvas=makeCanvasSprite(region);
+     sourceCanvas.dataset.nativeHitMask='WorldMap/'+region.kind+'.png';
+     stage.append(sourceCanvas);
      const hit=document.createElement('button');hit.className='world-location';hit.type='button';
      hit.dataset.region=region.id;hit.title=region.name;hit.setAttribute('aria-label',region.name);
      const [x,y,w,h]=region.hit;hit.style.cssText='left:'+x+'px;top:'+y+'px;width:'+w+'px;height:'+h+'px;';
@@ -213,7 +243,10 @@
      hit.addEventListener('focus',()=>{ref.region=region.id;renderLayer(region.id,frame)});
      hit.addEventListener('mouseleave',()=>{if(ref.region===region.id)ref.region=null;renderLayer(region.id,0)});
      hit.addEventListener('blur',()=>{if(ref.region===region.id)ref.region=null;renderLayer(region.id,0)});
-     hit.addEventListener('click',()=>clickRegion(region.id));
+     hit.addEventListener('click',event=>{
+       if(!nativePointerSourceHit(event,sourceCanvas,hit))return;
+       clickRegion(region.id);
+     });
      stage.append(hit);
    }
    const controls=document.createElement('div');controls.className='world-map-controls';
