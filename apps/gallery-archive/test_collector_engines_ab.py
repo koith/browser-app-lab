@@ -2,7 +2,7 @@
 """Offline comparison invariants for public engines; no live network."""
 from io import BytesIO
 from PIL import Image,ImageDraw
-from collector_engines_ab import scoped_generic_html,safe_photo,verify_public
+from collector_engines_ab import scoped_generic_html,safe_photo,verify_public,asset_group
 from direct_photo_pipeline import page_images
 
 
@@ -22,6 +22,8 @@ def test():
     assert not any('ignore.png' in x for x in urls),urls
     cross,status=scoped_generic_html(body,page,'mimmi')
     assert not cross and status=='no_model_context'
+    assert asset_group('https://djawaphoto.com/wp-content/uploads/2026/09/sample_cv1-1152x1536.jpg') == asset_group('https://djawaphoto.com/wp-content/uploads/2026/09/sample_cv1.jpg')
+    assert asset_group('https://djawaphoto.com/wp-content/uploads/2026/09/sample_cv2.jpg') != asset_group('https://djawaphoto.com/wp-content/uploads/2026/09/sample_cv1.jpg')
     assert safe_photo('https://djawaphoto.com/wp-content/uploads/2026/09/photo001.jpg')
     assert safe_photo('https://image.shypetal.com/image/public-folder/ShyPetal.com@-1.webp')
     assert not safe_photo('https://image.shypetal.com/private/1.webp')
