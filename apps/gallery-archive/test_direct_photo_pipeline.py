@@ -16,6 +16,64 @@ def photo(seed):
 
 
 class DirectTests(unittest.TestCase):
+    def test_all_recorded_public_hosts_without_static_allowlist(self):
+        from direct_photo_pipeline import safe_registered_public_page
+        self.assertTrue(safe_registered_public_page(
+            'https://public-gallery.example.org/album/sim-yui-spring','yui'))
+        self.assertTrue(safe_registered_public_page(
+            'https://x.com/super_yuisan/status/1234567890123456789','yui'))
+        self.assertFalse(safe_registered_public_page(
+            'https://x.com/unrelated_status/status/1234567890123456789','yui'))
+        self.assertFalse(safe_registered_public_page(
+            'https://x.com/super_yuisan/status/1234567890123456789','mimmi'))
+        self.assertFalse(safe_registered_public_page(
+            'https://x.com/super_yuisan','yui'))
+        self.assertFalse(safe_registered_public_page(
+            'https://127.0.0.1/photo/album','yui'))
+
+    def test_only_exact_creators_public_status_media(self):
+        url='https://x.com/super_yuisan/status/1234567890123456789'
+        good='https://pbs.twimg.com/media/AAA123.jpg?name=large'
+        wrong='https://pbs.twimg.com/media/WRONG123.jpg'
+        raw=f'''<html><article><a href="/super_yuisan">super_yuisan</a>
+             <img src="{good}"></article>
+             <article><a href="/different_artist">someone</a>
+             <img src="{wrong}"></article></html>'''
+        urls,_,status=page_images(raw,url,'yui')
+        self.assertEqual(status,'scoped_public_page')
+        self.assertEqual(urls,[good])
+        self.assertEqual(page_images(raw,url,'mimmi')[0],[])
+
+    @unittest.skipUnless(importlib.util.find_spec('scrapy') is not None,
+                         'Real Scrapy required for second chance article extraction')
+    def test_unlisted_registered_site_stages_real_photo(self):
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);base=root/'apps/yui-gallery';base.mkdir(parents=True)
+            (base/'stored-albums.json').write_text('{"model":"yui","albums":[]}')
+            page='https://public-gallery.example.org/yui-sim-spring/'
+            photo_url='https://cdn.public-gallery.example.org/image?id=123'
+            (base/'public-work-pages.json').write_text(json.dumps({'albums':[
+                {'id':'yui-spring','source':page,'title':'Yui Sim Spring'}]}))
+            prior=photo(3);fresh=photo(33)
+            owner={'model':'yui','schema_version':1,'albums':[{'id':'yui-spring',
+               'title':'Yui Sim Spring','images':[{'number':1,
+               'sha256':hashlib.sha256(prior).hexdigest()}]}]}
+            html=f'<h1>Yui Sim Spring</h1><article><img data-original="{photo_url}"></article>'
+            class Client:
+                def get(self,url):
+                    if url==page:return type('R',(),{'content':html.encode()})()
+                    if url==photo_url:return type('R',(),{'content':fresh})()
+                    raise ValueError('unknown')
+            with patch('direct_photo_pipeline.page_images',
+                       return_value=([],[],'no_public_photos')):
+                result=collect(root,'yui',owner,root/'stage',3,3,Client(),
+                               alternative_engines=True,render_budget=0)
+            self.assertEqual(result['new_local_individual_files'],1,result)
+            self.assertEqual(result['alternative_staged_new_files'],1)
+            item=json.loads((root/'stage/metadata/catalog.json').read_text())['albums'][0]['images'][0]
+            self.assertEqual((root/'stage'/item['key']).read_bytes(),fresh)
+
     @unittest.skipUnless(importlib.util.find_spec('scrapy') is not None,
                          'Real Scrapy required for production additional extraction')
     def test_observed_cdn_without_extension_becomes_real_staged_image(self):
