@@ -23,11 +23,10 @@ const {chromium}=require('playwright');
   await page.locator('#map-select').selectOption('4LEAF');
   await page.locator('#start-game').click();
   await page.waitForSelector('#game:not(.hidden)');
-  // These four direction-UNREVIEWED source members contain 0..7 packets. The
-  // 42 visually reviewed front-facing models (20 + 22 added 2026-11-01:
-  // 0047/0050/0063 among them) hold source fronts instead of rotating through
-  // back/side packets while walking; that path is checked at the end.
- const ids=['0067','0068','0074','0087'];
+  // After real visual review 0067/0068/0074 now use the true 25..30
+  // front packets. Retain 0..7 packet coverage on still direction-unreviewed
+  // original bodies; native EXE direction timing remains unknown.
+ const ids=['0086','0087','0088'];
   const results=[];
   for(const id of ids){
    const setup=await page.evaluate(id=>{
@@ -107,7 +106,7 @@ const {chromium}=require('playwright');
   // the last packet until the gameplay event asks for idle. This does not
   // claim that 2002 EXE action frame lookup or FPS has been recovered.
   const oneShot=await page.evaluate(async()=>{
-   const m=window.__ROG_TEST__.getMatch();m.players[0].team[0]='c_0067';
+   const m=window.__ROG_TEST__.getMatch();m.players[0].team[0]='c_0086';
    window.__ROG_TEST__.drawGame();
    const pawn=document.querySelector('#board-pawns .board-pawn[data-id="0"]');
    window.__LEAF_GENESIS_ACTORS__.poseByPlayer(m.players[0].id,'attack',0);
@@ -133,7 +132,7 @@ const {chromium}=require('playwright');
   // almost always left physical gameplay stuck on source indexes 0/1.
   await page.evaluate(()=>{
    const m=window.__ROG_TEST__.getMatch();
-   m.players[0].team[0]='c_0067'; // unreviewed member with source 0..7
+   m.players[0].team[0]='c_0086'; // unreviewed member with source 0..7
    m.players[0].position=0;m.players[1].position=35;m.active=0;
    // Controlled event-free GAME turn; retains actual native DMP map,
    // original source player, dice engine and turn transition.
@@ -184,7 +183,7 @@ const {chromium}=require('playwright');
    'REAL dice movement must render all eight source OBS frames, not repeatedly restart 0,1');
   assert.ok(liveTurn.recorded.some(x=>x.clock?.startsWith('continuous-across-real-DMP-steps/')),
    'later DMP steps must preserve source frame clock instead of restarting it');
-  assert.ok(liveTurn.recorded.every(x=>x.file?.includes('/OBS/bulk/1067-')),
+  assert.ok(liveTurn.recorded.every(x=>x.file?.includes('/OBS/bulk/1086-')),
    'real roll cannot substitute simulated or ChatTown figure frames');
   const missing=await page.evaluate(()=>{
    const m=window.__ROG_TEST__.getMatch();
