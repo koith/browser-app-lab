@@ -17,7 +17,7 @@
  }
  function logo(publisher){
   const asset=publisher.logo;
-  return asset?.verified_official===true&&/^publisher-logos\/[a-z0-9-]+\.(?:svg|png|jpe?g|webp|ico)$/.test(asset.path)?asset.path:null;
+  return asset?.verified_official===true&&new Set(['official_publisher_logo','official_site_logo','official_store_logo']).has(asset.asset_role)&&/^publisher-logos\/[a-z0-9-]+\.(?:svg|png|jpe?g|webp|ico)$/.test(asset.path)?asset.path:null;
  }
  const api={key,groups,logo,compareNames};if(typeof module!=='undefined'&&module.exports)module.exports=api;root.YuiPublishers=api;
 })(globalThis);
