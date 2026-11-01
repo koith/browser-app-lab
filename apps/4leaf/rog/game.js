@@ -1353,6 +1353,9 @@ function showBattleScene(attacker,defender,attack,defense,attackerPoints,defende
    Math.max(0,imageTop-canvas.top-201*sourceScale)+'px');
   stage.style.setProperty('--leaf-native-battle-heading-width',(222*sourceScale)+'px');
   stage.style.setProperty('--leaf-native-battle-heading-height',(42*sourceScale)+'px');
+  // Scale of the drawn 355x113 source podium; battle.jpg anchor offsets in
+  // dice-native-battle-podium.css are source pixels multiplied by this.
+  stage.style.setProperty('--leaf-native-podium-scale',String(sourceScale));
   stage.style.setProperty('--leaf-native-podium-left-x',left+'px');
   stage.style.setProperty('--leaf-native-podium-right-x',right+'px');
   stage.style.setProperty('--leaf-native-podium-actor-bottom',
