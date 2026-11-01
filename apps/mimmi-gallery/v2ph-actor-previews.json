@@ -1,7 +1,7 @@
 {
   "version": "v0.1.0-mimmi.3",
   "model": "mimmi",
-  "generated_at": "2026-10-31T20:31:33.648241+00:00",
+  "generated_at": "2026-11-01T00:14:19.471511+00:00",
   "source": "https://www.v2ph.com/actor/Mimmi",
   "actor_pages": [
     {
@@ -25,10 +25,10 @@
     }
   ],
   "summary": {
-    "actor_albums_discovered": 39,
-    "previously_configured_albums": 6,
-    "works_selected_for_revisit": 8,
-    "actor_work_count": 39,
+    "actor_albums_discovered": 0,
+    "previously_configured_albums": 0,
+    "works_selected_for_revisit": 0,
+    "actor_work_count": 0,
     "new_album_candidates": 39,
     "verified_public_image_urls": 462,
     "private_cloud_photos_archived": 0,
