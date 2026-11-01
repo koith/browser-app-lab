@@ -81,5 +81,21 @@ class NativeOBS(unittest.TestCase):
             codec.decode_rows(self.data,self.width,self.height,self.palette[:30])
 
 
+    def test_written_index0_pixel_is_opaque_when_alpha_from_runs(self):
+        # Row 0 writes [5,0,5] at x=2: the middle pixel is palette index 0,
+        # like the red pip of 1171.obs face "1". Pixel x=0 is never written.
+        width,height=6,2
+        data=encode_640_rows([(0,2,bytes([5,0,5])),(1,0,bytes([5]*6))],width,height)
+        legacy,_=codec.decode_rows(data,width,height,self.palette,minimum_opaque_pixels=0)
+        runs,info=codec.decode_rows(data,width,height,self.palette,
+                                    minimum_opaque_pixels=0,alpha_from_runs=True)
+        # Image is bottom-up: source row 0 is output y=1.
+        self.assertEqual(legacy.getpixel((3,1))[3],0,'legacy treats index 0 as hole')
+        self.assertEqual(runs.getpixel((3,1)),(0,0,255,255),'written index 0 is opaque palette[0]')
+        self.assertEqual(runs.getpixel((0,1))[3],0,'skipped pixel stays transparent')
+        self.assertEqual(info['alpha'],'written-runs')
+        self.assertEqual(info['opaquePixels'],9)
+
+
 if __name__=='__main__':
     unittest.main()

@@ -1,5 +1,5 @@
 'use strict';
-const REVISION='4leaf-revival-pwa-v117';
+const REVISION='4leaf-revival-pwa-v118';
 // 32 genuinely archived 145×97 original TIS platform images. First offline
 // Genesis match must draw the same extracted raised platforms, not replace
 // uncached native source art with a CSS placeholder on first room entry.
@@ -13,7 +13,7 @@ const CORE=['./','./index.html','./app-version.json','./pwa-runtime.js','./manif
  './dice-source-tile-pitch.css','./dice-d4-source-fallback.css',
  './dice-source-chessman-battle.css',
  ...['1042-00','1042-01','1042-02','1042-03','1042-10','1042-18','1042-25','1042-30',
- '1045-00','1045-01','1045-02','1045-10','1045-18'].map(id=>'./original/OBS/'+id+'.png')]).concat(NATIVE_OBS_BULK_FILES.map(id=>'./original/OBS/bulk/'+id+'.png')).concat(NATIVE_OBS_FRONT_FILES.map(id=>'./original/OBS/front-reviewed/'+id+'.png')).concat(ORIGINAL_SOURCE_SPR_FILES.map(id=>'./original/SourceSPR/'+id+'.png'))
+ '1045-00','1045-01','1045-02','1045-10','1045-18'].map(id=>'./original/OBS/'+id+'.png')]).concat(NATIVE_OBS_BULK_FILES.map(id=>'./original/OBS/bulk/'+id+'.png')).concat(NATIVE_OBS_FRONT_FILES.map(id=>'./original/OBS/front-reviewed/'+id+'.png')).concat(['00','01','02','03','04','05','06','07','10','18','25'].map(i=>'./original/OBS/d6-colorkey-corrected/1171-'+i+'.png')).concat(ORIGINAL_SOURCE_SPR_FILES.map(id=>'./original/SourceSPR/'+id+'.png'))
  .concat(['./original/SourceSPRExtra/manifest.json',
   './original/SourceSPRExtra/winBattle-00.png',
   './original/SourceSPRExtra/winBattle-01.png',

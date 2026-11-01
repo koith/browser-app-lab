@@ -1211,6 +1211,27 @@ function showBattleScene(attacker,defender,attack,defense,attackerPoints,defende
    }
    const title=document.createElement('strong');title.textContent=player.name;
    const score=document.createElement('div');score.className='battle-visual-total';score.textContent=String(result).padStart(2,'0');
+   // Original score numerals: Dice/OBS.pak 1167.obs frames 0-7 are the
+   // white, red-outlined digits 0..7 of battle.jpg (filed as card 0167).
+   // Digits 8/9 are not extracted yet, so a score containing 8 or 9 keeps
+   // the WEB text. Text stays in the DOM for accessibility and tests.
+   const numerals=window.ORIGINAL_LEAF_OBS_FRAMES?.['0167']?.frames||[];
+   const digits=score.textContent.split('').map(d=>numerals.find(f=>f.index===Number(d)));
+   if(digits.length&&digits.every(Boolean)){
+    const text=document.createElement('span');text.className='battle-total-text';
+    text.textContent=score.textContent;score.textContent='';score.append(text);
+    for(const f of digits){
+     const img=document.createElement('img');img.className='battle-total-digit';
+     img.alt='';img.draggable=false;img.setAttribute('aria-hidden','true');
+     img.src=f.url;img.width=f.width;img.height=f.height;
+     img.addEventListener('error',()=>score.classList.remove('battle-total-original'));
+     score.append(img);
+    }
+    score.classList.add('battle-total-original');
+    score.dataset.numeralSource='original-OBS-1167.obs/digits-0-7';
+   }else{
+    score.dataset.numeralSource=numerals.length?'web-text/digit-8-or-9-not-extracted':'web-text';
+   }
    const dice=document.createElement('div');dice.className='battle-visual-dice';
    // Archived board.jpg and battle.jpg display real six-sided dice with
    // visible pip topology, not operating-system Unicode dice characters.
@@ -1234,6 +1255,24 @@ function showBattleScene(attacker,defender,attack,defense,attackerPoints,defende
      dot.style.gridColumn=String((cell-1)%3+1);
      dot.style.gridRow=String(Math.floor((cell-1)/3)+1);
      die.append(dot);
+    }
+    // Original result face: Dice/OBS.pak 1171.obs frame (pips-1), the same
+    // art as battle.jpg. Face<->value VERIFIED by pip count. The CSS pips
+    // above remain only as a fallback if the PNG fails to load.
+    const face=window.__LEAF_DICE_FALL__?.originalD6?.()?.faces?.[value-1];
+    if(face){
+     const art=document.createElement('img');
+     art.className='battle-die-original';art.alt='';art.draggable=false;
+     art.setAttribute('aria-hidden','true');
+     art.src=face.url;art.width=face.width;art.height=face.height;
+     art.addEventListener('error',()=>{
+      die.classList.remove('battle-die-has-original');
+      die.dataset.source='archived-battle-photo-inferred-3d-pips';
+     });
+     die.classList.add('battle-die-has-original');
+     die.dataset.source='original-OBS-1171-face/VERIFIED-by-pip-count';
+     die.dataset.originalFrame=String(face.index);
+     die.append(art);
     }
     dice.append(die);
    });

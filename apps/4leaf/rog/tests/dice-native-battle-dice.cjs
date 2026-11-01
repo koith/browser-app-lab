@@ -35,6 +35,10 @@ const cells={
       row:getComputedStyle(p).gridRowStart,
       background:getComputedStyle(p).backgroundColor
      })),
+     original:el.querySelector('img.battle-die-original')?.getAttribute('src')||null,
+     originalVisible:(()=>{const i=el.querySelector('img.battle-die-original');return !!i&&getComputedStyle(i).display!=='none'&&i.complete&&i.naturalWidth===46&&i.naturalHeight===49})(),
+     frame:el.dataset.originalFrame,
+     pipsHidden:[...el.querySelectorAll('.battle-die-pip')].every(p=>getComputedStyle(p).visibility==='hidden'),
      layout:css.display,
      image:css.backgroundImage,
      size:[el.offsetWidth,el.offsetHeight],
@@ -59,20 +63,20 @@ const cells={
    for(const die of side.values){
     count++;
     assert.ok(Number.isInteger(die.eye)&&die.eye>=1&&die.eye<=6,'real rolled die has value 1..6');
-    assert.equal(die.source,'archived-battle-photo-inferred-3d-pips','do not mislabel CSS as historical binary mesh');
+    // 2026-11-01: the face is the ORIGINAL Dice/OBS.pak 1171.obs frame
+    // (eye-1), colour-key corrected, same art as battle.jpg. CSS pips stay
+    // in the DOM only as a hidden load-failure fallback.
+    assert.equal(die.source,'original-OBS-1171-face/VERIFIED-by-pip-count');
     assert.equal(die.role,'img','every independent die face is accessible');
     assert.equal(die.label,'주사위 '+die.eye+'눈','accessible text matches actual roll');
     assert.equal(die.faceText,'','do not overlay system font Unicode die characters');
-    assert.deepEqual(die.pips.map(x=>x.cell),cells[die.eye],'exact 3x3 physical die pip arrangement');
-    for(const pip of die.pips){
-     assert.equal(Number(pip.col),(pip.cell-1)%3+1,'pip is placed in correct 3D-die grid column');
-     assert.equal(Number(pip.row),Math.floor((pip.cell-1)/3)+1,'pip is placed in correct physical row');
-    }
-    assert.equal(die.layout,'grid','independent pip geometry paints, not a text glyph');
-    assert.deepEqual(die.size,[size,size],'rolled face has screenshot-sized white 3D box');
-    assert.ok(die.image.includes('linear-gradient'),'real DOM shading supplies a material face, not a screenshot');
-    if(die.eye===1)assert.equal(die.pips[0].background,'rgb(222, 28, 101)',
-     'historic single-eye pink centre dot is visually distinct');
+    assert.equal(die.frame,String(die.eye-1),'face frame index = pips - 1');
+    assert.equal(die.original,'./original/OBS/d6-colorkey-corrected/1171-0'+(die.eye-1)+'.png');
+    assert.ok(die.originalVisible,'original 46x49 face is painted: '+JSON.stringify(die));
+    assert.ok(die.pipsHidden,'fallback pips must not paint over the original face');
+    assert.deepEqual(die.pips.map(x=>x.cell),cells[die.eye],'fallback keeps exact 3x3 pip arrangement');
+    assert.deepEqual(die.size,size,'native 46x49 face (half size on phones)');
+
    }
   }
   assert.ok(count>=2,'both players display actual rolled dice');
@@ -95,13 +99,13 @@ const cells={
   });
   await page.waitForSelector('#battle-visual');
   const state=await readDice();
-  verify(state,42);
+  verify(state,[46,49]);
   assert.deepEqual(await page.evaluate(()=>window.__ROG_TEST__.getMatch().players.map(x=>x.position)),
    originalPositions,'displaying actual dice never moves real chessmen');
   await page.screenshot({path:'leaf-source-reference-physical-battle-dice.png'});
   await page.setViewportSize({width:390,height:844});
   const mobile=await readDice();
-  verify(mobile,26);
+  verify(mobile,[23,25]);
   await page.screenshot({path:'leaf-source-reference-physical-battle-dice-mobile.png'});
   await page.locator('#modal-buttons button').filter({hasText:'결과 확인'}).click();
   await page.waitForFunction(()=>!document.querySelector('#battle-visual'),null,{timeout:8000});

@@ -1,0 +1,112 @@
+{
+ "format": "4LEAF_OBS_COLORKEY_HOLE_CORRECTION_V1",
+ "rule": "enclosed transparent pixels with a single shared RGB (palette[0]) made opaque",
+ "evidence": "1171.obs face 1 pip is palette index 0 and opaque in archived battle.jpg",
+ "pixelsInvented": 0,
+ "frames": [
+  {
+   "file": "1171-00.png",
+   "sourcePath": "original/OBS/bulk/1171-00.png",
+   "sourceSHA256": "23b94a1e27a8a4771144040577d582bd6c21ea0d0101432ab849a5f0f8149b22",
+   "correctedSHA256": "481894093f4d6ee9b0331dea26615c5c5b4111efc27a1afb5bf235001df6dfda",
+   "restoredPixels": 152,
+   "restoredRGB": [
+    228,
+    32,
+    104
+   ]
+  },
+  {
+   "file": "1171-01.png",
+   "sourcePath": "original/OBS/bulk/1171-01.png",
+   "sourceSHA256": "1a608e384b5e83ae40f425eb3c2d5550c0deb8e6001e7c2cff1d129e0c13a7c7",
+   "correctedSHA256": "9ff1ccb06f15a50ac182485bf7ce16704e362e9ee6e47571574d8941f5c6de3d",
+   "restoredPixels": 13,
+   "restoredRGB": [
+    228,
+    32,
+    104
+   ]
+  },
+  {
+   "file": "1171-02.png",
+   "sourcePath": "original/OBS/bulk/1171-02.png",
+   "sourceSHA256": "cf2a4730e5541e6c5641a635ecfc077f26a709acd5eca6a56ba05ce6c03974d7",
+   "correctedSHA256": "befcc1e0e17487b3c41f927848db487bc06e3b6a3caa8d8cf5faf749d9d2ef77",
+   "restoredPixels": 0,
+   "restoredRGB": null
+  },
+  {
+   "file": "1171-03.png",
+   "sourcePath": "original/OBS/bulk/1171-03.png",
+   "sourceSHA256": "c8eabff0ce41ce191e94fa7da21216ca3fee090ded09b3555b78f7e975663a7c",
+   "correctedSHA256": "e7ef724526c61ba9fbde7a35e9ed2cbc4b0191c14ae5e7f06508a33c1c5c84e8",
+   "restoredPixels": 0,
+   "restoredRGB": null
+  },
+  {
+   "file": "1171-04.png",
+   "sourcePath": "original/OBS/bulk/1171-04.png",
+   "sourceSHA256": "f27a4423d8953be24ad217c44fd3ee4b6d9448bdb45a77b2030da5703aca41b3",
+   "correctedSHA256": "da3b8179d39ff45b27cc16eaa516cffa6842f7963421e62a1a4cfee519682b15",
+   "restoredPixels": 0,
+   "restoredRGB": null
+  },
+  {
+   "file": "1171-05.png",
+   "sourcePath": "original/OBS/bulk/1171-05.png",
+   "sourceSHA256": "38f2a5002505e51b416058742cc78eabe98adf75a97e75eaba7da25b1c3c120b",
+   "correctedSHA256": "9e2861ec68fdcc0e26b0536c5113acf409d194f31f778c0e4a9d77d1595d9f0f",
+   "restoredPixels": 0,
+   "restoredRGB": null
+  },
+  {
+   "file": "1171-06.png",
+   "sourcePath": "original/OBS/bulk/1171-06.png",
+   "sourceSHA256": "79f01e4206ee0f1704333f17f979490c668921e4d0c7de9c6bfacbcb35d9445d",
+   "correctedSHA256": "cbac455a45fd06efd27f9f7894b2e5314e5bd91b7e10d40dfe22e9f17aa3fa98",
+   "restoredPixels": 112,
+   "restoredRGB": [
+    228,
+    32,
+    104
+   ]
+  },
+  {
+   "file": "1171-07.png",
+   "sourcePath": "original/OBS/bulk/1171-07.png",
+   "sourceSHA256": "42cffa1340d1814b818ef0dcb7e85acfd5407466f0643e2e43f233e8fd72765a",
+   "correctedSHA256": "652c412eabebf6c91459bc14af34eea7dfba1d2848673cb0a95181b172e4bcec",
+   "restoredPixels": 0,
+   "restoredRGB": null
+  },
+  {
+   "file": "1171-10.png",
+   "sourcePath": "original/OBS/bulk/1171-10.png",
+   "sourceSHA256": "9a2eac579085d7d8515491566e5091c747f38c64d219bb7ac609dd4ddecd13d5",
+   "correctedSHA256": "e2a63fdaacebfe08924826013e8cd57c56aff970cfe600b50c75eec1aabf11c3",
+   "restoredPixels": 0,
+   "restoredRGB": null
+  },
+  {
+   "file": "1171-18.png",
+   "sourcePath": "original/OBS/bulk/1171-18.png",
+   "sourceSHA256": "356eeee08b631599a19f6d743e204e6115b9d83376e745c07c72637f50d3111f",
+   "correctedSHA256": "e0f42bf4dcb94fe42e15634a771e93f0dbe9e490587edf1c1a4315fa63293d44",
+   "restoredPixels": 0,
+   "restoredRGB": null
+  },
+  {
+   "file": "1171-25.png",
+   "sourcePath": "original/OBS/bulk/1171-25.png",
+   "sourceSHA256": "914ae3d6b85acabcf4a0bc5cb34e99008732ac8155b8a8350377196d13247c38",
+   "correctedSHA256": "47904d14799b9b820a90c019015fe864840e493c0e591c0ddeb8e8bc4af2ed7d",
+   "restoredPixels": 3,
+   "restoredRGB": [
+    228,
+    32,
+    104
+   ]
+  }
+ ]
+}

@@ -136,3 +136,14 @@
   animation:none!important;opacity:.83;transform:scale(.96)
  }
 }
+/* Original Dice/OBS.pak 1171.obs D6 sprite (2026-11-01). The stored PNGs
+ * are bottom-up like every extracted OBS frame, hence scaleY(-1). The WEB
+ * cube stays in the DOM but is transparent while the original loads; it is
+ * shown again only if the original PNG fails (class removed in JS). */
+#game .leaf-fall-piece .leaf-fall-original-d6{display:none}
+#game .leaf-fall-piece.leaf-fall-original .leaf-fall-cube{opacity:0}
+#game .leaf-fall-piece.leaf-fall-original .leaf-fall-original-d6{
+ display:block;position:absolute;left:50%;bottom:0;
+ transform:translateX(-50%) scaleY(-1);
+ image-rendering:pixelated;pointer-events:none;
+}
