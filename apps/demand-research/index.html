@@ -95,6 +95,7 @@ dialog::backdrop{background:#061223bb;backdrop-filter:blur(3px)}
 </div></div></section>
 <div class="counter" id="count">불러오는 중…</div>
 <section class="feed" id="feed" aria-live="polite"><div class="empty">게시글 불러오는 중…</div></section>
+<div class="more hidden" id="listMore"><button type="button" id="showMore">현재 수집된 게시글 더 보기</button></div>
 <div class="more hidden" id="paging"><button type="button" id="more">이전 기간 더 수집</button></div>
 <footer id="footnote">검색 기간은 SNS 인덱싱 날짜 기준입니다. 표시 건수는 실제 조회 결과이며 전체 게시물의 수집률을 보장하지 않습니다. 테라박스 원본 저장은 별도 연결 전입니다.</footer>
 </main>
@@ -106,7 +107,7 @@ const API="https://api.bsky.app/xrpc/app.bsky.feed.searchPosts";
 const TERMS=["뒷계","섹트","일탈계"];
 const DAY=86400000, MIN_WINDOW=3600000, CHUNK_DAYS=7, MAX_REQUESTS=85, MAX_POSTS=4500;
 const cloudMode=location.hostname!=="koith.github.io";
-let posts=[],ids=new Map(),active="all",needle="",fromMs=0,toMs=0,nextEnd=0,pending=[],requestCount=0,daysCovered=0,incomplete=0,failed=0,runID=0,busy=false,shown=0,cloudOffset=0,cloudTotal=0;
+let posts=[],ids=new Map(),active="all",needle="",fromMs=0,toMs=0,nextEnd=0,pending=[],requestCount=0,daysCovered=0,incomplete=0,failed=0,runID=0,busy=false,shown=0,visibleLimit=270,cloudOffset=0,cloudTotal=0;
 const $=id=>document.getElementById(id);
 const el=(tag,className,text)=>{let n=document.createElement(tag);if(className)n.className=className;if(text!==undefined)n.textContent=String(text);return n};
 const dayText=ms=>new Date(ms).toISOString().slice(0,10);
@@ -199,17 +200,19 @@ function closeDetail(){
 }
 function draw(){
   let rows=filtered(),list=$("feed");list.replaceChildren();
-  let limit=270,frag=document.createDocumentFragment();
+  let limit=visibleLimit,frag=document.createDocumentFragment();
   for(let p of rows.slice(0,limit))frag.append(tile(p));
   if(!rows.length)frag.append(el("div","empty",busy?"게시글 검색 중…":"해당 기간·검색 조건의 게시글이 없습니다."));
   list.append(frag);shown=Math.min(rows.length,limit);
+  $("listMore").classList.toggle("hidden",rows.length<=limit);
+  $("showMore").textContent="수집된 게시글 "+Math.min(180,Math.max(0,rows.length-limit))+"개 더 보기";
   let coverage=cloudMode?" · 테라박스 저장본":" · 조회 "+daysCovered+"일 / "+(Math.ceil((toMs-fromMs)/DAY))+"일";
   let warnings=(failed||incomplete)?" · 일부 구간 미확인 "+(failed+incomplete)+"건":"";
-  $("count").textContent=rows.length.toLocaleString()+"개 게시글"+coverage+warnings+(rows.length>limit?" · 최근 "+limit+"개 표시":"");
+  $("count").textContent=rows.length.toLocaleString()+"개 게시글"+coverage+warnings+(rows.length>limit?" · "+limit+"개 표시 중":"");
 }
 function startBusy(){busy=true;$("refresh").disabled=true;$("applyDate").disabled=true;$("more").disabled=true}
 function endBusy(){busy=false;$("refresh").disabled=false;$("applyDate").disabled=false;$("more").disabled=false}
-function resetData(){posts=[];ids.clear();pending=[];requestCount=0;daysCovered=0;failed=0;incomplete=0;draw()}
+function resetData(){posts=[];ids.clear();pending=[];visibleLimit=270;requestCount=0;daysCovered=0;failed=0;incomplete=0;draw()}
 async function fetchWindow(segment){
   let url=new URL(API);url.searchParams.set("q",segment.term);url.searchParams.set("sort","latest");url.searchParams.set("limit","100");
   url.searchParams.set("since",new Date(segment.start).toISOString());url.searchParams.set("until",new Date(segment.end).toISOString());
@@ -331,9 +334,10 @@ $("closeDetail").addEventListener("click",closeDetail);
 $("refresh").addEventListener("click",()=>cloudMode?loadCloud(true):loadBatch(true));
 $("applyDate").addEventListener("click",()=>loadBatch(true));
 $("more").addEventListener("click",()=>cloudMode?loadCloud(false):loadBatch(false));
-$("tabs").addEventListener("click",e=>{let button=e.target.closest("button[data-term]");if(!button)return;active=button.dataset.term;for(let b of $("tabs").querySelectorAll("button"))b.classList.toggle("active",b===button);draw()});
+$("showMore").addEventListener("click",()=>{visibleLimit+=180;draw()});
+$("tabs").addEventListener("click",e=>{let button=e.target.closest("button[data-term]");if(!button)return;active=button.dataset.term;visibleLimit=270;for(let b of $("tabs").querySelectorAll("button"))b.classList.toggle("active",b===button);draw()});
 $("presets").addEventListener("click",e=>{let b=e.target.closest("button[data-days]");if(!b)return;setPreset(Number(b.dataset.days));loadBatch(true)});
-$("find").addEventListener("click",()=>{needle=$("q").value.trim().toLowerCase();draw()});
+$("find").addEventListener("click",()=>{needle=$("q").value.trim().toLowerCase();visibleLimit=270;draw()});
 $("q").addEventListener("keydown",e=>{if(e.key==="Enter"){$("find").click()}});
 setPreset(30);
 if(cloudMode){
