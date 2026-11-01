@@ -21,7 +21,7 @@ TARGETS={
     "instagram":("instagram.com",),
 }
 PATTERNS={
-    "x":re.compile(r"^/[^/]+/status/\\d+(?:/|$)"),
+    "x":re.compile(r"^/[^/]+/status/[0-9]+(?:/|$)"),
     "threads":re.compile(r"^/@[^/]+/post/[^/?#]+"),
     "instagram":re.compile(r"^/(?:p|reel)/[^/?#]+"),
 }
