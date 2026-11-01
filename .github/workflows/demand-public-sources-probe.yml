@@ -1,0 +1,35 @@
+name: Demand Research Public Source Probe
+on:
+  workflow_dispatch:
+  push:
+    branches: [fix/intersection-source-multi-social-and-links-20261102]
+    paths: [.github/workflows/demand-public-sources-probe.yml]
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - name: Inspect public endpoint health (counts only)
+        shell: python
+        run: |
+          import json,urllib.request,urllib.parse
+          q=urllib.parse.quote('일탈계')
+          tests=[
+           ('lemmy',f'https://lemmy.world/api/v3/search?q={q}&type_=Posts&sort=New&limit=15',None),
+           ('lemmy_alt',f'https://lemmy.ml/api/v3/search?q={q}&type_=Posts&sort=New&limit=15',None),
+           ('mastodon',f'https://mastodon.social/api/v1/timelines/tag/{q}?limit=20',None),
+           ('misskey_get',f'https://misskey.io/api/notes/search?query={q}&limit=20',None),
+           ('misskey_post','https://misskey.io/api/notes/search',json.dumps({'query':'일탈계','limit':20}).encode()),
+           ('misskey_alt','https://misskey.design/api/notes/search',json.dumps({'query':'일탈계','limit':20}).encode()),
+          ]
+          for name,url,body in tests:
+            try:
+              req=urllib.request.Request(url,data=body,headers={'User-Agent':'IntersectionPublicResearch/1.0','Accept':'application/json','Origin':'https://koith.github.io',**({'Content-Type':'application/json'} if body else {})})
+              with urllib.request.urlopen(req,timeout=12) as r:
+                obj=json.load(r)
+                n=len(obj) if isinstance(obj,list) else len(obj.get('posts',[]))
+                print(json.dumps({'source':name,'http':r.status,'count':n,'cors':r.headers.get('Access-Control-Allow-Origin'),'kind':type(obj).__name__}))
+            except Exception as e:
+              print(json.dumps({'source':name,'error':str(e)[:80]}))
