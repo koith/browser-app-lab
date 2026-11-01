@@ -1,0 +1,17 @@
+name: Intersection public Fediverse source diagnostics
+on:
+  pull_request:
+    paths:
+      - "apps/demand-research/probe_fediverse.py"
+      - ".github/workflows/intersection-fediverse-probe.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check no-token public note discovery (counts only)
+        run: python apps/demand-research/probe_fediverse.py

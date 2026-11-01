@@ -39,7 +39,7 @@ def run(live=False):
             page=browser.new_page(viewport={"width":1200,"height":900},color_scheme="light")
             page.on("pageerror",lambda error:errors.append(str(error)[:220]))
             if live:
-                hosts={"mastodon.social","planet.moe","twingyeo.kr","lemmy.world","misskey.io","hoto.moe"}
+                hosts={"mastodon.social","planet.moe","twingyeo.kr","lemmy.world","misskey.io","hoto.moe","api.pullpush.io"}
                 page.on("response",lambda resp:provider_http.append({
                     "host":urlparse(resp.url).hostname,"status":resp.status
                 }) if urlparse(resp.url).hostname in hosts and "/api/" in resp.url else None)
@@ -109,6 +109,20 @@ def run(live=False):
                       body=json.dumps(rows,ensure_ascii=False))
                 page.route("https://misskey.io/api/**",misskey_api)
                 page.route("https://hoto.moe/api/**",misskey_api)
+                def reddit_api(route):
+                    term=parse_qs(urlparse(route.request.url).query).get("q",[""])[0]
+                    rows=[]
+                    if provider_on["enabled"] and term in TERMS:
+                        i=TERMS.index(term)
+                        rows=[{"id":"mock"+str(i),"author":"qa_reddit",
+                               "title":term+" synthetic Reddit QA","selftext":"public fixture",
+                               "created_utc":int(datetime.now(timezone.utc).timestamp()),
+                               "permalink":"/r/qa/comments/mock"+str(i)+"/fixture/",
+                               "url":"https://example.com/qa.png"}]
+                    route.fulfill(status=200,content_type="application/json",
+                      headers={"Access-Control-Allow-Origin":"*"},
+                      body=json.dumps({"data":rows},ensure_ascii=False))
+                page.route("https://api.pullpush.io/reddit/search/submission/**",reddit_api)
                 # Source logos exist on this branch but not yet on GitHub Pages
                 # until merge; isolate fixture from the previous Pages release.
                 page.route("https://koith.github.io/browser-app-lab/apps/demand-research/assets/*.svg",
@@ -213,12 +227,12 @@ def run(live=False):
                 page.locator("#openDate").click()
                 page.locator("#applyDate").click()
                 page.wait_for_function("document.getElementById('applyDate').disabled === false",timeout=120000)
-                for provider in ("M3","L3","K3"):
+                for provider in ("M3","L3","K3","R3"):
                     assert provider in page.locator("#count").text_content()
                 while page.locator('.source-badge[aria-label="출처: Mastodon"]').count()==0:
                     assert page.locator("#more").is_visible()
                     page.locator("#more").click()
-                for provider in ("Mastodon","Lemmy","Misskey","Bluesky"):
+                for provider in ("Mastodon","Lemmy","Misskey","Reddit","Bluesky"):
                     card=page.locator("article.post").filter(
                         has=page.locator('.source-badge[aria-label="출처: '+provider+'"]')).first
                     assert card.count()==1,f"Missing {provider} badge"
