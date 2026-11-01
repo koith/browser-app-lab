@@ -1,0 +1,36 @@
+name: 4LEAF source patch import
+on:
+  push:
+    branches:
+      - import/4leaf-claude-20261101
+permissions:
+  contents: write
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify and apply Claude Git patches
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/patches"
+          cp apps/4leaf/rog/tools/claude-import-patches/*.patch "$RUNNER_TEMP/patches/"
+          cd "$RUNNER_TEMP/patches"
+          test "$(git hash-object 0001.patch)" = 8aac88ce694631e900ef45eba6ea22dfcca11a2a
+          test "$(git hash-object 0002.patch)" = bd8545a31f5afcd8c8f6335acf0b445403d5a63f
+          test "$(git hash-object 0003.patch)" = 7a7d444e5a05376b7ef2d64640d578eda1a746de
+          test "$(git hash-object 0004.patch)" = 080bfd2d36d1af6eed102372fe52e97d6dd48c56
+          cd "$GITHUB_WORKSPACE"
+          git fetch origin main
+          git checkout -B restore/4leaf-claude-actor-dice-20261101 origin/main
+          git config user.name "4LEAF import bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git am "$RUNNER_TEMP"/patches/0001.patch "$RUNNER_TEMP"/patches/0002.patch "$RUNNER_TEMP"/patches/0003.patch "$RUNNER_TEMP"/patches/0004.patch
+          node --check apps/4leaf/rog/game.js
+          node --check apps/4leaf/rog/genesis-chessman-actors.js
+          node --check apps/4leaf/rog/dice-fall.js
+          python3 apps/4leaf/rog/tests/test_obs_native_640stride.py
+          python3 apps/4leaf/rog/tests/test_original_paks_full_dump.py
+          git push origin HEAD:refs/heads/restore/4leaf-claude-actor-dice-20261101
