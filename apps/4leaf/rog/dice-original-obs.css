@@ -81,3 +81,11 @@
  .board-pawn .leaf-chess-original-card-fallback[hidden]{
  display:none!important;
 }
+
+/* 2026-11-02: right-facing motion and attacker-side duel lunge mirror
+ * the source sprite horizontally (ACTION_TABLE_37, INFERRED).
+ * Source PNG pixels remain intact; anchor is mirrored in renderer. */
+#app.app-classic-dice #game :is(#board-pawns,#battle-visual)
+ .board-pawn[data-source-mirror="true"] img.leaf-chess-original-obs{
+ transform:scale(-1,-1)!important;
+}

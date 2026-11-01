@@ -109,7 +109,21 @@
   }
   return d6ImageCache.size;
  }
- const prefetchSourceDice=()=>{prefetchD4();prefetchD6()};
+ // Score numerals from original UI 1167 should be decoded before first battle.
+ // Separate cache preserves the original D6 (28) decoded-frame counters.
+ const numeralImageCache=new Map();
+ function prefetchNumerals(){
+  const frames=window.ORIGINAL_LEAF_UI_FRAMES?.['1167']?.frames||[];
+  if(typeof Image!=='function')return 0;
+  for(const f of frames){
+   if(numeralImageCache.has(f.url))continue;
+   const img=new Image();numeralImageCache.set(f.url,img);img.src=f.url;
+   if(typeof img.decode==='function')img.decode().catch(()=>{});
+  }
+  return frames.length;
+ }
+ const prefetchOriginalDice=()=>{prefetchD4();prefetchD6();return prefetchNumerals()};
+ const prefetchSourceDice=prefetchOriginalDice;
  if(document.readyState==='complete')prefetchSourceDice();
  else window.addEventListener('load',prefetchSourceDice,{once:true});
  const state=()=>({active:active>0,last:last.slice(),lastSides:lastSides.slice(),complete,
@@ -318,6 +332,6 @@
   }
  }
  window.__LEAF_DICE_FALL__={roll,getState:state,
-  faces:PIPS,orientation:ROTATION,originalD6,originalD4,prefetchD4,prefetchD6,
+  faces:PIPS,orientation:ROTATION,originalD6,originalD4,prefetchD4,prefetchD6,prefetchNumerals,prefetchOriginalDice,
   tetraOrientation:{...TETRA_LAND},tetraDihedralDegrees:TETRA_ANGLE};
 })();

@@ -133,6 +133,22 @@
  // Keep the older reviewed frame18 path for all other source characters.
  const FULL_SOURCE_ATTACK=Object.freeze(new Set(['0040','0046','0078']));
  const FULL_SOURCE_ATTACK_INDICES=[25,31,33,35,25];
+ /* ACTION_TABLE_37: INFERRED repeating 37-frame OBS layout for 41 human actors.
+  * 2002 executable's action timing / direction map remains UNVERIFIED.
+  * 0084,0085,0086,0088 use nonhumanoid layouts and stay on legacy path. */
+ const ACTION_TABLE_37=Object.freeze({
+  idle:{rear:[0,1,2],side:[11,12,13],front:[22,23,24]},
+  walk:{rear:[3,4,5,6,7,8],side:[14,15,16,17,18,19],front:[25,26,27,28,29,30]},
+  strike:{rear:[9,10],side:[20,21],front:[31,32]},
+  duel:[33,34,35,36]
+ });
+ const STRUCTURAL_37=Object.freeze(new Set([
+  '0040','0043','0044','0046','0047','0048','0049','0050','0051','0052',
+  '0053','0054','0055','0056','0058','0059','0060','0061','0062','0063',
+  '0064','0065','0066','0067','0068','0069','0070','0071','0072','0073',
+  '0074','0075','0076','0077','0078','0079','0080','0081','0082','0083',
+  '0166'
+ ]));
  function frontFacingSource(native,id){
   const available=native?.frames||[];
   const approved=AUDITED_FRONT_SOURCE[id];
@@ -179,7 +195,7 @@
   '0080':[25,30],'0081':[25,30],'0082':[25,30],'0083':[25,30],'0084':[25,30],
   '0085':[25,30],'0166':[25,30]
  });
- function sequenceFor(native,action,id,travel){
+ function sequenceFor(native,action,id,travel,context={}){
   const all=native.frames||[];
   const at=index=>all.find(f=>f.index===index)||null;
   const facing=frontFacingSource(native,id);
@@ -194,6 +210,24 @@
   const fullFrontCycle=REVIEWED_FRONT_MOTION[id]
     ?[25,26,27,28,29,30].map(at).filter(Boolean):[];
   if(action==='idle')return front?[front]:[];
+  if(approved&&STRUCTURAL_37.has(id)&&all.length===37){
+   const pick=list=>{const out=list.map(at);return out.every(Boolean)?out:null};
+   if(action==='walk'){
+    const dir=travel==='away'?'rear':(travel==='left'||travel==='right')?'side':'front';
+    const out=pick(ACTION_TABLE_37.walk[dir]);
+    if(out){out.mirror=dir==='side'&&travel==='right';out.table='walk-'+dir;return out}
+   }
+   if(action==='attack'){
+    if(context.duel){
+     // Side-facing native source lunge; attacker on the left mirrors toward defender.
+     const out=pick([25,...ACTION_TABLE_37.duel,25]);
+     if(out){out.mirror=context.side==='attacker';out.table='duel-33-36';return out}
+    }
+    const [windup,hit]=ACTION_TABLE_37.strike.front;
+    const out=pick([25,windup,hit,hit,25]);
+    if(out){out.table='strike-front-31-32';return out}
+   }
+  }
   if(approved){
    // Do not display verified BACK/SIDE 0..7 during an ordinary forward
    // movement, attack recovery or victory. One static authentic FRONT is
@@ -253,7 +287,11 @@
    // Native OBS signed image origins are often negative. Build a valid
    // single-operator CSS calc rather than 'calc(50% + -17px)' which browsers
    // can discard, silently placing authentic models on the wrong platform.
-   const horizontal=Number(frame.originX)||0;
+   // Mirror source anchor rather than altering source PNG bytes.
+   const mirrored=pawn.dataset.sourceMirror==='true';
+   const horizontal=mirrored
+    ?-((Number(frame.originX)||0)+(Number(frame.width)||0))
+    :Number(frame.originX)||0;
    img.style.setProperty('--leaf-obs-left',
     'calc(50% '+(horizontal<0?'-':'+')+' '+Math.abs(horizontal)+'px)');
    // The native OBS y origin is relative to that actor's own animation
@@ -386,7 +424,12 @@
    pawn.dataset.sourceFacingEvidence=facing.evidence;
    pawn.dataset.sourceDirection='front-source-candidate/not-EXE-direction-table';
    const travel=action==='walk'?(pawn.dataset.travelFacing||'toward'):'toward';
-   const seq=sequenceFor(native,action,id,travel);
+   const duel=pawn.classList.contains('leaf-battle-chessman');
+   const duelSide=pawn.dataset.duelSide||
+    (pawn.closest('.battle-visual-side')?.classList.contains('attacker')?'attacker':'defender');
+   const seq=sequenceFor(native,action,id,travel,{duel,side:duelSide});
+   pawn.dataset.sourceMirror=seq.mirror?'true':'false';
+   pawn.dataset.sourceActionTable=seq.table?seq.table+'/structural-37/INFERRED':'legacy';
    pawn.dataset.actorWalkFacing=action==='walk'?travel:'';
    pawn.dataset.sourceTravelFacing=action==='walk'&&travel==='left'&&
      seq.length&&seq[0].index===LEFT_PROFILE_WALK_INDICES[0]
@@ -402,6 +445,11 @@
      ?'front-three-quarter-18/visual-reviewed/INFERRED':'n/a';
    if(action==='walk'&&travel==='left'&&seq.length===4&&seq[0].index===14)
     pawn.dataset.sourceDirection='left-profile-source-14-17/2002-EXE-direction-unverified';
+   if(seq.table){
+    if(action==='walk')pawn.dataset.sourceTravelFacing=seq.table+(seq.mirror?'-mirrored':'')+'/structural-37/INFERRED';
+    if(action==='attack')pawn.dataset.sourceAttackEvidence=seq.table+(seq.mirror?'-mirrored':'')+'/structural-37/INFERRED';
+    pawn.dataset.sourceDirection=(seq.table.split('-')[1]||'front')+(seq.mirror?'-mirrored':'')+'/structural-37/EXE-table-unverified';
+   }
    // Expose EXACT SOURCE packet indexes independently from inferred labels;
    // QA can inspect what was really rendered during genuine gameplay.
    pawn.dataset.sourceFrameSequence=seq.map(frame=>frame.index).join(',');

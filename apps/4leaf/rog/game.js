@@ -550,8 +550,9 @@ function drawPawns(){
      // DMP step is actually horizontal; diagonal and vertical steps retain
      // the old source-backed rear/front mapping. Historic EXE facing
      // thresholds and FPS are not yet decoded.
-     pawn.dataset.travelFacing=Math.abs(dy)<0.5&&Math.abs(dx)>1
-      ?(dx<0?'left':'right'):(dy< -0.5?'away':'toward');
+     // ACTION_TABLE_37 direction blocks: rear, left/right mirrored side, front.
+     pawn.dataset.travelFacing=dy< -0.5?'away'
+      :Math.abs(dx)>1&&Math.abs(dx)>=Math.abs(dy)?(dx<0?'left':'right'):'toward';
      // The original source 0..7 bitmap frames take 7*120ms before frame 7
      // appears at the current explicitly WEB-provisional playback interval.
      // A 240ms timeout truncated EVERY real rolled movement to 0..1. Extend
@@ -1194,6 +1195,7 @@ function showBattleScene(attacker,defender,attack,defense,attackerPoints,defende
  function assemble(panel,player,result,values){
    const actor=document.createElement('div');
    actor.className='battle-visual-actor board-pawn leaf-battle-chessman';
+   actor.dataset.duelSide=panel.classList.contains('attacker')?'attacker':'defender';
    // This is the exact match participant, not an unrelated stand-in.
    // Keep this ID on the duel actor so gameplay pose events reach both
    // independent OBS renderers; source-absent keeper remains unassigned.
