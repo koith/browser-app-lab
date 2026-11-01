@@ -1,0 +1,123 @@
+{
+  "viewport": [
+    800,
+    600
+  ],
+  "original": "apps/4leaf/assets/board.jpg",
+  "deployed": "http://127.0.0.1:8765/index.html",
+  "originalState": "battle",
+  "deployedState": "two-player first turn",
+  "benchmarkTrust": "source-region proximity diagnostic; NOT pixel-perfect state match",
+  "regions": [
+    {
+      "id": "historic-menu",
+      "x": 96,
+      "y": 0,
+      "w": 608,
+      "h": 30,
+      "comparable": true,
+      "source": "original 800x600 JPG vs deployed 800x600 PNG",
+      "meanAbsoluteRgbDifference": 11.269,
+      "fractionRgbChannelsDifferingOver48": 0.0711,
+      "meanOriginalRgb": [
+        78,
+        81,
+        160
+      ],
+      "meanPublishedRgb": [
+        82,
+        83,
+        160
+      ],
+      "acceptance": "DIAGNOSTIC ONLY; dynamics/players/time differ, not historical sprite-perfect tolerance"
+    },
+    {
+      "id": "historic-minimap",
+      "x": 0,
+      "y": 448,
+      "w": 172,
+      "h": 152,
+      "comparable": true,
+      "source": "original 800x600 JPG vs deployed 800x600 PNG",
+      "meanAbsoluteRgbDifference": 21.618,
+      "fractionRgbChannelsDifferingOver48": 0.1653,
+      "meanOriginalRgb": [
+        85,
+        101,
+        165
+      ],
+      "meanPublishedRgb": [
+        83,
+        88,
+        175
+      ],
+      "acceptance": "DIAGNOSTIC ONLY; dynamics/players/time differ, not historical sprite-perfect tolerance"
+    },
+    {
+      "id": "historic-chat-window",
+      "x": 172,
+      "y": 448,
+      "w": 406,
+      "h": 152,
+      "comparable": true,
+      "source": "original 800x600 JPG vs deployed 800x600 PNG",
+      "meanAbsoluteRgbDifference": 13.783,
+      "fractionRgbChannelsDifferingOver48": 0.0895,
+      "meanOriginalRgb": [
+        62,
+        67,
+        108
+      ],
+      "meanPublishedRgb": [
+        57,
+        63,
+        103
+      ],
+      "acceptance": "DIAGNOSTIC ONLY; dynamics/players/time differ, not historical sprite-perfect tolerance"
+    },
+    {
+      "id": "historic-tools-and-chessmen",
+      "x": 578,
+      "y": 448,
+      "w": 222,
+      "h": 152,
+      "comparable": true,
+      "source": "original 800x600 JPG vs deployed 800x600 PNG",
+      "meanAbsoluteRgbDifference": 34.692,
+      "fractionRgbChannelsDifferingOver48": 0.2525,
+      "meanOriginalRgb": [
+        86,
+        86,
+        145
+      ],
+      "meanPublishedRgb": [
+        78,
+        80,
+        136
+      ],
+      "acceptance": "DIAGNOSTIC ONLY; dynamics/players/time differ, not historical sprite-perfect tolerance"
+    },
+    {
+      "id": "battle-vs-fresh-board-INCOMPARABLE",
+      "x": 96,
+      "y": 30,
+      "w": 608,
+      "h": 418,
+      "comparable": false,
+      "source": "original 800x600 JPG vs deployed 800x600 PNG",
+      "meanAbsoluteRgbDifference": 67.802,
+      "fractionRgbChannelsDifferingOver48": 0.5448,
+      "meanOriginalRgb": [
+        107,
+        94,
+        77
+      ],
+      "meanPublishedRgb": [
+        142,
+        137,
+        111
+      ],
+      "acceptance": "DIAGNOSTIC ONLY; dynamics/players/time differ, not historical sprite-perfect tolerance"
+    }
+  ]
+}
