@@ -1,0 +1,17 @@
+name: INTERSECTION Zero-Cost Public Source Probe
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/intersection-zero-cost-probe.yml"
+      - "apps/demand-research/probe_free_sources.py"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  aggregate-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Public-only, no credentials, aggregate counts
+        run: python apps/demand-research/probe_free_sources.py
