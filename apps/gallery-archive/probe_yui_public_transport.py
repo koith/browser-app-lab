@@ -12,6 +12,12 @@ from public_photo_archive import PublicSession, public_failure
 SAMPLES=[
     'https://showartx.net/artgravia-vol-693-yui/',
     'https://showartx.net/wp-content/uploads/2025/10/ART_693_3.jpg',
+    'https://www.nicesss.com/archives/mij/artgravia/469248.html',
+    'https://www.nicewww.com/wp-content/uploads/2026/05/1778813739-c81e728d9d4c2f6.jpg',
+    'https://www.8kcosplay.com/artgravia-vol-677-yui%EC%9C%A0%EC%9D%B4/',
+    'https://img119.imagetwist.com/th/77528/1lb5mywj6g45.jpg',
+    'https://kgravure.vip/en/sets/yui-%EC%9C%A0%EC%9D%B4-artgravia-vol-663/',
+    'https://wakobox.top/wp-content/uploads/2026/06/KOR06D087_1.webp',
 ]
 
 def inspect(url):
