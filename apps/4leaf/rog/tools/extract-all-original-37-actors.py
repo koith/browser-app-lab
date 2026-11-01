@@ -86,16 +86,16 @@ def extract(resource_dir,root):
           'frames':frames}
     if set(result)!=set(v[0] for v in allow.values()):
         raise ValueError('Missing original actor IDs '+str(set(v[0] for v in allow.values())-set(result)))
-    js='/* Full SHA-verified 2002 4LEAF Dice/OBS.pak 37-frame source actor sprites.\\n'+(
-        ' * Historical EXE action-to-frame and 8-direction tables NOT decoded. */\\n')
-    js+='window.ORIGINAL_LEAF_FULL_ACTION_FRAMES='+json.dumps(result,indent=1,sort_keys=True)+';\\n'
+    js='/* Full SHA-verified 2002 4LEAF Dice/OBS.pak 37-frame source actor sprites.\n'+(
+        ' * Historical EXE action-to-frame and 8-direction tables NOT decoded. */\n')
+    js+='window.ORIGINAL_LEAF_FULL_ACTION_FRAMES='+json.dumps(result,indent=1,sort_keys=True)+';\n'
     (dest/'manifest.js').write_text(js)
     summary={'actorCount':len(result),'frames':sum(len(v['frames']) for v in result.values()),
       'archiveObsPakSHA256':source.sha(match[0].read_bytes()),
       'members':{k:{'member':v['originalMember'],'sha256':v['sourceSHA256']} for k,v in result.items()},
       'originalExeActionTableDecoded':False,
       'note':'Complete original 2D frames only; historical behavior and rate are inferred and not claimed verified'}
-    (dest/'provenance.json').write_text(json.dumps(summary,indent=2)+'\\n')
+    (dest/'provenance.json').write_text(json.dumps(summary,indent=2)+'\n')
     return summary
 
 if __name__=='__main__':
