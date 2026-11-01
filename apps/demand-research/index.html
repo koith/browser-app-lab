@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
 <meta name="referrer" content="no-referrer">
-<meta name="theme-color" content="#111c2b">
+<meta name="theme-color" content="#e8e7e0">
 <title>소비조사 · 게시글 보기</title>
 <style>
 :root{font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",system-ui,sans-serif;color:#203047;background:#f4f6fa}
@@ -79,38 +79,177 @@ dialog::backdrop{background:#061223bb;backdrop-filter:blur(3px)}
 .dialog-actions a{background:#1c4d83;color:white;border-radius:8px;text-decoration:none;padding:11px 15px;font-size:13px;font-weight:650}
 .dialog-notice{font-size:12px;color:#71829a;margin:12px 0}
 @media(max-width:720px){main{padding:9px 7px 48px}.toolbar{padding:11px}.feed{gap:6px}.post{border-radius:8px}.post-body{padding:7px}.post-title{font-size:10px}.post-title .tag{display:none}.post-excerpt{font-size:11px;line-height:1.35;min-height:3.7em;-webkit-line-clamp:3}.post-thumb{aspect-ratio:1/1.05}.post-date{font-size:9px}.date-row{gap:6px}.date-row label{flex:1 1 125px}.presets{width:100%}.presets button{padding:9px 10px}.date-row .apply{flex:1}.dialog-content{padding:13px}.dialog-text{font-size:14px}.dialog-media{grid-template-columns:1fr}dialog{width:calc(100vw - 14px);max-height:calc(100dvh - 14px)}.dialog-content{max-height:calc(100dvh - 72px)}}
+
+/* Editorial design language: graphic monochrome, restrained signal orange,
+   animated halftone atmosphere. No copied site assets or scripts. */
+:root{--ink:#171815;--paper:#e8e7e0;--surface:#f6f5ee;--line:#b5b4ac;--accent:#ef5c31;--muted:#64645d;color:var(--ink);background:var(--paper);font-family:Arial,"Apple SD Gothic Neo",-apple-system,system-ui,sans-serif}
+html{background:var(--paper)}
+body{position:relative;isolation:isolate;min-height:100vh;background:transparent;color:var(--ink)}
+.ambient{position:fixed;inset:0;z-index:-1;pointer-events:none;overflow:hidden;background:var(--paper)}
+.ambient::before{content:"";position:absolute;inset:0;background:linear-gradient(110deg,#e8e7e0dd 8%,#e9e8e2a8 60%,#e5e3d8d8 100%);z-index:1}
+.halftone{position:absolute;will-change:transform;opacity:.58;background-image:radial-gradient(circle,#454640 1.15px,transparent 1.65px);background-size:9px 9px;filter:contrast(140%);transform-origin:center}
+.halftone-a{width:110vw;height:110vw;max-width:1150px;max-height:1150px;top:-29vw;right:-29vw;border-radius:50%;mask-image:radial-gradient(ellipse at center,#000 4%,#0009 30%,transparent 67%);animation:dot-drift 28s ease-in-out infinite alternate}
+.halftone-b{width:76vw;height:76vw;max-width:800px;max-height:800px;bottom:-30vw;left:-28vw;border-radius:50%;opacity:.32;mask-image:radial-gradient(circle,#000 6%,transparent 66%);animation:dot-orbit 35s ease-in-out infinite alternate}
+@keyframes dot-drift{0%{transform:translate3d(-3%,1%,0) rotate(-10deg) scale(.9)}50%{transform:translate3d(8%,8%,0) rotate(12deg) scale(1.1)}100%{transform:translate3d(-6%,14%,0) rotate(27deg) scale(.92)}}
+@keyframes dot-orbit{0%{transform:translate3d(-6%,0,0) rotate(0)}100%{transform:translate3d(12%,-13%,0) rotate(-30deg)}}
+body>header.site-head{background:transparent;color:var(--ink);padding:0;border-bottom:1px solid var(--ink)}
+.head-inner{max-width:1380px;margin:auto;padding:25px 24px 21px;display:flex;align-items:flex-end;justify-content:space-between;gap:16px}
+.eyebrow,.toolbar-kicker,.head-aside{font-family:ui-monospace,Menlo,monospace;font-size:10px;letter-spacing:.13em;font-weight:700}
+.head-brand .eyebrow{display:block;margin-bottom:13px}
+.live-dot{color:var(--accent);margin-left:10px;letter-spacing:0}
+body>header h1{font-size:clamp(52px,8vw,116px);font-weight:950;line-height:.88;letter-spacing:-.085em;margin:0 0 17px}
+.title-outline{-webkit-text-stroke:1.8px var(--ink);color:transparent}
+.title-mark{color:var(--accent);font-size:.46em;vertical-align:top;margin-left:10px;letter-spacing:0}
+body>header small{color:#56564e;font-size:11px;font-weight:700;letter-spacing:.08em}
+.head-aside{display:flex;flex-direction:column;align-items:flex-end;gap:8px;color:var(--muted);white-space:nowrap}
+.head-aside strong{font-size:34px;line-height:1;color:var(--ink);letter-spacing:-.08em}
+main{max-width:1380px;margin:auto;padding:22px 24px 70px}
+.toolbar{background:var(--surface);border:1px solid var(--ink);border-radius:0;padding:0;margin-bottom:0;box-shadow:7px 7px 0 #18191416}
+.toolbar-top{padding:13px 17px;border-bottom:1px solid var(--line);gap:12px}
+.toolbar-status{display:flex;flex-direction:column;gap:4px;min-width:0}
+.toolbar-kicker{color:var(--accent)}
+.status{font-size:12px;color:#52534d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:60vw}
+button{background:var(--ink);color:var(--surface);border-radius:0;padding:11px 15px;font-size:12px;letter-spacing:.015em}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.toolbar-top>button{background:transparent;color:var(--ink);border:1px solid var(--ink);font-size:12px;padding:9px 12px;white-space:nowrap}
+.tabs{display:flex;margin:0;gap:0;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
+.tabs button{background:transparent;color:var(--ink);font-weight:800;font-size:13px;padding:15px 22px;border-right:1px solid var(--line);border-radius:0;white-space:nowrap;flex:1}
+.tabs button.active{background:var(--ink);color:#fff}
+.filter-details{border-bottom:1px solid var(--line)}
+.filter-details summary,.date-details summary{list-style:none;display:flex;justify-content:space-between;align-items:center;gap:8px;cursor:pointer;padding:12px 17px;font-size:12px;font-weight:800}
+.filter-details summary::-webkit-details-marker,.date-details summary::-webkit-details-marker{display:none}
+.filter-desc{margin-left:auto;font-size:11px;font-weight:400;color:var(--muted)}
+.filter-chevron,.date-chevron{font-size:19px;font-weight:400;line-height:1;color:var(--accent)}
+.filter-details[open] .filter-chevron,.date-details[open] .date-chevron{transform:rotate(45deg)}
+.ad-row{margin:0;padding:12px 17px 15px;gap:12px;background:#eae9e2;border:0;border-radius:0;border-top:1px solid var(--line)}
+.ad-toggle{font-size:12px;color:var(--ink)}
+.ad-toggle input{accent-color:var(--ink)}
+.ad-row select{background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:0}
+.ad-note{color:var(--muted)}
+.search-row{display:flex;margin:0;padding:13px 16px;gap:10px;border-bottom:1px solid var(--line)}
+input{border:1px solid var(--line);border-radius:0;background:#fffefa;color:var(--ink);font-size:13px;padding:11px}
+.search-row input{background:#f7f6f0}
+.search-row button{min-width:92px;background:var(--accent);color:#161713;font-weight:850}
+.date-details summary{padding:12px 17px}
+.date-summary-title{display:flex;gap:15px;align-items:center}
+#dateSummary{font-weight:400;color:var(--muted)}
+.date-row{margin:0;border-top:1px solid var(--line);padding:14px 17px;gap:10px;align-items:end;background:#eeede6}
+.date-row label{color:#5c5d56;font-size:11px;flex:1 1 170px}
+.date-row label input{font-size:12px;width:100%;min-height:43px}
+.presets{gap:0}
+.presets button{background:transparent;color:var(--ink);border:1px solid var(--line);padding:12px 14px;border-radius:0}
+.presets button+button{border-left:0}
+.presets button.active{background:var(--ink);color:#fff}
+.date-row .apply{background:var(--ink);color:white;padding:13px 20px;min-height:43px}
+.results-head{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;padding:38px 0 15px}
+.results-head .eyebrow{color:var(--accent)}
+.results-head h2{font-size:clamp(27px,4vw,49px);letter-spacing:-.065em;line-height:1.05;margin:8px 0 0;font-weight:950}
+.results-symbol{color:var(--accent);font-weight:400}
+.counter{font-size:11px;color:#53554f;line-height:1.6;text-align:right;margin:0;max-width:57%}
+.feed{gap:13px;grid-template-columns:repeat(3,minmax(0,1fr))}
+.post{background:var(--surface);border:1px solid #282923;border-radius:0;box-shadow:4px 4px 0 #15161312;transition:transform .22s ease,box-shadow .22s ease}
+.post:hover{transform:translateY(-3px);box-shadow:6px 7px 0 #15161325}
+.post-open{border-radius:0}
+.post-thumb{background:#d2d1ca;aspect-ratio:1/1;overflow:hidden}
+.post-thumb img{filter:grayscale(.1);transition:transform .5s cubic-bezier(.2,.8,.2,1),filter .3s}
+.post:hover .post-thumb img{transform:scale(1.035);filter:grayscale(0)}
+.post-thumb .text-icon{background:radial-gradient(circle at 50% 45%,#d9d8d0,#bdbbb1);color:#5b5c55;font-size:11px;letter-spacing:.08em}
+.post-thumb .hide-icon{background:#dad8d0;color:#67665d}
+.post-thumb .media-num,.post-thumb .video-mark{background:var(--ink);color:white;border-radius:0;font-family:ui-monospace,monospace}
+.post-body{padding:12px 12px 13px}
+.post-title{color:#55564f;font-size:11px;gap:7px}
+.post-title .tag{background:var(--ink);color:white;border-radius:0;font-size:9px;padding:3px 6px}
+.post-excerpt{font-size:13px;color:var(--ink);font-weight:500;line-height:1.45;margin:8px 0;min-height:4.2em}
+.post-date{font-family:ui-monospace,monospace;font-size:10px;color:#73736d}
+.post-ad-marker{border-radius:0}
+.more button{background:var(--ink);min-width:240px}
+.empty{background:var(--surface);border:1px dashed var(--ink);border-radius:0}
+footer{border-top:1px solid var(--line);padding-top:15px;margin-top:30px;color:#65655e;font-size:10px;letter-spacing:.015em}
+dialog{background:var(--surface);color:var(--ink);border:1px solid var(--ink);border-radius:0;box-shadow:12px 12px 0 #0003}
+dialog::backdrop{background:#11120fd4;backdrop-filter:blur(6px)}
+.dialog-head{background:var(--surface);border-bottom:1px solid var(--ink)}
+.dialog-head b{font-size:13px;letter-spacing:.04em}
+.dialog-head button{border-radius:0;background:var(--ink);color:white}
+.dialog-author{color:var(--ink)}
+.dialog-actions{border-top:1px solid var(--line)}
+.dialog-actions a{background:var(--ink);border-radius:0}
+.dialog-media img,.dialog-media video{border-radius:0}
+@media(max-width:720px){
+.head-inner{padding:22px 15px 20px}
+body>header h1{font-size:clamp(54px,14vw,86px);margin-bottom:13px}
+body>header small{font-size:9px}
+.head-brand .eyebrow{font-size:9px}
+.head-aside{display:none}
+main{padding:12px 8px 55px}
+.toolbar{box-shadow:4px 4px 0 #18191412}
+.toolbar-top{padding:10px 11px}
+.toolbar-top>button{padding:9px;font-size:15px}
+.toolbar-top>button span{display:none}
+.status{max-width:66vw;font-size:11px}
+.tabs button{padding:13px 7px;font-size:12px}
+.filter-details summary,.date-details summary{padding:11px 12px}
+.filter-desc{font-size:10px}
+.ad-row{padding:12px}
+.search-row{padding:10px}
+.search-row button{min-width:67px}
+.date-row{padding:12px;gap:8px}
+.date-row label{flex:1 1 calc(50% - 8px)}
+.presets{width:auto;flex:1}
+.presets button{padding:10px 13px}
+.date-row .apply{flex:1;min-width:110px}
+.results-head{padding:26px 1px 11px;align-items:flex-end;gap:8px}
+.results-head h2{font-size:28px}
+.results-head .eyebrow{font-size:9px}
+.counter{font-size:10px;max-width:59%;line-height:1.45}
+.feed{gap:7px}
+.post{border-radius:0}
+.post-thumb{aspect-ratio:1/1.1}
+.post-body{padding:7px}
+.post-title{font-size:10px}
+.post-title .tag{display:none}
+.post-excerpt{font-size:11px;line-height:1.37;min-height:3.9em}
+.post-date{font-size:9px}
+.halftone-a{width:140vw;height:140vw;top:-30vw;right:-50vw}
+.halftone-b{width:130vw;height:130vw;bottom:-30vw;left:-50vw}
+}
+@media(prefers-reduced-motion:reduce){.halftone{animation:none!important;will-change:auto}.post,.post-thumb img{transition:none!important}}
+
 </style>
 </head>
 <body>
-<header><h1>소비조사</h1><small id="source">공개 게시글 · 사진/영상 통합 보기</small></header>
+<div class="ambient" aria-hidden="true"><div class="halftone halftone-a"></div><div class="halftone halftone-b"></div></div>
+<header class="site-head">
+<div class="head-inner"><div class="head-brand"><span class="eyebrow">SOCIAL / RESEARCH ARCHIVE <span class="live-dot">● LIVE</span></span><h1>소비<span class="title-outline">조사</span><span class="title-mark">✳</span></h1><small id="source">공개 게시글 아카이브 — IMAGE / VIDEO / TEXT</small></div><div class="head-aside"><span>FIELD NOTES</span><strong>001—003</strong><span>SCROLL TO EXPLORE ↓</span></div></div>
+</header>
 <main>
 <section class="toolbar">
-<div class="toolbar-top"><span class="status" id="status" role="status">게시글 불러오는 중…</span><button type="button" id="refresh">다시 조회</button></div>
+<div class="toolbar-top"><div class="toolbar-status"><span class="toolbar-kicker">DISCOVER / LIVE INDEX</span><span class="status" id="status" role="status">게시글 불러오는 중…</span></div><button type="button" id="refresh" aria-label="게시글 새로 조회">↻ <span>새로고침</span></button></div>
 <div class="tabs" id="tabs">
 <button type="button" data-term="all" class="active">전체</button>
 <button type="button" data-term="뒷계">뒷계</button>
 <button type="button" data-term="섹트">섹트</button>
 <button type="button" data-term="일탈계">일탈계</button>
 </div>
-<div class="ad-row" id="adFilters">
+<details class="filter-details" id="filterDetails"><summary>필터 설정 <span class="filter-desc">광고 숨김 · 성인 미디어 표시</span><span class="filter-chevron">＋</span></summary><div class="ad-row" id="adFilters">
 <label class="ad-toggle"><input type="checkbox" id="hideAds" checked>광고 숨김</label>
 <label class="ad-toggle"><input type="checkbox" id="showAdultMedia" checked>성인 미디어 표시</label>
 <select id="adLevel" aria-label="광고 필터 강도"><option value="strong" selected>강력 필터</option><option value="standard">기본 필터</option></select>
 <span class="ad-note" id="adSummary">반복 홍보·링크 유도·판매 문구 필터링</span>
-</div>
+</div></details>
 <div class="search-row"><input type="search" id="q" placeholder="본문 검색" aria-label="본문 검색"><button id="find" type="button">검색</button></div>
+<details class="date-details" id="dateDisclosure"><summary><span class="date-summary-title">기간 설정 <span id="dateSummary">최근 30일</span></span><span class="date-chevron">＋</span></summary>
 <div id="datePanel">
 <div class="date-row">
 <label>시작 날짜<input type="date" id="startDate"></label>
 <label>종료 날짜<input type="date" id="endDate"></label>
 <div class="presets" id="presets"><button type="button" data-days="7">7일</button><button type="button" data-days="30" class="active">30일</button><button type="button" data-days="90">90일</button></div>
 <button type="button" id="applyDate" class="apply">기간 조회</button>
-</div></div></section>
-<div class="counter" id="count">불러오는 중…</div>
+</div></div></details></section>
+<div class="results-head"><div><span class="eyebrow">THE FEED / INDEX</span><h2>탐색 결과 <span class="results-symbol">↘</span></h2></div><div class="counter" id="count">불러오는 중…</div></div>
 <section class="feed" id="feed" aria-live="polite"><div class="empty">게시글 불러오는 중…</div></section>
 <div class="more hidden" id="listMore"><button type="button" id="showMore">현재 수집된 게시글 더 보기</button></div>
 <div class="more hidden" id="paging"><button type="button" id="more">이전 기간 더 수집</button></div>
-<footer id="footnote">검색 기간은 SNS 인덱싱 날짜 기준입니다. 표시 건수는 실제 조회 결과이며 전체 게시물의 수집률을 보장하지 않습니다. 테라박스 원본 저장은 별도 연결 전입니다.</footer>
+<footer id="footnote">PUBLIC INDEX · 검색 기간은 SNS 인덱싱 날짜 기준 · 전체 게시물 수집률을 보장하지 않음 · 테라박스 저장은 별도 연결 전</footer>
 </main>
 <dialog id="detail" aria-label="게시글 상세"><div class="dialog-head"><b>게시글 상세</b><button id="closeDetail" type="button" aria-label="닫기">×</button></div><div class="dialog-content" id="detailContent"></div></dialog>
 <script>
@@ -349,6 +488,7 @@ async function processWork(work,epoch){
   return {left:queue,added};
 }
 function setPreset(days){
+  $("dateSummary").textContent="최근 "+days+"일";
   let today=new Date(),end=Date.UTC(today.getFullYear(),today.getMonth(),today.getDate());
   $("startDate").value=dayText(end-(days-1)*DAY);$("endDate").value=dayText(end);
   for(let btn of $("presets").querySelectorAll("button"))btn.classList.toggle("active",Number(btn.dataset.days)===days);
@@ -364,6 +504,8 @@ async function loadBatch(reset){
   if(busy)return;
   if(reset){
     let dates;try{dates=getDates()}catch(e){status(e.message);return}
+    let days=Math.ceil((dates[1]-dates[0])/DAY);
+    $("dateSummary").textContent=days+"일 · "+$("startDate").value+" ~ "+$("endDate").value;
     runID++;fromMs=dates[0];toMs=dates[1];nextEnd=toMs;resetData();
   }
   if(!pending.length&&nextEnd<=fromMs){status("선택 기간 조회를 마쳤습니다 · "+posts.length+"건");$("paging").classList.add("hidden");return}
@@ -423,11 +565,11 @@ $("detail").addEventListener("close",()=>{document.body.classList.remove("modal-
 $("detail").addEventListener("click",e=>{if(e.target===$("detail"))closeDetail()});
 $("closeDetail").addEventListener("click",closeDetail);
 $("refresh").addEventListener("click",()=>cloudMode?loadCloud(true):loadBatch(true));
-$("applyDate").addEventListener("click",()=>loadBatch(true));
+$("applyDate").addEventListener("click",()=>{$("dateDisclosure").open=false;loadBatch(true)});
 $("more").addEventListener("click",()=>cloudMode?loadCloud(false):loadBatch(false));
 $("showMore").addEventListener("click",()=>{visibleLimit+=180;draw()});
 $("tabs").addEventListener("click",e=>{let button=e.target.closest("button[data-term]");if(!button)return;active=button.dataset.term;visibleLimit=270;for(let b of $("tabs").querySelectorAll("button"))b.classList.toggle("active",b===button);draw()});
-$("presets").addEventListener("click",e=>{let b=e.target.closest("button[data-days]");if(!b)return;setPreset(Number(b.dataset.days));loadBatch(true)});
+$("presets").addEventListener("click",e=>{let b=e.target.closest("button[data-days]");if(!b)return;setPreset(Number(b.dataset.days));$("dateDisclosure").open=false;loadBatch(true)});
 $("hideAds").addEventListener("change",()=>{visibleLimit=270;draw()});
 $("showAdultMedia").addEventListener("change",()=>{visibleLimit=270;draw()});
 $("adLevel").addEventListener("change",()=>{visibleLimit=270;draw()});
@@ -436,7 +578,7 @@ $("q").addEventListener("keydown",e=>{if(e.key==="Enter"){$("find").click()}});
 setPreset(30);
 if(cloudMode){
   $("source").textContent="테라박스 저장 게시글 · 글/사진/영상";
-  $("tabs").classList.add("hidden");$("datePanel").classList.add("hidden");
+  $("tabs").classList.add("hidden");$("dateDisclosure").classList.add("hidden");
   $("footnote").textContent="게시글별 원문과 미디어는 테라박스에서 필요할 때만 불러옵니다.";
   loadCloud(true);
 }else loadBatch(true);
