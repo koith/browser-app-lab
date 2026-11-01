@@ -154,16 +154,18 @@ def search_one(session, lead, max_queries=3, timeout=17):
     return {'attempts': attempts, 'candidate_pages': candidates[:40]}
 
 
-def discover(root=ROOT, leads_path=LEADS, search=False, max_works=30, client=None):
+def discover(root=ROOT, leads_path=LEADS, search=False, max_works=30, client=None, offset=0):
     src = json.loads(Path(leads_path).read_text(encoding='utf-8'))
     if src['model'] != 'yui' or src['schema_version'] != 1:
         raise ValueError('Unexpected visual lead registry')
     current = source_works(root)
-    if not 1 <= max_works <= 100:
+    if not 1 <= max_works <= 100 or offset < 0:
         raise ValueError('Bounded discovery budget required')
     session = client or requests.Session()
     rows = []
-    for lead in src['works'][:max_works]:
+    selection = [src['works'][(offset + i) % len(src['works'])]
+                 for i in range(min(max_works, len(src['works'])))]
+    for lead in selection:
         matches = [x for x in current if same_work(lead, x)]
         row = {**lead, 'catalogue_matches': matches,
                'classification': 'mapped_work_needs_photo_coverage_audit' if matches else 'unmapped_work_priority_search',
@@ -185,9 +187,10 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--search', action='store_true', help='Ordinary public Bing and DuckDuckGo text search')
     ap.add_argument('--max-works', type=int, default=30)
+    ap.add_argument('--offset', type=int, default=0)
     ap.add_argument('--out', type=Path, required=True)
     args = ap.parse_args()
-    result = discover(search=args.search, max_works=args.max_works)
+    result = discover(search=args.search, max_works=args.max_works, offset=args.offset)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(result, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     print('VISUAL_WORK_DISCOVERY', json.dumps({k: result[k] for k in
