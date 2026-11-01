@@ -58,6 +58,29 @@ def flatten(catalog: dict, model: str) -> dict:
                      "expected":album.get("expected"),"images":album_photos}
     return albums
 
+def verified_optical_replacement(old, candidate):
+    """Preserve old bytes unless SAME-PHOTO measured quality improves.
+
+    Dimensions and file size are not evidence of actual optical detail.
+    The collection stage already compares decoded pixels at equal display size
+    and records its evidence for exact same-photo variants.
+    """
+    evidence=candidate.get('visual_quality')
+    if not isinstance(evidence,dict):
+        return False
+    if not evidence.get('same_photo_verified') or evidence.get('confidence')!='measured':
+        return False
+    if evidence.get('compared_to_sha256')!=old.get('sha256'):
+        return False
+    relation=evidence.get('relation')
+    if relation=='higher':
+        return candidate.get('higher_visual_quality_replacement') is True
+    if relation=='comparable':
+        return (old.get('watermark_status')=='present_verified' and
+                candidate.get('watermark_status')=='absent_verified')
+    return False
+
+
 def merge(stage: Path, previous: Path, model: str):
     current_path=stage/"metadata/catalog.json"
     current=json.loads(current_path.read_text(encoding="utf-8"))
@@ -83,9 +106,7 @@ def merge(stage: Path, previous: Path, model: str):
                     if old_file.exists():
                         old_file.unlink()
                 continue
-            old_quality=(former["width"]*former["height"],former["bytes"])
-            new_quality=(photo["width"]*photo["height"],photo["bytes"])
-            if new_quality>old_quality:
+            if verified_optical_replacement(former,photo):
                 historic["images"][number]=photo
                 higher+=1
             else:
