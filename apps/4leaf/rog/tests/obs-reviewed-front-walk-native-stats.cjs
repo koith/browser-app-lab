@@ -72,6 +72,18 @@ const {chromium,webkit}=require('playwright');
    assert.ok(evidence.actionEvidence?.includes('WEB-movement-and-FPS-inferred'),
     'original native frame labels/FPS are NOT proven');
    report.push(evidence);
+   if(['0067','0068','0074'].includes(id)){
+    // Assert real 2002 OBS pixels decode on a live chessman DOM node,
+    // not merely that a six-index WEB source string was written.
+    await page.waitForFunction(member=>{
+     const match=window.__ROG_TEST__.getMatch();
+     const pawn=document.querySelector('#board-pawns .board-pawn[data-id="'+match.players[0].id+'"]');
+     const native=pawn?.querySelector('img.leaf-chess-original-obs:not([hidden])');
+     return pawn?.dataset.chessmanId===member&&
+      native?.complete&&native?.naturalWidth>15&&native?.naturalHeight>15&&
+      native.getAttribute('src')?.includes('/original/OBS/action-full/1'+member.slice(1)+'-');
+    },id,{timeout:12000});
+   }
    if(['0044','0046','0048'].includes(id)){
    const slot=page.locator('#dice-native-party button.dice-chessman-slot.occupied').first();
    await slot.click();
