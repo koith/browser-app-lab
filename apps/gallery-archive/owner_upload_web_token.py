@@ -11,6 +11,7 @@ import asyncio
 import os
 from pathlib import Path
 import sys
+import httpx
 
 ROOT=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT/'apps/mimmi-gallery/cloud/gateway'))
@@ -60,7 +61,7 @@ if __name__=='__main__':
     a=p.parse_args()
     try:
         write_github_env(a.github_env)
-    except (WebStateUnavailable,OSError,TimeoutError) as exc:
+    except (WebStateUnavailable,httpx.RequestError,OSError,TimeoutError) as exc:
         if not a.best_effort:
             raise
         print('OWNER_WEB_TOKEN_OPTIONAL_UNAVAILABLE',type(exc).__name__,
