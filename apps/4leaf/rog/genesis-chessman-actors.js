@@ -51,9 +51,10 @@
   // The 2002 source inventory now has 45 genuine complete 37-frame
   // actor packets, with member SHA256 individually checked. Only actors
   // whose camera-facing source sprites were ALREADY independently reviewed
-  // are promoted to full live-frame playback. Unreviewed 0067/0068/0074/
-  // 0086/0088 keep their former partial pixels instead of inventing a
-  // front/action mapping from extra frames. All source frames remain
+  // are promoted to full live-frame playback. Additional frame 25..30
+  // front silhouettes for 0067/0068/0074 were inspected 2026-11-02.
+  // Unreviewed 0086/0088 retain partial original source rather than
+  // inventing direction/action mapping. All source frames remain
   // archived in ORIGINAL_LEAF_FULL_ACTION_FRAMES for future review.
   const full=window.ORIGINAL_LEAF_FULL_ACTION_FRAMES?.[id];
   if(full?.frames?.length===37&&full.originalAnimationCount===37&&
@@ -81,7 +82,13 @@
   // 37-frame members viewed upright at 2x beside frame0. 25/30 are camera-
   // facing bodies with changed limb poses, 0 is the back (same pattern as
   // above). Front silhouette only; action/FPS UNVERIFIED. Excluded:
-  // 0067/0068/0074/0086 (25 vs 0 differ), 0088 (rock-golem body).
+  // 0086/0088 (non-humanoid facing not confidently distinguished).
+  // 2026-11-02 independent 0 and 25..30 original PNG review: 1067 (orange
+  // winged), 1068 (dark winged), 1074 (sword + cape) each has a full
+  // consistently camera-facing six-image body cycle, distinct from frame0.
+  // Source frame orientation is VISUALLY reviewed, but real EXE action
+  // assignment, direction turn rules and FPS remain UNVERIFIED.
+  '0067':25,'0068':25,'0074':25,
   '0047':25,'0050':25,'0063':25,'0065':25,'0066':25,'0069':25,
   '0070':25,'0071':25,'0072':25,'0073':25,'0075':25,'0076':25,
   '0077':25,'0078':25,'0079':25,'0080':25,'0081':25,'0082':25,
@@ -162,6 +169,9 @@
   '0056':[25,30], '0058':[25,30], '0059':[25,30],
   '0060':[25,30], '0061':[25,30], '0062':[25,30],
   '0064':[25,30],
+  // 2026-11-02: 0067/0068/0074 native packets 25..30 inspected each,
+  // front silhouettes remain consistent while original limbs/capes move.
+  '0067':[25,30],'0068':[25,30],'0074':[25,30],
   // 2026-11-01: same 25/30 front-pose check for the 22 members above.
   '0047':[25,30],'0050':[25,30],'0063':[25,30],'0065':[25,30],'0066':[25,30],
   '0069':[25,30],'0070':[25,30],'0071':[25,30],'0072':[25,30],'0073':[25,30],
