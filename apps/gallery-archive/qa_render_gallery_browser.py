@@ -28,7 +28,7 @@ def exercise(browser,model,branch_html=False):
         # A live production PASS must verify the new code is served by Render,
         # not old proxy-cached HTML that happens to pass a nondeterministic race.
         if not branch_html:
-            marker="GalleryPhotoQuality.preferred(previous,p)"
+            marker="image-quality.js?v=2"
             for _ in range(9):
                 if page.evaluate("""marker=>[...document.scripts].some(s=>s.textContent.includes(marker))""",marker):
                     break
@@ -40,7 +40,21 @@ def exercise(browser,model,branch_html=False):
         # return old HTML/200 shell from a proxy cache).
         page.wait_for_function("""()=>typeof GalleryPhotoQuality!=='undefined'
             &&typeof GalleryPhotoQuality.preferred==='function'
-            &&!!document.querySelector('script[src^="image-quality.js"]')""",timeout=30000)
+            &&typeof GalleryPhotoQuality.watermarkStatus==='function'
+            &&!!document.querySelector('script[src^="image-quality.js?v=2"]')""",timeout=30000)
+        # The *actual loaded* priority must rank optical quality FIRST.
+        # A clean but blurred copy must never win solely due to its watermark.
+        assert page.evaluate("""()=>{
+          const quality=s=>({method:'decoded-pixel-v1',confidence:'measured',score:s});
+          const sharp={sha256:'a'.repeat(64),width:900,height:1200,bytes:120000,
+                       watermark_status:'present_verified',visual_quality:quality(90)};
+          const blurry={sha256:'b'.repeat(64),width:4000,height:6000,bytes:5000000,
+                        watermark_status:'absent_verified',visual_quality:quality(30)};
+          const near={...blurry,sha256:'c'.repeat(64),visual_quality:quality(87)};
+          return GalleryPhotoQuality.preferred(sharp,blurry)===sharp &&
+                 GalleryPhotoQuality.preferred(sharp,near)===near &&
+                 GalleryPhotoQuality.preferred(sharp,{...near,visual_quality:null})===sharp;
+        }"""),"LIVE_RENDER_OPTICAL_QUALITY_PRIORITY_VIOLATED"
         page.wait_for_function("""limit=>typeof stored!=='undefined'&&stored.reduce((n,a)=>n+a.images.length,0)>=limit&&document.querySelectorAll('#albumgrid .album').length>0&&document.querySelector('#inventory')?.textContent.includes('실제 저장본')""",arg=MIN[model],timeout=90000)
         if model=="yui":
             assert page.evaluate("""()=>['sweetbox','bcut','milkybomb'].every(id=>{
