@@ -75,6 +75,25 @@
   return {member:member.originalMember||'1171.obs',faces,
    tumble:D6_TUMBLE.map(at).filter(Boolean),declared:28,partial:true};
  }
+ // Warm the complete original D4 image sequence after the 1223 manifest
+ // loads. Without this, first-turn 60ms frame swaps may show blank/stale
+ // images on cold mobile networks. Only source assets are cached in memory;
+ // neither gameplay RNG nor timing/turn state is touched.
+ const d4ImageCache=new Map();
+ function prefetchD4(){
+  const native=originalD4();
+  if(!native||typeof Image!=='function')return 0;
+  for(const f of [...native.faces,...native.tumble]){
+   if(d4ImageCache.has(f.url))continue;
+   const img=new Image();
+   d4ImageCache.set(f.url,img);
+   img.src=f.url;
+   if(typeof img.decode==='function')img.decode().catch(()=>{});
+  }
+  return d4ImageCache.size;
+ }
+ if(document.readyState==='complete')prefetchD4();
+ else window.addEventListener('load',prefetchD4,{once:true});
  const state=()=>({active:active>0,last:last.slice(),lastSides:lastSides.slice(),complete,
   source:'user-reported fall/bounce; outcome from live game engine',
   // Full original roll (all tumble frames + trajectory) is not recovered.
@@ -82,7 +101,8 @@
   originalD6Faces:!!originalD6(),
   originalD6TumbleFrames:originalD6()?.tumble.map(f=>f.index)||[],
   originalD4Art:!!originalD4(),
-  originalD4TumbleFrames:originalD4()?.tumble.map(f=>f.index)||[]});
+  originalD4TumbleFrames:originalD4()?.tumble.map(f=>f.index)||[],
+  originalD4PrefetchCount:d4ImageCache.size});
  function makeFace(n){
   const face=document.createElement('span');
   face.className='leaf-die-face leaf-die-face-'+n;
@@ -277,6 +297,6 @@
   }
  }
  window.__LEAF_DICE_FALL__={roll,getState:state,
-  faces:PIPS,orientation:ROTATION,originalD6,originalD4,
+  faces:PIPS,orientation:ROTATION,originalD6,originalD4,prefetchD4,
   tetraOrientation:{...TETRA_LAND},tetraDihedralDegrees:TETRA_ANGLE};
 })();

@@ -3,7 +3,7 @@
  *  - walking up the board (away from camera) plays reviewed rear frames 3..7,
  *    walking down plays the front cycle; unreviewed members keep old paths;
  *  - attack shows the reviewed front three-quarter frame 18;
- *  - battle scores use original 1167.obs numerals when digits are 0..7.
+ *  - battle scores use all original 1167.obs numerals 0..9, including\n *    individually source-reviewed 8 and 9. Result/rule calculations unchanged.
  * Evidence level for direction/attack is INFERRED (visual review), not an
  * original EXE action table; this test pins behaviour, not historical truth. */
 const assert=require('node:assert/strict');
@@ -97,14 +97,35 @@ const {chromium,webkit}=require('playwright');
   for(const s of score){
    assert.match(s.text,/^\d\d$/);
    if(s.expect===undefined||s.expect.some(u=>!u)){
-    // digit 8/9 frame not in the manifest yet -> labelled WEB text
-    assert.equal(s.source,'web-text/digit-8-or-9-not-extracted');assert.equal(s.digits.length,0);
+    // Robust source-map failure fallback, not a claimed 8/9 limitation.
+    assert.equal(s.source,'web-text/source-score-frame-unavailable');assert.equal(s.digits.length,0);
    }else{
-    assert.equal(s.source,/[89]/.test(s.text)?'original-OBS-1167.obs/digits-0-7-verified/8-9-INFERRED':'original-OBS-1167.obs/digits-0-7');
+    assert.equal(s.source,'original-OBS-1167.obs/digits-0-9-visual-reviewed');
     assert.deepEqual(s.digits.map(d=>d.src),s.expect,'numerals come from the 1167 UI manifest');
     assert.ok(s.digits.every(d=>d.ok),'original numerals loaded');
    }
   }
+  // Exercise the two historically missing numerals on real source PNGs,
+  // independent of battle RNG. Pixels are bottom-up and CSS flips them.
+  const highDigits=await page.evaluate(async()=>{
+   const all=window.ORIGINAL_LEAF_UI_FRAMES?.['1167']?.frames||[];
+   return await Promise.all([8,9].map(async index=>{
+    const f=all.find(v=>v.index===index);
+    if(!f)return {index,missing:true};
+    const img=new Image();
+    img.src=f.url;
+    try{await img.decode();}catch(error){return {index,error:String(error)}}
+    return {index,url:f.url,width:img.naturalWidth,height:img.naturalHeight,
+     sourceWidth:f.width,sourceHeight:f.height,
+     sha256:f.sha256};
+   }));
+  });
+  assert.ok(highDigits.every((f,index)=>f.index===index+8&&!f.missing&&!f.error&&
+    f.url.endsWith('1167-00'+(index+8)+'.png')&&
+    f.width===f.sourceWidth&&f.height===f.sourceHeight&&
+    /^[0-9a-f]{64}$/.test(f.sha256)),
+   'source-reviewed 8 and 9 PNGs must be fully decoded and geometry-verified: '+
+   JSON.stringify(highDigits));
   assert.deepEqual(errors,[]);
   console.log('ACTOR DIRECTION / ATTACK / SCORE PASS',JSON.stringify({engine,seg,report,attack,score}));
  }finally{await browser.close();}
