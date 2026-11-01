@@ -20,8 +20,8 @@ def _detail(image):
     # Common display scale preserves meaningful differences between a blurry
     # upscale and a natively sharp image. Crop edges to avoid corner stamps.
     width,height=gray.size
-    gray=gray.resize((max(32,round(640*width/max(width,height))),
-                      max(32,round(640*height/max(width,height)))),Image.Resampling.LANCZOS)
+    gray=gray.resize((max(32,round(960*width/max(width,height))),
+                      max(32,round(960*height/max(width,height)))),Image.Resampling.LANCZOS)
     w,h=gray.size
     gray=gray.crop((int(.08*w),int(.08*h),int(.92*w),int(.92*h)))
     contrast=ImageStat.Stat(gray).stddev[0]
