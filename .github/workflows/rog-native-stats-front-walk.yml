@@ -9,6 +9,7 @@ on:
       - 'apps/4leaf/rog/tests/obs-reviewed-front-walk-native-stats.cjs'
       - 'apps/4leaf/rog/tests/obs-full-actor-side-walk.cjs'
       - 'apps/4leaf/rog/tests/original-actor-census.cjs'
+      - 'apps/4leaf/rog/tests/obs-complete-offline-fallback.cjs'
       - 'apps/4leaf/rog/original/OBS/action-full/**'
       - '.github/workflows/rog-native-stats-front-walk.yml'
   workflow_run:
@@ -65,6 +66,11 @@ jobs:
           FOURLEAF_BROWSER: ${{ matrix.browser }}
           FOURLEAF_MOBILE: ${{ matrix.mobile }}
         run: node apps/4leaf/rog/tests/obs-full-actor-side-walk.cjs
+      - name: Keep authentic original OBS chessmen when full-frame source cannot load offline
+        env:
+          FOURLEAF_TEST_URL: ${{ github.event_name == 'workflow_run' && 'https://koith.github.io/browser-app-lab/apps/4leaf/rog/' || 'http://127.0.0.1:8765/' }}
+          FOURLEAF_BROWSER: ${{ matrix.browser }}
+        run: node apps/4leaf/rog/tests/obs-complete-offline-fallback.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
