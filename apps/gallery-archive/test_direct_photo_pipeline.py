@@ -17,6 +17,135 @@ def photo(seed):
 
 class DirectTests(unittest.TestCase):
     @unittest.skipUnless(importlib.util.find_spec('scrapy') is not None,
+                         'Real selector engine required')
+    def test_reverse_image_source_lead_can_become_decoded_individual_photo(self):
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);(root/'apps/yui-gallery').mkdir(parents=True)
+            (root/'apps/gallery-archive').mkdir(parents=True)
+            (root/'apps/gallery-archive/global_source_registry.json').write_text('{"sources":[]}')
+            (root/'apps/yui-gallery/stored-albums.json').write_text('{"model":"yui","albums":[]}')
+            lead=root/'reverse.json'
+            page='https://public-gallery.example.org/summer/source-page'
+            asset='https://images.public-gallery.example.org/summer/17.jpg'
+            lead.write_text(json.dumps({'model':'yui','targets':[{
+                'id':'missing-summer','title':'Yui Sim Summer',
+                'urls':[page],'owner_registered':False}]}))
+            before=photo(10);new=photo(99)
+            owner={'model':'yui','schema_version':1,'albums':[{
+              'id':'older-gallery','images':[{'number':1,
+              'sha256':hashlib.sha256(before).hexdigest()}]}]}
+            class Client:
+                def get(self,url):
+                    if url==page:return type('R',(),{'content':
+                        f'<h1>Yui Sim Summer</h1><article><img src="{asset}"></article>'.encode()})()
+                    if url==asset:return type('R',(),{'content':new})()
+                    raise ValueError('unexpected')
+            with patch('collector_full_census.census',return_value={'targets':[]}),patch(
+                    'direct_photo_pipeline.page_images',return_value=([],[],'no_public_photos')):
+                report=collect(root,'yui',owner,root/'stage',2,3,Client(),
+                    alternative_engines=True,render_budget=0,reverse_evidence=lead)
+            self.assertEqual(report['new_local_individual_files'],1,report)
+            self.assertEqual(report['owner_census_source_coverage']['reverse_source_pages_admitted'],1)
+            rows=json.loads((root/'stage/metadata/catalog.json').read_text())['albums']
+            self.assertEqual(rows[0]['id'],'missing-summer')
+            self.assertEqual((root/'stage'/rows[0]['images'][0]['key']).read_bytes(),new)
+
+    @unittest.skipUnless(importlib.util.find_spec('scrapy') is not None,
+                         'Actual Scrapy dependency required')
+    def test_unowned_named_work_becomes_staged_album_only_after_identity_evidence(self):
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);base=root/'apps/yui-gallery';base.mkdir(parents=True)
+            (base/'stored-albums.json').write_text('{"model":"yui","albums":[]}')
+            (root/'apps/gallery-archive').mkdir()
+            (root/'apps/gallery-archive/global_source_registry.json').write_text('{"sources":[]}')
+            page='https://public-gallery.example.org/yui-sim-spring/'
+            img='https://images.public-gallery.example.org/spring/08.jpg'
+            existing=photo(7);new=photo(77)
+            owner={'model':'yui','schema_version':1,'albums':[{
+                'id':'older-work','title':'Older Yui Work','images':[{
+                    'number':1,'sha256':hashlib.sha256(existing).hexdigest()}]}]}
+            census={'targets':[{'kind':'work','model':'yui','id':'new-yui-spring',
+                  'title':'Yui Sim Spring','owner_registered':False,
+                  'manifest_sources':['public-work-pages.json'],'urls':[page]}]}
+            class Client:
+                def get(self,url):
+                    if url==page:
+                        return type('R',(),{'content':f'<h1>Yui Sim Spring</h1><article><img src="{img}"></article>'.encode()})()
+                    if url==img:return type('R',(),{'content':new})()
+                    raise ValueError('unexpected source')
+            with patch('collector_full_census.census',return_value=census),patch(
+                 'direct_photo_pipeline.page_images',
+                 return_value=([],[],'no_public_photos')):
+                got=collect(root,'yui',owner,root/'stage',5,4,Client(),
+                            alternative_engines=True,render_budget=0)
+            self.assertEqual(got['new_local_individual_files'],1,got)
+            self.assertEqual(got['owner_census_source_coverage']['newly_scheduled_unowned_works'],1)
+            catalog=json.loads((root/'stage/metadata/catalog.json').read_text())
+            self.assertEqual(catalog['albums'][0]['id'],'new-yui-spring')
+            p=catalog['albums'][0]['images'][0]
+            self.assertEqual((root/'stage'/p['key']).read_bytes(),new)
+
+    def test_all_recorded_public_hosts_without_static_allowlist(self):
+        from direct_photo_pipeline import safe_registered_public_page
+        self.assertTrue(safe_registered_public_page(
+            'https://public-gallery.example.org/album/sim-yui-spring','yui'))
+        self.assertTrue(safe_registered_public_page(
+            'https://x.com/super_yuisan/status/1234567890123456789','yui'))
+        self.assertFalse(safe_registered_public_page(
+            'https://x.com/unrelated_status/status/1234567890123456789','yui'))
+        self.assertFalse(safe_registered_public_page(
+            'https://x.com/super_yuisan/status/1234567890123456789','mimmi'))
+        self.assertFalse(safe_registered_public_page(
+            'https://x.com/super_yuisan','yui'))
+        self.assertFalse(safe_registered_public_page(
+            'https://127.0.0.1/photo/album','yui'))
+
+    def test_only_exact_creators_public_status_media(self):
+        url='https://x.com/super_yuisan/status/1234567890123456789'
+        good='https://pbs.twimg.com/media/AAA123.jpg?name=large'
+        wrong='https://pbs.twimg.com/media/WRONG123.jpg'
+        raw=f'''<html><article><a href="/super_yuisan">super_yuisan</a>
+             <img src="{good}"></article>
+             <article><a href="/different_artist">someone</a>
+             <img src="{wrong}"></article></html>'''
+        urls,_,status=page_images(raw,url,'yui')
+        self.assertEqual(status,'scoped_public_page')
+        self.assertEqual(urls,[good])
+        self.assertEqual(page_images(raw,url,'mimmi')[0],[])
+
+    @unittest.skipUnless(importlib.util.find_spec('scrapy') is not None,
+                         'Real Scrapy required for second chance article extraction')
+    def test_unlisted_registered_site_stages_real_photo(self):
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);base=root/'apps/yui-gallery';base.mkdir(parents=True)
+            (base/'stored-albums.json').write_text('{"model":"yui","albums":[]}')
+            page='https://public-gallery.example.org/yui-sim-spring/'
+            photo_url='https://cdn.public-gallery.example.org/image?id=123'
+            (base/'public-work-pages.json').write_text(json.dumps({'albums':[
+                {'id':'yui-spring','source':page,'title':'Yui Sim Spring'}]}))
+            prior=photo(3);fresh=photo(33)
+            owner={'model':'yui','schema_version':1,'albums':[{'id':'yui-spring',
+               'title':'Yui Sim Spring','images':[{'number':1,
+               'sha256':hashlib.sha256(prior).hexdigest()}]}]}
+            html=f'<h1>Yui Sim Spring</h1><article><img data-original="{photo_url}"></article>'
+            class Client:
+                def get(self,url):
+                    if url==page:return type('R',(),{'content':html.encode()})()
+                    if url==photo_url:return type('R',(),{'content':fresh})()
+                    raise ValueError('unknown')
+            with patch('direct_photo_pipeline.page_images',
+                       return_value=([],[],'no_public_photos')):
+                result=collect(root,'yui',owner,root/'stage',3,3,Client(),
+                               alternative_engines=True,render_budget=0)
+            self.assertEqual(result['new_local_individual_files'],1,result)
+            self.assertEqual(result['alternative_staged_new_files'],1)
+            item=json.loads((root/'stage/metadata/catalog.json').read_text())['albums'][0]['images'][0]
+            self.assertEqual((root/'stage'/item['key']).read_bytes(),fresh)
+
+    @unittest.skipUnless(importlib.util.find_spec('scrapy') is not None,
                          'Real Scrapy required for production additional extraction')
     def test_observed_cdn_without_extension_becomes_real_staged_image(self):
         from unittest.mock import patch

@@ -7,6 +7,7 @@ import argparse
 from collections import defaultdict, Counter
 from datetime import datetime, timezone
 import hashlib
+import ipaddress
 from io import BytesIO
 import json
 from pathlib import Path
@@ -57,6 +58,49 @@ def safe_page(url):
         return (p.scheme=='https' and p.hostname in PAGE_HOSTS and not p.username and not p.password and p.port in (None,443)
                 and (p.hostname!='teapawt.net' or p.path in {'/'+a for a in CREATOR_ACCOUNTS.values()}))
     except (ValueError,TypeError):return False
+
+
+X_PUBLIC_HOSTS={'x.com','www.x.com','twitter.com','www.twitter.com'}
+PUBLIC_SOURCE_DENIED_HOSTS={
+    'localhost','metadata.google.internal','cdn.jliji.com'
+}
+
+
+def safe_registered_public_page(url,model=None):
+    """Check any *already recorded* public work page, without a hostname allowlist.
+
+    Only call this for owner-work/source manifest URLs or a same-work observed
+    pagination link. No arbitrary Internet search URL becomes an owned work.
+    """
+    try:
+        p=urlsplit(url)
+        host=(p.hostname or '').lower().rstrip('.')
+        if (p.scheme!='https' or p.username or p.password or p.port not in (None,443)
+                or not host or host in PUBLIC_SOURCE_DENIED_HOSTS
+                or len(url)>2200 or p.fragment):
+            return False
+        if any(host.endswith(s) for s in (
+                '.local','.internal','.invalid','.test','.localhost','.example')):
+            return False
+        try:
+            if not ipaddress.ip_address(host).is_global:
+                return False
+        except ValueError:
+            if '.' not in host:
+                return False
+        if host=='teapawt.net':
+            return safe_page(url)
+        if host in X_PUBLIC_HOSTS:
+            if model not in CREATOR_ACCOUNTS:
+                return False
+            # Public, explicitly recorded posts by the actual creator only.
+            # Do not visit generic timelines, search pages or arbitrary actors.
+            return bool(re.fullmatch(
+                '/'+re.escape(CREATOR_ACCOUNTS[model])+r'/status/[0-9]{5,30}(?:/photo/[1-4])?/?',
+                p.path,re.I))
+        return True
+    except (ValueError, TypeError):
+        return False
 
 
 def public_full_variant(url):
@@ -113,22 +157,35 @@ def merge_owner_census_sources(books, owner, rows, model, safe_source=None):
     subset of manifests. This mismatch made verified detector improvements
     appear as zero new candidates during actual collection.
     """
-    allowed=safe_source or safe_page
+    allowed=safe_source or (lambda u:safe_registered_public_page(u,model))
     known={a['id']:a for a in owner['albums']}
     stats={'census_owner_work_count':0,'census_eligible_work_count':0,
+           'unowned_registered_works_with_source':0,
+           'newly_scheduled_unowned_works':0,
            'newly_scheduled_work_count':0,'additional_registered_pages':0,
            'registered_source_rejected':0}
     for row in rows:
         if row.get('model')!=model or row.get('kind')!='work':
             continue
         aid=row['id']
-        if aid not in known:continue
-        stats['census_owner_work_count']+=1
+        if not re.fullmatch(r'[a-z0-9][a-z0-9-]{1,100}',aid):
+            continue
+        owner_work=aid in known
+        # Unowned work IDs can be created ONLY from an existing real named-work
+        # manifest, never from a suggested model-alias or a guessed photo URL.
+        if not owner_work and not row.get('manifest_sources'):
+            continue
+        if owner_work:
+            stats['census_owner_work_count']+=1
         candidate=list(dict.fromkeys(row.get('urls') or []))
         verified=[u for u in candidate if allowed(u)]
         stats['registered_source_rejected']+=len(candidate)-len(verified)
-        if not verified:continue
-        stats['census_eligible_work_count']+=1
+        if not verified:
+            continue
+        if owner_work:
+            stats['census_eligible_work_count']+=1
+        else:
+            stats['unowned_registered_works_with_source']+=1
         if aid in books:
             book=books[aid]
             before=set([book['source']]+book.get('source_pages',[]))
@@ -137,11 +194,16 @@ def merge_owner_census_sources(books, owner, rows, model, safe_source=None):
             stats['additional_registered_pages']+=len(
                 set(book['source_pages'])-before)
         else:
-            held=known[aid]
-            books[aid]={'id':aid,'title':held.get('title') or aid,
+            held=known.get(aid,{})
+            books[aid]={'id':aid,'title':held.get('title') or row.get('title') or aid,
                         'source':verified[0],'source_pages':verified[1:],
-                        'curated_images_only':True,'census_existing_owner':True}
-            stats['newly_scheduled_work_count']+=1
+                        'curated_images_only':owner_work,
+                        'census_existing_owner':owner_work,
+                        'census_new_work':not owner_work}
+            if owner_work:
+                stats['newly_scheduled_work_count']+=1
+            else:
+                stats['newly_scheduled_unowned_works']+=1
     return stats
 
 
@@ -154,7 +216,8 @@ def _photo_asset_group(url):
 
 
 def verified_alternative_candidates(raw,page,model,baseline,known_urls,
-                                    rendered=(),scrapy_extractor=None):
+                                    rendered=(),scrapy_extractor=None,
+                                    trusted_registered_page=False):
     """Turn real Scrapy/Chromium findings into bounded *download candidates*.
 
     Existing owner/historical asset identities take precedence. Discovery is
@@ -163,7 +226,8 @@ def verified_alternative_candidates(raw,page,model,baseline,known_urls,
     and the work is already present in the private owner index.
     All accepted bytes still require inspect(), owner SHA readback and gallery QA.
     """
-    if not safe_page(page) or urlsplit(page).hostname=='teapawt.net':
+    if not (safe_page(page) or trusted_registered_page) or urlsplit(page).hostname in (
+            'teapawt.net',*X_PUBLIC_HOSTS):
         return [],'specialized_author_only'
     soup=BeautifulSoup(raw,'html.parser')
     heading=' '.join(tag.get_text(' ',strip=True) for tag in soup.select('h1,title'))
@@ -236,6 +300,36 @@ def in_excluded_article_section(tag,article):
 
 
 def page_images(raw,url,model):
+    if urlsplit(url).hostname in X_PUBLIC_HOSTS:
+        if not safe_registered_public_page(url,model):
+            return [],[],'unrelated_social_account_rejected'
+        # Only media embedded in the author's actual public status article.
+        # A sign-in wall is not a public photograph.
+        account=CREATOR_ACCOUNTS[model]
+        soup=BeautifulSoup(raw,'html.parser')
+        originals=[]
+        for article in soup.select('article'):
+            identity=bool(article.select(
+                'a[href="/'+account+'"],a[href^="/'+account+'/"]'))
+            identity=identity or bool(re.search(
+                r'(?<![a-z0-9_])@'+re.escape(account)+r'(?![a-z0-9_])',
+                article.get_text(' ',strip=True),re.I))
+            if not identity:
+                continue
+            for tag in article.select('img[src],img[data-src],source[srcset]'):
+                values=[tag.get('src'),tag.get('data-src')]
+                values.extend(part.strip().split()[0]
+                              for part in (tag.get('srcset') or '').split(',')
+                              if part.strip())
+                for value in values:
+                    if not value:
+                        continue
+                    u=urljoin(url,value)
+                    p=urlsplit(u)
+                    if (p.scheme=='https' and p.hostname=='pbs.twimg.com'
+                            and p.path.startswith('/media/') and u not in originals):
+                        originals.append(u)
+        return originals,[],'scoped_public_page' if originals else 'no_public_photos'
     if urlsplit(url).hostname=='teapawt.net':
         account=CREATOR_ACCOUNTS[model]
         if urlsplit(url).path!='/'+account:return [],[],'different_creator_account_rejected'
@@ -486,7 +580,7 @@ def atomic_bytes(path,data):
     tmp=path.with_name(path.name+'.pending');tmp.write_bytes(data);tmp.replace(path)
 
 
-def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_only=False,album_ids=None,page_cycle=0,alternative_engines=False,render_budget=8):
+def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_only=False,album_ids=None,page_cycle=0,alternative_engines=False,render_budget=8,reverse_evidence=None):
     root=Path(root);out=Path(out)
     if owner.get('model')!=model or owner.get('schema_version')!=1 or not owner.get('albums'):
         raise ValueError('Current owner catalog required; do not assume empty archive')
@@ -515,9 +609,9 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
             # while newer reviewed entries have a primary source. Do not silently
             # omit that entire ledger, invent a URL, or widen its image scope.
             legacy=not a.get('source')
-            pages=[u for u in a.get('source_pages',[]) if safe_page(u)]
+            pages=[u for u in a.get('source_pages',[]) if safe_registered_public_page(u,model)]
             source=a.get('source') or next(iter(pages),None)
-            if not source or not safe_page(source):continue
+            if not source or not safe_registered_public_page(source,model):continue
             if not re.fullmatch(r'[a-z0-9][a-z0-9-]{1,100}',str(a.get('id',''))):continue
             # A shared event/report can mention Yui while showing other models.
             # Legacy records admit only already curated image URLs in an existing
@@ -542,6 +636,41 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
     else:
         # Tiny synthetic test roots need not reproduce every research manifest.
         source_scope={'census_status':'synthetic_fixture_without_registry'}
+    reverse_counts={'reverse_source_pages_admitted':0,
+                    'reverse_works_with_source':0,
+                    'reverse_unverified_targets_rejected':0}
+    if reverse_evidence is not None and Path(reverse_evidence).exists():
+        evidence=json.loads(Path(reverse_evidence).read_text(encoding='utf-8'))
+        if evidence.get('model')!=model:
+            raise ValueError('Reverse-source model mismatch')
+        for target in evidence.get('targets',[]):
+            aid=target.get('id')
+            if not isinstance(aid,str) or not re.fullmatch(
+                    r'[a-z0-9][a-z0-9-]{1,100}',aid):
+                reverse_counts['reverse_unverified_targets_rejected']+=1
+                continue
+            links=list(dict.fromkeys(
+                u for u in target.get('urls',[])
+                if safe_registered_public_page(u,model)))
+            if not links:
+                reverse_counts['reverse_unverified_targets_rejected']+=1
+                continue
+            if aid in books:
+                book=books[aid]
+                book['source_pages']=list(dict.fromkeys(
+                    book.get('source_pages',[])+links))
+            else:
+                held=old_albums.get(aid,{})
+                book={'id':aid,'title':held.get('title') or target.get('title') or aid,
+                      'source':links[0],'source_pages':links[1:],
+                      'curated_images_only':bool(held),
+                      'census_new_work':not bool(held)}
+                books[aid]=book
+            book['reverse_unverified_pages']=list(dict.fromkeys(
+                book.get('reverse_unverified_pages',[])+links))
+            reverse_counts['reverse_works_with_source']+=1
+            reverse_counts['reverse_source_pages_admitted']+=len(links)
+    source_scope.update(reverse_counts)
     print('PRODUCTION_REGISTERED_WORK_COVERAGE',model,
           json.dumps(source_scope,ensure_ascii=False),flush=True)
     client=client or PublicSession(delay=.8)
@@ -600,14 +729,31 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
         alt_new_staged=0
         known_work_urls=[url for work_id,url in historic if work_id==aid]
 
-        queue=rotated_registered_page_queue(book['source'],[u for u in book.get('source_pages',[]) if safe_page(u)],max_pages,page_cycle);visited=set();errors=[];candidate_count=0;unreviewed_count=0
+        queue=rotated_registered_page_queue(book['source'],[u for u in book.get('source_pages',[]) if safe_registered_public_page(u,model)],max_pages,page_cycle);visited=set();errors=[];candidate_count=0;unreviewed_count=0
         while queue and len(visited)<max_pages and new_total<max_new:
             page=queue.pop(0)
             if page in visited:continue
             visited.add(page)
             try:
                 response=client.get(page);urls,more,status=page_images(response.content,page,model)
-                if urlsplit(page).hostname in RESEARCH_WORK_HOSTS:
+                if page in book.get('reverse_unverified_pages',[]):
+                    # Search-engine matches are only leads, never proof of a
+                    # model, edition or photo. Verify source article firsthand.
+                    reverse_heading=' '.join(h.get_text(' ',strip=True)
+                        for h in BeautifulSoup(response.content,'html.parser').select('h1,title'))
+                    if not (PUBLIC_STRONG_MODEL[model].search(reverse_heading)
+                            and _work_token_matched_in_heading(
+                                response.content,book.get('title'),aid,model)):
+                        errors.append({'page':page,
+                                       'reason':'reverse_page_model_or_work_not_proven'})
+                        continue
+                if book.get('census_new_work') and not _work_token_matched_in_heading(
+                        response.content,book.get('title'),aid,model):
+                    errors.append({'page':page,'reason':'new_work_identity_not_proven'})
+                    continue
+                if (urlsplit(page).hostname in RESEARCH_WORK_HOSTS or
+                        urlsplit(page).hostname not in PAGE_HOSTS
+                        and urlsplit(page).hostname not in X_PUBLIC_HOSTS):
                     title_line=' '.join(h.get_text(' ',strip=True)
                         for h in BeautifulSoup(response.content,'html.parser').select('h1,title'))
                     if not (PUBLIC_STRONG_MODEL[model].search(title_line)
@@ -618,9 +764,11 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                 original_urls=list(urls)
                 # An explicit login, wrong work/volume, or missing identity is
                 # still a hard reject. Alternative parsers do not bypass it.
+                social_proven=(urlsplit(page).hostname in X_PUBLIC_HOSTS
+                               and safe_registered_public_page(page,model))
                 legacy_work_proven=(bool(previous) and book.get('curated_images_only')
-                                    and _work_token_matched_in_heading(
-                                        response.content,book.get('title'),aid,model))
+                                    and (social_proven or _work_token_matched_in_heading(
+                                        response.content,book.get('title'),aid,model)))
                 eligible=(alternative_engines
                           and (not book.get('curated_images_only') or legacy_work_proven)
                           and status in ('scoped_public_page','no_public_photos','unscoped_page_rejected')
@@ -632,7 +780,8 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                         response.content,page,book['source'])))
                     try:
                         alternative,engine_status=verified_alternative_candidates(
-                            response.content,page,model,original_urls,known_work_urls)
+                            response.content,page,model,original_urls,known_work_urls,
+                            trusted_registered_page=True)
                         # Spend the Chromium budget on pages where static HTML
                         # extraction is weak, not the first eight already-full
                         # pages. Reuse the actual dynamically rendered image URLs.
@@ -647,6 +796,10 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                                     from public_work_photo_extractor import recover_public_work_photo_urls
                                     actual_dom=browser.page.content().encode('utf-8')
                                     rendered_raw=actual_dom
+                                    if urlsplit(page).hostname in X_PUBLIC_HOSTS:
+                                        posted,_,_ = page_images(actual_dom,page,model)
+                                        rendered=list(dict.fromkeys(rendered+posted))
+                                        urls=list(dict.fromkeys(urls+posted))
                                     additional_dom,_=recover_public_work_photo_urls(
                                         actual_dom,page,model,trusted_work=True)
                                     rendered=list(dict.fromkeys(rendered+additional_dom))
@@ -660,7 +813,8 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                             if rendered:
                                 alternative,_=verified_alternative_candidates(
                                     rendered_raw,page,model,original_urls,
-                                    known_work_urls,rendered=rendered)
+                                    known_work_urls,rendered=rendered,
+                                    trusted_registered_page=True)
                         alt_candidate_count+=len(alternative)
                         alt_photo_urls.update(alternative)
                         urls=list(dict.fromkeys(list(urls)+alternative))
@@ -797,7 +951,7 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
 
 
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('--root',type=Path,default=ROOT);p.add_argument('--model',choices=['mimmi','yui'],required=True);p.add_argument('--owner',type=Path,required=True);p.add_argument('--out',type=Path,required=True);p.add_argument('--max-new',type=int,default=180);p.add_argument('--max-pages',type=int,default=24);p.add_argument('--focused-only',action='store_true');p.add_argument('--album-id',action='append',default=[]);p.add_argument('--page-cycle',type=int,default=0);p.add_argument('--alternative-engines',action='store_true');p.add_argument('--render-budget',type=int,default=8);a=p.parse_args()
+    p=argparse.ArgumentParser();p.add_argument('--root',type=Path,default=ROOT);p.add_argument('--model',choices=['mimmi','yui'],required=True);p.add_argument('--owner',type=Path,required=True);p.add_argument('--out',type=Path,required=True);p.add_argument('--max-new',type=int,default=180);p.add_argument('--max-pages',type=int,default=24);p.add_argument('--focused-only',action='store_true');p.add_argument('--album-id',action='append',default=[]);p.add_argument('--page-cycle',type=int,default=0);p.add_argument('--alternative-engines',action='store_true');p.add_argument('--render-budget',type=int,default=8);p.add_argument('--reverse-evidence',type=Path);a=p.parse_args()
     if not 1<=a.max_new<=500 or not 1<=a.max_pages<=60:raise SystemExit('Bounded collection budget required')
-    report=collect(a.root,a.model,json.loads(a.owner.read_text()),a.out,a.max_new,a.max_pages,focused_only=a.focused_only,album_ids=a.album_id,page_cycle=a.page_cycle,alternative_engines=a.alternative_engines,render_budget=a.render_budget)
+    report=collect(a.root,a.model,json.loads(a.owner.read_text()),a.out,a.max_new,a.max_pages,focused_only=a.focused_only,album_ids=a.album_id,page_cycle=a.page_cycle,alternative_engines=a.alternative_engines,render_budget=a.render_budget,reverse_evidence=a.reverse_evidence)
     print('DIRECT_FILE_COLLECTION_COMPLETE',report['model'],report['new_local_individual_files'],'REMOTE_VERIFIED',0,'GALLERY_VERIFIED',0)
