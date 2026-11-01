@@ -92,6 +92,42 @@ class DirectTests(unittest.TestCase):
                 self.assertEqual(page_images(html.replace(title,'Wrong Album'),page,'yui')[2],
                                  'missing_model_or_volume_context')
 
+    def test_independent_origin_fallback_after_original_public_origin_403(self):
+        source='https://showartx.net/artgravia-vol-677-yui/'
+        alternate='https://www.nicesss.com/archives/mij/artgravia/469248.html'
+        image='https://www.nicewww.com/wp-content/uploads/2026/05/1778813739-c81e728d9d4c2f6.jpg'
+        unrelated='https://www.nicewww.com/wp-content/uploads/2026/05/not-the-same-work.jpg'
+        raw=f'''<h1>ArtGravia – Vol.677 Yui(유이)</h1><article>
+          <img src="{image}"><img src="{unrelated}">
+          <aside class="related"><img src="{unrelated}"></aside></article>'''
+        self.assertEqual(page_images(raw,alternate,'yui'),([image],[],'scoped_public_page'))
+        self.assertEqual(page_images(raw,alternate,'mimmi')[0],[])
+        self.assertEqual(page_images(raw.replace('Vol.677','Vol.693'),alternate,'yui')[2],
+                         'missing_model_or_volume_context')
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);base=root/'apps/yui-gallery';base.mkdir(parents=True)
+            (base/'stored-albums.json').write_text('{"model":"yui","albums":[]}')
+            (base/'public-work-pages.json').write_text(json.dumps({'albums':[{
+                'id':'artgravia-677-yui-public-samples','title':'Yui ArtGravia Vol.677',
+                'source':source,'source_pages':[alternate]}]}))
+            owner={'schema_version':1,'model':'yui','albums':[
+                {'id':'other-work','images':[{'number':1,'sha256':'b'*64}]}]}
+            jpeg=photo(117)
+            class Client:
+                calls=[]
+                def get(self,url):
+                    self.calls.append(url)
+                    if url==source:raise RuntimeError('Public source origin refuses GitHub runner')
+                    if url==alternate:return type('R',(),{'content':raw.encode()})()
+                    if url==image:return type('R',(),{'content':jpeg})()
+                    raise AssertionError('Only exact user-visible assets can be requested')
+            client=Client()
+            result=collect(root,'yui',owner,root/'stage',3,3,client,album_ids=['artgravia-677-yui-public-samples'])
+            self.assertEqual(result['new_local_individual_files'],1)
+            self.assertEqual(client.calls,[source,alternate,image])
+            self.assertEqual(len(list((root/'stage/originals').rglob('*.jpg'))),1)
+            self.assertEqual(result['remote_verified_files'],0)
+
     def test_v2ph_public_first_page_and_login_stop(self):
         page='https://www.v2ph.com/album/a887785a.html'
         first='https://cdn.v2ph.com/photos/A12345678.jpg'

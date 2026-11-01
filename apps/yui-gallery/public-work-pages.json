@@ -73,7 +73,11 @@
       "priority": 15,
       "source": "https://showartx.net/artgravia-vol-677-yui/",
       "source_claimed_total_edition_photos": 75,
-      "identity_evidence": "Public article directly identifies Yui and ArtGravia VOL.677 and exposes exactly 12 distinct visible numbered JPEG photo links. Capture only observed native same-volume ART_677_{number}.jpg embedded in article; no guessed sequence or full paid edition access. Storage and gallery count remain zero until real SHA remote readback and deployed image open QA."
+      "identity_evidence": "Public article directly identifies Yui and ArtGravia VOL.677 and exposes exactly 12 distinct visible numbered JPEG photo links. Capture only observed native same-volume ART_677_{number}.jpg embedded in article; no guessed sequence or full paid edition access. Storage and gallery count remain zero until real SHA remote readback and deployed image open QA.",
+      "source_pages": [
+        "https://www.nicesss.com/archives/mij/artgravia/469248.html"
+      ],
+      "alternate_public_source_note": "Independent observed public page + four exact non-ShowArtx JPEG preview URLs, source and image GET are HTTP 200 from GitHub Actions, first image decoded 800x1063, 91904 bytes. Do not claim full paid 37/75-image edition. Priority is valid standalone samples only."
     },
     {
       "id": "artgravia-684-yui-public-samples",
