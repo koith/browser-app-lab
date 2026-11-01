@@ -6,7 +6,7 @@ from pathlib import Path
 import tempfile
 import unittest
 from PIL import Image
-from direct_photo_pipeline import collect, inspect, page_images, same_variant, public_full_variant, rotated_registered_page_queue, verified_alternative_candidates
+from direct_photo_pipeline import collect, inspect, page_images, same_variant, public_full_variant, rotated_registered_page_queue, verified_alternative_candidates, merge_owner_census_sources, _work_token_matched_in_heading
 
 
 def photo(seed):
@@ -16,6 +16,67 @@ def photo(seed):
 
 
 class DirectTests(unittest.TestCase):
+    def test_full_owner_source_census_restores_absent_album_jobs_without_cross_model_pollution(self):
+        owner={'schema_version':1,'model':'yui','albums':[
+            {'id':'ramen125','title':'Yui Ramen 125','images':[{'sha256':'a'*64}]},
+            {'id':'held','title':'Yui Held','images':[]}]}
+        book={'held':{'id':'held','source':'https://djawaphoto.com/portfolio/yui-held/',
+                      'source_pages':[],'curated_images_only':True}}
+        rows=[{'kind':'work','model':'yui','id':'ramen125',
+               'urls':['https://djawaphoto.com/portfolio/yui-ramen/',
+                       'https://djawaphoto.com/portfolio/yui-ramen/?page=2']},
+              {'kind':'work','model':'yui','id':'held',
+               'urls':['https://djawaphoto.com/portfolio/yui-held/?page=2']},
+              {'kind':'work','model':'mimmi','id':'ramen125',
+               'urls':['https://djawaphoto.com/portfolio/other-model/']},
+              {'kind':'work','model':'yui','id':'not-in-owner',
+               'urls':['https://djawaphoto.com/portfolio/not-owned/']}]
+        counts=merge_owner_census_sources(book,owner,rows,'yui')
+        self.assertEqual(counts['newly_scheduled_work_count'],1)
+        self.assertEqual(counts['additional_registered_pages'],1)
+        self.assertEqual(book['ramen125']['source_pages'],[
+            'https://djawaphoto.com/portfolio/yui-ramen/?page=2'])
+        self.assertEqual(len(book),2)
+        self.assertTrue(book['ramen125']['curated_images_only'])
+        self.assertTrue(_work_token_matched_in_heading(
+            '<h1>Yui Ramen 125 new cut</h1>','Yui Ramen 125','ramen125','yui'))
+        self.assertFalse(_work_token_matched_in_heading(
+            '<h1>Yui Photo Gallery</h1>','Yui Ramen 125','ramen125','yui'))
+
+    @unittest.skipUnless(importlib.util.find_spec('scrapy') is not None,
+                         'Scrapy required for full owner work integration')
+    def test_unindexed_owner_work_sourced_from_complete_census_can_stage_new_cut(self):
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);base=root/'apps/yui-gallery';base.mkdir(parents=True)
+            (base/'stored-albums.json').write_text('{"model":"yui","albums":[]}')
+            (root/'apps/gallery-archive').mkdir()
+            (root/'apps/gallery-archive/global_source_registry.json').write_text('{"sources":[]}')
+            page='https://djawaphoto.com/portfolio/yui-ramen/'
+            image='https://djawaphoto.com/wp-content/uploads/2026/09/new-ramen-cut.jpg'
+            html=f'<html><h1>Yui Ramen 125</h1><article>Yui Ramen <img src="{image}"></article></html>'
+            saved=photo(15);new=photo(55)
+            owner={'schema_version':1,'model':'yui','albums':[{'id':'ramen125',
+                   'title':'Yui Ramen 125','images':[{'number':1,
+                   'sha256':hashlib.sha256(saved).hexdigest()}]}]}
+            census={'targets':[{'kind':'work','model':'yui','id':'ramen125',
+                              'urls':[page],'direct_image_urls':[]}]}
+            class Client:
+                def get(self,url):
+                    if url==page:return type('R',(),{'content':html.encode()})()
+                    if url==image:return type('R',(),{'content':new})()
+                    raise ValueError('unexpected URL '+url)
+            with patch('collector_full_census.census',return_value=census),patch(
+                 'direct_photo_pipeline.page_images',return_value=([],[],'no_public_photos')):
+                report=collect(root,'yui',owner,root/'stage',5,3,
+                               Client(),alternative_engines=True,render_budget=0)
+            self.assertEqual(report['new_local_individual_files'],1,report)
+            self.assertEqual(report['owner_census_source_coverage']['newly_scheduled_work_count'],1)
+            self.assertEqual(report['alternative_staged_new_files'],1)
+            self.assertEqual(report['remote_verified_files'],0)
+            catalog=json.loads((root/'stage/metadata/catalog.json').read_text())
+            self.assertEqual((root/'stage'/catalog['albums'][0]['images'][0]['key']).read_bytes(),new)
+
     @unittest.skipUnless(importlib.util.find_spec('scrapy') is not None,
                          'Real Scrapy test requires the Scrapy dependency')
     def test_registered_legacy_owner_source_can_store_a_distinct_verified_cut(self):
