@@ -30,7 +30,15 @@ jobs:
           git checkout -B restore/4leaf-dice-actions-round2-20261101 origin/main
           git config user.name "4LEAF patch import bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git am "$RUNNER_TEMP"/leaf-round2-patches/0001.patch "$RUNNER_TEMP"/leaf-round2-patches/0002.patch "$RUNNER_TEMP"/leaf-round2-patches/0003.patch "$RUNNER_TEMP"/leaf-round2-patches/0004.patch "$RUNNER_TEMP"/leaf-round2-patches/0005.patch
+          # GitHub Actions token cannot push newly added .github/workflows files.
+          # Import the verified source portions first; create the workflow in
+          # a separate authorized GitHub App commit after the source branch exists.
+          awk '
+            /^diff --git a\\/\\.github\\/workflows\\/rog-original-targeted-extract\\.yml / { skip=1; next }
+            /^diff --git / { skip=0 }
+            !skip { print }
+          ' "$RUNNER_TEMP/leaf-round2-patches/0001.patch" > "$RUNNER_TEMP/leaf-round2-patches/0001-source-only.patch"
+          git am "$RUNNER_TEMP"/leaf-round2-patches/0001-source-only.patch "$RUNNER_TEMP"/leaf-round2-patches/0002.patch "$RUNNER_TEMP"/leaf-round2-patches/0003.patch "$RUNNER_TEMP"/leaf-round2-patches/0004.patch "$RUNNER_TEMP"/leaf-round2-patches/0005.patch
           test -z "$(git status --porcelain)"
           node --check apps/4leaf/rog/game.js
           node --check apps/4leaf/rog/dice-fall.js
