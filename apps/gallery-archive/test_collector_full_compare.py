@@ -25,6 +25,17 @@ def test():
        <div class="related"><img src="https://djawaphoto.com/wp-content/uploads/2026/09/other.jpg"></div>
        </div></article></body></html>'''
     assert full.pagination_from_html(html,base,base)==[base+'?page=2']
+    # A newly discovered public CDN must NOT be rejected merely because the
+    # old in-house engine did not whitelist that host.
+    independent='https://new-public-cdn.photos-example.org/work/001.jpg'
+    from collector_engines_ab import safe_photo as legacy_safe_photo
+    assert full.alternative_safe_photo(independent)
+    assert not legacy_safe_photo(independent)
+    assert not full.alternative_safe_photo('https://127.0.0.1/private.jpg')
+    assert not full.alternative_safe_photo('http://new-public-cdn.photos-example.org/work/001.jpg')
+    independent_html=('<html><title>Mimmi public photo</title><article>Mimmi <img src="'+independent+'"></article></html>').encode()
+    extracted,_=full.independent_scrapy_extract(independent_html,base,'mimmi')
+    assert independent in extracted,extracted
     im=Image.new('RGB',(400,600),'white')
     ImageDraw.Draw(im).rectangle((40,50,300,500),fill=(12,30,200))
     dst=BytesIO();im.save(dst,format='JPEG')
