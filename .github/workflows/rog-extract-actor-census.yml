@@ -3,7 +3,7 @@ on:
   push:
     branches: [feat/4leaf-complete-45-actor-source-20261102]
     paths:
-      - .github/workflows/rog-extract-full-actor.yml
+      - .github/workflows/rog-extract-actor-census.yml
       - apps/4leaf/rog/tools/extract-reviewed-actor-complete.py
 permissions:
   contents: write
