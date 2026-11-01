@@ -209,7 +209,7 @@ def verified_alternative_candidates(raw,page,model,baseline,known_urls,
         rank=(not resized,len(p.path))
         if key not in groups or rank>groups[key][0]:
             groups[key]=(rank,u)
-    return [x[1] for x in groups.values()],status+'|'+recovery_status
+    return [x[1] for x in groups.values()],status
 
 
 def same_variant(old_raw,new_raw):
