@@ -49,31 +49,40 @@ def safe_photo(raw):
 
 
 def scoped_generic_html(raw,page,model):
-    """Scrapy/Parsel-style CSS extraction with independent DOM logic.
-
-    Candidate status is NEVER proof of the work's identity. Scope to article and
-    require a model-identifying heading, then decode exact public image bytes.
-    """
-    soup=BeautifulSoup(raw,'html.parser')
-    heading=' '.join(n.get_text(' ',strip=True) for n in soup.select('h1,title'))
+    """Real Scrapy selector engine over a public GET (different from the baseline)."""
+    from scrapy.http import HtmlResponse
+    response=HtmlResponse(url=page,body=raw,encoding='utf-8')
+    heading=' '.join(response.css('h1::text,title::text').getall())
     if not MODEL_PATTERNS[model].search(heading):return [],'no_model_heading'
-    article=(soup.select_one('#powerbbsContent') or soup.select_one('.portfolio-content') or
-             soup.select_one('.entry-content') or soup.select_one('article') or soup.select_one('main'))
+    article=None
+    for css in ('#powerbbsContent','.portfolio-content','.entry-content','article','main'):
+        selected=response.css(css)
+        if selected:
+            article=selected[0]
+            break
     if article is None:return [],'no_article'
     candidates=[]
-    for img in article.select('img,source'):
-        if any(re.search(r'related|recommend|comment|sidebar|advert',str(c),re.I)
-               for parent in img.parents if parent is not article for c in parent.get('class',[])):
-            continue
-        keys=('data-original','data-full','data-large-file','data-src','data-lazy-src','src','srcset','data-srcset')
-        attrs=[img.get(k) for k in keys if img.get(k)]
-        a=img.find_parent('a')
-        if a and a.get('href'):attrs.append(a['href'])
+    for node in article.css('img,source'):
+        # Do not inherit outer BODY class, e.g. body.sidebar-right.
+        ancestors=node.xpath('ancestor::*')
+        bad=False
+        for ancestor in ancestors:
+            if ancestor.root is article.root:break
+            if any(re.search(r'related|recommend|comment|sidebar|advert',c,re.I)
+                   for c in ancestor.attrib.get('class','').split()):
+                bad=True
+                break
+        if bad:continue
+        attrs=[node.attrib.get(k) for k in (
+            'data-original','data-full','data-large-file','data-src',
+            'data-lazy-src','src','srcset','data-srcset') if node.attrib.get(k)]
+        anchor=node.xpath('ancestor::a[1]/@href').get()
+        if anchor:attrs.append(anchor)
         for attr in attrs:
             for part in attr.split(',') if ',' in attr else [attr]:
                 u=urljoin(page,part.strip().split()[0]) if part.strip() else ''
                 if safe_photo(u) and u not in candidates:candidates.append(u)
-    return candidates[:120],'generic_scoped_article'
+    return candidates[:120],'scrapy_article_selector'
 
 
 def gdl_extract(page,limit=120):
