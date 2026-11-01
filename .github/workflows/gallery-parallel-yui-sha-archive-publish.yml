@@ -1,0 +1,175 @@
+name: Independent Yui Six-Photo SHA Archive and Gallery Publish
+on:
+  push:
+    branches: ['research/parallel-yui-public-photos-20261101']
+    paths: ['.github/workflows/gallery-parallel-yui-sha-archive-publish.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: gallery-terabox-private-mass-upload-yui
+  cancel-in-progress: false
+jobs:
+  publish-verified:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      RCLONE_CONFIG_ARCHIVE_TYPE: terabox
+      YUI_COOKIE: ${{ secrets.YUI_TERABOX_COOKIE }}
+      GH_TOKEN: ${{ github.token }}
+      REMOTE: archive:YuiArchive
+      REPO: koith/browser-app-lab
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Restore only this parallel run's real decoded photo files
+        uses: actions/download-artifact@v4
+        with:
+          name: independent-yui-public-photo-staging
+          run-id: 41264758166
+          repository: koith/browser-app-lab
+          github-token: ${{ github.token }}
+          path: ${{ runner.temp }}/stage
+      - name: Verify all six local originals and no concurrent main owner-index modification
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import base64,hashlib,json,os,subprocess
+          from pathlib import Path
+          root=Path(os.environ['RUNNER_TEMP'])/'stage'
+          catalog=json.loads((root/'metadata/catalog.json').read_text())
+          assert catalog['model']=='yui' and catalog['schema_version']==1
+          photos=[p for a in catalog['albums'] for p in a['images']]
+          assert len(photos)==6,('unexpected staged photo count',len(photos))
+          known=set()
+          for p in photos:
+              assert p['sha256'] not in known
+              known.add(p['sha256'])
+              for field,dig in [('key','sha256'),('preview','preview_sha256')]:
+                  path=(root/p[field]).resolve()
+                  assert path.is_relative_to(root.resolve()) and path.is_file()
+                  assert hashlib.sha256(path.read_bytes()).hexdigest()==p[dig]
+          api='repos/koith/browser-app-lab/contents/apps/yui-gallery/owner-index.json?ref=main'
+          current=json.loads(subprocess.check_output(['gh','api',api]))
+          published=base64.b64decode(current['content'])
+          checkout=Path('apps/yui-gallery/owner-index.json').read_bytes()
+          if json.loads(published)!=json.loads(checkout):
+              raise RuntimeError('Main owner index changed during Claude work; refusing publish')
+          print('SIX_YUI_PUBLIC_ORIGINALS_DECODED_AND_SHA_READY',len(photos),flush=True)
+          PY
+      - name: Install pre-existing checksum pinned private storage client
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL https://github.com/gulp79/rclone-extra/releases/download/v1.75.2-extra/rclone-linux-amd64.zip -o "$RUNNER_TEMP/client.zip"
+          echo "78855325a2a8d83b3feee3a8363d32e1211babbf4cda6356fa8ca5f472075062  $RUNNER_TEMP/client.zip" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/unpack" "$RUNNER_TEMP/bin"
+          unzip -q "$RUNNER_TEMP/client.zip" -d "$RUNNER_TEMP/unpack"
+          binary="$(find "$RUNNER_TEMP/unpack" -type f -name rclone -print -quit)"
+          test -n "$binary"
+          install -m 755 "$binary" "$RUNNER_TEMP/bin/rclone"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+      - name: Load current TeraBox catalog from same authenticated owner account
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$YUI_COOKIE"
+          cookie="$(python - <<'PY'
+          import os,sys
+          sys.path.insert(0,'apps/mimmi-gallery/cloud/gateway')
+          from cookie_format import cookie_header
+          print(cookie_header(os.environ['YUI_COOKIE']))
+          PY
+          )"
+          echo "::add-mask::$cookie"
+          echo "RCLONE_CONFIG_ARCHIVE_COOKIE=$cookie" >> "$GITHUB_ENV"
+          export RCLONE_CONFIG_ARCHIVE_COOKIE="$cookie"
+          rclone copyto "$REMOTE/metadata/catalog.json" "$RUNNER_TEMP/owner-before.json" --timeout=65s --retries=1
+          python - <<'PY'
+          import json,os,hashlib
+          from pathlib import Path
+          import sys
+          sys.path.insert(0,'apps/gallery-archive')
+          from merge_incremental import flatten
+          p=Path(os.environ['RUNNER_TEMP'])/'owner-before.json'
+          data=json.loads(p.read_text())
+          assert data['storage']=='owner-private-terabox-sha-verified-bytes'
+          albums=flatten(data,'yui')
+          rows=sum(len(a['images']) for a in albums.values())
+          checkout=json.loads(Path('apps/yui-gallery/owner-index.json').read_text())
+          assert rows==checkout['physical_originals_indexed'],('remote/catalog mismatch',rows,checkout['physical_originals_indexed'])
+          print('YUI_OWNER_BASELINE_EXACT_MATCH',rows,flush=True)
+          PY
+      - name: Merge staged originals without overwriting or replacing existing images
+        id: merge
+        shell: bash
+        run: |
+          set -euo pipefail
+          python apps/gallery-archive/merge_incremental.py --model yui --previous "$RUNNER_TEMP/owner-before.json" --stage "$RUNNER_TEMP/stage"
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          p=Path(os.environ['RUNNER_TEMP'])/'stage/metadata/incremental-merge.json'
+          delta=json.loads(p.read_text())
+          if (delta['new_photos']!=6 or delta['upgraded_photos']!=0 or
+              delta['lower_quality_rejected']!=0 or delta['previous_photos']!=3045 or
+              delta['total_photos']!=3051):
+              raise RuntimeError('Concurrent model archive modification or unexpected collision; leave all original files unchanged')
+          print('YUI_SIX_PHOTO_MONOTONIC_MERGE_READY',delta,flush=True)
+          PY
+      - name: Upload only previously absent images to authenticated private TeraBox
+        shell: bash
+        run: |
+          set -euo pipefail
+          python apps/gallery-archive/safe_rclone.py copy "$RUNNER_TEMP/stage/originals" "$REMOTE/originals" --ignore-existing --transfers 2 --checkers 2 --timeout 60s --retries 1
+          python apps/gallery-archive/safe_rclone.py copy "$RUNNER_TEMP/stage/previews" "$REMOTE/previews" --ignore-existing --transfers 2 --checkers 2 --timeout 60s --retries 1
+      - name: Independently reread exact originals and previews with full SHA256
+        shell: bash
+        run: |
+          set -euo pipefail
+          python apps/gallery-archive/verify_terabox.py --stage "$RUNNER_TEMP/stage" --remote "$REMOTE" --workers 2 --only-staged
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          r=json.loads((Path(os.environ['RUNNER_TEMP'])/'stage/metadata/remote-verification.json').read_text())
+          assert r['failed']==0 and r['full_SHA256_verified']==12
+          print('YUI_SIX_NEW_PHOTOS_TWELVE_ORIGINAL_PREVIEW_SHA_VERIFIED',flush=True)
+          PY
+      - name: Commit catalog and GitHub owner-index only after exact SHA and unchanged baseline
+        shell: bash
+        run: |
+          set -euo pipefail
+          rclone copyto "$REMOTE/metadata/catalog.json" "$RUNNER_TEMP/owner-lastcheck.json" --timeout=65s --retries=1
+          cmp "$RUNNER_TEMP/owner-before.json" "$RUNNER_TEMP/owner-lastcheck.json"
+          python - <<'PY'
+          import base64,json,subprocess
+          from pathlib import Path
+          api='repos/koith/browser-app-lab/contents/apps/yui-gallery/owner-index.json?ref=main'
+          p=json.loads(subprocess.check_output(['gh','api',api]))
+          latest=json.loads(base64.b64decode(p['content']))
+          baseline=json.loads(Path('apps/yui-gallery/owner-index.json').read_text())
+          if latest!=baseline:
+              raise RuntimeError('Claude or other developer changed main gallery index; do not overwrite')
+          PY
+          rclone copyto "$RUNNER_TEMP/stage/metadata/catalog.json" "$REMOTE/metadata/catalog.json" --ignore-times --timeout 65s --retries 1
+          rclone copyto "$REMOTE/metadata/catalog.json" "$RUNNER_TEMP/new-catalog-readback.json" --timeout=65s --retries=1
+          cmp "$RUNNER_TEMP/stage/metadata/catalog.json" "$RUNNER_TEMP/new-catalog-readback.json"
+          python apps/gallery-archive/publish_owner_index.py --model yui --input "$RUNNER_TEMP/new-catalog-readback.json" --output "$RUNNER_TEMP/owner-index.json"
+          python apps/gallery-archive/commit_owner_index.py --model yui --input "$RUNNER_TEMP/owner-index.json"
+          echo "YUI_SIX_NEW_OWNER_FILES_PUBLISHED_AFTER_FULL_SHA_VERIFICATION" >> "$GITHUB_STEP_SUMMARY"
+      - name: Trigger real deployed gallery browser QA
+        shell: bash
+        run: |
+          gh workflow run static.yml --ref main
+          gh workflow run gallery-deployed-pages-photo-qa.yml --ref main
+          gh workflow run gallery-newly-stored-photo-qa.yml --ref main
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: independent-yui-private-readback-audit
+          path: ${{ runner.temp }}/stage/metadata/
+          retention-days: 14
+          if-no-files-found: ignore
