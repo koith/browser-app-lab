@@ -1,0 +1,38 @@
+name: Demand Research — Instant Public Post Viewer Browser QA
+on:
+  push:
+    branches:
+      - main
+      - fix/demand-direct-live-view-20261101
+    paths:
+      - "apps/demand-research/index.html"
+      - "apps/demand-research/test_live_browser.py"
+      - ".github/workflows/demand-live-browser.yml"
+  pull_request:
+    paths:
+      - "apps/demand-research/index.html"
+      - "apps/demand-research/test_live_browser.py"
+      - ".github/workflows/demand-live-browser.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: demand-live-browser-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  browser:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install headless Chromium
+        run: |
+          python -m pip install --disable-pip-version-check playwright==1.56.0
+          python -m playwright install --with-deps chromium
+      - name: Grouped posts, attached images and no-password DOM fixture
+        run: python apps/demand-research/test_live_browser.py
+      - name: Real public API from browser with CORS (aggregate-only, no retained posts)
+        run: python apps/demand-research/test_live_browser.py --live
