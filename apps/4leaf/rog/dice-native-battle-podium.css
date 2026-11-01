@@ -261,3 +261,21 @@
   min-width:5px!important;
  }
 }
+/* Original 1167.obs score numerals (2026-11-01): bottom-up OBS PNGs, hence
+ * scaleY(-1). The text node is hidden visually but kept for a11y/tests. */
+#app.app-classic-dice #game #battle-visual .battle-visual-total .battle-total-digit{display:none}
+#app.app-classic-dice #game #battle-visual .battle-visual-total.battle-total-original{
+ -webkit-text-stroke:0!important;text-shadow:none!important;color:transparent!important;
+ display:flex!important;align-items:flex-end!important;gap:0!important;line-height:0!important;
+}
+#app.app-classic-dice #game #battle-visual .battle-visual-total.battle-total-original .battle-total-text{
+ position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;
+}
+#app.app-classic-dice #game #battle-visual .battle-visual-total.battle-total-original .battle-total-digit{
+ display:block!important;transform:scaleY(-1);image-rendering:pixelated;
+}
+/* 2026-11-01: the archived 800x600 battle.jpg has no minimap over the duel
+ * title/scores. Paint the (pointer-events:none) battle overlay above the WEB
+ * top-left minimap dock (z 21) so the original numerals are not clipped.
+ * The minimap stays clickable because the overlay never takes input. */
+#app.app-classic-dice #game #battle-visual{z-index:22!important}

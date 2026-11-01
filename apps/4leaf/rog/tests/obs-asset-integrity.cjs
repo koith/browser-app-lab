@@ -36,7 +36,8 @@ for(const cid of sourceIds){
   assert.ok(Number.isInteger(frame.index)&&frame.index>=0);
   assert.ok(!ids.has(frame.index),'same source animation index cannot appear twice');
   ids.add(frame.index);
-  assert.match(frame.url,/^\.\/original\/OBS\/(?:bulk\/)?[\w-]+\.png$/);
+  // front-reviewed/ holds PR #417's verified 26-29 front frames.
+  assert.match(frame.url,/^\.\/original\/OBS\/(?:bulk\/|front-reviewed\/)?[\w-]+\.png$/);
   const rel=frame.url.replace(/^\.\//,'');
   const full=path.resolve(root,rel);
   assert.ok(full.startsWith(path.join(root,'original/OBS')+path.sep),'source path must remain inside OBS');

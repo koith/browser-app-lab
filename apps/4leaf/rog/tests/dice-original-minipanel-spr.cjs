@@ -99,7 +99,8 @@ async function check(browser,mobile){
     source:el.dataset.sourceCardArtwork,info:el.querySelector('span').textContent};
   });
   assert.equal(second.card,'c_0042');
-  assert.ok(second.source.includes('original/CardData/chm_'));
+  assert.ok(second.source.includes('original/CardData/chm_')||
+   second.source.endsWith('original/IMG/avatarback.png'),second.source);
   assert.ok(second.name.length>0&&second.info.includes('방어'));
   await page.locator('#board-mini .leaf-native-minipanel-tab[data-panel="map"]').click();
   const restored=await page.evaluate(()=>{

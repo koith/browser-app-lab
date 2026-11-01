@@ -40,7 +40,10 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict');
    assert.equal(result.rig,'original-card-portrait-fallback',
     'native '+result.role+' cannot impersonate a Genesis warrior '+id);
    assert.equal(result.hidden,false);
-   assert.ok(result.card?.includes('/original/CardData/'),JSON.stringify(result));
+   // Effect members fall back to the card art slot: a legacy CardData face
+   // or, without a sourced portrait, the original IMG.pak card back.
+   assert.ok(result.card?.includes('/original/CardData/')||
+    result.card==='./original/IMG/avatarback.png',JSON.stringify(result));
    assert.equal(result.anim,'unavailable');
   }
   const genuine=await page.evaluate(()=>{

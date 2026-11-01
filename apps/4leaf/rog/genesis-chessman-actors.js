@@ -60,8 +60,44 @@
   '0045':18,'0046':25,'0048':25,'0049':25,
   '0051':25,'0052':25,'0053':25,'0054':25,'0055':25,
   '0056':25,'0058':25,'0059':25,'0060':25,'0061':25,
-  '0062':25,'0064':25
+  '0062':25,'0064':25,
+  // 2026-11-01 front-silhouette review: frame25 AND frame30 of 22 more
+  // 37-frame members viewed upright at 2x beside frame0. 25/30 are camera-
+  // facing bodies with changed limb poses, 0 is the back (same pattern as
+  // above). Front silhouette only; action/FPS UNVERIFIED. Excluded:
+  // 0067/0068/0074/0086 (25 vs 0 differ), 0088 (rock-golem body).
+  '0047':25,'0050':25,'0063':25,'0065':25,'0066':25,'0069':25,
+  '0070':25,'0071':25,'0072':25,'0073':25,'0075':25,'0076':25,
+  '0077':25,'0078':25,'0079':25,'0080':25,'0081':25,'0082':25,
+  '0083':25,'0084':25,'0085':25,'0166':25
  });
+ /* Direction/action evidence, 2026-11-01 (INFERRED, not an EXE table).
+  * In every reviewed 37-frame member the sampled indices show the SAME
+  * layout: 0-2 rear three-quarter, 3-7 rear view with alternating legs,
+  * 10 rear weapon raise, 18 front three-quarter strike/cast, 25-30 front
+  * view with alternating legs. Frames 8,9,11-17,19-24,31-36 are not in the
+  * repository, so the full table is still unknown.
+  * REVIEWED_BACK_WALK: 3..7 viewed at 2x per member and confirmed as a rear
+  *   body with alternating legs. Excluded: 0042 (only 3 extracted), 0058
+  *   (3-7 are diagonal sword poses), 0069/0079 (rear not distinguishable),
+  *   0084/0085 (non-humanoid), 0045 (front is 18).
+  * REVIEWED_FRONT_ATTACK: frame 18 is a front three-quarter strike or cast
+  *   that differs from the standing front. Excluded 0045 (18 is its idle
+  *   front), 0084/0085 (non-humanoid). */
+ const REVIEWED_BACK_WALK=Object.freeze(new Set([
+  '0040','0043','0044','0046','0047','0048','0049','0050','0051',
+  '0052','0053','0054','0055','0056','0059','0060','0061','0062',
+  '0063','0064','0065','0066','0070','0071','0072','0073','0075',
+  '0076','0077','0078','0080','0081','0082','0083','0166'
+ ]));
+ const REVIEWED_FRONT_ATTACK=Object.freeze(new Set([
+  '0040','0042','0043','0044','0046','0048','0049','0051','0052',
+  '0053','0054','0055','0056','0058','0059','0060','0061','0062',
+  '0064','0047','0050','0063','0065','0066','0069','0070','0071',
+  '0072','0073','0075','0076','0077','0078','0079','0080','0081',
+  '0082','0083','0166'
+ ]));
+ const BACK_WALK_INDICES=[3,4,5,6,7];
  function frontFacingSource(native,id){
   const available=native?.frames||[];
   const approved=AUDITED_FRONT_SOURCE[id];
@@ -97,9 +133,15 @@
   '0053':[25,30], '0054':[25,30], '0055':[25,30],
   '0056':[25,30], '0058':[25,30], '0059':[25,30],
   '0060':[25,30], '0061':[25,30], '0062':[25,30],
-  '0064':[25,30]
+  '0064':[25,30],
+  // 2026-11-01: same 25/30 front-pose check for the 22 members above.
+  '0047':[25,30],'0050':[25,30],'0063':[25,30],'0065':[25,30],'0066':[25,30],
+  '0069':[25,30],'0070':[25,30],'0071':[25,30],'0072':[25,30],'0073':[25,30],
+  '0075':[25,30],'0076':[25,30],'0077':[25,30],'0078':[25,30],'0079':[25,30],
+  '0080':[25,30],'0081':[25,30],'0082':[25,30],'0083':[25,30],'0084':[25,30],
+  '0085':[25,30],'0166':[25,30]
  });
- function sequenceFor(native,action,id){
+ function sequenceFor(native,action,id,travel){
   const all=native.frames||[];
   const at=index=>all.find(f=>f.index===index)||null;
   const facing=frontFacingSource(native,id);
@@ -118,6 +160,12 @@
    // Do not display verified BACK/SIDE 0..7 during an ordinary forward
    // movement, attack recovery or victory. One static authentic FRONT is
    // more truthful than a rapidly pirouetting chessman.
+   // Moving AWAY from the camera (up the screen) shows the reviewed rear
+   // walk 3..7 instead of a front body sliding backwards. INFERRED.
+   if(action==='walk'&&travel==='away'&&REVIEWED_BACK_WALK.has(id)){
+    const back=BACK_WALK_INDICES.map(at);
+    if(back.every(Boolean))return back;
+   }
    if(action==='walk')return fullFrontCycle.length===6
     ?fullFrontCycle
     :movement.length===2
@@ -126,8 +174,8 @@
    if(action==='victory')return movement.length===2
     ?[movement[0],movement[1],movement[0]]
     :front?[front]:[];
-   if(action==='attack'&&['0040','0042','0043'].includes(id)&&at(18))
-    return [front,at(18),front];
+   if(action==='attack'&&REVIEWED_FRONT_ATTACK.has(id)&&at(18))
+    return [front,at(18),at(18),front];
    // Original directional action-table does not confirm any other attack,
    // hit or defeat packet; preserve verified standing identity.
    return front?[front]:[];
@@ -267,7 +315,15 @@
    pawn.dataset.sourceFacingFrame=facing.frame?String(facing.frame.index):'none';
    pawn.dataset.sourceFacingEvidence=facing.evidence;
    pawn.dataset.sourceDirection='front-source-candidate/not-EXE-direction-table';
-   const seq=sequenceFor(native,action,id);
+   const travel=action==='walk'?(pawn.dataset.travelFacing||'toward'):'toward';
+   const seq=sequenceFor(native,action,id,travel);
+   pawn.dataset.actorWalkFacing=action==='walk'?travel:'';
+   pawn.dataset.sourceTravelFacing=action==='walk'&&travel==='away'&&
+     seq.length&&seq[0].index===BACK_WALK_INDICES[0]
+    ?'rear-walk-3-7/visual-reviewed/INFERRED'
+    :action==='walk'?'front/INFERRED':'n/a';
+   pawn.dataset.sourceAttackEvidence=action==='attack'&&REVIEWED_FRONT_ATTACK.has(id)
+    ?'front-three-quarter-18/visual-reviewed/INFERRED':'n/a';
    // Expose EXACT SOURCE packet indexes independently from inferred labels;
    // QA can inspect what was really rendered during genuine gameplay.
    pawn.dataset.sourceFrameSequence=seq.map(frame=>frame.index).join(',');
@@ -387,7 +443,9 @@
   const continueSourceWalk=action==='walk'&&pawn.dataset.actorPose==='walk'&&
    pawn.dataset.actorRig==='original-obs-sprite'&&
    (pawn.dataset.sourceFrontWalkVerified==='true'||
-    pawn.dataset.sourceWalkCoverage?.startsWith('8-of-8-'));
+    pawn.dataset.sourceWalkCoverage?.startsWith('8-of-8-'))&&
+   // A turn from front to rear (or back) must switch frame sets at once.
+   (pawn.dataset.actorWalkFacing||'toward')===(pawn.dataset.travelFacing||'toward');
   clearTimeout(timeouts.get(pawn));
   if(!continueSourceWalk){
    pawn.dataset.actorPose=action;
@@ -478,6 +536,8 @@
    originalFullBodyFramesRecovered:[...new Set([...Object.keys(window.ORIGINAL_LEAF_OBS_FRAMES||{}),...frames.keys()])].filter(id=>!Object.hasOwn(NON_ACTOR_OBS,id)),
    nativeObsEffectMembers:{...NON_ACTOR_OBS},
    originalFrontVisualAudited:{...AUDITED_FRONT_SOURCE},
+   reviewedBackWalk:[...REVIEWED_BACK_WALK],
+   reviewedFrontAttack:[...REVIEWED_FRONT_ATTACK],
    rendered:[...document.querySelectorAll('#board-pawns .board-pawn')].map(p=>({
     playerId:p.dataset.id,chessmanId:p.dataset.chessmanId,
     pose:p.dataset.actorPose,rig:p.dataset.actorRig,

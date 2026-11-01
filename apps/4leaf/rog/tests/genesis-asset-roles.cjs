@@ -70,8 +70,9 @@ const {chromium}=require('playwright');
   assert.ok(snap.board.every(x=>x.source.startsWith('OBS/')&&x.png?.includes('./original/OBS/')));
   assert.ok(snap.party.length>=1);
   for(const actor of snap.party){
-   assert.ok(actor.artwork.startsWith('./original/CardData/chm_'),
-    'live party detail retains actual original CardData artwork');
+   assert.ok(actor.artwork.startsWith('./original/CardData/chm_')||
+    actor.artwork==='./original/IMG/avatarback.png',
+    'party detail art is an original file (legacy CardData face or card back)');
    assert.ok(!actor.src.includes('/Registry/'),'player avatar cannot impersonate a party chessman');
    if(actor.source==='OBS.pak/verified-front'){
     assert.equal(actor.evidence,'visually-reviewed');
@@ -79,8 +80,11 @@ const {chromium}=require('playwright');
     assert.equal(actor.src,actor.expected);
     assert.ok(actor.flip.startsWith('matrix('),'original upside-down OBS packet is corrected');
    }else{
-    assert.ok(actor.source.startsWith('CardData/original-fallback-'));
-    assert.equal(actor.src,actor.artwork,'unverified/missing OBS uses its original CardData face');
+    // No reviewed OBS front: show the card's art slot. Since 2026-11-01 that is
+    // either a legacy (unsourced) CardData face or the original card back,
+    // never a face picked by the removed (id%59)+1 formula.
+    assert.ok(['IMG/avatarback/no-sourced-portrait','CardData/legacy-roster-unsourced'].includes(actor.source),actor.source);
+    assert.equal(actor.src,actor.artwork,'unverified/missing OBS uses its card art slot');
    }
   }
   assert.ok(snap.party.some(x=>x.card==='c_0045'&&x.source==='OBS.pak/verified-front'),

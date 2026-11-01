@@ -60,7 +60,8 @@ def unpack_frames(source):
         raise ValueError("Missing native 256-colour OBS palette at frame boundary")
     return frames,palette
 
-def decode_rows(body,width,height,palette,minimum_opaque_pixels=45):
+def decode_rows(body,width,height,palette,minimum_opaque_pixels=45,
+                alpha_from_runs=False):
     """Decode the exact 2002 FAST.PAL.COLORKEY 640-stride run stream.
 
     Same native packet format as verified Dice/IMG.pak roll.spr:
@@ -72,6 +73,13 @@ def decode_rows(body,width,height,palette,minimum_opaque_pixels=45):
     source palette, and final cursor are checked. Nothing is centered,
     interpolated, inferred from a false image-row marker, or rendered
     beyond its native recorded width/height.
+
+    alpha_from_runs (2026-11-01): transparency is the area the run stream
+    SKIPS, not palette index 0. Evidence: 1171.obs D6 face "1" writes its
+    centre pip with index 0 (RGB 228,32,104) and the archived battle.jpg
+    shows that pip opaque pink-red. The legacy default (index 0 transparent)
+    is kept so existing exports do not change silently; re-extractions
+    should use alpha_from_runs=True and be reviewed against the old PNGs.
     """
     if len(body)<6 or len(palette)!=768:
         raise ValueError("OBS 640-stride source packet or RGB palette truncated")
@@ -80,6 +88,7 @@ def decode_rows(body,width,height,palette,minimum_opaque_pixels=45):
         raise ValueError("OBS 640-stride invalid native run count")
     pos=4
     pixels=bytearray(width*height)
+    written=bytearray(width*height)
     opaque=0
     for run in range(run_count):
         if run:
@@ -102,7 +111,8 @@ def decode_rows(body,width,height,palette,minimum_opaque_pixels=45):
         if length:
             palette_run=body[pos:pos+length]
             pixels[y*width+x:y*width+x+length]=palette_run
-            opaque+=sum(i!=0 for i in palette_run)
+            written[y*width+x:y*width+x+length]=b"\xff"*length
+            opaque+=(length if alpha_from_runs else sum(i!=0 for i in palette_run))
         pos+=length
         cursor+=length
     if pos!=len(body):
@@ -123,11 +133,17 @@ def decode_rows(body,width,height,palette,minimum_opaque_pixels=45):
         raise ValueError("OBS native source too transparent after strict decoding")
     img=Image.frombytes("P",(width,height),bytes(pixels))
     img.putpalette(palette)
-    img.info["transparency"]=0
-    image=img.convert("RGBA").transpose(Image.Transpose.FLIP_TOP_BOTTOM)
+    if alpha_from_runs:
+        image=img.convert("RGB").convert("RGBA")
+        image.putalpha(Image.frombytes("L",(width,height),bytes(written)))
+    else:
+        img.info["transparency"]=0
+        image=img.convert("RGBA")
+    image=image.transpose(Image.Transpose.FLIP_TOP_BOTTOM)
     return image,{"sourceRows":height,
        "decoder":"VERIFIED-640-STRIDE-PALETTE-RLE/exact-run-cursor-and-width",
        "videoStride":640,"nativePackets":run_count,"opaquePixels":opaque,
+       "alpha":"written-runs" if alpha_from_runs else "legacy-palette-index-0",
        "scanlineX":"ORIGINAL-VIDEO-RUN-CURSOR; NOT CENTERED"}
 
 

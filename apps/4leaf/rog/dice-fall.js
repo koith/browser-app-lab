@@ -25,9 +25,36 @@
   4:'rotateY(-109.471deg) rotateZ(-240deg)'
  };
  let active=0,last=[],lastSides=[],complete=0;
+ /* ORIGINAL D6 SPRITE (2026-11-01). Dice/OBS.pak member 1171.obs was filed
+  * as card 0171 "HUD-card-icon", but its frames are the game's die:
+  * frames 0-5 are flat result faces showing 1..6 pips (46x49, red single
+  * pip) - the same art as the dice in the archived 800x600 battle.jpg -
+  * and frames 6+ are a white die tumbling in 3D (60x71). Face index =
+  * pips - 1 is VERIFIED by counting pips in each frame. Only tumble frames
+  * 6,7,10,18,25 are extracted so far (28 declared), so the tumble below is
+  * a PARTIAL original sequence, and the drop height/bounce path is still
+  * the WEB reconstruction. No D4 art has been found; D4 keeps the WEB mesh. */
+ const D6_MEMBER='0171';
+ const D6_TUMBLE=[6,7,10,18,25];
+ function originalD6(){
+  const member=window.ORIGINAL_LEAF_OBS_FRAMES?.[D6_MEMBER];
+  if(!member?.frames)return null;
+  // Use the colour-key corrected copies (tools/correct-obs-colorkey-holes.py):
+  // the legacy export turned the palette-0 pink-red "1" pip into a hole.
+  const fix=f=>f&&{...f,url:f.url.replace('/OBS/bulk/1171-','/OBS/d6-colorkey-corrected/1171-')};
+  const at=i=>fix(member.frames.find(f=>f.index===i)||null);
+  const faces=[0,1,2,3,4,5].map(at);
+  if(!faces.every(Boolean))return null;
+  return {member:member.originalMember||'1171.obs',faces,
+   tumble:D6_TUMBLE.map(at).filter(Boolean)};
+ }
  const state=()=>({active:active>0,last:last.slice(),lastSides:lastSides.slice(),complete,
   source:'user-reported fall/bounce; outcome from live game engine',
-  originalFramesRecovered:false});
+  // Full original roll (all tumble frames + trajectory) is not recovered.
+  originalFramesRecovered:false,
+  originalD6Faces:!!originalD6(),
+  originalD6TumbleFrames:originalD6()?.tumble.map(f=>f.index)||[],
+  originalD4Art:false});
  function makeFace(n){
   const face=document.createElement('span');
   face.className='leaf-die-face leaf-die-face-'+n;
@@ -71,12 +98,40 @@
    for(let n=1;n<=6;n++)cube.append(makeFace(n));
   }
   node.append(cube);
+  const source=sides===6?originalD6():null;
+  let sprite=null;
+  if(source){
+   sprite=document.createElement('img');
+   sprite.className='leaf-fall-original-d6';
+   sprite.alt='';sprite.draggable=false;
+   sprite.setAttribute('aria-hidden','true');
+   const first=source.tumble[0]||source.faces[result-1];
+   sprite.src=first.url;
+   sprite.dataset.frame=String(first.index);
+   node.classList.add('leaf-fall-original');
+   node.dataset.faceSource='original-OBS-'+source.member+'/face-VERIFIED-by-pip-count';
+   node.dataset.tumbleSource='original-OBS-'+source.member+'/partial-'+source.tumble.length+'-frames';
+   // If the original PNG cannot load, show the WEB cube instead of nothing.
+   sprite.addEventListener('error',()=>{
+    node.classList.remove('leaf-fall-original');
+    node.dataset.faceSource='web-cube-fallback/original-load-failed';
+   });
+   node.append(sprite);
+  }else{
+   node.dataset.faceSource=sides===4?'web-tetra/no-original-D4-art':'web-cube/original-missing';
+  }
   track.append(node);
-  return {track,node,cube,result,index,count,sides};
+  return {track,node,cube,result,index,count,sides,sprite,source};
  }
  const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
  async function animateDie(die,duration,instant){
-  const {track,node,cube,result,index,sides}=die;
+  const {track,node,cube,result,index,sides,sprite,source}=die;
+  const showFace=()=>{
+   if(!sprite)return;
+   const face=source.faces[result-1];
+   sprite.src=face.url;sprite.dataset.frame=String(face.index);
+   node.dataset.originalFace=String(face.index);
+  };
   // Match stationary ground-shadow opacity to the SAME presentation
   // timeline as actual fall/bounce animation, not an independent clock.
   track.style.setProperty('--leaf-dice-shadow-duration',duration+'ms');
@@ -118,7 +173,17 @@
   ];
   if(instant||typeof node.animate!=='function'){
    cube.style.transform=target;
+   showFace();
    return;
+  }
+  let tumbleTimer=0;
+  if(sprite&&source.tumble.length>1){
+   let k=0;
+   tumbleTimer=setInterval(()=>{
+    k=(k+1)%source.tumble.length;
+    const f=source.tumble[k];
+    sprite.src=f.url;sprite.dataset.frame=String(f.index);
+   },Math.max(60,Math.round(duration*.8/(source.tumble.length*2))));
   }
   const fall=node.animate(physics,{duration,
    easing:'linear',fill:'forwards'});
@@ -128,6 +193,8 @@
   finally{
    // Make the FINAL face permanent before removing animated layer.
    cube.style.transform=target;
+   if(tumbleTimer)clearInterval(tumbleTimer);
+   showFace();
    fall.cancel();turn.cancel();
    node.style.transform='translate3d(0,0,0)';
   }
@@ -181,6 +248,6 @@
   }
  }
  window.__LEAF_DICE_FALL__={roll,getState:state,
-  faces:PIPS,orientation:ROTATION,
+  faces:PIPS,orientation:ROTATION,originalD6,
   tetraOrientation:{...TETRA_LAND},tetraDihedralDegrees:TETRA_ANGLE};
 })();

@@ -77,3 +77,29 @@
   transition:none!important;animation:none!important;
  }
 }
+/* Original 1171.obs D6 result faces (2026-11-01). Same art as battle.jpg.
+ * The CSS cube/pips above are kept only as a load-failure fallback. Frames
+ * are bottom-up OBS PNGs, hence scaleY(-1); native 46x49 pixels. */
+#app.app-classic-dice #game #battle-visual .battle-visual-die .battle-die-original{display:none}
+#app.app-classic-dice #game #battle-visual .battle-visual-die.battle-die-has-original{
+ background:none!important;border:0!important;box-shadow:none!important;padding:0!important;
+ width:46px!important;min-width:46px!important;max-width:46px!important;
+ height:49px!important;min-height:49px!important;max-height:49px!important;
+ flex:0 0 46px!important;
+ transform:none!important;
+}
+#app.app-classic-dice #game #battle-visual .battle-visual-die.battle-die-has-original .battle-die-pip{visibility:hidden!important}
+#app.app-classic-dice #game #battle-visual .battle-visual-die.battle-die-has-original .battle-die-original{
+ display:block!important;position:absolute!important;left:0!important;top:0!important;
+ width:46px!important;height:49px!important;transform:scaleY(-1)!important;
+ image-rendering:pixelated;pointer-events:none;
+}
+@media(max-width:650px){
+ #app.app-classic-dice #game #battle-visual .battle-visual-die.battle-die-has-original{
+  width:23px!important;min-width:23px!important;max-width:23px!important;
+  height:25px!important;min-height:25px!important;max-height:25px!important;flex-basis:23px!important;
+ }
+ #app.app-classic-dice #game #battle-visual .battle-visual-die.battle-die-has-original .battle-die-original{
+  width:23px!important;height:25px!important;image-rendering:auto;
+ }
+}
