@@ -38,6 +38,51 @@
       "source": "https://showartx.net/artgravia-vol-693-yui/",
       "source_claimed_total_edition_photos": 84,
       "identity_evidence": "Public HTML names ArtGravia VOL.693 [Yui]. Capture only individually observed native ART_693_{number}.jpg image URLs inside that same article. Photo catalogue count 84 is a source claim, not the number of publicly accessible/stored images. No generated filenames, paid product access, related models or resized duplicates. Remote original+preview SHA readback needed before gallery publication."
+    },
+    {
+      "id": "artgravia-639-yui-public-samples",
+      "title": "ArtGravia Vol.639 [Yui] — 공개 사진 미리보기",
+      "publisher": "ArtGravia (source page: ShowArtx)",
+      "priority": 15,
+      "source": "https://showartx.net/artgravia-vol-639-yui/",
+      "source_claimed_total_edition_photos": 71,
+      "identity_evidence": "Public article directly identifies Yui and ArtGravia VOL.639 and exposes exactly 12 distinct visible numbered JPEG photo links. Capture only observed native same-volume ART_639_{number}.jpg embedded in article; no guessed sequence or full paid edition access. Storage and gallery count remain zero until real SHA remote readback and deployed image open QA."
+    },
+    {
+      "id": "artgravia-650-yui-public-samples",
+      "title": "ArtGravia Vol.650 [Yui] — 공개 사진 미리보기",
+      "publisher": "ArtGravia (source page: ShowArtx)",
+      "priority": 15,
+      "source": "https://showartx.net/artgravia-vol-650-yui/",
+      "source_claimed_total_edition_photos": 104,
+      "identity_evidence": "Public article directly identifies Yui and ArtGravia VOL.650 and exposes exactly 12 distinct visible numbered JPEG photo links. Capture only observed native same-volume ART_650_{number}.jpg embedded in article; no guessed sequence or full paid edition access. Storage and gallery count remain zero until real SHA remote readback and deployed image open QA."
+    },
+    {
+      "id": "artgravia-670-yui-public-samples",
+      "title": "ArtGravia Vol.670 [Yui] — 공개 사진 미리보기",
+      "publisher": "ArtGravia (source page: ShowArtx)",
+      "priority": 15,
+      "source": "https://showartx.net/artgravia-vol-670-yui/",
+      "source_claimed_total_edition_photos": 99,
+      "identity_evidence": "Public article directly identifies Yui and ArtGravia VOL.670 and exposes exactly 12 distinct visible numbered JPEG photo links. Capture only observed native same-volume ART_670_{number}.jpg embedded in article; no guessed sequence or full paid edition access. Storage and gallery count remain zero until real SHA remote readback and deployed image open QA."
+    },
+    {
+      "id": "artgravia-677-yui-public-samples",
+      "title": "ArtGravia Vol.677 [Yui] — 공개 사진 미리보기",
+      "publisher": "ArtGravia (source page: ShowArtx)",
+      "priority": 15,
+      "source": "https://showartx.net/artgravia-vol-677-yui/",
+      "source_claimed_total_edition_photos": 75,
+      "identity_evidence": "Public article directly identifies Yui and ArtGravia VOL.677 and exposes exactly 12 distinct visible numbered JPEG photo links. Capture only observed native same-volume ART_677_{number}.jpg embedded in article; no guessed sequence or full paid edition access. Storage and gallery count remain zero until real SHA remote readback and deployed image open QA."
+    },
+    {
+      "id": "artgravia-684-yui-public-samples",
+      "title": "ArtGravia Vol.684 [Yui] — 공개 사진 미리보기",
+      "publisher": "ArtGravia (source page: ShowArtx)",
+      "priority": 15,
+      "source": "https://showartx.net/artgravia-vol-684-yui/",
+      "source_claimed_total_edition_photos": 85,
+      "identity_evidence": "Public article directly identifies Yui and ArtGravia VOL.684 and exposes exactly 12 distinct visible numbered JPEG photo links. Capture only observed native same-volume ART_684_{number}.jpg embedded in article; no guessed sequence or full paid edition access. Storage and gallery count remain zero until real SHA remote readback and deployed image open QA."
     }
   ]
 }
