@@ -81,13 +81,25 @@ const {chromium,webkit}=require('playwright');
     const seen=new Set();
     const observer=new MutationObserver(()=>seen.add(Number(pawn.dataset.actorFrame)));
     observer.observe(pawn,{attributes:true,attributeFilter:['data-actor-frame']});
-    window.__LEAF_GENESIS_ACTORS__.poseByPlayer(id,'attack',900);
+    // Browser frame delivery differs on mobile WebKit. Keep the native
+    // source attack live long enough to observe all genuine source frames;
+    // this QA-only pose does not mutate the authoritative match state.
+    window.__LEAF_GENESIS_ACTORS__.poseByPlayer(id,'attack',1800);
     const seq=pawn.dataset.sourceFrameSequence;
     const evidence=pawn.dataset.sourceAttackEvidence;
-    return new Promise(resolve=>setTimeout(()=>{
-      observer.disconnect();
-      resolve({seq,evidence,seen:[...seen]});
-    },660));
+    return new Promise(resolve=>{
+      const cutoff=setTimeout(()=>{
+        observer.disconnect();
+        resolve({seq,evidence,seen:[...seen]});
+      },1450);
+      const check=setInterval(()=>{
+        if(![31,33,35].every(f=>seen.has(f)))return;
+        clearInterval(check);
+        clearTimeout(cutoff);
+        observer.disconnect();
+        resolve({seq,evidence,seen:[...seen]});
+      },35);
+    });
    },start.id);
    assert.equal(attack.seq,'25,31,33,35,25',
     card+' uses original wind-up, strike and follow-through frames');
