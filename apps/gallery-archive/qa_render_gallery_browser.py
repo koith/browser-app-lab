@@ -28,7 +28,7 @@ def exercise(browser,model,branch_html=False):
         # A live production PASS must verify the new code is served by Render,
         # not old proxy-cached HTML that happens to pass a nondeterministic race.
         if not branch_html:
-            marker="const nextOwner="
+            marker="GalleryPhotoQuality.preferred(previous,p)"
             for _ in range(9):
                 if page.evaluate("""marker=>[...document.scripts].some(s=>s.textContent.includes(marker))""",marker):
                     break
@@ -36,6 +36,16 @@ def exercise(browser,model,branch_html=False):
                 page.reload(wait_until="domcontentloaded",timeout=70000)
             assert page.evaluate("""marker=>[...document.scripts].some(s=>s.textContent.includes(marker))""",marker),(model,"Render still serves old gallery HTML")
         assert page.locator('input[type="password"]').count()==0
+        # Both first-party origins must actually load the new script (not only
+        # return old HTML/200 shell from a proxy cache).
+        page.wait_for_function("""()=>typeof GalleryPhotoQuality!=='undefined'
+            &&typeof GalleryPhotoQuality.preferred==='function'
+            &&!!document.querySelector('script[src^="image-quality.js"]')""",timeout=30000)
+        if model=="yui":
+            assert page.evaluate("""()=>['sweetbox','bcut','milkybomb'].every(id=>{
+                const group=publisherRegistry.publishers.find(x=>x.id===id);
+                return group && YuiPublishers.logo(group)===null;
+            })"""),"Unverified publisher logos reappeared"
         page.wait_for_function("""limit=>typeof stored!=='undefined'&&stored.reduce((n,a)=>n+a.images.length,0)>=limit&&document.querySelectorAll('#albumgrid .album').length>0&&document.querySelector('#inventory')?.textContent.includes('실제 저장본')""",arg=MIN[model],timeout=90000)
         stats=page.evaluate("""()=>({photos:stored.reduce((n,a)=>n+a.images.length,0),owner:stored.reduce((n,a)=>n+a.images.filter(p=>p.ownerAlbum).length,0),works:document.querySelectorAll('#albumgrid .album').length})""")
         assert not errors and not bad,(model,"script or asset failures",errors,bad)
