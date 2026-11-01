@@ -24,7 +24,7 @@ from public_photo_archive import PublicSession,public_failure
 from collect_private_batch import allowed_url, safe_reencoded_public_preview
 
 MODEL_PATTERNS={'mimmi':re.compile(r'(?<![a-z])mimmi(?![a-z])|밈미|밈미',re.I),
-                'yui':re.compile(r'(?<![a-z])yui(?![a-z])|유이|심혜성|super_yuisan',re.I)}
+                'yui':re.compile(r'(?<![a-z])yui(?![a-z])|유이|심혜성|심유이|沈慧圣|super_yuisan',re.I)}
 PAGE_HOSTS={'djawaphoto.com','www.djawaphoto.com','cosplay.pixibb.com','sexy.pixibb.com','www.v2ph.com','v2ph.com',
             'blog.hacosta.co.jp','showartx.net','www.nicesss.com','www.gamersky.com','www.inven.co.kr','photo.inven.co.kr',
             'www.ajunews.com','sportsseoul.com','www.sportsseoul.com','crazygiant.imweb.me','teapawt.net','www.shypetal.com',
@@ -36,6 +36,14 @@ PAGE_HOSTS={'djawaphoto.com','www.djawaphoto.com','cosplay.pixibb.com','sexy.pix
 SAME_HOST_WORK_IMAGE_SOURCES={'www.junmeitu.com','www.kaizty.com','misskon.com',
                               'www.imgcup.com','4kup.net','www.girl-atlas.com',
                               'www.huantuji.com','yuntu8.com','www.xiutu.me'}
+# Registered public gallery sites frequently feature different people named Yui.
+# We require an artist-specific identity AND the exact owner-work title token.
+RESEARCH_WORK_HOSTS={'www.junmeitu.com','www.kaizty.com',
+                     'misskon.com','www.imgcup.com'}
+PUBLIC_STRONG_MODEL={
+    'yui':re.compile(r'yui[ -]?sim|sim[ -]?yui|심혜성|심유이|沈慧圣|super_yuisan',re.I),
+    'mimmi':re.compile(r'(?<![a-z])mimmi(?![a-z])|밈미',re.I)
+}
 CREATOR_ACCOUNTS={'yui':'super_yuisan','mimmi':'Mimmi_official'}
 FORMATS={'JPEG':'jpg','PNG':'png','WEBP':'webp'}
 KNOWN_ALTERNATE_EDITIONS={
@@ -161,6 +169,9 @@ def verified_alternative_candidates(raw,page,model,baseline,known_urls,
     heading=' '.join(tag.get_text(' ',strip=True) for tag in soup.select('h1,title'))
     if not MODEL_PATTERNS[model].search(heading):
         return [],'no_headline_model_identity'
+    if urlsplit(page).hostname in RESEARCH_WORK_HOSTS:
+        if not PUBLIC_STRONG_MODEL[model].search(heading):
+            return [],'ambiguous_model_identity_on_research_host'
     if scrapy_extractor is None:
         from collector_full_compare import independent_scrapy_extract
         scrapy_extractor=independent_scrapy_extract
@@ -564,6 +575,14 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
             visited.add(page)
             try:
                 response=client.get(page);urls,more,status=page_images(response.content,page,model)
+                if urlsplit(page).hostname in RESEARCH_WORK_HOSTS:
+                    title_line=' '.join(h.get_text(' ',strip=True)
+                        for h in BeautifulSoup(response.content,'html.parser').select('h1,title'))
+                    if not (PUBLIC_STRONG_MODEL[model].search(title_line)
+                            and _work_token_matched_in_heading(
+                                response.content,book.get('title'),aid,model)):
+                        errors.append({'page':page,'reason':'research_work_identity_unverified'})
+                        continue
                 original_urls=list(urls)
                 # An explicit login, wrong work/volume, or missing identity is
                 # still a hard reject. Alternative parsers do not bypass it.
