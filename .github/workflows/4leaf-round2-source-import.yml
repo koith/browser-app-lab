@@ -34,8 +34,8 @@ jobs:
           # Import the verified source portions first; create the workflow in
           # a separate authorized GitHub App commit after the source branch exists.
           awk '
-            /^diff --git a\\/\\.github\\/workflows\\/rog-original-targeted-extract\\.yml / { skip=1; next }
-            /^diff --git / { skip=0 }
+            index($0, "diff --git a/.github/workflows/rog-original-targeted-extract.yml b/.github/workflows/rog-original-targeted-extract.yml") == 1 { skip=1; next }
+            index($0, "diff --git ") == 1 { skip=0 }
             !skip { print }
           ' "$RUNNER_TEMP/leaf-round2-patches/0001.patch" > "$RUNNER_TEMP/leaf-round2-patches/0001-source-only.patch"
           git am "$RUNNER_TEMP"/leaf-round2-patches/0001-source-only.patch "$RUNNER_TEMP"/leaf-round2-patches/0002.patch "$RUNNER_TEMP"/leaf-round2-patches/0003.patch "$RUNNER_TEMP"/leaf-round2-patches/0004.patch "$RUNNER_TEMP"/leaf-round2-patches/0005.patch
