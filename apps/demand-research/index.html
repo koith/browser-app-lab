@@ -629,7 +629,7 @@ function hasMoreResults(){
 }
 
 function tile(p){
-  let article=el("article","post"),button=el("button","post-open");button.type="button";button.setAttribute("aria-label","게시글 상세 보기");
+  let article=el("article","post"),button=el("div","post-open");button.setAttribute("role","button");button.tabIndex=0;button.setAttribute("aria-label","게시글 상세 보기");
   article.dataset.mediaPolicy=p.restricted?"restricted":p.adultLabeled?"adult":"general";
   let thumb=el("div","post-thumb"),first=p.media[0],blocked=hideMedia(p);
   thumb.append(sourceBadge(p));
@@ -648,6 +648,7 @@ function tile(p){
   body.append(title,el("p","post-excerpt",p.text),el("div","post-date",niceDate(p.posted)));
   button.append(thumb,body);
   button.addEventListener("click",()=>openDetail(p));
+  button.addEventListener("keydown",e=>{if(e.target===button&&(e.key==="Enter"||e.key===" ")){e.preventDefault();openDetail(p)}});
   article.append(button);return article;
 }
 function appendMedia(parent,m,post,one){
@@ -714,7 +715,9 @@ function draw(){
   $("more").textContent="더 보기";
   let coverage=cloudMode?" · 테라박스 저장본":" · 조회 "+daysCovered+"일 / "+(Math.ceil((toMs-fromMs)/DAY))+"일";
   let warnings=(failed||incomplete)?" · 일부 구간 미확인 "+(failed+incomplete)+"건":"";
-  $("count").textContent=rows.length.toLocaleString()+"건"+(hidden?" · 광고 "+hidden.toLocaleString()+"건 제외":"")+(rows.length>limit?" · "+limit+"건 표시":"");
+  updateServiceCounts();
+  let sources=" · B"+serviceCounts.bluesky+" M"+serviceCounts.mastodon+" L"+serviceCounts.lemmy;
+  $("count").textContent=rows.length.toLocaleString()+"건"+(cloudMode?"":sources)+(hidden?" · 광고 "+hidden.toLocaleString()+"건 제외":"")+(rows.length>limit?" · "+limit+"건 표시":"");
   $("count").setAttribute("aria-label",rows.length.toLocaleString()+"개 표시 / "+matching.length.toLocaleString()+"개 조회"+coverage+warnings);
 }
 function startBusy(){busy=true;$("refresh").disabled=true;$("applyDate").disabled=true;$("more").disabled=true}
@@ -787,9 +790,10 @@ async function loadBatch(reset){
   }
   if(!pending.length&&nextEnd<=fromMs){status("선택 기간 조회를 마쳤습니다 · "+posts.length+"건");$("paging").classList.toggle("hidden",!hasMoreResults());return}
   startBusy();let epoch=runID;
-  let queue=pending.splice(0);
+  let queue=pending.splice(0),supplementalStart=0,supplementalEnd=0;
   if(!queue.length){
     let batchStart=Math.max(fromMs,nextEnd-CHUNK_DAYS*DAY);
+    supplementalStart=batchStart;supplementalEnd=nextEnd;
     for(let d=nextEnd-DAY;d>=batchStart;d-=DAY){
       let end=Math.min(d+DAY,nextEnd);
       for(let term of TERMS)queue.push({term,start:d,end});
@@ -800,8 +804,11 @@ async function loadBatch(reset){
   // The request cap is reset per load, not across the whole historical range.
   requestCount=0;
   status("날짜별 검색 시작 · "+posts.length+"건");draw();
+  let extra=supplementalStart?fetchFederated(supplementalStart,supplementalEnd,epoch):Promise.resolve();
   let r=await processWork(queue,epoch);
+  await extra;
   pending=r.left;
+  updateServiceCounts();
   endBusy();posts.sort((a,b)=>String(b.indexed).localeCompare(String(a.indexed)));
   if(!pending.length&&nextEnd<=fromMs)status("선택 기간 조회 완료 · "+posts.length.toLocaleString()+"건"+((failed||incomplete)?" · 일부 구간 미확인":""));
   else status("조회 "+daysCovered+"일 · "+posts.length.toLocaleString()+"건 · 이전 기간 추가 수집 가능");
