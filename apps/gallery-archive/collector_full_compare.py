@@ -65,9 +65,17 @@ def independent_scrapy_extract(raw,url,model):
     if not MODEL_PATTERNS[model].search(context):return [],'missing_model_identity'
     images=[]
     for node in article.css('img,source'):
-        if any(any(re.search(r'related|recommend|comment|advert|sidebar',item,re.I)
-                   for item in ancestor.attrib.get('class','').split())
-               for ancestor in node.root.iterancestors() if ancestor is not article.root):
+        # A global body.sidebar-right is outside the scoped article and must
+        # NOT hide all real photos (the same class of bug as PR #439).
+        excluded=False
+        for ancestor in node.root.iterancestors():
+            if ancestor is article.root:
+                break
+            if any(re.search(r'related|recommend|comment|advert|sidebar',item,re.I)
+                   for item in ancestor.attrib.get('class','').split()):
+                excluded=True
+                break
+        if excluded:
             continue
         attrs=[]
         for k in ('data-full','data-original','data-large-file','data-src','data-lazy-src','src','srcset','data-srcset'):
