@@ -61,8 +61,14 @@ function preferred(previous,candidate){
  }
  if(qualityTie&&original(previous)!==original(candidate))
   return original(candidate)?candidate:previous;
- // Inconclusive or unassessed: do not guess from dimensions, encoded bytes
- // or mere absence of watermark. Preserve the existing version.
+ // No intrinsic-quality measurement is available: prefer the
+ // SHA-verified private stored original over a public preview INSTEAD of
+ // silently hiding owner-only bytes. This is storage preservation, not a
+ // declaration that the private file has higher optical quality.
+ const archived=p=>Boolean(p?.ownerAlbum||p?.vaultAlbum);
+ if(archived(previous)!==archived(candidate))
+  return archived(candidate)?candidate:previous;
+ // Otherwise do not guess from dimensions, bytes or an unverified clean label.
  return previous;
 }
 const api={preferred,score,paired,watermarked,watermarkStatus,original,pixels};
