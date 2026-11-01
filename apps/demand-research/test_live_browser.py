@@ -43,10 +43,10 @@ def run(live=False):
             if live:
                 page.on("response",lambda resp:provider_http.append({
                     "host":urlparse(resp.url).hostname,"status":resp.status
-                }) if urlparse(resp.url).hostname in ("mastodon.social","mstdn.social","lemmy.world") and "/api/" in resp.url else None)
+                }) if urlparse(resp.url).hostname in ("mastodon.social","mstdn.social","lemmy.world","misskey.io","planet.moe") and "/api/" in resp.url else None)
                 page.on("requestfailed",lambda req:provider_failed.append(
                     urlparse(req.url).hostname) if urlparse(req.url).hostname in (
-                    "mastodon.social","mstdn.social","lemmy.world") else None)
+                    "mastodon.social","mstdn.social","lemmy.world","misskey.io","planet.moe") else None)
             page.route(PAGE,lambda route:route.fulfill(status=200,
                       content_type="text/html; charset=utf-8",body=HTML))
             if not live:
@@ -97,6 +97,27 @@ def run(live=False):
                 page.route("https://mastodon.social/api/**",mastodon_api)
                 page.route("https://mstdn.social/api/**",mastodon_api)
                 page.route("https://lemmy.world/api/**",lemmy_api)
+                def misskey_api(route):
+                    if not provider_on["enabled"] or "planet.moe" in route.request.url:
+                        records=[]
+                    else:
+                        payload=route.request.post_data_json or {}
+                        term=payload.get("query","")
+                        if term not in TERMS:records=[]
+                        else:
+                            i=TERMS.index(term)
+                            records=[{
+                              "id":"mtest"+str(i),"createdAt":datetime.now(timezone.utc).isoformat(),
+                              "visibility":"public","text":term+" synthetic Misskey QA",
+                              "user":{"username":"qa","name":"Misskey QA"},
+                              "files":[{"type":"image/png","url":"https://example.com/qa.png",
+                                        "thumbnailUrl":"https://example.com/qa.png"}]
+                            }]
+                    route.fulfill(status=200,content_type="application/json",
+                      headers={"Access-Control-Allow-Origin":"*"},
+                      body=json.dumps(records,ensure_ascii=False))
+                page.route("https://misskey.io/api/**",misskey_api)
+                page.route("https://planet.moe/api/**",misskey_api)
                 page.route("https://example.com/qa.png",
                     lambda route:route.fulfill(status=200,body=PNG,content_type="image/png"))
             page.goto(PAGE,wait_until="domcontentloaded",timeout=30000)
@@ -237,14 +258,18 @@ def run(live=False):
                 page.wait_for_function("document.getElementById('refresh').disabled === false",timeout=120000)
                 assert "M3" in page.locator("#count").inner_text()
                 assert "L3" in page.locator("#count").inner_text()
+                assert "K3" in page.locator("#count").inner_text()
                 assert page.locator('.source-badge[aria-label="출처: Mastodon"]').count()>0 or (
                   page.locator("#more").click() is None and
                   page.locator('.source-badge[aria-label="출처: Mastodon"]').count()>0)
                 assert page.locator('.source-badge[aria-label="출처: Lemmy"]').count()>0
+                assert page.locator('.source-badge[aria-label="출처: Misskey"]').count()>0
                 mast=page.locator('article.post').filter(has=page.locator('.source-badge[aria-label="출처: Mastodon"]')).first
                 assert mast.locator('a.author').get_attribute("href")=="https://mastodon.social/@qa"
                 lemmy=page.locator('article.post').filter(has=page.locator('.source-badge[aria-label="출처: Lemmy"]')).first
                 assert lemmy.locator('a.author').get_attribute("href")=="https://lemmy.world/u/qa"
+                mis=page.locator('article.post').filter(has=page.locator('.source-badge[aria-label="출처: Misskey"]')).first
+                assert mis.locator('a.author').get_attribute("href")=="https://misskey.io/@qa"
                 bsky=page.locator('article.post').filter(has=page.locator('.source-badge[aria-label="출처: Bluesky"]')).first
                 assert bsky.locator('a.author').get_attribute("href")=="https://bsky.app/profile/qa-feed.bsky.social"
                 assert bsky.locator("a.author").get_attribute("target")=="_blank"
