@@ -242,7 +242,7 @@ def page_images(raw,url,model):
     candidates={};order=[]
     for tag in article.select('a[href],img,source'):
         # Related posts, recommended models and comments do not belong to work.
-        if tag.find_parent(class_=re.compile(r'related|recommend|comment|advert|sidebar',re.I)):continue
+        if in_excluded_article_section(tag,article):continue
         attrs=('href',) if tag.name=='a' else ('data-original','data-full','data-large-file','data-src','data-lazy-src','srcset','data-srcset','src')
         for attr in attrs:
             for item in (tag.get(attr,'').split(',') if 'srcset' in attr else [tag.get(attr,'')]):
