@@ -21,7 +21,10 @@ def parse_js_json(path,marker):
     tail=text[start:]
     # The extra manifest's JSON is the first brace following Object.assign(
     # and the legacy manifest's JSON follows '=' directly.
-    first=tail.index('{')
+    # Object.assign(window.OLD||{}, {REAL MAP}) contains an empty
+    # fallback '{}' BEFORE the map. Select the standalone brace on its
+    # own line, not the empty fallback object.
+    first=tail.index('\\n{')+1 if 'Object.assign(' in marker else tail.index('{')
     obj,_=json.JSONDecoder().raw_decode(tail[first:])
     return obj
 
