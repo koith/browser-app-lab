@@ -36,11 +36,11 @@ def exercise(browser,model,branch_html=False):
         if not branch_html:
             marker="image-quality.js?v=2"
             for _ in range(9):
-                if page.evaluate("""marker=>[...document.scripts].some(s=>s.textContent.includes(marker))""",marker):
+                if page.evaluate("""marker=>[...document.scripts].some(s=>s.getAttribute('src')===marker)""",marker):
                     break
                 page.wait_for_timeout(30000)
                 page.reload(wait_until="domcontentloaded",timeout=70000)
-            assert page.evaluate("""marker=>[...document.scripts].some(s=>s.textContent.includes(marker))""",marker),(model,"Render still serves old gallery HTML")
+            assert page.evaluate("""marker=>[...document.scripts].some(s=>s.getAttribute('src')===marker)""",marker),(model,"Render still serves old gallery HTML")
         assert page.locator('input[type="password"]').count()==0
         # Both first-party origins must actually load the new script (not only
         # return old HTML/200 shell from a proxy cache).
