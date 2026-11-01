@@ -1,10 +1,11 @@
 """Private TeraBox post viewer gateway. Never expose cloud credentials in Pages."""
 from __future__ import annotations
 import asyncio, hashlib, hmac, json, os, re, secrets, time
+from pathlib import Path
 from typing import AsyncIterator
-from fastapi import FastAPI, Header, HTTPException, Query, Request
+from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import StreamingResponse
+from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 
 app=FastAPI(title="Demand Research Private Cloud",docs_url=None,redoc_url=None)
 app.add_middleware(CORSMiddleware,allow_origins=["https://koith.github.io","http://localhost:8765"],allow_methods=["GET","OPTIONS"],allow_headers=["Authorization","Content-Type"])
@@ -21,11 +22,67 @@ _lock=asyncio.Lock()
 def configured():
     return len(TOKEN)>=24 and bool(COOKIE) and REMOTE.startswith("archive:")
 
-def check_auth(value):
+# The private bookmark is https://gateway.example/#access=<random 32+ char secret>.
+# URL fragments are never transmitted in HTTP request lines, referrers or proxy logs.
+# A one-time POST exchanges that capability for a signed HttpOnly cookie, so
+# repeated visits require no password, and rotating TOKEN revokes both.
+SESSION_SECONDS=30*24*60*60
+SESSION_COOKIE="demand_view"
+VIEW_FILE=Path(__file__).resolve().parent/"index.html"
+
+def session_value(issued_at:int)->str:
+    stamp=str(issued_at)
+    digest=hmac.new(TOKEN.encode(),("demand-session:v1:"+stamp).encode(),hashlib.sha256).hexdigest()
+    return stamp+"."+digest
+
+def check_auth(request:Request):
     if not configured():
         raise HTTPException(status_code=503,detail="TeraBox gateway not connected")
-    if not value or not secrets.compare_digest(value,"Bearer "+TOKEN):
-        raise HTTPException(status_code=401,detail="Viewer authentication required")
+    value=request.cookies.get(SESSION_COOKIE,"")
+    parts=value.split(".",1)
+    if len(parts)!=2 or not parts[0].isdigit() or len(parts[0])>11:
+        raise HTTPException(status_code=401,detail="Private link required")
+    issued=int(parts[0])
+    now=int(time.time())
+    if issued>now+60 or now-issued>SESSION_SECONDS or not secrets.compare_digest(value,session_value(issued)):
+        raise HTTPException(status_code=401,detail="Private link expired")
+
+@app.get("/",include_in_schema=False)
+async def viewer():
+    # The public HTML shell contains NO secret or private data.
+    # Actual posts/media remain behind signed cloud session checks.
+    return FileResponse(VIEW_FILE,media_type="text/html; charset=utf-8",
+        headers={"Cache-Control":"no-store","Referrer-Policy":"no-referrer",
+                 "X-Robots-Tag":"noindex, nofollow","X-Content-Type-Options":"nosniff"})
+
+@app.post("/api/activate",include_in_schema=False)
+async def activate(request:Request):
+    if not configured():
+        raise HTTPException(status_code=503,detail="Cloud not connected")
+    body=await request.body()
+    if len(body)>512:
+        raise HTTPException(status_code=413,detail="Invalid link")
+    try:
+        key=json.loads(body).get("token","")
+    except (json.JSONDecodeError,AttributeError,TypeError):
+        raise HTTPException(status_code=400,detail="Invalid link")
+    if not isinstance(key,str) or not secrets.compare_digest(key,TOKEN):
+        raise HTTPException(status_code=403,detail="Invalid private link")
+    result=JSONResponse({"connected":True},headers={"Cache-Control":"no-store"})
+    result.set_cookie(SESSION_COOKIE,session_value(int(time.time())),
+        max_age=SESSION_SECONDS,httponly=True,secure=True,samesite="strict",path="/")
+    return result
+
+@app.get("/api/session")
+async def session(request:Request):
+    check_auth(request)
+    return JSONResponse({"connected":True},headers={"Cache-Control":"no-store"})
+
+@app.post("/api/end-session",include_in_schema=False)
+async def end_session():
+    response=JSONResponse({"connected":False},headers={"Cache-Control":"no-store"})
+    response.delete_cookie(SESSION_COOKIE,path="/",secure=True,httponly=True,samesite="strict")
+    return response
 
 def validate_catalog(obj):
     if type(obj) is not dict or obj.get("schema_version")!=1 or type(obj.get("posts")) is not list:
@@ -89,8 +146,8 @@ async def health():
     return {"service":"demand-research-terabox","cloud":"terabox","configured":configured(),"data_cached":_cache["posts"] is not None}
 
 @app.get("/api/posts")
-async def list_posts(authorization:str|None=Header(None),offset:int=Query(0,ge=0),limit:int=Query(30,ge=1,le=60),q:str=Query("",max_length=100)):
-    check_auth(authorization)
+async def list_posts(request:Request,offset:int=Query(0,ge=0),limit:int=Query(30,ge=1,le=60),q:str=Query("",max_length=100)):
+    check_auth(request)
     posts=await get_catalog()
     if q: posts=[p for p in posts if q.casefold() in p["text"].casefold()]
     posts=sorted(posts,key=lambda p:p.get("posted_at",""),reverse=True)
