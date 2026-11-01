@@ -16,6 +16,36 @@ def photo(seed):
 
 
 class DirectTests(unittest.TestCase):
+    def test_blocked_origin_does_not_starve_other_recorded_source_pages(self):
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);base=root/'apps/mimmi-gallery';base.mkdir(parents=True)
+            (base/'stored-albums.json').write_text('{"model":"mimmi","albums":[]}')
+            primary='https://www.junmeitu.com/mimmi/album/'
+            accessible='https://djawaphoto.com/portfolio/mimmi-album/'
+            asset='https://djawaphoto.com/wp-content/uploads/2026/01/new-real.jpg'
+            (base/'public-work-pages.json').write_text(json.dumps({'albums':[{
+                'id':'mimmi-album','title':'Mimmi Album','source':primary,
+                'source_pages':[primary+'?page=2',primary+'?page=3',accessible]}]}))
+            owner={'schema_version':1,'model':'mimmi','albums':[
+                {'id':'mimmi-album','images':[{'number':1,
+                 'sha256':hashlib.sha256(photo(1)).hexdigest()}]}]}
+            raw=photo(40)
+            class Client:
+                blocked_origins={'https://www.junmeitu.com'}
+                def get(self,url):
+                    if url==accessible:return type('R',(),{'content':
+                       f'<h1>Mimmi Album</h1><article>Mimmi <img src="{asset}"></article>'.encode()})()
+                    if url==asset:return type('R',(),{'content':raw})()
+                    raise AssertionError('Should not retry a previously blocked host')
+            with patch('direct_photo_pipeline.page_images',
+                       return_value=([asset],[],'scoped_public_page')):
+                report=collect(root,'mimmi',owner,root/'stage',3,1,
+                               Client(),alternative_engines=False)
+            self.assertEqual(report['new_local_individual_files'],1,report)
+            self.assertEqual(report['results'][0]['blocked_origin_pages_not_retried'],3)
+            self.assertEqual(report['results'][0]['pages'],1)
+
     @unittest.skipUnless(importlib.util.find_spec('scrapy') is not None,
                          'Real selector engine required')
     def test_reverse_image_source_lead_can_become_decoded_individual_photo(self):
