@@ -419,6 +419,8 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
     if not isinstance(render_budget,int) or not 0<=render_budget<=50:
         raise ValueError('Invalid bounded Chromium page budget')
     browser=None
+    if alternative_engines:
+        import scrapy  # Real extractor dependency is required, not a silent fallback
     if alternative_engines and render_budget:
         from collector_full_compare import LiveBrowser
         browser=LiveBrowser(enabled=True)
@@ -582,7 +584,15 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
             'downloaded_new_this_invocation':downloaded_now,'resumed_verified_staged_files':new_total-downloaded_now,
             'new_photo_positions':sum(not p.get('higher_resolution_replacement') for a in new_albums for p in a['images']),
             'higher_resolution_replacements':sum(bool(p.get('higher_resolution_replacement')) for a in new_albums for p in a['images']),
-            'remote_verified_files':0,'gallery_open_verified_files':0,'photo_bundles_created':0,'results':results}
+            'remote_verified_files':0,'gallery_open_verified_files':0,'photo_bundles_created':0,
+            'alternative_engines_enabled':bool(alternative_engines),
+            'chromium_page_visits':rendered_pages,
+            'alternative_candidate_url_groups':sum(r.get('alternative_engine_url_candidates',0) for r in results),
+            'alternative_staged_new_files':sum(r.get('new_staged_files_from_alternative_engines',0) for r in results),
+            'alternative_engine_page_errors':sum(
+                str(error.get('reason','')).startswith('alternative_engine_')
+                for r in results for error in r.get('failures',[]) if isinstance(error,dict)),
+            'results':results}
     (metadata/'collection-audit.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
     # Record Hydrus-inspired SHA/visual duplicate candidates from actual bytes.
     # This never changes the catalogue or blocks safe original-file publication.
