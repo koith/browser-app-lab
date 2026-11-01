@@ -21,6 +21,9 @@ def fake_post(term, i=1):
       "record":{"text":term+(" 광고 판매 홍보 할인 구독 문의 텔레그램 "+str(i) if i%15==0 else " synthetic QA sample without personal details "+str(i)),
                 "createdAt":datetime.now(timezone.utc).isoformat()},
       "indexedAt":datetime.now(timezone.utc).isoformat(),
+      "labels":([{"val":"porn"}] if i%15==1 else
+                [{"val":"graphic-media"}] if i%15==2 else
+                [{"val":"!hide"}] if i%15==3 else []),
       "embed":{"$type":"app.bsky.embed.images#view","images":[{
         "fullsize":"https://example.com/qa.png",
         "thumb":"https://example.com/qa.png","alt":"QA fixture"}]}
@@ -60,8 +63,17 @@ def run(live=False):
             assert page.locator('input[type="date"]').count()==2
             cols=page.locator("#feed").evaluate("e=>getComputedStyle(e).gridTemplateColumns.split(' ').length")
             assert cols==3,f"Expected desktop three columns, got {cols}"
+            assert page.locator("#showAdultMedia").is_checked()
+            assert page.locator("input[type=password]").count()==0
+            adult=page.locator('article[data-media-policy="adult"]')
+            restricted=page.locator('article[data-media-policy="restricted"]')
+            adult_thumb=adult.locator("img").count()
+            assert restricted.locator("img").count()==0, "Restricted media must not be previewed"
             if live:
                 assert n>=1,f"Expected public results, saw {n} posts"
+                # Warn-class adult labels are no longer blanked by app code.
+                if adult.count():
+                    assert adult_thumb>=1,"Public adult-labeled media with thumbnails should display"
                 assert page.locator("#count").inner_text().find("조회")!=-1
                 page.locator(".post-open").first.click()
                 assert page.locator("dialog#detail").is_visible()
@@ -69,7 +81,24 @@ def run(live=False):
                 page.locator("#closeDetail").click()
             else:
                 assert n==270,f"Expected first 270 of 315 synthetic posts; saw {n}"
-                assert imgs==270,f"Card thumbnail not grouped with parent: {imgs}"
+                assert 200<=imgs<270,f"Expected visible adult media but blocked graphic labels: {imgs}"
+                assert adult.count()>0 and adult_thumb>0,"Available adult-labeled images must display"
+                assert restricted.count()>0
+                adult.first.locator(".post-open").click()
+                assert page.locator("#detailContent .dialog-media img").count()>0
+                page.locator("#closeDetail").click()
+                page.locator("#showAdultMedia").uncheck()
+                assert page.locator('article[data-media-policy="adult"] img').count()==0
+                page.locator('article[data-media-policy="adult"] .post-open').first.click()
+                assert "성인 미디어 표시가 꺼져" in page.locator("#detailContent .dialog-notice").inner_text()
+                page.locator("#closeDetail").click()
+                page.locator("#showAdultMedia").check()
+                assert page.locator('article[data-media-policy="adult"] img').count()>0
+                assert page.locator('article[data-media-policy="restricted"] img').count()==0
+                page.locator('article[data-media-policy="restricted"] .post-open').first.click()
+                assert "서비스 제한" in page.locator("#detailContent .dialog-notice").inner_text()
+                assert page.locator("#detailContent .dialog-media img").count()==0
+                page.locator("#closeDetail").click()
                 assert len(api_calls)>=21, f"Expected daily shards, got {len(api_calls)}"
                 assert "315개 조회" in page.locator("#count").inner_text()
                 assert page.locator("#hideAds").is_checked()
@@ -113,7 +142,7 @@ def run(live=False):
             assert not errors,"JavaScript exceptions: "+repr(errors[:5])
             print("REAL_PUBLIC_BROWSER_SMOKE" if live else "THREE_COLUMN_MODAL_DATE_QA",
                   json.dumps({"visible_post_cards":n,"thumbs":imgs,"columns":cols,
-                              "password_inputs":pwd,"requests":len(api_calls)}))
+                              "password_inputs":pwd,"requests":len(api_calls), "adult_thumbnails":adult_thumb, "restricted_cards":restricted.count()}))
         finally:
             browser.close()
 
