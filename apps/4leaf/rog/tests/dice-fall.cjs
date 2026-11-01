@@ -31,6 +31,21 @@ const {chromium,webkit}=require('playwright');
    count:Number(document.querySelector('#dice-box').dataset.rollCount||0)
   }));
   assert.equal(before.turn,0);assert.equal(before.count,0);
+  // The first actual roll must have all genuine D6 face + tumble PNGs
+  // decoded, rather than showing empty/stale source frames on cold cache.
+  await page.waitForFunction(()=>{
+   const state=window.__LEAF_DICE_FALL__?.getState();
+   return state?.originalD6PrefetchCount===28&&
+    state?.originalD6DecodedCount===28;
+  },null,{timeout:20000});
+  const d6Preload=await page.evaluate(()=>{
+   const s=window.__LEAF_DICE_FALL__.getState();
+   return {count:window.__LEAF_DICE_FALL__.prefetchD6(),
+    decoded:s.originalD6DecodedCount,tumbles:s.originalD6TumbleFrames.length,
+    originalFaces:s.originalD6Faces};
+  });
+  assert.deepEqual(d6Preload,{count:28,decoded:28,tumbles:22,originalFaces:true},
+   'all 28 authentic 1171 OBS D6 frames must be warm before first roll');
   await page.locator('#dice-source-roll').click();
   await page.waitForFunction(()=>window.__LEAF_DICE_FALL__.getState().active===true||
     window.__LEAF_DICE_FALL__.getState().active===1,{timeout:5000});

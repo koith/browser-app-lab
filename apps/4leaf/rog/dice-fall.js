@@ -92,14 +92,35 @@
   }
   return d4ImageCache.size;
  }
- if(document.readyState==='complete')prefetchD4();
- else window.addEventListener('load',prefetchD4,{once:true});
+ // D6 has 28 genuine source frames (6 audited landing faces + 22 tumble
+ // packets). Fetching them at 60ms cadence without predecode can show a
+ // stale/blank frame on the FIRST cold-cache turn, even though the native
+ // images are present. Keep real PNGs in memory; this is not synthesized art.
+ const d6ImageCache=new Map();
+ function prefetchD6(){
+  const native=originalD6();
+  if(!native||typeof Image!=='function')return 0;
+  for(const f of [...native.faces,...native.tumble]){
+   if(d6ImageCache.has(f.url))continue;
+   const img=new Image();
+   d6ImageCache.set(f.url,img);
+   img.src=f.url;
+   if(typeof img.decode==='function')img.decode().catch(()=>{});
+  }
+  return d6ImageCache.size;
+ }
+ const prefetchSourceDice=()=>{prefetchD4();prefetchD6()};
+ if(document.readyState==='complete')prefetchSourceDice();
+ else window.addEventListener('load',prefetchSourceDice,{once:true});
  const state=()=>({active:active>0,last:last.slice(),lastSides:lastSides.slice(),complete,
   source:'user-reported fall/bounce; outcome from live game engine',
   // Full original roll (all tumble frames + trajectory) is not recovered.
   originalFramesRecovered:false,
   originalD6Faces:!!originalD6(),
   originalD6TumbleFrames:originalD6()?.tumble.map(f=>f.index)||[],
+  originalD6PrefetchCount:d6ImageCache.size,
+  originalD6DecodedCount:[...d6ImageCache.values()]
+   .filter(image=>image.complete&&image.naturalWidth>0).length,
   originalD4Art:!!originalD4(),
   originalD4TumbleFrames:originalD4()?.tumble.map(f=>f.index)||[],
   originalD4PrefetchCount:d4ImageCache.size});
@@ -297,6 +318,6 @@
   }
  }
  window.__LEAF_DICE_FALL__={roll,getState:state,
-  faces:PIPS,orientation:ROTATION,originalD6,originalD4,prefetchD4,
+  faces:PIPS,orientation:ROTATION,originalD6,originalD4,prefetchD4,prefetchD6,
   tetraOrientation:{...TETRA_LAND},tetraDihedralDegrees:TETRA_ANGLE};
 })();
