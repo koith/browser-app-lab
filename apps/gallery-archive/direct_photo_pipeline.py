@@ -4,7 +4,7 @@ No photo ZIP, artifact, source hotlink, login, CAPTCHA, invented page/image URL,
 or unverified overwrite. Cloud publication is a separate SHA-readback transaction.
 """
 import argparse
-from collections import defaultdict
+from collections import defaultdict, Counter
 from datetime import datetime, timezone
 import hashlib
 from io import BytesIO
@@ -16,7 +16,7 @@ from urllib.parse import urljoin, urlsplit, urlunsplit, parse_qsl, urlencode
 
 from bs4 import BeautifulSoup
 from PIL import Image, ImageStat
-from photo_quality_evidence import preferred_pair
+from photo_quality_evidence import preferred_pair, _decoded, _detail
 
 ROOT=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT/'apps/yui-gallery'))
@@ -455,6 +455,29 @@ def inspect(raw):
         return {'sha256':hashlib.sha256(raw).hexdigest(),'bytes':len(raw),'width':w,'height':h,'extension':ext},data.getvalue(),im.format
 
 
+def measured_photo_quality(raw, photo):
+    """Inspect genuine decoded pixels; do not equate dimensions with sharpness.
+
+    A heuristic blur/upscale flag is not a rejection or a watermark detector.
+    The same-photo optical comparator decides any actual replacement.
+    """
+    im=_decoded(raw)
+    detail=_detail(im)
+    pixels=max(1,photo['width']*photo['height'])
+    density=round(8*photo['bytes']/pixels,4)
+    suspect=(pixels>=2_000_000 and density<0.42 and detail<0.035)
+    return {
+        'actual_decoded_megapixels':round(pixels/1_000_000,3),
+        'original_bytes':photo['bytes'],
+        'encoded_bits_per_pixel':density,
+        'real_pixel_detail_index':detail,
+        'possible_artificial_upscale_or_blur':suspect,
+        'watermark_status':'unverified',
+        'comparison_rule':'optical_detail_first_then_verified_watermark_absence',
+        'metrics_are_heuristic':True
+    }
+
+
 def atomic_bytes(path,data):
     path.parent.mkdir(parents=True,exist_ok=True)
     if path.exists():
@@ -645,6 +668,7 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                     errors.append({'number':number,'reason':'variant_slot_identity_not_proven'});continue
                 try:
                     r=client.get(url);raw=r.content;p,preview,fmt=inspect(raw)
+                    quality=measured_photo_quality(raw,p)
                     if variant:
                         if p['sha256'] in seen_sha:continue
                         reference=client.get(old['url']).content
@@ -680,6 +704,7 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                     atomic_bytes(out/original,raw);atomic_bytes(out/thumbnail,preview)
                     row={**p,'number':number,'key':original,'preview':thumbnail,
                          'preview_sha256':hashlib.sha256(preview).hexdigest(),'preview_bytes':len(preview),
+                         'measured_image_quality':quality,
                          'numbering_provenance':'published_source_order' if old else 'archive_append_order_not_publisher_number'}
                     images.append(row);new_total+=1;downloaded_now+=1
                     if url in alt_photo_urls:alt_new_staged+=1
@@ -687,12 +712,33 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                 except Exception as e:errors.append({'number':number,'url':url,'reason':type(e).__name__,**public_failure(e)})
         if images:new_albums.append({'id':aid,'title':book.get('title') or aid,'publisher':book.get('publisher'),
             'expected':None,'complete':False,'images':images})
-        results.append({'id':aid,'engine':'requests_scoped_public_pagination','pages':len(visited),
-                        'published_image_candidates':candidate_count,'individual_files_saved':len(images),
-                        'alternative_engine_url_candidates':alt_candidate_count,
-                        'new_staged_files_from_alternative_engines':alt_new_staged,
-                        'unreviewed_legacy_image_candidates_skipped':unreviewed_count,
-                        'failures':errors,'cloud_readback_pass':0,'gallery_open_pass':0})
+        declared_count=next((book.get(key) for key in (
+            'advertised_photos','advertised_publisher_photos','public_web_edition_photos',
+            'source_claimed_total_edition_photos','expected')
+            if type(book.get(key)) is int and 0<book[key]<=25000),None)
+        observed_saved=len({p.get('sha256') for p in previous+images if p.get('sha256')})
+        deficit=max(0,declared_count-observed_saved) if declared_count else None
+        reason_counts=dict(Counter(
+            (e.get('reason') or e.get('cause') or 'unknown')
+            if isinstance(e,dict) else str(e)
+            for e in errors))
+        work_result={'id':aid,'engine':'requests_scrapy_chromium_article_photo',
+                     'pages':len(visited),'source_pages_registered':
+                         len(set([book['source']]+book.get('source_pages',[]))),
+                     'published_image_candidates':candidate_count,
+                     'individual_files_saved':len(images),
+                     'alternative_engine_url_candidates':alt_candidate_count,
+                     'new_staged_files_from_alternative_engines':alt_new_staged,
+                     'unreviewed_legacy_image_candidates_skipped':unreviewed_count,
+                     'saved_distinct_sha_after_staging':observed_saved,
+                     'declared_photo_total_not_download_proof':declared_count,
+                     'unfilled_declared_count_not_verified_missing':deficit,
+                     'failure_categories':reason_counts,
+                     'failures':errors,'cloud_readback_pass':0,'gallery_open_pass':0}
+        results.append(work_result)
+        print('DIRECT_WORK_SOURCE_EVIDENCE',model,aid,json.dumps({
+            k:v for k,v in work_result.items() if k not in ('failures','engine')
+        },ensure_ascii=False),flush=True)
         print('DIRECT_INDIVIDUAL_PHOTO_COLLECTION',model,aid,'saved',len(images),'failures',len(errors),flush=True)
     if browser is not None:browser.close()
     catalog={'schema_version':1,'model':model,'storage':'owner-private-terabox-sha-verified-bytes','albums':new_albums}
