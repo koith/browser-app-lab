@@ -1,0 +1,287 @@
+From fc6a5d60d0214d879b7b58ab839b872f6a3a6ac8 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sun, 1 Nov 2026 11:10:25 +0900
+Subject: [PATCH 4/4] chore(4leaf): ledger events for dice/actor work; release
+ 0.86.0-beta.31 (PWA v118)
+
+Ledger (append-only, check --against HEAD passes): tasks ACT-05 and SRC-04
+added in_progress; DIE-01 and DIE-04 todo -> in_progress; 9 events plus an
+intake. Nothing marked done: no merge or Pages deployment from this session.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_011qw76wwfZ8kaKojeP97FsR
+---
+ apps/4leaf/rog/app-version.json             |   4 +-
+ apps/4leaf/rog/docs/RESTORATION_LEDGER.json | 171 +++++++++++++++++++-
+ apps/4leaf/rog/index.html                   |   2 +-
+ apps/4leaf/rog/tests/release-identity.cjs   |   2 +-
+ 4 files changed, 169 insertions(+), 10 deletions(-)
+
+diff --git a/apps/4leaf/rog/app-version.json b/apps/4leaf/rog/app-version.json
+index 55755054..9f6dc1cf 100644
+--- a/apps/4leaf/rog/app-version.json
++++ b/apps/4leaf/rog/app-version.json
+@@ -1,9 +1,9 @@
+ {
+   "application": "4LEAF Browser Revival",
+-  "version": "0.86.0-beta.30",
++  "version": "0.86.0-beta.31",
+   "releaseDate": "2026-11-01",
+   "channel": "source-restoration-beta",
+-  "pwaCache": "4leaf-revival-pwa-v117",
++  "pwaCache": "4leaf-revival-pwa-v118",
+   "originalClient": "4LEAF 2002–2004 reference; not this web build",
+   "sourceFidelity": "partial-original-assets/not-complete"
+ }
+diff --git a/apps/4leaf/rog/docs/RESTORATION_LEDGER.json b/apps/4leaf/rog/docs/RESTORATION_LEDGER.json
+index 1b5b9cb6..e8114a30 100644
+--- a/apps/4leaf/rog/docs/RESTORATION_LEDGER.json
++++ b/apps/4leaf/rog/docs/RESTORATION_LEDGER.json
+@@ -1235,6 +1235,24 @@
+         "P0-ACTOR",
+         "P0-DICE"
+       ]
++    },
++    {
++      "id": "REQ-20261101-001",
++      "date": "2026-11-01",
++      "origin": "user",
++      "text": "2026-11-01 Claude Code 주도 통합 개발 지시: PR #420 검증, 원본 체스맨 행동·방향 해독 및 렌더러 적용 확대, 원본 D4/D6 주사위 복원, 전투 화면 정밀 복원, 미해독 70프레임, 회귀 QA, PR 병합·Pages 배포, 원장 갱신, GPT 교차검증 인계. 원작 재현도 90% 전 완료 선언 금지.",
++      "taskIds": [
++        "ACT-02",
++        "ACT-03",
++        "P0-ACTOR",
++        "P0-DICE",
++        "DIE-01",
++        "DIE-02",
++        "DIE-04",
++        "BTL-02",
++        "ACT-05",
++        "SRC-04"
++      ]
+     }
+   ],
+   "tasks": [
+@@ -2115,9 +2133,9 @@
+       "id": "DIE-01",
+       "priority": "P0",
+       "title": "원본 D4/D6 본체 그래픽·메시 출처 발굴",
+-      "status": "todo",
++      "status": "in_progress",
+       "milestone": "M07",
+-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 현재 흰색 주사위는 CSS 3D 대체; 원본 roll.spr 4장/eventRoll1.spr 16장은 버튼이며 낙하 메시가 아님 | 구현 목표: 2002 Dice/IMG/SND/EXE/관련 버전 자료와 원작 영상에서 실제 주사위 모델/텍스처 및 별도 결과 렌더러 조사; 2026-10-20 read-only archive evidence: SHA-verified 2002 Dice source folder 31 files, 713 archive members inventoried. IMG.pak has 14 .spr and 16 .bmp original UI; roll.spr 4 source frames/eventRoll1.spr 16 UI frames are NOT D4/D6 3D mesh. D4/D6 executable-embedded source geometry and 2004 result-specific physics still not recovered; no false done.",
++      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 현재 흰색 주사위는 CSS 3D 대체; 원본 roll.spr 4장/eventRoll1.spr 16장은 버튼이며 낙하 메시가 아님 | 구현 목표: 2002 Dice/IMG/SND/EXE/관련 버전 자료와 원작 영상에서 실제 주사위 모델/텍스처 및 별도 결과 렌더러 조사; 2026-10-20 read-only archive evidence: SHA-verified 2002 Dice source folder 31 files, 713 archive members inventoried. IMG.pak has 14 .spr and 16 .bmp original UI; roll.spr 4 source frames/eventRoll1.spr 16 UI frames are NOT D4/D6 3D mesh. D4/D6 executable-embedded source geometry and 2004 result-specific physics still not recovered; no false done.; 2026-11-01 D6 원본 스프라이트(1171.obs) 확인·적용. D4 원본 및 전체 회전 시퀀스 미확보",
+       "acceptance": [
+         "원본 D4/D6 모델과 색/눈 배치/면 법선 등 검증된 소스 연결 또는 미확보 명시"
+       ],
+@@ -2129,7 +2147,7 @@
+         "https://github.com/koith/browser-app-lab/actions/runs/39418202106"
+       ],
+       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+-      "lastReviewed": "2026-10-20",
++      "lastReviewed": "2026-11-01",
+       "verifiedAcceptance": null,
+       "dependencies": [
+         "SRC-02"
+@@ -2204,9 +2222,9 @@
+       "id": "DIE-04",
+       "priority": "P0",
+       "title": "전투 주사위 개수·눈·점수·결과 정렬",
+-      "status": "todo",
++      "status": "in_progress",
+       "milestone": "M07",
+-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 기능상 pip 개별 DOM이 실 롤과 연결됐으나 원작 battle.jpg의 실제 주사위 크기·각도·개수와 좌우 위치가 다름 | 구현 목표: 원작 캡처의 공격/방어 점수, pip 수, 4개·6개 상황, 다이스 사운드 및 결과 업데이트 시점 맞춤; 2026-10-21 PR pending beta.7: WEB fallback D6 3x3 pip placement fixed to reserve all 9 real grid positions (unused cells hidden not removed). Add Chromium/WebKit all 1..6 physical pip grid/face normals landing regression, original D4 and source roll UI unchanged. Original 2002 3D geometry and keyframes remain UNVERIFIED.",
++      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 기능상 pip 개별 DOM이 실 롤과 연결됐으나 원작 battle.jpg의 실제 주사위 크기·각도·개수와 좌우 위치가 다름 | 구현 목표: 원작 캡처의 공격/방어 점수, pip 수, 4개·6개 상황, 다이스 사운드 및 결과 업데이트 시점 맞춤; 2026-10-21 PR pending beta.7: WEB fallback D6 3x3 pip placement fixed to reserve all 9 real grid positions (unused cells hidden not removed). Add Chromium/WebKit all 1..6 physical pip grid/face normals landing regression, original D4 and source roll UI unchanged. Original 2002 3D geometry and keyframes remain UNVERIFIED.; 2026-11-01 전투 주사위 원본 면과 원본 점수 숫자(0-7) 적용. 8/9 숫자 미추출",
+       "acceptance": [
+         "가변 주사위 개수·각 면 1–6값/합계가 게임 판정과 일치하고 원본형 배열이 화면 밖으로 잘리지 않음"
+       ],
+@@ -2216,7 +2234,7 @@
+         "tests/dice-native-battle-dice.cjs"
+       ],
+       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
+-      "lastReviewed": "2026-10-21",
++      "lastReviewed": "2026-11-01",
+       "verifiedAcceptance": null,
+       "dependencies": [
+         "BTL-02",
+@@ -2838,6 +2856,36 @@
+       "dependencies": [
+         "QA-04"
+       ]
++    },
++    {
++      "id": "ACT-05",
++      "priority": "P0",
++      "title": "체스맨 카드 초상화(CardData chm_N) 원본 근거 매핑",
++      "status": "in_progress",
++      "milestone": "M05",
++      "current": "(sourceId%59)+1 공식 제거(main 150fa9a에서 얼굴 35개가 카드 78장에 중복). 0040/0088·0087/0137 중복 제거. 미근거 카드는 IMG/avatarback. 남은 7건은 ef3df072 가상 로스터 유래 미근거.",
++      "acceptance": [
++        "CHR 레코드 등 원본 자료에서 카드ID→chm_N 매핑을 확인하고 근거 없는 매핑 0건."
++      ],
++      "evidence": [],
++      "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
++      "lastReviewed": "2026-11-01",
++      "verifiedAcceptance": null
++    },
++    {
++      "id": "SRC-04",
++      "priority": "P0",
++      "title": "OBS 투명도 규칙 정정(팔레트 0번 ≠ 투명) 및 재추출",
++      "status": "in_progress",
++      "milestone": "M00",
++      "current": "근거: 1171.obs D6 \"1\" 면의 중앙 점이 팔레트 0번(228,32,104)이며 battle.jpg에서 불투명. 디코더 옵션과 합성 테스트 추가. 주사위 11프레임만 내부 구멍 보정본 적용(tools/correct-obs-colorkey-holes.py). 체스맨 프레임은 원본 재추출 전 미보정.",
++      "acceptance": [
++        "원본 PAK을 decode_rows(alpha_from_runs=True)로 재추출해 기존 PNG와 차이를 프레임별로 검토하고, 실제로 채워진 index-0 픽셀을 반영."
++      ],
++      "evidence": [],
++      "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
++      "lastReviewed": "2026-11-01",
++      "verifiedAcceptance": null
+     }
+   ],
+   "events": [
+@@ -6541,6 +6589,117 @@
+         "P0-RELEASE"
+       ],
+       "details": "Feature branch feat/4leaf-reviewed-native-front-cycle-20261101: eighteen visually reviewed native original OBS model IDs 0040,0043,0044,0046,0048,0049,0051,0052,0053,0054,0055,0056,0058,0059,0060,0061,0062,0064; each has native 25-30 frontal source frame sequence. SHA matched original 25/30 published frames and verified 72 new 26-29 PNG from SHA-validated original CI PAK; source manifest/actual board actor walk renderer uses all six original frames. This playback mapping/FPS remains WEB INFERRED, original 2002 action labels/direction table unknown. 0042 separately sourced, deliberately not promoted. beta30 PWA v117 staged. Do not mark any task as done until merged CI and actual Pages QA."
++    },
++    {
++      "seq": 276,
++      "date": "2026-11-01",
++      "type": "TASK_ADDED",
++      "taskId": "ACT-05",
++      "details": "Claude dev branch dev/4leaf-actor-dice-20261101; not complete"
++    },
++    {
++      "seq": 277,
++      "date": "2026-11-01",
++      "type": "TASK_ADDED",
++      "taskId": "SRC-04",
++      "details": "Claude dev branch dev/4leaf-actor-dice-20261101; not complete"
++    },
++    {
++      "seq": 278,
++      "date": "2026-11-01",
++      "type": "ORIGINAL_D6_SPRITE_IDENTIFIED",
++      "taskIds": [
++        "DIE-01",
++        "P0-DICE",
++        "DIE-04"
++      ],
++      "details": "OBS.pak 1171.obs(기존 카드 0171 HUD-card-icon으로 분류)의 frame 0-5 = D6 결과 면 1-6(46x49, 눈 개수로 VERIFIED), frame 6+ = 3D 회전 주사위(60x71). battle.jpg와 동일 그림. 28프레임 중 0-7,10,18,25만 저장소에 있음. D4 그림은 미발견. OBS번호-1000=카드ID 가정이 0167/0171에서 틀렸음을 확인."
++    },
++    {
++      "seq": 279,
++      "date": "2026-11-01",
++      "type": "RUNTIME_ORIGINAL_D6_APPLIED",
++      "taskIds": [
++        "DIE-02",
++        "P0-DICE",
++        "DIE-04"
++      ],
++      "details": "낙하 D6: 비행 중 원본 회전 프레임 6,7,10,18,25 순환, 착지 시 원본 결과 면. 전투 주사위: 원본 결과 면 46x49(모바일 23x25). 낙하 궤적·바운스는 WEB 재구성 유지, D4는 WEB 메쉬 유지. tests/dice-fall.cjs, dice-native-battle-dice.cjs 갱신."
++    },
++    {
++      "seq": 280,
++      "date": "2026-11-01",
++      "type": "RUNTIME_ORIGINAL_SCORE_NUMERALS_APPLIED",
++      "taskIds": [
++        "BTL-02",
++        "DIE-04"
++      ],
++      "details": "1167.obs frame 0-7 = battle.jpg 점수 숫자 0-7. 두 자리가 0-7인 점수만 원본 숫자, 8/9 포함 시 WEB 텍스트(8,9 프레임 미추출). 전투 연출 z-index를 웹 미니맵 위로 올려 숫자 잘림 해소(pointer-events:none 유지)."
++    },
++    {
++      "seq": 281,
++      "date": "2026-11-01",
++      "type": "RUNTIME_DIRECTION_AWARE_WALK_AND_ATTACK",
++      "taskIds": [
++        "ACT-03",
++        "P0-ACTOR"
++      ],
++      "details": "37프레임 공통 배치(0-2 측후면, 3-7 뒷모습 걷기, 10 뒷모습 공격, 18 정면3/4 공격, 25-30 정면 걷기)를 6종 대조 후 멤버별 2배 확대 검토. 화면 위로 이동 시 3-7 뒷모습 걷기 35종, 공격 시 정면→18→18→정면 39종, 정면 실루엣 22종 추가(총 42종). 모두 INFERRED. 제외: 0042(4-7 미추출),0058,0069,0079,0084,0085. 8,9,11-17,19-24,31-36 미추출로 전체 행동표 미확정."
++    },
++    {
++      "seq": 282,
++      "date": "2026-11-01",
++      "type": "PR420_REVIEW",
++      "taskIds": [
++        "ACT-02",
++        "ACT-03"
++      ],
++      "details": "audit-obs-action-evidence.py는 dump-original-paks.py V1 보고서 키와 일치, 합성 테스트 PASS. 다만 개수 비교만 하고 프레임 geometry를 쓰지 않아 행동/방향 판별에는 부족. 실제 full-frame-report.json(Actions artifact)은 이 세션에서 API 차단으로 미확인."
++    },
++    {
++      "seq": 283,
++      "date": "2026-11-01",
++      "type": "STALE_TESTS_FIXED",
++      "taskIds": [
++        "QA-04"
++      ],
++      "details": "main 150fa9a에서 실패하던 obs-asset-integrity, dice-original-obs-bulk가 PR #417 front-reviewed 경로를 허용하지 않아 실패. 경로·개수(bulk 945 + front-reviewed 72) 분리로 수정."
++    },
++    {
++      "seq": 284,
++      "date": "2026-11-01",
++      "type": "STATUS_CHANGED",
++      "taskId": "DIE-01",
++      "from": "todo",
++      "to": "in_progress",
++      "details": "D6 원본 스프라이트(1171.obs) 확인·적용. D4 원본 및 전체 회전 시퀀스 미확보"
++    },
++    {
++      "seq": 285,
++      "date": "2026-11-01",
++      "type": "STATUS_CHANGED",
++      "taskId": "DIE-04",
++      "from": "todo",
++      "to": "in_progress",
++      "details": "전투 주사위 원본 면과 원본 점수 숫자(0-7) 적용. 8/9 숫자 미추출"
++    },
++    {
++      "seq": 286,
++      "date": "2026-11-01",
++      "type": "REQUEST_REGISTERED",
++      "requestId": "REQ-20261101-001",
++      "taskIds": [
++        "ACT-02",
++        "ACT-03",
++        "P0-ACTOR",
++        "P0-DICE",
++        "DIE-01",
++        "DIE-02",
++        "DIE-04",
++        "BTL-02",
++        "ACT-05",
++        "SRC-04"
++      ]
+     }
+   ]
+ }
+diff --git a/apps/4leaf/rog/index.html b/apps/4leaf/rog/index.html
+index ceeeb5d5..1d3f7e83 100644
+--- a/apps/4leaf/rog/index.html
++++ b/apps/4leaf/rog/index.html
+@@ -1,4 +1,4 @@
+-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="leaf-central-api" content="https://fourleaf-central-chat-free.onrender.com"><meta name="theme-color" content="#1b1941"><meta name="leaf-revival-version" content="0.86.0-beta.30"><meta name="leaf-restoration" content="partial-original-source-assets"><title>4LEAF Browser · 월드맵과 채팅</title><link rel="icon" href="./icon.svg" type="image/svg+xml"><link rel="manifest" href="./manifest.webmanifest"><link rel="stylesheet" href="./style.css"><link rel="stylesheet" href="./original.css"><link rel="stylesheet" href="./network.css"><link rel="stylesheet" href="./lobby.css"><link rel="stylesheet" href="./game-authentic.css"><link rel="stylesheet" href="./classic-focus.css"><link rel="stylesheet" href="./world-perspective.css"><link rel="stylesheet" href="./original-stage.css"><link rel="stylesheet" href="./original-tiles.css"><link rel="stylesheet" href="./world-social.css"><link rel="stylesheet" href="./world-map-source-moon.css"><link rel="stylesheet" href="./mainframe-native-snapshot.css"><link rel="stylesheet" href="./original-shell-accurate.css"><link rel="stylesheet" href="./mainframe-native-toolbar.css"><link rel="stylesheet" href="./dice-native-stage.css"><link rel="stylesheet" href="./dice-native-map-buttons.css"><link rel="stylesheet" href="./dice-native-room-buttons.css"><link rel="stylesheet" href="./town-native-room-hotspots.css"><link rel="stylesheet" href="./native-chattown-scale.css"><link rel="stylesheet" href="./knighttown-native.css"><link rel="stylesheet" href="./original-chat-input.css"><link rel="stylesheet" href="./chatroom-native-exit.css"><link rel="stylesheet" href="./original-world-notice.css"><link rel="stylesheet" href="./chatroom-native-talkbox.css"><link rel="stylesheet" href="./cardshop-native-controls.css"><link rel="stylesheet" href="./cardshop-original-2003.css"><link rel="stylesheet" href="./dice-native-client-frame.css"><link rel="stylesheet" href="./dice-native-minimap-navigation.css"><link rel="stylesheet" href="./dice-native-minipanel-spr.css"><link rel="stylesheet" href="./chatroom-native-panels.css"><link rel="stylesheet" href="./chatroom-native-ringbtn.css"><link rel="stylesheet" href="./chatroom-native-owner-dialog.css"><link rel="stylesheet" href="./registry-native-avatar-dialog.css"><link rel="stylesheet" href="./chatroom-native-expressions.css"><link rel="stylesheet" href="./chatroom-native-scrollbar.css"><link rel="stylesheet" href="./dice-native-player-portraits.css"><link rel="stylesheet" href="./dice-native-chessmen-hud.css"><link rel="stylesheet" href="./dice-original-selector.css"><link rel="stylesheet" href="./dice-original-chessman-stats.css"><link rel="stylesheet" href="./dice-native-tis-clean.css"><link rel="stylesheet" href="./dice-native-tis-depth.css"><link rel="stylesheet" href="./dice-native-pawn-dmp-depth.css"><link rel="stylesheet" href="./dice-dmp-camera-controls.css"><link rel="stylesheet" href="./dice-source-dmp-terrain-explorer.css"><link rel="stylesheet" href="./dice-ai-autoplay.css"><link rel="stylesheet" href="./dice-native-menu-chrome.css"><link rel="stylesheet" href="./dice-native-dialog-event.css"><link rel="stylesheet" href="./dice-native-battle-podium.css"><link rel="stylesheet" href="./dice-native-battle-dice.css"><link rel="stylesheet" href="./dice-source-roll.css"><link rel="stylesheet" href="./dice-source-native-ui.css"><link rel="stylesheet" href="./dice-fall.css"><link rel="stylesheet" href="./genesis-chessman-actors.css"><link rel="stylesheet" href="./dice-2004-full-frame.css"><link rel="stylesheet" href="./dice-source-tile-pitch.css"><link rel="stylesheet" href="./dice-native-tis-orientation.css"><link rel="stylesheet" href="./dice-d4-source-fallback.css"><link rel="stylesheet" href="./dice-source-chessman-battle.css"><link rel="stylesheet" href="./dice-original-obs.css"><link rel="stylesheet" href="./dice-native-battle-source-spr.css"><link rel="stylesheet" href="./dice-original-battle-unobstructed.css"><link rel="stylesheet" href="./dice-native-source-events.css"><link rel="stylesheet" href="./dice-original-ability-spr.css"><link rel="stylesheet" href="./chatroom-native-2004-frame.css"></head><body>
++<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="leaf-central-api" content="https://fourleaf-central-chat-free.onrender.com"><meta name="theme-color" content="#1b1941"><meta name="leaf-revival-version" content="0.86.0-beta.31"><meta name="leaf-restoration" content="partial-original-source-assets"><title>4LEAF Browser · 월드맵과 채팅</title><link rel="icon" href="./icon.svg" type="image/svg+xml"><link rel="manifest" href="./manifest.webmanifest"><link rel="stylesheet" href="./style.css"><link rel="stylesheet" href="./original.css"><link rel="stylesheet" href="./network.css"><link rel="stylesheet" href="./lobby.css"><link rel="stylesheet" href="./game-authentic.css"><link rel="stylesheet" href="./classic-focus.css"><link rel="stylesheet" href="./world-perspective.css"><link rel="stylesheet" href="./original-stage.css"><link rel="stylesheet" href="./original-tiles.css"><link rel="stylesheet" href="./world-social.css"><link rel="stylesheet" href="./world-map-source-moon.css"><link rel="stylesheet" href="./mainframe-native-snapshot.css"><link rel="stylesheet" href="./original-shell-accurate.css"><link rel="stylesheet" href="./mainframe-native-toolbar.css"><link rel="stylesheet" href="./dice-native-stage.css"><link rel="stylesheet" href="./dice-native-map-buttons.css"><link rel="stylesheet" href="./dice-native-room-buttons.css"><link rel="stylesheet" href="./town-native-room-hotspots.css"><link rel="stylesheet" href="./native-chattown-scale.css"><link rel="stylesheet" href="./knighttown-native.css"><link rel="stylesheet" href="./original-chat-input.css"><link rel="stylesheet" href="./chatroom-native-exit.css"><link rel="stylesheet" href="./original-world-notice.css"><link rel="stylesheet" href="./chatroom-native-talkbox.css"><link rel="stylesheet" href="./cardshop-native-controls.css"><link rel="stylesheet" href="./cardshop-original-2003.css"><link rel="stylesheet" href="./dice-native-client-frame.css"><link rel="stylesheet" href="./dice-native-minimap-navigation.css"><link rel="stylesheet" href="./dice-native-minipanel-spr.css"><link rel="stylesheet" href="./chatroom-native-panels.css"><link rel="stylesheet" href="./chatroom-native-ringbtn.css"><link rel="stylesheet" href="./chatroom-native-owner-dialog.css"><link rel="stylesheet" href="./registry-native-avatar-dialog.css"><link rel="stylesheet" href="./chatroom-native-expressions.css"><link rel="stylesheet" href="./chatroom-native-scrollbar.css"><link rel="stylesheet" href="./dice-native-player-portraits.css"><link rel="stylesheet" href="./dice-native-chessmen-hud.css"><link rel="stylesheet" href="./dice-original-selector.css"><link rel="stylesheet" href="./dice-original-chessman-stats.css"><link rel="stylesheet" href="./dice-native-tis-clean.css"><link rel="stylesheet" href="./dice-native-tis-depth.css"><link rel="stylesheet" href="./dice-native-pawn-dmp-depth.css"><link rel="stylesheet" href="./dice-dmp-camera-controls.css"><link rel="stylesheet" href="./dice-source-dmp-terrain-explorer.css"><link rel="stylesheet" href="./dice-ai-autoplay.css"><link rel="stylesheet" href="./dice-native-menu-chrome.css"><link rel="stylesheet" href="./dice-native-dialog-event.css"><link rel="stylesheet" href="./dice-native-battle-podium.css"><link rel="stylesheet" href="./dice-native-battle-dice.css"><link rel="stylesheet" href="./dice-source-roll.css"><link rel="stylesheet" href="./dice-source-native-ui.css"><link rel="stylesheet" href="./dice-fall.css"><link rel="stylesheet" href="./genesis-chessman-actors.css"><link rel="stylesheet" href="./dice-2004-full-frame.css"><link rel="stylesheet" href="./dice-source-tile-pitch.css"><link rel="stylesheet" href="./dice-native-tis-orientation.css"><link rel="stylesheet" href="./dice-d4-source-fallback.css"><link rel="stylesheet" href="./dice-source-chessman-battle.css"><link rel="stylesheet" href="./dice-original-obs.css"><link rel="stylesheet" href="./dice-native-battle-source-spr.css"><link rel="stylesheet" href="./dice-original-battle-unobstructed.css"><link rel="stylesheet" href="./dice-native-source-events.css"><link rel="stylesheet" href="./dice-original-ability-spr.css"><link rel="stylesheet" href="./chatroom-native-2004-frame.css"></head><body>
+ <div id="app" role="application" aria-label="4LEAF 브라우저">
+ <header class="titlebar"><div class="win-logo">♣</div><b>4LEAF Browser</b><small>Ver 0.96d · World & Chat</small><span class="top-space"></span><div class="window-buttons"><span>─</span><span>□</span><span>×</span></div></header>
+ <nav class="toolbar" aria-label="원본 MainFrame 도구모음 · 웹 복원 이동"><button data-route="sky" title="월드맵" aria-label="월드맵으로 이동" data-native-icon-row="0">⌂<span>HOME</span></button><button data-route="city" title="켈티카의 거리" aria-label="켈티카 거리로 이동" data-native-icon-row="2">♜<span>STREET</span></button><button data-route="rooms" title="채팅방" aria-label="하이아칸 채팅방으로 이동" data-native-icon-row="3">♧<span>CHAT</span></button><button data-route="shop" title="매직카덴" aria-label="매직카덴 상점으로 이동" data-native-icon-row="4">♠<span>SHOP</span></button><button data-route="lobby" title="주사위의 잔영" aria-label="주사위의 잔영으로 이동" data-native-icon-row="1">⚄<span>DICE</span></button><div class="tool-spacer"></div><span id="where">포리프 월드맵</span><button id="rename" class="smalltool" title="닉네임 변경" aria-label="닉네임 변경" data-native-icon-row="6">✎</button><button id="audio" class="smalltool" title="효과음" aria-label="효과음 켜기 또는 끄기" data-native-icon-row="5">♪</button><button id="help" class="smalltool" title="게임 안내" aria-label="게임 안내" data-native-icon-row="7">?</button></nav>
+diff --git a/apps/4leaf/rog/tests/release-identity.cjs b/apps/4leaf/rog/tests/release-identity.cjs
+index 7dd3743a..dcf86898 100644
+--- a/apps/4leaf/rog/tests/release-identity.cjs
++++ b/apps/4leaf/rog/tests/release-identity.cjs
+@@ -10,7 +10,7 @@ const root=path.resolve(__dirname,'..');
+ const meta=JSON.parse(fs.readFileSync(path.join(root,'app-version.json'),'utf8'));
+ const index=fs.readFileSync(path.join(root,'index.html'),'utf8');
+ const sw=fs.readFileSync(path.join(root,'sw.js'),'utf8');
+-assert.equal(meta.version,'0.86.0-beta.30');
++assert.equal(meta.version,'0.86.0-beta.31');
+ assert.match(meta.channel,/beta/,'original client exact copy was not completed');
+ assert.ok(meta.sourceFidelity.includes('not-complete'),'do not falsely claim original is finished');
+ assert.ok(!meta.originalClient.includes(meta.version),'web revival is separate from 2002–2004 release');
+-- 
+2.43.0
+

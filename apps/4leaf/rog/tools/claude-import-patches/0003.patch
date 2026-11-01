@@ -1,0 +1,1563 @@
+From 7fc9de50c402b971f0e3f285fe18f9ae119c5af1 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sun, 1 Nov 2026 11:10:24 +0900
+Subject: [PATCH 3/4] feat(4leaf): original D6 dice and battle score numerals
+ from OBS.pak
+
+Two OBS members filed as chessman cards are the game's dice UI:
+- 1171.obs (card 0171): frames 0-5 are D6 result faces 1..6 (46x49),
+  frames 6+ a white die tumbling in 3D (60x71). Same art as the dice in
+  the archived 800x600 battle.jpg. Face = pips-1, VERIFIED by pip count.
+- 1167.obs (card 0167): frames 0-7 are battle.jpg's white, red-outlined
+  score digits 0..7.
+
+Runtime
+- Falling D6 (dice-fall.js): plays original tumble frames 6,7,10,18,25 in
+  flight and lands on the original result face. Drop/bounce path is still
+  the WEB reconstruction; the CSS cube stays only as a load-failure
+  fallback. D4 keeps the WEB tetra (no original D4 art found).
+- Battle dice: original result faces, 46x49 (23x25 on phones), no rotation.
+- Battle score: original numerals when both digits are 0..7; scores with
+  8 or 9 keep WEB text because those frames are not extracted.
+- Battle overlay (pointer-events:none) now paints above the WEB top-left
+  minimap, which clipped the larger original numerals. battle.jpg has no
+  minimap there.
+
+Colour-key bug
+- The decoder treats palette index 0 as transparent. In VIDEO-RLE only
+  skipped pixels are transparent: the "1" pip of 1171 is index 0 and is
+  opaque pink-red in battle.jpg. decode_rows(alpha_from_runs=True) adds the
+  correct rule (default unchanged; synthetic test added). Other OBS frames
+  may have the same holes and need re-extraction.
+- tools/correct-obs-colorkey-holes.py restores enclosed holes whose RGB is
+  the frame's palette[0] for the 11 dice frames only (provenance.json has
+  source/corrected SHA-256; 280 pixels restored, 0 invented).
+
+PWA caches the corrected frames.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_011qw76wwfZ8kaKojeP97FsR
+---
+ apps/4leaf/rog/dice-fall.css                  |  11 ++
+ apps/4leaf/rog/dice-fall.js                   |  75 +++++++++++-
+ apps/4leaf/rog/dice-native-battle-dice.css    |  26 ++++
+ apps/4leaf/rog/dice-native-battle-podium.css  |  18 +++
+ apps/4leaf/rog/game.js                        |  39 ++++++
+ .../OBS/d6-colorkey-corrected/1171-00.png     | Bin 0 -> 1462 bytes
+ .../OBS/d6-colorkey-corrected/1171-01.png     | Bin 0 -> 1663 bytes
+ .../OBS/d6-colorkey-corrected/1171-02.png     | Bin 0 -> 2077 bytes
+ .../OBS/d6-colorkey-corrected/1171-03.png     | Bin 0 -> 2329 bytes
+ .../OBS/d6-colorkey-corrected/1171-04.png     | Bin 0 -> 2546 bytes
+ .../OBS/d6-colorkey-corrected/1171-05.png     | Bin 0 -> 2552 bytes
+ .../OBS/d6-colorkey-corrected/1171-06.png     | Bin 0 -> 4352 bytes
+ .../OBS/d6-colorkey-corrected/1171-07.png     | Bin 0 -> 4498 bytes
+ .../OBS/d6-colorkey-corrected/1171-10.png     | Bin 0 -> 4798 bytes
+ .../OBS/d6-colorkey-corrected/1171-18.png     | Bin 0 -> 4274 bytes
+ .../OBS/d6-colorkey-corrected/1171-25.png     | Bin 0 -> 4797 bytes
+ .../OBS/d6-colorkey-corrected/provenance.json | 112 ++++++++++++++++++
+ apps/4leaf/rog/sw.js                          |   4 +-
+ apps/4leaf/rog/tests/dice-fall.cjs            |  18 ++-
+ .../rog/tests/dice-native-battle-dice.cjs     |  30 +++--
+ .../rog/tests/test_obs_native_640stride.py    |  16 +++
+ .../rog/tools/correct-obs-colorkey-holes.py   |  87 ++++++++++++++
+ .../rog/tools/decode-original-obs-bulk.py     |  24 +++-
+ 23 files changed, 435 insertions(+), 25 deletions(-)
+ create mode 100644 apps/4leaf/rog/original/OBS/d6-colorkey-corrected/1171-00.png
+ create mode 100644 apps/4leaf/rog/original/OBS/d6-colorkey-corrected/1171-01.png
+ create mode 100644 apps/4leaf/rog/original/OBS/d6-colorkey-corrected/1171-02.png
+ create mode 100644 apps/4leaf/rog/original/OBS/d6-colorkey-corrected/1171-03.png
+ create mode 100644 apps/4leaf/rog/original/OBS/d6-colorkey-corrected/1171-04.png
+ create mode 100644 apps/4leaf/rog/original/OBS/d6-colorkey-corrected/1171-05.png
+ create mode 100644 apps/4leaf/rog/original/OBS/d6-colorkey-corrected/1171-06.png
+ create mode 100644 apps/4leaf/rog/original/OBS/d6-colorkey-corrected/1171-07.png
+ create mode 100644 apps/4leaf/rog/original/OBS/d6-colorkey-corrected/1171-10.png
+ create mode 100644 apps/4leaf/rog/original/OBS/d6-colorkey-corrected/1171-18.png
+ create mode 100644 apps/4leaf/rog/original/OBS/d6-colorkey-corrected/1171-25.png
+ create mode 100644 apps/4leaf/rog/original/OBS/d6-colorkey-corrected/provenance.json
+ create mode 100644 apps/4leaf/rog/tools/correct-obs-colorkey-holes.py
+
+diff --git a/apps/4leaf/rog/dice-fall.css b/apps/4leaf/rog/dice-fall.css
+index 727a2281..cf3603de 100644
+--- a/apps/4leaf/rog/dice-fall.css
++++ b/apps/4leaf/rog/dice-fall.css
+@@ -136,3 +136,14 @@
+   animation:none!important;opacity:.83;transform:scale(.96)
+  }
+ }
++/* Original Dice/OBS.pak 1171.obs D6 sprite (2026-11-01). The stored PNGs
++ * are bottom-up like every extracted OBS frame, hence scaleY(-1). The WEB
++ * cube stays in the DOM but is transparent while the original loads; it is
++ * shown again only if the original PNG fails (class removed in JS). */
++#game .leaf-fall-piece .leaf-fall-original-d6{display:none}
++#game .leaf-fall-piece.leaf-fall-original .leaf-fall-cube{opacity:0}
++#game .leaf-fall-piece.leaf-fall-original .leaf-fall-original-d6{
++ display:block;position:absolute;left:50%;bottom:0;
++ transform:translateX(-50%) scaleY(-1);
++ image-rendering:pixelated;pointer-events:none;
++}
+diff --git a/apps/4leaf/rog/dice-fall.js b/apps/4leaf/rog/dice-fall.js
+index b6a5093a..fd080115 100644
+--- a/apps/4leaf/rog/dice-fall.js
++++ b/apps/4leaf/rog/dice-fall.js
+@@ -25,9 +25,36 @@
+   4:'rotateY(-109.471deg) rotateZ(-240deg)'
+  };
+  let active=0,last=[],lastSides=[],complete=0;
++ /* ORIGINAL D6 SPRITE (2026-11-01). Dice/OBS.pak member 1171.obs was filed
++  * as card 0171 "HUD-card-icon", but its frames are the game's die:
++  * frames 0-5 are flat result faces showing 1..6 pips (46x49, red single
++  * pip) - the same art as the dice in the archived 800x600 battle.jpg -
++  * and frames 6+ are a white die tumbling in 3D (60x71). Face index =
++  * pips - 1 is VERIFIED by counting pips in each frame. Only tumble frames
++  * 6,7,10,18,25 are extracted so far (28 declared), so the tumble below is
++  * a PARTIAL original sequence, and the drop height/bounce path is still
++  * the WEB reconstruction. No D4 art has been found; D4 keeps the WEB mesh. */
++ const D6_MEMBER='0171';
++ const D6_TUMBLE=[6,7,10,18,25];
++ function originalD6(){
++  const member=window.ORIGINAL_LEAF_OBS_FRAMES?.[D6_MEMBER];
++  if(!member?.frames)return null;
++  // Use the colour-key corrected copies (tools/correct-obs-colorkey-holes.py):
++  // the legacy export turned the palette-0 pink-red "1" pip into a hole.
++  const fix=f=>f&&{...f,url:f.url.replace('/OBS/bulk/1171-','/OBS/d6-colorkey-corrected/1171-')};
++  const at=i=>fix(member.frames.find(f=>f.index===i)||null);
++  const faces=[0,1,2,3,4,5].map(at);
++  if(!faces.every(Boolean))return null;
++  return {member:member.originalMember||'1171.obs',faces,
++   tumble:D6_TUMBLE.map(at).filter(Boolean)};
++ }
+  const state=()=>({active:active>0,last:last.slice(),lastSides:lastSides.slice(),complete,
+   source:'user-reported fall/bounce; outcome from live game engine',
+-  originalFramesRecovered:false});
++  // Full original roll (all tumble frames + trajectory) is not recovered.
++  originalFramesRecovered:false,
++  originalD6Faces:!!originalD6(),
++  originalD6TumbleFrames:originalD6()?.tumble.map(f=>f.index)||[],
++  originalD4Art:false});
+  function makeFace(n){
+   const face=document.createElement('span');
+   face.className='leaf-die-face leaf-die-face-'+n;
+@@ -71,12 +98,40 @@
+    for(let n=1;n<=6;n++)cube.append(makeFace(n));
+   }
+   node.append(cube);
++  const source=sides===6?originalD6():null;
++  let sprite=null;
++  if(source){
++   sprite=document.createElement('img');
++   sprite.className='leaf-fall-original-d6';
++   sprite.alt='';sprite.draggable=false;
++   sprite.setAttribute('aria-hidden','true');
++   const first=source.tumble[0]||source.faces[result-1];
++   sprite.src=first.url;
++   sprite.dataset.frame=String(first.index);
++   node.classList.add('leaf-fall-original');
++   node.dataset.faceSource='original-OBS-'+source.member+'/face-VERIFIED-by-pip-count';
++   node.dataset.tumbleSource='original-OBS-'+source.member+'/partial-'+source.tumble.length+'-frames';
++   // If the original PNG cannot load, show the WEB cube instead of nothing.
++   sprite.addEventListener('error',()=>{
++    node.classList.remove('leaf-fall-original');
++    node.dataset.faceSource='web-cube-fallback/original-load-failed';
++   });
++   node.append(sprite);
++  }else{
++   node.dataset.faceSource=sides===4?'web-tetra/no-original-D4-art':'web-cube/original-missing';
++  }
+   track.append(node);
+-  return {track,node,cube,result,index,count,sides};
++  return {track,node,cube,result,index,count,sides,sprite,source};
+  }
+  const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+  async function animateDie(die,duration,instant){
+-  const {track,node,cube,result,index,sides}=die;
++  const {track,node,cube,result,index,sides,sprite,source}=die;
++  const showFace=()=>{
++   if(!sprite)return;
++   const face=source.faces[result-1];
++   sprite.src=face.url;sprite.dataset.frame=String(face.index);
++   node.dataset.originalFace=String(face.index);
++  };
+   // Match stationary ground-shadow opacity to the SAME presentation
+   // timeline as actual fall/bounce animation, not an independent clock.
+   track.style.setProperty('--leaf-dice-shadow-duration',duration+'ms');
+@@ -118,8 +173,18 @@
+   ];
+   if(instant||typeof node.animate!=='function'){
+    cube.style.transform=target;
++   showFace();
+    return;
+   }
++  let tumbleTimer=0;
++  if(sprite&&source.tumble.length>1){
++   let k=0;
++   tumbleTimer=setInterval(()=>{
++    k=(k+1)%source.tumble.length;
++    const f=source.tumble[k];
++    sprite.src=f.url;sprite.dataset.frame=String(f.index);
++   },Math.max(60,Math.round(duration*.8/(source.tumble.length*2))));
++  }
+   const fall=node.animate(physics,{duration,
+    easing:'linear',fill:'forwards'});
+   const turn=cube.animate(spin,{duration,
+@@ -128,6 +193,8 @@
+   finally{
+    // Make the FINAL face permanent before removing animated layer.
+    cube.style.transform=target;
++   if(tumbleTimer)clearInterval(tumbleTimer);
++   showFace();
+    fall.cancel();turn.cancel();
+    node.style.transform='translate3d(0,0,0)';
+   }
+@@ -181,6 +248,6 @@
+   }
+  }
+  window.__LEAF_DICE_FALL__={roll,getState:state,
+-  faces:PIPS,orientation:ROTATION,
++  faces:PIPS,orientation:ROTATION,originalD6,
+   tetraOrientation:{...TETRA_LAND},tetraDihedralDegrees:TETRA_ANGLE};
+ })();
+diff --git a/apps/4leaf/rog/dice-native-battle-dice.css b/apps/4leaf/rog/dice-native-battle-dice.css
+index ceae4400..b64c1f2c 100644
+--- a/apps/4leaf/rog/dice-native-battle-dice.css
++++ b/apps/4leaf/rog/dice-native-battle-dice.css
+@@ -77,3 +77,29 @@
+   transition:none!important;animation:none!important;
+  }
+ }
++/* Original 1171.obs D6 result faces (2026-11-01). Same art as battle.jpg.
++ * The CSS cube/pips above are kept only as a load-failure fallback. Frames
++ * are bottom-up OBS PNGs, hence scaleY(-1); native 46x49 pixels. */
++#app.app-classic-dice #game #battle-visual .battle-visual-die .battle-die-original{display:none}
++#app.app-classic-dice #game #battle-visual .battle-visual-die.battle-die-has-original{
++ background:none!important;border:0!important;box-shadow:none!important;padding:0!important;
++ width:46px!important;min-width:46px!important;max-width:46px!important;
++ height:49px!important;min-height:49px!important;max-height:49px!important;
++ flex:0 0 46px!important;
++ transform:none!important;
++}
++#app.app-classic-dice #game #battle-visual .battle-visual-die.battle-die-has-original .battle-die-pip{visibility:hidden!important}
++#app.app-classic-dice #game #battle-visual .battle-visual-die.battle-die-has-original .battle-die-original{
++ display:block!important;position:absolute!important;left:0!important;top:0!important;
++ width:46px!important;height:49px!important;transform:scaleY(-1)!important;
++ image-rendering:pixelated;pointer-events:none;
++}
++@media(max-width:650px){
++ #app.app-classic-dice #game #battle-visual .battle-visual-die.battle-die-has-original{
++  width:23px!important;min-width:23px!important;max-width:23px!important;
++  height:25px!important;min-height:25px!important;max-height:25px!important;flex-basis:23px!important;
++ }
++ #app.app-classic-dice #game #battle-visual .battle-visual-die.battle-die-has-original .battle-die-original{
++  width:23px!important;height:25px!important;image-rendering:auto;
++ }
++}
+diff --git a/apps/4leaf/rog/dice-native-battle-podium.css b/apps/4leaf/rog/dice-native-battle-podium.css
+index fbae56ba..90c02e0e 100644
+--- a/apps/4leaf/rog/dice-native-battle-podium.css
++++ b/apps/4leaf/rog/dice-native-battle-podium.css
+@@ -261,3 +261,21 @@
+   min-width:5px!important;
+  }
+ }
++/* Original 1167.obs score numerals (2026-11-01): bottom-up OBS PNGs, hence
++ * scaleY(-1). The text node is hidden visually but kept for a11y/tests. */
++#app.app-classic-dice #game #battle-visual .battle-visual-total .battle-total-digit{display:none}
++#app.app-classic-dice #game #battle-visual .battle-visual-total.battle-total-original{
++ -webkit-text-stroke:0!important;text-shadow:none!important;color:transparent!important;
++ display:flex!important;align-items:flex-end!important;gap:0!important;line-height:0!important;
++}
++#app.app-classic-dice #game #battle-visual .battle-visual-total.battle-total-original .battle-total-text{
++ position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;
++}
++#app.app-classic-dice #game #battle-visual .battle-visual-total.battle-total-original .battle-total-digit{
++ display:block!important;transform:scaleY(-1);image-rendering:pixelated;
++}
++/* 2026-11-01: the archived 800x600 battle.jpg has no minimap over the duel
++ * title/scores. Paint the (pointer-events:none) battle overlay above the WEB
++ * top-left minimap dock (z 21) so the original numerals are not clipped.
++ * The minimap stays clickable because the overlay never takes input. */
++#app.app-classic-dice #game #battle-visual{z-index:22!important}
+diff --git a/apps/4leaf/rog/game.js b/apps/4leaf/rog/game.js
+index d7956448..a13920ff 100644
+--- a/apps/4leaf/rog/game.js
++++ b/apps/4leaf/rog/game.js
+@@ -1211,6 +1211,27 @@ function showBattleScene(attacker,defender,attack,defense,attackerPoints,defende
+    }
+    const title=document.createElement('strong');title.textContent=player.name;
+    const score=document.createElement('div');score.className='battle-visual-total';score.textContent=String(result).padStart(2,'0');
++   // Original score numerals: Dice/OBS.pak 1167.obs frames 0-7 are the
++   // white, red-outlined digits 0..7 of battle.jpg (filed as card 0167).
++   // Digits 8/9 are not extracted yet, so a score containing 8 or 9 keeps
++   // the WEB text. Text stays in the DOM for accessibility and tests.
++   const numerals=window.ORIGINAL_LEAF_OBS_FRAMES?.['0167']?.frames||[];
++   const digits=score.textContent.split('').map(d=>numerals.find(f=>f.index===Number(d)));
++   if(digits.length&&digits.every(Boolean)){
++    const text=document.createElement('span');text.className='battle-total-text';
++    text.textContent=score.textContent;score.textContent='';score.append(text);
++    for(const f of digits){
++     const img=document.createElement('img');img.className='battle-total-digit';
++     img.alt='';img.draggable=false;img.setAttribute('aria-hidden','true');
++     img.src=f.url;img.width=f.width;img.height=f.height;
++     img.addEventListener('error',()=>score.classList.remove('battle-total-original'));
++     score.append(img);
++    }
++    score.classList.add('battle-total-original');
++    score.dataset.numeralSource='original-OBS-1167.obs/digits-0-7';
++   }else{
++    score.dataset.numeralSource=numerals.length?'web-text/digit-8-or-9-not-extracted':'web-text';
++   }
+    const dice=document.createElement('div');dice.className='battle-visual-dice';
+    // Archived board.jpg and battle.jpg display real six-sided dice with
+    // visible pip topology, not operating-system Unicode dice characters.
+@@ -1235,6 +1256,24 @@ function showBattleScene(attacker,defender,attack,defense,attackerPoints,defende
+      dot.style.gridRow=String(Math.floor((cell-1)/3)+1);
+      die.append(dot);
+     }
++    // Original result face: Dice/OBS.pak 1171.obs frame (pips-1), the same
++    // art as battle.jpg. Face<->value VERIFIED by pip count. The CSS pips
++    // above remain only as a fallback if the PNG fails to load.
++    const face=window.__LEAF_DICE_FALL__?.originalD6?.()?.faces?.[value-1];
++    if(face){
++     const art=document.createElement('img');
++     art.className='battle-die-original';art.alt='';art.draggable=false;
++     art.setAttribute('aria-hidden','true');
++     art.src=face.url;art.width=face.width;art.height=face.height;
++     art.addEventListener('error',()=>{
++      die.classList.remove('battle-die-has-original');
++      die.dataset.source='archived-battle-photo-inferred-3d-pips';
++     });
++     die.classList.add('battle-die-has-original');
++     die.dataset.source='original-OBS-1171-face/VERIFIED-by-pip-count';
++     die.dataset.originalFrame=String(face.index);
++     die.append(art);
++    }
+     dice.append(die);
+    });
+    const pedestal=document.createElement('div');pedestal.className='battle-visual-pedestal';
+diff --git a/apps/4leaf/rog/original/OBS/d6-colorkey-corrected/1171-00.png b/apps/4leaf/rog/original/OBS/d6-colorkey-corrected/1171-00.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..080e3865137be7c7edc88a54f2d111b8e4625c86
+GIT binary patch
+literal 1462
+zcmV;n1xfmeP)<h;3K|Lk000e1NJLTq001rk001!v1^@s6r8%2<000GjNkl<Zc-qyP
+zEtBI$5QZPS8Z;O%KtRC2V8Ma|`2m3k1M&j`0s;;!2naY37#I++;6UJkfPjF2fCB*m
+z0S5vW7#J7`2nYxaXwX#~Fp^icWv_Q_U+qnmOD@gV+dc1e_w;B|&EEj<{^r|z)d;kh
+zLEAROSkSf&rxr^s02<=@|GtvUM&H*>B&Edr#lI7PNi~1N-#@**zkW5tfVwj531E{a
+z1VKefo<`dUg5y{cG&q8g22C~Oy3xL3xErgLuv}%K-+lajGO6Zoh>P2M5ilSns4Gx~
+zJ;Fb(VFx9T2O#FSb`y-?GXs3H&J9HJSOBYKOWo8|bpaA`Qzdr{Ku{>I^Blv;_Z9I6
+zup7l6z?gT427_&kyYGEBjyWWY6thV4PZnr$xAgn#8D}p(rr8mJcZBXWKdeu%s-dc(
+zs`9%j4twZz5zyiXKo7xpeQabE>K3LNAozKK_rQh#bs*GGFqQlp?BtC;>$<^MWrV3Y
+z7b)Vqn%6z6Vr+rmrk0FpT*jC7T;Rp`gYN|xzEkOd4pu_9EY4cvav`m=XESQ|+gTCW
+z;`0Gq7uEP7+H7mRuU7`z?w%&QLQJ={aY^ux(Pl`U;oe)*XM7KTn$m;c&~UdAWuRG=
+z!vaqC+1*p^ct7U$bKiWummX_xBlcb{L6v^IB;9}6oMT(-W8lRP*!r_lrJJaJ`+@4O
+z-<bK<0)O>2#V@aS98?c-NF5s!YHPU3viAFVJRNY;f`57QX!CM$yQ9&^;u=q|Sms!z
+zO_16yRymCq$APXSL#eNCNVW@hpT$|5N8R3>a@f!xqw!-jJ*1Aky4eeQEWR1TH+?SC
+zy%RXyZEAE(%a3`|F-NsiFJr);X*rTYdjDZZqhng$IYa*N;h>`$3ZOdXIZvQTaNy5B
+zp4a(6zsGETh#kkD>wxz4dn#=Xg$HAlN_|-STn8kc?ej4d8MEt02WLK}aXZcBhi_g#
+zt6%x^>*JLppkYhnCa1al@apn`nagIXBt)3%iHBuZkbiEUrtQV;lPMW@%%PrkSQdv^
+zLip`CFyZ6vv*u|HisH;+tvG})I!*4`boS%-gpap`@N}9end8kMGdQU#zc0#9a|$|z
+z<I4)}?sAZ|rivIZzNo{j+zztjWrMaZ9<OSM;S4VSlWDu#oU?LB6)vBiI1Bjj;6Y=6
+zsq%Rg9WbL!`Lf_eTa-1=yDV4Fap7|*o=^Hc$Ayt}z)LIrVZwZ9Re1SS8Ky2a9MFsB
+z_u$+aLk2(9&tPMQjw*eMA_kZ)mgm0%x(LrTC-i4sgg9-QEYUtEbPng_kDP0hY$~sB
+zJA4;Bo5cPkG;QiC8+1QD|8b7o_%;>7NKz<Rm!<X0>)sr;38ZO_)hg$v%WfG&HlN;^
+zp=5c<-10m3hk74O?4J9spM#u^AGr~A<o4O*Ats+x^Ecf6dV8PR7PCZDp-L@Hoo_;$
+zx*?g-HuWHG2&e`?na>MUOUfb;W6qvxjCjfrBq*M2{Tz~ZEsz^7y73&gOJ;Z{N}u$U
+z46Yg+k({QkNXcoMnzpHFnk6Z<wCxJjh=>wnNl{#}!YB&IOo&z>qDZ~MMR9XPg&>Nw
+zhI>F%5OGujh$DoJ3w^;hR*y~yOOA$2fmPK3UsVg{v+MQO5A)eo*XtS$f}7zkXb>zp
+zQ5EZmxL7P$ttys_n#JM+W-Y#+IZqnG3@9jyKv7%~i<0?#MvNsfbgQHRBw-d13=zjX
+zppvizNV!f;ynTO@zn%cN{pPFtvMdN85~Fs)Cfs!`>E<^m4;twItAxQ-cj}%YU&hnt
+z(QE3uVY&E^rdiUqH6n^x_f3mNLWmT_6|>nK4Uw|ELW?WvRm*qpew+aO4{`*k&7tJY
+Qd;kCd07*qoM6N<$f&hKNF8}}l
+
+literal 0
+HcmV?d00001
+
+diff --git a/apps/4leaf/rog/original/OBS/d6-colorkey-corrected/1171-01.png b/apps/4leaf/rog/original/OBS/d6-colorkey-corrected/1171-01.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..26cf53c9455b19884f81f2a0d32c4a0dcd6ff0f5
+GIT binary patch
+literal 1663
+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
+JPDHLkV1ka&G9dr}
+
+literal 0
+HcmV?d00001
+
+diff --git a/apps/4leaf/rog/original/OBS/d6-colorkey-corrected/1171-02.png b/apps/4leaf/rog/original/OBS/d6-colorkey-corrected/1171-02.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..ac9c71f2db45cb47543d568516ed96315f80202d
+GIT binary patch
+literal 2077
+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
+Hu0mjf?hWl4
+
+literal 0
+HcmV?d00001
+
+diff --git a/apps/4leaf/rog/original/OBS/d6-colorkey-corrected/1171-03.png b/apps/4leaf/rog/original/OBS/d6-colorkey-corrected/1171-03.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..0820588646de46115b53240a34809fca782b17a8
+GIT binary patch
+literal 2329
+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
+
+literal 0
+HcmV?d00001
+
+diff --git a/apps/4leaf/rog/original/OBS/d6-colorkey-corrected/1171-04.png b/apps/4leaf/rog/original/OBS/d6-colorkey-corrected/1171-04.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..dfdca1533c56cb3450f547d688853e68c963364f
+GIT binary patch
+literal 2546
+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
+IM6N<$g3F-b5C8xG
+
+literal 0
+HcmV?d00001
+
+diff --git a/apps/4leaf/rog/original/OBS/d6-colorkey-corrected/1171-05.png b/apps/4leaf/rog/original/OBS/d6-colorkey-corrected/1171-05.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..6ac1d1920e7c87db1070c6f7a526761cbdcf051f
+GIT binary patch
+literal 2552
+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
+O0000<MNUMnLSTZtRPbd0
+
+literal 0
+HcmV?d00001
+
+diff --git a/apps/4leaf/rog/original/OBS/d6-colorkey-corrected/1171-06.png b/apps/4leaf/rog/original/OBS/d6-colorkey-corrected/1171-06.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..7c5a4816d702d4436d1c7bcfea58c351167db83f
+GIT binary patch
+literal 4352
+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
+
+literal 0
+HcmV?d00001
+
+diff --git a/apps/4leaf/rog/original/OBS/d6-colorkey-corrected/1171-07.png b/apps/4leaf/rog/original/OBS/d6-colorkey-corrected/1171-07.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..bb2548d57a1802f4c0b50bb72e12869002a97041
+GIT binary patch
+literal 4498
+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
+
+literal 0
+HcmV?d00001
+
+diff --git a/apps/4leaf/rog/original/OBS/d6-colorkey-corrected/1171-10.png b/apps/4leaf/rog/original/OBS/d6-colorkey-corrected/1171-10.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..fd31b143706eaa87189ac3dbfe4c10e9beb26e53
+GIT binary patch
+literal 4798
+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
+Y2U#82#CzV?9{>OV07*qoM6N<$f_Ef{hyVZp
+
+literal 0
+HcmV?d00001
+
+diff --git a/apps/4leaf/rog/original/OBS/d6-colorkey-corrected/1171-18.png b/apps/4leaf/rog/original/OBS/d6-colorkey-corrected/1171-18.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..5b896aa03549772073227d2ce3504c56262a61ae
+GIT binary patch
+literal 4274
+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
+U`H)-5R{#J207*qoM6N<$f=1VHIRF3v
+
+literal 0
+HcmV?d00001
+
+diff --git a/apps/4leaf/rog/original/OBS/d6-colorkey-corrected/1171-25.png b/apps/4leaf/rog/original/OBS/d6-colorkey-corrected/1171-25.png
+new file mode 100644
+index 0000000000000000000000000000000000000000..5ed585a955c3fbe8386bb1743851292a3e87f1cb
+GIT binary patch
+literal 4797
+zcmV;u5<=~XP)<h;3K|Lk000e1NJLTq002Ay002e^1^@s6kVW^^000t%Nkl<Zc-qaI
+zEo>ainuedrmaa-i1xi;98VqRAV8G~VfPuBLuB??ofVBz;FbD_;h*ky%1Q-Ma1Q-|u
+z7z6|a1Ox;G7#J8BSSxE~Fkrxd0Sy|oR;{Dbs&w_~s1z@#?w%fdoS$=YZ!*%zKbr2T
+zx4yskd%x;InLXuuzfNB4UyD~%)q<j^ajwRT=l!A@@Pl9XzV{8!k6vCUX^v8Yh(;-g
+z(So%JdwF{OqX7@Tr-d(%kFK@RxU$3tk9dy=)OATwln^{#^bfVR`kpt_M&oJ+fOi29
+z@;oCS=L{DMip7GmsxeyeWSn3B2;k~_y0Vr4;*lVTRM;c|z$zfmF~(ww5)s!}Jp9Xn
+ze;1d&JbHO;Q%hAj5KrwY%CZFD?DP%JEtX!O6SlUWkfs?`Rp9Ch?*)|om$>?O0X%<q
+zeC?bd;t=nd&u3g+o=_AQcV4r#z0dvKhZKt$)9D=V>c;2(xxm%;aAg}nL;$F&Vil|c
+z!tLuW&X3XB@Z#lT&dzeCmzUJ8#?=KznI@xK-Y@2ZpQbEb9v@w&LyPzbwyt6}uBv(W
+znPRcH^ZJYPH&iv`Sw=n{F&d4?^9_vASnaU7U@uRvzh^o7Q-E!v5if`c;%mHj7_AZU
+z-Dk2aUxF`I!Hd+m(ot1q6W^L)He|A~K{_0xb<zNL->rtLKUH%Dq9+SV_5D`XUegB;
+zpp>Gl9l<+-gkECPWZ4k1Aw^N*>IzHElTmW*gZfkPeeaLEvWCzh2Bk@pgd|PKvaPT4
+z5Ie$qhnGMIw>PN;p5-HKl3|QSg+J%!f5^gVs&Ou2mByM%fwGoFX*M=@Da$D#_`APY
+zDJC1cy}$JeXsvaZ2(2|(JEE@YWhjX4-27WC{>^3S^7YYmYBkOa&IurB6_B7hR}KMY
+z(<!GX$9P|^v0TE&<{q0{(Gx;r;hUf%IJsr@y7nyQ(^$U&AEMp92KYAtzI=Ujoeecr
+zP0Y-pUR~S`(7`)qvpI{!72Ze6nUA&@jdH9px1wFVUjf~MZ7n;@hGbbrVhu%EF`LaP
+z7IP}MTK7H&{F?w*C&$;FD?10uqm&|qXkpzXE(yy8gg}gSKmw>B1f@|yI<WnO6|ZS)
+zdQA|)i(suKO%pCJE+~pC07m0&v^E&6Da(SoUJz8)W{9;l{Hp;^-yC0C3*y18vF_5s
+zt9I)EE8PL_es6w8P+<kIh)`EGz9lr}jM?mD?b^oUT{gGwQxr92F-N4ti$R;bvG@}B
+zR{_3!{pvc)6s~Tp8yuQ|pyCc_6Mx>}+VtX5X-z&HViJXJ{^vZDWkp$4T|Bqe1-Q8Q
+zKwZy1yT&Zr;_&b_v)PQ(vkSx*RCQ>&xV!`XRb^?EtB5Cn1nI!)mNQCp?Few`+A0Vd
+zp{{G{x<)HVt;HCH)?gDzhmd8kF-e(>Cs=DxN_XEKUG;9TEtx5b3qGElv9U4X{>~P8
+zzCkuj+b!kk#>4BcDogXX$JbV3{7De35<t;;U}N3T#BHB|crQ5b5fRcPK?0nfoim?B
+zo;{xIuyg-Dqj3bE0pe4<6!CfyMC!F5TN2YJGiRr7*xBCfJjo_08BjTc()P=Bc>4DE
+zI?KRSy#_#Or0sE)MvKEWpxXo%6VVc^_kr{I1(z3ZS8DUg$t&K!%NdV%d2x6|mO(nS
+zl$FL>)4BAQ7~9Hblr=@^aL(bJM;k+CGtemqyRWX*=i_1-nj)YTSgWxKSOZ#v1dDS}
+zm6pmm2%aD@5w&1v(=%qXvs;w2UHEKv!ixhqJU+rEkR%CpT{l+BzJU;Bm_>p2buR&0
+z(!_u^)b2AeTzojbCNxP(KzxbO3Tq-*V?YB&LzcjJ14fy>RbT76YO<?*cCoYB372P6
+z5C|b)jUi1F5}S}D<F65z$ny=R1iT2&d8{=Uo1x7JV+}^D^)5YsdwiXx;9L{(;!sNA
+zB``amF`LEqZ#0>(yE`JWU;+&DSpOshsz%%DcTWA-TlYFWJ!Nxe(ruVhnk>)pvdh(_
+ztSBe9OVbY8Sfn91?IvhF1ZB`FM&(+-*$BinSy{l91+&?lj~@?LE%gx&UuYgZe#ODT
+zHYPxtLRH1x^ggnuyIRGY;6-X&MYmZ>D}n?j8xyi@$mPW;^ZEHo9<VlNWAh<dHpKgY
+z7aHp(7&Af}4NU=5>i`!YmsuI0Ease^o^o~dz6Vw}i=L5XIq%*+rK%1%I({5o-Dqr*
+z;3Z&_^s5t3Ivleo3RDo<O5TFDNy7Hd1GaY_bh*KpxcuD1Ocdg4MC$0uCPkYRWm3Ec
+zUls(i)fk??i&>dw1FNcLHk)&G^>)RwMKJ^9MoD<ZY`RMFW2-pCnBkY(Hf3TD-0zsW
+z!l1g2N-2#ok!EVG(OOeji+2@X1g#CI9Iz;p5+qQUCrqdBZui4k4z7-N7Y}t^<DC1-
+zvLJkT_ny{+wNhxM7>!2kJvu<^<g*E9GI_|bci+&E58dP2E%26W59_8|@_yxBMjLFB
+zp%u)g7hIe@M|_P^J;2q;acrpD%<OL`oiDwj2uG)Jp$)15{pj%v#^c>JB0$c=y%+30
+z+@m3DU2_q7jH`9+e(zi+v1b->9p~;`SzD^AW-)sX2<dP;_Uvukjz{2K%cvr$FvgIk
+z!*8gALyC&7V`^;_G)yKFMxzn6dxCgR2!gQ*T18gWl9iU4hNiP>tt@wd_C72LipnuI
+zL1~Kwm|nf_nA&LL0pc6Lo1<vihJ8T=qGC!P<u%skpDhV(Q$L<e&<dPHmlibO<AOy%
+z8xl(_<SSiP=;$CKNN5y~HK149NR9XsFJQFBBne8TD5a^(f^zYu5gRwL8Y&O}_FwbM
+zYuk9vy-%Qjfxj5g_kd533{(F0x4-j0m;a5(Z+FTyfB%nt{(W<k5CZB`Bl{5WpYEaf
+zghHe4MPQ#keOkHpuf~uhDfX|HU$o&Kf!}}s9e$V2#ee@4uf3=4@r%00Kja_$_M0R8
+zF8oCSD&?LUqD|!NmlyB&zu*2F(Cqx@JCfuVs{aLr2W)TgA@XFO#=gJ_O!ScFFJ5!}
+z>IG$a+3{t7BpLJI;ZruZcG~RH^|^w^D#0~wDh=g?fCNYrOPZ!6!$?y#AVDK8hDK2q
+zh;v<;>Y5S>I2RD_qIFG*v1!*Jcu!~DVg3Z0B#1P++g*gugy=`gKv1x`H6+X4bP27j
+z9oEDWq1zY?vNB}QjT2fG7a7FkeQfsA#75V1LR|~SXok5avGF@c7PQGI7A4;Ml}18j
+znW>E?f^A$Gpj=!4f-yrjHXnCtO9)@l9-08bf)2niGBBqtHnGbVG4#|8dR<jmf)?+(
+zc2Ox!Sydbz9o*=3HBX)%@%YgWNeZb2XOl(^k<PllNqPV#nZylOwgXmGQ>@L&CoeJ9
+zAOX6tMZl|Q#XCtsi0+oyNFCE8c20yo*yzei-LSCIc##fl9I>47`uNv1jlJ;Z^*#?C
+zJY=zG1cD^qQ|Y*Mt#yM4+Sq2lmu$|}HP$Nf@d0^0Zq^?|sH?*&K=5%7zX)6rcYhe)
+zjW-j}D1?Asu`)rT$k(#D`GTvfx1ZIl>w3nE=Z8@}(lO&lFHv~!BS%mvN@o~jR}_+H
+z_50+b&5o!P#e(@XiVpW$x0Igf)(5_B161Q8NebC;Y4H{`>IUeZGC93ESvv~2Id{6c
+zdQVX{N~cmdrwBn9RuxKXj7>4du2?sgM?;=x9oV{t#q2dzb>3rI{a9??q1QlsF20Rz
+zbg4W7Z>71;wS%CP>J}ifN>$tG;%&Mrlx2l@@J>jp0`EO@4O+K}()55Xk6kP!Cb&F%
+zOkJH~?U;ji`-6LJpmPVf;FrMfvUVHaStH1$mZfVejZ&(aD#|VQ`&@q<LZGZFoc9#g
+zBI3}-qD>Z=7ACs9UXHj{M1`vpTzv^>(&2W`r9+R!gw<r!x}3CD{~Yi(zB3pNqa1|N
+zC=5xGkR}Ov{&j=4w!`wSNqDYCDUG#B12%2q`!-mu+FE?r)Z&LEiD|NQSZe3e0Po&m
+zX?^K^uI=E~#d%9y%&@U|3Q3~TIw2hn*}i}OtJ=lQtw)Ft)V(oE1e$cN+$8DFotIQK
+zT34iw-<xi;|K``FF5T@=So3bcYgnnft^poY1o^r6PO}I+O%o>L2?qyn?$oK2GVI(x
+zU}xt(ph&CYhIJE^HY*_8^-JSr&MmE*4EK0-@qTc7TzUiCy8i=+THQ%p{F0ly+*(^T
+z@f|d17pDy4amL}%2dc8*{NkMH)d|K}hS`Metu0cU;w0)~Vxk~nj3JO<jKO&z6d0SW
+zBv!2&;!#|5*3~)#mPasDKVh{}Y`aryr^sup*&NU6Vrnh$Ccd?gpH(_i$Gz+^dwY9b
+z->sEu^z0h&h$yVJXl+qCMFQ026fd4+nB7`ORBEOeGb9;4=I!isuzCU@M5}f6xc5_f
+z8*wX{t<yXtTJWx{-qvr^u(i}e%q0zJ2gFG;uv3Jf(K<BJPE<@TFD^Jceb!Zw{+c6L
+z0UT-eEAQr)gY_o>WSOb;&Fn0V<kNsv4W$gaM=#d^k3DV7FE?Yn<L4$yN=Ae8n%Zd`
+z70x@r;eEi`w2@jZ^LfGS>Hv|NG>vUw>y=A7TQSTYMoDRQy2ji3vD<=EtH7mKla&h;
+z&XEU2*svJetK;i7tGVZmo_`tNX-t0FH5(Kx-g}&rC2dr;>2Y5nQe(^zn~YXmxdW{;
+zj1^vdcs96;9xr3FXUTqDZf_=+3l{G`GF}vvO=Ib@5u^Pl*e#3Fz3cm%7NXjqd!?lP
+z;+6PTAfj>JV2q8*W8=#6*#&iV+6>_y->SPUXlvo=@v}Qm0Nm56;lVdzxbLd{7`Mf|
+z1Ka+setpj6-VxQTF<VcMX|L0b`}sPym_e<n-?n)hOJY-uO_tU@Kkmxbc;nGZIqK6(
+z{{_wQ-stiE02A?v+)i98wQ7{%veE71ht$|&PW|{P<>7fO8~Tm}7{E8cgTGB)w2DL}
+zu@==NvT`xS`zU&EZojxiB_+g=sq4VAxBG)Hp3|y|m@)h0LmH0U#ijtcBHw#(>n6Ec
+z2B>^^hdw-u`nJA%geD<o^ty^x2~CFY8V|j^=lS`oPK+D%q~4ZCxAd}QQ(pv}KHMKn
+zXD+sR`bK?i<2gjP)H^x);iHwC48tnxC{N#GkI#@U5q-X-c@I?;8It$l+){e2Ylo{Z
+zQOdA&!@6y5(Hb7V+8=z=NxaGa^TFv^L0!c-YU4WeEG`~IL$be3a&WK&xJDT(Pv7I;
+zoX4?^x{({!Y(RUc&kKlzuG<Qs!k7u0+b_uStOFZ@EUBdbgGUdypC1i|kM;-W=LKFM
+zNuqnTz$Gl_PWpaMdUW*pV@_9BNEu?rR<~oh-<Wh$fg9pj2$sp_qt2DJhN>(GQgrux
+zdb~gQQ)ex=pC1j92m6Eb^LUCbv2j5XqRVwc|F$K0`<mhXz4d1)i#f~-@T+V{!cD^7
+zw4cikf>so=)-W3HcA-`jHH+C>yc3jxy~F*%cRO6V{rqrXclQSuS5+hlCIa^jAI5_o
+zDLB~afUnEqL2i_~aHDL6<?J>{w6F%eS1X;72wa}OWIq3hwmIJM&wT{o;^_JH#yEur
+zv{K7V+16h1KpjxEZ-|M-tjX58M{eUtWtk_O^Hg3p1G;6g{`lb~<>DP$Cp`J};+w7e
+zho5=4e06X=84p*uwr&W=%`Q>a5d40I6_#Mz&)3cYnxfKOVwx{%PTubT!q(0ahi9jQ
+zf7yBI&0h}(dS`zypH|(7#QR31cfEr!vLqU7Tgt|=Va>d_e~I&OarUg4CQPu&Cj5v;
+z04C2~M&Jt<6C2CK)+V>mn@Ze#b7yIm6)NRj)rfJBjkY;>|6=e%pFN!HKOcNNol#b<
+z>2G5#Z2<>XLH4Up2&*(P_Am+`493KJTwJ_qguMx`uV#av;$h1Nhpz{tC(j3`7jwiz
+zlBlMJhvvX&SZnDO4ZF+KzF}Z-(oilwpmjnr+~ucxx^(x&@nHC9e{gwO5CSAtH3v^4
+z=p}H88*;<?5~6aTlt&qmW)Pp{57#OfKlJI+b+7Z6&#uSgEE1RIlwCUrze^^n>Jl$0
+z-Ycfl3#zK-_0`$nr+j|+F4i`k7HAzU-cA*k2T@n24Z7DTC+UPNoA6UUKm4`iWjsnz
+z#Bvqqyeb}M(cpccu02jb#NzzdcS1jfg>SyLp1mB{-TlFIUNwhQ_1bgHN*R>-zF>a{
+z;68ADe}6Dvlvty>eqSkt)*5RRRVn<`kHr7c*T;jW*V%ALmRYJAs<LGJ`Qbn1aoYa}
+Xidy8uXo}Gu00000NkvXXu0mjfUAjs2
+
+literal 0
+HcmV?d00001
+
+diff --git a/apps/4leaf/rog/original/OBS/d6-colorkey-corrected/provenance.json b/apps/4leaf/rog/original/OBS/d6-colorkey-corrected/provenance.json
+new file mode 100644
+index 00000000..c8c341f4
+--- /dev/null
++++ b/apps/4leaf/rog/original/OBS/d6-colorkey-corrected/provenance.json
+@@ -0,0 +1,112 @@
++{
++ "format": "4LEAF_OBS_COLORKEY_HOLE_CORRECTION_V1",
++ "rule": "enclosed transparent pixels with a single shared RGB (palette[0]) made opaque",
++ "evidence": "1171.obs face 1 pip is palette index 0 and opaque in archived battle.jpg",
++ "pixelsInvented": 0,
++ "frames": [
++  {
++   "file": "1171-00.png",
++   "sourcePath": "original/OBS/bulk/1171-00.png",
++   "sourceSHA256": "23b94a1e27a8a4771144040577d582bd6c21ea0d0101432ab849a5f0f8149b22",
++   "correctedSHA256": "481894093f4d6ee9b0331dea26615c5c5b4111efc27a1afb5bf235001df6dfda",
++   "restoredPixels": 152,
++   "restoredRGB": [
++    228,
++    32,
++    104
++   ]
++  },
++  {
++   "file": "1171-01.png",
++   "sourcePath": "original/OBS/bulk/1171-01.png",
++   "sourceSHA256": "1a608e384b5e83ae40f425eb3c2d5550c0deb8e6001e7c2cff1d129e0c13a7c7",
++   "correctedSHA256": "9ff1ccb06f15a50ac182485bf7ce16704e362e9ee6e47571574d8941f5c6de3d",
++   "restoredPixels": 13,
++   "restoredRGB": [
++    228,
++    32,
++    104
++   ]
++  },
++  {
++   "file": "1171-02.png",
++   "sourcePath": "original/OBS/bulk/1171-02.png",
++   "sourceSHA256": "cf2a4730e5541e6c5641a635ecfc077f26a709acd5eca6a56ba05ce6c03974d7",
++   "correctedSHA256": "befcc1e0e17487b3c41f927848db487bc06e3b6a3caa8d8cf5faf749d9d2ef77",
++   "restoredPixels": 0,
++   "restoredRGB": null
++  },
++  {
++   "file": "1171-03.png",
++   "sourcePath": "original/OBS/bulk/1171-03.png",
++   "sourceSHA256": "c8eabff0ce41ce191e94fa7da21216ca3fee090ded09b3555b78f7e975663a7c",
++   "correctedSHA256": "e7ef724526c61ba9fbde7a35e9ed2cbc4b0191c14ae5e7f06508a33c1c5c84e8",
++   "restoredPixels": 0,
++   "restoredRGB": null
++  },
++  {
++   "file": "1171-04.png",
++   "sourcePath": "original/OBS/bulk/1171-04.png",
++   "sourceSHA256": "f27a4423d8953be24ad217c44fd3ee4b6d9448bdb45a77b2030da5703aca41b3",
++   "correctedSHA256": "da3b8179d39ff45b27cc16eaa516cffa6842f7963421e62a1a4cfee519682b15",
++   "restoredPixels": 0,
++   "restoredRGB": null
++  },
++  {
++   "file": "1171-05.png",
++   "sourcePath": "original/OBS/bulk/1171-05.png",
++   "sourceSHA256": "38f2a5002505e51b416058742cc78eabe98adf75a97e75eaba7da25b1c3c120b",
++   "correctedSHA256": "9e2861ec68fdcc0e26b0536c5113acf409d194f31f778c0e4a9d77d1595d9f0f",
++   "restoredPixels": 0,
++   "restoredRGB": null
++  },
++  {
++   "file": "1171-06.png",
++   "sourcePath": "original/OBS/bulk/1171-06.png",
++   "sourceSHA256": "79f01e4206ee0f1704333f17f979490c668921e4d0c7de9c6bfacbcb35d9445d",
++   "correctedSHA256": "cbac455a45fd06efd27f9f7894b2e5314e5bd91b7e10d40dfe22e9f17aa3fa98",
++   "restoredPixels": 112,
++   "restoredRGB": [
++    228,
++    32,
++    104
++   ]
++  },
++  {
++   "file": "1171-07.png",
++   "sourcePath": "original/OBS/bulk/1171-07.png",
++   "sourceSHA256": "42cffa1340d1814b818ef0dcb7e85acfd5407466f0643e2e43f233e8fd72765a",
++   "correctedSHA256": "652c412eabebf6c91459bc14af34eea7dfba1d2848673cb0a95181b172e4bcec",
++   "restoredPixels": 0,
++   "restoredRGB": null
++  },
++  {
++   "file": "1171-10.png",
++   "sourcePath": "original/OBS/bulk/1171-10.png",
++   "sourceSHA256": "9a2eac579085d7d8515491566e5091c747f38c64d219bb7ac609dd4ddecd13d5",
++   "correctedSHA256": "e2a63fdaacebfe08924826013e8cd57c56aff970cfe600b50c75eec1aabf11c3",
++   "restoredPixels": 0,
++   "restoredRGB": null
++  },
++  {
++   "file": "1171-18.png",
++   "sourcePath": "original/OBS/bulk/1171-18.png",
++   "sourceSHA256": "356eeee08b631599a19f6d743e204e6115b9d83376e745c07c72637f50d3111f",
++   "correctedSHA256": "e0f42bf4dcb94fe42e15634a771e93f0dbe9e490587edf1c1a4315fa63293d44",
++   "restoredPixels": 0,
++   "restoredRGB": null
++  },
++  {
++   "file": "1171-25.png",
++   "sourcePath": "original/OBS/bulk/1171-25.png",
++   "sourceSHA256": "914ae3d6b85acabcf4a0bc5cb34e99008732ac8155b8a8350377196d13247c38",
++   "correctedSHA256": "47904d14799b9b820a90c019015fe864840e493c0e591c0ddeb8e8bc4af2ed7d",
++   "restoredPixels": 3,
++   "restoredRGB": [
++    228,
++    32,
++    104
++   ]
++  }
++ ]
++}
+diff --git a/apps/4leaf/rog/sw.js b/apps/4leaf/rog/sw.js
+index 14f314eb..4304860d 100644
+--- a/apps/4leaf/rog/sw.js
++++ b/apps/4leaf/rog/sw.js
+@@ -1,5 +1,5 @@
+ 'use strict';
+-const REVISION='4leaf-revival-pwa-v117';
++const REVISION='4leaf-revival-pwa-v118';
+ // 32 genuinely archived 145×97 original TIS platform images. First offline
+ // Genesis match must draw the same extracted raised platforms, not replace
+ // uncached native source art with a CSS placeholder on first room entry.
+@@ -13,7 +13,7 @@ const CORE=['./','./index.html','./app-version.json','./pwa-runtime.js','./manif
+  './dice-source-tile-pitch.css','./dice-d4-source-fallback.css',
+  './dice-source-chessman-battle.css',
+  ...['1042-00','1042-01','1042-02','1042-03','1042-10','1042-18','1042-25','1042-30',
+- '1045-00','1045-01','1045-02','1045-10','1045-18'].map(id=>'./original/OBS/'+id+'.png')]).concat(NATIVE_OBS_BULK_FILES.map(id=>'./original/OBS/bulk/'+id+'.png')).concat(NATIVE_OBS_FRONT_FILES.map(id=>'./original/OBS/front-reviewed/'+id+'.png')).concat(ORIGINAL_SOURCE_SPR_FILES.map(id=>'./original/SourceSPR/'+id+'.png'))
++ '1045-00','1045-01','1045-02','1045-10','1045-18'].map(id=>'./original/OBS/'+id+'.png')]).concat(NATIVE_OBS_BULK_FILES.map(id=>'./original/OBS/bulk/'+id+'.png')).concat(NATIVE_OBS_FRONT_FILES.map(id=>'./original/OBS/front-reviewed/'+id+'.png')).concat(['00','01','02','03','04','05','06','07','10','18','25'].map(i=>'./original/OBS/d6-colorkey-corrected/1171-'+i+'.png')).concat(ORIGINAL_SOURCE_SPR_FILES.map(id=>'./original/SourceSPR/'+id+'.png'))
+  .concat(['./original/SourceSPRExtra/manifest.json',
+   './original/SourceSPRExtra/winBattle-00.png',
+   './original/SourceSPRExtra/winBattle-01.png',
+diff --git a/apps/4leaf/rog/tests/dice-fall.cjs b/apps/4leaf/rog/tests/dice-fall.cjs
+index c610ee07..b6413c87 100644
+--- a/apps/4leaf/rog/tests/dice-fall.cjs
++++ b/apps/4leaf/rog/tests/dice-fall.cjs
+@@ -43,6 +43,9 @@ const {chromium,webkit}=require('playwright');
+    overlay:getComputedStyle(document.querySelector('#leaf-dice-fall-layer')).pointerEvents,
+    pos:document.querySelector('#leaf-dice-fall-layer').getBoundingClientRect().toJSON(),
+    original:document.querySelectorAll('#board-nodes>.tile').length,
++   sprites:[...document.querySelectorAll('#leaf-dice-fall-layer .leaf-fall-piece[data-sides="6"]')].map(n=>({
++    src:n.querySelector('.leaf-fall-original-d6')?.getAttribute('src')||null,
++    original:n.classList.contains('leaf-fall-original'),faceSource:n.dataset.faceSource})),
+    // Read the live geometry of the currently playing D4/D6 stage, not
+    // an offscreen CSS constant. Source MVE keyframes remain unknown.
+    trajectories:[...document.querySelectorAll('#leaf-dice-fall-layer .leaf-fall-piece')].map(piece=>{
+@@ -69,8 +72,13 @@ const {chromium,webkit}=require('playwright');
+     })
+   }));
+   assert.equal(mid.phase,'falling','dice genuinely start high in the sky');
+-  assert.ok(mid.faceCount>=6&&mid.faceCount<=24,'every independent die has six visible-world 3D faces');
++  assert.ok(mid.faceCount>=6&&mid.faceCount<=24,'fallback cube keeps six 3D faces for load failure');
+   assert.equal(mid.count,0,'game dice result MUST NOT appear before bounce and landing');
++  // D6 in flight: ORIGINAL 1171.obs tumble frames (partial set 6,7,10,18,25).
++  assert.ok(mid.sprites.every(x=>x.original&&
++    /\/OBS\/d6-colorkey-corrected\/1171-(06|07|10|18|25)\.png$/.test(x.src||'')&&
++    x.faceSource==='original-OBS-1171.obs/face-VERIFIED-by-pip-count'),
++   'airborne D6 paints original tumble frames: '+JSON.stringify(mid.sprites));
+   assert.equal(mid.disabled,true,'other player cannot double-roll during drop');
+   assert.equal(mid.overlay,'none','physics never blocks underlying game input');
+   assert.equal(mid.original,104,'104 real TIS tiles unaffected by physics overlay');
+@@ -184,8 +192,11 @@ const {chromium,webkit}=require('playwright');
+       towardsCamera:Number(cssCube.multiply(faceMatrix)
+        .transformPoint(new DOMPoint(0,0,1,0)).z.toFixed(3))};
+     });
++    const sprite=document.querySelector('#leaf-dice-fall-layer .leaf-fall-original-d6');
++    const landedSprite={src:sprite?.getAttribute('src'),frame:sprite?.dataset.frame,
++     cubeOpacity:getComputedStyle(node).opacity};
+     const realValues=await pending;
+-    return {result:realValues,expected:window.__LEAF_DICE_FALL__.faces[eye],
++    return {landedSprite,result:realValues,expected:window.__LEAF_DICE_FALL__.faces[eye],
+      coordinates:layout,columns:xs.length,rows:ys.length,normals,
+      originalMesh:window.__LEAF_DICE_FALL__.getState().originalFramesRecovered};
+    },eye);
+@@ -202,6 +213,9 @@ const {chromium,webkit}=require('playwright');
+     'result '+eye+' must show correct geometrical eyes, not auto-packed pips');
+    assert.equal(proof.normals[eye-1].towardsCamera,1,
+     'actual 3D result-face normal must face front for '+eye+': '+JSON.stringify(proof.normals));
++   assert.equal(proof.landedSprite.src,'./original/OBS/d6-colorkey-corrected/1171-0'+(eye-1)+'.png',
++    'landed D6 shows the original face for '+eye);
++   assert.equal(proof.landedSprite.cubeOpacity,'0','WEB cube is only a hidden fallback');
+    assert.equal(proof.originalMesh,false,
+     'this corrected WEB fallback is not yet an original 2002 MVE die');
+    physicallyMeasured.push({eye,cells:proof.expected,
+diff --git a/apps/4leaf/rog/tests/dice-native-battle-dice.cjs b/apps/4leaf/rog/tests/dice-native-battle-dice.cjs
+index 535f97c5..b47e0441 100644
+--- a/apps/4leaf/rog/tests/dice-native-battle-dice.cjs
++++ b/apps/4leaf/rog/tests/dice-native-battle-dice.cjs
+@@ -35,6 +35,10 @@ const cells={
+       row:getComputedStyle(p).gridRowStart,
+       background:getComputedStyle(p).backgroundColor
+      })),
++     original:el.querySelector('img.battle-die-original')?.getAttribute('src')||null,
++     originalVisible:(()=>{const i=el.querySelector('img.battle-die-original');return !!i&&getComputedStyle(i).display!=='none'&&i.complete&&i.naturalWidth===46&&i.naturalHeight===49})(),
++     frame:el.dataset.originalFrame,
++     pipsHidden:[...el.querySelectorAll('.battle-die-pip')].every(p=>getComputedStyle(p).visibility==='hidden'),
+      layout:css.display,
+      image:css.backgroundImage,
+      size:[el.offsetWidth,el.offsetHeight],
+@@ -59,20 +63,20 @@ const cells={
+    for(const die of side.values){
+     count++;
+     assert.ok(Number.isInteger(die.eye)&&die.eye>=1&&die.eye<=6,'real rolled die has value 1..6');
+-    assert.equal(die.source,'archived-battle-photo-inferred-3d-pips','do not mislabel CSS as historical binary mesh');
++    // 2026-11-01: the face is the ORIGINAL Dice/OBS.pak 1171.obs frame
++    // (eye-1), colour-key corrected, same art as battle.jpg. CSS pips stay
++    // in the DOM only as a hidden load-failure fallback.
++    assert.equal(die.source,'original-OBS-1171-face/VERIFIED-by-pip-count');
+     assert.equal(die.role,'img','every independent die face is accessible');
+     assert.equal(die.label,'주사위 '+die.eye+'눈','accessible text matches actual roll');
+     assert.equal(die.faceText,'','do not overlay system font Unicode die characters');
+-    assert.deepEqual(die.pips.map(x=>x.cell),cells[die.eye],'exact 3x3 physical die pip arrangement');
+-    for(const pip of die.pips){
+-     assert.equal(Number(pip.col),(pip.cell-1)%3+1,'pip is placed in correct 3D-die grid column');
+-     assert.equal(Number(pip.row),Math.floor((pip.cell-1)/3)+1,'pip is placed in correct physical row');
+-    }
+-    assert.equal(die.layout,'grid','independent pip geometry paints, not a text glyph');
+-    assert.deepEqual(die.size,[size,size],'rolled face has screenshot-sized white 3D box');
+-    assert.ok(die.image.includes('linear-gradient'),'real DOM shading supplies a material face, not a screenshot');
+-    if(die.eye===1)assert.equal(die.pips[0].background,'rgb(222, 28, 101)',
+-     'historic single-eye pink centre dot is visually distinct');
++    assert.equal(die.frame,String(die.eye-1),'face frame index = pips - 1');
++    assert.equal(die.original,'./original/OBS/d6-colorkey-corrected/1171-0'+(die.eye-1)+'.png');
++    assert.ok(die.originalVisible,'original 46x49 face is painted: '+JSON.stringify(die));
++    assert.ok(die.pipsHidden,'fallback pips must not paint over the original face');
++    assert.deepEqual(die.pips.map(x=>x.cell),cells[die.eye],'fallback keeps exact 3x3 pip arrangement');
++    assert.deepEqual(die.size,size,'native 46x49 face (half size on phones)');
++
+    }
+   }
+   assert.ok(count>=2,'both players display actual rolled dice');
+@@ -95,13 +99,13 @@ const cells={
+   });
+   await page.waitForSelector('#battle-visual');
+   const state=await readDice();
+-  verify(state,42);
++  verify(state,[46,49]);
+   assert.deepEqual(await page.evaluate(()=>window.__ROG_TEST__.getMatch().players.map(x=>x.position)),
+    originalPositions,'displaying actual dice never moves real chessmen');
+   await page.screenshot({path:'leaf-source-reference-physical-battle-dice.png'});
+   await page.setViewportSize({width:390,height:844});
+   const mobile=await readDice();
+-  verify(mobile,26);
++  verify(mobile,[23,25]);
+   await page.screenshot({path:'leaf-source-reference-physical-battle-dice-mobile.png'});
+   await page.locator('#modal-buttons button').filter({hasText:'결과 확인'}).click();
+   await page.waitForFunction(()=>!document.querySelector('#battle-visual'),null,{timeout:8000});
+diff --git a/apps/4leaf/rog/tests/test_obs_native_640stride.py b/apps/4leaf/rog/tests/test_obs_native_640stride.py
+index c2a87d44..24eae84d 100644
+--- a/apps/4leaf/rog/tests/test_obs_native_640stride.py
++++ b/apps/4leaf/rog/tests/test_obs_native_640stride.py
+@@ -81,5 +81,21 @@ class NativeOBS(unittest.TestCase):
+             codec.decode_rows(self.data,self.width,self.height,self.palette[:30])
+ 
+ 
++    def test_written_index0_pixel_is_opaque_when_alpha_from_runs(self):
++        # Row 0 writes [5,0,5] at x=2: the middle pixel is palette index 0,
++        # like the red pip of 1171.obs face "1". Pixel x=0 is never written.
++        width,height=6,2
++        data=encode_640_rows([(0,2,bytes([5,0,5])),(1,0,bytes([5]*6))],width,height)
++        legacy,_=codec.decode_rows(data,width,height,self.palette,minimum_opaque_pixels=0)
++        runs,info=codec.decode_rows(data,width,height,self.palette,
++                                    minimum_opaque_pixels=0,alpha_from_runs=True)
++        # Image is bottom-up: source row 0 is output y=1.
++        self.assertEqual(legacy.getpixel((3,1))[3],0,'legacy treats index 0 as hole')
++        self.assertEqual(runs.getpixel((3,1)),(0,0,255,255),'written index 0 is opaque palette[0]')
++        self.assertEqual(runs.getpixel((0,1))[3],0,'skipped pixel stays transparent')
++        self.assertEqual(info['alpha'],'written-runs')
++        self.assertEqual(info['opaquePixels'],9)
++
++
+ if __name__=='__main__':
+     unittest.main()
+diff --git a/apps/4leaf/rog/tools/correct-obs-colorkey-holes.py b/apps/4leaf/rog/tools/correct-obs-colorkey-holes.py
+new file mode 100644
+index 00000000..4f149117
+--- /dev/null
++++ b/apps/4leaf/rog/tools/correct-obs-colorkey-holes.py
+@@ -0,0 +1,87 @@
++#!/usr/bin/env python3
++"""Restore palette-index-0 pixels that the legacy OBS export made transparent.
++
++The legacy decoder treated palette index 0 as transparent. In the original
++VIDEO-RLE stream only SKIPPED pixels are transparent; written index-0 pixels
++are opaque (1171.obs D6 face "1": its pink-red centre pip is index 0 and is
++opaque in the archived battle.jpg). See decode_rows(alpha_from_runs=True).
++
++Without the original PAK the true written mask is unavailable, so this tool
++applies the narrowest correction that the PNG itself supports: a transparent
++pixel that is NOT 4-connected to the image border (an enclosed hole) and
++whose stored RGB equals the frame's palette[0] colour is made opaque.
++A frame whose enclosed holes carry mixed RGB is refused. Only frames that a
++person has checked should be passed in; character frames can have genuine
++enclosed gaps and must instead be re-extracted with alpha_from_runs=True.
++"""
++import argparse
++import hashlib
++import json
++from collections import deque
++from pathlib import Path
++
++from PIL import Image
++
++
++def enclosed_holes(image):
++    w, h = image.size
++    px = image.load()
++    outside = set()
++    queue = deque()
++    for x in range(w):
++        queue.extend(((x, 0), (x, h - 1)))
++    for y in range(h):
++        queue.extend(((0, y), (w - 1, y)))
++    while queue:
++        x, y = queue.popleft()
++        if (x, y) in outside or not (0 <= x < w and 0 <= y < h) or px[x, y][3] != 0:
++            continue
++        outside.add((x, y))
++        queue.extend(((x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)))
++    return [(x, y) for y in range(h) for x in range(w)
++            if px[x, y][3] == 0 and (x, y) not in outside]
++
++
++def correct(path):
++    image = Image.open(path).convert("RGBA")
++    holes = enclosed_holes(image)
++    colours = {image.getpixel(p)[:3] for p in holes}
++    if len(colours) > 1:
++        raise ValueError("%s: enclosed holes carry mixed RGB %s; refuse" % (path, sorted(colours)))
++    px = image.load()
++    for x, y in holes:
++        r, g, b, _ = px[x, y]
++        px[x, y] = (r, g, b, 255)
++    return image, holes, (colours.pop() if colours else None)
++
++
++def main(argv=None):
++    ap = argparse.ArgumentParser()
++    ap.add_argument("output_dir", type=Path)
++    ap.add_argument("frames", nargs="+", type=Path)
++    a = ap.parse_args(argv)
++    a.output_dir.mkdir(parents=True, exist_ok=True)
++    records = []
++    for src in a.frames:
++        raw = src.read_bytes()
++        image, holes, colour = correct(src)
++        out = a.output_dir / src.name
++        image.save(out, optimize=True)
++        records.append({"file": out.name, "sourcePath": src.as_posix(),
++                        "sourceSHA256": hashlib.sha256(raw).hexdigest(),
++                        "correctedSHA256": hashlib.sha256(out.read_bytes()).hexdigest(),
++                        "restoredPixels": len(holes),
++                        "restoredRGB": list(colour) if colour else None})
++    provenance = {
++        "format": "4LEAF_OBS_COLORKEY_HOLE_CORRECTION_V1",
++        "rule": "enclosed transparent pixels with a single shared RGB (palette[0]) made opaque",
++        "evidence": "1171.obs face 1 pip is palette index 0 and opaque in archived battle.jpg",
++        "pixelsInvented": 0,
++        "frames": records,
++    }
++    (a.output_dir / "provenance.json").write_text(json.dumps(provenance, indent=1) + "\n")
++    print("COLORKEY_HOLES_RESTORED", json.dumps({r["file"]: r["restoredPixels"] for r in records}))
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/apps/4leaf/rog/tools/decode-original-obs-bulk.py b/apps/4leaf/rog/tools/decode-original-obs-bulk.py
+index a309af96..f36ecf05 100644
+--- a/apps/4leaf/rog/tools/decode-original-obs-bulk.py
++++ b/apps/4leaf/rog/tools/decode-original-obs-bulk.py
+@@ -60,7 +60,8 @@ def unpack_frames(source):
+         raise ValueError("Missing native 256-colour OBS palette at frame boundary")
+     return frames,palette
+ 
+-def decode_rows(body,width,height,palette,minimum_opaque_pixels=45):
++def decode_rows(body,width,height,palette,minimum_opaque_pixels=45,
++                alpha_from_runs=False):
+     """Decode the exact 2002 FAST.PAL.COLORKEY 640-stride run stream.
+ 
+     Same native packet format as verified Dice/IMG.pak roll.spr:
+@@ -72,6 +73,13 @@ def decode_rows(body,width,height,palette,minimum_opaque_pixels=45):
+     source palette, and final cursor are checked. Nothing is centered,
+     interpolated, inferred from a false image-row marker, or rendered
+     beyond its native recorded width/height.
++
++    alpha_from_runs (2026-11-01): transparency is the area the run stream
++    SKIPS, not palette index 0. Evidence: 1171.obs D6 face "1" writes its
++    centre pip with index 0 (RGB 228,32,104) and the archived battle.jpg
++    shows that pip opaque pink-red. The legacy default (index 0 transparent)
++    is kept so existing exports do not change silently; re-extractions
++    should use alpha_from_runs=True and be reviewed against the old PNGs.
+     """
+     if len(body)<6 or len(palette)!=768:
+         raise ValueError("OBS 640-stride source packet or RGB palette truncated")
+@@ -80,6 +88,7 @@ def decode_rows(body,width,height,palette,minimum_opaque_pixels=45):
+         raise ValueError("OBS 640-stride invalid native run count")
+     pos=4
+     pixels=bytearray(width*height)
++    written=bytearray(width*height)
+     opaque=0
+     for run in range(run_count):
+         if run:
+@@ -102,7 +111,8 @@ def decode_rows(body,width,height,palette,minimum_opaque_pixels=45):
+         if length:
+             palette_run=body[pos:pos+length]
+             pixels[y*width+x:y*width+x+length]=palette_run
+-            opaque+=sum(i!=0 for i in palette_run)
++            written[y*width+x:y*width+x+length]=b"\xff"*length
++            opaque+=(length if alpha_from_runs else sum(i!=0 for i in palette_run))
+         pos+=length
+         cursor+=length
+     if pos!=len(body):
+@@ -123,11 +133,17 @@ def decode_rows(body,width,height,palette,minimum_opaque_pixels=45):
+         raise ValueError("OBS native source too transparent after strict decoding")
+     img=Image.frombytes("P",(width,height),bytes(pixels))
+     img.putpalette(palette)
+-    img.info["transparency"]=0
+-    image=img.convert("RGBA").transpose(Image.Transpose.FLIP_TOP_BOTTOM)
++    if alpha_from_runs:
++        image=img.convert("RGB").convert("RGBA")
++        image.putalpha(Image.frombytes("L",(width,height),bytes(written)))
++    else:
++        img.info["transparency"]=0
++        image=img.convert("RGBA")
++    image=image.transpose(Image.Transpose.FLIP_TOP_BOTTOM)
+     return image,{"sourceRows":height,
+        "decoder":"VERIFIED-640-STRIDE-PALETTE-RLE/exact-run-cursor-and-width",
+        "videoStride":640,"nativePackets":run_count,"opaquePixels":opaque,
++       "alpha":"written-runs" if alpha_from_runs else "legacy-palette-index-0",
+        "scanlineX":"ORIGINAL-VIDEO-RUN-CURSOR; NOT CENTERED"}
+ 
+ 
+-- 
+2.43.0
+

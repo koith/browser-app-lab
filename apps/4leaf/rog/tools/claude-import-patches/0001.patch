@@ -1,0 +1,79 @@
+From d40cc660157c2be9b1174222df550ce72c4e8535 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sun, 1 Nov 2026 11:10:02 +0900
+Subject: [PATCH 1/4] test(4leaf): accept PR #417 front-reviewed frames in OBS
+ integrity tests
+
+obs-asset-integrity and dice-original-obs-bulk fail on main 150fa9a: their
+URL regex / folder check allowed only original/OBS/bulk, and the bulk report
+total (945) was compared with a manifest that now also holds PR #417's 72
+verified front frames (26-29 for 18 members). Allow front-reviewed/ and
+count it separately (must stay 72). No runtime change.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_011qw76wwfZ8kaKojeP97FsR
+---
+ apps/4leaf/rog/tests/dice-original-obs-bulk.cjs | 15 +++++++++++----
+ apps/4leaf/rog/tests/obs-asset-integrity.cjs    |  3 ++-
+ 2 files changed, 13 insertions(+), 5 deletions(-)
+
+diff --git a/apps/4leaf/rog/tests/dice-original-obs-bulk.cjs b/apps/4leaf/rog/tests/dice-original-obs-bulk.cjs
+index fe45d877..5404208b 100644
+--- a/apps/4leaf/rog/tests/dice-original-obs-bulk.cjs
++++ b/apps/4leaf/rog/tests/dice-original-obs-bulk.cjs
+@@ -22,7 +22,7 @@ assert.equal(report.archiveSHA256,
+ assert.equal(report.accepted,90,'all 90 matching original OBS.pak members recovered');
+ assert.ok(report.framePNGs>=945,'all 945 SHA-authentic OBS source frames, including native 0..7 per character, must remain available');
+ const sourceMissing=['0091','0126','0129','0132','0157','0168'];
+-let files=0,totalBytes=0;
++let files=0,totalBytes=0,frontReviewed=0;
+ assert.equal(Object.keys(recovered).length,report.accepted,'every reported source character has a manifest entry');
+ assert.ok(report.accepted>=40&&report.framePNGs>=200,'broad actual OBS coverage, not a two-character proof-of-concept');
+ for(const [id,source] of Object.entries(recovered)){
+@@ -52,10 +52,14 @@ for(const [id,source] of Object.entries(recovered)){
+   assert.notEqual(source.frames[0].index,0,'never manufacture zero-index original pose');
+  }
+  for(const frame of source.frames){
+-  assert.ok(frame.url.startsWith('./original/OBS/bulk/'),'only original OBS per-frame file is accepted');
++  assert.ok(frame.url.startsWith('./original/OBS/bulk/')||frame.url.startsWith('./original/OBS/front-reviewed/'),
++   'only original OBS per-frame file is accepted (bulk or PR #417 front-reviewed)');
+   const filename=path.resolve(root,frame.url.replace(/^\.\//,''));
+-  assert.ok(filename.startsWith(path.resolve(root,'original/OBS/bulk')+path.sep),'no cross-folder resource alias');
+-  const binary=fs.readFileSync(filename);files++;totalBytes+=binary.length;
++  assert.ok(['original/OBS/bulk','original/OBS/front-reviewed'].some(d=>filename.startsWith(path.resolve(root,d)+path.sep)),
++   'no cross-folder resource alias');
++  const binary=fs.readFileSync(filename);
++  if(frame.url.startsWith('./original/OBS/front-reviewed/'))frontReviewed++;
++  else{files++;totalBytes+=binary.length;}
+   assert.equal(binary.subarray(0,8).toString('hex'),'89504e470d0a1a0a');
+   assert.deepEqual([binary.readUInt32BE(16),binary.readUInt32BE(20)],[frame.width,frame.height],
+    'decoded bitmap keeps OBS frame-native geometry');
+@@ -67,8 +71,11 @@ for(const absent of sourceMissing){
+  assert.ok(!Object.hasOwn(recovered,absent),
+   'these six original 2002 OBS source members do not exist, never synthesize pixels: '+absent);
+ }
++// bulk-source-report.json covers the bulk sampler only; PR #417's 72
++// verified front frames (26-29 for 18 members) are counted separately.
+ assert.equal(files,report.framePNGs);
+ assert.equal(totalBytes,report.bytes);
++assert.equal(frontReviewed,72,'PR #417 front-reviewed frames');
+ (async()=>{
+  const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
+  const page=await browser.newPage({viewport:{width:1280,height:900},serviceWorkers:'block'});
+diff --git a/apps/4leaf/rog/tests/obs-asset-integrity.cjs b/apps/4leaf/rog/tests/obs-asset-integrity.cjs
+index 70239773..687343c4 100644
+--- a/apps/4leaf/rog/tests/obs-asset-integrity.cjs
++++ b/apps/4leaf/rog/tests/obs-asset-integrity.cjs
+@@ -36,7 +36,8 @@ for(const cid of sourceIds){
+   assert.ok(Number.isInteger(frame.index)&&frame.index>=0);
+   assert.ok(!ids.has(frame.index),'same source animation index cannot appear twice');
+   ids.add(frame.index);
+-  assert.match(frame.url,/^\.\/original\/OBS\/(?:bulk\/)?[\w-]+\.png$/);
++  // front-reviewed/ holds PR #417's verified 26-29 front frames.
++  assert.match(frame.url,/^\.\/original\/OBS\/(?:bulk\/|front-reviewed\/)?[\w-]+\.png$/);
+   const rel=frame.url.replace(/^\.\//,'');
+   const full=path.resolve(root,rel);
+   assert.ok(full.startsWith(path.join(root,'original/OBS')+path.sep),'source path must remain inside OBS');
+-- 
+2.43.0
+

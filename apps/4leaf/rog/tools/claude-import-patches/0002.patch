@@ -1,0 +1,579 @@
+From f3b26bee4e5c0c88b218d0e6153df88881e2e708 Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Sun, 1 Nov 2026 11:10:24 +0900
+Subject: [PATCH 2/4] feat(4leaf): chessmen face their walking direction;
+ original attack frame; no borrowed faces
+
+Direction and action (genesis-chessman-actors.js, game.js)
+- Every reviewed 37-frame OBS member shares one layout in the extracted
+  indices: 0-2 rear three-quarter, 3-7 rear body with alternating legs,
+  10 rear weapon raise, 18 front three-quarter strike/cast, 25-30 front
+  body with alternating legs. Checked on six members side by side, then
+  per member at 2x.
+- drawGame() now records the screen direction of each DMP step. Moving up
+  the board plays the rear walk 3..7 (35 members); moving down keeps the
+  front cycle. Before, every chessman walked backwards with its face to the
+  camera, and unreviewed ones spun through 0..7 in both directions.
+- attack plays front -> 18 -> 18 -> front for 39 members (was 3).
+- 22 more members get the reviewed front idle/walk (frames 25/30), total 42.
+- Excluded: 0042 (4-7 not extracted), 0058 (3-7 are sword poses),
+  0069/0079 (rear unclear), 0084/0085 (non-humanoid), 0045 (front is 18).
+- Evidence level INFERRED (visual review). The original action table and
+  frames 8,9,11-17,19-24,31-36 are still not extracted.
+
+Portraits (game.js imageFor)
+- Removed the invented (sourceId%59)+1 formula. On main it put 35 CardData
+  faces on 78 different cards. Removed the two entries giving one face to
+  two characters. Unsourced cards show the original IMG.pak card back.
+
+Tests: new actor-direction-attack-score.cjs and card-portrait-integrity.cjs
+check rendered frames/sources; five tests that pinned the old behaviour now
+cover unreviewed members (0067/0068/0074/0087) and accept the card back.
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_011qw76wwfZ8kaKojeP97FsR
+---
+ apps/4leaf/rog/game.js                        |  37 +++++-
+ apps/4leaf/rog/genesis-chessman-actors.js     |  74 ++++++++++--
+ .../tests/actor-direction-attack-score.cjs    | 109 ++++++++++++++++++
+ .../rog/tests/card-portrait-integrity.cjs     |  45 ++++++++
+ .../dice-obs-contiguous-source-motion.cjs     |  18 ++-
+ .../rog/tests/dice-original-minipanel-spr.cjs |   3 +-
+ apps/4leaf/rog/tests/genesis-asset-roles.cjs  |  12 +-
+ .../obs-reviewed-front-walk-native-stats.cjs  |  18 ++-
+ .../rog/tests/obs-source-nonactor-role.cjs    |   5 +-
+ 9 files changed, 294 insertions(+), 27 deletions(-)
+ create mode 100644 apps/4leaf/rog/tests/actor-direction-attack-score.cjs
+ create mode 100644 apps/4leaf/rog/tests/card-portrait-integrity.cjs
+
+diff --git a/apps/4leaf/rog/game.js b/apps/4leaf/rog/game.js
+index 6c5d81d2..d7956448 100644
+--- a/apps/4leaf/rog/game.js
++++ b/apps/4leaf/rog/game.js
+@@ -91,8 +91,25 @@ const BOT_NAMES=['티치엘','막시민','보리스','루시안','이스핀','
+ const COLORS=['#fff3bf','#91f2d1','#ffb4c4','#abc3ff','#e9b8fb','#ffda80','#ff9bab','#d9efff'];
+ const PAWNS=['♞','♜','♛','♝','♟','♙','♕','♗'];
+ const PORTRAITS={soldier:12,joan:119,rashid:56,narcia:41,merza:45,iolyn:54,christian:25,saladin:31,damian:101,sherazard:33,ironmask:11,schwarz:22};
+-const SOURCE_PORTRAITS={'0096':12,'0078':48,'0040':33,'0045':8,'0087':31,'0088':33,'0090':23,'0091':11,'0127':40,'0137':31,'0170':22};
+-const imageFor=(id)=>'./original/CardData/chm_'+(SOURCE_PORTRAITS[(CARD_MAP[id]||{}).sourceId]||PORTRAITS[id]||((Number((CARD_MAP[id]||{}).sourceId)||40)%59+1))+'.png';
++/* CardData/chm_N <-> CHR card id has NO recovered source mapping yet.
++   Audit 2026-11-01: this table was carried over from the fictional roster in
++   ef3df072 (soldier->12, ironmask->11, schwarz->22 ...), not read from CHR.pak,
++   and every other card used the invented formula (sourceId%59)+1, which put
++   another character's face on ~87 cards. The formula is removed. Entries that
++   claimed ONE portrait for TWO different characters (chm_33: 0040/0088,
++   chm_31: 0087/0137) are removed because at least one side is provably wrong.
++   The 7 remaining entries are legacy and UNSOURCED; they stay only until the
++   full CHR record dump (tools/dump-original-dice-data.py) yields a real
++   portrait field. Unmapped cards show the original IMG.pak card back instead
++   of a stranger's face. */
++const SOURCE_PORTRAITS={'0096':12,'0078':48,'0045':8,'0090':23,'0091':11,'0127':40,'0170':22};
++const NEUTRAL_CARD_ART='./original/IMG/avatarback.png';
++const portraitEvidence=(id)=>{const sid=(CARD_MAP[id]||{}).sourceId;
++ return Object.hasOwn(SOURCE_PORTRAITS,sid)?'legacy-roster-unsourced':
++  (Object.hasOwn(PORTRAITS,id)?'legacy-roster-unsourced':'none')};
++const imageFor=(id)=>{const sid=(CARD_MAP[id]||{}).sourceId;
++ const n=Object.hasOwn(SOURCE_PORTRAITS,sid)?SOURCE_PORTRAITS[sid]:PORTRAITS[id];
++ return n?'./original/CardData/chm_'+n+'.png':NEUTRAL_CARD_ART};
+ const townAvatar=(i)=>'./original/Registry/sava'+String([0,82,6,1,85][i%5]).padStart(2,'0')+'.png';
+ let remoteAct=false,remoteBattle=null,remoteBattleSequence=0;
+ let shopPage=0;
+@@ -521,6 +538,13 @@ function drawPawns(){
+    const previous=Number(pawn.dataset.position);
+    const moved=pawn.dataset.position!==undefined&&previous!==p.position;
+    if(moved){
++     // Screen direction of this step on the original DMP path (y grows
++     // downward). Moving up the board means walking away from the camera:
++     // the actor shows its reviewed rear walk frames instead of a front body
++     // sliding backwards. Direction choice is INFERRED, not an EXE table.
++     const from=PATH[Math.min(previous,PATH.length-1)];
++     const dy=from&&point?point.y-from.y:0;
++     pawn.dataset.travelFacing=dy< -0.5?'away':'toward';
+      // The original source 0..7 bitmap frames take 7*120ms before frame 7
+      // appears at the current explicitly WEB-provisional playback interval.
+      // A 240ms timeout truncated EVERY real rolled movement to 0..1. Extend
+@@ -718,9 +742,14 @@ function drawNativeChessmen(){
+     };
+    }else{
+     img.src=imageFor(source.id);
+-    slot.dataset.rightPortraitSource='CardData/original-fallback-direction-unverified';
++    // No sourced portrait -> original IMG.pak card back, never another
++    // character's CardData face (see SOURCE_PORTRAITS note).
++    slot.dataset.rightPortraitSource=img.src.endsWith(NEUTRAL_CARD_ART.slice(1))
++     ?'IMG/avatarback/no-sourced-portrait'
++     :'CardData/legacy-roster-unsourced';
+     slot.dataset.rightPortraitFacingEvidence='unknown';
+    }
++   slot.dataset.portraitEvidence=portraitEvidence(source.id);
+    img.alt=source.name;
+    img.loading='eager';
+    const stamp=document.createElement('span');stamp.className='dice-chessman-moon';
+@@ -1840,5 +1869,5 @@ function init(){installBoardControls();installNativeDiceMenu();
+      else if(action==='ability')await useAbility();
+      else await useItem(index,steps);
+    }finally{remoteAct=false}
+- }};window.__ROG_TEST__={startGame,drawGame,takeTurn,teamStats,generateTiles,getMatch:()=>match,go:navigate,setRoll:()=>{},setMatch:v=>{match=v;drawGame()},getSourceMaps:()=>SOURCE_INFO,getSourceTiles:()=>SOURCE_TILES,getMapRules:()=>MAPS,isNonBattleTitle:isHistoricalNonBattleTitle,resolveTile,finishGame,calculateMatchReward,elementalModifier,resolveBattle,moveValues,activePlayer,playerCanAct,refreshResume};if(match&&!match.finished){log('저장된 경기가 있습니다. 주사위 대기실의 이어하기로 복원하세요.')}refreshResume()}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
++ }};window.__ROG_TEST__={imageFor,portraitEvidence,startGame,drawGame,takeTurn,teamStats,generateTiles,getMatch:()=>match,go:navigate,setRoll:()=>{},setMatch:v=>{match=v;drawGame()},getSourceMaps:()=>SOURCE_INFO,getSourceTiles:()=>SOURCE_TILES,getMapRules:()=>MAPS,isNonBattleTitle:isHistoricalNonBattleTitle,resolveTile,finishGame,calculateMatchReward,elementalModifier,resolveBattle,moveValues,activePlayer,playerCanAct,refreshResume};if(match&&!match.finished){log('저장된 경기가 있습니다. 주사위 대기실의 이어하기로 복원하세요.')}refreshResume()}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+ })();
+\ No newline at end of file
+diff --git a/apps/4leaf/rog/genesis-chessman-actors.js b/apps/4leaf/rog/genesis-chessman-actors.js
+index b5dba8df..dc20e5e6 100644
+--- a/apps/4leaf/rog/genesis-chessman-actors.js
++++ b/apps/4leaf/rog/genesis-chessman-actors.js
+@@ -60,8 +60,44 @@
+   '0045':18,'0046':25,'0048':25,'0049':25,
+   '0051':25,'0052':25,'0053':25,'0054':25,'0055':25,
+   '0056':25,'0058':25,'0059':25,'0060':25,'0061':25,
+-  '0062':25,'0064':25
++  '0062':25,'0064':25,
++  // 2026-11-01 front-silhouette review: frame25 AND frame30 of 22 more
++  // 37-frame members viewed upright at 2x beside frame0. 25/30 are camera-
++  // facing bodies with changed limb poses, 0 is the back (same pattern as
++  // above). Front silhouette only; action/FPS UNVERIFIED. Excluded:
++  // 0067/0068/0074/0086 (25 vs 0 differ), 0088 (rock-golem body).
++  '0047':25,'0050':25,'0063':25,'0065':25,'0066':25,'0069':25,
++  '0070':25,'0071':25,'0072':25,'0073':25,'0075':25,'0076':25,
++  '0077':25,'0078':25,'0079':25,'0080':25,'0081':25,'0082':25,
++  '0083':25,'0084':25,'0085':25,'0166':25
+  });
++ /* Direction/action evidence, 2026-11-01 (INFERRED, not an EXE table).
++  * In every reviewed 37-frame member the sampled indices show the SAME
++  * layout: 0-2 rear three-quarter, 3-7 rear view with alternating legs,
++  * 10 rear weapon raise, 18 front three-quarter strike/cast, 25-30 front
++  * view with alternating legs. Frames 8,9,11-17,19-24,31-36 are not in the
++  * repository, so the full table is still unknown.
++  * REVIEWED_BACK_WALK: 3..7 viewed at 2x per member and confirmed as a rear
++  *   body with alternating legs. Excluded: 0042 (only 3 extracted), 0058
++  *   (3-7 are diagonal sword poses), 0069/0079 (rear not distinguishable),
++  *   0084/0085 (non-humanoid), 0045 (front is 18).
++  * REVIEWED_FRONT_ATTACK: frame 18 is a front three-quarter strike or cast
++  *   that differs from the standing front. Excluded 0045 (18 is its idle
++  *   front), 0084/0085 (non-humanoid). */
++ const REVIEWED_BACK_WALK=Object.freeze(new Set([
++  '0040','0043','0044','0046','0047','0048','0049','0050','0051',
++  '0052','0053','0054','0055','0056','0059','0060','0061','0062',
++  '0063','0064','0065','0066','0070','0071','0072','0073','0075',
++  '0076','0077','0078','0080','0081','0082','0083','0166'
++ ]));
++ const REVIEWED_FRONT_ATTACK=Object.freeze(new Set([
++  '0040','0042','0043','0044','0046','0048','0049','0051','0052',
++  '0053','0054','0055','0056','0058','0059','0060','0061','0062',
++  '0064','0047','0050','0063','0065','0066','0069','0070','0071',
++  '0072','0073','0075','0076','0077','0078','0079','0080','0081',
++  '0082','0083','0166'
++ ]));
++ const BACK_WALK_INDICES=[3,4,5,6,7];
+  function frontFacingSource(native,id){
+   const available=native?.frames||[];
+   const approved=AUDITED_FRONT_SOURCE[id];
+@@ -97,9 +133,15 @@
+   '0053':[25,30], '0054':[25,30], '0055':[25,30],
+   '0056':[25,30], '0058':[25,30], '0059':[25,30],
+   '0060':[25,30], '0061':[25,30], '0062':[25,30],
+-  '0064':[25,30]
++  '0064':[25,30],
++  // 2026-11-01: same 25/30 front-pose check for the 22 members above.
++  '0047':[25,30],'0050':[25,30],'0063':[25,30],'0065':[25,30],'0066':[25,30],
++  '0069':[25,30],'0070':[25,30],'0071':[25,30],'0072':[25,30],'0073':[25,30],
++  '0075':[25,30],'0076':[25,30],'0077':[25,30],'0078':[25,30],'0079':[25,30],
++  '0080':[25,30],'0081':[25,30],'0082':[25,30],'0083':[25,30],'0084':[25,30],
++  '0085':[25,30],'0166':[25,30]
+  });
+- function sequenceFor(native,action,id){
++ function sequenceFor(native,action,id,travel){
+   const all=native.frames||[];
+   const at=index=>all.find(f=>f.index===index)||null;
+   const facing=frontFacingSource(native,id);
+@@ -118,6 +160,12 @@
+    // Do not display verified BACK/SIDE 0..7 during an ordinary forward
+    // movement, attack recovery or victory. One static authentic FRONT is
+    // more truthful than a rapidly pirouetting chessman.
++   // Moving AWAY from the camera (up the screen) shows the reviewed rear
++   // walk 3..7 instead of a front body sliding backwards. INFERRED.
++   if(action==='walk'&&travel==='away'&&REVIEWED_BACK_WALK.has(id)){
++    const back=BACK_WALK_INDICES.map(at);
++    if(back.every(Boolean))return back;
++   }
+    if(action==='walk')return fullFrontCycle.length===6
+     ?fullFrontCycle
+     :movement.length===2
+@@ -126,8 +174,8 @@
+    if(action==='victory')return movement.length===2
+     ?[movement[0],movement[1],movement[0]]
+     :front?[front]:[];
+-   if(action==='attack'&&['0040','0042','0043'].includes(id)&&at(18))
+-    return [front,at(18),front];
++   if(action==='attack'&&REVIEWED_FRONT_ATTACK.has(id)&&at(18))
++    return [front,at(18),at(18),front];
+    // Original directional action-table does not confirm any other attack,
+    // hit or defeat packet; preserve verified standing identity.
+    return front?[front]:[];
+@@ -267,7 +315,15 @@
+    pawn.dataset.sourceFacingFrame=facing.frame?String(facing.frame.index):'none';
+    pawn.dataset.sourceFacingEvidence=facing.evidence;
+    pawn.dataset.sourceDirection='front-source-candidate/not-EXE-direction-table';
+-   const seq=sequenceFor(native,action,id);
++   const travel=action==='walk'?(pawn.dataset.travelFacing||'toward'):'toward';
++   const seq=sequenceFor(native,action,id,travel);
++   pawn.dataset.actorWalkFacing=action==='walk'?travel:'';
++   pawn.dataset.sourceTravelFacing=action==='walk'&&travel==='away'&&
++     seq.length&&seq[0].index===BACK_WALK_INDICES[0]
++    ?'rear-walk-3-7/visual-reviewed/INFERRED'
++    :action==='walk'?'front/INFERRED':'n/a';
++   pawn.dataset.sourceAttackEvidence=action==='attack'&&REVIEWED_FRONT_ATTACK.has(id)
++    ?'front-three-quarter-18/visual-reviewed/INFERRED':'n/a';
+    // Expose EXACT SOURCE packet indexes independently from inferred labels;
+    // QA can inspect what was really rendered during genuine gameplay.
+    pawn.dataset.sourceFrameSequence=seq.map(frame=>frame.index).join(',');
+@@ -387,7 +443,9 @@
+   const continueSourceWalk=action==='walk'&&pawn.dataset.actorPose==='walk'&&
+    pawn.dataset.actorRig==='original-obs-sprite'&&
+    (pawn.dataset.sourceFrontWalkVerified==='true'||
+-    pawn.dataset.sourceWalkCoverage?.startsWith('8-of-8-'));
++    pawn.dataset.sourceWalkCoverage?.startsWith('8-of-8-'))&&
++   // A turn from front to rear (or back) must switch frame sets at once.
++   (pawn.dataset.actorWalkFacing||'toward')===(pawn.dataset.travelFacing||'toward');
+   clearTimeout(timeouts.get(pawn));
+   if(!continueSourceWalk){
+    pawn.dataset.actorPose=action;
+@@ -478,6 +536,8 @@
+    originalFullBodyFramesRecovered:[...new Set([...Object.keys(window.ORIGINAL_LEAF_OBS_FRAMES||{}),...frames.keys()])].filter(id=>!Object.hasOwn(NON_ACTOR_OBS,id)),
+    nativeObsEffectMembers:{...NON_ACTOR_OBS},
+    originalFrontVisualAudited:{...AUDITED_FRONT_SOURCE},
++   reviewedBackWalk:[...REVIEWED_BACK_WALK],
++   reviewedFrontAttack:[...REVIEWED_FRONT_ATTACK],
+    rendered:[...document.querySelectorAll('#board-pawns .board-pawn')].map(p=>({
+     playerId:p.dataset.id,chessmanId:p.dataset.chessmanId,
+     pose:p.dataset.actorPose,rig:p.dataset.actorRig,
+diff --git a/apps/4leaf/rog/tests/actor-direction-attack-score.cjs b/apps/4leaf/rog/tests/actor-direction-attack-score.cjs
+new file mode 100644
+index 00000000..4f5ddb39
+--- /dev/null
++++ b/apps/4leaf/rog/tests/actor-direction-attack-score.cjs
+@@ -0,0 +1,109 @@
++'use strict';
++/* 2026-11-01 restoration checks, measured on the RENDERED game:
++ *  - walking up the board (away from camera) plays reviewed rear frames 3..7,
++ *    walking down plays the front cycle; unreviewed members keep old paths;
++ *  - attack shows the reviewed front three-quarter frame 18;
++ *  - battle scores use original 1167.obs numerals when digits are 0..7.
++ * Evidence level for direction/attack is INFERRED (visual review), not an
++ * original EXE action table; this test pins behaviour, not historical truth. */
++const assert=require('node:assert/strict');
++const path=require('node:path');
++const {chromium,webkit}=require('playwright');
++(async()=>{
++ const engine=process.env.FOURLEAF_BROWSER==='webkit'?'webkit':'chromium';
++ const browser=await (engine==='webkit'?webkit:chromium).launch({headless:true,
++  args:engine==='webkit'?[]:['--no-sandbox']});
++ const page=await browser.newPage({viewport:{width:800,height:600},serviceWorkers:'block'});
++ const errors=[];page.on('pageerror',e=>errors.push(String(e)));
++ await page.addInitScript(()=>{window.LEAF_CENTRAL_API_URL='';});
++ try{
++  await page.goto(process.env.FOURLEAF_TEST_URL||'file://'+path.resolve(__dirname,'../index.html'));
++  await page.waitForFunction(()=>window.__ROG_TEST__&&window.__LEAF_GENESIS_ACTORS__);
++  await page.locator('[data-route="lobby"]').first().click();
++  await page.locator('#lobby-create').click();
++  await page.locator('#game-mode').selectOption('hotseat');
++  await page.locator('#bot-count').selectOption('1');
++  await page.locator('#map-select').selectOption('4LEAF');
++  await page.locator('#start-game').click();
++  await page.waitForSelector('#game:not(.hidden)');
++  // Find an upward and a downward two-step run on the live DMP path.
++  const seg=await page.evaluate(()=>{
++   const T=window.__ROG_TEST__,m=T.getMatch(),n=m.tiles.length;
++   const pawn=document.querySelector('#board-pawns .board-pawn[data-id="'+m.players[0].id+'"]');
++   const ys=[];
++   for(let i=0;i<n;i++){m.players[0].position=i;T.setMatch(m);ys.push(parseFloat(pawn.style.top.replace('calc(','')));}
++   let up=-1,down=-1;
++   for(let i=1;i<n-1;i++){
++    if(up<0&&ys[i]-ys[i-1]<-1&&ys[i+1]-ys[i]<-1)up=i-1;
++    if(down<0&&ys[i]-ys[i-1]>1&&ys[i+1]-ys[i]>1)down=i-1;
++   }
++   return {up,down};
++  });
++  assert.ok(seg.up>=0&&seg.down>=0,'live path has upward and downward runs '+JSON.stringify(seg));
++  const walk=(card,start)=>page.evaluate(async([card,start])=>{
++   const T=window.__ROG_TEST__,m=T.getMatch();
++   m.players[0].team=[card];m.players[0].position=start;T.setMatch(m);
++   await new Promise(r=>setTimeout(r,250));
++   const pawn=document.querySelector('#board-pawns .board-pawn[data-id="'+m.players[0].id+'"]');
++   const seen=new Set();
++   const obs=new MutationObserver(()=>seen.add(Number(pawn.dataset.actorFrame)));
++   obs.observe(pawn,{attributes:true,attributeFilter:['data-actor-frame']});
++   for(let k=1;k<=2;k++){m.players[0].position=start+k;T.drawGame();await new Promise(r=>setTimeout(r,70));}
++   await new Promise(r=>setTimeout(r,700));obs.disconnect();
++   const img=pawn.querySelector('img.leaf-chess-original-obs');
++   return {facing:pawn.dataset.travelFacing,seq:pawn.dataset.sourceFrameSequence,
++    evidence:pawn.dataset.sourceTravelFacing,frames:[...seen].sort((a,b)=>a-b),
++    turn:m.active,position:m.players[0].position,src:img?.getAttribute('src')};
++  },[card,start]);
++  const report={};
++  for(const card of ['c_0046','c_0078','c_0040']){
++   const up=await walk(card,seg.up),down=await walk(card,seg.down);
++   assert.equal(up.facing,'away');assert.equal(down.facing,'toward');
++   assert.equal(up.seq,'3,4,5,6,7',card+' walks away with reviewed rear frames');
++   assert.equal(up.evidence,'rear-walk-3-7/visual-reviewed/INFERRED');
++   assert.ok(up.frames.length>=3&&up.frames.every(f=>f>=3&&f<=7),card+' rendered rear frames '+up.frames);
++   assert.ok(down.seq.split(',').every(f=>Number(f)>=25&&Number(f)<=30),card+' walks toward with front frames');
++   report[card]={up:up.frames,down:down.frames};
++  }
++  // Unreviewed rear (0058: diagonal sword poses at 3..7) keeps the front cycle.
++  const guarded=await walk('c_0058',seg.up);
++  assert.ok(guarded.seq.split(',').every(f=>Number(f)>=25),'0058 rear is not reviewed; never shows 3..7');
++  // Attack: reviewed front three-quarter frame 18, one-shot, ends on front.
++  const attack=await page.evaluate(async()=>{
++   const T=window.__ROG_TEST__,m=T.getMatch();m.players[0].team=['c_0046'];T.setMatch(m);
++   await new Promise(r=>setTimeout(r,200));
++   const pawn=document.querySelector('#board-pawns .board-pawn[data-id="'+m.players[0].id+'"]');
++   window.__LEAF_GENESIS_ACTORS__.poseByPlayer(m.players[0].id,'attack',0);
++   const seq=pawn.dataset.sourceFrameSequence,ev=pawn.dataset.sourceAttackEvidence;
++   await new Promise(r=>setTimeout(r,900));
++   return {seq,ev,end:pawn.dataset.actorFrame,done:pawn.dataset.sourcePlaybackComplete};
++  });
++  assert.equal(attack.seq,'25,18,18,25');
++  assert.equal(attack.ev,'front-three-quarter-18/visual-reviewed/INFERRED');
++  assert.equal(attack.done,'true');assert.equal(attack.end,'25');
++  // Battle score numerals.
++  const score=await page.evaluate(async()=>{
++   const T=window.__ROG_TEST__,m=T.getMatch();
++   m.players.forEach(p=>{p.position=5});T.setMatch(m);
++   const R=Math.random;const seq=[.55,0,.4,.4];let k=0;Math.random=()=>k<seq.length?seq[k++]:R();
++   try{T.resolveBattle(m.players[0],m.players[1]);}finally{setTimeout(()=>{Math.random=R},1500);}
++   await new Promise(r=>setTimeout(r,1300));
++   return [...document.querySelectorAll('#battle-visual .battle-visual-total')].map(el=>({
++    text:el.textContent,source:el.dataset.numeralSource,
++    digits:[...el.querySelectorAll('img.battle-total-digit')].map(i=>({src:i.getAttribute('src'),ok:i.complete&&i.naturalHeight>=65}))}));
++  });
++  assert.equal(score.length,2,'two battle scores');
++  for(const s of score){
++   assert.match(s.text,/^\d\d$/);
++   if(/[89]/.test(s.text)){
++    assert.equal(s.source,'web-text/digit-8-or-9-not-extracted');assert.equal(s.digits.length,0);
++   }else{
++    assert.equal(s.source,'original-OBS-1167.obs/digits-0-7');
++    assert.deepEqual(s.digits.map(d=>d.src),s.text.split('').map(d=>'./original/OBS/bulk/1167-0'+d+'.png'));
++    assert.ok(s.digits.every(d=>d.ok),'original numerals loaded');
++   }
++  }
++  assert.deepEqual(errors,[]);
++  console.log('ACTOR DIRECTION / ATTACK / SCORE PASS',JSON.stringify({engine,seg,report,attack,score}));
++ }finally{await browser.close();}
++})().catch(e=>{console.error('ACTOR DIRECTION FAILED',e.stack||e);process.exit(1);});
+diff --git a/apps/4leaf/rog/tests/card-portrait-integrity.cjs b/apps/4leaf/rog/tests/card-portrait-integrity.cjs
+new file mode 100644
+index 00000000..3c1094e5
+--- /dev/null
++++ b/apps/4leaf/rog/tests/card-portrait-integrity.cjs
+@@ -0,0 +1,45 @@
++'use strict';
++/* Card portrait integrity (audit 2026-11-01).
++ * Checks a property of the RENDERED result, not a provenance label:
++ *  1. no CardData face is shown for two different characters;
++ *  2. the removed (sourceId%59)+1 formula can never come back silently;
++ *  3. cards with no sourced portrait show the original IMG.pak card back.
++ * Passing this does NOT mean portraits are correct: the 7 legacy entries are
++ * unsourced until the CHR record dump provides a real portrait field. */
++const assert=require('node:assert/strict');
++const path=require('node:path');
++const {chromium}=require('playwright');
++(async()=>{
++ const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
++ const page=await browser.newPage({viewport:{width:800,height:600},serviceWorkers:'block'});
++ const errors=[];page.on('pageerror',e=>errors.push(String(e)));
++ await page.addInitScript(()=>{window.LEAF_CENTRAL_API_URL='';});
++ try{
++  await page.goto(process.env.FOURLEAF_TEST_URL||'file://'+path.resolve(__dirname,'../index.html'));
++  await page.waitForFunction(()=>window.__ROG_TEST__&&window.__ROG_TEST__.imageFor);
++  const rows=await page.evaluate(()=>{
++   const T=window.__ROG_TEST__;
++   return (window.ORIGINAL_LEAF_CHESSMEN||[]).map(c=>({id:c.id,name:c.name,
++    src:T.imageFor('c_'+c.id),evidence:T.portraitEvidence('c_'+c.id)}));
++  });
++  assert.ok(rows.length>=90,'original CHR roster loaded');
++  const byFace=new Map();
++  for(const r of rows){
++   if(!r.src.includes('/CardData/'))continue;
++   const owners=byFace.get(r.src)||[];owners.push(r.id);byFace.set(r.src,owners);
++  }
++  const shared=[...byFace].filter(([,ids])=>ids.length>1);
++  assert.deepEqual(shared,[],'one CardData face must not be shown for two characters');
++  for(const r of rows){
++   const formula='./original/CardData/chm_'+((Number(r.id)%59)+1)+'.png';
++   if(r.evidence==='none')assert.equal(r.src,'./original/IMG/avatarback.png',
++    r.id+' has no sourced portrait and must show the original card back');
++   if(r.evidence==='none')assert.notEqual(r.src,formula,r.id+' uses the removed formula');
++  }
++  const legacy=rows.filter(r=>r.evidence!=='none').map(r=>r.id);
++  assert.ok(legacy.length<=7,'legacy unsourced portraits may only shrink: '+legacy);
++  assert.deepEqual(errors,[]);
++  console.log('CARD PORTRAIT INTEGRITY PASS',JSON.stringify({roster:rows.length,
++   legacyUnsourced:legacy,neutral:rows.length-legacy.length}));
++ }finally{await browser.close();}
++})().catch(e=>{console.error(e);process.exit(1);});
+diff --git a/apps/4leaf/rog/tests/dice-obs-contiguous-source-motion.cjs b/apps/4leaf/rog/tests/dice-obs-contiguous-source-motion.cjs
+index 637e2844..e2c3b9cc 100644
+--- a/apps/4leaf/rog/tests/dice-obs-contiguous-source-motion.cjs
++++ b/apps/4leaf/rog/tests/dice-obs-contiguous-source-motion.cjs
+@@ -23,8 +23,11 @@ const {chromium}=require('playwright');
+   await page.locator('#map-select').selectOption('4LEAF');
+   await page.locator('#start-game').click();
+   await page.waitForSelector('#game:not(.hidden)');
+-  // These four direction-UNREVIEWED source members contain 0..7 packets; the 20 visually reviewed front-facing models now hold source fronts instead of rotating backward during walking.
+- const ids=['0047','0050','0063','0087'];
++  // These four direction-UNREVIEWED source members contain 0..7 packets. The
++  // 42 visually reviewed front-facing models (20 + 22 added 2026-11-01:
++  // 0047/0050/0063 among them) hold source fronts instead of rotating through
++  // back/side packets while walking; that path is checked at the end.
++ const ids=['0067','0068','0074','0087'];
+   const results=[];
+   for(const id of ids){
+    const setup=await page.evaluate(id=>{
+@@ -104,7 +107,7 @@ const {chromium}=require('playwright');
+   // the last packet until the gameplay event asks for idle. This does not
+   // claim that 2002 EXE action frame lookup or FPS has been recovered.
+   const oneShot=await page.evaluate(async()=>{
+-   const m=window.__ROG_TEST__.getMatch();m.players[0].team[0]='c_0047';
++   const m=window.__ROG_TEST__.getMatch();m.players[0].team[0]='c_0067';
+    window.__ROG_TEST__.drawGame();
+    const pawn=document.querySelector('#board-pawns .board-pawn[data-id="0"]');
+    window.__LEAF_GENESIS_ACTORS__.poseByPlayer(m.players[0].id,'attack',0);
+@@ -130,7 +133,7 @@ const {chromium}=require('playwright');
+   // almost always left physical gameplay stuck on source indexes 0/1.
+   await page.evaluate(()=>{
+    const m=window.__ROG_TEST__.getMatch();
+-   m.players[0].team[0]='c_0047'; // confirmed original source 0..7
++   m.players[0].team[0]='c_0067'; // unreviewed member with source 0..7
+    m.players[0].position=0;m.players[1].position=35;m.active=0;
+    // Controlled event-free GAME turn; retains actual native DMP map,
+    // original source player, dice engine and turn transition.
+@@ -181,7 +184,7 @@ const {chromium}=require('playwright');
+    'REAL dice movement must render all eight source OBS frames, not repeatedly restart 0,1');
+   assert.ok(liveTurn.recorded.some(x=>x.clock?.startsWith('continuous-across-real-DMP-steps/')),
+    'later DMP steps must preserve source frame clock instead of restarting it');
+-  assert.ok(liveTurn.recorded.every(x=>x.file?.includes('/OBS/bulk/1047-')),
++  assert.ok(liveTurn.recorded.every(x=>x.file?.includes('/OBS/bulk/1067-')),
+    'real roll cannot substitute simulated or ChatTown figure frames');
+   const missing=await page.evaluate(()=>{
+    const m=window.__ROG_TEST__.getMatch();
+@@ -206,7 +209,10 @@ const {chromium}=require('playwright');
+   assert.equal(nonBody.original,true,'keep source effect pixels for real hex VFX');
+   assert.equal(nonBody.effect,'hex-overlay');
+   assert.equal(nonBody.rig,'original-card-portrait-fallback');
+-  assert.ok(nonBody.fallback.includes('original/CardData/'));
++  // 0137 lost its duplicated chm_31 face on 2026-11-01 (also shown for
++  // 0087); without a sourced portrait the original card back is shown.
++  assert.ok(nonBody.fallback.includes('original/CardData/')||
++   nonBody.fallback==='./original/IMG/avatarback.png',nonBody.fallback);
+   assert.equal(missing.rig,'original-card-portrait-fallback');
+   assert.equal(missing.obs,false);
+   assert.ok(missing.fallback.includes('original/CardData/'));
+diff --git a/apps/4leaf/rog/tests/dice-original-minipanel-spr.cjs b/apps/4leaf/rog/tests/dice-original-minipanel-spr.cjs
+index d95c8728..7322d605 100644
+--- a/apps/4leaf/rog/tests/dice-original-minipanel-spr.cjs
++++ b/apps/4leaf/rog/tests/dice-original-minipanel-spr.cjs
+@@ -99,7 +99,8 @@ async function check(browser,mobile){
+     source:el.dataset.sourceCardArtwork,info:el.querySelector('span').textContent};
+   });
+   assert.equal(second.card,'c_0042');
+-  assert.ok(second.source.includes('original/CardData/chm_'));
++  assert.ok(second.source.includes('original/CardData/chm_')||
++   second.source.endsWith('original/IMG/avatarback.png'),second.source);
+   assert.ok(second.name.length>0&&second.info.includes('방어'));
+   await page.locator('#board-mini .leaf-native-minipanel-tab[data-panel="map"]').click();
+   const restored=await page.evaluate(()=>{
+diff --git a/apps/4leaf/rog/tests/genesis-asset-roles.cjs b/apps/4leaf/rog/tests/genesis-asset-roles.cjs
+index 3a90b793..8508c3c3 100644
+--- a/apps/4leaf/rog/tests/genesis-asset-roles.cjs
++++ b/apps/4leaf/rog/tests/genesis-asset-roles.cjs
+@@ -70,8 +70,9 @@ const {chromium}=require('playwright');
+   assert.ok(snap.board.every(x=>x.source.startsWith('OBS/')&&x.png?.includes('./original/OBS/')));
+   assert.ok(snap.party.length>=1);
+   for(const actor of snap.party){
+-   assert.ok(actor.artwork.startsWith('./original/CardData/chm_'),
+-    'live party detail retains actual original CardData artwork');
++   assert.ok(actor.artwork.startsWith('./original/CardData/chm_')||
++    actor.artwork==='./original/IMG/avatarback.png',
++    'party detail art is an original file (legacy CardData face or card back)');
+    assert.ok(!actor.src.includes('/Registry/'),'player avatar cannot impersonate a party chessman');
+    if(actor.source==='OBS.pak/verified-front'){
+     assert.equal(actor.evidence,'visually-reviewed');
+@@ -79,8 +80,11 @@ const {chromium}=require('playwright');
+     assert.equal(actor.src,actor.expected);
+     assert.ok(actor.flip.startsWith('matrix('),'original upside-down OBS packet is corrected');
+    }else{
+-    assert.ok(actor.source.startsWith('CardData/original-fallback-'));
+-    assert.equal(actor.src,actor.artwork,'unverified/missing OBS uses its original CardData face');
++    // No reviewed OBS front: show the card's art slot. Since 2026-11-01 that is
++    // either a legacy (unsourced) CardData face or the original card back,
++    // never a face picked by the removed (id%59)+1 formula.
++    assert.ok(['IMG/avatarback/no-sourced-portrait','CardData/legacy-roster-unsourced'].includes(actor.source),actor.source);
++    assert.equal(actor.src,actor.artwork,'unverified/missing OBS uses its card art slot');
+    }
+   }
+   assert.ok(snap.party.some(x=>x.card==='c_0045'&&x.source==='OBS.pak/verified-front'),
+diff --git a/apps/4leaf/rog/tests/obs-reviewed-front-walk-native-stats.cjs b/apps/4leaf/rog/tests/obs-reviewed-front-walk-native-stats.cjs
+index 0dd05bb9..57d3878f 100644
+--- a/apps/4leaf/rog/tests/obs-reviewed-front-walk-native-stats.cjs
++++ b/apps/4leaf/rog/tests/obs-reviewed-front-walk-native-stats.cjs
+@@ -29,7 +29,11 @@ const {chromium,webkit}=require('playwright');
+   const report=[];
+   for(const id of ['0040','0042','0043','0044','0046','0048','0049',
+    '0051','0052','0053','0054','0055','0056','0058','0059',
+-   '0060','0061','0062','0064']){
++   '0060','0061','0062','0064',
++   // 2026-11-01 front-silhouette review (see genesis-chessman-actors.js)
++   '0047','0050','0063','0065','0066','0069','0070','0071','0072','0073',
++   '0075','0076','0077','0078','0079','0080','0081','0082','0083','0084',
++   '0085','0166']){
+    const evidence=await page.evaluate(id=>{
+     const m=window.__ROG_TEST__.getMatch();
+     m.players[0].team=['c_'+id,'c_0042'];
+@@ -51,11 +55,13 @@ const {chromium,webkit}=require('playwright');
+    assert.equal(evidence.rig,'original-obs-sprite',id);
+    assert.ok(evidence.audited?.includes('visual-original-OBS-reviewed/front/'+id),JSON.stringify(evidence));
+    assert.equal(evidence.frontWalk,'true','only inspected source front pair is allowed');
+-   assert.equal(evidence.sequence,id==='0042'?'25,30,25,30':'25,26,27,28,29,30',
++   const twoFrameFront=id==='0042'||['0047','0050','0063','0065','0066','0069','0070','0071','0072','0073',
++    '0075','0076','0077','0078','0079','0080','0081','0082','0083','0084','0085','0166'].includes(id);
++   assert.equal(evidence.sequence,twoFrameFront?'25,30,25,30':'25,26,27,28,29,30',
+     'verified original front frames only; moving chessman must NEVER spin through back 0..7');
+    assert.equal(evidence.pose,'walk');
+    assert.ok(evidence.src?.includes('/original/OBS/')&&
+-    evidence.src.endsWith('/10'+id.slice(2)+'-25.png'),JSON.stringify(evidence));
++    evidence.src.endsWith('/1'+id.slice(1)+'-25.png'),JSON.stringify(evidence));
+    assert.ok(evidence.actionEvidence?.includes('WEB-movement-and-FPS-inferred'),
+     'original native frame labels/FPS are NOT proven');
+    report.push(evidence);
+@@ -79,7 +85,11 @@ const {chromium,webkit}=require('playwright');
+    assert.equal(stats.selected,'c_'+id);
+    assert.deepEqual(stats.actual,[164,125],'genuine original 164x125 stats bitmap');
+    assert.equal(stats.original,'./original/IMG/stats.png');
+-   assert.ok(stats.portrait?.includes('/original/CardData/'));
++   // Portrait: a real original file, never the removed (id%59)+1 formula
++   // face. Without a sourced CHR portrait field the card back is honest.
++   assert.ok(stats.portrait?.includes('/original/CardData/')||
++    stats.portrait==='./original/IMG/avatarback.png',stats.portrait);
++   assert.notEqual(stats.portrait,'./original/CardData/chm_'+((Number(id)%59)+1)+'.png');
+    for(const key of ['role','move','attack','defense','intellect','ability','point'])
+     assert.ok(stats.fields[key]?.length,JSON.stringify(stats));
+    if(id==='0044')await page.screenshot({path:'leaf-original-164x125-stats-'+engine.name()+(mobile?'-mobile':'')+'.png'});
+diff --git a/apps/4leaf/rog/tests/obs-source-nonactor-role.cjs b/apps/4leaf/rog/tests/obs-source-nonactor-role.cjs
+index 6f12a234..5dc6a5da 100644
+--- a/apps/4leaf/rog/tests/obs-source-nonactor-role.cjs
++++ b/apps/4leaf/rog/tests/obs-source-nonactor-role.cjs
+@@ -40,7 +40,10 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict');
+    assert.equal(result.rig,'original-card-portrait-fallback',
+     'native '+result.role+' cannot impersonate a Genesis warrior '+id);
+    assert.equal(result.hidden,false);
+-   assert.ok(result.card?.includes('/original/CardData/'),JSON.stringify(result));
++   // Effect members fall back to the card art slot: a legacy CardData face
++   // or, without a sourced portrait, the original IMG.pak card back.
++   assert.ok(result.card?.includes('/original/CardData/')||
++    result.card==='./original/IMG/avatarback.png',JSON.stringify(result));
+    assert.equal(result.anim,'unavailable');
+   }
+   const genuine=await page.evaluate(()=>{
+-- 
+2.43.0
+
