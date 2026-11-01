@@ -45,6 +45,13 @@ MAX_IMG_GET=90
 MAX_URLS_PER_ENGINE=90
 
 
+def asset_group(url):
+    """An image resize is a rendition, never a new photo cut by itself."""
+    p=urlsplit(url)
+    path=re.sub(r'-\d{2,5}x\d{2,5}(?=\.(?:jpe?g|webp|png)$)','',p.path,flags=re.I)
+    return (p.hostname or '',path)
+
+
 def safe_photo(raw):
     try:
         p=urlsplit(raw)
@@ -196,6 +203,24 @@ def compare(source,session,use_browser=True,limit=MAX_IMG_GET):
     result['baseline_unique_sha']=len(base_set)
     result['ensemble_unique_sha']=len(combined)
     result['additional_unique_sha']=len(combined-base_set)
+    # SHA catches byte equality, NOT different-sized versions of one photo.
+    # Compare native original vs generated WordPress resize variants by asset
+    # identity. Distinct unmatched URLs remain candidates, not proven cuts.
+    baseline_assets={asset_group(u) for u in proposals['existing_scoped_parser']
+                     if u in verdict and verdict[u]['status']=='decoded_sha'}
+    combined_assets={asset_group(u) for urls in proposals.values() for u in urls
+                     if u in verdict and verdict[u]['status']=='decoded_sha'}
+    result['baseline_distinct_asset_groups']=len(baseline_assets)
+    result['ensemble_distinct_asset_groups']=len(combined_assets)
+    result['additional_unmatched_asset_groups']=len(combined_assets-baseline_assets)
+    result['extra_sha_of_existing_asset_renditions']=len({
+        verdict[u]['sha256'] for engine,urls in proposals.items()
+        if engine!='existing_scoped_parser'
+        for u in urls if u in verdict and verdict[u]['status']=='decoded_sha'
+        and verdict[u]['sha256'] not in base_set and asset_group(u) in baseline_assets
+    })
+    result['unmatched_group_example_paths']=[path for _,path in
+        sorted(combined_assets-baseline_assets)[:15]]
     result['candidate_urls_seen']=len(verdict)
     result['actual_image_gets']=checked
     for engine,urls in proposals.items():
@@ -225,7 +250,9 @@ def run(out,use_browser=True,selection=None):
         'totals':{'works_compared':len(rows),
             'baseline_public_unique_sha_sum':sum(r['baseline_unique_sha'] for r in rows),
             'ensemble_public_unique_sha_sum':sum(r['ensemble_unique_sha'] for r in rows),
-            'additional_public_unique_sha_sum':sum(r['additional_unique_sha'] for r in rows)},
+            'additional_public_unique_sha_sum':sum(r['additional_unique_sha'] for r in rows),
+            'additional_unmatched_asset_groups_sum':sum(r['additional_unmatched_asset_groups'] for r in rows),
+            'extra_sha_of_existing_asset_renditions_sum':sum(r['extra_sha_of_existing_asset_renditions'] for r in rows)},
         'limits':{'max_verified_downloads_per_page':MAX_IMG_GET,
                   'max_urls_per_engine':MAX_URLS_PER_ENGINE,
                   'no_auth_no_paid_endpoints':True,
