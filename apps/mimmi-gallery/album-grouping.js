@@ -24,8 +24,11 @@
   for(const [from,to] of Object.entries(aliases||{})){
    if(from===to||typeof from!=='string'||typeof to!=='string')continue;
    const small=combined.get(from),large=combined.get(to);
+   // Exact SHA-subsets add no unique stored images; existing photos remain.
+   const exactSubset=small&&large&&Array.isArray(small.images)&&Array.isArray(large.images)&&small.images.length>0
+      &&(sha=>small.images.every(p=>sha.has(p.sha256)))(new Set(large.images.map(p=>p.sha256)));
    if(!small||!large||!Array.isArray(small.images)||!Array.isArray(large.images)
-      ||!large.images.length||(!samePublicSource(from,to,evidence)&&(large.images.length<30||large.images.length<small.images.length*2))
+      ||!large.images.length||(!exactSubset&&!samePublicSource(from,to,evidence)&&(large.images.length<30||large.images.length<small.images.length*2))
       ||isAI(small)!==isAI(large))continue;
    const sha=new Set(large.images.map(p=>p.sha256));
    let next=Math.max(0,...large.images.map(p=>Number.isInteger(p.number)?p.number:0));
