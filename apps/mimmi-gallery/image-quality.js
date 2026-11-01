@@ -9,11 +9,14 @@
  */
 (function(root){
 'use strict';
-function watermarked(p){
- return p?.watermarked===true ||
-  /pixibb|watermarked|watermark|third.party.public.watermarked/i.test(
-   [p?.quality,p?.source_url,p?.original_source_url,p?.origin_url].filter(Boolean).join(' '));
+function watermarkStatus(p){
+ if(p?.watermark_status==='present_verified'||p?.watermarked===true||
+    /pixibb|watermarked|watermark|third.party.public.watermarked/i.test(
+     [p?.quality,p?.source_url,p?.original_source_url,p?.origin_url].filter(Boolean).join(' ')))return 'present';
+ if(p?.watermark_status==='absent_verified')return 'absent';
+ return 'unknown';
 }
+function watermarked(p){return watermarkStatus(p)==='present'}
 function original(p){return p?.publisher_original_verified===true && p?.ai_enhanced!==true}
 function pixels(p){return Math.max(0,Number(p?.width)||0)*Math.max(0,Number(p?.height)||0)}
 function score(p){
@@ -51,15 +54,18 @@ function preferred(previous,candidate){
  const qualityTie=verifiedTie||(a!==null&&b!==null&&Math.abs(a-b)<8);
  // A clean blurry edit NEVER beats a visibly better watermarked edition.
  // When quality has not been evaluated, keep the known variant for review.
- if(qualityTie&&watermarked(previous)!==watermarked(candidate))
-  return watermarked(previous)?candidate:previous;
+ if(qualityTie){
+  const a=watermarkStatus(previous),b=watermarkStatus(candidate);
+  if(a==='present'&&b==='absent')return candidate;
+  if(a==='absent'&&b==='present')return previous;
+ }
  if(qualityTie&&original(previous)!==original(candidate))
   return original(candidate)?candidate:previous;
  // Inconclusive or unassessed: do not guess from dimensions, encoded bytes
  // or mere absence of watermark. Preserve the existing version.
  return previous;
 }
-const api={preferred,score,paired,watermarked,original,pixels};
+const api={preferred,score,paired,watermarked,watermarkStatus,original,pixels};
 if(typeof module!=='undefined'&&module.exports)module.exports=api;
 root.GalleryPhotoQuality=api;
 })(typeof window==='undefined'?globalThis:window);
