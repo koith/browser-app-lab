@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 from urllib.parse import urlencode, urlsplit
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError, URLError
-import json, os, re, unicodedata
+import ipaddress, json, os, re, unicodedata
 
 TERMS = ("뒷계", "섹트", "일탈계")
 ROUTES = {
@@ -36,6 +36,11 @@ def https_url(value: object, hosts: tuple[str, ...] | None = None) -> str:
             return ""
         if host in BLOCKED_HOSTS or host.endswith((".local", ".internal")):
             return ""
+        try:
+            if not ipaddress.ip_address(host).is_global:
+                return ""
+        except ValueError:
+            pass
         if re.match(r"^(?:127\.|10\.|192\.168\.|169\.254\.|172\.(?:1[6-9]|2\d|3[01])\.)", host):
             return ""
         if hosts and not any(host == h or host.endswith("." + h) for h in hosts):
@@ -46,6 +51,11 @@ def https_url(value: object, hosts: tuple[str, ...] | None = None) -> str:
 
 
 def parsed_date(value: object) -> datetime | None:
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        try:
+            return datetime.fromtimestamp(value / (1000 if value>10_000_000_000 else 1), timezone.utc)
+        except (ValueError, OverflowError, OSError):
+            return None
     if not isinstance(value, str):
         return None
     try:
@@ -71,7 +81,7 @@ def normalize_item(item: object, platform: str, term: str, start: datetime, end:
     content = _dict(p.get("content"))
     ext = _dict(p.get("ext"))
     text = "\n".join(x for x in (
-        _text(p.get("title")), _text(content.get("text")), _text(ext.get("selftext"))
+        _text(p.get("title") or ext.get("title")), _text(content.get("text")), _text(ext.get("selftext"))
     ) if x).strip()
     if not text or unicodedata.normalize("NFKC", term) not in unicodedata.normalize("NFKC", text):
         return None
