@@ -29,7 +29,11 @@ const {chromium,webkit}=require('playwright');
   const report=[];
   for(const id of ['0040','0042','0043','0044','0046','0048','0049',
    '0051','0052','0053','0054','0055','0056','0058','0059',
-   '0060','0061','0062','0064']){
+   '0060','0061','0062','0064',
+   // 2026-11-01 front-silhouette review (see genesis-chessman-actors.js)
+   '0047','0050','0063','0065','0066','0069','0070','0071','0072','0073',
+   '0075','0076','0077','0078','0079','0080','0081','0082','0083','0084',
+   '0085','0166']){
    const evidence=await page.evaluate(id=>{
     const m=window.__ROG_TEST__.getMatch();
     m.players[0].team=['c_'+id,'c_0042'];
@@ -51,11 +55,13 @@ const {chromium,webkit}=require('playwright');
    assert.equal(evidence.rig,'original-obs-sprite',id);
    assert.ok(evidence.audited?.includes('visual-original-OBS-reviewed/front/'+id),JSON.stringify(evidence));
    assert.equal(evidence.frontWalk,'true','only inspected source front pair is allowed');
-   assert.equal(evidence.sequence,id==='0042'?'25,30,25,30':'25,26,27,28,29,30',
+   const twoFrameFront=id==='0042'||['0047','0050','0063','0065','0066','0069','0070','0071','0072','0073',
+    '0075','0076','0077','0078','0079','0080','0081','0082','0083','0084','0085','0166'].includes(id);
+   assert.equal(evidence.sequence,twoFrameFront?'25,30,25,30':'25,26,27,28,29,30',
     'verified original front frames only; moving chessman must NEVER spin through back 0..7');
    assert.equal(evidence.pose,'walk');
    assert.ok(evidence.src?.includes('/original/OBS/')&&
-    evidence.src.endsWith('/10'+id.slice(2)+'-25.png'),JSON.stringify(evidence));
+    evidence.src.endsWith('/1'+id.slice(1)+'-25.png'),JSON.stringify(evidence));
    assert.ok(evidence.actionEvidence?.includes('WEB-movement-and-FPS-inferred'),
     'original native frame labels/FPS are NOT proven');
    report.push(evidence);
@@ -79,7 +85,11 @@ const {chromium,webkit}=require('playwright');
    assert.equal(stats.selected,'c_'+id);
    assert.deepEqual(stats.actual,[164,125],'genuine original 164x125 stats bitmap');
    assert.equal(stats.original,'./original/IMG/stats.png');
-   assert.ok(stats.portrait?.includes('/original/CardData/'));
+   // Portrait: a real original file, never the removed (id%59)+1 formula
+   // face. Without a sourced CHR portrait field the card back is honest.
+   assert.ok(stats.portrait?.includes('/original/CardData/')||
+    stats.portrait==='./original/IMG/avatarback.png',stats.portrait);
+   assert.notEqual(stats.portrait,'./original/CardData/chm_'+((Number(id)%59)+1)+'.png');
    for(const key of ['role','move','attack','defense','intellect','ability','point'])
     assert.ok(stats.fields[key]?.length,JSON.stringify(stats));
    if(id==='0044')await page.screenshot({path:'leaf-original-164x125-stats-'+engine.name()+(mobile?'-mobile':'')+'.png'});

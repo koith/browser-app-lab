@@ -91,8 +91,25 @@ const BOT_NAMES=['티치엘','막시민','보리스','루시안','이스핀','�
 const COLORS=['#fff3bf','#91f2d1','#ffb4c4','#abc3ff','#e9b8fb','#ffda80','#ff9bab','#d9efff'];
 const PAWNS=['♞','♜','♛','♝','♟','♙','♕','♗'];
 const PORTRAITS={soldier:12,joan:119,rashid:56,narcia:41,merza:45,iolyn:54,christian:25,saladin:31,damian:101,sherazard:33,ironmask:11,schwarz:22};
-const SOURCE_PORTRAITS={'0096':12,'0078':48,'0040':33,'0045':8,'0087':31,'0088':33,'0090':23,'0091':11,'0127':40,'0137':31,'0170':22};
-const imageFor=(id)=>'./original/CardData/chm_'+(SOURCE_PORTRAITS[(CARD_MAP[id]||{}).sourceId]||PORTRAITS[id]||((Number((CARD_MAP[id]||{}).sourceId)||40)%59+1))+'.png';
+/* CardData/chm_N <-> CHR card id has NO recovered source mapping yet.
+   Audit 2026-11-01: this table was carried over from the fictional roster in
+   ef3df072 (soldier->12, ironmask->11, schwarz->22 ...), not read from CHR.pak,
+   and every other card used the invented formula (sourceId%59)+1, which put
+   another character's face on ~87 cards. The formula is removed. Entries that
+   claimed ONE portrait for TWO different characters (chm_33: 0040/0088,
+   chm_31: 0087/0137) are removed because at least one side is provably wrong.
+   The 7 remaining entries are legacy and UNSOURCED; they stay only until the
+   full CHR record dump (tools/dump-original-dice-data.py) yields a real
+   portrait field. Unmapped cards show the original IMG.pak card back instead
+   of a stranger's face. */
+const SOURCE_PORTRAITS={'0096':12,'0078':48,'0045':8,'0090':23,'0091':11,'0127':40,'0170':22};
+const NEUTRAL_CARD_ART='./original/IMG/avatarback.png';
+const portraitEvidence=(id)=>{const sid=(CARD_MAP[id]||{}).sourceId;
+ return Object.hasOwn(SOURCE_PORTRAITS,sid)?'legacy-roster-unsourced':
+  (Object.hasOwn(PORTRAITS,id)?'legacy-roster-unsourced':'none')};
+const imageFor=(id)=>{const sid=(CARD_MAP[id]||{}).sourceId;
+ const n=Object.hasOwn(SOURCE_PORTRAITS,sid)?SOURCE_PORTRAITS[sid]:PORTRAITS[id];
+ return n?'./original/CardData/chm_'+n+'.png':NEUTRAL_CARD_ART};
 const townAvatar=(i)=>'./original/Registry/sava'+String([0,82,6,1,85][i%5]).padStart(2,'0')+'.png';
 let remoteAct=false,remoteBattle=null,remoteBattleSequence=0;
 let shopPage=0;
@@ -521,6 +538,13 @@ function drawPawns(){
    const previous=Number(pawn.dataset.position);
    const moved=pawn.dataset.position!==undefined&&previous!==p.position;
    if(moved){
+     // Screen direction of this step on the original DMP path (y grows
+     // downward). Moving up the board means walking away from the camera:
+     // the actor shows its reviewed rear walk frames instead of a front body
+     // sliding backwards. Direction choice is INFERRED, not an EXE table.
+     const from=PATH[Math.min(previous,PATH.length-1)];
+     const dy=from&&point?point.y-from.y:0;
+     pawn.dataset.travelFacing=dy< -0.5?'away':'toward';
      // The original source 0..7 bitmap frames take 7*120ms before frame 7
      // appears at the current explicitly WEB-provisional playback interval.
      // A 240ms timeout truncated EVERY real rolled movement to 0..1. Extend
@@ -718,9 +742,14 @@ function drawNativeChessmen(){
     };
    }else{
     img.src=imageFor(source.id);
-    slot.dataset.rightPortraitSource='CardData/original-fallback-direction-unverified';
+    // No sourced portrait -> original IMG.pak card back, never another
+    // character's CardData face (see SOURCE_PORTRAITS note).
+    slot.dataset.rightPortraitSource=img.src.endsWith(NEUTRAL_CARD_ART.slice(1))
+     ?'IMG/avatarback/no-sourced-portrait'
+     :'CardData/legacy-roster-unsourced';
     slot.dataset.rightPortraitFacingEvidence='unknown';
    }
+   slot.dataset.portraitEvidence=portraitEvidence(source.id);
    img.alt=source.name;
    img.loading='eager';
    const stamp=document.createElement('span');stamp.className='dice-chessman-moon';
@@ -1840,5 +1869,5 @@ function init(){installBoardControls();installNativeDiceMenu();
      else if(action==='ability')await useAbility();
      else await useItem(index,steps);
    }finally{remoteAct=false}
- }};window.__ROG_TEST__={startGame,drawGame,takeTurn,teamStats,generateTiles,getMatch:()=>match,go:navigate,setRoll:()=>{},setMatch:v=>{match=v;drawGame()},getSourceMaps:()=>SOURCE_INFO,getSourceTiles:()=>SOURCE_TILES,getMapRules:()=>MAPS,isNonBattleTitle:isHistoricalNonBattleTitle,resolveTile,finishGame,calculateMatchReward,elementalModifier,resolveBattle,moveValues,activePlayer,playerCanAct,refreshResume};if(match&&!match.finished){log('저장된 경기가 있습니다. 주사위 대기실의 이어하기로 복원하세요.')}refreshResume()}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+ }};window.__ROG_TEST__={imageFor,portraitEvidence,startGame,drawGame,takeTurn,teamStats,generateTiles,getMatch:()=>match,go:navigate,setRoll:()=>{},setMatch:v=>{match=v;drawGame()},getSourceMaps:()=>SOURCE_INFO,getSourceTiles:()=>SOURCE_TILES,getMapRules:()=>MAPS,isNonBattleTitle:isHistoricalNonBattleTitle,resolveTile,finishGame,calculateMatchReward,elementalModifier,resolveBattle,moveValues,activePlayer,playerCanAct,refreshResume};if(match&&!match.finished){log('저장된 경기가 있습니다. 주사위 대기실의 이어하기로 복원하세요.')}refreshResume()}if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
