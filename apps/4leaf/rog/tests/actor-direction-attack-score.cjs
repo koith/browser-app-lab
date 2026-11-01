@@ -90,16 +90,18 @@ const {chromium,webkit}=require('playwright');
    await new Promise(r=>setTimeout(r,1300));
    return [...document.querySelectorAll('#battle-visual .battle-visual-total')].map(el=>({
     text:el.textContent,source:el.dataset.numeralSource,
+    expect:el.querySelector('.battle-total-text')?.textContent.split('').map(d=>(window.ORIGINAL_LEAF_UI_FRAMES?.['1167']?.frames||[]).find(f=>f.index===Number(d))?.url||null),
     digits:[...el.querySelectorAll('img.battle-total-digit')].map(i=>({src:i.getAttribute('src'),ok:i.complete&&i.naturalHeight>=65}))}));
   });
   assert.equal(score.length,2,'two battle scores');
   for(const s of score){
    assert.match(s.text,/^\d\d$/);
-   if(/[89]/.test(s.text)){
+   if(s.expect===undefined||s.expect.some(u=>!u)){
+    // digit 8/9 frame not in the manifest yet -> labelled WEB text
     assert.equal(s.source,'web-text/digit-8-or-9-not-extracted');assert.equal(s.digits.length,0);
    }else{
-    assert.equal(s.source,'original-OBS-1167.obs/digits-0-7');
-    assert.deepEqual(s.digits.map(d=>d.src),s.text.split('').map(d=>'./original/OBS/bulk/1167-0'+d+'.png'));
+    assert.equal(s.source,/[89]/.test(s.text)?'original-OBS-1167.obs/digits-0-7-verified/8-9-INFERRED':'original-OBS-1167.obs/digits-0-7');
+    assert.deepEqual(s.digits.map(d=>d.src),s.expect,'numerals come from the 1167 UI manifest');
     assert.ok(s.digits.every(d=>d.ok),'original numerals loaded');
    }
   }

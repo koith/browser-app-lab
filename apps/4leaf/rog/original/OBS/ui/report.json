@@ -1,0 +1,667 @@
+{
+ "format": "4LEAF_TARGETED_ORIGINAL_V1",
+ "alpha": "written-runs",
+ "packs": [
+  {
+   "name": "OBS.pak",
+   "sha256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514"
+  },
+  {
+   "name": "OBS2.pak",
+   "sha256": "e1640fa7ae90577970c16365fb10cbb079f79141f204234e5b99071a8e7d5466"
+  },
+  {
+   "name": "OBS3.pak",
+   "sha256": "3118ca67b4968c14d7768a8c377d9330e383bf5c867e4d1d99e786b125e4e12e"
+  }
+ ],
+ "ui": {
+  "1167": {
+   "declared": 25,
+   "written": 25,
+   "allWritten": true,
+   "regression": [
+    {
+     "index": 0,
+     "vsLegacyBulk": {
+      "old": "/home/runner/work/browser-app-lab/browser-app-lab/apps/4leaf/rog/original/OBS/bulk/1167-00.png",
+      "sizeMatch": true,
+      "differentPixels": 0,
+      "onlyIndex0MadeOpaque": 0,
+      "identical": true
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 1,
+     "vsLegacyBulk": {
+      "old": "/home/runner/work/browser-app-lab/browser-app-lab/apps/4leaf/rog/original/OBS/bulk/1167-01.png",
+      "sizeMatch": true,
+      "differentPixels": 0,
+      "onlyIndex0MadeOpaque": 0,
+      "identical": true
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 2,
+     "vsLegacyBulk": {
+      "old": "/home/runner/work/browser-app-lab/browser-app-lab/apps/4leaf/rog/original/OBS/bulk/1167-02.png",
+      "sizeMatch": true,
+      "differentPixels": 0,
+      "onlyIndex0MadeOpaque": 0,
+      "identical": true
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 3,
+     "vsLegacyBulk": {
+      "old": "/home/runner/work/browser-app-lab/browser-app-lab/apps/4leaf/rog/original/OBS/bulk/1167-03.png",
+      "sizeMatch": true,
+      "differentPixels": 0,
+      "onlyIndex0MadeOpaque": 0,
+      "identical": true
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 4,
+     "vsLegacyBulk": {
+      "old": "/home/runner/work/browser-app-lab/browser-app-lab/apps/4leaf/rog/original/OBS/bulk/1167-04.png",
+      "sizeMatch": true,
+      "differentPixels": 0,
+      "onlyIndex0MadeOpaque": 0,
+      "identical": true
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 5,
+     "vsLegacyBulk": {
+      "old": "/home/runner/work/browser-app-lab/browser-app-lab/apps/4leaf/rog/original/OBS/bulk/1167-05.png",
+      "sizeMatch": true,
+      "differentPixels": 0,
+      "onlyIndex0MadeOpaque": 0,
+      "identical": true
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 6,
+     "vsLegacyBulk": {
+      "old": "/home/runner/work/browser-app-lab/browser-app-lab/apps/4leaf/rog/original/OBS/bulk/1167-06.png",
+      "sizeMatch": true,
+      "differentPixels": 0,
+      "onlyIndex0MadeOpaque": 0,
+      "identical": true
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 7,
+     "vsLegacyBulk": {
+      "old": "/home/runner/work/browser-app-lab/browser-app-lab/apps/4leaf/rog/original/OBS/bulk/1167-07.png",
+      "sizeMatch": true,
+      "differentPixels": 0,
+      "onlyIndex0MadeOpaque": 0,
+      "identical": true
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 8,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 9,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 10,
+     "vsLegacyBulk": {
+      "old": "/home/runner/work/browser-app-lab/browser-app-lab/apps/4leaf/rog/original/OBS/bulk/1167-10.png",
+      "sizeMatch": true,
+      "differentPixels": 0,
+      "onlyIndex0MadeOpaque": 0,
+      "identical": true
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 11,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 12,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 13,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 14,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 15,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 16,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 17,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 18,
+     "vsLegacyBulk": {
+      "old": "/home/runner/work/browser-app-lab/browser-app-lab/apps/4leaf/rog/original/OBS/bulk/1167-18.png",
+      "sizeMatch": true,
+      "differentPixels": 0,
+      "onlyIndex0MadeOpaque": 0,
+      "identical": true
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 19,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 20,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 21,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 22,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 23,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 24,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    }
+   ]
+  },
+  "1171": {
+   "declared": 28,
+   "written": 28,
+   "allWritten": true,
+   "regression": [
+    {
+     "index": 0,
+     "vsLegacyBulk": {
+      "old": "/home/runner/work/browser-app-lab/browser-app-lab/apps/4leaf/rog/original/OBS/bulk/1171-00.png",
+      "sizeMatch": true,
+      "differentPixels": 152,
+      "onlyIndex0MadeOpaque": 152,
+      "identical": false
+     },
+     "vsCorrected": {
+      "old": "/home/runner/work/browser-app-lab/browser-app-lab/apps/4leaf/rog/original/OBS/d6-colorkey-corrected/1171-00.png",
+      "sizeMatch": true,
+      "differentPixels": 0,
+      "onlyIndex0MadeOpaque": 0,
+      "identical": true
+     }
+    },
+    {
+     "index": 1,
+     "vsLegacyBulk": {
+      "old": "/home/runner/work/browser-app-lab/browser-app-lab/apps/4leaf/rog/original/OBS/bulk/1171-01.png",
+      "sizeMatch": true,
+      "differentPixels": 13,
+      "onlyIndex0MadeOpaque": 13,
+      "identical": false
+     },
+     "vsCorrected": {
+      "old": "/home/runner/work/browser-app-lab/browser-app-lab/apps/4leaf/rog/original/OBS/d6-colorkey-corrected/1171-01.png",
+      "sizeMatch": true,
+      "differentPixels": 0,
+      "onlyIndex0MadeOpaque": 0,
+      "identical": true
+     }
+    },
+    {
+     "index": 2,
+     "vsLegacyBulk": {
+      "old": "/home/runner/work/browser-app-lab/browser-app-lab/apps/4leaf/rog/original/OBS/bulk/1171-02.png",
+      "sizeMatch": true,
+      "differentPixels": 0,
+      "onlyIndex0MadeOpaque": 0,
+      "identical": true
+     },
+     "vsCorrected": {
+      "old": "/home/runner/work/browser-app-lab/browser-app-lab/apps/4leaf/rog/original/OBS/d6-colorkey-corrected/1171-02.png",
+      "sizeMatch": true,
+      "differentPixels": 0,
+      "onlyIndex0MadeOpaque": 0,
+      "identical": true
+     }
+    },
+    {
+     "index": 3,
+     "vsLegacyBulk": {
+      "old": "/home/runner/work/browser-app-lab/browser-app-lab/apps/4leaf/rog/original/OBS/bulk/1171-03.png",
+      "sizeMatch": true,
+      "differentPixels": 0,
+      "onlyIndex0MadeOpaque": 0,
+      "identical": true
+     },
+     "vsCorrected": {
+      "old": "/home/runner/work/browser-app-lab/browser-app-lab/apps/4leaf/rog/original/OBS/d6-colorkey-corrected/1171-03.png",
+      "sizeMatch": true,
+      "differentPixels": 0,
+      "onlyIndex0MadeOpaque": 0,
+      "identical": true
+     }
+    },
+    {
+     "index": 4,
+     "vsLegacyBulk": {
+      "old": "/home/runner/work/browser-app-lab/browser-app-lab/apps/4leaf/rog/original/OBS/bulk/1171-04.png",
+      "sizeMatch": true,
+      "differentPixels": 0,
+      "onlyIndex0MadeOpaque": 0,
+      "identical": true
+     },
+     "vsCorrected": {
+      "old": "/home/runner/work/browser-app-lab/browser-app-lab/apps/4leaf/rog/original/OBS/d6-colorkey-corrected/1171-04.png",
+      "sizeMatch": true,
+      "differentPixels": 0,
+      "onlyIndex0MadeOpaque": 0,
+      "identical": true
+     }
+    },
+    {
+     "index": 5,
+     "vsLegacyBulk": {
+      "old": "/home/runner/work/browser-app-lab/browser-app-lab/apps/4leaf/rog/original/OBS/bulk/1171-05.png",
+      "sizeMatch": true,
+      "differentPixels": 0,
+      "onlyIndex0MadeOpaque": 0,
+      "identical": true
+     },
+     "vsCorrected": {
+      "old": "/home/runner/work/browser-app-lab/browser-app-lab/apps/4leaf/rog/original/OBS/d6-colorkey-corrected/1171-05.png",
+      "sizeMatch": true,
+      "differentPixels": 0,
+      "onlyIndex0MadeOpaque": 0,
+      "identical": true
+     }
+    },
+    {
+     "index": 6,
+     "vsLegacyBulk": {
+      "old": "/home/runner/work/browser-app-lab/browser-app-lab/apps/4leaf/rog/original/OBS/bulk/1171-06.png",
+      "sizeMatch": true,
+      "differentPixels": 112,
+      "onlyIndex0MadeOpaque": 112,
+      "identical": false
+     },
+     "vsCorrected": {
+      "old": "/home/runner/work/browser-app-lab/browser-app-lab/apps/4leaf/rog/original/OBS/d6-colorkey-corrected/1171-06.png",
+      "sizeMatch": true,
+      "differentPixels": 0,
+      "onlyIndex0MadeOpaque": 0,
+      "identical": true
+     }
+    },
+    {
+     "index": 7,
+     "vsLegacyBulk": {
+      "old": "/home/runner/work/browser-app-lab/browser-app-lab/apps/4leaf/rog/original/OBS/bulk/1171-07.png",
+      "sizeMatch": true,
+      "differentPixels": 0,
+      "onlyIndex0MadeOpaque": 0,
+      "identical": true
+     },
+     "vsCorrected": {
+      "old": "/home/runner/work/browser-app-lab/browser-app-lab/apps/4leaf/rog/original/OBS/d6-colorkey-corrected/1171-07.png",
+      "sizeMatch": true,
+      "differentPixels": 0,
+      "onlyIndex0MadeOpaque": 0,
+      "identical": true
+     }
+    },
+    {
+     "index": 8,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 9,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 10,
+     "vsLegacyBulk": {
+      "old": "/home/runner/work/browser-app-lab/browser-app-lab/apps/4leaf/rog/original/OBS/bulk/1171-10.png",
+      "sizeMatch": true,
+      "differentPixels": 0,
+      "onlyIndex0MadeOpaque": 0,
+      "identical": true
+     },
+     "vsCorrected": {
+      "old": "/home/runner/work/browser-app-lab/browser-app-lab/apps/4leaf/rog/original/OBS/d6-colorkey-corrected/1171-10.png",
+      "sizeMatch": true,
+      "differentPixels": 0,
+      "onlyIndex0MadeOpaque": 0,
+      "identical": true
+     }
+    },
+    {
+     "index": 11,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 12,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 13,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 14,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 15,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 16,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 17,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 18,
+     "vsLegacyBulk": {
+      "old": "/home/runner/work/browser-app-lab/browser-app-lab/apps/4leaf/rog/original/OBS/bulk/1171-18.png",
+      "sizeMatch": true,
+      "differentPixels": 0,
+      "onlyIndex0MadeOpaque": 0,
+      "identical": true
+     },
+     "vsCorrected": {
+      "old": "/home/runner/work/browser-app-lab/browser-app-lab/apps/4leaf/rog/original/OBS/d6-colorkey-corrected/1171-18.png",
+      "sizeMatch": true,
+      "differentPixels": 0,
+      "onlyIndex0MadeOpaque": 0,
+      "identical": true
+     }
+    },
+    {
+     "index": 19,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 20,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 21,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 22,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 23,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 24,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 25,
+     "vsLegacyBulk": {
+      "old": "/home/runner/work/browser-app-lab/browser-app-lab/apps/4leaf/rog/original/OBS/bulk/1171-25.png",
+      "sizeMatch": true,
+      "differentPixels": 3,
+      "onlyIndex0MadeOpaque": 3,
+      "identical": false
+     },
+     "vsCorrected": {
+      "old": "/home/runner/work/browser-app-lab/browser-app-lab/apps/4leaf/rog/original/OBS/d6-colorkey-corrected/1171-25.png",
+      "sizeMatch": true,
+      "differentPixels": 0,
+      "onlyIndex0MadeOpaque": 0,
+      "identical": true
+     }
+    },
+    {
+     "index": 26,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 27,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    }
+   ]
+  }
+ },
+ "members": 245,
+ "declaredFrames": 6661,
+ "decodedFrames": 6661,
+ "failedFrames": 0,
+ "unparsedMembers": [
+  {
+   "pak": "OBS.pak",
+   "member": "1154.obs",
+   "error": "OBS frame geometry invalid; index=0 cursor=132 declared=(3782, 320, 320, -160, -160) memberBytes=58198"
+  },
+  {
+   "pak": "OBS.pak",
+   "member": "1175.obs",
+   "error": "OBS frame geometry invalid; index=0 cursor=132 declared=(2, 1, 1, -160, -161) memberBytes=658525"
+  },
+  {
+   "pak": "OBS.pak",
+   "member": "1182.obs",
+   "error": "OBS frame geometry invalid; index=0 cursor=132 declared=(29144, 438, 75, -219, -95) memberBytes=60111"
+  },
+  {
+   "pak": "OBS.pak",
+   "member": "1186.obs",
+   "error": "OBS frame geometry invalid; index=8 cursor=4316 declared=(13406, 478, 30, -223, -98) memberBytes=23336"
+  }
+ ],
+ "actionGifs": 66,
+ "d4CandidateCount": 54
+}

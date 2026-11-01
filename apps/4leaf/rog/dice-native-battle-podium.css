@@ -279,3 +279,32 @@
  * top-left minimap dock (z 21) so the original numerals are not clipped.
  * The minimap stays clickable because the overlay never takes input. */
 #app.app-classic-dice #game #battle-visual{z-index:22!important}
+/* 2026-11-01 battle.jpg anchors, measured RELATIVE TO THE ORIGINAL
+ * winBattle-01 podium sprite. Template match places that sprite at (220,265)
+ * in the archived 800x600 battle.jpg (median |diff| 21, 61% exact pixels).
+ * Original vs live (source px from the sprite's left/top edge):
+ *   left dice centre   24.0 (live 77.0)   right dice centre  273.5 (278.0)
+ *   dice top           75.0 (live 105)    score top         -153   (-160)
+ * (vertical values use the white-pixel tops, as measured on battle.jpg)
+ *   left score centre  62.0 (live 76.5)   right score centre 285.0 (278.0)
+ * The original draws the LEFT dice and score left of the left deck; the live
+ * duel centred them. Offsets are multiplied by the live podium scale so they
+ * follow the drawn sprite. Desktop only (phones keep their compact layout).
+ * tests/battle-anchor-compare.cjs re-measures every anchor (<= 3 px). */
+@media(min-width:651px){
+ #app.app-classic-dice #game #battle-visual .battle-visual-side.attacker>.battle-visual-dice{
+  translate:calc(var(--leaf-native-podium-scale,1) * -53px) calc(var(--leaf-native-podium-scale,1) * -34px)}
+ #app.app-classic-dice #game #battle-visual .battle-visual-side.defender>.battle-visual-dice{
+  translate:calc(var(--leaf-native-podium-scale,1) * -4.5px) calc(var(--leaf-native-podium-scale,1) * -34px)}
+ #app.app-classic-dice #game #battle-visual .battle-visual-side.attacker .battle-visual-total{
+  translate:calc(var(--leaf-native-podium-scale,1) * -14.5px) calc(var(--leaf-native-podium-scale,1) * 3px)}
+ #app.app-classic-dice #game #battle-visual .battle-visual-side.defender .battle-visual-total{
+  translate:calc(var(--leaf-native-podium-scale,1) * 7px) calc(var(--leaf-native-podium-scale,1) * 3px)}
+ /* battle.jpg "05": white centres of the two numerals are 49.5 px apart;
+  * the 1167 digit images (with outline) laid edge to edge give 57 px. */
+ #app.app-classic-dice #game #battle-visual .battle-visual-total.battle-total-original .battle-total-digit+.battle-total-digit{
+  margin-left:calc(var(--leaf-native-podium-scale,1) * -7.5px)!important}
+ /* battle.jpg dice pairs: face centres 51-51.5 px apart (46 px sprites). */
+ #app.app-classic-dice #game #battle-visual .battle-visual-side>.battle-visual-dice{
+  gap:calc(var(--leaf-native-podium-scale,1) * 5px)!important}
+}

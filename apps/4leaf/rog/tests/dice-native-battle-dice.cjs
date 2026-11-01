@@ -36,6 +36,7 @@ const cells={
       background:getComputedStyle(p).backgroundColor
      })),
      original:el.querySelector('img.battle-die-original')?.getAttribute('src')||null,
+     expected:(window.ORIGINAL_LEAF_UI_FRAMES?.['1171']?.frames||[]).find(f=>f.index===Number(el.dataset.eye)-1)?.url||'manifest-missing',
      originalVisible:(()=>{const i=el.querySelector('img.battle-die-original');return !!i&&getComputedStyle(i).display!=='none'&&i.complete&&i.naturalWidth===46&&i.naturalHeight===49})(),
      frame:el.dataset.originalFrame,
      pipsHidden:[...el.querySelectorAll('.battle-die-pip')].every(p=>getComputedStyle(p).visibility==='hidden'),
@@ -71,7 +72,7 @@ const cells={
     assert.equal(die.label,'주사위 '+die.eye+'눈','accessible text matches actual roll');
     assert.equal(die.faceText,'','do not overlay system font Unicode die characters');
     assert.equal(die.frame,String(die.eye-1),'face frame index = pips - 1');
-    assert.equal(die.original,'./original/OBS/d6-colorkey-corrected/1171-0'+(die.eye-1)+'.png');
+    assert.equal(die.original,die.expected,'face comes from the original 1171 UI manifest');
     assert.ok(die.originalVisible,'original 46x49 face is painted: '+JSON.stringify(die));
     assert.ok(die.pipsHidden,'fallback pips must not paint over the original face');
     assert.deepEqual(die.pips.map(x=>x.cell),cells[die.eye],'fallback keeps exact 3x3 pip arrangement');

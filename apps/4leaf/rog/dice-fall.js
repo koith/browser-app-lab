@@ -37,16 +37,26 @@
  const D6_MEMBER='0171';
  const D6_TUMBLE=[6,7,10,18,25];
  function originalD6(){
+  // Preferred: the UI manifest (tools/extract-targeted-original-frames.py)
+  // holding every decoded 1171 frame with written-run alpha. Faces 0-5 are
+  // VERIFIED by pip count; tumble order = native frame order (INFERRED).
+  const ui=window.ORIGINAL_LEAF_UI_FRAMES?.['1171'];
+  if(ui?.frames?.length){
+   const at=i=>ui.frames.find(f=>f.index===i)||null;
+   const faces=[0,1,2,3,4,5].map(at);
+   if(faces.every(Boolean))return {member:ui.member||'1171.obs',faces,
+    tumble:ui.frames.filter(f=>f.index>=6).sort((a,b)=>a.index-b.index),
+    declared:ui.declaredFrames,partial:!!ui.partial};
+  }
   const member=window.ORIGINAL_LEAF_OBS_FRAMES?.[D6_MEMBER];
   if(!member?.frames)return null;
-  // Use the colour-key corrected copies (tools/correct-obs-colorkey-holes.py):
-  // the legacy export turned the palette-0 pink-red "1" pip into a hole.
+  // Legacy fallback: colour-key corrected copies of the 11 sampled frames.
   const fix=f=>f&&{...f,url:f.url.replace('/OBS/bulk/1171-','/OBS/d6-colorkey-corrected/1171-')};
   const at=i=>fix(member.frames.find(f=>f.index===i)||null);
   const faces=[0,1,2,3,4,5].map(at);
   if(!faces.every(Boolean))return null;
   return {member:member.originalMember||'1171.obs',faces,
-   tumble:D6_TUMBLE.map(at).filter(Boolean)};
+   tumble:D6_TUMBLE.map(at).filter(Boolean),declared:28,partial:true};
  }
  const state=()=>({active:active>0,last:last.slice(),lastSides:lastSides.slice(),complete,
   source:'user-reported fall/bounce; outcome from live game engine',
