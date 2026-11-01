@@ -27,7 +27,15 @@ MODEL_PATTERNS={'mimmi':re.compile(r'(?<![a-z])mimmi(?![a-z])|밈미|밈�
                 'yui':re.compile(r'(?<![a-z])yui(?![a-z])|유이|심혜성|super_yuisan',re.I)}
 PAGE_HOSTS={'djawaphoto.com','www.djawaphoto.com','cosplay.pixibb.com','sexy.pixibb.com','www.v2ph.com','v2ph.com',
             'blog.hacosta.co.jp','showartx.net','www.nicesss.com','www.gamersky.com','www.inven.co.kr','photo.inven.co.kr',
-            'www.ajunews.com','sportsseoul.com','www.sportsseoul.com','crazygiant.imweb.me','teapawt.net','www.shypetal.com'}
+            'www.ajunews.com','sportsseoul.com','www.sportsseoul.com','crazygiant.imweb.me','teapawt.net','www.shypetal.com',
+            # Public owner-work source hosts actually present in full-corpus manifests.
+            # X/Twitter is deliberately excluded: generic timelines need author scoping.
+            'www.junmeitu.com','www.kaizty.com','misskon.com','www.imgcup.com',
+            '4kup.net','www.girl-atlas.com','www5.ajunews.com','v.daum.net',
+            'www.huantuji.com','yuntu8.com','www.xiutu.me'}
+SAME_HOST_WORK_IMAGE_SOURCES={'www.junmeitu.com','www.kaizty.com','misskon.com',
+                              'www.imgcup.com','4kup.net','www.girl-atlas.com',
+                              'www.huantuji.com','yuntu8.com','www.xiutu.me'}
 CREATOR_ACCOUNTS={'yui':'super_yuisan','mimmi':'Mimmi_official'}
 FORMATS={'JPEG':'jpg','PNG':'png','WEBP':'webp'}
 KNOWN_ALTERNATE_EDITIONS={
@@ -164,8 +172,13 @@ def verified_alternative_candidates(raw,page,model,baseline,known_urls,
         if not alternative_safe_photo(u):
             continue
         approved,_=allowed_url(u)
-        if not approved:continue
         p=urlsplit(u)
+        # Only an image actually embedded in the scoped article of an
+        # explicitly registered owner-source website can extend the image
+        # allowlist to that SAME PUBLIC ORIGIN. Third-party hosts stay denied.
+        if not approved and not (p.hostname==urlsplit(page).hostname
+                                 and p.hostname in SAME_HOST_WORK_IMAGE_SOURCES):
+            continue
         if p.hostname in ('djawaphoto.com','www.djawaphoto.com') and not p.path.startswith('/wp-content/uploads/'):
             continue
         key=_photo_asset_group(u)
