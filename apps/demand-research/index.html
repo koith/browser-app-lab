@@ -460,9 +460,12 @@ const FEDERATED=[
   {id:"mastodon",origin:"https://planet.moe",type:"mastodon"},
   {id:"mastodon",origin:"https://twingyeo.kr",type:"mastodon"},
   {id:"lemmy",origin:"https://lemmy.world",type:"lemmy"},
-  {id:"misskey",origin:"https://misskey.io",type:"misskey"}
+  {id:"misskey",origin:"https://misskey.io",type:"misskey"},
+  {id:"misskey",origin:"https://hoto.moe",type:"misskey"},
+  // PullPush indexes publicly visible Reddit submissions; coverage may lag.
+  {id:"reddit",origin:"https://api.pullpush.io",type:"reddit"}
 ];
-let federationCursors=new Map(),serviceCounts={bluesky:0,mastodon:0,lemmy:0,misskey:0};
+let federationCursors=new Map(),serviceCounts={bluesky:0,mastodon:0,lemmy:0,misskey:0,reddit:0};
 function safePublicLink(s,origin){
   let href=validUrl(s);
   if(!href)return "";
@@ -542,6 +545,27 @@ function addMisskeyNote(note,term,start,end,origin){
     adultLabeled:(note.files||[]).some(f=>f.isSensitive),restricted:false
   },term,start,end);
 }
+function addRedditSubmission(entry,term,start,end){
+  if(!entry||typeof entry.id!=="string"||!entry.id||!Number.isFinite(Number(entry.created_utc)))return false;
+  const author=String(entry.author||"").trim();
+  if(!author||["[deleted]","[removed]"].includes(author))return false;
+  const title=String(entry.title||""),body=String(entry.selftext||"");
+  if(["[deleted]","[removed]"].includes(body))return false;
+  const text=[title,body].filter(Boolean).join("\n").trim();
+  const permalink=String(entry.permalink||"");
+  const url=safePublicLink(permalink.startsWith("/")?"https://www.reddit.com"+permalink:"")||
+    "https://www.reddit.com/comments/"+encodeURIComponent(entry.id)+"/";
+  const profileUrl="https://www.reddit.com/user/"+encodeURIComponent(author)+"/";
+  let media=[],image=safePublicLink(entry.url_overridden_by_dest||entry.url||"");
+  if(image&&/\.(?:jpg|jpeg|png|webp|gif)(?:\?|$)/i.test(image))
+    media.push({type:"image",url:image,thumb:image,alt:"Reddit 첨부 이미지"});
+  else if(safePublicLink(entry.thumbnail||""))
+    media.push({type:"image",url:safePublicLink(entry.thumbnail),thumb:safePublicLink(entry.thumbnail),alt:"Reddit 썸네일"});
+  const posted=new Date(Number(entry.created_utc)*1000).toISOString();
+  return addFederatedRow({id:"reddit:"+entry.id,platform:"reddit",author:"u/"+author,
+    profileUrl,url,posted,indexed:posted,text,media,
+    adultLabeled:!!entry.over_18,restricted:!!entry.removed_by_category},term,start,end);
+}
 async function misskeyJson(url,term,offset){
   let controller=new AbortController(),timer=setTimeout(()=>controller.abort(),11000);
   try{
@@ -571,7 +595,8 @@ async function scanFederated(source,term,start,end,epoch){
   let added=0,checked=0;
   for(let page=0;page<3&&epoch===runID&&posts.length<MAX_POSTS;page++){
     let u=new URL(source.type==="mastodon"?
-      "/api/v1/timelines/tag/"+encodeURIComponent(term):"/api/v3/search",source.origin);
+      "/api/v1/timelines/tag/"+encodeURIComponent(term):
+      source.type==="reddit"?"/reddit/search/submission/":"/api/v3/search",source.origin);
     let data=[],lowest=Infinity;
     if(source.type==="misskey"){
       // Misskey's public note-search endpoint is POST with no account token.
@@ -581,24 +606,58 @@ async function scanFederated(source,term,start,end,epoch){
       u.searchParams.set("limit","40");
       if(cursor.maxId)u.searchParams.set("max_id",cursor.maxId);
       data=await publicJson(u.href);if(!Array.isArray(data))throw Error("Unexpected Mastodon response");
+      // A hashtag feed is not a full-text search. On an empty tag timeline,
+      // inspect the public timeline as a bounded fallback, without pretending
+      // that the full server history was searched.
+      if(!data.length&&!cursor.maxId){
+        let timeline=new URL("/api/v1/timelines/public",source.origin);
+        timeline.searchParams.set("limit","40");
+        try{
+          const items=await publicJson(timeline.href);
+          if(Array.isArray(items))data=items;
+        }catch{/* public timeline can be disabled independently */}
+        cursor.done=true;
+      }
       if(data.length)cursor.maxId=String(data[data.length-1].id||"");
+    }else if(source.type==="reddit"){
+      u.searchParams.set("q",term);u.searchParams.set("size","50");
+      u.searchParams.set("sort","desc");u.searchParams.set("sort_type","created_utc");
+      u.searchParams.set("after",String(Math.floor(start/1000)));
+      u.searchParams.set("before",String(Math.floor(Math.min(end,cursor.beforeMs||end)/1000)));
+      const response=await publicJson(u.href);
+      data=response.data||[];
+      if(!Array.isArray(data))throw Error("Unexpected Reddit archive response");
+      if(data.length){
+        const oldest=Math.min(...data.map(p=>Number(p.created_utc)||Infinity));
+        if(Number.isFinite(oldest))cursor.beforeMs=oldest*1000-1000;
+      }
     }else{
       u.searchParams.set("q",term);
       u.searchParams.set("type_","Posts");u.searchParams.set("sort","New");
       u.searchParams.set("limit","40");u.searchParams.set("page",cursor.page);
-      let response=await publicJson(u.href);data=response.posts||[];
+      let response;
+      try{response=await publicJson(u.href)}
+      catch(error){
+        if(!String(error).includes("404"))throw error;
+        let v4=new URL("/api/v4/search",source.origin);
+        u.searchParams.forEach((value,key)=>v4.searchParams.set(key,value));
+        response=await publicJson(v4.href);
+      }
+      data=response.posts||response.results||[];
       if(!Array.isArray(data))throw Error("Unexpected Lemmy response");
       cursor.page++;
     }
     checked++;
     if(!data.length){cursor.done=true;break}
     for(let item of data){
-      let date=Date.parse(source.type==="mastodon"?item.created_at:
-        source.type==="misskey"?item.createdAt:item.post?.published);
+      let date=source.type==="reddit"?Number(item.created_utc)*1000:
+        Date.parse(source.type==="mastodon"?item.created_at:
+          source.type==="misskey"?item.createdAt:item.post?.published);
       if(Number.isFinite(date))lowest=Math.min(lowest,date);
       if((source.type==="mastodon"&&addMastodonStatus(item,term,start,end))||
          (source.type==="misskey"&&addMisskeyNote(item,term,start,end,source.origin))||
-         (source.type==="lemmy"&&addLemmyPost(item,term,start,end)))added++;
+         (source.type==="lemmy"&&addLemmyPost(item,term,start,end))||
+         (source.type==="reddit"&&addRedditSubmission(item,term,start,end)))added++;
     }
     if(data.length<25){cursor.done=true;break}
     if(lowest<start)break;
@@ -623,7 +682,7 @@ async function fetchFederated(start,end,epoch){
   draw();
 }
 function updateServiceCounts(){
-  serviceCounts={bluesky:0,mastodon:0,lemmy:0,misskey:0};
+  serviceCounts={bluesky:0,mastodon:0,lemmy:0,misskey:0,reddit:0};
   for(let p of posts)if(p.platform in serviceCounts)serviceCounts[p.platform]++;
 }
 
@@ -677,6 +736,7 @@ const SERVICES={
   mastodon:{name:"Mastodon",favicon:"https://koith.github.io/browser-app-lab/apps/demand-research/assets/mastodon.svg"},
   lemmy:{name:"Lemmy",favicon:"https://koith.github.io/browser-app-lab/apps/demand-research/assets/lemmy.svg"},
   misskey:{name:"Misskey",favicon:"https://koith.github.io/browser-app-lab/apps/demand-research/assets/misskey.svg"},
+  reddit:{name:"Reddit",favicon:"https://koith.github.io/browser-app-lab/apps/demand-research/assets/reddit.svg"},
   cloud:{name:"Archive",favicon:""}
 };
 function sourceBadge(p){
@@ -784,7 +844,7 @@ function draw(){
   let coverage=cloudMode?" · 테라박스 저장본":" · 조회 "+daysCovered+"일 / "+(Math.ceil((toMs-fromMs)/DAY))+"일";
   let warnings=(failed||incomplete)?" · 일부 구간 미확인 "+(failed+incomplete)+"건":"";
   updateServiceCounts();
-  let sources=" · B"+serviceCounts.bluesky+" M"+serviceCounts.mastodon+" L"+serviceCounts.lemmy+" K"+serviceCounts.misskey;
+  let sources=" · B"+serviceCounts.bluesky+" M"+serviceCounts.mastodon+" L"+serviceCounts.lemmy+" K"+serviceCounts.misskey+" R"+serviceCounts.reddit;
   $("count").textContent=rows.length.toLocaleString()+"건"+(cloudMode?"":sources)+(hidden?" · 광고 "+hidden.toLocaleString()+"건 제외":"")+(rows.length>limit?" · "+limit+"건 표시":"");
   $("count").setAttribute("aria-label",rows.length.toLocaleString()+"개 표시 / "+matching.length.toLocaleString()+"개 조회"+coverage+warnings);
 }
