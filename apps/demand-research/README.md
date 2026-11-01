@@ -32,3 +32,19 @@ pip install fastapi uvicorn httpx pytest
 cd apps/demand-research
 python -m pytest -q test_gateway.py
 \`\`\`
+
+## Multi-source public discovery (2026-11-02)
+
+The public viewer now attempts Bluesky API plus Mastodon public hashtag feeds
+(with bounded public-timeline fallback), Misskey search on misskey.io and hoto.moe,
+Lemmy search (v3 with v4 fallback), and PullPush's publicly indexed Reddit
+submissions. It keeps origin links and platform badges, applies exact keyword,
+visibility and date filters, and deduplicates by origin ID. A successful HTTP
+request **does not** imply that the query matched any posts; CORS, authentication,
+server coverage, federated indexing, and archive latency may yield zero.
+
+X/Twitter, Instagram and Threads are **not** represented as connected sources:
+reliable official full-text access requires separate approved API credentials,
+and no paid requests have been enabled. Neither synthetic browser fixtures nor
+an API adapter alone establish real-world ingestion. Live provider counts and
+mobile deployment remain independent acceptance checks.
