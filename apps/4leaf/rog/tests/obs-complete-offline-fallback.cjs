@@ -62,7 +62,53 @@ const path=require('node:path');
   assert.ok(after.pixels[0]>20&&after.pixels[1]>20);
   assert.deepEqual({active:after.active,position:after.position},
    {active:start.active,position:start.position});
-  assert.deepEqual(errors,[],'no JavaScript runtime errors in offline fallback');
+  // Reuse the SAME DOM pawn so a failed 1043 full-source load cannot
+  // poison an unrelated recovered 1046 member through a stale flag.
+  const switchResult=await page.evaluate(id=>{
+   const pawn=document.querySelector('#board-pawns .board-pawn[data-id="'+id+'"]');
+   const portrait=pawn.querySelector('img.leaf-chess-portrait').getAttribute('src');
+   window.__LEAF_GENESIS_ACTORS__.mount(pawn,{team:['c_0046']},portrait);
+   return {samePawn:pawn.dataset.id===String(id),flag:pawn.dataset.sourceFullUnavailable||null};
+  },start.id);
+  assert.equal(switchResult.samePawn,true);
+  assert.equal(switchResult.flag,null,'a fresh actor cannot inherit another full-source failure');
+  await page.waitForFunction(id=>{
+   const pawn=document.querySelector('#board-pawns .board-pawn[data-id="'+id+'"]');
+   const img=pawn?.querySelector('img.leaf-chess-original-obs');
+   return pawn?.dataset.chessmanId==='0046'&&
+    pawn.dataset.sourceFullUnavailable!=='true'&&img?.complete&&img?.naturalWidth>15&&
+    img.getAttribute('src')?.includes('/original/OBS/action-full/1046-');
+  },start.id,{timeout:16000});
+  // Reproduce a real second 1043 failure before testing online recovery.
+  await page.evaluate(id=>{
+   const pawn=document.querySelector('#board-pawns .board-pawn[data-id="'+id+'"]');
+   const portrait=pawn.querySelector('img.leaf-chess-portrait').getAttribute('src');
+   window.__LEAF_GENESIS_ACTORS__.mount(pawn,{team:['c_0043']},portrait);
+  },start.id);
+  await page.waitForFunction(id=>{
+   const pawn=document.querySelector('#board-pawns .board-pawn[data-id="'+id+'"]');
+   const img=pawn?.querySelector('img.leaf-chess-original-obs');
+   return pawn?.dataset.sourceFullUnavailable==='true'&&img?.complete&&
+    img.naturalWidth>15&&img.getAttribute('src')?.includes('/original/OBS/bulk/');
+  },start.id,{timeout:16000});
+  // Network reconnect (or the app's explicit recovery API) must promote the
+  // genuine 37-frame original again without changing the match engine.
+  await page.unroute(/\/original\/OBS\/action-full\/1043-\d+\.png(?:\?|$)/);
+  await page.evaluate(()=>window.__LEAF_GENESIS_ACTORS__.recoverAvailableOriginals());
+  await page.waitForFunction(id=>{
+   const pawn=document.querySelector('#board-pawns .board-pawn[data-id="'+id+'"]');
+   const img=pawn?.querySelector('img.leaf-chess-original-obs');
+   return pawn?.dataset.sourceFullUnavailable!=='true'&&
+    pawn?.dataset.actorSourceLoad==='ready'&&img?.complete&&img?.naturalWidth>15&&
+    img.getAttribute('src')?.includes('/original/OBS/action-full/1043-');
+  },start.id,{timeout:16000});
+  const restored=await page.evaluate(()=>{
+   const m=window.__ROG_TEST__.getMatch();
+   return {active:m.active,position:m.players[0].position,team:m.players[0].team.slice()};
+  });
+  assert.deepEqual(restored,{active:start.active,position:start.position,
+   team:['c_0043']},'original-asset recovery does not mutate authoritative game state');
+  assert.deepEqual(errors,[],'no JS runtime errors during original asset failure, swap or recovery');
   console.log('4LEAF FULL OBS OFFLINE ORIGINAL SOURCE FALLBACK PASS',
    JSON.stringify({engine,denied,after}));
  }finally{await browser.close()}

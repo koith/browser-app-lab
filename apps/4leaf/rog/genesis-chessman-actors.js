@@ -540,6 +540,13 @@
   if(pawn.dataset.chessmanId!==src||!image.getAttribute('src')){
    pawn.dataset.chessmanId=src;
    delete pawn.dataset.obsUnavailable;
+   // Errors from another actor must never force the new source to legacy.
+   delete pawn.dataset.sourceFullUnavailable;
+   const previousSourceImage=pawn.querySelector('img.leaf-chess-original-obs');
+   if(previousSourceImage){
+    previousSourceImage.dataset.obsRetryCount='0';
+    delete previousSourceImage.dataset.obsRetryFor;
+   }
    pawn.dataset.actorSource=originalFor(src)?'OBS/'+originalFor(src).originalMember:'CardData';
    pawn.dataset.actorOriginalModelRecovered=String(!!originalFor(src));
    const num=Number(src.replace(/\D/g,''))||0;
@@ -583,14 +590,17 @@
     pawn.dataset.actorOriginalAnimationRegistered=String(Boolean(Object.keys(entries).length));
   }
  }
- // When an offline PWA regains connectivity, give the known authentic
- // source another chance. Keep source-missing 34 models on their truthful
- // CardData-only fallback; there is no original OBS URL to retry.
+ // After reconnection retry both missing original images and full 37-frame
+ // originals that temporarily downgraded to real, older OBS sprite pixels.
+ // Never fabricate recovered full bodies for source-missing card members.
  const recoverAvailableOriginals=()=>{
    for(const pawn of document.querySelectorAll(
      '#board-pawns .board-pawn, #battle-visual .leaf-battle-chessman')){
-     if(pawn.dataset.obsUnavailable!=='true'||!originalFor(pawn.dataset.chessmanId))continue;
+     const unavailable=pawn.dataset.obsUnavailable==='true';
+     const downgraded=pawn.dataset.sourceFullUnavailable==='true';
+     if((!unavailable&&!downgraded)||!originalFor(pawn.dataset.chessmanId))continue;
      delete pawn.dataset.obsUnavailable;
+     delete pawn.dataset.sourceFullUnavailable;
      const img=pawn.querySelector('img.leaf-chess-original-obs');
      if(img){img.dataset.obsRetryCount='0';delete img.dataset.obsRetryFor;}
      pawn.dataset.actorSourceLoad='retry-after-online';
