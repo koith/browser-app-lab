@@ -465,7 +465,8 @@ const FEDERATED=[
   // PullPush indexes publicly visible Reddit submissions; coverage may lag.
   {id:"reddit",origin:"https://api.pullpush.io",type:"reddit"}
 ];
-let federationCursors=new Map(),serviceCounts={bluesky:0,mastodon:0,lemmy:0,misskey:0,reddit:0};
+let federationCursors=new Map(),federationSourceFailures=new Map(),
+    serviceCounts={bluesky:0,mastodon:0,lemmy:0,misskey:0,reddit:0};
 function safePublicLink(s,origin){
   let href=validUrl(s);
   if(!href)return "";
@@ -548,6 +549,8 @@ function addMisskeyNote(note,term,start,end,origin){
 function addRedditSubmission(entry,term,start,end){
   if(!entry||typeof entry.id!=="string"||!entry.id||!Number.isFinite(Number(entry.created_utc)))return false;
   const author=String(entry.author||"").trim();
+  const publishedEpoch=Number(entry.created_utc);
+  if(!Number.isFinite(publishedEpoch)||publishedEpoch<0||publishedEpoch>4102444800)return false;
   if(!author||["[deleted]","[removed]"].includes(author))return false;
   const title=String(entry.title||""),body=String(entry.selftext||"");
   if(["[deleted]","[removed]"].includes(body))return false;
@@ -561,7 +564,7 @@ function addRedditSubmission(entry,term,start,end){
     media.push({type:"image",url:image,thumb:image,alt:"Reddit 첨부 이미지"});
   else if(safePublicLink(entry.thumbnail||""))
     media.push({type:"image",url:safePublicLink(entry.thumbnail),thumb:safePublicLink(entry.thumbnail),alt:"Reddit 썸네일"});
-  const posted=new Date(Number(entry.created_utc)*1000).toISOString();
+  const posted=new Date(publishedEpoch*1000).toISOString();
   return addFederatedRow({id:"reddit:"+entry.id,platform:"reddit",author:"u/"+author,
     profileUrl,url,posted,indexed:posted,text,media,
     adultLabeled:!!entry.over_18,restricted:!!entry.removed_by_category},term,start,end);
@@ -660,15 +663,20 @@ async function scanFederated(source,term,start,end,epoch){
          (source.type==="reddit"&&addRedditSubmission(item,term,start,end)))added++;
     }
     if(data.length<25){cursor.done=true;break}
-    if(lowest<start)break;
+    if(cursor.done||lowest<start)break;
   }
   federationCursors.set(key,cursor);
   return {added,checked};
 }
 async function fetchFederated(start,end,epoch){
   const jobs=[];
-  for(let source of FEDERATED)for(let term of TERMS)
-    jobs.push(scanFederated(source,term,start,end,epoch));
+  for(let source of FEDERATED)for(let term of TERMS){
+    if(federationSourceFailures.has(source.origin))continue;
+    jobs.push(scanFederated(source,term,start,end,epoch).catch(error=>{
+      federationSourceFailures.set(source.origin,String(error).slice(0,90));
+      throw error;
+    }));
+  }
   let results=await Promise.allSettled(jobs);
   if(epoch!==runID)return;
   let successful=0;
@@ -850,7 +858,7 @@ function draw(){
 }
 function startBusy(){busy=true;$("applyDate").disabled=true;$("more").disabled=true}
 function endBusy(){busy=false;$("applyDate").disabled=false;$("more").disabled=false}
-function resetData(){posts=[];ids.clear();pending=[];federationCursors.clear();visibleLimit=270;requestCount=0;daysCovered=0;failed=0;incomplete=0;draw()}
+function resetData(){posts=[];ids.clear();pending=[];federationCursors.clear();federationSourceFailures.clear();visibleLimit=270;requestCount=0;daysCovered=0;failed=0;incomplete=0;draw()}
 async function fetchWindow(segment){
   let url=new URL(API);url.searchParams.set("q",segment.term);url.searchParams.set("sort","latest");url.searchParams.set("limit","100");
   url.searchParams.set("since",new Date(segment.start).toISOString());url.searchParams.set("until",new Date(segment.end).toISOString());
