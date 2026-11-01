@@ -21,8 +21,10 @@ def test():
     assert not any('other.jpg' in x for x in urls),urls
     assert not any('ignore.png' in x for x in urls),urls
     cross,status=scoped_generic_html(body,page,'mimmi')
-    assert not cross and status=='no_model_heading'
+    assert not cross and status=='no_model_context'
     assert safe_photo('https://djawaphoto.com/wp-content/uploads/2026/09/photo001.jpg')
+    assert safe_photo('https://image.shypetal.com/image/public-folder/ShyPetal.com@-1.webp')
+    assert not safe_photo('https://image.shypetal.com/private/1.webp')
     assert not safe_photo('https://evil.example/secret.jpg')
     assert not safe_photo('http://djawaphoto.com/wp-content/uploads/2026/09/photo001.jpg')
     im=Image.new('RGB',(400,600),'white');d=ImageDraw.Draw(im)
