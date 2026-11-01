@@ -18,7 +18,7 @@ def fake_post(term, i=1):
     return {
       "uri":f"at://did:plc:synthetic{term}{i}/app.bsky.feed.post/{i+100}",
       "author":{"did":"did:plc:safe-synthetic", "handle":"sample.invalid", "displayName":"TEST"},
-      "record":{"text":term+" synthetic QA sample without personal details",
+      "record":{"text":term+(" 광고 판매 홍보 할인 구독 문의 텔레그램 "+str(i) if i%15==0 else " synthetic QA sample without personal details "+str(i)),
                 "createdAt":datetime.now(timezone.utc).isoformat()},
       "indexedAt":datetime.now(timezone.utc).isoformat(),
       "embed":{"$type":"app.bsky.embed.images#view","images":[{
@@ -71,10 +71,21 @@ def run(live=False):
                 assert n==270,f"Expected first 270 of 315 synthetic posts; saw {n}"
                 assert imgs==270,f"Card thumbnail not grouped with parent: {imgs}"
                 assert len(api_calls)>=21, f"Expected daily shards, got {len(api_calls)}"
-                assert "315개 게시글" in page.locator("#count").inner_text()
+                assert "315개 조회" in page.locator("#count").inner_text()
+                assert page.locator("#hideAds").is_checked()
+                assert "광고 의심 21건" in page.locator("#adSummary").inner_text()
                 assert page.locator("#showMore").is_visible()
                 page.locator("#showMore").click()
+                assert page.locator("article.post").count()==294
+                page.locator("#hideAds").uncheck()
+                assert page.locator("article.post").count()==270
+                page.locator("#showMore").click()
                 assert page.locator("article.post").count()==315
+                assert page.locator(".post-ad-marker").count()>=1
+                page.locator(".post-ad-marker").first.click()
+                assert page.locator("dialog#detail").is_visible()
+                assert "광고 의심" in page.locator("#detailContent .ad-detail").inner_text()
+                page.locator("#closeDetail").click()
                 assert all("since" in q and "until" in q for q in api_calls)
                 assert all(int(q["limit"][0])==100 for q in api_calls)
                 page.locator(".post-open").first.click()
