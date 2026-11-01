@@ -73,7 +73,7 @@ def rotated_registered_page_queue(primary, source_pages, max_pages, page_cycle=0
 def _photo_asset_group(url):
     """Canonicalize observed resized renditions without inventing a photo URL."""
     p=urlsplit(url)
-    canonical=re.sub(r'-\\d{2,5}x\\d{2,5}(?=\\.(?:jpe?g|png|webp)$)',
+    canonical=re.sub(r'-\d{2,5}x\d{2,5}(?=\.(?:jpe?g|png|webp)$)',
                      '',p.path,flags=re.I)
     return (p.hostname,canonical)
 
@@ -112,7 +112,7 @@ def verified_alternative_candidates(raw,page,model,baseline,known_urls,
         if key in prior:continue
         # Prefer a publicly observed native asset over a WordPress size variant
         # of that SAME URL, never fabricate a suffix-free URL.
-        resized=bool(re.search(r'-\\d{2,5}x\\d{2,5}(?=\\.)',p.path,re.I))
+        resized=bool(re.search(r'-\d{2,5}x\d{2,5}(?=\.)',p.path,re.I))
         rank=(not resized,len(p.path))
         if key not in groups or rank>groups[key][0]:
             groups[key]=(rank,u)
@@ -480,7 +480,9 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                 # An explicit login, wrong work/volume, or missing identity is
                 # still a hard reject. Alternative parsers do not bypass it.
                 eligible=(alternative_engines and not book.get('curated_images_only')
-                          and status in ('scoped_public_page','no_public_photos','unscoped_page_rejected'))
+                          and status in ('scoped_public_page','no_public_photos','unscoped_page_rejected')
+                          and (urlsplit(page).hostname not in ('showartx.net','www.nicesss.com')
+                               or status=='scoped_public_page'))
                 if eligible:
                     from collector_full_compare import pagination_from_html
                     more=list(dict.fromkeys(list(more)+pagination_from_html(
