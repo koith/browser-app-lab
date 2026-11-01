@@ -6900,6 +6900,21 @@
         "P0-RELEASE"
       ],
       "details": "Code implemented in fix/4leaf-original-obs-online-recovery-20261102 (beta.37/PWA v124): full 37-frame OBS temporarily degraded to genuine legacy OBS now retries on online/recoverAvailableOriginals; switching chessman on reused pawn clears failure/retry state. Extended Chromium/WebKit-capable real-source browser regression to simulate 1043 full network failure, 0046 same-DOM swap, second fallback, and 1043 full recovery without mutating match. VERIFIED: source code commits. UNVERIFIED pending: CI browser test, public Pages rollout and physical iPhone acceptance. 2002 action direction/3D model still open; do not mark restored."
+    },
+    {
+      "seq": 300,
+      "date": "2026-11-02",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261102-OBS-RECOVERY",
+      "taskIds": [
+        "ACT-04",
+        "ACT-03",
+        "P0-ACTOR",
+        "M05",
+        "P0-RELEASE",
+        "QA-03"
+      ],
+      "details": "Append-only intake audit event for active 4LEAF original restoration request; retained previous implementation event #299."
     }
   ]
 }
