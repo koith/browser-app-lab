@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
 <meta name="referrer" content="no-referrer">
-<meta name="theme-color" content="#dde3e0">
+<meta name="theme-color" content="#3040df">
 <title>INTERSECTION</title>
 <style>
 :root{font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",system-ui,sans-serif;color:#203047;background:#f4f6fa}
@@ -285,6 +285,46 @@ main{padding:8px 7px 47px}
 }
 @media(prefers-reduced-motion:reduce){#dotField{opacity:.7}}
 
+
+/* High-saturation editorial palette: electric ultramarine, ink and signal yellow. */
+:root{--paper:#3040df;--ink:#101432;--surface:#fff8e8;--line:#b0b3ca;--accent:#ffdf08;--muted:#3b419a;color:var(--ink);background:var(--paper)}
+html{background:var(--paper)}
+.ambient{background:radial-gradient(circle at 78% 17%,#3549f5 0%,#2736cf 48%,#192bba 100%)}
+#dotField{opacity:.95}
+body>header.site-head{background:#f8e913;color:var(--ink);backdrop-filter:none;border-bottom:2px solid var(--ink)}
+.site-head #refresh{background:var(--ink);color:#fff;border-color:var(--ink)}
+.toolbar{background:#fff9e8ed;box-shadow:6px 6px 0 #10143255}
+.tabs button.active{background:#101432;color:#fff}
+.filter-details{background:#fff9e8}
+.ad-row{background:#eeeddb}
+.ad-toggle input{accent-color:#233ce8}
+.date-panel{background:#fff9e8}
+.date-range input{background:#fffdf3;border-color:#727593}
+.date-arrow{color:#2835d9}
+.date-actions .presets button{background:#eeeddf;color:#101432;border-color:#727593}
+.date-actions .presets button.active{background:#101432;color:white}
+.date-actions #applyDate{background:#f7d600;color:#101432;border:1px solid #101432}
+.results-head>span{color:white;font-weight:750}
+.post{background:#fff9ed;border-color:#101432;box-shadow:4px 4px 0 #10143255}
+.post:hover{box-shadow:6px 7px 0 #10143288}
+.post .post-thumb{background:#d8d8e5}
+.post .post-thumb .text-icon{background:linear-gradient(135deg,#e0e3fc,#adb9ec);color:#353977}
+.post-title,.post-date{color:#343b8a}
+.post-excerpt{color:#101432}
+.more button{background:#ffdf08;color:#101432;border:1px solid #101432;min-width:240px}
+dialog{background:#fff9ed;border-color:#101432}
+.dialog-head{background:#fff9ed;border-color:#101432}
+.dialog-actions a{background:#233ce8;color:#fff}
+.source-badge{position:absolute;top:6px;right:6px;display:inline-flex;align-items:center;gap:3px;padding:4px 6px;background:#fffceb;color:#101432;border:1px solid #121432;box-shadow:1px 1px 0 #0005;font-size:9px;line-height:1;font-weight:800;z-index:1;white-space:nowrap}
+.source-badge img{width:13px!important;height:13px!important;min-height:0!important;object-fit:contain!important;border-radius:2px;filter:none!important}
+.dialog-source-row{display:flex;align-items:center;justify-content:space-between;gap:7px;margin-bottom:11px}
+.dialog-source-row .source-badge{position:static;font-size:11px;padding:7px 9px}
+.dialog-source-row .source-badge img{width:16px!important;height:16px!important}
+.profile-link{color:#122c9a;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px;font-weight:750}
+.profile-link:focus-visible{outline:2px solid #ffbd00;outline-offset:3px}
+.post-title .author{display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#122c9a;text-decoration:underline;text-underline-offset:2px}
+.post-title .tag{background:#101432;color:#fff}
+
 </style>
 </head>
 <body>
@@ -314,9 +354,7 @@ main{padding:8px 7px 47px}
 </div></section>
 <div class="results-head"><span>INDEX / <span id="count">불러오는 중…</span></span></div>
 <section class="feed" id="feed" aria-live="polite"><div class="empty">게시글 불러오는 중…</div></section>
-<div class="more hidden" id="listMore"><button type="button" id="showMore">현재 수집된 게시글 더 보기</button></div>
-<div class="more hidden" id="paging"><button type="button" id="more">이전 기간 더 수집</button></div>
-<footer id="footnote">PUBLIC INDEX · 검색 기간은 SNS 인덱싱 날짜 기준 · 전체 게시물 수집률을 보장하지 않음 · 테라박스 저장은 별도 연결 전</footer>
+<div class="more hidden" id="paging"><button type="button" id="more">더 보기</button></div>
 </main>
 <dialog id="detail" aria-label="게시글 상세"><div class="dialog-head"><b>게시글 상세</b><button id="closeDetail" type="button" aria-label="닫기">×</button></div><div class="dialog-content" id="detailContent"></div></dialog>
 <script>
@@ -421,10 +459,36 @@ function filtered(){
   return posts.filter(p=>matchesText(p)&&(!hide||!suspectedAd(p)))
     .sort((a,b)=>String(b.indexed).localeCompare(String(a.indexed)));
 }
+
+const SERVICES={
+  bluesky:{name:"Bluesky",favicon:"https://bsky.app/favicon.ico"},
+  mastodon:{name:"Mastodon",favicon:"https://mastodon.social/favicon.ico"},
+  lemmy:{name:"Lemmy",favicon:"https://lemmy.world/favicon.ico"},
+  cloud:{name:"Archive",favicon:""}
+};
+function sourceBadge(p){
+  let meta=SERVICES[p.platform]||SERVICES.cloud,badge=el("span","source-badge");
+  badge.setAttribute("aria-label","출처: "+meta.name);
+  if(meta.favicon){let logo=el("img");logo.src=meta.favicon;logo.alt="";logo.loading="lazy";logo.addEventListener("error",()=>logo.remove());badge.append(logo)}
+  badge.append(el("span","",meta.name));return badge;
+}
+function profileLink(p){
+  let a=el("a","profile-link",p.author||"작성자"),url=validUrl(p.profileUrl);
+  if(url){a.href=url;a.target="_blank";a.rel="noopener noreferrer";a.addEventListener("click",e=>e.stopPropagation())}
+  else a.setAttribute("aria-disabled","true");
+  return a;
+}
+function hasMoreResults(){
+  if(filtered().length>visibleLimit)return true;
+  if(cloudMode)return cloudOffset<cloudTotal;
+  return !!pending.length||nextEnd>fromMs;
+}
+
 function tile(p){
   let article=el("article","post"),button=el("button","post-open");button.type="button";button.setAttribute("aria-label","게시글 상세 보기");
   article.dataset.mediaPolicy=p.restricted?"restricted":p.adultLabeled?"adult":"general";
   let thumb=el("div","post-thumb"),first=p.media[0],blocked=hideMedia(p);
+  thumb.append(sourceBadge(p));
   if(first&&!blocked&&first.thumb){
     let img=el("img");img.src=first.thumb;img.alt="게시글 대표 이미지";img.loading="lazy";img.referrerPolicy="no-referrer";
     img.addEventListener("error",()=>img.remove());thumb.append(img);
@@ -435,7 +499,7 @@ function tile(p){
   if(first?.type==="video"&&!blocked)thumb.append(el("span","video-mark","▶ 영상"));
   if(p.media.length>1&&!blocked)thumb.append(el("span","media-num","+"+(p.media.length-1)));
   let body=el("div","post-body"),title=el("div","post-title");
-  title.append(el("span","author",p.author),el("span","tag",Array.from(p.terms)[0]));
+  let author=profileLink(p);author.className="author";title.append(author,el("span","tag",Array.from(p.terms)[0]));
   if(suspectedAd(p))title.append(el("span","post-ad-marker","광고 의심"));
   body.append(title,el("p","post-excerpt",p.text),el("div","post-date",niceDate(p.posted)));
   button.append(thumb,body);
@@ -468,7 +532,8 @@ function sourceLink(p,text){
 }
 function openDetail(p){
   let node=$("detailContent");node.replaceChildren();
-  node.append(el("div","dialog-author",p.author),el("div","dialog-date",niceDate(p.posted)));
+  let sourceRow=el("div","dialog-source-row");sourceRow.append(sourceBadge(p),profileLink(p));node.append(sourceRow);
+  node.append(el("div","dialog-date",niceDate(p.posted)));
   if(suspectedAd(p)){
     node.append(el("div","ad-detail","광고 의심 · "+(p.adEvidence?.reasons||[]).join(" / ")));
   }
@@ -501,8 +566,8 @@ function draw(){
   for(let p of rows.slice(0,limit))frag.append(tile(p));
   if(!rows.length)frag.append(el("div","empty",busy?"게시글 검색 중…":"해당 기간·검색 조건의 게시글이 없습니다."));
   list.append(frag);shown=Math.min(rows.length,limit);
-  $("listMore").classList.toggle("hidden",rows.length<=limit);
-  $("showMore").textContent="수집된 게시글 "+Math.min(180,Math.max(0,rows.length-limit))+"개 더 보기";
+  $("paging").classList.toggle("hidden",!hasMoreResults() || busy);
+  $("more").textContent="더 보기";
   let coverage=cloudMode?" · 테라박스 저장본":" · 조회 "+daysCovered+"일 / "+(Math.ceil((toMs-fromMs)/DAY))+"일";
   let warnings=(failed||incomplete)?" · 일부 구간 미확인 "+(failed+incomplete)+"건":"";
   $("count").textContent=rows.length.toLocaleString()+"건"+(hidden?" · 광고 "+hidden.toLocaleString()+"건 제외":"")+(rows.length>limit?" · "+limit+"건 표시":"");
@@ -576,7 +641,7 @@ async function loadBatch(reset){
     $("dateSummary").textContent=days+"일 · "+$("startDate").value+" ~ "+$("endDate").value;
     runID++;fromMs=dates[0];toMs=dates[1];nextEnd=toMs;resetData();
   }
-  if(!pending.length&&nextEnd<=fromMs){status("선택 기간 조회를 마쳤습니다 · "+posts.length+"건");$("paging").classList.add("hidden");return}
+  if(!pending.length&&nextEnd<=fromMs){status("선택 기간 조회를 마쳤습니다 · "+posts.length+"건");$("paging").classList.toggle("hidden",!hasMoreResults());return}
   startBusy();let epoch=runID;
   let queue=pending.splice(0);
   if(!queue.length){
@@ -596,8 +661,8 @@ async function loadBatch(reset){
   endBusy();posts.sort((a,b)=>String(b.indexed).localeCompare(String(a.indexed)));
   if(!pending.length&&nextEnd<=fromMs)status("선택 기간 조회 완료 · "+posts.length.toLocaleString()+"건"+((failed||incomplete)?" · 일부 구간 미확인":""));
   else status("조회 "+daysCovered+"일 · "+posts.length.toLocaleString()+"건 · 이전 기간 추가 수집 가능");
-  $("paging").classList.toggle("hidden",!pending.length&&nextEnd<=fromMs);
-  $("more").textContent=pending.length?"누락 위험 구간 이어서 조회":"이전 7일 더 수집";
+  $("paging").classList.toggle("hidden",!hasMoreResults());
+  $("more").textContent="더 보기";
   draw();
 }
 let cloudBusy=false;
@@ -623,8 +688,8 @@ async function loadCloud(reset){
       ids.set(p.id,row);posts.push(row);
     }
     cloudOffset+=(data.posts||[]).length;
-    status("테라박스 저장 게시글");$("paging").classList.toggle("hidden",cloudOffset>=cloudTotal);
-    $("more").textContent="저장된 게시글 더 보기";
+    status("테라박스 저장 게시글");$("paging").classList.toggle("hidden",!hasMoreResults());
+    $("more").textContent="더 보기";
     draw();
   }catch(e){status(e.message);if(!posts.length)$("feed").replaceChildren(el("div","empty",e.message))}
   finally{cloudBusy=false;endBusy()}
@@ -634,8 +699,11 @@ $("detail").addEventListener("click",e=>{if(e.target===$("detail"))closeDetail()
 $("closeDetail").addEventListener("click",closeDetail);
 $("refresh").addEventListener("click",()=>cloudMode?loadCloud(true):loadBatch(true));
 $("applyDate").addEventListener("click",()=>loadBatch(true));
-$("more").addEventListener("click",()=>cloudMode?loadCloud(false):loadBatch(false));
-$("showMore").addEventListener("click",()=>{visibleLimit+=180;draw()});
+$("more").addEventListener("click",()=>{
+  if(busy)return;
+  if(filtered().length>visibleLimit){visibleLimit+=180;draw()}
+  else if(cloudMode)loadCloud(false);else loadBatch(false);
+});
 $("tabs").addEventListener("click",e=>{let button=e.target.closest("button[data-term]");if(!button)return;active=button.dataset.term;visibleLimit=270;for(let b of $("tabs").querySelectorAll("button"))b.classList.toggle("active",b===button);draw()});
 $("presets").addEventListener("click",e=>{let b=e.target.closest("button[data-days]");if(!b)return;setPreset(Number(b.dataset.days));loadBatch(true)});
 $("hideAds").addEventListener("change",()=>{visibleLimit=270;draw()});
@@ -645,7 +713,6 @@ setPreset(30);
 if(cloudMode){
   $("source").textContent="테라박스 저장 게시글 · 글/사진/영상";
   $("tabs").classList.add("hidden");$("datePanel").classList.add("hidden");
-  $("footnote").textContent="게시글별 원문과 미디어는 테라박스에서 필요할 때만 불러옵니다.";
   loadCloud(true);
 }else loadBatch(true);
 })();
