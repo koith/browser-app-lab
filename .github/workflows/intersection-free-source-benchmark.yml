@@ -1,0 +1,19 @@
+name: INTERSECTION Free Public Source Benchmark
+on:
+  pull_request:
+    paths:
+      - "apps/demand-research/probe_free_sources_v2.py"
+      - ".github/workflows/intersection-free-source-benchmark.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install small websocket probe dependency (no credentials)
+        run: python -m pip install -q websocket-client==1.8.0
+      - name: Validate only aggregate public source responses, never store posts
+        run: python apps/demand-research/probe_free_sources_v2.py
