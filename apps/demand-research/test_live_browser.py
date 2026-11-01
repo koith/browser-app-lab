@@ -63,7 +63,17 @@ def run(live=False):
             assert page.locator('input[type="date"]').count()==2
             cols=page.locator("#feed").evaluate("e=>getComputedStyle(e).gridTemplateColumns.split(' ').length")
             assert cols==3,f"Expected desktop three columns, got {cols}"
+            assert page.locator(".halftone").count()==2
+            assert page.locator("#filterDetails").count()==1
+            assert page.locator("#dateDisclosure").count()==1
+            assert page.locator("#dateDisclosure").evaluate("e=>!e.open"),"Date controls should start compact"
+            assert page.locator("#filterDetails").evaluate("e=>!e.open"),"Filters should start compact"
+            assert page.locator("body").evaluate("e=>getComputedStyle(e).color")=="rgb(23, 24, 21)"
+            assert page.locator(".halftone-a").evaluate("e=>getComputedStyle(e).animationName")=="dot-drift"
             assert page.locator("#showAdultMedia").is_checked()
+            # Advanced switches stay collapsed until deliberately opened.
+            page.locator("#filterDetails summary").click()
+            assert page.locator("#filterDetails").evaluate("e=>e.open")
             assert page.locator("input[type=password]").count()==0
             adult=page.locator('article[data-media-policy="adult"]')
             restricted=page.locator('article[data-media-policy="restricted"]')
@@ -134,6 +144,8 @@ def run(live=False):
                 page.locator(".post-open").first.click()
                 assert page.locator("dialog#detail").is_visible()
                 page.locator("#closeDetail").click()
+                page.locator("#dateDisclosure summary").click()
+                assert page.locator("#dateDisclosure").evaluate("e=>e.open")
                 page.locator('button[data-days="7"]').click()
                 page.wait_for_function("document.getElementById('refresh').disabled === false",timeout=120000)
                 assert page.locator('input[type="date"]#startDate').input_value()
