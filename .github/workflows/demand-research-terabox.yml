@@ -16,7 +16,7 @@ jobs:
     timeout-minutes: 15
     env:
       RCLONE_CONFIG_ARCHIVE_TYPE: terabox
-      RCLONE_CONFIG_ARCHIVE_COOKIE: ${{ secrets.DEMAND_TERABOX_NDUS || secrets.YUI_TERABOX_NDUS }}
+      RCLONE_CONFIG_ARCHIVE_COOKIE: ${{ secrets.DEMAND_TERABOX_NDUS || secrets.YUI_TERABOX_NDUS || secrets.YUI_TERABOX_COOKIE }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
