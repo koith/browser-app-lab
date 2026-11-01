@@ -253,7 +253,9 @@
    // Normalize only the per-character reference pivot to the shared
    // DMP tile top. Preserve every source frame's relative origin motion.
    // Absolute foot pivot is inferred; original frame metadata remains intact.
-   const native=originalFor(pawn.dataset.chessmanId);
+   const native=pawn.dataset.sourceFullUnavailable==='true'
+    ?window.ORIGINAL_LEAF_OBS_FRAMES?.[pawn.dataset.chessmanId]
+    :originalFor(pawn.dataset.chessmanId);
    const standing=frontFacingSource(native,pawn.dataset.chessmanId).frame||frame;
    const sourceFoot=(frame.originY+frame.height);
    const standingFoot=(standing.originY+standing.height);
@@ -271,7 +273,12 @@
    const previous=sourceTimers.get(pawn);
    if(previous)clearInterval(previous);
    sourceTimers.delete(pawn);
-   const native=originalFor(id);
+   // If an on-demand full-source asset is not cached offline, keep using
+   // the already shipped original partial OBS sprites rather than dropping
+   // the player's full-body Genesis chessman to a card.
+   const native=pawn.dataset.sourceFullUnavailable==='true'
+    ?window.ORIGINAL_LEAF_OBS_FRAMES?.[id]
+    :originalFor(id);
    if(!native?.frames?.length||pawn.dataset.obsUnavailable==='true'){
      const previousImage=pawn.querySelector('img.leaf-chess-original-obs');
      if(previousImage)previousImage.hidden=true;
@@ -289,7 +296,8 @@
        img.dataset.obsRetryCount='0';
        delete img.dataset.obsRetryFor;
        img.hidden=false;
-       pawn.dataset.actorSourceLoad='ready';
+       pawn.dataset.actorSourceLoad=pawn.dataset.sourceFullUnavailable==='true'
+        ?'ready-legacy-original-OBS': 'ready';
      });
      img.addEventListener('error',()=>{
        if(!pawn.isConnected)return;
@@ -317,10 +325,26 @@
          },Math.min(750,120*2**(attempt-1)));
          return;
        }
+       // The 1,665 new full-frame source PNGs are loaded on demand.
+       // If one is not cached offline (or a CDN fetch repeatedly fails),
+       // retain the earlier source-verified bulk/front-reviewed OBS packets.
+       // Do not generate fake pixels or retry a missing full file forever.
+       const id=pawn.dataset.chessmanId;
+       const legacy=window.ORIGINAL_LEAF_OBS_FRAMES?.[id];
+       if(source.startsWith('./original/OBS/action-full/')&&
+          pawn.dataset.sourceFullUnavailable!=='true'&&
+          legacy?.frames?.length){
+         pawn.dataset.sourceFullUnavailable='true';
+         pawn.dataset.actorSourceLoad='falling-back-to-legacy-original-OBS';
+         delete img.dataset.obsRetryCount;
+         delete img.dataset.obsRetryFor;
+         renderFrame(pawn,id,pawn.dataset.actorPose||'idle');
+         return;
+       }
        pawn.dataset.obsUnavailable='true';
        pawn.dataset.actorOriginalModelRecovered='false';
        pawn.dataset.actorSourceLoad='unavailable';
-       renderFrame(pawn,pawn.dataset.chessmanId,pawn.dataset.actorPose||'idle');
+       renderFrame(pawn,id,pawn.dataset.actorPose||'idle');
      });
      pawn.append(img);
    }
