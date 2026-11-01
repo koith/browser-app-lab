@@ -360,6 +360,30 @@ dialog{background:#fff9ed;border-color:#101432}
 #socialControls.hidden{display:none}
 #socialControls select{border:1px solid #c7cbd3;border-radius:8px;background:white;padding:9px}
 #socialStatus{font-size:12px;color:#64748b}
+
+/* External indexed search links are unverified candidates, not collected posts. */
+.index-search{border:1px solid #101432;background:#fff9e9;margin:22px 0 12px;padding:16px;border-radius:11px;color:#101432}
+.index-search.hidden{display:none}
+.index-top{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.index-top strong{font-size:18px}
+.index-info,.index-status{font-size:12px;line-height:1.55;color:#565d69;margin:7px 0}
+.index-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:12px}
+.index-actions select{background:white;border:1px solid #a6afc0;border-radius:8px;padding:10px;font-size:13px;min-width:108px;flex:1 1 115px}
+.index-actions button{background:#101432;min-height:41px}
+.index-actions button:disabled{opacity:.5}
+.index-results{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:10px}
+.index-result{background:white;border:1px solid #d8d1bb;border-radius:9px;padding:12px;min-width:0}
+.index-result-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:11px}
+.index-origin{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:800}
+.index-origin img{height:14px;width:14px;object-fit:contain}
+.index-indexed{font-size:10px;color:#7b5018;background:#fff0c5;border-radius:5px;padding:4px 6px}
+.index-title{font-size:14px;font-weight:750;line-height:1.5;margin:12px 0 7px;overflow-wrap:anywhere}
+.index-description{font-size:12px;line-height:1.55;overflow-wrap:anywhere;max-height:6.2em;overflow:hidden;white-space:pre-wrap}
+.index-links{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;font-size:12px}
+.index-links a{color:#12378b;font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.index-results+.index-more{margin:14px auto 0;display:block;background:#101432}
+.index-more.hidden{display:none}
+@media(max-width:720px){.index-search{margin:16px 2px;padding:11px}.index-results{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.index-result{padding:9px}.index-title{font-size:12px}.index-description{font-size:11px}}
 </style>
 </head>
 <body>
@@ -381,6 +405,19 @@ dialog{background:#fff9ed;border-color:#101432}
 <div class="sr-only" id="count" role="status" aria-live="polite">불러오는 중…</div>
 <section class="feed" id="feed" aria-live="polite"><div class="empty">게시글 불러오는 중…</div></section>
 <div class="more hidden" id="paging"><button type="button" id="more">더 보기</button></div>
+
+<section class="index-search hidden" id="freeDiscovery" aria-label="무료 SNS 게시글 링크 검색">
+  <div class="index-top"><strong>다른 SNS 게시글 찾기</strong><span class="index-indexed">검색 인덱스 · 원문 미확인</span></div>
+  <p class="index-info">계정·결제 없이 X, Threads, Instagram의 공개 검색 인덱스를 조회합니다. 표시되는 것은 원본 게시글이 아니라 검색 결과 링크입니다. 게시 날짜와 원문 일치는 확인되지 않으며, 위의 기간 필터는 적용되지 않습니다.</p>
+  <div class="index-actions">
+    <select id="indexPlatform" aria-label="무료 검색 SNS"><option value="x">X</option><option value="threads">Threads</option><option value="instagram">Instagram</option></select>
+    <select id="indexTerm" aria-label="무료 SNS 검색어"><option value="뒷계">뒷계</option><option value="섹트">섹트</option><option value="일탈계">일탈계</option></select>
+    <button id="indexFind" type="button">무료 SNS 링크 찾기</button>
+  </div>
+  <p id="indexStatus" class="index-status" role="status" aria-live="polite">검색 버튼을 누르면 무료 검색 인덱스를 조회합니다. 자동·유료 검색은 실행하지 않습니다.</p>
+  <div id="indexResults" class="index-results" aria-live="polite"></div>
+  <button id="indexMore" class="index-more hidden" type="button">검색 후보 더 보기</button>
+</section>
 <div class="more hidden" id="socialControls" aria-label="확인된 SNS 검색">
   <select id="socialPlatform" aria-label="SNS 선택">
     <option value="x">X</option><option value="threads">Threads</option>
@@ -1161,4 +1198,5 @@ if(cloudMode){
   makeAtlas();redraw();
 })();
 </script>
+<script src="free_discovery.js" defer></script>
 </body></html>
