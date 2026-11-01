@@ -15,6 +15,83 @@ def photo(seed):
 
 
 class DirectTests(unittest.TestCase):
+    def test_yui_artgravia_693_article_only_observed_native_same_volume(self):
+        page='https://showartx.net/artgravia-vol-693-yui/'
+        native='https://showartx.net/wp-content/uploads/2025/10/ART_693_75.jpg'
+        variant='https://showartx.net/wp-content/uploads/2025/10/ART_693_75-768x576.jpg'
+        second='https://showartx.net/wp-content/uploads/2025/10/ART_693_80.jpg'
+        other='https://showartx.net/wp-content/uploads/2025/10/ART_684_15.jpg'
+        raw=f'''<h1>Artgravia VOL.693 [Yui]</h1><article>
+          <img src="{variant}"><a href="{native}"><img src="{variant}"></a>
+          <img data-src="{second}">
+          <img src="{other}">
+          <img src="https://playartx.com/p/other/poster-thumb.jpg">
+          <img src="https://showartx.net/wp-content/uploads/2025/10/ART_693_bn.jpg">
+          </article><aside class="related"><img src="https://showartx.net/wp-content/uploads/2025/10/ART_693_21.jpg"></aside>'''
+        photos,pages,status=page_images(raw,page,'yui')
+        self.assertEqual(status,'scoped_public_page')
+        self.assertEqual(photos,[native,second])
+        self.assertEqual(pages,[])
+        self.assertEqual(page_images(raw,page,'mimmi')[0],[])
+        self.assertEqual(page_images(raw.replace('VOL.693','VOL.639'),page,'yui')[2],'missing_model_or_volume_context')
+        self.assertEqual(page_images(raw,page.replace('693','684'),'yui')[2],'missing_model_or_volume_context')
+        self.assertEqual(page_images('<h1>ArtGravia Vol.693 Yui</h1><article>Nothing</article>',page,'yui')[2],'no_public_photos')
+
+    def test_artgravia_693_public_images_physically_staged_not_counted_from_84(self):
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);base=root/'apps/yui-gallery';base.mkdir(parents=True)
+            (base/'stored-albums.json').write_text('{"model":"yui","albums":[]}')
+            source='https://showartx.net/artgravia-vol-693-yui/'
+            url='https://showartx.net/wp-content/uploads/2025/10/ART_693_3.jpg'
+            (base/'public-work-pages.json').write_text(json.dumps({'albums':[
+                {'id':'artgravia-693-public','title':'ArtGravia Vol.693 Yui',
+                 'source':source,'source_claimed_total_edition_photos':84}]}))
+            raw=photo(20)
+            owner={'schema_version':1,'model':'yui','albums':[
+                {'id':'existing','images':[{'number':1,'sha256':'a'*64}]}]}
+            class Client:
+                calls=[]
+                def get(self,u):
+                    self.calls.append(u)
+                    if u==source:return type('R',(),{'content':(
+                        f'<h1>ArtGravia Vol.693 [Yui]</h1><article><img src="{url}"></article>').encode()})()
+                    if u==url:return type('R',(),{'content':raw})()
+                    raise AssertionError('Unobserved asset request')
+            client=Client()
+            result=collect(root,'yui',owner,root/'stage',10,4,client,album_ids=['artgravia-693-public'])
+            self.assertEqual(result['new_local_individual_files'],1)
+            self.assertEqual(result['remote_verified_files'],0)
+            self.assertEqual(client.calls,[source,url])
+            catalog=json.loads((root/'stage/metadata/catalog.json').read_text())
+            self.assertEqual(len(catalog['albums'][0]['images']),1)
+            self.assertEqual(catalog['albums'][0]['images'][0]['sha256'],hashlib.sha256(raw).hexdigest())
+            self.assertEqual(len(list((root/'stage/originals').rglob('*.jpg'))),1)
+
+    def test_named_yui_work_images_are_exact_slug_and_prefix_scoped(self):
+        cases=[
+            ('meow','Meow','Yui_Meow_'),
+            ('night-cat','Night Cat','NightCat_'),
+            ('asuna-qipao','Asuna Qipao','Yui_Asuna-Qipao_'),
+            ('summer','Summer','Yui_Sum_'),
+            ('pure','Pure','Yui_pure_'),
+            ('become-beautiful','Become Beautiful','yui_beautiful_'),
+            ('night-training','Night Training','Yui_Night-Training_'),
+        ]
+        for slug,title,prefix in cases:
+            with self.subTest(slug=slug):
+                page='https://showartx.net/yui-'+slug+'/'
+                native='https://showartx.net/wp-content/uploads/2026/03/'+prefix+'7.jpg'
+                resized='https://showartx.net/wp-content/uploads/2026/03/'+prefix+'7-768x512.jpg'
+                wrong='https://showartx.net/wp-content/uploads/2026/03/Yui_OTHER_2.jpg'
+                html=(f'<h1>Yui – [{title}]</h1><article>'
+                      f'<img src="{resized}"><a href="{native}"><img src="{resized}"></a>'
+                      f'<img src="{wrong}"><img src="https://other.example/ev.jpg">'
+                      '</article>')
+                self.assertEqual(page_images(html,page,'yui'),([native],[],'scoped_public_page'))
+                self.assertEqual(page_images(html,page,'mimmi')[0],[])
+                self.assertEqual(page_images(html.replace(title,'Wrong Album'),page,'yui')[2],
+                                 'missing_model_or_volume_context')
+
     def test_v2ph_public_first_page_and_login_stop(self):
         page='https://www.v2ph.com/album/a887785a.html'
         first='https://cdn.v2ph.com/photos/A12345678.jpg'
