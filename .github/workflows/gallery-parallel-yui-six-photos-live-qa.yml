@@ -1,0 +1,56 @@
+name: Independent Yui Six New Archived Photos Real Browser QA
+on:
+  push:
+    branches: ['research/parallel-yui-public-photos-20261101']
+    paths: ['.github/workflows/gallery-parallel-yui-six-photos-live-qa.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: independent-yui-six-image-sha-browser-qa
+  cancel-in-progress: false
+jobs:
+  exact-photo-qa:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        browser: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: 808960a87489057ffbfe91b39364974ffc7d6e77
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - name: Install actual browser engines with mobile viewport
+        shell: bash
+        run: |
+          python -m pip install 'playwright==1.58.0' requests
+          python -m playwright install --with-deps ${{ matrix.browser }}
+      - name: Verify the 6 exact newly stored original SHA files through public Pages
+        shell: bash
+        run: |
+          python apps/gallery-archive/qa_new_physical_photos.py \
+            --model yui --browser ${{ matrix.browser }} --shard 0 --shards 1 \
+            --since-commit 150fa9a417669967cbaa63ade29c374c84e504de \
+            --current-commit 808960a87489057ffbfe91b39364974ffc7d6e77 \
+            --out "$RUNNER_TEMP/yui-six-${{ matrix.browser }}.json"
+          python - <<'PY'
+          import os,json
+          from pathlib import Path
+          p=Path(os.environ['RUNNER_TEMP'])/'yui-six-${{ matrix.browser }}.json'
+          data=json.loads(p.read_text())
+          assert data.get('success') and data.get('reload_pass')
+          assert len(data['photos'])==6,('wrong total new photos',len(data['photos']))
+          assert all(p.get('thumbnail_decoded') and p.get('lightbox_decoded') and p.get('original_tab_decoded') and p.get('download_sha256_verified') for p in data['photos'])
+          print('YUI_SIX_NEW_FULL_IMAGES_DECODED_AND_SHA_BROWSER_PASS','${{ matrix.browser }}',flush=True)
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: independent-yui-six-real-browser-qa-${{ matrix.browser }}
+          path: ${{ runner.temp }}/yui-six-${{ matrix.browser }}.*
+          retention-days: 14
+          if-no-files-found: ignore
