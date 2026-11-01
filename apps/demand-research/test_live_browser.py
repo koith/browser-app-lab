@@ -94,7 +94,7 @@ def run(live=False):
             page.wait_for_selector("article.post",timeout=60000)
             page.wait_for_function("document.getElementById('refresh').disabled === false",timeout=120000)
             n=page.locator("article.post").count()
-            imgs=page.locator("article.post img").count()
+            imgs=page.locator("article.post .post-thumb > img").count()
             pwd=page.locator("input[type=password], #login").count()
             assert pwd==0,"Unexpected password/login UI"
             assert page.locator('input[type="date"]').count()==2
@@ -146,8 +146,8 @@ def run(live=False):
             assert page.locator("input[type=password]").count()==0
             adult=page.locator('article[data-media-policy="adult"]')
             restricted=page.locator('article[data-media-policy="restricted"]')
-            adult_thumb=adult.locator("img").count()
-            assert restricted.locator("img").count()==0, "Restricted media must not be previewed"
+            adult_thumb=adult.locator(".post-thumb > img").count()
+            assert restricted.locator(".post-thumb > img").count()==0, "Restricted media must not be previewed"
             if live:
                 assert n>=1,f"Expected public results, saw {n} posts"
                 # Warn-class adult labels are no longer blanked by app code.
@@ -167,13 +167,13 @@ def run(live=False):
                 assert page.locator("#detailContent .dialog-media img").count()>0
                 page.locator("#closeDetail").click()
                 page.locator("#showAdultMedia").uncheck()
-                assert page.locator('article[data-media-policy="adult"] img').count()==0
+                assert page.locator('article[data-media-policy="adult"] .post-thumb > img').count()==0
                 page.locator('article[data-media-policy="adult"] .post-open').first.click()
                 assert "성인 미디어 표시가 꺼져" in page.locator("#detailContent .dialog-notice").inner_text()
                 page.locator("#closeDetail").click()
                 page.locator("#showAdultMedia").check()
                 assert page.locator('article[data-media-policy="adult"] img').count()>0
-                assert page.locator('article[data-media-policy="restricted"] img').count()==0
+                assert page.locator('article[data-media-policy="restricted"] .post-thumb > img').count()==0
                 page.locator('article[data-media-policy="restricted"] .post-open').first.click()
                 assert "서비스 제한" in page.locator("#detailContent .dialog-notice").inner_text()
                 assert page.locator("#detailContent .dialog-media img").count()==0
@@ -199,7 +199,7 @@ def run(live=False):
                 page.locator(".post-open").first.click()
                 assert page.locator("dialog#detail").is_visible()
                 assert page.locator("#detailContent .dialog-text").inner_text().strip()
-                assert page.locator("#detailContent img").count()>=1
+                assert page.locator("#detailContent .dialog-media img").count()>=1
                 page.keyboard.press("Escape")
                 assert not page.locator("dialog#detail").is_visible()
                 page.get_by_role("button",name="섹트",exact=True).click()
@@ -237,8 +237,8 @@ def run(live=False):
                 lemmy=page.locator('article.post').filter(has=page.locator('.source-badge[aria-label="출처: Lemmy"]')).first
                 assert lemmy.locator('a.author').get_attribute("href")=="https://lemmy.world/u/qa"
                 bsky=page.locator('article.post').filter(has=page.locator('.source-badge[aria-label="출처: Bluesky"]')).first
-                assert "/profile/qa-feed.bsky.social/post/" in bsky.locator('a.author').get_attribute("href").replace("/post/","/post/") or (
-                    bsky.locator('a.author').get_attribute("href")=="https://bsky.app/profile/qa-feed.bsky.social")
+                assert bsky.locator('a.author').get_attribute("href")=="https://bsky.app/profile/qa-feed.bsky.social"
+                assert bsky.locator("a.author").get_attribute("target")=="_blank"
                 bsky.locator(".post-open").click(position={"x":30,"y":30})
                 assert page.locator("#detail").is_visible()
                 assert page.locator("#detailContent .source-badge").count()==1
