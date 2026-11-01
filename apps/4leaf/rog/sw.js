@@ -25,7 +25,9 @@ const CORE=['./','./index.html','./app-version.json','./pwa-runtime.js','./manif
   './original/SourceSPRExtra/winAbility-05.png',
   './original/SourceSPRExtra/winJail-00.png','./original/SourceSPRExtra/winDoa-00.png','./original/SourceSPRExtra/minipanel-00.png','./original/SourceSPRExtra/minipanel-01.png','./original/SourceSPRExtra/minipanel-02.png','./original/SourceSPRExtra/minipanel-03.png',
   './original/SourceSPRExtra/winResult-00.png']).concat(
- Array.from({length:22},(_,i)=>'./original/OBS/ui/1223-'+String(i).padStart(3,'0')+'.png'));
+ Array.from({length:22},(_,i)=>'./original/OBS/ui/1223-'+String(i).padStart(3,'0')+'.png')).concat(
+ ['./original/OBS/action-full/manifest.js',...['1040','1046','1078'].flatMap(stem=>
+  Array.from({length:37},(_,i)=>'./original/OBS/action-full/'+stem+'-'+String(i).padStart(2,'0')+'.png'))]);
 self.addEventListener('install',event=>{
  event.waitUntil(caches.open(REVISION).then(async cache=>{
    const requests=CORE.map(path=>new Request(new URL(path,self.registration.scope),{cache:'reload'}));
