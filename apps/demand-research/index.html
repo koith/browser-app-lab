@@ -325,37 +325,64 @@ dialog{background:#fff9ed;border-color:#101432}
 .post-title .author{display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#122c9a;text-decoration:underline;text-underline-offset:2px}
 .post-title .tag{background:#101432;color:#fff}
 
+
+/* Compact topic selectors and date modal. Advertising stays hidden and
+   supported adult-warn media stays visible without extra settings. */
+.head-inner{min-height:52px;padding:12px 19px}
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 9px;background:#fff9e8ed}
+.tabs{flex:0 1 auto;display:flex;gap:0;border-bottom:0;overflow:visible}
+.tabs button{flex:0 0 auto;min-width:55px;min-height:49px;padding:9px 11px;font-size:18px;line-height:1;background:transparent;color:#101432;display:flex;align-items:center;justify-content:center;border-right:1px solid #bbb4a0}
+.tabs button:first-child{font-size:13px;font-weight:850;min-width:61px}
+.tabs button.active{background:#101432;color:white}
+.period-trigger-row{flex:0 1 auto;min-width:0;display:flex;align-items:center;justify-content:flex-end;padding:6px 0}
+.period-trigger-row #openDate{display:flex;align-items:center;gap:8px;justify-content:center;min-width:0;background:#fff8d4;color:#101432;border:1px solid #101432;font-size:11px;font-weight:750;letter-spacing:0;white-space:nowrap;padding:10px 12px}
+.period-trigger-row #openDate span:nth-child(2){overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.period-dialog{max-width:440px;width:calc(100vw - 25px);background:#fff9e8;padding:0;max-height:calc(100dvh - 30px)}
+.period-dialog .date-panel{padding:18px}
+.period-dialog .date-range label{display:flex;flex-direction:column;gap:7px;font-size:12px;font-weight:700;min-width:0;color:#101432}
+.period-dialog .date-range input{font-size:13px;width:100%;background:#fffdf6}
+.period-dialog .date-actions{margin-top:18px}
+.period-dialog .date-actions #applyDate{flex:0 0 38%;min-width:100px}
+@media(max-width:720px){
+.head-inner{min-height:50px;padding:11px 11px}
+.toolbar{gap:3px;padding:0 4px}
+.tabs button{min-width:40px;padding:7px 7px;min-height:47px;font-size:18px}
+.tabs button:first-child{min-width:47px;font-size:12px}
+.period-trigger-row{padding:4px 1px;flex:1 1 auto;justify-content:flex-end}
+.period-trigger-row #openDate{padding:9px 6px;gap:4px;font-size:10px;max-width:100%;min-width:0}
+.period-dialog .date-panel{padding:13px}
+.period-dialog .date-range input{font-size:12px}
+.period-dialog .date-actions .presets{gap:3px}
+}
 </style>
 </head>
 <body>
 <div class="ambient" aria-hidden="true"><canvas id="dotField"></canvas></div>
 <header class="site-head">
-<div class="head-inner"><h1>INTERSECTION</h1><button type="button" id="refresh" aria-label="게시글 새로 조회" title="새로고침"><span aria-hidden="true">↻</span> <span>새로고침</span></button></div>
+<div class="head-inner"><h1>INTERSECTION</h1></div>
 <small id="source" class="sr-only">공개 게시글</small><span class="sr-only" id="status" role="status">게시글 불러오는 중…</span>
 </header>
 <main>
-<section class="toolbar">
-<div class="tabs" id="tabs">
-<button type="button" data-term="all" class="active">전체</button>
-<button type="button" data-term="뒷계">뒷계</button>
-<button type="button" data-term="섹트">섹트</button>
-<button type="button" data-term="일탈계">일탈계</button>
+<section class="toolbar" aria-label="주제 및 조회 기간">
+<div class="tabs" id="tabs" role="group" aria-label="주제 선택">
+<button type="button" data-term="all" class="active" title="전체" aria-label="전체" aria-pressed="true">All</button>
+<button type="button" data-term="뒷계" title="뒷계" aria-label="뒷계" aria-pressed="false"><span aria-hidden="true">🎭</span></button>
+<button type="button" data-term="섹트" title="섹트" aria-label="섹트" aria-pressed="false"><span aria-hidden="true">🔞</span></button>
+<button type="button" data-term="일탈계" title="일탈계" aria-label="일탈계" aria-pressed="false"><span aria-hidden="true">🦋</span></button>
 </div>
-<details class="filter-details" id="filterDetails"><summary>필터 <span class="filter-chevron">＋</span></summary><div class="ad-row" id="adFilters">
-<label class="ad-toggle"><input type="checkbox" id="hideAds" checked>광고 숨김</label>
-<label class="ad-toggle"><input type="checkbox" id="showAdultMedia" checked>성인 미디어 표시</label>
-<select id="adLevel" aria-label="광고 필터 강도"><option value="strong" selected>강력 필터</option><option value="standard">기본 필터</option></select>
-<span class="ad-note" id="adSummary">반복 홍보·링크 유도·판매 문구 필터링</span>
-</div></details>
-<div id="datePanel" class="date-panel">
-<div class="date-range"><label><span class="sr-only">시작 날짜</span><input type="date" id="startDate" aria-label="시작 날짜"></label><span class="date-arrow" aria-hidden="true">→</span><label><span class="sr-only">종료 날짜</span><input type="date" id="endDate" aria-label="종료 날짜"></label></div>
-<div class="date-actions"><div class="presets" id="presets"><button type="button" data-days="7">7일</button><button type="button" data-days="30" class="active">30일</button><button type="button" data-days="90">90일</button></div><button type="button" id="applyDate" class="apply">기간 조회 <span aria-hidden="true">↗</span></button></div>
-<span class="sr-only" id="dateSummary">최근 30일</span>
-</div></section>
-<div class="results-head"><span>INDEX / <span id="count">불러오는 중…</span></span></div>
+<div class="period-trigger-row"><button id="openDate" type="button" aria-haspopup="dialog" aria-controls="dateDialog"><span aria-hidden="true">◷</span> <span id="periodLabel">기간 선택</span> <span aria-hidden="true">⌄</span></button></div>
+</section>
+<div class="sr-only" id="count" role="status" aria-live="polite">불러오는 중…</div>
 <section class="feed" id="feed" aria-live="polite"><div class="empty">게시글 불러오는 중…</div></section>
 <div class="more hidden" id="paging"><button type="button" id="more">더 보기</button></div>
 </main>
+<dialog id="dateDialog" class="period-dialog" aria-label="기간 설정">
+<div class="dialog-head"><b>조회 기간</b><button type="button" id="closeDate" aria-label="닫기">×</button></div>
+<div id="datePanel" class="date-panel">
+<div class="date-range"><label>시작 날짜<input type="date" id="startDate" aria-label="시작 날짜"></label><span class="date-arrow" aria-hidden="true">→</span><label>종료 날짜<input type="date" id="endDate" aria-label="종료 날짜"></label></div>
+<div class="date-actions"><div class="presets" id="presets"><button type="button" data-days="7">7일</button><button type="button" data-days="30" class="active">30일</button><button type="button" data-days="90">90일</button></div><button type="button" id="applyDate" class="apply">기간 조회</button></div>
+<span id="dateSummary" class="sr-only">최근 30일</span></div>
+</dialog>
 <dialog id="detail" aria-label="게시글 상세"><div class="dialog-head"><b>게시글 상세</b><button id="closeDetail" type="button" aria-label="닫기">×</button></div><div class="dialog-content" id="detailContent"></div></dialog>
 <script>
 (function(){
@@ -398,7 +425,7 @@ function mediaPolicy(p){
           restricted:values.some(v=>RESTRICTED_LABELS.has(v))};
 }
 function hideMedia(p){
-  return !!p.restricted || (!!p.adultLabeled && !$("showAdultMedia").checked);
+  return !!p.restricted;
 }
 function addPost(p,term){
   if(!p||!p.uri||typeof p.record?.text!=="string"||!p.record.text.includes(term))return false;
@@ -634,14 +661,12 @@ function updateAdScores(){
   for(let p of posts)p.adEvidence=adEvidence(p,count);
 }
 function suspectedAd(post){
-  let threshold=$("adLevel").value==="standard"?6:4;
-  return (post.adEvidence?.score||0)>=threshold;
+  return (post.adEvidence?.score||0)>=4;
 }
 
 function matchesText(p){return (active==="all"||p.terms.has(active))&&(!needle||p.text.toLowerCase().includes(needle))}
 function filtered(){
-  let hide=$("hideAds").checked;
-  return posts.filter(p=>matchesText(p)&&(!hide||!suspectedAd(p)))
+  return posts.filter(p=>matchesText(p)&&!suspectedAd(p))
     .sort((a,b)=>String(b.indexed).localeCompare(String(a.indexed)));
 }
 
@@ -746,9 +771,8 @@ function closeDetail(){
 function draw(){
   updateAdScores();
   let matching=posts.filter(matchesText),suspected=matching.filter(suspectedAd).length;
-  let hidden=$("hideAds").checked?suspected:0;
+  let hidden=suspected;
   let rows=filtered(),list=$("feed");list.replaceChildren();
-  $("adSummary").textContent="광고 의심 "+suspected.toLocaleString()+"건 · "+(hidden?"숨김 "+hidden.toLocaleString()+"건":"광고 포함 표시");
   let limit=visibleLimit,frag=document.createDocumentFragment();
   for(let p of rows.slice(0,limit))frag.append(tile(p));
   if(!rows.length)frag.append(el("div","empty",busy?"게시글 검색 중…":"해당 기간·검색 조건의 게시글이 없습니다."));
@@ -762,8 +786,8 @@ function draw(){
   $("count").textContent=rows.length.toLocaleString()+"건"+(cloudMode?"":sources)+(hidden?" · 광고 "+hidden.toLocaleString()+"건 제외":"")+(rows.length>limit?" · "+limit+"건 표시":"");
   $("count").setAttribute("aria-label",rows.length.toLocaleString()+"개 표시 / "+matching.length.toLocaleString()+"개 조회"+coverage+warnings);
 }
-function startBusy(){busy=true;$("refresh").disabled=true;$("applyDate").disabled=true;$("more").disabled=true}
-function endBusy(){busy=false;$("refresh").disabled=false;$("applyDate").disabled=false;$("more").disabled=false}
+function startBusy(){busy=true;$("applyDate").disabled=true;$("more").disabled=true}
+function endBusy(){busy=false;$("applyDate").disabled=false;$("more").disabled=false}
 function resetData(){posts=[];ids.clear();pending=[];federationCursors.clear();visibleLimit=270;requestCount=0;daysCovered=0;failed=0;incomplete=0;draw()}
 async function fetchWindow(segment){
   let url=new URL(API);url.searchParams.set("q",segment.term);url.searchParams.set("sort","latest");url.searchParams.set("limit","100");
@@ -814,6 +838,12 @@ function setPreset(days){
   let today=new Date(),end=Date.UTC(today.getFullYear(),today.getMonth(),today.getDate());
   $("startDate").value=dayText(end-(days-1)*DAY);$("endDate").value=dayText(end);
   for(let btn of $("presets").querySelectorAll("button"))btn.classList.toggle("active",Number(btn.dataset.days)===days);
+  updatePeriodLabel();
+}
+function updatePeriodLabel(){
+  if($("startDate").value&&$("endDate").value)
+    $("periodLabel").textContent=$("startDate").value.replaceAll("-",".")+" ~ "+$("endDate").value.replaceAll("-",".");
+  else $("periodLabel").textContent="기간 선택";
 }
 function getDates(){
   let s=parseDay($("startDate").value),e=parseDay($("endDate").value);
@@ -828,6 +858,7 @@ async function loadBatch(reset){
     let dates;try{dates=getDates()}catch(e){status(e.message);return}
     let days=Math.ceil((dates[1]-dates[0])/DAY);
     $("dateSummary").textContent=days+"일 · "+$("startDate").value+" ~ "+$("endDate").value;
+    updatePeriodLabel();
     runID++;fromMs=dates[0];toMs=dates[1];nextEnd=toMs;resetData();
   }
   if(!pending.length&&nextEnd<=fromMs){status("선택 기간 조회를 마쳤습니다 · "+posts.length+"건");$("paging").classList.toggle("hidden",!hasMoreResults());return}
@@ -890,22 +921,35 @@ async function loadCloud(reset){
 $("detail").addEventListener("close",()=>{document.body.classList.remove("modal-open");$("detailContent").replaceChildren()});
 $("detail").addEventListener("click",e=>{if(e.target===$("detail"))closeDetail()});
 $("closeDetail").addEventListener("click",closeDetail);
-$("refresh").addEventListener("click",()=>cloudMode?loadCloud(true):loadBatch(true));
-$("applyDate").addEventListener("click",()=>loadBatch(true));
+$("openDate").addEventListener("click",()=>{
+  if(!busy&&!cloudMode)$("dateDialog").showModal();
+});
+$("closeDate").addEventListener("click",()=>$("dateDialog").close());
+$("dateDialog").addEventListener("click",e=>{if(e.target===$("dateDialog"))$("dateDialog").close()});
+$("applyDate").addEventListener("click",()=>{
+  if(busy)return;
+  try{getDates()}catch(e){status(e.message);return}
+  $("dateDialog").close();loadBatch(true);
+});
 $("more").addEventListener("click",()=>{
   if(busy)return;
   if(filtered().length>visibleLimit){visibleLimit+=180;draw()}
   else if(cloudMode)loadCloud(false);else loadBatch(false);
 });
-$("tabs").addEventListener("click",e=>{let button=e.target.closest("button[data-term]");if(!button)return;active=button.dataset.term;visibleLimit=270;for(let b of $("tabs").querySelectorAll("button"))b.classList.toggle("active",b===button);draw()});
-$("presets").addEventListener("click",e=>{let b=e.target.closest("button[data-days]");if(!b)return;setPreset(Number(b.dataset.days));loadBatch(true)});
-$("hideAds").addEventListener("change",()=>{visibleLimit=270;draw()});
-$("showAdultMedia").addEventListener("change",()=>{visibleLimit=270;draw()});
-$("adLevel").addEventListener("change",()=>{visibleLimit=270;draw()});
+$("tabs").addEventListener("click",e=>{
+  let button=e.target.closest("button[data-term]");if(!button)return;
+  active=button.dataset.term;visibleLimit=270;
+  for(let b of $("tabs").querySelectorAll("button")){
+    const selected=b===button;b.classList.toggle("active",selected);
+    b.setAttribute("aria-pressed",selected?"true":"false");
+  }
+  draw();
+});
+$("presets").addEventListener("click",e=>{let b=e.target.closest("button[data-days]");if(!b)return;setPreset(Number(b.dataset.days))});
 setPreset(30);
 if(cloudMode){
   $("source").textContent="테라박스 저장 게시글 · 글/사진/영상";
-  $("tabs").classList.add("hidden");$("datePanel").classList.add("hidden");
+  $("tabs").classList.add("hidden");$("openDate").classList.add("hidden");
   loadCloud(true);
 }else loadBatch(true);
 })();
