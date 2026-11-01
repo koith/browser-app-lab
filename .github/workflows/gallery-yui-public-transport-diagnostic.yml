@@ -1,0 +1,23 @@
+name: Yui Public Album Source Transport Diagnostic
+on:
+  pull_request:
+    paths:
+      - apps/gallery-archive/probe_yui_public_transport.py
+      - .github/workflows/gallery-yui-public-transport-diagnostic.yml
+  push:
+    branches: [main]
+    paths:
+      - apps/gallery-archive/probe_yui_public_transport.py
+      - .github/workflows/gallery-yui-public-transport-diagnostic.yml
+permissions:
+  contents: read
+jobs:
+  public-source-probe:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: "3.12"}
+      - run: python -m pip install 'requests==2.32.5' 'Pillow==11.3.0'
+      - run: python apps/gallery-archive/probe_yui_public_transport.py
