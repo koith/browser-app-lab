@@ -105,7 +105,7 @@ def run(fn,platform):
         return {"source":fn.__name__,"platform":platform or "reddit","error":type(e).__name__,"message":str(e)[:75]}
 
 def main():
-    tasks=[(bing,p) for p in TARGETS]+[(duckduckgo,p) for p in TARGETS]+[(pullpush,None)]
+    tasks=[(bing,p) for p in TARGETS]+[(duckduckgo,p) for p in TARGETS]+[(pullpush,None),(arctic,TERM),(arctic,"coffee")]
     with ThreadPoolExecutor(max_workers=4) as pool:
         for result in pool.map(lambda v:run(*v),tasks):
             print(json.dumps(result,ensure_ascii=False),flush=True)
