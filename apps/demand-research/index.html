@@ -840,7 +840,6 @@ function setPreset(days){
   let today=new Date(),end=Date.UTC(today.getFullYear(),today.getMonth(),today.getDate());
   $("startDate").value=dayText(end-(days-1)*DAY);$("endDate").value=dayText(end);
   for(let btn of $("presets").querySelectorAll("button"))btn.classList.toggle("active",Number(btn.dataset.days)===days);
-  updatePeriodLabel();
 }
 function updatePeriodLabel(){
   if($("startDate").value&&$("endDate").value)
