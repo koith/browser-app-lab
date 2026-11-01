@@ -101,9 +101,18 @@ def persist_new_photos(stage, previous, remote, model, uploader=run,
                 continue
             attempts+=1
             if refresh_owner_state is not None and attempts%30==1:
-                refresh_owner_state()
-                print('OWNER_UPLOAD_TOKEN_REFRESHED_DURING_BATCH',model,
-                      'photo_attempt',attempts,flush=True)
+                from owner_upload_web_token import WebStateUnavailable
+                import httpx
+                try:
+                    refresh_owner_state()
+                    print('OWNER_UPLOAD_TOKEN_REFRESHED_DURING_BATCH',model,
+                          'photo_attempt',attempts,flush=True)
+                except (WebStateUnavailable,httpx.RequestError,TimeoutError) as exc:
+                    # An optional token refresh cannot disable the existing
+                    # cookie-authenticated path that already SHA-verified a
+                    # real owner image. No alternative authentication is used.
+                    print('OWNER_WEB_TOKEN_REFRESH_UNAVAILABLE',type(exc).__name__,
+                          'OWNER_COOKIE_ONLY_PATH_REQUIRES_EXACT_SHA',True,flush=True)
             if not original_path.is_file() or preview_path is None or not preview_path.is_file():
                 raise ValueError('Incomplete locally staged photo pair')
             if (photo['number'] in old_slots and
