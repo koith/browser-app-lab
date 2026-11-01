@@ -160,19 +160,32 @@ def merge_owner_census_sources(books, owner, rows, model, safe_source=None):
     allowed=safe_source or (lambda u:safe_registered_public_page(u,model))
     known={a['id']:a for a in owner['albums']}
     stats={'census_owner_work_count':0,'census_eligible_work_count':0,
+           'unowned_registered_works_with_source':0,
+           'newly_scheduled_unowned_works':0,
            'newly_scheduled_work_count':0,'additional_registered_pages':0,
            'registered_source_rejected':0}
     for row in rows:
         if row.get('model')!=model or row.get('kind')!='work':
             continue
         aid=row['id']
-        if aid not in known:continue
-        stats['census_owner_work_count']+=1
+        if not re.fullmatch(r'[a-z0-9][a-z0-9-]{1,100}',aid):
+            continue
+        owner_work=aid in known
+        # Unowned work IDs can be created ONLY from an existing real named-work
+        # manifest, never from a suggested model-alias or a guessed photo URL.
+        if not owner_work and not row.get('manifest_sources'):
+            continue
+        if owner_work:
+            stats['census_owner_work_count']+=1
         candidate=list(dict.fromkeys(row.get('urls') or []))
         verified=[u for u in candidate if allowed(u)]
         stats['registered_source_rejected']+=len(candidate)-len(verified)
-        if not verified:continue
-        stats['census_eligible_work_count']+=1
+        if not verified:
+            continue
+        if owner_work:
+            stats['census_eligible_work_count']+=1
+        else:
+            stats['unowned_registered_works_with_source']+=1
         if aid in books:
             book=books[aid]
             before=set([book['source']]+book.get('source_pages',[]))
@@ -181,11 +194,16 @@ def merge_owner_census_sources(books, owner, rows, model, safe_source=None):
             stats['additional_registered_pages']+=len(
                 set(book['source_pages'])-before)
         else:
-            held=known[aid]
-            books[aid]={'id':aid,'title':held.get('title') or aid,
+            held=known.get(aid,{})
+            books[aid]={'id':aid,'title':held.get('title') or row.get('title') or aid,
                         'source':verified[0],'source_pages':verified[1:],
-                        'curated_images_only':True,'census_existing_owner':True}
-            stats['newly_scheduled_work_count']+=1
+                        'curated_images_only':owner_work,
+                        'census_existing_owner':owner_work,
+                        'census_new_work':not owner_work}
+            if owner_work:
+                stats['newly_scheduled_work_count']+=1
+            else:
+                stats['newly_scheduled_unowned_works']+=1
     return stats
 
 
@@ -683,6 +701,10 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
             visited.add(page)
             try:
                 response=client.get(page);urls,more,status=page_images(response.content,page,model)
+                if book.get('census_new_work') and not _work_token_matched_in_heading(
+                        response.content,book.get('title'),aid,model):
+                    errors.append({'page':page,'reason':'new_work_identity_not_proven'})
+                    continue
                 if (urlsplit(page).hostname in RESEARCH_WORK_HOSTS or
                         urlsplit(page).hostname not in PAGE_HOSTS
                         and urlsplit(page).hostname not in X_PUBLIC_HOSTS):
