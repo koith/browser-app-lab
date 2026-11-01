@@ -630,14 +630,20 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                     from collector_full_compare import pagination_from_html
                     more=list(dict.fromkeys(list(more)+pagination_from_html(
                         response.content,page,book['source'])))
-                    rendered=[]
-                    if browser is not None and rendered_pages<render_budget:
-                        rendered_pages+=1
-                        rendered,browser_status=browser.extract(page,model)
                     try:
                         alternative,engine_status=verified_alternative_candidates(
-                            response.content,page,model,original_urls,known_work_urls,
-                            rendered=rendered)
+                            response.content,page,model,original_urls,known_work_urls)
+                        # Spend the Chromium budget on pages where static HTML
+                        # extraction is weak, not the first eight already-full
+                        # pages. Reuse the actual dynamically rendered image URLs.
+                        if (browser is not None and rendered_pages<render_budget
+                                and (not alternative or not original_urls)):
+                            rendered_pages+=1
+                            rendered,browser_status=browser.extract(page,model)
+                            if rendered:
+                                alternative,_=verified_alternative_candidates(
+                                    response.content,page,model,original_urls,
+                                    known_work_urls,rendered=rendered)
                         alt_candidate_count+=len(alternative)
                         alt_photo_urls.update(alternative)
                         urls=list(dict.fromkeys(list(urls)+alternative))
