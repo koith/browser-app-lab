@@ -133,7 +133,13 @@ def browser_extract(page,model,enabled=False):
                 tab.evaluate('window.scrollBy(0, document.body.scrollHeight/2)')
                 tab.wait_for_timeout(500)
             raw=tab.content().encode('utf-8')
-            result,status=scoped_generic_html(raw,page,model)
+            if urlsplit(page).hostname=='teapawt.net':
+                # The generic DOM includes avatars, quoted users and feeds.
+                # Apply the proven exact-author card filter to rendered HTML.
+                result,_,status=page_images(raw,page,model)
+                status='rendered_exact_creator_'+status
+            else:
+                result,status=scoped_generic_html(raw,page,model)
             ctx.close();browser.close()
             return result,{'http':response.status,'selector_status':status}
     except Exception as exc:
@@ -177,6 +183,11 @@ def compare(source,session,use_browser=True,limit=MAX_IMG_GET):
     browser,browser_status=browser_extract(page,model,use_browser)
     proposals={'existing_scoped_parser':base,'scrapy_style_generic_article':generic,
                'gallery_dl_native':gdl,'playwright_rendered_article':browser}
+    untrusted_generic_social=urlsplit(page).hostname=='teapawt.net'
+    # Comparison transparently retains generic research candidates, but only
+    # direct-author extracts can prove Yui/Mimmi identity on a shared feed.
+    trusted_engines=set(proposals)-({'scrapy_style_generic_article'} if untrusted_generic_social else set())
+
     result['engines']={
         'existing_scoped_parser':{'urls':len(base),'status':status,'more_pages':len(more)},
         'scrapy_style_generic_article':{'urls':len(generic),'status':genstatus},
@@ -199,23 +210,26 @@ def compare(source,session,use_browser=True,limit=MAX_IMG_GET):
         result['public_decoded_by_engine'][engine]=len(hashes)
         result['engines'][engine]['unverified_or_failed_urls']=len(urls)-sum(1 for u in urls if u in verdict and verdict[u]['status']=='decoded_sha')
     base_set=engine_shas['existing_scoped_parser']
-    combined=set().union(*engine_shas.values())
+    research_combined=set().union(*engine_shas.values())
+    combined=set().union(*(engine_shas[e] for e in trusted_engines))
     result['baseline_unique_sha']=len(base_set)
     result['ensemble_unique_sha']=len(combined)
     result['additional_unique_sha']=len(combined-base_set)
+    result['research_only_untrusted_social_sha']=len(research_combined-combined)
+    result['trusted_engines']=sorted(trusted_engines)
     # SHA catches byte equality, NOT different-sized versions of one photo.
     # Compare native original vs generated WordPress resize variants by asset
     # identity. Distinct unmatched URLs remain candidates, not proven cuts.
     baseline_assets={asset_group(u) for u in proposals['existing_scoped_parser']
                      if u in verdict and verdict[u]['status']=='decoded_sha'}
-    combined_assets={asset_group(u) for urls in proposals.values() for u in urls
-                     if u in verdict and verdict[u]['status']=='decoded_sha'}
+    combined_assets={asset_group(u) for engine,urls in proposals.items() if engine in trusted_engines
+                     for u in urls if u in verdict and verdict[u]['status']=='decoded_sha'}
     result['baseline_distinct_asset_groups']=len(baseline_assets)
     result['ensemble_distinct_asset_groups']=len(combined_assets)
     result['additional_unmatched_asset_groups']=len(combined_assets-baseline_assets)
     result['extra_sha_of_existing_asset_renditions']=len({
         verdict[u]['sha256'] for engine,urls in proposals.items()
-        if engine!='existing_scoped_parser'
+        if engine!='existing_scoped_parser' and engine in trusted_engines
         for u in urls if u in verdict and verdict[u]['status']=='decoded_sha'
         and verdict[u]['sha256'] not in base_set and asset_group(u) in baseline_assets
     })
@@ -224,7 +238,7 @@ def compare(source,session,use_browser=True,limit=MAX_IMG_GET):
     result['candidate_urls_seen']=len(verdict)
     result['actual_image_gets']=checked
     for engine,urls in proposals.items():
-        if engine=='existing_scoped_parser':continue
+        if engine=='existing_scoped_parser' or engine not in trusted_engines:continue
         for u in urls:
             if u in verdict and verdict[u]['status']=='decoded_sha' and verdict[u]['sha256'] not in base_set:
                 result['extra_urls_not_stored'].append({'engine':engine,'url':u,'sha256':verdict[u]['sha256']})
