@@ -2246,14 +2246,16 @@
       "title": "전투 주사위 개수·눈·점수·결과 정렬",
       "status": "in_progress",
       "milestone": "M07",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 기능상 pip 개별 DOM이 실 롤과 연결됐으나 원작 battle.jpg의 실제 주사위 크기·각도·개수와 좌우 위치가 다름 | 구현 목표: 원작 캡처의 공격/방어 점수, pip 수, 4개·6개 상황, 다이스 사운드 및 결과 업데이트 시점 맞춤; 2026-10-21 PR pending beta.7: WEB fallback D6 3x3 pip placement fixed to reserve all 9 real grid positions (unused cells hidden not removed). Add Chromium/WebKit all 1..6 physical pip grid/face normals landing regression, original D4 and source roll UI unchanged. Original 2002 3D geometry and keyframes remain UNVERIFIED.; 2026-11-01 전투 주사위 원본 면과 원본 점수 숫자(0-7) 적용. 8/9 숫자 미추출",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 기능상 pip 개별 DOM이 실 롤과 연결됐으나 원작 battle.jpg의 실제 주사위 크기·각도·개수와 좌우 위치가 다름 | 구현 목표: 원작 캡처의 공격/방어 점수, pip 수, 4개·6개 상황, 다이스 사운드 및 결과 업데이트 시점 맞춤; 2026-10-21 PR pending beta.7: WEB fallback D6 3x3 pip placement fixed to reserve all 9 real grid positions (unused cells hidden not removed). Add Chromium/WebKit all 1..6 physical pip grid/face normals landing regression, original D4 and source roll UI unchanged. Original 2002 3D geometry and keyframes remain UNVERIFIED.; 2026-11-01 전투 주사위 원본 면과 원본 점수 숫자(0-7) 적용. 8/9 숫자 미추출; 2026-11-01 1167.obs frames 8 and 9 visually reviewed as original large 8/9 numerals; all 0..9 exist (25 source frames total). Browser source provenance now labels 0..9 as visually checked and preloads 1223 D4 sprite frames to prevent cold-first-roll blanks. Original 3D physics/timing still unresolved.",
       "acceptance": [
         "가변 주사위 개수·각 면 1–6값/합계가 게임 판정과 일치하고 원본형 배열이 화면 밖으로 잘리지 않음"
       ],
       "evidence": [
         "../assets/battle.jpg",
         "dice-native-battle-dice.css",
-        "tests/dice-native-battle-dice.cjs"
+        "tests/dice-native-battle-dice.cjs",
+        "apps/4leaf/rog/original/OBS/ui/manifest.js",
+        "apps/4leaf/rog/tests/actor-direction-attack-score.cjs"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
       "lastReviewed": "2026-11-01",
@@ -6821,6 +6823,16 @@
         "DIE-02"
       ],
       "details": "VERIFIED: original 2002 1223.obs 22/22 2D sprites sourceSHA256 f6f9792b..., result faces 0..3 with pips 1..4 visually inspected and original OBS/OBS2 bytes match. Source frames 4..21 proposed index-ordered render (INFERRED). The 3D mesh and native fall physics remain UNVERIFIED. CI and Pages to be checked before closure."
+    },
+    {
+      "seq": 296,
+      "date": "2026-11-01",
+      "type": "ORIGINAL_SCORE_08_09_VERIFIED_AND_D4_COLD_CACHE",
+      "taskIds": [
+        "DIE-04",
+        "DIE-02"
+      ],
+      "details": "Verified original 2002 Dice/OBS.pak 1167 large numeral frames 8/9 by direct sprite visual inspection and added source-size browser test. Original 1223 D4 sprites (22) now preload/decode after manifest load to avoid flickering; motion physics still INFERRED."
     }
   ]
 }
