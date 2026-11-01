@@ -79,13 +79,15 @@ const {chromium,webkit}=require('playwright');
     const victory=pawn.dataset.sourceFrameSequence;
     window.__LEAF_GENESIS_ACTORS__.poseByPlayer(match.players[0].id,'idle',0);
     return {id,idle,walking,attack,hurt,victory,evidence,continuity,atlas,
+     fullFrames:window.ORIGINAL_LEAF_FULL_ACTION_FRAMES?.[id]?.frames?.length||0,
      image:image.getAttribute('src'),rig:pawn.dataset.actorRig};
    },id);
    assert.equal(row.idle,'25',id+' source-verified front idle');
    assert.equal(row.walking,id==='0042'?'25,30,25,30':'25,26,27,28,29,30',
     id+' forward-facing original source movement without a BACK 0..7 spin');
    assert.equal(row.continuity,'true');
-   assert.equal(row.attack,id==='0040'?'25,31,33,35,25':'25,18,18,25',
+   const structural=row.fullFrames===37&&!['0084','0085','0086','0088'].includes(id);
+   assert.equal(row.attack,structural?'25,31,32,32,25':'25,18,18,25',
     id+' reviewed original source strike sequence with INFERRED WEB timing');
    assert.equal(row.hurt,'25',id+' unrecovered native hit direction must stay front, not jump to rear');
    assert.equal(row.victory,'25,30,25');
