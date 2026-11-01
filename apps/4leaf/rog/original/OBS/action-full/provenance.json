@@ -1,21 +1,282 @@
 {
-  "sourcePakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
-  "actorCount": 3,
-  "totalFrames": 111,
+  "actorCount": 45,
+  "failures": {},
+  "manuallyReviewedDirectionActorCount": 3,
   "members": {
     "0040": {
       "name": "1040.obs",
-      "sha256": "ac954b320e56b8c34ffbf1249a9905a4a53e9ac1e91c291cc398216cd8db0734"
+      "rendererDirectionReview": "visual-reviewed-20261101",
+      "sourceFrameCount": 37,
+      "sourceSHA256": "ac954b320e56b8c34ffbf1249a9905a4a53e9ac1e91c291cc398216cd8db0734"
+    },
+    "0043": {
+      "name": "1043.obs",
+      "rendererDirectionReview": "UNVERIFIED",
+      "sourceFrameCount": 37,
+      "sourceSHA256": "47637f8b5cbb525d761472a69bc10aaa66ba7c08ccf88fef7ae3f917a97d4852"
+    },
+    "0044": {
+      "name": "1044.obs",
+      "rendererDirectionReview": "UNVERIFIED",
+      "sourceFrameCount": 37,
+      "sourceSHA256": "6a6d7f024c20e18dcb0f572bba2113cae3e2fba2d9faf694a8e9419fb839f796"
     },
     "0046": {
       "name": "1046.obs",
-      "sha256": "dbc29b323135c119d5d44bdf77064d4cfc5b1d262669bd947e7f7bad9e9682e1"
+      "rendererDirectionReview": "visual-reviewed-20261101",
+      "sourceFrameCount": 37,
+      "sourceSHA256": "dbc29b323135c119d5d44bdf77064d4cfc5b1d262669bd947e7f7bad9e9682e1"
+    },
+    "0047": {
+      "name": "1047.obs",
+      "rendererDirectionReview": "UNVERIFIED",
+      "sourceFrameCount": 37,
+      "sourceSHA256": "fcd05bc06d54865e3cc592ffc6d74a38eab233d275b49e5a3fd65ea066c0bdd3"
+    },
+    "0048": {
+      "name": "1048.obs",
+      "rendererDirectionReview": "UNVERIFIED",
+      "sourceFrameCount": 37,
+      "sourceSHA256": "b0d9d4995c8278bdae042752c042e8eaf8984d108514c71c0a6e0ccd9321c64e"
+    },
+    "0049": {
+      "name": "1049.obs",
+      "rendererDirectionReview": "UNVERIFIED",
+      "sourceFrameCount": 37,
+      "sourceSHA256": "23eee0e6f6335d7ed69caaeb19fa016c1f164263f7597492cb68f2c54466d381"
+    },
+    "0050": {
+      "name": "1050.obs",
+      "rendererDirectionReview": "UNVERIFIED",
+      "sourceFrameCount": 37,
+      "sourceSHA256": "2f98625c04d18079fbfd3f7d373d9ab1d83c26fa0283b6b4cda479058e4ec79b"
+    },
+    "0051": {
+      "name": "1051.obs",
+      "rendererDirectionReview": "UNVERIFIED",
+      "sourceFrameCount": 37,
+      "sourceSHA256": "34d67c4d029bfad0326788b22b65e1d55b9e655cf5269d3598c8217202dd1a31"
+    },
+    "0052": {
+      "name": "1052.obs",
+      "rendererDirectionReview": "UNVERIFIED",
+      "sourceFrameCount": 37,
+      "sourceSHA256": "e14fe89614f5b563cabe8ae959fbd9792f8ca1fba59e25498e0c0ca3691b6c4d"
+    },
+    "0053": {
+      "name": "1053.obs",
+      "rendererDirectionReview": "UNVERIFIED",
+      "sourceFrameCount": 37,
+      "sourceSHA256": "cc5586497f50663c04c6d6501e9719ef36ace625e3ca178d764387ba822575fe"
+    },
+    "0054": {
+      "name": "1054.obs",
+      "rendererDirectionReview": "UNVERIFIED",
+      "sourceFrameCount": 37,
+      "sourceSHA256": "42c4ba6b976929720a84175a230b1323332d07580b4915288c6313a205fee236"
+    },
+    "0055": {
+      "name": "1055.obs",
+      "rendererDirectionReview": "UNVERIFIED",
+      "sourceFrameCount": 37,
+      "sourceSHA256": "414e0f087fe598aff57d39502d962fbeac98a3882521702ef3acfc4efdcd6618"
+    },
+    "0056": {
+      "name": "1056.obs",
+      "rendererDirectionReview": "UNVERIFIED",
+      "sourceFrameCount": 37,
+      "sourceSHA256": "e56658101a91e9d8eb8e9182b2353c19882f4d343ddc08fe055f56805146ce6d"
+    },
+    "0058": {
+      "name": "1058.obs",
+      "rendererDirectionReview": "UNVERIFIED",
+      "sourceFrameCount": 37,
+      "sourceSHA256": "65ea0f8b4719e60db938aab0eaf3c4a2d72eac26f44173b92fe5f9471b5d4efb"
+    },
+    "0059": {
+      "name": "1059.obs",
+      "rendererDirectionReview": "UNVERIFIED",
+      "sourceFrameCount": 37,
+      "sourceSHA256": "6094f708e693f5cef9131e766700d6cf6ae7c19da0f4708ce47dfadf9a5a1467"
+    },
+    "0060": {
+      "name": "1060.obs",
+      "rendererDirectionReview": "UNVERIFIED",
+      "sourceFrameCount": 37,
+      "sourceSHA256": "ec0c76ce9a6dac060098cc1b1ee8e03704e7edb3495aef2901b05dbc92e5e12e"
+    },
+    "0061": {
+      "name": "1061.obs",
+      "rendererDirectionReview": "UNVERIFIED",
+      "sourceFrameCount": 37,
+      "sourceSHA256": "656ceca8bd851e6568de3770e481f59c08943b1ef1da54c1e3909a16ee0d6bd7"
+    },
+    "0062": {
+      "name": "1062.obs",
+      "rendererDirectionReview": "UNVERIFIED",
+      "sourceFrameCount": 37,
+      "sourceSHA256": "4a6b47e3ae45a29e4048c5a4ec2e0e5cda92ee7e9fa3ad9e0cd56b4875ac9205"
+    },
+    "0063": {
+      "name": "1063.obs",
+      "rendererDirectionReview": "UNVERIFIED",
+      "sourceFrameCount": 37,
+      "sourceSHA256": "bacc3842d039158680d1f5bdd80aa1c245f95f09b59d39836ebf92fc18a0a28e"
+    },
+    "0064": {
+      "name": "1064.obs",
+      "rendererDirectionReview": "UNVERIFIED",
+      "sourceFrameCount": 37,
+      "sourceSHA256": "73f28ff5a5594521beb0293406f77d72c46a3a37fea2d192e127910b582238e9"
+    },
+    "0065": {
+      "name": "1065.obs",
+      "rendererDirectionReview": "UNVERIFIED",
+      "sourceFrameCount": 37,
+      "sourceSHA256": "4901695a7ecc2c36d1ef5586a76ac880a2e41a35d63e8b60dc29a1a605f7e1ea"
+    },
+    "0066": {
+      "name": "1066.obs",
+      "rendererDirectionReview": "UNVERIFIED",
+      "sourceFrameCount": 37,
+      "sourceSHA256": "1fce493bae40f09481d9e4d81b0c9b0fcd533599340b8694098b78b22dd6cc01"
+    },
+    "0067": {
+      "name": "1067.obs",
+      "rendererDirectionReview": "UNVERIFIED",
+      "sourceFrameCount": 37,
+      "sourceSHA256": "50fd972f807c1f33d56ed203c689b1fec854af1c39c3e0a07e1bac008e19b7e0"
+    },
+    "0068": {
+      "name": "1068.obs",
+      "rendererDirectionReview": "UNVERIFIED",
+      "sourceFrameCount": 37,
+      "sourceSHA256": "2d912261195c9da549350177c196edb579bd7b155691ca700bb6b140aa6826d0"
+    },
+    "0069": {
+      "name": "1069.obs",
+      "rendererDirectionReview": "UNVERIFIED",
+      "sourceFrameCount": 37,
+      "sourceSHA256": "8898df4dfe731d0127f25ccf51099da12ae91f8cb0181aee2c3f8aae5eada068"
+    },
+    "0070": {
+      "name": "1070.obs",
+      "rendererDirectionReview": "UNVERIFIED",
+      "sourceFrameCount": 37,
+      "sourceSHA256": "da68ee3d6302dcf94b78b108af57889f200c7979e6b284a9435c309857d9576a"
+    },
+    "0071": {
+      "name": "1071.obs",
+      "rendererDirectionReview": "UNVERIFIED",
+      "sourceFrameCount": 37,
+      "sourceSHA256": "9bfa980afc6ab3e8e6552b7fb231f359f1b5a939d1ca0cdff1fe93de2594ed82"
+    },
+    "0072": {
+      "name": "1072.obs",
+      "rendererDirectionReview": "UNVERIFIED",
+      "sourceFrameCount": 37,
+      "sourceSHA256": "0253a62013a1ab7960cc880a61efacb081b36306c3790ef7937ff9a36c222bb0"
+    },
+    "0073": {
+      "name": "1073.obs",
+      "rendererDirectionReview": "UNVERIFIED",
+      "sourceFrameCount": 37,
+      "sourceSHA256": "49c9107b905ba1c7c4106e4e3a860e9afac7832624c1892aede732ac07d80c2f"
+    },
+    "0074": {
+      "name": "1074.obs",
+      "rendererDirectionReview": "UNVERIFIED",
+      "sourceFrameCount": 37,
+      "sourceSHA256": "cf8d56b4d415931fdf582ede9d55b89e6f67e4ac062f7394b4a7820c1acc7cbc"
+    },
+    "0075": {
+      "name": "1075.obs",
+      "rendererDirectionReview": "UNVERIFIED",
+      "sourceFrameCount": 37,
+      "sourceSHA256": "13e0a6499f7c8c52b945e9b1091f284dabff6e8fb95ac8e1b1ed96f8d4168c05"
+    },
+    "0076": {
+      "name": "1076.obs",
+      "rendererDirectionReview": "UNVERIFIED",
+      "sourceFrameCount": 37,
+      "sourceSHA256": "af48bdf392446d73f9987ee025542ac3629805df9a47f764fdebfec8292e30a8"
+    },
+    "0077": {
+      "name": "1077.obs",
+      "rendererDirectionReview": "UNVERIFIED",
+      "sourceFrameCount": 37,
+      "sourceSHA256": "19fc1f2b3e91e16d4f1f0b4e791813b3991fa41fc8a137b4a2e2a1bcb57d8124"
     },
     "0078": {
       "name": "1078.obs",
-      "sha256": "4218c5b6d60905f02e793feb2533ecc8658195e4619017f3cfea1a461a844bfe"
+      "rendererDirectionReview": "visual-reviewed-20261101",
+      "sourceFrameCount": 37,
+      "sourceSHA256": "4218c5b6d60905f02e793feb2533ecc8658195e4619017f3cfea1a461a844bfe"
+    },
+    "0079": {
+      "name": "1079.obs",
+      "rendererDirectionReview": "UNVERIFIED",
+      "sourceFrameCount": 37,
+      "sourceSHA256": "47f8efb191148fa4218a73a7654b07b0c63f451cf7ee17956b6d6339bf9ce55c"
+    },
+    "0080": {
+      "name": "1080.obs",
+      "rendererDirectionReview": "UNVERIFIED",
+      "sourceFrameCount": 37,
+      "sourceSHA256": "43875a884cfdf32cf01f6536ee116502c875d0cac78b48c16a49b5a1e36adcd6"
+    },
+    "0081": {
+      "name": "1081.obs",
+      "rendererDirectionReview": "UNVERIFIED",
+      "sourceFrameCount": 37,
+      "sourceSHA256": "e81fea5dca522c6d834f62805c4e6aa67b86d9bef1841aee7fa5aa1d91d92316"
+    },
+    "0082": {
+      "name": "1082.obs",
+      "rendererDirectionReview": "UNVERIFIED",
+      "sourceFrameCount": 37,
+      "sourceSHA256": "48cb3e88cf9e254966683813f9d9c09b7efccb11d820d7330c30acece08d4bfd"
+    },
+    "0083": {
+      "name": "1083.obs",
+      "rendererDirectionReview": "UNVERIFIED",
+      "sourceFrameCount": 37,
+      "sourceSHA256": "92dc63b8159b37e54451e65b302d8ca7d0e192667c0640574dd0dd25aa95561f"
+    },
+    "0084": {
+      "name": "1084.obs",
+      "rendererDirectionReview": "UNVERIFIED",
+      "sourceFrameCount": 37,
+      "sourceSHA256": "7826f72a1a59dde94c41452317e7f75a63ad27c4bee6a92ceb65944a60a865ae"
+    },
+    "0085": {
+      "name": "1085.obs",
+      "rendererDirectionReview": "UNVERIFIED",
+      "sourceFrameCount": 37,
+      "sourceSHA256": "5ab0bb5bdfde3b5903f56ae68fa09a282518301c861a1aa9f3330cb85f3c067d"
+    },
+    "0086": {
+      "name": "1086.obs",
+      "rendererDirectionReview": "UNVERIFIED",
+      "sourceFrameCount": 37,
+      "sourceSHA256": "ab72bd843aadeda3349ca4dbfce7b4660fe9809977c26aab4cfce0b177b7e8bb"
+    },
+    "0088": {
+      "name": "1088.obs",
+      "rendererDirectionReview": "UNVERIFIED",
+      "sourceFrameCount": 37,
+      "sourceSHA256": "40cc720306610aea156d68afda4f3cbd500f2dfa1c4fc4929cdf452d83537976"
+    },
+    "0166": {
+      "name": "1166.obs",
+      "rendererDirectionReview": "UNVERIFIED",
+      "sourceFrameCount": 37,
+      "sourceSHA256": "656ceca8bd851e6568de3770e481f59c08943b1ef1da54c1e3909a16ee0d6bd7"
     }
   },
   "originalExeActionTableDecoded": false,
-  "review": "per-frame source body angle verified visually, action FPS and direction control INFERRED"
+  "sourceInventoryMembers": 45,
+  "sourcePak": "OBS.pak",
+  "sourcePakSHA256": "49738a942ffe3856fb86b4c5ce698b7e460bb876b38c31884028b3e2e833d514",
+  "totalFrames": 1665
 }

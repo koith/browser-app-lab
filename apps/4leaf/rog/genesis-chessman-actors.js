@@ -48,12 +48,20 @@
  });
  const originalFor=id=>{
   if(Object.hasOwn(NON_ACTOR_OBS,id))return null;
-  // Prefer the complete 37 verified source frames only for the three
-  // historically inspected actor IDs. Existing partial verified packets
-  // remain the fallback for every other chessman and cold-cache failure.
+  // The 2002 source inventory now has 45 genuine complete 37-frame
+  // actor packets, with member SHA256 individually checked. Only actors
+  // whose camera-facing source sprites were ALREADY independently reviewed
+  // are promoted to full live-frame playback. Unreviewed 0067/0068/0074/
+  // 0086/0088 keep their former partial pixels instead of inventing a
+  // front/action mapping from extra frames. All source frames remain
+  // archived in ORIGINAL_LEAF_FULL_ACTION_FRAMES for future review.
   const full=window.ORIGINAL_LEAF_FULL_ACTION_FRAMES?.[id];
   if(full?.frames?.length===37&&full.originalAnimationCount===37&&
-    full.frames.every((f,i)=>f.index===i))return full;
+    full.frames.every((f,i)=>f.index===i)&&
+    Object.hasOwn(AUDITED_FRONT_SOURCE,id)&&
+    full.frames.every(f=>typeof f.url==='string'&&
+      f.url.startsWith('./original/OBS/action-full/')&&
+      /^[a-f0-9]{64}$/.test(f.sha256)))return full;
   return window.ORIGINAL_LEAF_OBS_FRAMES?.[id]||null;
  };
  const poses=['idle','walk','attack','hurt','victory'];
@@ -245,7 +253,9 @@
    // Normalize only the per-character reference pivot to the shared
    // DMP tile top. Preserve every source frame's relative origin motion.
    // Absolute foot pivot is inferred; original frame metadata remains intact.
-   const native=originalFor(pawn.dataset.chessmanId);
+   const native=pawn.dataset.sourceFullUnavailable==='true'
+    ?window.ORIGINAL_LEAF_OBS_FRAMES?.[pawn.dataset.chessmanId]
+    :originalFor(pawn.dataset.chessmanId);
    const standing=frontFacingSource(native,pawn.dataset.chessmanId).frame||frame;
    const sourceFoot=(frame.originY+frame.height);
    const standingFoot=(standing.originY+standing.height);
@@ -263,7 +273,12 @@
    const previous=sourceTimers.get(pawn);
    if(previous)clearInterval(previous);
    sourceTimers.delete(pawn);
-   const native=originalFor(id);
+   // If an on-demand full-source asset is not cached offline, keep using
+   // the already shipped original partial OBS sprites rather than dropping
+   // the player's full-body Genesis chessman to a card.
+   const native=pawn.dataset.sourceFullUnavailable==='true'
+    ?window.ORIGINAL_LEAF_OBS_FRAMES?.[id]
+    :originalFor(id);
    if(!native?.frames?.length||pawn.dataset.obsUnavailable==='true'){
      const previousImage=pawn.querySelector('img.leaf-chess-original-obs');
      if(previousImage)previousImage.hidden=true;
@@ -281,7 +296,8 @@
        img.dataset.obsRetryCount='0';
        delete img.dataset.obsRetryFor;
        img.hidden=false;
-       pawn.dataset.actorSourceLoad='ready';
+       pawn.dataset.actorSourceLoad=pawn.dataset.sourceFullUnavailable==='true'
+        ?'ready-legacy-original-OBS': 'ready';
      });
      img.addEventListener('error',()=>{
        if(!pawn.isConnected)return;
@@ -309,10 +325,26 @@
          },Math.min(750,120*2**(attempt-1)));
          return;
        }
+       // The 1,665 new full-frame source PNGs are loaded on demand.
+       // If one is not cached offline (or a CDN fetch repeatedly fails),
+       // retain the earlier source-verified bulk/front-reviewed OBS packets.
+       // Do not generate fake pixels or retry a missing full file forever.
+       const id=pawn.dataset.chessmanId;
+       const legacy=window.ORIGINAL_LEAF_OBS_FRAMES?.[id];
+       if(source.startsWith('./original/OBS/action-full/')&&
+          pawn.dataset.sourceFullUnavailable!=='true'&&
+          legacy?.frames?.length){
+         pawn.dataset.sourceFullUnavailable='true';
+         pawn.dataset.actorSourceLoad='falling-back-to-legacy-original-OBS';
+         delete img.dataset.obsRetryCount;
+         delete img.dataset.obsRetryFor;
+         renderFrame(pawn,id,pawn.dataset.actorPose||'idle');
+         return;
+       }
        pawn.dataset.obsUnavailable='true';
        pawn.dataset.actorOriginalModelRecovered='false';
        pawn.dataset.actorSourceLoad='unavailable';
-       renderFrame(pawn,pawn.dataset.chessmanId,pawn.dataset.actorPose||'idle');
+       renderFrame(pawn,id,pawn.dataset.actorPose||'idle');
      });
      pawn.append(img);
    }
