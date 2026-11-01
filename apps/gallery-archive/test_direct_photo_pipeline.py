@@ -5,7 +5,7 @@ from pathlib import Path
 import tempfile
 import unittest
 from PIL import Image
-from direct_photo_pipeline import collect, inspect, page_images, same_variant, public_full_variant
+from direct_photo_pipeline import collect, inspect, page_images, same_variant, public_full_variant, rotated_registered_page_queue
 
 
 def photo(seed):
@@ -15,6 +15,20 @@ def photo(seed):
 
 
 class DirectTests(unittest.TestCase):
+    def test_repeated_bounded_runs_rotate_all_registered_public_pages(self):
+        first='https://djawaphoto.com/portfolio/mimmi-work/'
+        pages=[first+'?page='+str(i) for i in range(2,82)]
+        cycles=[rotated_registered_page_queue(first,pages,21,i)[:21]
+                for i in range(1,5)]
+        self.assertTrue(all(chunk[0]==first for chunk in cycles))
+        self.assertEqual(len(set(url for chunk in cycles for url in chunk)),81)
+        self.assertEqual(rotated_registered_page_queue(first,pages,21,0),
+                         [first]+pages)
+        self.assertEqual(rotated_registered_page_queue(first,[first]+pages[:3],21,12),
+                         [first]+pages[:3])
+        with self.assertRaises(ValueError):
+            rotated_registered_page_queue(first,pages,21,-1)
+
     def test_yui_artgravia_693_article_only_observed_native_same_volume(self):
         page='https://showartx.net/artgravia-vol-693-yui/'
         native='https://showartx.net/wp-content/uploads/2025/10/ART_693_75.jpg'
