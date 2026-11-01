@@ -17,7 +17,7 @@
  }
  function logo(publisher){
   const asset=publisher.logo, path=asset?.path;
-  if(asset?.verified_official!==true||typeof path!=='string')return null;
+  if(asset?.verified_official!==true||!new Set(['official_publisher_logo','official_site_logo','official_store_logo']).has(asset.asset_role)||typeof path!=='string')return null;
   const allowed=/^publisher-logos\/[a-z0-9-]+\.(?:svg|png|jpe?g|webp|ico)$/.test(path) ||
     /^\.\.\/yui-gallery\/publisher-logos\/[a-z0-9-]+\.(?:svg|png|jpe?g|webp|ico)$/.test(path);
   return allowed?path:null;

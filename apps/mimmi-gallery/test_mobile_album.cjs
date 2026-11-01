@@ -72,6 +72,7 @@ if(index.physical_verified_image_count!==undefined&&index.physical_verified_imag
   await card.click();
   await page.waitForFunction(()=>!document.querySelector('#detail').hidden,{timeout:12000});
   const actual=await page.evaluate(id=>validImages(stored.find(x=>x.id===id)).length,publicAlbum);
+  await page.waitForFunction(n=>document.querySelectorAll('#detailphotos .photo').length===n,actual,{timeout:25000});
   const rendered=await page.locator('#detailphotos .photo').count();
   if(rendered!==actual)throw Error('Rendered photo count mismatch: '+rendered+' vs '+actual);
   const localPhoto=page.locator('#detailphotos .photo:has(img[src^="stored-albums/"])').first();

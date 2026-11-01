@@ -49,7 +49,10 @@ const images=albums.flatMap(a=>a.images.map(p=>({album:a.id,...p})));
   await page.locator('#albumgrid [data-id="'+album+'"]').click();
   if(!await page.locator('#detail').isVisible())throw Error('Stored photo album detail hidden');
   const count=await page.evaluate(id=>validImages(stored.find(a=>a.id===id)).length,album);
-  if(await page.locator('#detailphotos .photo').count()!==count)throw Error('WebKit detail mismatch');
+  // Progressive DOM mounting is deliberate: first photos appear immediately,
+   // then the rest attach on animation frames without blocking mobile Safari.
+   await page.waitForFunction(n=>document.querySelectorAll('#detailphotos .photo').length===n,count,{timeout:25000});
+   if(await page.locator('#detailphotos .photo').count()!==count)throw Error('WebKit detail mismatch');
   await page.locator('#detailphotos .photo:has(img[src^="stored-albums/"])').first().click();
   await page.waitForFunction(()=>document.querySelector('#full')?.naturalWidth>100,{timeout:16000});
   if(!String(await page.locator('#full').getAttribute('src')).startsWith('stored-albums/'))throw Error('WebKit remote source photo presented as stored');
