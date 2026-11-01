@@ -79,6 +79,13 @@ def persist_new_photos(stage, previous, remote, model, uploader=run,
     new_catalog=deepcopy(old)
     by_id={a['id']:a for a in new_catalog['albums']}
     attempts=0;accepted=[];failed=[];statuses=Counter()
+    # Only the real authenticated owner client needs web-state refresh. Tests
+    # inject an uploader and never touch a live session. The same helper is
+    # used by the already deployed private Render gateway.
+    refresh_owner_state=None
+    if uploader is run:
+        from owner_upload_web_token import update_current_process
+        refresh_owner_state=update_current_process
     held_local=[]
     consecutive_provider_rejections=0
     for album in current['albums']:
@@ -93,6 +100,10 @@ def persist_new_photos(stage, previous, remote, model, uploader=run,
                     preview_path is not None and preview_path.is_file()):
                 continue
             attempts+=1
+            if refresh_owner_state is not None and attempts%30==1:
+                refresh_owner_state()
+                print('OWNER_UPLOAD_TOKEN_REFRESHED_DURING_BATCH',model,
+                      'photo_attempt',attempts,flush=True)
             if not original_path.is_file() or preview_path is None or not preview_path.is_file():
                 raise ValueError('Incomplete locally staged photo pair')
             if (photo['number'] in old_slots and
