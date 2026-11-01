@@ -1285,6 +1285,19 @@
         "P0-RELEASE",
         "QA-03"
       ]
+    },
+    {
+      "id": "REQ-20261102-D6-PREFETCH",
+      "date": "2026-11-02",
+      "origin": "user follow-up",
+      "text": "계속 원본 복원을 진행하면서 이미 복구된 주사위 리소스의 실게임 표시 문제를 보완",
+      "taskIds": [
+        "DIE-02",
+        "DIE-04",
+        "P0-DICE",
+        "M07",
+        "P0-RELEASE"
+      ]
     }
   ],
   "tasks": [
@@ -1425,7 +1438,7 @@
       "title": "주사위 원본 모델·결과별 모션",
       "status": "in_progress",
       "milestone": "M07",
-      "current": "원본 roll/eventRoll1 SPR 20프레임은 UI에 활용; 물리 주사위는 웹 대체물",
+      "current": "원본 roll/eventRoll1 SPR 20프레임은 UI에 활용; 물리 주사위는 웹 대체물 | 2026-11-02 beta.38 branch: original D6 1171.obs 28 PNG initial decode warmup implemented and browser regression added; native 2002 fall physics remains UNVERIFIED. PR/CI/deploy pending.",
       "acceptance": [
         "D4/D6 결과별 하늘 낙하/튕김/정지 원본 시퀀스를 리소스 근거로 구현하고 실제 결과와 일치"
       ],
@@ -1433,7 +1446,7 @@
         "apps/4leaf/rog/dice-fall.js"
       ],
       "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
-      "lastReviewed": "2026-10-18",
+      "lastReviewed": "2026-11-02",
       "verifiedAcceptance": null
     },
     {
@@ -1552,7 +1565,7 @@
       "title": "원작 주사위 눈별 낙하/튕김/정지 연출",
       "status": "in_progress",
       "milestone": "M07",
-      "current": "SPR 버튼은 실제 소스지만 물리 주사위 웹 폴백; 원본 IMG.pak eventRoll1.spr 16 PNG 선디코드·첫 콜드 롤 프레임 보장 코드를 구현. 최종 원본 3D 눈별 모션은 미복구.; D4 임시 연출은 숫자만 갈아 끼우던 평면 삼각형 대신 서로 다른 실제 3D 면과 결과별 법선 방향을 갖는 정사면체 렌더로 개선 중.; 원본 ROLL 16프레임 선디코드/캐시 및 D4 정사면체 4면 방향별 착지 구현, 원본 낙하 메시/키프레임은 여전히 미복원.; 사용자 스크린샷 흰색 입체 주사위는 웹 CSS 3D 폴백. 원본 roll.spr/eventRoll1.spr 20프레임은 ROLL UI 버튼이며 주사위 모델이 아님; 원본 D4/D6 MVE/EXE 메시/애니메이션 미복구. 원본 아닌 것을 원본으로 표시 금지.",
+      "current": "SPR 버튼은 실제 소스지만 물리 주사위 웹 폴백; 원본 IMG.pak eventRoll1.spr 16 PNG 선디코드·첫 콜드 롤 프레임 보장 코드를 구현. 최종 원본 3D 눈별 모션은 미복구.; D4 임시 연출은 숫자만 갈아 끼우던 평면 삼각형 대신 서로 다른 실제 3D 면과 결과별 법선 방향을 갖는 정사면체 렌더로 개선 중.; 원본 ROLL 16프레임 선디코드/캐시 및 D4 정사면체 4면 방향별 착지 구현, 원본 낙하 메시/키프레임은 여전히 미복원.; 사용자 스크린샷 흰색 입체 주사위는 웹 CSS 3D 폴백. 원본 roll.spr/eventRoll1.spr 20프레임은 ROLL UI 버튼이며 주사위 모델이 아님; 원본 D4/D6 MVE/EXE 메시/애니메이션 미복구. 원본 아닌 것을 원본으로 표시 금지. | 2026-11-02 beta.38 branch: original D6 1171.obs 28 PNG initial decode warmup implemented and browser regression added; native 2002 fall physics remains UNVERIFIED. PR/CI/deploy pending.",
       "acceptance": [
         "각 주사위의 최종 눈이 경기 엔진 판정과 일치, 실제 원본 연출 근거 확보"
       ],
@@ -1569,7 +1582,7 @@
         "apps/4leaf/rog/original/SourceSPR/manifest.json"
       ],
       "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
-      "lastReviewed": "2026-10-18",
+      "lastReviewed": "2026-11-02",
       "verifiedAcceptance": null
     },
     {
@@ -2213,7 +2226,7 @@
       "title": "결과값별 하늘 낙하·통통 반동·착지 원본 애니",
       "status": "in_progress",
       "milestone": "M07",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 현재 브라우저 구현은 결과별 CSS/JS 추정, 원작 궤적·회전·프레임 길이가 확인되지 않음 | 구현 목표: D4 1–4와 D6 1–6 각각의 모델 면방향/중력/바운스/정지 포즈를 출처 프레임과 타이밍별 매핑; 2026-10-21 PR pending beta.7: WEB fallback D6 3x3 pip placement fixed to reserve all 9 real grid positions (unused cells hidden not removed). Add Chromium/WebKit all 1..6 physical pip grid/face normals landing regression, original D4 and source roll UI unchanged. Original 2002 3D geometry and keyframes remain UNVERIFIED.; 2026-10-21 PR169 MERGED main 2fe53ab1 v0.86.0-beta.7/PWA94: physically correct WEB D6 result pip 3x3 grid using visibility hidden, all 1..6 result faces verified real DOM normals in Chromium, source gameplay roll unchanged. Original EXE die mesh/3D texture/keyframes still UNVERIFIED and not complete. Main original dice board QA 39609357986 + Pages deploy 39609357790 + build 39609327237 SUCCESS.; 2026-10-21 PR171 merged beta8: physical grounded WEB-INFERRED shadow now separated from moving original-source-unverified CSS D4/D6 object; independent floor opacity pulse synced to fall/bounce offsets; source 3D mesh still NOT recovered. PR source board 39610512486 / release WebKit 39610512328 / world/chat 39610512247 / central 39610512251 PASS, main 46c19ff. Current same-SHA Pages execution PENDING confirmation.; 2026-10-22 beta9 PR pending: inferred CSS D4/D6 falling 260px no longer blindly crosses viewport stage on iPhone; use real live stage bounds for initial height and proportional bounce heights, preserve authoritative dice outcomes/turn wait. Original MVE keyframes/3D source NOT RECOVERED; QA pending.; 2026-10-22 PR173 MERGED 5882947d beta9 PWA96: genuine gameplay-authoritative die result/camera fall stage bounds responsive WEB fallback, proportional bounces, Chromium/WebKit board/play result PASS 39714139407 39714139416, original CSS 3D assets still inferred. Pages 39714489431 and build 39714488921 SUCCESS, 2002 original MVE animations not recovered.; 2026-10-22 beta10 branch/PENDING QA: true falling D4 CSS-3D has no duplicate moving shadow after removing leftover D4 filter; ground contact anchored to track. Chromium/WebKit/iPhone midflight/result/engine rollCount test added. Source 2002 MVE model/lighting/keyframes UNVERIFIED, DO NOT mark done.; 2026-11-01 source OBS 1223 D4 face sprites 1..4 are wired into browser move roll with CSS geometry as image-load failure fallback. Source member sprite frames do NOT establish native MVE collision/bounce timing; this task remains in_progress.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 현재 브라우저 구현은 결과별 CSS/JS 추정, 원작 궤적·회전·프레임 길이가 확인되지 않음 | 구현 목표: D4 1–4와 D6 1–6 각각의 모델 면방향/중력/바운스/정지 포즈를 출처 프레임과 타이밍별 매핑; 2026-10-21 PR pending beta.7: WEB fallback D6 3x3 pip placement fixed to reserve all 9 real grid positions (unused cells hidden not removed). Add Chromium/WebKit all 1..6 physical pip grid/face normals landing regression, original D4 and source roll UI unchanged. Original 2002 3D geometry and keyframes remain UNVERIFIED.; 2026-10-21 PR169 MERGED main 2fe53ab1 v0.86.0-beta.7/PWA94: physically correct WEB D6 result pip 3x3 grid using visibility hidden, all 1..6 result faces verified real DOM normals in Chromium, source gameplay roll unchanged. Original EXE die mesh/3D texture/keyframes still UNVERIFIED and not complete. Main original dice board QA 39609357986 + Pages deploy 39609357790 + build 39609327237 SUCCESS.; 2026-10-21 PR171 merged beta8: physical grounded WEB-INFERRED shadow now separated from moving original-source-unverified CSS D4/D6 object; independent floor opacity pulse synced to fall/bounce offsets; source 3D mesh still NOT recovered. PR source board 39610512486 / release WebKit 39610512328 / world/chat 39610512247 / central 39610512251 PASS, main 46c19ff. Current same-SHA Pages execution PENDING confirmation.; 2026-10-22 beta9 PR pending: inferred CSS D4/D6 falling 260px no longer blindly crosses viewport stage on iPhone; use real live stage bounds for initial height and proportional bounce heights, preserve authoritative dice outcomes/turn wait. Original MVE keyframes/3D source NOT RECOVERED; QA pending.; 2026-10-22 PR173 MERGED 5882947d beta9 PWA96: genuine gameplay-authoritative die result/camera fall stage bounds responsive WEB fallback, proportional bounces, Chromium/WebKit board/play result PASS 39714139407 39714139416, original CSS 3D assets still inferred. Pages 39714489431 and build 39714488921 SUCCESS, 2002 original MVE animations not recovered.; 2026-10-22 beta10 branch/PENDING QA: true falling D4 CSS-3D has no duplicate moving shadow after removing leftover D4 filter; ground contact anchored to track. Chromium/WebKit/iPhone midflight/result/engine rollCount test added. Source 2002 MVE model/lighting/keyframes UNVERIFIED, DO NOT mark done.; 2026-11-01 source OBS 1223 D4 face sprites 1..4 are wired into browser move roll with CSS geometry as image-load failure fallback. Source member sprite frames do NOT establish native MVE collision/bounce timing; this task remains in_progress. | 2026-11-02 beta.38 branch: original D6 1171.obs 28 PNG initial decode warmup implemented and browser regression added; native 2002 fall physics remains UNVERIFIED. PR/CI/deploy pending.",
       "acceptance": [
         "D4×4 + D6×6 결과를 고정 seed로 반복 재생해 원본 애니와 착지 최종 눈/게임 엔진 결과가 항상 일치"
       ],
@@ -2235,7 +2248,7 @@
         "apps/4leaf/rog/tests/dice-fall.cjs"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-22",
+      "lastReviewed": "2026-11-02",
       "verifiedAcceptance": null,
       "dependencies": [
         "DIE-01"
@@ -6915,6 +6928,33 @@
         "QA-03"
       ],
       "details": "Append-only intake audit event for active 4LEAF original restoration request; retained previous implementation event #299."
+    },
+    {
+      "seq": 301,
+      "date": "2026-11-02",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261102-D6-PREFETCH",
+      "taskIds": [
+        "DIE-02",
+        "DIE-04",
+        "P0-DICE",
+        "M07",
+        "P0-RELEASE"
+      ],
+      "details": "Follow-on genuine original D6 cold-cache frames loading reliability; no fake source animation claims."
+    },
+    {
+      "seq": 302,
+      "date": "2026-11-02",
+      "type": "NATIVE_D6_FRAMES_PREDECODE_IMPLEMENTED",
+      "requestId": "REQ-20261102-D6-PREFETCH",
+      "taskIds": [
+        "DIE-02",
+        "DIE-04",
+        "P0-DICE",
+        "M07"
+      ],
+      "details": "beta.38/PWA v125 implementation branch: 1171.obs native D6 6 result faces+22 tumble frames are pre-requested and decoded as original images on initial page load. A browser test waits for 28 actual PNG naturalWidth/decoded status before the first live roll, then checks authoritative result/real fall physics unchanged. Source frame provenance SHA data untouched; animation timing and MVE physics remain INFERRED. Code committed; Chromium/WebKit, PR, Pages and iPhone acceptance pending."
     }
   ]
 }
