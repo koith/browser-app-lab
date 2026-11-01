@@ -1,0 +1,30 @@
+name: Gallery Real Image Pixel Quality Audit
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'apps/gallery-archive/audit_stored_image_quality.py'
+      - '.github/workflows/gallery-visual-quality-audit.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/gallery-archive/audit_stored_image_quality.py'
+      - '.github/workflows/gallery-visual-quality-audit.yml'
+permissions:
+  contents: read
+jobs:
+  inspect-committed-image-bytes:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - run: python -m pip install 'Pillow==11.2.1'
+      - name: Decode actual pixels and emit review-only quality flags
+        run: python apps/gallery-archive/audit_stored_image_quality.py --out gallery-visual-quality-audit.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gallery-visual-quality-audit
+          path: gallery-visual-quality-audit.json
+          if-no-files-found: warn
+          retention-days: 14
