@@ -64,10 +64,9 @@ def scoped_generic_html(raw,page,model):
     candidates=[]
     for node in article.css('img,source'):
         # Do not inherit outer BODY class, e.g. body.sidebar-right.
-        ancestors=node.xpath('ancestor::*')
         bad=False
-        for ancestor in ancestors:
-            if ancestor.root is article.root:break
+        for ancestor in node.root.iterancestors():
+            if ancestor is article.root:break
             if any(re.search(r'related|recommend|comment|sidebar|advert',c,re.I)
                    for c in ancestor.attrib.get('class','').split()):
                 bad=True
