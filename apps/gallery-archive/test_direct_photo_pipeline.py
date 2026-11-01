@@ -1,4 +1,5 @@
 import hashlib
+import importlib.util
 from io import BytesIO
 import json
 from pathlib import Path
@@ -34,6 +35,8 @@ class DirectTests(unittest.TestCase):
             '<h1>Mimmi</h1>', 'https://teapawt.net/Mimmi_official','mimmi',
             [],[],scrapy_extractor=extractor)[0],[])
 
+    @unittest.skipUnless(importlib.util.find_spec('scrapy') is not None,
+                         'Real Scrapy test requires the Scrapy dependency')
     def test_real_scrapy_discovered_image_enters_individual_storage_pipeline(self):
         from unittest.mock import patch
         with tempfile.TemporaryDirectory() as d:
