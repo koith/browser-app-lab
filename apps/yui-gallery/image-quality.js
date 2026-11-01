@@ -43,8 +43,8 @@ function preferred(previous,candidate){
  const prevDetail=detail(previous),candDetail=detail(candidate);
  // A >= 70% pixel jump without a comparable byte/detail increase is a
  // probable resample, not guaranteed extra optical information.
- if(candPx>=prevPx*1.7&&bytes(candidate)<=bytes(previous)*1.10&&candDetail<=prevDetail*1.12)return previous;
- if(prevPx>=candPx*1.7&&bytes(previous)<=bytes(candidate)*1.10&&prevDetail<=candDetail*1.12)return candidate;
+ if(candPx>=prevPx*1.7&&bytes(candidate)<=bytes(previous)*1.10&&!original(candidate))return previous;
+ if(prevPx>=candPx*1.7&&bytes(previous)<=bytes(candidate)*1.10&&!original(previous))return candidate;
  if(candDetail>prevDetail*1.15)return candidate;
  if(prevDetail>candDetail*1.15)return previous;
  // Comparable effective detail: retain better evidence of source bits,
