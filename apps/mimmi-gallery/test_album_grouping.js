@@ -56,3 +56,18 @@ const other={id:'not-the-same-work',title:'[AI Enhanced] Mimmi Original Photoboo
  assert.equal(combine([saved,ai],{[id]:target},evidence).albums.length,2);
 }
 console.log('MIMMI_FULL_ALBUM_GROUPING_NO_LOST_IMAGE_BYTES_AND_ORIGINAL_MEDIA_NUMBERS_PASS');
+
+
+// An exact SHA-subset is the very same set of stored frames regardless of album-size ratio.
+{
+ const assert=require('assert');const {combine}=require('./album-grouping.js');
+ const big={id:'big',title:'A',images:Array.from({length:12},(_,i)=>({number:i+1,sha256:String(i).padStart(64,'a')}))};
+ const sub={id:'sub',title:'A',images:big.images.slice(0,10).map(p=>({...p}))};
+ const result=combine([big,sub],{sub:'big'});
+ assert.strictEqual(result.albums.length,1);
+ assert.strictEqual(result.afterCount,12);
+ const different={id:'different',title:'A',images:[...big.images.slice(0,9),{number:10,sha256:'f'.repeat(64)}]};
+ assert.strictEqual(combine([big,different],{different:'big'}).albums.length,2,
+  'A non-subset cannot bypass existing size and provenance requirements');
+ console.log('EXACT_SHA_SUBSET_ALIAS_SAFETY_PASS');
+}
