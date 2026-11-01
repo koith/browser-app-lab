@@ -141,8 +141,10 @@
  * cube stays in the DOM but is transparent while the original loads; it is
  * shown again only if the original PNG fails (class removed in JS). */
 #game .leaf-fall-piece .leaf-fall-original-d6{display:none}
+#game .leaf-fall-piece .leaf-fall-original-d4{display:none}
 #game .leaf-fall-piece.leaf-fall-original .leaf-fall-cube{opacity:0}
-#game .leaf-fall-piece.leaf-fall-original .leaf-fall-original-d6{
+#game .leaf-fall-piece.leaf-fall-original .leaf-fall-original-d6,
+#game .leaf-fall-piece.leaf-fall-original .leaf-fall-original-d4{
  display:block;position:absolute;left:50%;bottom:0;
  transform:translateX(-50%) scaleY(-1);
  image-rendering:pixelated;pointer-events:none;

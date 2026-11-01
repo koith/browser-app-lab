@@ -1,0 +1,326 @@
+[
+  {
+    "pak": "OBS.pak",
+    "member": "1104.obs",
+    "score": 1.0,
+    "frames": 16
+  },
+  {
+    "pak": "OBS.pak",
+    "member": "1105.obs",
+    "score": 1.0,
+    "frames": 16
+  },
+  {
+    "pak": "OBS.pak",
+    "member": "1106.obs",
+    "score": 1.0,
+    "frames": 16
+  },
+  {
+    "pak": "OBS.pak",
+    "member": "1108.obs",
+    "score": 1.0,
+    "frames": 16
+  },
+  {
+    "pak": "OBS.pak",
+    "member": "1109.obs",
+    "score": 1.0,
+    "frames": 16
+  },
+  {
+    "pak": "OBS.pak",
+    "member": "1110.obs",
+    "score": 1.0,
+    "frames": 48
+  },
+  {
+    "pak": "OBS.pak",
+    "member": "1147.obs",
+    "score": 1.0,
+    "frames": 21
+  },
+  {
+    "pak": "OBS.pak",
+    "member": "1160.obs",
+    "score": 1.0,
+    "frames": 20
+  },
+  {
+    "pak": "OBS.pak",
+    "member": "1177.obs",
+    "score": 1.0,
+    "frames": 8
+  },
+  {
+    "pak": "OBS.pak",
+    "member": "1187.obs",
+    "score": 1.0,
+    "frames": 14
+  },
+  {
+    "pak": "OBS.pak",
+    "member": "1190.obs",
+    "score": 1.0,
+    "frames": 4
+  },
+  {
+    "pak": "OBS.pak",
+    "member": "1193.obs",
+    "score": 1.0,
+    "frames": 3
+  },
+  {
+    "pak": "OBS.pak",
+    "member": "1223.obs",
+    "score": 1.0,
+    "frames": 22
+  },
+  {
+    "pak": "OBS.pak",
+    "member": "1224.obs",
+    "score": 1.0,
+    "frames": 1
+  },
+  {
+    "pak": "OBS2.pak",
+    "member": "1223.obs",
+    "score": 1.0,
+    "frames": 22
+  },
+  {
+    "pak": "OBS2.pak",
+    "member": "1224.obs",
+    "score": 1.0,
+    "frames": 1
+  },
+  {
+    "pak": "OBS2.pak",
+    "member": "1238.obs",
+    "score": 1.0,
+    "frames": 5
+  },
+  {
+    "pak": "OBS2.pak",
+    "member": "1243.obs",
+    "score": 0.933,
+    "frames": 15
+  },
+  {
+    "pak": "OBS.pak",
+    "member": "1155.obs",
+    "score": 0.922,
+    "frames": 77
+  },
+  {
+    "pak": "OBS.pak",
+    "member": "1142.obs",
+    "score": 0.92,
+    "frames": 25
+  },
+  {
+    "pak": "OBS.pak",
+    "member": "1133.obs",
+    "score": 0.895,
+    "frames": 19
+  },
+  {
+    "pak": "OBS3.pak",
+    "member": "1133.obs",
+    "score": 0.895,
+    "frames": 19
+  },
+  {
+    "pak": "OBS2.pak",
+    "member": "1249.obs",
+    "score": 0.857,
+    "frames": 21
+  },
+  {
+    "pak": "OBS.pak",
+    "member": "1028.obs",
+    "score": 0.784,
+    "frames": 37
+  },
+  {
+    "pak": "OBS.pak",
+    "member": "1043.obs",
+    "score": 0.757,
+    "frames": 37
+  },
+  {
+    "pak": "OBS.pak",
+    "member": "1146.obs",
+    "score": 0.75,
+    "frames": 4
+  },
+  {
+    "pak": "OBS2.pak",
+    "member": "1246.obs",
+    "score": 0.75,
+    "frames": 12
+  },
+  {
+    "pak": "OBS.pak",
+    "member": "1079.obs",
+    "score": 0.73,
+    "frames": 37
+  },
+  {
+    "pak": "OBS3.pak",
+    "member": "1264.obs",
+    "score": 0.718,
+    "frames": 39
+  },
+  {
+    "pak": "OBS3.pak",
+    "member": "1269.obs",
+    "score": 0.714,
+    "frames": 14
+  },
+  {
+    "pak": "OBS.pak",
+    "member": "1068.obs",
+    "score": 0.703,
+    "frames": 37
+  },
+  {
+    "pak": "OBS.pak",
+    "member": "1070.obs",
+    "score": 0.676,
+    "frames": 37
+  },
+  {
+    "pak": "OBS.pak",
+    "member": "1153.obs",
+    "score": 0.676,
+    "frames": 34
+  },
+  {
+    "pak": "OBS.pak",
+    "member": "0074.obs",
+    "score": 0.667,
+    "frames": 6
+  },
+  {
+    "pak": "OBS.pak",
+    "member": "1096.obs",
+    "score": 0.667,
+    "frames": 3
+  },
+  {
+    "pak": "OBS2.pak",
+    "member": "1229.obs",
+    "score": 0.667,
+    "frames": 9
+  },
+  {
+    "pak": "OBS3.pak",
+    "member": "1254.obs",
+    "score": 0.647,
+    "frames": 34
+  },
+  {
+    "pak": "OBS.pak",
+    "member": "1150.obs",
+    "score": 0.636,
+    "frames": 33
+  },
+  {
+    "pak": "OBS.pak",
+    "member": "1156.obs",
+    "score": 0.632,
+    "frames": 38
+  },
+  {
+    "pak": "OBS.pak",
+    "member": "1025.obs",
+    "score": 0.622,
+    "frames": 37
+  },
+  {
+    "pak": "OBS.pak",
+    "member": "1058.obs",
+    "score": 0.622,
+    "frames": 37
+  },
+  {
+    "pak": "OBS.pak",
+    "member": "1067.obs",
+    "score": 0.622,
+    "frames": 37
+  },
+  {
+    "pak": "OBS.pak",
+    "member": "1102.obs",
+    "score": 0.6,
+    "frames": 5
+  },
+  {
+    "pak": "OBS2.pak",
+    "member": "1211.obs",
+    "score": 0.6,
+    "frames": 45
+  },
+  {
+    "pak": "OBS.pak",
+    "member": "1026.obs",
+    "score": 0.595,
+    "frames": 37
+  },
+  {
+    "pak": "OBS.pak",
+    "member": "1062.obs",
+    "score": 0.568,
+    "frames": 37
+  },
+  {
+    "pak": "OBS3.pak",
+    "member": "1266.obs",
+    "score": 0.562,
+    "frames": 32
+  },
+  {
+    "pak": "OBS2.pak",
+    "member": "1218.obs",
+    "score": 0.553,
+    "frames": 47
+  },
+  {
+    "pak": "OBS.pak",
+    "member": "1087.obs",
+    "score": 0.538,
+    "frames": 13
+  },
+  {
+    "pak": "OBS2.pak",
+    "member": "1242.obs",
+    "score": 0.538,
+    "frames": 13
+  },
+  {
+    "pak": "OBS3.pak",
+    "member": "1263.obs",
+    "score": 0.533,
+    "frames": 45
+  },
+  {
+    "pak": "OBS.pak",
+    "member": "1195.obs",
+    "score": 0.5,
+    "frames": 6
+  },
+  {
+    "pak": "OBS.pak",
+    "member": "1196.obs",
+    "score": 0.5,
+    "frames": 2
+  },
+  {
+    "pak": "OBS2.pak",
+    "member": "1217.obs",
+    "score": 0.5,
+    "frames": 42
+  }
+]

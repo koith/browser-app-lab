@@ -1,4 +1,6 @@
 /* Dice move=2 requires D4 + D4, not two painted D6 cubes.
+ * Original 2002 1223.obs D4 raster frames ARE recovered and preferred
+ * by dice-fall.js; this WEB tetra is used only on source-image failure.
  * The original 3D client mesh/animation is not recovered; this fallback
  * now contains FOUR actual independent CSS-3D triangular planes rather
  * than a single flat triangle with a switched result label.

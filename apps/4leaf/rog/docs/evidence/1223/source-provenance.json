@@ -1,0 +1,46 @@
+{
+  "artifactId": 13077121974,
+  "sourceRunId": 41290777900,
+  "archiveSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+  "selected": [
+    {
+      "file": "members-OBS-1223.png",
+      "sha256": "41697a8363dcad329a57f2ed0dd2381c9385bb246a8c8b6d04ae3e29321b1006",
+      "bytes": 45280,
+      "pathInArtifact": "members/OBS/1223.png"
+    },
+    {
+      "file": "members-OBS2-1223.png",
+      "sha256": "41697a8363dcad329a57f2ed0dd2381c9385bb246a8c8b6d04ae3e29321b1006",
+      "bytes": 45280,
+      "pathInArtifact": "members/OBS2/1223.png"
+    },
+    {
+      "file": "members-OBS-1223.json",
+      "sha256": "e2d448a1632adc722b3463a2a8e529bc95960f05c6e4b9e0bb6dd28f9bf2c753",
+      "bytes": 5701,
+      "pathInArtifact": "members/OBS/1223.json"
+    },
+    {
+      "file": "members-OBS2-1223.json",
+      "sha256": "c900457b6ba377aa4e7cfcf17e0288d19d093db9f16eaedd985f02ff24cb4781",
+      "bytes": 5702,
+      "pathInArtifact": "members/OBS2/1223.json"
+    }
+  ],
+  "matchingCandidates": [
+    {
+      "pak": "OBS.pak",
+      "member": "1223.obs",
+      "score": 1.0,
+      "frames": 22
+    },
+    {
+      "pak": "OBS2.pak",
+      "member": "1223.obs",
+      "score": 1.0,
+      "frames": 22
+    }
+  ],
+  "warning": "OBS contact sheets are candidate evidence, NOT proof of 3D D4 original mesh or exact frame-to-result mapping"
+}

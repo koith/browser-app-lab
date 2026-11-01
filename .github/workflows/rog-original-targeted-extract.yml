@@ -1,7 +1,7 @@
-name: 4LEAF targeted original extract (D6, score numerals, action evidence, D4 search)
+name: 4LEAF targeted original extract (D4, D6, score numerals and action evidence)
 # Runs the SHA1-verified 2002 client through tools/extract-targeted-original-frames.py.
-# Commits ONLY apps/4leaf/rog/original/OBS/ui/* (the two UI members the game
-# uses: 1171 D6 and 1167 score numerals) to the pushed non-main branch.
+# Commits ONLY original 2D UI members 1171 D6, 1167 score numerals and
+# visually verified 1223 D4 sprite frames to the pushed non-main branch.
 # Per-member geometry, contact sheets, 37-frame action GIFs and D4 candidates
 # go to a short-lived artifact for review, never to the repository.
 on:
@@ -77,6 +77,13 @@ jobs:
                       s = c[side]
                       if s.get('old'):
                           print(k, c['index'], side, json.dumps(s))
+          assert r['ui']['1223']['declared'] == 22 and r['ui']['1223']['written'] == 22
+          manifest_text = open('apps/4leaf/rog/original/OBS/ui/manifest.js').read()
+          manifest = json.loads(manifest_text.split('window.ORIGINAL_LEAF_UI_FRAMES=',1)[1].rsplit(';',1)[0])
+          actual_sha = manifest['1223']['sourceSHA256']
+          print('D4_1223_ACTUAL_SOURCE_SHA256', actual_sha)
+          assert actual_sha == 'f6f9792b1fdfa6185cfc89cb8e44be4bbdaf69b7d5cc3b792868354fc8a28f89', 'D4 source hash changed'
+          print('VERIFIED_ORIGINAL_1223_D4_ALL_22_SOURCE_FRAMES')
           print('UNPARSED', json.dumps(r['unparsedMembers']))
           print('D4_CANDIDATES', open('/tmp/leaf-targeted/d4-candidates.json').read()[:2000])
           PY
@@ -91,5 +98,12 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898699+github-actions[bot]@users.noreply.github.com'
           git add apps/4leaf/rog/original/OBS/ui
-          git diff --cached --quiet || git commit -m 'data(4leaf): original 1171 D6 and 1167 numeral frames (written-run alpha, SHA-verified client)'
-          git push || echo 'push skipped'
+          git diff --cached --quiet || git commit -m 'data(4leaf): original 1223 D4 22 frames plus 1171 D6 and 1167 numerals (SHA1-verified)'
+          for attempt in 1 2 3; do
+            git fetch origin "$GITHUB_REF_NAME"
+            git rebase "origin/$GITHUB_REF_NAME"
+            if git push origin "HEAD:refs/heads/$GITHUB_REF_NAME"; then exit 0; fi
+            sleep 3
+          done
+          echo 'ERROR: original asset push rejected after three rebase attempts' >&2
+          exit 1

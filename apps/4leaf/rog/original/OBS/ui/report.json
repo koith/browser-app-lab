@@ -634,6 +634,211 @@
      }
     }
    ]
+  },
+  "1223": {
+   "declared": 22,
+   "written": 22,
+   "allWritten": true,
+   "regression": [
+    {
+     "index": 0,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 1,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 2,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 3,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 4,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 5,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 6,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 7,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 8,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 9,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 10,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 11,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 12,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 13,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 14,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 15,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 16,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 17,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 18,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 19,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 20,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    },
+    {
+     "index": 21,
+     "vsLegacyBulk": {
+      "old": null
+     },
+     "vsCorrected": {
+      "old": null
+     }
+    }
+   ]
   }
  },
  "members": 245,
@@ -663,5 +868,5 @@
   }
  ],
  "actionGifs": 66,
- "d4CandidateCount": 54
+ "d4CandidateCount": 53
 }
