@@ -117,7 +117,7 @@ def hits_from_html(html, engine):
 
 def title_supported(lead, result):
     text = compact(result.get('title', '') + ' ' + result.get('snippet', ''))
-    if not MODEL_RE.search(text):
+    if not MODEL_RE.search(result.get('title', '') + ' ' + result.get('snippet', '')):
         return False
     if lead['series'].casefold() == 'artgravia':
         return 'artgravia' in text and bool(re.search(
