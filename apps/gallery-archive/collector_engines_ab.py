@@ -35,8 +35,8 @@ SOURCES=[
     {'model':'mimmi','work':'pixibb-my-small-bird','page':'https://sexy.pixibb.com/mimmi-vol-2-my-small-bird-135-photos-sexy-girl/'},
     {'model':'mimmi','work':'v2ph-public','page':'https://www.v2ph.com/album/a54385nz.html'},
 ]
-MAX_IMG_GET=55
-MAX_URLS_PER_ENGINE=35
+MAX_IMG_GET=90
+MAX_URLS_PER_ENGINE=90
 
 
 def safe_photo(raw):
@@ -55,7 +55,6 @@ def scoped_generic_html(raw,page,model):
     from scrapy.http import HtmlResponse
     response=HtmlResponse(url=page,body=raw,encoding='utf-8')
     heading=' '.join(response.css('h1::text,title::text').getall())
-    if not MODEL_PATTERNS[model].search(heading):return [],'no_model_heading'
     article=None
     for css in ('#powerbbsContent','.portfolio-content','.entry-content','article','main'):
         selected=response.css(css)
@@ -63,6 +62,8 @@ def scoped_generic_html(raw,page,model):
             article=selected[0]
             break
     if article is None:return [],'no_article'
+    identity=heading+' '+(' '.join(article.css('::text').getall()))
+    if not MODEL_PATTERNS[model].search(identity):return [],'no_model_context'
     candidates=[]
     for node in article.css('img,source'):
         # Do not inherit outer BODY class, e.g. body.sidebar-right.
