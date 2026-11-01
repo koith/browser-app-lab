@@ -49,6 +49,30 @@ def main():
         try:merge(again,before,"mimmi")
         except ValueError:pass
         else:raise AssertionError("Mismatched owner model was imported")
+        # Inflating width/height cannot overwrite genuine old photo bytes.
+        suspicious=photo('test-album',1,'upscaled',pixels=6000)
+        fake=stage/'fake-upscale';(fake/'metadata').mkdir(parents=True)
+        (fake/'metadata/catalog.json').write_text(json.dumps(catalog('yui',[suspicious])))
+        for key in ('key','preview'):
+            file=fake/suspicious[key];file.parent.mkdir(parents=True,exist_ok=True)
+            file.write_bytes(b'fake-but-high-dimensions'*250)
+        guarded=merge(fake,before,'yui')
+        assert guarded['upgraded_photos']==0 and guarded['lower_quality_rejected']==1
+        remains=json.loads((fake/'metadata/catalog.json').read_text())
+        assert remains['albums'][0]['images'][0]['sha256']==old['sha256']
+        # A genuine same-cut pixel comparison is accepted instead.
+        better=photo('test-album',1,'optically-better',pixels=500)
+        better['higher_visual_quality_replacement']=True
+        better['visual_quality']={'confidence':'measured','same_photo_verified':True,
+           'relation':'higher','compared_to_sha256':old['sha256']}
+        verified=stage/'verified-optics';(verified/'metadata').mkdir(parents=True)
+        (verified/'metadata/catalog.json').write_text(json.dumps(catalog('yui',[better])))
+        for key in ('key','preview'):
+            file=verified/better[key];file.parent.mkdir(parents=True,exist_ok=True)
+            file.write_bytes(b'actual-visually-verified-bytes'*250)
+        improved=merge(verified,before,'yui')
+        assert improved['upgraded_photos']==1 and improved['new_photos']==0
+
         print("TERABOX_INCREMENTAL_PRESERVES_PREVIOUS_PHOTOS_AND_NUMBER_ORDER_PASS")
 
 if __name__=="__main__":
