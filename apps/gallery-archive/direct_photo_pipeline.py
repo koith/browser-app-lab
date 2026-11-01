@@ -69,6 +69,56 @@ def rotated_registered_page_queue(primary, source_pages, max_pages, page_cycle=0
     return [first]+tail[offset:]+tail[:offset]
 
 
+
+def _photo_asset_group(url):
+    """Canonicalize observed resized renditions without inventing a photo URL."""
+    p=urlsplit(url)
+    canonical=re.sub(r'-\d{2,5}x\d{2,5}(?=\.(?:jpe?g|png|webp)$)',
+                     '',p.path,flags=re.I)
+    return (p.hostname,canonical)
+
+
+def verified_alternative_candidates(raw,page,model,baseline,known_urls,
+                                    rendered=(),scrapy_extractor=None):
+    """Turn real Scrapy/Chromium findings into bounded *download candidates*.
+
+    Existing owner/historical asset identities take precedence. Discovery is
+    deliberately unavailable for creator timelines and legacy curated-only
+    works; their weaker identity evidence must not silently become originals.
+    All accepted bytes still require inspect(), owner SHA readback and gallery QA.
+    """
+    if not safe_page(page) or urlsplit(page).hostname=='teapawt.net':
+        return [],'specialized_author_only'
+    soup=BeautifulSoup(raw,'html.parser')
+    heading=' '.join(tag.get_text(' ',strip=True) for tag in soup.select('h1,title'))
+    if not MODEL_PATTERNS[model].search(heading):
+        return [],'no_headline_model_identity'
+    if scrapy_extractor is None:
+        from collector_full_compare import independent_scrapy_extract
+        scrapy_extractor=independent_scrapy_extract
+    discovered,status=scrapy_extractor(raw,page,model)
+    from collector_full_compare import alternative_safe_photo
+    prior={_photo_asset_group(u) for u in list(baseline)+list(known_urls)}
+    groups={}
+    for u in list(discovered)+list(rendered):
+        if not alternative_safe_photo(u):
+            continue
+        approved,_=allowed_url(u)
+        if not approved:continue
+        p=urlsplit(u)
+        if p.hostname in ('djawaphoto.com','www.djawaphoto.com') and not p.path.startswith('/wp-content/uploads/'):
+            continue
+        key=_photo_asset_group(u)
+        if key in prior:continue
+        # Prefer a publicly observed native asset over a WordPress size variant
+        # of that SAME URL, never fabricate a suffix-free URL.
+        resized=bool(re.search(r'-\d{2,5}x\d{2,5}(?=\.)',p.path,re.I))
+        rank=(not resized,len(p.path))
+        if key not in groups or rank>groups[key][0]:
+            groups[key]=(rank,u)
+    return [x[1] for x in groups.values()],status
+
+
 def same_variant(old_raw,new_raw):
     """Same observed public asset only; never identify people or merge works."""
     with Image.open(BytesIO(old_raw)) as old, Image.open(BytesIO(new_raw)) as new:
@@ -320,7 +370,7 @@ def atomic_bytes(path,data):
     tmp=path.with_name(path.name+'.pending');tmp.write_bytes(data);tmp.replace(path)
 
 
-def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_only=False,album_ids=None,page_cycle=0):
+def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_only=False,album_ids=None,page_cycle=0,alternative_engines=False,render_budget=8):
     root=Path(root);out=Path(out)
     if owner.get('model')!=model or owner.get('schema_version')!=1 or not owner.get('albums'):
         raise ValueError('Current owner catalog required; do not assume empty archive')
@@ -366,6 +416,15 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                 if a.get('visual_reference_required'):prior.update(a)
             else:books[a['id']]=dict(a)
     client=client or PublicSession(delay=.8)
+    if not isinstance(render_budget,int) or not 0<=render_budget<=50:
+        raise ValueError('Invalid bounded Chromium page budget')
+    browser=None
+    if alternative_engines:
+        import scrapy  # Real extractor dependency is required, not a silent fallback
+    if alternative_engines and render_budget:
+        from collector_full_compare import LiveBrowser
+        browser=LiveBrowser(enabled=True)
+    rendered_pages=0
     results=[];new_albums=[];new_total=0;downloaded_now=0;seen_urls=set();seen_sha=set(saved_sha)
     resumed=defaultdict(list)
     journal=out/'journal.jsonl'
@@ -407,6 +466,11 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                 if k not in ('observed_filename_numbers','saved_cut_correspondence')},ensure_ascii=False),flush=True)
             continue
         images=list(resumed.get(aid,[]));occupied.update(p['number'] for p in images);next_number=max(occupied,default=0)+1
+        alt_photo_urls=set()
+        alt_candidate_count=0
+        alt_new_staged=0
+        known_work_urls=[url for work_id,url in historic if work_id==aid]
+
         queue=rotated_registered_page_queue(book['source'],[u for u in book.get('source_pages',[]) if safe_page(u)],max_pages,page_cycle);visited=set();errors=[];candidate_count=0;unreviewed_count=0
         while queue and len(visited)<max_pages and new_total<max_new:
             page=queue.pop(0)
@@ -414,9 +478,34 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
             visited.add(page)
             try:
                 response=client.get(page);urls,more,status=page_images(response.content,page,model)
+                original_urls=list(urls)
+                # An explicit login, wrong work/volume, or missing identity is
+                # still a hard reject. Alternative parsers do not bypass it.
+                eligible=(alternative_engines and not book.get('curated_images_only')
+                          and status in ('scoped_public_page','no_public_photos','unscoped_page_rejected')
+                          and (urlsplit(page).hostname not in ('showartx.net','www.nicesss.com')
+                               or status=='scoped_public_page'))
+                if eligible:
+                    from collector_full_compare import pagination_from_html
+                    more=list(dict.fromkeys(list(more)+pagination_from_html(
+                        response.content,page,book['source'])))
+                    rendered=[]
+                    if browser is not None and rendered_pages<render_budget:
+                        rendered_pages+=1
+                        rendered,browser_status=browser.extract(page,model)
+                    try:
+                        alternative,engine_status=verified_alternative_candidates(
+                            response.content,page,model,original_urls,known_work_urls,
+                            rendered=rendered)
+                        alt_candidate_count+=len(alternative)
+                        alt_photo_urls.update(alternative)
+                        urls=list(dict.fromkeys(list(urls)+alternative))
+                    except (ImportError,ValueError,TypeError) as e:
+                        errors.append({'page':page,'reason':'alternative_engine_'+type(e).__name__})
                 for p in more:
                     if p not in visited and p not in queue:queue.append(p)
-                if status!='scoped_public_page':errors.append({'page':page,'reason':status});continue
+                if status!='scoped_public_page' and not (eligible and urls):
+                    errors.append({'page':page,'reason':status});continue
             except Exception as e:
                 errors.append({'page':page,'reason':type(e).__name__,**public_failure(e)});continue
             for url in urls:
@@ -475,15 +564,19 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                          'preview_sha256':hashlib.sha256(preview).hexdigest(),'preview_bytes':len(preview),
                          'numbering_provenance':'published_source_order' if old else 'archive_append_order_not_publisher_number'}
                     images.append(row);new_total+=1;downloaded_now+=1
+                    if url in alt_photo_urls:alt_new_staged+=1
                     with journal.open('a') as log:log.write(json.dumps({'album':aid,'number':number,'source':url,'photo':row,'remote_verified':False})+'\n')
                 except Exception as e:errors.append({'number':number,'url':url,'reason':type(e).__name__,**public_failure(e)})
         if images:new_albums.append({'id':aid,'title':book.get('title') or aid,'publisher':book.get('publisher'),
             'expected':None,'complete':False,'images':images})
         results.append({'id':aid,'engine':'requests_scoped_public_pagination','pages':len(visited),
                         'published_image_candidates':candidate_count,'individual_files_saved':len(images),
+                        'alternative_engine_url_candidates':alt_candidate_count,
+                        'new_staged_files_from_alternative_engines':alt_new_staged,
                         'unreviewed_legacy_image_candidates_skipped':unreviewed_count,
                         'failures':errors,'cloud_readback_pass':0,'gallery_open_pass':0})
         print('DIRECT_INDIVIDUAL_PHOTO_COLLECTION',model,aid,'saved',len(images),'failures',len(errors),flush=True)
+    if browser is not None:browser.close()
     catalog={'schema_version':1,'model':model,'storage':'owner-private-terabox-sha-verified-bytes','albums':new_albums}
     metadata=out/'metadata';metadata.mkdir(parents=True,exist_ok=True)
     (metadata/'catalog.json').write_text(json.dumps(catalog,ensure_ascii=False,indent=2)+'\n')
@@ -491,7 +584,15 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
             'downloaded_new_this_invocation':downloaded_now,'resumed_verified_staged_files':new_total-downloaded_now,
             'new_photo_positions':sum(not p.get('higher_resolution_replacement') for a in new_albums for p in a['images']),
             'higher_resolution_replacements':sum(bool(p.get('higher_resolution_replacement')) for a in new_albums for p in a['images']),
-            'remote_verified_files':0,'gallery_open_verified_files':0,'photo_bundles_created':0,'results':results}
+            'remote_verified_files':0,'gallery_open_verified_files':0,'photo_bundles_created':0,
+            'alternative_engines_enabled':bool(alternative_engines),
+            'chromium_page_visits':rendered_pages,
+            'alternative_candidate_url_groups':sum(r.get('alternative_engine_url_candidates',0) for r in results),
+            'alternative_staged_new_files':sum(r.get('new_staged_files_from_alternative_engines',0) for r in results),
+            'alternative_engine_page_errors':sum(
+                str(error.get('reason','')).startswith('alternative_engine_')
+                for r in results for error in r.get('failures',[]) if isinstance(error,dict)),
+            'results':results}
     (metadata/'collection-audit.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
     # Record Hydrus-inspired SHA/visual duplicate candidates from actual bytes.
     # This never changes the catalogue or blocks safe original-file publication.
@@ -508,7 +609,7 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
 
 
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('--root',type=Path,default=ROOT);p.add_argument('--model',choices=['mimmi','yui'],required=True);p.add_argument('--owner',type=Path,required=True);p.add_argument('--out',type=Path,required=True);p.add_argument('--max-new',type=int,default=180);p.add_argument('--max-pages',type=int,default=24);p.add_argument('--focused-only',action='store_true');p.add_argument('--album-id',action='append',default=[]);p.add_argument('--page-cycle',type=int,default=0);a=p.parse_args()
+    p=argparse.ArgumentParser();p.add_argument('--root',type=Path,default=ROOT);p.add_argument('--model',choices=['mimmi','yui'],required=True);p.add_argument('--owner',type=Path,required=True);p.add_argument('--out',type=Path,required=True);p.add_argument('--max-new',type=int,default=180);p.add_argument('--max-pages',type=int,default=24);p.add_argument('--focused-only',action='store_true');p.add_argument('--album-id',action='append',default=[]);p.add_argument('--page-cycle',type=int,default=0);p.add_argument('--alternative-engines',action='store_true');p.add_argument('--render-budget',type=int,default=8);a=p.parse_args()
     if not 1<=a.max_new<=500 or not 1<=a.max_pages<=60:raise SystemExit('Bounded collection budget required')
-    report=collect(a.root,a.model,json.loads(a.owner.read_text()),a.out,a.max_new,a.max_pages,focused_only=a.focused_only,album_ids=a.album_id,page_cycle=a.page_cycle)
+    report=collect(a.root,a.model,json.loads(a.owner.read_text()),a.out,a.max_new,a.max_pages,focused_only=a.focused_only,album_ids=a.album_id,page_cycle=a.page_cycle,alternative_engines=a.alternative_engines,render_budget=a.render_budget)
     print('DIRECT_FILE_COLLECTION_COMPLETE',report['model'],report['new_local_individual_files'],'REMOTE_VERIFIED',0,'GALLERY_VERIFIED',0)

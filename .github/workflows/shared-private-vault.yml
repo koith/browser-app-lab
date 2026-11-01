@@ -24,7 +24,7 @@ jobs:
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
       - name: Install free individual-image validators
-        run: python -m pip install requests beautifulsoup4 Pillow
+        run: python -m pip install requests beautifulsoup4 Pillow Scrapy
       - name: Verify unchanged original bytes, resume, corruption refusal and no photo bundles
         run: |
           python apps/gallery-archive/test_direct_photo_pipeline.py
