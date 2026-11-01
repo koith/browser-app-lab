@@ -9,16 +9,11 @@
         "SWTB"
       ],
       "official_url": "https://x.com/sweetbox_s2",
-      "logo": {
-        "path": "publisher-logos/sweetbox.jpg",
+      "logo": null,
+      "logo_evidence": {
         "source_url": "https://pbs.twimg.com/profile_images/1484168345624911873/ovc1rM28_400x400.jpg",
-        "origin_page": "https://teapawt.net/sweetbox_s2",
-        "sha256": "472098bd9cb17934301a6986b2723d63b0bf17345bf9b8cb2cff8d134606c445",
-        "bytes": 21859,
-        "verified_official": true,
-        "theme": "dark",
         "asset_role": "publisher_profile_branding",
-        "evidence": "Public @sweetbox_s2 photographer profile uses this TAEHYEONG PICTURES brand image. It is a profile brand image, not a separately verified SWEETBOX wordmark."
+        "reason": "Identity/profile/parent-brand visual is not verified to be the exact named publisher wordmark"
       }
     },
     {
@@ -35,7 +30,8 @@
         "sha256": "a1dc6c086cbd52697de00a879308c73a87ab5f2a16fb786d32713651aaaab118",
         "bytes": 18802,
         "verified_official": true,
-        "theme": "light"
+        "theme": "light",
+        "asset_role": "official_publisher_logo"
       }
     },
     {
@@ -45,15 +41,11 @@
         "MilkyBomb"
       ],
       "official_url": "https://milkybomb.gumroad.com/",
-      "logo": {
-        "path": "publisher-logos/milkybomb.jpg",
+      "logo": null,
+      "logo_evidence": {
         "source_url": "https://public-files.gumroad.com/brj8zxyjd1dm16lzfhg53312cz97",
-        "origin_page": "https://milkybomb.gumroad.com/",
-        "sha256": "4391daa59432be5d00212a10f7db562cd3cc8392bbbf9e990c7e9bb6f768e7fa",
-        "bytes": 29820,
-        "verified_official": true,
-        "theme": "light",
-        "asset_role": "official_store_identity_icon"
+        "asset_role": "official_store_identity_icon",
+        "reason": "Identity/profile/parent-brand visual is not verified to be the exact named publisher wordmark"
       }
     },
     {
@@ -97,7 +89,8 @@
         "sha256": "d64a7c03e5be2184a3fb3a446dbecc39b451c841c35ca34b1e02d60740dd16a6",
         "bytes": 13372,
         "verified_official": true,
-        "theme": "dark"
+        "theme": "dark",
+        "asset_role": "official_publisher_logo"
       }
     },
     {
@@ -108,16 +101,11 @@
         "BCUT"
       ],
       "official_url": "https://bcut.maximkorea.net/creator/354",
-      "logo": {
-        "path": "publisher-logos/bcut.png",
+      "logo": null,
+      "logo_evidence": {
         "source_url": "https://seeklogo.com/images/M/maxim-logo-B237761956-seeklogo.com.png",
-        "origin_page": "https://seeklogo.com/vector-logo/89565/maxim-magazine",
-        "sha256": "3bebbe24b2450dbdab5445030676ea98c3ab6b394c9cb5bea6de67f032fdf78f",
-        "bytes": 8550,
-        "verified_official": true,
-        "theme": "light",
         "asset_role": "parent_publisher_brand_reference",
-        "evidence": "MAXIM is the parent publisher of bcut.maximkorea.net. This asset is the MAXIM publisher mark from a public brand reference, not a separately verified BCUT logotype."
+        "reason": "Identity/profile/parent-brand visual is not verified to be the exact named publisher wordmark"
       }
     },
     {
@@ -153,7 +141,8 @@
         "sha256": "f3cac2497eda69480b94faf8a4486a1c1b44ae2658df6342d2ed348a6293b685",
         "bytes": 24952,
         "verified_official": true,
-        "theme": "light"
+        "theme": "light",
+        "asset_role": "official_publisher_logo"
       }
     },
     {
@@ -171,9 +160,10 @@
         "sha256": "9f22b07f5c18642f997bf5ec1ea01d071eca64b3bc5ad0e07edc2948dc7ecdbb",
         "bytes": 5900,
         "verified_official": true,
-        "theme": "light"
+        "theme": "light",
+        "asset_role": "official_publisher_logo"
       }
     }
   ],
-  "logo_policy": "Only verified publisher brand assets; missing logos display a clearly labelled name fallback. Photograph hosts are not publishers."
+  "logo_policy": "Only verified first-party branding of the named publisher is displayed as its logo. Profile icons, unrelated photographers and parent-brand marks use a text-only label until the exact publisher identity is confirmed."
 }
