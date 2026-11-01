@@ -154,24 +154,32 @@ function rand(a){return Math.floor(Math.random()*a)}
 function diceN(n,sides){let values=[];for(let k=0;k<n;k++)values.push(d(sides));return {values,total:values.reduce((a,b)=>a+b,0)}}
 function syncMusic(){if(!soundOn){if(bgm)bgm.pause();return}const track=({sky:'00',city:'01',rooms:'02','dice-channels':'03',lobby:'03',shop:'04',game:'05','help-screen':'06'})[route]||'00';if(bgm&&bgmTrack===track){bgm.play().catch(()=>{});return}if(bgm)bgm.pause();bgm=new Audio('./music/'+track+'.mp3');bgm.loop=true;bgm.volume=.28;bgmTrack=track;bgm.play().catch(()=>{})}
 function sfx(freq=500,duration=.07){if(!soundOn)return;try{const AC=window.AudioContext||window.webkitAudioContext;audioCtx=audioCtx||new AC();const o=audioCtx.createOscillator(),g=audioCtx.createGain();o.type='triangle';o.frequency.value=freq;g.gain.setValueAtTime(.038,audioCtx.currentTime);g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+duration);o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+duration)}catch{}}
-function chat(who,message,type=''){
- const log=$('chat-log');
- // Native IMG/scrollButton.bmp up/down arrows navigate actual Dice chat
- // history. The former unconditional scrollTop=scrollHeight forced users
- // back to the last line whenever a GAME/SYSTEM message arrived (including
- // during a pending native-button click). Respect deliberate history scroll.
+// Single reader-preserving rule for ALL writers sharing the original
+// #chat-log: game messages, browser/central social chat and network peers.
+// New messages follow only when already at bottom. Retained log max differs
+// by writer; both authentic native scroll controllers update together.
+function appendChatLine(log,node,max=90){
+ if(!log||!node)return;
  const oldTop=log.scrollTop;
- const followLatest=log.scrollHeight-log.clientHeight-oldTop<=3;
+ const limit=Math.max(0,log.scrollHeight-log.clientHeight);
+ const followLatest=log.clientHeight===0||limit-oldTop<=3;
+ log.append(node);
+ let removedHeight=0;
+ while(log.childElementCount>max){
+  const first=log.firstElementChild;
+  removedHeight+=first.getBoundingClientRect().height;
+  first.remove();
+ }
+ log.scrollTop=followLatest?log.scrollHeight:Math.max(0,oldTop-removedHeight);
+ window.__LEAF_NATIVE_DICE_CHAT_SCROLL__?.refresh?.();
+ window.__LEAF_NATIVE_SCROLLBAR__?.update?.();
+}
+window.__LEAF_CHAT_APPEND__=appendChatLine;
+function chat(who,message,type=''){
  const line=document.createElement('div');line.className=type;
  const b=document.createElement('b');b.textContent=who+'　';
- line.append(b,document.createTextNode(String(message)));log.append(line);
- let removedHeight=0;
- while(log.children.length>90){
-  removedHeight+=log.firstElementChild.getBoundingClientRect().height;
-  log.firstElementChild.remove();
- }
- if(followLatest)log.scrollTop=log.scrollHeight;
- else log.scrollTop=Math.max(0,oldTop-removedHeight);
+ line.append(b,document.createTextNode(String(message)));
+ appendChatLine($('chat-log'),line,90);
 }
 function profileUI(){$('nick').textContent=profile.name;$('profile-name').textContent=profile.name;$('my-name').textContent=profile.name;$('gp').textContent=profile.gp.toLocaleString();$('shop-gp').textContent=profile.gp.toLocaleString();$('wins').textContent=profile.wins+'승';persist()}
 function navigate(id){if(!routeNames[id])return;route=id;if(id!=='game')$('app')?.classList.remove('dice-items-open');document.getElementById('app')?.classList.toggle('app-classic-dice',id==='game');$('app').classList.toggle('app-game',id==='game');query('.scene').forEach(s=>s.classList.toggle('hidden',s.id!==id));query('[data-route]').forEach(el=>el.classList.toggle('active',el.dataset.route===id));$('where').textContent=routeNames[id];$('chat-location').textContent=routeNames[id];if(id==='game'&&match){
@@ -468,7 +476,7 @@ function drawBoard(){
      // a row ahead ALWAYS paints over rows behind it. Reserve +1 for actors.
      const sourceY=dmp?dmp[1]:Math.round(PATH[i].y*100);
      const sourceX=dmp?dmp[0]:Math.round(PATH[i].x);
-     b.style.zIndex=String((sourceY*256+sourceX)*2);
+     b.style.zIndex=String((sourceY*256+sourceX)*8);
      const sourceArt=sourceTileGraphic(type,i);
      b.dataset.originalArt=sourceArt;
      b.style.setProperty('background','url("./original/Tiles/'+sourceArt+'.png") center / 100% 100% no-repeat','important');
@@ -589,7 +597,11 @@ function drawPawns(){
    // Actor stands above THEIR tile, but genuinely front-facing tiles may
    // occlude them. The original height/mesh code is not recovered; this uses
    // only verified DMP planar painter depth, not fabricated elevation.
-   const depth=Number.isFinite(platformDepth)?platformDepth+1:0;
+   // Reserve 8 depth slots for same-cell formations. Rear actors
+   // should paint behind the front row regardless of DOM player order.
+   const formationRows=Math.ceil(peers.length/columns);
+   const depth=Number.isFinite(platformDepth)?platformDepth+1+(formationRows-1-row):0;
+   pawn.dataset.formationRow=String(row);
    pawn.style.setProperty('--leaf-pawn-dmp-depth',String(depth));
    pawn.dataset.depthTile=String(p.position);
    pawn.dataset.dmpPainterDepth=String(depth);
@@ -1209,7 +1221,7 @@ function showBattleScene(attacker,defender,attack,defense,attackerPoints,defende
      // share the existing inferred rig/poses, not unrelated 4LEAF avatars.
      window.__LEAF_GENESIS_ACTORS__?.mount(actor,player,imageFor(player.team[0]));
      window.__LEAF_GENESIS_ACTORS__?.pose(actor,
-       panel.classList.contains('attacker')?'attack':'hurt',850);
+       panel.classList.contains('attacker')?'attack':'idle',850);
    }else{
      // Keeper mesh is not recovered. Do not impersonate it with savaNN.
      const placeholder=document.createElement('span');
@@ -1396,6 +1408,20 @@ function showBattleScene(attacker,defender,attack,defense,attackerPoints,defende
   });
   observer.observe(stage);observer.observe(nativePodiums);
  }
+ // The dice totals (not actor-side position) determine victory AFTER lunge.
+ // Historical hurt/victory poses are not recovered; labels stay UNVERIFIED.
+ const podiumOutcome=attackerPoints===defenderPoints?null
+  :attackerPoints>defenderPoints?'attacker':'defender';
+ stage.dataset.duelOutcome=podiumOutcome?podiumOutcome+'-wins':'none';
+ if(podiumOutcome)setTimeout(()=>{
+  if(!stage.isConnected)return;
+  for(const actor of stage.querySelectorAll('.leaf-battle-chessman')){
+   const side=actor.dataset.duelSide;
+   actor.dataset.duelResult=side===podiumOutcome?'win':'lose';
+   if(actor.dataset.chessmanId)window.__LEAF_GENESIS_ACTORS__?.pose(actor,
+    side===podiumOutcome?'victory':'hurt',side===podiumOutcome?1050:650);
+  }
+ },900);
  return stage;
 }
 function combat(attacker,defender,keeper=false){
