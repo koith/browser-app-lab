@@ -474,6 +474,17 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
             'higher_resolution_replacements':sum(bool(p.get('higher_resolution_replacement')) for a in new_albums for p in a['images']),
             'remote_verified_files':0,'gallery_open_verified_files':0,'photo_bundles_created':0,'results':results}
     (metadata/'collection-audit.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n')
+    # Record Hydrus-inspired SHA/visual duplicate candidates from actual bytes.
+    # This never changes the catalogue or blocks safe original-file publication.
+    try:
+        from perceptual_duplicate_audit import scan_stage
+        evidence=scan_stage(out)
+        (metadata/'perceptual-duplicate-evidence.json').write_text(
+            json.dumps(evidence,ensure_ascii=False,indent=2)+'\n')
+        print('STAGED_VISUAL_DUPLICATE_EVIDENCE',model,
+              evidence['files_scanned'],'candidates',len(evidence['review_pairs']),flush=True)
+    except (ValueError,OSError) as exc:
+        print('STAGED_VISUAL_DUPLICATE_AUDIT_UNAVAILABLE',type(exc).__name__,flush=True)
     return report
 
 
