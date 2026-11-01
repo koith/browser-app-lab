@@ -63,6 +63,9 @@ const {chromium,webkit}=require('playwright');
     const pawn=document.querySelector('#board-pawns .board-pawn[data-id="0"]');
     const idle=pawn.dataset.sourceFrameSequence;
     const image=pawn.querySelector('img.leaf-chess-original-obs');
+    // Front-only regression must not inherit a prior horizontal DMP
+    // vector from an unrelated real move.
+    pawn.dataset.travelFacing='toward';
     window.__LEAF_GENESIS_ACTORS__.poseByPlayer(match.players[0].id,'walk',900);
     const walking=pawn.dataset.sourceFrameSequence;
     const evidence=pawn.dataset.sourceActionEvidence;
@@ -82,7 +85,8 @@ const {chromium,webkit}=require('playwright');
    assert.equal(row.walking,id==='0042'?'25,30,25,30':'25,26,27,28,29,30',
     id+' forward-facing original source movement without a BACK 0..7 spin');
    assert.equal(row.continuity,'true');
-   assert.equal(row.attack,'25,18,18,25',id+' visually reviewed attack sequence with inferred WEB timing');
+   assert.equal(row.attack,id==='0040'?'25,31,33,35,25':'25,18,18,25',
+    id+' reviewed original source strike sequence with INFERRED WEB timing');
    assert.equal(row.hurt,'25',id+' unrecovered native hit direction must stay front, not jump to rear');
    assert.equal(row.victory,'25,30,25');
    assert.ok(row.evidence.includes('WEB-movement-and-FPS-inferred'));
