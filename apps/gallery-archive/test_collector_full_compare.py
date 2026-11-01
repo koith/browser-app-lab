@@ -66,6 +66,27 @@ def test():
         assert got['actual_public_images_decoded']==1,got
         assert got['new_private_originals_stored']==0,got
         assert got['extra_decoded_sha_not_in_baseline']==0,got
+        assert got['engine_page_statuses'].get('scrapy:independent_scrapy_selector')==2,got
+        assert 'scrapy:NameError' not in got['engine_page_statuses'],got
+        # If an image is already registered in a historical manifest, an
+        # alternative extractor rediscovering it is NOT a new photo.
+        known={**work,'direct_image_urls':[
+            'https://djawaphoto.com/wp-content/uploads/2026/09/sample-1.jpg']}
+        known_result=full.inspect_work(known,Client(),Browser(),max_pages=4,max_images=4)
+        assert known_result['extra_asset_groups_candidate_not_proven_distinct_cuts']==0,known_result
+        assert known_result['extra_decoded_sha_not_in_baseline']==0,known_result
+        class FakePage:
+            def goto(self,*args,**kwargs):
+                class Response:status=200
+                return Response()
+            def evaluate(self,*args):pass
+            def wait_for_timeout(self,*args):pass
+            def content(self):return html.decode()
+        real_chromium_parser=full.LiveBrowser()
+        real_chromium_parser.page=FakePage()
+        browser_urls,browser_status=real_chromium_parser.extract(base,'mimmi')
+        assert browser_status=='independent_scrapy_selector',(browser_status,browser_urls)
+        assert 'https://djawaphoto.com/wp-content/uploads/2026/09/sample-1.jpg' in browser_urls
         capped=full.inspect_work(work,Client(),Browser(),max_pages=1,max_images=1)
         assert 'max_pages_per_target' in capped['limits'],capped
     finally:full.gallery_dl_work=old
