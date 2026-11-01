@@ -158,6 +158,7 @@ footer{padding:15px 0 25px;justify-content:flex-end}
 </div>
 <script src="photo-vault.js"></script>
 <script src="owner-media.js"></script>
+<script src="image-quality.js?v=1"></script>
 <script src="gallery-labels.js?v=0.1.0-beta.10"></script>
 <script src="publishers.js?v=0.1.0-beta.13"></script>
 <script>
@@ -165,7 +166,7 @@ footer{padding:15px 0 25px;justify-content:flex-end}
 // The gallery itself is served by always-available GitHub Pages; never redirect to a sleeping Render instance.
 
 const $=id=>document.getElementById(id);
-let catalog=[],stored=[],localStored=[],remoteStored=[],ownerStored=[],vaultStored=[],albumAliases={},albumCovers={},publisherRegistry={publishers:[]},publisherWorkReferences=[],activePublisher=null,mode='albums',activeAlbum=null,viewerList=[],viewerIndex=0,detailAlbum=null;
+let catalog=[],stored=[],localStored=[],remoteStored=[],ownerStored=[],vaultStored=[],albumAliases={},albumCovers={},publisherRegistry={publishers:[]},publisherWorkReferences=[],activePublisher=null,mode='albums',activeAlbum=null,viewerList=[],viewerIndex=0,detailAlbum=null,ownerPhotoIndex=new Map(),detailRenderGeneration=0;
 function canonicalId(id){const original=id,seen=new Set();while(albumAliases[id]&&!seen.has(id)){seen.add(id);id=albumAliases[id]}return stored.some(a=>a.id===id)||!stored.some(a=>a.id===original)?id:original}
 const titleMap={'cn-huantuji':'幻图集 · Yui','cn-chaotuji':'潮图集 · Yui','cn-miaohuaying':'喵画影 · Yui','cn-yuntu8':'云图吧 · Yui','cn-wantuzhi-everyday':'Everyday Life','cn-yingyuge':'影语阁 · Yui','v04':'SWEETBOX · Teddy Bear'};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -185,7 +186,7 @@ function validImages(a){
 }
 function available(){return stored.filter(x=>validImages(x).length).sort((a,b)=>validImages(b).length-validImages(a).length)}
 function publisherGroups(){const known=new Set(catalog.flatMap(a=>[a.source,...(a.source_pages||[])].filter(Boolean)));const entries=[...catalog,...publisherWorkReferences.filter(a=>!known.has(a.source))];return YuiPublishers.groups(entries,publisherRegistry,YuiLabels.describe,validImages)}
-function setMode(m,publisher=null){mode=['albums','photos','all','publishers'].includes(m)?m:'albums';activePublisher=mode==='publishers'&&publisherGroups().some(g=>g.id===publisher)?publisher:null;activeAlbum=null;detailAlbum=null;document.body.classList.remove('detail-view');document.body.classList.toggle('publisher-view',!!activePublisher);$('detail').hidden=true;$('browse').hidden=false;const isPublisher=mode==='publishers';$('browse-mode').textContent=isPublisher?'발행처':'화보';$('browse-toggle').dataset.mode=isPublisher?'publishers':'albums';$('browse-toggle').setAttribute('aria-pressed',String(isPublisher));$('browse-toggle').setAttribute('aria-label',isPublisher?'발행처 목록 · 화보 목록으로 전환':'화보 목록 · 발행처 목록으로 전환');render()}
+function setMode(m,publisher=null){detailRenderGeneration++;mode=['albums','photos','all','publishers'].includes(m)?m:'albums';activePublisher=mode==='publishers'&&publisherGroups().some(g=>g.id===publisher)?publisher:null;activeAlbum=null;detailAlbum=null;document.body.classList.remove('detail-view');document.body.classList.toggle('publisher-view',!!activePublisher);$('detail').hidden=true;$('browse').hidden=false;const isPublisher=mode==='publishers';$('browse-mode').textContent=isPublisher?'발행처':'화보';$('browse-toggle').dataset.mode=isPublisher?'publishers':'albums';$('browse-toggle').setAttribute('aria-pressed',String(isPublisher));$('browse-toggle').setAttribute('aria-label',isPublisher?'발행처 목록 · 화보 목록으로 전환':'화보 목록 · 발행처 목록으로 전환');render()}
 function publisherCard(group){const asset=YuiPublishers.logo(group),assetLabel=group.logo?.asset_role==='publisher_profile_branding'?' 발행처 프로필':group.logo?.asset_role==='parent_publisher_brand_reference'?' 발행사 로고':' 로고',image=asset?'<img src="'+esc(asset)+'" alt="'+esc(group.name)+assetLabel+'">':'<span class="publisher-wordmark" role="img" aria-label="'+esc(group.name)+' — 로고 미확인">'+esc(group.name)+'</span>';return '<button class="publisher" data-publisher="'+esc(group.id)+'" data-logo-theme="'+(group.logo?.theme==='light'?'light':'dark')+'" aria-label="'+esc(group.name)+' · 등록 '+group.albums.length+' · 열람 '+group.viewable+'">'+image+'<span class="publisher-info"><strong>'+esc(group.name)+'</strong>등록 '+group.albums.length+' · 열람 '+group.viewable+'</span></button>'}
 function openPublisher(id,record=true){if(!publisherGroups().some(g=>g.id===id))return;if(record)remember({mode:'publishers',publisher:id});setMode('publishers',id);window.scrollTo(0,0)}
 function photosFor(a){return validImages(a).map((p,i)=>({...p,name:getName(a),albumId:a.id,number:p.number??i+1}))}
@@ -206,7 +207,7 @@ document.addEventListener('error',e=>{
  // For private archived tiles, a broken preview is not evidence that the
  // separately SHA-verified original is unavailable.
  if(img.dataset.owner&&img.dataset.ownerVariant!=='original'){
-  const photo=stored.flatMap(a=>a.images).find(p=>p.url===img.dataset.owner&&p.ownerAlbum);
+  const photo=ownerPhotoIndex.get(img.dataset.owner);
   if(photo&&photo.preview){
    img.dataset.ownerVariant='original';
    YuiPrivate.asset(photo,'original').then(url=>{
@@ -234,11 +235,11 @@ function card(a,hasImages){
  return '<button class="album"'+rotationAttributes(selected)+' data-id="'+esc(a.id)+'" data-available="'+(hasImages?'1':'0')+'" aria-label="'+esc(label+' · '+labels.publisher+' · '+n+' · '+labels.edition)+'">'+img+'<div class="gradient"></div><span class="cover-labels"><span class="publisher-sticker" title="발행사: '+esc(labels.publisher)+'">'+esc(labels.publisher)+'</span><span class="album-count">'+esc(n)+'</span></span><span class="edition-sticker" data-kind="'+esc(labels.kind)+'" title="'+esc(labels.detail)+'">'+esc(labels.edition)+'</span><strong class="name" title="'+esc(label)+'">'+esc(shortTitle)+'</strong></button>';
 }
 function photoHTML(p,i){return '<button class="photo"'+rotationAttributes(p)+' data-i="'+i+'" aria-label="'+esc(p.name)+' 사진 '+p.number+'"><img loading="lazy" referrerpolicy="no-referrer" '+((p.ownerAlbum||p.vaultAlbum)?'data-owner="'+esc(p.url):'src="'+esc(p.url))+'" alt="'+esc(p.name)+' 사진 '+p.number+'"><span>'+esc(p.name)+' · '+p.number+'</span></button>'}
-const ownerObserver=new IntersectionObserver(entries=>{for(const e of entries){if(!e.isIntersecting)continue;ownerObserver.unobserve(e.target);const p=stored.flatMap(a=>a.images).find(p=>p.url===e.target.dataset.owner);if(p){const isCover=!!e.target.closest('.album');(p.vaultAlbum?PhotoVault.asset(p):YuiPrivate.asset(p,isCover?'cover':'preview')).then(url=>{if(e.target.isConnected){e.target.loading='eager';e.target.decoding='async';e.target.src=url}}).catch(()=>{e.target.alt='보관본 연결을 확인해 주세요'})}}},{rootMargin:'64px'});
+const ownerObserver=new IntersectionObserver(entries=>{for(const e of entries){if(!e.isIntersecting)continue;ownerObserver.unobserve(e.target);const p=ownerPhotoIndex.get(e.target.dataset.owner);if(p){const isCover=!!e.target.closest('.album');(p.vaultAlbum?PhotoVault.asset(p):YuiPrivate.asset(p,isCover?'cover':'preview')).then(url=>{if(e.target.isConnected){e.target.loading='eager';e.target.decoding='async';e.target.src=url}}).catch(()=>{e.target.alt='보관본 연결을 확인해 주세요'})}}},{rootMargin:'64px'});
 function observeOwner(){document.querySelectorAll('img[data-owner]:not([src])').forEach(i=>ownerObserver.observe(i))}
 function render(){
  const q=$('search').value.toLocaleLowerCase().trim();
- const items=available(),all=items.flatMap(photosFor),match=s=>String(s).toLocaleLowerCase().includes(q);
+ const items=available(),all=mode==='photos'?items.flatMap(photosFor):[],match=s=>String(s).toLocaleLowerCase().includes(q);
  const publisherIndex=mode==='publishers'&&!activePublisher;
  $('publishergrid').hidden=!publisherIndex;$('albumgrid').hidden=mode==='photos'||publisherIndex;$('photogrid').hidden=mode!=='photos';$('nothing').hidden=true;
  if(publisherIndex){const groups=publisherGroups().filter(g=>match(g.name)||g.albums.some(a=>match(getName(a))));$('publishergrid').innerHTML=groups.map(publisherCard).join('');$('publishergrid').querySelectorAll('[data-publisher]').forEach(b=>b.onclick=()=>openPublisher(b.dataset.publisher));$('total').textContent=groups.length+' publishers';$('nothing').hidden=groups.length>0;
@@ -264,12 +265,27 @@ function openAlbum(id,record=true){
  const a=stored.find(x=>x.id===id);
  if(!a||!validImages(a).length)return;
  if(record)remember({album:id,mode,publisher:activePublisher});
- const photos=photosFor(a);detailAlbum=a;document.body.classList.add('detail-view');$('browse').hidden=true;$('detail').hidden=false;
- $('albumname').textContent=getName(a);$('albumtotal').textContent=photos.length+'장'+(a.expected&&photos.length<a.expected?' / '+a.expected+'장 · 일부':'');
- $('detailphotos').innerHTML=photos.map(photoHTML).join('');
- updateImageNotice();
- $('detailphotos').querySelectorAll('[data-i]').forEach(b=>b.onclick=()=>openViewer(photos,Number(b.dataset.i)));
- observeOwner();
+ const photos=photosFor(a),generation=++detailRenderGeneration;
+ detailAlbum=a;document.body.classList.add('detail-view');$('browse').hidden=true;$('detail').hidden=false;
+ $('albumname').textContent=getName(a);
+ $('albumtotal').textContent=photos.length+'장'+(a.expected&&photos.length<a.expected?' / '+a.expected+'장 · 일부':'');
+ const grid=$('detailphotos');grid.replaceChildren();
+ // Attach the first visible 48 images immediately; append the remainder
+ // in animation frames without detaching existing images or touch targets.
+ function append(offset){
+  if(generation!==detailRenderGeneration||detailAlbum?.id!==id||$('detail').hidden)return;
+  const end=Math.min(offset+48,photos.length),begin=grid.children.length;
+  grid.insertAdjacentHTML('beforeend',photos.slice(offset,end).map((p,i)=>photoHTML(p,offset+i)).join(''));
+  for(let i=begin;i<grid.children.length;i++){
+   const node=grid.children[i];
+   node.onclick=()=>openViewer(photos,Number(node.dataset.i));
+   const img=node.querySelector('img[data-owner]');
+   if(img)ownerObserver.observe(img);
+  }
+  updateImageNotice();
+  if(end<photos.length)requestAnimationFrame(()=>append(end));
+ }
+ append(0);
  window.scrollTo(0,0);
 }
 function openViewer(list,i,record=true){if(!list.length)return;viewerList=list;viewerIndex=((i%list.length)+list.length)%list.length;const p=list[viewerIndex];if(record)remember({album:p.albumId,photo:p.number,fromPhotos:!detailAlbum,mode,publisher:activePublisher});$('lightbox').classList.add('open');document.body.style.overflow='hidden';showViewer();$('close').focus({preventScroll:true})}
@@ -389,10 +405,9 @@ Promise.all([
    const index=row.images.findIndex(x=>Number.isSafeInteger(p.number)&&Number.isSafeInteger(x.number)?x.number===p.number:x.sha256===p.sha256);
    if(index<0){row.images.push(p);continue}
    const previous=row.images[index];
-   const pixels=q=>(q.width||0)*(q.height||0);
-   const privateFile=q=>Boolean(q.vaultAlbum||q.ownerAlbum);
+   
    // Keep the highest available resolution. Private verified bytes win ties.
-   if(pixels(p)>pixels(previous)||(pixels(p)===pixels(previous)&&privateFile(p)&&!privateFile(previous)))
+   if(GalleryPhotoQuality.preferred(previous,p)===p)
     row.images[index]={...previous,...p};
   }
  }
@@ -405,6 +420,7 @@ Promise.all([
   row.images.sort((a,b)=>(a.number??Number.MAX_SAFE_INTEGER)-(b.number??Number.MAX_SAFE_INTEGER));
  }
  stored=[...combined.values()];
+ ownerPhotoIndex=new Map(stored.flatMap(a=>a.images).filter(p=>p.ownerAlbum||p.vaultAlbum).map(p=>[p.url,p]));
  catalog=stored.slice();
  }
  rebuildStored();
