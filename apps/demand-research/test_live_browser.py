@@ -32,12 +32,21 @@ def fake_post(term, i=1):
 def run(live=False):
     errors=[]
     api_calls=[]
+    provider_http=[]
+    provider_failed=[]
     provider_on={"enabled":False}
     with sync_playwright() as p:
         browser=p.chromium.launch(headless=True,args=["--no-sandbox"])
         try:
             page=browser.new_page(viewport={"width":1200,"height":900})
             page.on("pageerror",lambda error:errors.append(str(error)[:200]))
+            if live:
+                page.on("response",lambda resp:provider_http.append({
+                    "host":urlparse(resp.url).hostname,"status":resp.status
+                }) if urlparse(resp.url).hostname in ("mastodon.social","mstdn.social","lemmy.world") and "/api/" in resp.url else None)
+                page.on("requestfailed",lambda req:provider_failed.append(
+                    urlparse(req.url).hostname) if urlparse(req.url).hostname in (
+                    "mastodon.social","mstdn.social","lemmy.world") else None)
             page.route(PAGE,lambda route:route.fulfill(status=200,
                       content_type="text/html; charset=utf-8",body=HTML))
             if not live:
@@ -247,7 +256,10 @@ def run(live=False):
             assert not errors,"JavaScript exceptions: "+repr(errors[:5])
             print("REAL_PUBLIC_BROWSER_SMOKE" if live else "THREE_COLUMN_MODAL_DATE_QA",
                   json.dumps({"visible_post_cards":n,"thumbs":imgs,"columns":cols,
-                              "password_inputs":pwd,"requests":len(api_calls), "adult_thumbnails":adult_thumb, "restricted_cards":restricted.count()}))
+                              "password_inputs":pwd,"requests":len(api_calls),
+                              "adult_thumbnails":adult_thumb, "restricted_cards":restricted.count(),
+                              "source_counter":page.locator("#count").inner_text(),
+                              "providers_http":provider_http,"providers_failed":provider_failed}))
         finally:
             browser.close()
 
