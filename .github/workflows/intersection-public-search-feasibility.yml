@@ -1,0 +1,17 @@
+name: INTERSECTION SearXNG Public API Feasibility
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/intersection-public-search-feasibility.yml"
+      - "apps/demand-research/probe_searxng.py"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Probe two public exact-term queries (aggregate-only, no results saved)
+        run: python apps/demand-research/probe_searxng.py
