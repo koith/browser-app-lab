@@ -39,8 +39,16 @@ def source_works(root=ROOT, model='yui'):
     for file in ('owner-index.json', 'albums.json'):
         data = json.loads((base / file).read_text(encoding='utf-8'))
         for row in data.get('albums', []):
+            # Catalogue pages are evidence of a title, NOT original photos.
+            # Count only distinct SHA-identified bytes from the physical owner ledger.
+            physical = file == 'owner-index.json'
             result.append({'file': file, 'id': row.get('id'),
-                           'title': row.get('title', '')})
+                           'title': row.get('title', ''),
+                           'owner_distinct_photos': (len({p['sha256'] for p in row.get('images', [])
+                               if isinstance(p, dict) and isinstance(p.get('sha256'), str)})
+                               if physical else 0),
+                           'ai_derivative_only': bool(re.search(r'AI[ _-]*Enhanced|AI[ _-]*보정',
+                               row.get('title', ''), re.I)) if physical else False})
     return result
 
 
@@ -61,6 +69,31 @@ def same_work(lead, existing):
         return 'baby blue' in title and bool(MODEL_RE.search(title))
     return bool(re.search(r'(?<![a-z])' + re.escape(name) + r'(?![a-z])', title)
                 and (MODEL_RE.search(title) or series == 'yui'))
+
+
+def coverage_status(lead, matches):
+    """Screenshot counts are a discovery floor, not publisher-original totals.
+
+    Never classify an indexed/AI-only album as fully collected merely because
+    a catalogue record exists. Keep the strongest single owner count; merging
+    similarly named albums is not safe without image-level identity checks.
+    """
+    original_rows = [m for m in matches
+                     if m['file'] == 'owner-index.json' and not m['ai_derivative_only']]
+    saved_originals = max((m['owner_distinct_photos'] for m in original_rows), default=0)
+    observed = lead.get('observed_items', 0)
+    if not isinstance(observed, int) or observed < 0:
+        observed = 0
+    search_floor = max(30, observed)
+    if not matches:
+        state = 'unmapped_work_priority_search'
+    elif not saved_originals:
+        state = 'mapped_without_verified_originals_priority_search'
+    elif saved_originals < search_floor:
+        state = 'mapped_low_photo_count_priority_search'
+    else:
+        state = 'mapped_reference_count_met_completeness_unverified'
+    return state, saved_originals, search_floor
 
 
 def queries(lead):
@@ -167,11 +200,17 @@ def discover(root=ROOT, leads_path=LEADS, search=False, max_works=30, client=Non
                  for i in range(min(max_works, len(src['works'])))]
     for lead in selection:
         matches = [x for x in current if same_work(lead, x)]
+        state, saved_originals, floor = coverage_status(lead, matches)
+        needs_search = state != 'mapped_reference_count_met_completeness_unverified'
         row = {**lead, 'catalogue_matches': matches,
-               'classification': 'mapped_work_needs_photo_coverage_audit' if matches else 'unmapped_work_priority_search',
+               'classification': state, 'owner_original_distinct_photos': saved_originals,
+               'discovery_floor_not_publisher_total': floor,
+               'priority_search_required': needs_search,
                'search_queries': queries(lead), 'images_new_saved': 0,
                'gallery_images_new': 0}
-        if search and not matches:
+        # The former unmapped-only condition silently skipped partially filled
+        # albums, including ones visibly richer in the user's own collection.
+        if search and needs_search:
             row['search_result'] = search_one(session, lead)
         rows.append(row)
     return {'schema_version': 1, 'generated_at': datetime.now(timezone.utc).isoformat(),
@@ -179,6 +218,9 @@ def discover(root=ROOT, leads_path=LEADS, search=False, max_works=30, client=Non
         'research_only_not_gallery_inventory': True,
         'total_works': len(rows),
         'unmapped_works': sum(not r['catalogue_matches'] for r in rows),
+        'mapped_low_coverage_works': sum(r['catalogue_matches'] and r['priority_search_required'] for r in rows),
+        'priority_search_works': sum(r['priority_search_required'] for r in rows),
+        'actual_search_attempts': sum('search_result' in r for r in rows),
         'physical_new_files': 0, 'visible_new_files': 0,
         'works': rows}
 
@@ -194,7 +236,8 @@ def main():
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(result, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
     print('VISUAL_WORK_DISCOVERY', json.dumps({k: result[k] for k in
-        ('total_works','unmapped_works','physical_new_files','visible_new_files')}, ensure_ascii=False))
+        ('total_works','unmapped_works','mapped_low_coverage_works','priority_search_works',
+         'actual_search_attempts','physical_new_files','visible_new_files')}, ensure_ascii=False))
 
 
 if __name__ == '__main__':
