@@ -23,6 +23,13 @@ button{font:inherit;border:0;border-radius:9px;background:#1c4d83;color:white;cu
 button:disabled{opacity:.45;cursor:default}
 button:focus-visible,input:focus-visible{outline:3px solid #77afff;outline-offset:2px}
 .tabs,.presets{display:flex;gap:6px;flex-wrap:wrap}
+.ad-row{margin-top:12px;display:flex;align-items:center;gap:11px;flex-wrap:wrap;padding:10px 11px;border:1px solid #e6edf5;background:#f7faff;border-radius:9px}
+.ad-toggle{display:inline-flex;gap:8px;align-items:center;font-size:13px;font-weight:700;color:#2c4d71;cursor:pointer}
+.ad-toggle input{width:17px;height:17px;accent-color:#1c4d83;cursor:pointer;flex:none}
+.ad-row select{border:1px solid #d1ddeb;border-radius:7px;color:#375474;background:white;padding:6px 8px;font:inherit;font-size:12px}
+.ad-note{font-size:11px;color:#72849c}
+.post-ad-marker{font-size:10px;display:inline-flex;color:#925b17;background:#ffefcc;border-radius:5px;padding:3px 6px}
+.ad-detail{color:#8c601f;background:#fff5dc;padding:10px 11px;border-radius:8px;font-size:12px;margin-bottom:12px}
 .tabs{margin-top:12px}
 .tabs button,.presets button{background:#eef3fa;color:#315272}
 .tabs button.active,.presets button.active{background:#1d4d84;color:white}
@@ -85,6 +92,11 @@ dialog::backdrop{background:#061223bb;backdrop-filter:blur(3px)}
 <button type="button" data-term="섹트">섹트</button>
 <button type="button" data-term="일탈계">일탈계</button>
 </div>
+<div class="ad-row" id="adFilters">
+<label class="ad-toggle"><input type="checkbox" id="hideAds" checked>광고 숨김</label>
+<select id="adLevel" aria-label="광고 필터 강도"><option value="strong" selected>강력 필터</option><option value="standard">기본 필터</option></select>
+<span class="ad-note" id="adSummary">반복 홍보·링크 유도·판매 문구 필터링</span>
+</div>
 <div class="search-row"><input type="search" id="q" placeholder="본문 검색" aria-label="본문 검색"><button id="find" type="button">검색</button></div>
 <div id="datePanel">
 <div class="date-row">
@@ -134,8 +146,52 @@ function addPost(p,term){
       terms:new Set([term]),media:getMedia(p),noPreview:sensitive(p)};
   posts.push(rec);ids.set(uri,rec);return true;
 }
+
+/*
+ * Explicit advertising-content heuristic, not a judgement about the author's
+ * identity, sexual activity or legitimacy. Scores only text/links and globally
+ * repeated templates; it never stores author-specific behavioral profiles.
+ * Labels mean "광고 의심" and not a verified commercial transaction.
+ */
+const AD_PATTERNS=[
+  {points:3,reason:"광고·판매 문구",re:/(?:광고|홍보|할인|이벤트|입장료|구독료|유료(?:방|자료|콘텐츠|컨텐츠)|판매(?:중|합니다|해요|해드립니다|가능)|구매(?:문의|가능|하세요)|가입(?:하세요|문의)|쿠폰|공구|협찬|체험단|스폰서|대행(?:해|합니다)|선착순|리딩방|후원\s*(?:계좌|받)|계정\s*판매)/i},
+  {points:3,reason:"외부 채널·유료 구독 유도",re:/(?:t\.me\/|텔레그램|telegram|오픈카톡|오픈채팅|open\.kakao|채널\s*입장|fantrie|onlyfans|patreon|fansly|팬트리|온리팬스)/i},
+  {points:2,reason:"외부 링크",re:/(?:https?:\/\/|(?:www\.)[\da-z.-]+\.[a-z]{2,}|discord\.gg\/|linktr\.ee\/|lit\.link\/|bio\.site\/)/i},
+  {points:2,reason:"문의·가입 유도",re:/(?:문의\s*(?:주세요|주세용|환영|가능|받습니다)|DM\s*(?:주세요|문의)|디엠\s*(?:주세요|문의)|(?:프로필|고정글|링크)\s*(?:확인|클릭|봐)|(?:모집중|구독자\s*모집|초대\s*받)|(?:무료\s*체험|첫\s*입장))/i},
+  {points:2,reason:"결제·송금 정보",re:/(?:결제|입금|가격표|정가|회비|정기구독|만원|페이팔|수익|송금|계좌)/i}
+];
+function fingerprint(text){
+  return String(text||"").normalize("NFKC").replace(/https?:\/\/\S+/gi,"")
+    .replace(/#[^\s#]+/g,"").replace(/[^\p{L}\p{N}]/gu,"").toLowerCase();
+}
+function adEvidence(post,count){
+  let text=String(post.text||""),key=fingerprint(text);
+  let repeats=key.length>=28?(count.get(key)||0):0,score=0,reasons=[];
+  function mark(value,reason){score+=value;reasons.push(reason)}
+  let hashtags=(text.match(/#[^\s#]+/g)||[]).length;
+  if(repeats>=3)mark(4,"같은 홍보형 문구 반복 "+repeats+"건");
+  else if(repeats>=2)mark(hashtags>=4?4:2,"동일 문구 반복 "+repeats+"건");
+  for(let test of AD_PATTERNS)if(test.re.test(text))mark(test.points,test.reason);
+  if(hashtags>=8)mark(2,"해시태그 과다");
+  else if(hashtags>=5)mark(1,"해시태그 다수");
+  if(post.externalLink)mark(1,"외부 사이트 연결");
+  return {score,reasons};
+}
+function updateAdScores(){
+  let count=new Map();
+  for(let p of posts){let k=fingerprint(p.text);if(k.length>=28)count.set(k,(count.get(k)||0)+1)}
+  for(let p of posts)p.adEvidence=adEvidence(p,count);
+}
+function suspectedAd(post){
+  let threshold=$("adLevel").value==="standard"?6:4;
+  return (post.adEvidence?.score||0)>=threshold;
+}
+
+function matchesText(p){return (active==="all"||p.terms.has(active))&&(!needle||p.text.toLowerCase().includes(needle))}
 function filtered(){
-  return posts.filter(p=>(active==="all"||p.terms.has(active))&&(!needle||p.text.toLowerCase().includes(needle))).sort((a,b)=>String(b.indexed).localeCompare(String(a.indexed)));
+  let hide=$("hideAds").checked;
+  return posts.filter(p=>matchesText(p)&&(!hide||!suspectedAd(p)))
+    .sort((a,b)=>String(b.indexed).localeCompare(String(a.indexed)));
 }
 function tile(p){
   let article=el("article","post"),button=el("button","post-open");button.type="button";button.setAttribute("aria-label","게시글 상세 보기");
@@ -151,6 +207,7 @@ function tile(p){
   if(p.media.length>1&&!p.noPreview)thumb.append(el("span","media-num","+"+(p.media.length-1)));
   let body=el("div","post-body"),title=el("div","post-title");
   title.append(el("span","author",p.author),el("span","tag",Array.from(p.terms)[0]));
+  if(suspectedAd(p))title.append(el("span","post-ad-marker","광고 의심"));
   body.append(title,el("p","post-excerpt",p.text),el("div","post-date",niceDate(p.posted)));
   button.append(thumb,body);
   button.addEventListener("click",()=>openDetail(p));
@@ -182,7 +239,11 @@ function sourceLink(p,text){
 }
 function openDetail(p){
   let node=$("detailContent");node.replaceChildren();
-  node.append(el("div","dialog-author",p.author),el("div","dialog-date",niceDate(p.posted)),el("p","dialog-text",p.text||"(본문 없음)"));
+  node.append(el("div","dialog-author",p.author),el("div","dialog-date",niceDate(p.posted)));
+  if(suspectedAd(p)){
+    node.append(el("div","ad-detail","광고 의심 · "+(p.adEvidence?.reasons||[]).join(" / ")));
+  }
+  node.append(el("p","dialog-text",p.text||"(본문 없음)"));
   if(p.media.length){
     if(p.noPreview)node.append(el("div","dialog-notice","민감도 표시가 있는 미디어는 원문에서 확인할 수 있습니다."));
     else{
@@ -199,7 +260,11 @@ function closeDetail(){
   $("detail").close();document.body.classList.remove("modal-open");$("detailContent").replaceChildren();
 }
 function draw(){
+  updateAdScores();
+  let matching=posts.filter(matchesText),suspected=matching.filter(suspectedAd).length;
+  let hidden=$("hideAds").checked?suspected:0;
   let rows=filtered(),list=$("feed");list.replaceChildren();
+  $("adSummary").textContent="광고 의심 "+suspected.toLocaleString()+"건 · "+(hidden?"숨김 "+hidden.toLocaleString()+"건":"광고 포함 표시");
   let limit=visibleLimit,frag=document.createDocumentFragment();
   for(let p of rows.slice(0,limit))frag.append(tile(p));
   if(!rows.length)frag.append(el("div","empty",busy?"게시글 검색 중…":"해당 기간·검색 조건의 게시글이 없습니다."));
@@ -208,7 +273,7 @@ function draw(){
   $("showMore").textContent="수집된 게시글 "+Math.min(180,Math.max(0,rows.length-limit))+"개 더 보기";
   let coverage=cloudMode?" · 테라박스 저장본":" · 조회 "+daysCovered+"일 / "+(Math.ceil((toMs-fromMs)/DAY))+"일";
   let warnings=(failed||incomplete)?" · 일부 구간 미확인 "+(failed+incomplete)+"건":"";
-  $("count").textContent=rows.length.toLocaleString()+"개 게시글"+coverage+warnings+(rows.length>limit?" · "+limit+"개 표시 중":"");
+  $("count").textContent=rows.length.toLocaleString()+"개 표시 / "+matching.length.toLocaleString()+"개 조회"+(hidden?" · 광고 의심 "+hidden.toLocaleString()+"개 제외":"")+coverage+warnings+(rows.length>limit?" · "+limit+"개 표시 중":"");
 }
 function startBusy(){busy=true;$("refresh").disabled=true;$("applyDate").disabled=true;$("more").disabled=true}
 function endBusy(){busy=false;$("refresh").disabled=false;$("applyDate").disabled=false;$("more").disabled=false}
@@ -337,6 +402,8 @@ $("more").addEventListener("click",()=>cloudMode?loadCloud(false):loadBatch(fals
 $("showMore").addEventListener("click",()=>{visibleLimit+=180;draw()});
 $("tabs").addEventListener("click",e=>{let button=e.target.closest("button[data-term]");if(!button)return;active=button.dataset.term;visibleLimit=270;for(let b of $("tabs").querySelectorAll("button"))b.classList.toggle("active",b===button);draw()});
 $("presets").addEventListener("click",e=>{let b=e.target.closest("button[data-days]");if(!b)return;setPreset(Number(b.dataset.days));loadBatch(true)});
+$("hideAds").addEventListener("change",()=>{visibleLimit=270;draw()});
+$("adLevel").addEventListener("change",()=>{visibleLimit=270;draw()});
 $("find").addEventListener("click",()=>{needle=$("q").value.trim().toLowerCase();visibleLimit=270;draw()});
 $("q").addEventListener("keydown",e=>{if(e.key==="Enter"){$("find").click()}});
 setPreset(30);
