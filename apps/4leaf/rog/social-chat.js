@@ -323,6 +323,8 @@
  // messages must not throw a user reading earlier conversation to the bottom.
  // Preserve a genuine scroll position and compensate for pruned oldest lines.
  function appendChatLine(log,line){
+  // One authoritative shared rule for game/RTC/BroadcastChannel/system.
+  if(window.__LEAF_CHAT_APPEND__)return window.__LEAF_CHAT_APPEND__(log,line,110);
   if(!log)return;
   const oldTop=log.scrollTop;
   const oldLimit=Math.max(0,log.scrollHeight-log.clientHeight);
