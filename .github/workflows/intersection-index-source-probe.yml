@@ -1,0 +1,17 @@
+name: Intersection public index X and Threads probe
+on:
+  pull_request:
+    paths:
+      - "apps/demand-research/probe_public_index.py"
+      - ".github/workflows/intersection-index-source-probe.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  read-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify public search RSS link discovery (aggregate only)
+        run: python apps/demand-research/probe_public_index.py
