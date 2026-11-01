@@ -356,6 +356,10 @@ dialog{background:#fff9ed;border-color:#101432}
 }
 .tabs button svg{display:block;width:22px;height:22px;flex:none;pointer-events:none}
 @media(max-width:720px){.tabs button svg{width:20px;height:20px}}
+#socialControls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:18px auto;max-width:740px}
+#socialControls.hidden{display:none}
+#socialControls select{border:1px solid #c7cbd3;border-radius:8px;background:white;padding:9px}
+#socialStatus{font-size:12px;color:#64748b}
 </style>
 </head>
 <body>
@@ -377,6 +381,17 @@ dialog{background:#fff9ed;border-color:#101432}
 <div class="sr-only" id="count" role="status" aria-live="polite">불러오는 중…</div>
 <section class="feed" id="feed" aria-live="polite"><div class="empty">게시글 불러오는 중…</div></section>
 <div class="more hidden" id="paging"><button type="button" id="more">더 보기</button></div>
+<div class="more hidden" id="socialControls" aria-label="확인된 SNS 검색">
+  <select id="socialPlatform" aria-label="SNS 선택">
+    <option value="x">X</option><option value="threads">Threads</option>
+    <option value="instagram">Instagram 릴스</option><option value="reddit">Reddit</option>
+  </select>
+  <select id="socialTerm" aria-label="검색어">
+    <option value="뒷계">뒷계</option><option value="섹트">섹트</option><option value="일탈계">일탈계</option>
+  </select>
+  <button type="button" id="socialFind">SNS 검색</button>
+  <span id="socialStatus" role="status" aria-live="polite"></span>
+</div>
 </main>
 <dialog id="dateDialog" class="period-dialog" aria-label="기간 설정">
 <div class="dialog-head"><b>조회 기간</b><button type="button" id="closeDate" aria-label="닫기">×</button></div>
@@ -745,6 +760,9 @@ const SERVICES={
   lemmy:{name:"Lemmy",favicon:"https://koith.github.io/browser-app-lab/apps/demand-research/assets/lemmy.svg"},
   misskey:{name:"Misskey",favicon:"https://koith.github.io/browser-app-lab/apps/demand-research/assets/misskey.svg"},
   reddit:{name:"Reddit",favicon:"https://koith.github.io/browser-app-lab/apps/demand-research/assets/reddit.svg"},
+  x:{name:"X",favicon:"https://koith.github.io/browser-app-lab/apps/demand-research/assets/x.svg"},
+  threads:{name:"Threads",favicon:"https://koith.github.io/browser-app-lab/apps/demand-research/assets/threads.svg"},
+  instagram:{name:"Instagram",favicon:"https://koith.github.io/browser-app-lab/apps/demand-research/assets/instagram.svg"},
   cloud:{name:"Archive",favicon:""}
 };
 function sourceBadge(p){
@@ -1000,6 +1018,30 @@ $("applyDate").addEventListener("click",()=>{
   try{getDates()}catch(e){status(e.message);return}
   $("dateDialog").close();loadBatch(true);
 });
+$("socialFind").addEventListener("click",async ()=>{
+  if(!cloudMode)return;
+  let button=$("socialFind"),term=$("socialTerm").value,platform=$("socialPlatform").value;
+  button.disabled=true;$("socialStatus").textContent="검색 중…";
+  try{
+    let end=new Date(),start=new Date(end.getTime()-29*DAY);
+    let qs=new URLSearchParams({platform,term,
+      start:start.toISOString().slice(0,10),end:end.toISOString().slice(0,10)});
+    const resp=await fetch("/api/discovery?"+qs.toString(),{credentials:"same-origin",cache:"no-store"});
+    if(!resp.ok){
+      let reason=resp.status===503?"검색 제공자가 아직 연결되지 않았습니다.":
+        resp.status===429?"검색 호출 상한에 도달했습니다.":"SNS 조회 실패 (HTTP "+resp.status+")";
+      throw Error(reason);
+    }
+    const data=await resp.json(),countBefore=posts.length;
+    const endMs=Date.now()+DAY,startMs=Date.now()-30*DAY;
+    for(const row of data.items||[])addFederatedRow(row,term,startMs,endMs);
+    const added=posts.length-countBefore;
+    posts.sort((a,b)=>String(b.indexed).localeCompare(String(a.indexed)));
+    $("socialStatus").textContent=platform.toUpperCase()+" · "+added+"건 추가 · "+data.received+"건 검사";
+    draw();
+  }catch(error){$("socialStatus").textContent=String(error.message||error)}
+  finally{button.disabled=false}
+});
 $("more").addEventListener("click",()=>{
   if(busy)return;
   if(filtered().length>visibleLimit){visibleLimit+=180;draw()}
@@ -1017,6 +1059,7 @@ $("tabs").addEventListener("click",e=>{
 $("presets").addEventListener("click",e=>{let b=e.target.closest("button[data-days]");if(!b)return;setPreset(Number(b.dataset.days))});
 setPreset(30);
 if(cloudMode){
+  $("socialControls").classList.remove("hidden");
   $("source").textContent="테라박스 저장 게시글 · 글/사진/영상";
   $("tabs").classList.add("hidden");$("openDate").classList.add("hidden");
   loadCloud(true);
