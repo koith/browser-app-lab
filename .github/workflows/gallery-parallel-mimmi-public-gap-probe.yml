@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/gallery-parallel-mimmi-public-gap-probe.yml'
       - 'apps/gallery-archive/parallel_mimmi_public_gap_probe.py'
+      - 'apps/mimmi-gallery/public-work-pages.json'
   workflow_dispatch:
 permissions:
   contents: read
@@ -30,9 +31,8 @@ jobs:
             --model mimmi \
             --owner apps/mimmi-gallery/owner-index.json \
             --out "$RUNNER_TEMP/stage" \
-            --max-new 30 --max-pages 2 \
-            --album-id v2ph-actor-axm7n43z \
-            --album-id v2ph-actor-an5o93ez
+            --max-new 30 --max-pages 3 \
+            --album-id public-mimmi-official-x
           python - <<'PY'
           import json,os,hashlib
           from pathlib import Path
