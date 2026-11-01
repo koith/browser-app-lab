@@ -29,7 +29,7 @@ jobs:
       matrix:
         model: [yui, mimmi]
     env:
-      MODEL: \${{ matrix.model }}
+      MODEL: ${{ matrix.model }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -41,11 +41,11 @@ jobs:
         run: |
           set -euo pipefail
           if [[ "$MODEL" == yui ]]; then
-            python apps/gallery-archive/collector_engines_ab.py --out "/tmp/ab-\${MODEL}.json" \
+            python apps/gallery-archive/collector_engines_ab.py --out "/tmp/ab-${MODEL}.json" \
               --work djawa-privaty --work artgravia-677-alt \
               --work artgravia-693
           else
-            python apps/gallery-archive/collector_engines_ab.py --out "/tmp/ab-\${MODEL}.json" \
+            python apps/gallery-archive/collector_engines_ab.py --out "/tmp/ab-${MODEL}.json" \
               --work djawa-summer-2 --work shypetal-summer-5 \
               --work pixibb-my-small-bird --work v2ph-public
           fi
@@ -53,7 +53,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: real-image-AB-\${{ matrix.model }}
-          path: /tmp/ab-\${{ matrix.model }}.json
+          name: real-image-AB-${{ matrix.model }}
+          path: /tmp/ab-${{ matrix.model }}.json
           if-no-files-found: warn
           retention-days: 14
