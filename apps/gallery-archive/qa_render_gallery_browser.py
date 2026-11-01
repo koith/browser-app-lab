@@ -25,6 +25,16 @@ def exercise(browser,model,branch_html=False):
         resp=page.goto(url,wait_until="domcontentloaded",timeout=70000)
         assert resp and resp.status==200,(model,"HTTP",resp.status if resp else None)
         assert page.url.startswith(url)
+        # A live production PASS must verify the new code is served by Render,
+        # not old proxy-cached HTML that happens to pass a nondeterministic race.
+        if not branch_html:
+            marker="const nextOwner="
+            for _ in range(9):
+                if page.evaluate("""marker=>[...document.scripts].some(s=>s.textContent.includes(marker))""",marker):
+                    break
+                page.wait_for_timeout(30000)
+                page.reload(wait_until="domcontentloaded",timeout=70000)
+            assert page.evaluate("""marker=>[...document.scripts].some(s=>s.textContent.includes(marker))""",marker),(model,"Render still serves old gallery HTML")
         assert page.locator('input[type="password"]').count()==0
         page.wait_for_function("""limit=>typeof stored!=='undefined'&&stored.reduce((n,a)=>n+a.images.length,0)>=limit&&document.querySelectorAll('#albumgrid .album').length>0&&document.querySelector('#inventory')?.textContent.includes('실제 저장본')""",arg=MIN[model],timeout=90000)
         stats=page.evaluate("""()=>({photos:stored.reduce((n,a)=>n+a.images.length,0),owner:stored.reduce((n,a)=>n+a.images.filter(p=>p.ownerAlbum).length,0),works:document.querySelectorAll('#albumgrid .album').length})""")
