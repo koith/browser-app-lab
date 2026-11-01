@@ -43,6 +43,8 @@ def safe_photo(raw):
     try:
         p=urlsplit(raw)
         approved,_=allowed_url(raw)
+        if p.hostname in ('djawaphoto.com','www.djawaphoto.com') and not p.path.startswith('/wp-content/uploads/'):
+            return False
         return bool(approved and re.search(r'\.(?:jpe?g|webp|png)$',p.path,re.I)
                     and not re.search(r'(?:logo|avatar|favicon|emoji|banner|tracking|placeholder)',p.path,re.I))
     except (ValueError,TypeError):return False
