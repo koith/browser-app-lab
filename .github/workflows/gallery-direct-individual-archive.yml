@@ -11,6 +11,7 @@ on:
     # All offline regressions still run on pull requests; manual collection stays available.
     paths:
       - apps/gallery-archive/direct_photo_pipeline.py
+      - apps/gallery-archive/merge_incremental.py
       - apps/gallery-archive/collect_teapawt_public.py
       - apps/gallery-archive/visual_public_work.py
       - apps/yui-gallery/public_photo_archive.py
@@ -18,6 +19,7 @@ on:
   pull_request:
     paths:
       - apps/gallery-archive/direct_photo_pipeline.py
+      - apps/gallery-archive/merge_incremental.py
       - apps/gallery-archive/defer_verified_batch.py
       - apps/gallery-archive/private_collection_snapshot.py
       - apps/gallery-archive/test_private_collection_snapshot.py
@@ -64,6 +66,7 @@ jobs:
           python apps/gallery-archive/test_direct_photo_pipeline.py
           python apps/gallery-archive/test_public_work_photo_extractor.py
           python apps/gallery-archive/test_reverse_source_bridge.py
+          python apps/gallery-archive/test_incremental.py
       - name: Measure every registered owner work and excluded public source host
         run: |
           python - <<'PY'
