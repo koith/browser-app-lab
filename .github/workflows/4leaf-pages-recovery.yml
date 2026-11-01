@@ -1,39 +1,26 @@
-name: 4LEAF Pages stuck deployment recovery (one-time)
+name: 4LEAF Pages publishing-source diagnostics
 on:
   push:
-    branches:
-      - ops/4leaf-pages-release-recovery-20261101
-    paths:
-      - '.github/workflows/4leaf-pages-recovery.yml'
-  workflow_dispatch:
+    branches: [ops/4leaf-pages-release-recovery-20261101]
+    paths: ['.github/workflows/4leaf-pages-recovery.yml']
 permissions:
   contents: read
   pages: write
-  actions: write
+  deployments: read
 jobs:
-  recover:
+  inspect-pages:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Check stale deployment status and release blocked Pages deployment
+      - name: Inspect Pages build type, source and recent deployments
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
-          old=bc1328b0940bb693d33e12853051522da10d9665
-          target=e6d06fe74bd430b5fa9142f3ac5750fbc3b39b6a
-          echo "Target main: $target; stale previous Pages deployment: $old"
-          status="$(gh api "repos/$GITHUB_REPOSITORY/pages/deployments/$old" --jq '.status')"
-          echo "Stale Pages deployment reported status: $status"
-          # The Pages API says 'succeed' but the deploy API *repeatedly*
-          # reports this specific old SHA as in-progress. Try the documented
-          # single-deployment cancel endpoint; leave any newer SHA untouched.
-          echo "Cancelling backend-stuck Pages deployment only: $old"
-          if gh api -X POST "repos/$GITHUB_REPOSITORY/pages/deployments/$old/cancel"; then
-            echo "Pages cancellation accepted"
-          else
-            echo "Pages cancellation rejected; retaining previous live site"
-          fi
-          echo "Dispatching one new Pages deployment from current main"
-          gh api -X POST "repos/$GITHUB_REPOSITORY/actions/workflows/static.yml/dispatches" -f ref=main
+          echo 'PAGES_CONFIGURATION'
+          gh api "repos/$GITHUB_REPOSITORY/pages" --jq '{status,build_type,source,html_url}'
+          echo 'DEPLOYMENTS'
+          gh api "repos/$GITHUB_REPOSITORY/deployments?environment=github-pages&per_page=12" --jq '[.[] | {id,sha,environment,created_at,original_environment}]'
+          echo 'OLD_PAGES_DEPLOYMENT'
+          gh api "repos/$GITHUB_REPOSITORY/pages/deployments/bc1328b0940bb693d33e12853051522da10d9665" --jq '.status'
