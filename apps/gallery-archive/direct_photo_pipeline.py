@@ -59,6 +59,20 @@ def same_variant(old_raw,new_raw):
         return max(ImageStat.Stat(ImageChops.difference(a,b)).mean)<=5
 
 
+def in_excluded_article_section(tag,article):
+    """Only reject related/advert/sidebar parents *inside* this work article.
+
+    Many WordPress pages have <body class="sidebar-right"> globally. Looking
+    at every ancestor mistakenly rejects every real photo in the main article.
+    """
+    for parent in tag.parents:
+        if parent is article:break
+        if any(re.search(r'related|recommend|comment|advert|sidebar',str(c),re.I)
+               for c in parent.get('class',[])):
+            return True
+    return False
+
+
 def page_images(raw,url,model):
     if urlsplit(url).hostname=='teapawt.net':
         account=CREATOR_ACCOUNTS[model]
@@ -137,7 +151,7 @@ def page_images(raw,url,model):
         }
         found=[]
         for img in article.select('img'):
-            if img.find_parent(class_=re.compile(r'related|recommend|comment|advert|sidebar',re.I)):
+            if in_excluded_article_section(img,article):
                 continue
             for key in ('data-original','data-src','src'):
                 value=img.get(key)
@@ -184,7 +198,7 @@ def page_images(raw,url,model):
         if article is None:return [],[],'unscoped_page_rejected'
         chosen={}
         for img in article.select('img'):
-            if img.find_parent(class_=re.compile(r'related|recommend|comment|advert|sidebar',re.I)):
+            if in_excluded_article_section(img,article):
                 continue
             links=[img.get('data-original'),img.get('data-src'),img.get('src')]
             anchor=img.find_parent('a')
