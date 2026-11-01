@@ -42,7 +42,8 @@ def run(live=False):
                     q=parse_qs(u.query)
                     term=q.get("q",[""])[0]
                     api_calls.append(q)
-                    records=[fake_post(term)] if term in TERMS else []
+                    day=int(q.get("since",["2026-11-01"])[0][8:10])
+                    records=[fake_post(term,day*100+i) for i in range(15)] if term in TERMS else []
                     route.fulfill(status=200,content_type="application/json",
                       headers={"Access-Control-Allow-Origin":"*"},
                       body=json.dumps({"posts":records},ensure_ascii=False))
@@ -67,9 +68,13 @@ def run(live=False):
                 assert page.locator("#detailContent .dialog-text").inner_text().strip()
                 page.locator("#closeDetail").click()
             else:
-                assert n==3,f"Expected unique synthetic posts for three topics; saw {n}"
-                assert imgs==3,f"Card thumbnail not grouped with parent: {imgs}"
+                assert n==270,f"Expected first 270 of 315 synthetic posts; saw {n}"
+                assert imgs==270,f"Card thumbnail not grouped with parent: {imgs}"
                 assert len(api_calls)>=21, f"Expected daily shards, got {len(api_calls)}"
+                assert "315개 게시글" in page.locator("#count").inner_text()
+                assert page.locator("#showMore").is_visible()
+                page.locator("#showMore").click()
+                assert page.locator("article.post").count()==27015
                 assert all("since" in q and "until" in q for q in api_calls)
                 assert all(int(q["limit"][0])==100 for q in api_calls)
                 page.locator(".post-open").first.click()
@@ -79,7 +84,7 @@ def run(live=False):
                 page.keyboard.press("Escape")
                 assert not page.locator("dialog#detail").is_visible()
                 page.get_by_role("button",name="섹트",exact=True).click()
-                assert page.locator("article.post").count()==1
+                assert page.locator("article.post").count()==105
                 assert "섹트" in page.locator("article.post .post-excerpt").first.inner_text()
                 page.get_by_role("button",name="전체",exact=True).click()
                 assert page.locator("article.post").count()==3
