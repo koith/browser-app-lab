@@ -25,6 +25,7 @@ def test():
        <div class="related"><img src="https://djawaphoto.com/wp-content/uploads/2026/09/other.jpg"></div>
        </div></article></body></html>'''
     assert full.pagination_from_html(html,base,base)==[base+'?page=2']
+    assert full.independent_scrapy_extract(html,base,'mimmi')[1]=='independent_scrapy_selector'
     # A newly discovered public CDN must NOT be rejected merely because the
     # old in-house engine did not whitelist that host.
     independent='https://new-public-cdn.photos-example.org/work/001.jpg'
