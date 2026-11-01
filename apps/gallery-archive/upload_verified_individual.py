@@ -49,8 +49,6 @@ def _upload_one(src, row, remote, uploader, readback, sleep):
     successful write response is NOT a verified object without SHA readback.
     """
     key,size,sha=row
-    if _read_exact(remote,row,readback):
-        return 'already_verified'
     args=['copyto',str(src),remote+'/'+key,'--ignore-existing',
           '--timeout=15s','--retries=1','--low-level-retries=1']
     rc=uploader(args)
