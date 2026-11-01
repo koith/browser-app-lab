@@ -1,4 +1,4 @@
-name: 4LEAF Pages publishing-source diagnostics
+name: 4LEAF Pages use single Actions publishing path
 on:
   push:
     branches: [ops/4leaf-pages-release-recovery-20261101]
@@ -6,21 +6,23 @@ on:
 permissions:
   contents: read
   pages: write
-  deployments: read
+  actions: write
 jobs:
-  inspect-pages:
+  switch-and-publish:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Inspect Pages build type, source and recent deployments
+      - name: Save current Pages settings, switch legacy to existing workflow publisher, dispatch main
         env:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
           set -euo pipefail
-          echo 'PAGES_CONFIGURATION'
-          gh api "repos/$GITHUB_REPOSITORY/pages" --jq '{status,build_type,source,html_url}'
-          echo 'DEPLOYMENTS'
-          gh api "repos/$GITHUB_REPOSITORY/deployments?environment=github-pages&per_page=12" --jq '[.[] | {id,sha,environment,created_at,original_environment}]'
-          echo 'OLD_PAGES_DEPLOYMENT'
-          gh api "repos/$GITHUB_REPOSITORY/pages/deployments/bc1328b0940bb693d33e12853051522da10d9665" --jq '.status'
+          echo "BEFORE"
+          gh api "repos/$GITHUB_REPOSITORY/pages" --jq '{build_type,source,html_url,status}'
+          echo "CHANGE PUBLISHER: legacy -> workflow (existing .github/workflows/static.yml), no URL/source path change"
+          gh api -X PUT "repos/$GITHUB_REPOSITORY/pages" -f build_type=workflow
+          echo "AFTER"
+          gh api "repos/$GITHUB_REPOSITORY/pages" --jq '{build_type,source,html_url,status}'
+          echo "DISPATCH current main existing static.yml"
+          gh api -X POST "repos/$GITHUB_REPOSITORY/actions/workflows/static.yml/dispatches" -f ref=main
