@@ -417,13 +417,16 @@ Promise.all([
  // Enrich the already-visible gallery when Render wakes; no loading/splash screen.
  YuiPrivate.albums().then(albums=>{
   if(!Array.isArray(albums)||!albums.length)return;
-  ownerStored=YuiPrivate.reconcile(ownerStored,albums).filter(allowed).map(a=>({...a,images:(a.images||[]).filter(p=>!excludedHashes.has(p.sha256))})).filter(a=>validImages(a).length);
-  if(!ownerStored.length)return;
+  const nextOwner=YuiPrivate.reconcile(ownerStored,albums).filter(allowed).map(a=>({...a,images:(a.images||[]).filter(p=>!excludedHashes.has(p.sha256))})).filter(a=>validImages(a).length);
+  if(!nextOwner.length)return;
+  // An unchanged remote catalogue must never detach cards while a user scrolls.
+  const photoSignature=rows=>JSON.stringify(rows.map(a=>[a.id,(a.images||[]).map(p=>[p.number,p.sha256,p.bytes,p.width,p.height,p.preview_sha256])]));
+  if(photoSignature(ownerStored)===photoSignature(nextOwner))return;
+  ownerStored=nextOwner;
   rebuildStored();
-  $('inventory').textContent=stored.reduce((n,a)=>n+validImages(a).length,0)+'장 · 실제 저장본';
-  // Background catalogue refresh must not replace the photo being scrolled,
-  // pressed, or viewed. The next navigation uses the rebuilt saved catalogue.
-  render();
+  // Keep existing DOM nodes and active scroll/touch/lightbox unchanged.
+  // The next user-initiated filter or navigation uses the updated catalogue;
+  // never replace all cards from an asynchronous background response.
  }).catch(()=>{});
 }).catch(()=>{$('total').textContent='—';$('nothing').textContent='이미지를 불러올 수 없습니다.';$('nothing').hidden=false});
 </script>
