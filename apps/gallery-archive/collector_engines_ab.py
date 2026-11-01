@@ -34,6 +34,12 @@ SOURCES=[
     {'model':'mimmi','work':'shypetal-summer-5','page':'https://www.shypetal.com/albums/mimmimimmi-djawa-photo-my-summer-vacation-vol/'},
     {'model':'mimmi','work':'pixibb-my-small-bird','page':'https://sexy.pixibb.com/mimmi-vol-2-my-small-bird-135-photos-sexy-girl/'},
     {'model':'mimmi','work':'v2ph-public','page':'https://www.v2ph.com/album/a54385nz.html'},
+    # Same verified creator handle via the existing public mirror vs a native
+    # gallery-dl supported Twitter/X extractor. Cross-origin, reported separately.
+    {'model':'yui','work':'sns-yui-cross-platform','page':'https://teapawt.net/super_yuisan',
+     'gallery_dl_source':'https://x.com/super_yuisan'},
+    {'model':'mimmi','work':'sns-mimmi-cross-platform','page':'https://teapawt.net/Mimmi_official',
+     'gallery_dl_source':'https://x.com/Mimmi_official'},
 ]
 MAX_IMG_GET=90
 MAX_URLS_PER_ENGINE=90
@@ -89,7 +95,7 @@ def scoped_generic_html(raw,page,model):
 
 def gdl_extract(page,limit=120):
     """Run real gallery-dl extractor with no cookies and no archive mutation."""
-    args=[sys.executable,'-m','gallery_dl','-g','--',page]
+    args=[sys.executable,'-m','gallery_dl','-g','--range','1-40','--',page]
     try:
         p=subprocess.run(args,capture_output=True,text=True,timeout=24)
         urls=[]
@@ -159,7 +165,8 @@ def compare(source,session,use_browser=True,limit=MAX_IMG_GET):
         base,more,status=page_images(raw,page,model)
         generic,genstatus=scoped_generic_html(raw,page,model)
     else:base,more,status,generic,genstatus=[],[],'unavailable',[],'unavailable'
-    gdl,gdl_status=gdl_extract(page)
+    gdl,gdl_status=gdl_extract(source.get('gallery_dl_source') or page)
+    gdl_status['comparison_origin']='same_creator_cross_platform' if source.get('gallery_dl_source') else 'same_public_work_page'
     browser,browser_status=browser_extract(page,model,use_browser)
     proposals={'existing_scoped_parser':base,'scrapy_style_generic_article':generic,
                'gallery_dl_native':gdl,'playwright_rendered_article':browser}
