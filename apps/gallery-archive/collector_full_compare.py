@@ -206,11 +206,19 @@ def inspect_work(row,client,browser,max_pages=500,max_images=650,
     statuses=Counter()
     engine_statuses=Counter()
     first_urls=initial[:]
-    # A site-specific gallery-dl extractor may itself follow its album pages.
+    # Give gallery-dl each *observed* work page a chance, not only the first.
+    # A site genuinely lacking a native extractor needs one test per origin,
+    # otherwise hundreds of identical unsupported subprocess calls add no value.
+    gdl_tried=set()
+    gdl_unsupported_origins=set()
+    gdl_page_budget=max_pages
     if initial:
         gdl,gs=gallery_dl_work(initial[0])
+        gdl_tried.add(initial[0])
         methods['gallery_dl'].extend(gdl)
         engine_statuses['gallery_dl:'+gs]+=1
+        if gs=='unsupported_extractor':
+            gdl_unsupported_origins.add(urlsplit(initial[0]).hostname)
         if len(gdl)>=GDL_PAGE_LIMIT:result['limits'].append('gallery_dl_range_limit')
     queue=deque(initial);visited=set();discovered=0;browser_visits=0
     blocked=set()
@@ -245,6 +253,21 @@ def inspect_work(row,client,browser,max_pages=500,max_images=650,
             if code in (401,403,429,451):
                 blocked.add(origin)
             continue
+        if url not in gdl_tried:
+            if origin in gdl_unsupported_origins:
+                engine_statuses['gallery_dl:unsupported_origin_skipped']+=1
+            elif len(gdl_tried)>=gdl_page_budget:
+                if 'gallery_dl_per_page_limit' not in result['limits']:
+                    result['limits'].append('gallery_dl_per_page_limit')
+            else:
+                discovered_photo_urls, extract_status=gallery_dl_work(url)
+                gdl_tried.add(url)
+                methods['gallery_dl'].extend(discovered_photo_urls)
+                engine_statuses['gallery_dl:'+extract_status]+=1
+                if extract_status=='unsupported_extractor':
+                    gdl_unsupported_origins.add(origin)
+                if len(discovered_photo_urls)>=GDL_PAGE_LIMIT:
+                    result['limits'].append('gallery_dl_range_limit')
         # A legacy work-specific parser is only executable on its supported origins.
         next_pages=[]
         if safe_page(url):
@@ -276,6 +299,8 @@ def inspect_work(row,client,browser,max_pages=500,max_images=650,
                 if p.hostname==q.hostname and p.username is None and p.password is None:
                     queue.append(link);discovered+=1
     result['registered_page_attempts']=len(visited)
+    result['gallery_dl_pages_attempted']=len(gdl_tried)
+    result['gallery_dl_unsupported_page_skips']=engine_statuses['gallery_dl:unsupported_origin_skipped']
     result['additional_pages_discovered']=discovered
     result['http_statuses']=dict(statuses)
     result['engine_page_statuses']=dict(engine_statuses)
