@@ -26,7 +26,7 @@ from collect_private_batch import allowed_url, safe_reencoded_public_preview
 MODEL_PATTERNS={'mimmi':re.compile(r'(?<![a-z])mimmi(?![a-z])|밈미|밈미',re.I),
                 'yui':re.compile(r'(?<![a-z])yui(?![a-z])|유이|심혜성|super_yuisan',re.I)}
 PAGE_HOSTS={'djawaphoto.com','www.djawaphoto.com','cosplay.pixibb.com','sexy.pixibb.com','www.v2ph.com','v2ph.com',
-            'blog.hacosta.co.jp','www.gamersky.com','www.inven.co.kr','photo.inven.co.kr',
+            'blog.hacosta.co.jp','showartx.net','www.gamersky.com','www.inven.co.kr','photo.inven.co.kr',
             'www.ajunews.com','sportsseoul.com','www.sportsseoul.com','crazygiant.imweb.me','teapawt.net','www.shypetal.com'}
 CREATOR_ACCOUNTS={'yui':'super_yuisan','mimmi':'Mimmi_official'}
 FORMATS={'JPEG':'jpg','PNG':'png','WEBP':'webp'}
@@ -116,6 +116,41 @@ def page_images(raw,url,model):
                 more.append(target)
         # No source identity/album content should be inferred from gallery count.
         return selected,more,'scoped_public_page' if selected else 'no_public_photos'
+    if urlsplit(url).hostname=='showartx.net':
+        # Public article-specific ArtGravia preview images. No numeric URL
+        # enumeration or paid product download; skip unrelated posts and ads.
+        work=re.fullmatch(r'/artgravia-vol-(\\d{2,4})-yui/?',urlsplit(url).path,re.I)
+        if model!='yui' or not work:
+            return [],[],'unscoped_page_rejected'
+        volume=int(work.group(1))
+        soup=BeautifulSoup(raw,'html.parser')
+        heading=' '.join(h.get_text(' ',strip=True) for h in soup.select('h1,title'))
+        if (not MODEL_PATTERNS[model].search(heading) or
+                not re.search(r'(?<!\\d)'+str(volume)+r'(?!\\d)',heading) or
+                'artgravia' not in heading.casefold()):
+            return [],[],'missing_model_or_volume_context'
+        article=soup.select_one('article') or soup.select_one('.entry-content')
+        if article is None:return [],[],'unscoped_page_rejected'
+        chosen={}
+        # Inspect only already-published <img> and its explicit link, never
+        # synthesize missing ART_<volume>_<n>.jpg asset paths.
+        for img in article.select('img'):
+            if img.find_parent(class_=re.compile(r'related|recommend|comment|advert|sidebar',re.I)):
+                continue
+            links=[img.get('data-original'),img.get('data-src'),img.get('src')]
+            anchor=img.find_parent('a')
+            if anchor:links.insert(0,anchor.get('href'))
+            for link in links:
+                if not link:continue
+                candidate=urljoin(url,link);p=urlsplit(candidate)
+                if p.scheme!='https' or p.hostname!='showartx.net' or p.query or p.fragment:
+                    continue
+                m=re.fullmatch(r'/wp-content/uploads/\\d{4}/\\d{2}/ART_'+str(volume)+r'_(\\d{1,3})(?:-(\\d{2,5})x\\d{2,5})?\\.jpg',p.path,re.I)
+                if not m:continue
+                number=int(m.group(1));native=m.group(2) is None
+                if number not in chosen or native and not chosen[number][0]:
+                    chosen[number]=(native,candidate)
+        return [chosen[k][1] for k in sorted(chosen)],[],'scoped_public_page' if chosen else 'no_public_photos'
     if urlsplit(url).hostname=='www.shypetal.com':
         # The ordinary page declares its individual lightbox image list. Read
         # that public JSON only; never click its compressed-download controls.
