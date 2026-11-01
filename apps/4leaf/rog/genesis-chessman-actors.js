@@ -48,12 +48,20 @@
  });
  const originalFor=id=>{
   if(Object.hasOwn(NON_ACTOR_OBS,id))return null;
-  // Prefer the complete 37 verified source frames only for the three
-  // historically inspected actor IDs. Existing partial verified packets
-  // remain the fallback for every other chessman and cold-cache failure.
+  // The 2002 source inventory now has 45 genuine complete 37-frame
+  // actor packets, with member SHA256 individually checked. Only actors
+  // whose camera-facing source sprites were ALREADY independently reviewed
+  // are promoted to full live-frame playback. Unreviewed 0067/0068/0074/
+  // 0086/0088 keep their former partial pixels instead of inventing a
+  // front/action mapping from extra frames. All source frames remain
+  // archived in ORIGINAL_LEAF_FULL_ACTION_FRAMES for future review.
   const full=window.ORIGINAL_LEAF_FULL_ACTION_FRAMES?.[id];
   if(full?.frames?.length===37&&full.originalAnimationCount===37&&
-    full.frames.every((f,i)=>f.index===i))return full;
+    full.frames.every((f,i)=>f.index===i)&&
+    Object.hasOwn(AUDITED_FRONT_SOURCE,id)&&
+    full.frames.every(f=>typeof f.url==='string'&&
+      f.url.startsWith('./original/OBS/action-full/')&&
+      /^[a-f0-9]{64}$/.test(f.sha256)))return full;
   return window.ORIGINAL_LEAF_OBS_FRAMES?.[id]||null;
  };
  const poses=['idle','walk','attack','hurt','victory'];
