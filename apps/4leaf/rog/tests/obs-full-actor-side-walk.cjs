@@ -23,7 +23,11 @@ const {chromium,webkit}=require('playwright');
    .map(([id,data])=>({id,count:data.frames.length,source:data.originalMember,
     indexes:data.frames.map(f=>f.index),
     sha:data.sourceSHA256})));
-  assert.deepEqual(available.map(x=>x.id),['0040','0046','0078']);
+  assert.equal(available.length,45,
+   'complete source inventory must contain all 45 SHA-verified original 37-frame members');
+  for(const id of ['0040','0046','0078'])
+   assert.ok(available.some(a=>a.id===id),
+    'previously visually reviewed side/attack actor must never be lost: '+id);
   assert.ok(available.every(x=>x.count===37&&
    x.indexes.every((n,i)=>n===i)&&/^[a-f0-9]{64}$/.test(x.sha)));
   await page.locator('[data-route="lobby"]').first().click();
