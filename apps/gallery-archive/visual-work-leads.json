@@ -1,0 +1,147 @@
+{
+  "schema_version": 1,
+  "model": "yui",
+  "evidence": "User-supplied screenshots dated 2026-11-01; item counts are the user's visible folder counts, not publisher expected counts or repository stored-file counts.",
+  "works": [
+    {
+      "key": "artgravia-639",
+      "series": "ArtGravia",
+      "volume": 639,
+      "title": "ArtGravia Vol.639 [Yui]",
+      "observed_items": 13
+    },
+    {
+      "key": "artgravia-650",
+      "series": "ArtGravia",
+      "volume": 650,
+      "title": "ArtGravia Vol.650 [Yui]",
+      "observed_items": 13
+    },
+    {
+      "key": "artgravia-670",
+      "series": "ArtGravia",
+      "volume": 670,
+      "title": "ArtGravia Vol.670 [Yui]",
+      "observed_items": 13
+    },
+    {
+      "key": "artgravia-677",
+      "series": "ArtGravia",
+      "volume": 677,
+      "title": "ArtGravia Vol.677 [Yui]",
+      "observed_items": 13
+    },
+    {
+      "key": "artgravia-684",
+      "series": "ArtGravia",
+      "volume": 684,
+      "title": "ArtGravia Vol.684 [Yui]",
+      "observed_items": 13
+    },
+    {
+      "key": "artgravia-693",
+      "series": "ArtGravia",
+      "volume": 693,
+      "title": "ArtGravia Vol.693 [Yui]",
+      "observed_items": 13
+    },
+    {
+      "key": "yui-asuna-qipao",
+      "series": "Yui",
+      "work_name": "Asuna Qipao",
+      "title": "Yui — Asuna Qipao",
+      "observed_items": 13
+    },
+    {
+      "key": "yui-become-beautiful",
+      "series": "Yui",
+      "work_name": "Become Beautiful",
+      "title": "Yui — Become Beautiful",
+      "observed_items": 13
+    },
+    {
+      "key": "yui-green",
+      "series": "Yui",
+      "work_name": "Green",
+      "title": "Yui — Green",
+      "observed_items": 12
+    },
+    {
+      "key": "yui-meow",
+      "series": "Yui",
+      "work_name": "Meow",
+      "title": "Yui — Meow",
+      "observed_items": 13
+    },
+    {
+      "key": "yui-night-cat",
+      "series": "Yui",
+      "work_name": "Night Cat",
+      "title": "Yui — Night Cat",
+      "observed_items": 13
+    },
+    {
+      "key": "yui-night-training",
+      "series": "Yui",
+      "work_name": "Night Training",
+      "title": "Yui — Night Training",
+      "observed_items": 13
+    },
+    {
+      "key": "yui-pure",
+      "series": "Yui",
+      "work_name": "Pure",
+      "title": "Yui — Pure",
+      "observed_items": 13
+    },
+    {
+      "key": "yui-summer",
+      "series": "Yui",
+      "work_name": "Summer",
+      "title": "Yui — Summer",
+      "observed_items": 13
+    },
+    {
+      "key": "yui-time-for-strawberries",
+      "series": "Yui",
+      "work_name": "Time for Strawberries",
+      "title": "Yui — Time for Strawberries",
+      "observed_items": 13
+    },
+    {
+      "key": "yui-baby-blue",
+      "series": "Yui Sim",
+      "work_name": "Baby Blue",
+      "title": "Yui Sim Vol.1 Baby Blue",
+      "observed_items": 13
+    },
+    {
+      "key": "artgravia-663",
+      "series": "ArtGravia",
+      "volume": 663,
+      "title": "ArtGravia Vol.663 [Yui]",
+      "observed_items": 32
+    },
+    {
+      "key": "yui-athletic-club",
+      "series": "Yui",
+      "work_name": "Athletic Club",
+      "title": "Yui — Athletic Club",
+      "observed_items": 104
+    },
+    {
+      "key": "yui-blackroom",
+      "series": "Yui",
+      "work_name": "Blackroom",
+      "title": "Yo-U Yui — Blackroom",
+      "observed_items": 148
+    },
+    {
+      "key": "yui-wet",
+      "series": "Yui",
+      "work_name": "Wet Yui",
+      "title": "Yui — Wet Yui",
+      "observed_items": 81
+    }
+  ]
+}
