@@ -42,6 +42,13 @@ def acquire(owner_path:Path,public_path:Path,out:Path,client=None):
     assert public['model']==MODEL
     allhashes={p['sha256'] for a in owner['albums'] for p in a['images']}
     allhashes.update(p['sha256'] for a in public['albums'] for p in a['images'])
+    seen_in={}
+    for album in owner['albums']:
+        for p in album['images']:
+            seen_in.setdefault(p['sha256'],set()).add('owner:'+album['id'])
+    for album in public['albums']:
+        for p in album['images']:
+            seen_in.setdefault(p['sha256'],set()).add('pages:'+album['id'])
     current=next((a for a in owner['albums'] if a['id']==ALBUM),None)
     oldcount=len(current['images']) if current else 0
     occupied={p['number'] for p in current['images']} if current else set()
@@ -72,7 +79,7 @@ def acquire(owner_path:Path,public_path:Path,out:Path,client=None):
             digest=meta['sha256']
             if digest in seen:
                 duplicates+=1
-                print('OBSERVED_PUBLIC_PHOTO_ALREADY_STORED',position,flush=True)
+                print('OBSERVED_PUBLIC_PHOTO_ALREADY_STORED',position,'sha',digest[:16], 'albums',','.join(sorted(seen_in.get(digest,[]))),flush=True)
                 continue
             seen.add(digest)
             n=next_number
