@@ -34,6 +34,7 @@ ALLOWED_EXACT = {
     "cdn.imweb.me", "image.ajunews.com", "t1.daumcdn.net",
     "img-jp-a.cdnimg.vip", "showartx.net", "www.nicewww.com",
     "public-files.gumroad.com", "assets.gumroad.com", "static-2.gumroad.com",
+    "image.shypetal.com",  # Individual image assets explicitly declared on public work pages
 }
 ALLOWED_PIXIBB = re.compile(r"(?:imgx\d{3}|images\d{2})\.pixibb\.com\Z", re.I)
 BLOCKED_ORIGINS = {"cdn.jliji.com"}
@@ -46,6 +47,9 @@ def allowed_url(raw: str) -> tuple[bool, str]:
     try:
         url = urlsplit(raw)
         host = (url.hostname or "").lower()
+        if host == "image.shypetal.com" and not re.fullmatch(
+                r"/image/[^/]+/ShyPetal\.com@-\d{1,4}\.webp", url.path):
+            return False, "unapproved_shypetal_asset_path"
         if host in BLOCKED_ORIGINS:
             return False, "origin_451_not_retried"
         if (url.scheme != "https" or not host
