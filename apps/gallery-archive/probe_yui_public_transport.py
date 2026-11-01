@@ -6,6 +6,8 @@ from urllib.parse import urlsplit
 
 import requests
 from PIL import Image, ImageStat
+from bs4 import BeautifulSoup
+from direct_photo_pipeline import page_images
 from io import BytesIO
 
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'yui-gallery'))
@@ -31,6 +33,13 @@ def inspect(url):
         row.update(public_session_status=r.status_code,
                    public_session_type=r.headers.get('Content-Type','').split(';')[0],
                    public_session_bytes=len(r.content))
+        if urlsplit(url).hostname=='www.nicesss.com' and r.headers.get('Content-Type','').lower().startswith('text/html'):
+            bs=BeautifulSoup(r.content,'html.parser')
+            urls,pages,status=page_images(r.content,url,'yui')
+            row.update(parser_status=status,parser_photo_count=len(urls),
+                page_heading=(bs.select_one('h1').get_text(' ',strip=True)[:90] if bs.select_one('h1') else None),
+                candidate_sections={css:len(bs.select(css)) for css in ('article','.entry-content','.article-content','.post-content','.entry','.post')},
+                native_preview_img_count=sum('nicewww.com/wp-content/uploads/2026/05/' in (im.get('src') or '') for im in bs.select('img')))
         if r.headers.get('Content-Type','').lower().startswith('image/'):
             with Image.open(BytesIO(r.content)) as im:
                 im.load();row.update(image_dimensions=(im.width,im.height),image_format=im.format,
