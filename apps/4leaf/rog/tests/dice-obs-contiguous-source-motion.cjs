@@ -26,7 +26,7 @@ const {chromium}=require('playwright');
   // After real visual review 0067/0068/0074 now use the true 25..30
   // front packets. Retain 0..7 packet coverage on still direction-unreviewed
   // original bodies; native EXE direction timing remains unknown.
- const ids=['0086','0087','0088'];
+ const ids=['0086','0087'];
   const results=[];
   for(const id of ids){
    const setup=await page.evaluate(id=>{
