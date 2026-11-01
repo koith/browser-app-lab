@@ -53,10 +53,10 @@ def extract(resource_dir,root):
     if set(reviewed)!=set(REVIEWED.values()):
         raise ValueError('Missing source actors '+str(set(REVIEWED.values())-set(reviewed)))
     (out/'manifest.js').write_text(
-      '/* 2002 original OBS.pak complete 37-frame source sprites.\\n'
-      ' * Historic EXE action/direction mapping NOT decoded; source images only. */\\n'
+      '/* 2002 original OBS.pak complete 37-frame source sprites.\n'
+      ' * Historic EXE action/direction mapping NOT decoded; source images only. */\n'
       'window.ORIGINAL_LEAF_FULL_ACTION_FRAMES='+
-      json.dumps(reviewed,indent=1,sort_keys=True)+';\\n')
+      json.dumps(reviewed,indent=1,sort_keys=True)+';\n')
     (out/'provenance.json').write_text(json.dumps({
       'sourcePakSHA256':target.sha(paths[0].read_bytes()),
       'actorCount':len(reviewed),
@@ -65,7 +65,7 @@ def extract(resource_dir,root):
                  for k,v in reviewed.items()},
       'originalExeActionTableDecoded':False,
       'review':'per-frame source body angle verified visually, action FPS and direction control INFERRED'
-    },indent=2)+'\\n')
+    },indent=2)+'\n')
     return reviewed
 
 if __name__=='__main__':
