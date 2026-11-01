@@ -58,6 +58,31 @@ def flatten(catalog: dict, model: str) -> dict:
                      "expected":album.get("expected"),"images":album_photos}
     return albums
 
+def optically_verified_upgrade(previous, incoming):
+    """Only replace an existing photo after measured SAME-PHOTO improvement.
+
+    Pixel dimensions and file byte count are useful diagnostics but cannot
+    prove genuine sharpness or absence of a watermark. A photo slot cannot
+    be repurposed for an unrelated source image by merely increasing its size.
+    """
+    v=incoming.get('visual_quality')
+    if not isinstance(v,dict):
+        return False
+    if (v.get('method')!='paired-decoded-pixel-v1'
+            or v.get('confidence')!='measured'
+            or v.get('same_photo_verified') is not True
+            or v.get('compared_to_sha256')!=previous.get('sha256')
+            or incoming.get('variant_of_sha256')!=previous.get('sha256')
+            or incoming.get('higher_visual_quality_replacement') is not True):
+        return False
+    if v.get('relation')=='higher':
+        return True
+    if v.get('relation')=='comparable':
+        return (previous.get('watermark_status')=='present_verified'
+                and incoming.get('watermark_status')=='absent_verified')
+    return False
+
+
 def merge(stage: Path, previous: Path, model: str):
     current_path=stage/"metadata/catalog.json"
     current=json.loads(current_path.read_text(encoding="utf-8"))
@@ -83,9 +108,7 @@ def merge(stage: Path, previous: Path, model: str):
                     if old_file.exists():
                         old_file.unlink()
                 continue
-            old_quality=(former["width"]*former["height"],former["bytes"])
-            new_quality=(photo["width"]*photo["height"],photo["bytes"])
-            if new_quality>old_quality:
+            if optically_verified_upgrade(former,photo):
                 historic["images"][number]=photo
                 higher+=1
             else:

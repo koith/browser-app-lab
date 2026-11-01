@@ -28,6 +28,7 @@ jobs:
       - name: Verify unchanged original bytes, resume, corruption refusal and no photo bundles
         run: |
           python apps/gallery-archive/test_direct_photo_pipeline.py
+          python apps/gallery-archive/test_incremental.py
           python apps/gallery-archive/test_visual_public_work.py
           python apps/gallery-archive/test_remote_readback_deadline.py
           python apps/gallery-archive/test_work_coverage.py
