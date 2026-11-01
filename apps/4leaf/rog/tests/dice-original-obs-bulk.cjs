@@ -119,7 +119,7 @@ assert.equal(frontReviewed,72,'PR #417 front-reviewed frames');
   assert.deepEqual(state.actors.map(x=>x.id),['0043','0054']);
   assert.ok(state.actors.every(x=>x.rig==='original-obs-sprite'&&
    x.source.startsWith('OBS/')&&x.map==='unverified'&&x.css==='none'&&
-   x.png.startsWith('./original/OBS/bulk/')&&x.pixels[0]>20));
+   x.png.startsWith('./original/OBS/action-full/')&&x.pixels[0]>20));
   assert.ok(state.actors.every(x=>x.sourceOrientation.replaceAll(' ','')==='matrix(1,0,0,-1,0,0)'),
    'archival OBS RGB source PNGs are stored bottom-up; real game CSS must unflip them upright');
   assert.equal(await page.locator('#board-pawns img[src*="/Registry/sava"]').count(),0,
@@ -145,7 +145,8 @@ assert.equal(frontReviewed,72,'PR #417 front-reviewed frames');
    proxy:getComputedStyle(a.querySelector('.leaf-chess-actor')).display
   })));
   assert.deepEqual(duel.map(x=>x.id),['0043','0054']);
-  assert.ok(duel.every(x=>x.src.startsWith('./original/OBS/bulk/')&&x.proxy==='none'));
+  assert.ok(duel.every(x=>x.src.startsWith('./original/OBS/action-full/')&&x.proxy==='none'),
+   'full source in actual battle must use 2002 OBS 37-frame actor PNGs');
   await page.screenshot({path:'leaf-new-original-2002-obs-body-actors.png'});
   assert.deepEqual(errors,[],'no runtime exceptions while playing native OBS PNG frames');
   console.log('NATIVE OBS 2002 BULK CHARACTER SCENE VERIFIED '+JSON.stringify({
