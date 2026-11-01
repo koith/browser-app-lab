@@ -40,7 +40,12 @@ async def main():
             json={'schema_version':1,'model':'yui','albums':[]}))
         await context.add_init_script("sessionStorage.setItem('yui-owner-session',JSON.stringify({api:'https://owner.example',token:'fixture-secret'}))")
         page=await context.new_page();await page.goto(origin,wait_until='domcontentloaded')
+        await page.locator('#albumgrid .album').first.wait_for()
+        # The asynchronous new owner catalog must append a new card, never
+        # detach an existing album card under the user's scrolling finger.
+        await page.evaluate("window.__firstCardBeforeOwner = document.querySelector('#albumgrid .album')")
         await page.locator('.album[data-id="owner-test"]').click()
+        assert await page.evaluate("window.__firstCardBeforeOwner.isConnected"),'Owner refresh detached an existing gallery card'
         await page.locator('#detailphotos .photo').first.click()
         await page.wait_for_function("document.querySelector('#full').naturalWidth===640")
         assert await page.locator('#original').get_attribute('href') is not None

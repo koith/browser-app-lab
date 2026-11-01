@@ -496,6 +496,20 @@ Promise.all([
   if(photoSignature(ownerStored)===photoSignature(nextOwner))return;
   ownerStored=nextOwner;
   rebuildStored();
+  // A newly indexed work must be usable immediately without replacing any
+  // existing card (which would cancel an ongoing tap or scroll).
+  if(!$('browse').hidden && mode==='albums' && !activePublisher && !$('search').value.trim()){
+   const grid=$('albumgrid'),shown=new Set([...grid.querySelectorAll('.album[data-id]')].map(b=>b.dataset.id));
+   for(const a of available()){
+    if(shown.has(a.id))continue;
+    const template=document.createElement('template');template.innerHTML=card(a,true);
+    const node=template.content.firstElementChild;
+    node.onclick=()=>{const current=stored.find(x=>x.id===a.id);if(current&&validImages(current).length)openAlbum(a.id)};
+    grid.appendChild(node);shown.add(a.id);
+   }
+   $('total').textContent=grid.querySelectorAll('.album').length+' albums';
+   observeOwner();
+  }
   // Keep existing DOM nodes and active scroll/touch/lightbox unchanged.
   // The next user-initiated filter or navigation uses the updated catalogue;
   // never replace all cards from an asynchronous background response.
