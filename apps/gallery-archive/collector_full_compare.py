@@ -248,7 +248,7 @@ def inspect_work(row,client,browser,max_pages=500,max_images=650,
             except Exception as exc:engine_statuses['existing_scoped:'+type(exc).__name__]+=1
         else:engine_statuses['existing_scoped:unsupported_origin']+=1
         try:
-            scrape,st=scoped_generic_html(raw,url,row['model'])
+            scrape,st=independent_scrapy_extract(raw,url,row['model'])
             methods['scrapy_selectors'].extend(u for u in scrape if alternative_safe_photo(u))
             engine_statuses['scrapy:'+st]+=1
         except Exception as exc:engine_statuses['scrapy:'+type(exc).__name__]+=1
