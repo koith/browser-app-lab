@@ -137,7 +137,7 @@ class LiveBrowser:
             if urlsplit(url).hostname=='teapawt.net':
                 urls,_,status=page_images(raw,url,model)
                 return urls,'exact_author_'+status
-            urls,status=scoped_generic_html(raw,url,model)
+            urls,status=independent_scrapy_extract(raw,url,model)
             return urls,status
         except Exception as exc:return [],'error_'+type(exc).__name__
     def close(self):
@@ -284,9 +284,17 @@ def inspect_work(row,client,browser,max_pages=500,max_images=650,
     author_scope=all(u.split('/')[2]=='teapawt.net' for u in initial) and bool(initial)
     trusted=set(SOURCE_ENS)
     if author_scope:trusted.discard('scrapy_selectors')
-    baseline=set(asset_group(u) for u in accepted['existing_scoped'])
-    pool=set(asset_group(u) for k,urls in accepted.items() if k in trusted for u in urls)
-    result['extra_asset_groups_candidate_not_proven_distinct_cuts']=len(pool-baseline)
+    # Compare *new engine discoveries* against BOTH what the current parser
+    # discovers AND the thousands of preexisting public-source manifest URLs.
+    # Old manifest evidence must never count as new collector output.
+    baseline_engine=('existing_scoped','manifest_known')
+    baseline=set(asset_group(u) for k in baseline_engine for u in accepted[k])
+    alternative_engines=trusted-set(baseline_engine)
+    alternatives=set(asset_group(u) for k in alternative_engines for u in accepted[k])
+    pool=baseline|alternatives
+    result['known_prior_asset_groups']=len(baseline)
+    result['alternative_engine_asset_groups']=len(alternatives)
+    result['extra_asset_groups_candidate_not_proven_distinct_cuts']=len(alternatives-baseline)
     result['untrusted_social_generic_candidates']=len(accepted['scrapy_selectors']) if author_scope else 0
     result['candidate_distinct_assets_across_methods']=len(pool)
     # Stronger evidence: downloads actual decoded public image bytes, with
@@ -320,9 +328,11 @@ def inspect_work(row,client,browser,max_pages=500,max_images=650,
                                                 if v.get('status')=='decoded_sha'})
     result['public_image_failure_statuses']=dict(Counter(v.get('status','unknown')
                                               for v in by_url.values() if v.get('status')!='decoded_sha'))
-    baseline_sha=decoded_sha['existing_scoped']
-    verified_all=set().union(*(decoded_sha[e] for e in trusted))
-    result['extra_decoded_sha_not_in_baseline']=len(verified_all-baseline_sha)
+    baseline_sha=set().union(*(decoded_sha[k] for k in baseline_engine))
+    alternative_sha=set().union(*(decoded_sha[k] for k in alternative_engines))
+    result['existing_corpus_decoded_sha']=len(baseline_sha)
+    result['alternative_engines_decoded_sha']=len(alternative_sha)
+    result['extra_decoded_sha_not_in_baseline']=len(alternative_sha-baseline_sha)
     result['unverified_image_urls']=max(0,len(image_urls)-len(by_url))
     result['no_auth_or_protected_retries']=True
     result['reason']='limited_incomplete' if result['limits'] else 'all_registered_pages_visited_within_public_access'
