@@ -1,0 +1,110 @@
+name: Yui Mimmi Exhaustive Registered Gallery Collector Comparison
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - apps/gallery-archive/collector_full_census.py
+      - apps/gallery-archive/test_collector_full_census.py
+      - apps/gallery-archive/collector_full_compare.py
+      - apps/gallery-archive/test_collector_full_compare.py
+      - apps/gallery-archive/collector_full_queue_comparison.py
+      - apps/gallery-archive/collector_full_aggregate.py
+      - .github/workflows/gallery-exhaustive-engines-audit.yml
+permissions:
+  contents: read
+jobs:
+  census-and-offline-qa:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install requests Pillow beautifulsoup4 gallery-dl Scrapy
+      - name: Demand 100 percent source/work/lead scope
+        run: |
+          python -m py_compile apps/gallery-archive/collector_full_census.py apps/gallery-archive/collector_full_compare.py apps/gallery-archive/collector_full_queue_comparison.py apps/gallery-archive/collector_full_aggregate.py
+          python apps/gallery-archive/test_collector_full_census.py
+          python apps/gallery-archive/test_collector_full_compare.py
+          python apps/gallery-archive/collector_full_census.py --out /tmp/all-registered-gallery-targets.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: all-registered-gallery-targets
+          path: /tmp/all-registered-gallery-targets.json
+          retention-days: 30
+  crawlee-scrapy-full-queue:
+    needs: census-and-offline-qa
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install crawlee Scrapy
+      - run: python apps/gallery-archive/collector_full_queue_comparison.py --out /tmp/all-source-queue-ab.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: full-gallery-crawlee-scrapy-queue
+          path: /tmp/all-source-queue-ab.json
+          if-no-files-found: warn
+          retention-days: 30
+  all-source-engine-comparison:
+    needs: census-and-offline-qa
+    runs-on: ubuntu-24.04
+    timeout-minutes: 58
+    strategy:
+      fail-fast: false
+      max-parallel: 4
+      matrix:
+        model: [yui, mimmi]
+        shard: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+    env:
+      MODEL: ${{ matrix.model }}
+      SHARD: ${{ matrix.shard }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install requests Pillow beautifulsoup4 gallery-dl Scrapy playwright
+      - run: python -m playwright install --with-deps chromium
+      - name: Audit every registered item in assigned shard, including actual public bytes
+        shell: bash
+        run: |
+          python apps/gallery-archive/collector_full_compare.py \
+            --model "$MODEL" --shard "$SHARD" --shards 12 \
+            --max-pages 600 --max-images 650 --browser-pages 600 \
+            --work-seconds 1100 \
+            --out "$RUNNER_TEMP/full-${MODEL}-${SHARD}.json"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: full-source-${{ matrix.model }}-${{ matrix.shard }}
+          path: ${{ runner.temp }}/full-${{ matrix.model }}-${{ matrix.shard }}.json
+          if-no-files-found: warn
+          retention-days: 30
+  require-every-registered-target:
+    if: always()
+    needs: [census-and-offline-qa, all-source-engine-comparison]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: full-source-*
+          path: /tmp/gallery-full-shards
+          merge-multiple: true
+      - run: |
+          python apps/gallery-archive/collector_full_aggregate.py \
+            --report-dir /tmp/gallery-full-shards \
+            --shards 12 --out /tmp/full-gallery-engine-comparison.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: full-gallery-engine-comparison-all-registered-targets
+          path: /tmp/full-gallery-engine-comparison.json
+          if-no-files-found: warn
+          retention-days: 30
