@@ -16,6 +16,42 @@ def photo(seed):
 
 
 class DirectTests(unittest.TestCase):
+    @unittest.skipUnless(importlib.util.find_spec('scrapy') is not None,
+                         'Actual Scrapy dependency required')
+    def test_unowned_named_work_becomes_staged_album_only_after_identity_evidence(self):
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);base=root/'apps/yui-gallery';base.mkdir(parents=True)
+            (base/'stored-albums.json').write_text('{"model":"yui","albums":[]}')
+            (root/'apps/gallery-archive').mkdir()
+            (root/'apps/gallery-archive/global_source_registry.json').write_text('{"sources":[]}')
+            page='https://public-gallery.example.org/yui-sim-spring/'
+            img='https://images.public-gallery.example.org/spring/08.jpg'
+            existing=photo(7);new=photo(77)
+            owner={'model':'yui','schema_version':1,'albums':[{
+                'id':'older-work','title':'Older Yui Work','images':[{
+                    'number':1,'sha256':hashlib.sha256(existing).hexdigest()}]}]}
+            census={'targets':[{'kind':'work','model':'yui','id':'new-yui-spring',
+                  'title':'Yui Sim Spring','owner_registered':False,
+                  'manifest_sources':['public-work-pages.json'],'urls':[page]}]}
+            class Client:
+                def get(self,url):
+                    if url==page:
+                        return type('R',(),{'content':f'<h1>Yui Sim Spring</h1><article><img src="{img}"></article>'.encode()})()
+                    if url==img:return type('R',(),{'content':new})()
+                    raise ValueError('unexpected source')
+            with patch('collector_full_census.census',return_value=census),patch(
+                 'direct_photo_pipeline.page_images',
+                 return_value=([],[],'no_public_photos')):
+                got=collect(root,'yui',owner,root/'stage',5,4,Client(),
+                            alternative_engines=True,render_budget=0)
+            self.assertEqual(got['new_local_individual_files'],1,got)
+            self.assertEqual(got['owner_census_source_coverage']['newly_scheduled_unowned_works'],1)
+            catalog=json.loads((root/'stage/metadata/catalog.json').read_text())
+            self.assertEqual(catalog['albums'][0]['id'],'new-yui-spring')
+            p=catalog['albums'][0]['images'][0]
+            self.assertEqual((root/'stage'/p['key']).read_bytes(),new)
+
     def test_all_recorded_public_hosts_without_static_allowlist(self):
         from direct_photo_pipeline import safe_registered_public_page
         self.assertTrue(safe_registered_public_page(
