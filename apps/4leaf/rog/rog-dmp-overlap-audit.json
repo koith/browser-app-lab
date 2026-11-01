@@ -1,0 +1,228 @@
+{
+  "checkedMaps": 26,
+  "checkedCells": 1920,
+  "duplicateCoordinates": 0,
+  "severeBoundingCollisions": 0,
+  "maximumRectangularOverlapPercent": 0,
+  "sourceGrid": {
+    "width": 2800,
+    "height": 1551,
+    "pitchX": 70,
+    "pitchY": 47
+  },
+  "projectedPitch": {
+    "x": 150,
+    "y": 100
+  },
+  "scope": "VERIFIED-DMP-DATA-AND-WEB-RECTANGLE-GEOMETRY; ORIGINAL-MESH/ALPHA/PIXEL-FIDELITY STILL UNVERIFIED",
+  "maps": [
+    {
+      "map": "0149",
+      "tiles": 46,
+      "duplicate": 0,
+      "severeBoundingCollisions": 0,
+      "adjacent": 30,
+      "maxRectangularOverlapPercent": 0
+    },
+    {
+      "map": "0153",
+      "tiles": 114,
+      "duplicate": 0,
+      "severeBoundingCollisions": 0,
+      "adjacent": 61,
+      "maxRectangularOverlapPercent": 0
+    },
+    {
+      "map": "0159",
+      "tiles": 58,
+      "duplicate": 0,
+      "severeBoundingCollisions": 0,
+      "adjacent": 36,
+      "maxRectangularOverlapPercent": 0
+    },
+    {
+      "map": "0160",
+      "tiles": 74,
+      "duplicate": 0,
+      "severeBoundingCollisions": 0,
+      "adjacent": 57,
+      "maxRectangularOverlapPercent": 0
+    },
+    {
+      "map": "0165",
+      "tiles": 69,
+      "duplicate": 0,
+      "severeBoundingCollisions": 0,
+      "adjacent": 50,
+      "maxRectangularOverlapPercent": 0
+    },
+    {
+      "map": "0170",
+      "tiles": 135,
+      "duplicate": 0,
+      "severeBoundingCollisions": 0,
+      "adjacent": 126,
+      "maxRectangularOverlapPercent": 0
+    },
+    {
+      "map": "0172",
+      "tiles": 104,
+      "duplicate": 0,
+      "severeBoundingCollisions": 0,
+      "adjacent": 78,
+      "maxRectangularOverlapPercent": 0
+    },
+    {
+      "map": "0173",
+      "tiles": 68,
+      "duplicate": 0,
+      "severeBoundingCollisions": 0,
+      "adjacent": 40,
+      "maxRectangularOverlapPercent": 0
+    },
+    {
+      "map": "0180",
+      "tiles": 90,
+      "duplicate": 0,
+      "severeBoundingCollisions": 0,
+      "adjacent": 62,
+      "maxRectangularOverlapPercent": 0
+    },
+    {
+      "map": "0183",
+      "tiles": 99,
+      "duplicate": 0,
+      "severeBoundingCollisions": 0,
+      "adjacent": 66,
+      "maxRectangularOverlapPercent": 0
+    },
+    {
+      "map": "0187",
+      "tiles": 81,
+      "duplicate": 0,
+      "severeBoundingCollisions": 0,
+      "adjacent": 60,
+      "maxRectangularOverlapPercent": 0
+    },
+    {
+      "map": "0189",
+      "tiles": 45,
+      "duplicate": 0,
+      "severeBoundingCollisions": 0,
+      "adjacent": 32,
+      "maxRectangularOverlapPercent": 0
+    },
+    {
+      "map": "0190",
+      "tiles": 85,
+      "duplicate": 0,
+      "severeBoundingCollisions": 0,
+      "adjacent": 52,
+      "maxRectangularOverlapPercent": 0
+    },
+    {
+      "map": "0191",
+      "tiles": 52,
+      "duplicate": 0,
+      "severeBoundingCollisions": 0,
+      "adjacent": 41,
+      "maxRectangularOverlapPercent": 0
+    },
+    {
+      "map": "0192",
+      "tiles": 72,
+      "duplicate": 0,
+      "severeBoundingCollisions": 0,
+      "adjacent": 48,
+      "maxRectangularOverlapPercent": 0
+    },
+    {
+      "map": "0193",
+      "tiles": 37,
+      "duplicate": 0,
+      "severeBoundingCollisions": 0,
+      "adjacent": 21,
+      "maxRectangularOverlapPercent": 0
+    },
+    {
+      "map": "0195",
+      "tiles": 75,
+      "duplicate": 0,
+      "severeBoundingCollisions": 0,
+      "adjacent": 48,
+      "maxRectangularOverlapPercent": 0
+    },
+    {
+      "map": "0197",
+      "tiles": 57,
+      "duplicate": 0,
+      "severeBoundingCollisions": 0,
+      "adjacent": 29,
+      "maxRectangularOverlapPercent": 0
+    },
+    {
+      "map": "0198",
+      "tiles": 111,
+      "duplicate": 0,
+      "severeBoundingCollisions": 0,
+      "adjacent": 90,
+      "maxRectangularOverlapPercent": 0
+    },
+    {
+      "map": "0199",
+      "tiles": 97,
+      "duplicate": 0,
+      "severeBoundingCollisions": 0,
+      "adjacent": 77,
+      "maxRectangularOverlapPercent": 0
+    },
+    {
+      "map": "0200",
+      "tiles": 34,
+      "duplicate": 0,
+      "severeBoundingCollisions": 0,
+      "adjacent": 27,
+      "maxRectangularOverlapPercent": 0
+    },
+    {
+      "map": "0202",
+      "tiles": 85,
+      "duplicate": 0,
+      "severeBoundingCollisions": 0,
+      "adjacent": 64,
+      "maxRectangularOverlapPercent": 0
+    },
+    {
+      "map": "0205",
+      "tiles": 75,
+      "duplicate": 0,
+      "severeBoundingCollisions": 0,
+      "adjacent": 66,
+      "maxRectangularOverlapPercent": 0
+    },
+    {
+      "map": "0207",
+      "tiles": 54,
+      "duplicate": 0,
+      "severeBoundingCollisions": 0,
+      "adjacent": 47,
+      "maxRectangularOverlapPercent": 0
+    },
+    {
+      "map": "0219",
+      "tiles": 45,
+      "duplicate": 0,
+      "severeBoundingCollisions": 0,
+      "adjacent": 33,
+      "maxRectangularOverlapPercent": 0
+    },
+    {
+      "map": "0221",
+      "tiles": 58,
+      "duplicate": 0,
+      "severeBoundingCollisions": 0,
+      "adjacent": 35,
+      "maxRectangularOverlapPercent": 0
+    }
+  ]
+}
