@@ -13,6 +13,7 @@ on:
       - apps/gallery-archive/direct_photo_pipeline.py
       - apps/gallery-archive/private_collection_snapshot.py
       - apps/gallery-archive/upload_verified_individual.py
+      - apps/gallery-archive/owner_upload_web_token.py
       - apps/gallery-archive/collect_teapawt_public.py
       - apps/gallery-archive/visual_public_work.py
       - apps/yui-gallery/public_photo_archive.py
@@ -23,6 +24,7 @@ on:
       - apps/gallery-archive/defer_verified_batch.py
       - apps/gallery-archive/private_collection_snapshot.py
       - apps/gallery-archive/upload_verified_individual.py
+      - apps/gallery-archive/owner_upload_web_token.py
       - apps/gallery-archive/test_private_collection_snapshot.py
       - apps/gallery-archive/test_deferred_verified_batch.py
       - apps/gallery-archive/transfer_individual_files.py
@@ -92,6 +94,7 @@ jobs:
           python apps/gallery-archive/test_deferred_verified_batch.py
           python apps/gallery-archive/test_private_collection_snapshot.py
           python apps/gallery-archive/test_upload_verified_individual.py
+          python apps/gallery-archive/test_owner_upload_web_token.py
           python apps/gallery-archive/test_transfer_individual_files.py
           python apps/gallery-archive/test_teapawt_public.py
           python apps/gallery-archive/test_public_failures.py
@@ -140,7 +143,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
-      - run: python -m pip install requests beautifulsoup4 Pillow Scrapy 'playwright==1.58.0'
+      - run: python -m pip install requests beautifulsoup4 Pillow Scrapy 'playwright==1.58.0' 'httpx==0.28.1'
       - name: Install Chromium only for public registered page rendering
         run: python -m playwright install --with-deps chromium
       - name: Install pinned owner storage client, not a photo archive
@@ -234,6 +237,9 @@ jobs:
           with open(os.environ['GITHUB_OUTPUT'],'a') as out:out.write('changed='+str(changed).lower()+'\n')
           print('ACTUAL_NEW_PHOTO_TRANSACTION',changed,d['new_photos'],d['upgraded_photos'])
           PY
+      - name: Refresh existing authenticated owner web token before individual upload
+        if: steps.delta.outputs.changed == 'true' && steps.incoming.outputs.found != 'true'
+        run: python apps/gallery-archive/owner_upload_web_token.py --github-env "$GITHUB_ENV" --best-effort
       - name: Upload originals and previews per photo with independent full SHA readback
         if: steps.delta.outputs.changed == 'true' && steps.incoming.outputs.found != 'true'
         run: |
@@ -251,6 +257,9 @@ jobs:
       - name: Persist the exact remotely verified batch without resetting deployed gallery QA
         if: steps.delta.outputs.changed == 'true' && env.ARCHIVE_PUBLICATION_MODE == 'deferred' && steps.incoming.outputs.found != 'true'
         run: python apps/gallery-archive/defer_verified_batch.py persist --stage "$RUNNER_TEMP/stage" --remote "$ARCHIVE_REMOTE"
+      - name: Renew normal owner web upload state before verified catalog commit
+        if: steps.delta.outputs.changed == 'true' && env.ARCHIVE_PUBLICATION_MODE != 'deferred'
+        run: python apps/gallery-archive/owner_upload_web_token.py --github-env "$GITHUB_ENV" --best-effort
       - name: Commit the owner catalogue only after full new-object readback
         if: steps.delta.outputs.changed == 'true' && env.ARCHIVE_PUBLICATION_MODE != 'deferred'
         run: |
