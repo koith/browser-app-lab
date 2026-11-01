@@ -7,11 +7,13 @@ on:
     paths:
       - "apps/demand-research/index.html"
       - "apps/demand-research/test_live_browser.py"
+      - "apps/demand-research/test_private_social_browser.py"
       - ".github/workflows/demand-live-browser.yml"
   pull_request:
     paths:
       - "apps/demand-research/index.html"
       - "apps/demand-research/test_live_browser.py"
+      - "apps/demand-research/test_private_social_browser.py"
       - ".github/workflows/demand-live-browser.yml"
   workflow_dispatch:
 permissions:
@@ -34,5 +36,7 @@ jobs:
           python -m playwright install --with-deps chromium
       - name: Grouped posts, attached images and no-password DOM fixture
         run: python apps/demand-research/test_live_browser.py
+      - name: Synthetic private gateway social search UI (one request, badge, profile link)
+        run: python apps/demand-research/test_private_social_browser.py
       - name: Real public API from browser with CORS (aggregate-only, no retained posts)
         run: python apps/demand-research/test_live_browser.py --live
