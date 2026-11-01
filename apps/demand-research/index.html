@@ -1,129 +1,135 @@
 <!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>리서치 아카이브 · TeraBox</title><style>
-:root{font-family:system-ui,-apple-system,"Apple SD Gothic Neo",sans-serif;background:#f4f6fa;color:#202b3d}*{box-sizing:border-box}body{margin:0}header{background:#142037;color:#fff;padding:24px max(18px,calc((100% - 1080px)/2))}header h1{font-size:23px;margin:0 0 5px}header small{color:#b9c9df}main{max-width:1080px;margin:auto;padding:24px 16px 60px}.info,.panel,.post,.metric{border:1px solid #e1e7f0;background:white;border-radius:15px}.info,.panel{padding:20px;margin-bottom:16px}.info{background:#fffaf0;border-color:#f0dab2}.info b{color:#85601a}.muted{color:#64748b;font-size:13px;line-height:1.65}input{min-width:0;width:100%;border:1px solid #ccd6e5;border-radius:9px;font-size:14px;padding:12px}button{background:#244878;color:#fff;border:0;border-radius:9px;padding:12px 17px;font-weight:750;cursor:pointer}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:18px 0}.metric{padding:18px}.metric b{font-size:27px;display:block;margin:5px 0}.toolbar{display:flex;gap:9px}.toolbar input{flex:1}.feed{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:13px}.post{overflow:hidden}.post .top,.post .foot{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:14px 16px}.post .top strong{font-size:13px;color:#2b609d}.post p{white-space:pre-wrap;overflow-wrap:anywhere;padding:0 16px;margin:0 0 13px;line-height:1.65;font-size:15px}.media{display:grid;grid-template-columns:repeat(2,1fr);gap:4px;background:#e5eaf1}.media img,.media video{display:block;max-height:350px;min-height:150px;width:100%;object-fit:contain;background:#131a28}.media .full{grid-column:1/-1}.post .foot{border-top:1px solid #edf1f6}.post a{color:#24548d;text-decoration:none;font-size:12px}.empty{grid-column:1/-1;padding:50px 12px;text-align:center;border:1px dashed #cbd5e1;border-radius:14px;color:#687990}#message{color:#aa3a2f;min-height:18px;font-size:13px}.hidden{display:none!important}.state{font-size:12px;color:#8e6113;background:#fff1d8;border-radius:20px;padding:7px 12px;display:inline-block;margin:15px 0}footer{font-size:12px;color:#718095;margin-top:30px;line-height:1.7}@media(max-width:650px){.metric{padding:12px}.metric b{font-size:20px}}
-</style></head><body><header><h1>리서치 아카이브</h1><small>게시글별 본문 · 사진 · 영상 | 비공개 TeraBox 원본 저장소</small></header><main>
-<div class="state" id="state">클라우드 연결 대기</div>
-<section class="info"><b>게시글·사진·영상은 테라박스에 저장합니다.</b><div class="muted">웹페이지는 한 게시글의 본문과 첨부파일을 함께 표시합니다. 휴대폰에는 전체 데이터를 다운로드하지 않습니다. 데이터가 실제로 저장·검증된 경우에만 게시글이 나타납니다.</div></section>
-<section class="panel" id="notice"><b>전용 주소만 열면 자동으로 연결됩니다.</b><p id="message" role="status" class="muted">게시글 보기 준비 중</p><div class="muted">비밀번호 입력은 필요 없습니다. 별도의 비공개 열람 주소를 북마크해서 사용합니다. 원본 파일은 휴대폰이 아닌 테라박스에 있습니다.</div></section>
-<div class="stats"><div class="metric"><small class="muted">검증된 게시글</small><b id="postCount">—</b></div><div class="metric"><small class="muted">표시된 사진</small><b id="imageCount">—</b></div><div class="metric"><small class="muted">표시된 영상</small><b id="videoCount">—</b></div></div>
-<section class="panel hidden" id="tools"><div class="toolbar"><input id="query" placeholder="글 내용 검색"><button id="search">검색</button><button id="refresh" style="background:#64748b">새로고침</button></div></section>
-<div class="feed" id="feed"><div class="empty">테라박스에 검증된 게시글이 연결되면<br>여기에 글·사진·영상이 게시글별로 나타납니다.</div></div>
-<div id="pagination" class="hidden" style="text-align:center;margin-top:20px"><button id="more">더 보기</button></div>
-<footer>원본은 테라박스에 저장하며, 미디어는 인증된 서버에서 필요한 구간만 전송합니다. 임의의 게시물 복사본은 공개 GitHub에 저장하지 않습니다. 게시물 보존은 원 플랫폼 이용조건과 개인 정보 관련 요건을 충족한 범위에서만 수행합니다.</footer></main>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex,nofollow"><meta name="referrer" content="no-referrer"><meta name="theme-color" content="#121c2b"><title>소비조사 · 게시글 보기</title>
+<style>
+:root{font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",system-ui,sans-serif;color:#1c293a;background:#f4f6fa}*{box-sizing:border-box}body{margin:0}header{background:#121c2b;color:white;padding:19px max(16px,calc((100vw - 1080px)/2))}header h1{font-size:22px;letter-spacing:-.6px;margin:0 0 3px}header small{color:#b5c4d8;font-size:12px}main{max-width:1112px;padding:18px 16px 65px;margin:auto}.toolbar{background:white;border-radius:14px;border:1px solid #e2e8f0;padding:14px;margin-bottom:14px}.toolbar-top{display:flex;align-items:center;justify-content:space-between;gap:8px}.status{font-size:12px;color:#65758b}button{border:0;border-radius:9px;background:#1d4c82;color:white;cursor:pointer;font-weight:650;padding:10px 13px;white-space:nowrap}button:disabled{opacity:.45;cursor:default}.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-top:13px}.tabs button{background:#edf2f8;color:#315170}.tabs button.active{background:#1d4c82;color:white}input{min-width:0;padding:11px;border-radius:9px;border:1px solid #d5deea;font:inherit;width:100%}.filter-row{display:flex;gap:9px;margin-top:12px}.filter-row button{padding:9px 16px}.counter{color:#52657d;font-size:13px;margin:14px 2px}.feed{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}.post{background:white;border:1px solid #e4e9f0;border-radius:14px;overflow:hidden;min-width:0;align-self:start;box-shadow:0 1px 4px #152a3e09}.post header{padding:14px 15px;background:white;color:#24334a;display:flex;align-items:center;gap:8px;flex-wrap:wrap}.post header b{font-size:13px;max-width:80%;overflow-wrap:anywhere}.post header time{font-size:11px;color:#8290a2;margin-left:auto}.post p{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6;padding:0 15px;margin:1px 0 13px;font-size:14px}.media{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:3px;background:#e8edf4}.media img,.media video{width:100%;max-height:360px;min-height:95px;object-fit:contain;display:block;background:#152031}.media .single{grid-column:1/-1}.media a{display:block;min-width:0;background:#152031}.media a.single{grid-column:1/-1}.media a img{min-height:0}.post-footer{display:flex;justify-content:space-between;align-items:center;padding:12px 15px;border-top:1px solid #f0f2f7;gap:10px}.post-footer a{color:#20568f;text-decoration:none;font-size:12px;font-weight:650}.post-footer small{font-size:11px;color:#8391a3}.empty{grid-column:1/-1;text-align:center;background:white;border:1px dashed #cbd5e1;border-radius:14px;padding:54px 15px;line-height:1.8;color:#6a7990}.more{display:flex;justify-content:center;margin-top:22px}.more button{width:min(300px,100%)}.hidden{display:none!important}.badge{font-size:11px;color:#517296;background:#eff5fa;padding:4px 7px;border-radius:6px}footer{padding:18px 2px;color:#78889a;font-size:11px;line-height:1.6}@media(max-width:760px){.feed{grid-template-columns:1fr}header{padding:15px}main{padding:11px 10px 50px}.toolbar{padding:12px}.post p{font-size:14px}.post header time{margin-left:0}.media img,.media video{max-height:420px}}
+</style></head>
+<body><header><h1>소비조사</h1><small id="source">공개 게시글 · 글/사진/동영상 통합 보기</small></header>
+<main><section class="toolbar">
+<div class="toolbar-top"><span class="status" id="status" role="status">게시글 불러오는 중…</span><button id="refresh" type="button">새로고침</button></div>
+<div class="tabs" id="tabs"><button type="button" data-term="all" class="active">전체</button><button type="button" data-term="뒷계">뒷계</button><button type="button" data-term="섹트">섹트</button><button type="button" data-term="일탈계">일탈계</button></div>
+<div class="filter-row"><input type="search" id="q" placeholder="게시글 내용 검색" aria-label="게시글 내용 검색"><button type="button" id="find">검색</button></div>
+</section>
+<div id="count" class="counter">게시글을 불러오고 있습니다.</div>
+<section id="feed" class="feed" aria-live="polite"><div class="empty">게시글 불러오는 중…</div></section>
+<div id="paging" class="more hidden"><button id="more" type="button">이전 게시글 더 보기</button></div>
+<footer id="footnote">공개 SNS 원문을 실시간으로 조회합니다. 원문·사진·동영상은 이 사이트나 휴대폰에 일괄 저장하지 않습니다. 테라박스 보관 자료는 별도 연결 전까지 포함되지 않습니다.</footer>
+</main>
 <script>
-(function () {
-  "use strict";
-  var offset=0,total=0,search="",rows=[],loading=false,ready=false;
-  var $=function(id){return document.getElementById(id)};
-  function state(s){$("state").textContent=s}
-  function note(s){$("message").textContent=s}
-  function reset(){
-    rows=[];offset=0;total=0;$("feed").replaceChildren();
-    $("postCount").textContent="—";$("imageCount").textContent="—";$("videoCount").textContent="—";
-    $("pagination").classList.add("hidden");
-  }
-  function mediaNode(m) {
-    var el;
-    if(m.mime.indexOf("image/")===0){el=document.createElement("img");el.alt="게시글 첨부 사진";el.loading="lazy"}
-    else if(m.mime.indexOf("video/")===0){el=document.createElement("video");el.controls=true;el.preload="metadata"}
-    else return null;
-    // The short-lived media URL is server-signed: no viewer secret in media URLs.
-    el.src=new URL(m.url,location.origin).href;
-    el.referrerPolicy="no-referrer";
-    return el;
-  }
-  function show(p) {
-    var c=document.createElement("article");c.className="post";
-    var h=document.createElement("div");h.className="top";
-    var b=document.createElement("strong");b.textContent=(p.platform||"SNS").toUpperCase();
-    var date=document.createElement("small");date.className="muted";
-    date.textContent=p.posted_at?new Date(p.posted_at).toLocaleString("ko-KR"):"작성시각 미상";
-    h.append(b,date);c.append(h);
-    var t=document.createElement("p");t.textContent=p.text||"(본문 없음)";c.append(t);
-    var items=p.media||[];
-    if(items.length){
-      var box=document.createElement("div");box.className="media";
-      for(var i=0;i<items.length;i++) if(items[i].verified){
-        var el=mediaNode(items[i]);if(el){if(items.length===1)el.className="full";box.append(el)}
+(function(){
+"use strict";
+var terms=["뒷계","섹트","일탈계"],api="https://api.bsky.app/xrpc/app.bsky.feed.searchPosts";
+var storedMode=location.hostname!=="koith.github.io",all=[],known=new Set(),active="all",needle="",loading=false,windowEnd=null;
+var $=id=>document.getElementById(id);
+function status(s){$("status").textContent=s}
+function elem(tag,className,text){var e=document.createElement(tag);if(className)e.className=className;if(text!==undefined)e.textContent=String(text);return e}
+function postUrl(p){var parts=String(p.uri||"").split("/");var rkey=parts[parts.length-1];var handle=p.author&&p.author.handle;return handle&&rkey?"https://bsky.app/profile/"+encodeURIComponent(handle)+"/post/"+encodeURIComponent(rkey):""}
+function typeIsVideo(m){return String(m&&m.$type||"").includes("video#view")||Boolean(m&&m.playlist)}
+function getEmbedded(p){var e=p.embed||{},m=e.media||e;if(Array.isArray(m.images))return m.images.map(i=>({type:"image",url:i.fullsize||i.thumb,thumb:i.thumb||i.fullsize,alt:i.alt||"게시글 사진"})).filter(i=>i.url);if(typeIsVideo(m))return [{type:"video",url:m.playlist||"",poster:m.thumbnail||""}];if(m.external&&m.external.thumb)return [{type:"external",url:m.external.uri||"",poster:m.external.thumb}];return []}
+function labelHidden(p){return (p.labels||[]).some(x=>["porn","sexual","nudity","graphic-media","gore","csam"].includes(String(x.val||"").toLowerCase()))}
+function parsePost(p,term){
+  if(!p||!p.uri||!p.record||typeof p.record.text!=="string")return null;
+  if(!p.record.text.includes(term))return null;
+  var url=postUrl(p);if(!url)return null;
+  return {id:p.uri,uri:p.uri,term:term,author:p.author&&p.author.displayName||p.author&&p.author.handle||"게시글",
+    text:p.record.text,posted:p.record.createdAt||p.indexedAt||"",url:url,
+    media:getEmbedded(p),labels:p.labels||[],noPreview:labelHidden(p)};
+}
+function card(p){
+  var article=elem("article","post"),h=elem("header"),name=elem("b","",p.author),tag=elem("span","badge",p.term),tm=elem("time","",p.posted?new Date(p.posted).toLocaleString("ko-KR"):"");
+  if(p.posted)tm.dateTime=p.posted;h.append(name,tag,tm);article.append(h);
+  article.append(elem("p","",p.text||"(본문 없음)"));
+  if(p.media&&p.media.length){
+    if(p.noPreview){
+      article.append(elem("p","badge","민감한 미디어 · 원문에서 확인"));
+    }else{
+      var media=elem("div","media");
+      for(var m of p.media.slice(0,10)){
+        if(m.type==="image"||m.type==="external"){
+          var a=elem("a",p.media.length===1?"single":"");a.href=m.type==="external"?m.url:p.url;a.rel="noopener noreferrer";a.target="_blank";
+          var image=elem("img");image.src=m.thumb||m.poster;image.loading="lazy";image.alt=m.alt||"게시글 첨부 이미지";image.referrerPolicy="no-referrer";
+          image.addEventListener("error",()=>{image.style.display="none"});
+          a.append(image);media.append(a);
+        }else if(m.type==="video"&&m.url){
+          var v=elem("video",p.media.length===1?"single":"");v.controls=true;v.preload="none";v.playsInline=true;
+          v.poster=m.poster||"";v.src=m.url;v.referrerPolicy="no-referrer";
+          v.addEventListener("error",()=>{var a=elem("a","","영상 원문 보기");a.href=p.url;a.target="_blank";a.rel="noopener noreferrer";v.replaceWith(a)});
+          media.append(v);
+        }
       }
-      if(box.childNodes.length)c.append(box);
+      if(media.childNodes.length)article.append(media);
     }
-    var f=document.createElement("div");f.className="foot";
-    var a=document.createElement("small");a.className="muted";
-    a.textContent="TeraBox 원격 검증 · 첨부 "+items.length+"개";f.append(a);
-    if(p.source_url&&p.source_url.indexOf("https://")===0){
-      var link=document.createElement("a");link.href=p.source_url;link.target="_blank";link.rel="noopener noreferrer";
-      link.textContent="원문 열기";f.append(link);
-    }
-    c.append(f);$("feed").append(c);
   }
-  async function load(resetList) {
-    if(!ready||loading)return false;
-    loading=true;
-    try {
-      if(resetList){reset();search=$("query").value.trim()}
-      var u=new URL("/api/posts",location.origin);
-      u.searchParams.set("offset",offset);u.searchParams.set("limit","30");
-      if(search)u.searchParams.set("q",search);
-      var r=await fetch(u.href,{credentials:"same-origin",cache:"no-store"});
-      if(r.status===401)throw Error("전용 링크 연결이 만료됐습니다. 원래 북마크 주소를 다시 열어주세요.");
-      if(!r.ok)throw Error("테라박스 목록을 불러오지 못했습니다 (HTTP "+r.status+")");
-      var d=await r.json();if(!Array.isArray(d.posts))throw Error("서버 응답 형식 오류");
-      total=d.total;
-      for(var p of d.posts){rows.push(p);show(p)}
-      offset+=d.posts.length;
-      $("postCount").textContent=total.toLocaleString("ko-KR");
-      $("imageCount").textContent=rows.reduce((n,p)=>n+(p.media||[]).filter(m=>m.mime.indexOf("image/")===0).length,0);
-      $("videoCount").textContent=rows.reduce((n,p)=>n+(p.media||[]).filter(m=>m.mime.indexOf("video/")===0).length,0);
-      if(rows.length===0)$("feed").innerHTML='<div class="empty">아직 테라박스에서 검증된 게시글이 없습니다.</div>';
-      $("pagination").classList.toggle("hidden",offset>=total);
-      note("전용 링크 접속 완료 · "+total+"건의 게시글이 확인되었습니다.");
-      return true;
-    }catch(e){
-      note(e.message);return false;
-    }finally{loading=false}
-  }
-  async function bootstrap() {
-    // GitHub Pages is public. Never send a secret fragment to the Pages host.
-    // Only the gateway's own HTTPS origin can exchange the private link for a
-    // short signed HttpOnly session. No form, password prompt or localStorage.
-    if(location.hostname==="koith.github.io"){
-      state("비공개 서버 연결 전");
-      note("여기는 공개 안내용 화면입니다. 실제 게시글 열람은 별도 전용 주소로 접속합니다. 주소 발급 후 한 번만 북마크하면 됩니다.");
-      return;
+  var foot=elem("div","post-footer"),meta=elem("small","",(p.media||[]).length+"개 첨부 · 공개 SNS"),link=elem("a","","원문 보기");
+  link.href=p.url;link.target="_blank";link.rel="noopener noreferrer";foot.append(meta,link);article.append(foot);return article
+}
+function filtered(){return all.filter(p=>(active==="all"||p.term===active)&&(!needle||p.text.toLowerCase().includes(needle)))}
+function draw(){
+  var rows=filtered(),node=$("feed");node.replaceChildren();
+  $("count").textContent=rows.length+"개 게시글 · 실제 공개 SNS 조회";
+  if(!rows.length)node.append(elem("div","empty",loading?"게시글을 불러오는 중…":"조건에 맞는 게시글이 없습니다."));
+  else{var frag=document.createDocumentFragment();for(var p of rows.slice(0,180))frag.append(card(p));node.append(frag)}
+}
+async function fetchSearch(term,start,end,limit){
+  var url=new URL(api);url.searchParams.set("q",term);url.searchParams.set("sort","latest");url.searchParams.set("limit",limit||25);
+  if(start)url.searchParams.set("since",start);if(end)url.searchParams.set("until",end);
+  var controller=new AbortController(),timer=setTimeout(()=>controller.abort(),18000);
+  try{
+    var r=await fetch(url.href,{mode:"cors",cache:"no-store",signal:controller.signal,headers:{"Accept":"application/json"}});
+    if(!r.ok)throw Error("API HTTP "+r.status);
+    var j=await r.json();if(!Array.isArray(j.posts))throw Error("응답 형식 오류");
+    return {term:term,posts:j.posts,next:Boolean(j.cursor),hint:j.hitsTotal||null};
+  }finally{clearTimeout(timer)}
+}
+async function loadLive(more){
+  if(loading)return;
+  loading=true;$("refresh").disabled=true;$("more").disabled=true;status("게시글 불러오는 중…");
+  if(!more){all=[];known.clear();windowEnd=null;draw()}
+  var end=more?windowEnd:null;
+  if(more&&!end){loading=false;$("refresh").disabled=false;return}
+  var tasks=terms.map(t=>fetchSearch(t,null,end,30));
+  var rs=await Promise.allSettled(tasks),added=0,failed=0,oldest=null,total=0;
+  for(var result of rs){
+    if(result.status!=="fulfilled"){failed++;continue}
+    var r=result.value;total+=r.posts.length;
+    for(var p of r.posts){
+      var rec=parsePost(p,r.term);if(!rec||known.has(rec.id))continue;
+      known.add(rec.id);all.push(rec);added++;
+      var when=rec.posted;if(when&&(!oldest||when<oldest))oldest=when;
     }
-    var fragment=location.hash;
-    var secret=null;
-    if(fragment.startsWith("#access=")){
-      try{secret=decodeURIComponent(fragment.slice("#access=".length))}
-      catch(e){state("전용 주소 오류");note("접속 주소 형식이 올바르지 않습니다.");return}
-      // Strip the key from the visible address immediately.
+  }
+  all.sort((a,b)=>String(b.posted).localeCompare(String(a.posted)));
+  if(oldest){var dt=new Date(oldest);dt.setMilliseconds(dt.getMilliseconds()-1);windowEnd=dt.toISOString()}
+  loading=false;$("refresh").disabled=false;$("more").disabled=false;
+  status(failed===3?"공개 SNS 연결에 실패했습니다":failed?"일부 자료만 불러왔습니다":"공개 게시글 최신 조회");
+  $("paging").classList.toggle("hidden",!windowEnd||failed===3);
+  draw();
+  if(failed===3){
+    $("feed").replaceChildren(elem("div","empty","현재 SNS 연결이 원활하지 않습니다. 새로고침하면 다시 조회합니다."));
+  }
+}
+async function loadCloud(){
+  try{
+    var params=new URLSearchParams(location.hash.slice(1)),key=params.get("access");
+    if(key){
       history.replaceState(null,"",location.pathname+location.search);
+      var a=await fetch("/api/activate",{method:"POST",headers:{"Content-Type":"application/json"},credentials:"same-origin",cache:"no-store",body:JSON.stringify({token:key})});
+      if(!a.ok)throw Error("전용 주소를 확인할 수 없습니다.");
     }
-    try{
-      if(secret){
-        state("전용 링크 연결 중");
-        var accepted=await fetch("/api/activate",{
-          method:"POST",headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({token:secret}),credentials:"same-origin",cache:"no-store"
-        });
-        secret=null;
-        if(!accepted.ok)throw Error("전용 링크를 확인하지 못했습니다 (HTTP "+accepted.status+")");
-      }
-      var check=await fetch("/api/session",{credentials:"same-origin",cache:"no-store"});
-      if(!check.ok){
-        if(check.status===503)throw Error("테라박스 서버 연결 준비 중입니다.");
-        throw Error("본인 전용 주소로 접속해주세요. 비밀번호 입력은 필요 없습니다.");
-      }
-      ready=true;state("전용 링크로 연결됨");
-      $("notice").classList.add("hidden");
-      $("tools").classList.remove("hidden");
-      await load(true);
-    }catch(e){state("전용 링크 연결 대기");note(e.message)}
-  }
-  $("search").addEventListener("click",()=>load(true));
-  $("refresh").addEventListener("click",()=>load(true));
-  $("more").addEventListener("click",()=>load(false));
-  bootstrap();
+    var r=await fetch("/api/session",{credentials:"same-origin",cache:"no-store"});
+    if(!r.ok)throw Error("전용 주소를 다시 열어주세요.");
+    var p=await fetch("/api/posts?limit=60",{credentials:"same-origin",cache:"no-store"});if(!p.ok)throw Error("보관 자료를 불러올 수 없습니다.");
+    var j=await p.json();if(!Array.isArray(j.posts))throw Error("자료 형식 오류");
+    all=j.posts.map(p=>({id:p.id,term:p.platform||"클라우드",author:p.platform||"게시글",text:p.text,posted:p.posted_at,url:p.source_url,media:(p.media||[]).map(m=>({type:String(m.mime||"").startsWith("video/")?"video":"image",url:m.url,thumb:m.url})),labels:[],noPreview:false}));
+    $("tabs").classList.add("hidden");$("paging").classList.add("hidden");$("footnote").textContent="원문은 테라박스에 저장되어 있으며 표시할 때만 불러옵니다.";
+    status("테라박스 게시글");draw()
+  }catch(e){status("보관 자료 연결 전");$("feed").replaceChildren(elem("div","empty",e.message))}
+}
+$("refresh").addEventListener("click",()=>storedMode?loadCloud():loadLive(false));
+$("more").addEventListener("click",()=>loadLive(true));
+$("tabs").addEventListener("click",e=>{var btn=e.target.closest("button[data-term]");if(!btn)return;active=btn.dataset.term;for(var b of $("tabs").querySelectorAll("button"))b.classList.toggle("active",b===btn);draw()});
+$("find").addEventListener("click",()=>{needle=$("q").value.trim().toLowerCase();draw()});
+$("q").addEventListener("keydown",e=>{if(e.key==="Enter"){$("find").click()}});
+if(storedMode){$("source").textContent="테라박스 게시글 · 글/사진/동영상";loadCloud()}
+else loadLive(false);
 })();
 </script></body></html>
