@@ -82,7 +82,7 @@ const {chromium,webkit}=require('playwright');
    assert.equal(row.walking,id==='0042'?'25,30,25,30':'25,26,27,28,29,30',
     id+' forward-facing original source movement without a BACK 0..7 spin');
    assert.equal(row.continuity,'true');
-   assert.equal(row.attack,'25,18,25',id+' existing original event packet within front recovery');
+   assert.equal(row.attack,'25,18,18,25',id+' visually reviewed attack sequence with inferred WEB timing');
    assert.equal(row.hurt,'25',id+' unrecovered native hit direction must stay front, not jump to rear');
    assert.equal(row.victory,'25,30,25');
    assert.ok(row.evidence.includes('WEB-movement-and-FPS-inferred'));
