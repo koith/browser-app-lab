@@ -16,7 +16,7 @@ def test():
     <a href="https://djawaphoto.com/wp-content/uploads/2026/09/photo003.jpg"><img src="ignore.png"></a>
     </div></article></body></html>'''
     urls,status=scoped_generic_html(body,page,'yui')
-    assert status=='generic_scoped_article',status
+    assert status=='scrapy_article_selector',status
     assert len(urls)==3,urls
     assert not any('other.jpg' in x for x in urls),urls
     assert not any('ignore.png' in x for x in urls),urls
