@@ -1,7 +1,7 @@
 # Demand Research — TeraBox private post archive
 
 ## Purpose
-A publicly accessible *viewer shell* at https://koith.github.io/browser-app-lab/apps/demand-research/ with a **private** TeraBox archive. Public GitHub Pages contains NO scraped personal source texts, photos, or videos. A separate authenticated HTTPS gateway reads private TeraBox objects and joins every post's text and attachments in one card. Mobile devices never receive a bulk copy of the archive; they stream only the media needed for display.
+A publicly accessible **landing/viewer shell** at https://koith.github.io/browser-app-lab/apps/demand-research/ and a separate **private one-click viewer** hosted by the gateway. The private gateway serves both the HTML and API on the same HTTPS origin. The corpus lives in **private** TeraBox. Public GitHub Pages contains NO scraped personal source texts, photos, or videos. A separate authenticated HTTPS gateway reads private TeraBox objects and joins every post's text and attachments in one card. Mobile devices never receive a bulk copy of the archive; they stream only the media needed for display.
 
 ## Cloud layout
 \`\`\`

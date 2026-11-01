@@ -83,8 +83,9 @@ def verified_alternative_candidates(raw,page,model,baseline,known_urls,
     """Turn real Scrapy/Chromium findings into bounded *download candidates*.
 
     Existing owner/historical asset identities take precedence. Discovery is
-    deliberately unavailable for creator timelines and legacy curated-only
-    works; their weaker identity evidence must not silently become originals.
+    unavailable for generic creator timelines. Older curated source pages may
+    admit NEW candidates only when their actual headline identifies the model
+    and the work is already present in the private owner index.
     All accepted bytes still require inspect(), owner SHA readback and gallery QA.
     """
     if not safe_page(page) or urlsplit(page).hostname=='teapawt.net':
@@ -481,7 +482,12 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                 original_urls=list(urls)
                 # An explicit login, wrong work/volume, or missing identity is
                 # still a hard reject. Alternative parsers do not bypass it.
-                eligible=(alternative_engines and not book.get('curated_images_only')
+                legacy_verified=(not book.get('curated_images_only') or (
+                    bool(previous) and page in ([book['source']]+book.get('source_pages',[]))
+                    and bool(MODEL_PATTERNS[model].search(' '.join(
+                        h.get_text(' ',strip=True)
+                        for h in BeautifulSoup(response.content,'html.parser').select('h1,title'))))))
+                eligible=(alternative_engines and legacy_verified
                           and status in ('scoped_public_page','no_public_photos','unscoped_page_rejected')
                           and (urlsplit(page).hostname not in ('showartx.net','www.nicesss.com')
                                or status=='scoped_public_page'))
@@ -512,7 +518,7 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                 if new_total>=max_new:break
                 candidate_count+=1
                 old=historic.get((aid,url))
-                if book.get('curated_images_only') and not old:
+                if book.get('curated_images_only') and not old and url not in alt_photo_urls:
                     unreviewed_count+=1;continue
                 if url in seen_urls:continue
                 seen_urls.add(url);variant=bool(old and old.get('public_full_variant'))

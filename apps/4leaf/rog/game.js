@@ -1218,13 +1218,13 @@ function showBattleScene(attacker,defender,attack,defense,attackerPoints,defende
    }
    const title=document.createElement('strong');title.textContent=player.name;
    const score=document.createElement('div');score.className='battle-visual-total';score.textContent=String(result).padStart(2,'0');
-   // Original score numerals: Dice/OBS.pak 1167.obs frames 0-7 are the
-   // white, red-outlined digits 0..7 of battle.jpg (filed as card 0167).
-   // Digits 8/9 are not extracted yet, so a score containing 8 or 9 keeps
-   // the WEB text. Text stays in the DOM for accessibility and tests.
-   // Prefer the full UI manifest (every 1167 frame once extracted). Digit d
-   // = large frame d: 0-7 VERIFIED by eye; 8 and 9 INFERRED from the
-   // sequence (0-7 in order, small set 10=='0', 18=='8').
+   // Genuine Dice/OBS.pak 1167.obs: frames 0..9 are the large red-
+   // outlined score digits 0..9 (all visually inspected upright from
+   // the SHA1-verified original source). Frames 10..19 are the small
+   // variants; 20..24 are operator/result art, NOT score digits.
+   // Keep the accessible text and source-image load-failure fallback.
+   // This verifies the source 2D glyph identity, NOT the original EXE
+   // score composition logic or historical rendering timing.
    const numerals=window.ORIGINAL_LEAF_UI_FRAMES?.['1167']?.frames||
     window.ORIGINAL_LEAF_OBS_FRAMES?.['0167']?.frames||[];
    const digits=score.textContent.split('').map(d=>numerals.find(f=>f.index===Number(d)));
@@ -1239,11 +1239,9 @@ function showBattleScene(attacker,defender,attack,defense,attackerPoints,defende
      score.append(img);
     }
     score.classList.add('battle-total-original');
-    score.dataset.numeralSource=/[89]/.test(score.querySelector('.battle-total-text').textContent)
-     ?'original-OBS-1167.obs/digits-0-7-verified/8-9-INFERRED'
-     :'original-OBS-1167.obs/digits-0-7';
+    score.dataset.numeralSource='original-OBS-1167.obs/digits-0-9-visual-reviewed';
    }else{
-    score.dataset.numeralSource=numerals.length?'web-text/digit-8-or-9-not-extracted':'web-text';
+    score.dataset.numeralSource=numerals.length?'web-text/source-score-frame-unavailable':'web-text';
    }
    const dice=document.createElement('div');dice.className='battle-visual-dice';
    // Archived board.jpg and battle.jpg display real six-sided dice with
