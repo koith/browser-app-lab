@@ -457,10 +457,11 @@ function addPost(p,term){
    CORS/auth-disabled sites yield no results and are reported as unverified. */
 const FEDERATED=[
   {id:"mastodon",origin:"https://mastodon.social",type:"mastodon"},
-  {id:"mastodon",origin:"https://mstdn.social",type:"mastodon"},
+  {id:"mastodon",origin:"https://planet.moe",type:"mastodon"},
+  {id:"mastodon",origin:"https://twingyeo.kr",type:"mastodon"},
   {id:"lemmy",origin:"https://lemmy.world",type:"lemmy"},
   {id:"misskey",origin:"https://misskey.io",type:"misskey"},
-  {id:"misskey",origin:"https://planet.moe",type:"misskey"}
+  {id:"misskey",origin:"https://hoto.moe",type:"misskey"}
 ];
 let federationCursors=new Map(),serviceCounts={bluesky:0,mastodon:0,lemmy:0,misskey:0};
 function safePublicLink(s,origin){
