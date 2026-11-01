@@ -32,7 +32,7 @@ ALLOWED_EXACT = {
     "djawaphoto.com", "blog.hacosta.co.jp",
     "img1.gamersky.com", "upload3.inven.co.kr",
     "cdn.imweb.me", "image.ajunews.com", "t1.daumcdn.net",
-    "img-jp-a.cdnimg.vip", "showartx.net",
+    "img-jp-a.cdnimg.vip", "showartx.net", "www.nicewww.com",
     "public-files.gumroad.com", "assets.gumroad.com", "static-2.gumroad.com",
 }
 ALLOWED_PIXIBB = re.compile(r"(?:imgx\d{3}|images\d{2})\.pixibb\.com\Z", re.I)
