@@ -71,6 +71,9 @@ def run(live=False):
             assert page.locator("body").evaluate("e=>getComputedStyle(e).color")=="rgb(23, 24, 21)"
             assert page.locator(".halftone-a").evaluate("e=>getComputedStyle(e).animationName")=="dot-drift"
             assert page.locator("#showAdultMedia").is_checked()
+            # Advanced switches stay collapsed until deliberately opened.
+            page.locator("#filterDetails summary").click()
+            assert page.locator("#filterDetails").evaluate("e=>e.open")
             assert page.locator("input[type=password]").count()==0
             adult=page.locator('article[data-media-policy="adult"]')
             restricted=page.locator('article[data-media-policy="restricted"]')
