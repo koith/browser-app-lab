@@ -1,0 +1,70 @@
+name: Independent Mimmi Public Gap Crawl - Candidate Bytes
+on:
+  push:
+    branches: ['research/parallel-mimmi-public-gap-crawl-20261101']
+    paths:
+      - '.github/workflows/gallery-parallel-mimmi-public-gap-probe.yml'
+      - 'apps/gallery-archive/parallel_mimmi_public_gap_probe.py'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: gallery-independent-mimmi-public-source-probe
+  cancel-in-progress: false
+jobs:
+  acquire-public-candidates:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install normal public-source parser dependencies
+        run: python -m pip install requests beautifulsoup4 Pillow
+      - name: Download & decode publicly accessible low-count Mimmi photos
+        shell: bash
+        run: |
+          set -euo pipefail
+          python apps/gallery-archive/direct_photo_pipeline.py \
+            --model mimmi \
+            --owner apps/mimmi-gallery/owner-index.json \
+            --out "$RUNNER_TEMP/stage" \
+            --max-new 30 --max-pages 2 \
+            --album-id v2ph-actor-axm7n43z \
+            --album-id v2ph-actor-an5o93ez
+          python - <<'PY'
+          import json,os,hashlib
+          from pathlib import Path
+          root=Path(os.environ['RUNNER_TEMP'])/'stage'
+          report=json.loads((root/'metadata/collection-audit.json').read_text())
+          expected=0
+          for a in json.loads((root/'metadata/catalog.json').read_text())['albums']:
+              for p in a['images']:
+                  for filename,digest in [(p['key'],p['sha256']),(p['preview'],p['preview_sha256'])]:
+                      b=(root/filename).read_bytes()
+                      assert hashlib.sha256(b).hexdigest()==digest
+                  expected+=1
+          assert expected==report['new_local_individual_files']
+          safe=[]
+          for x in report['results']:
+              safe.append({'album_id':x['id'],'pages':x.get('pages'),
+                           'source_image_candidates':x.get('published_image_candidates'),
+                           'actual_decoded_photo_files':x['individual_files_saved'],
+                           'failures':[{k:y.get(k) for k in ('reason','exception','cause','http_status','response_scope')}
+                                       for y in x.get('failures',[])]})
+          print('INDEPENDENT_PUBLIC_BYTES_SHA_VERIFIED',expected,flush=True)
+          print('PUBLIC_SOURCE_AUDIT',json.dumps(safe,ensure_ascii=False),flush=True)
+          with open(os.environ['GITHUB_STEP_SUMMARY'],'a') as f:
+              f.write('### Independent Mimmi 2-album public crawl\n')
+              f.write(f'- Actual decoded, SHA-verified individual source photos: {expected}\n')
+              f.write('- Archive published: NO; existing owner archive and Claude branch untouched.\n')
+          PY
+      - name: Retain independently validated individual files for safe subsequent archive
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: independent-mimmi-candidate-bytes-audit
+          path: ${{ runner.temp }}/stage/
+          retention-days: 2
+          if-no-files-found: ignore
