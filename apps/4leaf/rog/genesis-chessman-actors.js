@@ -112,6 +112,12 @@
  // horizontal DMP motion and playback period are still INFERRED.
  const LEFT_PROFILE_SOURCE=Object.freeze(new Set(['0040','0046','0078']));
  const LEFT_PROFILE_WALK_INDICES=[14,15,16,17];
+ // The same full 37-frame sheets show source wind-up, weapon-strike and
+ // follow-through silhouettes at 31,33,35 in these three actors. Their
+ // classification as battle ATTACK and WEB 175ms frame period are INFERRED.
+ // Keep the older reviewed frame18 path for all other source characters.
+ const FULL_SOURCE_ATTACK=Object.freeze(new Set(['0040','0046','0078']));
+ const FULL_SOURCE_ATTACK_INDICES=[25,31,33,35,25];
  function frontFacingSource(native,id){
   const available=native?.frames||[];
   const approved=AUDITED_FRONT_SOURCE[id];
@@ -192,6 +198,10 @@
    if(action==='victory')return movement.length===2
     ?[movement[0],movement[1],movement[0]]
     :front?[front]:[];
+   if(action==='attack'&&FULL_SOURCE_ATTACK.has(id)){
+    const reviewed=FULL_SOURCE_ATTACK_INDICES.map(at);
+    if(reviewed.every(Boolean))return reviewed;
+   }
    if(action==='attack'&&REVIEWED_FRONT_ATTACK.has(id)&&at(18))
     return [front,at(18),at(18),front];
    // Original directional action-table does not confirm any other attack,
@@ -343,8 +353,13 @@
       seq.length&&seq[0].index===BACK_WALK_INDICES[0]
      ?'rear-walk-3-7/visual-reviewed/INFERRED'
      :action==='walk'?'front/INFERRED':'n/a';
-   pawn.dataset.sourceAttackEvidence=action==='attack'&&REVIEWED_FRONT_ATTACK.has(id)
-    ?'front-three-quarter-18/visual-reviewed/INFERRED':'n/a';
+   pawn.dataset.sourceAttackEvidence=action==='attack'&&FULL_SOURCE_ATTACK.has(id)&&
+     seq.length===FULL_SOURCE_ATTACK_INDICES.length&&seq[1].index===31
+    ?'original-full-attack-31-33-35/visual-reviewed/WEB-action-FPS-INFERRED'
+    :action==='attack'&&REVIEWED_FRONT_ATTACK.has(id)
+     ?'front-three-quarter-18/visual-reviewed/INFERRED':'n/a';
+   if(action==='walk'&&travel==='left'&&seq.length===4&&seq[0].index===14)
+    pawn.dataset.sourceDirection='left-profile-source-14-17/2002-EXE-direction-unverified';
    // Expose EXACT SOURCE packet indexes independently from inferred labels;
    // QA can inspect what was really rendered during genuine gameplay.
    pawn.dataset.sourceFrameSequence=seq.map(frame=>frame.index).join(',');
