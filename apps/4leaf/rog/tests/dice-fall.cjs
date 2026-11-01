@@ -134,6 +134,11 @@ const {chromium,webkit}=require('playwright');
     trackTransform:getComputedStyle(track).transform,
     result:piece.dataset.result,
     source:window.__LEAF_DICE_FALL__.getState().originalFramesRecovered,
+    originalD4:window.__LEAF_DICE_FALL__.getState().originalD4Art,
+    originalD4Count:window.__LEAF_DICE_FALL__.getState().originalD4TumbleFrames.length,
+    nativeSprite:piece.querySelector('.leaf-fall-original-d4')?.getAttribute('src'),
+    nativeSource:piece.dataset.faceSource,
+    fallbackHidden:getComputedStyle(piece.querySelector('.leaf-fall-tetra')).opacity,
     rollCount:Number(document.querySelector('#dice-box').dataset.rollCount)};
   });
   assert.equal(d4Air.pieceFilter,'none',
@@ -143,6 +148,13 @@ const {chromium,webkit}=require('playwright');
    d4Air.trackTransform==='none',
    'D4 tetra must fall over a stationary ground-contact shadow');
   assert.equal(d4Air.result,'3');
+  assert.equal(d4Air.originalD4,true,'verified 1223 source manifest must be loaded');
+  assert.equal(d4Air.originalD4Count,18,'all 18 source tumble frames are available');
+  assert.ok(d4Air.nativeSprite?.startsWith('./original/OBS/ui/1223-')&&
+   d4Air.nativeSource==='original-OBS-1223.obs/face-VERIFIED-by-pip-count',
+   'actual D4 flight must use source sprite rather than synthetic tetra: '+
+   JSON.stringify(d4Air));
+  assert.equal(d4Air.fallbackHidden,'0','WEB tetra remains hidden when original D4 exists');
   assert.equal(d4Air.source,false,'2002 3D die source still unrecovered');
   assert.equal(d4Air.rollCount,2,'D4 visual-only probe cannot mutate gameplay');
   await page.screenshot({path:'leaf-d4-stationary-shadow-'+engine+
