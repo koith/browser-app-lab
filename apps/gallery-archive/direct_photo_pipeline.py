@@ -640,6 +640,21 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                                 and (not alternative or not original_urls)):
                             rendered_pages+=1
                             rendered,browser_status=browser.extract(page,model)
+                            if browser.page is not None and browser_status not in (
+                                    'not_run', 'http_401', 'http_403', 'http_429', 'http_451'):
+                                try:
+                                    from public_work_photo_extractor import recover_public_work_photo_urls
+                                    actual_dom=browser.page.content().encode('utf-8')
+                                    additional_dom,_=recover_public_work_photo_urls(
+                                        actual_dom,page,model,trusted_work=True)
+                                    rendered=list(dict.fromkeys(rendered+additional_dom))
+                                    for p in pagination_from_html(
+                                            actual_dom,page,book['source']):
+                                        if p not in more:
+                                            more.append(p)
+                                except Exception as exc:
+                                    errors.append({'page':page,
+                                                   'reason':'chromium_photo_dom_'+type(exc).__name__})
                             if rendered:
                                 alternative,_=verified_alternative_candidates(
                                     response.content,page,model,original_urls,
