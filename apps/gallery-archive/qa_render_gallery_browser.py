@@ -21,6 +21,10 @@ def exercise(browser,model,branch_html=False):
     if branch_html:
         body=Path(f"apps/{model}-gallery/index.html").read_text(encoding="utf-8")
         page.route(url,lambda route:route.fulfill(status=200,content_type="text/html",body=body))
+        # Candidate quality policy must run with the real Render media/API.
+        selector=Path(f"apps/{model}-gallery/image-quality.js").read_text(encoding="utf-8")
+        page.route(f"{url}image-quality.js?v=2",lambda route:route.fulfill(
+            status=200,content_type="application/javascript",body=selector))
     try:
         resp=page.goto(url,wait_until="domcontentloaded",timeout=70000)
         assert resp and resp.status==200,(model,"HTTP",resp.status if resp else None)
@@ -61,6 +65,20 @@ def exercise(browser,model,branch_html=False):
                 const group=publisherRegistry.publishers.find(x=>x.id===id);
                 return group && YuiPublishers.logo(group)===null;
             })"""),"Unverified publisher logos reappeared"
+        # The public SHA-only owner ledger is authoritative. Every unique
+        # SHA must remain in the composed UI after live catalog reconciliation.
+        integrity=page.evaluate("""async()=>{
+            const index=await(await fetch('owner-index.json',{cache:'no-store'})).json();
+            const keep=new Set(stored.flatMap(a=>(a.images||[]).map(p=>p.sha256)));
+            const original=new Set(index.albums.flatMap(a=>a.images.map(p=>p.sha256)));
+            return {owner:index.physical_originals_indexed||0,
+                    unique_originals:original.size,
+                    missing:[...original].filter(sha=>!keep.has(sha)).slice(0,10),
+                    missing_count:[...original].filter(sha=>!keep.has(sha)).length,
+                    composed_unique:keep.size};
+        }""")
+        assert integrity["missing_count"]==0,(model,"owner image SHA hidden by edition selection",integrity)
+        print("RENDER_OWNER_SHA_INTEGRITY_PASS",model,json.dumps(integrity),flush=True)
         stats=page.evaluate("""()=>({photos:stored.reduce((n,a)=>n+a.images.length,0),owner:stored.reduce((n,a)=>n+a.images.filter(p=>p.ownerAlbum).length,0),works:document.querySelectorAll('#albumgrid .album').length})""")
         assert not errors and not bad,(model,"script or asset failures",errors,bad)
         for album_id in WORKS[model]:
