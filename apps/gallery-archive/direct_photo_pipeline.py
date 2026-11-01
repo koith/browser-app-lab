@@ -7,6 +7,7 @@ import argparse
 from collections import defaultdict, Counter
 from datetime import datetime, timezone
 import hashlib
+import ipaddress
 from io import BytesIO
 import json
 from pathlib import Path
@@ -57,6 +58,49 @@ def safe_page(url):
         return (p.scheme=='https' and p.hostname in PAGE_HOSTS and not p.username and not p.password and p.port in (None,443)
                 and (p.hostname!='teapawt.net' or p.path in {'/'+a for a in CREATOR_ACCOUNTS.values()}))
     except (ValueError,TypeError):return False
+
+
+X_PUBLIC_HOSTS={'x.com','www.x.com','twitter.com','www.twitter.com'}
+PUBLIC_SOURCE_DENIED_HOSTS={
+    'localhost','metadata.google.internal','cdn.jliji.com'
+}
+
+
+def safe_registered_public_page(url,model=None):
+    """Check any *already recorded* public work page, without a hostname allowlist.
+
+    Only call this for owner-work/source manifest URLs or a same-work observed
+    pagination link. No arbitrary Internet search URL becomes an owned work.
+    """
+    try:
+        p=urlsplit(url)
+        host=(p.hostname or '').lower().rstrip('.')
+        if (p.scheme!='https' or p.username or p.password or p.port not in (None,443)
+                or not host or host in PUBLIC_SOURCE_DENIED_HOSTS
+                or len(url)>2200 or p.fragment):
+            return False
+        if any(host.endswith(s) for s in (
+                '.local','.internal','.invalid','.test','.localhost','.example')):
+            return False
+        try:
+            if not ipaddress.ip_address(host).is_global:
+                return False
+        except ValueError:
+            if '.' not in host:
+                return False
+        if host=='teapawt.net':
+            return safe_page(url)
+        if host in X_PUBLIC_HOSTS:
+            if model not in CREATOR_ACCOUNTS:
+                return False
+            # Public, explicitly recorded posts by the actual creator only.
+            # Do not visit generic timelines, search pages or arbitrary actors.
+            return bool(re.fullmatch(
+                '/'+re.escape(CREATOR_ACCOUNTS[model])+r'/status/[0-9]{5,30}/?',
+                p.path,re.I))
+        return True
+    except (ValueError, TypeError):
+        return False
 
 
 def public_full_variant(url):
@@ -113,7 +157,7 @@ def merge_owner_census_sources(books, owner, rows, model, safe_source=None):
     subset of manifests. This mismatch made verified detector improvements
     appear as zero new candidates during actual collection.
     """
-    allowed=safe_source or safe_page
+    allowed=safe_source or (lambda u:safe_registered_public_page(u,model))
     known={a['id']:a for a in owner['albums']}
     stats={'census_owner_work_count':0,'census_eligible_work_count':0,
            'newly_scheduled_work_count':0,'additional_registered_pages':0,
@@ -154,7 +198,8 @@ def _photo_asset_group(url):
 
 
 def verified_alternative_candidates(raw,page,model,baseline,known_urls,
-                                    rendered=(),scrapy_extractor=None):
+                                    rendered=(),scrapy_extractor=None,
+                                    trusted_registered_page=False):
     """Turn real Scrapy/Chromium findings into bounded *download candidates*.
 
     Existing owner/historical asset identities take precedence. Discovery is
@@ -163,7 +208,8 @@ def verified_alternative_candidates(raw,page,model,baseline,known_urls,
     and the work is already present in the private owner index.
     All accepted bytes still require inspect(), owner SHA readback and gallery QA.
     """
-    if not safe_page(page) or urlsplit(page).hostname=='teapawt.net':
+    if not (safe_page(page) or trusted_registered_page) or urlsplit(page).hostname in (
+            'teapawt.net',*X_PUBLIC_HOSTS):
         return [],'specialized_author_only'
     soup=BeautifulSoup(raw,'html.parser')
     heading=' '.join(tag.get_text(' ',strip=True) for tag in soup.select('h1,title'))
@@ -515,9 +561,9 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
             # while newer reviewed entries have a primary source. Do not silently
             # omit that entire ledger, invent a URL, or widen its image scope.
             legacy=not a.get('source')
-            pages=[u for u in a.get('source_pages',[]) if safe_page(u)]
+            pages=[u for u in a.get('source_pages',[]) if safe_registered_public_page(u,model)]
             source=a.get('source') or next(iter(pages),None)
-            if not source or not safe_page(source):continue
+            if not source or not safe_registered_public_page(source,model):continue
             if not re.fullmatch(r'[a-z0-9][a-z0-9-]{1,100}',str(a.get('id',''))):continue
             # A shared event/report can mention Yui while showing other models.
             # Legacy records admit only already curated image URLs in an existing
@@ -600,7 +646,7 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
         alt_new_staged=0
         known_work_urls=[url for work_id,url in historic if work_id==aid]
 
-        queue=rotated_registered_page_queue(book['source'],[u for u in book.get('source_pages',[]) if safe_page(u)],max_pages,page_cycle);visited=set();errors=[];candidate_count=0;unreviewed_count=0
+        queue=rotated_registered_page_queue(book['source'],[u for u in book.get('source_pages',[]) if safe_registered_public_page(u,model)],max_pages,page_cycle);visited=set();errors=[];candidate_count=0;unreviewed_count=0
         while queue and len(visited)<max_pages and new_total<max_new:
             page=queue.pop(0)
             if page in visited:continue
@@ -632,7 +678,8 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                         response.content,page,book['source'])))
                     try:
                         alternative,engine_status=verified_alternative_candidates(
-                            response.content,page,model,original_urls,known_work_urls)
+                            response.content,page,model,original_urls,known_work_urls,
+                            trusted_registered_page=True)
                         # Spend the Chromium budget on pages where static HTML
                         # extraction is weak, not the first eight already-full
                         # pages. Reuse the actual dynamically rendered image URLs.
@@ -660,7 +707,8 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                             if rendered:
                                 alternative,_=verified_alternative_candidates(
                                     rendered_raw,page,model,original_urls,
-                                    known_work_urls,rendered=rendered)
+                                    known_work_urls,rendered=rendered,
+                                    trusted_registered_page=True)
                         alt_candidate_count+=len(alternative)
                         alt_photo_urls.update(alternative)
                         urls=list(dict.fromkeys(list(urls)+alternative))
