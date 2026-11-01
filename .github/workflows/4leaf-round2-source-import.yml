@@ -1,0 +1,42 @@
+name: 4LEAF round-two Claude patch import
+on:
+  push:
+    branches:
+      - import/4leaf-round2-20261101
+permissions:
+  contents: write
+jobs:
+  apply-and-verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Verify source patch hashes and import onto latest main
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/leaf-round2-patches"
+          cp apps/4leaf/rog/tools/claude-round2-patches/*.patch "$RUNNER_TEMP/leaf-round2-patches/"
+          cd "$RUNNER_TEMP/leaf-round2-patches"
+          test "$(git hash-object 0001.patch)" = b0f27582bd0a2ed1a3c3e59ffc80d7d4698da74b
+          test "$(git hash-object 0002.patch)" = 019379451b715378f152968db7158b81277cc040
+          test "$(git hash-object 0003.patch)" = 22b1c5ca4c2a89cc748f0888eea8340cc9322e96
+          test "$(git hash-object 0004.patch)" = 26230cd1297ba936bde19b0ff53f4873efb7394b
+          test "$(git hash-object 0005.patch)" = ab5d8205440333e22dfb754f2969d6d938aaca6a
+          cd "$GITHUB_WORKSPACE"
+          git fetch origin main
+          git checkout -B restore/4leaf-dice-actions-round2-20261101 origin/main
+          git config user.name "4LEAF patch import bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git am "$RUNNER_TEMP"/leaf-round2-patches/0001.patch "$RUNNER_TEMP"/leaf-round2-patches/0002.patch "$RUNNER_TEMP"/leaf-round2-patches/0003.patch "$RUNNER_TEMP"/leaf-round2-patches/0004.patch "$RUNNER_TEMP"/leaf-round2-patches/0005.patch
+          test -z "$(git status --porcelain)"
+          node --check apps/4leaf/rog/game.js
+          node --check apps/4leaf/rog/dice-fall.js
+          node --check apps/4leaf/rog/original/OBS/ui/manifest.js
+          python3 -m pip install --disable-pip-version-check --break-system-packages pillow
+          python3 apps/4leaf/rog/tests/test_targeted_original_extract.py
+          python3 apps/4leaf/rog/tests/test_obs_action_evidence.py
+          python3 apps/4leaf/rog/tests/test_obs_native_640stride.py
+          git push origin HEAD:refs/heads/restore/4leaf-dice-actions-round2-20261101
