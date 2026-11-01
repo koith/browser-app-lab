@@ -319,20 +319,37 @@
   list.push(entry);
   try{localStorage.setItem(historyKey(entry.scope),JSON.stringify(list.slice(-90)))}catch{}
  }
+ // The historical ChatRoom has ONE native 390x97 transcript. Incoming peer
+ // messages must not throw a user reading earlier conversation to the bottom.
+ // Preserve a genuine scroll position and compensate for pruned oldest lines.
+ function appendChatLine(log,line){
+  if(!log)return;
+  const oldTop=log.scrollTop;
+  const oldLimit=Math.max(0,log.scrollHeight-log.clientHeight);
+  const followLatest=log.clientHeight===0||oldLimit-oldTop<=3;
+  log.append(line);
+  let removedHeight=0;
+  while(log.childElementCount>110){
+   const first=log.firstElementChild;
+   removedHeight+=first.getBoundingClientRect().height;
+   first.remove();
+  }
+  log.scrollTop=followLatest?log.scrollHeight:Math.max(0,oldTop-removedHeight);
+  window.__LEAF_NATIVE_SCROLLBAR__?.update?.();
+ }
  function renderMessage(m){
   const el=document.createElement('div');el.className='social-chat-message';
   const time=document.createElement('time');time.textContent=new Date(m.time).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
   const name=document.createElement('b');name.textContent=m.user+'　';
   const msg=document.createElement('span');msg.textContent=m.text;
-  el.append(time,name,msg);$('chat-log')?.append(el);
-  const log=$('chat-log');if(log){while(log.childElementCount>110)log.firstElementChild.remove();log.scrollTop=log.scrollHeight}
+  el.append(time,name,msg);
+  appendChatLine($('chat-log'),el);
  }
  function systemLine(message){
-  const log=$('chat-log');if(!log)return;
   const line=document.createElement('div');line.className='social-system-line';line.textContent='[안내] '+message;
-  log.append(line);log.scrollTop=log.scrollHeight;
+  appendChatLine($('chat-log'),line);
  }
- function renderHistory(){
+  function renderHistory(){
   const log=$('chat-log');if(!log)return;
   log.replaceChildren();
   // The original conversation pane starts with messages, not a fabricated

@@ -7,6 +7,8 @@
 @media(min-width:651px){
  #rooms.classic-chat-room .messenger[data-native-overlay="true"] #chat-log{
   overflow-y:auto!important;
+  /* Do not auto-shift the reading anchor after new peer messages. */
+  overflow-anchor:none!important;
   scrollbar-width:none!important;
   -ms-overflow-style:none!important;
  }
@@ -87,4 +89,9 @@
   outline:1px solid #eaf4ff!important;
   outline-offset:-1px!important;
  }
+}
+
+/* Keyboard focus is a real functional state, not a fabricated source image. */
+#rooms.classic-chat-room #social-native-scroll-track:focus-visible{
+ outline:1px solid #f7dca6!important;outline-offset:-1px!important;
 }

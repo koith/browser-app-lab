@@ -17,7 +17,9 @@
   const limit=Math.max(0,tHeight-h);
   const offset=max>0?Math.round(limit*Math.max(0,log.scrollTop)/max):0;
   thumb.style.height=h+'px';thumb.style.top=offset+'px';
-  track.setAttribute('aria-valuenow',String(Math.round(max?100*log.scrollTop/max:100)));
+  const percent=Math.round(max?100*log.scrollTop/max:100);
+  track.setAttribute('aria-valuenow',String(percent));
+  track.setAttribute('aria-valuetext',max>0?'대화 기록 '+percent+'%':'대화 기록 끝');
   up.disabled=log.scrollTop<1;down.disabled=log.scrollTop>=max-1;
   handle.dataset.scrollable=String(max>1);
  }
@@ -39,6 +41,26 @@
   track.setAttribute('role','scrollbar');track.setAttribute('aria-controls','chat-log');
   track.setAttribute('aria-label','채팅 기록 위치');track.setAttribute('aria-orientation','vertical');
   track.setAttribute('aria-valuemin','0');track.setAttribute('aria-valuemax','100');
+  // Historical bitmap is decoration over a LIVE scrollbar, so expose the
+  // same arrow/page/home/end navigation to keyboard and assistive devices.
+  track.tabIndex=0;
+  track.addEventListener('keydown',event=>{
+   const max=Math.max(0,log.scrollHeight-log.clientHeight);
+   const step=Math.max(16,Math.round(log.clientHeight*.8));
+   let next;
+   switch(event.key){
+    case 'ArrowUp':next=log.scrollTop-32;break;
+    case 'ArrowDown':next=log.scrollTop+32;break;
+    case 'PageUp':next=log.scrollTop-step;break;
+    case 'PageDown':next=log.scrollTop+step;break;
+    case 'Home':next=0;break;
+    case 'End':next=max;break;
+    default:return;
+   }
+   event.preventDefault();
+   log.scrollTop=Math.max(0,Math.min(max,next));
+   update();
+  });
   thumb=document.createElement('button');thumb.type='button';thumb.id='social-native-scroll-thumb';
   thumb.setAttribute('aria-label','채팅 스크롤 손잡이');thumb.title='스크롤 손잡이';
   down=document.createElement('button');down.type='button';down.id='social-native-scroll-down';
