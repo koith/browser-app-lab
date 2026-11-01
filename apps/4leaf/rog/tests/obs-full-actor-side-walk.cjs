@@ -68,7 +68,15 @@ const {chromium,webkit}=require('playwright');
     'source must be the actual complete 2002 actor sprites: '+JSON.stringify(state));
    assert.ok(state.seen.length>=3&&state.seen.every(f=>f>=14&&f<=17),
     'actual moving pawn renders distinct original side frames: '+JSON.stringify(state));
-   assert.ok(state.loaded,'native original actor pixels must load');
+   // WebKit may still be downloading the changing sprite at 660ms.
+   // Verify eventual real decoded pixels on the live pawn (not a mocked
+   // source) after the action settles, instead of assuming instant HTTP.
+   await page.waitForFunction(id=>{
+    const pawn=document.querySelector('#board-pawns .board-pawn[data-id="'+id+'"]');
+    const img=pawn?.querySelector('img.leaf-chess-original-obs');
+    return !!img?.complete&&img.naturalWidth>0&&
+      img.getAttribute('src')?.includes('/original/OBS/action-full/');
+   },start.id,{timeout:12000});
    const end=await page.evaluate(()=>({turn:window.__ROG_TEST__.getMatch().active,
     position:window.__ROG_TEST__.getMatch().players[0].position}));
    assert.deepEqual(end,{turn:start.turn,position:start.position},
@@ -89,6 +97,7 @@ const {chromium,webkit}=require('playwright');
     const evidence=pawn.dataset.sourceAttackEvidence;
     return new Promise(resolve=>{
       const cutoff=setTimeout(()=>{
+        clearInterval(check);
         observer.disconnect();
         resolve({seq,evidence,seen:[...seen]});
       },1450);
