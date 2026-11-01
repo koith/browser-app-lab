@@ -6,7 +6,7 @@ from pathlib import Path
 import tempfile
 import unittest
 from PIL import Image
-from direct_photo_pipeline import collect, inspect, page_images, same_variant, public_full_variant, rotated_registered_page_queue, verified_alternative_candidates, merge_owner_census_sources, _work_token_matched_in_heading
+from direct_photo_pipeline import collect, inspect, page_images, same_variant, public_full_variant, rotated_registered_page_queue, verified_alternative_candidates, merge_owner_census_sources, _work_token_matched_in_heading, safe_page
 
 
 def photo(seed):
@@ -16,6 +16,19 @@ def photo(seed):
 
 
 class DirectTests(unittest.TestCase):
+    def test_registered_public_photo_hosts_are_crawled_but_social_login_and_offsite_media_are_not(self):
+        for host in ('www.junmeitu.com','www.kaizty.com','misskon.com','www.imgcup.com'):
+            self.assertTrue(safe_page('https://'+host+'/yui-cream/'),host)
+        self.assertFalse(safe_page('https://x.com/super_yuisan'))
+        self.assertFalse(safe_page('https://127.0.0.1/owner'))
+        page='https://www.junmeitu.com/yui-cream/'
+        image='https://www.junmeitu.com/photo/yui-cream-38.jpg'
+        offsite='https://unexpected-media.example.com/yui-cream-38.jpg'
+        html='<html><h1>Yui Cream</h1><article>Yui Cream</article></html>'
+        urls,_=verified_alternative_candidates(html,page,'yui',[],[],
+                    scrapy_extractor=lambda raw,url,model:([image,offsite],'real_scoped_selector'))
+        self.assertEqual(urls,[image])
+
     def test_full_owner_source_census_restores_absent_album_jobs_without_cross_model_pollution(self):
         owner={'schema_version':1,'model':'yui','albums':[
             {'id':'ramen125','title':'Yui Ramen 125','images':[{'sha256':'a'*64}]},
