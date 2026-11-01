@@ -42,7 +42,7 @@ class DirectTests(unittest.TestCase):
         page='https://www.junmeitu.com/yui-cream/'
         image='https://www.junmeitu.com/photo/yui-cream-38.jpg'
         offsite='https://unexpected-media.example.com/yui-cream-38.jpg'
-        html='<html><h1>Yui Cream</h1><article>Yui Cream</article></html>'
+        html='<html><h1>Yui Sim Cream</h1><article>Yui Sim Cream</article></html>'
         urls,_=verified_alternative_candidates(html,page,'yui',[],[],
                     scrapy_extractor=lambda raw,url,model:([image,offsite],'real_scoped_selector'))
         self.assertEqual(urls,[image])
