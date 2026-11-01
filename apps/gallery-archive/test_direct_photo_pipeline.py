@@ -16,6 +16,35 @@ def photo(seed):
 
 
 class DirectTests(unittest.TestCase):
+    @unittest.skipUnless(importlib.util.find_spec('scrapy') is not None,
+                         'Real Scrapy test requires the Scrapy dependency')
+    def test_registered_legacy_owner_source_can_store_a_distinct_verified_cut(self):
+        from unittest.mock import patch
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);base=root/'apps/mimmi-gallery';base.mkdir(parents=True)
+            (base/'stored-albums.json').write_text('{"model":"mimmi","albums":[]}')
+            page='https://djawaphoto.com/portfolio/mimmi-editorial/'
+            image='https://djawaphoto.com/wp-content/uploads/2026/09/legacy-extra-cut.jpg'
+            (base/'official-previews.json').write_text(json.dumps({'albums':[{
+                'id':'legacy-work','title':'Mimmi editorial','source_pages':[page]}]}))
+            existing=photo(0);fresh=photo(80)
+            owner={'schema_version':1,'model':'mimmi','albums':[{
+                'id':'legacy-work','images':[{'number':1,
+                    'sha256':hashlib.sha256(existing).hexdigest()}]}]}
+            class Client:
+                def __init__(self,heading):self.heading=heading
+                def get(self,url):
+                    html=f'<html><h1>{self.heading}</h1><article><img src="{image}"></article></html>'
+                    return type('R',(),{'content':html.encode() if url==page else fresh})()
+            with patch('direct_photo_pipeline.page_images',return_value=([],[],'no_public_photos')):
+                allowed=collect(root,'mimmi',owner,root/'stage-good',3,3,
+                    Client('Mimmi editorial'),alternative_engines=True,render_budget=0)
+                denied=collect(root,'mimmi',owner,root/'stage-denied',3,3,
+                    Client('Other model editorial'),alternative_engines=True,render_budget=0)
+            self.assertEqual(allowed['new_local_individual_files'],1)
+            self.assertEqual(allowed['alternative_staged_new_files'],1)
+            self.assertEqual(denied['new_local_individual_files'],0)
+
     def test_scrapy_candidate_keeps_work_identity_and_rejects_existing_resizes(self):
         page='https://djawaphoto.com/portfolio/mimmi-book/'
         new='https://djawaphoto.com/wp-content/uploads/2026/09/new-cut.jpg'
