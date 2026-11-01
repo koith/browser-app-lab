@@ -26,7 +26,7 @@ from collect_private_batch import allowed_url, safe_reencoded_public_preview
 MODEL_PATTERNS={'mimmi':re.compile(r'(?<![a-z])mimmi(?![a-z])|밈미|밈미',re.I),
                 'yui':re.compile(r'(?<![a-z])yui(?![a-z])|유이|심혜성|super_yuisan',re.I)}
 PAGE_HOSTS={'djawaphoto.com','www.djawaphoto.com','cosplay.pixibb.com','sexy.pixibb.com','www.v2ph.com','v2ph.com',
-            'blog.hacosta.co.jp','showartx.net','www.gamersky.com','www.inven.co.kr','photo.inven.co.kr',
+            'blog.hacosta.co.jp','showartx.net','www.nicesss.com','www.gamersky.com','www.inven.co.kr','photo.inven.co.kr',
             'www.ajunews.com','sportsseoul.com','www.sportsseoul.com','crazygiant.imweb.me','teapawt.net','www.shypetal.com'}
 CREATOR_ACCOUNTS={'yui':'super_yuisan','mimmi':'Mimmi_official'}
 FORMATS={'JPEG':'jpg','PNG':'png','WEBP':'webp'}
@@ -116,6 +116,39 @@ def page_images(raw,url,model):
                 more.append(target)
         # No source identity/album content should be inferred from gallery count.
         return selected,more,'scoped_public_page' if selected else 'no_public_photos'
+    if urlsplit(url).hostname=='www.nicesss.com':
+        # Independent public previews for Yui ArtGravia Vol.677. A different
+        # origin may be usable after another origin returns 403. Only exact
+        # asset URLs observed on this single public post are admitted.
+        if model!='yui' or urlsplit(url).path!='/archives/mij/artgravia/469248.html':
+            return [],[],'unscoped_page_rejected'
+        heading=' '.join(h.get_text(' ',strip=True) for h in soup.select('h1,title'))
+        if not (MODEL_PATTERNS['yui'].search(heading) and 'artgravia' in heading.casefold()
+                and re.search(r'(?<!\d)677(?!\d)',heading)):
+            return [],[],'missing_model_or_volume_context'
+        article=(soup.select_one('.entry-content') or soup.select_one('article')
+                 or soup.select_one('.article-content'))
+        if article is None:return [],[],'unscoped_page_rejected'
+        approved={
+            'https://www.nicewww.com/wp-content/uploads/2026/05/1778813739-c81e728d9d4c2f6.jpg',
+            'https://www.nicewww.com/wp-content/uploads/2026/05/1778813742-eccbc87e4b5ce2f.jpg',
+            'https://www.nicewww.com/wp-content/uploads/2026/05/1778813743-a87ff679a2f3e71.jpg',
+            'https://www.nicewww.com/wp-content/uploads/2026/05/1778813745-e4da3b7fbbce234.jpg',
+        }
+        found=[]
+        for img in article.select('img'):
+            if img.find_parent(class_=re.compile(r'related|recommend|comment|advert|sidebar',re.I)):
+                continue
+            for key in ('data-original','data-src','src'):
+                value=img.get(key)
+                if value:
+                    full=urljoin(url,value)
+                    if full in approved and full not in found:found.append(full)
+            parent=img.find_parent('a')
+            if parent and parent.get('href'):
+                full=urljoin(url,parent.get('href'))
+                if full in approved and full not in found:found.append(full)
+        return found,[],'scoped_public_page' if found else 'no_public_photos'
     if urlsplit(url).hostname=='showartx.net':
         # Model+work scoped regular public preview gallery: do not enumerate
         # photo numbers or access the paid full edition. These prefix mappings
@@ -352,7 +385,7 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                     if p not in visited and p not in queue:queue.append(p)
                 if status!='scoped_public_page':errors.append({'page':page,'reason':status});continue
             except Exception as e:
-                errors.append({'page':page,'reason':type(e).__name__,**public_failure(e)});break
+                errors.append({'page':page,'reason':type(e).__name__,**public_failure(e)});continue
             for url in urls:
                 if new_total>=max_new:break
                 candidate_count+=1
