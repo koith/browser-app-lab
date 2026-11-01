@@ -33,7 +33,9 @@ const {chromium,webkit}=require('playwright');
    // 2026-11-01 front-silhouette review (see genesis-chessman-actors.js)
    '0047','0050','0063','0065','0066','0069','0070','0071','0072','0073',
    '0075','0076','0077','0078','0079','0080','0081','0082','0083','0084',
-   '0085','0166']){
+   '0085','0166',
+   // Independently inspected genuine 1067/1068/1074 frames 25..30.
+   '0067','0068','0074']){
    const evidence=await page.evaluate(id=>{
     const m=window.__ROG_TEST__.getMatch();
     m.players[0].team=['c_'+id,'c_0042'];
@@ -59,7 +61,7 @@ const {chromium,webkit}=require('playwright');
    assert.ok(evidence.audited?.includes('visual-original-OBS-reviewed/front/'+id),JSON.stringify(evidence));
    assert.equal(evidence.frontWalk,'true','only inspected source front pair is allowed');
    // The SHA-verified OBS source census now includes all 37 frames
-   // for the 40 visually front-reviewed actor members. Only 0042 has
+   // for the 43 visually front-reviewed full-37 actor members. Only 0042 has
    // no complete 37-frame member and still uses its native two-frame pair.
    const twoFrameFront=id==='0042';
    assert.equal(evidence.sequence,twoFrameFront?'25,30,25,30':'25,26,27,28,29,30',
