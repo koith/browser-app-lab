@@ -119,14 +119,14 @@ def page_images(raw,url,model):
     if urlsplit(url).hostname=='showartx.net':
         # Public article-specific ArtGravia preview images. No numeric URL
         # enumeration or paid product download; skip unrelated posts and ads.
-        work=re.fullmatch(r'/artgravia-vol-(\\d{2,4})-yui/?',urlsplit(url).path,re.I)
+        work=re.fullmatch(r'/artgravia-vol-(\d{2,4})-yui/?',urlsplit(url).path,re.I)
         if model!='yui' or not work:
             return [],[],'unscoped_page_rejected'
         volume=int(work.group(1))
         soup=BeautifulSoup(raw,'html.parser')
         heading=' '.join(h.get_text(' ',strip=True) for h in soup.select('h1,title'))
         if (not MODEL_PATTERNS[model].search(heading) or
-                not re.search(r'(?<!\\d)'+str(volume)+r'(?!\\d)',heading) or
+                not re.search(r'(?<!\d)'+str(volume)+r'(?!\d)',heading) or
                 'artgravia' not in heading.casefold()):
             return [],[],'missing_model_or_volume_context'
         article=soup.select_one('article') or soup.select_one('.entry-content')
@@ -145,7 +145,7 @@ def page_images(raw,url,model):
                 candidate=urljoin(url,link);p=urlsplit(candidate)
                 if p.scheme!='https' or p.hostname!='showartx.net' or p.query or p.fragment:
                     continue
-                m=re.fullmatch(r'/wp-content/uploads/\\d{4}/\\d{2}/ART_'+str(volume)+r'_(\\d{1,3})(?:-(\\d{2,5})x\\d{2,5})?\\.jpg',p.path,re.I)
+                m=re.fullmatch(r'/wp-content/uploads/\d{4}/\d{2}/ART_'+str(volume)+r'_(\d{1,3})(?:-(\d{2,5})x\d{2,5})?\.jpg',p.path,re.I)
                 if not m:continue
                 number=int(m.group(1));native=m.group(2) is None
                 if number not in chosen or native and not chosen[number][0]:
