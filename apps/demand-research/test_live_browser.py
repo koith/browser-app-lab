@@ -2,6 +2,7 @@
 Synthetic mode never stores real third-party posts. Live mode returns counts only.
 """
 import argparse
+import base64
 import json
 from datetime import datetime, timezone
 from pathlib import Path
@@ -11,7 +12,7 @@ from playwright.sync_api import sync_playwright
 HTML=Path(__file__).with_name("index.html").read_text(encoding="utf-8")
 PAGE="https://koith.github.io/browser-app-lab/apps/demand-research/"
 TERMS=("뒷계","섹트","일탈계")
-PNG=b"\x89PNG\r\n\x1a\n"
+PNG=base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVQIHWP4z8DwHwAFgAI/ScL/nwAAAABJRU5ErkJggg==")
 
 def fake_post(term, i=1):
     return {
