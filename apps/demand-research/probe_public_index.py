@@ -15,6 +15,6 @@ for site in SITES:
                 root=ET.fromstring(body)
                 links=[(n.text or "") for n in root.findall(".//item/link")]
                 matching=[s for s in links if re.search(r"https?://(?:www\\.)?"+re.escape(site)+r"/",s)]
-                print(json.dumps({"source":"bing_rss","site":site,"term":term,"http":response.status,"rss_items":len(links),"verified_domain_links":len(matching),"result_domains":dict(Counter(urllib.parse.urlsplit(s).hostname for s in links).most_common(5))},ensure_ascii=False))
+                print(json.dumps({"source":"bing_rss","site":site,"term":term,"http":response.status,"rss_items":len(links),"verified_domain_links":len(matching),"status_links":sum(bool(re.search(r"/(?:status|post)/[0-9]{6,}",u)) for u in matching),"result_domains":dict(Counter(urllib.parse.urlsplit(s).hostname for s in links).most_common(5))},ensure_ascii=False))
         except Exception as error:
             print(json.dumps({"source":"bing_rss","site":site,"term":term,"error":str(error)[:100]},ensure_ascii=False))
