@@ -24,6 +24,13 @@ for(const model of ['yui','mimmi']){
  const unknownMarked=sample(850,1100,90000,{sha256:'0'.repeat(64),watermark_status:'present_verified'});
  assert.equal(quality.preferred(unknownMarked,unknownClean),unknownMarked,'No actual quality measurement means preserve, never assume clean is higher quality');
  assert.equal(quality.preferred(unknownClean,unknownMarked),unknownClean,'No megapixel/byte winner when visual quality is unknown');
+ const physical=sample(640,960,62000,{sha256:'4'.repeat(64),ownerAlbum:'same-work'});
+ const staticPreview=sample(4800,7200,6000000,{sha256:'5'.repeat(64)});
+ assert.equal(quality.preferred(staticPreview,physical),physical,'Never lose owner originals because public copy has larger pixel dimensions');
+ assert.equal(quality.preferred(physical,staticPreview),physical,'Owner original preservation must be source-order independent');
+ const measuredStatic={...staticPreview,visual_quality:measured(96)};
+ const measuredArchive={...physical,visual_quality:measured(40)};
+ assert.equal(quality.preferred(measuredArchive,measuredStatic),measuredStatic,'Clearly superior measured optical quality wins even over owner storage');
  const knownOld=sample(900,1300,135000,{sha256:'1'.repeat(64)});
  const provenBetter=sample(800,1200,120000,{sha256:'2'.repeat(64),watermark_status:'present_verified',visual_quality:paired(knownOld,'higher')});
  assert.equal(quality.preferred(knownOld,provenBetter),provenBetter,'Actual same-photo pixel improvement beats even a watermark');
