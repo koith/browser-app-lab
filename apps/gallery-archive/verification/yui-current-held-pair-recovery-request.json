@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "scope": "existing_private_photos_only",
+  "originals_and_previews_are_readonly": true,
+  "no_private_metadata_handoff_to_github": true,
+  "models": {
+    "yui": {
+      "model": "yui",
+      "producer_run": 41196666551,
+      "producer_attempt": 1,
+      "producer_head": "967640c95bd31e6d5ad174c4f8e644322586afdc",
+      "journal_sha256": "c4261a778f7af9dc6ea3ccd75e34a4c3549a0f30c1d37246acd3f0be6de6d7e6",
+      "expected_collected_photos": 4,
+      "baseline_owner_fingerprint": "9cd57d35e21eb2f2c6ed5b013014942fefc419fb69a5f2de20511cd22cec51c5"
+    }
+  },
+  "current_owner_index_commit": "808960a87489057ffbfe91b39364974ffc7d6e77",
+  "deployed_visual_QA_completed_run": 41265209836,
+  "retry_reason": "Yui owner-index gained six exact-SHA originals (3045 to 3051). Rebind to current fingerprint and attempt only the one remaining separately held pair without rerunning Mimmi."
+}
