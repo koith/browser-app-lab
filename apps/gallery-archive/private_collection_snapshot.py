@@ -54,7 +54,7 @@ def snapshot(stage,model):
 
 
 
-def exact_journal_readback(stage,target,expected,attempts=4,sleep=time.sleep):
+def exact_journal_readback(stage,target,expected,attempts=4,sleep=None):
     """Independently verify newly uploaded private journal, with two read paths.
 
     The object can become readable only after metadata indexing completes.
@@ -63,6 +63,8 @@ def exact_journal_readback(stage,target,expected,attempts=4,sleep=time.sleep):
     remote-to-local copyto as a second method. Never allow an unverified
     journal to unlock original-photo transfer.
     """
+    if sleep is None:
+        sleep=time.sleep
     if not 1<=attempts<=6:
         raise ValueError('Invalid exact journal readback budget')
     expected_hash=hashlib.sha256(expected).digest()
