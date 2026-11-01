@@ -55,5 +55,13 @@ def write_github_env(destination,cookie=None,state=None):
 if __name__=='__main__':
     p=argparse.ArgumentParser()
     p.add_argument('--github-env',type=Path,required=True)
+    p.add_argument('--best-effort',action='store_true',
+                   help='Preserve the existing exact-SHA owner-cookie path if /main is unavailable')
     a=p.parse_args()
-    write_github_env(a.github_env)
+    try:
+        write_github_env(a.github_env)
+    except (WebStateUnavailable,OSError,TimeoutError) as exc:
+        if not a.best_effort:
+            raise
+        print('OWNER_WEB_TOKEN_OPTIONAL_UNAVAILABLE',type(exc).__name__,
+              'EXISTING_OWNER_COOKIE_UPLOAD_REQUIRES_EXACT_SHA',True,flush=True)
