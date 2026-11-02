@@ -96,6 +96,41 @@ class Tests(unittest.TestCase):
             self.assertEqual(report['results'][0]['verified_official_unique_urls_staged'],1)
             self.assertEqual(client.calls[0],url,'Previously verified missing official photo goes first')
 
+    def test_pages_local_sha_is_not_private_terabox_proof(self):
+        with tempfile.TemporaryDirectory() as td:
+            root=Path(td)
+            base,source,url,duplicate,owner,new,old,original=fixtures(root)
+            # The gallery already renders the file from Pages, but its SHA
+            # does NOT occur in the TeraBox owner ledger.
+            public={'albums':[{'id':'djawa-test-work','images':[{
+                'number':1,'url':'stored-albums/djawa-test-work/0001.jpeg',
+                'sha256':hashlib.sha256(new).hexdigest(),
+                'bytes':len(new),'width':400,'height':600}]}]}
+            (base/'stored-albums.json').write_text(json.dumps(public))
+            class Client:
+                blocked_origins=set()
+                def get(self,target):
+                    if target==url:return type('R',(),{'content':new})()
+                    if target==source:
+                        return type('R',(),{'content':b'<h1>Mimmi real sample</h1><article>Album</article>'})()
+                    raise AssertionError('Unexpected source')
+            report=collect(root,'mimmi',owner,root/'stage',5,2,Client(),
+                           reviewed_source_only=True)
+            self.assertEqual(report['new_local_individual_files'],1,report)
+            self.assertEqual(report['results'][0]['verified_official_unique_urls_staged'],1)
+            staged=json.loads((root/'stage/metadata/catalog.json').read_text())
+            self.assertEqual(staged['albums'][0]['images'][0]['number'],2)
+            self.assertEqual(staged['albums'][0]['images'][0]['sha256'],
+                             hashlib.sha256(new).hexdigest())
+            # An already private exact original never enters the backfill.
+            already_private={'model':'mimmi','schema_version':1,
+                'albums':[{'id':'djawa-test-work','images':[
+                    {'number':1,'sha256':hashlib.sha256(original).hexdigest()},
+                    {'number':2,'sha256':hashlib.sha256(new).hexdigest()}]}]}
+            again=collect(root,'mimmi',already_private,root/'second-stage',5,2,
+                          Client(),reviewed_source_only=True)
+            self.assertEqual(again['new_local_individual_files'],0)
+
     def test_rights_reviewed_mode_rejects_rehost_and_unrelated_media(self):
         self.assertTrue(reviewed_direct_source(
             'https://djawaphoto.com/portfolio/nikke-alice/','mimmi'))
