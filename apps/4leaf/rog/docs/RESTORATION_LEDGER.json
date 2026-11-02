@@ -1463,6 +1463,23 @@
         "QA-03",
         "P0-RELEASE"
       ]
+    },
+    {
+      "id": "REQ-20261102-GPT-014",
+      "date": "2026-11-02",
+      "origin": "Claude 7th source-decoding handoff ZIP imported by GPT",
+      "text": "원본 SHA1 검증 센서스 기반 출처·체스맨 프레임·방향 블록·D4/D6·26개 DMP·스크린샷의 8종 근거 JSON을 원장과 함께 인수. SHA256 프레임 증거 54종/2,087프레임, 구조 37프레임 44종, 26개 시작 칸 코드13 확인. 신형 OBS 해독기와 GitHub Actions 별도 data 브랜치 추출 구현. 18바이트 trailer/EXE 실제 행동표·주사위 모션은 아직 UNVERIFIED; 공개 앱 런타임에는 신규 후보 자동 연결 금지.",
+      "taskIds": [
+        "SRC-01",
+        "SRC-04",
+        "ACT-01",
+        "ACT-02",
+        "ACT-03",
+        "ACT-05",
+        "P0-DICE",
+        "P0-BOARD",
+        "QA-03"
+      ]
     }
   ],
   "tasks": [
@@ -1673,10 +1690,11 @@
         "https://github.com/koith/browser-app-lab/actions/runs/39122309781",
         "https://github.com/koith/browser-app-lab/commit/abfa068f71c26656dc3dfa083044863d38bce991",
         "apps/4leaf/rog/board-camera.js",
-        "apps/4leaf/rog/tests/dice-dmp-full-camera.cjs"
+        "apps/4leaf/rog/tests/dice-dmp-full-camera.cjs",
+        "apps/4leaf/rog/docs/evidence/source-maps/actor-frame-audit.json"
       ],
       "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
-      "lastReviewed": "2026-10-18",
+      "lastReviewed": "2026-11-02",
       "verifiedAcceptance": null
     },
     {
@@ -1745,7 +1763,8 @@
         "https://github.com/koith/browser-app-lab/actions/runs/39120197085",
         "https://github.com/koith/browser-app-lab/commit/38f147e9e41c79bb6c508f3cfb53a24388285f6a",
         "apps/4leaf/rog/dice-fall.js",
-        "apps/4leaf/rog/original/SourceSPR/manifest.json"
+        "apps/4leaf/rog/original/SourceSPR/manifest.json",
+        "apps/4leaf/rog/docs/evidence/source-maps/actor-frame-audit.json"
       ],
       "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
       "lastReviewed": "2026-11-02",
@@ -1843,10 +1862,11 @@
         "tools/audit-original-dice-resources.py",
         "apps/4leaf/rog/tests/native-img-source-integrity.cjs",
         "https://github.com/koith/browser-app-lab/actions/runs/39268819180",
-        "https://github.com/koith/browser-app-lab/pull/146"
+        "https://github.com/koith/browser-app-lab/pull/146",
+        "apps/4leaf/rog/docs/evidence/source-maps/actor-frame-audit.json"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-19",
+      "lastReviewed": "2026-11-02",
       "verifiedAcceptance": null,
       "dependencies": [],
       "category": "원본 근거"
@@ -2066,10 +2086,11 @@
         "apps/4leaf/rog/original/OBS/action-full/manifest.js",
         "apps/4leaf/rog/original/OBS/action-full/provenance.json",
         "apps/4leaf/rog/tests/original-actor-census.cjs",
-        "https://github.com/koith/browser-app-lab/actions/runs/41320435231"
+        "https://github.com/koith/browser-app-lab/actions/runs/41320435231",
+        "apps/4leaf/rog/docs/evidence/source-maps/actor-frame-audit.json"
       ],
       "evidenceLevel": "VERIFIED-92/98-2002-OBS-629-PNG-SHA-AND-NATIVE-640-STRIDE; 6 ABSENT IN THIS 2002 CLIENT; HISTORICAL ACTION-POSE MAP OPEN",
-      "lastReviewed": "2026-10-21",
+      "lastReviewed": "2026-11-02",
       "verifiedAcceptance": null,
       "dependencies": [
         "SRC-01"
@@ -2093,10 +2114,11 @@
         "apps/4leaf/rog/tests/dice-obs-640stride-native-game.cjs",
         "apps/4leaf/rog/tools/decode-original-obs-bulk.py",
         "https://github.com/koith/browser-app-lab/pull/153",
-        "https://github.com/koith/browser-app-lab/actions/runs/39443928060"
+        "https://github.com/koith/browser-app-lab/actions/runs/39443928060",
+        "apps/4leaf/rog/docs/evidence/source-maps/actor-frame-audit.json"
       ],
       "evidenceLevel": "VERIFIED-SOURCE-X-Y-PALETTE/ALL-PNG-SHA/DIMENSIONS; HISTORICAL-EXE-ACTION-CAMERA-OPEN",
-      "lastReviewed": "2026-10-20",
+      "lastReviewed": "2026-11-02",
       "verifiedAcceptance": null,
       "dependencies": [
         "ACT-01"
@@ -2156,7 +2178,8 @@
         "https://github.com/koith/browser-app-lab/actions/runs/41299536821",
         "apps/4leaf/rog/tests/original-actor-census.cjs",
         "https://github.com/koith/browser-app-lab/actions/runs/41320435231",
-        "apps/4leaf/rog/tests/dice-dmp-native-travel-facing.cjs"
+        "apps/4leaf/rog/tests/dice-dmp-native-travel-facing.cjs",
+        "apps/4leaf/rog/docs/evidence/source-maps/actor-frame-audit.json"
       ],
       "evidenceLevel": "VERIFIED-92-SOURCE-OBS-BODIES/958-PNG/80-EIGHT-CONTIGUOUS-SOURCE-SETS/REAL-CHROMIUM-ANIMATION; HISTORICAL-DIRECTION-POSE-FPS-UNVERIFIED",
       "lastReviewed": "2026-11-02",
@@ -2993,7 +3016,8 @@
         "apps/4leaf/rog/tests/dice-horizontal-native-actors.cjs",
         "apps/4leaf/rog/tests/dice-landscape-webkit-release.cjs",
         "apps/4leaf/rog/tests/chatroom-instant-seat-teleport.cjs",
-        "apps/4leaf/rog/tests/dice-dmp-native-travel-facing.cjs"
+        "apps/4leaf/rog/tests/dice-dmp-native-travel-facing.cjs",
+        "apps/4leaf/rog/docs/evidence/source-maps/actor-frame-audit.json"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
       "lastReviewed": "2026-11-02",
@@ -3110,9 +3134,11 @@
       "acceptance": [
         "CHR 레코드 등 원본 자료에서 카드ID→chm_N 매핑을 확인하고 근거 없는 매핑 0건."
       ],
-      "evidence": [],
+      "evidence": [
+        "apps/4leaf/rog/docs/evidence/source-maps/actor-frame-audit.json"
+      ],
       "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
-      "lastReviewed": "2026-11-01",
+      "lastReviewed": "2026-11-02",
       "verifiedAcceptance": null
     },
     {
@@ -3125,9 +3151,11 @@
       "acceptance": [
         "원본 PAK을 decode_rows(alpha_from_runs=True)로 재추출해 기존 PNG와 차이를 프레임별로 검토하고, 실제로 채워진 index-0 픽셀을 반영."
       ],
-      "evidence": [],
+      "evidence": [
+        "apps/4leaf/rog/docs/evidence/source-maps/actor-frame-audit.json"
+      ],
       "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
-      "lastReviewed": "2026-11-01",
+      "lastReviewed": "2026-11-02",
       "verifiedAcceptance": null
     }
   ],
@@ -7775,6 +7803,42 @@
         "P0-RELEASE"
       ],
       "details": "Real source routes: 26 DMP maps/1894 successive steps, prior projected percent comparison selected wrong horizontal OBS sprite on 10 original long diagonals. Web app now checks native DMP Y sign first, and native same-row X for left/right, tagging orientation inference. Actual Chromium/WebKit live source-board pawn regression and version beta47/PWA v134 CI pending. 2002 executable action-table still not decoded, original 3D fidelity not claimed."
+    },
+    {
+      "seq": 355,
+      "date": "2026-11-02",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261102-GPT-014",
+      "taskIds": [
+        "SRC-01",
+        "SRC-04",
+        "ACT-01",
+        "ACT-02",
+        "ACT-03",
+        "ACT-05",
+        "P0-DICE",
+        "P0-BOARD",
+        "QA-03"
+      ],
+      "details": "Import verified Claude round7 ZIP into GitHub PR, preserving previous board and chat main. Original source bytes are never fabricated; new extraction branch remains quarantined."
+    },
+    {
+      "seq": 356,
+      "date": "2026-11-02",
+      "type": "CLAUDE_ROUND7_EVIDENCE_AND_EXT_DECODER_STAGED",
+      "requestId": "REQ-20261102-GPT-014",
+      "taskIds": [
+        "SRC-01",
+        "SRC-04",
+        "ACT-01",
+        "ACT-02",
+        "ACT-03",
+        "ACT-05",
+        "P0-DICE",
+        "P0-BOARD",
+        "QA-03"
+      ],
+      "details": "Imported 8 source-maps JSON (54/98 bodies, 2087 verified published PNG frames, 44 verified 37-frame structural blocks, roles INFERRED), generated builder/test, OBS2/3 embedded and wide decoder, corrected test_obs_structure_37 set regex, and improved data-only CI force-add ignored outputs. 26 DMP starting code=13 verified in report. Extended original download/extraction, binary trailer decoding and any gameplay integration NOT YET VERIFIED; PR CI and separate data-branch runtime pending."
     }
   ]
 }
