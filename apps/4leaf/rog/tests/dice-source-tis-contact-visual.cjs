@@ -121,7 +121,7 @@ const {chromium}=require('playwright');
   assert.ok(desktop.tiles.every(nativeOnly),
    'real TIS art must have native 145x97 source pixels and no exterior WEB halo: '+
     JSON.stringify(desktop.tiles.filter(t=>!nativeOnly(t)).slice(0,6)));
-  assert.ok(desktop.pawns.every(p=>p.nativeReady&&p.source.includes('OBS/')),
+  assert.ok(desktop.pawns.every(p=>p.nativeReady&&p.source.startsWith('Original-CHR-body/')),
    'native chessman source body must remain on the board');
   for(const actor of desktop.pawns){
    assert.equal(actor.provenance,'inferred-shadow-width/from-original-OBS-frame');
