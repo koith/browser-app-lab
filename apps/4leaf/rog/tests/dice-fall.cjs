@@ -58,7 +58,10 @@ const {chromium,webkit}=require('playwright');
    overlay:getComputedStyle(document.querySelector('#leaf-dice-fall-layer')).pointerEvents,
    pos:document.querySelector('#leaf-dice-fall-layer').getBoundingClientRect().toJSON(),
    original:document.querySelectorAll('#board-nodes>.tile').length,
-   tumbleUrls:(window.ORIGINAL_LEAF_UI_FRAMES?.['1171']?.frames||[]).filter(f=>f.index>=6).map(f=>f.url),
+   // Accept only native member 1171's verified UI or newly decoded
+   // SHA256-gated trailer chain pixels. Never accept fabricated/web art.
+   tumbleUrls:(window.__LEAF_DICE_FALL__.originalEmbeddedDice(6)?.frames||
+    (window.ORIGINAL_LEAF_UI_FRAMES?.['1171']?.frames||[]).filter(f=>f.index>=6)).map(f=>f.url),
    sprites:[...document.querySelectorAll('#leaf-dice-fall-layer .leaf-fall-piece[data-sides="6"]')].map(n=>({
     src:n.querySelector('.leaf-fall-original-d6')?.getAttribute('src')||null,
     original:n.classList.contains('leaf-fall-original'),faceSource:n.dataset.faceSource})),
@@ -90,7 +93,7 @@ const {chromium,webkit}=require('playwright');
   assert.equal(mid.phase,'falling','dice genuinely start high in the sky');
   assert.ok(mid.faceCount>=6&&mid.faceCount<=24,'fallback cube keeps six 3D faces for load failure');
   assert.equal(mid.count,0,'game dice result MUST NOT appear before bounce and landing');
-  // D6 in flight: ORIGINAL 1171.obs tumble frames (partial set 6,7,10,18,25).
+  // D6 in flight: SHA256-verified original 1171.obs UI or trailer frames; original timeline unknown.
   assert.ok(mid.sprites.every(x=>x.original&&
     mid.tumbleUrls.length>=5&&mid.tumbleUrls.includes(x.src)&&
     x.faceSource==='original-OBS-1171.obs/face-VERIFIED-by-pip-count'),
@@ -172,7 +175,8 @@ const {chromium,webkit}=require('playwright');
   assert.equal(d4Air.result,'3');
   assert.equal(d4Air.originalD4,true,'verified 1223 source manifest must be loaded');
   assert.equal(d4Air.originalD4Count,18,'all 18 source tumble frames are available');
-  assert.ok(d4Air.nativeSprite?.startsWith('./original/OBS/ui/1223-')&&
+  assert.ok((d4Air.nativeSprite?.startsWith('./original/OBS/ui/1223-')||
+    d4Air.nativeSprite?.startsWith('./original/OBS/embedded/obs-1223-'))&&
    d4Air.nativeSource==='original-OBS-1223.obs/face-VERIFIED-by-pip-count',
    'actual D4 flight must use source sprite rather than synthetic tetra: '+
    JSON.stringify(d4Air));

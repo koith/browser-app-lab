@@ -30,6 +30,8 @@ jobs:
         run: node apps/4leaf/rog/tests/dmp-tile-overlap-audit.cjs
       - name: SHA256-audit 100 actual decoded source IMG.pak frames, preserving 2002 winBattle podium
         run: node apps/4leaf/rog/tests/native-img-source-integrity.cjs
+      - name: Verify the 63 embedded die pixels and signed source provenance
+        run: node apps/4leaf/rog/tests/dice-embedded-source-integrity.cjs
   chromium-game:
     runs-on: ubuntu-latest
     timeout-minutes: 18
@@ -56,6 +58,8 @@ jobs:
         run: node apps/4leaf/rog/tests/dice-all-source-maps-camera.cjs
       - name: All native DMP movement directions and real original actor facing
         run: node apps/4leaf/rog/tests/dice-dmp-native-travel-facing.cjs
+      - name: Original embedded D6/D4 source PNGs on live game without results mutation
+        run: node apps/4leaf/rog/tests/dice-embedded-native-live.cjs
       - name: Complete 25 historically named source maps and preserve unnamed 0170 random route
         run: node apps/4leaf/rog/tests/archive-coverage.cjs
       - name: Recover actual OBS full-body art after temporary HTTP error
@@ -167,6 +171,10 @@ jobs:
         env:
           FOURLEAF_BROWSER: webkit
         run: node apps/4leaf/rog/tests/dice-dmp-native-travel-facing.cjs
+      - name: Original trailer die source visuals on iPhone-size WebKit
+        env:
+          FOURLEAF_BROWSER: webkit
+        run: node apps/4leaf/rog/tests/dice-embedded-native-live.cjs
       - name: Original ChatRoom live seat teleport stays instant on WebKit and iPhone layout
         env:
           FOURLEAF_BROWSER: webkit

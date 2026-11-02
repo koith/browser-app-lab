@@ -1,7 +1,8 @@
 'use strict';
 /* The user remembers 4LEAF's actual roll sequence: dice descend from above,
  * bounce more than once and only THEN reveal their faces. This recovered
- * source archive has no original die animation mesh/frames. This renderer
+ * source archive has source die sprite frames but no decoded 2002 roll
+ * timing, mesh or trajectory. This renderer
  * is an explicit WEB RECONSTRUCTION of those interactions, NOT original
  * keyframe data. The underlying real game.js generates every outcome first.
  * No dice randomness, item or turn rule may be introduced here.
@@ -75,6 +76,36 @@
   return {member:member.originalMember||'1171.obs',faces,
    tumble:D6_TUMBLE.map(at).filter(Boolean),declared:28,partial:true};
  }
+ // These 63 genuine OBS.pak trailer pixels were independently extracted
+ // from the SHA1-verified client. Their roles and native action timings are
+ // NOT decoded. Only the presentation layer uses them as a reversible,
+ // clearly labelled WEB-inferred rolling visual; gameplay eyes stay fixed.
+ const EMBEDDED_DIE_CHAINS=Object.freeze({
+  6:[['obs-1171-c0',16],['obs-1171-c1',16],['obs-1171-c2',6]],
+  4:[['obs-1223-c0',9],['obs-1223-c1',16]]
+ });
+ function originalEmbeddedDice(sides){
+  const archive=window.ORIGINAL_LEAF_EMBEDDED_DICE;
+  if(!archive)return null;
+  const spec=EMBEDDED_DIE_CHAINS[sides],out=[];
+  if(!spec)return null;
+  for(const [id,count] of spec){
+   const item=archive[id];
+   if(item?.originalMember!=='OBS.pak/'+(sides===6?'1171':'1223')+'.obs'||
+      item.status!=='QUARANTINED/role-unknown'||
+      !Number.isInteger(item.trailerOffset)||item.trailerOffset<128||
+      !Array.isArray(item.frames)||item.frames.length!==count)return null;
+   for(let i=0;i<count;i++){
+    const f=item.frames[i];
+    if(f.index!==i||f.url!=='./original/OBS/embedded/'+id+'-'+String(i).padStart(3,'0')+'.png'||
+       !/^[a-f0-9]{64}$/.test(f.sha256)||!Number.isInteger(f.width)||
+       !Number.isInteger(f.height)||f.width<1||f.height<1)return null;
+    out.push({...f,sourceChain:id});
+   }
+  }
+  return {frames:out,chains:spec.map(x=>x[0]),
+   role:'source-OBS-pixels-VERIFIED/rolling-order-WEB-INFERRED'};
+ }
  // Warm the complete original D4 image sequence after the 1223 manifest
  // loads. Without this, first-turn 60ms frame swaps may show blank/stale
  // images on cold mobile networks. Only source assets are cached in memory;
@@ -109,6 +140,22 @@
   }
   return d6ImageCache.size;
  }
+ // Keep decoded native trailer PNGs available on the first cold-cache roll.
+ // Failures never affect game results: ordinary source UI sprites / WEB
+ // fallback remain independently available.
+ const embeddedDieCache=new Map();
+ function prefetchEmbeddedDice(){
+  if(typeof Image!=='function')return 0;
+  for(const sides of [4,6]){
+   for(const frame of originalEmbeddedDice(sides)?.frames||[]){
+    if(embeddedDieCache.has(frame.url))continue;
+    const img=new Image();embeddedDieCache.set(frame.url,img);
+    img.src=frame.url;
+    if(typeof img.decode==='function')img.decode().catch(()=>{});
+   }
+  }
+  return embeddedDieCache.size;
+ }
  // Score numerals from original UI 1167 should be decoded before first battle.
  // Separate cache preserves the original D6 (28) decoded-frame counters.
  const numeralImageCache=new Map();
@@ -122,7 +169,7 @@
   }
   return frames.length;
  }
- const prefetchOriginalDice=()=>{prefetchD4();prefetchD6();return prefetchNumerals()};
+ const prefetchOriginalDice=()=>{prefetchD4();prefetchD6();prefetchEmbeddedDice();return prefetchNumerals()};
  const prefetchSourceDice=prefetchOriginalDice;
  if(document.readyState==='complete')prefetchSourceDice();
  else window.addEventListener('load',prefetchSourceDice,{once:true});
@@ -137,7 +184,12 @@
    .filter(image=>image.complete&&image.naturalWidth>0).length,
   originalD4Art:!!originalD4(),
   originalD4TumbleFrames:originalD4()?.tumble.map(f=>f.index)||[],
-  originalD4PrefetchCount:d4ImageCache.size});
+  originalD4PrefetchCount:d4ImageCache.size,
+  nativeEmbeddedD6Frames:originalEmbeddedDice(6)?.frames.length||0,
+  nativeEmbeddedD4Frames:originalEmbeddedDice(4)?.frames.length||0,
+  nativeEmbeddedPrefetchCount:embeddedDieCache.size,
+  nativeEmbeddedDecodedCount:[...embeddedDieCache.values()].filter(img=>img.complete&&img.naturalWidth>0).length,
+  nativeEmbeddedRole:'source-pixels-VERIFIED/roll-timing-and-order-INFERRED'});
  function makeFace(n){
   const face=document.createElement('span');
   face.className='leaf-die-face leaf-die-face-'+n;
@@ -181,7 +233,13 @@
    for(let n=1;n<=6;n++)cube.append(makeFace(n));
   }
   node.append(cube);
-  const source=sides===4?originalD4():originalD6();
+  const original=sides===4?originalD4():originalD6();
+  const embedded=originalEmbeddedDice(sides);
+  // Never replace the VERIFIED 1..4 or 1..6 landing eyes from the
+  // established UI manifest. Only use quarantined native *pixels* during
+  // WEB-inferred tumble; preserve complete existing fallback if absent.
+  const source=original&&embedded?
+   {...original,tumble:embedded.frames,nativeEmbedded:embedded}:original;
   let sprite=null;
   if(source){
    sprite=document.createElement('img');
@@ -193,8 +251,13 @@
    sprite.dataset.frame=String(first.index);
    node.classList.add('leaf-fall-original');
    node.dataset.faceSource='original-OBS-'+source.member+'/face-VERIFIED-by-pip-count';
-   node.dataset.tumbleSource='original-OBS-'+source.member+'/' +
+   node.dataset.tumbleSource=source.nativeEmbedded?
+    'original-OBS/embedded/'+source.tumble.length+'-verified-source-pixels/WEB-sequence-INFERRED':
+    'original-OBS-'+source.member+'/' +
     (source.partial?'partial-':'index-ordered-INFERRED-')+source.tumble.length+'-frames';
+   node.dataset.embeddedSourceChains=source.nativeEmbedded?.chains.join(',')||'';
+   node.dataset.nativeSourceRole='landing-faces-VERIFIED/tumble-frames-source-VERIFIED/order-and-FPS-INFERRED';
+   sprite.dataset.sourceChain=first.sourceChain||'original-UI-OBS';
    // If the original PNG cannot load, show the WEB cube instead of nothing.
    sprite.addEventListener('error',()=>{
     node.classList.remove('leaf-fall-original');
@@ -214,6 +277,7 @@
    if(!sprite)return;
    const face=source.faces[result-1];
    sprite.src=face.url;sprite.dataset.frame=String(face.index);
+   sprite.dataset.sourceChain='original-UI-OBS';
    node.dataset.originalFace=String(face.index);
   };
   // Match stationary ground-shadow opacity to the SAME presentation
@@ -267,6 +331,7 @@
     k=(k+1)%source.tumble.length;
     const f=source.tumble[k];
     sprite.src=f.url;sprite.dataset.frame=String(f.index);
+    sprite.dataset.sourceChain=f.sourceChain||'original-UI-OBS';
    },Math.max(60,Math.round(duration*.8/(source.tumble.length*2))));
   }
   const fall=node.animate(physics,{duration,
@@ -332,6 +397,6 @@
   }
  }
  window.__LEAF_DICE_FALL__={roll,getState:state,
-  faces:PIPS,orientation:ROTATION,originalD6,originalD4,prefetchD4,prefetchD6,prefetchNumerals,prefetchOriginalDice,
+  faces:PIPS,orientation:ROTATION,originalD6,originalD4,originalEmbeddedDice,prefetchD4,prefetchD6,prefetchEmbeddedDice,prefetchNumerals,prefetchOriginalDice,
   tetraOrientation:{...TETRA_LAND},tetraDihedralDegrees:TETRA_ANGLE};
 })();

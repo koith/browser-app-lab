@@ -1495,6 +1495,18 @@
         "P0-ACTOR",
         "QA-03"
       ]
+    },
+    {
+      "id": "REQ-20261102-GPT-016",
+      "date": "2026-11-02",
+      "origin": "GPT 원본 주사위 런타임 통합 / Claude 8차 EXE·trailer 해독 분리",
+      "text": "원본 OBS 1171(D6)·1223(D4)의 trailer embedded 63 PNG를 SHA256-검증 완료 데이터에서 정규 subset 매니페스트로 생성하고, 게임 결과·고정 착지 눈을 바꾸지 않는 실제 굴림 프레임 렌더링에 투입. 정확한 원작 굴림 순서/낙하 물리·FPS는 UNVERIFIED로 명시. WebKit/Chromium 390px, PWA v135 캐시, 원본 이미지 없을 때 기존 소스 폴백, 마감 SHA와 게임 상태 보존을 검증. Claude는 별도 원본 구조 역공학 전담.",
+      "taskIds": [
+        "P0-DICE",
+        "SRC-01",
+        "QA-03",
+        "P0-RELEASE"
+      ]
     }
   ],
   "tasks": [
@@ -1780,7 +1792,9 @@
         "https://github.com/koith/browser-app-lab/commit/38f147e9e41c79bb6c508f3cfb53a24388285f6a",
         "apps/4leaf/rog/dice-fall.js",
         "apps/4leaf/rog/original/SourceSPR/manifest.json",
-        "apps/4leaf/rog/docs/evidence/source-maps/actor-frame-audit.json"
+        "apps/4leaf/rog/docs/evidence/source-maps/actor-frame-audit.json",
+        "apps/4leaf/rog/original/OBS/embedded/dice-selected.js",
+        "apps/4leaf/rog/tests/dice-embedded-native-live.cjs"
       ],
       "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
       "lastReviewed": "2026-11-02",
@@ -1833,10 +1847,12 @@
         "apps/4leaf/rog/dice-native-minipanel-spr.js",
         "apps/4leaf/rog/dice-native-minipanel-spr.css",
         "apps/4leaf/rog/tests/dice-original-minipanel-spr.cjs",
-        "apps/4leaf/rog/app-version.json"
+        "apps/4leaf/rog/app-version.json",
+        "apps/4leaf/rog/original/OBS/embedded/dice-selected.js",
+        "apps/4leaf/rog/tests/dice-embedded-native-live.cjs"
       ],
       "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
-      "lastReviewed": "2026-10-19",
+      "lastReviewed": "2026-11-02",
       "verifiedAcceptance": null
     },
     {
@@ -1880,7 +1896,9 @@
         "https://github.com/koith/browser-app-lab/actions/runs/39268819180",
         "https://github.com/koith/browser-app-lab/pull/146",
         "apps/4leaf/rog/docs/evidence/source-maps/actor-frame-audit.json",
-        "apps/4leaf/rog/tests/obs-extended-source-integrity.cjs"
+        "apps/4leaf/rog/tests/obs-extended-source-integrity.cjs",
+        "apps/4leaf/rog/original/OBS/embedded/dice-selected.js",
+        "apps/4leaf/rog/tests/dice-embedded-native-live.cjs"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
       "lastReviewed": "2026-11-02",
@@ -3038,7 +3056,9 @@
         "apps/4leaf/rog/tests/chatroom-instant-seat-teleport.cjs",
         "apps/4leaf/rog/tests/dice-dmp-native-travel-facing.cjs",
         "apps/4leaf/rog/docs/evidence/source-maps/actor-frame-audit.json",
-        "apps/4leaf/rog/tests/obs-extended-source-integrity.cjs"
+        "apps/4leaf/rog/tests/obs-extended-source-integrity.cjs",
+        "apps/4leaf/rog/original/OBS/embedded/dice-selected.js",
+        "apps/4leaf/rog/tests/dice-embedded-native-live.cjs"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
       "lastReviewed": "2026-11-02",
@@ -7893,6 +7913,32 @@
         "QA-03"
       ],
       "details": "Original source archive SHA1 86526d89679ae39b85fe9808da97ad871b7888d9 confirmed in Actions run 41403578713, all 2783 PNG SHA256 checked and pushed to data branch 3d4e0a416eb8cb13c5f42fb0971cd896bcb09f8e. Copied same Git blobs into source preservation PR #512: 68 wide, 923 embedded, 1792 OBS2/3; 3 manifests, 3 evidence JSON including 119 CHR, 245 trailers. Standalone integrity test pending. Role/action sequence/asset usability still UNVERIFIED, not live integrated."
+    },
+    {
+      "seq": 359,
+      "date": "2026-11-02",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261102-GPT-016",
+      "taskIds": [
+        "P0-DICE",
+        "SRC-01",
+        "QA-03",
+        "P0-RELEASE"
+      ],
+      "details": "8차 원본 주사위 해독-Claude vs runtime-GPT 분업. Proven SHA1 source 2,783 PNG archive merged by PR512; new 63 selected die images used only in presentation lane. No original EXE direction/timing assumption."
+    },
+    {
+      "seq": 360,
+      "date": "2026-11-02",
+      "type": "DICE_63_ORIGINAL_EMBEDDED_PIXELS_RUNTIME_QA_PENDING",
+      "requestId": "REQ-20261102-GPT-016",
+      "taskIds": [
+        "P0-DICE",
+        "SRC-01",
+        "QA-03",
+        "P0-RELEASE"
+      ],
+      "details": "D6 1171.embedded 16+16+6=38, D4 1223.embedded 9+16=25 source image packets. dice-fall.js selectively uses verified pixels with WEB inferred sequence labels, maintains source UI face result and unchanged gameplay RNG/turn/match. Chromium and WebKit live QA + offline PWA v135 in PR pending, physical iPhone and exact 2002 playback still UNVERIFIED."
     }
   ]
 }
