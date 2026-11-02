@@ -11,7 +11,7 @@ import json
 import os
 from pathlib import Path
 
-from fastapi import FastAPI, Header, HTTPException, Response
+from fastapi import FastAPI, Header, HTTPException
 
 from consumer_report import build_demo
 
@@ -38,7 +38,10 @@ def _data(authorization: str | None = None) -> dict:
     except (OSError, ValueError, UnicodeDecodeError, json.JSONDecodeError):
         raise HTTPException(503, detail="report unavailable")
     if (not isinstance(report, dict) or report.get("schema_version") != 1
-        or report.get("dataset", {}).get("mode") != "reviewed"
+        or not isinstance(report.get("dataset"), dict)
+        or report["dataset"].get("mode") != "reviewed"
+        or report["dataset"].get("is_real_data") is not True
+        or not isinstance(report.get("summary"), dict)
         or not isinstance(report.get("products"), list)):
         raise HTTPException(503, detail="report schema mismatch")
     return report
