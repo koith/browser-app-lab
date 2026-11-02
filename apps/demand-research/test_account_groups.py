@@ -65,6 +65,8 @@ def test_one_A_group_contains_ten_accounts_and_excludes_promotional_link(tmp_pat
     assert group["group_id"].startswith("A-")
     assert group["account_count"]==10
     assert group["distinct_posts"]==10
+    assert group["capped_daily_contributions"]==1
+    assert group["contribution_rule"]=="at_most_one_group_contribution_per_utc_day"
     assert len(group["accounts"])==10
     assert all(c["profileUrl"]!=extra[1] for c in group["accounts"])
     # Identical observations from two ingestion channels never count twice.
