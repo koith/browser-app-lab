@@ -1,0 +1,35 @@
+name: 4LEAF one-shot regenerate round7 evidence from canonical main source files
+on:
+  push:
+    branches: ['research/4leaf-round7-source-import-20261102']
+    paths:
+      - .github/workflows/rog-round7-rebuild.yml
+permissions:
+  contents: write
+jobs:
+  regenerate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install pillow numpy
+      - name: Generate evidence only from immutable archived member data and per-PNG SHA
+        run: python apps/4leaf/rog/tools/build-source-evidence.py
+      - name: Commit regenerated evidence to this research branch, never main
+        run: |
+          set -euo pipefail
+          git config user.name "4LEAF source evidence bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -f apps/4leaf/rog/docs/evidence/source-maps/*.json
+          git diff --cached --stat
+          if ! git diff --cached --quiet; then
+            git commit -m "data(4leaf): regenerate 8 source evidence JSONs from actual branch assets"
+          fi
+          git push origin "HEAD:refs/heads/$GITHUB_REF_NAME"
+      - name: Rebuild and compare byte-identical eight JSON and source PNG hashes
+        run: python apps/4leaf/rog/tests/test_source_evidence.py
