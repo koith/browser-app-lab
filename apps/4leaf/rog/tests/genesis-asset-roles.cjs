@@ -27,8 +27,8 @@ const {chromium}=require('playwright');
   await page.waitForSelector('#game:not(.hidden)');
   await page.evaluate(()=>{
    const m=window.__ROG_TEST__.getMatch();
-   m.players[0].team[0]='c_0045';
-   m.players[1].team[0]='c_0042';
+   m.players[0].team[0]='c_0056';
+   m.players[1].team[0]='c_0059';
    window.__ROG_TEST__.drawGame();
   });
   await page.waitForFunction(()=>{
@@ -49,15 +49,17 @@ const {chromium}=require('playwright');
     .map(slot=>{
      const img=slot.querySelector('.dice-chessman-face');
      const id=slot.dataset.cardId.slice(2);
-     const front=window.__LEAF_GENESIS_ACTORS__.getState().originalFrontVisualAudited[id];
-     const expected=window.ORIGINAL_LEAF_OBS_FRAMES[id]?.frames.find(f=>f.index===front)?.url;
+     const sourceMap=window.__LEAF_CHR_BODY_MAP__;
+     const key=sourceMap.assetKey(id);
+     const front=window.__LEAF_GENESIS_ACTORS__.getState().originalFrontVisualAudited[key];
+     const expected=sourceMap.resolve(id)?.frames.find(f=>f.index===front)?.url;
      return {src:img.getAttribute('src'),card:slot.dataset.cardId,
       artwork:slot.dataset.sourceCardArtwork,source:slot.dataset.rightPortraitSource,
       evidence:slot.dataset.rightPortraitFacingEvidence,expected,
       front:img.dataset.nativeFrontFrame,flip:getComputedStyle(img).transform};
     })
   }));
-  assert.deepEqual(snap.players,['c_0045','c_0042']);
+  assert.deepEqual(snap.players,['c_0056','c_0059']);
   assert.deepEqual(snap.rails.map(x=>x.wh),[[75,141],[75,141]],
    'left/right historical player profile uses genuine Registry SAVA pixel size');
   assert.ok(snap.rails.every(x=>x.src.startsWith('./original/Registry/sava')&&
@@ -67,7 +69,7 @@ const {chromium}=require('playwright');
     'sava84','sava04','sava03','sava83','sava05','sava86'][snap.actualAvatar]+'.png',
    'current selected avatar is reflected on original 1P rail');
   assert.deepEqual(snap.board.map(x=>x.rig),['original-obs-sprite','original-obs-sprite']);
-  assert.ok(snap.board.every(x=>x.source.startsWith('OBS/')&&x.png?.includes('./original/OBS/')));
+  assert.ok(snap.board.every(x=>x.source.startsWith('Original-CHR-body/OBS.pak/')&&x.png?.includes('./original/OBS/')));
   assert.ok(snap.party.length>=1);
   for(const actor of snap.party){
    assert.ok(actor.artwork.startsWith('./original/CardData/chm_')||
@@ -87,7 +89,7 @@ const {chromium}=require('playwright');
     assert.equal(actor.src,actor.artwork,'unverified/missing OBS uses its card art slot');
    }
   }
-  assert.ok(snap.party.some(x=>x.card==='c_0045'&&x.source==='OBS.pak/verified-front'),
+  assert.ok(snap.party.some(x=>x.card==='c_0056'&&x.source==='OBS.pak/verified-front'),
    'preserve PR204 verified original full-body restoration rather than demanding obsolete face-only HUD');
   await page.evaluate(()=>{
    const m=window.__ROG_TEST__.getMatch();
@@ -103,7 +105,7 @@ const {chromium}=require('playwright');
     portrait:x.querySelector('.leaf-chess-original-obs')?.getAttribute('src'),
     chatAvatar:x.querySelector('[src*="Registry/sava"]')?.getAttribute('src')||null
    })));
-  assert.deepEqual(duel.map(x=>x.id),['0045','0042']);
+  assert.deepEqual(duel.map(x=>x.id),['0056','0059']);
   assert.ok(duel.every(x=>x.rig==='original-obs-sprite'&&
    x.portrait?.startsWith('./original/OBS/')&&!x.chatAvatar));
   await page.locator('#modal-buttons button').filter({hasText:'결과 확인'}).click();
