@@ -192,7 +192,20 @@ const path=require('path');
   await host.evaluate(()=>window.__ROG_TEST__.takeTurn());
   assert.deepEqual(await snapshot(),beforeOfflineTurn,
     'disconnected WebRTC host may not roll or advance the authoritative match');
-  console.log('WEBRTC TURN AUTHORIZATION PASS: guest-only turn and disconnected-host state unchanged');
+  // A malformed or stale signaling role must never implicitly become guest.
+  await host.evaluate(()=>{
+    window.__LEAF_NET__.connected=true;
+    window.__LEAF_NET__.role='unknown';
+    window.__LEAF_BRIDGE__.getMatch().active=1;
+    window.__ROG_TEST__.drawGame();
+  });
+  assert.equal(await host.locator('#roll-btn').isDisabled(),true,
+    'unknown WebRTC role never inherits a guest turn');
+  const beforeUnknownRole=await snapshot();
+  await host.evaluate(()=>window.__ROG_TEST__.takeTurn());
+  assert.deepEqual(await snapshot(),beforeUnknownRole,
+    'unknown WebRTC role cannot mutate the authoritative match');
+  console.log('WEBRTC TURN AUTHORIZATION PASS: guest-only, disconnected-host, unknown-role state unchanged');
 
   assert.deepEqual(errors,[],'no client JavaScript errors');
   await guest.screenshot({path:'rog-online-guest.png'});
