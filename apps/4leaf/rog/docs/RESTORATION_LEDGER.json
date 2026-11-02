@@ -8065,6 +8065,20 @@
         "P0-RELEASE"
       ],
       "details": "Found remaining actual runtime regression: game.js drawNativeChessmen looked up verifiedFront and window.ORIGINAL_LEAF_OBS_FRAMES by CardData ID, not original CHR +260 body member, causing wrong original models or card-back in right-hand 2x2 selected party panel. Fixed lookup to the same __LEAF_CHR_BODY_MAP__.resolve used by board and duel, human-reviewed front evidence indexed by real OBS body member, and added explicit body/asset provenance metadata. Added real-browser 98-card census and native/published/unpublished fixture, plus post-merge source-role/battle selection regression updates. PR and CI pending. No new source bytes, source effects or original game FPS asserted."
+    },
+    {
+      "seq": 367,
+      "date": "2026-11-02",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261102-GPT-019",
+      "taskIds": [
+        "P0-ACTOR",
+        "ACT-01",
+        "SRC-04",
+        "QA-03",
+        "P0-RELEASE"
+      ],
+      "details": "User requested continued GPT original 4LEAF web runtime development during Claude original-data extraction. Live selected-party HUD CHR source mapping and post-merge source-only browser QA are now separate tracked work."
     }
   ]
 }
