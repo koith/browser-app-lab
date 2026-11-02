@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - "apps/demand-research/probe_social_improvements.py"
+      - "apps/demand-research/probe_meta_originals.py"
       - ".github/workflows/intersection-social-improvements.yml"
   workflow_dispatch:
 permissions:
@@ -15,3 +16,5 @@ jobs:
       - uses: actions/checkout@v4
       - name: Check live free date-limited search and tokenless Meta embeds (counts only)
         run: python apps/demand-research/probe_social_improvements.py
+      - name: Read public Threads and Instagram originals through free providers
+        run: python apps/demand-research/probe_meta_originals.py
