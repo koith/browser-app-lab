@@ -1327,6 +1327,25 @@
         "DIE-04",
         "SHOP-01"
       ]
+    },
+    {
+      "id": "REQ-20261102-004",
+      "date": "2026-11-02",
+      "origin": "user",
+      "text": "4LEAF 원작 대규모 연속 개발: 37프레임 대기와 비인간형, 타일 깊이·가림, 전투 결과 및 복귀, 채팅 스크롤 동작 개선, 원본 근거/전수 QA/GitHub 머지·Pages 배포",
+      "taskIds": [
+        "ACT-03",
+        "ACT-04",
+        "M05",
+        "P0-ACTOR",
+        "BRD-03",
+        "BTL-02",
+        "DIE-04",
+        "P0-PODIUM",
+        "P0-CHAT",
+        "CHT-02",
+        "QA-03"
+      ]
     }
   ],
   "tasks": [
@@ -1804,9 +1823,9 @@
       "id": "BRD-03",
       "priority": "P0",
       "title": "26맵 타일 간 깊이·캐릭터 가림 재현",
-      "status": "todo",
+      "status": "in_progress",
       "milestone": "M04",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 사각형 영역 중첩 0건과 DMP 행 painter 정렬 통과는 실제 입체 위아래 가림과 발 접지 증거가 아님 | 구현 목표: 실물 TIS 선후/알파·발판 측면 가림, 다중 체스맨, 카메라 확대와 텍스처 뎁스를 검증; 2026-10-21 NEW beta6 code/QA pending: projected native TIS 145x97 at 150x100 had genuine 5x3 pixel gaps but invented external blur and selected-tile neon glow bled across them; stripped only WEB shadows/glows (original pixels and hit/mapping unchanged). Native OBS sprite contact width proportional to real frame width and source foot-plane centered; shadow INFERRED, original EXE 3D/GFX still unknown. Before/after desktop and iPhone screens on same DMP state pending CI.; 2026-10-21 PR167 MERGED 6b4ffc v0.86.0-beta.6 PWA93: genuine TIS visual gap preserved without WEB external shadow on 145x97 source at WEB150x100, OBS source-frame width-proportional inferred foot contact. 26 DMP/1920 source tile QA, 32 TIS click, Chromium and iPhone original same-state snapshots PASS 39562503977; 2002 true perspective/lights remain UNVERIFIED. Pages 39562851108 SUCCESS; task still OPEN if original fidelity unknown.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 사각형 영역 중첩 0건과 DMP 행 painter 정렬 통과는 실제 입체 위아래 가림과 발 접지 증거가 아님 | 구현 목표: 실물 TIS 선후/알파·발판 측면 가림, 다중 체스맨, 카메라 확대와 텍스처 뎁스를 검증; 2026-10-21 NEW beta6 code/QA pending: projected native TIS 145x97 at 150x100 had genuine 5x3 pixel gaps but invented external blur and selected-tile neon glow bled across them; stripped only WEB shadows/glows (original pixels and hit/mapping unchanged). Native OBS sprite contact width proportional to real frame width and source foot-plane centered; shadow INFERRED, original EXE 3D/GFX still unknown. Before/after desktop and iPhone screens on same DMP state pending CI.; 2026-10-21 PR167 MERGED 6b4ffc v0.86.0-beta.6 PWA93: genuine TIS visual gap preserved without WEB external shadow on 145x97 source at WEB150x100, OBS source-frame width-proportional inferred foot contact. 26 DMP/1920 source tile QA, 32 TIS click, Chromium and iPhone original same-state snapshots PASS 39562503977; 2002 true perspective/lights remain UNVERIFIED. Pages 39562851108 SUCCESS; task still OPEN if original fidelity unknown.; 2026-11-02 Claude local 27 map/1995 cell alpha QA reported and x8 tile depth + actor same-cell formation integrated; original 2002 3D occlusion remains UNVERIFIED; Github CI and Pages proof pending.",
       "acceptance": [
         "26개 맵 경계/교차점/다중 캐릭터의 가림 순서 스크린샷 및 z-index 테스트, 원작과 모순 사례 0건"
       ],
@@ -1816,10 +1835,11 @@
         "https://github.com/koith/browser-app-lab/pull/167",
         "https://github.com/koith/browser-app-lab/actions/runs/39562503977",
         "https://github.com/koith/browser-app-lab/actions/runs/39562851108",
-        "https://github.com/koith/browser-app-lab/actions/runs/39562503977/artifacts/12328791405"
+        "https://github.com/koith/browser-app-lab/actions/runs/39562503977/artifacts/12328791405",
+        "apps/4leaf/rog/tests/board-actor-occlusion-all-maps.cjs"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-21",
+      "lastReviewed": "2026-11-02",
       "verifiedAcceptance": null,
       "dependencies": [
         "BRD-02",
@@ -7150,6 +7170,144 @@
         "QA-03"
       ],
       "details": "In original 794x528 ChatRoom the same 390x97 #chat-log is shared with ChatRoom/scrollbar.png (52x40). Incoming two-peer messages and real /help system notices previously called log.scrollTop=log.scrollHeight unconditionally, ejecting readers of older messages. Runtime now tracks whether listener was at bottom and preserves a scrolled-up position, compensating for pruned rows up to the 110-line DOM cap; no cloned transcript or fake actors. Original native source scrollbar is keyboard-operable via ArrowUp/Down, PageUp/Down, Home/End and exposes accessible progress. CSS overflow-anchor disabled to prevent browser jumps. Dedicated Chromium + WebKit two real browser peers regression and existing scroll source QA added. Historical 2002 event semantics and precise CP949 source encoding still UNVERIFIED; do NOT mark CHT-02 done. beta.42/PWA v129. PR/CI/public Pages QA pending."
+    },
+    {
+      "seq": 317,
+      "date": "2026-11-02",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261102-004",
+      "taskIds": [
+        "ACT-03",
+        "ACT-04",
+        "M05",
+        "P0-ACTOR",
+        "BRD-03",
+        "BTL-02",
+        "DIE-04",
+        "P0-PODIUM",
+        "P0-CHAT",
+        "CHT-02",
+        "QA-03"
+      ],
+      "details": "User authorized continued large round4 source restoration; Claude patch handoff 11 commits, PR merge pending. This event records actual latest integration, not final acceptance."
+    },
+    {
+      "seq": 318,
+      "date": "2026-11-02",
+      "type": "ACTION_TABLE_37_IDLE_BLOCKS",
+      "requestId": "REQ-20261102-004",
+      "taskIds": [
+        "ACT-03",
+        "P0-ACTOR",
+        "M05"
+      ],
+      "details": "Original OBS 0-2 rear, 11-13 side, 22-24 front blocks are wired as looping idle facing the last real move. Golem 0088 included. Source orientation visually reviewed by Claude locally; idle role and 340ms rate INFERRED; original executable action table UNVERIFIED."
+    },
+    {
+      "seq": 319,
+      "date": "2026-11-02",
+      "type": "NON_HUMANOID_37_REVIEW",
+      "requestId": "REQ-20261102-004",
+      "taskIds": [
+        "ACT-03",
+        "M05"
+      ],
+      "details": "0088 golem structurally 37-frame matched, table count 42. 0084 slime, 0085 bat, 0086 monster remain in legacy paths for insufficient direction evidence. The 0086 26-30 action is still ambiguous; not claimed fully restored."
+    },
+    {
+      "seq": 320,
+      "date": "2026-11-02",
+      "type": "MIRROR_ANCHOR_VISUAL_CHECK",
+      "requestId": "REQ-20261102-004",
+      "taskIds": [
+        "ACT-04",
+        "ACT-03"
+      ],
+      "details": "Side mirror about pawn foot/anchor with untouched shadow; Claude local evidence mirror-sheet.png. Whether actual 2002 renderer applied this exact horizontal transform remains UNVERIFIED."
+    },
+    {
+      "seq": 321,
+      "date": "2026-11-02",
+      "type": "BOARD_FORMATION_DEPTH_FIX",
+      "requestId": "REQ-20261102-004",
+      "taskIds": [
+        "BRD-03",
+        "ACT-04"
+      ],
+      "details": "DMP tile base z-index uses x8 to reserve seven actor layers, rear same-cell formation rows now render behind nearer rows independent of DOM player order. Reconstructed painter spacing INFERRED, native terrain depth UNVERIFIED."
+    },
+    {
+      "seq": 322,
+      "date": "2026-11-02",
+      "type": "BOARD_OCCLUSION_ALL_MAPS_QA",
+      "requestId": "REQ-20261102-004",
+      "taskIds": [
+        "BRD-03",
+        "BRD-01",
+        "ACT-04"
+      ],
+      "details": "Claude reported local full sweep 27 maps/1,995 cells, source tile-alpha body occlusion 0. Independent CI samples every 13th cell; original screenshot occlusion correspondence still UNVERIFIED."
+    },
+    {
+      "seq": 323,
+      "date": "2026-11-02",
+      "type": "BATTLE_OUTCOME_PODIUM_SYNC",
+      "requestId": "REQ-20261102-004",
+      "taskIds": [
+        "BTL-02",
+        "P0-PODIUM",
+        "DIE-04",
+        "ACT-03"
+      ],
+      "details": "Defender no longer starts hurt before results. Attacker lunges side-on 11,33-36,11. After 900ms real dice totals label winner/loser on podium. Hurt/victory on podium only hold source side pose with UNVERIFIED suffix; change-card result swapping not replayed."
+    },
+    {
+      "seq": 324,
+      "date": "2026-11-02",
+      "type": "BATTLE_RETURN_QA",
+      "requestId": "REQ-20261102-004",
+      "taskIds": [
+        "BTL-02",
+        "DIE-04",
+        "RULE-01"
+      ],
+      "details": "Claude locally tested four real duels: result confirm dismisses podium, loser retreats by score difference, winner stays, turn unchanged. New CI browser test to verify on integrated GitHub revision."
+    },
+    {
+      "seq": 325,
+      "date": "2026-11-02",
+      "type": "CHAT_READER_BOUNCE_ROOT_CAUSE",
+      "requestId": "REQ-20261102-004",
+      "taskIds": [
+        "P0-CHAT",
+        "CHT-02",
+        "QA-03"
+      ],
+      "details": "Root cause shared #chat-log had three writers: game.js guarded scroll, social-chat.js asynchronous peer/system and network.js each snapped to latest. Unified append for all and kept WIP native 52x40 keyboard rail and Chromium/WebKit two-peer regression. Claude reproduced 0→528 forced scroll on pre-fix main."
+    },
+    {
+      "seq": 326,
+      "date": "2026-11-02",
+      "type": "STATUS_CHANGED",
+      "requestId": "REQ-20261102-004",
+      "taskIds": [
+        "BRD-03"
+      ],
+      "details": "27 maps, 1,995 source TIS/DMP tile-alpha checks reported by Claude locally; WEB same-cell depth fix implemented. Original source photographic occlusion equivalence still open, BRD-03 todo→in_progress.",
+      "taskId": "BRD-03",
+      "from": "todo",
+      "to": "in_progress"
+    },
+    {
+      "seq": 327,
+      "date": "2026-11-02",
+      "type": "REGRESSION_FOUND_AND_FIXED",
+      "requestId": "REQ-20261102-004",
+      "taskIds": [
+        "ACT-03",
+        "QA-03"
+      ],
+      "details": "Looping idle rapidly changed source URLs; offline per-URL retry never reached limit. Per-actor full-frame failure counter triggers fallback after four errors; reset after successful original image load; original legacy OBS fallback retained."
     }
   ]
 }

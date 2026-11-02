@@ -62,7 +62,8 @@
        const div=document.createElement('div'),b=document.createElement('b');
        b.textContent=String(data.who||'상대').slice(0,12)+'　';
        div.append(b,document.createTextNode(data.text.slice(0,250)));
-       $('chat-log').append(div);$('chat-log').scrollTop=$('chat-log').scrollHeight;
+       if(window.__LEAF_CHAT_APPEND__)window.__LEAF_CHAT_APPEND__($('chat-log'),div,90);
+       else{$('chat-log').append(div);$('chat-log').scrollTop=$('chat-log').scrollHeight}
      }
    };
  }

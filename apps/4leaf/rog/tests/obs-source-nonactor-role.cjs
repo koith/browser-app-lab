@@ -54,7 +54,7 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict');
     frame:pawn.dataset.actorFrame,role:pawn.dataset.originalObsMemberRole||null};
   });
   assert.equal(genuine.rig,'original-obs-sprite');
-  assert.equal(genuine.frame,'25');
+  assert.ok(['22','23','24'].includes(genuine.frame),'front idle source '+genuine.frame);
   assert.equal(genuine.role,null);
   await page.screenshot({path:'leaf-real-chessman-vs-original-obs-hud-effects.png'});
   assert.deepEqual(errors,[]);

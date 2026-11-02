@@ -23,8 +23,8 @@ const SIDE='14,15,16,17,18,19',REAR='3,4,5,6,7,8',FRONT='25,26,27,28,29,30';
   await page.locator('#start-game').click();
   await page.waitForSelector('#game:not(.hidden)');
   const actors=await page.evaluate(()=>Object.keys(window.ORIGINAL_LEAF_FULL_ACTION_FRAMES)
-   .filter(id=>!['0084','0085','0086','0088'].includes(id)).sort());
-  assert.equal(actors.length,41,'41 humanoid actors with 37 source frames');
+   .filter(id=>!['0084','0085','0086'].includes(id)).sort());
+  assert.equal(actors.length,42,'41 humanoid actors plus reviewed 0088 golem');
   for(const id of actors){
    const r=await page.evaluate(id=>{
     const T=window.__ROG_TEST__,m=T.getMatch();
@@ -41,6 +41,9 @@ const SIDE='14,15,16,17,18,19',REAR='3,4,5,6,7,8',FRONT='25,26,27,28,29,30';
       expectedLeft:'calc(50% '+(x<0?'-':'+')+' '+Math.abs(x)+'px)',
       transform:getComputedStyle(img).transform,src:img.getAttribute('src')};
      window.__LEAF_GENESIS_ACTORS__.poseByPlayer(m.players[0].id,'idle',0);
+     out[facing].idle=pawn.dataset.sourceFrameSequence;
+     out[facing].idleMirror=pawn.dataset.sourceMirror;
+     out[facing].idleTable=pawn.dataset.sourceActionTable;
     }
     window.__LEAF_GENESIS_ACTORS__.poseByPlayer(m.players[0].id,'attack',0);
     out.attack={seq:pawn.dataset.sourceFrameSequence,label:pawn.dataset.sourceAttackEvidence};
@@ -57,9 +60,16 @@ const SIDE='14,15,16,17,18,19',REAR='3,4,5,6,7,8',FRONT='25,26,27,28,29,30';
    }
    assert.match(r.right.transform,/^matrix\(-1, 0, 0, -1/,id+' right mirrored');
    assert.match(r.left.transform,/^matrix\(1, 0, 0, -1/,id+' left unmirrored');
+   assert.equal(r.away.idle,'0,1,2,1',id+' rear idle');
+   assert.equal(r.left.idle,'11,12,13,12',id+' left side idle');
+   assert.equal(r.right.idle,'11,12,13,12',id+' right side idle');
+   assert.equal(r.toward.idle,'22,23,24,23',id+' front idle');
+   assert.equal(r.right.idleMirror,'true',id+' mirrored right idle');
+   assert.equal(r.left.idleMirror,'false',id+' left idle does not mirror');
+   assert.equal(r.toward.idleTable,'idle-front/structural-37/INFERRED');
    assert.equal(r.attack.seq,'25,31,32,32,25',id+' attack');
   }
-  for(const id of ['0084','0085','0086','0088']){
+  for(const id of ['0084','0085','0086']){
    const table=await page.evaluate(id=>{
     const T=window.__ROG_TEST__,m=T.getMatch();m.players[0].team=['c_'+id];T.setMatch(m);
     const pawn=document.querySelector('#board-pawns .board-pawn[data-id="'+m.players[0].id+'"]');
@@ -77,9 +87,25 @@ const SIDE='14,15,16,17,18,19',REAR='3,4,5,6,7,8',FRONT='25,26,27,28,29,30';
    const a=document.querySelector('#battle-visual .battle-visual-side.attacker .leaf-battle-chessman');
    const sides=[...document.querySelectorAll('#battle-visual .battle-visual-side')].map(side=>
     [...side.querySelectorAll('.battle-visual-die')].map(d=>Math.round(d.getBoundingClientRect().top)));
-   return {seq:a?.dataset.sourceFrameSequence,mirror:a?.dataset.sourceMirror,side:a?.dataset.duelSide,sides};
+   const defender=document.querySelector('#battle-visual .battle-visual-side.defender .leaf-battle-chessman');
+   const opening={seq:a?.dataset.sourceFrameSequence,mirror:a?.dataset.sourceMirror,defender: defender?.dataset.actorPose};
+   await new Promise(resolve=>setTimeout(resolve,1100));
+   return {opening,stage:document.querySelector('#battle-visual')?.dataset.duelOutcome,
+    outcome:{attacker:[a?.dataset.duelResult,a?.dataset.actorPose,a?.dataset.sourceFrameSequence,a?.dataset.sourceOutcomeEvidence,a?.dataset.sourceMirror],
+             defender:[defender?.dataset.duelResult,defender?.dataset.actorPose,defender?.dataset.sourceFrameSequence,defender?.dataset.sourceMirror]},
+    side:a?.dataset.duelSide,sides};
   });
-  assert.equal(duel.seq,'25,33,34,35,36,25');assert.equal(duel.mirror,'true');
+  assert.equal(duel.opening.seq,'11,33,34,35,36,11');
+  assert.equal(duel.opening.mirror,'true');
+  assert.equal(duel.opening.defender,'idle');
+  const attackerWins=duel.stage==='attacker-wins';
+  assert.ok(['attacker-wins','defender-wins'].includes(duel.stage));
+  assert.equal(duel.outcome.attacker[0],attackerWins?'win':'lose');
+  assert.equal(duel.outcome.defender[0],attackerWins?'lose':'win');
+  assert.equal(duel.outcome.attacker[2],attackerWins?'11,12,13,12':'11');
+  assert.equal(duel.outcome.attacker[4],'true');
+  assert.equal(duel.outcome.defender[3],'false');
+  assert.ok(duel.outcome.attacker[3]?.endsWith('/UNVERIFIED'),'no fabricated original hurt/victory source frame');
   assert.equal(duel.side,'attacker');
   for(const tops of duel.sides)assert.equal(new Set(tops).size,1,'battle dice single row');
   assert.deepEqual(errors,[]);

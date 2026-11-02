@@ -64,8 +64,9 @@ const {chromium}=require('playwright');
      dmp:[Number(t.dataset.dmpX),Number(t.dataset.dmpY)],art:t.dataset.originalArt})),
     pawns:pawns.map(p=>{
      const img=p.querySelector('.leaf-chess-original-obs');
-     const f=window.ORIGINAL_LEAF_OBS_FRAMES[p.dataset.chessmanId]
-      ?.frames.find(f=>f.index===Number(p.dataset.actorFrame));
+     const table=p.dataset.sourceFullFrame==='true'||/action-full/.test(img?.getAttribute('src')||'')
+      ?window.ORIGINAL_LEAF_FULL_ACTION_FRAMES:window.ORIGINAL_LEAF_OBS_FRAMES;
+     const f=table?.[p.dataset.chessmanId]?.frames.find(x=>x.index===Number(p.dataset.actorFrame));
      const shadow=getComputedStyle(p,'::before');
      const root=getComputedStyle(p);
      return {
@@ -137,7 +138,8 @@ const {chromium}=require('playwright');
     const img=pawn.querySelector('.leaf-chess-original-obs');
     // The user-visible ORIGINAL front frame is not necessarily native 0;
     // test the actual live OBS image width that creates the ground shadow.
-    const shown=window.ORIGINAL_LEAF_OBS_FRAMES[id].frames.find(
+    const full=/action-full/.test(img.getAttribute('src')||'');
+    const shown=(full?window.ORIGINAL_LEAF_FULL_ACTION_FRAMES:window.ORIGINAL_LEAF_OBS_FRAMES)[id].frames.find(
       f=>f.index===Number(pawn.dataset.actorFrame));
     out.push({id,source:shown.width,footprint:parseFloat(getComputedStyle(pawn,'::before').width),
       expected:Math.max(18,Math.min(84,Math.round(shown.width*.72))),

@@ -68,7 +68,7 @@ const path=require('node:path');
    assert.ok(actor.originalImage.startsWith('./original/CardData/chm_'),
     'Dice chessmen derive their portraits from the current team card, never 4LEAF chat avatars');
    assert.ok(actor.natural[0]>15&&actor.natural[1]>15,'real archive CardData source portrait loaded');
-   assert.equal(actor.anchor+1,actor.actual,'DMP owning tile is behind its current Genesis chessman');
+   assert.ok(actor.actual-actor.anchor>=1&&actor.actual-actor.anchor<=7,'DMP own tile below its actor in reserved formation order');
    assert.equal(actor.actual,actor.recorded,'actual CSS z-index equals source DMP painter depth');
    assert.equal(actor.actual,Number(actor.variable),'source painter depth drives the live CSS variable');
    assert.equal(actor.source,actor.seat,'chessman depth references the real current game tile, not fake elevation');

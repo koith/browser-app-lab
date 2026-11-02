@@ -92,7 +92,9 @@
   '0047':25,'0050':25,'0063':25,'0065':25,'0066':25,'0069':25,
   '0070':25,'0071':25,'0072':25,'0073':25,'0075':25,'0076':25,
   '0077':25,'0078':25,'0079':25,'0080':25,'0081':25,'0082':25,
-  '0083':25,'0084':25,'0085':25,'0166':25
+  '0083':25,'0084':25,'0085':25,'0166':25,
+  // Genuine 1088 golem 37-frame sheet reviewed, EXE labels unverified.
+  '0088':25
  });
  /* Direction/action evidence, 2026-11-01 (INFERRED, not an EXE table).
   * In every reviewed 37-frame member the sampled indices show the SAME
@@ -147,7 +149,7 @@
   '0053','0054','0055','0056','0058','0059','0060','0061','0062','0063',
   '0064','0065','0066','0067','0068','0069','0070','0071','0072','0073',
   '0074','0075','0076','0077','0078','0079','0080','0081','0082','0083',
-  '0166'
+  '0088','0166'
  ]));
  function frontFacingSource(native,id){
   const available=native?.frames||[];
@@ -193,7 +195,8 @@
   '0069':[25,30],'0070':[25,30],'0071':[25,30],'0072':[25,30],'0073':[25,30],
   '0075':[25,30],'0076':[25,30],'0077':[25,30],'0078':[25,30],'0079':[25,30],
   '0080':[25,30],'0081':[25,30],'0082':[25,30],'0083':[25,30],'0084':[25,30],
-  '0085':[25,30],'0166':[25,30]
+  '0085':[25,30],'0166':[25,30],
+  '0088':[25,30]
  });
  function sequenceFor(native,action,id,travel,context={}){
   const all=native.frames||[];
@@ -209,6 +212,18 @@
   // authenticated 2002 EXE action table. Never promote missing indices.
   const fullFrontCycle=REVIEWED_FRONT_MOTION[id]
     ?[25,26,27,28,29,30].map(at).filter(Boolean):[];
+  if(approved&&STRUCTURAL_37.has(id)&&all.length===37&&action==='idle'){
+   // Last real direction sets the 37-frame source stance block. Both
+   // historical action label and 340ms timing are INFERRED, not EXE data.
+   const rest=context.duel?'side':context.rest==='away'?'rear'
+    :(context.rest==='left'||context.rest==='right')?'side':'front';
+   const block=ACTION_TABLE_37.idle[rest].map(at);
+   if(block.every(Boolean)){
+    const out=[block[0],block[1],block[2],block[1]];
+    out.mirror=context.duel?context.side==='attacker':rest==='side'&&context.rest==='right';
+    out.table='idle-'+rest;out.loop=true;return out;
+   }
+  }
   if(action==='idle')return front?[front]:[];
   if(approved&&STRUCTURAL_37.has(id)&&all.length===37){
    const pick=list=>{const out=list.map(at);return out.every(Boolean)?out:null};
@@ -217,10 +232,20 @@
     const out=pick(ACTION_TABLE_37.walk[dir]);
     if(out){out.mirror=dir==='side'&&travel==='right';out.table='walk-'+dir;return out}
    }
+   if(context.duel&&(action==='hurt'||action==='victory')){
+    // No original hurt/victory source frames yet: hold an opponent-facing
+    // side stance and mark the inferred substitute explicitly.
+    const block=pick(ACTION_TABLE_37.idle.side);
+    if(block){
+     const out=action==='hurt'?[block[0]]:[block[0],block[1],block[2],block[1]];
+     out.mirror=context.side==='attacker';out.table='duel-'+action+'-holds-side-stance';
+     return out;
+    }
+   }
    if(action==='attack'){
     if(context.duel){
      // Side-facing native source lunge; attacker on the left mirrors toward defender.
-     const out=pick([25,...ACTION_TABLE_37.duel,25]);
+     const out=pick([11,...ACTION_TABLE_37.duel,11]);
      if(out){out.mirror=context.side==='attacker';out.table='duel-33-36';return out}
     }
     const [windup,hit]=ACTION_TABLE_37.strike.front;
@@ -343,6 +368,8 @@
      img.addEventListener('load',()=>{
        img.dataset.obsRetryCount='0';
        delete img.dataset.obsRetryFor;
+       if((img.getAttribute('src')||'').includes('/original/OBS/action-full/'))
+        delete pawn.dataset.fullFrameErrors;
        img.hidden=false;
        pawn.dataset.actorSourceLoad=pawn.dataset.sourceFullUnavailable==='true'
         ?'ready-legacy-original-OBS': 'ready';
@@ -357,7 +384,11 @@
          renderFrame(pawn,pawn.dataset.chessmanId,pawn.dataset.actorPose||'idle');
          return;
        }
-       const attempt=img.dataset.obsRetryFor===source?
+       // Looping idle changes source URL before per-file retries finish.
+       const fullErrors=source.startsWith('./original/OBS/action-full/')
+        ?Number(pawn.dataset.fullFrameErrors||0)+1:0;
+       if(fullErrors)pawn.dataset.fullFrameErrors=String(fullErrors);
+       const attempt=fullErrors>3?4:img.dataset.obsRetryFor===source?
          Number(img.dataset.obsRetryCount||0)+1:1;
        img.dataset.obsRetryFor=source;
        img.dataset.obsRetryCount=String(attempt);
@@ -383,6 +414,7 @@
           pawn.dataset.sourceFullUnavailable!=='true'&&
           legacy?.frames?.length){
          pawn.dataset.sourceFullUnavailable='true';
+         delete pawn.dataset.fullFrameErrors;
          pawn.dataset.actorSourceLoad='falling-back-to-legacy-original-OBS';
          delete img.dataset.obsRetryCount;
          delete img.dataset.obsRetryFor;
@@ -427,7 +459,7 @@
    const duel=pawn.classList.contains('leaf-battle-chessman');
    const duelSide=pawn.dataset.duelSide||
     (pawn.closest('.battle-visual-side')?.classList.contains('attacker')?'attacker':'defender');
-   const seq=sequenceFor(native,action,id,travel,{duel,side:duelSide});
+   const seq=sequenceFor(native,action,id,travel,{duel,side:duelSide,rest:pawn.dataset.travelFacing||'toward'});
    pawn.dataset.sourceMirror=seq.mirror?'true':'false';
    pawn.dataset.sourceActionTable=seq.table?seq.table+'/structural-37/INFERRED':'legacy';
    pawn.dataset.actorWalkFacing=action==='walk'?travel:'';
@@ -448,6 +480,8 @@
    if(seq.table){
     if(action==='walk')pawn.dataset.sourceTravelFacing=seq.table+(seq.mirror?'-mirrored':'')+'/structural-37/INFERRED';
     if(action==='attack')pawn.dataset.sourceAttackEvidence=seq.table+(seq.mirror?'-mirrored':'')+'/structural-37/INFERRED';
+    if(action==='idle')pawn.dataset.sourceIdleFacing=seq.table+(seq.mirror?'-mirrored':'')+'/structural-37/INFERRED';
+    if(action==='hurt'||action==='victory')pawn.dataset.sourceOutcomeEvidence=seq.table+'/no-source-'+action+'-frame/UNVERIFIED';
     pawn.dataset.sourceDirection=(seq.table.split('-')[1]||'front')+(seq.mirror?'-mirrored':'')+'/structural-37/EXE-table-unverified';
    }
    // Expose EXACT SOURCE packet indexes independently from inferred labels;
@@ -471,7 +505,7 @@
    // forever made a struck character oscillate between attack/hurt frames
    // while no actual new gameplay action had occurred. Original OBS bytes
    // remain untouched; action-to-source-index/FPS remains UNVERIFIED.
-   const loops=action==='walk';
+   const loops=action==='walk'||seq.loop===true;
    pawn.dataset.sourcePlaybackMode=loops?'loop/WEB-motion-inferred'
     :'one-shot/WEB-action-unverified';
    pawn.dataset.sourcePlaybackComplete='false';

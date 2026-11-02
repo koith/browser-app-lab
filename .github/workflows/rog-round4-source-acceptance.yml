@@ -1,0 +1,109 @@
+name: 4LEAF round4 source idle DMP battle and shared chat QA
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/**'
+      - '.github/workflows/rog-round4-source-acceptance.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/**'
+      - '.github/workflows/rog-round4-source-acceptance.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  round4-actor-battle:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install real Chromium
+        run: |
+          npm install --no-save playwright
+          npx playwright install chromium --with-deps
+      - name: Serve original 4LEAF art from the exact SHA
+        run: |
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog >/tmp/round4-http.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsSI http://127.0.0.1:8765/original/ChatRoom/room4.png >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/round4-http.log
+          exit 1
+      - name: Genuine 42 actor 37-frame directional idle walk and original podium sides
+        env:
+          FOURLEAF_TEST_URL: http://127.0.0.1:8765/
+        run: node apps/4leaf/rog/tests/actor-action-table-37.cjs
+      - name: Four actual battle outcomes and board return
+        run: node apps/4leaf/rog/tests/battle-outcome-return.cjs
+      - name: Original tile source contact geometry with full action frames
+        run: node apps/4leaf/rog/tests/dice-source-tis-contact-visual.cjs
+      - name: Offline full-frame failure returns to genuine legacy source frames
+        run: node apps/4leaf/rog/tests/obs-complete-offline-fallback.cjs
+      - name: Source frame after first failed offline install remains original
+        run: node apps/4leaf/rog/tests/dice-original-obs-offline.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: 4leaf-round4-native-actor-battle
+          path: leaf-*.png
+          if-no-files-found: ignore
+  round4-board-formation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          npm install --no-save playwright
+          npx playwright install chromium --with-deps
+      - run: |
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog >/tmp/round4-board.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsSI http://127.0.0.1:8765/original/Tiles/0015.png >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/round4-board.log
+          exit 1
+      - name: Every source DMP map sampled physical original alpha occlusion
+        run: node apps/4leaf/rog/tests/board-actor-occlusion-all-maps.cjs
+      - name: Source DMP tile depth actor painter regression
+        run: node apps/4leaf/rog/tests/dice-native-pawn-dmp-depth.cjs
+  round4-chat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    strategy:
+      fail-fast: false
+      matrix:
+        engine: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          npm install --no-save playwright
+          npx playwright install ${{ matrix.engine }} --with-deps
+      - run: |
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog >/tmp/round4-chat.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsSI http://127.0.0.1:8765/index.html >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/round4-chat.log
+          exit 1
+      - name: Two real browser peers preserve original 390x97 source history reading
+        env:
+          FOURLEAF_BROWSER: ${{ matrix.engine }}
+          FOURLEAF_TEST_URL: http://127.0.0.1:8765/
+        run: node apps/4leaf/rog/tests/chatroom-native-history-reading.cjs
+      - name: Dice chat asynchronous writers never bounce a native scroll reader
+        if: matrix.engine == 'chromium'
+        run: node apps/4leaf/rog/tests/chat-reader-position-async.cjs

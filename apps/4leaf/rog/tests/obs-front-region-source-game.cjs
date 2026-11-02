@@ -82,18 +82,21 @@ const {chromium,webkit}=require('playwright');
      fullFrames:window.ORIGINAL_LEAF_FULL_ACTION_FRAMES?.[id]?.frames?.length||0,
      image:image.getAttribute('src'),rig:pawn.dataset.actorRig};
    },id);
-   assert.equal(row.idle,'25',id+' source-verified front idle');
+   const tableActor=row.fullFrames===37&&!['0084','0085','0086'].includes(id)&&id!=='0042';
+   assert.equal(row.idle,tableActor?'22,23,24,23':'25',id+' front idle');
    assert.equal(row.walking,id==='0042'?'25,30,25,30':'25,26,27,28,29,30',
     id+' forward-facing original source movement without a BACK 0..7 spin');
    assert.equal(row.continuity,'true');
-   const structural=row.fullFrames===37&&!['0084','0085','0086','0088'].includes(id);
+   const structural=row.fullFrames===37&&!['0084','0085','0086'].includes(id);
    assert.equal(row.attack,structural?'25,31,32,32,25':'25,18,18,25',
     id+' reviewed original source strike sequence with INFERRED WEB timing');
    assert.equal(row.hurt,'25',id+' unrecovered native hit direction must stay front, not jump to rear');
    assert.equal(row.victory,'25,30,25');
    assert.ok(row.evidence.includes('WEB-movement-and-FPS-inferred'));
    assert.equal(row.rig,'original-obs-sprite');
-   assert.ok(row.image.includes('/OBS/')&&row.image.endsWith('-25.png'));
+   assert.ok(row.image.includes('/OBS/')&&
+    (tableActor?['-22.png','-23.png','-24.png'].some(s=>row.image.endsWith(s)):row.image.endsWith('-25.png')),
+    id+' source front image is genuine OBS packet '+row.image);
    inspected.push(row);
   }
   // 0045 is source-front frame18 ONLY (original OBS member 1045), not a

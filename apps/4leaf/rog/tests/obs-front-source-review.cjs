@@ -42,17 +42,21 @@ const {readFileSync}=require('node:fs');
     return {id,index:Number(pawn.dataset.actorFrame),url:img.getAttribute('src'),
      index0:source.frames.find(x=>x.index===0)?.url,
      provenance:pawn.dataset.sourceFacingEvidence,
-     sequence:pawn.dataset.sourceFrameSequence,
+     sequence:pawn.dataset.sourceFrameSequence,table:pawn.dataset.sourceActionTable,
      actual:pawn.dataset.actorRig,cssFlipY:matrix.m22,
      width:img.getBoundingClientRect().width,height:img.getBoundingClientRect().height,
      original:f?.sha256||null};
    },id);
-   assert.equal(state.index,expected,'verified native front 2002 packet for '+id);
+   const tableIdle=state.table==='idle-front/structural-37/INFERRED';
+   assert.ok((tableIdle?[22,23,24]:[expected]).includes(state.index),
+    'reviewed native front idle '+id+': '+state.index);
    assert.ok(state.url.endsWith('/'+(id==='0042'?'1042':id==='0045'?'1045':'1'+id.slice(1))+'-'+
-    String(expected).padStart(2,'0')+'.png'),JSON.stringify(state));
+    String(state.index).padStart(2,'0')+'.png'),JSON.stringify(state));
    assert.ok(!state.url.includes('-00.png'), 'the old back-facing source must not be visible at idle');
    assert.equal(state.actual,'original-obs-sprite');
-   assert.equal(state.sequence,String(expected),'do not animate backward 0..3 packets as idle');
+   assert.equal(state.sequence,tableIdle?'22,23,24,23':String(expected),
+    'do not animate backward idle packets');
+   if(!['0042','0045'].includes(id))assert.ok(tableIdle,id+' should use reviewed source idle');
    assert.ok(state.provenance.startsWith('visual-original-OBS-reviewed/front/'));
    assert.ok(state.cssFlipY<0,'exact FLIP_TOP_BOTTOM source PNG needs upright on-screen transform');
    assert.ok(state.width>=10&&state.height>=35,'native body must remain visible');
