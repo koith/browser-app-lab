@@ -7,7 +7,7 @@ on:
       - '.github/workflows/rog-world-to-game-user-flow.yml'
   push:
     branches:
-      - 'fix/4leaf-chr-hud-and-postmerge-qa-20261102'
+      - 'fix/4leaf-p0-mobile-start-tap-20261103'
     paths:
       - 'apps/4leaf/rog/**'
       - '.github/workflows/rog-world-to-game-user-flow.yml'
