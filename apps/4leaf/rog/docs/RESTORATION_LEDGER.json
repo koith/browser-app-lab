@@ -7370,6 +7370,18 @@
     {
       "seq": 331,
       "date": "2026-11-02",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261102-GPT-006",
+      "taskIds": [
+        "RULE-03",
+        "M08",
+        "P0-RELEASE"
+      ],
+      "details": "GPT network authority restoration work registered before implementation: reject dice roll when disconnected or out of turn, redraw controls on WebRTC channel lifecycle, verify real two-browser reconnect. Historical equivalence and mobile network QA remain open."
+    },
+    {
+      "seq": 332,
+      "date": "2026-11-02",
       "type": "NETWORK_DISCONNECT_AUTHORITY_GUARD",
       "requestId": "REQ-20261102-GPT-006",
       "taskIds": [
