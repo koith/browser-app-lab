@@ -47,3 +47,19 @@
 }
 /* Never draw READY/SELECT/REMAKE over the separate Map ROOM SELECT scene. */
 #lobby .lobby-scene:not(.config-open) .dice-original-room-button-art{display:none!important}
+
+/* Mobile touch accessibility: the source READY sprite remains EXACTLY
+   105x33 at (524,361) in the 794x404 native scene. Expand only the
+   invisible clickable surface to ~80x46 CSS px on a 390px iPhone.
+   No invented replacement art, no stretched palette pixels. */
+@media(max-width:600px){
+ #lobby .dice-native-stage #start-game{
+  left:494px!important;top:310px!important;
+  width:165px!important;height:94px!important;
+  touch-action:manipulation;
+ }
+ #lobby .dice-native-stage #start-game .dice-original-room-button-art{
+  position:absolute!important;left:30px!important;top:51px!important;
+  width:105px!important;height:33px!important;
+ }
+}

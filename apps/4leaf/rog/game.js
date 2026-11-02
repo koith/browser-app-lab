@@ -762,15 +762,24 @@ function drawNativeChessmen(){
    // OBS full-body as the 2004 right 2x2 panel did when provenance is
    // VERIFIED, with an automatic fallback if the source PNG is unavailable.
    const obsId=source.id.startsWith('c_')?source.id.slice(2):'';
-   const auditedIndex=Object.hasOwn(verifiedFront,obsId)
-    ?verifiedFront[obsId]:null;
-   const sourceMember=window.ORIGINAL_LEAF_OBS_FRAMES?.[obsId];
+   // CHR +260 is the ONLY proven card -> body mapping. Historically this
+   // panel indexed original OBS PNGs directly by CardData ID, and silently
+   // drew the WRONG 2002 actor for most cards after the #522 source census.
+   // Resolve the same verified body as the board and duel before choosing a
+   // visually reviewed source front. Do not substitute guessed OBS numbers.
+   const sourceMap=window.__LEAF_CHR_BODY_MAP__;
+   const sourceMember=sourceMap?.resolve(obsId)||null;
+   const bodyKey=sourceMap?.assetKey(obsId)||null;
+   const auditedIndex=bodyKey&&Object.hasOwn(verifiedFront,bodyKey)
+    ?verifiedFront[bodyKey]:null;
    const fullBody=auditedIndex===null?null:
     sourceMember?.frames?.find(frame=>frame.index===auditedIndex);
+   slot.dataset.chrOriginalBody=sourceMap?.lookup(obsId)?.originalMember||'missing';
+   slot.dataset.chrSourceMatch=String(Boolean(sourceMember));
    if(fullBody){
     img.classList.add('dice-chessman-original-obs');
     img.src=fullBody.url;
-    img.dataset.originalMember=sourceMember.originalMember||('10'+obsId.slice(2)+'.obs');
+    img.dataset.originalMember=sourceMember.originalMember;
     img.dataset.nativeFrontFrame=String(auditedIndex);
     slot.dataset.rightPortraitSource='OBS.pak/verified-front';
     slot.dataset.rightPortraitFacingEvidence='visually-reviewed';

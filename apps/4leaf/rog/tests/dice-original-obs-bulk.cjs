@@ -96,8 +96,8 @@ assert.equal(frontReviewed,72,'PR #417 front-reviewed frames');
   await page.waitForSelector('#game:not(.hidden)');
   await page.evaluate(()=>{
    const players=window.__ROG_TEST__.getMatch().players;
-   players[0].team[0]='c_0043';
-   players[1].team[0]='c_0054';
+   players[0].team[0]='c_0060';
+   players[1].team[0]='c_0071';
    window.__ROG_TEST__.drawGame();
   });
   await page.waitForFunction(()=>[...document.querySelectorAll('#board-pawns .leaf-chess-original-obs')]
@@ -116,9 +116,9 @@ assert.equal(frontReviewed,72,'PR #417 front-reviewed frames');
    }))
   }));
   assert.equal(state.count,104);
-  assert.deepEqual(state.actors.map(x=>x.id),['0043','0054']);
+  assert.deepEqual(state.actors.map(x=>x.id),['0060','0071']);
   assert.ok(state.actors.every(x=>x.rig==='original-obs-sprite'&&
-   x.source.startsWith('OBS/')&&x.map==='unverified'&&x.css==='none'&&
+   x.source.startsWith('Original-CHR-body/OBS.pak/')&&x.map==='unverified'&&x.css==='none'&&
    x.png.startsWith('./original/OBS/action-full/')&&x.pixels[0]>20));
   assert.ok(state.actors.every(x=>x.sourceOrientation.replaceAll(' ','')==='matrix(1,0,0,-1,0,0)'),
    'archival OBS RGB source PNGs are stored bottom-up; real game CSS must unflip them upright');
@@ -144,7 +144,7 @@ assert.equal(frontReviewed,72,'PR #417 front-reviewed frames');
    src:a.querySelector('.leaf-chess-original-obs')?.getAttribute('src'),
    proxy:getComputedStyle(a.querySelector('.leaf-chess-actor')).display
   })));
-  assert.deepEqual(duel.map(x=>x.id),['0043','0054']);
+  assert.deepEqual(duel.map(x=>x.id),['0060','0071']);
   assert.ok(duel.every(x=>x.src.startsWith('./original/OBS/action-full/')&&x.proxy==='none'),
    'full source in actual battle must use 2002 OBS 37-frame actor PNGs');
   await page.screenshot({path:'leaf-new-original-2002-obs-body-actors.png'});

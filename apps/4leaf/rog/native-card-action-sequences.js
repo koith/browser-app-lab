@@ -52,7 +52,12 @@
   const result=indexes.map(i=>native.frames[i]);
   result.mirror=side&&(action==='walk'?dir==='right':
    context.duel?context.side==='attacker':dir==='right');
-  result.loop=true;
+  // Round-10 original table proof: 0xFFFFFFFF + zero keys marks an
+  // UNDEFINED action slot, not an infinite-loop instruction. A static
+  // visible fallback is allowed, but must never claim native playback.
+  result.loop=!staticFallback;
+  result.nativeUndefinedSlot=staticFallback;
+  result.nativeDefined=!staticFallback;
   result.table='native-CHR-'+action+'-'+(rear?'rear':side?'side':'front');
   result.nativeKeyTicks=indexes.map((_,i)=>i*3);
   result.nativeEvidence=staticFallback?

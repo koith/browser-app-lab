@@ -44,8 +44,8 @@ const {chromium,webkit}=require('playwright');
   await page.waitForSelector('#game:not(.hidden)');
   await page.evaluate(()=>{
    const match=window.__ROG_TEST__.getMatch();
-   match.players[0].team=['c_0042','c_0043','c_0040'];
-   match.players[1].team=['c_0045','c_0046','c_0048'];
+   match.players[0].team=['c_0056','c_0059','c_0060']; // CHR body 1040/1042/1043
+   match.players[1].team=['c_0062','c_0063','c_0065']; // CHR body 1045/1046/1048
    window.__ROG_TEST__.drawGame();
   });
   await page.waitForFunction(()=>document.querySelectorAll('#dice-native-party .dice-chessman-slot.occupied').length>=3);
@@ -65,6 +65,7 @@ const {chromium,webkit}=require('playwright');
      atlas:slot.dataset.rightPortraitSource,
      proof:slot.dataset.rightPortraitFacingEvidence,
      source:img.getAttribute('src'),sourceFrame:img.dataset.nativeFrontFrame,
+     originalMember:img.dataset.originalMember,chrBody:slot.dataset.chrOriginalBody,
      image:[img.naturalWidth,img.naturalHeight],
      flipped:getComputedStyle(img).transform,
      tooltip:slot.title};
@@ -75,8 +76,11 @@ const {chromium,webkit}=require('playwright');
     'right actual chessman uses reviewed full-body source not face card: '+JSON.stringify(actor));
    assert.equal(actor.proof,'visually-reviewed');
    assert.equal(actor.sourceFrame,'25');
-   assert.ok(/104[023]-25/.test(actor.source)&&actor.source.endsWith('-25.png'),
-    'genuine 2002 OBS source frame 25 for audited 0040/0042/0043 only');
+   const original={"0056":"1040","0059":"1042","0060":"1043"}[actor.id?.slice(2)];
+   assert.ok(original&&actor.originalMember?.endsWith('/'+original+'.obs')&&
+    actor.chrBody?.endsWith('/'+original+'.obs')&&
+    actor.source?.includes('/'+original+'-25.png'),
+    'right 2x2 card must show its OWN CHR+260 original body, never another card');
    assert.ok(actor.image[0]>10&&actor.image[1]>20,
     'full-body original OBS bitmap has real native pixel geometry');
    assert.ok(actor.flipped.startsWith('matrix('),

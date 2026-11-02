@@ -1,0 +1,62 @@
+name: 4LEAF P0 actual user WorldMap to game-start gate
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/**'
+      - '.github/workflows/rog-world-to-game-user-flow.yml'
+  push:
+    branches:
+      - 'fix/4leaf-chr-hud-and-postmerge-qa-20261102'
+    paths:
+      - 'apps/4leaf/rog/**'
+      - '.github/workflows/rog-world-to-game-user-flow.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  world-to-native-game:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - browser: chromium
+            mobile: '0'
+          - browser: chromium
+            mobile: '1'
+          - browser: webkit
+            mobile: '1'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Prepare actual Chromium and iPhone WebKit rendering
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps ${{ matrix.browser }}
+      - name: Serve precisely the target restoration revision
+        run: |
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog > /tmp/leaf-user-flow.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsSI http://127.0.0.1:8765/index.html >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/leaf-user-flow.log
+          exit 1
+      - name: REAL TOUCH WorldMap -> Dice Channel -> ROOM CREATE -> READY -> first turn
+        env:
+          FOURLEAF_BROWSER: ${{ matrix.browser }}
+          FOURLEAF_MOBILE: ${{ matrix.mobile }}
+          FOURLEAF_TEST_URL: http://127.0.0.1:8765/
+        run: node apps/4leaf/rog/tests/world-to-dice-real-user-start.cjs
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: original-4leaf-world-to-play-${{ matrix.browser }}-mobile-${{ matrix.mobile }}
+          path: |
+            leaf-world-to-game-*.json
+            leaf-world-to-game-failure-*.png
+          if-no-files-found: ignore
