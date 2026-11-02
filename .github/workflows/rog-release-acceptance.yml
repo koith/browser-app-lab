@@ -30,6 +30,8 @@ jobs:
         run: node apps/4leaf/rog/tests/dmp-tile-overlap-audit.cjs
       - name: SHA256-audit 100 actual decoded source IMG.pak frames, preserving 2002 winBattle podium
         run: node apps/4leaf/rog/tests/native-img-source-integrity.cjs
+      - name: Verify the 63 embedded die pixels and signed source provenance
+        run: node apps/4leaf/rog/tests/dice-embedded-source-integrity.cjs
   chromium-game:
     runs-on: ubuntu-latest
     timeout-minutes: 18
