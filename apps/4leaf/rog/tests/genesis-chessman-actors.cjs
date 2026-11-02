@@ -91,7 +91,7 @@ const {chromium}=require('playwright');
     missing.portraitSrc==='./original/IMG/avatarback.png'));
   assert.deepEqual(missing.size,[40,55]);
   assert.notEqual(missing.visible,'none');
-  assert.match(missing.mapping,/original-OBS-missing/);
+  assert.match(missing.mapping,/original-CHR-body-unpublished-or-unavailable/);
   // Legitimate actual move sequence uses real 104-cell DMP game and calls
   // actor state transitions. Restore original card to continue real match.
   await page.evaluate(old=>{

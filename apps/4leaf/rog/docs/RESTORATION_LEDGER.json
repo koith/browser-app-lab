@@ -1534,6 +1534,19 @@
         "QA-03",
         "P0-RELEASE"
       ]
+    },
+    {
+      "id": "REQ-20261102-GPT-019",
+      "date": "2026-11-02",
+      "origin": "User continuation while Claude performs original client evidence extraction",
+      "text": "Verify merge of 98-CHR native body runtime on Pages; repair the last genuinely incorrect CardData card-index source selection in 2x2 selected Genesis chessman HUD; improve original actor provenance labels and all-live post-merge browser QA without inventing original OBS bytes or frame semantics.",
+      "taskIds": [
+        "P0-ACTOR",
+        "ACT-01",
+        "SRC-04",
+        "QA-03",
+        "P0-RELEASE"
+      ]
     }
   ],
   "tasks": [
@@ -8024,6 +8037,48 @@
         "P0-RELEASE"
       ],
       "details": "Round 9 original 98 CHR records rechecked against compressed source mapping: 97 distinct referenced bodies, 78 published original PNG members, 19 unpublished, 1 missing card 0156. Body 1040 is card 0056, Scheherazade 0088 body1071, Saladin 0087 body1070, Ironmask 0091 body1074, Black Prince 0170 OBS3 body1267. New CHR-sourced runtime refuses card-number-based OBS fallback. Six native animation groups (idle/walk 3 dirs) from original member 18-byte records mapped to 78 published actors, 3 native ticks per frame. Semantic actions and actual tick duration remain INFERRED/UNVERIFIED; all original events remain disabled. D6/D4 palette: UNVERIFIED per Claude ninth correction; previous quarantine preserved. Browser/CI and published Pages acceptance pending."
+    },
+    {
+      "seq": 365,
+      "date": "2026-11-02",
+      "type": "CHR_OFFSET260_98_CARD_NATIVE_ACTOR_PR522_MERGED_PAGES_VERIFIED",
+      "requestId": "REQ-20261102-GPT-018",
+      "taskIds": [
+        "P0-ACTOR",
+        "ACT-01",
+        "SRC-04",
+        "QA-03",
+        "P0-RELEASE"
+      ],
+      "details": "PR #522 merged into main at 12ccf5ddbf3e030d2b904267e7169582a3e5e56e. PR head 79c8c1c93e368045d6424bc066380445182fbff3 passed 23 checks with zero failures (1 conditionally skipped). GitHub Pages build and Deploy static content to Pages for merge SHA completed successfully. Read-only public /apps/4leaf/rog/app-version.json returned 0.86.0-beta.50 and PWA v137. Original 78 published card-linked bodies and six source index idle/walk groups are partial, NOT complete original game reconstruction. Post-merge supplemental QA failures disclosed and queued for follow-on correction."
+    },
+    {
+      "seq": 366,
+      "date": "2026-11-02",
+      "type": "CHR_CARD_VS_OBS_BODY_2X2_HUD_FIX_PR_PENDING",
+      "requestId": "REQ-20261102-GPT-019",
+      "taskIds": [
+        "P0-ACTOR",
+        "ACT-01",
+        "SRC-04",
+        "QA-03",
+        "P0-RELEASE"
+      ],
+      "details": "Found remaining actual runtime regression: game.js drawNativeChessmen looked up verifiedFront and window.ORIGINAL_LEAF_OBS_FRAMES by CardData ID, not original CHR +260 body member, causing wrong original models or card-back in right-hand 2x2 selected party panel. Fixed lookup to the same __LEAF_CHR_BODY_MAP__.resolve used by board and duel, human-reviewed front evidence indexed by real OBS body member, and added explicit body/asset provenance metadata. Added real-browser 98-card census and native/published/unpublished fixture, plus post-merge source-role/battle selection regression updates. PR and CI pending. No new source bytes, source effects or original game FPS asserted."
+    },
+    {
+      "seq": 367,
+      "date": "2026-11-02",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261102-GPT-019",
+      "taskIds": [
+        "P0-ACTOR",
+        "ACT-01",
+        "SRC-04",
+        "QA-03",
+        "P0-RELEASE"
+      ],
+      "details": "User requested continued GPT original 4LEAF web runtime development during Claude original-data extraction. Live selected-party HUD CHR source mapping and post-merge source-only browser QA are now separate tracked work."
     }
   ]
 }

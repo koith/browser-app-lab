@@ -590,9 +590,9 @@
    node.dataset.actorSource='CardData (OBS full-body not recovered)';
    node.dataset.actorOriginalModelRecovered='false';
    node.dataset.sourceAnimation='unavailable';
-   node.dataset.sourcePoseMapping=Object.hasOwn(NON_ACTOR_OBS,src)
-    ?'OBS-member-is-non-character-effect/CardData-fallback'
-    :'original-OBS-missing/CardData-original-portrait-only';
+   // src is a CHR card ID, not an OBS member ID. The pre-CHR list of
+   // historical OBS effects cannot classify a card's actual original body.
+   node.dataset.sourcePoseMapping='original-CHR-body-unpublished-or-unavailable/CardData-original-portrait-only';
    node.dataset.originalObsMemberRole='CHR-original-body-unpublished-or-unavailable';
   }
  }

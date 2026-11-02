@@ -47,7 +47,9 @@ const path=require('path');
   assert.ok(hud.empty.every(x=>!x.hasImg&&x.button==='DIV'),'unoccupied source pane cannot show a fake portrait');
   assert.deepEqual(hud.occupied.map(x=>x.id),hud.roster,'original displayed chessmen are actual match party, in role order');
   assert.ok(hud.occupied.every(x=>x.button==='BUTTON'&&
-   (x.source.startsWith('./original/CardData/chm_')||x.source.includes('/original/OBS/'))&&x.text.length>0),
+   (x.source.startsWith('./original/CardData/chm_')||
+     x.source.includes('/original/OBS/')||
+     x.source==='./original/IMG/avatarback.png')&&x.text.length>0),
    'actual enrolled source CardData remains fallback while reviewed front OBS full bodies replace facial previews');
   assert.equal(hud.side,'flex','source 800x600 game shows its dedicated right side UI');
   assert.ok(hud.originalBackground.includes('original/IMG/avatarback.png'),'real source 4LEAF blue atlas used');

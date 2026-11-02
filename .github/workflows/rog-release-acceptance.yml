@@ -84,6 +84,10 @@ jobs:
         env:
           FOURLEAF_TEST_URL: http://127.0.0.1:8765/
         run: node apps/4leaf/rog/tests/actor-action-table-37.cjs
+      - name: Verify source-authenticated CHR member identity in the live 2x2 selected chessman HUD
+        env:
+          FOURLEAF_TEST_URL: http://127.0.0.1:8765/
+        run: node apps/4leaf/rog/tests/chr-party-hud-source-identity.cjs
       - name: Verify original Magic Carden table sprites and hotspots
         env:
           FOURLEAF_TEST_URL: http://127.0.0.1:8765/
