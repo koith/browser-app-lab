@@ -12,7 +12,7 @@ const {chromium}=require('playwright');
  const errors=[];page.on('pageerror',e=>errors.push(String(e)));
  try{
   await page.emulateMedia({reducedMotion:'reduce'});
-  await page.route('**/original/OBS/action-full-ext/1045-18.png*',async route=>{
+  await page.route('**/original/OBS/action-full-ext/1045-22.png*',async route=>{
    if(failures0045++<2)await route.fulfill({status:503,body:'transient original OBS source'});
    else await route.continue();
   });
@@ -41,13 +41,13 @@ const {chromium}=require('playwright');
   // The first genuine OBS asset was temporarily unavailable twice,
   // but should load its OWN SHA-authenticated original bytes after retry.
   await page.waitForFunction(()=>{
-   const p=document.querySelector('#board-pawns .board-pawn[data-chessman-id="0045"]');
+   const p=document.querySelector('#board-pawns .board-pawn[data-chessman-id="0062"]');
    const img=p?.querySelector('.leaf-chess-original-obs');
    return p?.dataset.actorSourceLoad==='ready'&&img?.complete&&img.naturalWidth>20;
   },null,{timeout:18000});
   assert.ok(failures0045>=3,'original OBS source must retry after transient HTTP errors');
   const restored=await page.evaluate(()=>{
-   const p=document.querySelector('#board-pawns .board-pawn[data-chessman-id="0045"]');
+   const p=document.querySelector('#board-pawns .board-pawn[data-chessman-id="0062"]');
    const img=p.querySelector('.leaf-chess-original-obs');
    return {rig:p.dataset.actorRig,source:p.dataset.actorSource,
     load:p.dataset.actorSourceLoad,original:p.dataset.actorOriginalModelRecovered,
@@ -55,37 +55,38 @@ const {chromium}=require('playwright');
     missing:p.dataset.obsUnavailable};
   });
   assert.equal(restored.rig,'original-obs-sprite');
-  assert.equal(restored.source,'OBS/OBS.pak/1045.obs');
+  assert.equal(restored.source,'Original-CHR-body/1045.obs');
   assert.equal(restored.original,'true');
-  assert.ok(restored.path.startsWith('./original/OBS/action-full-ext/1045-18.png'));
+  assert.ok(restored.path.startsWith('./original/OBS/action-full-ext/1045-22.png'));
   assert.ok(restored.native[0]>20&&restored.native[1]>50);
   assert.equal(restored.missing,undefined);
 
-  // If the new 0042 full-source image is unreachable, retain an older
-  // original OBS body as fallback. Do NOT drop to a CardData portrait.
-  // Once reconnected, retry the full original extended series.
-  await page.waitForFunction(()=>document.querySelector(
-   '#board-pawns .board-pawn[data-chessman-id="0042"]')?.dataset.sourceFullUnavailable==='true',
-   null,{timeout:22000});
+  // Original 1042 belongs to CARD 0059. Permanent source errors must show
+  // that card's authentic portrait, not another member's OBS pixels.
+  await page.waitForFunction(()=>{
+   const p=document.querySelector('#board-pawns .board-pawn[data-chessman-id="0059"]');
+   return p?.dataset.actorRig==='original-card-portrait-fallback'&&
+    p.dataset.obsUnavailable==='true';
+  },null,{timeout:22000});
   const unavailable=await page.evaluate(()=>{
-   const p=document.querySelector('#board-pawns .board-pawn[data-chessman-id="0042"]');
+   const p=document.querySelector('#board-pawns .board-pawn[data-chessman-id="0059"]');
    return {rig:p.dataset.actorRig,source:p.dataset.actorSource,
-    load:p.dataset.actorSourceLoad,cardVisible:!!p.querySelector('.leaf-chess-original-card-fallback:not([hidden])'),
-    legacy:p.querySelector('img.leaf-chess-original-obs')?.getAttribute('src')};
+    cardVisible:!!p.querySelector('.leaf-chess-original-card-fallback:not([hidden])'),
+    portrait:p.querySelector('.leaf-chess-original-card-fallback')?.getAttribute('src')};
   });
-  assert.equal(unavailable.rig,'original-obs-sprite');
-  assert.ok(unavailable.legacy.includes('./original/OBS/1042-25.png'));
-  assert.equal(unavailable.cardVisible,false);
-  assert.ok(failures0042>=1,'the extended source must be attempted before authentic legacy fallback');
+  assert.equal(unavailable.rig,'original-card-portrait-fallback');
+  assert.ok(unavailable.cardVisible);
+  assert.ok(unavailable.portrait.startsWith('./original/CardData/'));
+  assert.ok(failures0042>=1,'real CHR-linked source must be attempted');
   await page.unroute('**/original/OBS/action-full-ext/1042-22.png*');
   await page.evaluate(()=>window.__LEAF_GENESIS_ACTORS__.recoverAvailableOriginals());
   await page.waitForFunction(()=>{
-   const p=document.querySelector('#board-pawns .board-pawn[data-chessman-id="0042"]');
+   const p=document.querySelector('#board-pawns .board-pawn[data-chessman-id="0059"]');
    const img=p?.querySelector('.leaf-chess-original-obs');
-   return p?.dataset.actorSourceLoad==='ready'&&p.dataset.sourceFullUnavailable!== 'true'&&
-    img?.getAttribute('src')?.includes('action-full-ext/1042-22.png')&&p.dataset.actorRig==='original-obs-sprite'&&
-    p.dataset.actorOriginalModelRecovered==='true'&&img?.naturalWidth>20&&!img.hidden;
-  },null,{timeout:15000});
+   return p?.dataset.actorSourceLoad==='ready'&&
+    img?.getAttribute('src')?.includes('action-full-ext/1042-22.png')&&
+    p.dataset.actorRig==='original-obs-sprite'&&img?.naturalWidth>20&&!img.hidden;
+  },null,{timeout:16000});
   const after=await page.evaluate(()=>window.__ROG_TEST__.getMatch().players.map(p=>({
    id:p.id,position:p.position,team:p.team[0]
   })));
