@@ -62,9 +62,8 @@ const {chromium,webkit}=require('playwright');
    assert.equal(evidence.frontWalk,'true','only inspected source front pair is allowed');
    // The SHA-verified OBS source census now includes all 37 frames
    // for the 43 visually front-reviewed full-37 actor members. Only 0042 has
-   // no complete 37-frame member and still uses its native two-frame pair.
-   const twoFrameFront=id==='0042';
-   assert.equal(evidence.sequence,twoFrameFront?'25,30,25,30':'25,26,27,28,29,30',
+   // a complete source 37-frame member now; original action FPS remains INFERRED.
+   assert.equal(evidence.sequence,'25,26,27,28,29,30',
     'verified front frames only; original 37-frame actors use all 25..30 poses');
    assert.equal(evidence.pose,'walk');
    assert.ok(evidence.src?.includes('/original/OBS/')&&
