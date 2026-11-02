@@ -142,7 +142,7 @@ def arctic_reddit():
         out.update(results=len(data),source_timestamps=sum(bool(p.get("created_utc")) for p in data if isinstance(p,dict)))
     except Exception:out["valid_json"]=False
     return out
-TASKS=[*(bluesky,(x,)) for x in TERMS]
+TASKS=[(bluesky,(x,)) for x in TERMS]
 TASKS+= [(instagram_profile,("nasa",)),(instagram_profile,("instagram",)),
          (instagram_page,("nasa",)),(mastodon_hashtag,("coffee",)),
          (mastodon_hashtag,("뒷계",)),(telegram_preview,()),(arctic_reddit,())]
