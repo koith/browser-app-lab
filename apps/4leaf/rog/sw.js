@@ -1,5 +1,5 @@
 'use strict';
-const REVISION='4leaf-revival-pwa-v131';
+const REVISION='4leaf-revival-pwa-v132';
 // 32 genuinely archived 145×97 original TIS platform images. First offline
 // Genesis match must draw the same extracted raised platforms, not replace
 // uncached native source art with a CSS placeholder on first room entry.
@@ -27,7 +27,10 @@ const CORE=['./','./index.html','./app-version.json','./pwa-runtime.js','./manif
   './original/SourceSPRExtra/winResult-00.png']).concat(
  Array.from({length:22},(_,i)=>'./original/OBS/ui/1223-'+String(i).padStart(3,'0')+'.png')).concat(
  ['./original/OBS/action-full/manifest.js',...['1040','1046','1078'].flatMap(stem=>
-  Array.from({length:37},(_,i)=>'./original/OBS/action-full/'+stem+'-'+String(i).padStart(2,'0')+'.png'))]);
+  Array.from({length:37},(_,i)=>'./original/OBS/action-full/'+stem+'-'+String(i).padStart(2,'0')+'.png'))])
+ .concat(['./original/OBS/action-full-ext/manifest.js',
+  ...['1042','1045'].flatMap(stem=>Array.from({length:37},(_,i)=>
+   './original/OBS/action-full-ext/'+stem+'-'+String(i).padStart(2,'0')+'.png'))]);
 self.addEventListener('install',event=>{
  event.waitUntil(caches.open(REVISION).then(async cache=>{
    const requests=CORE.map(path=>new Request(new URL(path,self.registration.scope),{cache:'reload'}));
