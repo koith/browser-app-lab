@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - "apps/demand-research/probe_competitor_sources.py"
+      - "apps/demand-research/probe_threads_index_to_original.py"
       - ".github/workflows/intersection-competitor-source-validation.yml"
   workflow_dispatch:
 permissions:
@@ -15,3 +16,5 @@ jobs:
       - uses: actions/checkout@v4
       - name: Probe RSSHub Threads embedded JSON, hosted RSS, Pixelfed (aggregate-only)
         run: python apps/demand-research/probe_competitor_sources.py
+      - name: Test search-index discovery to first-party public Threads original page proof
+        run: python apps/demand-research/probe_threads_index_to_original.py
