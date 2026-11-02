@@ -441,6 +441,19 @@ main{padding-top:10px}
   .account-metrics strong{font-size:19px}
   .account-list-toolbar input{width:48%}
 }
+
+.account-discovered{margin-top:23px;border-top:2px solid #152747;padding-top:14px}
+.account-discovered-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.account-discovered h3{margin:0;font-size:16px}
+.account-discovered-head span{font-size:12px;font-weight:800;color:#2440ad}
+.account-discovered>p{font-size:11px;color:#607089;line-height:1.5;margin:6px 0 11px}
+.account-discovered-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.account-discovered-card{background:#fff;border:1px solid #d0d9e5;display:flex;align-items:center;gap:7px;padding:11px;min-width:0}
+.account-discovered-card .source-badge{flex:none}
+.account-discovered-name{font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1}
+.account-discovered-card button{border-radius:0;background:#2943c9;font-size:10px;padding:7px;flex:none}
+@media(max-width:850px){.account-discovered-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:580px){.account-discovered-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -500,6 +513,15 @@ main{padding-top:10px}
   <div id="accountWatchList" class="account-watch-grid" aria-live="polite">
     <div class="account-empty">추적 계정이 없습니다. 게시글 상세에서 공개 계정을 선택해 추가할 수 있습니다.</div>
   </div>
+  <section class="account-discovered" aria-label="현재 수집한 공개 계정">
+    <div class="account-discovered-head">
+      <h3>현재 수집에서 발견된 공개 계정</h3><span id="accountDiscoveredCount">0개</span>
+    </div>
+    <p>새로 발견한 계정은 공개 게시글 기준으로 표시됩니다. 추적 추가를 선택한 계정만 브라우저에 저장합니다.</p>
+    <div id="accountDiscoveredList" class="account-discovered-grid" aria-live="polite">
+      <div class="account-empty">공개 게시글에서 계정 정보를 불러오는 중입니다.</div>
+    </div>
+  </section>
   <div class="account-analysis-note">
     <strong>분석 방식</strong>
     <p>동일 플랫폼의 같은 계정은 중복 계산하지 않습니다. 플랫폼 간 계정 수를 사람 수로 간주하지 않으며, 중복 미확정 계정은 별도로 구분합니다. 소비 관련 지표는 게시글에 실제로 나타난 구매·가격·제품 언급만 집계합니다.</p>
