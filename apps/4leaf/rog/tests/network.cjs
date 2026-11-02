@@ -117,6 +117,10 @@ const path=require('path');
     await page.locator('#exit-game').click();
     await page.locator('#modal-buttons button').filter({hasText:'나가기'}).click();
     await page.waitForSelector('#lobby:not(.hidden)');
+    // Leaving a room resets the lobby to its ordinary local-game selector.
+    // Re-select network mode through the real visible control before inviting.
+    await page.locator('#game-mode').selectOption('network');
+    await page.waitForSelector('#net-panel:not(.hidden)');
   }
   await host.locator('#net-make').click();
   await host.waitForFunction(()=>document.querySelector('#net-output-offer').value.length>100);
@@ -144,7 +148,8 @@ const path=require('path');
   await host.evaluate(()=>{
     const m=window.__LEAF_BRIDGE__.getMatch();
     m.active=0;m.players[0].position=0;m.players[1].position=50;
-    for(let i=1;i<=17;i++)m.tiles[i]='normal';
+    m.players[0].jail=0;m.players[0].ability=0;m.players[0].effects={};
+    for(let i=1;i<=40;i++)m.tiles[i]='normal';
     for(let i=51;i<=70;i++)m.tiles[i]='normal';
     window.__LEAF_BRIDGE__.onState(m);
     window.__ROG_TEST__.drawGame();
