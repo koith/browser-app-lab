@@ -850,7 +850,7 @@ window.INTERSECTION_receiveCandidates=function(raw){
     const label=String(candidate.title||"").trim().slice(0,220);
     const excerpt=String(candidate.description||"").trim().slice(0,450);
     const text=[label,excerpt].filter(Boolean).join("\n").slice(0,650);
-    if(!text||!TERMS.some(term=>text.includes(term)))continue;
+    if(!text)continue;
     let profileUrl="",author=platform==="x"?"X":platform==="threads"?"Threads":"Instagram";
     if(platform==="x"){
       profileUrl="https://x.com/"+matched[1];author="@"+matched[1];
@@ -861,7 +861,8 @@ window.INTERSECTION_receiveCandidates=function(raw){
     const p={id,postId,platform,author,profileUrl,url:link,
       text,posted:"",indexed:"",terms:new Set(TERMS.filter(t=>text.includes(t))),
       media:[],adultLabeled:false,restricted:false,discoveryCandidate:true,
-      discoverySource:String(candidate.provider||"search").slice(0,40)};
+      discoverySource:String(candidate.provider||"search").slice(0,40),
+      snippetMatched:TERMS.some(term=>text.includes(term))};
     seen.add(id);result.push(p);
   }
   indexedCandidates=result;candidateById=new Map(result.map(p=>[p.id,p]));
@@ -914,7 +915,8 @@ function tile(p){
   if(p.media.length>1&&!blocked)thumb.append(el("span","media-num","+"+(p.media.length-1)));
   let body=el("div","post-body"),title=el("div","post-title");
   let author=profileLink(p);author.className="author";title.append(author,el("span","tag",Array.from(p.terms)[0]||"SNS"));
-  if(p.discoveryCandidate)title.append(el("span","index-candidate-mark","링크 · 원문 미확인"));
+  if(p.discoveryCandidate)title.append(el("span","index-candidate-mark",
+    p.snippetMatched?"링크 · 원문 미확인":"검색어·원문 미확인"));
   if(suspectedAd(p))title.append(el("span","post-ad-marker","광고 의심"));
   body.append(title,el("p","post-excerpt",p.text),el("div","post-date",p.discoveryCandidate?"작성일 미확인 · 검색 결과":niceDate(p.posted)));
   button.append(thumb,body);
