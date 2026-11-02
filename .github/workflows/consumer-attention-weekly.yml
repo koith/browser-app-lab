@@ -1,0 +1,66 @@
+name: Weekly Current Wikipedia Product Attention Review
+on:
+  schedule:
+    - cron: "29 4 * * 1"
+  workflow_dispatch:
+permissions:
+  contents: write
+  pull-requests: write
+concurrency:
+  group: intersection-weekly-public-attention
+  cancel-in-progress: false
+jobs:
+  propose-weekly-snapshot:
+    if: github.repository == 'koith/browser-app-lab'
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            apps/demand-research/consumer_attention.py
+            apps/demand-research/consumer/attention-report.json
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Fetch only six public Wikipedia articles into privacy-minimal aggregate
+        run: |
+          python apps/demand-research/consumer_attention.py --as-of "$(date -u +%Y-%m-%d)" --output /tmp/current-wiki-attention.json
+      - name: Compare current and previous public snapshots
+        id: compare
+        run: |
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          old=json.loads(Path('apps/demand-research/consumer/attention-report.json').read_text())
+          new=json.loads(Path('/tmp/current-wiki-attention.json').read_text())
+          assert new['dataset']['license']=='CC0 1.0'
+          assert old['dataset']['license']=='CC0 1.0'
+          assert new['dataset']['is_demand'] is False and new['dataset']['is_purchases'] is False
+          assert len(new['topics'])==len(old['topics'])==6
+          assert new['dataset']['window_end']>old['dataset']['window_end'] or new==old, 'stale or regressing source window'
+          changed=new!=old
+          with open(os.environ['GITHUB_OUTPUT'],'a') as f: f.write('changed='+str(changed).lower()+'\n')
+          print('ATTENTION_PERIOD_CHANGE',changed,'old=',old['dataset']['window_end'],'new=',new['dataset']['window_end'])
+          PY
+      - name: Stage reviewed aggregate-only snapshot
+        if: steps.compare.outputs.changed == 'true'
+        run: |
+          cp /tmp/current-wiki-attention.json apps/demand-research/consumer/attention-report.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          BRANCH="agent/attention-aggregate-update-${GITHUB_RUN_ID}"
+          git switch -c "$BRANCH"
+          git add apps/demand-research/consumer/attention-report.json
+          git commit -m "data(intersection): propose updated CC0 Wikipedia article attention window"
+          git push origin "HEAD:$BRANCH"
+          echo "ATTENTION_REFRESH_BRANCH=$BRANCH" >> "$GITHUB_ENV"
+      - name: Open human-reviewable public-data PR
+        if: steps.compare.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr create --base main --head "$ATTENTION_REFRESH_BRANCH" \
+            --title "Data refresh: 2026 public Wiki article attention window" \
+            --body "Weekly official Wikimedia Analytics CC0 aggregate. English Wikipedia document pageviews, not unique people, consumer demand or sales. Verify the canonical article names and the six full 14-day time series before merging. No private SNS posts or account identities were accessed."

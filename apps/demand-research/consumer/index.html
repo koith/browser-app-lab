@@ -110,6 +110,32 @@ summary{cursor:pointer;font-size:12px;font-weight:800}
 .session-row small{display:block;color:#657c9b;font-size:10px;line-height:1.6;margin-top:7px}
 .session-footnote{font-size:11px;color:#58739a;border-top:1px dashed #a9bbd5;margin-top:14px;padding-top:11px}
 @media(max-width:700px){.session-lab{padding:12px}.session-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.session-rows{grid-template-columns:1fr}.session-selector strong{margin-left:0}}
+
+.attention-lab{background:#fff3d4;border:2px solid #53331c;box-shadow:5px 5px 0 #4e3426;padding:18px;margin:16px 5px 28px 0}
+.attention-kicker{font-size:11px;font-weight:900;letter-spacing:1.3px;color:#9b5818}
+.attention-lab h2{margin:5px 0 8px;font-size:22px}
+.attention-lab p{font-size:12px;line-height:1.55;color:#644a33}
+.attention-lab a{color:#814419}
+.attention-window{font-size:11px;color:#7e5d3b}
+.attention-status{font-size:12px;color:#875d28;min-height:17px;margin:10px 0}
+.attention-controls{display:flex;align-items:center;gap:9px;flex-wrap:wrap;font-size:12px;margin:12px 0}
+.attention-controls select{background:#fff;border:1px solid #744b27;padding:8px}
+.attention-cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.attention-card{background:#fffdf4;border:1px solid #bf9763;padding:13px;min-width:0}
+.attention-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.attention-card-head small{color:#90704b;font-size:10px}
+.attention-card h3{font-size:14px;line-height:1.4;margin:4px 0 7px}
+.attention-change{font-variant-numeric:tabular-nums;font-size:17px;white-space:nowrap}
+.attention-change.up{color:#1c7863}.attention-change.down{color:#ae542d}
+.attention-change small{display:block;font-size:9px;font-weight:500}
+.attention-count{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin:9px 0}
+.attention-count b{font-size:25px;font-variant-numeric:tabular-nums}
+.attention-count small{font-size:10px;color:#816c51}
+.attention-spark{height:56px;display:flex;align-items:flex-end;gap:3px;border-bottom:1px solid #c4ab82;padding-top:2px}
+.attention-day{display:block;background:#c87531;flex:1;min-width:2px}
+.attention-source{display:inline-block;margin-top:10px;font-size:11px;font-weight:800}
+@media(max-width:900px){.attention-cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.attention-cards{grid-template-columns:1fr}.attention-lab{padding:12px}}
 </style>
 </head>
 <body>
@@ -117,8 +143,8 @@ summary{cursor:pointer;font-size:12px;font-weight:800}
 <main class="wrap">
  <div class="hero">
   <div><div class="eyebrow">01 / independent product evidence</div><h1>상품 수요 <u>교차 검증</u></h1>
-   <p>같은 내용의 반복 유통과 독립적인 상품 후기를 구분합니다. 단순 SNS 계정 수를 실제 소비자 수로 간주하지 않습니다.</p></div>
-  <div id="modeBadge" class="pill" role="status">합성 데이터 예시</div>
+   <p>최근 공개 관심도, 과거 구매 전환, 전문가 평가, 중복 탐지 실험을 서로 다른 근거로 구분합니다. 단순 계정 수를 고유 소비자 수로 간주하지 않습니다.</p></div>
+  
  </div>
  <div class="toolbox">
   <label for="reportFile">분석 리포트 열기</label>
@@ -128,7 +154,25 @@ summary{cursor:pointer;font-size:12px;font-weight:800}
   <span class="subtle">파일은 브라우저에서만 열리며 서버로 업로드되지 않습니다.</span>
  </div>
  <div class="status" id="loadStatus" role="status" aria-live="polite">분석 리포트를 불러오는 중…</div>
- <section id="sessionLab" class="session-lab" aria-labelledby="sessionHeading">
+ <section id="attentionLab" class="attention-lab" aria-labelledby="attentionHeading">
+ <div class="attention-kicker">2026 CURRENT PUBLIC SIGNAL / WIKIMEDIA CC0</div>
+ <h2 id="attentionHeading">최근 상품·기술 관심 신호</h2>
+ <p>2026년 영어 위키백과 문서의 최근 7일 조회수와 이전 7일 조회수를 비교합니다.
+ <strong>이 지표는 백과사전 문서 열람량이지 소비자의 구매 의사·실제 판매량이 아닙니다.</strong>
+ 제품 문서와 넓은 상품 범주는 서로 직접 비교할 수 없습니다.</p>
+ <p>출처: <a href="https://doc.wikimedia.org/generated-data-platform/aqs/analytics-api/" target="_blank" rel="noopener noreferrer">Wikimedia Analytics API</a> ·
+ <a href="https://creativecommons.org/publicdomain/zero/1.0/" target="_blank" rel="noopener noreferrer">CC0 1.0</a></p>
+ <div id="attentionWindow" class="attention-window">최근 14일 비교 기간</div>
+ <div id="attentionStatus" class="attention-status" role="status" aria-live="polite">실제 문서 조회량 불러오는 중…</div>
+ <div class="attention-controls">
+  <label for="attentionType">문서 유형</label>
+  <select id="attentionType">
+   <option value="">전체</option><option value="goods">특정 제품·제품군</option><option value="category">상품 범주</option>
+  </select>
+ </div>
+ <div id="attentionCards" class="attention-cards" aria-live="polite"></div>
+</section>
+<section id="sessionLab" class="session-lab" aria-labelledby="sessionHeading">
  <div class="session-kicker">REAL TRANSACTION OUTCOME / UCI · CC BY 4.0</div>
  <h2 id="sessionHeading">실제 쇼핑 세션 · 구매 전환</h2>
  <p>2018년 공개된 전자상거래 방문 세션 연구에서 구매 완료 여부를 집계했습니다.
@@ -165,6 +209,7 @@ summary{cursor:pointer;font-size:12px;font-weight:800}
   </div>
   <div id="editorialCards" class="editorial-cards" aria-live="polite"></div>
 </section>
+<div id="modeBadge" class="pill" role="status">합성 데이터 예시</div>
 <div class="section-head"><h2>중복 탐지 합성 실험</h2><small>아래 표는 실제 소비자 통계가 아닌 재현 가능한 합성 데이터입니다.</small></div>
 <div class="metrics" id="metrics" aria-label="전체 분석 요약"></div>
  <div class="section-head"><div><h2>상품별 콘텐츠 신호</h2><small>동일 콘텐츠 중복 제거 후 남은 그룹을 비교합니다.</small></div>
@@ -285,6 +330,7 @@ function showError(error){$("loadStatus").textContent="오류: "+String(error?.m
 loadDemo().catch(showError);
 })();
 </script>
+<script src="./attention_view.js" defer></script>
 <script src="./session_view.js" defer></script>
 <script src="./editorial_view.js" defer></script>
 </body>

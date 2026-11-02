@@ -1,0 +1,447 @@
+{
+  "schema_version": 1,
+  "dataset": {
+    "name": "Wikimedia Analytics public Wikipedia article pageviews",
+    "kind": "current_article_attention_not_demand",
+    "license": "CC0 1.0",
+    "source_url": "https://doc.wikimedia.org/generated-data-platform/aqs/analytics-api/",
+    "project": "en.wikipedia",
+    "access": "all-access",
+    "agent": "user",
+    "as_of": "2026-11-03",
+    "window_start": "2026-10-18",
+    "window_end": "2026-10-31",
+    "real_aggregate_data": true,
+    "is_purchases": false,
+    "is_demand": false,
+    "contains_individuals": false,
+    "existing_sns_pipeline_connected": false
+  },
+  "summary": {
+    "topics": 6,
+    "days_per_topic": 14,
+    "latest_7d_total_views_across_mixed_topics": 52685
+  },
+  "topics": [
+    {
+      "id": "ps5",
+      "title": "PlayStation 5",
+      "article": "PlayStation_5",
+      "article_type": "device",
+      "wiki_url": "https://en.wikipedia.org/wiki/PlayStation_5",
+      "previous_7d_views": 28662,
+      "latest_7d_views": 27232,
+      "difference_views": -1430,
+      "week_on_week_change_pct": -4.99,
+      "daily": [
+        {
+          "day": "2026-10-18",
+          "views": 4055
+        },
+        {
+          "day": "2026-10-19",
+          "views": 4189
+        },
+        {
+          "day": "2026-10-20",
+          "views": 4417
+        },
+        {
+          "day": "2026-10-21",
+          "views": 4283
+        },
+        {
+          "day": "2026-10-22",
+          "views": 4026
+        },
+        {
+          "day": "2026-10-23",
+          "views": 3969
+        },
+        {
+          "day": "2026-10-24",
+          "views": 3723
+        },
+        {
+          "day": "2026-10-25",
+          "views": 3784
+        },
+        {
+          "day": "2026-10-26",
+          "views": 3888
+        },
+        {
+          "day": "2026-10-27",
+          "views": 4195
+        },
+        {
+          "day": "2026-10-28",
+          "views": 4145
+        },
+        {
+          "day": "2026-10-29",
+          "views": 4039
+        },
+        {
+          "day": "2026-10-30",
+          "views": 3698
+        },
+        {
+          "day": "2026-10-31",
+          "views": 3483
+        }
+      ]
+    },
+    {
+      "id": "switch2",
+      "title": "Nintendo Switch 2",
+      "article": "Nintendo_Switch_2",
+      "article_type": "device",
+      "wiki_url": "https://en.wikipedia.org/wiki/Nintendo_Switch_2",
+      "previous_7d_views": 21168,
+      "latest_7d_views": 21009,
+      "difference_views": -159,
+      "week_on_week_change_pct": -0.75,
+      "daily": [
+        {
+          "day": "2026-10-18",
+          "views": 3083
+        },
+        {
+          "day": "2026-10-19",
+          "views": 2974
+        },
+        {
+          "day": "2026-10-20",
+          "views": 3056
+        },
+        {
+          "day": "2026-10-21",
+          "views": 2875
+        },
+        {
+          "day": "2026-10-22",
+          "views": 3142
+        },
+        {
+          "day": "2026-10-23",
+          "views": 2997
+        },
+        {
+          "day": "2026-10-24",
+          "views": 3041
+        },
+        {
+          "day": "2026-10-25",
+          "views": 3006
+        },
+        {
+          "day": "2026-10-26",
+          "views": 3067
+        },
+        {
+          "day": "2026-10-27",
+          "views": 2971
+        },
+        {
+          "day": "2026-10-28",
+          "views": 2981
+        },
+        {
+          "day": "2026-10-29",
+          "views": 2999
+        },
+        {
+          "day": "2026-10-30",
+          "views": 3096
+        },
+        {
+          "day": "2026-10-31",
+          "views": 2889
+        }
+      ]
+    },
+    {
+      "id": "airpods",
+      "title": "AirPods Pro",
+      "article": "AirPods_Pro",
+      "article_type": "device_family",
+      "wiki_url": "https://en.wikipedia.org/wiki/AirPods_Pro",
+      "previous_7d_views": 2827,
+      "latest_7d_views": 2867,
+      "difference_views": 40,
+      "week_on_week_change_pct": 1.41,
+      "daily": [
+        {
+          "day": "2026-10-18",
+          "views": 407
+        },
+        {
+          "day": "2026-10-19",
+          "views": 432
+        },
+        {
+          "day": "2026-10-20",
+          "views": 420
+        },
+        {
+          "day": "2026-10-21",
+          "views": 403
+        },
+        {
+          "day": "2026-10-22",
+          "views": 406
+        },
+        {
+          "day": "2026-10-23",
+          "views": 401
+        },
+        {
+          "day": "2026-10-24",
+          "views": 358
+        },
+        {
+          "day": "2026-10-25",
+          "views": 395
+        },
+        {
+          "day": "2026-10-26",
+          "views": 435
+        },
+        {
+          "day": "2026-10-27",
+          "views": 445
+        },
+        {
+          "day": "2026-10-28",
+          "views": 465
+        },
+        {
+          "day": "2026-10-29",
+          "views": 388
+        },
+        {
+          "day": "2026-10-30",
+          "views": 358
+        },
+        {
+          "day": "2026-10-31",
+          "views": 381
+        }
+      ]
+    },
+    {
+      "id": "robotvac",
+      "title": "로봇청소기",
+      "article": "Robotic_vacuum_cleaner",
+      "article_type": "category",
+      "wiki_url": "https://en.wikipedia.org/wiki/Robotic_vacuum_cleaner",
+      "previous_7d_views": 556,
+      "latest_7d_views": 497,
+      "difference_views": -59,
+      "week_on_week_change_pct": -10.61,
+      "daily": [
+        {
+          "day": "2026-10-18",
+          "views": 80
+        },
+        {
+          "day": "2026-10-19",
+          "views": 77
+        },
+        {
+          "day": "2026-10-20",
+          "views": 88
+        },
+        {
+          "day": "2026-10-21",
+          "views": 72
+        },
+        {
+          "day": "2026-10-22",
+          "views": 60
+        },
+        {
+          "day": "2026-10-23",
+          "views": 95
+        },
+        {
+          "day": "2026-10-24",
+          "views": 84
+        },
+        {
+          "day": "2026-10-25",
+          "views": 108
+        },
+        {
+          "day": "2026-10-26",
+          "views": 81
+        },
+        {
+          "day": "2026-10-27",
+          "views": 63
+        },
+        {
+          "day": "2026-10-28",
+          "views": 56
+        },
+        {
+          "day": "2026-10-29",
+          "views": 67
+        },
+        {
+          "day": "2026-10-30",
+          "views": 70
+        },
+        {
+          "day": "2026-10-31",
+          "views": 52
+        }
+      ]
+    },
+    {
+      "id": "espresso",
+      "title": "에스프레소 머신",
+      "article": "Espresso_machine",
+      "article_type": "category",
+      "wiki_url": "https://en.wikipedia.org/wiki/Espresso_machine",
+      "previous_7d_views": 1154,
+      "latest_7d_views": 865,
+      "difference_views": -289,
+      "week_on_week_change_pct": -25.04,
+      "daily": [
+        {
+          "day": "2026-10-18",
+          "views": 148
+        },
+        {
+          "day": "2026-10-19",
+          "views": 97
+        },
+        {
+          "day": "2026-10-20",
+          "views": 188
+        },
+        {
+          "day": "2026-10-21",
+          "views": 120
+        },
+        {
+          "day": "2026-10-22",
+          "views": 359
+        },
+        {
+          "day": "2026-10-23",
+          "views": 125
+        },
+        {
+          "day": "2026-10-24",
+          "views": 117
+        },
+        {
+          "day": "2026-10-25",
+          "views": 118
+        },
+        {
+          "day": "2026-10-26",
+          "views": 123
+        },
+        {
+          "day": "2026-10-27",
+          "views": 119
+        },
+        {
+          "day": "2026-10-28",
+          "views": 130
+        },
+        {
+          "day": "2026-10-29",
+          "views": 105
+        },
+        {
+          "day": "2026-10-30",
+          "views": 131
+        },
+        {
+          "day": "2026-10-31",
+          "views": 139
+        }
+      ]
+    },
+    {
+      "id": "standingdesk",
+      "title": "스탠딩 데스크",
+      "article": "Standing_desk",
+      "article_type": "category",
+      "wiki_url": "https://en.wikipedia.org/wiki/Standing_desk",
+      "previous_7d_views": 214,
+      "latest_7d_views": 215,
+      "difference_views": 1,
+      "week_on_week_change_pct": 0.47,
+      "daily": [
+        {
+          "day": "2026-10-18",
+          "views": 20
+        },
+        {
+          "day": "2026-10-19",
+          "views": 22
+        },
+        {
+          "day": "2026-10-20",
+          "views": 46
+        },
+        {
+          "day": "2026-10-21",
+          "views": 47
+        },
+        {
+          "day": "2026-10-22",
+          "views": 29
+        },
+        {
+          "day": "2026-10-23",
+          "views": 14
+        },
+        {
+          "day": "2026-10-24",
+          "views": 36
+        },
+        {
+          "day": "2026-10-25",
+          "views": 50
+        },
+        {
+          "day": "2026-10-26",
+          "views": 15
+        },
+        {
+          "day": "2026-10-27",
+          "views": 49
+        },
+        {
+          "day": "2026-10-28",
+          "views": 25
+        },
+        {
+          "day": "2026-10-29",
+          "views": 32
+        },
+        {
+          "day": "2026-10-30",
+          "views": 22
+        },
+        {
+          "day": "2026-10-31",
+          "views": 22
+        }
+      ]
+    }
+  ],
+  "warnings": [
+    "Wikipedia pageviews are encyclopedia attention, not purchase intent, sales, unique readers, or consumer needs.",
+    "Article titles mix specific devices and broad categories; totals are not a comparable product ranking.",
+    "Bot filtering is imperfect; topical news, browsing, and editorial factors affect traffic.",
+    "Counts are in English Wikipedia and the selected articles only, not global web search."
+  ]
+}
