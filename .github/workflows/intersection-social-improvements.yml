@@ -1,0 +1,18 @@
+name: INTERSECTION Free Social Full-Post Feasibility
+# Expensive public keyless probes must run only on operator dispatch, not every PR push.
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check live free date-limited search and tokenless Meta embeds (counts only)
+        run: python apps/demand-research/probe_social_improvements.py
+      - name: Read public Threads and Instagram originals through free providers
+        run: python apps/demand-research/probe_meta_originals.py
+      - name: Compare 3-source OR and hashtag no-key discovery coverage
+        run: python apps/demand-research/probe_multiterm.py

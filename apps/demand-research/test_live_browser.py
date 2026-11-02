@@ -1,4 +1,4 @@
-"""Browser QA: INTERSECTION icon tabs, date popup, automatic ad filtering,
+"""Browser QA: INTERSECTION compact header date selector, date popup, automatic ad filtering,
 one More button, federated provider badges/links and touchscreen halftone.
 No real user post content is saved or printed.
 """
@@ -139,12 +139,13 @@ def run(live=False):
             assert page.locator("input[type=password],#login,#refresh,#filterDetails,#hideAds,#showAdultMedia,#adLevel").count()==0
             assert page.locator("#count").evaluate("e=>getComputedStyle(e).clipPath==='inset(50%)'"), "Verbose statistics must be screen-reader-only"
             assert page.locator("footer,#footnote,#showMore,#listMore").count()==0
-            assert page.locator("#tabs button").count()==4
-            assert page.locator('#tabs button[data-term="all"]').inner_text()=="All"
-            for term in TERMS:
-                button=page.locator('#tabs button[data-term="'+term+'"]')
-                assert button.get_attribute("aria-label")==term
-                assert button.inner_text().strip() not in TERMS, "Topic selector must be icon-only"
+            assert page.locator("#tabs,[data-term],section.toolbar").count()==0
+            assert page.locator("header .head-inner > h1").count()==1
+            assert page.locator("header .head-inner > .header-period #openDate").count()==1
+            title_bounds=page.locator("header h1").bounding_box()
+            date_bounds=page.locator("header #openDate").bounding_box()
+            assert abs((title_bounds["y"]+title_bounds["height"]/2)-
+                (date_bounds["y"]+date_bounds["height"]/2))<14, "Date should align with site title"
             assert page.locator("#openDate").is_visible()
             assert not page.locator("#dateDialog").is_visible()
             assert page.locator("main input[type=date]").count()==0
@@ -203,16 +204,18 @@ def run(live=False):
                 assert page.locator("article[data-media-policy=adult] .post-thumb > img").count()>0
                 assert page.locator("article[data-media-policy=restricted] .post-thumb > img").count()==0
                 assert len(api_calls)>=21 and all("since" in q and "until" in q for q in api_calls)
-                page.get_by_role("button",name="섹트",exact=True).click()
-                assert page.locator("article.post").count()>0
-                assert "섹트" in page.locator("article.post .post-excerpt").first.inner_text()
-                page.get_by_role("button",name="전체",exact=True).click()
-                assert page.locator("article.post").count()==270
+                assert page.locator("#tabs,[data-term]").count()==0
+                # All three terms remain in the unsegmented post feed.
+                all_text=" ".join(page.locator("article.post .post-excerpt").all_inner_texts())
+                assert all(term in all_text for term in TERMS)
 
                 page.set_viewport_size({"width":390,"height":844})
                 assert page.locator("#feed").evaluate("e=>getComputedStyle(e).gridTemplateColumns.split(' ').length")==3
                 assert page.locator("#openDate").is_visible()
                 assert page.locator("#openDate").evaluate("e=>e.getBoundingClientRect().right")<=391
+                title=page.locator("header h1").bounding_box()
+                date=page.locator("header #openDate").bounding_box()
+                assert abs((title["y"]+title["height"]/2)-(date["y"]+date["height"]/2))<14
                 page.locator("#openDate").click()
                 boxes=page.locator("#dateDialog input[type=date]").evaluate_all(
                   "els=>els.map(e=>e.getBoundingClientRect().toJSON())")

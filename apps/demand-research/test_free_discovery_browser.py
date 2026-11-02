@@ -38,22 +38,22 @@ def run():
                 body=route.request.post_data_json
                 assert "섹트" in body["query"]
                 rows=[
-                    {"url":"https://x.com/example/status/12345678","title":"섹트 synthetic indexed result","description":"Synthetic only"},
+                    {"url":"https://x.com/example/status/1234567890123456789","title":"섹트 synthetic indexed result","description":"Synthetic only"},
                     {"url":"https://x.com.evil.example/example/status/999","title":"섹트 bad spoof URL"},
                     {"url":"http://x.com/example/status/321","title":"섹트 http disallowed"}
                 ]
                 if provider=="keenable":
-                    rows.append({"url":"https://x.com/example2/status/987654","title":"Other index result"})
+                    rows.append({"url":"https://x.com/example2/status/9876543210123456789","title":"Other index result"})
                 else:
-                    rows.append({"url":"https://twitter.com/example3/status/777777","description":"섹트 next candidate"})
+                    rows.append({"url":"https://twitter.com/example3/status/7777777770123456789","description":"섹트 next candidate"})
                 data={"results":rows} if provider=="keenable" else {"success":True,"data":{"web":rows}}
                 route.fulfill(status=200,content_type="application/json",
                     headers={"Access-Control-Allow-Origin":"*"},body=json.dumps(data))
             if not LIVE:
-                page.route("https://api.fxtwitter.com/status/12345678",
+                page.route("https://api.fxtwitter.com/status/1234567890123456789",
                     lambda route:route.fulfill(status=200,content_type="application/json",
                         headers={"Access-Control-Allow-Origin":"*"},
-                        body=json.dumps({"tweet":{"id":"12345678",
+                        body=json.dumps({"tweet":{"id":"1234567890123456789",
                             "text":"섹트 synthetic original public record",
                             "created_at":"2026-11-02T00:00:00Z",
                             "author":{"screen_name":"example","protected":False}}})))
@@ -68,8 +68,8 @@ def run():
             page.wait_for_selector("#freeDiscovery:not(.hidden)",timeout=20000)
             assert page.locator("#indexResults .index-result").count()==0
             assert page.locator("#indexStatus").inner_text().find("자동·유료 검색은 실행하지 않습니다")>=0
-            page.select_option("#indexPlatform","x")
-            page.select_option("#indexTerm","섹트")
+            page.select_option("#indexPlatform","all" if LIVE else "x")
+            page.select_option("#indexTerm","all" if LIVE else "섹트")
             page.locator("#indexFind").click()
             page.wait_for_function("document.getElementById('indexFind').disabled === false",timeout=90000)
             n=page.locator("#indexResults .index-result").count()
@@ -84,13 +84,16 @@ def run():
                 assert page.locator("#indexResults .index-indexed").count()>=3
                 assert len([x for x in upstream if x["method"]=="POST"])==2
                 page.locator(".index-result").filter(
-                    has=page.locator("a[href='https://x.com/example/status/12345678']")
+                    has=page.locator("a[href='https://x.com/example/status/1234567890123456789']")
                     ).locator(".index-check").click()
                 page.wait_for_function("""() =>
                     document.querySelector('.index-verify-result')?.textContent?.includes(
                         '섹트 synthetic original public record')""",timeout=20000)
                 assert "공개 원문 확인" in page.locator(".index-verify-result").first.inner_text()
-                print("INDEX_DISCOVERY_BROWSER_FIXTURE",json.dumps({"cards":n,"paid_keys":0,
+                page.wait_for_selector('article.post .source-badge[aria-label="출처: X"]',timeout=20000)
+                assert page.locator("article.post").count()==1
+                assert "X1" in page.locator("#count").text_content()
+                print("INDEX_DISCOVERY_BROWSER_FIXTURE",json.dumps({"cards":n,"verified_x_feed":1,"paid_keys":0,
                       "canonical_safe":True,"dedup":True,"errors":len(errors)}))
             else:
                 public_x=page.evaluate("""async () => {
@@ -108,7 +111,19 @@ def run():
                     }
                     return output;
                 }""")
-                print("INDEX_DISCOVERY_BROWSER_LIVE",json.dumps({"cards":n,
+                # Expand every indexed candidate without storing any user identifiers.
+                for _ in range(15):
+                    if not page.locator("#indexMore").is_visible():break
+                    page.locator("#indexMore").click()
+                all_cards=page.locator("#indexResults .index-result")
+                by_source={k:page.locator("#indexResults .index-origin").filter(
+                    has_text=k).count() for k in ("X","Threads","Instagram")}
+                confirmed=page.locator("article.post .source-badge[aria-label='출처: X']").count()
+                checked=page.locator("#indexResults .index-indexed").filter(
+                    has_text="텍스트 확인").count()
+                print("INDEX_DISCOVERY_BROWSER_LIVE",json.dumps({"cards":all_cards.count(),
+                    "by_source":by_source,"verified_date_scoped_x_feed":confirmed,
+                    "third_party_page_text_confirmed":checked,
                     "status_contains_error":("응답 실패" in msg or "오류" in msg),
                     "http_codes":[x.get("status") for x in upstream if x.get("status")],
                     "public_x_read":public_x,"errors":len(errors)}))
