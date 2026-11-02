@@ -17,7 +17,14 @@ const path=require('node:path');
   await page.locator('#start-game').click();
   await page.waitForSelector('#game:not(.hidden)');
   const preview=await page.evaluate(()=>{
-   const m=window.__ROG_TEST__.getMatch(),defender=m.players[1];
+   const m=window.__ROG_TEST__.getMatch();
+   // The original default human/bot teams may legally include cards whose
+   // CHR bodies have no published PNG. Choose two real, distinct card bodies
+   // for the authentic OBS podium alignment probe without altering RNG/rules.
+   m.players[0].team=['c_0078']; // CHR 1061 original source
+   m.players[1].team=['c_0088']; // Scheherazade CHR 1071, NOT 1088 golem
+   window.__ROG_TEST__.drawGame();
+   const defender=m.players[1];
    window.__ROG_TEST__.resolveBattle(m.players[0],defender,false);
    return document.querySelector('#board-pawns .board-pawn[data-id="'+defender.id+'"]')?.dataset.actorPose;
   });
