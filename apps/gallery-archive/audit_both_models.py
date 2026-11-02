@@ -140,46 +140,86 @@ def rows(root: Path, model: str, owner: Path | None = None) -> dict:
                 record["by_number"][n].add(p["sha256"])
                 known_source_sha.add(p["sha256"])
 
-    # SHA equality is objective evidence across mirrored IDs. Identical titles
-    # alone never justify merging distinct editions or filling a paid set.
+    # Cross-site discovery creates different album IDs for the SAME photos.
+    # A shared SHA proves byte identity, but does not prove equal publisher
+    # photo numbering or an identical work/edition. Do not score an unmapped
+    # research album's positions as MISSING from an unrelated saved album.
+    alias_path = base / "album-aliases.json"
+    aliases = read_json(alias_path).get("aliases", {}) if alias_path.exists() else {}
+    if not isinstance(aliases, dict):
+        raise ValueError("Invalid album aliases")
+
+    def canonical_work(work: str) -> str:
+        seen = set()
+        while work in aliases:
+            if work in seen:
+                raise ValueError("Cyclic album aliases")
+            seen.add(work)
+            target = aliases[work]
+            if not isinstance(target, str) or not target:
+                raise ValueError("Invalid album alias target")
+            work = target
+        return work
+
     unarchived_shas = known_source_sha - stored_sha
     missing = []
     known_missing = 0
     advertised_missing = 0
     unfilled_source_positions = 0
     alternate_versions_at_filled_positions = 0
+    unlinked_source_positions = 0
+    reviewed_alias_source_positions = 0
+    unlinked_work_ids = 0
     for aid, info in per_album.items():
         absent = info["sha"] - stored_sha
         known_missing += len(absent)
         expected = info["expected"]
-        filled_positions = set(saved.get(aid, {}))
-        source_unfilled = info["numbers"] - filled_positions
+        canonical = canonical_work(aid)
+        # Only exact IDs may share publisher photo position numbers. A reviewed
+        # alias certifies work membership, not a source site's numbering.
+        if aid in saved and saved[aid]:
+            relationship = "exact_saved_work"
+            filled_positions = set(saved[aid])
+        elif canonical != aid and saved.get(canonical):
+            relationship = "reviewed_alias_different_numbering"
+            filled_positions = set(saved[canonical])
+            reviewed_alias_source_positions += len(info["numbers"])
+        else:
+            relationship = "unlinked_research_work"
+            filled_positions = set()
+            unlinked_source_positions += len(info["numbers"])
+            unlinked_work_ids += 1
+        position_comparable = relationship == "exact_saved_work"
+        source_unfilled = info["numbers"] - filled_positions if position_comparable else set()
         source_alternative_hashes = sum(
             len(hashes - stored_sha) for number, hashes in info["by_number"].items()
             if number in filled_positions
-        )
+        ) if position_comparable else 0
         unfilled_source_positions += len(source_unfilled)
         alternate_versions_at_filled_positions += source_alternative_hashes
-        if expected is not None:
-            advertised_missing += len(set(range(1, expected + 1)) - filled_positions)
-        if source_unfilled or (expected is not None and len(filled_positions) < expected) or source_alternative_hashes:
+        advertised_gap = (len(set(range(1, expected + 1)) - filled_positions)
+                          if expected is not None and position_comparable else None)
+        if advertised_gap is not None:
+            advertised_missing += advertised_gap
+        if absent or source_unfilled or advertised_gap or source_alternative_hashes or relationship != "exact_saved_work":
             missing.append({
                 "id": aid,
+                "relationship": relationship,
+                "canonical_saved_work": canonical if relationship == "reviewed_alias_different_numbering" else None,
                 "source_sha_not_yet_stored": len(absent),
-                "source_numbered_positions_not_stored": len(source_unfilled),
-                "alternate_source_sha_at_saved_number": source_alternative_hashes,
-                "stored_numbered_positions": len(filled_positions),
+                "source_shas_already_stored_elsewhere": len(info["sha"] & stored_sha) if relationship != "exact_saved_work" else 0,
+                "source_numbered_positions_not_stored": len(source_unfilled) if position_comparable else None,
+                "alternate_source_sha_at_saved_number": source_alternative_hashes if position_comparable else None,
+                "stored_numbered_positions": len(filled_positions) if relationship != "unlinked_research_work" else None,
                 "source_known_numbers": len(info["numbers"]),
                 "web_expected_numbered_positions": expected,
-                "missing_numbered_positions": (
-                    len(set(range(1, expected + 1)) - filled_positions)
-                    if expected is not None else None
-                ),
+                "missing_numbered_positions": advertised_gap,
             })
+    # Prioritize genuinely unknown bytes over numbering-only claims.
     missing.sort(key=lambda a: (
-        -(a["source_numbered_positions_not_stored"]),
-        -(a["missing_numbered_positions"] or 0),
-        -(a["alternate_source_sha_at_saved_number"]), a["id"]
+        -a["source_sha_not_yet_stored"],
+        -(a["source_numbered_positions_not_stored"] or 0),
+        -(a["missing_numbered_positions"] or 0), a["id"]
     ))
     saved_positions = sum(len(x) for x in saved.values())
     return {
@@ -196,11 +236,14 @@ def rows(root: Path, model: str, owner: Path | None = None) -> dict:
         "research_distinct_sha_not_in_saved_catalog": len(unarchived_shas),
         "missing_source_sha_album_observations": known_missing,
         "source_numbered_positions_not_stored": unfilled_source_positions,
+        "unlinked_research_work_positions_not_claimed_missing": unlinked_source_positions,
+        "reviewed_alias_source_positions_not_number_comparable": reviewed_alias_source_positions,
+        "unlinked_research_work_ids": unlinked_work_ids,
         "source_sha_alternatives_for_already_filled_positions": alternate_versions_at_filled_positions,
         "advertised_numbered_positions_not_in_matching_id": advertised_missing,
         "research_records_skipped_without_valid_sha": invalid_entries,
         "albums_needing_review": missing,
-        "caution": "Source SHA differences at an occupied number are ALTERNATE IMAGE VERSIONS, not a missing photo. Research, advertised totals, and private-catalog entries are not newly downloaded images. Cross-site album IDs may differ. Paid-edition completeness and publisher masters are not certified.",
+        "caution": "Identical SHA across research IDs means identical bytes, NOT identical edition numbering. Unlinked research works and reviewed aliases do not contribute false missing-number counts. Alternate source SHA can be a re-encode, not an absent cut. Research, advertised totals and private-catalog entries are not newly downloaded photos; paid-edition completeness and publisher masters remain unverified.",
     }
 
 
