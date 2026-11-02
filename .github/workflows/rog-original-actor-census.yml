@@ -25,6 +25,7 @@ jobs:
           python3 apps/4leaf/rog/tests/test_census_original_actors.py
           python3 apps/4leaf/rog/tests/test_obs_structure_37.py
           python3 apps/4leaf/rog/tests/test_src04_palette0_pairs.py
+          python3 apps/4leaf/rog/tests/test_dmp_step_directions.py
       - name: Download archived 2002 client and verify exact SHA1
         shell: bash
         run: |
