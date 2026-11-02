@@ -18,7 +18,8 @@ def main():
     _,ids=S.load_checked_in_member(ROOT,"0040")
     assert len(ids)==45,len(ids)
     txt=(ROOT/"genesis-chessman-actors.js").read_text()
-    block=re.search(r"STRUCTURAL_37=Object\.freeze\(new Set\(\[(.*?)\]\)\)",txt,re.S).group(1)
+    # Runtime holds separate EXT_STRUCTURAL_37; only match original set.
+    block=re.search(r"\bconst STRUCTURAL_37=Object\.freeze\(new Set\(\[(.*?)\]\)\)",txt,re.S).group(1)
     expected=set(re.findall(r"'(\d{4})'",block))
     detected=set()
     for card in ids:

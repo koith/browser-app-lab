@@ -6,12 +6,24 @@ on:
       - 'apps/4leaf/rog/tools/restoration-ledger.cjs'
       - 'apps/4leaf/rog/tests/restoration-ledger.cjs'
       - '.github/workflows/rog-restoration-ledger.yml'
+      - 'apps/4leaf/rog/docs/evidence/source-maps/**'
+      - 'apps/4leaf/rog/tools/*source-evidence*.py'
+      - 'apps/4leaf/rog/tools/decode-obs-extended.py'
+      - 'apps/4leaf/rog/tests/test_*evidence.py'
+      - 'apps/4leaf/rog/tests/test_decode_obs_extended.py'
+      - 'apps/4leaf/rog/tests/test_obs_structure_37.py'
   pull_request:
     paths:
       - 'apps/4leaf/rog/docs/RESTORATION_LEDGER.json'
       - 'apps/4leaf/rog/tools/restoration-ledger.cjs'
       - 'apps/4leaf/rog/tests/restoration-ledger.cjs'
       - '.github/workflows/rog-restoration-ledger.yml'
+      - 'apps/4leaf/rog/docs/evidence/source-maps/**'
+      - 'apps/4leaf/rog/tools/*source-evidence*.py'
+      - 'apps/4leaf/rog/tools/decode-obs-extended.py'
+      - 'apps/4leaf/rog/tests/test_*evidence.py'
+      - 'apps/4leaf/rog/tests/test_decode_obs_extended.py'
+      - 'apps/4leaf/rog/tests/test_obs_structure_37.py'
   workflow_dispatch:
 permissions:
   contents: read
@@ -42,3 +54,19 @@ jobs:
         run: node apps/4leaf/rog/tests/restoration-ledger.cjs
       - name: Surface exact remaining original restoration work
         run: node apps/4leaf/rog/tools/restoration-ledger.cjs open
+
+  round7-original-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install pillow numpy
+      - name: Verify synthetic wide and embedded source chain decoder
+        run: python apps/4leaf/rog/tests/test_decode_obs_extended.py
+      - name: Rebuild all 8 original source evidence JSONs and audit SHA256
+        run: python apps/4leaf/rog/tests/test_source_evidence.py
+      - name: Isolate STRUCTURAL_37 from EXT_STRUCTURAL_37
+        run: python apps/4leaf/rog/tests/test_obs_structure_37.py

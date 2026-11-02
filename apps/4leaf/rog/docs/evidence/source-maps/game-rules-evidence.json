@@ -1,0 +1,54 @@
+{
+ "chr": {
+  "recordBytes": 472,
+  "decodedFields": {
+   "196": "CP949 name",
+   "452": "<9H defense, element, ability, intelligence, attack, move, score, level, usable"
+  },
+  "validatedAgainst": "Saladin 1/4/4/2, Black Prince 2/5/3/2, Damian 2/2/4/3, Sherazard 2/1/2/5 (tools/extract_original.py)",
+  "cards": 98
+ },
+ "specialCells": {
+  "10": {
+   "count": 129,
+   "param5IsInRouteTarget": 129,
+   "targetsBackward": 85,
+   "targetsForward": 42,
+   "targetAlsoType10": 72,
+   "meaning": "link to another cell of the same route (warp/jump) - INFERRED"
+  },
+  "11": {
+   "count": 52,
+   "param4Values": {
+    "1": 17,
+    "2": 11,
+    "3": 10,
+    "4": 3,
+    "5": 3,
+    "6": 1,
+    "7": 1,
+    "8": 3,
+    "10": 1,
+    "11": 1,
+    "12": 1
+   },
+   "meaning": "cell with one amount parameter, values 1-12 (INFERRED)"
+  },
+  "12": {
+   "count": 67,
+   "meaning": "cell without parameters (INFERRED)"
+  }
+ },
+ "startCell": "cell index 0 has cell code 13 on all 26 routes (VERIFIED)",
+ "mapModes": {
+  "0": 5,
+  "1": 10,
+  "2": 10
+ },
+ "notInOriginalData": [
+  "turn order",
+  "victory condition",
+  "battle dice count rule",
+  "item effects"
+ ]
+}

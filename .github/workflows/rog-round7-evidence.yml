@@ -1,0 +1,33 @@
+name: 4LEAF round7 original-source evidence and decoder acceptance
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/docs/evidence/source-maps/**'
+      - 'apps/4leaf/rog/tools/decode-obs-extended.py'
+      - 'apps/4leaf/rog/tools/build-source-evidence.py'
+      - 'apps/4leaf/rog/tests/test_source_evidence.py'
+      - 'apps/4leaf/rog/tests/test_decode_obs_extended.py'
+      - 'apps/4leaf/rog/tests/test_obs_structure_37.py'
+      - '.github/workflows/rog-original-obs-extended.yml'
+      - '.github/workflows/rog-round7-evidence.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  decode-and-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install original-source decoder dependencies
+        run: python -m pip install pillow numpy
+      - name: 2002 original OBS extended decoder synthetic chains
+        run: python apps/4leaf/rog/tests/test_decode_obs_extended.py
+      - name: Recompute 8 source evidence maps from archived bytes
+        run: python apps/4leaf/rog/tests/test_source_evidence.py
+      - name: Recheck strict 37-frame action blocks with EXT set isolation
+        run: python apps/4leaf/rog/tests/test_obs_structure_37.py

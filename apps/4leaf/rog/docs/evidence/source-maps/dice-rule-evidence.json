@@ -1,0 +1,19 @@
+{
+ "verified": [
+  "D6 member 1171 frames 0-5 show 1-6 pips",
+  "score numerals 1167 digits 0-7",
+  "D4 member 1223 exists in OBS.pak and OBS2.pak with 22 frames",
+  "no .mesh/.x/3D model member in any PAK (CI 40053447386)",
+  "no 37-frame block-layout array (u8/u16/u32) in 4Leaf.exe, 4Leaf.dll, Dice.dll, Core.dll, DNet.dll, Lime.dll, Rare.dll, WinCore.dll (census)"
+ ],
+ "inferred": [
+  "D4 result-face to frame mapping",
+  "fall/bounce trajectory and durations in the web build"
+ ],
+ "unverified": [
+  "original roll physics",
+  "whether Dice.dll renders a die procedurally",
+  "sound timing"
+ ],
+ "nextData": "trailers of 1171/1223 (decode-obs-extended.py) and Dice.dll code analysis"
+}
