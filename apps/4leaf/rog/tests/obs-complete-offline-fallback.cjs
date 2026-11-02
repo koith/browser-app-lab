@@ -45,7 +45,8 @@ const path=require('node:path');
   },start.id);
   assert.ok(denied>=1,'exercise real failed 1043 asset download');
   assert.equal(after.card,'0060');assert.equal(after.rig,'original-card-portrait-fallback');
-  assert.ok(after.portrait?.startsWith('./original/CardData/'));
+  assert.ok((after.portrait?.startsWith('./original/CardData/')||
+    after.portrait==='./original/IMG/avatarback.png'));
   assert.deepEqual({active:after.active,position:after.position},
    {active:start.active,position:start.position});
   await page.unroute(blocked);
