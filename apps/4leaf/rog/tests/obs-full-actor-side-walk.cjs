@@ -38,7 +38,7 @@ const {chromium,webkit}=require('playwright');
   await page.locator('#start-game').click();
   await page.waitForSelector('#game:not(.hidden)');
   const probe=[];
-  for(const card of ['c_0040','c_0046','c_0078']){
+  for(const card of ['c_0056','c_0063','c_0095']){
    const start=await page.evaluate(card=>{
     const T=window.__ROG_TEST__,m=T.getMatch();
     m.players[0].team=[card];m.players[0].position=1;T.setMatch(m);
@@ -66,8 +66,8 @@ const {chromium,webkit}=require('playwright');
    assert.equal(state.missing,undefined,card+' actual source pawn exists');
    assert.equal(state.rig,'original-obs-sprite',card+' never uses fabricated proxy');
    assert.equal(state.seq,'14,15,16,17,18,19',card+' side walk block');
-   assert.equal(state.source,'walk-side/structural-37/INFERRED');
-   const stem=card.slice(-4).replace(/^0/,'1');
+   assert.equal(state.source,'native-CHR-walk-side/source-index-VERIFIED/semantic-role-INFERRED');
+   const stem=({'c_0056':'1040','c_0063':'1046','c_0095':'1078'})[card];
    assert.ok(state.src?.includes('/original/OBS/action-full/'+stem+'-'),
     'source must be the actual complete 2002 actor sprites: '+JSON.stringify(state));
    assert.ok(state.seen.length>=3&&state.seen.every(f=>f>=14&&f<=19),

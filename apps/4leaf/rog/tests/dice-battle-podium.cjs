@@ -17,7 +17,14 @@ const path=require('node:path');
   await page.locator('#start-game').click();
   await page.waitForSelector('#game:not(.hidden)');
   const preview=await page.evaluate(()=>{
-   const m=window.__ROG_TEST__.getMatch(),defender=m.players[1];
+   const m=window.__ROG_TEST__.getMatch();
+   // The original default human/bot teams may legally include cards whose
+   // CHR bodies have no published PNG. Choose two real, distinct card bodies
+   // for the authentic OBS podium alignment probe without altering RNG/rules.
+   m.players[0].team=['c_0078']; // CHR 1061 original source
+   m.players[1].team=['c_0088']; // Scheherazade CHR 1071, NOT 1088 golem
+   window.__ROG_TEST__.drawGame();
+   const defender=m.players[1];
    window.__ROG_TEST__.resolveBattle(m.players[0],defender,false);
    return document.querySelector('#board-pawns .board-pawn[data-id="'+defender.id+'"]')?.dataset.actorPose;
   });
@@ -41,10 +48,14 @@ const path=require('node:path');
    window.__LEAF_GENESIS_ACTORS__.poseByPlayer(ids[1],'hurt',1200);
    return {ids,board:board.map(el=>({id:el?.dataset.id,pose:el?.dataset.actorPose,
     chessman:el?.dataset.chessmanId,frames:el?.dataset.sourceFrameSequence,
-    source:el?.dataset.actorRig})),
+    source:el?.dataset.actorRig,
+    originalMember:el?.dataset.actorSource,
+    originalFrame:el?.querySelector('img.leaf-chess-original-obs')?.getAttribute('src')})),
     duel:duel.map(el=>({id:el?.dataset.id,pose:el?.dataset.actorPose,
     chessman:el?.dataset.chessmanId,frames:el?.dataset.sourceFrameSequence,
-    source:el?.dataset.actorRig}))};
+    source:el?.dataset.actorRig,
+    originalMember:el?.dataset.actorSource,
+    originalFrame:el?.querySelector('img.leaf-chess-original-obs')?.getAttribute('src')}))};
   });
   assert.equal(new Set(synced.ids).size,2,'each live duel side is a distinct match player');
   assert.deepEqual(synced.board.map(x=>x.pose),['walk','hurt']);
@@ -54,8 +65,23 @@ const path=require('node:path');
    'duel actors must preserve the real match-player IDs');
   assert.deepEqual(synced.duel.map(x=>x.chessman),synced.board.map(x=>x.chessman),
    'duel and board must play each same real selected Genesis chessman');
-  assert.deepEqual(synced.duel.map(x=>x.frames),synced.board.map(x=>x.frames),
-   'board/podium may not substitute different inferred frame indexes');
+  // In a duel the defender faces SIDEWAYS toward their opponent; on the
+  // board that same character faces the CAMERA. Native source frame 11 vs
+  // frame 25 is a correct orientation difference, not a changed identity.
+  assert.deepEqual(synced.duel.map(x=>x.originalMember),
+   synced.board.map(x=>x.originalMember),
+   'board and podium must use identical CHR-linked original OBS bodies');
+  assert.ok(synced.duel.every((x,i)=>{
+   const member=synced.board[i].originalMember?.match(/(1\d{3})\.obs$/)?.[1];
+   return member&&x.originalFrame?.includes('/'+member+'-')&&
+    synced.board[i].originalFrame?.includes('/'+member+'-');
+  }),'both presentation contexts must display the same native member, not a guessed actor');
+  assert.equal(synced.duel[0].frames,synced.board[0].frames,
+   'attacker walking frontwards uses identical native animation keys');
+  assert.equal(synced.duel[1].frames,'11',
+   'duel defender holds native side pose while looking at attacker');
+  assert.equal(synced.board[1].frames,'25',
+   'board defender holds genuine front pose from that same CHR member');
   assert.ok(synced.duel.every(x=>x.source==='original-obs-sprite'),
    'already recovered true OBS full bodies must be rendered on both podiums');
   // ARCHIVED SOURCE IMAGE anchor regression: validate the physical

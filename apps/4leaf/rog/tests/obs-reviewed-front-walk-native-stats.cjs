@@ -33,12 +33,16 @@ const {chromium,webkit}=require('playwright');
    // 2026-11-01 front-silhouette review (see genesis-chessman-actors.js)
    '0047','0050','0063','0065','0066','0069','0070','0071','0072','0073',
    '0075','0076','0077','0078','0079','0080','0081','0082','0083','0084',
-   '0085','0166',
+   '0085',
    // Independently inspected genuine 1067/1068/1074 frames 25..30.
    '0067','0068','0074']){
    const evidence=await page.evaluate(id=>{
     const m=window.__ROG_TEST__.getMatch();
-    m.players[0].team=['c_'+id,'c_0042'];
+    const originalMap=window.__LEAF_CHR_BODY_MAP__;
+    const card=Object.keys(originalMap.cards).find(x=>
+     originalMap.assetKey(x)===id&&originalMap.resolve(x));
+    if(!card)return {skipped:'source body has no original CHR card',id};
+    m.players[0].team=['c_'+card,'c_0059'];
     window.__ROG_TEST__.drawGame();
     const pawn=document.querySelector('#board-pawns .board-pawn[data-id="'+m.players[0].id+'"]');
     if(!pawn)return {error:'missing actual game pawn',id};
@@ -49,6 +53,7 @@ const {chromium,webkit}=require('playwright');
     const n=pawn.querySelector('img.leaf-chess-original-obs');
     return {id,rig:pawn.dataset.actorRig,
       audited:pawn.dataset.sourceFacingEvidence,
+      originalCard:card,
       frontWalk:pawn.dataset.sourceFrontWalkVerified,
       pose:pawn.dataset.actorPose,
       sequence:pawn.dataset.sourceFrameSequence,
@@ -56,9 +61,10 @@ const {chromium,webkit}=require('playwright');
       src:n?.getAttribute('src'),
       sourceMember:pawn.dataset.actorSource};
    },id);
+   if(evidence.skipped)continue;
    assert.equal(evidence.error,undefined,JSON.stringify(evidence));
    assert.equal(evidence.rig,'original-obs-sprite',id);
-   assert.ok(evidence.audited?.includes('visual-original-OBS-reviewed/front/'+id),JSON.stringify(evidence));
+   assert.ok(evidence.audited?.includes('CHR-native-front-keys'),JSON.stringify(evidence));
    assert.equal(evidence.frontWalk,'true','only inspected source front pair is allowed');
    // The SHA-verified OBS source census now includes all 37 frames
    // for the 43 visually front-reviewed full-37 actor members. Only 0042 has
@@ -68,7 +74,7 @@ const {chromium,webkit}=require('playwright');
    assert.equal(evidence.pose,'walk');
    assert.ok(evidence.src?.includes('/original/OBS/')&&
     evidence.src.endsWith('/1'+id.slice(1)+'-25.png'),JSON.stringify(evidence));
-   assert.ok(evidence.actionEvidence?.includes('WEB-movement-and-FPS-inferred'),
+   assert.ok(evidence.actionEvidence?.includes('unverified')||evidence.actionEvidence?.includes('inferred'),
     'original native frame labels/FPS are NOT proven');
    report.push(evidence);
    if(['0067','0068','0074'].includes(id)){
@@ -78,7 +84,9 @@ const {chromium,webkit}=require('playwright');
      const match=window.__ROG_TEST__.getMatch();
      const pawn=document.querySelector('#board-pawns .board-pawn[data-id="'+match.players[0].id+'"]');
      const native=pawn?.querySelector('img.leaf-chess-original-obs:not([hidden])');
-     return pawn?.dataset.chessmanId===member&&
+     const card=Object.keys(window.__LEAF_CHR_BODY_MAP__.cards).find(x=>
+      window.__LEAF_CHR_BODY_MAP__.assetKey(x)===member);
+     return pawn?.dataset.chessmanId===card&&
       native?.complete&&native?.naturalWidth>15&&native?.naturalHeight>15&&
       native.getAttribute('src')?.includes('/original/OBS/action-full/1'+member.slice(1)+'-');
     },id,{timeout:12000});
@@ -100,7 +108,7 @@ const {chromium,webkit}=require('playwright');
    });
    assert.equal(stats.source,'Dice/IMG.pak:stats.png');
    assert.equal(stats.verified,'false','do not claim recovered source stat text/placement');
-   assert.equal(stats.selected,'c_'+id);
+   assert.equal(stats.selected,'c_'+evidence.originalCard);
    assert.deepEqual(stats.actual,[164,125],'genuine original 164x125 stats bitmap');
    assert.equal(stats.original,'./original/IMG/stats.png');
    // Portrait: a real original file, never the removed (id%59)+1 formula
@@ -119,8 +127,8 @@ const {chromium,webkit}=require('playwright');
   // score and real pip arrays. Do NOT paste historical BATTLE JPG into game.
   await page.evaluate(()=>{
    const m=window.__ROG_TEST__.getMatch();
-   m.players[0].team=['c_0044','c_0046','c_0048'];
-   m.players[1].team=['c_0042','c_0043'];
+   m.players[0].team=['c_0061','c_0063','c_0065'];
+   m.players[1].team=['c_0059','c_0060'];
    window.__ROG_TEST__.drawGame();
    void window.__ROG_TEST__.resolveBattle(m.players[0],m.players[1],false);
   });

@@ -1519,6 +1519,21 @@
         "QA-03",
         "P0-RELEASE"
       ]
+    },
+    {
+      "id": "REQ-20261102-GPT-018",
+      "date": "2026-11-02",
+      "origin": "User continuation and uploaded Claude round9 patch source",
+      "text": "Apply original CHR offset 260 card-to-body links to live 4LEAF web app. Replace all incorrect card=OBS assumptions, use verified per-body original idle/walk frame indexes for available members, never misassign unpublished or absent original bodies, and keep original dice palette/timing evidence unresolved until verified.",
+      "taskIds": [
+        "ACT-01",
+        "ACT-02",
+        "ACT-03",
+        "P0-ACTOR",
+        "SRC-04",
+        "QA-03",
+        "P0-RELEASE"
+      ]
     }
   ],
   "tasks": [
@@ -7977,6 +7992,38 @@
         "P0-RELEASE"
       ],
       "details": "Previous PR515 embedded frame sequence was from source bytes but FIRST-block palette was incorrectly applied to independent later blocks. Runtime now requires explicit SHA256 allowlist for fully reviewed palette-corrected frames; 63 existing archive images remain catalogued but cannot be used or preloaded as live frames. Original source UI OBS 1171/1223 frames and verified game results remain intact. Browser and CI acceptance not yet confirmed."
+    },
+    {
+      "seq": 363,
+      "date": "2026-11-02",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261102-GPT-018",
+      "taskIds": [
+        "ACT-01",
+        "ACT-02",
+        "ACT-03",
+        "P0-ACTOR",
+        "SRC-04",
+        "QA-03",
+        "P0-RELEASE"
+      ],
+      "details": "Original CHR offset 260 source links from 4leaf-round9-20261102.zip decoded source, distinct from prior 1040 as card 0040 assumption."
+    },
+    {
+      "seq": 364,
+      "date": "2026-11-02",
+      "type": "CHR_OFFSET260_98_CARD_NATIVE_ACTOR_FIX_PR_PENDING",
+      "requestId": "REQ-20261102-GPT-018",
+      "taskIds": [
+        "ACT-01",
+        "ACT-02",
+        "ACT-03",
+        "P0-ACTOR",
+        "SRC-04",
+        "QA-03",
+        "P0-RELEASE"
+      ],
+      "details": "Round 9 original 98 CHR records rechecked against compressed source mapping: 97 distinct referenced bodies, 78 published original PNG members, 19 unpublished, 1 missing card 0156. Body 1040 is card 0056, Scheherazade 0088 body1071, Saladin 0087 body1070, Ironmask 0091 body1074, Black Prince 0170 OBS3 body1267. New CHR-sourced runtime refuses card-number-based OBS fallback. Six native animation groups (idle/walk 3 dirs) from original member 18-byte records mapped to 78 published actors, 3 native ticks per frame. Semantic actions and actual tick duration remain INFERRED/UNVERIFIED; all original events remain disabled. D6/D4 palette: UNVERIFIED per Claude ninth correction; previous quarantine preserved. Browser/CI and published Pages acceptance pending."
     }
   ]
 }

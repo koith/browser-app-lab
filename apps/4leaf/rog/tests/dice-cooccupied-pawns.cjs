@@ -25,7 +25,7 @@ const {chromium}=require('playwright');
   await page.evaluate(()=>{
    const m=window.__ROG_TEST__.getMatch();
    m.players[0].position=0;m.players[1].position=0;
-   m.players[0].team[0]='c_0045';m.players[1].team[0]='c_0042';
+   m.players[0].team[0]='c_0062';m.players[1].team[0]='c_0059'; // CHR 1045/1042 authentic distinct bodies
    window.__ROG_TEST__.drawGame();
   });
   await page.waitForFunction(()=>[...document.querySelectorAll(

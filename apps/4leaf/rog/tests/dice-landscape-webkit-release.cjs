@@ -27,8 +27,21 @@ const {webkit}=require('playwright');
   await page.locator('#bot-count').selectOption('1');
   await page.locator('#start-game').click();
   await page.waitForSelector('#game:not(.hidden)');
+  // Use two real, source-published CHR bodies for this native-OBS-only
+  // landscape test; the game's default cards may have missing PNGs.
+  await page.evaluate(()=>{
+   const m=window.__ROG_TEST__.getMatch();
+   m.players[0].team=['c_0056']; // verified original member 1040
+   m.players[1].team=['c_0088']; // Scheherazade original member 1071
+   window.__ROG_TEST__.drawGame();
+  });
   await page.waitForFunction(()=>document.querySelectorAll('#board-nodes>.tile').length===104&&
-   document.querySelectorAll('#board-pawns .leaf-chess-original-obs').length===2);
+   document.querySelectorAll('#board-pawns .board-pawn').length===2&&
+   [...document.querySelectorAll('#board-pawns .board-pawn')].every(p=>
+    p.dataset.actorRig==='original-obs-sprite'&&
+    p.querySelector('img.leaf-chess-original-obs')?.complete&&
+    p.querySelector('img.leaf-chess-original-obs')?.naturalWidth>10),
+   null,{timeout:30000});
   const positions=await page.evaluate(()=>window.__ROG_TEST__.getMatch().players.map(x=>x.position));
   const orientations=[];
   for(const size of [{width:390,height:844},{width:844,height:390}]){

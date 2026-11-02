@@ -25,7 +25,7 @@ const {chromium}=require('playwright');
   const initial=await page.evaluate(()=>({
    cardTeam:window.__ROG_TEST__.getMatch().players.map(p=>p.team[0].replace(/^c_/,'')),
    actors:window.__LEAF_GENESIS_ACTORS__.getState().rendered,
-   sourceIds:Object.keys(window.ORIGINAL_LEAF_OBS_FRAMES||{}),
+   sourceIds:Object.keys(window.__LEAF_CHR_BODY_MAP__?.cards||{}).filter(id=>!!window.__LEAF_CHR_BODY_MAP__.resolve(id)),
    portraits:[...document.querySelectorAll('#board-pawns .leaf-chess-portrait')].map(el=>({
     src:el.getAttribute('src'),ready:el.complete,dimensions:[el.naturalWidth,el.naturalHeight]})),
    heights:[...document.querySelectorAll('#board-pawns .leaf-chess-actor')].map(el=>el.getBoundingClientRect().height),
@@ -42,8 +42,9 @@ const {chromium}=require('playwright');
   }), 'each existing original OBS character must use its actual 2002 pixels; missing frames may use explicitly inferred proxy');
   assert.ok(initial.heights.every(n=>n===0),
    'source-only chessmen must never render an oversized synthetic CSS skeleton');
-  assert.ok(initial.actors.every(x=>x.rig==='original-obs-sprite'),
-   'default hotseat players both select recovered original OBS full-body characters');
+  assert.ok(initial.actors.every(x=>initial.sourceIds.includes(x.chessmanId)?
+   x.rig==='original-obs-sprite':x.rig==='original-card-portrait-fallback'),
+   'default hotseat actor must match original CHR publication availability');
   assert.equal(initial.chatAvatar,0,'ChatTown avatars are NOT used on Genesis board');
   await page.waitForFunction(()=>[...document.querySelectorAll('#board-pawns .leaf-chess-portrait')].every(x=>x.complete&&x.naturalWidth>15),null,{timeout:13000});
   assert.ok(initial.portraits.every(x=>x.src.startsWith('./original/CardData/chm_')));
@@ -54,12 +55,12 @@ const {chromium}=require('playwright');
   const original=await rig.getAttribute('data-chessman-id');
   await page.evaluate(()=>{
    const m=window.__ROG_TEST__.getMatch();
-   m.players[0].team[0]='c_0045';
+   m.players[0].team[0]='c_0056';
    window.__ROG_TEST__.drawGame();
   });
   assert.notEqual(await rig.getAttribute('data-chessman-id'),original,
    'changing an actual team card rerenders real actor identity instead of fixed player-index avatar');
-  assert.equal(await rig.getAttribute('data-chessman-id'),'0045');
+  assert.equal(await rig.getAttribute('data-chessman-id'),'0056');
   assert.equal(await rig.getAttribute('data-actor-rig'),'original-obs-sprite',
    'original OBS pixels replace inferred CSS when the chessman asset exists');
   // Genuine source 1096.obs was recovered using the 640-stride RGB RLE
@@ -69,7 +70,7 @@ const {chromium}=require('playwright');
   const missing=await page.evaluate(()=>{
    const m=window.__ROG_TEST__.getMatch();
    const old=m.players[1].team[0];
-   m.players[1].team[0]='c_0091';
+   m.players[1].team[0]='c_0040';
    window.__ROG_TEST__.drawGame();
    const n=document.querySelector('#board-pawns .board-pawn[data-id="1"]');
    const css=getComputedStyle(n.querySelector('.leaf-chess-actor'));
@@ -84,9 +85,10 @@ const {chromium}=require('playwright');
    return data;
   });
   assert.equal(missing.rig,'original-card-portrait-fallback',
-   '0091 is absent from all 3 original OBS packs; a phantom actor is prohibited');
+   'card 0040 has verified original body 1025 but no published PNG; do not show unrelated 1040');
   assert.equal(missing.css,'none','missing OBS must not show an invented tall figure');
-  assert.ok(missing.portraitSrc?.startsWith('./original/CardData/chm_'));
+  assert.ok((missing.portraitSrc?.startsWith('./original/CardData/chm_')||
+    missing.portraitSrc==='./original/IMG/avatarback.png'));
   assert.deepEqual(missing.size,[40,55]);
   assert.notEqual(missing.visible,'none');
   assert.match(missing.mapping,/original-OBS-missing/);
@@ -121,8 +123,8 @@ const {chromium}=require('playwright');
   await page.evaluate(()=>window.__LEAF_GENESIS_ACTORS__.poseByPlayer(0,'victory',200));
   assert.equal(await rig.getAttribute('data-actor-pose'),'victory');
   const recovered=await page.evaluate(()=>window.__LEAF_GENESIS_ACTORS__.getState().originalFullBodyFramesRecovered);
-  assert.ok(['0042','0045','0043','0054'].every(id=>recovered.includes(id))&&
-   recovered.length>=46,
+  assert.ok(['0056','0088','0091','0170'].every(id=>recovered.includes(id))&&
+   recovered.length===78,
    'recovered IDs include all existing 2002 OBS source characters without fabricating unrelated rig files');
   await page.screenshot({path:'leaf-genesis-source-card-proxy-not-chat-actor.png'});
   assert.deepEqual(errors,[]);

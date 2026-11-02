@@ -50,8 +50,8 @@ const {chromium}=require('playwright');
   await page.waitForSelector('#game:not(.hidden)');
   await page.evaluate(()=>{
    const m=window.__ROG_TEST__.getMatch();
-   m.players[0].team[0]='c_0043';
-   m.players[1].team[0]='c_0054';
+   m.players[0].team[0]='c_0056'; // CHR 1040: original 37-frame source install-cached
+   m.players[1].team[0]='c_0063'; // CHR 1046: original 37-frame source install-cached
    window.__ROG_TEST__.drawGame();
   });
   await page.waitForFunction(()=>[...document.querySelectorAll(
@@ -66,8 +66,10 @@ const {chromium}=require('playwright');
    }))
   }));
   assert.equal(cached.tiles,104);
-  assert.deepEqual(cached.actors.map(x=>x.id),['0043','0054']);
-  assert.ok(cached.actors.every(x=>x.rig==='original-obs-sprite'&&x.source?.includes('/OBS/bulk/')));
+  assert.deepEqual(cached.actors.map(x=>x.id),['0056','0063']);
+  assert.ok(cached.actors.every((x,i)=>x.rig==='original-obs-sprite'&&
+   x.source?.includes('/OBS/action-full/'+(i===0?'1040':'1046')+'-')),
+   'offline must show authentic cached member from CHR card, not a mismatched OBS bulk fallback');
   await page.locator('#dice-source-roll').click();
   await page.waitForFunction(()=>window.__ROG_TEST__.getMatch().lastRoll?.length>0,
    null,{timeout:20000});

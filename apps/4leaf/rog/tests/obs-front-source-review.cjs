@@ -1,13 +1,9 @@
 'use strict';
-/* OBS front-direction visual audit regression — original pixels only.
- * 0 is visibly back/side on the sampled authentic OBS sprites; assert that
- * source 25 (and 1045/18) replaces the default backward idle rotation.
- * Non-reviewed character direction and historical EXE FPS remain OPEN.
+/* Visual front-source audit revised after original CHR +260 card-body mapping.
+ * 2004 screenshot remains comparison reference. No identity guessed from card ID.
  */
-const assert=require('node:assert/strict');
-const {chromium}=require('playwright');
-const path=require('node:path');
-const {readFileSync}=require('node:fs');
+const assert=require('node:assert/strict'),path=require('node:path');
+const {readFileSync}=require('node:fs'),{chromium}=require('playwright');
 (async()=>{
  const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
  const page=await browser.newPage({viewport:{width:1280,height:920},serviceWorkers:'block'});
@@ -15,8 +11,8 @@ const {readFileSync}=require('node:fs');
  try{
   await page.addInitScript(()=>{window.LEAF_CENTRAL_API_URL='';});
   await page.goto(process.env.FOURLEAF_TEST_URL||'http://127.0.0.1:8765/');
-  await page.waitForFunction(()=>window.__ROG_TEST__&&window.__LEAF_GENESIS_ACTORS__&&
-   window.ORIGINAL_LEAF_OBS_FRAMES,null,{timeout:15000});
+  await page.waitForFunction(()=>window.__ROG_TEST__&&window.__LEAF_CHR_BODY_MAP__&&
+   window.__LEAF_NATIVE_CARD_ACTIONS__&&window.__LEAF_GENESIS_ACTORS__);
   await page.locator('[data-route="lobby"]').first().click();
   await page.locator('#lobby-create').click();
   await page.locator('#game-mode').selectOption('hotseat');
@@ -24,72 +20,65 @@ const {readFileSync}=require('node:fs');
   await page.locator('#map-select').selectOption('4LEAF');
   await page.locator('#start-game').click();
   await page.waitForSelector('#game:not(.hidden)');
-  const verified={'0040':25,'0042':25,'0043':25,'0044':25,'0045':18,
-   '0046':25,'0048':25,'0049':25,'0051':25,'0052':25,
-   '0053':25,'0054':25,'0055':25,'0056':25,'0058':25,
-   '0059':25,'0060':25,'0061':25,'0062':25,'0064':25};
+  const visualReviewedBodyKeys=['0040','0042','0043','0044','0045',
+   '0046','0048','0049','0051','0052','0053','0054','0055','0056','0058',
+   '0059','0060','0061','0062','0064'];
+  const reviewedCards=await page.evaluate(keys=>{
+   const map=window.__LEAF_CHR_BODY_MAP__;
+   return keys.map(key=>Object.keys(map.cards).find(card=>map.assetKey(card)===key)).filter(Boolean);
+  },visualReviewedBodyKeys);
+  assert.equal(reviewedCards.length,20,'all 20 previously audited ORIGINAL body keys have true CHR cards');
   const proofs=[];
-  for(const [id,expected] of Object.entries(verified)){
-   const state=await page.evaluate(id=>{
-    const match=window.__ROG_TEST__.getMatch();
-    match.players[0].team[0]='c_'+id;
-    window.__ROG_TEST__.drawGame();
-    const pawn=document.querySelector('#board-pawns .board-pawn[data-id="0"]');
+  for(const card of reviewedCards){
+   const state=await page.evaluate(card=>{
+    const T=window.__ROG_TEST__,m=T.getMatch();m.players[0].team[0]='c_'+card;
+    T.drawGame();
+    const pawn=document.querySelector('#board-pawns .board-pawn[data-id="'+m.players[0].id+'"]');
+    window.__LEAF_GENESIS_ACTORS__.poseByPlayer(m.players[0].id,'idle',0);
+    const src=window.__LEAF_CHR_BODY_MAP__.resolve(card);
+    const f=src.frames[Number(pawn.dataset.actorFrame)];
     const img=pawn.querySelector('img.leaf-chess-original-obs');
-    const source=window.ORIGINAL_LEAF_OBS_FRAMES[id];
-    const f=source.frames.find(x=>x.index===Number(pawn.dataset.actorFrame));
     const style=getComputedStyle(img),matrix=new DOMMatrixReadOnly(style.transform);
-    return {id,index:Number(pawn.dataset.actorFrame),url:img.getAttribute('src'),
-     index0:source.frames.find(x=>x.index===0)?.url,
-     provenance:pawn.dataset.sourceFacingEvidence,
-     sequence:pawn.dataset.sourceFrameSequence,table:pawn.dataset.sourceActionTable,
-     actual:pawn.dataset.actorRig,cssFlipY:matrix.m22,
-     width:img.getBoundingClientRect().width,height:img.getBoundingClientRect().height,
-     original:f?.sha256||null};
-   },id);
-   const tableIdle=state.table==='idle-front/structural-37/INFERRED';
-   assert.ok((tableIdle?[22,23,24]:[expected]).includes(state.index),
-    'reviewed native front idle '+id+': '+state.index);
-   assert.ok(state.url.endsWith('/'+(id==='0042'?'1042':id==='0045'?'1045':'1'+id.slice(1))+'-'+
-    String(state.index).padStart(2,'0')+'.png'),JSON.stringify(state));
-   assert.ok(!state.url.includes('-00.png'), 'the old back-facing source must not be visible at idle');
-   assert.equal(state.actual,'original-obs-sprite');
-   assert.equal(state.sequence,tableIdle?'22,23,24,23':String(expected),
-    'do not animate backward idle packets');
-   if(!['0042','0045'].includes(id))assert.ok(tableIdle,id+' should use reviewed source idle');
-   assert.ok(state.provenance.startsWith('visual-original-OBS-reviewed/front/'));
-   assert.ok(state.cssFlipY<0,'exact FLIP_TOP_BOTTOM source PNG needs upright on-screen transform');
-   assert.ok(state.width>=10&&state.height>=35,'native body must remain visible');
+    return {card,member:src.originalMember,index:Number(pawn.dataset.actorFrame),
+     source:img.getAttribute('src'),sha:f.sha256,
+     rig:pawn.dataset.actorRig,seq:pawn.dataset.sourceFrameSequence,
+     evidence:pawn.dataset.sourceFacingEvidence,cssFlipY:matrix.m22,
+     w:img.getBoundingClientRect().width,h:img.getBoundingClientRect().height};
+   },card);
+   assert.ok([22,23,24].includes(state.index),
+    'source front idle must be the CHR-selected original frame: '+JSON.stringify(state));
+   assert.equal(state.seq,'22,23,24');
+   const member=state.member.match(/(1\d{3})\.obs$/)?.[1];
+   assert.ok(member&&state.source.includes('/'+member+'-'+String(state.index).padStart(2,'0')+'.png'),
+    'native PNG must come from true CHR member: '+JSON.stringify(state));
+   assert.equal(state.rig,'original-obs-sprite');
+   assert.match(state.evidence,/CHR-native-front-keys/);
+   assert.ok(state.cssFlipY<0,'original OBS flip-top-bottom decoder must render upright');
+   assert.ok(state.w>=10&&state.h>=35,'original native actor must be visible');
    proofs.push(state);
   }
-  const sourceCoverage=await page.evaluate(()=>{
-   const all=Object.entries(window.ORIGINAL_LEAF_OBS_FRAMES);
-   const with25=all.filter(([,m])=>m.frames?.some(f=>f.index===25)).length;
-   const missing=all.filter(([,m])=>!m.frames?.some(f=>f.index===25)).map(([id])=>id);
-   return {models:all.length,with25,missing};
+  const bad=await page.evaluate(()=>{
+   const m=window.__ROG_TEST__.getMatch();m.players[0].team[0]='c_0040';
+   window.__ROG_TEST__.drawGame();
+   const p=document.querySelector('#board-pawns .board-pawn[data-id="'+m.players[0].id+'"]');
+   return {source:p.dataset.actorSource,rig:p.dataset.actorRig};
   });
-  assert.equal(sourceCoverage.models,92);
-  assert.ok(sourceCoverage.with25>=60);
-  // Visual before/after comparison: archived native 2004 screenshot next
-  // to actual running board + source character sheet via single QA artifact.
-  const originalBattle='data:image/jpeg;base64,'+
+  assert.equal(bad.rig,'original-card-portrait-fallback',
+   'original body 1025 not published: do not substitute 1040');
+  const original='data:image/jpeg;base64,'+
    readFileSync(path.resolve(__dirname,'../../assets/battle.jpg')).toString('base64');
   await page.evaluate(reference=>{
-   const wrap=document.createElement('div');
-   wrap.id='obs-visual-audit';
-   wrap.style.cssText='position:fixed;left:0;top:0;z-index:99999;width:100vw;height:100vh;'+
-    'display:flex;gap:14px;align-items:flex-start;background:#17132e;padding:18px;color:white';
-   const original=new Image();original.src=reference;
-   original.style.cssText='width:46vw;max-width:640px;object-fit:contain';
+   const wrap=document.createElement('div');wrap.id='obs-visual-audit';
+   wrap.style.cssText='position:fixed;inset:0;z-index:99999;display:flex;gap:14px;background:#17132e;padding:18px';
+   const image=new Image();image.src=reference;image.style.width='46vw';
    const live=document.getElementById('game').cloneNode(true);
    live.style.cssText='position:relative!important;width:46vw;height:600px;display:block';
-   wrap.append(original,live);document.body.append(wrap);
-  },originalBattle);
-  await page.waitForFunction(()=>document.querySelector('#obs-visual-audit>img')?.naturalWidth===800,
-   null,{timeout:12000});
-  await page.screenshot({path:'leaf-obs-original-battle-vs-front-native-web.png'});
+   wrap.append(image,live);document.body.append(wrap);
+  },original);
+  await page.waitForFunction(()=>document.querySelector('#obs-visual-audit>img')?.naturalWidth===800);
+  await page.screenshot({path:'leaf-obs-original-battle-vs-chr-native-source.png'});
   assert.deepEqual(errors,[]);
-  console.log('ORIGINAL OBS VISUALLY REVIEWED FRONT IDLE PASS '+
-   JSON.stringify({verified:proofs.map(x=>({id:x.id,front:x.index,source:x.url})),sourceCoverage}));
+  console.log('CHR 20 VERIFIED BODY FRONTS ORIGINAL OBS PASS',
+   JSON.stringify({audited:proofs.length,wrongCardFallbackPrevented:true}));
  }finally{await browser.close()}
-})().catch(e=>{console.error('OBS FRONT SOURCE QA FAILED',e.stack||e);process.exit(1)});
+})().catch(e=>{console.error('CHR FRONT ORIGINAL SOURCE FAILED',e.stack||e);process.exit(1)});

@@ -27,8 +27,8 @@ const {chromium,webkit}=require('playwright');
   await page.waitForSelector('#game:not(.hidden)');
   await page.evaluate(()=>{
    const players=window.__ROG_TEST__.getMatch().players;
-   players[0].team[0]='c_0045';
-   players[1].team[0]='c_0042';
+   players[0].team[0]='c_0062';
+   players[1].team[0]='c_0059';
    window.__ROG_TEST__.drawGame();
   });
   const sources=await page.evaluate(()=>({
@@ -45,13 +45,13 @@ const {chromium,webkit}=require('playwright');
    tiles:document.querySelectorAll('#board-nodes .tile').length
   }));
   assert.equal(sources.tiles,104,'real recovered DMP board preserved');
-  assert.deepEqual(sources.visible.map(x=>x.card),['0045','0042']);
+  assert.deepEqual(sources.visible.map(x=>x.card),['0062','0059']);
   assert.deepEqual(sources.visible.map(x=>x.actor),
    ['original-obs-sprite','original-obs-sprite'],
    'original source full-body replaces all synthetic puppets when available');
   assert.ok(sources.visible.every(x=>x.hidden==='none'&&x.poseMapping==='unverified'),
    'no CSS-generated humanoid or invented native pose metadata is displayed');
-  assert.deepEqual(sources.visible.map(x=>x.source),['OBS/OBS.pak/1045.obs','OBS/OBS.pak/1042.obs']);
+  assert.deepEqual(sources.visible.map(x=>x.source),['Original-CHR-body/OBS.pak/1045.obs','Original-CHR-body/OBS.pak/1042.obs']);
   assert.ok(sources.visible.every(x=>x.src?.startsWith('./original/OBS/')));
   assert.ok(sources.actors.every(x=>x.originalRecovered==='true'));
   assert.equal(sources.cache['0045'].originalAnimationCount,37);
@@ -68,8 +68,7 @@ const {chromium,webkit}=require('playwright');
    '#board-pawns .board-pawn')].map(pawn=>{
    const img=pawn.querySelector('.leaf-chess-original-obs');
    const id=pawn.dataset.chessmanId;
-   const manifest=window.ORIGINAL_LEAF_EXT_ACTION_FRAMES?.[id]||
-     window.ORIGINAL_LEAF_OBS_FRAMES[id];
+   const manifest=window.__LEAF_CHR_BODY_MAP__?.resolve(id);
    const frame=manifest?.frames.find(f=>f.url===img?.getAttribute('src'));
    return {id,src:img?.getAttribute('src'),loaded:!!img?.complete,
     sourceMember:manifest?.originalMember,
@@ -78,7 +77,7 @@ const {chromium,webkit}=require('playwright');
     sourceFrame:frame?.index,
     poseMapping:pawn.dataset.sourcePoseMapping};
   }));
-  assert.deepEqual(sourceFrames.map(f=>f.id),['0045','0042']);
+  assert.deepEqual(sourceFrames.map(f=>f.id),['0062','0059']);
   for(const frame of sourceFrames){
    assert.ok(frame.loaded&&frame.expected,'loaded frame must be in original OBS.pak archive manifest: '+JSON.stringify(frame));
    assert.deepEqual(frame.actual,frame.expected,
@@ -104,9 +103,9 @@ const {chromium,webkit}=require('playwright');
    coverage:el.dataset.sourceWalkCoverage,
    source:el.querySelector('.leaf-chess-original-obs')?.getAttribute('src')
   }));
-  assert.equal(partial.sequence,'18','verified source front must not loop rear-facing unverified walk');
-  assert.equal(partial.coverage,'front-only/source-verified/WEB-action-unverified');
-  assert.match(partial.source,/1045-18\.png$/);
+  assert.equal(partial.sequence,'25,26,27,28,29,30','decoded native 1045 walk now uses its original front frame keys');
+  assert.equal(partial.coverage,'native-CHR-OBS-indices/2002-ms-UNVERIFIED');
+  assert.match(partial.source,/1045-2[5-9]\.png$|1045-30\.png$/);
   const movement=partial.source;
   await page.waitForFunction(()=>document.querySelector('#board-pawns .board-pawn')?.dataset.actorPose==='idle',null,{timeout:4000});
   await page.locator('#dice-source-roll').click();
