@@ -488,8 +488,8 @@ main{padding-top:10px}
 </div>
 <section id="accountsView" class="account-panel hidden" role="tabpanel" aria-labelledby="viewAccounts">
   <div class="account-intro">
-    <h2>공개 계정 추적</h2>
-    <p>게시글에서 계정을 선택하거나 공개 프로필 주소를 추가해, 현재 조회 기간에 확인된 활동을 플랫폼별로 분석합니다.</p>
+    <h2>선택한 계정의 활동 상세</h2>
+    <p>전체 공개 계정은 위에서 자동 집계됩니다. 이 영역은 특정 공개 계정의 글을 추가 확인할 때만 사용하는 선택 기능입니다.</p>
   </div>
   <form id="accountWatchForm" class="account-add-form" autocomplete="off">
     <label for="accountProfileInput">공개 프로필 URL</label>
@@ -507,7 +507,7 @@ main{padding-top:10px}
     <div><span>중복된 상품 문구</span><strong id="accountMetricRepeat">0</strong></div>
   </div>
   <div class="account-list-toolbar">
-    <h3>추적 목록</h3>
+    <h3>선택한 계정 상세 추적 (선택 기능)</h3>
     <input id="accountWatchSearch" type="search" placeholder="플랫폼·계정 검색" aria-label="추적 계정 검색">
   </div>
   <div id="accountWatchList" class="account-watch-grid" aria-live="polite">
@@ -515,9 +515,9 @@ main{padding-top:10px}
   </div>
   <section class="account-discovered" aria-label="현재 수집한 공개 계정">
     <div class="account-discovered-head">
-      <h3>현재 수집에서 발견된 공개 계정</h3><span id="accountDiscoveredCount">0개</span>
+      <h3>새로 발견된 계정 · 전체 목록은 자동 분석에 표시</h3><span id="accountDiscoveredCount">0개</span>
     </div>
-    <p>새로 발견한 계정은 공개 게시글 기준으로 표시됩니다. 추적 추가를 선택한 계정만 브라우저에 저장합니다.</p>
+    <p>선택 추적 여부와 상관없이 전체 발견 계정을 위 자동 분석에 포함합니다. 이 목록의 버튼은 상세 피드 확인용입니다.</p>
     <div id="accountDiscoveredList" class="account-discovered-grid" aria-live="polite">
       <div class="account-empty">공개 게시글에서 계정 정보를 불러오는 중입니다.</div>
     </div>
@@ -1428,4 +1428,5 @@ if(cloudMode){
 </script>
 <script src="free_discovery.js" defer></script>
 <script src="account_watch.js" defer></script>
+<script src="account_auto_analysis.js" defer></script>
 </body></html>
