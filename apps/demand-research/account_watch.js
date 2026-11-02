@@ -28,7 +28,8 @@ function profile(raw){
  let u;try{u=new URL(String(raw||""))}catch{return null}
  if(u.protocol!=="https:"||u.username||u.password||u.port)return null;
  const host=u.hostname.toLowerCase().replace(/^www\./,"");
- const p=decodeURIComponent(u.pathname).replace(/\/+$/,""),parts=p.split("/").filter(Boolean);
+ let p;try{p=decodeURIComponent(u.pathname).replace(/\/+$/,"")}catch{return null}
+ const parts=p.split("/").filter(Boolean);
  let platform="",username="",url="";
  if(host==="bsky.app"&&parts.length===2&&parts[0]==="profile"&&
     (/^(?:did:(?:plc|web):[A-Za-z0-9._:-]{6,140}|[A-Za-z0-9][A-Za-z0-9.-]{2,199})$/).test(parts[1])){
