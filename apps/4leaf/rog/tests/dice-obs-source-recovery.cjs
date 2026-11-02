@@ -12,11 +12,11 @@ const {chromium}=require('playwright');
  const errors=[];page.on('pageerror',e=>errors.push(String(e)));
  try{
   await page.emulateMedia({reducedMotion:'reduce'});
-  await page.route('**/original/OBS/1045-18.png*',async route=>{
+  await page.route('**/original/OBS/action-full-ext/1045-18.png*',async route=>{
    if(failures0045++<2)await route.fulfill({status:503,body:'transient original OBS source'});
    else await route.continue();
   });
-  await page.route('**/original/OBS/1042-25.png*',async route=>{
+  await page.route('**/original/OBS/action-full-ext/1042-22.png*',async route=>{
    failures0042++;
    await route.fulfill({status:503,body:'offline original OBS source'});
   });
@@ -57,32 +57,33 @@ const {chromium}=require('playwright');
   assert.equal(restored.rig,'original-obs-sprite');
   assert.equal(restored.source,'OBS/1045.obs');
   assert.equal(restored.original,'true');
-  assert.ok(restored.path.startsWith('./original/OBS/1045-18.png'));
+  assert.ok(restored.path.startsWith('./original/OBS/action-full-ext/1045-18.png'));
   assert.ok(restored.native[0]>20&&restored.native[1]>50);
   assert.equal(restored.missing,undefined);
 
-  // The native default front-direction frame (not old rear-facing index 0)
-  // must recover after actual 503 retries. A source that remains unreachable
-  // must show genuine CardData artwork,
-  // never a random unverified 8-head proxy. On reconnect it must retry the
-  // real 1042-25.png source without replacing players or resetting turns.
+  // If the new 0042 full-source image is unreachable, retain an older
+  // original OBS body as fallback. Do NOT drop to a CardData portrait.
+  // Once reconnected, retry the full original extended series.
   await page.waitForFunction(()=>document.querySelector(
-   '#board-pawns .board-pawn[data-chessman-id="0042"]')?.dataset.obsUnavailable==='true',
+   '#board-pawns .board-pawn[data-chessman-id="0042"]')?.dataset.sourceFullUnavailable==='true',
    null,{timeout:22000});
   const unavailable=await page.evaluate(()=>{
    const p=document.querySelector('#board-pawns .board-pawn[data-chessman-id="0042"]');
    return {rig:p.dataset.actorRig,source:p.dataset.actorSource,
-    load:p.dataset.actorSourceLoad,cardVisible:!!p.querySelector('.leaf-chess-original-card-fallback:not([hidden])')};
+    load:p.dataset.actorSourceLoad,cardVisible:!!p.querySelector('.leaf-chess-original-card-fallback:not([hidden])'),
+    legacy:p.querySelector('img.leaf-chess-original-obs')?.getAttribute('src')};
   });
-  assert.equal(unavailable.rig,'original-card-portrait-fallback');
-  assert.equal(unavailable.cardVisible,true);
+  assert.equal(unavailable.rig,'original-obs-sprite');
+  assert.ok(unavailable.legacy.includes('./original/OBS/1042-25.png'));
+  assert.equal(unavailable.cardVisible,false);
   assert.ok(failures0042>=4,'exhaust actual original source retries before fallback');
-  await page.unroute('**/original/OBS/1042-25.png*');
+  await page.unroute('**/original/OBS/action-full-ext/1042-22.png*');
   await page.evaluate(()=>window.__LEAF_GENESIS_ACTORS__.recoverAvailableOriginals());
   await page.waitForFunction(()=>{
    const p=document.querySelector('#board-pawns .board-pawn[data-chessman-id="0042"]');
    const img=p?.querySelector('.leaf-chess-original-obs');
-   return p?.dataset.actorSourceLoad==='ready'&&p.dataset.actorRig==='original-obs-sprite'&&
+   return p?.dataset.actorSourceLoad==='ready'&&p.dataset.sourceFullUnavailable!== 'true'&&
+    img?.getAttribute('src')?.includes('action-full-ext/1042-22.png')&&p.dataset.actorRig==='original-obs-sprite'&&
     p.dataset.actorOriginalModelRecovered==='true'&&img?.naturalWidth>20&&!img.hidden;
   },null,{timeout:15000});
   const after=await page.evaluate(()=>window.__ROG_TEST__.getMatch().players.map(p=>({
