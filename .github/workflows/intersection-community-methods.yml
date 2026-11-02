@@ -1,0 +1,20 @@
+name: INTERSECTION Additional Community Methods Live Probe
+on:
+  pull_request:
+    paths:
+      - "apps/demand-research/probe_community_methods.py"
+      - "apps/demand-research/probe_community_second_paths.py"
+      - ".github/workflows/intersection-community-methods.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  public-methods:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Probe public cross-post discovery and no-key profile/hashtag APIs (aggregate only)
+        run: python apps/demand-research/probe_community_methods.py
+      - name: Try second public paths, corrected Arctic query and Instagram HTML JSON
+        run: python apps/demand-research/probe_community_second_paths.py
