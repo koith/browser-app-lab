@@ -71,7 +71,10 @@ def inspect(browser,model,spec):
                for(const album of stored)for(const photo of album.images||[])
                  shown.set(photo.sha256,(shown.get(photo.sha256)||0)+1);
                const owner=new Set(index.albums.flatMap(a=>a.images.map(p=>p.sha256)));
-               const collisions=await (await fetch('number-collision-distinct.json',{cache:'no-store'})).json().catch(()=>({photos:[]}));
+               const collisions=location.pathname.includes('/mimmi-gallery/')
+                 ?await fetch('number-collision-distinct.json',{cache:'no-store'})
+                    .then(r=>r.ok?r.json():{photos:[]}).catch(()=>({photos:[]}))
+                 :{photos:[]};
                const historical=(collisions.photos||[]).map(p=>p.sha256);
                return {owner_sha:owner.size,not_shown:[...owner].filter(sha=>!shown.has(sha)).length,
                        repeated_sha:[...shown.values()].filter(n=>n>1).length,unique:shown.size,
