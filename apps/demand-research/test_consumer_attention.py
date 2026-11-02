@@ -84,3 +84,10 @@ def test_rolling_window_is_reproducible(tmp_path):
     out=tmp_path/"attention.json";save(report,out)
     assert out.is_file()
     assert len(out.read_text())<20000
+
+
+def test_reject_robot_vacuum_redirect_alias():
+    # The redirect alias had only 7 weekly views versus 497 on the real article.
+    canonical = next(article for key, _, article, _ in ARTICLES if key == "robotvac")
+    assert canonical == "Robotic_vacuum_cleaner"
+    assert "Robot_vacuum_cleaner" not in [article for _,_,article,_ in ARTICLES]
