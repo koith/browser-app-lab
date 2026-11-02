@@ -63,6 +63,16 @@
     full.frames.every(f=>typeof f.url==='string'&&
       f.url.startsWith('./original/OBS/action-full/')&&
       /^[a-f0-9]{64}$/.test(f.sha256)))return full;
+  // Promote only the independently source-reviewed complete 0042/0045 packets.
+  // Seven irregular partial actors remain quarantined from invented action maps.
+  const ext=window.ORIGINAL_LEAF_EXT_ACTION_FRAMES?.[id];
+  if((id==='0042'||id==='0045')&&ext?.frameCount===37&&
+    ext.layout37===true&&ext.originalMember==='OBS.pak/1'+id.slice(1)+'.obs'&&
+    Array.isArray(ext.frames)&&ext.frames.length===37&&
+    Object.hasOwn(AUDITED_FRONT_SOURCE,id)&&
+    ext.frames.every((f,i)=>f.index===i&&typeof f.url==='string'&&
+      f.url.startsWith('./original/OBS/action-full-ext/')&&
+      /^[a-f0-9]{64}$/.test(f.sha256)))return ext;
   return window.ORIGINAL_LEAF_OBS_FRAMES?.[id]||null;
  };
  const poses=['idle','walk','attack','hurt','victory'];
@@ -144,6 +154,7 @@
   strike:{rear:[9,10],side:[20,21],front:[31,32]},
   duel:[33,34,35,36]
  });
+ const EXT_STRUCTURAL_37=Object.freeze(new Set(['0042']));
  const STRUCTURAL_37=Object.freeze(new Set([
   '0040','0043','0044','0046','0047','0048','0049','0050','0051','0052',
   '0053','0054','0055','0056','0058','0059','0060','0061','0062','0063',
@@ -212,7 +223,7 @@
   // authenticated 2002 EXE action table. Never promote missing indices.
   const fullFrontCycle=REVIEWED_FRONT_MOTION[id]
     ?[25,26,27,28,29,30].map(at).filter(Boolean):[];
-  if(approved&&STRUCTURAL_37.has(id)&&all.length===37&&action==='idle'){
+  if(approved&&(STRUCTURAL_37.has(id)||EXT_STRUCTURAL_37.has(id))&&all.length===37&&action==='idle'){
    // Last real direction sets the 37-frame source stance block. Both
    // historical action label and 340ms timing are INFERRED, not EXE data.
    const rest=context.duel?'side':context.rest==='away'?'rear'
@@ -225,7 +236,7 @@
    }
   }
   if(action==='idle')return front?[front]:[];
-  if(approved&&STRUCTURAL_37.has(id)&&all.length===37){
+  if(approved&&(STRUCTURAL_37.has(id)||EXT_STRUCTURAL_37.has(id))&&all.length===37){
    const pick=list=>{const out=list.map(at);return out.every(Boolean)?out:null};
    if(action==='walk'){
     const dir=travel==='away'?'rear':(travel==='left'||travel==='right')?'side':'front';
@@ -368,7 +379,8 @@
      img.addEventListener('load',()=>{
        img.dataset.obsRetryCount='0';
        delete img.dataset.obsRetryFor;
-       if((img.getAttribute('src')||'').includes('/original/OBS/action-full/'))
+       if(['/original/OBS/action-full/','/original/OBS/action-full-ext/'].some(dir=>
+         (img.getAttribute('src')||'').includes(dir)))
         delete pawn.dataset.fullFrameErrors;
        img.hidden=false;
        pawn.dataset.actorSourceLoad=pawn.dataset.sourceFullUnavailable==='true'
@@ -385,7 +397,8 @@
          return;
        }
        // Looping idle changes source URL before per-file retries finish.
-       const fullErrors=source.startsWith('./original/OBS/action-full/')
+       const fullErrors=(source.startsWith('./original/OBS/action-full/')||
+         source.startsWith('./original/OBS/action-full-ext/'))
         ?Number(pawn.dataset.fullFrameErrors||0)+1:0;
        if(fullErrors)pawn.dataset.fullFrameErrors=String(fullErrors);
        const attempt=fullErrors>3?4:img.dataset.obsRetryFor===source?
@@ -410,7 +423,8 @@
        // Do not generate fake pixels or retry a missing full file forever.
        const id=pawn.dataset.chessmanId;
        const legacy=window.ORIGINAL_LEAF_OBS_FRAMES?.[id];
-       if(source.startsWith('./original/OBS/action-full/')&&
+       if((source.startsWith('./original/OBS/action-full/')||
+            source.startsWith('./original/OBS/action-full-ext/'))&&
           pawn.dataset.sourceFullUnavailable!=='true'&&
           legacy?.frames?.length){
          pawn.dataset.sourceFullUnavailable='true';
