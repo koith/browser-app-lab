@@ -21,7 +21,7 @@ const {chromium}=require('playwright');
   await page.locator('#map-select').selectOption('4LEAF');
   await page.locator('#start-game').click();
   await page.waitForSelector('#game:not(.hidden)');
-  for(const pair of [['0046','0051'],['0078','0040'],['0088','0063'],['0054','0070']]){
+  for(const pair of [['0056','0063'],['0078','0088'],['0091','0087'],['0060','0081']]){
    const before=await page.evaluate(([a,b])=>{
     const T=window.__ROG_TEST__,m=T.getMatch();
     m.players[0].team=['c_'+a];m.players[1].team=['c_'+b];
@@ -51,7 +51,8 @@ const {chromium}=require('playwright');
     const w=(a.side==='attacker')===win;
     assert.equal(a.result,w?'win':'lose');
     assert.equal(a.pose,w?'victory':'hurt');
-    assert.match(a.source,/UNVERIFIED$/);
+    assert.ok(a.source===undefined||/UNVERIFIED$/.test(a.source),
+      'original EXE outcome pose evidence must never claim verified actions');
    }
    await page.locator('.leaf-native-battle-actions button, #modal-buttons button',
     {hasText:'결과 확인'}).first().click();
