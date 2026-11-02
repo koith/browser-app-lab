@@ -38,7 +38,7 @@ const sw=read('sw.js'),meta=JSON.parse(read('app-version.json'));
 assert.ok(sw.includes("const EMBEDDED_DIE_OFFLINE=") &&
  sw.includes("concat(EMBEDDED_DIE_OFFLINE)"),'all die frames included in offline cache');
 assert.ok(sw.includes("const REVISION='"+meta.pwaCache+"'"));
-assert.match(meta.version,/^0\\.86\\.0-beta\\.\\d+$/,'source integrity test cannot pin a previous release');
+assert.match(meta.version,new RegExp('^0[.]86[.]0-beta[.][0-9]+$'),'source integrity test cannot pin a previous release');
 const diceFall=read('dice-fall.js');
 assert.ok(diceFall.includes('EMBEDDED_PALETTE_REVIEWED_SHA256=Object.freeze({})'),
  'incorrect per-block palettes must not be approved by default');
