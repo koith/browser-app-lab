@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from commit_crawler_research import merge_evidence
+from commit_crawler_research import merge_evidence, ALLOWED
 
 
 def album(aid, digest, source=None):
@@ -54,6 +54,28 @@ class Cases(unittest.TestCase):
         conflicting = album("album-one", "b", "https://cosplay.pixibb.com/different/")
         with self.assertRaisesRegex(ValueError, "distinct photo sources"):
             merge_evidence(doc(one), doc(conflicting))
+
+    def test_verified_official_social_manifest_is_allowed_for_atomic_merging(self):
+        self.assertIn("social-public-previews.json", ALLOWED)
+        source = "https://twoucan.com/profile/Mimmi_official"
+        previous = album("mimmi-official-social-public", "a", source)
+        incoming = album("mimmi-official-social-public", "b", source)
+        previous["samples"][0]["url"] = "https://pbs.twimg.com/media/old.jpg"
+        incoming["samples"][0]["url"] = "https://pbs.twimg.com/media/new.jpg"
+        first = doc(previous)
+        second = doc(incoming)
+        first["summary"] = {"official_social_images_verified": 1, "private_cloud_archived": 0}
+        second["summary"] = {"official_social_images_verified": 1, "private_cloud_archived": 0}
+        joined = merge_evidence(first, second)
+        self.assertEqual(len(joined["albums"][0]["samples"]), 2)
+        self.assertEqual(joined["summary"]["official_social_images_verified"], 2)
+        self.assertEqual(joined["summary"]["private_cloud_archived"], 0)
+        # A temporarily empty feed must preserve both previously verified posts.
+        blank = doc({**incoming, "samples": []})
+        blank["summary"] = {"official_social_images_verified": 0, "private_cloud_archived": 0}
+        later = merge_evidence(joined, blank)
+        self.assertEqual(len(later["albums"][0]["samples"]), 2)
+        self.assertEqual(later["summary"]["official_social_images_verified"], 2)
 
     def test_reject_wrong_model_and_false_stored_images(self):
         a = album("a", "a")
