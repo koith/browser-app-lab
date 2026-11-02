@@ -7647,6 +7647,18 @@
         "P0-RELEASE"
       ],
       "details": "Original SHA1-verified archive extraction contributed 37/37 authentic OBS frames for each previously partial actor 0042 and 0045. Runtime loads /original/OBS/action-full-ext/manifest.js in index.html before actors. Only audited actor 0042 is allowed inferred 37-frame directional action sequences, actor 0045 holds source-reviewed frame18 (no EXE action-map invention). Other seven non-37 partial actors remain source-archived without fabricated original action assignment. Extended native-image failures retry and fall back to prior authentic OBS frames. Chromium integration added to existing round4 QA workflow. App version beta45 and PWA v132; final real-device/source equivalence not yet verified."
+    },
+    {
+      "seq": 349,
+      "date": "2026-11-02",
+      "type": "CHATROOM_NATIVE_TERRAIN_INPUT_FIX_PENDING_BROWSER_QA",
+      "requestId": "REQ-20261102-GPT-011",
+      "taskIds": [
+        "P0-CHAT",
+        "QA-03",
+        "P0-RELEASE"
+      ],
+      "details": "PR #505, branch fix/4leaf-room-native-input-20261102: original ChatRoom 794x528 frame receives one room-only click handler instead of accumulating identical listeners after render(); switching out of room clears handler. Terrain-only clicks preserve immediate original-style seat snap; native chat log, message form, roster, scrollbar, toolbar, peers and other interactive controls no longer trigger teleport. Playwright terrain-input regression added to rog-world-chat PR CI, including desktop/mobile and room exit checks. JS static syntax checked; browser CI, actual Pages deploy and iPhone manual acceptance are NOT yet verified. This does not recover original server seat anchors or original 8-direction source animation."
     }
   ]
 }
