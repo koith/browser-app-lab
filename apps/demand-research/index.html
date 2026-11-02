@@ -382,6 +382,78 @@ main{padding-top:10px}
 .post .index-candidate-mark{display:inline-block;font-size:10px;letter-spacing:0;line-height:1.3;color:#6b3f17;background:#fff0cb;border:1px solid #cba75b;padding:3px 5px;margin-left:3px}
 .dialog-index-note{padding:11px 12px;margin:7px 0 10px;background:#fff0cd;color:#65400a;font-size:12px;line-height:1.6}
 @media(max-width:720px){.post .index-candidate-mark{font-size:9px;padding:3px}.dialog-index-note{font-size:11px}}
+
+.primary-views{display:flex;gap:8px;margin:2px 0 13px;align-items:center;padding-bottom:8px;border-bottom:2px solid #132541}
+.primary-views button{background:#fff4c4;border:2px solid #101e3a;color:#142142;border-radius:0;font-weight:850;padding:10px 16px;box-shadow:3px 3px 0 #122544;min-height:44px}
+.primary-views button.active{background:#2e42df;color:#fff;box-shadow:3px 3px 0 #ffdd27}
+.primary-views #watchCount{display:inline-grid;place-items:center;min-width:22px;padding:2px 5px;margin-left:5px;background:#ffe271;color:#172341;font-size:11px;border-radius:12px}
+.account-panel{background:#fff8d9;color:#152744;border:2px solid #182c4e;box-shadow:5px 5px 0 #152848;padding:19px 17px 23px;min-height:360px}
+.account-intro h2{font-size:23px;margin:0;letter-spacing:-.5px}
+.account-intro p{color:#43516a;font-size:12px;line-height:1.65;margin:7px 0 16px}
+.account-add-form{background:white;border:1px solid #ced6e4;padding:13px}
+.account-add-form label{display:block;font-size:12px;font-weight:800;margin-bottom:7px}
+.account-add-row{display:flex;gap:7px}
+.account-add-row input{flex:1;min-width:0;border-radius:0}
+.account-add-row button{background:#243fd3;border-radius:0;min-width:110px}
+.account-hint{font-size:11px;line-height:1.5;color:#52607a;margin:8px 0 0;overflow-wrap:anywhere}
+.account-metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;margin:17px 0}
+.account-metrics>div{padding:12px;background:white;border:1px solid #cdd7e9;display:grid;gap:4px}
+.account-metrics span{font-size:11px;color:#536681}
+.account-metrics strong{font-size:22px;font-weight:850;font-variant-numeric:tabular-nums}
+.account-list-toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:11px}
+.account-list-toolbar h3{margin:0;font-size:16px}
+.account-list-toolbar input{max-width:270px;width:45%;border-radius:0}
+.account-watch-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.account-watch-card{min-width:0;display:flex;flex-direction:column;gap:9px;background:#fff;border:1px solid #d4dbe7;padding:13px}
+.account-watch-head{display:flex;align-items:center;gap:9px;min-width:0}
+.account-watch-head .source-badge{flex:none}
+.account-watch-title{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px;font-weight:800;color:#182b54}
+.account-watch-card .account-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:#f2f6fa;padding:9px 5px;text-align:center}
+.account-stats span{display:block;font-size:10px;color:#63748f;line-height:1.4}
+.account-stats strong{display:block;color:#19335c;font-size:17px;font-variant-numeric:tabular-nums}
+.account-watch-meta{font-size:11px;color:#62718c;line-height:1.5}
+.account-watch-actions{display:flex;gap:6px;flex-wrap:wrap}
+.account-watch-actions button,.account-watch-actions a{padding:8px 10px;border:1px solid #2245a5;border-radius:0;background:white;color:#1d3da3;font-size:11px;font-weight:700;text-decoration:none;cursor:pointer}
+.account-watch-actions button.primary{background:#2441d4;color:white}
+.account-watch-actions button.danger{border-color:#b6bbc7;color:#69748b}
+.account-empty{grid-column:1/-1;text-align:center;padding:37px 15px;background:#fff;font-size:13px;color:#5c6c86}
+.account-privacy,.account-analysis-note{font-size:11px;color:#53617a;line-height:1.6;margin:17px 0 0}
+.account-analysis-note{background:#fff;border-left:4px solid #2d49cc;padding:12px}
+.account-analysis-note p{margin:5px 0 0}
+.account-dialog .account-detail-content{padding:18px;overflow:auto;max-height:calc(100dvh - 90px)}
+.account-detail-content h3{margin:10px 0;font-size:18px}
+.account-detail-content .detail-summary{font-size:12px;color:#596b84;line-height:1.7}
+.account-activity-bars{display:flex;align-items:end;gap:5px;height:86px;margin:12px 0 5px;background:#f3f7ff;padding:9px}
+.account-activity-bars>div{flex:1;min-width:4px;background:#2b4ac9;min-height:2px}
+.account-detail-posts{display:grid;gap:7px;margin-top:14px}
+.account-detail-posts>div{border-top:1px solid #dbe2ee;padding:10px 0;font-size:12px;color:#223551}
+.account-detail-posts small{color:#64738b}
+.account-detail-posts a{color:#2245a8}
+.account-select-watch{margin-top:11px;border-radius:0;background:#213fd3}
+@media(max-width:720px){
+  .primary-views button{font-size:12px;flex:1}
+  .account-panel{padding:14px 10px}
+  .account-intro h2{font-size:20px}
+  .account-watch-grid{grid-template-columns:1fr}
+  .account-add-row button{min-width:91px;font-size:11px;padding:9px 8px}
+  .account-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .account-metrics>div{padding:9px 7px}
+  .account-metrics strong{font-size:19px}
+  .account-list-toolbar input{width:48%}
+}
+
+.account-discovered{margin-top:23px;border-top:2px solid #152747;padding-top:14px}
+.account-discovered-head{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.account-discovered h3{margin:0;font-size:16px}
+.account-discovered-head span{font-size:12px;font-weight:800;color:#2440ad}
+.account-discovered>p{font-size:11px;color:#607089;line-height:1.5;margin:6px 0 11px}
+.account-discovered-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.account-discovered-card{background:#fff;border:1px solid #d0d9e5;display:flex;align-items:center;gap:7px;padding:11px;min-width:0}
+.account-discovered-card .source-badge{flex:none}
+.account-discovered-name{font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1}
+.account-discovered-card button{border-radius:0;background:#2943c9;font-size:10px;padding:7px;flex:none}
+@media(max-width:850px){.account-discovered-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:580px){.account-discovered-grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
@@ -392,6 +464,11 @@ main{padding-top:10px}
 </header>
 <main>
 
+<nav class="primary-views" role="tablist" aria-label="교집합 주요 화면">
+  <button type="button" role="tab" id="viewPosts" class="active" aria-selected="true" aria-controls="postsView">게시글</button>
+  <button type="button" role="tab" id="viewAccounts" aria-selected="false" aria-controls="accountsView">계정 분석 <span id="watchCount" aria-hidden="true">0</span></button>
+</nav>
+<div id="postsView" role="tabpanel" aria-labelledby="viewPosts">
 <div class="sr-only" id="count" role="status" aria-live="polite">불러오는 중…</div>
 <section class="feed" id="feed" aria-live="polite"><div class="empty">게시글 불러오는 중…</div></section>
 <div class="more hidden" id="paging"><button type="button" id="more">더 보기</button></div>
@@ -408,7 +485,54 @@ main{padding-top:10px}
   <button type="button" id="socialFind">SNS 검색</button>
   <span id="socialStatus" role="status" aria-live="polite"></span>
 </div>
+</div>
+<section id="accountsView" class="account-panel hidden" role="tabpanel" aria-labelledby="viewAccounts">
+  <div class="account-intro">
+    <h2>공개 계정 추적</h2>
+    <p>게시글에서 계정을 선택하거나 공개 프로필 주소를 추가해, 현재 조회 기간에 확인된 활동을 플랫폼별로 분석합니다.</p>
+  </div>
+  <form id="accountWatchForm" class="account-add-form" autocomplete="off">
+    <label for="accountProfileInput">공개 프로필 URL</label>
+    <div class="account-add-row">
+      <input id="accountProfileInput" type="url" inputmode="url" maxlength="400" placeholder="https://bsky.app/profile/example.bsky.social" required>
+      <button type="submit">추적 추가</button>
+    </div>
+    <p class="account-hint" id="accountWatchStatus" role="status" aria-live="polite">계정별로 게시글·활동 빈도를 확인합니다. 아직 불러오지 않은 기간의 활동은 집계되지 않습니다.</p>
+  </form>
+  <div class="account-metrics" aria-label="추적 활동 요약">
+    <div><span>추적 계정</span><strong id="accountMetricTracked">0</strong></div>
+    <div><span>기간 내 확인된 글</span><strong id="accountMetricVerified">0</strong></div>
+    <div><span>원문 미확인 링크</span><strong id="accountMetricCandidates">0</strong></div>
+    <div><span>중복 제거 상품 언급</span><strong id="accountMetricCommerce">0</strong></div>
+    <div><span>중복된 상품 문구</span><strong id="accountMetricRepeat">0</strong></div>
+  </div>
+  <div class="account-list-toolbar">
+    <h3>추적 목록</h3>
+    <input id="accountWatchSearch" type="search" placeholder="플랫폼·계정 검색" aria-label="추적 계정 검색">
+  </div>
+  <div id="accountWatchList" class="account-watch-grid" aria-live="polite">
+    <div class="account-empty">추적 계정이 없습니다. 게시글 상세에서 공개 계정을 선택해 추가할 수 있습니다.</div>
+  </div>
+  <section class="account-discovered" aria-label="현재 수집한 공개 계정">
+    <div class="account-discovered-head">
+      <h3>현재 수집에서 발견된 공개 계정</h3><span id="accountDiscoveredCount">0개</span>
+    </div>
+    <p>새로 발견한 계정은 공개 게시글 기준으로 표시됩니다. 추적 추가를 선택한 계정만 브라우저에 저장합니다.</p>
+    <div id="accountDiscoveredList" class="account-discovered-grid" aria-live="polite">
+      <div class="account-empty">공개 게시글에서 계정 정보를 불러오는 중입니다.</div>
+    </div>
+  </section>
+  <div class="account-analysis-note">
+    <strong>분석 방식</strong>
+    <p>동일 플랫폼의 같은 계정은 중복 계산하지 않습니다. 플랫폼 간 계정 수를 사람 수로 간주하지 않으며, 중복 미확정 계정은 별도로 구분합니다. 소비 관련 지표는 게시글에 실제로 나타난 구매·가격·제품 언급만 집계합니다.</p>
+  </div>
+  <p class="account-privacy">추적 목록은 이 브라우저에 공개 프로필 주소만 저장합니다. 신상정보·개인적 성적 활동·서로 다른 익명 계정의 신원 연결은 수집하거나 추정하지 않습니다. 글 원문과 행동 이력은 저장하지 않고 현재 조회된 공개 자료에서 계산합니다.</p>
+</section>
 </main>
+<dialog id="accountDialog" class="account-dialog" aria-label="추적 계정 상세">
+ <div class="dialog-head"><b>공개 계정 상세</b><button type="button" id="closeAccountDialog" aria-label="계정 상세 닫기">×</button></div>
+ <div id="accountDialogContent" class="account-detail-content"></div>
+</dialog>
 <dialog id="dateDialog" class="period-dialog" aria-label="기간 설정">
 <div class="dialog-head"><b>조회 기간</b><button type="button" id="closeDate" aria-label="닫기">×</button></div>
 <div id="datePanel" class="date-panel">
@@ -971,7 +1095,18 @@ function openDetail(p){
       else node.append(el("div","dialog-notice","현재 제공된 이미지·영상 주소가 없습니다. SNS 원문에서 확인하세요."));
     }
   }
-  let actions=el("div","dialog-actions");actions.append(sourceLink(p,"SNS 원문 보기"));node.append(actions);
+  let actions=el("div","dialog-actions");actions.append(sourceLink(p,"SNS 원문 보기"));
+  if(p.profileUrl&&p.platform!=="cloud"){
+    const trackButton=el("button","account-select-watch","계정 추적");
+    trackButton.type="button";
+    trackButton.addEventListener("click",()=>{
+      if(typeof window.INTERSECTION_watchPublicAccount==="function"){
+        window.INTERSECTION_watchPublicAccount({platform:p.platform,profileUrl:p.profileUrl,author:p.author});
+      }
+    });
+    actions.append(trackButton);
+  }
+  node.append(actions);
   document.body.classList.add("modal-open");
   $("detail").showModal();
 }
@@ -996,7 +1131,21 @@ function draw(){
   let candidates=cloudMode?0:rows.filter(p=>p.discoveryCandidate).length;
   $("count").textContent=(rows.length-candidates).toLocaleString()+"건"+(cloudMode?"":sources)+(candidates?" · 원문 미확인 링크 "+candidates+"건":"")+(hidden?" · 광고 "+hidden.toLocaleString()+"건 제외":"")+(rows.length>limit?" · "+limit+"건 표시":"");
   $("count").setAttribute("aria-label",rows.length.toLocaleString()+"개 표시 / "+matching.length.toLocaleString()+"개 조회"+coverage+warnings);
+  window.dispatchEvent(new Event("intersection:feed-updated"));
 }
+/* Read-only account analytics view. No post text, author history or sensitive
+   personal information is persisted by the account UI. */
+window.INTERSECTION_publicAccountSnapshot=function(){
+  return {fromMs,toMs,
+    verified:posts.filter(p=>p.platform!=="cloud"&&!p.restricted).map(p=>({
+      platform:p.platform,profileUrl:p.profileUrl,author:p.author,
+      posted:p.posted,url:p.url,text:String(p.text||"").slice(0,1800),id:p.id
+    })),
+    candidates:indexedCandidates.map(p=>({
+      platform:p.platform,profileUrl:p.profileUrl,author:p.author,id:p.id
+    }))
+  };
+};
 function startBusy(){busy=true;$("applyDate").disabled=true;$("more").disabled=true}
 function endBusy(){busy=false;$("applyDate").disabled=false;$("more").disabled=false}
 function resetData(){posts=[];ids.clear();pending=[];federationCursors.clear();federationSourceFailures.clear();visibleLimit=270;requestCount=0;daysCovered=0;failed=0;incomplete=0;draw()}
@@ -1278,4 +1427,5 @@ if(cloudMode){
 })();
 </script>
 <script src="free_discovery.js" defer></script>
+<script src="account_watch.js" defer></script>
 </body></html>
