@@ -114,7 +114,8 @@ def reviewed_direct_source(url, model):
     p=urlsplit(url)
     if p.hostname in X_PUBLIC_HOSTS:
         return True  # safe_registered_public_page already binds exact model author/status
-    if p.hostname=='teapawt.net' and model=='mimmi' and p.path=='/Mimmi_official':
+    if (p.hostname=='teapawt.net' and model in CREATOR_ACCOUNTS
+            and p.path=='/'+CREATOR_ACCOUNTS[model]):
         return True
     return False
 
