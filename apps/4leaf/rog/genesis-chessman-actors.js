@@ -473,9 +473,18 @@
    const duel=pawn.classList.contains('leaf-battle-chessman');
    const duelSide=pawn.dataset.duelSide||
     (pawn.closest('.battle-visual-side')?.classList.contains('attacker')?'attacker':'defender');
-   const seq=sequenceFor(native,action,id,travel,{duel,side:duelSide,rest:pawn.dataset.travelFacing||'toward'});
+   const context={duel,side:duelSide,rest:pawn.dataset.travelFacing||'toward'};
+   // Only original 1040 source SHA and contiguous native frames qualify.
+   const nativeSeq=window.__LEAF_NATIVE_OBS_ACTIONS__?.sequenceFor(native,action,id,travel,context);
+   const seq=nativeSeq||sequenceFor(native,action,id,travel,context);
    pawn.dataset.sourceMirror=seq.mirror?'true':'false';
-   pawn.dataset.sourceActionTable=seq.table?seq.table+'/structural-37/INFERRED':'legacy';
+   pawn.dataset.sourceActionTable=nativeSeq
+    ?seq.table+'/OBS-keys-VERIFIED/action-label-INFERRED'
+    :seq.table?seq.table+'/structural-37/INFERRED':'legacy';
+   pawn.dataset.sourceNativeKeyTicks=nativeSeq?seq.nativeKeyTicks.join(','):'';
+   pawn.dataset.sourceNativeMilliseconds=nativeSeq?seq.nativeMilliseconds:'';
+   pawn.dataset.sourceNativeEffects=nativeSeq?seq.nativeEffectPlayback:'';
+   pawn.dataset.sourceKeyframeProvenance=nativeSeq?seq.nativeEvidence:'WEB-structural-guess';
    pawn.dataset.actorWalkFacing=action==='walk'?travel:'';
    pawn.dataset.sourceTravelFacing=action==='walk'&&travel==='left'&&
      seq.length&&seq[0].index===LEFT_PROFILE_WALK_INDICES[0]
@@ -491,12 +500,20 @@
      ?'front-three-quarter-18/visual-reviewed/INFERRED':'n/a';
    if(action==='walk'&&travel==='left'&&seq.length===4&&seq[0].index===14)
     pawn.dataset.sourceDirection='left-profile-source-14-17/2002-EXE-direction-unverified';
-   if(seq.table){
+   if(seq.table&&!nativeSeq){
     if(action==='walk')pawn.dataset.sourceTravelFacing=seq.table+(seq.mirror?'-mirrored':'')+'/structural-37/INFERRED';
     if(action==='attack')pawn.dataset.sourceAttackEvidence=seq.table+(seq.mirror?'-mirrored':'')+'/structural-37/INFERRED';
     if(action==='idle')pawn.dataset.sourceIdleFacing=seq.table+(seq.mirror?'-mirrored':'')+'/structural-37/INFERRED';
     if(action==='hurt'||action==='victory')pawn.dataset.sourceOutcomeEvidence=seq.table+'/no-source-'+action+'-frame/UNVERIFIED';
     pawn.dataset.sourceDirection=(seq.table.split('-')[1]||'front')+(seq.mirror?'-mirrored':'')+'/structural-37/EXE-table-unverified';
+   }
+   if(nativeSeq){
+    pawn.dataset.sourceDirection=seq.table+(seq.mirror?'-mirrored':'')+
+     '/OBS-key-index-VERIFIED/label-INFERRED';
+    if(action==='walk')pawn.dataset.sourceTravelFacing=pawn.dataset.sourceDirection;
+    if(action==='attack')pawn.dataset.sourceAttackEvidence=
+     'native-1040-duel-33-36/OBS-keys-VERIFIED/duel-role-INFERRED';
+    if(action==='idle')pawn.dataset.sourceIdleFacing=pawn.dataset.sourceDirection;
    }
    // Expose EXACT SOURCE packet indexes independently from inferred labels;
    // QA can inspect what was really rendered during genuine gameplay.
@@ -510,7 +527,8 @@
        ?'front-source-pair/visual-reviewed; WEB-movement-and-FPS-inferred'
        :'front-source-static/visual-reviewed; native-action-table-unknown')
     :'source-packets/orientation-and-2002-action-unverified';
-   pawn.dataset.sourceFrameSequenceProvenance='original-OBS-indexes/WEB-action-timing-unverified';
+   pawn.dataset.sourceFrameSequenceProvenance=nativeSeq
+    ?seq.nativeEvidence:'original-OBS-indexes/WEB-action-timing-unverified';
    renderNativeFrame(pawn,seq[0]);
    const sourceSheet=pawn.querySelector('.leaf-chess-source-frame');
    if(sourceSheet)sourceSheet.hidden=true;
@@ -520,8 +538,9 @@
    // while no actual new gameplay action had occurred. Original OBS bytes
    // remain untouched; action-to-source-index/FPS remains UNVERIFIED.
    const loops=action==='walk'||seq.loop===true;
-   pawn.dataset.sourcePlaybackMode=loops?'loop/WEB-motion-inferred'
-    :'one-shot/WEB-action-unverified';
+   pawn.dataset.sourcePlaybackMode=nativeSeq
+    ?(loops?'loop':'one-shot')+'/OBS-keys-VERIFIED/WEB-milliseconds-INFERRED'
+    :loops?'loop/WEB-motion-inferred':'one-shot/WEB-action-unverified';
    pawn.dataset.sourcePlaybackComplete='false';
    if(seq.length>1&&!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches){
      let i=0;
@@ -539,7 +558,7 @@
          i=0;
        }
        renderNativeFrame(pawn,seq[i]);
-     },action==='idle'?340:action==='walk'?120:175);
+     },nativeSeq?120:action==='idle'?340:action==='walk'?120:175);
      sourceTimers.set(pawn,timer);
    }else if(!loops){
      pawn.dataset.sourcePlaybackComplete='true';
