@@ -1,6 +1,11 @@
 name: Keep both galleries connected to stored TeraBox originals
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/gallery-terabox-render-session-sync.yml'
+      - 'apps/gallery-archive/verify_render_gallery_read.py'
+      - 'apps/gallery-archive/test_verify_render_gallery_read.py'
   push:
     branches: [main]
     paths:
@@ -18,17 +23,36 @@ concurrency:
   group: galleries-secure-terabox-render-session-sync
   cancel-in-progress: false
 jobs:
+  read-only-probe-tests:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: apps/gallery-archive
+          sparse-checkout-cone-mode: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: |
+          python -m py_compile apps/gallery-archive/verify_render_gallery_read.py
+          python apps/gallery-archive/test_verify_render_gallery_read.py
   synchronize:
     if: >-
-      github.event_name != 'workflow_run' ||
+      github.event_name != 'pull_request' &&
+      (github.event_name != 'workflow_run' ||
       (github.event.workflow_run.conclusion == 'success' &&
        github.event.workflow_run.head_branch == 'main' &&
-       github.event.workflow_run.head_repository.full_name == github.repository)
+       github.event.workflow_run.head_repository.full_name == github.repository))
     runs-on: ubuntu-24.04
     timeout-minutes: 9
     env:
       ARCHIVE_COOKIE: ${{ secrets.MIMMI_TERABOX_NDUS }}
     steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: apps/gallery-archive
+          sparse-checkout-cone-mode: true
       - name: Securely refresh Render storage session without exposing cookies or viewer passwords
         shell: bash
         run: |
@@ -77,38 +101,8 @@ jobs:
                   raise SystemExit("Render storage refresh unavailable")
               time.sleep(15)
 
-          for model,path,expected in (
-              ("yui","/api/yui/catalog",2700),
-              ("mimmi","/api/catalog",2600)):
-              with urllib.request.urlopen(origin+path,timeout=115) as response:
-                  catalog=json.load(response)
-              count=sum(len(album["images"]) for album in catalog.get("albums",[]))
-              if catalog.get("model")!=model or count<expected:
-                  raise SystemExit("Gallery catalog verification failed: "+model)
-              print("CONNECTED_GALLERY",model,"albums",len(catalog["albums"]),"images",count)
-              # Exercise the first-party reduced thumbnail endpoint as well as
-              # the metadata connection; preview SHA is verified on the server.
-              choice=next((
-                  (a,p) for a in catalog["albums"]
-                  for p in a.get("images",[])
-                  # Public metadata exposes a preview flag and SHA, not its
-                  # private path/byte count. Check actual cover bytes below.
-                  if p.get("preview") is True and
-                     isinstance(p.get("preview_sha256"), str) and
-                     len(p["preview_sha256"]) == 64
-              ),None)
-              if not choice:
-                  raise SystemExit("Gallery has no stored preview: "+model)
-              album,photo=choice
-              cover_path="/api/cover/{}/{}/{}?v={}".format(
-                  model,album["id"],photo["number"],photo["preview_sha256"][:24])
-              with urllib.request.urlopen(origin+cover_path,timeout=115) as response:
-                  cover=response.read(1000001)
-                  media_type=response.headers.get("Content-Type","")
-                  cache_header=response.headers.get("Cache-Control","")
-              if not (200<len(cover)<=1000000 and media_type.startswith("image/") and
-                      "max-age=604800" in cache_header):
-                  raise SystemExit("Gallery cover cache failed: "+model)
-              print("LIVE_COVER_CACHED",model,"bytes",len(cover))
           PY
+          # Read-only verifier retries temporary 502/503/504 without masking
+          # wrong-model catalogs, provider JSON or malformed cover bytes.
+          python apps/gallery-archive/verify_render_gallery_read.py
           echo 'Both passwordless galleries are connected to verified TeraBox albums.' >> "$GITHUB_STEP_SUMMARY"
