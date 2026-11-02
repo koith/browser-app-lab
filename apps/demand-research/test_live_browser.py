@@ -1,4 +1,4 @@
-"""Browser QA: INTERSECTION icon tabs, date popup, automatic ad filtering,
+"""Browser QA: INTERSECTION compact header date selector, date popup, automatic ad filtering,
 one More button, federated provider badges/links and touchscreen halftone.
 No real user post content is saved or printed.
 """
@@ -139,12 +139,13 @@ def run(live=False):
             assert page.locator("input[type=password],#login,#refresh,#filterDetails,#hideAds,#showAdultMedia,#adLevel").count()==0
             assert page.locator("#count").evaluate("e=>getComputedStyle(e).clipPath==='inset(50%)'"), "Verbose statistics must be screen-reader-only"
             assert page.locator("footer,#footnote,#showMore,#listMore").count()==0
-            assert page.locator("#tabs button").count()==4
-            assert page.locator('#tabs button[data-term="all"]').inner_text()=="All"
-            for term in TERMS:
-                button=page.locator('#tabs button[data-term="'+term+'"]')
-                assert button.get_attribute("aria-label")==term
-                assert button.inner_text().strip() not in TERMS, "Topic selector must be icon-only"
+            assert page.locator("#tabs,[data-term],section.toolbar").count()==0
+            assert page.locator("header .head-inner > h1").count()==1
+            assert page.locator("header .head-inner > .header-period #openDate").count()==1
+            title_bounds=page.locator("header h1").bounding_box()
+            date_bounds=page.locator("header #openDate").bounding_box()
+            assert abs((title_bounds["y"]+title_bounds["height"]/2)-
+                (date_bounds["y"]+date_bounds["height"]/2))<14, "Date should align with site title"
             assert page.locator("#openDate").is_visible()
             assert not page.locator("#dateDialog").is_visible()
             assert page.locator("main input[type=date]").count()==0
