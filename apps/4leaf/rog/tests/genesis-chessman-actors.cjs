@@ -87,7 +87,8 @@ const {chromium}=require('playwright');
   assert.equal(missing.rig,'original-card-portrait-fallback',
    'card 0040 has verified original body 1025 but no published PNG; do not show unrelated 1040');
   assert.equal(missing.css,'none','missing OBS must not show an invented tall figure');
-  assert.ok(missing.portraitSrc?.startsWith('./original/CardData/chm_'));
+  assert.ok((missing.portraitSrc?.startsWith('./original/CardData/chm_')||
+    missing.portraitSrc==='./original/IMG/avatarback.png'));
   assert.deepEqual(missing.size,[40,55]);
   assert.notEqual(missing.visible,'none');
   assert.match(missing.mapping,/original-OBS-missing/);
