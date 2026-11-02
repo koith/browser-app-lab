@@ -650,7 +650,8 @@ function addPost(p,term){
   let rec={id:uri,platform:"bluesky",author:a.displayName||a.handle||"게시글",
       profileUrl,text:p.record.text,posted:p.record.createdAt||p.indexedAt||"",
       indexed:p.indexedAt||p.record.createdAt||"",url,
-      terms:new Set([term]),media:getMedia(p),adultLabeled:policy.adult,restricted:policy.restricted};
+      terms:new Set([term]),media:getMedia(p),adultLabeled:policy.adult,restricted:policy.restricted,
+      engagement:{likes:p.likeCount,reposts:p.repostCount,replies:p.replyCount,quotes:p.quoteCount}};
   posts.push(rec);ids.set(uri,rec);return true;
 }
 
@@ -748,7 +749,8 @@ function addMastodonStatus(item,term,start,end){
     id:"mastodon:"+String(item.uri||item.url||item.id),platform:"mastodon",
     author:account.display_name||account.acct||"Mastodon",
     profileUrl:account.url,url:item.url,posted:item.created_at,indexed:item.created_at,
-    text:body,media,adultLabeled:!!item.sensitive,restricted:false
+    text:body,media,adultLabeled:!!item.sensitive,restricted:false,
+    engagement:{likes:item.favourites_count,reposts:item.reblogs_count,replies:item.replies_count}
   },term,start,end);
 }
 function addLemmyPost(entry,term,start,end){
@@ -765,7 +767,8 @@ function addLemmyPost(entry,term,start,end){
     id:"lemmy:"+String(p.ap_id||p.id||""),platform:"lemmy",
     author:a.display_name||a.name||"Lemmy",profileUrl,
     url:canonical,posted:p.published,indexed:p.published,
-    text,media,adultLabeled:!!p.nsfw,restricted:!!p.removed||!!p.deleted
+    text,media,adultLabeled:!!p.nsfw,restricted:!!p.removed||!!p.deleted,
+    engagement:{likes:entry.counts?.upvotes,replies:entry.counts?.comments}
   },term,start,end);
 }
 
@@ -785,7 +788,9 @@ function addMisskeyNote(note,term,start,end,origin){
     author:u.name||username||"Misskey",profileUrl,url:noteUrl,
     posted:note.createdAt,indexed:note.createdAt,
     text:[note.cw,note.text].filter(Boolean).join("\n"),media,
-    adultLabeled:(note.files||[]).some(f=>f.isSensitive),restricted:false
+    adultLabeled:(note.files||[]).some(f=>f.isSensitive),restricted:false,
+    engagement:{likes:note.reactions&&Object.values(note.reactions).reduce((sum,n)=>sum+(Number.isFinite(n)&&n>0?n:0),0),
+      reposts:note.renoteCount,replies:note.repliesCount}
   },term,start,end);
 }
 function addRedditSubmission(entry,term,start,end){
@@ -809,7 +814,8 @@ function addRedditSubmission(entry,term,start,end){
   const posted=new Date(publishedEpoch*1000).toISOString();
   return addFederatedRow({id:"reddit:"+entry.id,platform:"reddit",author:"u/"+author,
     profileUrl,url,posted,indexed:posted,text,media,
-    adultLabeled:!!entry.over_18,restricted:!!entry.removed_by_category},term,start,end);
+    adultLabeled:!!entry.over_18,restricted:!!entry.removed_by_category,
+    engagement:{likes:entry.score,replies:entry.num_comments}},term,start,end);
 }
 async function misskeyJson(url,term,offset){
   let controller=new AbortController(),timer=setTimeout(()=>controller.abort(),11000);
