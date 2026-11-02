@@ -230,7 +230,7 @@
     status("무료 검색 후보 "+results.length+"건 ("+sourceCounts+")"+
       " · 공개 원문/페이지 확인 "+checked+"건"+
       (errors.length?" · 제공자 응답 실패 "+errors.join(", "):"")+
-      " · 게시 시각을 검증하지 않은 링크는 실제 수집 건수에서 제외");
+      " · 원문/게시 시각 미확인 링크는 실제 수집 건수에서 제외");
   }
   async function enriched(items,limit,fn){
     let accepted=0;
