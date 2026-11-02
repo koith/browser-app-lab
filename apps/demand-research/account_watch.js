@@ -204,12 +204,18 @@ function render(){
  $("watchCount").textContent=String(watches.length);
  $("accountMetricTracked").textContent=metricText(watches.length);
  const snap=snapshot(),record=watches.map(w=>({w,...storedActivity(w,snap)}));
- const seenPosts=new Set();
+ const seenPosts=new Set(),allPosts=[];
  for(const account of record){
-   for(const item of account.posts)seenPosts.add(item.id);
+   for(const item of account.posts){
+     if(seenPosts.has(item.id))continue;
+     seenPosts.add(item.id);allPosts.push(item);
+   }
  }
  $("accountMetricVerified").textContent=metricText(seenPosts.size);
  $("accountMetricCandidates").textContent=metricText(record.reduce((n,a)=>n+a.candidates,0));
+ const product=dedupedContent(allPosts);
+ $("accountMetricCommerce").textContent=metricText(product.matched);
+ $("accountMetricRepeat").textContent=metricText(product.duplicates);
  if(currentView!=="accounts")return;
  const needle=$("accountWatchSearch").value.trim().toLowerCase();
  const visible=record.filter(a=>!needle||(a.w.username+" "+a.w.platform).toLowerCase().includes(needle))
