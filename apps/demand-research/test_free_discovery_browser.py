@@ -34,9 +34,11 @@ def setup_federated(page):
       ("https://hoto.moe/api/**","[]"),
       ("https://api.pullpush.io/**",'{"data":[]}')
     ]:
-        page.route(base,lambda r,raw=response:r.fulfill(
-           status=200,content_type="application/json",
-           headers={"Access-Control-Allow-Origin":"*"},body=raw))
+        def make_handler(raw):
+            return lambda route:route.fulfill(
+                status=200,content_type="application/json",
+                headers={"Access-Control-Allow-Origin":"*"},body=raw)
+        page.route(base,make_handler(response))
 def run():
     errors=[];calls=[];now=datetime.now(timezone.utc).isoformat()
     with sync_playwright() as p:
