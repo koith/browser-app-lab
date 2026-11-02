@@ -26,7 +26,7 @@ ARTICLES = (
     ("ps5", "PlayStation 5", "PlayStation_5", "device"),
     ("switch2", "Nintendo Switch 2", "Nintendo_Switch_2", "device"),
     ("airpods", "AirPods Pro", "AirPods_Pro", "device_family"),
-    ("robotvac", "로봇청소기", "Robot_vacuum_cleaner", "category"),
+    ("robotvac", "로봇청소기", "Robotic_vacuum_cleaner", "category"),
     ("espresso", "에스프레소 머신", "Espresso_machine", "category"),
     ("standingdesk", "스탠딩 데스크", "Standing_desk", "category"),
 )
