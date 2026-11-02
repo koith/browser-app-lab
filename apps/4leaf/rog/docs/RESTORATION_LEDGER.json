@@ -1449,6 +1449,20 @@
         "QA-03",
         "P0-RELEASE"
       ]
+    },
+    {
+      "id": "REQ-20261102-GPT-013",
+      "date": "2026-11-02",
+      "origin": "4LEAF 병렬 복원 개발: GPT original DMP runtime lane",
+      "text": "원본 DMP 격자 XY를 이용해 창세기전 체스맨 2D OBS 앞뒤좌우 프레임 선택 오류를 수정하고 전체 DMP 1,894스텝과 실제 원본 10개 비연속 대각 이동을 Chromium/WebKit 게임에서 검증. PR #506 chat collision 해결: 최신 beta46 main 기준 보드만 재적용하고 별도 beta47/PWA v134. 원본 EXE 행동표는 여전히 미검증.",
+      "taskIds": [
+        "ACT-03",
+        "BRD-03",
+        "ACT-04",
+        "P0-ACTOR",
+        "QA-03",
+        "P0-RELEASE"
+      ]
     }
   ],
   "tasks": [
@@ -1685,7 +1699,8 @@
         "apps/4leaf/rog/original/OBS/action-full/manifest.js",
         "apps/4leaf/rog/original/OBS/action-full/provenance.json",
         "apps/4leaf/rog/tests/original-actor-census.cjs",
-        "https://github.com/koith/browser-app-lab/actions/runs/41320435231"
+        "https://github.com/koith/browser-app-lab/actions/runs/41320435231",
+        "apps/4leaf/rog/tests/dice-dmp-native-travel-facing.cjs"
       ],
       "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
       "lastReviewed": "2026-11-02",
@@ -1940,7 +1955,8 @@
         "https://github.com/koith/browser-app-lab/actions/runs/39562503977",
         "https://github.com/koith/browser-app-lab/actions/runs/39562851108",
         "https://github.com/koith/browser-app-lab/actions/runs/39562503977/artifacts/12328791405",
-        "apps/4leaf/rog/tests/board-actor-occlusion-all-maps.cjs"
+        "apps/4leaf/rog/tests/board-actor-occlusion-all-maps.cjs",
+        "apps/4leaf/rog/tests/dice-dmp-native-travel-facing.cjs"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
       "lastReviewed": "2026-11-02",
@@ -2139,7 +2155,8 @@
         "apps/4leaf/rog/tests/obs-full-actor-side-walk.cjs",
         "https://github.com/koith/browser-app-lab/actions/runs/41299536821",
         "apps/4leaf/rog/tests/original-actor-census.cjs",
-        "https://github.com/koith/browser-app-lab/actions/runs/41320435231"
+        "https://github.com/koith/browser-app-lab/actions/runs/41320435231",
+        "apps/4leaf/rog/tests/dice-dmp-native-travel-facing.cjs"
       ],
       "evidenceLevel": "VERIFIED-92-SOURCE-OBS-BODIES/958-PNG/80-EIGHT-CONTIGUOUS-SOURCE-SETS/REAL-CHROMIUM-ANIMATION; HISTORICAL-DIRECTION-POSE-FPS-UNVERIFIED",
       "lastReviewed": "2026-11-02",
@@ -2208,7 +2225,8 @@
         "https://github.com/koith/browser-app-lab/actions/runs/39562851108",
         "https://github.com/koith/browser-app-lab/actions/runs/39562503977/artifacts/12328791405",
         "https://github.com/koith/browser-app-lab/pull/177",
-        "https://github.com/koith/browser-app-lab/actions/runs/39813521946"
+        "https://github.com/koith/browser-app-lab/actions/runs/39813521946",
+        "apps/4leaf/rog/tests/dice-dmp-native-travel-facing.cjs"
       ],
       "evidenceLevel": "VERIFIED-92-ORIGINAL-OBS-BODIES-IN-PLAYABLE-GAME; 6 ORIGINAL-OBS-FILES-MISSING; EXACT-POSE-3D-CONTACT-OPEN",
       "lastReviewed": "2026-11-02",
@@ -2974,7 +2992,8 @@
         "tests/dice-horizontal-native-actors.cjs",
         "apps/4leaf/rog/tests/dice-horizontal-native-actors.cjs",
         "apps/4leaf/rog/tests/dice-landscape-webkit-release.cjs",
-        "apps/4leaf/rog/tests/chatroom-instant-seat-teleport.cjs"
+        "apps/4leaf/rog/tests/chatroom-instant-seat-teleport.cjs",
+        "apps/4leaf/rog/tests/dice-dmp-native-travel-facing.cjs"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
       "lastReviewed": "2026-11-02",
@@ -7726,6 +7745,36 @@
         "P0-RELEASE"
       ],
       "details": "GPT isolated runtime PR based on main 5fcbb07 (#504). Replaced accumulating ChatRoom frame click listeners with one room-scoped `onclick`, cleared on scene redraw; excluded actual messenger transcript/input, native roster, toolbar and other controls from teleport. Kept source room sprites, 794x528 registration and instant seat snap. Added tests/chatroom-terrain-input.cjs to existing rog-world-chat Chromium PR CI including mobile view. JS syntax parsed, CI/browser and actual public Pages/iPhone physical QA still PENDING. Original source, historical seat anchors and full restoration remain unverified."
+    },
+    {
+      "seq": 353,
+      "date": "2026-11-02",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261102-GPT-013",
+      "taskIds": [
+        "ACT-03",
+        "BRD-03",
+        "ACT-04",
+        "P0-ACTOR",
+        "QA-03",
+        "P0-RELEASE"
+      ],
+      "details": "Source-XY 2D OBS walk facing bugfix on rebased GPT branch; preserve merged PR #506 native room interaction and beta46. Separate from Claude original archive research."
+    },
+    {
+      "seq": 354,
+      "date": "2026-11-02",
+      "type": "NATIVE_DMP_DIRECTION_REBASED_QA_PENDING",
+      "requestId": "REQ-20261102-GPT-013",
+      "taskIds": [
+        "ACT-03",
+        "BRD-03",
+        "ACT-04",
+        "P0-ACTOR",
+        "QA-03",
+        "P0-RELEASE"
+      ],
+      "details": "Real source routes: 26 DMP maps/1894 successive steps, prior projected percent comparison selected wrong horizontal OBS sprite on 10 original long diagonals. Web app now checks native DMP Y sign first, and native same-row X for left/right, tagging orientation inference. Actual Chromium/WebKit live source-board pawn regression and version beta47/PWA v134 CI pending. 2002 executable action-table still not decoded, original 3D fidelity not claimed."
     }
   ]
 }
