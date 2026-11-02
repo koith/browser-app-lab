@@ -117,6 +117,8 @@ const path=require('path');
     await page.locator('#exit-game').click();
     await page.locator('#modal-buttons button').filter({hasText:'나가기'}).click();
     await page.waitForSelector('#lobby:not(.hidden)');
+    // Re-open the visible original lobby creation panel before choosing mode.
+    await page.locator('#lobby-create').click();
     // Leaving a room resets the lobby to its ordinary local-game selector.
     // Re-select network mode through the real visible control before inviting.
     await page.locator('#game-mode').selectOption('network');
