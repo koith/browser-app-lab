@@ -7579,6 +7579,33 @@
         "QA-03"
       ],
       "details": "GPT GitHub write-enabled source extraction integration and asset preservation request registered before CI result."
+    },
+    {
+      "seq": 345,
+      "date": "2026-11-02",
+      "type": "ORIGINAL_ACTOR_CENSUS_SHA1_VERIFIED_AND_EXPORTED",
+      "requestId": "REQ-20261102-GPT-009",
+      "taskIds": [
+        "ACT-01",
+        "ACT-03",
+        "ACT-05",
+        "SRC-04",
+        "SRC-01",
+        "QA-03"
+      ],
+      "details": "VERIFIED GitHub Actions run 41383997188 successfully downloaded archive.org/download/4leaf/4leaf.zip with original 2002 SHA1 86526d89679ae39b85fe9808da97ad871b7888d9; unshielded read-only installer; decoded all 245 OBS*.pak members (OBS 166, OBS2 53, OBS3 26). 66 37-frame members total (OBS 64, OBS2 2, OBS3 0), 61 strict pixel-layout matches entirely OBS; OBS2/3 strict candidate body count 0 (prior ~21 guessed candidates REJECTED). Exported 422 SHA256-verified frame PNGs of nine previously partial actor member IDs: 0042 37,0045 37,0087 13,0089 13,0090 51,0092 7,0093 78,0094 14,0095 172, with action-full-ext/manifest.js. 119 CHR records, 11 heuristic member references, 0 CHR offset links passing >=50% and 0 block-pattern hits in native dll/exe; no original action table decoded. Across original bulk comparisons legacy palette index 0 lost 6103 pixels. Source census docs/evidence/obs-census/census.json; extraction source and game code not confused."
+    },
+    {
+      "seq": 346,
+      "date": "2026-11-02",
+      "type": "CENSUS_OUTPUT_PERSISTENCE_VERIFIED",
+      "requestId": "REQ-20261102-GPT-009",
+      "taskIds": [
+        "SRC-01",
+        "ACT-01",
+        "QA-03"
+      ],
+      "details": "First successful CI run 41383794180 verified extraction but GitHub outputs remained untracked due to .gitignore. Repaired workflow to git add -f and reran 41383997188. VERIFIED subsequent data branch contains obs-census/census.json and 422 original pixel PNG files + manifest with SHA256 validated. No OBS2/OBS3 actor candidates were promoted. Production runtime not yet connected; source completeness and original animation fidelity still in_progress."
     }
   ]
 }
