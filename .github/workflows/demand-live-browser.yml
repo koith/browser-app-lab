@@ -10,6 +10,7 @@ on:
       - "apps/demand-research/test_private_social_browser.py"
       - "apps/demand-research/free_discovery.js"
       - "apps/demand-research/test_free_discovery_browser.py"
+      - "apps/demand-research/test_all_social_browser.py"
       - ".github/workflows/demand-live-browser.yml"
   pull_request:
     paths:
@@ -42,6 +43,8 @@ jobs:
         run: python apps/demand-research/test_private_social_browser.py
       - name: Zero-cost search index browser fixture (dedup, safety, no keys)
         run: python apps/demand-research/test_free_discovery_browser.py
+      - name: All SNS free source discovery and date-qualified X feed acceptance (fixture)
+        run: python apps/demand-research/test_all_social_browser.py
       - name: Real zero-cost public search in Chromium (aggregate-only)
         run: python apps/demand-research/test_free_discovery_browser.py --live
       - name: Real public API from browser with CORS (aggregate-only, no retained posts)
