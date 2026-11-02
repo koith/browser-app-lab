@@ -32,7 +32,7 @@ const {chromium}=require('playwright');
   await page.waitForSelector('#game:not(.hidden)');
   await page.evaluate(()=>{
    const players=window.__ROG_TEST__.getMatch().players;
-   players[0].team[0]='c_0045';players[1].team[0]='c_0042';
+   players[0].team[0]='c_0062';players[1].team[0]='c_0059';
    window.__ROG_TEST__.drawGame();
   });
   const before=await page.evaluate(()=>window.__ROG_TEST__.getMatch().players.map(p=>({
