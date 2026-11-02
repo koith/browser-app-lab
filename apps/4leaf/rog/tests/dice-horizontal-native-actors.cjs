@@ -25,6 +25,15 @@ const path=require('node:path');
   await page.locator('#map-select').selectOption('4LEAF');
   await page.locator('#start-game').click();
   await page.waitForSelector('#game:not(.hidden)');
+  // This test requires two actual source-OBS silhouettes, so select two
+  // CHR-verified published bodies instead of the user's saved/default team,
+  // which may legally reference an unpublished original body.
+  await page.evaluate(()=>{
+   const m=window.__ROG_TEST__.getMatch();
+   m.players[0].team=['c_0056']; // original member OBS/1040
+   m.players[1].team=['c_0088']; // original member OBS/1071
+   window.__ROG_TEST__.drawGame();
+  });
   await page.waitForFunction(()=>[...document.querySelectorAll('#board-nodes>.tile')]
    .length===104&&[...document.querySelectorAll('#board-pawns .leaf-chess-original-obs')]
    .length===2,null,{timeout:15000});
