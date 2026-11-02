@@ -14,21 +14,37 @@
  function reset(){net.connected=false;net.role=null;try{channel?.close()}catch{}try{peer?.close()}catch{}channel=null;peer=null}
  function openPeer(role){
    if(typeof RTCPeerConnection==='undefined')throw Error('이 WebView는 WebRTC 통신을 지원하지 않습니다.');
-   reset();net.role=role;peer=new RTCPeerConnection(settings);
-   peer.ondatachannel=e=>{if(net.role==='guest')attach(e.channel)};
-   peer.onconnectionstatechange=()=>{if(peer&&peer.connectionState==='failed'){net.connected=false;notice('직접 연결 실패: 양쪽 네트워크 또는 방화벽을 확인하세요.')}};
-   return peer;
+   reset();net.role=role;
+   const pc=new RTCPeerConnection(settings);
+   peer=pc;
+   // A delayed event from a closed RTCPeerConnection cannot take over a newer session.
+   pc.ondatachannel=e=>{if(peer===pc&&net.role==='guest')attach(e.channel)};
+   pc.onconnectionstatechange=()=>{
+     if(peer!==pc)return;
+     if(pc.connectionState==='failed'){
+       net.connected=false;
+       notice('직접 연결 실패: 양쪽 네트워크 또는 방화벽을 확인하세요.');
+     }
+   };
+   return pc;
  }
  function attach(ch){
    channel=ch;
+   const isCurrent=()=>channel===ch;
    channel.onopen=()=>{
+     if(!isCurrent())return;
      net.connected=true;if(net.role==='host'&&bridge())bridge().onState=m=>send({type:'state',match:m});notice(net.role==='host'?'연결 완료! 아래 게임 시작으로 2인 대전을 열 수 있습니다.':'연결 완료! 호스트가 경기를 시작하면 자동으로 입장합니다.',true);
      send({type:'hello',name:bridge()?.getName?.()||'Guest'});
      if(net.role==='host'&&bridge()?.getMatch?.()?.mode==='network')send({type:'state',match:bridge().getMatch()});
    };
-   channel.onclose=()=>{net.connected=false;notice('상대와 연결이 끊어졌습니다. 다시 초대를 생성하세요.')};
-   channel.onerror=()=>notice('통신 오류. 연결 코드를 재발급하세요.');
+   channel.onclose=()=>{
+     if(!isCurrent())return;
+     net.connected=false;
+     notice('상대와 연결이 끊어졌습니다. 다시 초대를 생성하세요.');
+   };
+   channel.onerror=()=>{if(isCurrent())notice('통신 오류. 연결 코드를 재발급하세요.')};
    channel.onmessage=e=>{
+     if(!isCurrent()||!net.connected||ch.readyState!=='open')return;
      if(typeof e.data!=='string'||e.data.length>150000)return;
      let data;try{data=JSON.parse(e.data)}catch{return}
      if(!data||typeof data!=='object')return;
@@ -69,31 +85,50 @@
  }
  async function makeOffer(){
    notice('초대 코드 생성 중…');
+   outputOffer.value='';
+   let pc=null;
    try{
-     const pc=openPeer('host');attach(pc.createDataChannel('4leaf',{ordered:true}));
-     await pc.setLocalDescription(await pc.createOffer());await gather(pc);
+     pc=openPeer('host');attach(pc.createDataChannel('4leaf',{ordered:true}));
+     const offer=await pc.createOffer();
+     if(peer!==pc)return;
+     await pc.setLocalDescription(offer);
+     if(peer!==pc)return;
+     await gather(pc);
+     if(peer!==pc)return;
      outputOffer.value=encode({type:'offer',sdp:pc.localDescription.sdp});
      notice('초대 코드를 상대 기기에 전달하고, 받은 응답 코드를 아래에 붙여넣으세요.');
-   }catch(e){notice('초대 실패: '+e.message)}
+   }catch(e){if(!pc||peer===pc)notice('초대 실패: '+e.message)}
  }
  async function makeAnswer(){
    notice('초대를 수락하는 중…');
+   outputAnswer.value='';
+   let pc=null;
    try{
-     const data=decode(inputOffer.value,'offer'),pc=openPeer('guest');
+     const data=decode(inputOffer.value,'offer');
+     pc=openPeer('guest');
      await pc.setRemoteDescription({type:'offer',sdp:data.sdp});
-     await pc.setLocalDescription(await pc.createAnswer());await gather(pc);
+     if(peer!==pc)return;
+     const answer=await pc.createAnswer();
+     if(peer!==pc)return;
+     await pc.setLocalDescription(answer);
+     if(peer!==pc)return;
+     await gather(pc);
+     if(peer!==pc)return;
      outputAnswer.value=encode({type:'answer',sdp:pc.localDescription.sdp});
      notice('생성된 응답 코드를 호스트 기기로 보내세요.');
-   }catch(e){notice('초대 수락 실패: '+e.message)}
+   }catch(e){if(!pc||peer===pc)notice('초대 수락 실패: '+e.message)}
  }
  async function acceptAnswer(){
    notice('두 기기를 연결하는 중…');
+   const pc=peer;
    try{
-     if(!peer||net.role!=='host')throw Error('호스트 초대를 먼저 생성하세요.');
+     if(!pc||net.role!=='host')throw Error('호스트 초대를 먼저 생성하세요.');
      const data=decode(inputAnswer.value,'answer');
-     await peer.setRemoteDescription({type:'answer',sdp:data.sdp});
+     if(peer!==pc)return;
+     await pc.setRemoteDescription({type:'answer',sdp:data.sdp});
+     if(peer!==pc)return;
      notice('P2P 연결을 확인 중입니다…');
-   }catch(e){notice('연결 실패: '+e.message)}
+   }catch(e){if(!pc||peer===pc)notice('연결 실패: '+e.message)}
  }
  async function copy(box){try{await navigator.clipboard.writeText(box.value);notice('코드를 복사했습니다.')}catch{box.focus();box.select();notice('코드를 선택했습니다. 직접 복사해 주세요.')}}
  function init(){
