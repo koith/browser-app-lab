@@ -165,6 +165,35 @@ const path=require('path');
     'reconnected host must not roll during the guest turn');
   console.log('WEBRTC REAL TWO-BROWSER RECONNECT PASS: same match and authoritative turn');
 
+  // A disabled button is not an authorization check. Invoking the underlying
+  // exported game handler must not allow the host to roll for the guest.
+  const snapshot=()=>host.evaluate(()=>{
+    const m=window.__LEAF_BRIDGE__.getMatch();
+    return {active:m.active,round:m.round,positions:m.players.map(p=>p.position),
+      history:m.history?.length??0};
+  });
+  const beforeForeignTurn=await snapshot();
+  assert.equal(beforeForeignTurn.active,1,'the reconnected guest currently owns the turn');
+  await host.evaluate(()=>window.__ROG_TEST__.takeTurn());
+  assert.deepEqual(await snapshot(),beforeForeignTurn,
+    'host cannot mutate guest turn through a stale or direct JS roll handler');
+
+  // Losing connectivity while it is the host's turn must both disable the
+  // visible button and protect the authoritative match state from mutation.
+  await host.evaluate(()=>{
+    const m=window.__LEAF_BRIDGE__.getMatch();
+    m.active=0;
+    window.__LEAF_NET__.connected=false;
+    window.__ROG_TEST__.drawGame();
+  });
+  assert.equal(await host.locator('#roll-btn').isDisabled(),true,
+    'the host dice button is disabled when WebRTC becomes disconnected');
+  const beforeOfflineTurn=await snapshot();
+  await host.evaluate(()=>window.__ROG_TEST__.takeTurn());
+  assert.deepEqual(await snapshot(),beforeOfflineTurn,
+    'disconnected WebRTC host may not roll or advance the authoritative match');
+  console.log('WEBRTC TURN AUTHORIZATION PASS: guest-only turn and disconnected-host state unchanged');
+
   assert.deepEqual(errors,[],'no client JavaScript errors');
   await guest.screenshot({path:'rog-online-guest.png'});
   await host.screenshot({path:'rog-online-host.png'});
