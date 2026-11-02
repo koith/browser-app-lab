@@ -111,6 +111,12 @@ class Tests(unittest.TestCase):
             self.assertFalse(reviewed_direct_source(page,'mimmi'))
         self.assertTrue(reviewed_direct_source(
             'https://x.com/super_yuisan/status/1234567890123','yui'))
+        self.assertTrue(reviewed_direct_source(
+            'https://teapawt.net/super_yuisan','yui'))
+        self.assertTrue(reviewed_direct_source(
+            'https://teapawt.net/Mimmi_official','mimmi'))
+        self.assertFalse(reviewed_direct_source(
+            'https://teapawt.net/Mimmi_official','yui'))
         self.assertFalse(reviewed_direct_source(
             'https://x.com/anyoneelse/status/1234567890123','yui'))
         self.assertFalse(reviewed_direct_source(
