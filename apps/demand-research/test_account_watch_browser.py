@@ -15,6 +15,7 @@ PAGE="https://koith.github.io/browser-app-lab/apps/demand-research/"
 HTML=(ROOT/"index.html").read_text("utf-8")
 FREE=(ROOT/"free_discovery.js").read_text("utf-8")
 WATCH=(ROOT/"account_watch.js").read_text("utf-8")
+AUTO=(ROOT/"account_auto_analysis.js").read_text("utf-8")
 NOW=datetime.now(timezone.utc).isoformat()
 BAD_HOST="https://x.com.evil.invalid/test"
 
@@ -43,6 +44,17 @@ def run():
                 status=200,content_type="application/javascript",body=FREE))
             page.route(PAGE+"account_watch.js",lambda route:route.fulfill(
                 status=200,content_type="application/javascript",body=WATCH))
+            page.route(PAGE+"account_auto_analysis.js",lambda route:route.fulfill(
+                status=200,content_type="application/javascript",body=AUTO))
+            def public_profiles(r):
+                qs=parse_qs(urlparse(r.request.url).query)
+                actors=qs.get("actors",[])
+                profiles=([{"handle":"qa-feed.bsky.social","did":"did:plc:syntheticaccount",
+                            "description":"https://mastodon.social/@qa"}]
+                          if "qa-feed.bsky.social" in actors else [])
+                r.fulfill(status=200,content_type="application/json",
+                    headers={"Access-Control-Allow-Origin":"*"},body=json.dumps({"profiles":profiles}))
+            page.route("https://public.api.bsky.app/xrpc/app.bsky.actor.getProfiles**",public_profiles)
             page.route(PAGE+"assets/*.svg",lambda route:route.fulfill(
                 status=200,content_type="image/svg+xml",body="<svg xmlns='http://www.w3.org/2000/svg'></svg>"))
             def keenable(r):
@@ -89,7 +101,9 @@ def run():
             def mastodon(r):
                 mast_calls.append(r.request.url)
                 if "/accounts/lookup" in r.request.url:
-                    data={"id":"101","username":"qa","locked":False}
+                    data={"id":"101","username":"qa","locked":False,
+                          "fields":[{"name":"Other profile","value":
+                          '<a href="https://bsky.app/profile/qa-feed.bsky.social">Bluesky</a>'}]}
                 elif "/statuses" in r.request.url:
                     data=[{"id":"111","account":{"id":"101"},"visibility":"public",
                          "created_at":NOW,"content":"<p>제품 리뷰 테스트</p>",
@@ -187,12 +201,33 @@ def run():
             page.locator("#accountWatchSearch").fill("")
             page.locator(".account-watch-card .danger").first.click()
             assert page.locator("#accountMetricTracked").text_content()=="2"
+            # Account audit works without the user choosing profiles to track.
+            # 1,200 distinct synthetic accounts test no 36/80-record audit cap.
+            page.wait_for_function("window.INTERSECTION_autoAccountStats && window.INTERSECTION_autoAccountStats().scanFinished",timeout=25000)
+            page.evaluate("""() => {
+              const verified=[{profileUrl:'https://bsky.app/profile/qa-feed.bsky.social'},
+                {profileUrl:'https://mastodon.social/@qa'}];
+              for(let i=0;i<1200;i++)
+                verified.push({profileUrl:'https://bsky.app/profile/qa-'+i+'.bsky.social'});
+              window.INTERSECTION_publicAccountSnapshot=()=>({verified,candidates:[]});
+              window.dispatchEvent(new Event('intersection:feed-updated'));
+            }""")
+            page.wait_for_function("window.INTERSECTION_autoAccountStats().accountCount===1202",timeout=15000)
+            assert page.locator("#accountAutoRows > div").count()==80
+            page.locator("#accountAutoMore").click()
+            assert page.locator("#accountAutoRows > div").count()==160
+            page.wait_for_function("window.INTERSECTION_autoAccountStats().linkGroups===1",timeout=35000)
+            assert page.locator("#accountAutoGroups article").count()==1
+            assert "1,202" in page.locator("#accountAutoSummary").inner_text()
+            assert page.locator("#accountAutoGroups article a").count()==2
             assert not errors,errors
             print("PUBLIC_ACCOUNT_WATCH_BROWSER_QA",json.dumps({
               "tabs":2,"discovered_source_accounts_visible":True,"opt_in_profiles_saved":3,"bluesky_direct_public_feed":True,
               "mastodon_direct_public_feed":True,"x_original_public_post_verified":True,
               "cross_account_duplicate_content_removed":True,"private_rows_excluded":True,
-              "cross_platform_identity_inference":False,"malicious_urls_blocked":True,
+              "cross_platform_identity_inference":False,"auto_accounts_discovered":1202,
+              "reciprocal_public_link_groups":1,"no_manual_selection_required":True,
+              "malicious_urls_blocked":True,
               "post_history_persisted":False,"reload_persistence":True,
               "errors":len(errors)
             }),flush=True)
