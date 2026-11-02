@@ -454,6 +454,9 @@ main{padding-top:10px}
 .account-discovered-card button{border-radius:0;background:#2943c9;font-size:10px;padding:7px;flex:none}
 @media(max-width:850px){.account-discovered-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:580px){.account-discovered-grid{grid-template-columns:1fr}}
+.consumer-entry{margin:10px 0 15px;padding:11px 14px;display:flex;align-items:center;gap:13px;justify-content:space-between;background:#e6f4d8;border:1.5px solid #173c31;flex-wrap:wrap}
+.consumer-entry a{display:inline-flex;align-items:center;gap:9px;color:#173d31;font-size:14px;font-weight:850;text-decoration:none;padding:5px 0}
+.consumer-entry a:hover{text-decoration:underline}.consumer-entry small{font-size:11px;color:#54715d}
 </style>
 </head>
 <body>
@@ -468,6 +471,7 @@ main{padding-top:10px}
   <button type="button" role="tab" id="viewPosts" class="active" aria-selected="true" aria-controls="postsView">게시글</button>
   <button type="button" role="tab" id="viewAccounts" aria-selected="false" aria-controls="accountsView">계정 분석 <span id="watchCount" aria-hidden="true">0</span></button>
 </nav>
+<div class="consumer-entry"><a href="./consumer/" aria-label="일반 상품 수요 분석 별도 화면으로 이동">◩ 상품 수요 분석 <span aria-hidden="true">↗</span></a><small>별도 일반 소비재 데이터 · 합성 예시부터 검증</small></div>
 <div id="postsView" role="tabpanel" aria-labelledby="viewPosts">
 <div class="sr-only" id="count" role="status" aria-live="polite">불러오는 중…</div>
 <section class="feed" id="feed" aria-live="polite"><div class="empty">게시글 불러오는 중…</div></section>
