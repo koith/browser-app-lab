@@ -20,7 +20,7 @@
   "summary": {
     "topics": 6,
     "days_per_topic": 14,
-    "latest_7d_total_views_across_mixed_topics": 52195
+    "latest_7d_total_views_across_mixed_topics": 52685
   },
   "topics": [
     {
@@ -233,69 +233,69 @@
     {
       "id": "robotvac",
       "title": "로봇청소기",
-      "article": "Robot_vacuum_cleaner",
+      "article": "Robotic_vacuum_cleaner",
       "article_type": "category",
-      "wiki_url": "https://en.wikipedia.org/wiki/Robot_vacuum_cleaner",
-      "previous_7d_views": 11,
-      "latest_7d_views": 7,
-      "difference_views": -4,
-      "week_on_week_change_pct": -36.36,
+      "wiki_url": "https://en.wikipedia.org/wiki/Robotic_vacuum_cleaner",
+      "previous_7d_views": 556,
+      "latest_7d_views": 497,
+      "difference_views": -59,
+      "week_on_week_change_pct": -10.61,
       "daily": [
         {
           "day": "2026-10-18",
-          "views": 1
+          "views": 80
         },
         {
           "day": "2026-10-19",
-          "views": 1
+          "views": 77
         },
         {
           "day": "2026-10-20",
-          "views": 4
+          "views": 88
         },
         {
           "day": "2026-10-21",
-          "views": 0
+          "views": 72
         },
         {
           "day": "2026-10-22",
-          "views": 2
+          "views": 60
         },
         {
           "day": "2026-10-23",
-          "views": 0
+          "views": 95
         },
         {
           "day": "2026-10-24",
-          "views": 3
+          "views": 84
         },
         {
           "day": "2026-10-25",
-          "views": 3
+          "views": 108
         },
         {
           "day": "2026-10-26",
-          "views": 0
+          "views": 81
         },
         {
           "day": "2026-10-27",
-          "views": 0
+          "views": 63
         },
         {
           "day": "2026-10-28",
-          "views": 3
+          "views": 56
         },
         {
           "day": "2026-10-29",
-          "views": 0
+          "views": 67
         },
         {
           "day": "2026-10-30",
-          "views": 1
+          "views": 70
         },
         {
           "day": "2026-10-31",
-          "views": 0
+          "views": 52
         }
       ]
     },
