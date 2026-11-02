@@ -55,7 +55,7 @@ def validated_rows(body,term,start,end):
             continue
         author=p.get("author") or {}
         uri=str(p.get("uri") or "")
-        match=re.fullmatch(r"at://(did:(?:plc|web):[A-Za-z0-9.:-]{6,150})/app\\.bsky\\.feed\\.post/([A-Za-z0-9]+)",uri)
+        match=re.fullmatch(r"at://(did:(?:plc|web):[A-Za-z0-9.:-]{6,150})/app\.bsky\.feed\.post/([A-Za-z0-9]+)",uri)
         if not match or not isinstance(author,dict):
             continue
         did=str(author.get("did") or "")
