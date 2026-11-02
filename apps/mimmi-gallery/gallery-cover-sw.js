@@ -1,4 +1,4 @@
-/* Reuse only previously decoded, SHA-versioned Mimmi ALBUM COVER previews.
+/* Reuse only previously fetched, SHA-versioned Mimmi ALBUM COVER previews.
  * No originals, personal vault entries, credentials, source images or catalog
  * metadata are cached. This is a device-local reload optimization, not a CDN.
  */
@@ -42,7 +42,7 @@ self.addEventListener('fetch', event => {
       // A CORS response lets us check 200 + image MIME; do not cache opaque
       // responses, provider JSON errors, rejected logins or broken thumbnails.
       const response = await fetch(request.url, {
-        mode: 'cors', credentials: 'omit', redirect: 'follow'
+        mode: 'cors', credentials: 'omit', redirect: 'error'
       });
       const mime = response.headers.get('content-type') || '';
       if (response.ok && /^image\/(webp|jpeg|png)$/i.test(mime.split(';')[0].trim())) {
