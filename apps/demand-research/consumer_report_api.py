@@ -100,3 +100,31 @@ def _public_editorial() -> dict:
 def editorial():
     """Public general-goods editorial ratings; never individual review content."""
     return _public_editorial()
+
+
+def _public_sessions() -> dict:
+    """Historical CC BY4 aggregate only. No raw sessions, person IDs or SNS data."""
+    file_path = Path(__file__).resolve().parent / "consumer" / "session-report.json"
+    try:
+        if not file_path.is_file() or file_path.stat().st_size > 100_000:
+            raise ValueError("UCI aggregate unavailable or unexpectedly large")
+        report = json.loads(file_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError, UnicodeDecodeError, json.JSONDecodeError):
+        raise HTTPException(503, detail="historical session report unavailable")
+    ds = report.get("dataset", {}) if isinstance(report, dict) else {}
+    s = report.get("summary", {}) if isinstance(report, dict) else {}
+    if (report.get("schema_version") != 1 or
+        ds.get("kind") != "historical_real_ecommerce_sessions" or
+        ds.get("is_current_data") is not False or
+        ds.get("is_current_market_demand") is not False or
+        ds.get("contains_person_identifiers") is not False or
+        ds.get("license") != "CC BY 4.0" or
+        s.get("sessions") != 12330 or s.get("purchases") != 1908):
+        raise HTTPException(503, detail="historical session aggregate schema mismatch")
+    return report
+
+
+@app.get("/api/consumer/sessions")
+def shopping_session_aggregates():
+    """Read-only historical purchase-completion evidence, not live conversion."""
+    return _public_sessions()
