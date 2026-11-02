@@ -1,0 +1,33 @@
+name: Mimmi Saved Album Cover Reload Cache QA
+on:
+  pull_request:
+    paths:
+      - 'apps/mimmi-gallery/index.html'
+      - 'apps/mimmi-gallery/gallery-cover-sw.js'
+      - 'apps/mimmi-gallery/test_cover_sw.cjs'
+      - '.github/workflows/mimmi-cover-reload-cache-qa.yml'
+permissions:
+  contents: read
+jobs:
+  cover-cache-safety:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify strict scope, version pin, no provider-error caching and bounded entries
+        run: |
+          node --check apps/mimmi-gallery/gallery-cover-sw.js
+          node --check apps/mimmi-gallery/test_cover_sw.cjs
+          node apps/mimmi-gallery/test_cover_sw.cjs
+      - name: Confirm gallery does not cache originals or use service worker outside Pages
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          page = Path('apps/mimmi-gallery/index.html').read_text()
+          worker = Path('apps/mimmi-gallery/gallery-cover-sw.js').read_text()
+          assert "location.hostname==='koith.github.io'" in page
+          assert "serviceWorker.register('./gallery-cover-sw.js'" in page
+          assert "request.destination !== 'image'" in worker
+          assert "'/api/media/'" not in worker
+          assert "credentials: 'omit'" in worker
+          print('MIMMI_ONLY_SAVED_ALBUM_COVER_CACHE_PASS')
+          PY
