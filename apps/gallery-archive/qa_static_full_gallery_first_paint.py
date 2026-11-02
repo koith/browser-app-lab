@@ -71,15 +71,22 @@ def inspect(browser,model,spec):
                for(const album of stored)for(const photo of album.images||[])
                  shown.set(photo.sha256,(shown.get(photo.sha256)||0)+1);
                const owner=new Set(index.albums.flatMap(a=>a.images.map(p=>p.sha256)));
+               const collisions=await (await fetch('number-collision-distinct.json',{cache:'no-store'})).json().catch(()=>({photos:[]}));
+               const historical=(collisions.photos||[]).map(p=>p.sha256);
                return {owner_sha:owner.size,not_shown:[...owner].filter(sha=>!shown.has(sha)).length,
                        repeated_sha:[...shown.values()].filter(n=>n>1).length,unique:shown.size,
-                       recovered:stored.reduce((n,a)=>n+(a.images||[]).filter(p=>p.collisionRecovered).length,0)};
+                       historical_collisions:historical.length,
+                       historical_collisions_not_shown:historical.filter(sha=>!shown.has(sha)).length};
             }""")
             print("GALLERY_SHA_INTEGRITY",model,json.dumps(integrity),flush=True)
             assert integrity["not_shown"]==0,(model,integrity)
             if model=="mimmi":
                 assert integrity["repeated_sha"]==0,(model,integrity)
-                assert integrity["recovered"]==115,(model,integrity)
+                # The 115 photo recovery marker was removed by the SHA-union
+                # fix. Prove the actual 115 historical SHA files remain visible
+                # rather than requiring a deleted UI implementation flag.
+                assert integrity["historical_collisions"]==115,(model,integrity)
+                assert integrity["historical_collisions_not_shown"]==0,(model,integrity)
             assert "실제 저장본" in info["inventory"],(model,info["inventory"])
             for aid,minimum in spec["checks"]:
                 assert info["perAlbum"].get(aid,0)>=minimum,(model,aid,info["perAlbum"].get(aid,0))
