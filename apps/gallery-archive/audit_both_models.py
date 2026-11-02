@@ -107,6 +107,34 @@ def rows(root: Path, model: str, owner: Path | None = None) -> dict:
                 stored_sha.add(p["sha256"])
                 owner_count += 1
 
+    # A provider read may fail while the last published static owner index
+    # still records thousands of SHA-checked photos. Do NOT mistake a failed
+    # live catalog read for zero saved owner photos. Keep live verification
+    # counts separate; use published metadata only as UNVERIFIED gap context.
+    live_private_catalog_verified = owner is not None and owner.is_file()
+    reference_saved = defaultdict(dict, {aid: dict(photos) for aid, photos in saved.items()})
+    reference_sha = set(stored_sha)
+    published_fallback_rows = 0
+    published_fallback_used = False
+    if not live_private_catalog_verified:
+        published = base / "owner-index.json"
+        if published.exists():
+            index = read_json(published)
+            if (index.get("model") != model or index.get("schema_version") != 1
+                    or not isinstance(index.get("albums"), list)):
+                raise ValueError("Published owner index schema/model mismatch")
+            published_fallback_used = True
+            for album in index["albums"]:
+                if not isinstance(album.get("id"), str) or not isinstance(album.get("images"), list):
+                    raise ValueError("Published owner index invalid album")
+                for ix, p in enumerate(album["images"], 1):
+                    if not valid_photo(p):
+                        raise ValueError("Published owner index invalid SHA/size")
+                    position = photo_number(p, ix)
+                    reference_saved[album["id"]].setdefault(position, p["sha256"])
+                    reference_sha.add(p["sha256"])
+                    published_fallback_rows += 1
+
     seen_sources = set()
     known_source_sha = set()
     per_album = defaultdict(lambda: {"sha": set(), "numbers": set(), "by_number": defaultdict(set), "expected": None})
@@ -161,7 +189,7 @@ def rows(root: Path, model: str, owner: Path | None = None) -> dict:
             work = target
         return work
 
-    unarchived_shas = known_source_sha - stored_sha
+    unarchived_shas = known_source_sha - reference_sha
     missing = []
     known_missing = 0
     advertised_missing = 0
@@ -171,18 +199,18 @@ def rows(root: Path, model: str, owner: Path | None = None) -> dict:
     reviewed_alias_source_positions = 0
     unlinked_work_ids = 0
     for aid, info in per_album.items():
-        absent = info["sha"] - stored_sha
+        absent = info["sha"] - reference_sha
         known_missing += len(absent)
         expected = info["expected"]
         canonical = canonical_work(aid)
         # Only exact IDs may share publisher photo position numbers. A reviewed
         # alias certifies work membership, not a source site's numbering.
-        if aid in saved and saved[aid]:
+        if aid in reference_saved and reference_saved[aid]:
             relationship = "exact_saved_work"
-            filled_positions = set(saved[aid])
-        elif canonical != aid and saved.get(canonical):
+            filled_positions = set(reference_saved[aid])
+        elif canonical != aid and reference_saved.get(canonical):
             relationship = "reviewed_alias_different_numbering"
-            filled_positions = set(saved[canonical])
+            filled_positions = set(reference_saved[canonical])
             reviewed_alias_source_positions += len(info["numbers"])
         else:
             relationship = "unlinked_research_work"
@@ -192,7 +220,7 @@ def rows(root: Path, model: str, owner: Path | None = None) -> dict:
         position_comparable = relationship == "exact_saved_work"
         source_unfilled = info["numbers"] - filled_positions if position_comparable else set()
         source_alternative_hashes = sum(
-            len(hashes - stored_sha) for number, hashes in info["by_number"].items()
+            len(hashes - reference_sha) for number, hashes in info["by_number"].items()
             if number in filled_positions
         ) if position_comparable else 0
         unfilled_source_positions += len(source_unfilled)
@@ -206,9 +234,13 @@ def rows(root: Path, model: str, owner: Path | None = None) -> dict:
                 "id": aid,
                 "relationship": relationship,
                 "canonical_saved_work": canonical if relationship == "reviewed_alias_different_numbering" else None,
-                "source_sha_not_yet_stored": len(absent),
-                "source_shas_already_stored_elsewhere": len(info["sha"] & stored_sha) if relationship != "exact_saved_work" else 0,
-                "source_numbered_positions_not_stored": len(source_unfilled) if position_comparable else None,
+                "source_sha_not_yet_stored": len(absent) if not published_fallback_used else None,
+                "source_sha_absent_from_reference_index": len(absent),
+                "reference_is_live_private_catalog": live_private_catalog_verified,
+                "source_shas_already_stored_elsewhere": (len(info["sha"] & reference_sha) if relationship != "exact_saved_work" else 0) if not published_fallback_used else None,
+                "source_shas_indexed_elsewhere": len(info["sha"] & reference_sha) if relationship != "exact_saved_work" else 0,
+                "source_numbered_positions_not_stored": len(source_unfilled) if position_comparable and not published_fallback_used else None,
+                "source_numbered_positions_absent_from_reference": len(source_unfilled) if position_comparable else None,
                 "alternate_source_sha_at_saved_number": source_alternative_hashes if position_comparable else None,
                 "stored_numbered_positions": len(filled_positions) if relationship != "unlinked_research_work" else None,
                 "source_known_numbers": len(info["numbers"]),
@@ -217,11 +249,12 @@ def rows(root: Path, model: str, owner: Path | None = None) -> dict:
             })
     # Prioritize genuinely unknown bytes over numbering-only claims.
     missing.sort(key=lambda a: (
-        -a["source_sha_not_yet_stored"],
+        -a["source_sha_absent_from_reference_index"],
         -(a["source_numbered_positions_not_stored"] or 0),
         -(a["missing_numbered_positions"] or 0), a["id"]
     ))
     saved_positions = sum(len(x) for x in saved.values())
+    reference_positions = sum(len(x) for x in reference_saved.values())
     return {
         "model": model,
         "checked_at": datetime.now(timezone.utc).isoformat(),
@@ -230,20 +263,27 @@ def rows(root: Path, model: str, owner: Path | None = None) -> dict:
         "private_catalog_entries": owner_count if owner is not None and owner.exists() else None,
         "private_catalog_albums": owner_albums if owner is not None and owner.exists() else None,
         "combined_unique_album_number_positions": saved_positions,
+        "published_owner_index_only_rows": published_fallback_rows if published_fallback_used else None,
+        "indexed_reference_positions": reference_positions,
+        "gap_reference_integrity": "LIVE_PRIVATE_CATALOG" if live_private_catalog_verified else ("PUBLISHED_METADATA_REMOTE_UNVERIFIED" if published_fallback_used else "PUBLIC_FILES_ONLY"),
         "public_private_position_conflicts_for_manual_identity_review": len(public_private_position_conflicts),
         "research_album_ids": len(work_ids),
         "research_distinct_sha_candidates": len(known_source_sha),
-        "research_distinct_sha_not_in_saved_catalog": len(unarchived_shas),
-        "missing_source_sha_album_observations": known_missing,
-        "source_numbered_positions_not_stored": unfilled_source_positions,
+        "research_distinct_sha_not_in_saved_catalog": len(unarchived_shas) if not published_fallback_used else None,
+        "research_distinct_sha_not_in_index_reference": len(unarchived_shas),
+        "missing_source_sha_album_observations": known_missing if not published_fallback_used else None,
+        "source_sha_absent_from_index_reference_observations": known_missing,
+        "source_numbered_positions_not_stored": unfilled_source_positions if not published_fallback_used else None,
+        "source_numbered_positions_not_in_reference": unfilled_source_positions,
         "unlinked_research_work_positions_not_claimed_missing": unlinked_source_positions,
         "reviewed_alias_source_positions_not_number_comparable": reviewed_alias_source_positions,
         "unlinked_research_work_ids": unlinked_work_ids,
         "source_sha_alternatives_for_already_filled_positions": alternate_versions_at_filled_positions,
-        "advertised_numbered_positions_not_in_matching_id": advertised_missing,
+        "advertised_numbered_positions_not_in_matching_id": advertised_missing if not published_fallback_used else None,
+        "advertised_numbered_positions_not_in_reference": advertised_missing,
         "research_records_skipped_without_valid_sha": invalid_entries,
         "albums_needing_review": missing,
-        "caution": "Identical SHA across research IDs means identical bytes, NOT identical edition numbering. Unlinked research works and reviewed aliases do not contribute false missing-number counts. Alternate source SHA can be a re-encode, not an absent cut. Research, advertised totals and private-catalog entries are not newly downloaded photos; paid-edition completeness and publisher masters remain unverified.",
+        "caution": "When gap_reference_integrity=PUBLISHED_METADATA_REMOTE_UNVERIFIED, private bytes have NOT been freshly read; only the last published index is used to prevent false missing inventory. Identical SHA across research IDs means identical bytes, NOT identical edition numbering. Unlinked research works and reviewed aliases do not contribute false missing-number counts. Alternate source SHA can be a re-encode, not an absent cut. Research, advertised totals and private-catalog entries are not newly downloaded photos; paid-edition completeness and publisher masters remain unverified.",
     }
 
 
