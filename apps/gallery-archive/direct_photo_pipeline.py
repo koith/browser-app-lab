@@ -56,7 +56,9 @@ def safe_page(url):
     try:
         p=urlsplit(url)
         return (p.scheme=='https' and p.hostname in PAGE_HOSTS and not p.username and not p.password and p.port in (None,443)
-                and (p.hostname!='teapawt.net' or p.path in {'/'+a for a in CREATOR_ACCOUNTS.values()}))
+                and (p.hostname!='teapawt.net' or p.path in {
+                    '/'+a+suffix for a in CREATOR_ACCOUNTS.values()
+                    for suffix in ('','/media')}))
     except (ValueError,TypeError):return False
 
 
@@ -115,7 +117,8 @@ def reviewed_direct_source(url, model):
     if p.hostname in X_PUBLIC_HOSTS:
         return True  # safe_registered_public_page already binds exact model author/status
     if (p.hostname=='teapawt.net' and model in CREATOR_ACCOUNTS
-            and p.path=='/'+CREATOR_ACCOUNTS[model]):
+            and p.path in ('/'+CREATOR_ACCOUNTS[model],
+                           '/'+CREATOR_ACCOUNTS[model]+'/media')):
         return True
     return False
 
@@ -367,7 +370,8 @@ def page_images(raw,url,model):
         return originals,[],'scoped_public_page' if originals else 'no_public_photos'
     if urlsplit(url).hostname=='teapawt.net':
         account=CREATOR_ACCOUNTS[model]
-        if urlsplit(url).path!='/'+account:return [],[],'different_creator_account_rejected'
+        if urlsplit(url).path not in ('/'+account,'/'+account+'/media'):
+            return [],[],'different_creator_account_rejected'
         from collect_teapawt_public import public_images_from_author
         # Use exact media URLs exposed by the normal page, preserving its
         # original-size query. No guessed CDN hosts, protected API or login.
@@ -790,7 +794,16 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
         blocked_origin_pages=0
         known_work_urls=[url for work_id,url in historic if work_id==aid]
 
-        queue=rotated_registered_page_queue(book['source'],[u for u in book.get('source_pages',[]) if safe_registered_public_page(u,model)],max_pages,page_cycle);visited=set();errors=[];candidate_count=0;unreviewed_count=0
+        queue=rotated_registered_page_queue(book['source'],[u for u in book.get('source_pages',[]) if safe_registered_public_page(u,model)],max_pages,page_cycle)
+        # The registered Yui model-owned Media tab is discoverable from the
+        # real model's public account navigation, not a guessed X endpoint.
+        # Rotate X status URLs for coverage, but never allow 60 blocked X
+        # attempts to starve the one public author-only media feed.
+        if reviewed_source_only and model=='yui' and aid=='public-yui-sns':
+            author_media='https://teapawt.net/super_yuisan/media'
+            if author_media in [book['source']]+book.get('source_pages',[]):
+                queue=[author_media]+[u for u in queue if u!=author_media]
+        visited=set();errors=[];candidate_count=0;unreviewed_count=0
         known_official_saved=0
         for gap in official_gaps.get(aid,[]):
             if new_total>=max_new:
