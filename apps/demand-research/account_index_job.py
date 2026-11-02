@@ -64,7 +64,9 @@ def latest_manifest():
     # failure observed on latest.json. Never delete previous verified snapshots.
     try:
         listing=command(["lsf",REMOTE+"/manifests","--files-only","--retries","2"],timeout=90)
-    except RuntimeError:
+    except (RuntimeError, OSError):
+        # A first-run missing folder, a blocked listing, or a CI test without
+        # rclone must not prevent the read-only legacy pointer fallback.
         listing=b""
     names=[name.strip() for name in listing.decode("utf-8","replace").splitlines()
            if MANIFEST_RE.fullmatch(name.strip())]
