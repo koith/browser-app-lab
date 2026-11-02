@@ -51,7 +51,7 @@ const {chromium,webkit}=require('playwright');
    'original source full-body replaces all synthetic puppets when available');
   assert.ok(sources.visible.every(x=>x.hidden==='none'&&x.poseMapping==='unverified'),
    'no CSS-generated humanoid or invented native pose metadata is displayed');
-  assert.deepEqual(sources.visible.map(x=>x.source),['Original-CHR-body/1045.obs','Original-CHR-body/1042.obs']);
+  assert.deepEqual(sources.visible.map(x=>x.source),['Original-CHR-body/OBS.pak/1045.obs','Original-CHR-body/OBS.pak/1042.obs']);
   assert.ok(sources.visible.every(x=>x.src?.startsWith('./original/OBS/')));
   assert.ok(sources.actors.every(x=>x.originalRecovered==='true'));
   assert.equal(sources.cache['0045'].originalAnimationCount,37);
