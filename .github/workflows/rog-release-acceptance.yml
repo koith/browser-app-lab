@@ -32,6 +32,8 @@ jobs:
         run: node apps/4leaf/rog/tests/native-img-source-integrity.cjs
       - name: Verify the 63 embedded die pixels and signed source provenance
         run: node apps/4leaf/rog/tests/dice-embedded-source-integrity.cjs
+      - name: Source-verified OBS 1040 keyframe bridge and no inferred mass assignment
+        run: node apps/4leaf/rog/tests/native-obs-action-runtime.cjs
   chromium-game:
     runs-on: ubuntu-latest
     timeout-minutes: 18

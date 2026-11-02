@@ -1519,6 +1519,21 @@
         "QA-03",
         "P0-RELEASE"
       ]
+    },
+    {
+      "id": "REQ-20261102-GPT-018",
+      "date": "2026-11-02",
+      "origin": "User continued 4LEAF development instruction after Claude handoff",
+      "text": "Continue GPT side of native 4LEAF restoration. Connect verified OBS 1040 source motion to the browser runtime, preserve unverified-card exclusions and keep Claude original decoding separate.",
+      "taskIds": [
+        "ACT-01",
+        "ACT-02",
+        "ACT-03",
+        "P0-ACTOR",
+        "SRC-04",
+        "QA-03",
+        "P0-RELEASE"
+      ]
     }
   ],
   "tasks": [
@@ -7977,6 +7992,38 @@
         "P0-RELEASE"
       ],
       "details": "Previous PR515 embedded frame sequence was from source bytes but FIRST-block palette was incorrectly applied to independent later blocks. Runtime now requires explicit SHA256 allowlist for fully reviewed palette-corrected frames; 63 existing archive images remain catalogued but cannot be used or preloaded as live frames. Original source UI OBS 1171/1223 frames and verified game results remain intact. Browser and CI acceptance not yet confirmed."
+    },
+    {
+      "seq": 363,
+      "date": "2026-11-02",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261102-GPT-018",
+      "taskIds": [
+        "ACT-01",
+        "ACT-02",
+        "ACT-03",
+        "P0-ACTOR",
+        "SRC-04",
+        "QA-03",
+        "P0-RELEASE"
+      ],
+      "details": "GPT actor live runtime and native OBS table adapter work."
+    },
+    {
+      "seq": 364,
+      "date": "2026-11-02",
+      "type": "NATIVE_1040_SOURCE_ACTION_RUNTIME_PR_PENDING",
+      "requestId": "REQ-20261102-GPT-018",
+      "taskIds": [
+        "ACT-01",
+        "ACT-02",
+        "ACT-03",
+        "P0-ACTOR",
+        "SRC-04",
+        "QA-03",
+        "P0-RELEASE"
+      ],
+      "details": "1040.obs original SHA256 pinned to frame-accurate live rear walk 3,5,6,7,8 (excluding invented frame 4), side/front walk and three facing idle groups, duel frame indexes 33..36. 3-tick native spacing preserved in metadata; playback 120ms per frame is WEB approximation, semantic labels INFERRED, EXE tick milliseconds and effect mappings UNVERIFIED. 53-member decoded map structural intake does not activate unknown card identities. Regression QA and Pages deployment pending."
     }
   ]
 }
