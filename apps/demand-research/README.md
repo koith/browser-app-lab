@@ -1,3 +1,56 @@
+## Private indexed account corpus (2026-11-02)
+
+**Code complete; production connection is separately verifiable.** The new
+`account_index.py` writes a private SQLite account index from the verified
+TeraBox catalog and authorized provider pages. `account_index_sources.py`
+adds bounded unauthenticated Bluesky original search, hourly checkpointed
+refresh and one-year rolling-window backfill with saturation splitting.
+A public API's inability to return a window, pagination restrictions and
+rate limits are recorded as incomplete/failed; they must not be treated
+as proof that no additional accounts exist. Search results are source
+evidence, not individual/person identity.
+
+The gateway includes authenticated
+`GET /api/accounts/status`, `GET /api/accounts` (offset/limit/search/platform),
+and `POST /api/accounts/sync`, plus same-origin JS/SVG file routes. A separate
+private section inside Account Analysis displays the server count and
+80-row filtered pages; the public Pages per-session snapshot remains available.
+The database stores canonical public profile URLs and SHA-256 post references,
+not text, images or behavioral same-person assertions. No client-write endpoint
+exists.
+
+**Required gateway configuration before declaring real data indexed:**
+
+- Connect the private HTTPS gateway and TeraBox catalog under the existing
+  `DEMAND_VIEWER_TOKEN`, `RCLONE_CONFIG_ARCHIVE_COOKIE`, and
+  `DEMAND_TERABOX_REMOTE` requirements. Never place these in the public UI.
+- Mount a PRIVATE, persistent, writeable disk for the backend service, and set
+  `DEMAND_ACCOUNT_INDEX_DB=/var/data/intersection/accounts.sqlite3` to a path
+  **inside the attached disk** (replace path if another persistent mount is
+  used). Without this setting, the account API fails closed with 503.
+- `DEMAND_AUTO_PUBLIC_INDEX=1` (default when the gateway is running with
+  a configured DB): maximum six bounded Bluesky search windows per hour,
+  checked against original post ID, author DID, visibility, keyword, and
+  timestamp. Set it to `0` to disable network discovery.
+- On first activation, verify `/api/accounts/status` after authentication:
+  `accounts`, `source_rows`, `last_catalog_sync`,
+  `last_catalog_skipped`, `public_scan_windows`. A successful fixture test
+  does NOT verify production accounts or complete external platform coverage.
+- Verify mounted disk durability by restarting the container and comparing
+  account counts, then verify sync/delete consistency and mobile HTTPS.
+  Do not deploy a SQLite file on a disposable container filesystem.
+
+**Source coverage:** The public no-key backfill currently covers Bluesky.
+X, Threads, Instagram and Reddit may contribute through the already existing
+authorized SocialCrawl gateway adapter only when credentials and call budget
+are explicitly enabled. Public non-Bluesky feed modules in the static viewer
+do not yet upload to this private index. The current system does **not**
+establish that all platforms or all years have been indexed.
+
+**QA:** `python -m pytest -q test_account_index.py
+test_account_index_sources.py test_gateway.py test_social_sources.py`.
+The synthetic 20,000-record volume test is not a real-world crawl.
+
 
 ## Automatic public-account audit (2026-11-02)
 

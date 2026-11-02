@@ -8,6 +8,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from datetime import datetime, timezone, timedelta
 from social_sources import TERMS, ROUTES, request_one_page
+import account_index
+import account_index_sources
 
 app=FastAPI(title="Demand Research Private Cloud",docs_url=None,redoc_url=None)
 app.add_middleware(CORSMiddleware,allow_origins=["https://koith.github.io","http://localhost:8765"],allow_methods=["GET","OPTIONS"],allow_headers=["Authorization","Content-Type"])
@@ -31,6 +33,59 @@ def configured():
 SESSION_SECONDS=30*24*60*60
 SESSION_COOKIE="demand_view"
 VIEW_FILE=Path(__file__).resolve().parent/"index.html"
+INDEX_DB=os.getenv("DEMAND_ACCOUNT_INDEX_DB","").strip()
+INDEX_SECONDS=15*60
+_index_lock=asyncio.Lock()
+_index_synced_at=0.0
+_index_last_error=""
+_index_task=None
+
+async def refresh_account_index(force=False):
+    global _index_synced_at,_index_last_error
+    if not INDEX_DB:
+        raise HTTPException(503,"Private account-index storage not configured")
+    async with _index_lock:
+        if not force and _index_synced_at and time.monotonic()-_index_synced_at<INDEX_SECONDS:
+            return
+        try:
+            catalog=await get_catalog()
+            await asyncio.to_thread(account_index.sync_catalog,INDEX_DB,catalog)
+            _index_synced_at=time.monotonic()
+            _index_last_error=""
+        except Exception as error:
+            _index_last_error=type(error).__name__
+            raise
+
+@app.on_event("startup")
+async def start_account_index():
+    global _index_task
+    if not INDEX_DB or not configured():
+        return
+    async def periodic():
+        while True:
+            try:
+                await refresh_account_index()
+            except Exception as error:
+                print("ACCOUNT_INDEX_REFRESH_FAILED",type(error).__name__,flush=True)
+            if os.getenv("DEMAND_AUTO_PUBLIC_INDEX","1")=="1":
+                try:
+                    result=await asyncio.to_thread(account_index_sources.run_batch,INDEX_DB)
+                    if result.get("requests"):
+                        print("ACCOUNT_INDEX_PUBLIC_WINDOW",json.dumps(result),flush=True)
+                except Exception as error:
+                    print("ACCOUNT_INDEX_PUBLIC_FAILED",type(error).__name__,flush=True)
+            await asyncio.sleep(INDEX_SECONDS)
+    _index_task=asyncio.create_task(periodic())
+
+@app.on_event("shutdown")
+async def stop_account_index():
+    if _index_task is not None:
+        _index_task.cancel()
+        try:
+            await _index_task
+        except asyncio.CancelledError:
+            pass
+
 
 def session_value(issued_at:int)->str:
     stamp=str(issued_at)
@@ -143,6 +198,49 @@ async def get_catalog():
 def media_signature(post_id,index,expires):
     return hmac.new(TOKEN.encode(),(post_id+":"+str(index)+":"+str(expires)).encode(),hashlib.sha256).hexdigest()
 
+async def _background_account_index_refresh():
+    try:
+        await refresh_account_index()
+    except Exception as error:
+        print("ACCOUNT_INDEX_LAZY_REFRESH_FAILED",type(error).__name__,flush=True)
+
+@app.get("/api/accounts/status")
+async def accounts_status(request:Request):
+    check_auth(request)
+    if not INDEX_DB:
+        raise HTTPException(503,"Private account-index storage not configured")
+    # Indexing must not block the UI; the background refresh is also periodic.
+    if not _index_lock.locked() and (not _index_synced_at or time.monotonic()-_index_synced_at>INDEX_SECONDS):
+        asyncio.create_task(_background_account_index_refresh())
+    data=await asyncio.to_thread(account_index.status,INDEX_DB)
+    if os.getenv("DEMAND_AUTO_PUBLIC_INDEX","1")=="1":
+        data["public_scan_windows"]=await asyncio.to_thread(account_index_sources.coverage,INDEX_DB)
+    data.update({"refreshing":_index_lock.locked(),
+                 "refresh_error":_index_last_error,"persistent_db_configured":True})
+    return JSONResponse(data,headers={"Cache-Control":"private, no-store"})
+
+@app.get("/api/accounts")
+async def accounts_list(request:Request,offset:int=Query(0,ge=0,le=10000000),
+                        limit:int=Query(80,ge=1,le=100),
+                        q:str=Query("",max_length=80),platform:str=Query("",max_length=20)):
+    check_auth(request)
+    if not INDEX_DB:
+        raise HTTPException(503,"Private account-index storage not configured")
+    try:
+        data=await asyncio.to_thread(account_index.page,INDEX_DB,offset,limit,q,platform)
+    except ValueError as error:
+        raise HTTPException(400,str(error)) from None
+    return JSONResponse(data,headers={"Cache-Control":"private, no-store"})
+
+@app.post("/api/accounts/sync")
+async def accounts_sync(request:Request):
+    check_auth(request)
+    if _index_synced_at and time.monotonic()-_index_synced_at<300:
+        raise HTTPException(429,"Account-index sync recently completed")
+    await refresh_account_index(force=True)
+    return JSONResponse(await asyncio.to_thread(account_index.status,INDEX_DB),
+                        headers={"Cache-Control":"private, no-store"})
+
 @app.get("/api/health")
 async def health():
     return {"service":"demand-research-terabox","cloud":"terabox","configured":configured(),"data_cached":_cache["posts"] is not None}
@@ -207,6 +305,11 @@ async def discovery(request:Request,
         except ValueError as error:
             # Fail closed; never forward paid-provider responses or credentials.
             raise HTTPException(502,str(error)[:100]) from None
+        if INDEX_DB and result.get("items"):
+            try:
+                await asyncio.to_thread(account_index.ingest_discovery,INDEX_DB,result["items"])
+            except Exception as error:
+                print("ACCOUNT_INDEX_DISCOVERY_FAILED",type(error).__name__,flush=True)
         _search_cache[cache_key]={"at":time.monotonic(),"response":result}
         # Do not retain all searches indefinitely in long-lived workers.
         if len(_search_cache)>100:
@@ -278,3 +381,22 @@ async def media(post_id:str,index:int,request:Request,exp:int,sig:str):
              "Cache-Control":"private, no-store","X-Content-Type-Options":"nosniff"}
     if status==206: headers["Content-Range"]="bytes "+str(start)+"-"+str(end)+"/"+str(total)
     return StreamingResponse(remote_stream(item["key"],start,end-start+1),status_code=status,media_type=item["mime"],headers=headers)
+
+# Allow only the browser's three known scripts and fixed SVG assets. Never
+# expose the Python source tree, cloud files or private database via StaticFiles.
+@app.get("/{asset_name}",include_in_schema=False)
+async def viewer_script(asset_name:str):
+    if asset_name not in {"account_auto_analysis.js","account_index_client.js","account_watch.js","free_discovery.js"}:
+        raise HTTPException(404,"Not found")
+    return FileResponse(VIEW_FILE.parent/asset_name,media_type="application/javascript",
+        headers={"Cache-Control":"no-store","X-Content-Type-Options":"nosniff"})
+
+@app.get("/assets/{asset_name}",include_in_schema=False)
+async def viewer_asset(asset_name:str):
+    if not re.fullmatch(r"[a-z0-9_-]{1,50}\\.svg",asset_name):
+        raise HTTPException(404,"Not found")
+    path=VIEW_FILE.parent/"assets"/asset_name
+    if not path.is_file():
+        raise HTTPException(404,"Not found")
+    return FileResponse(path,media_type="image/svg+xml",
+                        headers={"Cache-Control":"public,max-age=3600","X-Content-Type-Options":"nosniff"})
