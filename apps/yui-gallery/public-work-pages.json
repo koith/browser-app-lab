@@ -8,7 +8,10 @@
       "publisher": "공개 SNS",
       "priority": 20,
       "source": "https://teapawt.net/super_yuisan",
-      "identity_evidence": "Only direct attachments of timeline-item cards with the exact professional author account super_yuisan. Quoted and nested other-author attachments are excluded. Follow observed Load more cursor links; preserve observed pbs.twimg.com media URLs and original-size query without rewriting them. Every decoded file still requires private remote SHA readback before publication."
+      "identity_evidence": "Only direct attachments of timeline-item cards with the exact professional author account super_yuisan. Quoted and nested other-author attachments are excluded. Follow observed Load more cursor links; preserve observed pbs.twimg.com media URLs and original-size query without rewriting them. Every decoded file still requires private remote SHA readback before publication. The /media URL is the real public model-authored tab observed in the author's public site navigation, not a guessed post route; real media bytes must come directly from the original x.com media CDN.",
+      "source_pages": [
+        "https://teapawt.net/super_yuisan/media"
+      ]
     },
     {
       "id": "inven-public-photos",
