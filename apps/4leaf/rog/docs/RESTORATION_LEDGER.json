@@ -7666,6 +7666,19 @@
     {
       "seq": 349,
       "date": "2026-11-02",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261102-GPT-011",
+      "taskIds": [
+        "CHT-04",
+        "QA-03",
+        "P0-CHAT",
+        "P0-RELEASE"
+      ],
+      "details": "GPT/Claude source-vs-runtime work split; GPT takes physical-click ChatRoom instant-seat browser CI/QA and source-preserving integration, Claude takes original archive, action mapping, gameplay evidence. Prior source work retained. Runtime acceptance not yet claimed."
+    },
+    {
+      "seq": 350,
+      "date": "2026-11-02",
       "type": "REAL_CLICK_INSTANT_SEAT_QA_PR_PENDING",
       "requestId": "REQ-20261102-GPT-011",
       "taskIds": [
