@@ -41,7 +41,7 @@ def test_bounded_batch_stores_profiles_not_text_and_resumes(tmp_path):
     assert first["requests"]==6
     assert first["accepted"]==6
     assert account_index.status(db)["accounts"]==1
-    assert account_index.status(db)["source_rows"]==3
+    assert account_index.status(db)["source_rows"]==1  # identical original URI across terms deduplicates
     assert sources.run_batch(db,fetcher=mock,max_requests=6,now=NOW+120)["skipped_recent_run"]
     second=sources.run_batch(db,fetcher=mock,max_requests=6,now=NOW+3600)
     assert second["requests"]==6
