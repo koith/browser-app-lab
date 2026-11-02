@@ -27,6 +27,10 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: independent-consumer-evidence-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   report-and-ui:
     runs-on: ubuntu-latest
