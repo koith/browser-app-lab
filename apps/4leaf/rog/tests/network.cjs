@@ -106,6 +106,58 @@ const path=require('path');
   await guest.waitForFunction(()=>document.querySelector('#chat-log').textContent.includes('호스트 실시간 응답'),null,{timeout:6000});
   console.log('WEBRTC CHAT PASS: two-way real peer messenger messages mirrored live');
 
+  // Actual two-Chromium-browser reconnect: keep the match and exchange a fresh
+  // host/guest SDP pair after leaving the original game screen. This exercises
+  // the same visible lobby controls used when the previous WebRTC link dies.
+  const beforeReconnect=await host.evaluate(()=>{
+    const m=window.__LEAF_BRIDGE__.getMatch();
+    return {map:m.map,round:m.round,active:m.active,positions:m.players.map(p=>p.position)};
+  });
+  for(const page of [host,guest]){
+    await page.locator('#exit-game').click();
+    await page.locator('#modal-buttons button').filter({hasText:'나가기'}).click();
+    await page.waitForSelector('#lobby:not(.hidden)');
+  }
+  await host.locator('#net-make').click();
+  await host.waitForFunction(()=>document.querySelector('#net-output-offer').value.length>100);
+  const secondOffer=await host.locator('#net-output-offer').inputValue();
+  await guest.locator('#net-input-offer').fill(secondOffer);
+  await guest.locator('#net-accept-offer').click();
+  await guest.waitForFunction(()=>document.querySelector('#net-output-answer').value.length>100);
+  const secondAnswer=await guest.locator('#net-output-answer').inputValue();
+  await host.locator('#net-input-answer').fill(secondAnswer);
+  await host.locator('#net-apply-answer').click();
+  await Promise.all([
+    host.waitForFunction(()=>window.__LEAF_NET__?.connected,null,{timeout:20000}),
+    guest.waitForFunction(()=>window.__LEAF_NET__?.connected,null,{timeout:20000})
+  ]);
+  // The authoritative host sends the running match on the new channel.
+  await guest.waitForFunction(()=>document.querySelector('#game:not(.hidden)')!==null);
+  await guest.waitForFunction(expected=>{
+    const m=window.__LEAF_BRIDGE__.getMatch();
+    return m?.mode==='network'&&m.map===expected.map&&m.round===expected.round&&
+      m.active===expected.active&&
+      JSON.stringify(m.players.map(p=>p.position))===JSON.stringify(expected.positions);
+  },beforeReconnect);
+  await host.locator('#resume-game').click();
+  await host.waitForSelector('#game:not(.hidden)');
+  await host.evaluate(()=>{
+    const m=window.__LEAF_BRIDGE__.getMatch();
+    m.active=0;m.players[0].position=0;m.players[1].position=50;
+    for(let i=1;i<=17;i++)m.tiles[i]='normal';
+    for(let i=51;i<=70;i++)m.tiles[i]='normal';
+    window.__LEAF_BRIDGE__.onState(m);
+    window.__ROG_TEST__.drawGame();
+  });
+  await host.locator('#roll-btn').click();
+  await guest.waitForFunction(()=>{
+    const m=window.__LEAF_BRIDGE__.getMatch();
+    return m?.active===1&&m.players[0].position>0&&window.__LEAF_NET__?.connected;
+  },null,{timeout:20000});
+  assert.equal(await host.locator('#roll-btn').isDisabled(),true,
+    'reconnected host must not roll during the guest turn');
+  console.log('WEBRTC REAL TWO-BROWSER RECONNECT PASS: same match and authoritative turn');
+
   assert.deepEqual(errors,[],'no client JavaScript errors');
   await guest.screenshot({path:'rog-online-guest.png'});
   await host.screenshot({path:'rog-online-host.png'});
