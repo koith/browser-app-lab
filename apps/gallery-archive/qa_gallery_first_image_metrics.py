@@ -48,6 +48,17 @@ def audit(browser, model: str, timeout_ms: int) -> dict:
               })""", timeout=timeout_ms)
             result["first_decoded_visible_cover_s"] = round(
                 time.monotonic() - start, 2)
+            # First visibly decoded image's origin only; never emit signed URLs.
+            result["first_cover"] = page.evaluate("""() => {
+              const img=[...document.querySelectorAll('#albumgrid .album img')]
+                .find(im => {const r=im.getBoundingClientRect();
+                  return r.bottom>0 && r.top<innerHeight && im.complete &&
+                    im.naturalWidth>=160 && im.naturalHeight>=160;});
+              if(!img)return null;
+              let host='unknown';
+              try{host=new URL(img.currentSrc).hostname}catch{}
+              return {host, width:img.naturalWidth,height:img.naturalHeight};
+            }""")
         except BrowserTimeout:
             result["first_decoded_visible_cover_s"] = None
             result["thumbnail_failure"] = (
@@ -93,13 +104,23 @@ def main() -> None:
     args = parser.parse_args()
     if args.image_timeout_ms < 1000:
         parser.error("--image-timeout-ms must be >= 1000")
+    # Compare opposite model orders in independent browser processes.
+    # The two galleries use the same Render gateway; a first-request cold
+    # start must not be misreported as a Mimmi-specific frontend slowdown.
+    # Each model gets its own clean incognito context in both orders.
+    orders = (("mimmi", "yui"), ("yui", "mimmi"))
+    results = []
     with sync_playwright() as playwright:
-        browser = getattr(playwright, args.browser).launch(headless=True)
-        try:
-            results = [audit(browser, model, args.image_timeout_ms)
-                       for model in ("mimmi", "yui")]
-        finally:
-            browser.close()
+        for order in orders:
+            browser = getattr(playwright, args.browser).launch(headless=True)
+            try:
+                for position, model in enumerate(order):
+                    measured = audit(browser, model, args.image_timeout_ms)
+                    measured["order"] = " -> ".join(order)
+                    measured["position_in_order"] = position + 1
+                    results.append(measured)
+            finally:
+                browser.close()
     for result in results:
         print("GALLERY_FIRST_IMAGE_AUDIT",
               json.dumps({"browser": args.browser, **result},
