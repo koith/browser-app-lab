@@ -195,3 +195,19 @@ def test_public_editorial_api_is_licensed_and_not_consumer_demand():
     assert data["summary"]["source_ratings_rows"]==8107
     assert data["summary"]["selected_products"]==36
     assert all("author_id" not in str(p) for p in data["products"])
+
+
+def test_readonly_historical_session_aggregate_api():
+    import consumer_report_api
+    from fastapi.testclient import TestClient
+    c = TestClient(consumer_report_api.app)
+    response = c.get("/api/consumer/sessions")
+    assert response.status_code == 200
+    assert response.headers["cache-control"] == "no-store"
+    out = response.json()
+    assert out["dataset"]["kind"] == "historical_real_ecommerce_sessions"
+    assert out["dataset"]["is_current_data"] is False
+    assert out["dataset"]["contains_person_identifiers"] is False
+    assert out["summary"]["sessions"] == 12330
+    assert out["summary"]["purchases"] == 1908
+    assert c.post("/api/consumer/sessions").status_code == 405
