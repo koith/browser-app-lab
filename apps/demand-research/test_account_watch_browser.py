@@ -101,8 +101,10 @@ def run():
               ("https://lemmy.world/api/**",'{"posts":[]}'),
               ("https://api.pullpush.io/**",'{"data":[]}')
             ]:
-                page.route(ptn,lambda r,raw=body:r.fulfill(status=200,content_type="application/json",
-                    headers={"Access-Control-Allow-Origin":"*"},body=raw))
+                def route_json(raw):
+                    return lambda route:route.fulfill(status=200,content_type="application/json",
+                        headers={"Access-Control-Allow-Origin":"*"},body=raw)
+                page.route(ptn,route_json(body))
             page.goto(PAGE,wait_until="domcontentloaded",timeout=30000)
             page.wait_for_selector("article.post",timeout=50000)
             page.wait_for_function("document.getElementById('applyDate').disabled===false",timeout=120000)
