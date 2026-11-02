@@ -55,7 +55,7 @@ const {chromium}=require('playwright');
     missing:p.dataset.obsUnavailable};
   });
   assert.equal(restored.rig,'original-obs-sprite');
-  assert.equal(restored.source,'OBS/1045.obs');
+  assert.equal(restored.source,'OBS/OBS.pak/1045.obs');
   assert.equal(restored.original,'true');
   assert.ok(restored.path.startsWith('./original/OBS/action-full-ext/1045-18.png'));
   assert.ok(restored.native[0]>20&&restored.native[1]>50);
