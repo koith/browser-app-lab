@@ -1137,7 +1137,7 @@ function draw(){
    personal information is persisted by the account UI. */
 window.INTERSECTION_publicAccountSnapshot=function(){
   return {fromMs,toMs,
-    verified:posts.filter(p=>p.platform!=="cloud").map(p=>({
+    verified:posts.filter(p=>p.platform!=="cloud"&&!p.restricted).map(p=>({
       platform:p.platform,profileUrl:p.profileUrl,author:p.author,
       posted:p.posted,url:p.url,text:String(p.text||"").slice(0,1800),id:p.id
     })),
