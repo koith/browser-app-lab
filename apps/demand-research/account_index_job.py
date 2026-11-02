@@ -15,6 +15,7 @@ from pathlib import Path
 
 import account_index
 import account_index_sources
+import account_groups
 
 REMOTE="archive:DemandAccountIndex"
 ARCHIVE="archive:DemandResearch/metadata/catalog.json"
@@ -109,10 +110,15 @@ def run():
                 catalog_info="verified_"+str(imported["accepted"])
             else:
                 raise ValueError("catalog schema invalid")
+        group_scan=account_groups.scan_known_profiles(str(db),max_profiles=55)
         stats=account_index.status(str(db))
         windows=account_index_sources.coverage(str(db))
         output=create_snapshot(db,run_id)
-        output.update({"accounts":stats["accounts"],"source_rows":stats["source_rows"],
+        groups=account_groups.groups_page(str(db),limit=1)
+        output.update({"account_groups":groups["total"],
+            "grouped_accounts":groups["linked_accounts"],
+            "group_evidence_checked":group_scan["checked"],
+            "accounts":stats["accounts"],"source_rows":stats["source_rows"],
             "last_catalog_sync":stats["last_catalog_sync"],
             "public_scan_windows":windows,"catalog":catalog_info,
             "last_public_scan_requests":scan.get("requests",0),
@@ -124,6 +130,8 @@ def run():
             raise RuntimeError("latest pointer readback mismatch")
         print("PRIVATE_ACCOUNT_INDEX_VERIFIED",json.dumps({
             "accounts":output["accounts"],"source_rows":output["source_rows"],
+            "account_groups":output["account_groups"],
+            "grouped_accounts":output["grouped_accounts"],
             "public_scan_windows":windows,"catalog":catalog_info,
             "snapshot_readback_sha256":True,"no_person_identity_inference":True
         },ensure_ascii=False),flush=True)
