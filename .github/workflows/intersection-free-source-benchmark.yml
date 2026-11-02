@@ -7,6 +7,7 @@ on:
       - "apps/demand-research/probe_keyless_search.py"
       - "apps/demand-research/probe_live_verify.py"
       - "apps/demand-research/probe_keyless_original_scrape.py"
+      - "apps/demand-research/probe_fxtwitter_search.py"
       - ".github/workflows/intersection-free-source-benchmark.yml"
   workflow_dispatch:
 permissions:
@@ -29,3 +30,5 @@ jobs:
         run: python apps/demand-research/probe_live_verify.py
       - name: Check original public source content with no-key scrape (maximum three)
         run: python apps/demand-research/probe_keyless_original_scrape.py
+      - name: Test direct free X full-text search on public FxEmbed
+        run: python apps/demand-research/probe_fxtwitter_search.py
