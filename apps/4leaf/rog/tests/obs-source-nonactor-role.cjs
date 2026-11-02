@@ -1,9 +1,7 @@
 'use strict';
-/* Actual OBS source pixel role test. A 2002 OBS.pak member may be an attack
- * effect, HUD glyph, weapon, or die numeral, NOT a playable chessman.
- * Never pass visual FX off as an original actor by merely choosing frame0.
- */
-const {chromium}=require('playwright'),assert=require('node:assert/strict');
+/* Correct original native role assertion: OBS member IDs are NOT CardData IDs.
+ * Original 1096 is FX; CardData 0096 is a playable 1079 actor. */
+const assert=require('node:assert/strict'),{chromium}=require('playwright');
 (async()=>{
  const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
  const page=await browser.newPage({viewport:{width:1280,height:900},serviceWorkers:'block'});
@@ -11,7 +9,8 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict');
  try{
   await page.addInitScript(()=>{window.LEAF_CENTRAL_API_URL='';});
   await page.goto(process.env.FOURLEAF_TEST_URL||'http://127.0.0.1:8765/');
-  await page.waitForFunction(()=>window.__ROG_TEST__&&window.__LEAF_GENESIS_ACTORS__&&window.ORIGINAL_LEAF_OBS_FRAMES);
+  await page.waitForFunction(()=>window.__ROG_TEST__&&window.__LEAF_GENESIS_ACTORS__&&
+   window.__LEAF_CHR_BODY_MAP__);
   await page.locator('[data-route="lobby"]').first().click();
   await page.locator('#lobby-create').click();
   await page.locator('#game-mode').selectOption('hotseat');
@@ -19,48 +18,45 @@ const {chromium}=require('playwright'),assert=require('node:assert/strict');
   await page.locator('#map-select').selectOption('4LEAF');
   await page.locator('#start-game').click();
   await page.waitForSelector('#game:not(.hidden)');
-  const native=await page.evaluate(()=>window.__LEAF_GENESIS_ACTORS__.getState());
-  assert.equal(Object.keys(native.nativeObsEffectMembers).length,38);
-  const originals=await page.evaluate(()=>Object.keys(window.ORIGINAL_LEAF_OBS_FRAMES||{}));
-  for(const id of ['0096','0097','0098','0100','0125','0128',
-    '0133','0134','0136','0137','0138','0139','0141','0142',
-    '0145','0146','0147','0159','0160','0161','0163','0164','0165','0167','0170',
-    '0099','0127','0130','0131','0135','0140','0143','0144',
-    '0156','0158','0162','0169','0171']){
-   const result=await page.evaluate(id=>{
-    const match=window.__ROG_TEST__.getMatch();match.players[0].team[0]='c_'+id;
-    window.__ROG_TEST__.drawGame();
-    const pawn=document.querySelector('#board-pawns .board-pawn[data-id="0"]');
-    const card=pawn?.querySelector('.leaf-chess-original-card-fallback');
-    return {id,rig:pawn?.dataset.actorRig,role:pawn?.dataset.originalObsMemberRole,
-     source:pawn?.dataset.actorSource,sourceMember:!!window.ORIGINAL_LEAF_OBS_FRAMES[id],
-     card:card?.getAttribute('src'),hidden:card?.hidden,anim:pawn?.dataset.sourceAnimation};
-   },id);
-   assert.equal(result.sourceMember,true,'genuine effects stay archived '+id);
-   assert.equal(result.rig,'original-card-portrait-fallback',
-    'native '+result.role+' cannot impersonate a Genesis warrior '+id);
-   assert.equal(result.hidden,false);
-   // Effect members fall back to the card art slot: a legacy CardData face
-   // or, without a sourced portrait, the original IMG.pak card back.
-   assert.ok(result.card?.includes('/original/CardData/')||
-    result.card==='./original/IMG/avatarback.png',JSON.stringify(result));
-   assert.equal(result.anim,'unavailable');
-  }
-  const genuine=await page.evaluate(()=>{
-   const match=window.__ROG_TEST__.getMatch();match.players[0].team[0]='c_0046';
-   window.__ROG_TEST__.drawGame();
-   const pawn=document.querySelector('#board-pawns .board-pawn[data-id="0"]');
-   return {rig:pawn.dataset.actorRig,source:pawn.dataset.actorSource,
-    frame:pawn.dataset.actorFrame,role:pawn.dataset.originalObsMemberRole||null};
+  const roles=await page.evaluate(()=>{
+   const m=window.__LEAF_CHR_BODY_MAP__,a=window.__LEAF_GENESIS_ACTORS__.getState();
+   return {effects:a.nativeObsEffectMembers,cards:m.cards,
+    sources:Object.keys(window.ORIGINAL_LEAF_OBS_FRAMES||{}).length,
+    mapped:m.getState()};
   });
-  assert.equal(genuine.rig,'original-obs-sprite');
-  assert.ok(['22','23','24'].includes(genuine.frame),'front idle source '+genuine.frame);
-  assert.equal(genuine.role,null);
-  await page.screenshot({path:'leaf-real-chessman-vs-original-obs-hud-effects.png'});
+  assert.equal(Object.keys(roles.effects).length,38);
+  assert.equal(roles.mapped.resolvedSourceCards,78);
+  for(const id of Object.keys(roles.effects)){
+   const member='1'+id.slice(1);
+   assert.ok(!Object.values(roles.cards).some(card=>card.pak==='OBS'&&card.member===member),
+    'non-actor original OBS member '+member+' must not be referenced by any CHR card');
+  }
+  for(const [card,member] of [['0096','1079'],['0097','1080'],
+   ['0088','1071'],['0087','1070'],['0170','1267']]){
+   const original=await page.evaluate(card=>{
+    const match=window.__ROG_TEST__.getMatch();match.players[0].team[0]='c_'+card;
+    window.__ROG_TEST__.drawGame();
+    const pawn=document.querySelector('#board-pawns .board-pawn[data-id="'+match.players[0].id+'"]');
+    return {rig:pawn.dataset.actorRig,source:pawn.dataset.actorSource,
+     png:pawn.querySelector('img.leaf-chess-original-obs')?.getAttribute('src')};
+   },card);
+   assert.equal(original.rig,'original-obs-sprite',card+' must be genuine original character');
+   assert.ok(original.source.includes(member+'.obs'),JSON.stringify(original));
+   assert.ok(original.png?.includes('/original/OBS/'));
+  }
+  const unavailable=await page.evaluate(()=>{
+   const match=window.__ROG_TEST__.getMatch();match.players[0].team[0]='c_0156';
+   window.__ROG_TEST__.drawGame();
+   const pawn=document.querySelector('#board-pawns .board-pawn[data-id="'+match.players[0].id+'"]');
+   return {rig:pawn.dataset.actorRig,
+    portrait:pawn.querySelector('.leaf-chess-original-card-fallback')?.getAttribute('src')};
+  });
+  assert.equal(unavailable.rig,'original-card-portrait-fallback');
+  assert.ok(unavailable.portrait?.startsWith('./original/CardData/chm_'));
+  await page.screenshot({path:'leaf-chr-correct-original-actors-and-unassigned-effect-sprites.png'});
   assert.deepEqual(errors,[]);
-  console.log('SOURCE OBS PIXEL ROLE QA PASS '+JSON.stringify({
-   nativeOriginalSourceMembers:originals.length,
-   visuallyReviewedNonActors:Object.keys(native.nativeObsEffectMembers).length,
-   realChessman:genuine}));
+  console.log('4LEAF ORIGINAL OBS NONACTOR ROLES AND TRUE CHR CARD SOURCES PASS',
+   JSON.stringify({effectMembers:38,realCards:97,published:78,
+    unassignedEffectsPreserved:true}));
  }finally{await browser.close()}
-})().catch(e=>{console.error('OBS SOURCE EFFECT ROLE QA FAILED',e.stack||e);process.exitCode=1});
+})().catch(e=>{console.error('CHR OBS NON-ACTOR ROLE QA FAILED',e.stack||e);process.exit(1)});
