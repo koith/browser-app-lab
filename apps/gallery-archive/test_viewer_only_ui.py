@@ -29,8 +29,15 @@ class ViewerOnlyTest(unittest.TestCase):
                 self.assertIn(f"{client}.albums()",html)
                 self.assertIn(f"{client}.asset(",html)
                 self.assertIn(f"PhotoVault.albums('{model}')",html)
-                self.assertTrue("stored=[...combined.values()]" in html or "stored=joined.albums" in html,
-                                "Gallery must use only saved, verified album rows")
+                # The saved-photo SHA union replaces the legacy number-keyed
+                # merge. Keep this guard aligned with the actual rendering path,
+                # while the corpus test independently verifies every saved SHA.
+                self.assertIn('src="saved-photo-union.js"', html)
+                self.assertTrue(
+                    "stored=SavedGalleryPhotoUnion.join([localStored,ownerStored,vaultStored])" in html
+                    or ("const merged=SavedGalleryPhotoUnion.join([localStored,ownerStored,vaultStored])" in html
+                        and "stored=joined.albums" in html),
+                    "Gallery must render only the SHA-verified saved-photo union")
                 self.assertIn("const archivedCount=stored.reduce(",html)
                 # Archive-only: a discovered link cannot create a gallery photo.
                 self.assertIn("localStored=",html)
