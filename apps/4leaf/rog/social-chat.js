@@ -653,6 +653,9 @@
   const originalToolstrip=$root()?.querySelector('.social-classic-toolbar');
   if(originalToolstrip?.parentElement===frame)
    $root()?.querySelector('.social-header')?.append(originalToolstrip);
+  // The source frame survives every view redraw. A room-only click handler
+  // must never leak into ChatTown or accumulate with repeated room renders.
+  frame.onclick=null;
   frame.replaceChildren();
   if(state.view==='board')renderBulletin(frame);
   if(state.view==='town')renderTown(frame);
@@ -1272,12 +1275,19 @@
    close.onclick=()=>closeRoom(room.id);
    $root()?.querySelector('.social-header-tools')?.prepend(close);
   }
-  frame.addEventListener('click',e=>{
-   // Do not teleport from a click on a participant or UI overlay.
-   if(e.target.closest('button, .social-room-title, .social-avatar'))return;
-   const rect=frame.getBoundingClientRect();const x=100*(e.clientX-rect.left)/rect.width,y=100*(e.clientY-rect.top)/rect.height;
+  // Render replaces the contents but reuses the same frame. Assign a single
+  // handler rather than stacking listeners on each redraw/room re-entry.
+  frame.onclick=e=>{
+   // Clicking the real chat transcript, user roster, scroll chrome or source
+   // toolbar is not a movement command. Only free room terrain teleports.
+   if(e.button!==0||!(e.target instanceof Element)||
+      e.target.closest('button, a, input, textarea, select, label, [role="button"], [role="scrollbar"], [contenteditable], .messenger, .social-user-panel, .social-classic-toolbar, .social-actor-menu, .social-room-title'))return;
+   const rect=frame.getBoundingClientRect();
+   if(!rect.width||!rect.height)return;
+   const x=100*(e.clientX-rect.left)/rect.width;
+   const y=100*(e.clientY-rect.top)/rect.height;
    teleportToFreeSeat(x,y);
-  });
+  };
   renderOccupants();
  }
  function showPeerInfo(user){
