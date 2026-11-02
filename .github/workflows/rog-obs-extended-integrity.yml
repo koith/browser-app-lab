@@ -1,0 +1,32 @@
+name: 4LEAF original extended OBS pixel SHA-verified archive
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/original/OBS/recovered-wide/**'
+      - 'apps/4leaf/rog/original/OBS/embedded/**'
+      - 'apps/4leaf/rog/original/OBS/obs23-actors/**'
+      - 'apps/4leaf/rog/docs/evidence/obs-trailers/**'
+      - 'apps/4leaf/rog/tests/obs-extended-source-integrity.cjs'
+      - '.github/workflows/rog-obs-extended-integrity.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/original/OBS/recovered-wide/**'
+      - 'apps/4leaf/rog/original/OBS/embedded/**'
+      - 'apps/4leaf/rog/original/OBS/obs23-actors/**'
+      - 'apps/4leaf/rog/docs/evidence/obs-trailers/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-pixel-integrity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Recompute SHA256 for 2783 source PNGs and confirm 245 OBS members
+        run: node apps/4leaf/rog/tests/obs-extended-source-integrity.cjs
