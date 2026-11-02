@@ -7,6 +7,7 @@ from playwright.sync_api import sync_playwright
 HTML=Path(__file__).with_name("index.html").read_text(encoding="utf-8")
 AUTO=Path(__file__).with_name("account_auto_analysis.js").read_text(encoding="utf-8")
 ACCOUNT_UI=Path(__file__).with_name("account_index_client.js").read_text(encoding="utf-8")
+GROUP_UI=Path(__file__).with_name("account_group_client.js").read_text(encoding="utf-8")
 WATCH=Path(__file__).with_name("account_watch.js").read_text(encoding="utf-8")
 ORIGIN="https://private.intersection.test/"
 
@@ -24,6 +25,22 @@ def run():
                 status=200,content_type="application/javascript",body=AUTO))
             page.route(ORIGIN+"account_index_client.js",lambda route:route.fulfill(
                 status=200,content_type="application/javascript",body=ACCOUNT_UI))
+            page.route(ORIGIN+"account_group_client.js",lambda route:route.fulfill(
+                status=200,content_type="application/javascript",body=GROUP_UI))
+            def group_page(route):
+                from urllib.parse import urlsplit,parse_qs
+                params=parse_qs(urlsplit(route.request.url).query)
+                offset=int(params.get("offset",[0])[0])
+                accounts=[{"platform":"bluesky",
+                  "profileUrl":"https://bsky.app/profile/fake%d.bsky.social"%i,
+                  "verified_posts":i+1} for i in range(10)]
+                item={"group_id":"A-fixture123","account_count":10,"distinct_posts":55,"capped_daily_contributions":1,
+                  "accounts":accounts,"evidence":"reciprocal_explicit_public_self_declaration"}
+                items=[item] if offset==0 else []
+                route.fulfill(status=200,content_type="application/json",
+                  body=json.dumps({"total":1,"account_count":20002,
+                  "linked_accounts":10,"unresolved_accounts":19992,"items":items}))
+            page.route(ORIGIN+"api/account-groups?*",group_page)
             page.route(ORIGIN+"api/accounts/status",lambda route:route.fulfill(
                 status=200,content_type="application/json",body=json.dumps({
                 "accounts":20002,"source_rows":28000,"last_catalog_sync":1793600000,
@@ -67,11 +84,15 @@ def run():
             assert page.locator("article.post a.author").get_attribute("href")=="https://x.com/qa"
             assert page.locator("#socialStatus").inner_text().find("1건 추가")>=0
             page.locator("#viewAccounts").click()
+            page.wait_for_selector("#intersectionGroupRows details",timeout=25000)
+            assert "A-fixture123" in page.locator("#intersectionGroupRows summary").inner_text()
+            page.locator("#intersectionGroupRows summary").click()
+            assert page.locator("#intersectionGroupRows details a").count()==10
             page.wait_for_function("document.querySelectorAll('#privateAccountRows > div').length===80",timeout=25000)
             assert "20,002" in page.locator("#privateAccountSummary").inner_text()
             page.locator("#privateAccountIndex .account-auto-more").click()
             page.wait_for_function("document.querySelectorAll('#privateAccountRows > div').length===160",timeout=15000)
             assert not errors,errors
-            print("PRIVATE_SOCIAL_BROWSER_FIXTURE",json.dumps({"cards":1,"calls":len(requested),"indexed_account_rows":160,"total_accounts":20002,"source_badge":"X","errors":len(errors)}))
+            print("PRIVATE_SOCIAL_BROWSER_FIXTURE",json.dumps({"cards":1,"calls":len(requested),"indexed_account_rows":160,"total_accounts":20002,"self_declared_group_accounts":10,"source_badge":"X","errors":len(errors)}))
         finally: browser.close()
 if __name__=="__main__":run()

@@ -1,3 +1,58 @@
+## One-to-many public account connection groups (2026-11-02)
+
+The business requirement is to avoid the **incorrect assumption that one SNS
+account equals one human customer**. The private account tab therefore
+distinguishes (a) observed SNS accounts, (b) **explicitly self-declared,
+reciprocally linked account groups**, and (c) **unresolved accounts**.
+
+For example, an entity that *publicly and mutually* claims ten accounts can be
+displayed as group **A-[stable ID]** with ten child accounts and the total
+distinct source-post count from all ten. The ID is pseudonymous; no legal
+name or sensitive identity profile is constructed. These public declarations
+are not irrefutable evidence that the same natural person is the operator
+(e.g. team/brand pages, account delegation). Neither multiple accounts nor
+an unknown account are counted as *confirmed distinct humans*.
+
+Technical approach:
+- Official Bluesky `app.bsky.actor.getProfiles` returns public description
+  and stable DID; Mastodon account lookup supplies public profile fields.
+- A profile must explicitly say the target URL is **its other account** and
+  the target profile must **also explicitly claim the source**. Simple
+  follows, promotional links, similar handles, reposts and posting-time
+  similarities do not become identity edges.
+- The server stores canonical URL pairs and verification timestamps, not
+  bios, images, captions, personal identity or inferred sensitive traits.
+  A link is inactive after 14 days without successful renewal.
+- Each hourly index job checks up to 55 previously seen public Bluesky/
+  Mastodon accounts using a rotating priority queue. Network or visibility
+  failures remain unresolved, not auto-verified.
+- Groups are connected components of reciprocal, current public claims. The
+  group API `GET /api/account-groups` requires the same private session as
+  the rest of the gateway. Group rows expand to show all child account URLs,
+  platforms, and observed source-post counts. The source posts use hashed
+  original IDs for de-duplication across catalog/discovery ingestion.
+- The fallback count is always **unknown human count**, not one person per
+  ungrouped account. All such counts are described as account-level metrics.
+
+Research supporting these engineering decisions:
+- Mastodon official documentation (HTTPS `rel=me`): 
+  https://docs.joinmastodon.org/user/profile/
+- AT Protocol official DID/handle identity resolution:
+  https://github.com/bluesky-social/bsky-docs/blob/main/docs/advanced-guides/resolving-identities.md
+- Splink edge accuracy / precision warning: 
+  https://github.com/moj-analytical-services/splink/blob/master/docs/topic_guides/evaluation/edge_overview.md
+- IEEE privacy-preserving linkage survey:
+  https://signalprocessingsociety.org/publications-resources/ieee-transactions-information-forensics-and-security/2021/01/modern-privacy
+
+**Limitations:** This is a conservative connected-account analysis, not
+cross-platform deanonymization. The current gateway does not verify OAuth
+ownership claims on X/Instagram/Threads and does not infer anonymous private
+profiles from behavioral traits. An operator may choose not to publicly
+self-declare their other accounts; those accounts must remain unresolved.
+This prevents false positive human identity merges and gives a truthful
+statistical denominator. CI's 10-account fixture is synthetic, not a real
+person's account portfolio.
+
 ## Private indexed account corpus (2026-11-02)
 
 **Code complete; production connection is separately verifiable.** The new

@@ -10,6 +10,7 @@ from datetime import datetime, timezone, timedelta
 from social_sources import TERMS, ROUTES, request_one_page
 import account_index
 import account_index_sources
+import account_groups
 
 app=FastAPI(title="Demand Research Private Cloud",docs_url=None,redoc_url=None)
 app.add_middleware(CORSMiddleware,allow_origins=["https://koith.github.io","http://localhost:8765"],allow_methods=["GET","OPTIONS"],allow_headers=["Authorization","Content-Type"])
@@ -72,6 +73,9 @@ async def start_account_index():
                     result=await asyncio.to_thread(account_index_sources.run_batch,INDEX_DB)
                     if result.get("requests"):
                         print("ACCOUNT_INDEX_PUBLIC_WINDOW",json.dumps(result),flush=True)
+                    if os.getenv("DEMAND_ACCOUNT_SELF_LINKS_ENABLED","1")=="1":
+                        group_result=await asyncio.to_thread(account_groups.scan_known_profiles,INDEX_DB)
+                        print("ACCOUNT_GROUP_PUBLIC_CHECK",json.dumps(group_result),flush=True)
                 except Exception as error:
                     print("ACCOUNT_INDEX_PUBLIC_FAILED",type(error).__name__,flush=True)
             await asyncio.sleep(INDEX_SECONDS)
@@ -203,6 +207,17 @@ async def _background_account_index_refresh():
         await refresh_account_index()
     except Exception as error:
         print("ACCOUNT_INDEX_LAZY_REFRESH_FAILED",type(error).__name__,flush=True)
+
+@app.get("/api/account-groups")
+async def account_groups_list(request:Request,
+                              offset:int=Query(0,ge=0,le=10000000),
+                              limit:int=Query(30,ge=1,le=100)):
+    check_auth(request)
+    if not INDEX_DB:
+        raise HTTPException(503,"Private account-index storage not configured")
+    return JSONResponse(await asyncio.to_thread(
+        account_groups.groups_page, INDEX_DB, offset=offset, limit=limit),
+        headers={"Cache-Control":"private, no-store"})
 
 @app.get("/api/accounts/status")
 async def accounts_status(request:Request):
@@ -386,7 +401,7 @@ async def media(post_id:str,index:int,request:Request,exp:int,sig:str):
 # expose the Python source tree, cloud files or private database via StaticFiles.
 @app.get("/{asset_name}",include_in_schema=False)
 async def viewer_script(asset_name:str):
-    if asset_name not in {"account_auto_analysis.js","account_index_client.js","account_watch.js","free_discovery.js"}:
+    if asset_name not in {"account_auto_analysis.js","account_index_client.js","account_group_client.js","account_watch.js","free_discovery.js"}:
         raise HTTPException(404,"Not found")
     return FileResponse(VIEW_FILE.parent/asset_name,media_type="application/javascript",
         headers={"Cache-Control":"no-store","X-Content-Type-Options":"nosniff"})
