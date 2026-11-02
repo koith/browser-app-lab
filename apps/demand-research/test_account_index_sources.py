@@ -70,3 +70,24 @@ def test_source_failure_records_and_limited_retries(tmp_path):
     result=sources.run_batch(db,fetcher=broken,max_requests=3,now=NOW)
     assert result["errors"]==3
     assert sources.coverage(db)["pending"]>=3
+
+
+def test_public_search_falls_back_to_second_official_host(monkeypatch):
+    from urllib.error import HTTPError
+    import io,json
+    called=[]
+    class Response:
+        def __enter__(self):return self
+        def __exit__(self,*a):return False
+        def read(self,n):return json.dumps({"posts":[]}).encode()
+    def urlopen(request,timeout):
+        called.append(request.full_url)
+        if len(called)==1:
+            raise HTTPError(request.full_url,403,"forbidden",{},None)
+        return Response()
+    monkeypatch.setattr(sources,"urlopen",urlopen)
+    body=sources.fetch_public("섹트",NOW-3600,NOW)
+    assert body=={"posts":[]}
+    assert len(called)==2
+    assert called[0].startswith("https://api.bsky.app/")
+    assert called[1].startswith("https://public.api.bsky.app/")

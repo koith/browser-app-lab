@@ -14,7 +14,10 @@ from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 import account_index
 
-API="https://public.api.bsky.app/xrpc/app.bsky.feed.searchPosts"
+# The public AppView search service can reject keyless search even while the
+# public api.bsky.app search endpoint is available. Try both official hosts.
+APIS=("https://api.bsky.app/xrpc/app.bsky.feed.searchPosts",
+      "https://public.api.bsky.app/xrpc/app.bsky.feed.searchPosts")
 TERMS=("뒷계","섹트","일탈계")
 HOUR=3600
 DAY=86400
@@ -32,16 +35,24 @@ def fetch_public(term,start,end):
         raise ValueError("invalid bounded search window")
     params=urlencode({"q":term,"sort":"latest","limit":MAX_PER_REQUEST,
         "since":_date(start),"until":_date(end)})
-    url=API+"?"+params
-    request=Request(url,headers={"Accept":"application/json","User-Agent":"IntersectionPublicAccountIndex/1.0"})
-    with urlopen(request,timeout=12) as response:
-        payload=response.read(2_000_001)
-    if len(payload)>2_000_000:
-        raise ValueError("search response too large")
-    result=json.loads(payload)
-    if not isinstance(result,dict) or not isinstance(result.get("posts"),list):
-        raise ValueError("unexpected search API response")
-    return result
+    failures=[]
+    for api in APIS:
+        request=Request(api+"?"+params,headers={"Accept":"application/json",
+            "User-Agent":"Mozilla/5.0 (compatible; INTERSECTION-Public-Index/1.0)"})
+        try:
+            with urlopen(request,timeout=12) as response:
+                payload=response.read(2_000_001)
+            if len(payload)>2_000_000:
+                raise ValueError("search response too large")
+            result=json.loads(payload)
+            if not isinstance(result,dict) or not isinstance(result.get("posts"),list):
+                raise ValueError("unexpected search API response")
+            return result
+        except Exception as error:
+            code=getattr(error,"code",None)
+            failures.append("HTTP_"+str(code) if isinstance(code,int)
+                else type(error).__name__)
+    raise RuntimeError("public_search_unavailable:"+",".join(failures))
 
 
 def validated_rows(body,term,start,end):
@@ -105,7 +116,10 @@ def run_batch(db_path,fetcher=fetch_public,max_requests=6,now=None):
         _ensure_queue(db)
         previous=db.execute("SELECT value FROM index_meta WHERE key='last_public_scan'").fetchone()
         if previous and now-int(previous[0])<55*60:
-            return {"requests":0,"accepted":0,"skipped_recent_run":True}
+            prior_errors=db.execute("""SELECT count(*) FROM public_index_windows
+                WHERE status='pending' AND error<>''""").fetchone()[0]
+            if not prior_errors:
+                return {"requests":0,"accepted":0,"skipped_recent_run":True}
         # Always check the last complete hour on the public index.
         for term in TERMS:
             db.execute("""INSERT OR IGNORE INTO public_index_windows
@@ -150,7 +164,9 @@ def run_batch(db_path,fetcher=fetch_public,max_requests=6,now=None):
                 with db:
                     db.execute("""UPDATE public_index_windows SET status=?,attempts=attempts+1,error=?
                         WHERE term=? AND begin_ts=? AND end_ts=?""",
-                        ("failed" if attempts>=2 else "pending",type(error).__name__,term,begin,end))
+                        ("failed" if attempts>=2 else "pending",
+                         str(error)[:100] if str(error).startswith("public_search_unavailable:")
+                         else type(error).__name__,term,begin,end))
         with db:
             db.execute("""INSERT INTO index_meta(key,value) VALUES('last_public_scan',?)
                 ON CONFLICT(key) DO UPDATE SET value=excluded.value""",(str(now),))
