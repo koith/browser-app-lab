@@ -518,6 +518,23 @@ function drawBoard(){
  query('.tile',root).forEach((node,i)=>node.classList.toggle('player-here',currentPositions.has(i)));
  drawPawns();
 }
+// Native DMP cell coordinates, not normalized screen percentages, determine
+// which recovered 2D side/rear/front OBS block to use. This is a WEB-facing
+// inference from the authentic source route, NOT decoded EXE orientation.
+// In particular a long diagonal step must never be called horizontal simply
+// because screen projection scales X and Y by different amounts.
+function sourceDmpTravelFacing(route,fromIndex,toIndex){
+ const from=route?.[fromIndex],to=route?.[toIndex];
+ if(!from||!to||!Number.isFinite(from[0])||!Number.isFinite(from[1])||
+    !Number.isFinite(to[0])||!Number.isFinite(to[1]))return null;
+ const dx=to[0]-from[0],dy=to[1]-from[1];
+ if(dy<0)return 'away';
+ if(dy>0)return 'toward';
+ if(dx<0)return 'left';
+ if(dx>0)return 'right';
+ return 'toward';
+}
+window.__LEAF_DMP_TRAVEL__={facing:sourceDmpTravelFacing};
 function drawPawns(){
  let layer=$('board-pawns');
  const tiles=$('board-nodes');
@@ -554,14 +571,16 @@ function drawPawns(){
      const from=PATH[Math.min(previous,PATH.length-1)];
      const dy=from&&point?point.y-from.y:0;
      const dx=from&&point?point.x-from.x:0;
-     // Source 1040/1046/1078 OBS contact sheets contain genuine left-profile
-     // walk pixels 14..17. Only choose that reviewed pose when this real
-     // DMP step is actually horizontal; diagonal and vertical steps retain
-     // the old source-backed rear/front mapping. Historic EXE facing
-     // thresholds and FPS are not yet decoded.
-     // ACTION_TABLE_37 direction blocks: rear, left/right mirrored side, front.
-     pawn.dataset.travelFacing=dy< -0.5?'away'
-      :Math.abs(dx)>1&&Math.abs(dx)>=Math.abs(dy)?(dx<0?'left':'right'):'toward';
+     // Source 1040/1046/1078 OBS side poses are genuine, but using
+     // PROJECTED percent deltas made 10 long diagonals in 26 DMP routes
+     // incorrectly select a side-walk animation. Only true native row
+     // changes may select rear/front. EXE direction thresholds remain unknown.
+     const sourceRoute=SOURCE_ROUTES[SOURCE_IDS[match.map]];
+     const grounded=sourceDmpTravelFacing(sourceRoute,previous,p.position);
+     pawn.dataset.travelFacing=grounded||
+      (dy< -0.5?'away':Math.abs(dy)>0.5?'toward':dx<0?'left':'right');
+     pawn.dataset.travelFacingBasis=grounded?'original-DMP-XY/web-direction-inference':
+      'projected-path/web-fallback';
      // The original source 0..7 bitmap frames take 7*120ms before frame 7
      // appears at the current explicitly WEB-provisional playback interval.
      // A 240ms timeout truncated EVERY real rolled movement to 0..1. Extend
