@@ -7670,6 +7670,18 @@
         "P0-RELEASE"
       ],
       "details": "PR #505, branch fix/4leaf-room-native-input-20261102: original ChatRoom 794x528 frame receives one room-only click handler instead of accumulating identical listeners after render(); switching out of room clears handler. Terrain-only clicks preserve immediate original-style seat snap; native chat log, message form, roster, scrollbar, toolbar, peers and other interactive controls no longer trigger teleport. Playwright terrain-input regression added to rog-world-chat PR CI, including desktop/mobile and room exit checks. JS static syntax checked; browser CI, actual Pages deploy and iPhone manual acceptance are NOT yet verified. This does not recover original server seat anchors or original 8-direction source animation."
+    },
+    {
+      "seq": 350,
+      "date": "2026-11-02",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261102-GPT-011",
+      "taskIds": [
+        "P0-CHAT",
+        "QA-03",
+        "P0-RELEASE"
+      ],
+      "details": "Registered user instruction to continue GPT-owned 4LEAF runtime, UI, functional regression and release QA independently of Claude original-source extraction. Preserved previous intake/event prefixes without altering incomplete source restoration status."
     }
   ]
 }
