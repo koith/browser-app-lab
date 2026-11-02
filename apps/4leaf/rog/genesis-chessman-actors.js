@@ -425,7 +425,7 @@
     auditedMovement.every(index=>native.frames.some(f=>f.index===index))));
    pawn.dataset.sourceWalkCoverage=pawn.dataset.sourceFrontWalkVerified==='true'
     ?'front-pair-25-30/source-verified/WEB-action-unverified'
-    :Object.hasOwn(AUDITED_FRONT_SOURCE,id)
+    :Object.hasOwn(AUDITED_FRONT_SOURCE,bodyVisualId(id))
      ?'front-only/source-verified/WEB-action-unverified'
      :Array.from({length:8},(_,i)=>i)
       .every(index=>native.frames.some(frame=>frame.index===index))
@@ -489,11 +489,11 @@
    // Expose EXACT SOURCE packet indexes independently from inferred labels;
    // QA can inspect what was really rendered during genuine gameplay.
    pawn.dataset.sourceFrameSequence=seq.map(frame=>frame.index).join(',');
-   pawn.dataset.sourceFrontCycleCoverage=REVIEWED_FRONT_MOTION[id]&&
+   pawn.dataset.sourceFrontCycleCoverage=REVIEWED_FRONT_MOTION[bodyVisualId(id)]&&
      [25,26,27,28,29,30].every(index=>native.frames.some(f=>f.index===index))
        ?'six-original-pixel-frames/WEB-walk-timing-inferred'
        :'partial-2002-source-front-cycle';
-   pawn.dataset.sourceActionEvidence=Object.hasOwn(AUDITED_FRONT_SOURCE,id)
+   pawn.dataset.sourceActionEvidence=Object.hasOwn(AUDITED_FRONT_SOURCE,bodyVisualId(id))
     ?(pawn.dataset.sourceFrontWalkVerified==='true'
        ?'front-source-pair/visual-reviewed; WEB-movement-and-FPS-inferred'
        :'front-source-static/visual-reviewed; native-action-table-unknown')
