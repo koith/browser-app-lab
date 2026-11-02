@@ -121,7 +121,25 @@ def read_remote_with_recovery(row,remote,deadline_seconds=75,command=None,copyto
         # A live same-account experiment proved rclone copyto can retrieve the
         # exact original while cat returns a 112-byte provider JSON response.
         # The alternative MUST independently pass the complete SHA-256.
-        return read_remote_via_copyto(row,remote,min(75,deadline-time.monotonic()),copyto_command)
+        # TeraBox occasionally interrupts an otherwise authenticated copyto
+        # with "corrupted on transfer: sizes differ". This is a transport read
+        # failure, NOT evidence of matching media. Retry at most twice with a
+        # fresh local target, under the ORIGINAL per-object deadline. Access
+        # denials, verification challenges, and successful wrong bytes remain
+        # hard failures and must never be retried by this fallback.
+        for attempt in range(3):
+            remaining=deadline-time.monotonic()
+            if remaining<=2:raise TimeoutError('Owner copyto SHA readback deadline exceeded')
+            try:
+                return read_remote_via_copyto(row,remote,min(75,remaining),copyto_command)
+            except ValueError as failure:
+                message=str(failure)
+                is_transient=bool(re.search(r'corrupted on transfer:\\s*sizes differ',message,re.I))
+                is_denied=bool(re.search(r'\\b(?:401|403|429|451)\\b|access denied|failed to login',message,re.I))
+                if not is_transient or is_denied or attempt==2 or deadline-time.monotonic()<=4:
+                    raise
+                time.sleep(min(1+attempt,max(0,deadline-time.monotonic()-2)))
+        raise AssertionError('Unreachable bounded copyto retry')
     except RemoteCommandFailure as error:
         if not error.retryable_transport or deadline-time.monotonic()<=2:raise
         time.sleep(1)
