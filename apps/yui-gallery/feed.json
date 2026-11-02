@@ -1,9 +1,25 @@
 {
-  "updated": "2026-11-02T08:14:23+00:00",
+  "updated": "2026-11-02T22:28:56+00:00",
   "source": "https://teapawt.net/super_yuisan/media",
   "complete_pagination": false,
-  "pages_visited": 44,
+  "pages_visited": 42,
   "images": [
+    {
+      "url": "https://pbs.twimg.com/media/HWH1MUrbEAAuqFK.jpg?name=orig",
+      "post": "https://x.com/super_yuisan/status/2117242902825091424",
+      "date": "2026-11-02T13:10:19.161000+00:00",
+      "name": "SNS 2026-11-02 · HWH1MUrbEAAuqFK.jpg",
+      "caption": "심유이 공개 SNS 미디어",
+      "source": "official-sns"
+    },
+    {
+      "url": "https://pbs.twimg.com/media/HWH1MUra8AAJGEJ.jpg?name=orig",
+      "post": "https://x.com/super_yuisan/status/2117242902825091424",
+      "date": "2026-11-02T13:10:19.161000+00:00",
+      "name": "SNS 2026-11-02 · HWH1MUra8AAJGEJ.jpg",
+      "caption": "심유이 공개 SNS 미디어",
+      "source": "official-sns"
+    },
     {
       "url": "https://pbs.twimg.com/media/HV94k3NaIAA2bH_.jpg?name=orig",
       "post": "https://x.com/super_yuisan/status/2116542930211201229",
