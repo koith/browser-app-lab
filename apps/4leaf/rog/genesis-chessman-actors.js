@@ -46,35 +46,9 @@
   '0169':'pumpkin-prop',
   '0171':'HUD-card-icon'
  });
- const originalFor=id=>{
-  if(Object.hasOwn(NON_ACTOR_OBS,id))return null;
-  // The 2002 source inventory now has 45 genuine complete 37-frame
-  // actor packets, with member SHA256 individually checked. Only actors
-  // whose camera-facing source sprites were ALREADY independently reviewed
-  // are promoted to full live-frame playback. Additional frame 25..30
-  // front silhouettes for 0067/0068/0074 were inspected 2026-11-02.
-  // Unreviewed 0086/0088 retain partial original source rather than
-  // inventing direction/action mapping. All source frames remain
-  // archived in ORIGINAL_LEAF_FULL_ACTION_FRAMES for future review.
-  const full=window.ORIGINAL_LEAF_FULL_ACTION_FRAMES?.[id];
-  if(full?.frames?.length===37&&full.originalAnimationCount===37&&
-    full.frames.every((f,i)=>f.index===i)&&
-    Object.hasOwn(AUDITED_FRONT_SOURCE,id)&&
-    full.frames.every(f=>typeof f.url==='string'&&
-      f.url.startsWith('./original/OBS/action-full/')&&
-      /^[a-f0-9]{64}$/.test(f.sha256)))return full;
-  // Promote only the independently source-reviewed complete 0042/0045 packets.
-  // Seven irregular partial actors remain quarantined from invented action maps.
-  const ext=window.ORIGINAL_LEAF_EXT_ACTION_FRAMES?.[id];
-  if((id==='0042'||id==='0045')&&ext?.frameCount===37&&
-    ext.layout37===true&&ext.originalMember==='OBS.pak/1'+id.slice(1)+'.obs'&&
-    Array.isArray(ext.frames)&&ext.frames.length===37&&
-    Object.hasOwn(AUDITED_FRONT_SOURCE,id)&&
-    ext.frames.every((f,i)=>f.index===i&&typeof f.url==='string'&&
-      f.url.startsWith('./original/OBS/action-full-ext/')&&
-      /^[a-f0-9]{64}$/.test(f.sha256)))return ext;
-  return window.ORIGINAL_LEAF_OBS_FRAMES?.[id]||null;
- };
+ // CHR source reference +260, not inferred 0NNN->1NNN mapping.
+ const originalFor=id=>window.__LEAF_CHR_BODY_MAP__?.resolve(id)||null;
+ const bodyVisualId=id=>window.__LEAF_CHR_BODY_MAP__?.assetKey(id)||'';
  const poses=['idle','walk','attack','hurt','victory'];
  // VISUALLY COMPARED against recovered original pixels, 2026-10-24.
  // Sample frame 0 is NOT a front-facing pose: original 1040/1042/1043/
@@ -212,7 +186,7 @@
  function sequenceFor(native,action,id,travel,context={}){
   const all=native.frames||[];
   const at=index=>all.find(f=>f.index===index)||null;
-  const facing=frontFacingSource(native,id);
+  const facing=frontFacingSource(native,bodyVisualId(id));
   const front=facing.frame;
   const approved=Object.hasOwn(AUDITED_FRONT_SOURCE,id)&&
    facing.evidence.startsWith('visual-original-OBS-reviewed/');
@@ -340,7 +314,7 @@
    const native=pawn.dataset.sourceFullUnavailable==='true'
     ?window.ORIGINAL_LEAF_OBS_FRAMES?.[pawn.dataset.chessmanId]
     :originalFor(pawn.dataset.chessmanId);
-   const standing=frontFacingSource(native,pawn.dataset.chessmanId).frame||frame;
+   const standing=frontFacingSource(native,bodyVisualId(pawn.dataset.chessmanId)).frame||frame;
    const sourceFoot=(frame.originY+frame.height);
    const standingFoot=(standing.originY+standing.height);
    const relativeSourceOffset=sourceFoot-standingFoot;
@@ -422,7 +396,7 @@
        // retain the earlier source-verified bulk/front-reviewed OBS packets.
        // Do not generate fake pixels or retry a missing full file forever.
        const id=pawn.dataset.chessmanId;
-       const legacy=window.ORIGINAL_LEAF_OBS_FRAMES?.[id];
+       const legacy=null /* never show another card-number-matched actor */;
        if((source.startsWith('./original/OBS/action-full/')||
             source.startsWith('./original/OBS/action-full-ext/'))&&
           pawn.dataset.sourceFullUnavailable!=='true'&&
@@ -446,10 +420,10 @@
    if(fallback)fallback.hidden=true;
    delete pawn.dataset.originalObsMemberRole;
    pawn.dataset.actorRig='original-obs-sprite';
-   pawn.dataset.actorSource='OBS/'+native.originalMember;
+   pawn.dataset.actorSource='Original-CHR-body/'+native.originalMember;
    pawn.dataset.actorOriginalModelRecovered='true';
    pawn.dataset.sourceAnimation='genuine-OBS-pixels';
-   const auditedMovement=REVIEWED_FRONT_MOTION[id]||null;
+   const auditedMovement=REVIEWED_FRONT_MOTION[bodyVisualId(id)]||null;
    pawn.dataset.sourceFrontWalkVerified=String(Boolean(auditedMovement&&
     auditedMovement.every(index=>native.frames.some(f=>f.index===index))));
    pawn.dataset.sourceWalkCoverage=pawn.dataset.sourceFrontWalkVerified==='true'
@@ -465,7 +439,7 @@
      :native.hasVerifiedFrameZero===false
       ?'unverified-frame-zero-missing/static-source-pose':'unverified';
    img.hidden=false;
-   const facing=frontFacingSource(native,id);
+   const facing=frontFacingSource(native,bodyVisualId(id));
    pawn.dataset.sourceFacingFrame=facing.frame?String(facing.frame.index):'none';
    pawn.dataset.sourceFacingEvidence=facing.evidence;
    pawn.dataset.sourceDirection='front-source-candidate/not-EXE-direction-table';
@@ -473,7 +447,7 @@
    const duel=pawn.classList.contains('leaf-battle-chessman');
    const duelSide=pawn.dataset.duelSide||
     (pawn.closest('.battle-visual-side')?.classList.contains('attacker')?'attacker':'defender');
-   const seq=sequenceFor(native,action,id,travel,{duel,side:duelSide,rest:pawn.dataset.travelFacing||'toward'});
+   const seq=sequenceFor(native,action,bodyVisualId(id),travel,{duel,side:duelSide,rest:pawn.dataset.travelFacing||'toward'});
    pawn.dataset.sourceMirror=seq.mirror?'true':'false';
    pawn.dataset.sourceActionTable=seq.table?seq.table+'/structural-37/INFERRED':'legacy';
    pawn.dataset.actorWalkFacing=action==='walk'?travel:'';
@@ -604,7 +578,7 @@
    node.dataset.sourcePoseMapping=Object.hasOwn(NON_ACTOR_OBS,src)
     ?'OBS-member-is-non-character-effect/CardData-fallback'
     :'original-OBS-missing/CardData-original-portrait-only';
-   node.dataset.originalObsMemberRole=NON_ACTOR_OBS[src]||'missing-full-body';
+   node.dataset.originalObsMemberRole='CHR-original-body-unpublished-or-unavailable';
   }
  }
  function pose(pawn,requested='idle',duration=0){
@@ -717,7 +691,8 @@
  window.__LEAF_GENESIS_ACTORS__={
   mount,pose,poseByPlayer,registerFrames,recoverAvailableOriginals,
   getState:()=>({
-   originalFullBodyFramesRecovered:[...new Set([...Object.keys(window.ORIGINAL_LEAF_OBS_FRAMES||{}),...frames.keys()])].filter(id=>!Object.hasOwn(NON_ACTOR_OBS,id)),
+   originalFullBodyFramesRecovered:Object.keys(window.__LEAF_CHR_BODY_MAP__?.cards||{}).filter(id=>!!originalFor(id)),
+   chrSourceMapping:window.__LEAF_CHR_BODY_MAP__?.getState()||null,
    nativeObsEffectMembers:{...NON_ACTOR_OBS},
    originalFrontVisualAudited:{...AUDITED_FRONT_SOURCE},
    reviewedBackWalk:[...REVIEWED_BACK_WALK],
