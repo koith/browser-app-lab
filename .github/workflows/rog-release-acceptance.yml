@@ -122,6 +122,8 @@ jobs:
         env:
           FOURLEAF_SKIP_WEBKIT: '1'
         run: node apps/4leaf/rog/tests/chatroom-native-toolbar-six.cjs
+      - name: Original ChatRoom real pointer click teleports without actor tween
+        run: node apps/4leaf/rog/tests/chatroom-instant-seat-teleport.cjs
       - name: Six genuine WorldMap locations, authentic source navigation
         run: node apps/4leaf/rog/tests/world-six-original-route-gate.cjs
       - name: Cold installed PWA stores original game and ChatRoom source graphics
@@ -159,6 +161,10 @@ jobs:
         run: node apps/4leaf/rog/tests/dice-mobile-roll-dmp-order.cjs
       - name: WebKit phone landscape 844x390 hit-tests real original ROLL with full source OBS
         run: node apps/4leaf/rog/tests/dice-landscape-webkit-release.cjs
+      - name: Original ChatRoom live seat teleport stays instant on WebKit and iPhone layout
+        env:
+          FOURLEAF_BROWSER: webkit
+        run: node apps/4leaf/rog/tests/chatroom-instant-seat-teleport.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
