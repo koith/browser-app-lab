@@ -103,6 +103,40 @@ def safe_registered_public_page(url,model=None):
         return False
 
 
+def reviewed_direct_source(url, model):
+    """Eligible *storage* origins. Other public hosts remain discovery leads."""
+    from official_sample_recovery import _publisher_page
+    from urllib.parse import urlsplit
+    if _publisher_page(url):
+        return True
+    if not safe_registered_public_page(url,model):
+        return False
+    p=urlsplit(url)
+    if p.hostname in X_PUBLIC_HOSTS:
+        return True  # safe_registered_public_page already binds exact model author/status
+    if p.hostname=='teapawt.net' and model=='mimmi' and p.path=='/Mimmi_official':
+        return True
+    return False
+
+
+def reviewed_direct_media(url, page, model):
+    from official_sample_recovery import _publisher_page, _publisher_photo
+    from urllib.parse import urlsplit
+    if _publisher_page(page):
+        return _publisher_photo(url)
+    p=urlsplit(url)
+    if (urlsplit(page).hostname in X_PUBLIC_HOSTS
+            and reviewed_direct_source(page,model)):
+        return (p.scheme=='https' and p.hostname=='pbs.twimg.com'
+                and p.path.startswith('/media/') and not p.username
+                and not p.password and not p.fragment)
+    if (urlsplit(page).hostname=='teapawt.net' and
+            reviewed_direct_source(page,model)):
+        return (p.scheme=='https' and p.hostname in {'teapawt.net','pbs.twimg.com'}
+                and not p.username and not p.password and not p.fragment)
+    return False
+
+
 def public_full_variant(url):
     p=urlsplit(url)
     if p.hostname=='upload3.inven.co.kr':
@@ -580,7 +614,7 @@ def atomic_bytes(path,data):
     tmp=path.with_name(path.name+'.pending');tmp.write_bytes(data);tmp.replace(path)
 
 
-def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_only=False,album_ids=None,page_cycle=0,alternative_engines=False,render_budget=8,reverse_evidence=None):
+def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_only=False,album_ids=None,page_cycle=0,alternative_engines=False,render_budget=8,reverse_evidence=None,reviewed_source_only=False):
     root=Path(root);out=Path(out)
     if owner.get('model')!=model or owner.get('schema_version')!=1 or not owner.get('albums'):
         raise ValueError('Current owner catalog required; do not assume empty archive')
@@ -671,6 +705,28 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
             reverse_counts['reverse_works_with_source']+=1
             reverse_counts['reverse_source_pages_admitted']+=len(links)
     source_scope.update(reverse_counts)
+    # Prioritize exact, already-SHA-recorded publisher sample URLs that have
+    # no matching byte variant in the real owner archive. A duplicate URL with
+    # two historical hashes counts as ONE possible photo, never two.
+    from official_sample_recovery import (
+        missing_verified_publisher_samples, matching_recorded_variant)
+    official_gaps=missing_verified_publisher_samples(base,owner,model)
+    source_scope['known_official_unarchived_unique_urls']=sum(
+        len(rows) for rows in official_gaps.values())
+    if reviewed_source_only:
+        approved=[]
+        for book in books.values():
+            proposed=list(dict.fromkeys(
+                [book['source']]+book.get('source_pages',[])))
+            approved_pages=[u for u in proposed if reviewed_direct_source(u,model)]
+            if not approved_pages:
+                continue
+            book['source']=approved_pages[0]
+            book['source_pages']=approved_pages[1:]
+            approved.append(book)
+        books={book['id']:book for book in approved}
+        source_scope['reviewed_storage_scope_works']=len(books)
+        source_scope['unreviewed_pages_are_discovery_leads_not_storage']=True
     print('PRODUCTION_REGISTERED_WORK_COVERAGE',model,
           json.dumps(source_scope,ensure_ascii=False),flush=True)
     client=client or PublicSession(delay=.8)
@@ -702,7 +758,9 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
     books=sorted((a for a in books.values()
                   if (not focused_only or a.get('visual_reference_required'))
                   and (not selected or a['id'] in selected)),
-        key=lambda a:(a.get('priority',100),len(old_albums.get(a['id'],{}).get('images',[])),a['id']))
+        key=lambda a:(0 if official_gaps.get(a['id']) else 1,
+                      a.get('priority',100),
+                      len(old_albums.get(a['id'],{}).get('images',[])),a['id']))
     if set(resumed)-{a['id'] for a in books}:
         raise ValueError('Resumed work no longer in source scope; preserve staged files for review')
     for book in books:
@@ -732,6 +790,55 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
         known_work_urls=[url for work_id,url in historic if work_id==aid]
 
         queue=rotated_registered_page_queue(book['source'],[u for u in book.get('source_pages',[]) if safe_registered_public_page(u,model)],max_pages,page_cycle);visited=set();errors=[];candidate_count=0;unreviewed_count=0
+        known_official_saved=0
+        for gap in official_gaps.get(aid,[]):
+            if new_total>=max_new:
+                break
+            url=gap['url']
+            if url in seen_urls:
+                continue
+            if not reviewed_direct_source(gap['publisher_page'],model):
+                continue
+            if not reviewed_direct_media(url,gap['publisher_page'],model):
+                continue
+            seen_urls.add(url)
+            try:
+                raw=client.get(url).content
+                p,preview,fmt=inspect(raw)
+                if not matching_recorded_variant(
+                        raw,p,gap['recorded_variants']):
+                    errors.append({'url':url,'reason':'official_publisher_bytes_not_same_sha_as_verified_history'})
+                    continue
+                if p['sha256'] in seen_sha:
+                    continue
+                quality=measured_photo_quality(raw,p)
+                number=next_number
+                next_number+=1
+                occupied.add(number)
+                seen_sha.add(p['sha256'])
+                name=f'{number:05d}-{p["sha256"][:16]}'
+                original=f'originals/{aid}/{name}.{p.pop("extension")}'
+                thumbnail=f'previews/{aid}/{name}.webp'
+                atomic_bytes(out/original,raw)
+                atomic_bytes(out/thumbnail,preview)
+                row={**p,'number':number,'key':original,'preview':thumbnail,
+                     'preview_sha256':hashlib.sha256(preview).hexdigest(),
+                     'preview_bytes':len(preview),
+                     'measured_image_quality':quality,
+                     'numbering_provenance':'official_source_unique_url_append_not_publisher_sequence'}
+                images.append(row)
+                new_total+=1
+                downloaded_now+=1
+                known_official_saved+=1
+                with journal.open('a') as log:
+                    log.write(json.dumps({
+                        'album':aid,'number':number,'source':url,
+                        'photo':row,'remote_verified':False})+'\\n')
+            except Exception as exc:
+                errors.append({'url':url,'reason':type(exc).__name__,**public_failure(exc)})
+        if known_official_saved:
+            print('OFFICIAL_UNARCHIVED_SAMPLE_STAGED',model,aid,
+                  known_official_saved,flush=True)
         while queue and len(visited)<max_pages and new_total<max_new:
             page=queue.pop(0)
             if page in visited:continue
@@ -832,6 +939,8 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                     except (ImportError,ValueError,TypeError) as e:
                         errors.append({'page':page,'reason':'alternative_engine_'+type(e).__name__})
                 for p in more:
+                    if reviewed_source_only and not reviewed_direct_source(p,model):
+                        continue
                     if p not in visited and p not in queue:queue.append(p)
                 if status!='scoped_public_page' and not (eligible and urls):
                     errors.append({'page':page,'reason':status});continue
@@ -839,6 +948,9 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                 errors.append({'page':page,'reason':type(e).__name__,**public_failure(e)});continue
             for url in urls:
                 if new_total>=max_new:break
+                if reviewed_source_only and not reviewed_direct_media(url,page,model):
+                    unreviewed_count+=1
+                    continue
                 candidate_count+=1
                 old=historic.get((aid,url))
                 if book.get('curated_images_only') and not old and url not in alt_photo_urls:
@@ -915,6 +1027,7 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                      'blocked_origin_pages_not_retried':blocked_origin_pages,
                      'source_pages_registered':
                          len(set([book['source']]+book.get('source_pages',[]))),
+                     'verified_official_unique_urls_staged':known_official_saved,
                      'published_image_candidates':candidate_count,
                      'individual_files_saved':len(images),
                      'alternative_engine_url_candidates':alt_candidate_count,
@@ -964,7 +1077,7 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
 
 
 if __name__=='__main__':
-    p=argparse.ArgumentParser();p.add_argument('--root',type=Path,default=ROOT);p.add_argument('--model',choices=['mimmi','yui'],required=True);p.add_argument('--owner',type=Path,required=True);p.add_argument('--out',type=Path,required=True);p.add_argument('--max-new',type=int,default=180);p.add_argument('--max-pages',type=int,default=24);p.add_argument('--focused-only',action='store_true');p.add_argument('--album-id',action='append',default=[]);p.add_argument('--page-cycle',type=int,default=0);p.add_argument('--alternative-engines',action='store_true');p.add_argument('--render-budget',type=int,default=8);p.add_argument('--reverse-evidence',type=Path);a=p.parse_args()
+    p=argparse.ArgumentParser();p.add_argument('--root',type=Path,default=ROOT);p.add_argument('--model',choices=['mimmi','yui'],required=True);p.add_argument('--owner',type=Path,required=True);p.add_argument('--out',type=Path,required=True);p.add_argument('--max-new',type=int,default=180);p.add_argument('--max-pages',type=int,default=24);p.add_argument('--focused-only',action='store_true');p.add_argument('--album-id',action='append',default=[]);p.add_argument('--page-cycle',type=int,default=0);p.add_argument('--alternative-engines',action='store_true');p.add_argument('--render-budget',type=int,default=8);p.add_argument('--reverse-evidence',type=Path);p.add_argument('--reviewed-source-only',action='store_true');a=p.parse_args()
     if not 1<=a.max_new<=500 or not 1<=a.max_pages<=60:raise SystemExit('Bounded collection budget required')
-    report=collect(a.root,a.model,json.loads(a.owner.read_text()),a.out,a.max_new,a.max_pages,focused_only=a.focused_only,album_ids=a.album_id,page_cycle=a.page_cycle,alternative_engines=a.alternative_engines,render_budget=a.render_budget,reverse_evidence=a.reverse_evidence)
+    report=collect(a.root,a.model,json.loads(a.owner.read_text()),a.out,a.max_new,a.max_pages,focused_only=a.focused_only,album_ids=a.album_id,page_cycle=a.page_cycle,alternative_engines=a.alternative_engines,render_budget=a.render_budget,reverse_evidence=a.reverse_evidence,reviewed_source_only=a.reviewed_source_only)
     print('DIRECT_FILE_COLLECTION_COMPLETE',report['model'],report['new_local_individual_files'],'REMOTE_VERIFIED',0,'GALLERY_VERIFIED',0)
