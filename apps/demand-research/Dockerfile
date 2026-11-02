@@ -11,6 +11,12 @@ RUN python -m pip install --no-cache-dir fastapi==0.115.12 uvicorn==0.35.0
 WORKDIR /app
 COPY apps/demand-research/gateway.py /app/gateway.py
 COPY apps/demand-research/social_sources.py /app/social_sources.py
+COPY apps/demand-research/account_index.py /app/account_index.py
+COPY apps/demand-research/account_auto_analysis.js /app/account_auto_analysis.js
+COPY apps/demand-research/account_index_client.js /app/account_index_client.js
+COPY apps/demand-research/account_watch.js /app/account_watch.js
+COPY apps/demand-research/free_discovery.js /app/free_discovery.js
+COPY apps/demand-research/assets /app/assets
 COPY apps/demand-research/index.html /app/index.html
 RUN useradd --create-home --uid 10001 appuser && chown -R appuser:appuser /app
 USER appuser
