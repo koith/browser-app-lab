@@ -79,10 +79,25 @@ def run():
                 print("INDEX_DISCOVERY_BROWSER_FIXTURE",json.dumps({"cards":n,"paid_keys":0,
                       "canonical_safe":True,"dedup":True,"errors":len(errors)}))
             else:
+                public_x=page.evaluate("""async () => {
+                    const services=[
+                        "https://api.fxtwitter.com/status/20",
+                        "https://api.vxtwitter.com/Twitter/status/20"
+                    ];
+                    const output=[];
+                    for(const endpoint of services){
+                        try{
+                            const res=await fetch(endpoint,{mode:"cors",credentials:"omit"});
+                            const data=await res.json();
+                            output.push({http:res.status,public_original:!!(data.tweet?.id||data.tweetID)});
+                        }catch(error){output.push({error:"Browser CORS or network blocked"});}
+                    }
+                    return output;
+                }""")
                 print("INDEX_DISCOVERY_BROWSER_LIVE",json.dumps({"cards":n,
                     "status_contains_error":("응답 실패" in msg or "오류" in msg),
                     "http_codes":[x.get("status") for x in upstream if x.get("status")],
-                    "errors":len(errors)}))
+                    "public_x_read":public_x,"errors":len(errors)}))
         finally:browser.close()
 
 if __name__=="__main__":run()
