@@ -1,0 +1,92 @@
+name: Independent General Product Evidence QA
+
+on:
+  pull_request:
+    paths:
+      - "apps/demand-research/consumer_dedup.py"
+      - "apps/demand-research/consumer_report.py"
+      - "apps/demand-research/consumer_report_api.py"
+      - "apps/demand-research/test_consumer_dedup.py"
+      - "apps/demand-research/test_consumer_report.py"
+      - "apps/demand-research/consumer/**"
+      - "apps/demand-research/index.html"
+      - ".github/workflows/consumer-evidence-qa.yml"
+  push:
+    branches: [main]
+    paths:
+      - "apps/demand-research/consumer_dedup.py"
+      - "apps/demand-research/consumer_report.py"
+      - "apps/demand-research/consumer_report_api.py"
+      - "apps/demand-research/test_consumer_dedup.py"
+      - "apps/demand-research/test_consumer_report.py"
+      - "apps/demand-research/consumer/**"
+      - "apps/demand-research/index.html"
+      - ".github/workflows/consumer-evidence-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: independent-consumer-evidence-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  report-and-ui:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            apps/demand-research/consumer_dedup.py
+            apps/demand-research/consumer_report.py
+            apps/demand-research/consumer_report_api.py
+            apps/demand-research/test_consumer_dedup.py
+            apps/demand-research/test_consumer_report.py
+            apps/demand-research/consumer/
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install test dependencies
+        run: python -m pip install pytest==8.3.5 fastapi==0.115.12 httpx==0.28.1
+      - name: Validate modules and tests
+        working-directory: apps/demand-research
+        run: |
+          python -m py_compile consumer_dedup.py consumer_report.py consumer_report_api.py
+          python -m pytest -q test_consumer_dedup.py test_consumer_report.py
+      - name: Check standalone dashboard JavaScript syntax
+        working-directory: apps/demand-research
+        run: |
+          python - <<'PY'
+          import re
+          from pathlib import Path
+          html=Path('consumer/index.html').read_text(encoding='utf-8')
+          scripts=re.findall(r'<script[^>]*>(.*?)</script>', html, flags=re.I|re.S)
+          assert len(scripts)==1, 'expected one standalone inline script'
+          Path('/tmp/consumer-dashboard-inline.js').write_text(scripts[0],encoding='utf-8')
+          assert 'social_sources' not in html and 'account_groups' not in html
+          PY
+          node --check /tmp/consumer-dashboard-inline.js
+      - name: Generate reproducible synthetic aggregate report
+        working-directory: apps/demand-research
+        run: |
+          python consumer_report.py --demo --output consumer/ci-demo-report.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          obj=json.loads(Path('consumer/ci-demo-report.json').read_text())
+          assert obj['dataset']['mode']=='demo'
+          print('REPORT_JSON_BEGIN')
+          print(json.dumps(obj,ensure_ascii=False,separators=(',',':')))
+          print('REPORT_JSON_END')
+          if Path('consumer/demo-report.json').exists():
+              assert obj == json.loads(Path('consumer/demo-report.json').read_text())
+              print('CHECKED_IN_DEMO_REPORT_MATCHED')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: synthetic-general-product-report
+          path: apps/demand-research/consumer/ci-demo-report.json
+          retention-days: 7

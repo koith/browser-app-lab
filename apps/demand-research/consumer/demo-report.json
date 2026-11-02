@@ -1,0 +1,671 @@
+{
+  "schema_version": 1,
+  "dataset": {
+    "name": "일반 소비재 합성 데이터",
+    "mode": "demo",
+    "is_real_data": false,
+    "kind": "synthetic_general_products",
+    "sha256": "f4ec20de1b3c538f5661908c0c787e894115d98adbfea0feb2a290fdf3867e59",
+    "provenance": {
+      "source": "local_deterministic_fixture",
+      "generated": "2026-11-02"
+    },
+    "admission_check": "schema_and_exact_sha256_only",
+    "same_person_inferred": false,
+    "existing_sns_pipeline_connected": false
+  },
+  "summary": {
+    "raw_input_rows": 282,
+    "unique_post_ids": 280,
+    "repeated_ingestion_rows": 2,
+    "unique_content_groups": 212,
+    "known_content_groups": 200,
+    "unresolved_groups": 12,
+    "repeated_content_posts": 68,
+    "observed_accounts_not_people": 43,
+    "products": 4
+  },
+  "products": [
+    {
+      "product_id": "coffee",
+      "name": "커피",
+      "observed_posts": 70,
+      "content_groups": 53,
+      "known_content_groups": 50,
+      "unresolved_content_groups": 3,
+      "removed_repeated_content_posts": 17,
+      "verified_repost_edges": 10,
+      "exact_text_join_edges": 7,
+      "missing_repost_targets": 0,
+      "short_or_missing_text_posts": 13,
+      "largest_content_group": 3,
+      "observed_accounts": 43,
+      "top_account_share": 0.042857,
+      "account_hhi": 0.026939,
+      "per_account_day_capped_mentions": 70,
+      "missing_post_day": 3,
+      "repeated_groups": [
+        {
+          "group_id": "C-2eec036cacae",
+          "posts": 3,
+          "accounts": 3,
+          "methods": [
+            "explicit_repost",
+            "exact_substantial_text"
+          ],
+          "evidence_ids": [
+            "57a5fcdc4caf",
+            "853e59cdc19d",
+            "e9eabb1d1f6a"
+          ]
+        },
+        {
+          "group_id": "C-3bf2b3cc5628",
+          "posts": 3,
+          "accounts": 3,
+          "methods": [
+            "explicit_repost",
+            "exact_substantial_text"
+          ],
+          "evidence_ids": [
+            "13b54764a2b6",
+            "68ea23570d67",
+            "be785a733979"
+          ]
+        },
+        {
+          "group_id": "C-3ce5397ed6d4",
+          "posts": 3,
+          "accounts": 3,
+          "methods": [
+            "explicit_repost",
+            "exact_substantial_text"
+          ],
+          "evidence_ids": [
+            "0340665c826e",
+            "2226d5b19aaf",
+            "c0d00c3d377e"
+          ]
+        },
+        {
+          "group_id": "C-7517c9e333fc",
+          "posts": 3,
+          "accounts": 3,
+          "methods": [
+            "explicit_repost",
+            "exact_substantial_text"
+          ],
+          "evidence_ids": [
+            "985231ee34e0",
+            "ad823fa277c6",
+            "d6a0ec1f6f20"
+          ]
+        },
+        {
+          "group_id": "C-8e3c8a954d34",
+          "posts": 3,
+          "accounts": 3,
+          "methods": [
+            "explicit_repost",
+            "exact_substantial_text"
+          ],
+          "evidence_ids": [
+            "5f602a8639c3",
+            "6223ed17953f",
+            "6d30687355a8"
+          ]
+        },
+        {
+          "group_id": "C-c509867913a5",
+          "posts": 3,
+          "accounts": 3,
+          "methods": [
+            "explicit_repost",
+            "exact_substantial_text"
+          ],
+          "evidence_ids": [
+            "2a4498aac3f4",
+            "46dda1c331a9",
+            "f555964146d7"
+          ]
+        },
+        {
+          "group_id": "C-cdb49e4faa01",
+          "posts": 3,
+          "accounts": 3,
+          "methods": [
+            "explicit_repost",
+            "exact_substantial_text"
+          ],
+          "evidence_ids": [
+            "60c47b2fa00a",
+            "e07cb417443d",
+            "e469e5ac920c"
+          ]
+        },
+        {
+          "group_id": "C-5550d11930c8",
+          "posts": 2,
+          "accounts": 2,
+          "methods": [
+            "explicit_repost"
+          ],
+          "evidence_ids": [
+            "24adf9623e37",
+            "390feb101dea"
+          ]
+        },
+        {
+          "group_id": "C-a016ec61bf86",
+          "posts": 2,
+          "accounts": 2,
+          "methods": [
+            "explicit_repost"
+          ],
+          "evidence_ids": [
+            "5ebcb4403155",
+            "e95fd2e0a01a"
+          ]
+        },
+        {
+          "group_id": "C-c42fc86d1a33",
+          "posts": 2,
+          "accounts": 2,
+          "methods": [
+            "explicit_repost"
+          ],
+          "evidence_ids": [
+            "656a6011f55b",
+            "898fe6a13c73"
+          ]
+        }
+      ],
+      "duplicate_ratio": 0.242857,
+      "evidence_lower_bound": 50,
+      "unresolved_upper_bound": 53,
+      "quality": "incomplete"
+    },
+    {
+      "product_id": "earbuds",
+      "name": "무선 이어폰",
+      "observed_posts": 70,
+      "content_groups": 53,
+      "known_content_groups": 50,
+      "unresolved_content_groups": 3,
+      "removed_repeated_content_posts": 17,
+      "verified_repost_edges": 10,
+      "exact_text_join_edges": 7,
+      "missing_repost_targets": 0,
+      "short_or_missing_text_posts": 13,
+      "largest_content_group": 3,
+      "observed_accounts": 43,
+      "top_account_share": 0.042857,
+      "account_hhi": 0.026939,
+      "per_account_day_capped_mentions": 70,
+      "missing_post_day": 3,
+      "repeated_groups": [
+        {
+          "group_id": "C-2d5ea77048d2",
+          "posts": 3,
+          "accounts": 3,
+          "methods": [
+            "explicit_repost",
+            "exact_substantial_text"
+          ],
+          "evidence_ids": [
+            "32c9dd027cf2",
+            "483966b08d26",
+            "6a0af96e49f5"
+          ]
+        },
+        {
+          "group_id": "C-765bcf5e5e1d",
+          "posts": 3,
+          "accounts": 3,
+          "methods": [
+            "explicit_repost",
+            "exact_substantial_text"
+          ],
+          "evidence_ids": [
+            "4e89fee4419a",
+            "c17ea9941aaa",
+            "ed4fc0a00158"
+          ]
+        },
+        {
+          "group_id": "C-7e31ee95f8fe",
+          "posts": 3,
+          "accounts": 3,
+          "methods": [
+            "explicit_repost",
+            "exact_substantial_text"
+          ],
+          "evidence_ids": [
+            "7309ac195695",
+            "a1e700c4b3f9",
+            "c05081922ac5"
+          ]
+        },
+        {
+          "group_id": "C-a72a71bd0c6c",
+          "posts": 3,
+          "accounts": 3,
+          "methods": [
+            "explicit_repost",
+            "exact_substantial_text"
+          ],
+          "evidence_ids": [
+            "1f41879ff596",
+            "83c9392ca0d0",
+            "bff42a9682fb"
+          ]
+        },
+        {
+          "group_id": "C-a94d111321ea",
+          "posts": 3,
+          "accounts": 3,
+          "methods": [
+            "explicit_repost",
+            "exact_substantial_text"
+          ],
+          "evidence_ids": [
+            "51b27eb3968d",
+            "63c12529cbc3",
+            "beac07d28917"
+          ]
+        },
+        {
+          "group_id": "C-b7375bc80cc7",
+          "posts": 3,
+          "accounts": 3,
+          "methods": [
+            "explicit_repost",
+            "exact_substantial_text"
+          ],
+          "evidence_ids": [
+            "918f8bc3169b",
+            "cea9fe547347",
+            "f7fd21d0498e"
+          ]
+        },
+        {
+          "group_id": "C-c97cf9bd2e54",
+          "posts": 3,
+          "accounts": 3,
+          "methods": [
+            "explicit_repost",
+            "exact_substantial_text"
+          ],
+          "evidence_ids": [
+            "6bf92bce3eb7",
+            "e73cd193b8e6",
+            "f6440457dd00"
+          ]
+        },
+        {
+          "group_id": "C-001bb392198f",
+          "posts": 2,
+          "accounts": 2,
+          "methods": [
+            "explicit_repost"
+          ],
+          "evidence_ids": [
+            "51bb4c54db9d",
+            "77ac64da3c83"
+          ]
+        },
+        {
+          "group_id": "C-0720902d6c0c",
+          "posts": 2,
+          "accounts": 2,
+          "methods": [
+            "explicit_repost"
+          ],
+          "evidence_ids": [
+            "6eb16d345424",
+            "c7017d4208ab"
+          ]
+        },
+        {
+          "group_id": "C-138f6dfbd31d",
+          "posts": 2,
+          "accounts": 2,
+          "methods": [
+            "explicit_repost"
+          ],
+          "evidence_ids": [
+            "a2a8fe2c6b37",
+            "e35bb1fdbfdd"
+          ]
+        }
+      ],
+      "duplicate_ratio": 0.242857,
+      "evidence_lower_bound": 50,
+      "unresolved_upper_bound": 53,
+      "quality": "incomplete"
+    },
+    {
+      "product_id": "sneakers",
+      "name": "운동화",
+      "observed_posts": 70,
+      "content_groups": 53,
+      "known_content_groups": 50,
+      "unresolved_content_groups": 3,
+      "removed_repeated_content_posts": 17,
+      "verified_repost_edges": 10,
+      "exact_text_join_edges": 7,
+      "missing_repost_targets": 0,
+      "short_or_missing_text_posts": 13,
+      "largest_content_group": 3,
+      "observed_accounts": 43,
+      "top_account_share": 0.042857,
+      "account_hhi": 0.026939,
+      "per_account_day_capped_mentions": 70,
+      "missing_post_day": 3,
+      "repeated_groups": [
+        {
+          "group_id": "C-5c08dfac92eb",
+          "posts": 3,
+          "accounts": 3,
+          "methods": [
+            "explicit_repost",
+            "exact_substantial_text"
+          ],
+          "evidence_ids": [
+            "2383567109ce",
+            "3b5953712881",
+            "feebc74687f7"
+          ]
+        },
+        {
+          "group_id": "C-6313e8bcd2bf",
+          "posts": 3,
+          "accounts": 3,
+          "methods": [
+            "explicit_repost",
+            "exact_substantial_text"
+          ],
+          "evidence_ids": [
+            "780729f531ee",
+            "afb06ed160b6",
+            "ef73877ed044"
+          ]
+        },
+        {
+          "group_id": "C-686405548be6",
+          "posts": 3,
+          "accounts": 3,
+          "methods": [
+            "explicit_repost",
+            "exact_substantial_text"
+          ],
+          "evidence_ids": [
+            "23edfc7c5876",
+            "b925b20c934d",
+            "de808b70e994"
+          ]
+        },
+        {
+          "group_id": "C-6d780e805605",
+          "posts": 3,
+          "accounts": 3,
+          "methods": [
+            "explicit_repost",
+            "exact_substantial_text"
+          ],
+          "evidence_ids": [
+            "2cfa11c5198e",
+            "d3a6b70313e4",
+            "f61a85e553e5"
+          ]
+        },
+        {
+          "group_id": "C-7543421b4361",
+          "posts": 3,
+          "accounts": 3,
+          "methods": [
+            "explicit_repost",
+            "exact_substantial_text"
+          ],
+          "evidence_ids": [
+            "4e01db7fae51",
+            "64f2bd6f821c",
+            "8407b3b279c1"
+          ]
+        },
+        {
+          "group_id": "C-76e9829a685b",
+          "posts": 3,
+          "accounts": 3,
+          "methods": [
+            "explicit_repost",
+            "exact_substantial_text"
+          ],
+          "evidence_ids": [
+            "1f013e9a6d6b",
+            "2d72bda1ad54",
+            "4398a19fd06c"
+          ]
+        },
+        {
+          "group_id": "C-af37c9c58b26",
+          "posts": 3,
+          "accounts": 3,
+          "methods": [
+            "explicit_repost",
+            "exact_substantial_text"
+          ],
+          "evidence_ids": [
+            "99f283a7624b",
+            "e59e2818a10c",
+            "f68ca4e491e0"
+          ]
+        },
+        {
+          "group_id": "C-0bcec6bf81f0",
+          "posts": 2,
+          "accounts": 2,
+          "methods": [
+            "explicit_repost"
+          ],
+          "evidence_ids": [
+            "956b9bdb3ac3",
+            "b35dc103acc8"
+          ]
+        },
+        {
+          "group_id": "C-f7ca7f4be003",
+          "posts": 2,
+          "accounts": 2,
+          "methods": [
+            "explicit_repost"
+          ],
+          "evidence_ids": [
+            "c6ae484adf6e",
+            "e853212d3d94"
+          ]
+        },
+        {
+          "group_id": "C-f7fa41a0cf8b",
+          "posts": 2,
+          "accounts": 2,
+          "methods": [
+            "explicit_repost"
+          ],
+          "evidence_ids": [
+            "66e5fd0ee4d7",
+            "e538a735841f"
+          ]
+        }
+      ],
+      "duplicate_ratio": 0.242857,
+      "evidence_lower_bound": 50,
+      "unresolved_upper_bound": 53,
+      "quality": "incomplete"
+    },
+    {
+      "product_id": "water",
+      "name": "생수",
+      "observed_posts": 70,
+      "content_groups": 53,
+      "known_content_groups": 50,
+      "unresolved_content_groups": 3,
+      "removed_repeated_content_posts": 17,
+      "verified_repost_edges": 10,
+      "exact_text_join_edges": 7,
+      "missing_repost_targets": 0,
+      "short_or_missing_text_posts": 13,
+      "largest_content_group": 3,
+      "observed_accounts": 43,
+      "top_account_share": 0.042857,
+      "account_hhi": 0.026939,
+      "per_account_day_capped_mentions": 70,
+      "missing_post_day": 3,
+      "repeated_groups": [
+        {
+          "group_id": "C-1e6b7730a4bb",
+          "posts": 3,
+          "accounts": 3,
+          "methods": [
+            "explicit_repost",
+            "exact_substantial_text"
+          ],
+          "evidence_ids": [
+            "11278d4e6841",
+            "2052f726e272",
+            "6f2f2dedbc2b"
+          ]
+        },
+        {
+          "group_id": "C-330128f0f187",
+          "posts": 3,
+          "accounts": 3,
+          "methods": [
+            "explicit_repost",
+            "exact_substantial_text"
+          ],
+          "evidence_ids": [
+            "58c889f30bcc",
+            "ae5a44ab237e",
+            "ef5b7b5989de"
+          ]
+        },
+        {
+          "group_id": "C-6c6929f95825",
+          "posts": 3,
+          "accounts": 3,
+          "methods": [
+            "explicit_repost",
+            "exact_substantial_text"
+          ],
+          "evidence_ids": [
+            "0b6b8c3289d0",
+            "8a9dc40c1db1",
+            "e9362efa33a5"
+          ]
+        },
+        {
+          "group_id": "C-9a6a197210b3",
+          "posts": 3,
+          "accounts": 3,
+          "methods": [
+            "explicit_repost",
+            "exact_substantial_text"
+          ],
+          "evidence_ids": [
+            "1dc1dca837c8",
+            "7ba5643edd4e",
+            "92d232610757"
+          ]
+        },
+        {
+          "group_id": "C-b0988f8daddc",
+          "posts": 3,
+          "accounts": 3,
+          "methods": [
+            "explicit_repost",
+            "exact_substantial_text"
+          ],
+          "evidence_ids": [
+            "102c6e98a682",
+            "327c28582f25",
+            "42dc7e67e682"
+          ]
+        },
+        {
+          "group_id": "C-dd749d2dc546",
+          "posts": 3,
+          "accounts": 3,
+          "methods": [
+            "explicit_repost",
+            "exact_substantial_text"
+          ],
+          "evidence_ids": [
+            "6d2e5a433b3b",
+            "a4cacf66ce62",
+            "d45575063f5f"
+          ]
+        },
+        {
+          "group_id": "C-fa0a6d5ecdf0",
+          "posts": 3,
+          "accounts": 3,
+          "methods": [
+            "explicit_repost",
+            "exact_substantial_text"
+          ],
+          "evidence_ids": [
+            "57e6784b0387",
+            "d6fe834c5c97",
+            "fa7479a1bc2d"
+          ]
+        },
+        {
+          "group_id": "C-3cc7e2a683d7",
+          "posts": 2,
+          "accounts": 2,
+          "methods": [
+            "explicit_repost"
+          ],
+          "evidence_ids": [
+            "b7186b8216a5",
+            "bc2cd4ae459c"
+          ]
+        },
+        {
+          "group_id": "C-45de272cef14",
+          "posts": 2,
+          "accounts": 2,
+          "methods": [
+            "explicit_repost"
+          ],
+          "evidence_ids": [
+            "b35644d28b48",
+            "fd531a4bf608"
+          ]
+        },
+        {
+          "group_id": "C-9d3fbda47245",
+          "posts": 2,
+          "accounts": 2,
+          "methods": [
+            "explicit_repost"
+          ],
+          "evidence_ids": [
+            "20b5b8f770e2",
+            "7bad0c9131fe"
+          ]
+        }
+      ],
+      "duplicate_ratio": 0.242857,
+      "evidence_lower_bound": 50,
+      "unresolved_upper_bound": 53,
+      "quality": "incomplete"
+    }
+  ],
+  "meaning": {
+    "known_content_groups": "근거가 있는 콘텐츠 그룹 수. 고유 소비자 수가 아닙니다.",
+    "unresolved_groups": "내용 또는 출처 근거가 부족해 독립성 확인이 어려운 그룹입니다.",
+    "repeated_content_posts": "정확한 본문 중복 또는 명시된 재게시 링크로 병합된 게시물입니다."
+  }
+}

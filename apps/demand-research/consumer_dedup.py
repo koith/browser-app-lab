@@ -85,7 +85,7 @@ class _DSU:
         return True
 
 
-def analyze(rows: list[Mapping[str, object]], *, dataset_kind: str) -> dict:
+def analyze(rows: list[Mapping[str, object]], *, dataset_kind: str, with_groups: bool = False) -> dict:
     """Analyze an explicitly synthetic, non-sensitive general-product fixture.
 
     Each row requires product_id, platform, author_id, post_id, and text. An
@@ -95,6 +95,12 @@ def analyze(rows: list[Mapping[str, object]], *, dataset_kind: str) -> dict:
     """
     if dataset_kind != DATASET_KIND:
         raise ValueError("only the synthetic general-products dataset is supported")
+    return _analyze_rows(rows, dataset_kind=DATASET_KIND, with_groups=with_groups)
+
+
+def _analyze_rows(rows: list[Mapping[str, object]], *, dataset_kind: str,
+                  with_groups: bool = False) -> dict:
+    """Internal pure grouping implementation. Admission belongs to the caller."""
     if not isinstance(rows, list) or len(rows) > MAX_ROWS:
         raise ValueError("rows must be a list of at most 50000 observations")
 
@@ -169,7 +175,23 @@ def analyze(rows: list[Mapping[str, object]], *, dataset_kind: str) -> dict:
         known_groups = 0
         unresolved_groups = 0
         max_group_size = 0
+        repeated_groups = []
         for group in groups.values():
+            if with_groups and len(group) > 1:
+                keys_in_group = {p["key"] for p in group}
+                methods = []
+                if any(p["repost_of"] in keys_in_group for p in group if p["repost_of"]):
+                    methods.append("explicit_repost")
+                text_frequency = Counter(p["text"] for p in group if p["text"])
+                if any(n > 1 for n in text_frequency.values()):
+                    methods.append("exact_substantial_text")
+                digest = hashlib.sha256((product + "\\0" + "\\0".join(sorted(keys_in_group))).encode()).hexdigest()[:12]
+                repeated_groups.append({
+                    "group_id": "C-" + digest, "posts": len(group),
+                    "accounts": len({p["account"] for p in group}),
+                    "methods": methods,
+                    "evidence_ids": sorted(hashlib.sha256(p["key"].encode()).hexdigest()[:12] for p in group)[:12],
+                })
             max_group_size = max(max_group_size, len(group))
             if any(p["text"] for p in group):
                 known_groups += 1
@@ -194,8 +216,11 @@ def analyze(rows: list[Mapping[str, object]], *, dataset_kind: str) -> dict:
             "per_account_day_capped_mentions": len(daily_keys) + missing_day,
             "missing_post_day": missing_day,
         }
+        if with_groups:
+            result[product]["repeated_groups"] = sorted(
+                repeated_groups, key=lambda g: (-g["posts"], g["group_id"]))[:30]
     return {
-        "dataset_kind": DATASET_KIND,
+        "dataset_kind": dataset_kind,
         "raw_input_rows": len(rows),
         "distinct_post_ids": len(unique),
         "repeated_ingestion_rows": repeated_ingestion,
