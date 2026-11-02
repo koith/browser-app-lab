@@ -39,6 +39,10 @@ jobs:
         env:
           FOURLEAF_TEST_URL: http://127.0.0.1:8765/
         run: node apps/4leaf/rog/tests/actor-action-table-37.cjs
+      - name: Recovered original full actor 0042 and 0045 live browser playback
+        env:
+          FOURLEAF_TEST_URL: http://127.0.0.1:8765/
+        run: node apps/4leaf/rog/tests/obs-extended-original-live.cjs
       - name: Four actual battle outcomes and board return
         run: node apps/4leaf/rog/tests/battle-outcome-return.cjs
       - name: Original tile source contact geometry with full action frames
