@@ -13,6 +13,14 @@
  const LABELS={bluesky:"Bluesky",x:"X",threads:"Threads",instagram:"Instagram",
    mastodon:"Mastodon",misskey:"Misskey",reddit:"Reddit",lemmy:"Lemmy"};
  const STATS=["likes","reposts","replies","quotes"];
+ // Reuse only HTTPS media URLs already provided by the visible public feed.
+ function safeThumbnail(raw){
+   if(typeof raw!=="string"||raw.length>2048)return "";
+   let u;try{u=new URL(raw);}catch{return "";}
+   if(u.protocol!=="https:"||u.username||u.password||u.port)return "";
+   if(/^(localhost|127\.|10\.|192\.168\.|169\.254\.|172\.(1[6-9]|2\d|3[01])\.)/.test(u.hostname.toLowerCase()))return "";
+   return u.href;
+ }
  const fmt=n=>Number(n||0).toLocaleString("ko-KR");
  function canonical(raw,platform){
    if(!LABELS[platform])return "";
@@ -53,11 +61,16 @@
      if(!g){
        g={platform:p.platform,profileUrl:profile,
           author:String(p.author||profile.split("/").pop()).slice(0,90),
-          posts:0,days:new Set(),reactions:0,measuredPosts:0};
+          posts:0,days:new Set(),reactions:0,measuredPosts:0,
+          latestMs:-Infinity,latestId:"",latestThumbnail:""};
        groups.set(key,g);
      }
      g.posts+=1;
      g.days.add(new Date(ms).toISOString().slice(0,10));
+     if(ms>g.latestMs||(ms===g.latestMs&&p.id>g.latestId)){
+       g.latestMs=ms;g.latestId=p.id;
+       g.latestThumbnail=safeThumbnail(p.thumbnailUrl);
+     }
      const values=STATS.map(k=>count(p.engagement?.[k]));
      if(values.some(v=>v!==null)){
        g.measuredPosts+=1;
@@ -75,7 +88,8 @@
        platform:g.platform,profileUrl:g.profileUrl,author:g.author,
        posts:g.posts,activeDays,reactions:g.reactions,
        measuredPosts:g.measuredPosts,
-       score:signal,engagementAvailable:g.measuredPosts>0
+       score:signal,engagementAvailable:g.measuredPosts>0,
+       latestThumbnail:g.latestThumbnail,latestPosted:new Date(g.latestMs).toISOString()
      });
    }
    return output.sort((a,b)=>b.score-a.score||b.posts-a.posts||a.profileUrl.localeCompare(b.profileUrl));
@@ -90,7 +104,49 @@
      if(text!==undefined)e.textContent=String(text);
      return e;
    };
-   let expanded=false,ranking=[],partial=true;
+   let expanded=false,ranking=[];
+   const dialog=$("activityRankingDialog"),detail=$("activityRankingDialogContent");
+   function closeDetail(){
+     if(!dialog)return;
+     if(typeof dialog.close==="function"&&dialog.open)dialog.close();
+     else dialog.removeAttribute("open");
+     if(detail)detail.replaceChildren();
+   }
+   function openDetail(g,rank){
+     if(!dialog||!detail)return;
+     detail.replaceChildren();
+     const intro=node("div","activity-rank-detail-intro");
+     const title=node("div","");
+     title.append(node("div","activity-rank-detail-source",LABELS[g.platform]+" · #"+rank),
+       node("div","activity-rank-detail-title",g.author));
+     intro.append(title);
+     if(g.latestThumbnail){
+       const img=node("img","activity-rank-detail-thumb");
+       img.src=g.latestThumbnail;img.alt="최근 게시글 썸네일";img.referrerPolicy="no-referrer";
+       img.addEventListener("error",()=>img.remove());
+       intro.append(img);
+     }
+     detail.append(intro);
+     const metrics=node("div","activity-rank-detail-metrics");
+     for(const [label,value] of [
+       ["활동 지수",fmt(g.score)],["게시글",fmt(g.posts)],
+       ["활동 일수",fmt(g.activeDays)+"일"],
+       ["공개 반응",g.engagementAvailable?fmt(g.reactions):"미제공"],
+       ["반응 제공",fmt(g.measuredPosts)+" / "+fmt(g.posts)+"건"],
+       ["최근 게시글",new Date(g.latestPosted).toLocaleDateString("ko-KR")]
+     ]){
+       const metric=node("div","activity-rank-detail-metric");
+       metric.append(node("small","",label),node("strong","",value));
+       metrics.append(metric);
+     }
+     detail.append(metrics,node("div","activity-rank-detail-note",
+       "현재 검색 기간에 관측된 공개 게시글 기준 · 활동 지수는 게시글×2 + 활동 일수×3 + 공개 반응 보정"));
+     const link=node("a","activity-rank-detail-link","SNS 프로필 열기 ↗");
+     link.href=g.profileUrl;link.target="_blank";link.rel="noopener noreferrer";
+     detail.append(link);
+     if(typeof dialog.showModal==="function")dialog.showModal();
+     else dialog.setAttribute("open","");
+   }
    function draw(){
      const platform=$("activityRankingPlatform").value,order=$("activityRankingSort").value;
      const filtered=ranking.filter(x=>platform==="all"||x.platform===platform);
@@ -105,38 +161,33 @@
      const list=$("activityRankingRows");
      list.replaceChildren();
      const show=expanded?20:5;
-     if(!sorted.length)list.append(node("div","activity-ranking-empty",
-       "현재 검색 조건에 랭킹으로 집계할 공개 게시글이 없습니다."));
+     if(!sorted.length)list.append(node("div","activity-ranking-empty","랭킹 없음"));
      sorted.slice(0,show).forEach((g,index)=>{
-       const card=node("article","activity-rank-card");
-       const top=node("div","activity-rank-head");
-       top.append(node("span","activity-rank-num",String(index+1).padStart(2,"0")),
-         node("span","activity-rank-source",LABELS[g.platform]));
-       card.append(top);
-       const link=node("a","activity-rank-user",g.author);
-       link.href=g.profileUrl;link.target="_blank";link.rel="noopener noreferrer";
-       link.title="공개 SNS 프로필 열기";
-       card.append(link);
-       const score=node("div","activity-rank-score",fmt(g.score));
-       score.append(node("small","","관측 지수"));
-       card.append(score);
-       card.append(node("div","activity-rank-stats",
-         "게시 "+fmt(g.posts)+" · 활동 "+fmt(g.activeDays)+"일"));
-       card.append(node("div","activity-rank-stats",
-         g.engagementAvailable?"공개 반응 "+fmt(g.reactions)+" · 제공 "+g.measuredPosts+"/"+g.posts+"건":
-         "공개 반응 자료 미제공"));
+       const card=node("button","activity-rank-card");
+       card.type="button";
+       card.setAttribute("aria-label",index+1+"위 "+g.author+" 상세 보기");
+       card.append(node("span","activity-rank-num",String(index+1).padStart(2,"0")),
+         node("span","activity-rank-user",g.author));
+       const thumb=node("span","activity-rank-thumb");
+       if(g.latestThumbnail){
+         const img=node("img","");
+         img.src=g.latestThumbnail;img.alt="";img.loading="lazy";
+         img.decoding="async";img.referrerPolicy="no-referrer";
+         img.addEventListener("error",()=>{img.remove();thumb.classList.add("activity-rank-thumb-empty");});
+         thumb.append(img);
+       }else thumb.classList.add("activity-rank-thumb-empty");
+       card.append(thumb);
+       card.addEventListener("click",()=>openDetail(g,index+1));
        list.append(card);
      });
-     const more=$("activityRankingMore");more.classList.toggle("hidden",sorted.length<=5);
-     more.setAttribute("aria-expanded",String(expanded));more.textContent=expanded?"접기":"더 보기 ("+fmt(Math.min(20,sorted.length))+"위까지)";
-     $("activityRankingStatus").textContent="확인된 공개 계정 "+fmt(sorted.length)+"개 · "+
-        "관측 게시글 "+fmt(sorted.reduce((n,g)=>n+g.posts,0))+"건"+
-        (partial?" · 일부 기간/플랫폼 미확인":" · 현재 조회 범위")+
-        " · 지수 = 게시글×2 + 활동일×3 + 공개 반응 보정(자료 제공 시)";
+     const more=$("activityRankingMore");
+     more.classList.toggle("hidden",sorted.length<=5);
+     more.setAttribute("aria-expanded",String(expanded));
+     more.textContent=expanded?"접기":"더 보기";
    }
    function update(){
      let snap;try{snap=win.INTERSECTION_publicRankingSnapshot?.();}catch{}
-     ranking=compute(snap);partial=snap?.partial!==false;
+     ranking=compute(snap);
      const select=$("activityRankingPlatform"),prev=select.value;
      const available=[...new Set(ranking.map(x=>x.platform))].sort();
      select.replaceChildren();
@@ -150,11 +201,14 @@
      if(scheduled)return;scheduled=true;
      win.queueMicrotask(()=>{scheduled=false;update();});
    }
-   $("activityRankingPlatform").addEventListener("change",()=>{expanded=false;draw();});
-   $("activityRankingSort").addEventListener("change",draw);
+   $("activityRankingPlatform").addEventListener("change",()=>{expanded=false;closeDetail();draw();});
+   $("activityRankingSort").addEventListener("change",()=>{closeDetail();draw();});
    $("activityRankingMore").addEventListener("click",()=>{expanded=!expanded;draw();});
+   $("activityRankingDialogClose")?.addEventListener("click",closeDetail);
+   dialog?.addEventListener("click",e=>{if(e.target===dialog)closeDetail();});
+   dialog?.addEventListener("close",()=>detail?.replaceChildren());
    win.addEventListener("intersection:feed-updated",schedule);
-   win.addEventListener("intersection:date-range-change",()=>{expanded=false;schedule();});
+   win.addEventListener("intersection:date-range-change",()=>{expanded=false;closeDetail();schedule();});
    update();
  }
  return {compute,mount};
