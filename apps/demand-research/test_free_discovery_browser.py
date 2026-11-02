@@ -68,8 +68,8 @@ def run():
             page.wait_for_selector("#freeDiscovery:not(.hidden)",timeout=20000)
             assert page.locator("#indexResults .index-result").count()==0
             assert page.locator("#indexStatus").inner_text().find("자동·유료 검색은 실행하지 않습니다")>=0
-            page.select_option("#indexPlatform","x")
-            page.select_option("#indexTerm","섹트")
+            page.select_option("#indexPlatform","all" if LIVE else "x")
+            page.select_option("#indexTerm","all" if LIVE else "섹트")
             page.locator("#indexFind").click()
             page.wait_for_function("document.getElementById('indexFind').disabled === false",timeout=90000)
             n=page.locator("#indexResults .index-result").count()
@@ -111,7 +111,19 @@ def run():
                     }
                     return output;
                 }""")
-                print("INDEX_DISCOVERY_BROWSER_LIVE",json.dumps({"cards":n,
+                # Expand every indexed candidate without storing any user identifiers.
+                for _ in range(15):
+                    if not page.locator("#indexMore").is_visible():break
+                    page.locator("#indexMore").click()
+                all_cards=page.locator("#indexResults .index-result")
+                by_source={k:page.locator("#indexResults .index-origin").filter(
+                    has_text=k).count() for k in ("X","Threads","Instagram")}
+                confirmed=page.locator("article.post .source-badge[aria-label='출처: X']").count()
+                checked=page.locator("#indexResults .index-indexed").filter(
+                    has_text="텍스트 확인").count()
+                print("INDEX_DISCOVERY_BROWSER_LIVE",json.dumps({"cards":all_cards.count(),
+                    "by_source":by_source,"verified_date_scoped_x_feed":confirmed,
+                    "third_party_page_text_confirmed":checked,
                     "status_contains_error":("응답 실패" in msg or "오류" in msg),
                     "http_codes":[x.get("status") for x in upstream if x.get("status")],
                     "public_x_read":public_x,"errors":len(errors)}))
