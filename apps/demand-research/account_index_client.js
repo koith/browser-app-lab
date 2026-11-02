@@ -47,6 +47,10 @@ function render(){
   "건 · 보관본 최종 동기화 "+(data.last_catalog_sync?new Date(data.last_catalog_sync*1000).toLocaleString("ko-KR"):"진행 전")+
   (data.refreshing?" · 갱신 중":"")+
   (data.last_catalog_skipped?" · 계정 출처를 확인할 수 없는 글 "+data.last_catalog_skipped+"건":"");
+ const w=data.public_scan_windows||{};
+ caution.textContent="공개 Bluesky 자동 조회 구간: 확인 "+(w.done||0)+" · 분할 "+(w.split||0)+
+   " · 대기 "+(w.pending||0)+" · 미완료 "+(w.incomplete||0)+" · 실패 "+(w.failed||0)+
+   " · 다른 SNS는 연결된 인증 수집 출처가 있을 때만 포함합니다. 계정 수는 서로 다른 사람 수가 아닙니다.";
  const frag=document.createDocumentFragment();
  for(const record of rows){
    const div=el("div");const a=el("a",record.platform+" · "+record.profileUrl);
