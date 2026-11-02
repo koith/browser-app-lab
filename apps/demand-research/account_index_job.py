@@ -18,7 +18,7 @@ import account_index_sources
 
 REMOTE="archive:DemandAccountIndex"
 ARCHIVE="archive:DemandResearch/metadata/catalog.json"
-SNAP_RE=re.compile(r"^snapshot-[0-9]{6,30}\\.sqlite3$")
+SNAP_RE=re.compile(r"^snapshot-[0-9]{6,30}\.sqlite3$")
 MAX_DB=120_000_000
 MAX_CATALOG=70_000_000
 
@@ -119,6 +119,9 @@ def run():
             "last_public_scan_accepted":scan.get("accepted",0)})
         # The pointer is written LAST. A crash before this write preserves prior state.
         command(["rcat",REMOTE+"/latest.json"],data=(json.dumps(output,sort_keys=True)+"\n").encode(),timeout=120)
+        pointer=latest_manifest()
+        if not pointer or pointer["sha256"]!=output["sha256"] or pointer["file"]!=output["file"]:
+            raise RuntimeError("latest pointer readback mismatch")
         print("PRIVATE_ACCOUNT_INDEX_VERIFIED",json.dumps({
             "accounts":output["accounts"],"source_rows":output["source_rows"],
             "public_scan_windows":windows,"catalog":catalog_info,
