@@ -75,7 +75,8 @@
     // Main viewer handles the single unified feed and dated-source dedup.
     // Non-matching snippets are not treated as posts until original text
     // independently establishes that they match one of the topic terms.
-    const rows=Array.from(records.values()).filter(x=>x.matched.length>0)
+    const rows=Array.from(records.values())
+      .sort((a,b)=>b.matched.length-a.matched.length)
       .map(x=>({platform:x.platform,url:x.url,title:x.title,
         description:x.description,provider:Array.from(x.providers).join(",")}));
     receive(rows);
