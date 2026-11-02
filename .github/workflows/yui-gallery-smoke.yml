@@ -70,9 +70,9 @@ jobs:
               // Never require owner originals to have a local Pages URL.
               // Instead ensure every locally committed unique SHA remains
               // represented by the actual viewer and each local file decodes.
-              const shown=await page.evaluate(()=>new Set(
-                available().flatMap(a=>validImages(a).map(p=>p.sha256)).filter(Boolean)));
-              const missing=photos.filter(p=>!shown.has(p.sha256));
+              const representedSha=new Set(await page.evaluate(
+                ()=>[...new Set(available().flatMap(a=>validImages(a).map(p=>p.sha256)).filter(Boolean))]));
+              const missing=photos.filter(p=>!representedSha.has(p.sha256));
               if(missing.length)throw Error('Local stored photo SHA absent from viewer '+missing[0].sha256.slice(0,12));
               const urls=photos.map(p=>p.url);
               if(urls.some(x=>!x.startsWith('stored-albums/')))throw Error('Local stored file path is external');
