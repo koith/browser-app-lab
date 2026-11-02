@@ -1425,6 +1425,17 @@
         "QA-03",
         "P0-RELEASE"
       ]
+    },
+    {
+      "id": "REQ-20261102-GPT-011",
+      "date": "2026-11-02",
+      "origin": "user",
+      "text": "GPT: Claude가 원본 OBS/주사위/행동표 분석을 담당하는 동안, 웹앱 통합·원작 채팅방 순간이동·원본 UI 오작동 회귀 방지·브라우저 QA·PR 및 배포 검증을 실제 코드로 처리한다.",
+      "taskIds": [
+        "P0-CHAT",
+        "QA-03",
+        "P0-RELEASE"
+      ]
     }
   ],
   "tasks": [
