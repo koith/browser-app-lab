@@ -34,7 +34,7 @@ def run():
                 accounts=[{"platform":"bluesky",
                   "profileUrl":"https://bsky.app/profile/fake%d.bsky.social"%i,
                   "verified_posts":i+1} for i in range(10)]
-                item={"group_id":"A-fixture123","account_count":10,"distinct_posts":55,
+                item={"group_id":"A-fixture123","account_count":10,"distinct_posts":55,"capped_daily_contributions":1,
                   "accounts":accounts,"evidence":"reciprocal_explicit_public_self_declaration"}
                 items=[item] if offset==0 else []
                 route.fulfill(status=200,content_type="application/json",
