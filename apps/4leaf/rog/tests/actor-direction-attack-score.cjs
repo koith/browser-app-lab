@@ -59,8 +59,11 @@ const {chromium,webkit}=require('playwright');
   for(const card of ['c_0046','c_0078','c_0040']){
    const up=await walk(card,seg.up),down=await walk(card,seg.down);
    assert.equal(up.facing,'away');assert.equal(down.facing,'toward');
-   assert.equal(up.seq,'3,4,5,6,7,8',card+' walks away with the rear walk block');
-   assert.equal(up.evidence,'walk-rear/structural-37/INFERRED');
+   assert.equal(up.seq,card==='c_0040'?'3,5,6,7,8':'3,4,5,6,7,8',
+    card+' walks away with source-indexed rear walk block');
+   assert.equal(up.evidence,card==='c_0040'
+    ?'native-1040-walk-rear/OBS-key-index-VERIFIED/label-INFERRED'
+    :'walk-rear/structural-37/INFERRED');
    assert.ok(up.frames.length>=3&&up.frames.every(f=>f>=3&&f<=8),card+' rendered rear frames '+up.frames);
    assert.ok(down.seq.split(',').every(f=>Number(f)>=25&&Number(f)<=30),card+' walks toward with front frames');
    report[card]={up:up.frames,down:down.frames};

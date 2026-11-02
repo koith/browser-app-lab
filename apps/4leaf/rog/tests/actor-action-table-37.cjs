@@ -5,6 +5,7 @@ const assert=require('node:assert/strict');
 const path=require('node:path');
 const {chromium,webkit}=require('playwright');
 const SIDE='14,15,16,17,18,19',REAR='3,4,5,6,7,8',FRONT='25,26,27,28,29,30';
+const REAR_1040='3,5,6,7,8'; // actual OBS 1040 trailer keyframes exclude index 4
 (async()=>{
  const engine=process.env.FOURLEAF_BROWSER==='webkit'?'webkit':'chromium';
  const browser=await (engine==='webkit'?webkit:chromium).launch({headless:true,args:engine==='webkit'?[]:['--no-sandbox']});
@@ -37,7 +38,10 @@ const SIDE='14,15,16,17,18,19',REAR='3,4,5,6,7,8',FRONT='25,26,27,28,29,30';
      const frame=window.ORIGINAL_LEAF_FULL_ACTION_FRAMES[id].frames[Number(pawn.dataset.actorFrame)];
      const x=pawn.dataset.sourceMirror==='true'?-(frame.originX+frame.width):frame.originX;
      out[facing]={seq:pawn.dataset.sourceFrameSequence,mirror:pawn.dataset.sourceMirror,
-      table:pawn.dataset.sourceActionTable,left:img.style.getPropertyValue('--leaf-obs-left'),
+      table:pawn.dataset.sourceActionTable,
+      keyTicks:pawn.dataset.sourceNativeKeyTicks,
+      keyEvidence:pawn.dataset.sourceKeyframeProvenance,
+      left:img.style.getPropertyValue('--leaf-obs-left'),
       expectedLeft:'calc(50% '+(x<0?'-':'+')+' '+Math.abs(x)+'px)',
       transform:getComputedStyle(img).transform,src:img.getAttribute('src')};
      window.__LEAF_GENESIS_ACTORS__.poseByPlayer(m.players[0].id,'idle',0);
@@ -49,7 +53,12 @@ const SIDE='14,15,16,17,18,19',REAR='3,4,5,6,7,8',FRONT='25,26,27,28,29,30';
     out.attack={seq:pawn.dataset.sourceFrameSequence,label:pawn.dataset.sourceAttackEvidence};
     window.__LEAF_GENESIS_ACTORS__.poseByPlayer(m.players[0].id,'idle',0);return out;
    },id);
-   assert.equal(r.away.seq,REAR,id+' rear');
+   assert.equal(r.away.seq,id==='0040'?REAR_1040:REAR,id+' rear');
+   if(id==='0040'){
+    assert.equal(r.away.keyTicks,'0,3,6,9,12');
+    assert.match(r.away.keyEvidence,/OBS-1040\/keyframe-index/);
+    assert.match(r.away.table,/OBS-keys-VERIFIED\/action-label-INFERRED/);
+   }else assert.equal(r.away.keyTicks,'','other source action mappings are WEB-INFERRED');
    assert.equal(r.left.seq,SIDE,id+' left');
    assert.equal(r.right.seq,SIDE,id+' mirrored right');
    assert.equal(r.toward.seq,FRONT,id+' front');
@@ -60,13 +69,15 @@ const SIDE='14,15,16,17,18,19',REAR='3,4,5,6,7,8',FRONT='25,26,27,28,29,30';
    }
    assert.match(r.right.transform,/^matrix\(-1, 0, 0, -1/,id+' right mirrored');
    assert.match(r.left.transform,/^matrix\(1, 0, 0, -1/,id+' left unmirrored');
-   assert.equal(r.away.idle,'0,1,2,1',id+' rear idle');
-   assert.equal(r.left.idle,'11,12,13,12',id+' left side idle');
-   assert.equal(r.right.idle,'11,12,13,12',id+' right side idle');
-   assert.equal(r.toward.idle,'22,23,24,23',id+' front idle');
+   assert.equal(r.away.idle,id==='0040'?'0,1,2':'0,1,2,1',id+' rear idle');
+   assert.equal(r.left.idle,id==='0040'?'11,12,13':'11,12,13,12',id+' left side idle');
+   assert.equal(r.right.idle,id==='0040'?'11,12,13':'11,12,13,12',id+' right side idle');
+   assert.equal(r.toward.idle,id==='0040'?'22,23,24':'22,23,24,23',id+' front idle');
    assert.equal(r.right.idleMirror,'true',id+' mirrored right idle');
    assert.equal(r.left.idleMirror,'false',id+' left idle does not mirror');
-   assert.equal(r.toward.idleTable,'idle-front/structural-37/INFERRED');
+   assert.equal(r.toward.idleTable,id==='0040'
+    ?'native-1040-idle-front/OBS-keys-VERIFIED/action-label-INFERRED'
+    :'idle-front/structural-37/INFERRED');
    assert.equal(r.attack.seq,'25,31,32,32,25',id+' attack');
   }
   for(const id of ['0084','0085','0086']){

@@ -48,15 +48,17 @@ const {readFileSync}=require('node:fs');
      original:f?.sha256||null};
    },id);
    const tableIdle=state.table==='idle-front/structural-37/INFERRED';
-   assert.ok((tableIdle?[22,23,24]:[expected]).includes(state.index),
+   const native1040=id==='0040'&&state.table===
+    'native-1040-idle-front/OBS-keys-VERIFIED/action-label-INFERRED';
+   assert.ok(((tableIdle||native1040)?[22,23,24]:[expected]).includes(state.index),
     'reviewed native front idle '+id+': '+state.index);
    assert.ok(state.url.endsWith('/'+(id==='0042'?'1042':id==='0045'?'1045':'1'+id.slice(1))+'-'+
     String(state.index).padStart(2,'0')+'.png'),JSON.stringify(state));
    assert.ok(!state.url.includes('-00.png'), 'the old back-facing source must not be visible at idle');
    assert.equal(state.actual,'original-obs-sprite');
-   assert.equal(state.sequence,tableIdle?'22,23,24,23':String(expected),
+   assert.equal(state.sequence,native1040?'22,23,24':tableIdle?'22,23,24,23':String(expected),
     'do not animate backward idle packets');
-   if(!['0042','0045'].includes(id))assert.ok(tableIdle,id+' should use reviewed source idle');
+   if(!['0042','0045'].includes(id))assert.ok(tableIdle||native1040,id+' should use reviewed source idle');
    assert.ok(state.provenance.startsWith('visual-original-OBS-reviewed/front/'));
    assert.ok(state.cssFlipY<0,'exact FLIP_TOP_BOTTOM source PNG needs upright on-screen transform');
    assert.ok(state.width>=10&&state.height>=35,'native body must remain visible');

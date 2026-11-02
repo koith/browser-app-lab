@@ -66,7 +66,9 @@ const {chromium,webkit}=require('playwright');
    assert.equal(state.missing,undefined,card+' actual source pawn exists');
    assert.equal(state.rig,'original-obs-sprite',card+' never uses fabricated proxy');
    assert.equal(state.seq,'14,15,16,17,18,19',card+' side walk block');
-   assert.equal(state.source,'walk-side/structural-37/INFERRED');
+   assert.equal(state.source,card==='c_0040'
+     ?'native-1040-walk-side/OBS-key-index-VERIFIED/label-INFERRED'
+     :'walk-side/structural-37/INFERRED');
    const stem=card.slice(-4).replace(/^0/,'1');
    assert.ok(state.src?.includes('/original/OBS/action-full/'+stem+'-'),
     'source must be the actual complete 2002 actor sprites: '+JSON.stringify(state));
