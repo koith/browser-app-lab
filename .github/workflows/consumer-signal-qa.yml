@@ -1,0 +1,26 @@
+name: Consumer signal lab — synthetic QA
+on:
+  pull_request:
+    paths:
+      - "apps/consumer-signal-lab/**"
+      - ".github/workflows/consumer-signal-qa.yml"
+  push:
+    branches: [main]
+    paths:
+      - "apps/consumer-signal-lab/**"
+      - ".github/workflows/consumer-signal-qa.yml"
+permissions:
+  contents: read
+jobs:
+  offline-safe-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Run isolated synthetic unit tests
+        run: |
+          python -m compileall -q apps/consumer-signal-lab
+          python -m unittest discover -s apps/consumer-signal-lab -p 'test_*.py' -v
