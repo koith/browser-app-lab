@@ -85,6 +85,31 @@ summary{cursor:pointer;font-size:12px;font-weight:800}
 .editorial-links{display:flex;gap:6px;flex-wrap:wrap}.editorial-links a{font-size:10px;padding:5px 8px;border:1px solid #a7c0b2;text-decoration:none}
 .editorial-status{font-size:11px;color:#557366;min-height:17px}
 @media(max-width:700px){.editorial-lab{padding:12px}.editorial-cards{grid-template-columns:1fr}.editorial-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.editorial-stat strong{font-size:20px}}
+
+.session-lab{border:2px solid #172e4b;background:#f3f7ff;box-shadow:5px 5px 0 #1d3252;padding:18px;margin:14px 5px 29px 0}
+.session-lab .session-kicker{font-size:11px;font-weight:900;color:#28468e;letter-spacing:1.5px}
+.session-lab h2{font-size:22px;letter-spacing:-.5px;margin:4px 0 9px}
+.session-lab p{font-size:12px;color:#385473;line-height:1.6}
+.session-lab a{color:#234b9f}
+.session-status{font-size:12px;margin:12px 0;color:#315783;min-height:17px}
+.session-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:14px 0}
+.session-stat{background:#fff;border:1px solid #b8ccec;padding:12px;display:grid;gap:3px;min-width:0}
+.session-stat small{color:#53729e;font-size:10px}
+.session-stat strong{font-size:clamp(17px,2vw,24px);font-weight:900;letter-spacing:-.5px;overflow-wrap:anywhere}
+.session-stat span{font-size:10px;color:#597698}
+.session-selector{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:19px 0 11px}
+.session-selector label{font-size:12px;font-weight:800}
+.session-selector select{background:#fff;border:1.5px solid #274f84;padding:8px 10px;font-size:12px;max-width:100%}
+.session-selector strong{margin-left:auto;color:#345480;font-size:12px}
+.session-rows{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.session-row{background:#fff;border:1px solid #c0d1e8;padding:12px;min-width:0}
+.session-row-head{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13px;margin-bottom:7px}
+.session-row-head strong{font-variant-numeric:tabular-nums;color:#153b7c}
+.session-track{height:12px;background:#e3ebf7;overflow:hidden}
+.session-fill{background:#396bd4;height:100%;min-width:0;transition:width .2s}
+.session-row small{display:block;color:#657c9b;font-size:10px;line-height:1.6;margin-top:7px}
+.session-footnote{font-size:11px;color:#58739a;border-top:1px dashed #a9bbd5;margin-top:14px;padding-top:11px}
+@media(max-width:700px){.session-lab{padding:12px}.session-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.session-rows{grid-template-columns:1fr}.session-selector strong{margin-left:0}}
 </style>
 </head>
 <body>
@@ -103,7 +128,29 @@ summary{cursor:pointer;font-size:12px;font-weight:800}
   <span class="subtle">파일은 브라우저에서만 열리며 서버로 업로드되지 않습니다.</span>
  </div>
  <div class="status" id="loadStatus" role="status" aria-live="polite">분석 리포트를 불러오는 중…</div>
- <section id="editorialLab" class="editorial-lab" aria-labelledby="editorialHeading">
+ <section id="sessionLab" class="session-lab" aria-labelledby="sessionHeading">
+ <div class="session-kicker">REAL TRANSACTION OUTCOME / UCI · CC BY 4.0</div>
+ <h2 id="sessionHeading">실제 쇼핑 세션 · 구매 전환</h2>
+ <p>2018년 공개된 전자상거래 방문 세션 연구에서 구매 완료 여부를 집계했습니다.
+ <strong>과거 한 웹사이트의 기록이며 현재 시장 수요·매출액·상품별 구매량과 다릅니다.</strong>
+ 개인 정보와 개별 세션은 제공하지 않고 집계만 표시합니다.</p>
+ <p>출처: <a href="https://archive.ics.uci.edu/dataset/468/online+shoppers+purchasing+intention+dataset" target="_blank" rel="noopener noreferrer">UCI Online Shoppers Purchasing Intention Dataset (Sakar & Kastro, 2018)</a> ·
+ <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">CC BY 4.0</a></p>
+ <div id="sessionStatus" class="session-status" role="status" aria-live="polite">2018년 쇼핑 기록 집계 불러오는 중…</div>
+ <div id="sessionMetrics" class="session-metrics" aria-label="과거 실제 쇼핑 세션 구매 전환"></div>
+ <div class="session-selector">
+  <label for="sessionDimension">구분</label>
+  <select id="sessionDimension">
+   <option value="month">월별</option><option value="visitor">방문 유형</option>
+   <option value="weekend">주중·주말</option><option value="product_pages">상품 페이지 열람 수</option>
+  </select>
+  <strong id="sessionDimensionLabel">월별 비교</strong>
+ </div>
+ <div id="sessionRows" class="session-rows" aria-live="polite"></div>
+ <p class="session-footnote">각 구간의 95% Wilson 범위는 단순 이항 근사이며 연구 표본의 대표성을 보장하지 않습니다.
+ 구간 차이는 인과관계가 아닙니다. 세션을 고유한 사람 수로 해석하지 않습니다.</p>
+</section>
+<section id="editorialLab" class="editorial-lab" aria-labelledby="editorialHeading">
   <div class="editorial-kicker">REAL OPEN DATA / CC BY 4.0</div>
   <h2 id="editorialHeading">실제 전문가 상품 평가</h2>
   <p class="editorial-disc"><strong>실제 공개 데이터</strong>를 근거로 여러 전문 매체의 평가를 확인합니다.
@@ -238,6 +285,7 @@ function showError(error){$("loadStatus").textContent="오류: "+String(error?.m
 loadDemo().catch(showError);
 })();
 </script>
+<script src="./session_view.js" defer></script>
 <script src="./editorial_view.js" defer></script>
 </body>
 </html>
