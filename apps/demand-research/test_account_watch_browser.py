@@ -121,6 +121,11 @@ def run():
             page.wait_for_function("document.getElementById('applyDate').disabled===false",timeout=120000)
             assert page.locator(".primary-views button").count()==2
             assert not page.locator("#accountsView").is_visible()
+            page.locator("#viewAccounts").click()
+            assert page.locator("#accountDiscoveredList .account-discovered-card").count()==1
+            assert "1개" in page.locator("#accountDiscoveredCount").text_content()
+            page.locator("#viewPosts").click()
+
             assert page.locator("#tabs,[data-term]").count()==0
             page.locator(".post-open").first.click()
             assert page.locator("#detail .account-select-watch").is_visible()
@@ -183,7 +188,7 @@ def run():
             assert page.locator("#accountMetricTracked").text_content()=="2"
             assert not errors,errors
             print("PUBLIC_ACCOUNT_WATCH_BROWSER_QA",json.dumps({
-              "tabs":2,"opt_in_profiles_saved":3,"bluesky_direct_public_feed":True,
+              "tabs":2,"discovered_source_accounts_visible":True,"opt_in_profiles_saved":3,"bluesky_direct_public_feed":True,
               "mastodon_direct_public_feed":True,"x_original_public_post_verified":True,
               "cross_account_duplicate_content_removed":True,"private_rows_excluded":True,
               "cross_platform_identity_inference":False,"malicious_urls_blocked":True,
