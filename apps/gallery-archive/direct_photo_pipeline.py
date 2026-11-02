@@ -622,6 +622,9 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
     base=root/'apps'/(model+'-gallery')
     inputs=(['official-previews.json','v2ph-actor-previews.json','pixibb-public-previews.json'] if model=='mimmi' else ['additional-source-albums.json'])+['public-work-pages.json']
     old_albums={a['id']:a for a in owner['albums']};saved_sha={p['sha256'] for a in owner['albums'] for p in a['images']}
+    # A locally visible GitHub Pages copy is not proof of a remote TeraBox
+    # original+preview pair. Keep both ledgers separate for official recovery.
+    owner_remote_sha=set(saved_sha)
     public=json.loads((base/'stored-albums.json').read_text())
     reference_paths={}
     for album in public['albums']:
@@ -741,6 +744,7 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
         browser=LiveBrowser(enabled=True)
     rendered_pages=0
     results=[];new_albums=[];new_total=0;downloaded_now=0;seen_urls=set();seen_sha=set(saved_sha)
+    official_staged_sha=set()
     resumed=defaultdict(list)
     journal=out/'journal.jsonl'
     if journal.exists():
@@ -810,13 +814,18 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                         raw,p,gap['recorded_variants']):
                     errors.append({'url':url,'reason':'official_publisher_bytes_not_same_sha_as_verified_history'})
                     continue
-                if p['sha256'] in seen_sha:
+                # Exact owner-private bytes determine storage completion.
+                # Public Pages may already show this SHA without an owner
+                # TeraBox original; we still have to archive that photo pair.
+                if (p['sha256'] in owner_remote_sha
+                        or p['sha256'] in official_staged_sha):
                     continue
                 quality=measured_photo_quality(raw,p)
                 number=next_number
                 next_number+=1
                 occupied.add(number)
                 seen_sha.add(p['sha256'])
+                official_staged_sha.add(p['sha256'])
                 name=f'{number:05d}-{p["sha256"][:16]}'
                 original=f'originals/{aid}/{name}.{p.pop("extension")}'
                 thumbnail=f'previews/{aid}/{name}.webp'
