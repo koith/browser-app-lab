@@ -11,6 +11,7 @@ from urllib.parse import parse_qs, urlparse
 from playwright.sync_api import sync_playwright
 
 HTML=Path(__file__).with_name("index.html").read_text(encoding="utf-8")
+FREE_JS=Path(__file__).with_name("free_discovery.js").read_text(encoding="utf-8")
 PAGE="https://koith.github.io/browser-app-lab/apps/demand-research/"
 TERMS=("뒷계","섹트","일탈계")
 PNG=base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAFElEQVR4nGPUit7yn4GBgYGJAQoAIS4CPGFQl4cAAAAASUVORK5CYII=")
@@ -47,6 +48,17 @@ def run(live=False):
                     urlparse(req.url).hostname) if urlparse(req.url).hostname in hosts else None)
             page.route(PAGE,lambda route:route.fulfill(status=200,
                         content_type="text/html; charset=utf-8",body=HTML))
+            page.route(PAGE+"free_discovery.js",lambda route:route.fulfill(status=200,
+                        content_type="application/javascript",body=FREE_JS))
+            if not live:
+                page.route("https://api.keenable.ai/v1/search/public",
+                    lambda route:route.fulfill(status=200,content_type="application/json",
+                      headers={"Access-Control-Allow-Origin":"*"},body='{"results":[]}'))
+                page.route("https://api.firecrawl.dev/v2/search",
+                    lambda route:route.fulfill(status=200,content_type="application/json",
+                      headers={"Access-Control-Allow-Origin":"*"},
+                      body='{"success":true,"data":{"web":[]}}'))
+
             if not live:
                 def bluesky_api(route):
                     q=parse_qs(urlparse(route.request.url).query)
@@ -139,7 +151,7 @@ def run(live=False):
             assert page.locator("input[type=password],#login,#refresh,#filterDetails,#hideAds,#showAdultMedia,#adLevel").count()==0
             assert page.locator("#count").evaluate("e=>getComputedStyle(e).clipPath==='inset(50%)'"), "Verbose statistics must be screen-reader-only"
             assert page.locator("footer,#footnote,#showMore,#listMore").count()==0
-            assert page.locator("#tabs,[data-term],section.toolbar").count()==0
+            assert page.locator("#tabs,[data-term],section.toolbar,#freeDiscovery,#indexFind,#socialControls:not(.hidden)").count()==0
             assert page.locator("header .head-inner > h1").count()==1
             assert page.locator("header .head-inner > .header-period #openDate").count()==1
             title_bounds=page.locator("header h1").bounding_box()

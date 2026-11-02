@@ -85,7 +85,52 @@ Validation: `cd apps/demand-research && python -m pytest -q test_gateway.py test
 Fixtures represent synthetic rows only; passing these tests does not imply
 live records exist.
 
-## Verified zero-key public SNS search link discovery (2026-11-02)
+## Current operation — automatic unified multi-SNS feed (2026-11-02)
+
+**No "다른 SNS 게시글 찾기" section, button, platform selector, or extra user action.**
+The public GitHub Pages viewer runs one bounded background discovery pass when
+the page opens, in parallel with its Bluesky/Mastodon/Misskey/Lemmy/Reddit adapters.
+The free anonymous Keenable + Firecrawl endpoints are called once each per
+X/Threads/Instagram (six network-search calls total, on the visitor's network).
+Each canonical post-link candidate gets a platform logo, the correct original
+permalink and an author-profile URL when the URL supplies the handle. Duplicate
+search-result URLs are collapsed by platform post ID. These results are
+**interleaved within the one main feed**, not kept in a special section hidden
+below hundreds of Bluesky cards.
+
+**Source accuracy and dated filtering:**
+- Search-index entries are conspicuously tagged `링크 · 원문 미확인` or
+  `검색어·원문 미확인`. They show `작성일 미확인 · 검색 결과`, no
+  synthetic date, and an original-source link. Such entries are **not** counted
+  as confirmed collected posts, even though they appear in the one feed.
+  Their date-range membership is unknown; the detail dialog states this.
+- For a bounded set of public X candidates, the third-party no-key FxEmbed
+  reader is queried and exact ID, source timestamp, visibility and required
+  text match are checked. Only matching originals inside the selected date
+  range become **real dated X post cards**; the link candidate disappears
+  when an original is admitted.
+- Threads/Instagram may yield cached public-page text via a separate bounded
+  Keenable fetch, but this is **not authoritative publication timestamp proof**,
+  so those remain explicitly indexed-link candidates.
+- Existing date selector, one `더 보기` control, source badges, advertising
+  filter and original-link/author-link navigation are preserved. Changing the
+  period reapplies the date window to already verified originals without
+  repeating all six index searches.
+- No keys, credentials, login, paid services, media downloads, account
+  targeting, cloud storage, or persistence of possibly sensitive indexed
+  content. Provider limits and removals are respected; all-public SNS
+  completeness cannot be guaranteed by a search index.
+
+**Verification:** `python apps/demand-research/test_free_discovery_browser.py`
+covers automatic calls, interleaved cards, source URL/domain checks,
+dated-source promotion, and period-change replay using synthetic responses.
+`--live` calls actual free providers in Chromium and reports aggregate
+results without saving usernames, post text or URLs. The existing
+`test_live_browser.py` checks the Bluesky and combined viewer separately.
+
+--- Historical implementation notes below (manual UI removed) ---
+
+## Historical verified zero-key public SNS search link discovery (2026-11-02)
 
 Public Pages now offers a user-triggered, independently-labelled indexed-link discovery feature in free_discovery.js. This feature NEVER changes real Bluesky post counts and NEVER pretends index candidates are verified original posts.
 

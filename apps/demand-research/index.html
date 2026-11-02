@@ -361,34 +361,6 @@ dialog{background:#fff9ed;border-color:#101432}
 #socialControls select{border:1px solid #c7cbd3;border-radius:8px;background:white;padding:9px}
 #socialStatus{font-size:12px;color:#64748b}
 
-/* External indexed search links are unverified candidates, not collected posts. */
-.index-search{border:1px solid #101432;background:#fff9e9;margin:22px 0 12px;padding:16px;border-radius:11px;color:#101432}
-.index-search.hidden{display:none}
-.index-top{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
-.index-top strong{font-size:18px}
-.index-info,.index-status{font-size:12px;line-height:1.55;color:#565d69;margin:7px 0}
-.index-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:12px}
-.index-actions select{background:white;border:1px solid #a6afc0;border-radius:8px;padding:10px;font-size:13px;min-width:108px;flex:1 1 115px}
-.index-actions button{background:#101432;min-height:41px}
-.index-actions button:disabled{opacity:.5}
-.index-results{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:10px}
-.index-result{background:white;border:1px solid #d8d1bb;border-radius:9px;padding:12px;min-width:0}
-.index-result-head{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:11px}
-.index-origin{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:800}
-.index-origin img{height:14px;width:14px;object-fit:contain}
-.index-indexed{font-size:10px;color:#7b5018;background:#fff0c5;border-radius:5px;padding:4px 6px}
-.index-title{font-size:14px;font-weight:750;line-height:1.5;margin:12px 0 7px;overflow-wrap:anywhere}
-.index-description{font-size:12px;line-height:1.55;overflow-wrap:anywhere;max-height:6.2em;overflow:hidden;white-space:pre-wrap}
-.index-links{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px;font-size:12px}
-.index-links a{color:#12378b;font-weight:700;text-decoration:underline;text-underline-offset:3px}
-.index-check{background:#ec6328;color:#101432;border:1px solid #101432;padding:8px 10px;margin-top:8px;font-size:11px}
-.index-check:disabled{opacity:.55}
-.index-verify-result{font-size:12px;line-height:1.5;color:#253b4f;margin-top:8px;white-space:pre-wrap}
-.index-verify-result strong{font-size:12px;color:#173778}
-.index-results+.index-more{margin:14px auto 0;display:block;background:#101432}
-.index-more.hidden{display:none}
-@media(max-width:720px){.index-search{margin:16px 2px;padding:11px}.index-results{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.index-result{padding:9px}.index-title{font-size:12px}.index-description{font-size:11px}}
-
 /* Single-title/header date control. Topic buttons removed entirely. */
 body>header.site-head .head-inner{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .site-head .header-period{display:flex;align-items:center;justify-content:flex-end;flex:0 1 auto;min-width:0;margin:0;padding:0}
@@ -401,6 +373,15 @@ main{padding-top:10px}
   .site-head .header-period #openDate{font-size:10px;padding:8px 7px;gap:3px}
   .site-head .header-period #openDate span:first-child{display:none}
 }
+
+/* Native cross-source feed: date-unknown index entries live among real posts. */
+.post[data-discovery-candidate="true"]{border-style:solid}
+.post[data-discovery-candidate="true"] .post-thumb{background:#fff1d1}
+.post[data-discovery-candidate="true"] .post-thumb .text-icon{font-size:12px;line-height:1.5;text-align:center;padding:12px;color:#282c40}
+.post[data-discovery-candidate="true"] .post-date{font-weight:750;color:#80501f}
+.post .index-candidate-mark{display:inline-block;font-size:10px;letter-spacing:0;line-height:1.3;color:#6b3f17;background:#fff0cb;border:1px solid #cba75b;padding:3px 5px;margin-left:3px}
+.dialog-index-note{padding:11px 12px;margin:7px 0 10px;background:#fff0cd;color:#65400a;font-size:12px;line-height:1.6}
+@media(max-width:720px){.post .index-candidate-mark{font-size:9px;padding:3px}.dialog-index-note{font-size:11px}}
 </style>
 </head>
 <body>
@@ -412,18 +393,6 @@ main{padding-top:10px}
 <main>
 
 <div class="sr-only" id="count" role="status" aria-live="polite">불러오는 중…</div>
-<section class="index-search hidden" id="freeDiscovery" aria-label="무료 SNS 게시글 링크 검색">
-  <div class="index-top"><strong>다른 SNS 게시글 찾기</strong><span class="index-indexed">검색 인덱스 · 원문 미확인</span></div>
-  <p class="index-info">계정·결제 없이 X·Threads·Instagram을 함께 검색합니다. 확인된 X 공개 원문은 선택한 기간에 맞으면 게시글 목록에 추가합니다. Threads·Instagram은 공개 페이지 내용을 별도로 확인하되, 검증 전 결과를 실제 수집 건수로 계산하지 않습니다.</p>
-  <div class="index-actions">
-    <select id="indexPlatform" aria-label="무료 검색 SNS"><option value="all">전체 SNS</option><option value="x">X</option><option value="threads">Threads</option><option value="instagram">Instagram</option></select>
-    <select id="indexTerm" aria-label="무료 SNS 검색어"><option value="all">전체 검색어</option><option value="뒷계">뒷계</option><option value="섹트">섹트</option><option value="일탈계">일탈계</option></select>
-    <button id="indexFind" type="button">다른 SNS 전체 조회</button>
-  </div>
-  <p id="indexStatus" class="index-status" role="status" aria-live="polite">조회 버튼을 누르면 세 SNS를 무료로 검색합니다. 자동·유료 검색은 실행하지 않습니다. 클라우드 저장도 하지 않습니다.</p>
-  <div id="indexResults" class="index-results" aria-live="polite"></div>
-  <button id="indexMore" class="index-more hidden" type="button">검색 후보 더 보기</button>
-</section>
 <section class="feed" id="feed" aria-live="polite"><div class="empty">게시글 불러오는 중…</div></section>
 <div class="more hidden" id="paging"><button type="button" id="more">더 보기</button></div>
 
@@ -455,7 +424,7 @@ const API="https://api.bsky.app/xrpc/app.bsky.feed.searchPosts";
 const TERMS=["뒷계","섹트","일탈계"];
 const DAY=86400000, MIN_WINDOW=3600000, CHUNK_DAYS=7, MAX_REQUESTS=85, MAX_POSTS=4500;
 const cloudMode=location.hostname!=="koith.github.io";
-let posts=[],ids=new Map(),needle="",fromMs=0,toMs=0,nextEnd=0,pending=[],requestCount=0,daysCovered=0,incomplete=0,failed=0,runID=0,busy=false,shown=0,visibleLimit=270,cloudOffset=0,cloudTotal=0;
+let posts=[],ids=new Map(),indexedCandidates=[],candidateById=new Map(),needle="",fromMs=0,toMs=0,nextEnd=0,pending=[],requestCount=0,daysCovered=0,incomplete=0,failed=0,runID=0,busy=false,shown=0,visibleLimit=270,cloudOffset=0,cloudTotal=0;
 const $=id=>document.getElementById(id);
 const el=(tag,className,text)=>{let n=document.createElement(tag);if(className)n.className=className;if(text!==undefined)n.textContent=String(text);return n};
 const dayText=ms=>new Date(ms).toISOString().slice(0,10);
@@ -586,7 +555,13 @@ window.INTERSECTION_acceptPublicX=function(record){
     posted:new Date(posted).toISOString(),indexed:new Date(posted).toISOString(),
     terms:new Set(terms),media:[],adultLabeled:false,restricted:false,
     verification:"unofficial-public-source"};
-  ids.set(key,post);posts.push(post);updateServiceCounts();draw();
+  ids.set(key,post);posts.push(post);
+  const candidateKey="index:x:"+id;
+  if(candidateById.has(candidateKey)){
+    candidateById.delete(candidateKey);
+    indexedCandidates=indexedCandidates.filter(p=>p.id!==candidateKey);
+  }
+  updateServiceCounts();draw();
   return {accepted:true,reason:"matched"};
 };
 
@@ -820,9 +795,11 @@ function adEvidence(post,count){
   return {score,reasons};
 }
 function updateAdScores(){
+  // Identical ad detection applies to both genuine posts and indexed links.
+  const all=cloudMode?posts:posts.concat(indexedCandidates);
   let count=new Map();
-  for(let p of posts){let k=fingerprint(p.text);if(k.length>=28)count.set(k,(count.get(k)||0)+1)}
-  for(let p of posts)p.adEvidence=adEvidence(p,count);
+  for(let p of all){let k=fingerprint(p.text);if(k.length>=28)count.set(k,(count.get(k)||0)+1)}
+  for(let p of all)p.adEvidence=adEvidence(p,count);
 }
 function suspectedAd(post){
   return (post.adEvidence?.score||0)>=4;
@@ -833,6 +810,66 @@ function filtered(){
   return posts.filter(p=>matchesText(p)&&!suspectedAd(p))
     .sort((a,b)=>String(b.indexed).localeCompare(String(a.indexed)));
 }
+/* Keep original dated records and date-unknown search index candidates in one
+   feed. A candidate remains clearly marked and NEVER changes verified counts.
+   We interleave instead of appending after hundreds of Bluesky records. */
+function feedRows(){
+  const originals=filtered();
+  if(cloudMode)return originals;
+  const candidates=indexedCandidates.filter(p=>
+    matchesText(p)&&!suspectedAd(p)&&!ids.has("x:"+p.postId));
+  const combined=[];let i=0,j=0;
+  while(i<originals.length||j<candidates.length){
+    for(let n=0;n<3&&i<originals.length;n++)combined.push(originals[i++]);
+    if(j<candidates.length)combined.push(candidates[j++]);
+    else if(i>=originals.length)break;
+  }
+  return combined;
+}
+/* Called by the background discovery adapter. Snippets are ephemeral, strictly
+   canonical HTTPS source links, with no invented publication date or media. */
+window.INTERSECTION_receiveCandidates=function(raw){
+  if(cloudMode||!Array.isArray(raw))return 0;
+  const platforms={
+    x:{hosts:["x.com","twitter.com"],pattern:/^\/([A-Za-z0-9_]{1,15})\/status\/([0-9]+)\/?$/i},
+    threads:{hosts:["threads.com","threads.net"],pattern:/^\/@([A-Za-z0-9._]+)\/post\/([A-Za-z0-9_-]+)\/?$/i},
+    instagram:{hosts:["instagram.com"],pattern:/^\/(p|reel)\/([A-Za-z0-9_-]+)\/?$/i}
+  };
+  const result=[],seen=new Set();
+  for(const candidate of raw.slice(0,180)){
+    const platform=String(candidate.platform||""),config=platforms[platform];
+    if(!config)continue;
+    let url,matched;
+    try{
+      url=new URL(String(candidate.url||""));
+      if(url.protocol!=="https:"||url.username||url.password||
+        !config.hosts.includes(url.hostname.replace(/^www\./,"").toLowerCase()))continue;
+      matched=config.pattern.exec(url.pathname);
+    }catch{continue}
+    if(!matched)continue;
+    const postId=matched[2],id="index:"+platform+":"+postId;
+    if(seen.has(id)||ids.has("x:"+postId))continue;
+    const label=String(candidate.title||"").trim().slice(0,220);
+    const excerpt=String(candidate.description||"").trim().slice(0,450);
+    const text=[label,excerpt].filter(Boolean).join("\n").slice(0,650);
+    if(!text)continue;
+    let profileUrl="",author=platform==="x"?"X":platform==="threads"?"Threads":"Instagram";
+    if(platform==="x"){
+      profileUrl="https://x.com/"+matched[1];author="@"+matched[1];
+    }else if(platform==="threads"){
+      profileUrl="https://www.threads.com/@"+matched[1];author="@"+matched[1];
+    }
+    const link="https://"+url.hostname+url.pathname.replace(/\/$/,"");
+    const p={id,postId,platform,author,profileUrl,url:link,
+      text,posted:"",indexed:"",terms:new Set(TERMS.filter(t=>text.includes(t))),
+      media:[],adultLabeled:false,restricted:false,discoveryCandidate:true,
+      discoverySource:String(candidate.provider||"search").slice(0,40),
+      snippetMatched:TERMS.some(term=>text.includes(term))};
+    seen.add(id);result.push(p);
+  }
+  indexedCandidates=result;candidateById=new Map(result.map(p=>[p.id,p]));
+  draw();return result.length;
+};
 
 const SERVICES={
   bluesky:{name:"Bluesky",favicon:"https://koith.github.io/browser-app-lab/apps/demand-research/assets/bluesky.svg"},
@@ -858,7 +895,7 @@ function profileLink(p){
   return a;
 }
 function hasMoreResults(){
-  if(filtered().length>visibleLimit)return true;
+  if(feedRows().length>visibleLimit)return true;
   if(cloudMode)return cloudOffset<cloudTotal;
   return !!pending.length||nextEnd>fromMs;
 }
@@ -866,6 +903,7 @@ function hasMoreResults(){
 function tile(p){
   let article=el("article","post"),button=el("div","post-open");button.setAttribute("role","button");button.tabIndex=0;button.setAttribute("aria-label","게시글 상세 보기");
   article.dataset.mediaPolicy=p.restricted?"restricted":p.adultLabeled?"adult":"general";
+  if(p.discoveryCandidate)article.dataset.discoveryCandidate="true";
   let thumb=el("div","post-thumb"),first=p.media[0],blocked=hideMedia(p);
   thumb.append(sourceBadge(p));
   if(first&&!blocked&&first.thumb){
@@ -873,14 +911,16 @@ function tile(p){
     img.addEventListener("error",()=>img.remove());thumb.append(img);
   }else{
     let label=blocked?(p.restricted?"제한된 미디어":"성인 미디어 숨김"):first?.type==="video"?"영상 보기":first?"미리보기 없음":"글 보기";
-    thumb.append(el("span","text-icon"+(blocked?" hide-icon":""),label));
+    thumb.append(el("span","text-icon"+(blocked?" hide-icon":""),p.discoveryCandidate?"SNS 원문 링크\n검색 결과":label));
   }
   if(first?.type==="video"&&!blocked)thumb.append(el("span","video-mark","▶ 영상"));
   if(p.media.length>1&&!blocked)thumb.append(el("span","media-num","+"+(p.media.length-1)));
   let body=el("div","post-body"),title=el("div","post-title");
-  let author=profileLink(p);author.className="author";title.append(author,el("span","tag",Array.from(p.terms)[0]));
+  let author=profileLink(p);author.className="author";title.append(author,el("span","tag",Array.from(p.terms)[0]||"SNS"));
+  if(p.discoveryCandidate)title.append(el("span","index-candidate-mark",
+    p.snippetMatched?"링크 · 원문 미확인":"검색어·원문 미확인"));
   if(suspectedAd(p))title.append(el("span","post-ad-marker","광고 의심"));
-  body.append(title,el("p","post-excerpt",p.text),el("div","post-date",niceDate(p.posted)));
+  body.append(title,el("p","post-excerpt",p.text),el("div","post-date",p.discoveryCandidate?"작성일 미확인 · 검색 결과":niceDate(p.posted)));
   button.append(thumb,body);
   button.addEventListener("click",()=>openDetail(p));
   button.addEventListener("keydown",e=>{if(e.target===button&&(e.key==="Enter"||e.key===" ")){e.preventDefault();openDetail(p)}});
@@ -913,7 +953,9 @@ function sourceLink(p,text){
 function openDetail(p){
   let node=$("detailContent");node.replaceChildren();
   let sourceRow=el("div","dialog-source-row");sourceRow.append(sourceBadge(p),profileLink(p));node.append(sourceRow);
-  node.append(el("div","dialog-date",niceDate(p.posted)));
+  node.append(el("div","dialog-date",p.discoveryCandidate?"게시일 미확인":niceDate(p.posted)));
+  if(p.discoveryCandidate)node.append(el("div","dialog-index-note",
+    "검색엔진에서 발견된 공개 게시글 주소입니다. 원문 내용·게시 날짜·현재 공개 상태를 확인하지 못했으므로 선택한 기간에 포함된다고 보장하지 않습니다. 내용은 검색 미리보기입니다."));
   if(suspectedAd(p)){
     node.append(el("div","ad-detail","광고 의심 · "+(p.adEvidence?.reasons||[]).join(" / ")));
   }
@@ -938,9 +980,9 @@ function closeDetail(){
 }
 function draw(){
   updateAdScores();
-  let matching=posts.filter(matchesText),suspected=matching.filter(suspectedAd).length;
+  let matching=(cloudMode?posts:posts.concat(indexedCandidates)).filter(matchesText),suspected=matching.filter(suspectedAd).length;
   let hidden=suspected;
-  let rows=filtered(),list=$("feed");list.replaceChildren();
+  let rows=feedRows(),list=$("feed");list.replaceChildren();
   let limit=visibleLimit,frag=document.createDocumentFragment();
   for(let p of rows.slice(0,limit))frag.append(tile(p));
   if(!rows.length)frag.append(el("div","empty",busy?"게시글 검색 중…":"해당 기간·검색 조건의 게시글이 없습니다."));
@@ -951,7 +993,8 @@ function draw(){
   let warnings=(failed||incomplete)?" · 일부 구간 미확인 "+(failed+incomplete)+"건":"";
   updateServiceCounts();
   let sources=" · B"+serviceCounts.bluesky+" M"+serviceCounts.mastodon+" L"+serviceCounts.lemmy+" K"+serviceCounts.misskey+" R"+serviceCounts.reddit+" X"+serviceCounts.x;
-  $("count").textContent=rows.length.toLocaleString()+"건"+(cloudMode?"":sources)+(hidden?" · 광고 "+hidden.toLocaleString()+"건 제외":"")+(rows.length>limit?" · "+limit+"건 표시":"");
+  let candidates=cloudMode?0:rows.filter(p=>p.discoveryCandidate).length;
+  $("count").textContent=(rows.length-candidates).toLocaleString()+"건"+(cloudMode?"":sources)+(candidates?" · 원문 미확인 링크 "+candidates+"건":"")+(hidden?" · 광고 "+hidden.toLocaleString()+"건 제외":"")+(rows.length>limit?" · "+limit+"건 표시":"");
   $("count").setAttribute("aria-label",rows.length.toLocaleString()+"개 표시 / "+matching.length.toLocaleString()+"개 조회"+coverage+warnings);
 }
 function startBusy(){busy=true;$("applyDate").disabled=true;$("more").disabled=true}
@@ -1027,6 +1070,7 @@ async function loadBatch(reset){
     $("dateSummary").textContent=days+"일 · "+$("startDate").value+" ~ "+$("endDate").value;
     updatePeriodLabel();
     runID++;fromMs=dates[0];toMs=dates[1];nextEnd=toMs;resetData();
+    window.dispatchEvent(new Event("intersection:date-range-change"));
   }
   if(!pending.length&&nextEnd<=fromMs){status("선택 기간 조회를 마쳤습니다 · "+posts.length+"건");$("paging").classList.toggle("hidden",!hasMoreResults());return}
   startBusy();let epoch=runID;
