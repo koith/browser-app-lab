@@ -34,7 +34,7 @@ jobs:
           worker=Path('apps/mimmi-gallery/gallery-cover-sw.js').read_text()
           assert "location.hostname==='koith.github.io'" in page
           assert "register('./gallery-cover-sw.js',{scope:'./'})" in page
-          assert "api/cover" in worker and "request.destination !== 'image'" in worker
+          assert "eligibleCover(request)" in worker and "request.destination !== 'image'" in worker
           assert "credentials: 'omit'" in worker
           print('MIMMI_COVER_WORKER_SCOPE_AND_PRIVATE_CREDENTIAL_EXCLUSION_PASS')
           PY
