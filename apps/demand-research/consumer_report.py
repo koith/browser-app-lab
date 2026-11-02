@@ -91,7 +91,7 @@ def _report(rows: list[dict], *, name: str, dataset_kind: str, digest: str,
         "dataset": {
             "name": name, "mode": mode, "is_real_data": mode == "reviewed",
             "kind": dataset_kind, "sha256": digest, "provenance": provenance,
-            "safe_inputs_only": True, "same_person_inferred": False,
+            "admission_check": "schema_and_exact_sha256_only", "same_person_inferred": False,
             "existing_sns_pipeline_connected": False,
         },
         "summary": summary,
