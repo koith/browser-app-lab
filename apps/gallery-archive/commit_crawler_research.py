@@ -15,7 +15,7 @@ import sys
 from pathlib import Path
 
 ALLOWED = {"pixibb-public-previews.json", "xiutu-public-previews.json",
-           "v2ph-actor-previews.json"}
+           "v2ph-actor-previews.json", "social-public-previews.json"}
 PROJECT = Path(__file__).resolve().parents[2]
 
 
@@ -84,6 +84,11 @@ def merge_evidence(current: dict | None, new: dict) -> dict:
     summary["works"] = len(result["albums"])
     if "images_verified" in summary:
         summary["images_verified"] = sum(len(a.get("samples", [])) for a in result["albums"])
+    if "official_social_images_verified" in summary:
+        # A temporarily empty social feed must not hide already saved,
+        # previously SHA-recorded public-post evidence from the totals.
+        summary["official_social_images_verified"] = sum(
+            len(a.get("samples", [])) for a in result["albums"])
     if "actual_sha_verified_public_photo_urls" in summary:
         summary["actual_sha_verified_public_photo_urls"] = sum(
             len(a.get("samples", [])) for a in result["albums"])
