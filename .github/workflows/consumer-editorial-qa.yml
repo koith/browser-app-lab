@@ -1,0 +1,77 @@
+name: Licensed General Product Editorial Evidence QA
+
+on:
+  pull_request:
+    paths:
+      - "apps/demand-research/consumer_editorial.py"
+      - "apps/demand-research/test_consumer_editorial.py"
+      - "apps/demand-research/consumer/editorial_view.js"
+      - "apps/demand-research/consumer/index.html"
+      - "apps/demand-research/consumer/Dockerfile"
+      - "apps/demand-research/consumer_report_api.py"
+      - "apps/demand-research/consumer/editorial-report.json"
+      - ".github/workflows/consumer-editorial-qa.yml"
+  push:
+    branches: [main]
+    paths:
+      - "apps/demand-research/consumer_editorial.py"
+      - "apps/demand-research/test_consumer_editorial.py"
+      - "apps/demand-research/consumer/editorial_view.js"
+      - "apps/demand-research/consumer/index.html"
+      - "apps/demand-research/consumer/Dockerfile"
+      - "apps/demand-research/consumer_report_api.py"
+      - "apps/demand-research/consumer/editorial-report.json"
+      - ".github/workflows/consumer-editorial-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+concurrency:
+  group: consumer-editorial-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  editorial-source-and-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            apps/demand-research/consumer_editorial.py
+            apps/demand-research/test_consumer_editorial.py
+            apps/demand-research/consumer/
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install test dependencies
+        run: python -m pip install pytest==8.3.5
+      - name: Validate the independent licensed-source importer
+        working-directory: apps/demand-research
+        run: |
+          python -m py_compile consumer_editorial.py test_consumer_editorial.py
+          python -m pytest -q test_consumer_editorial.py
+      - name: Fetch official CSV and build actual 2026 editorial aggregate
+        working-directory: apps/demand-research
+        run: |
+          python consumer_editorial.py --as-of 2026-11-03 --output /tmp/real-editorial-report.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          report=json.loads(Path('/tmp/real-editorial-report.json').read_text())
+          assert report['dataset']['is_consumer_demand'] is False
+          assert report['dataset']['license']=='CC BY 4.0'
+          assert report['summary']['source_ratings_rows']>=1000
+          print('EDITORIAL_REPORT_JSON='+json.dumps(report,ensure_ascii=True,separators=(',',':')))
+          checked=Path('consumer/editorial-report.json')
+          if checked.exists():
+              snapshot=json.loads(checked.read_text())
+              assert snapshot==report,'Checked-in source snapshot differs from verified official CSV'
+              print('EDITORIAL_CHECKED_IN_REPORT_MATCHED')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: real-editorial-aggregate-cc-by4
+          path: /tmp/real-editorial-report.json
+          retention-days: 7
