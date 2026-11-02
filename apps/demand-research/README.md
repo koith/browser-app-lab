@@ -1,3 +1,33 @@
+
+## Automatic public-account audit (2026-11-02)
+
+The Account Analysis view now begins with an **automatic public-account audit**.
+It enumerates every unique, allowlisted canonical public profile URL present in
+the **loaded** verified-post/index-candidate snapshot, regardless of whether the
+operator added any profiles to the optional watch list. It counts verified and
+indexed-only records separately, and paginates accounts at 80 per view. The
+existing 80-item limit still applies to *optional manual additional feed checks*,
+not the automatic account census.
+
+Cross-platform connected-account groups are shown **only** when each public
+profile explicitly links the other profile's canonical URL. They are evidence
+of public cross-promotion or self-declared connection, **not a confirmed
+individual/person identity**. There is no style/activity/facial/handle
+similarity-based inferred identity linkage. Unlinked/unchecked profiles are
+unknown, not separate people. The reader automatically checks at most 160
+Bluesky profiles (using the unauthenticated official getProfiles API) and 32
+allowlisted public Mastodon profiles per page pass, without persistence or
+paid calls. Unsupported networks and remaining profiles are not verified for
+cross-links. Only profile URLs and live public metadata are used in memory.
+
+**Scope:** This does not convert the visitor's current filtered feed into a
+complete all-time index of tens of thousands of accounts. The backend needs
+a durable, authorized, pagination-aware account index and a rate-limited
+refresh worker to reach that coverage. The browser reports only profiles
+actually visible to `INTERSECTION_publicAccountSnapshot()`; no full-corpus
+coverage is claimed. Synthetic Chromium QA verifies 20,002 profiles and
+a reciprocal-link group; it is a scalability fixture, not a live data census.
+
 # Demand Research — TeraBox private post archive
 
 ## Purpose
