@@ -204,16 +204,18 @@ def run(live=False):
                 assert page.locator("article[data-media-policy=adult] .post-thumb > img").count()>0
                 assert page.locator("article[data-media-policy=restricted] .post-thumb > img").count()==0
                 assert len(api_calls)>=21 and all("since" in q and "until" in q for q in api_calls)
-                page.get_by_role("button",name="섹트",exact=True).click()
-                assert page.locator("article.post").count()>0
-                assert "섹트" in page.locator("article.post .post-excerpt").first.inner_text()
-                page.get_by_role("button",name="전체",exact=True).click()
-                assert page.locator("article.post").count()==270
+                assert page.locator("#tabs,[data-term]").count()==0
+                # All three terms remain in the unsegmented post feed.
+                all_text=" ".join(page.locator("article.post .post-excerpt").all_inner_texts())
+                assert all(term in all_text for term in TERMS)
 
                 page.set_viewport_size({"width":390,"height":844})
                 assert page.locator("#feed").evaluate("e=>getComputedStyle(e).gridTemplateColumns.split(' ').length")==3
                 assert page.locator("#openDate").is_visible()
                 assert page.locator("#openDate").evaluate("e=>e.getBoundingClientRect().right")<=391
+                title=page.locator("header h1").bounding_box()
+                date=page.locator("header #openDate").bounding_box()
+                assert abs((title["y"]+title["height"]/2)-(date["y"]+date["height"]/2))<14
                 page.locator("#openDate").click()
                 boxes=page.locator("#dateDialog input[type=date]").evaluate_all(
                   "els=>els.map(e=>e.getBoundingClientRect().toJSON())")
