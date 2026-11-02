@@ -84,3 +84,31 @@ are **NOT YET VERIFIED**.
 Validation: `cd apps/demand-research && python -m pytest -q test_gateway.py test_social_sources.py`.
 Fixtures represent synthetic rows only; passing these tests does not imply
 live records exist.
+
+## Verified zero-key public SNS search link discovery (2026-11-02)
+
+Public Pages now offers a user-triggered, independently-labelled indexed-link discovery feature in free_discovery.js. This feature NEVER changes real Bluesky post counts and NEVER pretends index candidates are verified original posts.
+
+- Keenable public no-key endpoint: POST https://api.keenable.ai/v1/search/public, X-Keenable-Title header, keyword and site restriction, max 10 results.
+- Firecrawl public no-key endpoint: POST https://api.firecrawl.dev/v2/search, web-only, max 10 results. No key or billing data is supplied. The provider enforces shared-IP daily requests/credits; an HTTP 429 ends use, with no automatic paid upgrade.
+- A click triggers at most two requests and no request happens automatically. Browser-side per-session 12 click courtesy guard and 10-second cooldown; these are not global abuse controls.
+- Validate canonical X status, Threads post and Instagram p/reel links with strict domain/path allowlists, reject spoofed domains and HTTP links, deduplicate by platform post ID, and display snippets as plain text (no injected HTML). Author profile links are shown only when a permalink contains a defensible handle. Candidate links open in a new tab.
+- These search-index candidates lack verified original content, original timestamp and certainty of visibility. They are displayed separately, without fabricated dates and outside the cloud catalog or real posts feed. Never copy indexed sensitive personal data to a public archive.
+
+**Live GitHub Actions evidence:** On 2026-11-02, Firecrawl returned 2 canonical X, 8 Threads and 4 Instagram links; Keenable returned 7 X, 8 Threads, 0 Instagram links for initial project terms. These are NON-DEDUPLICATED search result URL candidates, not true confirmed live posts; repeat queries showed result variation. Five X candidate original-status checks were inconclusive. Both providers returned CORS preflight success for https://koith.github.io. Prior Bing RSS tests returned 0 canonical social-post links. An additional direct no-key source benchmark validated public X single-post lookup through FixTweet/vxTwitter, Telegram 20 message previews, a scoped Arctic Shift Reddit feed with 3 posts, and Misskey/Nostr control-word searches; none proves project-term full-text coverage.
+
+Browser QA: python apps/demand-research/test_free_discovery_browser.py, and --live for real provider CORS/data in Chromium. CLI source probes: probe_free_sources_v2.py, probe_free_index_v2.py, probe_keyless_search.py, probe_live_verify.py. All CI probes print aggregate counts only and do not retain personal text, URLs, usernames, media or IDs.
+
+Source documentation:
+- Firecrawl free keyless IP daily limits: https://github.com/firecrawl/firecrawl-docs/blob/main/rate-limits.mdx
+- Firecrawl search operators and limits: https://github.com/firecrawl/firecrawl-docs/blob/main/features/search.mdx
+- Keenable free search pricing: https://keenable.ai/pricing
+- socialfetch public single-post and Telegram viewer: https://github.com/EdgeAIG/socialfetch
+
+Provider terms, indexing, deletion and CORS rules can change. Keyless index search is a link discovery aid, NOT completeness evidence, a right to republish, or a guarantee of zero errors.
+
+### Follow-up original verification (2026-11-02)
+
+- A second FxEmbed X status comparison corrected a date-parser false negative. Five public X original records resolved with HTTP 200, and two contained the requested literal project keyword. **None** was posted in the preceding 32 days. One keyless Firecrawl original-page scrape also returned HTTP 200, non-empty page text containing the term, but no published-date metadata. Repeated original scrapes remain unreliable: first X request timed out, and Threads/Instagram returned 403.
+- FxEmbed v2 global search is **NOT** a current viable keyless discovery source: despite documented GET /2/search, both project and neutral control queries returned HTTP 404 (see open public upstream issue). Single X original lookup is a separate successfully verified feature, not proof that global X search works.
+- In Chromium running at the GitHub Pages origin, GET https://api.fxtwitter.com/status/20 returned HTTP 200 with a public post and readable JSON via CORS. A manually clicked **X 공개 원문 확인 (무료)** action uses this free endpoint to check the exact post ID, content, keyword and actual provider timestamp before optionally displaying the text. This is an unofficial third-party API, not X's first-party proof; other provider data are still marked indexed-only. No automatic mass collection, storage or download occurs.

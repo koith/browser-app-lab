@@ -8,6 +8,8 @@ on:
       - "apps/demand-research/index.html"
       - "apps/demand-research/test_live_browser.py"
       - "apps/demand-research/test_private_social_browser.py"
+      - "apps/demand-research/free_discovery.js"
+      - "apps/demand-research/test_free_discovery_browser.py"
       - ".github/workflows/demand-live-browser.yml"
   pull_request:
     paths:
@@ -38,5 +40,9 @@ jobs:
         run: python apps/demand-research/test_live_browser.py
       - name: Synthetic private gateway social search UI (one request, badge, profile link)
         run: python apps/demand-research/test_private_social_browser.py
+      - name: Zero-cost search index browser fixture (dedup, safety, no keys)
+        run: python apps/demand-research/test_free_discovery_browser.py
+      - name: Real zero-cost public search in Chromium (aggregate-only)
+        run: python apps/demand-research/test_free_discovery_browser.py --live
       - name: Real public API from browser with CORS (aggregate-only, no retained posts)
         run: python apps/demand-research/test_live_browser.py --live
