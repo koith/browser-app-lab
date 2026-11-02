@@ -124,7 +124,7 @@ jobs:
 
   launch-safely-deduplicated-captures:
     needs: audit-both-models
-    if: github.ref == 'refs/heads/main' && github.event_name != 'schedule'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
     timeout-minutes: 12
     env:
@@ -162,7 +162,7 @@ jobs:
 
   serialize-committing-source-discoveries:
     needs: audit-both-models
-    if: github.ref == 'refs/heads/main' && github.event_name != 'schedule'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
     timeout-minutes: 260
     env:
