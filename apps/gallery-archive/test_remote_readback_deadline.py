@@ -62,4 +62,56 @@ class RemoteDeadlineTests(unittest.TestCase):
             read_remote(row,'unused',2,[sys.executable,'-c','print("abd",end="")'])
 
 
+    def test_copyto_retries_temporary_corrupted_transfer_and_still_checks_sha(self):
+        payload = b'q' * 1000
+        cat = [sys.executable, '-c', 'import sys;sys.stdout.write(\'{"errno":400141}\')']
+        with tempfile.TemporaryDirectory() as tmp:
+            attempt = Path(tmp) / 'attempt'
+            copy = (
+                'from pathlib import Path;import sys;'
+                's=Path(sys.argv[1]);n=(int(s.read_text()) if s.exists() else 0)+1;'
+                's.write_text(str(n));Path(sys.argv[2]).write_bytes(b"q"*1000);'
+                'sys.stderr.write("corrupted on transfer: sizes differ" if n==1 else "");'
+                'sys.exit(1 if n==1 else 0)'
+            )
+            row = ('private-key', len(payload), hashlib.sha256(payload).hexdigest())
+            actual = read_remote_with_recovery(row, 'unused', 12, cat,
+                [sys.executable, '-c', copy, str(attempt), '{dest}'])
+            self.assertEqual(actual, 'private-key')
+            self.assertEqual(attempt.read_text(), '2')
+
+    def test_copyto_same_error_with_403_is_not_retried(self):
+        payload = b'q' * 1000
+        cat = [sys.executable, '-c', 'import sys;sys.stdout.write(\'{"errno":400141}\')']
+        with tempfile.TemporaryDirectory() as tmp:
+            attempt = Path(tmp) / 'attempt'
+            copy = (
+                'from pathlib import Path;import sys;'
+                's=Path(sys.argv[1]);s.write_text((s.read_text() if s.exists() else "")+"x");'
+                'sys.stderr.write("HTTP 403: corrupted on transfer: sizes differ");sys.exit(1)'
+            )
+            row = ('private-key', len(payload), hashlib.sha256(payload).hexdigest())
+            with self.assertRaises(ValueError):
+                read_remote_with_recovery(row, 'unused', 12, cat,
+                    [sys.executable, '-c', copy, str(attempt), '{dest}'])
+            self.assertEqual(attempt.read_text(), 'x')
+
+    def test_copyto_persistent_corruption_fails_closed_after_three_attempts(self):
+        payload = b'q' * 1000
+        cat = [sys.executable, '-c', 'import sys;sys.stdout.write(\'{"errno":400141}\')']
+        with tempfile.TemporaryDirectory() as tmp:
+            attempt = Path(tmp) / 'attempt'
+            copy = (
+                'from pathlib import Path;import sys;'
+                's=Path(sys.argv[1]);s.write_text((s.read_text() if s.exists() else "")+"x");'
+                'sys.stderr.write("corrupted on transfer: sizes differ");sys.exit(1)'
+            )
+            row = ('private-key', len(payload), hashlib.sha256(payload).hexdigest())
+            with self.assertRaises(ValueError):
+                read_remote_with_recovery(row, 'unused', 12, cat,
+                    [sys.executable, '-c', copy, str(attempt), '{dest}'])
+            self.assertEqual(attempt.read_text(), 'xxx')
+
+
+
 if __name__=='__main__':unittest.main(verbosity=2)

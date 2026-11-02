@@ -25,6 +25,10 @@ class RemoteCommandFailure(ValueError):
 
 
 
+class OwnerCopytoTransferSizeMismatch(ValueError):
+    """Transient same-account copyto read failure, not successful file integrity."""
+
+
 class ProviderReadChallenge(ValueError):
     """The ordinary authenticated read returned a provider JSON challenge, not media."""
     def __init__(self, code, received):
@@ -56,8 +60,15 @@ def read_remote_via_copyto(row, remote, deadline_seconds=75, command=None):
                 raise TimeoutError('Alternate owner read deadline exceeded') from None
             if proc.returncode:
                 errors.seek(0)
+                raw_error=errors.read(32000).decode('utf-8','replace')
+                # Classify the private raw diagnostic without ever emitting it.
+                # Provider denials and auth challenges always fail closed.
+                transient_size=bool(re.search(r'corrupted on transfer:\s*sizes differ',raw_error,re.I))
+                denied=bool(re.search(r'\b(?:401|403|429|451)\b|access denied|failed to login',raw_error,re.I))
+                if transient_size and not denied:
+                    raise OwnerCopytoTransferSizeMismatch('Owner copyto transfer size mismatch')
                 raise ValueError('Owner copyto read failed (same account): '+
-                                 diagnostic(errors.read(32000).decode('utf-8','replace'))[:320])
+                                 diagnostic(raw_error)[:320])
         if not destination.is_file() or destination.stat().st_size!=size:
             raise ValueError('Owner copyto returned wrong byte length')
         digest=hashlib.sha256()
@@ -121,7 +132,22 @@ def read_remote_with_recovery(row,remote,deadline_seconds=75,command=None,copyto
         # A live same-account experiment proved rclone copyto can retrieve the
         # exact original while cat returns a 112-byte provider JSON response.
         # The alternative MUST independently pass the complete SHA-256.
-        return read_remote_via_copyto(row,remote,min(75,deadline-time.monotonic()),copyto_command)
+        # TeraBox occasionally interrupts an otherwise authenticated copyto
+        # with "corrupted on transfer: sizes differ". This is a transport read
+        # failure, NOT evidence of matching media. Retry at most twice with a
+        # fresh local target, under the ORIGINAL per-object deadline. Access
+        # denials, verification challenges, and successful wrong bytes remain
+        # hard failures and must never be retried by this fallback.
+        for attempt in range(3):
+            remaining=deadline-time.monotonic()
+            if remaining<=2:raise TimeoutError('Owner copyto SHA readback deadline exceeded')
+            try:
+                return read_remote_via_copyto(row,remote,min(75,remaining),copyto_command)
+            except OwnerCopytoTransferSizeMismatch:
+                if attempt==2 or deadline-time.monotonic()<=4:
+                    raise
+                time.sleep(min(1+attempt,max(0,deadline-time.monotonic()-2)))
+        raise AssertionError('Unreachable bounded copyto retry')
     except RemoteCommandFailure as error:
         if not error.retryable_transport or deadline-time.monotonic()<=2:raise
         time.sleep(1)
