@@ -51,3 +51,31 @@ def test_durable_snapshot_requires_private_cloud_env(tmp_path,monkeypatch):
     monkeypatch.delenv("RCLONE_CONFIG_ARCHIVE_COOKIE",raising=False)
     with pytest.raises(RuntimeError,match="credential"):
         job.run()
+
+
+def test_immutable_manifest_write_and_latest_selection(tmp_path,monkeypatch):
+    cloud={}
+    def fake_command(args,*,data=None,timeout=180):
+        if args[0]=="copyto":
+            cloud[args[2]]=__import__("pathlib").Path(args[1]).read_bytes()
+            return b""
+        if args[0]=="lsf":
+            return b"manifest-123456789.json\nmanifest-123456788.json\n"
+        raise AssertionError("mutable latest.json overwrite must not be called")
+    monkeypatch.setattr(job,"command",fake_command)
+    monkeypatch.setattr(job,"read_remote",lambda path,limit,optional=False:cloud.get(path))
+    previous={"file":"snapshot-123456788.sqlite3","sha256":"b"*64}
+    cloud[job.REMOTE+"/manifests/manifest-123456788.json"]=json.dumps(previous).encode()
+    current={"file":"snapshot-123456789.sqlite3","sha256":"a"*64}
+    result=job.publish_manifest(tmp_path,current,"123456789")
+    assert result["file"]==current["file"]
+    assert job.latest_manifest()["file"]==current["file"]
+    assert job.REMOTE+"/latest.json" not in cloud
+    assert job.REMOTE+"/manifests/manifest-123456788.json" in cloud
+
+
+def test_immutable_manifest_corruption_does_not_replace_prior(tmp_path,monkeypatch):
+    monkeypatch.setattr(job,"command",lambda *a,**k:b"")
+    monkeypatch.setattr(job,"read_remote",lambda *a,**k:b"tampered")
+    with pytest.raises(RuntimeError,match="readback mismatch"):
+        job.publish_manifest(tmp_path,{"file":"snapshot-123456789.sqlite3","sha256":"a"*64},"123456789")
