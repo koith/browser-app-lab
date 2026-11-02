@@ -79,12 +79,13 @@ const {chromium,webkit}=require('playwright');
     const victory=pawn.dataset.sourceFrameSequence;
     window.__LEAF_GENESIS_ACTORS__.poseByPlayer(match.players[0].id,'idle',0);
     return {id,idle,walking,attack,hurt,victory,evidence,continuity,atlas,
-     fullFrames:window.ORIGINAL_LEAF_FULL_ACTION_FRAMES?.[id]?.frames?.length||0,
+     fullFrames:window.ORIGINAL_LEAF_EXT_ACTION_FRAMES?.[id]?.frames?.length||
+       window.ORIGINAL_LEAF_FULL_ACTION_FRAMES?.[id]?.frames?.length||0,
      image:image.getAttribute('src'),rig:pawn.dataset.actorRig};
    },id);
-   const tableActor=row.fullFrames===37&&!['0084','0085','0086'].includes(id)&&id!=='0042';
+   const tableActor=row.fullFrames===37&&!['0084','0085','0086'].includes(id);
    assert.equal(row.idle,tableActor?'22,23,24,23':'25',id+' front idle');
-   assert.equal(row.walking,id==='0042'?'25,30,25,30':'25,26,27,28,29,30',
+   assert.equal(row.walking,'25,26,27,28,29,30',
     id+' forward-facing original source movement without a BACK 0..7 spin');
    assert.equal(row.continuity,'true');
    const structural=row.fullFrames===37&&!['0084','0085','0086'].includes(id);

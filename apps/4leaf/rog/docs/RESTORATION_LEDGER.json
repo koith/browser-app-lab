@@ -1412,6 +1412,19 @@
         "SRC-01",
         "QA-03"
       ]
+    },
+    {
+      "id": "REQ-20261102-GPT-010",
+      "date": "2026-11-02",
+      "origin": "user",
+      "text": "GPT independent follow-up: deploy source-verified extended complete OBS frames for previously partial chessman actors 0042 and 0045, preserving original-source fallback, runtime Playwright QA and release identity. Non-37 frame actor action tables stay unverified and never fabricated.",
+      "taskIds": [
+        "ACT-03",
+        "ACT-05",
+        "SRC-01",
+        "QA-03",
+        "P0-RELEASE"
+      ]
     }
   ],
   "tasks": [
@@ -7606,6 +7619,34 @@
         "QA-03"
       ],
       "details": "First successful CI run 41383794180 verified extraction but GitHub outputs remained untracked due to .gitignore. Repaired workflow to git add -f and reran 41383997188. VERIFIED subsequent data branch contains obs-census/census.json and 422 original pixel PNG files + manifest with SHA256 validated. No OBS2/OBS3 actor candidates were promoted. Production runtime not yet connected; source completeness and original animation fidelity still in_progress."
+    },
+    {
+      "seq": 347,
+      "date": "2026-11-02",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261102-GPT-010",
+      "taskIds": [
+        "ACT-03",
+        "ACT-05",
+        "SRC-01",
+        "QA-03",
+        "P0-RELEASE"
+      ],
+      "details": "GPT runtime integration of complete source-extracted 0042/0045 packets, guarded by source SHA256 manifest metadata and reviewed facing pixels."
+    },
+    {
+      "seq": 348,
+      "date": "2026-11-02",
+      "type": "ORIGINAL_EXTENDED_FRAMES_RUNTIME_CONNECTED",
+      "requestId": "REQ-20261102-GPT-010",
+      "taskIds": [
+        "ACT-03",
+        "ACT-05",
+        "SRC-01",
+        "QA-03",
+        "P0-RELEASE"
+      ],
+      "details": "Original SHA1-verified archive extraction contributed 37/37 authentic OBS frames for each previously partial actor 0042 and 0045. Runtime loads /original/OBS/action-full-ext/manifest.js in index.html before actors. Only audited actor 0042 is allowed inferred 37-frame directional action sequences, actor 0045 holds source-reviewed frame18 (no EXE action-map invention). Other seven non-37 partial actors remain source-archived without fabricated original action assignment. Extended native-image failures retry and fall back to prior authentic OBS frames. Chromium integration added to existing round4 QA workflow. App version beta45 and PWA v132; final real-device/source equivalence not yet verified."
     }
   ]
 }

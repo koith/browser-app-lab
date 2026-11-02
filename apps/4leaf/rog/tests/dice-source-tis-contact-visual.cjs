@@ -64,8 +64,11 @@ const {chromium}=require('playwright');
      dmp:[Number(t.dataset.dmpX),Number(t.dataset.dmpY)],art:t.dataset.originalArt})),
     pawns:pawns.map(p=>{
      const img=p.querySelector('.leaf-chess-original-obs');
-     const table=p.dataset.sourceFullFrame==='true'||/action-full/.test(img?.getAttribute('src')||'')
-      ?window.ORIGINAL_LEAF_FULL_ACTION_FRAMES:window.ORIGINAL_LEAF_OBS_FRAMES;
+     const frameSource=img?.getAttribute('src')||'';
+     const table=frameSource.includes('/action-full-ext/')
+      ?window.ORIGINAL_LEAF_EXT_ACTION_FRAMES
+      :p.dataset.sourceFullFrame==='true'||/action-full/.test(frameSource)
+       ?window.ORIGINAL_LEAF_FULL_ACTION_FRAMES:window.ORIGINAL_LEAF_OBS_FRAMES;
      const f=table?.[p.dataset.chessmanId]?.frames.find(x=>x.index===Number(p.dataset.actorFrame));
      const shadow=getComputedStyle(p,'::before');
      const root=getComputedStyle(p);

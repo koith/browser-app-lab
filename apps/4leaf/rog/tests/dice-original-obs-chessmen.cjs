@@ -51,7 +51,7 @@ const {chromium,webkit}=require('playwright');
    'original source full-body replaces all synthetic puppets when available');
   assert.ok(sources.visible.every(x=>x.hidden==='none'&&x.poseMapping==='unverified'),
    'no CSS-generated humanoid or invented native pose metadata is displayed');
-  assert.deepEqual(sources.visible.map(x=>x.source),['OBS/1045.obs','OBS/1042.obs']);
+  assert.deepEqual(sources.visible.map(x=>x.source),['OBS/OBS.pak/1045.obs','OBS/OBS.pak/1042.obs']);
   assert.ok(sources.visible.every(x=>x.src?.startsWith('./original/OBS/')));
   assert.ok(sources.actors.every(x=>x.originalRecovered==='true'));
   assert.equal(sources.cache['0045'].originalAnimationCount,37);
@@ -68,7 +68,8 @@ const {chromium,webkit}=require('playwright');
    '#board-pawns .board-pawn')].map(pawn=>{
    const img=pawn.querySelector('.leaf-chess-original-obs');
    const id=pawn.dataset.chessmanId;
-   const manifest=window.ORIGINAL_LEAF_OBS_FRAMES[id];
+   const manifest=window.ORIGINAL_LEAF_EXT_ACTION_FRAMES?.[id]||
+     window.ORIGINAL_LEAF_OBS_FRAMES[id];
    const frame=manifest?.frames.find(f=>f.url===img?.getAttribute('src'));
    return {id,src:img?.getAttribute('src'),loaded:!!img?.complete,
     sourceMember:manifest?.originalMember,
@@ -82,7 +83,7 @@ const {chromium,webkit}=require('playwright');
    assert.ok(frame.loaded&&frame.expected,'loaded frame must be in original OBS.pak archive manifest: '+JSON.stringify(frame));
    assert.deepEqual(frame.actual,frame.expected,
     'the current live animation frame must retain its own genuine native dimensions: '+JSON.stringify(frame));
-   assert.match(frame.sourceMember,/^10(45|42)\.obs$/);
+   assert.match(frame.sourceMember,/^(?:OBS\.pak\/)?10(45|42)\.obs$/);
    assert.equal(frame.poseMapping,'unverified','do not invent historically proven OBS action names');
   }
   const sizes=sourceFrames.map(f=>f.actual);
