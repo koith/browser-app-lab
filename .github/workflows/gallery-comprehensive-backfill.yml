@@ -58,11 +58,19 @@ jobs:
               continue
             fi
             echo "::add-mask::$RCLONE_CONFIG_ARCHIVE_COOKIE"
-            if rclone cat "$remote/metadata/catalog.json" --timeout 45s --retries 1 > "$RUNNER_TEMP/owner/$model.json" 2>"$RUNNER_TEMP/reader-error"; then
-              echo "$model: PRIVATE_CATALOG_READ_OK" >> "$GITHUB_STEP_SUMMARY"
+            # A 0 exit status from rclone cat may still contain provider JSON
+            # (e.g. errno=400141) instead of the expected private catalog.
+            # Reuse the existing validated metadata reader, which verifies
+            # schema, model and the minimum published owner photo count and
+            # may use one normal same-account copyto readback when permitted.
+            if python apps/gallery-archive/read_owner_metadata.py \\
+                --remote "$remote" --model "$model" \\
+                --published-index "apps/$model-gallery/owner-index.json" \\
+                --out "$RUNNER_TEMP/owner/$model.json" 2>"$RUNNER_TEMP/reader-error"; then
+              echo "$model: PRIVATE_CATALOG_SCHEMA_AND_READBACK_VERIFIED" >> "$GITHUB_STEP_SUMMARY"
             else
               rm -f "$RUNNER_TEMP/owner/$model.json"
-              echo "$model: PRIVATE_CATALOG_READ_FAILED (public archive still audited)" >> "$GITHUB_STEP_SUMMARY"
+              echo "$model: PRIVATE_CATALOG_UNVERIFIED (public archive only)" >> "$GITHUB_STEP_SUMMARY"
             fi
           done
       - name: Compare physical SHA bytes, private slots, all research source manifests
