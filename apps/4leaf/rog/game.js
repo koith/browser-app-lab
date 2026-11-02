@@ -735,11 +735,11 @@ function drawNativeChessmen(){
  root.dataset.playerId=String(p.id);
  root.dataset.selectedIndex=String(selectedIndex);
  root.dataset.playerName=p.name;
- // The 2004 battle.jpg right-hand ability slots show tiny FULL-BODY
- // Chessmen, not 75x141 CardData facial headshots. Only twenty recovered
- // OBS members have had a human visual check of their true FRONT packet.
- // Reuse the identical source authority used for live DMP/battle actors;
- // never invent a front-facing direction for unreviewed OBS or an FX member.
+ // The original battle.jpg right-hand ability slots show FULL-BODY
+ // chessmen, not unrelated CardData headshots. Use human-reviewed FRONT
+ // pixels where available. For other CHR-linked authentic bodies, an
+ // original native keyframe can be shown with inferred-facing provenance;
+ // original 2002 source direction labels still require EXE verification.
  const verifiedFront=window.__LEAF_GENESIS_ACTORS__?.getState()
   ?.originalFrontVisualAudited||{};
  for(let i=0;i<4;i++){
@@ -772,7 +772,14 @@ function drawNativeChessmen(){
    const verifiedClassic=chrBody?.pak==='OBS'&&
     bodyKey&&Object.hasOwn(verifiedFront,bodyKey);
    const auditedIndex=verifiedClassic?verifiedFront[bodyKey]:null;
-   const fullBody=auditedIndex===null?null:
+   // The source 18-byte CHR/OBS2/OBS3 records provide authentic keyframe
+   // indexes for all 78 published bodies. Where no independent visual
+   // orientation review exists, display a REAL indexed body frame but
+   // explicitly mark its presumed "front" role as INFERRED/UNVERIFIED.
+   // Never fabricate a frame or silently transfer a different card's body.
+   const candidate=auditedIndex===null&&sourceMember?
+    window.__LEAF_NATIVE_CARD_ACTIONS__?.frontFrame(sourceMember,obsId):null;
+   const fullBody=auditedIndex===null?candidate:
     sourceMember?.frames?.find(frame=>frame.index===auditedIndex);
    // Always expose authentic membership for regression/auditing, even when
    // the corresponding original pixels have not yet been published.
@@ -784,9 +791,11 @@ function drawNativeChessmen(){
     img.classList.add('dice-chessman-original-obs');
     img.src=fullBody.url;
     img.dataset.originalMember=chrBody.originalMember;
-    img.dataset.nativeFrontFrame=String(auditedIndex);
-    slot.dataset.rightPortraitSource='OBS.pak/verified-front';
-    slot.dataset.rightPortraitFacingEvidence='visually-reviewed';
+    img.dataset.nativeFrontFrame=String(fullBody.index);
+    slot.dataset.rightPortraitSource=auditedIndex===null?
+     'CHR-OBS/native-keyframe-role-inferred':'OBS.pak/verified-front';
+    slot.dataset.rightPortraitFacingEvidence=auditedIndex===null?
+     'original-18-byte-frame-index-VERIFIED/orientation-INFERRED':'visually-reviewed';
     img.onerror=()=>{
      img.onerror=null;img.src=imageFor(source.id);
      img.classList.remove('dice-chessman-original-obs');
