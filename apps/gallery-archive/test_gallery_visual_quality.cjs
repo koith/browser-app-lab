@@ -55,7 +55,11 @@ for(const model of ['yui','mimmi']){
  const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
  const owner=fs.readFileSync(path.join(root,'owner-media.js'),'utf8');
  assert.ok(html.includes('image-quality.js?v=2'),model+' cache-busts quality scorer');
- assert.ok(html.includes('GalleryPhotoQuality.preferred(previous,p)'),model+' ranks duplicate photo slots');
+ // A different SHA is a distinct stored file, even when two source catalogs
+ // reuse a display number. Optical ranking remains for true replacement
+ // decisions inside the authenticated owner-catalog reconciliation.
+ assert.ok(html.includes('SavedGalleryPhotoUnion.join([localStored,ownerStored,vaultStored])'),model+' retains SHA-distinct saved photo variants');
+ assert.ok(html.includes('src="saved-photo-union.js"'),model+' loads the real stored-photo merge module');
  assert.ok(owner.includes('globalThis.GalleryPhotoQuality?.preferred(old,p)'),model+' avoids megapixel-only async overwrite');
  console.log('GALLERY_OPTICAL_QUALITY_FIRST_WATERMARK_SECOND_PASS',model);
 }

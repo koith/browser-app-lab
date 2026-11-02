@@ -1,0 +1,44 @@
+name: Both Galleries Saved-Photo SHA Union and Storage Route QA
+on:
+  pull_request:
+    paths:
+      - apps/mimmi-gallery/index.html
+      - apps/yui-gallery/index.html
+      - apps/mimmi-gallery/saved-photo-union.js
+      - apps/yui-gallery/saved-photo-union.js
+      - apps/gallery-archive/test_saved_photo_union.cjs
+      - .github/workflows/gallery-saved-photo-union-qa.yml
+permissions:
+  contents: read
+jobs:
+  union-source-and-real-corpus:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            apps/gallery-archive
+            apps/mimmi-gallery
+            apps/yui-gallery
+          sparse-checkout-cone-mode: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Inspect real Mimmi and Yui albums, saved SHA and actual storage positions
+        run: |
+          node --check apps/mimmi-gallery/saved-photo-union.js
+          node --check apps/yui-gallery/saved-photo-union.js
+          node apps/gallery-archive/test_saved_photo_union.cjs
+      - name: Verify JS loaded before static-index merge and no second inline script
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          for model in ('mimmi','yui'):
+              page=Path('apps',f'{model}-gallery','index.html').read_text()
+              assert page.index('src="saved-photo-union.js"')<page.index('function rebuildStored()')
+              assert 'SavedGalleryPhotoUnion.join([localStored,ownerStored,vaultStored])' in page
+              assert len(re.findall(r'<script>(.*?)</script>',page,re.S))==1
+              print('SAVED_PHOTO_UNION_GALLERY_SCRIPT_INVARIANTS_PASS',model)
+          PY
