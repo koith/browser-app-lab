@@ -4,6 +4,7 @@ on:
     paths:
       - "apps/demand-research/probe_social_improvements.py"
       - "apps/demand-research/probe_meta_originals.py"
+      - "apps/demand-research/probe_multiterm.py"
       - ".github/workflows/intersection-social-improvements.yml"
   workflow_dispatch:
 permissions:
@@ -18,3 +19,5 @@ jobs:
         run: python apps/demand-research/probe_social_improvements.py
       - name: Read public Threads and Instagram originals through free providers
         run: python apps/demand-research/probe_meta_originals.py
+      - name: Compare 3-source OR and hashtag no-key discovery coverage
+        run: python apps/demand-research/probe_multiterm.py
