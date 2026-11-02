@@ -76,3 +76,27 @@ def product(product_id: str, authorization: str | None = Header(default=None)):
         if item["product_id"] == product_id:
             return {"dataset": report["dataset"], "product": item}
     raise HTTPException(404, detail="product not found")
+
+
+def _public_editorial() -> dict:
+    """Only a bundled, licensed aggregate; not the existing SNS database."""
+    file_path=Path(__file__).resolve().parent / "consumer" / "editorial-report.json"
+    try:
+        if not file_path.is_file() or file_path.stat().st_size>200_000:
+            raise ValueError("editorial report absent or oversized")
+        record=json.loads(file_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError, UnicodeDecodeError, json.JSONDecodeError):
+        raise HTTPException(503,detail="licensed editorial report unavailable")
+    if (not isinstance(record,dict) or record.get("schema_version")!=1
+        or record.get("dataset",{}).get("kind")!="real_editorial_product_ratings"
+        or record.get("dataset",{}).get("is_consumer_demand") is not False
+        or record.get("dataset",{}).get("license")!="CC BY 4.0"
+        or not isinstance(record.get("products"),list)):
+        raise HTTPException(503,detail="editorial report schema mismatch")
+    return record
+
+
+@app.get("/api/consumer/editorial")
+def editorial():
+    """Public general-goods editorial ratings; never individual review content."""
+    return _public_editorial()
