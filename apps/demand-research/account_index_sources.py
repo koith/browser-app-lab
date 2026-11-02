@@ -116,7 +116,10 @@ def run_batch(db_path,fetcher=fetch_public,max_requests=6,now=None):
         _ensure_queue(db)
         previous=db.execute("SELECT value FROM index_meta WHERE key='last_public_scan'").fetchone()
         if previous and now-int(previous[0])<55*60:
-            return {"requests":0,"accepted":0,"skipped_recent_run":True}
+            prior_errors=db.execute("""SELECT count(*) FROM public_index_windows
+                WHERE status='pending' AND error<>''""").fetchone()[0]
+            if not prior_errors:
+                return {"requests":0,"accepted":0,"skipped_recent_run":True}
         # Always check the last complete hour on the public index.
         for term in TERMS:
             db.execute("""INSERT OR IGNORE INTO public_index_windows
