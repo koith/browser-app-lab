@@ -60,7 +60,7 @@ const {chromium,webkit}=require('playwright');
    original:document.querySelectorAll('#board-nodes>.tile').length,
    // Accept only native member 1171's verified UI or newly decoded
    // SHA256-gated trailer chain pixels. Never accept fabricated/web art.
-   tumbleUrls:(window.__LEAF_DICE_FALL__.originalEmbeddedDice(6)?.frames||
+   tumbleUrls:(window.__LEAF_DICE_FALL__.playableEmbeddedDice(6)?.frames||
     (window.ORIGINAL_LEAF_UI_FRAMES?.['1171']?.frames||[]).filter(f=>f.index>=6)).map(f=>f.url),
    sprites:[...document.querySelectorAll('#leaf-dice-fall-layer .leaf-fall-piece[data-sides="6"]')].map(n=>({
     src:n.querySelector('.leaf-fall-original-d6')?.getAttribute('src')||null,

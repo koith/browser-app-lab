@@ -38,7 +38,12 @@ const sw=read('sw.js'),meta=JSON.parse(read('app-version.json'));
 assert.ok(sw.includes("const EMBEDDED_DIE_OFFLINE=") &&
  sw.includes("concat(EMBEDDED_DIE_OFFLINE)"),'all die frames included in offline cache');
 assert.ok(sw.includes("const REVISION='"+meta.pwaCache+"'"));
-assert.equal(meta.version,'0.86.0-beta.48');
+assert.equal(meta.version,'0.86.0-beta.49');
+const diceFall=read('dice-fall.js');
+assert.ok(diceFall.includes('EMBEDDED_PALETTE_REVIEWED_SHA256=Object.freeze({})'),
+ 'incorrect per-block palettes must not be approved by default');
+assert.ok(diceFall.includes('const embedded=playableEmbeddedDice(sides)'),
+ 'live roll must use exact SHA256 allowlisted corrected frames only');
 console.log('4LEAF NATIVE EMBEDDED DICE SOURCE PROVENANCE PASS',
  JSON.stringify({sourcePixels:count,d6:38,d4:25,installerSHA1:'86526d89679ae39b85fe9808da97ad871b7888d9',
  role:'source-bytes-VERIFIED/sequencing-INFERRED',version:meta.version}));

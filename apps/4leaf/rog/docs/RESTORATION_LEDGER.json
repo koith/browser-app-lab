@@ -1507,6 +1507,18 @@
         "QA-03",
         "P0-RELEASE"
       ]
+    },
+    {
+      "id": "REQ-20261102-GPT-017",
+      "date": "2026-11-02",
+      "origin": "User 9th restoration continuation based on Claude's 8th decode result",
+      "text": "Resume original 4LEAF restoration; quarantine mispaletted 63 D4/D6 embedded frames pending independent block palette verification; preserve working original UI die and game result; establish Claude source decode / GPT live runtime responsibilities.",
+      "taskIds": [
+        "P0-DICE",
+        "SRC-01",
+        "QA-03",
+        "P0-RELEASE"
+      ]
     }
   ],
   "tasks": [
@@ -7939,6 +7951,32 @@
         "P0-RELEASE"
       ],
       "details": "D6 1171.embedded 16+16+6=38, D4 1223.embedded 9+16=25 source image packets. dice-fall.js selectively uses verified pixels with WEB inferred sequence labels, maintains source UI face result and unchanged gameplay RNG/turn/match. Chromium and WebKit live QA + offline PWA v135 in PR pending, physical iPhone and exact 2002 playback still UNVERIFIED."
+    },
+    {
+      "seq": 361,
+      "date": "2026-11-02",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261102-GPT-017",
+      "taskIds": [
+        "P0-DICE",
+        "SRC-01",
+        "QA-03",
+        "P0-RELEASE"
+      ],
+      "details": "New confirmed incorrect palette discovered in the original 63 embedded trailer frame integration."
+    },
+    {
+      "seq": 362,
+      "date": "2026-11-02",
+      "type": "PALETTE_QUARANTINE_RUNTIME_FIX_PR_PENDING",
+      "requestId": "REQ-20261102-GPT-017",
+      "taskIds": [
+        "P0-DICE",
+        "SRC-01",
+        "QA-03",
+        "P0-RELEASE"
+      ],
+      "details": "Previous PR515 embedded frame sequence was from source bytes but FIRST-block palette was incorrectly applied to independent later blocks. Runtime now requires explicit SHA256 allowlist for fully reviewed palette-corrected frames; 63 existing archive images remain catalogued but cannot be used or preloaded as live frames. Original source UI OBS 1171/1223 frames and verified game results remain intact. Browser and CI acceptance not yet confirmed."
     }
   ]
 }
