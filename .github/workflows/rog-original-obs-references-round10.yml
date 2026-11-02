@@ -1,0 +1,121 @@
+name: 4LEAF round10 recover missing CHR bodies and own-palette OBS blocks
+on:
+  push:
+    branches: ["data/4leaf-obs-blocks-**"]
+    paths:
+      - ".github/workflows/rog-original-obs-references-round10.yml"
+      - "apps/4leaf/rog/tools/decode-obs-referenced-round10.py"
+      - "apps/4leaf/rog/tests/test_round10_source_recovery.py"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: 4leaf-round10-data
+  cancel-in-progress: false
+jobs:
+  decode-source:
+    if: github.ref != 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install original-source read-only extraction dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq unshield
+          python3 -m pip install --break-system-packages pillow numpy
+      - name: Verify synthetic OBS block format and 0xFFFFFFFF empty action
+        run: python3 apps/4leaf/rog/tests/test_round10_source_recovery.py
+      - name: Download exactly SHA1-authenticated 2002 installer (no Windows code executed)
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/4leaf-r10-source /tmp/4leaf-r10-resources
+          python3 - <<'PY'
+          import hashlib,time,urllib.request
+          from pathlib import Path
+          p=Path('/tmp/4leaf-r10-source/original.zip')
+          urls=['https://archive.org/download/4leaf/4leaf.zip',
+                'https://archive.org/download/4leaf/4leaf.zip?download=1']
+          errors=[]
+          for i in range(4):
+              u=urls[i%len(urls)]
+              try:
+                  req=urllib.request.Request(u,headers={'User-Agent':'Mozilla/5.0 4LEAF verified source recovery'})
+                  h=hashlib.sha1()
+                  with urllib.request.urlopen(req,timeout=150) as response,p.open('wb') as out:
+                      while data:=response.read(1<<20):
+                          out.write(data);h.update(data)
+                          if out.tell()>90*1024*1024:raise ValueError('archive too large')
+                  if h.hexdigest()!='86526d89679ae39b85fe9808da97ad871b7888d9':
+                      raise ValueError('original installer SHA1 mismatch')
+                  print('ORIGINAL_CLIENT_SHA1_VERIFIED',h.hexdigest(),p.stat().st_size)
+                  break
+              except Exception as exc:
+                  errors.append(str(exc));print('SOURCE_FETCH_ATTEMPT_FAILED',i+1,type(exc).__name__,str(exc))
+                  if i==3:raise RuntimeError('source archive unavailable: '+str(errors))
+                  time.sleep(5*(i+1))
+          PY
+          unzip -q /tmp/4leaf-r10-source/original.zip data1.cab data1.hdr -d /tmp/4leaf-r10-source
+          unshield x -d /tmp/4leaf-r10-resources /tmp/4leaf-r10-source/data1.cab >/dev/null
+      - name: Recover authentic missing CHR card bodies, effects, block palettes and original action tables
+        run: |
+          python3 apps/4leaf/rog/tools/decode-obs-referenced-round10.py /tmp/4leaf-r10-resources "$GITHUB_WORKSPACE"
+      - name: Verify every newly decoded original PNG with its written SHA256 manifest
+        run: |
+          python3 - <<'PY'
+          import hashlib,json
+          from pathlib import Path
+          rog=Path('apps/4leaf/rog')
+          count=0;bad=[]
+          for folder,variable in (('referenced','ORIGINAL_LEAF_OBS_REFERENCED'),
+                                  ('blocks','ORIGINAL_LEAF_OBS_BLOCKS')):
+              m=rog/'original/OBS'/folder/'manifest.js'
+              if not m.exists():continue
+              content=m.read_text()
+              records=json.loads(content.split('window.'+variable+'=',1)[1].rsplit(';',1)[0])
+              for key,member in records.items():
+                  for block in member['blocks']:
+                      for frame in block['frames']:
+                          if 'url' not in frame:continue
+                          src=rog/frame['url'][2:]
+                          if not src.is_file() or hashlib.sha256(src.read_bytes()).hexdigest()!=frame['sha256']:
+                              bad.append(frame['url'])
+                          count+=1
+          summary=json.loads((rog/'docs/evidence/obs-blocks/round10-extract-summary.json').read_text())
+          assert not bad,bad[:20]
+          assert count>=summary['referencedPNG']+summary['blockPNG'],(count,summary)
+          assert summary['recoveredMissingBodies']>0,summary
+          print('ORIGINAL_PNG_SHA256_ALL_PASS',count,
+                'new_CHR_bodies',summary['recoveredMissingBodies'],
+                'still_unpublished',summary['stillMissing'])
+          PY
+      - name: Upload extracted evidence regardless of downstream branch write result
+        uses: actions/upload-artifact@v4
+        with:
+          name: 4leaf-round10-verified-extracted-originals
+          path: |
+            apps/4leaf/rog/docs/evidence/obs-blocks/
+            apps/4leaf/rog/original/OBS/referenced/
+            apps/4leaf/rog/original/OBS/blocks/
+          retention-days: 14
+          if-no-files-found: error
+      - name: Commit genuine original pixels and complete action source tables to data branch only
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "4LEAF original-source extraction bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          for dir in apps/4leaf/rog/docs/evidence/obs-blocks apps/4leaf/rog/original/OBS/referenced apps/4leaf/rog/original/OBS/blocks; do
+            test -d "$dir" && git add -f -- "$dir"
+          done
+          if git diff --cached --quiet; then echo "NO_NEW_SOURCE_BYTES"; exit 0; fi
+          git commit -m "data(4leaf): recover genuine CHR missing bodies and own-palette original OBS blocks"
+          for attempt in 1 2 3; do
+            git fetch origin "$GITHUB_REF_NAME"
+            git rebase "origin/$GITHUB_REF_NAME"
+            if git push origin "HEAD:refs/heads/$GITHUB_REF_NAME"; then exit 0; fi
+            sleep 5
+          done
+          echo "SOURCE_ARTIFACT_RETAINED_BUT_BRANCH_WRITE_FAILED" >&2
+          exit 1
