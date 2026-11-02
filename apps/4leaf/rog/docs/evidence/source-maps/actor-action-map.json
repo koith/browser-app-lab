@@ -1,0 +1,3398 @@
+{
+ "layout37Roles": {
+  "rear": {
+   "idle": [
+    0,
+    2
+   ],
+   "walk": [
+    3,
+    8
+   ],
+   "strike": [
+    9,
+    10
+   ]
+  },
+  "sideLeft": {
+   "idle": [
+    11,
+    13
+   ],
+   "walk": [
+    14,
+    19
+   ],
+   "strike": [
+    20,
+    21
+   ]
+  },
+  "front": {
+   "idle": [
+    22,
+    24
+   ],
+   "walk": [
+    25,
+    30
+   ],
+   "strike": [
+    31,
+    32
+   ]
+  },
+  "lunge": [
+   33,
+   36
+  ]
+ },
+ "mirrorForRightFacing": "INFERRED (only left-facing side block exists)",
+ "summary": {
+  "bodies": 54,
+  "layout37Verified": 44,
+  "layout37": [
+   "0040",
+   "0042",
+   "0043",
+   "0044",
+   "0045",
+   "0046",
+   "0047",
+   "0048",
+   "0049",
+   "0050",
+   "0051",
+   "0052",
+   "0053",
+   "0054",
+   "0055",
+   "0056",
+   "0058",
+   "0059",
+   "0060",
+   "0061",
+   "0062",
+   "0063",
+   "0064",
+   "0065",
+   "0066",
+   "0067",
+   "0068",
+   "0069",
+   "0070",
+   "0071",
+   "0072",
+   "0073",
+   "0074",
+   "0075",
+   "0076",
+   "0077",
+   "0078",
+   "0079",
+   "0080",
+   "0081",
+   "0082",
+   "0083",
+   "0088",
+   "0166"
+  ],
+  "otherLayouts": [
+   "0084",
+   "0085",
+   "0086",
+   "0087",
+   "0089",
+   "0090",
+   "0092",
+   "0093",
+   "0094",
+   "0095"
+  ]
+ },
+ "actors": {
+  "0040": {
+   "frames": 37,
+   "layout37": true,
+   "blocks": {
+    "rear": {
+     "idle": [
+      0,
+      2
+     ],
+     "walk": [
+      3,
+      8
+     ],
+     "strike": [
+      9,
+      10
+     ]
+    },
+    "sideLeft": {
+     "idle": [
+      11,
+      13
+     ],
+     "walk": [
+      14,
+      19
+     ],
+     "strike": [
+      20,
+      21
+     ]
+    },
+    "front": {
+     "idle": [
+      22,
+      24
+     ],
+     "walk": [
+      25,
+      30
+     ],
+     "strike": [
+      31,
+      32
+     ]
+    },
+    "lunge": [
+     33,
+     36
+    ]
+   },
+   "evidence": {
+    "blockStructure": "VERIFIED-pixels/obs_structure",
+    "orientation": "VERIFIED-visual-review-2026-11-02",
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": true,
+    "directionChangeJump": true,
+    "hasFacingShape": true
+   }
+  },
+  "0042": {
+   "frames": 37,
+   "layout37": true,
+   "blocks": {
+    "rear": {
+     "idle": [
+      0,
+      2
+     ],
+     "walk": [
+      3,
+      8
+     ],
+     "strike": [
+      9,
+      10
+     ]
+    },
+    "sideLeft": {
+     "idle": [
+      11,
+      13
+     ],
+     "walk": [
+      14,
+      19
+     ],
+     "strike": [
+      20,
+      21
+     ]
+    },
+    "front": {
+     "idle": [
+      22,
+      24
+     ],
+     "walk": [
+      25,
+      30
+     ],
+     "strike": [
+      31,
+      32
+     ]
+    },
+    "lunge": [
+     33,
+     36
+    ]
+   },
+   "evidence": {
+    "blockStructure": "VERIFIED-pixels/obs_structure",
+    "orientation": "VERIFIED-visual-review-2026-11-02",
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": true,
+    "directionChangeJump": true,
+    "hasFacingShape": true
+   }
+  },
+  "0043": {
+   "frames": 37,
+   "layout37": true,
+   "blocks": {
+    "rear": {
+     "idle": [
+      0,
+      2
+     ],
+     "walk": [
+      3,
+      8
+     ],
+     "strike": [
+      9,
+      10
+     ]
+    },
+    "sideLeft": {
+     "idle": [
+      11,
+      13
+     ],
+     "walk": [
+      14,
+      19
+     ],
+     "strike": [
+      20,
+      21
+     ]
+    },
+    "front": {
+     "idle": [
+      22,
+      24
+     ],
+     "walk": [
+      25,
+      30
+     ],
+     "strike": [
+      31,
+      32
+     ]
+    },
+    "lunge": [
+     33,
+     36
+    ]
+   },
+   "evidence": {
+    "blockStructure": "VERIFIED-pixels/obs_structure",
+    "orientation": "VERIFIED-visual-review-2026-11-02",
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": true,
+    "directionChangeJump": true,
+    "hasFacingShape": true
+   }
+  },
+  "0044": {
+   "frames": 37,
+   "layout37": true,
+   "blocks": {
+    "rear": {
+     "idle": [
+      0,
+      2
+     ],
+     "walk": [
+      3,
+      8
+     ],
+     "strike": [
+      9,
+      10
+     ]
+    },
+    "sideLeft": {
+     "idle": [
+      11,
+      13
+     ],
+     "walk": [
+      14,
+      19
+     ],
+     "strike": [
+      20,
+      21
+     ]
+    },
+    "front": {
+     "idle": [
+      22,
+      24
+     ],
+     "walk": [
+      25,
+      30
+     ],
+     "strike": [
+      31,
+      32
+     ]
+    },
+    "lunge": [
+     33,
+     36
+    ]
+   },
+   "evidence": {
+    "blockStructure": "VERIFIED-pixels/obs_structure",
+    "orientation": "VERIFIED-visual-review-2026-11-02",
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": true,
+    "directionChangeJump": true,
+    "hasFacingShape": true
+   }
+  },
+  "0045": {
+   "frames": 37,
+   "layout37": true,
+   "blocks": {
+    "rear": {
+     "idle": [
+      0,
+      2
+     ],
+     "walk": [
+      3,
+      8
+     ],
+     "strike": [
+      9,
+      10
+     ]
+    },
+    "sideLeft": {
+     "idle": [
+      11,
+      13
+     ],
+     "walk": [
+      14,
+      19
+     ],
+     "strike": [
+      20,
+      21
+     ]
+    },
+    "front": {
+     "idle": [
+      22,
+      24
+     ],
+     "walk": [
+      25,
+      30
+     ],
+     "strike": [
+      31,
+      32
+     ]
+    },
+    "lunge": [
+     33,
+     36
+    ]
+   },
+   "evidence": {
+    "blockStructure": "VERIFIED-pixels/obs_structure",
+    "orientation": "VERIFIED-visual-review-2026-11-02",
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": true,
+    "directionChangeJump": true,
+    "hasFacingShape": true
+   }
+  },
+  "0046": {
+   "frames": 37,
+   "layout37": true,
+   "blocks": {
+    "rear": {
+     "idle": [
+      0,
+      2
+     ],
+     "walk": [
+      3,
+      8
+     ],
+     "strike": [
+      9,
+      10
+     ]
+    },
+    "sideLeft": {
+     "idle": [
+      11,
+      13
+     ],
+     "walk": [
+      14,
+      19
+     ],
+     "strike": [
+      20,
+      21
+     ]
+    },
+    "front": {
+     "idle": [
+      22,
+      24
+     ],
+     "walk": [
+      25,
+      30
+     ],
+     "strike": [
+      31,
+      32
+     ]
+    },
+    "lunge": [
+     33,
+     36
+    ]
+   },
+   "evidence": {
+    "blockStructure": "VERIFIED-pixels/obs_structure",
+    "orientation": "VERIFIED-visual-review-2026-11-02",
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": true,
+    "directionChangeJump": true,
+    "hasFacingShape": true
+   }
+  },
+  "0047": {
+   "frames": 37,
+   "layout37": true,
+   "blocks": {
+    "rear": {
+     "idle": [
+      0,
+      2
+     ],
+     "walk": [
+      3,
+      8
+     ],
+     "strike": [
+      9,
+      10
+     ]
+    },
+    "sideLeft": {
+     "idle": [
+      11,
+      13
+     ],
+     "walk": [
+      14,
+      19
+     ],
+     "strike": [
+      20,
+      21
+     ]
+    },
+    "front": {
+     "idle": [
+      22,
+      24
+     ],
+     "walk": [
+      25,
+      30
+     ],
+     "strike": [
+      31,
+      32
+     ]
+    },
+    "lunge": [
+     33,
+     36
+    ]
+   },
+   "evidence": {
+    "blockStructure": "VERIFIED-pixels/obs_structure",
+    "orientation": "VERIFIED-visual-review-2026-11-02",
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": true,
+    "directionChangeJump": true,
+    "hasFacingShape": true
+   }
+  },
+  "0048": {
+   "frames": 37,
+   "layout37": true,
+   "blocks": {
+    "rear": {
+     "idle": [
+      0,
+      2
+     ],
+     "walk": [
+      3,
+      8
+     ],
+     "strike": [
+      9,
+      10
+     ]
+    },
+    "sideLeft": {
+     "idle": [
+      11,
+      13
+     ],
+     "walk": [
+      14,
+      19
+     ],
+     "strike": [
+      20,
+      21
+     ]
+    },
+    "front": {
+     "idle": [
+      22,
+      24
+     ],
+     "walk": [
+      25,
+      30
+     ],
+     "strike": [
+      31,
+      32
+     ]
+    },
+    "lunge": [
+     33,
+     36
+    ]
+   },
+   "evidence": {
+    "blockStructure": "VERIFIED-pixels/obs_structure",
+    "orientation": "VERIFIED-visual-review-2026-11-02",
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": true,
+    "directionChangeJump": true,
+    "hasFacingShape": true
+   }
+  },
+  "0049": {
+   "frames": 37,
+   "layout37": true,
+   "blocks": {
+    "rear": {
+     "idle": [
+      0,
+      2
+     ],
+     "walk": [
+      3,
+      8
+     ],
+     "strike": [
+      9,
+      10
+     ]
+    },
+    "sideLeft": {
+     "idle": [
+      11,
+      13
+     ],
+     "walk": [
+      14,
+      19
+     ],
+     "strike": [
+      20,
+      21
+     ]
+    },
+    "front": {
+     "idle": [
+      22,
+      24
+     ],
+     "walk": [
+      25,
+      30
+     ],
+     "strike": [
+      31,
+      32
+     ]
+    },
+    "lunge": [
+     33,
+     36
+    ]
+   },
+   "evidence": {
+    "blockStructure": "VERIFIED-pixels/obs_structure",
+    "orientation": "VERIFIED-visual-review-2026-11-02",
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": true,
+    "directionChangeJump": true,
+    "hasFacingShape": true
+   }
+  },
+  "0050": {
+   "frames": 37,
+   "layout37": true,
+   "blocks": {
+    "rear": {
+     "idle": [
+      0,
+      2
+     ],
+     "walk": [
+      3,
+      8
+     ],
+     "strike": [
+      9,
+      10
+     ]
+    },
+    "sideLeft": {
+     "idle": [
+      11,
+      13
+     ],
+     "walk": [
+      14,
+      19
+     ],
+     "strike": [
+      20,
+      21
+     ]
+    },
+    "front": {
+     "idle": [
+      22,
+      24
+     ],
+     "walk": [
+      25,
+      30
+     ],
+     "strike": [
+      31,
+      32
+     ]
+    },
+    "lunge": [
+     33,
+     36
+    ]
+   },
+   "evidence": {
+    "blockStructure": "VERIFIED-pixels/obs_structure",
+    "orientation": "VERIFIED-visual-review-2026-11-02",
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": true,
+    "directionChangeJump": true,
+    "hasFacingShape": true
+   }
+  },
+  "0051": {
+   "frames": 37,
+   "layout37": true,
+   "blocks": {
+    "rear": {
+     "idle": [
+      0,
+      2
+     ],
+     "walk": [
+      3,
+      8
+     ],
+     "strike": [
+      9,
+      10
+     ]
+    },
+    "sideLeft": {
+     "idle": [
+      11,
+      13
+     ],
+     "walk": [
+      14,
+      19
+     ],
+     "strike": [
+      20,
+      21
+     ]
+    },
+    "front": {
+     "idle": [
+      22,
+      24
+     ],
+     "walk": [
+      25,
+      30
+     ],
+     "strike": [
+      31,
+      32
+     ]
+    },
+    "lunge": [
+     33,
+     36
+    ]
+   },
+   "evidence": {
+    "blockStructure": "VERIFIED-pixels/obs_structure",
+    "orientation": "VERIFIED-visual-review-2026-11-02",
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": true,
+    "directionChangeJump": true,
+    "hasFacingShape": true
+   }
+  },
+  "0052": {
+   "frames": 37,
+   "layout37": true,
+   "blocks": {
+    "rear": {
+     "idle": [
+      0,
+      2
+     ],
+     "walk": [
+      3,
+      8
+     ],
+     "strike": [
+      9,
+      10
+     ]
+    },
+    "sideLeft": {
+     "idle": [
+      11,
+      13
+     ],
+     "walk": [
+      14,
+      19
+     ],
+     "strike": [
+      20,
+      21
+     ]
+    },
+    "front": {
+     "idle": [
+      22,
+      24
+     ],
+     "walk": [
+      25,
+      30
+     ],
+     "strike": [
+      31,
+      32
+     ]
+    },
+    "lunge": [
+     33,
+     36
+    ]
+   },
+   "evidence": {
+    "blockStructure": "VERIFIED-pixels/obs_structure",
+    "orientation": "VERIFIED-visual-review-2026-11-02",
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": true,
+    "directionChangeJump": true,
+    "hasFacingShape": true
+   }
+  },
+  "0053": {
+   "frames": 37,
+   "layout37": true,
+   "blocks": {
+    "rear": {
+     "idle": [
+      0,
+      2
+     ],
+     "walk": [
+      3,
+      8
+     ],
+     "strike": [
+      9,
+      10
+     ]
+    },
+    "sideLeft": {
+     "idle": [
+      11,
+      13
+     ],
+     "walk": [
+      14,
+      19
+     ],
+     "strike": [
+      20,
+      21
+     ]
+    },
+    "front": {
+     "idle": [
+      22,
+      24
+     ],
+     "walk": [
+      25,
+      30
+     ],
+     "strike": [
+      31,
+      32
+     ]
+    },
+    "lunge": [
+     33,
+     36
+    ]
+   },
+   "evidence": {
+    "blockStructure": "VERIFIED-pixels/obs_structure",
+    "orientation": "VERIFIED-visual-review-2026-11-02",
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": true,
+    "directionChangeJump": true,
+    "hasFacingShape": true
+   }
+  },
+  "0054": {
+   "frames": 37,
+   "layout37": true,
+   "blocks": {
+    "rear": {
+     "idle": [
+      0,
+      2
+     ],
+     "walk": [
+      3,
+      8
+     ],
+     "strike": [
+      9,
+      10
+     ]
+    },
+    "sideLeft": {
+     "idle": [
+      11,
+      13
+     ],
+     "walk": [
+      14,
+      19
+     ],
+     "strike": [
+      20,
+      21
+     ]
+    },
+    "front": {
+     "idle": [
+      22,
+      24
+     ],
+     "walk": [
+      25,
+      30
+     ],
+     "strike": [
+      31,
+      32
+     ]
+    },
+    "lunge": [
+     33,
+     36
+    ]
+   },
+   "evidence": {
+    "blockStructure": "VERIFIED-pixels/obs_structure",
+    "orientation": "VERIFIED-visual-review-2026-11-02",
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": true,
+    "directionChangeJump": true,
+    "hasFacingShape": true
+   }
+  },
+  "0055": {
+   "frames": 37,
+   "layout37": true,
+   "blocks": {
+    "rear": {
+     "idle": [
+      0,
+      2
+     ],
+     "walk": [
+      3,
+      8
+     ],
+     "strike": [
+      9,
+      10
+     ]
+    },
+    "sideLeft": {
+     "idle": [
+      11,
+      13
+     ],
+     "walk": [
+      14,
+      19
+     ],
+     "strike": [
+      20,
+      21
+     ]
+    },
+    "front": {
+     "idle": [
+      22,
+      24
+     ],
+     "walk": [
+      25,
+      30
+     ],
+     "strike": [
+      31,
+      32
+     ]
+    },
+    "lunge": [
+     33,
+     36
+    ]
+   },
+   "evidence": {
+    "blockStructure": "VERIFIED-pixels/obs_structure",
+    "orientation": "VERIFIED-visual-review-2026-11-02",
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": true,
+    "directionChangeJump": true,
+    "hasFacingShape": true
+   }
+  },
+  "0056": {
+   "frames": 37,
+   "layout37": true,
+   "blocks": {
+    "rear": {
+     "idle": [
+      0,
+      2
+     ],
+     "walk": [
+      3,
+      8
+     ],
+     "strike": [
+      9,
+      10
+     ]
+    },
+    "sideLeft": {
+     "idle": [
+      11,
+      13
+     ],
+     "walk": [
+      14,
+      19
+     ],
+     "strike": [
+      20,
+      21
+     ]
+    },
+    "front": {
+     "idle": [
+      22,
+      24
+     ],
+     "walk": [
+      25,
+      30
+     ],
+     "strike": [
+      31,
+      32
+     ]
+    },
+    "lunge": [
+     33,
+     36
+    ]
+   },
+   "evidence": {
+    "blockStructure": "VERIFIED-pixels/obs_structure",
+    "orientation": "VERIFIED-visual-review-2026-11-02",
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": true,
+    "directionChangeJump": true,
+    "hasFacingShape": true
+   }
+  },
+  "0058": {
+   "frames": 37,
+   "layout37": true,
+   "blocks": {
+    "rear": {
+     "idle": [
+      0,
+      2
+     ],
+     "walk": [
+      3,
+      8
+     ],
+     "strike": [
+      9,
+      10
+     ]
+    },
+    "sideLeft": {
+     "idle": [
+      11,
+      13
+     ],
+     "walk": [
+      14,
+      19
+     ],
+     "strike": [
+      20,
+      21
+     ]
+    },
+    "front": {
+     "idle": [
+      22,
+      24
+     ],
+     "walk": [
+      25,
+      30
+     ],
+     "strike": [
+      31,
+      32
+     ]
+    },
+    "lunge": [
+     33,
+     36
+    ]
+   },
+   "evidence": {
+    "blockStructure": "VERIFIED-pixels/obs_structure",
+    "orientation": "VERIFIED-visual-review-2026-11-02",
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": true,
+    "directionChangeJump": true,
+    "hasFacingShape": true
+   }
+  },
+  "0059": {
+   "frames": 37,
+   "layout37": true,
+   "blocks": {
+    "rear": {
+     "idle": [
+      0,
+      2
+     ],
+     "walk": [
+      3,
+      8
+     ],
+     "strike": [
+      9,
+      10
+     ]
+    },
+    "sideLeft": {
+     "idle": [
+      11,
+      13
+     ],
+     "walk": [
+      14,
+      19
+     ],
+     "strike": [
+      20,
+      21
+     ]
+    },
+    "front": {
+     "idle": [
+      22,
+      24
+     ],
+     "walk": [
+      25,
+      30
+     ],
+     "strike": [
+      31,
+      32
+     ]
+    },
+    "lunge": [
+     33,
+     36
+    ]
+   },
+   "evidence": {
+    "blockStructure": "VERIFIED-pixels/obs_structure",
+    "orientation": "VERIFIED-visual-review-2026-11-02",
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": true,
+    "directionChangeJump": true,
+    "hasFacingShape": true
+   }
+  },
+  "0060": {
+   "frames": 37,
+   "layout37": true,
+   "blocks": {
+    "rear": {
+     "idle": [
+      0,
+      2
+     ],
+     "walk": [
+      3,
+      8
+     ],
+     "strike": [
+      9,
+      10
+     ]
+    },
+    "sideLeft": {
+     "idle": [
+      11,
+      13
+     ],
+     "walk": [
+      14,
+      19
+     ],
+     "strike": [
+      20,
+      21
+     ]
+    },
+    "front": {
+     "idle": [
+      22,
+      24
+     ],
+     "walk": [
+      25,
+      30
+     ],
+     "strike": [
+      31,
+      32
+     ]
+    },
+    "lunge": [
+     33,
+     36
+    ]
+   },
+   "evidence": {
+    "blockStructure": "VERIFIED-pixels/obs_structure",
+    "orientation": "VERIFIED-visual-review-2026-11-02",
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": true,
+    "directionChangeJump": true,
+    "hasFacingShape": true
+   }
+  },
+  "0061": {
+   "frames": 37,
+   "layout37": true,
+   "blocks": {
+    "rear": {
+     "idle": [
+      0,
+      2
+     ],
+     "walk": [
+      3,
+      8
+     ],
+     "strike": [
+      9,
+      10
+     ]
+    },
+    "sideLeft": {
+     "idle": [
+      11,
+      13
+     ],
+     "walk": [
+      14,
+      19
+     ],
+     "strike": [
+      20,
+      21
+     ]
+    },
+    "front": {
+     "idle": [
+      22,
+      24
+     ],
+     "walk": [
+      25,
+      30
+     ],
+     "strike": [
+      31,
+      32
+     ]
+    },
+    "lunge": [
+     33,
+     36
+    ]
+   },
+   "evidence": {
+    "blockStructure": "VERIFIED-pixels/obs_structure",
+    "orientation": "VERIFIED-visual-review-2026-11-02",
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": true,
+    "directionChangeJump": true,
+    "hasFacingShape": true
+   }
+  },
+  "0062": {
+   "frames": 37,
+   "layout37": true,
+   "blocks": {
+    "rear": {
+     "idle": [
+      0,
+      2
+     ],
+     "walk": [
+      3,
+      8
+     ],
+     "strike": [
+      9,
+      10
+     ]
+    },
+    "sideLeft": {
+     "idle": [
+      11,
+      13
+     ],
+     "walk": [
+      14,
+      19
+     ],
+     "strike": [
+      20,
+      21
+     ]
+    },
+    "front": {
+     "idle": [
+      22,
+      24
+     ],
+     "walk": [
+      25,
+      30
+     ],
+     "strike": [
+      31,
+      32
+     ]
+    },
+    "lunge": [
+     33,
+     36
+    ]
+   },
+   "evidence": {
+    "blockStructure": "VERIFIED-pixels/obs_structure",
+    "orientation": "VERIFIED-visual-review-2026-11-02",
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": true,
+    "directionChangeJump": true,
+    "hasFacingShape": true
+   }
+  },
+  "0063": {
+   "frames": 37,
+   "layout37": true,
+   "blocks": {
+    "rear": {
+     "idle": [
+      0,
+      2
+     ],
+     "walk": [
+      3,
+      8
+     ],
+     "strike": [
+      9,
+      10
+     ]
+    },
+    "sideLeft": {
+     "idle": [
+      11,
+      13
+     ],
+     "walk": [
+      14,
+      19
+     ],
+     "strike": [
+      20,
+      21
+     ]
+    },
+    "front": {
+     "idle": [
+      22,
+      24
+     ],
+     "walk": [
+      25,
+      30
+     ],
+     "strike": [
+      31,
+      32
+     ]
+    },
+    "lunge": [
+     33,
+     36
+    ]
+   },
+   "evidence": {
+    "blockStructure": "VERIFIED-pixels/obs_structure",
+    "orientation": "VERIFIED-visual-review-2026-11-02",
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": true,
+    "directionChangeJump": true,
+    "hasFacingShape": true
+   }
+  },
+  "0064": {
+   "frames": 37,
+   "layout37": true,
+   "blocks": {
+    "rear": {
+     "idle": [
+      0,
+      2
+     ],
+     "walk": [
+      3,
+      8
+     ],
+     "strike": [
+      9,
+      10
+     ]
+    },
+    "sideLeft": {
+     "idle": [
+      11,
+      13
+     ],
+     "walk": [
+      14,
+      19
+     ],
+     "strike": [
+      20,
+      21
+     ]
+    },
+    "front": {
+     "idle": [
+      22,
+      24
+     ],
+     "walk": [
+      25,
+      30
+     ],
+     "strike": [
+      31,
+      32
+     ]
+    },
+    "lunge": [
+     33,
+     36
+    ]
+   },
+   "evidence": {
+    "blockStructure": "VERIFIED-pixels/obs_structure",
+    "orientation": "VERIFIED-visual-review-2026-11-02",
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": true,
+    "directionChangeJump": true,
+    "hasFacingShape": true
+   }
+  },
+  "0065": {
+   "frames": 37,
+   "layout37": true,
+   "blocks": {
+    "rear": {
+     "idle": [
+      0,
+      2
+     ],
+     "walk": [
+      3,
+      8
+     ],
+     "strike": [
+      9,
+      10
+     ]
+    },
+    "sideLeft": {
+     "idle": [
+      11,
+      13
+     ],
+     "walk": [
+      14,
+      19
+     ],
+     "strike": [
+      20,
+      21
+     ]
+    },
+    "front": {
+     "idle": [
+      22,
+      24
+     ],
+     "walk": [
+      25,
+      30
+     ],
+     "strike": [
+      31,
+      32
+     ]
+    },
+    "lunge": [
+     33,
+     36
+    ]
+   },
+   "evidence": {
+    "blockStructure": "VERIFIED-pixels/obs_structure",
+    "orientation": "VERIFIED-visual-review-2026-11-02",
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": true,
+    "directionChangeJump": true,
+    "hasFacingShape": true
+   }
+  },
+  "0066": {
+   "frames": 37,
+   "layout37": true,
+   "blocks": {
+    "rear": {
+     "idle": [
+      0,
+      2
+     ],
+     "walk": [
+      3,
+      8
+     ],
+     "strike": [
+      9,
+      10
+     ]
+    },
+    "sideLeft": {
+     "idle": [
+      11,
+      13
+     ],
+     "walk": [
+      14,
+      19
+     ],
+     "strike": [
+      20,
+      21
+     ]
+    },
+    "front": {
+     "idle": [
+      22,
+      24
+     ],
+     "walk": [
+      25,
+      30
+     ],
+     "strike": [
+      31,
+      32
+     ]
+    },
+    "lunge": [
+     33,
+     36
+    ]
+   },
+   "evidence": {
+    "blockStructure": "VERIFIED-pixels/obs_structure",
+    "orientation": "VERIFIED-visual-review-2026-11-02",
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": true,
+    "directionChangeJump": true,
+    "hasFacingShape": true
+   }
+  },
+  "0067": {
+   "frames": 37,
+   "layout37": true,
+   "blocks": {
+    "rear": {
+     "idle": [
+      0,
+      2
+     ],
+     "walk": [
+      3,
+      8
+     ],
+     "strike": [
+      9,
+      10
+     ]
+    },
+    "sideLeft": {
+     "idle": [
+      11,
+      13
+     ],
+     "walk": [
+      14,
+      19
+     ],
+     "strike": [
+      20,
+      21
+     ]
+    },
+    "front": {
+     "idle": [
+      22,
+      24
+     ],
+     "walk": [
+      25,
+      30
+     ],
+     "strike": [
+      31,
+      32
+     ]
+    },
+    "lunge": [
+     33,
+     36
+    ]
+   },
+   "evidence": {
+    "blockStructure": "VERIFIED-pixels/obs_structure",
+    "orientation": "VERIFIED-visual-review-2026-11-02",
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": true,
+    "directionChangeJump": true,
+    "hasFacingShape": true
+   }
+  },
+  "0068": {
+   "frames": 37,
+   "layout37": true,
+   "blocks": {
+    "rear": {
+     "idle": [
+      0,
+      2
+     ],
+     "walk": [
+      3,
+      8
+     ],
+     "strike": [
+      9,
+      10
+     ]
+    },
+    "sideLeft": {
+     "idle": [
+      11,
+      13
+     ],
+     "walk": [
+      14,
+      19
+     ],
+     "strike": [
+      20,
+      21
+     ]
+    },
+    "front": {
+     "idle": [
+      22,
+      24
+     ],
+     "walk": [
+      25,
+      30
+     ],
+     "strike": [
+      31,
+      32
+     ]
+    },
+    "lunge": [
+     33,
+     36
+    ]
+   },
+   "evidence": {
+    "blockStructure": "VERIFIED-pixels/obs_structure",
+    "orientation": "VERIFIED-visual-review-2026-11-02",
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": true,
+    "directionChangeJump": true,
+    "hasFacingShape": true
+   }
+  },
+  "0069": {
+   "frames": 37,
+   "layout37": true,
+   "blocks": {
+    "rear": {
+     "idle": [
+      0,
+      2
+     ],
+     "walk": [
+      3,
+      8
+     ],
+     "strike": [
+      9,
+      10
+     ]
+    },
+    "sideLeft": {
+     "idle": [
+      11,
+      13
+     ],
+     "walk": [
+      14,
+      19
+     ],
+     "strike": [
+      20,
+      21
+     ]
+    },
+    "front": {
+     "idle": [
+      22,
+      24
+     ],
+     "walk": [
+      25,
+      30
+     ],
+     "strike": [
+      31,
+      32
+     ]
+    },
+    "lunge": [
+     33,
+     36
+    ]
+   },
+   "evidence": {
+    "blockStructure": "VERIFIED-pixels/obs_structure",
+    "orientation": "VERIFIED-visual-review-2026-11-02",
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": true,
+    "directionChangeJump": true,
+    "hasFacingShape": true
+   }
+  },
+  "0070": {
+   "frames": 37,
+   "layout37": true,
+   "blocks": {
+    "rear": {
+     "idle": [
+      0,
+      2
+     ],
+     "walk": [
+      3,
+      8
+     ],
+     "strike": [
+      9,
+      10
+     ]
+    },
+    "sideLeft": {
+     "idle": [
+      11,
+      13
+     ],
+     "walk": [
+      14,
+      19
+     ],
+     "strike": [
+      20,
+      21
+     ]
+    },
+    "front": {
+     "idle": [
+      22,
+      24
+     ],
+     "walk": [
+      25,
+      30
+     ],
+     "strike": [
+      31,
+      32
+     ]
+    },
+    "lunge": [
+     33,
+     36
+    ]
+   },
+   "evidence": {
+    "blockStructure": "VERIFIED-pixels/obs_structure",
+    "orientation": "VERIFIED-visual-review-2026-11-02",
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": true,
+    "directionChangeJump": true,
+    "hasFacingShape": true
+   }
+  },
+  "0071": {
+   "frames": 37,
+   "layout37": true,
+   "blocks": {
+    "rear": {
+     "idle": [
+      0,
+      2
+     ],
+     "walk": [
+      3,
+      8
+     ],
+     "strike": [
+      9,
+      10
+     ]
+    },
+    "sideLeft": {
+     "idle": [
+      11,
+      13
+     ],
+     "walk": [
+      14,
+      19
+     ],
+     "strike": [
+      20,
+      21
+     ]
+    },
+    "front": {
+     "idle": [
+      22,
+      24
+     ],
+     "walk": [
+      25,
+      30
+     ],
+     "strike": [
+      31,
+      32
+     ]
+    },
+    "lunge": [
+     33,
+     36
+    ]
+   },
+   "evidence": {
+    "blockStructure": "VERIFIED-pixels/obs_structure",
+    "orientation": "VERIFIED-visual-review-2026-11-02",
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": true,
+    "directionChangeJump": true,
+    "hasFacingShape": true
+   }
+  },
+  "0072": {
+   "frames": 37,
+   "layout37": true,
+   "blocks": {
+    "rear": {
+     "idle": [
+      0,
+      2
+     ],
+     "walk": [
+      3,
+      8
+     ],
+     "strike": [
+      9,
+      10
+     ]
+    },
+    "sideLeft": {
+     "idle": [
+      11,
+      13
+     ],
+     "walk": [
+      14,
+      19
+     ],
+     "strike": [
+      20,
+      21
+     ]
+    },
+    "front": {
+     "idle": [
+      22,
+      24
+     ],
+     "walk": [
+      25,
+      30
+     ],
+     "strike": [
+      31,
+      32
+     ]
+    },
+    "lunge": [
+     33,
+     36
+    ]
+   },
+   "evidence": {
+    "blockStructure": "VERIFIED-pixels/obs_structure",
+    "orientation": "VERIFIED-visual-review-2026-11-02",
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": true,
+    "directionChangeJump": true,
+    "hasFacingShape": true
+   }
+  },
+  "0073": {
+   "frames": 37,
+   "layout37": true,
+   "blocks": {
+    "rear": {
+     "idle": [
+      0,
+      2
+     ],
+     "walk": [
+      3,
+      8
+     ],
+     "strike": [
+      9,
+      10
+     ]
+    },
+    "sideLeft": {
+     "idle": [
+      11,
+      13
+     ],
+     "walk": [
+      14,
+      19
+     ],
+     "strike": [
+      20,
+      21
+     ]
+    },
+    "front": {
+     "idle": [
+      22,
+      24
+     ],
+     "walk": [
+      25,
+      30
+     ],
+     "strike": [
+      31,
+      32
+     ]
+    },
+    "lunge": [
+     33,
+     36
+    ]
+   },
+   "evidence": {
+    "blockStructure": "VERIFIED-pixels/obs_structure",
+    "orientation": "VERIFIED-visual-review-2026-11-02",
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": true,
+    "directionChangeJump": true,
+    "hasFacingShape": true
+   }
+  },
+  "0074": {
+   "frames": 37,
+   "layout37": true,
+   "blocks": {
+    "rear": {
+     "idle": [
+      0,
+      2
+     ],
+     "walk": [
+      3,
+      8
+     ],
+     "strike": [
+      9,
+      10
+     ]
+    },
+    "sideLeft": {
+     "idle": [
+      11,
+      13
+     ],
+     "walk": [
+      14,
+      19
+     ],
+     "strike": [
+      20,
+      21
+     ]
+    },
+    "front": {
+     "idle": [
+      22,
+      24
+     ],
+     "walk": [
+      25,
+      30
+     ],
+     "strike": [
+      31,
+      32
+     ]
+    },
+    "lunge": [
+     33,
+     36
+    ]
+   },
+   "evidence": {
+    "blockStructure": "VERIFIED-pixels/obs_structure",
+    "orientation": "VERIFIED-visual-review-2026-11-02",
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": true,
+    "directionChangeJump": true,
+    "hasFacingShape": true
+   }
+  },
+  "0075": {
+   "frames": 37,
+   "layout37": true,
+   "blocks": {
+    "rear": {
+     "idle": [
+      0,
+      2
+     ],
+     "walk": [
+      3,
+      8
+     ],
+     "strike": [
+      9,
+      10
+     ]
+    },
+    "sideLeft": {
+     "idle": [
+      11,
+      13
+     ],
+     "walk": [
+      14,
+      19
+     ],
+     "strike": [
+      20,
+      21
+     ]
+    },
+    "front": {
+     "idle": [
+      22,
+      24
+     ],
+     "walk": [
+      25,
+      30
+     ],
+     "strike": [
+      31,
+      32
+     ]
+    },
+    "lunge": [
+     33,
+     36
+    ]
+   },
+   "evidence": {
+    "blockStructure": "VERIFIED-pixels/obs_structure",
+    "orientation": "VERIFIED-visual-review-2026-11-02",
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": true,
+    "directionChangeJump": true,
+    "hasFacingShape": true
+   }
+  },
+  "0076": {
+   "frames": 37,
+   "layout37": true,
+   "blocks": {
+    "rear": {
+     "idle": [
+      0,
+      2
+     ],
+     "walk": [
+      3,
+      8
+     ],
+     "strike": [
+      9,
+      10
+     ]
+    },
+    "sideLeft": {
+     "idle": [
+      11,
+      13
+     ],
+     "walk": [
+      14,
+      19
+     ],
+     "strike": [
+      20,
+      21
+     ]
+    },
+    "front": {
+     "idle": [
+      22,
+      24
+     ],
+     "walk": [
+      25,
+      30
+     ],
+     "strike": [
+      31,
+      32
+     ]
+    },
+    "lunge": [
+     33,
+     36
+    ]
+   },
+   "evidence": {
+    "blockStructure": "VERIFIED-pixels/obs_structure",
+    "orientation": "VERIFIED-visual-review-2026-11-02",
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": true,
+    "directionChangeJump": true,
+    "hasFacingShape": true
+   }
+  },
+  "0077": {
+   "frames": 37,
+   "layout37": true,
+   "blocks": {
+    "rear": {
+     "idle": [
+      0,
+      2
+     ],
+     "walk": [
+      3,
+      8
+     ],
+     "strike": [
+      9,
+      10
+     ]
+    },
+    "sideLeft": {
+     "idle": [
+      11,
+      13
+     ],
+     "walk": [
+      14,
+      19
+     ],
+     "strike": [
+      20,
+      21
+     ]
+    },
+    "front": {
+     "idle": [
+      22,
+      24
+     ],
+     "walk": [
+      25,
+      30
+     ],
+     "strike": [
+      31,
+      32
+     ]
+    },
+    "lunge": [
+     33,
+     36
+    ]
+   },
+   "evidence": {
+    "blockStructure": "VERIFIED-pixels/obs_structure",
+    "orientation": "VERIFIED-visual-review-2026-11-02",
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": true,
+    "directionChangeJump": true,
+    "hasFacingShape": true
+   }
+  },
+  "0078": {
+   "frames": 37,
+   "layout37": true,
+   "blocks": {
+    "rear": {
+     "idle": [
+      0,
+      2
+     ],
+     "walk": [
+      3,
+      8
+     ],
+     "strike": [
+      9,
+      10
+     ]
+    },
+    "sideLeft": {
+     "idle": [
+      11,
+      13
+     ],
+     "walk": [
+      14,
+      19
+     ],
+     "strike": [
+      20,
+      21
+     ]
+    },
+    "front": {
+     "idle": [
+      22,
+      24
+     ],
+     "walk": [
+      25,
+      30
+     ],
+     "strike": [
+      31,
+      32
+     ]
+    },
+    "lunge": [
+     33,
+     36
+    ]
+   },
+   "evidence": {
+    "blockStructure": "VERIFIED-pixels/obs_structure",
+    "orientation": "VERIFIED-visual-review-2026-11-02",
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": true,
+    "directionChangeJump": true,
+    "hasFacingShape": true
+   }
+  },
+  "0079": {
+   "frames": 37,
+   "layout37": true,
+   "blocks": {
+    "rear": {
+     "idle": [
+      0,
+      2
+     ],
+     "walk": [
+      3,
+      8
+     ],
+     "strike": [
+      9,
+      10
+     ]
+    },
+    "sideLeft": {
+     "idle": [
+      11,
+      13
+     ],
+     "walk": [
+      14,
+      19
+     ],
+     "strike": [
+      20,
+      21
+     ]
+    },
+    "front": {
+     "idle": [
+      22,
+      24
+     ],
+     "walk": [
+      25,
+      30
+     ],
+     "strike": [
+      31,
+      32
+     ]
+    },
+    "lunge": [
+     33,
+     36
+    ]
+   },
+   "evidence": {
+    "blockStructure": "VERIFIED-pixels/obs_structure",
+    "orientation": "VERIFIED-visual-review-2026-11-02",
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": true,
+    "directionChangeJump": true,
+    "hasFacingShape": true
+   }
+  },
+  "0080": {
+   "frames": 37,
+   "layout37": true,
+   "blocks": {
+    "rear": {
+     "idle": [
+      0,
+      2
+     ],
+     "walk": [
+      3,
+      8
+     ],
+     "strike": [
+      9,
+      10
+     ]
+    },
+    "sideLeft": {
+     "idle": [
+      11,
+      13
+     ],
+     "walk": [
+      14,
+      19
+     ],
+     "strike": [
+      20,
+      21
+     ]
+    },
+    "front": {
+     "idle": [
+      22,
+      24
+     ],
+     "walk": [
+      25,
+      30
+     ],
+     "strike": [
+      31,
+      32
+     ]
+    },
+    "lunge": [
+     33,
+     36
+    ]
+   },
+   "evidence": {
+    "blockStructure": "VERIFIED-pixels/obs_structure",
+    "orientation": "VERIFIED-visual-review-2026-11-02",
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": true,
+    "directionChangeJump": true,
+    "hasFacingShape": true
+   }
+  },
+  "0081": {
+   "frames": 37,
+   "layout37": true,
+   "blocks": {
+    "rear": {
+     "idle": [
+      0,
+      2
+     ],
+     "walk": [
+      3,
+      8
+     ],
+     "strike": [
+      9,
+      10
+     ]
+    },
+    "sideLeft": {
+     "idle": [
+      11,
+      13
+     ],
+     "walk": [
+      14,
+      19
+     ],
+     "strike": [
+      20,
+      21
+     ]
+    },
+    "front": {
+     "idle": [
+      22,
+      24
+     ],
+     "walk": [
+      25,
+      30
+     ],
+     "strike": [
+      31,
+      32
+     ]
+    },
+    "lunge": [
+     33,
+     36
+    ]
+   },
+   "evidence": {
+    "blockStructure": "VERIFIED-pixels/obs_structure",
+    "orientation": "VERIFIED-visual-review-2026-11-02",
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": true,
+    "directionChangeJump": true,
+    "hasFacingShape": true
+   }
+  },
+  "0082": {
+   "frames": 37,
+   "layout37": true,
+   "blocks": {
+    "rear": {
+     "idle": [
+      0,
+      2
+     ],
+     "walk": [
+      3,
+      8
+     ],
+     "strike": [
+      9,
+      10
+     ]
+    },
+    "sideLeft": {
+     "idle": [
+      11,
+      13
+     ],
+     "walk": [
+      14,
+      19
+     ],
+     "strike": [
+      20,
+      21
+     ]
+    },
+    "front": {
+     "idle": [
+      22,
+      24
+     ],
+     "walk": [
+      25,
+      30
+     ],
+     "strike": [
+      31,
+      32
+     ]
+    },
+    "lunge": [
+     33,
+     36
+    ]
+   },
+   "evidence": {
+    "blockStructure": "VERIFIED-pixels/obs_structure",
+    "orientation": "VERIFIED-visual-review-2026-11-02",
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": true,
+    "directionChangeJump": true,
+    "hasFacingShape": true
+   }
+  },
+  "0083": {
+   "frames": 37,
+   "layout37": true,
+   "blocks": {
+    "rear": {
+     "idle": [
+      0,
+      2
+     ],
+     "walk": [
+      3,
+      8
+     ],
+     "strike": [
+      9,
+      10
+     ]
+    },
+    "sideLeft": {
+     "idle": [
+      11,
+      13
+     ],
+     "walk": [
+      14,
+      19
+     ],
+     "strike": [
+      20,
+      21
+     ]
+    },
+    "front": {
+     "idle": [
+      22,
+      24
+     ],
+     "walk": [
+      25,
+      30
+     ],
+     "strike": [
+      31,
+      32
+     ]
+    },
+    "lunge": [
+     33,
+     36
+    ]
+   },
+   "evidence": {
+    "blockStructure": "VERIFIED-pixels/obs_structure",
+    "orientation": "VERIFIED-visual-review-2026-11-02",
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": true,
+    "directionChangeJump": true,
+    "hasFacingShape": true
+   }
+  },
+  "0084": {
+   "frames": 37,
+   "layout37": false,
+   "blocks": null,
+   "evidence": {
+    "blockStructure": "REJECTED",
+    "orientation": null,
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": true,
+    "directionChangeJump": true,
+    "hasFacingShape": false
+   }
+  },
+  "0085": {
+   "frames": 37,
+   "layout37": false,
+   "blocks": null,
+   "evidence": {
+    "blockStructure": "REJECTED",
+    "orientation": null,
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": false,
+    "idleToWalkBoundaryJump": false,
+    "directionChangeJump": false,
+    "hasFacingShape": true
+   }
+  },
+  "0086": {
+   "frames": 37,
+   "layout37": false,
+   "blocks": null,
+   "evidence": {
+    "blockStructure": "REJECTED",
+    "orientation": null,
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": false,
+    "directionChangeJump": true,
+    "hasFacingShape": true
+   }
+  },
+  "0087": {
+   "frames": 13,
+   "layout37": false,
+   "blockProposal": [
+    [
+     0,
+     3
+    ],
+    [
+     4,
+     8
+    ],
+    [
+     9,
+     9
+    ],
+    [
+     10,
+     10
+    ],
+    [
+     11,
+     12
+    ]
+   ],
+   "evidence": {
+    "blockStructure": "UNVERIFIED-change-point-proposal",
+    "actionRoles": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   }
+  },
+  "0088": {
+   "frames": 37,
+   "layout37": true,
+   "blocks": {
+    "rear": {
+     "idle": [
+      0,
+      2
+     ],
+     "walk": [
+      3,
+      8
+     ],
+     "strike": [
+      9,
+      10
+     ]
+    },
+    "sideLeft": {
+     "idle": [
+      11,
+      13
+     ],
+     "walk": [
+      14,
+      19
+     ],
+     "strike": [
+      20,
+      21
+     ]
+    },
+    "front": {
+     "idle": [
+      22,
+      24
+     ],
+     "walk": [
+      25,
+      30
+     ],
+     "strike": [
+      31,
+      32
+     ]
+    },
+    "lunge": [
+     33,
+     36
+    ]
+   },
+   "evidence": {
+    "blockStructure": "VERIFIED-pixels/obs_structure",
+    "orientation": "VERIFIED-visual-review-2026-11-02",
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": true,
+    "directionChangeJump": true,
+    "hasFacingShape": true
+   }
+  },
+  "0089": {
+   "frames": 13,
+   "layout37": false,
+   "blockProposal": [
+    [
+     0,
+     3
+    ],
+    [
+     4,
+     6
+    ],
+    [
+     7,
+     7
+    ],
+    [
+     8,
+     8
+    ],
+    [
+     9,
+     12
+    ]
+   ],
+   "evidence": {
+    "blockStructure": "UNVERIFIED-change-point-proposal",
+    "actionRoles": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   }
+  },
+  "0090": {
+   "frames": 51,
+   "layout37": false,
+   "blockProposal": [
+    [
+     0,
+     23
+    ],
+    [
+     24,
+     31
+    ],
+    [
+     32,
+     40
+    ],
+    [
+     41,
+     42
+    ],
+    [
+     43,
+     50
+    ]
+   ],
+   "evidence": {
+    "blockStructure": "UNVERIFIED-change-point-proposal",
+    "actionRoles": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   }
+  },
+  "0092": {
+   "frames": 7,
+   "layout37": false,
+   "blockProposal": [
+    [
+     0,
+     6
+    ]
+   ],
+   "evidence": {
+    "blockStructure": "UNVERIFIED-change-point-proposal",
+    "actionRoles": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   }
+  },
+  "0093": {
+   "frames": 78,
+   "layout37": false,
+   "blockProposal": [
+    [
+     0,
+     10
+    ],
+    [
+     11,
+     16
+    ],
+    [
+     17,
+     18
+    ],
+    [
+     19,
+     22
+    ],
+    [
+     23,
+     34
+    ],
+    [
+     35,
+     38
+    ],
+    [
+     39,
+     40
+    ],
+    [
+     41,
+     42
+    ],
+    [
+     43,
+     46
+    ],
+    [
+     47,
+     47
+    ],
+    [
+     48,
+     56
+    ],
+    [
+     57,
+     57
+    ],
+    [
+     58,
+     58
+    ],
+    [
+     59,
+     62
+    ],
+    [
+     63,
+     64
+    ],
+    [
+     65,
+     66
+    ],
+    [
+     67,
+     71
+    ],
+    [
+     72,
+     74
+    ],
+    [
+     75,
+     77
+    ]
+   ],
+   "evidence": {
+    "blockStructure": "UNVERIFIED-change-point-proposal",
+    "actionRoles": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   }
+  },
+  "0094": {
+   "frames": 14,
+   "layout37": false,
+   "blockProposal": [
+    [
+     0,
+     10
+    ],
+    [
+     11,
+     11
+    ],
+    [
+     12,
+     12
+    ],
+    [
+     13,
+     13
+    ]
+   ],
+   "evidence": {
+    "blockStructure": "UNVERIFIED-change-point-proposal",
+    "actionRoles": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   }
+  },
+  "0095": {
+   "frames": 172,
+   "layout37": false,
+   "blockProposal": [
+    [
+     0,
+     17
+    ],
+    [
+     18,
+     18
+    ],
+    [
+     19,
+     27
+    ],
+    [
+     28,
+     29
+    ],
+    [
+     30,
+     72
+    ],
+    [
+     73,
+     75
+    ],
+    [
+     76,
+     76
+    ],
+    [
+     77,
+     81
+    ],
+    [
+     82,
+     82
+    ],
+    [
+     83,
+     83
+    ],
+    [
+     84,
+     84
+    ],
+    [
+     85,
+     86
+    ],
+    [
+     87,
+     107
+    ],
+    [
+     108,
+     108
+    ],
+    [
+     109,
+     110
+    ],
+    [
+     111,
+     112
+    ],
+    [
+     113,
+     113
+    ],
+    [
+     114,
+     115
+    ],
+    [
+     116,
+     116
+    ],
+    [
+     117,
+     130
+    ],
+    [
+     131,
+     136
+    ],
+    [
+     137,
+     137
+    ],
+    [
+     138,
+     138
+    ],
+    [
+     139,
+     139
+    ],
+    [
+     140,
+     141
+    ],
+    [
+     142,
+     148
+    ],
+    [
+     149,
+     150
+    ],
+    [
+     151,
+     151
+    ],
+    [
+     152,
+     152
+    ],
+    [
+     153,
+     153
+    ],
+    [
+     154,
+     155
+    ],
+    [
+     156,
+     158
+    ],
+    [
+     159,
+     159
+    ],
+    [
+     160,
+     171
+    ]
+   ],
+   "evidence": {
+    "blockStructure": "UNVERIFIED-change-point-proposal",
+    "actionRoles": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   }
+  },
+  "0166": {
+   "frames": 37,
+   "layout37": true,
+   "blocks": {
+    "rear": {
+     "idle": [
+      0,
+      2
+     ],
+     "walk": [
+      3,
+      8
+     ],
+     "strike": [
+      9,
+      10
+     ]
+    },
+    "sideLeft": {
+     "idle": [
+      11,
+      13
+     ],
+     "walk": [
+      14,
+      19
+     ],
+     "strike": [
+      20,
+      21
+     ]
+    },
+    "front": {
+     "idle": [
+      22,
+      24
+     ],
+     "walk": [
+      25,
+      30
+     ],
+     "strike": [
+      31,
+      32
+     ]
+    },
+    "lunge": [
+     33,
+     36
+    ]
+   },
+   "evidence": {
+    "blockStructure": "VERIFIED-pixels/obs_structure",
+    "orientation": "VERIFIED-visual-review-2026-11-02",
+    "actionRoles": "INFERRED",
+    "playbackRate": "UNVERIFIED",
+    "exeActionTable": "UNDECODED"
+   },
+   "checks": {
+    "idleSmallerThanWalk": true,
+    "idleToWalkBoundaryJump": true,
+    "directionChangeJump": true,
+    "hasFacingShape": true
+   }
+  }
+ }
+}

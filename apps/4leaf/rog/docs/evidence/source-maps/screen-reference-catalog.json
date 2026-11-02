@@ -1,0 +1,160 @@
+{
+ "references": [
+  {
+   "file": "apps/4leaf/assets/street.jpg",
+   "sha256": "42cb02e5553f63286bf227f8827102fdce19562f9b32d8e448cb38c28fad955f",
+   "size": [
+    2153,
+    543
+   ],
+   "source": "https://t1.daumcdn.net/cfile/tistory/193E9C335142CED517",
+   "screen": "Keltika street panorama",
+   "version": "unknown",
+   "kind": "third-party screenshot of the live service (not a client resource)",
+   "motion": "still image only - no frame timing measurable",
+   "reliability": "VERIFIED as a period screenshot by in-image client chrome; source blog, not an official archive"
+  },
+  {
+   "file": "apps/4leaf/assets/chat.jpg",
+   "sha256": "4db511ca2ad2c815e05cae1ade6dd7b3f1bd5b397c99a0c23e027aa6f0b840cb",
+   "size": [
+    794,
+    528
+   ],
+   "source": "https://t1.daumcdn.net/cfile/tistory/172E384F514188D509",
+   "screen": "permanent chat room (Hayakan)",
+   "version": "2004-02 (date stamp 04.02.11 in image)",
+   "kind": "third-party screenshot of the live service (not a client resource)",
+   "motion": "still image only - no frame timing measurable",
+   "reliability": "VERIFIED as a period screenshot by in-image client chrome; source blog, not an official archive"
+  },
+  {
+   "file": "apps/4leaf/assets/dice_ref.png",
+   "sha256": "db04b202260c78acfef6edb7c9acb4edd465e812086b59cbcc1e5722449bb373",
+   "size": [
+    800,
+    600
+   ],
+   "source": "https://t1.daumcdn.net/cfile/tistory/0227DF4C5141D1B126",
+   "screen": "dice game TOWN SELECT (channels)",
+   "version": "unknown",
+   "kind": "third-party screenshot of the live service (not a client resource)",
+   "motion": "still image only - no frame timing measurable",
+   "reliability": "VERIFIED as a period screenshot by in-image client chrome; source blog, not an official archive"
+  },
+  {
+   "file": "apps/4leaf/assets/dice_ref2.png",
+   "sha256": "ed16a7de656bb85397cacc498c593b82fac648a6c68c2def2a471b7fb4492e8c",
+   "size": [
+    800,
+    600
+   ],
+   "source": "https://t1.daumcdn.net/cfile/tistory/146CBD4A514178AF27",
+   "screen": "dice game ROOM SELECT",
+   "version": "unknown",
+   "kind": "third-party screenshot of the live service (not a client resource)",
+   "motion": "still image only - no frame timing measurable",
+   "reliability": "VERIFIED as a period screenshot by in-image client chrome; source blog, not an official archive"
+  },
+  {
+   "file": "apps/4leaf/assets/shop_ref.png",
+   "sha256": "5c1dd76723721eee022ad4642ca312ef3057428aae7116d09e93badc5417ac9b",
+   "size": [
+    541,
+    402
+   ],
+   "source": "https://t1.daumcdn.net/thumb/R1024x0/?fname=http%3A%2F%2Fcfile241.uf.daum.net%2Fimage%2F99DC854E5AE04B01147070",
+   "screen": "Magic Carden card shop with Normal/Valuable/Rare tabs",
+   "version": "later than the 2002 client (Rare tab absent in 2002 data)",
+   "kind": "third-party screenshot of the live service (not a client resource)",
+   "motion": "still image only - no frame timing measurable",
+   "reliability": "VERIFIED as a period screenshot by in-image client chrome; source blog, not an official archive"
+  },
+  {
+   "file": "apps/4leaf/assets/town_ref.jpg",
+   "sha256": "ee6be930ce4689f5d0949192e8df9b5f8c710637d873a7cdd62127f74045de4a",
+   "size": [
+    794,
+    528
+   ],
+   "source": "https://t1.daumcdn.net/cfile/tistory/1152263A51418F4519",
+   "screen": "forest town chat screen",
+   "version": "2004-02 (date stamp in image)",
+   "kind": "third-party screenshot of the live service (not a client resource)",
+   "motion": "still image only - no frame timing measurable",
+   "reliability": "VERIFIED as a period screenshot by in-image client chrome; source blog, not an official archive"
+  },
+  {
+   "file": "apps/4leaf/assets/chat_ref.jpg",
+   "sha256": "e61301b3d1102af64378197ce9a3951d9f91ac97e43f4ad13a801b00462047d5",
+   "size": [
+    794,
+    528
+   ],
+   "source": "https://t1.daumcdn.net/cfile/tistory/012D994F514188ED0B",
+   "screen": "permanent chat room (Hayakan), same room later moment",
+   "version": "2004-02 (date stamp in image)",
+   "kind": "third-party screenshot of the live service (not a client resource)",
+   "motion": "still image only - no frame timing measurable",
+   "reliability": "VERIFIED as a period screenshot by in-image client chrome; source blog, not an official archive"
+  },
+  {
+   "file": "apps/4leaf/assets/sky.jpg",
+   "sha256": "7d6fae36ceb7d24b88ccc3b71c0d2217982b94063689562d249e97eba3848e4f",
+   "size": [
+    794,
+    528
+   ],
+   "source": "https://t1.daumcdn.net/cfile/tistory/24280E405142A07C0B",
+   "screen": "world map (moon)",
+   "version": "2004-02 (date stamp 04.02.08 in image)",
+   "kind": "third-party screenshot of the live service (not a client resource)",
+   "motion": "still image only - no frame timing measurable",
+   "reliability": "VERIFIED as a period screenshot by in-image client chrome; source blog, not an official archive"
+  },
+  {
+   "file": "apps/4leaf/assets/board.jpg",
+   "sha256": "8e1d883b109c167cf656bb0879695175de57cccb4b897cf725bd9be38138e9e0",
+   "size": [
+    800,
+    600
+   ],
+   "source": "https://t1.daumcdn.net/cfile/tistory/0117613A5142AFC70D",
+   "screen": "chessman battle, 2 vs 1 dice",
+   "version": "2004 client",
+   "kind": "third-party screenshot of the live service (not a client resource)",
+   "motion": "still image only - no frame timing measurable",
+   "reliability": "VERIFIED as a period screenshot by in-image client chrome; source blog, not an official archive"
+  },
+  {
+   "file": "apps/4leaf/assets/battle.jpg",
+   "sha256": "1d83ffa2dec09e0a66ff5b9689def54a910328c704757546674e64860297ef11",
+   "size": [
+    800,
+    600
+   ],
+   "source": "https://t1.daumcdn.net/cfile/tistory/230E993A5142AFD719",
+   "screen": "chessman battle, 2 vs 4 dice",
+   "version": "2004 client",
+   "kind": "third-party screenshot of the live service (not a client resource)",
+   "motion": "still image only - no frame timing measurable",
+   "reliability": "VERIFIED as a period screenshot by in-image client chrome; source blog, not an official archive"
+  },
+  {
+   "file": "apps/4leaf/assets/intro.jpg",
+   "sha256": "1ddc13fd84279690e6be4a9af1287bc1b99b85cd4177716868f0b03714179f55",
+   "size": [
+    800,
+    600
+   ],
+   "source": "https://t1.daumcdn.net/cfile/tistory/16570B3E5142ABBA13",
+   "screen": "loading screen",
+   "version": "unknown",
+   "kind": "third-party screenshot of the live service (not a client resource)",
+   "motion": "still image only - no frame timing measurable",
+   "reliability": "VERIFIED as a period screenshot by in-image client chrome; source blog, not an official archive"
+  }
+ ],
+ "videos": [],
+ "videoSearch": "no downloadable gameplay video found (2026-11-02); timing must come from original data"
+}

@@ -1,0 +1,665 @@
+{
+ "cardsWithoutOriginalBody": [
+  {
+   "card": "0091",
+   "name": "철가면",
+   "reason": "no member with this number in OBS/OBS2/OBS3"
+  },
+  {
+   "card": "0096",
+   "name": "솔져",
+   "reason": "OBS.pak member with this number is an effect/UI (NON_ACTOR_OBS)"
+  },
+  {
+   "card": "0097",
+   "name": "마법사",
+   "reason": "OBS.pak member with this number is an effect/UI (NON_ACTOR_OBS)"
+  },
+  {
+   "card": "0098",
+   "name": "제국나이트",
+   "reason": "OBS.pak member with this number is an effect/UI (NON_ACTOR_OBS)"
+  },
+  {
+   "card": "0099",
+   "name": "워락",
+   "reason": "OBS.pak member with this number is an effect/UI (NON_ACTOR_OBS)"
+  },
+  {
+   "card": "0100",
+   "name": "파일럿",
+   "reason": "OBS.pak member with this number is an effect/UI (NON_ACTOR_OBS)"
+  },
+  {
+   "card": "0125",
+   "name": "나탈리",
+   "reason": "OBS.pak member with this number is an effect/UI (NON_ACTOR_OBS)"
+  },
+  {
+   "card": "0126",
+   "name": "네리샤",
+   "reason": "no member with this number in OBS/OBS2/OBS3"
+  },
+  {
+   "card": "0127",
+   "name": "데미안",
+   "reason": "OBS.pak member with this number is an effect/UI (NON_ACTOR_OBS)"
+  },
+  {
+   "card": "0128",
+   "name": "디에네",
+   "reason": "OBS.pak member with this number is an effect/UI (NON_ACTOR_OBS)"
+  },
+  {
+   "card": "0129",
+   "name": "란",
+   "reason": "no member with this number in OBS/OBS2/OBS3"
+  },
+  {
+   "card": "0130",
+   "name": "레드헤드",
+   "reason": "OBS.pak member with this number is an effect/UI (NON_ACTOR_OBS)"
+  },
+  {
+   "card": "0131",
+   "name": "루시엔",
+   "reason": "OBS.pak member with this number is an effect/UI (NON_ACTOR_OBS)"
+  },
+  {
+   "card": "0132",
+   "name": "루크",
+   "reason": "no member with this number in OBS/OBS2/OBS3"
+  },
+  {
+   "card": "0133",
+   "name": "리엔",
+   "reason": "OBS.pak member with this number is an effect/UI (NON_ACTOR_OBS)"
+  },
+  {
+   "card": "0134",
+   "name": "리차드",
+   "reason": "OBS.pak member with this number is an effect/UI (NON_ACTOR_OBS)"
+  },
+  {
+   "card": "0135",
+   "name": "마리아",
+   "reason": "OBS.pak member with this number is an effect/UI (NON_ACTOR_OBS)"
+  },
+  {
+   "card": "0136",
+   "name": "베라모드",
+   "reason": "OBS.pak member with this number is an effect/UI (NON_ACTOR_OBS)"
+  },
+  {
+   "card": "0137",
+   "name": "살라딘2",
+   "reason": "OBS.pak member with this number is an effect/UI (NON_ACTOR_OBS)"
+  },
+  {
+   "card": "0138",
+   "name": "손나딘",
+   "reason": "OBS.pak member with this number is an effect/UI (NON_ACTOR_OBS)"
+  },
+  {
+   "card": "0139",
+   "name": "아마딘",
+   "reason": "OBS.pak member with this number is an effect/UI (NON_ACTOR_OBS)"
+  },
+  {
+   "card": "0140",
+   "name": "아셀라스",
+   "reason": "OBS.pak member with this number is an effect/UI (NON_ACTOR_OBS)"
+  },
+  {
+   "card": "0141",
+   "name": "아슈레이",
+   "reason": "OBS.pak member with this number is an effect/UI (NON_ACTOR_OBS)"
+  },
+  {
+   "card": "0142",
+   "name": "엠블라",
+   "reason": "OBS.pak member with this number is an effect/UI (NON_ACTOR_OBS)"
+  },
+  {
+   "card": "0143",
+   "name": "죠안2",
+   "reason": "OBS.pak member with this number is an effect/UI (NON_ACTOR_OBS)"
+  },
+  {
+   "card": "0144",
+   "name": "쥬디",
+   "reason": "OBS.pak member with this number is an effect/UI (NON_ACTOR_OBS)"
+  },
+  {
+   "card": "0145",
+   "name": "슈",
+   "reason": "OBS.pak member with this number is an effect/UI (NON_ACTOR_OBS)"
+  },
+  {
+   "card": "0146",
+   "name": "카를로스",
+   "reason": "OBS.pak member with this number is an effect/UI (NON_ACTOR_OBS)"
+  },
+  {
+   "card": "0147",
+   "name": "크리스티앙2",
+   "reason": "OBS.pak member with this number is an effect/UI (NON_ACTOR_OBS)"
+  },
+  {
+   "card": "0156",
+   "name": "프라이오스_슈퍼슬라임_",
+   "reason": "OBS.pak member with this number is an effect/UI (NON_ACTOR_OBS)"
+  },
+  {
+   "card": "0157",
+   "name": "강화병",
+   "reason": "no member with this number in OBS/OBS2/OBS3"
+  },
+  {
+   "card": "0158",
+   "name": "고렘",
+   "reason": "OBS.pak member with this number is an effect/UI (NON_ACTOR_OBS)"
+  },
+  {
+   "card": "0159",
+   "name": "루칼드",
+   "reason": "OBS.pak member with this number is an effect/UI (NON_ACTOR_OBS)"
+  },
+  {
+   "card": "0160",
+   "name": "바룬",
+   "reason": "OBS.pak member with this number is an effect/UI (NON_ACTOR_OBS)"
+  },
+  {
+   "card": "0161",
+   "name": "아지다하카",
+   "reason": "OBS.pak member with this number is an effect/UI (NON_ACTOR_OBS)"
+  },
+  {
+   "card": "0162",
+   "name": "엘더마스터",
+   "reason": "OBS.pak member with this number is an effect/UI (NON_ACTOR_OBS)"
+  },
+  {
+   "card": "0163",
+   "name": "제이슨",
+   "reason": "OBS.pak member with this number is an effect/UI (NON_ACTOR_OBS)"
+  },
+  {
+   "card": "0164",
+   "name": "좀비",
+   "reason": "OBS.pak member with this number is an effect/UI (NON_ACTOR_OBS)"
+  },
+  {
+   "card": "0165",
+   "name": "켄",
+   "reason": "OBS.pak member with this number is an effect/UI (NON_ACTOR_OBS)"
+  },
+  {
+   "card": "0167",
+   "name": "펜텀 마리아",
+   "reason": "OBS.pak member with this number is an effect/UI (NON_ACTOR_OBS)"
+  },
+  {
+   "card": "0168",
+   "name": "펜텀 유진",
+   "reason": "no member with this number in OBS/OBS2/OBS3"
+  },
+  {
+   "card": "0169",
+   "name": "해골병사",
+   "reason": "OBS.pak member with this number is an effect/UI (NON_ACTOR_OBS)"
+  },
+  {
+   "card": "0170",
+   "name": "흑태자",
+   "reason": "OBS.pak member with this number is an effect/UI (NON_ACTOR_OBS)"
+  },
+  {
+   "card": "0171",
+   "name": "하이델룬",
+   "reason": "OBS.pak member with this number is an effect/UI (NON_ACTOR_OBS)"
+  }
+ ],
+ "absentFromAllPacks": [
+  "0091",
+  "0126",
+  "0129",
+  "0132",
+  "0157",
+  "0168"
+ ],
+ "obs2obs3CharacterSizeMembersNotYetExported": [
+  {
+   "pak": "OBS2.pak",
+   "member": "1199.obs",
+   "frames": 36,
+   "maxSize": [
+    110,
+    82
+   ]
+  },
+  {
+   "pak": "OBS2.pak",
+   "member": "1200.obs",
+   "frames": 36,
+   "maxSize": [
+    106,
+    80
+   ]
+  },
+  {
+   "pak": "OBS2.pak",
+   "member": "1201.obs",
+   "frames": 46,
+   "maxSize": [
+    142,
+    108
+   ]
+  },
+  {
+   "pak": "OBS2.pak",
+   "member": "1202.obs",
+   "frames": 42,
+   "maxSize": [
+    78,
+    77
+   ]
+  },
+  {
+   "pak": "OBS2.pak",
+   "member": "1203.obs",
+   "frames": 41,
+   "maxSize": [
+    121,
+    127
+   ]
+  },
+  {
+   "pak": "OBS2.pak",
+   "member": "1204.obs",
+   "frames": 57,
+   "maxSize": [
+    121,
+    93
+   ]
+  },
+  {
+   "pak": "OBS2.pak",
+   "member": "1205.obs",
+   "frames": 47,
+   "maxSize": [
+    49,
+    78
+   ]
+  },
+  {
+   "pak": "OBS2.pak",
+   "member": "1206.obs",
+   "frames": 42,
+   "maxSize": [
+    73,
+    80
+   ]
+  },
+  {
+   "pak": "OBS2.pak",
+   "member": "1207.obs",
+   "frames": 49,
+   "maxSize": [
+    83,
+    106
+   ]
+  },
+  {
+   "pak": "OBS2.pak",
+   "member": "1208.obs",
+   "frames": 47,
+   "maxSize": [
+    93,
+    84
+   ]
+  },
+  {
+   "pak": "OBS2.pak",
+   "member": "1209.obs",
+   "frames": 31,
+   "maxSize": [
+    99,
+    93
+   ]
+  },
+  {
+   "pak": "OBS2.pak",
+   "member": "1210.obs",
+   "frames": 57,
+   "maxSize": [
+    130,
+    146
+   ]
+  },
+  {
+   "pak": "OBS2.pak",
+   "member": "1211.obs",
+   "frames": 45,
+   "maxSize": [
+    147,
+    126
+   ]
+  },
+  {
+   "pak": "OBS2.pak",
+   "member": "1213.obs",
+   "frames": 42,
+   "maxSize": [
+    56,
+    80
+   ]
+  },
+  {
+   "pak": "OBS2.pak",
+   "member": "1214.obs",
+   "frames": 44,
+   "maxSize": [
+    111,
+    85
+   ]
+  },
+  {
+   "pak": "OBS2.pak",
+   "member": "1215.obs",
+   "frames": 48,
+   "maxSize": [
+    145,
+    118
+   ]
+  },
+  {
+   "pak": "OBS2.pak",
+   "member": "1216.obs",
+   "frames": 42,
+   "maxSize": [
+    59,
+    77
+   ]
+  },
+  {
+   "pak": "OBS2.pak",
+   "member": "1217.obs",
+   "frames": 42,
+   "maxSize": [
+    130,
+    94
+   ]
+  },
+  {
+   "pak": "OBS2.pak",
+   "member": "1218.obs",
+   "frames": 47,
+   "maxSize": [
+    133,
+    99
+   ]
+  },
+  {
+   "pak": "OBS2.pak",
+   "member": "1219.obs",
+   "frames": 27,
+   "maxSize": [
+    71,
+    81
+   ]
+  },
+  {
+   "pak": "OBS2.pak",
+   "member": "1220.obs",
+   "frames": 44,
+   "maxSize": [
+    117,
+    118
+   ]
+  },
+  {
+   "pak": "OBS2.pak",
+   "member": "1221.obs",
+   "frames": 45,
+   "maxSize": [
+    57,
+    87
+   ]
+  },
+  {
+   "pak": "OBS2.pak",
+   "member": "1223.obs",
+   "frames": 22,
+   "maxSize": [
+    69,
+    69
+   ]
+  },
+  {
+   "pak": "OBS2.pak",
+   "member": "1226.obs",
+   "frames": 23,
+   "maxSize": [
+    146,
+    90
+   ]
+  },
+  {
+   "pak": "OBS2.pak",
+   "member": "1231.obs",
+   "frames": 25,
+   "maxSize": [
+    140,
+    161
+   ]
+  },
+  {
+   "pak": "OBS2.pak",
+   "member": "1232.obs",
+   "frames": 37,
+   "maxSize": [
+    207,
+    116
+   ]
+  },
+  {
+   "pak": "OBS2.pak",
+   "member": "1233.obs",
+   "frames": 23,
+   "maxSize": [
+    167,
+    80
+   ]
+  },
+  {
+   "pak": "OBS2.pak",
+   "member": "1240.obs",
+   "frames": 37,
+   "maxSize": [
+    74,
+    68
+   ]
+  },
+  {
+   "pak": "OBS2.pak",
+   "member": "1249.obs",
+   "frames": 21,
+   "maxSize": [
+    66,
+    51
+   ]
+  },
+  {
+   "pak": "OBS3.pak",
+   "member": "1134.obs",
+   "frames": 20,
+   "maxSize": [
+    179,
+    182
+   ]
+  },
+  {
+   "pak": "OBS3.pak",
+   "member": "1254.obs",
+   "frames": 34,
+   "maxSize": [
+    104,
+    112
+   ]
+  },
+  {
+   "pak": "OBS3.pak",
+   "member": "1255.obs",
+   "frames": 38,
+   "maxSize": [
+    148,
+    112
+   ]
+  },
+  {
+   "pak": "OBS3.pak",
+   "member": "1257.obs",
+   "frames": 46,
+   "maxSize": [
+    142,
+    108
+   ]
+  },
+  {
+   "pak": "OBS3.pak",
+   "member": "1258.obs",
+   "frames": 52,
+   "maxSize": [
+    66,
+    61
+   ]
+  },
+  {
+   "pak": "OBS3.pak",
+   "member": "1259.obs",
+   "frames": 24,
+   "maxSize": [
+    56,
+    85
+   ]
+  },
+  {
+   "pak": "OBS3.pak",
+   "member": "1260.obs",
+   "frames": 51,
+   "maxSize": [
+    117,
+    109
+   ]
+  },
+  {
+   "pak": "OBS3.pak",
+   "member": "1261.obs",
+   "frames": 38,
+   "maxSize": [
+    64,
+    88
+   ]
+  },
+  {
+   "pak": "OBS3.pak",
+   "member": "1262.obs",
+   "frames": 48,
+   "maxSize": [
+    70,
+    75
+   ]
+  },
+  {
+   "pak": "OBS3.pak",
+   "member": "1263.obs",
+   "frames": 45,
+   "maxSize": [
+    151,
+    108
+   ]
+  },
+  {
+   "pak": "OBS3.pak",
+   "member": "1264.obs",
+   "frames": 39,
+   "maxSize": [
+    102,
+    86
+   ]
+  },
+  {
+   "pak": "OBS3.pak",
+   "member": "1265.obs",
+   "frames": 41,
+   "maxSize": [
+    150,
+    151
+   ]
+  },
+  {
+   "pak": "OBS3.pak",
+   "member": "1266.obs",
+   "frames": 32,
+   "maxSize": [
+    60,
+    82
+   ]
+  },
+  {
+   "pak": "OBS3.pak",
+   "member": "1267.obs",
+   "frames": 55,
+   "maxSize": [
+    160,
+    129
+   ]
+  },
+  {
+   "pak": "OBS3.pak",
+   "member": "1271.obs",
+   "frames": 40,
+   "maxSize": [
+    102,
+    91
+   ]
+  },
+  {
+   "pak": "OBS3.pak",
+   "member": "1276.obs",
+   "frames": 44,
+   "maxSize": [
+    111,
+    119
+   ]
+  }
+ ],
+ "membersFailedFirstPassDecode": [
+  {
+   "pak": "OBS.pak",
+   "member": "1154.obs",
+   "error": "OBS frame geometry invalid; index=0 cursor=132 declared=(3782, 320, 320, -160, -160) memberBytes=58198"
+  },
+  {
+   "pak": "OBS.pak",
+   "member": "1175.obs",
+   "error": "OBS frame geometry invalid; index=0 cursor=132 declared=(2, 1, 1, -160, -161) memberBytes=658525"
+  },
+  {
+   "pak": "OBS.pak",
+   "member": "1182.obs",
+   "error": "OBS frame geometry invalid; index=0 cursor=132 declared=(29144, 438, 75, -219, -95) memberBytes=60111"
+  },
+  {
+   "pak": "OBS.pak",
+   "member": "1186.obs",
+   "error": "OBS frame geometry invalid; index=8 cursor=4316 declared=(13406, 478, 30, -223, -98) memberBytes=23336"
+  }
+ ],
+ "undecodedBytes": {
+  "memberTrailers": "fixed 18-byte records + embedded data; bytes only in CI (decode-obs-extended.py exports them)",
+  "chrRecords": "472-byte records; only offsets 196 (name) and 452 (stats) decoded"
+ }
+}
