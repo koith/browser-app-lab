@@ -42,6 +42,12 @@ assert.deepEqual(ids(seq('0125','idle','toward')),[25,26,27]);
 assert.deepEqual(ids(seq('0135','idle','toward')).slice(0,3),[27,27,27]);
 assert.deepEqual(ids(seq('0135','walk','toward')),[27],
  'empty native sequence uses same source frame rather than a fabricated walk');
+assert.equal(seq('0135','walk','toward').nativeUndefinedSlot,true,
+ 'original 0xFFFFFFFF empty action is undefined, not a looping move');
+assert.equal(seq('0135','walk','toward').loop,false,
+ 'one visual fallback frame must not claim source-native repeat behavior');
+assert.equal(seq('0056','walk','toward').nativeDefined,true,
+ 'genuine native frame keys remain available for actual source actions');
 assert.deepEqual(ids(seq('0171','walk','toward')),[38,39,40,41,42,43]);
 assert.equal(seq('0040','walk','away'),null,'unpublished original body not replaced with unrelated 1040');
 assert.equal(seq('0156','walk','away'),null,'missing original body not assigned');
