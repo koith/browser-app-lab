@@ -174,3 +174,18 @@ Provider terms, indexing, deletion and CORS rules can change. Keyless index sear
 ## Additional free source & community research (2026-11-02)
 
 Read [SOURCE_COMMUNITY_FIELDGUIDE_20261102.md](./SOURCE_COMMUNITY_FIELDGUIDE_20261102.md) for a verified, citation-linked comparison of open-source scrapers, actual maintainer issue comments and pull requests, 2026 Reddit/DEV development discussions, official quota restrictions, and independent anonymous live probes. It differentiates VERIFIED results from proposed source integrations and gives priorities for genuine dated post acquisition, not just index links.
+
+
+## 2026-11-02: public account watch, source-level dedup and commerce signals
+
+A second top-level **계정 분석** tab has been added; the existing unified post feed remains the default. The account page saves **opt-in public profile URLs** in the user's browser only (up to 80). Users can add from a post-detail button, enter a public profile URL, inspect the account, refresh eligible source feeds, search watched profiles and remove an account.
+
+- Local browser storage contains only the manually selected normalized public profile URLs; no posts, media, word-based behavior history, cookies, credentials or cross-platform identity mappings are persisted. Refresh results remain in tab memory.
+- Verified public posts are included only for the selected period. Indexed links lacking original dates are counted and labelled separately; they are not promoted to verified data.
+- Direct public feed support: anonymous Bluesky app.bsky.feed.getAuthorFeed, anonymous Mastodon account lookup and public-status fetch, and bounded X keyless search with public FxEmbed single-status original checks (ID, exact author handle, visibility, timestamp). X reader is unofficial and fallible. Replies/reposts and nonpublic statuses are never used to claim public authoring. Other networks still use matching posts already in the global feed.
+- Up to four previously opted-in supported accounts are refreshed at page load; other checks are on user click. In-memory source cache lasts 10 minutes, source calls have a 13-second timeout, and no background polling is scheduled.
+- Account analytics: source-specific account ID, number of verified sample posts, date of latest observed post, current seven-day chart, and exact-commerce-word occurrence counts. Across followed accounts, duplicate normalized commerce texts are counted only once, separately showing repeat counts.
+- **One distinct account is not one distinct real person.** Cross-platform pseudonymous identity resolution is not inferred or implemented; this protects against false unique-people claims and unintended deanonymization. The dashboard reports accounts and deduplicated public content, never unique individuals, actual purchases, or sensitive personal traits.
+- Public profile URLs use an HTTPS hostname/path allowlist. Any untrusted public source text is displayed using textContent, not inserted as HTML. No account list or source posts are sent to a new service.
+
+Test: python apps/demand-research/test_account_watch_browser.py (mobile Chromium fixture). The GitHub Pages and post-merge CI runs must pass before declaring this deployed; physical iPhone QA is pending.
