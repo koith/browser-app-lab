@@ -762,15 +762,28 @@ function drawNativeChessmen(){
    // OBS full-body as the 2004 right 2x2 panel did when provenance is
    // VERIFIED, with an automatic fallback if the source PNG is unavailable.
    const obsId=source.id.startsWith('c_')?source.id.slice(2):'';
-   const auditedIndex=Object.hasOwn(verifiedFront,obsId)
-    ?verifiedFront[obsId]:null;
-   const sourceMember=window.ORIGINAL_LEAF_OBS_FRAMES?.[obsId];
+   // CHR.pak record +260 owns the original OBS body member. These card IDs
+   // are NOT the old OBS member suffixes: e.g. card 0088 => 1071.obs, not
+   // 1088.obs. Share the exact source-membership gate with board & battle.
+   // Visual-review keys refer to OBS member numbers, never CardData IDs.
+   const chrBody=window.__LEAF_CHR_BODY_MAP__?.lookup(obsId)||null;
+   const sourceMember=window.__LEAF_CHR_BODY_MAP__?.resolve(obsId)||null;
+   const bodyKey=window.__LEAF_CHR_BODY_MAP__?.assetKey(obsId)||null;
+   const verifiedClassic=chrBody?.pak==='OBS'&&
+    bodyKey&&Object.hasOwn(verifiedFront,bodyKey);
+   const auditedIndex=verifiedClassic?verifiedFront[bodyKey]:null;
    const fullBody=auditedIndex===null?null:
     sourceMember?.frames?.find(frame=>frame.index===auditedIndex);
+   // Always expose authentic membership for regression/auditing, even when
+   // the corresponding original pixels have not yet been published.
+   slot.dataset.originalChrBody=chrBody?.originalMember||
+    (chrBody?.missing?'CHR-body-missing':'CHR-body-unverified');
+   slot.dataset.chrBodySource=sourceMember?'published-and-hash-gated':
+    'original-body-unpublished-or-unavailable';
    if(fullBody){
     img.classList.add('dice-chessman-original-obs');
     img.src=fullBody.url;
-    img.dataset.originalMember=sourceMember.originalMember||('10'+obsId.slice(2)+'.obs');
+    img.dataset.originalMember=chrBody.originalMember;
     img.dataset.nativeFrontFrame=String(auditedIndex);
     slot.dataset.rightPortraitSource='OBS.pak/verified-front';
     slot.dataset.rightPortraitFacingEvidence='visually-reviewed';
