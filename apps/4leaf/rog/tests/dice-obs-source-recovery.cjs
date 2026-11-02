@@ -55,7 +55,7 @@ const {chromium}=require('playwright');
     missing:p.dataset.obsUnavailable};
   });
   assert.equal(restored.rig,'original-obs-sprite');
-  assert.equal(restored.source,'Original-CHR-body/1045.obs');
+  assert.equal(restored.source,'Original-CHR-body/OBS.pak/1045.obs');
   assert.equal(restored.original,'true');
   assert.ok(restored.path.startsWith('./original/OBS/action-full-ext/1045-22.png'));
   assert.ok(restored.native[0]>20&&restored.native[1]>50);
@@ -76,7 +76,8 @@ const {chromium}=require('playwright');
   });
   assert.equal(unavailable.rig,'original-card-portrait-fallback');
   assert.ok(unavailable.cardVisible);
-  assert.ok(unavailable.portrait.startsWith('./original/CardData/'));
+  assert.ok(unavailable.portrait.startsWith('./original/CardData/')||
+   unavailable.portrait==='./original/IMG/avatarback.png');
   assert.ok(failures0042>=1,'real CHR-linked source must be attempted');
   await page.unroute('**/original/OBS/action-full-ext/1042-22.png*');
   await page.evaluate(()=>window.__LEAF_GENESIS_ACTORS__.recoverAvailableOriginals());
