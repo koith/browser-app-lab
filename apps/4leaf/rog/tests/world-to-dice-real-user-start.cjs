@@ -60,33 +60,34 @@ const phone=process.env.FOURLEAF_MOBILE==='1';
   // A meaningful source sprite hit is normally inside the native button,
   // not generic navigate('lobby'). Three actual taps at distinct pixels
   // reproduce touch hit masks without using hidden JS state shortcuts.
+  const press=(locator,options)=>phone?locator.tap(options||{}):locator.click(options||{});
   const world=page.locator('.world-location[data-region="dice"]');
   assert.equal(await world.count(),1,'WorldMap must expose one dice region');
   const rect=await world.boundingBox();assert.ok(rect&&rect.width>10&&rect.height>10);
   for(const [x,y] of [[.5,.5],[.35,.42],[.6,.7]]){
    if(await page.locator('#dice-channels:not(.hidden)').count())break;
-   await world.click({position:{x:Math.round(rect.width*x),y:Math.round(rect.height*y)}});
+   await press(world,{position:{x:Math.round(rect.width*x),y:Math.round(rect.height*y)}});
    await page.waitForTimeout(200);
   }
   let state=await inspect('world-dice-click');
   assert.equal(state.route,'dice-channels',
    'WorldMap dice entry must open ORIGINAL Region source channel selection');
   const select=page.locator('#dice-channels .dice-channel-hotspot[data-channel="ispin:1"]');
-  await select.click();state=await inspect('native-region-channel');
+  await press(select);state=await inspect('native-region-channel');
   assert.equal(state.route,'lobby','source Ispin 1 channel must enter actual room list');
-  await page.locator('#lobby-create').click();state=await inspect('native-room-create');
+  await press(page.locator('#lobby-create'));state=await inspect('native-room-create');
   assert.equal(state.route,'lobby');
   assert.ok(state.config?.includes('lobby-config')&&!state.config.includes('hidden'),
    'native ROOM CREATE must reveal playable game settings and READY');
   assert.equal(state.ready.disabled,false,'game ready must not be disabled');
   assert.equal(state.ready.hidden,false,'source READY must actually be visible');
-  assert.ok(state.ready.box?.w>=20&&state.ready.box.h>=15,
-    'native READY must have a mobile-accessible click area');
+  assert.ok(state.ready.box?.w>=(phone?44:20)&&state.ready.box.h>=(phone?44:15),
+    'native READY must have at least 44×44 CSS px touch hitbox on a phone');
   await page.locator('#game-mode').selectOption('hotseat');
   await page.locator('#point-limit').selectOption('12');
   await page.locator('#bot-count').selectOption('1');
   await page.locator('#map-select').selectOption('4LEAF');
-  await page.locator('#start-game').click();
+  await press(page.locator('#start-game'));
   await page.waitForTimeout(350);state=await inspect('ready-tap-game-start');
   assert.equal(state.route,'game',
     'original native ROOM READY must transition to playable board without hidden modal');
@@ -94,7 +95,7 @@ const phone=process.env.FOURLEAF_MOBILE==='1';
   assert.equal(state.match?.players.length,2);
   assert.ok(!state.modal,'no invisible blocker modal may stop a fresh play');
   const before=state.match.players[0].position;
-  await page.locator('#roll-btn').click();
+  await press(page.locator('#roll-btn'));
   await page.waitForFunction(before=>{
    const m=window.__ROG_TEST__?.getMatch?.();
    return !!m&&m.lastRoll?.length>0&&m.players[0].position!==before;
