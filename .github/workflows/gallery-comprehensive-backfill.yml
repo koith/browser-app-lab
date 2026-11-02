@@ -81,10 +81,7 @@ jobs:
             # Reuse the existing validated metadata reader, which verifies
             # schema, model and the minimum published owner photo count and
             # may use one normal same-account copyto readback when permitted.
-            if python apps/gallery-archive/read_owner_metadata.py \\
-                --remote "$remote" --model "$model" \\
-                --published-index "apps/$model-gallery/owner-index.json" \\
-                --out "$RUNNER_TEMP/owner/$model.json" 2>"$RUNNER_TEMP/reader-error"; then
+            if python apps/gallery-archive/read_owner_metadata.py --remote "$remote" --model "$model" --published-index "apps/$model-gallery/owner-index.json" --out "$RUNNER_TEMP/owner/$model.json" 2>"$RUNNER_TEMP/reader-error"; then
               echo "$model: PRIVATE_CATALOG_SCHEMA_AND_READBACK_VERIFIED" >> "$GITHUB_STEP_SUMMARY"
             else
               rm -f "$RUNNER_TEMP/owner/$model.json"
