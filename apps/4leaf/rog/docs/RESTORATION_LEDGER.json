@@ -1437,6 +1437,18 @@
         "P0-CHAT",
         "P0-RELEASE"
       ]
+    },
+    {
+      "id": "REQ-20261102-GPT-012",
+      "date": "2026-11-02",
+      "origin": "user",
+      "text": "GPT 4LEAF 복원 계속: Claude 원본 수집·해독과 독립적으로 현재 웹앱 런타임 입력 오류를 수정하고, 원작 ChatRoom 좌석 순간이동/메신저 상호작용 회귀를 실제 브라우저에서 테스트하여 PR·배포까지 검증한다.",
+      "taskIds": [
+        "P0-CHAT",
+        "CHT-04",
+        "QA-03",
+        "P0-RELEASE"
+      ]
     }
   ],
   "tasks": [
@@ -7688,6 +7700,32 @@
         "P0-RELEASE"
       ],
       "details": "GPT added a new real pointer click Chromium/WebKit ChatRoom test for original instantaneous seat reassignment: click through actual scene hitbox, ensure actor changes slot without CSS transition or later interpolation, 390px mobile form remains operable. Integrated into same-revision release acceptance workflow. Syntax checked separately; browser CI, iPhone physical device and original historical equivalence NOT YET verified; PR pending."
+    },
+    {
+      "seq": 351,
+      "date": "2026-11-02",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261102-GPT-012",
+      "taskIds": [
+        "P0-CHAT",
+        "CHT-04",
+        "QA-03",
+        "P0-RELEASE"
+      ],
+      "details": "Registered additional GPT webapp-runtime restoration request after concurrent PR #504 claimed GPT-011. Scoped to ChatRoom frame repeated handlers and interactive overlay misclick fixes."
+    },
+    {
+      "seq": 352,
+      "date": "2026-11-02",
+      "type": "CHATROOM_NATIVE_TERRAIN_HANDLER_FIX_PENDING_CI",
+      "requestId": "REQ-20261102-GPT-012",
+      "taskIds": [
+        "P0-CHAT",
+        "CHT-04",
+        "QA-03",
+        "P0-RELEASE"
+      ],
+      "details": "GPT isolated runtime PR based on main 5fcbb07 (#504). Replaced accumulating ChatRoom frame click listeners with one room-scoped `onclick`, cleared on scene redraw; excluded actual messenger transcript/input, native roster, toolbar and other controls from teleport. Kept source room sprites, 794x528 registration and instant seat snap. Added tests/chatroom-terrain-input.cjs to existing rog-world-chat Chromium PR CI including mobile view. JS syntax parsed, CI/browser and actual public Pages/iPhone physical QA still PENDING. Original source, historical seat anchors and full restoration remain unverified."
     }
   ]
 }
