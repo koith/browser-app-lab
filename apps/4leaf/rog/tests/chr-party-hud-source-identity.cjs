@@ -34,17 +34,18 @@ const path=require('node:path');
   assert.equal(census.uniqueNewMembers,97);
   assert.deepEqual(census.missing,['0156']);
   const cases=[
-   ['0056','OBS.pak/1040.obs','1040',25],
-   ['0059','OBS.pak/1042.obs','1042',25],
-   ['0060','OBS.pak/1043.obs','1043',25],
-   ['0062','OBS.pak/1045.obs','1045',18],
-   ['0088','OBS.pak/1071.obs','1071',25],
-   ['0040','OBS.pak/1025.obs',null,null],
-   ['0156',null,null,null],
-   ['0170','OBS3.pak/1267.obs',null,null],
+   ['0056','OBS.pak/1040.obs','1040',25,true],
+   ['0059','OBS.pak/1042.obs','1042',25,true],
+   ['0060','OBS.pak/1043.obs','1043',25,true],
+   ['0062','OBS.pak/1045.obs','1045',18,true],
+   ['0088','OBS.pak/1071.obs','1071',25,true],
+   ['0125','OBS2.pak/1199.obs','1199',25,false],
+   ['0170','OBS3.pak/1267.obs','1267',34,false],
+   ['0040','OBS.pak/1025.obs',null,null,false],
+   ['0156',null,null,null,false],
   ];
   const report=[];
-  for(const [card,body,shown,frame] of cases){
+  for(const [card,body,shown,frame,visuallyReviewed] of cases){
    const sample=await page.evaluate(card=>{
     const test=window.__ROG_TEST__,match=test.getMatch();
     match.active=0;match.players[0].team=['c_'+card,'c_0059','c_0060'];
@@ -56,7 +57,10 @@ const path=require('node:path');
     const visualKey=original.assetKey(card);
     const audit=window.__LEAF_GENESIS_ACTORS__.getState().originalFrontVisualAudited;
     const idx=visualKey&&Object.hasOwn(audit,visualKey)?audit[visualKey]:null;
-    const expected=idx===null?null:source?.frames?.find(f=>f.index===idx)?.url;
+    const originalFrame=idx===null?
+     window.__LEAF_NATIVE_CARD_ACTIONS__.frontFrame(source,card):
+     source?.frames?.find(f=>f.index===idx);
+    const expected=originalFrame?.url||null;
     return {card,observedCard:slot?.dataset.cardId,
      originalChrBody:slot?.dataset.originalChrBody,
      sourceAvailability:slot?.dataset.chrBodySource,
@@ -72,12 +76,19 @@ const path=require('node:path');
     (card==='0156'?'CHR-body-missing':'CHR-body-unverified'));
    if(shown){
     assert.equal(sample.sourceAvailability,'published-and-hash-gated');
-    assert.equal(sample.source,'OBS.pak/verified-front',JSON.stringify(sample));
-    assert.equal(sample.approved,'visually-reviewed',card);
+    assert.equal(sample.source,visuallyReviewed?
+     'OBS.pak/verified-front':'CHR-OBS/native-keyframe-role-inferred',
+     JSON.stringify(sample));
+    assert.equal(sample.approved,visuallyReviewed?'visually-reviewed':
+     'original-18-byte-frame-index-VERIFIED/orientation-INFERRED',card);
     assert.equal(sample.frame,String(frame),card);
     assert.equal(sample.originalMember,body,card);
     assert.equal(sample.image,sample.expected,card);
-    assert.ok(sample.image.includes('/'+shown+'-'+frame+'.png'),card);
+    const sourceFilename=visuallyReviewed?
+     shown+'-'+frame+'.png':
+     (body.startsWith('OBS2')?'obs2-':'obs3-')+
+      shown+'-'+String(frame).padStart(3,'0')+'.png';
+    assert.ok(sample.image.endsWith('/'+sourceFilename),JSON.stringify(sample));
    }else{
     assert.ok(!sample.image?.includes('/OBS/'),JSON.stringify(sample));
     assert.equal(sample.image,sample.art,'same card artwork, no unrelated OBS');
