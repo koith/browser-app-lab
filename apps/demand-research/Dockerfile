@@ -12,6 +12,7 @@ WORKDIR /app
 COPY apps/demand-research/gateway.py /app/gateway.py
 COPY apps/demand-research/social_sources.py /app/social_sources.py
 COPY apps/demand-research/account_index.py /app/account_index.py
+COPY apps/demand-research/account_index_sources.py /app/account_index_sources.py
 COPY apps/demand-research/account_auto_analysis.js /app/account_auto_analysis.js
 COPY apps/demand-research/account_index_client.js /app/account_index_client.js
 COPY apps/demand-research/account_watch.js /app/account_watch.js
