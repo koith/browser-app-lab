@@ -24,6 +24,7 @@ on:
       - apps/gallery-archive/direct_photo_pipeline.py
       - apps/gallery-archive/official_sample_recovery.py
       - apps/gallery-archive/test_official_sample_recovery.py
+      - apps/gallery-archive/probe_official_missing_bytes.py
       - apps/gallery-archive/defer_verified_batch.py
       - apps/gallery-archive/private_collection_snapshot.py
       - apps/gallery-archive/upload_verified_individual.py
@@ -61,6 +62,25 @@ on:
 permissions:
   contents: read
 jobs:
+  official-publisher-missing-photo-probe:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            apps/mimmi-gallery
+            apps/gallery-archive
+          sparse-checkout-cone-mode: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install requests Pillow
+      - name: Verify exact current public publisher image bytes, no cloud writes
+        run: python apps/gallery-archive/probe_official_missing_bytes.py
   offline-regressions:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
