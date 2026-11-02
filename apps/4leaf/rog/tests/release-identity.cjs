@@ -10,7 +10,10 @@ const root=path.resolve(__dirname,'..');
 const meta=JSON.parse(fs.readFileSync(path.join(root,'app-version.json'),'utf8'));
 const index=fs.readFileSync(path.join(root,'index.html'),'utf8');
 const sw=fs.readFileSync(path.join(root,'sw.js'),'utf8');
-assert.equal(meta.version,'0.86.0-beta.45');
+// The release number advances independently of the 2004 original client.
+// Do not pin this acceptance test to the prior deployment's beta number:
+// instead validate the beta format and cross-file release/cache identity.
+assert.match(meta.version,/^0\\.86\\.0-beta\\.\\d+$/,'the deployed revival must remain a versioned beta');
 assert.match(meta.channel,/beta/,'original client exact copy was not completed');
 assert.ok(meta.sourceFidelity.includes('not-complete'),'do not falsely claim original is finished');
 assert.ok(!meta.originalClient.includes(meta.version),'web revival is separate from 2002–2004 release');
