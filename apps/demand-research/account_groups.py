@@ -82,6 +82,10 @@ def ensure(db):
         );
         CREATE INDEX IF NOT EXISTS ix_account_self_links_dst
             ON account_self_links(dst);
+        CREATE TABLE IF NOT EXISTS account_profile_checks (
+            url TEXT PRIMARY KEY REFERENCES accounts(url) ON DELETE CASCADE,
+            checked_at INTEGER NOT NULL
+        );
     """)
 
 
@@ -114,6 +118,11 @@ def replace_claims(db_path, source, targets, *, when=None):
             db.executemany(
                 "INSERT INTO account_self_links(src,dst,checked_at,method) VALUES(?,?,?,'public_self_declaration')",
                 ((parsed[1], url, now) for url in sorted(allowed)),
+            )
+            db.execute(
+                """INSERT INTO account_profile_checks(url,checked_at) VALUES(?,?)
+                   ON CONFLICT(url) DO UPDATE SET checked_at=excluded.checked_at""",
+                (parsed[1],now),
             )
         return {"updated": True, "links": len(allowed)}
     finally:
@@ -261,7 +270,7 @@ def scan_known_profiles(db_path, *, max_profiles=55, now=None,
         rows = db.execute("""
             SELECT a.url,a.platform FROM accounts a
             WHERE a.platform IN ('bluesky','mastodon')
-            ORDER BY COALESCE((SELECT max(l.checked_at) FROM account_self_links l WHERE l.src=a.url),0), a.url
+            ORDER BY COALESCE((SELECT c.checked_at FROM account_profile_checks c WHERE c.url=a.url),0), a.url
             LIMIT ?""", (max_profiles,)).fetchall()
     finally:
         db.close()
