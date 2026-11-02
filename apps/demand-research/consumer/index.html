@@ -95,11 +95,12 @@ summary{cursor:pointer;font-size:12px;font-weight:800}
 (()=>{
 "use strict";
 const $=id=>document.getElementById(id),fmt=n=>Number(n||0).toLocaleString("ko-KR");
-let report=null;
+let report=null,loadedFromLocalFile=false;
 const node=(tag,cls,txt)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(txt!==undefined)e.textContent=String(txt);return e};
 const add=(parent,tag,cls,txt)=>{const e=node(tag,cls,txt);parent.append(e);return e};
 function valid(data){
  if(!data||data.schema_version!==1||!data.summary||!data.dataset||!Array.isArray(data.products)||data.products.length>300)throw Error("지원하지 않는 리포트 형식입니다.");
+ if(!["demo","reviewed"].includes(data.dataset.mode)||data.dataset.is_real_data!==(data.dataset.mode==="reviewed"))throw Error("데이터 출처·모드 불일치");
  for(const p of data.products){
   if(typeof p.product_id!=="string"||p.product_id.length>120||typeof p.name!=="string"||p.name.length>180)throw Error("상품 식별자 오류");
   for(const k of ["observed_posts","content_groups","known_content_groups","unresolved_content_groups","removed_repeated_content_posts","top_account_share"]){
@@ -121,10 +122,10 @@ function render(){
  metric("판정 미확정 그룹",fmt(s.unresolved_groups),"원문·근거 부족");
  const demo=!report.dataset.is_real_data;
  $("modeBadge").className=demo?"pill":"pill real";
- $("modeBadge").textContent=demo?"● 합성 데이터 · 실측 아님":"● 검토된 일반 상품 데이터";
- $("sourceNote").textContent=demo
-  ?"합성 데이터 예시로, 실제 시장 수요나 기존 SNS 수집 통계가 아닙니다."
-  :"외부 검토와 승인된 입력의 집계 리포트입니다. 본 화면은 입력 데이터의 권리·적법성을 독립적으로 보증하지 않습니다.";
+ $("modeBadge").textContent=loadedFromLocalFile?(demo?"● 합성 리포트 파일":"● 사용자 제공 리포트 · 검증 필요"):(demo?"● 합성 데이터 · 실측 아님":"● 검토된 일반 상품 데이터");
+ $("sourceNote").textContent=loadedFromLocalFile
+   ?"로컬 리포트 파일을 사용 중입니다. 이 화면은 파일의 승인·진위·권리를 검증하지 않습니다."
+   :(demo?"합성 데이터 예시로, 실제 시장 수요나 기존 SNS 수집 통계가 아닙니다.":"검토 후 승인된 일반 상품 집계 리포트입니다. 화면 자체는 데이터의 진위·적법성을 보증하지 않습니다.");
  const order=$("order").value;
  const sort={known:(a,b)=>b.known_content_groups-a.known_content_groups,
              observed:(a,b)=>b.observed_posts-a.observed_posts,
@@ -174,20 +175,20 @@ async function loadDemo(){
  $("loadStatus").textContent="합성 리포트 불러오는 중…";
  const response=await fetch("./demo-report.json",{cache:"no-store"});
  if(!response.ok)throw Error("예시 리포트 파일이 아직 배포되지 않았습니다.");
- report=valid(await response.json());render();
+ report=valid(await response.json());loadedFromLocalFile=false;render();
 }
 $("order").addEventListener("change",render);
 $("reset").addEventListener("click",()=>{ $("reportFile").value="";loadDemo().catch(showError);});
 $("reportFile").addEventListener("change",async e=>{
  try{const file=e.target.files?.[0];if(!file)return;
   if(file.size>2_000_000)throw Error("리포트 파일은 2MB 이하만 허용합니다.");
-  report=valid(JSON.parse(await file.text()));render();
+  report=valid(JSON.parse(await file.text()));loadedFromLocalFile=true;render();
  }catch(err){showError(err);}
 });
 $("exportCsv").addEventListener("click",()=>{
  if(!report)return;
  const cols=["product_id","name","observed_posts","content_groups","known_content_groups","unresolved_content_groups","removed_repeated_content_posts","duplicate_ratio","top_account_share","account_hhi","per_account_day_capped_mentions"];
- const safe=v=>'"'+String(v??"").replace(/"/g,'""').replace(/^[=+\-@\t\r]/,"'")+"'";
+  const safe=v=>'"'+String(v??"").replace(/^[=+\-@\t\r]/,"'").replace(/"/g,'""')+'"';
  const csv="\ufeff"+[cols.join(","),...report.products.map(p=>cols.map(k=>safe(p[k])).join(","))].join("\r\n");
  const uri=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));
  const a=document.createElement("a");a.href=uri;a.download="intersection_product_evidence.csv";a.click();
