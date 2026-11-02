@@ -48,6 +48,7 @@ function makeHarness(gatewayReply=response()) {
   assert.equal(h.observed.length,1);
   assert.equal(h.observed[0].opts.mode,'cors');
   assert.equal(h.observed[0].opts.credentials,'omit');
+  assert.equal(h.observed[0].opts.redirect,'error');
   assert.equal((await h.dispatch(a)).status,200);
   assert.equal(h.observed.length,1,'second request must be served from private browser cache');
 
