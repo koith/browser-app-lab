@@ -23,6 +23,14 @@ const {chromium}=require('playwright');
   await page.locator('#map-select').selectOption('4LEAF');
   await page.locator('#start-game').click();
   await page.waitForSelector('#game:not(.hidden)');
+  // Original CHR cards 0040/0045 may legitimately lack published body art.
+  // Use two TRUE source-published bodies in this native contact-shadow QA.
+  await page.evaluate(()=>{
+   const m=window.__ROG_TEST__.getMatch();
+   m.players[0].team=['c_0056']; // original OBS 1040
+   m.players[1].team=['c_0063']; // original OBS 1046
+   window.__ROG_TEST__.drawGame();
+  });
   await page.waitForFunction(()=>document.querySelectorAll('#board-nodes>.tile').length===104&&
    [...document.querySelectorAll('#board-nodes>.tile')].every(t=>t.dataset.tisAlpha==='ready')&&
    [...document.querySelectorAll('#board-pawns .leaf-chess-original-obs')].length===2&&
@@ -65,11 +73,8 @@ const {chromium}=require('playwright');
     pawns:pawns.map(p=>{
      const img=p.querySelector('.leaf-chess-original-obs');
      const frameSource=img?.getAttribute('src')||'';
-     const table=frameSource.includes('/action-full-ext/')
-      ?window.ORIGINAL_LEAF_EXT_ACTION_FRAMES
-      :p.dataset.sourceFullFrame==='true'||/action-full/.test(frameSource)
-       ?window.ORIGINAL_LEAF_FULL_ACTION_FRAMES:window.ORIGINAL_LEAF_OBS_FRAMES;
-     const f=table?.[p.dataset.chessmanId]?.frames.find(x=>x.index===Number(p.dataset.actorFrame));
+     const source=window.__LEAF_CHR_BODY_MAP__?.resolve(p.dataset.chessmanId);
+     const f=source?.frames.find(x=>x.index===Number(p.dataset.actorFrame));
      const shadow=getComputedStyle(p,'::before');
      const root=getComputedStyle(p);
      return {
@@ -134,15 +139,19 @@ const {chromium}=require('playwright');
   // WEB size for every 2002 character. Same exact source TIS cell & match.
   const variants=await page.evaluate(()=>{
    const m=window.__ROG_TEST__.getMatch(),out=[];
-   for(const id of ['0046','0092']){
+   const candidates=Object.keys(window.__LEAF_CHR_BODY_MAP__.cards)
+    .map(id=>({id,source:window.__LEAF_CHR_BODY_MAP__.resolve(id)}))
+    .filter(x=>x.source&&x.source.frames?.[22]?.width>0)
+    .sort((a,b)=>a.source.frames[22].width-b.source.frames[22].width);
+   const extremes=[candidates[0],candidates.at(-1)];
+   for(const {id} of extremes){
     m.players[0].team[0]='c_'+id;
     window.__ROG_TEST__.drawGame();
     const pawn=document.querySelector('#board-pawns .board-pawn[data-id="0"]');
     const img=pawn.querySelector('.leaf-chess-original-obs');
     // The user-visible ORIGINAL front frame is not necessarily native 0;
     // test the actual live OBS image width that creates the ground shadow.
-    const full=/action-full/.test(img.getAttribute('src')||'');
-    const shown=(full?window.ORIGINAL_LEAF_FULL_ACTION_FRAMES:window.ORIGINAL_LEAF_OBS_FRAMES)[id].frames.find(
+    const shown=window.__LEAF_CHR_BODY_MAP__.resolve(id)?.frames.find(
       f=>f.index===Number(pawn.dataset.actorFrame));
     out.push({id,source:shown.width,footprint:parseFloat(getComputedStyle(pawn,'::before').width),
       expected:Math.max(18,Math.min(84,Math.round(shown.width*.72))),
@@ -152,7 +161,7 @@ const {chromium}=require('playwright');
    return out;
   });
   assert.ok(variants[0].footprint<variants[1].footprint,'actual small/wide original bodies must not share a made-up contact ring');
-  assert.ok(variants.every(x=>x.footprint===x.expected&&x.member.startsWith('OBS/')&&
+  assert.ok(variants.every(x=>x.footprint===x.expected&&x.member.startsWith('Original-CHR-body/')&&
    x.img?.includes('/OBS/')&&x.alpha==='ready'), 'native variants '+JSON.stringify(variants));
   await page.setViewportSize({width:390,height:844});
   const mobile=await measure();
