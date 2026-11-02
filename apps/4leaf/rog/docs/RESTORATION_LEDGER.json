@@ -1480,6 +1480,21 @@
         "P0-BOARD",
         "QA-03"
       ]
+    },
+    {
+      "id": "REQ-20261102-GPT-015",
+      "date": "2026-11-02",
+      "origin": "4LEAF Claude 7th original source recovery autonomous GPT preservation",
+      "text": "SHA1 검증 2002 클라이언트로 새로 추출한 원본 OBS PNG 2783장과 6종 매니페스트/원장 원바이트 입력을 data 브랜치에서 실제 main 보존 브랜치로 Git Blob 동일 SHA 그대로 반입. wide 68 / embedded 923 / OBS2·OBS3 1792. 전 파일 SHA256·PNG 크기 검증 CI 추가. 캐릭터·원작 행동표 및 주사위 실제 재생순서는 미검증 상태로 격리하며 라이브 게임 자동 적용 금지.",
+      "taskIds": [
+        "SRC-01",
+        "SRC-04",
+        "ACT-01",
+        "ACT-02",
+        "ACT-03",
+        "P0-ACTOR",
+        "QA-03"
+      ]
     }
   ],
   "tasks": [
@@ -1718,7 +1733,8 @@
         "apps/4leaf/rog/original/OBS/action-full/provenance.json",
         "apps/4leaf/rog/tests/original-actor-census.cjs",
         "https://github.com/koith/browser-app-lab/actions/runs/41320435231",
-        "apps/4leaf/rog/tests/dice-dmp-native-travel-facing.cjs"
+        "apps/4leaf/rog/tests/dice-dmp-native-travel-facing.cjs",
+        "apps/4leaf/rog/tests/obs-extended-source-integrity.cjs"
       ],
       "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
       "lastReviewed": "2026-11-02",
@@ -1863,7 +1879,8 @@
         "apps/4leaf/rog/tests/native-img-source-integrity.cjs",
         "https://github.com/koith/browser-app-lab/actions/runs/39268819180",
         "https://github.com/koith/browser-app-lab/pull/146",
-        "apps/4leaf/rog/docs/evidence/source-maps/actor-frame-audit.json"
+        "apps/4leaf/rog/docs/evidence/source-maps/actor-frame-audit.json",
+        "apps/4leaf/rog/tests/obs-extended-source-integrity.cjs"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
       "lastReviewed": "2026-11-02",
@@ -2087,7 +2104,8 @@
         "apps/4leaf/rog/original/OBS/action-full/provenance.json",
         "apps/4leaf/rog/tests/original-actor-census.cjs",
         "https://github.com/koith/browser-app-lab/actions/runs/41320435231",
-        "apps/4leaf/rog/docs/evidence/source-maps/actor-frame-audit.json"
+        "apps/4leaf/rog/docs/evidence/source-maps/actor-frame-audit.json",
+        "apps/4leaf/rog/tests/obs-extended-source-integrity.cjs"
       ],
       "evidenceLevel": "VERIFIED-92/98-2002-OBS-629-PNG-SHA-AND-NATIVE-640-STRIDE; 6 ABSENT IN THIS 2002 CLIENT; HISTORICAL ACTION-POSE MAP OPEN",
       "lastReviewed": "2026-11-02",
@@ -2115,7 +2133,8 @@
         "apps/4leaf/rog/tools/decode-original-obs-bulk.py",
         "https://github.com/koith/browser-app-lab/pull/153",
         "https://github.com/koith/browser-app-lab/actions/runs/39443928060",
-        "apps/4leaf/rog/docs/evidence/source-maps/actor-frame-audit.json"
+        "apps/4leaf/rog/docs/evidence/source-maps/actor-frame-audit.json",
+        "apps/4leaf/rog/tests/obs-extended-source-integrity.cjs"
       ],
       "evidenceLevel": "VERIFIED-SOURCE-X-Y-PALETTE/ALL-PNG-SHA/DIMENSIONS; HISTORICAL-EXE-ACTION-CAMERA-OPEN",
       "lastReviewed": "2026-11-02",
@@ -2179,7 +2198,8 @@
         "apps/4leaf/rog/tests/original-actor-census.cjs",
         "https://github.com/koith/browser-app-lab/actions/runs/41320435231",
         "apps/4leaf/rog/tests/dice-dmp-native-travel-facing.cjs",
-        "apps/4leaf/rog/docs/evidence/source-maps/actor-frame-audit.json"
+        "apps/4leaf/rog/docs/evidence/source-maps/actor-frame-audit.json",
+        "apps/4leaf/rog/tests/obs-extended-source-integrity.cjs"
       ],
       "evidenceLevel": "VERIFIED-92-SOURCE-OBS-BODIES/958-PNG/80-EIGHT-CONTIGUOUS-SOURCE-SETS/REAL-CHROMIUM-ANIMATION; HISTORICAL-DIRECTION-POSE-FPS-UNVERIFIED",
       "lastReviewed": "2026-11-02",
@@ -3017,7 +3037,8 @@
         "apps/4leaf/rog/tests/dice-landscape-webkit-release.cjs",
         "apps/4leaf/rog/tests/chatroom-instant-seat-teleport.cjs",
         "apps/4leaf/rog/tests/dice-dmp-native-travel-facing.cjs",
-        "apps/4leaf/rog/docs/evidence/source-maps/actor-frame-audit.json"
+        "apps/4leaf/rog/docs/evidence/source-maps/actor-frame-audit.json",
+        "apps/4leaf/rog/tests/obs-extended-source-integrity.cjs"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
       "lastReviewed": "2026-11-02",
@@ -3152,7 +3173,8 @@
         "원본 PAK을 decode_rows(alpha_from_runs=True)로 재추출해 기존 PNG와 차이를 프레임별로 검토하고, 실제로 채워진 index-0 픽셀을 반영."
       ],
       "evidence": [
-        "apps/4leaf/rog/docs/evidence/source-maps/actor-frame-audit.json"
+        "apps/4leaf/rog/docs/evidence/source-maps/actor-frame-audit.json",
+        "apps/4leaf/rog/tests/obs-extended-source-integrity.cjs"
       ],
       "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
       "lastReviewed": "2026-11-02",
@@ -7839,6 +7861,38 @@
         "QA-03"
       ],
       "details": "Imported 8 source-maps JSON (54/98 bodies, 2087 verified published PNG frames, 44 verified 37-frame structural blocks, roles INFERRED), generated builder/test, OBS2/3 embedded and wide decoder, corrected test_obs_structure_37 set regex, and improved data-only CI force-add ignored outputs. 26 DMP starting code=13 verified in report. Extended original download/extraction, binary trailer decoding and any gameplay integration NOT YET VERIFIED; PR CI and separate data-branch runtime pending."
+    },
+    {
+      "seq": 357,
+      "date": "2026-11-02",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261102-GPT-015",
+      "taskIds": [
+        "SRC-01",
+        "SRC-04",
+        "ACT-01",
+        "ACT-02",
+        "ACT-03",
+        "P0-ACTOR",
+        "QA-03"
+      ],
+      "details": "Record genuine 2002 OBS wide/embedded/OBS2/OBS3 source pixels and original trailer/CHR records for permanent GitHub archive after GitHub Actions read-only extraction."
+    },
+    {
+      "seq": 358,
+      "date": "2026-11-02",
+      "type": "OBS_EXTENDED_SOURCE_ARCHIVE_PRESERVED_PR_PENDING",
+      "requestId": "REQ-20261102-GPT-015",
+      "taskIds": [
+        "SRC-01",
+        "SRC-04",
+        "ACT-01",
+        "ACT-02",
+        "ACT-03",
+        "P0-ACTOR",
+        "QA-03"
+      ],
+      "details": "Original source archive SHA1 86526d89679ae39b85fe9808da97ad871b7888d9 confirmed in Actions run 41403578713, all 2783 PNG SHA256 checked and pushed to data branch 3d4e0a416eb8cb13c5f42fb0971cd896bcb09f8e. Copied same Git blobs into source preservation PR #512: 68 wide, 923 embedded, 1792 OBS2/3; 3 manifests, 3 evidence JSON including 119 CHR, 245 trailers. Standalone integrity test pending. Role/action sequence/asset usability still UNVERIFIED, not live integrated."
     }
   ]
 }
