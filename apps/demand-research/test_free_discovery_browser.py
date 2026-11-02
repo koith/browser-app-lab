@@ -38,22 +38,22 @@ def run():
                 body=route.request.post_data_json
                 assert "섹트" in body["query"]
                 rows=[
-                    {"url":"https://x.com/example/status/12345678","title":"섹트 synthetic indexed result","description":"Synthetic only"},
+                    {"url":"https://x.com/example/status/1234567890123456789","title":"섹트 synthetic indexed result","description":"Synthetic only"},
                     {"url":"https://x.com.evil.example/example/status/999","title":"섹트 bad spoof URL"},
                     {"url":"http://x.com/example/status/321","title":"섹트 http disallowed"}
                 ]
                 if provider=="keenable":
-                    rows.append({"url":"https://x.com/example2/status/987654","title":"Other index result"})
+                    rows.append({"url":"https://x.com/example2/status/9876543210123456789","title":"Other index result"})
                 else:
-                    rows.append({"url":"https://twitter.com/example3/status/777777","description":"섹트 next candidate"})
+                    rows.append({"url":"https://twitter.com/example3/status/7777777770123456789","description":"섹트 next candidate"})
                 data={"results":rows} if provider=="keenable" else {"success":True,"data":{"web":rows}}
                 route.fulfill(status=200,content_type="application/json",
                     headers={"Access-Control-Allow-Origin":"*"},body=json.dumps(data))
             if not LIVE:
-                page.route("https://api.fxtwitter.com/status/12345678",
+                page.route("https://api.fxtwitter.com/status/1234567890123456789",
                     lambda route:route.fulfill(status=200,content_type="application/json",
                         headers={"Access-Control-Allow-Origin":"*"},
-                        body=json.dumps({"tweet":{"id":"12345678",
+                        body=json.dumps({"tweet":{"id":"1234567890123456789",
                             "text":"섹트 synthetic original public record",
                             "created_at":"2026-11-02T00:00:00Z",
                             "author":{"screen_name":"example","protected":False}}})))
@@ -84,13 +84,16 @@ def run():
                 assert page.locator("#indexResults .index-indexed").count()>=3
                 assert len([x for x in upstream if x["method"]=="POST"])==2
                 page.locator(".index-result").filter(
-                    has=page.locator("a[href='https://x.com/example/status/12345678']")
+                    has=page.locator("a[href='https://x.com/example/status/1234567890123456789']")
                     ).locator(".index-check").click()
                 page.wait_for_function("""() =>
                     document.querySelector('.index-verify-result')?.textContent?.includes(
                         '섹트 synthetic original public record')""",timeout=20000)
                 assert "공개 원문 확인" in page.locator(".index-verify-result").first.inner_text()
-                print("INDEX_DISCOVERY_BROWSER_FIXTURE",json.dumps({"cards":n,"paid_keys":0,
+                page.wait_for_selector('article.post .source-badge[aria-label="출처: X"]',timeout=20000)
+                assert page.locator("article.post").count()==1
+                assert "X1" in page.locator("#count").text_content()
+                print("INDEX_DISCOVERY_BROWSER_FIXTURE",json.dumps({"cards":n,"verified_x_feed":1,"paid_keys":0,
                       "canonical_safe":True,"dedup":True,"errors":len(errors)}))
             else:
                 public_x=page.evaluate("""async () => {
