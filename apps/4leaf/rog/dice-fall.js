@@ -76,10 +76,10 @@
   return {member:member.originalMember||'1171.obs',faces,
    tumble:D6_TUMBLE.map(at).filter(Boolean),declared:28,partial:true};
  }
- // These 63 genuine OBS.pak trailer pixels were independently extracted
- // from the SHA1-verified client. Their roles and native action timings are
- // NOT decoded. Only the presentation layer uses them as a reversible,
- // clearly labelled WEB-inferred rolling visual; gameplay eyes stay fixed.
+ // These 63 SHA1-archive-derived PNGs are correctly located but their
+ // independent per-block palettes were decoded incorrectly in round 7.
+ // They are kept as forensic evidence only, NOT used in live gameplay.
+ // The separately verified original UI result faces remain authoritative.
  const EMBEDDED_DIE_CHAINS=Object.freeze({
   6:[['obs-1171-c0',16],['obs-1171-c1',16],['obs-1171-c2',6]],
   4:[['obs-1223-c0',9],['obs-1223-c1',16]]
@@ -105,6 +105,21 @@
   }
   return {frames:out,chains:spec.map(x=>x[0]),
    role:'source-OBS-pixels-VERIFIED/rolling-order-WEB-INFERRED'};
+ }
+ // The 7th extraction used the FIRST block's palette for independent
+ // additional OBS blocks. Their coordinates are source-derived but colours
+ // are wrong; a matching source PNG SHA256 does NOT establish palette
+ // correctness. Do not render any of those 63 extra frames until each
+ // corrected frame has been visually checked, SHA256 pinned, and explicitly
+ // added to this allowlist. No runtime metadata flag can override the gate.
+ // Each approved chain must supply the exact complete indexed set.
+ const EMBEDDED_PALETTE_REVIEWED_SHA256=Object.freeze({});
+ function playableEmbeddedDice(sides){
+  const candidate=originalEmbeddedDice(sides);
+  if(!candidate)return null;
+  return candidate.frames.every(frame=>
+   EMBEDDED_PALETTE_REVIEWED_SHA256[frame.sourceChain]?.[frame.index]===frame.sha256
+  )?candidate:null;
  }
  // Warm the complete original D4 image sequence after the 1223 manifest
  // loads. Without this, first-turn 60ms frame swaps may show blank/stale
@@ -140,14 +155,14 @@
   }
   return d6ImageCache.size;
  }
- // Keep decoded native trailer PNGs available on the first cold-cache roll.
- // Failures never affect game results: ordinary source UI sprites / WEB
- // fallback remain independently available.
+ // Preload only separately colour-verified native trailer PNGs. All 63
+ // current extra frames stay quarantined; the original UI art is preloaded
+ // independently, so gameplay and offline fallback remain available.
  const embeddedDieCache=new Map();
  function prefetchEmbeddedDice(){
   if(typeof Image!=='function')return 0;
   for(const sides of [4,6]){
-   for(const frame of originalEmbeddedDice(sides)?.frames||[]){
+   for(const frame of playableEmbeddedDice(sides)?.frames||[]){
     if(embeddedDieCache.has(frame.url))continue;
     const img=new Image();embeddedDieCache.set(frame.url,img);
     img.src=frame.url;
@@ -187,9 +202,12 @@
   originalD4PrefetchCount:d4ImageCache.size,
   nativeEmbeddedD6Frames:originalEmbeddedDice(6)?.frames.length||0,
   nativeEmbeddedD4Frames:originalEmbeddedDice(4)?.frames.length||0,
+  nativeEmbeddedPlayableD6Frames:playableEmbeddedDice(6)?.frames.length||0,
+  nativeEmbeddedPlayableD4Frames:playableEmbeddedDice(4)?.frames.length||0,
+  nativeEmbeddedPaletteStatus:'QUARANTINED/per-block-palette-not-yet-verified',
   nativeEmbeddedPrefetchCount:embeddedDieCache.size,
   nativeEmbeddedDecodedCount:[...embeddedDieCache.values()].filter(img=>img.complete&&img.naturalWidth>0).length,
-  nativeEmbeddedRole:'source-pixels-VERIFIED/roll-timing-and-order-INFERRED'});
+  nativeEmbeddedRole:'source-pixel-coordinates-VERIFIED/palette-UNVERIFIED/not-live'});
  function makeFace(n){
   const face=document.createElement('span');
   face.className='leaf-die-face leaf-die-face-'+n;
@@ -234,10 +252,10 @@
   }
   node.append(cube);
   const original=sides===4?originalD4():originalD6();
-  const embedded=originalEmbeddedDice(sides);
-  // Never replace the VERIFIED 1..4 or 1..6 landing eyes from the
-  // established UI manifest. Only use quarantined native *pixels* during
-  // WEB-inferred tumble; preserve complete existing fallback if absent.
+  const embedded=playableEmbeddedDice(sides);
+  // Never replace the VERIFIED landing eyes from the established UI
+  // manifest. The 63 additional frames have incorrect per-block colours;
+  // only SHA256-allowlisted and independently reviewed frames may be used.
   const source=original&&embedded?
    {...original,tumble:embedded.frames,nativeEmbedded:embedded}:original;
   let sprite=null;
@@ -397,6 +415,6 @@
   }
  }
  window.__LEAF_DICE_FALL__={roll,getState:state,
-  faces:PIPS,orientation:ROTATION,originalD6,originalD4,originalEmbeddedDice,prefetchD4,prefetchD6,prefetchEmbeddedDice,prefetchNumerals,prefetchOriginalDice,
+  faces:PIPS,orientation:ROTATION,originalD6,originalD4,originalEmbeddedDice,playableEmbeddedDice,prefetchD4,prefetchD6,prefetchEmbeddedDice,prefetchNumerals,prefetchOriginalDice,
   tetraOrientation:{...TETRA_LAND},tetraDihedralDegrees:TETRA_ANGLE};
 })();
