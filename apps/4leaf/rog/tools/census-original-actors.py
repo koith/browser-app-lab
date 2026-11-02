@@ -19,6 +19,7 @@ from PIL import Image, ImageDraw
 HERE = Path(__file__).resolve().parent
 PACKS = {"obs.pak", "obs2.pak", "obs3.pak"}
 CHR_RECORD = 472
+STARTS = [0, 3, 9, 11, 14, 20, 22, 25, 31, 33]
 PATTERNS = {
     "blockStarts": [0, 3, 9, 11, 14, 20, 22, 25, 31, 33],
     "blockEndsInclusive": [2, 8, 10, 13, 19, 21, 24, 30, 32, 36],
