@@ -1,0 +1,17 @@
+name: INTERSECTION Account Source Public API Proof
+on:
+  pull_request:
+    paths:
+      - "apps/demand-research/probe_public_account_sources.py"
+      - ".github/workflows/intersection-account-source-check.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  proof:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@v4
+      - name: Confirm no-key Bluesky and Mastodon public author feed endpoints (counts only)
+        run: python apps/demand-research/probe_public_account_sources.py
