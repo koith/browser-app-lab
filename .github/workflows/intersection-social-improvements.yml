@@ -1,0 +1,17 @@
+name: INTERSECTION Free Social Full-Post Feasibility
+on:
+  pull_request:
+    paths:
+      - "apps/demand-research/probe_social_improvements.py"
+      - ".github/workflows/intersection-social-improvements.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  source-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check live free date-limited search and tokenless Meta embeds (counts only)
+        run: python apps/demand-research/probe_social_improvements.py
