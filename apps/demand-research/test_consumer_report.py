@@ -179,3 +179,19 @@ def test_approved_report_cannot_appear_as_demo():
     r = build_reviewed(data, approved_sha256=digest)
     assert r["dataset"]["is_real_data"] is True
     assert r["dataset"]["kind"] == "reviewed_general_products"
+
+
+def test_public_editorial_api_is_licensed_and_not_consumer_demand():
+    import consumer_report_api
+    from fastapi.testclient import TestClient
+    c=TestClient(consumer_report_api.app)
+    response=c.get("/api/consumer/editorial")
+    assert response.status_code==200
+    assert response.headers["cache-control"]=="no-store"
+    data=response.json()
+    assert data["dataset"]["kind"]=="real_editorial_product_ratings"
+    assert data["dataset"]["license"]=="CC BY 4.0"
+    assert data["dataset"]["is_consumer_demand"] is False
+    assert data["summary"]["source_ratings_rows"]==8107
+    assert data["summary"]["selected_products"]==36
+    assert all("author_id" not in str(p) for p in data["products"])

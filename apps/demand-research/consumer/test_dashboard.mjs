@@ -2,11 +2,19 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
-import { JSDOM, VirtualConsole } from "jsdom";
+import { JSDOM, VirtualConsole, ResourceLoader } from "jsdom";
 
 const dir = path.dirname(new URL(import.meta.url).pathname);
 const html = fs.readFileSync(path.join(dir, "index.html"), "utf8");
 const source = JSON.parse(fs.readFileSync(path.join(dir, "demo-report.json"), "utf8"));
+const editorial = JSON.parse(fs.readFileSync(path.join(dir, "editorial-report.json"), "utf8"));
+const editorialJS = fs.readFileSync(path.join(dir, "editorial_view.js"), "utf8");
+class LocalOnlyLoader extends ResourceLoader {
+  fetch(url) {
+    if (url.endsWith("/editorial_view.js")) return Promise.resolve(Buffer.from(editorialJS));
+    throw new Error("Unexpected external page resource: " + url);
+  }
+}
 const failures = [];
 const vc = new VirtualConsole();
 vc.on("jsdomError", e => failures.push(String(e.stack || e)));
@@ -15,21 +23,27 @@ let fetched = [];
 const dom = new JSDOM(html, {
   url: "https://koith.github.io/browser-app-lab/apps/demand-research/consumer/",
   runScripts: "dangerously",
-  resources: "usable",
+  resources: new LocalOnlyLoader(),
   virtualConsole: vc,
   beforeParse(win) {
     win.fetch = async (url, options) => {
       fetched.push({url: String(url), options});
-      assert.equal(String(url), "./demo-report.json");
-      return {ok: true, json: async () => source};
+      if (String(url) === "./demo-report.json") return {ok: true, json: async () => source};
+      if (String(url) === "./editorial-report.json") return {ok: true, json: async () => editorial};
+      throw new Error("Unapproved fetch: " + String(url));
     };
   },
 });
 
-await new Promise(resolve => setTimeout(resolve, 150));
+await new Promise(resolve => setTimeout(resolve, 350));
 const doc = dom.window.document;
 assert.deepEqual(failures, [], "browser JavaScript errors");
-assert.equal(fetched.length, 1, "the dashboard fetches exactly one demo report");
+assert.deepEqual(fetched.map(x => x.url).sort(), ["./demo-report.json", "./editorial-report.json"]);
+assert.equal(doc.querySelectorAll(".editorial-stat").length, 4);
+assert.equal(doc.querySelectorAll(".editorial-card").length, 36);
+assert.match(doc.querySelector("#editorialMetrics").textContent, /8,107/);
+assert.match(doc.querySelector("#editorialMetrics").textContent, /101/);
+assert.match(doc.querySelector("#editorialStatus").textContent, /구매 수요 지표 아님/);
 assert.equal(doc.querySelectorAll(".metric").length, 4);
 assert.equal(doc.querySelectorAll("article.product").length, 4);
 assert.match(doc.querySelector("#modeBadge").textContent, /합성 데이터/);
@@ -46,7 +60,11 @@ const select = doc.querySelector("#order");
 select.value = "repeat";
 select.dispatchEvent(new dom.window.Event("change", {bubbles: true}));
 assert.equal(doc.querySelectorAll("article.product").length, 4);
-assert.equal(fetched.length, 1);
+assert.equal(fetched.length, 2);
+const category = doc.querySelector("#editorialCategory");
+category.value = "robot-vacuums";
+category.dispatchEvent(new dom.window.Event("change", {bubbles: true}));
+assert.equal(doc.querySelectorAll(".editorial-card").length, 7);
 assert.deepEqual(failures, []);
-console.log("BROWSER_DOM_QA_PASS: 4 metrics, 4 product cards, 40 evidence groups, sorting, no JS errors");
+console.log("BROWSER_DOM_QA_PASS: 4 synthetic metrics, 4 product cards, 40 groups; 4 live editorial metrics, 36 products, category filter, no JS errors");
 dom.window.close();

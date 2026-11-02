@@ -1,0 +1,679 @@
+{
+  "schema_version": 1,
+  "dataset": {
+    "kind": "real_editorial_product_ratings",
+    "name": "Verdict Cross-Publication Product Review Ratings",
+    "is_real_data": true,
+    "is_consumer_demand": false,
+    "is_current_sales": false,
+    "as_of": "2026-11-03",
+    "source_url": "https://verdict-reviews.com/data/",
+    "license": "CC BY 4.0",
+    "citation": "Verdict Cross-Publication Product Review Ratings (Michael Hunter, 2026)",
+    "ratings_csv_sha256": "936e0e1428c98fe93a9c88eeb50c491496741512e577269e1474807f384adf24",
+    "products_csv_sha256": "9ade7f3bd521c581b27540fe6abc50eab71fa9a4b670ca538435bb6f3d7bf95b",
+    "same_person_inferred": false,
+    "existing_sns_pipeline_connected": false,
+    "method": "Only outlet-published scores are used for the conservative average."
+  },
+  "summary": {
+    "source_ratings_rows": 8107,
+    "source_products_rows": 2169,
+    "selected_categories": 7,
+    "selected_products": 36,
+    "selected_review_links": 146,
+    "publisher_stated_scores": 101,
+    "inferred_scores_excluded": 8,
+    "unscored_reviews": 37,
+    "duplicate_source_rows": 0
+  },
+  "categories": [
+    {
+      "id": "robot-vacuums",
+      "name": "로봇청소기",
+      "products": 7,
+      "reviews": 41,
+      "published_scores": 23
+    },
+    {
+      "id": "wireless-earbuds",
+      "name": "무선 이어폰",
+      "products": 5,
+      "reviews": 24,
+      "published_scores": 24
+    },
+    {
+      "id": "4k-monitors",
+      "name": "4K 모니터",
+      "products": 4,
+      "reviews": 12,
+      "published_scores": 11
+    },
+    {
+      "id": "coffee-grinders-under-200",
+      "name": "커피 그라인더",
+      "products": 8,
+      "reviews": 34,
+      "published_scores": 20
+    },
+    {
+      "id": "espresso-machines-under-500",
+      "name": "에스프레소 머신",
+      "products": 4,
+      "reviews": 16,
+      "published_scores": 9
+    },
+    {
+      "id": "full-frame-mirrorless-cameras",
+      "name": "미러리스 카메라",
+      "products": 4,
+      "reviews": 9,
+      "published_scores": 8
+    },
+    {
+      "id": "standing-desks",
+      "name": "스탠딩 데스크",
+      "products": 4,
+      "reviews": 10,
+      "published_scores": 6
+    }
+  ],
+  "products": [
+    {
+      "category": "wireless-earbuds",
+      "category_name": "무선 이어폰",
+      "product_id": "sony-wf-1000xm6",
+      "name": "Sony WF-1000XM6",
+      "product_url": "https://verdict-reviews.com/product/sony-wf-1000xm6/",
+      "publication_reviews": 6,
+      "publisher_stated_scores": 6,
+      "inferred_scores_excluded": 0,
+      "unscored_reviews": 0,
+      "publisher_stated_mean_5pt": 4.3,
+      "sample_review_urls": [
+        "https://www.soundguys.com/sony-wf-1000xm6-review-152013/",
+        "https://www.tomsguide.com/audio/earbuds/sony-wf-1000xm6-review",
+        "https://www.techradar.com/audio/earbuds-airpods/sony-wf-1000xm6-review"
+      ]
+    },
+    {
+      "category": "robot-vacuums",
+      "category_name": "로봇청소기",
+      "product_id": "roborock-saros-20",
+      "name": "Roborock Saros 20",
+      "product_url": "https://verdict-reviews.com/product/roborock-saros-20/",
+      "publication_reviews": 8,
+      "publisher_stated_scores": 5,
+      "inferred_scores_excluded": 0,
+      "unscored_reviews": 3,
+      "publisher_stated_mean_5pt": 4.08,
+      "sample_review_urls": [
+        "https://www.pcworld.com/article/3182095/roborock-saros-20-review.html",
+        "https://mashable.com/review/roborock-saros-20-robot-vacuum",
+        "https://www.techadvisor.com/article/3115154/roborock-saros-20-mopping-robot-vacuum-review.html"
+      ]
+    },
+    {
+      "category": "wireless-earbuds",
+      "category_name": "무선 이어폰",
+      "product_id": "apple-airpods-pro-2",
+      "name": "Apple AirPods Pro 2",
+      "product_url": "https://verdict-reviews.com/product/apple-airpods-pro-2/",
+      "publication_reviews": 5,
+      "publisher_stated_scores": 5,
+      "inferred_scores_excluded": 0,
+      "unscored_reviews": 0,
+      "publisher_stated_mean_5pt": 4.46,
+      "sample_review_urls": [
+        "https://www.soundguys.com/apple-airpods-pro-2nd-generation-review-78938/",
+        "https://www.whathifi.com/reviews/apple-airpods-pro-2",
+        "https://www.cnet.com/tech/mobile/apple-airpods-pro-2-review-better-battery-life-and-improved-sound/"
+      ]
+    },
+    {
+      "category": "wireless-earbuds",
+      "category_name": "무선 이어폰",
+      "product_id": "technics-eah-az100",
+      "name": "Technics EAH-AZ100",
+      "product_url": "https://verdict-reviews.com/product/technics-eah-az100/",
+      "publication_reviews": 5,
+      "publisher_stated_scores": 5,
+      "inferred_scores_excluded": 0,
+      "unscored_reviews": 0,
+      "publisher_stated_mean_5pt": 4.32,
+      "sample_review_urls": [
+        "https://www.tomsguide.com/audio/earbuds/technics-eah-az100-wireless-earbuds-review",
+        "https://www.soundguys.com/technics-eah-az100-review-135211/",
+        "https://www.whathifi.com/reviews/technics-eah-az100"
+      ]
+    },
+    {
+      "category": "4k-monitors",
+      "category_name": "4K 모니터",
+      "product_id": "dell-ultrasharp-u3225qe",
+      "name": "Dell UltraSharp U3225QE",
+      "product_url": "https://verdict-reviews.com/product/dell-ultrasharp-u3225qe/",
+      "publication_reviews": 4,
+      "publisher_stated_scores": 4,
+      "inferred_scores_excluded": 0,
+      "unscored_reviews": 0,
+      "publisher_stated_mean_5pt": 4.175,
+      "sample_review_urls": [
+        "https://www.pcworld.com/article/2618102/dell-ultrasharp-u3225qe-review-the-best-home-office-monitor-yet.html",
+        "https://www.techradar.com/pro/dell-ultrasharp-u3225qe-monitor-review",
+        "https://www.laptopmag.com/gaming/gaming-monitors/dell-ultrasharp-32-4k-thunderbolt-hub-monitor-review"
+      ]
+    },
+    {
+      "category": "espresso-machines-under-500",
+      "category_name": "에스프레소 머신",
+      "product_id": "breville-bambino-plus-espresso-machine",
+      "name": "Breville Bambino Plus Espresso Machine",
+      "product_url": "https://verdict-reviews.com/product/breville-bambino-plus-espresso-machine/",
+      "publication_reviews": 5,
+      "publisher_stated_scores": 4,
+      "inferred_scores_excluded": 0,
+      "unscored_reviews": 1,
+      "publisher_stated_mean_5pt": 4.55,
+      "sample_review_urls": [
+        "https://www.tomsguide.com/home/home-appliances/breville-sage-bambino-plus-review",
+        "https://coffeechronicler.com/breville-bambino-plus-review/",
+        "https://www.the-independent.com/extras/indybest/us/breville-bambino-plus-review-b2922231.html"
+      ]
+    },
+    {
+      "category": "robot-vacuums",
+      "category_name": "로봇청소기",
+      "product_id": "roborock-q7-m5",
+      "name": "Roborock Q7 M5+",
+      "product_url": "https://verdict-reviews.com/product/roborock-q7-m5/",
+      "publication_reviews": 6,
+      "publisher_stated_scores": 4,
+      "inferred_scores_excluded": 0,
+      "unscored_reviews": 2,
+      "publisher_stated_mean_5pt": 3.05,
+      "sample_review_urls": [
+        "https://www.techgearlab.com/reviews/smart-home/robot-vacuum/roborock-q7-m5-plus",
+        "https://www.homesandgardens.com/solved/roborock-q7-m5-robot-vacuum-cleaner-review",
+        "https://www.zdnet.com/home-and-office/kitchen-household/roborock-q7-m5-review/"
+      ]
+    },
+    {
+      "category": "robot-vacuums",
+      "category_name": "로봇청소기",
+      "product_id": "shark-powerdetect-uv-reveal",
+      "name": "Shark PowerDetect UV Reveal",
+      "product_url": "https://verdict-reviews.com/product/shark-powerdetect-uv-reveal/",
+      "publication_reviews": 8,
+      "publisher_stated_scores": 4,
+      "inferred_scores_excluded": 0,
+      "unscored_reviews": 4,
+      "publisher_stated_mean_5pt": 3.9,
+      "sample_review_urls": [
+        "https://www.pcworld.com/article/3184221/shark-powerdetect-uv-reveal-review.html",
+        "https://vacuumwars.com/shark-powerdetect-uv-reveal-review/",
+        "https://www.wired.com/review/shark-powerdetect-uv-reveal/"
+      ]
+    },
+    {
+      "category": "wireless-earbuds",
+      "category_name": "무선 이어폰",
+      "product_id": "bose-quietcomfort-ultra-earbuds",
+      "name": "Bose QuietComfort Ultra Earbuds",
+      "product_url": "https://verdict-reviews.com/product/bose-quietcomfort-ultra-earbuds/",
+      "publication_reviews": 4,
+      "publisher_stated_scores": 4,
+      "inferred_scores_excluded": 0,
+      "unscored_reviews": 0,
+      "publisher_stated_mean_5pt": 4.3,
+      "sample_review_urls": [
+        "https://www.whathifi.com/reviews/bose-quietcomfort-ultra-earbuds",
+        "https://www.cnet.com/tech/mobile/bose-quietcomfort-ultra-earbuds-review/",
+        "https://www.tomsguide.com/reviews/bose-quietcomfort-ultra-earbuds"
+      ]
+    },
+    {
+      "category": "wireless-earbuds",
+      "category_name": "무선 이어폰",
+      "product_id": "sennheiser-momentum-tw4",
+      "name": "Sennheiser Momentum TW4",
+      "product_url": "https://verdict-reviews.com/product/sennheiser-momentum-tw4/",
+      "publication_reviews": 4,
+      "publisher_stated_scores": 4,
+      "inferred_scores_excluded": 0,
+      "unscored_reviews": 0,
+      "publisher_stated_mean_5pt": 4.575,
+      "sample_review_urls": [
+        "https://www.soundguys.com/sennheiser-momentum-true-wireless-4-review-111429/",
+        "https://www.tomsguide.com/audio/earbuds/sennheiser-momentum-true-wireless-4",
+        "https://www.techradar.com/audio/headphones/earbuds-airpods/sennheiser-momentum-true-wireless-4-review"
+      ]
+    },
+    {
+      "category": "4k-monitors",
+      "category_name": "4K 모니터",
+      "product_id": "benq-pd3220u",
+      "name": "BenQ PD3220U",
+      "product_url": "https://verdict-reviews.com/product/benq-pd3220u/",
+      "publication_reviews": 3,
+      "publisher_stated_scores": 3,
+      "inferred_scores_excluded": 0,
+      "unscored_reviews": 0,
+      "publisher_stated_mean_5pt": 4.667,
+      "sample_review_urls": [
+        "https://www.techradar.com/reviews/benq-pd3220u-monitor-review",
+        "https://www.pcmag.com/reviews/benq-pd3220u-designvue-designer-monitor",
+        "https://www.imore.com/mac/benq-pd3220u-review"
+      ]
+    },
+    {
+      "category": "coffee-grinders-under-200",
+      "category_name": "커피 그라인더",
+      "product_id": "baratza-encore",
+      "name": "Baratza Encore",
+      "product_url": "https://verdict-reviews.com/product/baratza-encore/",
+      "publication_reviews": 5,
+      "publisher_stated_scores": 3,
+      "inferred_scores_excluded": 1,
+      "unscored_reviews": 1,
+      "publisher_stated_mean_5pt": 4.433,
+      "sample_review_urls": [
+        "https://coffeexplore.com/baratza-encore-review/",
+        "https://www.flypresso.com/reviews/baratza-encore-grinder-review",
+        "https://www.coffeeness.de/en/baratza-encore-review/"
+      ]
+    },
+    {
+      "category": "coffee-grinders-under-200",
+      "category_name": "커피 그라인더",
+      "product_id": "fellow-opus",
+      "name": "Fellow Opus",
+      "product_url": "https://verdict-reviews.com/product/fellow-opus/",
+      "publication_reviews": 4,
+      "publisher_stated_scores": 3,
+      "inferred_scores_excluded": 1,
+      "unscored_reviews": 0,
+      "publisher_stated_mean_5pt": 4.5,
+      "sample_review_urls": [
+        "https://thecoffeelocator.com/grinders/fellow-opus-review/",
+        "https://www.coffeeness.de/en/fellow-opus-review/",
+        "https://www.wired.com/review/fellow-opus-conical-burr-grinder/"
+      ]
+    },
+    {
+      "category": "coffee-grinders-under-200",
+      "category_name": "커피 그라인더",
+      "product_id": "hario-skerton-pro",
+      "name": "Hario Skerton Pro",
+      "product_url": "https://verdict-reviews.com/product/hario-skerton-pro/",
+      "publication_reviews": 3,
+      "publisher_stated_scores": 3,
+      "inferred_scores_excluded": 0,
+      "unscored_reviews": 0,
+      "publisher_stated_mean_5pt": 4.233,
+      "sample_review_urls": [
+        "https://cornercoffeestore.com/hario-skerton-pro-review/",
+        "https://homecoffeeexpert.com/hario-skerton-pro-review/",
+        "https://www.homegrounds.co/hario-skerton-hand-grinder-review/"
+      ]
+    },
+    {
+      "category": "coffee-grinders-under-200",
+      "category_name": "커피 그라인더",
+      "product_id": "oxo-brew-conical-burr-coffee-grinder",
+      "name": "OXO Brew Conical Burr Coffee Grinder",
+      "product_url": "https://verdict-reviews.com/product/oxo-brew-conical-burr-coffee-grinder/",
+      "publication_reviews": 4,
+      "publisher_stated_scores": 3,
+      "inferred_scores_excluded": 0,
+      "unscored_reviews": 1,
+      "publisher_stated_mean_5pt": 4.067,
+      "sample_review_urls": [
+        "https://www.homegrounds.co/oxo-brew-conical-burr-coffee-grinder-review/",
+        "https://homecoffeeexpert.com/oxo-brew-conical-burr-coffee-grinder-review/",
+        "https://coffeexplore.com/oxo-conical-burr-grinder-review/"
+      ]
+    },
+    {
+      "category": "robot-vacuums",
+      "category_name": "로봇청소기",
+      "product_id": "roborock-q10-s5",
+      "name": "Roborock Q10 S5+",
+      "product_url": "https://verdict-reviews.com/product/roborock-q10-s5/",
+      "publication_reviews": 4,
+      "publisher_stated_scores": 3,
+      "inferred_scores_excluded": 1,
+      "unscored_reviews": 0,
+      "publisher_stated_mean_5pt": 3.717,
+      "sample_review_urls": [
+        "https://www.techgearlab.com/reviews/smart-home/robot-vacuum/roborock-q10-s5-plus",
+        "https://securingtheuniverse.com/2026/06/17/review-roborock-q10-s5-robot-vacuum-and-mop/",
+        "https://vacuumwars.com/roborock-q10-s5-review/"
+      ]
+    },
+    {
+      "category": "robot-vacuums",
+      "category_name": "로봇청소기",
+      "product_id": "roborock-saros-10r",
+      "name": "Roborock Saros 10R",
+      "product_url": "https://verdict-reviews.com/product/roborock-saros-10r/",
+      "publication_reviews": 5,
+      "publisher_stated_scores": 3,
+      "inferred_scores_excluded": 1,
+      "unscored_reviews": 1,
+      "publisher_stated_mean_5pt": 3.933,
+      "sample_review_urls": [
+        "https://www.rtings.com/robot-vacuum/reviews/roborock/saros-10r",
+        "https://www.techgearlab.com/reviews/smart-home/robot-vacuum/roborock-saros-10r",
+        "https://vacuumwars.com/roborock-saros-10r-review/"
+      ]
+    },
+    {
+      "category": "4k-monitors",
+      "category_name": "4K 모니터",
+      "product_id": "apple-studio-display",
+      "name": "Apple Studio Display",
+      "product_url": "https://verdict-reviews.com/product/apple-studio-display/",
+      "publication_reviews": 3,
+      "publisher_stated_scores": 2,
+      "inferred_scores_excluded": 0,
+      "unscored_reviews": 1,
+      "publisher_stated_mean_5pt": 3.625,
+      "sample_review_urls": [
+        "https://www.macworld.com/article/3091564/studio-display-2026-review-a-great-monitor-if-you-can-get-it-for-half-price.html",
+        "https://www.cgmagonline.com/review/hardware/apple-studio-display-2026/"
+      ]
+    },
+    {
+      "category": "4k-monitors",
+      "category_name": "4K 모니터",
+      "product_id": "dell-u2723qe",
+      "name": "Dell U2723QE",
+      "product_url": "https://verdict-reviews.com/product/dell-u2723qe/",
+      "publication_reviews": 2,
+      "publisher_stated_scores": 2,
+      "inferred_scores_excluded": 0,
+      "unscored_reviews": 0,
+      "publisher_stated_mean_5pt": 4.5,
+      "sample_review_urls": [
+        "https://www.pcmag.com/reviews/dell-ultrasharp-27-4k-usb-c-hub-monitor-u2723qe",
+        "https://www.techradar.com/reviews/dell-ultrasharp-u2723qe-4k-usb-c-hub-monitor-review"
+      ]
+    },
+    {
+      "category": "coffee-grinders-under-200",
+      "category_name": "커피 그라인더",
+      "product_id": "1zpresso-q2",
+      "name": "1Zpresso Q2",
+      "product_url": "https://verdict-reviews.com/product/1zpresso-q2/",
+      "publication_reviews": 3,
+      "publisher_stated_scores": 2,
+      "inferred_scores_excluded": 0,
+      "unscored_reviews": 1,
+      "publisher_stated_mean_5pt": 4.2,
+      "sample_review_urls": [
+        "https://homecoffeeexpert.com/1zpresso-q2-review/",
+        "https://www.coffeeble.com/reviews/1zpresso-q2/"
+      ]
+    },
+    {
+      "category": "coffee-grinders-under-200",
+      "category_name": "커피 그라인더",
+      "product_id": "capresso-infinity",
+      "name": "Capresso Infinity",
+      "product_url": "https://verdict-reviews.com/product/capresso-infinity/",
+      "publication_reviews": 6,
+      "publisher_stated_scores": 2,
+      "inferred_scores_excluded": 0,
+      "unscored_reviews": 4,
+      "publisher_stated_mean_5pt": 4.2,
+      "sample_review_urls": [
+        "https://homecoffeeexpert.com/capresso-infinity-review/",
+        "https://cornercoffeestore.com/capresso-infinity-coffee-grinder-review/"
+      ]
+    },
+    {
+      "category": "coffee-grinders-under-200",
+      "category_name": "커피 그라인더",
+      "product_id": "timemore-chestnut-c2",
+      "name": "Timemore Chestnut C2",
+      "product_url": "https://verdict-reviews.com/product/timemore-chestnut-c2/",
+      "publication_reviews": 3,
+      "publisher_stated_scores": 2,
+      "inferred_scores_excluded": 1,
+      "unscored_reviews": 0,
+      "publisher_stated_mean_5pt": 4.125,
+      "sample_review_urls": [
+        "https://homecoffeeexpert.com/timemore-c2-review/",
+        "https://www.flypresso.com/reviews/timemore-chestnut-c2-grinder-review"
+      ]
+    },
+    {
+      "category": "coffee-grinders-under-200",
+      "category_name": "커피 그라인더",
+      "product_id": "timemore-chestnut-c3",
+      "name": "Timemore Chestnut C3",
+      "product_url": "https://verdict-reviews.com/product/timemore-chestnut-c3/",
+      "publication_reviews": 6,
+      "publisher_stated_scores": 2,
+      "inferred_scores_excluded": 0,
+      "unscored_reviews": 4,
+      "publisher_stated_mean_5pt": 4.25,
+      "sample_review_urls": [
+        "https://thecoffeelocator.com/grinders/timemore-chestnut-c3-review/",
+        "https://homecoffeeexpert.com/timemore-c3-review/"
+      ]
+    },
+    {
+      "category": "espresso-machines-under-500",
+      "category_name": "에스프레소 머신",
+      "product_id": "delonghi-dedica",
+      "name": "De'Longhi Dedica",
+      "product_url": "https://verdict-reviews.com/product/delonghi-dedica/",
+      "publication_reviews": 4,
+      "publisher_stated_scores": 2,
+      "inferred_scores_excluded": 2,
+      "unscored_reviews": 0,
+      "publisher_stated_mean_5pt": 4,
+      "sample_review_urls": [
+        "https://coffeexplore.com/delonghi-dedica-espresso-machine-review/",
+        "https://www.coffeeness.de/en/delonghi-dedica-review/"
+      ]
+    },
+    {
+      "category": "espresso-machines-under-500",
+      "category_name": "에스프레소 머신",
+      "product_id": "gaggia-classic-pro",
+      "name": "Gaggia Classic Pro",
+      "product_url": "https://verdict-reviews.com/product/gaggia-classic-pro/",
+      "publication_reviews": 5,
+      "publisher_stated_scores": 2,
+      "inferred_scores_excluded": 0,
+      "unscored_reviews": 3,
+      "publisher_stated_mean_5pt": 4.5,
+      "sample_review_urls": [
+        "https://www.homegrounds.co/gaggia-classic-pro-review/",
+        "https://thecoffeelocator.com/espresso-machines/gaggia-classic-pro-review/"
+      ]
+    },
+    {
+      "category": "full-frame-mirrorless-cameras",
+      "category_name": "미러리스 카메라",
+      "product_id": "canon-r5-mark-ii",
+      "name": "Canon EOS R5 Mark II",
+      "product_url": "https://verdict-reviews.com/product/canon-r5-mark-ii/",
+      "publication_reviews": 3,
+      "publisher_stated_scores": 2,
+      "inferred_scores_excluded": 0,
+      "unscored_reviews": 1,
+      "publisher_stated_mean_5pt": 5,
+      "sample_review_urls": [
+        "https://www.techradar.com/cameras/mirrorless-cameras/canon-eos-r5-mark-ii-review",
+        "https://www.photographyblog.com/reviews/canon_eos_r5_mark_ii_review"
+      ]
+    },
+    {
+      "category": "full-frame-mirrorless-cameras",
+      "category_name": "미러리스 카메라",
+      "product_id": "nikon-z8",
+      "name": "Nikon Z8",
+      "product_url": "https://verdict-reviews.com/product/nikon-z8/",
+      "publication_reviews": 2,
+      "publisher_stated_scores": 2,
+      "inferred_scores_excluded": 0,
+      "unscored_reviews": 0,
+      "publisher_stated_mean_5pt": 4.75,
+      "sample_review_urls": [
+        "https://www.photographyblog.com/reviews/nikon_z8_review",
+        "https://www.techradar.com/reviews/nikon-z8-review"
+      ]
+    },
+    {
+      "category": "full-frame-mirrorless-cameras",
+      "category_name": "미러리스 카메라",
+      "product_id": "sony-a1-ii",
+      "name": "Sony A1 II",
+      "product_url": "https://verdict-reviews.com/product/sony-a1-ii/",
+      "publication_reviews": 2,
+      "publisher_stated_scores": 2,
+      "inferred_scores_excluded": 0,
+      "unscored_reviews": 0,
+      "publisher_stated_mean_5pt": 4.25,
+      "sample_review_urls": [
+        "https://www.tomsguide.com/cameras-photography/mirrorless-cameras/sony-a1-ii-review",
+        "https://www.pcmag.com/reviews/sony-a1-ii"
+      ]
+    },
+    {
+      "category": "full-frame-mirrorless-cameras",
+      "category_name": "미러리스 카메라",
+      "product_id": "sony-a7r-v",
+      "name": "Sony A7R V",
+      "product_url": "https://verdict-reviews.com/product/sony-a7r-v/",
+      "publication_reviews": 2,
+      "publisher_stated_scores": 2,
+      "inferred_scores_excluded": 0,
+      "unscored_reviews": 0,
+      "publisher_stated_mean_5pt": 4.5,
+      "sample_review_urls": [
+        "https://www.tomsguide.com/cameras-photography/mirrorless-cameras/sony-a7r-v-review",
+        "https://www.techradar.com/reviews/sony-a7r-v"
+      ]
+    },
+    {
+      "category": "robot-vacuums",
+      "category_name": "로봇청소기",
+      "product_id": "ecovacs-t90-pro-omni",
+      "name": "Ecovacs T90 Pro Omni",
+      "product_url": "https://verdict-reviews.com/product/ecovacs-t90-pro-omni/",
+      "publication_reviews": 7,
+      "publisher_stated_scores": 2,
+      "inferred_scores_excluded": 0,
+      "unscored_reviews": 5,
+      "publisher_stated_mean_5pt": 3.6,
+      "sample_review_urls": [
+        "https://www.lbtechreviews.com/test/smart-home/ecovacs-deebot-t90-pro-omni",
+        "https://vacuumwars.com/ecovacs-deebot-t90-pro-omni-review/"
+      ]
+    },
+    {
+      "category": "robot-vacuums",
+      "category_name": "로봇청소기",
+      "product_id": "mova-p10-pro-ultra",
+      "name": "Mova P10 Pro Ultra",
+      "product_url": "https://verdict-reviews.com/product/mova-p10-pro-ultra/",
+      "publication_reviews": 3,
+      "publisher_stated_scores": 2,
+      "inferred_scores_excluded": 0,
+      "unscored_reviews": 1,
+      "publisher_stated_mean_5pt": 3.625,
+      "sample_review_urls": [
+        "https://www.rtings.com/robot-vacuum/reviews/mova/p10-pro-ultra",
+        "https://www.techgearlab.com/reviews/smart-home/robot-vacuum/mova-p10-pro-ultra"
+      ]
+    },
+    {
+      "category": "standing-desks",
+      "category_name": "스탠딩 데스크",
+      "product_id": "fully-jarvis-bamboo",
+      "name": "Fully Jarvis Bamboo Standing Desk",
+      "product_url": "https://verdict-reviews.com/product/fully-jarvis-bamboo/",
+      "publication_reviews": 5,
+      "publisher_stated_scores": 2,
+      "inferred_scores_excluded": 1,
+      "unscored_reviews": 2,
+      "publisher_stated_mean_5pt": 4,
+      "sample_review_urls": [
+        "https://www.tomsguide.com/reviews/fully-jarvis-bamboo-standing-desk",
+        "https://www.techradar.com/reviews/fully-jarvis-standing-desk-review"
+      ]
+    },
+    {
+      "category": "standing-desks",
+      "category_name": "스탠딩 데스크",
+      "product_id": "uplift-v2-standing-desk",
+      "name": "Uplift V2 Standing Desk",
+      "product_url": "https://verdict-reviews.com/product/uplift-v2-standing-desk/",
+      "publication_reviews": 2,
+      "publisher_stated_scores": 2,
+      "inferred_scores_excluded": 0,
+      "unscored_reviews": 0,
+      "publisher_stated_mean_5pt": 4,
+      "sample_review_urls": [
+        "https://www.tomsguide.com/reviews/uplift-v2-standing-desk",
+        "https://www.techradar.com/reviews/uplift-v2-standing-desk"
+      ]
+    },
+    {
+      "category": "espresso-machines-under-500",
+      "category_name": "에스프레소 머신",
+      "product_id": "philips-1200-series-fully-automatic-espresso-machine",
+      "name": "Philips 1200 Series Fully Automatic Espresso Machine",
+      "product_url": "https://verdict-reviews.com/product/philips-1200-series-fully-automatic-espresso-machine/",
+      "publication_reviews": 2,
+      "publisher_stated_scores": 1,
+      "inferred_scores_excluded": 0,
+      "unscored_reviews": 1,
+      "publisher_stated_mean_5pt": 4,
+      "sample_review_urls": [
+        "https://coffeedrinker.net/reviews/espresso-machine-reviews/philips-1200/"
+      ]
+    },
+    {
+      "category": "standing-desks",
+      "category_name": "스탠딩 데스크",
+      "product_id": "flexispot-e7-pro-plus",
+      "name": "Flexispot E7 Pro Plus Standing Desk",
+      "product_url": "https://verdict-reviews.com/product/flexispot-e7-pro-plus/",
+      "publication_reviews": 2,
+      "publisher_stated_scores": 1,
+      "inferred_scores_excluded": 0,
+      "unscored_reviews": 1,
+      "publisher_stated_mean_5pt": 4.5,
+      "sample_review_urls": [
+        "https://www.tomsguide.com/reviews/flexispot-e7-pro-plus-standing-desk"
+      ]
+    },
+    {
+      "category": "standing-desks",
+      "category_name": "스탠딩 데스크",
+      "product_id": "vari-electric-standing-desk",
+      "name": "Vari Classic Electric Standing Desk",
+      "product_url": "https://verdict-reviews.com/product/vari-electric-standing-desk/",
+      "publication_reviews": 1,
+      "publisher_stated_scores": 1,
+      "inferred_scores_excluded": 0,
+      "unscored_reviews": 0,
+      "publisher_stated_mean_5pt": 4.5,
+      "sample_review_urls": [
+        "https://www.tomsguide.com/reviews/vari-electric-standing-desk"
+      ]
+    }
+  ],
+  "warnings": [
+    "Editorial ratings are not buyer interest, sales, or independent consumers.",
+    "Review syndication across different domains may remain undetected.",
+    "Published scores are a selected subset; missing and model-derived scores are excluded.",
+    "Dates of source reviews are not inferred from product update dates."
+  ]
+}

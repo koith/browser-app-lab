@@ -63,7 +63,7 @@ jobs:
           import re
           from pathlib import Path
           html=Path('consumer/index.html').read_text(encoding='utf-8')
-          scripts=re.findall(r'<script[^>]*>(.*?)</script>', html, flags=re.I|re.S)
+          scripts=[x for x in re.findall(r'<script[^>]*>(.*?)</script>', html, flags=re.I|re.S) if x.strip()]
           assert len(scripts)==1, 'expected one standalone inline script'
           Path('/tmp/consumer-dashboard-inline.js').write_text(scripts[0],encoding='utf-8')
           assert 'social_sources' not in html and 'account_groups' not in html
