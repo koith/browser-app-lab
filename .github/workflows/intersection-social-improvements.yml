@@ -1,11 +1,6 @@
 name: INTERSECTION Free Social Full-Post Feasibility
+# Expensive public keyless probes must run only on operator dispatch, not every PR push.
 on:
-  pull_request:
-    paths:
-      - "apps/demand-research/probe_social_improvements.py"
-      - "apps/demand-research/probe_meta_originals.py"
-      - "apps/demand-research/probe_multiterm.py"
-      - ".github/workflows/intersection-social-improvements.yml"
   workflow_dispatch:
 permissions:
   contents: read
