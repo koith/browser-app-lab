@@ -1,0 +1,68 @@
+name: Weekly Licensed Editorial Product Source Check
+on:
+  schedule:
+    - cron: "23 4 * * 1"
+  workflow_dispatch:
+permissions:
+  contents: write
+  pull-requests: write
+concurrency:
+  group: general-product-editorial-weekly
+  cancel-in-progress: false
+jobs:
+  audit-and-propose:
+    if: github.repository == 'koith/browser-app-lab'
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            apps/demand-research/consumer_editorial.py
+            apps/demand-research/consumer/editorial-report.json
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Retrieve canonical source and generate new aggregate
+        run: |
+          python apps/demand-research/consumer_editorial.py --as-of "$(date -u +%Y-%m-%d)" --output /tmp/new-editorial-report.json
+      - name: Verify monotonic source coverage and detect genuine content changes
+        id: change
+        run: |
+          python - <<'PY'
+          import json,os
+          from pathlib import Path
+          old=json.loads(Path('apps/demand-research/consumer/editorial-report.json').read_text())
+          new=json.loads(Path('/tmp/new-editorial-report.json').read_text())
+          assert old['dataset']['license']==new['dataset']['license']=='CC BY 4.0'
+          assert old['dataset']['is_consumer_demand'] is False and new['dataset']['is_consumer_demand'] is False
+          assert new['summary']['source_ratings_rows'] >= old['summary']['source_ratings_rows']*0.5, 'Unexpected loss of source coverage'
+          a=(old['dataset']['ratings_csv_sha256'],old['dataset']['products_csv_sha256'])
+          b=(new['dataset']['ratings_csv_sha256'],new['dataset']['products_csv_sha256'])
+          changed=a!=b
+          with open(os.environ['GITHUB_OUTPUT'],'a') as f: f.write('changed='+str(changed).lower()+'\n')
+          print('EDITORIAL_CHANGE_DETECTED',changed)
+          print('OLD',old['summary'])
+          print('NEW',new['summary'])
+          PY
+      - name: Prepare proposed snapshot update
+        if: steps.change.outputs.changed == 'true'
+        run: |
+          cp /tmp/new-editorial-report.json apps/demand-research/consumer/editorial-report.json
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          BRANCH="agent/consumer-editorial-refresh-${GITHUB_RUN_ID}"
+          git switch -c "$BRANCH"
+          git add apps/demand-research/consumer/editorial-report.json
+          git commit -m "data(intersection): propose refreshed licensed real editorial ratings"
+          git push origin "HEAD:$BRANCH"
+          echo "REFRESH_BRANCH=$BRANCH" >> "$GITHUB_ENV"
+      - name: Open review PR instead of silently changing production
+        if: steps.change.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr create --base main --head "$REFRESH_BRANCH" \
+            --title "Data refresh: licensed general-product editorial snapshot" \
+            --body "Weekly CC BY 4.0 licensed source update proposal. Real expert scores are not consumer demand. Source: https://verdict-reviews.com/data/ . Verify dataset provenance and QA before merge. No SNS corpus is accessed."
