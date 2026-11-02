@@ -128,3 +128,31 @@ def _public_sessions() -> dict:
 def shopping_session_aggregates():
     """Read-only historical purchase-completion evidence, not live conversion."""
     return _public_sessions()
+
+
+def _public_attention() -> dict:
+    """Only six CC0 article view aggregates; not requests/people/SNS."""
+    file_path = Path(__file__).resolve().parent / "consumer" / "attention-report.json"
+    try:
+        if not file_path.is_file() or file_path.stat().st_size > 60_000:
+            raise ValueError("attention aggregate missing or too large")
+        report = json.loads(file_path.read_text(encoding="utf-8"))
+    except (OSError, ValueError, UnicodeDecodeError, json.JSONDecodeError):
+        raise HTTPException(503, detail="attention report unavailable")
+    data = report.get("dataset", {}) if isinstance(report, dict) else {}
+    topics = report.get("topics", []) if isinstance(report, dict) else []
+    if (report.get("schema_version") != 1 or
+        data.get("kind") != "current_article_attention_not_demand" or
+        data.get("license") != "CC0 1.0" or
+        data.get("is_demand") is not False or
+        data.get("is_purchases") is not False or
+        data.get("contains_individuals") is not False or
+        len(topics) != 6):
+        raise HTTPException(503, detail="unexpected attention report schema")
+    return report
+
+
+@app.get("/api/consumer/attention")
+def public_attention():
+    """Wikimedia current aggregate pageviews; explicitly not sales demand."""
+    return _public_attention()
