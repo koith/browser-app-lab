@@ -43,7 +43,7 @@
       }else if(platform==="threads"){
         handle=m[1];profile="https://www.threads.com/@"+handle;
       }
-      return {canonical,identity:platform+":"+m[2],profile,handle};
+      return {canonical,identity:platform+":"+m[2],postId:m[2],profile,handle};
     }catch{return null}
   }
   function normalize(row,platform,term,provider) {
@@ -53,7 +53,7 @@
     const title=String(row.title||"").replace(/\s+/g," ").slice(0,240);
     const description=String(row.description||row.snippet||"").replace(/\s+/g," ").slice(0,450);
     const exact=title.includes(term)||description.includes(term);
-    return {...found,platform,title,description,exact,provider};
+    return {...found,platform,term,title,description,exact,provider};
   }
   async function searchOne(engine,platform,term){
     const domain=NETWORKS[platform].host[0];
@@ -76,6 +76,42 @@
   function link(text,url){
     const a=make("a","",text);a.href=url;a.target="_blank";a.rel="noopener noreferrer";a.referrerPolicy="no-referrer";return a;
   }
+
+  async function verifyX(item,button,output) {
+    button.disabled=true;
+    output.textContent="공개 원문 확인 중…";
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),16000);
+    try {
+      // Independent public third-party embed API. Not an official X API.
+      const endpoint="https://api.fxtwitter.com/status/"+encodeURIComponent(item.postId);
+      const response=await fetch(endpoint,{mode:"cors",credentials:"omit",cache:"no-store",
+        signal:controller.signal});
+      if(!response.ok)throw Error("HTTP "+response.status);
+      const payload=await response.json(),tweet=payload?.tweet;
+      if(!tweet||String(tweet.id||"")!==item.postId||tweet.author?.protected===true)
+        throw Error("게시글 ID 또는 공개 상태가 확인되지 않음");
+      const body=String(tweet.text||"");
+      const dateMs=Date.parse(String(tweet.created_at||""));
+      if(!body||!Number.isFinite(dateMs))throw Error("원문 또는 작성 날짜 확인 실패");
+      const date=new Date(dateMs).toLocaleString("ko-KR",{year:"numeric",month:"short",
+        day:"numeric",hour:"2-digit",minute:"2-digit"});
+      if(!body.includes(item.term)){
+        output.textContent="원문은 확인했으나 검색어가 포함되지 않았습니다. 게시: "+date;
+        return;
+      }
+      // No archiving or image/media download, display this one public post only
+      // after a deliberate click; the user can open the originating page.
+      output.replaceChildren(make("strong","", "무료 공개 원문 확인 · "+date),
+        make("p","index-description",body.slice(0,1200)));
+      output.append(make("p","index-info","출처: FxEmbed 공개 API(비공식) · 게시일은 인덱스가 아닌 원문 메타데이터 기준"));
+    }catch(error){
+      output.textContent="무료 원문 조회 실패 · "+String(error.message||error).slice(0,90)+
+        " · 원본 링크에서 직접 확인해주세요.";
+      button.disabled=false;
+    }finally{clearTimeout(timer)}
+  }
+
   function card(item){
     const node=make("article","index-result");
     const head=make("div","index-result-head");
@@ -91,6 +127,12 @@
     if(item.profile)actions.append(link("작성자 프로필",item.profile));
     node.append(actions);
     node.append(make("p","index-info","검색 결과: "+Array.from(item.providers).join(" · ")+" · 게시 날짜 미확인"));
+    if(item.platform==="x"){
+      const verify=make("button","index-check","X 공개 원문 확인 (무료)");
+      const result=make("div","index-verify-result");
+      verify.addEventListener("click",()=>verifyX(item,verify,result));
+      node.append(verify,result);
+    }
     return node;
   }
   function render(){
