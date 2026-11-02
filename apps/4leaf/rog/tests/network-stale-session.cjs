@@ -51,7 +51,8 @@ const path=require('node:path');
    setRemoteDescription(value){this.remoteDescription=value;return Promise.resolve()}
    close(){this.connectionState='closed'}
  }
- const window={__LEAF_BRIDGE__:{
+ let redraws=0;
+ const window={__ROG_TEST__:{drawGame:()=>{redraws++}},__LEAF_BRIDGE__:{
    getName:()=>'QA participant',getMatch:()=>null,
    remoteCommand:(...args)=>commands.push(args),
    receiveMatch:value=>states.push(value)
@@ -71,12 +72,15 @@ const path=require('node:path');
  current.readyState='open';current.onopen();
  assert.equal(net.connected,true,'replacement WebRTC session opens');
  const status=element('net-status').textContent;
+ const newSessionRedraws=redraws;
+ assert.ok(newSessionRedraws>=4,'opening and resetting sessions re-evaluates real match controls');
 
  // In a browser these callbacks can arrive AFTER the replacement onopen.
  old.onclose();old.onerror();
  old.onmessage({data:JSON.stringify({type:'command',action:'roll'})});
  oldPeer.connectionState='failed';oldPeer.onconnectionstatechange();
  assert.equal(net.connected,true,'old peer cannot disconnect the replacement');
+ assert.equal(redraws,newSessionRedraws,'stale WebRTC events cannot repaint the current match controls');
  assert.equal(element('net-status').textContent,status,'old events cannot rewrite status');
  assert.equal(commands.length,0,'old channel cannot inject a gameplay command');
 
@@ -121,7 +125,9 @@ const path=require('node:path');
  liveGuestChannel.onmessage({data:JSON.stringify({type:'state',match:{id:'current'}})});
  assert.deepEqual(states,[{id:'current'}],'new guest channel receives host state');
 
+ const priorCloseRedraws=redraws;
  liveGuestChannel.onclose();
+ assert.equal(redraws,priorCloseRedraws+1,'real channel close immediately refreshes disabled match controls');
  assert.equal(net.connected,false,'current session closing must disconnect');
  assert.equal(net.send({type:'chat',text:'too late'}),false,
    'no sends after current channel closes');
