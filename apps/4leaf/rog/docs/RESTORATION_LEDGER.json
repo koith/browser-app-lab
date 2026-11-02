@@ -1425,6 +1425,18 @@
         "QA-03",
         "P0-RELEASE"
       ]
+    },
+    {
+      "id": "REQ-20261102-GPT-011",
+      "date": "2026-11-02",
+      "origin": "사용자: Claude/GPT 분업 후 4LEAF 복원 계속",
+      "text": "클로드는 원본 소스/행동·규칙 근거 해독을 담당하고 GPT는 실제 ChatRoom·보드·전투·네트워크 런타임과 QA/PR/Pages를 담당. 첫 GPT 독립 작업으로 원작 즉시 좌석 이동 동작이 CSS tween이나 클릭 가림 회귀를 일으키지 않는지 Chromium 및 WebKit 실제 포인터·iPhone 폭 QA 게이트 작성. 전체 원작 동등성 판정은 유지.",
+      "taskIds": [
+        "CHT-04",
+        "QA-03",
+        "P0-CHAT",
+        "P0-RELEASE"
+      ]
     }
   ],
   "tasks": [
@@ -1728,7 +1740,8 @@
         "apps/4leaf/rog/tests/world-chat.cjs",
         "https://github.com/koith/browser-app-lab/actions/runs/39123213181",
         "https://github.com/koith/browser-app-lab/pull/113",
-        "https://github.com/koith/browser-app-lab/pull/118"
+        "https://github.com/koith/browser-app-lab/pull/118",
+        "apps/4leaf/rog/tests/chatroom-instant-seat-teleport.cjs"
       ],
       "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
       "lastReviewed": "2026-11-02",
@@ -2547,10 +2560,11 @@
         "tests/chatroom-native-expressions.cjs",
         "tests/world-chat.cjs",
         "apps/4leaf/rog/tests/chatroom-six-live-original-seats.cjs",
-        "https://github.com/koith/browser-app-lab/actions/runs/39214210565"
+        "https://github.com/koith/browser-app-lab/actions/runs/39214210565",
+        "apps/4leaf/rog/tests/chatroom-instant-seat-teleport.cjs"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-19",
+      "lastReviewed": "2026-11-02",
       "verifiedAcceptance": null,
       "dependencies": [
         "CHT-01"
@@ -2947,7 +2961,8 @@
         "tests/dice-mobile-roll-dmp-order.cjs",
         "tests/dice-horizontal-native-actors.cjs",
         "apps/4leaf/rog/tests/dice-horizontal-native-actors.cjs",
-        "apps/4leaf/rog/tests/dice-landscape-webkit-release.cjs"
+        "apps/4leaf/rog/tests/dice-landscape-webkit-release.cjs",
+        "apps/4leaf/rog/tests/chatroom-instant-seat-teleport.cjs"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
       "lastReviewed": "2026-11-02",
@@ -7647,6 +7662,19 @@
         "P0-RELEASE"
       ],
       "details": "Original SHA1-verified archive extraction contributed 37/37 authentic OBS frames for each previously partial actor 0042 and 0045. Runtime loads /original/OBS/action-full-ext/manifest.js in index.html before actors. Only audited actor 0042 is allowed inferred 37-frame directional action sequences, actor 0045 holds source-reviewed frame18 (no EXE action-map invention). Other seven non-37 partial actors remain source-archived without fabricated original action assignment. Extended native-image failures retry and fall back to prior authentic OBS frames. Chromium integration added to existing round4 QA workflow. App version beta45 and PWA v132; final real-device/source equivalence not yet verified."
+    },
+    {
+      "seq": 349,
+      "date": "2026-11-02",
+      "type": "REAL_CLICK_INSTANT_SEAT_QA_PR_PENDING",
+      "requestId": "REQ-20261102-GPT-011",
+      "taskIds": [
+        "CHT-04",
+        "QA-03",
+        "P0-CHAT",
+        "P0-RELEASE"
+      ],
+      "details": "GPT added a new real pointer click Chromium/WebKit ChatRoom test for original instantaneous seat reassignment: click through actual scene hitbox, ensure actor changes slot without CSS transition or later interpolation, 390px mobile form remains operable. Integrated into same-revision release acceptance workflow. Syntax checked separately; browser CI, iPhone physical device and original historical equivalence NOT YET verified; PR pending."
     }
   ]
 }
