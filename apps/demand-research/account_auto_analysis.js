@@ -83,8 +83,8 @@ async function get(url){
   return await res.json();
  }finally{clearTimeout(timer)}
 }
-let records=new Map(),cursor=PAGE,scanDone=false,scanAt=0,busy=false,scheduled=false;
-let scanResult={checked:0,failed:0,skipped:0},viewReady=false,revision=0;
+let records=new Map(),cursor=PAGE,groupCursor=30,scanDone=false,scanAt=0,busy=false,scheduled=false;
+let scanResult={checked:0,failed:0};
 function UI(){
  const host=$("accountsView");if(!host)return false;
  if($(ID))return true;
@@ -96,10 +96,12 @@ function UI(){
   "동일 SNS의 중복 프로필은 자동 정리합니다. 서로 다른 SNS는 공개 프로필이 서로를 직접 링크한 경우에만 연결 계정으로 표시하며, 동일인이라는 확정 판정은 아닙니다.");
  const status=mk("p","account-auto-status","");status.id="accountAutoStatus";
  const groups=mk("div","account-auto-groups");groups.id="accountAutoGroups";
+ const groupMore=mk("button","account-auto-more","연결 그룹 더 보기");groupMore.id="accountAutoGroupMore";groupMore.type="button";
+ groupMore.addEventListener("click",()=>{groupCursor+=30;render()});
  const listing=mk("div","account-auto-rows");listing.id="accountAutoRows";
  const more=mk("button","account-auto-more","결과 더 보기");more.type="button";more.id="accountAutoMore";
  more.addEventListener("click",()=>{cursor+=PAGE;render()});
- section.append(title,summary,hints,status,groups,listing,more);
+ section.append(title,summary,hints,status,groups,groupMore,listing,more);
  const legacy=host.querySelector(".account-intro");
  if(legacy)legacy.before(section);else host.prepend(section);
  const css=mk("style");css.textContent=`
@@ -149,12 +151,13 @@ function render(){
  const known=values.reduce((n,x)=>n+x.verified,0),indexed=values.reduce((n,x)=>n+x.indexed,0);
  const groups=groupsOf(records);
  summary.textContent="자동 발견 "+values.length.toLocaleString("ko-KR")+"개 공개 계정 · 원문 확인 글 "+known.toLocaleString("ko-KR")+
-  "건 · 인덱스 링크 "+indexed.toLocaleString("ko-KR")+"건 · 상호 링크 확인 그룹 "+groups.linked.length+"개";
- status.textContent="공개 프로필 근거 조회 "+scanResult.checked+"/"+Math.min(values.length,BSKY_SCAN+MASTODON_SCAN)+
+  "건 · 인덱스 링크 "+indexed.toLocaleString("ko-KR")+"건 · 상호 링크 확인 그룹 "+groups.linked.length+"개 (현재 불러온 데이터 기준)";
+ const eligible=Math.min(values.filter(v=>v.network==="bluesky").length,BSKY_SCAN)+Math.min(values.filter(v=>v.network==="mastodon").length,MASTODON_SCAN);
+ status.textContent="공개 프로필 근거 조회 "+scanResult.checked+"/"+eligible+
   "개 (실패 "+scanResult.failed+" · 미지원/미조회 계정은 연결 미확정)"+
   (busy?" · 자동 검증 진행 중":scanDone?" · 이번 조회 완료":"");
  const fg=document.createDocumentFragment();
- for(const group of groups.linked.slice(0,30)){
+ for(const group of groups.linked.slice(0,groupCursor)){
   const item=mk("article");
   item.append(mk("strong","","서로 공개 연결한 계정 "+group.length+"개"));
   for(const rec of group){
@@ -166,6 +169,8 @@ function render(){
    scanDone?"이번에 검사한 공개 프로필에서는 상호 링크를 확인하지 못했습니다. 미확인 계정을 별도 사용자로 단정하지 않습니다.":
    "상호 링크가 확인되면 이곳에 자동 표시됩니다."));
  groupHolder.replaceChildren(fg);
+ $("accountAutoGroupMore").hidden=groups.linked.length<=groupCursor;
+ $("accountAutoGroupMore").textContent="연결 그룹 더 보기 ("+Math.max(0,groups.linked.length-groupCursor)+"개 남음)";
  const frag=document.createDocumentFragment();
  for(const rec of values.slice(0,cursor)){
   const line=mk("div");
@@ -179,7 +184,7 @@ function render(){
  $("accountAutoMore").textContent="결과 더 보기 ("+Math.max(0,values.length-cursor).toLocaleString("ko-KR")+"개 남음)";
 }
 function refresh(){
- const next=discover();
+ const next=discover(),previousSize=records.size;
  const unchanged=next.size===records.size&&[...next].every(([key,v])=>{
   const old=records.get(key);return old&&old.verified===v.verified&&old.indexed===v.indexed;
  });
@@ -188,8 +193,8 @@ function refresh(){
   const old=records.get(key);
   if(old)rec.claims=old.claims;
  }
- records=next;revision++;render();
- if(!busy&&(!scanDone||Date.now()-scanAt>REFRESH_MS))scan().catch(()=>{});
+ records=next;render();
+ if(!busy&&(next.size!==previousSize||!scanDone||Date.now()-scanAt>REFRESH_MS))scan().catch(()=>{});
 }
 function schedule(){
  if(scheduled)return;scheduled=true;
@@ -207,7 +212,11 @@ async function scan(){
   batch.forEach(v=>q.append("actors",v.user));
   try{
    const response=await get("https://public.api.bsky.app/xrpc/app.bsky.actor.getProfiles?"+q);
-   const got=new Map((Array.isArray(response.profiles)?response.profiles:[]).map(p=>[String(p.handle||"").toLowerCase(),p]));
+   const got=new Map();
+   for(const p of Array.isArray(response.profiles)?response.profiles:[]){
+    if(p.handle)got.set(String(p.handle).toLowerCase(),p);
+    if(p.did)got.set(String(p.did).toLowerCase(),p);
+   }
    for(const row of batch){
     const profile=got.get(row.user);
     if(profile){addClaim(row,profile.description||"");scanResult.checked++}
