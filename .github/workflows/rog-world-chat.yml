@@ -77,6 +77,7 @@ on:
       - 'apps/4leaf/rog/chatroom-native-scrollbar.js'
       - 'apps/4leaf/rog/chatroom-native-scrollbar.css'
       - 'apps/4leaf/rog/tests/chat-native-scrollbar.cjs'
+      - 'apps/4leaf/rog/tests/chatroom-terrain-input.cjs'
       - 'apps/4leaf/rog/chatroom-native-exit.css'
       - 'apps/4leaf/rog/index.html'
       - 'apps/4leaf/rog/dice-native-player-portraits.css'
@@ -200,6 +201,8 @@ jobs:
         run: node apps/4leaf/rog/tests/native-offline-cache.cjs
       - name: Verify original 52x40 ChatRoom scrollbar with real messages and pointer drag
         run: node apps/4leaf/rog/tests/chat-native-scrollbar.cjs
+      - name: Guard instant room seat clicks from chat UI and repeated view renders
+        run: node apps/4leaf/rog/tests/chatroom-terrain-input.cjs
       - name: Preserve old ChatRoom conversation position during two-peer live messages and keyboard source scrollbar
         run: node apps/4leaf/rog/tests/chatroom-native-history-reading.cjs
       - name: Verify live source Registry chroma key, true side player portraits, game turns and mobile
