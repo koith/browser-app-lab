@@ -1,6 +1,11 @@
 name: Mimmi Official Social Public Photo Discovery
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/mimmi-official-social-public.yml'
+      - 'apps/gallery-archive/commit_crawler_research.py'
+      - 'apps/gallery-archive/test_commit_crawler_research.py'
   schedule:
     - cron: '30 14 * * 1,4'
   push:
@@ -14,7 +19,19 @@ concurrency:
   group: mimmi-source-index-writer-${{ github.ref_name }}
   cancel-in-progress: false
 jobs:
+  reconcile-official-social-test:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: |
+          python -m py_compile apps/gallery-archive/commit_crawler_research.py
+          python apps/gallery-archive/test_commit_crawler_research.py
   collect:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
     runs-on: ubuntu-24.04
     timeout-minutes: 55
     steps:
@@ -42,16 +59,8 @@ jobs:
                   assert len(p["sha256"])==64 and p["bytes"]>4500
           print("MIMMI_PUBLIC_SOCIAL_IMAGES_EVIDENCE",d["summary"])
           PY
-      - name: Publish ONLY verified public photo URLs to Mimmi gallery catalogue
+      - name: Reconcile verified official SNS evidence without losing concurrent crawler commits
         if: github.ref == 'refs/heads/main'
         run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add apps/mimmi-gallery/social-public-previews.json
-          if ! git diff --cached --quiet; then git commit -m "Record Mimmi official public social photo image evidence"; fi
-          git fetch origin "$GITHUB_REF_NAME"
-          git rebase "origin/$GITHUB_REF_NAME"
-          python apps/mimmi-gallery/build_model_gallery.py
-          git add apps/mimmi-gallery/source-viewer-albums.json apps/mimmi-gallery/albums.json
-          if ! git diff --cached --quiet; then git commit -m "Index new public Mimmi social gallery photos"; fi
-          git push origin "HEAD:$GITHUB_REF_NAME"
+          python apps/gallery-archive/test_commit_crawler_research.py
+          python apps/gallery-archive/commit_crawler_research.py --manifest social-public-previews.json --retries 8
