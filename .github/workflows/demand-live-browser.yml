@@ -36,6 +36,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+      - name: Verify account watcher JS/Python syntax before browser
+        run: |
+          node --check apps/demand-research/account_watch.js
+          python -m py_compile apps/demand-research/test_account_watch_browser.py
       - name: Install headless Chromium
         run: |
           python -m pip install --disable-pip-version-check playwright==1.56.0
