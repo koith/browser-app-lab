@@ -56,7 +56,7 @@ const {chromium,webkit}=require('playwright');
   await page.locator('#start-game').click();
   await page.waitForSelector('#game:not(.hidden)');
   const inspected=[];
-  for(const id of ['0040','0042','0043']){
+  for(const id of ['0056','0059','0060']){
    const row=await page.evaluate(id=>{
     const match=window.__ROG_TEST__.getMatch();
     match.players[0].team[0]='c_'+id;window.__ROG_TEST__.drawGame();
@@ -79,12 +79,11 @@ const {chromium,webkit}=require('playwright');
     const victory=pawn.dataset.sourceFrameSequence;
     window.__LEAF_GENESIS_ACTORS__.poseByPlayer(match.players[0].id,'idle',0);
     return {id,idle,walking,attack,hurt,victory,evidence,continuity,atlas,
-     fullFrames:window.ORIGINAL_LEAF_EXT_ACTION_FRAMES?.[id]?.frames?.length||
-       window.ORIGINAL_LEAF_FULL_ACTION_FRAMES?.[id]?.frames?.length||0,
+     fullFrames:window.__LEAF_CHR_BODY_MAP__?.resolve(id)?.frames?.length||0,
      image:image.getAttribute('src'),rig:pawn.dataset.actorRig};
    },id);
    const tableActor=row.fullFrames===37&&!['0084','0085','0086'].includes(id);
-   assert.equal(row.idle,tableActor?'22,23,24,23':'25',id+' front idle');
+   assert.equal(row.idle,'22,23,24',id+' CHR native front idle');
    assert.equal(row.walking,'25,26,27,28,29,30',
     id+' forward-facing original source movement without a BACK 0..7 spin');
    assert.equal(row.continuity,'true');
@@ -102,19 +101,19 @@ const {chromium,webkit}=require('playwright');
   }
   // 0045 is source-front frame18 ONLY (original OBS member 1045), not a
   // visually approved 25/30 pair. Never infer 2002 action/FPS from 0046.
-  const staticFront=await page.evaluate(()=>{
-   const m=window.__ROG_TEST__.getMatch();m.players[0].team[0]='c_0045';
+  const formerlyStatic=await page.evaluate(()=>{
+   const m=window.__ROG_TEST__.getMatch();m.players[0].team[0]='c_0062';
    window.__ROG_TEST__.drawGame();
    const p=document.querySelector('#board-pawns .board-pawn[data-id="0"]');
    window.__LEAF_GENESIS_ACTORS__.poseByPlayer(0,'walk',0);
    return {sequence:p.dataset.sourceFrameSequence,coverage:p.dataset.sourceWalkCoverage};
   });
-  assert.equal(staticFront.sequence,'18',
-   '0045 must stay on its visually verified 18 front packet');
-  assert.ok(staticFront.coverage.startsWith('front-only/'));
+  assert.equal(formerlyStatic.sequence,'25,26,27,28,29,30',
+   'original 1045 OBS native 18-byte table now reveals genuine 25-30 walk');
+  assert.ok(formerlyStatic.coverage.startsWith('native-CHR-OBS-indices/'));
   // A real TURN and dice-roll moves source actor on original DMP terrain.
   await page.evaluate(()=>{
-   const m=window.__ROG_TEST__.getMatch();m.players[0].team[0]='c_0042';
+   const m=window.__ROG_TEST__.getMatch();m.players[0].team[0]='c_0059';
    for(let i=1;i<=14;i++)m.tiles[i]='normal';
    window.__ROG_TEST__.drawGame();
   });
@@ -130,9 +129,9 @@ const {chromium,webkit}=require('playwright');
   });
   assert.ok(after.pos>before&&after.roll?.length>0);
   assert.equal(after.actor,'original-obs-sprite');
-  assert.equal(after.front,'25');
+  assert.equal(after.front,'22');
   await page.screenshot({path:'leaf-obs-2002-front-motion-live-'+(mobile?'mobile-':'')+engine.name()+'.png'});
   assert.deepEqual(errors,[],'native actor and regional UI must not cause runtime exceptions');
-  console.log('SOURCE REGION NUMBERS + FRONT OBS REAL DMP GAME PASS',JSON.stringify({engine:engine.name(),mobile,source,lit,inspected,staticFront,after}));
+  console.log('SOURCE REGION NUMBERS + CHR OBS REAL DMP GAME PASS',JSON.stringify({engine:engine.name(),mobile,source,lit,inspected,formerlyStatic,after}));
  }finally{await browser.close()}
 })().catch(e=>{console.error('SOURCE REGION / OBS FRONT GAME FAILED',e.stack||e);process.exit(1)});
