@@ -172,10 +172,14 @@ def groups_page(db_path, *, offset=0, limit=30, now=None):
         result = []
         for members in groups[offset:offset+limit]:
             placeholders = ",".join("?" for _ in members)
-            posts = db.execute(
-                "SELECT count(DISTINCT post_hash) FROM observed WHERE account_url IN ("+placeholders+")",
+            posts, activity_days = db.execute(
+                """SELECT count(DISTINCT post_hash),
+                   count(DISTINCT CASE
+                     WHEN posted_at GLOB '[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]*'
+                     THEN substr(posted_at,1,10) END)
+                   FROM observed WHERE account_url IN ("""+placeholders+")",
                 members,
-            ).fetchone()[0]
+            ).fetchone()
             per_account = {
                 url: (platform, count) for url, platform, count in db.execute(
                     """SELECT a.url,a.platform,count(DISTINCT o.post_hash)
@@ -191,6 +195,8 @@ def groups_page(db_path, *, offset=0, limit=30, now=None):
                 "label": "공개적으로 연결을 선언한 계정 그룹",
                 "account_count": len(members),
                 "distinct_posts": posts,
+                "capped_daily_contributions": activity_days,
+                "contribution_rule": "at_most_one_group_contribution_per_utc_day",
                 "accounts": [
                     {"profileUrl":url,"platform":per_account[url][0],"verified_posts":per_account[url][1]}
                     for url in members
