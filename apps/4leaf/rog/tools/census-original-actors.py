@@ -163,10 +163,10 @@ def checked_in(root):
     rog=root/"apps/4leaf/rog"
     cards={row["id"] for row in json.loads((rog/"original/chessmen.json").read_text())}
     txt=(rog/"original/OBS/action-full/manifest.js").read_text()
-    complete=set(re.findall(r'^ "(\\d{4})": \\{',txt,re.M))
+    complete=set(re.findall(r'^ "(\d{4})": \{',txt,re.M))
     actors=(rog/"genesis-chessman-actors.js").read_text()
-    block=re.search(r"NON_ACTOR_OBS=Object\\.freeze\\(\\{(.*?)\\}\\)",actors,re.S)
-    non_actor=set(re.findall(r"'(\\d{4})'",block.group(1))) if block else set()
+    block=re.search(r"NON_ACTOR_OBS=Object\.freeze\(\{(.*?)\}\)",actors,re.S)
+    non_actor=set(re.findall(r"'(\d{4})'",block.group(1))) if block else set()
     return rog,cards,complete,non_actor
 
 def run(resources,root,artifact):
