@@ -134,8 +134,8 @@ def read_remote_with_recovery(row,remote,deadline_seconds=75,command=None,copyto
                 return read_remote_via_copyto(row,remote,min(75,remaining),copyto_command)
             except ValueError as failure:
                 message=str(failure)
-                is_transient=bool(re.search(r'corrupted on transfer:\\s*sizes differ',message,re.I))
-                is_denied=bool(re.search(r'\\b(?:401|403|429|451)\\b|access denied|failed to login',message,re.I))
+                is_transient=bool(re.search(r'corrupted on transfer:\s*sizes differ',message,re.I))
+                is_denied=bool(re.search(r'\b(?:401|403|429|451)\b|access denied|failed to login',message,re.I))
                 if not is_transient or is_denied or attempt==2 or deadline-time.monotonic()<=4:
                     raise
                 time.sleep(min(1+attempt,max(0,deadline-time.monotonic()-2)))
