@@ -182,6 +182,7 @@ def run():
             saved=page.evaluate("JSON.parse(localStorage.getItem('intersection:public-account-watch:v1'))")
             assert len(saved)==3 and all(isinstance(s,str) for s in saved)
             page.locator("#accountWatchSearch").fill("mastodon")
+            page.wait_for_function("document.querySelectorAll('#accountWatchList article').length===1",timeout=8000)
             assert page.locator("#accountWatchList article").count()==1
             page.locator("#accountWatchSearch").fill("")
             page.locator(".account-watch-card .danger").first.click()
