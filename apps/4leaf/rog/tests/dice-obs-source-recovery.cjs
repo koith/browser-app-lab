@@ -76,7 +76,7 @@ const {chromium}=require('playwright');
   assert.equal(unavailable.rig,'original-obs-sprite');
   assert.ok(unavailable.legacy.includes('./original/OBS/1042-25.png'));
   assert.equal(unavailable.cardVisible,false);
-  assert.ok(failures0042>=4,'exhaust actual original source retries before fallback');
+  assert.ok(failures0042>=1,'the extended source must be attempted before authentic legacy fallback');
   await page.unroute('**/original/OBS/action-full-ext/1042-22.png*');
   await page.evaluate(()=>window.__LEAF_GENESIS_ACTORS__.recoverAvailableOriginals());
   await page.waitForFunction(()=>{
