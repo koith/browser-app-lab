@@ -73,9 +73,18 @@ def x_check(status_id,term):
         post=json.loads(raw).get("tweet",{})
         text=str(post.get("text") or "")
         dt=str(post.get("created_at") or "")
-        stamp=datetime.fromisoformat(dt.replace("Z","+00:00"))
+        stamp=None
+        try:
+            stamp=datetime.fromisoformat(dt.replace("Z","+00:00"))
+        except ValueError:
+            try:
+                from email.utils import parsedate_to_datetime
+                stamp=parsedate_to_datetime(dt)
+            except (ValueError,TypeError,IndexError):
+                pass
+        if stamp is not None and stamp.tzinfo is None:stamp=stamp.replace(tzinfo=timezone.utc)
         return {"http":code,"real":bool(post.get("id")),"match":term in text,
-                "recent":datetime.now(timezone.utc)-timedelta(days=32)<=stamp<=datetime.now(timezone.utc)}
+                "recent":bool(stamp and datetime.now(timezone.utc)-timedelta(days=32)<=stamp<=datetime.now(timezone.utc))}
     except (ValueError,TypeError,AttributeError):return {"http":code,"real":False,"match":False,"recent":False}
 
 def main():
