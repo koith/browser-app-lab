@@ -52,6 +52,19 @@ jobs:
         run: |
           python -m py_compile consumer_dedup.py consumer_report.py consumer_report_api.py
           python -m pytest -q test_consumer_dedup.py test_consumer_report.py
+      - name: Check standalone dashboard JavaScript syntax
+        working-directory: apps/demand-research
+        run: |
+          python - <<'PY'
+          import re
+          from pathlib import Path
+          html=Path('consumer/index.html').read_text(encoding='utf-8')
+          scripts=re.findall(r'<script(?:\\s[^>]*)?>([\\s\\S]*?)</script>', html, flags=re.I)
+          assert len(scripts)==1, 'expected one standalone inline script'
+          Path('/tmp/consumer-dashboard-inline.js').write_text(scripts[0],encoding='utf-8')
+          assert 'social_sources' not in html and 'account_groups' not in html
+          PY
+          node --check /tmp/consumer-dashboard-inline.js
       - name: Generate reproducible synthetic aggregate report
         working-directory: apps/demand-research
         run: |
