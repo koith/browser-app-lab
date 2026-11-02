@@ -50,7 +50,7 @@ def run():
                 qs=parse_qs(urlparse(r.request.url).query)
                 actors=qs.get("actors",[])
                 profiles=([{"handle":"qa-feed.bsky.social","did":"did:plc:syntheticaccount",
-                            "description":"https://mastodon.social/@qa"}]
+                            "description":"My other account https://mastodon.social/@qa"}]
                           if "qa-feed.bsky.social" in actors else [])
                 r.fulfill(status=200,content_type="application/json",
                     headers={"Access-Control-Allow-Origin":"*"},body=json.dumps({"profiles":profiles}))
@@ -102,7 +102,7 @@ def run():
                 mast_calls.append(r.request.url)
                 if "/accounts/lookup" in r.request.url:
                     data={"id":"101","username":"qa","locked":False,
-                          "fields":[{"name":"Other profile","value":
+                          "fields":[{"name":"My other account","value":
                           '<a href="https://bsky.app/profile/qa-feed.bsky.social">Bluesky</a>'}]}
                 elif "/statuses" in r.request.url:
                     data=[{"id":"111","account":{"id":"101"},"visibility":"public",
