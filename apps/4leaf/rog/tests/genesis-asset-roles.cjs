@@ -27,8 +27,11 @@ const {chromium}=require('playwright');
   await page.waitForSelector('#game:not(.hidden)');
   await page.evaluate(()=>{
    const m=window.__ROG_TEST__.getMatch();
-   m.players[0].team[0]='c_0056'; // CHR original member 1040
-   m.players[1].team[0]='c_0059'; // CHR original member 1042
+   // Distinct CHR-original members with independently visually reviewed
+   // front bodies. Other unpublished/OBS2+3 cases are verified by the
+   // dedicated 98-card party HUD browser acceptance.
+   m.players[0].team=['c_0056','c_0059','c_0060'];
+   m.players[1].team=['c_0059'];
    window.__ROG_TEST__.drawGame();
   });
   await page.waitForFunction(()=>{
