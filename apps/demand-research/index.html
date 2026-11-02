@@ -785,7 +785,7 @@ async function fetchFederated(start,end,epoch){
   draw();
 }
 function updateServiceCounts(){
-  serviceCounts={bluesky:0,mastodon:0,lemmy:0,misskey:0,reddit:0};
+  serviceCounts={bluesky:0,mastodon:0,lemmy:0,misskey:0,reddit:0,x:0};
   for(let p of posts)if(p.platform in serviceCounts)serviceCounts[p.platform]++;
 }
 
