@@ -1,6 +1,11 @@
 name: Yui Mimmi Full Stored-Photo Gap Audit and Backfill
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - '.github/workflows/gallery-comprehensive-backfill.yml'
+      - 'apps/gallery-archive/read_owner_metadata.py'
+      - 'apps/gallery-archive/test_owner_metadata.py'
   push:
     branches: [main]
     paths:
@@ -16,7 +21,20 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  metadata-reader-regressions:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Reject wrong model, provider errors and auth challenges in read-only metadata
+        run: |
+          python -m py_compile apps/gallery-archive/read_owner_metadata.py apps/gallery-archive/audit_both_models.py
+          python apps/gallery-archive/test_owner_metadata.py
   audit-both-models:
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
@@ -58,11 +76,19 @@ jobs:
               continue
             fi
             echo "::add-mask::$RCLONE_CONFIG_ARCHIVE_COOKIE"
-            if rclone cat "$remote/metadata/catalog.json" --timeout 45s --retries 1 > "$RUNNER_TEMP/owner/$model.json" 2>"$RUNNER_TEMP/reader-error"; then
-              echo "$model: PRIVATE_CATALOG_READ_OK" >> "$GITHUB_STEP_SUMMARY"
+            # A 0 exit status from rclone cat may still contain provider JSON
+            # (e.g. errno=400141) instead of the expected private catalog.
+            # Reuse the existing validated metadata reader, which verifies
+            # schema, model and the minimum published owner photo count and
+            # may use one normal same-account copyto readback when permitted.
+            if python apps/gallery-archive/read_owner_metadata.py \\
+                --remote "$remote" --model "$model" \\
+                --published-index "apps/$model-gallery/owner-index.json" \\
+                --out "$RUNNER_TEMP/owner/$model.json" 2>"$RUNNER_TEMP/reader-error"; then
+              echo "$model: PRIVATE_CATALOG_SCHEMA_AND_READBACK_VERIFIED" >> "$GITHUB_STEP_SUMMARY"
             else
               rm -f "$RUNNER_TEMP/owner/$model.json"
-              echo "$model: PRIVATE_CATALOG_READ_FAILED (public archive still audited)" >> "$GITHUB_STEP_SUMMARY"
+              echo "$model: PRIVATE_CATALOG_UNVERIFIED (public archive only)" >> "$GITHUB_STEP_SUMMARY"
             fi
           done
       - name: Compare physical SHA bytes, private slots, all research source manifests
@@ -98,7 +124,7 @@ jobs:
 
   launch-safely-deduplicated-captures:
     needs: audit-both-models
-    if: github.ref == 'refs/heads/main' && github.event_name != 'schedule'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
     timeout-minutes: 12
     env:
@@ -136,7 +162,7 @@ jobs:
 
   serialize-committing-source-discoveries:
     needs: audit-both-models
-    if: github.ref == 'refs/heads/main' && github.event_name != 'schedule'
+    if: github.ref == 'refs/heads/main' && github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-24.04
     timeout-minutes: 260
     env:
