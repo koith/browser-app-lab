@@ -169,3 +169,8 @@ Provider terms, indexing, deletion and CORS rules can change. Keyless index sear
 - Static browser QA exercises unchanged Bluesky feed, tab absence, title/date vertical alignment at 390px, date dialog, source badges, one-click all-network search, date-checked X admission and provider errors. In data-sensitive contexts no indexed post text/URLs are logged to public Actions outputs; only aggregate diagnostics.
 
 **Acceptance boundary:** The user's largest limitation is still the high-fidelity *recent full-text original collection* across Threads and Instagram, which cannot be asserted from indexed links alone. Official Threads keyword search is a separate no-fee option that requires Meta app review for `threads_keyword_search` permission, and may suppress sensitive topics; this is not enabled without the approved token. All read requests follow provider visibility, rate limits and deletion policies.
+
+
+## Additional free source & community research (2026-11-02)
+
+Read [SOURCE_COMMUNITY_FIELDGUIDE_20261102.md](./SOURCE_COMMUNITY_FIELDGUIDE_20261102.md) for a verified, citation-linked comparison of open-source scrapers, actual maintainer issue comments and pull requests, 2026 Reddit/DEV development discussions, official quota restrictions, and independent anonymous live probes. It differentiates VERIFIED results from proposed source integrations and gives priorities for genuine dated post acquisition, not just index links.
