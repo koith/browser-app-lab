@@ -1,0 +1,72 @@
+name: Historical UCI Shopping Conversion Evidence QA
+on:
+  pull_request:
+    paths:
+      - "apps/demand-research/consumer_sessions.py"
+      - "apps/demand-research/test_consumer_sessions.py"
+      - "apps/demand-research/consumer/session-report.json"
+      - "apps/demand-research/consumer/session_view.js"
+      - "apps/demand-research/consumer/index.html"
+      - "apps/demand-research/consumer/test_dashboard.mjs"
+      - ".github/workflows/consumer-sessions-qa.yml"
+  push:
+    branches: [main]
+    paths:
+      - "apps/demand-research/consumer_sessions.py"
+      - "apps/demand-research/test_consumer_sessions.py"
+      - "apps/demand-research/consumer/session-report.json"
+      - "apps/demand-research/consumer/session_view.js"
+      - "apps/demand-research/consumer/index.html"
+      - "apps/demand-research/consumer/test_dashboard.mjs"
+      - ".github/workflows/consumer-sessions-qa.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: intersection-uci-sessions-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+jobs:
+  real-session-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            apps/demand-research/consumer_sessions.py
+            apps/demand-research/test_consumer_sessions.py
+            apps/demand-research/consumer/
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install pytest
+        run: python -m pip install pytest==8.3.5
+      - name: Strict synthetic tests
+        working-directory: apps/demand-research
+        run: |
+          python -m py_compile consumer_sessions.py test_consumer_sessions.py
+          python -m pytest -q test_consumer_sessions.py
+      - name: Official UCI source and historical conversion aggregation
+        working-directory: apps/demand-research
+        run: |
+          python consumer_sessions.py --snapshot-date 2026-11-03 --output /tmp/real-uci-sessions.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          out=json.loads(Path('/tmp/real-uci-sessions.json').read_text())
+          assert out['summary']['sessions']==12330
+          assert out['summary']['purchases']==1908
+          assert out['dataset']['is_current_data'] is False
+          assert out['dataset']['license']=='CC BY 4.0'
+          print('UCI_SESSION_REPORT_JSON='+json.dumps(out,ensure_ascii=True,separators=(',',':')))
+          target=Path('consumer/session-report.json')
+          if target.is_file():
+              assert json.loads(target.read_text())==out, 'Checked-in UCI source snapshot differs'
+              print('UCI_SESSION_CHECKED_IN_REPORT_MATCHED')
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: historical-uci-shopper-conversion-aggregate
+          path: /tmp/real-uci-sessions.json
+          retention-days: 7

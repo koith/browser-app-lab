@@ -9,9 +9,12 @@ const html = fs.readFileSync(path.join(dir, "index.html"), "utf8");
 const source = JSON.parse(fs.readFileSync(path.join(dir, "demo-report.json"), "utf8"));
 const editorial = JSON.parse(fs.readFileSync(path.join(dir, "editorial-report.json"), "utf8"));
 const editorialJS = fs.readFileSync(path.join(dir, "editorial_view.js"), "utf8");
+const sessionReport = JSON.parse(fs.readFileSync(path.join(dir, "session-report.json"), "utf8"));
+const sessionJS = fs.readFileSync(path.join(dir, "session_view.js"), "utf8");
 class LocalOnlyLoader extends ResourceLoader {
   fetch(url) {
     if (url.endsWith("/editorial_view.js")) return Promise.resolve(Buffer.from(editorialJS));
+    if (url.endsWith("/session_view.js")) return Promise.resolve(Buffer.from(sessionJS));
     throw new Error("Unexpected external page resource: " + url);
   }
 }
@@ -30,6 +33,7 @@ const dom = new JSDOM(html, {
       fetched.push({url: String(url), options});
       if (String(url) === "./demo-report.json") return {ok: true, json: async () => source};
       if (String(url) === "./editorial-report.json") return {ok: true, json: async () => editorial};
+      if (String(url) === "./session-report.json") return {ok: true, json: async () => sessionReport};
       throw new Error("Unapproved fetch: " + String(url));
     };
   },
@@ -38,7 +42,13 @@ const dom = new JSDOM(html, {
 await new Promise(resolve => setTimeout(resolve, 350));
 const doc = dom.window.document;
 assert.deepEqual(failures, [], "browser JavaScript errors");
-assert.deepEqual(fetched.map(x => x.url).sort(), ["./demo-report.json", "./editorial-report.json"]);
+assert.deepEqual(fetched.map(x => x.url).sort(), ["./demo-report.json", "./editorial-report.json", "./session-report.json"]);
+assert.equal(doc.querySelectorAll(".session-stat").length, 4);
+assert.match(doc.querySelector("#sessionMetrics").textContent, /12,330/);
+assert.match(doc.querySelector("#sessionMetrics").textContent, /1,908/);
+assert.match(doc.querySelector("#sessionMetrics").textContent, /15.47%/);
+assert.match(doc.querySelector("#sessionStatus").textContent, /현재 구매 전환율/);
+assert.ok(doc.querySelectorAll(".session-row").length >= 8, "historic month cohort rows");
 assert.equal(doc.querySelectorAll(".editorial-stat").length, 4);
 assert.equal(doc.querySelectorAll(".editorial-card").length, 36);
 assert.match(doc.querySelector("#editorialMetrics").textContent, /8,107/);
@@ -60,11 +70,19 @@ const select = doc.querySelector("#order");
 select.value = "repeat";
 select.dispatchEvent(new dom.window.Event("change", {bubbles: true}));
 assert.equal(doc.querySelectorAll("article.product").length, 4);
-assert.equal(fetched.length, 2);
+assert.equal(fetched.length, 3);
 const category = doc.querySelector("#editorialCategory");
 category.value = "robot-vacuums";
 category.dispatchEvent(new dom.window.Event("change", {bubbles: true}));
 assert.equal(doc.querySelectorAll(".editorial-card").length, 7);
+const dimension=doc.querySelector("#sessionDimension");
+dimension.value="visitor";
+dimension.dispatchEvent(new dom.window.Event("change", {bubbles: true}));
+assert.equal(doc.querySelectorAll(".session-row").length, 3);
+dimension.value="product_pages";
+dimension.dispatchEvent(new dom.window.Event("change", {bubbles: true}));
+assert.equal(doc.querySelectorAll(".session-row").length, 5);
+assert.equal(fetched.length, 3);
 assert.deepEqual(failures, []);
-console.log("BROWSER_DOM_QA_PASS: 4 synthetic metrics, 4 product cards, 40 groups; 4 live editorial metrics, 36 products, category filter, no JS errors");
+console.log("BROWSER_DOM_QA_PASS: 4 synthetic metrics and 40 groups; real 36 editorial products; real UCI 12330 sessions and 1908 purchases, cohort filters, no JS errors");
 dom.window.close();

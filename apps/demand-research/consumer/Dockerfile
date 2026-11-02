@@ -6,6 +6,7 @@ COPY apps/demand-research/consumer_dedup.py /app/consumer_dedup.py
 COPY apps/demand-research/consumer_report.py /app/consumer_report.py
 COPY apps/demand-research/consumer_report_api.py /app/consumer_report_api.py
 COPY apps/demand-research/consumer/editorial-report.json /app/consumer/editorial-report.json
+COPY apps/demand-research/consumer/session-report.json /app/consumer/session-report.json
 RUN useradd --create-home --uid 10001 api && chown -R api:api /app
 USER api
 EXPOSE 10000
