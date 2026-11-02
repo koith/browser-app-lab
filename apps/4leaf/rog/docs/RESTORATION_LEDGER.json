@@ -1437,6 +1437,20 @@
         "P0-CHAT",
         "P0-RELEASE"
       ]
+    },
+    {
+      "id": "REQ-20261102-GPT-012",
+      "date": "2026-11-02",
+      "origin": "4LEAF 원작 복원 병렬 개발 지시 (GPT runtime lane)",
+      "text": "기존 2D OBS 걷기 방향을 웹 투영 좌표의 X/Y 비율로 판단하던 오류 수정. 26 DMP 지도 1,894 스텝에서 원본 XY로 순수 수평/대각/수직 이동을 분류하고 실제 체스맨 프레임 방향 및 본인 발판 painter depth를 Chromium/WebKit에서 검증. 2002 EXE 8방향 행동표는 아직 미해독으로 원작 동일성 판정 불가.",
+      "taskIds": [
+        "ACT-03",
+        "BRD-03",
+        "ACT-04",
+        "P0-ACTOR",
+        "QA-03",
+        "P0-RELEASE"
+      ]
     }
   ],
   "tasks": [
@@ -1673,7 +1687,8 @@
         "apps/4leaf/rog/original/OBS/action-full/manifest.js",
         "apps/4leaf/rog/original/OBS/action-full/provenance.json",
         "apps/4leaf/rog/tests/original-actor-census.cjs",
-        "https://github.com/koith/browser-app-lab/actions/runs/41320435231"
+        "https://github.com/koith/browser-app-lab/actions/runs/41320435231",
+        "apps/4leaf/rog/tests/dice-dmp-native-travel-facing.cjs"
       ],
       "evidenceLevel": "UNVERIFIED-ORIGINAL-EQUIVALENCE",
       "lastReviewed": "2026-11-02",
@@ -1928,7 +1943,8 @@
         "https://github.com/koith/browser-app-lab/actions/runs/39562503977",
         "https://github.com/koith/browser-app-lab/actions/runs/39562851108",
         "https://github.com/koith/browser-app-lab/actions/runs/39562503977/artifacts/12328791405",
-        "apps/4leaf/rog/tests/board-actor-occlusion-all-maps.cjs"
+        "apps/4leaf/rog/tests/board-actor-occlusion-all-maps.cjs",
+        "apps/4leaf/rog/tests/dice-dmp-native-travel-facing.cjs"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
       "lastReviewed": "2026-11-02",
@@ -2127,7 +2143,8 @@
         "apps/4leaf/rog/tests/obs-full-actor-side-walk.cjs",
         "https://github.com/koith/browser-app-lab/actions/runs/41299536821",
         "apps/4leaf/rog/tests/original-actor-census.cjs",
-        "https://github.com/koith/browser-app-lab/actions/runs/41320435231"
+        "https://github.com/koith/browser-app-lab/actions/runs/41320435231",
+        "apps/4leaf/rog/tests/dice-dmp-native-travel-facing.cjs"
       ],
       "evidenceLevel": "VERIFIED-92-SOURCE-OBS-BODIES/958-PNG/80-EIGHT-CONTIGUOUS-SOURCE-SETS/REAL-CHROMIUM-ANIMATION; HISTORICAL-DIRECTION-POSE-FPS-UNVERIFIED",
       "lastReviewed": "2026-11-02",
@@ -2196,7 +2213,8 @@
         "https://github.com/koith/browser-app-lab/actions/runs/39562851108",
         "https://github.com/koith/browser-app-lab/actions/runs/39562503977/artifacts/12328791405",
         "https://github.com/koith/browser-app-lab/pull/177",
-        "https://github.com/koith/browser-app-lab/actions/runs/39813521946"
+        "https://github.com/koith/browser-app-lab/actions/runs/39813521946",
+        "apps/4leaf/rog/tests/dice-dmp-native-travel-facing.cjs"
       ],
       "evidenceLevel": "VERIFIED-92-ORIGINAL-OBS-BODIES-IN-PLAYABLE-GAME; 6 ORIGINAL-OBS-FILES-MISSING; EXACT-POSE-3D-CONTACT-OPEN",
       "lastReviewed": "2026-11-02",
@@ -2962,7 +2980,8 @@
         "tests/dice-horizontal-native-actors.cjs",
         "apps/4leaf/rog/tests/dice-horizontal-native-actors.cjs",
         "apps/4leaf/rog/tests/dice-landscape-webkit-release.cjs",
-        "apps/4leaf/rog/tests/chatroom-instant-seat-teleport.cjs"
+        "apps/4leaf/rog/tests/chatroom-instant-seat-teleport.cjs",
+        "apps/4leaf/rog/tests/dice-dmp-native-travel-facing.cjs"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
       "lastReviewed": "2026-11-02",
@@ -7688,6 +7707,36 @@
         "P0-RELEASE"
       ],
       "details": "GPT added a new real pointer click Chromium/WebKit ChatRoom test for original instantaneous seat reassignment: click through actual scene hitbox, ensure actor changes slot without CSS transition or later interpolation, 390px mobile form remains operable. Integrated into same-revision release acceptance workflow. Syntax checked separately; browser CI, iPhone physical device and original historical equivalence NOT YET verified; PR pending."
+    },
+    {
+      "seq": 351,
+      "date": "2026-11-02",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261102-GPT-012",
+      "taskIds": [
+        "ACT-03",
+        "BRD-03",
+        "ACT-04",
+        "P0-ACTOR",
+        "QA-03",
+        "P0-RELEASE"
+      ],
+      "details": "GPT independent runtime branch fix/4leaf-dmp-native-travel-facing-20261102; Claude owns 2002 archive/EXE/OBS research. No shared source or Claude files changed."
+    },
+    {
+      "seq": 352,
+      "date": "2026-11-02",
+      "type": "DMP_DIAGONAL_FACING_RUNTIME_PATCH_AWAITING_RELEASE_QA",
+      "requestId": "REQ-20261102-GPT-012",
+      "taskIds": [
+        "ACT-03",
+        "BRD-03",
+        "ACT-04",
+        "P0-ACTOR",
+        "QA-03",
+        "P0-RELEASE"
+      ],
+      "details": "Source audit original/maps.js: 26 DMP routes and 1894 steps. 10 original nonunit diagonal transitions project into mistaken side walk under old percent-space comparison. game.js now uses native DMP signed dx/dy: change Y selects reviewed front/rear; same row X selects left/right; source metric tagged original-DMP-XY/web-direction-inference. Regression enumerates every step, tests all affected live actor moves and native pawn platform depth on Chromium and WebKit. beta46/PWA v133 bump; CI, Pages, iPhone hardware and historical original direction table still pending."
     }
   ]
 }
