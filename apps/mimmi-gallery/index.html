@@ -180,6 +180,7 @@ footer{padding:15px 0 25px;justify-content:flex-end}
 </div>
 <script src="photo-vault.js"></script>
 <script src="owner-media.js"></script>
+<script src="saved-photo-union.js"></script>
 <script src="image-quality.js?v=2"></script>
 <script src="album-grouping.js"></script>
 <script src="gallery-labels.js?v=0.1.0-beta.10"></script>
@@ -467,37 +468,14 @@ Promise.all([
  remoteStored=[];publisherWorkReferences=[];
  // Union of real saved files; no count for source-only links or duplicate hashes.
  function rebuildStored(){
- const combined=new Map();
- for(const a of [...localStored,...ownerStored,...vaultStored]){
-  if(!combined.has(a.id))combined.set(a.id,{...a,images:[]});
-  const row=combined.get(a.id);
-  row.expected=Math.max(row.expected||0,a.expected||0)||null;
-  for(const p of a.images){
-   if(collisionDistinct.has(a.id+'|'+p.sha256)){row.images.push({...p,collisionRecovered:true});continue}
-   const index=row.images.findIndex(x=>!x.collisionRecovered&&(Number.isSafeInteger(p.number)&&Number.isSafeInteger(x.number)?x.number===p.number:x.sha256===p.sha256));
-   if(index<0){row.images.push(p);continue}
-   const previous=row.images[index];
-   
-   // Keep the highest available resolution. Private verified bytes win ties.
-   if(GalleryPhotoQuality.preferred(previous,p)===p)
-    row.images[index]={...previous,...p};
-  }
- }
- for(const row of combined.values()){
-  const seenSHA=new Set();
-  row.images=row.images.filter(p=>{
-   if(!p.sha256||seenSHA.has(p.sha256))return false;
-   seenSHA.add(p.sha256);return true;
-  });
-  // Display-only renumbering: no original file path or owner image position is changed.
-  let last=Math.max(0,...row.images.filter(p=>!p.collisionRecovered).map(p=>Number.isSafeInteger(p.number)?p.number:0));
-  for(const p of row.images)if(p.collisionRecovered)p.number=++last;
-  row.images.sort((a,b)=>(a.number??Number.MAX_SAFE_INTEGER)-(b.number??Number.MAX_SAFE_INTEGER));
- }
- const joined=MimmiAlbumGrouping.combine([...combined.values()],albumAliases,albumAliasEvidence);
- stored=joined.albums;
- ownerPhotoIndex=new Map(stored.flatMap(a=>a.images).filter(p=>p.ownerAlbum||p.vaultAlbum).map(p=>[p.url,p]));
- catalog=stored.slice();
+  // Never collapse two SHA-distinct saved originals solely because two
+  // independent storage indexes reused the same publisher-facing number.
+  // Save the physical storage number separately from the gallery number.
+  const merged=SavedGalleryPhotoUnion.join([localStored,ownerStored,vaultStored]);
+  const joined=MimmiAlbumGrouping.combine(merged,albumAliases,albumAliasEvidence);
+  stored=joined.albums;
+  ownerPhotoIndex=new Map(stored.flatMap(a=>a.images).filter(p=>p.ownerAlbum||p.vaultAlbum).map(p=>[p.url,p]));
+  catalog=stored.slice();
  }
  rebuildStored();
 
