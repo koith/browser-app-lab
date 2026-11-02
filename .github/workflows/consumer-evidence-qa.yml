@@ -69,6 +69,11 @@ jobs:
           assert 'social_sources' not in html and 'account_groups' not in html
           PY
           node --check /tmp/consumer-dashboard-inline.js
+      - name: Run hydrated dashboard DOM smoke test
+        working-directory: apps/demand-research/consumer
+        run: |
+          npm install --no-save --no-package-lock jsdom@25.0.1
+          node test_dashboard.mjs
       - name: Generate reproducible synthetic aggregate report
         working-directory: apps/demand-research
         run: |
