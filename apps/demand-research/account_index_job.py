@@ -20,6 +20,7 @@ import account_groups
 REMOTE="archive:DemandAccountIndex"
 ARCHIVE="archive:DemandResearch/metadata/catalog.json"
 SNAP_RE=re.compile(r"^snapshot-[0-9]{6,30}\.sqlite3$")
+MANIFEST_RE=re.compile(r"^manifest-[0-9]{6,30}\.json$")
 MAX_DB=120_000_000
 MAX_CATALOG=70_000_000
 
@@ -51,13 +52,52 @@ def read_remote(path,max_bytes,optional=False):
             proc.kill();proc.wait()
 
 
-def latest_manifest():
-    raw=read_remote(REMOTE+"/latest.json",2048,optional=True)
-    if raw is None:return None
+def _parse_manifest(raw):
     info=json.loads(raw)
     if not isinstance(info,dict) or not SNAP_RE.fullmatch(str(info.get("file",""))) or not re.fullmatch(r"[0-9a-f]{64}",str(info.get("sha256",""))):
         raise ValueError("unsafe latest manifest")
     return info
+
+
+def latest_manifest():
+    # Immutable, unique per-run manifests avoid the TeraBox rcat overwrite
+    # failure observed on latest.json. Never delete previous verified snapshots.
+    try:
+        listing=command(["lsf",REMOTE+"/manifests","--files-only","--retries","2"],timeout=90)
+    except (RuntimeError, OSError):
+        # A first-run missing folder, a blocked listing, or a CI test without
+        # rclone must not prevent the read-only legacy pointer fallback.
+        listing=b""
+    names=[name.strip() for name in listing.decode("utf-8","replace").splitlines()
+           if MANIFEST_RE.fullmatch(name.strip())]
+    # GitHub run IDs increase with each run. The newest fully verified pointer wins.
+    for name in sorted(names,key=lambda v:int(v[9:-5]),reverse=True)[:30]:
+        raw=read_remote(REMOTE+"/manifests/"+name,4096,optional=True)
+        if raw is None:
+            continue
+        try:
+            info=_parse_manifest(raw)
+        except (ValueError,TypeError,json.JSONDecodeError):
+            continue
+        if info["file"]=="snapshot-"+name[9:-5]+".sqlite3":
+            return info
+    # Backward compatible with the historical latest.json pointer; no writes.
+    legacy=read_remote(REMOTE+"/latest.json",4096,optional=True)
+    return _parse_manifest(legacy) if legacy is not None else None
+
+
+def publish_manifest(local_dir, data, run_id):
+    if not re.fullmatch(r"[0-9]{6,30}",run_id):
+        raise ValueError("invalid GitHub run ID")
+    name="manifest-"+run_id+".json"
+    payload=(json.dumps(data,sort_keys=True)+"\n").encode()
+    path=Path(local_dir)/name
+    path.write_bytes(payload)
+    command(["copyto",str(path),REMOTE+"/manifests/"+name,"--retries","3"],timeout=240)
+    readback=read_remote(REMOTE+"/manifests/"+name,4096)
+    if readback != payload:
+        raise RuntimeError("versioned manifest readback mismatch")
+    return _parse_manifest(readback)
 
 
 def load_snapshot(path,manifest):
@@ -123,11 +163,11 @@ def run():
             "public_scan_windows":windows,"catalog":catalog_info,
             "last_public_scan_requests":scan.get("requests",0),
             "last_public_scan_accepted":scan.get("accepted",0)})
-        # The pointer is written LAST. A crash before this write preserves prior state.
-        command(["rcat",REMOTE+"/latest.json"],data=(json.dumps(output,sort_keys=True)+"\n").encode(),timeout=120)
-        pointer=latest_manifest()
-        if not pointer or pointer["sha256"]!=output["sha256"] or pointer["file"]!=output["file"]:
-            raise RuntimeError("latest pointer readback mismatch")
+        # An immutable manifest is written LAST. Failed writes cannot clobber
+        # the previously verified snapshot, and a readback confirms every byte.
+        pointer=publish_manifest(folder,output,run_id)
+        if pointer["sha256"]!=output["sha256"] or pointer["file"]!=output["file"]:
+            raise RuntimeError("versioned pointer readback mismatch")
         print("PRIVATE_ACCOUNT_INDEX_VERIFIED",json.dumps({
             "accounts":output["accounts"],"source_rows":output["source_rows"],
             "account_groups":output["account_groups"],
