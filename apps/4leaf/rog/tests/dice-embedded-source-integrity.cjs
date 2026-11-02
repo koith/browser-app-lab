@@ -38,7 +38,11 @@ const sw=read('sw.js'),meta=JSON.parse(read('app-version.json'));
 assert.ok(sw.includes("const EMBEDDED_DIE_OFFLINE=") &&
  sw.includes("concat(EMBEDDED_DIE_OFFLINE)"),'all die frames included in offline cache');
 assert.ok(sw.includes("const REVISION='"+meta.pwaCache+"'"));
-assert.equal(meta.version,'0.86.0-beta.49');
+assert.match(meta.version,/^0\\.86\\.0-beta\\.\\d+$/,'current verified revival beta version');
+const release=read('index.html');
+assert.ok(release.includes('name="leaf-revival-version" content="'+meta.version+'"'),
+ 'deployed app index must advertise same source restoration beta');
+assert.equal(meta.pwaCache,'4leaf-revival-pwa-v137','native card source must get new offline cache');
 const diceFall=read('dice-fall.js');
 assert.ok(diceFall.includes('EMBEDDED_PALETTE_REVIEWED_SHA256=Object.freeze({})'),
  'incorrect per-block palettes must not be approved by default');
