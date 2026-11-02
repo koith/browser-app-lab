@@ -182,7 +182,8 @@ def _analyze_rows(rows: list[Mapping[str, object]], *, dataset_kind: str,
                 methods = []
                 if any(p["repost_of"] in keys_in_group for p in group if p["repost_of"]):
                     methods.append("explicit_repost")
-                if len([p for p in group if p["text"]]) > 1:
+                text_frequency = Counter(p["text"] for p in group if p["text"])
+                if any(n > 1 for n in text_frequency.values()):
                     methods.append("exact_substantial_text")
                 digest = hashlib.sha256((product + "\\0" + "\\0".join(sorted(keys_in_group))).encode()).hexdigest()[:12]
                 repeated_groups.append({
