@@ -56,7 +56,7 @@ const {chromium}=require('playwright');
    assert.ok(proof.source.includes(member+'.obs'));
    assert.equal(proof.sequence,'3,5,6,7,8');
    assert.equal(proof.ticks,'0,3,6,9,12');
-   assert.match(proof.provenance,/source-native-18-byte-keyframe-indices-VERIFIED/);
+   assert.match(proof.provenance,/original-OBS-18-byte-keyframe-indices-VERIFIED/);
    assert.deepEqual(proof.before,proof.after,'visual animation cannot modify actual DMP turn');
    const seen=proof.seen.map(([i])=>i).sort((a,b)=>a-b);
    assert.deepEqual(seen,[3,5,6,7,8],
