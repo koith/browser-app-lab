@@ -200,10 +200,46 @@ function card(w,data){
  if(data.error)root.append(node("div","account-hint","공개 피드 조회 실패 · "+data.error));
  return root;
 }
+function renderDiscovered(snap){
+ const groups=new Map();
+ const tracked=new Set(watches.map(w=>w.key));
+ for(const [kind,items] of [["verified",snap.verified||[]],["candidate",snap.candidates||[]]]){
+   for(const item of items){
+     const p=profile(item?.profileUrl);
+     if(!p||tracked.has(p.key))continue;
+     let group=groups.get(p.key);
+     if(!group){
+       group={profile:p,verified:0,candidate:0};
+       groups.set(p.key,group);
+     }
+     group[kind==="verified"?"verified":"candidate"]++;
+   }
+ }
+ const ranked=[...groups.values()].sort((a,b)=>b.verified-a.verified||b.candidate-a.candidate||
+   a.profile.key.localeCompare(b.profile.key));
+ $("accountDiscoveredCount").textContent=metricText(groups.size)+"개";
+ const holder=$("accountDiscoveredList"),frag=document.createDocumentFragment();
+ for(const g of ranked.slice(0,36)){
+   const row=node("div","account-discovered-card");
+   row.append(makeSource(g.profile));
+   const info=node("div","account-discovered-name",
+     "@"+g.profile.username+" · 확인 "+g.verified+" / 링크 "+g.candidate);
+   info.title=info.textContent;
+   row.append(info);
+   const add=node("button","","추적");add.type="button";
+   add.setAttribute("aria-label",g.profile.username+" 공개 계정 추적");
+   add.addEventListener("click",()=>chooseWatch(g.profile.url,false));
+   row.append(add);frag.append(row);
+ }
+ if(!ranked.length)frag.append(node("div","account-empty","현재 표시된 공개 게시글에서 추가할 계정이 없습니다."));
+ holder.replaceChildren(frag);
+}
+
 function render(){
  $("watchCount").textContent=String(watches.length);
  $("accountMetricTracked").textContent=metricText(watches.length);
  const snap=snapshot(),record=watches.map(w=>({w,...storedActivity(w,snap)}));
+ if(currentView==="accounts")renderDiscovered(snap);
  const seenPosts=new Set(),allPosts=[];
  for(const account of record){
    for(const item of account.posts){
