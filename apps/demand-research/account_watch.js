@@ -185,7 +185,7 @@ function card(w,data){
  const actions=node("div","account-watch-actions");
  const inspect=node("button","primary","활동 상세");inspect.type="button";inspect.addEventListener("click",()=>openDetail(w));actions.append(inspect);
  const refresh=node("button","","새 글 확인");refresh.type="button";
- const canRefresh=w.platform==="bluesky"||w.platform==="mastodon";
+ const canRefresh=["bluesky","mastodon","x"].includes(w.platform);
  refresh.disabled=!canRefresh||busyKeys.has(w.key);
  refresh.title=canRefresh?"공개 계정 원문에서 최신 글을 확인":"현재 검색 피드에서 확인된 공개 게시글만 집계";
  refresh.addEventListener("click",()=>refreshWatch(w,true));actions.append(refresh);
@@ -278,6 +278,48 @@ async function getJSON(url){
   return await r.json();
  }finally{clearTimeout(timer)}
 }
+/* User-selected public X account: discover a tiny number of public status
+ * permalinks using a keyless search index, then independently check original
+ * status ID, exact public author handle and timestamp via FxEmbed. An index
+ * snippet is never counted as a real dated account post. */
+async function fetchX(w,manual){
+ const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),14000);
+ let rows=[];
+ try{
+   const q="site:x.com/"+w.username+"/status";
+   const res=await fetch("https://api.keenable.ai/v1/search/public",{
+      method:"POST",mode:"cors",credentials:"omit",cache:"no-store",
+      headers:{"Accept":"application/json","Content-Type":"application/json",
+        "X-Keenable-Title":"intersection-research"},
+      body:JSON.stringify({query:q,max_results:20}),signal:ctrl.signal
+   });
+   if(!res.ok)throw Error("무료 공개 검색 HTTP "+res.status);
+   const json=await res.json();
+   rows=Array.isArray(json.results)?json.results:[];
+ }finally{clearTimeout(timer)}
+ const found=new Set(),ids=[];
+ for(const row of rows){
+   let u;try{u=new URL(String(row?.url||""))}catch{continue}
+   if(u.protocol!=="https:"||!["x.com","twitter.com"].includes(u.hostname.toLowerCase().replace(/^www\./,"")))continue;
+   const m=/^\/([A-Za-z0-9_]{1,15})\/status\/([0-9]{10,25})\/?$/.exec(u.pathname);
+   if(!m||m[1].toLowerCase()!==w.username||found.has(m[2]))continue;
+   found.add(m[2]);ids.push(m[2]);
+ }
+ const result=[];
+ for(const id of ids.slice(0,manual?8:4)){
+   try{
+     const tweet=await getJSON("https://api.fxtwitter.com/status/"+encodeURIComponent(id));
+     const t=tweet?.tweet,author=String(t?.author?.screen_name||"").toLowerCase();
+     if(!t||String(t.id)!==id||t.author?.protected===true||author!==w.username)continue;
+     const posted=cleanDate(t.created_at),text=String(t.text||"").slice(0,2000);
+     if(!posted||!text)continue;
+     result.push({id:"x:"+id,platform:"x",text,posted,
+       url:"https://x.com/"+w.username+"/status/"+id});
+   }catch{/* A single public post may be deleted or blocked; continue safely. */}
+ }
+ return result;
+}
+
 async function fetchBluesky(w){
  const args=new URLSearchParams({actor:w.username,limit:"50",filter:"posts_no_replies",includePins:"false"});
  const data=await getJSON("https://public.api.bsky.app/xrpc/app.bsky.feed.getAuthorFeed?"+args);
@@ -324,7 +366,7 @@ async function fetchMastodon(w){
 }
 async function refreshWatch(w,manual){
  if(!w||!watches.some(x=>x.key===w.key)||busyKeys.has(w.key))return;
- if(!["bluesky","mastodon"].includes(w.platform)){
+ if(!["bluesky","mastodon","x"].includes(w.platform)){
    if(manual)$("accountWatchStatus").textContent="이 플랫폼은 현재 수집된 공개 게시글만 집계합니다. 인증이 없는 공개 계정 피드 API는 아직 검증되지 않았습니다.";
    return;
  }
@@ -333,7 +375,7 @@ async function refreshWatch(w,manual){
  busyKeys.add(w.key);render();
  if(manual)$("accountWatchStatus").textContent=SERVICE_LABELS[w.platform]+" 공개 글 확인 중…";
  try{
-    const posts=w.platform==="bluesky"?await fetchBluesky(w):await fetchMastodon(w);
+    const posts=w.platform==="bluesky"?await fetchBluesky(w):w.platform==="mastodon"?await fetchMastodon(w):await fetchX(w,manual);
     if(watches.some(x=>x.key===w.key)){
       remote.set(w.key,{items:posts,provider:"public-api",checkedAt:Date.now(),error:""});
       if(manual)$("accountWatchStatus").textContent="공개 계정 피드 "+posts.length+"건 확인 · 글 내용은 브라우저 저장소에 보관하지 않습니다.";
@@ -365,7 +407,7 @@ window.addEventListener("storage",e=>{if(e.key===STORE){watches=read();render()}
 render();
 // On page load, bounded refresh: no background monitoring or polling.
 Promise.resolve().then(async()=>{
-  const initial=watches.filter(w=>w.platform==="bluesky"||w.platform==="mastodon").slice(0,4);
+  const initial=watches.filter(w=>["bluesky","mastodon","x"].includes(w.platform)).slice(0,4);
   for(const w of initial)await refreshWatch(w,false);
 });
 })();
