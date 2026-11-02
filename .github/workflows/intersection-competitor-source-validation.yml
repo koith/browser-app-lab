@@ -1,0 +1,17 @@
+name: INTERSECTION Competitor Source Method Validation
+on:
+  pull_request:
+    paths:
+      - "apps/demand-research/probe_competitor_sources.py"
+      - ".github/workflows/intersection-competitor-source-validation.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  public-methods:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - name: Probe RSSHub Threads embedded JSON, hosted RSS, Pixelfed (aggregate-only)
+        run: python apps/demand-research/probe_competitor_sources.py
