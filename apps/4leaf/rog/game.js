@@ -137,7 +137,8 @@ function playerCanAct(){
  if(activePlayer().bot&&!(match.mode==='ai'&&match.botAutoplay===false))return false;
  if(match.mode==='network'&&!remoteAct){
    const net=window.__LEAF_NET__;
-   return !!(net?.connected&&match.active===(net.role==='host'?0:1));
+   const ownedSeat=net?.role==='host'?0:net?.role==='guest'?1:null;
+   return !!(net?.connected&&ownedSeat!==null&&match.active===ownedSeat);
  }
  return true;
 }
