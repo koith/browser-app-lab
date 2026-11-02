@@ -198,6 +198,12 @@ async def get_catalog():
 def media_signature(post_id,index,expires):
     return hmac.new(TOKEN.encode(),(post_id+":"+str(index)+":"+str(expires)).encode(),hashlib.sha256).hexdigest()
 
+async def _background_account_index_refresh():
+    try:
+        await refresh_account_index()
+    except Exception as error:
+        print("ACCOUNT_INDEX_LAZY_REFRESH_FAILED",type(error).__name__,flush=True)
+
 @app.get("/api/accounts/status")
 async def accounts_status(request:Request):
     check_auth(request)
@@ -205,7 +211,7 @@ async def accounts_status(request:Request):
         raise HTTPException(503,"Private account-index storage not configured")
     # Indexing must not block the UI; the background refresh is also periodic.
     if not _index_lock.locked() and (not _index_synced_at or time.monotonic()-_index_synced_at>INDEX_SECONDS):
-        asyncio.create_task(refresh_account_index())
+        asyncio.create_task(_background_account_index_refresh())
     data=await asyncio.to_thread(account_index.status,INDEX_DB)
     if os.getenv("DEMAND_AUTO_PUBLIC_INDEX","1")=="1":
         data["public_scan_windows"]=await asyncio.to_thread(account_index_sources.coverage,INDEX_DB)
@@ -229,6 +235,8 @@ async def accounts_list(request:Request,offset:int=Query(0,ge=0,le=10000000),
 @app.post("/api/accounts/sync")
 async def accounts_sync(request:Request):
     check_auth(request)
+    if _index_synced_at and time.monotonic()-_index_synced_at<300:
+        raise HTTPException(429,"Account-index sync recently completed")
     await refresh_account_index(force=True)
     return JSONResponse(await asyncio.to_thread(account_index.status,INDEX_DB),
                         headers={"Cache-Control":"private, no-store"})
