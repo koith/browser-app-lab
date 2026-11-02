@@ -74,6 +74,8 @@ jobs:
         run: node apps/4leaf/rog/tests/dice-obs-contiguous-source-motion.cjs
       - name: Validate visually reviewed 2002 OBS front-facing default actors
         run: node apps/4leaf/rog/tests/obs-front-source-review.cjs
+      - name: Verify actual CHR +260 selected card body on the original right-hand HUD
+        run: node apps/4leaf/rog/tests/chr-hud-native-source-binding.cjs
       - name: Validate published-failure original IMG scrollbar with real chat-form messages
         run: node apps/4leaf/rog/tests/dice-source-native-ui.cjs
       - name: Reject source OBS HUD FX and dice numerals as playable chessmen
