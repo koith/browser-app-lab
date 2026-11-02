@@ -25,6 +25,10 @@ class RemoteCommandFailure(ValueError):
 
 
 
+class OwnerCopytoTransferSizeMismatch(ValueError):
+    """Transient same-account copyto read failure, not successful file integrity."""
+
+
 class ProviderReadChallenge(ValueError):
     """The ordinary authenticated read returned a provider JSON challenge, not media."""
     def __init__(self, code, received):
@@ -56,8 +60,15 @@ def read_remote_via_copyto(row, remote, deadline_seconds=75, command=None):
                 raise TimeoutError('Alternate owner read deadline exceeded') from None
             if proc.returncode:
                 errors.seek(0)
+                raw_error=errors.read(32000).decode('utf-8','replace')
+                # Classify the private raw diagnostic without ever emitting it.
+                # Provider denials and auth challenges always fail closed.
+                transient_size=bool(re.search(r'corrupted on transfer:\s*sizes differ',raw_error,re.I))
+                denied=bool(re.search(r'\b(?:401|403|429|451)\b|access denied|failed to login',raw_error,re.I))
+                if transient_size and not denied:
+                    raise OwnerCopytoTransferSizeMismatch('Owner copyto transfer size mismatch')
                 raise ValueError('Owner copyto read failed (same account): '+
-                                 diagnostic(errors.read(32000).decode('utf-8','replace'))[:320])
+                                 diagnostic(raw_error)[:320])
         if not destination.is_file() or destination.stat().st_size!=size:
             raise ValueError('Owner copyto returned wrong byte length')
         digest=hashlib.sha256()
@@ -132,11 +143,8 @@ def read_remote_with_recovery(row,remote,deadline_seconds=75,command=None,copyto
             if remaining<=2:raise TimeoutError('Owner copyto SHA readback deadline exceeded')
             try:
                 return read_remote_via_copyto(row,remote,min(75,remaining),copyto_command)
-            except ValueError as failure:
-                message=str(failure)
-                is_transient=bool(re.search(r'corrupted on transfer:\s*sizes differ',message,re.I))
-                is_denied=bool(re.search(r'\b(?:401|403|429|451)\b|access denied|failed to login',message,re.I))
-                if not is_transient or is_denied or attempt==2 or deadline-time.monotonic()<=4:
+            except OwnerCopytoTransferSizeMismatch:
+                if attempt==2 or deadline-time.monotonic()<=4:
                     raise
                 time.sleep(min(1+attempt,max(0,deadline-time.monotonic()-2)))
         raise AssertionError('Unreachable bounded copyto retry')
