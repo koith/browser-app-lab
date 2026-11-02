@@ -163,7 +163,8 @@ const {chromium,webkit}=require('playwright');
   assert.deepEqual(landscape.viewport,[844,390]);
   assert.equal(landscape.sourceOriginal,true,'rotation preserves 145x97 source TIS art');
   assert.ok(landscape.sourceActors.length>=2&&
-   landscape.sourceActors.every(v=>v==='original-obs-sprite'));
+   landscape.sourceActors.every(v=>['original-obs-sprite','original-card-portrait-fallback'].includes(v)),
+   'source-linked CHR body or authentic CardData fallback; never a fake generated actor');
   assert.ok(landscape.board[3]>=80,'landscape game board remains visible');
   assert.equal(landscape.sourceRollSource,'Dice/IMG.pak:eventRoll1.spr');
   assert.equal(landscape.sourceRollState,'ready');
