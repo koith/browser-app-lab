@@ -19,12 +19,14 @@ on:
       - apps/gallery-archive/visual_public_work.py
       - apps/yui-gallery/public_photo_archive.py
       - apps/*-gallery/public-work-pages.json
+      - apps/gallery-archive/test_yui_public_author_media_priority.py
   pull_request:
     paths:
       - apps/gallery-archive/direct_photo_pipeline.py
       - apps/gallery-archive/official_sample_recovery.py
       - apps/gallery-archive/test_official_sample_recovery.py
       - apps/gallery-archive/probe_official_missing_bytes.py
+      - apps/gallery-archive/test_yui_public_author_media_priority.py
       - apps/gallery-archive/defer_verified_batch.py
       - apps/gallery-archive/private_collection_snapshot.py
       - apps/gallery-archive/upload_verified_individual.py
@@ -81,6 +83,62 @@ jobs:
       - run: python -m pip install requests Pillow
       - name: Verify exact current public publisher image bytes, no cloud writes
         run: python apps/gallery-archive/probe_official_missing_bytes.py
+  yui-real-public-author-media-probe:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            apps/yui-gallery
+            apps/gallery-archive
+          sparse-checkout-cone-mode: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install requests beautifulsoup4 Pillow Scrapy
+      - name: Read only model-authored publicly indexed original CDN URLs
+        run: |
+          python - <<'PY'
+          import sys
+          sys.path.insert(0,'apps/gallery-archive')
+          from direct_photo_pipeline import page_images
+          from public_photo_archive import PublicSession,public_failure
+          link='https://teapawt.net/super_yuisan/media'
+          try:
+              response=PublicSession(delay=.3).get(link)
+              urls,pages,status=page_images(response.content,link,'yui')
+              print('YUI_ACTUAL_PUBLIC_OWNER_MEDIA_READ',{'status':status,
+                  'author_media_candidates':len(urls),'page_http':response.status_code},flush=True)
+              assert status=='scoped_public_page' and len(urls)>0
+              # Fetch the media bytes from the original X CDN, never from the
+              # public indexing site. Inspect decoded photo quality and check
+              # current owner SHA without writing any new private catalog.
+              import json
+              from pathlib import Path
+              from collections import Counter
+              from direct_photo_pipeline import inspect,reviewed_direct_media
+              index=json.loads(Path('apps/yui-gallery/owner-index.json').read_text())
+              owner_sha={p['sha256'] for a in index['albums'] for p in a['images']}
+              counts=Counter()
+              for candidate in urls[:20]:
+                  if not reviewed_direct_media(candidate,link,'yui'):
+                      counts['not_author_owned_cdn']+=1
+                      continue
+                  try:
+                      photo=PublicSession(delay=.2).get(candidate).content
+                      attributes,preview,format_name=inspect(photo)
+                      counts['already_owner_sha' if attributes['sha256'] in owner_sha
+                             else 'NEW_DECODED_OWNER_MEDIA']+=1
+                  except Exception as error:
+                      counts['unavailable_'+public_failure(error)['cause']]+=1
+              print('YUI_ACTUAL_PUBLIC_OWNER_CDN_BYTES',
+                    {'urls_checked':min(20,len(urls)),**dict(counts)},flush=True)
+          except Exception as exc:
+              print('YUI_PUBLIC_AUTHOR_PAGE_BLOCKER',public_failure(exc),flush=True)
+              raise
+          PY
   offline-regressions:
     runs-on: ubuntu-24.04
     timeout-minutes: 10
@@ -92,6 +150,7 @@ jobs:
       - run: |
           python apps/gallery-archive/test_direct_photo_pipeline.py
           python apps/gallery-archive/test_official_sample_recovery.py
+          python apps/gallery-archive/test_yui_public_author_media_priority.py
           python apps/gallery-archive/test_public_work_photo_extractor.py
           python apps/gallery-archive/test_reverse_source_bridge.py
       - name: Measure every registered owner work and excluded public source host
