@@ -7,6 +7,7 @@ from playwright.sync_api import sync_playwright
 HTML=Path(__file__).with_name("index.html").read_text(encoding="utf-8")
 AUTO=Path(__file__).with_name("account_auto_analysis.js").read_text(encoding="utf-8")
 ACCOUNT_UI=Path(__file__).with_name("account_index_client.js").read_text(encoding="utf-8")
+WATCH=Path(__file__).with_name("account_watch.js").read_text(encoding="utf-8")
 ORIGIN="https://private.intersection.test/"
 
 def run():
@@ -17,6 +18,8 @@ def run():
             page=browser.new_page(viewport={"width":390,"height":844})
             page.on("pageerror",lambda e:errors.append(str(e)))
             page.route(ORIGIN,lambda route:route.fulfill(status=200,content_type="text/html",body=HTML))
+            page.route(ORIGIN+"account_watch.js",lambda route:route.fulfill(
+                status=200,content_type="application/javascript",body=WATCH))
             page.route(ORIGIN+"account_auto_analysis.js",lambda route:route.fulfill(
                 status=200,content_type="application/javascript",body=AUTO))
             page.route(ORIGIN+"account_index_client.js",lambda route:route.fulfill(
