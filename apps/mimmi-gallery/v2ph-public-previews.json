@@ -1,11 +1,11 @@
 {
   "schema_version": 1,
   "version": "v0.1.0-mimmi.2",
-  "generated_at": "2026-10-31T05:30:05.676472+00:00",
+  "generated_at": "2026-11-02T10:58:53.925500+00:00",
   "source": "public V2PH photobook pages, no private downloads or paid content",
   "summary": {
     "albums": 6,
-    "preview_images_verified": 61,
+    "preview_images_verified": 62,
     "publicly_rehosted_images": 0
   },
   "albums": [
@@ -69,8 +69,8 @@
         },
         {
           "url": "https://cdn.v2ph.com/photos/G56s9YRS8DnbfU4Z.jpg",
-          "bytes": 562888,
-          "sha256": "fbe2ccf08127eeca0c08de620f9ae9d8e3746f0e80225718d92d37e049acef93",
+          "bytes": 543264,
+          "sha256": "b5643724cd1544d2fe48408fd780d9cb50e07ebbd8c52cee6ad2e55b3963590c",
           "width": 1800,
           "height": 2700,
           "origin": "v2ph_public_page",
@@ -119,8 +119,8 @@
         },
         {
           "url": "https://cdn.v2ph.com/photos/G56s9YRS8DnbfU4Z.jpg",
-          "bytes": 543264,
-          "sha256": "b5643724cd1544d2fe48408fd780d9cb50e07ebbd8c52cee6ad2e55b3963590c",
+          "bytes": 562888,
+          "sha256": "fbe2ccf08127eeca0c08de620f9ae9d8e3746f0e80225718d92d37e049acef93",
           "width": 1800,
           "height": 2700,
           "origin": "v2ph_public_page",
@@ -540,8 +540,8 @@
         },
         {
           "url": "https://cdn.v2ph.com/photos/DIZ5NH8SUf1J-WR9.jpg",
-          "bytes": 690543,
-          "sha256": "f485747578ae37f25fc99e52e746a11518a30cd3287d49d90db7b2b8b5366409",
+          "bytes": 717475,
+          "sha256": "f0d867184b8eeed6e15b39e34b3bf866e4a7d064bea73241b95e9670fa613a9d",
           "width": 1800,
           "height": 2700,
           "origin": "v2ph_public_page",
@@ -607,6 +607,17 @@
           "origin": "v2ph_public_page",
           "private_cloud_file": false,
           "number": 10
+        },
+        {
+          "url": "https://cdn.v2ph.com/photos/DIZ5NH8SUf1J-WR9.jpg",
+          "bytes": 690543,
+          "sha256": "f485747578ae37f25fc99e52e746a11518a30cd3287d49d90db7b2b8b5366409",
+          "width": 1800,
+          "height": 2700,
+          "origin": "v2ph_public_page",
+          "private_cloud_file": false,
+          "number": 11,
+          "carried_from_previous_verification": true
         }
       ],
       "pages": [
@@ -617,7 +628,7 @@
         }
       ],
       "fresh_http_verified": 10,
-      "carried_from_previous_verification": 0,
+      "carried_from_previous_verification": 1,
       "status": "v2ph_public_samples_verified"
     },
     {
