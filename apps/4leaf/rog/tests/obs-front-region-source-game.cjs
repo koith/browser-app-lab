@@ -94,7 +94,9 @@ const {chromium,webkit}=require('playwright');
    assert.equal(row.victory,'25,30,25');
    assert.ok(row.evidence.includes('WEB-movement-and-FPS-inferred'));
    assert.equal(row.rig,'original-obs-sprite');
-   assert.ok(row.image.includes('/OBS/')&&(tableActor?/-2[234]\\.png$/.test(row.image):row.image.endsWith('-25.png')));
+   assert.ok(row.image.includes('/OBS/')&&
+    (tableActor?['-22.png','-23.png','-24.png'].some(s=>row.image.endsWith(s)):row.image.endsWith('-25.png')),
+    id+' source front image is genuine OBS packet '+row.image);
    inspected.push(row);
   }
   // 0045 is source-front frame18 ONLY (original OBS member 1045), not a
