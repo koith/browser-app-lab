@@ -833,7 +833,7 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                 with journal.open('a') as log:
                     log.write(json.dumps({
                         'album':aid,'number':number,'source':url,
-                        'photo':row,'remote_verified':False})+'\\n')
+                        'photo':row,'remote_verified':False})+'\n')
             except Exception as exc:
                 errors.append({'url':url,'reason':type(exc).__name__,**public_failure(exc)})
         if known_official_saved:
