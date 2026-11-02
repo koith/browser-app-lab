@@ -72,7 +72,9 @@ function findLinks(raw){
  }
  return found;
 }
+const SELF_DECLARE=/(?:my\s+(?:other|alt|alternate|second|backup)\s+(?:account|profile)|also\s+me\s+(?:on|at)|(?:내|제)\s*(?:다른|부|보조|서브)\s*계정|(?:나의|제)\s*(?:계정|SNS)\s*목록|(?:본인|같은\s*사람)의\s*(?:다른|부)\s*계정)/i;
 function addClaim(row,raw){
+ if(!SELF_DECLARE.test(String(raw||"")))return;
  for(const key of findLinks(raw))if(key!==row.id)row.claims.add(key);
 }
 async function get(url){
@@ -89,11 +91,11 @@ function UI(){
  const host=$("accountsView");if(!host)return false;
  if($(ID))return true;
  const section=mk("section","account-auto-section");section.id=ID;
- const title=mk("h3","","자동 계정 분석 · 수동 추적 등록 불필요");
+ const title=mk("h3","","공개 자기 계정 연결 그룹 · 자동 분석");
  const summary=mk("p","account-auto-summary","게시글 인덱스에서 공개 계정을 자동 집계하고 있습니다.");
  summary.id="accountAutoSummary";
  const hints=mk("p","account-auto-hint",
-  "동일 SNS의 중복 프로필은 자동 정리합니다. 서로 다른 SNS는 공개 프로필이 서로를 직접 링크한 경우에만 연결 계정으로 표시하며, 동일인이라는 확정 판정은 아닙니다.");
+  "동일 SNS의 중복 프로필은 자동 정리합니다. 서로 다른 SNS 계정은 양쪽에서 자신이 운영하는 다른 계정이라고 공개 선언한 경우에만 A 그룹으로 표시합니다. 실제 개인의 신원을 확정하는 것은 아닙니다.");
  const status=mk("p","account-auto-status","");status.id="accountAutoStatus";
  const groups=mk("div","account-auto-groups");groups.id="accountAutoGroups";
  const groupMore=mk("button","account-auto-more","연결 그룹 더 보기");groupMore.id="accountAutoGroupMore";groupMore.type="button";
@@ -157,9 +159,9 @@ function render(){
   "개 (실패 "+scanResult.failed+" · 미지원/미조회 계정은 연결 미확정)"+
   (busy?" · 자동 검증 진행 중":scanDone?" · 이번 조회 완료":"");
  const fg=document.createDocumentFragment();
- for(const group of groups.linked.slice(0,groupCursor)){
+ for(const [i,group] of groups.linked.slice(0,groupCursor).entries()){
   const item=mk("article");
-  item.append(mk("strong","","서로 공개 연결한 계정 "+group.length+"개"));
+  item.append(mk("strong","","A-"+String(i+1).padStart(3,"0")+" · 공개 자기 계정 연결 "+group.length+"개"));
   for(const rec of group){
    const a=mk("a","",(names[rec.network]||rec.network)+" @"+rec.user);
    a.href=rec.url;a.target="_blank";a.rel="noopener noreferrer";item.append(a);
@@ -232,11 +234,13 @@ async function scan(){
    const p=await get(origin+"/api/v1/accounts/lookup?"+new URLSearchParams({acct:row.user}));
    if(p?.locked||p?.suspended){scanResult.failed++;continue}
    const doc=new DOMParser().parseFromString(String(p?.note||""),"text/html");
+   const note=String(doc.body.textContent||"");
    for(const f of p?.fields||[]){
     const d=new DOMParser().parseFromString(String(f.value||""),"text/html");
-    for(const link of d.querySelectorAll("a[href]"))addClaim(row,link.href);
+    const label=String(f.name||"")+" "+String(d.body.textContent||"");
+    for(const link of d.querySelectorAll("a[href]"))addClaim(row,label+" "+link.href);
    }
-   for(const link of doc.querySelectorAll("a[href]"))addClaim(row,link.href);
+   for(const link of doc.querySelectorAll("a[href]"))addClaim(row,note+" "+link.href);
    scanResult.checked++;
   }catch{scanResult.failed++}
   render();
