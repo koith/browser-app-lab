@@ -458,29 +458,48 @@ main{padding-top:10px}
 .consumer-entry a{display:inline-flex;align-items:center;gap:9px;color:#173d31;font-size:14px;font-weight:850;text-decoration:none;padding:5px 0}
 .consumer-entry a:hover{text-decoration:underline}.consumer-entry small{font-size:11px;color:#54715d}
 
-.activity-ranking{border:1.5px solid #151a30;background:#fffdf1;padding:17px 17px 13px;margin:0 0 20px;box-shadow:5px 5px 0 #14172916;color:#14172a;min-width:0}
-.activity-ranking-top{display:flex;gap:12px;justify-content:space-between;align-items:flex-end;flex-wrap:wrap}
-.activity-ranking-kicker{font-size:10px;letter-spacing:.1em;color:#705d57;font-family:ui-monospace,monospace;font-weight:800}
-.activity-ranking h2{font-size:clamp(20px,3.5vw,31px);letter-spacing:-.06em;margin:6px 0 4px;font-weight:950}
-.activity-ranking h2 span{font-size:.65em;color:#ee4a2b;vertical-align:top}
-.activity-ranking-controls{display:flex;align-items:center;gap:6px;flex-wrap:wrap;font-size:11px;font-weight:800}
-.activity-ranking-controls select{max-width:190px;padding:7px 9px;border:1px solid #6b6b65;border-radius:0;color:#171927;background:#fffefa;font-size:11px;min-height:34px}
-.activity-ranking-status{font-size:11px;color:#63665f;margin:10px 0 12px}
-.activity-ranking-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
-.activity-rank-card{background:#f6f5ec;border:1px solid #c4c1b1;min-width:0;padding:10px;display:grid;gap:6px}
+
+/* RANK: compact, image-first account tiles. Expanded metrics live in the dialog. */
+.activity-ranking{border:1px solid #151a30;background:#fffdf1;padding:8px;margin:0 0 10px;color:#14172a;min-width:0}
+.activity-ranking-top{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 7px}
+.activity-ranking h2{font-size:16px;line-height:1.15;font-weight:950;letter-spacing:.04em;margin:0}
+.activity-ranking-controls{display:flex;gap:4px;align-items:center;min-width:0}
+.activity-ranking-controls select{max-width:150px;min-width:0;height:28px;padding:3px 5px;border:1px solid #8d8d80;border-radius:0;background:#fffefa;color:#151829;font-size:11px;font-weight:700}
+.activity-ranking-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(0,168px));gap:4px}
+.activity-rank-card{display:grid;grid-template-columns:21px minmax(0,1fr) 38px;align-items:center;gap:4px;min-width:0;min-height:46px;padding:3px;border:1px solid #c4c1b1;border-radius:0;background:#f6f5ec;color:#14172a;text-align:left;box-shadow:none}
 .activity-rank-card:first-child{background:#fff0cc;border-color:#d7ad56}
-.activity-rank-head{display:flex;align-items:center;justify-content:space-between;gap:4px}
-.activity-rank-num{font-family:ui-monospace,monospace;font-size:17px;font-weight:950;color:#e45c32}
-.activity-rank-source{font-size:10px;color:#5d615c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.activity-rank-user{display:block;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:#152d50;text-decoration:underline;text-underline-offset:3px;font-size:13px;font-weight:900}
-.activity-rank-score{font-size:23px;line-height:1.15;letter-spacing:-.5px;font-weight:950;font-variant-numeric:tabular-nums}
-.activity-rank-score small{font-size:10px;color:#61685d;font-weight:650;margin-left:5px;letter-spacing:0}
-.activity-rank-stats{font-size:10px;line-height:1.55;color:#4b5651}
-.activity-ranking-more{background:#151829;color:#fff;margin:11px auto 0;display:block;max-width:100%;padding:9px 17px}
-.activity-ranking-note{border-top:1px dashed #c4c1b1;margin:12px 0 0;padding-top:9px;font-size:10px;line-height:1.6;color:#62645a}
-.activity-ranking-empty{grid-column:1/-1;font-size:12px;padding:22px 9px;text-align:center;border:1px dashed #b3b1a9;color:#5d605c}
-@media(max-width:1050px){.activity-ranking-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
-@media(max-width:720px){.activity-ranking{padding:11px 9px;margin:0 0 14px}.activity-ranking-top{align-items:flex-start}.activity-ranking-controls{width:100%}.activity-ranking-controls select{max-width:calc(50% - 27px);flex:1}.activity-ranking-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.activity-rank-card{padding:8px}.activity-rank-score{font-size:20px}.activity-rank-user{font-size:12px}}
+.activity-rank-card:hover{border-color:#e45c32;background:#fff8e5}
+.activity-rank-card:focus-visible{outline:2px solid #e45c32;outline-offset:1px}
+.activity-rank-num{font:900 12px/1 ui-monospace,monospace;color:#db5028;font-variant-numeric:tabular-nums}
+.activity-rank-user{min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;font-size:12px;line-height:1.25;font-weight:850}
+.activity-rank-thumb{display:block;width:38px;height:38px;overflow:hidden;background:#dedbd1}
+.activity-rank-thumb img{display:block;width:100%;height:100%;object-fit:cover}
+.activity-rank-thumb-empty{background:repeating-linear-gradient(135deg,#e0ded4,#e0ded4 4px,#d4d1c6 4px,#d4d1c6 8px)}
+.activity-ranking-more{display:block;margin:6px 0 0;padding:4px 10px;min-height:26px;border-radius:0;background:#151829;color:#fff;font-size:11px}
+.activity-ranking-empty{grid-column:1/-1;padding:10px 4px;font-size:11px;color:#5d605c}
+.activity-rank-dialog{width:min(440px,calc(100vw - 16px));max-width:440px;border:1px solid #151a30;border-radius:0;background:#fffdf1}
+.activity-rank-dialog .dialog-head{background:#fffdf1}
+.activity-rank-dialog .dialog-content{display:grid;gap:12px;padding:14px;max-height:calc(100dvh - 80px)}
+.activity-rank-detail-intro{display:flex;justify-content:space-between;align-items:center;gap:12px;min-width:0}
+.activity-rank-detail-source{font-size:11px;font-weight:750;color:#66665e}
+.activity-rank-detail-title{font-size:17px;overflow-wrap:anywhere;font-weight:900;margin-top:4px}
+.activity-rank-detail-thumb{width:68px;height:68px;object-fit:cover;background:#dedbd1;flex:none}
+.activity-rank-detail-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.activity-rank-detail-metric{border:1px solid #c4c1b1;padding:9px;min-width:0}
+.activity-rank-detail-metric small{display:block;color:#68665f;font-size:10px}
+.activity-rank-detail-metric strong{display:block;margin-top:4px;font-size:17px;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.activity-rank-detail-note{font-size:11px;line-height:1.5;color:#68665f}
+.activity-rank-detail-link{display:block;width:fit-content;padding:8px 12px;background:#151829;color:white;text-decoration:none;font-size:12px;font-weight:750}
+@media(max-width:720px){
+ .activity-ranking{padding:6px;margin-bottom:8px}
+ .activity-ranking-top{gap:5px;margin-bottom:6px}
+ .activity-ranking h2{font-size:15px}
+ .activity-ranking-controls select{max-width:105px;height:27px;font-size:10px}
+ .activity-ranking-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}
+ .activity-rank-card{grid-template-columns:20px minmax(0,1fr) 36px;gap:3px;min-height:44px;padding:3px}
+ .activity-rank-thumb{width:36px;height:36px}
+ .activity-rank-user{font-size:11px}
+}
 </style>
 </head>
 <body>
@@ -500,23 +519,17 @@ main{padding-top:10px}
 <div class="sr-only" id="count" role="status" aria-live="polite">불러오는 중…</div>
 <section id="activityRanking" class="activity-ranking" aria-labelledby="activityRankingTitle">
  <div class="activity-ranking-top">
-  <div><div class="activity-ranking-kicker">PUBLIC ACCOUNT ACTIVITY / OBSERVED POSTS</div>
-   <h2 id="activityRankingTitle">활동·반응 랭킹 <span aria-hidden="true">↗</span></h2>
-  </div>
+  <h2 id="activityRankingTitle">RANK</h2>
   <div class="activity-ranking-controls">
-   <label for="activityRankingPlatform">SNS</label>
    <select id="activityRankingPlatform" aria-label="랭킹 SNS 선택"><option value="all">전체 SNS</option></select>
-   <label for="activityRankingSort">정렬</label>
    <select id="activityRankingSort" aria-label="랭킹 정렬 기준">
-    <option value="signal">관측 영향 지수</option><option value="posts">게시글 수</option>
-    <option value="reactions">공개 반응 합계</option><option value="days">활동 일수</option>
+    <option value="signal">활동 지수</option><option value="posts">게시글 수</option>
+    <option value="reactions">공개 반응</option><option value="days">활동 일수</option>
    </select>
   </div>
  </div>
- <p id="activityRankingStatus" class="activity-ranking-status" role="status" aria-live="polite">공개 게시글을 수집해 랭킹을 계산합니다.</p>
  <div id="activityRankingRows" class="activity-ranking-grid" aria-label="공개 계정 활동 랭킹"></div>
- <button type="button" id="activityRankingMore" class="activity-ranking-more hidden" aria-expanded="false">더 많은 계정 보기</button>
- <p class="activity-ranking-note">현재 기간·검색 조건에서 관측한 공개 게시물만 집계합니다. 광고 의심·제한·민감 라벨 게시물과 원문 미확인 링크는 제외합니다. 영향 지수는 관측 활동·공개 반응의 참고 지표로 실제 도달 범위나 동일인 수를 뜻하지 않으며, SNS별 반응 제공 범위가 달라 직접 비교에는 한계가 있습니다.</p>
+ <button type="button" id="activityRankingMore" class="activity-ranking-more hidden" aria-expanded="false">더 보기</button>
 </section>
 <section class="feed" id="feed" aria-live="polite"><div class="empty">게시글 불러오는 중…</div></section>
 <div class="more hidden" id="paging"><button type="button" id="more">더 보기</button></div>
@@ -577,6 +590,10 @@ main{padding-top:10px}
   <p class="account-privacy">추적 목록은 이 브라우저에 공개 프로필 주소만 저장합니다. 신상정보·개인적 성적 활동·서로 다른 익명 계정의 신원 연결은 수집하거나 추정하지 않습니다. 글 원문과 행동 이력은 저장하지 않고 현재 조회된 공개 자료에서 계산합니다.</p>
 </section>
 </main>
+<dialog id="activityRankingDialog" class="activity-rank-dialog" aria-labelledby="activityRankingDialogTitle">
+ <div class="dialog-head"><b id="activityRankingDialogTitle">RANK</b><button type="button" id="activityRankingDialogClose" aria-label="랭킹 상세 닫기">×</button></div>
+ <div id="activityRankingDialogContent" class="dialog-content"></div>
+</dialog>
 <dialog id="accountDialog" class="account-dialog" aria-label="추적 계정 상세">
  <div class="dialog-head"><b>공개 계정 상세</b><button type="button" id="closeAccountDialog" aria-label="계정 상세 닫기">×</button></div>
  <div id="accountDialogContent" class="account-detail-content"></div>
@@ -1194,7 +1211,8 @@ function draw(){
      verified:filtered().filter(p=>p.platform!=="cloud"&&!p.restricted&&!p.adultLabeled&&
        !p.discoveryCandidate&&p.profileUrl&&p.id).map(p=>({
        id:p.id,platform:p.platform,profileUrl:p.profileUrl,author:p.author,
-       posted:p.posted,engagement:p.engagement||null
+       posted:p.posted,engagement:p.engagement||null,
+        thumbnailUrl:safePublicLink(p.media?.[0]?.thumb||"")
      }))};
  };
  /* Read-only account analytics view. No post text, author history or sensitive
