@@ -108,7 +108,7 @@
     return window.INTERSECTION_acceptPublicX(verified);
   }
   async function verifyX(item,button,output,quiet=false){
-    if(button)button.disabled=true;
+    if(button){button.disabled=true;item.expanded=true}
     if(output)output.textContent="X 공개 원문을 확인하는 중…";
     try{
       const verified=await getPublicX(item);
@@ -125,10 +125,10 @@
       item.matched=matched;item.exact=true;
       const admitted=registerX(item,verified);
       item.verifyInfo=admitted.accepted?
-        "원문 확인 · 기간 내 게시글 피드 반영":
-        admitted.reason==="outside-period"?"원문 확인 · 선택한 기간 밖":
-        admitted.reason==="duplicate"?"원문 확인 · 이미 표시한 글":
-        "원문 확인 · 현재 피드 반영 조건 미충족";
+        "공개 원문 확인 · 기간 내 게시글 피드 반영":
+        admitted.reason==="outside-period"?"공개 원문 확인 · 선택한 기간 밖":
+        admitted.reason==="duplicate"?"공개 원문 확인 · 이미 표시한 글":
+        "공개 원문 확인 · 현재 피드 반영 조건 미충족";
       if(output){
         const date=new Date(item.verifiedDate).toLocaleString("ko-KR");
         output.replaceChildren(make("strong","",item.verifyInfo+" · "+date),
@@ -146,7 +146,7 @@
     }
   }
   async function checkPage(item,button,output,quiet=false){
-    if(button)button.disabled=true;
+    if(button){button.disabled=true;item.expanded=true}
     if(output)output.textContent="공개 페이지 텍스트 확인 중…";
     const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),15000);
     try{
@@ -205,6 +205,11 @@
     const verify=make("button","index-check",
       item.platform==="x"?"X 공개 원문 확인 (무료)":"무료 공개 페이지 확인");
     const result=make("div","index-verify-result");
+    if(item.expanded && item.verifyInfo){
+      result.append(make("strong","",item.verifyInfo+
+        (item.verifiedDate?" · "+new Date(item.verifiedDate).toLocaleString("ko-KR"):"")));
+      if(item.verifiedText)result.append(make("p","index-description",item.verifiedText));
+    }
     verify.addEventListener("click",async()=>{
       if(item.platform==="x")await verifyX(item,verify,result);
       else await checkPage(item,verify,result);
