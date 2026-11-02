@@ -1346,6 +1346,17 @@
         "CHT-02",
         "QA-03"
       ]
+    },
+    {
+      "id": "REQ-20261102-005",
+      "date": "2026-11-02",
+      "origin": "User directed GPT to begin its previously assigned implementation while Claude independently handles archival assets",
+      "text": "GPT: independently improve actual game multiplayer sync/reconnection resilience with implementation, repeatable browser QA, branch/PR and release verification; do not overlap Claude archive decode.",
+      "taskIds": [
+        "RULE-03",
+        "M08",
+        "P0-RELEASE"
+      ]
     }
   ],
   "tasks": [
@@ -2722,9 +2733,9 @@
       "id": "RULE-03",
       "priority": "P1",
       "title": "실제 멀티플레이 경기 권한·동기화 실환경 검증",
-      "status": "todo",
+      "status": "in_progress",
       "milestone": "M08",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: WebRTC/중앙 채팅과 임시 로컬 경기 구현이 있지만 서버 권한·이탈/재접속·기록이 원작 흐름과 동일한지 미검증 | 구현 목표: 두 브라우저+휴대전화 2인, 원격 턴/주사위/전투 승인/중도 이탈·복귀/replay와 권한검사 실행",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: WebRTC/중앙 채팅과 임시 로컬 경기 구현이 있지만 서버 권한·이탈/재접속·기록이 원작 흐름과 동일한지 미검증 | 구현 목표: 두 브라우저+휴대전화 2인, 원격 턴/주사위/전투 승인/중도 이탈·복귀/replay와 권한검사 실행 | 2026-11-02 GPT: stale WebRTC RTCPeerConnection/datachannel events and delayed SDP promises isolated by active peer/channel identity; disconnected channels cannot forward gameplay commands. Independent simulated host/guest race runtime PASS; committed regression and CI workflow. Full 2-device reconnect acceptance and native-original protocol remain open.",
       "acceptance": [
         "다중 클라이언트 동일 턴/눈/카드/채팅 표시; 롤 중복/치트 요청·재접속 상태 불일치 0건"
       ],
@@ -2732,8 +2743,8 @@
         "tests/network.cjs",
         "tests/central-browser.cjs"
       ],
-      "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-18",
+      "evidenceLevel": "VERIFIED-DETERMINISTIC-WEBRTC-RACE-TEST; CI-AND-REAL-TWO-DEVICE-PENDING; HISTORICAL-PROTOCOL-UNVERIFIED",
+      "lastReviewed": "2026-11-02",
       "verifiedAcceptance": null,
       "dependencies": [
         "RULE-02"
@@ -7308,6 +7319,42 @@
         "QA-03"
       ],
       "details": "Looping idle rapidly changed source URLs; offline per-URL retry never reached limit. Per-actor full-frame failure counter triggers fallback after four errors; reset after successful original image load; original legacy OBS fallback retained."
+    },
+    {
+      "seq": 328,
+      "date": "2026-11-02",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261102-005",
+      "taskIds": [
+        "RULE-03",
+        "M08",
+        "P0-RELEASE"
+      ],
+      "details": "GPT/Claude split authorized. GPT owns runtime multiplayer, board, battle, chat UI and deployment; Claude owns source archive extraction and historical evidence; separate branches and no duplicated runtime file editing."
+    },
+    {
+      "seq": 329,
+      "date": "2026-11-02",
+      "type": "WEBRTC_STALE_SESSION_RACE_FIXED",
+      "requestId": "REQ-20261102-005",
+      "taskIds": [
+        "RULE-03",
+        "M08"
+      ],
+      "details": "GitHub branch fix/4leaf-webrtc-stale-session-20261102: network.js now ignores stale peer/channel onopen/onclose/onerror/onmessage; rejects prior SDP createOffer/createAnswer completion; host/guest state and commands only pass current open channel; in-session simulated race PASS. Permanent tests/network-stale-session.cjs and rog-network.yml CI added; GitHub CI, merged public Pages and physical iPhone acceptance still PENDING."
+    },
+    {
+      "seq": 330,
+      "date": "2026-11-02",
+      "type": "STATUS_CHANGED",
+      "requestId": "REQ-20261102-005",
+      "taskId": "RULE-03",
+      "from": "todo",
+      "to": "in_progress",
+      "taskIds": [
+        "RULE-03"
+      ],
+      "details": "Implementation and deterministic test added, but historical equivalence, multi-device reconnection and mobile network QA still pending."
     }
   ]
 }
