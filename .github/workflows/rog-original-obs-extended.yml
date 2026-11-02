@@ -1,4 +1,5 @@
 name: 4LEAF original OBS extended decode (wide frames, embedded chains, trailer tables, OBS2/OBS3 actors, CHR)
+# Run 2026-11-02 SHA1-verified 2002 original census on isolated data branch.
 on:
   push:
     branches: ['data/4leaf-obs-extended-**']
