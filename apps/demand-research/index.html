@@ -396,7 +396,7 @@ main{padding-top:10px}
 .account-add-row input{flex:1;min-width:0;border-radius:0}
 .account-add-row button{background:#243fd3;border-radius:0;min-width:110px}
 .account-hint{font-size:11px;line-height:1.5;color:#52607a;margin:8px 0 0;overflow-wrap:anywhere}
-.account-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin:17px 0}
+.account-metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:9px;margin:17px 0}
 .account-metrics>div{padding:12px;background:white;border:1px solid #cdd7e9;display:grid;gap:4px}
 .account-metrics span{font-size:11px;color:#536681}
 .account-metrics strong{font-size:22px;font-weight:850;font-variant-numeric:tabular-nums}
@@ -436,6 +436,7 @@ main{padding-top:10px}
   .account-intro h2{font-size:20px}
   .account-watch-grid{grid-template-columns:1fr}
   .account-add-row button{min-width:91px;font-size:11px;padding:9px 8px}
+  .account-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}
   .account-metrics>div{padding:9px 7px}
   .account-metrics strong{font-size:19px}
   .account-list-toolbar input{width:48%}
@@ -489,6 +490,8 @@ main{padding-top:10px}
     <div><span>추적 계정</span><strong id="accountMetricTracked">0</strong></div>
     <div><span>기간 내 확인된 글</span><strong id="accountMetricVerified">0</strong></div>
     <div><span>원문 미확인 링크</span><strong id="accountMetricCandidates">0</strong></div>
+    <div><span>중복 제거 상품 언급</span><strong id="accountMetricCommerce">0</strong></div>
+    <div><span>중복된 상품 문구</span><strong id="accountMetricRepeat">0</strong></div>
   </div>
   <div class="account-list-toolbar">
     <h3>추적 목록</h3>
