@@ -67,18 +67,21 @@ const {chromium}=require('playwright');
   // Only visually inspected REAL actor identities may be tested as bodies.
    // 1100 lightning / 1134 Dice Attack logo / 1146 bomb / 1165 glow are
    // genuine source effects, not source warriors.
-   const samples=accepted.filter(x=>['0046','0061','0064','0085','0087','0092'].includes(x.id));
+   const samples=accepted.filter(x=>['0046','0061','0064','0067','0070','0074'].includes(x.id));
+  const nativeCards={'0046':'0063','0061':'0078','0064':'0081',
+    '0067':'0084','0070':'0087','0074':'0091'};
   for(const item of samples){
+   const card=nativeCards[item.id];
    await page.evaluate(id=>{
     window.__ROG_TEST__.getMatch().players[0].team[0]='c_'+id;
     window.__ROG_TEST__.drawGame();
-   },item.id);
+   },card);
    await page.waitForFunction(id=>{
     const p=document.querySelector('#board-pawns .board-pawn[data-chessman-id="'+id+'"]');
     const img=p?.querySelector('.leaf-chess-original-obs');
     return p?.dataset.actorRig==='original-obs-sprite'&&img?.complete&&img.naturalWidth>10&&
      img.getAttribute('src')?.startsWith('./original/OBS/');
-   },item.id,{timeout:13000});
+   },card,{timeout:13000});
    const source=await page.evaluate(id=>{
     const p=document.querySelector('#board-pawns .board-pawn[data-chessman-id="'+id+'"]');
     const img=p.querySelector('.leaf-chess-original-obs');
@@ -86,10 +89,10 @@ const {chromium}=require('playwright');
       fakeFallback:!!p.querySelector('.leaf-chess-original-card-fallback:not([hidden])'),
       frame:img.getAttribute('src'),sourcePoseMapping:p.dataset.sourcePoseMapping,
       native:[img.naturalWidth,img.naturalHeight]};
-   },item.id);
+   },card);
    assert.equal(source.rig,'original-obs-sprite');
    assert.equal(source.fakeFallback,false);
-   assert.ok(source.source.startsWith('OBS/'));
+   assert.ok(source.source.startsWith('Original-CHR-body/'));
    assert.ok(source.frame.includes('/OBS/'));
   }
   await page.setViewportSize({width:390,height:844});
