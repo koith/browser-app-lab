@@ -45,9 +45,20 @@ def run():
                 status=200,content_type="application/javascript",body=WATCH))
             page.route(PAGE+"assets/*.svg",lambda route:route.fulfill(
                 status=200,content_type="image/svg+xml",body="<svg xmlns='http://www.w3.org/2000/svg'></svg>"))
-            page.route("https://api.keenable.ai/v1/search/public",lambda r:r.fulfill(
-                status=200,content_type="application/json",headers={"Access-Control-Allow-Origin":"*"},
-                body='{"results":[]}'))
+            def keenable(r):
+                body=r.request.post_data_json if r.request.method=="POST" else {}
+                q=str((body or {}).get("query",""))
+                rows=([{"url":"https://x.com/qa_feed/status/1234567890123456789",
+                        "title":"synthetic public QA","description":"product"}]
+                      if q=="site:x.com/qa_feed/status" else [])
+                r.fulfill(status=200,content_type="application/json",
+                    headers={"Access-Control-Allow-Origin":"*"},body=json.dumps({"results":rows}))
+            page.route("https://api.keenable.ai/v1/search/public",keenable)
+            page.route("https://api.fxtwitter.com/status/1234567890123456789",
+                lambda r:r.fulfill(status=200,content_type="application/json",
+                  headers={"Access-Control-Allow-Origin":"*"},body=json.dumps({"tweet":{
+                  "id":"1234567890123456789","text":"섹트 제품 가격 확인 후기 입니다. 테스트 텍스트 A",
+                  "created_at":NOW,"author":{"screen_name":"qa_feed","protected":False}}})))
             page.route("https://api.firecrawl.dev/v2/search",lambda r:r.fulfill(
                 status=200,content_type="application/json",headers={"Access-Control-Allow-Origin":"*"},
                 body='{"success":true,"data":{"web":[]}}'))
@@ -146,13 +157,17 @@ def run():
             page.locator('#accountWatchForm button[type="submit"]').click()
             assert page.locator("#accountMetricTracked").text_content()=="2"
             assert page.locator("#accountWatchList article").count()==2
+            page.wait_for_function("document.querySelector('#accountMetricVerified').textContent==='6'",timeout=20000)
+            assert int(page.locator("#accountMetricRepeat").text_content())>=2
+            assert page.locator("#accountMetricCommerce").text_content()!=""
+
             assert "계정 수를 사람 수로 간주하지" in page.locator(".account-analysis-note").inner_text()
             # Add a public Mastodon account with a private status fixture: only
             # explicitly public statuses may appear in analysis.
             page.locator("#accountProfileInput").fill("https://mastodon.social/@qa")
             page.locator('#accountWatchForm button[type="submit"]').click()
             page.wait_for_function("document.querySelectorAll('.account-watch-card').length===3",timeout=15000)
-            page.wait_for_function("document.querySelector('#accountMetricVerified').textContent==='6'",timeout=20000)
+            page.wait_for_function("document.querySelector('#accountMetricVerified').textContent==='7'",timeout=20000)
             assert len(mast_calls)>=2
             assert "사적 글" not in page.locator("#accountWatchList").inner_text()
             # Persistence: only profile URLs survive refresh. No content text.
@@ -169,7 +184,8 @@ def run():
             assert not errors,errors
             print("PUBLIC_ACCOUNT_WATCH_BROWSER_QA",json.dumps({
               "tabs":2,"opt_in_profiles_saved":3,"bluesky_direct_public_feed":True,
-              "mastodon_direct_public_feed":True,"private_rows_excluded":True,
+              "mastodon_direct_public_feed":True,"x_original_public_post_verified":True,
+              "cross_account_duplicate_content_removed":True,"private_rows_excluded":True,
               "cross_platform_identity_inference":False,"malicious_urls_blocked":True,
               "post_history_persisted":False,"reload_persistence":True,
               "errors":len(errors)
