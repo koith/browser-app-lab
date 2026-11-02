@@ -28,8 +28,9 @@ const path=require('node:path');
   await page.waitForFunction(()=>[...document.querySelectorAll('#board-nodes>.tile')]
    .length===104&&[...document.querySelectorAll('#board-pawns .leaf-chess-original-obs')]
    .length===2,null,{timeout:15000});
-  await page.waitForFunction(()=>[...document.querySelectorAll('#board-pawns .leaf-chess-original-obs')]
-   .every(el=>el.complete&&el.naturalWidth>15),null,{timeout:15000});
+  await page.waitForFunction(()=>[...document.querySelectorAll('#board-pawns .board-pawn')]
+   .every(p=>p.dataset.actorRig==='original-obs-sprite'||
+     p.dataset.actorRig==='original-card-portrait-fallback'),null,{timeout:15000});
   const proof=await page.evaluate(()=>{
    const camera=window.__LEAF_CAMERA__.getState();
    const board=[...document.querySelectorAll('#board-nodes>.tile')];
@@ -77,11 +78,13 @@ const path=require('node:path');
   assert.ok(proof.pitch.x>=145&&proof.pitch.y>=97,
    'DMP source artwork cannot be more tightly pitched than its real dimensions');
   assert.equal(proof.actors.length,2,'no bogus non-player actor');
-  assert.ok(proof.actors.every(a=>a.rig==='original-obs-sprite'&&
-    a.cssRigVisible==='none'&&a.native?.includes('/OBS/')&&a.nativeReady),
-   'default human and opponent MUST both render genuine recovered Genesis OBS sprites');
+  assert.ok(proof.actors.every(a=>a.cssRigVisible==='none'&&
+    (a.rig==='original-obs-sprite'?a.native?.includes('/OBS/')&&a.nativeReady:
+     a.rig==='original-card-portrait-fallback')),
+   'true CHR bodies must show original sprite when published, else genuine CardData portrait');
   assert.equal(proof.fakeBodies,0,'the giant default fake stickman is gone');
-  assert.equal(proof.fakeCards,0,'default players need no source-missing card fallback');
+  assert.equal(proof.fakeCards,proof.actors.filter(a=>a.rig==='original-card-portrait-fallback').length,
+   'unpublished original body must use CardData fallback, never a guessed actor');
   assert.deepEqual(errors,[]);
   await page.screenshot({path:'leaf-iphone-original-board-no-overlap.png'});
   // A real iPhone rotates into a much shorter viewport. Verify source
@@ -112,8 +115,9 @@ const path=require('node:path');
   assert.deepEqual(landscape.screen,[844,390]);
   assert.equal(landscape.tiles,104,'turning the iPhone cannot erase original DMP source cells');
   assert.ok(landscape.originalSizes,'landscape must preserve exact native 145x97 TIS PNG pixels');
-  assert.ok(landscape.actorRigs.length===2&&landscape.actorRigs.every(a=>a==='original-obs-sprite'),
-   'rotation may not replace recovered original OBS with a web-drawn dummy');
+  assert.ok(landscape.actorRigs.length===2&&landscape.actorRigs.every(a=>
+   ['original-obs-sprite','original-card-portrait-fallback'].includes(a)),
+   'rotation may not replace actual CHR actor with fabricated web figure');
   assert.ok(landscape.board.visible&&landscape.board.h>=80,
    'physical board must remain visible on rotated phone: '+JSON.stringify(landscape));
   assert.ok(landscape.visibleTiles>=1,'at least one native tile should be on-screen');
