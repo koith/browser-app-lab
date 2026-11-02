@@ -56,21 +56,21 @@ const {chromium,webkit}=require('playwright');
     turn:m.active,position:m.players[0].position,src:img?.getAttribute('src')};
   },[card,start]);
   const report={};
-  for(const card of ['c_0046','c_0078','c_0040']){
+  for(const card of ['c_0063','c_0095','c_0056']){
    const up=await walk(card,seg.up),down=await walk(card,seg.down);
    assert.equal(up.facing,'away');assert.equal(down.facing,'toward');
-   assert.equal(up.seq,'3,4,5,6,7,8',card+' walks away with the rear walk block');
-   assert.equal(up.evidence,'walk-rear/structural-37/INFERRED');
+   assert.equal(up.seq,'3,5,6,7,8',card+' walks away with the rear walk block');
+   assert.equal(up.evidence,'native-CHR-walk-rear/source-index-VERIFIED/semantic-role-INFERRED');
    assert.ok(up.frames.length>=3&&up.frames.every(f=>f>=3&&f<=8),card+' rendered rear frames '+up.frames);
    assert.ok(down.seq.split(',').every(f=>Number(f)>=25&&Number(f)<=30),card+' walks toward with front frames');
    report[card]={up:up.frames,down:down.frames};
   }
   // Unreviewed rear (0058: diagonal sword poses at 3..7) keeps the front cycle.
-  const guarded=await walk('c_0042',seg.up);
-  assert.ok(guarded.seq.split(',').every(f=>Number(f)>=25),'0042 rear is not reviewed; never shows 3..7');
+  const guarded=await walk('c_0059',seg.up);
+  assert.equal(guarded.seq,'3,5,6,7,8','1042 rear walk from decoded native table, not old unreviewed guess');
   // Attack: reviewed front three-quarter frame 18, one-shot, ends on front.
   const attack=await page.evaluate(async()=>{
-   const T=window.__ROG_TEST__,m=T.getMatch();m.players[0].team=['c_0046'];T.setMatch(m);
+   const T=window.__ROG_TEST__,m=T.getMatch();m.players[0].team=['c_0063'];T.setMatch(m);
    await new Promise(r=>setTimeout(r,200));
    const pawn=document.querySelector('#board-pawns .board-pawn[data-id="'+m.players[0].id+'"]');
    window.__LEAF_GENESIS_ACTORS__.poseByPlayer(m.players[0].id,'attack',0);
