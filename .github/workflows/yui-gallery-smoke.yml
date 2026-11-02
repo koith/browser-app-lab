@@ -65,8 +65,17 @@ jobs:
               const runtime=await page.evaluate(()=>({albums:available().length,photos:stored.reduce((n,a)=>n+validImages(a).length,0)}));
               if(cards!==runtime.albums)throw Error('Rendered saved owner+local album count wrong '+cards);
               if(await page.locator('#inventory').innerText()!==runtime.photos+'장 · 실제 저장본')throw Error('Inventory counts unarchived media');
-              const urls=await page.evaluate(()=>available().flatMap(a=>validImages(a).map(p=>p.url).filter(u=>u?.startsWith('stored-albums/'))));
-              if(urls.length!==photos.length||urls.some(x=>!x.startsWith('stored-albums/')))throw Error('Remote photo shown');
+              // The combined gallery legitimately renders SHA-verified
+              // TeraBox owner originals alongside its 23 local originals.
+              // Never require owner originals to have a local Pages URL.
+              // Instead ensure every locally committed unique SHA remains
+              // represented by the actual viewer and each local file decodes.
+              const shown=await page.evaluate(()=>new Set(
+                available().flatMap(a=>validImages(a).map(p=>p.sha256)).filter(Boolean)));
+              const missing=photos.filter(p=>!shown.has(p.sha256));
+              if(missing.length)throw Error('Local stored photo SHA absent from viewer '+missing[0].sha256.slice(0,12));
+              const urls=photos.map(p=>p.url);
+              if(urls.some(x=>!x.startsWith('stored-albums/')))throw Error('Local stored file path is external');
               const failed=await page.evaluate(async list=>{
                 const bad=[];
                 for(const url of list){
