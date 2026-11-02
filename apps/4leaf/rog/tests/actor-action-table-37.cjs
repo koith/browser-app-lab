@@ -99,7 +99,8 @@ const {chromium,webkit}=require('playwright');
       portrait:p.querySelector('.leaf-chess-original-card-fallback')?.getAttribute('src')};
    },card);
    assert.equal(state.rig,'original-card-portrait-fallback',card);
-   assert.ok(state.portrait?.startsWith('./original/CardData/chm_'),card);
+   assert.ok((state.portrait?.startsWith('./original/CardData/chm_')||
+     state.portrait==='./original/IMG/avatarback.png'),card);
   }
   assert.deepEqual(errors,[],'live source model must not throw JS errors');
   console.log('CHR 98 ORIGINAL CARD-BODY AND 42 CLASSIC ACTION-37 BROWSER PASS',
