@@ -106,3 +106,9 @@ Source documentation:
 - socialfetch public single-post and Telegram viewer: https://github.com/EdgeAIG/socialfetch
 
 Provider terms, indexing, deletion and CORS rules can change. Keyless index search is a link discovery aid, NOT completeness evidence, a right to republish, or a guarantee of zero errors.
+
+### Follow-up original verification (2026-11-02)
+
+- A second FxEmbed X status comparison corrected a date-parser false negative. Five public X original records resolved with HTTP 200, and two contained the requested literal project keyword. **None** was posted in the preceding 32 days. One keyless Firecrawl original-page scrape also returned HTTP 200, non-empty page text containing the term, but no published-date metadata. Repeated original scrapes remain unreliable: first X request timed out, and Threads/Instagram returned 403.
+- FxEmbed v2 global search is **NOT** a current viable keyless discovery source: despite documented GET /2/search, both project and neutral control queries returned HTTP 404 (see open public upstream issue). Single X original lookup is a separate successfully verified feature, not proof that global X search works.
+- In Chromium running at the GitHub Pages origin, GET https://api.fxtwitter.com/status/20 returned HTTP 200 with a public post and readable JSON via CORS. A manually clicked **X 공개 원문 확인 (무료)** action uses this free endpoint to check the exact post ID, content, keyword and actual provider timestamp before optionally displaying the text. This is an unofficial third-party API, not X's first-party proof; other provider data are still marked indexed-only. No automatic mass collection, storage or download occurs.
