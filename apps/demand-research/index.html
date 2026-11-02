@@ -795,9 +795,11 @@ function adEvidence(post,count){
   return {score,reasons};
 }
 function updateAdScores(){
+  // Identical ad detection applies to both genuine posts and indexed links.
+  const all=cloudMode?posts:posts.concat(indexedCandidates);
   let count=new Map();
-  for(let p of posts){let k=fingerprint(p.text);if(k.length>=28)count.set(k,(count.get(k)||0)+1)}
-  for(let p of posts)p.adEvidence=adEvidence(p,count);
+  for(let p of all){let k=fingerprint(p.text);if(k.length>=28)count.set(k,(count.get(k)||0)+1)}
+  for(let p of all)p.adEvidence=adEvidence(p,count);
 }
 function suspectedAd(post){
   return (post.adEvidence?.score||0)>=4;
@@ -978,7 +980,7 @@ function closeDetail(){
 }
 function draw(){
   updateAdScores();
-  let matching=posts.filter(matchesText),suspected=matching.filter(suspectedAd).length;
+  let matching=(cloudMode?posts:posts.concat(indexedCandidates)).filter(matchesText),suspected=matching.filter(suspectedAd).length;
   let hidden=suspected;
   let rows=feedRows(),list=$("feed");list.replaceChildren();
   let limit=visibleLimit,frag=document.createDocumentFragment();
