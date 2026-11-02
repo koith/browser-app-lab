@@ -182,6 +182,8 @@ def main(argv=None) -> None:
     else:
         if not args.approved_sha256:
             parser.error("--approved-sha256 is required for curated input")
+        if args.input.expanduser().resolve() == args.output.expanduser().resolve():
+            parser.error("output must not overwrite the reviewed source input")
         report = build_reviewed(args.input.read_bytes(), approved_sha256=args.approved_sha256)
     write_report(report, args.output)
     print(json.dumps({"output": str(args.output), "demo": not report["dataset"]["is_real_data"],
