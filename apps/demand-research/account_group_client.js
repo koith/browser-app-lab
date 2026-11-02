@@ -42,7 +42,7 @@ function render(){
  for(const group of rows){
   const details=node("details");
   details.append(node("summary","그룹 "+group.group_id+" · SNS 계정 "+group.account_count+
-    "개 · 고유 원문 "+group.distinct_posts+"건"));
+    "개 · 고유 원문 "+group.distinct_posts+"건 · 하루 1회 제한 기여 "+(group.capped_daily_contributions||0)+"일"));
   const body=node("div");body.className="group-body";
   body.append(node("p","연결 근거: 양방향 공개 프로필에서 서로를 자신의 계정으로 명시"));
   for(const a of group.accounts||[]){
