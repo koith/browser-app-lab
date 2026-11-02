@@ -44,8 +44,8 @@ const {chromium,webkit}=require('playwright');
   await page.waitForSelector('#game:not(.hidden)');
   await page.evaluate(()=>{
    const match=window.__ROG_TEST__.getMatch();
-   match.players[0].team=['c_0042','c_0043','c_0040'];
-   match.players[1].team=['c_0045','c_0046','c_0048'];
+   match.players[0].team=['c_0056','c_0059','c_0060']; // CHR bodies 1040/1042/1043
+   match.players[1].team=['c_0062','c_0063','c_0065']; // independently recovered bodies
    window.__ROG_TEST__.drawGame();
   });
   await page.waitForFunction(()=>document.querySelectorAll('#dice-native-party .dice-chessman-slot.occupied').length>=3);
@@ -76,7 +76,7 @@ const {chromium,webkit}=require('playwright');
    assert.equal(actor.proof,'visually-reviewed');
    assert.equal(actor.sourceFrame,'25');
    assert.ok(/104[023]-25/.test(actor.source)&&actor.source.endsWith('-25.png'),
-    'genuine 2002 OBS source frame 25 for audited 0040/0042/0043 only');
+    'genuine 2002 source frame 25 for CHR-linked members 1040/1042/1043 only');
    assert.ok(actor.image[0]>10&&actor.image[1]>20,
     'full-body original OBS bitmap has real native pixel geometry');
    assert.ok(actor.flipped.startsWith('matrix('),
