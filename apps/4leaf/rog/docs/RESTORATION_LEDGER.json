@@ -1368,6 +1368,50 @@
         "M08",
         "P0-RELEASE"
       ]
+    },
+    {
+      "id": "REQ-20261102-007",
+      "date": "2026-11-02",
+      "origin": "user",
+      "text": "Claude 5차 병렬 개발: 체스맨 원본 전수 복원(OBS/OBS2/OBS3, 누락 6종, 행동표·8방향, SRC-04), D4/D6·전투 원본, DMP/TIS/DMO 구조, 원작 화면 근거. Claude는 추출·디코더·분석·검증 테스트, GPT는 런타임·UI·병합·배포.",
+      "taskIds": [
+        "ACT-01",
+        "ACT-03",
+        "SRC-04",
+        "SRC-01",
+        "BRD-04",
+        "DIE-01",
+        "ACT-05",
+        "SRC-02"
+      ]
+    },
+    {
+      "id": "REQ-20261102-008",
+      "date": "2026-11-02",
+      "origin": "user",
+      "text": "Claude 6차: 미복원 44종(OBS2/OBS3 후보·CHR·EXE 연결), 부분 7종 전 프레임, 원본 행동표 역공학, D4/D6 원본 구조, 원본 확보 경로 확대, 원작 영상·외형 수치화.",
+      "taskIds": [
+        "ACT-01",
+        "ACT-03",
+        "ACT-05",
+        "DIE-01",
+        "SRC-01",
+        "SRC-02"
+      ]
+    },
+    {
+      "id": "REQ-20261102-GPT-009",
+      "date": "2026-11-02",
+      "origin": "user",
+      "text": "GPT: Claude round-5/6 archive tooling을 GitHub data branch에 통합하고 SHA1-검증 원본 센서스 CI 실제 실행, 결과 확인·보존·QA·PR 병합을 진행한다.",
+      "taskIds": [
+        "ACT-01",
+        "ACT-03",
+        "ACT-05",
+        "SRC-04",
+        "SRC-01",
+        "QA-03"
+      ]
     }
   ],
   "tasks": [
@@ -7390,6 +7434,178 @@
         "P0-RELEASE"
       ],
       "details": "During a real WebRTC match, network.js refreshes live game controls on channel reset/open/close and ICE failure; game.js takeTurn rejects disconnected host/guest and unauthorized host rolling during guest's active turn. Playwright two-peer reconnect E2E test now asserts unchanged authoritative positions, round and history for direct handler invocation. Deterministic stale-session test asserts redraw only for current session. Historic original protocol equivalence and mobile carrier/NAT performance remain UNVERIFIED."
+    },
+    {
+      "seq": 333,
+      "date": "2026-11-02",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261102-007",
+      "taskIds": [
+        "ACT-01",
+        "ACT-03",
+        "SRC-04",
+        "SRC-01",
+        "BRD-04",
+        "DIE-01",
+        "ACT-05",
+        "SRC-02"
+      ],
+      "details": "Claude round5 archive source census intake."
+    },
+    {
+      "seq": 334,
+      "date": "2026-11-02",
+      "type": "ACTOR_SOURCE_COVERAGE_RECOUNT",
+      "requestId": "REQ-20261102-007",
+      "taskIds": [
+        "ACT-01",
+        "SRC-01"
+      ],
+      "details": "Checked-in 2002 OBS: source-authentic card bodies 54/98, not older 92/98 (effects/UI incorrectly counted). 45 complete 37-frame actors and nine partial originals (0042,0045,0087,0089,0090,0092,0093,0094,0095). Card 0096–0171 effect/UI members are not proof of bodies. 44 still missing verified bodies; 66 total 37-frame OBS/OBS2/OBS3 members. Historical original mapping remains incomplete."
+    },
+    {
+      "seq": 335,
+      "date": "2026-11-02",
+      "type": "SRC04_PALETTE0_PAIR_AUDIT",
+      "requestId": "REQ-20261102-007",
+      "taskIds": [
+        "SRC-04"
+      ],
+      "details": "Regression test compared 540 bulk vs run-alpha original frame pairs. 21 legacy index-0 transparency losses, 1,618 pixels (0084 1,581; 0086 30; 0085 5; 0088 2). New census will extend check to bulk-only original members. Runtime existing 45 use run-alpha."
+    },
+    {
+      "seq": 336,
+      "date": "2026-11-02",
+      "type": "OBS_STRUCTURE_CLASSIFIER",
+      "requestId": "REQ-20261102-007",
+      "taskIds": [
+        "ACT-03"
+      ],
+      "details": "tools/obs_structure.py 37-frame origin-aligned silhouette classifier passes 42/45 checked-in actors; rejects non-conforming 0084/0085/0086. Model calibrated on same 45, not an independent original EXE action-table decoder."
+    },
+    {
+      "seq": 337,
+      "date": "2026-11-02",
+      "type": "ACTOR_CENSUS_TOOL_READY",
+      "requestId": "REQ-20261102-007",
+      "taskIds": [
+        "ACT-01",
+        "ACT-03",
+        "ACT-05",
+        "SRC-04",
+        "SRC-01"
+      ],
+      "details": "SHA1-verified original archive census workflow and Python pipeline: all OBS packs, run-alpha export of incomplete card bodies, quarantined OBS2/OBS3 candidates, CHR card/body offset tests and binary pattern search. Claude synthetic tests PASS; production CI execution recorded separately."
+    },
+    {
+      "seq": 338,
+      "date": "2026-11-02",
+      "type": "MAP_SOURCE_CORRESPONDENCE",
+      "requestId": "REQ-20261102-007",
+      "taskIds": [
+        "BRD-04",
+        "RULE-01"
+      ],
+      "details": "26 source DMP routes: 25 have MapList.d1 CP949 title, route 0170 has no title, entry 27 is random option not original map. Tile codes 12/13 not yet proven from original EXE."
+    },
+    {
+      "seq": 339,
+      "date": "2026-11-02",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261102-008",
+      "taskIds": [
+        "ACT-01",
+        "ACT-03",
+        "ACT-05",
+        "DIE-01",
+        "SRC-01",
+        "SRC-02"
+      ],
+      "details": "Claude round6 additional archive decoding and asset search intake."
+    },
+    {
+      "seq": 340,
+      "date": "2026-11-02",
+      "type": "SOURCE_ACQUISITION_ROUTES_CHECKED",
+      "requestId": "REQ-20261102-008",
+      "taskIds": [
+        "SRC-01",
+        "ACT-01"
+      ],
+      "details": "Claude session: archive.org inaccessible from shell HTTP000 and WebFetch, GitHub push 403, 518 remote branches examined without missing original decoded data; new original source files 0. Later GPT GitHub-hosted CI successfully downloaded SHA1-verified original client (separate event)."
+    },
+    {
+      "seq": 341,
+      "date": "2026-11-02",
+      "type": "PORTRAIT_MAPPING_PIXEL_TEST_NEGATIVE",
+      "requestId": "REQ-20261102-008",
+      "taskIds": [
+        "ACT-05"
+      ],
+      "details": "Card-to-portrait histogram correlations not better than random: proposed card-39 ranks 53.7/97 overall and 47.8/97 hair (random ~49). No assignment promoted; source CHR evidence still required."
+    },
+    {
+      "seq": 342,
+      "date": "2026-11-02",
+      "type": "DMP_STEP_DIRECTIONS",
+      "requestId": "REQ-20261102-008",
+      "taskIds": [
+        "ACT-03",
+        "BRD-04"
+      ],
+      "details": "Original 26 maps contain 1,894 successive route steps; 1,828 (96.52%) are eight unit directions; diagonals on both row parities. Sprite source has rear/side/front blocks only; exact direction-mirroring/speed rules need EXE decode. Evidence original/maps.json and docs/evidence/dmp-step-directions.json."
+    },
+    {
+      "seq": 343,
+      "date": "2026-11-02",
+      "type": "VIDEO_EVIDENCE_SEARCH",
+      "requestId": "REQ-20261102-008",
+      "taskIds": [
+        "SRC-02"
+      ],
+      "details": "Claude found no downloadable original gameplay video beyond existing still reference screenshots. Motion and FPS timing remain UNVERIFIED."
+    },
+    {
+      "seq": 344,
+      "date": "2026-11-02",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261102-GPT-009",
+      "taskIds": [
+        "ACT-01",
+        "ACT-03",
+        "ACT-05",
+        "SRC-04",
+        "SRC-01",
+        "QA-03"
+      ],
+      "details": "GPT GitHub write-enabled source extraction integration and asset preservation request registered before CI result."
+    },
+    {
+      "seq": 345,
+      "date": "2026-11-02",
+      "type": "ORIGINAL_ACTOR_CENSUS_SHA1_VERIFIED_AND_EXPORTED",
+      "requestId": "REQ-20261102-GPT-009",
+      "taskIds": [
+        "ACT-01",
+        "ACT-03",
+        "ACT-05",
+        "SRC-04",
+        "SRC-01",
+        "QA-03"
+      ],
+      "details": "VERIFIED GitHub Actions run 41383997188 successfully downloaded archive.org/download/4leaf/4leaf.zip with original 2002 SHA1 86526d89679ae39b85fe9808da97ad871b7888d9; unshielded read-only installer; decoded all 245 OBS*.pak members (OBS 166, OBS2 53, OBS3 26). 66 37-frame members total (OBS 64, OBS2 2, OBS3 0), 61 strict pixel-layout matches entirely OBS; OBS2/3 strict candidate body count 0 (prior ~21 guessed candidates REJECTED). Exported 422 SHA256-verified frame PNGs of nine previously partial actor member IDs: 0042 37,0045 37,0087 13,0089 13,0090 51,0092 7,0093 78,0094 14,0095 172, with action-full-ext/manifest.js. 119 CHR records, 11 heuristic member references, 0 CHR offset links passing >=50% and 0 block-pattern hits in native dll/exe; no original action table decoded. Across original bulk comparisons legacy palette index 0 lost 6103 pixels. Source census docs/evidence/obs-census/census.json; extraction source and game code not confused."
+    },
+    {
+      "seq": 346,
+      "date": "2026-11-02",
+      "type": "CENSUS_OUTPUT_PERSISTENCE_VERIFIED",
+      "requestId": "REQ-20261102-GPT-009",
+      "taskIds": [
+        "SRC-01",
+        "ACT-01",
+        "QA-03"
+      ],
+      "details": "First successful CI run 41383794180 verified extraction but GitHub outputs remained untracked due to .gitignore. Repaired workflow to git add -f and reran 41383997188. VERIFIED subsequent data branch contains obs-census/census.json and 422 original pixel PNG files + manifest with SHA256 validated. No OBS2/OBS3 actor candidates were promoted. Production runtime not yet connected; source completeness and original animation fidelity still in_progress."
     }
   ]
 }

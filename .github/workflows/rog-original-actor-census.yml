@@ -1,0 +1,105 @@
+name: 4LEAF original actor census (OBS/OBS2/OBS3, CHR, Dice.dll layout search)
+on:
+  push:
+    branches: ['data/4leaf-actor-census-**']
+    paths:
+      - .github/workflows/rog-original-actor-census.yml
+      - apps/4leaf/rog/tools/census-original-actors.py
+      - apps/4leaf/rog/tools/obs_structure.py
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  census:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install read-only extract dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -qq -y unshield
+          python3 -m pip install --break-system-packages pillow numpy
+      - name: Synthetic tests (no original bytes)
+        run: |
+          python3 apps/4leaf/rog/tests/test_census_original_actors.py
+          python3 apps/4leaf/rog/tests/test_obs_structure_37.py
+          python3 apps/4leaf/rog/tests/test_src04_palette0_pairs.py
+          python3 apps/4leaf/rog/tests/test_dmp_step_directions.py
+      - name: Download archived 2002 client and verify exact SHA1
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/leaf-source /tmp/leaf-resources
+          python3 - <<'PY'
+          import urllib.request,hashlib
+          from pathlib import Path
+          p=Path('/tmp/leaf-source/original.zip')
+          h=hashlib.sha1()
+          req=urllib.request.Request('https://archive.org/download/4leaf/4leaf.zip',headers={'User-Agent':'Mozilla/5.0 (4LEAF archival reproduction)'})
+          with urllib.request.urlopen(req,timeout=120) as response,p.open('wb') as f:
+              while chunk:=response.read(1<<20):
+                  f.write(chunk); h.update(chunk)
+                  if f.tell()>90*1024*1024: raise RuntimeError('archive exceeded 90 MiB')
+          assert h.hexdigest()=='86526d89679ae39b85fe9808da97ad871b7888d9',h.hexdigest()
+          print('ORIGINAL_4LEAF_2002_SHA1_VERIFIED',h.hexdigest())
+          PY
+          unzip -q /tmp/leaf-source/original.zip data1.cab data1.hdr -d /tmp/leaf-source
+          unshield x -d /tmp/leaf-resources /tmp/leaf-source/data1.cab >/dev/null
+      - name: Census every original actor source (read-only, no Windows code executed)
+        run: python3 apps/4leaf/rog/tools/census-original-actors.py /tmp/leaf-resources "$GITHUB_WORKSPACE" /tmp/census-artifact
+      - name: Verify exported pixels against their manifests
+        run: |
+          python3 - <<'PY'
+          import json,hashlib
+          from pathlib import Path
+          rog=Path('apps/4leaf/rog')
+          c=json.loads((rog/'docs/evidence/obs-census/census.json').read_text())
+          assert c['claims']['exeActionTableDecoded'] is False
+          packs={p['name'].lower() for p in c['packs']}
+          assert {'obs.pak','obs2.pak','obs3.pak'}<=packs,packs
+          assert len(c['members'])>=240,len(c['members'])
+          for folder in ('action-full-ext','obs23-candidates'):
+              directory=rog/'original/OBS'/folder
+              manifest=directory/'manifest.js'
+              if not manifest.exists(): print('NO',folder); continue
+              text=manifest.read_text()
+              data=json.loads(text[text.index('={')+1:text.rindex(';')])
+              count=0
+              for key,rec in data.items():
+                  for frame in rec['frames']:
+                      payload=(rog/frame['url'][2:]).read_bytes()
+                      assert hashlib.sha256(payload).hexdigest()==frame['sha256'],(key,frame['url'])
+                      count+=1
+              assert count==len(list(directory.glob('*.png'))),(folder,count)
+              print('VERIFIED',folder,len(data),'members',count,'frames')
+          if (rog/'original/OBS/obs23-candidates/manifest.js').exists():
+              text=(rog/'original/OBS/obs23-candidates/manifest.js').read_text()
+              assert '"assignedCard": null' in text
+          PY
+          for f in apps/4leaf/rog/original/OBS/action-full-ext/manifest.js apps/4leaf/rog/original/OBS/obs23-candidates/manifest.js; do [ -f "$f" ] && node --check "$f"; done; true
+      - name: Keep review sheets, member byte dumps and CHR records as a short-lived artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: 4leaf-actor-census
+          path: /tmp/census-artifact
+          retention-days: 7
+      - name: Commit census JSON and exported original pixels to this data branch only
+        if: github.ref != 'refs/heads/main'
+        run: |
+          set -euo pipefail
+          git config user.name "4LEAF source extract bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          test -s apps/4leaf/rog/docs/evidence/obs-census/census.json
+          git add -f apps/4leaf/rog/docs/evidence/obs-census/census.json
+          if [ -d apps/4leaf/rog/original/OBS/action-full-ext ]; then git add -f apps/4leaf/rog/original/OBS/action-full-ext; fi
+          if [ -d apps/4leaf/rog/original/OBS/obs23-candidates ]; then git add -f apps/4leaf/rog/original/OBS/obs23-candidates; fi
+          echo "CENSUS_STAGED_FILE_COUNT=$(git diff --cached --name-only | wc -l)"
+          git diff --cached --quiet || git commit -m "data(4leaf): original actor census and quarantined OBS2/OBS3 candidate pixels"
+          for attempt in 1 2 3; do
+            git fetch origin "$GITHUB_REF_NAME"
+            git rebase "origin/$GITHUB_REF_NAME"
+            if git push origin "HEAD:refs/heads/$GITHUB_REF_NAME"; then exit 0; fi
+            sleep 3
+          done
+          exit 1
