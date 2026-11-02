@@ -42,7 +42,7 @@ assert.match(meta.version,/^0\.86\.0-beta\.\d+$/,'current verified revival beta 
 const release=read('index.html');
 assert.ok(release.includes('name="leaf-revival-version" content="'+meta.version+'"'),
  'deployed app index must advertise same source restoration beta');
-assert.equal(meta.pwaCache,'4leaf-revival-pwa-v137','native card source must get new offline cache');
+assert.equal(meta.pwaCache,'4leaf-revival-pwa-v138','native card source must get new offline cache');
 const diceFall=read('dice-fall.js');
 assert.ok(diceFall.includes('EMBEDDED_PALETTE_REVIEWED_SHA256=Object.freeze({})'),
  'incorrect per-block palettes must not be approved by default');
