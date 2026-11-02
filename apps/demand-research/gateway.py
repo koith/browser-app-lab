@@ -9,6 +9,7 @@ from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 from datetime import datetime, timezone, timedelta
 from social_sources import TERMS, ROUTES, request_one_page
 import account_index
+import account_index_sources
 
 app=FastAPI(title="Demand Research Private Cloud",docs_url=None,redoc_url=None)
 app.add_middleware(CORSMiddleware,allow_origins=["https://koith.github.io","http://localhost:8765"],allow_methods=["GET","OPTIONS"],allow_headers=["Authorization","Content-Type"])
@@ -66,6 +67,13 @@ async def start_account_index():
                 await refresh_account_index()
             except Exception as error:
                 print("ACCOUNT_INDEX_REFRESH_FAILED",type(error).__name__,flush=True)
+            if os.getenv("DEMAND_AUTO_PUBLIC_INDEX","1")=="1":
+                try:
+                    result=await asyncio.to_thread(account_index_sources.run_batch,INDEX_DB)
+                    if result.get("requests"):
+                        print("ACCOUNT_INDEX_PUBLIC_WINDOW",json.dumps(result),flush=True)
+                except Exception as error:
+                    print("ACCOUNT_INDEX_PUBLIC_FAILED",type(error).__name__,flush=True)
             await asyncio.sleep(INDEX_SECONDS)
     _index_task=asyncio.create_task(periodic())
 
@@ -199,6 +207,8 @@ async def accounts_status(request:Request):
     if not _index_lock.locked() and (not _index_synced_at or time.monotonic()-_index_synced_at>INDEX_SECONDS):
         asyncio.create_task(refresh_account_index())
     data=await asyncio.to_thread(account_index.status,INDEX_DB)
+    if os.getenv("DEMAND_AUTO_PUBLIC_INDEX","1")=="1":
+        data["public_scan_windows"]=await asyncio.to_thread(account_index_sources.coverage,INDEX_DB)
     data.update({"refreshing":_index_lock.locked(),
                  "refresh_error":_index_last_error,"persistent_db_configured":True})
     return JSONResponse(data,headers={"Cache-Control":"private, no-store"})
