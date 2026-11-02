@@ -1,0 +1,42 @@
+name: Synthetic Consumer Review Dedup QA
+
+on:
+  pull_request:
+    paths:
+      - "apps/demand-research/consumer_dedup.py"
+      - "apps/demand-research/test_consumer_dedup.py"
+      - "apps/demand-research/README_consumer_dedup.md"
+      - ".github/workflows/demand-synthetic-review-dedup.yml"
+  push:
+    branches: [main]
+    paths:
+      - "apps/demand-research/consumer_dedup.py"
+      - "apps/demand-research/test_consumer_dedup.py"
+      - "apps/demand-research/README_consumer_dedup.md"
+      - ".github/workflows/demand-synthetic-review-dedup.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  synthetic-only-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            apps/demand-research/consumer_dedup.py
+            apps/demand-research/test_consumer_dedup.py
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install pytest
+        run: python -m pip install pytest
+      - name: Python syntax and isolated synthetic tests
+        working-directory: apps/demand-research
+        run: |
+          python -m py_compile consumer_dedup.py test_consumer_dedup.py
+          python -m pytest -q test_consumer_dedup.py
