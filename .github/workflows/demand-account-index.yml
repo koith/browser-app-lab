@@ -1,0 +1,45 @@
+name: Demand Research — Private Account Index QA
+on:
+  pull_request:
+    paths:
+      - "apps/demand-research/account_index.py"
+      - "apps/demand-research/gateway.py"
+      - "apps/demand-research/account_index_client.js"
+      - "apps/demand-research/account_auto_analysis.js"
+      - "apps/demand-research/index.html"
+      - "apps/demand-research/test_account_index.py"
+      - "apps/demand-research/Dockerfile"
+      - ".github/workflows/demand-account-index.yml"
+  push:
+    branches: [main]
+    paths:
+      - "apps/demand-research/account_index.py"
+      - "apps/demand-research/gateway.py"
+      - "apps/demand-research/account_index_client.js"
+      - "apps/demand-research/account_auto_analysis.js"
+      - "apps/demand-research/index.html"
+      - "apps/demand-research/test_account_index.py"
+      - "apps/demand-research/Dockerfile"
+      - ".github/workflows/demand-account-index.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  private-index:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Python and browser module syntax
+        run: |
+          python -m py_compile apps/demand-research/account_index.py apps/demand-research/gateway.py apps/demand-research/test_account_index.py
+          node --check apps/demand-research/account_index_client.js
+          node --check apps/demand-research/account_auto_analysis.js
+      - name: Install only pinned test dependencies
+        run: python -m pip install --disable-pip-version-check fastapi==0.115.12 httpx==0.28.1 pytest==8.3.5
+      - name: Private index and existing gateway regressions
+        working-directory: apps/demand-research
+        run: python -m pytest -q test_account_index.py test_gateway.py test_social_sources.py
