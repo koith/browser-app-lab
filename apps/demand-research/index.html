@@ -414,13 +414,13 @@ main{padding-top:10px}
 <div class="sr-only" id="count" role="status" aria-live="polite">불러오는 중…</div>
 <section class="index-search hidden" id="freeDiscovery" aria-label="무료 SNS 게시글 링크 검색">
   <div class="index-top"><strong>다른 SNS 게시글 찾기</strong><span class="index-indexed">검색 인덱스 · 원문 미확인</span></div>
-  <p class="index-info">계정·결제 없이 X, Threads, Instagram의 공개 검색 인덱스를 조회합니다. 표시되는 것은 원본 게시글이 아니라 검색 결과 링크입니다. 게시 날짜와 원문 일치는 확인되지 않으며, 위의 기간 필터는 적용되지 않습니다.</p>
+  <p class="index-info">계정·결제 없이 X·Threads·Instagram을 함께 검색합니다. 확인된 X 공개 원문은 선택한 기간에 맞으면 게시글 목록에 추가합니다. Threads·Instagram은 공개 페이지 내용을 별도로 확인하되, 검증 전 결과를 실제 수집 건수로 계산하지 않습니다.</p>
   <div class="index-actions">
-    <select id="indexPlatform" aria-label="무료 검색 SNS"><option value="x">X</option><option value="threads">Threads</option><option value="instagram">Instagram</option></select>
-    <select id="indexTerm" aria-label="무료 SNS 검색어"><option value="뒷계">뒷계</option><option value="섹트">섹트</option><option value="일탈계">일탈계</option></select>
-    <button id="indexFind" type="button">무료 SNS 링크 찾기</button>
+    <select id="indexPlatform" aria-label="무료 검색 SNS"><option value="all">전체 SNS</option><option value="x">X</option><option value="threads">Threads</option><option value="instagram">Instagram</option></select>
+    <select id="indexTerm" aria-label="무료 SNS 검색어"><option value="all">전체 검색어</option><option value="뒷계">뒷계</option><option value="섹트">섹트</option><option value="일탈계">일탈계</option></select>
+    <button id="indexFind" type="button">다른 SNS 전체 조회</button>
   </div>
-  <p id="indexStatus" class="index-status" role="status" aria-live="polite">검색 버튼을 누르면 무료 검색 인덱스를 조회합니다. 자동·유료 검색은 실행하지 않습니다.</p>
+  <p id="indexStatus" class="index-status" role="status" aria-live="polite">조회 버튼을 누르면 세 SNS를 무료로 검색합니다. 자동 검색·유료 API·클라우드 저장은 실행하지 않습니다.</p>
   <div id="indexResults" class="index-results" aria-live="polite"></div>
   <button id="indexMore" class="index-more hidden" type="button">검색 후보 더 보기</button>
 </section>
@@ -528,7 +528,7 @@ const FEDERATED=[
   {id:"reddit",origin:"https://api.pullpush.io",type:"reddit"}
 ];
 let federationCursors=new Map(),federationSourceFailures=new Map(),
-    serviceCounts={bluesky:0,mastodon:0,lemmy:0,misskey:0,reddit:0};
+    serviceCounts={bluesky:0,mastodon:0,lemmy:0,misskey:0,reddit:0,x:0};
 function safePublicLink(s,origin){
   let href=validUrl(s);
   if(!href)return "";
@@ -557,6 +557,39 @@ function addFederatedRow(row,term,start,end){
   row.restricted=!!row.restricted;
   ids.set(row.id,row);posts.push(row);return true;
 }
+/* Cross-network source validation is explicit, ephemeral and date-scoped.
+   An indexed snippet alone can never add a source to the real feed. */
+window.INTERSECTION_acceptPublicX=function(record){
+  if(cloudMode||!record||typeof record!=="object")return {accepted:false,reason:"unsupported"};
+  const id=String(record.id||""),txt=String(record.text||"");
+  if(!/^[0-9]{10,25}$/.test(id)||!txt||txt.length>5000||record.protected===true)
+    return {accepted:false,reason:"invalid"};
+  const terms=TERMS.filter(term=>txt.includes(term));
+  if(!terms.length)return {accepted:false,reason:"keyword"};
+  let url,match;
+  try{
+    url=new URL(String(record.url||""));
+    if(url.protocol!=="https:"||!["x.com","twitter.com"].includes(url.hostname.toLowerCase())||
+       url.username||url.password)return {accepted:false,reason:"origin"};
+    match=/^\/([a-zA-Z0-9_]{1,15})\/status\/([0-9]+)\/?$/.exec(url.pathname);
+  }catch{return {accepted:false,reason:"origin"}}
+  if(!match||match[2]!==id)return {accepted:false,reason:"permalink"};
+  const posted=Date.parse(String(record.created_at||""));
+  if(!Number.isFinite(posted)||posted>Date.now()+DAY||posted<0)
+    return {accepted:false,reason:"date"};
+  const key="x:"+id;
+  if(ids.has(key))return {accepted:false,reason:"duplicate"};
+  if(!(posted>=fromMs&&posted<toMs))return {accepted:false,reason:"outside-period"};
+  const name=String(record.author||"").trim().slice(0,75)||"@"+match[1];
+  const profileUrl="https://x.com/"+match[1],canonical="https://x.com/"+match[1]+"/status/"+id;
+  const post={id:key,platform:"x",author:name,profileUrl,url:canonical,text:txt,
+    posted:new Date(posted).toISOString(),indexed:new Date(posted).toISOString(),
+    terms:new Set(terms),media:[],adultLabeled:false,restricted:false,
+    verification:"unofficial-public-source"};
+  ids.set(key,post);posts.push(post);updateServiceCounts();draw();
+  return {accepted:true,reason:"matched"};
+};
+
 function addMastodonStatus(item,term,start,end){
   if(!item||!item.id||item.visibility!=="public")return false;
   const account=item.account||{},body=textFromHtml(item.content||"");
@@ -917,7 +950,7 @@ function draw(){
   let coverage=cloudMode?" · 테라박스 저장본":" · 조회 "+daysCovered+"일 / "+(Math.ceil((toMs-fromMs)/DAY))+"일";
   let warnings=(failed||incomplete)?" · 일부 구간 미확인 "+(failed+incomplete)+"건":"";
   updateServiceCounts();
-  let sources=" · B"+serviceCounts.bluesky+" M"+serviceCounts.mastodon+" L"+serviceCounts.lemmy+" K"+serviceCounts.misskey+" R"+serviceCounts.reddit;
+  let sources=" · B"+serviceCounts.bluesky+" M"+serviceCounts.mastodon+" L"+serviceCounts.lemmy+" K"+serviceCounts.misskey+" R"+serviceCounts.reddit+" X"+serviceCounts.x;
   $("count").textContent=rows.length.toLocaleString()+"건"+(cloudMode?"":sources)+(hidden?" · 광고 "+hidden.toLocaleString()+"건 제외":"")+(rows.length>limit?" · "+limit+"건 표시":"");
   $("count").setAttribute("aria-label",rows.length.toLocaleString()+"개 표시 / "+matching.length.toLocaleString()+"개 조회"+coverage+warnings);
 }
