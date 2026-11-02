@@ -137,7 +137,8 @@ function playerCanAct(){
  if(activePlayer().bot&&!(match.mode==='ai'&&match.botAutoplay===false))return false;
  if(match.mode==='network'&&!remoteAct){
    const net=window.__LEAF_NET__;
-   return !!(net?.connected&&match.active===(net.role==='host'?0:1));
+   const ownedSeat=net?.role==='host'?0:net?.role==='guest'?1:null;
+   return !!(net?.connected&&ownedSeat!==null&&match.active===ownedSeat);
  }
  return true;
 }
@@ -1803,6 +1804,10 @@ async function computerPrepareTurn(p){
 }
 async function takeTurn(){
  if(!match||match.finished||busy)return;
+ // Host-authoritative WebRTC: a disconnected peer, or a host acting during
+ // the remote guest's turn, must never mutate the saved match.  Remote guest
+ // commands are still executed under remoteAct by the connected host.
+ if(match.mode==='network'&&(!window.__LEAF_NET__?.connected||(!remoteAct&&!playerCanAct())))return;
  if(match.mode==='network'&&window.__LEAF_NET__?.role==='guest'&&!remoteAct){
    if(playerCanAct())window.__LEAF_NET__?.send?.({type:'command',action:'roll'});
    return;

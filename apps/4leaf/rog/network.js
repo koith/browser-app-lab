@@ -7,11 +7,13 @@
  let peer=null,channel=null,outputOffer=null,outputAnswer=null,inputOffer=null,inputAnswer=null,state=null;
  const settings={iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'}]};
  function notice(text,ok=false){if(state){state.textContent=text;state.className=ok?'net-status connected':'net-status'}}
+ // Real match controls must reflect connection changes even if no turn redraw occurs.
+ function refreshTurnControls(){window.__ROG_TEST__?.drawGame?.()}
  function encode(data){return btoa(JSON.stringify(data))}
  function decode(value,type){let result;try{result=JSON.parse(atob(value.replace(/\s/g,'')))}catch{throw Error('코드 형식이 올바르지 않습니다.')}if(result?.type!==type||typeof result.sdp!=='string'||!result.sdp.startsWith('v=0')||result.sdp.length>85000)throw Error('다른 연결 코드가 입력됐습니다.');return result}
  async function gather(pc){if(pc.iceGatheringState==='complete')return;await new Promise(resolve=>{let timer;const finish=()=>{clearTimeout(timer);pc.removeEventListener('icegatheringstatechange',check);resolve()};const check=()=>{if(pc.iceGatheringState==='complete')finish()};pc.addEventListener('icegatheringstatechange',check);timer=setTimeout(finish,10500)})}
  function send(data){if(!net.connected||channel?.readyState!=='open')return false;try{channel.send(JSON.stringify(data));return true}catch{return false}}
- function reset(){net.connected=false;net.role=null;try{channel?.close()}catch{}try{peer?.close()}catch{}channel=null;peer=null}
+ function reset(){net.connected=false;net.role=null;try{channel?.close()}catch{}try{peer?.close()}catch{}channel=null;peer=null;refreshTurnControls()}
  function openPeer(role){
    if(typeof RTCPeerConnection==='undefined')throw Error('이 WebView는 WebRTC 통신을 지원하지 않습니다.');
    reset();net.role=role;
@@ -23,6 +25,7 @@
      if(peer!==pc)return;
      if(pc.connectionState==='failed'){
        net.connected=false;
+       refreshTurnControls();
        notice('직접 연결 실패: 양쪽 네트워크 또는 방화벽을 확인하세요.');
      }
    };
@@ -33,13 +36,14 @@
    const isCurrent=()=>channel===ch;
    channel.onopen=()=>{
      if(!isCurrent())return;
-     net.connected=true;if(net.role==='host'&&bridge())bridge().onState=m=>send({type:'state',match:m});notice(net.role==='host'?'연결 완료! 아래 게임 시작으로 2인 대전을 열 수 있습니다.':'연결 완료! 호스트가 경기를 시작하면 자동으로 입장합니다.',true);
+     net.connected=true;if(net.role==='host'&&bridge())bridge().onState=m=>send({type:'state',match:m});refreshTurnControls();notice(net.role==='host'?'연결 완료! 아래 게임 시작으로 2인 대전을 열 수 있습니다.':'연결 완료! 호스트가 경기를 시작하면 자동으로 입장합니다.',true);
      send({type:'hello',name:bridge()?.getName?.()||'Guest'});
      if(net.role==='host'&&bridge()?.getMatch?.()?.mode==='network')send({type:'state',match:bridge().getMatch()});
    };
    channel.onclose=()=>{
      if(!isCurrent())return;
      net.connected=false;
+     refreshTurnControls();
      notice('상대와 연결이 끊어졌습니다. 다시 초대를 생성하세요.');
    };
    channel.onerror=()=>{if(isCurrent())notice('통신 오류. 연결 코드를 재발급하세요.')};

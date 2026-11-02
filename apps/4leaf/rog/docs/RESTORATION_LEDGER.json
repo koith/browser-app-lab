@@ -1357,6 +1357,17 @@
         "M08",
         "P0-RELEASE"
       ]
+    },
+    {
+      "id": "REQ-20261102-GPT-006",
+      "date": "2026-11-02",
+      "origin": "GPT independent network code review following Claude round 5 report",
+      "text": "멀티플레이 호스트/게스트 연결 해제 후 주사위 조작 상태와 실제 게임 엔진 권한 검사 동기화. 비연결 호스트와 게스트 턴 동안의 호스트 강제 롤 차단, 재접속 후 조작 허용 회귀 검증.",
+      "taskIds": [
+        "RULE-03",
+        "M08",
+        "P0-RELEASE"
+      ]
     }
   ],
   "tasks": [
@@ -7355,6 +7366,30 @@
         "RULE-03"
       ],
       "details": "Implementation and deterministic test added, but historical equivalence, multi-device reconnection and mobile network QA still pending."
+    },
+    {
+      "seq": 331,
+      "date": "2026-11-02",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261102-GPT-006",
+      "taskIds": [
+        "RULE-03",
+        "M08",
+        "P0-RELEASE"
+      ],
+      "details": "GPT network authority restoration work registered before implementation: reject dice roll when disconnected or out of turn, redraw controls on WebRTC channel lifecycle, verify real two-browser reconnect. Historical equivalence and mobile network QA remain open."
+    },
+    {
+      "seq": 332,
+      "date": "2026-11-02",
+      "type": "NETWORK_DISCONNECT_AUTHORITY_GUARD",
+      "requestId": "REQ-20261102-GPT-006",
+      "taskIds": [
+        "RULE-03",
+        "M08",
+        "P0-RELEASE"
+      ],
+      "details": "During a real WebRTC match, network.js refreshes live game controls on channel reset/open/close and ICE failure; game.js takeTurn rejects disconnected host/guest and unauthorized host rolling during guest's active turn. Playwright two-peer reconnect E2E test now asserts unchanged authoritative positions, round and history for direct handler invocation. Deterministic stale-session test asserts redraw only for current session. Historic original protocol equivalence and mobile carrier/NAT performance remain UNVERIFIED."
     }
   ]
 }
