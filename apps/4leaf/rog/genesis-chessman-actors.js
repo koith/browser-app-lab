@@ -186,7 +186,7 @@
  function sequenceFor(native,action,id,travel,context={}){
   const all=native.frames||[];
   const at=index=>all.find(f=>f.index===index)||null;
-  const facing=frontFacingSource(native,bodyVisualId(id));
+  const facing=frontFacingSource(native,id);
   const front=facing.frame;
   const approved=Object.hasOwn(AUDITED_FRONT_SOURCE,id)&&
    facing.evidence.startsWith('visual-original-OBS-reviewed/');
@@ -311,10 +311,9 @@
    // Normalize only the per-character reference pivot to the shared
    // DMP tile top. Preserve every source frame's relative origin motion.
    // Absolute foot pivot is inferred; original frame metadata remains intact.
-   const native=pawn.dataset.sourceFullUnavailable==='true'
-    ?window.ORIGINAL_LEAF_OBS_FRAMES?.[pawn.dataset.chessmanId]
-    :originalFor(pawn.dataset.chessmanId);
-   const standing=frontFacingSource(native,bodyVisualId(pawn.dataset.chessmanId)).frame||frame;
+   const native=originalFor(pawn.dataset.chessmanId);
+   const standing=window.__LEAF_NATIVE_CARD_ACTIONS__?.frontFrame(native,pawn.dataset.chessmanId)||
+    frontFacingSource(native,bodyVisualId(pawn.dataset.chessmanId)).frame||frame;
    const sourceFoot=(frame.originY+frame.height);
    const standingFoot=(standing.originY+standing.height);
    const relativeSourceOffset=sourceFoot-standingFoot;
@@ -334,9 +333,7 @@
    // If an on-demand full-source asset is not cached offline, keep using
    // the already shipped original partial OBS sprites rather than dropping
    // the player's full-body Genesis chessman to a card.
-   const native=pawn.dataset.sourceFullUnavailable==='true'
-    ?window.ORIGINAL_LEAF_OBS_FRAMES?.[id]
-    :originalFor(id);
+   const native=originalFor(id);
    if(!native?.frames?.length||pawn.dataset.obsUnavailable==='true'){
      const previousImage=pawn.querySelector('img.leaf-chess-original-obs');
      if(previousImage)previousImage.hidden=true;
@@ -439,7 +436,9 @@
      :native.hasVerifiedFrameZero===false
       ?'unverified-frame-zero-missing/static-source-pose':'unverified';
    img.hidden=false;
-   const facing=frontFacingSource(native,bodyVisualId(id));
+   const sourceNativeFront=window.__LEAF_NATIVE_CARD_ACTIONS__?.frontFrame(native,id);
+   const facing=sourceNativeFront?{frame:sourceNativeFront,evidence:'CHR-native-front-keys/role-INFERRED'}:
+    frontFacingSource(native,bodyVisualId(id));
    pawn.dataset.sourceFacingFrame=facing.frame?String(facing.frame.index):'none';
    pawn.dataset.sourceFacingEvidence=facing.evidence;
    pawn.dataset.sourceDirection='front-source-candidate/not-EXE-direction-table';
@@ -447,9 +446,17 @@
    const duel=pawn.classList.contains('leaf-battle-chessman');
    const duelSide=pawn.dataset.duelSide||
     (pawn.closest('.battle-visual-side')?.classList.contains('attacker')?'attacker':'defender');
-   const seq=sequenceFor(native,action,bodyVisualId(id),travel,{duel,side:duelSide,rest:pawn.dataset.travelFacing||'toward'});
+   const context={duel,side:duelSide,rest:pawn.dataset.travelFacing||'toward'};
+   const nativeSeq=window.__LEAF_NATIVE_CARD_ACTIONS__?.sequenceFor(native,id,action,travel,context);
+   const seq=nativeSeq||sequenceFor(native,action,bodyVisualId(id),travel,context);
    pawn.dataset.sourceMirror=seq.mirror?'true':'false';
-   pawn.dataset.sourceActionTable=seq.table?seq.table+'/structural-37/INFERRED':'legacy';
+   pawn.dataset.sourceActionTable=nativeSeq
+    ?seq.table+'/original-index-VERIFIED/action-label-INFERRED'
+    :seq.table?seq.table+'/structural-37/INFERRED':'legacy';
+   pawn.dataset.sourceNativeKeyTicks=nativeSeq?seq.nativeKeyTicks.join(','):'';
+   pawn.dataset.sourceKeyframeProvenance=nativeSeq?seq.nativeEvidence:'WEB-structural-guess';
+   pawn.dataset.sourceNativeMilliseconds=nativeSeq?seq.nativeMilliseconds:'';
+   pawn.dataset.sourceNativeEffects=nativeSeq?seq.nativeEffects:'';
    pawn.dataset.actorWalkFacing=action==='walk'?travel:'';
    pawn.dataset.sourceTravelFacing=action==='walk'&&travel==='left'&&
      seq.length&&seq[0].index===LEFT_PROFILE_WALK_INDICES[0]
@@ -465,12 +472,19 @@
      ?'front-three-quarter-18/visual-reviewed/INFERRED':'n/a';
    if(action==='walk'&&travel==='left'&&seq.length===4&&seq[0].index===14)
     pawn.dataset.sourceDirection='left-profile-source-14-17/2002-EXE-direction-unverified';
-   if(seq.table){
+   if(seq.table&&!nativeSeq){
     if(action==='walk')pawn.dataset.sourceTravelFacing=seq.table+(seq.mirror?'-mirrored':'')+'/structural-37/INFERRED';
     if(action==='attack')pawn.dataset.sourceAttackEvidence=seq.table+(seq.mirror?'-mirrored':'')+'/structural-37/INFERRED';
     if(action==='idle')pawn.dataset.sourceIdleFacing=seq.table+(seq.mirror?'-mirrored':'')+'/structural-37/INFERRED';
     if(action==='hurt'||action==='victory')pawn.dataset.sourceOutcomeEvidence=seq.table+'/no-source-'+action+'-frame/UNVERIFIED';
     pawn.dataset.sourceDirection=(seq.table.split('-')[1]||'front')+(seq.mirror?'-mirrored':'')+'/structural-37/EXE-table-unverified';
+   }
+   if(nativeSeq){
+    pawn.dataset.sourceDirection=seq.table+'/source-index-VERIFIED/semantic-role-INFERRED';
+    if(action==='walk')pawn.dataset.sourceTravelFacing=pawn.dataset.sourceDirection;
+    if(action==='idle')pawn.dataset.sourceIdleFacing=pawn.dataset.sourceDirection;
+    pawn.dataset.sourceFrontWalkVerified=String(action==='walk'&&seq.length>1);
+    pawn.dataset.sourceWalkCoverage='native-CHR-OBS-indices/2002-ms-UNVERIFIED';
    }
    // Expose EXACT SOURCE packet indexes independently from inferred labels;
    // QA can inspect what was really rendered during genuine gameplay.
@@ -484,7 +498,7 @@
        ?'front-source-pair/visual-reviewed; WEB-movement-and-FPS-inferred'
        :'front-source-static/visual-reviewed; native-action-table-unknown')
     :'source-packets/orientation-and-2002-action-unverified';
-   pawn.dataset.sourceFrameSequenceProvenance='original-OBS-indexes/WEB-action-timing-unverified';
+   pawn.dataset.sourceFrameSequenceProvenance=nativeSeq?seq.nativeEvidence:'original-OBS-indexes/WEB-action-timing-unverified';
    renderNativeFrame(pawn,seq[0]);
    const sourceSheet=pawn.querySelector('.leaf-chess-source-frame');
    if(sourceSheet)sourceSheet.hidden=true;
@@ -494,8 +508,9 @@
    // while no actual new gameplay action had occurred. Original OBS bytes
    // remain untouched; action-to-source-index/FPS remains UNVERIFIED.
    const loops=action==='walk'||seq.loop===true;
-   pawn.dataset.sourcePlaybackMode=loops?'loop/WEB-motion-inferred'
-    :'one-shot/WEB-action-unverified';
+   pawn.dataset.sourcePlaybackMode=nativeSeq
+    ?(loops?'loop':'one-shot')+'/OBS-source-index-VERIFIED/WEB-ms-INFERRED'
+    :loops?'loop/WEB-motion-inferred':'one-shot/WEB-action-unverified';
    pawn.dataset.sourcePlaybackComplete='false';
    if(seq.length>1&&!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches){
      let i=0;
@@ -693,6 +708,7 @@
   getState:()=>({
    originalFullBodyFramesRecovered:Object.keys(window.__LEAF_CHR_BODY_MAP__?.cards||{}).filter(id=>!!originalFor(id)),
    chrSourceMapping:window.__LEAF_CHR_BODY_MAP__?.getState()||null,
+   nativeActionMapping:window.__LEAF_NATIVE_CARD_ACTIONS__?.getState()||null,
    nativeObsEffectMembers:{...NON_ACTOR_OBS},
    originalFrontVisualAudited:{...AUDITED_FRONT_SOURCE},
    reviewedBackWalk:[...REVIEWED_BACK_WALK],
