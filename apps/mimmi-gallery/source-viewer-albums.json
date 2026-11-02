@@ -8,8 +8,8 @@
   "disclaimer": "Every image is verified public source evidence, not a purchased full photobook. Public sites may block remote image hotlinks.",
   "summary": {
     "displayed_albums": 72,
-    "verified_unique_source_images": 3108,
-    "input_source_image_occurrences": 3289,
+    "verified_unique_source_images": 3109,
+    "input_source_image_occurrences": 3290,
     "duplicate_hashes_skipped": 181,
     "photos_with_alternative_public_source": 111,
     "actual_full_publisher_photobooks": 0,
@@ -4485,13 +4485,15 @@
           "number": 3,
           "url": "https://cdn.v2ph.com/photos/yqsmItlKWfVodSSs.jpg",
           "source_url": "https://cdn.v2ph.com/photos/yqsmItlKWfVodSSs.jpg",
-          "sha256": "2d494cf4724a00b04f76785d2f0be79ebc0eefb09068bf316ddd6e381329adfe",
+          "sha256": "7930769728f0a1e70831a62835c61f2ae5d7d4532666f43f73d3308d8c37e4b1",
           "width": 2700,
           "height": 1800,
-          "bytes": 265078,
+          "bytes": 255346,
           "quality": "third_party_public_web",
           "publisher_original_verified": false,
-          "alternate_source_urls": []
+          "alternate_source_urls": [
+            "https://img-jp-a.cdnimg.vip/korea/2025/12/10/5513lqlp2bd.jpg"
+          ]
         },
         {
           "number": 4,
@@ -4511,13 +4513,15 @@
           "number": 5,
           "url": "https://cdn.v2ph.com/photos/4lxVIzKwr4NXhf7O.jpg",
           "source_url": "https://cdn.v2ph.com/photos/4lxVIzKwr4NXhf7O.jpg",
-          "sha256": "1b9c9a00157c156bc78f5fa2a1b15b878269b91ea33d9dfbf6fb44a6b1f949ee",
+          "sha256": "5ee92acf7dd1de5a4670a5edac826b27ee9fa648a0ee85a8f88e661c928402c0",
           "width": 1800,
           "height": 2700,
-          "bytes": 259415,
+          "bytes": 252299,
           "quality": "third_party_public_web",
           "publisher_original_verified": false,
-          "alternate_source_urls": []
+          "alternate_source_urls": [
+            "https://img-jp-a.cdnimg.vip/korea/2025/12/10/pkzdqo535r4.jpg"
+          ]
         },
         {
           "number": 6,
@@ -4593,29 +4597,25 @@
           "number": 11,
           "url": "https://cdn.v2ph.com/photos/yqsmItlKWfVodSSs.jpg",
           "source_url": "https://cdn.v2ph.com/photos/yqsmItlKWfVodSSs.jpg",
-          "sha256": "7930769728f0a1e70831a62835c61f2ae5d7d4532666f43f73d3308d8c37e4b1",
+          "sha256": "2d494cf4724a00b04f76785d2f0be79ebc0eefb09068bf316ddd6e381329adfe",
           "width": 2700,
           "height": 1800,
-          "bytes": 255346,
+          "bytes": 265078,
           "quality": "third_party_public_web",
           "publisher_original_verified": false,
-          "alternate_source_urls": [
-            "https://img-jp-a.cdnimg.vip/korea/2025/12/10/5513lqlp2bd.jpg"
-          ]
+          "alternate_source_urls": []
         },
         {
           "number": 12,
           "url": "https://cdn.v2ph.com/photos/4lxVIzKwr4NXhf7O.jpg",
           "source_url": "https://cdn.v2ph.com/photos/4lxVIzKwr4NXhf7O.jpg",
-          "sha256": "5ee92acf7dd1de5a4670a5edac826b27ee9fa648a0ee85a8f88e661c928402c0",
+          "sha256": "1b9c9a00157c156bc78f5fa2a1b15b878269b91ea33d9dfbf6fb44a6b1f949ee",
           "width": 1800,
           "height": 2700,
-          "bytes": 252299,
+          "bytes": 259415,
           "quality": "third_party_public_web",
           "publisher_original_verified": false,
-          "alternate_source_urls": [
-            "https://img-jp-a.cdnimg.vip/korea/2025/12/10/pkzdqo535r4.jpg"
-          ]
+          "alternate_source_urls": []
         },
         {
           "number": 13,
@@ -20614,10 +20614,10 @@
           "number": 7,
           "url": "https://cdn.v2ph.com/photos/X1a-Ak2c2CLy6Y0m.jpg",
           "source_url": "https://cdn.v2ph.com/photos/X1a-Ak2c2CLy6Y0m.jpg",
-          "sha256": "4df4e054799ae405acba1f94af653ef3a67bff5dedebf87a8810fb17252950cc",
+          "sha256": "895760cd71e4b0679f8a9fefe587e990998df51a8be0b98d1b2bf3e4144f8f1b",
           "width": 1802,
           "height": 2700,
-          "bytes": 1568960,
+          "bytes": 1723879,
           "quality": "third_party_public_web",
           "publisher_original_verified": false,
           "alternate_source_urls": []
@@ -20660,6 +20660,18 @@
         },
         {
           "number": 11,
+          "url": "https://cdn.v2ph.com/photos/X1a-Ak2c2CLy6Y0m.jpg",
+          "source_url": "https://cdn.v2ph.com/photos/X1a-Ak2c2CLy6Y0m.jpg",
+          "sha256": "4df4e054799ae405acba1f94af653ef3a67bff5dedebf87a8810fb17252950cc",
+          "width": 1802,
+          "height": 2700,
+          "bytes": 1568960,
+          "quality": "third_party_public_web",
+          "publisher_original_verified": false,
+          "alternate_source_urls": []
+        },
+        {
+          "number": 12,
           "url": "https://cdn.v2ph.com/photos/DIIyHygm8U6Ip_M2.jpg",
           "source_url": "https://cdn.v2ph.com/photos/DIIyHygm8U6Ip_M2.jpg",
           "sha256": "2899187bf00a28466ec72549d5db77142deaed81e9596848a196b9cf09935781",
@@ -20671,7 +20683,7 @@
           "alternate_source_urls": []
         },
         {
-          "number": 12,
+          "number": 13,
           "url": "https://cdn.v2ph.com/photos/sy90LD2HT57U_fr8.jpg",
           "source_url": "https://cdn.v2ph.com/photos/sy90LD2HT57U_fr8.jpg",
           "sha256": "79d845f3bb5be9da8d4aa96154c97e144b624f50ff72c5335d84167e90774f98",
@@ -20696,7 +20708,7 @@
           "source_type": "v2ph_actor",
           "id": "v2ph-actor-am8o3e7z",
           "source": "https://www.v2ph.com/album/am8o3e7z.html",
-          "verified_image_count": 12,
+          "verified_image_count": 13,
           "claimed_image_count": null
         }
       ],
