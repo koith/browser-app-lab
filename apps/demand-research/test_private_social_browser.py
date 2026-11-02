@@ -5,6 +5,8 @@ from pathlib import Path
 from playwright.sync_api import sync_playwright
 
 HTML=Path(__file__).with_name("index.html").read_text(encoding="utf-8")
+AUTO=Path(__file__).with_name("account_auto_analysis.js").read_text(encoding="utf-8")
+ACCOUNT_UI=Path(__file__).with_name("account_index_client.js").read_text(encoding="utf-8")
 ORIGIN="https://private.intersection.test/"
 
 def run():
@@ -15,6 +17,25 @@ def run():
             page=browser.new_page(viewport={"width":390,"height":844})
             page.on("pageerror",lambda e:errors.append(str(e)))
             page.route(ORIGIN,lambda route:route.fulfill(status=200,content_type="text/html",body=HTML))
+            page.route(ORIGIN+"account_auto_analysis.js",lambda route:route.fulfill(
+                status=200,content_type="application/javascript",body=AUTO))
+            page.route(ORIGIN+"account_index_client.js",lambda route:route.fulfill(
+                status=200,content_type="application/javascript",body=ACCOUNT_UI))
+            page.route(ORIGIN+"api/accounts/status",lambda route:route.fulfill(
+                status=200,content_type="application/json",body=json.dumps({
+                "accounts":20002,"source_rows":28000,"last_catalog_sync":1793600000,
+                "refreshing":False,"last_catalog_skipped":0})))
+            def account_page(route):
+                from urllib.parse import urlsplit,parse_qs
+                params=parse_qs(urlsplit(route.request.url).query)
+                offset=int(params.get("offset",[0])[0]);limit=int(params.get("limit",[80])[0])
+                items=[{"platform":"bluesky",
+                    "profileUrl":"https://bsky.app/profile/fixture"+str(i)+".bsky.social",
+                    "verified_posts":2,"latest_posted":"2026-11-02T00:00:00Z"}
+                    for i in range(offset,min(20002,offset+limit))]
+                route.fulfill(status=200,content_type="application/json",
+                    body=json.dumps({"total":20002,"items":items,"limit":limit,"offset":offset}))
+            page.route(ORIGIN+"api/accounts?*",account_page)
             page.route(ORIGIN+"api/posts?*",lambda route:route.fulfill(
                 status=200,content_type="application/json",body=json.dumps({"total":0,"posts":[]})))
             def discovery(route):
@@ -42,7 +63,12 @@ def run():
             assert page.locator('.source-badge[aria-label="출처: X"]').count()==1
             assert page.locator("article.post a.author").get_attribute("href")=="https://x.com/qa"
             assert page.locator("#socialStatus").inner_text().find("1건 추가")>=0
+            page.locator("#viewAccounts").click()
+            page.wait_for_function("document.querySelectorAll('#privateAccountRows > div').length===80",timeout=25000)
+            assert "20,002" in page.locator("#privateAccountSummary").inner_text()
+            page.locator("#privateAccountIndex .account-auto-more").click()
+            page.wait_for_function("document.querySelectorAll('#privateAccountRows > div').length===160",timeout=15000)
             assert not errors,errors
-            print("PRIVATE_SOCIAL_BROWSER_FIXTURE",json.dumps({"cards":1,"calls":len(requested),"source_badge":"X","errors":len(errors)}))
+            print("PRIVATE_SOCIAL_BROWSER_FIXTURE",json.dumps({"cards":1,"calls":len(requested),"indexed_account_rows":160,"total_accounts":20002,"source_badge":"X","errors":len(errors)}))
         finally: browser.close()
 if __name__=="__main__":run()
