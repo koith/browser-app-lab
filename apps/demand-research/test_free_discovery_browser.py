@@ -50,6 +50,13 @@ def run():
                 route.fulfill(status=200,content_type="application/json",
                     headers={"Access-Control-Allow-Origin":"*"},body=json.dumps(data))
             if not LIVE:
+                page.route("https://api.fxtwitter.com/status/12345678",
+                    lambda route:route.fulfill(status=200,content_type="application/json",
+                        headers={"Access-Control-Allow-Origin":"*"},
+                        body=json.dumps({"tweet":{"id":"12345678",
+                            "text":"섹트 synthetic original public record",
+                            "created_at":"2026-11-02T00:00:00Z",
+                            "author":{"screen_name":"example","protected":False}}})))
                 page.route("https://api.keenable.ai/v1/search/public",lambda route:api(route,"keenable"))
                 page.route("https://api.firecrawl.dev/v2/search",lambda route:api(route,"firecrawl"))
             else:
@@ -76,6 +83,13 @@ def run():
                 assert page.locator("#indexResults a").filter(has_text="작성자 프로필").count()==3
                 assert page.locator("#indexResults .index-indexed").count()>=3
                 assert len([x for x in upstream if x["method"]=="POST"])==2
+                page.locator(".index-result").filter(
+                    has=page.locator("a[href='https://x.com/example/status/12345678']")
+                    ).locator(".index-check").click()
+                page.wait_for_function("""() =>
+                    document.querySelector('.index-verify-result')?.textContent?.includes(
+                        '섹트 synthetic original public record')""",timeout=20000)
+                assert "공개 원문 확인" in page.locator(".index-verify-result").first.inner_text()
                 print("INDEX_DISCOVERY_BROWSER_FIXTURE",json.dumps({"cards":n,"paid_keys":0,
                       "canonical_safe":True,"dedup":True,"errors":len(errors)}))
             else:
