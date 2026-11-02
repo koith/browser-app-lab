@@ -1,0 +1,40 @@
+name: Mimmi Versioned Cover Reload Cache QA
+on:
+  pull_request:
+    paths:
+      - 'apps/mimmi-gallery/gallery-cover-sw.js'
+      - 'apps/mimmi-gallery/test_cover_sw.cjs'
+      - 'apps/mimmi-gallery/index.html'
+      - '.github/workflows/mimmi-cover-cache-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: mimmi-versioned-cover-cache-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  safe-cover-cache:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify covers only, SHA version, error rejection and bounded cache
+        run: |
+          node --check apps/mimmi-gallery/gallery-cover-sw.js
+          node --check apps/mimmi-gallery/test_cover_sw.cjs
+          node apps/mimmi-gallery/test_cover_sw.cjs
+      - name: Assert only Pages gallery opts into one scoped worker
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          page=Path('apps/mimmi-gallery/index.html').read_text()
+          worker=Path('apps/mimmi-gallery/gallery-cover-sw.js').read_text()
+          assert "location.hostname==='koith.github.io'" in page
+          assert "register('./gallery-cover-sw.js',{scope:'./'})" in page
+          assert "eligibleCover(request)" in worker and "request.destination !== 'image'" in worker
+          assert "credentials: 'omit'" in worker
+          print('MIMMI_COVER_WORKER_SCOPE_AND_PRIVATE_CREDENTIAL_EXCLUSION_PASS')
+          PY
