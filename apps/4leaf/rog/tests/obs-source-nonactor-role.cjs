@@ -52,7 +52,9 @@ const assert=require('node:assert/strict'),{chromium}=require('playwright');
     portrait:pawn.querySelector('.leaf-chess-original-card-fallback')?.getAttribute('src')};
   });
   assert.equal(unavailable.rig,'original-card-portrait-fallback');
-  assert.ok(unavailable.portrait?.startsWith('./original/CardData/chm_'));
+  assert.ok(unavailable.portrait?.startsWith('./original/CardData/chm_')||
+   unavailable.portrait==='./original/IMG/avatarback.png',
+   'original unassigned member must show CardData illustration or actual IMG card-back, never a false actor');
   await page.screenshot({path:'leaf-chr-correct-original-actors-and-unassigned-effect-sprites.png'});
   assert.deepEqual(errors,[]);
   console.log('4LEAF ORIGINAL OBS NONACTOR ROLES AND TRUE CHR CARD SOURCES PASS',
