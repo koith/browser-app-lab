@@ -88,7 +88,7 @@ def publish_manifest(local_dir, data, run_id):
     if not re.fullmatch(r"[0-9]{6,30}",run_id):
         raise ValueError("invalid GitHub run ID")
     name="manifest-"+run_id+".json"
-    payload=(json.dumps(data,sort_keys=True)+"\\n").encode()
+    payload=(json.dumps(data,sort_keys=True)+"\n").encode()
     path=Path(local_dir)/name
     path.write_bytes(payload)
     command(["copyto",str(path),REMOTE+"/manifests/"+name,"--retries","3"],timeout=240)
