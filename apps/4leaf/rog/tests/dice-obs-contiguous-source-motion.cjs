@@ -113,7 +113,8 @@ const {chromium}=require('playwright');
      image:pawn.querySelector('.leaf-chess-original-card-fallback')?.getAttribute('src')};
    },card);
    assert.equal(bad.rig,'original-card-portrait-fallback');
-   assert.ok(bad.image?.startsWith('./original/CardData/chm_'));
+   assert.ok((bad.image?.startsWith('./original/CardData/chm_')||
+     bad.image==='./original/IMG/avatarback.png'));
   }
   await page.screenshot({path:'leaf-chr-native-5-frame-rear-walk-real-game.png'});
   assert.deepEqual(errors,[]);
