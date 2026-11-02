@@ -1,6 +1,14 @@
 name: Yui Mimmi Full Static Gallery Without Render QA
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - 'apps/yui-gallery/index.html'
+      - 'apps/mimmi-gallery/index.html'
+      - 'apps/yui-gallery/owner-media.js'
+      - 'apps/mimmi-gallery/owner-media.js'
+      - 'apps/gallery-archive/qa_static_full_gallery_first_paint.py'
+      - '.github/workflows/gallery-first-paint-no-backend-qa.yml'
   push:
     branches: [main]
     paths:
