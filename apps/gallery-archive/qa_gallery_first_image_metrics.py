@@ -37,6 +37,21 @@ def audit(browser, model: str, timeout_ms: int) -> dict:
             timeout=timeout_ms,
         )
         result["first_album_card_s"] = round(time.monotonic() - start, 2)
+        # A rendered card or image URL is NOT evidence that a thumbnail decoded.
+        # Only count a decoded, viewport-visible image with real image dimensions.
+        try:
+            page.wait_for_function("""() => [...document.querySelectorAll('#albumgrid .album img')]
+              .some(img => {
+                const r=img.getBoundingClientRect();
+                return r.bottom>0 && r.top<innerHeight &&
+                  img.complete && img.naturalWidth>=160 && img.naturalHeight>=160;
+              })""", timeout=timeout_ms)
+            result["first_decoded_visible_cover_s"] = round(
+                time.monotonic() - start, 2)
+        except BrowserTimeout:
+            result["first_decoded_visible_cover_s"] = None
+            result["thumbnail_failure"] = (
+                f"No decoded visible album cover within {timeout_ms} ms")
         # Count every saved owner SHA, not just a sample of popular works.
         result["coverage"] = page.evaluate("""async () => {
           const response = await fetch('owner-index.json', {cache:'no-store'});
@@ -60,21 +75,6 @@ def audit(browser, model: str, timeout_ms: int) -> dict:
             duplicate_sha_within_owner_work:repeatedInOwner};
         }""".replace("MODEL", model))
         result["coverage_verified_s"] = round(time.monotonic() - start, 2)
-        # A rendered card or image URL is NOT evidence that a thumbnail decoded.
-        # Only count a decoded, viewport-visible image with real image dimensions.
-        try:
-            page.wait_for_function("""() => [...document.querySelectorAll('#albumgrid .album img')]
-              .some(img => {
-                const r=img.getBoundingClientRect();
-                return r.bottom>0 && r.top<innerHeight &&
-                  img.complete && img.naturalWidth>=160 && img.naturalHeight>=160;
-              })""", timeout=timeout_ms)
-            result["first_decoded_visible_cover_s"] = round(
-                time.monotonic() - start, 2)
-        except BrowserTimeout:
-            result["first_decoded_visible_cover_s"] = None
-            result["thumbnail_failure"] = (
-                f"No decoded visible album cover within {timeout_ms} ms")
         result["script_errors"] = errors
         result["status"] = (
             "FAIL" if result["coverage"]["owner_sha_absent_from_rendered_gallery"]
