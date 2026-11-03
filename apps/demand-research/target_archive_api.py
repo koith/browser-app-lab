@@ -21,7 +21,7 @@ from target_account_archive import profile_input
 
 WORKFLOW = "intersection-target-account-archive.yml"
 _REPO = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
-_last_request = 0.0
+_last_request = None
 _lock = asyncio.Lock()
 
 
@@ -98,7 +98,7 @@ def create_router(auth):
         except (ValueError,KeyError,TypeError):
             raise HTTPException(400,"Invalid public account selection") from None
         async with _lock:
-            if time.monotonic()-_last_request<45:
+            if _last_request is not None and time.monotonic()-_last_request<45:
                 raise HTTPException(429,"Archive request throttled")
             try:
                 await asyncio.to_thread(dispatch,platform,account)
