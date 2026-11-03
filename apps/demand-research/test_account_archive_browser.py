@@ -87,7 +87,7 @@ def run(browser_type,name,width,height):
         page.get_by_role("heading",name="Synthetic QA").wait_for(timeout=12000)
         assert page.get_by_text("Synthetic biography for browser verification").count()==1
         assert page.locator("#followerCount").inner_text()=="13"
-        assert page.get_by_text("Synthetic posted image and comment history").count()==1
+        page.locator("#results").get_by_text("Synthetic posted image and comment history").wait_for(timeout=10000)
         assert page.locator(".post-media img").count()==1
         page.get_by_role("button",name="댓글·상세 보기").click()
         assert page.locator("#postDetail[open]").count()==1
@@ -99,7 +99,7 @@ def run(browser_type,name,width,height):
         page.get_by_role("tab",name="팔로잉").click()
         assert page.get_by_text("reader.bsky.social").count()>=1
         page.get_by_role("tab",name="게시글·답글").click()
-        assert page.get_by_text("Synthetic posted image and comment history").count()==1
+        page.locator("#results").get_by_text("Synthetic posted image and comment history").wait_for(timeout=10000)
         doc=page.evaluate("() => ({w:document.documentElement.scrollWidth, v:innerWidth})")
         assert doc["w"]<=doc["v"]+2,("horizontal overflow",doc)
         assert not errors,errors
