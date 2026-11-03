@@ -130,3 +130,30 @@ def test_logout_without_password_prompt(connected_gateway):
         "token":"strong-secret-link-only-for-local-tests-012345"}).status_code==200
     assert client.post("/api/end-session").status_code==200
     assert client.get("/api/session").status_code==401
+
+
+def test_private_archive_query_filters_all_remote_rows(connected_gateway,monkeypatch):
+    """Search/filter on the server before paging; never silently hide partials."""
+    import time
+    client=connected_gateway
+    pbase={"posted_at":"2026-11-03T00:00:00Z","text":"synthetic coffee purchase",
+           "media":[],"media_expected":0,"archive_complete":True}
+    async def catalog():
+        return [
+            {**pbase,"id":"a"*40,"platform":"bluesky"},
+            {**pbase,"id":"b"*40,"platform":"mastodon","text":"synthetic train experience",
+             "media_expected":2,"archive_complete":False},
+        ]
+    monkeypatch.setattr(gateway,"get_catalog",catalog)
+    assert client.post("/api/activate",json={"token":"strong-secret-link-only-for-local-tests-012345"}).status_code==200
+    all_rows=client.get("/api/posts").json()
+    assert all_rows["total"]==2
+    assert client.get("/api/posts?q=coffee").json()["total"]==1
+    assert client.get("/api/posts?platform=mastodon").json()["total"]==1
+    incomplete=client.get("/api/posts?media_status=partial").json()
+    assert incomplete["total"]==1
+    assert incomplete["posts"][0]["media_expected"]==2
+    assert incomplete["posts"][0]["media_saved"]==0
+    assert client.get("/api/posts?media_status=complete").json()["total"]==1
+    assert client.get("/api/posts?platform=invalid").status_code==400
+    assert client.get("/api/posts?media_status=unknown").status_code==400
