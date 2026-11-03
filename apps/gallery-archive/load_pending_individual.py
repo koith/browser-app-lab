@@ -122,7 +122,7 @@ def list_pending_entries(remote,model,reader=None):
             if not sep or not re.fullmatch(r'[0-9]+',size_raw):
                 raise ValueError('Untrusted alternate queue size/path')
             size=int(size_raw)
-            if not re.fullmatch(r'[0-9a-f]{64}\\.json',name):
+            if not re.fullmatch(r'[0-9a-f]{64}\.json',name):
                 raise ValueError('Unexpected object in pending queue')
             if not 0<size<=2_000_000:
                 raise ValueError('Alternate pending queue object size invalid')
