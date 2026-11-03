@@ -89,3 +89,8 @@
 
 - [x] [PR #635](https://github.com/koith/browser-app-lab/pull/635) — 게시글별 원본 CDN URL과 첨부 순번을 SHA 검증된 staging marker에 불변 결합하고, 재시도 시 정확히 같은 링크만 허용. 기존 URL 없는 과거 marker는 최초 공개 관측 기록의 **동일 게시글·동일 첨부 번호** 링크를 통해 입증될 때만 재사용. 원본 URL 변경·손상·누락은 다른 사진으로 대체하지 않으며 기존 staging 바이트를 삭제하지 않음. [오프라인/회귀 CI #41658926885](https://github.com/koith/browser-app-lab/actions/runs/41658926885) PASS, main 병합 `93d5d4af7dc58300d5d322ed1bba0b1c99b0f45f`. **CODE_ONLY**.
 - [ ] **INT-03 전체 완료** — 기존 누락 원본의 실운영 TeraBox readback SHA 전수 검증과 출처 일치, 복구 가능한 항목 0 미완료 입증 전.
+
+## 2026-11-03 INT-04 원격 정합성 하위 검증
+
+- [x] [PR #636](https://github.com/koith/browser-app-lab/pull/636) — 암호화 아티팩트 재전송과 catalog/journal 정비를 하나의 20분 job에서 연속 수행하던 구조를 분리, 재전송은 기존 독립 예약 workflow와 동일 maintenence 직렬화 그룹을 계속 사용. PR CI를 운영 TeraBox 유지보수 큐에서 분리. SHA 검증된 게시글 표본에 한해 **정확한 해당 게시글 미디어의 SHA 원격 재읽기 표본**을 최대 8MB로 수행, 미검증·크기제한 제외 별도 집계. `full_integrity_claim=False`, 원본·URL·계정 ID를 로그에 출력하지 않음. [오프라인 QA #41660215777](https://github.com/koith/browser-app-lab/actions/runs/41660215777) 성공, main 병합 `be8c295b6bd2d05a66c051b07a477ed7e64247a9`. **CODE_ONLY / 운영 검증 대기**.
+- [ ] **INT-04 전체 완료** — 운영 journal/catalog/first-observation/첨부 SHA·개수 전수 일치 및 손상 항목 0 실증 전.
