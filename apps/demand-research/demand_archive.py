@@ -538,17 +538,25 @@ class CloudArchive:
                             if sha256(record) == marker["sha256"]:
                                 break
                         else:
-                            proven=(self.corroborate_mismatched_post(pid,record)
-                                    if repair and directory=="metadata/entries"
-                                    else None)
-                            if proven is not None:
-                                result[pid]=proven
-                                new+=1
-                                self.repaired_entries+=1
+                            # Read-only SHA verification against both approved
+                            # endpoints can distinguish a stale primary read
+                            # from truly different immutable content.
+                            verified=self.read_verified(
+                                "posts/"+pid+"/post.json",marker["sha256"],cap=MAX_POST)
+                            if verified is not None:
+                                record=verified
+                            else:
+                                proven=(self.corroborate_mismatched_post(pid,record)
+                                        if repair and directory=="metadata/entries"
+                                        else None)
+                                if proven is not None:
+                                    result[pid]=proven
+                                    new+=1
+                                    self.repaired_entries+=1
+                                    continue
+                                self.unrecoverable_entries += 1
+                                self.quarantined_ids.add(pid)
                                 continue
-                            self.unrecoverable_entries += 1
-                            self.quarantined_ids.add(pid)
-                            continue
                     post = validate_post(json.loads(record))
                     if post["id"] != pid:
                         raise ValueError("marker/post mismatch")
