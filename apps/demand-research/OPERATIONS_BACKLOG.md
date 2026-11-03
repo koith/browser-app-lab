@@ -79,3 +79,8 @@
 - [ ] **INT-10 전체 완료** — 실제 운영 SNS 게시글로 기존/신규 분포, 필터·더 보기·순위 상세, 실제 모바일 사용성 별도 확인 전.
 - [ ] **INT-08 전체 완료** — 물리적 아이폰 실사용 PASS 및 배포 주요 기능 종합 QA 전.
 - [ ] **INT-02 5분 운영 주기** — Actions 예약 실행 전체 184건(조회 당시) 중 교집합 Fast Capture 예약 실행은 1건[#41636436888](https://github.com/koith/browser-app-lab/actions/runs/41636436888)만 존재함. `cron` 설정값 5분을 실측 5분으로 취급하지 않음. GitHub 예약 지연/누락과 20분가량 점유되는 저장 실패 작업을 분리 진단할 것. **FAILED/UNVERIFIED: 실제 5분 주기 불입증.**
+
+## 2026-11-03 INT-02 지연 복구 하위 개발 검증
+
+- [x] [PR #634](https://github.com/koith/browser-app-lab/pull/634) — 예약 실행 간격을 GitHub Actions 실기록에서 계산하며, **5분 cron 설정**을 **실제 5분 주기 성공**으로 허위 표기하지 않음. 실행 간격이 확인된 지연분만 최대 180분까지 과거 공개 게시글 추가 검색. 직전 16분 현재 공개글 수집 우선, 같은 게시글 중복 저장 방지 및 기존 24건 암호화 보관 상한 유지. [PR 오프라인 테스트 #41657330360](https://github.com/koith/browser-app-lab/actions/runs/41657330360) PASS, main 병합 `62a8c1b76781e6852aec481ebcb09c45c6232524`.
+- [ ] **INT-02 최종 완료** — 실제 다음 예약 실행들에서 `INTERSECTION_CAPTURE_SCHEDULE_HEALTH`와 신규 원본 저장/복구 간격 및 누락률 재측정 전. **GitHub 예약 실행의 엄격한 5분 정시성은 검증되지 않음.**
