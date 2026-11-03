@@ -30,6 +30,12 @@ on:
   pull_request:
     paths:
       - "apps/demand-research/target_account_archive.py"
+      - "apps/demand-research/target_account_enrichment.py"
+      - "apps/demand-research/target_account_viewer.py"
+      - "apps/demand-research/test_target_account_viewer.py"
+      - "apps/demand-research/account_archive_view.html"
+      - "apps/demand-research/account_archive_view.css"
+      - "apps/demand-research/account_archive_view.js"
       - "apps/demand-research/test_target_account_archive.py"
       - "apps/demand-research/target_archive_api.py"
       - "apps/demand-research/test_target_archive_api.py"
@@ -65,9 +71,10 @@ jobs:
           set -euo pipefail
           python -m pip install --disable-pip-version-check pytest==8.4.2 cryptography==46.0.4 fastapi==0.115.12 httpx==0.28.1
           cd apps/demand-research
-          python -m py_compile target_account_archive.py target_archive_api.py test_target_account_archive.py test_target_archive_api.py gateway.py
+          python -m py_compile target_account_archive.py target_account_enrichment.py target_account_viewer.py target_archive_api.py test_target_account_archive.py test_target_account_viewer.py test_target_archive_api.py gateway.py
           node --check target_archive_client.js
-          python -m pytest -q test_target_account_archive.py test_target_archive_api.py test_demand_archive.py test_gateway.py
+          node --check account_archive_view.js
+          python -m pytest -q test_target_account_archive.py test_target_account_viewer.py test_target_archive_api.py test_demand_archive.py test_gateway.py
 
   private-account-history:
     if: github.event_name != 'pull_request'
