@@ -796,7 +796,7 @@ def test_missing_original_attachment_is_retryable_not_a_frozen_backup(monkeypatc
     attempts={"ready":False}
     raw=b"synthetic image data"
     pid=post_key("bluesky",original)
-    def fake_make_post(current,now,get_media=None,pid_override=None):
+    def fake_make_post(current,now,get_media=None,pid_override=None,cloud=None):
         media=([{"key":"posts/"+pid+"/media/0001.jpg","mime":"image/jpeg",
                  "bytes":len(raw),"sha256":sha256(raw),"remote_verified":True}]
                if attempts["ready"] else [])
@@ -836,3 +836,53 @@ def test_media_indices_do_not_shift_when_first_original_missing():
     assert p["media_saved"]==1
     assert p["media"][0]["key"].endswith("/0002.jpg")
     assert blobs==[b"second"]
+
+
+def test_partial_original_attachments_remain_in_cloud_and_reuse_correct_slot(monkeypatch):
+    """A first photo survives an outage of the same source on a later retry."""
+    cloud=FakeCloud()
+    pid=post_key("bluesky","at://did:plc:abcdefghijk/app.bsky.feed.post/stageboth")
+    first=b"synthetic original first photo";second=b"synthetic original second photo"
+    urls=["https://cdn.bsky.app/img/original1.jpg","https://cdn.bsky.app/img/original2.jpg"]
+    row={"platform":"bluesky","original_id":"at://did:plc:abcdefghijk/app.bsky.feed.post/stageboth",
+         "source_url":"https://bsky.app/profile/did:plc:abcdefghijk/post/stageboth",
+         "text":"synthetic "+job.TERMS[0],"posted_at":"2026-11-03T00:00:00Z",
+         "media_urls":urls,"media_expected":2}
+    part,part_blobs=job.make_post(
+        row,1793667900,
+        get_media=lambda url:("image/jpeg",first) if url==urls[0] else None,
+        cloud=cloud)
+    assert not part["archive_complete"] and part["media_saved"]==1
+    cloud.stage_partial_media(part,part_blobs)
+    assert cloud.read_staged_media(pid,1)==("image/jpeg",first)
+    assert cloud.read_staged_media(pid,2) is None
+    before=dict(cloud.objects)
+    full,full_blobs=job.make_post(
+        row,1793667900,
+        get_media=lambda url:("image/jpeg",second) if url==urls[1] else None,
+        cloud=cloud)
+    assert full["archive_complete"] and full["media_saved"]==2
+    assert full_blobs==[first,second]
+    assert full["media"][0]["key"].endswith("/0001.jpg")
+    assert full["media"][1]["key"].endswith("/0002.jpg")
+    cloud.save_post(full,full_blobs)
+    result=cloud.load_catalog()
+    assert len(result)==1 and result[0]["media_saved"]==2
+    assert all(cloud.objects[k]==v for k,v in before.items()),"no archived originals overwritten"
+
+
+def test_staged_media_checksum_mismatch_never_substitutes_wrong_bytes():
+    cloud=FakeCloud()
+    p=post()
+    pid=p["id"]
+    raw=b"synthetic exact photo"
+    p["media"]=[{"key":"posts/"+pid+"/media/0001.jpg","mime":"image/jpeg",
+                 "bytes":len(raw),"sha256":sha256(raw),"remote_verified":True}]
+    p["media_expected"]=2
+    p["media_saved"]=1
+    p["archive_complete"]=False
+    cloud.stage_partial_media(p,[raw])
+    key="posts/"+pid+"/media/0001.jpg"
+    cloud.objects[key]=b"some other different image"
+    assert cloud.read_staged_media(pid,1) is None
+    assert "metadata/entries/"+pid+".json" not in cloud.objects
