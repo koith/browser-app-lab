@@ -316,6 +316,26 @@ function card(a,hasImages){
 function photoHTML(p,i){return '<button class="photo"'+rotationAttributes(p)+' data-i="'+i+'" aria-label="'+esc(p.name)+' 사진 '+p.number+'"><img loading="lazy" referrerpolicy="no-referrer" '+((p.ownerAlbum||p.vaultAlbum)?'data-owner="'+esc(p.url):'src="'+esc(p.url))+'" alt="'+esc(p.name)+' 사진 '+p.number+'"><span>'+esc(p.name)+' · '+p.number+'</span></button>'}
 const ownerObserver=new IntersectionObserver(entries=>{for(const e of entries){if(!e.isIntersecting)continue;ownerObserver.unobserve(e.target);const p=ownerPhotoIndex.get(e.target.dataset.owner);if(p){const isCover=!!e.target.closest('.album');(p.vaultAlbum?PhotoVault.asset(p):MimmiPrivate.asset(p,isCover?'cover':'preview')).then(url=>{if(e.target.isConnected){e.target.loading='eager';e.target.decoding='async';e.target.src=url}}).catch(()=>{if(!recoverSavedCover(e.target))e.target.alt='보관본 연결을 확인해 주세요'})}}},{rootMargin:'64px'});
 function observeOwner(){document.querySelectorAll('img[data-owner]:not([src])').forEach(i=>ownerObserver.observe(i))}
+// Retain the same in-flight image element as the complete album renderer takes
+// over. Recreating <img> can cancel an already downloading Pages thumbnail.
+// Only an exact chosen SHA AND identical saved URL may survive the handoff.
+function adoptFastCoverImages(grid,oldCards){
+ if(!oldCards.size)return;
+ for(const card of grid.querySelectorAll('button.album[data-id]')){
+  const previous=oldCards.get(card.dataset.id);
+  if(!previous?.image||!previous.sha)continue;
+  const next=card.querySelector('img'),old=previous.image;
+  if(!next||!next.getAttribute('src')||next.getAttribute('src')!==old.getAttribute('src'))continue;
+  const a=stored.find(a=>a.id===card.dataset.id);
+  if(!a)continue;
+  const imgs=validImages(a),chosen=imgs.find(p=>p.sha256===albumCovers[a.id]?.sha256)||imgs[0];
+  if(chosen?.sha256!==previous.sha)continue;
+  for(const attr of [...old.attributes])if(attr.name!=='src')old.removeAttribute(attr.name);
+  for(const attr of [...next.attributes])if(attr.name!=='src')old.setAttribute(attr.name,attr.value);
+  old.dataset.fastPreserved='1';
+  next.replaceWith(old);
+ }
+}
 function render(){
  const q=$('search').value.toLocaleLowerCase().trim();
  const items=available(),all=mode==='photos'?items.flatMap(photosFor):[],match=s=>String(s).toLocaleLowerCase().includes(q);
@@ -332,7 +352,9 @@ function render(){
   const src=group?group.albums:items;
   if(group){$('albumname').textContent=group.name;$('albumtotal').textContent=group.albums.length+'개 · 열람 '+group.viewable}
   const matched=src.filter(a=>match(getName(a))).sort((a,b)=>{const ac=validImages(stored.find(x=>x.id===(a.previewAlbumId||a.id))||a).length,bc=validImages(stored.find(x=>x.id===(b.previewAlbumId||b.id))||b).length;return (bc>0)-(ac>0)||MimmiPublishers.compareNames(MimmiLabels.coverTitle(a),MimmiLabels.coverTitle(b))||MimmiPublishers.compareNames(a.id,b.id)});
-  $('albumgrid').innerHTML=matched.map(a=>card(a,validImages(stored.find(x=>x.id===(a.previewAlbumId||a.id))||a).length>0)).join('');
+  const grid=$('albumgrid'),fastCovers=new Map([...grid.querySelectorAll('a[data-fast-cover="1"]')].map(a=>[a.dataset.id,{image:a.querySelector('img'),sha:a.dataset.fastSha}]));
+   grid.innerHTML=matched.map(a=>card(a,validImages(stored.find(x=>x.id===(a.previewAlbumId||a.id))||a).length>0)).join('');
+   adoptFastCoverImages(grid,fastCovers);
   $('albumgrid').querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>{const a=stored.find(a=>a.id===b.dataset.id);if(a&&validImages(a).length)openAlbum(a.id)});
   $('total').textContent=matched.length+' albums';
   $('nothing').hidden=matched.length>0;
