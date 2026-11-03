@@ -782,10 +782,20 @@ window.INTERSECTION_acceptPublicX=function(record){
   if(!(posted>=fromMs&&posted<toMs))return {accepted:false,reason:"outside-period"};
   const name=String(record.author||"").trim().slice(0,75)||"@"+match[1];
   const profileUrl="https://x.com/"+match[1],canonical="https://x.com/"+match[1]+"/status/"+id;
+  // FxEmbed returns original public post media, but is not an official X API.
+  // Accept only source-linked HTTPS URLs; absent media remain text posts.
+  let media=[];
+  for(const entry of (Array.isArray(record.media)?record.media:[]).slice(0,12)){
+    if(!entry||!["image","video"].includes(entry.type))continue;
+    const url=safePublicLink(entry.url),thumb=safePublicLink(entry.thumb||entry.url);
+    if(!url&&!thumb)continue;
+    media.push({type:entry.type,url,thumb,alt:entry.type==="video"?"X 공개 영상":"X 공개 이미지"});
+  }
+  const avatarUrl=safePublicLink(record.avatarUrl);
   const post={id:key,platform:"x",author:name,profileUrl,url:canonical,text:txt,
     posted:new Date(posted).toISOString(),indexed:new Date(posted).toISOString(),
-    terms:new Set(terms),media:[],adultLabeled:false,restricted:false,
-    verification:"unofficial-public-source"};
+    terms:new Set(terms),media,avatarUrl,adultLabeled:!!record.possibly_sensitive,restricted:false,
+    verification:"unofficial-public-source",engagement:record.engagement||null};
   ids.set(key,post);posts.push(post);
   const candidateKey="index:x:"+id;
   if(candidateById.has(candidateKey)){
