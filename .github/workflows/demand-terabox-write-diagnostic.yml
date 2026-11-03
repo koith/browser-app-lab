@@ -1,0 +1,38 @@
+name: INTERSECTION — Private Synthetic TeraBox Write Diagnostics
+on:
+  push:
+    branches: [main]
+    paths:
+      - "apps/demand-research/diagnose_terabox_write.py"
+      - ".github/workflows/demand-terabox-write-diagnostic.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: demand-synthetic-write-diagnostic
+  cancel-in-progress: false
+jobs:
+  synthetic-write:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      RCLONE_CONFIG_ARCHIVE_TYPE: terabox
+      RCLONE_CONFIG_ARCHIVE_COOKIE: ${{ secrets.DEMAND_TERABOX_NDUS || secrets.YUI_TERABOX_NDUS || secrets.YUI_TERABOX_COOKIE }}
+      GITHUB_RUN_ID: ${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Fail if private cloud authentication missing
+        run: test -n "$RCLONE_CONFIG_ARCHIVE_COOKIE"
+      - name: Install digest-pinned TeraBox rclone
+        run: |
+          set -euo pipefail
+          curl -fsSL https://github.com/gulp79/rclone-extra/releases/download/v1.75.2-extra/rclone-linux-amd64.zip -o /tmp/rclone.zip
+          echo '78855325a2a8d83b3feee3a8363d32e1211babbf4cda6356fa8ca5f472075062  /tmp/rclone.zip' | sha256sum -c -
+          unzip -q /tmp/rclone.zip -d /tmp/rclone-extra
+          find /tmp/rclone-extra -type f -name rclone -exec sudo install -m 755 {} /usr/local/bin/rclone \;
+          rclone help backends | grep -qi terabox
+      - name: Distinguish copyto, rcat, nested-directory and readback behavior
+        run: python apps/demand-research/diagnose_terabox_write.py
