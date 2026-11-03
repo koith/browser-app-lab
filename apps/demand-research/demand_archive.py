@@ -261,14 +261,17 @@ class CloudArchive:
         try:
             target = self.remote + "/" + key
             failure = None
-            for attempt in range(4):
-                method = "rcat" if attempt % 2 and len(data) < 2_000_000 else "copyto"
+            # Avoid exhausting the entire five-minute acquisition window on
+            # four attempts against one intermittently failing TeraBox host.
+            # One copyto plus one rcat is followed by verified alternate-host retry.
+            for attempt in range(2):
+                method = "rcat" if attempt and len(data) < 2_000_000 else "copyto"
                 try:
                     if method == "copyto":
-                        self.command(["copyto", path, target, "--retries", "2"], timeout=130)
+                        self.command(["copyto", path, target, "--retries", "2"], timeout=150 if len(data)>2_000_000 else 70)
                     else:
                         self.command(["rcat", target, "--retries", "2"],
-                                     data=data, timeout=130)
+                                     data=data, timeout=70)
                 except RuntimeError as error:
                     failure = error
                     if "(missing)" in str(error):
