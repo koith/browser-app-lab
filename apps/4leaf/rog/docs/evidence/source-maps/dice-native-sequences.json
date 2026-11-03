@@ -1,0 +1,764 @@
+{
+ "D6": {
+  "member": "OBS.pak/1171.obs",
+  "memberSHA256": "d49a20290f5953f5e09d656686e2eb6305bd8c808d1974452381556261d497ff",
+  "block0Frames": 28,
+  "groups": {
+   "facesPerDie": 6,
+   "flatFaces": [
+    0,
+    5
+   ],
+   "isometricFaces": [
+    6,
+    11
+   ],
+   "highlightedIsometric": [
+    12,
+    17
+   ],
+   "tumble": [
+    18,
+    27
+   ],
+   "checks": {
+    "flatSameSizeWithin4px": true,
+    "highlightSameGeometryAsIsometric": true,
+    "highlightCyanAbove50": true,
+    "tumbleGeometryVaries": true
+   }
+  },
+  "features": [
+   {
+    "index": 0,
+    "size": [
+     46,
+     49
+    ],
+    "origin": [
+     -23,
+     -24
+    ],
+    "cyan": -3.2,
+    "fill": 0.99
+   },
+   {
+    "index": 1,
+    "size": [
+     46,
+     49
+    ],
+    "origin": [
+     -23,
+     -24
+    ],
+    "cyan": 8.9,
+    "fill": 0.99
+   },
+   {
+    "index": 2,
+    "size": [
+     46,
+     49
+    ],
+    "origin": [
+     -23,
+     -24
+    ],
+    "cyan": 11.7,
+    "fill": 0.99
+   },
+   {
+    "index": 3,
+    "size": [
+     46,
+     49
+    ],
+    "origin": [
+     -23,
+     -24
+    ],
+    "cyan": 13.2,
+    "fill": 0.99
+   },
+   {
+    "index": 4,
+    "size": [
+     46,
+     49
+    ],
+    "origin": [
+     -23,
+     -24
+    ],
+    "cyan": 14.1,
+    "fill": 0.99
+   },
+   {
+    "index": 5,
+    "size": [
+     46,
+     49
+    ],
+    "origin": [
+     -23,
+     -24
+    ],
+    "cyan": 12.9,
+    "fill": 0.99
+   },
+   {
+    "index": 6,
+    "size": [
+     60,
+     71
+    ],
+    "origin": [
+     -30,
+     -35
+    ],
+    "cyan": 17.3,
+    "fill": 0.74
+   },
+   {
+    "index": 7,
+    "size": [
+     61,
+     71
+    ],
+    "origin": [
+     -30,
+     -35
+    ],
+    "cyan": 22.5,
+    "fill": 0.73
+   },
+   {
+    "index": 8,
+    "size": [
+     60,
+     71
+    ],
+    "origin": [
+     -30,
+     -35
+    ],
+    "cyan": 25.4,
+    "fill": 0.74
+   },
+   {
+    "index": 9,
+    "size": [
+     61,
+     71
+    ],
+    "origin": [
+     -30,
+     -35
+    ],
+    "cyan": 24.9,
+    "fill": 0.73
+   },
+   {
+    "index": 10,
+    "size": [
+     61,
+     71
+    ],
+    "origin": [
+     -30,
+     -35
+    ],
+    "cyan": 24.0,
+    "fill": 0.73
+   },
+   {
+    "index": 11,
+    "size": [
+     60,
+     71
+    ],
+    "origin": [
+     -30,
+     -35
+    ],
+    "cyan": 22.6,
+    "fill": 0.74
+   },
+   {
+    "index": 12,
+    "size": [
+     60,
+     71
+    ],
+    "origin": [
+     -30,
+     -35
+    ],
+    "cyan": 85.3,
+    "fill": 0.74
+   },
+   {
+    "index": 13,
+    "size": [
+     61,
+     71
+    ],
+    "origin": [
+     -30,
+     -35
+    ],
+    "cyan": 79.5,
+    "fill": 0.73
+   },
+   {
+    "index": 14,
+    "size": [
+     60,
+     71
+    ],
+    "origin": [
+     -30,
+     -35
+    ],
+    "cyan": 88.3,
+    "fill": 0.74
+   },
+   {
+    "index": 15,
+    "size": [
+     61,
+     71
+    ],
+    "origin": [
+     -30,
+     -35
+    ],
+    "cyan": 82.6,
+    "fill": 0.73
+   },
+   {
+    "index": 16,
+    "size": [
+     61,
+     71
+    ],
+    "origin": [
+     -30,
+     -35
+    ],
+    "cyan": 80.3,
+    "fill": 0.73
+   },
+   {
+    "index": 17,
+    "size": [
+     60,
+     71
+    ],
+    "origin": [
+     -30,
+     -35
+    ],
+    "cyan": 77.1,
+    "fill": 0.74
+   },
+   {
+    "index": 18,
+    "size": [
+     60,
+     71
+    ],
+    "origin": [
+     -30,
+     -35
+    ],
+    "cyan": 21.6,
+    "fill": 0.68
+   },
+   {
+    "index": 19,
+    "size": [
+     61,
+     55
+    ],
+    "origin": [
+     -30,
+     -27
+    ],
+    "cyan": 21.5,
+    "fill": 0.89
+   },
+   {
+    "index": 20,
+    "size": [
+     58,
+     64
+    ],
+    "origin": [
+     -29,
+     -32
+    ],
+    "cyan": 20.5,
+    "fill": 0.82
+   },
+   {
+    "index": 21,
+    "size": [
+     59,
+     52
+    ],
+    "origin": [
+     -29,
+     -26
+    ],
+    "cyan": 20.0,
+    "fill": 0.83
+   },
+   {
+    "index": 22,
+    "size": [
+     71,
+     61
+    ],
+    "origin": [
+     -35,
+     -30
+    ],
+    "cyan": 21.6,
+    "fill": 0.7
+   },
+   {
+    "index": 23,
+    "size": [
+     63,
+     68
+    ],
+    "origin": [
+     -31,
+     -34
+    ],
+    "cyan": 24.3,
+    "fill": 0.74
+   },
+   {
+    "index": 24,
+    "size": [
+     72,
+     64
+    ],
+    "origin": [
+     -36,
+     -32
+    ],
+    "cyan": 27.0,
+    "fill": 0.65
+   },
+   {
+    "index": 25,
+    "size": [
+     60,
+     70
+    ],
+    "origin": [
+     -30,
+     -35
+    ],
+    "cyan": 20.6,
+    "fill": 0.69
+   },
+   {
+    "index": 26,
+    "size": [
+     56,
+     61
+    ],
+    "origin": [
+     -28,
+     -30
+    ],
+    "cyan": 21.5,
+    "fill": 0.77
+   },
+   {
+    "index": 27,
+    "size": [
+     58,
+     66
+    ],
+    "origin": [
+     -29,
+     -33
+    ],
+    "cyan": 17.1,
+    "fill": 0.69
+   }
+  ],
+  "extraBlocks": {
+   "obs-1171-c0": {
+    "trailerOffset": 128,
+    "frames": 16
+   },
+   "obs-1171-c1": {
+    "trailerOffset": 49893,
+    "frames": 16
+   },
+   "obs-1171-c2": {
+    "trailerOffset": 100218,
+    "frames": 6
+   }
+  },
+  "trailerBytes": 118024,
+  "evidence": {
+   "groupBoundaries": "VERIFIED (measured geometry/colour)",
+   "flatFacePips": "VERIFIED 1..6 by pip count",
+   "isometricTopFace": "INFERRED same order as flat faces",
+   "highlightMeaning": "INFERRED (selected/winning die)",
+   "extraBlocks": "VERIFIED as further blocks of the member (128-byte block header, frames, 768-byte palette)",
+   "extraBlockColours": "UNVERIFIED: published original/OBS/embedded PNGs use block 0's palette. On the two multi-block members whose bytes are stored (OBS2 1228, 1238) the own block palette gives identical colours, so a palette defect is NOT shown; the speckled look may be original dithering. tools/decode-obs-blocks.py records each block's palette SHA in CI.",
+   "rollSequenceAndTiming": "UNVERIFIED until tools/decode-obs-blocks.py runs in CI (member animation table sits after the last block, beyond the stored 4 KiB)",
+   "perResultSequences": "UNVERIFIED (D6 x6 / D4 x4 result-specific landing order not yet read from the table)",
+   "fallBounceKeyframes": "NOT FOUND in any decoded table; do not claim"
+  }
+ },
+ "D4": {
+  "member": "OBS.pak/1223.obs",
+  "memberSHA256": "f6f9792b1fdfa6185cfc89cb8e44be4bbdaf69b7d5cc3b792868354fc8a28f89",
+  "block0Frames": 22,
+  "groups": {
+   "facesPerDie": 4,
+   "flatFaces": [
+    0,
+    3
+   ],
+   "isometricFaces": [
+    4,
+    7
+   ],
+   "highlightedIsometric": [
+    8,
+    11
+   ],
+   "tumble": [
+    12,
+    21
+   ],
+   "checks": {
+    "flatSameSizeWithin4px": true,
+    "highlightSameGeometryAsIsometric": true,
+    "highlightCyanAbove50": true,
+    "tumbleGeometryVaries": true
+   }
+  },
+  "features": [
+   {
+    "index": 0,
+    "size": [
+     69,
+     56
+    ],
+    "origin": [
+     -34,
+     -28
+    ],
+    "cyan": 3.6,
+    "fill": 0.55
+   },
+   {
+    "index": 1,
+    "size": [
+     69,
+     57
+    ],
+    "origin": [
+     -34,
+     -28
+    ],
+    "cyan": 12.6,
+    "fill": 0.55
+   },
+   {
+    "index": 2,
+    "size": [
+     69,
+     56
+    ],
+    "origin": [
+     -34,
+     -28
+    ],
+    "cyan": 14.5,
+    "fill": 0.54
+   },
+   {
+    "index": 3,
+    "size": [
+     69,
+     60
+    ],
+    "origin": [
+     -34,
+     -30
+    ],
+    "cyan": 13.7,
+    "fill": 0.55
+   },
+   {
+    "index": 4,
+    "size": [
+     64,
+     59
+    ],
+    "origin": [
+     -32,
+     -29
+    ],
+    "cyan": -3.3,
+    "fill": 0.57
+   },
+   {
+    "index": 5,
+    "size": [
+     65,
+     60
+    ],
+    "origin": [
+     -32,
+     -30
+    ],
+    "cyan": 12.8,
+    "fill": 0.56
+   },
+   {
+    "index": 6,
+    "size": [
+     65,
+     60
+    ],
+    "origin": [
+     -32,
+     -30
+    ],
+    "cyan": 13.6,
+    "fill": 0.56
+   },
+   {
+    "index": 7,
+    "size": [
+     64,
+     62
+    ],
+    "origin": [
+     -32,
+     -31
+    ],
+    "cyan": 13.2,
+    "fill": 0.56
+   },
+   {
+    "index": 8,
+    "size": [
+     64,
+     59
+    ],
+    "origin": [
+     -32,
+     -29
+    ],
+    "cyan": 24.6,
+    "fill": 0.57
+   },
+   {
+    "index": 9,
+    "size": [
+     65,
+     60
+    ],
+    "origin": [
+     -32,
+     -30
+    ],
+    "cyan": 70.8,
+    "fill": 0.56
+   },
+   {
+    "index": 10,
+    "size": [
+     65,
+     60
+    ],
+    "origin": [
+     -32,
+     -30
+    ],
+    "cyan": 77.7,
+    "fill": 0.56
+   },
+   {
+    "index": 11,
+    "size": [
+     64,
+     62
+    ],
+    "origin": [
+     -32,
+     -31
+    ],
+    "cyan": 68.8,
+    "fill": 0.56
+   },
+   {
+    "index": 12,
+    "size": [
+     60,
+     63
+    ],
+    "origin": [
+     -30,
+     -31
+    ],
+    "cyan": 10.1,
+    "fill": 0.54
+   },
+   {
+    "index": 13,
+    "size": [
+     65,
+     62
+    ],
+    "origin": [
+     -32,
+     -31
+    ],
+    "cyan": 2.3,
+    "fill": 0.53
+   },
+   {
+    "index": 14,
+    "size": [
+     61,
+     59
+    ],
+    "origin": [
+     -30,
+     -29
+    ],
+    "cyan": 10.2,
+    "fill": 0.64
+   },
+   {
+    "index": 15,
+    "size": [
+     59,
+     64
+    ],
+    "origin": [
+     -29,
+     -32
+    ],
+    "cyan": 11.2,
+    "fill": 0.53
+   },
+   {
+    "index": 16,
+    "size": [
+     67,
+     61
+    ],
+    "origin": [
+     -33,
+     -30
+    ],
+    "cyan": 2.2,
+    "fill": 0.51
+   },
+   {
+    "index": 17,
+    "size": [
+     67,
+     58
+    ],
+    "origin": [
+     -33,
+     -29
+    ],
+    "cyan": 4.9,
+    "fill": 0.52
+   },
+   {
+    "index": 18,
+    "size": [
+     54,
+     69
+    ],
+    "origin": [
+     -27,
+     -34
+    ],
+    "cyan": 10.6,
+    "fill": 0.52
+   },
+   {
+    "index": 19,
+    "size": [
+     63,
+     65
+    ],
+    "origin": [
+     -31,
+     -32
+    ],
+    "cyan": 3.7,
+    "fill": 0.49
+   },
+   {
+    "index": 20,
+    "size": [
+     60,
+     60
+    ],
+    "origin": [
+     -30,
+     -30
+    ],
+    "cyan": 2.0,
+    "fill": 0.65
+   },
+   {
+    "index": 21,
+    "size": [
+     65,
+     62
+    ],
+    "origin": [
+     -32,
+     -31
+    ],
+    "cyan": 8.3,
+    "fill": 0.58
+   }
+  ],
+  "extraBlocks": {
+   "obs-1223-c0": {
+    "trailerOffset": 128,
+    "frames": 9
+   },
+   "obs-1223-c1": {
+    "trailerOffset": 21477,
+    "frames": 16
+   }
+  },
+  "trailerBytes": 62637,
+  "evidence": {
+   "groupBoundaries": "VERIFIED (measured geometry/colour)",
+   "flatFacePips": "VERIFIED 1..4 by pip count",
+   "isometricTopFace": "INFERRED same order as flat faces",
+   "highlightMeaning": "INFERRED (selected/winning die)",
+   "extraBlocks": "VERIFIED as further blocks of the member (128-byte block header, frames, 768-byte palette)",
+   "extraBlockColours": "UNVERIFIED: published original/OBS/embedded PNGs use block 0's palette. On the two multi-block members whose bytes are stored (OBS2 1228, 1238) the own block palette gives identical colours, so a palette defect is NOT shown; the speckled look may be original dithering. tools/decode-obs-blocks.py records each block's palette SHA in CI.",
+   "rollSequenceAndTiming": "UNVERIFIED until tools/decode-obs-blocks.py runs in CI (member animation table sits after the last block, beyond the stored 4 KiB)",
+   "perResultSequences": "UNVERIFIED (D6 x6 / D4 x4 result-specific landing order not yet read from the table)",
+   "fallBounceKeyframes": "NOT FOUND in any decoded table; do not claim"
+  }
+ }
+}

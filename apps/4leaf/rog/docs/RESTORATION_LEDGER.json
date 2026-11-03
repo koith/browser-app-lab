@@ -1582,6 +1582,36 @@
         "RULE-03",
         "QA-03"
       ]
+    },
+    {
+      "id": "REQ-20261102-C08",
+      "date": "2026-11-02",
+      "origin": "user",
+      "text": "Claude 10차: 9차 CHR 원본 증거 확정·정리, 미공개 원본 몸체 19개 추출, 행동표 97개 구조·의미 검증, D4/D6 블록 팔레트·동작표 재검증, GitHub 반입.",
+      "taskIds": [
+        "ACT-01",
+        "ACT-03",
+        "ACT-05",
+        "DIE-01",
+        "DIE-02",
+        "SRC-01"
+      ]
+    },
+    {
+      "id": "REQ-20261103-C09",
+      "date": "2026-11-03",
+      "origin": "user",
+      "text": "4LEAF 원작 복원 — 클로드 담당 대량 개발 지시 (11차): 원본 체스맨·애니메이션 데이터 실게임 적용, D4/D6 원본 주사위, 전투 발판·카메라·원근 정합, 해독 파이프라인·근거 검증. 기준: 확보한 원본 리소스가 실제 플레이 화면에서 원본과 일치하게 작동.",
+      "taskIds": [
+        "ACT-01",
+        "ACT-03",
+        "ACT-04",
+        "P0-ACTOR",
+        "P0-PODIUM",
+        "DIE-01",
+        "DIE-02",
+        "SRC-01"
+      ]
     }
   ],
   "tasks": [
@@ -8161,6 +8191,137 @@
         "QA-03"
       ],
       "details": "PR #573: source audit confirms RTCPeerConnection disconnected state was ignored while a DataChannel could remain open, leaving net.connected true and remote game commands enabled. New peer-state guard pauses game on disconnected/failed/closed, resumes only if the same current peer is connected and its channel open; stale callback rejection remains. Deterministic disconnect/recovery/replay QA extended; real two-Chromium browser PR CI enabled. CI results and deployed SHA pending; no original-2002 equivalence claimed."
+    },
+    {
+      "seq": 372,
+      "date": "2026-11-02",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261102-C08",
+      "taskIds": [
+        "ACT-01",
+        "ACT-03",
+        "ACT-05",
+        "DIE-01",
+        "DIE-02",
+        "SRC-01"
+      ]
+    },
+    {
+      "seq": 373,
+      "date": "2026-11-02",
+      "type": "CORRECTION_DICE_PALETTE_CLAIM",
+      "requestId": "REQ-20261102-C08",
+      "taskIds": [
+        "DIE-01",
+        "DIE-02"
+      ],
+      "details": "Correction to events 361-362 (append-only): the claim that the 63 embedded D6/D4 frames carry a wrong first-block palette was a round-8 INFERENCE, not a byte-level fact. On the only multi-block members whose extra-block bytes are stored (OBS2 1228, 1238; 9 frames) decoding with the block's own palette is identical in alpha and visible colour to the published PNGs (tests/test_block_palette_check.py). D6/D4 colour status: UNVERIFIED. Keep the #516 quarantine until CI records the dice block palettes."
+    },
+    {
+      "seq": 374,
+      "date": "2026-11-02",
+      "type": "RUNTIME_CHR_MAP_VERIFIED_AGAINST_BYTES",
+      "requestId": "REQ-20261102-C08",
+      "taskIds": [
+        "ACT-01",
+        "ACT-05",
+        "P0-ACTOR"
+      ],
+      "details": "tests/test_runtime_chr_map_vs_bytes.py loads chr-body-source-map.js (#522) and compares it with CHR.pak record bytes (+260) for all 98 cards: 98/98 agree, pak matches the census pak holding the member, 0156->1222 absent from all packs. Key cases 0088->1071, 0087->1070, 0091->1074, 0170->1267, 0056->1040, 0040->1025, 0125->1199, 0147->1221, 0157->1254, 0171->1276. VERIFIED."
+    },
+    {
+      "seq": 375,
+      "date": "2026-11-02",
+      "type": "OBS_FORMAT_AND_ANIMATION_TABLES",
+      "requestId": "REQ-20261102-C08",
+      "taskIds": [
+        "ACT-02",
+        "ACT-03"
+      ],
+      "details": "OBS member = u32 blockCount | blocks(128-byte header, frameCount u16 at +66, frames, 768-byte palette) | u32 animationCount | animations(u32 durationTicks, u32 n, n x 18-byte records) | ending (34 zero x223, 162-byte variant x3, none x1). All 227 stored trailers parse to the last byte. 97 card bodies: 85 x 17 animations, 12 x 15 animations (17 without 15-16). VERIFIED (tools/decode-obs-anim-table.py)."
+    },
+    {
+      "seq": 376,
+      "date": "2026-11-02",
+      "type": "ANIMATION_EMPTY_SLOT_AND_DURATION_RULE",
+      "requestId": "REQ-20261102-C08",
+      "taskIds": [
+        "ACT-03"
+      ],
+      "details": "durationTicks 0xFFFFFFFF marks an EMPTY animation slot (0 frame keys in every case), only in OBS2/OBS3 bodies at indexes 0, 6, 9, 15, 16 (OBS3 1 x index 8); the round-9 loop reading is withdrawn. Finite durations equal last key tick + 3 in 1432/1441 animations (each key shown 3 ticks). VERIFIED. Tick length in ms, action names for 6-11/13-16 and mirroring for right facing remain UNVERIFIED (no right-facing or diagonal animation exists in any table)."
+    },
+    {
+      "seq": 377,
+      "date": "2026-11-02",
+      "type": "NOT_DONE_19_BODIES_AND_DICE_TABLES",
+      "requestId": "REQ-20261102-C08",
+      "taskIds": [
+        "ACT-01",
+        "DIE-01"
+      ],
+      "details": "Not done in this session: original bytes are only reachable from GitHub Actions; this session has no GitHub write (push 403 policy denial, no GitHub connector, account not linked). Pending CI: rog-original-obs-blocks.yml on data/4leaf-obs-blocks-** exports the 19 unpublished card bodies (1025-1039, 1041, 1057, OBS2 1212, OBS3 1256), effect members referenced by animation events (1096-1124...), per-block palettes of D6 1171 / D4 1223 / 0094 and every member animation table. 0156->1222 has no original bytes and must not be substituted."
+    },
+    {
+      "seq": 378,
+      "date": "2026-11-03",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261103-C09",
+      "taskIds": [
+        "ACT-01",
+        "ACT-03",
+        "ACT-04",
+        "P0-ACTOR",
+        "P0-PODIUM",
+        "DIE-01",
+        "DIE-02",
+        "SRC-01"
+      ]
+    },
+    {
+      "seq": 379,
+      "date": "2026-11-03",
+      "type": "NATIVE_ACTION_MODULE_GENERATED_FROM_DECODED_TABLES",
+      "requestId": "REQ-20261103-C09",
+      "taskIds": [
+        "ACT-03",
+        "P0-ACTOR"
+      ],
+      "details": "native-card-action-sequences.js is now generated by tools/build-native-card-action-module.py from actor-native-anim-runtime.json (97 CHR bodies, slots 0-5 and 12, source SHA-256 in header, --check guard). idle/walk frame indices identical to #522 for all 78 published bodies except 0135 (keyless walk slots: sideways now holds its own side stance 4 instead of front 27). Original key ticks replace the assumed i*3. Byte fact: body 1057 (card 0074) has front/rear swapped vs the other 58 OBS bodies, so the removed hard-coded classic table would have been wrong for it. VERIFIED: key frame indices and ticks. INFERRED: slot roles. UNVERIFIED: tick->ms."
+    },
+    {
+      "seq": 380,
+      "date": "2026-11-03",
+      "type": "DUEL_LUNGE_ORIGINAL_SLOT12_IN_PLAY",
+      "requestId": "REQ-20261103-C09",
+      "taskIds": [
+        "ACT-03",
+        "P0-ACTOR",
+        "P0-PODIUM"
+      ],
+      "details": "Duel attack now plays each body's original slot 12 (role INFERRED) with keys held for their exact tick spans at a WEB 40ms/tick, attacker mirrored toward the defender; replaces the WEB structural [11,33,34,35,36,11] and the legacy attack [10,18] that OBS2/OBS3 bodies fell into. 77/78 published bodies have keys; 0125 slot 12 has none and holds its own side stance. Playback is clocked so steps are dropped, not stretched. game.js podium outcome timer waits max(900ms, lunge). Real hotseat duel test (OBS 1061, OBS2 1200, OBS3 1267): exact key order, final key reached, mirror constant, actor inside its podium side. Not compared with original motion video (none available); tick->ms UNVERIFIED."
+    },
+    {
+      "seq": 381,
+      "date": "2026-11-03",
+      "type": "OUTCOME_POSES_NO_LEGACY_INDICES",
+      "requestId": "REQ-20261103-C09",
+      "taskIds": [
+        "ACT-03"
+      ],
+      "details": "hurt/victory (all published bodies) and board attack of OBS2/OBS3 bodies hold the body's own original stance (first key of the facing idle slot) instead of legacy [18,10]/[25,30,0]/[10,18]. No original hurt/victory slot is identified; slots 6-11 and 13-16 stay UNVERIFIED and effect members are not played."
+    },
+    {
+      "seq": 382,
+      "date": "2026-11-03",
+      "type": "NOT_DONE_ROUND11",
+      "requestId": "REQ-20261103-C09",
+      "taskIds": [
+        "ACT-01",
+        "DIE-01",
+        "DIE-02",
+        "P0-PODIUM"
+      ],
+      "details": "Still not secured: 19 CHR bodies without published frames (1025-1039,1041,1057,OBS2 1212,OBS3 1256 -> cards 0040,0042-0055,0058,0074,0138,0159 keep their current non-native path), effect members 1096-1102/1112/1114/1118, D6/D4 per-block palettes and roll tables (CI branch data/4leaf-obs-blocks-* never run), original tick length, hurt/victory/board-attack slot meanings. Dice #516 quarantine kept. Podium geometry not changed this round; mid-lunge screenshots only."
     }
   ]
 }

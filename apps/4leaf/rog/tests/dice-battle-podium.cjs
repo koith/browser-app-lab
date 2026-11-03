@@ -80,8 +80,13 @@ const path=require('node:path');
    'attacker walking frontwards uses identical native animation keys');
   assert.equal(synced.duel[1].frames,'11',
    'duel defender holds native side pose while looking at attacker');
-  assert.equal(synced.board[1].frames,'25',
-   'board defender holds genuine front pose from that same CHR member');
+  // Round 11: hurt has no identified original slot, so the board defender
+  // holds the FIRST KEY of its own original front-idle slot (anim 2),
+  // exactly the frame its idle animation starts from (was WEB-reviewed 25).
+  const frontIdleKey=await page.evaluate(card=>String(
+   window.__LEAF_NATIVE_CARD_ACTIONS__.table(card).anims[2].keys[0][1]),synced.board[1].chessman);
+  assert.equal(synced.board[1].frames,frontIdleKey,
+   'board defender holds the original front-idle first key of that same CHR member');
   assert.ok(synced.duel.every(x=>x.source==='original-obs-sprite'),
    'already recovered true OBS full bodies must be rendered on both podiums');
   // ARCHIVED SOURCE IMAGE anchor regression: validate the physical
@@ -367,7 +372,10 @@ const path=require('node:path');
   const resultActors=await page.evaluate(({winner,loser})=>
    [winner,loser].map(id=>{
     const actor=document.querySelector('#board-pawns .board-pawn[data-id="'+id+'"]');
-    const native=window.ORIGINAL_LEAF_OBS_FRAMES[actor.dataset.chessmanId];
+    // The rendered family is the CHR +260 body resolved from the full
+    // original action manifests (round 9/#522), not the older bulk subset.
+    const native=window.__LEAF_CHR_BODY_MAP__?.resolve(actor.dataset.chessmanId)||
+     window.ORIGINAL_LEAF_OBS_FRAMES[actor.dataset.chessmanId];
     const seq=(actor.dataset.sourceFrameSequence||'').split(',').map(Number);
     return {id,pose:actor.dataset.actorPose,rig:actor.dataset.actorRig,
      sequence:seq,sourceNative:native?.frames?.map(x=>x.index)||[],

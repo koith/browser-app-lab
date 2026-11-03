@@ -1,0 +1,54 @@
+{
+ "requestText": "Claude 8차 원본 해독 전담",
+ "events": [
+  {
+   "type": "OBS_MEMBER_FORMAT_DECODED",
+   "taskIds": [
+    "ACT-02",
+    "SRC-01"
+   ],
+   "details": "OBS member = u32 blockCount | blocks (128-byte header, u16 frameCount at +66, frames, own 768-byte palette) | u32 animationCount | animations (u32 durationTicks, u32 n, n x 18-byte records) | 34 zero bytes. Header byte0 = 1 + embedded chains on 227/241 members; all 227 stored trailers parse to the last byte (tail variants {\"162-with-8-at-32\": 3, \"zero0\": 1, \"zero34\": 223}). VERIFIED."
+  },
+  {
+   "type": "ORIGINAL_ANIMATION_TABLE_DECODED",
+   "taskIds": [
+    "ACT-03",
+    "P0-ACTOR",
+    "M05"
+   ],
+   "details": "Original per-member animation tables decoded for 227 members; 86 use the 17-animation chessman schema (51 OBS.pak incl. 1025-1039/1041/1057 without cards, 23 OBS2, 12 OBS3). 1040: idle 0-2/11-13/22-24, walk 3,5,6,7,8 (frame 4 unused) /14-19/25-30, 3 ticks per key; events reference effect members 1096-1124. Tick length and action names UNVERIFIED."
+  },
+  {
+   "type": "DICE_EXTRA_BLOCK_COLOURS_UNVERIFIED",
+   "taskIds": [
+    "DIE-01",
+    "DIE-02"
+   ],
+   "details": "D6 1171 extra blocks 16/16/6 and D4 1223 extra blocks 9/16 each carry a palette; the published original/OBS/embedded PNGs use block 0's palette. Round 9 check on OBS2 1228/1238 (bytes stored): own-palette decode is pixel-identical, so a palette defect is NOT demonstrated (round-8 claim corrected). Dice block palettes are recorded per block by tools/decode-obs-blocks.py in CI; keep the #516 quarantine until then."
+  },
+  {
+   "type": "DICE_FRAME_GROUPS_MEASURED",
+   "taskIds": [
+    "DIE-01",
+    "DIE-04"
+   ],
+   "details": "D6: 0-5 flat faces, 6-11 isometric, 12-17 highlighted copies (same geometry, cyan), 18-27 varying. D4: 0-3, 4-7, 8-11, 12-21 likewise. Boundaries VERIFIED by measurement; meanings INFERRED."
+  },
+  {
+   "type": "CHR_BODY_MEMBER_FIELD_DECODED",
+   "taskIds": [
+    "ACT-01",
+    "ACT-05",
+    "P0-ACTOR"
+   ],
+   "details": "CHR record offset 260 = ASCII OBS member number of the character body (VERIFIED, all 119 records). 97/98 cards have that member in OBS/OBS2/OBS3 (0156 -> 1222 absent). The old card 0NNN = member 1NNN rule was wrong for every card; 7 bodies used so far belong to non-card records (slime 1084, zombie 1086, skeleton 1087, golem 1088, lich 1089, Azi Dahaka 1090, test 1092). OBS2 1199+k = card 0125+k confirmed. 19 card bodies are not yet published as PNG. See card-body-map.json, quantity-reconciliation.json."
+  },
+  {
+   "type": "QUANTITY_RECONCILED",
+   "taskIds": [
+    "ACT-01"
+   ],
+   "details": "98 cards -> 97 distinct bodies (no duplicates); 86 schema-17 members = 85 card bodies + 1166 (byte copy of 1061, unreferenced); 12 card bodies use 14/15-animation tables; old 54 = 42 card bodies (of other cards) + 7 non-card bodies + 5 unreferenced. The round-8 '52 new bodies' figure is superseded."
+  }
+ ]
+}

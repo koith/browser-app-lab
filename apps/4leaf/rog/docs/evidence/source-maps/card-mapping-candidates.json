@@ -1,0 +1,15 @@
+{
+ "status": "SUPERSEDED by card-body-map.json (VERIFIED from CHR record offset 260)",
+ "previousRule": {
+  "rule": "card 0NNN = OBS.pak member 1NNN",
+  "result": "WRONG for every card (e.g. 0088 Sherazard -> 1071, not golem 1088; 0087 Saladin -> 1070, not skeleton 1087)"
+ },
+ "previousCandidate": {
+  "rule": "card 0125+k <-> OBS2 1199+k",
+  "result": "CONFIRMED by CHR for all 23 cards"
+ },
+ "verifiedCardBodies": 97,
+ "missing": [
+  "0156"
+ ]
+}
