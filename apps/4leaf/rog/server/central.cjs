@@ -46,6 +46,9 @@ function makeServer(options={}){
   sequence=archive.sequence;
  };
  const ready=persistent?Promise.resolve().then(()=>persistent.load()).then(applyArchive):Promise.resolve();
+ // Keep the rejection observable by await ready, but avoid an unhandled
+ // rejection if remote initialization fails before the first HTTP request.
+ ready.catch(()=>{});
  const snapshot=()=>({rooms:[...rooms.values()],history:[...history.entries()],sequence});
  const save=async()=>{
   const data=snapshot();
