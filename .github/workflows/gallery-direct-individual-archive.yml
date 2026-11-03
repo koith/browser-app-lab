@@ -13,6 +13,7 @@ on:
       - apps/gallery-archive/direct_photo_pipeline.py
       - apps/gallery-archive/private_collection_snapshot.py
       - apps/gallery-archive/read_owner_metadata.py
+      - apps/gallery-archive/load_pending_individual.py
       - apps/gallery-archive/upload_verified_individual.py
       - apps/gallery-archive/commit_verified_owner_catalog.py
       - apps/gallery-archive/owner_upload_web_token.py
