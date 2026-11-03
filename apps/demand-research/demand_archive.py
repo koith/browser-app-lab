@@ -79,18 +79,35 @@ def validate_post(p):
 
 
 def validate_catalog(payload):
+    # Keep legacy permissioned TeraBox catalogs intact. They may have older
+    # 16/64-hex IDs and omit the new capture-only provenance/date fields.
     if not isinstance(payload, dict) or payload.get("schema_version") != 1 or not isinstance(payload.get("posts"), list):
         raise ValueError("invalid catalog")
     if len(payload["posts"]) > MAX_POST:
         raise ValueError("catalog too many posts")
     seen = set()
     for p in payload["posts"]:
-        validate_post(p)
+        if not isinstance(p, dict) or not re.fullmatch(r"[a-f0-9]{16,64}", str(p.get("id", ""))):
+            raise ValueError("bad catalog post id")
         if p["id"] in seen:
-            raise ValueError("duplicate post")
+            raise ValueError("duplicate catalog post")
         seen.add(p["id"])
+        if not isinstance(p.get("text"), str) or len(p["text"]) > 30000:
+            raise ValueError("invalid catalog body")
+        media = p.get("media")
+        if not isinstance(media, list) or len(media) > 100:
+            raise ValueError("invalid catalog attachments")
+        for m in media:
+            if not isinstance(m, dict) or m.get("mime") not in MIMES:
+                raise ValueError("invalid catalog media type")
+            key = m.get("key", "")
+            if (not isinstance(key, str) or not key.startswith("posts/" + p["id"] + "/media/")
+                    or ".." in key or "\\" in key or "%" in key
+                    or not isinstance(m.get("bytes"), int) or not 0 < m["bytes"] <= 1_500_000_000
+                    or not re.fullmatch(r"[a-f0-9]{64}", str(m.get("sha256", "")))
+                    or m.get("remote_verified") is not True):
+                raise ValueError("unverified catalog media")
     return payload["posts"]
-
 
 class CloudArchive:
     def __init__(self, remote=None, runner=None):
