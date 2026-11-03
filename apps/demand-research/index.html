@@ -454,9 +454,26 @@ main{padding-top:10px}
 .account-discovered-card button{border-radius:0;background:#2943c9;font-size:10px;padding:7px;flex:none}
 @media(max-width:850px){.account-discovered-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:580px){.account-discovered-grid{grid-template-columns:1fr}}
-.consumer-entry{margin:10px 0 15px;padding:11px 14px;display:flex;align-items:center;gap:13px;justify-content:space-between;background:#e6f4d8;border:1.5px solid #173c31;flex-wrap:wrap}
-.consumer-entry a{display:inline-flex;align-items:center;gap:9px;color:#173d31;font-size:14px;font-weight:850;text-decoration:none;padding:5px 0}
-.consumer-entry a:hover{text-decoration:underline}.consumer-entry small{font-size:11px;color:#54715d}
+.head-title-group{display:flex;align-items:center;gap:11px;min-width:0}
+.head-title-group h1{flex:none}
+.header-consumer-entry{display:inline-flex;align-items:center;justify-content:center;flex:none;white-space:nowrap;text-decoration:none;padding:5px 8px;height:30px;line-height:1;border:1px solid #101432;background:#fff8d4;color:#101432;font-size:11px;font-weight:800}
+.header-consumer-entry:hover{background:#101432;color:#fff}
+.header-consumer-entry:focus-visible{outline:2px solid #ee4a2b;outline-offset:2px}
+.post-thumb>.source-badge--icon-only{padding:2px;width:23px;height:23px;display:flex;align-items:center;justify-content:center;top:5px;right:5px;gap:0;overflow:hidden}
+.post-thumb>.source-badge--icon-only img{width:16px!important;height:16px!important;border-radius:0}
+.source-badge-fallback{display:block;font-size:15px;line-height:1;font-weight:950}
+@media(max-width:720px){
+ .head-title-group{gap:5px}
+ .header-consumer-entry{font-size:9px;height:27px;padding:3px 5px}
+ .post-thumb>.source-badge--icon-only{top:4px;right:4px;width:21px;height:21px}
+ .post-thumb>.source-badge--icon-only img{width:15px!important;height:15px!important}
+}
+@media(max-width:375px){
+ .head-title-group{gap:3px}
+ body>header.site-head h1{font-size:clamp(19px,5.4vw,23px)}
+ .header-consumer-entry{padding:3px;font-size:9px}
+ .site-head .header-period #openDate{font-size:9px;padding:7px 4px}
+}
 
 
 /* RANK: compact, image-first account tiles. Expanded metrics live in the dialog. */
@@ -505,7 +522,7 @@ main{padding-top:10px}
 <body>
 <div class="ambient" aria-hidden="true"><canvas id="dotField"></canvas></div>
 <header class="site-head">
-<div class="head-inner"><h1>INTERSECTION</h1><div class="period-trigger-row header-period"><button id="openDate" type="button" aria-haspopup="dialog" aria-controls="dateDialog"><span aria-hidden="true">◷</span> <span id="periodLabel">기간 선택</span> <span aria-hidden="true">⌄</span></button></div></div>
+<div class="head-inner"><div class="head-title-group"><h1>INTERSECTION</h1><a class="header-consumer-entry" href="./consumer/" aria-label="일반 상품 수요 분석 별도 화면으로 이동">상품 수요 분석</a></div><div class="period-trigger-row header-period"><button id="openDate" type="button" aria-haspopup="dialog" aria-controls="dateDialog"><span aria-hidden="true">◷</span> <span id="periodLabel">기간 선택</span> <span aria-hidden="true">⌄</span></button></div></div>
 <small id="source" class="sr-only">공개 게시글</small><span class="sr-only" id="status" role="status">게시글 불러오는 중…</span>
 </header>
 <main>
@@ -514,7 +531,6 @@ main{padding-top:10px}
   <button type="button" role="tab" id="viewPosts" class="active" aria-selected="true" aria-controls="postsView">게시글</button>
   <button type="button" role="tab" id="viewAccounts" aria-selected="false" aria-controls="accountsView">계정 분석 <span id="watchCount" aria-hidden="true">0</span></button>
 </nav>
-<div class="consumer-entry"><a href="./consumer/" aria-label="일반 상품 수요 분석 별도 화면으로 이동">◩ 상품 수요 분석 <span aria-hidden="true">↗</span></a><small>별도 일반 소비재 데이터 · 합성 예시부터 검증</small></div>
 <div id="postsView" role="tabpanel" aria-labelledby="viewPosts">
 <div class="sr-only" id="count" role="status" aria-live="polite">불러오는 중…</div>
 <section id="activityRanking" class="activity-ranking" aria-labelledby="activityRankingTitle">
@@ -1075,13 +1091,18 @@ const SERVICES={
   x:{name:"X",favicon:"https://koith.github.io/browser-app-lab/apps/demand-research/assets/x.svg"},
   threads:{name:"Threads",favicon:"https://koith.github.io/browser-app-lab/apps/demand-research/assets/threads.svg"},
   instagram:{name:"Instagram",favicon:"https://koith.github.io/browser-app-lab/apps/demand-research/assets/instagram.svg"},
-  cloud:{name:"Archive",favicon:""}
+  cloud:{name:"Archive",favicon:"https://koith.github.io/browser-app-lab/apps/demand-research/assets/archive.svg"}
 };
-function sourceBadge(p){
-  let meta=SERVICES[p.platform]||SERVICES.cloud,badge=el("span","source-badge");
+function sourceBadge(p,iconOnly=false){
+  let meta=SERVICES[p.platform]||SERVICES.cloud,badge=el("span","source-badge"+(iconOnly?" source-badge--icon-only":""));
   badge.setAttribute("aria-label","출처: "+meta.name);
-  if(meta.favicon){let logo=el("img");logo.src=meta.favicon;logo.alt="";logo.loading="lazy";logo.addEventListener("error",()=>logo.remove());badge.append(logo)}
-  badge.append(el("span","",meta.name));return badge;
+  if(meta.favicon){
+    let logo=el("img");logo.src=meta.favicon;logo.alt="";logo.loading="lazy";
+    logo.addEventListener("error",()=>{logo.remove();if(iconOnly)badge.append(el("span","source-badge-fallback","◩"))});
+    badge.append(logo);
+  }else if(iconOnly)badge.append(el("span","source-badge-fallback","◩"));
+  if(!iconOnly)badge.append(el("span","",meta.name));
+  return badge;
 }
 function profileLink(p){
   let a=el("a","profile-link",p.author||"작성자"),url=validUrl(p.profileUrl);
@@ -1100,7 +1121,7 @@ function tile(p){
   article.dataset.mediaPolicy=p.restricted?"restricted":p.adultLabeled?"adult":"general";
   if(p.discoveryCandidate)article.dataset.discoveryCandidate="true";
   let thumb=el("div","post-thumb"),first=p.media[0],blocked=hideMedia(p);
-  thumb.append(sourceBadge(p));
+  thumb.append(sourceBadge(p,true));
   if(first&&!blocked&&first.thumb){
     let img=el("img");img.src=first.thumb;img.alt="게시글 대표 이미지";img.loading="lazy";img.referrerPolicy="no-referrer";
     img.addEventListener("error",()=>img.remove());thumb.append(img);
