@@ -560,7 +560,7 @@ class CloudArchive:
                 return raw
         return None
 
-    def save_first_observation(self, pid, raw):
+    def save_first_observation(self, pid, raw, *, prefer_flat=False):
         """Store immutable public first sighting; retry via metadata flat path.
 
         Both candidate remote objects have fixed keys derived only from the
@@ -580,7 +580,11 @@ class CloudArchive:
             return previous
         canonical,flat=self.first_observation_keys(pid)
         last=None
-        for key in (canonical,flat):
+        # The five-minute watcher prioritizes a shallow already-used metadata
+        # directory to preserve the first observation immediately. The slower
+        # repair pass retains canonical-first compatibility.
+        locations=(flat,canonical) if prefer_flat else (canonical,flat)
+        for key in locations:
             try:
                 self.write_immutable(key,raw)
                 # write_immutable verified the uploaded SHA by remote readback.
