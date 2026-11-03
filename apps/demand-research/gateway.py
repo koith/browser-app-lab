@@ -348,7 +348,11 @@ async def list_posts(request:Request,offset:int=Query(0,ge=0),limit:int=Query(30
                           "url":"/api/media/"+post["id"]+"/"+str(i)+"?exp="+str(exp)+"&sig="+media_signature(post["id"],i,exp)})
         output.append({"id":post["id"],"platform":post.get("platform","unknown"),"posted_at":post.get("posted_at",""),
                        "text":post["text"],"media":media,"reply_count":post.get("reply_count",0),
-                       "source_url":post.get("source_url",""),"capture_status":"remote_verified"})
+                       "source_url":post.get("source_url",""),
+                        "profile_url":post.get("profile_url",""),
+                        "media_expected":post.get("media_expected",len(post["media"])),
+                        "media_saved":len(post["media"]),
+                        "capture_status":"remote_verified" if post.get("archive_complete",True) else "partial_media"})
     return {"total":len(posts),"offset":offset,"limit":limit,"posts":output,"storage":"TeraBox"}
 
 async def remote_stream(path,start,length)->AsyncIterator[bytes]:
