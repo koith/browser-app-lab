@@ -143,17 +143,28 @@ def read_via_existing_owner_gateway(remote,model,*,minimum=1,batch=None,opener=N
                 raise ProviderVerificationRequired('Authenticated catalog redirect rejected')
         opener=urllib.request.build_opener(NoRedirect()).open
 
-    def fetch(request,limit,timeout):
+    def fetch(request,limit,timeout,stage):
         try:
             with opener(request,timeout=timeout) as response:
-                if getattr(response,'status',200)!=200:
+                status=getattr(response,'status',200)
+                if status!=200:
+                    print('OWNER_SIGNED_READ_HTTP_STATUS',model,stage,
+                          status,file=sys.stderr,flush=True)
                     raise ProviderVerificationRequired('Owner gateway HTTP read unavailable')
                 raw=response.read(limit+1)
                 if not raw or len(raw)>limit:
                     raise ProviderVerificationRequired('Owner gateway read exceeds bounds')
                 return raw
-        except (urllib.error.HTTPError,urllib.error.URLError,TimeoutError,OSError):
-            raise ProviderVerificationRequired('Owner gateway signed read unavailable') from None
+        except urllib.error.HTTPError as error:
+            # HTTP status is safe to report; no URI, cookie, token, response
+            # body or signed media location may be written to Actions logs.
+            print('OWNER_SIGNED_READ_HTTP_STATUS',model,stage,
+                  error.code,file=sys.stderr,flush=True)
+            raise ProviderVerificationRequired('Owner gateway signed HTTP read unavailable') from None
+        except (urllib.error.URLError,TimeoutError,OSError):
+            print('OWNER_SIGNED_READ_TRANSPORT_FAILURE',model,stage,
+                  file=sys.stderr,flush=True)
+            raise ProviderVerificationRequired('Owner gateway signed transport read unavailable') from None
 
     audience='gallery-archive-terabox-sync'
     sep='&' if target.query else '?'
@@ -161,7 +172,7 @@ def read_via_existing_owner_gateway(remote,model,*,minimum=1,batch=None,opener=N
         request_url+sep+'audience='+quote(audience),
         headers={'Authorization':'Bearer '+request_token})
     try:
-        id_token=json.loads(fetch(request,24000,30)).get('value')
+        id_token=json.loads(fetch(request,24000,30,'github-oidc')).get('value')
     except (ValueError,TypeError,AttributeError):
         raise ProviderVerificationRequired('Collector GitHub identity response invalid') from None
     if not isinstance(id_token,str) or not 80<=len(id_token)<=12000:
@@ -172,7 +183,7 @@ def read_via_existing_owner_gateway(remote,model,*,minimum=1,batch=None,opener=N
     request=urllib.request.Request(endpoint,method='POST',data=b'',
                                    headers={'Authorization':'Bearer '+id_token,
                                             'Content-Type':'application/octet-stream'})
-    raw=fetch(request,2_000_000 if batch else 6_000_000,125)
+    raw=fetch(request,2_000_000 if batch else 6_000_000,125,'pending' if batch else 'catalog')
     if not matches(raw,model,batch,minimum):
         raise ProviderVerificationRequired('Gateway owner metadata identity or batch SHA invalid')
     print('OWNER_REMOTE_AUTHENTICATED_GATEWAY_READ',model,
