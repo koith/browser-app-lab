@@ -523,18 +523,95 @@ class CloudArchive:
                     ids.add(m.group(1))
         return ids
 
+    @staticmethod
+    def first_observation_keys(pid):
+        """Immutable first-observation keys; fallback uses a pre-existing root."""
+        if not isinstance(pid,str) or not ID.fullmatch(pid):
+            raise ValueError("invalid public capture id")
+        return ("posts/"+pid+"/capture.json","metadata/early-"+pid+".json")
+
+    def read_first_observation(self, pid):
+        """Read either private original without promoting or replacing bytes.
+
+        An upload to a freshly created posts/<id> folder may fail before the
+        source is archived. The metadata root has existed since catalog setup
+        and offers a shallower independent storage route.
+        """
+        canonical,flat=self.first_observation_keys(pid)
+        for key in (canonical,flat):
+            try:
+                raw=self.read(key,cap=100_000,optional=True)
+            except RuntimeError:
+                raw=None
+            if raw is None:
+                try:
+                    raw=self.read(key,cap=100_000,optional=True,
+                                  domain="https://nephobox.com")
+                except RuntimeError:
+                    raw=None
+            if raw is not None:
+                # Never return a record for another public post.
+                try:
+                    data=json.loads(raw)
+                except (ValueError,TypeError):
+                    raise ValueError("invalid first observation bytes")
+                if not isinstance(data,dict) or data.get("id")!=pid:
+                    raise ValueError("first observation identity mismatch")
+                return raw
+        return None
+
+    def save_first_observation(self, pid, raw):
+        """Store immutable public first sighting; retry via metadata flat path.
+
+        Both candidate remote objects have fixed keys derived only from the
+        post ID, and both require verified byte readback before acceptance.
+        Existing observations win; no write replaces older original bytes.
+        """
+        if not isinstance(raw,bytes) or len(raw)>100_000:
+            raise ValueError("invalid first observation payload")
+        try:
+            obj=json.loads(raw)
+        except (TypeError,ValueError) as error:
+            raise ValueError("invalid first observation JSON") from error
+        if not isinstance(obj,dict) or obj.get("id")!=pid:
+            raise ValueError("first observation identity mismatch")
+        previous=self.read_first_observation(pid)
+        if previous is not None:
+            return previous
+        canonical,flat=self.first_observation_keys(pid)
+        last=None
+        for key in (canonical,flat):
+            try:
+                self.write_immutable(key,raw)
+                # write_immutable verified the uploaded SHA by remote readback.
+                return raw
+            except RuntimeError as error:
+                last=error
+                # Access denial or capacity exhaustion cannot be bypassed.
+                if any(code in str(error) for code in
+                       ("(authorization)","(capacity)","(rate_limited)")):
+                    raise
+                previous=self.read_first_observation(pid)
+                if previous is not None:
+                    return previous
+        raise RuntimeError("first observation unavailable on both private paths") from last
+
     def pending_capture_ids(self, existing):
         # Early snapshots survive a crash even before a verified entry is written.
         raw = self.command(["lsf", self.remote + "/posts", "--dirs-only",
                             "--retries", "2"], timeout=120, allow_missing=True)
-        if raw is None:
-            return []
-        names = raw.decode("utf-8", "replace").splitlines()
+        names = raw.decode("utf-8", "replace").splitlines() if raw else []
         if len(names) > MAX_ENTRIES:
             raise ValueError("private capture directory listing exceeds limit")
-        return [name[:-1] for name in names if name.endswith("/")
-                and ID.fullmatch(name[:-1]) and name[:-1] not in existing
-                and name[:-1] not in self.quarantined_ids]
+        ids={name[:-1] for name in names if name.endswith("/")
+             and ID.fullmatch(name[:-1])}
+        # A flat first observation may be the ONLY durable record when nested
+        # TeraBox uploads fail. The slow repair pass must find it after a crash.
+        for name in self.names("metadata"):
+            if re.fullmatch(r"early-[a-f0-9]{40}\.json",name):
+                ids.add(name[6:-5])
+        return sorted(pid for pid in ids if pid not in existing
+                      and pid not in self.quarantined_ids)
 
     def corroborate_mismatched_post(self, pid, record):
         """Recover only if two independent immutable captures agree on identity,
@@ -549,7 +626,7 @@ class CloudArchive:
             post=validate_post(json.loads(record))
             if post["id"]!=pid:
                 return None
-            raw=self.read("posts/"+pid+"/capture.json",cap=100_000,optional=True)
+            raw=self.read_first_observation(pid)
             if raw is None:
                 return None
             first=json.loads(raw)
