@@ -182,6 +182,7 @@
      });
      const more=$("activityRankingMore");
      more.classList.toggle("hidden",sorted.length<=show);
+     more.setAttribute("aria-expanded",String(show>10));
      more.setAttribute("aria-label",`랭킹 ${Math.min(10,Math.max(0,sorted.length-show))}명 더 보기`);
      more.textContent="더 보기";
    }
