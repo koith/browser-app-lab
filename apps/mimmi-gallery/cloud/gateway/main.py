@@ -118,6 +118,22 @@ async def authenticated(request: Request, authorization: str | None = Header(def
 
 
 
+def same_owner_copyto_read_allowed(path: str, limit: int, remote: str | None) -> bool:
+    """Only SHA-scoped existing owner pending metadata may join media fallback.
+
+    This cannot read arbitrary private metadata, other models, or another
+    account; the signed pending endpoint independently validates the payload.
+    """
+    if not 1 <= limit <= 140_000_001:
+        return False
+    if media_key_valid(path):
+        return True
+    match=re.fullmatch(
+        r"metadata/pending-individual/(mimmi|yui)/[a-f0-9]{64}\\.json",path)
+    return bool(match and limit <= 2_000_001
+                and (remote or REMOTE)==(REMOTE if match[1]=="mimmi" else YUI_REMOTE))
+
+
 async def read_owner_media_via_copyto(path: str, limit: int, client_env: dict,
                                       remote: str | None = None) -> bytes:
     """Read an existing own-account original by a proven alternative rclone method.
@@ -125,7 +141,7 @@ async def read_owner_media_via_copyto(path: str, limit: int, client_env: dict,
     Exact SHA verification remains mandatory in verified_remote_media().
     This doesn't alter source credentials, any remote object or access controls.
     """
-    if not media_key_valid(path) or not 1 <= limit <= 140_000_001:
+    if not same_owner_copyto_read_allowed(path,limit,remote):
         raise HTTPException(status_code=502,detail='Invalid owner media read request')
     with tempfile.TemporaryDirectory(prefix='gallery-media-copyto-') as tmp:
         destination=Path(tmp)/'owner-media'
@@ -202,7 +218,8 @@ async def rclone_bytes(path: str, limit: int, *, remote: str | None = None) -> b
                 raise HTTPException(status_code=502, detail="Cloud media unavailable",
                     headers={'X-Archive-Read-Cause':'transport_interruption'} if retryable else None)
             raw=bytes(content)
-            if path.startswith(('originals/','previews/')) and len(raw)<=512:
+            if (path.startswith(('originals/','previews/'))
+                    or re.fullmatch(r"metadata/pending-individual/(mimmi|yui)/[a-f0-9]{64}\\.json",path)) and len(raw)<=512:
                 try: body=json.loads(raw)
                 except (ValueError,TypeError):body={}
                 if isinstance(body,dict) and body.get('errno')==400141:
