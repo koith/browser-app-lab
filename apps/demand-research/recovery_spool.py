@@ -66,10 +66,19 @@ def _decode_file(raw,secret):
         raise ValueError("invalid encrypted buffer header")
     salt=raw[6:22]
     nonce=raw[22:34]
-    decrypted=_crypto()(_key(secret,salt)).decrypt(nonce,raw[34:],AAD)
+    from cryptography.exceptions import InvalidTag
+    try:
+        decrypted=_crypto()(_key(secret,salt)).decrypt(nonce,raw[34:],AAD)
+    except InvalidTag:
+        # Incorrect key or tampering is a recoverable, privacy-safe failure.
+        # Never expose ciphertext or personal originals in exception text.
+        raise ValueError("encrypted recovery authentication failed") from None
     # Bound decompression to avoid a hostile artifact consuming unlimited RAM.
     decomp=zlib.decompressobj()
-    plain=decomp.decompress(decrypted,MAX_BUFFER_BYTES+1)
+    try:
+        plain=decomp.decompress(decrypted,MAX_BUFFER_BYTES+1)
+    except zlib.error:
+        raise ValueError("invalid compressed private recovery record") from None
     if len(plain)>MAX_BUFFER_BYTES or not decomp.eof or decomp.unused_data:
         raise ValueError("invalid recovered buffer payload")
     result=json.loads(plain)
