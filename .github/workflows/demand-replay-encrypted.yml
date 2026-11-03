@@ -1,0 +1,83 @@
+name: INTERSECTION — Immediate Encrypted TeraBox Recovery
+on:
+  workflow_run:
+    workflows:
+      - "INTERSECTION — Fast Private Public-Post Capture"
+    types: [completed]
+    branches: [main]
+  pull_request:
+    paths:
+      - ".github/workflows/demand-replay-encrypted.yml"
+      - "apps/demand-research/recover_spool_artifacts.py"
+      - "apps/demand-research/recovery_spool.py"
+      - "apps/demand-research/test_recovery_spool.py"
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: intersection-private-verified-recovery-${{ github.event_name == 'pull_request' && github.head_ref || 'production' }}
+  cancel-in-progress: false
+
+jobs:
+  offline-tests:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Verify safe artifact replay and identity checks without any credentials
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check pytest==8.4.2 cryptography==46.0.4
+          cd apps/demand-research
+          python -m py_compile recovery_spool.py recover_spool_artifacts.py
+          python -m pytest -q test_recovery_spool.py test_degraded_encrypted_capture.py
+
+  replay:
+    # Never replay a pull-request artifact or run from an untrusted branch.
+    # The prior capture's artifact upload step has already completed.
+    if: >-
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.event != 'pull_request' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.conclusion != 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 21
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GITHUB_RUN_ID: ${{ github.run_id }}
+      DEMAND_RECOVERY_SOURCE_RUN_ID: ${{ github.event.workflow_run.id }}
+      RCLONE_CONFIG_ARCHIVE_TYPE: terabox
+      RCLONE_CONFIG_ARCHIVE_UPLOAD_THREADS: "1"
+      RCLONE_CONFIG_ARCHIVE_COOKIE: ${{ secrets.DEMAND_TERABOX_NDUS || secrets.YUI_TERABOX_NDUS || secrets.YUI_TERABOX_COOKIE }}
+      DEMAND_ARCHIVE_RECOVERY_KEY: ${{ secrets.DEMAND_ARCHIVE_RECOVERY_KEY }}
+      DEMAND_TERABOX_REMOTE: "archive:DemandResearch"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Require privately configured cloud credential
+        run: test -n "$RCLONE_CONFIG_ARCHIVE_COOKIE"
+      - name: Install pinned private archive backend
+        run: |
+          set -euo pipefail
+          curl -fsSL https://github.com/gulp79/rclone-extra/releases/download/v1.75.2-extra/rclone-linux-amd64.zip -o /tmp/rclone.zip
+          echo '78855325a2a8d83b3feee3a8363d32e1211babbf4cda6356fa8ca5f472075062  /tmp/rclone.zip' | sha256sum -c -
+          unzip -q /tmp/rclone.zip -d /tmp/rclone-extra
+          find /tmp/rclone-extra -type f -name rclone -exec sudo install -m 755 {} /usr/local/bin/rclone \;
+          rclone help backends | grep -qi terabox
+          rm -rf /tmp/rclone.zip /tmp/rclone-extra
+      - name: Install authenticated encryption dependency
+        run: python -m pip install --disable-pip-version-check cryptography==46.0.4
+      - name: Replay ONLY this failed main-branch capture's encrypted originals
+        working-directory: apps/demand-research
+        run: |
+          set -euo pipefail
+          python recover_spool_artifacts.py
+          echo 'Recovery attempted; only aggregate SHA-verified counters are logged.' >> "$GITHUB_STEP_SUMMARY"
