@@ -15,6 +15,7 @@ on:
       - "apps/demand-research/test_rebuild_index_readback.py"
       - "apps/demand-research/test_recovery_spool.py"
       - "apps/demand-research/test_degraded_encrypted_capture.py"
+      - "apps/demand-research/test_encrypted_batch_recovery.py"
       - "apps/demand-research/rebuild_archive.py"
       - ".github/workflows/demand-fast-capture.yml"
   push:
