@@ -114,7 +114,25 @@ const townAvatar=(i)=>'./original/Registry/sava'+String([0,82,6,1,85][i%5]).padS
 let remoteAct=false,remoteBattle=null,remoteBattleSequence=0;
 let shopPage=0;
 let profile,match=null,route='sky',chosenCard=CHR_SOURCE.length>50?'c_0040':'joan',group='all',currentRoom='샤이닝 브리즈',soundOn=false,audioCtx=null,busy=false,bgm=null,bgmTrack=null;
-const safe=(v,f)=>{try{const a=JSON.parse(localStorage.getItem('rog_'+v));return a===null?f:a}catch{return f}};
+// A truncated local save may be left by an interrupted browser/PWA write.
+// Never erase its original bytes merely because JSON.parse failed at boot.
+let unreadableSavedMatchRaw=null;
+const safe=(v,f)=>{
+ let raw=null;
+ try{
+  raw=localStorage.getItem('rog_'+v);
+  const value=JSON.parse(raw);
+  return value===null?f:value;
+ }catch(error){
+  if(v==='match'&&raw!==null){
+   unreadableSavedMatchRaw=raw;
+   // SyntaxError messages can quote source JSON fragments containing names.
+   // Log only the error category; never expose the damaged save contents.
+   console.warn('4LEAF saved game is unreadable; original storage retained for recovery',error?.name||'parse-error');
+  }
+  return f;
+ }
+};
 profile=safe('profile',DEFAULT_PROFILE);
 if(!profile||!Array.isArray(profile.owned))profile=structuredClone(DEFAULT_PROFILE);
 if(CHR_SOURCE.length>50){
@@ -143,8 +161,36 @@ function playerCanAct(){
  return true;
 }
 function refreshResume(){if(!$('resume-game'))return;$('resume-game').classList.toggle('hidden',!(match&&!match.finished&&MAPS[match.map]))}
+function archiveUnreadableSavedMatch(){
+ if(unreadableSavedMatchRaw===null)return true;
+ try{
+  const first='rog_match_invalid_backup_v1';
+  const prior=localStorage.getItem(first);
+  let target=first;
+  if(prior!==null&&prior!==unreadableSavedMatchRaw)
+   target=first+'_'+Date.now();
+  const existing=localStorage.getItem(target);
+  if(existing!==unreadableSavedMatchRaw){
+   // Never overwrite a different older recovery snapshot.
+   if(existing!==null)throw Error('Recovery key collision');
+   localStorage.setItem(target,unreadableSavedMatchRaw);
+  }
+  unreadableSavedMatchRaw=null;
+  return true;
+ }catch(error){
+  console.warn('4LEAF failed to back up unreadable match; refusing to overwrite its bytes',error);
+  return false;
+ }
+}
 function persist(){
- try{localStorage.setItem('rog_profile',JSON.stringify(profile));localStorage.setItem('rog_match',JSON.stringify(match))}catch{}
+ try{
+  localStorage.setItem('rog_profile',JSON.stringify(profile));
+  // Initial UI/profile updates must not turn malformed original bytes into
+  // the literal 'null'. On a real fresh game, retain a separate exact copy
+  // before changing the active match key. If backup fails, fail closed.
+  if(unreadableSavedMatchRaw===null||(match&&archiveUnreadableSavedMatch()))
+   localStorage.setItem('rog_match',JSON.stringify(match));
+ }catch(error){console.warn('4LEAF local game save failed',error)}
  if(match?.mode==='network'&&window.__LEAF_NET__?.connected&&window.__LEAF_NET__.role==='host'){
    window.__LEAF_BRIDGE__?.onState?.(match);
  }
