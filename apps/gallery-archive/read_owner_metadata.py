@@ -93,10 +93,51 @@ def read(remote,model,*,batch=None,minimum=1,reader=None):
     return raw
 
 
+
+def read_with_current_owner_web_session(remote,model,*,minimum=1,reader=None,refresh=None):
+    """Try the owner's *existing*, authenticated /main session before metadata IO.
+
+    The archive client can use its ordinary jsToken for API requests. The
+    previous production sequence only obtained this web token *after* the
+    metadata preflight, where provider 400141 caused an early exit. This is
+    a legitimate same-account session refresh, not a challenge workaround.
+
+    A rejected login/verification remains rejected. Never accept a public
+    GitHub index in place of fresh remotely authenticated owner metadata.
+    """
+    expected={'mimmi':'archive:MimmiArchive/metadata/catalog.json',
+              'yui':'archive:YuiArchive/metadata/catalog.json'}.get(model)
+    if remote!=expected:
+        raise ValueError('Only the original model-specific owner catalog may refresh web state')
+    if refresh is None:
+        from owner_upload_web_token import update_current_process
+        refresh=update_current_process
+    from owner_upload_web_token import WebStateUnavailable
+    import httpx
+    try:
+        token=refresh()
+        if not isinstance(token,str) or not token:
+            raise WebStateUnavailable('No owner web token')
+        print('OWNER_AUTHENTICATED_WEB_STATE_READY_BEFORE_CATALOG',model,
+              'TOKEN_DISCLOSED',False,file=sys.stderr,flush=True)
+    except (WebStateUnavailable,httpx.RequestError,OSError,TimeoutError) as error:
+        # A normal credential refresh failure does not license a different
+        # account, source host, signed URL, or verification challenge bypass.
+        print('OWNER_AUTHENTICATED_WEB_STATE_UNAVAILABLE',model,
+              type(error).__name__,'COOKIE_ONLY_READ_REMAINS_SHA_GATED',True,
+              file=sys.stderr,flush=True)
+    return read(remote,model,minimum=minimum,reader=reader)
+
+
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('--remote',required=True);p.add_argument('--model',choices=['mimmi','yui'],required=True)
-    p.add_argument('--out',type=Path,required=True);p.add_argument('--published-index',type=Path,required=True);a=p.parse_args()
+    p.add_argument('--out',type=Path,required=True);p.add_argument('--published-index',type=Path,required=True);p.add_argument('--refresh-existing-web-session',action='store_true');a=p.parse_args()
     index=json.loads(a.published_index.read_text())
     if index.get('model')!=a.model:raise ValueError('Wrong published owner model')
     minimum=sum(len(album['images']) for album in index['albums'])
-    a.out.write_bytes(read(a.remote.rstrip('/')+'/metadata/catalog.json',a.model,minimum=minimum))
+    remote=a.remote.rstrip('/')+'/metadata/catalog.json'
+    if a.refresh_existing_web_session:
+        raw=read_with_current_owner_web_session(remote,a.model,minimum=minimum)
+    else:
+        raw=read(remote,a.model,minimum=minimum)
+    a.out.write_bytes(raw)

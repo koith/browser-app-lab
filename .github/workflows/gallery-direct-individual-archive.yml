@@ -209,7 +209,10 @@ jobs:
           echo "RCLONE_CONFIG_ARCHIVE_COOKIE=$cookie" >> "$GITHUB_ENV"
           echo "ARCHIVE_REMOTE=$remote" >> "$GITHUB_ENV"
           export RCLONE_CONFIG_ARCHIVE_COOKIE="$cookie"
-          python apps/gallery-archive/read_owner_metadata.py --remote "$remote" --model "$MODEL" --out "$RUNNER_TEMP/owner-before.json" --published-index "apps/$MODEL-gallery/owner-index.json"
+          # Before checking remote metadata, try the same authorised TeraBox
+          # web session already used for uploads. If normal login needs
+          # verification, retain the existing provider-challenge fail-closed gate.
+          python apps/gallery-archive/read_owner_metadata.py --remote "$remote" --model "$MODEL" --out "$RUNNER_TEMP/owner-before.json" --published-index "apps/$MODEL-gallery/owner-index.json" --refresh-existing-web-session
           python - <<'PY'
           import json,os
           from pathlib import Path
