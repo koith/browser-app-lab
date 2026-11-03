@@ -12,6 +12,11 @@ WORKDIR /app
 COPY apps/demand-research/gateway.py /app/gateway.py
 COPY apps/demand-research/target_archive_api.py /app/target_archive_api.py
 COPY apps/demand-research/target_account_archive.py /app/target_account_archive.py
+COPY apps/demand-research/target_account_enrichment.py /app/target_account_enrichment.py
+COPY apps/demand-research/target_account_viewer.py /app/target_account_viewer.py
+COPY apps/demand-research/account_archive_view.html /app/account_archive_view.html
+COPY apps/demand-research/account_archive_view.js /app/account_archive_view.js
+COPY apps/demand-research/account_archive_view.css /app/account_archive_view.css
 COPY apps/demand-research/demand_archive.py /app/demand_archive.py
 COPY apps/demand-research/social_sources.py /app/social_sources.py
 COPY apps/demand-research/account_index.py /app/account_index.py
