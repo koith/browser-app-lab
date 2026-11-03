@@ -415,6 +415,11 @@ async def media(post_id:str,index:int,request:Request,exp:int,sig:str):
     if status==206: headers["Content-Range"]="bytes "+str(start)+"-"+str(end)+"/"+str(total)
     return StreamingResponse(remote_stream(item["key"],start,end-start+1),status_code=status,media_type=item["mime"],headers=headers)
 
+# Read-only SNS-style account archive must be registered BEFORE the
+# single-segment script catchall. All routes check the private signed session.
+from target_account_viewer import create_router as create_account_viewer_router
+app.include_router(create_account_viewer_router(check_auth))
+
 # Allow only the browser's three known scripts and fixed SVG assets. Never
 # expose the Python source tree, cloud files or private database via StaticFiles.
 @app.get("/{asset_name}",include_in_schema=False)
