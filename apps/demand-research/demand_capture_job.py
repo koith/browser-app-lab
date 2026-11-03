@@ -299,8 +299,8 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None):
                "media_urls": first["media_links"][:MAX_MEDIA_PER_POST],
                "media_expected": len(first["media_links"])}
         post, blobs = make_post(row, first["observed_at"], pid_override=pid)
-        cloud.save_post(post, blobs)
-        known[pid] = post
+        saved_post = cloud.save_post(post, blobs)
+        known[pid] = saved_post
         early_recovered += 1
     seen_this_scan = set()
     for getter in sources:
@@ -365,7 +365,7 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None):
                 saved_post = cloud.save_post(post, blobs)
                 known[pid] = saved_post
                 saved += 1
-                partial += not post["archive_complete"]
+                partial += not saved_post["archive_complete"]
     # Entries written immediately per post are the recovery journal. The versioned
     # catalog is published LAST and never destroys an earlier verified catalog.
     if saved or recovered or early_recovered:
