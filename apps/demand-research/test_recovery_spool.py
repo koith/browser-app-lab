@@ -176,3 +176,46 @@ def test_mismatched_post_identity_never_restores_unrelated_attachment(tmp_path):
     result=recover_directory(tmp_path,cloud)
     assert result["failures"]==1
     assert cloud.objects=={}
+
+
+def test_first_cloud_write_failure_still_captures_exact_media_before_origin_disappears(tmp_path,monkeypatch):
+    from datetime import datetime,timezone
+    class PrivateCloudUnavailable(FakeCloud):
+        def save_first_observation(self,*args,**kwargs):
+            raise RuntimeError("synthetic private cloud upload failed")
+    bad=PrivateCloudUnavailable()
+    monkeypatch.setenv("DEMAND_RECOVERY_SPOOL_DIR",str(tmp_path))
+    oid="at://did:plc:abcdefghijk/app.bsky.feed.post/volatile-original"
+    pid=post_key("bluesky",oid)
+    raw=b"PUBLIC-ORIGINAL-JPEG-BYTES-TEST-42"
+    row={"platform":"bluesky","original_id":oid,
+         "text":"synthetic verified "+job.TERMS[0],
+         "source_url":"https://bsky.app/profile/did:plc:abcdefghijk/post/volatile-original",
+         "posted_at":"2026-11-03T00:00:00Z",
+         "media_urls":["https://cdn.bsky.app/img/volatile-original.jpg"],
+         "profile_url":"https://bsky.app/profile/did:plc:abcdefghijk",
+         "media_expected":1}
+    def source_media(current,now,get_media=None,pid_override=None,cloud=None):
+        p={"id":pid,"platform":current["platform"],
+           "text":current["text"],"source_url":current["source_url"],
+           "posted_at":current["posted_at"],
+           "captured_at":datetime.fromtimestamp(now,timezone.utc).isoformat(),
+           "media_expected":1,"media_saved":1,"archive_complete":True,
+           "media":[{"key":"posts/"+pid+"/media/0001.jpg",
+                     "mime":"image/jpeg","bytes":len(raw),
+                     "sha256":sha256(raw),"remote_verified":True}]}
+        return p,[raw]
+    monkeypatch.setattr(job,"make_post",source_media)
+    with pytest.raises(RuntimeError,match="unverified"):
+        job.run(fetchers=[lambda term,start,end: [row] if term==job.TERMS[0] else []],
+                cloud=bad,clock=lambda:1793667900,run_id="123456834",fast_mode=True)
+    assert bad.objects=={}
+    encrypted=list(tmp_path.glob("*.enc"))
+    assert len(encrypted)==1
+    ciphertext=encrypted[0].read_bytes()
+    assert raw not in ciphertext
+    good=FakeCloud()
+    receipt=recover_directory(tmp_path,good)
+    assert receipt["post_and_media_verified"]==1
+    assert receipt["failures"]==0
+    assert good.objects["posts/"+pid+"/media/0001.jpg"]==raw
