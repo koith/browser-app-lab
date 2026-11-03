@@ -822,9 +822,10 @@ class CloudArchive:
                     if original is None:
                         return None
                     observed=json.loads(original)
+                    if not isinstance(observed,dict):
+                        return None
                     links=observed.get("media_links")
-                    if (not isinstance(observed,dict)
-                            or observed.get("id")!=pid
+                    if (observed.get("id")!=pid
                             or not isinstance(links,list)
                             or len(links)<index):
                         return None
