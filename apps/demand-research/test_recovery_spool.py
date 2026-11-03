@@ -105,10 +105,10 @@ def test_fast_capture_spools_failed_cloud_observation_and_can_replay(tmp_path,mo
     assert b"PRIVATE TEST BODY" not in names[0].read_bytes()
     repaired=FakeCloud()
     stats=recover_directory(tmp_path,repaired)
-    assert stats["first_observation_verified"]==1
+    assert stats["post_and_media_verified"]==1
     pid=post_key("bluesky",original_id)
     assert repaired.read_first_observation(pid) is not None
-    assert repaired.load_catalog()==[]
+    assert repaired.load_catalog()[0]["id"]==pid
 
 
 def test_verified_capture_drops_encrypted_transient_buffer(tmp_path,monkeypatch):
