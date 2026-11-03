@@ -1624,6 +1624,19 @@
         "DIE-02",
         "SRC-01"
       ]
+    },
+    {
+      "id": "REQ-20261103-GPT-19-CHR-BODIES",
+      "date": "2026-11-03",
+      "origin": "2026-11-03 user 4LEAF restoration continuation; original OBS block CI source recovery",
+      "text": "원본 2002 설치본 SHA1 검증 및 OBS 블록별 팔레트 추출로 미공개 체스맨 19개 몸체 662프레임을 복구하였으므로 원본 CHR 매핑으로 실게임에 표시하고 Chromium/WebKit 검증한다. 원본이 없는 0156은 타 카드로 대체하지 않는다.",
+      "taskIds": [
+        "ACT-01",
+        "ACT-03",
+        "P0-ACTOR",
+        "SRC-01",
+        "QA-03"
+      ]
     }
   ],
   "tasks": [
@@ -8359,6 +8372,33 @@
         "P0-PODIUM"
       ],
       "details": "Still not secured: 19 CHR bodies without published frames (1025-1039,1041,1057,OBS2 1212,OBS3 1256 -> cards 0040,0042-0055,0058,0074,0138,0159 keep their current non-native path), effect members 1096-1102/1112/1114/1118, D6/D4 per-block palettes and roll tables (CI branch data/4leaf-obs-blocks-* never run), original tick length, hurt/victory/board-attack slot meanings. Dice #516 quarantine kept. Podium geometry not changed this round; mid-lunge screenshots only."
+    },
+    {
+      "seq": 385,
+      "date": "2026-11-03",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261103-GPT-19-CHR-BODIES",
+      "taskIds": [
+        "ACT-01",
+        "ACT-03",
+        "P0-ACTOR",
+        "SRC-01",
+        "QA-03"
+      ]
+    },
+    {
+      "seq": 386,
+      "date": "2026-11-03",
+      "type": "RECOVERED_19_ORIGINAL_CHR_BODY_ASSETS_PR_PENDING",
+      "requestId": "REQ-20261103-GPT-19-CHR-BODIES",
+      "taskIds": [
+        "ACT-01",
+        "ACT-03",
+        "P0-ACTOR",
+        "SRC-01",
+        "QA-03"
+      ],
+      "details": "Isolated 2026-11-03 OBS-block decoder CI 41572616159 PASS, installer SHA1 86526d89679ae39b85fe9808da97ad871b7888d9. 19 exact CHR-owned OBS/OBS2/OBS3 original members 1025-1039,1041,1057,1212,1256=662 frames with per-file SHA256 and own block palette. No fabricated asset for missing original OBS2/1222/card0156. Source-backed frontend map, 19-body real Chromium/WebKit visual browser and SHA checks, PWA beta53/v140 implemented in stacked PR. No original EXE action roles/dice semantics claimed; release merge and Pages acceptance pending."
     }
   ]
 }
