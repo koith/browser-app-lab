@@ -1168,6 +1168,7 @@ function tile(p){
   }
   function showFallback(){
     thumb.querySelectorAll("img.post-media-img,.thumb-placeholder,.thumb-kind-label").forEach(n=>n.remove());
+    article.dataset.noMedia="true";
     if(!blocked&&avatar){
       const profile=el("img","post-media-img");
       profile.src=avatar;profile.alt="작성자 프로필 사진 · 게시글 첨부 사진 아님";
@@ -1283,7 +1284,7 @@ function draw(){
   $("more").textContent="더 보기";
   let coverage=cloudMode?" · 테라박스 저장본":" · 조회 "+daysCovered+"일 / "+(Math.ceil((toMs-fromMs)/DAY))+"일";
   let warnings=(failed||incomplete)?" · 일부 구간 미확인 "+(failed+incomplete)+"건":"";
-  let filteredDigests=matching.filter(isAutomatedTrendDigest).length;
+
   updateServiceCounts();
   let sources=" · B"+serviceCounts.bluesky+" M"+serviceCounts.mastodon+" L"+serviceCounts.lemmy+" K"+serviceCounts.misskey+" R"+serviceCounts.reddit+" X"+serviceCounts.x;
   let candidates=cloudMode?0:indexedCandidates.filter(p=>matchesText(p)&&!suspectedAd(p)).length;
