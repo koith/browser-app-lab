@@ -62,11 +62,17 @@
        g={platform:p.platform,profileUrl:profile,
           author:String(p.author||profile.split("/").pop()).slice(0,90),
           posts:0,days:new Set(),reactions:0,measuredPosts:0,
-          latestMs:-Infinity,latestId:"",latestThumbnail:""};
+          latestMs:-Infinity,latestId:"",latestThumbnail:"",profileCreatedAt:"",profilePostCount:null};
        groups.set(key,g);
      }
      g.posts+=1;
      g.days.add(new Date(ms).toISOString().slice(0,10));
+     const created=Date.parse(p.profileCreatedAt||"");
+     if(Number.isFinite(created)&&created>0&&created<=ms&&
+        (!g.profileCreatedAt||created<Date.parse(g.profileCreatedAt)))
+       g.profileCreatedAt=new Date(created).toISOString();
+     const lifetime=count(p.profilePostCount);
+     if(lifetime!==null)g.profilePostCount=Math.max(g.profilePostCount??0,lifetime);
      if(ms>g.latestMs||(ms===g.latestMs&&p.id>g.latestId)){
        g.latestMs=ms;g.latestId=p.id;
        g.latestThumbnail=safeThumbnail(p.thumbnailUrl);
@@ -89,10 +95,19 @@
        posts:g.posts,activeDays,reactions:g.reactions,
        measuredPosts:g.measuredPosts,
        score:signal,engagementAvailable:g.measuredPosts>0,
-       latestThumbnail:g.latestThumbnail,latestPosted:new Date(g.latestMs).toISOString()
+       latestThumbnail:g.latestThumbnail,latestPosted:new Date(g.latestMs).toISOString(),
+       profileCreatedAt:g.profileCreatedAt,profilePostCount:g.profilePostCount
      });
    }
    return output.sort((a,b)=>b.score-a.score||b.posts-a.posts||a.profileUrl.localeCompare(b.profileUrl));
+ }
+ function cohortOf(g,nowMs=Date.now()){
+   const date=Date.parse(g.profileCreatedAt||"");
+   if(Number.isFinite(date)&&date>0&&date<=nowMs)
+     return nowMs-date>=30*86400000?"established":"new";
+   if(Number.isInteger(g.profilePostCount)&&g.profilePostCount>=20)return "established";
+   if(g.posts>=2&&g.activeDays>=2)return "established";
+   return "new";
  }
  function mount(win){
    const doc=win.document;
@@ -212,5 +227,5 @@
    win.addEventListener("intersection:date-range-change",()=>{visibleCount=20;closeDetail();schedule();});
    update();
  }
- return {compute,mount};
+ return {compute,cohortOf,mount};
 });
