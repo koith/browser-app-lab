@@ -938,3 +938,59 @@ def test_staged_media_checksum_mismatch_never_substitutes_wrong_bytes():
     cloud.objects[key]=b"some other different image"
     assert cloud.read_staged_media(pid,1) is None
     assert "metadata/entries/"+pid+".json" not in cloud.objects
+
+
+def test_read_verified_reconciles_stale_primary_with_exact_alternate_sha():
+    class PrimaryStaleCloud(FakeCloud):
+        def fake(self,args,data=None,timeout=150,allow_missing=False):
+            if (args[0]=="cat" and args[1].endswith("/post.json")
+                    and "--terabox-domain" not in args):
+                return b"stale primary bytes with wrong SHA"
+            return super().fake(args,data=data,timeout=timeout,allow_missing=allow_missing)
+    cloud=PrimaryStaleCloud()
+    p=post()
+    raw=canonical_json(p)
+    cloud.objects["posts/"+p["id"]+"/post.json"]=raw
+    assert cloud.read_verified("posts/"+p["id"]+"/post.json",sha256(raw))==raw
+    assert cloud.objects["posts/"+p["id"]+"/post.json"]==raw
+
+
+def test_existing_immutable_exact_alt_is_not_overwritten_on_stale_primary():
+    class PrimaryStaleCloud(FakeCloud):
+        def fake(self,args,data=None,timeout=150,allow_missing=False):
+            if (args[0]=="cat" and args[1].endswith("/capture.json")
+                    and "--terabox-domain" not in args):
+                return b"old stale content"
+            return super().fake(args,data=data,timeout=timeout,allow_missing=allow_missing)
+    cloud=PrimaryStaleCloud()
+    key="posts/"+"e"*40+"/capture.json"
+    exact=b'{"synthetic":"correct original"}\n'
+    cloud.objects[key]=exact
+    before=dict(cloud.objects)
+    assert cloud.write_immutable(key,exact) is False
+    assert cloud.objects==before
+
+
+def test_dual_endpoint_checksum_disagreement_fails_without_overwrite():
+    cloud=FakeCloud()
+    key="posts/"+"f"*40+"/capture.json"
+    original=b'{"synthetic":"first immutable"}\n'
+    cloud.objects[key]=original
+    with pytest.raises(RuntimeError,match="immutable archive key collision"):
+        cloud.write_immutable(key,b'{"synthetic":"different content"}\n')
+    assert cloud.objects[key]==original
+
+
+def test_successful_write_corroborates_alternate_on_stale_primary():
+    class PrimaryStaleAfterWrite(FakeCloud):
+        def fake(self,args,data=None,timeout=150,allow_missing=False):
+            if (args[0]=="cat" and args[1].endswith("/post.json")
+                    and "--terabox-domain" not in args
+                    and args[1].split("archive:DemandResearch/",1)[1] in self.objects):
+                return b"temporary stale wrong bytes"
+            return super().fake(args,data=data,timeout=timeout,allow_missing=allow_missing)
+    cloud=PrimaryStaleAfterWrite()
+    p=post()
+    cloud.save_post(p)
+    assert cloud.objects["posts/"+p["id"]+"/post.json"]==canonical_json(p)
+    assert cloud.load_catalog()[0]["id"]==p["id"]
