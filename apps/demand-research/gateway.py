@@ -13,6 +13,8 @@ import account_index_sources
 import account_groups
 from demand_archive import CloudArchive
 
+from target_archive_api import create_router as create_target_archive_router
+
 app=FastAPI(title="Demand Research Private Cloud",docs_url=None,redoc_url=None)
 app.add_middleware(CORSMiddleware,allow_origins=["https://koith.github.io","http://localhost:8765"],allow_methods=["GET","OPTIONS"],allow_headers=["Authorization","Content-Type"])
 REMOTE=os.getenv("DEMAND_TERABOX_REMOTE","archive:DemandResearch").rstrip("/")
@@ -20,7 +22,8 @@ TOKEN=os.getenv("DEMAND_VIEWER_TOKEN","")
 COOKIE=os.getenv("RCLONE_CONFIG_ARCHIVE_COOKIE","")
 ID_RE=re.compile(r"^[a-f0-9]{16,64}$")
 SHA_RE=re.compile(r"^[a-f0-9]{64}$")
-MIMES={"image/jpeg","image/png","image/webp","image/avif","video/mp4","video/webm","video/quicktime"}
+MIMES={"image/jpeg","image/png","image/webp","image/avif","video/mp4","video/webm","video/quicktime", "audio/mpeg", "audio/mp4", "audio/ogg",
+       "audio/wav", "audio/webm", "audio/flac"}
 MAX_SIZE=1500000000
 _cache={"at":0.0,"posts":None}
 _lock=asyncio.Lock()
@@ -412,11 +415,16 @@ async def media(post_id:str,index:int,request:Request,exp:int,sig:str):
     if status==206: headers["Content-Range"]="bytes "+str(start)+"-"+str(end)+"/"+str(total)
     return StreamingResponse(remote_stream(item["key"],start,end-start+1),status_code=status,media_type=item["mime"],headers=headers)
 
+# Read-only SNS-style account archive must be registered BEFORE the
+# single-segment script catchall. All routes check the private signed session.
+from target_account_viewer import create_router as create_account_viewer_router
+app.include_router(create_account_viewer_router(check_auth))
+
 # Allow only the browser's three known scripts and fixed SVG assets. Never
 # expose the Python source tree, cloud files or private database via StaticFiles.
 @app.get("/{asset_name}",include_in_schema=False)
 async def viewer_script(asset_name:str):
-    if asset_name not in {"account_auto_analysis.js","account_index_client.js","account_group_client.js","account_watch.js","free_discovery.js"}:
+    if asset_name not in {"account_auto_analysis.js","account_index_client.js","account_group_client.js","account_watch.js","free_discovery.js","post_activity_ranking.js","target_archive_client.js"}:
         raise HTTPException(404,"Not found")
     return FileResponse(VIEW_FILE.parent/asset_name,media_type="application/javascript",
         headers={"Cache-Control":"no-store","X-Content-Type-Options":"nosniff"})
@@ -430,3 +438,6 @@ async def viewer_asset(asset_name:str):
         raise HTTPException(404,"Not found")
     return FileResponse(path,media_type="image/svg+xml",
                         headers={"Cache-Control":"public,max-age=3600","X-Content-Type-Options":"nosniff"})
+
+# Authenticated command routes are separate from public read-only APIs.
+app.include_router(create_target_archive_router(check_auth))

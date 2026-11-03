@@ -1,0 +1,138 @@
+name: INTERSECTION — Archive Selected Public Account to Private TeraBox
+
+on:
+  workflow_dispatch:
+    inputs:
+      platform:
+        description: "SNS of the chosen public account"
+        required: true
+        type: choice
+        options:
+          - bluesky
+          - mastodon
+      account:
+        description: "Bluesky handle/profile URL or Mastodon user@instance/profile URL"
+        required: true
+        type: string
+      max_pages:
+        description: "Maximum paginated public-history batches in this execution (1-4)"
+        required: true
+        default: "2"
+        type: choice
+        options:
+          - "1"
+          - "2"
+          - "3"
+          - "4"
+  schedule:
+    # Resume registered public accounts with one bounded, private history pass.
+    - cron: "17 */6 * * *"
+  pull_request:
+    paths:
+      - "apps/demand-research/target_account_archive.py"
+      - "apps/demand-research/target_account_enrichment.py"
+      - "apps/demand-research/target_account_viewer.py"
+      - "apps/demand-research/account_archive_view.js"
+      - "apps/demand-research/account_archive_view.css"
+      - "apps/demand-research/account_archive_view.html"
+      - "apps/demand-research/target_account_enrichment.py"
+      - "apps/demand-research/target_account_viewer.py"
+      - "apps/demand-research/test_target_account_viewer.py"
+      - "apps/demand-research/test_account_archive_browser.py"
+      - "apps/demand-research/account_archive_view.html"
+      - "apps/demand-research/account_archive_view.css"
+      - "apps/demand-research/account_archive_view.js"
+      - "apps/demand-research/test_target_account_archive.py"
+      - "apps/demand-research/target_archive_api.py"
+      - "apps/demand-research/test_target_archive_api.py"
+      - "apps/demand-research/target_archive_client.js"
+      - "apps/demand-research/gateway.py"
+      - "apps/demand-research/index.html"
+      - "apps/demand-research/Dockerfile"
+      - "apps/demand-research/demand_archive.py"
+      - ".github/workflows/intersection-target-account-archive.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  offline-tests:
+    if: github.event_name == 'pull_request'
+    concurrency:
+      group: intersection-target-qa-${{ github.head_ref }}
+      cancel-in-progress: true
+    runs-on: ubuntu-24.04
+    timeout-minutes: 13
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            apps/demand-research
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Check isolated public-account archive, original PDS blobs, audio and replay
+        run: |
+          set -euo pipefail
+          python -m pip install --disable-pip-version-check pytest==8.4.2 cryptography==46.0.4 fastapi==0.115.12 httpx==0.28.1
+          cd apps/demand-research
+          python -m py_compile target_account_archive.py target_account_enrichment.py target_account_viewer.py target_archive_api.py test_target_account_archive.py test_target_account_viewer.py test_target_archive_api.py gateway.py
+          node --check target_archive_client.js
+          node --check account_archive_view.js
+          python -m pytest -q test_target_account_archive.py test_target_account_viewer.py test_target_archive_api.py test_demand_archive.py test_gateway.py
+          python -m pip install --disable-pip-version-check playwright==1.56.0
+          python -m playwright install --with-deps chromium webkit
+          python test_account_archive_browser.py
+
+  private-account-history:
+    if: github.event_name != 'pull_request'
+    concurrency:
+      group: intersection-private-maintenance-production
+      cancel-in-progress: false
+      queue: max
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      RCLONE_CONFIG_ARCHIVE_TYPE: terabox
+      RCLONE_CONFIG_ARCHIVE_UPLOAD_THREADS: "1"
+      RCLONE_CONFIG_ARCHIVE_COOKIE: ${{ secrets.DEMAND_TERABOX_NDUS || secrets.YUI_TERABOX_NDUS || secrets.YUI_TERABOX_COOKIE }}
+      DEMAND_TERABOX_REMOTE: "archive:DemandResearch"
+      TARGET_PLATFORM: ${{ inputs.platform }}
+      TARGET_ACCOUNT: ${{ inputs.account }}
+      TARGET_MAX_PAGES: ${{ inputs.max_pages }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Require configured private archive
+        run: |
+          test -n "$RCLONE_CONFIG_ARCHIVE_COOKIE" || {
+            echo "::error::Private TeraBox archive unavailable"
+            exit 1
+          }
+      - name: Install verified pinned free TeraBox backend
+        run: |
+          set -euo pipefail
+          curl -fsSL https://github.com/gulp79/rclone-extra/releases/download/v1.75.2-extra/rclone-linux-amd64.zip -o /tmp/rclone.zip
+          echo '78855325a2a8d83b3feee3a8363d32e1211babbf4cda6356fa8ca5f472075062  /tmp/rclone.zip' | sha256sum -c -
+          unzip -q /tmp/rclone.zip -d /tmp/rclone-extra
+          find /tmp/rclone-extra -type f -name rclone -exec sudo install -m 755 {} /usr/local/bin/rclone \;
+          rclone help backends | grep -qi terabox
+          rm -rf /tmp/rclone.zip /tmp/rclone-extra
+      - name: Save only verified original public account content to TeraBox
+        working-directory: apps/demand-research
+        run: |
+          set -euo pipefail
+          umask 077
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            test -n "$TARGET_PLATFORM" && test -n "$TARGET_ACCOUNT"
+            timeout --signal=TERM --kill-after=10s 1000s python target_account_archive.py \
+              --platform "$TARGET_PLATFORM" --account "$TARGET_ACCOUNT" \
+              --max-pages "$TARGET_MAX_PAGES"
+          else
+            timeout --signal=TERM --kill-after=10s 1000s python target_account_archive.py \
+              --resume-registered
+          fi
+          echo 'Read-only source scan and private TeraBox SHA verification attempted; consult aggregate counts.' >> "$GITHUB_STEP_SUMMARY"

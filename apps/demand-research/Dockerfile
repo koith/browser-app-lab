@@ -10,6 +10,13 @@ RUN curl -fsSL https://github.com/gulp79/rclone-extra/releases/download/v1.75.2-
 RUN python -m pip install --no-cache-dir fastapi==0.115.12 uvicorn==0.35.0
 WORKDIR /app
 COPY apps/demand-research/gateway.py /app/gateway.py
+COPY apps/demand-research/target_archive_api.py /app/target_archive_api.py
+COPY apps/demand-research/target_account_archive.py /app/target_account_archive.py
+COPY apps/demand-research/target_account_enrichment.py /app/target_account_enrichment.py
+COPY apps/demand-research/target_account_viewer.py /app/target_account_viewer.py
+COPY apps/demand-research/account_archive_view.html /app/account_archive_view.html
+COPY apps/demand-research/account_archive_view.js /app/account_archive_view.js
+COPY apps/demand-research/account_archive_view.css /app/account_archive_view.css
 COPY apps/demand-research/demand_archive.py /app/demand_archive.py
 COPY apps/demand-research/social_sources.py /app/social_sources.py
 COPY apps/demand-research/account_index.py /app/account_index.py
@@ -20,6 +27,8 @@ COPY apps/demand-research/account_auto_analysis.js /app/account_auto_analysis.js
 COPY apps/demand-research/account_index_client.js /app/account_index_client.js
 COPY apps/demand-research/account_watch.js /app/account_watch.js
 COPY apps/demand-research/free_discovery.js /app/free_discovery.js
+COPY apps/demand-research/post_activity_ranking.js /app/post_activity_ranking.js
+COPY apps/demand-research/target_archive_client.js /app/target_archive_client.js
 COPY apps/demand-research/assets /app/assets
 COPY apps/demand-research/index.html /app/index.html
 RUN useradd --create-home --uid 10001 appuser && chown -R appuser:appuser /app

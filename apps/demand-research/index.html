@@ -556,6 +556,17 @@ main{padding-top:10px}
 .archive-media-state--complete{color:#296c43}
 @media(max-width:720px){.archive-controls form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%}.archive-controls input{grid-column:1/-1;min-width:0}.archive-controls select{min-width:0}}
 @media(max-width:720px){.post[data-no-media="true"] .post-thumb{min-height:70px;max-height:98px}.post-thumb .thumb-placeholder{min-height:70px;padding:7px}.post-thumb .thumb-placeholder span{font-size:10px}.discovery-link-list{grid-template-columns:1fr}}
+
+/* Public-account history archive can only be dispatched from the private gateway. */
+.target-archive{margin:12px 0;border:1px solid var(--line,#b5b4ac);background:var(--surface,#f6f5ee);padding:14px;min-width:0}
+.target-archive h3{font-size:15px;margin:0 0 6px}
+.target-archive p{font-size:12px;line-height:1.5;color:var(--muted,#64645d);margin:0 0 10px}
+.target-archive form{display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap}
+.target-archive label{display:grid;gap:5px;font-size:11px;font-weight:700;flex:1 1 180px;min-width:0}
+.target-archive select,.target-archive input{width:100%;min-height:41px;border:1px solid var(--line,#b5b4ac);background:#fffefa;color:#161713;padding:8px;font:inherit;font-size:12px}
+.target-archive button{min-height:41px;white-space:nowrap}
+.target-archive a{font-size:12px;color:inherit;text-decoration:underline;font-weight:700}
+.target-archive [role=status]{display:block;margin-top:9px;font-size:11px;line-height:1.5;overflow-wrap:anywhere}
 </style>
 </head>
 <body>
@@ -614,6 +625,21 @@ main{padding-top:10px}
     <h2>선택한 계정의 활동 상세</h2>
     <p>전체 공개 계정은 위에서 자동 집계됩니다. 이 영역은 특정 공개 계정의 글을 추가 확인할 때만 사용하는 선택 기능입니다.</p>
   </div>
+  <section id="targetArchivePanel" class="target-archive" aria-labelledby="targetArchiveTitle">
+    <h3 id="targetArchiveTitle">지정 SNS 계정 전체 공개 이력 · 테라박스 백업</h3>
+    <p>현재 접근 가능한 공개 글·직접 작성한 댓글/답글·이미지·오디오·동영상의 원본을 계정별 비공개 영역에 검증 저장합니다. 누락/삭제/비공개 항목은 복구할 수 없으며, 대량 이력은 여러 번 나누어 이어받습니다.</p>
+    <form id="targetArchiveForm" autocomplete="off">
+      <label for="targetArchivePlatform">서비스
+        <select id="targetArchivePlatform"><option value="bluesky">Bluesky</option><option value="mastodon">Mastodon</option></select>
+      </label>
+      <label for="targetArchiveAccount">공개 계정 주소 또는 핸들
+        <input id="targetArchiveAccount" type="text" inputmode="url" maxlength="260" placeholder="https://bsky.app/profile/example.bsky.social" required>
+      </label>
+      <button id="targetArchiveSubmit" type="submit" disabled>테라박스 백업 시작</button>
+    </form>
+    <span id="targetArchiveStatus" role="status" aria-live="polite">비공개 아카이브 서버 연결을 확인 중입니다.</span>
+    <a id="targetArchiveWorkflow" href="https://github.com/koith/browser-app-lab/actions/workflows/intersection-target-account-archive.yml" target="_blank" rel="noopener noreferrer">GitHub Actions에서 직접 실행</a>
+  </section>
   <form id="accountWatchForm" class="account-add-form" autocomplete="off">
     <label for="accountProfileInput">공개 프로필 URL</label>
     <div class="account-add-row">
@@ -1685,6 +1711,7 @@ if(cloudMode){
 })();
 </script>
 <script src="post_activity_ranking.js" defer></script>
+<script src="target_archive_client.js" defer></script>
 <script src="free_discovery.js" defer></script>
 <script src="account_watch.js" defer></script>
 <script src="account_auto_analysis.js" defer></script>

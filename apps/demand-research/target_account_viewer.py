@@ -1,0 +1,343 @@
+"""Authenticated read-only SNS-like viewer of verified private account archives.
+
+Endpoints never fetch provider posts. They expose only previously stored private
+TeraBox records to the owner of the private gateway's signed HttpOnly session.
+No repo logs/analytics, broad CORS, unverified media or account identifier leaks.
+"""
+from __future__ import annotations
+
+import asyncio
+import json
+import re
+from pathlib import Path
+from urllib.parse import urlsplit
+from fastapi import APIRouter, HTTPException, Query, Request
+from fastapi.responses import JSONResponse, FileResponse, Response
+from demand_archive import CloudArchive, sha256
+from target_account_archive import REGISTRY_RE, archive_key
+from target_account_enrichment import PROFILE_FILE_RE, THREAD_FILE_RE
+
+HEX40=re.compile(r"^[a-f0-9]{40}$")
+GRAPH_PAGE=re.compile(r"^(followers|following)-([0-9]{8})\.json$")
+VIEW_DIR=Path(__file__).resolve().parent
+CACHE_HEADERS={"Cache-Control":"private, no-store",
+               "X-Content-Type-Options":"nosniff",
+               "Referrer-Policy":"no-referrer",
+               "X-Robots-Tag":"noindex, nofollow"}
+
+
+def open_root():
+    return CloudArchive()
+
+
+def public_profile_fields(doc):
+    if not isinstance(doc,dict):
+        return {}
+    return {key:doc.get(key) for key in (
+        "platform","identity","handle","display_name","description",
+        "followers_count","following_count","posts_count","fields",
+        "created_at","captured_at","complete_media","profile_url")}
+
+
+def sanitize_safe_link(value):
+    if not isinstance(value,str) or len(value)>2048:
+        return ""
+    url=urlsplit(value)
+    if (url.scheme!="https" or not url.hostname or url.username
+            or url.password or url.fragment):
+        return ""
+    return value
+
+
+def open_account(account):
+    match=REGISTRY_RE.fullmatch(account+".json")
+    if not match:
+        raise HTTPException(400,"Invalid archive account key")
+    root=open_root()
+    try:
+        raw=root.read("metadata/target-accounts/"+account+".json",
+                      cap=4000,optional=True)
+        if raw is None:
+            raise HTTPException(404,"Public account archive not registered")
+        meta=json.loads(raw)
+        if (not isinstance(meta,dict) or meta.get("platform")!=match.group(1)
+                or archive_key(meta)!=match.group(2)):
+            raise HTTPException(404,"Archive identity mismatch")
+        return root,meta,CloudArchive(
+            root.remote+"/account-archives/"+meta["platform"]+"/"+match.group(2),
+            runner=root.runner)
+    except (RuntimeError,TypeError,ValueError,KeyError) as error:
+        raise HTTPException(502,"Private account archive read unavailable") from None
+
+
+def latest_snapshot(archive,folder,pattern,cap=300_000):
+    names=archive.names(folder)
+    valid=sorted(n for n in names if pattern.fullmatch(n))
+    if not valid:
+        return None
+    for name in valid[-3:][::-1]:
+        raw=archive.read(folder+"/"+name,cap=cap,optional=True)
+        if raw is None:
+            continue
+        try:
+            item=json.loads(raw)
+            if isinstance(item,dict):
+                return item
+        except (ValueError,TypeError):
+            continue
+    return None
+
+
+def feed_data(archive,account,offset,limit):
+    # Every returned post is backed by the existing read-verified entry journal.
+    rows=archive.load_catalog(include_entries=True)
+    matching=[]
+    for post in rows:
+        if not isinstance(post,dict) or not HEX40.fullmatch(str(post.get("id",""))):
+            continue
+        pid=post["id"]
+        media=[]
+        for index,item in enumerate(post.get("media",[])):
+            if not isinstance(item,dict) or item.get("remote_verified") is not True:
+                continue
+            media.append({
+                "kind":item.get("kind","image"),
+                "mime":item.get("mime"),"bytes":item.get("bytes"),
+                "url":"/api/account-archives/"+account+"/media/"+pid+"/"+str(index),
+                "verified_sha256":True})
+        matching.append({
+            "id":pid,"posted_at":post.get("posted_at"),"text":post.get("text",""),
+            "source_url":sanitize_safe_link(post.get("source_url")),
+            "profile_url":sanitize_safe_link(post.get("profile_url")),
+            "kind":post.get("kind","post"),
+            "reply_to":post.get("reply_to",""),
+            "media":media,"media_expected":post.get("media_expected",0),
+            "media_saved":post.get("media_saved",0),
+            "archive_complete":post.get("archive_complete") is True})
+    return {"total":len(matching),"offset":offset,"limit":limit,
+            "posts":matching[offset:offset+limit],"more":offset+limit<len(matching)}
+
+
+def graph_data(archive,kind,offset,limit):
+    page_names=sorted((int(m.group(2)),n) for n in archive.names("graph/pages")
+                      if (m:=GRAPH_PAGE.fullmatch(n)) and m.group(1)==kind)
+    merged=[]
+    known=set()
+    # Retain account records in public edge order; each page has a source
+    # snapshot timestamp and remains immutable for history/reconciliation.
+    for _seq,name in page_names:
+        raw=archive.read("graph/pages/"+name,cap=100_000,optional=True)
+        if raw is None:
+            continue
+        try:
+            value=json.loads(raw)
+            items=value.get("items",[])
+            if not isinstance(items,list):
+                continue
+            for user in items:
+                if not isinstance(user,dict):
+                    continue
+                key=str(user.get("id",""))
+                if not key or key in known: continue
+                known.add(key)
+                merged.append({"id":key,"handle":str(user.get("handle",""))[:200],
+                               "display_name":str(user.get("display_name",""))[:300],
+                               "profile_url":sanitize_safe_link(user.get("profile_url"))})
+        except (ValueError,TypeError):
+            continue
+    return {"kind":kind,"captured_unique":len(merged),
+            "source_pages":len(page_names),"offset":offset,"limit":limit,
+            "accounts":merged[offset:offset+limit],
+            "more":offset+limit<len(merged),
+            "full_network_coverage_guaranteed":False}
+
+
+def get_verified_media(archive,item,request):
+    key=item.get("key");digest=item.get("sha256")
+    length=item.get("bytes");mime=item.get("mime")
+    if not (isinstance(key,str) and isinstance(digest,str)
+            and re.fullmatch(r"[a-f0-9]{64}",digest)
+            and isinstance(length,int) and 0<length<=80_000_000
+            and item.get("remote_verified",True) is True):
+        raise HTTPException(404,"Original media not verified")
+    try:
+        raw=archive.read_verified(key,digest,cap=length+1)
+    except (RuntimeError,ValueError):
+        raw=None
+    if raw is None or len(raw)!=length:
+        raise HTTPException(502,"Archived media SHA readback unavailable")
+    # Safari requires byte ranges for video; validate the request strictly.
+    range_value=request.headers.get("range","")
+    if range_value:
+        m=re.fullmatch(r"bytes=(\d*)-(\d*)",range_value)
+        if not m or (not m.group(1) and not m.group(2)):
+            raise HTTPException(416,"Invalid media range")
+        if m.group(1):
+            start=int(m.group(1))
+            end=min(int(m.group(2)),len(raw)-1) if m.group(2) else len(raw)-1
+        else:
+            suffix=int(m.group(2))
+            start=max(0,len(raw)-suffix)
+            end=len(raw)-1
+        if start>=len(raw) or end<start:
+            raise HTTPException(416,"Unsatisfiable media range")
+        return Response(raw[start:end+1],status_code=206,media_type=mime,
+                        headers={**CACHE_HEADERS,"Accept-Ranges":"bytes",
+                                 "Content-Range":f"bytes {start}-{end}/{len(raw)}"})
+    return Response(raw,media_type=mime,
+                    headers={**CACHE_HEADERS,"Accept-Ranges":"bytes"})
+
+
+def create_router(auth):
+    router=APIRouter()
+
+    @router.get("/account-archive",include_in_schema=False)
+    async def viewer(request:Request):
+        auth(request)
+        return FileResponse(VIEW_DIR/"account_archive_view.html",
+                            media_type="text/html; charset=utf-8",
+                            headers={**CACHE_HEADERS,
+                                     "Content-Security-Policy":
+                                     "default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; media-src 'self'; connect-src 'self'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"})
+
+    @router.get("/account-archive/{asset_name}",include_in_schema=False)
+    async def asset(request:Request,asset_name:str):
+        auth(request)
+        if asset_name not in ("account_archive_view.js","account_archive_view.css"):
+            raise HTTPException(404,"Unknown viewer asset")
+        mime="application/javascript" if asset_name.endswith(".js") else "text/css"
+        return FileResponse(VIEW_DIR/asset_name,media_type=mime,headers=CACHE_HEADERS)
+
+    @router.get("/api/account-archives")
+    async def accounts(request:Request):
+        auth(request)
+        root=open_root()
+        try:
+            names=root.names("metadata/target-accounts")
+            data=[]
+            for name in names:
+                if not REGISTRY_RE.fullmatch(name):
+                    continue
+                raw=root.read("metadata/target-accounts/"+name,cap=4000,optional=True)
+                if raw is None:continue
+                entry=json.loads(raw)
+                if (entry.get("platform")+"-"+archive_key(entry)+".json")!=name:
+                    continue
+                data.append({"key":name[:-5],"platform":entry["platform"],
+                             "profile_url":sanitize_safe_link(entry.get("profile_url"))})
+            return JSONResponse({"accounts":data},headers=CACHE_HEADERS)
+        except (RuntimeError,TypeError,ValueError,KeyError):
+            raise HTTPException(502,"Private account index unavailable") from None
+
+    @router.get("/api/account-archives/{account}/profile")
+    async def profile(request:Request,account:str):
+        auth(request)
+        _,entry,archive=open_account(account)
+        try:
+            doc=latest_snapshot(archive,"profile/snapshots",PROFILE_FILE_RE)
+            if not doc:
+                return JSONResponse({"available":False,"profile_url":
+                                     sanitize_safe_link(entry.get("profile_url"))},
+                                    headers=CACHE_HEADERS)
+            view=public_profile_fields(doc)
+            view["available"]=True
+            view["profile_url"]=sanitize_safe_link(entry.get("profile_url"))
+            view["assets"]={}
+            for name in ("avatar","banner"):
+                asset=doc.get("assets",{}).get(name,{})
+                if asset.get("status")=="sha256_verified":
+                    view["assets"][name]="/api/account-archives/"+account+"/profile-asset/"+name
+                else:
+                    view["assets"][name]=None
+            return JSONResponse(view,headers=CACHE_HEADERS)
+        except (RuntimeError,ValueError,TypeError):
+            raise HTTPException(502,"Archived public profile unavailable") from None
+
+    @router.get("/api/account-archives/{account}/feed")
+    async def feed(request:Request,account:str,
+                   offset:int=Query(0,ge=0,le=200000),
+                   limit:int=Query(20,ge=1,le=50)):
+        auth(request)
+        _,_,archive=open_account(account)
+        try:
+            return JSONResponse(await asyncio.to_thread(feed_data,archive,account,offset,limit),
+                                headers=CACHE_HEADERS)
+        except (RuntimeError,ValueError,TypeError):
+            raise HTTPException(502,"Account history read unavailable") from None
+
+    @router.get("/api/account-archives/{account}/graph/{kind}")
+    async def graph(request:Request,account:str,kind:str,
+                    offset:int=Query(0,ge=0,le=200000),
+                    limit:int=Query(50,ge=1,le=100)):
+        auth(request)
+        if kind not in ("followers","following"):
+            raise HTTPException(400,"Invalid public graph")
+        _,_,archive=open_account(account)
+        try:
+            return JSONResponse(await asyncio.to_thread(graph_data,archive,kind,offset,limit),
+                                headers=CACHE_HEADERS)
+        except (RuntimeError,ValueError,TypeError):
+            raise HTTPException(502,"Public graph archive unavailable") from None
+
+    @router.get("/api/account-archives/{account}/threads/{pid}")
+    async def thread(request:Request,account:str,pid:str):
+        auth(request)
+        if not HEX40.fullmatch(pid):
+            raise HTTPException(400,"Invalid post")
+        _,_,archive=open_account(account)
+        try:
+            data=latest_snapshot(archive,"threads/"+pid,THREAD_FILE_RE,cap=500_000)
+            if not data:
+                return JSONResponse({"captured":False,"replies":[]},headers=CACHE_HEADERS)
+            out=[]
+            for r in data.get("replies",[])[:120]:
+                if not isinstance(r,dict):continue
+                out.append({"id":r.get("id"),"author":r.get("author"),
+                            "display_name":r.get("display_name"),
+                            "text":r.get("text"),"posted_at":r.get("posted_at"),
+                            "source_url":sanitize_safe_link(r.get("uri")),
+                            "media_source_links":[sanitize_safe_link(v)
+                                    for v in r.get("media_urls",[])[:16]
+                                    if sanitize_safe_link(v)]})
+            return JSONResponse({"captured":True,"replies":out,
+                                 "truncated":bool(data.get("truncated")),
+                                 "captured_at":data.get("captured_at"),
+                                 "comment_media_backed_up":False},headers=CACHE_HEADERS)
+        except (RuntimeError,ValueError,TypeError):
+            raise HTTPException(502,"Public reply archive unavailable") from None
+
+    @router.get("/api/account-archives/{account}/media/{pid}/{index}")
+    async def post_media(request:Request,account:str,pid:str,index:int):
+        auth(request)
+        if not HEX40.fullmatch(pid) or index<0 or index>=16:
+            raise HTTPException(400,"Invalid original media")
+        _,_,archive=open_account(account)
+        try:
+            posts=await asyncio.to_thread(archive.load_catalog)
+            post=next((p for p in posts if p.get("id")==pid),None)
+            if not post or index>=len(post.get("media",[])):
+                raise HTTPException(404,"Media not archived")
+            media=post["media"][index]
+            if not media.get("key","").startswith("posts/"+pid+"/media/"):
+                raise HTTPException(404,"Invalid original source")
+            return await asyncio.to_thread(get_verified_media,archive,media,request)
+        except (RuntimeError,ValueError,TypeError):
+            raise HTTPException(502,"Original media read unavailable") from None
+
+    @router.get("/api/account-archives/{account}/profile-asset/{kind}")
+    async def profile_asset(request:Request,account:str,kind:str):
+        auth(request)
+        if kind not in ("avatar","banner"):
+            raise HTTPException(400,"Invalid profile media")
+        _,_,archive=open_account(account)
+        doc=latest_snapshot(archive,"profile/snapshots",PROFILE_FILE_RE)
+        if not doc:
+            raise HTTPException(404,"Profile snapshot unavailable")
+        asset=doc.get("assets",{}).get(kind,{})
+        if (asset.get("status")!="sha256_verified"
+                or not str(asset.get("key","")).startswith("profile/assets/")):
+            raise HTTPException(404,"Profile image not archived")
+        return await asyncio.to_thread(get_verified_media,archive,
+                                       {**asset,"remote_verified":True},request)
+
+    return router
