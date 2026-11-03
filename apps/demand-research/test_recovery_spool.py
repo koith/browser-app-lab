@@ -256,3 +256,48 @@ def test_failed_main_run_replays_only_exact_named_artifact(monkeypatch,tmp_path)
     assert result["artifact_download_failures"]==0
     assert result["buffer_failures"]==0
     assert cloud.read_first_observation(pid)==canonical_json(first(pid))
+
+
+def test_replay_circuit_breaker_preserves_deferred_encrypted_buffers(tmp_path,monkeypatch):
+    from recover_spool_artifacts import replay
+    class UnavailableCloud(FakeCloud):
+        def __init__(self):
+            super().__init__()
+            self.restore_attempts=0
+        def save_first_observation(self,*args,**kwargs):
+            self.restore_attempts+=1
+            raise RuntimeError("synthetic TeraBox write unavailable")
+    spool=RecoverySpool(tmp_path)
+    for n in range(5):
+        pid=hashlib.sha1(str(n).encode()).hexdigest()
+        spool.save(pid,first(pid))
+    cloud=UnavailableCloud()
+    outcome=replay(cloud=cloud,local_directory=tmp_path)
+    assert cloud.restore_attempts==3,"provider outage must not stall on every original"
+    assert outcome["buffer_failures"]==3
+    assert outcome["deferred_buffers"]==2
+    assert outcome["encrypted_buffers"]==3
+    assert len(list(tmp_path.glob("*.enc")))==5,"deferred ciphertext is never discarded"
+    assert cloud.objects=={}
+
+
+def test_replay_per_record_runner_budget_preserves_exact_original(tmp_path):
+    from recover_spool_artifacts import restore_with_budget
+    pid=synthetic_post()["id"]
+    spool=RecoverySpool(tmp_path)
+    sealed=spool.save(pid,first(pid))
+    class BoundedCloud(FakeCloud):
+        def __init__(self):
+            super().__init__()
+            self.calls=[]
+        def fake(self,args,data=None,timeout=150,allow_missing=False):
+            self.calls.append(timeout)
+            return super().fake(args,data=data,timeout=timeout,
+                                allow_missing=allow_missing)
+    cloud=BoundedCloud()
+    original_runner=cloud.runner
+    status=restore_with_budget(spool,sealed,cloud,max_seconds=7)
+    assert status=="first_observation_verified"
+    assert cloud.calls and all(0<limit<=7 for limit in cloud.calls)
+    assert cloud.runner==original_runner
+    assert cloud.read_first_observation(pid)==canonical_json(first(pid))
