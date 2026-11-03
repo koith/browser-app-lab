@@ -483,10 +483,34 @@ $('lightbox').addEventListener('touchstart',e=>{if(e.touches.length!==1){gesture
 $('lightbox').addEventListener('touchmove',e=>{if(e.touches.length!==1&&gesture)gesture.valid=false},{passive:true});
 $('lightbox').addEventListener('touchcancel',()=>{gesture=null},{passive:true});
 $('lightbox').addEventListener('touchend',e=>{if(e.touches.length){gesture=null;return}const g=gesture;gesture=null;const t=e.changedTouches[0];if(!g?.valid||!t||(visualViewport?.scale||1)>1.01)return;const dx=t.clientX-g.x,dy=t.clientY-g.y;if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.5)step(dx>0?-1:1)},{passive:true});
+
+/* Static Pages' SHA-verified owner index is essential for the gallery.
+   A transient Pages/CDN error must not silently turn thousands of saved photos
+   into an empty catalogue for the lifetime of the page. */
+async function fetchOwnerIndexWithRetry(model){
+ let lastError;
+ for(let attempt=0;attempt<4;attempt++){
+  const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),12000);
+  try{
+   const response=await fetch('owner-index.json',{cache:'no-store',signal:controller.signal});
+   if(!response.ok)throw Error('owner-index HTTP '+response.status);
+   const index=await response.json();
+   if(index?.schema_version!==1||index.model!==model||!Array.isArray(index.albums))
+    throw Error('owner-index schema mismatch');
+   return index;
+  }catch(error){
+   lastError=error;
+   if(attempt<3)await new Promise(resolve=>setTimeout(resolve,500*(attempt+1)));
+  }finally{clearTimeout(timeout)}
+ }
+ console.warn('Saved owner index failed after four Pages requests:',String(lastError));
+ throw lastError;
+}
+
 // Backward-compatible hidden verifier is for existing archive QA; no import controls appear in the gallery.
 Promise.all([
  fetch('stored-albums.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('stored index unavailable');return r.json()}),
- fetch('owner-index.json',{cache:'no-store'}).then(r=>r.ok?r.json():{schema_version:1,model:'mimmi',albums:[]}).then(d=>({albums:MimmiPrivate.fromIndex(d)})).catch(error=>({albums:[],error:error.message})), // Complete saved-photo metadata from static Pages; originals remain on TeraBox.
+ fetchOwnerIndexWithRetry('mimmi').then(d=>({albums:MimmiPrivate.fromIndex(d)})).catch(error=>({albums:[],error:error.message})), // Complete saved-photo metadata from static Pages; originals remain on TeraBox.
  PhotoVault.albums('mimmi').then(albums=>({albums})).catch(error=>({albums:[],error:error.message})),
  fetch('identity-exclusions.json',{cache:'no-store'}).then(r=>{if(!r.ok)throw Error('identity exclusions');return r.json()}),
  fetch('album-covers.json',{cache:'no-store'}).then(r=>r.ok?r.json():{}).catch(()=>({})),
