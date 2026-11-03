@@ -114,11 +114,11 @@ def test_current_public_source_and_partial_media(monkeypatch):
       "posts": [
         {"uri": "at://did:plc:abcdefghijk/app.bsky.feed.post/abcdef",
          "author": {"did": "did:plc:abcdefghijk"},
-         "record": {"text": "섹트 상품 후기", "createdAt": "2026-11-03T00:00:00Z"},
+         "record": {"text": "섹트 상품 후기", "createdAt": "2026-11-03T00:55:00Z"},
          "embed": {"images": [{"fullsize": "https://cdn.bsky.app/img/something.jpg"}]}},
         {"uri": "at://did:plc:abcdefghijk/app.bsky.feed.post/restricted",
          "author": {"did": "did:plc:abcdefghijk"},
-         "record": {"text": "섹트 private", "createdAt": "2026-11-03T00:00:00Z"},
+         "record": {"text": "섹트 private", "createdAt": "2026-11-03T00:55:00Z"},
          "labels": [{"val": "!hide"}]}
       ]
     }
