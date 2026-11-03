@@ -96,8 +96,12 @@ def test_remote_corruption_blocks_recovery():
     p = post()
     cloud.save_post(p)
     cloud.objects["posts/" + p["id"] + "/post.json"] = b"unexpected bad bytes"
-    with pytest.raises(RuntimeError, match="checksum"):
-        cloud.recover_entries({})
+    recovered, count = cloud.recover_entries({})
+    assert count == 0 and recovered == {}
+    assert cloud.unrecoverable_entries == 1
+    assert p["id"] in cloud.quarantined_ids
+    assert p["id"] not in cloud.pending_capture_ids({})
+    assert cloud.objects["metadata/entries/" + p["id"] + ".json"]
 
 
 def test_media_sha_and_remote_readback():
@@ -318,3 +322,26 @@ def test_existing_invalid_marker_uses_separate_repaired_namespace():
     assert cloud.objects[key] == b"corrupt"
     restored, count = cloud.recover_entries({})
     assert count == 1 and restored[original["id"]] == original
+
+
+def test_corrupt_record_does_not_block_other_verified_posts(monkeypatch):
+    cloud = FakeCloud()
+    old = post()
+    cloud.save_post(old)
+    cloud.objects["posts/" + old["id"] + "/post.json"] = b"bad old bytes"
+    monkeypatch.setenv("RCLONE_CONFIG_ARCHIVE_COOKIE", "offline-test")
+    monkeypatch.setenv("DEMAND_CAPTURE_PUBLIC_ALLOWED", "1")
+    row = {
+        "platform": "bluesky",
+        "original_id": "at://did:plc:abcdefghijk/app.bsky.feed.post/newgood01",
+        "source_url": "https://bsky.app/profile/did:plc:abcdefghijk/post/newgood01",
+        "text": "synthetic test " + job.TERMS[0],
+        "posted_at": "2026-11-03T00:00:00Z",
+        "media_urls": [], "media_expected": 0,
+    }
+    result=job.run(fetchers=[lambda term, start, end: [row] if term==job.TERMS[0] else []],
+                   cloud=cloud,clock=lambda:1793667900,run_id="123456799")
+    assert result["saved_verified"] == 1
+    assert result["unrecoverable_markers"] == 1
+    assert cloud.load_catalog()[0]["id"]==post_key("bluesky",row["original_id"])
+    assert cloud.objects["posts/" + old["id"] + "/post.json"] == b"bad old bytes"
