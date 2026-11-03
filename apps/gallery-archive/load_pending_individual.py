@@ -78,6 +78,20 @@ def load(owner,documents,model):
         {**a,'source_coverage':coverage.get(a['id'],{})} for a in albums.values()]},batches
 
 
+def canonical_pending_name(name,model):
+    """Admit only the exact model's SHA queue, optionally folder-prefixed."""
+    if model not in ('mimmi','yui') or not isinstance(name,str):
+        return None
+    prefixes=('',f'metadata/pending-individual/{model}/',
+              f'pending-individual/{model}/')
+    for prefix in prefixes:
+        if name.startswith(prefix):
+            remainder=name[len(prefix):]
+            if re.fullmatch(r'[a-f0-9]{64}\.json',remainder):
+                return remainder
+    return None
+
+
 def list_pending_entries(remote,model,reader=None):
     """Two ordinary same-owner file-list formats; never infer no queue from a failed read.
 
@@ -99,14 +113,15 @@ def list_pending_entries(remote,model,reader=None):
         if not isinstance(entries,list) or len(entries)>30:
             raise ValueError('Pending JSON listing exceeds verified bounds')
         if entries:
-            valid=[entry for entry in entries if isinstance(entry,dict)
-                   and isinstance(entry.get('Path'),str)
-                   and re.fullmatch(r'[a-f0-9]{64}\.json',entry['Path'])]
+            valid=[{**entry,'Path':name} for entry in entries
+                   if isinstance(entry,dict)
+                   for name in [canonical_pending_name(entry.get('Path'),model)]
+                   if name is not None]
             print('OWNER_PENDING_LISTING',model,'FORMAT','lsjson',
                   'ENTRIES',len(entries),'SHA_NAMED',len(valid),
                   'IGNORED_OTHER_NAMES',len(entries)-len(valid),flush=True)
             if valid:
-                return entries
+                return valid
             # Unrelated files are not proof the pending queue was consumed.
             # Try another same-owner standard listing before reporting empty.
     print('OWNER_PENDING_PRIMARY_LIST_EMPTY_OR_UNAVAILABLE',model,
@@ -129,12 +144,13 @@ def list_pending_entries(remote,model,reader=None):
             if not sep or not re.fullmatch(r'[0-9]+',size_raw):
                 raise ValueError('Untrusted alternate queue size/path')
             size=int(size_raw)
-            if not re.fullmatch(r'[0-9a-f]{64}\.json',name):
+            exact=canonical_pending_name(name,model)
+            if exact is None:
                 ignored+=1
                 continue
             if not 0<size<=2_000_000:
                 raise ValueError('Alternate pending queue object size invalid')
-            files.append({'Path':name,'Size':size})
+            files.append({'Path':exact,'Size':size})
     except (UnicodeError,ValueError):
         raise ValueError('Untrusted alternate owner pending listing') from None
     print('OWNER_PENDING_LISTING',model,'FORMAT','lsf-sp',
