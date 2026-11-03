@@ -95,7 +95,12 @@
       const payload=await res.json(),tweet=payload?.tweet;
       if(!tweet||String(tweet.id||"")!==item.postId||tweet.author?.protected===true)
         return false;
-      const text=String(tweet.text||""),dateMs=Date.parse(String(tweet.created_at||""));
+      const text=String(tweet.text||"");
+      // Prefer provider's UTC epoch: iOS Safari does not consistently parse
+      // legacy X date strings such as "Sun Jul 17 09:35:58 +0000 2022".
+      const epoch=Number(tweet.created_timestamp);
+      const dateMs=Number.isFinite(epoch)&&epoch>0?epoch*1000:
+        Date.parse(String(tweet.created_at||""));
       if(!text||text.length>5000||!Number.isFinite(dateMs)||
         dateMs>Date.now()+86400000||!termsIn(text).length)return false;
       const media=[];
@@ -177,12 +182,12 @@
       }
     });
     publish();
-    // Check up to 12 likely matches on X (index-only results can be
+    // Check up to 24 likely matches on X (index-only results can be
     // false positives), and up to 4 links on each Meta network where
     // snippet was incomplete. Never bypass provider denials.
     const x=Array.from(records.values()).filter(x=>x.platform==="x")
       .sort((a,b)=>b.matched.length-a.matched.length);
-    await limited(x,12,readX);
+    await limited(x,24,readX);
     publish();
     for(const network of ["threads","instagram"]){
       const missing=Array.from(records.values()).filter(
