@@ -182,19 +182,39 @@ class CloudArchive:
         if not isinstance(data, bytes):
             raise TypeError("cloud content must be bytes")
         cap = max(len(data) + 1, MAX_MEDIA_BYTES + MAX_POST)
+        expected_sha = sha256(data)
+
+        def read_consistent():
+            # TeraBox may briefly show stale remote bytes after successful
+            # copyto/rcat. Never treat a single mismatching cat as authoritative.
+            last = None
+            for delay in (0.0, 0.4, 0.8, 1.5, 2.5, 4.0, 5.0):
+                if delay:
+                    time.sleep(delay)
+                try:
+                    last = self.read(key, cap=cap, optional=True)
+                except RuntimeError:
+                    last = None
+                if last is not None and sha256(last) == expected_sha:
+                    return True, False
+            return False, last is not None
+
         existing = self.read(key, cap=cap, optional=True)
         if existing is not None:
-            if sha256(existing) != sha256(data):
-                raise RuntimeError("immutable archive key collision")
-            return False
+            if sha256(existing) == expected_sha:
+                return False
+            # No overwrite while an immutable object with other bytes is
+            # visible. It might be a stale version of this same upload.
+            if read_consistent()[0]:
+                return False
+            raise RuntimeError("immutable archive key collision after readback retries")
+
         with tempfile.NamedTemporaryFile(prefix="demand-cloud-", delete=False) as temp:
             temp.write(data)
             path = temp.name
         try:
             target = self.remote + "/" + key
             failure = None
-            # TeraBox's copyto and small-object rcat use different write paths.
-            # Never accept an upload command's exit code without byte readback.
             for attempt in range(4):
                 method = "rcat" if attempt % 2 and len(data) < 2_000_000 else "copyto"
                 try:
@@ -205,19 +225,21 @@ class CloudArchive:
                                      data=data, timeout=130)
                 except RuntimeError as error:
                     failure = error
-                for _ in range(2):
-                    try:
-                        saved = self.read(key, cap=cap, optional=True)
-                    except RuntimeError as error:
-                        failure = error
-                        saved = None
-                    if saved is not None:
-                        if sha256(saved) != sha256(data):
-                            raise RuntimeError("immutable cloud write collision/readback mismatch")
-                        return True
-                    time.sleep(0.5)
-                if attempt < 3:
-                    time.sleep(min(3, attempt + 1))
+                    if "(missing)" in str(error):
+                        # A missing parent directory is distinguishable from
+                        # stale object visibility; idempotent mkdir is safe.
+                        try:
+                            self.command(["mkdir", self.remote + "/" + key.rsplit("/", 1)[0]],
+                                         timeout=90)
+                        except RuntimeError:
+                            pass
+                matched, conflicting = read_consistent()
+                if matched:
+                    return True
+                if conflicting:
+                    # Never repeatedly overwrite apparently different remote
+                    # bytes: preserve both states for integrity investigation.
+                    raise RuntimeError("private cloud readback did not converge")
             raise RuntimeError("private cloud write unverified after alternate methods") from failure
         finally:
             os.unlink(path)
