@@ -109,9 +109,11 @@ def test_primary_upload_missing_and_parent_refresh_failure_uses_alt():
             self.alternate_uploads=0
         def fake(self,args,data=None,timeout=150,allow_missing=False):
             primary="--terabox-domain" not in args
-            if args[0]=="mkdir" and primary and self.primary_uploads:
+            if (args[0]=="mkdir" and primary and self.primary_uploads
+                    and "/posts/" in args[1]):
                 raise RuntimeError("private cloud mkdir failed (missing)")
-            if args[0]=="lsf" and primary and self.primary_uploads:
+            if (args[0]=="lsf" and primary and self.primary_uploads
+                    and "/posts/" in args[1]):
                 return None
             if args[0] in ("copyto","rcat") and primary:
                 self.primary_uploads+=1
