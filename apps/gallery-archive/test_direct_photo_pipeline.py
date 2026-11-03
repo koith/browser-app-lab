@@ -660,6 +660,42 @@ class DirectTests(unittest.TestCase):
             self.assertEqual((root/'stage'/row['key']).read_bytes(),new)
             self.assertEqual(row['sha256'],hashlib.sha256(new).hexdigest())
 
+    def test_previous_official_creator_feed_uses_independent_public_media_when_timeline_held(self):
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);base=root/'apps/yui-gallery';base.mkdir(parents=True)
+            (base/'stored-albums.json').write_text('{"model":"yui","albums":[]}')
+            source='https://teapawt.net/super_yuisan'
+            media='https://pbs.twimg.com/media/IndependentlyPublicABC.jpg?name=orig'
+            (base/'public-work-pages.json').write_text(json.dumps({'albums':[{
+                'id':'public-yui-sns','title':'Yui public SNS','source':source}]}))
+            (base/'feed.json').write_text(json.dumps({
+                'source':'https://teapawt.net/super_yuisan/media','images':[{
+                    'source':'official-sns',
+                    'post':'https://x.com/super_yuisan/status/2117242902825091424',
+                    'url':media}]}))
+            original=photo(9);new=photo(69)
+            owner={'schema_version':1,'model':'yui','albums':[{
+                'id':'public-yui-sns','images':[{
+                    'number':1,'sha256':hashlib.sha256(original).hexdigest()}]}]}
+            class Client:
+                def __init__(self):
+                    self.blocked_origins={'https://teapawt.net'};self.calls=[]
+                def get(self,url):
+                    self.calls.append(url)
+                    if url!=media:raise AssertionError('Held timeline must not be accessed')
+                    return type('R',(),{'content':new})()
+            client=Client()
+            report=collect(root,'yui',owner,root/'stage',3,2,client,
+                           reviewed_source_only=True)
+            self.assertEqual(client.calls,[media])
+            self.assertEqual(report['new_local_individual_files'],1)
+            self.assertEqual(report['results'][0]['blocked_origin_pages_not_retried'],1)
+            self.assertEqual(report['results'][0]['official_creator_feed_candidates_added'],1)
+            catalog=json.loads((root/'stage/metadata/catalog.json').read_text())
+            row=catalog['albums'][0]['images'][0]
+            self.assertEqual((root/'stage'/row['key']).read_bytes(),new)
+            self.assertEqual(len((root/'stage/journal.jsonl').read_text().splitlines()),1)
+
     def test_public_media_origin_pause_skips_repeated_denied_downloads(self):
         from public_photo_archive import PublicOriginPaused
         with tempfile.TemporaryDirectory() as d:
