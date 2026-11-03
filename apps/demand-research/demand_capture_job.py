@@ -266,6 +266,28 @@ def make_post(row, now, get_media=download_media, pid_override=None):
     return post, blobs
 
 
+def public_error_class(err):
+    """Strictly whitelisted aggregation. Never log post text/IDs/URLs/errors."""
+    msg=str(err).lower()
+    categories=(
+        ("early original capture mismatch","first_observation_conflict"),
+        ("immutable archive key collision","immutable_key_conflict"),
+        ("immutable cloud write collision","remote_write_conflict"),
+        ("private cloud readback did not converge","readback_mismatch"),
+        ("after alternate methods","backend_write_unverified"),
+        ("(rate_limited)","backend_rate_limit"),
+        ("(authorization)","backend_authorization"),
+        ("(missing)","backend_missing_path"),
+        ("(network_timeout)","backend_timeout"),
+        ("(capacity)","backend_capacity"),
+        ("(remote_server)","backend_server_error"),
+        ("(backend_rejected)","backend_rejected"),
+        ("checksum","checksum_failure"),
+        ("bad original media","media_integrity_failure")
+    )
+    return next((name for pattern,name in categories if pattern in msg),"unclassified_failure")
+
+
 def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=False):
     if os.environ.get("DEMAND_CAPTURE_PUBLIC_ALLOWED", "") != "1":
         raise RuntimeError("public capture needs explicit source/retention authorization")
@@ -278,6 +300,7 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
     start = now - WINDOW_MINUTES * 60
     sources = fetchers or (bluesky, mastodon, misskey, lemmy)
     saved = partial = duplicates = fetched = failures = storage_failures = 0
+    storage_error_kinds={}
     capture_interrupted = False
     early_recovered = invalid_early_captures = failed_early_recoveries = recovered = 0
     if fast_mode:
@@ -406,9 +429,12 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
                     known_ids.add(pid)
                     saved += 1
                     partial += not saved_post["archive_complete"]
-                except (RuntimeError,ValueError):
-                    # A single remote object failure must not prevent verified
-                    # objects from being catalogued. Never mark it as stored.
+                except (RuntimeError,ValueError) as error:
+                    # A single failure must not poison other verified posts.
+                    # Only a fixed category, never raw backend output or a
+                    # personal source link, appears in public workflow logs.
+                    kind=public_error_class(error)
+                    storage_error_kinds[kind]=storage_error_kinds.get(kind,0)+1
                     storage_failures += 1
                     seen_this_scan.discard(pid)
                     if storage_failures >= 3:
@@ -424,7 +450,9 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
         "catalog_expected":len(known) if not fast_mode else None,
         "known_marker_name_hints":len(known_ids) if fast_mode else None,
         "integrity_excluded":cloud.unrecoverable_entries,
-        "write_failures":storage_failures,"source_query_failures":failures,
+        "write_failures":storage_failures,
+        "storage_error_categories":storage_error_kinds,
+        "source_query_failures":failures,
         "invalid_early_captures":invalid_early_captures,
         "failed_early_recoveries":failed_early_recoveries,
         "capture_interrupted":capture_interrupted
@@ -458,6 +486,7 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
               "failed_early_recoveries":failed_early_recoveries,
               "budget_exhausted": budget_exhausted,
               "storage_failures": storage_failures,
+               "storage_error_categories":storage_error_kinds,
               "storage_interrupted": capture_interrupted, "catalog": catalog,
               "operational_status": ("JOURNAL_ONLY" if fast_mode else
                 "DEGRADED_INDEX" if catalog.get("publication_pending") else
