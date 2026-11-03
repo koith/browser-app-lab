@@ -43,6 +43,28 @@ def main():
     assert "FirstPhoto1234" in urls[0] and "NotYuiPicture" not in str(urls)
     assert pagination.endswith("?cursor=CURSOR123"),pagination
     assert public_original_variant(urls[0])[0].endswith("name=orig")
+    # Real official public /media is a distinct, openly visible photo tab.
+    # Accept only this creator, do not change accounts or follow other paths.
+    from direct_photo_pipeline import (
+        safe_registered_public_page, reviewed_direct_source, page_images)
+    media_source={**SRC,"url":"https://teapawt.net/super_yuisan/media"}
+    media_html=P1.replace("/super_yuisan?cursor=", "/super_yuisan/media?cursor=")
+    media_urls,media_next,media_cards=public_images_from_author(
+        media_html,media_source,media_source["url"])
+    assert media_cards==1 and len(media_urls)==1
+    assert media_next=="https://teapawt.net/super_yuisan/media?cursor=CURSOR123"
+    assert safe_registered_public_page(media_source["url"],"yui")
+    assert reviewed_direct_source(media_source["url"],"yui")
+    assert not reviewed_direct_source(media_source["url"],"mimmi")
+    assert not safe_registered_public_page("https://teapawt.net/other_person/media","yui")
+    assert not reviewed_direct_source("https://teapawt.net/super_yuisan/reposts","yui")
+    assert page_images(media_html,media_source["url"],"yui")[0]==media_urls
+    assert page_images(media_html,media_source["url"],"mimmi")[0]==[]
+    assert public_images_from_author(
+        media_html.replace("data-username=\"super_yuisan\"",
+                           "data-username=\"different_user\""),
+        media_source,media_source["url"])[0]==[]
+
     assert not safe_media_url("https://pbs.twimg.com.evil.test/media/Foo123456",SRC["url"])
     assert not safe_media_url("https://pbs.twimg.com/protected/privatephoto",SRC["url"])
     # CDN rejects explicit cross-site Referer; public media works with a
