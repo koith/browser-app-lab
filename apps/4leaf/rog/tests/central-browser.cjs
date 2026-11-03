@@ -24,6 +24,24 @@ const BASE='http://127.0.0.1:8765/',API='http://127.0.0.1:8877';
  };
  try{
   await enterTown(host);await enterTown(guest);
+  // Two room selections in the same browser event turn must leave exactly
+  // one authoritative membership in the LAST selected room.
+  await host.evaluate(()=>{
+   window.__LEAF_SOCIAL__.joinRoom('leaf-public-north-3-0');
+   window.__LEAF_SOCIAL__.joinRoom('leaf-public-north-3-1');
+  });
+  await host.waitForFunction(()=>
+   window.__LEAF_SOCIAL__?.getState().roomId==='leaf-public-north-3-1'&&
+   window.__LEAF_CENTRAL_CHAT__?.joinedId==='leaf-public-north-3-1',
+   null,{timeout:15000});
+  const fresh=await guest.evaluate(()=>window.__LEAF_CENTRAL_CHAT__.list('north','샤이닝 브리즈'));
+  assert.equal(fresh.find(r=>r.id==='leaf-public-north-3-0')?.occupants,0,
+   'superseded public room cannot retain a ghost occupant');
+  assert.equal(fresh.find(r=>r.id==='leaf-public-north-3-1')?.occupants,1,
+   'last chosen room must contain the single actual device');
+  await host.locator('#social-back').click();
+  await host.waitForFunction(()=>window.__LEAF_CENTRAL_CHAT__?.joinedId===null,
+   null,{timeout:12000});
   await host.locator('#social-new-room').click();
   await host.locator('#social-modal [name="name"]').fill('중앙 테스트 공개방');
   await host.locator('#social-modal button[type="submit"]').click();
