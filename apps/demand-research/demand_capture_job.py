@@ -282,38 +282,38 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None):
         for term in TERMS:
             try:
                 iterator = iter(getter(term, start, now))
-                while True:
-                    try:
-                        row = next(iterator)
-                    except StopIteration:
-                        break
-                    fetched += 1
-                    pid = post_key(row["platform"], row["original_id"])
-                    if pid in known or pid in seen_this_scan:
-                        duplicates += 1
-                        continue
-                    if saved >= MAX_PER_RUN:
-                        raise RuntimeError("capture budget exceeded; coverage incomplete")
-                    seen_this_scan.add(pid)
-                    # The original text snapshot is uploaded BEFORE any media download.
-                    # If a media download or later catalog publication fails, the first
-                    # observed public text remains in a private immutable capture file.
-                    early = {"id": pid, "platform": row["platform"], "text": row["text"],
-                             "source_url": row["source_url"], "posted_at": row["posted_at"],
-                             "observed_at": now, "media_links": row["media_urls"]}
-                    cloud.write_immutable("posts/" + pid + "/capture.json",
-                                          canonical_json(early))
-                    post, blobs = make_post(row, now)
-                    cloud.save_post(post, blobs)
-                    known[pid] = post
-                    saved += 1
-                    partial += not post["archive_complete"]
-            except RuntimeError:
-                # Never swallow quota exhaustion or a verified remote write failure.
-                raise
             except Exception:
                 failures += 1
                 continue
+            while True:
+                try:
+                    row = next(iterator)
+                except StopIteration:
+                    break
+                except Exception:
+                    # One provider may fail; retain records already captured
+                    # and continue to other public providers and search terms.
+                    failures += 1
+                    break
+                fetched += 1
+                pid = post_key(row["platform"], row["original_id"])
+                if pid in known or pid in seen_this_scan:
+                    duplicates += 1
+                    continue
+                if saved >= MAX_PER_RUN:
+                    raise RuntimeError("capture budget exceeded; coverage incomplete")
+                seen_this_scan.add(pid)
+                # First remote write contains observed public text, ahead of media fetch.
+                early = {"id": pid, "platform": row["platform"], "text": row["text"],
+                         "source_url": row["source_url"], "posted_at": row["posted_at"],
+                         "observed_at": now, "media_links": row["media_urls"]}
+                cloud.write_immutable("posts/" + pid + "/capture.json",
+                                      canonical_json(early))
+                post, blobs = make_post(row, now)
+                cloud.save_post(post, blobs)
+                known[pid] = post
+                saved += 1
+                partial += not post["archive_complete"]
     # Entries written immediately per post are the recovery journal. The versioned
     # catalog is published LAST and never destroys an earlier verified catalog.
     if saved or recovered:
