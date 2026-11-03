@@ -240,13 +240,17 @@ def download_media(url):
         return None
 
 
-def make_post(row, now, get_media=download_media, pid_override=None):
+def make_post(row, now, get_media=download_media, pid_override=None, cloud=None):
     pid = pid_override or post_key(row["platform"], row["original_id"])
     sources = row["media_urls"]
     media = []
     blobs = []
     for index, url in enumerate(sources, start=1):
         item = get_media(url)
+        if item is None and cloud is not None:
+            # This slot may already contain the same original media from an
+            # earlier partial attempt. Verify its private byte SHA before reuse.
+            item = cloud.read_staged_media(pid,index)
         if item is None:
             continue
         mime, blob = item
@@ -344,8 +348,9 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
                        "profile_url": first.get("profile_url", ""),
                        "media_urls": first["media_links"],
                        "media_expected": len(first["media_links"])}
-                post, blobs = make_post(row, first["observed_at"], pid_override=pid)
+                post, blobs = make_post(row, first["observed_at"], pid_override=pid, cloud=cloud)
                 if not post["archive_complete"]:
+                    cloud.stage_partial_media(post,blobs)
                     # The immutable post.json would otherwise freeze a missing
                     # original attachment forever. Keep the early source snapshot
                     # pending and retry while the public original remains accessible.
@@ -431,8 +436,9 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
                            "profile_url": first.get("profile_url", ""),
                            "media_urls": first["media_links"],
                            "media_expected": len(first["media_links"])}
-                    post, blobs = make_post(row, first["observed_at"])
+                    post, blobs = make_post(row, first["observed_at"], cloud=cloud)
                     if not post["archive_complete"]:
+                        cloud.stage_partial_media(post,blobs)
                         partial += 1
                         # The verified first-observation record already remains
                         # in the cloud. Never finalize a permanently incomplete
