@@ -99,9 +99,16 @@ def list_pending_entries(remote,model,reader=None):
         if not isinstance(entries,list) or len(entries)>30:
             raise ValueError('Pending JSON listing exceeds verified bounds')
         if entries:
+            valid=[entry for entry in entries if isinstance(entry,dict)
+                   and isinstance(entry.get('Path'),str)
+                   and re.fullmatch(r'[a-f0-9]{64}\.json',entry['Path'])]
             print('OWNER_PENDING_LISTING',model,'FORMAT','lsjson',
-                  'ENTRIES',len(entries),flush=True)
-            return entries
+                  'ENTRIES',len(entries),'SHA_NAMED',len(valid),
+                  'IGNORED_OTHER_NAMES',len(entries)-len(valid),flush=True)
+            if valid:
+                return entries
+            # Unrelated files are not proof the pending queue was consumed.
+            # Try another same-owner standard listing before reporting empty.
     print('OWNER_PENDING_PRIMARY_LIST_EMPTY_OR_UNAVAILABLE',model,
           'UNAVAILABLE',primary is None,flush=True)
     # lsf prints "size;path" with --format sp. Keep the path last; it
@@ -116,21 +123,23 @@ def list_pending_entries(remote,model,reader=None):
         lines=alternate.decode('utf-8').splitlines()
         if len(lines)>30:
             raise ValueError('Alternate queue listing exceeds verified bounds')
-        files=[]
+        files=[];ignored=0
         for line in lines:
             size_raw,sep,name=line.partition(';')
             if not sep or not re.fullmatch(r'[0-9]+',size_raw):
                 raise ValueError('Untrusted alternate queue size/path')
             size=int(size_raw)
             if not re.fullmatch(r'[0-9a-f]{64}\.json',name):
-                raise ValueError('Unexpected object in pending queue')
+                ignored+=1
+                continue
             if not 0<size<=2_000_000:
                 raise ValueError('Alternate pending queue object size invalid')
             files.append({'Path':name,'Size':size})
     except (UnicodeError,ValueError):
         raise ValueError('Untrusted alternate owner pending listing') from None
     print('OWNER_PENDING_LISTING',model,'FORMAT','lsf-sp',
-          'ENTRIES',len(files),'ALT_RECOVERY_CANDIDATES',len(files),flush=True)
+          'ENTRIES',len(lines),'SHA_NAMED',len(files),
+          'IGNORED_OTHER_NAMES',ignored,'ALT_RECOVERY_CANDIDATES',len(files),flush=True)
     return files
 
 
