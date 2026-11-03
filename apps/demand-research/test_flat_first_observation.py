@@ -92,3 +92,45 @@ def test_invalid_flat_first_observation_is_quarantined_not_published(monkeypatch
     assert outcome["invalid_early_captures"]==1
     assert pid not in [x["id"] for x in cloud.load_catalog()]
     assert cloud.objects[cloud.first_observation_keys(pid)[1]]==b'{"id":"wrong"}'
+
+
+def test_fast_capture_prioritizes_flat_observation_before_nested_storage(monkeypatch):
+    cloud=UnavailableNestedCapture()
+    monkeypatch.setenv("RCLONE_CONFIG_ARCHIVE_COOKIE","synthetic")
+    monkeypatch.setenv("DEMAND_CAPTURE_PUBLIC_ALLOWED","1")
+    original_id="at://did:plc:abcdefghijk/app.bsky.feed.post/first"
+    pid=post_key("bluesky",original_id)
+    row={"platform":"bluesky","original_id":original_id,
+         "source_url":first_payload(pid)["source_url"],
+         "profile_url":first_payload(pid)["profile_url"],
+         "posted_at":first_payload(pid)["posted_at"],
+         "text":first_payload(pid)["text"],"media_urls":[],"media_expected":0}
+    outcome=job.run(fetchers=[
+         lambda term,start,end:[row] if term==job.TERMS[0] else []],
+         cloud=cloud,clock=lambda:1793668200,
+         run_id="123456781",fast_mode=True)
+    assert outcome["saved_verified"]==1
+    assert outcome["storage_failures"]==0
+    assert cloud.nested_failures==0,"flat snapshot must precede nested capture writes"
+    canonical,flat=cloud.first_observation_keys(pid)
+    assert canonical not in cloud.objects
+    assert flat in cloud.objects
+    assert cloud.load_catalog()[0]["id"]==pid
+
+
+def test_first_observation_fails_closed_if_both_remote_paths_reject_writes():
+    class BothPathsUnavailable(UnavailableNestedCapture):
+        def fake(self,args,data=None,timeout=150,allow_missing=False):
+            if args[0] in ("copyto","rcat"):
+                target=args[2] if args[0]=="copyto" else args[1]
+                if "/capture.json" in target or "/early-" in target:
+                    raise RuntimeError("private cloud upload failed (missing)")
+            return super().fake(args,data=data,timeout=timeout,
+                                allow_missing=allow_missing)
+    cloud=BothPathsUnavailable()
+    pid="c"*40
+    raw=canonical_json(first_payload(pid))
+    with pytest.raises(RuntimeError,match="first observation unavailable"):
+        cloud.save_first_observation(pid,raw,prefer_flat=True)
+    assert cloud.read_first_observation(pid) is None
+    assert not any("early-"+pid in k for k in cloud.objects)
