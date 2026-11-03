@@ -8,6 +8,9 @@
       "publisher": "공개 SNS",
       "priority": 20,
       "source": "https://teapawt.net/super_yuisan",
+      "source_pages": [
+        "https://teapawt.net/super_yuisan/media"
+      ],
       "identity_evidence": "Only direct attachments of timeline-item cards with the exact professional author account super_yuisan. Quoted and nested other-author attachments are excluded. Follow observed Load more cursor links; preserve observed pbs.twimg.com media URLs and original-size query without rewriting them. Every decoded file still requires private remote SHA readback before publication."
     },
     {
