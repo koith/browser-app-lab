@@ -136,3 +136,65 @@ def test_total_provider_outage_remains_failure_and_never_creates_marker():
     with pytest.raises(RuntimeError):
         cloud.save_post(post())
     assert cloud.objects=={}
+
+
+def test_replay_opt_in_writes_media_and_journal_shallow_first(monkeypatch):
+    monkeypatch.setenv("DEMAND_RECOVERY_PREFER_FLAT","1")
+    class Observe(RejectNestedCloud):
+        def __init__(self):
+            self.mutated=[]
+            super().__init__()
+        def fake(self,args,data=None,timeout=150,allow_missing=False):
+            if args[0] in ("mkdir","copyto","rcat"):
+                target=args[2] if args[0]=="copyto" else args[1]
+                self.mutated.append(target)
+            return super().fake(args,data=data,timeout=timeout,allow_missing=allow_missing)
+    cloud=Observe()
+    entry=post()
+    media=b"synthetic source photo"
+    media_key="posts/"+entry["id"]+"/media/0001.jpg"
+    entry["media"]=[{"key":media_key,"mime":"image/jpeg","bytes":len(media),
+                     "sha256":sha256(media),"remote_verified":True}]
+    entry["media_expected"]=entry["media_saved"]=1
+    assert cloud.save_post(entry,[media])==entry
+    assert cloud.load_catalog()==[entry]
+    assert cloud.read_verified(media_key,sha256(media),cap=len(media)+1)==media
+    assert cloud.mutated
+    assert all("/posts/" not in target and "/metadata/entries/" not in target
+               for target in cloud.mutated)
+    assert any("metadata/flat-blob-" in target for target in cloud.mutated)
+
+
+def test_replay_opt_in_never_masks_conflicting_canonical_object(monkeypatch):
+    monkeypatch.setenv("DEMAND_RECOVERY_PREFER_FLAT","1")
+    cloud=FakeCloud()
+    key="posts/"+"b"*40+"/post.json"
+    original=b"old canonical bytes"
+    cloud.objects[key]=original
+    with pytest.raises(RuntimeError,match="canonical checksum conflict"):
+        cloud.write_immutable(key,b"new conflicting bytes")
+    assert cloud.objects=={key:original}
+
+
+def test_replay_opt_in_reuses_matching_canonical_without_shadow_copy(monkeypatch):
+    monkeypatch.setenv("DEMAND_RECOVERY_PREFER_FLAT","1")
+    cloud=FakeCloud()
+    key="posts/"+"c"*40+"/post.json"
+    original=b"same original"
+    cloud.objects[key]=original
+    assert cloud.write_immutable(key,original) is False
+    assert list(cloud.objects)==[key]
+
+
+def test_replay_opt_in_cannot_claim_saved_when_shallow_unavailable(monkeypatch):
+    monkeypatch.setenv("DEMAND_RECOVERY_PREFER_FLAT","1")
+    class Down(FakeCloud):
+        def fake(self,args,data=None,timeout=150,allow_missing=False):
+            if args[0] in ("copyto","rcat"):
+                raise RuntimeError("private cloud "+args[0]+" failed (missing)")
+            return super().fake(args,data=data,timeout=timeout,
+                                allow_missing=allow_missing)
+    cloud=Down()
+    with pytest.raises(RuntimeError):
+        cloud.save_post(post())
+    assert cloud.objects=={}
