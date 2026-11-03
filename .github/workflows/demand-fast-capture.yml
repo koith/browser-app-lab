@@ -11,6 +11,7 @@ on:
       - "apps/demand-research/recover_spool_artifacts.py"
       - "apps/demand-research/test_demand_archive.py"
       - "apps/demand-research/test_terabox_parent_fallback.py"
+      - "apps/demand-research/test_flat_immutable_fallback.py"
       - "apps/demand-research/test_flat_first_observation.py"
       - "apps/demand-research/test_rebuild_index_readback.py"
       - "apps/demand-research/test_recovery_spool.py"
@@ -51,9 +52,9 @@ jobs:
         run: |
           python -m pip install --disable-pip-version-check pytest==8.4.2
           cd apps/demand-research
-          python -m py_compile capture_schedule_health.py test_capture_schedule_health.py demand_archive.py demand_capture_job.py recovery_spool.py recover_spool_artifacts.py test_demand_archive.py test_terabox_parent_fallback.py test_flat_first_observation.py rebuild_archive.py test_rebuild_index_readback.py test_recovery_spool.py test_degraded_encrypted_capture.py test_media_source_binding.py
+          python -m py_compile capture_schedule_health.py test_capture_schedule_health.py demand_archive.py demand_capture_job.py recovery_spool.py recover_spool_artifacts.py test_demand_archive.py test_terabox_parent_fallback.py test_flat_immutable_fallback.py test_flat_first_observation.py rebuild_archive.py test_rebuild_index_readback.py test_recovery_spool.py test_degraded_encrypted_capture.py test_media_source_binding.py
           python -m pip install --disable-pip-version-check cryptography==46.0.4
-          python -m pytest -q test_capture_schedule_health.py test_demand_archive.py test_terabox_parent_fallback.py test_flat_first_observation.py test_rebuild_index_readback.py test_recovery_spool.py test_degraded_encrypted_capture.py test_media_source_binding.py
+          python -m pytest -q test_capture_schedule_health.py test_demand_archive.py test_terabox_parent_fallback.py test_flat_immutable_fallback.py test_flat_first_observation.py test_rebuild_index_readback.py test_recovery_spool.py test_degraded_encrypted_capture.py test_media_source_binding.py
   capture:
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-24.04

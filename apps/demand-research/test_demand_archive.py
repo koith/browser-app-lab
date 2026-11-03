@@ -1029,7 +1029,7 @@ def test_temporary_missing_nested_parent_waits_until_listed_before_upload():
     assert cloud.load_catalog()[0]["id"]==p["id"]
 
 
-def test_unobservable_nested_parent_cannot_be_claimed_saved():
+def test_unobservable_nested_parent_only_counts_sha_verified_shallow_original():
     class InvisibleParent(FakeCloud):
         def fake(self,args,data=None,timeout=150,allow_missing=False):
             if (args[0]=="lsf" and "/posts/" in args[1] and
@@ -1037,6 +1037,10 @@ def test_unobservable_nested_parent_cannot_be_claimed_saved():
                 return None
             return super().fake(args,data=data,timeout=timeout,allow_missing=allow_missing)
     cloud=InvisibleParent()
-    with pytest.raises(RuntimeError,match="parent directory unverified"):
-        cloud.save_post(post())
-    assert not any(k.endswith("/post.json") for k in cloud.objects)
+    p=post()
+    cloud.save_post(p)
+    original="posts/"+p["id"]+"/post.json"
+    assert original not in cloud.objects
+    assert cloud.objects[cloud.flat_storage_key(original)]==canonical_json(p)
+    assert cloud.read_verified(original,sha256(canonical_json(p)))==canonical_json(p)
+    assert cloud.load_catalog()==[p]
