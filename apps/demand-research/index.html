@@ -1041,8 +1041,14 @@ function updateAdScores(){
   for(let p of all){let k=fingerprint(p.text);if(k.length>=28)count.set(k,(count.get(k)||0)+1)}
   for(let p of all)p.adEvidence=adEvidence(p,count);
 }
+function isAutomatedTrendDigest(post){
+  // Generated trend digests are not individual consumer experiences.
+  const text=String(post.text||"");
+  return /Trending Tags\s*\(Beta\)/i.test(text)||
+         /(?:BlueSky|Bluesky)\s+trending\s+hashtags/i.test(text);
+}
 function suspectedAd(post){
-  return (post.adEvidence?.score||0)>=4;
+  return (post.adEvidence?.score||0)>=4||isAutomatedTrendDigest(post);
 }
 
 function matchesText(p){return !needle||p.text.toLowerCase().includes(needle)}
@@ -1277,10 +1283,11 @@ function draw(){
   $("more").textContent="더 보기";
   let coverage=cloudMode?" · 테라박스 저장본":" · 조회 "+daysCovered+"일 / "+(Math.ceil((toMs-fromMs)/DAY))+"일";
   let warnings=(failed||incomplete)?" · 일부 구간 미확인 "+(failed+incomplete)+"건":"";
+  let filteredDigests=matching.filter(isAutomatedTrendDigest).length;
   updateServiceCounts();
   let sources=" · B"+serviceCounts.bluesky+" M"+serviceCounts.mastodon+" L"+serviceCounts.lemmy+" K"+serviceCounts.misskey+" R"+serviceCounts.reddit+" X"+serviceCounts.x;
   let candidates=cloudMode?0:indexedCandidates.filter(p=>matchesText(p)&&!suspectedAd(p)).length;
-  $("count").textContent=(rows.length-candidates).toLocaleString()+"건"+(cloudMode?"":sources)+(candidates?" · 원문 미확인 링크 "+candidates+"건":"")+(hidden?" · 광고 "+hidden.toLocaleString()+"건 제외":"")+(rows.length>limit?" · "+limit+"건 표시":"");
+  $("count").textContent=(rows.length-candidates).toLocaleString()+"건"+(cloudMode?"":sources)+(candidates?" · 원문 미확인 링크 "+candidates+"건":"")+(hidden?" · 광고·자동 생성글 "+hidden.toLocaleString()+"건 제외":"")+(rows.length>limit?" · "+limit+"건 표시":"");
   $("count").setAttribute("aria-label",rows.length.toLocaleString()+"개 표시 / "+matching.length.toLocaleString()+"개 조회"+coverage+warnings);
   window.dispatchEvent(new Event("intersection:feed-updated"));
 }
