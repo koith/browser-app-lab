@@ -266,7 +266,7 @@ def make_post(row, now, get_media=download_media, pid_override=None):
     return post, blobs
 
 
-def run(fetchers=None, cloud=None, clock=time.time, run_id=None):
+def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=False):
     if os.environ.get("DEMAND_CAPTURE_PUBLIC_ALLOWED", "") != "1":
         raise RuntimeError("public capture needs explicit source/retention authorization")
     cloud = cloud or CloudArchive()
@@ -279,53 +279,61 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None):
     sources = fetchers or (bluesky, mastodon, misskey, lemmy)
     saved = partial = duplicates = fetched = failures = storage_failures = 0
     capture_interrupted = False
-    known = {p["id"]: p for p in cloud.load_catalog(include_entries=False)}
-    known, recovered = cloud.recover_entries(known)
-    early_recovered = 0
-    invalid_early_captures = 0
-    failed_early_recoveries = 0
-    # Independent first-observation snapshots survive truncated/post-deletion
-    # runs. A single damaged object must never poison the entire archive.
-    for pid in cloud.pending_capture_ids(known)[:MAX_PER_RUN]:
-        try:
-            raw = cloud.read("posts/" + pid + "/capture.json",
-                             cap=100_000, optional=True)
-            if raw is None:
+    early_recovered = invalid_early_captures = failed_early_recoveries = recovered = 0
+    if fast_mode:
+        # Fast acquisition lists only existing names. The separate recovery job
+        # verifies every journal entry's checksum.
+        known={}
+        known_ids=cloud.marker_ids()
+    else:
+        known = {p["id"]: p for p in cloud.load_catalog(include_entries=False)}
+        known, recovered = cloud.recover_entries(known)
+        early_recovered = 0
+        invalid_early_captures = 0
+        failed_early_recoveries = 0
+        # Independent first-observation snapshots survive truncated/post-deletion
+        # runs. A single damaged object must never poison the entire archive.
+        for pid in cloud.pending_capture_ids(known)[:MAX_PER_RUN]:
+            try:
+                raw = cloud.read("posts/" + pid + "/capture.json",
+                                 cap=100_000, optional=True)
+                if raw is None:
+                    continue
+                first = json.loads(raw)
+                if (not isinstance(first, dict)
+                        or first.get("id") != pid
+                        or first.get("platform") not in
+                        ("bluesky", "mastodon", "misskey", "lemmy")
+                        or not isinstance(first.get("text"), str)
+                        or not 0 <= len(first["text"]) <= 30_000
+                        or not public_url(first.get("source_url"))
+                        or not isinstance(first.get("posted_at"), str)
+                        or not isinstance(first.get("observed_at"), int)
+                        or not 1577836800 <= first["observed_at"] <= now+120
+                        or not isinstance(first.get("media_links"), list)
+                        or len(first["media_links"]) > MAX_MEDIA_PER_POST
+                        or any(not public_url(link) for link in first["media_links"])):
+                    raise ValueError("invalid original public capture record")
+                row = {"platform": first["platform"], "source_url": first["source_url"],
+                       "text": first["text"], "posted_at": first["posted_at"],
+                       "profile_url": first.get("profile_url", ""),
+                       "media_urls": first["media_links"],
+                       "media_expected": len(first["media_links"])}
+                post, blobs = make_post(row, first["observed_at"], pid_override=pid)
+            except (ValueError,TypeError,KeyError,OverflowError,json.JSONDecodeError):
+                # Keep damaged bytes untouched. Do not promote or overwrite them.
+                cloud.quarantined_ids.add(pid)
+                invalid_early_captures += 1
                 continue
-            first = json.loads(raw)
-            if (not isinstance(first, dict)
-                    or first.get("id") != pid
-                    or first.get("platform") not in
-                    ("bluesky", "mastodon", "misskey", "lemmy")
-                    or not isinstance(first.get("text"), str)
-                    or not 0 <= len(first["text"]) <= 30_000
-                    or not public_url(first.get("source_url"))
-                    or not isinstance(first.get("posted_at"), str)
-                    or not isinstance(first.get("observed_at"), int)
-                    or not 1577836800 <= first["observed_at"] <= now+120
-                    or not isinstance(first.get("media_links"), list)
-                    or len(first["media_links"]) > MAX_MEDIA_PER_POST
-                    or any(not public_url(link) for link in first["media_links"])):
-                raise ValueError("invalid original public capture record")
-            row = {"platform": first["platform"], "source_url": first["source_url"],
-                   "text": first["text"], "posted_at": first["posted_at"],
-                   "profile_url": first.get("profile_url", ""),
-                   "media_urls": first["media_links"],
-                   "media_expected": len(first["media_links"])}
-            post, blobs = make_post(row, first["observed_at"], pid_override=pid)
-        except (ValueError,TypeError,KeyError,OverflowError,json.JSONDecodeError):
-            # Keep damaged bytes untouched. Do not promote or overwrite them.
-            cloud.quarantined_ids.add(pid)
-            invalid_early_captures += 1
-            continue
-        try:
-            saved_post=cloud.save_post(post,blobs)
-        except (RuntimeError,ValueError):
-            # A recoverable network/backend failure is not an invalid source.
-            failed_early_recoveries += 1
-            continue
-        known[pid]=saved_post
-        early_recovered+=1
+            try:
+                saved_post=cloud.save_post(post,blobs)
+            except (RuntimeError,ValueError):
+                # A recoverable network/backend failure is not an invalid source.
+                failed_early_recoveries += 1
+                continue
+            known[pid]=saved_post
+            early_recovered+=1
+        known_ids=set(known)
     seen_this_scan = set()
     budget_exhausted = False
     for getter in sources:
@@ -351,10 +359,10 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None):
                     break
                 fetched += 1
                 pid = post_key(row["platform"], row["original_id"])
-                if pid in known or pid in seen_this_scan:
+                if pid in known_ids or pid in known or pid in seen_this_scan:
                     duplicates += 1
                     continue
-                if saved >= MAX_PER_RUN:
+                if saved >= (24 if fast_mode else MAX_PER_RUN):
                     budget_exhausted = True
                     break
                 seen_this_scan.add(pid)
@@ -395,6 +403,7 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None):
                     post, blobs = make_post(row, first["observed_at"])
                     saved_post = cloud.save_post(post, blobs)
                     known[pid] = saved_post
+                    known_ids.add(pid)
                     saved += 1
                     partial += not saved_post["archive_complete"]
                 except (RuntimeError,ValueError):
@@ -411,7 +420,9 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None):
     # individual objects passed remote SHA256 readback.
     print("PRIVATE_PER_POST_READBACK_CHECKPOINT",json.dumps({
         "new_verified":saved,"restored_entries":recovered,
-        "restored_first_observations":early_recovered,"catalog_expected":len(known),
+        "restored_first_observations":early_recovered,
+        "catalog_expected":len(known) if not fast_mode else None,
+        "known_marker_name_hints":len(known_ids) if fast_mode else None,
         "integrity_excluded":cloud.unrecoverable_entries,
         "write_failures":storage_failures,"source_query_failures":failures,
         "invalid_early_captures":invalid_early_captures,
@@ -420,7 +431,12 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None):
     },sort_keys=True),flush=True)
     # Entries written immediately per post are the recovery journal. The versioned
     # catalog is published LAST and never destroys an earlier verified catalog.
-    if saved or recovered or early_recovered:
+    if fast_mode:
+        catalog={"mode":"journal_fast_capture","catalog_sha256_verified":False,
+                 "publication_pending":True,
+                 "readable_via_verified_entry_journal":True,
+                 "reason":"compact_catalog_rebuilt_by_separate_integrity_job"}
+    elif saved or recovered or early_recovered:
         try:
             catalog = cloud.publish_catalog(known, run_id)
         except (RuntimeError,ValueError):
@@ -443,7 +459,8 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None):
               "budget_exhausted": budget_exhausted,
               "storage_failures": storage_failures,
               "storage_interrupted": capture_interrupted, "catalog": catalog,
-              "operational_status": ("DEGRADED_INDEX" if catalog.get("publication_pending") else
+              "operational_status": ("JOURNAL_ONLY" if fast_mode else
+                "DEGRADED_INDEX" if catalog.get("publication_pending") else
                 "DEGRADED_STORAGE" if storage_failures else "VERIFIED_POSTS"),
               "scope": "confirmed_public_only", "poll_minutes": 5,
               "completeness_guaranteed": False}
@@ -454,4 +471,4 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None):
 
 
 if __name__ == "__main__":
-    run()
+    run(fast_mode=os.environ.get("DEMAND_FAST_CAPTURE_MODE")=="1")
