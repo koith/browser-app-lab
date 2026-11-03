@@ -336,18 +336,21 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None):
                     first = json.loads(first_blob)
                     if first.get("id") != pid or first.get("platform") != row["platform"]:
                         raise ValueError("early capture integrity mismatch")
+                    now_for_post = first["observed_at"]
                     row = {**row, "text": first["text"],
                            "posted_at": first["posted_at"],
                            "media_urls": first["media_links"],
                            "media_expected": len(first["media_links"])}
-                post, blobs = make_post(row, now)
+                post, blobs = make_post(row, locals().get("now_for_post", now))
+                if "now_for_post" in locals():
+                    del now_for_post
                 cloud.save_post(post, blobs)
                 known[pid] = post
                 saved += 1
                 partial += not post["archive_complete"]
     # Entries written immediately per post are the recovery journal. The versioned
     # catalog is published LAST and never destroys an earlier verified catalog.
-    if saved or recovered:
+    if saved or recovered or early_recovered:
         catalog = cloud.publish_catalog(known, run_id)
     else:
         catalog = {"posts": len(known), "catalog_sha256_verified": False,
