@@ -86,6 +86,9 @@ jobs:
       RCLONE_CONFIG_ARCHIVE_COOKIE: ${{ secrets.DEMAND_TERABOX_NDUS || secrets.YUI_TERABOX_NDUS || secrets.YUI_TERABOX_COOKIE }}
       DEMAND_ARCHIVE_RECOVERY_KEY: ${{ secrets.DEMAND_ARCHIVE_RECOVERY_KEY }}
       DEMAND_TERABOX_REMOTE: "archive:DemandResearch"
+      # Historical recovery only: skip repeated failing deep-folder attempts.
+      # Each shallow object is still immutable and remote SHA-readback verified.
+      DEMAND_RECOVERY_PREFER_FLAT: "1"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
