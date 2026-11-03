@@ -136,6 +136,8 @@ class CloudArchive:
                 category = "missing"
             elif re.search(r"429|rate.limit|too many requests|throttl", message):
                 category = "rate_limited"
+            elif re.search(r"409|already exists|duplicate|conflict", message):
+                category = "duplicate"
             elif re.search(r"403|permission|access.denied|unauthorized|cookie", message):
                 category = "authorization"
             elif re.search(r"quota|space|capacity", message):
