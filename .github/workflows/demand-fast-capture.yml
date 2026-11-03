@@ -18,7 +18,9 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: intersection-fast-private-capture
+  # PR testing must never evict a queued production archive run.
+  # Both schedule + main push share the same production serialization group.
+  group: intersection-fast-private-capture-${{ github.event_name == 'pull_request' && github.head_ref || 'production' }}
   cancel-in-progress: false
 jobs:
   offline-tests:
