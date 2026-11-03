@@ -170,6 +170,9 @@ jobs:
       # all 470 media bytes matched existing 454 distinct SHA files, +0 new.
       # Return to rotating 40/link run; no need to re-fetch 470 duplicates each cycle.
       GALLERY_YUI_FEED_SCAN_LIMIT: '40'
+      # Only main collector: exact SHA-named pre-existing owner pending queues
+      # may be re-read via the same-account signed gateway on provider 400141.
+      GALLERY_AUTHORIZED_PENDING_READ: '1'
       # The first cohort is fully proven before this release is merged.
       # Incoming batches still require independent exact media SHA readback.
       ARCHIVE_PUBLICATION_MODE: immediate
