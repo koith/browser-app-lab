@@ -151,3 +151,37 @@ with TestClient(gateway.app) as client:
     failed=client.get('/api/media/mimmi-test/1/preview',headers=auth)
     assert failed.status_code==502 and b'SHA' in failed.content
 print("MIMMI_SEPARATE_PREVIEW_SHA_REMOTE_BYTE_QA_PASS")
+
+
+# Only the exact collector workflow with a valid short-lived OIDC identity
+# may read the unredacted private catalog. Anonymous gallery users must never
+# see storage keys or any unpublished owner metadata.
+from unittest.mock import patch
+private_fixture=json.loads(json.dumps(catalog))
+private_fixture.update(storage="owner-private-terabox-sha-verified-bytes")
+async def private_owner_catalog(key,limit,*,remote=None):
+    if key!="metadata/catalog.json" or remote!="archive:MimmiArchive":
+        raise ValueError("Wrong private owner path")
+    return json.dumps(private_fixture).encode()
+gateway.rclone_bytes=private_owner_catalog
+with TestClient(gateway.app) as client:
+    path="/internal/gallery-owner-catalog/mimmi"
+    assert client.post(path).status_code==403
+    assert client.post(path,headers={"Authorization":"Bearer untrusted"}).status_code==403
+    assert client.post("/internal/gallery-owner-catalog/unknown").status_code==404
+    def exact_workflow(token,workflow_ref):
+        assert workflow_ref==gateway._COLLECT_WORKFLOW
+        return token=="offline-valid-OIDC-identity"
+    with patch.object(gateway,"_verify_sync_identity",side_effect=exact_workflow):
+        header={"Authorization":"Bearer offline-valid-OIDC-identity"}
+        reply=client.post(path,headers=header)
+        assert reply.status_code==200,reply.text
+        assert reply.headers["cache-control"]=="private, no-store"
+        assert reply.json()["albums"][0]["images"][0]["key"]=="originals/mimmi-test/0001.jpg"
+        assert client.post(path,headers=header,content=b"nonempty").status_code==413
+        private_fixture["model"]="yui"
+        assert client.post(path,headers=header).status_code==503
+        private_fixture["model"]="mimmi"
+        private_fixture["storage"]="unsanctioned-cache"
+        assert client.post(path,headers=header).status_code==503
+print("OWNER_SIGNED_CATALOG_READ_QA_PASS")
