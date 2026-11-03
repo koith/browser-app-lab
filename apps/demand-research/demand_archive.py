@@ -122,6 +122,9 @@ class CloudArchive:
         self.unrecoverable_entries = 0
         self.catalog_unverified_refs = 0
         self._ensured_parents = set()
+        # Opt-in for bounded encrypted replay only. Fresh fast capture remains
+        # canonical-first; historical recovery avoids slow broken nested paths.
+        self.recovery_flat_first = (os.getenv("DEMAND_RECOVERY_PREFER_FLAT") == "1")
 
     @staticmethod
     def _run(args, data=None, timeout=150, allow_missing=False):
@@ -350,11 +353,33 @@ class CloudArchive:
                 raise RuntimeError("private cloud parent directory unverified") from last
 
     def write_immutable(self, key, data):
-        """Canonical immutable upload, then shallow fallback only for path failures.
-
-        Never fallback on authorization, quota, rate limit, or conflicting
-        immutable bytes. Success still requires remote SHA256 byte readback.
-        """
+        """Immutable SHA-verified upload with opt-in fast shallow recovery path."""
+        flat=self.flat_storage_key(key)
+        if self.recovery_flat_first and flat:
+            if not isinstance(data,bytes):
+                raise TypeError("cloud content must be bytes")
+            expected=sha256(data)
+            # Verify canonical objects on both remote hosts BEFORE any mutation.
+            # A conflicting canonical original is authoritative evidence and
+            # must never be hidden by a matching shallow replica.
+            for domain in (None,"https://nephobox.com"):
+                observed=self._read_physical(
+                    key,cap=max(len(data)+1,MAX_MEDIA_BYTES+MAX_POST),
+                    optional=True,domain=domain)
+                if observed is None:
+                    continue
+                if sha256(observed)!=expected:
+                    raise RuntimeError("immutable archive key collision: canonical checksum conflict")
+                return False
+            result=self._write_immutable_direct(flat,data)
+            # Always reread from remote, not local memory. A cloud ACK is never
+            # a completed archive, including if no mutation was needed.
+            actual=self.read_verified(key,expected,
+                                      cap=max(len(data)+1,MAX_POST))
+            if actual!=data:
+                raise RuntimeError("private cloud recovery flat SHA unverified")
+            return result
+        # Existing canonical-first path used for normal capture and metadata.
         try:
             return self._write_immutable_direct(key,data)
         except RuntimeError as error:
