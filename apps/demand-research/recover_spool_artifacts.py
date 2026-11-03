@@ -12,6 +12,7 @@ from pathlib import Path
 import re
 import subprocess
 import tempfile
+import time
 
 from demand_archive import CloudArchive
 from recovery_spool import RecoverySpool
@@ -19,6 +20,8 @@ from recovery_spool import RecoverySpool
 ARTIFACT_NAME=re.compile(r"^intersection-private-recovery$")
 MAX_ARTIFACTS=20
 MAX_BYTES=200_000_000
+MAX_CONSECUTIVE_FAILURES=3
+MAX_RECORD_SECONDS=55
 
 
 def _gh(args,*,max_bytes=2_000_000):
@@ -77,13 +80,39 @@ def validate_source_run(source_run):
         raise RuntimeError("untrusted private recovery source run")
 
 
+def restore_with_budget(spool,path,cloud,*,max_seconds=MAX_RECORD_SECONDS):
+    """Limit each restore without bypassing TeraBox immutable SHA readback.
+
+    Every subprocess invocation is shorter than the remaining per-original
+    budget. A stalled provider must not monopolize the entire Actions runner
+    and prevent the next encrypted artifact from being retried later.
+    """
+    previous_runner=cloud.runner
+    deadline=time.monotonic()+max_seconds
+
+    def bounded_runner(args,data=None,timeout=150,allow_missing=False):
+        remaining=deadline-time.monotonic()
+        if remaining<=0:
+            raise RuntimeError("private encrypted restore time budget exceeded")
+        return previous_runner(
+            args,data=data,timeout=max(1,min(timeout,18,remaining)),
+            allow_missing=allow_missing)
+
+    cloud.runner=bounded_runner
+    try:
+        return spool.restore(path,cloud)
+    finally:
+        cloud.runner=previous_runner
+
+
 def replay(cloud=None,local_directory=None):
     active=cloud or CloudArchive()
     active.preflight()
     summary={"artifacts":0,"encrypted_buffers":0,
              "first_observation_verified":0,"post_and_media_verified":0,
              "prior_original_preserved":0,"original_media_incomplete":0,
-             "buffer_failures":0,"artifact_download_failures":0}
+             "buffer_failures":0,"artifact_download_failures":0,
+             "deferred_buffers":0}
     if local_directory:
         source_dirs=[Path(local_directory)]
     else:
@@ -120,8 +149,9 @@ def replay(cloud=None,local_directory=None):
             except (RuntimeError,OSError,subprocess.TimeoutExpired):
                 summary["artifact_download_failures"]+=1
     try:
+        consecutive_failures=0
         for _name,directory in directories:
-            encrypted=list(directory.glob("*.enc"))
+            encrypted=sorted(directory.glob("*.enc"))
             if not encrypted:
                 continue
             summary["artifacts"]+=1
@@ -129,13 +159,20 @@ def replay(cloud=None,local_directory=None):
                 summary["buffer_failures"]+=1
                 continue
             spool=RecoverySpool(directory)
-            for path in encrypted:
+            for offset,path in enumerate(encrypted):
+                if consecutive_failures>=MAX_CONSECUTIVE_FAILURES:
+                    # All source bytes remain encrypted and eligible for the
+                    # next periodic replay. Never claim these are backed up.
+                    summary["deferred_buffers"]+=len(encrypted)-offset
+                    break
                 summary["encrypted_buffers"]+=1
                 try:
-                    state=spool.restore(path,active)
+                    state=restore_with_budget(spool,path,active)
                     summary[state]+=1
+                    consecutive_failures=0
                 except (RuntimeError,ValueError,KeyError,TypeError,OverflowError):
                     summary["buffer_failures"]+=1
+                    consecutive_failures+=1
     finally:
         if tmp:
             tmp.cleanup()
@@ -146,5 +183,6 @@ def replay(cloud=None,local_directory=None):
 
 if __name__=="__main__":
     result=replay()
-    if result["buffer_failures"] or result["artifact_download_failures"]:
+    if (result["buffer_failures"] or result["artifact_download_failures"]
+            or result["deferred_buffers"]):
         raise RuntimeError("private archived recovery buffers still unverified")
