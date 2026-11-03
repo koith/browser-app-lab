@@ -220,4 +220,36 @@ class OwnerMetadataTests(unittest.TestCase):
                      reader=lambda *a,**k:b'{"errno":400141}')
 
 
+    def test_pending_signed_gateway_http_failure_logs_only_safe_status(self):
+        import io
+        from contextlib import redirect_stderr
+        from urllib.error import HTTPError
+        from urllib.request import Request
+        class Reply:
+            status=200
+            def __enter__(self):return self
+            def __exit__(self,*a):return False
+            def read(self,n):return json.dumps({'value':'z'*120}).encode()[:n]
+        requests=[]
+        def opener(request,timeout):
+            self.assertIsInstance(request,Request)
+            requests.append(request)
+            if len(requests)==1:return Reply()
+            raise HTTPError(request.full_url,503,'private-provider-held',{},None)
+        batch='f'*64
+        remote='archive:MimmiArchive/metadata/pending-individual/mimmi/'+batch+'.json'
+        diagnostics=io.StringIO()
+        with patch.dict(os.environ,{
+            'ACTIONS_ID_TOKEN_REQUEST_URL':'https://pipelines.actions.githubusercontent.com/fixture',
+            'ACTIONS_ID_TOKEN_REQUEST_TOKEN':'test-only-secret-must-never-log'
+        }),redirect_stderr(diagnostics):
+            with self.assertRaises(ProviderVerificationRequired):
+                read_via_existing_owner_gateway(remote,'mimmi',batch=batch,opener=opener)
+        log=diagnostics.getvalue()
+        self.assertIn('OWNER_SIGNED_REMOTE_HTTP mimmi pending 503',log)
+        self.assertNotIn('test-only-secret-must-never-log',log)
+        self.assertNotIn(remote,log)
+        self.assertEqual(len(requests),2)
+
+
 if __name__=='__main__':unittest.main(verbosity=2)

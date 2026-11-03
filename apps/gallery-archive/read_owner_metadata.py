@@ -143,7 +143,7 @@ def read_via_existing_owner_gateway(remote,model,*,minimum=1,batch=None,opener=N
                 raise ProviderVerificationRequired('Authenticated catalog redirect rejected')
         opener=urllib.request.build_opener(NoRedirect()).open
 
-    def fetch(request,limit,timeout):
+    def fetch(request,limit,timeout,phase):
         try:
             with opener(request,timeout=timeout) as response:
                 if getattr(response,'status',200)!=200:
@@ -152,7 +152,16 @@ def read_via_existing_owner_gateway(remote,model,*,minimum=1,batch=None,opener=N
                 if not raw or len(raw)>limit:
                     raise ProviderVerificationRequired('Owner gateway read exceeds bounds')
                 return raw
-        except (urllib.error.HTTPError,urllib.error.URLError,TimeoutError,OSError):
+        except urllib.error.HTTPError as error:
+            # Only phase + status are recorded. No URL, bearer, body,
+            # private paths or owner material ever enter Actions logs.
+            print('OWNER_SIGNED_REMOTE_HTTP',model,phase,error.code,
+                  'PRIVATE_ENDPOINTS_LOGGED',False,file=sys.stderr,flush=True)
+            raise ProviderVerificationRequired('Owner gateway signed read unavailable') from None
+        except (urllib.error.URLError,TimeoutError,OSError) as error:
+            print('OWNER_SIGNED_REMOTE_TRANSPORT',model,phase,
+                  type(error).__name__,'PRIVATE_ENDPOINTS_LOGGED',False,
+                  file=sys.stderr,flush=True)
             raise ProviderVerificationRequired('Owner gateway signed read unavailable') from None
 
     audience='gallery-archive-terabox-sync'
@@ -161,7 +170,7 @@ def read_via_existing_owner_gateway(remote,model,*,minimum=1,batch=None,opener=N
         request_url+sep+'audience='+quote(audience),
         headers={'Authorization':'Bearer '+request_token})
     try:
-        id_token=json.loads(fetch(request,24000,30)).get('value')
+        id_token=json.loads(fetch(request,24000,30,'oidc')).get('value')
     except (ValueError,TypeError,AttributeError):
         raise ProviderVerificationRequired('Collector GitHub identity response invalid') from None
     if not isinstance(id_token,str) or not 80<=len(id_token)<=12000:
@@ -172,7 +181,7 @@ def read_via_existing_owner_gateway(remote,model,*,minimum=1,batch=None,opener=N
     request=urllib.request.Request(endpoint,method='POST',data=b'',
                                    headers={'Authorization':'Bearer '+id_token,
                                             'Content-Type':'application/octet-stream'})
-    raw=fetch(request,2_000_000 if batch else 6_000_000,125)
+    raw=fetch(request,2_000_000 if batch else 6_000_000,125,'pending' if batch else 'catalog')
     if not matches(raw,model,batch,minimum):
         raise ProviderVerificationRequired('Gateway owner metadata identity or batch SHA invalid')
     print('OWNER_REMOTE_AUTHENTICATED_GATEWAY_READ',model,
