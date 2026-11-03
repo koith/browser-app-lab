@@ -90,6 +90,36 @@ const path=require('node:path');
  assert.equal(net.send({type:'chat',text:'hello'}),true);
  assert.equal(current.sent.at(-1),JSON.stringify({type:'chat',text:'hello'}));
 
+ // Genuine WebRTC transitions can report 'disconnected' BEFORE onclose.
+ // A still-open DataChannel must not authorize gameplay in that interval.
+ const beforeDrop=redraws,commandCount=commands.length;
+ newPeer.connectionState='disconnected';newPeer.onconnectionstatechange();
+ assert.equal(net.connected,false,'temporary ICE disconnect must disable game turns');
+ assert.equal(net.send({type:'chat',text:'offline'}),false,
+  'disconnected ICE must not be treated as a usable chat/game transport');
+ current.onmessage({data:JSON.stringify({type:'command',action:'roll'})});
+ assert.equal(commands.length,commandCount,
+  'stale open DataChannel cannot mutate host game while disconnected');
+ assert.equal(redraws,beforeDrop+1,'ICE disconnect refreshes visible roll availability');
+ const afterDrop=redraws;
+ newPeer.connectionState='disconnected';newPeer.onconnectionstatechange();
+ assert.equal(redraws,afterDrop,'repeated ICE disconnect must not repaint endlessly');
+ // Transient disconnects sometimes recover on the same DataChannel.
+ newPeer.connectionState='connected';newPeer.onconnectionstatechange();
+ assert.equal(net.connected,true,'current ICE peer can recover on the same open channel');
+ assert.equal(redraws,afterDrop+1,'recovery restores real game turn controls');
+ assert.equal(net.send({type:'chat',text:'reconnected'}),true);
+ current.onmessage({data:JSON.stringify({type:'command',action:'roll'})});
+ assert.equal(commands.length,commandCount+1,'reconnected host accepts real guest commands');
+ // Never re-enable a DataChannel that is already closed.
+ newPeer.connectionState='disconnected';newPeer.onconnectionstatechange();
+ current.readyState='closed';
+ newPeer.connectionState='connected';newPeer.onconnectionstatechange();
+ assert.equal(net.connected,false,'ICE connected alone cannot revive a closed DataChannel');
+ current.readyState='open';
+ newPeer.connectionState='connected';newPeer.onconnectionstatechange();
+ assert.equal(net.connected,true,'only an open channel and current peer allow recovery');
+
  // If the first createOffer promise resolves last, it must not publish old SDP.
  delayNextOffer=true;
  const pending=element('net-make').onclick();

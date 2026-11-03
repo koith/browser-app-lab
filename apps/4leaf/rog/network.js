@@ -23,10 +23,24 @@
    pc.ondatachannel=e=>{if(peer===pc&&net.role==='guest')attach(e.channel)};
    pc.onconnectionstatechange=()=>{
      if(peer!==pc)return;
-     if(pc.connectionState==='failed'){
-       net.connected=false;
+     const status=pc.connectionState;
+     // A WebRTC DataChannel may remain in 'open' while ICE connectivity is
+     // disconnected. Pause game commands immediately, not only on 'failed'.
+     if(['disconnected','failed','closed'].includes(status)){
+       if(net.connected){net.connected=false;refreshTurnControls()}
+       notice(status==='disconnected'
+        ?'직접 연결이 일시적으로 끊어졌습니다. 상대와 다시 연결되면 턴을 진행할 수 있습니다.'
+        :'직접 연결 실패: 양쪽 네트워크 또는 방화벽을 확인하세요.');
+     }else if(status==='connected'&&channel?.readyState==='open'&&!net.connected){
+       // An ICE interruption can recover without another DataChannel open.
+       // Re-enable actions only for this exact current peer and open channel.
+       net.connected=true;
        refreshTurnControls();
-       notice('직접 연결 실패: 양쪽 네트워크 또는 방화벽을 확인하세요.');
+       notice('상대와 다시 연결되었습니다.',true);
+       if(net.role==='host'&&bridge()?.getMatch?.()?.mode==='network')
+         send({type:'state',match:bridge().getMatch()});
+       else if(net.role==='guest')
+         send({type:'hello',name:bridge()?.getName?.()||'Guest'});
      }
    };
    return pc;

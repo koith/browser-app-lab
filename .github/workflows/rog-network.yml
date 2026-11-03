@@ -1,5 +1,15 @@
 name: 4LEAF WebRTC real multiplayer integration
 on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/network.js'
+      - 'apps/4leaf/rog/network.css'
+      - 'apps/4leaf/rog/index.html'
+      - 'apps/4leaf/rog/game.js'
+      - 'apps/4leaf/rog/tests/network.cjs'
+      - 'apps/4leaf/rog/tests/network-stale-session.cjs'
+      - '.github/workflows/rog-network.yml'
   push:
     paths:
       - 'apps/4leaf/rog/network.js'
