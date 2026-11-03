@@ -125,3 +125,54 @@ def test_verified_capture_drops_encrypted_transient_buffer(tmp_path,monkeypatch)
     assert outcome["storage_failures"]==0
     assert outcome["saved_verified"]==1
     assert not list(tmp_path.glob("*.enc"))
+
+
+def test_repair_entrypoint_replays_encrypted_local_staging_without_source_access(tmp_path):
+    from recover_spool_artifacts import replay
+    pid=synthetic_post()["id"]
+    RecoverySpool(tmp_path).save(pid,first(pid))
+    cloud=FakeCloud()
+    report=replay(cloud=cloud,local_directory=tmp_path)
+    assert report["first_observation_verified"]==1
+    assert report["encrypted_buffers"]==1
+    assert report["buffer_failures"]==0
+    assert cloud.read_first_observation(pid)==canonical_json(first(pid))
+
+
+def test_artifact_discovery_rejects_unrelated_or_inconsistent_run_names(monkeypatch):
+    import json
+    import recover_spool_artifacts as mod
+    monkeypatch.setenv("GITHUB_REPOSITORY","koith/browser-app-lab")
+    seen=[]
+    def fake_gh(args,*,max_bytes=2_000_000):
+        seen.append(args)
+        assert "name=intersection-private-recovery" in args[-1]
+        payload={"artifacts":[
+           {"name":"unrelated-album","size_in_bytes":1024,"expired":False,
+            "workflow_run":{"id":12345601},"created_at":"2026-11-03T10:00:00Z"},
+           {"name":"intersection-private-recovery","size_in_bytes":512,"expired":False,
+            "workflow_run":{"id":12345602},"created_at":"2026-11-03T10:02:00Z"},
+           {"name":"intersection-private-recovery","size_in_bytes":200_000_001,"expired":False,
+            "workflow_run":{"id":12345603},"created_at":"2026-11-03T10:03:00Z"},
+           {"name":"intersection-private-recovery","size_in_bytes":128,"expired":True,
+            "workflow_run":{"id":12345604},"created_at":"2026-11-03T10:04:00Z"}]}
+        return json.dumps(payload).encode("utf-8")
+    monkeypatch.setattr(mod,"_gh",fake_gh)
+    candidates=mod.list_candidates()
+    assert len(candidates)==1
+    assert candidates[0][1]==12345602
+    assert candidates[0][2]=="intersection-private-recovery"
+    assert len(seen)==1
+
+
+def test_mismatched_post_identity_never_restores_unrelated_attachment(tmp_path):
+    p=synthetic_post()
+    pid=p["id"]
+    source=first(pid)
+    p["media_expected"]=0
+    p["media_saved"]=0
+    RecoverySpool(tmp_path).save(pid,source,p,[])
+    cloud=FakeCloud()
+    result=recover_directory(tmp_path,cloud)
+    assert result["failures"]==1
+    assert cloud.objects=={}
