@@ -275,6 +275,7 @@ def public_error_class(err):
         ("private cloud readback did not converge","readback_mismatch"),
         ("after alternate methods","backend_write_unverified"),
         ("(rate_limited)","backend_rate_limit"),
+        ("(duplicate)","backend_duplicate"),
         ("(authorization)","backend_authorization"),
         ("(missing)","backend_missing_path"),
         ("(network_timeout)","backend_timeout"),
