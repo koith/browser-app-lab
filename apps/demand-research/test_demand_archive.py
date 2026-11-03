@@ -15,7 +15,7 @@ class FakeCloud(CloudArchive):
         self.objects = {}
         super().__init__(remote="archive:DemandResearch", runner=self.fake)
 
-    def fake(self, args, timeout=150, allow_missing=False):
+    def fake(self, args, data=None, timeout=150, allow_missing=False):
         op = args[0]
         if op == "lsf":
             if "--dirs-only" in args and args[1].endswith("/posts"):
@@ -35,6 +35,10 @@ class FakeCloud(CloudArchive):
                     return None
                 raise RuntimeError("missing mock cloud file")
             return self.objects[key]
+        if op == "rcat":
+            key = args[1].split("archive:DemandResearch/", 1)[1]
+            self.objects[key] = data
+            return b""
         if op == "copyto":
             key = args[2].split("archive:DemandResearch/", 1)[1]
             self.objects[key] = Path(args[1]).read_bytes()
@@ -189,3 +193,34 @@ def test_orphan_first_observation_recovered_even_after_source_disappears(monkeyp
     assert result["recovered_early_snapshots"] == 1
     assert cloud.load_catalog()[0]["text"] == "섹트 first observation"
     assert cloud.load_catalog()[0]["captured_at"] == "2026-11-03T01:00:00+00:00"
+
+
+def test_transient_copyto_rejection_falls_back_to_rcat_and_readback():
+    class AlternateCloud(FakeCloud):
+        def __init__(self):
+            super().__init__()
+            self.copy_failures = 0
+
+        def fake(self, args, data=None, timeout=150, allow_missing=False):
+            if args[0] == "copyto" and self.copy_failures == 0:
+                self.copy_failures += 1
+                raise RuntimeError("private cloud copyto failed (backend_rejected)")
+            return super().fake(args, data=data, timeout=timeout,
+                                allow_missing=allow_missing)
+
+    cloud = AlternateCloud()
+    p = post()
+    cloud.save_post(p)
+    assert cloud.copy_failures == 1
+    assert json.loads(cloud.objects["posts/" + p["id"] + "/post.json"]) == p
+
+
+def test_permission_error_does_not_masquerade_as_missing_remote(monkeypatch):
+    from demand_archive import CloudArchive
+    class Result:
+        returncode = 3
+        stderr = b"error 403 permission denied"
+        stdout = b""
+    monkeypatch.setattr("demand_archive.subprocess.run", lambda *a, **k: Result())
+    with pytest.raises(RuntimeError, match="authorization"):
+        CloudArchive._run(["cat", "archive:DemandResearch/file"], allow_missing=True)

@@ -120,17 +120,34 @@ class CloudArchive:
     def _run(args, data=None, timeout=150, allow_missing=False):
         try:
             r = subprocess.run(["rclone", *args], input=data, stdout=subprocess.PIPE,
-                               stderr=subprocess.DEVNULL, timeout=timeout, check=False)
+                               stderr=subprocess.PIPE, timeout=timeout, check=False)
         except (OSError, subprocess.TimeoutExpired) as e:
             raise RuntimeError("private cloud command could not execute") from e
         if r.returncode:
-            if allow_missing:
+            # Diagnostics contain error classes only. Never print cookie, remote
+            # paths, source text, URLs or raw backend error output to Actions.
+            message = r.stderr.decode("utf-8", "replace").lower()
+            if re.search(r"not found|does not exist|doesn't exist|no such file|directory not found", message):
+                category = "missing"
+            elif re.search(r"429|rate.limit|too many requests|throttl", message):
+                category = "rate_limited"
+            elif re.search(r"403|permission|access.denied|unauthorized|cookie", message):
+                category = "authorization"
+            elif re.search(r"quota|space|capacity", message):
+                category = "capacity"
+            elif re.search(r"timeout|timed out|deadline|connection", message):
+                category = "network_timeout"
+            elif re.search(r"500|502|503|504|server.error", message):
+                category = "remote_server"
+            else:
+                category = "backend_rejected"
+            if allow_missing and category == "missing":
                 return None
-            raise RuntimeError("private cloud request failed")
+            raise RuntimeError("private cloud " + args[0] + " failed (" + category + ")")
         return r.stdout
 
-    def command(self, args, *, timeout=150, allow_missing=False):
-        return self.runner(args, timeout=timeout, allow_missing=allow_missing)
+    def command(self, args, *, data=None, timeout=150, allow_missing=False):
+        return self.runner(args, data=data, timeout=timeout, allow_missing=allow_missing)
 
     def preflight(self):
         if not os.environ.get("RCLONE_CONFIG_ARCHIVE_COOKIE"):
@@ -161,7 +178,8 @@ class CloudArchive:
     def write_immutable(self, key, data):
         if not isinstance(data, bytes):
             raise TypeError("cloud content must be bytes")
-        existing = self.read(key, cap=max(len(data) + 1, MAX_MEDIA_BYTES + MAX_POST), optional=True)
+        cap = max(len(data) + 1, MAX_MEDIA_BYTES + MAX_POST)
+        existing = self.read(key, cap=cap, optional=True)
         if existing is not None:
             if sha256(existing) != sha256(data):
                 raise RuntimeError("immutable archive key collision")
@@ -170,14 +188,36 @@ class CloudArchive:
             temp.write(data)
             path = temp.name
         try:
-            self.command(["copyto", path, self.remote + "/" + key, "--retries", "3"],
-                         timeout=240)
-            saved = self.read(key, cap=len(data) + 1)
-            if saved != data:
-                raise RuntimeError("cloud content SHA256 readback mismatch")
+            target = self.remote + "/" + key
+            failure = None
+            # TeraBox's copyto and small-object rcat use different write paths.
+            # Never accept an upload command's exit code without byte readback.
+            for attempt in range(4):
+                method = "rcat" if attempt % 2 and len(data) < 2_000_000 else "copyto"
+                try:
+                    if method == "copyto":
+                        self.command(["copyto", path, target, "--retries", "2"], timeout=130)
+                    else:
+                        self.command(["rcat", target, "--retries", "2"],
+                                     data=data, timeout=130)
+                except RuntimeError as error:
+                    failure = error
+                for _ in range(2):
+                    try:
+                        saved = self.read(key, cap=cap, optional=True)
+                    except RuntimeError as error:
+                        failure = error
+                        saved = None
+                    if saved is not None:
+                        if sha256(saved) != sha256(data):
+                            raise RuntimeError("immutable cloud write collision/readback mismatch")
+                        return True
+                    time.sleep(0.5)
+                if attempt < 3:
+                    time.sleep(min(3, attempt + 1))
+            raise RuntimeError("private cloud write unverified after alternate methods") from failure
         finally:
             os.unlink(path)
-        return True
 
     def load_catalog(self):
         names = [n for n in self.names("metadata/manifests") if MANIFEST.fullmatch(n)]
