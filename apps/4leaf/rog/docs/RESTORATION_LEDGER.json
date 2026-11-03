@@ -1558,6 +1558,18 @@
         "RULE-03",
         "QA-03"
       ]
+    },
+    {
+      "id": "REQ-20261103-GPT-CORRUPT-MATCH-PRESERVE",
+      "date": "2026-11-03",
+      "origin": "2026-11-03 user restoration continuation; GPT code path analysis",
+      "text": "주잔 기존 경기 데이터가 파싱 오류나 로컬 저장 실패로 손상돼도 앱 초기화가 원본 기록을 무단 삭제하지 않도록 보존 및 복구 사본 경로를 개발한다.",
+      "taskIds": [
+        "M08",
+        "P0-RELEASE",
+        "QA-03",
+        "RULE-03"
+      ]
     }
   ],
   "tasks": [
@@ -8087,6 +8099,31 @@
         "QA-03"
       ],
       "details": "PR #570: game.js source audit confirms ROOM READY can silently replace unfinished match and persisted rog_match. Protect existing match via explicit keep/replace decision, defer chooseSourcePath until commitment, and block replacement while busy or changed asynchronously. Real WorldMap/Region/Room/Exit/new-room Chromium desktop + mobile WebKit browser QA added. This is WEB safety, not verified original 2002 UI. At entry into PR, QA and Pages not yet verified; no tasks marked done."
+    },
+    {
+      "seq": 368,
+      "date": "2026-11-03",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261103-GPT-CORRUPT-MATCH-PRESERVE",
+      "taskIds": [
+        "M08",
+        "P0-RELEASE",
+        "QA-03",
+        "RULE-03"
+      ]
+    },
+    {
+      "seq": 369,
+      "date": "2026-11-03",
+      "type": "UNREADABLE_LOCAL_MATCH_ORIGINAL_BYTES_GUARD_PR_PENDING",
+      "requestId": "REQ-20261103-GPT-CORRUPT-MATCH-PRESERVE",
+      "taskIds": [
+        "M08",
+        "P0-RELEASE",
+        "QA-03",
+        "RULE-03"
+      ],
+      "details": "PR #571. Confirmed source path: safe('match') JSON.parse error falls back to null, while init()->profileUI()->persist() rewrites rog_match to the literal null. New guard retains raw malformed JSON at boot and writes an exact non-overwriting recovery backup only before replacing it with a newly started valid game. A second different invalid record gets a distinct timestamped backup. Real WebKit mobile/Chromium desktop two-corruption browser test and existing game-start gate added; PASS/deploy to be verified, no task marked done. Does not assert actual user data is corrupt."
     }
   ]
 }
