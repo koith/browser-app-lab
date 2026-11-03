@@ -383,6 +383,16 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None):
                         capture_interrupted = True
                         break
                     continue
+    # Per-post verified objects are durable independently of the final catalog.
+    # Log counts BEFORE publishing so a catalog failure does not obscure which
+    # individual objects passed remote SHA256 readback.
+    print("PRIVATE_PER_POST_READBACK_CHECKPOINT",json.dumps({
+        "new_verified":saved,"restored_entries":recovered,
+        "restored_first_observations":early_recovered,"catalog_expected":len(known),
+        "integrity_excluded":cloud.unrecoverable_entries,
+        "write_failures":storage_failures,"source_query_failures":failures,
+        "capture_interrupted":capture_interrupted
+    },sort_keys=True),flush=True)
     # Entries written immediately per post are the recovery journal. The versioned
     # catalog is published LAST and never destroys an earlier verified catalog.
     if saved or recovered or early_recovered:
