@@ -1594,6 +1594,24 @@
         "RULE-03",
         "QA-03"
       ]
+    },
+    {
+      "id": "REQ-20261103-CHAT-FIRST-ARCHITECTURE",
+      "date": "2026-11-03",
+      "origin": "2026-11-03 사용자 직접 우선순위 정정",
+      "text": "착각하면 안되는게 기본이 되는 시스템은 채팅이야. 4LEAF는 채팅 우선의 플랫폼으로 복원하며 주잔은 그 위의 게임 콘텐츠다. 이 구조를 모든 개발 및 수용 우선순위의 상위 원칙으로 적용한다.",
+      "taskIds": [
+        "M03",
+        "P0-CHAT",
+        "CHT-02",
+        "CHT-03",
+        "CHT-04",
+        "CHT-05",
+        "CHT-06",
+        "M01",
+        "M08",
+        "P0-RELEASE"
+      ]
     }
   ],
   "tasks": [
@@ -8198,6 +8216,39 @@
         "QA-03"
       ],
       "details": "PR #576. Game bootstrap previously accepted only unfinished matches with players array 2..8; subsequent profileUI.persist() overwrote completed match histories and malformed-but-parseable JSON with null. A conservative runtime schema guard keeps unsafe records out of live gameplay while preserving exact original storage. Only on explicit next game creation does it archive finished raw JSON or malformed player data in distinct, non-destructive keys. Chromium + WebKit real room-start/reload tests included; PASS/Pages pending, no source equivalence claimed."
+    },
+    {
+      "seq": 374,
+      "date": "2026-11-03",
+      "type": "USER_ARCHITECTURE_PRIORITY_CORRECTION_CHAT_FIRST",
+      "requestId": "REQ-20261103-CHAT-FIRST-ARCHITECTURE",
+      "taskIds": [
+        "M03",
+        "P0-CHAT",
+        "CHT-02",
+        "CHT-03",
+        "CHT-04",
+        "CHT-05",
+        "CHT-06",
+        "M01",
+        "M08",
+        "P0-RELEASE"
+      ],
+      "details": "채팅 기반 아키텍처를 최상위 원칙으로 명시. 채팅의 접속-지역-채널-방-사용자-좌석-메시지-재접속을 우선하며 주잔은 종속 게임 콘텐츠로 관리. 기존 60 task 상태 및 완료 판정은 변경하지 않았고, 코드 수정/실기 QA를 수행했다고 주장하지 않는다."
     }
-  ]
+  ],
+  "restorationPriority": {
+    "authoritativeUserDirection": "4LEAF의 기본 시스템은 채팅이다. 주사위의 잔영(주잔)은 채팅 플랫폼에 연결된 게임 콘텐츠이며 최상위 기본 시스템이 아니다.",
+    "order": [
+      "P0-1: 채팅 접속/사용자/지역/채널/방/실시간 대화",
+      "P0-2: 원본 채팅방 배경/UI/아바타/좌석/표정/동작/방 관리",
+      "P0-3: 다중사용자 입퇴장/동기화/재접속/메시지 전달",
+      "P1: 월드맵/지역/상점 이동 연결",
+      "P2: 주잔 게임 시작/말판/체스맨/주사위/전투/규칙",
+      "P3: 전체 원작 비교/모바일/배포 검증"
+    ],
+    "acceptanceRule": "채팅 화면의 외형만 아니라 실제 다중사용자 채팅, 세션, 입퇴장, 재접속이 통합 검증되어야 기반 복원이 완료된다. 주잔 시작 불가와 데이터 유실 등 기능 차단/안전 결함은 영역에 관계없이 긴급 수정한다.",
+    "bookkeeping": "상위 목표와 세부 작업을 같은 독립 작업으로 중복 계산하지 말고, 코드 구현/통합 배포/원작 수용 단계별 증빙을 구분한다.",
+    "updatedAt": "2026-11-03"
+  }
 }
