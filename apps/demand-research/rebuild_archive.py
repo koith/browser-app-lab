@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import json
 import os
+import time
 from demand_archive import CloudArchive
 from demand_capture_job import run
 
@@ -16,26 +17,38 @@ def rebuild(cloud=None, run_id=None):
     active=cloud or CloudArchive()
     result=run(fetchers=[lambda term,start,end: []],cloud=active,
                run_id=run_id, fast_mode=False)
-    # A new reader instance ensures we verify remote durable state, not a
-    # convenient in-memory dictionary retained by the writer.
-    reader=CloudArchive(active.remote,runner=active.runner)
-    # A concurrent fast capture may append new verified posts while this
-    # compact snapshot is being published. Do NOT require a byte-for-byte
-    # equality against a moving journal head; gateway reads both.
-    snapshot=reader.load_catalog(include_entries=False)
-    unverified_refs=reader.catalog_unverified_refs
-    journal=reader.load_catalog(include_entries=True)
-    invalid_markers=reader.unrecoverable_entries
-    snapshot_ids={p["id"] for p in snapshot}
-    journal_ids={p["id"] for p in journal}
+    # The TeraBox listing backend can show an older manifest immediately
+    # after the writer has independently read back and SHA-verified the new
+    # immutable index. A single stale read must not mean permanent data loss.
+    # Use fresh independent readers and bounded rechecks. Never write an
+    # alternate index merely to make a stale observation look successful.
     expected=result["catalog"].get("posts",0)
-    snapshot_valid=(bool(snapshot_ids)
-                    and snapshot_ids.issubset(journal_ids)
-                    and len(snapshot_ids)>=expected
-                    and unverified_refs==0)
+    snapshot_valid=False
+    attempts=0
+    # A concurrent fast capture may append new verified posts. Equality with
+    # that moving journal is not required; the published snapshot must at
+    # least include all entries the current rebuild committed.
+    for delay in (0.0,0.6,1.6,3.0):
+        if delay:
+            time.sleep(delay)
+        attempts+=1
+        reader=CloudArchive(active.remote,runner=active.runner)
+        snapshot=reader.load_catalog(include_entries=False)
+        unverified_refs=reader.catalog_unverified_refs
+        journal=reader.load_catalog(include_entries=True)
+        invalid_markers=reader.unrecoverable_entries
+        snapshot_ids={p["id"] for p in snapshot}
+        journal_ids={p["id"] for p in journal}
+        snapshot_valid=(bool(snapshot_ids)
+                        and snapshot_ids.issubset(journal_ids)
+                        and len(snapshot_ids)>=expected
+                        and unverified_refs==0)
+        if snapshot_valid:
+            break
     lag=len(journal_ids-snapshot_ids)
     complete=snapshot_valid and lag==0 and invalid_markers==0
-    summary={"journal_readable_posts":len(journal),
+    summary={"independent_read_attempts":attempts,
+             "journal_readable_posts":len(journal),
              "published_catalog_posts":len(snapshot),
              "catalog_matches_journal":snapshot_ids==journal_ids,
              "index_lag_post_count":lag,
