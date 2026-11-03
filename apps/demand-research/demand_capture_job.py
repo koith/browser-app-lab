@@ -318,22 +318,41 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
     if os.environ.get("DEMAND_CAPTURE_PUBLIC_ALLOWED", "") != "1":
         raise RuntimeError("public capture needs explicit source/retention authorization")
     cloud = cloud or CloudArchive()
-    cloud.preflight()
+    cloud_available=True
+    try:
+        cloud.preflight()
+    except RuntimeError:
+        if not fast_mode or spool is None:
+            raise
+        # The archive is unreachable, not necessarily the public SNS source.
+        # Continue only with authenticated, short-lived encrypted originals.
+        cloud_available=False
     now = int(clock())
     run_id = run_id or os.getenv("GITHUB_RUN_ID", "")
     if not re.fullmatch(r"[0-9]{6,30}", str(run_id)):
         raise ValueError("an immutable numeric run ID is required")
     start = now - WINDOW_MINUTES * 60
     sources = fetchers or (bluesky, mastodon, misskey, lemmy)
-    saved = partial = duplicates = fetched = failures = storage_failures = 0
-    storage_error_kinds={}
+    saved = partial = duplicates = fetched = failures = buffered = 0
+    storage_failures=0 if cloud_available else 1
+    storage_error_kinds=(
+        {} if cloud_available else {"preflight:private_cloud_unavailable":1})
     capture_interrupted = False
     early_recovered = invalid_early_captures = failed_early_recoveries = recovered = 0
     if fast_mode:
         # Fast acquisition lists only existing names. The separate recovery job
         # verifies every journal entry's checksum.
         known={}
-        known_ids=cloud.marker_ids()
+        if cloud_available:
+            try:
+                known_ids=cloud.marker_ids()
+            except RuntimeError:
+                cloud_available=False
+                known_ids=set()
+                storage_failures+=1
+                storage_error_kinds["journal_list:private_cloud_unavailable"]=1
+        else:
+            known_ids=set()
     else:
         known = {p["id"]: p for p in cloud.load_catalog(include_entries=False)}
         known, recovered = cloud.recover_entries(known)
@@ -417,7 +436,7 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
                 if pid in known_ids or pid in known or pid in seen_this_scan:
                     duplicates += 1
                     continue
-                if saved >= (24 if fast_mode else MAX_PER_RUN):
+                if saved + buffered >= (24 if fast_mode else MAX_PER_RUN):
                     budget_exhausted = True
                     break
                 seen_this_scan.add(pid)
@@ -431,6 +450,18 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
                     if spool is not None:
                         # Authenticated encryption BEFORE the first cloud call.
                         spool.save(pid,early)
+                    if not cloud_available:
+                        # Failover circuit: never describe ciphertext as a
+                        # TeraBox backup, but preserve all available original
+                        # attachment bytes while their source remains public.
+                        post,blobs=make_post(row,now,cloud=None)
+                        spool.save(pid,early,post,blobs)
+                        buffered+=1
+                        storage_failures+=1
+                        label="cloud_unreachable:encrypted_recovery_pending"
+                        storage_error_kinds[label]=storage_error_kinds.get(label,0)+1
+                        partial += not post["archive_complete"]
+                        continue
                     first_remote_verified=True
                     first_blob = cloud.read_first_observation(pid)
                     if first_blob is None:
@@ -484,7 +515,9 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
                             storage_error_kinds["first_snapshot:encrypted_recovery_pending"] = (
                                 storage_error_kinds.get("first_snapshot:encrypted_recovery_pending",0)+1)
                             storage_failures += 1
-                            if storage_failures >= 3:
+                            if storage_failures >= 3 and spool is not None:
+                                cloud_available=False
+                            elif storage_failures >= 3:
                                 capture_interrupted=True
                                 break
                         continue
@@ -496,7 +529,10 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
                         storage_error_kinds["first_snapshot:encrypted_recovery_pending"] = (
                             storage_error_kinds.get("first_snapshot:encrypted_recovery_pending",0)+1)
                         storage_failures += 1
-                        if storage_failures >= 3:
+                        buffered+=1
+                        if storage_failures >= 3 and spool is not None:
+                            cloud_available=False
+                        elif storage_failures >= 3:
                             capture_interrupted=True
                             break
                         continue
@@ -515,8 +551,13 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
                     label=phase+":"+kind
                     storage_error_kinds[label]=storage_error_kinds.get(label,0)+1
                     storage_failures += 1
-                    seen_this_scan.discard(pid)
-                    if storage_failures >= 3:
+                    if spool is None:
+                        seen_this_scan.discard(pid)
+                    elif spool._path(pid).exists():
+                        buffered+=1
+                    if storage_failures >= 3 and spool is not None:
+                        cloud_available=False
+                    elif storage_failures >= 3:
                         capture_interrupted = True
                         break
                     continue
@@ -537,7 +578,9 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
         "failed_early_recoveries":failed_early_recoveries,
         "capture_interrupted":capture_interrupted,
         "encrypted_recovery_files":(
-            len(list(spool.directory.glob("*.enc"))) if spool is not None else 0)
+            len(list(spool.directory.glob("*.enc"))) if spool is not None else 0),
+        "encrypted_only_originals":buffered,
+        "private_cloud_circuit_open":not cloud_available
     },sort_keys=True),flush=True)
     # Entries written immediately per post are the recovery journal. The versioned
     # catalog is published LAST and never destroys an earlier verified catalog.
@@ -573,6 +616,8 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
               "storage_interrupted": capture_interrupted,
               "encrypted_recovery_files":(
                   len(list(spool.directory.glob("*.enc"))) if spool is not None else 0),
+              "encrypted_only_originals":buffered,
+              "private_cloud_circuit_open":not cloud_available,
               "catalog": catalog,
               "operational_status": ("DEGRADED_STORAGE" if storage_failures else
                 "DEGRADED_MEDIA" if partial or failed_early_recoveries else
