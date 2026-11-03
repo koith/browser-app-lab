@@ -48,11 +48,29 @@ class OwnerMetadataTests(unittest.TestCase):
             run.assert_not_called()
         with self.assertRaises(ValueError):read('archive:OtherOwner/metadata/catalog.json','mimmi',reader=denied)
 
-    def test_known_provider_verification_never_uses_a_download_alternative(self):
-        with patch('read_owner_metadata.subprocess.run') as run:
+    def test_known_provider_cat_challenge_allows_exact_same_account_file_download(self):
+        # A normal file copy with current authorized credentials is distinct
+        # from performing CAPTCHA/verification or trying a different account.
+        def copied(command,**kwargs):
+            self.assertEqual(command[:3],['rclone','copyto',self.remote])
+            Path(command[3]).write_bytes(self.raw)
+            return SimpleNamespace(returncode=0)
+        with patch('read_owner_metadata.subprocess.run',side_effect=copied) as run:
+            value=read(self.remote,'mimmi',reader=lambda *a,**k:b'{"errno":400141}')
+        self.assertEqual(value,self.raw)
+        self.assertEqual(run.call_count,1)
+
+    def test_verification_required_when_both_same_account_read_methods_fail(self):
+        with patch('read_owner_metadata.subprocess.run',return_value=SimpleNamespace(returncode=1)) as run:
             with self.assertRaises(ProviderVerificationRequired):
                 read(self.remote,'mimmi',reader=lambda *a,**k:b'{"errno":400141}')
-            run.assert_not_called()
+            self.assertEqual(run.call_count,1)
+        def invalid(command,**kwargs):
+            Path(command[3]).write_bytes(b'{"errno":400141}')
+            return SimpleNamespace(returncode=0)
+        with patch('read_owner_metadata.subprocess.run',side_effect=invalid):
+            with self.assertRaises(ProviderVerificationRequired):
+                read(self.remote,'mimmi',reader=lambda *a,**k:b'{"errno":400141}')
 
 
 if __name__=='__main__':unittest.main(verbosity=2)
