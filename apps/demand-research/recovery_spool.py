@@ -29,6 +29,8 @@ from demand_archive import ID, MAX_MEDIA_BYTES, canonical_json, sha256, validate
 MAGIC=b"INTSP1"
 AAD=b"intersection-private-recovery-v1"
 MAX_BUFFER_BYTES=96*1024*1024
+# Base64 media expands before compression; allow a larger bounded plaintext.
+MAX_PLAIN_BYTES=160*1024*1024
 MAX_BLOBS=16
 FILE_PATTERN=re.compile(r"[a-f0-9]{64}\.enc\Z")
 
@@ -76,10 +78,10 @@ def _decode_file(raw,secret):
     # Bound decompression to avoid a hostile artifact consuming unlimited RAM.
     decomp=zlib.decompressobj()
     try:
-        plain=decomp.decompress(decrypted,MAX_BUFFER_BYTES+1)
+        plain=decomp.decompress(decrypted,MAX_PLAIN_BYTES+1)
     except zlib.error:
         raise ValueError("invalid compressed private recovery record") from None
-    if len(plain)>MAX_BUFFER_BYTES or not decomp.eof or decomp.unused_data:
+    if len(plain)>MAX_PLAIN_BYTES or not decomp.eof or decomp.unused_data:
         raise ValueError("invalid recovered buffer payload")
     result=json.loads(plain)
     if not isinstance(result,dict) or result.get("schema")!=1:
