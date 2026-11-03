@@ -30,7 +30,7 @@ MAGIC=b"INTSP1"
 AAD=b"intersection-private-recovery-v1"
 MAX_BUFFER_BYTES=96*1024*1024
 MAX_BLOBS=16
-FILE_PATTERN=re.compile(r"[a-f0-9]{64}\\.enc\\Z")
+FILE_PATTERN=re.compile(r"[a-f0-9]{64}\.enc\Z")
 
 
 def _encryption_secret():
