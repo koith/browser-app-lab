@@ -906,26 +906,40 @@
   body.textContent='이 채팅방은 현재 '+allowedCapacity(room.capacity)+'명으로 가득 찼습니다. 다른 방을 선택해 주세요.';
   popup('채팅방 정원 초과',body);
  }
+ let roomJoinIntent=0,roomJoinQueue=Promise.resolve();
  function joinRoom(id){
   const room=roomById(id);if(!room)return;
+  const intent=++roomJoinIntent;
   // A remotely cached count is advisory only; the central server must make
   // the final admission decision, including simultaneous joins and vacancies.
   if(!central.enabled&&!roomHasSpace(room)){roomFullNotice(room);return}
   if(central.enabled){
-   const verifiedJoin=async password=>{
-    try{
-     // Cold-start free Render can take tens of seconds. A click on the
-     // canonical server room should WAKE the authority and actually join,
-     // not immediately fail because /api/session is still pending.
-     if(!central.ready)await central.connect(nick());
-     await central.join(id,password);
-     if(state.view!=='directory'){await central.leave();return}
-     if(!enterRoom(room)){await central.leave();return}
-     presence();
-    }catch(e){
-     if(/full|정원/i.test(e.message))roomFullNotice(room);
-     else systemLine('채팅방 입장 실패: '+e.message);
-    }
+   // A rapid second room click must supersede the first. Serializing the
+   // WHOLE UI join (including any compensating leave) avoids a server/scene
+   // split where the screen shows room A but the authority already left B.
+   const verifiedJoin=password=>{
+    const attempt=async()=>{
+     if(intent!==roomJoinIntent||state.view!=='directory')return;
+     try{
+      if(!central.ready)await central.connect(nick());
+      if(intent!==roomJoinIntent||state.view!=='directory')return;
+      await central.join(id,password);
+      if(intent!==roomJoinIntent||state.view!=='directory'){
+       await central.leave();return;
+      }
+      if(!enterRoom(room)){await central.leave();return}
+      presence();
+     }catch(e){
+      if(intent!==roomJoinIntent)return;
+      if(state.view==='directory'&&central.joinedId)
+       await central.leave().catch(err=>console.warn('ChatTown rollback:',err.message));
+      if(/full|정원/i.test(e.message))roomFullNotice(room);
+      else systemLine('채팅방 입장 실패: '+e.message);
+     }
+    };
+    const pending=roomJoinQueue.then(attempt,attempt);
+    roomJoinQueue=pending.catch(()=>{});
+    return pending;
    };
    if(room.passwordProof)askText('비공개 채팅방','비밀번호',true,value=>{void verifiedJoin(value)});
    else void verifiedJoin('');
@@ -942,6 +956,7 @@
   enterRoom(room);
  }
  function openDirectory(){
+  ++roomJoinIntent; // cancel any outstanding admission for an abandoned directory
   if(central.enabled&&central.joinedId)central.leave().catch(e=>systemLine('퇴장 처리 실패: '+e.message));
   state.view='directory';state.roomId=null;render();
   if(central.enabled&&central.ready)
