@@ -280,3 +280,41 @@ def test_readback_race_preserves_original_first_observation(monkeypatch):
     assert result["saved_verified"] == 1
     assert result["catalog"]["posts"] == 1
     assert cloud.load_catalog()[0]["text"] == early["text"]
+
+
+def test_corrupted_legacy_entry_recovered_without_deleting_original():
+    cloud = FakeCloud()
+    original = post()
+    cloud.save_post(original)
+    key = "metadata/entries/" + original["id"] + ".json"
+    cloud.objects[key] = b'{"id":"bad","sha256":"broken"}'
+    restored, count = cloud.recover_entries({})
+    assert count == 1 and restored[original["id"]] == original
+    assert cloud.repaired_entries == 1
+    assert cloud.objects[key] == b'{"id":"bad","sha256":"broken"}'
+    backup = "metadata/entries-repaired/" + original["id"] + ".json"
+    assert json.loads(cloud.objects[backup])["id"] == original["id"]
+    assert cloud.recover_entries({})[0][original["id"]] == original
+    assert cloud.repaired_entries == 0
+
+
+def test_invalid_marker_without_post_is_quarantined_not_catalogued():
+    cloud = FakeCloud()
+    pid = "b"*40
+    cloud.objects["metadata/entries/" + pid + ".json"] = b"not JSON"
+    restored, count = cloud.recover_entries({})
+    assert count == 0 and restored == {}
+    assert cloud.unrecoverable_entries == 1
+    assert "metadata/entries-repaired/" + pid + ".json" not in cloud.objects
+
+
+def test_existing_invalid_marker_uses_separate_repaired_namespace():
+    cloud = FakeCloud()
+    original = post()
+    key = "metadata/entries/" + original["id"] + ".json"
+    cloud.objects[key] = b"corrupt"
+    saved = cloud.save_post(original)
+    assert saved == original
+    assert cloud.objects[key] == b"corrupt"
+    restored, count = cloud.recover_entries({})
+    assert count == 1 and restored[original["id"]] == original

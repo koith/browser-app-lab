@@ -256,23 +256,58 @@ class CloudArchive:
     def recover_entries(self, existing):
         result = dict(existing)
         new = 0
-        for filename in self.names("metadata/entries"):
-            match = ENTRY.fullmatch(filename)
-            if not match or match.group(1) in result:
-                continue
-            key = "metadata/entries/" + filename
-            entry = json.loads(self.read(key, cap=1024))
-            pid = match.group(1)
-            if entry.get("id") != pid or not re.fullmatch(r"[a-f0-9]{64}", str(entry.get("sha256", ""))):
-                raise ValueError("invalid archive entry marker")
-            raw = self.read("posts/" + pid + "/post.json", cap=MAX_POST)
-            if sha256(raw) != entry["sha256"]:
-                raise RuntimeError("private post record checksum mismatch")
-            post = validate_post(json.loads(raw))
-            if post["id"] != pid:
-                raise ValueError("private post identifier mismatch")
-            result[pid] = post
-            new += 1
+        self.repaired_entries = 0
+        self.unrecoverable_entries = 0
+        # Repaired markers are preferred. Damaged legacy markers are never
+        # overwritten or deleted; only re-signed after independent readback.
+        for directory in ("metadata/entries-repaired", "metadata/entries"):
+            for filename in self.names(directory):
+                match = ENTRY.fullmatch(filename)
+                if not match or match.group(1) in result:
+                    continue
+                pid = match.group(1)
+                key = directory + "/" + filename
+                try:
+                    marker_raw = self.read(key, cap=1024)
+                    marker = json.loads(marker_raw)
+                    if (not isinstance(marker, dict) or marker.get("id") != pid
+                            or not re.fullmatch(r"[a-f0-9]{64}",
+                                                str(marker.get("sha256", "")))):
+                        raise ValueError("bad entry metadata")
+                    record = self.read("posts/" + pid + "/post.json", cap=MAX_POST)
+                    if sha256(record) != marker["sha256"]:
+                        raise RuntimeError("private post record checksum mismatch")
+                    post = validate_post(json.loads(record))
+                    if post["id"] != pid:
+                        raise ValueError("marker/post mismatch")
+                except (ValueError, TypeError, KeyError, json.JSONDecodeError):
+                    if directory != "metadata/entries":
+                        self.unrecoverable_entries += 1
+                        continue
+                    # Recovery is allowed only if a separately readable post
+                    # validates and a new marker can be written/read back twice.
+                    try:
+                        record = self.read("posts/" + pid + "/post.json",
+                                           cap=MAX_POST, optional=True)
+                        if record is None:
+                            self.unrecoverable_entries += 1
+                            continue
+                        post = validate_post(json.loads(record))
+                        if post["id"] != pid:
+                            self.unrecoverable_entries += 1
+                            continue
+                        marker_data = canonical_json({"id": pid, "sha256": sha256(record)})
+                        self.write_immutable("metadata/entries-repaired/" + filename,
+                                             marker_data)
+                        if self.read("posts/" + pid + "/post.json", cap=MAX_POST) != record:
+                            raise RuntimeError("repaired post changed during readback")
+                        self.repaired_entries += 1
+                    except (ValueError, TypeError, KeyError, json.JSONDecodeError,
+                            RuntimeError):
+                        self.unrecoverable_entries += 1
+                        continue
+                result[pid] = post
+                new += 1
         return result, new
 
     def save_post(self, post, media_blobs=()):
@@ -302,8 +337,13 @@ class CloudArchive:
                 raise RuntimeError("different existing post at immutable key")
             raw = old_raw
             post = old
-        self.write_immutable("metadata/entries/" + pid + ".json",
-                             canonical_json({"id": pid, "sha256": sha256(raw)}))
+        marker=canonical_json({"id": pid, "sha256": sha256(raw)})
+        try:
+            self.write_immutable("metadata/entries/" + pid + ".json", marker)
+        except (RuntimeError, ValueError):
+            # A previously corrupted immutable marker must not hold up all
+            # future captures; use a distinct verified repair namespace.
+            self.write_immutable("metadata/entries-repaired/" + pid + ".json", marker)
         return post
 
     def publish_catalog(self, posts_by_id, run_id):

@@ -375,6 +375,8 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None):
                    "reason": "no new items"}
     result = {"fetched": fetched, "saved_verified": saved, "partial_media": partial,
               "duplicates": duplicates, "recovered_entries": recovered, "recovered_early_snapshots": early_recovered,
+              "repaired_archive_markers": cloud.repaired_entries,
+              "unrecoverable_markers": cloud.unrecoverable_entries,
               "source_query_failures": failures, "catalog": catalog,
               "scope": "confirmed_public_only", "poll_minutes": 5,
               "completeness_guaranteed": False}
