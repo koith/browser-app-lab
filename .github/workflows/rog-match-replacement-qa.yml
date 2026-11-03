@@ -5,12 +5,14 @@ on:
     paths:
       - 'apps/4leaf/rog/game.js'
       - 'apps/4leaf/rog/tests/dice-new-match-confirmation.cjs'
+      - 'apps/4leaf/rog/tests/dice-unreadable-save-recovery.cjs'
       - '.github/workflows/rog-match-replacement-qa.yml'
   push:
     branches: [main]
     paths:
       - 'apps/4leaf/rog/game.js'
       - 'apps/4leaf/rog/tests/dice-new-match-confirmation.cjs'
+      - 'apps/4leaf/rog/tests/dice-unreadable-save-recovery.cjs'
       - '.github/workflows/rog-match-replacement-qa.yml'
   workflow_dispatch:
 permissions:
@@ -51,3 +53,9 @@ jobs:
           FOURLEAF_MOBILE: ${{ matrix.mobile }}
           FOURLEAF_TEST_URL: http://127.0.0.1:8765/
         run: node apps/4leaf/rog/tests/dice-new-match-confirmation.cjs
+      - name: Preserve malformed saved-game original bytes and two independent backups
+        env:
+          FOURLEAF_BROWSER: ${{ matrix.browser }}
+          FOURLEAF_MOBILE: ${{ matrix.mobile }}
+          FOURLEAF_TEST_URL: http://127.0.0.1:8765/
+        run: node apps/4leaf/rog/tests/dice-unreadable-save-recovery.cjs
