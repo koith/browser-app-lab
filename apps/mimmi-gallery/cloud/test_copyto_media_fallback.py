@@ -65,8 +65,8 @@ class GatewayCopytoTests(unittest.IsolatedAsyncioTestCase):
                 Path(args[3]).write_bytes(original)
                 return Proc()
             raise AssertionError('Unexpected operation')
-        with patch.object(gateway.asyncio,'create_subprocess_exec',factory),\\
-             patch.object(gateway,'cookie_header',lambda value:value):
+        with (patch.object(gateway.asyncio,'create_subprocess_exec',factory),
+              patch.object(gateway,'cookie_header',lambda value:value)):
             recovered=await gateway.rclone_bytes(path,2_000_001,remote='archive:MimmiArchive')
         self.assertEqual(recovered,original)
         self.assertEqual(calls,['cat','copyto'])
