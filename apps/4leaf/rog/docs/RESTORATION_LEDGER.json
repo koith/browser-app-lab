@@ -8065,6 +8065,19 @@
     {
       "seq": 366,
       "date": "2026-11-03",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261103-GPT-SAFE-NEW-MATCH",
+      "taskIds": [
+        "M08",
+        "P0-RELEASE",
+        "RULE-03",
+        "QA-03"
+      ],
+      "details": "Record user restoration continuation and focused P0 game-data safety task."
+    },
+    {
+      "seq": 367,
+      "date": "2026-11-03",
       "type": "IN_PROGRESS_MATCH_REPLACEMENT_CONSENT_PR_PENDING",
       "requestId": "REQ-20261103-GPT-SAFE-NEW-MATCH",
       "taskIds": [
