@@ -1,7 +1,7 @@
 """INTERSECTION auto SNS -> one feed QA (fixture and real no-key browser).
 
 Fixture: 3 networks search automatically, 6 provider calls, unverified links
-interleaved with normal cards, genuine dated public X promoted, date change
+listed separately from verified posts, genuine public X media promoted, date change
 replays only originals, no separate user-facing search UI.
 Live: no synthetic provider replies, aggregate statistics only, no user data.
 """
@@ -106,9 +106,17 @@ def run():
                         body=json.dumps({"tweet":{
                             "id":X_ID,"text":"섹트 synthetic verified public original",
                             "created_at":now,
-                            "author":{"screen_name":"qa","protected":False}
+                            "created_timestamp":int(datetime.now(timezone.utc).timestamp()),
+                            "author":{"screen_name":"qa","protected":False,
+                                      "avatar_url":"https://example.com/qa-avatar.jpg"},
+                            "media":{"photos":[{"url":"https://example.com/qa.jpg"}],
+                                     "videos":[{"url":"https://example.com/qa.mp4",
+                                                "thumbnail_url":"https://example.com/qa-video.jpg"}]}
                         }}))
-                page.route("https://api.fxtwitter.com/status/*",x_public)
+                page.route("https://api.fxtwitter.com/*/status/*",x_public)
+                page.route("https://example.com/*.jpg",
+                    lambda route:route.fulfill(status=200,content_type="image/jpeg",
+                      body=b"synthetic jpeg fixture"))
             else:
                 page.on("response",lambda response:calls.append({
                     "host":urlparse(response.url).hostname,
@@ -124,14 +132,14 @@ def run():
               "window.INTERSECTION_autoCoverageStatus?.completed === true",timeout=160000)
             assert not errors,errors
             cards=page.locator('article.post[data-discovery-candidate="true"]')
+            discovered=page.locator("#discoveryCandidateList a")
             verified=page.locator('article.post:not([data-discovery-candidate]) .source-badge[aria-label="출처: X"]')
             if LIVE:
-                counts={label:page.locator(
-                    f'article.post[data-discovery-candidate="true"] .source-badge[aria-label="출처: {label}"]').count()
+                counts={label:discovered.filter(has_text=label).count()
                     for label in ("X","Threads","Instagram")}
                 raw=page.evaluate("window.INTERSECTION_autoCoverageStatus")
                 print("AUTO_UNIFIED_SNS_LIVE",json.dumps({
-                    "visible_index_candidates":cards.count(),
+                    "visible_index_candidates":discovered.count(),
                     "by_source":counts,
                     "verified_date_scoped_x":verified.count(),
                     "sources_checked":raw["sources"],
@@ -142,14 +150,16 @@ def run():
                 assert len(calls)==6,calls
                 # Dedup 2 providers across 4 canonical links; X valid
                 # promoted, other three remain as *undated* candidates.
-                assert cards.count()==3,cards.count()
-                for label in ("X","Threads","Instagram"):
-                    assert cards.filter(has=page.locator(
-                        f'.source-badge[aria-label="출처: {label}"]')).count()==1
+                assert cards.count()==0,"search snippets must not be shown as dated post cards"
+                assert discovered.count()==3,discovered.count()
+                assert page.locator("#discoveryCandidates").is_visible()
                 assert verified.count()==1
                 assert "원문 미확인 링크 3건" in page.locator("#count").text_content()
+                xcard=page.locator("article.post").filter(
+                    has=page.locator('.source-badge[aria-label="출처: X"]')).first
+                assert xcard.locator(".post-thumb > img").count()==1, "public X image must be shown"
                 assert page.locator("article.post .post-date").filter(
-                    has_text="작성일 미확인").count()==3
+                    has_text="작성일 미확인").count()==0
                 assert page.locator("a[href*='evil.invalid']").count()==0
                 assert page.locator("a[href^='http://']").count()==0
                 # Manual period change should NOT fabricate dates for
@@ -160,19 +170,19 @@ def run():
                 page.locator("#applyDate").click()
                 page.wait_for_function(
                     "document.getElementById('applyDate').disabled===false",timeout=30000)
-                assert page.locator('.source-badge[aria-label="출처: X"]').count()>=1
+                assert discovered.count()==3,"search leads remain without invented dates"
                 assert page.locator(
-                    'article.post:not([data-discovery-candidate]) .source-badge[aria-label="출처: X"]').count()==0
+                    'article.post .source-badge[aria-label="출처: X"]').count()==0
                 page.locator("#openDate").click()
                 page.locator('#dateDialog button[data-days="7"]').click()
                 page.locator("#applyDate").click()
                 page.wait_for_function(
                     "document.getElementById('applyDate').disabled===false",timeout=30000)
                 assert page.locator(
-                    'article.post:not([data-discovery-candidate]) .source-badge[aria-label="출처: X"]').count()==1
+                    'article.post .source-badge[aria-label="출처: X"]').count()==1
                 print("AUTO_UNIFIED_SNS_FIXTURE",json.dumps({
                     "provider_search_calls":len(calls),
-                    "undated_candidate_cards":3,
+                    "undated_candidate_links":3,
                     "real_dated_x_cards":1,
                     "date_filter_replay":"pass",
                     "no_search_controls":True,
