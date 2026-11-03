@@ -148,12 +148,52 @@ assert.equal(ageDom.window.document.querySelectorAll(".activity-rank-card").leng
   "verified older account not misclassified as newcomer");
 ageDom.window.close();
 
+// A failed profile response must not permanently brand a veteran as new,
+// and the initial tab must never appear empty when valid new/unknown rows exist.
+const retryDom=new JSDOM(html,{url:"https://koith.github.io/browser-app-lab/apps/demand-research/",
+  runScripts:"outside-only"});
+let attempts=0,clock=Date.now();
+retryDom.window.Date.now=()=>clock;
+retryDom.window.INTERSECTION_publicRankingSnapshot=()=>({
+  fromMs:from,toMs:to,verified:[oldAccount]
+});
+retryDom.window.fetch=async()=>{
+  attempts++;
+  if(attempts===1)throw new Error("transient public API failure");
+  return {ok:true,json:async()=>({profiles:[{
+    handle:"veteran.bsky.social",createdAt:"2021-05-01T00:00:00Z",postsCount:122
+  }]})};
+};
+retryDom.window.eval(script);
+await new Promise(resolve=>setTimeout(resolve,0));
+assert.equal(attempts,1);
+assert.equal(retryDom.window.document.querySelector('[data-rank-cohort="new"]').getAttribute("aria-selected"),"true",
+  "when age evidence is temporarily unavailable, show verified current activity rather than an empty panel");
+assert.equal(retryDom.window.document.querySelectorAll(".activity-rank-card").length,1);
+retryDom.window.dispatchEvent(new retryDom.window.Event("intersection:feed-updated"));
+await new Promise(resolve=>setTimeout(resolve,0));
+assert.equal(attempts,1,"backoff avoids rapid profile retries");
+clock+=61000;
+retryDom.window.dispatchEvent(new retryDom.window.Event("intersection:feed-updated"));
+await new Promise(resolve=>setTimeout(resolve,0));
+assert.equal(attempts,2,"a temporary failure is retryable");
+assert.equal(retryDom.window.document.querySelector('[data-rank-cohort="established"]').getAttribute("aria-selected"),"true");
+assert.equal(retryDom.window.document.querySelectorAll(".activity-rank-card").length,1);
+retryDom.window.close();
+
+const historic=row("historic","https://bsky.app/profile/historic.bsky.social",
+  null,"bluesky","Historic",1);
+historic.posted="2026-09-01T12:00:00Z";
+const history=compute({fromMs:Date.parse("2026-09-01"),toMs:to,verified:[historic]});
+assert.equal(cohortOf(history[0],Date.parse("2026-11-03T00:00:00Z")),"established",
+  "an actual old public post is sufficient independent evidence the account existed 30 days ago");
+
 const main=fs.readFileSync(path.join(dir,"index.html"),"utf8");
 const posPanel=main.indexOf('id="activityRanking"'),posFeed=main.indexOf('id="feed"');
 assert.ok(posPanel>0&&posFeed>posPanel,"ranking physically above post feed");
 assert.ok(main.includes("post_activity_ranking.js"));
-assert.ok(main.includes("flex:0 0 calc((100% - 36px)/10)"),"desktop exactly ten equal-width tiles");
-assert.ok(main.includes("flex-basis:calc((100% - 16px)/5)"),"mobile exactly five equal-width tiles");
+assert.ok(main.includes("grid-template-columns:repeat(20,minmax(0,1fr))"),"desktop exactly ten equal-width tiles spanning two tracks each");
+assert.ok(main.includes("grid-template-columns:repeat(10,minmax(0,1fr))"),"mobile exactly five equal-width tiles spanning two tracks each");
 assert.ok(main.includes("profileCreatedAt:account.created_at"),"Mastodon age provenance");
 assert.ok(main.includes("profileCreatedAt:u.createdAt"),"Misskey age provenance");
 assert.ok(main.includes("profileCreatedAt:p.profileCreatedAt"),"snapshot preserves provider age");
@@ -178,4 +218,4 @@ assert.ok(main.includes('if(!iconOnly)badge.append(el("span","",meta.name))'),"i
 assert.ok(main.includes('"source-badge"+(iconOnly?" source-badge--icon-only":"")'),"accessible icon-only badge variant");
 assert.ok(main.includes('cloud:{name:"Archive",favicon:"https://koith.github.io/browser-app-lab/apps/demand-research/assets/archive.svg"}'),"archive has a pictogram");
 assert.ok(!script.includes("localStorage")&&!script.includes("sessionStorage"));
-console.log("PUBLIC_ACTIVITY_RANKING_QA_PASS: centered 10/5-column 20-at-a-time cohort ranking, source-logo-only tiles, compact header link, detail dialog, dedup and safe URLs");
+console.log("PUBLIC_ACTIVITY_RANKING_QA_PASS: fixed-grid 10/5-column 20-at-a-time cohort ranking, source-logo-only tiles, compact header link, detail dialog, dedup and safe URLs");
