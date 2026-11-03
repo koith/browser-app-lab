@@ -104,7 +104,7 @@ class RecoverySpool:
     def _path(self,pid):
         return self.directory/_filename(pid,self.secret)
 
-    def save(self,pid,first,post=None,blobs=()):
+    def save(self,pid,first,post=None,blobs=(),*,verified_remote_first=False):
         if first.get("id")!=pid or ID.fullmatch(str(pid)) is None:
             raise ValueError("wrong source observation id")
         original=first
@@ -113,7 +113,10 @@ class RecoverySpool:
         target=self._path(pid)
         if target.exists():
             prior=_decode_file(target.read_bytes(),self.secret)
-            original=prior["first"]  # first observed immutable copy wins
+            original=(first if verified_remote_first else prior["first"])
+            # The immutable cloud first sighting is authoritative if it has
+            # independently verified to be an earlier observation than the
+            # local pre-write safety copy from this process.
             old_post=prior["post"]
             old_media=prior["media"]
         if post is not None:
@@ -168,9 +171,14 @@ class RecoverySpool:
         original=canonical_json(first)
         current=cloud.save_first_observation(pid,original,prefer_flat=True)
         if current!=original:
-            # A separately stored, earlier public observation always wins.
-            # Do not use a conflicting later snapshot as a replacement.
-            return "prior_original_preserved"
+            # An earlier saved observation may have a different captured time
+            # but still describe exactly this public source. Resume media only
+            # when all independent identity/content fields match; otherwise
+            # preserve the earlier original and refuse a silent substitution.
+            previous=json.loads(current)
+            compared=("id","platform","source_url","posted_at","text","media_links")
+            if any(previous.get(field)!=first.get(field) for field in compared):
+                return "prior_original_preserved"
         post=record.get("post")
         if post is None:
             return "first_observation_verified"
