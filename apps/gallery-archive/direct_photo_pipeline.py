@@ -908,12 +908,55 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
         if known_official_saved:
             print('OFFICIAL_UNARCHIVED_SAMPLE_STAGED',model,aid,
                   known_official_saved,flush=True)
+        # The published creator feed is a prior author-scoped observation,
+        # not a third-party mirror and not a claim that images were stored.
+        # Its original media CDN may remain publicly accessible even while
+        # the separate public timeline origin is unavailable. Each image URL
+        # gets its own normal robots/HTTP check, byte decode, SHA and remote
+        # original+preview verification before the public index may change.
+        if model=='yui' and aid=='public-yui-sns' and reviewed_source_only:
+            cached=verified_creator_feed_candidates(base,page_cycle)
+            creator_feed_candidates_added=len(cached)
+            creator_feed_attached=True
+            for url in cached:
+                if new_total>=max_new:break
+                if url in seen_urls:continue
+                seen_urls.add(url);candidate_count+=1
+                if public_media_candidate_on_hold(client,url):
+                    deferred_media_due_to_origin_pause+=1
+                    continue
+                if not reviewed_direct_media(url,'https://teapawt.net/super_yuisan/media',model):
+                    errors.append({'reason':'cached_creator_media_not_reviewed'})
+                    continue
+                try:
+                    raw=client.get(url).content
+                    p,preview,fmt=inspect(raw)
+                    if p['sha256'] in seen_sha:continue
+                    quality=measured_photo_quality(raw,p)
+                    number=next_number;next_number+=1
+                    occupied.add(number);seen_sha.add(p['sha256'])
+                    name=f'{number:05d}-{p["sha256"][:16]}'
+                    original=f'originals/{aid}/{name}.{p.pop("extension")}'
+                    thumbnail=f'previews/{aid}/{name}.webp'
+                    atomic_bytes(out/original,raw)
+                    atomic_bytes(out/thumbnail,preview)
+                    row={**p,'number':number,'key':original,'preview':thumbnail,
+                         'preview_sha256':hashlib.sha256(preview).hexdigest(),
+                         'preview_bytes':len(preview),'measured_image_quality':quality,
+                         'numbering_provenance':'verified_creator_cached_public_feed_append'}
+                    images.append(row);new_total+=1;downloaded_now+=1
+                    with journal.open('a') as log:
+                        log.write(json.dumps({'album':aid,'number':number,
+                            'source':url,'photo':row,'remote_verified':False})+'\\n')
+                except Exception as exc:
+                    errors.append({'url':url,'reason':type(exc).__name__,**public_failure(exc)})
         while queue and len(visited)<max_pages and new_total<max_new:
             page=queue.pop(0)
             if page in visited:continue
             origin=urlsplit(page).scheme+'://'+urlsplit(page).netloc
-            if origin in getattr(client,'blocked_origins',set()):
-                # The crawler has already observed an access/rate/legal block.
+            if public_media_candidate_on_hold(client,page):
+                # Observe cached robots/policy/cooldown holds too, rather than
+                # repeating the same refused page for every catalog entry.
                 # Skip this host in the current run; spend remaining work
                 # budget on other explicitly registered public sources.
                 blocked_origin_pages+=1
