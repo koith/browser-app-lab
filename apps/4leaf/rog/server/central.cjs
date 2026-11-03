@@ -5,6 +5,7 @@ const http=require('node:http');
 const fs=require('node:fs');
 const path=require('node:path');
 const {randomUUID,randomBytes,scryptSync,timingSafeEqual,createHash}=require('node:crypto');
+const {createSupabasePersistence}=require('./persistence-supabase.cjs');
 const REGIONS={
  north:['실버 호라이즌','화이트 크리스탈','퓨어 시티','샤이닝 브리즈','윈트리 아이스','스노우 폴','스위트 자스민','그린 에메랄드'],
  south:['블루 사파이어','헤이즐리 웨이브','미쉘 에메랄드','엘핀 포레스트','아루아 코랄','블랙씨 아린','브라브 지피트','미스틱 머메이드']
@@ -16,6 +17,13 @@ function makeServer(options={}){
  const clock=options.now||Date.now;
  const store=options.storageFile||process.env.LEAF_CENTRAL_STORAGE||'';
  const origins=(options.origins??process.env.LEAF_CENTRAL_ORIGINS??'').split(',').map(x=>x.trim()).filter(Boolean);
+ const dbUrl=options.dbUrl??process.env.LEAF_CENTRAL_DB_URL??'';
+ const dbSecret=options.dbSecret??process.env.LEAF_CENTRAL_DB_SECRET??'';
+ const archiveKey=options.archiveKey??process.env.LEAF_CENTRAL_ARCHIVE_KEY??'';
+ const persistent=options.persistence||(dbUrl||dbSecret||archiveKey?
+  createSupabasePersistence({url:dbUrl,secret:dbSecret,archiveKey,
+   slot:(options.dbSlot??process.env.LEAF_CENTRAL_DB_SLOT)||'production'}):null);
+ if(persistent&&store)throw new Error('Do not enable both remote and local chat storage; migrate and explicitly choose one');
  const sessions=new Map(),rooms=new Map(),history=new Map(),kicked=new Map();let sequence=0;
  if(store&&fs.existsSync(store)){
   const archive=JSON.parse(fs.readFileSync(store,'utf8'));
@@ -23,12 +31,51 @@ function makeServer(options={}){
   for(const [id,lines] of archive.history||[])if(Array.isArray(lines))history.set(id,lines.slice(-200));
   sequence=Number(archive.sequence)||0;
  }
- const save=()=>{
+ // Once a remote database is configured, never serve a blank chat-world
+ // while it is unavailable or while its authenticated archive is corrupt.
+ const applyArchive=archive=>{
+  if(!archive||!Array.isArray(archive.rooms)||!Array.isArray(archive.history)||
+   !Number.isSafeInteger(archive.sequence)||archive.sequence<0)
+   throw Error('Invalid persisted ChatTown state');
+  rooms.clear();history.clear();
+  for(const room of archive.rooms)if(room?.id&&valid(room.region,room.district))
+   rooms.set(room.id,room);
+  for(const pair of archive.history)
+   if(Array.isArray(pair)&&typeof pair[0]==='string'&&Array.isArray(pair[1]))
+    history.set(pair[0],pair[1].slice(-200));
+  sequence=archive.sequence;
+ };
+ const ready=persistent?Promise.resolve().then(()=>persistent.load()).then(applyArchive):Promise.resolve();
+ // Keep the rejection observable by await ready, but avoid an unhandled
+ // rejection if remote initialization fails before the first HTTP request.
+ ready.catch(()=>{});
+ const snapshot=()=>({rooms:[...rooms.values()],history:[...history.entries()],sequence});
+ const save=async()=>{
+  const data=snapshot();
+  if(persistent){await persistent.save(data);return}
   if(!store)return;
   fs.mkdirSync(path.dirname(store),{recursive:true});
   const temp=store+'.'+process.pid+'.tmp';
-  fs.writeFileSync(temp,JSON.stringify({rooms:[...rooms.values()],history:[...history.entries()],sequence}),{mode:0o600});
+  fs.writeFileSync(temp,JSON.stringify(data),{mode:0o600});
   fs.renameSync(temp,store);
+ };
+ // Every externally confirmed write is atomic with respect to the active
+ // authority. Failed remote CAS/timeout never gets a 201 or leaks as a
+ // visible ghost message to another authenticated HTTP reader.
+ const transactional=async mutate=>{
+  const before={
+   rooms:[...rooms].map(([id,record])=>[id,{...record}]),
+   history:[...history].map(([id,lines])=>[id,lines.slice()]),
+   sequence
+  };
+  try{const value=mutate();await save();return value}
+  catch(error){
+   rooms.clear();for(const [id,record] of before.rooms)rooms.set(id,record);
+   history.clear();for(const [id,lines] of before.history)history.set(id,lines);
+   sequence=before.sequence;
+   const err=new Error('Chat archive commit failed; no message or room change was accepted');
+   err.status=503;throw err;
+  }
  };
  const count=id=>[...sessions.values()].filter(s=>s.roomId===id).length;
  // Source ChatRoom 794x528 seat locations are currently picture-measured WEB
@@ -104,7 +151,7 @@ function makeServer(options={}){
   }
   try{
    clean();const u=new URL(req.url,'http://localhost'),route=u.pathname;
-   if(req.method==='GET'&&route==='/api/health')return send(res,200,{ok:true,version:1},origin);
+   if(req.method==='GET'&&route==='/api/health')return send(res,200,{ok:true,version:1,archive:persistent?'remote-encrypted':store?'local-file':'volatile'},origin);
    if(req.method==='POST'&&route==='/api/session'){
     const b=await parse(req);
     let token=/^[a-f0-9]{64}$/.test(b.resume||'')?b.resume:'';
@@ -149,16 +196,16 @@ function makeServer(options={}){
     const r={id:randomUUID(),region:b.region,district,name,capacity,background,preset:false,
      ownerId:s.id,ownerTokenHash:secretFingerprint(token),created:clock(),passwordSalt:salt,
      passwordHash:password?scryptSync(password,salt,32).toString('hex'):''};
-    rooms.set(r.id,r);save();return send(res,201,{room:dto(r,s)},origin);
+    await transactional(()=>{rooms.set(r.id,r)});return send(res,201,{room:dto(r,s)},origin);
    }
    const action=/^\/api\/rooms\/([^/]+)\/(join|close|transfer|kick)$/.exec(route);
    if(req.method==='POST'&&action){
     const r=room(action[1]);if(!r)fail(404,'No such room');
     if(action[2]==='close'){
      if(r.preset||r.ownerId!==s.id)fail(403,'Only the owner can close a private room');
-     rooms.delete(r.id);history.delete(r.id);
+     await transactional(()=>{rooms.delete(r.id);history.delete(r.id)});
      for(const peer of sessions.values())if(peer.roomId===r.id)peer.roomId=null;
-     save();return send(res,200,{closed:true},origin);
+     return send(res,200,{closed:true},origin);
     }
     const b=await parse(req);
     if(action[2]==='transfer'||action[2]==='kick'){
@@ -171,8 +218,10 @@ function makeServer(options={}){
      if(action[2]==='transfer'){
       // Only the authority decides ownership; change both the persistent
       // person id and the recoverable owner-secret fingerprint atomically.
-      r.ownerId=target.id;r.ownerTokenHash=secretFingerprint(targetToken);
-      save();return send(res,200,{transferred:true,room:dto(r,s),targetId},origin);
+      await transactional(()=>{
+       r.ownerId=target.id;r.ownerTokenHash=secretFingerprint(targetToken);
+      });
+      return send(res,200,{transferred:true,room:dto(r,s),targetId},origin);
      }
      target.roomId=null;
      kicked.set(r.id+':'+target.id,clock()+120000);
@@ -214,11 +263,14 @@ function makeServer(options={}){
     if(!message)fail(400,'Empty message');
     s.recent=s.recent.filter(t=>clock()-t<5000);
     if(s.recent.length>=12)fail(429,'Rate limit');
+    const item=await transactional(()=>{
+     const entry={id:randomUUID(),seq:++sequence,roomId:s.roomId,sender:s.id,
+      user:s.nick,text:message,time:clock()};
+     const lines=history.get(s.roomId)||[];
+     lines.push(entry);history.set(s.roomId,lines.slice(-200));
+     return entry;
+    });
     s.recent.push(clock());
-    const item={id:randomUUID(),seq:++sequence,roomId:s.roomId,sender:s.id,
-     user:s.nick,text:message,time:clock()};
-    const lines=history.get(s.roomId)||[];
-    lines.push(item);history.set(s.roomId,lines.slice(-200));save();
     return send(res,201,{entry:item},origin);
    }
    if(req.method==='GET'&&route==='/api/snapshot'){
@@ -234,9 +286,23 @@ function makeServer(options={}){
    fail(404,'Unknown endpoint');
   }catch(e){send(res,e.status||500,{error:e.status?e.message:'Internal error'},origin)}
  };
- const server=http.createServer((req,res)=>{void handler(req,res)});
+ // Serialize requests in remote mode so uncommitted mutations cannot become
+ // visible in snapshots or race with a second write's optimistic revision.
+ let requestQueue=Promise.resolve();
+ const server=http.createServer((req,res)=>{
+  const execute=async()=>{
+   try{await ready;await handler(req,res)}
+   catch{
+    if(!res.headersSent)send(res,503,{error:'Chat archive unavailable; retry later'},String(req.headers.origin||''));
+   }
+  };
+  if(persistent){
+   const run=requestQueue.then(execute,execute);
+   requestQueue=run.catch(()=>{});
+  }else void execute();
+ });
  return {server,close:()=>{clearInterval(ticker);return new Promise(done=>server.close(done))},
-  inspect:()=>({rooms:rooms.size,sessions:sessions.size})};
+  inspect:()=>({rooms:rooms.size,sessions:sessions.size,archive:persistent?.kind||'local'})};
 }
 if(require.main===module){
  const port=Number(process.env.PORT||8787);
