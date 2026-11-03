@@ -72,6 +72,24 @@ class PendingTests(unittest.TestCase):
         self.assertEqual(found,[{'Path':'d'*64+'.json','Size':1753}])
         self.assertEqual(commands,['lsjson','lsf'])
 
+    def test_unrelated_primary_listing_is_not_false_pending_absence(self):
+        commands=[]
+        def reader(args):
+            commands.append(args[0])
+            if args[0]=='lsjson':
+                return json.dumps([{'Path':'old-audit.json','Size':20} for _ in range(11)]).encode()
+            return ('1765;'+'a'*64+'.json\n').encode()
+        actual=list_pending_entries('archive:MimmiArchive','mimmi',reader)
+        self.assertEqual(actual,[{'Path':'a'*64+'.json','Size':1765}])
+        self.assertEqual(commands,['lsjson','lsf'])
+
+    def test_alternate_listing_ignores_unrelated_artifacts_not_unsafe_sha(self):
+        def reader(args):
+            if args[0]=='lsjson': return b'[]'
+            return ('17;unrelated-object.json\n'+'100;'+'a'*64+'.json\n').encode()
+        self.assertEqual(len(list_pending_entries(
+            'archive:MimmiArchive','mimmi',reader)),1)
+
     def test_nonempty_primary_listing_does_not_consult_alternate(self):
         primary=json.dumps([{'Path':'d'*64+'.json','Size':1000}]).encode()
         self.assertEqual(list_pending_entries('archive:MimmiArchive','mimmi',
