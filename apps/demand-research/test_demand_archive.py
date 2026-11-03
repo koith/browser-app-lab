@@ -345,3 +345,55 @@ def test_corrupt_record_does_not_block_other_verified_posts(monkeypatch):
     assert result["unrecoverable_markers"] == 1
     assert cloud.load_catalog()[0]["id"]==post_key("bluesky",row["original_id"])
     assert cloud.objects["posts/" + old["id"] + "/post.json"] == b"bad old bytes"
+
+
+def test_capture_budget_keeps_catalog_and_reports_partial_coverage(monkeypatch):
+    cloud=FakeCloud()
+    monkeypatch.setenv("RCLONE_CONFIG_ARCHIVE_COOKIE","offline-test")
+    monkeypatch.setenv("DEMAND_CAPTURE_PUBLIC_ALLOWED","1")
+    monkeypatch.setattr(job,"MAX_PER_RUN",1)
+    rows=[{
+        "platform":"bluesky",
+        "original_id":"at://did:plc:abcdefghijk/app.bsky.feed.post/budget"+str(i),
+        "source_url":"https://bsky.app/profile/did:plc:abcdefghijk/post/budget"+str(i),
+        "text":"synthetic allowed record "+job.TERMS[0],
+        "posted_at":"2026-11-03T00:00:00Z",
+        "media_urls":[],"media_expected":0
+    } for i in range(2)]
+    result=job.run(fetchers=[lambda term,start,end:rows if term==job.TERMS[0] else []],
+                   cloud=cloud,clock=lambda:1793667900,run_id="123456812")
+    assert result["saved_verified"]==1
+    assert result["budget_exhausted"] is True
+    assert result["completeness_guaranteed"] is False
+    assert len(cloud.load_catalog())==1
+
+
+def test_one_cloud_write_failure_does_not_block_other_verified_catalogued_record(monkeypatch):
+    class FailingCloud(FakeCloud):
+        def __init__(self):
+            super().__init__()
+            self.failed_once = False
+
+        def write_immutable(self, key, data):
+            if key.endswith("/capture.json") and not self.failed_once:
+                self.failed_once = True
+                raise RuntimeError("test-only remote write unavailable")
+            return super().write_immutable(key, data)
+
+    cloud=FailingCloud()
+    monkeypatch.setenv("RCLONE_CONFIG_ARCHIVE_COOKIE","offline-test")
+    monkeypatch.setenv("DEMAND_CAPTURE_PUBLIC_ALLOWED","1")
+    rows=[{
+        "platform":"bluesky",
+        "original_id":"at://did:plc:abcdefghijk/app.bsky.feed.post/transient"+str(i),
+        "source_url":"https://bsky.app/profile/did:plc:abcdefghijk/post/transient"+str(i),
+        "text":"synthetic public "+job.TERMS[0],
+        "posted_at":"2026-11-03T00:00:00Z",
+        "media_urls":[],"media_expected":0
+    } for i in range(2)]
+    with pytest.raises(RuntimeError,match="unverified"):
+        job.run(fetchers=[lambda term,start,end:rows if term==job.TERMS[0] else []],
+                cloud=cloud,clock=lambda:1793667900,run_id="123456813")
+    assert cloud.failed_once
+    assert len(cloud.load_catalog())==1,"successful record must be published despite another failure"
+    assert cloud.load_catalog()[0]["id"]==post_key("bluesky",rows[1]["original_id"])

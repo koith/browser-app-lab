@@ -277,7 +277,8 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None):
         raise ValueError("an immutable numeric run ID is required")
     start = now - WINDOW_MINUTES * 60
     sources = fetchers or (bluesky, mastodon, misskey, lemmy)
-    saved = partial = duplicates = fetched = failures = 0
+    saved = partial = duplicates = fetched = failures = storage_failures = 0
+    capture_interrupted = False
     known = {p["id"]: p for p in cloud.load_catalog()}
     known, recovered = cloud.recover_entries(known)
     early_recovered = 0
@@ -303,8 +304,13 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None):
         known[pid] = saved_post
         early_recovered += 1
     seen_this_scan = set()
+    budget_exhausted = False
     for getter in sources:
+        if budget_exhausted or capture_interrupted:
+            break
         for term in TERMS:
+            if budget_exhausted or capture_interrupted:
+                break
             try:
                 iterator = iter(getter(term, start, now))
             except Exception:
@@ -326,46 +332,57 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None):
                     duplicates += 1
                     continue
                 if saved >= MAX_PER_RUN:
-                    raise RuntimeError("capture budget exceeded; coverage incomplete")
+                    budget_exhausted = True
+                    break
                 seen_this_scan.add(pid)
-                # First remote write contains observed public text, ahead of media fetch.
-                early = {"id": pid, "platform": row["platform"], "text": row["text"],
-                         "source_url": row["source_url"], "posted_at": row["posted_at"],
-                         "observed_at": now, "media_links": row["media_urls"],
-                         "profile_url": row.get("profile_url", "")}
-                key = "posts/" + pid + "/capture.json"
-                first_blob = cloud.read(key, cap=100_000, optional=True)
-                if first_blob is None:
-                    # A stale 404 from a cloud backend can make a previously
-                    # written immutable original look missing. On conflicting
-                    # readback, inspect the earlier snapshot and never clobber it.
-                    try:
-                        cloud.write_immutable(key, canonical_json(early))
-                        first_blob = canonical_json(early)
-                    except RuntimeError:
-                        first_blob = cloud.read(key, cap=100_000, optional=True)
-                        if first_blob is None:
-                            raise
-                first = json.loads(first_blob)
-                if (not isinstance(first, dict)
-                        or first.get("id") != pid
-                        or first.get("platform") != row["platform"]
-                        or first.get("source_url") != row["source_url"]
-                        or first.get("posted_at") != row["posted_at"]
-                        or not isinstance(first.get("text"), str)
-                        or not isinstance(first.get("observed_at"), int)
-                        or not isinstance(first.get("media_links"), list)):
-                    raise ValueError("early original capture mismatch; cannot silently replace")
-                row = {**row, "text": first["text"],
-                       "posted_at": first["posted_at"],
-                       "profile_url": first.get("profile_url", ""),
-                       "media_urls": first["media_links"],
-                       "media_expected": len(first["media_links"])}
-                post, blobs = make_post(row, first["observed_at"])
-                saved_post = cloud.save_post(post, blobs)
-                known[pid] = saved_post
-                saved += 1
-                partial += not saved_post["archive_complete"]
+                try:
+                    # First remote write contains observed public text, ahead of media fetch.
+                    early = {"id": pid, "platform": row["platform"], "text": row["text"],
+                             "source_url": row["source_url"], "posted_at": row["posted_at"],
+                             "observed_at": now, "media_links": row["media_urls"],
+                             "profile_url": row.get("profile_url", "")}
+                    key = "posts/" + pid + "/capture.json"
+                    first_blob = cloud.read(key, cap=100_000, optional=True)
+                    if first_blob is None:
+                        # A stale 404 from a cloud backend can make a previously
+                        # written immutable original look missing. On conflicting
+                        # readback, inspect the earlier snapshot and never clobber it.
+                        try:
+                            cloud.write_immutable(key, canonical_json(early))
+                            first_blob = canonical_json(early)
+                        except RuntimeError:
+                            first_blob = cloud.read(key, cap=100_000, optional=True)
+                            if first_blob is None:
+                                raise
+                    first = json.loads(first_blob)
+                    if (not isinstance(first, dict)
+                            or first.get("id") != pid
+                            or first.get("platform") != row["platform"]
+                            or first.get("source_url") != row["source_url"]
+                            or first.get("posted_at") != row["posted_at"]
+                            or not isinstance(first.get("text"), str)
+                            or not isinstance(first.get("observed_at"), int)
+                            or not isinstance(first.get("media_links"), list)):
+                        raise ValueError("early original capture mismatch; cannot silently replace")
+                    row = {**row, "text": first["text"],
+                           "posted_at": first["posted_at"],
+                           "profile_url": first.get("profile_url", ""),
+                           "media_urls": first["media_links"],
+                           "media_expected": len(first["media_links"])}
+                    post, blobs = make_post(row, first["observed_at"])
+                    saved_post = cloud.save_post(post, blobs)
+                    known[pid] = saved_post
+                    saved += 1
+                    partial += not saved_post["archive_complete"]
+                except (RuntimeError,ValueError):
+                    # A single remote object failure must not prevent verified
+                    # objects from being catalogued. Never mark it as stored.
+                    storage_failures += 1
+                    seen_this_scan.discard(pid)
+                    if storage_failures >= 3:
+                        capture_interrupted = True
+                        break
+                    continue
     # Entries written immediately per post are the recovery journal. The versioned
     # catalog is published LAST and never destroys an earlier verified catalog.
     if saved or recovered or early_recovered:
@@ -377,10 +394,15 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None):
               "duplicates": duplicates, "recovered_entries": recovered, "recovered_early_snapshots": early_recovered,
               "repaired_archive_markers": cloud.repaired_entries,
               "unrecoverable_markers": cloud.unrecoverable_entries,
-              "source_query_failures": failures, "catalog": catalog,
+              "source_query_failures": failures,
+              "budget_exhausted": budget_exhausted,
+              "storage_failures": storage_failures,
+              "storage_interrupted": capture_interrupted, "catalog": catalog,
               "scope": "confirmed_public_only", "poll_minutes": 5,
               "completeness_guaranteed": False}
     print("DEMAND_CAPTURE_AGGREGATE_ONLY", json.dumps(result, ensure_ascii=False), flush=True)
+    if storage_failures:
+        raise RuntimeError("some private cloud writes remain unverified")
     return result
 
 
