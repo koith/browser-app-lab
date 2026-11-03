@@ -84,7 +84,10 @@ def _decode_file(raw,secret):
         raise ValueError("invalid original attachment list")
     if result.get("post") is not None:
         post=validate_post(result["post"])
-        if post["id"]!=first["id"] or len(post["media"])!=len(result["media"]):
+        compared=("id","platform","source_url","posted_at","text")
+        if (len(post["media"])!=len(result["media"])
+                or any(post.get(field)!=first.get(field) for field in compared)
+                or post.get("media_expected")!=len(first.get("media_links",[]))):
             raise ValueError("post and original media identity mismatch")
     return result
 
