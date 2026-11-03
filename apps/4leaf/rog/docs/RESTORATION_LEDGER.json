@@ -1570,6 +1570,18 @@
         "QA-03",
         "RULE-03"
       ]
+    },
+    {
+      "id": "REQ-20261103-GPT-WEBRTC-DISCONNECT",
+      "date": "2026-11-03",
+      "origin": "User request to continue remaining 4LEAF restoration work; runtime audit",
+      "text": "클로드 원본 리소스 복원 작업과 겹치지 않도록 멀티플레이 연결 상태 점검과 오작동 수정 및 실제 브라우저 QA를 진행한다.",
+      "taskIds": [
+        "M08",
+        "P0-RELEASE",
+        "RULE-03",
+        "QA-03"
+      ]
     }
   ],
   "tasks": [
@@ -8124,6 +8136,31 @@
         "RULE-03"
       ],
       "details": "PR #571. Confirmed source path: safe('match') JSON.parse error falls back to null, while init()->profileUI()->persist() rewrites rog_match to the literal null. New guard retains raw malformed JSON at boot and writes an exact non-overwriting recovery backup only before replacing it with a newly started valid game. A second different invalid record gets a distinct timestamped backup. Real WebKit mobile/Chromium desktop two-corruption browser test and existing game-start gate added; PASS/deploy to be verified, no task marked done. Does not assert actual user data is corrupt."
+    },
+    {
+      "seq": 370,
+      "date": "2026-11-03",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261103-GPT-WEBRTC-DISCONNECT",
+      "taskIds": [
+        "M08",
+        "P0-RELEASE",
+        "RULE-03",
+        "QA-03"
+      ]
+    },
+    {
+      "seq": 371,
+      "date": "2026-11-03",
+      "type": "WEBRTC_ICE_DISCONNECTED_TURN_GUARD_PR_PENDING",
+      "requestId": "REQ-20261103-GPT-WEBRTC-DISCONNECT",
+      "taskIds": [
+        "M08",
+        "P0-RELEASE",
+        "RULE-03",
+        "QA-03"
+      ],
+      "details": "PR #573: source audit confirms RTCPeerConnection disconnected state was ignored while a DataChannel could remain open, leaving net.connected true and remote game commands enabled. New peer-state guard pauses game on disconnected/failed/closed, resumes only if the same current peer is connected and its channel open; stale callback rejection remains. Deterministic disconnect/recovery/replay QA extended; real two-Chromium browser PR CI enabled. CI results and deployed SHA pending; no original-2002 equivalence claimed."
     }
   ]
 }
