@@ -15,17 +15,24 @@ async function fixture(){
  await new Promise(ok=>app.server.listen(0,'127.0.0.1',ok));
  const base='http://127.0.0.1:'+app.server.address().port;
  const timers=[];
- function browser(){
-  const data=new Map(),window={LEAF_CENTRAL_API_URL:base},events=[];
+ function browser(fetchOverride=fetch){
+  const events=[],retryFns=[],handlers=new Map();
+  const data=new Map(),window={
+   LEAF_CENTRAL_API_URL:base,
+   addEventListener:(kind,fn)=>handlers.set(kind,fn)
+  };
   const storage={getItem:k=>data.get(k)||null,setItem:(k,v)=>data.set(k,String(v))};
   vm.runInNewContext(clientSource,{
    window,document:{querySelector:()=>null},location:{protocol:'http:'},URL,
-   sessionStorage:storage,fetch,console,setInterval:fn=>{timers.push(fn);return timers.length},
-   clearInterval:()=>{}
+   sessionStorage:storage,fetch:fetchOverride,console,
+   setInterval:fn=>{timers.push(fn);return timers.length},clearInterval:()=>{},
+   setTimeout:fn=>{retryFns.push(fn);return retryFns.length},
+   clearTimeout:()=>{}
   },{filename:'central-client.js'});
   const client=window.__LEAF_CENTRAL_CHAT__;
   client.subscribe(e=>events.push(e));
-  return {client,events,token:()=>storage.getItem('leaf_central_session_v1')};
+  return {client,events,token:()=>storage.getItem('leaf_central_session_v1'),
+   retries:retryFns,online:()=>handlers.get('online')?.()};
  }
  const call=async(method,route,token,body)=>{
   const resp=await fetch(base+route,{method,headers:{
@@ -139,4 +146,42 @@ test('private room owner proves original token after TTL and reuses password onl
  const visitor=f.browser();await visitor.client.connect('Visitor');
  await assert.rejects(visitor.client.join(roomId,''),/Incorrect password/);
  assert.equal(visitor.client.joinedId,null);
+});
+
+
+test('cold free-tier authority 503 recovers without page reload or a duplicate polling timer',async t=>{
+ const f=await fixture();t.after(f.close);
+ let attempts=0;
+ const a=f.browser(async(url,options)=>{
+  if(String(url).endsWith('/api/session')&&attempts++===0)
+   return new Response(JSON.stringify({error:'Authority is waking up'}),{status:503});
+  return fetch(url,options);
+ });
+ await assert.rejects(a.client.connect('ColdStart'),/waking up/);
+ assert.equal(a.client.ready,false,'an unconfirmed session is not reported connected');
+ assert.equal(a.retries.length,1,'one bounded reconnect timer is scheduled');
+ await a.retries.shift()();
+ assert.equal(a.client.ready,true,'the same browser reconnects automatically');
+ assert.equal(a.events.filter(e=>e.type==='ready').length,1);
+ assert.equal(f.timers.length,1,'reconnection may install only one snapshot polling interval');
+ await a.client.join(ROOM_A);
+ const result=await a.client.chat('콜드스타트 복구 후 실제 채팅');
+ assert.equal(result.entry.text,'콜드스타트 복구 후 실제 채팅');
+});
+
+test('manual disconnect cancels cold-start retries and does not create a ghost session',async t=>{
+ const f=await fixture();t.after(f.close);
+ let attempts=0;
+ const a=f.browser(async(url,options)=>{
+  if(String(url).endsWith('/api/session')&&attempts++===0)
+   return new Response(JSON.stringify({error:'Service unavailable'}),{status:503});
+  return fetch(url,options);
+ });
+ await assert.rejects(a.client.connect('Disconnected'),/unavailable/);
+ assert.equal(a.retries.length,1);
+ a.client.disconnect();
+ await a.retries.shift()();
+ assert.equal(a.client.ready,false);
+ assert.equal(attempts,1,'manual disconnect does not silently authenticate again');
+ assert.equal(f.timers.length,0,'no hidden polling after manual disconnect');
 });
