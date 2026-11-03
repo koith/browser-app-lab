@@ -11,29 +11,36 @@
  * This is an original-table test on the real app, not a synthetic one. */
 const assert=require('node:assert/strict');
 const path=require('node:path');
-const {chromium}=require('playwright');
+const {chromium,webkit}=require('playwright');
+const mobile=process.env.FOURLEAF_MOBILE==='1';
+const engine=process.env.FOURLEAF_BROWSER==='webkit'?webkit:chromium;
 const CASES=[
  {attacker:'c_0078',defender:'c_0088'}, // OBS 1061 classic 37-frame body
  {attacker:'c_0126',defender:'c_0056'}, // OBS2 1200: own 23-tick lunge 20..24
  {attacker:'c_0170',defender:'c_0063'}  // OBS3 1267
 ];
 (async()=>{
- const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
+ const browser=await engine.launch({headless:true,...(engine===chromium?{args:['--no-sandbox']}:{})});
  const report=[];
  try{
   for(const c of CASES){
-   const context=await browser.newContext({viewport:{width:1280,height:900}});
+   const context=await browser.newContext({viewport:mobile?{width:390,height:844}:{width:1280,height:900},isMobile:mobile,hasTouch:mobile,serviceWorkers:'block'});
    await context.addInitScript(()=>{window.LEAF_CENTRAL_API_URL='';});
    const page=await context.newPage(),errors=[];
    page.on('pageerror',e=>errors.push(e.message));
    await page.goto(process.env.FOURLEAF_TEST_URL||'file://'+path.resolve(__dirname,'../index.html'),{waitUntil:'domcontentloaded'});
    await page.waitForFunction(()=>window.__ROG_TEST__&&window.__LEAF_NATIVE_CARD_ACTIONS__&&
     window.ORIGINAL_LEAF_CHESSMEN?.length>50);
-   await page.locator('[data-route="lobby"]').first().click();
-   await page.locator('#lobby-create').click();
+   if(mobile){
+    await page.locator('.world-location[data-region="dice"]').tap();
+    await page.locator('#dice-channels [data-channel="ispin:1"]').tap();
+   }else await page.locator('[data-route="lobby"]').first().click();
+   if(mobile)await page.locator('#lobby-create').tap();
+   else await page.locator('#lobby-create').click();
    await page.locator('#game-mode').selectOption('hotseat');
    await page.locator('#bot-count').selectOption('1');
-   await page.locator('#start-game').click();
+   if(mobile)await page.locator('#start-game').tap();
+   else await page.locator('#start-game').click();
    await page.waitForSelector('#game:not(.hidden)');
    const run=await page.evaluate(async({attacker,defender})=>{
     const T=window.__ROG_TEST__,m=T.getMatch();
@@ -114,6 +121,6 @@ const CASES=[
     expectedSteps:expanded.length,ticks:run.anim12.ticks,observedSpanMs:Math.round(span)});
    await context.close();
   }
-  console.log('CHR NATIVE DUEL LUNGE PLAY PASS',JSON.stringify(report));
+  console.log('CHR NATIVE DUEL LUNGE PLAY PASS',JSON.stringify({browser:engine.name(),mobile,report}));
  }finally{await browser.close();}
 })().catch(e=>{console.error('CHR NATIVE DUEL LUNGE PLAY FAILED',e.stack||e);process.exit(1);});
