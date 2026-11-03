@@ -71,3 +71,11 @@
 - 사용자 문의에 따라 별도 대화를 생성하던 ChatGPT 정기 작업 자동화 6ae9d47392dc8191aef2037762a8d83b 비활성화 확인. GitHub Actions 서버측 수집·복구 워크플로는 유지.
 
 **현재 판정: CODE_ONLY(개발·CI) + FAILED(실운영), INT-01 최종 미완료.** 본문·개인정보·비밀값은 저장소에 기재하지 않음.
+
+## 2026-11-03 순차 처리 체크 (실제 검증 기준)
+
+- [x] **INT-10 하위 개발** — [PR #632](https://github.com/koith/browser-app-lab/pull/632) main 병합 `cf8a25c8eead84ee1cbf355dc18d3008efbf230a`. 검증된 과거 공개 글·프로필 근거로 기존/신규 분류 개선, 실패한 프로필 메타데이터 조회 재시도, 초기 빈 랭킹 방지, PC 10장/모바일 5장 동일 크기 및 마지막 줄 중앙 정렬. [랭킹 CI #41654447298](https://github.com/koith/browser-app-lab/actions/runs/41654447298), [브라우저 CI #41654447263](https://github.com/koith/browser-app-lab/actions/runs/41654447263), 계정 인덱스·제품 증거 CI 모두 PASS. **INT-10 전체 완료와 별도.**
+- [x] **INT-08 배포 자동 QA 하위 개발·실운영 검증** — [PR #633](https://github.com/koith/browser-app-lab/pull/633) main 병합 `1c1b3c71087a1400d473f539a17a0c6fa820204a`, [Pages 실제 배포 #41655917301](https://github.com/koith/browser-app-lab/actions/runs/41655917301) PASS, [배포 HTML/JS SHA 읽기·데스크톱 Chromium·모바일 WebKit #41655917420](https://github.com/koith/browser-app-lab/actions/runs/41655917420) PASS. 외부 SNS 호출 없이 합성 계정으로 UI만 검증. **물리적 아이폰 사용성은 UNVERIFIED.**
+- [ ] **INT-10 전체 완료** — 실제 운영 SNS 게시글로 기존/신규 분포, 필터·더 보기·순위 상세, 실제 모바일 사용성 별도 확인 전.
+- [ ] **INT-08 전체 완료** — 물리적 아이폰 실사용 PASS 및 배포 주요 기능 종합 QA 전.
+- [ ] **INT-02 5분 운영 주기** — Actions 예약 실행 전체 184건(조회 당시) 중 교집합 Fast Capture 예약 실행은 1건[#41636436888](https://github.com/koith/browser-app-lab/actions/runs/41636436888)만 존재함. `cron` 설정값 5분을 실측 5분으로 취급하지 않음. GitHub 예약 지연/누락과 20분가량 점유되는 저장 실패 작업을 분리 진단할 것. **FAILED/UNVERIFIED: 실제 5분 주기 불입증.**
