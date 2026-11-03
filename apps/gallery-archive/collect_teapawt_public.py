@@ -82,7 +82,9 @@ def public_images_from_author(html,source,current):
         p=urlsplit(u)
         # Follow only the exact tab being viewed. No guessed cursor, no
         # unrelated social feed or a redirect to a protected endpoint.
-        base_path=urlsplit(source["url"]).path
+        # page_images() passes an author-only descriptor; use the actual
+        # currently visited public tab when no explicit source URL is present.
+        base_path=urlsplit(source.get("url") or current).path
         allowed=(p.scheme=="https" and p.hostname==HOST and p.path==base_path
                  and not p.username and not p.password and not p.fragment and p.port is None)
         if allowed and "cursor" in dict(parse_qsl(p.query)):
