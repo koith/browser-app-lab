@@ -185,15 +185,22 @@ class CloudArchive:
         """
         if not re.fullmatch(r"[a-f0-9]{64}", str(expected_digest)):
             raise ValueError("unsafe expected checksum")
-        for delay in (0.0,0.4,0.9,1.8,3.0):
-            if delay:
-                time.sleep(delay)
-            try:
-                raw=self.read(key,cap=cap,optional=True)
-            except (RuntimeError,ValueError):
-                raw=None
-            if raw is not None and sha256(raw)==expected_digest:
-                return raw
+        # A single backend can serve stale bytes while the other endpoint
+        # already serves the intended immutable object. Read from both domains
+        # before labeling a verified journal/catalog object as corrupt.
+        for domain, delays in (
+            (None,(0.0,0.4,0.9,1.8,3.0)),
+            ("https://nephobox.com",(0.0,0.5,1.0)),
+        ):
+            for delay in delays:
+                if delay:
+                    time.sleep(delay)
+                try:
+                    raw=self.read(key,cap=cap,optional=True,domain=domain)
+                except (RuntimeError,ValueError):
+                    raw=None
+                if raw is not None and sha256(raw)==expected_digest:
+                    return raw
         return None
 
     def names(self, prefix):
@@ -250,7 +257,20 @@ class CloudArchive:
             # visible. It might be a stale version of this same upload.
             if read_consistent()[0]:
                 return False
-            raise RuntimeError("immutable archive key collision after readback retries")
+            # Do not mutate an apparently existing immutable object. The
+            # alternate endpoint may merely have caught up with a successful
+            # earlier upload; a matching SHA is sufficient to accept it.
+            for delay in (0.0,0.6,1.2):
+                if delay:
+                    time.sleep(delay)
+                try:
+                    alternate_existing=self.read(
+                        key,cap=cap,optional=True,domain="https://nephobox.com")
+                except (RuntimeError,ValueError):
+                    alternate_existing=None
+                if alternate_existing is not None and sha256(alternate_existing)==expected_sha:
+                    return False
+            raise RuntimeError("immutable archive key collision after dual-endpoint readback")
 
         # Bootstrap parents ahead of upload (not only after rclone fails).
         # This also covers a brand-new versioned catalog directory.
@@ -280,8 +300,19 @@ class CloudArchive:
                 if matched:
                     return True
                 if conflicting:
-                    # Never repeatedly overwrite apparently different remote
-                    # bytes: preserve both states for integrity investigation.
+                    # A different primary response is not proof of wrong media.
+                    # Another endpoint can independently corroborate the exact
+                    # original SHA. Never overwrite conflicting immutable bytes.
+                    for delay in (0.0,0.5,1.0):
+                        if delay:
+                            time.sleep(delay)
+                        try:
+                            observed=self.read(key,cap=cap,optional=True,
+                                               domain="https://nephobox.com")
+                        except (RuntimeError,ValueError):
+                            observed=None
+                        if observed is not None and sha256(observed)==expected_sha:
+                            return True
                     raise RuntimeError("private cloud readback did not converge")
             # The backend documents the same TeraBox account via nephobox.com
             # in regions where the primary upload host is intermittently broken.
