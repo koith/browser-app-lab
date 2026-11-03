@@ -276,7 +276,7 @@ class CloudArchive:
                         raise ValueError("bad entry metadata")
                     record = self.read("posts/" + pid + "/post.json", cap=MAX_POST)
                     if sha256(record) != marker["sha256"]:
-                        raise ValueError("marker hash mismatch")
+                        raise RuntimeError("private post record checksum mismatch")
                     post = validate_post(json.loads(record))
                     if post["id"] != pid:
                         raise ValueError("marker/post mismatch")
