@@ -21,7 +21,9 @@ MANIFEST = re.compile(r"^manifest-([0-9]{6,30})\.json$")
 ENTRY = re.compile(r"^([a-f0-9]{40})\.json$")
 MIMES = {"image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp",
          "image/avif": ".avif", "video/mp4": ".mp4",
-         "video/webm": ".webm", "video/quicktime": ".mov"}
+         "video/webm": ".webm", "video/quicktime": ".mov",
+         "audio/mpeg": ".mp3", "audio/mp4": ".m4a", "audio/ogg": ".ogg",
+         "audio/wav": ".wav", "audio/webm": ".weba", "audio/flac": ".flac"}
 MAX_CATALOG = 70_000_000
 MAX_POST = 100_000
 MAX_MEDIA_BYTES = 80_000_000
