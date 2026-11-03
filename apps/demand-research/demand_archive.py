@@ -159,11 +159,15 @@ class CloudArchive:
             raise RuntimeError("private TeraBox authentication not configured")
         self.command(["lsf", "archive:", "--max-depth", "1", "--retries", "2"], timeout=90)
 
-    def read(self, key, *, cap=MAX_CATALOG, optional=False):
+    def read(self, key, *, cap=MAX_CATALOG, optional=False, domain=None):
         if not isinstance(key, str) or not key or ".." in key or "\\" in key:
             raise ValueError("unsafe remote key")
-        data = self.command(["cat", self.remote + "/" + key, "--retries", "2"],
-                            timeout=120, allow_missing=optional)
+        args=["cat",self.remote+"/"+key,"--retries","2"]
+        if domain:
+            if domain!="https://nephobox.com":
+                raise ValueError("unapproved alternate cloud endpoint")
+            args.extend(["--terabox-domain",domain])
+        data=self.command(args,timeout=120,allow_missing=optional)
         if data is None:
             return None
         if len(data) > cap:
@@ -277,7 +281,45 @@ class CloudArchive:
                     # Never repeatedly overwrite apparently different remote
                     # bytes: preserve both states for integrity investigation.
                     raise RuntimeError("private cloud readback did not converge")
-            raise RuntimeError("private cloud write unverified after alternate methods") from failure
+            # The backend documents the same TeraBox account via nephobox.com
+            # in regions where the primary upload host is intermittently broken.
+            # Live synthetic copy/readback on 2026-11-03 succeeded. Try it only
+            # after primary writes all fail; do not use for auth/quota/rate limits.
+            if failure and any(code in str(failure) for code in
+                               ("(authorization)","(capacity)","(rate_limited)")):
+                raise RuntimeError("private cloud write blocked by account limits") from failure
+            alternate="https://nephobox.com"
+            before=None
+            for delay in (0.0,0.6,1.2):
+                if delay:
+                    time.sleep(delay)
+                try:
+                    before=self.read(key,cap=cap,optional=True,domain=alternate)
+                except RuntimeError:
+                    before=None
+                if before is not None:
+                    if sha256(before)==expected_sha:
+                        return True
+                    raise RuntimeError("immutable alternate cloud endpoint checksum conflict")
+            try:
+                # Ignore any existing object even if TeraBox's listing API
+                # is stale. Never intentionally overwrite an immutable key.
+                self.command(["copyto",path,target,"--ignore-existing",
+                              "--terabox-domain",alternate,"--retries","2"],timeout=130)
+            except RuntimeError as error:
+                failure=error
+            for delay in (0.0,0.5,1.0,2.0,4.0):
+                if delay:
+                    time.sleep(delay)
+                try:
+                    observed=self.read(key,cap=cap,optional=True,domain=alternate)
+                except RuntimeError:
+                    observed=None
+                if observed is not None:
+                    if sha256(observed)==expected_sha:
+                        return True
+                    raise RuntimeError("immutable alternate cloud endpoint checksum conflict")
+            raise RuntimeError("private cloud write unverified after primary and alternate endpoints") from failure
         finally:
             os.unlink(path)
 
