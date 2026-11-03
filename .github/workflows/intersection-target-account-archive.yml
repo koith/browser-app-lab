@@ -57,7 +57,7 @@ jobs:
       - name: Check isolated public-account archive, original PDS blobs, audio and replay
         run: |
           set -euo pipefail
-          python -m pip install --disable-pip-version-check pytest==8.4.2 cryptography==46.0.4
+          python -m pip install --disable-pip-version-check pytest==8.4.2 cryptography==46.0.4 fastapi==0.115.12 httpx==0.28.1
           cd apps/demand-research
           python -m py_compile target_account_archive.py test_target_account_archive.py
           python -m pytest -q test_target_account_archive.py test_demand_archive.py test_gateway.py
