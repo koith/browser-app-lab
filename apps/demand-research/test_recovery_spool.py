@@ -91,11 +91,10 @@ def test_fast_capture_spools_failed_cloud_observation_and_can_replay(tmp_path,mo
          "text":"PRIVATE TEST BODY sentinel-327849",
          "source_url":"https://bsky.app/profile/did:plc:abcdefghijk/post/synthetic",
          "posted_at":"2026-11-03T00:00:00Z","media_urls":[],"media_expected":0}
-    res=job.run(fetchers=[
-        lambda term,start,end:[row] if term==job.TERMS[0] else []],
-        cloud=cloud,clock=lambda:1793667900,run_id="123456832",fast_mode=True)
-    assert res["storage_failures"]==1
-    assert res["encrypted_recovery_files"]==1
+    with pytest.raises(RuntimeError,match="unverified"):
+        job.run(fetchers=[
+            lambda term,start,end:[row] if term==job.TERMS[0] else []],
+            cloud=cloud,clock=lambda:1793667900,run_id="123456832",fast_mode=True)
     assert cloud.objects=={}
     names=list(tmp_path.glob("*.enc"))
     assert len(names)==1
