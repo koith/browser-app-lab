@@ -106,6 +106,22 @@ class Transport:
         except (OSError, TimeoutError) as error:
             raise SourceUnavailable("public source unavailable") from error
 
+    def json_with_headers(self,url):
+        """Return public JSON and Link header for genuine Mastodon pagination."""
+        require_public_https(url)
+        require_global_dns(urlsplit(url).hostname)
+        req=Request(url,headers={"Accept":"application/json",
+                                 "User-Agent":"INTERSECTION-PublicAccountArchive/1.0"})
+        try:
+            with self.opener.open(req,timeout=20) as response:
+                raw=response.read(MAX_SOURCE_BYTES+1)
+                headers={"Link":response.headers.get("Link","")}
+            if not 0<len(raw)<=MAX_SOURCE_BYTES:
+                raise SourceUnavailable("public source response bound exceeded")
+            return json.loads(raw),headers
+        except (OSError,TimeoutError,ValueError) as error:
+            raise SourceUnavailable("public source pagination unavailable") from error
+
     def json(self, url, body=None):
         _mime, raw = self.read(url, body=body)
         try:
@@ -411,7 +427,7 @@ def save_public_record(cloud, profile, item, api):
     post={"id":pid,"platform":profile["platform"],"source_url":item["source_url"],
           "posted_at":posted.isoformat(),"captured_at":datetime.now(timezone.utc).isoformat(),
           "text":item["text"],"profile_url":profile["profile_url"],
-          "kind":item["kind"],"reply_to":item["reply_to"],
+          "kind":item["kind"],"reply_to":item["reply_to"],"original_id":item["original_id"],
           "media":media,"media_expected":len(blobs),"media_saved":len(media),
           "archive_complete":len(blobs)==len(media),
           "provenance":"selected_public_account","retention_review":"required_on_removal_request"}
@@ -455,6 +471,21 @@ def run_one(platform, raw_account, *, root=None, api=None, max_pages=2,
                          canonical_json(registration))
     archive=account_cloud(root,profile)
     seq,cursor,previously_complete=state_from_cloud(archive)
+    # Profile and public social-graph snapshots are independent from post
+    # history checkpoints. An API restriction is counted, never bypassed.
+    from target_account_enrichment import archive_profile, archive_graph, backfill_public_threads
+    profile_stat={"profile_verified":False,"profile_assets_verified":0,
+                  "profile_assets_unavailable":0}
+    graph_stats={}
+    try:
+        profile_stat=archive_profile(profile,api,archive)
+    except (RuntimeError,ValueError,TypeError,KeyError):
+        pass
+    for graph_kind in ("followers","following"):
+        try:
+            graph_stats[graph_kind]=archive_graph(profile,graph_kind,api,archive)
+        except (RuntimeError,ValueError,TypeError,KeyError):
+            graph_stats[graph_kind]={"pages":0,"members":0,"more_public_pages":None}
     if previously_complete:
         # Re-check newest public posts after historical backfill completed.
         cursor=None
@@ -508,6 +539,12 @@ def run_one(platform, raw_account, *, root=None, api=None, max_pages=2,
             if exhausted:
                 break
         status="COMPLETE_CURRENT_PUBLIC_CURSOR" if pages and not cursor else "RESUME_NEEDED"
+        # Bounded comment/thread backlog scans retain progress even when
+        # the selected source has thousands of historical posts.
+        try:
+            thread_stats=backfill_public_threads(profile,api,archive)
+        except (RuntimeError,ValueError,TypeError,KeyError):
+            thread_stats={"threads_verified":0,"threads_pending":True}
     except (RuntimeError,ValueError):
         status="FAILED_RETRYABLE"
         raise
@@ -517,10 +554,20 @@ def run_one(platform, raw_account, *, root=None, api=None, max_pages=2,
               json.dumps({"platform":platform,"pages_verified":pages,
                           "posts_verified":saved,"previously_saved":duplicates,
                           "excluded_not_public":restricted,
-                          "media_pending":media_pending,"state":locals().get("status","FAILED_RETRYABLE")},
+                          "media_pending":media_pending,
+                          "profile_verified":profile_stat["profile_verified"],
+                          "profile_assets_verified":profile_stat["profile_assets_verified"],
+                          "profile_assets_unavailable":profile_stat["profile_assets_unavailable"],
+                          "graph_pages_verified":sum(v["pages"] for v in graph_stats.values()),
+                          "graph_pages_pending":sum(v.get("more_public_pages") is not False for v in graph_stats.values()),
+                          "threads_verified":locals().get("thread_stats",{}).get("threads_verified",0),
+                          "threads_pending":locals().get("thread_stats",{}).get("threads_pending",True),
+                          "state":locals().get("status","FAILED_RETRYABLE")},
                          sort_keys=True),flush=True)
     return {"platform":platform,"pages_verified":pages,"posts_verified":saved,
-            "previously_saved":duplicates,"status":status}
+            "previously_saved":duplicates,"status":status,
+            "profile":profile_stat,"graph":graph_stats,
+            "threads":locals().get("thread_stats",{})}
 
 
 def run_registered(*, root=None, api=None, max_accounts=2):
