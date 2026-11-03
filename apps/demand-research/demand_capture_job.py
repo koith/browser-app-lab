@@ -23,6 +23,7 @@ from account_index_sources import fetch_public as bluesky_public_search
 
 TERMS = ("뒷계", "섹트", "일탈계")
 WINDOW_MINUTES = 16
+MAX_CATCHUP_MINUTES = 180  # bounded missed-schedule window; current 16m always comes first
 MAX_PER_RUN = 90
 MAX_MEDIA_PER_POST = 6
 MAX_IMAGE = 24_000_000
@@ -332,7 +333,22 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
     if not re.fullmatch(r"[0-9]{6,30}", str(run_id)):
         raise ValueError("an immutable numeric run ID is required")
     start = now - WINDOW_MINUTES * 60
-    sources = fetchers or (bluesky, mastodon, misskey, lemmy)
+    sources = tuple(fetchers or (bluesky, mastodon, misskey, lemmy))
+    lookback_minutes=WINDOW_MINUTES
+    if fast_mode and spool is not None:
+        # Capture recent originals FIRST. Only then backfill still-public
+        # posts after a demonstrably delayed scheduled run. No nonpublic access.
+        try:
+            requested=int(os.environ.get("DEMAND_CAPTURE_LOOKBACK_MINUTES",str(WINDOW_MINUTES)))
+        except (ValueError,TypeError):
+            requested=WINDOW_MINUTES
+        lookback_minutes=min(MAX_CATCHUP_MINUTES,max(WINDOW_MINUTES,requested))
+        if lookback_minutes>WINDOW_MINUTES:
+            original_sources=sources
+            sources+=tuple((
+                lambda term,_start,end,origin=origin,mins=lookback_minutes:
+                    origin(term,end-mins*60,end)
+            ) for origin in original_sources)
     saved = partial = duplicates = fetched = failures = buffered = 0
     storage_failures=0 if cloud_available else 1
     storage_error_kinds=(
@@ -612,6 +628,8 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
               "invalid_early_captures":invalid_early_captures,
               "failed_early_recoveries":failed_early_recoveries,
               "budget_exhausted": budget_exhausted,
+              "effective_lookback_minutes":lookback_minutes,
+              "catchup_search_enabled":lookback_minutes>WINDOW_MINUTES,
               "storage_failures": storage_failures,
                "storage_error_categories":storage_error_kinds,
               "storage_interrupted": capture_interrupted,
