@@ -140,6 +140,30 @@ jobs:
           python apps/mimmi-gallery/cloud/test_gateway.py
           python apps/mimmi-gallery/cloud/test_copyto_media_fallback.py
           python apps/mimmi-gallery/cloud/test_cover_cache.py
+      - name: Check whether the existing Render private pending route has actually deployed
+        if: github.event_name != 'pull_request'
+        run: |
+          python - <<'PY'
+          import urllib.error
+          import urllib.request
+          # GET never returns private metadata; a deployed POST-only route
+          # responds 405, and the old server responds 404. No credentials,
+          # real object IDs, or user data are used in this readiness check.
+          url=("https://mimmi-private-gallery-free.onrender.com"
+               "/internal/gallery-owner-pending/mimmi/"+("0"*64))
+          status=None
+          try:
+              with urllib.request.urlopen(urllib.request.Request(
+                      url,method="GET"),timeout=22) as response:
+                  status=response.status
+          except urllib.error.HTTPError as error:
+              status=error.code
+          except (urllib.error.URLError,TimeoutError,OSError):
+              print("GALLERY_PENDING_ROUTE_DEPLOYED_UNKNOWN transport",flush=True)
+          if status is not None:
+              print("GALLERY_PENDING_ROUTE_DEPLOYED",
+                    status==405,"HTTP",status,flush=True)
+          PY
   collect-store-readback:
     needs: offline-regressions
     if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
