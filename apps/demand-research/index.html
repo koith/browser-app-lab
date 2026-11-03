@@ -686,7 +686,7 @@ function status(s){$("status").textContent=s}
 function getMedia(p){
   let e=p.embed||{},m=e.media||e;
   if(Array.isArray(m.images))return m.images.map(i=>({type:"image",url:validUrl(i.fullsize||i.thumb),thumb:validUrl(i.thumb||i.fullsize),alt:i.alt||"첨부 이미지"})).filter(x=>x.url||x.thumb);
-  if(String(m.$type||"").includes("video")||m.playlist)return [{type:"video",url:validUrl(m.playlist),thumb:validUrl(m.thumbnail||m.poster)}];
+  if(String(m.$type||"").includes("video")||m.playlist)return [{type:"video",url:validUrl(m.playlist),thumb:validUrl(m.thumbnail||m.poster),alt:String(m.alt||p.record?.embed?.alt||"").slice(0,1000)}];
   if(m.external&&(m.external.thumb||m.external.uri))return [{type:"external",url:validUrl(m.external.uri),thumb:validUrl(m.external.thumb||m.external.thumbnail)}];
   return [];
 }
@@ -726,7 +726,7 @@ function addPost(p,term){
   let profileUrl="https://bsky.app/profile/"+actor;
   let url=profileUrl+"/post/"+rkey;
   let policy=mediaPolicy(p);
-  let rec={id:uri,platform:"bluesky",author:a.displayName||a.handle||"게시글",
+  let rec={id:uri,platform:"bluesky",author:a.displayName||a.handle||"게시글",authorDid:did,
       profileUrl,text:p.record.text,posted:p.record.createdAt||p.indexedAt||"",
       profileCreatedAt:a.createdAt||"",profilePostCount:a.postsCount,
       indexed:p.indexedAt||p.record.createdAt||"",url,
@@ -1054,25 +1054,64 @@ function fingerprint(text){
   return String(text||"").normalize("NFKC").replace(/https?:\/\/\S+/gi,"")
     .replace(/#[^\s#]+/g,"").replace(/[^\p{L}\p{N}]/gu,"").toLowerCase();
 }
-function adEvidence(post,count){
-  let text=String(post.text||""),key=fingerprint(text);
-  let repeats=key.length>=28?(count.get(key)||0):0,score=0,reasons=[];
+function promotionalMediaDescription(post){
+  // Author-provided media alt and preview title can carry the commercial
+  // campaign even when the visible post body contains no link or ad keyword.
+  // Generic media labels are not evidence of advertising.
+  return (Array.isArray(post.media)?post.media:[])
+    .map(m=>String(m?.alt||"").normalize("NFKC").slice(0,1000))
+    .filter(Boolean);
+}
+function adEvidence(post,count,mediaCount){
+  const text=String(post.text||""),key=fingerprint(text);
+  const repeats=key.length>=12?(count.get(key)||0):0;
+  const descriptions=promotionalMediaDescription(post);
+  let score=0,reasons=[];
   function mark(value,reason){score+=value;reasons.push(reason)}
-  let hashtags=(text.match(/#[^\s#]+/g)||[]).length;
-  if(repeats>=3)mark(4,"같은 홍보형 문구 반복 "+repeats+"건");
-  else if(repeats>=2)mark(hashtags>=4?4:2,"동일 문구 반복 "+repeats+"건");
-  for(let test of AD_PATTERNS)if(test.re.test(text))mark(test.points,test.reason);
+  const hashtags=(text.match(/#[^\s#]+/g)||[]).length;
+  // Short rotating copy is common in automated campaigns. Repetition alone
+  // cannot classify a legitimate conversation as an advertisement.
+  if(repeats>=5)mark(2,"짧은 게시 문구 반복 "+repeats+"건");
+  else if(repeats>=3)mark(1,"게시 문구 반복 "+repeats+"건");
+  for(const test of AD_PATTERNS)if(test.re.test(text))mark(test.points,test.reason);
   if(hashtags>=8)mark(2,"해시태그 과다");
   else if(hashtags>=5)mark(1,"해시태그 다수");
   if(post.externalLink)mark(1,"외부 사이트 연결");
+
+  let repeatedMedia=false;
+  for(const alt of descriptions){
+    if(/(?:프로모션|광고\s*(?:영상|클립)|홍보\s*(?:영상|용)|협찬\s*(?:콘텐츠|영상)|(?:promotional?|sponsored?)\s*(?:video|clip|teaser)|브랜드\s*프로모션)/i.test(alt)){
+      mark(5,"미디어 설명 내 홍보·광고 표기");
+      break;
+    }
+  }
+  for(const alt of descriptions){
+    const mediaKey=fingerprint(alt);
+    if(mediaKey.length>=16&&(mediaCount.get(mediaKey)||0)>=5){
+      repeatedMedia=true;
+      break;
+    }
+  }
+  // An identical descriptive media title plus repeatedly rotated posting
+  // copy is a campaign signal. No sexual-content tag, account age or
+  // demographic inference is used to label a user.
+  if(repeatedMedia&&repeats>=3)mark(3,"반복 문구와 동일 미디어 설명 조합");
   return {score,reasons};
 }
 function updateAdScores(){
-  // Identical ad detection applies to both genuine posts and indexed links.
+  // Score verified public content and indexed links consistently. Preserve
+  // archived bytes; presentation filtering never deletes source records.
   const all=cloudMode?posts:posts.concat(indexedCandidates);
-  let count=new Map();
-  for(let p of all){let k=fingerprint(p.text);if(k.length>=28)count.set(k,(count.get(k)||0)+1)}
-  for(let p of all)p.adEvidence=adEvidence(p,count);
+  const count=new Map(),mediaCount=new Map();
+  for(const p of all){
+    const key=fingerprint(p.text);
+    if(key.length>=12)count.set(key,(count.get(key)||0)+1);
+    for(const alt of promotionalMediaDescription(p)){
+      const mediaKey=fingerprint(alt);
+      if(mediaKey.length>=16)mediaCount.set(mediaKey,(mediaCount.get(mediaKey)||0)+1);
+    }
+  }
+  for(const p of all)p.adEvidence=adEvidence(p,count,mediaCount);
 }
 function isAutomatedTrendDigest(post){
   // Generated trend digests are not individual consumer experiences.
@@ -1348,7 +1387,7 @@ function draw(){
    personal information is persisted by the account UI. */
 window.INTERSECTION_publicAccountSnapshot=function(){
   return {fromMs,toMs,
-    verified:posts.filter(p=>p.platform!=="cloud"&&!p.restricted).map(p=>({
+    verified:posts.filter(p=>p.platform!=="cloud"&&!p.restricted&&!suspectedAd(p)).map(p=>({
       platform:p.platform,profileUrl:p.profileUrl,author:p.author,
       posted:p.posted,url:p.url,text:String(p.text||"").slice(0,1800),id:p.id
     })),
