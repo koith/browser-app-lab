@@ -467,7 +467,7 @@ def run_one(platform, raw_account, *, root=None, api=None, max_pages=2,
                 break
             current_cursor=cursor
             records,next_cursor=page_records(profile,cursor,api)
-            if records and next_cursor==current_cursor:
+            if records and next_cursor is not None and next_cursor==current_cursor:
                 raise SourceUnavailable("public provider cursor did not advance")
             for raw in records:
                 item=normalize_record(profile,raw)
