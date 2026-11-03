@@ -90,6 +90,27 @@ def probe():
                 outcomes[label]={"success":verified,"mismatch":mismatch}
             except (OSError,subprocess.TimeoutExpired,RuntimeError) as e:
                 outcomes[label]={"success":False,"error":str(e)}
+    # Backend maintainers document nephobox.com as the alternative domain
+    # when the default TeraBox host has regional upload errors.
+    # This optional synthetic check does not switch live credentials or data.
+    alt_data=b'{"kind":"SYNTHETIC_ALT_DOMAIN_QA"}\n'
+    alt_target=base+"/alternative-domain-qa.json"
+    with tempfile.NamedTemporaryFile(prefix="demand-alt-domain-qa-",delete=False) as tmp:
+        tmp.write(alt_data)
+        alt_path=tmp.name
+    try:
+        try:
+            cmd(["copyto",alt_path,alt_target,
+                 "--terabox-domain","https://nephobox.com"])
+            observed=cmd(["cat",alt_target,
+                          "--terabox-domain","https://nephobox.com"],tolerate=True)
+            outcomes["alternate-domain-optional"]={"success":observed==alt_data}
+        except (OSError,subprocess.TimeoutExpired,RuntimeError) as e:
+            outcomes["alternate-domain-optional"]={
+                "success":False,"error_class":type(e).__name__}
+    finally:
+        os.unlink(alt_path)
+
     # A second write to the SAME synthetic object tests TeraBox's duplicate-name
     # and eventual-consistency semantics, without touching production objects.
     collision_target=base+"/collision-test.json"
@@ -116,7 +137,7 @@ def probe():
     except RuntimeError as e:
         outcomes["same-key-overwrite"]={"error":str(e)}
     print("SYNTHETIC_TERABOX_WRITE_TEST",json.dumps(outcomes,sort_keys=True),flush=True)
-    if not all(r.get("success") for name,r in outcomes.items() if name!="same-key-overwrite"):
+    if not all(r.get("success") for name,r in outcomes.items() if name not in ("same-key-overwrite","alternate-domain-optional")):
         raise RuntimeError("Synthetic cloud write integrity failed; live archive remains unverified")
 
 
