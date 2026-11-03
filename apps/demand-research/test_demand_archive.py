@@ -260,11 +260,11 @@ def test_readback_race_preserves_original_first_observation(monkeypatch):
         def pending_capture_ids(self, existing):
             return []
 
-        def read(self, key, *, cap=70_000_000, optional=False):
+        def read(self, key, *, cap=70_000_000, optional=False, domain=None):
             if key.endswith("/capture.json") and not self.missing_once:
                 self.missing_once = True
                 return None
-            return super().read(key, cap=cap, optional=optional)
+            return super().read(key, cap=cap, optional=optional, domain=domain)
 
         def write_immutable(self, key, data):
             if key.endswith("/capture.json") and self.conflict_once:
@@ -780,3 +780,44 @@ def test_read_only_audit_waits_for_matching_remote_post_checksum(monkeypatch):
     assert status["sample_valid"]==1
     assert status["sample_mismatch"]==0
     assert stale["remaining"]==0
+
+
+def test_alternative_domain_salvages_primary_backend_rejection(monkeypatch):
+    class PrimaryRejected(FakeCloud):
+        def __init__(self):
+            super().__init__()
+            self.alternate_copies=0
+        def fake(self,args,data=None,timeout=150,allow_missing=False):
+            alternative="--terabox-domain" in args
+            if args[0] in ("copyto","rcat") and not alternative:
+                raise RuntimeError("private cloud "+args[0]+" failed (backend_rejected)")
+            if args[0]=="cat" and not alternative:
+                return None
+            if args[0]=="copyto" and alternative:
+                self.alternate_copies+=1
+            return super().fake(args,data=data,timeout=timeout,
+                                allow_missing=allow_missing)
+    cloud=PrimaryRejected()
+    p=post()
+    cloud.save_post(p)
+    assert cloud.alternate_copies==2,"post body and entry marker must independently pass readback"
+    assert json.loads(cloud.objects["posts/"+p["id"]+"/post.json"])==p
+    assert cloud.load_catalog(include_entries=True)[0]==p
+
+
+def test_alternate_domain_never_overwrites_conflicting_immutable_bytes(monkeypatch):
+    class PrimaryInvisible(FakeCloud):
+        def fake(self,args,data=None,timeout=150,allow_missing=False):
+            alternative="--terabox-domain" in args
+            if args[0]=="cat" and not alternative:
+                return None
+            if args[0] in ("copyto","rcat") and not alternative:
+                raise RuntimeError("private cloud "+args[0]+" failed (backend_rejected)")
+            return super().fake(args,data=data,timeout=timeout,
+                                allow_missing=allow_missing)
+    cloud=PrimaryInvisible()
+    key="posts/"+"d"*40+"/capture.json"
+    cloud.objects[key]=b"independent old source data"
+    with pytest.raises(RuntimeError,match="checksum conflict"):
+        cloud.write_immutable(key,b"new different source observation")
+    assert cloud.objects[key]==b"independent old source data"
