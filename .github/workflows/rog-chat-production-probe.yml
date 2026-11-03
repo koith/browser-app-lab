@@ -1,0 +1,61 @@
+name: 4LEAF published central chat production probe
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/rog-chat-production-probe.yml'
+      - 'apps/4leaf/rog/central-client.js'
+      - 'apps/4leaf/rog/app-version.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  actual-published-chat:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify public Pages serves exact chat client and free HTTPS authority is alive
+        shell: bash
+        run: |
+          set -euo pipefail
+          base='https://koith.github.io/browser-app-lab/apps/4leaf/rog'
+          api='https://fourleaf-central-chat-free.onrender.com'
+          for attempt in $(seq 1 24); do
+            if curl -fsSL --max-time 15 "$base/central-client.js?probe=$GITHUB_SHA" -o /tmp/live-chat.js &&
+               cmp -s /tmp/live-chat.js apps/4leaf/rog/central-client.js &&
+               curl -fsSL --max-time 15 "$base/index.html?probe=$GITHUB_SHA" -o /tmp/live-4leaf.html &&
+               grep -Fq 'leaf-revival-version" content="0.86.0-beta.54"' /tmp/live-4leaf.html &&
+               curl -fsSL --max-time 30 "$api/api/health" -o /tmp/live-chat-health.json &&
+               node -e "if(require('/tmp/live-chat-health.json').ok!==true)process.exit(1)" 2>/dev/null; then
+               echo "4LEAF PUBLISHED CHAT CLIENT AND HTTPS AUTHORITY HEALTH PASS"
+               node <<'NODE'
+          'use strict';
+          const assert=require('node:assert/strict');
+          (async()=>{
+            const origin='https://koith.github.io';
+            const api='https://fourleaf-central-chat-free.onrender.com';
+            const start=await fetch(api+'/api/session',{method:'POST',
+              headers:{origin,'content-type':'application/json'},
+              body:JSON.stringify({nick:'ReadOnlyQA'})});
+            assert.equal(start.status,201,'HTTPS authority accepts real browser-origin session');
+            const session=await start.json();
+            assert.match(session.token,/^[a-f0-9]{64}$/);
+            const rooms=await fetch(api+'/api/rooms?region=north&district='+encodeURIComponent('샤이닝 브리즈'),
+              {headers:{origin,authorization:'Bearer '+session.token}});
+            assert.equal(rooms.status,200);
+            const directory=await rooms.json();
+            assert.equal(directory.rooms.filter(r=>r.preset).length,8);
+            console.log('4LEAF LIVE CHAT ORIGIN, SESSION, CANONICAL ROOMS PASS');
+          })().catch(e=>{console.error(e);process.exitCode=1});
+          NODE
+               exit 0
+            fi
+            echo "Deployment/authority not yet confirmed: attempt $attempt of 24"
+            sleep 12
+          done
+          echo 'PUBLISHED CHAT LIVE VERIFICATION FAILED: do not mark as deployed'
+          exit 1
