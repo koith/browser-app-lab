@@ -5,11 +5,15 @@ Use the same configured owner account and path, never a credential workaround.
 """
 import argparse
 import json
+import os
 from pathlib import Path
 import re
 import subprocess
 import sys
 import tempfile
+import urllib.error
+import urllib.request
+from urllib.parse import urlsplit,quote
 
 from merge_incremental import flatten
 from safe_rclone import diagnostic
@@ -94,7 +98,69 @@ def read(remote,model,*,batch=None,minimum=1,reader=None):
 
 
 
-def read_with_current_owner_web_session(remote,model,*,minimum=1,reader=None,refresh=None):
+
+def read_via_existing_owner_gateway(remote,model,*,minimum=1,opener=None):
+    """Fallback ONLY to an authorized, fresh private catalog from our gateway.
+
+    The gateway and this repo's main-branch collector authenticate each other
+    with a short-lived GitHub Actions OIDC identity. No token, cookie, private
+    storage key or raw catalog is committed to GitHub or sent to public Pages.
+    """
+    expected={'mimmi':'archive:MimmiArchive/metadata/catalog.json',
+              'yui':'archive:YuiArchive/metadata/catalog.json'}.get(model)
+    if remote!=expected:
+        raise ValueError('Unapproved private model / catalog')
+    request_url=os.environ.get('ACTIONS_ID_TOKEN_REQUEST_URL','')
+    request_token=os.environ.get('ACTIONS_ID_TOKEN_REQUEST_TOKEN','')
+    target=urlsplit(request_url)
+    if (target.scheme!='https' or not target.hostname
+            or not target.hostname.endswith('.actions.githubusercontent.com')
+            or target.username or target.password or not request_token):
+        raise ProviderVerificationRequired('Collector GitHub OIDC identity unavailable')
+
+    if opener is None:
+        class NoRedirect(urllib.request.HTTPRedirectHandler):
+            def redirect_request(self,*args,**kwargs):
+                raise ProviderVerificationRequired('Authenticated catalog redirect rejected')
+        opener=urllib.request.build_opener(NoRedirect()).open
+
+    def fetch(request,limit,timeout):
+        try:
+            with opener(request,timeout=timeout) as response:
+                if getattr(response,'status',200)!=200:
+                    raise ProviderVerificationRequired('Owner gateway HTTP read unavailable')
+                raw=response.read(limit+1)
+                if not raw or len(raw)>limit:
+                    raise ProviderVerificationRequired('Owner gateway read exceeds bounds')
+                return raw
+        except (urllib.error.HTTPError,urllib.error.URLError,TimeoutError,OSError):
+            raise ProviderVerificationRequired('Owner gateway signed read unavailable') from None
+
+    audience='gallery-archive-terabox-sync'
+    sep='&' if target.query else '?'
+    request=urllib.request.Request(
+        request_url+sep+'audience='+quote(audience),
+        headers={'Authorization':'Bearer '+request_token})
+    try:
+        id_token=json.loads(fetch(request,24000,30)).get('value')
+    except (ValueError,TypeError,AttributeError):
+        raise ProviderVerificationRequired('Collector GitHub identity response invalid') from None
+    if not isinstance(id_token,str) or not 80<=len(id_token)<=12000:
+        raise ProviderVerificationRequired('Collector OIDC token missing')
+    endpoint='https://mimmi-private-gallery-free.onrender.com/internal/gallery-owner-catalog/'+model
+    request=urllib.request.Request(endpoint,method='POST',data=b'',
+                                   headers={'Authorization':'Bearer '+id_token,
+                                            'Content-Type':'application/octet-stream'})
+    raw=fetch(request,6_000_000,125)
+    if not matches(raw,model,None,minimum):
+        raise ProviderVerificationRequired('Gateway catalog identity or original-file count invalid')
+    print('OWNER_REMOTE_CATALOG_AUTHENTICATED_GATEWAY_READ',model,
+          'RAW_BYTES',len(raw),'PRIVATE_PATHS_LOGGED',False,
+          file=sys.stderr,flush=True)
+    return raw
+
+
+def read_with_current_owner_web_session(remote,model,*,minimum=1,reader=None,refresh=None,gateway_fallback=False,gateway_reader=None):
     """Try the owner's *existing*, authenticated /main session before metadata IO.
 
     The archive client can use its ordinary jsToken for API requests. The
@@ -109,35 +175,50 @@ def read_with_current_owner_web_session(remote,model,*,minimum=1,reader=None,ref
               'yui':'archive:YuiArchive/metadata/catalog.json'}.get(model)
     if remote!=expected:
         raise ValueError('Only the original model-specific owner catalog may refresh web state')
+    optional_network_errors=()
     if refresh is None:
         from owner_upload_web_token import update_current_process
+        import httpx
+        optional_network_errors=(httpx.RequestError,)
         refresh=update_current_process
-    from owner_upload_web_token import WebStateUnavailable
-    import httpx
     try:
         token=refresh()
         if not isinstance(token,str) or not token:
-            raise WebStateUnavailable('No owner web token')
+            raise ValueError('No owner web token')
         print('OWNER_AUTHENTICATED_WEB_STATE_READY_BEFORE_CATALOG',model,
               'TOKEN_DISCLOSED',False,file=sys.stderr,flush=True)
-    except (WebStateUnavailable,httpx.RequestError,OSError,TimeoutError) as error:
+    except Exception as error:
+        if not isinstance(error,(ValueError,OSError,TimeoutError)+optional_network_errors):
+            raise
         # A normal credential refresh failure does not license a different
         # account, source host, signed URL, or verification challenge bypass.
         print('OWNER_AUTHENTICATED_WEB_STATE_UNAVAILABLE',model,
               type(error).__name__,'COOKIE_ONLY_READ_REMAINS_SHA_GATED',True,
               file=sys.stderr,flush=True)
-    return read(remote,model,minimum=minimum,reader=reader)
+    try:
+        return read(remote,model,minimum=minimum,reader=reader)
+    except ProviderVerificationRequired:
+        if not gateway_fallback:
+            raise
+        if gateway_reader is None:
+            gateway_reader=read_via_existing_owner_gateway
+        # Existing remote metadata is still verified against the published
+        # photo baseline; do not accept public/unauthenticated index guesses.
+        raw=gateway_reader(remote,model,minimum=minimum)
+        if not matches(raw,model,None,minimum):
+            raise ProviderVerificationRequired('Signed gateway remote catalog failed complete identity and baseline validation')
+        return raw
 
 
 if __name__=='__main__':
     p=argparse.ArgumentParser();p.add_argument('--remote',required=True);p.add_argument('--model',choices=['mimmi','yui'],required=True)
-    p.add_argument('--out',type=Path,required=True);p.add_argument('--published-index',type=Path,required=True);p.add_argument('--refresh-existing-web-session',action='store_true');a=p.parse_args()
+    p.add_argument('--out',type=Path,required=True);p.add_argument('--published-index',type=Path,required=True);p.add_argument('--refresh-existing-web-session',action='store_true');p.add_argument('--signed-gateway-catalog-fallback',action='store_true');a=p.parse_args()
     index=json.loads(a.published_index.read_text())
     if index.get('model')!=a.model:raise ValueError('Wrong published owner model')
     minimum=sum(len(album['images']) for album in index['albums'])
     remote=a.remote.rstrip('/')+'/metadata/catalog.json'
     if a.refresh_existing_web_session:
-        raw=read_with_current_owner_web_session(remote,a.model,minimum=minimum)
+        raw=read_with_current_owner_web_session(remote,a.model,minimum=minimum,gateway_fallback=a.signed_gateway_catalog_fallback)
     else:
         raw=read(remote,a.model,minimum=minimum)
     a.out.write_bytes(raw)
