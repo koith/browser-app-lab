@@ -213,6 +213,18 @@ function imageState(image,failed){
 document.addEventListener('error',e=>{
  const img=e.target;
  if(!(img instanceof HTMLImageElement))return;
+ // If an exact-byte public saved cover is unavailable, use the matching
+ // authenticated private cover (then the existing original fallback).
+ if(img.dataset.owner&&img.dataset.ownerVariant==='local'){
+  const photo=ownerPhotoIndex.get(img.dataset.owner);
+  if(photo){
+   img.dataset.ownerVariant='cover';
+   YuiPrivate.asset(photo,'cover').then(url=>{
+    if(img.isConnected){img.hidden=false;img.removeAttribute('src');img.src=url}
+   }).catch(()=>{if(img.isConnected)imageState(img,true)});
+   return;
+  }
+ }
  // For private archived tiles, a broken preview is not evidence that the
  // separately SHA-verified original is unavailable.
  if(img.dataset.owner&&img.dataset.ownerVariant!=='original'){
@@ -240,7 +252,15 @@ function card(a,hasImages){
  const style='object-position:'+position[0]+'% '+position[1]+'%;object-fit:cover';
  const n=count?(expected!=null&&expected!==count?count+' / '+expected+'장':count+'장'):(expected!=null?expected+'장 · 미확보':'미확보 · 장수 미확인');
  const cloudCover=(selected?.ownerAlbum||selected?.vaultAlbum)?selected:null;
- const img=cloudCover?'<img data-owner="'+esc(cloudCover.url)+'" style="'+style+'" alt="'+esc(label)+' 표지">':cover?'<img loading="lazy" referrerpolicy="no-referrer" src="'+esc(cover)+'" style="'+style+'" alt="'+esc(label)+' 표지">':'<div class="placeholder">Y</div>';
+ // Use the SAME SHA and byte/dimension-verified public stored file before
+ // waiting for Render; keep the owner URL for original/full-size navigation.
+ const localCopy=cloudCover?localStored.filter(a=>canonicalId(a.id)===owned.id).flatMap(validImages).find(q=>
+  q.sha256===selected.sha256&&q.bytes===selected.bytes&&q.width===selected.width&&q.height===selected.height):null;
+ const img=cloudCover
+  ?(localCopy
+    ?'<img loading="lazy" referrerpolicy="no-referrer" data-owner="'+esc(cloudCover.url)+'" data-owner-variant="local" src="'+esc(localCopy.url)+'" style="'+style+'" alt="'+esc(label)+' 표지">'
+    :'<img data-owner="'+esc(cloudCover.url)+'" style="'+style+'" alt="'+esc(label)+' 표지">')
+  :cover?'<img loading="lazy" referrerpolicy="no-referrer" src="'+esc(cover)+'" style="'+style+'" alt="'+esc(label)+' 표지">':'<div class="placeholder">Y</div>';
  return '<button class="album"'+rotationAttributes(selected)+' data-id="'+esc(a.id)+'" data-available="'+(hasImages?'1':'0')+'" aria-label="'+esc(label+' · '+labels.publisher+' · '+n+' · '+labels.edition)+'">'+img+'<div class="gradient"></div><span class="cover-labels"><span class="publisher-sticker" title="발행사: '+esc(labels.publisher)+'">'+esc(labels.publisher)+'</span><span class="album-count">'+esc(n)+'</span></span><span class="edition-sticker" data-kind="'+esc(labels.kind)+'" title="'+esc(labels.detail)+'">'+esc(labels.edition)+'</span><strong class="name" title="'+esc(label)+'">'+esc(shortTitle)+'</strong></button>';
 }
 function photoHTML(p,i){return '<button class="photo"'+rotationAttributes(p)+' data-i="'+i+'" aria-label="'+esc(p.name)+' 사진 '+p.number+'"><img loading="lazy" referrerpolicy="no-referrer" '+((p.ownerAlbum||p.vaultAlbum)?'data-owner="'+esc(p.url):'src="'+esc(p.url))+'" alt="'+esc(p.name)+' 사진 '+p.number+'"><span>'+esc(p.name)+' · '+p.number+'</span></button>'}
