@@ -141,12 +141,12 @@ def preserve_encrypted_batch(cloud,spool,paths):
     return key
 
 
-def restore_with_budget(spool,path,cloud,*,max_seconds=MAX_RECORD_SECONDS):
-    """Limit each restore without bypassing TeraBox immutable SHA readback.
+def with_cloud_budget(cloud,work,*,max_seconds=MAX_RECORD_SECONDS):
+    """Bound both batch backup AND individual post restore.
 
-    Every subprocess invocation is shorter than the remaining per-original
-    budget. A stalled provider must not monopolize the entire Actions runner
-    and prevent the next encrypted artifact from being retried later.
+    TimeoutError deliberately escapes the TeraBox backend's ordinary
+    RuntimeError retry loops. The caller treats it as a safe unverified
+    provider failure. No cloud object is deleted or overwritten.
     """
     previous_runner=cloud.runner
     deadline=time.monotonic()+max_seconds
@@ -154,16 +154,21 @@ def restore_with_budget(spool,path,cloud,*,max_seconds=MAX_RECORD_SECONDS):
     def bounded_runner(args,data=None,timeout=150,allow_missing=False):
         remaining=deadline-time.monotonic()
         if remaining<=0:
-            raise RuntimeError("private encrypted restore time budget exceeded")
+            raise TimeoutError("private recovery time budget exceeded")
         return previous_runner(
             args,data=data,timeout=max(1,min(timeout,18,remaining)),
             allow_missing=allow_missing)
 
     cloud.runner=bounded_runner
     try:
-        return spool.restore(path,cloud)
+        return work()
     finally:
         cloud.runner=previous_runner
+
+
+def restore_with_budget(spool,path,cloud,*,max_seconds=MAX_RECORD_SECONDS):
+    return with_cloud_budget(cloud,lambda:spool.restore(path,cloud),
+                             max_seconds=max_seconds)
 
 
 def replay(cloud=None,local_directory=None):
@@ -225,10 +230,12 @@ def replay(cloud=None,local_directory=None):
             # Protect original ciphertext from Actions-artifact expiry with
             # one content-addressed cloud write before slow per-post uploads.
             try:
-                if preserve_encrypted_batch(active,spool,encrypted):
+                if with_cloud_budget(
+                        active,lambda:preserve_encrypted_batch(active,spool,encrypted),
+                        max_seconds=MAX_RECORD_SECONDS):
                     summary["batch_sha_verified"]+=1
                     summary["batch_ciphertext_count"]+=len(encrypted)
-            except (RuntimeError,ValueError,OSError,KeyError,TypeError):
+            except (RuntimeError,ValueError,OSError,KeyError,TypeError,TimeoutError):
                 summary["batch_failures"]+=1
             # Retry different source IDs on later recovery runs rather than
             # forever failing on the same first three immutable keys.
@@ -247,7 +254,7 @@ def replay(cloud=None,local_directory=None):
                     state=restore_with_budget(spool,path,active)
                     summary[state]+=1
                     consecutive_failures=0
-                except (RuntimeError,ValueError,KeyError,TypeError,OverflowError):
+                except (RuntimeError,ValueError,KeyError,TypeError,OverflowError,TimeoutError):
                     summary["buffer_failures"]+=1
                     consecutive_failures+=1
     finally:

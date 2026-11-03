@@ -1,7 +1,7 @@
 name: INTERSECTION — Verify and Rebuild Private TeraBox Archive
 on:
   schedule:
-    - cron: "23 * * * *"
+    - cron: "23 */6 * * *"
   workflow_dispatch:
   push:
     branches: [main]
@@ -15,12 +15,15 @@ permissions:
   contents: read
   actions: read
 concurrency:
-  group: intersection-private-archive-repair
+  # Same production group as encrypted replay, to avoid overlapping
+  # long-running cloud maintenance requests on the unofficial backend.
+  group: intersection-private-maintenance-production
   cancel-in-progress: false
+  queue: max
 jobs:
   repair-and-verify:
     runs-on: ubuntu-24.04
-    timeout-minutes: 35
+    timeout-minutes: 20
     env:
       RCLONE_CONFIG_ARCHIVE_TYPE: terabox
       # Single TeraBox upload chunk avoids parallel backend request bursts.
@@ -59,7 +62,7 @@ jobs:
         working-directory: apps/demand-research
         run: |
           set -euo pipefail
-          python rebuild_archive.py
+          timeout --signal=TERM --kill-after=10s 1050s python rebuild_archive.py
       - name: Flag encrypted recovery import failures after archive reconciliation
         if: always()
         run: |

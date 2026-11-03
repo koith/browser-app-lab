@@ -32,8 +32,11 @@ permissions:
   actions: read
 
 concurrency:
-  group: intersection-private-verified-recovery-${{ github.event_name == 'pull_request' && github.head_ref || 'production' }}
+  # Serialize long-running replay and catalog repair against the same private
+  # TeraBox account. Capture remains independent so discovery is not queued.
+  group: ${{ github.event_name == 'pull_request' && format('intersection-maintenance-pr-{0}', github.head_ref) || 'intersection-private-maintenance-production' }}
   cancel-in-progress: false
+  queue: max
 
 jobs:
   offline-tests:
