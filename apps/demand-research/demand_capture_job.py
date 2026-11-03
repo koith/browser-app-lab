@@ -431,6 +431,7 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
                     if spool is not None:
                         # Authenticated encryption BEFORE the first cloud call.
                         spool.save(pid,early)
+                    first_remote_verified=True
                     first_blob = cloud.read_first_observation(pid)
                     if first_blob is None:
                         # A stale 404 from a cloud backend can make a previously
@@ -443,7 +444,14 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
                         except RuntimeError:
                             first_blob = cloud.read_first_observation(pid)
                             if first_blob is None:
-                                raise
+                                if spool is None:
+                                    raise
+                                # The original public post is still visible.
+                                # Fetch its exact media NOW, before it becomes
+                                # unavailable, into a sealed emergency spool.
+                                # This is not counted as a TeraBox success.
+                                first_blob=canonical_json(early)
+                                first_remote_verified=False
                     first = json.loads(first_blob)
                     if (not isinstance(first, dict)
                             or first.get("id") != pid
@@ -455,7 +463,7 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
                             or not isinstance(first.get("media_links"), list)):
                         raise ValueError("early original capture mismatch; cannot silently replace")
                     if spool is not None:
-                        spool.save(pid,first,verified_remote_first=True)
+                        spool.save(pid,first,verified_remote_first=first_remote_verified)
                     row = {**row, "text": first["text"],
                            "posted_at": first["posted_at"],
                            "profile_url": first.get("profile_url", ""),
@@ -470,9 +478,20 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
                     if not post["archive_complete"]:
                         cloud.stage_partial_media(post,blobs)
                         partial += 1
-                        # The verified first-observation record already remains
-                        # in the cloud. Never finalize a permanently incomplete
-                        # post.json and mark it as a full backup.
+                        # A partial snapshot never becomes a falsely complete
+                        # immutable post. Its encrypted original remains queued.
+                        continue
+                    if not first_remote_verified:
+                        # We have preserved this exact public post AND its
+                        # original attachment bytes in the authenticated spool.
+                        # Continue discovery rather than discarding these
+                        # bytes or pretending they already exist in TeraBox.
+                        storage_error_kinds["first_snapshot:encrypted_recovery_pending"] = (
+                            storage_error_kinds.get("first_snapshot:encrypted_recovery_pending",0)+1)
+                        storage_failures += 1
+                        if storage_failures >= 3:
+                            capture_interrupted=True
+                            break
                         continue
                     saved_post = cloud.save_post(post, blobs)
                     if spool is not None:
