@@ -7,10 +7,13 @@ on:
     paths:
       - "apps/demand-research/demand_archive.py"
       - "apps/demand-research/demand_capture_job.py"
+      - "apps/demand-research/recovery_spool.py"
+      - "apps/demand-research/recover_spool_artifacts.py"
       - "apps/demand-research/test_demand_archive.py"
       - "apps/demand-research/test_terabox_parent_fallback.py"
       - "apps/demand-research/test_flat_first_observation.py"
       - "apps/demand-research/test_rebuild_index_readback.py"
+      - "apps/demand-research/test_recovery_spool.py"
       - "apps/demand-research/rebuild_archive.py"
       - ".github/workflows/demand-fast-capture.yml"
   push:
@@ -18,6 +21,8 @@ on:
     paths:
       - "apps/demand-research/demand_archive.py"
       - "apps/demand-research/demand_capture_job.py"
+      - "apps/demand-research/recovery_spool.py"
+      - "apps/demand-research/recover_spool_artifacts.py"
       - ".github/workflows/demand-fast-capture.yml"
 permissions:
   contents: read
@@ -40,8 +45,9 @@ jobs:
         run: |
           python -m pip install --disable-pip-version-check pytest==8.4.2
           cd apps/demand-research
-          python -m py_compile demand_archive.py demand_capture_job.py test_demand_archive.py test_terabox_parent_fallback.py test_flat_first_observation.py rebuild_archive.py test_rebuild_index_readback.py
-          python -m pytest -q test_demand_archive.py test_terabox_parent_fallback.py test_flat_first_observation.py test_rebuild_index_readback.py
+          python -m py_compile demand_archive.py demand_capture_job.py recovery_spool.py recover_spool_artifacts.py test_demand_archive.py test_terabox_parent_fallback.py test_flat_first_observation.py rebuild_archive.py test_rebuild_index_readback.py test_recovery_spool.py
+          python -m pip install --disable-pip-version-check cryptography==46.0.4
+          python -m pytest -q test_demand_archive.py test_terabox_parent_fallback.py test_flat_first_observation.py test_rebuild_index_readback.py test_recovery_spool.py
   capture:
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-24.04
@@ -52,6 +58,8 @@ jobs:
       DEMAND_TERABOX_REMOTE: "archive:DemandResearch"
       DEMAND_CAPTURE_PUBLIC_ALLOWED: "1"
       DEMAND_FAST_CAPTURE_MODE: "1"
+      DEMAND_ARCHIVE_RECOVERY_KEY: ${{ secrets.DEMAND_ARCHIVE_RECOVERY_KEY }}
+      DEMAND_RECOVERY_SPOOL_DIR: ${{ runner.temp }}/intersection-private-recovery
       GITHUB_RUN_ID: ${{ github.run_id }}
     steps:
       - uses: actions/checkout@v4
@@ -70,9 +78,21 @@ jobs:
           find /tmp/rclone-extra -type f -name rclone -exec sudo install -m 755 {} /usr/local/bin/rclone \;
           rclone help backends | grep -qi terabox
           rm -rf /tmp/rclone.zip /tmp/rclone-extra
-      - name: Capture source-verified public posts and verify private cloud persistence
+      - name: Install authenticated encryption for private recovery
+        run: python -m pip install --disable-pip-version-check cryptography==46.0.4
+      - name: Capture public originals with an encrypted pre-upload safety buffer
         working-directory: apps/demand-research
         run: |
           set -euo pipefail
-          python demand_capture_job.py
-          echo 'Private capture attempted; see aggregate-only counters in job log. Frequency is best-effort, not real-time or complete.' >> "$GITHUB_STEP_SUMMARY"
+          umask 077
+          timeout --signal=TERM --kill-after=10s 1080s python demand_capture_job.py
+          echo 'Private capture attempted; aggregate counters are in job log.' >> "$GITHUB_STEP_SUMMARY"
+      - name: Persist encrypted recovery buffers only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: intersection-private-recovery-${{ github.run_id }}
+          path: ${{ runner.temp }}/intersection-private-recovery/*.enc
+          retention-days: 14
+          if-no-files-found: ignore
+          compression-level: 0
