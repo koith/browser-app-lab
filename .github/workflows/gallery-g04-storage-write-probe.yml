@@ -1,0 +1,54 @@
+name: Gallery G04 Actual TeraBox Image Byte Write and Readback
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - apps/gallery-archive/g04_owner_write_probe.py
+      - .github/workflows/gallery-g04-storage-write-probe.yml
+permissions:
+  contents: read
+jobs:
+  isolated-owner-sha:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    concurrency:
+      group: gallery-terabox-private-mass-upload-${{ matrix.model }}
+      cancel-in-progress: false
+    strategy:
+      fail-fast: false
+      matrix:
+        model: [mimmi, yui]
+    env:
+      MODEL: ${{ matrix.model }}
+      MIMMI_COOKIE: ${{ secrets.MIMMI_TERABOX_NDUS }}
+      YUI_COOKIE: ${{ secrets.YUI_TERABOX_COOKIE }}
+      RCLONE_CONFIG_ARCHIVE_TYPE: terabox
+      RCLONE_CONFIG_ARCHIVE_UPLOAD_THREADS: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            apps/gallery-archive
+            apps/mimmi-gallery/cloud/gateway
+          sparse-checkout-cone-mode: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install 'Pillow==11.3.0' 'httpx==0.28.1'
+      - name: Install verified owner TeraBox storage client
+        run: |
+          set -euo pipefail
+          curl -fsSL https://github.com/gulp79/rclone-extra/releases/download/v1.75.2-extra/rclone-linux-amd64.zip -o "$RUNNER_TEMP/rclone.zip"
+          echo "78855325a2a8d83b3feee3a8363d32e1211babbf4cda6356fa8ca5f472075062  $RUNNER_TEMP/rclone.zip" | sha256sum -c -
+          mkdir -p "$RUNNER_TEMP/client" "$RUNNER_TEMP/bin"
+          unzip -q "$RUNNER_TEMP/rclone.zip" -d "$RUNNER_TEMP/client"
+          binary="$(find "$RUNNER_TEMP/client" -type f -name rclone -print -quit)"
+          install -m 755 "$binary" "$RUNNER_TEMP/bin/rclone"
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+      - name: Write exact JPEG and WebP fixture, independently SHA-read back
+        run: python apps/gallery-archive/g04_owner_write_probe.py --model "$MODEL" --run-id "$GITHUB_RUN_ID"
+      - name: Do not count diagnostic fixtures as archived gallery photos
+        if: always()
+        run: echo 'Only SHA-verified, real photo transactions in gallery collector can increase image counts.' >> "$GITHUB_STEP_SUMMARY"
