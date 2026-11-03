@@ -104,7 +104,7 @@
      if(text!==undefined)e.textContent=String(text);
      return e;
    };
-   let expanded=false,ranking=[];
+   let visibleCount=10,ranking=[];
    const dialog=$("activityRankingDialog"),detail=$("activityRankingDialogContent");
    function closeDetail(){
      if(!dialog)return;
@@ -160,7 +160,7 @@
         a.profileUrl.localeCompare(b.profileUrl));
      const list=$("activityRankingRows");
      list.replaceChildren();
-     const show=expanded?20:5;
+     const show=visibleCount;
      if(!sorted.length)list.append(node("div","activity-ranking-empty","랭킹 없음"));
      sorted.slice(0,show).forEach((g,index)=>{
        const card=node("button","activity-rank-card");
@@ -181,9 +181,9 @@
        list.append(card);
      });
      const more=$("activityRankingMore");
-     more.classList.toggle("hidden",sorted.length<=5);
-     more.setAttribute("aria-expanded",String(expanded));
-     more.textContent=expanded?"접기":"더 보기";
+     more.classList.toggle("hidden",sorted.length<=show);
+     more.setAttribute("aria-label",`랭킹 ${Math.min(10,Math.max(0,sorted.length-show))}명 더 보기`);
+     more.textContent="더 보기";
    }
    function update(){
      let snap;try{snap=win.INTERSECTION_publicRankingSnapshot?.();}catch{}
@@ -201,14 +201,14 @@
      if(scheduled)return;scheduled=true;
      win.queueMicrotask(()=>{scheduled=false;update();});
    }
-   $("activityRankingPlatform").addEventListener("change",()=>{expanded=false;closeDetail();draw();});
+   $("activityRankingPlatform").addEventListener("change",()=>{visibleCount=10;closeDetail();draw();});
    $("activityRankingSort").addEventListener("change",()=>{closeDetail();draw();});
-   $("activityRankingMore").addEventListener("click",()=>{expanded=!expanded;draw();});
+   $("activityRankingMore").addEventListener("click",()=>{visibleCount+=10;draw();});
    $("activityRankingDialogClose")?.addEventListener("click",closeDetail);
    dialog?.addEventListener("click",e=>{if(e.target===dialog)closeDetail();});
    dialog?.addEventListener("close",()=>detail?.replaceChildren());
    win.addEventListener("intersection:feed-updated",schedule);
-   win.addEventListener("intersection:date-range-change",()=>{expanded=false;closeDetail();schedule();});
+   win.addEventListener("intersection:date-range-change",()=>{visibleCount=10;closeDetail();schedule();});
    update();
  }
  return {compute,mount};
