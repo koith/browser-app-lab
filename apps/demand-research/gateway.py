@@ -419,7 +419,7 @@ async def media(post_id:str,index:int,request:Request,exp:int,sig:str):
 # expose the Python source tree, cloud files or private database via StaticFiles.
 @app.get("/{asset_name}",include_in_schema=False)
 async def viewer_script(asset_name:str):
-    if asset_name not in {"account_auto_analysis.js","account_index_client.js","account_group_client.js","account_watch.js","free_discovery.js"}:
+    if asset_name not in {"account_auto_analysis.js","account_index_client.js","account_group_client.js","account_watch.js","free_discovery.js","post_activity_ranking.js","target_archive_client.js"}:
         raise HTTPException(404,"Not found")
     return FileResponse(VIEW_FILE.parent/asset_name,media_type="application/javascript",
         headers={"Cache-Control":"no-store","X-Content-Type-Options":"nosniff"})
