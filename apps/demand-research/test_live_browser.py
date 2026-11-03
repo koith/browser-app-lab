@@ -152,7 +152,11 @@ def run(live=False):
             assert page.locator("#count").evaluate("e=>getComputedStyle(e).clipPath==='inset(50%)'"), "Verbose statistics must be screen-reader-only"
             assert page.locator("footer,#footnote,#showMore,#listMore").count()==0
             assert page.locator("#tabs,[data-term],section.toolbar,#freeDiscovery,#indexFind,#socialControls:not(.hidden)").count()==0
-            assert page.locator("header .head-inner > h1").count()==1
+            assert page.locator("header .head-inner > .head-title-group > h1").count()==1
+            assert page.locator("header .head-title-group > a.header-consumer-entry").count()==1
+            assert page.locator("header .header-consumer-entry").inner_text().strip()=="상품 수요 분석"
+            assert page.locator(".consumer-entry").count()==0, "Old oversized banner must be removed"
+            assert page.locator(".header-consumer-entry").get_attribute("href")=="./consumer/"
             assert page.locator("header .head-inner > .header-period #openDate").count()==1
             title_bounds=page.locator("header h1").bounding_box()
             date_bounds=page.locator("header #openDate").bounding_box()
@@ -168,6 +172,10 @@ def run(live=False):
             thumbnails=page.locator("article.post .post-thumb > img").count()
             assert n>0
             assert page.locator("article.post .source-badge").count()==n
+            assert page.locator("article.post .post-thumb > .source-badge--icon-only").count()==n
+            assert page.locator("article.post .post-thumb > .source-badge--icon-only").evaluate_all(
+                "els=>els.every(e=>e.textContent.trim()==='')"),"Source badges over thumbnails must have only logos"
+            assert page.locator("article.post .source-badge img").count()>=1
             assert page.locator("article.post a.author[target=_blank]").count()>0
 
             # Real canvas-alpha interaction: remove and restore at the pointer.
@@ -226,8 +234,12 @@ def run(live=False):
                 assert page.locator("#openDate").is_visible()
                 assert page.locator("#openDate").evaluate("e=>e.getBoundingClientRect().right")<=391
                 title=page.locator("header h1").bounding_box()
+                shortcut=page.locator("header .header-consumer-entry").bounding_box()
                 date=page.locator("header #openDate").bounding_box()
                 assert abs((title["y"]+title["height"]/2)-(date["y"]+date["height"]/2))<14
+                assert abs((title["y"]+title["height"]/2)-(shortcut["y"]+shortcut["height"]/2))<14
+                assert shortcut["x"]+shortcut["width"]<=date["x"]+2, "Shortcut must not overlap the date selector"
+                assert shortcut["x"]+shortcut["width"]<=391, "Shortcut must remain inside iPhone viewport"
                 page.locator("#openDate").click()
                 boxes=page.locator("#dateDialog input[type=date]").evaluate_all(
                   "els=>els.map(e=>e.getBoundingClientRect().toJSON())")
