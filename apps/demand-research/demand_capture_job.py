@@ -237,8 +237,8 @@ def download_media(url):
         return None
 
 
-def make_post(row, now, get_media=download_media):
-    pid = post_key(row["platform"], row["original_id"])
+def make_post(row, now, get_media=download_media, pid_override=None):
+    pid = pid_override or post_key(row["platform"], row["original_id"])
     sources = row["media_urls"]
     media = []
     blobs = []
@@ -277,6 +277,27 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None):
     saved = partial = duplicates = fetched = failures = 0
     known = {p["id"]: p for p in cloud.load_catalog()}
     known, recovered = cloud.recover_entries(known)
+    early_recovered = 0
+    # The earliest observed public text survives interrupted media/catalog stages.
+    for pid in cloud.pending_capture_ids(known)[:MAX_PER_RUN]:
+        raw = cloud.read("posts/" + pid + "/capture.json", cap=100_000, optional=True)
+        if raw is None:
+            continue
+        first = json.loads(raw)
+        if (first.get("id") != pid or first.get("platform") not in
+                ("bluesky", "mastodon", "misskey", "lemmy")
+                or not isinstance(first.get("text"), str)
+                or not public_url(first.get("source_url"))
+                or not isinstance(first.get("media_links"), list)):
+            raise ValueError("invalid original public capture record")
+        row = {"platform": first["platform"], "source_url": first["source_url"],
+               "text": first["text"], "posted_at": first["posted_at"],
+               "media_urls": first["media_links"][:MAX_MEDIA_PER_POST],
+               "media_expected": len(first["media_links"])}
+        post, blobs = make_post(row, first["observed_at"], pid_override=pid)
+        cloud.save_post(post, blobs)
+        known[pid] = post
+        early_recovered += 1
     seen_this_scan = set()
     for getter in sources:
         for term in TERMS:
@@ -307,8 +328,18 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None):
                 early = {"id": pid, "platform": row["platform"], "text": row["text"],
                          "source_url": row["source_url"], "posted_at": row["posted_at"],
                          "observed_at": now, "media_links": row["media_urls"]}
-                cloud.write_immutable("posts/" + pid + "/capture.json",
-                                      canonical_json(early))
+                key = "posts/" + pid + "/capture.json"
+                first_blob = cloud.read(key, cap=100_000, optional=True)
+                if first_blob is None:
+                    cloud.write_immutable(key, canonical_json(early))
+                else:
+                    first = json.loads(first_blob)
+                    if first.get("id") != pid or first.get("platform") != row["platform"]:
+                        raise ValueError("early capture integrity mismatch")
+                    row = {**row, "text": first["text"],
+                           "posted_at": first["posted_at"],
+                           "media_urls": first["media_links"],
+                           "media_expected": len(first["media_links"])}
                 post, blobs = make_post(row, now)
                 cloud.save_post(post, blobs)
                 known[pid] = post
@@ -322,7 +353,7 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None):
         catalog = {"posts": len(known), "catalog_sha256_verified": False,
                    "reason": "no new items"}
     result = {"fetched": fetched, "saved_verified": saved, "partial_media": partial,
-              "duplicates": duplicates, "recovered_entries": recovered,
+              "duplicates": duplicates, "recovered_entries": recovered, "recovered_early_snapshots": early_recovered,
               "source_query_failures": failures, "catalog": catalog,
               "scope": "confirmed_public_only", "poll_minutes": 5,
               "completeness_guaranteed": False}
