@@ -30,12 +30,15 @@ jobs:
       - name: Validate central client and server syntax
         run: |
           node --check apps/4leaf/rog/server/central.cjs
+          node --check apps/4leaf/rog/server/persistence-supabase.cjs
           node --check apps/4leaf/rog/central-client.js
           node --check apps/4leaf/rog/social-chat.js
       - name: Verify authenticated server occupancy, chat and permissions
         run: node --test apps/4leaf/rog/server/central.test.cjs
       - name: Exercise real authority session expiry and room isolation
         run: node --test apps/4leaf/rog/tests/central-client-recovery.cjs
+      - name: Verify encrypted remote state, restart recovery and rollback
+        run: node --test apps/4leaf/rog/server/durability.test.cjs
       - name: Build and boot the deployable Docker authority
         run: |
           set -euo pipefail
