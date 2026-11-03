@@ -210,13 +210,13 @@ class CloudArchive:
         # Already shallow: do not recursively create aliases.
         if key.startswith("metadata/") and key.count("/")==1:
             return None
-        match=re.fullmatch(r"posts/([a-f0-9]{40})/capture\\.json",key)
+        match=re.fullmatch(r"posts/([a-f0-9]{40})/capture\.json",key)
         if match:
             return "metadata/early-"+match.group(1)+".json"
         for pattern,prefix in (
-                (r"metadata/entries/([a-f0-9]{40})\\.json","flat-entry-"),
-                (r"metadata/entries-repaired/([a-f0-9]{40})\\.json","flat-repaired-"),
-                (r"metadata/manifests/(manifest-[0-9]{6,30}\\.json)","flat-")):
+                (r"metadata/entries/([a-f0-9]{40})\.json","flat-entry-"),
+                (r"metadata/entries-repaired/([a-f0-9]{40})\.json","flat-repaired-"),
+                (r"metadata/manifests/(manifest-[0-9]{6,30}\.json)","flat-")):
             match=re.fullmatch(pattern,key)
             if match:
                 return "metadata/"+prefix+match.group(1)+(".json" if prefix=="flat-entry-" or prefix=="flat-repaired-" else "")
@@ -265,9 +265,7 @@ class CloudArchive:
     def names(self, prefix):
         raw = self.command(["lsf", self.remote + "/" + prefix,
                             "--files-only", "--retries", "2"], timeout=120, allow_missing=True)
-        if raw is None:
-            return []
-        lines = raw.decode("utf-8", "replace").splitlines()
+        lines = raw.decode("utf-8", "replace").splitlines() if raw is not None else []
         if prefix in ("metadata/entries","metadata/entries-repaired",
                       "metadata/manifests"):
             # Nested lsf may be broken even though the flat metadata root is
@@ -281,9 +279,9 @@ class CloudArchive:
                 flattened=None
             if flattened:
                 pattern={
-                    "metadata/entries":r"flat-entry-([a-f0-9]{40})\\.json",
-                    "metadata/entries-repaired":r"flat-repaired-([a-f0-9]{40})\\.json",
-                    "metadata/manifests":r"flat-(manifest-[0-9]{6,30}\\.json)",
+                    "metadata/entries":r"flat-entry-([a-f0-9]{40})\.json",
+                    "metadata/entries-repaired":r"flat-repaired-([a-f0-9]{40})\.json",
+                    "metadata/manifests":r"flat-(manifest-[0-9]{6,30}\.json)",
                 }[prefix]
                 for name in flattened.decode("utf-8","replace").splitlines():
                     match=re.fullmatch(pattern,name)
