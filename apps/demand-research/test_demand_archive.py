@@ -760,6 +760,27 @@ def test_compact_index_accepts_concurrent_appended_verified_post(monkeypatch):
     assert len(cloud.load_catalog(include_entries=True))==2
 
 
+def test_read_only_audit_waits_for_matching_remote_post_checksum(monkeypatch):
+    from inspect_terabox_status import inspect
+    cloud=FakeCloud()
+    monkeypatch.setenv("RCLONE_CONFIG_ARCHIVE_COOKIE","offline-test")
+    p=post()
+    cloud.save_post(p)
+    cloud.publish_catalog({p["id"]:p},"123456965")
+    original=cloud.fake
+    stale={"remaining":2}
+    def temporary_old_post(args,data=None,timeout=150,allow_missing=False):
+        if (args[0]=="cat" and args[1].endswith("/post.json")
+                and stale["remaining"]>0):
+            stale["remaining"]-=1
+            return b"wrong temporary cloud response"
+        return original(args,data=data,timeout=timeout,allow_missing=allow_missing)
+    cloud.runner=temporary_old_post
+    status=inspect(cloud)
+    assert status["sample_valid"]==1
+    assert status["sample_mismatch"]==0
+    assert stale["remaining"]==0
+
 def test_missing_original_attachment_is_retryable_not_a_frozen_backup(monkeypatch):
     """Keep first observation, but never publish a permanently incomplete post."""
     from datetime import datetime, timezone

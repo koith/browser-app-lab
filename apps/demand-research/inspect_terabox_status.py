@@ -29,10 +29,12 @@ def inspect(cloud=None, sample_size=8):
             break
         try:
             meta=json.loads(cloud.read(parent+"/"+name,cap=1024))
-            data=cloud.read("posts/"+pid+"/post.json",cap=100_000)
-            good=(isinstance(meta,dict) and meta.get("id")==pid and
-                  re.fullmatch(r"[0-9a-f]{64}",str(meta.get("sha256",""))) and
-                  sha256(data)==meta.get("sha256"))
+            valid_marker=(isinstance(meta,dict) and meta.get("id")==pid and
+                          re.fullmatch(r"[0-9a-f]{64}",str(meta.get("sha256",""))))
+            data=(cloud.read_verified("posts/"+pid+"/post.json",
+                                      meta["sha256"],cap=100_000)
+                  if valid_marker else None)
+            good=bool(valid_marker and data is not None)
             ok += bool(good)
             bad += not bool(good)
         except (RuntimeError,ValueError,TypeError,KeyError):
