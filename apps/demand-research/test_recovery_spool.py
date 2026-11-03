@@ -278,7 +278,12 @@ def test_replay_circuit_breaker_preserves_deferred_encrypted_buffers(tmp_path,mo
     assert outcome["deferred_buffers"]==2
     assert outcome["encrypted_buffers"]==3
     assert len(list(tmp_path.glob("*.enc")))==5,"deferred ciphertext is never discarded"
-    assert cloud.objects=={}
+    # A verified ciphertext-only pack protects source originals despite
+    # failed per-post uploads; it must NOT become a post/journal success.
+    assert outcome["batch_sha_verified"]==1
+    assert outcome["batch_ciphertext_count"]==5
+    assert len(cloud.objects)==1
+    assert next(iter(cloud.objects)).startswith("metadata/recovery-pack-")
 
 
 def test_replay_per_record_runner_budget_preserves_exact_original(tmp_path):
