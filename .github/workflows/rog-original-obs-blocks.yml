@@ -81,6 +81,13 @@ jobs:
             if [ -d "$directory" ]; then git add -f -- "$directory"; fi
           done
           git diff --cached --quiet || git commit -m "data(4leaf): OBS members decoded block by block with own palettes; complete animation tables"
+          # The downloader/decoder may also modify tracked scratch manifests
+          # outside the committed evidence paths. Rebase requires a clean
+          # tracked worktree; retain the committed original blobs, and show
+          # the remaining files in the Actions log before cleaning.
+          echo 'POST-COMMIT WORKTREE RESIDUE'
+          git status --short | head -80 || true
+          git reset --hard HEAD
           for attempt in 1 2 3; do
             git fetch origin "$GITHUB_REF_NAME"
             git rebase "origin/$GITHUB_REF_NAME"
