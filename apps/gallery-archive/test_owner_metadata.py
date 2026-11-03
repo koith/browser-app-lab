@@ -1,11 +1,13 @@
 """Provider success-shaped JSON is never accepted as a verified owner document."""
 import json
+import os
 from pathlib import Path
 from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
-from read_owner_metadata import read,matches,ProviderVerificationRequired
+from read_owner_metadata import read,matches,ProviderVerificationRequired,read_with_current_owner_web_session
+from owner_upload_web_token import WebStateUnavailable
 
 
 class OwnerMetadataTests(unittest.TestCase):
@@ -71,6 +73,47 @@ class OwnerMetadataTests(unittest.TestCase):
         with patch('read_owner_metadata.subprocess.run',side_effect=invalid):
             with self.assertRaises(ProviderVerificationRequired):
                 read(self.remote,'mimmi',reader=lambda *a,**k:b'{"errno":400141}')
+
+
+    def test_refreshes_existing_same_account_web_state_before_catalog_read(self):
+        from unittest.mock import Mock
+        token='t'*48
+        def refresh():
+            os.environ['RCLONE_CONFIG_ARCHIVE_JSTOKEN']=token
+            return token
+        def stored_reader(*args,**kwargs):
+            self.assertEqual(os.environ.get('RCLONE_CONFIG_ARCHIVE_JSTOKEN'),token)
+            return self.raw
+        with patch.dict(os.environ,{},clear=False),patch('read_owner_metadata.subprocess.run') as file_copy:
+            self.assertEqual(read_with_current_owner_web_session(
+                self.remote,'mimmi',reader=stored_reader,refresh=refresh),self.raw)
+            file_copy.assert_not_called()
+
+    def test_existing_web_session_unavailable_preserves_cookie_only_sha_safe_read(self):
+        def missing():
+            raise WebStateUnavailable('Owner session needs normal login')
+        with patch('read_owner_metadata.subprocess.run') as file_copy:
+            result=read_with_current_owner_web_session(
+                self.remote,'mimmi',reader=lambda *a,**k:self.raw,refresh=missing)
+            self.assertEqual(result,self.raw)
+            file_copy.assert_not_called()
+
+    def test_existing_session_refresh_never_bypasses_actual_provider_verification(self):
+        with patch('read_owner_metadata.subprocess.run',return_value=SimpleNamespace(returncode=1)) as file_copy:
+            with self.assertRaises(ProviderVerificationRequired):
+                read_with_current_owner_web_session(
+                    self.remote,'mimmi',reader=lambda *a,**k:b'{"errno":400141}',
+                    refresh=lambda:'t'*48)
+            self.assertEqual(file_copy.call_count,1)
+
+    def test_wrong_archive_is_rejected_before_any_web_request(self):
+        from unittest.mock import Mock
+        refresh=Mock(return_value='t'*48)
+        with self.assertRaises(ValueError):
+            read_with_current_owner_web_session(
+                'archive:Unknown/metadata/catalog.json','mimmi',
+                reader=lambda *a,**k:self.raw,refresh=refresh)
+        refresh.assert_not_called()
 
 
 if __name__=='__main__':unittest.main(verbosity=2)
