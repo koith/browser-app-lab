@@ -330,20 +330,19 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None):
                          "observed_at": now, "media_links": row["media_urls"]}
                 key = "posts/" + pid + "/capture.json"
                 first_blob = cloud.read(key, cap=100_000, optional=True)
+                capture_at = now
                 if first_blob is None:
                     cloud.write_immutable(key, canonical_json(early))
                 else:
                     first = json.loads(first_blob)
                     if first.get("id") != pid or first.get("platform") != row["platform"]:
                         raise ValueError("early capture integrity mismatch")
-                    now_for_post = first["observed_at"]
+                    capture_at = first["observed_at"]
                     row = {**row, "text": first["text"],
                            "posted_at": first["posted_at"],
                            "media_urls": first["media_links"],
                            "media_expected": len(first["media_links"])}
-                post, blobs = make_post(row, locals().get("now_for_post", now))
-                if "now_for_post" in locals():
-                    del now_for_post
+                post, blobs = make_post(row, capture_at)
                 cloud.save_post(post, blobs)
                 known[pid] = post
                 saved += 1
