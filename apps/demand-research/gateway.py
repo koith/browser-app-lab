@@ -13,6 +13,8 @@ import account_index_sources
 import account_groups
 from demand_archive import CloudArchive
 
+from target_archive_api import create_router as create_target_archive_router
+
 app=FastAPI(title="Demand Research Private Cloud",docs_url=None,redoc_url=None)
 app.add_middleware(CORSMiddleware,allow_origins=["https://koith.github.io","http://localhost:8765"],allow_methods=["GET","OPTIONS"],allow_headers=["Authorization","Content-Type"])
 REMOTE=os.getenv("DEMAND_TERABOX_REMOTE","archive:DemandResearch").rstrip("/")
@@ -431,3 +433,6 @@ async def viewer_asset(asset_name:str):
         raise HTTPException(404,"Not found")
     return FileResponse(path,media_type="image/svg+xml",
                         headers={"Cache-Control":"public,max-age=3600","X-Content-Type-Options":"nosniff"})
+
+# Authenticated command routes are separate from public read-only APIs.
+app.include_router(create_target_archive_router(check_auth))
