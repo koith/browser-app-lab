@@ -54,6 +54,8 @@ jobs:
     timeout-minutes: 23
     env:
       RCLONE_CONFIG_ARCHIVE_TYPE: terabox
+      # Single TeraBox upload chunk avoids parallel backend request bursts.
+      RCLONE_CONFIG_ARCHIVE_UPLOAD_THREADS: "1"
       RCLONE_CONFIG_ARCHIVE_COOKIE: ${{ secrets.DEMAND_TERABOX_NDUS || secrets.YUI_TERABOX_NDUS || secrets.YUI_TERABOX_COOKIE }}
       DEMAND_TERABOX_REMOTE: "archive:DemandResearch"
       DEMAND_CAPTURE_PUBLIC_ALLOWED: "1"
