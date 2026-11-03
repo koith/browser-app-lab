@@ -210,3 +210,30 @@ with patch.object(gateway.jwt,"get_unverified_header",return_value={"alg":"RS256
     decoder.return_value=base_claims
 
 print("OWNER_SIGNED_CATALOG_READ_QA_PASS")
+
+# Authenticated, SHA-name-bound pending source manifests are read-only.
+pending_sha="d"*64
+pending_fixture={
+    "schema_version":1,"model":"mimmi","source_batch_sha256":pending_sha,
+    "albums":[{"id":"mimmi-test","images":[{"sha256":"a"*64}]}]
+}
+async def pending_read(key,limit,*,remote=None):
+    assert remote=="archive:MimmiArchive"
+    assert key=="metadata/pending-individual/mimmi/"+pending_sha+".json"
+    return json.dumps(pending_fixture).encode()
+gateway.rclone_bytes=pending_read
+with TestClient(gateway.app) as client:
+    path="/internal/gallery-owner-pending/mimmi/"+pending_sha
+    assert client.post(path).status_code==403
+    assert client.post("/internal/gallery-owner-pending/mimmi/invalid").status_code==404
+    with patch.object(gateway,"_verify_sync_identity",
+                      side_effect=lambda value,workflow:value=="valid" and workflow==gateway._COLLECT_WORKFLOW):
+        headers={"Authorization":"Bearer valid"}
+        result=client.post(path,headers=headers)
+        assert result.status_code==200,result.text
+        assert result.json()["source_batch_sha256"]==pending_sha
+        assert result.headers["cache-control"]=="private, no-store"
+        assert client.post(path,headers=headers,content=b"not-empty").status_code==413
+        pending_fixture["source_batch_sha256"]="e"*64
+        assert client.post(path,headers=headers).status_code==503
+print("OWNER_PENDING_SIGNED_BATCH_READ_QA_PASS")
