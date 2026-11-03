@@ -91,6 +91,12 @@ with TestClient(gateway.app) as client:
     assert client.get("/api/yui/catalog").status_code==200
     loaded=client.get("/api/yui/catalog",headers=headers)
     assert loaded.status_code==200 and loaded.json()["model"]=="yui"
+    # Published viewer metadata must carry the SHA *and* byte count for each
+    # non-sensitive preview. The live real-byte test uses both independently.
+    view_photo=loaded.json()['albums'][0]['images'][0]
+    assert view_photo['preview_sha256']==yui_preview_sha
+    assert view_photo['preview_bytes']==len(yui_preview)
+    assert not {'key','source_photo_number','historical_sha256'}&view_photo.keys()
     photo=client.get("/api/yui/media/yui-only/4/original",headers=headers)
     assert photo.status_code==200 and photo.content==yui_raw
     preview=client.get("/api/yui/media/yui-only/4/preview",headers=headers)
