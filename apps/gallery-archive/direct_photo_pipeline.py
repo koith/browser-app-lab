@@ -13,6 +13,7 @@ import json
 from pathlib import Path
 import re
 import sys
+import time
 from urllib.parse import urljoin, urlsplit, urlunsplit, parse_qsl, urlencode
 
 from bs4 import BeautifulSoup
@@ -21,7 +22,7 @@ from photo_quality_evidence import preferred_pair, _decoded, _detail
 
 ROOT=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT/'apps/yui-gallery'))
-from public_photo_archive import PublicSession,public_failure
+from public_photo_archive import PublicSession,public_failure,USER_AGENT as PUBLIC_USER_AGENT
 from collect_private_batch import allowed_url, safe_reencoded_public_preview
 
 MODEL_PATTERNS={'mimmi':re.compile(r'(?<![a-z])mimmi(?![a-z])|밈미|밈미',re.I),
@@ -141,6 +142,17 @@ def reviewed_direct_media(url, page, model):
         return (p.scheme=='https' and p.hostname in {'teapawt.net','pbs.twimg.com'}
                 and not p.username and not p.password and not p.fragment)
     return False
+
+
+def public_media_candidate_on_hold(client, url):
+    """Skip only an already observed access/policy/cooldown hold, not new sites."""
+    p=urlsplit(url);origin=p.scheme+'://'+p.netloc
+    if origin in getattr(client,'blocked_origins',set()):return True
+    robots=getattr(client,'robots',{}).get(origin)
+    if robots is not None and not robots.can_fetch(PUBLIC_USER_AGENT,url):
+        return True
+    until=getattr(client,'cooldowns',{}).get(origin,(0,None))[0]
+    return until>time.monotonic()
 
 
 def verified_creator_feed_candidates(base, page_cycle=0):
@@ -664,7 +676,7 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
     if owner.get('model')!=model or owner.get('schema_version')!=1 or not owner.get('albums'):
         raise ValueError('Current owner catalog required; do not assume empty archive')
     base=root/'apps'/(model+'-gallery')
-    inputs=(['official-previews.json','v2ph-actor-previews.json','pixibb-public-previews.json'] if model=='mimmi' else ['additional-source-albums.json'])+['public-work-pages.json']
+    inputs=(['official-previews.json','v2ph-actor-previews.json'] if model=='mimmi' else ['additional-source-albums.json'])+['public-work-pages.json']
     old_albums={a['id']:a for a in owner['albums']};saved_sha={p['sha256'] for a in owner['albums'] for p in a['images']}
     # A locally visible GitHub Pages copy is not proof of a remote TeraBox
     # original+preview pair. Keep both ledgers separate for official recovery.
@@ -1017,8 +1029,7 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                 if new_total>=max_new:break
                 # A genuine denied/rate-limited origin is stopped by PublicSession.
                 # Do not turn one denial into dozens of futile network attempts.
-                media_origin=urlsplit(url).scheme+'://'+urlsplit(url).netloc
-                if media_origin in getattr(client,'blocked_origins',set()):
+                if public_media_candidate_on_hold(client,url):
                     deferred_media_due_to_origin_pause+=1
                     continue
                 if reviewed_source_only and not reviewed_direct_media(url,page,model):
@@ -1112,6 +1123,9 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                      'declared_photo_total_not_download_proof':declared_count,
                      'unfilled_declared_count_not_verified_missing':deficit,
                      'failure_categories':reason_counts,
+                     'failure_causes':dict(Counter(
+                         (e.get('cause') or 'unknown') for e in errors
+                         if isinstance(e,dict))),
                      'failures':errors,'cloud_readback_pass':0,'gallery_open_pass':0}
         results.append(work_result)
         print('DIRECT_WORK_SOURCE_EVIDENCE',model,aid,json.dumps({
