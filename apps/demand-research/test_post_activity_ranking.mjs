@@ -107,6 +107,36 @@ document.querySelector('[data-rank-cohort="established"]').click();
 assert.equal(document.querySelectorAll(".activity-rank-card").length,1);
 dom.window.close();
 
+// A one-post public search result can be an established account.
+// The official, bounded Bluesky profile metadata must fix that classification.
+const oldAccount=row("single1","https://bsky.app/profile/veteran.bsky.social",
+  {likes:0},"bluesky","기존 사용자",2);
+const ageDom=new JSDOM(html,{url:"https://koith.github.io/browser-app-lab/apps/demand-research/",
+  runScripts:"outside-only"});
+let profileRequests=0;
+ageDom.window.INTERSECTION_publicRankingSnapshot=()=>({
+  fromMs:from,toMs:to,verified:[oldAccount]
+});
+ageDom.window.fetch=async (url,opts)=>{
+  profileRequests++;
+  assert.match(url,/app.bsky.actor.getProfiles/);
+  assert.equal(new URL(url).searchParams.get("actors"),"veteran.bsky.social");
+  assert.equal(opts.credentials,"omit");
+  return {ok:true,json:async()=>({profiles:[{
+    did:"did:plc:abcdefghijklmnopqrstuvwxyz",
+    handle:"veteran.bsky.social",createdAt:"2021-05-01T00:00:00Z",postsCount:122
+  }]})};
+};
+ageDom.window.eval(script);
+await new Promise(resolve=>setTimeout(resolve,0));
+assert.equal(profileRequests,1,"one official getProfiles lookup");
+assert.equal(ageDom.window.document.querySelectorAll(".activity-rank-card").length,1,
+  "known old account must appear even if just one post in selected period");
+ageDom.window.document.querySelector('[data-rank-cohort="new"]').click();
+assert.equal(ageDom.window.document.querySelectorAll(".activity-rank-card").length,0,
+  "verified older account not misclassified as newcomer");
+ageDom.close();
+
 const main=fs.readFileSync(path.join(dir,"index.html"),"utf8");
 const posPanel=main.indexOf('id="activityRanking"'),posFeed=main.indexOf('id="feed"');
 assert.ok(posPanel>0&&posFeed>posPanel,"ranking physically above post feed");
