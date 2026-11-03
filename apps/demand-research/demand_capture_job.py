@@ -274,7 +274,6 @@ def make_post(row, now, get_media=download_media, pid_override=None, cloud=None)
 
 def public_error_class(err):
     """Strictly whitelisted aggregation. Never log post text/IDs/URLs/errors."""
-    msg=str(err).lower()
     categories=(
         ("early original capture mismatch","first_observation_conflict"),
         ("immutable archive key collision","immutable_key_conflict"),
@@ -282,6 +281,7 @@ def public_error_class(err):
         ("private cloud readback did not converge","readback_mismatch"),
         ("after alternate methods","backend_write_unverified"),
         ("(rate_limited)","backend_rate_limit"),
+        ("(duplicate)","backend_duplicate"),
         ("(authorization)","backend_authorization"),
         ("(missing)","backend_missing_path"),
         ("(network_timeout)","backend_timeout"),
@@ -291,7 +291,20 @@ def public_error_class(err):
         ("checksum","checksum_failure"),
         ("bad original media","media_integrity_failure")
     )
-    return next((name for pattern,name in categories if pattern in msg),"unclassified_failure")
+    chain=[]
+    current=err
+    for _ in range(4):
+        if current is None:
+            break
+        chain.append(str(current).lower())
+        current=current.__cause__
+    # The outer message "write unverified" hides the useful safe error class
+    # from the original rclone invocation. Prefer the root cause.
+    for msg in reversed(chain):
+        for pattern,name in categories:
+            if pattern in msg:
+                return name
+    return "unclassified_failure"
 
 
 def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=False):
@@ -402,6 +415,7 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
                     budget_exhausted = True
                     break
                 seen_this_scan.add(pid)
+                phase="read_first_snapshot"
                 try:
                     # First remote write contains observed public text, ahead of media fetch.
                     early = {"id": pid, "platform": row["platform"], "text": row["text"],
@@ -415,6 +429,7 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
                         # written immutable original look missing. On conflicting
                         # readback, inspect the earlier snapshot and never clobber it.
                         try:
+                            phase="write_first_snapshot"
                             cloud.write_immutable(key, canonical_json(early))
                             first_blob = canonical_json(early)
                         except RuntimeError:
@@ -436,6 +451,7 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
                            "profile_url": first.get("profile_url", ""),
                            "media_urls": first["media_links"],
                            "media_expected": len(first["media_links"])}
+                    phase="write_post_and_verify_media"
                     post, blobs = make_post(row, first["observed_at"], cloud=cloud)
                     if not post["archive_complete"]:
                         cloud.stage_partial_media(post,blobs)
@@ -454,7 +470,8 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
                     # Only a fixed category, never raw backend output or a
                     # personal source link, appears in public workflow logs.
                     kind=public_error_class(error)
-                    storage_error_kinds[kind]=storage_error_kinds.get(kind,0)+1
+                    label=phase+":"+kind
+                    storage_error_kinds[label]=storage_error_kinds.get(label,0)+1
                     storage_failures += 1
                     seen_this_scan.discard(pid)
                     if storage_failures >= 3:
