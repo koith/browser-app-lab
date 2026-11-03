@@ -144,6 +144,9 @@ def list_pending_entries(remote,model,reader=None):
             if not sep or not re.fullmatch(r'[0-9]+',size_raw):
                 raise ValueError('Untrusted alternate queue size/path')
             size=int(size_raw)
+            if ('..' in name.split('/') or name.startswith('/')
+                    or '\\' in name or not name):
+                raise ValueError('Unsafe alternate pending queue path')
             exact=canonical_pending_name(name,model)
             if exact is None:
                 ignored+=1
