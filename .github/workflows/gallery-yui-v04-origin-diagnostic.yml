@@ -1,0 +1,23 @@
+name: Yui v04 Owner Original Exact Byte and Pixel Diagnostic
+on:
+  push:
+    paths:
+      - 'apps/gallery-archive/diagnose_yui_v04_origin.py'
+      - '.github/workflows/gallery-yui-v04-origin-diagnostic.yml'
+  pull_request:
+    paths:
+      - 'apps/gallery-archive/diagnose_yui_v04_origin.py'
+      - '.github/workflows/gallery-yui-v04-origin-diagnostic.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect-real-v04-pixels:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: python -m pip install 'requests>=2.31,<3' 'Pillow>=10,<13'
+      - run: python apps/gallery-archive/diagnose_yui_v04_origin.py
