@@ -72,6 +72,24 @@ class PendingTests(unittest.TestCase):
         self.assertEqual(found,[{'Path':'d'*64+'.json','Size':1753}])
         self.assertEqual(commands,['lsjson','lsf'])
 
+    def test_exact_model_prefixed_paths_are_normalized_without_cross_model(self):
+        from load_pending_individual import canonical_pending_name
+        sha='e'*64+'.json'
+        names=[sha,'metadata/pending-individual/mimmi/'+sha,
+               'pending-individual/mimmi/'+sha]
+        for raw_name in names:
+            def reader(args):
+                self.assertEqual(args[0],'lsjson')
+                return json.dumps([{'Path':raw_name,'Size':1600}]).encode()
+            self.assertEqual(list_pending_entries(
+                'archive:MimmiArchive','mimmi',reader),
+                [{'Path':sha,'Size':1600}])
+        for rejected in ('metadata/pending-individual/yui/'+sha,
+                         '../mimmi/'+sha,'x/'+sha,
+                         'metadata/pending-individual/mimmi/../'+sha):
+            self.assertIsNone(canonical_pending_name(rejected,'mimmi'))
+
+
     def test_unrelated_primary_listing_is_not_false_pending_absence(self):
         commands=[]
         def reader(args):
