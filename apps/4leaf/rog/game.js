@@ -126,7 +126,9 @@ const safe=(v,f)=>{
  }catch(error){
   if(v==='match'&&raw!==null){
    unreadableSavedMatchRaw=raw;
-   console.warn('4LEAF saved game is unreadable; original storage retained for recovery',error);
+   // SyntaxError messages can quote source JSON fragments containing names.
+   // Log only the error category; never expose the damaged save contents.
+   console.warn('4LEAF saved game is unreadable; original storage retained for recovery',error?.name||'parse-error');
   }
   return f;
  }
