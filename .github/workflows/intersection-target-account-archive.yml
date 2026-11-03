@@ -38,6 +38,7 @@ on:
       - "apps/demand-research/target_account_enrichment.py"
       - "apps/demand-research/target_account_viewer.py"
       - "apps/demand-research/test_target_account_viewer.py"
+      - "apps/demand-research/test_account_archive_browser.py"
       - "apps/demand-research/account_archive_view.html"
       - "apps/demand-research/account_archive_view.css"
       - "apps/demand-research/account_archive_view.js"
@@ -61,7 +62,7 @@ jobs:
       group: intersection-target-qa-${{ github.head_ref }}
       cancel-in-progress: true
     runs-on: ubuntu-24.04
-    timeout-minutes: 7
+    timeout-minutes: 13
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -76,6 +77,9 @@ jobs:
           node --check target_archive_client.js
           node --check account_archive_view.js
           python -m pytest -q test_target_account_archive.py test_target_account_viewer.py test_target_archive_api.py test_demand_archive.py test_gateway.py
+          python -m pip install --disable-pip-version-check playwright==1.56.0
+          python -m playwright install --with-deps chromium webkit
+          python test_account_archive_browser.py
 
   private-account-history:
     if: github.event_name != 'pull_request'
