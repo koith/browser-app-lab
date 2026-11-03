@@ -151,7 +151,9 @@ def test_artifact_discovery_rejects_unrelated_or_inconsistent_run_names(monkeypa
            {"name":"unrelated-album","size_in_bytes":1024,"expired":False,
             "workflow_run":{"id":12345601},"created_at":"2026-11-03T10:00:00Z"},
            {"name":"intersection-private-recovery","size_in_bytes":512,"expired":False,
-            "workflow_run":{"id":12345602},"created_at":"2026-11-03T10:02:00Z"},
+            "workflow_run":{"id":12345602,"repository_id":1284121913,
+                            "head_repository_id":1284121913,"head_branch":"main"},
+            "created_at":"2026-11-03T10:02:00Z"},
            {"name":"intersection-private-recovery","size_in_bytes":200_000_001,"expired":False,
             "workflow_run":{"id":12345603},"created_at":"2026-11-03T10:03:00Z"},
            {"name":"intersection-private-recovery","size_in_bytes":128,"expired":True,
@@ -223,6 +225,7 @@ def test_first_cloud_write_failure_still_captures_exact_media_before_origin_disa
 
 def test_failed_main_run_replays_only_exact_named_artifact(monkeypatch,tmp_path):
     from pathlib import Path
+    import json
     import shutil
     import recover_spool_artifacts as mod
     pid=synthetic_post()["id"]
@@ -233,6 +236,12 @@ def test_failed_main_run_replays_only_exact_named_artifact(monkeypatch,tmp_path)
     def prevent_fuzzy_scan():
         raise AssertionError("must never scan unrelated archives for targeted recovery")
     def fake_gh(args,*,max_bytes=2_000_000):
+        if args[0]=="api":
+            assert args[1].endswith("/actions/runs/123456890")
+            return json.dumps({
+                "name":"INTERSECTION — Fast Private Public-Post Capture",
+                "head_branch":"main","event":"push",
+                "head_repository":{"full_name":"koith/browser-app-lab"}}).encode()
         assert args[:4]==["run","download","123456890","-n"]
         assert args[4]=="intersection-private-recovery"
         target=Path(args[-1])
