@@ -31,6 +31,7 @@ jobs:
         run: |
           node --check apps/4leaf/rog/server/central.cjs
           node --check apps/4leaf/rog/server/persistence-supabase.cjs
+          node --check apps/4leaf/rog/server/abuse-guard.cjs
           node --check apps/4leaf/rog/central-client.js
           node --check apps/4leaf/rog/social-chat.js
       - name: Verify authenticated server occupancy, chat and permissions
@@ -39,6 +40,8 @@ jobs:
         run: node --test apps/4leaf/rog/tests/central-client-recovery.cjs
       - name: Verify encrypted remote state, restart recovery and rollback
         run: node --test apps/4leaf/rog/server/durability.test.cjs
+      - name: Verify bounded real guest sessions and password protection
+        run: node --test apps/4leaf/rog/server/abuse-guard.test.cjs
       - name: Build and boot the deployable Docker authority
         run: |
           set -euo pipefail
