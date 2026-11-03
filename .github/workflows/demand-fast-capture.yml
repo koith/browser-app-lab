@@ -47,6 +47,7 @@ jobs:
       RCLONE_CONFIG_ARCHIVE_COOKIE: ${{ secrets.DEMAND_TERABOX_NDUS || secrets.YUI_TERABOX_NDUS || secrets.YUI_TERABOX_COOKIE }}
       DEMAND_TERABOX_REMOTE: "archive:DemandResearch"
       DEMAND_CAPTURE_PUBLIC_ALLOWED: "1"
+      DEMAND_FAST_CAPTURE_MODE: "1"
       GITHUB_RUN_ID: ${{ github.run_id }}
     steps:
       - uses: actions/checkout@v4

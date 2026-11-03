@@ -335,6 +335,20 @@ class CloudArchive:
         return sorted(by_id.values(),
                       key=lambda p:str(p.get("posted_at","")),reverse=True)
 
+    def marker_ids(self):
+        """List ID names without re-downloading every old post on every short poll.
+
+        These are presence hints only, NOT verified archive totals. The separate
+        integrity/recovery job continues byte-by-byte SHA256 validation.
+        """
+        ids=set()
+        for directory in ("metadata/entries", "metadata/entries-repaired"):
+            for name in self.names(directory):
+                m=ENTRY.fullmatch(name)
+                if m:
+                    ids.add(m.group(1))
+        return ids
+
     def pending_capture_ids(self, existing):
         # Early snapshots survive a crash even before a verified entry is written.
         raw = self.command(["lsf", self.remote + "/posts", "--dirs-only",
