@@ -11,6 +11,11 @@ const assert=require('node:assert/strict');
    await page.locator('#lobby-create').click();
    await page.locator('#map-select').selectOption(name);
    await page.locator('#start-game').click();
+   if(name!=='4LEAF'){
+    await page.locator('#modal:not(.hidden)').waitFor();
+    assert.match(await page.locator('#modal-title').textContent(),/진행 중인 경기 보호/);
+    await page.locator('#modal-buttons button').filter({hasText:'새 경기 시작'}).click();
+   }
    await page.waitForSelector('#game:not(.hidden)');
    await page.waitForFunction(()=>[...document.querySelectorAll('#board-nodes .tile')]
     .every(el=>el.dataset.tisAlpha==='ready'),null,{timeout:20000});
