@@ -1,6 +1,7 @@
 name: Demand Research — Private TeraBox Connectivity + QA
 on:
   push:
+    branches: [main]
     paths:
       - "apps/demand-research/**"
       - ".github/workflows/demand-research-terabox.yml"
