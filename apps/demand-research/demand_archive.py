@@ -286,10 +286,25 @@ class CloudArchive:
                 raise ValueError("bad original media bytes")
             self.write_immutable(item["key"], blob)
         raw = canonical_json(post)
-        self.write_immutable("posts/" + pid + "/post.json", raw)
+        key = "posts/" + pid + "/post.json"
+        try:
+            self.write_immutable(key, raw)
+        except RuntimeError:
+            # An earlier attempt may already have succeeded, despite a transient
+            # provider write error. Reuse only a fully valid same-source record.
+            old_raw = self.read(key, cap=MAX_POST, optional=True)
+            if old_raw is None:
+                raise
+            old = validate_post(json.loads(old_raw))
+            if (old["id"] != pid or old["platform"] != post["platform"]
+                    or old.get("source_url") != post.get("source_url")
+                    or old.get("posted_at") != post.get("posted_at")):
+                raise RuntimeError("different existing post at immutable key")
+            raw = old_raw
+            post = old
         self.write_immutable("metadata/entries/" + pid + ".json",
                              canonical_json({"id": pid, "sha256": sha256(raw)}))
-        return pid
+        return post
 
     def publish_catalog(self, posts_by_id, run_id):
         if not re.fullmatch(r"[0-9]{6,30}", str(run_id)):
