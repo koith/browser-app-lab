@@ -339,6 +339,22 @@ def run(live=False):
                 blu=page.locator("article.post").filter(
                     has=page.locator('.source-badge[aria-label="출처: Bluesky"]')).first
                 assert blu.locator("a.author").get_attribute("href")=="https://bsky.app/profile/qa-feed.bsky.social"
+                accepted=page.evaluate("""() => window.INTERSECTION_acceptPublicX({
+                  id:'1234567890123456789',
+                  url:'https://x.com/qa_account/status/1234567890123456789',
+                  text:'섹트 test-only public X image',
+                  created_at:new Date().toISOString(),
+                  author:'synthetic QA account',avatarUrl:'https://example.com/qa.png',
+                  media:[{type:'image',url:'https://example.com/qa.png',
+                          thumb:'https://example.com/qa.png'}],
+                  protected:false
+                })""")
+                assert accepted["accepted"] is True,accepted
+                xcard=page.locator("article.post").filter(
+                    has=page.locator('.source-badge[aria-label="출처: X"]')).first
+                assert xcard.count()==1,"source-validated X post must enter verified feed"
+                assert xcard.locator(".post-thumb > img.post-media-img").count()==1,"X image must render as original thumbnail"
+                assert not page.locator("#discoveryCandidates").is_visible(),"verified X post removes unverified search lead"
             else:
                 assert n>=1,"No real public posts"
                 assert thumbnails>0,"No public thumbnails"
