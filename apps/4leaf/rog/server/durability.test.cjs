@@ -12,6 +12,7 @@ function database(){
  let failWrites=false,delayMs=0;
  const respond=(data,status=200)=>new Response(JSON.stringify(data),{status,headers:{'content-type':'application/json'}});
  const fetch=async (url,opt)=>{
+  try{
   const u=new URL(url),method=opt.method,slot=(u.searchParams.get('slot')||'').replace(/^eq\./,'')||'production';
   assert.equal(u.hostname,'fourleaf-qa.supabase.co');
   assert.equal(opt.headers.apikey,SECRET,'backend-only key is used, never leaked in a browser URL');
@@ -32,6 +33,7 @@ function database(){
    rows.set(slot,{...row,...body});return respond([{...row,...body}]);
   }
   throw Error('Unknown mock REST call '+method);
+  }catch(error){console.error('Mock storage transport failure:',error.stack);throw error}
  };
  return {fetch,rows,setFailed:b=>{failWrites=b},setDelay:n=>{delayMs=n}};
 }
