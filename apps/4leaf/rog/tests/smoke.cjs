@@ -5,6 +5,12 @@ async function run(){
  const browser=await chromium.launch({headless:true,args:['--no-sandbox']});
  const page=await browser.newPage({viewport:{width:1440,height:900},deviceScaleFactor:1});
  const errors=[];page.on('pageerror',e=>{errors.push(String(e));console.error('4LEAF PAGEERROR:',e.stack||e)});page.on('console',m=>{if(m.type()==='error')console.error('4LEAF CONSOLE:',m.text())});
+ // Existing matches must be replaced through the real visible consent UI.
+ const approveReplacement=async()=>{
+  await page.locator('#modal:not(.hidden)').waitFor();
+  assert.match(await page.locator('#modal-title').textContent(),/진행 중인 경기 보호/);
+  await page.locator('#modal-buttons button').filter({hasText:'새 경기 시작'}).click();
+ };
  const url='file://'+path.resolve(__dirname,'../index.html');
  await page.goto(url);await page.waitForFunction(()=>!!window.__ROG_TEST__,null,{timeout:6000});
  assert.equal(await page.title(),'4LEAF Browser · 월드맵과 채팅');
@@ -58,6 +64,7 @@ async function run(){
  await page.locator('#lobby-create').click();
  await page.locator('#map-select').selectOption('악마의 달팽이');
  await page.locator('#start-game').click();
+ await approveReplacement();
  await page.waitForSelector('#game:not(.hidden)');
  assert.equal(await page.locator('#board-nodes .tile').count(),69,'original Devil Snail MVE tile count');
  await page.setViewportSize({width:390,height:844});
@@ -73,6 +80,7 @@ async function run(){
  await page.locator('#bot-count').selectOption('1');
  await page.locator('#map-select').selectOption('4LEAF');
  await page.locator('#start-game').click();
+ await approveReplacement();
  await page.waitForFunction(()=>window.__ROG_TEST__.getMatch()?.mode==='hotseat',null,{timeout:6000});
  await page.evaluate(()=>{const m=window.__ROG_TEST__.getMatch();m.players[1].position=50;for(let i=1;i<20;i++)m.tiles[i]='normal';for(let i=51;i<70;i++)m.tiles[i]='normal';window.__ROG_TEST__.drawGame()});
  assert.equal(await page.locator('#board-pawns .board-pawn').count(),2,'persistent independent actors');
