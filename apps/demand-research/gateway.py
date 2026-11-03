@@ -11,6 +11,7 @@ from social_sources import TERMS, ROUTES, request_one_page
 import account_index
 import account_index_sources
 import account_groups
+from demand_archive import CloudArchive
 
 app=FastAPI(title="Demand Research Private Cloud",docs_url=None,redoc_url=None)
 app.add_middleware(CORSMiddleware,allow_origins=["https://koith.github.io","http://localhost:8765"],allow_methods=["GET","OPTIONS"],allow_headers=["Authorization","Content-Type"])
@@ -193,8 +194,8 @@ async def get_catalog():
         if _cache["posts"] is not None and time.time()-_cache["at"]<90:
             return _cache["posts"]
         try:
-            posts=validate_catalog(json.loads(await remote_bytes("metadata/catalog.json")))
-        except (ValueError,json.JSONDecodeError) as e:
+            posts=await asyncio.to_thread(CloudArchive(REMOTE).load_catalog)
+        except (ValueError,json.JSONDecodeError,RuntimeError) as e:
             raise HTTPException(502,"Cloud catalog validation failure") from e
         _cache.update(at=time.time(),posts=posts)
         return posts
