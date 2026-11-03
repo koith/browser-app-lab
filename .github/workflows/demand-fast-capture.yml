@@ -59,7 +59,7 @@ jobs:
       DEMAND_CAPTURE_PUBLIC_ALLOWED: "1"
       DEMAND_FAST_CAPTURE_MODE: "1"
       DEMAND_ARCHIVE_RECOVERY_KEY: ${{ secrets.DEMAND_ARCHIVE_RECOVERY_KEY }}
-      DEMAND_RECOVERY_SPOOL_DIR: ${{ runner.temp }}/intersection-private-recovery
+      DEMAND_RECOVERY_SPOOL_DIR: "/tmp/intersection-private-recovery"
       GITHUB_RUN_ID: ${{ github.run_id }}
     steps:
       - uses: actions/checkout@v4
@@ -92,7 +92,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: intersection-private-recovery-${{ github.run_id }}
-          path: ${{ runner.temp }}/intersection-private-recovery/*.enc
+          path: /tmp/intersection-private-recovery/*.enc
           retention-days: 14
           if-no-files-found: ignore
           compression-level: 0
