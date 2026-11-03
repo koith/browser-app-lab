@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "version": "v0.1.0-mimmi.2",
-  "generated_at": "2026-11-02T10:58:53.925500+00:00",
+  "generated_at": "2026-11-03T12:24:18.868886+00:00",
   "source": "public V2PH photobook pages, no private downloads or paid content",
   "summary": {
     "albums": 6,
@@ -540,8 +540,8 @@
         },
         {
           "url": "https://cdn.v2ph.com/photos/DIZ5NH8SUf1J-WR9.jpg",
-          "bytes": 717475,
-          "sha256": "f0d867184b8eeed6e15b39e34b3bf866e4a7d064bea73241b95e9670fa613a9d",
+          "bytes": 690543,
+          "sha256": "f485747578ae37f25fc99e52e746a11518a30cd3287d49d90db7b2b8b5366409",
           "width": 1800,
           "height": 2700,
           "origin": "v2ph_public_page",
@@ -610,8 +610,8 @@
         },
         {
           "url": "https://cdn.v2ph.com/photos/DIZ5NH8SUf1J-WR9.jpg",
-          "bytes": 690543,
-          "sha256": "f485747578ae37f25fc99e52e746a11518a30cd3287d49d90db7b2b8b5366409",
+          "bytes": 717475,
+          "sha256": "f0d867184b8eeed6e15b39e34b3bf866e4a7d064bea73241b95e9670fa613a9d",
           "width": 1800,
           "height": 2700,
           "origin": "v2ph_public_page",
