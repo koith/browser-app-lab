@@ -81,3 +81,48 @@ def test_safe_error_counters_pinpoint_missing_parent_or_upload():
         "private cloud copyto failed (missing)"))=="backend_upload_missing"
     assert public_error_class(RuntimeError(
         "private cloud rcat failed (missing)"))=="backend_upload_missing"
+
+
+def test_primary_missing_read_does_not_overwrite_verified_alternate_original():
+    class StalePrimary(FakeCloud):
+        def fake(self,args,data=None,timeout=150,allow_missing=False):
+            if args[0]=="cat" and "--terabox-domain" not in args:
+                return None
+            return super().fake(args,data=data,timeout=timeout,
+                                allow_missing=allow_missing)
+    cloud=StalePrimary()
+    key="posts/"+"a"*40+"/capture.json"
+    original=b"original synthetic archive bytes"
+    cloud.objects[key]=original
+    assert cloud.write_immutable(key,original) is False
+    assert cloud.objects[key]==original
+    with pytest.raises(RuntimeError,match="immutable archive key collision"):
+        cloud.write_immutable(key,b"unrelated payload")
+    assert cloud.objects[key]==original
+
+
+def test_primary_upload_missing_and_parent_refresh_failure_uses_alt():
+    class UploadMissing(FakeCloud):
+        def __init__(self):
+            super().__init__()
+            self.primary_uploads=0
+            self.alternate_uploads=0
+        def fake(self,args,data=None,timeout=150,allow_missing=False):
+            primary="--terabox-domain" not in args
+            if args[0]=="mkdir" and primary and self.primary_uploads:
+                raise RuntimeError("private cloud mkdir failed (missing)")
+            if args[0]=="lsf" and primary and self.primary_uploads:
+                return None
+            if args[0] in ("copyto","rcat") and primary:
+                self.primary_uploads+=1
+                raise RuntimeError("private cloud upload failed (missing)")
+            if args[0]=="copyto" and not primary:
+                self.alternate_uploads+=1
+            return super().fake(args,data=data,timeout=timeout,
+                                allow_missing=allow_missing)
+    cloud=UploadMissing()
+    p=post()
+    cloud.save_post(p)
+    assert cloud.primary_uploads>0
+    assert cloud.alternate_uploads>0
+    assert cloud.load_catalog()[0]["id"]==p["id"]
