@@ -199,14 +199,18 @@
        ["활동 일수",fmt(g.activeDays)+"일"],
        ["공개 반응",g.engagementAvailable?fmt(g.reactions):"미제공"],
        ["반응 제공",fmt(g.measuredPosts)+" / "+fmt(g.posts)+"건"],
-       ["최근 게시글",new Date(g.latestPosted).toLocaleDateString("ko-KR")]
+       ["최근 게시글",new Date(g.latestPosted).toLocaleDateString("ko-KR")],
+       ["계정 공개 이력",g.profileCreatedAt?
+          new Date(g.profileCreatedAt).toLocaleDateString("ko-KR")+"부터":
+          (g.profilePostCount!==null?"누적 "+fmt(g.profilePostCount)+"건":"확인 중/미확인")],
+       ["활동 구분",cohortOf(g)==="established"?"기존 활동":"신규/이력 미확인"]
      ]){
        const metric=node("div","activity-rank-detail-metric");
        metric.append(node("small","",label),node("strong","",value));
        metrics.append(metric);
      }
      detail.append(metrics,node("div","activity-rank-detail-note",
-       "현재 검색 기간에 관측된 공개 게시글 기준 · 기존 활동군은 관측 게시글 3건 이상 및 활동일 3일 이상, 신규 활동군은 그 외 · 계정 생성일을 뜻하지 않음 · 활동 지수는 게시글×2 + 활동 일수×3 + 공개 반응 보정"));
+       "기간 내 활동 지수: 게시글×2 + 활동 일수×3 + 공개 반응 보정 · 기존 활동: 공개 프로필 생성일 30일 이상, 생성일 미제공 시 누적 게시글 20건 이상 또는 조회 기간 중 서로 다른 날 2일 이상 활동 · 신규 활동에는 공개 이력 미확인 계정도 포함 · 다른 SNS 계정을 동일인으로 추정하지 않음"));
      const link=node("a","activity-rank-detail-link","SNS 프로필 열기 ↗");
      link.href=g.profileUrl;link.target="_blank";link.rel="noopener noreferrer";
      detail.append(link);
