@@ -7,6 +7,11 @@ import pytest
 from test_demand_archive import FakeCloud, post
 
 
+@pytest.fixture(autouse=True)
+def no_remote_backoff_in_synthetic_test(monkeypatch):
+    monkeypatch.setattr("demand_archive.time.sleep", lambda _: None)
+
+
 class PrimaryParentMissing(FakeCloud):
     def __init__(self):
         super().__init__()
