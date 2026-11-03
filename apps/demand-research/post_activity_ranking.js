@@ -316,7 +316,7 @@
    dialog?.addEventListener("click",e=>{if(e.target===dialog)closeDetail();});
    dialog?.addEventListener("close",()=>detail?.replaceChildren());
    win.addEventListener("intersection:feed-updated",schedule);
-   win.addEventListener("intersection:date-range-change",()=>{visibleCount=20;cohortTouched=false;closeDetail();schedule();});
+   win.addEventListener("intersection:date-range-change",()=>{visibleCount=20;closeDetail();schedule();});
    update();
  }
  return {compute,cohortOf,mount};
