@@ -3,10 +3,12 @@ on:
   push:
     paths:
       - 'apps/gallery-archive/diagnose_yui_v04_origin.py'
+      - 'apps/gallery-archive/diagnose_yui_v04_browser.py'
       - '.github/workflows/gallery-yui-v04-origin-diagnostic.yml'
   pull_request:
     paths:
       - 'apps/gallery-archive/diagnose_yui_v04_origin.py'
+      - 'apps/gallery-archive/diagnose_yui_v04_browser.py'
       - '.github/workflows/gallery-yui-v04-origin-diagnostic.yml'
   workflow_dispatch:
 permissions:
@@ -21,3 +23,7 @@ jobs:
         with: {python-version: '3.12'}
       - run: python -m pip install 'requests>=2.31,<3' 'Pillow>=10,<13'
       - run: python apps/gallery-archive/diagnose_yui_v04_origin.py
+      - run: |
+          python -m pip install 'playwright==1.58.0'
+          python -m playwright install --with-deps chromium
+          python apps/gallery-archive/diagnose_yui_v04_browser.py
