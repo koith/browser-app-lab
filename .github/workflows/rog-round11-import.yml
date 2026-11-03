@@ -81,7 +81,26 @@ jobs:
             python3 "apps/4leaf/rog/tests/$py"
           done
           node apps/4leaf/rog/tests/chr-native-duel-sequences.cjs
-      - name: Push verified import commits to this branch (never main)
+      - name: Squash source changes without modifying workflow files using CI token
+        shell: bash
+        run: |
+          set -euo pipefail
+          # GitHub Actions has contents:write but cannot push any commit that
+          # changes .github/workflows/ without workflows permission. Keep the
+          # exact upstream 9-commit bundle in docs/handoff for provenance;
+          # import the source data and game code as ONE final-file-tree commit.
+          # A separate GitHub connector (with workflow write permission) will
+          # register the source decoder workflow once this branch is pushed.
+          test -f .github/workflows/rog-original-obs-blocks.yml
+          git reset --soft "${GITHUB_SHA}"
+          git rm -f -- .github/workflows/rog-original-obs-blocks.yml
+          git add -A
+          if git diff --cached --name-only | grep '^\\.github/workflows/'; then
+            echo 'Refusing to push a workflow change with restricted CI token'
+            exit 1
+          fi
+          git commit -m "feat(4leaf): import verified Claude round11 native CHR battle actions and append ledger"
+      - name: Push verified source-only import commit (never main)
         shell: bash
         run: |
           set -euo pipefail
