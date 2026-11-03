@@ -57,7 +57,11 @@ const {chromium}=require('playwright');
   assert.equal(resumed.channel,'ispin:2');
   assert.equal(resumed.persistedChannel,'ispin:2','channel adoption must survive page reload');
   assert.equal(resumed.region,'genesis');
-  await page.locator('[data-route="sky"]').first().click();
+  // The original game client hides the toolbar during a full-screen
+  // match. Reload like a returning player to validate persisted migration;
+  // do not click an intentionally invisible navigation control.
+  await page.reload();
+  await page.waitForFunction(()=>window.__LEAF_WORLD__&&window.__LEAF_LOBBY__&&window.__ROG_TEST__);
   await page.locator('.world-location[data-region="dice"]').click();
   await page.locator('#dice-channels [data-channel="ispin:1"]').click();
   assert.equal(await page.locator('#lobby-room-list .lobby-room-row[data-match="saved"]').count(),0,
