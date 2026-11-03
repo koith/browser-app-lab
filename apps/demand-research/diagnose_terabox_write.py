@@ -48,6 +48,7 @@ def probe():
         "copyto-unicode-capture":json.dumps({"kind":"SYNTHETIC_QA","message":"검증"*1000},ensure_ascii=False).encode("utf-8"),
         "rcat-unicode-capture":json.dumps({"kind":"SYNTHETIC_QA","message":"확인"*1100},ensure_ascii=False).encode("utf-8"),
         "prodroot-unicode-capture":json.dumps({"kind":"SYNTHETIC_QA","message":"검사"*900},ensure_ascii=False).encode("utf-8"),
+        "realmeta-versioned-catalog":json.dumps({"schema_version":1,"posts":[],"kind":"SYNTHETIC_QA"},ensure_ascii=False).encode("utf-8"),
     }
     outcomes={}
     with tempfile.TemporaryDirectory(prefix="terabox-write-qa-") as local:
@@ -60,6 +61,12 @@ def probe():
                   "/posts/"+"d"*40+"/capture.json" if label=="prodroot-unicode-capture" else
                   "/"+label+".json")
             target=target_base+name
+            if label=="realmeta-versioned-catalog":
+                # Directly test the formerly failing production DIRECTORY, but
+                # never place a file matching the production catalog name.
+                for parent in ("metadata","metadata/catalogs"):
+                    cmd(["mkdir","archive:DemandResearch/"+parent])
+                target="archive:DemandResearch/metadata/catalogs/qa-synthetic-"+run_id+".json"
             local_file=Path(local)/("local-"+label+".json")
             local_file.write_bytes(raw)
             try:
