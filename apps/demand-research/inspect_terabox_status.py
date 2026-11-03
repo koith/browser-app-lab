@@ -64,8 +64,8 @@ def inspect(cloud=None, sample_size=8):
                         continue
                     sample_bytes+=length
                     try:
-                        original=cloud.read_verified(key,digest,cap=length+1)
-                        if original is None or len(original)!=length:
+                        media_blob=cloud.read_verified(key,digest,cap=length+1)
+                        if media_blob is None or len(media_blob)!=length:
                             media_unverified+=1
                         else:
                             media_ok+=1
