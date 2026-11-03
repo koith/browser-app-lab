@@ -1552,6 +1552,11 @@ function showBattleScene(attacker,defender,attack,defense,attackerPoints,defende
  const podiumOutcome=attackerPoints===defenderPoints?null
   :attackerPoints>defenderPoints?'attacker':'defender';
  stage.dataset.duelOutcome=podiumOutcome?podiumOutcome+'-wins':'none';
+ // Round 11: wait for the attacker's original slot-12 lunge (exact tick span,
+ // WEB tick ms); do not cut off an original full animation at 900ms.
+ const lungeMs=Number(stage.querySelector('.leaf-battle-chessman[data-duel-side="attacker"]')
+  ?.dataset.sourceNativeDurationMs)||0;
+ stage.dataset.duelOutcomeDelayMs=String(Math.max(900,lungeMs));
  if(podiumOutcome)setTimeout(()=>{
   if(!stage.isConnected)return;
   for(const actor of stage.querySelectorAll('.leaf-battle-chessman')){
@@ -1560,7 +1565,7 @@ function showBattleScene(attacker,defender,attack,defense,attackerPoints,defende
    if(actor.dataset.chessmanId)window.__LEAF_GENESIS_ACTORS__?.pose(actor,
     side===podiumOutcome?'victory':'hurt',side===podiumOutcome?1050:650);
   }
- },900);
+ },Math.max(900,lungeMs));
  return stage;
 }
 function combat(attacker,defender,keeper=false){

@@ -36,7 +36,9 @@ def main():
                 per_member[card]=per_member.get(card,0)+int(lost.sum())
             pairs+=1
     assert pairs>=540,pairs
-    assert "ORIGINAL_LEAF_FULL_ACTION_FRAMES" in (ROOT/"genesis-chessman-actors.js").read_text()
+    # #522 moved the full-frame lookup into chr-body-source-map.js.
+    runtime=(ROOT/"genesis-chessman-actors.js").read_text()+(ROOT/"chr-body-source-map.js").read_text()
+    assert "ORIGINAL_LEAF_FULL_ACTION_FRAMES" in runtime
     print("SRC04 PALETTE0 PAIR AUDIT PASS",json.dumps({"pairs":pairs,"pairsWithLegacyIndex0Loss":lost_pairs,"lostPixels":lost_total,"members":per_member}))
 if __name__=="__main__":
     main()

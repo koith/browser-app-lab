@@ -1,0 +1,89 @@
+name: 4LEAF original OBS block-by-block decode (own palettes) and complete animation tables
+on:
+  push:
+    branches: ['data/4leaf-obs-blocks-**']
+    paths:
+      - .github/workflows/rog-original-obs-blocks.yml
+      - apps/4leaf/rog/tools/decode-obs-blocks.py
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  decode:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install read-only extract dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -qq -y unshield
+          python3 -m pip install --break-system-packages pillow numpy
+      - name: Synthetic test (no original bytes)
+        run: python3 apps/4leaf/rog/tests/test_decode_obs_blocks.py
+      - name: Rebuild 8 original source evidence JSONs and verify their byte identity
+        run: |
+          python3 apps/4leaf/rog/tests/test_source_evidence.py
+          python3 apps/4leaf/rog/tests/test_obs_structure_37.py
+      - name: Download archived 2002 client and verify exact SHA1
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/leaf-source /tmp/leaf-resources
+          python3 - <<'PY'
+          import urllib.request,hashlib
+          from pathlib import Path
+          p=Path('/tmp/leaf-source/original.zip')
+          h=hashlib.sha1()
+          req=urllib.request.Request('https://archive.org/download/4leaf/4leaf.zip',headers={'User-Agent':'Mozilla/5.0 (4LEAF archival reproduction)'})
+          with urllib.request.urlopen(req,timeout=120) as response,p.open('wb') as f:
+              while chunk:=response.read(1<<20):
+                  f.write(chunk); h.update(chunk)
+                  if f.tell()>90*1024*1024: raise RuntimeError('archive exceeded 90 MiB')
+          assert h.hexdigest()=='86526d89679ae39b85fe9808da97ad871b7888d9',h.hexdigest()
+          print('ORIGINAL_4LEAF_2002_SHA1_VERIFIED',h.hexdigest())
+          PY
+          unzip -q /tmp/leaf-source/original.zip data1.cab data1.hdr -d /tmp/leaf-source
+          unshield x -d /tmp/leaf-resources /tmp/leaf-source/data1.cab >/dev/null
+      - name: Block-by-block decode with own palettes (read-only, no Windows code executed)
+        run: python3 apps/4leaf/rog/tools/decode-obs-blocks.py /tmp/leaf-resources "$GITHUB_WORKSPACE"
+      - name: Verify every exported PNG against its manifest SHA-256
+        run: |
+          python3 - <<'PY'
+          import json,hashlib
+          from pathlib import Path
+          rog=Path('apps/4leaf/rog'); total=0
+          for folder in ('blocks','referenced'):
+              m=rog/'original/OBS'/folder/'manifest.js'
+              if not m.exists(): print('NONE',folder); continue
+              t=m.read_text(); data=json.loads(t[t.index('={')+1:t.rindex(';')]); n=0
+              for key,rec in data.items():
+                  for f in [f for b in rec['blocks'] for f in b['frames']]:
+                      if 'url' not in f: continue
+                      assert hashlib.sha256((rog/f['url'][2:]).read_bytes()).hexdigest()==f['sha256'],(key,f['url']); n+=1
+              assert n==len(list((rog/'original/OBS'/folder).glob('*.png'))),(folder,n)
+              total+=n; print('VERIFIED',folder,len(data),'members',n,'frames')
+          s=json.loads((rog/'docs/evidence/obs-blocks/summary.json').read_text())
+          assert s['installerSHA1']=='86526d89679ae39b85fe9808da97ad871b7888d9' and s['members']>=240,s['members']
+          assert s['splitOK']==s['members'] or s['splitFailed'],s['splitFailed']
+          print('OBS_BLOCKS_VERIFIED_FRAMES',total,s['tableDecoded'],'tables')
+          PY
+      - name: Commit block-decoded original pixels and animation tables to this data branch only
+        if: github.ref != 'refs/heads/main'
+        run: |
+          set -euo pipefail
+          git config user.name "4LEAF source extract bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # Prior CI lost outputs because original/ is gitignored. Force-add only
+          # directories that actually exist; never silently ignore missing data.
+          for directory in apps/4leaf/rog/docs/evidence/obs-blocks apps/4leaf/rog/original/OBS/blocks apps/4leaf/rog/original/OBS/referenced; do
+            if [ -d "$directory" ]; then git add -f -- "$directory"; fi
+          done
+          git diff --cached --quiet || git commit -m "data(4leaf): OBS members decoded block by block with own palettes; complete animation tables"
+          for attempt in 1 2 3; do
+            git fetch origin "$GITHUB_REF_NAME"
+            git rebase "origin/$GITHUB_REF_NAME"
+            if git push origin "HEAD:refs/heads/$GITHUB_REF_NAME"; then exit 0; fi
+            sleep 3
+          done
+          exit 1
