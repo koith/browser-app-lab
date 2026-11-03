@@ -135,7 +135,7 @@ assert.equal(ageDom.window.document.querySelectorAll(".activity-rank-card").leng
 ageDom.window.document.querySelector('[data-rank-cohort="new"]').click();
 assert.equal(ageDom.window.document.querySelectorAll(".activity-rank-card").length,0,
   "verified older account not misclassified as newcomer");
-ageDom.close();
+ageDom.window.close();
 
 const main=fs.readFileSync(path.join(dir,"index.html"),"utf8");
 const posPanel=main.indexOf('id="activityRanking"'),posFeed=main.indexOf('id="feed"');
