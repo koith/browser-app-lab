@@ -245,14 +245,16 @@ def make_post(row, now, get_media=download_media, pid_override=None):
     sources = row["media_urls"]
     media = []
     blobs = []
-    for url in sources:
+    for index, url in enumerate(sources, start=1):
         item = get_media(url)
         if item is None:
             continue
         mime, blob = item
         if mime not in MIMES or not isinstance(blob, bytes):
             continue
-        key = "posts/" + pid + "/media/" + str(len(media) + 1).zfill(4) + MIMES[mime]
+        # Stable original attachment positions: a missing first image must not
+        # shift another post image into its slot in a future retry.
+        key = "posts/" + pid + "/media/" + str(index).zfill(4) + MIMES[mime]
         media.append({"key": key, "mime": mime, "bytes": len(blob),
                       "sha256": sha256(blob), "remote_verified": True,
                       "kind": "video" if mime.startswith("video/") else "image"})
@@ -343,6 +345,12 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
                        "media_urls": first["media_links"],
                        "media_expected": len(first["media_links"])}
                 post, blobs = make_post(row, first["observed_at"], pid_override=pid)
+                if not post["archive_complete"]:
+                    # The immutable post.json would otherwise freeze a missing
+                    # original attachment forever. Keep the early source snapshot
+                    # pending and retry while the public original remains accessible.
+                    failed_early_recoveries += 1
+                    continue
             except (ValueError,TypeError,KeyError,OverflowError,json.JSONDecodeError):
                 # Keep damaged bytes untouched. Do not promote or overwrite them.
                 cloud.quarantined_ids.add(pid)
@@ -424,6 +432,12 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
                            "media_urls": first["media_links"],
                            "media_expected": len(first["media_links"])}
                     post, blobs = make_post(row, first["observed_at"])
+                    if not post["archive_complete"]:
+                        partial += 1
+                        # The verified first-observation record already remains
+                        # in the cloud. Never finalize a permanently incomplete
+                        # post.json and mark it as a full backup.
+                        continue
                     saved_post = cloud.save_post(post, blobs)
                     known[pid] = saved_post
                     known_ids.add(pid)
@@ -451,6 +465,7 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
         "known_marker_name_hints":len(known_ids) if fast_mode else None,
         "integrity_excluded":cloud.unrecoverable_entries,
         "write_failures":storage_failures,
+        "pending_media_retry":partial + failed_early_recoveries,
         "storage_error_categories":storage_error_kinds,
         "source_query_failures":failures,
         "invalid_early_captures":invalid_early_captures,
@@ -478,6 +493,7 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
         catalog = {"posts": len(known), "catalog_sha256_verified": False,
                    "reason": "no new items"}
     result = {"fetched": fetched, "saved_verified": saved, "partial_media": partial,
+              "pending_media_retry": partial + failed_early_recoveries,
               "duplicates": duplicates, "recovered_entries": recovered, "recovered_early_snapshots": early_recovered,
               "repaired_archive_markers": cloud.repaired_entries,
               "unrecoverable_markers": cloud.unrecoverable_entries,
@@ -488,9 +504,10 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
               "storage_failures": storage_failures,
                "storage_error_categories":storage_error_kinds,
               "storage_interrupted": capture_interrupted, "catalog": catalog,
-              "operational_status": ("JOURNAL_ONLY" if fast_mode else
-                "DEGRADED_INDEX" if catalog.get("publication_pending") else
-                "DEGRADED_STORAGE" if storage_failures else "VERIFIED_POSTS"),
+              "operational_status": ("DEGRADED_STORAGE" if storage_failures else
+                "DEGRADED_MEDIA" if partial or failed_early_recoveries else
+                "JOURNAL_ONLY" if fast_mode else
+                "DEGRADED_INDEX" if catalog.get("publication_pending") else "VERIFIED_POSTS"),
               "scope": "confirmed_public_only", "poll_minutes": 5,
               "completeness_guaranteed": False}
     print("DEMAND_CAPTURE_AGGREGATE_ONLY", json.dumps(result, ensure_ascii=False), flush=True)
