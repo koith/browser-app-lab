@@ -529,6 +529,10 @@ _SYNC_WORKFLOW = (
     "koith/browser-app-lab/.github/workflows/"
     "gallery-terabox-render-session-sync.yml@refs/heads/main"
 )
+_COLLECT_WORKFLOW = (
+    "koith/browser-app-lab/.github/workflows/"
+    "gallery-direct-individual-archive.yml@refs/heads/main"
+)
 _SYNC_JWKS = jwt.PyJWKClient(
     "https://token.actions.githubusercontent.com/.well-known/jwks",
     cache_jwk_set=True, lifespan=3600
@@ -536,7 +540,7 @@ _SYNC_JWKS = jwt.PyJWKClient(
 _sync_lock = asyncio.Lock()
 
 
-def _verify_sync_identity(value: str) -> bool:
+def _verify_sync_identity(value: str, workflow_ref: str = _SYNC_WORKFLOW) -> bool:
     if not value or len(value) > 12000:
         return False
     try:
@@ -557,10 +561,56 @@ def _verify_sync_identity(value: str) -> bool:
             and claims.get("repository") == "koith/browser-app-lab"
             and str(claims.get("repository_id")) == "1284121913"
             and claims.get("ref") == "refs/heads/main"
-            and claims.get("workflow_ref") == _SYNC_WORKFLOW
+            and claims.get("workflow_ref") == workflow_ref
         )
     except Exception:
         return False
+
+
+@app.post("/internal/gallery-owner-catalog/{model}")
+async def signed_gallery_owner_catalog(model: str, request: Request):
+    """Read the owner's *fresh* raw metadata through the already trusted gateway.
+
+    The public /api/catalog deliberately strips storage keys; this narrowly
+    scoped endpoint returns private canonical metadata only to this repo's
+    main-branch collection workflow carrying a verified GitHub OIDC identity.
+    No cookie or signed media URL goes through GitHub, and the response is
+    never cached or served to the public gallery.
+    """
+    if model not in ("mimmi","yui"):
+        raise HTTPException(status_code=404, detail="Unknown private model")
+    authorization=request.headers.get("Authorization","")
+    if not authorization.startswith("Bearer ") or not _verify_sync_identity(
+        authorization[len("Bearer "):], _COLLECT_WORKFLOW
+    ):
+        raise HTTPException(status_code=403, detail="Untrusted gallery collector")
+    if await request.body():
+        raise HTTPException(status_code=413, detail="Catalog read accepts no payload")
+    remote=REMOTE if model=="mimmi" else YUI_REMOTE
+    # A new owner cookie may be installed by the existing sync job; read a
+    # single stable session. Never use an in-process/Pages catalog cache.
+    async with _sync_lock:
+        try:
+            raw=await rclone_bytes("metadata/catalog.json",6_000_000,remote=remote)
+            if not 1<=len(raw)<=6_000_000:
+                raise ValueError("Invalid bounded catalog size")
+            data=json.loads(raw)
+            if (not isinstance(data,dict) or data.get("model")!=model
+                    or data.get("schema_version")!=1
+                    or data.get("storage")!="owner-private-terabox-sha-verified-bytes"
+                    or not isinstance(data.get("albums"),list) or not data["albums"]
+                    or any(not isinstance(a,dict) or not isinstance(a.get("images"),list)
+                           for a in data["albums"])):
+                raise ValueError("Incorrect authenticated owner catalog")
+        except (HTTPException,ValueError,TypeError,OSError,asyncio.TimeoutError):
+            # Never echo the body of an opaque provider error to the caller.
+            raise HTTPException(status_code=503,
+                                detail="Authenticated private metadata read unavailable") from None
+    return Response(raw,media_type="application/json",headers={
+        "Cache-Control":"private, no-store",
+        "Pragma":"no-cache",
+        "X-Content-Type-Options":"nosniff"
+    })
 
 
 @app.post("/internal/terabox-session-refresh")
