@@ -1594,6 +1594,18 @@
         "RULE-03",
         "QA-03"
       ]
+    },
+    {
+      "id": "REQ-20261103-GPT-LEGACY-QA-CONSENT",
+      "date": "2026-11-03",
+      "origin": "User requested continue remaining 4LEAF restoration development; regressions from real gameplay CI",
+      "text": "기존 경기 보존 확인창 때문에 구버전 자동 테스트가 멈추는 문제를 수정하여 원본 보드·게임·26맵 검사가 실제 확인 절차를 지나 끝까지 수행되도록 한다.",
+      "taskIds": [
+        "M08",
+        "P0-RELEASE",
+        "QA-03",
+        "RULE-03"
+      ]
     }
   ],
   "tasks": [
@@ -8198,6 +8210,31 @@
         "QA-03"
       ],
       "details": "PR #576. Game bootstrap previously accepted only unfinished matches with players array 2..8; subsequent profileUI.persist() overwrote completed match histories and malformed-but-parseable JSON with null. A conservative runtime schema guard keeps unsafe records out of live gameplay while preserving exact original storage. Only on explicit next game creation does it archive finished raw JSON or malformed player data in distinct, non-destructive keys. Chromium + WebKit real room-start/reload tests included; PASS/Pages pending, no source equivalence claimed."
+    },
+    {
+      "seq": 374,
+      "date": "2026-11-03",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261103-GPT-LEGACY-QA-CONSENT",
+      "taskIds": [
+        "M08",
+        "P0-RELEASE",
+        "QA-03",
+        "RULE-03"
+      ]
+    },
+    {
+      "seq": 375,
+      "date": "2026-11-03",
+      "type": "OLD_SMOKE_BOARD_26MAP_CONSENT_QA_FIX_PR_PENDING",
+      "requestId": "REQ-20261103-GPT-LEGACY-QA-CONSENT",
+      "taskIds": [
+        "M08",
+        "P0-RELEASE",
+        "QA-03",
+        "RULE-03"
+      ],
+      "details": "Existing smoke.cjs second/third new game, board-layout.cjs second map and 26-map board-actor-occlusion-all-maps.cjs shared browser storage timeout in #570 original saved-match protection confirmation. Keep production guard intact; explicitly assert the real prompt and click '새 경기 시작' for deliberate QA map switching. Add PR-triggered smoke CI. No original-source visual assertions waived, and pre-existing CHR/OBS actor failure is separate. CI/merge/Pages unverified at PR creation."
     }
   ]
 }
