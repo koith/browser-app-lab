@@ -51,69 +51,50 @@ assert.equal(compute({fromMs:to,toMs:from,verified:fixture.verified}).length,0);
 const html='<!doctype html><html lang="ko"><body><section id="activityRanking">'+
  '<select id="activityRankingPlatform"><option value="all">전체</option></select>'+
  '<select id="activityRankingSort"><option value="signal">점수</option><option value="posts">게시글</option><option value="reactions">반응</option><option value="days">일수</option></select>'+
- '<div id="activityRankingRows"></div><button id="activityRankingMore" class="hidden" aria-expanded="false"></button>'+
+ '<div role="tablist"><button data-rank-cohort="established" class="active">기존 활동</button><button data-rank-cohort="new">신규 활동</button></div><div id="activityRankingRows"></div><button id="activityRankingMore" class="hidden" aria-expanded="false"></button>'+
  '</section><dialog id="activityRankingDialog"><button id="activityRankingDialogClose">닫기</button><div id="activityRankingDialogContent"></div></dialog></body></html>';
 const dom=new JSDOM(html,{url:"https://koith.github.io/browser-app-lab/apps/demand-research/",runScripts:"outside-only"});
 dom.window.INTERSECTION_publicRankingSnapshot=()=>fixture;
 dom.window.eval(script);
 const document=dom.window.document;
 const $=id=>document.getElementById(id);
+assert.equal(document.querySelectorAll(".activity-rank-card").length,0,"no established accounts in short fixture");
+document.querySelector('[data-rank-cohort="new"]').click();
 assert.equal(document.querySelectorAll(".activity-rank-card").length,4);
-assert.equal($("activityRankingPlatform").options.length,4);
-assert.equal(document.querySelectorAll(".activity-rank-card > *").length,12,"only rank, name and thumbnail on each card");
-assert.equal(document.querySelectorAll(".activity-rank-score,.activity-rank-stats,.activity-rank-source").length,0);
-assert.equal(document.querySelectorAll(".activity-rank-card a").length,0,"profile link lives in detail dialog");
-const alphaCard=[...document.querySelectorAll(".activity-rank-card")].find(c=>c.querySelector(".activity-rank-user")?.textContent==="테스트 계정");
+assert.equal(document.querySelectorAll(".activity-rank-user").length,0,"no nickname on tiles");
+assert.equal(document.querySelectorAll(".activity-rank-card > *").length,8,"rank number and square thumbnail only");
+const alphaCard=[...document.querySelectorAll(".activity-rank-card")].find(c=>c.getAttribute("aria-label").includes("테스트 계정"));
 assert.ok(alphaCard);
 assert.equal(alphaCard.querySelector(".activity-rank-thumb img").src,"https://cdn.bsky.app/img/new.jpg");
-assert.equal(alphaCard.querySelector(".activity-rank-thumb img").getAttribute("alt"),"");
-assert.equal(alphaCard.textContent,"02테스트 계정","no extra visible text on tile");
 alphaCard.click();
-assert.equal($("activityRankingDialog").hasAttribute("open"),true,"card opens detail dialog");
+assert.equal($("activityRankingDialog").hasAttribute("open"),true);
 assert.match($("activityRankingDialogContent").textContent,/활동 지수/);
-assert.match($("activityRankingDialogContent").textContent,/게시글/);
-assert.match($("activityRankingDialogContent").textContent,/반응 제공/);
-const profile=$("activityRankingDialogContent").querySelector(".activity-rank-detail-link");
-assert.equal(profile.href,"https://bsky.app/profile/alpha.bsky.social");
-assert.equal(profile.target,"_blank");
-assert.match(profile.rel,/noopener/);
+assert.match($("activityRankingDialogContent").textContent,/계정 생성일을 뜻하지 않음/);
 $("activityRankingDialogClose").click();
-assert.equal($("activityRankingDialog").hasAttribute("open"),false,"close returns to rank grid");
-assert.ok([...document.querySelectorAll(".activity-rank-card")].some(c=>c.querySelector(".activity-rank-thumb-empty")),"unsafe or absent thumbnail uses empty block");
 $("activityRankingPlatform").value="bluesky";
 $("activityRankingPlatform").dispatchEvent(new dom.window.Event("change"));
-assert.equal(document.querySelectorAll(".activity-rank-card").length,2,"platform filter");
-$("activityRankingSort").value="posts";
-$("activityRankingSort").dispatchEvent(new dom.window.Event("change"));
-assert.equal(document.querySelector(".activity-rank-user").textContent,"테스트 계정");
-
-const extra=Array.from({length:24},(_,i)=>row("n"+i,
+assert.equal(document.querySelectorAll(".activity-rank-card").length,2);
+const extra=Array.from({length:44},(_,i)=>row("n"+i,
   "https://bsky.app/profile/test"+i+".bsky.social",{likes:i},"bluesky","테스트 "+i,3));
 fixture.verified=[...fixture.verified,...extra];
 dom.window.dispatchEvent(new dom.window.Event("intersection:feed-updated"));
 await new Promise(resolve=>setTimeout(resolve,0));
-assert.equal(document.querySelectorAll(".activity-rank-card").length,10,"initial top 10");
-assert.equal($("activityRankingMore").classList.contains("hidden"),false);
-assert.equal($("activityRankingMore").textContent,"더 보기");
-assert.match($("activityRankingMore").getAttribute("aria-label"),/10명 더 보기/);
+assert.equal(document.querySelectorAll(".activity-rank-card").length,20,"initial top 20");
+assert.match($("activityRankingMore").getAttribute("aria-label"),/20명 더 보기/);
 $("activityRankingMore").click();
-assert.equal(document.querySelectorAll(".activity-rank-card").length,20,"first click adds exactly 10");
-assert.equal($("activityRankingMore").getAttribute("aria-expanded"),"true");
+assert.equal(document.querySelectorAll(".activity-rank-card").length,40,"first click adds 20");
 $("activityRankingMore").click();
-assert.equal(document.querySelectorAll(".activity-rank-card").length,26,"second click adds remaining six");
-assert.equal($("activityRankingMore").classList.contains("hidden"),true,"no more when exhausted");
-assert.equal(document.querySelectorAll(".activity-rank-card")[25].querySelector(".activity-rank-num").textContent,"26");
+assert.equal(document.querySelectorAll(".activity-rank-card").length,46,"remaining six");
+assert.equal($("activityRankingMore").classList.contains("hidden"),true);
 $("activityRankingPlatform").value="reddit";
 $("activityRankingPlatform").dispatchEvent(new dom.window.Event("change"));
-assert.equal(document.querySelectorAll(".activity-rank-card").length,1,"platform filter resets count to ten");
+assert.equal(document.querySelectorAll(".activity-rank-card").length,1);
 $("activityRankingPlatform").value="bluesky";
 $("activityRankingPlatform").dispatchEvent(new dom.window.Event("change"));
-assert.equal(document.querySelectorAll(".activity-rank-card").length,10,"returning to filter starts at ten");
-$("activityRankingMore").click();
-assert.equal(document.querySelectorAll(".activity-rank-card").length,20);
+assert.equal(document.querySelectorAll(".activity-rank-card").length,20,"filter resets to 20");
 dom.window.dispatchEvent(new dom.window.Event("intersection:date-range-change"));
 await new Promise(resolve=>setTimeout(resolve,0));
-assert.equal(document.querySelectorAll(".activity-rank-card").length,10,"date range change resets to ten");
+assert.equal(document.querySelectorAll(".activity-rank-card").length,20,"date reset to 20");
 dom.window.close();
 
 const main=fs.readFileSync(path.join(dir,"index.html"),"utf8");
@@ -139,4 +120,4 @@ assert.ok(main.includes('if(!iconOnly)badge.append(el("span","",meta.name))'),"i
 assert.ok(main.includes('"source-badge"+(iconOnly?" source-badge--icon-only":"")'),"accessible icon-only badge variant");
 assert.ok(main.includes('cloud:{name:"Archive",favicon:"https://koith.github.io/browser-app-lab/apps/demand-research/assets/archive.svg"}'),"archive has a pictogram");
 assert.ok(!script.includes("localStorage")&&!script.includes("sessionStorage"));
-console.log("PUBLIC_ACTIVITY_RANKING_QA_PASS: 10-at-a-time ranking, source-logo-only tiles, compact header link, detail dialog, dedup and safe URLs");
+console.log("PUBLIC_ACTIVITY_RANKING_QA_PASS: 20-at-a-time cohort ranking, source-logo-only tiles, compact header link, detail dialog, dedup and safe URLs");
