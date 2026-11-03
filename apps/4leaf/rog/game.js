@@ -404,10 +404,36 @@ function installAuthenticMaps(){const list=$('map-select'),entries=Object.entrie
  list.append(opt)}const randomOption=document.createElement('option');randomOption.value='__RANDOM__';randomOption.textContent='랜덤맵 · 원작 2003.02 업데이트';list.append(randomOption);list.value='4LEAF'}
 function freshItems(){return Array.from({length:3},()=>{const pool=ITEMS.filter(item=>!item.disabled);return pool[rand(pool.length)].id})}
 function newPlayer(id,bot,name,team){return {id,bot,name,team,position:0,jail:0,ability:0,items:freshItems(),effects:{shoe:0,dove:0,clover:0,spade:0,ring:0,armageddon:0,valkyrie:0,oddcurse:0,evencurse:0,block:0,destroy:0,keeper:0},usedItem:false,color:COLORS[id],pawn:PAWNS[id]}}
-function startGame(){let map=$('map-select').value;const limit=Number($('point-limit').value),stats=teamStats(profile.team);if(map==='__RANDOM__'){const candidates=Object.keys(SOURCE_IDS).filter(name=>MAPS[name]&&SOURCE_ROUTES[SOURCE_IDS[name]]?.length>9);map=candidates[rand(candidates.length)]||'4LEAF';}chooseSourcePath(map);if(!profile.team[0])return modal('파티 구성','공격 체스맨을 선택하세요.',[{label:'확인',primary:true}]);if(stats.point>limit)return modal('소환 POINT 초과','현재 파티는 '+stats.point+'POINT이며 제한은 '+limit+'POINT입니다.',[{label:'확인',primary:true}]);const selectedMode=$('game-mode').value,hotseat=selectedMode!=='ai',bots=selectedMode==='network'?1:Number($('bot-count').value);
+function startGame(){return startGameWithConfirmation(false)}
+function startGameWithConfirmation(replacementConfirmed){let map=$('map-select').value;const limit=Number($('point-limit').value),stats=teamStats(profile.team);if(map==='__RANDOM__'){const candidates=Object.keys(SOURCE_IDS).filter(name=>MAPS[name]&&SOURCE_ROUTES[SOURCE_IDS[name]]?.length>9);map=candidates[rand(candidates.length)]||'4LEAF';}if(!profile.team[0])return modal('파티 구성','공격 체스맨을 선택하세요.',[{label:'확인',primary:true}]);if(stats.point>limit)return modal('소환 POINT 초과','현재 파티는 '+stats.point+'POINT이며 제한은 '+limit+'POINT입니다.',[{label:'확인',primary:true}]);const selectedMode=$('game-mode').value,hotseat=selectedMode!=='ai',bots=selectedMode==='network'?1:Number($('bot-count').value);
  if(selectedMode==='network'&&(!window.__LEAF_NET__?.connected||window.__LEAF_NET__.role!=='host')){
     return modal('온라인 대전 연결','온라인 대전에서는 먼저 상대 브라우저와 연결해야 합니다. 호스트에서 연결을 시작하세요.',[{label:'확인',primary:true}]);
- }let players=[newPlayer(0,false,profile.name,profile.team.slice())];for(let i=0;i<bots;i++){const weakTeams=CHR_SOURCE.length>50?[
+ }
+ // Creating a new room must never silently overwrite an unfinished local
+ // game. Keep the entire previous match (tiles, positions, items and history)
+ // until the player explicitly confirms replacement. This is an added WEB
+ // safety rule; the original 2002 client flow is not evidenced here.
+ if(match&&!match.finished){
+   if(busy)return modal('진행 중인 턴','주사위와 칸 이벤트 처리가 끝난 뒤 다시 시도하세요.',[{label:'확인',primary:true}]);
+   if(!replacementConfirmed){
+     const protectedMatch=match;
+     return modal('진행 중인 경기 보호',
+       '진행 중인 '+match.map+' 경기가 저장되어 있습니다. 새 경기를 시작하면 기존 경기의 진행 위치와 기록이 교체됩니다. 계속하시겠습니까?',
+       [{label:'기존 경기 유지',primary:true},
+        {label:'새 경기 시작',run:()=>{
+          // An async network update can change the active saved match while
+          // the confirmation is open. Never overwrite that newer state.
+          if(match!==protectedMatch)return modal('경기 상태 변경',
+            '기존 경기 상태가 변경되었습니다. 현재 경기를 확인한 뒤 다시 시도하세요.',
+            [{label:'확인',primary:true}]);
+          startGameWithConfirmation(true);
+        }}]);
+   }
+ }
+ // Do not alter the previous match's global DMP coordinates when a new-game
+ // validation fails or the user cancels the replacement dialog.
+ chooseSourcePath(map);
+ let players=[newPlayer(0,false,profile.name,profile.team.slice())];for(let i=0;i<bots;i++){const weakTeams=CHR_SOURCE.length>50?[
  // Default opponents must have an actual recovered OBS body. In the old
  // sample, c_0096 (no decoded OBS source) displayed a HUGE synthetic mannequin.
  // Existing saved/user-selected teams are never silently replaced.

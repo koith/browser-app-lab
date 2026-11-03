@@ -1546,6 +1546,18 @@
         "QA-03",
         "RULE-03"
       ]
+    },
+    {
+      "id": "REQ-20261103-GPT-SAFE-NEW-MATCH",
+      "date": "2026-11-03",
+      "origin": "2026-11-03 user 4LEAF restoration continuation",
+      "text": "클로드 원본 리소스 작업과 독립적으로 GPT가 실제 작동 및 데이터 유실 위험을 점검하여 미완료 저장 경기가 새 방 생성으로 확인 없이 덮어써지는 문제를 수정한다.",
+      "taskIds": [
+        "M08",
+        "P0-RELEASE",
+        "RULE-03",
+        "QA-03"
+      ]
     }
   ],
   "tasks": [
@@ -8049,6 +8061,32 @@
         "RULE-03"
       ],
       "details": "PR #558. Earlier local Dice matches lacking diceChannel were filtered out of playable() after choosing original Region number. Legacy matches may appear, and explicit resume binds selected channel and persists it without resetting players, board, RNG or history. Existing channel-bound saves retain strict isolation. Real Chromium end-to-end legacy resume workflow added; PR and CI acceptance pending; no public deployment or native iPhone PASS claimed."
+    },
+    {
+      "seq": 366,
+      "date": "2026-11-03",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261103-GPT-SAFE-NEW-MATCH",
+      "taskIds": [
+        "M08",
+        "P0-RELEASE",
+        "RULE-03",
+        "QA-03"
+      ],
+      "details": "Record user restoration continuation and focused P0 game-data safety task."
+    },
+    {
+      "seq": 367,
+      "date": "2026-11-03",
+      "type": "IN_PROGRESS_MATCH_REPLACEMENT_CONSENT_PR_PENDING",
+      "requestId": "REQ-20261103-GPT-SAFE-NEW-MATCH",
+      "taskIds": [
+        "M08",
+        "P0-RELEASE",
+        "RULE-03",
+        "QA-03"
+      ],
+      "details": "PR #570: game.js source audit confirms ROOM READY can silently replace unfinished match and persisted rog_match. Protect existing match via explicit keep/replace decision, defer chooseSourcePath until commitment, and block replacement while busy or changed asynchronously. Real WorldMap/Region/Room/Exit/new-room Chromium desktop + mobile WebKit browser QA added. This is WEB safety, not verified original 2002 UI. At entry into PR, QA and Pages not yet verified; no tasks marked done."
     }
   ]
 }
