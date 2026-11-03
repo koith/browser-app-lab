@@ -1,11 +1,11 @@
 name: INTERSECTION — Immediate Encrypted TeraBox Recovery
 on:
-  # One-time safe replay of older AES-GCM recovery artifacts after this change
-  # reaches the protected main branch. Also provides an explicit retry route.
-  push:
-    branches: [main]
-    paths:
-      - ".github/workflows/demand-replay-encrypted.yml"
+  # Best-effort periodic retries continue while encrypted originals remain
+  # in short-lived private Actions artifacts. The workflow_run hook handles
+  # fresh failures immediately; this prevents a single failed replay from
+  # leaving old original bytes untried until their artifact retention expires.
+  schedule:
+    - cron: "41 */6 * * *"
   workflow_dispatch:
     inputs:
       source_run_id:
@@ -56,7 +56,7 @@ jobs:
     # Never replay a pull-request artifact or run from an untrusted branch.
     # The prior capture's artifact upload step has already completed.
     if: >-
-      github.event_name == 'push' ||
+      github.event_name == 'schedule' ||
       github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'workflow_run' &&
        github.event.workflow_run.event != 'pull_request' &&
