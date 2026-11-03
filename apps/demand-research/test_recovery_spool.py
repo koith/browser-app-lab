@@ -61,6 +61,10 @@ def test_restore_exact_original_media_after_temporary_terabox_unavailability(tmp
     p=synthetic_post()
     pid=p["id"]
     source=first(pid)
+    source["media_links"]=["https://cdn.bsky.app/img/original-test-only.jpg"]
+    p.update({"text":source["text"],"source_url":source["source_url"],
+              "posted_at":source["posted_at"],"media_expected":1,
+              "media_saved":1,"archive_complete":True})
     blob=b"\\x89PNG\\r\\n\\x1a\\n synthetic original capture 1"
     # A JPEG MIME is used only as synthetic metadata, not as a visible image.
     p["media"]=[{"key":"posts/"+pid+"/media/0001.jpg","mime":"image/jpeg",
