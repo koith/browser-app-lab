@@ -56,7 +56,11 @@ def safe_page(url):
     try:
         p=urlsplit(url)
         return (p.scheme=='https' and p.hostname in PAGE_HOSTS and not p.username and not p.password and p.port in (None,443)
-                and (p.hostname!='teapawt.net' or p.path in {'/'+a for a in CREATOR_ACCOUNTS.values()}))
+                and (p.hostname!='teapawt.net' or p.path in {
+                    '/'+a for a in CREATOR_ACCOUNTS.values()
+                } | {
+                    '/'+a+'/media' for a in CREATOR_ACCOUNTS.values()
+                }))
     except (ValueError,TypeError):return False
 
 
@@ -115,7 +119,8 @@ def reviewed_direct_source(url, model):
     if p.hostname in X_PUBLIC_HOSTS:
         return True  # safe_registered_public_page already binds exact model author/status
     if (p.hostname=='teapawt.net' and model in CREATOR_ACCOUNTS
-            and p.path=='/'+CREATOR_ACCOUNTS[model]):
+            and p.path in ('/'+CREATOR_ACCOUNTS[model],
+                           '/'+CREATOR_ACCOUNTS[model]+'/media')):
         return True
     return False
 
@@ -367,7 +372,8 @@ def page_images(raw,url,model):
         return originals,[],'scoped_public_page' if originals else 'no_public_photos'
     if urlsplit(url).hostname=='teapawt.net':
         account=CREATOR_ACCOUNTS[model]
-        if urlsplit(url).path!='/'+account:return [],[],'different_creator_account_rejected'
+        if urlsplit(url).path not in ('/'+account,'/'+account+'/media'):
+            return [],[],'different_creator_account_rejected'
         from collect_teapawt_public import public_images_from_author
         # Use exact media URLs exposed by the normal page, preserving its
         # original-size query. No guessed CDN hosts, protected API or login.

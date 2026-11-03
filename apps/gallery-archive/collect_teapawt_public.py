@@ -31,7 +31,8 @@ def validate_source(source):
     url=urlsplit(source["url"])
     assert (source.get("kind")=="teapawt" and url.scheme=="https" and
         url.hostname==HOST and url.port is None and
-        url.path=="/"+source["account"] and not url.query and not url.fragment)
+        url.path in ("/"+source["account"],"/"+source["account"]+"/media")
+        and not url.query and not url.fragment)
     assert re.fullmatch(r"[A-Za-z0-9_]{3,30}",source["account"])
 
 def safe_media_url(raw,base):
@@ -79,7 +80,12 @@ def public_images_from_author(html,source,current):
             continue
         u=urljoin(current,a.get("href",""))
         p=urlsplit(u)
-        allowed=(p.scheme=="https" and p.hostname==HOST and p.path=="/"+source["account"]
+        # Follow only the exact tab being viewed. No guessed cursor, no
+        # unrelated social feed or a redirect to a protected endpoint.
+        # page_images() passes an author-only descriptor; use the actual
+        # currently visited public tab when no explicit source URL is present.
+        base_path=urlsplit(source.get("url") or current).path
+        allowed=(p.scheme=="https" and p.hostname==HOST and p.path==base_path
                  and not p.username and not p.password and not p.fragment and p.port is None)
         if allowed and "cursor" in dict(parse_qsl(p.query)):
             next_page=u
