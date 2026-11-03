@@ -340,7 +340,10 @@ class CloudArchive:
         try:
             target = self.remote + "/" + key
             failure = None
-            for attempt in range(4):
+            # Each rclone command already retries twice. After one copyto
+            # and one rcat attempt, switch endpoints rather than spending a
+            # multi-minute fast-capture window on a repeatedly missing path.
+            for attempt in range(2):
                 method = "rcat" if attempt % 2 and len(data) < 2_000_000 else "copyto"
                 try:
                     if method == "copyto":
