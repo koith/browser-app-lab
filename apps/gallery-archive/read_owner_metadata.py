@@ -29,7 +29,14 @@ def matches(raw,model,batch,minimum):
         if (not isinstance(document,dict) or document.get('model')!=model
                 or document.get('schema_version')!=1 or not isinstance(document.get('albums'),list)):
             return False
-        if batch:return document.get('source_batch_sha256')==batch
+        if batch:
+            albums=document.get('albums')
+            return (document.get('source_batch_sha256')==batch
+                    and isinstance(albums,list) and bool(albums)
+                    and all(isinstance(a,dict)
+                            and isinstance(a.get('id'),str) and a.get('id')
+                            and isinstance(a.get('images'),list) and a['images']
+                            for a in albums))
         if document.get('storage')!='owner-private-terabox-sha-verified-bytes':return False
         albums=flatten(document,model)
         return bool(albums) and sum(len(a['images']) for a in albums.values())>=minimum
