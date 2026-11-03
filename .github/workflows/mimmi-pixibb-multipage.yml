@@ -1,8 +1,8 @@
 name: Mimmi Multi-Page Public Photo Crawl
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '15 1 * * 2,5'
+  # Research-only PixiBB mirror excluded from automatic collection.
+  # Run manually for diagnostics; never treat its previews as saved photos.
   push:
     paths:
       - 'apps/mimmi-gallery/collect_pixibb_public.py'
