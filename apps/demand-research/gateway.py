@@ -334,12 +334,22 @@ async def discovery(request:Request,
         return JSONResponse(result,headers={"Cache-Control":"private, no-store"})
 
 @app.get("/api/posts")
-async def list_posts(request:Request,offset:int=Query(0,ge=0),limit:int=Query(30,ge=1,le=60),q:str=Query("",max_length=100)):
+async def list_posts(request:Request,offset:int=Query(0,ge=0),limit:int=Query(30,ge=1,le=60),q:str=Query("",max_length=100),
+                     platform:str=Query("",max_length=32),media_status:str=Query("",max_length=16)):
     check_auth(request)
+    if platform not in ("","bluesky","mastodon","misskey","lemmy"):
+        raise HTTPException(400,"Invalid platform filter")
+    if media_status not in ("","complete","partial"):
+        raise HTTPException(400,"Invalid attachment status filter")
     posts=await get_catalog()
     if q: posts=[p for p in posts if q.casefold() in p["text"].casefold()]
+    if platform: posts=[p for p in posts if p.get("platform")==platform]
+    if media_status:
+        def complete(p):
+            return bool(p.get("archive_complete",len(p.get("media",[]))>=p.get("media_expected",len(p.get("media",[])))))
+        posts=[p for p in posts if complete(p)==(media_status=="complete")]
     posts=sorted(posts,key=lambda p:p.get("posted_at",""),reverse=True)
-    exp=int(time.time())+1200
+    exp=int(time.time())+3600
     output=[]
     for post in posts[offset:offset+limit]:
         media=[]
