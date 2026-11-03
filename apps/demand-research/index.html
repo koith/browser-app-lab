@@ -1125,7 +1125,7 @@ function suspectedAd(post){
 
 function matchesText(p){return !needle||p.text.toLowerCase().includes(needle)}
 function filtered(){
-  return posts.filter(p=>matchesText(p)&&(cloudMode||!suspectedAd(p)))
+  return posts.filter(p=>matchesText(p)&&!suspectedAd(p))
     .sort((a,b)=>String(b.indexed).localeCompare(String(a.indexed)));
 }
 /* The main feed contains dated, source-verified SNS originals only.
