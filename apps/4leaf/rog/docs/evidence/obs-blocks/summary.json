@@ -1,0 +1,16 @@
+{
+ "blockFrames": 1400,
+ "installerSHA1": "86526d89679ae39b85fe9808da97ad871b7888d9",
+ "members": 245,
+ "multiBlockMembers": 27,
+ "referencedMembers": 55,
+ "splitFailed": [],
+ "splitOK": 245,
+ "tableDecoded": 245,
+ "tableFailed": [],
+ "tailVariants": {
+  "162-with-8-at-32": 3,
+  "zero0": 1,
+  "zero34": 241
+ }
+}
