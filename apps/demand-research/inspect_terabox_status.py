@@ -9,6 +9,9 @@ import json
 import re
 from demand_archive import CloudArchive, sha256, canonical_json
 
+MAX_SAMPLED_MEDIA_BYTES=8_000_000
+MAX_SINGLE_MEDIA_SAMPLE=2_000_000
+
 
 def inspect(cloud=None, sample_size=8):
     cloud=cloud or CloudArchive()
@@ -19,6 +22,7 @@ def inspect(cloud=None, sample_size=8):
     markers=[("metadata/entries-repaired",n) for n in repaired if re.fullmatch(r"[0-9a-f]{40}\.json",n)]
     markers += [("metadata/entries",n) for n in original if re.fullmatch(r"[0-9a-f]{40}\.json",n)]
     ok=bad=0
+    media_ok=media_unverified=media_skipped=sample_bytes=0
     visited=set()
     for parent,name in markers:
         pid=name[:-5]
@@ -37,6 +41,36 @@ def inspect(cloud=None, sample_size=8):
             good=bool(valid_marker and data is not None)
             ok += bool(good)
             bad += not bool(good)
+            if good:
+                record=json.loads(data)
+                attachments=record.get("media",[]) if isinstance(record,dict) else []
+                if not isinstance(attachments,list):
+                    attachments=[]
+                for media in attachments:
+                    if not isinstance(media,dict):
+                        media_unverified+=1
+                        continue
+                    length=media.get("bytes")
+                    key=media.get("key")
+                    digest=media.get("sha256")
+                    if (not isinstance(length,int) or not 0<length<=2_000_000
+                            or not isinstance(key,str)
+                            or not key.startswith("posts/"+pid+"/media/")
+                            or not re.fullmatch(r"[0-9a-f]{64}",str(digest))):
+                        media_skipped+=1
+                        continue
+                    if sample_bytes+length>MAX_SAMPLED_MEDIA_BYTES:
+                        media_skipped+=1
+                        continue
+                    sample_bytes+=length
+                    try:
+                        original=cloud.read_verified(key,digest,cap=length+1)
+                        if original is None or len(original)!=length:
+                            media_unverified+=1
+                        else:
+                            media_ok+=1
+                    except (RuntimeError,ValueError,TypeError,KeyError):
+                        media_unverified+=1
         except (RuntimeError,ValueError,TypeError,KeyError):
             bad+=1
     try:
@@ -65,6 +99,10 @@ def inspect(cloud=None, sample_size=8):
       "repaired_marker_count":len([n for n in repaired if re.fullmatch(r"[0-9a-f]{40}\.json",n)]),
       "sampled_unique_entries":min(len(visited),sample_size),
       "sample_valid":ok,"sample_mismatch":bad,
+      "media_sha_readback_verified":media_ok,
+      "media_sha_readback_unverified":media_unverified,
+      "media_sample_skipped_large_or_unsafe":media_skipped,
+      "media_sample_byte_budget":MAX_SAMPLED_MEDIA_BYTES,
       "sampling_only":True,"full_integrity_claim":False
     }
     print("PRIVATE_ARCHIVE_READ_ONLY_SUMMARY",json.dumps(result,sort_keys=True),flush=True)
