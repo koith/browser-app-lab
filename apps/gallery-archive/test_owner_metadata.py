@@ -220,4 +220,36 @@ class OwnerMetadataTests(unittest.TestCase):
                      reader=lambda *a,**k:b'{"errno":400141}')
 
 
+    def test_owner_gateway_404_is_reported_as_deployment_without_leaking_uri(self):
+        import io
+        import contextlib
+        import urllib.error
+        from unittest.mock import patch
+        calls=[]
+        class Reply:
+            status=200
+            def __enter__(self):return self
+            def __exit__(self,*a):return False
+            def read(self,n):return json.dumps({'value':'x'*120}).encode()
+        def opener(request,timeout):
+            calls.append(request.full_url)
+            if len(calls)==1:return Reply()
+            raise urllib.error.HTTPError(request.full_url,404,'route unavailable',{},None)
+        stderr=io.StringIO()
+        with patch.dict(os.environ,{
+            'ACTIONS_ID_TOKEN_REQUEST_URL':
+                'https://pipelines.actions.githubusercontent.com/fixture?job=1',
+            'ACTIONS_ID_TOKEN_REQUEST_TOKEN':'fixture-private-oidc-request'
+        }),contextlib.redirect_stderr(stderr):
+            with self.assertRaises(ProviderVerificationRequired):
+                read_via_existing_owner_gateway(
+                    'archive:MimmiArchive/metadata/pending-individual/mimmi/'+('d'*64)+'.json',
+                    'mimmi',batch='d'*64,opener=opener)
+        safe=stderr.getvalue()
+        self.assertIn('OWNER_SIGNED_READ_HTTP_STATUS mimmi pending 404',safe)
+        self.assertNotIn('fixture-private-oidc-request',safe)
+        self.assertNotIn('d'*64,safe)
+        self.assertNotIn('https://',safe)
+
+
 if __name__=='__main__':unittest.main(verbosity=2)
