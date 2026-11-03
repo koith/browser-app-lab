@@ -203,7 +203,17 @@ class RecoverySpool:
             if len(blob)!=info["bytes"] or sha256(blob)!=info["sha256"]:
                 raise ValueError("recovered original attachment checksum mismatch")
         if post.get("archive_complete"):
-            cloud.save_post(post,blobs)
+            saved=cloud.save_post(post,blobs)
+            # A pre-existing immutable post may win when the new observation
+            # differs. Do not count the queued local media as verified merely
+            # because some earlier post with the same ID is readable.
+            exact=("platform","source_url","posted_at","text")
+            if any(saved.get(field)!=post.get(field) for field in exact):
+                return "prior_original_preserved"
+            source_media=[(m["key"],m["sha256"]) for m in post["media"]]
+            stored_media=[(m["key"],m["sha256"]) for m in saved["media"]]
+            if source_media!=stored_media:
+                return "prior_original_preserved"
             return "post_and_media_verified"
         if blobs:
             cloud.stage_partial_media(post,blobs)
