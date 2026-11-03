@@ -144,7 +144,7 @@ class CloudArchive:
     def write_immutable(self, key, data):
         if not isinstance(data, bytes):
             raise TypeError("cloud content must be bytes")
-        existing = self.read(key, cap=len(data) + 1, optional=True)
+        existing = self.read(key, cap=max(len(data) + 1, MAX_MEDIA_BYTES + MAX_POST), optional=True)
         if existing is not None:
             if sha256(existing) != sha256(data):
                 raise RuntimeError("immutable archive key collision")
