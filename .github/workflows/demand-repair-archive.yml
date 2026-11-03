@@ -11,6 +11,7 @@ on:
       - ".github/workflows/demand-repair-archive.yml"
 permissions:
   contents: read
+  actions: read
 concurrency:
   group: intersection-private-archive-repair
   cancel-in-progress: false
@@ -20,9 +21,13 @@ jobs:
     timeout-minutes: 35
     env:
       RCLONE_CONFIG_ARCHIVE_TYPE: terabox
+      # Single TeraBox upload chunk avoids parallel backend request bursts.
+      RCLONE_CONFIG_ARCHIVE_UPLOAD_THREADS: "1"
       RCLONE_CONFIG_ARCHIVE_COOKIE: ${{ secrets.DEMAND_TERABOX_NDUS || secrets.YUI_TERABOX_NDUS || secrets.YUI_TERABOX_COOKIE }}
       DEMAND_TERABOX_REMOTE: "archive:DemandResearch"
       DEMAND_CAPTURE_PUBLIC_ALLOWED: "1"
+      DEMAND_ARCHIVE_RECOVERY_KEY: ${{ secrets.DEMAND_ARCHIVE_RECOVERY_KEY }}
+      GH_TOKEN: ${{ github.token }}
       GITHUB_RUN_ID: ${{ github.run_id }}
     steps:
       - uses: actions/checkout@v4
@@ -39,11 +44,27 @@ jobs:
           unzip -q /tmp/rclone.zip -d /tmp/rclone-extra
           find /tmp/rclone-extra -type f -name rclone -exec sudo install -m 755 {} /usr/local/bin/rclone \;
           rclone help backends | grep -qi terabox
+      - name: Install authenticated encryption for secure capture recovery
+        run: python -m pip install --disable-pip-version-check cryptography==46.0.4
+      - name: Restore encrypted failed capture originals to verified TeraBox objects
+        id: restore_crypt
+        continue-on-error: true
+        working-directory: apps/demand-research
+        run: |
+          set -euo pipefail
+          python recover_spool_artifacts.py
       - name: Validate and restore posts, publish compact catalog, then verify via fresh reader
         working-directory: apps/demand-research
         run: |
           set -euo pipefail
           python rebuild_archive.py
+      - name: Flag encrypted recovery import failures after archive reconciliation
+        if: always()
+        run: |
+          test "${{ steps.restore_crypt.outcome }}" != "failure" || {
+            echo "::error::Encrypted public capture recovery still incomplete"
+            exit 1
+          }
       - name: Read-only post-journal inventory
         if: always()
         working-directory: apps/demand-research
