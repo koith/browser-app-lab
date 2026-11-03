@@ -725,7 +725,7 @@ class DirectTests(unittest.TestCase):
             client=Client()
             report=collect(root,'yui',owner,root/'stage',3,2,client,
                            reviewed_source_only=True)
-            self.assertEqual(client.calls,[page,media[0]])
+            self.assertEqual(client.calls,[media[0],page])
             self.assertEqual(report['results'][0]['failure_categories'],{'PublicOriginPaused':1})
             self.assertEqual(report['results'][0]['media_candidates_deferred_after_origin_pause'],2)
             self.assertEqual(report['new_local_individual_files'],0)
