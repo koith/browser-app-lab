@@ -46,7 +46,35 @@ class BlueAPI:
     def json(self,url,body=None):
         self.calls.append(url)
         if "app.bsky.actor.getProfile" in url:
-            return {"did":DID,"handle":"qa-example.bsky.social"}
+            return {"did":DID,"handle":"qa-example.bsky.social",
+                    "displayName":"QA account","description":"Archived public biography",
+                    "avatar":"https://cdn.bsky.app/img/qa-avatar",
+                    "followersCount":1,"followsCount":1,"postsCount":2}
+        if "com.atproto.repo.getRecord" in url:
+            return {"value":{"avatar":{
+                "$type":"blob","mimeType":"image/jpeg",
+                "ref":{"$link":cid(PHOTO)},"size":len(PHOTO)}}}
+        if "app.bsky.graph.getFollowers" in url:
+            return {"followers":[{"did":"did:plc:"+"b"*24,
+                                   "handle":"reader.bsky.social",
+                                   "displayName":"Public reader"}]}
+        if "app.bsky.graph.getFollows" in url:
+            return {"follows":[{"did":"did:plc:"+"c"*24,
+                                "handle":"friend.bsky.social",
+                                "displayName":"Public friend"}]}
+        if "app.bsky.feed.getPostThread" in url:
+            target=parse_qs(urlsplit(url).query).get("uri",[""])[0]
+            own=next((row for page in self.pages.values() for row in page[0]
+                      if row["uri"]==target),None)
+            if own is None:
+                raise job.SourceUnavailable("public thread unavailable")
+            reply={"post":{"uri":"at://did:plc:"+"b"*24+
+                                    "/app.bsky.feed.post/comment1",
+                           "author":{"did":"did:plc:"+"b"*24,
+                                     "handle":"reader.bsky.social"},
+                           "record":{"text":"Public comment synthetic",
+                                     "createdAt":"2026-11-03T12:05:00Z"}}}
+            return {"thread":{"post":{"uri":target},"replies":[reply]}}
         if url.startswith("https://plc.directory/"):
             return {"service":[{"id":"#atproto_pds",
                     "serviceEndpoint":"https://pds.testing.example"}]}
@@ -73,11 +101,27 @@ class MastodonAPI:
         self.calls.append(url)
         if "/api/v1/accounts/lookup" in url:
             return {"id":"20200","acct":"writer","url":"https://mastodon.example/@writer"}
+        if "/api/v1/accounts/20200" in url and "/statuses?" not in url and "/followers" not in url and "/following" not in url:
+            return {"id":"20200","acct":"writer","display_name":"Public writer",
+                    "note":"<p>Archived profile about</p>",
+                    "followers_count":1,"following_count":1,"statuses_count":2}
+        if "/api/v1/statuses/" in url and "/context" in url:
+            return {"ancestors":[],"descendants":[{
+                "id":"890","visibility":"public","account":{"id":"20201","acct":"commenter"},
+                "created_at":"2026-11-03T12:10:00Z",
+                "content":"<p>Public reply to writer</p>",
+                "media_attachments":[]}]}
         if "/statuses?" in url:
             if "max_id=" in url:
                 return []
             return self.statuses
         raise AssertionError("unexpected provider request: "+url)
+
+    def json_with_headers(self,url):
+        if "/followers" in url or "/following" in url:
+            return ([{"id":"20201","acct":"public-reader","display_name":"Public",
+                      "url":"https://mastodon.example/@public-reader"}],{})
+        raise AssertionError("unexpected social graph endpoint")
 
     def media(self,url,mime):
         if url.endswith(".mp3"):
@@ -119,6 +163,16 @@ def test_blue_source_replies_and_video_original_bytes_are_verified_and_resume(ca
     assert cloud.objects[root+"/"+latest["media"][1]["key"]]==VIDEO
     assert len([k for k in cloud.objects if k.startswith(root+"/metadata/source-records/")])==2
     assert len([k for k in cloud.objects if k.startswith(root+"/metadata/checkpoints/")])==2
+    profiles=[json.loads(raw) for k,raw in cloud.objects.items()
+              if k.startswith(root+"/profile/snapshots/")]
+    assert profiles[-1]["description"]=="Archived public biography"
+    assert profiles[-1]["assets"]["avatar"]["status"]=="sha256_verified"
+    assert profiles[-1]["followers_count"]==1
+    assert len([k for k in cloud.objects if k.startswith(root+"/graph/pages/")])==4
+    assert len([k for k in cloud.objects if k.startswith(root+"/threads/")])==2
+    assert len([k for k in cloud.objects if k.startswith(root+"/thread-markers/")])==2
+    thread=[json.loads(raw) for k,raw in cloud.objects.items() if "/threads/" in k]
+    assert thread[0]["replies"][0]["text"]=="Public comment synthetic"
     assert "qa-example" not in capsys.readouterr().out
 
 
