@@ -92,6 +92,19 @@ def canonical_pending_name(name,model):
     return None
 
 
+def pending_duplicate_census(owner,documents):
+    """Audit exact SHA duplicates without logging private paths or content."""
+    existing={p['sha256'] for a in owner['albums'] for p in a['images']}
+    queued=[p['sha256'] for _,d in documents for a in d['albums']
+            for p in a['images']]
+    unique=set(queued)
+    return {'batches_read':len(documents),'queued_rows':len(queued),
+            'distinct_queued_sha':len(unique),
+            'already_saved_sha':len(unique&existing),
+            'new_distinct_sha':len(unique-existing),
+            'repeated_queue_rows':len(queued)-len(unique)}
+
+
 def list_pending_entries(remote,model,reader=None):
     """Two ordinary same-owner file-list formats; never infer no queue from a failed read.
 
@@ -197,7 +210,11 @@ if __name__=='__main__':
     prefix=args.remote.rstrip('/')+'/metadata/pending-individual/'+args.model
     entries=list_pending_entries(args.remote,args.model)
     documents,held=accessible_documents(entries,args.remote,args.model)
-    delta,batches=load(json.loads(args.owner.read_text()),documents,args.model)
+    owner=json.loads(args.owner.read_text())
+    delta,batches=load(owner,documents,args.model)
+    print('OWNER_PENDING_SHA_CENSUS',args.model,
+          json.dumps(pending_duplicate_census(owner,documents),sort_keys=True),
+          flush=True)
     count=sum(len(a['images']) for a in delta['albums'])
     if count:
         root=args.stage/'metadata';root.mkdir(parents=True,exist_ok=True)
