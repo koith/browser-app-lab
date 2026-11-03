@@ -614,6 +614,23 @@ class DirectTests(unittest.TestCase):
         mixed=raw.replace('Mimmi_Work/ShyPetal.com@-003','Other_Work/ShyPetal.com@-003')
         self.assertEqual(page_images(mixed,page,'mimmi')[2],'mixed_public_editions_rejected')
 
+    def test_verified_creator_feed_can_scan_entire_known_corpus_without_unbounded_fetch(self):
+        from direct_photo_pipeline import verified_creator_feed_candidates
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);rows=[{
+                'source':'official-sns',
+                'post':f'https://x.com/super_yuisan/status/{2117242902825091424+i}',
+                'url':f'https://pbs.twimg.com/media/OfficialCut{i:04d}.jpg?name=orig'}
+                for i in range(75)]
+            (root/'feed.json').write_text(json.dumps({
+                'source':'https://teapawt.net/super_yuisan/media','images':rows}))
+            full=verified_creator_feed_candidates(root,page_cycle=3,max_urls=75)
+            self.assertEqual(len(full),75)
+            self.assertEqual(set(full),{x['url'] for x in rows})
+            self.assertEqual(len(verified_creator_feed_candidates(root,page_cycle=3)),40)
+            with self.assertRaises(ValueError):
+                verified_creator_feed_candidates(root,max_urls=501)
+
     def test_official_yui_feed_link_is_downloaded_as_real_individual_file(self):
         from direct_photo_pipeline import verified_creator_feed_candidates
         with tempfile.TemporaryDirectory() as d:

@@ -163,6 +163,8 @@ jobs:
       RCLONE_CONFIG_ARCHIVE_TYPE: terabox
       RCLONE_CONFIG_ARCHIVE_UPLOAD_THREADS: '1'
       MODEL: ${{ matrix.model }}
+      # One-time full author-scoped public feed inventory. Revert to 40 after measured readback.
+      GALLERY_YUI_FEED_SCAN_LIMIT: '470'
       # The first cohort is fully proven before this release is merged.
       # Incoming batches still require independent exact media SHA readback.
       ARCHIVE_PUBLICATION_MODE: immediate
