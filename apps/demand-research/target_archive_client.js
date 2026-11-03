@@ -12,6 +12,12 @@
   const account=$("targetArchiveAccount");
   const submit=$("targetArchiveSubmit");
   const workflow=$("targetArchiveWorkflow");
+  const viewer=document.createElement("a");
+  viewer.href="/account-archive";
+  viewer.textContent="저장된 계정 아카이브 보기";
+  viewer.style.marginLeft="14px";
+  viewer.hidden=true;
+  workflow.after(viewer);
   let ready=false;
   async function check(){
     try{
@@ -19,12 +25,14 @@
         credentials:"same-origin",cache:"no-store"});
       if(!response.ok)throw new Error("private gateway unavailable");
       const result=await response.json();
+      viewer.hidden=false; // authenticated read-only viewer works without dispatch permission
       ready=Boolean(result.enabled);
       submit.disabled=!ready;
       message.textContent=ready
         ?"개인용 보관 서버 연결됨 · 공개 게시글과 직접 작성한 답글, 원본 첨부를 순차 백업합니다."
         :"서버의 아카이브 실행 권한이 아직 설정되지 않았습니다. GitHub Actions에서 직접 실행할 수 있습니다.";
     }catch{
+      viewer.hidden=true;
       ready=false;
       submit.disabled=true;
       message.textContent="공개 Pages에서는 직접 백업을 실행하지 않습니다. 아래 GitHub Actions에서 계정을 지정해 실행하세요.";
