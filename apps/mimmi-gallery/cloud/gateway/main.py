@@ -129,7 +129,7 @@ def same_owner_copyto_read_allowed(path: str, limit: int, remote: str | None) ->
     if media_key_valid(path):
         return True
     match=re.fullmatch(
-        r"metadata/pending-individual/(mimmi|yui)/[a-f0-9]{64}\\.json",path)
+        r"metadata/pending-individual/(mimmi|yui)/[a-f0-9]{64}\.json",path)
     return bool(match and limit <= 2_000_001
                 and (remote or REMOTE)==(REMOTE if match[1]=="mimmi" else YUI_REMOTE))
 
@@ -219,7 +219,7 @@ async def rclone_bytes(path: str, limit: int, *, remote: str | None = None) -> b
                     headers={'X-Archive-Read-Cause':'transport_interruption'} if retryable else None)
             raw=bytes(content)
             if (path.startswith(('originals/','previews/'))
-                    or re.fullmatch(r"metadata/pending-individual/(mimmi|yui)/[a-f0-9]{64}\\.json",path)) and len(raw)<=512:
+                    or re.fullmatch(r"metadata/pending-individual/(mimmi|yui)/[a-f0-9]{64}\.json",path)) and len(raw)<=512:
                 try: body=json.loads(raw)
                 except (ValueError,TypeError):body={}
                 if isinstance(body,dict) and body.get('errno')==400141:
