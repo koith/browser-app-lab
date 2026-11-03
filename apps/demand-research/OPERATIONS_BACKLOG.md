@@ -84,3 +84,8 @@
 
 - [x] [PR #634](https://github.com/koith/browser-app-lab/pull/634) — 예약 실행 간격을 GitHub Actions 실기록에서 계산하며, **5분 cron 설정**을 **실제 5분 주기 성공**으로 허위 표기하지 않음. 실행 간격이 확인된 지연분만 최대 180분까지 과거 공개 게시글 추가 검색. 직전 16분 현재 공개글 수집 우선, 같은 게시글 중복 저장 방지 및 기존 24건 암호화 보관 상한 유지. [PR 오프라인 테스트 #41657330360](https://github.com/koith/browser-app-lab/actions/runs/41657330360) PASS, main 병합 `62a8c1b76781e6852aec481ebcb09c45c6232524`.
 - [ ] **INT-02 최종 완료** — 실제 다음 예약 실행들에서 `INTERSECTION_CAPTURE_SCHEDULE_HEALTH`와 신규 원본 저장/복구 간격 및 누락률 재측정 전. **GitHub 예약 실행의 엄격한 5분 정시성은 검증되지 않음.**
+
+## 2026-11-03 INT-03 동일 원본 첨부 증명 하위 개발
+
+- [x] [PR #635](https://github.com/koith/browser-app-lab/pull/635) — 게시글별 원본 CDN URL과 첨부 순번을 SHA 검증된 staging marker에 불변 결합하고, 재시도 시 정확히 같은 링크만 허용. 기존 URL 없는 과거 marker는 최초 공개 관측 기록의 **동일 게시글·동일 첨부 번호** 링크를 통해 입증될 때만 재사용. 원본 URL 변경·손상·누락은 다른 사진으로 대체하지 않으며 기존 staging 바이트를 삭제하지 않음. [오프라인/회귀 CI #41658926885](https://github.com/koith/browser-app-lab/actions/runs/41658926885) PASS, main 병합 `93d5d4af7dc58300d5d322ed1bba0b1c99b0f45f`. **CODE_ONLY**.
+- [ ] **INT-03 전체 완료** — 기존 누락 원본의 실운영 TeraBox readback SHA 전수 검증과 출처 일치, 복구 가능한 항목 0 미완료 입증 전.
