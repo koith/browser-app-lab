@@ -50,6 +50,11 @@ jobs:
           rclone lsf archive: --max-depth 1 --retries 2 >/dev/null
           echo 'TeraBox account: READ CONNECTIVITY VERIFIED' >> "$GITHUB_STEP_SUMMARY"
           echo 'Research post files: NOT uploaded by this QA job' >> "$GITHUB_STEP_SUMMARY"
+      - name: Audit private catalog and sample immutable post checksums (read-only)
+        if: env.RCLONE_CONFIG_ARCHIVE_COOKIE != ''
+        working-directory: apps/demand-research
+        run: |
+          python inspect_terabox_status.py
       - name: Verify actual TeraBox write, post bundling and remote SHA256 readback
         # Mutating cloud integrity checks are isolated from normal code/PR CI.
         # They must be explicitly dispatched to avoid orphaning QA prefixes.

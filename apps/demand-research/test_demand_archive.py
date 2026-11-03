@@ -512,3 +512,21 @@ def test_parent_mkdir_failure_prevents_false_storage_success():
     with pytest.raises(RuntimeError,match="authorization"):
         cloud.save_post(post())
     assert not any(key.endswith("/post.json") for key in cloud.objects)
+
+
+def test_read_only_archive_summary_reports_remote_sample_without_mutation(monkeypatch):
+    from inspect_terabox_status import inspect
+    cloud=FakeCloud()
+    monkeypatch.setenv("RCLONE_CONFIG_ARCHIVE_COOKIE","offline-test")
+    p=post()
+    cloud.save_post(p)
+    cloud.publish_catalog({p["id"]:p},"123456987")
+    before=dict(cloud.objects)
+    status=inspect(cloud)
+    assert status["catalog_post_count"]==1
+    assert status["catalog_expected_bytes"]>0
+    assert status["versioned_manifest_count"]==1
+    assert status["entry_marker_count"]==1
+    assert status["sample_valid"]==1
+    assert status["sample_mismatch"]==0
+    assert cloud.objects==before,"audit must never mutate archive"
