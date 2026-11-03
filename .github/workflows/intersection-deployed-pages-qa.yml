@@ -1,0 +1,51 @@
+name: INTERSECTION — Deployed Pages Desktop and Mobile QA
+
+on:
+  pull_request:
+    paths:
+      - "apps/demand-research/test_deployed_pages_browser.py"
+      - ".github/workflows/intersection-deployed-pages-qa.yml"
+  push:
+    branches: [main]
+    paths:
+      - "apps/demand-research/index.html"
+      - "apps/demand-research/post_activity_ranking.js"
+      - "apps/demand-research/test_deployed_pages_browser.py"
+      - ".github/workflows/intersection-deployed-pages-qa.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: intersection-deployed-pages-production
+  cancel-in-progress: false
+
+jobs:
+  code-check:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate read-only deployment QA syntax
+        run: python -m py_compile apps/demand-research/test_deployed_pages_browser.py
+
+  deployed-browser:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install pinned browser QA
+        run: |
+          python -m pip install --disable-pip-version-check playwright==1.56.0
+          python -m playwright install --with-deps chromium webkit
+      - name: Read SHA-verified deployed Pages, Chromium desktop and mobile WebKit
+        run: python apps/demand-research/test_deployed_pages_browser.py
