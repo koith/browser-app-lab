@@ -8,8 +8,12 @@ from research/source URLs or TeraBox-only storage may be prepainted.
 from __future__ import annotations
 
 from html.parser import HTMLParser
+import hashlib
+from io import BytesIO
 import json
 from pathlib import Path
+
+from PIL import Image
 from urllib.parse import unquote
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -61,7 +65,19 @@ for model in ("mimmi", "yui"):
         p = matches[0]
         assert p["sha256"] not in excluded_sha
         assert img["src"].startswith(f"stored-albums/{aid}/")
-        assert (base / img["src"]).is_file(), (model, img["src"])
+        disk = base / img["src"]
+        assert disk.is_file(), (model, img["src"])
+        # The manifest's hash, bytes, and dimensions are not proof that the
+        # actual committed image is intact. Validate its physical bytes and
+        # decoded pixels before calling the prepaint cache safe.
+        raw = disk.read_bytes()
+        assert len(raw) == p["bytes"], (model, aid, "incorrect physical file size")
+        assert hashlib.sha256(raw).hexdigest() == p["sha256"], (
+            model, aid, "physical file does not match SHA manifest")
+        with Image.open(BytesIO(raw)) as actual:
+            actual.load()
+            assert actual.size == (p["width"], p["height"]), (
+                model, aid, "decoded pixels differ from saved catalog")
         assert img["width"] == str(p["width"]) and img["height"] == str(p["height"])
         assert img["decoding"] == "async"
         assert img["loading"] == ("eager" if index < 4 else "lazy")
