@@ -163,7 +163,7 @@ class CloudArchive:
             raise RuntimeError("private TeraBox authentication not configured")
         self.command(["lsf", "archive:", "--max-depth", "1", "--retries", "2"], timeout=90)
 
-    def read(self, key, *, cap=MAX_CATALOG, optional=False, domain=None):
+    def _read_physical(self, key, *, cap=MAX_CATALOG, optional=False, domain=None):
         if not isinstance(key, str) or not key or ".." in key or "\\" in key:
             raise ValueError("unsafe remote key")
         args=["cat",self.remote+"/"+key,"--retries","2"]
@@ -174,9 +174,55 @@ class CloudArchive:
         data=self.command(args,timeout=120,allow_missing=optional)
         if data is None:
             return None
-        if len(data) > cap:
+        if len(data)>cap:
             raise ValueError("private remote object exceeds cap")
         return data
+
+    def read(self, key, *, cap=MAX_CATALOG, optional=False, domain=None):
+        # Canonical bytes always take precedence. A missing canonical path can
+        # be served by its immutable shallow counterpart, including on a new
+        # worker after the in-memory writer state has been discarded.
+        raw=self._read_physical(key,cap=cap,optional=True,domain=domain)
+        if raw is not None:
+            return raw
+        alternate=self.flat_storage_key(key)
+        if alternate:
+            raw=self._read_physical(alternate,cap=cap,optional=True,domain=domain)
+            if raw is not None:
+                return raw
+        if optional:
+            return None
+        return self._read_physical(key,cap=cap,optional=False,domain=domain)
+
+
+    @staticmethod
+    def flat_storage_key(key):
+        """Deterministic shallow fallback under the existing metadata directory.
+
+        Keep canonical keys and immutable source bytes unchanged. A flat
+        object is never listed as a completed post until its entry marker
+        and original SHA-verified post/media can be read independently.
+        """
+        if not isinstance(key,str) or not key.startswith(("posts/","metadata/")):
+            return None
+        if ".." in key or "\\" in key or key.startswith("metadata/flat-"):
+            return None
+        # Already shallow: do not recursively create aliases.
+        if key.startswith("metadata/") and key.count("/")==1:
+            return None
+        match=re.fullmatch(r"posts/([a-f0-9]{40})/capture\\.json",key)
+        if match:
+            return "metadata/early-"+match.group(1)+".json"
+        for pattern,prefix in (
+                (r"metadata/entries/([a-f0-9]{40})\\.json","flat-entry-"),
+                (r"metadata/entries-repaired/([a-f0-9]{40})\\.json","flat-repaired-"),
+                (r"metadata/manifests/(manifest-[0-9]{6,30}\\.json)","flat-")):
+            match=re.fullmatch(pattern,key)
+            if match:
+                return "metadata/"+prefix+match.group(1)+(".json" if prefix=="flat-entry-" or prefix=="flat-repaired-" else "")
+        if not re.fullmatch(r"[A-Za-z0-9_./-]+",key):
+            return None
+        return "metadata/flat-blob-"+sha256(key.encode("utf-8"))+".bin"
 
     def read_verified(self, key, expected_digest, *, cap=MAX_POST):
         """Read SHA-matched object across bounded TeraBox stale-response windows.
@@ -203,6 +249,17 @@ class CloudArchive:
                     raw=None
                 if raw is not None and sha256(raw)==expected_digest:
                     return raw
+        # A stale canonical read must not hide a separately SHA-verified flat
+        # object. Never accept a mismatching or unreadable fallback.
+        flat=self.flat_storage_key(key)
+        if flat:
+            for domain in (None,"https://nephobox.com"):
+                try:
+                    raw=self._read_physical(flat,cap=cap,optional=True,domain=domain)
+                except (RuntimeError,ValueError):
+                    raw=None
+                if raw is not None and sha256(raw)==expected_digest:
+                    return raw
         return None
 
     def names(self, prefix):
@@ -211,7 +268,30 @@ class CloudArchive:
         if raw is None:
             return []
         lines = raw.decode("utf-8", "replace").splitlines()
-        if len(lines) > MAX_ENTRIES:
+        if prefix in ("metadata/entries","metadata/entries-repaired",
+                      "metadata/manifests"):
+            # Nested lsf may be broken even though the flat metadata root is
+            # healthy. Virtualize only narrowly named, SHA-checked journal
+            # entries; all other metadata filenames are ignored.
+            try:
+                flattened=self.command(["lsf",self.remote+"/metadata",
+                                        "--files-only","--retries","2"],
+                                       timeout=120,allow_missing=True)
+            except RuntimeError:
+                flattened=None
+            if flattened:
+                pattern={
+                    "metadata/entries":r"flat-entry-([a-f0-9]{40})\\.json",
+                    "metadata/entries-repaired":r"flat-repaired-([a-f0-9]{40})\\.json",
+                    "metadata/manifests":r"flat-(manifest-[0-9]{6,30}\\.json)",
+                }[prefix]
+                for name in flattened.decode("utf-8","replace").splitlines():
+                    match=re.fullmatch(pattern,name)
+                    if match:
+                        lines.append(match.group(1)+
+                                     (".json" if prefix!="metadata/manifests" else ""))
+        lines=sorted(set(lines))
+        if len(lines)>MAX_ENTRIES:
             raise ValueError("private archive entry listing too large")
         return lines
 
@@ -272,6 +352,30 @@ class CloudArchive:
                 raise RuntimeError("private cloud parent directory unverified") from last
 
     def write_immutable(self, key, data):
+        """Canonical immutable upload, then shallow fallback only for path failures.
+
+        Never fallback on authorization, quota, rate limit, or conflicting
+        immutable bytes. Success still requires remote SHA256 byte readback.
+        """
+        try:
+            return self._write_immutable_direct(key,data)
+        except RuntimeError as error:
+            flat=self.flat_storage_key(key)
+            reason=str(error)
+            if (flat is None or not isinstance(data,bytes)
+                    or not any(code in reason for code in (
+                        "parent directory unverified",
+                        "write unverified after primary and alternate endpoints"))):
+                raise
+            self._write_immutable_direct(flat,data)
+            expected=sha256(data)
+            actual=self.read_verified(key,expected,
+                                      cap=max(len(data)+1,MAX_POST))
+            if actual!=data:
+                raise RuntimeError("private cloud flat fallback SHA unverified") from error
+            return True
+
+    def _write_immutable_direct(self, key, data):
         if not isinstance(data, bytes):
             raise TypeError("cloud content must be bytes")
         cap = max(len(data) + 1, MAX_MEDIA_BYTES + MAX_POST)
