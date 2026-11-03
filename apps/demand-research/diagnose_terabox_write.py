@@ -74,8 +74,33 @@ def probe():
                 outcomes[label]={"success":verified,"mismatch":mismatch}
             except (OSError,subprocess.TimeoutExpired,RuntimeError) as e:
                 outcomes[label]={"success":False,"error":str(e)}
+    # A second write to the SAME synthetic object tests TeraBox's duplicate-name
+    # and eventual-consistency semantics, without touching production objects.
+    collision_target=base+"/collision-test.json"
+    first=b'{"synthetic":"initial"}\n'
+    second=b'{"synthetic":"replacement"}\n'
+    try:
+        cmd(["rcat",collision_target],data=first)
+        time.sleep(1)
+        initial=cmd(["cat",collision_target],tolerate=True)
+        if initial!=first:
+            outcomes["same-key-overwrite"]={"first_readback":False}
+        else:
+            try:
+                cmd(["rcat",collision_target],data=second)
+                time.sleep(2)
+                replacement=cmd(["cat",collision_target],tolerate=True)
+                outcomes["same-key-overwrite"]={
+                    "first_readback":True,
+                    "updated_bytes_visible":replacement==second,
+                    "old_bytes_returned":replacement==first}
+            except RuntimeError as e:
+                outcomes["same-key-overwrite"]={
+                    "first_readback":True,"error":str(e)}
+    except RuntimeError as e:
+        outcomes["same-key-overwrite"]={"error":str(e)}
     print("SYNTHETIC_TERABOX_WRITE_TEST",json.dumps(outcomes,sort_keys=True),flush=True)
-    if not all(r.get("success") for r in outcomes.values()):
+    if not all(r.get("success") for name,r in outcomes.items() if name!="same-key-overwrite"):
         raise RuntimeError("Synthetic cloud write integrity failed; live archive remains unverified")
 
 
