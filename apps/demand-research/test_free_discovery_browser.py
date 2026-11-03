@@ -5,7 +5,7 @@ listed separately from verified posts, genuine public X media promoted, date cha
 replays only originals, no separate user-facing search UI.
 Live: no synthetic provider replies, aggregate statistics only, no user data.
 """
-import json,sys
+import json,sys,base64
 from datetime import datetime,timezone,timedelta
 from pathlib import Path
 from urllib.parse import parse_qs,urlparse
@@ -16,6 +16,7 @@ PAGE="https://koith.github.io/browser-app-lab/apps/demand-research/"
 HTML=(ROOT/"index.html").read_text(encoding="utf-8")
 JS=(ROOT/"free_discovery.js").read_text(encoding="utf-8")
 LIVE="--live" in sys.argv
+PNG=base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAFElEQVR4nGPUit7yn4GBgYGJAQoAIS4CPGFQl4cAAAAASUVORK5CYII=")
 X_ID="1234567890123456789"
 X_OTHER="9876543210123456789"
 LINKS={
@@ -115,8 +116,8 @@ def run():
                         }}))
                 page.route("https://api.fxtwitter.com/*/status/*",x_public)
                 page.route("https://example.com/*.jpg",
-                    lambda route:route.fulfill(status=200,content_type="image/jpeg",
-                      body=b"synthetic jpeg fixture"))
+                    lambda route:route.fulfill(status=200,content_type="image/png",
+                      body=PNG))
             else:
                 page.on("response",lambda response:calls.append({
                     "host":urlparse(response.url).hostname,
