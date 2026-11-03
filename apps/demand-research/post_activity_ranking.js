@@ -62,10 +62,12 @@
        g={platform:p.platform,profileUrl:profile,
           author:String(p.author||profile.split("/").pop()).slice(0,90),
           posts:0,days:new Set(),reactions:0,measuredPosts:0,
-          latestMs:-Infinity,latestId:"",latestThumbnail:"",profileCreatedAt:"",profilePostCount:null};
+          latestMs:-Infinity,latestId:"",latestThumbnail:"",latestAvatar:"",profileCreatedAt:"",profilePostCount:null};
        groups.set(key,g);
      }
      g.posts+=1;
+     const publicAvatar=safeThumbnail(p.avatarUrl);
+     if(publicAvatar)g.latestAvatar=publicAvatar;
      g.days.add(new Date(ms).toISOString().slice(0,10));
      const created=Date.parse(p.profileCreatedAt||"");
      if(Number.isFinite(created)&&created>0&&created<=ms&&
@@ -95,7 +97,7 @@
        posts:g.posts,activeDays,reactions:g.reactions,
        measuredPosts:g.measuredPosts,
        score:signal,engagementAvailable:g.measuredPosts>0,
-       latestThumbnail:g.latestThumbnail,latestPosted:new Date(g.latestMs).toISOString(),
+       latestThumbnail:g.latestThumbnail,latestAvatar:g.latestAvatar,latestPosted:new Date(g.latestMs).toISOString(),
        profileCreatedAt:g.profileCreatedAt,profilePostCount:g.profilePostCount
      });
    }
@@ -186,10 +188,16 @@
      title.append(node("div","activity-rank-detail-source",LABELS[g.platform]+" · #"+rank),
        node("div","activity-rank-detail-title",g.author));
      intro.append(title);
-     if(g.latestThumbnail){
+     if(g.latestThumbnail||g.latestAvatar){
        const img=node("img","activity-rank-detail-thumb");
-       img.src=g.latestThumbnail;img.alt="최근 게시글 썸네일";img.referrerPolicy="no-referrer";
-       img.addEventListener("error",()=>img.remove());
+       img.src=g.latestThumbnail||g.latestAvatar;
+       img.alt=g.latestThumbnail?"최근 게시글 이미지":"공개 프로필 사진";
+       img.referrerPolicy="no-referrer";
+       img.addEventListener("error",()=>{
+         if(g.latestThumbnail&&g.latestAvatar&&img.src!==g.latestAvatar){
+           img.src=g.latestAvatar;img.alt="공개 프로필 사진";
+         }else img.remove();
+       });
        intro.append(img);
      }
      detail.append(intro);
@@ -247,11 +255,14 @@
        card.setAttribute("aria-label",index+1+"위 "+g.author+" 상세 보기");
        card.append(node("span","activity-rank-num",String(index+1).padStart(2,"0")));
        const thumb=node("span","activity-rank-thumb");
-       if(g.latestThumbnail){
+       if(g.latestThumbnail||g.latestAvatar){
          const img=node("img","");
-         img.src=g.latestThumbnail;img.alt="";img.loading="lazy";
-         img.decoding="async";img.referrerPolicy="no-referrer";
-         img.addEventListener("error",()=>{img.remove();thumb.classList.add("activity-rank-thumb-empty");});
+         img.src=g.latestThumbnail||g.latestAvatar;img.alt="";
+         img.loading="lazy";img.decoding="async";img.referrerPolicy="no-referrer";
+         img.addEventListener("error",()=>{
+           if(g.latestThumbnail&&g.latestAvatar&&img.src!==g.latestAvatar)img.src=g.latestAvatar;
+           else{img.remove();thumb.classList.add("activity-rank-thumb-empty");}
+         });
          thumb.append(img);
        }else thumb.classList.add("activity-rank-thumb-empty");
        card.append(thumb);

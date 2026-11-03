@@ -72,7 +72,7 @@
     }finally{clearTimeout(timer)}
   }
   function publish(){
-    // Main viewer handles the single unified feed and dated-source dedup.
+    // Main viewer keeps dated original posts separate from unverifiable search leads.
     // Non-matching snippets are not treated as posts until original text
     // independently establishes that they match one of the topic terms.
     const rows=Array.from(records.values())
@@ -84,19 +84,42 @@
   async function readX(item){
     const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),12000);
     try{
-      const res=await fetch("https://api.fxtwitter.com/status/"+
-        encodeURIComponent(item.postId),{mode:"cors",credentials:"omit",
+      // The public legacy FxEmbed API documents /:handle/status/:id.
+      // /status/:id alone can return a 404 on some gateway versions.
+      const url="https://api.fxtwitter.com/"+
+        encodeURIComponent(item.handle||"i")+"/status/"+
+        encodeURIComponent(item.postId);
+      const res=await fetch(url,{mode:"cors",credentials:"omit",
         cache:"no-store",signal:ctrl.signal});
       if(!res.ok)return false;
       const payload=await res.json(),tweet=payload?.tweet;
       if(!tweet||String(tweet.id||"")!==item.postId||tweet.author?.protected===true)
         return false;
-      const text=String(tweet.text||""),dateMs=Date.parse(String(tweet.created_at||""));
+      const text=String(tweet.text||"");
+      // Prefer provider's UTC epoch: iOS Safari does not consistently parse
+      // legacy X date strings such as "Sun Jul 17 09:35:58 +0000 2022".
+      const epoch=Number(tweet.created_timestamp);
+      const dateMs=Number.isFinite(epoch)&&epoch>0?epoch*1000:
+        Date.parse(String(tweet.created_at||""));
       if(!text||text.length>5000||!Number.isFinite(dateMs)||
         dateMs>Date.now()+86400000||!termsIn(text).length)return false;
+      const media=[];
+      const m=tweet.media||{};
+      for(const photo of (Array.isArray(m.photos)?m.photos:[]).slice(0,12)){
+        if(photo&&typeof photo.url==="string")
+          media.push({type:"image",url:photo.url,thumb:photo.url});
+      }
+      for(const video of (Array.isArray(m.videos)?m.videos:[]).slice(0,12)){
+        if(video&&typeof video.url==="string")
+          media.push({type:"video",url:video.url,thumb:video.thumbnail_url||""});
+      }
       const verified={
         id:item.postId,text,created_at:new Date(dateMs).toISOString(),
         author:String(tweet.author?.name||tweet.author?.screen_name||item.handle||""),
+        avatarUrl:String(tweet.author?.avatar_url||""),
+        possibly_sensitive:!!tweet.possibly_sensitive,
+        engagement:{likes:tweet.likes,reposts:tweet.retweets,replies:tweet.replies},
+        media:media.slice(0,12),
         protected:false,url:item.url
       };
       originals.set(item.id,verified);
@@ -159,12 +182,12 @@
       }
     });
     publish();
-    // Check up to 12 likely matches on X (index-only results can be
+    // Check up to 24 likely matches on X (index-only results can be
     // false positives), and up to 4 links on each Meta network where
     // snippet was incomplete. Never bypass provider denials.
     const x=Array.from(records.values()).filter(x=>x.platform==="x")
       .sort((a,b)=>b.matched.length-a.matched.length);
-    await limited(x,12,readX);
+    await limited(x,24,readX);
     publish();
     for(const network of ["threads","instagram"]){
       const missing=Array.from(records.values()).filter(

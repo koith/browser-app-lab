@@ -18,9 +18,19 @@ PNG=base64.b64decode("iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAYAAABytg0kAAAAFElEQVR4nG
 
 def fake_post(term,i):
     today=datetime.now(timezone.utc).isoformat()
+    embed={"images":[{"fullsize":"https://example.com/qa.png",
+                      "thumb":"https://example.com/qa.png","alt":"QA fixture"}]}
+    if i%17==5:
+        embed={"images":[]}  # actual source text-only post
+    elif i%17==6:
+        embed={"$type":"app.bsky.embed.video#view","playlist":"https://example.com/qa.m3u8"}  # no poster
+    elif i%17==7:
+        embed={"images":[{"fullsize":"https://example.com/qa.png",
+                          "thumb":"https://example.com/broken-qa.png","alt":"QA fallback"}]}
     return {
         "uri":f"at://did:plc:synthetic{i}{term}/app.bsky.feed.post/{i+100}",
-        "author":{"did":"did:plc:safe-synthetic","handle":"qa-feed.bsky.social","displayName":"TEST"},
+        "author":{"did":"did:plc:safe-synthetic","handle":"qa-feed.bsky.social","displayName":"TEST",
+                   "avatar":"https://example.com/qa.png"},
         "record":{"text":term+(" 광고 판매 홍보 할인 구독 문의 텔레그램 "+str(i)
                  if i%15==0 else " synthetic QA without personal details "+str(i)),
                   "createdAt":today},
@@ -28,8 +38,7 @@ def fake_post(term,i):
         "labels":([{"val":"porn"}] if i%15==1 else
                   [{"val":"graphic-media"}] if i%15==2 else
                   [{"val":"!hide"}] if i%15==3 else []),
-        "embed":{"images":[{"fullsize":"https://example.com/qa.png",
-                            "thumb":"https://example.com/qa.png","alt":"QA fixture"}]}
+        "embed":embed
     }
 
 
@@ -181,6 +190,8 @@ def run(live=False):
                       body='<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><circle cx="12" cy="12" r="7"/></svg>'))
                 page.route("https://example.com/qa.png",
                     lambda route:route.fulfill(status=200,content_type="image/png",body=PNG))
+                page.route("https://example.com/broken-qa.png",
+                    lambda route:route.fulfill(status=404,content_type="text/plain",body="synthetic missing"))
             page.goto(PAGE,wait_until="domcontentloaded",timeout=30000)
             page.wait_for_selector("article.post",timeout=60000)
             page.wait_for_function("document.getElementById('applyDate').disabled === false",timeout=120000)
@@ -216,6 +227,22 @@ def run(live=False):
                 "els=>els.every(e=>e.textContent.trim()==='')"),"Source badges over thumbnails must have only logos"
             assert page.locator("article.post .source-badge img").count()>=1
             assert page.locator("article.post a.author[target=_blank]").count()>0
+            if not live:
+                assert page.locator('article.post[data-no-media="true"]').count()>0, "text-only and posterless video cards need compact fallback"
+                assert page.locator("article.post .thumb-kind-label").count()>0, "source avatars must be explicitly labeled as profile pictures"
+                text_tile=page.locator('article.post[data-no-media="true"]').first
+                assert text_tile.locator(".post-thumb").evaluate("e=>e.getBoundingClientRect().height")<130, "no more full-height empty image boxes"
+                before_candidates=page.locator("article.post").count()
+                accepted=page.evaluate("""() => window.INTERSECTION_receiveCandidates([{
+                  platform:'x',url:'https://x.com/qa_account/status/1234567890123456789',
+                  title:'섹트 test-only search result',description:'Unverified synthetic link',
+                  provider:'test'
+                }])""")
+                assert accepted==1
+                assert page.locator("article.post").count()==before_candidates, "search hits must not masquerade as verified posts"
+                assert page.locator("#discoveryCandidates").is_visible()
+                page.locator("#discoveryCandidates summary").click()
+                assert page.locator("#discoveryCandidateList a[target=_blank]").count()==1
 
             # Real canvas-alpha interaction: remove and restore at the pointer.
             def alpha():
@@ -312,6 +339,22 @@ def run(live=False):
                 blu=page.locator("article.post").filter(
                     has=page.locator('.source-badge[aria-label="출처: Bluesky"]')).first
                 assert blu.locator("a.author").get_attribute("href")=="https://bsky.app/profile/qa-feed.bsky.social"
+                accepted=page.evaluate("""() => window.INTERSECTION_acceptPublicX({
+                  id:'1234567890123456789',
+                  url:'https://x.com/qa_account/status/1234567890123456789',
+                  text:'섹트 test-only public X image',
+                  created_at:new Date().toISOString(),
+                  author:'synthetic QA account',avatarUrl:'https://example.com/qa.png',
+                  media:[{type:'image',url:'https://example.com/qa.png',
+                          thumb:'https://example.com/qa.png'}],
+                  protected:false
+                })""")
+                assert accepted["accepted"] is True,accepted
+                xcard=page.locator("article.post").filter(
+                    has=page.locator('.source-badge[aria-label="출처: X"]')).first
+                assert xcard.count()==1,"source-validated X post must enter verified feed"
+                assert xcard.locator(".post-thumb > img.post-media-img").count()==1,"X image must render as original thumbnail"
+                assert not page.locator("#discoveryCandidates").is_visible(),"verified X post removes unverified search lead"
             else:
                 assert n>=1,"No real public posts"
                 assert thumbnails>0,"No public thumbnails"
