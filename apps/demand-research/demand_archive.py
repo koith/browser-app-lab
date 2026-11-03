@@ -283,6 +283,8 @@ class CloudArchive:
                 if sha256(blob)!=info["sha256"]:
                     continue
                 parsed=json.loads(blob)
+                if not isinstance(parsed,dict):
+                    continue
                 if parsed.get("schema_version")==1:
                     for p in validate_catalog(parsed):
                         by_id[p["id"]]=p
@@ -384,7 +386,7 @@ class CloudArchive:
                     post = validate_post(json.loads(record))
                     if post["id"] != pid:
                         raise ValueError("marker/post mismatch")
-                except (ValueError, TypeError, KeyError, json.JSONDecodeError):
+                except (ValueError, TypeError, KeyError, json.JSONDecodeError, RuntimeError):
                     if directory != "metadata/entries" or not repair:
                         self.unrecoverable_entries += 1
                         continue
@@ -453,20 +455,35 @@ class CloudArchive:
     def publish_catalog(self, posts_by_id, run_id):
         if not re.fullmatch(r"[0-9]{6,30}", str(run_id)):
             raise ValueError("invalid publication ID")
-        rows = [validate_post(v) for _, v in sorted(posts_by_id.items())]
-        blob = canonical_json({"schema_version": 1, "posts": rows})
-        if len(blob) > MAX_CATALOG:
-            raise ValueError("catalog too large")
-        # Aggregate size evidence only. Never expose post identifiers, text,
-        # media names, cookie values or remote object URLs in workflow logs.
+        if len(posts_by_id)>MAX_POST:
+            raise ValueError("too many entries")
+        # Compact v2 snapshot contains NO post text, accounts, profile URLs or
+        # attachment links. Immutable post.json + entry journals own the bytes.
+        refs=[]
+        for pid,post in sorted(posts_by_id.items()):
+            if not ID.fullmatch(str(pid)):
+                continue
+            try:
+                validate_post(post)
+            except ValueError:
+                # Legacy inlined records remain available from catalog.json.
+                continue
+            refs.append({"id":pid,"sha256":sha256(canonical_json(post))})
+        blob=canonical_json({"schema_version":2,"post_refs":refs})
+        if len(blob)>MAX_CATALOG:
+            raise ValueError("reference catalog too large")
         print("PRIVATE_CATALOG_PUBLISH_ATTEMPT",json.dumps({
-            "records":len(rows),"bytes":len(blob),
+            "records":len(refs),"bytes":len(blob),
+            "index_format":"sha256_references_only",
             "versioned":True},sort_keys=True),flush=True)
-        catalog = "metadata/catalogs/catalog-" + str(run_id) + ".json"
-        manifest = "metadata/manifests/manifest-" + str(run_id) + ".json"
-        self.write_immutable(catalog, blob)
-        # Last write: pointer always refers to a readable, verified catalog.
-        self.write_immutable(manifest, canonical_json({
-            "schema_version": 1, "catalog": catalog,
-            "sha256": sha256(blob), "posts": len(rows), "published_at": int(time.time())}))
-        return {"posts": len(rows), "catalog_sha256_verified": True, "versioned": True}
+        catalog="metadata/catalogs/catalog-"+str(run_id)+".json"
+        manifest="metadata/manifests/manifest-"+str(run_id)+".json"
+        self.write_immutable(catalog,blob)
+        # Publish the pointer only AFTER the compact index is read back.
+        self.write_immutable(manifest,canonical_json({
+            "schema_version":1,"catalog":catalog,
+            "sha256":sha256(blob),"posts":len(refs),
+            "published_at":int(time.time())}))
+        return {"posts":len(refs),"catalog_sha256_verified":True,
+                "versioned":True,"index_format":"sha256_references_only"}
+
