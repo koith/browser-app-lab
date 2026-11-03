@@ -91,7 +91,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: intersection-private-recovery-${{ github.run_id }}
+          name: intersection-private-recovery
           path: /tmp/intersection-private-recovery/*.enc
           retention-days: 14
           if-no-files-found: ignore
