@@ -1,5 +1,18 @@
 name: INTERSECTION — Immediate Encrypted TeraBox Recovery
 on:
+  # One-time safe replay of older AES-GCM recovery artifacts after this change
+  # reaches the protected main branch. Also provides an explicit retry route.
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/demand-replay-encrypted.yml"
+  workflow_dispatch:
+    inputs:
+      source_run_id:
+        description: "Optional trusted main-branch capture run ID; blank replays retained encrypted backlog"
+        type: string
+        required: false
+        default: ""
   workflow_run:
     workflows:
       - "INTERSECTION — Fast Private Public-Post Capture"
@@ -11,6 +24,7 @@ on:
       - "apps/demand-research/recover_spool_artifacts.py"
       - "apps/demand-research/recovery_spool.py"
       - "apps/demand-research/test_recovery_spool.py"
+      - "apps/demand-research/test_replay_artifact_selection.py"
 
 permissions:
   contents: read
@@ -35,23 +49,25 @@ jobs:
           set -euo pipefail
           python -m pip install --disable-pip-version-check pytest==8.4.2 cryptography==46.0.4
           cd apps/demand-research
-          python -m py_compile recovery_spool.py recover_spool_artifacts.py
-          python -m pytest -q test_recovery_spool.py test_degraded_encrypted_capture.py
+          python -m py_compile recovery_spool.py recover_spool_artifacts.py test_replay_artifact_selection.py
+          python -m pytest -q test_recovery_spool.py test_degraded_encrypted_capture.py test_replay_artifact_selection.py
 
   replay:
     # Never replay a pull-request artifact or run from an untrusted branch.
     # The prior capture's artifact upload step has already completed.
     if: >-
-      github.event_name == 'workflow_run' &&
-      github.event.workflow_run.event != 'pull_request' &&
-      github.event.workflow_run.head_branch == 'main' &&
-      github.event.workflow_run.conclusion != 'success'
+      github.event_name == 'push' ||
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.event != 'pull_request' &&
+       github.event.workflow_run.head_branch == 'main' &&
+       github.event.workflow_run.conclusion != 'success')
     runs-on: ubuntu-24.04
     timeout-minutes: 21
     env:
       GH_TOKEN: ${{ github.token }}
       GITHUB_RUN_ID: ${{ github.run_id }}
-      DEMAND_RECOVERY_SOURCE_RUN_ID: ${{ github.event.workflow_run.id }}
+      DEMAND_RECOVERY_SOURCE_RUN_ID: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.id || inputs.source_run_id || '' }}
       RCLONE_CONFIG_ARCHIVE_TYPE: terabox
       RCLONE_CONFIG_ARCHIVE_UPLOAD_THREADS: "1"
       RCLONE_CONFIG_ARCHIVE_COOKIE: ${{ secrets.DEMAND_TERABOX_NDUS || secrets.YUI_TERABOX_NDUS || secrets.YUI_TERABOX_COOKIE }}
@@ -75,7 +91,7 @@ jobs:
           rm -rf /tmp/rclone.zip /tmp/rclone-extra
       - name: Install authenticated encryption dependency
         run: python -m pip install --disable-pip-version-check cryptography==46.0.4
-      - name: Replay ONLY this failed main-branch capture's encrypted originals
+      - name: Replay only trusted main-branch encrypted originals and SHA-verify TeraBox readback
         working-directory: apps/demand-research
         run: |
           set -euo pipefail
