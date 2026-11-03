@@ -377,7 +377,7 @@ def test_capture_budget_keeps_catalog_and_reports_partial_coverage(monkeypatch):
     assert len(cloud.load_catalog())==1
 
 
-def test_one_cloud_write_failure_does_not_block_other_verified_catalogued_record(monkeypatch):
+def test_one_nested_capture_write_failure_uses_flat_verified_recovery(monkeypatch):
     class FailingCloud(FakeCloud):
         def __init__(self):
             super().__init__()
@@ -400,12 +400,15 @@ def test_one_cloud_write_failure_does_not_block_other_verified_catalogued_record
         "posted_at":"2026-11-03T00:00:00Z",
         "media_urls":[],"media_expected":0
     } for i in range(2)]
-    with pytest.raises(RuntimeError,match="unverified"):
-        job.run(fetchers=[lambda term,start,end:rows if term==job.TERMS[0] else []],
-                cloud=cloud,clock=lambda:1793667900,run_id="123456813")
+    outcome=job.run(fetchers=[lambda term,start,end:rows if term==job.TERMS[0] else []],
+                    cloud=cloud,clock=lambda:1793667900,run_id="123456813")
     assert cloud.failed_once
-    assert len(cloud.load_catalog())==1,"successful record must be published despite another failure"
-    assert cloud.load_catalog()[0]["id"]==post_key("bluesky",rows[1]["original_id"])
+    assert outcome["storage_failures"]==0
+    assert outcome["saved_verified"]==2
+    assert len(cloud.load_catalog())==2,"flat rescue must retain both verified originals"
+    first_id=post_key("bluesky",rows[0]["original_id"])
+    assert cloud.read_first_observation(first_id) is not None
+    assert cloud.objects["metadata/early-"+first_id+".json"]
 
 
 def test_eventually_consistent_remote_recovers_from_two_stale_reads(monkeypatch):
@@ -866,7 +869,8 @@ def test_missing_original_attachment_is_retryable_not_a_frozen_backup(monkeypatc
     assert first["pending_media_retry"]==1
     assert first["operational_status"]=="DEGRADED_MEDIA"
     assert cloud.load_catalog()==[]
-    assert "posts/"+pid+"/capture.json" in cloud.objects
+    assert cloud.read_first_observation(pid) is not None
+    assert "metadata/early-"+pid+".json" in cloud.objects
     assert "metadata/entries/"+pid+".json" not in cloud.objects
     attempts["ready"]=True
     second=job.run(fetchers=[getter],cloud=cloud,clock=lambda:1793668200,

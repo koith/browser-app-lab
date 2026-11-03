@@ -341,8 +341,7 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
         # runs. A single damaged object must never poison the entire archive.
         for pid in cloud.pending_capture_ids(known)[:MAX_PER_RUN]:
             try:
-                raw = cloud.read("posts/" + pid + "/capture.json",
-                                 cap=100_000, optional=True)
+                raw = cloud.read_first_observation(pid)
                 if raw is None:
                     continue
                 first = json.loads(raw)
@@ -426,18 +425,17 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
                              "source_url": row["source_url"], "posted_at": row["posted_at"],
                              "observed_at": now, "media_links": row["media_urls"],
                              "profile_url": row.get("profile_url", "")}
-                    key = "posts/" + pid + "/capture.json"
-                    first_blob = cloud.read(key, cap=100_000, optional=True)
+                    first_blob = cloud.read_first_observation(pid)
                     if first_blob is None:
                         # A stale 404 from a cloud backend can make a previously
                         # written immutable original look missing. On conflicting
                         # readback, inspect the earlier snapshot and never clobber it.
                         try:
                             phase="write_first_snapshot"
-                            cloud.write_immutable(key, canonical_json(early))
-                            first_blob = canonical_json(early)
+                            first_blob = cloud.save_first_observation(
+                                pid,canonical_json(early),prefer_flat=fast_mode)
                         except RuntimeError:
-                            first_blob = cloud.read(key, cap=100_000, optional=True)
+                            first_blob = cloud.read_first_observation(pid)
                             if first_blob is None:
                                 raise
                     first = json.loads(first_blob)
