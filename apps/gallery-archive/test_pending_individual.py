@@ -2,7 +2,7 @@ import copy
 import json
 import sys
 import unittest
-from load_pending_individual import load,storage,accessible_documents
+from load_pending_individual import load,storage,accessible_documents,list_pending_entries
 from read_owner_metadata import ProviderVerificationRequired
 
 
@@ -59,6 +59,34 @@ class PendingTests(unittest.TestCase):
         self.assertEqual(len(delta['albums'][0]['images']),1)
         def malformed(*a,**kw):raise ValueError('wrong model or corrupt metadata')
         with self.assertRaises(ValueError):accessible_documents(entries,'archive:MimmiArchive','mimmi',malformed)
+
+
+    def test_alternate_same_owner_size_path_list_recovers_missing_json_listing(self):
+        commands=[]
+        def reader(arguments):
+            commands.append(arguments[0])
+            if arguments[0]=='lsjson':return b'[]'
+            if arguments[0]=='lsf':return ('1753;'+'d'*64+'.json\\n').encode()
+            raise AssertionError('unexpected listing')
+        found=list_pending_entries('archive:MimmiArchive','mimmi',reader=reader)
+        self.assertEqual(found,[{'Path':'d'*64+'.json','Size':1753}])
+        self.assertEqual(commands,['lsjson','lsf'])
+
+    def test_nonempty_primary_listing_does_not_consult_alternate(self):
+        primary=json.dumps([{'Path':'d'*64+'.json','Size':1000}]).encode()
+        self.assertEqual(list_pending_entries('archive:MimmiArchive','mimmi',
+            reader=lambda command:primary if command[0]=='lsjson' else
+            self.fail('unexpected independent fallback'))[0]['Size'],1000)
+
+    def test_alternate_unsafe_or_provider_response_never_admitted(self):
+        for bad in (b'{"errno":400141}',b'1;../catalog.json\\n',
+                    b'3000000;'+'d'.encode()*64+b'.json\\n',b'abc;not-valid.json\\n'):
+            def reader(command):
+                return b'[]' if command[0]=='lsjson' else bad
+            with self.subTest(raw=bad[:30]),self.assertRaises(ValueError):
+                list_pending_entries('archive:MimmiArchive','mimmi',reader=reader)
+        with self.assertRaises(ValueError):
+            list_pending_entries('archive:YuiArchive','mimmi',reader=lambda a:b'[]')
 
 
 if __name__=='__main__':unittest.main(verbosity=2)
