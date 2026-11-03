@@ -184,4 +184,29 @@ with TestClient(gateway.app) as client:
         private_fixture["model"]="mimmi"
         private_fixture["storage"]="unsanctioned-cache"
         assert client.post(path,headers=header).status_code==503
+# Reusing the existing session-sync OIDC verifier must not silently extend
+# permission to the public session-refresh operation or unrelated workflows.
+from types import SimpleNamespace
+base_claims={
+    "sub":"repo:koith/browser-app-lab:ref:refs/heads/main",
+    "repository":"koith/browser-app-lab",
+    "repository_id":"1284121913",
+    "ref":"refs/heads/main",
+    "workflow_ref":gateway._COLLECT_WORKFLOW,
+}
+with patch.object(gateway.jwt,"get_unverified_header",return_value={"alg":"RS256"}), \
+     patch.object(gateway._SYNC_JWKS,"get_signing_key_from_jwt",
+                  return_value=SimpleNamespace(key="offline")), \
+     patch.object(gateway.jwt,"decode",return_value=base_claims) as decoder:
+    assert gateway._verify_sync_identity("offline-fixture",gateway._COLLECT_WORKFLOW)
+    assert not gateway._verify_sync_identity("offline-fixture")
+    assert decoder.call_args.kwargs["audience"]==gateway._SYNC_AUDIENCE
+    for field,bad in (("repository","untrusted/foreign"),
+                      ("repository_id","999"),
+                      ("ref","refs/heads/untrusted"),
+                      ("workflow_ref","koith/browser-app-lab/.github/workflows/other.yml@refs/heads/main")):
+        decoder.return_value={**base_claims,field:bad}
+        assert not gateway._verify_sync_identity("offline-fixture",gateway._COLLECT_WORKFLOW)
+    decoder.return_value=base_claims
+
 print("OWNER_SIGNED_CATALOG_READ_QA_PASS")
