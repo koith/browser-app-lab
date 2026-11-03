@@ -1070,6 +1070,9 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                 errors.append({'page':page,'reason':type(e).__name__,**public_failure(e)});continue
             for url in urls:
                 if new_total>=max_new:break
+                if url in seen_urls:continue
+                # Previously processed original or held feed candidate is not
+                # a new media request and must not inflate pause counters.
                 # A genuine denied/rate-limited origin is stopped by PublicSession.
                 # Do not turn one denial into dozens of futile network attempts.
                 if public_media_candidate_on_hold(client,url):
