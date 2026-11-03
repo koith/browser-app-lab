@@ -359,6 +359,30 @@ def run(live=False):
                 assert n>=1,"No real public posts"
                 assert thumbnails>0,"No public thumbnails"
                 assert "B" in page.locator("#count").text_content()
+                # An <img> element is not proof its bytes loaded. Decode
+                # a bounded visible sample and report only aggregate counts.
+                integrity=page.evaluate("""async () => {
+                  const photos=[...document.querySelectorAll('article.post .post-thumb > img.post-media-img')].slice(0,40);
+                  photos.forEach(img=>{img.loading='eager';});
+                  await Promise.all(photos.map(async img=>{
+                    try{
+                      await Promise.race([
+                        img.decode(),
+                        new Promise(resolve=>setTimeout(resolve,6500))
+                      ]);
+                    }catch{}
+                  }));
+                  const actual=photos.filter(img=>img.isConnected);
+                  return {
+                    image_elements_sampled:photos.length,
+                    decoded:actual.filter(img=>img.complete&&img.naturalWidth>0).length,
+                    still_loading:actual.filter(img=>!img.complete).length,
+                    attached_but_failed:actual.filter(img=>img.complete&&img.naturalWidth===0).length,
+                    replaced_with_profile:document.querySelectorAll('.post-thumb img[alt*="프로필 사진"]').length,
+                    compact_without_media:document.querySelectorAll('article.post[data-no-media="true"]').length
+                  };
+                }""")
+                print("LIVE_PUBLIC_IMAGE_INTEGRITY",json.dumps(integrity,ensure_ascii=False),flush=True)
 
             assert not errors, "Browser JS exceptions: "+str(errors[:5])
             print("REAL_PUBLIC_BROWSER_SMOKE" if live else "INTERSECTION_COMPACT_QA",json.dumps({
