@@ -25,7 +25,7 @@ async function fixture(){
   },{filename:'central-client.js'});
   const client=window.__LEAF_CENTRAL_CHAT__;
   client.subscribe(e=>events.push(e));
-  return {client,events};
+  return {client,events,token:()=>storage.getItem('leaf_central_session_v1')};
  }
  const call=async(method,route,token,body)=>{
   const resp=await fetch(base+route,{method,headers:{
@@ -52,14 +52,18 @@ test('expired authority session reauthenticates and re-enters its real public ro
  assert.equal(a.client.joinedId,ROOM_A,'no phantom room; admission is confirmed by the authority');
  assert.notEqual(a.client.id,original.id,'expired non-owner identity is re-issued by the authority');
  assert.ok(a.events.some(e=>e.type==='rejoined'&&e.room.id===ROOM_A));
- const state=await f.call('GET','/api/snapshot?after=0',a.events.findLast(e=>e.type==='ready')?.token||null);
+ const state=await f.call('GET','/api/snapshot?after=0',a.token());
+ assert.equal(state.code,200);
+ assert.deepEqual(state.data.entries.map(e=>e.text),['before expiry','after expiry'],
+  'authoritative message history is retained across the 45-second token reset');
+ assert.equal(state.data.peers.length,1,'the expired peer has only one real replacement seat');
  // Verify through a fresh authenticated peer, not through browser-local history.
  const b=f.browser();await b.client.connect('Bob');await b.client.join(ROOM_A);
  const snapshot=await b.client.chat('bob confirmed');
  assert.equal(snapshot.entry.text,'bob confirmed');
  assert.equal(snapshot.entry.roomId,ROOM_A);
  assert.ok(a.events.filter(e=>e.type==='ready').length===2);
- assert.equal(state.code,401,'a missing token cannot read protected room content');
+ assert.notEqual(a.token(),original.token,'rotated credential must be stored for later reload');
 });
 
 test('changing real rooms resets the received-history cursor and never leaks prior-room history',async t=>{
@@ -90,11 +94,12 @@ test('server refusal after expiry does not leave a fabricated joined room',async
  const f=await fixture();t.after(f.close);
  const a=f.browser(),b=f.browser(),c=f.browser();
  await a.client.connect('LostSeat');
- const owner=await b.client.connect('OtherSeat');
+ await b.client.connect('OtherSeat');
  await a.client.join(ROOM_A);
  f.clock.value+=46001; // a's seat is now expired
  await b.client.connect('OtherSeat');
  await b.client.join(ROOM_A);
+ const activePeerId=b.client.id;
  await c.client.connect('ThirdSeat');
  await c.client.join(ROOM_A);
  // The standard room has 12 seats, so occupy all remaining slots using
@@ -109,5 +114,5 @@ test('server refusal after expiry does not leave a fabricated joined room',async
  assert.ok(a.events.some(e=>e.type==='membership-lost'&&e.roomId===ROOM_A));
  const bMessage=await b.client.chat('still live');
  assert.equal(bMessage.entry.text,'still live');
- assert.equal(owner.id,b.client.id,'real active peer identity remains stable');
+ assert.equal(activePeerId,b.client.id,'renewed active peer identity remains stable');
 });
