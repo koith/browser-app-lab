@@ -118,6 +118,7 @@ class CloudArchive:
         self.quarantined_ids = set()
         self.repaired_entries = 0
         self.unrecoverable_entries = 0
+        self._ensured_parents = set()
 
     @staticmethod
     def _run(args, data=None, timeout=150, allow_missing=False):
@@ -178,6 +179,21 @@ class CloudArchive:
             raise ValueError("private archive entry listing too large")
         return lines
 
+    def ensure_parent(self, key):
+        # rclone-extra's unofficial TeraBox apiFileUpload requires an existing
+        # parent directory. Its backend Mkdir handles one level at a time, not
+        # recursively; make ancestors in order before the FIRST write.
+        parts=key.split("/")[:-1]
+        for idx in range(1,len(parts)+1):
+            rel="/".join(parts[:idx])
+            if rel in self._ensured_parents:
+                continue
+            # Mkdir is idempotent when a directory already exists. Do not
+            # swallow errors: a failed parent must not produce a false success.
+            self.command(["mkdir",self.remote+"/"+rel,"--retries","2"],
+                         timeout=90)
+            self._ensured_parents.add(rel)
+
     def write_immutable(self, key, data):
         if not isinstance(data, bytes):
             raise TypeError("cloud content must be bytes")
@@ -209,6 +225,9 @@ class CloudArchive:
                 return False
             raise RuntimeError("immutable archive key collision after readback retries")
 
+        # Bootstrap parents ahead of upload (not only after rclone fails).
+        # This also covers a brand-new versioned catalog directory.
+        self.ensure_parent(key)
         with tempfile.NamedTemporaryFile(prefix="demand-cloud-", delete=False) as temp:
             temp.write(data)
             path = temp.name
@@ -226,13 +245,10 @@ class CloudArchive:
                 except RuntimeError as error:
                     failure = error
                     if "(missing)" in str(error):
-                        # A missing parent directory is distinguishable from
-                        # stale object visibility; idempotent mkdir is safe.
-                        try:
-                            self.command(["mkdir", self.remote + "/" + key.rsplit("/", 1)[0]],
-                                         timeout=90)
-                        except RuntimeError:
-                            pass
+                        # A different runner or a provider inconsistency can
+                        # invalidate a cached parent; reconstruct all levels.
+                        self._ensured_parents.clear()
+                        self.ensure_parent(key)
                 matched, conflicting = read_consistent()
                 if matched:
                     return True

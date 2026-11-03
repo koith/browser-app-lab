@@ -9,6 +9,12 @@ import pytest
 from demand_archive import CloudArchive, canonical_json, post_key, sha256
 import demand_capture_job as job
 
+@pytest.fixture(autouse=True)
+def no_real_backoff_in_isolated_archive_tests(monkeypatch):
+    # Exercise retry branches without wasting CI wall-clock on artificial sleeps.
+    monkeypatch.setattr("demand_archive.time.sleep",lambda _:None)
+
+
 
 class FakeCloud(CloudArchive):
     def __init__(self):
@@ -458,3 +464,51 @@ def test_parent_missing_triggers_safe_mkdir_then_alternate_method(monkeypatch):
     cloud.save_post(p)
     assert cloud.failed and cloud.mkdir_count>=1
     assert cloud.objects["posts/"+p["id"]+"/post.json"]==canonical_json(p)
+
+
+def test_nested_catalog_parent_bootstrap_before_first_cloud_upload():
+    class NestedDirectoryBackend(FakeCloud):
+        def __init__(self):
+            super().__init__()
+            self.directories={"", "DemandResearch"}
+            self.mkdir_order=[]
+
+        def fake(self,args,data=None,timeout=150,allow_missing=False):
+            if args[0]=="mkdir":
+                dst=args[1].split("archive:",1)[1].strip("/")
+                parent=dst.rsplit("/",1)[0] if "/" in dst else ""
+                if parent not in self.directories:
+                    raise RuntimeError("private cloud mkdir failed (missing)")
+                self.directories.add(dst)
+                self.mkdir_order.append(dst)
+                return b""
+            if args[0] in ("copyto","rcat"):
+                dst=args[2] if args[0]=="copyto" else args[1]
+                parent=dst.split("archive:",1)[1].rsplit("/",1)[0].strip("/")
+                if parent not in self.directories:
+                    raise RuntimeError("private cloud "+args[0]+" failed (missing)")
+            return super().fake(args,data=data,timeout=timeout,allow_missing=allow_missing)
+
+    cloud=NestedDirectoryBackend()
+    p=post()
+    cloud.save_post(p)
+    catalog=cloud.publish_catalog({p["id"]:p},"123456901")
+    assert catalog["catalog_sha256_verified"] is True
+    assert cloud.load_catalog()[0]["id"]==p["id"]
+    assert "DemandResearch/metadata" in cloud.mkdir_order
+    assert "DemandResearch/metadata/catalogs" in cloud.mkdir_order
+    assert "DemandResearch/metadata/manifests" in cloud.mkdir_order
+    assert cloud.mkdir_order.index("DemandResearch/metadata")<cloud.mkdir_order.index("DemandResearch/metadata/catalogs")
+
+
+def test_parent_mkdir_failure_prevents_false_storage_success():
+    class NoParentPermission(FakeCloud):
+        def fake(self,args,data=None,timeout=150,allow_missing=False):
+            if args[0]=="mkdir":
+                raise RuntimeError("private cloud mkdir failed (authorization)")
+            return super().fake(args,data=data,timeout=timeout,allow_missing=allow_missing)
+
+    cloud=NoParentPermission()
+    with pytest.raises(RuntimeError,match="authorization"):
+        cloud.save_post(post())
+    assert not any(key.endswith("/post.json") for key in cloud.objects)
