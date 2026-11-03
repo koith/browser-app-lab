@@ -62,11 +62,17 @@
        g={platform:p.platform,profileUrl:profile,
           author:String(p.author||profile.split("/").pop()).slice(0,90),
           posts:0,days:new Set(),reactions:0,measuredPosts:0,
-          latestMs:-Infinity,latestId:"",latestThumbnail:""};
+          latestMs:-Infinity,latestId:"",latestThumbnail:"",profileCreatedAt:"",profilePostCount:null};
        groups.set(key,g);
      }
      g.posts+=1;
      g.days.add(new Date(ms).toISOString().slice(0,10));
+     const created=Date.parse(p.profileCreatedAt||"");
+     if(Number.isFinite(created)&&created>0&&created<=ms&&
+        (!g.profileCreatedAt||created<Date.parse(g.profileCreatedAt)))
+       g.profileCreatedAt=new Date(created).toISOString();
+     const lifetime=count(p.profilePostCount);
+     if(lifetime!==null)g.profilePostCount=Math.max(g.profilePostCount??0,lifetime);
      if(ms>g.latestMs||(ms===g.latestMs&&p.id>g.latestId)){
        g.latestMs=ms;g.latestId=p.id;
        g.latestThumbnail=safeThumbnail(p.thumbnailUrl);
@@ -89,10 +95,19 @@
        posts:g.posts,activeDays,reactions:g.reactions,
        measuredPosts:g.measuredPosts,
        score:signal,engagementAvailable:g.measuredPosts>0,
-       latestThumbnail:g.latestThumbnail,latestPosted:new Date(g.latestMs).toISOString()
+       latestThumbnail:g.latestThumbnail,latestPosted:new Date(g.latestMs).toISOString(),
+       profileCreatedAt:g.profileCreatedAt,profilePostCount:g.profilePostCount
      });
    }
    return output.sort((a,b)=>b.score-a.score||b.posts-a.posts||a.profileUrl.localeCompare(b.profileUrl));
+ }
+ function cohortOf(g,nowMs=Date.now()){
+   const date=Date.parse(g.profileCreatedAt||"");
+   if(Number.isFinite(date)&&date>0&&date<=nowMs)
+     return nowMs-date>=30*86400000?"established":"new";
+   if(Number.isInteger(g.profilePostCount)&&g.profilePostCount>=20)return "established";
+   if(g.posts>=2&&g.activeDays>=2)return "established";
+   return "new";
  }
  function mount(win){
    const doc=win.document;
@@ -105,6 +120,57 @@
      return e;
    };
    let visibleCount=20,ranking=[],cohort="established";
+   const profileCache=new Map(),pendingProfiles=new Set();
+   let profileFetchActive=false;
+   function mergeProfileEvidence(){
+     for(const g of ranking){
+       const evidence=profileCache.get(g.profileUrl);
+       if(!evidence)continue;
+       if(evidence.createdAt)g.profileCreatedAt=evidence.createdAt;
+       if(Number.isInteger(evidence.postsCount))g.profilePostCount=evidence.postsCount;
+     }
+   }
+   async function hydratePublicProfiles(){
+     if(typeof win.fetch!=="function"||profileFetchActive)return;
+     const want=ranking.filter(g=>g.platform==="bluesky"&&
+        !profileCache.has(g.profileUrl)&&!pendingProfiles.has(g.profileUrl)).slice(0,120);
+     if(!want.length)return;
+     profileFetchActive=true;
+     try{
+       for(let i=0;i<want.length;i+=25){
+         const batch=want.slice(i,i+25);
+         batch.forEach(g=>pendingProfiles.add(g.profileUrl));
+         try{
+           const u=new URL("https://public.api.bsky.app/xrpc/app.bsky.actor.getProfiles");
+           for(const g of batch)u.searchParams.append("actors",g.profileUrl.split("/profile/")[1]);
+           const init={cache:"no-store",credentials:"omit"};
+           if(typeof win.AbortSignal?.timeout==="function")init.signal=win.AbortSignal.timeout(9000);
+           const response=await win.fetch(u.href,init);
+           if(!response.ok)throw Error("public profile lookup unavailable");
+           const payload=await response.json();
+           if(!Array.isArray(payload.profiles))throw Error("invalid profile response");
+           for(const g of batch){
+             const actor=g.profileUrl.split("/profile/")[1].toLowerCase();
+             const profile=payload.profiles.find(p=>p&&
+               (String(p.did||"").toLowerCase()===actor||
+                String(p.handle||"").toLowerCase()===actor));
+             const joined=Date.parse(profile?.createdAt||"");
+             const posts=count(profile?.postsCount);
+             profileCache.set(g.profileUrl,{
+               createdAt:Number.isFinite(joined)&&joined>0&&joined<=Date.now()?new Date(joined).toISOString():"",
+               postsCount:posts
+             });
+           }
+         }catch{
+           batch.forEach(g=>profileCache.set(g.profileUrl,{}));
+         }finally{
+           batch.forEach(g=>pendingProfiles.delete(g.profileUrl));
+           mergeProfileEvidence();
+           draw();
+         }
+       }
+     }finally{profileFetchActive=false;}
+   }
    const dialog=$("activityRankingDialog"),detail=$("activityRankingDialogContent");
    function closeDetail(){
      if(!dialog)return;
@@ -133,14 +199,18 @@
        ["활동 일수",fmt(g.activeDays)+"일"],
        ["공개 반응",g.engagementAvailable?fmt(g.reactions):"미제공"],
        ["반응 제공",fmt(g.measuredPosts)+" / "+fmt(g.posts)+"건"],
-       ["최근 게시글",new Date(g.latestPosted).toLocaleDateString("ko-KR")]
+       ["최근 게시글",new Date(g.latestPosted).toLocaleDateString("ko-KR")],
+       ["계정 공개 이력",g.profileCreatedAt?
+          new Date(g.profileCreatedAt).toLocaleDateString("ko-KR")+"부터":
+          (g.profilePostCount!==null?"누적 "+fmt(g.profilePostCount)+"건":"확인 중/미확인")],
+       ["활동 구분",cohortOf(g)==="established"?"기존 활동":"신규/이력 미확인"]
      ]){
        const metric=node("div","activity-rank-detail-metric");
        metric.append(node("small","",label),node("strong","",value));
        metrics.append(metric);
      }
      detail.append(metrics,node("div","activity-rank-detail-note",
-       "현재 검색 기간에 관측된 공개 게시글 기준 · 기존 활동군은 관측 게시글 3건 이상 및 활동일 3일 이상, 신규 활동군은 그 외 · 계정 생성일을 뜻하지 않음 · 활동 지수는 게시글×2 + 활동 일수×3 + 공개 반응 보정"));
+       "기간 내 활동 지수: 게시글×2 + 활동 일수×3 + 공개 반응 보정 · 기존 활동: 공개 프로필 생성일 30일 이상, 생성일 미제공 시 누적 게시글 20건 이상 또는 조회 기간 중 서로 다른 날 2일 이상 활동 · 신규 활동에는 공개 이력 미확인 계정도 포함 · 다른 SNS 계정을 동일인으로 추정하지 않음"));
      const link=node("a","activity-rank-detail-link","SNS 프로필 열기 ↗");
      link.href=g.profileUrl;link.target="_blank";link.rel="noopener noreferrer";
      detail.append(link);
@@ -149,7 +219,14 @@
    }
    function draw(){
      const platform=$("activityRankingPlatform").value,order=$("activityRankingSort").value;
-     const filtered=ranking.filter(x=>(platform==="all"||x.platform===platform)&& (cohort==="established"?(x.posts>=3&&x.activeDays>=3):(x.posts<3||x.activeDays<3)));
+     const visible=ranking.filter(x=>platform==="all"||x.platform===platform);
+     const established=visible.filter(x=>cohortOf(x)==="established");
+     const newcomer=visible.filter(x=>cohortOf(x)==="new");
+     const filtered=cohort==="established"?established:newcomer;
+     doc.querySelectorAll("[data-rank-cohort]").forEach(btn=>{
+       const n=btn.dataset.rankCohort==="established"?established.length:newcomer.length;
+       btn.textContent=(btn.dataset.rankCohort==="established"?"기존 활동 ":"신규 활동 ")+n;
+     });
      const sorter={
        posts:(a,b)=>b.posts-a.posts,
        days:(a,b)=>b.activeDays-a.activeDays,
@@ -161,7 +238,9 @@
      const list=$("activityRankingRows");
      list.replaceChildren();
      const show=visibleCount;
-     if(!sorted.length)list.append(node("div","activity-ranking-empty","랭킹 없음"));
+     if(!sorted.length)list.append(node("div","activity-ranking-empty",
+       ranking.some(g=>g.platform==="bluesky"&&pendingProfiles.has(g.profileUrl))?
+         "공개 프로필 이력 확인 중…":"해당 분류의 확인된 계정이 없습니다. 신규 활동에는 공개 이력 미확인 계정도 포함됩니다."));
      sorted.slice(0,show).forEach((g,index)=>{
        const card=node("button","activity-rank-card");
        card.type="button";
@@ -188,6 +267,7 @@
    function update(){
      let snap;try{snap=win.INTERSECTION_publicRankingSnapshot?.();}catch{}
      ranking=compute(snap);
+     mergeProfileEvidence();
      const select=$("activityRankingPlatform"),prev=select.value;
      const available=[...new Set(ranking.map(x=>x.platform))].sort();
      select.replaceChildren();
@@ -195,6 +275,7 @@
      for(const p of available){const o=node("option","",LABELS[p]);o.value=p;select.append(o);}
      select.value=available.includes(prev)?prev:"all";
      draw();
+     void hydratePublicProfiles();
    }
    let scheduled=false;
    function schedule(){
@@ -212,5 +293,5 @@
    win.addEventListener("intersection:date-range-change",()=>{visibleCount=20;closeDetail();schedule();});
    update();
  }
- return {compute,mount};
+ return {compute,cohortOf,mount};
 });

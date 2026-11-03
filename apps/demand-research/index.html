@@ -482,11 +482,11 @@ main{padding-top:10px}
 .activity-ranking h2{font-size:16px;line-height:1.15;font-weight:950;letter-spacing:.04em;margin:0}
 .activity-ranking-controls{display:flex;gap:4px;align-items:center;min-width:0}
 .activity-ranking-controls select{max-width:150px;min-width:0;height:28px;padding:3px 5px;border:1px solid #8d8d80;border-radius:0;background:#fffefa;color:#151829;font-size:11px;font-weight:700}
-.activity-ranking-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(0,70px));gap:4px}
+.activity-ranking-grid{display:flex;flex-wrap:wrap;justify-content:center;align-items:flex-start;width:100%;gap:4px}
 .activity-ranking-cohorts{display:flex;gap:4px;margin-bottom:6px}
 .activity-ranking-cohorts button{padding:5px 10px;background:#ece9dd;color:#24232a;font-size:11px;border-radius:0}
 .activity-ranking-cohorts button.active{background:#151829;color:#fff}
-.activity-rank-card{position:relative;display:block;aspect-ratio:1/1;min-width:0;min-height:0;padding:0;overflow:hidden;border:1px solid #c4c1b1;border-radius:0;background:#f6f5ec;color:#14172a;text-align:left;box-shadow:none}
+.activity-rank-card{position:relative;display:block;flex:0 0 calc((100% - 36px)/10);aspect-ratio:1/1;min-width:0;min-height:0;padding:0;overflow:hidden;border:1px solid #c4c1b1;border-radius:0;background:#f6f5ec;color:#14172a;text-align:left;box-shadow:none}
 .activity-rank-card:first-child{background:#fff0cc;border-color:#d7ad56}
 .activity-rank-card:hover{border-color:#e45c32;background:#fff8e5}
 .activity-rank-card:focus-visible{outline:2px solid #e45c32;outline-offset:1px}
@@ -515,8 +515,8 @@ main{padding-top:10px}
  .activity-ranking-top{gap:5px;margin-bottom:6px}
  .activity-ranking h2{font-size:15px}
  .activity-ranking-controls select{max-width:105px;height:27px;font-size:10px}
- .activity-ranking-grid{grid-template-columns:repeat(auto-fill,minmax(0,55px));gap:4px}
- .activity-rank-card{min-height:0;padding:0}
+ .activity-ranking-grid{gap:4px}
+ .activity-rank-card{flex-basis:calc((100% - 16px)/5);min-height:0;padding:0}
  .activity-rank-thumb{width:100%;height:100%}
  .activity-rank-user{font-size:11px}
 }
@@ -686,6 +686,7 @@ function addPost(p,term){
   let policy=mediaPolicy(p);
   let rec={id:uri,platform:"bluesky",author:a.displayName||a.handle||"게시글",
       profileUrl,text:p.record.text,posted:p.record.createdAt||p.indexedAt||"",
+      profileCreatedAt:a.createdAt||"",profilePostCount:a.postsCount,
       indexed:p.indexedAt||p.record.createdAt||"",url,
       terms:new Set([term]),media:getMedia(p),adultLabeled:policy.adult,restricted:policy.restricted,
       engagement:{likes:p.likeCount,reposts:p.repostCount,replies:p.replyCount,quotes:p.quoteCount}};
@@ -786,6 +787,7 @@ function addMastodonStatus(item,term,start,end){
     id:"mastodon:"+String(item.uri||item.url||item.id),platform:"mastodon",
     author:account.display_name||account.acct||"Mastodon",
     profileUrl:account.url,url:item.url,posted:item.created_at,indexed:item.created_at,
+    profileCreatedAt:account.created_at,profilePostCount:account.statuses_count,
     text:body,media,adultLabeled:!!item.sensitive,restricted:false,
     engagement:{likes:item.favourites_count,reposts:item.reblogs_count,replies:item.replies_count}
   },term,start,end);
@@ -804,6 +806,7 @@ function addLemmyPost(entry,term,start,end){
     id:"lemmy:"+String(p.ap_id||p.id||""),platform:"lemmy",
     author:a.display_name||a.name||"Lemmy",profileUrl,
     url:canonical,posted:p.published,indexed:p.published,
+    profileCreatedAt:a.published,profilePostCount:entry.creator_aggregates?.post_count,
     text,media,adultLabeled:!!p.nsfw,restricted:!!p.removed||!!p.deleted,
     engagement:{likes:entry.counts?.upvotes,replies:entry.counts?.comments}
   },term,start,end);
@@ -824,6 +827,7 @@ function addMisskeyNote(note,term,start,end,origin){
     id:"misskey:"+origin+":"+note.id,platform:"misskey",
     author:u.name||username||"Misskey",profileUrl,url:noteUrl,
     posted:note.createdAt,indexed:note.createdAt,
+    profileCreatedAt:u.createdAt,profilePostCount:u.notesCount,
     text:[note.cw,note.text].filter(Boolean).join("\n"),media,
     adultLabeled:(note.files||[]).some(f=>f.isSensitive),restricted:false,
     engagement:{likes:note.reactions&&Object.values(note.reactions).reduce((sum,n)=>sum+(Number.isFinite(n)&&n>0?n:0),0),
@@ -1237,6 +1241,7 @@ function draw(){
        !p.discoveryCandidate&&p.profileUrl&&p.id).map(p=>({
        id:p.id,platform:p.platform,profileUrl:p.profileUrl,author:p.author,
        posted:p.posted,engagement:p.engagement||null,
+        profileCreatedAt:p.profileCreatedAt||"",profilePostCount:p.profilePostCount,
         thumbnailUrl:safePublicLink(p.media?.[0]?.thumb||"")
      }))};
  };
