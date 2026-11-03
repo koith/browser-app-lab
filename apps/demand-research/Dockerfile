@@ -10,6 +10,8 @@ RUN curl -fsSL https://github.com/gulp79/rclone-extra/releases/download/v1.75.2-
 RUN python -m pip install --no-cache-dir fastapi==0.115.12 uvicorn==0.35.0
 WORKDIR /app
 COPY apps/demand-research/gateway.py /app/gateway.py
+COPY apps/demand-research/target_archive_api.py /app/target_archive_api.py
+COPY apps/demand-research/target_account_archive.py /app/target_account_archive.py
 COPY apps/demand-research/demand_archive.py /app/demand_archive.py
 COPY apps/demand-research/social_sources.py /app/social_sources.py
 COPY apps/demand-research/account_index.py /app/account_index.py
