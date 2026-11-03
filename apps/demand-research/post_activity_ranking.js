@@ -62,13 +62,14 @@
        g={platform:p.platform,profileUrl:profile,
           author:String(p.author||profile.split("/").pop()).slice(0,90),
           posts:0,days:new Set(),reactions:0,measuredPosts:0,
-          latestMs:-Infinity,latestId:"",latestThumbnail:"",latestAvatar:"",profileCreatedAt:"",profilePostCount:null};
+          latestMs:-Infinity,earliestMs:Infinity,latestId:"",latestThumbnail:"",latestAvatar:"",profileCreatedAt:"",profilePostCount:null};
        groups.set(key,g);
      }
      g.posts+=1;
      const publicAvatar=safeThumbnail(p.avatarUrl);
      if(publicAvatar)g.latestAvatar=publicAvatar;
      g.days.add(new Date(ms).toISOString().slice(0,10));
+     g.earliestMs=Math.min(g.earliestMs,ms);
      const created=Date.parse(p.profileCreatedAt||"");
      if(Number.isFinite(created)&&created>0&&created<=ms&&
         (!g.profileCreatedAt||created<Date.parse(g.profileCreatedAt)))
@@ -98,6 +99,7 @@
        measuredPosts:g.measuredPosts,
        score:signal,engagementAvailable:g.measuredPosts>0,
        latestThumbnail:g.latestThumbnail,latestAvatar:g.latestAvatar,latestPosted:new Date(g.latestMs).toISOString(),
+       firstObservedPosted:new Date(g.earliestMs).toISOString(),
        profileCreatedAt:g.profileCreatedAt,profilePostCount:g.profilePostCount
      });
    }
@@ -107,6 +109,11 @@
    const date=Date.parse(g.profileCreatedAt||"");
    if(Number.isFinite(date)&&date>0&&date<=nowMs)
      return nowMs-date>=30*86400000?"established":"new";
+   // A verifiably old public post proves the account existed before the
+   // current month even when a provider omits account-creation metadata.
+   const observed=Date.parse(g.firstObservedPosted||"");
+   if(Number.isFinite(observed)&&observed>0&&observed<=nowMs&&
+      nowMs-observed>=30*86400000)return "established";
    if(Number.isInteger(g.profilePostCount)&&g.profilePostCount>=20)return "established";
    if(g.posts>=2&&g.activeDays>=2)return "established";
    return "new";
@@ -121,8 +128,8 @@
      if(text!==undefined)e.textContent=String(text);
      return e;
    };
-   let visibleCount=20,ranking=[],cohort="established";
-   const profileCache=new Map(),pendingProfiles=new Set();
+   let visibleCount=20,ranking=[],cohort="established",cohortTouched=false;
+   const profileCache=new Map(),pendingProfiles=new Set(),profileRetryAfter=new Map();
    let profileFetchActive=false;
    function mergeProfileEvidence(){
      for(const g of ranking){
@@ -135,7 +142,8 @@
    async function hydratePublicProfiles(){
      if(typeof win.fetch!=="function"||profileFetchActive)return;
      const want=ranking.filter(g=>g.platform==="bluesky"&&
-        !profileCache.has(g.profileUrl)&&!pendingProfiles.has(g.profileUrl)).slice(0,120);
+        !profileCache.has(g.profileUrl)&&!pendingProfiles.has(g.profileUrl)&&
+        (profileRetryAfter.get(g.profileUrl)||0)<=Date.now()).slice(0,120);
      if(!want.length)return;
      profileFetchActive=true;
      try{
@@ -158,13 +166,17 @@
                 String(p.handle||"").toLowerCase()===actor));
              const joined=Date.parse(profile?.createdAt||"");
              const posts=count(profile?.postsCount);
+             // Missing profile records and transient provider failures are
+             // not proof of a new account. Retry on a later feed update.
+             if(!profile){profileRetryAfter.set(g.profileUrl,Date.now()+60000);continue;}
              profileCache.set(g.profileUrl,{
                createdAt:Number.isFinite(joined)&&joined>0&&joined<=Date.now()?new Date(joined).toISOString():"",
                postsCount:posts
              });
+             profileRetryAfter.delete(g.profileUrl);
            }
          }catch{
-           batch.forEach(g=>profileCache.set(g.profileUrl,{}));
+           batch.forEach(g=>profileRetryAfter.set(g.profileUrl,Date.now()+60000));
          }finally{
            batch.forEach(g=>pendingProfiles.delete(g.profileUrl));
            mergeProfileEvidence();
@@ -228,8 +240,14 @@
      const visible=ranking.filter(x=>platform==="all"||x.platform===platform);
      const established=visible.filter(x=>cohortOf(x)==="established");
      const newcomer=visible.filter(x=>cohortOf(x)==="new");
+     // An unavailable age API should not leave the entire ranking blank on
+     // first load. Do not mislabel unverified accounts as established.
+     if(!cohortTouched)cohort=established.length?"established":"new";
      const filtered=cohort==="established"?established:newcomer;
      doc.querySelectorAll("[data-rank-cohort]").forEach(btn=>{
+       const selected=btn.dataset.rankCohort===cohort;
+       btn.classList.toggle("active",selected);
+       btn.setAttribute("aria-selected",String(selected));
        const n=btn.dataset.rankCohort==="established"?established.length:newcomer.length;
        btn.textContent=(btn.dataset.rankCohort==="established"?"기존 활동 ":"신규 활동 ")+n;
      });
@@ -290,7 +308,7 @@
      if(scheduled)return;scheduled=true;
      win.queueMicrotask(()=>{scheduled=false;update();});
    }
-   doc.querySelectorAll('[data-rank-cohort]').forEach(btn=>btn.addEventListener('click',()=>{cohort=btn.dataset.rankCohort;visibleCount=20;closeDetail();doc.querySelectorAll('[data-rank-cohort]').forEach(b=>{b.classList.toggle('active',b===btn);b.setAttribute('aria-selected',String(b===btn));});draw();}));
+   doc.querySelectorAll('[data-rank-cohort]').forEach(btn=>btn.addEventListener('click',()=>{cohort=btn.dataset.rankCohort;cohortTouched=true;visibleCount=20;closeDetail();doc.querySelectorAll('[data-rank-cohort]').forEach(b=>{b.classList.toggle('active',b===btn);b.setAttribute('aria-selected',String(b===btn));});draw();}));
    $("activityRankingPlatform").addEventListener("change",()=>{visibleCount=20;closeDetail();draw();});
    $("activityRankingSort").addEventListener("change",()=>{closeDetail();draw();});
    $("activityRankingMore").addEventListener("click",()=>{visibleCount+=20;draw();});
@@ -298,7 +316,7 @@
    dialog?.addEventListener("click",e=>{if(e.target===dialog)closeDetail();});
    dialog?.addEventListener("close",()=>detail?.replaceChildren());
    win.addEventListener("intersection:feed-updated",schedule);
-   win.addEventListener("intersection:date-range-change",()=>{visibleCount=20;closeDetail();schedule();});
+   win.addEventListener("intersection:date-range-change",()=>{visibleCount=20;cohortTouched=false;closeDetail();schedule();});
    update();
  }
  return {compute,cohortOf,mount};
