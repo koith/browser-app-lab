@@ -1301,7 +1301,7 @@ function draw(){
        id:p.id,platform:p.platform,profileUrl:p.profileUrl,author:p.author,
        posted:p.posted,engagement:p.engagement||null,
         profileCreatedAt:p.profileCreatedAt||"",profilePostCount:p.profilePostCount,
-        thumbnailUrl:safePublicLink(p.media?.[0]?.thumb||"")
+        thumbnailUrl:safePublicLink(p.media?.[0]?.thumb||""),avatarUrl:safePublicLink(p.avatarUrl||"")
      }))};
  };
  /* Read-only account analytics view. No post text, author history or sensitive
