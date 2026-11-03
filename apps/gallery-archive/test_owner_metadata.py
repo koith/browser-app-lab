@@ -7,7 +7,7 @@ import unittest
 from unittest.mock import patch
 
 from read_owner_metadata import read,matches,ProviderVerificationRequired,read_with_current_owner_web_session,read_via_existing_owner_gateway
-from owner_upload_web_token import WebStateUnavailable
+# Metadata integrity tests deliberately require no optional HTTP library.
 
 
 class OwnerMetadataTests(unittest.TestCase):
@@ -91,7 +91,7 @@ class OwnerMetadataTests(unittest.TestCase):
 
     def test_existing_web_session_unavailable_preserves_cookie_only_sha_safe_read(self):
         def missing():
-            raise WebStateUnavailable('Owner session needs normal login')
+            raise ValueError('Owner session needs normal login')
         with patch('read_owner_metadata.subprocess.run') as file_copy:
             result=read_with_current_owner_web_session(
                 self.remote,'mimmi',reader=lambda *a,**k:self.raw,refresh=missing)
