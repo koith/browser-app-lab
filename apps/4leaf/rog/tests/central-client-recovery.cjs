@@ -116,3 +116,27 @@ test('server refusal after expiry does not leave a fabricated joined room',async
  assert.equal(bMessage.entry.text,'still live');
  assert.equal(activePeerId,b.client.id,'renewed active peer identity remains stable');
 });
+
+
+test('private room owner proves original token after TTL and reuses password only in live memory',async t=>{
+ const f=await fixture();t.after(f.close);
+ const a=f.browser();const auth=await a.client.connect('Owner');
+ const created=await a.client.create({region:'north',district:'샤이닝 브리즈',
+  name:'복구할 비밀방',capacity:2,background:3,password:'mySecret987'});
+ const roomId=created.room.id;
+ await a.client.join(roomId,'mySecret987');
+ await a.client.chat('owner before');
+ f.clock.value+=46001;
+ const after=await a.client.chat('owner after');
+ assert.equal(after.entry.roomId,roomId);
+ assert.equal(a.client.joinedId,roomId);
+ assert.equal(a.client.id,auth.id,
+  'the password is not an owner credential; the archived SHA256 token fingerprint restores ownership');
+ const check=await f.call('GET','/api/snapshot?after=0',a.token());
+ assert.equal(check.code,200);
+ assert.equal(check.data.room.isOwner,true);
+ assert.deepEqual(check.data.entries.map(x=>x.text),['owner before','owner after']);
+ const visitor=f.browser();await visitor.client.connect('Visitor');
+ await assert.rejects(visitor.client.join(roomId,''),/Incorrect password/);
+ assert.equal(visitor.client.joinedId,null);
+});
