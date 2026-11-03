@@ -711,3 +711,50 @@ def test_safe_storage_error_classification_never_reflects_user_post_or_url():
     assert public_error_class(RuntimeError("private cloud readback did not converge"))=="readback_mismatch"
     assert public_error_class(ValueError("early original capture mismatch; cannot silently replace"))=="first_observation_conflict"
     assert public_error_class(ValueError("secret person https://example.com/p/42"))=="unclassified_failure"
+
+
+def test_verified_v2_catalog_reads_through_transient_wrong_post_bytes():
+    class StalePost(FakeCloud):
+        def __init__(self):
+            super().__init__()
+            self.stale_remaining=0
+        def fake(self,args,data=None,timeout=150,allow_missing=False):
+            if (args[0]=="cat" and args[1].endswith("/post.json")
+                    and self.stale_remaining>0):
+                self.stale_remaining-=1
+                return b"transient stale bytes not matching SHA256"
+            return super().fake(args,data=data,timeout=timeout,allow_missing=allow_missing)
+
+    cloud=StalePost()
+    p=post()
+    cloud.save_post(p)
+    cloud.publish_catalog({p["id"]:p},"123456963")
+    cloud.stale_remaining=2
+    rows=cloud.load_catalog(include_entries=False)
+    assert len(rows)==1 and rows[0]["id"]==p["id"]
+    assert cloud.catalog_unverified_refs==0
+    assert cloud.stale_remaining==0
+
+
+def test_compact_index_accepts_concurrent_appended_verified_post(monkeypatch):
+    from rebuild_archive import rebuild
+    cloud=FakeCloud()
+    monkeypatch.setenv("RCLONE_CONFIG_ARCHIVE_COOKIE","offline-test")
+    monkeypatch.setenv("DEMAND_CAPTURE_PUBLIC_ALLOWED","1")
+    first=post()
+    cloud.save_post(first)
+    later={**first,"id":"b"*40,
+           "source_url":"https://bsky.app/profile/did:plc:abcdefghijk/post/other",
+           "text":"second verified synthetic observation"}
+    publish=cloud.publish_catalog
+    def with_concurrent_upload(*args,**kwargs):
+        result=publish(*args,**kwargs)
+        cloud.save_post(later)
+        return result
+    cloud.publish_catalog=with_concurrent_upload
+    outcome=rebuild(cloud,run_id="123456964")
+    assert outcome["snapshot_sha_verified"] is True
+    assert outcome["catalog_matches_journal"] is False
+    assert outcome["index_lag_post_count"]==1
+    assert outcome["fully_reconciled"] is False
+    assert len(cloud.load_catalog(include_entries=True))==2

@@ -19,22 +19,36 @@ def rebuild(cloud=None, run_id=None):
     # A new reader instance ensures we verify remote durable state, not a
     # convenient in-memory dictionary retained by the writer.
     reader=CloudArchive(active.remote,runner=active.runner)
-    journal=reader.load_catalog(include_entries=True)
+    # A concurrent fast capture may append new verified posts while this
+    # compact snapshot is being published. Do NOT require a byte-for-byte
+    # equality against a moving journal head; gateway reads both.
     snapshot=reader.load_catalog(include_entries=False)
+    unverified_refs=reader.catalog_unverified_refs
+    journal=reader.load_catalog(include_entries=True)
+    invalid_markers=reader.unrecoverable_entries
     snapshot_ids={p["id"] for p in snapshot}
     journal_ids={p["id"] for p in journal}
-    valid=bool(snapshot_ids) and snapshot_ids==journal_ids
+    expected=result["catalog"].get("posts",0)
+    snapshot_valid=(bool(snapshot_ids)
+                    and snapshot_ids.issubset(journal_ids)
+                    and len(snapshot_ids)>=expected
+                    and unverified_refs==0)
+    lag=len(journal_ids-snapshot_ids)
+    complete=snapshot_valid and lag==0 and invalid_markers==0
     summary={"journal_readable_posts":len(journal),
              "published_catalog_posts":len(snapshot),
-             "catalog_matches_journal":valid,
-             "unverified_marker_count":reader.unrecoverable_entries,
-             "unverified_catalog_references":reader.catalog_unverified_refs,
+             "catalog_matches_journal":snapshot_ids==journal_ids,
+             "index_lag_post_count":lag,
+             "snapshot_sha_verified":snapshot_valid,
+             "fully_reconciled":complete,
+             "unverified_marker_count":invalid_markers,
+             "unverified_catalog_references":unverified_refs,
              "catalog_published_this_run":bool(
                  result["catalog"].get("catalog_sha256_verified"))}
     print("PRIVATE_ARCHIVE_REBUILD_SUMMARY",
           json.dumps(summary,sort_keys=True),flush=True)
-    if not valid:
-        raise RuntimeError("private cloud index not yet consistent with verified journal")
+    if not snapshot_valid:
+        raise RuntimeError("private cloud snapshot has unverified or missing post references")
     return summary
 
 
