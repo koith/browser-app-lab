@@ -201,6 +201,18 @@ class CloudArchive:
         legacy = self.read("metadata/catalog.json", cap=MAX_CATALOG, optional=True)
         return validate_catalog(json.loads(legacy)) if legacy is not None else []
 
+    def pending_capture_ids(self, existing):
+        # Early snapshots survive a crash even before a verified entry is written.
+        raw = self.command(["lsf", self.remote + "/posts", "--dirs-only",
+                            "--retries", "2"], timeout=120, allow_missing=True)
+        if raw is None:
+            return []
+        names = raw.decode("utf-8", "replace").splitlines()
+        if len(names) > MAX_ENTRIES:
+            raise ValueError("private capture directory listing exceeds limit")
+        return [name[:-1] for name in names if name.endswith("/")
+                and ID.fullmatch(name[:-1]) and name[:-1] not in existing]
+
     def recover_entries(self, existing):
         result = dict(existing)
         new = 0
