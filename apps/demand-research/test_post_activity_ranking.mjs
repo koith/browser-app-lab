@@ -30,6 +30,8 @@ const fixture={
   row("outside","https://bsky.app/profile/outside.bsky.social",{likes:500},"bluesky","Outside",10),
  ]
 };
+fixture.verified[1].avatarUrl="https://cdn.bsky.app/img/profile-avatar.jpg";
+fixture.verified[3].avatarUrl="https://cdn.bsky.app/img/bravo-avatar.jpg";
 const rank=compute(fixture);
 assert.equal(rank.length,4,"only valid dated public accounts");
 assert.equal(rank[0].platform,"reddit");
@@ -40,6 +42,8 @@ assert.equal(b.reactions,47);
 assert.equal(b.measuredPosts,2);
 assert.equal(b.score,4+6+Math.round(6*Math.log2(48)));
 assert.equal(b.latestThumbnail,"https://cdn.bsky.app/img/new.jpg","latest post thumbnail");
+assert.equal(b.latestAvatar,"https://cdn.bsky.app/img/profile-avatar.jpg",
+  "retain verified public account avatar fallback");
 assert.equal(b.latestPosted,new Date(from+2*DAY).toISOString());
 assert.equal(rank.find(x=>x.platform==="x").latestThumbnail,"","unsafe thumbnails dropped");
 assert.equal(rank.find(x=>x.platform==="x").engagementAvailable,false);
@@ -68,9 +72,16 @@ assert.equal(document.querySelectorAll(".activity-rank-card").length,1,
 const alphaCard=document.querySelector(".activity-rank-card");
 assert.ok(alphaCard.getAttribute("aria-label").includes("테스트 계정"));
 assert.equal(alphaCard.querySelector(".activity-rank-thumb img").src,"https://cdn.bsky.app/img/new.jpg");
+alphaCard.querySelector(".activity-rank-thumb img").dispatchEvent(new dom.window.Event("error"));
+assert.equal(alphaCard.querySelector(".activity-rank-thumb img").src,
+  "https://cdn.bsky.app/img/profile-avatar.jpg","broken ranking media uses profile photo");
 alphaCard.click();
 assert.equal($("activityRankingDialog").hasAttribute("open"),true);
 assert.match($("activityRankingDialogContent").textContent,/계정 공개 이력/);
+const detailThumb=$("activityRankingDialogContent").querySelector(".activity-rank-detail-thumb");
+assert.ok(detailThumb);
+detailThumb.dispatchEvent(new dom.window.Event("error"));
+assert.equal(detailThumb.src,"https://cdn.bsky.app/img/profile-avatar.jpg");
 assert.match($("activityRankingDialogContent").textContent,/기존 활동/);
 $("activityRankingDialogClose").click();
 document.querySelector('[data-rank-cohort="new"]').click();
@@ -150,6 +161,7 @@ assert.ok(script.includes("app.bsky.actor.getProfiles"),"Bluesky public metadata
 assert.ok(main.includes('id="activityRankingTitle">RANK</h2>'));
 assert.ok(main.includes('id="activityRankingDialog"'));
 assert.ok(main.includes("thumbnailUrl:safePublicLink(p.media?.[0]?.thumb"));
+assert.ok(main.includes('avatarUrl:safePublicLink(p.avatarUrl||"")'),"rank snapshot includes public avatar fallback");
 assert.ok(!main.includes('id="activityRankingStatus"'));
 assert.ok(!main.includes("activity-ranking-kicker")&&!main.includes("activity-ranking-note"));
 assert.ok(main.includes("INTERSECTION_publicRankingSnapshot"));
