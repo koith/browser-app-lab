@@ -355,6 +355,100 @@ async def list_posts(request:Request,offset:int=Query(0,ge=0),limit:int=Query(30
                         "capture_status":"remote_verified" if post.get("archive_complete",True) else "partial_media"})
     return {"total":len(posts),"offset":offset,"limit":limit,"posts":output,"storage":"TeraBox"}
 
+def archive_account(post):
+    """One visible SNS account, never inferred identity across platforms."""
+    declared = str(post.get("platform", "")).lower()
+    parsed = account_index.profile_url(post.get("profile_url"))
+    if parsed is None:
+        parsed = account_index.from_original(post.get("source_url", ""))
+    if not parsed or parsed[0] != declared:
+        return None
+    return {"platform": parsed[0], "profile_url": parsed[1]}
+
+
+def signed_archive_media(post):
+    exp = int(time.time()) + 1200
+    result = []
+    for i, m in enumerate(post["media"][:16]):
+        result.append({
+            "mime": m["mime"], "kind": m.get("kind", "image"),
+            "bytes": m["bytes"],
+            "url": "/api/media/" + post["id"] + "/" + str(i)
+                   + "?exp=" + str(exp) + "&sig=" + media_signature(post["id"], i, exp)
+        })
+    return result
+
+
+@app.get("/api/archive/accounts")
+async def archived_accounts(request: Request,
+                            platform: str = Query("all", max_length=20),
+                            q: str = Query("", max_length=90),
+                            offset: int = Query(0, ge=0),
+                            limit: int = Query(20, ge=1, le=40)):
+    check_auth(request)
+    if platform != "all" and platform not in account_index.KNOWN:
+        raise HTTPException(400, "unsupported platform")
+    posts = await get_catalog()
+    grouped = {}
+    unmatched = 0
+    for post in posts:
+        acc = archive_account(post)
+        if not acc:
+            unmatched += 1
+            continue
+        key = (acc["platform"], acc["profile_url"])
+        item = grouped.get(key)
+        if item is None:
+            item = {**acc, "post_count": 0, "media_count": 0,
+                    "partial_posts": 0, "latest_posted_at": ""}
+            grouped[key] = item
+        item["post_count"] += 1
+        item["media_count"] += len(post["media"])
+        item["partial_posts"] += post.get("archive_complete") is False
+        when = str(post.get("posted_at", ""))[:40]
+        if when > item["latest_posted_at"]:
+            item["latest_posted_at"] = when
+    entries = [v for v in grouped.values()
+               if (platform == "all" or v["platform"] == platform)
+               and (not q or q.casefold() in v["profile_url"].casefold())]
+    entries.sort(key=lambda a: (-a["post_count"], -len(a["latest_posted_at"]),
+                                a["platform"], a["profile_url"]))
+    return JSONResponse({"total_accounts": len(entries), "total_archived_posts": len(posts),
+                         "unassigned_posts": unmatched,
+                         "offset": offset, "limit": limit,
+                         "accounts": entries[offset:offset + limit]},
+                        headers={"Cache-Control": "private, no-store"})
+
+
+@app.get("/api/archive/posts")
+async def archived_account_posts(request: Request,
+                                 profile: str = Query(..., max_length=512),
+                                 offset: int = Query(0, ge=0),
+                                 limit: int = Query(20, ge=1, le=40)):
+    check_auth(request)
+    parsed = account_index.profile_url(profile)
+    if parsed is None:
+        raise HTTPException(400, "invalid account profile")
+    posts = [p for p in await get_catalog()
+             if (a := archive_account(p)) is not None
+             and (a["platform"], a["profile_url"]) == parsed]
+    posts.sort(key=lambda p: (str(p.get("posted_at", "")), p["id"]), reverse=True)
+    items = [{
+        "id": p["id"], "platform": parsed[0], "profile_url": parsed[1],
+        "posted_at": p.get("posted_at", ""), "captured_at": p.get("captured_at", ""),
+        "text": p["text"], "source_url": p.get("source_url", ""),
+        "media": signed_archive_media(p),
+        "media_expected": p.get("media_expected", len(p["media"])),
+        "media_saved": len(p["media"]),
+        "capture_status": "remote_verified" if p.get("archive_complete", True)
+                          else "partial_media"
+    } for p in posts[offset:offset + limit]]
+    return JSONResponse({"profile_url": parsed[1], "platform": parsed[0],
+                         "total": len(posts), "offset": offset, "limit": limit,
+                         "posts": items},
+                        headers={"Cache-Control": "private, no-store"})
+
+
 async def remote_stream(path,start,length)->AsyncIterator[bytes]:
     proc=await asyncio.create_subprocess_exec("rclone","cat",REMOTE+"/"+path,"--offset",str(start),"--count",str(length),
               "--timeout=60s","--retries=2",stdout=asyncio.subprocess.PIPE,stderr=asyncio.subprocess.DEVNULL)
