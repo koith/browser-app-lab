@@ -6,7 +6,7 @@ from types import SimpleNamespace
 import unittest
 from unittest.mock import patch
 
-from read_owner_metadata import read,matches,ProviderVerificationRequired,read_with_current_owner_web_session
+from read_owner_metadata import read,matches,ProviderVerificationRequired,read_with_current_owner_web_session,read_via_existing_owner_gateway
 from owner_upload_web_token import WebStateUnavailable
 
 
@@ -114,6 +114,73 @@ class OwnerMetadataTests(unittest.TestCase):
                 'archive:Unknown/metadata/catalog.json','mimmi',
                 reader=lambda *a,**k:self.raw,refresh=refresh)
         refresh.assert_not_called()
+
+
+    def test_gateway_fallback_only_after_real_provider_verification_and_full_baseline(self):
+        remote=self.remote
+        invocations=[]
+        def gateway_reader(uri,model,minimum):
+            invocations.append((uri,model,minimum))
+            return self.raw
+        with patch('read_owner_metadata.subprocess.run',
+                   return_value=SimpleNamespace(returncode=1)):
+            result=read_with_current_owner_web_session(
+                remote,'mimmi',minimum=1,
+                reader=lambda *a,**k:b'{"errno":400141}',
+                refresh=lambda:'t'*48,gateway_fallback=True,
+                gateway_reader=gateway_reader)
+        self.assertEqual(result,self.raw)
+        self.assertEqual(invocations,[(remote,'mimmi',1)])
+
+    def test_malformed_gateway_response_cannot_replace_private_owner_baseline(self):
+        with patch('read_owner_metadata.subprocess.run',
+                   return_value=SimpleNamespace(returncode=1)):
+            with self.assertRaises(ProviderVerificationRequired):
+                read_with_current_owner_web_session(
+                    self.remote,'mimmi',minimum=1,
+                    reader=lambda *a,**k:b'{"errno":400141}',
+                    refresh=lambda:'t'*48,gateway_fallback=True,
+                    gateway_reader=lambda *a,**k:b'{"errno":0,"albums":[]}')
+
+    def test_signed_gateway_reader_only_uses_exact_render_and_actions_origins(self):
+        import os
+        from urllib.request import Request
+        from urllib.parse import urlsplit
+        class Reply:
+            status=200
+            def __init__(self,raw):self.raw=raw
+            def __enter__(self):return self
+            def __exit__(self,*args):return False
+            def read(self,n):return self.raw[:n]
+        seen=[]
+        def opener(request,timeout):
+            self.assertIsInstance(request,Request)
+            seen.append((request.full_url,request.get_method(),timeout))
+            if len(seen)==1:
+                return Reply(json.dumps({'value':'x'*120}).encode())
+            if len(seen)==2:
+                return Reply(self.raw)
+            raise AssertionError('Only two authenticated requests')
+        with patch.dict(os.environ,{
+            'ACTIONS_ID_TOKEN_REQUEST_URL':
+                'https://pipelines.actions.githubusercontent.com/fixture?job=1',
+            'ACTIONS_ID_TOKEN_REQUEST_TOKEN':'offline-actions-request-secret'
+        }):
+            result=read_via_existing_owner_gateway(
+                self.remote,'mimmi',minimum=1,opener=opener)
+        self.assertEqual(result,self.raw)
+        self.assertEqual(len(seen),2)
+        self.assertIn('audience=gallery-archive-terabox-sync',seen[0][0])
+        self.assertEqual(seen[1][0],
+            'https://mimmi-private-gallery-free.onrender.com/internal/gallery-owner-catalog/mimmi')
+        self.assertEqual(seen[1][1],'POST')
+        with patch.dict(os.environ,{
+            'ACTIONS_ID_TOKEN_REQUEST_URL':'https://invalid.example/identity',
+            'ACTIONS_ID_TOKEN_REQUEST_TOKEN':'offline-token'
+        }):
+            with self.assertRaises(ProviderVerificationRequired):
+                read_via_existing_owner_gateway(self.remote,'mimmi',opener=opener)
+        self.assertEqual(len(seen),2)
 
 
 if __name__=='__main__':unittest.main(verbosity=2)
