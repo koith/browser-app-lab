@@ -291,6 +291,18 @@ class CloudArchive:
             return False, last is not None
 
         existing = self.read(key, cap=cap, optional=True)
+        # A missing response from one TeraBox host is not evidence that an
+        # immutable original is absent on the other. Verify before writing.
+        if existing is None:
+            try:
+                alternate_existing = self.read(
+                    key,cap=cap,optional=True,domain="https://nephobox.com")
+            except RuntimeError:
+                alternate_existing = None
+            if alternate_existing is not None:
+                if sha256(alternate_existing)==expected_sha:
+                    return False
+                raise RuntimeError("immutable archive key collision on alternate endpoint")
         if existing is not None:
             if sha256(existing) == expected_sha:
                 return False
