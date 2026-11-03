@@ -117,9 +117,10 @@ class Transport:
         actual, blob = self.read(url, cap=MAX_MEDIA_BYTES)
         # Authoritative ATProto blob record MIME is used when PDS responds
         # with application/octet-stream; otherwise require a matching class.
-        if actual and actual != "application/octet-stream" and actual != mime:
+        if (mime is not None and actual and actual != "application/octet-stream"
+                and actual != mime):
             raise SourceUnavailable("source media MIME mismatch")
-        return blob
+        return (mime or actual), blob
 
 
 class TextOnly(HTMLParser):
@@ -322,7 +323,7 @@ def normalize_record(profile, raw):
                 "reply_to":(value.get("reply",{}).get("parent",{}).get("uri","")
                             if isinstance(value.get("reply"),dict) else ""),
                 "blobs":atproto_blobs(value),"raw":raw}
-    if str((raw.get("account") or {}).get("id")) != profile["actor"]:
+    if not isinstance(raw.get("account"),dict) or str(raw["account"].get("id")) != profile["actor"]:
         return None
     if raw.get("visibility")!="public" or raw.get("sensitive") or raw.get("reblog"):
         return None
@@ -385,7 +386,7 @@ def save_public_record(cloud, profile, item, api):
                 source_url=(profile["pds"]+"/xrpc/com.atproto.sync.getBlob?"+
                             urlencode({"did":profile["identity"],"cid":ref}))
                 expected=cid_sha256(ref)
-                data=api.media(source_url,mime)
+                _,data=api.media(source_url,mime)
                 if sha256(data)!=expected:
                     raise SourceUnavailable("original PDS CID mismatch")
                 current_mime=mime
