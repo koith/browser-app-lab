@@ -9,6 +9,12 @@ import pytest
 from demand_archive import CloudArchive, canonical_json, post_key, sha256
 import demand_capture_job as job
 
+@pytest.fixture(autouse=True)
+def no_real_backoff_in_isolated_archive_tests(monkeypatch):
+    # Exercise retry branches without wasting CI wall-clock on artificial sleeps.
+    monkeypatch.setattr("demand_archive.time.sleep",lambda _:None)
+
+
 
 class FakeCloud(CloudArchive):
     def __init__(self):
