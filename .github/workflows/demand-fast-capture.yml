@@ -15,6 +15,8 @@ on:
       - "apps/demand-research/test_rebuild_index_readback.py"
       - "apps/demand-research/test_recovery_spool.py"
       - "apps/demand-research/test_degraded_encrypted_capture.py"
+      - "apps/demand-research/capture_schedule_health.py"
+      - "apps/demand-research/test_capture_schedule_health.py"
       - "apps/demand-research/test_encrypted_batch_recovery.py"
       - "apps/demand-research/rebuild_archive.py"
       - ".github/workflows/demand-fast-capture.yml"
@@ -28,6 +30,7 @@ on:
       - ".github/workflows/demand-fast-capture.yml"
 permissions:
   contents: read
+  actions: read
 concurrency:
   # PR testing must never evict a queued production archive run.
   # Both schedule + main push share the same production serialization group.
@@ -47,9 +50,9 @@ jobs:
         run: |
           python -m pip install --disable-pip-version-check pytest==8.4.2
           cd apps/demand-research
-          python -m py_compile demand_archive.py demand_capture_job.py recovery_spool.py recover_spool_artifacts.py test_demand_archive.py test_terabox_parent_fallback.py test_flat_first_observation.py rebuild_archive.py test_rebuild_index_readback.py test_recovery_spool.py test_degraded_encrypted_capture.py
+          python -m py_compile capture_schedule_health.py test_capture_schedule_health.py demand_archive.py demand_capture_job.py recovery_spool.py recover_spool_artifacts.py test_demand_archive.py test_terabox_parent_fallback.py test_flat_first_observation.py rebuild_archive.py test_rebuild_index_readback.py test_recovery_spool.py test_degraded_encrypted_capture.py
           python -m pip install --disable-pip-version-check cryptography==46.0.4
-          python -m pytest -q test_demand_archive.py test_terabox_parent_fallback.py test_flat_first_observation.py test_rebuild_index_readback.py test_recovery_spool.py test_degraded_encrypted_capture.py
+          python -m pytest -q test_capture_schedule_health.py test_demand_archive.py test_terabox_parent_fallback.py test_flat_first_observation.py test_rebuild_index_readback.py test_recovery_spool.py test_degraded_encrypted_capture.py
   capture:
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-24.04
@@ -84,6 +87,10 @@ jobs:
           rm -rf /tmp/rclone.zip /tmp/rclone-extra
       - name: Install authenticated encryption for private recovery
         run: python -m pip install --disable-pip-version-check cryptography==46.0.4
+      - name: Measure actual scheduler gap and set bounded source catch-up
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python apps/demand-research/capture_schedule_health.py
       - name: Capture public originals with an encrypted pre-upload safety buffer
         working-directory: apps/demand-research
         run: |
