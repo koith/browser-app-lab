@@ -703,3 +703,11 @@ def test_conflicting_first_capture_is_never_silently_resigned():
     assert cloud.unrecoverable_entries==1
     assert pid in cloud.quarantined_ids
     assert "metadata/entries-repaired/"+pid+".json" not in cloud.objects
+
+
+def test_safe_storage_error_classification_never_reflects_user_post_or_url():
+    from demand_capture_job import public_error_class
+    assert public_error_class(RuntimeError("private cloud rcat failed (rate_limited)"))=="backend_rate_limit"
+    assert public_error_class(RuntimeError("private cloud readback did not converge"))=="readback_mismatch"
+    assert public_error_class(ValueError("early original capture mismatch; cannot silently replace"))=="first_observation_conflict"
+    assert public_error_class(ValueError("secret person https://example.com/p/42"))=="unclassified_failure"
