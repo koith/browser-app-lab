@@ -120,6 +120,57 @@
      return e;
    };
    let visibleCount=20,ranking=[],cohort="established";
+   const profileCache=new Map(),pendingProfiles=new Set();
+   let profileFetchActive=false;
+   function mergeProfileEvidence(){
+     for(const g of ranking){
+       const evidence=profileCache.get(g.profileUrl);
+       if(!evidence)continue;
+       if(evidence.createdAt)g.profileCreatedAt=evidence.createdAt;
+       if(Number.isInteger(evidence.postsCount))g.profilePostCount=evidence.postsCount;
+     }
+   }
+   async function hydratePublicProfiles(){
+     if(typeof win.fetch!=="function"||profileFetchActive)return;
+     const want=ranking.filter(g=>g.platform==="bluesky"&&
+        !profileCache.has(g.profileUrl)&&!pendingProfiles.has(g.profileUrl)).slice(0,120);
+     if(!want.length)return;
+     profileFetchActive=true;
+     try{
+       for(let i=0;i<want.length;i+=25){
+         const batch=want.slice(i,i+25);
+         batch.forEach(g=>pendingProfiles.add(g.profileUrl));
+         try{
+           const u=new URL("https://public.api.bsky.app/xrpc/app.bsky.actor.getProfiles");
+           for(const g of batch)u.searchParams.append("actors",g.profileUrl.split("/profile/")[1]);
+           const init={cache:"no-store",credentials:"omit"};
+           if(typeof win.AbortSignal?.timeout==="function")init.signal=win.AbortSignal.timeout(9000);
+           const response=await win.fetch(u.href,init);
+           if(!response.ok)throw Error("public profile lookup unavailable");
+           const payload=await response.json();
+           if(!Array.isArray(payload.profiles))throw Error("invalid profile response");
+           for(const g of batch){
+             const actor=g.profileUrl.split("/profile/")[1].toLowerCase();
+             const profile=payload.profiles.find(p=>p&&
+               (String(p.did||"").toLowerCase()===actor||
+                String(p.handle||"").toLowerCase()===actor));
+             const joined=Date.parse(profile?.createdAt||"");
+             const posts=count(profile?.postsCount);
+             profileCache.set(g.profileUrl,{
+               createdAt:Number.isFinite(joined)&&joined>0&&joined<=Date.now()?new Date(joined).toISOString():"",
+               postsCount:posts
+             });
+           }
+         }catch{
+           batch.forEach(g=>profileCache.set(g.profileUrl,{}));
+         }finally{
+           batch.forEach(g=>pendingProfiles.delete(g.profileUrl));
+           mergeProfileEvidence();
+           draw();
+         }
+       }
+     }finally{profileFetchActive=false;}
+   }
    const dialog=$("activityRankingDialog"),detail=$("activityRankingDialogContent");
    function closeDetail(){
      if(!dialog)return;
@@ -164,7 +215,14 @@
    }
    function draw(){
      const platform=$("activityRankingPlatform").value,order=$("activityRankingSort").value;
-     const filtered=ranking.filter(x=>(platform==="all"||x.platform===platform)&& (cohort==="established"?(x.posts>=3&&x.activeDays>=3):(x.posts<3||x.activeDays<3)));
+     const visible=ranking.filter(x=>platform==="all"||x.platform===platform);
+     const established=visible.filter(x=>cohortOf(x)==="established");
+     const newcomer=visible.filter(x=>cohortOf(x)==="new");
+     const filtered=cohort==="established"?established:newcomer;
+     doc.querySelectorAll("[data-rank-cohort]").forEach(btn=>{
+       const n=btn.dataset.rankCohort==="established"?established.length:newcomer.length;
+       btn.textContent=(btn.dataset.rankCohort==="established"?"기존 활동 ":"신규 활동 ")+n;
+     });
      const sorter={
        posts:(a,b)=>b.posts-a.posts,
        days:(a,b)=>b.activeDays-a.activeDays,
@@ -176,7 +234,9 @@
      const list=$("activityRankingRows");
      list.replaceChildren();
      const show=visibleCount;
-     if(!sorted.length)list.append(node("div","activity-ranking-empty","랭킹 없음"));
+     if(!sorted.length)list.append(node("div","activity-ranking-empty",
+       ranking.some(g=>g.platform==="bluesky"&&pendingProfiles.has(g.profileUrl))?
+         "공개 프로필 이력 확인 중…":"해당 분류의 확인된 계정이 없습니다. 신규 활동에는 공개 이력 미확인 계정도 포함됩니다."));
      sorted.slice(0,show).forEach((g,index)=>{
        const card=node("button","activity-rank-card");
        card.type="button";
@@ -203,6 +263,7 @@
    function update(){
      let snap;try{snap=win.INTERSECTION_publicRankingSnapshot?.();}catch{}
      ranking=compute(snap);
+     mergeProfileEvidence();
      const select=$("activityRankingPlatform"),prev=select.value;
      const available=[...new Set(ranking.map(x=>x.platform))].sort();
      select.replaceChildren();
@@ -210,6 +271,7 @@
      for(const p of available){const o=node("option","",LABELS[p]);o.value=p;select.append(o);}
      select.value=available.includes(prev)?prev:"all";
      draw();
+     void hydratePublicProfiles();
    }
    let scheduled=false;
    function schedule(){
