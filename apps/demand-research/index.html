@@ -533,6 +533,14 @@ main{padding-top:10px}
 .discovery-link-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;max-height:420px;overflow:auto}
 .discovery-link-list a{display:block;background:white;padding:7px 9px;border:1px solid #d3ceba;color:#20295c;font-size:11px;text-decoration:underline;overflow-wrap:anywhere}
 .discovery-link-list a span{display:block;color:#666574;font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:3px}
+.archive-controls{display:flex;flex-wrap:wrap;align-items:center;gap:8px;background:#f7f4e7;border:1px solid #242438;padding:10px;margin:10px 0}
+.archive-controls form{display:flex;gap:7px;flex-wrap:wrap;flex:1}
+.archive-controls input{min-width:160px;flex:2}
+.archive-controls select{min-width:110px;flex:1}
+.archive-controls button{min-height:35px;padding:6px 12px}
+.archive-media-state{font-size:10px;color:#8d3e16;font-weight:750;margin-top:5px}
+.archive-media-state--complete{color:#296c43}
+@media(max-width:720px){.archive-controls form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));width:100%}.archive-controls input{grid-column:1/-1;min-width:0}.archive-controls select{min-width:0}}
 @media(max-width:720px){.post[data-no-media="true"] .post-thumb{min-height:70px;max-height:98px}.post-thumb .thumb-placeholder{min-height:70px;padding:7px}.post-thumb .thumb-placeholder span{font-size:10px}.discovery-link-list{grid-template-columns:1fr}}
 </style>
 </head>
@@ -565,6 +573,7 @@ main{padding-top:10px}
  <div id="activityRankingRows" class="activity-ranking-grid" aria-label="공개 계정 활동 랭킹"></div>
  <button type="button" id="activityRankingMore" class="activity-ranking-more hidden" aria-expanded="false">더 보기</button>
 </section>
+<div id="archiveControls" class="archive-controls hidden" aria-label="테라박스 저장 게시글 검색"><form id="archiveSearchForm" autocomplete="off"><input id="archiveQuery" type="search" maxlength="100" placeholder="보관된 게시글 본문 검색" aria-label="보관본 본문 검색"><select id="archivePlatform" aria-label="보관 SNS"><option value="">모든 SNS</option><option value="bluesky">Bluesky</option><option value="mastodon">Mastodon</option><option value="misskey">Misskey</option><option value="lemmy">Lemmy</option></select><select id="archiveMediaStatus" aria-label="첨부 보관 상태"><option value="">전체 보관본</option><option value="complete">첨부 보관 완료</option><option value="partial">첨부 일부 누락</option></select><button type="submit">보관본 검색</button><button id="archiveReset" type="button">초기화</button></form><span id="archiveResults" role="status" aria-live="polite"></span></div>
 <section class="feed" id="feed" aria-live="polite"><div class="empty">게시글 불러오는 중…</div></section>
 <div class="more hidden" id="paging"><button type="button" id="more">더 보기</button></div>
 <details class="discovery-links hidden" id="discoveryCandidates">
@@ -1063,7 +1072,7 @@ function suspectedAd(post){
 
 function matchesText(p){return !needle||p.text.toLowerCase().includes(needle)}
 function filtered(){
-  return posts.filter(p=>matchesText(p)&&!suspectedAd(p))
+  return posts.filter(p=>matchesText(p)&&(cloudMode||!suspectedAd(p)))
     .sort((a,b)=>String(b.indexed).localeCompare(String(a.indexed)));
 }
 /* The main feed contains dated, source-verified SNS originals only.
@@ -1169,7 +1178,6 @@ function tile(p){
   if(p.discoveryCandidate)article.dataset.discoveryCandidate="true";
   let thumb=el("div","post-thumb"),first=p.media?.[0],blocked=hideMedia(p);
   thumb.append(sourceBadge(p,true));
-  const avatar=validUrl(p.avatarUrl);
   function textPreview(message){
     article.dataset.noMedia="true";
     const box=el("div","thumb-placeholder");
@@ -1179,18 +1187,15 @@ function tile(p){
   function showFallback(){
     thumb.querySelectorAll("img.post-media-img,.thumb-placeholder,.thumb-kind-label").forEach(n=>n.remove());
     article.dataset.noMedia="true";
-    if(!blocked&&avatar){
-      const profile=el("img","post-media-img");
-      profile.src=avatar;profile.alt="작성자 프로필 사진 · 게시글 첨부 사진 아님";
-      profile.loading="lazy";profile.decoding="async";profile.referrerPolicy="no-referrer";
-      profile.addEventListener("error",()=>{profile.remove();textPreview(first?.type==="video"?"영상 미리보기 없음":"본문만 있는 게시글")},{once:true});
-      thumb.append(profile,el("span","thumb-kind-label",first?.type==="video"?"프로필 사진 · 영상 보기":"프로필 사진"));
-      return;
-    }
-    textPreview(blocked?"표시 제한된 미디어":first?.type==="video"?"영상 미리보기 없음":first?"이미지 미리보기 없음":"본문만 있는 게시글");
+    // Never substitute an account photo, unrelated photo, or a fabricated
+    // thumbnail for the media attached to this specific original post.
+    const message=blocked?"표시 제한된 미디어":first?.type==="video"?"해당 영상 미리보기 없음":
+      first?.type==="external"?"외부 링크 · 게시글 사진 아님":
+      first?"원본 게시글 이미지 불러오기 실패":"첨부 이미지 없는 게시글";
+    textPreview(message);
   }
   if(!blocked&&first){
-    const sources=[validUrl(first.thumb)];
+    const sources=first.type==="image"||first.type==="video"?[validUrl(first.thumb)]:[];
     if(first.type==="image"&&validUrl(first.url)&&first.url!==first.thumb)sources.push(validUrl(first.url));
     const candidates=[...new Set(sources.filter(Boolean))];
     if(candidates.length){
@@ -1211,6 +1216,11 @@ function tile(p){
     p.snippetMatched?"링크 · 원문 미확인":"검색어·원문 미확인"));
   if(suspectedAd(p))title.append(el("span","post-ad-marker","광고 의심"));
   body.append(title,el("p","post-excerpt",p.text),el("div","post-date",p.discoveryCandidate?"작성일 미확인 · 검색 결과":niceDate(p.posted)));
+  if(p.archived){
+    const missing=Math.max(0,(p.mediaExpected||0)-(p.mediaSaved||0));
+    body.append(el("div","archive-media-state"+(missing?"":" archive-media-state--complete"),
+      missing?"테라박스 첨부 "+p.mediaSaved+"/"+p.mediaExpected+"개 · 누락 "+missing+"개":"테라박스 저장본 · 첨부 "+(p.mediaSaved||0)+"개"));
+  }
   button.append(thumb,body);
   button.addEventListener("click",()=>openDetail(p));
   button.addEventListener("keydown",e=>{if(e.target===button&&(e.key==="Enter"||e.key===" ")){e.preventDefault();openDetail(p)}});
@@ -1221,7 +1231,7 @@ function appendMedia(parent,m,post,one){
     let src=validUrl(m.url);if(!src)return;
     let link=el("a",one?"single":"");link.href=src;link.target="_blank";link.rel="noopener noreferrer";
     let img=el("img");img.src=src;img.loading="lazy";img.alt=m.alt||"첨부 사진";img.referrerPolicy="no-referrer";
-    img.addEventListener("error",()=>{link.replaceWith(sourceLink(post,"이미지 원문에서 보기"))},{once:true});
+    img.addEventListener("error",()=>{link.replaceWith(sourceLink(post,"원본 게시글 이미지 로드 실패 · SNS 원문 확인"))},{once:true});
     link.append(img);parent.append(link);
   }else if(m.type==="video"){
     let src=validUrl(m.url),poster=validUrl(m.thumb);
@@ -1251,6 +1261,12 @@ function openDetail(p){
     node.append(el("div","ad-detail","광고 의심 · "+(p.adEvidence?.reasons||[]).join(" / ")));
   }
   node.append(el("p","dialog-text",p.text||"(본문 없음)"));
+  if(p.archived){
+    const missing=Math.max(0,(p.mediaExpected||0)-(p.mediaSaved||0));
+    node.append(el("div","dialog-notice",missing?
+      "테라박스에 원본 첨부 "+p.mediaSaved+"/"+p.mediaExpected+"개가 보관됐습니다. 누락 "+missing+"개는 저장 완료로 표시하지 않습니다.":
+      "테라박스에 저장한 게시글입니다. 첨부 "+(p.mediaSaved||0)+"개 보관 기록이 있습니다."));
+  }
   if(p.media.length){
     if(hideMedia(p)){
       let message=p.restricted?"서비스 제한 라벨이 적용된 미디어입니다. SNS 원문에서 확인하세요.":"성인 미디어 표시가 꺼져 있습니다.";
@@ -1443,17 +1459,21 @@ async function loadCloud(reset){
         if(!result.ok)throw Error("전용 주소가 유효하지 않습니다.");
       }
     }
-    let r=await fetch("/api/posts?limit=60&offset="+cloudOffset,{credentials:"same-origin",cache:"no-store"});
+    let params=new URLSearchParams({limit:"60",offset:String(cloudOffset),q:$("archiveQuery").value.trim(),platform:$("archivePlatform").value,media_status:$("archiveMediaStatus").value});
+    let r=await fetch("/api/posts?"+params.toString(),{credentials:"same-origin",cache:"no-store"});
     if(!r.ok)throw Error("테라박스 목록을 불러올 수 없습니다.");
     let data=await r.json();cloudTotal=data.total;
     for(let p of data.posts||[]){
       if(ids.has(p.id))continue;
       let media=(p.media||[]).map(m=>({type:String(m.mime||"").startsWith("video/")?"video":"image",url:validUrl(new URL(m.url,location.origin).href),thumb:validUrl(new URL(m.url,location.origin).href),alt:"첨부파일"}));
-      let row={id:p.id,platform:"cloud",author:p.platform||"SNS",profileUrl:"",text:p.text||"",posted:p.posted_at,indexed:p.posted_at,url:validUrl(p.source_url),terms:new Set(["클라우드"]),media,adultLabeled:false,restricted:false};
+      let row={id:p.id,platform:p.platform||"cloud",author:(p.platform||"SNS")+" · 보관본",archived:true,
+        profileUrl:validUrl(p.profile_url),text:p.text||"",posted:p.posted_at,indexed:p.posted_at,
+        url:validUrl(p.source_url),terms:new Set(["테라박스"]),media,adultLabeled:false,restricted:false,
+        mediaExpected:Number(p.media_expected)||0,mediaSaved:Number(p.media_saved)||0};
       ids.set(p.id,row);posts.push(row);
     }
     cloudOffset+=(data.posts||[]).length;
-    status("테라박스 저장 게시글");$("paging").classList.toggle("hidden",!hasMoreResults());
+    status("테라박스 저장 게시글");$("archiveResults").textContent=cloudTotal.toLocaleString()+"건 검색됨";$("paging").classList.toggle("hidden",!hasMoreResults());
     $("more").textContent="더 보기";
     draw();
   }catch(e){status(e.message);if(!posts.length)$("feed").replaceChildren(el("div","empty",e.message))}
@@ -1496,6 +1516,8 @@ $("socialFind").addEventListener("click",async ()=>{
   }catch(error){$("socialStatus").textContent=String(error.message||error)}
   finally{button.disabled=false}
 });
+$("archiveSearchForm").addEventListener("submit",e=>{e.preventDefault();if(cloudMode&&!cloudBusy)loadCloud(true)});
+$("archiveReset").addEventListener("click",()=>{if(!cloudMode||cloudBusy)return;for(let key of ["archiveQuery","archivePlatform","archiveMediaStatus"])$(key).value="";loadCloud(true)});
 $("more").addEventListener("click",()=>{
   if(busy)return;
   if(filtered().length>visibleLimit){visibleLimit+=180;draw()}
@@ -1505,6 +1527,8 @@ $("more").addEventListener("click",()=>{
 $("presets").addEventListener("click",e=>{let b=e.target.closest("button[data-days]");if(!b)return;setPreset(Number(b.dataset.days))});
 setPreset(30);
 if(cloudMode){
+  $("archiveControls").classList.remove("hidden");
+  $("activityRanking").classList.add("hidden");
   $("socialControls").classList.remove("hidden");
   $("source").textContent="테라박스 저장 게시글 · 글/사진/영상";
   $("openDate").classList.add("hidden");
