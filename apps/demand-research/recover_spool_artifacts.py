@@ -16,7 +16,7 @@ import tempfile
 from demand_archive import CloudArchive
 from recovery_spool import RecoverySpool
 
-ARTIFACT_NAME=re.compile(r"^intersection-private-recovery-([0-9]{6,30})$")
+ARTIFACT_NAME=re.compile(r"^intersection-private-recovery$")
 MAX_ARTIFACTS=20
 MAX_BYTES=200_000_000
 
@@ -38,19 +38,18 @@ def list_candidates():
         raise RuntimeError("missing repository context for private recovery")
     items=[]
     for page in (1,2,3):
-        raw=_gh(["api",f"/repos/{repo}/actions/artifacts?per_page=100&page={page}"])
+        raw=_gh(["api",f"/repos/{repo}/actions/artifacts?name=intersection-private-recovery&per_page=100&page={page}"])
         data=json.loads(raw)
         batch=data.get("artifacts",[])
         for item in batch:
             name=item.get("name","")
-            matched=ARTIFACT_NAME.fullmatch(name)
-            if (not matched or item.get("expired") is True
+            if (not ARTIFACT_NAME.fullmatch(name) or item.get("expired") is True
                     or not isinstance(item.get("size_in_bytes"),int)
                     or item["size_in_bytes"]>MAX_BYTES):
                 continue
             run=item.get("workflow_run") or {}
             run_id=run.get("id")
-            if not isinstance(run_id,int) or str(run_id)!=matched.group(1):
+            if not isinstance(run_id,int) or run_id<1:
                 continue
             items.append((str(item.get("created_at","")),run_id,name))
         if len(batch)<100:
