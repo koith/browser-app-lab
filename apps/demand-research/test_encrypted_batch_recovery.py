@@ -119,3 +119,17 @@ def test_degraded_capture_keeps_sha_verified_batch_separate_from_post_restore(tm
     assert result["deferred_buffers"]==2
     assert len([x for x in cloud.objects if x.startswith("metadata/recovery-pack-")])==1
     assert len(list(tmp_path.glob("*.enc")))==5
+
+
+
+def test_recovery_batch_time_limit_interrupts_backend_retry_and_restores_runner(tmp_path):
+    spool=RecoverySpool(tmp_path)
+    path=spool.save("c"*40,first("c"*40))
+    cloud=FakeCloud()
+    original_runner=cloud.runner
+    with pytest.raises(TimeoutError,match="budget exceeded"):
+        replay.with_cloud_budget(
+            cloud,lambda:replay.preserve_encrypted_batch(cloud,spool,[path]),
+            max_seconds=-1)
+    assert cloud.runner is original_runner
+    assert cloud.objects=={}
