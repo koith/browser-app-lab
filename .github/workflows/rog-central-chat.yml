@@ -10,6 +10,7 @@ on:
       - 'apps/4leaf/rog/chatroom-native-exit.css'
       - 'apps/4leaf/rog/index.html'
       - 'apps/4leaf/rog/tests/central-browser.cjs'
+      - 'apps/4leaf/rog/tests/central-client-recovery.cjs'
       - '.github/workflows/rog-central-chat.yml'
   pull_request:
     branches: [main]
@@ -33,6 +34,8 @@ jobs:
           node --check apps/4leaf/rog/social-chat.js
       - name: Verify authenticated server occupancy, chat and permissions
         run: node --test apps/4leaf/rog/server/central.test.cjs
+      - name: Exercise real authority session expiry and room isolation
+        run: node --test apps/4leaf/rog/tests/central-client-recovery.cjs
       - name: Build and boot the deployable Docker authority
         run: |
           set -euo pipefail

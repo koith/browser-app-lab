@@ -944,7 +944,7 @@
  }
  function enterRoom(room){
   if(central.enabled&&central.joinedId!==room.id)return false;
-  if(!roomHasSpace(room)){roomFullNotice(room);return false}
+  if(!central.enabled&&!roomHasSpace(room)){roomFullNotice(room);return false}
   if(room.region!==state.region){state.region=room.region}
   state.district=room.district;state.roomId=room.id;state.view='room';
   const seats=roomSeats(room.background);
@@ -1499,7 +1499,22 @@
     window.__ROG_TEST__?.go('rooms');
     enterRoom(room);
     presence();
-   }else if(event.type==='rooms'){
+    }else if(event.type==='rejoined'&&event.room){
+     // Real authority reauthentication and room admission happened before
+     // we show this peer again. A stale browser seat is never authoritative.
+     const room=centralRoom(event.room);
+     centralRooms.set(room.id,room);
+     centralCounts.set(room.id,Number(event.room.occupants)||0);
+     if(state.view==='room'&&state.roomId===room.id){
+      presence();renderOccupants();
+      systemLine('중앙 채팅 서버에 재접속했습니다.');
+     }
+    }else if(event.type==='membership-lost'){
+     if(state.view==='room'&&state.roomId===event.roomId){
+      state.view='directory';state.roomId=null;render();
+      systemLine('서버 연결은 복구됐지만 이전 채팅방에는 입장하지 못했습니다. 방 목록에서 다시 선택해 주세요.');
+     }
+    }else if(event.type==='rooms'){
     if(!event.rooms||!Array.isArray(event.rooms))return;
     for(const [id,r] of centralRooms)if(r.region===event.region&&r.district===event.district)centralRooms.delete(id);
     for(const r of event.rooms){
