@@ -2,7 +2,7 @@ import copy
 import json
 import sys
 import unittest
-from load_pending_individual import load,storage,accessible_documents,list_pending_entries
+from load_pending_individual import load,storage,accessible_documents,list_pending_entries,pending_duplicate_census
 from read_owner_metadata import ProviderVerificationRequired
 
 
@@ -16,6 +16,18 @@ class PendingTests(unittest.TestCase):
             {**self.row,'number':9,'sha256':'c'*64}]}]}
         self.queue={'schema_version':1,'model':'mimmi','source_batch_sha256':'d'*64,
                     'albums':[{'id':'saved-work','images':[self.row]}]}
+
+    def test_pending_census_counts_duplicate_without_calling_it_new(self):
+        docs=[('d'*64+'.json',self.queue)]
+        stats=pending_duplicate_census(self.owner,docs)
+        self.assertEqual(stats['batches_read'],1)
+        self.assertEqual(stats['queued_rows'],1)
+        self.assertEqual(stats['new_distinct_sha'],1)
+        old=copy.deepcopy(self.owner)
+        old['albums'][0]['images'].append(self.row)
+        known=pending_duplicate_census(old,docs)
+        self.assertEqual(known['new_distinct_sha'],0)
+        self.assertEqual(known['already_saved_sha'],1)
 
     def test_append_after_fresh_inventory_and_skip_exact_duplicates(self):
         delta,_=load(self.owner,[('d'*64+'.json',self.queue)],'mimmi')
