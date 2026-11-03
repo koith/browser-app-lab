@@ -371,30 +371,35 @@
   return ({'/묵':'✊ 묵','/찌':'✌ 찌','/빠':'✋ 빠'})[command]||null;
  }
  function publishText(text){
-  const v=safe(text,250);if(!v)return;
-  if(v==='/help'){systemLine('/주사위 · /묵 · /찌 · /빠 · /nick 별명 · /me 행동');return}
-  if(v.startsWith('/nick ')){$('rename')?.click();return}
+  const v=safe(text,250);if(!v)return Promise.resolve(false);
+  if(v==='/help'){systemLine('/주사위 · /묵 · /찌 · /빠 · /nick 별명 · /me 행동');return Promise.resolve(true)}
+  if(v.startsWith('/nick ')){$('rename')?.click();return Promise.resolve(true)}
   const content=originalChatToy(v)||(v.startsWith('/me ')?'＊ '+nick()+' '+v.slice(4):v);
   const item={kind:'chat',id:uuid(),scope:state.scope,user:nick(),text:content,sender:tabId,time:now()};
   if(central.enabled&&state.view==='room'&&(!central.ready||central.joinedId!==state.roomId)){
-   systemLine('중앙 채팅방에 실제 입장한 뒤 메시지를 보낼 수 있습니다.');return;
+   systemLine('중앙 채팅방에 실제 입장한 뒤 메시지를 보낼 수 있습니다.');
+   return Promise.resolve(false);
   }
   if(central.enabled&&state.view==='room'){
-   // Do not create a visible or saved "sent" message before the authority
-   // accepts it. Failed sends must not masquerade as genuine chat history.
-   central.chat(content).then(result=>{
-    const entry=result.entry;if(!entry)return;
+   // Only a 201 from the actual central authority counts as delivery.
+   // A failed HTTP call cannot erase an unsent draft or invent local history.
+   return central.chat(content).then(result=>{
+    const entry=result.entry;if(!entry)return false;
     const confirmed={id:entry.id,scope:'room:'+entry.roomId,user:entry.user,
      text:entry.text,sender:tabId,time:entry.time};
     storeMessage(confirmed);
     if(state.view==='room'&&state.roomId===entry.roomId){
      renderMessage(confirmed);showBubble(tabId,entry.text);
     }
-   }).catch(e=>systemLine('서버 메시지 전송 실패: '+e.message));
-  }else{
-   storeMessage(item);renderMessage(item);showBubble(tabId,content);
-   sendLocal(item);sendRTC(item)
+    return true;
+   }).catch(e=>{
+    systemLine('서버 메시지 전송 실패: '+e.message+' · 입력한 내용은 유지됩니다.');
+    return false;
+   });
   }
+  storeMessage(item);renderMessage(item);showBubble(tabId,content);
+  sendLocal(item);sendRTC(item);
+  return Promise.resolve(true);
  }
  function onlinePeers(sc=state.scope){
   const fresh=[compactPresence()];
@@ -1590,7 +1595,25 @@
    form.onsubmit=e=>{
      const social=['sky','city','rooms'].some(id=>!$(id)?.classList.contains('hidden'));
      if(!social){if(oldForm)return oldForm.call(form,e);return}
-     e.preventDefault();const input=$('message'),v=input.value.trim();input.value='';publishText(v);
+     e.preventDefault();
+     const input=$('message'),v=input.value.trim();if(!v)return;
+     if(central.enabled&&state.view==='room'){
+      // Do not lose the draft on a transient error, or dispatch twice while
+      // the very same message is still waiting on server confirmation.
+      if(form.dataset.centralSending==='true')return;
+      const submitted=input.value;
+      const submit=form.querySelector('button[type="submit"]');
+      form.dataset.centralSending='true';
+      if(submit)submit.disabled=true;
+      void Promise.resolve(publishText(v)).then(delivered=>{
+       if(delivered&&input.value===submitted)input.value='';
+      }).finally(()=>{
+       delete form.dataset.centralSending;
+       if(submit)submit.disabled=false;
+      });
+      return;
+     }
+     input.value='';void publishText(v);
    };
   }
   window.addEventListener('leaf-route-change',e=>{
