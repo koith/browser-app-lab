@@ -772,16 +772,28 @@ class CloudArchive:
             match=re.fullmatch(r"posts/"+pid+r"/media/([0-9]{4})\.[a-z0-9]+",media["key"])
             if match is None:
                 raise ValueError("bad staged media source position")
+            source=media.get("source_url")
+            if source is not None and not public_url(source):
+                raise ValueError("invalid original attachment source evidence")
             self.write_immutable(media["key"],blob)
             slot=match.group(1)
             marker={"id":pid,"index":int(slot),"key":media["key"],
                     "mime":media["mime"],"bytes":media["bytes"],
                     "sha256":media["sha256"]}
+            if source is not None:
+                # This one-to-one URL binding is immutable beside the bytes,
+                # preserving the exact source slot across partial retries.
+                marker["source_url"]=source
             self.write_immutable("metadata/media-parts/"+pid+"/"+slot+".json",
                                  canonical_json(marker))
 
-    def read_staged_media(self,pid,index):
-        """Return only a SHA-matched attachment from the original post/slot."""
+    def read_staged_media(self,pid,index,*,expected_source_url=None):
+        """Return only original source/slot-bound, byte SHA-matched media.
+
+        For old markers without a source URL, accept a matching source URL
+        only when the immutable first-observation record proves the position.
+        A missing/corrupt observation never licenses an unbound substitution.
+        """
         if not ID.fullmatch(str(pid)) or not isinstance(index,int) or not 1<=index<=16:
             raise ValueError("invalid staged media index")
         slot=str(index).zfill(4)
@@ -798,6 +810,27 @@ class CloudArchive:
                     or not re.fullmatch(r"[a-f0-9]{64}",str(info.get("sha256","")))
                     or info.get("key")!="posts/"+pid+"/media/"+slot+MIMES[info["mime"]]):
                 return None
+            if expected_source_url is not None:
+                if not public_url(expected_source_url):
+                    return None
+                source=info.get("source_url")
+                if source is None:
+                    # Legacy marker: verify against the first captured public
+                    # original rather than assuming this slot belonged to
+                    # the latest URL in a mutable provider response.
+                    original=self.read_first_observation(pid)
+                    if original is None:
+                        return None
+                    observed=json.loads(original)
+                    links=observed.get("media_links")
+                    if (not isinstance(observed,dict)
+                            or observed.get("id")!=pid
+                            or not isinstance(links,list)
+                            or len(links)<index):
+                        return None
+                    source=links[index-1]
+                if not isinstance(source,str) or source!=expected_source_url:
+                    return None
             data=self.read_verified(info["key"],info["sha256"],
                                     cap=MAX_MEDIA_BYTES+1)
             if data is None or len(data)!=info["bytes"]:
