@@ -317,7 +317,10 @@ class CloudArchive:
         # This also covers a brand-new versioned catalog directory.
         try:
             self.ensure_parent(key)
-        except RuntimeError:
+        except RuntimeError as error:
+            if any(code in str(error) for code in (
+                    "(authorization)","(capacity)","(rate_limited)")):
+                raise
             self.ensure_parent(key,domain="https://nephobox.com",force=True)
         with tempfile.NamedTemporaryFile(prefix="demand-cloud-", delete=False) as temp:
             temp.write(data)
