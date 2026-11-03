@@ -117,6 +117,7 @@ let profile,match=null,route='sky',chosenCard=CHR_SOURCE.length>50?'c_0040':'joa
 // A truncated local save may be left by an interrupted browser/PWA write.
 // Never erase its original bytes merely because JSON.parse failed at boot.
 let unreadableSavedMatchRaw=null;
+let nonResumableSavedMatchRaw=null,nonResumableSavedMatchKind='invalid';
 const safe=(v,f)=>{
  let raw=null;
  try{
@@ -142,10 +143,36 @@ if(CHR_SOURCE.length>50){
  if(!profile.team.length)profile.team=DEFAULT_PROFILE.team.slice();
  if(!CARD_MAP[chosenCard])chosenCard=profile.owned[0];
 }
-const savedMatch=safe('match',null);if(savedMatch&&Array.isArray(savedMatch.players)&&savedMatch.players.length>=2&&savedMatch.players.length<=8&&!savedMatch.finished){
+// A syntactically valid JSON document can still be an unsafe match: a
+// finished game, a missing player, or a truncated schema. The previous
+// bootstrap silently rewrote ALL such records to the JSON literal null.
+// Keep their exact bytes until the player explicitly starts a new game.
+function resumableSavedMatch(m){
+ if(!m||typeof m!=='object'||Array.isArray(m)||m.finished)return false;
+ if(typeof m.map!=='string'||!Object.hasOwn(MAPS,m.map)&&
+    !Object.hasOwn(SOURCE_IDS,m.map))return false;
+ if(!['ai','hotseat','network'].includes(m.mode)||
+    !Array.isArray(m.tiles)||m.tiles.length<2||m.tiles.length>500||
+    !Array.isArray(m.players)||m.players.length<2||m.players.length>8||
+    !Number.isInteger(m.active)||m.active<0||m.active>=m.players.length||
+    !Number.isInteger(m.round)||m.round<1)return false;
+ return m.players.every(p=>p&&typeof p==='object'&&
+  typeof p.name==='string'&&Array.isArray(p.team)&&Array.isArray(p.items)&&
+  p.effects&&typeof p.effects==='object'&&!Array.isArray(p.effects)&&
+  Number.isInteger(p.position)&&p.position>=0&&p.position<m.tiles.length);
+}
+const savedMatch=safe('match',null);
+if(resumableSavedMatch(savedMatch)){
  match=savedMatch;
  // Saved AI games never resume automatic dice turns without fresh consent.
  if(match.mode==='ai')match.botAutoplay=false;
+}else if(savedMatch!==null){
+ // Do not promote a damaged match to live gameplay. Equally, never erase a
+ // completed game's moves, participants, or history merely by opening 4LEAF.
+ try{
+  nonResumableSavedMatchRaw=localStorage.getItem('rog_match');
+  nonResumableSavedMatchKind=savedMatch?.finished===true?'finished':'invalid';
+ }catch{}
 }
 function activePlayer(){return match?.players?.[match.active]||null}
 function playerCanAct(){
@@ -182,13 +209,33 @@ function archiveUnreadableSavedMatch(){
   return false;
  }
 }
+function archiveNonResumableSavedMatch(){
+ if(nonResumableSavedMatchRaw===null)return true;
+ try{
+  const root='rog_match_'+nonResumableSavedMatchKind+'_backup_v1';
+  const prior=localStorage.getItem(root);
+  const target=prior===null||prior===nonResumableSavedMatchRaw
+   ?root:root+'_'+Date.now();
+  const existing=localStorage.getItem(target);
+  if(existing!==nonResumableSavedMatchRaw){
+   if(existing!==null)throw Error('Recovery backup key already exists');
+   localStorage.setItem(target,nonResumableSavedMatchRaw);
+  }
+  nonResumableSavedMatchRaw=null;
+  return true;
+ }catch(error){
+  console.warn('4LEAF prior match preservation failed; keeping original storage untouched',error?.name||'storage-error');
+  return false;
+ }
+}
 function persist(){
  try{
   localStorage.setItem('rog_profile',JSON.stringify(profile));
   // Initial UI/profile updates must not turn malformed original bytes into
   // the literal 'null'. On a real fresh game, retain a separate exact copy
   // before changing the active match key. If backup fails, fail closed.
-  if(unreadableSavedMatchRaw===null||(match&&archiveUnreadableSavedMatch()))
+  if((unreadableSavedMatchRaw===null||(match&&archiveUnreadableSavedMatch()))&&
+     (nonResumableSavedMatchRaw===null||(match&&archiveNonResumableSavedMatch())))
    localStorage.setItem('rog_match',JSON.stringify(match));
  }catch(error){console.warn('4LEAF local game save failed',error)}
  if(match?.mode==='network'&&window.__LEAF_NET__?.connected&&window.__LEAF_NET__.role==='host'){

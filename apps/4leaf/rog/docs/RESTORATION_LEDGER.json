@@ -1582,6 +1582,18 @@
         "RULE-03",
         "QA-03"
       ]
+    },
+    {
+      "id": "REQ-20261103-GPT-COMPLETED-MATCH-HISTORY",
+      "date": "2026-11-03",
+      "origin": "User requested continuing remaining 4LEAF restoration; GPT game save source audit",
+      "text": "완료된 경기의 이력과 구조가 손상된 저장 경기 데이터가 게임 재진입 때 삭제되지 않도록 보존하고, 새 경기 시작 시 복구 기록을 안전하게 보관한다.",
+      "taskIds": [
+        "M08",
+        "P0-RELEASE",
+        "RULE-03",
+        "QA-03"
+      ]
     }
   ],
   "tasks": [
@@ -8161,6 +8173,31 @@
         "QA-03"
       ],
       "details": "PR #573: source audit confirms RTCPeerConnection disconnected state was ignored while a DataChannel could remain open, leaving net.connected true and remote game commands enabled. New peer-state guard pauses game on disconnected/failed/closed, resumes only if the same current peer is connected and its channel open; stale callback rejection remains. Deterministic disconnect/recovery/replay QA extended; real two-Chromium browser PR CI enabled. CI results and deployed SHA pending; no original-2002 equivalence claimed."
+    },
+    {
+      "seq": 372,
+      "date": "2026-11-03",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261103-GPT-COMPLETED-MATCH-HISTORY",
+      "taskIds": [
+        "M08",
+        "P0-RELEASE",
+        "RULE-03",
+        "QA-03"
+      ]
+    },
+    {
+      "seq": 373,
+      "date": "2026-11-03",
+      "type": "COMPLETED_MATCH_AND_VALID_JSON_INVALID_SHAPE_BACKUP_PR_PENDING",
+      "requestId": "REQ-20261103-GPT-COMPLETED-MATCH-HISTORY",
+      "taskIds": [
+        "M08",
+        "P0-RELEASE",
+        "RULE-03",
+        "QA-03"
+      ],
+      "details": "PR #576. Game bootstrap previously accepted only unfinished matches with players array 2..8; subsequent profileUI.persist() overwrote completed match histories and malformed-but-parseable JSON with null. A conservative runtime schema guard keeps unsafe records out of live gameplay while preserving exact original storage. Only on explicit next game creation does it archive finished raw JSON or malformed player data in distinct, non-destructive keys. Chromium + WebKit real room-start/reload tests included; PASS/Pages pending, no source equivalence claimed."
     }
   ]
 }
