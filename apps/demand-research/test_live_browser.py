@@ -238,8 +238,8 @@ def run(live=False):
                 date=page.locator("header #openDate").bounding_box()
                 assert abs((title["y"]+title["height"]/2)-(date["y"]+date["height"]/2))<14
                 assert abs((title["y"]+title["height"]/2)-(shortcut["y"]+shortcut["height"]/2))<14
-                assert shortcut["right"]<=date["x"]+2, "Shortcut must not overlap the date selector"
-                assert shortcut["right"]<=391, "Shortcut must remain inside iPhone viewport"
+                assert shortcut["x"]+shortcut["width"]<=date["x"]+2, "Shortcut must not overlap the date selector"
+                assert shortcut["x"]+shortcut["width"]<=391, "Shortcut must remain inside iPhone viewport"
                 page.locator("#openDate").click()
                 boxes=page.locator("#dateDialog input[type=date]").evaluate_all(
                   "els=>els.map(e=>e.getBoundingClientRect().toJSON())")
