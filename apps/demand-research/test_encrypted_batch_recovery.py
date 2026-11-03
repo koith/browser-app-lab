@@ -133,3 +133,24 @@ def test_recovery_batch_time_limit_interrupts_backend_retry_and_restores_runner(
             max_seconds=-1)
     assert cloud.runner is original_runner
     assert cloud.objects=={}
+
+
+def test_replay_streams_artifacts_and_reports_unprocessed_backlog(monkeypatch):
+    """Avoid an Actions timeout even when a backlog has many slow downloads."""
+    from test_demand_archive import FakeCloud
+    monkeypatch.setenv("GH_TOKEN","synthetic-token-for-tests")
+    monkeypatch.setattr(replay,"list_candidates",lambda: [
+        ("2026-11-03T00:00:00Z",100001,"intersection-private-recovery"),
+        ("2026-11-03T00:01:00Z",100002,"intersection-private-recovery"),
+        ("2026-11-03T00:02:00Z",100003,"intersection-private-recovery"),
+    ])
+    calls=[]
+    monkeypatch.setattr(replay,"_gh",
+                        lambda args,**kwargs:calls.append(args) or b"")
+    ticks=iter([0,300,600,900])
+    monkeypatch.setattr(replay.time,"monotonic",lambda:next(ticks))
+    result=replay.replay(cloud=FakeCloud())
+    assert len(calls)==2  # Third archived source remains queued, not lost.
+    assert result["deferred_artifacts"]==1
+    assert result["post_and_media_verified"]==0
+    assert result["batch_sha_verified"]==0
