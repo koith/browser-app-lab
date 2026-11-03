@@ -39,6 +39,10 @@
    const result=await request('POST','/api/session',{nick:lastNick,resume});
    token=result.token;id=result.id;
    joinedId=result.room?.id||null;
+   // A browser reload retains the server's membership. Public rooms require
+   // no stored password, so they can also recover after a later token expiry.
+   // Never persist a private-room password in storage.
+   if(result.room&&!result.room.locked&&!lastJoin)lastJoin={id:result.room.id,password:''};
    try{sessionStorage.setItem('leaf_central_session_v1',token)}catch{}
    active=true;notify({type:'ready',id});
    // The server alone decides whether a page reload still belongs to a room.
