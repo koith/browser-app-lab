@@ -8300,6 +8300,71 @@
         "P0-RELEASE"
       ],
       "details": "PR #639 squash 7a9a945263f092f37449a073e7f1e22988e2ea9f merged, beta55/PWA142. Real central Chromium E2E validated failed POST draft preservation, successful retry, fast duplicate Enter, rapid room selection, ownership/chat regression; Node authority/10 real users/release id PASS. Source visual ChatRoom 6 backgrounds/actor/depth work assigned in separate Claude instruction; live exact beta55 Pages QA and physical iPhone unverified; 13/60 done unchanged."
+    },
+    {
+      "seq": 377,
+      "date": "2026-11-04",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261103-GPT-LEGACY-MATCH",
+      "taskIds": [
+        "M08",
+        "P0-RELEASE",
+        "QA-03",
+        "RULE-03"
+      ],
+      "details": "Append-only recovery of missing canonical request-registration event; original intake and historical evidence remain unchanged. This restores validator-required registration linkage."
+    },
+    {
+      "seq": 378,
+      "date": "2026-11-04",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261103-CHAT-FIRST-ARCHITECTURE",
+      "taskIds": [
+        "M03",
+        "P0-CHAT",
+        "CHT-02",
+        "CHT-03",
+        "CHT-04",
+        "CHT-05",
+        "CHT-06",
+        "M01",
+        "M08",
+        "P0-RELEASE"
+      ],
+      "details": "Append-only recovery of missing canonical request-registration event; original intake and historical evidence remain unchanged. This restores validator-required registration linkage."
+    },
+    {
+      "seq": 379,
+      "date": "2026-11-04",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261103-CHAT-FOUNDATION-IMPLEMENT",
+      "taskIds": [
+        "M03",
+        "P0-CHAT",
+        "CHT-02",
+        "CHT-03",
+        "CHT-04",
+        "CHT-05",
+        "CHT-06",
+        "M09",
+        "P0-RELEASE"
+      ],
+      "details": "Append-only recovery of missing canonical request-registration event; original intake and historical evidence remain unchanged. This restores validator-required registration linkage."
+    },
+    {
+      "seq": 380,
+      "date": "2026-11-04",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261104-CHAT-ORIGINAL-PARALLEL-STABILITY",
+      "taskIds": [
+        "M03",
+        "P0-CHAT",
+        "CHT-02",
+        "CHT-04",
+        "CHT-05",
+        "P0-RELEASE"
+      ],
+      "details": "Append-only recovery of missing canonical request-registration event; original intake and historical evidence remain unchanged. This restores validator-required registration linkage."
     }
   ],
   "restorationPriority": {
