@@ -869,7 +869,8 @@ def test_missing_original_attachment_is_retryable_not_a_frozen_backup(monkeypatc
     assert first["pending_media_retry"]==1
     assert first["operational_status"]=="DEGRADED_MEDIA"
     assert cloud.load_catalog()==[]
-    assert "posts/"+pid+"/capture.json" in cloud.objects
+    assert cloud.read_first_observation(pid) is not None
+    assert "metadata/early-"+pid+".json" in cloud.objects
     assert "metadata/entries/"+pid+".json" not in cloud.objects
     attempts["ready"]=True
     second=job.run(fetchers=[getter],cloud=cloud,clock=lambda:1793668200,
