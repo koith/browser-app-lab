@@ -6,7 +6,7 @@ const {test}=require('node:test');
 const assert=require('node:assert/strict');
 const {createSupabasePersistence}=require('./persistence-supabase.cjs');
 const {makeServer}=require('./central.cjs');
-const KEY='ab'.repeat(32),SECRET='fake-backend-only-key',URL='https://fourleaf-qa.supabase.co';
+const KEY='ab'.repeat(32),SECRET='fake-backend-only-key',PROJECT_URL='https://fourleaf-qa.supabase.co';
 function database(){
  const rows=new Map();
  let failWrites=false,delayMs=0;
@@ -38,7 +38,7 @@ function database(){
  return {fetch,rows,setFailed:b=>{failWrites=b},setDelay:n=>{delayMs=n}};
 }
 async function appFor(db,archiveKey=KEY){
- const persistence=createSupabasePersistence({url:URL,secret:SECRET,archiveKey,fetch:db.fetch});
+ const persistence=createSupabasePersistence({url:PROJECT_URL,secret:SECRET,archiveKey,fetch:db.fetch});
  const app=makeServer({persistence});
  await new Promise(ok=>app.server.listen(0,'127.0.0.1',ok));
  const base='http://127.0.0.1:'+app.server.address().port;
