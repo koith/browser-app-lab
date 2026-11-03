@@ -19,6 +19,9 @@ class PrimaryParentMissing(FakeCloud):
         self.alternate_mkdirs = 0
 
     def fake(self,args,data=None,timeout=150,allow_missing=False):
+        if (args[0]=="lsf" and "/posts" in args[1]
+                and "--max-depth" in args):
+            return b"" if "--terabox-domain" in args else None
         if args[0]=="mkdir" and "/posts" in args[1]:
             if "--terabox-domain" not in args:
                 self.primary_mkdir_errors += 1
@@ -41,6 +44,9 @@ def test_primary_folder_failure_uses_alternate_before_upload():
 def test_alternate_folder_failure_does_not_claim_archive_saved():
     class BothParentsMissing(PrimaryParentMissing):
         def fake(self,args,data=None,timeout=150,allow_missing=False):
+            if (args[0]=="lsf" and "/posts" in args[1]
+                    and "--max-depth" in args):
+                return None
             if args[0]=="mkdir" and "/posts" in args[1]:
                 raise RuntimeError("private cloud mkdir failed (missing)")
             return super().fake(args,data=data,timeout=timeout,
