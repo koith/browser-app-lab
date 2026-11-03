@@ -14,6 +14,7 @@ on:
       - "apps/demand-research/test_flat_first_observation.py"
       - "apps/demand-research/test_rebuild_index_readback.py"
       - "apps/demand-research/test_recovery_spool.py"
+      - "apps/demand-research/test_degraded_encrypted_capture.py"
       - "apps/demand-research/rebuild_archive.py"
       - ".github/workflows/demand-fast-capture.yml"
   push:
@@ -45,9 +46,9 @@ jobs:
         run: |
           python -m pip install --disable-pip-version-check pytest==8.4.2
           cd apps/demand-research
-          python -m py_compile demand_archive.py demand_capture_job.py recovery_spool.py recover_spool_artifacts.py test_demand_archive.py test_terabox_parent_fallback.py test_flat_first_observation.py rebuild_archive.py test_rebuild_index_readback.py test_recovery_spool.py
+          python -m py_compile demand_archive.py demand_capture_job.py recovery_spool.py recover_spool_artifacts.py test_demand_archive.py test_terabox_parent_fallback.py test_flat_first_observation.py rebuild_archive.py test_rebuild_index_readback.py test_recovery_spool.py test_degraded_encrypted_capture.py
           python -m pip install --disable-pip-version-check cryptography==46.0.4
-          python -m pytest -q test_demand_archive.py test_terabox_parent_fallback.py test_flat_first_observation.py test_rebuild_index_readback.py test_recovery_spool.py
+          python -m pytest -q test_demand_archive.py test_terabox_parent_fallback.py test_flat_first_observation.py test_rebuild_index_readback.py test_recovery_spool.py test_degraded_encrypted_capture.py
   capture:
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-24.04
