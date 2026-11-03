@@ -41,7 +41,7 @@ def test_primary_folder_failure_uses_alternate_before_upload():
     assert "posts/"+p["id"]+"/post.json" in cloud.objects
 
 
-def test_alternate_folder_failure_does_not_claim_archive_saved():
+def test_both_nested_parents_missing_only_counts_verified_shallow_archive():
     class BothParentsMissing(PrimaryParentMissing):
         def fake(self,args,data=None,timeout=150,allow_missing=False):
             if (args[0]=="lsf" and "/posts" in args[1]
@@ -52,9 +52,12 @@ def test_alternate_folder_failure_does_not_claim_archive_saved():
             return super().fake(args,data=data,timeout=timeout,
                                 allow_missing=allow_missing)
     cloud=BothParentsMissing()
-    with pytest.raises(RuntimeError,match="parent directory unverified"):
-        cloud.save_post(post())
-    assert not any(k.endswith("/post.json") for k in cloud.objects)
+    entry=post()
+    cloud.save_post(entry)
+    assert "posts/"+entry["id"]+"/post.json" not in cloud.objects
+    key=cloud.flat_storage_key("posts/"+entry["id"]+"/post.json")
+    assert key in cloud.objects
+    assert cloud.load_catalog()==[entry]
 
 
 def test_missing_account_access_is_not_bypassed_with_alternate_domain():
