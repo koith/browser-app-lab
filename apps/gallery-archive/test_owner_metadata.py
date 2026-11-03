@@ -32,6 +32,20 @@ class OwnerMetadataTests(unittest.TestCase):
         self.assertEqual(run.call_count,1)
         self.assertEqual(run.call_args.args[0][:3],['rclone','copyto',self.remote])
 
+    def test_sha_named_pending_requires_nonempty_album_and_photo_shape(self):
+        pending={**self.document,'source_batch_sha256':'f'*64}
+        good=json.dumps(pending).encode()
+        self.assertTrue(matches(good,'mimmi','f'*64,1))
+        for altered in (
+            {**pending,'albums':[]},
+            {**pending,'albums':[{'id':'saved-work','images':[]}]},
+            {**pending,'albums':[{'id':'saved-work','images':'bad'}]},
+            {**pending,'albums':[{'images':[{}]}]},
+        ):
+            with self.subTest(albums=altered['albums']):
+                self.assertFalse(matches(json.dumps(altered).encode(),'mimmi','f'*64,1))
+
+
     def test_wrong_model_partial_catalog_and_bad_queue_are_never_admitted(self):
         self.assertFalse(matches(self.raw,'yui',None,1))
         self.assertFalse(matches(self.raw,'mimmi',None,2))
