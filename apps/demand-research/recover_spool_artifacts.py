@@ -171,6 +171,32 @@ def restore_with_budget(spool,path,cloud,*,max_seconds=MAX_RECORD_SECONDS):
                              max_seconds=max_seconds)
 
 
+def archive_local_spool(cloud=None,directory=None):
+    """Best-effort private cloud backup AFTER the Actions artifact is saved.
+
+    A successful SHA response means the authenticated encrypted ORIGINALS
+    really reside in TeraBox. It does NOT imply their post.json, per-slot
+    media or entry journals have been reconstructed yet.
+    """
+    root=Path(directory or os.environ["DEMAND_RECOVERY_SPOOL_DIR"])
+    paths=sorted(root.glob("*.enc")) if root.exists() else []
+    summary={"encrypted_objects":len(paths),"terabox_batch_sha_verified":False}
+    if not paths:
+        print("INTERSECTION_CAPTURE_BATCH_SHA_VERIFY",
+              json.dumps(summary,sort_keys=True),flush=True)
+        return summary
+    active=cloud or CloudArchive()
+    spool=RecoverySpool(root)
+    def write_and_verify():
+        active.preflight()
+        return preserve_encrypted_batch(active,spool,paths)
+    if with_cloud_budget(active,write_and_verify,max_seconds=65):
+        summary["terabox_batch_sha_verified"]=True
+    print("INTERSECTION_CAPTURE_BATCH_SHA_VERIFY",
+          json.dumps(summary,sort_keys=True),flush=True)
+    return summary
+
+
 def replay(cloud=None,local_directory=None):
     active=cloud or CloudArchive()
     active.preflight()
@@ -266,7 +292,12 @@ def replay(cloud=None,local_directory=None):
 
 
 if __name__=="__main__":
-    result=replay()
-    if (result["buffer_failures"] or result["artifact_download_failures"]
-            or result["deferred_buffers"]):
-        raise RuntimeError("private archived recovery buffers still unverified")
+    if "--pack-local" in __import__("sys").argv[1:]:
+        result=archive_local_spool()
+        if result["encrypted_objects"] and not result["terabox_batch_sha_verified"]:
+            raise RuntimeError("private capture encrypted batch not remotely verified")
+    else:
+        result=replay()
+        if (result["buffer_failures"] or result["artifact_download_failures"]
+                or result["deferred_buffers"]):
+            raise RuntimeError("private archived recovery buffers still unverified")
