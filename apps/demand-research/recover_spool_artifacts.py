@@ -75,7 +75,15 @@ def replay(cloud=None,local_directory=None):
             raise RuntimeError("private recovery actions token unavailable")
         source_dirs=[]
         # Download and restore sequentially; never spill plaintext artifacts.
-        candidates=list_candidates()
+        source_run=os.getenv("DEMAND_RECOVERY_SOURCE_RUN_ID","")
+        if source_run:
+            if not re.fullmatch(r"[0-9]{6,30}",source_run):
+                raise ValueError("invalid private recovery source run")
+            # A workflow_run completion event targets the exact failed capture
+            # so recently deleted public originals are reuploaded first.
+            candidates=[("",int(source_run),"intersection-private-recovery")]
+        else:
+            candidates=list_candidates()
     if local_directory:
         directories=[(None,Path(local_directory))]
         tmp=None

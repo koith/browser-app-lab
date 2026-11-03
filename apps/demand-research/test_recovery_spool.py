@@ -219,3 +219,31 @@ def test_first_cloud_write_failure_still_captures_exact_media_before_origin_disa
     assert receipt["post_and_media_verified"]==1
     assert receipt["failures"]==0
     assert good.objects["posts/"+pid+"/media/0001.jpg"]==raw
+
+
+def test_failed_main_run_replays_only_exact_named_artifact(monkeypatch,tmp_path):
+    from pathlib import Path
+    import shutil
+    import recover_spool_artifacts as mod
+    pid=synthetic_post()["id"]
+    staged=tmp_path/"encrypted"
+    sealed=RecoverySpool(staged).save(pid,first(pid))
+    monkeypatch.setenv("GH_TOKEN","synthetic-token-never-sent")
+    monkeypatch.setenv("DEMAND_RECOVERY_SOURCE_RUN_ID","123456890")
+    def prevent_fuzzy_scan():
+        raise AssertionError("must never scan unrelated archives for targeted recovery")
+    def fake_gh(args,*,max_bytes=2_000_000):
+        assert args[:4]==["run","download","123456890","-n"]
+        assert args[4]=="intersection-private-recovery"
+        target=Path(args[-1])
+        assert target.is_dir()
+        shutil.copyfile(sealed,target/sealed.name)
+        return b""
+    monkeypatch.setattr(mod,"list_candidates",prevent_fuzzy_scan)
+    monkeypatch.setattr(mod,"_gh",fake_gh)
+    cloud=FakeCloud()
+    result=mod.replay(cloud=cloud)
+    assert result["first_observation_verified"]==1
+    assert result["artifact_download_failures"]==0
+    assert result["buffer_failures"]==0
+    assert cloud.read_first_observation(pid)==canonical_json(first(pid))
