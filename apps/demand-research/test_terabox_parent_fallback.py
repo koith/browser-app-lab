@@ -69,3 +69,15 @@ def test_missing_account_access_is_not_bypassed_with_alternate_domain():
         cloud.save_post(post())
     assert cloud.alternate_mkdirs==0
     assert cloud.objects=={}
+
+
+def test_safe_error_counters_pinpoint_missing_parent_or_upload():
+    from demand_capture_job import public_error_class
+    assert public_error_class(RuntimeError(
+        "private cloud parent directory unverified"))=="backend_parent_unverified"
+    assert public_error_class(RuntimeError(
+        "private cloud mkdir failed (missing)"))=="backend_mkdir_missing"
+    assert public_error_class(RuntimeError(
+        "private cloud copyto failed (missing)"))=="backend_upload_missing"
+    assert public_error_class(RuntimeError(
+        "private cloud rcat failed (missing)"))=="backend_upload_missing"
