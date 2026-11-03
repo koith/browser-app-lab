@@ -480,6 +480,13 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
                         partial += 1
                         # A partial snapshot never becomes a falsely complete
                         # immutable post. Its encrypted original remains queued.
+                        if not first_remote_verified:
+                            storage_error_kinds["first_snapshot:encrypted_recovery_pending"] = (
+                                storage_error_kinds.get("first_snapshot:encrypted_recovery_pending",0)+1)
+                            storage_failures += 1
+                            if storage_failures >= 3:
+                                capture_interrupted=True
+                                break
                         continue
                     if not first_remote_verified:
                         # We have preserved this exact public post AND its
