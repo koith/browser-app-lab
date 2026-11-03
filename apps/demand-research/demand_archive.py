@@ -406,6 +406,11 @@ class CloudArchive:
         blob = canonical_json({"schema_version": 1, "posts": rows})
         if len(blob) > MAX_CATALOG:
             raise ValueError("catalog too large")
+        # Aggregate size evidence only. Never expose post identifiers, text,
+        # media names, cookie values or remote object URLs in workflow logs.
+        print("PRIVATE_CATALOG_PUBLISH_ATTEMPT",json.dumps({
+            "records":len(rows),"bytes":len(blob),
+            "versioned":True},sort_keys=True),flush=True)
         catalog = "metadata/catalogs/catalog-" + str(run_id) + ".json"
         manifest = "metadata/manifests/manifest-" + str(run_id) + ".json"
         self.write_immutable(catalog, blob)
