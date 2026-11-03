@@ -176,7 +176,10 @@
   // The Region choice is a Dice channel namespace, not just a cosmetic title:
   // a saved match from another channel must not appear as a joinable game room.
   if(selection.channel){
-   if(m.diceChannel!==selection.channel.slug+':'+selection.channel.number)return null;
+   // Pre-channel releases saved local matches without a diceChannel field.
+   // Keep those matches resumable; a user-initiated resume binds them once
+   // to the selected channel. Explicit newer channel IDs stay isolated.
+   if(m.diceChannel&&m.diceChannel!==selection.channel.slug+':'+selection.channel.number)return null;
   }
   return m;
  };
@@ -234,6 +237,16 @@
   if(match.mode==='network'&&!window.__LEAF_NET__?.connected){
    inform('직접 연결이 필요합니다','저장된 온라인 경기는 WebRTC 상대와 다시 연결해야 합니다. 먼저 방 만들기에서 직접 연결 모드를 설정해 주세요.');
    return;
+  }
+  // Older local saves predate the real Region channel selector. Do not
+  // discard them just because no channel was recorded. Assign the selected
+  // namespace only after the player explicitly chooses to resume, rather
+  // than silently moving the saved game when browsing channel lists.
+  if(selection.channel&&!match.diceChannel){
+   match.diceChannel=selection.channel.slug+':'+selection.channel.number;
+   match.diceRegion='genesis';
+   try{localStorage.setItem('rog_match',JSON.stringify(match))}
+   catch(error){console.warn('4LEAF legacy match channel save unavailable; current game remains playable',error)}
   }
   closeCreator();
   window.__ROG_TEST__?.go('game');
