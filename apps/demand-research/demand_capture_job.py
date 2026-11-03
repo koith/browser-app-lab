@@ -299,8 +299,8 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None):
                "media_urls": first["media_links"][:MAX_MEDIA_PER_POST],
                "media_expected": len(first["media_links"])}
         post, blobs = make_post(row, first["observed_at"], pid_override=pid)
-        cloud.save_post(post, blobs)
-        known[pid] = post
+        saved_post = cloud.save_post(post, blobs)
+        known[pid] = saved_post
         early_recovered += 1
     seen_this_scan = set()
     for getter in sources:
@@ -335,24 +335,37 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None):
                          "profile_url": row.get("profile_url", "")}
                 key = "posts/" + pid + "/capture.json"
                 first_blob = cloud.read(key, cap=100_000, optional=True)
-                capture_at = now
                 if first_blob is None:
-                    cloud.write_immutable(key, canonical_json(early))
-                else:
-                    first = json.loads(first_blob)
-                    if first.get("id") != pid or first.get("platform") != row["platform"]:
-                        raise ValueError("early capture integrity mismatch")
-                    capture_at = first["observed_at"]
-                    row = {**row, "text": first["text"],
-                           "posted_at": first["posted_at"],
-                           "profile_url": first.get("profile_url", ""),
-                           "media_urls": first["media_links"],
-                           "media_expected": len(first["media_links"])}
-                post, blobs = make_post(row, capture_at)
-                cloud.save_post(post, blobs)
-                known[pid] = post
+                    # A stale 404 from a cloud backend can make a previously
+                    # written immutable original look missing. On conflicting
+                    # readback, inspect the earlier snapshot and never clobber it.
+                    try:
+                        cloud.write_immutable(key, canonical_json(early))
+                        first_blob = canonical_json(early)
+                    except RuntimeError:
+                        first_blob = cloud.read(key, cap=100_000, optional=True)
+                        if first_blob is None:
+                            raise
+                first = json.loads(first_blob)
+                if (not isinstance(first, dict)
+                        or first.get("id") != pid
+                        or first.get("platform") != row["platform"]
+                        or first.get("source_url") != row["source_url"]
+                        or first.get("posted_at") != row["posted_at"]
+                        or not isinstance(first.get("text"), str)
+                        or not isinstance(first.get("observed_at"), int)
+                        or not isinstance(first.get("media_links"), list)):
+                    raise ValueError("early original capture mismatch; cannot silently replace")
+                row = {**row, "text": first["text"],
+                       "posted_at": first["posted_at"],
+                       "profile_url": first.get("profile_url", ""),
+                       "media_urls": first["media_links"],
+                       "media_expected": len(first["media_links"])}
+                post, blobs = make_post(row, first["observed_at"])
+                saved_post = cloud.save_post(post, blobs)
+                known[pid] = saved_post
                 saved += 1
-                partial += not post["archive_complete"]
+                partial += not saved_post["archive_complete"]
     # Entries written immediately per post are the recovery journal. The versioned
     # catalog is published LAST and never destroys an earlier verified catalog.
     if saved or recovered or early_recovered:
