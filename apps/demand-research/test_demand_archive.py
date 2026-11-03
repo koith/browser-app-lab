@@ -781,6 +781,18 @@ def test_read_only_audit_waits_for_matching_remote_post_checksum(monkeypatch):
     assert status["sample_mismatch"]==0
     assert stale["remaining"]==0
 
+
+def test_outer_upload_failure_classifies_underlying_safe_backend_cause():
+    from demand_capture_job import public_error_class
+    try:
+        try:
+            raise RuntimeError("private cloud rcat failed (backend_rejected)")
+        except RuntimeError as inner:
+            raise RuntimeError("private cloud write unverified after alternate methods") from inner
+    except RuntimeError as outer:
+        assert public_error_class(outer)=="backend_rejected"
+    assert public_error_class(RuntimeError("private cloud copyto failed (duplicate)"))=="backend_duplicate"
+
 def test_missing_original_attachment_is_retryable_not_a_frozen_backup(monkeypatch):
     """Keep first observation, but never publish a permanently incomplete post."""
     from datetime import datetime, timezone
