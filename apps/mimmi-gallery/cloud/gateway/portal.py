@@ -28,7 +28,7 @@ SAFE_IMAGE = re.compile(
     r"|publisher-logos/[a-zA-Z0-9._-]+\.(?:jpg|jpeg|png|webp|svg))$"
 )
 ALLOWED_ASSETS = {
-    "owner-media.js", "photo-vault.js", "image-quality.js", "gallery-labels.js",
+    "owner-media.js", "photo-vault.js", "saved-photo-union.js", "image-quality.js", "gallery-labels.js",
     "publishers.js", "stored-albums.json", "identity-exclusions.json",
     "album-covers.json", "album-aliases.json", "publishers.json",
     # Required by the GitHub Pages Mimmi album composer and both owner-backed
