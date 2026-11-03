@@ -38,7 +38,7 @@ def inspect(cloud=None, sample_size=8):
         except (RuntimeError,ValueError,TypeError,KeyError):
             bad+=1
     try:
-        posts=cloud.load_catalog()
+        posts=cloud.load_catalog(include_entries=False)
         status="readable"
         count=len(posts)
         catalog_bytes=len(canonical_json({"schema_version":1,"posts":posts}))
@@ -46,10 +46,18 @@ def inspect(cloud=None, sample_size=8):
         status="unreadable"
         count=None
         catalog_bytes=None
+    try:
+        journal_verified_count=len(cloud.load_catalog(include_entries=True))
+        journal_integrity_failures=cloud.unrecoverable_entries
+    except (RuntimeError,ValueError,TypeError):
+        journal_verified_count=None
+        journal_integrity_failures=None
     result={
       "catalog_status":status,
       "catalog_post_count":count,
       "catalog_expected_bytes":catalog_bytes,
+      "journal_verified_post_count":journal_verified_count,
+      "journal_unrecoverable_count":journal_integrity_failures,
       "versioned_manifest_count":len([n for n in catalogs if re.fullmatch(r"manifest-[0-9]{6,30}\.json",n)]),
       "entry_marker_count":len([n for n in original if re.fullmatch(r"[0-9a-f]{40}\.json",n)]),
       "repaired_marker_count":len([n for n in repaired if re.fullmatch(r"[0-9a-f]{40}\.json",n)]),

@@ -92,7 +92,8 @@ def test_mid_run_crash_recovered_by_entry_markers():
     cloud = FakeCloud()
     p = post()
     cloud.save_post(p)
-    assert cloud.load_catalog() == []  # pointer was never published
+    assert cloud.load_catalog(include_entries=False)==[],"pointer was never published"
+    assert cloud.load_catalog()==[p],"verified entry journal is independently readable"
     recovered, count = cloud.recover_entries({})
     assert count == 1 and recovered[p["id"]] == p
     cloud.publish_catalog(recovered, "123456790")
@@ -530,3 +531,47 @@ def test_read_only_archive_summary_reports_remote_sample_without_mutation(monkey
     assert status["sample_valid"]==1
     assert status["sample_mismatch"]==0
     assert cloud.objects==before,"audit must never mutate archive"
+
+
+def test_compact_catalog_does_not_duplicate_original_text_or_media():
+    cloud=FakeCloud()
+    p=post()
+    p["text"]="SYNTHETIC PRIVATE TEST BODY SHOULD NOT ENTER INDEX"
+    cloud.save_post(p)
+    info=cloud.publish_catalog({p["id"]:p},"123456991")
+    assert info["index_format"]=="sha256_references_only"
+    index=cloud.objects["metadata/catalogs/catalog-123456991.json"]
+    parsed=json.loads(index)
+    assert parsed["schema_version"]==2
+    assert parsed["post_refs"]==[{"id":p["id"],"sha256":sha256(canonical_json(p))}]
+    assert p["text"].encode() not in index
+    assert cloud.load_catalog()==[p]
+
+
+def test_failed_compact_catalog_publication_keeps_verified_journal_readable(monkeypatch):
+    class CatalogDenied(FakeCloud):
+        def write_immutable(self,key,data):
+            if key.startswith("metadata/catalogs/"):
+                raise RuntimeError("synthetic backend refused catalog")
+            return super().write_immutable(key,data)
+
+    cloud=CatalogDenied()
+    monkeypatch.setenv("RCLONE_CONFIG_ARCHIVE_COOKIE","offline-test")
+    monkeypatch.setenv("DEMAND_CAPTURE_PUBLIC_ALLOWED","1")
+    row={
+        "platform":"bluesky",
+        "original_id":"at://did:plc:abcdefghijk/app.bsky.feed.post/journal01",
+        "source_url":"https://bsky.app/profile/did:plc:abcdefghijk/post/journal01",
+        "text":"synthetic "+job.TERMS[0],
+        "posted_at":"2026-11-03T00:00:00Z",
+        "media_urls":[],"media_expected":0
+    }
+    result=job.run(fetchers=[lambda term,start,end:[row] if term==job.TERMS[0] else []],
+                   cloud=cloud,clock=lambda:1793667900,run_id="123456992")
+    assert result["saved_verified"]==1
+    assert result["catalog"]["catalog_sha256_verified"] is False
+    assert result["catalog"]["publication_pending"] is True
+    assert result["operational_status"]=="DEGRADED_INDEX"
+    assert len(cloud.load_catalog(include_entries=False))==0
+    assert len(cloud.load_catalog())==1
+    assert cloud.load_catalog()[0]["id"]==post_key("bluesky",row["original_id"])

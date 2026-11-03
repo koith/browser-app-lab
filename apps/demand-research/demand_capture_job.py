@@ -279,7 +279,7 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None):
     sources = fetchers or (bluesky, mastodon, misskey, lemmy)
     saved = partial = duplicates = fetched = failures = storage_failures = 0
     capture_interrupted = False
-    known = {p["id"]: p for p in cloud.load_catalog()}
+    known = {p["id"]: p for p in cloud.load_catalog(include_entries=False)}
     known, recovered = cloud.recover_entries(known)
     early_recovered = 0
     # The earliest observed public text survives interrupted media/catalog stages.
@@ -396,7 +396,16 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None):
     # Entries written immediately per post are the recovery journal. The versioned
     # catalog is published LAST and never destroys an earlier verified catalog.
     if saved or recovered or early_recovered:
-        catalog = cloud.publish_catalog(known, run_id)
+        try:
+            catalog = cloud.publish_catalog(known, run_id)
+        except (RuntimeError,ValueError):
+            # Verified per-post journal is independently readable. Do not
+            # lose successful writes merely because the optional acceleration
+            # snapshot could not be committed by the unofficial backend.
+            catalog = {"posts":len(known),"catalog_sha256_verified":False,
+                       "publication_pending":True,
+                       "readable_via_verified_entry_journal":True}
+            print("::warning::Compact catalog publication deferred; verified post journal remains readable",flush=True)
     else:
         catalog = {"posts": len(known), "catalog_sha256_verified": False,
                    "reason": "no new items"}
@@ -408,6 +417,8 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None):
               "budget_exhausted": budget_exhausted,
               "storage_failures": storage_failures,
               "storage_interrupted": capture_interrupted, "catalog": catalog,
+              "operational_status": ("DEGRADED_INDEX" if catalog.get("publication_pending") else
+                "DEGRADED_STORAGE" if storage_failures else "VERIFIED_POSTS"),
               "scope": "confirmed_public_only", "poll_minutes": 5,
               "completeness_guaranteed": False}
     print("DEMAND_CAPTURE_AGGREGATE_ONLY", json.dumps(result, ensure_ascii=False), flush=True)
