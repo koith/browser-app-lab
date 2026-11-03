@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import json
 import re
-from demand_archive import CloudArchive, sha256
+from demand_archive import CloudArchive, sha256, canonical_json
 
 
 def inspect(cloud=None, sample_size=8):
@@ -41,12 +41,15 @@ def inspect(cloud=None, sample_size=8):
         posts=cloud.load_catalog()
         status="readable"
         count=len(posts)
+        catalog_bytes=len(canonical_json({"schema_version":1,"posts":posts}))
     except (RuntimeError,ValueError,TypeError):
         status="unreadable"
         count=None
+        catalog_bytes=None
     result={
       "catalog_status":status,
       "catalog_post_count":count,
+      "catalog_expected_bytes":catalog_bytes,
       "versioned_manifest_count":len([n for n in catalogs if re.fullmatch(r"manifest-[0-9]{6,30}\.json",n)]),
       "entry_marker_count":len([n for n in original if re.fullmatch(r"[0-9a-f]{40}\.json",n)]),
       "repaired_marker_count":len([n for n in repaired if re.fullmatch(r"[0-9a-f]{40}\.json",n)]),
