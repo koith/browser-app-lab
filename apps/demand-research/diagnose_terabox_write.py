@@ -49,6 +49,9 @@ def probe():
         "rcat-unicode-capture":json.dumps({"kind":"SYNTHETIC_QA","message":"확인"*1100},ensure_ascii=False).encode("utf-8"),
         "prodroot-unicode-capture":json.dumps({"kind":"SYNTHETIC_QA","message":"검사"*900},ensure_ascii=False).encode("utf-8"),
         "realmeta-versioned-catalog":json.dumps({"schema_version":1,"posts":[],"kind":"SYNTHETIC_QA"},ensure_ascii=False).encode("utf-8"),
+        # Test the already-established shallow production metadata folder:
+        # never reuse a user object name or interpret mere upload ACK as saved.
+        "shallow-metadata":b'{"kind":"SYNTHETIC_SHALLOW_READBACK","version":1}\\n',
     }
     outcomes={}
     with tempfile.TemporaryDirectory(prefix="terabox-write-qa-") as local:
@@ -61,6 +64,8 @@ def probe():
                   "/posts/"+"d"*40+"/capture.json" if label=="prodroot-unicode-capture" else
                   "/"+label+".json")
             target=target_base+name
+            if label=="shallow-metadata":
+                target="archive:DemandResearch/metadata/qa-flat-write-"+run_id+".json"
             if label=="realmeta-versioned-catalog":
                 # Directly test the formerly failing production DIRECTORY, but
                 # never place a file matching the production catalog name.
