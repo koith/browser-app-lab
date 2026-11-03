@@ -303,8 +303,13 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None):
         known[pid] = saved_post
         early_recovered += 1
     seen_this_scan = set()
+    budget_exhausted = False
     for getter in sources:
+        if budget_exhausted:
+            break
         for term in TERMS:
+            if budget_exhausted:
+                break
             try:
                 iterator = iter(getter(term, start, now))
             except Exception:
@@ -326,7 +331,8 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None):
                     duplicates += 1
                     continue
                 if saved >= MAX_PER_RUN:
-                    raise RuntimeError("capture budget exceeded; coverage incomplete")
+                    budget_exhausted = True
+                    break
                 seen_this_scan.add(pid)
                 # First remote write contains observed public text, ahead of media fetch.
                 early = {"id": pid, "platform": row["platform"], "text": row["text"],
@@ -377,7 +383,8 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None):
               "duplicates": duplicates, "recovered_entries": recovered, "recovered_early_snapshots": early_recovered,
               "repaired_archive_markers": cloud.repaired_entries,
               "unrecoverable_markers": cloud.unrecoverable_entries,
-              "source_query_failures": failures, "catalog": catalog,
+              "source_query_failures": failures,
+              "budget_exhausted": budget_exhausted, "catalog": catalog,
               "scope": "confirmed_public_only", "poll_minutes": 5,
               "completeness_guaranteed": False}
     print("DEMAND_CAPTURE_AGGREGATE_ONLY", json.dumps(result, ensure_ascii=False), flush=True)
