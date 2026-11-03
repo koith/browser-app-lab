@@ -660,3 +660,46 @@ def test_separate_repair_reconciles_fast_journal_and_publishes_compact_index(mon
     assert compact["schema_version"]==2
     assert "text" not in json.dumps(compact)
     assert "post_refs" in compact
+
+
+def test_checksum_mismatch_can_be_repaired_only_with_matching_first_capture(monkeypatch):
+    from datetime import datetime
+    cloud=FakeCloud()
+    p=post()
+    cloud.save_post(p)
+    pid=p["id"]
+    new={**p,"profile_url":"https://bsky.app/profile/did:plc:abcdefghijk"}
+    newer=canonical_json(new)
+    cloud.objects["posts/"+pid+"/post.json"]=newer
+    first={"id":pid,"platform":p["platform"],"source_url":p["source_url"],
+           "posted_at":p["posted_at"],"text":p["text"],"media_links":[],
+           "observed_at":int(datetime.fromisoformat(p["captured_at"]).timestamp())}
+    cloud.objects["posts/"+pid+"/capture.json"]=canonical_json(first)
+    old_marker=cloud.objects["metadata/entries/"+pid+".json"]
+    found,count=cloud.recover_entries({})
+    assert count==1 and found[pid]==new
+    assert cloud.repaired_entries==1
+    assert cloud.unrecoverable_entries==0
+    assert cloud.objects["metadata/entries/"+pid+".json"]==old_marker
+    repair="metadata/entries-repaired/"+pid+".json"
+    assert json.loads(cloud.objects[repair])["sha256"]==sha256(newer)
+    assert cloud.recover_entries({},repair=False)[0][pid]==new
+
+
+def test_conflicting_first_capture_is_never_silently_resigned():
+    from datetime import datetime
+    cloud=FakeCloud()
+    p=post()
+    cloud.save_post(p)
+    pid=p["id"]
+    changed={**p,"text":"different unverified text"}
+    cloud.objects["posts/"+pid+"/post.json"]=canonical_json(changed)
+    first={"id":pid,"platform":p["platform"],"source_url":p["source_url"],
+           "posted_at":p["posted_at"],"text":p["text"],"media_links":[],
+           "observed_at":int(datetime.fromisoformat(p["captured_at"]).timestamp())}
+    cloud.objects["posts/"+pid+"/capture.json"]=canonical_json(first)
+    recovered,count=cloud.recover_entries({})
+    assert not recovered and count==0
+    assert cloud.unrecoverable_entries==1
+    assert pid in cloud.quarantined_ids
+    assert "metadata/entries-repaired/"+pid+".json" not in cloud.objects
