@@ -432,7 +432,8 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
                         # readback, inspect the earlier snapshot and never clobber it.
                         try:
                             phase="write_first_snapshot"
-                            first_blob = cloud.save_first_observation(pid,canonical_json(early))
+                            first_blob = cloud.save_first_observation(
+                                pid,canonical_json(early),prefer_flat=fast_mode)
                         except RuntimeError:
                             first_blob = cloud.read_first_observation(pid)
                             if first_blob is None:
