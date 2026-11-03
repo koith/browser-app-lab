@@ -947,7 +947,7 @@ def collect(root,model,owner,out,max_new=180,max_pages=24,client=None,focused_on
                     images.append(row);new_total+=1;downloaded_now+=1
                     with journal.open('a') as log:
                         log.write(json.dumps({'album':aid,'number':number,
-                            'source':url,'photo':row,'remote_verified':False})+'\\n')
+                            'source':url,'photo':row,'remote_verified':False})+'\n')
                 except Exception as exc:
                     errors.append({'url':url,'reason':type(exc).__name__,**public_failure(exc)})
         while queue and len(visited)<max_pages and new_total<max_new:
