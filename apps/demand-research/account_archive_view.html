@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<meta name="color-scheme" content="light">
+<title>교집합 · 계정 보관함</title>
+<link rel="stylesheet" href="/account-archive/account_archive_view.css">
+<script src="/account-archive/account_archive_view.js" defer></script>
+</head>
+<body>
+<div class="layout">
+<header class="app-header">
+ <a href="/" class="brand" aria-label="교집합으로 돌아가기"><span class="brand-mark">∩</span> 교집합</a>
+ <span class="header-label">PRIVATE ACCOUNT ARCHIVE</span>
+ <a class="home-link" href="/">계정 분석으로</a>
+</header>
+<main class="main">
+ <div class="page-lead">
+  <p class="eyebrow">TERABOX · VERIFIED ARCHIVE</p>
+  <h1>계정 보관함</h1>
+  <p class="description">선택한 SNS 계정의 공개 프로필·게시글·답글·첨부 원본·공개 관계 목록을 따로 보관해 조회합니다. 플랫폼에서 더 이상 제공하지 않는 정보는 복원된 것으로 표시하지 않습니다.</p>
+ </div>
+ <div class="account-picker">
+  <label for="accountSelect">보관된 계정 선택</label>
+  <select id="accountSelect" aria-label="보관 계정 선택"><option value="">계정 불러오는 중…</option></select>
+  <span id="loadStatus" role="status" aria-live="polite">아카이브 서버에 연결 중입니다.</span>
+ </div>
+ <section class="profile" aria-label="공개 프로필 보관본">
+  <div id="cover" class="cover"><span>HEADER IMAGE · ARCHIVED ORIGINAL</span></div>
+  <div class="profile-content">
+   <div class="avatar" id="avatar" aria-label="보관된 프로필 이미지">?</div>
+   <div class="profile-head">
+    <div><h2 id="displayName">계정을 선택하세요</h2><p id="handle" class="muted">공개 프로필</p></div>
+    <a id="sourceProfile" class="external" target="_blank" rel="noopener noreferrer" hidden>원본 프로필</a>
+   </div>
+   <p id="biography" class="bio">저장된 프로필을 불러오면 이곳에 계정 소개가 표시됩니다.</p>
+   <p id="profileFields" class="muted profile-fields"></p>
+   <div class="stats">
+    <button id="statPosts" type="button" data-section="posts"><strong id="postCount">—</strong><span>게시글</span></button>
+    <button id="statFollowers" type="button" data-section="followers"><strong id="followerCount">—</strong><span>팔로워</span></button>
+    <button id="statFollowing" type="button" data-section="following"><strong id="followingCount">—</strong><span>팔로잉</span></button>
+   </div>
+   <p id="profileStatus" class="evidence">보관 여부 확인 전 · 미확인 자료는 표시하지 않습니다.</p>
+  </div>
+ </section>
+ <section class="archive-content" aria-label="계정 보관 콘텐츠">
+  <nav class="tabs" role="tablist" aria-label="아카이브 항목">
+   <button type="button" role="tab" data-section="posts" aria-selected="true" class="active">게시글·답글</button>
+   <button type="button" role="tab" data-section="followers" aria-selected="false">팔로워</button>
+   <button type="button" role="tab" data-section="following" aria-selected="false">팔로잉</button>
+  </nav>
+  <div id="results" class="results" aria-live="polite">
+    <p class="placeholder">보관된 계정을 선택해 주세요.</p>
+  </div>
+  <button type="button" id="more" class="more" hidden>더 보기</button>
+ </section>
+ <p class="footer-note">공개 API가 제공한 시점의 자료만 보관됩니다. 계정 전체 이력과 관계 목록의 완전성은 보장되지 않으며, 댓글의 외부 미디어 링크는 별도 검증 저장되지 않았을 수 있습니다.</p>
+</main>
+</div>
+<dialog id="postDetail" class="detail" aria-labelledby="detailTitle">
+ <div class="detail-header"><h2 id="detailTitle">게시글 상세</h2><button type="button" id="closeDetail" aria-label="닫기">×</button></div>
+ <div id="detailBody" class="detail-body"></div>
+</dialog>
+</body>
+</html>
