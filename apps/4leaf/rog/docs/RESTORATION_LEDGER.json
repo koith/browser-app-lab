@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "project": "4LEAF 원작 복원 웹앱",
   "canonicalFile": "apps/4leaf/rog/docs/RESTORATION_LEDGER.json",
-  "updatedAt": "2026-11-02",
+  "updatedAt": "2026-11-03",
   "sourceOfTruth": "Git 저장소의 이 JSON과 커밋 이력. 과거 챗 대화는 기록 근거이지 진행 상태의 원본 데이터가 아님.",
   "operatingRule": "새 요청 즉시 작업 등록 → open 목록 조회 → 실제 수정 → 원본 근거/코드/브라우저/배포 검증 → 검증 증거와 함께 상태 전이. 부분 구현을 원작 완성으로 표시 금지.",
   "statusDefinitions": {
@@ -1533,6 +1533,18 @@
         "SRC-04",
         "QA-03",
         "P0-RELEASE"
+      ]
+    },
+    {
+      "id": "REQ-20261103-GPT-LEGACY-MATCH",
+      "date": "2026-11-03",
+      "origin": "2026-11-03 user restoration continuation and GitHub code audit",
+      "text": "주잔 실행 안정성을 점검하고 저장된 이전 버전 경기가 원본 Region 채널 추가 이후에도 유실 없이 이어지도록 호환성을 복구한다. 관련 PR의 실제 CI 확인 전 완료 처리 금지.",
+      "taskIds": [
+        "M08",
+        "P0-RELEASE",
+        "QA-03",
+        "RULE-03"
       ]
     }
   ],
@@ -8024,6 +8036,19 @@
         "P0-RELEASE"
       ],
       "details": "Round 9 original 98 CHR records rechecked against compressed source mapping: 97 distinct referenced bodies, 78 published original PNG members, 19 unpublished, 1 missing card 0156. Body 1040 is card 0056, Scheherazade 0088 body1071, Saladin 0087 body1070, Ironmask 0091 body1074, Black Prince 0170 OBS3 body1267. New CHR-sourced runtime refuses card-number-based OBS fallback. Six native animation groups (idle/walk 3 dirs) from original member 18-byte records mapped to 78 published actors, 3 native ticks per frame. Semantic actions and actual tick duration remain INFERRED/UNVERIFIED; all original events remain disabled. D6/D4 palette: UNVERIFIED per Claude ninth correction; previous quarantine preserved. Browser/CI and published Pages acceptance pending."
+    },
+    {
+      "seq": 365,
+      "date": "2026-11-03",
+      "type": "LEGACY_DICE_REGION_MATCH_RESUME_COMPAT_PR_PENDING",
+      "requestId": "REQ-20261103-GPT-LEGACY-MATCH",
+      "taskIds": [
+        "M08",
+        "P0-RELEASE",
+        "QA-03",
+        "RULE-03"
+      ],
+      "details": "PR #558. Earlier local Dice matches lacking diceChannel were filtered out of playable() after choosing original Region number. Legacy matches may appear, and explicit resume binds selected channel and persists it without resetting players, board, RNG or history. Existing channel-bound saves retain strict isolation. Real Chromium end-to-end legacy resume workflow added; PR and CI acceptance pending; no public deployment or native iPhone PASS claimed."
     }
   ]
 }
