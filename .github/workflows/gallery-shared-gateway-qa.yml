@@ -3,6 +3,8 @@ on:
   push:
     paths:
       - 'apps/mimmi-gallery/cloud/gateway/main.py'
+      - 'apps/mimmi-gallery/cloud/gateway/portal.py'
+      - 'apps/mimmi-gallery/cloud/test_portal_assets.py'
       - 'apps/mimmi-gallery/cloud/test_gateway.py'
       - 'apps/mimmi-gallery/cloud/test_media_versions.py'
       - 'apps/gallery-archive/test_owner_snapshot.cjs'
@@ -26,6 +28,8 @@ on:
   pull_request:
     paths:
       - 'apps/mimmi-gallery/cloud/gateway/main.py'
+      - 'apps/mimmi-gallery/cloud/gateway/portal.py'
+      - 'apps/mimmi-gallery/cloud/test_portal_assets.py'
       - 'apps/mimmi-gallery/cloud/test_gateway.py'
       - 'apps/mimmi-gallery/cloud/test_media_versions.py'
       - 'apps/gallery-archive/test_owner_snapshot.cjs'
@@ -59,6 +63,7 @@ jobs:
       - run: python -m pip install -r apps/mimmi-gallery/cloud/gateway/requirements.txt 'httpx==0.28.1'
       - run: |
           python -m py_compile apps/mimmi-gallery/cloud/gateway/main.py
+          python apps/mimmi-gallery/cloud/test_portal_assets.py
           python apps/mimmi-gallery/cloud/test_gateway.py
           python apps/mimmi-gallery/cloud/test_cover_cache.py
           python apps/mimmi-gallery/cloud/test_media_cache.py
