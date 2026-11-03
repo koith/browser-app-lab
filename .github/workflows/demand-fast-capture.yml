@@ -1,7 +1,7 @@
 name: INTERSECTION — Fast Private Public-Post Capture
 on:
   schedule:
-    - cron: "*/5 * * * *"
+    - cron: "3-58/5 * * * *"
   workflow_dispatch:
   pull_request:
     paths:
