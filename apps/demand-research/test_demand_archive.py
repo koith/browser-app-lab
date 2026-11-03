@@ -791,7 +791,7 @@ def test_alternative_domain_salvages_primary_backend_rejection(monkeypatch):
             alternative="--terabox-domain" in args
             if args[0] in ("copyto","rcat") and not alternative:
                 raise RuntimeError("private cloud "+args[0]+" failed (backend_rejected)")
-            if args[0]=="cat" and not alternative:
+            if args[0]=="cat" and not alternative and self.alternate_copies<2:
                 return None
             if args[0]=="copyto" and alternative:
                 self.alternate_copies+=1
