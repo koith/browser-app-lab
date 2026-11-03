@@ -291,6 +291,18 @@ class CloudArchive:
             return False, last is not None
 
         existing = self.read(key, cap=cap, optional=True)
+        # A missing response from one TeraBox host is not evidence that an
+        # immutable original is absent on the other. Verify before writing.
+        if existing is None:
+            try:
+                alternate_existing = self.read(
+                    key,cap=cap,optional=True,domain="https://nephobox.com")
+            except RuntimeError:
+                alternate_existing = None
+            if alternate_existing is not None:
+                if sha256(alternate_existing)==expected_sha:
+                    return False
+                raise RuntimeError("immutable archive key collision: alternate endpoint checksum conflict")
         if existing is not None:
             if sha256(existing) == expected_sha:
                 return False
@@ -315,7 +327,13 @@ class CloudArchive:
 
         # Bootstrap parents ahead of upload (not only after rclone fails).
         # This also covers a brand-new versioned catalog directory.
-        self.ensure_parent(key)
+        try:
+            self.ensure_parent(key)
+        except RuntimeError as error:
+            if any(code in str(error) for code in (
+                    "(authorization)","(capacity)","(rate_limited)")):
+                raise
+            self.ensure_parent(key,domain="https://nephobox.com",force=True)
         with tempfile.NamedTemporaryFile(prefix="demand-cloud-", delete=False) as temp:
             temp.write(data)
             path = temp.name
@@ -336,7 +354,20 @@ class CloudArchive:
                         # A different runner or a provider inconsistency can
                         # invalidate a cached parent; reconstruct all levels.
                         self._ensured_parents.clear()
-                        self.ensure_parent(key,force=True)
+                        try:
+                            self.ensure_parent(key,force=True)
+                        except RuntimeError as parent_error:
+                            if any(code in str(parent_error) for code in (
+                                    "(authorization)","(capacity)","(rate_limited)")):
+                                raise
+                            # The primary host can be unable to recreate a
+                            # newly-visible path even after the first upload.
+                            # Give the alternate host a chance before failing.
+                            try:
+                                self.ensure_parent(
+                                    key,domain="https://nephobox.com",force=True)
+                            except RuntimeError:
+                                pass
                 matched, conflicting = read_consistent()
                 if matched:
                     return True

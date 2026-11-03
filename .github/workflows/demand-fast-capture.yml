@@ -8,6 +8,7 @@ on:
       - "apps/demand-research/demand_archive.py"
       - "apps/demand-research/demand_capture_job.py"
       - "apps/demand-research/test_demand_archive.py"
+      - "apps/demand-research/test_terabox_parent_fallback.py"
       - ".github/workflows/demand-fast-capture.yml"
   push:
     branches: [main]
@@ -36,8 +37,8 @@ jobs:
         run: |
           python -m pip install --disable-pip-version-check pytest==8.4.2
           cd apps/demand-research
-          python -m py_compile demand_archive.py demand_capture_job.py test_demand_archive.py
-          python -m pytest -q test_demand_archive.py
+          python -m py_compile demand_archive.py demand_capture_job.py test_demand_archive.py test_terabox_parent_fallback.py
+          python -m pytest -q test_demand_archive.py test_terabox_parent_fallback.py
   capture:
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-24.04
