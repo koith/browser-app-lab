@@ -6,8 +6,7 @@ on:
       - 'apps/mimmi-gallery/discover_pixibb_search.py'
       - 'apps/mimmi-gallery/test_pixibb_search.py'
       - '.github/workflows/mimmi-pixibb-alias-search.yml'
-  schedule:
-    - cron: '05 16 * * 1,5'
+  # Disabled scheduled mirror crawling: this is research, not physical archive.
 permissions:
   contents: write
 concurrency:
