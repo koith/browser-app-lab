@@ -32,6 +32,11 @@ on:
       - "apps/demand-research/target_account_archive.py"
       - "apps/demand-research/target_account_enrichment.py"
       - "apps/demand-research/target_account_viewer.py"
+      - "apps/demand-research/account_archive_view.js"
+      - "apps/demand-research/account_archive_view.css"
+      - "apps/demand-research/account_archive_view.html"
+      - "apps/demand-research/target_account_enrichment.py"
+      - "apps/demand-research/target_account_viewer.py"
       - "apps/demand-research/test_target_account_viewer.py"
       - "apps/demand-research/account_archive_view.html"
       - "apps/demand-research/account_archive_view.css"
@@ -53,7 +58,7 @@ concurrency:
   # Never saturate the same TeraBox account during encrypted P0 recovery or
   # catalog reconciliation. PR synthetic tests use their own safe group.
   group: ${{ github.event_name == 'pull_request' && format('intersection-target-qa-{0}', github.head_ref) || 'intersection-private-maintenance-production' }}
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
   queue: max
 
 jobs:
