@@ -11,6 +11,7 @@ from social_sources import TERMS, ROUTES, request_one_page
 import account_index
 import account_index_sources
 import account_groups
+from demand_archive import CloudArchive
 
 app=FastAPI(title="Demand Research Private Cloud",docs_url=None,redoc_url=None)
 app.add_middleware(CORSMiddleware,allow_origins=["https://koith.github.io","http://localhost:8765"],allow_methods=["GET","OPTIONS"],allow_headers=["Authorization","Content-Type"])
@@ -193,8 +194,8 @@ async def get_catalog():
         if _cache["posts"] is not None and time.time()-_cache["at"]<90:
             return _cache["posts"]
         try:
-            posts=validate_catalog(json.loads(await remote_bytes("metadata/catalog.json")))
-        except (ValueError,json.JSONDecodeError) as e:
+            posts=await asyncio.to_thread(CloudArchive(REMOTE).load_catalog)
+        except (ValueError,json.JSONDecodeError,RuntimeError) as e:
             raise HTTPException(502,"Cloud catalog validation failure") from e
         _cache.update(at=time.time(),posts=posts)
         return posts
@@ -347,7 +348,11 @@ async def list_posts(request:Request,offset:int=Query(0,ge=0),limit:int=Query(30
                           "url":"/api/media/"+post["id"]+"/"+str(i)+"?exp="+str(exp)+"&sig="+media_signature(post["id"],i,exp)})
         output.append({"id":post["id"],"platform":post.get("platform","unknown"),"posted_at":post.get("posted_at",""),
                        "text":post["text"],"media":media,"reply_count":post.get("reply_count",0),
-                       "source_url":post.get("source_url",""),"capture_status":"remote_verified"})
+                       "source_url":post.get("source_url",""),
+                        "profile_url":post.get("profile_url",""),
+                        "media_expected":post.get("media_expected",len(post["media"])),
+                        "media_saved":len(post["media"]),
+                        "capture_status":"remote_verified" if post.get("archive_complete",True) else "partial_media"})
     return {"total":len(posts),"offset":offset,"limit":limit,"posts":output,"storage":"TeraBox"}
 
 async def remote_stream(path,start,length)->AsyncIterator[bytes]:
