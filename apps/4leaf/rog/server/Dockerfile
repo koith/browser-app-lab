@@ -2,6 +2,7 @@
 FROM node:22-alpine
 WORKDIR /app
 COPY apps/4leaf/rog/server/central.cjs ./central.cjs
+COPY apps/4leaf/rog/server/persistence-supabase.cjs ./persistence-supabase.cjs
 ENV NODE_ENV=production PORT=10000 HOST=0.0.0.0 \
     LEAF_CENTRAL_ORIGINS=https://koith.github.io \
     LEAF_CENTRAL_STORAGE=/var/lib/4leaf/chat-state.json
