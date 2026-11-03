@@ -455,7 +455,7 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
                             or not isinstance(first.get("media_links"), list)):
                         raise ValueError("early original capture mismatch; cannot silently replace")
                     if spool is not None:
-                        spool.save(pid,first)
+                        spool.save(pid,first,verified_remote_first=True)
                     row = {**row, "text": first["text"],
                            "posted_at": first["posted_at"],
                            "profile_url": first.get("profile_url", ""),
