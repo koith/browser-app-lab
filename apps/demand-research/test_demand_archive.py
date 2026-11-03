@@ -530,3 +530,29 @@ def test_read_only_archive_summary_reports_remote_sample_without_mutation(monkey
     assert status["sample_valid"]==1
     assert status["sample_mismatch"]==0
     assert cloud.objects==before,"audit must never mutate archive"
+
+
+def test_malformed_early_capture_is_isolated_without_poisoning_good_recovery(monkeypatch):
+    cloud=FakeCloud()
+    monkeypatch.setenv("RCLONE_CONFIG_ARCHIVE_COOKIE","offline-test")
+    monkeypatch.setenv("DEMAND_CAPTURE_PUBLIC_ALLOWED","1")
+    bad_id="d"*40
+    cloud.objects["posts/"+bad_id+"/capture.json"]=b'{"incomplete":true}'
+    original_id="at://did:plc:abcdefghijk/app.bsky.feed.post/goodrestored01"
+    pid=post_key("bluesky",original_id)
+    early={
+        "id":pid,"platform":"bluesky","text":"synthetic "+job.TERMS[0],
+        "source_url":"https://bsky.app/profile/did:plc:abcdefghijk/post/goodrestored01",
+        "posted_at":"2026-11-03T00:00:00Z","observed_at":1793667600,
+        "media_links":[]
+    }
+    cloud.objects["posts/"+pid+"/capture.json"]=canonical_json(early)
+    status=job.run(fetchers=[lambda *args:[]],cloud=cloud,
+                   clock=lambda:1793667900,run_id="123456945")
+    assert status["invalid_early_captures"]==1
+    assert status["recovered_early_snapshots"]==1
+    assert status["catalog"]["posts"]==1
+    assert cloud.load_catalog()[0]["id"]==pid
+    assert cloud.objects["posts/"+bad_id+"/capture.json"]==b'{"incomplete":true}'
+    assert bad_id in cloud.quarantined_ids
+    assert not any(key.startswith("posts/"+bad_id+"/post.json") for key in cloud.objects)

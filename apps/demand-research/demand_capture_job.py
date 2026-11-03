@@ -282,27 +282,50 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None):
     known = {p["id"]: p for p in cloud.load_catalog()}
     known, recovered = cloud.recover_entries(known)
     early_recovered = 0
-    # The earliest observed public text survives interrupted media/catalog stages.
+    invalid_early_captures = 0
+    failed_early_recoveries = 0
+    # Independent first-observation snapshots survive truncated/post-deletion
+    # runs. A single damaged object must never poison the entire archive.
     for pid in cloud.pending_capture_ids(known)[:MAX_PER_RUN]:
-        raw = cloud.read("posts/" + pid + "/capture.json", cap=100_000, optional=True)
-        if raw is None:
+        try:
+            raw = cloud.read("posts/" + pid + "/capture.json",
+                             cap=100_000, optional=True)
+            if raw is None:
+                continue
+            first = json.loads(raw)
+            if (not isinstance(first, dict)
+                    or first.get("id") != pid
+                    or first.get("platform") not in
+                    ("bluesky", "mastodon", "misskey", "lemmy")
+                    or not isinstance(first.get("text"), str)
+                    or not 0 <= len(first["text"]) <= 30_000
+                    or not public_url(first.get("source_url"))
+                    or not isinstance(first.get("posted_at"), str)
+                    or not isinstance(first.get("observed_at"), int)
+                    or not 1577836800 <= first["observed_at"] <= now+120
+                    or not isinstance(first.get("media_links"), list)
+                    or len(first["media_links"]) > MAX_MEDIA_PER_POST
+                    or any(not public_url(link) for link in first["media_links"])):
+                raise ValueError("invalid original public capture record")
+            row = {"platform": first["platform"], "source_url": first["source_url"],
+                   "text": first["text"], "posted_at": first["posted_at"],
+                   "profile_url": first.get("profile_url", ""),
+                   "media_urls": first["media_links"],
+                   "media_expected": len(first["media_links"])}
+            post, blobs = make_post(row, first["observed_at"], pid_override=pid)
+        except (ValueError,TypeError,KeyError,OverflowError,json.JSONDecodeError):
+            # Keep damaged bytes untouched. Do not promote or overwrite them.
+            cloud.quarantined_ids.add(pid)
+            invalid_early_captures += 1
             continue
-        first = json.loads(raw)
-        if (first.get("id") != pid or first.get("platform") not in
-                ("bluesky", "mastodon", "misskey", "lemmy")
-                or not isinstance(first.get("text"), str)
-                or not public_url(first.get("source_url"))
-                or not isinstance(first.get("media_links"), list)):
-            raise ValueError("invalid original public capture record")
-        row = {"platform": first["platform"], "source_url": first["source_url"],
-               "text": first["text"], "posted_at": first["posted_at"],
-               "profile_url": first.get("profile_url", ""),
-               "media_urls": first["media_links"][:MAX_MEDIA_PER_POST],
-               "media_expected": len(first["media_links"])}
-        post, blobs = make_post(row, first["observed_at"], pid_override=pid)
-        saved_post = cloud.save_post(post, blobs)
-        known[pid] = saved_post
-        early_recovered += 1
+        try:
+            saved_post=cloud.save_post(post,blobs)
+        except (RuntimeError,ValueError):
+            # A recoverable network/backend failure is not an invalid source.
+            failed_early_recoveries += 1
+            continue
+        known[pid]=saved_post
+        early_recovered+=1
     seen_this_scan = set()
     budget_exhausted = False
     for getter in sources:
@@ -391,6 +414,8 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None):
         "restored_first_observations":early_recovered,"catalog_expected":len(known),
         "integrity_excluded":cloud.unrecoverable_entries,
         "write_failures":storage_failures,"source_query_failures":failures,
+        "invalid_early_captures":invalid_early_captures,
+        "failed_early_recoveries":failed_early_recoveries,
         "capture_interrupted":capture_interrupted
     },sort_keys=True),flush=True)
     # Entries written immediately per post are the recovery journal. The versioned
@@ -405,6 +430,8 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None):
               "repaired_archive_markers": cloud.repaired_entries,
               "unrecoverable_markers": cloud.unrecoverable_entries,
               "source_query_failures": failures,
+              "invalid_early_captures":invalid_early_captures,
+              "failed_early_recoveries":failed_early_recoveries,
               "budget_exhausted": budget_exhausted,
               "storage_failures": storage_failures,
               "storage_interrupted": capture_interrupted, "catalog": catalog,
