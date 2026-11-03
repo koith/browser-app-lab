@@ -193,11 +193,9 @@
        img.src=g.latestThumbnail||g.latestAvatar;
        img.alt=g.latestThumbnail?"최근 게시글 이미지":"공개 프로필 사진";
        img.referrerPolicy="no-referrer";
-       img.addEventListener("error",()=>{
-         if(g.latestThumbnail&&g.latestAvatar&&img.src!==g.latestAvatar){
-           img.src=g.latestAvatar;img.alt="공개 프로필 사진";
-         }else img.remove();
-       });
+       // A broken post image must never silently become a different account
+       // image. Profile avatars are used only when no post photo was provided.
+       img.addEventListener("error",()=>img.remove());
        intro.append(img);
      }
      detail.append(intro);
@@ -260,8 +258,7 @@
          img.src=g.latestThumbnail||g.latestAvatar;img.alt="";
          img.loading="lazy";img.decoding="async";img.referrerPolicy="no-referrer";
          img.addEventListener("error",()=>{
-           if(g.latestThumbnail&&g.latestAvatar&&img.src!==g.latestAvatar)img.src=g.latestAvatar;
-           else{img.remove();thumb.classList.add("activity-rank-thumb-empty");}
+           img.remove();thumb.classList.add("activity-rank-thumb-empty");
          });
          thumb.append(img);
        }else thumb.classList.add("activity-rank-thumb-empty");

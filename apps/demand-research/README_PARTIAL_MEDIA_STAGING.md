@@ -1,0 +1,3 @@
+# Private TeraBox partial attachment staging
+
+When a public original lists multiple attachments but a download fails, only the successfully downloaded original bytes are stored in immutable per-slot objects. `metadata/media-parts/<post_id>/<slot>.json` has the exact byte length and SHA256 checksum. The original `capture.json` remains the source of record, and **no complete `post.json` or entry marker is published** until all expected attachments have independently verified bytes. Later retries may assemble from still-public URLs and previously staged verified bytes. The gateway never substitutes other users' images. Staging is private, does not bypass access controls, and does not guarantee that originally unavailable attachments will later be recovered.

@@ -73,15 +73,15 @@ const alphaCard=document.querySelector(".activity-rank-card");
 assert.ok(alphaCard.getAttribute("aria-label").includes("테스트 계정"));
 assert.equal(alphaCard.querySelector(".activity-rank-thumb img").src,"https://cdn.bsky.app/img/new.jpg");
 alphaCard.querySelector(".activity-rank-thumb img").dispatchEvent(new dom.window.Event("error"));
-assert.equal(alphaCard.querySelector(".activity-rank-thumb img").src,
-  "https://cdn.bsky.app/img/profile-avatar.jpg","broken ranking media uses profile photo");
+assert.equal(alphaCard.querySelector(".activity-rank-thumb img"),null,
+  "broken post media must never become an unrelated account image");
 alphaCard.click();
 assert.equal($("activityRankingDialog").hasAttribute("open"),true);
 assert.match($("activityRankingDialogContent").textContent,/계정 공개 이력/);
 const detailThumb=$("activityRankingDialogContent").querySelector(".activity-rank-detail-thumb");
 assert.ok(detailThumb);
 detailThumb.dispatchEvent(new dom.window.Event("error"));
-assert.equal(detailThumb.src,"https://cdn.bsky.app/img/profile-avatar.jpg");
+assert.equal(detailThumb.isConnected,false,"failed post media is removed, not swapped to profile avatar");
 assert.match($("activityRankingDialogContent").textContent,/기존 활동/);
 $("activityRankingDialogClose").click();
 document.querySelector('[data-rank-cohort="new"]').click();

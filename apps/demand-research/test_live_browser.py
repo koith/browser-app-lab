@@ -229,7 +229,8 @@ def run(live=False):
             assert page.locator("article.post a.author[target=_blank]").count()>0
             if not live:
                 assert page.locator('article.post[data-no-media="true"]').count()>0, "text-only and posterless video cards need compact fallback"
-                assert page.locator("article.post .thumb-kind-label").count()>0, "source avatars must be explicitly labeled as profile pictures"
+                assert page.locator("article.post .post-thumb img[alt*='프로필 사진']").count()==0, "post images must never be substituted by account avatars"
+                assert page.locator("article.post .thumb-kind-label").count()==0, "no unrelated photo labels may mask missing original media"
                 text_tile=page.locator('article.post[data-no-media="true"]').first
                 assert text_tile.locator(".post-thumb").evaluate("e=>e.getBoundingClientRect().height")<130, "no more full-height empty image boxes"
                 before_candidates=page.locator("article.post").count()

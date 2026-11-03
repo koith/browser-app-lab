@@ -551,6 +551,58 @@ class CloudArchive:
                 new += 1
         return result, new
 
+    def stage_partial_media(self, post, media_blobs=()):
+        """Keep independently verified original attachment bytes across retries.
+
+        No incomplete post.json or completed journal marker is published.
+        Immutable per-slot checksum records are stored only in private cloud.
+        """
+        validate_post(post)
+        pid=post["id"]
+        blobs=list(media_blobs)
+        if len(blobs)!=len(post["media"]):
+            raise ValueError("missing staged media bytes")
+        for media,blob in zip(post["media"],blobs):
+            if (not isinstance(blob,bytes) or len(blob)!=media["bytes"]
+                    or sha256(blob)!=media["sha256"]):
+                raise ValueError("bad staged original media bytes")
+            match=re.fullmatch(r"posts/"+pid+r"/media/([0-9]{4})\.[a-z0-9]+",media["key"])
+            if match is None:
+                raise ValueError("bad staged media source position")
+            self.write_immutable(media["key"],blob)
+            slot=match.group(1)
+            marker={"id":pid,"index":int(slot),"key":media["key"],
+                    "mime":media["mime"],"bytes":media["bytes"],
+                    "sha256":media["sha256"]}
+            self.write_immutable("metadata/media-parts/"+pid+"/"+slot+".json",
+                                 canonical_json(marker))
+
+    def read_staged_media(self,pid,index):
+        """Return only a SHA-matched attachment from the original post/slot."""
+        if not ID.fullmatch(str(pid)) or not isinstance(index,int) or not 1<=index<=16:
+            raise ValueError("invalid staged media index")
+        slot=str(index).zfill(4)
+        raw=self.read("metadata/media-parts/"+pid+"/"+slot+".json",
+                      cap=2048,optional=True)
+        if raw is None:
+            return None
+        try:
+            info=json.loads(raw)
+            if (not isinstance(info,dict) or info.get("id")!=pid
+                    or info.get("index")!=index or info.get("mime") not in MIMES
+                    or not isinstance(info.get("bytes"),int)
+                    or not 0<info["bytes"]<=MAX_MEDIA_BYTES
+                    or not re.fullmatch(r"[a-f0-9]{64}",str(info.get("sha256","")))
+                    or info.get("key")!="posts/"+pid+"/media/"+slot+MIMES[info["mime"]]):
+                return None
+            data=self.read_verified(info["key"],info["sha256"],
+                                    cap=MAX_MEDIA_BYTES+1)
+            if data is None or len(data)!=info["bytes"]:
+                return None
+            return info["mime"],data
+        except (RuntimeError,ValueError,TypeError,KeyError,json.JSONDecodeError):
+            return None
+
     def save_post(self, post, media_blobs=()):
         validate_post(post)
         pid = post["id"]
