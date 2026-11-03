@@ -6,6 +6,7 @@ const fs=require('node:fs');
 const path=require('node:path');
 const {randomUUID,randomBytes,scryptSync,timingSafeEqual,createHash}=require('node:crypto');
 const {createSupabasePersistence}=require('./persistence-supabase.cjs');
+const {createAbuseGuard}=require('./abuse-guard.cjs');
 const REGIONS={
  north:['실버 호라이즌','화이트 크리스탈','퓨어 시티','샤이닝 브리즈','윈트리 아이스','스노우 폴','스위트 자스민','그린 에메랄드'],
  south:['블루 사파이어','헤이즐리 웨이브','미쉘 에메랄드','엘핀 포레스트','아루아 코랄','블랙씨 아린','브라브 지피트','미스틱 머메이드']
@@ -15,6 +16,7 @@ const valid=(r,d)=>Object.hasOwn(REGIONS,r)&&REGIONS[r].includes(d);
 const secretFingerprint=token=>createHash('sha256').update(token).digest('hex');
 function makeServer(options={}){
  const clock=options.now||Date.now;
+ const guard=createAbuseGuard({now:clock});
  const store=options.storageFile||process.env.LEAF_CENTRAL_STORAGE||'';
  const origins=(options.origins??process.env.LEAF_CENTRAL_ORIGINS??'').split(',').map(x=>x.trim()).filter(Boolean);
  const dbUrl=options.dbUrl??process.env.LEAF_CENTRAL_DB_URL??'';
@@ -154,6 +156,9 @@ function makeServer(options={}){
    if(req.method==='GET'&&route==='/api/health')return send(res,200,{ok:true,version:1,archive:persistent?'remote-encrypted':store?'local-file':'volatile'},origin);
    if(req.method==='POST'&&route==='/api/session'){
     const b=await parse(req);
+    // The socket address is the only network peer identity we trust here.
+    // An unverified forwarded header can be freely forged by a direct client.
+    guard.session(req.socket.remoteAddress||'unknown');
     let token=/^[a-f0-9]{64}$/.test(b.resume||'')?b.resume:'';
     let existing=token&&sessions.get(token);
     if(!existing&&token){
@@ -192,6 +197,9 @@ function makeServer(options={}){
     if(![2,4,8,12].includes(capacity)||!Number.isInteger(background)||background<0||background>5)fail(400,'Invalid room type');
     const password=String(b.password||'');
     if(password&&(password.length<6||password.length>24))fail(400,'Password length 6–24');
+    if([...rooms.values()].filter(r=>r.ownerId===s.id).length>=24)
+     fail(429,'Too many user-created ChatTown rooms');
+    guard.createRoom(s.id);
     const salt=password?randomBytes(16).toString('hex'):'';
     const r={id:randomUUID(),region:b.region,district,name,capacity,background,preset:false,
      ownerId:s.id,ownerTokenHash:secretFingerprint(token),created:clock(),passwordSalt:salt,
@@ -229,6 +237,8 @@ function makeServer(options={}){
     }
     if(kicked.get(r.id+':'+s.id)>clock())fail(403,'Temporarily removed by the room owner');
     if(r.passwordHash){
+     // scrypt is deliberately expensive; throttle before doing CPU work.
+     guard.password(s.id);
      const guess=scryptSync(String(b.password||''),r.passwordSalt,32);
      if(!timingSafeEqual(guess,Buffer.from(r.passwordHash,'hex')))fail(403,'Incorrect password');
     }
@@ -263,6 +273,7 @@ function makeServer(options={}){
     if(!message)fail(400,'Empty message');
     s.recent=s.recent.filter(t=>clock()-t<5000);
     if(s.recent.length>=12)fail(429,'Rate limit');
+    guard.chat();
     const item=await transactional(()=>{
      const entry={id:randomUUID(),seq:++sequence,roomId:s.roomId,sender:s.id,
       user:s.nick,text:message,time:clock()};
@@ -302,7 +313,8 @@ function makeServer(options={}){
   }else void execute();
  });
  return {server,close:()=>{clearInterval(ticker);return new Promise(done=>server.close(done))},
-  inspect:()=>({rooms:rooms.size,sessions:sessions.size,archive:persistent?.kind||'local'})};
+  inspect:()=>({rooms:rooms.size,sessions:sessions.size,archive:persistent?.kind||'local',
+   abuse:guard.inspect()})};
 }
 if(require.main===module){
  const port=Number(process.env.PORT||8787);
