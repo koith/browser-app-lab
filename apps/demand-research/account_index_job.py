@@ -16,6 +16,7 @@ from pathlib import Path
 import account_index
 import account_index_sources
 import account_groups
+from demand_archive import CloudArchive
 
 REMOTE="archive:DemandAccountIndex"
 ARCHIVE="archive:DemandResearch/metadata/catalog.json"
@@ -139,17 +140,11 @@ def run():
         if prior:load_snapshot(db,prior)
         scan=account_index_sources.run_batch(str(db),max_requests=6)
         catalog_info="not_found"
-        raw=read_remote(ARCHIVE,MAX_CATALOG,optional=True)
-        if raw is not None:
-            # The existing authenticated TeraBox post catalog remains read-only.
-            obj=json.loads(raw)
-            from gateway import validate_catalog
-            if isinstance(obj,dict):
-                posts=validate_catalog(obj)
-                imported=account_index.sync_catalog(str(db),posts)
-                catalog_info="verified_"+str(imported["accepted"])
-            else:
-                raise ValueError("catalog schema invalid")
+        # New immutable versioned catalog with legacy fallback.
+        posts=CloudArchive("archive:DemandResearch").load_catalog()
+        if posts:
+            imported=account_index.sync_catalog(str(db),posts)
+            catalog_info="verified_"+str(imported["accepted"])
         group_scan=account_groups.scan_known_profiles(str(db),max_profiles=55)
         stats=account_index.status(str(db))
         windows=account_index_sources.coverage(str(db))
