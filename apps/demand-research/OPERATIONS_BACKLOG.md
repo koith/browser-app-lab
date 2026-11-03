@@ -31,6 +31,23 @@
 - **UNVERIFIED**: 검증 근거 없음.
 - 항목별 체크박스 변경 시 **근거 PR/SHA/Actions Run ID, 변경 시각, 성공·실패·한계**를 함께 기재.
 
+
+## 2026-11-03 19:45 KST 재점검 — 완료된 하위 작업만 체크
+
+아래의 **[x]는 하위 개발 작업의 완료**를 뜻한다. 위의 INT-01~INT-10 전체 완료를 의미하지 않는다. 해당 10개 최종 완료 체크박스는 모두 미체크 상태다.
+
+- [x] PR #598: 원 게시글이 아닌 대체 사진을 쓰지 않도록 수정, 정적 브라우저 테스트 통과.
+- [x] PR #604: 다중 엔드포인트 SHA 검증과 부모 폴더 준비 경로 개선, CI 통과.
+- [x] PR #608: 기본 호스트 폴더 생성 실패 시 대체 호스트 복구, CI 통과.
+- [x] PR #610: 반복 업로드 실패 시 외부 재시도 단축, CI 통과.
+- [x] [Actions #41621602175](https://github.com/koith/browser-app-lab/actions/runs/41621602175): Pages 최신 배포 작업 성공. **아이폰 실사용 검증을 포함한 INT-08은 아직 미완료.**
+- [x] [Actions #41616060341](https://github.com/koith/browser-app-lab/actions/runs/41616060341): 첫 관측 기록 3건 및 journal 기록 5건 복원, 저장된 catalog SHA 검증. **복구 전체 작업은 실패**했으며 이 항목을 INT-04 전체 완료로 취급하면 안 됨.
+
+**운영 장애의 최신 확인 값:**
+- [Actions #41616060145](https://github.com/koith/browser-app-lab/actions/runs/41616060145): fetched=7, new_verified=4, write_failures=3, 모두 `write_first_snapshot:backend_upload_missing`; **INT-01 = FAILED**.
+- [Actions #41616060341](https://github.com/koith/browser-app-lab/actions/runs/41616060341): 재발행 직후 snapshot=54, journal=62, 뒤이은 독립 조회 snapshot=62, journal=62, 샘플8/8 SHA 통과. 원인 확정 전 **INT-04 = UNVERIFIED**.
+- PR #614: 새 글 폴더 업로드에 실패하더라도 비공개 metadata 루트에 최초 관측 원문을 SHA 확인 후 불변 저장, 이후 복구 대상을 조회하도록 개발 중. **CODE_ONLY; 운영 검증 전 INT-01/03 완료 금지.**
+
 ## 재사용할 검증 근거
 
 - [PR #598 — 정확한 원본 이미지·부분 첨부 재시도·비공개 검색 UI](https://github.com/koith/browser-app-lab/pull/598): 코드 병합 및 사전 CI 통과. 별도 운영 실증 필요.
