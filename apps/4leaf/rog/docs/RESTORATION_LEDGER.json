@@ -1629,6 +1629,20 @@
         "M09",
         "P0-RELEASE"
       ]
+    },
+    {
+      "id": "REQ-20261104-CHAT-ORIGINAL-PARALLEL-STABILITY",
+      "date": "2026-11-04",
+      "origin": "2026-11-04 사용자 후속 지시: 진행하고 클로드 병렬 지시문도 제공",
+      "text": "4LEAF 채팅을 기본 시스템으로 유지. GPT는 실제 메시지 입력/서버 실패·중복 전송/방 입장 경합 및 QA, Claude는 6개 ChatRoom 원본 배경·좌석·전경/아바타·툴바 원본 시각 정합성으로 분담. 독립 PR로 충돌 방지. 원본 일치/실기 수용 전에는 상위 CHT-02, CHT-04, CHT-05, M03, P0-CHAT 완료 표시 금지.",
+      "taskIds": [
+        "M03",
+        "P0-CHAT",
+        "CHT-02",
+        "CHT-04",
+        "CHT-05",
+        "P0-RELEASE"
+      ]
     }
   ],
   "tasks": [
@@ -2703,7 +2717,7 @@
       "title": "상단 검정 채팅 로그·입력창 원본 픽셀 정합",
       "status": "in_progress",
       "milestone": "M03",
-      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원작 chat.jpg의 좌측 상단 투명 검정 대화 로그·작은 스크롤바·흰 입력박스와 현재 실제 창 배치/간격 차이 | 구현 목표: 원본 ChatRoom 입력/말풍선/글꼴/자막/스크롤바 리소스를 원래 794×528 좌표에 맞춤; 2026-10-19 진짜 chat.jpg 794×528 원작 JPEG의 흰색 입력창 밝은 픽셀을 동적 검출하고, 진짜 ChatRoom room4의 한글 메시지/원본 로그·스크롤·우측 목록의 독립 DOM 좌표와 직접 대조하는 Playwright 회귀 작업 시작; 감으로 픽셀 미세조정하지 않음.; 2026-10-19 follow-up: PR #141 2004 original JPG input white y99 vs actual native form y97, input source artwork y98, log/source scroll height97 and frame total118 accepted Chromium+WebKit. Now test real 24 Korean messages, native 52x40 scrollbar and genuine talkbox.png nine-slice speech without fabricated occupants; pending browser QA. Full CP949 historical client fidelity remains unproven.; PR #142 verified 24 actual Korean messages, one real 390x97 chat log + original talkbox.png 9-slice + source 52x40 scroll Up/Down, exact 2004 photo input row. CP949 original encoding and full historical speech placement still open.",
+      "current": "2026-10-18 역사적 원작과 현 배포 웹앱 비교: 원작 chat.jpg의 좌측 상단 투명 검정 대화 로그·작은 스크롤바·흰 입력박스와 현재 실제 창 배치/간격 차이 | 구현 목표: 원본 ChatRoom 입력/말풍선/글꼴/자막/스크롤바 리소스를 원래 794×528 좌표에 맞춤; 2026-10-19 진짜 chat.jpg 794×528 원작 JPEG의 흰색 입력창 밝은 픽셀을 동적 검출하고, 진짜 ChatRoom room4의 한글 메시지/원본 로그·스크롤·우측 목록의 독립 DOM 좌표와 직접 대조하는 Playwright 회귀 작업 시작; 감으로 픽셀 미세조정하지 않음.; 2026-10-19 follow-up: PR #141 2004 original JPG input white y99 vs actual native form y97, input source artwork y98, log/source scroll height97 and frame total118 accepted Chromium+WebKit. Now test real 24 Korean messages, native 52x40 scrollbar and genuine talkbox.png nine-slice speech without fabricated occupants; pending browser QA. Full CP949 historical client fidelity remains unproven.; PR #142 verified 24 actual Korean messages, one real 390x97 chat log + original talkbox.png 9-slice + source 52x40 scroll Up/Down, exact 2004 photo input row. CP949 original encoding and full historical speech placement still open. | 2026-11-04: PR #639 merged (7a9a9452), beta.55/PWA v142. 중앙 서버 503 실패 시 입력 초안 유지, 중복 Enter 방지, 방 연속 선택 시 권위 서버와 UI 동기화. 실제 독립 Chromium 2브라우저 중앙 채팅 E2E PASS, 10명 참가자/Node 서버/릴리스 테스트 PASS. 원본 CP949·전체 픽셀 동등성·iPhone 실기는 여전히 미완료.",
       "acceptance": [
         "실제 메시지·CP949/한글 입력·스크롤·복수 말풍선이 원본 창 테두리와 동일 위치에 렌더"
       ],
@@ -2717,10 +2731,11 @@
         "https://github.com/koith/browser-app-lab/actions/runs/39197145350",
         "apps/4leaf/rog/tests/chatroom-original-input-photometry.cjs",
         "https://github.com/koith/browser-app-lab/actions/runs/39211031352",
-        "https://github.com/koith/browser-app-lab/pull/142"
+        "https://github.com/koith/browser-app-lab/pull/142",
+        "tests/central-browser.cjs"
       ],
       "evidenceLevel": "VERIFIED-ARCHIVAL-SCREENSHOT/WEBAPP-CURRENT; HISTORICAL-EQUIVALENCE-UNVERIFIED",
-      "lastReviewed": "2026-10-19",
+      "lastReviewed": "2026-11-04",
       "verifiedAcceptance": null,
       "dependencies": [
         "CHT-01"
@@ -8270,6 +8285,21 @@
         "P0-RELEASE"
       ],
       "details": "PR #621 squash merged 0ec921d5, beta54/PWA v141. 12 Node authority+recovery tests PASS, 2 Chromium real users PASS, 10 real connected users PASS, world/chat integration PASS. Postmerge public Pages deploy repeatedly cancelled by concurrent unrelated main pushes; added read-only live API and public bundle probe. Keep overall original-chat and service launch acceptance open until production probe PASS; no fabricated completion."
+    },
+    {
+      "seq": 376,
+      "date": "2026-11-04",
+      "type": "CHAT_DRAFT_DELIVERY_RACE_MERGED_ORIGINAL_UI_PARALLEL",
+      "requestId": "REQ-20261104-CHAT-ORIGINAL-PARALLEL-STABILITY",
+      "taskIds": [
+        "M03",
+        "P0-CHAT",
+        "CHT-02",
+        "CHT-04",
+        "CHT-05",
+        "P0-RELEASE"
+      ],
+      "details": "PR #639 squash 7a9a945263f092f37449a073e7f1e22988e2ea9f merged, beta55/PWA142. Real central Chromium E2E validated failed POST draft preservation, successful retry, fast duplicate Enter, rapid room selection, ownership/chat regression; Node authority/10 real users/release id PASS. Source visual ChatRoom 6 backgrounds/actor/depth work assigned in separate Claude instruction; live exact beta55 Pages QA and physical iPhone unverified; 13/60 done unchanged."
     }
   ],
   "restorationPriority": {
@@ -8288,15 +8318,17 @@
     "chatFoundation": {
       "implementation": "MERGED",
       "integration": "VERIFIED",
-      "deployment": "PENDING-LIVE-PROBE",
+      "deployment": "BETA55-EXACT-PUBLIC-PROBE-PENDING",
       "scope": "P0-1: real central HTTPS session/users/16 districts/128 canonical rooms/create/join/leave/realtime messages/seat and ownership/session reauth",
       "pr": 621,
       "mergeSha": "0ec921d5b67e58fab59930620849f01c60dcac30",
-      "release": "0.86.0-beta.54",
-      "pwaCache": "4leaf-revival-pwa-v141",
-      "evidence": "GitHub Actions latest PR 10bf7035: 8/8 server + 4/4 recovery + independent Chromium central-chat + 10 real participant browser + world-and-chat CI PASS. Real Pages + free Render service acceptance tracked by production probe workflow.",
+      "release": "0.86.0-beta.55",
+      "pwaCache": "4leaf-revival-pwa-v142",
+      "evidence": "PR #621 foundation and PR #639 draft/rapid-room-switch; GitHub Actions 0882c405 server-authority, central-chromium, 10-real-peer, evidence-and-release-id PASS. Earlier production central/session probe 41636054981 SUCCESS for beta54; new beta55 exact public-bundle probe pending after workflow hard-coded version was fixed.",
       "limitations": "Physical iPhone, historical 2002 chat fidelity, long-term durable free server history, actual public Pages/Render integration not yet signed off; P0-CHAT/M03 stay in_progress.",
-      "updatedAt": "2026-11-03"
+      "updatedAt": "2026-11-04",
+      "currentStabilityPR": 639,
+      "currentStabilitySha": "7a9a945263f092f37449a073e7f1e22988e2ea9f"
     }
   }
 }
