@@ -18,6 +18,10 @@ class FakeCloud(CloudArchive):
     def fake(self, args, timeout=150, allow_missing=False):
         op = args[0]
         if op == "lsf":
+            if "--dirs-only" in args and args[1].endswith("/posts"):
+                found = sorted({k.split("/")[1] + "/" for k in self.objects
+                                if k.startswith("posts/") and len(k.split("/")) >= 3})
+                return ("\n".join(found) + ("\n" if found else "")).encode()
             if args[1] == "archive:":
                 return b"DemandResearch/\n"
             prefix = args[1].split("archive:DemandResearch/", 1)[1].rstrip("/") + "/"
@@ -165,3 +169,23 @@ def test_disabled_capture_fails_closed(monkeypatch):
     with pytest.raises(RuntimeError, match="authorization"):
         job.run(fetchers=[lambda *args: []], cloud=FakeCloud(),
                 run_id="123456793")
+
+
+def test_orphan_first_observation_recovered_even_after_source_disappears(monkeypatch):
+    cloud = FakeCloud()
+    monkeypatch.setenv("RCLONE_CONFIG_ARCHIVE_COOKIE", "offline-test")
+    monkeypatch.setenv("DEMAND_CAPTURE_PUBLIC_ALLOWED", "1")
+    pid = post_key("bluesky", "at://did:plc:abcdefghijk/app.bsky.feed.post/suddenlydeleted")
+    first = {"id": pid, "platform": "bluesky", "text": "섹트 first observation",
+             "source_url": "https://bsky.app/profile/did:plc:abcdefghijk/post/suddenlydeleted",
+             "posted_at": "2026-11-03T00:00:00Z",
+             "profile_url": "https://bsky.app/profile/did:plc:abcdefghijk",
+             "observed_at": 1793667600, "media_links": []}
+    cloud.write_immutable("posts/" + pid + "/capture.json", canonical_json(first))
+    assert cloud.load_catalog() == []
+    result = job.run(fetchers=[lambda *args: []], cloud=cloud,
+                     clock=lambda: 1793667900, run_id="123456794")
+    assert result["saved_verified"] == 0
+    assert result["recovered_early_snapshots"] == 1
+    assert cloud.load_catalog()[0]["text"] == "섹트 first observation"
+    assert cloud.load_catalog()[0]["captured_at"] == "2026-11-03T01:00:00+00:00"
