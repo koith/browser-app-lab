@@ -9,7 +9,7 @@ from __future__ import annotations
 import argparse
 import json
 import time
-from playwright.sync_api import sync_playwright, Error as PlaywrightError
+from playwright.sync_api import sync_playwright, Error as PlaywrightError, TimeoutError as PlaywrightTimeoutError
 
 ROOT = "https://koith.github.io/browser-app-lab"
 RENDER = "mimmi-private-gallery-free.onrender.com"
@@ -118,18 +118,55 @@ def exercise(browser, model: str, rule: dict, engine: str):
     start = time.monotonic()
     url = f"{ROOT}/apps/{model}-gallery/"
     failures = []
+    page_resources = []
     page.on("pageerror", lambda error: failures.append(str(error)[:180]))
+    # Log only sanitized resource names; never URLs carrying an auth token.
+    page.on("requestfailed", lambda req: page_resources.append({
+        "resource": req.url.split("?")[0].rsplit("/", 1)[-1],
+        "error": str(req.failure)[:120],
+    }))
+    page.on("response", lambda res: page_resources.append({
+        "resource": res.url.split("?")[0].rsplit("/", 1)[-1],
+        "status": res.status,
+    }) if res.status >= 400 else None)
     try:
         response = page.goto(url, wait_until="domcontentloaded", timeout=60000)
         assert response and response.status == 200, (model, "deployed HTML status", response.status if response else None)
         assert page.url.startswith(url), (model, "unexpected redirect away from GitHub Pages", page.url)
         assert RENDER not in page.url, (model, "Render interstitial", page.url)
-        page.wait_for_function("""([minimum, privateMinimum]) => {
-          if (typeof stored === 'undefined' || !Array.isArray(stored)) return false;
-          const total=stored.reduce((n,a)=>n+(a.images||[]).length,0);
-          const owner=stored.reduce((n,a)=>n+(a.images||[]).filter(p=>!!p.ownerAlbum).length,0);
-          return total>=minimum && owner>=privateMinimum;
-        }""", arg=[rule["min_count"], rule["min_private"]], timeout=170000)
+        try:
+            page.wait_for_function("""([minimum, privateMinimum]) => {
+              if (typeof stored === 'undefined' || !Array.isArray(stored)) return false;
+              const total=stored.reduce((n,a)=>n+(a.images||[]).length,0);
+              const owner=stored.reduce((n,a)=>n+(a.images||[]).filter(p=>!!p.ownerAlbum).length,0);
+              return total>=minimum && owner>=privateMinimum;
+            }""", arg=[rule["min_count"], rule["min_private"]], timeout=170000)
+        except PlaywrightTimeoutError as exc:
+            # An unlabelled timeout cannot tell a broken stored index from
+            # a Pages/CDN fetch failure, blocked IndexedDB, or a JS error.
+            try:
+                state = page.evaluate("""() => ({
+                  ready: document.readyState,
+                  storedDefined: typeof stored !== 'undefined',
+                  total: typeof stored !== 'undefined' && Array.isArray(stored)
+                    ? stored.reduce((n,a)=>n+(a.images||[]).length,0) : null,
+                  owner: typeof stored !== 'undefined' && Array.isArray(stored)
+                    ? stored.reduce((n,a)=>n+(a.images||[]).filter(p=>!!p.ownerAlbum).length,0) : null,
+                  inventory: document.querySelector('#inventory')?.textContent || '',
+                  empty: document.querySelector('#nothing')?.textContent || '',
+                  fastCovers: document.querySelectorAll('[data-fast-cover]').length,
+                  renderedAlbums: document.querySelectorAll('#albumgrid .album').length,
+                  scripts: [...document.scripts].filter(x=>x.src).map(x=>{
+                    try{return new URL(x.src).pathname.split('/').pop()}catch{return 'unknown'}
+                  }),
+                })""")
+            except PlaywrightError as diagnostic_error:
+                state = {"diagnostic_error": str(diagnostic_error)[:180]}
+            diagnostic = {"model": model, "browser": engine, "state": state,
+                          "page_errors": failures[:8], "resource_errors": page_resources[-25:]}
+            print("DEPLOYED_GALLERY_BOOTSTRAP_TIMEOUT",
+                  json.dumps(diagnostic, ensure_ascii=False), flush=True)
+            raise AssertionError(("gallery bootstrap did not reach physical count", diagnostic)) from exc
         # Mimmi's old raw threshold included 481 repeated SHA rows. Require
         # every baseline distinct original plus the unchanged raw owner ledger;
         # duplicate rows can no longer make this test pass.
