@@ -66,7 +66,7 @@ class PendingTests(unittest.TestCase):
         def reader(arguments):
             commands.append(arguments[0])
             if arguments[0]=='lsjson':return b'[]'
-            if arguments[0]=='lsf':return ('1753;'+'d'*64+'.json\\n').encode()
+            if arguments[0]=='lsf':return ('1753;'+'d'*64+'.json\n').encode()
             raise AssertionError('unexpected listing')
         found=list_pending_entries('archive:MimmiArchive','mimmi',reader=reader)
         self.assertEqual(found,[{'Path':'d'*64+'.json','Size':1753}])
@@ -79,8 +79,8 @@ class PendingTests(unittest.TestCase):
             self.fail('unexpected independent fallback'))[0]['Size'],1000)
 
     def test_alternate_unsafe_or_provider_response_never_admitted(self):
-        for bad in (b'{"errno":400141}',b'1;../catalog.json\\n',
-                    b'3000000;'+'d'.encode()*64+b'.json\\n',b'abc;not-valid.json\\n'):
+        for bad in (b'{"errno":400141}',b'1;../catalog.json\n',
+                    b'3000000;'+'d'.encode()*64+b'.json\n',b'abc;not-valid.json\n'):
             def reader(command):
                 return b'[]' if command[0]=='lsjson' else bad
             with self.subTest(raw=bad[:30]),self.assertRaises(ValueError):
