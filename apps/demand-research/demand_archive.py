@@ -118,6 +118,7 @@ class CloudArchive:
         self.quarantined_ids = set()
         self.repaired_entries = 0
         self.unrecoverable_entries = 0
+        self.catalog_unverified_refs = 0
         self._ensured_parents = set()
 
     @staticmethod
@@ -260,27 +261,77 @@ class CloudArchive:
         finally:
             os.unlink(path)
 
-    def load_catalog(self):
-        names = [n for n in self.names("metadata/manifests") if MANIFEST.fullmatch(n)]
-        # The newest fully verified catalog is the only authoritative pointer.
-        for name in sorted(names, key=lambda n: int(MANIFEST.fullmatch(n).group(1)), reverse=True):
-            raw = self.read("metadata/manifests/" + name, cap=2048, optional=True)
-            if raw is None:
-                continue
+    def load_catalog(self, *, include_entries=True):
+        # The entry journal, not a large monolithic catalog, is the durable
+        # source of truth. Catalogs are validated acceleration snapshots only.
+        self.catalog_unverified_refs = 0
+        legacy_raw = self.read("metadata/catalog.json",cap=MAX_CATALOG,optional=True)
+        legacy = validate_catalog(json.loads(legacy_raw)) if legacy_raw is not None else []
+        by_id={p["id"]:p for p in legacy}
+        selected=None
+        names=[n for n in self.names("metadata/manifests") if MANIFEST.fullmatch(n)]
+        for name in sorted(names,key=lambda n:int(MANIFEST.fullmatch(n).group(1)),reverse=True):
             try:
-                info = json.loads(raw)
-                if (info.get("schema_version") != 1 or not
-                    re.fullmatch(r"metadata/catalogs/catalog-[0-9]{6,30}\.json", str(info.get("catalog", "")))
-                    or not re.fullmatch(r"[a-f0-9]{64}", str(info.get("sha256", "")))):
+                raw=self.read("metadata/manifests/"+name,cap=2048,optional=True)
+                info=json.loads(raw) if raw is not None else None
+                if (not isinstance(info,dict) or info.get("schema_version")!=1
+                        or not re.fullmatch(r"metadata/catalogs/catalog-[0-9]{6,30}\.json",
+                                            str(info.get("catalog","")))
+                        or not re.fullmatch(r"[a-f0-9]{64}",str(info.get("sha256","")))):
                     continue
-                cat = self.read(info["catalog"], cap=MAX_CATALOG)
-                if sha256(cat) != info["sha256"]:
+                blob=self.read(info["catalog"],cap=MAX_CATALOG)
+                if sha256(blob)!=info["sha256"]:
                     continue
-                return validate_catalog(json.loads(cat))
-            except (ValueError, KeyError, json.JSONDecodeError, RuntimeError):
+                parsed=json.loads(blob)
+                if parsed.get("schema_version")==1:
+                    for p in validate_catalog(parsed):
+                        by_id[p["id"]]=p
+                    selected="legacy_inline"
+                elif parsed.get("schema_version")==2:
+                    refs=parsed.get("post_refs")
+                    if not isinstance(refs,list) or len(refs)>MAX_POST:
+                        continue
+                    unique=set()
+                    valid=True
+                    for row in refs:
+                        pid=row.get("id") if isinstance(row,dict) else None
+                        digest=row.get("sha256") if isinstance(row,dict) else None
+                        if (not isinstance(pid,str) or not ID.fullmatch(pid)
+                                or not re.fullmatch(r"[a-f0-9]{64}",str(digest))
+                                or pid in unique):
+                            valid=False
+                            break
+                        unique.add(pid)
+                    if not valid:
+                        continue
+                    selected=refs
+                else:
+                    continue
+                break
+            except (RuntimeError,ValueError,TypeError,KeyError,json.JSONDecodeError):
                 continue
-        legacy = self.read("metadata/catalog.json", cap=MAX_CATALOG, optional=True)
-        return validate_catalog(json.loads(legacy)) if legacy is not None else []
+        if isinstance(selected,list):
+            # Read-only SHA-verified materialization. A damaged reference cannot
+            # erase an older verified record or stop unrelated entries loading.
+            for row in selected:
+                pid=row["id"]
+                try:
+                    raw=self.read("posts/"+pid+"/post.json",cap=MAX_POST,optional=True)
+                    if raw is None or sha256(raw)!=row["sha256"]:
+                        self.catalog_unverified_refs+=1
+                        continue
+                    item=validate_post(json.loads(raw))
+                    if item["id"]!=pid:
+                        raise ValueError("referenced post id mismatch")
+                    by_id[pid]=item
+                except (RuntimeError,ValueError,TypeError,KeyError,json.JSONDecodeError):
+                    self.catalog_unverified_refs+=1
+        if include_entries:
+            # Read-only reconstruction works even if no catalog has EVER
+            # published. This is the primary crash-recovery guarantee.
+            by_id,_=self.recover_entries(by_id,repair=False)
+        return sorted(by_id.values(),
+                      key=lambda p:str(p.get("posted_at","")),reverse=True)
 
     def pending_capture_ids(self, existing):
         # Early snapshots survive a crash even before a verified entry is written.
@@ -295,7 +346,7 @@ class CloudArchive:
                 and ID.fullmatch(name[:-1]) and name[:-1] not in existing
                 and name[:-1] not in self.quarantined_ids]
 
-    def recover_entries(self, existing):
+    def recover_entries(self, existing, *, repair=True):
         result = dict(existing)
         new = 0
         self.repaired_entries = 0
@@ -334,7 +385,7 @@ class CloudArchive:
                     if post["id"] != pid:
                         raise ValueError("marker/post mismatch")
                 except (ValueError, TypeError, KeyError, json.JSONDecodeError):
-                    if directory != "metadata/entries":
+                    if directory != "metadata/entries" or not repair:
                         self.unrecoverable_entries += 1
                         continue
                     # Recovery is allowed only if a separately readable post
