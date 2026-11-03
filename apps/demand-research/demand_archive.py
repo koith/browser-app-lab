@@ -115,6 +115,9 @@ class CloudArchive:
         if not re.fullmatch(r"archive:[A-Za-z0-9_/-]+", self.remote):
             raise ValueError("archive destination must be a private archive: prefix")
         self.runner = runner or self._run
+        self.quarantined_ids = set()
+        self.repaired_entries = 0
+        self.unrecoverable_entries = 0
 
     @staticmethod
     def _run(args, data=None, timeout=150, allow_missing=False):
@@ -251,7 +254,8 @@ class CloudArchive:
         if len(names) > MAX_ENTRIES:
             raise ValueError("private capture directory listing exceeds limit")
         return [name[:-1] for name in names if name.endswith("/")
-                and ID.fullmatch(name[:-1]) and name[:-1] not in existing]
+                and ID.fullmatch(name[:-1]) and name[:-1] not in existing
+                and name[:-1] not in self.quarantined_ids]
 
     def recover_entries(self, existing):
         result = dict(existing)
@@ -263,7 +267,7 @@ class CloudArchive:
         for directory in ("metadata/entries-repaired", "metadata/entries"):
             for filename in self.names(directory):
                 match = ENTRY.fullmatch(filename)
-                if not match or match.group(1) in result:
+                if not match or match.group(1) in result or match.group(1) in self.quarantined_ids:
                     continue
                 pid = match.group(1)
                 key = directory + "/" + filename
@@ -276,7 +280,18 @@ class CloudArchive:
                         raise ValueError("bad entry metadata")
                     record = self.read("posts/" + pid + "/post.json", cap=MAX_POST)
                     if sha256(record) != marker["sha256"]:
-                        raise RuntimeError("private post record checksum mismatch")
+                        # Never rebuild a valid signed marker from different
+                        # bytes. A remote read can be briefly stale; retry
+                        # before quarantining this record without erasing it.
+                        for _ in range(2):
+                            time.sleep(0.5)
+                            record = self.read("posts/" + pid + "/post.json", cap=MAX_POST)
+                            if sha256(record) == marker["sha256"]:
+                                break
+                        else:
+                            self.unrecoverable_entries += 1
+                            self.quarantined_ids.add(pid)
+                            continue
                     post = validate_post(json.loads(record))
                     if post["id"] != pid:
                         raise ValueError("marker/post mismatch")
