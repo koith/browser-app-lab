@@ -758,3 +758,60 @@ def test_compact_index_accepts_concurrent_appended_verified_post(monkeypatch):
     assert outcome["index_lag_post_count"]==1
     assert outcome["fully_reconciled"] is False
     assert len(cloud.load_catalog(include_entries=True))==2
+
+
+def test_missing_original_attachment_is_retryable_not_a_frozen_backup(monkeypatch):
+    """Keep first observation, but never publish a permanently incomplete post."""
+    from datetime import datetime, timezone
+    cloud=FakeCloud()
+    monkeypatch.setenv("RCLONE_CONFIG_ARCHIVE_COOKIE","offline-test")
+    monkeypatch.setenv("DEMAND_CAPTURE_PUBLIC_ALLOWED","1")
+    original="at://did:plc:abcdefghijk/app.bsky.feed.post/retrymissingphoto"
+    row={"platform":"bluesky","original_id":original,
+         "source_url":"https://bsky.app/profile/did:plc:abcdefghijk/post/retrymissingphoto",
+         "profile_url":"https://bsky.app/profile/did:plc:abcdefghijk",
+         "text":"synthetic "+job.TERMS[0],"posted_at":"2026-11-03T00:00:00Z",
+         "media_urls":["https://cdn.bsky.app/img/original.jpg"],"media_expected":1}
+    attempts={"ready":False}
+    raw=b"synthetic image data"
+    pid=post_key("bluesky",original)
+    def fake_make_post(current,now,get_media=None,pid_override=None):
+        media=([{"key":"posts/"+pid+"/media/0001.jpg","mime":"image/jpeg",
+                 "bytes":len(raw),"sha256":sha256(raw),"remote_verified":True}]
+               if attempts["ready"] else [])
+        p={"id":pid,"platform":"bluesky","source_url":current["source_url"],
+           "posted_at":current["posted_at"],"captured_at":datetime.fromtimestamp(now,timezone.utc).isoformat(),
+           "text":current["text"],"media":media,"profile_url":current.get("profile_url",""),
+           "media_expected":1,"media_saved":len(media),
+           "archive_complete":bool(media),"provenance":"public_source_observed"}
+        return p,([raw] if media else [])
+    monkeypatch.setattr(job,"make_post",fake_make_post)
+    getter=lambda term,start,end:[row] if term==job.TERMS[0] else []
+    first=job.run(fetchers=[getter],cloud=cloud,clock=lambda:1793667900,
+                  run_id="123457100",fast_mode=True)
+    assert first["saved_verified"]==0
+    assert first["pending_media_retry"]==1
+    assert first["operational_status"]=="DEGRADED_MEDIA"
+    assert cloud.load_catalog()==[]
+    assert "posts/"+pid+"/capture.json" in cloud.objects
+    assert "metadata/entries/"+pid+".json" not in cloud.objects
+    attempts["ready"]=True
+    second=job.run(fetchers=[getter],cloud=cloud,clock=lambda:1793668200,
+                   run_id="123457101",fast_mode=True)
+    assert second["saved_verified"]==1
+    assert second["pending_media_retry"]==0
+    assert cloud.load_catalog()[0]["archive_complete"] is True
+    assert cloud.objects["posts/"+pid+"/media/0001.jpg"]==raw
+
+
+def test_media_indices_do_not_shift_when_first_original_missing():
+    row={"platform":"bluesky","original_id":"example","source_url":"https://bsky.app/example",
+         "posted_at":"2026-11-03T00:00:00Z","text":"synthetic post",
+         "media_urls":["https://cdn.bsky.app/a.jpg","https://cdn.bsky.app/b.jpg"],
+         "media_expected":2}
+    p,blobs=job.make_post(row,1793667900,get_media=lambda u:
+                         ("image/jpeg",b"second") if u.endswith("b.jpg") else None)
+    assert p["archive_complete"] is False
+    assert p["media_saved"]==1
+    assert p["media"][0]["key"].endswith("/0002.jpg")
+    assert blobs==[b"second"]
