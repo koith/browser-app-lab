@@ -213,20 +213,50 @@ class CloudArchive:
             raise ValueError("private archive entry listing too large")
         return lines
 
-    def ensure_parent(self, key):
-        # rclone-extra's unofficial TeraBox apiFileUpload requires an existing
-        # parent directory. Its backend Mkdir handles one level at a time, not
-        # recursively; make ancestors in order before the FIRST write.
-        parts=key.split("/")[:-1]
-        for idx in range(1,len(parts)+1):
-            rel="/".join(parts[:idx])
-            if rel in self._ensured_parents:
+    def ensure_parent(self, key, *, domain=None, force=False):
+        """Create and verify ancestors even when TeraBox directory views lag.
+
+        The unofficial backend can acknowledge mkdir before apiFileUpload can
+        resolve the new parent. The final directory must be observable before
+        the first upload; a cached parent is rechecked on missing-path errors.
+        No remote files are removed, renamed, or overwritten.
+        """
+        if domain not in (None, "https://nephobox.com"):
+            raise ValueError("unapproved alternate cloud endpoint")
+        parents=key.split("/")[:-1]
+        final="/".join(parents)
+        for idx in range(1,len(parents)+1):
+            rel="/".join(parents[:idx])
+            if rel in self._ensured_parents and not force and domain is None:
                 continue
-            # Mkdir is idempotent when a directory already exists. Do not
-            # swallow errors: a failed parent must not produce a false success.
-            self.command(["mkdir",self.remote+"/"+rel,"--retries","2"],
-                         timeout=90)
-            self._ensured_parents.add(rel)
+            dst=self.remote+"/"+rel
+            opts=["--terabox-domain",domain] if domain else []
+            last=None
+            for delay in (0.0,0.6,1.5,3.0):
+                if delay:
+                    time.sleep(delay)
+                try:
+                    self.command(["mkdir",dst,*opts,"--retries","2"],timeout=90)
+                except RuntimeError as error:
+                    last=error
+                    if "(authorization)" in str(error) or "(capacity)" in str(error):
+                        raise
+                # Verify the deepest parent actually appears to this endpoint.
+                # A successful mkdir alone is not a durable readiness proof.
+                if rel==final:
+                    try:
+                        listed=self.command(
+                            ["lsf",dst,"--max-depth","1",*opts,"--retries","2"],
+                            timeout=90,allow_missing=True)
+                    except RuntimeError as error:
+                        last=error
+                        listed=None
+                    if listed is None:
+                        continue
+                self._ensured_parents.add(rel)
+                break
+            else:
+                raise RuntimeError("private cloud parent directory unverified") from last
 
     def write_immutable(self, key, data):
         if not isinstance(data, bytes):
@@ -295,7 +325,7 @@ class CloudArchive:
                         # A different runner or a provider inconsistency can
                         # invalidate a cached parent; reconstruct all levels.
                         self._ensured_parents.clear()
-                        self.ensure_parent(key)
+                        self.ensure_parent(key,force=True)
                 matched, conflicting = read_consistent()
                 if matched:
                     return True
@@ -335,6 +365,9 @@ class CloudArchive:
                         return True
                     raise RuntimeError("immutable alternate cloud endpoint checksum conflict")
             try:
+                # A fresh nested directory can exist on one backend while
+                # remaining temporarily unresolvable on the other.
+                self.ensure_parent(key,domain=alternate,force=True)
                 # Ignore any existing object even if TeraBox's listing API
                 # is stale. Never intentionally overwrite an immutable key.
                 self.command(["copyto",path,target,"--ignore-existing",
