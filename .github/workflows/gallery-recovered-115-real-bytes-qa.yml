@@ -1,6 +1,10 @@
 name: Mimmi 115 Recovered Pages Files SHA and Browser Decode QA
 on:
   workflow_dispatch:
+  pull_request:
+    paths:
+      - apps/gallery-archive/qa_recovered_115_real_bytes.py
+      - .github/workflows/gallery-recovered-115-real-bytes-qa.yml
   push:
     branches: [main]
     paths:

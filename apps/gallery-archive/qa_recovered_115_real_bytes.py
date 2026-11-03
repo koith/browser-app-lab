@@ -18,17 +18,26 @@ def run(browser):
     page.route("**/*onrender.com/**",lambda r:r.abort("blockedbyclient"))
     page.goto(PAGE,wait_until="domcontentloaded",timeout=60000)
     page.wait_for_function(
-        "()=>typeof stored!=='undefined' && stored.reduce((n,a)=>n+a.images.filter(p=>p.collisionRecovered).length,0)===115",
+        "()=>typeof stored!=='undefined' && Array.isArray(stored) && stored.length>0 && Array.isArray(localStored)",
         timeout=90000)
     result=page.evaluate("""async()=>{
       const manifest=await fetch('number-collision-distinct.json',{cache:'no-store'}).then(r=>{
         if(!r.ok)throw Error('manifest http '+r.status);
         return r.json();
       });
-      const rows=stored.flatMap(a=>a.images.filter(p=>p.collisionRecovered).map(p=>({
-        album:a.id,sha256:p.sha256,url:p.url,width:p.width,height:p.height
-      })));
       const expected=new Set(manifest.photos.map(p=>p.album+'|'+p.sha256));
+      const displayed=new Set(stored.flatMap(a=>a.images.map(p=>p.sha256)));
+      // SHA-union (PR #545) retired collisionRecovered; using that old flag
+      // creates a false 90-second timeout. Verify each historic SHA is BOTH
+      // displayed in the current union and still a real saved Pages file.
+      const rows=manifest.photos.map(record=>{
+        const album=localStored.find(a=>a.id===record.album);
+        const photo=album?.images.find(p=>p.sha256===record.sha256);
+        if(!photo || !displayed.has(record.sha256))
+          throw Error('Historical SHA missing from physical store or gallery');
+        return {album:record.album,sha256:record.sha256,url:photo.url,
+                width:photo.width,height:photo.height};
+      });
       if(expected.size!==115||rows.length!==115||
          rows.some(p=>!expected.has(p.album+'|'+p.sha256)))
          throw Error('Missing, unreviewed or duplicate recovered image');
