@@ -1,0 +1,43 @@
+name: 4LEAF legacy dice match recovery and channel isolation QA
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/lobby-ui.js'
+      - 'apps/4leaf/rog/tests/dice-legacy-channel-resume.cjs'
+      - '.github/workflows/rog-legacy-match-resume-qa.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/lobby-ui.js'
+      - 'apps/4leaf/rog/tests/dice-legacy-channel-resume.cjs'
+      - '.github/workflows/rog-legacy-match-resume-qa.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  legacy-match-resume:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Playwright Chromium
+        run: |
+          npm install --no-save playwright
+          npx playwright install --with-deps chromium
+      - name: Serve actual 4LEAF game assets
+        run: |
+          nohup python3 -m http.server 8765 --bind 127.0.0.1 --directory apps/4leaf/rog > /tmp/leaf-legacy-resume.log 2>&1 &
+          for i in $(seq 1 30); do
+            if curl -fsSI http://127.0.0.1:8765/index.html >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/leaf-legacy-resume.log
+          exit 1
+      - name: Real game -> upgraded legacy save -> resume -> channel isolation
+        env:
+          FOURLEAF_TEST_URL: http://127.0.0.1:8765/
+        run: node apps/4leaf/rog/tests/dice-legacy-channel-resume.cjs
