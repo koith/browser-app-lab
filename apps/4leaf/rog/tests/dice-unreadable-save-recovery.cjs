@@ -32,11 +32,11 @@ const mobile=process.env.FOURLEAF_MOBILE==='1';
  };
  try{
   await page.addInitScript(raw=>{
+   window.LEAF_CENTRAL_API_URL='';
    // addInitScript executes on every reload. Seed only the first navigation.
    if(sessionStorage.getItem('__leaf_corrupt_fixture'))return;
    sessionStorage.setItem('__leaf_corrupt_fixture','seeded');
    localStorage.setItem('rog_match',raw);
-   window.LEAF_CENTRAL_API_URL='';
   },raw1);
   await page.goto(process.env.FOURLEAF_TEST_URL||'http://127.0.0.1:8765/',{waitUntil:'domcontentloaded'});
   await page.waitForFunction(()=>window.__ROG_TEST__&&window.__LEAF_LOBBY__&&window.__LEAF_WORLD__);
