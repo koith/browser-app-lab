@@ -302,7 +302,7 @@ class CloudArchive:
             if alternate_existing is not None:
                 if sha256(alternate_existing)==expected_sha:
                     return False
-                raise RuntimeError("immutable archive key collision on alternate endpoint")
+                raise RuntimeError("immutable archive key collision: alternate endpoint checksum conflict")
         if existing is not None:
             if sha256(existing) == expected_sha:
                 return False
