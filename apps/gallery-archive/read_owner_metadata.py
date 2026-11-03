@@ -201,7 +201,10 @@ def read_with_current_owner_web_session(remote,model,*,minimum=1,reader=None,ref
             gateway_reader=read_via_existing_owner_gateway
         # Existing remote metadata is still verified against the published
         # photo baseline; do not accept public/unauthenticated index guesses.
-        return gateway_reader(remote,model,minimum=minimum)
+        raw=gateway_reader(remote,model,minimum=minimum)
+        if not matches(raw,model,None,minimum):
+            raise ProviderVerificationRequired('Signed gateway remote catalog failed complete identity and baseline validation')
+        return raw
 
 
 if __name__=='__main__':
