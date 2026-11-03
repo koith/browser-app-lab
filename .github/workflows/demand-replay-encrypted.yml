@@ -13,6 +13,14 @@ on:
         type: string
         required: false
         default: ""
+  # Re-attempt retained encrypted originals as soon as repaired archive code
+  # reaches main. This does not start a separate ChatGPT conversation.
+  push:
+    branches: [main]
+    paths:
+      - "apps/demand-research/demand_archive.py"
+      - "apps/demand-research/recover_spool_artifacts.py"
+      - ".github/workflows/demand-replay-encrypted.yml"
   workflow_run:
     workflows:
       - "INTERSECTION — Fast Private Public-Post Capture"
@@ -61,6 +69,7 @@ jobs:
     # The prior capture's artifact upload step has already completed.
     if: >-
       github.event_name == 'schedule' ||
+      github.event_name == 'push' ||
       github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'workflow_run' &&
        github.event.workflow_run.event != 'pull_request' &&
