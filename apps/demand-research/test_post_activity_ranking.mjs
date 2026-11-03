@@ -136,7 +136,7 @@ assert.equal((main.match(/href="\.\/consumer\/"/g)||[]).length,1,"single consume
 assert.ok(!main.includes('class="consumer-entry"'),"no oversized standalone consumer banner");
 assert.ok(main.includes("thumb.append(sourceBadge(p,true))"),"post thumbnail requests icon-only source badge");
 assert.ok(main.includes('if(!iconOnly)badge.append(el("span","",meta.name))'),"icon badge has no platform-name text");
-assert.ok(main.includes('class="source-badge"+(iconOnly?" source-badge--icon-only":"")'),"accessible icon-only badge variant");
+assert.ok(main.includes('"source-badge"+(iconOnly?" source-badge--icon-only":"")'),"accessible icon-only badge variant");
 assert.ok(main.includes('cloud:{name:"Archive",favicon:"https://koith.github.io/browser-app-lab/apps/demand-research/assets/archive.svg"}'),"archive has a pictogram");
 assert.ok(!script.includes("localStorage")&&!script.includes("sessionStorage"));
 console.log("PUBLIC_ACTIVITY_RANKING_QA_PASS: 10-at-a-time ranking, source-logo-only tiles, compact header link, detail dialog, dedup and safe URLs");
