@@ -1151,15 +1151,41 @@ function tile(p){
   let article=el("article","post"),button=el("div","post-open");button.setAttribute("role","button");button.tabIndex=0;button.setAttribute("aria-label","게시글 상세 보기");
   article.dataset.mediaPolicy=p.restricted?"restricted":p.adultLabeled?"adult":"general";
   if(p.discoveryCandidate)article.dataset.discoveryCandidate="true";
-  let thumb=el("div","post-thumb"),first=p.media[0],blocked=hideMedia(p);
+  let thumb=el("div","post-thumb"),first=p.media?.[0],blocked=hideMedia(p);
   thumb.append(sourceBadge(p,true));
-  if(first&&!blocked&&first.thumb){
-    let img=el("img");img.src=first.thumb;img.alt="게시글 대표 이미지";img.loading="lazy";img.referrerPolicy="no-referrer";
-    img.addEventListener("error",()=>img.remove());thumb.append(img);
-  }else{
-    let label=blocked?(p.restricted?"제한된 미디어":"성인 미디어 숨김"):first?.type==="video"?"영상 보기":first?"미리보기 없음":"글 보기";
-    thumb.append(el("span","text-icon"+(blocked?" hide-icon":""),p.discoveryCandidate?"SNS 원문 링크\n검색 결과":label));
+  const avatar=validUrl(p.avatarUrl);
+  function textPreview(message){
+    article.dataset.noMedia="true";
+    const box=el("div","thumb-placeholder");
+    box.append(el("b","",message),el("span","",String(p.text||"원문을 확인하세요").slice(0,135)));
+    thumb.append(box);
   }
+  function showFallback(){
+    thumb.querySelectorAll("img.post-media-img,.thumb-placeholder,.thumb-kind-label").forEach(n=>n.remove());
+    if(!blocked&&avatar){
+      const profile=el("img","post-media-img");
+      profile.src=avatar;profile.alt="작성자 프로필 사진 · 게시글 첨부 사진 아님";
+      profile.loading="lazy";profile.decoding="async";profile.referrerPolicy="no-referrer";
+      profile.addEventListener("error",()=>{profile.remove();textPreview(first?.type==="video"?"영상 미리보기 없음":"본문만 있는 게시글")},{once:true});
+      thumb.append(profile,el("span","thumb-kind-label",first?.type==="video"?"프로필 사진 · 영상 보기":"프로필 사진"));
+      return;
+    }
+    textPreview(blocked?"표시 제한된 미디어":first?.type==="video"?"영상 미리보기 없음":first?"이미지 미리보기 없음":"본문만 있는 게시글");
+  }
+  if(!blocked&&first){
+    const sources=[validUrl(first.thumb)];
+    if(first.type==="image"&&validUrl(first.url)&&first.url!==first.thumb)sources.push(validUrl(first.url));
+    const candidates=[...new Set(sources.filter(Boolean))];
+    if(candidates.length){
+      const img=el("img","post-media-img");
+      img.alt="SNS 원본 게시글 첨부 미리보기";
+      img.loading="lazy";img.decoding="async";img.referrerPolicy="no-referrer";
+      let next=0;
+      img.addEventListener("error",()=>{next++;if(next<candidates.length)img.src=candidates[next];else showFallback()});
+      img.src=candidates[0];
+      thumb.append(img);
+    }else showFallback();
+  }else showFallback();
   if(first?.type==="video"&&!blocked)thumb.append(el("span","video-mark","▶ 영상"));
   if(p.media.length>1&&!blocked)thumb.append(el("span","media-num","+"+(p.media.length-1)));
   let body=el("div","post-body"),title=el("div","post-title");
@@ -1178,6 +1204,7 @@ function appendMedia(parent,m,post,one){
     let src=validUrl(m.url);if(!src)return;
     let link=el("a",one?"single":"");link.href=src;link.target="_blank";link.rel="noopener noreferrer";
     let img=el("img");img.src=src;img.loading="lazy";img.alt=m.alt||"첨부 사진";img.referrerPolicy="no-referrer";
+    img.addEventListener("error",()=>{link.replaceWith(sourceLink(post,"이미지 원문에서 보기"))},{once:true});
     link.append(img);parent.append(link);
   }else if(m.type==="video"){
     let src=validUrl(m.url),poster=validUrl(m.thumb);
@@ -1238,7 +1265,7 @@ function closeDetail(){
 }
 function draw(){
   updateAdScores();
-  let matching=(cloudMode?posts:posts.concat(indexedCandidates)).filter(matchesText),suspected=matching.filter(suspectedAd).length;
+  let matching=posts.filter(matchesText),suspected=matching.filter(suspectedAd).length;
   let hidden=suspected;
   let rows=feedRows(),list=$("feed");list.replaceChildren();
   drawDiscoveredLinks();
