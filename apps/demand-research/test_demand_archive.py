@@ -601,3 +601,62 @@ def test_failed_compact_catalog_publication_keeps_verified_journal_readable(monk
     assert len(cloud.load_catalog(include_entries=False))==0
     assert len(cloud.load_catalog())==1
     assert cloud.load_catalog()[0]["id"]==post_key("bluesky",row["original_id"])
+
+
+def test_fast_capture_only_checks_marker_names_and_saves_new_post(monkeypatch):
+    cloud=FakeCloud()
+    monkeypatch.setenv("RCLONE_CONFIG_ARCHIVE_COOKIE","offline-test")
+    monkeypatch.setenv("DEMAND_CAPTURE_PUBLIC_ALLOWED","1")
+    first=post()
+    cloud.save_post(first)
+    old_id="at://did:plc:abcdefghijk/app.bsky.feed.post/abc"
+    rows=[
+        {"platform":"bluesky","original_id":original,"source_url":
+         "https://bsky.app/profile/did:plc:abcdefghijk/post/"+suffix,
+         "text":"synthetic only "+job.TERMS[0],
+         "posted_at":"2026-11-03T00:00:00Z","media_urls":[],"media_expected":0}
+        for original,suffix in [
+          (old_id,"abc"),
+          ("at://did:plc:abcdefghijk/app.bsky.feed.post/newfast01","newfast01")]
+    ]
+    class FastCloud(FakeCloud):
+        def load_catalog(self,*args,**kwargs):
+            raise AssertionError("fast poll must not download old post journal")
+        def recover_entries(self,*args,**kwargs):
+            raise AssertionError("fast poll must not verify old post hashes")
+        def pending_capture_ids(self,*args,**kwargs):
+            raise AssertionError("fast poll must not scan old captures")
+
+    fast=FastCloud()
+    fast.objects=cloud.objects
+    result=job.run(
+        fetchers=[lambda term,start,end:rows if term==job.TERMS[0] else []],
+        cloud=fast, clock=lambda:1793667900,
+        run_id="123456996", fast_mode=True)
+    assert result["saved_verified"]==1
+    assert result["duplicates"]==1
+    assert result["operational_status"]=="JOURNAL_ONLY"
+    assert result["storage_failures"]==0
+    assert not any("metadata/manifests/" in key for key in cloud.objects)
+    assert len(CloudArchive(remote=fast.remote,runner=fast.runner)
+               .load_catalog(include_entries=True))==2
+
+
+def test_separate_repair_reconciles_fast_journal_and_publishes_compact_index(monkeypatch):
+    from rebuild_archive import rebuild
+    cloud=FakeCloud()
+    monkeypatch.setenv("RCLONE_CONFIG_ARCHIVE_COOKIE","offline-test")
+    monkeypatch.setenv("DEMAND_CAPTURE_PUBLIC_ALLOWED","1")
+    cloud.save_post(post())
+    summary=rebuild(cloud,run_id="123456997")
+    assert summary["catalog_matches_journal"] is True
+    assert summary["journal_readable_posts"]==1
+    assert summary["published_catalog_posts"]==1
+    assert summary["catalog_published_this_run"] is True
+    assert len(cloud.load_catalog(include_entries=False))==1
+    versions=[k for k in cloud.objects if k.startswith("metadata/catalogs/")]
+    assert len(versions)==1
+    compact=json.loads(cloud.objects[versions[0]])
+    assert compact["schema_version"]==2
+    assert "text" not in json.dumps(compact)
+    assert "post_refs" in compact
