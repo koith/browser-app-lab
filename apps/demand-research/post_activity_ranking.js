@@ -104,7 +104,7 @@
      if(text!==undefined)e.textContent=String(text);
      return e;
    };
-   let visibleCount=10,ranking=[];
+   let visibleCount=20,ranking=[],cohort="established";
    const dialog=$("activityRankingDialog"),detail=$("activityRankingDialogContent");
    function closeDetail(){
      if(!dialog)return;
@@ -140,7 +140,7 @@
        metrics.append(metric);
      }
      detail.append(metrics,node("div","activity-rank-detail-note",
-       "현재 검색 기간에 관측된 공개 게시글 기준 · 활동 지수는 게시글×2 + 활동 일수×3 + 공개 반응 보정"));
+       "현재 검색 기간에 관측된 공개 게시글 기준 · 기존 활동군은 관측 게시글 3건 이상 및 활동일 3일 이상, 신규 활동군은 그 외 · 계정 생성일을 뜻하지 않음 · 활동 지수는 게시글×2 + 활동 일수×3 + 공개 반응 보정"));
      const link=node("a","activity-rank-detail-link","SNS 프로필 열기 ↗");
      link.href=g.profileUrl;link.target="_blank";link.rel="noopener noreferrer";
      detail.append(link);
@@ -149,7 +149,7 @@
    }
    function draw(){
      const platform=$("activityRankingPlatform").value,order=$("activityRankingSort").value;
-     const filtered=ranking.filter(x=>platform==="all"||x.platform===platform);
+     const filtered=ranking.filter(x=>(platform==="all"||x.platform===platform)&& (cohort==="established"?(x.posts>=3&&x.activeDays>=3):(x.posts<3||x.activeDays<3)));
      const sorter={
        posts:(a,b)=>b.posts-a.posts,
        days:(a,b)=>b.activeDays-a.activeDays,
@@ -166,8 +166,7 @@
        const card=node("button","activity-rank-card");
        card.type="button";
        card.setAttribute("aria-label",index+1+"위 "+g.author+" 상세 보기");
-       card.append(node("span","activity-rank-num",String(index+1).padStart(2,"0")),
-         node("span","activity-rank-user",g.author));
+       card.append(node("span","activity-rank-num",String(index+1).padStart(2,"0")));
        const thumb=node("span","activity-rank-thumb");
        if(g.latestThumbnail){
          const img=node("img","");
@@ -182,8 +181,8 @@
      });
      const more=$("activityRankingMore");
      more.classList.toggle("hidden",sorted.length<=show);
-     more.setAttribute("aria-expanded",String(show>10));
-     more.setAttribute("aria-label",`랭킹 ${Math.min(10,Math.max(0,sorted.length-show))}명 더 보기`);
+     more.setAttribute("aria-expanded",String(show>20));
+     more.setAttribute("aria-label",`랭킹 ${Math.min(20,Math.max(0,sorted.length-show))}명 더 보기`);
      more.textContent="더 보기";
    }
    function update(){
@@ -202,14 +201,15 @@
      if(scheduled)return;scheduled=true;
      win.queueMicrotask(()=>{scheduled=false;update();});
    }
-   $("activityRankingPlatform").addEventListener("change",()=>{visibleCount=10;closeDetail();draw();});
+   doc.querySelectorAll('[data-rank-cohort]').forEach(btn=>btn.addEventListener('click',()=>{cohort=btn.dataset.rankCohort;visibleCount=20;closeDetail();doc.querySelectorAll('[data-rank-cohort]').forEach(b=>{b.classList.toggle('active',b===btn);b.setAttribute('aria-selected',String(b===btn));});draw();}));
+   $("activityRankingPlatform").addEventListener("change",()=>{visibleCount=20;closeDetail();draw();});
    $("activityRankingSort").addEventListener("change",()=>{closeDetail();draw();});
-   $("activityRankingMore").addEventListener("click",()=>{visibleCount+=10;draw();});
+   $("activityRankingMore").addEventListener("click",()=>{visibleCount+=20;draw();});
    $("activityRankingDialogClose")?.addEventListener("click",closeDetail);
    dialog?.addEventListener("click",e=>{if(e.target===dialog)closeDetail();});
    dialog?.addEventListener("close",()=>detail?.replaceChildren());
    win.addEventListener("intersection:feed-updated",schedule);
-   win.addEventListener("intersection:date-range-change",()=>{visibleCount=10;closeDetail();schedule();});
+   win.addEventListener("intersection:date-range-change",()=>{visibleCount=20;closeDetail();schedule();});
    update();
  }
  return {compute,mount};
