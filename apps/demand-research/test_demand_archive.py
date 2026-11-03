@@ -35,6 +35,8 @@ class FakeCloud(CloudArchive):
                     return None
                 raise RuntimeError("missing mock cloud file")
             return self.objects[key]
+        if op == "mkdir":
+            return b""
         if op == "rcat":
             key = args[1].split("archive:DemandResearch/", 1)[1]
             self.objects[key] = data
@@ -397,3 +399,62 @@ def test_one_cloud_write_failure_does_not_block_other_verified_catalogued_record
     assert cloud.failed_once
     assert len(cloud.load_catalog())==1,"successful record must be published despite another failure"
     assert cloud.load_catalog()[0]["id"]==post_key("bluesky",rows[1]["original_id"])
+
+
+def test_eventually_consistent_remote_recovers_from_two_stale_reads(monkeypatch):
+    monkeypatch.setattr("demand_archive.time.sleep",lambda _:None)
+    class StaleCloud(FakeCloud):
+        def __init__(self):
+            super().__init__()
+            self.stale_remaining = 0
+
+        def fake(self, args, data=None, timeout=150, allow_missing=False):
+            if args[0] in ("copyto","rcat"):
+                result=super().fake(args,data=data,timeout=timeout,allow_missing=allow_missing)
+                self.stale_remaining=2
+                return result
+            if args[0]=="cat" and self.stale_remaining>0:
+                self.stale_remaining-=1
+                return b"synthetic stale remote bytes"
+            return super().fake(args,data=data,timeout=timeout,allow_missing=allow_missing)
+
+    cloud=StaleCloud()
+    p=post()
+    cloud.save_post(p)
+    assert cloud.stale_remaining==0
+    assert json.loads(cloud.objects["posts/"+p["id"]+"/post.json"])==p
+    assert cloud.recover_entries({})[0][p["id"]]==p
+
+
+def test_existing_conflicting_remote_bytes_never_overwritten(monkeypatch):
+    monkeypatch.setattr("demand_archive.time.sleep",lambda _:None)
+    cloud=FakeCloud()
+    target="posts/"+"a"*40+"/post.json"
+    cloud.objects[target]=b"synthetic existing content"
+    with pytest.raises(RuntimeError,match="immutable"):
+        cloud.write_immutable(target,b"new synthetic bytes")
+    assert cloud.objects[target]==b"synthetic existing content"
+
+
+def test_parent_missing_triggers_safe_mkdir_then_alternate_method(monkeypatch):
+    monkeypatch.setattr("demand_archive.time.sleep",lambda _:None)
+    class ParentMissing(FakeCloud):
+        def __init__(self):
+            super().__init__()
+            self.failed=False
+            self.mkdir_count=0
+
+        def fake(self,args,data=None,timeout=150,allow_missing=False):
+            if args[0]=="copyto" and not self.failed:
+                self.failed=True
+                raise RuntimeError("private cloud copyto failed (missing)")
+            if args[0]=="mkdir":
+                self.mkdir_count+=1
+                return b""
+            return super().fake(args,data=data,timeout=timeout,allow_missing=allow_missing)
+
+    cloud=ParentMissing()
+    p=post()
+    cloud.save_post(p)
+    assert cloud.failed and cloud.mkdir_count>=1
+    assert cloud.objects["posts/"+p["id"]+"/post.json"]==canonical_json(p)
