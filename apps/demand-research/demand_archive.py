@@ -241,6 +241,17 @@ class CloudArchive:
                     last=error
                     if "(authorization)" in str(error) or "(capacity)" in str(error):
                         raise
+                    # A directory may already exist even if mkdir returned
+                    # "duplicate" or a transient backend error. Only accept
+                    # that case when an independent listing confirms it.
+                    try:
+                        visible=self.command(
+                            ["lsf",dst,"--max-depth","1",*opts,"--retries","2"],
+                            timeout=90,allow_missing=True)
+                    except RuntimeError:
+                        visible=None
+                    if visible is None:
+                        continue
                 # Verify the deepest parent actually appears to this endpoint.
                 # A successful mkdir alone is not a durable readiness proof.
                 if rel==final:
