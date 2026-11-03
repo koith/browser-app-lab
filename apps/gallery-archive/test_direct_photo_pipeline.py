@@ -614,6 +614,86 @@ class DirectTests(unittest.TestCase):
         mixed=raw.replace('Mimmi_Work/ShyPetal.com@-003','Other_Work/ShyPetal.com@-003')
         self.assertEqual(page_images(mixed,page,'mimmi')[2],'mixed_public_editions_rejected')
 
+    def test_official_yui_feed_link_is_downloaded_as_real_individual_file(self):
+        from direct_photo_pipeline import verified_creator_feed_candidates
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);base=root/'apps/yui-gallery';base.mkdir(parents=True)
+            (base/'stored-albums.json').write_text('{"model":"yui","albums":[]}')
+            page='https://teapawt.net/super_yuisan'
+            previous='https://pbs.twimg.com/media/ExistingPhoto123.jpg?name=orig'
+            fresh='https://pbs.twimg.com/media/NewPhotoABCDE.jpg?name=orig'
+            wrong='https://pbs.twimg.com/media/OtherPhotoXYZ.jpg?name=orig'
+            (base/'public-work-pages.json').write_text(json.dumps({'albums':[{
+                'id':'public-yui-sns','title':'Yui official SNS',
+                'source':page}]}))
+            (base/'feed.json').write_text(json.dumps({
+                'source':'https://teapawt.net/super_yuisan/media',
+                'images':[
+                    {'source':'official-sns','post':'https://x.com/super_yuisan/status/2117242902825091424','url':fresh},
+                    {'source':'official-sns','post':'https://x.com/other/status/2117242902825091424','url':wrong},
+                    {'source':'mirror','post':'https://x.com/super_yuisan/status/2117242902825091425','url':wrong},
+                    {'source':'official-sns','post':'https://x.com/super_yuisan/status/2117242902825091424','url':fresh}]}))
+            self.assertEqual(verified_creator_feed_candidates(base),[fresh])
+            already=photo(2);new=photo(33)
+            owner={'schema_version':1,'model':'yui','albums':[{
+                'id':'public-yui-sns','images':[{
+                    'number':1,'sha256':hashlib.sha256(already).hexdigest()}]}]}
+            class Client:
+                calls=[]
+                def get(self,url):
+                    self.calls.append(url)
+                    if url==page:
+                        body=f'<div class="timeline-item" data-username="super_yuisan"><img src="{previous}"></div>'
+                        return type('R',(),{'content':body.encode()})()
+                    if url==previous:data=already
+                    elif url==fresh:data=new
+                    else:raise AssertionError('Untrusted media must not be fetched: '+url)
+                    return type('R',(),{'content':data})()
+            client=Client()
+            report=collect(root,'yui',owner,root/'stage',3,2,client,
+                           reviewed_source_only=True)
+            self.assertEqual(report['new_local_individual_files'],1)
+            self.assertEqual(report['results'][0]['official_creator_feed_candidates_added'],1)
+            self.assertNotIn(wrong,client.calls)
+            catalog=json.loads((root/'stage/metadata/catalog.json').read_text())
+            row=catalog['albums'][0]['images'][0]
+            self.assertEqual((root/'stage'/row['key']).read_bytes(),new)
+            self.assertEqual(row['sha256'],hashlib.sha256(new).hexdigest())
+
+    def test_public_media_origin_pause_skips_repeated_denied_downloads(self):
+        from public_photo_archive import PublicOriginPaused
+        with tempfile.TemporaryDirectory() as d:
+            root=Path(d);base=root/'apps/yui-gallery';base.mkdir(parents=True)
+            (base/'stored-albums.json').write_text('{"model":"yui","albums":[]}')
+            page='https://teapawt.net/super_yuisan'
+            media=[f'https://pbs.twimg.com/media/OriginalTest{i:02d}.jpg?name=orig' for i in range(3)]
+            (base/'public-work-pages.json').write_text(json.dumps({'albums':[{
+                'id':'public-yui-sns','title':'Yui official SNS','source':page}]}))
+            (base/'feed.json').write_text(json.dumps({
+                'source':'https://teapawt.net/super_yuisan/media','images':[
+                    {'source':'official-sns',
+                     'post':f'https://x.com/super_yuisan/status/211724290282509142{i}',
+                     'url':u} for i,u in enumerate(media)]}))
+            owner={'schema_version':1,'model':'yui','albums':[{
+                'id':'public-yui-sns','images':[{
+                    'number':1,'sha256':hashlib.sha256(photo(0)).hexdigest()}]}]}
+            class Client:
+                def __init__(self):self.blocked_origins=set();self.calls=[]
+                def get(self,url):
+                    self.calls.append(url)
+                    if url==page:
+                        html=f'<div class="timeline-item" data-username="super_yuisan"><img src="{media[0]}"></div>'
+                        return type('R',(),{'content':html.encode()})()
+                    self.blocked_origins.add('https://pbs.twimg.com')
+                    raise PublicOriginPaused(403,'access_denied')
+            client=Client()
+            report=collect(root,'yui',owner,root/'stage',3,2,client,
+                           reviewed_source_only=True)
+            self.assertEqual(client.calls,[page,media[0]])
+            self.assertEqual(report['results'][0]['failure_categories'],{'PublicOriginPaused':1})
+            self.assertEqual(report['results'][0]['media_candidates_deferred_after_origin_pause'],2)
+            self.assertEqual(report['new_local_individual_files'],0)
+
     def test_creator_feed_keeps_observed_original_and_rejects_quote_media(self):
         page='https://teapawt.net/super_yuisan'
         own='https://pbs.twimg.com/media/OwnPhoto1234.jpg?name=orig'
