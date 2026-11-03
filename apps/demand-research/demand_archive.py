@@ -342,7 +342,20 @@ class CloudArchive:
                         # A different runner or a provider inconsistency can
                         # invalidate a cached parent; reconstruct all levels.
                         self._ensured_parents.clear()
-                        self.ensure_parent(key,force=True)
+                        try:
+                            self.ensure_parent(key,force=True)
+                        except RuntimeError as parent_error:
+                            if any(code in str(parent_error) for code in (
+                                    "(authorization)","(capacity)","(rate_limited)")):
+                                raise
+                            # The primary host can be unable to recreate a
+                            # newly-visible path even after the first upload.
+                            # Give the alternate host a chance before failing.
+                            try:
+                                self.ensure_parent(
+                                    key,domain="https://nephobox.com",force=True)
+                            except RuntimeError:
+                                pass
                 matched, conflicting = read_consistent()
                 if matched:
                     return True
