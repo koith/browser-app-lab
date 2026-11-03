@@ -46,7 +46,7 @@
 **운영 장애의 최신 확인 값:**
 - [Actions #41616060145](https://github.com/koith/browser-app-lab/actions/runs/41616060145): fetched=7, new_verified=4, write_failures=3, 모두 `write_first_snapshot:backend_upload_missing`; **INT-01 = FAILED**.
 - [Actions #41616060341](https://github.com/koith/browser-app-lab/actions/runs/41616060341): 재발행 직후 snapshot=54, journal=62, 뒤이은 독립 조회 snapshot=62, journal=62, 샘플8/8 SHA 통과. 원인 확정 전 **INT-04 = UNVERIFIED**.
-- PR #614: 새 글 폴더 업로드에 실패하더라도 비공개 metadata 루트에 최초 관측 원문을 SHA 확인 후 불변 저장, 이후 복구 대상을 조회하도록 개발 중. **CODE_ONLY; 운영 검증 전 INT-01/03 완료 금지.**
+- [x] PR #614: 비공개 metadata 경로에 원문 불변 저장 코드 병합 및 합성 CI 통과. **실운영 실패가 남아 INT-01/03 최종 완료는 아님.**
 
 ## 재사용할 검증 근거
 
@@ -54,3 +54,20 @@
 - [PR #602 — 대체 도메인을 이용한 TeraBox 업로드 재검증](https://github.com/koith/browser-app-lab/pull/602): 코드 병합. 실제 글 전체 저장 성공은 별도 판단.
 - [Actions #41607742899](https://github.com/koith/browser-app-lab/actions/runs/41607742899): 2건 확인, 3건 실패를 집계한 기존 운영 기록.
 - [Actions #41611359428](https://github.com/koith/browser-app-lab/actions/runs/41611359428): GitHub Pages 배포 성공. 정확한 게시글 원본 렌더링은 별도 QA.
+
+
+## 2026-11-03 P0-01 후속 확인 — 최종 완료 아님
+
+- [x] [PR #616](https://github.com/koith/browser-app-lab/pull/616), [#617](https://github.com/koith/browser-app-lab/pull/617), [#618](https://github.com/koith/browser-app-lab/pull/618): AES-256-GCM 암호화 원본 보존 및 복구 코드 병합.
+- [x] [PR #624](https://github.com/koith/browser-app-lab/pull/624): 잔여 암호화 아티팩트 선택·메인 브랜치 출처 확인·재전송 도입, 캡처 CI 78개 및 복구 CI 19개 통과.
+- [x] [PR #626](https://github.com/koith/browser-app-lab/pull/626): GitHub Actions 6시간 간격 재전송 재시도 경로 CI 통과·병합.
+- [x] [PR #628](https://github.com/koith/browser-app-lab/pull/628): 건별 복구 시간 상한과 3회 연속 실패 시 서킷 브레이커, 합성 CI 통과 및 main 병합(f6a703bdf922e95fbe5eab16ef3f6717b52c42f8).
+- [x] [운영 #41629506950](https://github.com/koith/browser-app-lab/actions/runs/41629506950): 원본 3건 긴급 AES-GCM 아티팩트 존재를 확인했으나 테라박스 저장 미검증.
+- [x] [운영 #41630564927](https://github.com/koith/browser-app-lab/actions/runs/41630564927): 발견 25건, 원격 검증 5건, 암호화 보관 19건, 실운영 실패.
+- [x] [운영 #41636436888](https://github.com/koith/browser-app-lab/actions/runs/41636436888): 발견 23건, 원격 검증 3건, 암호화 보관 18건, 실운영 실패.
+- [x] [자동 복구 #41633484793](https://github.com/koith/browser-app-lab/actions/runs/41633484793): 장시간 재전송 후 잡 취소 확인, 복구 완료 아님.
+- [ ] **INT-01 최종 게이트**: 원문과 원본 첨부의 테라박스 SHA256 재읽기 실패 0을 여러 운영 회차 검증, 암호화 잔여 파일 전수 복구, 원격 무결성·손실 0 증빙.
+- [ ] 새 코드 [캡처 #41640004233](https://github.com/koith/browser-app-lab/actions/runs/41640004233)·[복구 #41639213292](https://github.com/koith/browser-app-lab/actions/runs/41639213292)의 실제 최종 집계 확인.
+- 사용자 문의에 따라 별도 대화를 생성하던 ChatGPT 정기 작업 자동화 6ae9d47392dc8191aef2037762a8d83b 비활성화 확인. GitHub Actions 서버측 수집·복구 워크플로는 유지.
+
+**현재 판정: CODE_ONLY(개발·CI) + FAILED(실운영), INT-01 최종 미완료.** 본문·개인정보·비밀값은 저장소에 기재하지 않음.
