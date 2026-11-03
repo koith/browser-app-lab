@@ -22,7 +22,7 @@ function makeServer(options={}){
  const archiveKey=options.archiveKey??process.env.LEAF_CENTRAL_ARCHIVE_KEY??'';
  const persistent=options.persistence||(dbUrl||dbSecret||archiveKey?
   createSupabasePersistence({url:dbUrl,secret:dbSecret,archiveKey,
-   slot:options.dbSlot??process.env.LEAF_CENTRAL_DB_SLOT||'production'}):null);
+   slot:(options.dbSlot??process.env.LEAF_CENTRAL_DB_SLOT)||'production'}):null);
  if(persistent&&store)throw new Error('Do not enable both remote and local chat storage; migrate and explicitly choose one');
  const sessions=new Map(),rooms=new Map(),history=new Map(),kicked=new Map();let sequence=0;
  if(store&&fs.existsSync(store)){
