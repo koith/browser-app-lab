@@ -251,7 +251,7 @@ def make_post(row, now, get_media=download_media, pid_override=None, cloud=None)
         if item is None and cloud is not None:
             # This slot may already contain the same original media from an
             # earlier partial attempt. Verify its private byte SHA before reuse.
-            item = cloud.read_staged_media(pid,index)
+            item = cloud.read_staged_media(pid,index,expected_source_url=url)
         if item is None:
             continue
         mime, blob = item
@@ -262,7 +262,8 @@ def make_post(row, now, get_media=download_media, pid_override=None, cloud=None)
         key = "posts/" + pid + "/media/" + str(index).zfill(4) + MIMES[mime]
         media.append({"key": key, "mime": mime, "bytes": len(blob),
                       "sha256": sha256(blob), "remote_verified": True,
-                      "kind": "video" if mime.startswith("video/") else "image"})
+                      "kind": "video" if mime.startswith("video/") else "image",
+                      "source_url":url})
         blobs.append(blob)
     post = {"id": pid, "platform": row["platform"], "source_url": row["source_url"],
             "posted_at": row["posted_at"], "captured_at": datetime.fromtimestamp(now, timezone.utc).isoformat(),
