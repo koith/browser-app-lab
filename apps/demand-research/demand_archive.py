@@ -362,6 +362,54 @@ class CloudArchive:
                 and ID.fullmatch(name[:-1]) and name[:-1] not in existing
                 and name[:-1] not in self.quarantined_ids]
 
+    def corroborate_mismatched_post(self, pid, record):
+        """Recover only if two independent immutable captures agree on identity,
+        text, original timestamp and *every stored media checksum*.
+
+        This never modifies post.json, capture.json, or the original marker;
+        a separately named repaired marker preserves the conflicting evidence.
+        """
+        if not ID.fullmatch(str(pid)):
+            return None
+        try:
+            post=validate_post(json.loads(record))
+            if post["id"]!=pid:
+                return None
+            raw=self.read("posts/"+pid+"/capture.json",cap=100_000,optional=True)
+            if raw is None:
+                return None
+            first=json.loads(raw)
+            if not isinstance(first,dict) or first.get("id")!=pid:
+                return None
+            for field,other in (("platform","platform"),("source_url","source_url"),
+                                ("posted_at","posted_at"),("text","text")):
+                if first.get(field)!=post.get(other):
+                    return None
+            observed=first.get("observed_at")
+            if not isinstance(observed,int):
+                return None
+            from datetime import datetime,timezone
+            if post.get("captured_at")!=datetime.fromtimestamp(
+                    observed,timezone.utc).isoformat():
+                return None
+            for media in post["media"]:
+                blob=self.read(media["key"],cap=MAX_MEDIA_BYTES+1,optional=True)
+                if blob is None or len(blob)!=media["bytes"] or sha256(blob)!=media["sha256"]:
+                    return None
+            # Check post bytes one more time to avoid signing a transient stale
+            # read. The new marker remains immutable and SHA256-readback verified.
+            if self.read("posts/"+pid+"/post.json",cap=MAX_POST)!=record:
+                return None
+            marker=canonical_json({"id":pid,"sha256":sha256(record)})
+            self.write_immutable("metadata/entries-repaired/"+pid+".json",marker)
+            if (self.read("metadata/entries-repaired/"+pid+".json",cap=1024)!=marker
+                    or self.read("posts/"+pid+"/post.json",cap=MAX_POST)!=record):
+                return None
+            return post
+        except (RuntimeError,ValueError,TypeError,KeyError,
+                OverflowError,json.JSONDecodeError):
+            return None
+
     def recover_entries(self, existing, *, repair=True):
         result = dict(existing)
         new = 0
@@ -394,6 +442,14 @@ class CloudArchive:
                             if sha256(record) == marker["sha256"]:
                                 break
                         else:
+                            proven=(self.corroborate_mismatched_post(pid,record)
+                                    if repair and directory=="metadata/entries"
+                                    else None)
+                            if proven is not None:
+                                result[pid]=proven
+                                new+=1
+                                self.repaired_entries+=1
+                                continue
                             self.unrecoverable_entries += 1
                             self.quarantined_ids.add(pid)
                             continue
