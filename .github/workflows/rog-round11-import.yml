@@ -1,0 +1,92 @@
+name: 4LEAF Claude round11 conflict-safe original action import
+on:
+  push:
+    branches: ['import/4leaf-round11-native-play-20261103']
+    paths:
+      - 'apps/4leaf/rog/docs/handoff/4leaf-round11-20261103.bundle'
+      - '.github/workflows/rog-round11-import.yml'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  import-round11:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Verify unchanged Claude bundle bytes and original base commit
+        shell: bash
+        run: |
+          set -euo pipefail
+          BUNDLE=apps/4leaf/rog/docs/handoff/4leaf-round11-20261103.bundle
+          echo '54a54b998c717fb5cb2ec28b172b3ddecf818182473c95b315f68ee7bee9f201  '"${BUNDLE}" | sha256sum -c -
+          git cat-file -e 063bc388ead4eb399c06195241e3a7babc8c213d^{commit}
+          git bundle verify "$BUNDLE"
+          git fetch "$BUNDLE" 'refs/heads/research/4leaf-round11-native-play-20261103:refs/heads/claude-round11'
+          test "$(git rev-parse claude-round11)" = 3d16ceb3$(git rev-parse claude-round11 | cut -c 9-)
+          git log --oneline -9 claude-round11
+          git show claude-round11:apps/4leaf/rog/docs/RESTORATION_LEDGER.json > /tmp/claude-round11-ledger.json
+      - name: Apply eight original Claude commits without replacing GPT's saved-game fixes
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "4LEAF restoration import bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # Source branch: 063bc388 + round10 commits 1–4 + round11 commits 5–8.
+          # Deliberately do NOT transplant the old 365-event ledger snapshot (#9).
+          git format-patch --stdout --no-signature 063bc388ead4eb399c06195241e3a7babc8c213d..b1d1273f | git am -3
+          node --check apps/4leaf/rog/game.js
+          node --check apps/4leaf/rog/genesis-chessman-actors.js
+          node --check apps/4leaf/rog/native-card-action-sequences.js
+      - name: Append Claude C08 and C09 source events to latest permanent ledger
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          import copy,json,pathlib
+          target=pathlib.Path('apps/4leaf/rog/docs/RESTORATION_LEDGER.json')
+          cur=json.loads(target.read_text())
+          old=json.loads(pathlib.Path('/tmp/claude-round11-ledger.json').read_text())
+          assert len(old['events'])==376 and len(old['intake'])>=2
+          prev_ids={r['id'] for r in cur['intake']}
+          old_by_id={r['id']:r for r in old['intake']}
+          for key in ('REQ-20261102-C08','REQ-20261103-C09'):
+              if key not in prev_ids:
+                  cur['intake'].append(copy.deepcopy(old_by_id[key]))
+          types_before={(e.get('type'),e.get('requestId'),e.get('details')) for e in cur['events']}
+          appended=[]
+          for e in old['events'][365:]:
+              identity=(e.get('type'),e.get('requestId'),e.get('details'))
+              if identity in types_before: continue
+              item=copy.deepcopy(e);item['seq']=len(cur['events'])+1
+              cur['events'].append(item);appended.append((item['seq'],item['type']))
+          cur['updatedAt']='2026-11-03'
+          target.write_text(json.dumps(cur,ensure_ascii=False,indent=2)+'\n')
+          print('CLAUDE ROUND11 C08/C09 LEDGER APPEND',appended)
+          assert len(appended)>=10,appended
+          PY
+          git add apps/4leaf/rog/docs/RESTORATION_LEDGER.json
+          git commit -m "docs(4leaf): append Claude C08/C09 requests and events without erasing existing P0 records"
+      - name: Verify source mapping and original animation regressions
+        shell: bash
+        run: |
+          set -euo pipefail
+          for py in test_native_card_action_module.py test_chr_model_map.py test_runtime_chr_map_vs_bytes.py test_decode_obs_blocks.py; do
+            python3 "apps/4leaf/rog/tests/$py"
+          done
+          node apps/4leaf/rog/tests/chr-native-duel-sequences.cjs
+      - name: Push verified import commits to this branch (never main)
+        shell: bash
+        run: |
+          set -euo pipefail
+          git push origin "HEAD:refs/heads/${GITHUB_REF_NAME}"
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: 4leaf-round11-import-failure-evidence
+          path: |
+            /tmp/claude-round11-ledger.json
+            apps/4leaf/rog/docs/handoff/4leaf-round11-20261103.bundle
