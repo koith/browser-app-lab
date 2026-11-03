@@ -312,6 +312,9 @@ def public_error_class(err):
 
 
 def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=False):
+    from recovery_spool import RecoverySpool
+    # Enabled only when the private workflow supplies a spool directory.
+    spool=RecoverySpool.from_environment()
     if os.environ.get("DEMAND_CAPTURE_PUBLIC_ALLOWED", "") != "1":
         raise RuntimeError("public capture needs explicit source/retention authorization")
     cloud = cloud or CloudArchive()
@@ -425,6 +428,9 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
                              "source_url": row["source_url"], "posted_at": row["posted_at"],
                              "observed_at": now, "media_links": row["media_urls"],
                              "profile_url": row.get("profile_url", "")}
+                    if spool is not None:
+                        # Authenticated encryption BEFORE the first cloud call.
+                        spool.save(pid,early)
                     first_blob = cloud.read_first_observation(pid)
                     if first_blob is None:
                         # A stale 404 from a cloud backend can make a previously
@@ -448,6 +454,8 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
                             or not isinstance(first.get("observed_at"), int)
                             or not isinstance(first.get("media_links"), list)):
                         raise ValueError("early original capture mismatch; cannot silently replace")
+                    if spool is not None:
+                        spool.save(pid,first)
                     row = {**row, "text": first["text"],
                            "posted_at": first["posted_at"],
                            "profile_url": first.get("profile_url", ""),
@@ -455,6 +463,10 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
                            "media_expected": len(first["media_links"])}
                     phase="write_post_and_verify_media"
                     post, blobs = make_post(row, first["observed_at"], cloud=cloud)
+                    if spool is not None:
+                        # Preserve exact original attachment bytes before all
+                        # remote media writes; never substitute other images.
+                        spool.save(pid,first,post,blobs)
                     if not post["archive_complete"]:
                         cloud.stage_partial_media(post,blobs)
                         partial += 1
@@ -463,6 +475,8 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
                         # post.json and mark it as a full backup.
                         continue
                     saved_post = cloud.save_post(post, blobs)
+                    if spool is not None:
+                        spool.discard(pid)
                     known[pid] = saved_post
                     known_ids.add(pid)
                     saved += 1
@@ -495,7 +509,9 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
         "source_query_failures":failures,
         "invalid_early_captures":invalid_early_captures,
         "failed_early_recoveries":failed_early_recoveries,
-        "capture_interrupted":capture_interrupted
+        "capture_interrupted":capture_interrupted,
+        "encrypted_recovery_files":(
+            len(list(spool.directory.glob("*.enc"))) if spool is not None else 0)
     },sort_keys=True),flush=True)
     # Entries written immediately per post are the recovery journal. The versioned
     # catalog is published LAST and never destroys an earlier verified catalog.
@@ -528,7 +544,10 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None, *, fast_mode=Fa
               "budget_exhausted": budget_exhausted,
               "storage_failures": storage_failures,
                "storage_error_categories":storage_error_kinds,
-              "storage_interrupted": capture_interrupted, "catalog": catalog,
+              "storage_interrupted": capture_interrupted,
+              "encrypted_recovery_files":(
+                  len(list(spool.directory.glob("*.enc"))) if spool is not None else 0),
+              "catalog": catalog,
               "operational_status": ("DEGRADED_STORAGE" if storage_failures else
                 "DEGRADED_MEDIA" if partial or failed_early_recoveries else
                 "JOURNAL_ONLY" if fast_mode else
