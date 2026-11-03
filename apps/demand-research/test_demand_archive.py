@@ -524,6 +524,7 @@ def test_read_only_archive_summary_reports_remote_sample_without_mutation(monkey
     before=dict(cloud.objects)
     status=inspect(cloud)
     assert status["catalog_post_count"]==1
+    assert status["catalog_expected_bytes"]>0
     assert status["versioned_manifest_count"]==1
     assert status["entry_marker_count"]==1
     assert status["sample_valid"]==1
