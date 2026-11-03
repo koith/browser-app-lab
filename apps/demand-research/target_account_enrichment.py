@@ -325,5 +325,57 @@ def archive_thread(profile,item,api,cloud):
     payload={"post_id":item["id"],"source_url":item["source_url"],
              "captured_at":datetime.now(timezone.utc).isoformat(),**thread}
     save_snapshot(cloud,"threads/"+item["id"],payload)
+    cloud.write_immutable("thread-markers/"+item["id"]+".json",
+                          canonical_json({"post_id":item["id"],"verified":True,
+                                          "public_replies":len(thread["replies"]),
+                                          "truncated":thread["truncated"]}))
     return {"public_replies":len(thread["replies"]),
             "thread_truncated":thread["truncated"]}
+
+
+def backfill_public_threads(profile,api,cloud,max_threads=MAX_THREAD_PER_RUN):
+    """Resume archived public comment contexts from persisted journal.
+
+    The marker is written only AFTER the corresponding thread snapshot passed
+    TeraBox readback; missing/blocked public context remains retryable.
+    """
+    markers=set()
+    for location in ("metadata/entries","metadata/entries-repaired"):
+        for name in cloud.names(location):
+            if re.fullmatch(r"[a-f0-9]{40}\.json",name):
+                markers.add(name[:-5])
+    verified={name[:-5] for name in cloud.names("thread-markers")
+              if re.fullmatch(r"[a-f0-9]{40}\.json",name)}
+    pending=sorted(markers-verified)
+    successes=failures=0
+    for pid in pending[:max_threads]:
+        try:
+            raw_marker=(cloud.read("metadata/entries/"+pid+".json",
+                                   cap=1024,optional=True)
+                        or cloud.read("metadata/entries-repaired/"+pid+".json",
+                                      cap=1024,optional=True))
+            if raw_marker is None:
+                failures+=1
+                continue
+            m=json.loads(raw_marker)
+            raw_post=cloud.read_verified("posts/"+pid+"/post.json",m["sha256"],
+                                         cap=100_000)
+            if raw_post is None:
+                failures+=1
+                continue
+            post=json.loads(raw_post)
+            original=post.get("original_id")
+            if not isinstance(original,str):
+                failures+=1
+                continue
+            result=archive_thread(profile,{
+                "id":pid,"original_id":original,
+                "source_url":post["source_url"]},api,cloud)
+            successes+=1
+        except (RuntimeError,ValueError,TypeError,KeyError):
+            failures+=1
+    return {"threads_verified":successes,
+            "threads_unavailable":failures,
+            "threads_pending":len(pending)>successes,
+            "pending_before":len(pending)}
+
