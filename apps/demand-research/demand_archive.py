@@ -340,6 +340,10 @@ class CloudArchive:
         try:
             target = self.remote + "/" + key
             failure = None
+            # The unofficial provider documents --timeout=15s for stuck uploads.
+            # This bounds idle transport stalls without truncating actively
+            # transferring files. AES-encrypted source originals are protected
+            # by the separate emergency buffer when remote upload is down.
             # Each rclone command already retries twice. After one copyto
             # and one rcat attempt, switch endpoints rather than spending a
             # multi-minute fast-capture window on a repeatedly missing path.
@@ -347,10 +351,10 @@ class CloudArchive:
                 method = "rcat" if attempt % 2 and len(data) < 2_000_000 else "copyto"
                 try:
                     if method == "copyto":
-                        self.command(["copyto", path, target, "--retries", "2"], timeout=130)
+                        self.command(["copyto", path, target, "--timeout", "15s", "--retries", "2"], timeout=100)
                     else:
-                        self.command(["rcat", target, "--retries", "2"],
-                                     data=data, timeout=130)
+                        self.command(["rcat", target, "--timeout", "15s", "--retries", "2"],
+                                     data=data, timeout=100)
                 except RuntimeError as error:
                     failure = error
                     if "(missing)" in str(error):
@@ -416,7 +420,8 @@ class CloudArchive:
                 # Ignore any existing object even if TeraBox's listing API
                 # is stale. Never intentionally overwrite an immutable key.
                 self.command(["copyto",path,target,"--ignore-existing",
-                              "--terabox-domain",alternate,"--retries","2"],timeout=130)
+                              "--terabox-domain",alternate,"--timeout","15s",
+                              "--retries","2"],timeout=100)
             except RuntimeError as error:
                 failure=error
             for delay in (0.0,0.5,1.0,2.0,4.0):
