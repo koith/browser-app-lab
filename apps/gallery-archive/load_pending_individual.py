@@ -78,6 +78,62 @@ def load(owner,documents,model):
         {**a,'source_coverage':coverage.get(a['id'],{})} for a in albums.values()]},batches
 
 
+def list_pending_entries(remote,model,reader=None):
+    """Two ordinary same-owner file-list formats; never infer no queue from a failed read.
+
+    Some provider list results are transiently empty. The second view uses
+    rclone's documented size/path machine-readable format, not any new
+    credentials, provider endpoints, or unverified queue payload.
+    """
+    if reader is None:reader=storage
+    expected={'mimmi':'archive:MimmiArchive','yui':'archive:YuiArchive'}.get(model)
+    if remote!=expected:
+        raise ValueError('Wrong owner pending-list scope')
+    prefix=remote+'/metadata/pending-individual/'+model
+    primary=reader(['lsjson',prefix,'--files-only','--max-depth','1'])
+    entries=[]
+    if primary is not None:
+        try:entries=json.loads(primary)
+        except (TypeError,ValueError):
+            raise ValueError('Pending JSON listing is invalid') from None
+        if not isinstance(entries,list) or len(entries)>30:
+            raise ValueError('Pending JSON listing exceeds verified bounds')
+        if entries:
+            print('OWNER_PENDING_LISTING',model,'FORMAT','lsjson',
+                  'ENTRIES',len(entries),flush=True)
+            return entries
+    print('OWNER_PENDING_PRIMARY_LIST_EMPTY_OR_UNAVAILABLE',model,
+          'UNAVAILABLE',primary is None,flush=True)
+    # lsf prints "size;path" with --format sp. Keep the path last; it
+    # cannot be mistaken for HTTP/provider JSON success-shaped error.
+    alternate=reader(['lsf',prefix,'--files-only','--max-depth','1',
+                      '--format','sp'])
+    if alternate is None:
+        print('OWNER_PENDING_ALTERNATE_LIST_UNAVAILABLE',model,
+              'EMPTY_NOT_CONFIRMED',True,flush=True)
+        return []
+    try:
+        lines=alternate.decode('utf-8').splitlines()
+        if len(lines)>30:
+            raise ValueError('Alternate queue listing exceeds verified bounds')
+        files=[]
+        for line in lines:
+            size_raw,sep,name=line.partition(';')
+            if not sep or not re.fullmatch(r'[0-9]+',size_raw):
+                raise ValueError('Untrusted alternate queue size/path')
+            size=int(size_raw)
+            if not re.fullmatch(r'[0-9a-f]{64}\\.json',name):
+                raise ValueError('Unexpected object in pending queue')
+            if not 0<size<=2_000_000:
+                raise ValueError('Alternate pending queue object size invalid')
+            files.append({'Path':name,'Size':size})
+    except (UnicodeError,ValueError):
+        raise ValueError('Untrusted alternate owner pending listing') from None
+    print('OWNER_PENDING_LISTING',model,'FORMAT','lsf-sp',
+          'ENTRIES',len(files),'ALT_RECOVERY_CANDIDATES',len(files),flush=True)
+    return files
+
+
 def accessible_documents(entries,remote,model,reader=None):
     """Keep inaccessible queues intact without blocking independent acquisition.
 
@@ -111,8 +167,7 @@ if __name__=='__main__':
     p.add_argument('--remote',required=True);p.add_argument('--model',choices=['mimmi','yui'],required=True)
     p.add_argument('--github-output',type=Path,required=True);args=p.parse_args()
     prefix=args.remote.rstrip('/')+'/metadata/pending-individual/'+args.model
-    raw=storage(['lsjson',prefix,'--files-only','--max-depth','1'])
-    entries=json.loads(raw) if raw else []
+    entries=list_pending_entries(args.remote,args.model)
     documents,held=accessible_documents(entries,args.remote,args.model)
     delta,batches=load(json.loads(args.owner.read_text()),documents,args.model)
     count=sum(len(a['images']) for a in delta['albums'])
