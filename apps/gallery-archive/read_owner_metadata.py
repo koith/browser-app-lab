@@ -59,8 +59,13 @@ def read(remote,model,*,batch=None,minimum=1,reader=None):
     if raw is not None and matches(raw,model,batch,minimum):return raw
     evidence=summary(raw,model,batch)
     print('OWNER_METADATA_STREAM_INVALID',json.dumps(evidence,sort_keys=True),file=sys.stderr,flush=True)
-    if evidence['provider_errno']==400141:
-        raise ProviderVerificationRequired('Owner storage requires provider verification (400141)')
+    # A provider JSON error returned by streaming 'cat' is not file bytes.
+    # Try the ordinary SAME-ACCOUNT file download once. This does not solve
+    # a verification challenge, change credentials, or use another account;
+    # a successful download must pass the complete private catalog schema
+    # and previous published row floor. If both normal methods fail on
+    # 400141, preserve the explicit verification-required state.
+    challenged=evidence['provider_errno']==400141
     with tempfile.TemporaryDirectory(prefix='owner-metadata-') as temporary:
         local=Path(temporary)/'metadata.json'
         with tempfile.TemporaryFile() as errors:
@@ -68,6 +73,10 @@ def read(remote,model,*,batch=None,minimum=1,reader=None):
                 '--max-size',str(limit),'--timeout=60s','--retries=1'],
                 stdout=subprocess.DEVNULL,stderr=errors,timeout=75)
             if result.returncode:
+                if challenged:
+                    raise ProviderVerificationRequired(
+                        'Owner storage requires provider verification (400141); '
+                        'same-account file download also failed') from None
                 errors.seek(0)
                 raise ValueError('Normal owner metadata download failed: '+
                     diagnostic(errors.read(32000).decode('utf-8','replace'))) from None
@@ -75,6 +84,10 @@ def read(remote,model,*,batch=None,minimum=1,reader=None):
             raise ValueError('Downloaded owner metadata exceeds its bounded size')
         raw=local.read_bytes()
     if not matches(raw,model,batch,minimum):
+        if challenged:
+            raise ProviderVerificationRequired(
+                'Owner storage requires provider verification (400141); '
+                'same-account download did not contain a valid catalog')
         raise ValueError('Downloaded metadata envelope invalid '+json.dumps(summary(raw,model,batch),sort_keys=True))
     print('OWNER_METADATA_NORMAL_FILE_DOWNLOAD_VERIFIED',model,'pending' if batch else 'catalog',file=sys.stderr,flush=True)
     return raw
