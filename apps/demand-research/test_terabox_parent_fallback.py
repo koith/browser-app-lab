@@ -154,3 +154,40 @@ def test_primary_upload_attempts_are_bounded_before_alternate_rescue():
     assert cloud.alternate_attempts==1
     assert cloud.write_immutable(key,expected) is False
     assert cloud.objects[key]==expected
+
+
+def test_stalled_private_uploads_use_documented_idle_timeout_without_breaking_sha():
+    class ObserveUploadOptions(FakeCloud):
+        def __init__(self):
+            super().__init__()
+            self.uploads=[]
+        def fake(self,args,data=None,timeout=150,allow_missing=False):
+            if args[0] in ("copyto","rcat"):
+                self.uploads.append(list(args))
+            return super().fake(args,data=data,timeout=timeout,allow_missing=allow_missing)
+    cloud=ObserveUploadOptions()
+    p=post()
+    cloud.save_post(p)
+    assert cloud.uploads
+    assert all("--timeout" in args and args[args.index("--timeout")+1]=="15s"
+               for args in cloud.uploads)
+    assert cloud.load_catalog()[0]["id"]==p["id"]
+
+
+def test_stalled_primary_upload_reaches_sha_verified_alternate_with_idle_bound():
+    class StalledPrimary(FakeCloud):
+        def __init__(self):
+            super().__init__()
+            self.alternate_seen=False
+        def fake(self,args,data=None,timeout=150,allow_missing=False):
+            if args[0] in ("copyto","rcat"):
+                assert "--timeout" in args and args[args.index("--timeout")+1]=="15s"
+                if "--terabox-domain" not in args:
+                    raise RuntimeError("private cloud copyto failed (network_timeout)")
+                self.alternate_seen=True
+            return super().fake(args,data=data,timeout=timeout,allow_missing=allow_missing)
+    cloud=StalledPrimary()
+    p=post()
+    cloud.save_post(p)
+    assert cloud.alternate_seen
+    assert cloud.load_catalog()[0]["id"]==p["id"]
