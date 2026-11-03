@@ -11,7 +11,7 @@ def client(monkeypatch):
     monkeypatch.setattr(gateway,"COOKIE","synthetic-cloud-cookie")
     monkeypatch.setenv("DEMAND_ARCHIVE_DISPATCH_TOKEN","synthetic-private-actions-writer-token")
     monkeypatch.setenv("DEMAND_ARCHIVE_DISPATCH_REPO","koith/browser-app-lab")
-    monkeypatch.setattr(target_archive_api,"_last_request",0.0)
+    monkeypatch.setattr(target_archive_api,"_last_request",None)
     client=TestClient(gateway.app,base_url="https://testserver")
     response=client.post("/api/activate",json={
         "token":"synthetic-private-gateway-token-that-is-long-enough"})
