@@ -37,6 +37,10 @@ def audit(browser, model: str, timeout_ms: int) -> dict:
             timeout=timeout_ms,
         )
         result["first_album_card_s"] = round(time.monotonic() - start, 2)
+        # Diagnostic only until the new HTML is deployed: a newly constructed
+        # <img> can cancel the prepaint image's in-flight download.
+        result["first_paint_image_nodes_reused"] = page.locator(
+            '#albumgrid img[data-fast-preserved="1"]').count()
         # A rendered card or image URL is NOT evidence that a thumbnail decoded.
         # Only count a decoded, viewport-visible image with real image dimensions.
         try:
