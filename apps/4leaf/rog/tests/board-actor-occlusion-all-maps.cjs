@@ -26,6 +26,13 @@ const {chromium}=require('playwright');
    await page.locator('#bot-count').selectOption('3');
    await page.locator('#map-select').selectOption(map);
    await page.locator('#start-game').click();
+   // Later maps share this browser's unfinished local save. Replacing it
+   // is a deliberate QA action and must use the real consent button.
+   if(report.length){
+    await page.locator('#modal:not(.hidden)').waitFor();
+    assert.match(await page.locator('#modal-title').textContent(),/진행 중인 경기 보호/);
+    await page.locator('#modal-buttons button').filter({hasText:'새 경기 시작'}).click();
+   }
    await page.waitForSelector('#game:not(.hidden)');
    const stride=process.env.FOURLEAF_FULL_SWEEP==='1'?1:13;
    const result=await page.evaluate(async stride=>{
