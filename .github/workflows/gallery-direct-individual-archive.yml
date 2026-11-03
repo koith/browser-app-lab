@@ -148,6 +148,9 @@ jobs:
     permissions:
       contents: write
       actions: write
+      # Only this exact main-branch collector may request the signed, fresh
+      # private catalog already accessible through the user's Render gateway.
+      id-token: write
     concurrency:
       group: gallery-terabox-private-mass-upload-${{ matrix.model }}
       cancel-in-progress: false
@@ -212,7 +215,7 @@ jobs:
           # Before checking remote metadata, try the same authorised TeraBox
           # web session already used for uploads. If normal login needs
           # verification, retain the existing provider-challenge fail-closed gate.
-          python apps/gallery-archive/read_owner_metadata.py --remote "$remote" --model "$MODEL" --out "$RUNNER_TEMP/owner-before.json" --published-index "apps/$MODEL-gallery/owner-index.json" --refresh-existing-web-session
+          python apps/gallery-archive/read_owner_metadata.py --remote "$remote" --model "$MODEL" --out "$RUNNER_TEMP/owner-before.json" --published-index "apps/$MODEL-gallery/owner-index.json" --refresh-existing-web-session --signed-gateway-catalog-fallback
           python - <<'PY'
           import json,os
           from pathlib import Path
