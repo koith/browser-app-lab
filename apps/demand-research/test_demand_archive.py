@@ -994,3 +994,45 @@ def test_successful_write_corroborates_alternate_on_stale_primary():
     cloud.save_post(p)
     assert cloud.objects["posts/"+p["id"]+"/post.json"]==canonical_json(p)
     assert cloud.load_catalog()[0]["id"]==p["id"]
+
+
+def test_temporary_missing_nested_parent_waits_until_listed_before_upload():
+    """Mkdir ACK can precede TeraBox's actual nested upload readiness."""
+    class SlowParent(FakeCloud):
+        def __init__(self):
+            super().__init__()
+            self.visits=0
+            self.created=set()
+        def fake(self,args,data=None,timeout=150,allow_missing=False):
+            if args[0]=="mkdir":
+                self.created.add(args[1])
+                return b""
+            if (args[0]=="lsf" and
+                    "/posts/" in args[1] and "--max-depth" in args):
+                self.visits+=1
+                if self.visits<3:
+                    return None
+                return b""
+            if args[0] in ("copyto","rcat"):
+                dst=args[2] if args[0]=="copyto" else args[1]
+                assert dst.rsplit("/",1)[0] in self.created, "missing final ancestor"
+                assert self.visits>=3, "uploaded before remote parent was ready"
+            return super().fake(args,data=data,timeout=timeout,allow_missing=allow_missing)
+    cloud=SlowParent()
+    p=post()
+    cloud.save_post(p)
+    assert cloud.visits>=3
+    assert cloud.load_catalog()[0]["id"]==p["id"]
+
+
+def test_unobservable_nested_parent_cannot_be_claimed_saved():
+    class InvisibleParent(FakeCloud):
+        def fake(self,args,data=None,timeout=150,allow_missing=False):
+            if (args[0]=="lsf" and "/posts/" in args[1] and
+                    "--max-depth" in args):
+                return None
+            return super().fake(args,data=data,timeout=timeout,allow_missing=allow_missing)
+    cloud=InvisibleParent()
+    with pytest.raises(RuntimeError,match="parent directory unverified"):
+        cloud.save_post(post())
+    assert not any(k.endswith("/post.json") for k in cloud.objects)
