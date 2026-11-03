@@ -1,5 +1,10 @@
 name: 4LEAF dynamic game smoke tests
 on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/4leaf/rog/tests/smoke.cjs'
+      - '.github/workflows/rog-test.yml'
   push:
     paths:
       - 'apps/4leaf/rog/**'
