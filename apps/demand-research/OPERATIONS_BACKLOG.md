@@ -106,3 +106,12 @@
 - [ ] **INT-11 최종 운영 게이트** — PR 병합/배포를 넘어 실제 지정 계정에 대해 TeraBox 원격 재읽기·표시·손실 없는 페이지 이어받기 및 모바일 실기 검증 완료. 현재 특정 실계정은 지정되지 않았고, **합성 CI PASS ≠ 실계정 전체 백업 완료**.
 
 검증 기준: [PR #637](https://github.com/koith/browser-app-lab/pull/637) 공개 소스 API 기반 첫 개발. Bluesky와 Mastodon부터 지원. OAuth/플랫폼 권한이 없는 비공개 게시글·숨긴 명단·삭제물·DM은 수집하지 않음. 사용자 또는 플랫폼의 삭제·보관 제한 정책을 준수하고 대체 인물 정보로 빈칸을 채우지 않음.
+
+## 2026-11-04 확인 — 광고 필터 회귀 및 지정 계정 아카이브
+
+- [x] **INT-12 광고 필터 누락 재현** — [y2ujhh.bsky.social](https://bsky.app/profile/y2ujhh.bsky.social) / [gxzmcg.bsky.social](https://bsky.app/profile/gxzmcg.bsky.social): 공식 공개 `getProfile`/`getAuthorFeed`에서 계정별 최근 50개 중 영상 50개, 본문 6종 교대, 영상 `alt` 동일 문구(`nimi.wiki 실시간 SNS 영상 랭킹 프로모션 티저`) 50개 확인. 정확한 원인은 `getMedia`에서 video `alt` 소실, 28자 미만 반복 문구 미집계, gateway 피드/공개 계정 분석 필터 불일치.
+- [x] **INT-12 수정 코드·회귀 CI** — [PR #638](https://github.com/koith/browser-app-lab/pull/638), `main` squash `781e63a88bff0255b0d716ba8c3c67862bcbf5f4`. 영상 `alt` 복원, 명시적 광고 설명 및 짧은 본문+미디어 반복 복합 신호, 공용/개인용 게시글 피드 및 공개 계정 분석 동일 필터. 특정 핸들 영구 차단·게시글 삭제 없음. [전용 QA #41734215370](https://github.com/koith/browser-app-lab/actions/runs/41734215370) **100건 광고 의심 탐지 + 정상 대조군 PASS**, [브라우저 QA #41734215297](https://github.com/koith/browser-app-lab/actions/runs/41734215297) PASS.
+- [x] **INT-12 배포 검증** — [Pages #41734837884](https://github.com/koith/browser-app-lab/actions/runs/41734837884) 및 [배포 HTML/JS SHA + Chromium/WebKit #41734837937](https://github.com/koith/browser-app-lab/actions/runs/41734837937) 성공(광고 필터 병합본). 후속 PR #637을 병합한 최신 조합의 배포 검증 결과는 별도 확인 필요.
+- [x] **INT-11 코드·합성 테스트 완료** — [PR #637](https://github.com/koith/browser-app-lab/pull/637), `main` squash `8b4c35305623d9cd50c56752357537dc09b10108`. Bluesky/Mastodon 공개 계정 지정, 원본 사진/영상/음성 및 작성 글·댓글·공개 대화·프로필 헤더·팔로워/팔로잉 명단의 TeraBox SHA 기반 보관 코드와 인증 전용 `/account-archive` 웹뷰, 피드/상세/댓글 탭. [합성 CI #41735015243](https://github.com/koith/browser-app-lab/actions/runs/41735015243): Python 86개 통과, Chromium·모바일 WebKit 화면 PASS. **CODE/CI 검증**이며 실제 보관 및 개인용 서버 배포 성공과는 별개.
+- [ ] **INT-11 실운영 완료** — 현재 확인된 Render 서비스 목록에 교집합 전용 게이트웨이가 없고, 실계정 타깃 지정·TeraBox 인증·원본 SHA 전체 재읽기·iPhone 실기 시험도 아직 미입증. 비공개/삭제 데이터나 접근 제한된 관계 명단은 포함 완전성 주장 금지. 기존 `[ ]` 하위 운영 조건 유지.
+- [ ] **INT-01 실운영 저장·복구 장애** — 최신 실패 [빠른 수집 #41706181750](https://github.com/koith/browser-app-lab/actions/runs/41706181750): 발견 29, 테라박스 검증 5, storage_failures 19, 암호화 보관 19, DEGRADED_STORAGE. [복구 #41709127089](https://github.com/koith/browser-app-lab/actions/runs/41709127089): 실제 원본+미디어 SHA 검증 2, 실패 3, 잔여 14. 원격 전체 복구를 `[x]`로 표시하지 않음.
