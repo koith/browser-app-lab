@@ -7,6 +7,7 @@ on:
     branches: [main]
     paths:
       - "apps/demand-research/rebuild_archive.py"
+      - "apps/demand-research/demand_archive.py"
       - ".github/workflows/demand-repair-archive.yml"
 permissions:
   contents: read
