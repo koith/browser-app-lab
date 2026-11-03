@@ -24,11 +24,18 @@ jobs:
           set -euo pipefail
           base='https://koith.github.io/browser-app-lab/apps/4leaf/rog'
           api='https://fourleaf-central-chat-free.onrender.com'
+          version="$(node -p 'require("./apps/4leaf/rog/app-version.json").version')"
           for attempt in $(seq 1 24); do
             if curl -fsSL --max-time 15 "$base/central-client.js?probe=$GITHUB_SHA" -o /tmp/live-chat.js &&
                cmp -s /tmp/live-chat.js apps/4leaf/rog/central-client.js &&
+               curl -fsSL --max-time 15 "$base/social-chat.js?probe=$GITHUB_SHA" -o /tmp/live-social.js &&
+               cmp -s /tmp/live-social.js apps/4leaf/rog/social-chat.js &&
+               curl -fsSL --max-time 15 "$base/sw.js?probe=$GITHUB_SHA" -o /tmp/live-pwa.js &&
+               cmp -s /tmp/live-pwa.js apps/4leaf/rog/sw.js &&
+               curl -fsSL --max-time 15 "$base/app-version.json?probe=$GITHUB_SHA" -o /tmp/live-version.json &&
+               cmp -s /tmp/live-version.json apps/4leaf/rog/app-version.json &&
                curl -fsSL --max-time 15 "$base/index.html?probe=$GITHUB_SHA" -o /tmp/live-4leaf.html &&
-               grep -Fq 'leaf-revival-version" content="0.86.0-beta.54"' /tmp/live-4leaf.html &&
+               grep -Fq "leaf-revival-version\" content=\"$version\"" /tmp/live-4leaf.html &&
                curl -fsSL --max-time 30 "$api/api/health" -o /tmp/live-chat-health.json &&
                node -e "if(require('/tmp/live-chat-health.json').ok!==true)process.exit(1)" 2>/dev/null; then
                echo "4LEAF PUBLISHED CHAT CLIENT AND HTTPS AUTHORITY HEALTH PASS"
