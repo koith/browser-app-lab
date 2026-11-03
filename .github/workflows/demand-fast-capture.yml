@@ -100,3 +100,12 @@ jobs:
           retention-days: 14
           if-no-files-found: ignore
           compression-level: 0
+      - name: Independently SHA-verify sealed originals on TeraBox after safe artifact upload
+        if: always()
+        continue-on-error: true
+        working-directory: apps/demand-research
+        run: |
+          set -euo pipefail
+          # The encrypted Actions artifact is already persisted before this
+          # best-effort cloud attempt. A provider outage never destroys it.
+          timeout --signal=TERM --kill-after=5s 100s python recover_spool_artifacts.py --pack-local
