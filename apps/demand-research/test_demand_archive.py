@@ -832,3 +832,24 @@ def test_alternate_domain_never_overwrites_conflicting_immutable_bytes(monkeypat
     with pytest.raises(RuntimeError,match="checksum conflict"):
         cloud.write_immutable(key,b"new different source observation")
     assert cloud.objects[key]==b"independent old source data"
+
+
+def test_primary_failed_host_switches_after_only_two_attempts(monkeypatch):
+    class CountingAlternate(FakeCloud):
+        def __init__(self):
+            super().__init__()
+            self.primary_calls=0
+            self.alternate_calls=0
+        def fake(self,args,data=None,timeout=150,allow_missing=False):
+            alt="--terabox-domain" in args
+            if args[0] in ("copyto","rcat"):
+                if alt:
+                    self.alternate_calls+=1
+                else:
+                    self.primary_calls+=1
+                    raise RuntimeError("private cloud "+args[0]+" failed (backend_rejected)")
+            return super().fake(args,data=data,timeout=timeout,allow_missing=allow_missing)
+    cloud=CountingAlternate()
+    cloud.save_post(post())
+    assert cloud.primary_calls==4,"two primary attempts per immutable object"
+    assert cloud.alternate_calls==2,"both post and marker verified through fallback"
