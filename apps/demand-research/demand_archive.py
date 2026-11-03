@@ -170,6 +170,26 @@ class CloudArchive:
             raise ValueError("private remote object exceeds cap")
         return data
 
+    def read_verified(self, key, expected_digest, *, cap=MAX_POST):
+        """Read SHA-matched object across bounded TeraBox stale-response windows.
+
+        The cloud backend sometimes answers with older/empty bytes immediately
+        after a successful upload. A single read mismatch is not corruption.
+        This never overwrites or modifies the remote object.
+        """
+        if not re.fullmatch(r"[a-f0-9]{64}", str(expected_digest)):
+            raise ValueError("unsafe expected checksum")
+        for delay in (0.0,0.4,0.9,1.8,3.0):
+            if delay:
+                time.sleep(delay)
+            try:
+                raw=self.read(key,cap=cap,optional=True)
+            except (RuntimeError,ValueError):
+                raw=None
+            if raw is not None and sha256(raw)==expected_digest:
+                return raw
+        return None
+
     def names(self, prefix):
         raw = self.command(["lsf", self.remote + "/" + prefix,
                             "--files-only", "--retries", "2"], timeout=120, allow_missing=True)
@@ -279,8 +299,8 @@ class CloudArchive:
                                             str(info.get("catalog","")))
                         or not re.fullmatch(r"[a-f0-9]{64}",str(info.get("sha256","")))):
                     continue
-                blob=self.read(info["catalog"],cap=MAX_CATALOG)
-                if sha256(blob)!=info["sha256"]:
+                blob=self.read_verified(info["catalog"],info["sha256"],cap=MAX_CATALOG)
+                if blob is None:
                     continue
                 parsed=json.loads(blob)
                 if not isinstance(parsed,dict):
@@ -318,8 +338,9 @@ class CloudArchive:
             for row in selected:
                 pid=row["id"]
                 try:
-                    raw=self.read("posts/"+pid+"/post.json",cap=MAX_POST,optional=True)
-                    if raw is None or sha256(raw)!=row["sha256"]:
+                    raw=self.read_verified("posts/"+pid+"/post.json",
+                                          row["sha256"],cap=MAX_POST)
+                    if raw is None:
                         self.catalog_unverified_refs+=1
                         continue
                     item=validate_post(json.loads(raw))
