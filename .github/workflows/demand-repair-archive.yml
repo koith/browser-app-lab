@@ -1,0 +1,49 @@
+name: INTERSECTION — Verify and Rebuild Private TeraBox Archive
+on:
+  schedule:
+    - cron: "23 * * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "apps/demand-research/rebuild_archive.py"
+      - ".github/workflows/demand-repair-archive.yml"
+permissions:
+  contents: read
+concurrency:
+  group: intersection-private-archive-repair
+  cancel-in-progress: false
+jobs:
+  repair-and-verify:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
+    env:
+      RCLONE_CONFIG_ARCHIVE_TYPE: terabox
+      RCLONE_CONFIG_ARCHIVE_COOKIE: ${{ secrets.DEMAND_TERABOX_NDUS || secrets.YUI_TERABOX_NDUS || secrets.YUI_TERABOX_COOKIE }}
+      DEMAND_TERABOX_REMOTE: "archive:DemandResearch"
+      DEMAND_CAPTURE_PUBLIC_ALLOWED: "1"
+      GITHUB_RUN_ID: ${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Fail closed if private archive configuration missing
+        run: test -n "$RCLONE_CONFIG_ARCHIVE_COOKIE"
+      - name: Install fixed TeraBox rclone backend
+        run: |
+          set -euo pipefail
+          curl -fsSL https://github.com/gulp79/rclone-extra/releases/download/v1.75.2-extra/rclone-linux-amd64.zip -o /tmp/rclone.zip
+          echo '78855325a2a8d83b3feee3a8363d32e1211babbf4cda6356fa8ca5f472075062  /tmp/rclone.zip' | sha256sum -c -
+          unzip -q /tmp/rclone.zip -d /tmp/rclone-extra
+          find /tmp/rclone-extra -type f -name rclone -exec sudo install -m 755 {} /usr/local/bin/rclone \;
+          rclone help backends | grep -qi terabox
+      - name: Validate and restore posts, publish compact catalog, then verify via fresh reader
+        working-directory: apps/demand-research
+        run: |
+          set -euo pipefail
+          python rebuild_archive.py
+      - name: Read-only post-journal inventory
+        if: always()
+        working-directory: apps/demand-research
+        run: python inspect_terabox_status.py
