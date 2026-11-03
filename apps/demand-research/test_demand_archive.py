@@ -224,3 +224,59 @@ def test_permission_error_does_not_masquerade_as_missing_remote(monkeypatch):
     monkeypatch.setattr("demand_archive.subprocess.run", lambda *a, **k: Result())
     with pytest.raises(RuntimeError, match="authorization"):
         CloudArchive._run(["cat", "archive:DemandResearch/file"], allow_missing=True)
+
+
+def test_prior_immutable_post_survives_different_observation_time():
+    cloud = FakeCloud()
+    first = post()
+    cloud.save_post(first)
+    later = {**first, "captured_at": "2026-11-03T02:00:00+00:00"}
+    chosen = cloud.save_post(later)
+    assert chosen == first
+    assert json.loads(cloud.objects["posts/" + first["id"] + "/post.json"]) == first
+    assert cloud.recover_entries({})[0][first["id"]] == first
+
+
+def test_readback_race_preserves_original_first_observation(monkeypatch):
+    class StaleReadCloud(FakeCloud):
+        def __init__(self):
+            super().__init__()
+            self.missing_once = False
+            self.conflict_once = True
+
+        def pending_capture_ids(self, existing):
+            return []
+
+        def read(self, key, *, cap=70_000_000, optional=False):
+            if key.endswith("/capture.json") and not self.missing_once:
+                self.missing_once = True
+                return None
+            return super().read(key, cap=cap, optional=optional)
+
+        def write_immutable(self, key, data):
+            if key.endswith("/capture.json") and self.conflict_once:
+                self.conflict_once = False
+                raise RuntimeError("immutable cloud write collision/readback mismatch")
+            return super().write_immutable(key, data)
+
+    cloud = StaleReadCloud()
+    monkeypatch.setenv("RCLONE_CONFIG_ARCHIVE_COOKIE", "offline-test")
+    monkeypatch.setenv("DEMAND_CAPTURE_PUBLIC_ALLOWED", "1")
+    original_id = "at://did:plc:abcdefghijk/app.bsky.feed.post/stale01"
+    pid = post_key("bluesky", original_id)
+    early = {"id": pid, "platform": "bluesky",
+             "text": "뒷계 합성 데이터 최초 본문",
+             "source_url": "https://bsky.app/profile/did:plc:abcdefghijk/post/stale01",
+             "posted_at": "2026-11-03T00:00:00Z",
+             "observed_at": 1793667600, "media_links": []}
+    cloud.objects["posts/" + pid + "/capture.json"] = canonical_json(early)
+    row = {"platform": "bluesky", "original_id": original_id,
+           "source_url": early["source_url"], "text": early["text"],
+           "posted_at": early["posted_at"], "media_urls": [],
+           "media_expected": 0}
+    result = job.run(fetchers=[lambda term, start, end:
+        [row] if term == "뒷계" else []], cloud=cloud,
+        clock=lambda: 1793667900, run_id="123456795")
+    assert result["saved_verified"] == 1
+    assert result["catalog"]["posts"] == 1
+    assert cloud.load_catalog()[0]["text"] == early["text"]
