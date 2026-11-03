@@ -183,4 +183,41 @@ class OwnerMetadataTests(unittest.TestCase):
         self.assertEqual(len(seen),2)
 
 
+    def test_signed_exact_pending_batch_recovers_only_authorized_owner_queue(self):
+        batch='d'*64
+        path='archive:MimmiArchive/metadata/pending-individual/mimmi/'+batch+'.json'
+        pending={**self.document,'source_batch_sha256':batch}
+        raw=json.dumps(pending).encode()
+        with patch.dict(os.environ,{'GALLERY_AUTHORIZED_PENDING_READ':'1'}), \
+             patch('read_owner_metadata.subprocess.run',
+                   return_value=SimpleNamespace(returncode=1)), \
+             patch('read_owner_metadata.read_via_existing_owner_gateway',
+                   return_value=raw) as remote_reader:
+            recovered=read(path,'mimmi',batch=batch,
+                           reader=lambda *args,**kwargs:b'{"errno":400141}')
+        self.assertEqual(recovered,raw)
+        remote_reader.assert_called_once_with(path,'mimmi',minimum=1,batch=batch)
+
+    def test_provider_pending_queue_remains_held_when_oidc_disabled_or_sha_wrong(self):
+        batch='d'*64
+        path='archive:MimmiArchive/metadata/pending-individual/mimmi/'+batch+'.json'
+        with patch.dict(os.environ,{'GALLERY_AUTHORIZED_PENDING_READ':'0'}), \
+             patch('read_owner_metadata.subprocess.run',
+                   return_value=SimpleNamespace(returncode=1)), \
+             patch('read_owner_metadata.read_via_existing_owner_gateway') as remote_reader:
+            with self.assertRaises(ProviderVerificationRequired):
+                read(path,'mimmi',batch=batch,
+                     reader=lambda *a,**k:b'{"errno":400141}')
+            remote_reader.assert_not_called()
+        wrong=json.dumps({**self.document,'source_batch_sha256':'e'*64}).encode()
+        with patch.dict(os.environ,{'GALLERY_AUTHORIZED_PENDING_READ':'1'}), \
+             patch('read_owner_metadata.subprocess.run',
+                   return_value=SimpleNamespace(returncode=1)), \
+             patch('read_owner_metadata.read_via_existing_owner_gateway',
+                   return_value=wrong):
+            with self.assertRaises(ProviderVerificationRequired):
+                read(path,'mimmi',batch=batch,
+                     reader=lambda *a,**k:b'{"errno":400141}')
+
+
 if __name__=='__main__':unittest.main(verbosity=2)

@@ -78,9 +78,7 @@ def read(remote,model,*,batch=None,minimum=1,reader=None):
                 stdout=subprocess.DEVNULL,stderr=errors,timeout=75)
             if result.returncode:
                 if challenged:
-                    raise ProviderVerificationRequired(
-                        'Owner storage requires provider verification (400141); '
-                        'same-account file download also failed') from None
+                    return signed_pending_gateway_read_or_hold(remote,model,batch,minimum)
                 errors.seek(0)
                 raise ValueError('Normal owner metadata download failed: '+
                     diagnostic(errors.read(32000).decode('utf-8','replace'))) from None
@@ -89,9 +87,7 @@ def read(remote,model,*,batch=None,minimum=1,reader=None):
         raw=local.read_bytes()
     if not matches(raw,model,batch,minimum):
         if challenged:
-            raise ProviderVerificationRequired(
-                'Owner storage requires provider verification (400141); '
-                'same-account download did not contain a valid catalog')
+            return signed_pending_gateway_read_or_hold(remote,model,batch,minimum)
         raise ValueError('Downloaded metadata envelope invalid '+json.dumps(summary(raw,model,batch),sort_keys=True))
     print('OWNER_METADATA_NORMAL_FILE_DOWNLOAD_VERIFIED',model,'pending' if batch else 'catalog',file=sys.stderr,flush=True)
     return raw
@@ -99,17 +95,40 @@ def read(remote,model,*,batch=None,minimum=1,reader=None):
 
 
 
-def read_via_existing_owner_gateway(remote,model,*,minimum=1,opener=None):
+
+def signed_pending_gateway_read_or_hold(remote,model,batch,minimum):
+    """Strict optional recovery of already-existing SHA-named owner queue.
+
+    Never relax the catalog preflight, substitute public Pages metadata, or
+    import a queue before the independently verified original+preview read.
+    """
+    if (not batch or os.environ.get('GALLERY_AUTHORIZED_PENDING_READ')!='1'):
+        raise ProviderVerificationRequired(
+            'Owner storage verification required; private queue held unchanged')
+    raw=read_via_existing_owner_gateway(remote,model,minimum=minimum,batch=batch)
+    if not matches(raw,model,batch,minimum):
+        raise ProviderVerificationRequired(
+            'Owner signed pending metadata did not match exact source batch')
+    print('OWNER_PENDING_GATEWAY_MATCHED_EXACT_BATCH',model,batch[:12],
+          'IMPORTED',False,'MEDIA_VERIFIED',False,
+          file=sys.stderr,flush=True)
+    return raw
+
+
+def read_via_existing_owner_gateway(remote,model,*,minimum=1,batch=None,opener=None):
     """Fallback ONLY to an authorized, fresh private catalog from our gateway.
 
     The gateway and this repo's main-branch collector authenticate each other
     with a short-lived GitHub Actions OIDC identity. No token, cookie, private
     storage key or raw catalog is committed to GitHub or sent to public Pages.
     """
-    expected={'mimmi':'archive:MimmiArchive/metadata/catalog.json',
-              'yui':'archive:YuiArchive/metadata/catalog.json'}.get(model)
+    base={'mimmi':'archive:MimmiArchive','yui':'archive:YuiArchive'}.get(model)
+    if batch is not None and not re.fullmatch(r'[a-f0-9]{64}',batch):
+        raise ValueError('Invalid exact owner pending SHA')
+    expected=(base+('/metadata/pending-individual/'+model+'/'+batch+'.json'
+                    if batch else '/metadata/catalog.json')) if base else None
     if remote!=expected:
-        raise ValueError('Unapproved private model / catalog')
+        raise ValueError('Unapproved private model / catalog / pending object')
     request_url=os.environ.get('ACTIONS_ID_TOKEN_REQUEST_URL','')
     request_token=os.environ.get('ACTIONS_ID_TOKEN_REQUEST_TOKEN','')
     target=urlsplit(request_url)
@@ -147,14 +166,17 @@ def read_via_existing_owner_gateway(remote,model,*,minimum=1,opener=None):
         raise ProviderVerificationRequired('Collector GitHub identity response invalid') from None
     if not isinstance(id_token,str) or not 80<=len(id_token)<=12000:
         raise ProviderVerificationRequired('Collector OIDC token missing')
-    endpoint='https://mimmi-private-gallery-free.onrender.com/internal/gallery-owner-catalog/'+model
+    path=('/internal/gallery-owner-pending/'+model+'/'+batch) if batch else (
+          '/internal/gallery-owner-catalog/'+model)
+    endpoint='https://mimmi-private-gallery-free.onrender.com'+path
     request=urllib.request.Request(endpoint,method='POST',data=b'',
                                    headers={'Authorization':'Bearer '+id_token,
                                             'Content-Type':'application/octet-stream'})
-    raw=fetch(request,6_000_000,125)
-    if not matches(raw,model,None,minimum):
-        raise ProviderVerificationRequired('Gateway catalog identity or original-file count invalid')
-    print('OWNER_REMOTE_CATALOG_AUTHENTICATED_GATEWAY_READ',model,
+    raw=fetch(request,2_000_000 if batch else 6_000_000,125)
+    if not matches(raw,model,batch,minimum):
+        raise ProviderVerificationRequired('Gateway owner metadata identity or batch SHA invalid')
+    print('OWNER_REMOTE_AUTHENTICATED_GATEWAY_READ',model,
+          'KIND','pending' if batch else 'catalog',
           'RAW_BYTES',len(raw),'PRIVATE_PATHS_LOGGED',False,
           file=sys.stderr,flush=True)
     return raw

@@ -613,6 +613,46 @@ async def signed_gallery_owner_catalog(model: str, request: Request):
     })
 
 
+@app.post("/internal/gallery-owner-pending/{model}/{batch}")
+async def signed_gallery_owner_pending(model: str,batch: str,request: Request):
+    """Private SHA-pinned pending metadata, for a single authorised collector.
+
+    An unverified remote queue is never public, auto-imported, deleted or
+    trusted merely because this endpoint returned 200. The existing Actions
+    importer still validates every slot and independently reads each original.
+    """
+    if model not in ("mimmi","yui") or not re.fullmatch(r"[a-f0-9]{64}",batch):
+        raise HTTPException(status_code=404,detail="Unknown private pending object")
+    authorization=request.headers.get("Authorization","")
+    if not authorization.startswith("Bearer ") or not _verify_sync_identity(
+        authorization[len("Bearer "):],_COLLECT_WORKFLOW
+    ):
+        raise HTTPException(status_code=403,detail="Untrusted gallery collector")
+    if await request.body():
+        raise HTTPException(status_code=413,detail="Pending metadata read accepts no payload")
+    remote=REMOTE if model=="mimmi" else YUI_REMOTE
+    key="metadata/pending-individual/"+model+"/"+batch+".json"
+    async with _sync_lock:
+        try:
+            raw=await rclone_bytes(key,2_000_000,remote=remote)
+            if not 1<=len(raw)<=2_000_000:
+                raise ValueError("Invalid private pending size")
+            data=json.loads(raw)
+            if (not isinstance(data,dict) or data.get("model")!=model
+                    or data.get("schema_version")!=1
+                    or data.get("source_batch_sha256")!=batch
+                    or not isinstance(data.get("albums"),list) or not data["albums"]
+                    or any(not isinstance(a,dict) or not isinstance(a.get("images"),list)
+                           for a in data["albums"])):
+                raise ValueError("Invalid pinned individual import queue")
+        except (HTTPException,ValueError,TypeError,OSError,asyncio.TimeoutError):
+            raise HTTPException(status_code=503,detail="Private pending metadata unavailable") from None
+    return Response(raw,media_type="application/json",headers={
+        "Cache-Control":"private, no-store","Pragma":"no-cache",
+        "X-Content-Type-Options":"nosniff"
+    })
+
+
 @app.post("/internal/terabox-session-refresh")
 async def sync_archive_session(request: Request):
     authorization = request.headers.get("Authorization", "")
