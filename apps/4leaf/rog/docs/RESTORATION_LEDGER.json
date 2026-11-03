@@ -1612,6 +1612,23 @@
         "M08",
         "P0-RELEASE"
       ]
+    },
+    {
+      "id": "REQ-20261103-CHAT-FOUNDATION-IMPLEMENT",
+      "date": "2026-11-03",
+      "origin": "2026-11-03 사용자 지시: 1번 채팅 기반 시스템 개발완료",
+      "text": "채팅을 기본 시스템으로 복원: 실제 서버 접속·사용자·북/남 지역·채널·방·실시간 메시지와 세션 만료/복구, 방 이동 커서, 서버 권위 정원과 권한 검증. 운영 실환경 수용이 확인되기 전에는 원작 채팅 전체 완료로 표시하지 않음.",
+      "taskIds": [
+        "M03",
+        "P0-CHAT",
+        "CHT-02",
+        "CHT-03",
+        "CHT-04",
+        "CHT-05",
+        "CHT-06",
+        "M09",
+        "P0-RELEASE"
+      ]
     }
   ],
   "tasks": [
@@ -8235,6 +8252,24 @@
         "P0-RELEASE"
       ],
       "details": "채팅 기반 아키텍처를 최상위 원칙으로 명시. 채팅의 접속-지역-채널-방-사용자-좌석-메시지-재접속을 우선하며 주잔은 종속 게임 콘텐츠로 관리. 기존 60 task 상태 및 완료 판정은 변경하지 않았고, 코드 수정/실기 QA를 수행했다고 주장하지 않는다."
+    },
+    {
+      "seq": 375,
+      "date": "2026-11-03",
+      "type": "CHAT_FOUNDATION_MERGED_CI_VERIFIED_DEPLOY_PROBE_PENDING",
+      "requestId": "REQ-20261103-CHAT-FOUNDATION-IMPLEMENT",
+      "taskIds": [
+        "M03",
+        "P0-CHAT",
+        "CHT-02",
+        "CHT-03",
+        "CHT-04",
+        "CHT-05",
+        "CHT-06",
+        "M09",
+        "P0-RELEASE"
+      ],
+      "details": "PR #621 squash merged 0ec921d5, beta54/PWA v141. 12 Node authority+recovery tests PASS, 2 Chromium real users PASS, 10 real connected users PASS, world/chat integration PASS. Postmerge public Pages deploy repeatedly cancelled by concurrent unrelated main pushes; added read-only live API and public bundle probe. Keep overall original-chat and service launch acceptance open until production probe PASS; no fabricated completion."
     }
   ],
   "restorationPriority": {
@@ -8249,6 +8284,19 @@
     ],
     "acceptanceRule": "채팅 화면의 외형만 아니라 실제 다중사용자 채팅, 세션, 입퇴장, 재접속이 통합 검증되어야 기반 복원이 완료된다. 주잔 시작 불가와 데이터 유실 등 기능 차단/안전 결함은 영역에 관계없이 긴급 수정한다.",
     "bookkeeping": "상위 목표와 세부 작업을 같은 독립 작업으로 중복 계산하지 말고, 코드 구현/통합 배포/원작 수용 단계별 증빙을 구분한다.",
-    "updatedAt": "2026-11-03"
+    "updatedAt": "2026-11-03",
+    "chatFoundation": {
+      "implementation": "MERGED",
+      "integration": "VERIFIED",
+      "deployment": "PENDING-LIVE-PROBE",
+      "scope": "P0-1: real central HTTPS session/users/16 districts/128 canonical rooms/create/join/leave/realtime messages/seat and ownership/session reauth",
+      "pr": 621,
+      "mergeSha": "0ec921d5b67e58fab59930620849f01c60dcac30",
+      "release": "0.86.0-beta.54",
+      "pwaCache": "4leaf-revival-pwa-v141",
+      "evidence": "GitHub Actions latest PR 10bf7035: 8/8 server + 4/4 recovery + independent Chromium central-chat + 10 real participant browser + world-and-chat CI PASS. Real Pages + free Render service acceptance tracked by production probe workflow.",
+      "limitations": "Physical iPhone, historical 2002 chat fidelity, long-term durable free server history, actual public Pages/Render integration not yet signed off; P0-CHAT/M03 stay in_progress.",
+      "updatedAt": "2026-11-03"
+    }
   }
 }
