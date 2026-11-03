@@ -20,7 +20,8 @@ TOKEN=os.getenv("DEMAND_VIEWER_TOKEN","")
 COOKIE=os.getenv("RCLONE_CONFIG_ARCHIVE_COOKIE","")
 ID_RE=re.compile(r"^[a-f0-9]{16,64}$")
 SHA_RE=re.compile(r"^[a-f0-9]{64}$")
-MIMES={"image/jpeg","image/png","image/webp","image/avif","video/mp4","video/webm","video/quicktime"}
+MIMES={"image/jpeg","image/png","image/webp","image/avif","video/mp4","video/webm","video/quicktime", "audio/mpeg", "audio/mp4", "audio/ogg",
+       "audio/wav", "audio/webm", "audio/flac"}
 MAX_SIZE=1500000000
 _cache={"at":0.0,"posts":None}
 _lock=asyncio.Lock()
