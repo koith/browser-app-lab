@@ -175,18 +175,21 @@ def read_with_current_owner_web_session(remote,model,*,minimum=1,reader=None,ref
               'yui':'archive:YuiArchive/metadata/catalog.json'}.get(model)
     if remote!=expected:
         raise ValueError('Only the original model-specific owner catalog may refresh web state')
+    optional_network_errors=()
     if refresh is None:
         from owner_upload_web_token import update_current_process
+        import httpx
+        optional_network_errors=(httpx.RequestError,)
         refresh=update_current_process
-    from owner_upload_web_token import WebStateUnavailable
-    import httpx
     try:
         token=refresh()
         if not isinstance(token,str) or not token:
-            raise WebStateUnavailable('No owner web token')
+            raise ValueError('No owner web token')
         print('OWNER_AUTHENTICATED_WEB_STATE_READY_BEFORE_CATALOG',model,
               'TOKEN_DISCLOSED',False,file=sys.stderr,flush=True)
-    except (WebStateUnavailable,httpx.RequestError,OSError,TimeoutError) as error:
+    except Exception as error:
+        if not isinstance(error,(ValueError,OSError,TimeoutError)+optional_network_errors):
+            raise
         # A normal credential refresh failure does not license a different
         # account, source host, signed URL, or verification challenge bypass.
         print('OWNER_AUTHENTICATED_WEB_STATE_UNAVAILABLE',model,
