@@ -32,6 +32,45 @@ def fake_post(term,i):
                             "thumb":"https://example.com/qa.png","alt":"QA fixture"}]}
     }
 
+
+def assert_rank_rows_centered(page, width):
+    # Temporary synthetic DOM only: tests real Chromium layout without
+    # fetching/storing any account or post data.
+    measured=page.evaluate("""() => {
+      const host=document.getElementById("activityRankingRows");
+      const original=[...host.childNodes];
+      const sample=Array.from({length:23},()=>{
+        const tile=document.createElement("button");
+        tile.type="button";
+        tile.className="activity-rank-card";
+        return tile;
+      });
+      host.replaceChildren(...sample);
+      try{
+        const parent=host.getBoundingClientRect();
+        const boxes=sample.map(tile=>tile.getBoundingClientRect());
+        const rows=[];
+        for(const box of boxes){
+          const at=rows.find(row=>Math.abs(row.y-box.y)<1);
+          if(at)at.boxes.push(box);
+          else rows.push({y:box.y,boxes:[box]});
+        }
+        const last=rows[rows.length-1].boxes;
+        return {
+          rowCounts:rows.map(row=>row.boxes.length),
+          tileWidths:boxes.map(box=>box.width),
+          leftGap:last[0].left-parent.left,
+          rightGap:parent.right-last[last.length-1].right,
+          overflow:boxes.some(box=>box.right>parent.right+2||box.left<parent.left-2)
+        };
+      }finally{host.replaceChildren(...original);}
+    }""")
+    columns=10 if width>720 else 5
+    assert measured["rowCounts"]==([10,10,3] if columns==10 else [5,5,5,5,3]),measured
+    assert max(measured["tileWidths"])-min(measured["tileWidths"])<1.1,measured
+    assert abs(measured["leftGap"]-measured["rightGap"])<3,measured
+    assert not measured["overflow"],measured
+
 def run(live=False):
     errors=[];api_calls=[];provider_http=[];provider_failed=[];provider_on={"enabled":False}
     with sync_playwright() as playwright:
@@ -216,6 +255,7 @@ def run(live=False):
             assert not page.locator("#dateDialog").is_visible()
 
             if not live:
+                assert_rank_rows_centered(page,1200)
                 assert n==270,f"Expected initial 270 visible card limit, got {n}"
                 assert "B315" in page.locator("#count").text_content()
                 assert page.locator("#more").is_visible()
@@ -230,6 +270,7 @@ def run(live=False):
                 assert all(term in all_text for term in TERMS)
 
                 page.set_viewport_size({"width":390,"height":844})
+                assert_rank_rows_centered(page,390)
                 assert page.locator("#feed").evaluate("e=>getComputedStyle(e).gridTemplateColumns.split(' ').length")==3
                 assert page.locator("#openDate").is_visible()
                 assert page.locator("#openDate").evaluate("e=>e.getBoundingClientRect().right")<=391
