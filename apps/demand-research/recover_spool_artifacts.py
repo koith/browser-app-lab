@@ -49,7 +49,10 @@ def list_candidates():
                 continue
             run=item.get("workflow_run") or {}
             run_id=run.get("id")
-            if not isinstance(run_id,int) or run_id<1:
+            if (not isinstance(run_id,int) or run_id<1
+                    or run.get("head_branch")!="main"
+                    or run.get("repository_id")!=run.get("head_repository_id")):
+                # Never restore an untrusted fork or pull-request artifact.
                 continue
             items.append((str(item.get("created_at","")),run_id,name))
         if len(batch)<100:
@@ -57,6 +60,21 @@ def list_candidates():
     # First observed snapshots are immutable; process the oldest retained
     # encrypted artifact first if they represent the same original post.
     return sorted(items)[:MAX_ARTIFACTS]
+
+
+def validate_source_run(source_run):
+    """Check that a targeted artifact comes from our trusted main workflow."""
+    repo=os.environ.get("GITHUB_REPOSITORY","")
+    if not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+",repo):
+        raise RuntimeError("missing repository context for private recovery")
+    raw=_gh(["api",f"/repos/{repo}/actions/runs/{source_run}"])
+    data=json.loads(raw)
+    head=data.get("head_repository") or {}
+    if (data.get("name")!="INTERSECTION — Fast Private Public-Post Capture"
+            or data.get("head_branch")!="main"
+            or data.get("event") not in ("push","schedule","workflow_dispatch")
+            or head.get("full_name")!=repo):
+        raise RuntimeError("untrusted private recovery source run")
 
 
 def replay(cloud=None,local_directory=None):
@@ -79,8 +97,10 @@ def replay(cloud=None,local_directory=None):
         if source_run:
             if not re.fullmatch(r"[0-9]{6,30}",source_run):
                 raise ValueError("invalid private recovery source run")
-            # A workflow_run completion event targets the exact failed capture
-            # so recently deleted public originals are reuploaded first.
+            # A workflow_run completion event or explicit operator retry
+            # can target a single run, but only if that run is an approved
+            # main-branch capture (not an untrusted pull request or fork).
+            validate_source_run(source_run)
             candidates=[("",int(source_run),"intersection-private-recovery")]
         else:
             candidates=list_candidates()
