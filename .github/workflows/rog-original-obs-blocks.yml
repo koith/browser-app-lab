@@ -1,4 +1,5 @@
 name: 4LEAF original OBS block-by-block decode (own palettes) and complete animation tables
+# Isolated 2026-11-03 data-branch run; outputs never write directly to main.
 on:
   push:
     branches: ['data/4leaf-obs-blocks-**']
