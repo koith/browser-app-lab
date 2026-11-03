@@ -73,13 +73,14 @@ def sensitive_labels(labels):
                str(x.get("val", "")).lower() in SENSITIVE_LABELS for x in labels)
 
 
-def normalized(platform, original_id, url, text, published, media_urls=()):
+def normalized(platform, original_id, url, text, published, media_urls=(), profile_url=''):
     if not public_url(url) or not isinstance(text, str) or not any(t in text for t in TERMS):
         return None
     text = text[:30000]
     media = [u for u in media_urls if isinstance(u, str) and public_url(u)]
     return {"platform": platform, "original_id": original_id,
             "source_url": url, "text": text, "posted_at": published,
+            "profile_url": profile_url if public_url(profile_url) else "",
             "media_urls": list(dict.fromkeys(media))[:MAX_MEDIA_PER_POST],
             "media_expected": len(list(dict.fromkeys(media_urls)))}
 
@@ -104,7 +105,8 @@ def bluesky(term, start, end):
             images = [m.get("fullsize") for m in embed.get("images", [])
                       if isinstance(m, dict)] if isinstance(embed, dict) else []
             link = "https://bsky.app/profile/" + match.group(1) + "/post/" + match.group(2)
-            row = normalized("bluesky", uri, link, rec.get("text", ""), posted, images)
+            row = normalized("bluesky", uri, link, rec.get("text", ""), posted, images,
+                             "https://bsky.app/profile/" + match.group(1))
             if row:
                 yield row
         except (TypeError, ValueError, AttributeError):
@@ -146,7 +148,7 @@ def mastodon(term, start, end):
             images = [m.get("url") for m in attachments if isinstance(m, dict)
                       and m.get("type") in ("image", "video", "gifv")]
             row = normalized("mastodon", str(item.get("uri") or item.get("id")), url,
-                             text, posted, images)
+                             text, posted, images, (item.get("account") or {}).get("url", ""))
             if row:
                 yield row
 
@@ -175,7 +177,8 @@ def misskey(term, start, end):
                      if isinstance(m, dict) and not m.get("isSensitive")]
             link = "https://" + host + "/notes/" + nid
             row = normalized("misskey", host + ":" + nid, link,
-                             str(note.get("text") or ""), posted, media)
+                             str(note.get("text") or ""), posted, media,
+                             "https://" + host + "/@" + uid)
             if row:
                 yield row
 
@@ -256,7 +259,7 @@ def make_post(row, now, get_media=download_media, pid_override=None):
         blobs.append(blob)
     post = {"id": pid, "platform": row["platform"], "source_url": row["source_url"],
             "posted_at": row["posted_at"], "captured_at": datetime.fromtimestamp(now, timezone.utc).isoformat(),
-            "text": row["text"], "media": media,
+            "text": row["text"], "profile_url": row.get("profile_url", ""), "media": media,
             "media_expected": row["media_expected"], "media_saved": len(media),
             "archive_complete": len(media) == row["media_expected"],
             "provenance": "public_source_observed", "retention_review": "required_on_removal_request"}
@@ -292,6 +295,7 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None):
             raise ValueError("invalid original public capture record")
         row = {"platform": first["platform"], "source_url": first["source_url"],
                "text": first["text"], "posted_at": first["posted_at"],
+               "profile_url": first.get("profile_url", ""),
                "media_urls": first["media_links"][:MAX_MEDIA_PER_POST],
                "media_expected": len(first["media_links"])}
         post, blobs = make_post(row, first["observed_at"], pid_override=pid)
@@ -327,7 +331,8 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None):
                 # First remote write contains observed public text, ahead of media fetch.
                 early = {"id": pid, "platform": row["platform"], "text": row["text"],
                          "source_url": row["source_url"], "posted_at": row["posted_at"],
-                         "observed_at": now, "media_links": row["media_urls"]}
+                         "observed_at": now, "media_links": row["media_urls"],
+                         "profile_url": row.get("profile_url", "")}
                 key = "posts/" + pid + "/capture.json"
                 first_blob = cloud.read(key, cap=100_000, optional=True)
                 capture_at = now
@@ -340,6 +345,7 @@ def run(fetchers=None, cloud=None, clock=time.time, run_id=None):
                     capture_at = first["observed_at"]
                     row = {**row, "text": first["text"],
                            "posted_at": first["posted_at"],
+                           "profile_url": first.get("profile_url", ""),
                            "media_urls": first["media_links"],
                            "media_expected": len(first["media_links"])}
                 post, blobs = make_post(row, capture_at)
