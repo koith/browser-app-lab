@@ -128,3 +128,29 @@ def test_primary_upload_missing_and_parent_refresh_failure_uses_alt():
     assert cloud.primary_uploads>0
     assert cloud.alternate_uploads>0
     assert cloud.load_catalog()[0]["id"]==p["id"]
+
+
+def test_primary_upload_attempts_are_bounded_before_alternate_rescue():
+    class PersistentlyRejectedPrimary(FakeCloud):
+        def __init__(self):
+            super().__init__()
+            self.primary_attempts=0
+            self.alternate_attempts=0
+        def fake(self,args,data=None,timeout=150,allow_missing=False):
+            alternate="--terabox-domain" in args
+            if args[0] in ("copyto","rcat") and not alternate:
+                self.primary_attempts+=1
+                raise RuntimeError("private cloud upload failed (backend_rejected)")
+            if args[0]=="copyto" and alternate:
+                self.alternate_attempts+=1
+            return super().fake(args,data=data,timeout=timeout,
+                                allow_missing=allow_missing)
+    cloud=PersistentlyRejectedPrimary()
+    key="posts/"+"c"*40+"/capture.json"
+    expected=b'{"synthetic":"original public observation"}'
+    assert cloud.write_immutable(key,expected) is True
+    assert cloud.objects[key]==expected
+    assert cloud.primary_attempts==2
+    assert cloud.alternate_attempts==1
+    assert cloud.write_immutable(key,expected) is False
+    assert cloud.objects[key]==expected
