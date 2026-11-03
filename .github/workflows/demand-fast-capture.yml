@@ -1,0 +1,71 @@
+name: INTERSECTION — Fast Private Public-Post Capture
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "apps/demand-research/demand_archive.py"
+      - "apps/demand-research/demand_capture_job.py"
+      - "apps/demand-research/test_demand_archive.py"
+      - ".github/workflows/demand-fast-capture.yml"
+  push:
+    branches: [main]
+    paths:
+      - "apps/demand-research/demand_archive.py"
+      - "apps/demand-research/demand_capture_job.py"
+      - ".github/workflows/demand-fast-capture.yml"
+permissions:
+  contents: read
+concurrency:
+  group: intersection-fast-private-capture
+  cancel-in-progress: false
+jobs:
+  offline-tests:
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Test private archive crash recovery and public capture without external accounts
+        run: |
+          python -m pip install --disable-pip-version-check pytest==8.4.2
+          cd apps/demand-research
+          python -m py_compile demand_archive.py demand_capture_job.py test_demand_archive.py
+          python -m pytest -q test_demand_archive.py
+  capture:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 23
+    env:
+      RCLONE_CONFIG_ARCHIVE_TYPE: terabox
+      RCLONE_CONFIG_ARCHIVE_COOKIE: ${{ secrets.DEMAND_TERABOX_NDUS || secrets.YUI_TERABOX_NDUS || secrets.YUI_TERABOX_COOKIE }}
+      DEMAND_TERABOX_REMOTE: "archive:DemandResearch"
+      DEMAND_CAPTURE_PUBLIC_ALLOWED: "1"
+      GITHUB_RUN_ID: ${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Fail closed if private TeraBox credential is not available
+        run: |
+          test -n "$RCLONE_CONFIG_ARCHIVE_COOKIE" || { echo "::error::Private archive credential missing: capture not started"; exit 1; }
+      - name: Install pinned private TeraBox backend
+        run: |
+          set -euo pipefail
+          curl -fsSL https://github.com/gulp79/rclone-extra/releases/download/v1.75.2-extra/rclone-linux-amd64.zip -o /tmp/rclone.zip
+          echo '78855325a2a8d83b3feee3a8363d32e1211babbf4cda6356fa8ca5f472075062  /tmp/rclone.zip' | sha256sum -c -
+          unzip -q /tmp/rclone.zip -d /tmp/rclone-extra
+          find /tmp/rclone-extra -type f -name rclone -exec sudo install -m 755 {} /usr/local/bin/rclone \;
+          rclone help backends | grep -qi terabox
+          rm -rf /tmp/rclone.zip /tmp/rclone-extra
+      - name: Capture source-verified public posts and verify private cloud persistence
+        working-directory: apps/demand-research
+        run: |
+          set -euo pipefail
+          python demand_capture_job.py
+          echo 'Private capture attempted; see aggregate-only counters in job log. Frequency is best-effort, not real-time or complete.' >> "$GITHUB_STEP_SUMMARY"
