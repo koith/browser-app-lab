@@ -70,6 +70,9 @@ jobs:
           PY
           git add apps/4leaf/rog/docs/RESTORATION_LEDGER.json
           git commit -m "docs(4leaf): append Claude C08/C09 requests and events without erasing existing P0 records"
+      - name: Install isolated OBS decoder test dependencies
+        run: |
+          python3 -m pip install --break-system-packages --user numpy pillow
       - name: Verify source mapping and original animation regressions
         shell: bash
         run: |
