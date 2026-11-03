@@ -25,6 +25,7 @@ on:
       - "apps/demand-research/recovery_spool.py"
       - "apps/demand-research/test_recovery_spool.py"
       - "apps/demand-research/test_replay_artifact_selection.py"
+      - "apps/demand-research/test_encrypted_batch_recovery.py"
 
 permissions:
   contents: read
@@ -49,8 +50,8 @@ jobs:
           set -euo pipefail
           python -m pip install --disable-pip-version-check pytest==8.4.2 cryptography==46.0.4
           cd apps/demand-research
-          python -m py_compile recovery_spool.py recover_spool_artifacts.py test_replay_artifact_selection.py
-          python -m pytest -q test_recovery_spool.py test_degraded_encrypted_capture.py test_replay_artifact_selection.py
+          python -m py_compile recovery_spool.py recover_spool_artifacts.py test_replay_artifact_selection.py test_encrypted_batch_recovery.py
+          python -m pytest -q test_recovery_spool.py test_degraded_encrypted_capture.py test_replay_artifact_selection.py test_encrypted_batch_recovery.py
 
   replay:
     # Never replay a pull-request artifact or run from an untrusted branch.
