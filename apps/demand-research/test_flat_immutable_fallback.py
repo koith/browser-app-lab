@@ -121,3 +121,18 @@ def test_normal_canonical_upload_remains_original_contract():
     assert "posts/"+entry["id"]+"/post.json" in cloud.objects
     assert not any(k.startswith("metadata/flat-") for k in cloud.objects)
     assert cloud.load_catalog()==[entry]
+
+
+def test_total_provider_outage_remains_failure_and_never_creates_marker():
+    class Unavailable(RejectNestedCloud):
+        def fake(self,args,data=None,timeout=150,allow_missing=False):
+            target=(args[2] if args[0]=="copyto" else args[1]) if len(args)>1 else ""
+            if ("/metadata" in target and args[0] in ("mkdir","copyto","rcat")):
+                raise RuntimeError("private cloud "+args[0]+" failed (missing)")
+            if args[0]=="lsf" and "/metadata" in target:
+                return None
+            return super().fake(args,data=data,timeout=timeout,allow_missing=allow_missing)
+    cloud=Unavailable()
+    with pytest.raises(RuntimeError):
+        cloud.save_post(post())
+    assert cloud.objects=={}
