@@ -27,6 +27,9 @@ MAX_BUNDLE_BYTES=48_000_000
 MAX_ARTIFACT_PAGES=60
 MAX_CONSECUTIVE_FAILURES=3
 MAX_RECORD_SECONDS=55
+# Leave time for a final sanitized summary before the 21-minute Actions kill.
+MAX_REPLAY_SECONDS=900
+MAX_BATCH_SECONDS=100
 
 
 def _gh(args,*,max_bytes=2_000_000):
@@ -172,6 +175,7 @@ def restore_with_budget(spool,path,cloud,*,max_seconds=MAX_RECORD_SECONDS):
 
 
 def replay(cloud=None,local_directory=None):
+    started=time.monotonic()
     active=cloud or CloudArchive()
     active.preflight()
     summary={"artifacts":0,"encrypted_buffers":0,
@@ -180,7 +184,7 @@ def replay(cloud=None,local_directory=None):
              "buffer_failures":0,"artifact_download_failures":0,
              "deferred_buffers":0,
              "batch_sha_verified":0,"batch_ciphertext_count":0,
-             "batch_failures":0}
+             "batch_failures":0,"deferred_artifacts":0}
     if local_directory:
         source_dirs=[Path(local_directory)]
     else:
@@ -202,23 +206,32 @@ def replay(cloud=None,local_directory=None):
         else:
             candidates=list_candidates()
     if local_directory:
-        directories=[(None,Path(local_directory))]
+        pending=[(None,Path(local_directory))]
         tmp=None
     else:
         tmp=tempfile.TemporaryDirectory(prefix="intersection-recovery-")
-        directories=[]
-        for index,(created,run_id,name) in enumerate(candidates):
-            target=Path(tmp.name)/str(index)
-            target.mkdir(mode=0o700)
-            try:
-                _gh(["run","download",str(run_id),"-n",name,"-D",str(target)],
-                    max_bytes=1_000_000)
-                directories.append((name,target))
-            except (RuntimeError,OSError,subprocess.TimeoutExpired):
-                summary["artifact_download_failures"]+=1
+        pending=[(name,run_id) for _,run_id,name in candidates]
+    deadline=started+MAX_REPLAY_SECONDS
     try:
         consecutive_failures=0
-        for _name,directory in directories:
+        for index,item in enumerate(pending):
+            # Process one artifact immediately; eager downloading all twelve
+            # can exhaust the runner without recovering even one original.
+            if time.monotonic()>=deadline-MAX_BATCH_SECONDS-MAX_RECORD_SECONDS:
+                summary["deferred_artifacts"]+=len(pending)-index
+                break
+            if tmp is None:
+                _,directory=item
+            else:
+                name,run_id=item
+                directory=Path(tmp.name)/str(index)
+                directory.mkdir(mode=0o700)
+                try:
+                    _gh(["run","download",str(run_id),"-n",name,"-D",str(directory)],
+                        max_bytes=1_000_000)
+                except (RuntimeError,OSError,subprocess.TimeoutExpired):
+                    summary["artifact_download_failures"]+=1
+                    continue
             encrypted=sorted(directory.glob("*.enc"))
             if not encrypted:
                 continue
@@ -232,7 +245,8 @@ def replay(cloud=None,local_directory=None):
             try:
                 if with_cloud_budget(
                         active,lambda:preserve_encrypted_batch(active,spool,encrypted),
-                        max_seconds=MAX_RECORD_SECONDS):
+                        max_seconds=min(MAX_BATCH_SECONDS,max(1,
+                            deadline-time.monotonic()-MAX_RECORD_SECONDS))):
                     summary["batch_sha_verified"]+=1
                     summary["batch_ciphertext_count"]+=len(encrypted)
             except (RuntimeError,ValueError,OSError,KeyError,TypeError,TimeoutError):
@@ -244,6 +258,9 @@ def replay(cloud=None,local_directory=None):
                 offset=seed%len(encrypted)
                 encrypted=encrypted[offset:]+encrypted[:offset]
             for offset,path in enumerate(encrypted):
+                if time.monotonic()>=deadline-MAX_RECORD_SECONDS:
+                    summary["deferred_buffers"]+=len(encrypted)-offset
+                    break
                 if consecutive_failures>=MAX_CONSECUTIVE_FAILURES:
                     # Source artifacts and any SHA-verified batch remain
                     # untouched, but none of these files count as restored.
@@ -268,5 +285,6 @@ def replay(cloud=None,local_directory=None):
 if __name__=="__main__":
     result=replay()
     if (result["buffer_failures"] or result["artifact_download_failures"]
-            or result["deferred_buffers"]):
+            or result["deferred_buffers"] or result["deferred_artifacts"]
+            or result["batch_failures"]):
         raise RuntimeError("private archived recovery buffers still unverified")
