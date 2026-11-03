@@ -141,8 +141,8 @@ const main=fs.readFileSync(path.join(dir,"index.html"),"utf8");
 const posPanel=main.indexOf('id="activityRanking"'),posFeed=main.indexOf('id="feed"');
 assert.ok(posPanel>0&&posFeed>posPanel,"ranking physically above post feed");
 assert.ok(main.includes("post_activity_ranking.js"));
-assert.ok(main.includes("grid-template-columns:repeat(10,minmax(0,1fr))"),"desktop exactly ten columns");
-assert.ok(main.includes("grid-template-columns:repeat(5,minmax(0,1fr))"),"mobile exactly five columns");
+assert.ok(main.includes("flex:0 0 calc((100% - 36px)/10)"),"desktop exactly ten equal-width tiles");
+assert.ok(main.includes("flex-basis:calc((100% - 16px)/5)"),"mobile exactly five equal-width tiles");
 assert.ok(main.includes("profileCreatedAt:account.created_at"),"Mastodon age provenance");
 assert.ok(main.includes("profileCreatedAt:u.createdAt"),"Misskey age provenance");
 assert.ok(main.includes("profileCreatedAt:p.profileCreatedAt"),"snapshot preserves provider age");
@@ -166,4 +166,4 @@ assert.ok(main.includes('if(!iconOnly)badge.append(el("span","",meta.name))'),"i
 assert.ok(main.includes('"source-badge"+(iconOnly?" source-badge--icon-only":"")'),"accessible icon-only badge variant");
 assert.ok(main.includes('cloud:{name:"Archive",favicon:"https://koith.github.io/browser-app-lab/apps/demand-research/assets/archive.svg"}'),"archive has a pictogram");
 assert.ok(!script.includes("localStorage")&&!script.includes("sessionStorage"));
-console.log("PUBLIC_ACTIVITY_RANKING_QA_PASS: 20-at-a-time cohort ranking, source-logo-only tiles, compact header link, detail dialog, dedup and safe URLs");
+console.log("PUBLIC_ACTIVITY_RANKING_QA_PASS: centered 10/5-column 20-at-a-time cohort ranking, source-logo-only tiles, compact header link, detail dialog, dedup and safe URLs");
