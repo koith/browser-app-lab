@@ -45,12 +45,21 @@ def probe():
         "copyto-json":b'{"kind":"SYNTHETIC_PUBLIC_QA","value":1}\n',
         "rcat-json":b'{"kind":"SYNTHETIC_PUBLIC_QA","value":2}\n',
         "copyto-long-post":b'{"kind":"SYNTHETIC_PUBLIC_QA","value":3}\n',
+        "copyto-unicode-capture":json.dumps({"kind":"SYNTHETIC_QA","message":"검증"*1000},ensure_ascii=False).encode("utf-8"),
+        "rcat-unicode-capture":json.dumps({"kind":"SYNTHETIC_QA","message":"확인"*1100},ensure_ascii=False).encode("utf-8"),
+        "prodroot-unicode-capture":json.dumps({"kind":"SYNTHETIC_QA","message":"검사"*900},ensure_ascii=False).encode("utf-8"),
     }
     outcomes={}
     with tempfile.TemporaryDirectory(prefix="terabox-write-qa-") as local:
         for label,raw in payloads.items():
-            target=base+("/posts/"+"a"*40+"/post.json" if label=="copyto-long-post"
-                        else "/"+label+".json")
+            target_base=("archive:DemandResearch/qa/write-method-probe-"+run_id
+                         if label=="prodroot-unicode-capture" else base)
+            name=("/posts/"+"a"*40+"/post.json" if label=="copyto-long-post" else
+                  "/posts/"+"b"*40+"/capture.json" if label=="copyto-unicode-capture" else
+                  "/posts/"+"c"*40+"/capture.json" if label=="rcat-unicode-capture" else
+                  "/posts/"+"d"*40+"/capture.json" if label=="prodroot-unicode-capture" else
+                  "/"+label+".json")
+            target=target_base+name
             local_file=Path(local)/("local-"+label+".json")
             local_file.write_bytes(raw)
             try:
