@@ -48,6 +48,18 @@ PUBLIC_STRONG_MODEL={
     'mimmi':re.compile(r'(?<![a-z])mimmi(?![a-z])|밈미',re.I)
 }
 CREATOR_ACCOUNTS={'yui':'super_yuisan','mimmi':'Mimmi_official'}
+# One photographer-authored public X status explicitly tagging Yui.
+# The teapawt permalink is an HTML discovery fallback only; media bytes
+# must come from X's first-party pbs.twimg.com media URLs, not repost CDN.
+YUI_PHOTOGRAPHER_ORIGINAL_X='https://x.com/chinokun_photo/status/2116593328175333409'
+YUI_PHOTOGRAPHER_PUBLIC_VIEW='https://teapawt.net/chinokun_photo/status/2116593328175333409'
+YUI_PHOTOGRAPHER_ORIGINAL_MEDIA=frozenset({
+    'https://pbs.twimg.com/media/HV-mQ9pagAABNmu.jpg?name=orig',
+    'https://pbs.twimg.com/media/HV-mUdQawAAFrMO.jpg?name=orig',
+    'https://pbs.twimg.com/media/HV-mUdAaYAAMHpJ.jpg?name=orig',
+    'https://pbs.twimg.com/media/HV-mUdTagAAF9yo.jpg?name=orig',
+})
+
 FORMATS={'JPEG':'jpg','PNG':'png','WEBP':'webp'}
 KNOWN_ALTERNATE_EDITIONS={
     'pixibb-auto-creamsoda-mimmi-vol-2-neko-mimmi-62-photos-cosplay':'xiutu-public-1190160',
@@ -95,7 +107,9 @@ def safe_registered_public_page(url,model=None):
             if '.' not in host:
                 return False
         if host=='teapawt.net':
-            return safe_page(url)
+            return safe_page(url) or (model=='yui' and url==YUI_PHOTOGRAPHER_PUBLIC_VIEW)
+        if model=='yui' and url==YUI_PHOTOGRAPHER_ORIGINAL_X:
+            return True
         if host in X_PUBLIC_HOSTS:
             if model not in CREATOR_ACCOUNTS:
                 return False
@@ -113,6 +127,8 @@ def reviewed_direct_source(url, model):
     """Eligible *storage* origins. Other public hosts remain discovery leads."""
     from official_sample_recovery import _publisher_page
     from urllib.parse import urlsplit
+    if model=='yui' and url in (YUI_PHOTOGRAPHER_ORIGINAL_X,YUI_PHOTOGRAPHER_PUBLIC_VIEW):
+        return True
     if _publisher_page(url):
         return True
     if not safe_registered_public_page(url,model):
@@ -130,6 +146,8 @@ def reviewed_direct_source(url, model):
 def reviewed_direct_media(url, page, model):
     from official_sample_recovery import _publisher_page, _publisher_photo
     from urllib.parse import urlsplit
+    if model=='yui' and page in (YUI_PHOTOGRAPHER_ORIGINAL_X,YUI_PHOTOGRAPHER_PUBLIC_VIEW):
+        return url in YUI_PHOTOGRAPHER_ORIGINAL_MEDIA
     if _publisher_page(page):
         return _publisher_photo(url)
     p=urlsplit(url)
@@ -394,6 +412,25 @@ def in_excluded_article_section(tag,article):
 
 
 def page_images(raw,url,model):
+    if model=='yui' and url in (YUI_PHOTOGRAPHER_ORIGINAL_X,YUI_PHOTOGRAPHER_PUBLIC_VIEW):
+        # A fixed, first-party photographer post; not the model's repost,
+        # generic social search or recommendations from nearby post cards.
+        soup=BeautifulSoup(raw,'html.parser')
+        heading=' '.join(tag.get_text(' ',strip=True)
+                         for tag in soup.select('title,h1'))
+        content=soup.get_text(' ',strip=True)
+        if ('chinokun_photo' not in (heading+' '+content)
+                or 'super_yuisan' not in content
+                or '심유이' not in content):
+            return [],[],'photographer_or_model_identity_unverified'
+        observed=[]
+        for node in soup.select('a[href]'):
+            value=node.get('href')
+            if not value:continue
+            link=urljoin(url,value)
+            if link in YUI_PHOTOGRAPHER_ORIGINAL_MEDIA and link not in observed:
+                observed.append(link)
+        return observed,[],'scoped_public_page' if observed else 'no_public_photos'
     if urlsplit(url).hostname in X_PUBLIC_HOSTS:
         if not safe_registered_public_page(url,model):
             return [],[],'unrelated_social_account_rejected'

@@ -3,6 +3,17 @@
   "model": "yui",
   "albums": [
     {
+      "id": "yui-chinokun-illustar-2026-public",
+      "title": "심유이 — 2026 일러스타페스 · 사진가 치노쿤 공개 사진",
+      "publisher": "사진가 @chinokun_photo (본인 공개 X 원문)",
+      "priority": 0,
+      "source": "https://x.com/chinokun_photo/status/2116593328175333409",
+      "source_pages": [
+        "https://teapawt.net/chinokun_photo/status/2116593328175333409"
+      ],
+      "identity_evidence": "Photographer @chinokun_photo publicly posted on 2026-10-31 an original authored X status stating 2026-10-10 Illustar photo session, explicitly tagging model 심유이 @super_yuisan. Four individual pbs.twimg.com/media first-party original links were observed in the same public status (not invented from sequential names or a third-party image archive). The teapawt page is only an unprotected HTML discovery fallback. Full original and preview SHA-256 storage + deployed gallery decode are mandatory, and this page must not silently include other authors."
+    },
+    {
       "id": "public-yui-sns",
       "title": "심유이 — 코스프레·공개 사진",
       "publisher": "공개 SNS",
