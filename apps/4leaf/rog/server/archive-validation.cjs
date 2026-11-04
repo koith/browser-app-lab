@@ -70,8 +70,8 @@ function validateArchive(archive,validDistrict){
    messageIds.add(e.id);
    if(e.clientMessageId!==undefined){
     if(typeof e.clientMessageId!=='string'||!/^(?:[0-9a-f]{32}|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$/i.test(e.clientMessageId)||
-     clientIds.has(e.clientMessageId))bad('duplicate or invalid client message id');
-    clientIds.add(e.clientMessageId);
+     clientIds.has(e.clientMessageId.toLowerCase()))bad('duplicate or invalid client message id');
+    clientIds.add(e.clientMessageId.toLowerCase());
    }
    last=e.seq;
   }
