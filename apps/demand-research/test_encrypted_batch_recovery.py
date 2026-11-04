@@ -154,3 +154,107 @@ def test_replay_streams_artifacts_and_reports_unprocessed_backlog(monkeypatch):
     assert result["deferred_artifacts"]==1
     assert result["post_and_media_verified"]==0
     assert result["batch_sha_verified"]==0
+
+def test_expired_github_artifact_restores_exact_post_and_media_from_terabox_pack(
+        tmp_path,monkeypatch):
+    """The source Actions artifact can disappear; immutable cloud ciphertext
+    must still recover exact original SHA-matched media and first observation.
+    """
+    from demand_archive import sha256,canonical_json
+    from test_demand_archive import post as synthetic_post
+    monkeypatch.setenv("GH_TOKEN","offline-test-no-real-github-requests")
+    monkeypatch.delenv("DEMAND_RECOVERY_SOURCE_RUN_ID",raising=False)
+    monkeypatch.setattr(replay,"list_candidates",lambda:[])
+    spool=RecoverySpool(tmp_path)
+    post=synthetic_post()
+    pid=post["id"]
+    first_seen=first(pid)
+    first_seen["media_links"]=["https://cdn.bsky.app/img/synthetic-only-original.jpg"]
+    post.update({"text":first_seen["text"],"source_url":first_seen["source_url"],
+                 "posted_at":first_seen["posted_at"],"media_expected":1,
+                 "media_saved":1,"archive_complete":True})
+    original=b"original synthetic picture exactly preserved 1234567"
+    post["media"]=[{"key":"posts/"+pid+"/media/0001.jpg","mime":"image/jpeg",
+                    "bytes":len(original),"sha256":sha256(original),
+                    "remote_verified":True}]
+    sealed=spool.save(pid,first_seen,post,[original])
+    cloud=FakeCloud()
+    key=replay.preserve_encrypted_batch(cloud,spool,[sealed])
+    sealed.unlink()  # Only the TEST'S local Actions artifact is removed.
+    assert not list(tmp_path.glob("*.enc"))
+    result=replay.replay(cloud=cloud)
+    assert result["remote_packs_sha_verified"]==1
+    assert result["remote_pack_ciphertext_count"]==1
+    assert result["post_and_media_verified"]==1
+    assert result["remote_pack_failures"]==0
+    assert result["buffer_failures"]==0
+    assert cloud.objects["posts/"+pid+"/media/0001.jpg"]==original
+    assert cloud.read_first_observation(pid)==canonical_json(first_seen)
+    assert cloud.objects[key],"source encrypted pack is never deleted"
+    # Idempotent replay: no overwritten immutable original or duplicated data.
+    again=replay.replay(cloud=cloud)
+    assert again["post_and_media_verified"]==1
+    assert cloud.objects["posts/"+pid+"/media/0001.jpg"]==original
+
+
+def test_sha_mismatch_cloud_pack_never_restores_or_claims_success(
+        tmp_path,monkeypatch):
+    monkeypatch.setenv("GH_TOKEN","offline-test-no-real-github-requests")
+    monkeypatch.delenv("DEMAND_RECOVERY_SOURCE_RUN_ID",raising=False)
+    monkeypatch.setattr(replay,"list_candidates",lambda:[])
+    cloud=FakeCloud()
+    cloud.objects["metadata/recovery-pack-"+("a"*64)+".zip"]=b"invalid"
+    result=replay.replay(cloud=cloud)
+    assert result["remote_pack_failures"]==1
+    assert result["remote_packs_sha_verified"]==0
+    assert result["post_and_media_verified"]==0
+    assert not any(key.startswith("posts/") for key in cloud.objects)
+
+
+def test_verified_zip_with_path_traversal_is_refused_before_remote_writes(
+        tmp_path):
+    cloud=FakeCloud()
+    buffer=BytesIO()
+    with zipfile.ZipFile(buffer,"w") as out:
+        out.writestr("../"+("a"*64)+".enc",b"not encrypted")
+    raw=buffer.getvalue()
+    key="metadata/recovery-pack-"+hashlib.sha256(raw).hexdigest()+".zip"
+    cloud.objects[key]=raw
+    with pytest.raises(ValueError,match="unsafe private recovery pack member"):
+        replay.extract_verified_remote_pack(cloud,key,tmp_path/"isolated")
+    assert not list(tmp_path.rglob("*.enc"))
+    assert list(cloud.objects)==[key]
+
+
+def test_cloud_pack_selection_is_bounded_and_rotates(monkeypatch):
+    cloud=FakeCloud()
+    for n in range(7):
+        cloud.objects["metadata/recovery-pack-"+format(n,"064x")+".zip"]=b"stub"
+    cloud.objects["metadata/unrelated-secret.zip"]=b"must-not-read"
+    monkeypatch.setenv("GITHUB_RUN_ID","41700010001")
+    first_selection=replay.select_remote_encrypted_packs(cloud)
+    monkeypatch.setenv("GITHUB_RUN_ID","41700010002")
+    second_selection=replay.select_remote_encrypted_packs(cloud)
+    assert len(first_selection)==len(second_selection)==replay.MAX_CLOUD_PACKS
+    assert first_selection!=second_selection
+    assert all(x.startswith("metadata/recovery-pack-") for x in
+               first_selection+second_selection)
+
+
+def test_source_run_targeted_restore_never_scans_other_cloud_packs(
+        tmp_path,monkeypatch):
+    """An explicitly requested main-branch capture cannot borrow another
+    user's unrelated remote batch from the general historical backlog.
+    """
+    monkeypatch.setenv("GH_TOKEN","offline-test-no-real-github-requests")
+    monkeypatch.setenv("DEMAND_RECOVERY_SOURCE_RUN_ID","41700010003")
+    monkeypatch.setattr(replay,"validate_source_run",lambda _:True)
+    monkeypatch.setattr(replay,"select_remote_encrypted_packs",
+                        lambda cloud: (_ for _ in ()).throw(
+                            AssertionError("targeted restore must not scan remote packs")))
+    monkeypatch.setattr(replay,"_gh",lambda args,**kwargs:b"")
+    cloud=FakeCloud()
+    result=replay.replay(cloud=cloud)
+    assert result["remote_packs_sha_verified"]==0
+    assert result["remote_pack_list_failures"]==0
+

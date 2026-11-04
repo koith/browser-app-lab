@@ -18,7 +18,7 @@ import time
 import zipfile
 
 from demand_archive import CloudArchive
-from recovery_spool import RecoverySpool, FILE_PATTERN
+from recovery_spool import RecoverySpool, FILE_PATTERN, MAX_BUFFER_BYTES
 
 ARTIFACT_NAME=re.compile(r"^intersection-private-recovery$")
 MAX_ARTIFACTS=12
@@ -30,6 +30,10 @@ MAX_RECORD_SECONDS=55
 # Leave time for a final sanitized summary before the 21-minute Actions kill.
 MAX_REPLAY_SECONDS=900
 MAX_BATCH_SECONDS=100
+MAX_CLOUD_PACKS=2
+MAX_CLOUD_PACK_FILES=120
+CLOUD_PACK_ITEM="__verified_remote_pack__"
+CLOUD_PACK_NAME=re.compile(r"recovery-pack-([a-f0-9]{64})\.zip\Z")
 
 
 def _gh(args,*,max_bytes=2_000_000):
@@ -144,6 +148,76 @@ def preserve_encrypted_batch(cloud,spool,paths):
     return key
 
 
+def select_remote_encrypted_packs(cloud):
+    """Select only SHA-addressed ciphertext packs from the private archive.
+
+    Rotate bounded recovery sources so expired Actions artifacts remain
+    recoverable without indefinitely starving other encrypted originals.
+    """
+    names=cloud.names("metadata")
+    if not isinstance(names,list):
+        raise ValueError("invalid private recovery pack listing")
+    keys=sorted("metadata/"+name for name in names
+                if isinstance(name,str) and CLOUD_PACK_NAME.fullmatch(name))
+    if not keys:
+        return []
+    seed=int(os.environ.get("GITHUB_RUN_ID","0") or "0")
+    offset=seed%len(keys)
+    return (keys[offset:]+keys[:offset])[:MAX_CLOUD_PACKS]
+
+
+def extract_verified_remote_pack(cloud,key,directory):
+    """Independently verify TeraBox ZIP SHA before decrypting original buffers.
+
+    Reject archive paths, duplicates, invalid names and zip bombs; nothing is
+    unzipped as plaintext or outside an isolated temporary directory.
+    """
+    match=re.fullmatch(r"metadata/recovery-pack-([a-f0-9]{64})\.zip",key)
+    if not match:
+        raise ValueError("untrusted private recovery pack key")
+    raw=cloud.read_verified(key,match.group(1),cap=MAX_BUNDLE_BYTES+1)
+    if raw is None or not 0<len(raw)<=MAX_BUNDLE_BYTES:
+        raise RuntimeError("private recovery pack SHA256 readback unverified")
+    if hashlib.sha256(raw).hexdigest()!=match.group(1):
+        raise RuntimeError("private recovery pack checksum mismatch")
+    try:
+        with zipfile.ZipFile(io.BytesIO(raw)) as archive:
+            entries=archive.infolist()
+            if not 0<len(entries)<=MAX_CLOUD_PACK_FILES:
+                raise ValueError("invalid private recovery pack count")
+            names=set()
+            total=0
+            sealed=[]
+            for member in entries:
+                name=member.filename
+                if (not FILE_PATTERN.fullmatch(name) or member.is_dir()
+                        or name in names or member.flag_bits&1):
+                    raise ValueError("unsafe private recovery pack member")
+                names.add(name)
+                total+=member.file_size
+                if (not 34<member.file_size<=MAX_BUFFER_BYTES+2048
+                        or total>MAX_BUNDLE_BYTES):
+                    raise ValueError("private recovery pack exceeds size limit")
+                ciphertext=archive.read(member)
+                if len(ciphertext)!=member.file_size:
+                    raise ValueError("invalid recovery pack ciphertext length")
+                sealed.append((name,ciphertext))
+    except (zipfile.BadZipFile,RuntimeError,EOFError) as error:
+        raise ValueError("invalid private recovery pack integrity") from error
+    directory=Path(directory)
+    directory.mkdir(parents=True,exist_ok=True,mode=0o700)
+    directory.chmod(0o700)
+    spool=RecoverySpool(directory)
+    for name,ciphertext in sealed:
+        dest=directory/name
+        with dest.open("xb") as file:
+            os.chmod(dest,0o600)
+            file.write(ciphertext)
+        # Verify AES-GCM authentication before any remote post/media writes.
+        spool.read(dest)
+    return sorted(directory.glob("*.enc"))
+
+
 def with_cloud_budget(cloud,work,*,max_seconds=MAX_RECORD_SECONDS):
     """Bound both batch backup AND individual post restore.
 
@@ -184,7 +258,9 @@ def replay(cloud=None,local_directory=None):
              "buffer_failures":0,"artifact_download_failures":0,
              "deferred_buffers":0,
              "batch_sha_verified":0,"batch_ciphertext_count":0,
-             "batch_failures":0,"deferred_artifacts":0}
+             "batch_failures":0,"deferred_artifacts":0,
+             "remote_packs_sha_verified":0,"remote_pack_ciphertext_count":0,
+             "remote_pack_list_failures":0,"remote_pack_failures":0}
     if local_directory:
         source_dirs=[Path(local_directory)]
     else:
@@ -211,6 +287,16 @@ def replay(cloud=None,local_directory=None):
     else:
         tmp=tempfile.TemporaryDirectory(prefix="intersection-recovery-")
         pending=[(name,run_id) for _,run_id,name in candidates]
+        if not source_run:
+            # Never require an expired GitHub artifact to restore an existing
+            # SHA-verified encrypted pack from private TeraBox.
+            try:
+                packs=select_remote_encrypted_packs(active)
+            except (RuntimeError,ValueError,KeyError,TypeError,OSError):
+                summary["remote_pack_list_failures"]+=1
+                packs=[]
+            # The oldest unexpired Actions artifact is still urgent.
+            pending=pending[:1]+[(CLOUD_PACK_ITEM,key) for key in packs]+pending[1:]
     deadline=started+MAX_REPLAY_SECONDS
     try:
         consecutive_failures=0
@@ -220,18 +306,33 @@ def replay(cloud=None,local_directory=None):
             if time.monotonic()>=deadline-MAX_BATCH_SECONDS-MAX_RECORD_SECONDS:
                 summary["deferred_artifacts"]+=len(pending)-index
                 break
+            cloud_pack=False
             if tmp is None:
                 _,directory=item
             else:
                 name,run_id=item
                 directory=Path(tmp.name)/str(index)
                 directory.mkdir(mode=0o700)
-                try:
-                    _gh(["run","download",str(run_id),"-n",name,"-D",str(directory)],
-                        max_bytes=1_000_000)
-                except (RuntimeError,OSError,subprocess.TimeoutExpired):
-                    summary["artifact_download_failures"]+=1
-                    continue
+                cloud_pack=(name==CLOUD_PACK_ITEM)
+                if cloud_pack:
+                    try:
+                        encrypted=with_cloud_budget(
+                            active,lambda:extract_verified_remote_pack(
+                                active,run_id,directory),
+                            max_seconds=MAX_BATCH_SECONDS)
+                        summary["remote_packs_sha_verified"]+=1
+                        summary["remote_pack_ciphertext_count"]+=len(encrypted)
+                    except (RuntimeError,ValueError,KeyError,TypeError,OSError,
+                            TimeoutError,zipfile.BadZipFile):
+                        summary["remote_pack_failures"]+=1
+                        continue
+                else:
+                    try:
+                        _gh(["run","download",str(run_id),"-n",name,"-D",str(directory)],
+                            max_bytes=1_000_000)
+                    except (RuntimeError,OSError,subprocess.TimeoutExpired):
+                        summary["artifact_download_failures"]+=1
+                        continue
             encrypted=sorted(directory.glob("*.enc"))
             if not encrypted:
                 continue
@@ -240,17 +341,19 @@ def replay(cloud=None,local_directory=None):
                 summary["buffer_failures"]+=1
                 continue
             spool=RecoverySpool(directory)
-            # Protect original ciphertext from Actions-artifact expiry with
-            # one content-addressed cloud write before slow per-post uploads.
-            try:
-                if with_cloud_budget(
-                        active,lambda:preserve_encrypted_batch(active,spool,encrypted),
-                        max_seconds=min(MAX_BATCH_SECONDS,max(1,
-                            deadline-time.monotonic()-MAX_RECORD_SECONDS))):
-                    summary["batch_sha_verified"]+=1
-                    summary["batch_ciphertext_count"]+=len(encrypted)
-            except (RuntimeError,ValueError,OSError,KeyError,TypeError,TimeoutError):
-                summary["batch_failures"]+=1
+            # New GitHub artifacts need an immutable encrypted safety pack.
+            # Existing cloud packs are already verified: never upload or
+            # overwrite them while restoring individual original posts.
+            if not cloud_pack:
+                try:
+                    if with_cloud_budget(
+                            active,lambda:preserve_encrypted_batch(active,spool,encrypted),
+                            max_seconds=min(MAX_BATCH_SECONDS,max(1,
+                                deadline-time.monotonic()-MAX_RECORD_SECONDS))):
+                        summary["batch_sha_verified"]+=1
+                        summary["batch_ciphertext_count"]+=len(encrypted)
+                except (RuntimeError,ValueError,OSError,KeyError,TypeError,TimeoutError):
+                    summary["batch_failures"]+=1
             # Retry different source IDs on later recovery runs rather than
             # forever failing on the same first three immutable keys.
             if len(encrypted)>1:
@@ -286,5 +389,6 @@ if __name__=="__main__":
     result=replay()
     if (result["buffer_failures"] or result["artifact_download_failures"]
             or result["deferred_buffers"] or result["deferred_artifacts"]
-            or result["batch_failures"]):
+            or result["batch_failures"] or result["remote_pack_list_failures"]
+            or result["remote_pack_failures"]):
         raise RuntimeError("private archived recovery buffers still unverified")
