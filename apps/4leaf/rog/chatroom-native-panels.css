@@ -136,3 +136,99 @@
 #rooms.classic-chat-room .social-user-panel .social-user-row small{
  display:none!important;
 }
+
+/* The source '=' button exists only on the composed source panel. */
+.leaf-native-userlist-menu{display:none}
+/* 2026-11-04 participant panel rebuilt from the ChatRoom/userlist.png SLICE
+   ATLAS at anchors template-matched in chat.jpg and chat_ref.jpg (VERIFIED):
+   panel 163x128 at (620,10); header strip (627,15); '=' (760,16); live list
+   box (627,33) 149x97 with the ChatRoom/scrollbar.png scroll column at
+   x758 (thumb top y35, updown block y110..127). Coordinates below are
+   relative to the panel origin (620,10). Without a composed frame (file://,
+   decode error) the earlier CSS look above remains as the fallback. */
+@media(min-width:651px){
+ #rooms.classic-chat-room .social-user-panel[data-native-overlay="true"][data-native-frame="userlist.png-9slice"]{
+  display:block!important;
+  top:10px!important;left:620px!important;right:auto!important;
+  width:163px!important;height:128px!important;max-height:128px!important;
+  border:0!important;border-radius:0!important;box-shadow:none!important;
+  background:var(--leaf-userlist-frame) no-repeat 0 0/163px 128px!important;
+  overflow:visible!important;
+ }
+ #rooms.classic-chat-room .social-user-panel[data-native-frame="userlist.png-9slice"] .social-user-titlebar{
+  position:absolute!important;inset:0 auto auto 0!important;
+  width:163px!important;height:23px!important;min-height:0!important;
+  background:transparent!important;border:0!important;padding:0!important;
+ }
+ #rooms.classic-chat-room .social-user-panel[data-native-frame="userlist.png-9slice"] .social-user-titlebar h4{
+  display:none!important;
+ }
+ /* The REAL decoded canvas shows only its header strip (atlas x21..149,
+    y0..15): object-position crops the outer-corner/button cells away. */
+ #rooms.classic-chat-room .social-user-panel[data-native-frame="userlist.png-9slice"] #social-original-userlist{
+  position:absolute!important;left:7px!important;top:5px!important;
+  width:129px!important;height:16px!important;
+  object-fit:none!important;object-position:-21px 0!important;
+  pointer-events:none;
+ }
+ #rooms.classic-chat-room .social-user-panel[data-native-frame="userlist.png-9slice"] #social-native-user-count{
+  top:7px!important;left:77px!important;right:auto!important;
+  min-width:0!important;text-align:left!important;
+  font:12px/13px Gulim,'굴림',sans-serif!important;
+  color:#000!important;text-shadow:none!important;
+ }
+ #rooms.classic-chat-room .social-user-panel[data-native-frame="userlist.png-9slice"] .leaf-native-userlist-menu{
+  display:block;position:absolute;left:140px;top:6px;width:15px;height:14px;
+  margin:0;padding:0;border:0;border-radius:0;cursor:pointer;
+  background:url("./original/ChatRoom/userlist.png") no-repeat -32px -21px;
+  z-index:6;
+ }
+ #rooms.classic-chat-room .social-user-panel[data-native-frame="userlist.png-9slice"] .leaf-native-userlist-menu:is(:hover,:focus-visible){
+  background-position:-62px -21px;outline:0;
+ }
+ #rooms.classic-chat-room .social-user-panel[data-native-frame="userlist.png-9slice"] #social-peer-list{
+  position:absolute!important;left:8px!important;top:25px!important;
+  width:143px!important;height:93px!important;max-height:none!important;
+  box-sizing:border-box!important;margin:0!important;
+  padding:2px 0 0 4px!important;
+  background:transparent!important;color:#000!important;
+  overflow-x:hidden!important;overflow-y:scroll!important;
+  /* Chromium ignores ::-webkit-scrollbar art when either standard
+     property is set, so reset the earlier thin/colour declaration. */
+  scrollbar-width:auto!important;scrollbar-color:auto!important;
+ }
+ #rooms.classic-chat-room .social-user-panel[data-native-frame="userlist.png-9slice"] .social-user-row{
+  display:block!important;min-height:16px!important;max-height:16px!important;
+  padding:0!important;margin:0!important;
+  font:12px/16px Gulim,'굴림',sans-serif!important;
+  white-space:nowrap;overflow:hidden;text-overflow:clip;
+ }
+ #rooms.classic-chat-room .social-user-panel[data-native-frame="userlist.png-9slice"] .social-user-row b{
+  font-weight:normal!important;color:#000!important;
+ }
+ /* Live WebKit/Chromium scrollbar painted with ChatRoom/scrollbar.png:
+    thumb = atlas (0,19) 12x21, track = atlas column x17..21 (exact pixel
+    colours #6676bc,#9fb2ff), up/down = atlas column 1 rows 0..8 / 9..17
+    stacked at the bottom exactly as in chat.jpg (758,110). */
+ #rooms.classic-chat-room .social-user-panel[data-native-frame="userlist.png-9slice"] #social-peer-list::-webkit-scrollbar{
+  width:13px;background:transparent;
+ }
+ #rooms.classic-chat-room .social-user-panel[data-native-frame="userlist.png-9slice"] #social-peer-list::-webkit-scrollbar-track{
+  background:linear-gradient(90deg,transparent 0 3px,#6676bc 3px 4px,#9fb2ff 4px 8px,transparent 8px) no-repeat;
+ }
+ #rooms.classic-chat-room .social-user-panel[data-native-frame="userlist.png-9slice"] #social-peer-list::-webkit-scrollbar-thumb{
+  min-height:21px;
+  background:url("./original/ChatRoom/scrollbar.png") no-repeat 0 -19px;
+ }
+ #rooms.classic-chat-room .social-user-panel[data-native-frame="userlist.png-9slice"] #social-peer-list::-webkit-scrollbar-button:vertical:start{
+  display:none;height:0;
+ }
+ #rooms.classic-chat-room .social-user-panel[data-native-frame="userlist.png-9slice"] #social-peer-list::-webkit-scrollbar-button:vertical:end:decrement{
+  display:block;width:13px;height:9px;
+  background:url("./original/ChatRoom/scrollbar.png") no-repeat -13px 0;
+ }
+ #rooms.classic-chat-room .social-user-panel[data-native-frame="userlist.png-9slice"] #social-peer-list::-webkit-scrollbar-button:vertical:end:increment{
+  display:block;width:13px;height:9px;
+  background:url("./original/ChatRoom/scrollbar.png") no-repeat -13px -9px;
+ }
+}
