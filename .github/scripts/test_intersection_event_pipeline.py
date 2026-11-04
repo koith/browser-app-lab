@@ -147,6 +147,16 @@ class EventDrivenTests(unittest.TestCase):
         self.assertEqual(final["action"], "NONE")
         self.assertIn("FINAL_PRODUCT_GATE_PENDING", final["reason"])
 
+    def test_report_runs_only_after_controller_job_finishes(self):
+        workflow = (Path(__file__).parents[1] / "workflows"
+                    / "intersection-autonomous-controller.yml").read_text()
+        self.assertIn("  status-board:", workflow)
+        self.assertIn("    needs: [safe-controller]", workflow)
+        self.assertEqual(
+            workflow.count("run: python .github/scripts/intersection_ops_status.py"), 1
+        )
+        self.assertNotIn("  schedule:", workflow)
+
     def test_disabled_old_timers_not_present_in_pipeline(self):
         source = Path(__file__).with_name("intersection_event_pipeline.py").read_text()
         self.assertNotIn("timedelta(", source)
