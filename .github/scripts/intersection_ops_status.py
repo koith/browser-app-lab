@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 import json
 import os
 import re
+import subprocess
 from urllib.error import HTTPError, URLError
 from urllib.parse import quote
 from urllib.request import Request, urlopen
@@ -226,7 +227,7 @@ class GitHub:
                 and row.get("event") != "pull_request"][:limit]
 
     def metrics_for_run(self, run, marker, job_name):
-        """Best effort: unavailable logs are *unknown*, never zero failures."""
+        """Read only aggregated counters, or return unknown (never zero)."""
         try:
             jobs = self.request(
                 f"/repos/{self.repo}/actions/runs/{run['id']}/jobs?per_page=30"
@@ -236,23 +237,55 @@ class GitHub:
             )
             if not selected or selected.get("status") != "completed":
                 return None
-            # The GitHub API exposes authenticated job logs as a redirect to
-            # its own expiring artifact storage. Only aggregate counters leave
-            # this scope. Never render or log the raw response or its URL.
+            job_id = selected.get("id")
+            run_id = run.get("id")
+            if (not isinstance(job_id, int) or job_id < 1
+                    or not isinstance(run_id, int) or run_id < 1):
+                return None
+        except (HTTPError, URLError, OSError, ValueError, KeyError, StopIteration):
+            return None
+
+        # The REST job-log download may return a temporary redirected
+        # artifact, which is sometimes unavailable to the Python URL client
+        # despite the Actions run being readable. Use the locally available
+        # authenticated GitHub CLI as an independent route in that case.
+        try:
             req = Request(
-                PREFIX + f"/repos/{self.repo}/actions/jobs/{selected['id']}/logs",
+                PREFIX + f"/repos/{self.repo}/actions/jobs/{job_id}/logs",
                 headers={"Authorization": "Bearer " + self.token,
                          "Accept": "application/vnd.github+json"},
             )
-            with urlopen(req, timeout=30) as response:
+            with urlopen(req, timeout=22) as response:
                 payload = response.read(8_000_001)
-                if len(payload) > 8_000_000:
-                    return None
-            return sanitized_metrics(
-                payload.decode("utf-8", errors="replace"), marker
+            if len(payload) <= 8_000_000:
+                metrics = sanitized_metrics(
+                    payload.decode("utf-8", errors="replace"), marker
+                )
+                if metrics:
+                    return metrics
+        except (HTTPError, URLError, OSError, ValueError):
+            pass
+
+        try:
+            # Fixed executable/arguments, validated numeric IDs, and
+            # capture_output=True: raw logs, account names and credentials
+            # never enter the public workflow log or GitHub issue comment.
+            result = subprocess.run(
+                ["gh", "run", "view", str(run_id),
+                 "--job", str(job_id), "--log", "--repo", self.repo],
+                capture_output=True, timeout=28, check=False,
             )
-        except (HTTPError, URLError, OSError, ValueError, KeyError, StopIteration):
-            return None
+            if result.returncode == 0 and len(result.stdout) <= 8_000_000:
+                metrics = sanitized_metrics(
+                    result.stdout.decode("utf-8", errors="replace"), marker
+                )
+                if metrics:
+                    return metrics
+        except (OSError, subprocess.TimeoutExpired):
+            pass
+        # An absent summary, expired log or permission denial remains
+        # UNVERIFIED; it must never turn into a false zero failure.
+        return None
 
     def upsert_comment(self, body):
         existing = None

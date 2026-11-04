@@ -5,6 +5,9 @@ from datetime import datetime, timezone
 import importlib.util
 from pathlib import Path
 import unittest
+from unittest.mock import patch
+from urllib.error import URLError
+from types import SimpleNamespace
 
 
 spec = importlib.util.spec_from_file_location(
@@ -92,6 +95,29 @@ class StatusBoardTests(unittest.TestCase):
         )
         self.assertIn("미검증", result)
         self.assertNotIn("P0 / INT-01: VERIFIED", result)
+
+    def test_gh_cli_fallback_recovers_aggregate_metrics_without_raw_logging(self):
+        gh = ops.GitHub(REPO, "synthetic-private-job-token")
+        listed = {"jobs": [{"id": 1234, "name": "capture", "status": "completed"}]}
+        output = (
+            b"2026-11-04Z DEMAND_CAPTURE_AGGREGATE_ONLY "
+            b'{"fetched":42,"saved_verified":3,"storage_failures":21,'
+            b'"encrypted_only_originals":21,"secret":"NEVER_SHOW_ME"}'
+        )
+        with (
+            patch.object(gh, "request", return_value=listed),
+            patch.object(ops, "urlopen", side_effect=URLError("temporary-log-redirect")),
+            patch.object(ops.subprocess, "run", return_value=SimpleNamespace(
+                returncode=0, stdout=output, stderr=b"")) as cli,
+        ):
+            stats = gh.metrics_for_run(
+                run(99), "DEMAND_CAPTURE_AGGREGATE_ONLY", "capture"
+            )
+        self.assertEqual(stats["storage_failures"], 21)
+        self.assertEqual(stats["saved_verified"], 3)
+        self.assertNotIn("secret", stats)
+        self.assertIn("--repo", cli.call_args.args[0])
+        self.assertTrue(cli.call_args.kwargs["capture_output"])
 
     def test_non_user_input_workflow_urls_are_canonical(self):
         self.assertEqual(
