@@ -8,6 +8,7 @@ on:
       - 'apps/gallery-archive/test_fast_cover_bootstrap.py'
       - 'apps/gallery-archive/test_reuse_fast_cover_nodes.cjs'
       - 'apps/gallery-archive/test_local_saved_detail_previews.cjs'
+      - 'apps/gallery-archive/test_progressive_photo_grid.cjs'
       - 'apps/gallery-archive/qa_gallery_first_image_metrics.py'
   push:
     branches: [main]
@@ -17,6 +18,7 @@ on:
       - 'apps/gallery-archive/test_fast_cover_bootstrap.py'
       - 'apps/gallery-archive/test_reuse_fast_cover_nodes.cjs'
       - 'apps/gallery-archive/test_local_saved_detail_previews.cjs'
+      - 'apps/gallery-archive/test_progressive_photo_grid.cjs'
       - 'apps/gallery-archive/qa_gallery_first_image_metrics.py'
       - '.github/workflows/gallery-first-image-metrics.yml'
 permissions:
@@ -43,6 +45,7 @@ jobs:
           python apps/gallery-archive/test_fast_cover_bootstrap.py
           node apps/gallery-archive/test_reuse_fast_cover_nodes.cjs
           node apps/gallery-archive/test_local_saved_detail_previews.cjs
+          node apps/gallery-archive/test_progressive_photo_grid.cjs
       - run: |
           python -m pip install 'playwright==1.58.0'
           python -m playwright install --with-deps ${{ matrix.browser }}
