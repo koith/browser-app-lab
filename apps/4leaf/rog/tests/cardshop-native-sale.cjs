@@ -11,7 +11,16 @@ const path=require('node:path');
  try{
   const page=await browser.newPage({viewport:{width:1280,height:900},serviceWorkers:'block'});
   const errors=[];page.on('pageerror',e=>errors.push(e.stack||String(e)));
-  await page.addInitScript(()=>{window.LEAF_CENTRAL_API_URL=''});
+  await page.addInitScript(()=>{
+   window.LEAF_CENTRAL_API_URL='';
+   const set=Storage.prototype.setItem;
+   Storage.prototype.setItem=function(key,value){
+    if(this===localStorage&&key==='rog_profile'&&
+     sessionStorage.getItem('__leaf_shop_write_blocked')==='1')
+     throw new DOMException('Simulated full shop storage quota','QuotaExceededError');
+    return set.call(this,key,value);
+   };
+  });
   await page.goto(process.env.FOURLEAF_TEST_URL||
    'file://'+path.resolve(__dirname,'../index.html'));
   await page.waitForFunction(()=>window.__ROG_TEST__&&window.__LEAF_SHOP_NATIVE__);
@@ -45,6 +54,19 @@ const path=require('node:path');
   assert.ok(before.button.includes('original/CardShop/cardshopbutton.png'));
   assert.equal(before.pos,'-294px -481px','source original disabled 판매하기 98x21 frame');
   assert.equal(before.scene,'CardShop/cardshopback.png');
+  // Browser quota failure must NOT create a phantom purchased card or
+  // subtract GP only in memory. The exact old profile stays on disk.
+  const beforePurchaseRaw=await page.evaluate(()=>localStorage.getItem('rog_profile'));
+  await page.evaluate(()=>sessionStorage.setItem('__leaf_shop_write_blocked','1'));
+  await page.locator('#shop-buy').click();
+  await page.locator('#modal-buttons button').filter({hasText:'구매'}).first().click();
+  assert.equal((await page.locator('#modal-title').textContent()).trim(),'매직카덴 저장 실패');
+  assert.equal(await page.evaluate(()=>localStorage.getItem('rog_profile')),beforePurchaseRaw);
+  assert.equal(await page.locator('#shop-gp').textContent(),before.old.toLocaleString('ko-KR'));
+  assert.equal(await page.locator('#shop-grid .shop-card[data-card-id="'+cardId+'"]').getAttribute('data-owned'),'false');
+  await page.locator('#modal-buttons button').filter({hasText:'확인'}).click();
+  await page.evaluate(()=>sessionStorage.removeItem('__leaf_shop_write_blocked'));
+  // An identical retry with storage restored commits one real purchase.
   await page.locator('#shop-buy').click();
   await page.locator('#modal-buttons button').filter({hasText:'구매'}).first().click();
   await page.waitForFunction(id=>JSON.parse(localStorage.getItem('rog_profile')).owned.includes(id),cardId);
@@ -67,8 +89,19 @@ const path=require('node:path');
   assert.equal(afterBuy.clickTarget,'shop-sell',
    'source sale button must be physically clickable below open inventory');
   assert.ok(afterBuy.p.gp<before.old,'purchase reduces actual GP');
+  // A denied resale must not credit phantom GP or remove a genuine card.
+  const beforeSaleRaw=await page.evaluate(()=>localStorage.getItem('rog_profile'));
+  await page.evaluate(()=>sessionStorage.setItem('__leaf_shop_write_blocked','1'));
   await page.locator('#shop-sell').click();
   assert.ok((await page.locator('#modal-content').textContent()).includes('원작 재판매 가격 규칙 미확인'));
+  await page.locator('#modal-buttons button').filter({hasText:'판매'}).first().click();
+  assert.equal((await page.locator('#modal-title').textContent()).trim(),'매직카덴 저장 실패');
+  assert.equal(await page.evaluate(()=>localStorage.getItem('rog_profile')),beforeSaleRaw);
+  assert.equal(await page.locator('#shop-gp').textContent(),afterBuy.p.gp.toLocaleString('ko-KR'));
+  assert.equal(await page.locator('#shop-grid .shop-card[data-card-id="'+cardId+'"]').getAttribute('data-owned'),'true');
+  await page.locator('#modal-buttons button').filter({hasText:'확인'}).click();
+  await page.evaluate(()=>sessionStorage.removeItem('__leaf_shop_write_blocked'));
+  await page.locator('#shop-sell').click();
   await page.locator('#modal-buttons button').filter({hasText:'판매'}).first().click();
   await page.waitForFunction(id=>!JSON.parse(localStorage.getItem('rog_profile')).owned.includes(id),cardId);
   const afterSell=await page.evaluate(()=>JSON.parse(localStorage.getItem('rog_profile')));
