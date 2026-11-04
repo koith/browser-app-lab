@@ -13,6 +13,7 @@ on:
       - 'apps/gallery-archive/test_local_saved_detail_previews.cjs'
       - 'apps/gallery-archive/test_progressive_photo_grid.cjs'
       - 'apps/gallery-archive/qa_gallery_first_image_metrics.py'
+      - '.github/workflows/gallery-first-image-metrics.yml'
   push:
     branches: [main]
     paths:
