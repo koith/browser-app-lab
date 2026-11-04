@@ -1,17 +1,6 @@
 name: Yui 405 Source Gallery and Free Crawler Sync
 on:
-  push:
-    paths:
-      - .github/workflows/yui-source-viewer-sync.yml
-      - apps/yui-gallery/build_source_viewer_manifest.py
-      - apps/yui-gallery/test_source_viewer_manifest.py
-      - apps/yui-gallery/gallery_dl_collector.py
-      - apps/yui-gallery/gallery_dl_extractors/**
-      - apps/yui-gallery/gallery_dl_targets.json
-      - apps/yui-gallery/test_gallery_dl_collector.py
   workflow_dispatch:
-  schedule:
-    - cron: '12 18 * * 2,5'
 permissions:
   contents: write
 concurrency:
