@@ -7,19 +7,23 @@
 window.SavedGalleryPhotoUnion=(()=>{
  function join(sources){
   const albums=new Map();
+  const shaPositionByAlbum=new Map();
   for(const group of sources){
    if(!Array.isArray(group))throw new TypeError('Expected saved album records');
    for(const album of group){
     if(!album||typeof album.id!=='string'||!Array.isArray(album.images))
      throw new TypeError('Malformed saved album');
-    if(!albums.has(album.id))albums.set(album.id,{...album,images:[],expected:album.expected??null});
+    if(!albums.has(album.id)){
+     albums.set(album.id,{...album,images:[],expected:album.expected??null});
+     shaPositionByAlbum.set(album.id,new Map());
+    }
     const result=albums.get(album.id);
     const count=Number(album.expected)||0;
     if(count>(Number(result.expected)||0))result.expected=count;
     for(const photo of album.images){
      if(!photo||!/^[a-f0-9]{64}$/.test(photo.sha256||''))continue;
-     const known=result.images.findIndex(p=>p.sha256===photo.sha256);
-     if(known>=0){
+     const known=shaPositionByAlbum.get(album.id).get(photo.sha256);
+     if(known!==undefined){
       const previous=result.images[known];
       // Byte-identical replicas do not add a photo. Keep the server-verified
       // original route over a static lower-quality/unaudited route for QA.
@@ -32,6 +36,7 @@ window.SavedGalleryPhotoUnion=(()=>{
      const copy={...photo};
      if(copy.ownerAlbum||copy.vaultAlbum)
       copy.storageNumber=copy.storageNumber??copy.number;
+     shaPositionByAlbum.get(album.id).set(copy.sha256,result.images.length);
      result.images.push(copy);
     }
    }
