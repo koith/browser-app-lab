@@ -109,3 +109,25 @@ def test_capture_soft_budget_reports_partial_aes_before_external_timeout(
     assert len(list(tmp_path.glob("*.enc")))==1
 
 
+
+
+def test_time_budget_with_no_cloud_failure_must_not_claim_capture_complete(
+        monkeypatch,capsys):
+    """A healthy backend cannot turn an entirely unscanned interval into PASS."""
+    import json
+    ticks=iter([0,800])
+    with pytest.raises(RuntimeError,match="time budget exceeded"):
+        job.run(fetchers=[lambda *_:[source(400)]],cloud=FakeCloud(),
+                clock=lambda:1793667900,run_id="123456950",fast_mode=True,
+                elapsed_clock=lambda:next(ticks),max_fast_seconds=720)
+    prefix="DEMAND_CAPTURE_AGGREGATE_ONLY "
+    out=[json.loads(line[len(prefix):]) for line in capsys.readouterr().out.splitlines()
+         if line.startswith(prefix)]
+    assert len(out)==1
+    assert out[0]["soft_time_budget_exhausted"] is True
+    assert out[0]["storage_failures"]==0
+    assert out[0]["operational_status"]=="CAPTURE_TIME_BUDGET"
+    assert out[0]["completeness_guaranteed"] is False
+    assert out[0]["saved_verified"]==0
+
+
