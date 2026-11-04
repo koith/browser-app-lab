@@ -1,6 +1,9 @@
 name: Gallery — First Image Latency and Full SHA Coverage
 on:
   workflow_dispatch:
+  workflow_run:
+    workflows: ["Deploy static content to Pages"]
+    types: [completed]
   pull_request:
     paths:
       - 'apps/mimmi-gallery/index.html'
@@ -25,9 +28,14 @@ permissions:
   contents: read
 concurrency:
   group: gallery-first-image-metrics-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: false
 jobs:
   first-image-audit:
+    if: >-
+      github.event_name != 'workflow_run' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'main' &&
+       github.event.workflow_run.head_repository.full_name == github.repository)
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     strategy:
@@ -36,6 +44,8 @@ jobs:
         browser: [chromium, webkit]
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -50,4 +60,8 @@ jobs:
           python -m pip install 'playwright==1.58.0'
           python -m playwright install --with-deps ${{ matrix.browser }}
       - name: Time first decoded public cover and audit complete SHA visibility
-        run: python apps/gallery-archive/qa_gallery_first_image_metrics.py --browser ${{ matrix.browser }}
+        shell: bash
+        run: |
+          flags=()
+          if [[ "${{ github.event_name }}" == "workflow_run" ]]; then flags+=(--verify-progressive); fi
+          python apps/gallery-archive/qa_gallery_first_image_metrics.py --browser '${{ matrix.browser }}' "${flags[@]}"
