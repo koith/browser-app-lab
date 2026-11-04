@@ -13,15 +13,11 @@ on:
     types: [edited]
   workflow_run:
     workflows:
-      - Gallery Direct Individual Photo Collection and Verified Storage
-      - Yui Mimmi ALL Owner Albums Reverse Image and Named Work Source Comparison
-      - Yui Mimmi Exhaustive Registered Gallery Collector Comparison
-      - Gallery Real Image Pixel Quality Audit
       - Gallery — First Image Latency and Full SHA Coverage
       - Gallery Quality Branding and Fast Entry Regression QA
-      - Deploy static content to Pages
       - Yui Mimmi Deployed GitHub Pages Real Photo Browser QA
-      - Gallery Newly Stored Exact Original Mobile QA
+      - Gallery Real Image Pixel Quality Audit
+      - Deploy static content to Pages
     types: [completed]
   pull_request:
     paths:
