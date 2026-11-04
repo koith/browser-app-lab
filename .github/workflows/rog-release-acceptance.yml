@@ -38,7 +38,7 @@ jobs:
         run: node apps/4leaf/rog/tests/native-img-source-integrity.cjs
       - name: Verify the 63 embedded die pixels and signed source provenance
         run: node apps/4leaf/rog/tests/dice-embedded-source-integrity.cjs
-      - name: Verify 98 original CHR body references and 78 published native frame families
+      - name: Verify 98 original CHR references and 97 recovered native bodies
         run: node apps/4leaf/rog/tests/chr-native-action-sequences.cjs
       - name: Verify all 98 CHR references reject wrong-card source fallbacks
         run: node apps/4leaf/rog/tests/chr-body-source-map.cjs
@@ -70,6 +70,8 @@ jobs:
         run: node apps/4leaf/rog/tests/dice-dmp-native-travel-facing.cjs
       - name: Original embedded D6/D4 source PNGs on live game without results mutation
         run: node apps/4leaf/rog/tests/dice-embedded-native-live.cjs
+      - name: Actual SHA-pinned original D4/D6 roll from falling through impact to exact final pip
+        run: node apps/4leaf/rog/tests/dice-original-roll-tables.cjs
       - name: Complete 25 historically named source maps and preserve unnamed 0170 random route
         run: node apps/4leaf/rog/tests/archive-coverage.cjs
       - name: Recover actual OBS full-body art after temporary HTTP error
@@ -185,6 +187,10 @@ jobs:
         env:
           FOURLEAF_BROWSER: webkit
         run: node apps/4leaf/rog/tests/dice-embedded-native-live.cjs
+      - name: WebKit original D4/D6 SHA-pinned falling impact and exact rest on native pip
+        env:
+          FOURLEAF_BROWSER: webkit
+        run: node apps/4leaf/rog/tests/dice-original-roll-tables.cjs
       - name: Original ChatRoom live seat teleport stays instant on WebKit and iPhone layout
         env:
           FOURLEAF_BROWSER: webkit
