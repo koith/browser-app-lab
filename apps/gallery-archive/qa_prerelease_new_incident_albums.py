@@ -8,7 +8,7 @@ import argparse
 from qa_prerelease_real_owner_gateway import TARGET, run
 
 INCIDENT_ALBUMS = {
-    "mimmi": ("djawa-janus-scary-lantern-night", 8),
+    "mimmi": ("djawa-janus-scary-lantern-night", 15),
     "yui": ("djawa-privaty-public-samples", 30),
 }
 
