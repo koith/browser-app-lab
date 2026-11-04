@@ -264,3 +264,26 @@ def test_empty_registered_schedule_is_not_a_successful_backup(capsys):
     assert '"processed": 0' in output
     assert '"state": "NO_REGISTERED_TARGETS"' in output
     assert not any("/account-archives/" in path for path in cloud.objects)
+
+
+def test_reviewed_bootstrap_retries_first_registration_with_remote_verification(tmp_path,capsys):
+    """A failed first dispatch is retried by schedule without a false-green no-op."""
+    request=tmp_path/"selected.json"
+    request.write_text(json.dumps({"schema_version":1,"platform":"bluesky",
+                                   "account":"qa-example.bsky.social","max_pages":1}))
+    post=blue_row("bootstrap01","synthetic public original")
+    cloud=FakeCloud()
+    api=BlueAPI({None:([post],None)})
+    job.run_registered(root=cloud,api=api,bootstrap=True,bootstrap_path=request)
+    assert any("metadata/target-accounts/" in name for name in cloud.objects)
+    assert any(name.endswith("/post.json") for name in cloud.objects)
+    assert '"initial_registration": true' in capsys.readouterr().out.lower()
+
+
+def test_reviewed_bootstrap_does_not_accept_unvalidated_config(tmp_path):
+    path=tmp_path/"selected.json"
+    path.write_text(json.dumps({"schema_version":1,"platform":"bluesky",
+                                "account":"qa-example.bsky.social",
+                                "max_pages":2,"surprise":"untrusted"}))
+    with pytest.raises(ValueError,match="invalid reviewed target"):
+        job.read_bootstrap_request(path)

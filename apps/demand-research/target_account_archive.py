@@ -17,6 +17,7 @@ import json
 import os
 import re
 import socket
+from pathlib import Path
 import time
 from urllib.parse import quote, urlencode, urlsplit
 from urllib.request import Request, build_opener, HTTPRedirectHandler
@@ -570,14 +571,38 @@ def run_one(platform, raw_account, *, root=None, api=None, max_pages=2,
             "threads":locals().get("thread_stats",{})}
 
 
-def run_registered(*, root=None, api=None, max_accounts=2):
+def read_bootstrap_request(path=None):
+    """Load only a reviewed public profile, with no credential or media in Git."""
+    source=Path(path) if path is not None else Path(__file__).with_name("target_account_bootstrap.json")
+    if not source.is_file():
+        return None
+    data=json.loads(source.read_text(encoding="utf-8"))
+    if (type(data) is not dict or set(data)!={"schema_version","platform","account","max_pages"}
+            or data.get("schema_version")!=1 or type(data.get("max_pages")) is not int
+            or not 1<=data["max_pages"]<=MAX_PAGES):
+        raise ValueError("invalid reviewed target request")
+    profile_input(data["platform"],data["account"])
+    return data
+
+
+def run_registered(*, root=None, api=None, max_accounts=2, bootstrap=False,
+                   bootstrap_path=None):
     root=root or CloudArchive()
     root.preflight()
     names=sorted(n for n in root.names("metadata/target-accounts")
                  if REGISTRY_RE.fullmatch(n))
     if not names:
-        # A scheduled workflow that archives no accounts must not be marked as
-        # successful: operators otherwise mistake a green check for a backup.
+        # On initial TeraBox registration failure, retry the reviewed profile
+        # on the next schedule instead of repeatedly reporting an empty run.
+        request=read_bootstrap_request(bootstrap_path) if bootstrap else None
+        if request is not None:
+            result=run_one(request["platform"],request["account"],root=root,api=api,
+                           max_pages=request["max_pages"])
+            print("TARGET_ACCOUNT_ARCHIVE_SCHEDULE",
+                  json.dumps({"registered":1,"processed":1,"initial_registration":True,
+                              "posts_verified":result["posts_verified"],
+                              "state":result["status"]},sort_keys=True),flush=True)
+            return
         print("TARGET_ACCOUNT_ARCHIVE_SCHEDULE",
               json.dumps({"registered":0,"processed":0,
                           "state":"NO_REGISTERED_TARGETS"},sort_keys=True),flush=True)
@@ -614,7 +639,7 @@ if __name__=="__main__":
     if args.resume_registered:
         if args.platform or args.account:
             cli.error("scheduled resume does not accept a manually targeted account")
-        run_registered()
+        run_registered(bootstrap=True)
     elif args.platform and args.account:
         run_one(args.platform,args.account,max_pages=args.max_pages)
     else:
