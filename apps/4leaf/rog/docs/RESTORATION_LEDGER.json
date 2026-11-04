@@ -1669,6 +1669,17 @@
         "CHT-04",
         "CHT-05"
       ]
+    },
+    {
+      "id": "REQ-20261104-P0-CHAT-ARCHIVE-FAIL-CLOSED",
+      "date": "2026-11-04",
+      "origin": "사용자 요청: 클로드 병렬 진행 동안 GPT의 독립 개발 업무 처리",
+      "text": "채팅 서버 보존 데이터가 구조적으로 손상되어도 일부 레코드를 조용히 제외한 뒤 후속 쓰기로 손실을 영구화하지 않도록 원격 스냅샷 전체 사전 검증을 강제하고, CAS 충돌로 쓰기 중단 시 헬스체크를 실패 상태로 보고한다. 복구·Docker·CI·문서·QA까지 일괄 검증. 클로드의 원본 6개 방 UI/좌석 작업은 변경하지 않는다.",
+      "taskIds": [
+        "M03",
+        "P0-CHAT",
+        "P0-RELEASE"
+      ]
     }
   ],
   "tasks": [
@@ -8479,6 +8490,30 @@
         "M03"
       ],
       "details": "Still unresolved: non-original seven-button room toolbar and 방 닫기; seat row spacing 74–79px overlaps 141px actors in rooms 0/1/2/5; name tags 10–35px low; fallback Gulim font and (나) suffix diverge from source. UI patch imported atop beta57 as beta58/PWA v145; core room/game/server files not overwritten. User-facing completion must await CI and public deploy."
+    },
+    {
+      "seq": 388,
+      "date": "2026-11-04",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261104-P0-CHAT-ARCHIVE-FAIL-CLOSED",
+      "taskIds": [
+        "M03",
+        "P0-CHAT",
+        "P0-RELEASE"
+      ],
+      "details": "Register parallel GPT-only archive integrity and health acceptance batch; preserve Claude visual branch."
+    },
+    {
+      "seq": 389,
+      "date": "2026-11-04",
+      "type": "ENCRYPTED_CHAT_ARCHIVE_STRICT_RESTORE_QA_IN_PROGRESS",
+      "requestId": "REQ-20261104-P0-CHAT-ARCHIVE-FAIL-CLOSED",
+      "taskIds": [
+        "M03",
+        "P0-CHAT",
+        "P0-RELEASE"
+      ],
+      "details": "Added archive-validation.cjs and explicit restore regression tests, called validator before any room/history state changes, included file in Node Docker image, gated CI; CAS broken state must report health 503. Pending PR CI and deployment evidence. No task status changed."
     }
   ],
   "restorationPriority": {
