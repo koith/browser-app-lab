@@ -337,6 +337,11 @@ function card(a,hasImages){
 // Exact, same-album local archive bytes can paint detail tiles without waking
 // the remote TeraBox gateway. Every fallback keeps the owner media key.
 function localPhotoKey(id,p){return [id,p.sha256,p.bytes,p.width,p.height].join('|')}
+// The full-screen viewer may read committed photo bytes immediately only
+// when the same album, SHA-256, byte length and dimensions all match.
+function exactSavedViewerCopy(p){
+ return p?.ownerAlbum?localPreviewIndex.get(localPhotoKey(p.albumId,p))||null:null;
+}
 function rebuildLocalPreviewIndex(){
  const next=new Map();
  for(const album of localStored){
@@ -486,14 +491,23 @@ function showViewer(){
  const image=$('full'),status=$('media-status');
  status.textContent='불러오는 중';
  image.removeAttribute('src');image.hidden=true;
- const src=p.url;
- function install(url,allowPreviewFallback=false){
-  // Retrying referrer headers cannot repair a failed private original.
-  const policies=allowPreviewFallback?['no-referrer']:['no-referrer','strict-origin-when-cross-origin','origin'];
+ const src=p.url,localCopy=exactSavedViewerCopy(p);
+ function install(url,allowPreviewFallback=false,fallbackToOriginal=false){
+  // Replaying the same denied remote URL with different referrer headers
+  // neither restores owner access nor helps a verified local copy.
+  const policies=['no-referrer'];
   let retry=0;
   const fail=()=>{
    if(generation!==viewerGeneration)return;
    if(retry>=policies.length){
+    if(fallbackToOriginal&&p.ownerAlbum){
+     status.textContent='기존 보관 원본 연결 확인 중';
+     MimmiPrivate.asset(p,'original').then(privateUrl=>{
+      if(generation!==viewerGeneration)return;
+      install(privateUrl,true);$('original').href=privateUrl;
+     }).catch(error=>{if(generation===viewerGeneration)status.textContent=error.message});
+     return;
+    }
     if(allowPreviewFallback&&p.ownerAlbum&&p.preview){
      status.textContent='원본 연결 오류 · 보관 미리보기 확인 중';
      MimmiPrivate.asset(p,'preview').then(previewUrl=>{
@@ -512,14 +526,17 @@ function showViewer(){
   image.onload=()=>{if(generation!==viewerGeneration)return;if(image.naturalWidth>100){image.hidden=false;status.textContent='';registerImageHealth(url,true)}else fail()};
   image.onerror=fail;fail();
  }
- if(p.ownerAlbum||p.vaultAlbum){
+ if(localCopy){
+  install(localCopy.url,false,true);$('original').href=localCopy.url;
+ }else if(p.ownerAlbum||p.vaultAlbum){
   (p.vaultAlbum?PhotoVault.asset(p):MimmiPrivate.asset(p,'original')).then(url=>{
    if(generation===viewerGeneration){install(url,!!p.ownerAlbum);$('original').href=url}
   }).catch(error=>{if(generation===viewerGeneration)status.textContent=error.message});
  }else install(src);
  image.alt=p.name+' · '+p.number;
  $('position').textContent=(viewerIndex+1)+' / '+viewerList.length+' · '+p.width+'×'+p.height;
- if(p.ownerAlbum||p.vaultAlbum)$('original').removeAttribute('href');else $('original').href=src;
+ if((p.ownerAlbum||p.vaultAlbum)&&!localCopy)$('original').removeAttribute('href');
+ else $('original').href=localCopy?.url||src;
 }
 function hideViewer(){clearTimeout(routeTimer);viewerGeneration++;$('lightbox').classList.remove('open');document.body.style.overflow='';$('full').removeAttribute('src')}
 function closeViewer(){if(history.state?.mimmi&&history.state.photo)goBack();else hideViewer()}
