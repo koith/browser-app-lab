@@ -1158,7 +1158,10 @@ function filtered(){
    Search snippets have no verified media or timestamp: list separately. */
 function feedRows(){return filtered();}
 function drawDiscoveredLinks(){
-  const rows=indexedCandidates.filter(p=>matchesText(p)&&!suspectedAd(p)&&!ids.has("x:"+p.postId));
+  // A verified X post only supersedes its own X search lead. Threads and
+  // Instagram can legitimately use the same opaque post ID string.
+  const rows=indexedCandidates.filter(p=>matchesText(p)&&!suspectedAd(p)&&
+    !(p.platform==="x"&&ids.has("x:"+p.postId)));
   const container=$("discoveryCandidates"),list=$("discoveryCandidateList");
   container.classList.toggle("hidden",cloudMode||rows.length===0);
   $("discoveryCandidatesCount").textContent=String(rows.length);
@@ -1194,7 +1197,7 @@ window.INTERSECTION_receiveCandidates=function(raw){
     }catch{continue}
     if(!matched)continue;
     const postId=matched[2],id="index:"+platform+":"+postId;
-    if(seen.has(id)||ids.has("x:"+postId))continue;
+    if(seen.has(id)||(platform==="x"&&ids.has("x:"+postId)))continue;
     const label=String(candidate.title||"").trim().slice(0,220);
     const excerpt=String(candidate.description||"").trim().slice(0,450);
     const text=[label,excerpt].filter(Boolean).join("\n").slice(0,650);
