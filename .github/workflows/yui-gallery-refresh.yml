@@ -1,12 +1,6 @@
 name: Yui gallery public-feed refresh
 on:
-  schedule:
-    - cron: '40 1,13 * * *'
   workflow_dispatch:
-  push:
-    paths:
-      - apps/yui-gallery/sync_feed.py
-      - .github/workflows/yui-gallery-refresh.yml
 permissions:
   contents: write
 concurrency:
