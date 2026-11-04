@@ -225,10 +225,69 @@ def archive_key(profile):
     return sha256((profile["platform"]+"\0"+profile["identity"]).encode())[:40]
 
 
+class AccountCloudArchive(CloudArchive):
+    """Private account store with a depth-one immutable original-media fallback.
+
+    TeraBox's unofficial backend intermittently returns missing for nested
+    copyto paths even after mkdir/lsf succeeds. All existing canonical and
+    account-local flat files retain priority; only verified media bytes use
+    a deterministic root-level SHA-addressed object on fresh writes.
+    """
+
+    def __init__(self, root, profile):
+        self.account_hash=archive_key(profile)
+        self.shared=CloudArchive(remote=root.remote,runner=root.runner)
+        super().__init__(root.remote+"/account-archives/"+profile["platform"]+
+                         "/"+self.account_hash,runner=root.runner)
+
+    def shared_media_key(self,key):
+        if not isinstance(key,str) or not re.fullmatch(
+                r"posts/[a-f0-9]{40}/media/[0-9]{4}\\.[a-z0-9]{2,10}",key):
+            return None
+        return "account-media-"+self.account_hash+"-"+sha256(key.encode("utf-8"))+".bin"
+
+    def read(self,key,*,cap=3_000_000,optional=False,domain=None):
+        # Original canonical and legacy account-local flat paths are preferred.
+        original=super().read(key,cap=cap,optional=True,domain=domain)
+        if original is not None:
+            return original
+        shallow=self.shared_media_key(key)
+        if shallow:
+            raw=self.shared.read(shallow,cap=cap,optional=True,domain=domain)
+            if raw is not None:
+                return raw
+        if optional:
+            return None
+        return super().read(key,cap=cap,optional=False,domain=domain)
+
+    def write_immutable(self,key,data):
+        shallow=self.shared_media_key(key)
+        if shallow is None:
+            return super().write_immutable(key,data)
+        if not isinstance(data,bytes):
+            raise TypeError("cloud content must be bytes")
+        expected=sha256(data)
+        cap=len(data)+1
+        # Never mask conflicting canonical or legacy immutable objects.
+        for domain in (None,"https://nephobox.com"):
+            existing=super().read(key,cap=cap,optional=True,domain=domain)
+            if existing is None:
+                continue
+            if sha256(existing)!=expected:
+                raise RuntimeError("immutable account media checksum collision")
+            return False
+        # One shallow file in the same private TeraBox root, unique to the
+        # verified account AND original source slot. No additional folder
+        # creation, unsafe overwrite, public media or external storage.
+        written=self.shared.write_immutable(shallow,data)
+        actual=self.shared.read_verified(shallow,expected,cap=cap)
+        if actual!=data:
+            raise RuntimeError("private account media shallow SHA readback failed")
+        return written
+
+
 def account_cloud(root, profile):
-    return CloudArchive(
-        root.remote+"/account-archives/"+profile["platform"]+"/"+archive_key(profile),
-        runner=root.runner)
+    return AccountCloudArchive(root,profile)
 
 
 def cid_sha256(cid):
