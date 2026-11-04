@@ -69,4 +69,23 @@ for(const model of ['mimmi','yui']){
  const second=join([[{id:'work',images:merged}],[{id:'work',images:merged}]]);
  assert.equal(second[0].images.length,2,'repeat merge must be idempotent');
 }
+{
+ const size=5000;
+ const local=[],owner=[];
+ for(let number=1;number<=size;number++){
+  const sha=number.toString(16).padStart(64,'0');
+  local.push({number,sha256:sha,bytes:100000,
+    url:'stored-albums/heavy/'+number+'.jpg'});
+  owner.push({number,sha256:sha,bytes:100000,
+    url:'owner:heavy:'+number,ownerAlbum:'heavy'});
+ }
+ const start=performance.now();
+ const merged=join([[{id:'heavy',images:local}],[{id:'heavy',images:owner}]]);
+ const elapsed=Math.round(performance.now()-start);
+ assert.equal(merged.length,1);
+ assert.equal(merged[0].images.length,size,'large duplicate corpus must not lose or double-count photos');
+ assert.ok(merged[0].images.every((p,i)=>p.ownerAlbum==='heavy'&&
+   p.storageNumber===i+1),'owner-backed SHA routes must win for every image');
+ console.log('GALLERY_SHA_UNION_5000_PHOTO_OWNER_PRIORITY_PASS','elapsed_ms',elapsed);
+}
 console.log('GALLERY_NUMBER_COLLISION_EXACT_SHA_STORAGE_ROUTING_PASS');
