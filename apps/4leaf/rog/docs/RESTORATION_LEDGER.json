@@ -1779,6 +1779,17 @@
         "RULE-03",
         "P0-RELEASE"
       ]
+    },
+    {
+      "id": "REQ-20261104-WEBRTC-GUEST-SCHEMA-VALIDATION",
+      "date": "2026-11-04",
+      "origin": "GPT independent development while Claude restores 4LEAF original sources",
+      "text": "WebRTC 게스트가 올바른 원본 맵 이름만 포함하고 플레이어·타일 정보가 누락된 원격 경기 패킷을 잘못 저장해 게임 화면이 손상되는 문제를 수정한다. 정상 멀티플레이·종료 결과는 유지하고 가짜 구조 또는 오프라인 모드 수신은 저장 전에 거부한다.",
+      "taskIds": [
+        "M08",
+        "RULE-03",
+        "P0-RELEASE"
+      ]
     }
   ],
   "tasks": [
@@ -8876,6 +8887,30 @@
         "P0-RELEASE"
       ],
       "details": "Incoming guest match now preflights unreadable/nonresumable old-save backups, commits remote JSON to localStorage before match mutation or rendering; fails closed and shows a truthful modal on quota denial. New real Chromium test covers active-save quota rollback, retry, reload, corrupted previous save, denied backup and byte-perfect archival. GitHub PR/CI/public Pages acceptance pending; no claim of original network rule equivalence."
+    },
+    {
+      "seq": 412,
+      "date": "2026-11-04",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261104-WEBRTC-GUEST-SCHEMA-VALIDATION",
+      "taskIds": [
+        "M08",
+        "RULE-03",
+        "P0-RELEASE"
+      ],
+      "details": "Incoming WebRTC peer state schema and network-mode validation before durable commit."
+    },
+    {
+      "seq": 413,
+      "date": "2026-11-04",
+      "type": "WEBRTC_GUEST_PACKET_VALIDATION_QA_PENDING",
+      "requestId": "REQ-20261104-WEBRTC-GUEST-SCHEMA-VALIDATION",
+      "taskIds": [
+        "M08",
+        "RULE-03",
+        "P0-RELEASE"
+      ],
+      "details": "Require incoming guest snapshot to match resumable game schema (finished match checked with a nonmutating finished:false view), network mode and valid map; malformed packets cannot replace persisted or active match. Added real Chromium negative cases for empty players, spoofed offline mode, malformed finished marker and invalid player. PR/CI/Pages acceptance pending."
     }
   ],
   "restorationPriority": {
