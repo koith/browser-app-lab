@@ -65,6 +65,31 @@ def send(path, body, token, extra=None):
         return json.load(response)
 
 
+def send_verified_photo_with_catalog_recovery(model, body, token, headers, catalog_bytes):
+    """Recover once if Render restarted after receiving the owner catalog.
+
+    HTTP 409 is not automatically retried: only a signed endpoint's exact
+    'Owner catalog is not verified' response permits re-sending the SAME
+    already verified catalog. Never retry or downgrade other denials.
+    """
+    endpoint="/internal/gallery-rescue-media/"+model
+    try:
+        return send(endpoint, body, token, headers)
+    except HTTPError as error:
+        if error.code != 409:
+            raise
+        try:
+            detail=json.loads(error.read(2048)).get("detail")
+        except (ValueError,AttributeError,UnicodeError):
+            raise error
+        if detail!="Owner catalog is not verified":
+            raise error
+        result=send("/internal/gallery-rescue-catalog/"+model,catalog_bytes,token)
+        if result.get("verified") is not True:
+            raise OwnerReadUnavailable("Owner catalog was not restored after restart")
+        return send(endpoint,body,token,headers)
+
+
 def verified_file(remote, key, env, maximum):
     if (not isinstance(key,str) or key.startswith("/")
             or ".." in key.split("/") or "\\\\" in key or
@@ -241,11 +266,12 @@ def run(model,token):
             else:
                 skipped+=1
                 continue
-        receipt=send("/internal/gallery-rescue-media/"+model,content,token,{
-            "X-Owner-Album":album["id"],
-            "X-Owner-Number":str(photo["number"]),
-            "X-Owner-Variant":variant
-        })
+        receipt=send_verified_photo_with_catalog_recovery(
+            model,content,token,{
+                "X-Owner-Album":album["id"],
+                "X-Owner-Number":str(photo["number"]),
+                "X-Owner-Variant":variant
+            },raw)
         if receipt.get("cached") is not True:
             raise OwnerReadUnavailable("Render rejected the verified original")
         count+=1;used+=len(content)
