@@ -222,6 +222,10 @@ test('public ChatRoom lost-ACK replay recovers the original sender after full en
  assert.equal(replay.data.replayed,true);
  assert.equal(replay.data.entry.id,sent.data.entry.id);
  assert.equal(replay.data.entry.seq,sent.data.entry.seq);
+ const replayUpper=await second.call('POST','/api/chat',author.token,
+  {text:'상설방 재시작 전 실제 한 번 보낸 메시지',clientMessageId:key.toUpperCase()});
+ assert.equal(replayUpper.status,200,'a case-variant retry after restart is the SAME message');
+ assert.equal(replayUpper.data.entry.id,sent.data.entry.id);
  assert.equal(db.rows.get('production').revision,savedRevision,
   'lost-ACK retry cannot create a second room message or archive revision');
 
