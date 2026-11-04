@@ -57,7 +57,8 @@ test('expired authority session reauthenticates and re-enters its real public ro
  assert.equal(posted.entry.text,'after expiry');
  assert.equal(a.client.ready,true);
  assert.equal(a.client.joinedId,ROOM_A,'no phantom room; admission is confirmed by the authority');
- assert.notEqual(a.client.id,original.id,'expired non-owner identity is re-issued by the authority');
+ assert.equal(a.client.id,original.id,
+  'retained authenticated chat history restores the same original sender after TTL expiry');
  assert.ok(a.events.some(e=>e.type==='rejoined'&&e.room.id===ROOM_A));
  const state=await f.call('GET','/api/snapshot?after=0',a.token());
  assert.equal(state.code,200);
@@ -70,7 +71,25 @@ test('expired authority session reauthenticates and re-enters its real public ro
  assert.equal(snapshot.entry.text,'bob confirmed');
  assert.equal(snapshot.entry.roomId,ROOM_A);
  assert.ok(a.events.filter(e=>e.type==='ready').length===2);
- assert.notEqual(a.token(),original.token,'rotated credential must be stored for later reload');
+ assert.equal(a.token(),original.token,
+  'sender bearer token is recovered only when an archived message fingerprint proves ownership');
+});
+
+test('a guest without retained messages receives a fresh identity after session expiry',async t=>{
+ const f=await fixture();t.after(f.close);
+ const a=f.browser(),original=await a.client.connect('QuietGuest');
+ await a.client.join(ROOM_A);
+ f.clock.value+=46001;
+ const posted=await a.client.chat('first retained message after expiry');
+ assert.equal(posted.entry.text,'first retained message after expiry');
+ assert.notEqual(a.client.id,original.id,
+  'a token without archived owner/message evidence cannot claim an old identity');
+ assert.notEqual(a.token(),original.token,
+  'unproven expired bearer tokens are rotated instead of blindly accepted');
+ const state=await f.call('GET','/api/snapshot?after=0',a.token());
+ assert.equal(state.code,200);
+ assert.equal(state.data.entries.length,1);
+ assert.equal(state.data.peers.length,1,'guest resumes only after real room re-admission');
 });
 
 test('changing real rooms resets the received-history cursor and never leaks prior-room history',async t=>{
