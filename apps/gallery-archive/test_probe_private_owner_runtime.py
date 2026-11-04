@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""No-network sanity for full-gallery 49-original recovery readiness."""
+"""No-network sanity for full-gallery 56-original recovery readiness."""
 import io
 import json
 from pathlib import Path
@@ -21,16 +21,16 @@ class FakeResponse:
 
 
 with patch.object(probe,"urlopen",return_value=FakeResponse(200,
-    {"ready":True,"expected":49,"available":49})) as request:
+    {"ready":True,"expected":56,"available":56})) as request:
     assert probe.check() is True
     assert request.call_count==1
     assert request.call_args.args[0].full_url.endswith("/api/gallery-media-readiness")
 
 for body in (
-    {"ready":True,"expected":49,"available":48},
+    {"ready":True,"expected":56,"available":55},
     {"ready":True,"expected":11,"available":11},
-    {"ready":False,"expected":49,"available":49},
-    {"ready":"true","expected":49,"available":49},
+    {"ready":False,"expected":56,"available":56},
+    {"ready":"true","expected":56,"available":56},
     {},
 ):
     with patch.object(probe,"urlopen",return_value=FakeResponse(200,body)):
@@ -40,4 +40,4 @@ with patch.object(probe,"urlopen",side_effect=HTTPError(probe.URL,503,"cold",{},
     assert probe.check() is False
 with patch.object(probe,"urlopen",side_effect=URLError("connection failed")):
     assert probe.check() is False
-print("OWNER_49_EXACT_ORIGINALS_NO_SECRETS_READY_PROBE_FAIL_CLOSED_PASS")
+print("OWNER_56_EXACT_ORIGINALS_NO_SECRETS_READY_PROBE_FAIL_CLOSED_PASS")
