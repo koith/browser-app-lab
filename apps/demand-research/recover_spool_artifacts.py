@@ -248,6 +248,55 @@ def restore_with_budget(spool,path,cloud,*,max_seconds=MAX_RECORD_SECONDS):
                              max_seconds=max_seconds)
 
 
+
+def safe_failure_category(error):
+    """Map private backend errors to fixed labels; never expose raw messages.
+
+    Rclone/JSON exceptions may include private remote paths, credentials or
+    account identifiers. Only this finite allowlist is emitted to Actions.
+    Search chained causes first because higher layers often wrap an exact
+    provider error with an uninformative generic write failure.
+    """
+    chain=[]
+    seen=set()
+    current=error
+    while current is not None and id(current) not in seen and len(chain)<5:
+        seen.add(id(current))
+        chain.append(current)
+        current=current.__cause__ or current.__context__
+    for err in reversed(chain):
+        if isinstance(err,TimeoutError):
+            return "timeout"
+        message=str(err).lower()
+        if any(tag in message for tag in ("(authorization)","authentication failed",
+                                           "unauthorized","forbidden")):
+            return "authorization"
+        if any(tag in message for tag in ("(capacity)","quota exceeded","no space")):
+            return "capacity"
+        if any(tag in message for tag in ("(rate_limited)","too many requests")):
+            return "rate_limited"
+        if any(tag in message for tag in ("(missing)","backend_missing_path",
+                                           "missing path","directory not found")):
+            return "missing_remote_path"
+        if any(tag in message for tag in ("checksum mismatch",
+                                           "sha256 mismatch","checksum conflict",
+                                           "immutable archive key collision",
+                                           "integrity mismatch","invalid tag")):
+            return "integrity_conflict"
+        if any(tag in message for tag in ("readback unverified","checksum unverified",
+                                           "readback did not converge")):
+            return "readback_unverified"
+    if isinstance(error,(ValueError,KeyError,TypeError,OverflowError)):
+        return "invalid_record"
+    return "backend_unclassified"
+
+
+def count_safe_failure(summary,field,error):
+    key=safe_failure_category(error)
+    buckets=summary[field]
+    buckets[key]=buckets.get(key,0)+1
+
+
 def replay(cloud=None,local_directory=None):
     started=time.monotonic()
     active=cloud or CloudArchive()
@@ -255,10 +304,12 @@ def replay(cloud=None,local_directory=None):
     summary={"artifacts":0,"encrypted_buffers":0,
              "first_observation_verified":0,"post_and_media_verified":0,
              "prior_original_preserved":0,"original_media_incomplete":0,
-             "buffer_failures":0,"artifact_download_failures":0,
+             "buffer_failures":0,"buffer_error_categories":{},
+             "artifact_download_failures":0,
              "deferred_buffers":0,
              "batch_sha_verified":0,"batch_ciphertext_count":0,
-             "batch_failures":0,"deferred_artifacts":0,
+             "batch_failures":0,"batch_error_categories":{},
+             "deferred_artifacts":0,
              "remote_packs_sha_verified":0,"remote_pack_ciphertext_count":0,
              "remote_pack_list_failures":0,"remote_pack_failures":0}
     if local_directory:
@@ -352,8 +403,9 @@ def replay(cloud=None,local_directory=None):
                                 deadline-time.monotonic()-MAX_RECORD_SECONDS))):
                         summary["batch_sha_verified"]+=1
                         summary["batch_ciphertext_count"]+=len(encrypted)
-                except (RuntimeError,ValueError,OSError,KeyError,TypeError,TimeoutError):
+                except (RuntimeError,ValueError,OSError,KeyError,TypeError,TimeoutError) as error:
                     summary["batch_failures"]+=1
+                    count_safe_failure(summary,"batch_error_categories",error)
             # Retry different source IDs on later recovery runs rather than
             # forever failing on the same first three immutable keys.
             if len(encrypted)>1:
@@ -374,8 +426,9 @@ def replay(cloud=None,local_directory=None):
                     state=restore_with_budget(spool,path,active)
                     summary[state]+=1
                     consecutive_failures=0
-                except (RuntimeError,ValueError,KeyError,TypeError,OverflowError,TimeoutError):
+                except (RuntimeError,ValueError,KeyError,TypeError,OverflowError,TimeoutError) as error:
                     summary["buffer_failures"]+=1
+                    count_safe_failure(summary,"buffer_error_categories",error)
                     consecutive_failures+=1
     finally:
         if tmp:
