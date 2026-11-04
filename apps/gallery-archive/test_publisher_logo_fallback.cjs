@@ -1,8 +1,12 @@
 'use strict';
 const assert=require('node:assert/strict');
+const crypto=require('node:crypto');
 const fs=require('node:fs');
 const path=require('node:path');
 const vm=require('node:vm');
+const officialYuiRegistry=JSON.parse(fs.readFileSync(
+ path.join(__dirname,'..','yui-gallery','publishers.json'),'utf8'));
+const officialBrands=new Map(officialYuiRegistry.publishers.map(p=>[p.id,p]));
 for(const model of ['mimmi','yui']){
  const root=path.resolve(__dirname,'..',model+'-gallery');
  const html=fs.readFileSync(path.join(root,'index.html'),'utf8');
@@ -23,6 +27,27 @@ for(const model of ['mimmi','yui']){
     'reject logo escaping approved gallery folder: '+link);
   const buf=fs.readFileSync(candidate);
   assert.ok(buf.length>=100,'invalid empty published image '+link);
+  // A valid PNG header is NOT sufficient evidence of the right publisher.
+  // Bind each verified first-party brand identity to its exact committed bytes.
+  const official=officialBrands.get(item.id);
+  const expectedSHA=item.logo.sha256||official?.logo?.sha256;
+  const expectedBytes=item.logo.bytes||official?.logo?.bytes;
+  assert.match(expectedSHA||'',/^[a-f0-9]{64}$/,
+    model+' '+item.id+' missing official logo SHA');
+  assert.ok(Number.isSafeInteger(expectedBytes)&&expectedBytes>100,
+    model+' '+item.id+' missing official file byte count');
+  assert.equal(buf.length,expectedBytes,
+    model+' '+item.id+' unexpected official logo size');
+  const actualSHA=crypto.createHash('sha256').update(buf).digest('hex');
+  assert.equal(actualSHA,expectedSHA,
+    model+' '+item.id+' registered publisher logo has swapped bytes');
+  if(model==='mimmi'){
+    assert.ok(official?.logo?.verified_official,
+      'cross-gallery brand must refer to same verified publisher '+item.id);
+    assert.equal(path.resolve(root,link),
+      path.resolve(__dirname,'..','yui-gallery',official.logo.path),
+      'shared publisher logo points at the wrong branded image');
+  }
   const ext=path.extname(candidate).toLowerCase();
   if(ext==='.png') assert.equal(buf.subarray(0,8).toString('hex'),'89504e470d0a1a0a');
   else if(['.jpg','.jpeg'].includes(ext)) assert.equal(buf.subarray(0,2).toString('hex'),'ffd8');
