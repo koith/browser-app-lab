@@ -18,12 +18,14 @@ TASKS = tuple(f"INT-{n:02d}" for n in range(1, 13))
 CAPTURE = "demand-fast-capture.yml"
 REPLAY = "demand-replay-encrypted.yml"
 REPAIR = "demand-repair-archive.yml"
+DIAG = "demand-terabox-write-diagnostic.yml"
 PAGES = "static.yml"
 # Workflow name as surfaced by GitHub, not a guessed file path.
 WORKFLOW_NAMES = {
     "INTERSECTION — Fast Private Public-Post Capture": CAPTURE,
     "INTERSECTION — Immediate Encrypted TeraBox Recovery": REPLAY,
     "INTERSECTION — Verify and Rebuild Private TeraBox Archive": REPAIR,
+    "INTERSECTION — Private Synthetic TeraBox Write Diagnostics": DIAG,
     "Deploy static content to Pages": PAGES,
     "INTERSECTION — Deployed Pages Desktop and Mobile QA": "intersection-deployed-pages-qa.yml",
     "Demand Research Public Source Probe": "demand-public-sources-probe.yml",
@@ -42,7 +44,7 @@ WEB_TASKS = {"INT-07", "INT-08", "INT-10"}
 DEPLOYED_QA = "intersection-deployed-pages-qa.yml"
 ACTIVE = {"queued", "pending", "in_progress", "waiting", "requested"}
 # Explicitly allowlisted dispatches. No arbitrary user-provided workflow path.
-DISPATCHABLE = frozenset(QA_FOR_TASK.values()) | {REPAIR, DEPLOYED_QA}
+DISPATCHABLE = frozenset(QA_FOR_TASK.values()) | {REPAIR, REPLAY, DIAG, DEPLOYED_QA}
 
 
 def first_incomplete(body):
@@ -118,7 +120,17 @@ def decide(task, trigger, main_sha, runs):
     if task == "INT-01":
         if trigger.get("name") == "INTERSECTION — Immediate Encrypted TeraBox Recovery":
             if trigger.get("conclusion") != "success":
-                return action(task, "NONE", "RECOVERY_FAILED_REQUIRES_CODE_REPAIR")
+                # Once per main code revision, validate tiny synthetic writes on
+                # all known provider paths. No real post or catalog mutation.
+                # If it already ran on this SHA, wait for a code fix instead
+                # of looping infinitely when the provider is offline.
+                diagnostics = runs.get(DIAG, [])
+                if any(safe_status(x) == "ACTIVE" for x in diagnostics):
+                    return action(task, "NONE", "SYNTHETIC_DIAGNOSTIC_ALREADY_RUNNING")
+                if any(x.get("head_sha") == main_sha
+                       and x.get("event") != "pull_request" for x in diagnostics):
+                    return action(task, "NONE", "DIAGNOSTIC_ALREADY_TRIED_ON_SAME_CODE")
+                return action(task, "DISPATCH", "RECOVERY_FAILED_TRY_SAFE_CLOUD_DIAGNOSTIC", DIAG)
             repair_runs = runs.get(REPAIR, [])
             if any(safe_status(x) == "ACTIVE" for x in repair_runs):
                 return action(task, "NONE", "REPAIR_ALREADY_IN_PROGRESS")
@@ -129,6 +141,16 @@ def decide(task, trigger, main_sha, runs):
                 return action(task, "NONE", "REPAIR_ALREADY_ATTEMPTED_AFTER_REPLAY")
             return action(task, "DISPATCH", "RECOVERY_COMPLETE_START_REMOTE_RECONCILIATION",
                           REPAIR)
+        if trigger.get("name") == "INTERSECTION — Private Synthetic TeraBox Write Diagnostics":
+            if trigger.get("conclusion") != "success":
+                return action(task, "NONE", "SYNTHETIC_DIAGNOSTIC_FAILED_WAIT_CODE_FIX")
+            if any(safe_status(x) == "ACTIVE" for x in runs.get(REPLAY, [])):
+                return action(task, "NONE", "RECOVERY_ALREADY_QUEUED_OR_RUNNING")
+            if any(x.get("id", 0) > trigger.get("id", 0)
+                   for x in runs.get(REPLAY, [])
+                   if x.get("event") != "pull_request"):
+                return action(task, "NONE", "RECOVERY_ALREADY_ATTEMPTED_AFTER_DIAGNOSTIC")
+            return action(task, "DISPATCH", "DIAGNOSTIC_PASS_REPLAY_ENCRYPTED_ORIGINALS", REPLAY)
         if trigger.get("name") == "INTERSECTION — Verify and Rebuild Private TeraBox Archive":
             if trigger.get("conclusion") == "success":
                 return action(task, "NONE", "REBUILD_PASS_FULL_HISTORICAL_GATE_STILL_UNVERIFIED")
@@ -247,8 +269,10 @@ def main():
             raise ValueError("current main commit unverifiable")
         trigger = (data.get("workflow_run") or {}
                    if event_name == "workflow_run" else {})
-        want = ([REPAIR] if task == "INT-01" and
+        want = ([REPAIR, DIAG] if task == "INT-01" and
                 trigger.get("name") == "INTERSECTION — Immediate Encrypted TeraBox Recovery"
+                else [REPLAY] if task == "INT-01" and
+                trigger.get("name") == "INTERSECTION — Private Synthetic TeraBox Write Diagnostics"
                 else [QA_FOR_TASK[task], PAGES, DEPLOYED_QA]
                 if task in QA_FOR_TASK and task in WEB_TASKS
                 else [QA_FOR_TASK[task]]
