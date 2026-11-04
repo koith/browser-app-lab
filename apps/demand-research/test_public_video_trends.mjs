@@ -110,7 +110,8 @@ $("videoTrendReviewNext").click();
 assert.match($("videoTrendReviewStatus").textContent,/2 \/ 16/);
 assert.equal($("videoTrendReviewPrev").disabled,false);
 assert.equal($("videoTrendReviewContent").querySelector("a").href,
-  "https://bsky.app/profile/qa.bsky.social/post/b");
+  "https://bsky.app/profile/qa.bsky.social/post/item0",
+  "the second review item follows public-reaction sorting, not fixture input order");
 $("videoTrendReviewClose").click();
 assert.equal(fakeDialog.open,false);
 assert.equal($("videoTrendRows").firstChild.target,"_blank");
