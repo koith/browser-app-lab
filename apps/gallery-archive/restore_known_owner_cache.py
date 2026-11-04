@@ -112,6 +112,31 @@ def photo_ok(photo,data,variant):
     return True
 
 
+def verified_same_owner_existing_read(model, key, env, photo, variant, attempts=1):
+    """Bound transient incomplete content; never retry explicit provider denial.
+
+    All attempts use exactly the original authorized model account and key.
+    Bytes are returned ONLY after the recorded SHA, length and pixels pass.
+    """
+    if not 1 <= attempts <= 3:
+        raise ValueError("Invalid owner read budget")
+    for number in range(attempts):
+        data=verified_file(REMOTE[model],key,env,MAX_FILE)
+        if len(data)<=512:
+            try:
+                provider=json.loads(data)
+            except (ValueError,UnicodeError):
+                provider={}
+            if isinstance(provider,dict) and provider.get("error_code")==31326:
+                raise OwnerReadUnavailable("Owner provider explicitly denied this read")
+        if photo_ok(photo,data,variant):
+            return data
+        if number+1<attempts:
+            print("OWNER_EXISTING_SHA_INCOMPLETE_RETRY",model,variant,number+1,flush=True)
+            time.sleep(1.0)
+    raise OwnerReadUnavailable("Owner media SHA/pixel integrity not verified")
+
+
 def select_rows(model,catalog):
     covers_path=ROOT / (model+"-gallery") / "album-covers.json"
     # The pinned cover manifest is only an advisory selector; never a
@@ -190,32 +215,29 @@ def run(model,token):
             album["id"],photo["number"],variant) not in fullset:
             skipped+=1
             continue
+        urgent_photo=(album["id"],photo["number"],variant) in fullset
         try:
-            content=verified_file(REMOTE[model],key,env,MAX_FILE)
+            content=verified_same_owner_existing_read(
+                model,key,env,photo,variant,attempts=3 if urgent_photo else 1)
         except OwnerReadUnavailable:
-            skipped+=1
-            continue
-        if not photo_ok(photo,content,variant):
-            # Some old preview metadata is stale. No photo may be accepted
-            # from preview bytes with a mismatched digest. The existing
-            # original is a separate, SHA-verified owner file.
-            if variant == "preview":
+            if variant=="preview" and not urgent_photo:
+                # Stale preview SHA does not authorize silently using it.
+                # A separately recorded original may still be verified.
                 print("OWNER_RESCUE_PREVIEW_SHA_MISMATCH_TRY_VERIFIED_ORIGINAL",model,flush=True)
                 if not ensure_only_private_original(model,album,photo,"original"):
                     skipped+=1
                     continue
                 try:
-                    verified_original=verified_file(REMOTE[model],photo["key"],env,MAX_FILE)
+                    content=verified_same_owner_existing_read(
+                        model,photo["key"],env,photo,"original",attempts=2)
                 except OwnerReadUnavailable:
                     skipped+=1
                     continue
-                if not photo_ok(photo,verified_original,"original"):
-                    skipped+=1
-                    continue
-                content=verified_original
                 variant="original"
-            elif (album["id"],photo["number"],variant) in fullset:
-                raise OwnerReadUnavailable("Incident original failed verified SHA/decode")
+            elif urgent_photo:
+                # Fail closed: even after the bounded same-account attempts,
+                # never publish or claim an incomplete existing original.
+                raise
             else:
                 skipped+=1
                 continue
