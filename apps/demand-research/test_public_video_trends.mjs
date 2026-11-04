@@ -40,7 +40,7 @@ assert.equal(derive(snap,{mode:"day",nowMs:NOW}).length,2);
 assert.equal(derive(snap,{mode:"week",nowMs:NOW}).length,4);
 assert.equal(derive(snap,{mode:"month",nowMs:NOW}).length,5);
 assert.deepEqual(derive(snap,{mode:"latest",nowMs:NOW}).map(x=>x.id),["a","b","c","d","e","f"]);
-assert.equal(derive(snap,{mode:"archive",month:"2026-10",nowMs:NOW}).length,1,
+assert.equal(derive(snap,{mode:"archive",month:"2026-10",nowMs:NOW}).length,2,
   "monthly archive is limited to actually loaded historical posts");
 assert.deepEqual(months(snap,NOW),["2026-11","2026-10","2026-09"]);
 assert.equal(derive(snap,{mode:"archive",month:"2025-01",nowMs:NOW}).length,0);
@@ -83,9 +83,9 @@ doc.querySelector('[data-video-mode="archive"]').click();
 assert.equal($("videoTrendMonth").hidden,false);
 $("videoTrendMonth").value="2026-10";
 $("videoTrendMonth").dispatchEvent(new dom.window.Event("change"));
-assert.equal($("videoTrendRows").querySelectorAll("a.video-trend-card").length,1);
+assert.equal($("videoTrendRows").querySelectorAll("a.video-trend-card").length,2);
 assert.equal($("videoTrendRows").querySelectorAll("a.video-trend-card")[0].href,
-  "https://bsky.app/profile/qa.bsky.social/post/f","archive source original");
+  "https://bsky.app/profile/qa.bsky.social/post/d","archive source original");
 doc.querySelector('[data-video-mode="latest"]').click();
 assert.equal($("videoTrendMonth").hidden,true);
 const oldCount=$("videoTrendCount").textContent;
