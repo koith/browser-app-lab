@@ -137,15 +137,18 @@
  // Exact historical anchors are not stored in the extracted bitmap assets, so these
  // values remain image-grounded approximations, not decoded native engine coordinates.
  const ROOM_LAYOUTS={
-  0:{seats:[[21,66],[38,66],[55,66],[73,66],[20,80],[38,80],[55,80],[74,80],[22,92],[39,92],[57,92],[74,92]]},
-  1:{seats:[[24,64],[42,64],[60,64],[76,64],[22,78],[40,78],[59,78],[76,78],[22,91],[40,91],[59,91],[76,91]]},
-  2:{seats:[[20,63],[37,63],[55,63],[73,63],[21,78],[38,78],[56,78],[73,78],[22,92],[39,92],[57,92],[74,92]]},
+  // Seat placements measured against the six original backdrops. Only room4
+  // has a photographed crowd reference; other room coordinates are INFERRED.
+  // Adjacent 75px-tall Registry actors are staggered between feet bands.
+  0:{seats:[[27.1,56.8],[42.2,56.8],[57.3,56.8],[72.4,56.8],[19.5,71.0],[34.6,71.0],[49.7,71.0],[64.9,71.0],[27.1,86.2],[42.2,86.2],[57.3,86.2],[72.4,86.2]]},
+  1:{seats:[[22.7,54.9],[37.8,54.9],[52.9,54.9],[68.0,54.9],[30.2,69.1],[45.3,69.1],[60.5,69.1],[75.6,69.1],[22.7,83.3],[37.8,83.3],[52.9,83.3],[68.0,83.3]]},
+  2:{seats:[[35.3,60.6],[50.4,60.6],[65.5,60.6],[80.6,60.6],[27.7,74.8],[42.8,74.8],[57.9,74.8],[73.0,74.8],[20.2,89.0],[35.3,89.0],[65.5,89.0],[80.6,89.0]]},
   // VERIFIED ARCHIVE: room3t.png is 272×102 and room5t.png is 176×128.
   // Previous CSS geometry stretched them to 568×213 and 260×170, unlike
   // room4's now-proven native 1:1 bitmap. Positions below are INFERRED from
   // the room3 backdrop's table legs and room5 rug/shadow, NOT decoded native
   // seat anchors or contemporary screenshot registration.
-  3:{seats:[[19,83],[38,72],[59,72],[81,83],[24,94],[39,94],[56,94],[72,94],[22,69],[77,69],[39,83],[61,83]],
+  3:{seats:[[18.9,65.3],[34.0,65.3],[49.1,65.3],[64.2,65.3],[79.3,65.3],[11.3,79.5],[26.4,79.5],[71.8,79.5],[86.9,79.5],[18.9,93.8],[41.6,93.8],[56.7,93.8]],
      foreground:{file:'room3t',x:261,y:363,w:272,h:102,depth:80}},
   // ARCHIVE-MEASURED: apps/4leaf/assets/chat_ref.jpg contains the exact
   // original ChatRoom/room4.png environment. Robust transparent-sprite
@@ -156,7 +159,7 @@
   4:{seats:[[17,65],[32,61],[45,70],[61,72],[73,64],[91,65],
             [8,97],[29,97],[48,97],[73,97],[91,97],[52,62]],
      foreground:{file:'room4t',x:427,y:425,w:115,h:103,depth:80}},
-  5:{seats:[[20,66],[38,66],[56,66],[74,66],[20,81],[39,81],[57,81],[75,81],[22,93],[39,93],[57,93],[74,93]],
+  5:{seats:[[23.9,65.3],[39.0,65.3],[54.2,65.3],[78.1,65.3],[16.4,78.6],[31.5,78.6],[70.5,78.6],[85.6,78.6],[23.9,93.8],[50.4,93.8],[63.0,93.8],[78.1,93.8]],
      foreground:{file:'room5t',x:307,y:357,w:176,h:128,depth:78}}
  };
  const roomLayout=(bg=currentRoom()?.background)=>ROOM_LAYOUTS[bg]||ROOM_LAYOUTS[2];
@@ -424,12 +427,13 @@
  function updateCounts(){
   if(!sceneInit)return;
   const c=$('social-online-count');if(c)c.textContent=onlinePeers().length+'명';
-  const nativeCount=$('social-native-user-count');if(nativeCount)nativeCount.textContent=onlinePeers().length+'명';
+  const nativeCount=$('social-native-user-count');if(nativeCount)nativeCount.textContent=onlinePeers().length+' 명';
   const group=$('social-peer-list');
   if(group){group.replaceChildren();onlinePeers().forEach(user=>{
     const row=document.createElement('div');row.className='social-user-row';
     const status=document.createElement('i');status.className='social-status-led';
-    const name=document.createElement('b');name.textContent=user.nick+(user.id===tabId?' (나)':'');
+    const name=document.createElement('b');name.textContent=user.nick;
+    if(user.id===tabId)row.dataset.self='true';
     const last=document.createElement('small');last.textContent='접속 중';
     row.append(status,name,last);group.append(row);
   })}
