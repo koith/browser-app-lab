@@ -116,16 +116,108 @@
   roster.dataset.nativeOverlay='true';
   apply();
  }
+
+ /* Original toolbar belongs to MainFrame/title outside 794x528 photo.
+  * Move the EXISTING live controls to preserve event handlers/permissions. */
+ const CHROME_QUERY='(min-width:801px) and (min-height:640px)';
+ const chromeFits=()=>window.matchMedia(CHROME_QUERY).matches;
+ function chromeHost(){
+  const title=document.querySelector('#app>.titlebar');
+  if(!title)return null;
+  let host=title.querySelector('.leaf-room-mainframe-tools');
+  if(!host){
+   host=document.createElement('div');host.className='leaf-room-mainframe-tools';
+   const grip=document.createElement('span');grip.className='leaf-room-toolbar-grip';
+   grip.setAttribute('aria-hidden','true');grip.dataset.source='MainFrame/toolbarmove.png';
+   host.append(grip);title.append(host);
+  }
+  return host;
+ }
+ function homeChrome(){
+  const host=document.querySelector('#app>.titlebar .leaf-room-mainframe-tools');
+  if(!host)return;
+  const bar=host.querySelector('.social-classic-toolbar');
+  if(bar)$('rooms')?.querySelector('.social-header')?.append(bar);
+  const close=host.querySelector('#social-close-room');
+  if(close)$('rooms')?.querySelector('.social-header-tools')?.prepend(close);
+  document.documentElement.classList.remove('leaf-room-mainframe');
+ }
+ function placeChrome(){
+  if(!active()||!chromeFits()){homeChrome();return}
+  const host=chromeHost();if(!host)return;
+  const bar=$('rooms')?.querySelector('.social-classic-toolbar');
+  if(bar&&bar.parentElement!==host)host.append(bar);
+  if(bar){delete bar.dataset.webPositionInferred;bar.dataset.nativeHost='MainFrame/title'}
+  const close=$('social-close-room');
+  if(close&&close.parentElement!==host)host.append(close);
+  document.documentElement.classList.add('leaf-room-mainframe');
+ }
+ /* The original photograph anchors nickname labels above the 141px
+  * Registry canvas. Collision offsets remain INFERRED, deterministic and
+  * constrained to the source room bounds; not client-decoded positions. */
+ const TAG_GAP=2;
+ const TAG_STEPS=[[0,0],[-16,0],[16,0],[-32,0],[32,0],[-48,0],[48,0],
+  [0,-18],[-24,-18],[24,-18],[-48,-18],[48,-18],[0,-36],[-32,-36],[32,-36]];
+ let tagFrame=0;
+ function layoutTags(){
+  tagFrame=0;
+  const frame=$('social-image-frame');
+  if(!active()||!frame)return;
+  const fr=frame.getBoundingClientRect();
+  if(fr.width<1)return;
+  const scale=fr.width/794;
+  const figures=[...frame.querySelectorAll('#social-avatar-layer .social-avatar')]
+   .map(el=>({el,tag:el.querySelector('.social-avatar-name'),
+    y:parseFloat(el.style.top)||0,x:parseFloat(el.style.left)||0}))
+   .filter(f=>f.tag)
+   .sort((a,b)=>b.y-a.y||a.x-b.x);
+  const placed=[];
+  for(const f of figures){
+   f.tag.style.setProperty('--leaf-tag-dx','0px');
+   f.tag.style.setProperty('--leaf-tag-dy','0px');
+   const r=f.tag.getBoundingClientRect();
+   const base={l:(r.left-fr.left)/scale,t:(r.top-fr.top)/scale,w:r.width/scale,h:r.height/scale};
+   let chosen=TAG_STEPS[0];
+   for(const step of TAG_STEPS){
+    const c={l:base.l+step[0],t:base.t+step[1],w:base.w,h:base.h};
+    if(c.l<0||c.l+c.w>794||c.t<0)continue;
+    const collides=placed.some(p=>c.l<p.l+p.w+TAG_GAP&&p.l<c.l+c.w+TAG_GAP&&
+     c.t<p.t+p.h+TAG_GAP&&p.t<c.t+c.h+TAG_GAP);
+    if(!collides){chosen=step;break}
+   }
+   f.tag.style.setProperty('--leaf-tag-dx',chosen[0]+'px');
+   f.tag.style.setProperty('--leaf-tag-dy',chosen[1]+'px');
+   f.tag.dataset.tagShift=chosen.join(',');
+   placed.push({l:base.l+chosen[0],t:base.t+chosen[1],w:base.w,h:base.h});
+  }
+ }
+ const scheduleTags=()=>{if(!tagFrame)tagFrame=requestAnimationFrame(layoutTags)};
+ let tagObserver=null;
+ function watchTags(){
+  const frame=$('social-image-frame');
+  if(!frame||tagObserver)return;
+  // Exclude our own tag style writes to avoid observer/requestAnimationFrame loop.
+  tagObserver=new MutationObserver(records=>{
+   if(records.some(r=>!(r.type==='attributes'&&r.target.classList?.contains('social-avatar-name'))))
+    scheduleTags();
+  });
+  tagObserver.observe(frame,{childList:true,subtree:true,
+   attributes:true,attributeFilter:['style'],characterData:true});
+ }
+ function before(){homeChrome();restore()}
+ function after(){sync();placeChrome();watchTags();scheduleTags()}
  function start(){
   remember();
-  window.addEventListener('resize',sync,{passive:true});
-  window.addEventListener('leaf-route-change',sync);
-  sync();
+  window.addEventListener('resize',()=>{
+   sync();requestAnimationFrame(()=>{placeChrome();scheduleTags()})
+  },{passive:true});
+  window.addEventListener('leaf-route-change',()=>{sync();placeChrome()});
+  sync();placeChrome();watchTags();
  }
  window.__LEAF_NATIVE_ROOM_PANELS__={
-  beforeRender:restore,
-  afterRender:sync,
-  sync,
+  beforeRender:before,
+  afterRender:after,
+  sync,layoutTags,
   getState:()=>({
    inRoom:active(),
    overlay:messenger?.dataset.nativeOverlay==='true',
@@ -134,6 +226,8 @@
    messageFormCount:document.querySelectorAll('#chat-form').length,
    rosterCount:document.querySelectorAll('#social-peer-list').length,
    userlistFrame:roster?.dataset.nativeFrame||'pending',
+   toolbarHost:$('rooms')?.querySelector('.social-classic-toolbar')?.closest('.leaf-room-mainframe-tools')?'MainFrame/title':
+    $('rooms')?.querySelector('.social-classic-toolbar')?.parentElement?.id||'header',
    userlistAnchors:PANEL
   })
  };
