@@ -259,7 +259,11 @@ def lemmy(term, start, end):
                     or (origin_host=="pictrs.lemmy.world"
                         and path.startswith("/image/"))):
                 source_media=[original]
-        row = normalized("lemmy", str(p.get("id") or url), url, source,
+        local_id=str(p.get("id") or "")
+        # Preserve legacy IDs when valid; a short local ID cannot pass the
+        # immutable key validator, so use the canonical public AP permalink.
+        original_id=local_id if len(local_id)>=4 else url
+        row = normalized("lemmy", original_id, url, source,
                          posted, source_media)
         if row:
             yield row
