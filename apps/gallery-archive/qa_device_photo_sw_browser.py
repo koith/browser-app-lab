@@ -113,6 +113,14 @@ def main():
                 first = decode()
                 assert first == {"loaded": True, "width": 48}, first
                 assert state["requests"] == 1, state
+                page.wait_for_function("""async () => {
+                    const names = await caches.keys();
+                    if (!names.some(name => name.endsWith('-owner-verified-photos-v1'))) return false;
+                    const cache = await caches.open(
+                        names.find(name => name.endsWith('-owner-verified-photos-v1')));
+                    const keys = await cache.keys();
+                    return keys.length === 1;
+                }""", timeout=15000)
                 state["offline"] = True
                 page.reload(wait_until="domcontentloaded")
                 page.wait_for_function("() => !!navigator.serviceWorker.controller",
