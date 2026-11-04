@@ -104,10 +104,12 @@ class StatusBoardTests(unittest.TestCase):
             b'{"fetched":42,"saved_verified":3,"storage_failures":21,'
             b'"encrypted_only_originals":21,"secret":"NEVER_SHOW_ME"}'
         )
-        with patch.object(gh, "request", return_value=listed), \\
-             patch.object(ops, "urlopen", side_effect=URLError("temporary-log-redirect")), \\
-             patch.object(ops.subprocess, "run", return_value=SimpleNamespace(
-                 returncode=0, stdout=output, stderr=b"")) as cli:
+        with (
+            patch.object(gh, "request", return_value=listed),
+            patch.object(ops, "urlopen", side_effect=URLError("temporary-log-redirect")),
+            patch.object(ops.subprocess, "run", return_value=SimpleNamespace(
+                returncode=0, stdout=output, stderr=b"")) as cli,
+        ):
             stats = gh.metrics_for_run(
                 run(99), "DEMAND_CAPTURE_AGGREGATE_ONLY", "capture"
             )
