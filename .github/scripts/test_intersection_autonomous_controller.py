@@ -59,6 +59,25 @@ class ControllerTests(unittest.TestCase):
         self.assertEqual(state["task"], "INT-02")
         self.assertEqual(state["action"], "NONE")
 
+    def test_after_verified_issue_gate_only_allowlisted_qa_can_start(self):
+        updated = BODY.replace("- [ ] **INT-01**", "- [x] **INT-01**")
+        result = c.decide(updated, [run(12)], [run(10, hours=7)],
+                          NOW, qa_runs=[run(4, hours=30)])
+        self.assertEqual(result["task"], "INT-02")
+        self.assertEqual(result["action"], "DISPATCH_QA")
+        self.assertEqual(result["workflow"], "demand-public-sources-probe.yml")
+        self.assertNotIn("INT-01", result["workflow"])
+
+    def test_next_task_qa_is_rate_limited_and_never_auto_checked(self):
+        updated = BODY.replace("- [ ] **INT-01**", "- [x] **INT-01**")
+        pending = c.decide(updated, [run(12)], [],
+                           NOW, qa_runs=[run(4, "pending", hours=40)])
+        self.assertEqual(pending["action"], "NONE")
+        self.assertEqual(pending["reason"], "QA_ALREADY_QUEUED_OR_RUNNING")
+        cooldown = c.decide(updated, [run(12)], [],
+                            NOW, qa_runs=[run(4, hours=2)])
+        self.assertEqual(cooldown["reason"], "QA_COOLDOWN")
+
     def test_missing_task_and_missing_evidence_fail_closed(self):
         self.assertEqual(c.first_incomplete("")[1], "MISSING_FROM_ISSUE")
         self.assertEqual(c.decide(BODY, [], [], NOW)["action"], "NONE")
