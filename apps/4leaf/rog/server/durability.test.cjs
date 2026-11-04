@@ -136,8 +136,23 @@ test('optimistic revision conflict never overwrites newer remote data',async t=>
  const denied=await f.call('POST','/api/chat',a.token,{text:'충돌은 폐기'});
  assert.equal(denied.status,503);
  assert.equal(db.rows.get('production').revision,2);
- assert.equal((await f.call('GET','/api/snapshot?after=0',a.token)).data.entries.length,1);
+ // With an unknown newer authoritative revision, returning the old local
+ // copy would falsely claim no other writer changed that room.
+ assert.equal((await f.call('GET','/api/health',null)).status,503);
+ assert.equal((await f.call('GET','/api/snapshot?after=0',a.token)).status,503);
+ assert.equal((await f.call('GET','/api/rooms?region=north&district='+encodeURIComponent(info.district),a.token)).status,503);
+ assert.equal((await f.call('POST','/api/presence',a.token,{nick:'stale'})).status,503);
+ assert.equal((await f.call('POST','/api/session',null,{nick:'new user'})).status,503);
  assert.equal((await f.call('POST','/api/chat',a.token,{text:'재시작 전 추가 쓰기 금지'})).status,503);
+ assert.equal(db.rows.get('production').revision,2,'stale process never overwrites remote winner');
+ // A new authority can fully reload the winning revision and resume traffic.
+ const recovered=await appFor(db);t.after(()=>recovered.close());
+ const newcomer=await recovered.session('RecoveredUser');
+ assert.equal((await recovered.call('POST','/api/rooms/leaf-public-north-3-0/join',newcomer.token,{})).status,200);
+ const afterRestart=await recovered.call('GET','/api/snapshot?after=0',newcomer.token);
+ assert.deepEqual(afterRestart.data.entries.map(e=>e.text),['원본 1']);
+ assert.equal((await recovered.call('POST','/api/chat',newcomer.token,{text:'새 권한자 복구 후 저장'})).status,201);
+ assert.equal(db.rows.get('production').revision,3);
 });
 
 
