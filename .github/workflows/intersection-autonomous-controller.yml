@@ -69,6 +69,10 @@ jobs:
       actions: write
       issues: write
       contents: read
+    outputs:
+      stage_task: ${{ steps.pipeline.outputs.stage_task }}
+      stage_action: ${{ steps.pipeline.outputs.stage_action }}
+      stage_reason: ${{ steps.pipeline.outputs.stage_reason }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -77,6 +81,7 @@ jobs:
         with:
           python-version: "3.12"
       - name: Event received → check issue gate → QA → deployment → next work
+        id: pipeline
         env:
           GH_TOKEN: ${{ github.token }}
         run: python .github/scripts/intersection_event_pipeline.py
@@ -105,4 +110,7 @@ jobs:
       - name: After completed decision, update the existing issue #607 bot comment
         env:
           GH_TOKEN: ${{ github.token }}
+          INTERSECTION_STAGE_TASK: ${{ needs.safe-controller.outputs.stage_task }}
+          INTERSECTION_STAGE_ACTION: ${{ needs.safe-controller.outputs.stage_action }}
+          INTERSECTION_STAGE_REASON: ${{ needs.safe-controller.outputs.stage_reason }}
         run: python .github/scripts/intersection_ops_status.py
