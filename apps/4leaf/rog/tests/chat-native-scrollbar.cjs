@@ -49,7 +49,9 @@ const path=require('node:path');
   assert.equal(source.rendered,'true','source PNG decoded at native size, preserving original alpha directly');
   assert.equal(source.parentFrame,'social-image-frame','actual scrollbar moves with existing original room chat pane');
   assert.equal(source.count,1,'no fake secondary transcript replaces the native original room chat');
-  assert.equal(source.computed,'flex','original 13px vertical scrollbar appears beside actual conversation');
+  // 2026-11-04: the column positions its live controls absolutely at the
+  // anchors template-matched in chat.jpg (track x410 y16, arrows (406,78)).
+  assert.equal(source.computed,'block','original 13px vertical scrollbar appears beside actual conversation');
   assert.deepEqual(source.size,[13,13],'both native sprites have original 13px column width');
   assert.ok(source.art.includes('original/ChatRoom/scrollbar.png'),'original source 52x40 file is painted unmodified, not a re-encoded canvas');
   assert.equal(source.role,'scrollbar','source decoration has accessible real scrollbar semantics');
@@ -83,7 +85,9 @@ const path=require('node:path');
    track:el.querySelector('#social-native-scroll-track').getAttribute('aria-valuenow'),
    thumbHeight:parseFloat(getComputedStyle(el.querySelector('#social-native-scroll-thumb')).height),
    up:el.querySelector('#social-native-scroll-up').disabled,
-   source:getComputedStyle(el.querySelector('#social-native-scroll-thumb')).backgroundImage,
+   // The fixed 12x21 source thumb (atlas 0,19) is painted by ::before,
+   // centred on the live proportional handle (2026-11-04 layout).
+   source:getComputedStyle(el.querySelector('#social-native-scroll-thumb'),'::before').backgroundImage,
    count:document.querySelectorAll('#social-native-chat-scroll').length
   }));
   assert.ok(Number(native.track)>=0&&Number(native.track)<=100,'scroll thumb retains correct accessible value');
