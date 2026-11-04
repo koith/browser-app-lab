@@ -116,18 +116,31 @@ def bluesky(term, start, end):
             video = typ in ("app.bsky.embed.video#view","app.bsky.embed.video")
             if video:
                 playlist = view.get("playlist")
+                claimed_cid=str(view.get("cid") or "")
+                cid_valid=bool(re.fullmatch(r"baf[a-z2-7]{25,120}",claimed_cid))
                 if not (isinstance(playlist,str) and public_url(playlist)
-                        and urlsplit(playlist).hostname=="video.bsky.app"
-                        and urlsplit(playlist).path.endswith("/playlist.m3u8")):
+                        and urlsplit(playlist).hostname=="video.bsky.app"):
                     playlist=None
+                if playlist:
+                    # Strict actor and CID binding prevents another public
+                    # account's video from being labelled as this post's.
+                    parts=urlsplit(playlist).path.split("/")
+                    if (len(parts)!=5 or parts[1]!="watch" or
+                            parts[2]!=match.group(1) or
+                            parts[4]!="playlist.m3u8" or
+                            not re.fullmatch(r"baf[a-z2-7]{25,120}",parts[3]) or
+                            (cid_valid and parts[3]!=claimed_cid)):
+                        playlist=None
                 if not playlist:
                     record_embed=rec.get("embed") or {}
                     if record_embed.get("$type")=="app.bsky.embed.video":
                         ref=((record_embed.get("video") or {}).get("ref") or {})
                         cid=ref.get("$link") if isinstance(ref,dict) else ""
-                        if isinstance(cid,str) and re.fullmatch(r"baf[a-z2-7]{25,120}",cid):
-                            playlist=("https://video.bsky.app/watch/"+
-                                      match.group(1)+"/"+cid+"/playlist.m3u8")
+                    else:
+                        cid=claimed_cid
+                    if isinstance(cid,str) and re.fullmatch(r"baf[a-z2-7]{25,120}",cid):
+                        playlist=("https://video.bsky.app/watch/"+
+                                  match.group(1)+"/"+cid+"/playlist.m3u8")
                 if playlist:
                     images.append(playlist)
                 else:
