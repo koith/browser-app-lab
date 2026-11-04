@@ -40,8 +40,8 @@ def test_missed_schedule_expands_bounded_catchup():
                    current_id=99,current_time=t,event_name="schedule")
     assert delayed["status"]=="DELAYED_OR_MISSED"
     assert delayed["lookback_minutes"]==290
-    assert delayed["lookback_minutes"]>=delayed["observed_gap_minutes"],
-        "the actually observed 274-minute delay must fit inside catch-up"
+    assert delayed["lookback_minutes"]>=delayed["observed_gap_minutes"], (
+        "the actually observed 274-minute delay must fit inside catch-up")
 
 
 def test_insufficient_evidence_never_labels_cron_healthy():
