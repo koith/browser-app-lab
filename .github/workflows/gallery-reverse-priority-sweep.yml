@@ -1,16 +1,6 @@
 name: Aggressive Image-First Weak Album Source Sweep
 on:
   workflow_dispatch:
-  push:
-    branches: [main]
-    paths:
-      - apps/gallery-archive/reverse_seed_priority.py
-      - apps/gallery-archive/reverse_sites_parser.py
-      - apps/gallery-archive/reverse_image_sweep.py
-      - apps/gallery-archive/test_reverse_image_sweep.py
-      - .github/workflows/gallery-reverse-priority-sweep.yml
-  schedule:
-    - cron: "6 0,3,6,9,12,15,18,21 * * *"
   pull_request:
     paths:
       - apps/gallery-archive/reverse_seed_priority.py
