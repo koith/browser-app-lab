@@ -480,7 +480,19 @@ function routeURL(s){const q=new URLSearchParams();if(s.album)q.set('album',s.al
 function remember(s){history.replaceState({...history.state,scroll:window.scrollY},'');const state={yui:true,key:Date.now().toString(36)+'-'+(++historyEntry),depth:(history.state?.depth||0)+1,scroll:0,...s};history.pushState(state,'',routeURL(state))}
 function goBack(){if(history.state?.yui&&history.state.depth>0)history.back();else{const state={yui:true,depth:0,mode:activePublisher?'publishers':'albums',publisher:history.state?.album?activePublisher:null,scroll:0};history.replaceState(state,'',routeURL(state));applyRoute(state)}}
 function applyRoute(s){$('search-dialog').close();s=viewerRoutes.get(s.key)||s;s={...s,album:canonicalId(s.album)};hideViewer();setMode(s.mode||'albums',s.publisher);if(s.album&&!s.fromPhotos)openAlbum(s.album,false);if(s.photo){const a=stored.find(a=>a.id===s.album);const list=s.fromPhotos?available().flatMap(photosFor).filter(p=>p.name.toLocaleLowerCase().includes($('search').value.toLocaleLowerCase().trim())):a?photosFor(a):[];const i=list.findIndex(p=>p.albumId===s.album&&p.number===Number(s.photo));if(i>=0)openViewer(list,i,false)}if(s.searchOpen)showSearch();requestAnimationFrame(()=>window.scrollTo(0,s.scroll||0))}
-window.addEventListener('popstate',()=>{const s=history.state;if(s?.yui)applyRoute(s)});
+// Safari can restore a page from back-forward cache with stale in-memory UI.
+// Reconstruct the saved route from the URL when no typed history.state exists.
+function routeFromLocation(){
+ const raw=location.hash.slice(1),q=new URLSearchParams(raw);
+ const album=canonicalId(raw&&!raw.includes('=')?decodeURIComponent(raw):q.get('album'));
+ return {yui:true,depth:0,mode:q.get('view')||'albums',
+   publisher:q.get('publisher'),album,photo:q.get('photo'),
+   fromPhotos:q.get('from')==='photos',scroll:0};
+}
+window.addEventListener('popstate',()=>applyRoute(history.state?.yui?history.state:routeFromLocation()));
+window.addEventListener('pageshow',event=>{
+ if(event.persisted&&catalog.length)applyRoute(history.state?.yui?history.state:routeFromLocation());
+});
 $('prev').onclick=()=>step(-1);$('next').onclick=()=>step(1);$('close').onclick=closeViewer;
 $('back').onclick=goBack;
 function showSearch(){if(!$('search-dialog').open)$('search-dialog').showModal();$('search').focus()}
@@ -560,7 +572,7 @@ Promise.all([
  const archivedCount=stored.reduce((n,a)=>n+validImages(a).length,0);
  $('inventory').textContent=archivedCount+'장 · 실제 저장본';
  render();
- const raw=location.hash.slice(1),q=new URLSearchParams(raw);const id=canonicalId(raw&&!raw.includes('=')?decodeURIComponent(raw):q.get('album'));const state={yui:true,depth:0,mode:q.get('view')||'albums',publisher:q.get('publisher'),album:id,fromPhotos:q.get('from')==='photos',scroll:0};history.replaceState(state,'',routeURL(state));applyRoute(state);if(q.get('photo')){const a=stored.find(a=>a.id===id);if(a){const list=photosFor(a),i=list.findIndex(p=>p.number===Number(q.get('photo')));if(i>=0)openViewer(list,i)}}
+ const raw=location.hash.slice(1),q=new URLSearchParams(raw);const id=canonicalId(raw&&!raw.includes('=')?decodeURIComponent(raw):q.get('album'));const state={yui:true,depth:0,mode:q.get('view')||'albums',publisher:q.get('publisher'),album:id,photo:q.get('photo'),fromPhotos:q.get('from')==='photos',scroll:0};history.replaceState(state,'',routeURL(state));applyRoute(state);
 
  // Enrich the already-visible gallery when Render wakes; no loading/splash screen.
  YuiPrivate.albums().then(albums=>{
