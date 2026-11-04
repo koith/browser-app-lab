@@ -578,6 +578,7 @@ main{padding-top:10px}
 .video-trend-tools button.active{background:#151829;color:#fff}
 .video-trend-tools select{min-height:30px;font-size:11px;padding:3px;border-radius:0;max-width:130px}
 .video-trend-count{font-size:11px;padding:0 12px 9px;color:#5d605c}
+.video-trend-coverage{padding:0 12px 9px;font-size:10px;line-height:1.6;color:#5d605c;overflow-wrap:anywhere}
 .video-trend-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;padding:0 12px 12px}
 .video-trend-card{display:flex;flex-direction:column;min-width:0;text-decoration:none;color:inherit;border:1px solid #c4c1b1;background:#fffef7}
 .video-trend-card:hover,.video-trend-card:focus-visible{border-color:#e45c32;outline:1px solid #e45c32}
@@ -634,8 +635,10 @@ main{padding-top:10px}
   <button type="button" data-video-mode="latest">최신 게시</button>
   <button type="button" data-video-mode="archive">월별 기록</button>
   <select id="videoTrendMonth" aria-label="영상 기록 월 선택" hidden></select>
+  <select id="videoTrendSource" aria-label="영상 SNS 출처 선택"><option value="all">전체 SNS</option></select>
  </div>
  <div id="videoTrendCount" class="video-trend-count" role="status" aria-live="polite">영상 집계 중…</div>
+ <div id="videoTrendCoverage" class="video-trend-coverage" aria-label="SNS별 검증 영상 게시글 수와 공개 반응 제공률"></div>
  <div id="videoTrendRows" class="video-trend-grid"></div>
  <button type="button" id="videoTrendMore" class="video-trend-more" hidden>더 보기</button>
 </details>

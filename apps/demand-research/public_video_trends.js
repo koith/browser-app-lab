@@ -53,6 +53,17 @@
    }
    return out;
  }
+ function summarizeSources(rows){
+   const counts=new Map();
+   for(const row of rows){
+     if(!row||!LABELS[row.platform])continue;
+     let item=counts.get(row.platform);
+     if(!item){item={platform:row.platform,count:0,measured:0};counts.set(row.platform,item);}
+     item.count+=1;
+     if(row.measured)item.measured+=1;
+   }
+   return [...counts.values()].sort((a,b)=>b.count-a.count||a.platform.localeCompare(b.platform));
+ }
  function derive(snapshot,opts={}){
    const mode=Object.prototype.hasOwnProperty.call(PERIODS,opts.mode)?opts.mode:
      ["latest","archive"].includes(opts.mode)?opts.mode:"day";
@@ -61,6 +72,7 @@
    let rows=allVideos(snapshot).filter(r=>r.time<=now);
    if(PERIODS[mode])rows=rows.filter(r=>r.time>=now-PERIODS[mode]);
    if(mode==="archive")rows=rows.filter(r=>month&&r.month===month);
+   if(opts.platform&&opts.platform!=="all")rows=rows.filter(r=>r.platform===opts.platform);
    if(mode==="latest"||mode==="archive")rows.sort((a,b)=>b.time-a.time||a.url.localeCompare(b.url));
    else rows.sort((a,b)=>Number(b.measured)-Number(a.measured)||b.score-a.score||
       b.time-a.time||a.url.localeCompare(b.url));
@@ -79,7 +91,7 @@
      if(text!==undefined)el.textContent=String(text);
      return el;
    };
-   let mode="day",month="",visible=12,snapshot=null;
+   let mode="day",month="",platform="all",visible=12,snapshot=null;
    function read(){
      try{snapshot=win.INTERSECTION_publicVideoSnapshot?.()||null;}catch{snapshot=null;}
    }
@@ -92,12 +104,29 @@
      for(const m of avail){const opt=make("option","",m);opt.value=m;sel.append(opt);}
      sel.value=month;
      sel.hidden=mode!=="archive";
+     // Source options come from the current verified snapshot, never guesses
+     // or third-party search lead counts.
+     const sourceSelect=$("videoTrendSource");
+     const available=summarizeSources(allVideos(snapshot));
+     sourceSelect.replaceChildren();
+     const all=make("option","","전체 SNS");all.value="all";sourceSelect.append(all);
+     for(const item of available){
+       const option=make("option","",LABELS[item.platform]);
+       option.value=item.platform;sourceSelect.append(option);
+     }
+     if(platform!=="all"&&!available.some(item=>item.platform===platform))platform="all";
+     sourceSelect.value=platform;
      doc.querySelectorAll("[data-video-mode]").forEach(btn=>{
        const active=btn.dataset.videoMode===mode;
        btn.classList.toggle("active",active);
        btn.setAttribute("aria-pressed",String(active));
      });
-     const rows=derive(snapshot,{mode,month});
+     const scoped=derive(snapshot,{mode,month});
+     const coverage=summarizeSources(scoped);
+     $("videoTrendCoverage").textContent=coverage.length?
+       "SNS별 영상 · "+coverage.map(x=>LABELS[x.platform]+" "+x.count+"건 (반응 제공 "+x.measured+"/"+x.count+")").join(" · "):
+       "선택한 기간에 확인된 SNS별 영상이 없습니다.";
+     const rows=platform==="all"?scoped:scoped.filter(x=>x.platform===platform);
      const shown=rows.slice(0,visible),list=$("videoTrendRows");
      list.replaceChildren();
      for(const [i,r] of shown.entries()){
@@ -132,6 +161,9 @@
      mode=btn.dataset.videoMode;visible=12;draw();
    }));
    $("videoTrendMonth").addEventListener("change",()=>{month=$("videoTrendMonth").value;visible=12;draw();});
+   $("videoTrendSource").addEventListener("change",()=>{
+     platform=$("videoTrendSource").value;visible=12;draw();
+   });
    $("videoTrendMore").addEventListener("click",()=>{visible+=12;draw();});
    let scheduled=false;
    function schedule(){
@@ -142,5 +174,5 @@
    win.addEventListener("intersection:date-range-change",schedule);
    update();
  }
- return {allVideos,derive,months,mount};
+ return {allVideos,derive,months,summarizeSources,mount};
 });
