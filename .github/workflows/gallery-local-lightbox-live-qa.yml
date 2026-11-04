@@ -1,0 +1,67 @@
+name: Gallery Pages Same-SHA Local Lightbox Live QA
+on:
+  pull_request:
+    paths:
+      - 'apps/gallery-archive/qa_local_lightbox_live.py'
+      - '.github/workflows/gallery-local-lightbox-live-qa.yml'
+  workflow_run:
+    workflows: ["Deploy static content to Pages"]
+    types: [completed]
+permissions:
+  contents: read
+concurrency:
+  group: gallery-local-lightbox-${{ github.event_name }}-${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.ref }}
+  cancel-in-progress: false
+jobs:
+  syntax-and-selection-regression:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: '22'}
+      - run: |
+          python -m py_compile apps/gallery-archive/qa_local_lightbox_live.py
+          node apps/gallery-archive/test_local_saved_detail_previews.cjs
+          node apps/gallery-archive/test_local_lightbox_source.cjs
+
+  live-mobile-same-sha:
+    if: >-
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'main' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-24.04
+    timeout-minutes: 17
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+      - name: Check exact deploy SHA and supported fixture
+        id: source
+        shell: bash
+        run: |
+          test "$(git rev-parse HEAD)" = "${{ github.event.workflow_run.head_sha }}"
+          if [[ -f apps/gallery-archive/qa_local_lightbox_live.py ]]; then
+            echo 'supported=true' >> "$GITHUB_OUTPUT"
+            echo "GALLERY_STATIC_LIGHTBOX_DEPLOYED_SHA=$(git rev-parse HEAD)"
+          else
+            echo 'supported=false' >> "$GITHUB_OUTPUT"
+            echo 'GALLERY_HISTORIC_PAGES_LIGHTBOX_NOT_VERIFIED'
+          fi
+      - uses: actions/setup-python@v5
+        if: steps.source.outputs.supported == 'true'
+        with: {python-version: '3.12'}
+      - name: Verify decoded original and downloaded SHA in real Pages
+        if: steps.source.outputs.supported == 'true'
+        shell: bash
+        run: |
+          python -m py_compile apps/gallery-archive/qa_local_lightbox_live.py
+          python -m pip install 'playwright==1.58.0'
+          python -m playwright install --with-deps ${{ matrix.browser }}
+          python apps/gallery-archive/qa_local_lightbox_live.py --browser '${{ matrix.browser }}'
