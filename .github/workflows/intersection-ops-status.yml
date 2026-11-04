@@ -1,0 +1,59 @@
+name: INTERSECTION — Evidence-Based Operations Board
+
+on:
+  # A single bot comment is UPDATED, not a new ChatGPT conversation or
+  # another discussion thread. Schedule jitter does not imply strict timing.
+  schedule:
+    - cron: "17 */2 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - ".github/scripts/intersection_ops_status.py"
+      - ".github/scripts/test_intersection_ops_status.py"
+      - ".github/workflows/intersection-ops-status.yml"
+  pull_request:
+    paths:
+      - ".github/scripts/intersection_ops_status.py"
+      - ".github/scripts/test_intersection_ops_status.py"
+      - ".github/workflows/intersection-ops-status.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: intersection-evidence-status-report-${{ github.event_name == 'pull_request' && github.head_ref || 'main' }}
+  cancel-in-progress: false
+
+jobs:
+  offline-tests:
+    if: github.event_name == 'pull_request' || github.event_name == 'push'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Validate safely redacted progress and strict unverified handling
+        run: |
+          python -m py_compile .github/scripts/intersection_ops_status.py .github/scripts/test_intersection_ops_status.py
+          python -m unittest discover -s .github/scripts -p 'test_intersection_ops_status.py' -v
+
+  evidence-board:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      actions: read
+      contents: read
+      issues: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Update exactly one GitHub Issue operations comment with evidence
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python .github/scripts/intersection_ops_status.py
