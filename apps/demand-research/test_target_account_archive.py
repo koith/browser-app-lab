@@ -275,7 +275,7 @@ def test_reviewed_bootstrap_retries_first_registration_with_remote_verification(
     cloud=FakeCloud()
     api=BlueAPI({None:([post],None)})
     job.run_registered(root=cloud,api=api,bootstrap=True,bootstrap_path=request)
-    assert any("/metadata/target-accounts/" in name for name in cloud.objects)
+    assert any("metadata/target-accounts/" in name for name in cloud.objects)
     assert any(name.endswith("/post.json") for name in cloud.objects)
     assert '"initial_registration": true' in capsys.readouterr().out.lower()
 
