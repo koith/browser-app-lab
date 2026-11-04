@@ -29,10 +29,15 @@ function makeServer(options={}){
  if(persistent&&store)throw new Error('Do not enable both remote and local chat storage; migrate and explicitly choose one');
  const sessions=new Map(),rooms=new Map(),history=new Map(),kicked=new Map();let sequence=0;
  if(store&&fs.existsSync(store)){
+  // Local/mounted-volume recovery must be as strict as the remote encrypted
+  // recovery. Ignoring a malformed room or truncating a damaged chat history
+  // would permanently erase it when the next message is written.
+  // Leave the original bytes untouched and refuse to start instead.
   const archive=JSON.parse(fs.readFileSync(store,'utf8'));
-  for(const r of archive.rooms||[])if(r?.id&&valid(r.region,r.district))rooms.set(r.id,r);
-  for(const [id,lines] of archive.history||[])if(Array.isArray(lines))history.set(id,lines.slice(-200));
-  sequence=Number(archive.sequence)||0;
+  validateArchive(archive,valid);
+  for(const r of archive.rooms)rooms.set(r.id,r);
+  for(const [id,lines] of archive.history)history.set(id,lines);
+  sequence=archive.sequence;
  }
  // Once a remote database is configured, never serve a blank chat-world
  // while it is unavailable or while its authenticated archive is corrupt.
