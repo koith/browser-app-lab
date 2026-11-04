@@ -1643,6 +1643,19 @@
         "CHT-05",
         "P0-RELEASE"
       ]
+    },
+    {
+      "id": "REQ-20261104-CONTINUOUS-BATCH-EXECUTION",
+      "date": "2026-11-04",
+      "origin": "2026-11-04 사용자의 반복 지시 및 개별 확인 비용 개선 요청",
+      "text": "4LEAF 복원 개발을 개별 작업마다 정지하지 않고 의존성별 묶음으로 연속 수행한다. 클로드 원작 6개 채팅방 시각 복원과 GPT의 채팅 서버/안정성/QA를 병렬로 분리한다. 고비용 CI에서는 이전 PR 검사만 취소하고 main SHA와 공개 배포 수용 검사는 보존한다. 남은 47개 원장 업무의 완료 판정은 기존 근거 기준 유지.",
+      "taskIds": [
+        "M03",
+        "P0-CHAT",
+        "M09",
+        "P0-RELEASE",
+        "FL-MAP-01"
+      ]
     }
   ],
   "tasks": [
@@ -8365,6 +8378,34 @@
         "P0-RELEASE"
       ],
       "details": "Append-only recovery of missing canonical request-registration event; original intake and historical evidence remain unchanged. This restores validator-required registration linkage."
+    },
+    {
+      "seq": 381,
+      "date": "2026-11-04",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261104-CONTINUOUS-BATCH-EXECUTION",
+      "taskIds": [
+        "M03",
+        "P0-CHAT",
+        "M09",
+        "P0-RELEASE",
+        "FL-MAP-01"
+      ],
+      "details": "Register user's improvement request without dropping immutable backlog."
+    },
+    {
+      "seq": 382,
+      "date": "2026-11-04",
+      "type": "RESTORATION_BATCH_EXECUTION_AND_CI_QUEUE_POLICY",
+      "requestId": "REQ-20261104-CONTINUOUS-BATCH-EXECUTION",
+      "taskIds": [
+        "M03",
+        "P0-CHAT",
+        "M09",
+        "P0-RELEASE",
+        "FL-MAP-01"
+      ],
+      "details": "New docs/RESTORATION_BATCH_EXECUTION.md; 8 expensive 4LEAF workflows cancel superseded PR revisions only; main SHA checks and Pages remain preserved. Claude/GPT separate owners, batch DoD, no microapproval; no task statuses changed. GitHub Actions workflow validation and PR merge pending."
     }
   ],
   "restorationPriority": {
