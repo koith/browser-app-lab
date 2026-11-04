@@ -17,13 +17,15 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: deployed-real-gallery-browser-check-${{ github.ref_name }}
+  group: deployed-real-gallery-browser-check-${{ github.event_name }}-${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.ref }}
   cancel-in-progress: false
 jobs:
   syntax-before-deployment:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
       - run: python -m py_compile apps/gallery-archive/qa_deployed_pages_gallery.py
   gallery-deployed-visual:
     if: |
@@ -40,7 +42,16 @@ jobs:
       matrix:
         browser: [chromium, webkit]
     steps:
+      # The exact successful Pages source is authoritative. Latest main may
+      # already contain a different regression fixture or gallery HTML.
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+      - name: Prove checkout matches the Pages deployment event
+        if: github.event_name == 'workflow_run'
+        run: |
+          test "$(git rev-parse HEAD)" = "${{ github.event.workflow_run.head_sha }}"
+          echo 'GALLERY_DEPLOYED_PHOTO_QA_EXACT_PAGES_SOURCE_SHA_PASS'
       - uses: actions/setup-python@v5
         with: {python-version: '3.12'}
       - name: Install real browser with mobile viewport, no owner secrets
