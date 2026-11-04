@@ -20,7 +20,7 @@ from fastapi.testclient import TestClient
 from PIL import Image
 
 HERE=Path(__file__).resolve().parent
-ROOT=HERE.parents[1]
+ROOT=HERE.parent
 sys.path.insert(0,str(HERE))
 sys.path.insert(0,str(ROOT/"mimmi-gallery"/"cloud"))
 from qa_existing_owner_exact_file import read_existing
