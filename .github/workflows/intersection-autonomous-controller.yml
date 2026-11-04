@@ -1,27 +1,46 @@
 name: INTERSECTION — Autonomous Safe Recovery Controller
 
+# No scheduled timer drives development progression. A verified prior GitHub
+# event invokes this coordinator. The separate 5-minute public SNS polling
+# schedule is an ingestion safety requirement, not a task-advancement clock.
 on:
-  schedule:
-    - cron: "7,37 * * * *"
-  workflow_dispatch:
+  workflow_run:
+    workflows:
+      - "INTERSECTION — Fast Private Public-Post Capture"
+      - "INTERSECTION — Immediate Encrypted TeraBox Recovery"
+      - "INTERSECTION — Verify and Rebuild Private TeraBox Archive"
+      - "Deploy static content to Pages"
+      - "INTERSECTION — Deployed Pages Desktop and Mobile QA"
+      - "Demand Research Public Source Probe"
+      - "INTERSECTION Public Activity Ranking QA"
+      - "Demand Research — Instant Public Post Viewer Browser QA"
+    types: [completed]
+    branches: [main]
+  issues:
+    types: [edited, reopened]
   push:
     branches: [main]
     paths:
-      - ".github/scripts/intersection_autonomous_controller.py"
-      - ".github/scripts/test_intersection_autonomous_controller.py"
+      - "apps/demand-research/**"
+      - ".github/scripts/intersection_event_pipeline.py"
+      - ".github/scripts/test_intersection_event_pipeline.py"
       - ".github/workflows/intersection-autonomous-controller.yml"
+  workflow_dispatch:
   pull_request:
     paths:
-      - ".github/scripts/intersection_autonomous_controller.py"
-      - ".github/scripts/test_intersection_autonomous_controller.py"
+      - ".github/scripts/intersection_event_pipeline.py"
+      - ".github/scripts/test_intersection_event_pipeline.py"
       - ".github/workflows/intersection-autonomous-controller.yml"
 
 permissions:
   contents: read
 
 concurrency:
-  group: intersection-autonomous-safe-controller-${{ github.event_name == 'pull_request' && github.head_ref || 'production' }}
+  # All main-branch stage decisions are serialized. Never cancel a decision
+  # after it dispatches the next event; no timer-based retries.
+  group: intersection-event-pipeline-${{ github.event_name == 'pull_request' && github.head_ref || 'main' }}
   cancel-in-progress: false
+  queue: max
 
 jobs:
   offline-tests:
@@ -33,25 +52,35 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Prove no duplicate recovery or premature next-task promotion
+      - name: Verify stage-gate security, no timer, no early next task
         run: |
-          python -m py_compile .github/scripts/intersection_autonomous_controller.py .github/scripts/test_intersection_autonomous_controller.py
-          python -m unittest discover -s .github/scripts -p 'test_intersection_autonomous_controller.py' -v
+          set -euo pipefail
+          python -m py_compile .github/scripts/intersection_event_pipeline.py .github/scripts/test_intersection_event_pipeline.py
+          python -m unittest discover -s .github/scripts -p 'test_intersection_event_pipeline.py' -v
 
   safe-controller:
-    if: github.event_name != 'pull_request'
+    if: >-
+      github.event_name != 'pull_request' &&
+      (github.event_name != 'issues' || github.event.issue.number == 607)
     runs-on: ubuntu-24.04
-    timeout-minutes: 6
+    timeout-minutes: 7
     permissions:
       actions: write
-      issues: read
+      issues: write
       contents: read
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - name: Choose first incomplete issue and safely dispatch bounded replay
+      - name: Event received → check issue gate → QA → deployment → next work
         env:
           GH_TOKEN: ${{ github.token }}
-        run: python .github/scripts/intersection_autonomous_controller.py
+        run: python .github/scripts/intersection_event_pipeline.py
+      - name: Update only existing issue #607 bot status comment
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python .github/scripts/intersection_ops_status.py
