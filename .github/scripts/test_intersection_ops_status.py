@@ -134,6 +134,34 @@ class StatusBoardTests(unittest.TestCase):
         self.assertIn("P0 / INT-01: FAILED", rendered)
         self.assertIn("컨트롤러 실행 성공은 저장 장애 해결을 뜻하지 않음", rendered)
 
+    def test_event_stage_reason_is_whitelisted_and_visible(self):
+        good = ('INTERSECTION_EVENT_PIPELINE '
+                '{"task":"INT-01","action":"NONE",'
+                '"reason":"INT01_OPERATIONAL_PROOF_PENDING",'
+                '"secret":"NEVER_DISCLOSE_PERSONAL_DATA"}')
+        metrics = ops.sanitized_metrics(good, "INTERSECTION_EVENT_PIPELINE")
+        self.assertEqual(metrics["task"], "INT-01")
+        self.assertEqual(metrics["reason"], "INT01_OPERATIONAL_PROOF_PENDING")
+        self.assertNotIn("secret", metrics)
+        wrong = ('INTERSECTION_EVENT_PIPELINE '
+                 '{"task":"INT-01","reason":"secret123456",'
+                 '"action":"UNTRUSTED_DISPATCH"}')
+        self.assertEqual(ops.sanitized_metrics(
+            wrong, "INTERSECTION_EVENT_PIPELINE"
+        ), {"task": "INT-01"})
+        rows = {
+            ops.CAPTURE: [run(20, "failure")],
+            ops.REPLAY: [],
+            ops.REPAIR: [],
+            ops.CONTROLLER: [run(22, "success")],
+        }
+        board = ops.render("koith/browser-app-lab", rows, {22: metrics},
+                           "- [ ] **INT-01** failing",
+                           datetime(2026, 11, 4, tzinfo=timezone.utc))
+        self.assertIn("선택 일감: **INT-01**", board)
+        self.assertIn("INT01_OPERATIONAL_PROOF_PENDING", board)
+        self.assertNotIn("NEVER_DISCLOSE_PERSONAL_DATA", board)
+
     def test_non_user_input_workflow_urls_are_canonical(self):
         self.assertEqual(
             ops.run_url(run(42), REPO),
