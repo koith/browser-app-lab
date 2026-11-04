@@ -31,6 +31,9 @@ function validateArchive(archive,validDistrict){
  // in multiple public rooms. Legacy archives without fingerprints remain valid.
  const sendersByToken=new Map();
  const histories=new Set();
+ // A single monotonic sequence is shared by ALL ChatTown rooms. Repeated
+ // cursors across rooms make client ?after= replay ambiguous after restart.
+ const globalSequences=new Set(),globalMessageIds=new Set();
  for(const pair of archive.history){
   if(!Array.isArray(pair)||pair.length!==2||
    typeof pair[0]!=='string'||!pair[0]||!Array.isArray(pair[1]))
@@ -51,7 +54,7 @@ function validateArchive(archive,validDistrict){
   // Refuse a longer archive instead of losing records on startup.
   if(entries.length>200)bad('history exceeds retention limit');
   let last=0;
-  const messageIds=new Set(),clientIds=new Set();
+  const clientIds=new Set();
   for(const e of entries){
    if(!isObject(e)||typeof e.id!=='string'||!e.id||
     !Number.isSafeInteger(e.seq)||e.seq<=last||e.seq>archive.sequence||
@@ -66,8 +69,10 @@ function validateArchive(archive,validDistrict){
      bad('one sender credential maps to multiple identities');
     sendersByToken.set(e.senderTokenHash,e.sender);
    }
-   if(messageIds.has(e.id))bad('duplicate message id');
-   messageIds.add(e.id);
+   if(globalMessageIds.has(e.id))bad('duplicate message id across rooms');
+   globalMessageIds.add(e.id);
+   if(globalSequences.has(e.seq))bad('duplicate global message sequence');
+   globalSequences.add(e.seq);
    if(e.clientMessageId!==undefined){
     if(typeof e.clientMessageId!=='string'||!/^(?:[0-9a-f]{32}|[0-9a-f]{8}(?:-[0-9a-f]{4}){3}-[0-9a-f]{12})$/i.test(e.clientMessageId)||
      clientIds.has(e.clientMessageId.toLowerCase()))bad('duplicate or invalid client message id');
