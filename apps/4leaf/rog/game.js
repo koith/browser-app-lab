@@ -2133,7 +2133,14 @@ function init(){installBoardControls();installNativeDiceMenu();
   }},{label:'취소'}]);
 };$('rename').onclick=()=>{const div=document.createElement('div');div.textContent='사용할 닉네임을 입력하세요.';const input=document.createElement('input');input.maxLength=12;input.value=profile.name;div.append(document.createElement('hr'),input);modal('4LEAF 별명 변경',div,[{label:'변경',primary:true,run:()=>{if(!input.value.trim())return;profile.name=input.value.trim().slice(0,12);profileUI();buildPeople();if($('rog-real-user'))$('rog-real-user').textContent='♧ '+profile.name+' (내 기기)';if(match&&!match.finished)match.players[0].name=profile.name;chat('SYSTEM','닉네임이 '+profile.name+'(으)로 변경되었습니다.','system')}},{label:'취소'}])};$('audio').onclick=()=>{soundOn=!soundOn;syncMusic();log(soundOn?'원작 배경음악/효과음 켜짐':'배경음악/효과음 꺼짐');sfx(650)};$('help').onclick=()=>navigate('help-screen');$('chat-form').onsubmit=e=>{e.preventDefault();const input=$('message'),message=input.value.trim();input.value='';if(!message)return;chat(profile.name,message);if(window.__LEAF_NET__?.connected&&match?.mode==='network')window.__LEAF_NET__.send({type:'chat',who:profile.name,text:message});sfx(480);};const list=$('online-list');list.replaceChildren();const selfUser=document.createElement('div');selfUser.id='rog-real-user';selfUser.textContent='♧ '+profile.name+' (내 기기)';list.append(selfUser);setInterval(()=>{$('clock').textContent=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})},12000);$('clock').textContent=new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});chat('SYSTEM','4LEAF Browser에 오신 것을 환영합니다.','system');chat('SYSTEM','원작 화면 재구성 · AI/로컬 대전 · 브라우저 간 직접 연결. 원작 중앙 서버는 지원하지 않습니다.','system');navigate('sky');window.__LEAF_BRIDGE__={getMatch:()=>match,getName:()=>profile.name,onState:null,
  receiveMatch:remote=>{
-   if(window.__LEAF_NET__?.role!=='guest'||!remote||!MAPS[remote.map])return false;
+   // A remote JSON packet can name a real map but omit players/tiles or
+   // spoof a local-mode match. Refuse it before any save or live-state change.
+   // A genuine finished network match is still admissible: validate its
+   // gameplay schema using a non-mutating finished:false view.
+   if(window.__LEAF_NET__?.role!=='guest'||!remote||!MAPS[remote.map]||
+      remote.mode!=='network'||
+      (remote.finished!==undefined&&typeof remote.finished!=='boolean')||
+      !resumableSavedMatch({...remote,finished:false}))return false;
    // An incoming remote state is NOT committed merely because a WebRTC
    // packet arrived. Never display an unsaved replacement on quota denial.
    // Corrupt/completed older saves must be backed up before replacement.
