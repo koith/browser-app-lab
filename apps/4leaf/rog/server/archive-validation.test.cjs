@@ -63,6 +63,21 @@ test('public-room messages are valid even though canonical preset rooms are neve
    text:'원작 상설방',time:1700000000000}]]]};
  assert.equal(validateArchive(s,valid),s);
 });
+test('encrypted sender fingerprints are valid only with consistent identity; old archives stay loadable',()=>{
+ const s=fixture();
+ // Old archive versions did not persist a token fingerprint.
+ assert.equal(validateArchive(s,valid),s);
+ const authHash='e'.repeat(64);
+ s.history[0][1][0].senderTokenHash=authHash;
+ assert.equal(validateArchive(s,valid),s);
+ const malformed=clone(s);malformed.history[0][1][0].senderTokenHash='not-a-token-fingerprint';
+ assert.throws(()=>validateArchive(malformed,valid),/Invalid persisted ChatTown state/);
+ const mismatch=clone(s);mismatch.sequence=10;
+ mismatch.history[0][1].push({...mismatch.history[0][1][0],id:'m2',seq:10,
+  sender:'different-person'});
+ assert.throws(()=>validateArchive(mismatch,valid),/Invalid persisted ChatTown state/,
+  'one bearer-token fingerprint cannot claim two original sender identities');
+});
 test('server serves 503 rather than accepting partial encrypted restore and never commits blank state',async t=>{
  const archive=fixture();archive.rooms[0].district='malformed';
  let saves=0;
