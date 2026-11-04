@@ -1768,6 +1768,17 @@
         "M02",
         "P0-RELEASE"
       ]
+    },
+    {
+      "id": "REQ-20261104-WEBRTC-GUEST-DURABLE-SNAPSHOT",
+      "date": "2026-11-04",
+      "origin": "User requested independent fast development while Claude restores original 4LEAF visuals",
+      "text": "WebRTC 게스트가 호스트의 게임 상태를 받았을 때 브라우저 저장 실패·이전 손상 경기 백업 실패에도 새 경기를 표시하던 오류를 바로잡는다. 기존 경기를 보존하고 저장 완료 후에만 새 경기 상태를 반영한다.",
+      "taskIds": [
+        "M08",
+        "RULE-03",
+        "P0-RELEASE"
+      ]
     }
   ],
   "tasks": [
@@ -8841,6 +8852,30 @@
         "P0-RELEASE"
       ],
       "details": "Copied PR #696 transaction persistence and Chromium quota-failure QA after verifying source file identity on merged #718 main; CI and release not yet accepted."
+    },
+    {
+      "seq": 410,
+      "date": "2026-11-04",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261104-WEBRTC-GUEST-DURABLE-SNAPSHOT",
+      "taskIds": [
+        "M08",
+        "RULE-03",
+        "P0-RELEASE"
+      ],
+      "details": "WebRTC guest snapshot must be persisted before replacing live match, and unreadable earlier match archived before overwrite."
+    },
+    {
+      "seq": 411,
+      "date": "2026-11-04",
+      "type": "WEBRTC_GUEST_DURABLE_SNAPSHOT_BROWSER_QA_PENDING",
+      "requestId": "REQ-20261104-WEBRTC-GUEST-DURABLE-SNAPSHOT",
+      "taskIds": [
+        "M08",
+        "RULE-03",
+        "P0-RELEASE"
+      ],
+      "details": "Incoming guest match now preflights unreadable/nonresumable old-save backups, commits remote JSON to localStorage before match mutation or rendering; fails closed and shows a truthful modal on quota denial. New real Chromium test covers active-save quota rollback, retry, reload, corrupted previous save, denied backup and byte-perfect archival. GitHub PR/CI/public Pages acceptance pending; no claim of original network rule equivalence."
     }
   ],
   "restorationPriority": {

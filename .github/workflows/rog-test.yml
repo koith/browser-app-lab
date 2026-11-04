@@ -46,6 +46,10 @@ jobs:
         env:
           FOURLEAF_TEST_URL: http://127.0.0.1:8765/
         run: node apps/4leaf/rog/tests/cardshop-native-sale.cjs
+      - name: Preserve guest game on denied WebRTC snapshot save and recover after retry
+        env:
+          FOURLEAF_SMOKE_URL: http://127.0.0.1:8765/
+        run: node --test apps/4leaf/rog/tests/dice-webrtc-guest-save.cjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
