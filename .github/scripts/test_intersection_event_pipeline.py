@@ -69,9 +69,47 @@ class EventDrivenTests(unittest.TestCase):
         })
         self.assertEqual(attempted["reason"], "REPAIR_ALREADY_ATTEMPTED_AFTER_REPLAY")
         failed = p.decide("INT-01", trigger(t["name"],
-                          conclusion="failure"), SHA, {p.REPAIR: []})
+                          conclusion="failure"), SHA,
+                          {p.REPAIR: [], p.DIAG: [row(125)]})
         self.assertEqual(failed["action"], "NONE")
-        self.assertEqual(failed["reason"], "RECOVERY_FAILED_REQUIRES_CODE_REPAIR")
+        self.assertEqual(failed["reason"], "DIAGNOSTIC_ALREADY_TRIED_ON_SAME_CODE")
+
+    def test_failed_replay_triggers_one_synthetic_probe_per_code_revision(self):
+        failed = trigger("INTERSECTION — Immediate Encrypted TeraBox Recovery",
+                         conclusion="failure", id_=11)
+        first = p.decide("INT-01", failed, SHA,
+                         {p.REPAIR: [], p.DIAG: []})
+        self.assertEqual(first["action"], "DISPATCH")
+        self.assertEqual(first["workflow"], p.DIAG)
+        self.assertIn("DIAGNOSTIC", first["reason"])
+        queued = p.decide("INT-01", failed, SHA, {
+            p.DIAG: [row(12, status="pending")]
+        })
+        self.assertEqual(queued["action"], "NONE")
+        completed = p.decide("INT-01", failed, SHA, {
+            p.DIAG: [row(12)]
+        })
+        self.assertEqual(completed["reason"], "DIAGNOSTIC_ALREADY_TRIED_ON_SAME_CODE")
+        newer_code = p.decide("INT-01", failed, "f" * 40, {
+            p.DIAG: [row(12)]
+        })
+        self.assertEqual(newer_code["workflow"], p.DIAG)
+
+    def test_synthetic_success_replays_once_then_waits_repair(self):
+        diag = trigger("INTERSECTION — Private Synthetic TeraBox Write Diagnostics",
+                       conclusion="success", id_=12)
+        replay = p.decide("INT-01", diag, SHA, {p.REPLAY: []})
+        self.assertEqual(replay["action"], "DISPATCH")
+        self.assertEqual(replay["workflow"], p.REPLAY)
+        already = p.decide("INT-01", diag, SHA, {
+            p.REPLAY: [row(13)]
+        })
+        self.assertEqual(already["action"], "NONE")
+        self.assertEqual(already["reason"], "RECOVERY_ALREADY_ATTEMPTED_AFTER_DIAGNOSTIC")
+        failed = p.decide("INT-01", trigger(diag["name"], conclusion="failure"),
+                          SHA, {p.REPLAY: []})
+        self.assertEqual(failed["action"], "NONE")
+        self.assertIn("WAIT_CODE_FIX", failed["reason"])
 
     def test_code_pass_alone_never_completes_int01(self):
         d = p.decide("INT-01", trigger(
