@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
   "platform": "bluesky",
-  "account": "ziy-oung.bsky.social",
+  "account": "https://bsky.app/profile/ziy-oung.bsky.social",
   "max_pages": 2
 }
