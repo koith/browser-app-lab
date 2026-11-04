@@ -261,11 +261,21 @@ def exercise(browser, model: str, rule: dict, engine: str):
                  img.src.startsWith('blob:'));
             })""", arg=model, timeout=110000)
             click_current(page, "#detailphotos .photo")
-            page.wait_for_function("""() => {
+            # G-09-B now prefers the exact saved Pages file when SHA, bytes and
+            # dimensions match. Do not reject a fully decoded local original
+            # solely because it is not a gateway /api/ or blob response.
+            page.wait_for_function("""model => {
               const img=document.querySelector('#full');
-              return !!img && img.complete && img.naturalWidth>=160
-                && (img.src.includes('/api/') || img.src.startsWith('blob:'));
-            }""", timeout=110000)
+              if (!img || !img.complete || img.naturalWidth<160) return false;
+              const source=img.currentSrc||img.src||'';
+              if (source.startsWith('blob:') || source.includes('/api/'))
+                return true;
+              try {
+                const u=new URL(source, location.href);
+                return u.origin===location.origin &&
+                  u.pathname.startsWith('/browser-app-lab/apps/'+model+'-gallery/stored-albums/');
+              } catch { return false; }
+            }""", arg=model, timeout=110000)
             assert page.locator("#lightbox").is_visible(), (model, album_id)
             if album_id == rule["album_ids"][0]:
                 # Use real mobile taps and decoded stored images. A local HTTP
