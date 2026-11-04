@@ -163,6 +163,42 @@ def audit(browser, model: str, timeout_ms: int, verify_progressive: bool = False
               "viewer_back_returns_to_album":True,
               "backend_auth_required":False,
             }
+            # G-11-B: historic links used a bare "#work-id" fragment.
+            # Test the actual deployed page on Chromium and WebKit rather
+            # than treating a JavaScript unit mock as a public-site PASS.
+            from urllib.parse import quote
+            old_url = f"{BASE}/{model}-gallery/#" + quote(target["album"], safe="")
+            page.goto(old_url, wait_until="domcontentloaded", timeout=60000)
+            page.wait_for_function("""wanted => {
+              const state=history.state;
+              return state && state.depth===0 &&
+                state.album===wanted &&
+                document.querySelector('#detail')?.hidden===false;
+            }""", arg=target["album"], timeout=20000)
+            page.reload(wait_until="domcontentloaded", timeout=60000)
+            page.wait_for_function("""wanted =>
+              history.state?.album===wanted &&
+              document.querySelector('#detail')?.hidden===false
+            """, arg=target["album"], timeout=20000)
+            # Safari may emit popstate without the gallery's typed state.
+            # Explicitly clear only this test page's history.state and
+            # emit a real browser event from the historic URL.
+            page.evaluate("""album => {
+              history.replaceState(null, '', '#'+encodeURIComponent(album));
+              setMode('albums');
+              window.dispatchEvent(new PopStateEvent('popstate', {state:null}));
+            }""", target["album"])
+            page.wait_for_function("""wanted =>
+              document.querySelector('#detail')?.hidden===false &&
+              detailAlbum?.id===wanted
+            """, arg=target["album"], timeout=15000)
+            result["legacy_bare_hash_route"] = {
+              "album":target["album"],
+              "opens_on_direct_navigation":True,
+              "survives_reload":True,
+              "restores_on_untyped_popstate":True,
+              "physical_iphone_tested":False,
+            }
         result["script_errors"] = errors
         result["status"] = (
             "FAIL" if result["coverage"]["owner_sha_absent_from_rendered_gallery"]
