@@ -828,7 +828,7 @@ async def restore_authenticated_owner_media(model: str, request: Request):
 # whether a cover or catalog can load. No remote I/O, secrets or file bytes.
 _INCIDENT_MEDIA = {
     "mimmi": (
-        ("djawa-janus-scary-lantern-night", 8),
+        ("djawa-janus-scary-lantern-night", 15),
         ("mimmi-indie-sana-sopmod2-2019", 7),
     ),
     "yui": (
