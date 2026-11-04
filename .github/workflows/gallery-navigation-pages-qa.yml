@@ -1,0 +1,64 @@
+name: Gallery Pages Independent Mobile Navigation QA
+on:
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["Deploy static content to Pages"]
+    types: [completed]
+  pull_request:
+    paths:
+      - 'apps/gallery-archive/qa_gallery_navigation_routes.py'
+      - '.github/workflows/gallery-navigation-pages-qa.yml'
+      - '.github/workflows/gallery-deployed-pages-photo-qa.yml'
+permissions:
+  contents: read
+concurrency:
+  group: gallery-navigation-${{ github.event_name }}-${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.ref }}
+  cancel-in-progress: false
+jobs:
+  syntax:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: python -m py_compile apps/gallery-archive/qa_gallery_navigation_routes.py
+
+  live-mobile-navigation:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'workflow_run' &&
+       github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.head_branch == 'main' &&
+       github.event.workflow_run.head_repository.full_name == github.repository)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, webkit]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+      - name: Mark historic deployment without this QA as NOT_VERIFIED
+        id: source
+        shell: bash
+        run: |
+          if [[ -f apps/gallery-archive/qa_gallery_navigation_routes.py ]]; then
+            echo 'supported=true' >> "$GITHUB_OUTPUT"
+            echo "GALLERY_NAVIGATION_QA_DEPLOY_SHA=$(git rev-parse HEAD)"
+          else
+            echo 'supported=false' >> "$GITHUB_OUTPUT"
+            echo 'GALLERY_HISTORIC_PAGES_NAVIGATION_QA_NOT_VERIFIED'
+          fi
+      - uses: actions/setup-python@v5
+        if: steps.source.outputs.supported == 'true'
+        with:
+          python-version: '3.12'
+      - name: Verify real mobile routes without remote image decoding
+        if: steps.source.outputs.supported == 'true'
+        shell: bash
+        run: |
+          python -m py_compile apps/gallery-archive/qa_gallery_navigation_routes.py
+          python -m pip install 'playwright==1.58.0'
+          python -m playwright install --with-deps ${{ matrix.browser }}
+          python apps/gallery-archive/qa_gallery_navigation_routes.py --browser '${{ matrix.browser }}'
