@@ -1790,6 +1790,17 @@
         "RULE-03",
         "P0-RELEASE"
       ]
+    },
+    {
+      "id": "REQ-20261104-WEBRTC-PEER-MESSAGE-RESILIENCE",
+      "date": "2026-11-04",
+      "origin": "GPT independent development while Claude restores original visuals",
+      "text": "WebRTC 직접 대전에서 비정상 전투 패킷 수신 시 브라우저 이벤트 처리 예외 및 모달 오류를 차단하고, 연결 재생성 시 이전 호스트 상태 송신 콜백과 게스트 식별정보를 초기화한다. 실제 두 Chromium 브라우저의 DataChannel 송수신으로 검증한다.",
+      "taskIds": [
+        "M08",
+        "RULE-03",
+        "P0-RELEASE"
+      ]
     }
   ],
   "tasks": [
@@ -8911,6 +8922,30 @@
         "P0-RELEASE"
       ],
       "details": "Require incoming guest snapshot to match resumable game schema (finished match checked with a nonmutating finished:false view), network mode and valid map; malformed packets cannot replace persisted or active match. Added real Chromium negative cases for empty players, spoofed offline mode, malformed finished marker and invalid player. PR/CI/Pages acceptance pending."
+    },
+    {
+      "seq": 414,
+      "date": "2026-11-04",
+      "type": "REQUEST_REGISTERED",
+      "requestId": "REQ-20261104-WEBRTC-PEER-MESSAGE-RESILIENCE",
+      "taskIds": [
+        "M08",
+        "RULE-03",
+        "P0-RELEASE"
+      ],
+      "details": "Reject malformed WebRTC peer battle packets, clear stale host broadcast callback and prior guest name on peer reset."
+    },
+    {
+      "seq": 415,
+      "date": "2026-11-04",
+      "type": "WEBRTC_BATTLE_PACKET_AND_REOFFER_BROWSER_QA_PENDING",
+      "requestId": "REQ-20261104-WEBRTC-PEER-MESSAGE-RESILIENCE",
+      "taskIds": [
+        "M08",
+        "RULE-03",
+        "P0-RELEASE"
+      ],
+      "details": "Validate battle packet bid, names, score fields, source-D6 value arrays and bounded options before touching guest dialog; reset stale bridge.onState and guestName. Added real 2-peer Chromium offer/answer test for malformed inputs, valid battle choice, and reoffer cleanup; CI/merge/Pages still pending."
     }
   ],
   "restorationPriority": {

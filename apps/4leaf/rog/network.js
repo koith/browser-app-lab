@@ -13,7 +13,14 @@
  function decode(value,type){let result;try{result=JSON.parse(atob(value.replace(/\s/g,'')))}catch{throw Error('코드 형식이 올바르지 않습니다.')}if(result?.type!==type||typeof result.sdp!=='string'||!result.sdp.startsWith('v=0')||result.sdp.length>85000)throw Error('다른 연결 코드가 입력됐습니다.');return result}
  async function gather(pc){if(pc.iceGatheringState==='complete')return;await new Promise(resolve=>{let timer;const finish=()=>{clearTimeout(timer);pc.removeEventListener('icegatheringstatechange',check);resolve()};const check=()=>{if(pc.iceGatheringState==='complete')finish()};pc.addEventListener('icegatheringstatechange',check);timer=setTimeout(finish,10500)})}
  function send(data){if(!net.connected||channel?.readyState!=='open')return false;try{channel.send(JSON.stringify(data));return true}catch{return false}}
- function reset(){net.connected=false;net.role=null;try{channel?.close()}catch{}try{peer?.close()}catch{}channel=null;peer=null;refreshTurnControls()}
+ function reset(){
+   net.connected=false;net.role=null;net.guestName=null;
+   // Do not retain a host-only broadcast callback across a new peer session.
+   // A later guest connection must never inherit old host authority.
+   if(bridge())bridge().onState=null;
+   try{channel?.close()}catch{}try{peer?.close()}catch{}
+   channel=null;peer=null;refreshTurnControls();
+ }
  function openPeer(role){
    if(typeof RTCPeerConnection==='undefined')throw Error('이 WebView는 WebRTC 통신을 지원하지 않습니다.');
    reset();net.role=role;
@@ -44,6 +51,21 @@
      }
    };
    return pc;
+ }
+ // The peer is allowed to send a battle dialog, not arbitrary JSON that
+ // crashes the receiver or creates thousands of UI controls. Validate the
+ // actual host-produced protocol shape before touching the current modal.
+ function validBattleRequest(data){
+   const dice=a=>Array.isArray(a)&&a.length<=32&&
+    a.every(v=>Number.isInteger(v)&&v>=1&&v<=6);
+   return Number.isSafeInteger(data.bid)&&data.bid>0&&
+    typeof data.attacker==='string'&&data.attacker.length<=80&&
+    typeof data.defender==='string'&&data.defender.length<=80&&
+    Number.isFinite(data.attack)&&Number.isFinite(data.defense)&&
+    dice(data.diceAttack)&&dice(data.diceDefense)&&
+    Array.isArray(data.options)&&data.options.length>=1&&
+    data.options.length<=9&&data.options.every(v=>
+     typeof v==='string'&&v.length>0&&v.length<=100);
  }
  function attach(ch){
    channel=ch;
@@ -76,7 +98,7 @@
        bridge()?.remoteCommand?.(data.action,data.index,data.steps);
      }else if(data.type==='battle-request'&&net.role==='guest'){
        const modal=$('modal'),title=$('modal-title'),body=$('modal-content'),buttons=$('modal-buttons');
-       if(!modal||!Array.isArray(data.options))return;
+       if(!modal||!validBattleRequest(data))return;
        title.textContent='⚔ 전투 카드 선택 · '+String(data.attacker).slice(0,16)+' VS '+String(data.defender).slice(0,16);
        body.replaceChildren();
        const p=document.createElement('p');p.textContent='공격 '+data.attack+' / 방어 '+data.defense+' · '+(data.diceAttack||[]).join(',')+' : '+(data.diceDefense||[]).join(',');body.append(p);
