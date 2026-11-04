@@ -53,10 +53,12 @@
      if(!profile)continue;
      const ms=Date.parse(p.posted);
      if(!Number.isFinite(ms)||ms<from||ms>=to)continue;
-     const postKey=p.platform+":"+p.id;
+     // Some federated providers issue post IDs within each server or actor.
+     // Deduplicate repeats within the same public account, not across actors.
+     const key=p.platform+"|"+profile;
+     const postKey=key+"|"+p.id;
      if(seen.has(postKey))continue;
      seen.add(postKey);
-     const key=p.platform+"|"+profile;
      let g=groups.get(key);
      if(!g){
        g={platform:p.platform,profileUrl:profile,
